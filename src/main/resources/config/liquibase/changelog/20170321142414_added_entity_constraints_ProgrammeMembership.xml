@@ -1,0 +1,30 @@
+<?xml version="1.0" encoding="utf-8"?>
+<databaseChangeLog
+    xmlns="http://www.liquibase.org/xml/ns/dbchangelog"
+    xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+    xsi:schemaLocation="http://www.liquibase.org/xml/ns/dbchangelog http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-3.4.xsd">
+    <!--
+        Added the constraints for entity ProgrammeMembership.
+    -->
+    <changeSet id="20170321142414-2" author="jhipster">
+        
+        <addForeignKeyConstraint baseColumnNames="programme_id"
+                                 baseTableName="programme_membership"
+                                 constraintName="fk_programme_membership_programme_id"
+                                 referencedColumnNames="id"
+                                 referencedTableName="programme"/>
+
+        <addForeignKeyConstraint baseColumnNames="curriculum_id"
+                                 baseTableName="programme_membership"
+                                 constraintName="fk_programme_membership_curriculum_id"
+                                 referencedColumnNames="id"
+                                 referencedTableName="curriculum"/>
+
+        <addForeignKeyConstraint baseColumnNames="training_number_id"
+                                 baseTableName="programme_membership"
+                                 constraintName="fk_programme_membership_training_number_id"
+                                 referencedColumnNames="id"
+                                 referencedTableName="training_number"/>
+
+    </changeSet>
+</databaseChangeLog>

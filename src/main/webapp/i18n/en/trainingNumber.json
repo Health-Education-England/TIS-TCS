@@ -1,0 +1,27 @@
+{
+    "tcsApp": {
+        "trainingNumber" : {
+            "home": {
+                "title": "Training Numbers",
+                "createLabel": "Create a new Training Number",
+                "createOrEditLabel": "Create or edit a Training Number"
+            },
+            "created": "A new Training Number is created with identifier {{ param }}",
+            "updated": "A Training Number is updated with identifier {{ param }}",
+            "deleted": "A Training Number is deleted with identifier {{ param }}",
+            "delete": {
+                "question": "Are you sure you want to delete Training Number {{ id }}?"
+            },
+            "detail": {
+                "title": "Training Number"
+            },
+            "trainingNumberType": "Training Number Type",
+            "localOffice": "Local Office",
+            "number": "Number",
+            "appointmentYear": "Appointment Year",
+            "typeOfContract": "Type Of Contract",
+            "suffix": "Suffix",
+            "programmeMembership": "Programme Membership"
+        }
+    }
+}

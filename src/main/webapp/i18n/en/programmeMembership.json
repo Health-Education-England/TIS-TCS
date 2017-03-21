@@ -1,0 +1,32 @@
+{
+    "tcsApp": {
+        "programmeMembership" : {
+            "home": {
+                "title": "Programme Memberships",
+                "createLabel": "Create a new Programme Membership",
+                "createOrEditLabel": "Create or edit a Programme Membership"
+            },
+            "created": "A new Programme Membership is created with identifier {{ param }}",
+            "updated": "A Programme Membership is updated with identifier {{ param }}",
+            "deleted": "A Programme Membership is deleted with identifier {{ param }}",
+            "delete": {
+                "question": "Are you sure you want to delete Programme Membership {{ id }}?"
+            },
+            "detail": {
+                "title": "Programme Membership"
+            },
+            "programmeMembershipType": "Programme Membership Type",
+            "rotation": "Rotation",
+            "curriculumStartDate": "Curriculum Start Date",
+            "curriculumEndDate": "Curriculum End Date",
+            "periodOfGrace": "Period Of Grace",
+            "programmeStartDate": "Programme Start Date",
+            "curriculumCompletionDate": "Curriculum Completion Date",
+            "programmeEndDate": "Programme End Date",
+            "leavingDestination": "Leaving Destination",
+            "programme": "Programme",
+            "curriculum": "Curriculum",
+            "trainingNumber": "Training Number"
+        }
+    }
+}

@@ -1,0 +1,24 @@
+{
+    "fluentMethods": true,
+    "relationships": [
+        {
+            "relationshipType": "many-to-many",
+            "relationshipName": "curriculumId",
+            "otherEntityName": "curriculum",
+            "ownerSide": false,
+            "otherEntityRelationshipName": "grade"
+        }
+    ],
+    "fields": [
+        {
+            "fieldName": "name",
+            "fieldType": "String"
+        }
+    ],
+    "changelogDate": "20170321142414",
+    "entityTableName": "grade",
+    "dto": "mapstruct",
+    "pagination": "no",
+    "service": "no",
+    "angularJSSuffix": "tisProgrammes"
+}

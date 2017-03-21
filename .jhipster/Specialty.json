@@ -1,0 +1,43 @@
+{
+    "fluentMethods": true,
+    "relationships": [
+        {
+            "relationshipType": "one-to-many",
+            "relationshipName": "curriculum",
+            "otherEntityName": "curriculum",
+            "otherEntityRelationshipName": "specialty"
+        },
+        {
+            "relationshipType": "many-to-one",
+            "relationshipName": "specialtyGroup",
+            "otherEntityName": "specialtyGroup",
+            "otherEntityField": "id"
+        }
+    ],
+    "fields": [
+        {
+            "fieldName": "status",
+            "fieldType": "Status",
+            "fieldValues": "CURRENT,INACTIVE,DELETE"
+        },
+        {
+            "fieldName": "college",
+            "fieldType": "String"
+        },
+        {
+            "fieldName": "nhsSpecialtyCode",
+            "fieldType": "String"
+        },
+        {
+            "fieldName": "specialtyType",
+            "fieldType": "SpecialtyType",
+            "fieldValues": "CURRICULUM,POST,PLACEMENT,SUB_SPECIALTY"
+        }
+    ],
+    "changelogDate": "20170321142414",
+    "entityTableName": "specialty",
+    "dto": "mapstruct",
+    "pagination": "pagination",
+    "service": "serviceImpl",
+    "angularJSSuffix": "tisProgrammes"
+}

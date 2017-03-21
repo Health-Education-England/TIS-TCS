@@ -1,0 +1,45 @@
+
+<div *ngIf="trainingNumber">
+    <h2><span jhiTranslate="tcsApp.trainingNumber.detail.title">Training Number</span> {{trainingNumber.id}}</h2>
+    <hr>
+    <jhi-alert-error></jhi-alert-error>
+    <dl class="row-md jh-entity-details">
+        <dt><span jhiTranslate="tcsApp.trainingNumber.trainingNumberType">Training Number Type</span></dt>
+        <dd>
+            <span jhiTranslate="{{'tcsApp.TrainingNumberType.' + trainingNumber.trainingNumberType}}">{{trainingNumber.trainingNumberType}}</span>
+        </dd>
+        <dt><span jhiTranslate="tcsApp.trainingNumber.localOffice">Local Office</span></dt>
+        <dd>
+            <span>{{trainingNumber.localOffice}}</span>
+        </dd>
+        <dt><span jhiTranslate="tcsApp.trainingNumber.number">Number</span></dt>
+        <dd>
+            <span>{{trainingNumber.number}}</span>
+        </dd>
+        <dt><span jhiTranslate="tcsApp.trainingNumber.appointmentYear">Appointment Year</span></dt>
+        <dd>
+            <span>{{trainingNumber.appointmentYear}}</span>
+        </dd>
+        <dt><span jhiTranslate="tcsApp.trainingNumber.typeOfContract">Type Of Contract</span></dt>
+        <dd>
+            <span>{{trainingNumber.typeOfContract}}</span>
+        </dd>
+        <dt><span jhiTranslate="tcsApp.trainingNumber.suffix">Suffix</span></dt>
+        <dd>
+            <span>{{trainingNumber.suffix}}</span>
+        </dd>
+    </dl>
+
+    <button type="submit"
+            (click)="previousState()"
+            class="btn btn-info">
+        <span class="fa fa-arrow-left"></span>&nbsp;<span jhiTranslate="entity.action.back"> Back</span>
+    </button>
+
+    <button type="button"
+            [routerLink]="['/', { outlets: { popup: 'training-number-tis-programmes/'+ trainingNumber.id + '/edit'} }]"
+            replaceUrl="true"
+            class="btn btn-primary">
+        <span class="fa fa-pencil"></span>&nbsp;<span jhiTranslate="entity.action.edit"> Edit</span>
+    </button>
+</div>

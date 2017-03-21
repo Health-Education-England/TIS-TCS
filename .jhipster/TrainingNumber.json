@@ -1,0 +1,44 @@
+{
+    "fluentMethods": true,
+    "relationships": [
+        {
+            "relationshipType": "one-to-many",
+            "relationshipName": "programmeMembership",
+            "otherEntityName": "programmeMembership",
+            "otherEntityRelationshipName": "trainingNumber"
+        }
+    ],
+    "fields": [
+        {
+            "fieldName": "trainingNumberType",
+            "fieldType": "TrainingNumberType",
+            "fieldValues": "NTN,DRN"
+        },
+        {
+            "fieldName": "localOffice",
+            "fieldType": "String"
+        },
+        {
+            "fieldName": "number",
+            "fieldType": "Integer"
+        },
+        {
+            "fieldName": "appointmentYear",
+            "fieldType": "Integer"
+        },
+        {
+            "fieldName": "typeOfContract",
+            "fieldType": "String"
+        },
+        {
+            "fieldName": "suffix",
+            "fieldType": "String"
+        }
+    ],
+    "changelogDate": "20170321142414",
+    "entityTableName": "training_number",
+    "dto": "mapstruct",
+    "pagination": "no",
+    "service": "serviceImpl",
+    "angularJSSuffix": "tisProgrammes"
+}

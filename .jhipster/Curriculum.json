@@ -1,0 +1,63 @@
+{
+    "fluentMethods": true,
+    "relationships": [
+        {
+            "relationshipType": "one-to-many",
+            "relationshipName": "programmeMembership",
+            "otherEntityName": "programmeMembership",
+            "otherEntityRelationshipName": "curriculum"
+        },
+        {
+            "relationshipType": "many-to-many",
+            "otherEntityRelationshipName": "curriculumId",
+            "relationshipName": "grade",
+            "otherEntityName": "grade",
+            "otherEntityField": "id",
+            "ownerSide": true
+        },
+        {
+            "relationshipName": "specialty",
+            "otherEntityName": "specialty",
+            "relationshipType": "many-to-one",
+            "otherEntityField": "id"
+        }
+    ],
+    "fields": [
+        {
+            "fieldName": "name",
+            "fieldType": "String"
+        },
+        {
+            "fieldName": "start",
+            "fieldType": "LocalDate"
+        },
+        {
+            "fieldName": "end",
+            "fieldType": "LocalDate"
+        },
+        {
+            "fieldName": "curriculumSubType",
+            "fieldType": "CurriculumSubType",
+            "fieldValues": "MEDICAL_CURRICULUM,MEDICAL_SPR,DENTAL_CURRICULUM,DENTAL_SPR,SUB_SPECIALTY,DENTAL_POST_CCST,ACF_OTHER_FUNDING,ACL,AFT,ACL_OTHER_FUNDING,CLINICAL_LECTURER,CLINICAL_TEACHING_FELLOW,CLINICAL_RESEARCH_FELLOW,ACFNIHR_FUNDING,ACLNIHR_FUNDING,OTHER_FELLOWSHIP"
+        },
+        {
+            "fieldName": "assessmentType",
+            "fieldType": "AssessmentType",
+            "fieldValues": "ARCP,RITA,ACADEMIC"
+        },
+        {
+            "fieldName": "doesThisCurriculumLeadToCct",
+            "fieldType": "Boolean"
+        },
+        {
+            "fieldName": "periodOfGrace",
+            "fieldType": "Integer"
+        }
+    ],
+    "changelogDate": "20170321142414",
+    "entityTableName": "curriculum",
+    "dto": "mapstruct",
+    "pagination": "pagination",
+    "service": "serviceImpl",
+    "angularJSSuffix": "tisProgrammes"
+}

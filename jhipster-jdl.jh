@@ -1,0 +1,127 @@
+entity Programme {
+	status Status,
+    managingDeanery String
+    programmeName String,
+    programmeNumber String,
+    leadProvider String,
+}
+
+entity Curriculum {
+	id String,
+    name String,
+    start LocalDate,
+    end LocalDate,
+    curriculumSubType CurriculumSubType,
+    assessmentType AssessmentType,
+    doesThisCurriculumLeadToCct Boolean,
+    periodOfGrace Integer
+}
+
+relationship OneToMany {
+	Specialty{curriculum} to Curriculum,
+    Curriculum{ProgrammeMembership} to ProgrammeMembership,
+    Programme{ProgrammeMembership} to ProgrammeMembership,
+    TrainingNumber{ProgrammeMembership} to ProgrammeMembership
+}
+
+relationship ManyToMany {
+	Curriculum{grade(id)} to Grade{curriculumId}
+}
+
+relationship ManyToOne {
+	Specialty{specialtyGroup} to SpecialtyGroup
+}
+
+entity ProgrammeMembership {
+	id String,
+    programmeMembershipType ProgrammeMembershipType,
+    rotation String,
+    curriculumStartDate LocalDate,
+    curriculumEndDate LocalDate, 
+    periodOfGrace Integer,
+    programmeStartDate LocalDate,
+    curriculumCompletionDate LocalDate,
+    programmeEndDate LocalDate,
+    leavingDestination String
+}
+
+enum ProgrammeMembershipType {
+	SUBSTANTIVE, LAT, FTSTA, MILITARY, VISITOR
+}
+
+entity Specialty {
+	id String,
+    status Status,
+    college String,
+    nhsSpecialtyCode String,
+    specialtyType SpecialtyType
+}
+
+entity TrainingNumber {
+	id String,
+    trainingNumberType TrainingNumberType,
+    localOffice String,
+    number Integer,
+    appointmentYear Integer,
+    typeOfContract String,
+    suffix String
+}
+
+enum TrainingNumberType {
+	NTN, DRN
+}
+
+enum SpecialtyType {
+	CURRICULUM, POST, PLACEMENT, SUB_SPECIALTY
+}
+
+entity SpecialtyGroup {
+	id String,
+    name String
+}
+
+entity Grade {
+	id String,
+    name String
+}
+
+enum AssessmentType {
+	ARCP,
+	RITA,
+	ACADEMIC
+}
+
+enum CurriculumSubType {
+	MEDICAL_CURRICULUM,
+	MEDICAL_SPR,
+	DENTAL_CURRICULUM,
+	DENTAL_SPR,
+	SUB_SPECIALTY,
+	DENTAL_POST_CCST,
+	ACF_OTHER_FUNDING,
+	ACL,
+	AFT,
+	ACL_OTHER_FUNDING,
+	CLINICAL_LECTURER,
+	CLINICAL_TEACHING_FELLOW,
+	CLINICAL_RESEARCH_FELLOW,
+	ACFNIHR_FUNDING,
+	ACLNIHR_FUNDING,
+	OTHER_FELLOWSHIP
+}
+
+enum Status {
+	CURRENT, INACTIVE, DELETE
+}
+
+
+// Set pagination options
+paginate Programme, ProgrammeMembership, Curriculum, Specialty with pagination
+
+dto * with mapstruct
+
+// Set service options to all except few
+service all with serviceImpl except Grade
+
+// Set an angular suffix
+angularSuffix * with tisProgrammes

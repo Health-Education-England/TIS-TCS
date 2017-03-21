@@ -1,0 +1,12 @@
+{
+    "tcsApp": {
+        "ProgrammeMembershipType" : {
+            "null": "",
+            "SUBSTANTIVE": "SUBSTANTIVE",
+            "LAT": "LAT",
+            "FTSTA": "FTSTA",
+            "MILITARY": "MILITARY",
+            "VISITOR": "VISITOR"
+        }
+    }
+}

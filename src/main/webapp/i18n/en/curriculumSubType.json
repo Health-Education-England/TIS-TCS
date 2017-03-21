@@ -1,0 +1,23 @@
+{
+    "tcsApp": {
+        "CurriculumSubType" : {
+            "null": "",
+            "MEDICAL_CURRICULUM": "MEDICAL_CURRICULUM",
+            "MEDICAL_SPR": "MEDICAL_SPR",
+            "DENTAL_CURRICULUM": "DENTAL_CURRICULUM",
+            "DENTAL_SPR": "DENTAL_SPR",
+            "SUB_SPECIALTY": "SUB_SPECIALTY",
+            "DENTAL_POST_CCST": "DENTAL_POST_CCST",
+            "ACF_OTHER_FUNDING": "ACF_OTHER_FUNDING",
+            "ACL": "ACL",
+            "AFT": "AFT",
+            "ACL_OTHER_FUNDING": "ACL_OTHER_FUNDING",
+            "CLINICAL_LECTURER": "CLINICAL_LECTURER",
+            "CLINICAL_TEACHING_FELLOW": "CLINICAL_TEACHING_FELLOW",
+            "CLINICAL_RESEARCH_FELLOW": "CLINICAL_RESEARCH_FELLOW",
+            "ACFNIHR_FUNDING": "ACFNIHR_FUNDING",
+            "ACLNIHR_FUNDING": "ACLNIHR_FUNDING",
+            "OTHER_FELLOWSHIP": "OTHER_FELLOWSHIP"
+        }
+    }
+}

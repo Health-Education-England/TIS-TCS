@@ -1,0 +1,21 @@
+{
+    "tcsApp": {
+        "specialtyGroup" : {
+            "home": {
+                "title": "Specialty Groups",
+                "createLabel": "Create a new Specialty Group",
+                "createOrEditLabel": "Create or edit a Specialty Group"
+            },
+            "created": "A new Specialty Group is created with identifier {{ param }}",
+            "updated": "A Specialty Group is updated with identifier {{ param }}",
+            "deleted": "A Specialty Group is deleted with identifier {{ param }}",
+            "delete": {
+                "question": "Are you sure you want to delete Specialty Group {{ id }}?"
+            },
+            "detail": {
+                "title": "Specialty Group"
+            },
+            "name": "Name"
+        }
+    }
+}

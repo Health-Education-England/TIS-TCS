@@ -1,0 +1,77 @@
+<?xml version="1.0" encoding="utf-8"?>
+<databaseChangeLog
+    xmlns="http://www.liquibase.org/xml/ns/dbchangelog"
+    xmlns:ext="http://www.liquibase.org/xml/ns/dbchangelog-ext"
+    xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+    xsi:schemaLocation="http://www.liquibase.org/xml/ns/dbchangelog http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-3.4.xsd
+                        http://www.liquibase.org/xml/ns/dbchangelog-ext http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-ext.xsd">
+
+    <property name="now" value="now()" dbms="h2"/>
+
+    <property name="now" value="now()" dbms="mysql"/>
+    <property name="autoIncrement" value="true"/>
+
+    <property name="floatType" value="float4" dbms="postgresql, h2"/>
+    <property name="floatType" value="float" dbms="mysql, oracle, mssql"/>
+
+    <!--
+        Added the entity ProgrammeMembership.
+    -->
+    <changeSet id="20170321142414-1" author="jhipster">
+        <createTable tableName="programme_membership">
+            <column name="id" type="bigint" autoIncrement="${autoIncrement}">
+                <constraints primaryKey="true" nullable="false"/>
+            </column>
+            <column name="programme_membership_type" type="varchar(255)">
+                <constraints nullable="true" />
+            </column>
+
+            <column name="rotation" type="varchar(255)">
+                <constraints nullable="true" />
+            </column>
+
+            <column name="curriculum_start_date" type="date">
+                <constraints nullable="true" />
+            </column>
+
+            <column name="curriculum_end_date" type="date">
+                <constraints nullable="true" />
+            </column>
+
+            <column name="period_of_grace" type="integer">
+                <constraints nullable="true" />
+            </column>
+
+            <column name="programme_start_date" type="date">
+                <constraints nullable="true" />
+            </column>
+
+            <column name="curriculum_completion_date" type="date">
+                <constraints nullable="true" />
+            </column>
+
+            <column name="programme_end_date" type="date">
+                <constraints nullable="true" />
+            </column>
+
+            <column name="leaving_destination" type="varchar(255)">
+                <constraints nullable="true" />
+            </column>
+
+            <column name="programme_id" type="bigint">
+                <constraints nullable="true" />
+            </column>
+
+            <column name="curriculum_id" type="bigint">
+                <constraints nullable="true" />
+            </column>
+
+            <column name="training_number_id" type="bigint">
+                <constraints nullable="true" />
+            </column>
+
+            <!-- jhipster-needle-liquibase-add-column - JHipster will add columns here, do not remove-->
+        </createTable>
+        
+    </changeSet>
+</databaseChangeLog>

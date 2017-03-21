@@ -1,0 +1,40 @@
+{
+    "fluentMethods": true,
+    "relationships": [
+        {
+            "relationshipType": "one-to-many",
+            "relationshipName": "programmeMembership",
+            "otherEntityName": "programmeMembership",
+            "otherEntityRelationshipName": "programme"
+        }
+    ],
+    "fields": [
+        {
+            "fieldName": "status",
+            "fieldType": "Status",
+            "fieldValues": "CURRENT,INACTIVE,DELETE"
+        },
+        {
+            "fieldName": "managingDeanery",
+            "fieldType": "String"
+        },
+        {
+            "fieldName": "programmeName",
+            "fieldType": "String"
+        },
+        {
+            "fieldName": "programmeNumber",
+            "fieldType": "String"
+        },
+        {
+            "fieldName": "leadProvider",
+            "fieldType": "String"
+        }
+    ],
+    "changelogDate": "20170321142414",
+    "entityTableName": "programme",
+    "dto": "mapstruct",
+    "pagination": "pagination",
+    "service": "serviceImpl",
+    "angularJSSuffix": "tisProgrammes"
+}

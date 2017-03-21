@@ -1,0 +1,10 @@
+{
+    "tcsApp": {
+        "Status" : {
+            "null": "",
+            "CURRENT": "CURRENT",
+            "INACTIVE": "INACTIVE",
+            "DELETE": "DELETE"
+        }
+    }
+}
