@@ -1,8 +1,6 @@
-import { NgModule, CUSTOM_ELEMENTS_SCHEMA } from '@angular/core';
-import { RouterModule } from '@angular/router';
-
-import { TcsSharedModule } from '../../shared';
-
+import {NgModule, CUSTOM_ELEMENTS_SCHEMA} from "@angular/core";
+import {RouterModule} from "@angular/router";
+import {TcsSharedModule} from "../../shared";
 import {
     TrainingNumberTisProgrammesService,
     TrainingNumberTisProgrammesPopupService,
@@ -13,8 +11,8 @@ import {
     TrainingNumberTisProgrammesDeletePopupComponent,
     TrainingNumberTisProgrammesDeleteDialogComponent,
     trainingNumberRoute,
-    trainingNumberPopupRoute,
-} from './';
+    trainingNumberPopupRoute
+} from "./";
 
 let ENTITY_STATES = [
     ...trainingNumberRoute,
@@ -24,7 +22,7 @@ let ENTITY_STATES = [
 @NgModule({
     imports: [
         TcsSharedModule,
-        RouterModule.forRoot(ENTITY_STATES, { useHash: true })
+        RouterModule.forRoot(ENTITY_STATES, {useHash: true})
     ],
     declarations: [
         TrainingNumberTisProgrammesComponent,
@@ -47,4 +45,5 @@ let ENTITY_STATES = [
     ],
     schemas: [CUSTOM_ELEMENTS_SCHEMA]
 })
-export class TcsTrainingNumberTisProgrammesModule {}
+export class TcsTrainingNumberTisProgrammesModule {
+}

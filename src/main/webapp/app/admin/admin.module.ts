@@ -1,9 +1,6 @@
-import { NgModule, CUSTOM_ELEMENTS_SCHEMA } from '@angular/core';
-import { RouterModule } from '@angular/router';
-import { ParseLinks } from 'ng-jhipster';
-
-import { TcsSharedModule } from '../shared';
-
+import {NgModule, CUSTOM_ELEMENTS_SCHEMA} from "@angular/core";
+import {RouterModule} from "@angular/router";
+import {TcsSharedModule} from "../shared";
 import {
     adminState,
     AuditsComponent,
@@ -28,13 +25,13 @@ import {
     UserResolvePagingParams,
     UserResolve,
     UserModalService
-} from './';
+} from "./";
 
 
 @NgModule({
     imports: [
         TcsSharedModule,
-        RouterModule.forRoot(adminState, { useHash: true })
+        RouterModule.forRoot(adminState, {useHash: true})
     ],
     declarations: [
         AuditsComponent,
@@ -70,4 +67,5 @@ import {
     ],
     schemas: [CUSTOM_ELEMENTS_SCHEMA]
 })
-export class TcsAdminModule {}
+export class TcsAdminModule {
+}

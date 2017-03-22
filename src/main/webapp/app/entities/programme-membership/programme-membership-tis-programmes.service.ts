@@ -1,18 +1,17 @@
-import { Injectable } from '@angular/core';
-import { Http, Response, URLSearchParams, BaseRequestOptions } from '@angular/http';
-import { Observable } from 'rxjs/Rx';
-
-import { ProgrammeMembershipTisProgrammes } from './programme-membership-tis-programmes.model';
-import { DateUtils } from 'ng-jhipster';
+import {Injectable} from "@angular/core";
+import {Http, Response, URLSearchParams, BaseRequestOptions} from "@angular/http";
+import {Observable} from "rxjs/Rx";
+import {ProgrammeMembershipTisProgrammes} from "./programme-membership-tis-programmes.model";
+import {DateUtils} from "ng-jhipster";
 @Injectable()
 export class ProgrammeMembershipTisProgrammesService {
 
     private resourceUrl = 'api/programme-memberships';
 
-    constructor(private http: Http, private dateUtils: DateUtils) { }
+    constructor(private http: Http, private dateUtils: DateUtils) {
+    }
 
-    create(programmeMembership: ProgrammeMembershipTisProgrammes):
-        Observable<ProgrammeMembershipTisProgrammes> {
+    create(programmeMembership: ProgrammeMembershipTisProgrammes): Observable<ProgrammeMembershipTisProgrammes> {
 
         let copy: ProgrammeMembershipTisProgrammes = Object.assign({}, programmeMembership);
         copy.curriculumStartDate = this.dateUtils
@@ -30,8 +29,7 @@ export class ProgrammeMembershipTisProgrammesService {
         });
     }
 
-    update(programmeMembership: ProgrammeMembershipTisProgrammes):
-        Observable<ProgrammeMembershipTisProgrammes> {
+    update(programmeMembership: ProgrammeMembershipTisProgrammes): Observable<ProgrammeMembershipTisProgrammes> {
 
         let copy: ProgrammeMembershipTisProgrammes = Object.assign({}, programmeMembership);
         copy.curriculumStartDate = this.dateUtils
@@ -70,7 +68,7 @@ export class ProgrammeMembershipTisProgrammesService {
         let options = this.createRequestOption(req);
         return this.http.get(this.resourceUrl, options)
             .map((res: any) => this.convertResponse(res))
-        ;
+            ;
     }
 
     delete(id: number): Observable<Response> {

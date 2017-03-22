@@ -1,9 +1,8 @@
-import { Component, OnInit } from '@angular/core';
-import { NgbModal } from '@ng-bootstrap/ng-bootstrap';
-import { JhiLanguageService } from 'ng-jhipster';
-
-import { JhiMetricsMonitoringModalComponent } from './metrics-modal.component';
-import { JhiMetricsService } from './metrics.service';
+import {Component, OnInit} from "@angular/core";
+import {NgbModal} from "@ng-bootstrap/ng-bootstrap";
+import {JhiLanguageService} from "ng-jhipster";
+import {JhiMetricsMonitoringModalComponent} from "./metrics-modal.component";
+import {JhiMetricsService} from "./metrics.service";
 
 @Component({
     selector: 'jhi-metrics',
@@ -14,13 +13,11 @@ export class JhiMetricsMonitoringComponent implements OnInit {
     cachesStats: any = {};
     servicesStats: any = {};
     updatingMetrics = true;
-    JCACHE_KEY: string ;
+    JCACHE_KEY: string;
 
-    constructor(
-        private jhiLanguageService: JhiLanguageService,
-        private modalService: NgbModal,
-        private metricsService: JhiMetricsService
-    ) {
+    constructor(private jhiLanguageService: JhiLanguageService,
+                private modalService: NgbModal,
+                private metricsService: JhiMetricsService) {
         this.JCACHE_KEY = 'jcache.statistics';
         this.jhiLanguageService.setLocations(['metrics']);
     }
@@ -29,7 +26,7 @@ export class JhiMetricsMonitoringComponent implements OnInit {
         this.refresh();
     }
 
-    refresh () {
+    refresh() {
         this.updatingMetrics = true;
         this.metricsService.getMetrics().subscribe((metrics) => {
             this.metrics = metrics;
@@ -59,9 +56,9 @@ export class JhiMetricsMonitoringComponent implements OnInit {
         });
     }
 
-    refreshThreadDumpData () {
+    refreshThreadDumpData() {
         this.metricsService.threadDump().subscribe((data) => {
-            const modalRef  = this.modalService.open(JhiMetricsMonitoringModalComponent, { size: 'lg'});
+            const modalRef = this.modalService.open(JhiMetricsMonitoringModalComponent, {size: 'lg'});
             modalRef.componentInstance.threadDump = data;
             modalRef.result.then((result) => {
                 // Left blank intentionally, nothing to do here

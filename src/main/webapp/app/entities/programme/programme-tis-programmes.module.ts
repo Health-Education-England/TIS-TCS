@@ -1,8 +1,6 @@
-import { NgModule, CUSTOM_ELEMENTS_SCHEMA } from '@angular/core';
-import { RouterModule } from '@angular/router';
-
-import { TcsSharedModule } from '../../shared';
-
+import {NgModule, CUSTOM_ELEMENTS_SCHEMA} from "@angular/core";
+import {RouterModule} from "@angular/router";
+import {TcsSharedModule} from "../../shared";
 import {
     ProgrammeTisProgrammesService,
     ProgrammeTisProgrammesPopupService,
@@ -14,8 +12,8 @@ import {
     ProgrammeTisProgrammesDeleteDialogComponent,
     programmeRoute,
     programmePopupRoute,
-    ProgrammeTisProgrammesResolvePagingParams,
-} from './';
+    ProgrammeTisProgrammesResolvePagingParams
+} from "./";
 
 let ENTITY_STATES = [
     ...programmeRoute,
@@ -25,7 +23,7 @@ let ENTITY_STATES = [
 @NgModule({
     imports: [
         TcsSharedModule,
-        RouterModule.forRoot(ENTITY_STATES, { useHash: true })
+        RouterModule.forRoot(ENTITY_STATES, {useHash: true})
     ],
     declarations: [
         ProgrammeTisProgrammesComponent,
@@ -49,4 +47,5 @@ let ENTITY_STATES = [
     ],
     schemas: [CUSTOM_ELEMENTS_SCHEMA]
 })
-export class TcsProgrammeTisProgrammesModule {}
+export class TcsProgrammeTisProgrammesModule {
+}

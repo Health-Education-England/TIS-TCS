@@ -1,8 +1,7 @@
-import { NgModule } from '@angular/core';
-import { RouterModule, Routes, Resolve } from '@angular/router';
-
-import { navbarRoute } from '../app.route';
-import { errorRoute } from './';
+import {NgModule} from "@angular/core";
+import {RouterModule} from "@angular/router";
+import {navbarRoute} from "../app.route";
+import {errorRoute} from "./";
 
 let LAYOUT_ROUTES = [
     navbarRoute,
@@ -10,11 +9,12 @@ let LAYOUT_ROUTES = [
 ];
 
 @NgModule({
-  imports: [
-    RouterModule.forRoot(LAYOUT_ROUTES, { useHash: true })
-  ],
-  exports: [
-    RouterModule
-  ]
+    imports: [
+        RouterModule.forRoot(LAYOUT_ROUTES, {useHash: true})
+    ],
+    exports: [
+        RouterModule
+    ]
 })
-export class LayoutRoutingModule {}
+export class LayoutRoutingModule {
+}

@@ -1,8 +1,8 @@
-import { Component, OnInit, OnDestroy } from '@angular/core';
-import { ActivatedRoute } from '@angular/router';
-import { JhiLanguageService } from 'ng-jhipster';
-import { ProgrammeMembershipTisProgrammes } from './programme-membership-tis-programmes.model';
-import { ProgrammeMembershipTisProgrammesService } from './programme-membership-tis-programmes.service';
+import {Component, OnInit, OnDestroy} from "@angular/core";
+import {ActivatedRoute} from "@angular/router";
+import {JhiLanguageService} from "ng-jhipster";
+import {ProgrammeMembershipTisProgrammes} from "./programme-membership-tis-programmes.model";
+import {ProgrammeMembershipTisProgrammesService} from "./programme-membership-tis-programmes.service";
 
 @Component({
     selector: 'jhi-programme-membership-tis-programmes-detail',
@@ -13,11 +13,9 @@ export class ProgrammeMembershipTisProgrammesDetailComponent implements OnInit, 
     programmeMembership: ProgrammeMembershipTisProgrammes;
     private subscription: any;
 
-    constructor(
-        private jhiLanguageService: JhiLanguageService,
-        private programmeMembershipService: ProgrammeMembershipTisProgrammesService,
-        private route: ActivatedRoute
-    ) {
+    constructor(private jhiLanguageService: JhiLanguageService,
+                private programmeMembershipService: ProgrammeMembershipTisProgrammesService,
+                private route: ActivatedRoute) {
         this.jhiLanguageService.setLocations(['programmeMembership', 'programmeMembershipType']);
     }
 
@@ -27,11 +25,12 @@ export class ProgrammeMembershipTisProgrammesDetailComponent implements OnInit, 
         });
     }
 
-    load (id) {
+    load(id) {
         this.programmeMembershipService.find(id).subscribe(programmeMembership => {
             this.programmeMembership = programmeMembership;
         });
     }
+
     previousState() {
         window.history.back();
     }

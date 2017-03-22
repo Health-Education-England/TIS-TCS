@@ -1,8 +1,7 @@
-import { Component, OnInit, OnDestroy } from '@angular/core';
-import { ActivatedRoute } from '@angular/router';
-import { JhiLanguageService } from 'ng-jhipster';
-
-import { User, UserService } from '../../shared';
+import {Component, OnInit, OnDestroy} from "@angular/core";
+import {ActivatedRoute} from "@angular/router";
+import {JhiLanguageService} from "ng-jhipster";
+import {User, UserService} from "../../shared";
 
 @Component({
     selector: 'jhi-user-mgmt-detail',
@@ -13,11 +12,9 @@ export class UserMgmtDetailComponent implements OnInit, OnDestroy {
     user: User;
     private subscription: any;
 
-    constructor(
-        private jhiLanguageService: JhiLanguageService,
-        private userService: UserService,
-        private route: ActivatedRoute
-    ) {
+    constructor(private jhiLanguageService: JhiLanguageService,
+                private userService: UserService,
+                private route: ActivatedRoute) {
         this.jhiLanguageService.setLocations(['user-management']);
     }
 
@@ -27,7 +24,7 @@ export class UserMgmtDetailComponent implements OnInit, OnDestroy {
         });
     }
 
-    load (login) {
+    load(login) {
         this.userService.find(login).subscribe(user => {
             this.user = user;
         });

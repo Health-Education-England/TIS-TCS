@@ -1,64 +1,70 @@
-
-
 <form name="editForm" role="form" novalidate (ngSubmit)="save()" #editForm="ngForm">
 
-    <div class="modal-header">
-        <h4 class="modal-title" id="myTrainingNumberLabel" jhiTranslate="tcsApp.trainingNumber.home.createOrEditLabel">Create or edit a Training Number</h4>
-        <button type="button" class="close" data-dismiss="modal" aria-hidden="true"
-                (click)="clear()">&times;</button>
-    </div>
-    <div class="modal-body">
-        <jhi-alert-error></jhi-alert-error>
-        <div class="form-group" [hidden]="!trainingNumber.id">
-            <label for="id" jhiTranslate="global.field.id">ID</label>
-            <input type="text" class="form-control" id="id" name="id"
-                   [(ngModel)]="trainingNumber.id" readonly />
-        </div>
-        <div class="form-group">
-            <label class="form-control-label" jhiTranslate="tcsApp.trainingNumber.trainingNumberType" for="field_trainingNumberType">Training Number Type</label>
-            <select class="form-control" name="trainingNumberType" [(ngModel)]="trainingNumber.trainingNumberType" id="field_trainingNumberType" >
-                <option value="NTN" jhiTranslate="tcsApp.TrainingNumberType.NTN">NTN</option>
-                <option value="DRN" jhiTranslate="tcsApp.TrainingNumberType.DRN">DRN</option>
-            </select>
-        </div>
-        <div class="form-group">
-            <label class="form-control-label" jhiTranslate="tcsApp.trainingNumber.localOffice" for="field_localOffice">Local Office</label>
-            <input type="text" class="form-control" name="localOffice" id="field_localOffice"
-                [(ngModel)]="trainingNumber.localOffice"
-             />
-        </div>
-        <div class="form-group">
-            <label class="form-control-label" jhiTranslate="tcsApp.trainingNumber.number" for="field_number">Number</label>
-            <input type="number" class="form-control" name="number" id="field_number"
-                [(ngModel)]="trainingNumber.number"
-             />
-        </div>
-        <div class="form-group">
-            <label class="form-control-label" jhiTranslate="tcsApp.trainingNumber.appointmentYear" for="field_appointmentYear">Appointment Year</label>
-            <input type="number" class="form-control" name="appointmentYear" id="field_appointmentYear"
-                [(ngModel)]="trainingNumber.appointmentYear"
-             />
-        </div>
-        <div class="form-group">
-            <label class="form-control-label" jhiTranslate="tcsApp.trainingNumber.typeOfContract" for="field_typeOfContract">Type Of Contract</label>
-            <input type="text" class="form-control" name="typeOfContract" id="field_typeOfContract"
-                [(ngModel)]="trainingNumber.typeOfContract"
-             />
-        </div>
-        <div class="form-group">
-            <label class="form-control-label" jhiTranslate="tcsApp.trainingNumber.suffix" for="field_suffix">Suffix</label>
-            <input type="text" class="form-control" name="suffix" id="field_suffix"
-                [(ngModel)]="trainingNumber.suffix"
-             />
-        </div>
+	<div class="modal-header">
+		<h4 class="modal-title" id="myTrainingNumberLabel" jhiTranslate="tcsApp.trainingNumber.home.createOrEditLabel">
+			Create or edit a Training Number</h4>
+		<button type="button" class="close" data-dismiss="modal" aria-hidden="true"
+		        (click)="clear()">&times;</button>
+	</div>
+	<div class="modal-body">
+		<jhi-alert-error></jhi-alert-error>
+		<div class="form-group" [hidden]="!trainingNumber.id">
+			<label for="id" jhiTranslate="global.field.id">ID</label>
+			<input type="text" class="form-control" id="id" name="id"
+			       [(ngModel)]="trainingNumber.id" readonly/>
+		</div>
+		<div class="form-group">
+			<label class="form-control-label" jhiTranslate="tcsApp.trainingNumber.trainingNumberType"
+			       for="field_trainingNumberType">Training Number Type</label>
+			<select class="form-control" name="trainingNumberType" [(ngModel)]="trainingNumber.trainingNumberType"
+			        id="field_trainingNumberType">
+				<option value="NTN" jhiTranslate="tcsApp.TrainingNumberType.NTN">NTN</option>
+				<option value="DRN" jhiTranslate="tcsApp.TrainingNumberType.DRN">DRN</option>
+			</select>
+		</div>
+		<div class="form-group">
+			<label class="form-control-label" jhiTranslate="tcsApp.trainingNumber.localOffice" for="field_localOffice">Local
+				Office</label>
+			<input type="text" class="form-control" name="localOffice" id="field_localOffice"
+			       [(ngModel)]="trainingNumber.localOffice"
+			/>
+		</div>
+		<div class="form-group">
+			<label class="form-control-label" jhiTranslate="tcsApp.trainingNumber.number"
+			       for="field_number">Number</label>
+			<input type="number" class="form-control" name="number" id="field_number"
+			       [(ngModel)]="trainingNumber.number"
+			/>
+		</div>
+		<div class="form-group">
+			<label class="form-control-label" jhiTranslate="tcsApp.trainingNumber.appointmentYear"
+			       for="field_appointmentYear">Appointment Year</label>
+			<input type="number" class="form-control" name="appointmentYear" id="field_appointmentYear"
+			       [(ngModel)]="trainingNumber.appointmentYear"
+			/>
+		</div>
+		<div class="form-group">
+			<label class="form-control-label" jhiTranslate="tcsApp.trainingNumber.typeOfContract"
+			       for="field_typeOfContract">Type Of Contract</label>
+			<input type="text" class="form-control" name="typeOfContract" id="field_typeOfContract"
+			       [(ngModel)]="trainingNumber.typeOfContract"
+			/>
+		</div>
+		<div class="form-group">
+			<label class="form-control-label" jhiTranslate="tcsApp.trainingNumber.suffix"
+			       for="field_suffix">Suffix</label>
+			<input type="text" class="form-control" name="suffix" id="field_suffix"
+			       [(ngModel)]="trainingNumber.suffix"
+			/>
+		</div>
 
-    </div>
-    <div class="modal-footer">
-        <button type="button" class="btn btn-default" data-dismiss="modal" (click)="clear()">
-            <span class="fa fa-ban"></span>&nbsp;<span jhiTranslate="entity.action.cancel">Cancel</span>
-        </button>
-        <button type="submit" [disabled]="editForm.form.invalid || isSaving" class="btn btn-primary">
-            <span class="fa fa-save"></span>&nbsp;<span jhiTranslate="entity.action.save">Save</span>
-        </button>
-    </div>
+	</div>
+	<div class="modal-footer">
+		<button type="button" class="btn btn-default" data-dismiss="modal" (click)="clear()">
+			<span class="fa fa-ban"></span>&nbsp;<span jhiTranslate="entity.action.cancel">Cancel</span>
+		</button>
+		<button type="submit" [disabled]="editForm.form.invalid || isSaving" class="btn btn-primary">
+			<span class="fa fa-save"></span>&nbsp;<span jhiTranslate="entity.action.save">Save</span>
+		</button>
+	</div>
 </form>

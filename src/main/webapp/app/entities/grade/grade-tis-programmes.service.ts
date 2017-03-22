@@ -1,14 +1,14 @@
-import { Injectable } from '@angular/core';
-import { Http, Response, URLSearchParams, BaseRequestOptions } from '@angular/http';
-import { Observable } from 'rxjs/Rx';
-
-import { GradeTisProgrammes } from './grade-tis-programmes.model';
+import {Injectable} from "@angular/core";
+import {Http, Response, URLSearchParams, BaseRequestOptions} from "@angular/http";
+import {Observable} from "rxjs/Rx";
+import {GradeTisProgrammes} from "./grade-tis-programmes.model";
 @Injectable()
 export class GradeTisProgrammesService {
 
     private resourceUrl = 'api/grades';
 
-    constructor(private http: Http) { }
+    constructor(private http: Http) {
+    }
 
     create(grade: GradeTisProgrammes): Observable<GradeTisProgrammes> {
         let copy: GradeTisProgrammes = Object.assign({}, grade);
@@ -33,13 +33,12 @@ export class GradeTisProgrammesService {
     query(req?: any): Observable<Response> {
         let options = this.createRequestOption(req);
         return this.http.get(this.resourceUrl, options)
-        ;
+            ;
     }
 
     delete(id: number): Observable<Response> {
         return this.http.delete(`${this.resourceUrl}/${id}`);
     }
-
 
 
     private createRequestOption(req?: any): BaseRequestOptions {

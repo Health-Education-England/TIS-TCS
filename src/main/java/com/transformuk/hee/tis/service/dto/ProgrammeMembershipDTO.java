@@ -1,172 +1,182 @@
 package com.transformuk.hee.tis.service.dto;
 
-import java.time.LocalDate;
-import java.io.Serializable;
-import java.util.HashSet;
-import java.util.Set;
-import java.util.Objects;
 import com.transformuk.hee.tis.domain.enumeration.ProgrammeMembershipType;
+
+import java.io.Serializable;
+import java.time.LocalDate;
+import java.util.Objects;
 
 /**
  * A DTO for the ProgrammeMembership entity.
  */
 public class ProgrammeMembershipDTO implements Serializable {
 
-    private Long id;
+	private Long id;
 
-    private ProgrammeMembershipType programmeMembershipType;
+	private ProgrammeMembershipType programmeMembershipType;
 
-    private String rotation;
+	private String rotation;
 
-    private LocalDate curriculumStartDate;
+	private LocalDate curriculumStartDate;
 
-    private LocalDate curriculumEndDate;
+	private LocalDate curriculumEndDate;
 
-    private Integer periodOfGrace;
+	private Integer periodOfGrace;
 
-    private LocalDate programmeStartDate;
+	private LocalDate programmeStartDate;
 
-    private LocalDate curriculumCompletionDate;
+	private LocalDate curriculumCompletionDate;
 
-    private LocalDate programmeEndDate;
+	private LocalDate programmeEndDate;
 
-    private String leavingDestination;
+	private String leavingDestination;
 
-    private Long programmeId;
+	private Long programmeId;
 
-    private Long curriculumId;
+	private Long curriculumId;
 
-    private Long trainingNumberId;
+	private Long trainingNumberId;
 
-    public Long getId() {
-        return id;
-    }
+	public Long getId() {
+		return id;
+	}
 
-    public void setId(Long id) {
-        this.id = id;
-    }
-    public ProgrammeMembershipType getProgrammeMembershipType() {
-        return programmeMembershipType;
-    }
+	public void setId(Long id) {
+		this.id = id;
+	}
 
-    public void setProgrammeMembershipType(ProgrammeMembershipType programmeMembershipType) {
-        this.programmeMembershipType = programmeMembershipType;
-    }
-    public String getRotation() {
-        return rotation;
-    }
+	public ProgrammeMembershipType getProgrammeMembershipType() {
+		return programmeMembershipType;
+	}
 
-    public void setRotation(String rotation) {
-        this.rotation = rotation;
-    }
-    public LocalDate getCurriculumStartDate() {
-        return curriculumStartDate;
-    }
+	public void setProgrammeMembershipType(ProgrammeMembershipType programmeMembershipType) {
+		this.programmeMembershipType = programmeMembershipType;
+	}
 
-    public void setCurriculumStartDate(LocalDate curriculumStartDate) {
-        this.curriculumStartDate = curriculumStartDate;
-    }
-    public LocalDate getCurriculumEndDate() {
-        return curriculumEndDate;
-    }
+	public String getRotation() {
+		return rotation;
+	}
 
-    public void setCurriculumEndDate(LocalDate curriculumEndDate) {
-        this.curriculumEndDate = curriculumEndDate;
-    }
-    public Integer getPeriodOfGrace() {
-        return periodOfGrace;
-    }
+	public void setRotation(String rotation) {
+		this.rotation = rotation;
+	}
 
-    public void setPeriodOfGrace(Integer periodOfGrace) {
-        this.periodOfGrace = periodOfGrace;
-    }
-    public LocalDate getProgrammeStartDate() {
-        return programmeStartDate;
-    }
+	public LocalDate getCurriculumStartDate() {
+		return curriculumStartDate;
+	}
 
-    public void setProgrammeStartDate(LocalDate programmeStartDate) {
-        this.programmeStartDate = programmeStartDate;
-    }
-    public LocalDate getCurriculumCompletionDate() {
-        return curriculumCompletionDate;
-    }
+	public void setCurriculumStartDate(LocalDate curriculumStartDate) {
+		this.curriculumStartDate = curriculumStartDate;
+	}
 
-    public void setCurriculumCompletionDate(LocalDate curriculumCompletionDate) {
-        this.curriculumCompletionDate = curriculumCompletionDate;
-    }
-    public LocalDate getProgrammeEndDate() {
-        return programmeEndDate;
-    }
+	public LocalDate getCurriculumEndDate() {
+		return curriculumEndDate;
+	}
 
-    public void setProgrammeEndDate(LocalDate programmeEndDate) {
-        this.programmeEndDate = programmeEndDate;
-    }
-    public String getLeavingDestination() {
-        return leavingDestination;
-    }
+	public void setCurriculumEndDate(LocalDate curriculumEndDate) {
+		this.curriculumEndDate = curriculumEndDate;
+	}
 
-    public void setLeavingDestination(String leavingDestination) {
-        this.leavingDestination = leavingDestination;
-    }
+	public Integer getPeriodOfGrace() {
+		return periodOfGrace;
+	}
 
-    public Long getProgrammeId() {
-        return programmeId;
-    }
+	public void setPeriodOfGrace(Integer periodOfGrace) {
+		this.periodOfGrace = periodOfGrace;
+	}
 
-    public void setProgrammeId(Long programmeId) {
-        this.programmeId = programmeId;
-    }
+	public LocalDate getProgrammeStartDate() {
+		return programmeStartDate;
+	}
 
-    public Long getCurriculumId() {
-        return curriculumId;
-    }
+	public void setProgrammeStartDate(LocalDate programmeStartDate) {
+		this.programmeStartDate = programmeStartDate;
+	}
 
-    public void setCurriculumId(Long curriculumId) {
-        this.curriculumId = curriculumId;
-    }
+	public LocalDate getCurriculumCompletionDate() {
+		return curriculumCompletionDate;
+	}
 
-    public Long getTrainingNumberId() {
-        return trainingNumberId;
-    }
+	public void setCurriculumCompletionDate(LocalDate curriculumCompletionDate) {
+		this.curriculumCompletionDate = curriculumCompletionDate;
+	}
 
-    public void setTrainingNumberId(Long trainingNumberId) {
-        this.trainingNumberId = trainingNumberId;
-    }
+	public LocalDate getProgrammeEndDate() {
+		return programmeEndDate;
+	}
 
-    @Override
-    public boolean equals(Object o) {
-        if (this == o) {
-            return true;
-        }
-        if (o == null || getClass() != o.getClass()) {
-            return false;
-        }
+	public void setProgrammeEndDate(LocalDate programmeEndDate) {
+		this.programmeEndDate = programmeEndDate;
+	}
 
-        ProgrammeMembershipDTO programmeMembershipDTO = (ProgrammeMembershipDTO) o;
+	public String getLeavingDestination() {
+		return leavingDestination;
+	}
 
-        if ( ! Objects.equals(id, programmeMembershipDTO.id)) { return false; }
+	public void setLeavingDestination(String leavingDestination) {
+		this.leavingDestination = leavingDestination;
+	}
 
-        return true;
-    }
+	public Long getProgrammeId() {
+		return programmeId;
+	}
 
-    @Override
-    public int hashCode() {
-        return Objects.hashCode(id);
-    }
+	public void setProgrammeId(Long programmeId) {
+		this.programmeId = programmeId;
+	}
 
-    @Override
-    public String toString() {
-        return "ProgrammeMembershipDTO{" +
-            "id=" + id +
-            ", programmeMembershipType='" + programmeMembershipType + "'" +
-            ", rotation='" + rotation + "'" +
-            ", curriculumStartDate='" + curriculumStartDate + "'" +
-            ", curriculumEndDate='" + curriculumEndDate + "'" +
-            ", periodOfGrace='" + periodOfGrace + "'" +
-            ", programmeStartDate='" + programmeStartDate + "'" +
-            ", curriculumCompletionDate='" + curriculumCompletionDate + "'" +
-            ", programmeEndDate='" + programmeEndDate + "'" +
-            ", leavingDestination='" + leavingDestination + "'" +
-            '}';
-    }
+	public Long getCurriculumId() {
+		return curriculumId;
+	}
+
+	public void setCurriculumId(Long curriculumId) {
+		this.curriculumId = curriculumId;
+	}
+
+	public Long getTrainingNumberId() {
+		return trainingNumberId;
+	}
+
+	public void setTrainingNumberId(Long trainingNumberId) {
+		this.trainingNumberId = trainingNumberId;
+	}
+
+	@Override
+	public boolean equals(Object o) {
+		if (this == o) {
+			return true;
+		}
+		if (o == null || getClass() != o.getClass()) {
+			return false;
+		}
+
+		ProgrammeMembershipDTO programmeMembershipDTO = (ProgrammeMembershipDTO) o;
+
+		if (!Objects.equals(id, programmeMembershipDTO.id)) {
+			return false;
+		}
+
+		return true;
+	}
+
+	@Override
+	public int hashCode() {
+		return Objects.hashCode(id);
+	}
+
+	@Override
+	public String toString() {
+		return "ProgrammeMembershipDTO{" +
+				"id=" + id +
+				", programmeMembershipType='" + programmeMembershipType + "'" +
+				", rotation='" + rotation + "'" +
+				", curriculumStartDate='" + curriculumStartDate + "'" +
+				", curriculumEndDate='" + curriculumEndDate + "'" +
+				", periodOfGrace='" + periodOfGrace + "'" +
+				", programmeStartDate='" + programmeStartDate + "'" +
+				", curriculumCompletionDate='" + curriculumCompletionDate + "'" +
+				", programmeEndDate='" + programmeEndDate + "'" +
+				", leavingDestination='" + leavingDestination + "'" +
+				'}';
+	}
 }

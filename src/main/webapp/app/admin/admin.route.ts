@@ -1,5 +1,4 @@
-import { Routes, CanActivate } from '@angular/router';
-
+import {Routes} from "@angular/router";
 import {
     auditsRoute,
     configurationRoute,
@@ -9,9 +8,8 @@ import {
     metricsRoute,
     userMgmtRoute,
     userDialogRoute
-} from './';
-
-import { UserRouteAccessService } from '../shared';
+} from "./";
+import {UserRouteAccessService} from "../shared";
 
 let ADMIN_ROUTES = [
     auditsRoute,

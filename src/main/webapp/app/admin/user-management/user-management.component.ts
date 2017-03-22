@@ -1,10 +1,9 @@
-import { Component, OnInit, OnDestroy } from '@angular/core';
-import { Response } from '@angular/http';
-import { ActivatedRoute, Router } from '@angular/router';
-import { EventManager, PaginationUtil, ParseLinks, AlertService, JhiLanguageService } from 'ng-jhipster';
-
-import { ITEMS_PER_PAGE, Principal, User, UserService } from '../../shared';
-import { PaginationConfig } from '../../blocks/config/uib-pagination.config';
+import {Component, OnInit, OnDestroy} from "@angular/core";
+import {Response} from "@angular/http";
+import {ActivatedRoute, Router} from "@angular/router";
+import {EventManager, PaginationUtil, ParseLinks, AlertService, JhiLanguageService} from "ng-jhipster";
+import {ITEMS_PER_PAGE, Principal, User, UserService} from "../../shared";
+import {PaginationConfig} from "../../blocks/config/uib-pagination.config";
 
 @Component({
     selector: 'jhi-user-mgmt',
@@ -26,17 +25,15 @@ export class UserMgmtComponent implements OnInit, OnDestroy {
     previousPage: any;
     reverse: any;
 
-    constructor(
-        private jhiLanguageService: JhiLanguageService,
-        private userService: UserService,
-        private parseLinks: ParseLinks,
-        private alertService: AlertService,
-        private principal: Principal,
-        private eventManager: EventManager,        private paginationUtil: PaginationUtil,
-        private paginationConfig: PaginationConfig,
-        private activatedRoute: ActivatedRoute,
-        private router: Router
-    ) {
+    constructor(private jhiLanguageService: JhiLanguageService,
+                private userService: UserService,
+                private parseLinks: ParseLinks,
+                private alertService: AlertService,
+                private principal: Principal,
+                private eventManager: EventManager, private paginationUtil: PaginationUtil,
+                private paginationConfig: PaginationConfig,
+                private activatedRoute: ActivatedRoute,
+                private router: Router) {
         this.itemsPerPage = ITEMS_PER_PAGE;
         this.routeData = this.activatedRoute.data.subscribe(data => {
             this.page = data['pagingParams'].page;
@@ -63,7 +60,7 @@ export class UserMgmtComponent implements OnInit, OnDestroy {
         this.eventManager.subscribe('userListModification', (response) => this.loadAll());
     }
 
-    setActive (user, isActivated) {
+    setActive(user, isActivated) {
         user.activated = isActivated;
 
         this.userService.update(user).subscribe(
@@ -79,21 +76,22 @@ export class UserMgmtComponent implements OnInit, OnDestroy {
             });
     }
 
-    loadAll () {
+    loadAll() {
         this.userService.query({
             page: this.page - 1,
             size: this.itemsPerPage,
-            sort: this.sort()}).subscribe(
+            sort: this.sort()
+        }).subscribe(
             (res: Response) => this.onSuccess(res.json(), res.headers),
             (res: Response) => this.onError(res.json())
         );
     }
 
-    trackIdentity (index, item: User) {
+    trackIdentity(index, item: User) {
         return item.id;
     }
 
-    sort () {
+    sort() {
         let result = [this.predicate + ',' + (this.reverse ? 'asc' : 'desc')];
         if (this.predicate !== 'id') {
             result.push('id');
@@ -101,19 +99,19 @@ export class UserMgmtComponent implements OnInit, OnDestroy {
         return result;
     }
 
-    loadPage (page: number) {
+    loadPage(page: number) {
         if (page !== this.previousPage) {
             this.previousPage = page;
             this.transition();
         }
     }
 
-    transition () {
-        this.router.navigate(['/user-management'], { queryParams:
-                {
-                    page: this.page,
-                    sort: this.predicate + ',' + (this.reverse ? 'asc' : 'desc')
-                }
+    transition() {
+        this.router.navigate(['/user-management'], {
+            queryParams: {
+                page: this.page,
+                sort: this.predicate + ',' + (this.reverse ? 'asc' : 'desc')
+            }
         });
         this.loadAll();
     }

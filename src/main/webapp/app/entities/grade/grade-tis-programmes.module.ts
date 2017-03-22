@@ -1,8 +1,6 @@
-import { NgModule, CUSTOM_ELEMENTS_SCHEMA } from '@angular/core';
-import { RouterModule } from '@angular/router';
-
-import { TcsSharedModule } from '../../shared';
-
+import {NgModule, CUSTOM_ELEMENTS_SCHEMA} from "@angular/core";
+import {RouterModule} from "@angular/router";
+import {TcsSharedModule} from "../../shared";
 import {
     GradeTisProgrammesService,
     GradeTisProgrammesPopupService,
@@ -13,8 +11,8 @@ import {
     GradeTisProgrammesDeletePopupComponent,
     GradeTisProgrammesDeleteDialogComponent,
     gradeRoute,
-    gradePopupRoute,
-} from './';
+    gradePopupRoute
+} from "./";
 
 let ENTITY_STATES = [
     ...gradeRoute,
@@ -24,7 +22,7 @@ let ENTITY_STATES = [
 @NgModule({
     imports: [
         TcsSharedModule,
-        RouterModule.forRoot(ENTITY_STATES, { useHash: true })
+        RouterModule.forRoot(ENTITY_STATES, {useHash: true})
     ],
     declarations: [
         GradeTisProgrammesComponent,
@@ -47,4 +45,5 @@ let ENTITY_STATES = [
     ],
     schemas: [CUSTOM_ELEMENTS_SCHEMA]
 })
-export class TcsGradeTisProgrammesModule {}
+export class TcsGradeTisProgrammesModule {
+}

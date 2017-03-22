@@ -1,12 +1,10 @@
-import { Component, OnInit, OnDestroy } from '@angular/core';
-import { ActivatedRoute } from '@angular/router';
-
-import { NgbActiveModal, NgbModalRef } from '@ng-bootstrap/ng-bootstrap';
-import { EventManager, JhiLanguageService } from 'ng-jhipster';
-
-import { TrainingNumberTisProgrammes } from './training-number-tis-programmes.model';
-import { TrainingNumberTisProgrammesPopupService } from './training-number-tis-programmes-popup.service';
-import { TrainingNumberTisProgrammesService } from './training-number-tis-programmes.service';
+import {Component, OnInit, OnDestroy} from "@angular/core";
+import {ActivatedRoute} from "@angular/router";
+import {NgbActiveModal, NgbModalRef} from "@ng-bootstrap/ng-bootstrap";
+import {EventManager, JhiLanguageService} from "ng-jhipster";
+import {TrainingNumberTisProgrammes} from "./training-number-tis-programmes.model";
+import {TrainingNumberTisProgrammesPopupService} from "./training-number-tis-programmes-popup.service";
+import {TrainingNumberTisProgrammesService} from "./training-number-tis-programmes.service";
 
 @Component({
     selector: 'jhi-training-number-tis-programmes-delete-dialog',
@@ -16,20 +14,18 @@ export class TrainingNumberTisProgrammesDeleteDialogComponent {
 
     trainingNumber: TrainingNumberTisProgrammes;
 
-    constructor(
-        private jhiLanguageService: JhiLanguageService,
-        private trainingNumberService: TrainingNumberTisProgrammesService,
-        public activeModal: NgbActiveModal,
-        private eventManager: EventManager
-    ) {
+    constructor(private jhiLanguageService: JhiLanguageService,
+                private trainingNumberService: TrainingNumberTisProgrammesService,
+                public activeModal: NgbActiveModal,
+                private eventManager: EventManager) {
         this.jhiLanguageService.setLocations(['trainingNumber', 'trainingNumberType']);
     }
 
-    clear () {
+    clear() {
         this.activeModal.dismiss('cancel');
     }
 
-    confirmDelete (id: number) {
+    confirmDelete(id: number) {
         this.trainingNumberService.delete(id).subscribe(response => {
             this.eventManager.broadcast({
                 name: 'trainingNumberListModification',
@@ -49,10 +45,9 @@ export class TrainingNumberTisProgrammesDeletePopupComponent implements OnInit, 
     modalRef: NgbModalRef;
     routeSub: any;
 
-    constructor (
-        private route: ActivatedRoute,
-        private trainingNumberPopupService: TrainingNumberTisProgrammesPopupService
-    ) {}
+    constructor(private route: ActivatedRoute,
+                private trainingNumberPopupService: TrainingNumberTisProgrammesPopupService) {
+    }
 
     ngOnInit() {
         this.routeSub = this.route.params.subscribe(params => {

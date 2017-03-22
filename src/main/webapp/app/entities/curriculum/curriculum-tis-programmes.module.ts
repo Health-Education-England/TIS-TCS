@@ -1,8 +1,6 @@
-import { NgModule, CUSTOM_ELEMENTS_SCHEMA } from '@angular/core';
-import { RouterModule } from '@angular/router';
-
-import { TcsSharedModule } from '../../shared';
-
+import {NgModule, CUSTOM_ELEMENTS_SCHEMA} from "@angular/core";
+import {RouterModule} from "@angular/router";
+import {TcsSharedModule} from "../../shared";
 import {
     CurriculumTisProgrammesService,
     CurriculumTisProgrammesPopupService,
@@ -14,8 +12,8 @@ import {
     CurriculumTisProgrammesDeleteDialogComponent,
     curriculumRoute,
     curriculumPopupRoute,
-    CurriculumTisProgrammesResolvePagingParams,
-} from './';
+    CurriculumTisProgrammesResolvePagingParams
+} from "./";
 
 let ENTITY_STATES = [
     ...curriculumRoute,
@@ -25,7 +23,7 @@ let ENTITY_STATES = [
 @NgModule({
     imports: [
         TcsSharedModule,
-        RouterModule.forRoot(ENTITY_STATES, { useHash: true })
+        RouterModule.forRoot(ENTITY_STATES, {useHash: true})
     ],
     declarations: [
         CurriculumTisProgrammesComponent,
@@ -49,4 +47,5 @@ let ENTITY_STATES = [
     ],
     schemas: [CUSTOM_ELEMENTS_SCHEMA]
 })
-export class TcsCurriculumTisProgrammesModule {}
+export class TcsCurriculumTisProgrammesModule {
+}

@@ -1,4 +1,3 @@
-
 const enum CurriculumSubType {
     'MEDICAL_CURRICULUM',
     'MEDICAL_SPR',
@@ -17,28 +16,28 @@ const enum CurriculumSubType {
     'ACLNIHR_FUNDING',
     'OTHER_FELLOWSHIP'
 
-};
+}
+;
 
 const enum AssessmentType {
     'ARCP',
     'RITA',
     'ACADEMIC'
 
-};
+}
+;
 export class CurriculumTisProgrammes {
-    constructor(
-        public id?: number,
-        public name?: string,
-        public start?: any,
-        public end?: any,
-        public curriculumSubType?: CurriculumSubType,
-        public assessmentType?: AssessmentType,
-        public doesThisCurriculumLeadToCct?: boolean,
-        public periodOfGrace?: number,
-        public programmeMembershipId?: number,
-        public gradeId?: number,
-        public specialtyId?: number,
-    ) {
+    constructor(public id?: number,
+                public name?: string,
+                public start?: any,
+                public end?: any,
+                public curriculumSubType?: CurriculumSubType,
+                public assessmentType?: AssessmentType,
+                public doesThisCurriculumLeadToCct?: boolean,
+                public periodOfGrace?: number,
+                public programmeMembershipId?: number,
+                public gradeId?: number,
+                public specialtyId?: number,) {
         this.doesThisCurriculumLeadToCct = false;
     }
 }

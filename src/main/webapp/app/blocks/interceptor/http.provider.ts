@@ -1,21 +1,18 @@
-import { Injector } from '@angular/core';
-import { Http, XHRBackend, RequestOptions } from '@angular/http';
-import { EventManager, InterceptableHttp } from 'ng-jhipster';
+import {Injector} from "@angular/core";
+import {Http, XHRBackend, RequestOptions} from "@angular/http";
+import {EventManager, InterceptableHttp} from "ng-jhipster";
+import {AuthInterceptor} from "./auth.interceptor";
+import {LocalStorageService, SessionStorageService} from "ng2-webstorage";
+import {AuthExpiredInterceptor} from "./auth-expired.interceptor";
+import {ErrorHandlerInterceptor} from "./errorhandler.interceptor";
+import {NotificationInterceptor} from "./notification.interceptor";
 
-import { AuthInterceptor } from './auth.interceptor';
-import { LocalStorageService, SessionStorageService } from 'ng2-webstorage';
-import { AuthExpiredInterceptor } from './auth-expired.interceptor';
-import { ErrorHandlerInterceptor } from './errorhandler.interceptor';
-import { NotificationInterceptor } from './notification.interceptor';
-
-export function interceptableFactory(
-    backend: XHRBackend,
-    defaultOptions: RequestOptions,
-    localStorage: LocalStorageService,
-    sessionStorage: SessionStorageService,
-    injector: Injector,
-    eventManager: EventManager
-) {
+export function interceptableFactory(backend: XHRBackend,
+                                     defaultOptions: RequestOptions,
+                                     localStorage: LocalStorageService,
+                                     sessionStorage: SessionStorageService,
+                                     injector: Injector,
+                                     eventManager: EventManager) {
     return new InterceptableHttp(
         backend,
         defaultOptions,

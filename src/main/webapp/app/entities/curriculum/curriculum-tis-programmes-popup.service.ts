@@ -1,19 +1,18 @@
-import { Injectable, Component } from '@angular/core';
-import { Router } from '@angular/router';
-import { NgbModal, NgbModalRef } from '@ng-bootstrap/ng-bootstrap';
-import { CurriculumTisProgrammes } from './curriculum-tis-programmes.model';
-import { CurriculumTisProgrammesService } from './curriculum-tis-programmes.service';
+import {Injectable, Component} from "@angular/core";
+import {Router} from "@angular/router";
+import {NgbModal, NgbModalRef} from "@ng-bootstrap/ng-bootstrap";
+import {CurriculumTisProgrammes} from "./curriculum-tis-programmes.model";
+import {CurriculumTisProgrammesService} from "./curriculum-tis-programmes.service";
 @Injectable()
 export class CurriculumTisProgrammesPopupService {
     private isOpen = false;
-    constructor (
-        private modalService: NgbModal,
-        private router: Router,
-        private curriculumService: CurriculumTisProgrammesService
 
-    ) {}
+    constructor(private modalService: NgbModal,
+                private router: Router,
+                private curriculumService: CurriculumTisProgrammesService) {
+    }
 
-    open (component: Component, id?: number | any): NgbModalRef {
+    open(component: Component, id?: number | any): NgbModalRef {
         if (this.isOpen) {
             return;
         }
@@ -43,13 +42,13 @@ export class CurriculumTisProgrammesPopupService {
     }
 
     curriculumModalRef(component: Component, curriculum: CurriculumTisProgrammes): NgbModalRef {
-        let modalRef = this.modalService.open(component, { size: 'lg', backdrop: 'static'});
+        let modalRef = this.modalService.open(component, {size: 'lg', backdrop: 'static'});
         modalRef.componentInstance.curriculum = curriculum;
         modalRef.result.then(result => {
-            this.router.navigate([{ outlets: { popup: null }}], { replaceUrl: true });
+            this.router.navigate([{outlets: {popup: null}}], {replaceUrl: true});
             this.isOpen = false;
         }, (reason) => {
-            this.router.navigate([{ outlets: { popup: null }}], { replaceUrl: true });
+            this.router.navigate([{outlets: {popup: null}}], {replaceUrl: true});
             this.isOpen = false;
         });
         return modalRef;

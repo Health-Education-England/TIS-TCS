@@ -1,11 +1,11 @@
 {
-    "tcsApp": {
-        "SpecialtyType" : {
-            "null": "",
-            "CURRICULUM": "CURRICULUM",
-            "POST": "POST",
-            "PLACEMENT": "PLACEMENT",
-            "SUB_SPECIALTY": "SUB_SPECIALTY"
-        }
-    }
+  "tcsApp": {
+	"SpecialtyType": {
+	  "null": "",
+	  "CURRICULUM": "CURRICULUM",
+	  "POST": "POST",
+	  "PLACEMENT": "PLACEMENT",
+	  "SUB_SPECIALTY": "SUB_SPECIALTY"
+	}
+  }
 }

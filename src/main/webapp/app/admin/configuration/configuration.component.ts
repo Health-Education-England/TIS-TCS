@@ -1,7 +1,6 @@
-import { Component, OnInit } from '@angular/core';
-import { JhiLanguageService } from 'ng-jhipster';
-
-import { JhiConfigurationService } from './configuration.service';
+import {Component, OnInit} from "@angular/core";
+import {JhiLanguageService} from "ng-jhipster";
+import {JhiConfigurationService} from "./configuration.service";
 
 @Component({
     selector: 'jhi-configuration',
@@ -15,10 +14,8 @@ export class JhiConfigurationComponent implements OnInit {
     orderProp: string;
     reverse: boolean;
 
-    constructor(
-        private jhiLanguageService: JhiLanguageService,
-        private configurationService: JhiConfigurationService
-    ) {
+    constructor(private jhiLanguageService: JhiLanguageService,
+                private configurationService: JhiConfigurationService) {
         this.jhiLanguageService.setLocations(['configuration']);
         this.configKeys = [];
         this.filter = '';

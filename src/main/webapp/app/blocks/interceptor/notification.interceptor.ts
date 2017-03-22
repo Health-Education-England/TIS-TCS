@@ -1,6 +1,6 @@
-import { HttpInterceptor } from 'ng-jhipster';
-import { RequestOptionsArgs, Response } from '@angular/http';
-import { Observable } from 'rxjs/Observable';
+import {HttpInterceptor} from "ng-jhipster";
+import {RequestOptionsArgs, Response} from "@angular/http";
+import {Observable} from "rxjs/Observable";
 
 export class NotificationInterceptor extends HttpInterceptor {
 

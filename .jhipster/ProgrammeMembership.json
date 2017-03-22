@@ -1,68 +1,68 @@
 {
-    "fluentMethods": true,
-    "relationships": [
-        {
-            "relationshipName": "programme",
-            "otherEntityName": "programme",
-            "relationshipType": "many-to-one",
-            "otherEntityField": "id"
-        },
-        {
-            "relationshipName": "curriculum",
-            "otherEntityName": "curriculum",
-            "relationshipType": "many-to-one",
-            "otherEntityField": "id"
-        },
-        {
-            "relationshipName": "trainingNumber",
-            "otherEntityName": "trainingNumber",
-            "relationshipType": "many-to-one",
-            "otherEntityField": "id"
-        }
-    ],
-    "fields": [
-        {
-            "fieldName": "programmeMembershipType",
-            "fieldType": "ProgrammeMembershipType",
-            "fieldValues": "SUBSTANTIVE,LAT,FTSTA,MILITARY,VISITOR"
-        },
-        {
-            "fieldName": "rotation",
-            "fieldType": "String"
-        },
-        {
-            "fieldName": "curriculumStartDate",
-            "fieldType": "LocalDate"
-        },
-        {
-            "fieldName": "curriculumEndDate",
-            "fieldType": "LocalDate"
-        },
-        {
-            "fieldName": "periodOfGrace",
-            "fieldType": "Integer"
-        },
-        {
-            "fieldName": "programmeStartDate",
-            "fieldType": "LocalDate"
-        },
-        {
-            "fieldName": "curriculumCompletionDate",
-            "fieldType": "LocalDate"
-        },
-        {
-            "fieldName": "programmeEndDate",
-            "fieldType": "LocalDate"
-        },
-        {
-            "fieldName": "leavingDestination",
-            "fieldType": "String"
-        }
-    ],
-    "changelogDate": "20170321142414",
-    "entityTableName": "programme_membership",
-    "dto": "mapstruct",
-    "pagination": "pagination",
-    "service": "serviceImpl",
-    "angularJSSuffix": "tisProgrammes"
+  "fluentMethods": true,
+  "relationships": [
+	{
+	  "relationshipName": "programme",
+	  "otherEntityName": "programme",
+	  "relationshipType": "many-to-one",
+	  "otherEntityField": "id"
+	},
+	{
+	  "relationshipName": "curriculum",
+	  "otherEntityName": "curriculum",
+	  "relationshipType": "many-to-one",
+	  "otherEntityField": "id"
+	},
+	{
+	  "relationshipName": "trainingNumber",
+	  "otherEntityName": "trainingNumber",
+	  "relationshipType": "many-to-one",
+	  "otherEntityField": "id"
+	}
+  ],
+  "fields": [
+	{
+	  "fieldName": "programmeMembershipType",
+	  "fieldType": "ProgrammeMembershipType",
+	  "fieldValues": "SUBSTANTIVE,LAT,FTSTA,MILITARY,VISITOR"
+	},
+	{
+	  "fieldName": "rotation",
+	  "fieldType": "String"
+	},
+	{
+	  "fieldName": "curriculumStartDate",
+	  "fieldType": "LocalDate"
+	},
+	{
+	  "fieldName": "curriculumEndDate",
+	  "fieldType": "LocalDate"
+	},
+	{
+	  "fieldName": "periodOfGrace",
+	  "fieldType": "Integer"
+	},
+	{
+	  "fieldName": "programmeStartDate",
+	  "fieldType": "LocalDate"
+	},
+	{
+	  "fieldName": "curriculumCompletionDate",
+	  "fieldType": "LocalDate"
+	},
+	{
+	  "fieldName": "programmeEndDate",
+	  "fieldType": "LocalDate"
+	},
+	{
+	  "fieldName": "leavingDestination",
+	  "fieldType": "String"
+	}
+  ],
+  "changelogDate": "20170321142414",
+  "entityTableName": "programme_membership",
+  "dto": "mapstruct",
+  "pagination": "pagination",
+  "service": "serviceImpl",
+  "angularJSSuffix": "tisProgrammes"
 }

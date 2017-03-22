@@ -1,30 +1,25 @@
-import { Component, OnInit, OnDestroy } from '@angular/core';
-import { Response } from '@angular/http';
-import { ActivatedRoute, Router } from '@angular/router';
-import { Subscription } from 'rxjs/Rx';
-import { EventManager, ParseLinks, PaginationUtil, JhiLanguageService, AlertService } from 'ng-jhipster';
-
-import { GradeTisProgrammes } from './grade-tis-programmes.model';
-import { GradeTisProgrammesService } from './grade-tis-programmes.service';
-import { ITEMS_PER_PAGE, Principal } from '../../shared';
-import { PaginationConfig } from '../../blocks/config/uib-pagination.config';
+import {Component, OnInit, OnDestroy} from "@angular/core";
+import {Response} from "@angular/http";
+import {Subscription} from "rxjs/Rx";
+import {EventManager, JhiLanguageService, AlertService} from "ng-jhipster";
+import {GradeTisProgrammes} from "./grade-tis-programmes.model";
+import {GradeTisProgrammesService} from "./grade-tis-programmes.service";
+import {Principal} from "../../shared";
 
 @Component({
     selector: 'jhi-grade-tis-programmes',
     templateUrl: './grade-tis-programmes.component.html'
 })
 export class GradeTisProgrammesComponent implements OnInit, OnDestroy {
-grades: GradeTisProgrammes[];
+    grades: GradeTisProgrammes[];
     currentAccount: any;
     eventSubscriber: Subscription;
 
-    constructor(
-        private jhiLanguageService: JhiLanguageService,
-        private gradeService: GradeTisProgrammesService,
-        private alertService: AlertService,
-        private eventManager: EventManager,
-        private principal: Principal
-    ) {
+    constructor(private jhiLanguageService: JhiLanguageService,
+                private gradeService: GradeTisProgrammesService,
+                private alertService: AlertService,
+                private eventManager: EventManager,
+                private principal: Principal) {
         this.jhiLanguageService.setLocations(['grade']);
     }
 
@@ -36,6 +31,7 @@ grades: GradeTisProgrammes[];
             (res: Response) => this.onError(res.json())
         );
     }
+
     ngOnInit() {
         this.loadAll();
         this.principal.identity().then((account) => {
@@ -48,10 +44,9 @@ grades: GradeTisProgrammes[];
         this.eventManager.destroy(this.eventSubscriber);
     }
 
-    trackId (index: number, item: GradeTisProgrammes) {
+    trackId(index: number, item: GradeTisProgrammes) {
         return item.id;
     }
-
 
 
     registerChangeInGrades() {
@@ -59,7 +54,7 @@ grades: GradeTisProgrammes[];
     }
 
 
-    private onError (error) {
+    private onError(error) {
         this.alertService.error(error.message, null, null);
     }
 }

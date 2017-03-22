@@ -1,12 +1,10 @@
-import { Component, OnInit, OnDestroy } from '@angular/core';
-import { ActivatedRoute } from '@angular/router';
-
-import { NgbActiveModal, NgbModalRef } from '@ng-bootstrap/ng-bootstrap';
-import { EventManager, JhiLanguageService } from 'ng-jhipster';
-
-import { SpecialtyTisProgrammes } from './specialty-tis-programmes.model';
-import { SpecialtyTisProgrammesPopupService } from './specialty-tis-programmes-popup.service';
-import { SpecialtyTisProgrammesService } from './specialty-tis-programmes.service';
+import {Component, OnInit, OnDestroy} from "@angular/core";
+import {ActivatedRoute} from "@angular/router";
+import {NgbActiveModal, NgbModalRef} from "@ng-bootstrap/ng-bootstrap";
+import {EventManager, JhiLanguageService} from "ng-jhipster";
+import {SpecialtyTisProgrammes} from "./specialty-tis-programmes.model";
+import {SpecialtyTisProgrammesPopupService} from "./specialty-tis-programmes-popup.service";
+import {SpecialtyTisProgrammesService} from "./specialty-tis-programmes.service";
 
 @Component({
     selector: 'jhi-specialty-tis-programmes-delete-dialog',
@@ -16,20 +14,18 @@ export class SpecialtyTisProgrammesDeleteDialogComponent {
 
     specialty: SpecialtyTisProgrammes;
 
-    constructor(
-        private jhiLanguageService: JhiLanguageService,
-        private specialtyService: SpecialtyTisProgrammesService,
-        public activeModal: NgbActiveModal,
-        private eventManager: EventManager
-    ) {
+    constructor(private jhiLanguageService: JhiLanguageService,
+                private specialtyService: SpecialtyTisProgrammesService,
+                public activeModal: NgbActiveModal,
+                private eventManager: EventManager) {
         this.jhiLanguageService.setLocations(['specialty', 'status', 'specialtyType']);
     }
 
-    clear () {
+    clear() {
         this.activeModal.dismiss('cancel');
     }
 
-    confirmDelete (id: number) {
+    confirmDelete(id: number) {
         this.specialtyService.delete(id).subscribe(response => {
             this.eventManager.broadcast({
                 name: 'specialtyListModification',
@@ -49,10 +45,9 @@ export class SpecialtyTisProgrammesDeletePopupComponent implements OnInit, OnDes
     modalRef: NgbModalRef;
     routeSub: any;
 
-    constructor (
-        private route: ActivatedRoute,
-        private specialtyPopupService: SpecialtyTisProgrammesPopupService
-    ) {}
+    constructor(private route: ActivatedRoute,
+                private specialtyPopupService: SpecialtyTisProgrammesPopupService) {
+    }
 
     ngOnInit() {
         this.routeSub = this.route.params.subscribe(params => {

@@ -1,8 +1,8 @@
-import { Component, OnInit, OnDestroy } from '@angular/core';
-import { ActivatedRoute } from '@angular/router';
-import { JhiLanguageService } from 'ng-jhipster';
-import { SpecialtyGroupTisProgrammes } from './specialty-group-tis-programmes.model';
-import { SpecialtyGroupTisProgrammesService } from './specialty-group-tis-programmes.service';
+import {Component, OnInit, OnDestroy} from "@angular/core";
+import {ActivatedRoute} from "@angular/router";
+import {JhiLanguageService} from "ng-jhipster";
+import {SpecialtyGroupTisProgrammes} from "./specialty-group-tis-programmes.model";
+import {SpecialtyGroupTisProgrammesService} from "./specialty-group-tis-programmes.service";
 
 @Component({
     selector: 'jhi-specialty-group-tis-programmes-detail',
@@ -13,11 +13,9 @@ export class SpecialtyGroupTisProgrammesDetailComponent implements OnInit, OnDes
     specialtyGroup: SpecialtyGroupTisProgrammes;
     private subscription: any;
 
-    constructor(
-        private jhiLanguageService: JhiLanguageService,
-        private specialtyGroupService: SpecialtyGroupTisProgrammesService,
-        private route: ActivatedRoute
-    ) {
+    constructor(private jhiLanguageService: JhiLanguageService,
+                private specialtyGroupService: SpecialtyGroupTisProgrammesService,
+                private route: ActivatedRoute) {
         this.jhiLanguageService.setLocations(['specialtyGroup']);
     }
 
@@ -27,11 +25,12 @@ export class SpecialtyGroupTisProgrammesDetailComponent implements OnInit, OnDes
         });
     }
 
-    load (id) {
+    load(id) {
         this.specialtyGroupService.find(id).subscribe(specialtyGroup => {
             this.specialtyGroup = specialtyGroup;
         });
     }
+
     previousState() {
         window.history.back();
     }

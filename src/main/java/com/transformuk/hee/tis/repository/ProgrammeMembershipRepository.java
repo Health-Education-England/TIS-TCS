@@ -1,15 +1,12 @@
 package com.transformuk.hee.tis.repository;
 
 import com.transformuk.hee.tis.domain.ProgrammeMembership;
-
-import org.springframework.data.jpa.repository.*;
-
-import java.util.List;
+import org.springframework.data.jpa.repository.JpaRepository;
 
 /**
  * Spring Data JPA repository for the ProgrammeMembership entity.
  */
 @SuppressWarnings("unused")
-public interface ProgrammeMembershipRepository extends JpaRepository<ProgrammeMembership,Long> {
+public interface ProgrammeMembershipRepository extends JpaRepository<ProgrammeMembership, Long> {
 
 }

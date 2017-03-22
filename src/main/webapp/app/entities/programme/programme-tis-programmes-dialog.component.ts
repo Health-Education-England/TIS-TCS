@@ -1,14 +1,12 @@
-import { Component, OnInit, OnDestroy } from '@angular/core';
-import { ActivatedRoute } from '@angular/router';
-import { Response } from '@angular/http';
-
-import { NgbActiveModal, NgbModalRef } from '@ng-bootstrap/ng-bootstrap';
-import { EventManager, AlertService, JhiLanguageService } from 'ng-jhipster';
-
-import { ProgrammeTisProgrammes } from './programme-tis-programmes.model';
-import { ProgrammeTisProgrammesPopupService } from './programme-tis-programmes-popup.service';
-import { ProgrammeTisProgrammesService } from './programme-tis-programmes.service';
-import { ProgrammeMembershipTisProgrammes, ProgrammeMembershipTisProgrammesService } from '../programme-membership';
+import {Component, OnInit, OnDestroy} from "@angular/core";
+import {ActivatedRoute} from "@angular/router";
+import {Response} from "@angular/http";
+import {NgbActiveModal, NgbModalRef} from "@ng-bootstrap/ng-bootstrap";
+import {EventManager, AlertService, JhiLanguageService} from "ng-jhipster";
+import {ProgrammeTisProgrammes} from "./programme-tis-programmes.model";
+import {ProgrammeTisProgrammesPopupService} from "./programme-tis-programmes-popup.service";
+import {ProgrammeTisProgrammesService} from "./programme-tis-programmes.service";
+import {ProgrammeMembershipTisProgrammes, ProgrammeMembershipTisProgrammesService} from "../programme-membership";
 @Component({
     selector: 'jhi-programme-tis-programmes-dialog',
     templateUrl: './programme-tis-programmes-dialog.component.html'
@@ -20,14 +18,13 @@ export class ProgrammeTisProgrammesDialogComponent implements OnInit {
     isSaving: boolean;
 
     programmememberships: ProgrammeMembershipTisProgrammes[];
-    constructor(
-        public activeModal: NgbActiveModal,
-        private jhiLanguageService: JhiLanguageService,
-        private alertService: AlertService,
-        private programmeService: ProgrammeTisProgrammesService,
-        private programmeMembershipService: ProgrammeMembershipTisProgrammesService,
-        private eventManager: EventManager
-    ) {
+
+    constructor(public activeModal: NgbActiveModal,
+                private jhiLanguageService: JhiLanguageService,
+                private alertService: AlertService,
+                private programmeService: ProgrammeTisProgrammesService,
+                private programmeMembershipService: ProgrammeMembershipTisProgrammesService,
+                private eventManager: EventManager) {
         this.jhiLanguageService.setLocations(['programme', 'status']);
     }
 
@@ -35,13 +32,16 @@ export class ProgrammeTisProgrammesDialogComponent implements OnInit {
         this.isSaving = false;
         this.authorities = ['ROLE_USER', 'ROLE_ADMIN'];
         this.programmeMembershipService.query().subscribe(
-            (res: Response) => { this.programmememberships = res.json(); }, (res: Response) => this.onError(res.json()));
+            (res: Response) => {
+                this.programmememberships = res.json();
+            }, (res: Response) => this.onError(res.json()));
     }
-    clear () {
+
+    clear() {
         this.activeModal.dismiss('cancel');
     }
 
-    save () {
+    save() {
         this.isSaving = true;
         if (this.programme.id !== undefined) {
             this.programmeService.update(this.programme)
@@ -54,18 +54,18 @@ export class ProgrammeTisProgrammesDialogComponent implements OnInit {
         }
     }
 
-    private onSaveSuccess (result: ProgrammeTisProgrammes) {
-        this.eventManager.broadcast({ name: 'programmeListModification', content: 'OK'});
+    private onSaveSuccess(result: ProgrammeTisProgrammes) {
+        this.eventManager.broadcast({name: 'programmeListModification', content: 'OK'});
         this.isSaving = false;
         this.activeModal.dismiss(result);
     }
 
-    private onSaveError (error) {
+    private onSaveError(error) {
         this.isSaving = false;
         this.onError(error);
     }
 
-    private onError (error) {
+    private onError(error) {
         this.alertService.error(error.message, null, null);
     }
 
@@ -83,14 +83,13 @@ export class ProgrammeTisProgrammesPopupComponent implements OnInit, OnDestroy {
     modalRef: NgbModalRef;
     routeSub: any;
 
-    constructor (
-        private route: ActivatedRoute,
-        private programmePopupService: ProgrammeTisProgrammesPopupService
-    ) {}
+    constructor(private route: ActivatedRoute,
+                private programmePopupService: ProgrammeTisProgrammesPopupService) {
+    }
 
     ngOnInit() {
         this.routeSub = this.route.params.subscribe(params => {
-            if ( params['id'] ) {
+            if (params['id']) {
                 this.modalRef = this.programmePopupService
                     .open(ProgrammeTisProgrammesDialogComponent, params['id']);
             } else {

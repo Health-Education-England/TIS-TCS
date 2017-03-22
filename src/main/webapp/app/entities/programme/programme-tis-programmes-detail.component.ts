@@ -1,8 +1,8 @@
-import { Component, OnInit, OnDestroy } from '@angular/core';
-import { ActivatedRoute } from '@angular/router';
-import { JhiLanguageService } from 'ng-jhipster';
-import { ProgrammeTisProgrammes } from './programme-tis-programmes.model';
-import { ProgrammeTisProgrammesService } from './programme-tis-programmes.service';
+import {Component, OnInit, OnDestroy} from "@angular/core";
+import {ActivatedRoute} from "@angular/router";
+import {JhiLanguageService} from "ng-jhipster";
+import {ProgrammeTisProgrammes} from "./programme-tis-programmes.model";
+import {ProgrammeTisProgrammesService} from "./programme-tis-programmes.service";
 
 @Component({
     selector: 'jhi-programme-tis-programmes-detail',
@@ -13,11 +13,9 @@ export class ProgrammeTisProgrammesDetailComponent implements OnInit, OnDestroy 
     programme: ProgrammeTisProgrammes;
     private subscription: any;
 
-    constructor(
-        private jhiLanguageService: JhiLanguageService,
-        private programmeService: ProgrammeTisProgrammesService,
-        private route: ActivatedRoute
-    ) {
+    constructor(private jhiLanguageService: JhiLanguageService,
+                private programmeService: ProgrammeTisProgrammesService,
+                private route: ActivatedRoute) {
         this.jhiLanguageService.setLocations(['programme', 'status']);
     }
 
@@ -27,11 +25,12 @@ export class ProgrammeTisProgrammesDetailComponent implements OnInit, OnDestroy 
         });
     }
 
-    load (id) {
+    load(id) {
         this.programmeService.find(id).subscribe(programme => {
             this.programme = programme;
         });
     }
+
     previousState() {
         window.history.back();
     }

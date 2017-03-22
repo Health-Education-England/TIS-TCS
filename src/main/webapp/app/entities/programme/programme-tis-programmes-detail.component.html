@@ -1,41 +1,40 @@
-
 <div *ngIf="programme">
-    <h2><span jhiTranslate="tcsApp.programme.detail.title">Programme</span> {{programme.id}}</h2>
-    <hr>
-    <jhi-alert-error></jhi-alert-error>
-    <dl class="row-md jh-entity-details">
-        <dt><span jhiTranslate="tcsApp.programme.status">Status</span></dt>
-        <dd>
-            <span jhiTranslate="{{'tcsApp.Status.' + programme.status}}">{{programme.status}}</span>
-        </dd>
-        <dt><span jhiTranslate="tcsApp.programme.managingDeanery">Managing Deanery</span></dt>
-        <dd>
-            <span>{{programme.managingDeanery}}</span>
-        </dd>
-        <dt><span jhiTranslate="tcsApp.programme.programmeName">Programme Name</span></dt>
-        <dd>
-            <span>{{programme.programmeName}}</span>
-        </dd>
-        <dt><span jhiTranslate="tcsApp.programme.programmeNumber">Programme Number</span></dt>
-        <dd>
-            <span>{{programme.programmeNumber}}</span>
-        </dd>
-        <dt><span jhiTranslate="tcsApp.programme.leadProvider">Lead Provider</span></dt>
-        <dd>
-            <span>{{programme.leadProvider}}</span>
-        </dd>
-    </dl>
+	<h2><span jhiTranslate="tcsApp.programme.detail.title">Programme</span> {{programme.id}}</h2>
+	<hr>
+	<jhi-alert-error></jhi-alert-error>
+	<dl class="row-md jh-entity-details">
+		<dt><span jhiTranslate="tcsApp.programme.status">Status</span></dt>
+		<dd>
+			<span jhiTranslate="{{'tcsApp.Status.' + programme.status}}">{{programme.status}}</span>
+		</dd>
+		<dt><span jhiTranslate="tcsApp.programme.managingDeanery">Managing Deanery</span></dt>
+		<dd>
+			<span>{{programme.managingDeanery}}</span>
+		</dd>
+		<dt><span jhiTranslate="tcsApp.programme.programmeName">Programme Name</span></dt>
+		<dd>
+			<span>{{programme.programmeName}}</span>
+		</dd>
+		<dt><span jhiTranslate="tcsApp.programme.programmeNumber">Programme Number</span></dt>
+		<dd>
+			<span>{{programme.programmeNumber}}</span>
+		</dd>
+		<dt><span jhiTranslate="tcsApp.programme.leadProvider">Lead Provider</span></dt>
+		<dd>
+			<span>{{programme.leadProvider}}</span>
+		</dd>
+	</dl>
 
-    <button type="submit"
-            (click)="previousState()"
-            class="btn btn-info">
-        <span class="fa fa-arrow-left"></span>&nbsp;<span jhiTranslate="entity.action.back"> Back</span>
-    </button>
+	<button type="submit"
+	        (click)="previousState()"
+	        class="btn btn-info">
+		<span class="fa fa-arrow-left"></span>&nbsp;<span jhiTranslate="entity.action.back"> Back</span>
+	</button>
 
-    <button type="button"
-            [routerLink]="['/', { outlets: { popup: 'programme-tis-programmes/'+ programme.id + '/edit'} }]"
-            replaceUrl="true"
-            class="btn btn-primary">
-        <span class="fa fa-pencil"></span>&nbsp;<span jhiTranslate="entity.action.edit"> Edit</span>
-    </button>
+	<button type="button"
+	        [routerLink]="['/', { outlets: { popup: 'programme-tis-programmes/'+ programme.id + '/edit'} }]"
+	        replaceUrl="true"
+	        class="btn btn-primary">
+		<span class="fa fa-pencil"></span>&nbsp;<span jhiTranslate="entity.action.edit"> Edit</span>
+	</button>
 </div>

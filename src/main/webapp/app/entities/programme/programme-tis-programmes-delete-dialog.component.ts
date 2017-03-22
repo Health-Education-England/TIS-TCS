@@ -1,12 +1,10 @@
-import { Component, OnInit, OnDestroy } from '@angular/core';
-import { ActivatedRoute } from '@angular/router';
-
-import { NgbActiveModal, NgbModalRef } from '@ng-bootstrap/ng-bootstrap';
-import { EventManager, JhiLanguageService } from 'ng-jhipster';
-
-import { ProgrammeTisProgrammes } from './programme-tis-programmes.model';
-import { ProgrammeTisProgrammesPopupService } from './programme-tis-programmes-popup.service';
-import { ProgrammeTisProgrammesService } from './programme-tis-programmes.service';
+import {Component, OnInit, OnDestroy} from "@angular/core";
+import {ActivatedRoute} from "@angular/router";
+import {NgbActiveModal, NgbModalRef} from "@ng-bootstrap/ng-bootstrap";
+import {EventManager, JhiLanguageService} from "ng-jhipster";
+import {ProgrammeTisProgrammes} from "./programme-tis-programmes.model";
+import {ProgrammeTisProgrammesPopupService} from "./programme-tis-programmes-popup.service";
+import {ProgrammeTisProgrammesService} from "./programme-tis-programmes.service";
 
 @Component({
     selector: 'jhi-programme-tis-programmes-delete-dialog',
@@ -16,20 +14,18 @@ export class ProgrammeTisProgrammesDeleteDialogComponent {
 
     programme: ProgrammeTisProgrammes;
 
-    constructor(
-        private jhiLanguageService: JhiLanguageService,
-        private programmeService: ProgrammeTisProgrammesService,
-        public activeModal: NgbActiveModal,
-        private eventManager: EventManager
-    ) {
+    constructor(private jhiLanguageService: JhiLanguageService,
+                private programmeService: ProgrammeTisProgrammesService,
+                public activeModal: NgbActiveModal,
+                private eventManager: EventManager) {
         this.jhiLanguageService.setLocations(['programme', 'status']);
     }
 
-    clear () {
+    clear() {
         this.activeModal.dismiss('cancel');
     }
 
-    confirmDelete (id: number) {
+    confirmDelete(id: number) {
         this.programmeService.delete(id).subscribe(response => {
             this.eventManager.broadcast({
                 name: 'programmeListModification',
@@ -49,10 +45,9 @@ export class ProgrammeTisProgrammesDeletePopupComponent implements OnInit, OnDes
     modalRef: NgbModalRef;
     routeSub: any;
 
-    constructor (
-        private route: ActivatedRoute,
-        private programmePopupService: ProgrammeTisProgrammesPopupService
-    ) {}
+    constructor(private route: ActivatedRoute,
+                private programmePopupService: ProgrammeTisProgrammesPopupService) {
+    }
 
     ngOnInit() {
         this.routeSub = this.route.params.subscribe(params => {

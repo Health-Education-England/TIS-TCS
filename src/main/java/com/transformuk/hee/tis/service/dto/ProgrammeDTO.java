@@ -1,102 +1,108 @@
 package com.transformuk.hee.tis.service.dto;
 
 
-import java.io.Serializable;
-import java.util.HashSet;
-import java.util.Set;
-import java.util.Objects;
 import com.transformuk.hee.tis.domain.enumeration.Status;
+
+import java.io.Serializable;
+import java.util.Objects;
 
 /**
  * A DTO for the Programme entity.
  */
 public class ProgrammeDTO implements Serializable {
 
-    private Long id;
+	private Long id;
 
-    private Status status;
+	private Status status;
 
-    private String managingDeanery;
+	private String managingDeanery;
 
-    private String programmeName;
+	private String programmeName;
 
-    private String programmeNumber;
+	private String programmeNumber;
 
-    private String leadProvider;
+	private String leadProvider;
 
-    public Long getId() {
-        return id;
-    }
+	public Long getId() {
+		return id;
+	}
 
-    public void setId(Long id) {
-        this.id = id;
-    }
-    public Status getStatus() {
-        return status;
-    }
+	public void setId(Long id) {
+		this.id = id;
+	}
 
-    public void setStatus(Status status) {
-        this.status = status;
-    }
-    public String getManagingDeanery() {
-        return managingDeanery;
-    }
+	public Status getStatus() {
+		return status;
+	}
 
-    public void setManagingDeanery(String managingDeanery) {
-        this.managingDeanery = managingDeanery;
-    }
-    public String getProgrammeName() {
-        return programmeName;
-    }
+	public void setStatus(Status status) {
+		this.status = status;
+	}
 
-    public void setProgrammeName(String programmeName) {
-        this.programmeName = programmeName;
-    }
-    public String getProgrammeNumber() {
-        return programmeNumber;
-    }
+	public String getManagingDeanery() {
+		return managingDeanery;
+	}
 
-    public void setProgrammeNumber(String programmeNumber) {
-        this.programmeNumber = programmeNumber;
-    }
-    public String getLeadProvider() {
-        return leadProvider;
-    }
+	public void setManagingDeanery(String managingDeanery) {
+		this.managingDeanery = managingDeanery;
+	}
 
-    public void setLeadProvider(String leadProvider) {
-        this.leadProvider = leadProvider;
-    }
+	public String getProgrammeName() {
+		return programmeName;
+	}
 
-    @Override
-    public boolean equals(Object o) {
-        if (this == o) {
-            return true;
-        }
-        if (o == null || getClass() != o.getClass()) {
-            return false;
-        }
+	public void setProgrammeName(String programmeName) {
+		this.programmeName = programmeName;
+	}
 
-        ProgrammeDTO programmeDTO = (ProgrammeDTO) o;
+	public String getProgrammeNumber() {
+		return programmeNumber;
+	}
 
-        if ( ! Objects.equals(id, programmeDTO.id)) { return false; }
+	public void setProgrammeNumber(String programmeNumber) {
+		this.programmeNumber = programmeNumber;
+	}
 
-        return true;
-    }
+	public String getLeadProvider() {
+		return leadProvider;
+	}
 
-    @Override
-    public int hashCode() {
-        return Objects.hashCode(id);
-    }
+	public void setLeadProvider(String leadProvider) {
+		this.leadProvider = leadProvider;
+	}
 
-    @Override
-    public String toString() {
-        return "ProgrammeDTO{" +
-            "id=" + id +
-            ", status='" + status + "'" +
-            ", managingDeanery='" + managingDeanery + "'" +
-            ", programmeName='" + programmeName + "'" +
-            ", programmeNumber='" + programmeNumber + "'" +
-            ", leadProvider='" + leadProvider + "'" +
-            '}';
-    }
+	@Override
+	public boolean equals(Object o) {
+		if (this == o) {
+			return true;
+		}
+		if (o == null || getClass() != o.getClass()) {
+			return false;
+		}
+
+		ProgrammeDTO programmeDTO = (ProgrammeDTO) o;
+
+		if (!Objects.equals(id, programmeDTO.id)) {
+			return false;
+		}
+
+		return true;
+	}
+
+	@Override
+	public int hashCode() {
+		return Objects.hashCode(id);
+	}
+
+	@Override
+	public String toString() {
+		return "ProgrammeDTO{" +
+				"id=" + id +
+				", status='" + status + "'" +
+				", managingDeanery='" + managingDeanery + "'" +
+				", programmeName='" + programmeName + "'" +
+				", programmeNumber='" + programmeNumber + "'" +
+				", leadProvider='" + leadProvider + "'" +
+				'}';
+	}
 }

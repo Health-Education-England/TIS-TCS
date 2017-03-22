@@ -1,14 +1,14 @@
-import { Injectable } from '@angular/core';
-import { Http, Response, URLSearchParams, BaseRequestOptions } from '@angular/http';
-import { Observable } from 'rxjs/Rx';
-
-import { TrainingNumberTisProgrammes } from './training-number-tis-programmes.model';
+import {Injectable} from "@angular/core";
+import {Http, Response, URLSearchParams, BaseRequestOptions} from "@angular/http";
+import {Observable} from "rxjs/Rx";
+import {TrainingNumberTisProgrammes} from "./training-number-tis-programmes.model";
 @Injectable()
 export class TrainingNumberTisProgrammesService {
 
     private resourceUrl = 'api/training-numbers';
 
-    constructor(private http: Http) { }
+    constructor(private http: Http) {
+    }
 
     create(trainingNumber: TrainingNumberTisProgrammes): Observable<TrainingNumberTisProgrammes> {
         let copy: TrainingNumberTisProgrammes = Object.assign({}, trainingNumber);
@@ -33,13 +33,12 @@ export class TrainingNumberTisProgrammesService {
     query(req?: any): Observable<Response> {
         let options = this.createRequestOption(req);
         return this.http.get(this.resourceUrl, options)
-        ;
+            ;
     }
 
     delete(id: number): Observable<Response> {
         return this.http.delete(`${this.resourceUrl}/${id}`);
     }
-
 
 
     private createRequestOption(req?: any): BaseRequestOptions {

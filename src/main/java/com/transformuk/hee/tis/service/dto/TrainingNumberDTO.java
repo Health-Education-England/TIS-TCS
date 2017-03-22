@@ -1,112 +1,119 @@
 package com.transformuk.hee.tis.service.dto;
 
 
-import java.io.Serializable;
-import java.util.HashSet;
-import java.util.Set;
-import java.util.Objects;
 import com.transformuk.hee.tis.domain.enumeration.TrainingNumberType;
+
+import java.io.Serializable;
+import java.util.Objects;
 
 /**
  * A DTO for the TrainingNumber entity.
  */
 public class TrainingNumberDTO implements Serializable {
 
-    private Long id;
+	private Long id;
 
-    private TrainingNumberType trainingNumberType;
+	private TrainingNumberType trainingNumberType;
 
-    private String localOffice;
+	private String localOffice;
 
-    private Integer number;
+	private Integer number;
 
-    private Integer appointmentYear;
+	private Integer appointmentYear;
 
-    private String typeOfContract;
+	private String typeOfContract;
 
-    private String suffix;
+	private String suffix;
 
-    public Long getId() {
-        return id;
-    }
+	public Long getId() {
+		return id;
+	}
 
-    public void setId(Long id) {
-        this.id = id;
-    }
-    public TrainingNumberType getTrainingNumberType() {
-        return trainingNumberType;
-    }
+	public void setId(Long id) {
+		this.id = id;
+	}
 
-    public void setTrainingNumberType(TrainingNumberType trainingNumberType) {
-        this.trainingNumberType = trainingNumberType;
-    }
-    public String getLocalOffice() {
-        return localOffice;
-    }
+	public TrainingNumberType getTrainingNumberType() {
+		return trainingNumberType;
+	}
 
-    public void setLocalOffice(String localOffice) {
-        this.localOffice = localOffice;
-    }
-    public Integer getNumber() {
-        return number;
-    }
+	public void setTrainingNumberType(TrainingNumberType trainingNumberType) {
+		this.trainingNumberType = trainingNumberType;
+	}
 
-    public void setNumber(Integer number) {
-        this.number = number;
-    }
-    public Integer getAppointmentYear() {
-        return appointmentYear;
-    }
+	public String getLocalOffice() {
+		return localOffice;
+	}
 
-    public void setAppointmentYear(Integer appointmentYear) {
-        this.appointmentYear = appointmentYear;
-    }
-    public String getTypeOfContract() {
-        return typeOfContract;
-    }
+	public void setLocalOffice(String localOffice) {
+		this.localOffice = localOffice;
+	}
 
-    public void setTypeOfContract(String typeOfContract) {
-        this.typeOfContract = typeOfContract;
-    }
-    public String getSuffix() {
-        return suffix;
-    }
+	public Integer getNumber() {
+		return number;
+	}
 
-    public void setSuffix(String suffix) {
-        this.suffix = suffix;
-    }
+	public void setNumber(Integer number) {
+		this.number = number;
+	}
 
-    @Override
-    public boolean equals(Object o) {
-        if (this == o) {
-            return true;
-        }
-        if (o == null || getClass() != o.getClass()) {
-            return false;
-        }
+	public Integer getAppointmentYear() {
+		return appointmentYear;
+	}
 
-        TrainingNumberDTO trainingNumberDTO = (TrainingNumberDTO) o;
+	public void setAppointmentYear(Integer appointmentYear) {
+		this.appointmentYear = appointmentYear;
+	}
 
-        if ( ! Objects.equals(id, trainingNumberDTO.id)) { return false; }
+	public String getTypeOfContract() {
+		return typeOfContract;
+	}
 
-        return true;
-    }
+	public void setTypeOfContract(String typeOfContract) {
+		this.typeOfContract = typeOfContract;
+	}
 
-    @Override
-    public int hashCode() {
-        return Objects.hashCode(id);
-    }
+	public String getSuffix() {
+		return suffix;
+	}
 
-    @Override
-    public String toString() {
-        return "TrainingNumberDTO{" +
-            "id=" + id +
-            ", trainingNumberType='" + trainingNumberType + "'" +
-            ", localOffice='" + localOffice + "'" +
-            ", number='" + number + "'" +
-            ", appointmentYear='" + appointmentYear + "'" +
-            ", typeOfContract='" + typeOfContract + "'" +
-            ", suffix='" + suffix + "'" +
-            '}';
-    }
+	public void setSuffix(String suffix) {
+		this.suffix = suffix;
+	}
+
+	@Override
+	public boolean equals(Object o) {
+		if (this == o) {
+			return true;
+		}
+		if (o == null || getClass() != o.getClass()) {
+			return false;
+		}
+
+		TrainingNumberDTO trainingNumberDTO = (TrainingNumberDTO) o;
+
+		if (!Objects.equals(id, trainingNumberDTO.id)) {
+			return false;
+		}
+
+		return true;
+	}
+
+	@Override
+	public int hashCode() {
+		return Objects.hashCode(id);
+	}
+
+	@Override
+	public String toString() {
+		return "TrainingNumberDTO{" +
+				"id=" + id +
+				", trainingNumberType='" + trainingNumberType + "'" +
+				", localOffice='" + localOffice + "'" +
+				", number='" + number + "'" +
+				", appointmentYear='" + appointmentYear + "'" +
+				", typeOfContract='" + typeOfContract + "'" +
+				", suffix='" + suffix + "'" +
+				'}';
+	}
 }

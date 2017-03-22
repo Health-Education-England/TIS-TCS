@@ -1,14 +1,12 @@
-import { Component, OnInit, OnDestroy } from '@angular/core';
-import { ActivatedRoute } from '@angular/router';
-import { Response } from '@angular/http';
-
-import { NgbActiveModal, NgbModalRef } from '@ng-bootstrap/ng-bootstrap';
-import { EventManager, AlertService, JhiLanguageService } from 'ng-jhipster';
-
-import { TrainingNumberTisProgrammes } from './training-number-tis-programmes.model';
-import { TrainingNumberTisProgrammesPopupService } from './training-number-tis-programmes-popup.service';
-import { TrainingNumberTisProgrammesService } from './training-number-tis-programmes.service';
-import { ProgrammeMembershipTisProgrammes, ProgrammeMembershipTisProgrammesService } from '../programme-membership';
+import {Component, OnInit, OnDestroy} from "@angular/core";
+import {ActivatedRoute} from "@angular/router";
+import {Response} from "@angular/http";
+import {NgbActiveModal, NgbModalRef} from "@ng-bootstrap/ng-bootstrap";
+import {EventManager, AlertService, JhiLanguageService} from "ng-jhipster";
+import {TrainingNumberTisProgrammes} from "./training-number-tis-programmes.model";
+import {TrainingNumberTisProgrammesPopupService} from "./training-number-tis-programmes-popup.service";
+import {TrainingNumberTisProgrammesService} from "./training-number-tis-programmes.service";
+import {ProgrammeMembershipTisProgrammes, ProgrammeMembershipTisProgrammesService} from "../programme-membership";
 @Component({
     selector: 'jhi-training-number-tis-programmes-dialog',
     templateUrl: './training-number-tis-programmes-dialog.component.html'
@@ -20,14 +18,13 @@ export class TrainingNumberTisProgrammesDialogComponent implements OnInit {
     isSaving: boolean;
 
     programmememberships: ProgrammeMembershipTisProgrammes[];
-    constructor(
-        public activeModal: NgbActiveModal,
-        private jhiLanguageService: JhiLanguageService,
-        private alertService: AlertService,
-        private trainingNumberService: TrainingNumberTisProgrammesService,
-        private programmeMembershipService: ProgrammeMembershipTisProgrammesService,
-        private eventManager: EventManager
-    ) {
+
+    constructor(public activeModal: NgbActiveModal,
+                private jhiLanguageService: JhiLanguageService,
+                private alertService: AlertService,
+                private trainingNumberService: TrainingNumberTisProgrammesService,
+                private programmeMembershipService: ProgrammeMembershipTisProgrammesService,
+                private eventManager: EventManager) {
         this.jhiLanguageService.setLocations(['trainingNumber', 'trainingNumberType']);
     }
 
@@ -35,13 +32,16 @@ export class TrainingNumberTisProgrammesDialogComponent implements OnInit {
         this.isSaving = false;
         this.authorities = ['ROLE_USER', 'ROLE_ADMIN'];
         this.programmeMembershipService.query().subscribe(
-            (res: Response) => { this.programmememberships = res.json(); }, (res: Response) => this.onError(res.json()));
+            (res: Response) => {
+                this.programmememberships = res.json();
+            }, (res: Response) => this.onError(res.json()));
     }
-    clear () {
+
+    clear() {
         this.activeModal.dismiss('cancel');
     }
 
-    save () {
+    save() {
         this.isSaving = true;
         if (this.trainingNumber.id !== undefined) {
             this.trainingNumberService.update(this.trainingNumber)
@@ -54,18 +54,18 @@ export class TrainingNumberTisProgrammesDialogComponent implements OnInit {
         }
     }
 
-    private onSaveSuccess (result: TrainingNumberTisProgrammes) {
-        this.eventManager.broadcast({ name: 'trainingNumberListModification', content: 'OK'});
+    private onSaveSuccess(result: TrainingNumberTisProgrammes) {
+        this.eventManager.broadcast({name: 'trainingNumberListModification', content: 'OK'});
         this.isSaving = false;
         this.activeModal.dismiss(result);
     }
 
-    private onSaveError (error) {
+    private onSaveError(error) {
         this.isSaving = false;
         this.onError(error);
     }
 
-    private onError (error) {
+    private onError(error) {
         this.alertService.error(error.message, null, null);
     }
 
@@ -83,14 +83,13 @@ export class TrainingNumberTisProgrammesPopupComponent implements OnInit, OnDest
     modalRef: NgbModalRef;
     routeSub: any;
 
-    constructor (
-        private route: ActivatedRoute,
-        private trainingNumberPopupService: TrainingNumberTisProgrammesPopupService
-    ) {}
+    constructor(private route: ActivatedRoute,
+                private trainingNumberPopupService: TrainingNumberTisProgrammesPopupService) {
+    }
 
     ngOnInit() {
         this.routeSub = this.route.params.subscribe(params => {
-            if ( params['id'] ) {
+            if (params['id']) {
                 this.modalRef = this.trainingNumberPopupService
                     .open(TrainingNumberTisProgrammesDialogComponent, params['id']);
             } else {

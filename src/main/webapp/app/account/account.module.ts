@@ -1,8 +1,6 @@
-import { NgModule, CUSTOM_ELEMENTS_SCHEMA } from '@angular/core';
-import { RouterModule } from '@angular/router';
-
-import { TcsSharedModule } from '../shared';
-
+import {NgModule, CUSTOM_ELEMENTS_SCHEMA} from "@angular/core";
+import {RouterModule} from "@angular/router";
+import {TcsSharedModule} from "../shared";
 import {
     Register,
     Activate,
@@ -17,12 +15,12 @@ import {
     PasswordResetFinishComponent,
     SettingsComponent,
     accountState
-} from './';
+} from "./";
 
 @NgModule({
     imports: [
         TcsSharedModule,
-        RouterModule.forRoot(accountState, { useHash: true })
+        RouterModule.forRoot(accountState, {useHash: true})
     ],
     declarations: [
         ActivateComponent,
@@ -42,4 +40,5 @@ import {
     ],
     schemas: [CUSTOM_ELEMENTS_SCHEMA]
 })
-export class TcsAccountModule {}
+export class TcsAccountModule {
+}

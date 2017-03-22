@@ -1,14 +1,14 @@
-import { Injectable } from '@angular/core';
-import { Http, Response, URLSearchParams, BaseRequestOptions } from '@angular/http';
-import { Observable } from 'rxjs/Rx';
-
-import { SpecialtyGroupTisProgrammes } from './specialty-group-tis-programmes.model';
+import {Injectable} from "@angular/core";
+import {Http, Response, URLSearchParams, BaseRequestOptions} from "@angular/http";
+import {Observable} from "rxjs/Rx";
+import {SpecialtyGroupTisProgrammes} from "./specialty-group-tis-programmes.model";
 @Injectable()
 export class SpecialtyGroupTisProgrammesService {
 
     private resourceUrl = 'api/specialty-groups';
 
-    constructor(private http: Http) { }
+    constructor(private http: Http) {
+    }
 
     create(specialtyGroup: SpecialtyGroupTisProgrammes): Observable<SpecialtyGroupTisProgrammes> {
         let copy: SpecialtyGroupTisProgrammes = Object.assign({}, specialtyGroup);
@@ -33,13 +33,12 @@ export class SpecialtyGroupTisProgrammesService {
     query(req?: any): Observable<Response> {
         let options = this.createRequestOption(req);
         return this.http.get(this.resourceUrl, options)
-        ;
+            ;
     }
 
     delete(id: number): Observable<Response> {
         return this.http.delete(`${this.resourceUrl}/${id}`);
     }
-
 
 
     private createRequestOption(req?: any): BaseRequestOptions {

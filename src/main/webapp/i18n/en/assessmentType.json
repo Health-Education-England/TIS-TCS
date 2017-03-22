@@ -1,10 +1,10 @@
 {
-    "tcsApp": {
-        "AssessmentType" : {
-            "null": "",
-            "ARCP": "ARCP",
-            "RITA": "RITA",
-            "ACADEMIC": "ACADEMIC"
-        }
-    }
+  "tcsApp": {
+	"AssessmentType": {
+	  "null": "",
+	  "ARCP": "ARCP",
+	  "RITA": "RITA",
+	  "ACADEMIC": "ACADEMIC"
+	}
+  }
 }

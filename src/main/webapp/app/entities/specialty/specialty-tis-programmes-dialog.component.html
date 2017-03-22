@@ -1,63 +1,70 @@
-
-
 <form name="editForm" role="form" novalidate (ngSubmit)="save()" #editForm="ngForm">
 
-    <div class="modal-header">
-        <h4 class="modal-title" id="mySpecialtyLabel" jhiTranslate="tcsApp.specialty.home.createOrEditLabel">Create or edit a Specialty</h4>
-        <button type="button" class="close" data-dismiss="modal" aria-hidden="true"
-                (click)="clear()">&times;</button>
-    </div>
-    <div class="modal-body">
-        <jhi-alert-error></jhi-alert-error>
-        <div class="form-group" [hidden]="!specialty.id">
-            <label for="id" jhiTranslate="global.field.id">ID</label>
-            <input type="text" class="form-control" id="id" name="id"
-                   [(ngModel)]="specialty.id" readonly />
-        </div>
-        <div class="form-group">
-            <label class="form-control-label" jhiTranslate="tcsApp.specialty.status" for="field_status">Status</label>
-            <select class="form-control" name="status" [(ngModel)]="specialty.status" id="field_status" >
-                <option value="CURRENT" jhiTranslate="tcsApp.Status.CURRENT">CURRENT</option>
-                <option value="INACTIVE" jhiTranslate="tcsApp.Status.INACTIVE">INACTIVE</option>
-                <option value="DELETE" jhiTranslate="tcsApp.Status.DELETE">DELETE</option>
-            </select>
-        </div>
-        <div class="form-group">
-            <label class="form-control-label" jhiTranslate="tcsApp.specialty.college" for="field_college">College</label>
-            <input type="text" class="form-control" name="college" id="field_college"
-                [(ngModel)]="specialty.college"
-             />
-        </div>
-        <div class="form-group">
-            <label class="form-control-label" jhiTranslate="tcsApp.specialty.nhsSpecialtyCode" for="field_nhsSpecialtyCode">Nhs Specialty Code</label>
-            <input type="text" class="form-control" name="nhsSpecialtyCode" id="field_nhsSpecialtyCode"
-                [(ngModel)]="specialty.nhsSpecialtyCode"
-             />
-        </div>
-        <div class="form-group">
-            <label class="form-control-label" jhiTranslate="tcsApp.specialty.specialtyType" for="field_specialtyType">Specialty Type</label>
-            <select class="form-control" name="specialtyType" [(ngModel)]="specialty.specialtyType" id="field_specialtyType" >
-                <option value="CURRICULUM" jhiTranslate="tcsApp.SpecialtyType.CURRICULUM">CURRICULUM</option>
-                <option value="POST" jhiTranslate="tcsApp.SpecialtyType.POST">POST</option>
-                <option value="PLACEMENT" jhiTranslate="tcsApp.SpecialtyType.PLACEMENT">PLACEMENT</option>
-                <option value="SUB_SPECIALTY" jhiTranslate="tcsApp.SpecialtyType.SUB_SPECIALTY">SUB_SPECIALTY</option>
-            </select>
-        </div>
+	<div class="modal-header">
+		<h4 class="modal-title" id="mySpecialtyLabel" jhiTranslate="tcsApp.specialty.home.createOrEditLabel">Create or
+			edit a Specialty</h4>
+		<button type="button" class="close" data-dismiss="modal" aria-hidden="true"
+		        (click)="clear()">&times;</button>
+	</div>
+	<div class="modal-body">
+		<jhi-alert-error></jhi-alert-error>
+		<div class="form-group" [hidden]="!specialty.id">
+			<label for="id" jhiTranslate="global.field.id">ID</label>
+			<input type="text" class="form-control" id="id" name="id"
+			       [(ngModel)]="specialty.id" readonly/>
+		</div>
+		<div class="form-group">
+			<label class="form-control-label" jhiTranslate="tcsApp.specialty.status" for="field_status">Status</label>
+			<select class="form-control" name="status" [(ngModel)]="specialty.status" id="field_status">
+				<option value="CURRENT" jhiTranslate="tcsApp.Status.CURRENT">CURRENT</option>
+				<option value="INACTIVE" jhiTranslate="tcsApp.Status.INACTIVE">INACTIVE</option>
+				<option value="DELETE" jhiTranslate="tcsApp.Status.DELETE">DELETE</option>
+			</select>
+		</div>
+		<div class="form-group">
+			<label class="form-control-label" jhiTranslate="tcsApp.specialty.college"
+			       for="field_college">College</label>
+			<input type="text" class="form-control" name="college" id="field_college"
+			       [(ngModel)]="specialty.college"
+			/>
+		</div>
+		<div class="form-group">
+			<label class="form-control-label" jhiTranslate="tcsApp.specialty.nhsSpecialtyCode"
+			       for="field_nhsSpecialtyCode">Nhs Specialty Code</label>
+			<input type="text" class="form-control" name="nhsSpecialtyCode" id="field_nhsSpecialtyCode"
+			       [(ngModel)]="specialty.nhsSpecialtyCode"
+			/>
+		</div>
+		<div class="form-group">
+			<label class="form-control-label" jhiTranslate="tcsApp.specialty.specialtyType" for="field_specialtyType">Specialty
+				Type</label>
+			<select class="form-control" name="specialtyType" [(ngModel)]="specialty.specialtyType"
+			        id="field_specialtyType">
+				<option value="CURRICULUM" jhiTranslate="tcsApp.SpecialtyType.CURRICULUM">CURRICULUM</option>
+				<option value="POST" jhiTranslate="tcsApp.SpecialtyType.POST">POST</option>
+				<option value="PLACEMENT" jhiTranslate="tcsApp.SpecialtyType.PLACEMENT">PLACEMENT</option>
+				<option value="SUB_SPECIALTY" jhiTranslate="tcsApp.SpecialtyType.SUB_SPECIALTY">SUB_SPECIALTY</option>
+			</select>
+		</div>
 
-        <div class="form-group">
-            <label jhiTranslate="tcsApp.specialty.specialtyGroup" for="field_specialtyGroup">Specialty Group</label>
-            <select class="form-control" id="field_specialtyGroup" name="specialtyGroup" [(ngModel)]="specialty.specialtyGroupId" >
-                <option [ngValue]="null"></option>
-                <option [ngValue]="specialtyGroupOption.id" *ngFor="let specialtyGroupOption of specialtygroups; trackBy: trackSpecialtyGroupById">{{specialtyGroupOption.id}}</option>
-            </select>
-        </div>
-    </div>
-    <div class="modal-footer">
-        <button type="button" class="btn btn-default" data-dismiss="modal" (click)="clear()">
-            <span class="fa fa-ban"></span>&nbsp;<span jhiTranslate="entity.action.cancel">Cancel</span>
-        </button>
-        <button type="submit" [disabled]="editForm.form.invalid || isSaving" class="btn btn-primary">
-            <span class="fa fa-save"></span>&nbsp;<span jhiTranslate="entity.action.save">Save</span>
-        </button>
-    </div>
+		<div class="form-group">
+			<label jhiTranslate="tcsApp.specialty.specialtyGroup" for="field_specialtyGroup">Specialty Group</label>
+			<select class="form-control" id="field_specialtyGroup" name="specialtyGroup"
+			        [(ngModel)]="specialty.specialtyGroupId">
+				<option [ngValue]="null"></option>
+				<option [ngValue]="specialtyGroupOption.id"
+				        *ngFor="let specialtyGroupOption of specialtygroups; trackBy: trackSpecialtyGroupById">
+					{{specialtyGroupOption.id}}
+				</option>
+			</select>
+		</div>
+	</div>
+	<div class="modal-footer">
+		<button type="button" class="btn btn-default" data-dismiss="modal" (click)="clear()">
+			<span class="fa fa-ban"></span>&nbsp;<span jhiTranslate="entity.action.cancel">Cancel</span>
+		</button>
+		<button type="submit" [disabled]="editForm.form.invalid || isSaving" class="btn btn-primary">
+			<span class="fa fa-save"></span>&nbsp;<span jhiTranslate="entity.action.save">Save</span>
+		</button>
+	</div>
 </form>

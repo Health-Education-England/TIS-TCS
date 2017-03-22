@@ -1,9 +1,10 @@
 package com.transformuk.hee.tis.service.mapper;
 
-import com.transformuk.hee.tis.domain.*;
+import com.transformuk.hee.tis.domain.Programme;
 import com.transformuk.hee.tis.service.dto.ProgrammeDTO;
+import org.mapstruct.Mapper;
+import org.mapstruct.Mapping;
 
-import org.mapstruct.*;
 import java.util.List;
 
 /**
@@ -12,12 +13,12 @@ import java.util.List;
 @Mapper(componentModel = "spring", uses = {})
 public interface ProgrammeMapper {
 
-    ProgrammeDTO programmeToProgrammeDTO(Programme programme);
+	ProgrammeDTO programmeToProgrammeDTO(Programme programme);
 
-    List<ProgrammeDTO> programmesToProgrammeDTOs(List<Programme> programmes);
+	List<ProgrammeDTO> programmesToProgrammeDTOs(List<Programme> programmes);
 
-    @Mapping(target = "programmeMemberships", ignore = true)
-    Programme programmeDTOToProgramme(ProgrammeDTO programmeDTO);
+	@Mapping(target = "programmeMemberships", ignore = true)
+	Programme programmeDTOToProgramme(ProgrammeDTO programmeDTO);
 
-    List<Programme> programmeDTOsToProgrammes(List<ProgrammeDTO> programmeDTOs);
+	List<Programme> programmeDTOsToProgrammes(List<ProgrammeDTO> programmeDTOs);
 }

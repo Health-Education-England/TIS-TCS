@@ -9,51 +9,54 @@ import java.util.Objects;
  */
 public class SpecialtyGroupDTO implements Serializable {
 
-    private Long id;
+	private Long id;
 
-    private String name;
+	private String name;
 
-    public Long getId() {
-        return id;
-    }
+	public Long getId() {
+		return id;
+	}
 
-    public void setId(Long id) {
-        this.id = id;
-    }
-    public String getName() {
-        return name;
-    }
+	public void setId(Long id) {
+		this.id = id;
+	}
 
-    public void setName(String name) {
-        this.name = name;
-    }
+	public String getName() {
+		return name;
+	}
 
-    @Override
-    public boolean equals(Object o) {
-        if (this == o) {
-            return true;
-        }
-        if (o == null || getClass() != o.getClass()) {
-            return false;
-        }
+	public void setName(String name) {
+		this.name = name;
+	}
 
-        SpecialtyGroupDTO specialtyGroupDTO = (SpecialtyGroupDTO) o;
+	@Override
+	public boolean equals(Object o) {
+		if (this == o) {
+			return true;
+		}
+		if (o == null || getClass() != o.getClass()) {
+			return false;
+		}
 
-        if ( ! Objects.equals(id, specialtyGroupDTO.id)) { return false; }
+		SpecialtyGroupDTO specialtyGroupDTO = (SpecialtyGroupDTO) o;
 
-        return true;
-    }
+		if (!Objects.equals(id, specialtyGroupDTO.id)) {
+			return false;
+		}
 
-    @Override
-    public int hashCode() {
-        return Objects.hashCode(id);
-    }
+		return true;
+	}
 
-    @Override
-    public String toString() {
-        return "SpecialtyGroupDTO{" +
-            "id=" + id +
-            ", name='" + name + "'" +
-            '}';
-    }
+	@Override
+	public int hashCode() {
+		return Objects.hashCode(id);
+	}
+
+	@Override
+	public String toString() {
+		return "SpecialtyGroupDTO{" +
+				"id=" + id +
+				", name='" + name + "'" +
+				'}';
+	}
 }

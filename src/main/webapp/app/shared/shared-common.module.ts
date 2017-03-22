@@ -1,16 +1,14 @@
-import { NgModule, Sanitizer } from '@angular/core';
-import { Title } from '@angular/platform-browser';
-
-import { TranslateService } from 'ng2-translate';
-import { AlertService } from 'ng-jhipster';
-
+import {NgModule, Sanitizer} from "@angular/core";
+import {Title} from "@angular/platform-browser";
+import {TranslateService} from "ng2-translate";
+import {AlertService} from "ng-jhipster";
 import {
     TcsSharedLibsModule,
     JhiLanguageHelper,
     FindLanguageFromKeyPipe,
     JhiAlertComponent,
     JhiAlertErrorComponent
-} from './';
+} from "./";
 
 
 export function alertServiceProvider(sanitizer: Sanitizer, translateService: TranslateService) {
@@ -44,4 +42,5 @@ export function alertServiceProvider(sanitizer: Sanitizer, translateService: Tra
         JhiAlertErrorComponent
     ]
 })
-export class TcsSharedCommonModule {}
+export class TcsSharedCommonModule {
+}

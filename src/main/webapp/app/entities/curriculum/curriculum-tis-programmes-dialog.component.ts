@@ -1,16 +1,14 @@
-import { Component, OnInit, OnDestroy } from '@angular/core';
-import { ActivatedRoute } from '@angular/router';
-import { Response } from '@angular/http';
-
-import { NgbActiveModal, NgbModalRef } from '@ng-bootstrap/ng-bootstrap';
-import { EventManager, AlertService, JhiLanguageService } from 'ng-jhipster';
-
-import { CurriculumTisProgrammes } from './curriculum-tis-programmes.model';
-import { CurriculumTisProgrammesPopupService } from './curriculum-tis-programmes-popup.service';
-import { CurriculumTisProgrammesService } from './curriculum-tis-programmes.service';
-import { ProgrammeMembershipTisProgrammes, ProgrammeMembershipTisProgrammesService } from '../programme-membership';
-import { GradeTisProgrammes, GradeTisProgrammesService } from '../grade';
-import { SpecialtyTisProgrammes, SpecialtyTisProgrammesService } from '../specialty';
+import {Component, OnInit, OnDestroy} from "@angular/core";
+import {ActivatedRoute} from "@angular/router";
+import {Response} from "@angular/http";
+import {NgbActiveModal, NgbModalRef} from "@ng-bootstrap/ng-bootstrap";
+import {EventManager, AlertService, JhiLanguageService} from "ng-jhipster";
+import {CurriculumTisProgrammes} from "./curriculum-tis-programmes.model";
+import {CurriculumTisProgrammesPopupService} from "./curriculum-tis-programmes-popup.service";
+import {CurriculumTisProgrammesService} from "./curriculum-tis-programmes.service";
+import {ProgrammeMembershipTisProgrammes, ProgrammeMembershipTisProgrammesService} from "../programme-membership";
+import {GradeTisProgrammes, GradeTisProgrammesService} from "../grade";
+import {SpecialtyTisProgrammes, SpecialtyTisProgrammesService} from "../specialty";
 @Component({
     selector: 'jhi-curriculum-tis-programmes-dialog',
     templateUrl: './curriculum-tis-programmes-dialog.component.html'
@@ -26,16 +24,15 @@ export class CurriculumTisProgrammesDialogComponent implements OnInit {
     grades: GradeTisProgrammes[];
 
     specialties: SpecialtyTisProgrammes[];
-    constructor(
-        public activeModal: NgbActiveModal,
-        private jhiLanguageService: JhiLanguageService,
-        private alertService: AlertService,
-        private curriculumService: CurriculumTisProgrammesService,
-        private programmeMembershipService: ProgrammeMembershipTisProgrammesService,
-        private gradeService: GradeTisProgrammesService,
-        private specialtyService: SpecialtyTisProgrammesService,
-        private eventManager: EventManager
-    ) {
+
+    constructor(public activeModal: NgbActiveModal,
+                private jhiLanguageService: JhiLanguageService,
+                private alertService: AlertService,
+                private curriculumService: CurriculumTisProgrammesService,
+                private programmeMembershipService: ProgrammeMembershipTisProgrammesService,
+                private gradeService: GradeTisProgrammesService,
+                private specialtyService: SpecialtyTisProgrammesService,
+                private eventManager: EventManager) {
         this.jhiLanguageService.setLocations(['curriculum', 'curriculumSubType', 'assessmentType']);
     }
 
@@ -43,17 +40,24 @@ export class CurriculumTisProgrammesDialogComponent implements OnInit {
         this.isSaving = false;
         this.authorities = ['ROLE_USER', 'ROLE_ADMIN'];
         this.programmeMembershipService.query().subscribe(
-            (res: Response) => { this.programmememberships = res.json(); }, (res: Response) => this.onError(res.json()));
+            (res: Response) => {
+                this.programmememberships = res.json();
+            }, (res: Response) => this.onError(res.json()));
         this.gradeService.query().subscribe(
-            (res: Response) => { this.grades = res.json(); }, (res: Response) => this.onError(res.json()));
+            (res: Response) => {
+                this.grades = res.json();
+            }, (res: Response) => this.onError(res.json()));
         this.specialtyService.query().subscribe(
-            (res: Response) => { this.specialties = res.json(); }, (res: Response) => this.onError(res.json()));
+            (res: Response) => {
+                this.specialties = res.json();
+            }, (res: Response) => this.onError(res.json()));
     }
-    clear () {
+
+    clear() {
         this.activeModal.dismiss('cancel');
     }
 
-    save () {
+    save() {
         this.isSaving = true;
         if (this.curriculum.id !== undefined) {
             this.curriculumService.update(this.curriculum)
@@ -66,18 +70,18 @@ export class CurriculumTisProgrammesDialogComponent implements OnInit {
         }
     }
 
-    private onSaveSuccess (result: CurriculumTisProgrammes) {
-        this.eventManager.broadcast({ name: 'curriculumListModification', content: 'OK'});
+    private onSaveSuccess(result: CurriculumTisProgrammes) {
+        this.eventManager.broadcast({name: 'curriculumListModification', content: 'OK'});
         this.isSaving = false;
         this.activeModal.dismiss(result);
     }
 
-    private onSaveError (error) {
+    private onSaveError(error) {
         this.isSaving = false;
         this.onError(error);
     }
 
-    private onError (error) {
+    private onError(error) {
         this.alertService.error(error.message, null, null);
     }
 
@@ -114,14 +118,13 @@ export class CurriculumTisProgrammesPopupComponent implements OnInit, OnDestroy 
     modalRef: NgbModalRef;
     routeSub: any;
 
-    constructor (
-        private route: ActivatedRoute,
-        private curriculumPopupService: CurriculumTisProgrammesPopupService
-    ) {}
+    constructor(private route: ActivatedRoute,
+                private curriculumPopupService: CurriculumTisProgrammesPopupService) {
+    }
 
     ngOnInit() {
         this.routeSub = this.route.params.subscribe(params => {
-            if ( params['id'] ) {
+            if (params['id']) {
                 this.modalRef = this.curriculumPopupService
                     .open(CurriculumTisProgrammesDialogComponent, params['id']);
             } else {

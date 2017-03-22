@@ -1,14 +1,12 @@
-import { Component, OnInit, OnDestroy } from '@angular/core';
-import { ActivatedRoute } from '@angular/router';
-import { Response } from '@angular/http';
-
-import { NgbActiveModal, NgbModalRef } from '@ng-bootstrap/ng-bootstrap';
-import { EventManager, AlertService, JhiLanguageService } from 'ng-jhipster';
-
-import { GradeTisProgrammes } from './grade-tis-programmes.model';
-import { GradeTisProgrammesPopupService } from './grade-tis-programmes-popup.service';
-import { GradeTisProgrammesService } from './grade-tis-programmes.service';
-import { CurriculumTisProgrammes, CurriculumTisProgrammesService } from '../curriculum';
+import {Component, OnInit, OnDestroy} from "@angular/core";
+import {ActivatedRoute} from "@angular/router";
+import {Response} from "@angular/http";
+import {NgbActiveModal, NgbModalRef} from "@ng-bootstrap/ng-bootstrap";
+import {EventManager, AlertService, JhiLanguageService} from "ng-jhipster";
+import {GradeTisProgrammes} from "./grade-tis-programmes.model";
+import {GradeTisProgrammesPopupService} from "./grade-tis-programmes-popup.service";
+import {GradeTisProgrammesService} from "./grade-tis-programmes.service";
+import {CurriculumTisProgrammes, CurriculumTisProgrammesService} from "../curriculum";
 @Component({
     selector: 'jhi-grade-tis-programmes-dialog',
     templateUrl: './grade-tis-programmes-dialog.component.html'
@@ -20,14 +18,13 @@ export class GradeTisProgrammesDialogComponent implements OnInit {
     isSaving: boolean;
 
     curricula: CurriculumTisProgrammes[];
-    constructor(
-        public activeModal: NgbActiveModal,
-        private jhiLanguageService: JhiLanguageService,
-        private alertService: AlertService,
-        private gradeService: GradeTisProgrammesService,
-        private curriculumService: CurriculumTisProgrammesService,
-        private eventManager: EventManager
-    ) {
+
+    constructor(public activeModal: NgbActiveModal,
+                private jhiLanguageService: JhiLanguageService,
+                private alertService: AlertService,
+                private gradeService: GradeTisProgrammesService,
+                private curriculumService: CurriculumTisProgrammesService,
+                private eventManager: EventManager) {
         this.jhiLanguageService.setLocations(['grade']);
     }
 
@@ -35,13 +32,16 @@ export class GradeTisProgrammesDialogComponent implements OnInit {
         this.isSaving = false;
         this.authorities = ['ROLE_USER', 'ROLE_ADMIN'];
         this.curriculumService.query().subscribe(
-            (res: Response) => { this.curricula = res.json(); }, (res: Response) => this.onError(res.json()));
+            (res: Response) => {
+                this.curricula = res.json();
+            }, (res: Response) => this.onError(res.json()));
     }
-    clear () {
+
+    clear() {
         this.activeModal.dismiss('cancel');
     }
 
-    save () {
+    save() {
         this.isSaving = true;
         if (this.grade.id !== undefined) {
             this.gradeService.update(this.grade)
@@ -54,18 +54,18 @@ export class GradeTisProgrammesDialogComponent implements OnInit {
         }
     }
 
-    private onSaveSuccess (result: GradeTisProgrammes) {
-        this.eventManager.broadcast({ name: 'gradeListModification', content: 'OK'});
+    private onSaveSuccess(result: GradeTisProgrammes) {
+        this.eventManager.broadcast({name: 'gradeListModification', content: 'OK'});
         this.isSaving = false;
         this.activeModal.dismiss(result);
     }
 
-    private onSaveError (error) {
+    private onSaveError(error) {
         this.isSaving = false;
         this.onError(error);
     }
 
-    private onError (error) {
+    private onError(error) {
         this.alertService.error(error.message, null, null);
     }
 
@@ -94,14 +94,13 @@ export class GradeTisProgrammesPopupComponent implements OnInit, OnDestroy {
     modalRef: NgbModalRef;
     routeSub: any;
 
-    constructor (
-        private route: ActivatedRoute,
-        private gradePopupService: GradeTisProgrammesPopupService
-    ) {}
+    constructor(private route: ActivatedRoute,
+                private gradePopupService: GradeTisProgrammesPopupService) {
+    }
 
     ngOnInit() {
         this.routeSub = this.route.params.subscribe(params => {
-            if ( params['id'] ) {
+            if (params['id']) {
                 this.modalRef = this.gradePopupService
                     .open(GradeTisProgrammesDialogComponent, params['id']);
             } else {

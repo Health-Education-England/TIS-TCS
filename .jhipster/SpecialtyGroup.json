@@ -1,16 +1,16 @@
 {
-    "fluentMethods": true,
-    "relationships": [],
-    "fields": [
-        {
-            "fieldName": "name",
-            "fieldType": "String"
-        }
-    ],
-    "changelogDate": "20170321142414",
-    "entityTableName": "specialty_group",
-    "dto": "mapstruct",
-    "pagination": "no",
-    "service": "serviceImpl",
-    "angularJSSuffix": "tisProgrammes"
+  "fluentMethods": true,
+  "relationships": [],
+  "fields": [
+	{
+	  "fieldName": "name",
+	  "fieldType": "String"
+	}
+  ],
+  "changelogDate": "20170321142414",
+  "entityTableName": "specialty_group",
+  "dto": "mapstruct",
+  "pagination": "no",
+  "service": "serviceImpl",
+  "angularJSSuffix": "tisProgrammes"
 }

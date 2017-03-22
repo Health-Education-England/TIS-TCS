@@ -1,143 +1,153 @@
 package com.transformuk.hee.tis.service.dto;
 
-import java.time.LocalDate;
-import java.io.Serializable;
-import java.util.HashSet;
-import java.util.Set;
-import java.util.Objects;
-import com.transformuk.hee.tis.domain.enumeration.CurriculumSubType;
 import com.transformuk.hee.tis.domain.enumeration.AssessmentType;
+import com.transformuk.hee.tis.domain.enumeration.CurriculumSubType;
+
+import java.io.Serializable;
+import java.time.LocalDate;
+import java.util.HashSet;
+import java.util.Objects;
+import java.util.Set;
 
 /**
  * A DTO for the Curriculum entity.
  */
 public class CurriculumDTO implements Serializable {
 
-    private Long id;
+	private Long id;
 
-    private String name;
+	private String name;
 
-    private LocalDate start;
+	private LocalDate start;
 
-    private LocalDate end;
+	private LocalDate end;
 
-    private CurriculumSubType curriculumSubType;
+	private CurriculumSubType curriculumSubType;
 
-    private AssessmentType assessmentType;
+	private AssessmentType assessmentType;
 
-    private Boolean doesThisCurriculumLeadToCct;
+	private Boolean doesThisCurriculumLeadToCct;
 
-    private Integer periodOfGrace;
+	private Integer periodOfGrace;
 
-    private Set<GradeDTO> grades = new HashSet<>();
+	private Set<GradeDTO> grades = new HashSet<>();
 
-    private Long specialtyId;
+	private Long specialtyId;
 
-    public Long getId() {
-        return id;
-    }
+	public Long getId() {
+		return id;
+	}
 
-    public void setId(Long id) {
-        this.id = id;
-    }
-    public String getName() {
-        return name;
-    }
+	public void setId(Long id) {
+		this.id = id;
+	}
 
-    public void setName(String name) {
-        this.name = name;
-    }
-    public LocalDate getStart() {
-        return start;
-    }
+	public String getName() {
+		return name;
+	}
 
-    public void setStart(LocalDate start) {
-        this.start = start;
-    }
-    public LocalDate getEnd() {
-        return end;
-    }
+	public void setName(String name) {
+		this.name = name;
+	}
 
-    public void setEnd(LocalDate end) {
-        this.end = end;
-    }
-    public CurriculumSubType getCurriculumSubType() {
-        return curriculumSubType;
-    }
+	public LocalDate getStart() {
+		return start;
+	}
 
-    public void setCurriculumSubType(CurriculumSubType curriculumSubType) {
-        this.curriculumSubType = curriculumSubType;
-    }
-    public AssessmentType getAssessmentType() {
-        return assessmentType;
-    }
+	public void setStart(LocalDate start) {
+		this.start = start;
+	}
 
-    public void setAssessmentType(AssessmentType assessmentType) {
-        this.assessmentType = assessmentType;
-    }
-    public Boolean getDoesThisCurriculumLeadToCct() {
-        return doesThisCurriculumLeadToCct;
-    }
+	public LocalDate getEnd() {
+		return end;
+	}
 
-    public void setDoesThisCurriculumLeadToCct(Boolean doesThisCurriculumLeadToCct) {
-        this.doesThisCurriculumLeadToCct = doesThisCurriculumLeadToCct;
-    }
-    public Integer getPeriodOfGrace() {
-        return periodOfGrace;
-    }
+	public void setEnd(LocalDate end) {
+		this.end = end;
+	}
 
-    public void setPeriodOfGrace(Integer periodOfGrace) {
-        this.periodOfGrace = periodOfGrace;
-    }
+	public CurriculumSubType getCurriculumSubType() {
+		return curriculumSubType;
+	}
 
-    public Set<GradeDTO> getGrades() {
-        return grades;
-    }
+	public void setCurriculumSubType(CurriculumSubType curriculumSubType) {
+		this.curriculumSubType = curriculumSubType;
+	}
 
-    public void setGrades(Set<GradeDTO> grades) {
-        this.grades = grades;
-    }
+	public AssessmentType getAssessmentType() {
+		return assessmentType;
+	}
 
-    public Long getSpecialtyId() {
-        return specialtyId;
-    }
+	public void setAssessmentType(AssessmentType assessmentType) {
+		this.assessmentType = assessmentType;
+	}
 
-    public void setSpecialtyId(Long specialtyId) {
-        this.specialtyId = specialtyId;
-    }
+	public Boolean getDoesThisCurriculumLeadToCct() {
+		return doesThisCurriculumLeadToCct;
+	}
 
-    @Override
-    public boolean equals(Object o) {
-        if (this == o) {
-            return true;
-        }
-        if (o == null || getClass() != o.getClass()) {
-            return false;
-        }
+	public void setDoesThisCurriculumLeadToCct(Boolean doesThisCurriculumLeadToCct) {
+		this.doesThisCurriculumLeadToCct = doesThisCurriculumLeadToCct;
+	}
 
-        CurriculumDTO curriculumDTO = (CurriculumDTO) o;
+	public Integer getPeriodOfGrace() {
+		return periodOfGrace;
+	}
 
-        if ( ! Objects.equals(id, curriculumDTO.id)) { return false; }
+	public void setPeriodOfGrace(Integer periodOfGrace) {
+		this.periodOfGrace = periodOfGrace;
+	}
 
-        return true;
-    }
+	public Set<GradeDTO> getGrades() {
+		return grades;
+	}
 
-    @Override
-    public int hashCode() {
-        return Objects.hashCode(id);
-    }
+	public void setGrades(Set<GradeDTO> grades) {
+		this.grades = grades;
+	}
 
-    @Override
-    public String toString() {
-        return "CurriculumDTO{" +
-            "id=" + id +
-            ", name='" + name + "'" +
-            ", start='" + start + "'" +
-            ", end='" + end + "'" +
-            ", curriculumSubType='" + curriculumSubType + "'" +
-            ", assessmentType='" + assessmentType + "'" +
-            ", doesThisCurriculumLeadToCct='" + doesThisCurriculumLeadToCct + "'" +
-            ", periodOfGrace='" + periodOfGrace + "'" +
-            '}';
-    }
+	public Long getSpecialtyId() {
+		return specialtyId;
+	}
+
+	public void setSpecialtyId(Long specialtyId) {
+		this.specialtyId = specialtyId;
+	}
+
+	@Override
+	public boolean equals(Object o) {
+		if (this == o) {
+			return true;
+		}
+		if (o == null || getClass() != o.getClass()) {
+			return false;
+		}
+
+		CurriculumDTO curriculumDTO = (CurriculumDTO) o;
+
+		if (!Objects.equals(id, curriculumDTO.id)) {
+			return false;
+		}
+
+		return true;
+	}
+
+	@Override
+	public int hashCode() {
+		return Objects.hashCode(id);
+	}
+
+	@Override
+	public String toString() {
+		return "CurriculumDTO{" +
+				"id=" + id +
+				", name='" + name + "'" +
+				", start='" + start + "'" +
+				", end='" + end + "'" +
+				", curriculumSubType='" + curriculumSubType + "'" +
+				", assessmentType='" + assessmentType + "'" +
+				", doesThisCurriculumLeadToCct='" + doesThisCurriculumLeadToCct + "'" +
+				", periodOfGrace='" + periodOfGrace + "'" +
+				'}';
+	}
 }

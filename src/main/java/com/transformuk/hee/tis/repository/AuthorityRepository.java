@@ -1,7 +1,6 @@
 package com.transformuk.hee.tis.repository;
 
 import com.transformuk.hee.tis.domain.Authority;
-
 import org.springframework.data.jpa.repository.JpaRepository;
 
 /**

@@ -1,25 +1,24 @@
-
 <div *ngIf="specialtyGroup">
-    <h2><span jhiTranslate="tcsApp.specialtyGroup.detail.title">Specialty Group</span> {{specialtyGroup.id}}</h2>
-    <hr>
-    <jhi-alert-error></jhi-alert-error>
-    <dl class="row-md jh-entity-details">
-        <dt><span jhiTranslate="tcsApp.specialtyGroup.name">Name</span></dt>
-        <dd>
-            <span>{{specialtyGroup.name}}</span>
-        </dd>
-    </dl>
+	<h2><span jhiTranslate="tcsApp.specialtyGroup.detail.title">Specialty Group</span> {{specialtyGroup.id}}</h2>
+	<hr>
+	<jhi-alert-error></jhi-alert-error>
+	<dl class="row-md jh-entity-details">
+		<dt><span jhiTranslate="tcsApp.specialtyGroup.name">Name</span></dt>
+		<dd>
+			<span>{{specialtyGroup.name}}</span>
+		</dd>
+	</dl>
 
-    <button type="submit"
-            (click)="previousState()"
-            class="btn btn-info">
-        <span class="fa fa-arrow-left"></span>&nbsp;<span jhiTranslate="entity.action.back"> Back</span>
-    </button>
+	<button type="submit"
+	        (click)="previousState()"
+	        class="btn btn-info">
+		<span class="fa fa-arrow-left"></span>&nbsp;<span jhiTranslate="entity.action.back"> Back</span>
+	</button>
 
-    <button type="button"
-            [routerLink]="['/', { outlets: { popup: 'specialty-group-tis-programmes/'+ specialtyGroup.id + '/edit'} }]"
-            replaceUrl="true"
-            class="btn btn-primary">
-        <span class="fa fa-pencil"></span>&nbsp;<span jhiTranslate="entity.action.edit"> Edit</span>
-    </button>
+	<button type="button"
+	        [routerLink]="['/', { outlets: { popup: 'specialty-group-tis-programmes/'+ specialtyGroup.id + '/edit'} }]"
+	        replaceUrl="true"
+	        class="btn btn-primary">
+		<span class="fa fa-pencil"></span>&nbsp;<span jhiTranslate="entity.action.edit"> Edit</span>
+	</button>
 </div>

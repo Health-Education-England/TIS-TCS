@@ -1,12 +1,11 @@
 package com.transformuk.hee.tis.config;
 
-import io.github.jhipster.config.JHipsterProperties;
-
 import ch.qos.logback.classic.AsyncAppender;
 import ch.qos.logback.classic.Level;
 import ch.qos.logback.classic.LoggerContext;
 import ch.qos.logback.classic.spi.LoggerContextListener;
 import ch.qos.logback.core.spi.ContextAwareBase;
+import io.github.jhipster.config.JHipsterProperties;
 import net.logstash.logback.appender.LogstashSocketAppender;
 import net.logstash.logback.stacktrace.ShortenedThrowableConverter;
 import org.slf4j.Logger;
@@ -17,93 +16,89 @@ import org.springframework.context.annotation.Configuration;
 @Configuration
 public class LoggingConfiguration {
 
-    private final Logger log = LoggerFactory.getLogger(LoggingConfiguration.class);
+	private final Logger log = LoggerFactory.getLogger(LoggingConfiguration.class);
+	private final JHipsterProperties jHipsterProperties;
+	private LoggerContext context = (LoggerContext) LoggerFactory.getILoggerFactory();
+	@Value("${spring.application.name}")
+	private String appName;
+	@Value("${server.port}")
+	private String serverPort;
 
-    private LoggerContext context = (LoggerContext) LoggerFactory.getILoggerFactory();
+	public LoggingConfiguration(JHipsterProperties jHipsterProperties) {
+		this.jHipsterProperties = jHipsterProperties;
+		if (jHipsterProperties.getLogging().getLogstash().isEnabled()) {
+			addLogstashAppender(context);
 
-    @Value("${spring.application.name}")
-    private String appName;
+			// Add context listener
+			LogbackLoggerContextListener loggerContextListener = new LogbackLoggerContextListener();
+			loggerContextListener.setContext(context);
+			context.addListener(loggerContextListener);
+		}
+	}
 
-    @Value("${server.port}")
-    private String serverPort;
+	public void addLogstashAppender(LoggerContext context) {
+		log.info("Initializing Logstash logging");
 
-    private final JHipsterProperties jHipsterProperties;
+		LogstashSocketAppender logstashAppender = new LogstashSocketAppender();
+		logstashAppender.setName("LOGSTASH");
+		logstashAppender.setContext(context);
+		String customFields = "{\"app_name\":\"" + appName + "\",\"app_port\":\"" + serverPort + "\"}";
 
-    public LoggingConfiguration(JHipsterProperties jHipsterProperties) {
-        this.jHipsterProperties = jHipsterProperties;
-        if (jHipsterProperties.getLogging().getLogstash().isEnabled()) {
-            addLogstashAppender(context);
+		// Set the Logstash appender config from JHipster properties
+		logstashAppender.setSyslogHost(jHipsterProperties.getLogging().getLogstash().getHost());
+		logstashAppender.setPort(jHipsterProperties.getLogging().getLogstash().getPort());
+		logstashAppender.setCustomFields(customFields);
 
-            // Add context listener
-            LogbackLoggerContextListener loggerContextListener = new LogbackLoggerContextListener();
-            loggerContextListener.setContext(context);
-            context.addListener(loggerContextListener);
-        }
-    }
+		// Limit the maximum length of the forwarded stacktrace so that it won't exceed the 8KB UDP limit of logstash
+		ShortenedThrowableConverter throwableConverter = new ShortenedThrowableConverter();
+		throwableConverter.setMaxLength(7500);
+		throwableConverter.setRootCauseFirst(true);
+		logstashAppender.setThrowableConverter(throwableConverter);
 
-    public void addLogstashAppender(LoggerContext context) {
-        log.info("Initializing Logstash logging");
+		logstashAppender.start();
 
-        LogstashSocketAppender logstashAppender = new LogstashSocketAppender();
-        logstashAppender.setName("LOGSTASH");
-        logstashAppender.setContext(context);
-        String customFields = "{\"app_name\":\"" + appName + "\",\"app_port\":\"" + serverPort + "\"}";
+		// Wrap the appender in an Async appender for performance
+		AsyncAppender asyncLogstashAppender = new AsyncAppender();
+		asyncLogstashAppender.setContext(context);
+		asyncLogstashAppender.setName("ASYNC_LOGSTASH");
+		asyncLogstashAppender.setQueueSize(jHipsterProperties.getLogging().getLogstash().getQueueSize());
+		asyncLogstashAppender.addAppender(logstashAppender);
+		asyncLogstashAppender.start();
 
-        // Set the Logstash appender config from JHipster properties
-        logstashAppender.setSyslogHost(jHipsterProperties.getLogging().getLogstash().getHost());
-        logstashAppender.setPort(jHipsterProperties.getLogging().getLogstash().getPort());
-        logstashAppender.setCustomFields(customFields);
+		context.getLogger("ROOT").addAppender(asyncLogstashAppender);
+	}
 
-        // Limit the maximum length of the forwarded stacktrace so that it won't exceed the 8KB UDP limit of logstash
-        ShortenedThrowableConverter throwableConverter = new ShortenedThrowableConverter();
-        throwableConverter.setMaxLength(7500);
-        throwableConverter.setRootCauseFirst(true);
-        logstashAppender.setThrowableConverter(throwableConverter);
+	/**
+	 * Logback configuration is achieved by configuration file and API.
+	 * When configuration file change is detected, the configuration is reset.
+	 * This listener ensures that the programmatic configuration is also re-applied after reset.
+	 */
+	class LogbackLoggerContextListener extends ContextAwareBase implements LoggerContextListener {
 
-        logstashAppender.start();
+		@Override
+		public boolean isResetResistant() {
+			return true;
+		}
 
-        // Wrap the appender in an Async appender for performance
-        AsyncAppender asyncLogstashAppender = new AsyncAppender();
-        asyncLogstashAppender.setContext(context);
-        asyncLogstashAppender.setName("ASYNC_LOGSTASH");
-        asyncLogstashAppender.setQueueSize(jHipsterProperties.getLogging().getLogstash().getQueueSize());
-        asyncLogstashAppender.addAppender(logstashAppender);
-        asyncLogstashAppender.start();
+		@Override
+		public void onStart(LoggerContext context) {
+			addLogstashAppender(context);
+		}
 
-        context.getLogger("ROOT").addAppender(asyncLogstashAppender);
-    }
+		@Override
+		public void onReset(LoggerContext context) {
+			addLogstashAppender(context);
+		}
 
-    /**
-     * Logback configuration is achieved by configuration file and API.
-     * When configuration file change is detected, the configuration is reset.
-     * This listener ensures that the programmatic configuration is also re-applied after reset.
-     */
-    class LogbackLoggerContextListener extends ContextAwareBase implements LoggerContextListener {
+		@Override
+		public void onStop(LoggerContext context) {
+			// Nothing to do.
+		}
 
-        @Override
-        public boolean isResetResistant() {
-            return true;
-        }
-
-        @Override
-        public void onStart(LoggerContext context) {
-            addLogstashAppender(context);
-        }
-
-        @Override
-        public void onReset(LoggerContext context) {
-            addLogstashAppender(context);
-        }
-
-        @Override
-        public void onStop(LoggerContext context) {
-            // Nothing to do.
-        }
-
-        @Override
-        public void onLevelChange(ch.qos.logback.classic.Logger logger, Level level) {
-            // Nothing to do.
-        }
-    }
+		@Override
+		public void onLevelChange(ch.qos.logback.classic.Logger logger, Level level) {
+			// Nothing to do.
+		}
+	}
 
 }

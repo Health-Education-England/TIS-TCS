@@ -1,15 +1,15 @@
-import { Injectable } from '@angular/core';
-import { Http, Response, URLSearchParams, BaseRequestOptions } from '@angular/http';
-import { Observable } from 'rxjs/Rx';
-
-import { CurriculumTisProgrammes } from './curriculum-tis-programmes.model';
-import { DateUtils } from 'ng-jhipster';
+import {Injectable} from "@angular/core";
+import {Http, Response, URLSearchParams, BaseRequestOptions} from "@angular/http";
+import {Observable} from "rxjs/Rx";
+import {CurriculumTisProgrammes} from "./curriculum-tis-programmes.model";
+import {DateUtils} from "ng-jhipster";
 @Injectable()
 export class CurriculumTisProgrammesService {
 
     private resourceUrl = 'api/curricula';
 
-    constructor(private http: Http, private dateUtils: DateUtils) { }
+    constructor(private http: Http, private dateUtils: DateUtils) {
+    }
 
     create(curriculum: CurriculumTisProgrammes): Observable<CurriculumTisProgrammes> {
         let copy: CurriculumTisProgrammes = Object.assign({}, curriculum);
@@ -48,7 +48,7 @@ export class CurriculumTisProgrammesService {
         let options = this.createRequestOption(req);
         return this.http.get(this.resourceUrl, options)
             .map((res: any) => this.convertResponse(res))
-        ;
+            ;
     }
 
     delete(id: number): Observable<Response> {

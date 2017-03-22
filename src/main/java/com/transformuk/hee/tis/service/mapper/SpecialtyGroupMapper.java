@@ -1,9 +1,9 @@
 package com.transformuk.hee.tis.service.mapper;
 
-import com.transformuk.hee.tis.domain.*;
+import com.transformuk.hee.tis.domain.SpecialtyGroup;
 import com.transformuk.hee.tis.service.dto.SpecialtyGroupDTO;
+import org.mapstruct.Mapper;
 
-import org.mapstruct.*;
 import java.util.List;
 
 /**
@@ -12,11 +12,11 @@ import java.util.List;
 @Mapper(componentModel = "spring", uses = {})
 public interface SpecialtyGroupMapper {
 
-    SpecialtyGroupDTO specialtyGroupToSpecialtyGroupDTO(SpecialtyGroup specialtyGroup);
+	SpecialtyGroupDTO specialtyGroupToSpecialtyGroupDTO(SpecialtyGroup specialtyGroup);
 
-    List<SpecialtyGroupDTO> specialtyGroupsToSpecialtyGroupDTOs(List<SpecialtyGroup> specialtyGroups);
+	List<SpecialtyGroupDTO> specialtyGroupsToSpecialtyGroupDTOs(List<SpecialtyGroup> specialtyGroups);
 
-    SpecialtyGroup specialtyGroupDTOToSpecialtyGroup(SpecialtyGroupDTO specialtyGroupDTO);
+	SpecialtyGroup specialtyGroupDTOToSpecialtyGroup(SpecialtyGroupDTO specialtyGroupDTO);
 
-    List<SpecialtyGroup> specialtyGroupDTOsToSpecialtyGroups(List<SpecialtyGroupDTO> specialtyGroupDTOs);
+	List<SpecialtyGroup> specialtyGroupDTOsToSpecialtyGroups(List<SpecialtyGroupDTO> specialtyGroupDTOs);
 }
