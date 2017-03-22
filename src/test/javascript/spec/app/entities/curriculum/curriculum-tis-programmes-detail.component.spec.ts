@@ -14,65 +14,65 @@ import {CurriculumTisProgrammes} from "../../../../../../main/webapp/app/entitie
 
 describe('Component Tests', () => {
 
-    describe('CurriculumTisProgrammes Management Detail Component', () => {
-        let comp: CurriculumTisProgrammesDetailComponent;
-        let fixture: ComponentFixture<CurriculumTisProgrammesDetailComponent>;
-        let service: CurriculumTisProgrammesService;
+	describe('CurriculumTisProgrammes Management Detail Component', () => {
+		let comp: CurriculumTisProgrammesDetailComponent;
+		let fixture: ComponentFixture<CurriculumTisProgrammesDetailComponent>;
+		let service: CurriculumTisProgrammesService;
 
-        beforeEach(async(() => {
-            TestBed.configureTestingModule({
-                declarations: [CurriculumTisProgrammesDetailComponent],
-                providers: [
-                    MockBackend,
-                    BaseRequestOptions,
-                    DateUtils,
-                    DataUtils,
-                    DatePipe,
-                    {
-                        provide: ActivatedRoute,
-                        useValue: new MockActivatedRoute({id: 123})
-                    },
-                    {
-                        provide: Http,
-                        useFactory: (backendInstance: MockBackend, defaultOptions: BaseRequestOptions) => {
-                            return new Http(backendInstance, defaultOptions);
-                        },
-                        deps: [MockBackend, BaseRequestOptions]
-                    },
-                    {
-                        provide: JhiLanguageService,
-                        useClass: MockLanguageService
-                    },
-                    CurriculumTisProgrammesService
-                ]
-            }).overrideComponent(CurriculumTisProgrammesDetailComponent, {
-                set: {
-                    template: ''
-                }
-            }).compileComponents();
-        }));
+		beforeEach(async(() => {
+			TestBed.configureTestingModule({
+				declarations: [CurriculumTisProgrammesDetailComponent],
+				providers: [
+					MockBackend,
+					BaseRequestOptions,
+					DateUtils,
+					DataUtils,
+					DatePipe,
+					{
+						provide: ActivatedRoute,
+						useValue: new MockActivatedRoute({id: 123})
+					},
+					{
+						provide: Http,
+						useFactory: (backendInstance: MockBackend, defaultOptions: BaseRequestOptions) => {
+							return new Http(backendInstance, defaultOptions);
+						},
+						deps: [MockBackend, BaseRequestOptions]
+					},
+					{
+						provide: JhiLanguageService,
+						useClass: MockLanguageService
+					},
+					CurriculumTisProgrammesService
+				]
+			}).overrideComponent(CurriculumTisProgrammesDetailComponent, {
+				set: {
+					template: ''
+				}
+			}).compileComponents();
+		}));
 
-        beforeEach(() => {
-            fixture = TestBed.createComponent(CurriculumTisProgrammesDetailComponent);
-            comp = fixture.componentInstance;
-            service = fixture.debugElement.injector.get(CurriculumTisProgrammesService);
-        });
+		beforeEach(() => {
+			fixture = TestBed.createComponent(CurriculumTisProgrammesDetailComponent);
+			comp = fixture.componentInstance;
+			service = fixture.debugElement.injector.get(CurriculumTisProgrammesService);
+		});
 
 
-        describe('OnInit', () => {
-            it('Should call load all on init', () => {
-                // GIVEN
+		describe('OnInit', () => {
+			it('Should call load all on init', () => {
+				// GIVEN
 
-                spyOn(service, 'find').and.returnValue(Observable.of(new CurriculumTisProgrammes(10)));
+				spyOn(service, 'find').and.returnValue(Observable.of(new CurriculumTisProgrammes(10)));
 
-                // WHEN
-                comp.ngOnInit();
+				// WHEN
+				comp.ngOnInit();
 
-                // THEN
-                expect(service.find).toHaveBeenCalledWith(123);
-                expect(comp.curriculum).toEqual(jasmine.objectContaining({id: 10}));
-            });
-        });
-    });
+				// THEN
+				expect(service.find).toHaveBeenCalledWith(123);
+				expect(comp.curriculum).toEqual(jasmine.objectContaining({id: 10}));
+			});
+		});
+	});
 
 });

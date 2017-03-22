@@ -7,54 +7,54 @@ import {SpecialtyGroupTisProgrammesService} from "./specialty-group-tis-programm
 import {Principal} from "../../shared";
 
 @Component({
-    selector: 'jhi-specialty-group-tis-programmes',
-    templateUrl: './specialty-group-tis-programmes.component.html'
+	selector: 'jhi-specialty-group-tis-programmes',
+	templateUrl: './specialty-group-tis-programmes.component.html'
 })
 export class SpecialtyGroupTisProgrammesComponent implements OnInit, OnDestroy {
-    specialtyGroups: SpecialtyGroupTisProgrammes[];
-    currentAccount: any;
-    eventSubscriber: Subscription;
+	specialtyGroups: SpecialtyGroupTisProgrammes[];
+	currentAccount: any;
+	eventSubscriber: Subscription;
 
-    constructor(private jhiLanguageService: JhiLanguageService,
-                private specialtyGroupService: SpecialtyGroupTisProgrammesService,
-                private alertService: AlertService,
-                private eventManager: EventManager,
-                private principal: Principal) {
-        this.jhiLanguageService.setLocations(['specialtyGroup']);
-    }
+	constructor(private jhiLanguageService: JhiLanguageService,
+	            private specialtyGroupService: SpecialtyGroupTisProgrammesService,
+	            private alertService: AlertService,
+	            private eventManager: EventManager,
+	            private principal: Principal) {
+		this.jhiLanguageService.setLocations(['specialtyGroup']);
+	}
 
-    loadAll() {
-        this.specialtyGroupService.query().subscribe(
-            (res: Response) => {
-                this.specialtyGroups = res.json();
-            },
-            (res: Response) => this.onError(res.json())
-        );
-    }
+	loadAll() {
+		this.specialtyGroupService.query().subscribe(
+			(res: Response) => {
+				this.specialtyGroups = res.json();
+			},
+			(res: Response) => this.onError(res.json())
+		);
+	}
 
-    ngOnInit() {
-        this.loadAll();
-        this.principal.identity().then((account) => {
-            this.currentAccount = account;
-        });
-        this.registerChangeInSpecialtyGroups();
-    }
+	ngOnInit() {
+		this.loadAll();
+		this.principal.identity().then((account) => {
+			this.currentAccount = account;
+		});
+		this.registerChangeInSpecialtyGroups();
+	}
 
-    ngOnDestroy() {
-        this.eventManager.destroy(this.eventSubscriber);
-    }
+	ngOnDestroy() {
+		this.eventManager.destroy(this.eventSubscriber);
+	}
 
-    trackId(index: number, item: SpecialtyGroupTisProgrammes) {
-        return item.id;
-    }
-
-
-    registerChangeInSpecialtyGroups() {
-        this.eventSubscriber = this.eventManager.subscribe('specialtyGroupListModification', (response) => this.loadAll());
-    }
+	trackId(index: number, item: SpecialtyGroupTisProgrammes) {
+		return item.id;
+	}
 
 
-    private onError(error) {
-        this.alertService.error(error.message, null, null);
-    }
+	registerChangeInSpecialtyGroups() {
+		this.eventSubscriber = this.eventManager.subscribe('specialtyGroupListModification', (response) => this.loadAll());
+	}
+
+
+	private onError(error) {
+		this.alertService.error(error.message, null, null);
+	}
 }

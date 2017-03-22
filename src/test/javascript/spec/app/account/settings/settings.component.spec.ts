@@ -9,94 +9,94 @@ import {MockPrincipal} from "../../../helpers/mock-principal.service";
 
 describe('Component Tests', () => {
 
-    describe('SettingsComponent', () => {
+	describe('SettingsComponent', () => {
 
-        let comp: SettingsComponent;
-        let fixture: ComponentFixture<SettingsComponent>;
-        let mockAuth: MockAccountService;
-        let mockPrincipal: MockPrincipal;
+		let comp: SettingsComponent;
+		let fixture: ComponentFixture<SettingsComponent>;
+		let mockAuth: MockAccountService;
+		let mockPrincipal: MockPrincipal;
 
-        beforeEach(async(() => {
-            TestBed.configureTestingModule({
-                imports: [TcsTestModule],
-                declarations: [SettingsComponent],
-                providers: [
-                    {
-                        provide: Principal,
-                        useClass: MockPrincipal
-                    },
-                    {
-                        provide: AccountService,
-                        useClass: MockAccountService
-                    },
-                    {
-                        provide: JhiLanguageHelper,
-                        useValue: null
-                    },
-                ]
-            }).overrideComponent(SettingsComponent, {
-                set: {
-                    template: ''
-                }
-            }).compileComponents();
-        }));
+		beforeEach(async(() => {
+			TestBed.configureTestingModule({
+				imports: [TcsTestModule],
+				declarations: [SettingsComponent],
+				providers: [
+					{
+						provide: Principal,
+						useClass: MockPrincipal
+					},
+					{
+						provide: AccountService,
+						useClass: MockAccountService
+					},
+					{
+						provide: JhiLanguageHelper,
+						useValue: null
+					},
+				]
+			}).overrideComponent(SettingsComponent, {
+				set: {
+					template: ''
+				}
+			}).compileComponents();
+		}));
 
-        beforeEach(() => {
-            fixture = TestBed.createComponent(SettingsComponent);
-            comp = fixture.componentInstance;
-            mockAuth = fixture.debugElement.injector.get(AccountService);
-            mockPrincipal = fixture.debugElement.injector.get(Principal);
-        });
+		beforeEach(() => {
+			fixture = TestBed.createComponent(SettingsComponent);
+			comp = fixture.componentInstance;
+			mockAuth = fixture.debugElement.injector.get(AccountService);
+			mockPrincipal = fixture.debugElement.injector.get(Principal);
+		});
 
-        it('should send the current identity upon save', function () {
-            // GIVEN
-            let accountValues = {
-                firstName: 'John',
-                lastName: 'Doe',
+		it('should send the current identity upon save', function () {
+			// GIVEN
+			let accountValues = {
+				firstName: 'John',
+				lastName: 'Doe',
 
-                activated: true,
-                email: 'john.doe@mail.com',
-                langKey: 'en',
-                login: 'john'
-            };
-            mockPrincipal.setResponse(accountValues);
+				activated: true,
+				email: 'john.doe@mail.com',
+				langKey: 'en',
+				login: 'john'
+			};
+			mockPrincipal.setResponse(accountValues);
 
-            // WHEN
-            comp.settingsAccount = accountValues;
-            comp.save();
+			// WHEN
+			comp.settingsAccount = accountValues;
+			comp.save();
 
-            // THEN
-            expect(mockPrincipal.identitySpy).toHaveBeenCalled();
-            expect(mockAuth.saveSpy).toHaveBeenCalledWith(accountValues);
-            expect(comp.settingsAccount).toEqual(accountValues);
-        });
+			// THEN
+			expect(mockPrincipal.identitySpy).toHaveBeenCalled();
+			expect(mockAuth.saveSpy).toHaveBeenCalledWith(accountValues);
+			expect(comp.settingsAccount).toEqual(accountValues);
+		});
 
-        it('should notify of success upon successful save', function () {
-            // GIVEN
-            let accountValues = {
-                firstName: 'John',
-                lastName: 'Doe'
-            };
-            mockPrincipal.setResponse(accountValues);
+		it('should notify of success upon successful save', function () {
+			// GIVEN
+			let accountValues = {
+				firstName: 'John',
+				lastName: 'Doe'
+			};
+			mockPrincipal.setResponse(accountValues);
 
-            // WHEN
-            comp.save();
+			// WHEN
+			comp.save();
 
-            // THEN
-            expect(comp.error).toBeNull();
-            expect(comp.success).toBe('OK');
-        });
+			// THEN
+			expect(comp.error).toBeNull();
+			expect(comp.success).toBe('OK');
+		});
 
-        it('should notify of error upon failed save', function () {
-            // GIVEN
-            mockAuth.saveSpy.and.returnValue(Observable.throw('ERROR'));
+		it('should notify of error upon failed save', function () {
+			// GIVEN
+			mockAuth.saveSpy.and.returnValue(Observable.throw('ERROR'));
 
-            // WHEN
-            comp.save();
+			// WHEN
+			comp.save();
 
-            // THEN
-            expect(comp.error).toEqual('ERROR');
-            expect(comp.success).toBeNull();
-        });
-    });
+			// THEN
+			expect(comp.error).toEqual('ERROR');
+			expect(comp.success).toBeNull();
+		});
+	});
 });

@@ -10,121 +10,121 @@ import {ProgrammeTisProgrammes, ProgrammeTisProgrammesService} from "../programm
 import {CurriculumTisProgrammes, CurriculumTisProgrammesService} from "../curriculum";
 import {TrainingNumberTisProgrammes, TrainingNumberTisProgrammesService} from "../training-number";
 @Component({
-    selector: 'jhi-programme-membership-tis-programmes-dialog',
-    templateUrl: './programme-membership-tis-programmes-dialog.component.html'
+	selector: 'jhi-programme-membership-tis-programmes-dialog',
+	templateUrl: './programme-membership-tis-programmes-dialog.component.html'
 })
 export class ProgrammeMembershipTisProgrammesDialogComponent implements OnInit {
 
-    programmeMembership: ProgrammeMembershipTisProgrammes;
-    authorities: any[];
-    isSaving: boolean;
+	programmeMembership: ProgrammeMembershipTisProgrammes;
+	authorities: any[];
+	isSaving: boolean;
 
-    programmes: ProgrammeTisProgrammes[];
+	programmes: ProgrammeTisProgrammes[];
 
-    curricula: CurriculumTisProgrammes[];
+	curricula: CurriculumTisProgrammes[];
 
-    trainingnumbers: TrainingNumberTisProgrammes[];
+	trainingnumbers: TrainingNumberTisProgrammes[];
 
-    constructor(public activeModal: NgbActiveModal,
-                private jhiLanguageService: JhiLanguageService,
-                private alertService: AlertService,
-                private programmeMembershipService: ProgrammeMembershipTisProgrammesService,
-                private programmeService: ProgrammeTisProgrammesService,
-                private curriculumService: CurriculumTisProgrammesService,
-                private trainingNumberService: TrainingNumberTisProgrammesService,
-                private eventManager: EventManager) {
-        this.jhiLanguageService.setLocations(['programmeMembership', 'programmeMembershipType']);
-    }
+	constructor(public activeModal: NgbActiveModal,
+	            private jhiLanguageService: JhiLanguageService,
+	            private alertService: AlertService,
+	            private programmeMembershipService: ProgrammeMembershipTisProgrammesService,
+	            private programmeService: ProgrammeTisProgrammesService,
+	            private curriculumService: CurriculumTisProgrammesService,
+	            private trainingNumberService: TrainingNumberTisProgrammesService,
+	            private eventManager: EventManager) {
+		this.jhiLanguageService.setLocations(['programmeMembership', 'programmeMembershipType']);
+	}
 
-    ngOnInit() {
-        this.isSaving = false;
-        this.authorities = ['ROLE_USER', 'ROLE_ADMIN'];
-        this.programmeService.query().subscribe(
-            (res: Response) => {
-                this.programmes = res.json();
-            }, (res: Response) => this.onError(res.json()));
-        this.curriculumService.query().subscribe(
-            (res: Response) => {
-                this.curricula = res.json();
-            }, (res: Response) => this.onError(res.json()));
-        this.trainingNumberService.query().subscribe(
-            (res: Response) => {
-                this.trainingnumbers = res.json();
-            }, (res: Response) => this.onError(res.json()));
-    }
+	ngOnInit() {
+		this.isSaving = false;
+		this.authorities = ['ROLE_USER', 'ROLE_ADMIN'];
+		this.programmeService.query().subscribe(
+			(res: Response) => {
+				this.programmes = res.json();
+			}, (res: Response) => this.onError(res.json()));
+		this.curriculumService.query().subscribe(
+			(res: Response) => {
+				this.curricula = res.json();
+			}, (res: Response) => this.onError(res.json()));
+		this.trainingNumberService.query().subscribe(
+			(res: Response) => {
+				this.trainingnumbers = res.json();
+			}, (res: Response) => this.onError(res.json()));
+	}
 
-    clear() {
-        this.activeModal.dismiss('cancel');
-    }
+	clear() {
+		this.activeModal.dismiss('cancel');
+	}
 
-    save() {
-        this.isSaving = true;
-        if (this.programmeMembership.id !== undefined) {
-            this.programmeMembershipService.update(this.programmeMembership)
-                .subscribe((res: ProgrammeMembershipTisProgrammes) =>
-                    this.onSaveSuccess(res), (res: Response) => this.onSaveError(res.json()));
-        } else {
-            this.programmeMembershipService.create(this.programmeMembership)
-                .subscribe((res: ProgrammeMembershipTisProgrammes) =>
-                    this.onSaveSuccess(res), (res: Response) => this.onSaveError(res.json()));
-        }
-    }
+	save() {
+		this.isSaving = true;
+		if (this.programmeMembership.id !== undefined) {
+			this.programmeMembershipService.update(this.programmeMembership)
+				.subscribe((res: ProgrammeMembershipTisProgrammes) =>
+					this.onSaveSuccess(res), (res: Response) => this.onSaveError(res.json()));
+		} else {
+			this.programmeMembershipService.create(this.programmeMembership)
+				.subscribe((res: ProgrammeMembershipTisProgrammes) =>
+					this.onSaveSuccess(res), (res: Response) => this.onSaveError(res.json()));
+		}
+	}
 
-    private onSaveSuccess(result: ProgrammeMembershipTisProgrammes) {
-        this.eventManager.broadcast({name: 'programmeMembershipListModification', content: 'OK'});
-        this.isSaving = false;
-        this.activeModal.dismiss(result);
-    }
+	private onSaveSuccess(result: ProgrammeMembershipTisProgrammes) {
+		this.eventManager.broadcast({name: 'programmeMembershipListModification', content: 'OK'});
+		this.isSaving = false;
+		this.activeModal.dismiss(result);
+	}
 
-    private onSaveError(error) {
-        this.isSaving = false;
-        this.onError(error);
-    }
+	private onSaveError(error) {
+		this.isSaving = false;
+		this.onError(error);
+	}
 
-    private onError(error) {
-        this.alertService.error(error.message, null, null);
-    }
+	private onError(error) {
+		this.alertService.error(error.message, null, null);
+	}
 
-    trackProgrammeById(index: number, item: ProgrammeTisProgrammes) {
-        return item.id;
-    }
+	trackProgrammeById(index: number, item: ProgrammeTisProgrammes) {
+		return item.id;
+	}
 
-    trackCurriculumById(index: number, item: CurriculumTisProgrammes) {
-        return item.id;
-    }
+	trackCurriculumById(index: number, item: CurriculumTisProgrammes) {
+		return item.id;
+	}
 
-    trackTrainingNumberById(index: number, item: TrainingNumberTisProgrammes) {
-        return item.id;
-    }
+	trackTrainingNumberById(index: number, item: TrainingNumberTisProgrammes) {
+		return item.id;
+	}
 }
 
 @Component({
-    selector: 'jhi-programme-membership-tis-programmes-popup',
-    template: ''
+	selector: 'jhi-programme-membership-tis-programmes-popup',
+	template: ''
 })
 export class ProgrammeMembershipTisProgrammesPopupComponent implements OnInit, OnDestroy {
 
-    modalRef: NgbModalRef;
-    routeSub: any;
+	modalRef: NgbModalRef;
+	routeSub: any;
 
-    constructor(private route: ActivatedRoute,
-                private programmeMembershipPopupService: ProgrammeMembershipTisProgrammesPopupService) {
-    }
+	constructor(private route: ActivatedRoute,
+	            private programmeMembershipPopupService: ProgrammeMembershipTisProgrammesPopupService) {
+	}
 
-    ngOnInit() {
-        this.routeSub = this.route.params.subscribe(params => {
-            if (params['id']) {
-                this.modalRef = this.programmeMembershipPopupService
-                    .open(ProgrammeMembershipTisProgrammesDialogComponent, params['id']);
-            } else {
-                this.modalRef = this.programmeMembershipPopupService
-                    .open(ProgrammeMembershipTisProgrammesDialogComponent);
-            }
+	ngOnInit() {
+		this.routeSub = this.route.params.subscribe(params => {
+			if (params['id']) {
+				this.modalRef = this.programmeMembershipPopupService
+					.open(ProgrammeMembershipTisProgrammesDialogComponent, params['id']);
+			} else {
+				this.modalRef = this.programmeMembershipPopupService
+					.open(ProgrammeMembershipTisProgrammesDialogComponent);
+			}
 
-        });
-    }
+		});
+	}
 
-    ngOnDestroy() {
-        this.routeSub.unsubscribe();
-    }
+	ngOnDestroy() {
+		this.routeSub.unsubscribe();
+	}
 }

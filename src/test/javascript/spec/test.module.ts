@@ -5,21 +5,21 @@ import {JhiLanguageService} from "ng-jhipster";
 import {MockLanguageService} from "./helpers/mock-language.service";
 
 @NgModule({
-    providers: [
-        MockBackend,
-        BaseRequestOptions,
-        {
-            provide: JhiLanguageService,
-            useClass: MockLanguageService
-        },
-        {
-            provide: Http,
-            useFactory: (backendInstance: MockBackend, defaultOptions: BaseRequestOptions) => {
-                return new Http(backendInstance, defaultOptions);
-            },
-            deps: [MockBackend, BaseRequestOptions]
-        }
-    ]
+	providers: [
+		MockBackend,
+		BaseRequestOptions,
+		{
+			provide: JhiLanguageService,
+			useClass: MockLanguageService
+		},
+		{
+			provide: Http,
+			useFactory: (backendInstance: MockBackend, defaultOptions: BaseRequestOptions) => {
+				return new Http(backendInstance, defaultOptions);
+			},
+			deps: [MockBackend, BaseRequestOptions]
+		}
+	]
 })
 export class TcsTestModule {
 }

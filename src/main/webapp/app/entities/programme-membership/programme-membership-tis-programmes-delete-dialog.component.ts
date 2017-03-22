@@ -7,56 +7,56 @@ import {ProgrammeMembershipTisProgrammesPopupService} from "./programme-membersh
 import {ProgrammeMembershipTisProgrammesService} from "./programme-membership-tis-programmes.service";
 
 @Component({
-    selector: 'jhi-programme-membership-tis-programmes-delete-dialog',
-    templateUrl: './programme-membership-tis-programmes-delete-dialog.component.html'
+	selector: 'jhi-programme-membership-tis-programmes-delete-dialog',
+	templateUrl: './programme-membership-tis-programmes-delete-dialog.component.html'
 })
 export class ProgrammeMembershipTisProgrammesDeleteDialogComponent {
 
-    programmeMembership: ProgrammeMembershipTisProgrammes;
+	programmeMembership: ProgrammeMembershipTisProgrammes;
 
-    constructor(private jhiLanguageService: JhiLanguageService,
-                private programmeMembershipService: ProgrammeMembershipTisProgrammesService,
-                public activeModal: NgbActiveModal,
-                private eventManager: EventManager) {
-        this.jhiLanguageService.setLocations(['programmeMembership', 'programmeMembershipType']);
-    }
+	constructor(private jhiLanguageService: JhiLanguageService,
+	            private programmeMembershipService: ProgrammeMembershipTisProgrammesService,
+	            public activeModal: NgbActiveModal,
+	            private eventManager: EventManager) {
+		this.jhiLanguageService.setLocations(['programmeMembership', 'programmeMembershipType']);
+	}
 
-    clear() {
-        this.activeModal.dismiss('cancel');
-    }
+	clear() {
+		this.activeModal.dismiss('cancel');
+	}
 
-    confirmDelete(id: number) {
-        this.programmeMembershipService.delete(id).subscribe(response => {
-            this.eventManager.broadcast({
-                name: 'programmeMembershipListModification',
-                content: 'Deleted an programmeMembership'
-            });
-            this.activeModal.dismiss(true);
-        });
-    }
+	confirmDelete(id: number) {
+		this.programmeMembershipService.delete(id).subscribe(response => {
+			this.eventManager.broadcast({
+				name: 'programmeMembershipListModification',
+				content: 'Deleted an programmeMembership'
+			});
+			this.activeModal.dismiss(true);
+		});
+	}
 }
 
 @Component({
-    selector: 'jhi-programme-membership-tis-programmes-delete-popup',
-    template: ''
+	selector: 'jhi-programme-membership-tis-programmes-delete-popup',
+	template: ''
 })
 export class ProgrammeMembershipTisProgrammesDeletePopupComponent implements OnInit, OnDestroy {
 
-    modalRef: NgbModalRef;
-    routeSub: any;
+	modalRef: NgbModalRef;
+	routeSub: any;
 
-    constructor(private route: ActivatedRoute,
-                private programmeMembershipPopupService: ProgrammeMembershipTisProgrammesPopupService) {
-    }
+	constructor(private route: ActivatedRoute,
+	            private programmeMembershipPopupService: ProgrammeMembershipTisProgrammesPopupService) {
+	}
 
-    ngOnInit() {
-        this.routeSub = this.route.params.subscribe(params => {
-            this.modalRef = this.programmeMembershipPopupService
-                .open(ProgrammeMembershipTisProgrammesDeleteDialogComponent, params['id']);
-        });
-    }
+	ngOnInit() {
+		this.routeSub = this.route.params.subscribe(params => {
+			this.modalRef = this.programmeMembershipPopupService
+				.open(ProgrammeMembershipTisProgrammesDeleteDialogComponent, params['id']);
+		});
+	}
 
-    ngOnDestroy() {
-        this.routeSub.unsubscribe();
-    }
+	ngOnDestroy() {
+		this.routeSub.unsubscribe();
+	}
 }

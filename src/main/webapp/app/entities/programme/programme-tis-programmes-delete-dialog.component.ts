@@ -7,56 +7,56 @@ import {ProgrammeTisProgrammesPopupService} from "./programme-tis-programmes-pop
 import {ProgrammeTisProgrammesService} from "./programme-tis-programmes.service";
 
 @Component({
-    selector: 'jhi-programme-tis-programmes-delete-dialog',
-    templateUrl: './programme-tis-programmes-delete-dialog.component.html'
+	selector: 'jhi-programme-tis-programmes-delete-dialog',
+	templateUrl: './programme-tis-programmes-delete-dialog.component.html'
 })
 export class ProgrammeTisProgrammesDeleteDialogComponent {
 
-    programme: ProgrammeTisProgrammes;
+	programme: ProgrammeTisProgrammes;
 
-    constructor(private jhiLanguageService: JhiLanguageService,
-                private programmeService: ProgrammeTisProgrammesService,
-                public activeModal: NgbActiveModal,
-                private eventManager: EventManager) {
-        this.jhiLanguageService.setLocations(['programme', 'status']);
-    }
+	constructor(private jhiLanguageService: JhiLanguageService,
+	            private programmeService: ProgrammeTisProgrammesService,
+	            public activeModal: NgbActiveModal,
+	            private eventManager: EventManager) {
+		this.jhiLanguageService.setLocations(['programme', 'status']);
+	}
 
-    clear() {
-        this.activeModal.dismiss('cancel');
-    }
+	clear() {
+		this.activeModal.dismiss('cancel');
+	}
 
-    confirmDelete(id: number) {
-        this.programmeService.delete(id).subscribe(response => {
-            this.eventManager.broadcast({
-                name: 'programmeListModification',
-                content: 'Deleted an programme'
-            });
-            this.activeModal.dismiss(true);
-        });
-    }
+	confirmDelete(id: number) {
+		this.programmeService.delete(id).subscribe(response => {
+			this.eventManager.broadcast({
+				name: 'programmeListModification',
+				content: 'Deleted an programme'
+			});
+			this.activeModal.dismiss(true);
+		});
+	}
 }
 
 @Component({
-    selector: 'jhi-programme-tis-programmes-delete-popup',
-    template: ''
+	selector: 'jhi-programme-tis-programmes-delete-popup',
+	template: ''
 })
 export class ProgrammeTisProgrammesDeletePopupComponent implements OnInit, OnDestroy {
 
-    modalRef: NgbModalRef;
-    routeSub: any;
+	modalRef: NgbModalRef;
+	routeSub: any;
 
-    constructor(private route: ActivatedRoute,
-                private programmePopupService: ProgrammeTisProgrammesPopupService) {
-    }
+	constructor(private route: ActivatedRoute,
+	            private programmePopupService: ProgrammeTisProgrammesPopupService) {
+	}
 
-    ngOnInit() {
-        this.routeSub = this.route.params.subscribe(params => {
-            this.modalRef = this.programmePopupService
-                .open(ProgrammeTisProgrammesDeleteDialogComponent, params['id']);
-        });
-    }
+	ngOnInit() {
+		this.routeSub = this.route.params.subscribe(params => {
+			this.modalRef = this.programmePopupService
+				.open(ProgrammeTisProgrammesDeleteDialogComponent, params['id']);
+		});
+	}
 
-    ngOnDestroy() {
-        this.routeSub.unsubscribe();
-    }
+	ngOnDestroy() {
+		this.routeSub.unsubscribe();
+	}
 }

@@ -14,65 +14,65 @@ import {ProgrammeMembershipTisProgrammes} from "../../../../../../main/webapp/ap
 
 describe('Component Tests', () => {
 
-    describe('ProgrammeMembershipTisProgrammes Management Detail Component', () => {
-        let comp: ProgrammeMembershipTisProgrammesDetailComponent;
-        let fixture: ComponentFixture<ProgrammeMembershipTisProgrammesDetailComponent>;
-        let service: ProgrammeMembershipTisProgrammesService;
+	describe('ProgrammeMembershipTisProgrammes Management Detail Component', () => {
+		let comp: ProgrammeMembershipTisProgrammesDetailComponent;
+		let fixture: ComponentFixture<ProgrammeMembershipTisProgrammesDetailComponent>;
+		let service: ProgrammeMembershipTisProgrammesService;
 
-        beforeEach(async(() => {
-            TestBed.configureTestingModule({
-                declarations: [ProgrammeMembershipTisProgrammesDetailComponent],
-                providers: [
-                    MockBackend,
-                    BaseRequestOptions,
-                    DateUtils,
-                    DataUtils,
-                    DatePipe,
-                    {
-                        provide: ActivatedRoute,
-                        useValue: new MockActivatedRoute({id: 123})
-                    },
-                    {
-                        provide: Http,
-                        useFactory: (backendInstance: MockBackend, defaultOptions: BaseRequestOptions) => {
-                            return new Http(backendInstance, defaultOptions);
-                        },
-                        deps: [MockBackend, BaseRequestOptions]
-                    },
-                    {
-                        provide: JhiLanguageService,
-                        useClass: MockLanguageService
-                    },
-                    ProgrammeMembershipTisProgrammesService
-                ]
-            }).overrideComponent(ProgrammeMembershipTisProgrammesDetailComponent, {
-                set: {
-                    template: ''
-                }
-            }).compileComponents();
-        }));
+		beforeEach(async(() => {
+			TestBed.configureTestingModule({
+				declarations: [ProgrammeMembershipTisProgrammesDetailComponent],
+				providers: [
+					MockBackend,
+					BaseRequestOptions,
+					DateUtils,
+					DataUtils,
+					DatePipe,
+					{
+						provide: ActivatedRoute,
+						useValue: new MockActivatedRoute({id: 123})
+					},
+					{
+						provide: Http,
+						useFactory: (backendInstance: MockBackend, defaultOptions: BaseRequestOptions) => {
+							return new Http(backendInstance, defaultOptions);
+						},
+						deps: [MockBackend, BaseRequestOptions]
+					},
+					{
+						provide: JhiLanguageService,
+						useClass: MockLanguageService
+					},
+					ProgrammeMembershipTisProgrammesService
+				]
+			}).overrideComponent(ProgrammeMembershipTisProgrammesDetailComponent, {
+				set: {
+					template: ''
+				}
+			}).compileComponents();
+		}));
 
-        beforeEach(() => {
-            fixture = TestBed.createComponent(ProgrammeMembershipTisProgrammesDetailComponent);
-            comp = fixture.componentInstance;
-            service = fixture.debugElement.injector.get(ProgrammeMembershipTisProgrammesService);
-        });
+		beforeEach(() => {
+			fixture = TestBed.createComponent(ProgrammeMembershipTisProgrammesDetailComponent);
+			comp = fixture.componentInstance;
+			service = fixture.debugElement.injector.get(ProgrammeMembershipTisProgrammesService);
+		});
 
 
-        describe('OnInit', () => {
-            it('Should call load all on init', () => {
-                // GIVEN
+		describe('OnInit', () => {
+			it('Should call load all on init', () => {
+				// GIVEN
 
-                spyOn(service, 'find').and.returnValue(Observable.of(new ProgrammeMembershipTisProgrammes(10)));
+				spyOn(service, 'find').and.returnValue(Observable.of(new ProgrammeMembershipTisProgrammes(10)));
 
-                // WHEN
-                comp.ngOnInit();
+				// WHEN
+				comp.ngOnInit();
 
-                // THEN
-                expect(service.find).toHaveBeenCalledWith(123);
-                expect(comp.programmeMembership).toEqual(jasmine.objectContaining({id: 10}));
-            });
-        });
-    });
+				// THEN
+				expect(service.find).toHaveBeenCalledWith(123);
+				expect(comp.programmeMembership).toEqual(jasmine.objectContaining({id: 10}));
+			});
+		});
+	});
 
 });

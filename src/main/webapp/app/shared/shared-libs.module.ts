@@ -7,22 +7,22 @@ import {NgJhipsterModule} from "ng-jhipster";
 import {InfiniteScrollModule} from "angular2-infinite-scroll";
 
 @NgModule({
-    imports: [
-        NgbModule.forRoot(),
-        NgJhipsterModule.forRoot({
-            i18nEnabled: true,
-            defaultI18nLang: 'en'
-        }),
-        InfiniteScrollModule
-    ],
-    exports: [
-        FormsModule,
-        HttpModule,
-        CommonModule,
-        NgbModule,
-        NgJhipsterModule,
-        InfiniteScrollModule
-    ]
+	imports: [
+		NgbModule.forRoot(),
+		NgJhipsterModule.forRoot({
+			i18nEnabled: true,
+			defaultI18nLang: 'en'
+		}),
+		InfiniteScrollModule
+	],
+	exports: [
+		FormsModule,
+		HttpModule,
+		CommonModule,
+		NgbModule,
+		NgJhipsterModule,
+		InfiniteScrollModule
+	]
 })
 export class TcsSharedLibsModule {
 }

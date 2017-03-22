@@ -6,49 +6,49 @@ import {TrainingNumberTisProgrammesDeletePopupComponent} from "./training-number
 
 
 export const trainingNumberRoute: Routes = [
-    {
-        path: 'training-number-tis-programmes',
-        component: TrainingNumberTisProgrammesComponent,
-        data: {
-            authorities: ['ROLE_USER'],
-            pageTitle: 'tcsApp.trainingNumber.home.title'
-        }
-    }, {
-        path: 'training-number-tis-programmes/:id',
-        component: TrainingNumberTisProgrammesDetailComponent,
-        data: {
-            authorities: ['ROLE_USER'],
-            pageTitle: 'tcsApp.trainingNumber.home.title'
-        }
-    }
+	{
+		path: 'training-number-tis-programmes',
+		component: TrainingNumberTisProgrammesComponent,
+		data: {
+			authorities: ['ROLE_USER'],
+			pageTitle: 'tcsApp.trainingNumber.home.title'
+		}
+	}, {
+		path: 'training-number-tis-programmes/:id',
+		component: TrainingNumberTisProgrammesDetailComponent,
+		data: {
+			authorities: ['ROLE_USER'],
+			pageTitle: 'tcsApp.trainingNumber.home.title'
+		}
+	}
 ];
 
 export const trainingNumberPopupRoute: Routes = [
-    {
-        path: 'training-number-tis-programmes-new',
-        component: TrainingNumberTisProgrammesPopupComponent,
-        data: {
-            authorities: ['ROLE_USER'],
-            pageTitle: 'tcsApp.trainingNumber.home.title'
-        },
-        outlet: 'popup'
-    },
-    {
-        path: 'training-number-tis-programmes/:id/edit',
-        component: TrainingNumberTisProgrammesPopupComponent,
-        data: {
-            authorities: ['ROLE_USER'],
-            pageTitle: 'tcsApp.trainingNumber.home.title'
-        },
-        outlet: 'popup'
-    },
-    {
-        path: 'training-number-tis-programmes/:id/delete',
-        component: TrainingNumberTisProgrammesDeletePopupComponent,
-        data: {
-            authorities: ['ROLE_USER'],
-            pageTitle: 'tcsApp.trainingNumber.home.title'
-        },
-        outlet: 'popup'
-    }
+	{
+		path: 'training-number-tis-programmes-new',
+		component: TrainingNumberTisProgrammesPopupComponent,
+		data: {
+			authorities: ['ROLE_USER'],
+			pageTitle: 'tcsApp.trainingNumber.home.title'
+		},
+		outlet: 'popup'
+	},
+	{
+		path: 'training-number-tis-programmes/:id/edit',
+		component: TrainingNumberTisProgrammesPopupComponent,
+		data: {
+			authorities: ['ROLE_USER'],
+			pageTitle: 'tcsApp.trainingNumber.home.title'
+		},
+		outlet: 'popup'
+	},
+	{
+		path: 'training-number-tis-programmes/:id/delete',
+		component: TrainingNumberTisProgrammesDeletePopupComponent,
+		data: {
+			authorities: ['ROLE_USER'],
+			pageTitle: 'tcsApp.trainingNumber.home.title'
+		},
+		outlet: 'popup'
+	}
 ];

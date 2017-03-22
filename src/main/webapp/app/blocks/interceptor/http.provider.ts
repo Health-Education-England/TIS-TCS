@@ -13,30 +13,30 @@ export function interceptableFactory(backend: XHRBackend,
                                      sessionStorage: SessionStorageService,
                                      injector: Injector,
                                      eventManager: EventManager) {
-    return new InterceptableHttp(
-        backend,
-        defaultOptions,
-        [
-            new AuthInterceptor(localStorage, sessionStorage),
-            new AuthExpiredInterceptor(injector),
-            // Other interceptors can be added here
-            new ErrorHandlerInterceptor(eventManager),
-            new NotificationInterceptor()
-        ]
-    );
+	return new InterceptableHttp(
+		backend,
+		defaultOptions,
+		[
+			new AuthInterceptor(localStorage, sessionStorage),
+			new AuthExpiredInterceptor(injector),
+			// Other interceptors can be added here
+			new ErrorHandlerInterceptor(eventManager),
+			new NotificationInterceptor()
+		]
+	);
 };
 
 export function customHttpProvider() {
-    return {
-        provide: Http,
-        useFactory: interceptableFactory,
-        deps: [
-            XHRBackend,
-            RequestOptions,
-            LocalStorageService,
-            SessionStorageService,
-            Injector,
-            EventManager
-        ]
-    };
+	return {
+		provide: Http,
+		useFactory: interceptableFactory,
+		deps: [
+			XHRBackend,
+			RequestOptions,
+			LocalStorageService,
+			SessionStorageService,
+			Injector,
+			EventManager
+		]
+	};
 };

@@ -5,38 +5,38 @@ import {TrainingNumberTisProgrammes} from "./training-number-tis-programmes.mode
 import {TrainingNumberTisProgrammesService} from "./training-number-tis-programmes.service";
 
 @Component({
-    selector: 'jhi-training-number-tis-programmes-detail',
-    templateUrl: './training-number-tis-programmes-detail.component.html'
+	selector: 'jhi-training-number-tis-programmes-detail',
+	templateUrl: './training-number-tis-programmes-detail.component.html'
 })
 export class TrainingNumberTisProgrammesDetailComponent implements OnInit, OnDestroy {
 
-    trainingNumber: TrainingNumberTisProgrammes;
-    private subscription: any;
+	trainingNumber: TrainingNumberTisProgrammes;
+	private subscription: any;
 
-    constructor(private jhiLanguageService: JhiLanguageService,
-                private trainingNumberService: TrainingNumberTisProgrammesService,
-                private route: ActivatedRoute) {
-        this.jhiLanguageService.setLocations(['trainingNumber', 'trainingNumberType']);
-    }
+	constructor(private jhiLanguageService: JhiLanguageService,
+	            private trainingNumberService: TrainingNumberTisProgrammesService,
+	            private route: ActivatedRoute) {
+		this.jhiLanguageService.setLocations(['trainingNumber', 'trainingNumberType']);
+	}
 
-    ngOnInit() {
-        this.subscription = this.route.params.subscribe(params => {
-            this.load(params['id']);
-        });
-    }
+	ngOnInit() {
+		this.subscription = this.route.params.subscribe(params => {
+			this.load(params['id']);
+		});
+	}
 
-    load(id) {
-        this.trainingNumberService.find(id).subscribe(trainingNumber => {
-            this.trainingNumber = trainingNumber;
-        });
-    }
+	load(id) {
+		this.trainingNumberService.find(id).subscribe(trainingNumber => {
+			this.trainingNumber = trainingNumber;
+		});
+	}
 
-    previousState() {
-        window.history.back();
-    }
+	previousState() {
+		window.history.back();
+	}
 
-    ngOnDestroy() {
-        this.subscription.unsubscribe();
-    }
+	ngOnDestroy() {
+		this.subscription.unsubscribe();
+	}
 
 }

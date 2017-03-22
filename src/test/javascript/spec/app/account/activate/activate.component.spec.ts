@@ -9,76 +9,76 @@ import {ActivateComponent} from "../../../../../../main/webapp/app/account/activ
 
 describe('Component Tests', () => {
 
-    describe('ActivateComponent', () => {
+	describe('ActivateComponent', () => {
 
-        let comp: ActivateComponent;
+		let comp: ActivateComponent;
 
-        beforeEach(async(() => {
-            TestBed.configureTestingModule({
-                imports: [TcsTestModule],
-                declarations: [ActivateComponent],
-                providers: [
-                    Activate,
-                    {
-                        provide: ActivatedRoute,
-                        useValue: new MockActivatedRoute({'key': 'ABC123'})
-                    },
-                    {
-                        provide: LoginModalService,
-                        useValue: null
-                    }
-                ]
-            }).overrideComponent(ActivateComponent, {
-                set: {
-                    template: ''
-                }
-            }).compileComponents();
-        }));
+		beforeEach(async(() => {
+			TestBed.configureTestingModule({
+				imports: [TcsTestModule],
+				declarations: [ActivateComponent],
+				providers: [
+					Activate,
+					{
+						provide: ActivatedRoute,
+						useValue: new MockActivatedRoute({'key': 'ABC123'})
+					},
+					{
+						provide: LoginModalService,
+						useValue: null
+					}
+				]
+			}).overrideComponent(ActivateComponent, {
+				set: {
+					template: ''
+				}
+			}).compileComponents();
+		}));
 
-        beforeEach(() => {
-            let fixture = TestBed.createComponent(ActivateComponent);
-            comp = fixture.componentInstance;
-        });
+		beforeEach(() => {
+			let fixture = TestBed.createComponent(ActivateComponent);
+			comp = fixture.componentInstance;
+		});
 
-        it('calls activate.get with the key from params',
-            inject([Activate],
-                fakeAsync((service: Activate) => {
-                    spyOn(service, 'get').and.returnValue(Observable.of());
+		it('calls activate.get with the key from params',
+			inject([Activate],
+				fakeAsync((service: Activate) => {
+					spyOn(service, 'get').and.returnValue(Observable.of());
 
-                    comp.ngOnInit();
-                    tick();
+					comp.ngOnInit();
+					tick();
 
-                    expect(service.get).toHaveBeenCalledWith('ABC123');
-                })
-            )
-        );
+					expect(service.get).toHaveBeenCalledWith('ABC123');
+				})
+			)
+		);
 
-        it('should set set success to OK upon successful activation',
-            inject([Activate],
-                fakeAsync((service: Activate) => {
-                    spyOn(service, 'get').and.returnValue(Observable.of({}));
+		it('should set set success to OK upon successful activation',
+			inject([Activate],
+				fakeAsync((service: Activate) => {
+					spyOn(service, 'get').and.returnValue(Observable.of({}));
 
-                    comp.ngOnInit();
-                    tick();
+					comp.ngOnInit();
+					tick();
 
-                    expect(comp.error).toBe(null);
-                    expect(comp.success).toEqual('OK');
-                })
-            )
-        );
+					expect(comp.error).toBe(null);
+					expect(comp.success).toEqual('OK');
+				})
+			)
+		);
 
-        it('should set set error to ERROR upon activation failure',
-            inject([Activate],
-                fakeAsync((service: Activate) => {
-                    spyOn(service, 'get').and.returnValue(Observable.throw('ERROR'));
+		it('should set set error to ERROR upon activation failure',
+			inject([Activate],
+				fakeAsync((service: Activate) => {
+					spyOn(service, 'get').and.returnValue(Observable.throw('ERROR'));
 
-                    comp.ngOnInit();
-                    tick();
+					comp.ngOnInit();
+					tick();
 
-                    expect(comp.error).toBe('ERROR');
-                    expect(comp.success).toEqual(null);
-                })
-            )
-        );
-    });
+					expect(comp.error).toBe('ERROR');
+					expect(comp.success).toEqual(null);
+				})
+			)
+		);
+	});
 });

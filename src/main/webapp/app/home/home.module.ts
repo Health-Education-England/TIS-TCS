@@ -5,16 +5,16 @@ import {HOME_ROUTE, HomeComponent} from "./";
 
 
 @NgModule({
-    imports: [
-        TcsSharedModule,
-        RouterModule.forRoot([HOME_ROUTE], {useHash: true})
-    ],
-    declarations: [
-        HomeComponent,
-    ],
-    entryComponents: [],
-    providers: [],
-    schemas: [CUSTOM_ELEMENTS_SCHEMA]
+	imports: [
+		TcsSharedModule,
+		RouterModule.forRoot([HOME_ROUTE], {useHash: true})
+	],
+	declarations: [
+		HomeComponent,
+	],
+	entryComponents: [],
+	providers: [],
+	schemas: [CUSTOM_ELEMENTS_SCHEMA]
 })
 export class TcsHomeModule {
 }

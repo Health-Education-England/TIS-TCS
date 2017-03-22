@@ -9,20 +9,20 @@ import {TcsTrainingNumberTisProgrammesModule} from "./training-number/training-n
 /* jhipster-needle-add-entity-module-import - JHipster will add entity modules imports here */
 
 @NgModule({
-    imports: [
-        TcsCurriculumTisProgrammesModule,
-        TcsGradeTisProgrammesModule,
-        TcsProgrammeTisProgrammesModule,
-        TcsProgrammeMembershipTisProgrammesModule,
-        TcsSpecialtyTisProgrammesModule,
-        TcsSpecialtyGroupTisProgrammesModule,
-        TcsTrainingNumberTisProgrammesModule,
-        /* jhipster-needle-add-entity-module - JHipster will add entity modules here */
-    ],
-    declarations: [],
-    entryComponents: [],
-    providers: [],
-    schemas: [CUSTOM_ELEMENTS_SCHEMA]
+	imports: [
+		TcsCurriculumTisProgrammesModule,
+		TcsGradeTisProgrammesModule,
+		TcsProgrammeTisProgrammesModule,
+		TcsProgrammeMembershipTisProgrammesModule,
+		TcsSpecialtyTisProgrammesModule,
+		TcsSpecialtyGroupTisProgrammesModule,
+		TcsTrainingNumberTisProgrammesModule,
+		/* jhipster-needle-add-entity-module - JHipster will add entity modules here */
+	],
+	declarations: [],
+	entryComponents: [],
+	providers: [],
+	schemas: [CUSTOM_ELEMENTS_SCHEMA]
 })
 export class TcsEntityModule {
 }

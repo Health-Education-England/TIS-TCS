@@ -14,65 +14,65 @@ import {GradeTisProgrammes} from "../../../../../../main/webapp/app/entities/gra
 
 describe('Component Tests', () => {
 
-    describe('GradeTisProgrammes Management Detail Component', () => {
-        let comp: GradeTisProgrammesDetailComponent;
-        let fixture: ComponentFixture<GradeTisProgrammesDetailComponent>;
-        let service: GradeTisProgrammesService;
+	describe('GradeTisProgrammes Management Detail Component', () => {
+		let comp: GradeTisProgrammesDetailComponent;
+		let fixture: ComponentFixture<GradeTisProgrammesDetailComponent>;
+		let service: GradeTisProgrammesService;
 
-        beforeEach(async(() => {
-            TestBed.configureTestingModule({
-                declarations: [GradeTisProgrammesDetailComponent],
-                providers: [
-                    MockBackend,
-                    BaseRequestOptions,
-                    DateUtils,
-                    DataUtils,
-                    DatePipe,
-                    {
-                        provide: ActivatedRoute,
-                        useValue: new MockActivatedRoute({id: 123})
-                    },
-                    {
-                        provide: Http,
-                        useFactory: (backendInstance: MockBackend, defaultOptions: BaseRequestOptions) => {
-                            return new Http(backendInstance, defaultOptions);
-                        },
-                        deps: [MockBackend, BaseRequestOptions]
-                    },
-                    {
-                        provide: JhiLanguageService,
-                        useClass: MockLanguageService
-                    },
-                    GradeTisProgrammesService
-                ]
-            }).overrideComponent(GradeTisProgrammesDetailComponent, {
-                set: {
-                    template: ''
-                }
-            }).compileComponents();
-        }));
+		beforeEach(async(() => {
+			TestBed.configureTestingModule({
+				declarations: [GradeTisProgrammesDetailComponent],
+				providers: [
+					MockBackend,
+					BaseRequestOptions,
+					DateUtils,
+					DataUtils,
+					DatePipe,
+					{
+						provide: ActivatedRoute,
+						useValue: new MockActivatedRoute({id: 123})
+					},
+					{
+						provide: Http,
+						useFactory: (backendInstance: MockBackend, defaultOptions: BaseRequestOptions) => {
+							return new Http(backendInstance, defaultOptions);
+						},
+						deps: [MockBackend, BaseRequestOptions]
+					},
+					{
+						provide: JhiLanguageService,
+						useClass: MockLanguageService
+					},
+					GradeTisProgrammesService
+				]
+			}).overrideComponent(GradeTisProgrammesDetailComponent, {
+				set: {
+					template: ''
+				}
+			}).compileComponents();
+		}));
 
-        beforeEach(() => {
-            fixture = TestBed.createComponent(GradeTisProgrammesDetailComponent);
-            comp = fixture.componentInstance;
-            service = fixture.debugElement.injector.get(GradeTisProgrammesService);
-        });
+		beforeEach(() => {
+			fixture = TestBed.createComponent(GradeTisProgrammesDetailComponent);
+			comp = fixture.componentInstance;
+			service = fixture.debugElement.injector.get(GradeTisProgrammesService);
+		});
 
 
-        describe('OnInit', () => {
-            it('Should call load all on init', () => {
-                // GIVEN
+		describe('OnInit', () => {
+			it('Should call load all on init', () => {
+				// GIVEN
 
-                spyOn(service, 'find').and.returnValue(Observable.of(new GradeTisProgrammes(10)));
+				spyOn(service, 'find').and.returnValue(Observable.of(new GradeTisProgrammes(10)));
 
-                // WHEN
-                comp.ngOnInit();
+				// WHEN
+				comp.ngOnInit();
 
-                // THEN
-                expect(service.find).toHaveBeenCalledWith(123);
-                expect(comp.grade).toEqual(jasmine.objectContaining({id: 10}));
-            });
-        });
-    });
+				// THEN
+				expect(service.find).toHaveBeenCalledWith(123);
+				expect(comp.grade).toEqual(jasmine.objectContaining({id: 10}));
+			});
+		});
+	});
 
 });

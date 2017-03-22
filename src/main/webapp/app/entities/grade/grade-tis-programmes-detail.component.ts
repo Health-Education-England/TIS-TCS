@@ -5,38 +5,38 @@ import {GradeTisProgrammes} from "./grade-tis-programmes.model";
 import {GradeTisProgrammesService} from "./grade-tis-programmes.service";
 
 @Component({
-    selector: 'jhi-grade-tis-programmes-detail',
-    templateUrl: './grade-tis-programmes-detail.component.html'
+	selector: 'jhi-grade-tis-programmes-detail',
+	templateUrl: './grade-tis-programmes-detail.component.html'
 })
 export class GradeTisProgrammesDetailComponent implements OnInit, OnDestroy {
 
-    grade: GradeTisProgrammes;
-    private subscription: any;
+	grade: GradeTisProgrammes;
+	private subscription: any;
 
-    constructor(private jhiLanguageService: JhiLanguageService,
-                private gradeService: GradeTisProgrammesService,
-                private route: ActivatedRoute) {
-        this.jhiLanguageService.setLocations(['grade']);
-    }
+	constructor(private jhiLanguageService: JhiLanguageService,
+	            private gradeService: GradeTisProgrammesService,
+	            private route: ActivatedRoute) {
+		this.jhiLanguageService.setLocations(['grade']);
+	}
 
-    ngOnInit() {
-        this.subscription = this.route.params.subscribe(params => {
-            this.load(params['id']);
-        });
-    }
+	ngOnInit() {
+		this.subscription = this.route.params.subscribe(params => {
+			this.load(params['id']);
+		});
+	}
 
-    load(id) {
-        this.gradeService.find(id).subscribe(grade => {
-            this.grade = grade;
-        });
-    }
+	load(id) {
+		this.gradeService.find(id).subscribe(grade => {
+			this.grade = grade;
+		});
+	}
 
-    previousState() {
-        window.history.back();
-    }
+	previousState() {
+		window.history.back();
+	}
 
-    ngOnDestroy() {
-        this.subscription.unsubscribe();
-    }
+	ngOnDestroy() {
+		this.subscription.unsubscribe();
+	}
 
 }

@@ -7,56 +7,56 @@ import {SpecialtyTisProgrammesPopupService} from "./specialty-tis-programmes-pop
 import {SpecialtyTisProgrammesService} from "./specialty-tis-programmes.service";
 
 @Component({
-    selector: 'jhi-specialty-tis-programmes-delete-dialog',
-    templateUrl: './specialty-tis-programmes-delete-dialog.component.html'
+	selector: 'jhi-specialty-tis-programmes-delete-dialog',
+	templateUrl: './specialty-tis-programmes-delete-dialog.component.html'
 })
 export class SpecialtyTisProgrammesDeleteDialogComponent {
 
-    specialty: SpecialtyTisProgrammes;
+	specialty: SpecialtyTisProgrammes;
 
-    constructor(private jhiLanguageService: JhiLanguageService,
-                private specialtyService: SpecialtyTisProgrammesService,
-                public activeModal: NgbActiveModal,
-                private eventManager: EventManager) {
-        this.jhiLanguageService.setLocations(['specialty', 'status', 'specialtyType']);
-    }
+	constructor(private jhiLanguageService: JhiLanguageService,
+	            private specialtyService: SpecialtyTisProgrammesService,
+	            public activeModal: NgbActiveModal,
+	            private eventManager: EventManager) {
+		this.jhiLanguageService.setLocations(['specialty', 'status', 'specialtyType']);
+	}
 
-    clear() {
-        this.activeModal.dismiss('cancel');
-    }
+	clear() {
+		this.activeModal.dismiss('cancel');
+	}
 
-    confirmDelete(id: number) {
-        this.specialtyService.delete(id).subscribe(response => {
-            this.eventManager.broadcast({
-                name: 'specialtyListModification',
-                content: 'Deleted an specialty'
-            });
-            this.activeModal.dismiss(true);
-        });
-    }
+	confirmDelete(id: number) {
+		this.specialtyService.delete(id).subscribe(response => {
+			this.eventManager.broadcast({
+				name: 'specialtyListModification',
+				content: 'Deleted an specialty'
+			});
+			this.activeModal.dismiss(true);
+		});
+	}
 }
 
 @Component({
-    selector: 'jhi-specialty-tis-programmes-delete-popup',
-    template: ''
+	selector: 'jhi-specialty-tis-programmes-delete-popup',
+	template: ''
 })
 export class SpecialtyTisProgrammesDeletePopupComponent implements OnInit, OnDestroy {
 
-    modalRef: NgbModalRef;
-    routeSub: any;
+	modalRef: NgbModalRef;
+	routeSub: any;
 
-    constructor(private route: ActivatedRoute,
-                private specialtyPopupService: SpecialtyTisProgrammesPopupService) {
-    }
+	constructor(private route: ActivatedRoute,
+	            private specialtyPopupService: SpecialtyTisProgrammesPopupService) {
+	}
 
-    ngOnInit() {
-        this.routeSub = this.route.params.subscribe(params => {
-            this.modalRef = this.specialtyPopupService
-                .open(SpecialtyTisProgrammesDeleteDialogComponent, params['id']);
-        });
-    }
+	ngOnInit() {
+		this.routeSub = this.route.params.subscribe(params => {
+			this.modalRef = this.specialtyPopupService
+				.open(SpecialtyTisProgrammesDeleteDialogComponent, params['id']);
+		});
+	}
 
-    ngOnDestroy() {
-        this.routeSub.unsubscribe();
-    }
+	ngOnDestroy() {
+		this.routeSub.unsubscribe();
+	}
 }

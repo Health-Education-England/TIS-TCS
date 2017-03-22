@@ -4,17 +4,17 @@ import {navbarRoute} from "../app.route";
 import {errorRoute} from "./";
 
 let LAYOUT_ROUTES = [
-    navbarRoute,
-    ...errorRoute
+	navbarRoute,
+	...errorRoute
 ];
 
 @NgModule({
-    imports: [
-        RouterModule.forRoot(LAYOUT_ROUTES, {useHash: true})
-    ],
-    exports: [
-        RouterModule
-    ]
+	imports: [
+		RouterModule.forRoot(LAYOUT_ROUTES, {useHash: true})
+	],
+	exports: [
+		RouterModule
+	]
 })
 export class LayoutRoutingModule {
 }

@@ -7,56 +7,56 @@ import {GradeTisProgrammesPopupService} from "./grade-tis-programmes-popup.servi
 import {GradeTisProgrammesService} from "./grade-tis-programmes.service";
 
 @Component({
-    selector: 'jhi-grade-tis-programmes-delete-dialog',
-    templateUrl: './grade-tis-programmes-delete-dialog.component.html'
+	selector: 'jhi-grade-tis-programmes-delete-dialog',
+	templateUrl: './grade-tis-programmes-delete-dialog.component.html'
 })
 export class GradeTisProgrammesDeleteDialogComponent {
 
-    grade: GradeTisProgrammes;
+	grade: GradeTisProgrammes;
 
-    constructor(private jhiLanguageService: JhiLanguageService,
-                private gradeService: GradeTisProgrammesService,
-                public activeModal: NgbActiveModal,
-                private eventManager: EventManager) {
-        this.jhiLanguageService.setLocations(['grade']);
-    }
+	constructor(private jhiLanguageService: JhiLanguageService,
+	            private gradeService: GradeTisProgrammesService,
+	            public activeModal: NgbActiveModal,
+	            private eventManager: EventManager) {
+		this.jhiLanguageService.setLocations(['grade']);
+	}
 
-    clear() {
-        this.activeModal.dismiss('cancel');
-    }
+	clear() {
+		this.activeModal.dismiss('cancel');
+	}
 
-    confirmDelete(id: number) {
-        this.gradeService.delete(id).subscribe(response => {
-            this.eventManager.broadcast({
-                name: 'gradeListModification',
-                content: 'Deleted an grade'
-            });
-            this.activeModal.dismiss(true);
-        });
-    }
+	confirmDelete(id: number) {
+		this.gradeService.delete(id).subscribe(response => {
+			this.eventManager.broadcast({
+				name: 'gradeListModification',
+				content: 'Deleted an grade'
+			});
+			this.activeModal.dismiss(true);
+		});
+	}
 }
 
 @Component({
-    selector: 'jhi-grade-tis-programmes-delete-popup',
-    template: ''
+	selector: 'jhi-grade-tis-programmes-delete-popup',
+	template: ''
 })
 export class GradeTisProgrammesDeletePopupComponent implements OnInit, OnDestroy {
 
-    modalRef: NgbModalRef;
-    routeSub: any;
+	modalRef: NgbModalRef;
+	routeSub: any;
 
-    constructor(private route: ActivatedRoute,
-                private gradePopupService: GradeTisProgrammesPopupService) {
-    }
+	constructor(private route: ActivatedRoute,
+	            private gradePopupService: GradeTisProgrammesPopupService) {
+	}
 
-    ngOnInit() {
-        this.routeSub = this.route.params.subscribe(params => {
-            this.modalRef = this.gradePopupService
-                .open(GradeTisProgrammesDeleteDialogComponent, params['id']);
-        });
-    }
+	ngOnInit() {
+		this.routeSub = this.route.params.subscribe(params => {
+			this.modalRef = this.gradePopupService
+				.open(GradeTisProgrammesDeleteDialogComponent, params['id']);
+		});
+	}
 
-    ngOnDestroy() {
-        this.routeSub.unsubscribe();
-    }
+	ngOnDestroy() {
+		this.routeSub.unsubscribe();
+	}
 }

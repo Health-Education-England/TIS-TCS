@@ -1,5 +1,5 @@
 export class Log {
-    constructor(public name: string,
-                public level: string) {
-    }
+	constructor(public name: string,
+	            public level: string) {
+	}
 }

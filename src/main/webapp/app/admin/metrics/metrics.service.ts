@@ -5,14 +5,14 @@ import {Observable} from "rxjs/Rx";
 @Injectable()
 export class JhiMetricsService {
 
-    constructor(private http: Http) {
-    }
+	constructor(private http: Http) {
+	}
 
-    getMetrics(): Observable<any> {
-        return this.http.get('management/metrics').map((res: Response) => res.json());
-    }
+	getMetrics(): Observable<any> {
+		return this.http.get('management/metrics').map((res: Response) => res.json());
+	}
 
-    threadDump(): Observable<any> {
-        return this.http.get('management/dump').map((res: Response) => res.json());
-    }
+	threadDump(): Observable<any> {
+		return this.http.get('management/dump').map((res: Response) => res.json());
+	}
 }

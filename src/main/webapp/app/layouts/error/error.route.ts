@@ -3,22 +3,22 @@ import {UserRouteAccessService} from "../../shared";
 import {ErrorComponent} from "./error.component";
 
 export const errorRoute: Routes = [
-    {
-        path: 'error',
-        component: ErrorComponent,
-        data: {
-            authorities: [],
-            pageTitle: 'error.title'
-        },
-        canActivate: [UserRouteAccessService]
-    },
-    {
-        path: 'accessdenied',
-        component: ErrorComponent,
-        data: {
-            authorities: [],
-            pageTitle: 'error.title'
-        },
-        canActivate: [UserRouteAccessService]
-    }
+	{
+		path: 'error',
+		component: ErrorComponent,
+		data: {
+			authorities: [],
+			pageTitle: 'error.title'
+		},
+		canActivate: [UserRouteAccessService]
+	},
+	{
+		path: 'accessdenied',
+		component: ErrorComponent,
+		data: {
+			authorities: [],
+			pageTitle: 'error.title'
+		},
+		canActivate: [UserRouteAccessService]
+	}
 ];

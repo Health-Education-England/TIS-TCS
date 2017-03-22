@@ -14,65 +14,65 @@ import {TrainingNumberTisProgrammes} from "../../../../../../main/webapp/app/ent
 
 describe('Component Tests', () => {
 
-    describe('TrainingNumberTisProgrammes Management Detail Component', () => {
-        let comp: TrainingNumberTisProgrammesDetailComponent;
-        let fixture: ComponentFixture<TrainingNumberTisProgrammesDetailComponent>;
-        let service: TrainingNumberTisProgrammesService;
+	describe('TrainingNumberTisProgrammes Management Detail Component', () => {
+		let comp: TrainingNumberTisProgrammesDetailComponent;
+		let fixture: ComponentFixture<TrainingNumberTisProgrammesDetailComponent>;
+		let service: TrainingNumberTisProgrammesService;
 
-        beforeEach(async(() => {
-            TestBed.configureTestingModule({
-                declarations: [TrainingNumberTisProgrammesDetailComponent],
-                providers: [
-                    MockBackend,
-                    BaseRequestOptions,
-                    DateUtils,
-                    DataUtils,
-                    DatePipe,
-                    {
-                        provide: ActivatedRoute,
-                        useValue: new MockActivatedRoute({id: 123})
-                    },
-                    {
-                        provide: Http,
-                        useFactory: (backendInstance: MockBackend, defaultOptions: BaseRequestOptions) => {
-                            return new Http(backendInstance, defaultOptions);
-                        },
-                        deps: [MockBackend, BaseRequestOptions]
-                    },
-                    {
-                        provide: JhiLanguageService,
-                        useClass: MockLanguageService
-                    },
-                    TrainingNumberTisProgrammesService
-                ]
-            }).overrideComponent(TrainingNumberTisProgrammesDetailComponent, {
-                set: {
-                    template: ''
-                }
-            }).compileComponents();
-        }));
+		beforeEach(async(() => {
+			TestBed.configureTestingModule({
+				declarations: [TrainingNumberTisProgrammesDetailComponent],
+				providers: [
+					MockBackend,
+					BaseRequestOptions,
+					DateUtils,
+					DataUtils,
+					DatePipe,
+					{
+						provide: ActivatedRoute,
+						useValue: new MockActivatedRoute({id: 123})
+					},
+					{
+						provide: Http,
+						useFactory: (backendInstance: MockBackend, defaultOptions: BaseRequestOptions) => {
+							return new Http(backendInstance, defaultOptions);
+						},
+						deps: [MockBackend, BaseRequestOptions]
+					},
+					{
+						provide: JhiLanguageService,
+						useClass: MockLanguageService
+					},
+					TrainingNumberTisProgrammesService
+				]
+			}).overrideComponent(TrainingNumberTisProgrammesDetailComponent, {
+				set: {
+					template: ''
+				}
+			}).compileComponents();
+		}));
 
-        beforeEach(() => {
-            fixture = TestBed.createComponent(TrainingNumberTisProgrammesDetailComponent);
-            comp = fixture.componentInstance;
-            service = fixture.debugElement.injector.get(TrainingNumberTisProgrammesService);
-        });
+		beforeEach(() => {
+			fixture = TestBed.createComponent(TrainingNumberTisProgrammesDetailComponent);
+			comp = fixture.componentInstance;
+			service = fixture.debugElement.injector.get(TrainingNumberTisProgrammesService);
+		});
 
 
-        describe('OnInit', () => {
-            it('Should call load all on init', () => {
-                // GIVEN
+		describe('OnInit', () => {
+			it('Should call load all on init', () => {
+				// GIVEN
 
-                spyOn(service, 'find').and.returnValue(Observable.of(new TrainingNumberTisProgrammes(10)));
+				spyOn(service, 'find').and.returnValue(Observable.of(new TrainingNumberTisProgrammes(10)));
 
-                // WHEN
-                comp.ngOnInit();
+				// WHEN
+				comp.ngOnInit();
 
-                // THEN
-                expect(service.find).toHaveBeenCalledWith(123);
-                expect(comp.trainingNumber).toEqual(jasmine.objectContaining({id: 10}));
-            });
-        });
-    });
+				// THEN
+				expect(service.find).toHaveBeenCalledWith(123);
+				expect(comp.trainingNumber).toEqual(jasmine.objectContaining({id: 10}));
+			});
+		});
+	});
 
 });

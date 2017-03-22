@@ -6,49 +6,49 @@ import {GradeTisProgrammesDeletePopupComponent} from "./grade-tis-programmes-del
 
 
 export const gradeRoute: Routes = [
-    {
-        path: 'grade-tis-programmes',
-        component: GradeTisProgrammesComponent,
-        data: {
-            authorities: ['ROLE_USER'],
-            pageTitle: 'tcsApp.grade.home.title'
-        }
-    }, {
-        path: 'grade-tis-programmes/:id',
-        component: GradeTisProgrammesDetailComponent,
-        data: {
-            authorities: ['ROLE_USER'],
-            pageTitle: 'tcsApp.grade.home.title'
-        }
-    }
+	{
+		path: 'grade-tis-programmes',
+		component: GradeTisProgrammesComponent,
+		data: {
+			authorities: ['ROLE_USER'],
+			pageTitle: 'tcsApp.grade.home.title'
+		}
+	}, {
+		path: 'grade-tis-programmes/:id',
+		component: GradeTisProgrammesDetailComponent,
+		data: {
+			authorities: ['ROLE_USER'],
+			pageTitle: 'tcsApp.grade.home.title'
+		}
+	}
 ];
 
 export const gradePopupRoute: Routes = [
-    {
-        path: 'grade-tis-programmes-new',
-        component: GradeTisProgrammesPopupComponent,
-        data: {
-            authorities: ['ROLE_USER'],
-            pageTitle: 'tcsApp.grade.home.title'
-        },
-        outlet: 'popup'
-    },
-    {
-        path: 'grade-tis-programmes/:id/edit',
-        component: GradeTisProgrammesPopupComponent,
-        data: {
-            authorities: ['ROLE_USER'],
-            pageTitle: 'tcsApp.grade.home.title'
-        },
-        outlet: 'popup'
-    },
-    {
-        path: 'grade-tis-programmes/:id/delete',
-        component: GradeTisProgrammesDeletePopupComponent,
-        data: {
-            authorities: ['ROLE_USER'],
-            pageTitle: 'tcsApp.grade.home.title'
-        },
-        outlet: 'popup'
-    }
+	{
+		path: 'grade-tis-programmes-new',
+		component: GradeTisProgrammesPopupComponent,
+		data: {
+			authorities: ['ROLE_USER'],
+			pageTitle: 'tcsApp.grade.home.title'
+		},
+		outlet: 'popup'
+	},
+	{
+		path: 'grade-tis-programmes/:id/edit',
+		component: GradeTisProgrammesPopupComponent,
+		data: {
+			authorities: ['ROLE_USER'],
+			pageTitle: 'tcsApp.grade.home.title'
+		},
+		outlet: 'popup'
+	},
+	{
+		path: 'grade-tis-programmes/:id/delete',
+		component: GradeTisProgrammesDeletePopupComponent,
+		data: {
+			authorities: ['ROLE_USER'],
+			pageTitle: 'tcsApp.grade.home.title'
+		},
+		outlet: 'popup'
+	}
 ];

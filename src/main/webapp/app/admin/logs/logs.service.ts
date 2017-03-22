@@ -5,14 +5,14 @@ import {Log} from "./log.model";
 
 @Injectable()
 export class LogsService {
-    constructor(private http: Http) {
-    }
+	constructor(private http: Http) {
+	}
 
-    changeLevel(log: Log): Observable<Response> {
-        return this.http.put('management/logs', log);
-    }
+	changeLevel(log: Log): Observable<Response> {
+		return this.http.put('management/logs', log);
+	}
 
-    findAll(): Observable<Log[]> {
-        return this.http.get('management/logs').map((res: Response) => res.json());
-    }
+	findAll(): Observable<Log[]> {
+		return this.http.get('management/logs').map((res: Response) => res.json());
+	}
 }

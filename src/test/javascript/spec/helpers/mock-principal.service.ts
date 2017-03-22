@@ -4,17 +4,17 @@ import Spy = jasmine.Spy;
 
 export class MockPrincipal extends SpyObject {
 
-    identitySpy: Spy;
-    fakeResponse: any;
+	identitySpy: Spy;
+	fakeResponse: any;
 
-    constructor() {
-        super(Principal);
+	constructor() {
+		super(Principal);
 
-        this.fakeResponse = {};
-        this.identitySpy = this.spy('identity').andReturn(Promise.resolve(this.fakeResponse));
-    }
+		this.fakeResponse = {};
+		this.identitySpy = this.spy('identity').andReturn(Promise.resolve(this.fakeResponse));
+	}
 
-    setResponse(json: any): void {
-        this.fakeResponse = json;
-    }
+	setResponse(json: any): void {
+		this.fakeResponse = json;
+	}
 }

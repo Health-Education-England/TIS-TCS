@@ -14,65 +14,65 @@ import {ProgrammeTisProgrammes} from "../../../../../../main/webapp/app/entities
 
 describe('Component Tests', () => {
 
-    describe('ProgrammeTisProgrammes Management Detail Component', () => {
-        let comp: ProgrammeTisProgrammesDetailComponent;
-        let fixture: ComponentFixture<ProgrammeTisProgrammesDetailComponent>;
-        let service: ProgrammeTisProgrammesService;
+	describe('ProgrammeTisProgrammes Management Detail Component', () => {
+		let comp: ProgrammeTisProgrammesDetailComponent;
+		let fixture: ComponentFixture<ProgrammeTisProgrammesDetailComponent>;
+		let service: ProgrammeTisProgrammesService;
 
-        beforeEach(async(() => {
-            TestBed.configureTestingModule({
-                declarations: [ProgrammeTisProgrammesDetailComponent],
-                providers: [
-                    MockBackend,
-                    BaseRequestOptions,
-                    DateUtils,
-                    DataUtils,
-                    DatePipe,
-                    {
-                        provide: ActivatedRoute,
-                        useValue: new MockActivatedRoute({id: 123})
-                    },
-                    {
-                        provide: Http,
-                        useFactory: (backendInstance: MockBackend, defaultOptions: BaseRequestOptions) => {
-                            return new Http(backendInstance, defaultOptions);
-                        },
-                        deps: [MockBackend, BaseRequestOptions]
-                    },
-                    {
-                        provide: JhiLanguageService,
-                        useClass: MockLanguageService
-                    },
-                    ProgrammeTisProgrammesService
-                ]
-            }).overrideComponent(ProgrammeTisProgrammesDetailComponent, {
-                set: {
-                    template: ''
-                }
-            }).compileComponents();
-        }));
+		beforeEach(async(() => {
+			TestBed.configureTestingModule({
+				declarations: [ProgrammeTisProgrammesDetailComponent],
+				providers: [
+					MockBackend,
+					BaseRequestOptions,
+					DateUtils,
+					DataUtils,
+					DatePipe,
+					{
+						provide: ActivatedRoute,
+						useValue: new MockActivatedRoute({id: 123})
+					},
+					{
+						provide: Http,
+						useFactory: (backendInstance: MockBackend, defaultOptions: BaseRequestOptions) => {
+							return new Http(backendInstance, defaultOptions);
+						},
+						deps: [MockBackend, BaseRequestOptions]
+					},
+					{
+						provide: JhiLanguageService,
+						useClass: MockLanguageService
+					},
+					ProgrammeTisProgrammesService
+				]
+			}).overrideComponent(ProgrammeTisProgrammesDetailComponent, {
+				set: {
+					template: ''
+				}
+			}).compileComponents();
+		}));
 
-        beforeEach(() => {
-            fixture = TestBed.createComponent(ProgrammeTisProgrammesDetailComponent);
-            comp = fixture.componentInstance;
-            service = fixture.debugElement.injector.get(ProgrammeTisProgrammesService);
-        });
+		beforeEach(() => {
+			fixture = TestBed.createComponent(ProgrammeTisProgrammesDetailComponent);
+			comp = fixture.componentInstance;
+			service = fixture.debugElement.injector.get(ProgrammeTisProgrammesService);
+		});
 
 
-        describe('OnInit', () => {
-            it('Should call load all on init', () => {
-                // GIVEN
+		describe('OnInit', () => {
+			it('Should call load all on init', () => {
+				// GIVEN
 
-                spyOn(service, 'find').and.returnValue(Observable.of(new ProgrammeTisProgrammes(10)));
+				spyOn(service, 'find').and.returnValue(Observable.of(new ProgrammeTisProgrammes(10)));
 
-                // WHEN
-                comp.ngOnInit();
+				// WHEN
+				comp.ngOnInit();
 
-                // THEN
-                expect(service.find).toHaveBeenCalledWith(123);
-                expect(comp.programme).toEqual(jasmine.objectContaining({id: 10}));
-            });
-        });
-    });
+				// THEN
+				expect(service.find).toHaveBeenCalledWith(123);
+				expect(comp.programme).toEqual(jasmine.objectContaining({id: 10}));
+			});
+		});
+	});
 
 });

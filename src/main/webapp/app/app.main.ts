@@ -5,7 +5,7 @@ import {TcsAppModule} from "./app.module";
 ProdConfig();
 
 if (module['hot']) {
-    module['hot'].accept();
+	module['hot'].accept();
 }
 
 platformBrowserDynamic().bootstrapModule(TcsAppModule);

@@ -14,65 +14,65 @@ import {SpecialtyGroupTisProgrammes} from "../../../../../../main/webapp/app/ent
 
 describe('Component Tests', () => {
 
-    describe('SpecialtyGroupTisProgrammes Management Detail Component', () => {
-        let comp: SpecialtyGroupTisProgrammesDetailComponent;
-        let fixture: ComponentFixture<SpecialtyGroupTisProgrammesDetailComponent>;
-        let service: SpecialtyGroupTisProgrammesService;
+	describe('SpecialtyGroupTisProgrammes Management Detail Component', () => {
+		let comp: SpecialtyGroupTisProgrammesDetailComponent;
+		let fixture: ComponentFixture<SpecialtyGroupTisProgrammesDetailComponent>;
+		let service: SpecialtyGroupTisProgrammesService;
 
-        beforeEach(async(() => {
-            TestBed.configureTestingModule({
-                declarations: [SpecialtyGroupTisProgrammesDetailComponent],
-                providers: [
-                    MockBackend,
-                    BaseRequestOptions,
-                    DateUtils,
-                    DataUtils,
-                    DatePipe,
-                    {
-                        provide: ActivatedRoute,
-                        useValue: new MockActivatedRoute({id: 123})
-                    },
-                    {
-                        provide: Http,
-                        useFactory: (backendInstance: MockBackend, defaultOptions: BaseRequestOptions) => {
-                            return new Http(backendInstance, defaultOptions);
-                        },
-                        deps: [MockBackend, BaseRequestOptions]
-                    },
-                    {
-                        provide: JhiLanguageService,
-                        useClass: MockLanguageService
-                    },
-                    SpecialtyGroupTisProgrammesService
-                ]
-            }).overrideComponent(SpecialtyGroupTisProgrammesDetailComponent, {
-                set: {
-                    template: ''
-                }
-            }).compileComponents();
-        }));
+		beforeEach(async(() => {
+			TestBed.configureTestingModule({
+				declarations: [SpecialtyGroupTisProgrammesDetailComponent],
+				providers: [
+					MockBackend,
+					BaseRequestOptions,
+					DateUtils,
+					DataUtils,
+					DatePipe,
+					{
+						provide: ActivatedRoute,
+						useValue: new MockActivatedRoute({id: 123})
+					},
+					{
+						provide: Http,
+						useFactory: (backendInstance: MockBackend, defaultOptions: BaseRequestOptions) => {
+							return new Http(backendInstance, defaultOptions);
+						},
+						deps: [MockBackend, BaseRequestOptions]
+					},
+					{
+						provide: JhiLanguageService,
+						useClass: MockLanguageService
+					},
+					SpecialtyGroupTisProgrammesService
+				]
+			}).overrideComponent(SpecialtyGroupTisProgrammesDetailComponent, {
+				set: {
+					template: ''
+				}
+			}).compileComponents();
+		}));
 
-        beforeEach(() => {
-            fixture = TestBed.createComponent(SpecialtyGroupTisProgrammesDetailComponent);
-            comp = fixture.componentInstance;
-            service = fixture.debugElement.injector.get(SpecialtyGroupTisProgrammesService);
-        });
+		beforeEach(() => {
+			fixture = TestBed.createComponent(SpecialtyGroupTisProgrammesDetailComponent);
+			comp = fixture.componentInstance;
+			service = fixture.debugElement.injector.get(SpecialtyGroupTisProgrammesService);
+		});
 
 
-        describe('OnInit', () => {
-            it('Should call load all on init', () => {
-                // GIVEN
+		describe('OnInit', () => {
+			it('Should call load all on init', () => {
+				// GIVEN
 
-                spyOn(service, 'find').and.returnValue(Observable.of(new SpecialtyGroupTisProgrammes(10)));
+				spyOn(service, 'find').and.returnValue(Observable.of(new SpecialtyGroupTisProgrammes(10)));
 
-                // WHEN
-                comp.ngOnInit();
+				// WHEN
+				comp.ngOnInit();
 
-                // THEN
-                expect(service.find).toHaveBeenCalledWith(123);
-                expect(comp.specialtyGroup).toEqual(jasmine.objectContaining({id: 10}));
-            });
-        });
-    });
+				// THEN
+				expect(service.find).toHaveBeenCalledWith(123);
+				expect(comp.specialtyGroup).toEqual(jasmine.objectContaining({id: 10}));
+			});
+		});
+	});
 
 });
