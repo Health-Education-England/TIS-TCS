@@ -75,7 +75,7 @@ liquibase:
 #        keyAlias: tcs
 # ===================================================================
 server:
-    port: 8080
+    port: 8093
 
 # ===================================================================
 # JHipster specific properties
@@ -95,7 +95,7 @@ jhipster:
                 token-validity-in-seconds-for-remember-me: 2592000
     mail: # specific JHipster mail property, for standard properties see MailProperties
         from: tcs@localhost
-        base-url: http://127.0.0.1:8080
+        base-url: http://127.0.0.1:8093
     metrics: # DropWizard Metrics configuration, used by MetricsConfiguration
         jmx.enabled: true
         graphite: # Use the "graphite" Maven profile to have the Graphite dependencies

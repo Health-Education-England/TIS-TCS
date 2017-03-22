@@ -68,7 +68,7 @@ liquibase:
 #        keyAlias: tcs
 # ===================================================================
 server:
-    port: 8080
+    port: 8093
     compression:
         enabled: true
         mime-types: text/html,text/xml,text/plain,text/css, application/javascript, application/json

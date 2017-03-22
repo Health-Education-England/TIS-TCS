@@ -4,7 +4,7 @@
 	"baseName": "tcs",
 	"packageName": "com.transformuk.hee.tis",
 	"packageFolder": "com/transformuk/hee/tis",
-	"serverPort": "8080",
+	"serverPort": "8093",
 	"authenticationType": "jwt",
 	"hibernateCache": "no",
 	"clusteredHttpSession": false,
