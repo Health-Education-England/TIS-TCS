@@ -76,8 +76,6 @@ jhipster:
         #exposed-headers:
         #allow-credentials: true
         #max-age: 1800
-    mail:
-        from: tcs@localhost
     swagger:
         default-include-pattern: /api/.*
         title: tcs API
