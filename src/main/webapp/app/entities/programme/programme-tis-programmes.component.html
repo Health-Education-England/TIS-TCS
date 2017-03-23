@@ -1,7 +1,7 @@
 <div>
 	<h2>
 		<span jhiTranslate="tcsApp.programme.home.title">Programmes</span>
-		<button class="btn btn-primary float-right create-programme-tis-programmes"
+		<button class="btn tis-btn-nhs-blue float-right create-programme-tis-programmes"
 		        [routerLink]="['/', { outlets: { popup: ['programme-tis-programmes-new'] } }]">
 			<span class="fa fa-plus"></span>
 			<span jhiTranslate="tcsApp.programme.home.createLabel">
@@ -52,7 +52,7 @@
 						<button type="submit"
 						        [routerLink]="['/', { outlets: { popup: 'programme-tis-programmes/'+ programme.id + '/edit'} }]"
 						        replaceUrl="true"
-						        class="btn btn-primary btn-sm">
+						        class="btn tis-btn-nhs-blue-blue btn-sm">
 							<span class="fa fa-pencil"></span>
 							<span class="hidden-md-down" jhiTranslate="entity.action.edit">Edit</span>
 						</button>

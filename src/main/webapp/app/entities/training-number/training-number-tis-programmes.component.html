@@ -1,7 +1,7 @@
 <div>
 	<h2>
 		<span jhiTranslate="tcsApp.trainingNumber.home.title">Training Numbers</span>
-		<button class="btn btn-primary float-right create-training-number-tis-programmes"
+		<button class="btn tis-btn-nhs-blue float-right create-training-number-tis-programmes"
 		        [routerLink]="['/', { outlets: { popup: ['training-number-tis-programmes-new'] } }]">
 			<span class="fa fa-plus"></span>
 			<span jhiTranslate="tcsApp.trainingNumber.home.createLabel">
@@ -14,7 +14,7 @@
 	</div>
 	<br/>
 	<div class="table-responsive" *ngIf="trainingNumbers">
-		<table class="table table-striped">
+		<table class="tis-table">
 			<thead>
 			<tr>
 				<th><span jhiTranslate="global.field.id">ID</span></th>
@@ -51,7 +51,7 @@
 						<button type="submit"
 						        [routerLink]="['/', { outlets: { popup: 'training-number-tis-programmes/'+ trainingNumber.id + '/edit'} }]"
 						        replaceUrl="true"
-						        class="btn btn-primary btn-sm">
+						        class="btn tis-btn-nhs-blue btn-sm">
 							<span class="fa fa-pencil"></span>
 							<span class="hidden-md-down" jhiTranslate="entity.action.edit">Edit</span>
 						</button>

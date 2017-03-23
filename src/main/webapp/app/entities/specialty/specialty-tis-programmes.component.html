@@ -1,7 +1,7 @@
 <div>
 	<h2>
 		<span jhiTranslate="tcsApp.specialty.home.title">Specialties</span>
-		<button class="btn btn-primary float-right create-specialty-tis-programmes"
+		<button class="btn tis-btn-nhs-blue float-right create-specialty-tis-programmes"
 		        [routerLink]="['/', { outlets: { popup: ['specialty-tis-programmes-new'] } }]">
 			<span class="fa fa-plus"></span>
 			<span jhiTranslate="tcsApp.specialty.home.createLabel">
@@ -14,7 +14,7 @@
 	</div>
 	<br/>
 	<div class="table-responsive" *ngIf="specialties">
-		<table class="table table-striped">
+		<table class="tis-table">
 			<thead>
 			<tr jhiSort [(predicate)]="predicate" [(ascending)]="reverse" [callback]="transition.bind(this)">
 				<th jhiSortBy="id"><span jhiTranslate="global.field.id">ID</span> <span class="fa fa-sort"></span></th>
@@ -56,7 +56,7 @@
 						<button type="submit"
 						        [routerLink]="['/', { outlets: { popup: 'specialty-tis-programmes/'+ specialty.id + '/edit'} }]"
 						        replaceUrl="true"
-						        class="btn btn-primary btn-sm">
+						        class="btn tis-btn-nhs-blue btn-sm">
 							<span class="fa fa-pencil"></span>
 							<span class="hidden-md-down" jhiTranslate="entity.action.edit">Edit</span>
 						</button>
