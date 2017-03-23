@@ -51,8 +51,6 @@ spring:
         password:
     messages:
         cache-seconds: 1
-    thymeleaf:
-        cache: false
 
 # ===================================================================
 # To enable SSL, generate a certificate using:

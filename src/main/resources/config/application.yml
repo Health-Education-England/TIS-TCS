@@ -43,8 +43,6 @@ spring:
     mvc:
         favicon:
             enabled: false
-    thymeleaf:
-        mode: XHTML
 
 security:
     basic:
