@@ -12,7 +12,6 @@ import java.util.Set;
  * A Grade.
  */
 @Entity
-@Table(name = "grade")
 public class Grade implements Serializable {
 
 	private static final long serialVersionUID = 1L;
@@ -21,7 +20,6 @@ public class Grade implements Serializable {
 	@GeneratedValue(strategy = GenerationType.IDENTITY)
 	private Long id;
 
-	@Column(name = "name")
 	private String name;
 
 	@ManyToMany(mappedBy = "grades")

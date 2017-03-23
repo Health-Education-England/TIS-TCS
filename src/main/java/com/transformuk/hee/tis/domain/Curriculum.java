@@ -15,7 +15,6 @@ import java.util.Set;
  * A Curriculum.
  */
 @Entity
-@Table(name = "curriculum")
 public class Curriculum implements Serializable {
 
 	private static final long serialVersionUID = 1L;
@@ -24,27 +23,20 @@ public class Curriculum implements Serializable {
 	@GeneratedValue(strategy = GenerationType.IDENTITY)
 	private Long id;
 
-	@Column(name = "name")
 	private String name;
 
-	@Column(name = "start")
 	private LocalDate start;
 
-	@Column(name = "end")
 	private LocalDate end;
 
 	@Enumerated(EnumType.STRING)
-	@Column(name = "curriculum_sub_type")
 	private CurriculumSubType curriculumSubType;
 
 	@Enumerated(EnumType.STRING)
-	@Column(name = "assessment_type")
 	private AssessmentType assessmentType;
 
-	@Column(name = "does_this_curriculum_lead_to_cct")
 	private Boolean doesThisCurriculumLeadToCct;
 
-	@Column(name = "period_of_grace")
 	private Integer periodOfGrace;
 
 	@OneToMany(mappedBy = "curriculum")
@@ -52,12 +44,13 @@ public class Curriculum implements Serializable {
 	private Set<ProgrammeMembership> programmeMemberships = new HashSet<>();
 
 	@ManyToMany
-	@JoinTable(name = "curriculum_grade",
-			joinColumns = @JoinColumn(name = "curricula_id", referencedColumnName = "id"),
-			inverseJoinColumns = @JoinColumn(name = "grades_id", referencedColumnName = "id"))
+	@JoinTable(name = "CurriculumGrade",
+			joinColumns = @JoinColumn(name = "curriculaId", referencedColumnName = "id"),
+			inverseJoinColumns = @JoinColumn(name = "gradesId", referencedColumnName = "id"))
 	private Set<Grade> grades = new HashSet<>();
 
 	@ManyToOne
+	@JoinColumn(name = "specialtyId")
 	private Specialty specialty;
 
 	public Long getId() {

@@ -14,7 +14,6 @@ import java.util.Set;
  * A Specialty.
  */
 @Entity
-@Table(name = "specialty")
 public class Specialty implements Serializable {
 
 	private static final long serialVersionUID = 1L;
@@ -24,17 +23,13 @@ public class Specialty implements Serializable {
 	private Long id;
 
 	@Enumerated(EnumType.STRING)
-	@Column(name = "status")
 	private Status status;
 
-	@Column(name = "college")
 	private String college;
 
-	@Column(name = "nhs_specialty_code")
 	private String nhsSpecialtyCode;
 
 	@Enumerated(EnumType.STRING)
-	@Column(name = "specialty_type")
 	private SpecialtyType specialtyType;
 
 	@OneToMany(mappedBy = "specialty")
@@ -42,6 +37,7 @@ public class Specialty implements Serializable {
 	private Set<Curriculum> curricula = new HashSet<>();
 
 	@ManyToOne
+	@JoinColumn(name = "specialtyGroupId")
 	private SpecialtyGroup specialtyGroup;
 
 	public Long getId() {

@@ -13,7 +13,6 @@ import java.util.Set;
  * A TrainingNumber.
  */
 @Entity
-@Table(name = "training_number")
 public class TrainingNumber implements Serializable {
 
 	private static final long serialVersionUID = 1L;
@@ -23,22 +22,16 @@ public class TrainingNumber implements Serializable {
 	private Long id;
 
 	@Enumerated(EnumType.STRING)
-	@Column(name = "training_number_type")
 	private TrainingNumberType trainingNumberType;
 
-	@Column(name = "local_office")
 	private String localOffice;
 
-	@Column(name = "number")
 	private Integer number;
 
-	@Column(name = "appointment_year")
 	private Integer appointmentYear;
 
-	@Column(name = "type_of_contract")
 	private String typeOfContract;
 
-	@Column(name = "suffix")
 	private String suffix;
 
 	@OneToMany(mappedBy = "trainingNumber")

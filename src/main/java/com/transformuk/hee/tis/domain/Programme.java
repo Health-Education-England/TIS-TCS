@@ -13,7 +13,6 @@ import java.util.Set;
  * A Programme.
  */
 @Entity
-@Table(name = "programme")
 public class Programme implements Serializable {
 
 	private static final long serialVersionUID = 1L;
@@ -23,19 +22,14 @@ public class Programme implements Serializable {
 	private Long id;
 
 	@Enumerated(EnumType.STRING)
-	@Column(name = "status")
 	private Status status;
 
-	@Column(name = "managing_deanery")
 	private String managingDeanery;
 
-	@Column(name = "programme_name")
 	private String programmeName;
 
-	@Column(name = "programme_number")
 	private String programmeNumber;
 
-	@Column(name = "lead_provider")
 	private String leadProvider;
 
 	@OneToMany(mappedBy = "programme")

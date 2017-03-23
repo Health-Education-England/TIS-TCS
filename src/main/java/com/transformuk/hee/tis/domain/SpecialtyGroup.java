@@ -9,7 +9,6 @@ import java.util.Objects;
  * A SpecialtyGroup.
  */
 @Entity
-@Table(name = "specialty_group")
 public class SpecialtyGroup implements Serializable {
 
 	private static final long serialVersionUID = 1L;
@@ -18,7 +17,6 @@ public class SpecialtyGroup implements Serializable {
 	@GeneratedValue(strategy = GenerationType.IDENTITY)
 	private Long id;
 
-	@Column(name = "name")
 	private String name;
 
 	public Long getId() {

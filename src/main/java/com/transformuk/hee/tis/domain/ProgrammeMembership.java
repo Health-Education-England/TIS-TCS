@@ -12,7 +12,6 @@ import java.util.Objects;
  * A ProgrammeMembership.
  */
 @Entity
-@Table(name = "programme_membership")
 public class ProgrammeMembership implements Serializable {
 
 	private static final long serialVersionUID = 1L;
@@ -22,40 +21,34 @@ public class ProgrammeMembership implements Serializable {
 	private Long id;
 
 	@Enumerated(EnumType.STRING)
-	@Column(name = "programme_membership_type")
 	private ProgrammeMembershipType programmeMembershipType;
 
-	@Column(name = "rotation")
 	private String rotation;
 
-	@Column(name = "curriculum_start_date")
 	private LocalDate curriculumStartDate;
 
-	@Column(name = "curriculum_end_date")
 	private LocalDate curriculumEndDate;
 
-	@Column(name = "period_of_grace")
 	private Integer periodOfGrace;
 
-	@Column(name = "programme_start_date")
 	private LocalDate programmeStartDate;
 
-	@Column(name = "curriculum_completion_date")
 	private LocalDate curriculumCompletionDate;
 
-	@Column(name = "programme_end_date")
 	private LocalDate programmeEndDate;
 
-	@Column(name = "leaving_destination")
 	private String leavingDestination;
 
 	@ManyToOne
+	@JoinColumn(name="programmeId")
 	private Programme programme;
 
 	@ManyToOne
+	@JoinColumn(name="curriculumId")
 	private Curriculum curriculum;
 
 	@ManyToOne
+	@JoinColumn(name="trainingNumberId")
 	private TrainingNumber trainingNumber;
 
 	public Long getId() {
