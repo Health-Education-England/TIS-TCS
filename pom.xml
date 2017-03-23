@@ -4,9 +4,9 @@
 	<modelVersion>4.0.0</modelVersion>
 
 	<parent>
-		<artifactId>spring-boot-starter-parent</artifactId>
-		<groupId>org.springframework.boot</groupId>
-		<version>1.5.2.RELEASE</version>
+		<groupId>com.transformuk.hee</groupId>
+		<artifactId>tis-parent</artifactId>
+		<version>2.0.1</version>
 		<relativePath/>
 	</parent>
 
@@ -21,13 +21,14 @@
 	</prerequisites>
 
 	<properties>
+		<tis.shared.modules.version>2.0.1</tis.shared.modules.version>
 		<argLine>-Djava.security.egd=file:/dev/./urandom -Xmx256m</argLine>
 		<assertj.version>3.6.2</assertj.version>
 		<awaitility.version>2.0.0</awaitility.version>
 		<commons-io.version>2.5</commons-io.version>
 		<commons-lang.version>3.5</commons-lang.version>
 		<docker-maven-plugin.version>0.4.13</docker-maven-plugin.version>
-		<frontend-maven-plugin.version>1.3</frontend-maven-plugin.version>
+		<frontend.maven.plugin.version>1.3</frontend.maven.plugin.version>
 		<hibernate.version>5.2.8.Final</hibernate.version>
 		<hikaricp.version>2.6.0</hikaricp.version>
 		<jacoco-maven-plugin.version>0.7.9</jacoco-maven-plugin.version>
@@ -35,8 +36,6 @@
 		<javassist.version>3.21.0-GA</javassist.version>
 		<jhipster.server.version>1.1.0</jhipster.server.version>
 		<jjwt.version>0.7.0</jjwt.version>
-		<liquibase-hibernate5.version>3.6</liquibase-hibernate5.version>
-		<liquibase-slf4j.version>2.0.0</liquibase-slf4j.version>
 		<logstash-logback-encoder.version>4.8</logstash-logback-encoder.version>
 		<m2e.apt.activation>jdt_apt</m2e.apt.activation>
 		<mapstruct.version>1.1.0.Final</mapstruct.version>
@@ -50,7 +49,6 @@
 		<metrics-spring.version>3.1.3</metrics-spring.version>
 		<node.version>v6.10.0</node.version>
 		<!-- These remain empty unless the corresponding profile is active -->
-		<profile.no-liquibase/>
 		<profile.swagger/>
 		<prometheus-simpleclient.version>0.0.20</prometheus-simpleclient.version>
 		<!-- Sonar properties -->
@@ -193,11 +191,6 @@
 			<version>${springfox.version}</version>
 		</dependency>
 		<dependency>
-			<groupId>com.mattbertolini</groupId>
-			<artifactId>liquibase-slf4j</artifactId>
-			<version>${liquibase-slf4j.version}</version>
-		</dependency>
-		<dependency>
 			<groupId>com.ryantenney.metrics</groupId>
 			<artifactId>metrics-spring</artifactId>
 			<version>${metrics-spring.version}</version>
@@ -253,16 +246,6 @@
 		<dependency>
 			<groupId>org.hibernate</groupId>
 			<artifactId>hibernate-validator</artifactId>
-		</dependency>
-		<dependency>
-			<groupId>org.liquibase</groupId>
-			<artifactId>liquibase-core</artifactId>
-			<exclusions>
-				<exclusion>
-					<artifactId>jetty-servlet</artifactId>
-					<groupId>org.eclipse.jetty</groupId>
-				</exclusion>
-			</exclusions>
 		</dependency>
 		<dependency>
 			<groupId>org.mapstruct</groupId>
@@ -532,49 +515,6 @@
 				<version>${sonar-maven-plugin.version}</version>
 			</plugin>
 			<plugin>
-				<groupId>org.liquibase</groupId>
-				<artifactId>liquibase-maven-plugin</artifactId>
-				<version>${liquibase.version}</version>
-				<configuration>
-					<changeLogFile>src/main/resources/config/liquibase/master.xml</changeLogFile>
-					<diffChangeLogFile>
-						src/main/resources/config/liquibase/changelog/${maven.build.timestamp}_changelog.xml
-					</diffChangeLogFile>
-					<driver>com.mysql.jdbc.Driver</driver>
-					<url>jdbc:mysql://localhost:3306/tcs</url>
-					<defaultSchemaName>tcs</defaultSchemaName>
-					<username>root</username>
-					<password></password>
-					<referenceUrl>
-						hibernate:spring:com.transformuk.hee.tis.domain?dialect=org.hibernate.dialect.MySQL5InnoDBDialect&amp;hibernate.physical_naming_strategy=org.springframework.boot.orm.jpa.hibernate.SpringPhysicalNamingStrategy&amp;hibernate.implicit_naming_strategy=org.springframework.boot.orm.jpa.hibernate.SpringImplicitNamingStrategy
-					</referenceUrl>
-					<verbose>true</verbose>
-					<logging>debug</logging>
-				</configuration>
-				<dependencies>
-					<dependency>
-						<groupId>org.javassist</groupId>
-						<artifactId>javassist</artifactId>
-						<version>${javassist.version}</version>
-					</dependency>
-					<dependency>
-						<groupId>org.liquibase.ext</groupId>
-						<artifactId>liquibase-hibernate5</artifactId>
-						<version>${liquibase-hibernate5.version}</version>
-					</dependency>
-					<dependency>
-						<groupId>org.springframework.boot</groupId>
-						<artifactId>spring-boot-starter-data-jpa</artifactId>
-						<version>${project.parent.version}</version>
-					</dependency>
-					<dependency>
-						<groupId>javax.validation</groupId>
-						<artifactId>validation-api</artifactId>
-						<version>${validation-api.version}</version>
-					</dependency>
-				</dependencies>
-			</plugin>
-			<plugin>
 				<groupId>org.springframework.boot</groupId>
 				<artifactId>spring-boot-maven-plugin</artifactId>
 				<configuration>
@@ -639,7 +579,7 @@
 									<pluginExecutionFilter>
 										<groupId>com.github.eirslett</groupId>
 										<artifactId>frontend-maven-plugin</artifactId>
-										<versionRange>${frontend-maven-plugin.version}</versionRange>
+										<versionRange>${frontend.maven.plugin.version}</versionRange>
 										<goals>
 											<goal>install-node-and-yarn</goal>
 											<goal>yarn</goal>
@@ -658,12 +598,6 @@
 	</build>
 	<profiles>
 		<profile>
-			<id>no-liquibase</id>
-			<properties>
-				<profile.no-liquibase>,no-liquibase</profile.no-liquibase>
-			</properties>
-		</profile>
-		<profile>
 			<id>swagger</id>
 			<properties>
 				<profile.swagger>,swagger</profile.swagger>
@@ -676,7 +610,7 @@
 					<plugin>
 						<groupId>com.github.eirslett</groupId>
 						<artifactId>frontend-maven-plugin</artifactId>
-						<version>${frontend-maven-plugin.version}</version>
+						<version>${frontend.maven.plugin.version}</version>
 						<executions>
 							<execution>
 								<id>install node and yarn</id>
@@ -734,7 +668,7 @@
 				<!-- log configuration -->
 				<logback.loglevel>DEBUG</logback.loglevel>
 				<!-- default Spring profiles -->
-				<spring.profiles.active>dev${profile.no-liquibase}</spring.profiles.active>
+				<spring.profiles.active>dev</spring.profiles.active>
 			</properties>
 		</profile>
 		<profile>
@@ -781,7 +715,7 @@
 					<plugin>
 						<groupId>com.github.eirslett</groupId>
 						<artifactId>frontend-maven-plugin</artifactId>
-						<version>${frontend-maven-plugin.version}</version>
+						<version>${frontend.maven.plugin.version}</version>
 						<executions>
 							<execution>
 								<id>install node and yarn</id>
@@ -820,7 +754,7 @@
 				<!-- log configuration -->
 				<logback.loglevel>INFO</logback.loglevel>
 				<!-- default Spring profiles -->
-				<spring.profiles.active>prod${profile.swagger}${profile.no-liquibase}</spring.profiles.active>
+				<spring.profiles.active>prod${profile.swagger}</spring.profiles.active>
 			</properties>
 		</profile>
 		<profile>
@@ -880,34 +814,6 @@
 								<phase>none</phase>
 							</execution>
 						</executions>
-					</plugin>
-					<plugin>
-						<groupId>net.alchim31.maven</groupId>
-						<artifactId>scala-maven-plugin</artifactId>
-						<version>${scala-maven-plugin.version}</version>
-						<executions>
-							<execution>
-								<id>compile</id>
-								<phase>compile</phase>
-								<goals>
-									<goal>add-source</goal>
-									<goal>compile</goal>
-								</goals>
-							</execution>
-							<execution>
-								<id>test-compile</id>
-								<phase>test-compile</phase>
-								<goals>
-									<goal>add-source</goal>
-									<goal>testCompile</goal>
-								</goals>
-							</execution>
-						</executions>
-						<configuration>
-							<recompileMode>incremental</recompileMode>
-							<verbose>true</verbose>
-							<scalaVersion>${scala.version}</scalaVersion>
-						</configuration>
 					</plugin>
 				</plugins>
 			</build>
