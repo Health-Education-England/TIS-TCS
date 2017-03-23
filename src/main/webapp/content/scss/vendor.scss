@@ -5,6 +5,8 @@ $fa-font-path: '~font-awesome/fonts';
 put Sass variables here:
 eg $input-color: red;
 ****************************/
+@import "src/main/webapp/content/scss/global/variables";
+@import "src/main/webapp/content/scss/global/palette";
 
 @import 'node_modules/bootstrap/scss/bootstrap';
 @import 'node_modules/font-awesome/scss/font-awesome';

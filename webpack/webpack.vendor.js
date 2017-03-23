@@ -28,7 +28,7 @@ module.exports = {
 		exprContextCritical: false,
 		rules: [
 			{
-				test: /(vendor\.scss|global\.scss)/,
+				test: /(main\.scss)/,
 				loaders: ['style-loader', 'css-loader', 'postcss-loader', 'sass-loader']
 			},
 			{

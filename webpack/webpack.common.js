@@ -14,7 +14,7 @@ module.exports = function (options) {
 	return {
 		entry: {
 			'polyfills': './src/main/webapp/app/polyfills',
-			'global': './src/main/webapp/content/scss/global.scss',
+			'global': './src/main/webapp/content/scss/main.scss',
 			'main': './src/main/webapp/app/app.main'
 		},
 		resolve: {
@@ -38,23 +38,23 @@ module.exports = function (options) {
 					exclude: ['./src/main/webapp/index.html']
 				},
 				{
-					test: /\.scss$/,
-					loaders: ['to-string-loader', 'css-loader', 'sass-loader'],
-					exclude: /(vendor\.scss|global\.scss)/
-				},
-				{
-					test: /(vendor\.scss|global\.scss)/,
-					loaders: ['style-loader', 'css-loader', 'postcss-loader', 'sass-loader']
-				},
-				{
-					test: /\.css$/,
-					loaders: ['to-string-loader', 'css-loader'],
-					exclude: /(vendor\.css|global\.css)/
-				},
-				{
-					test: /(vendor\.css|global\.css)/,
-					loaders: ['style-loader', 'css-loader']
-				},
+                    test: /\.scss$/,
+                    loaders: ['to-string-loader', 'css-loader', 'sass-loader'],
+                    exclude: /(vendor\.scss|global\.scss|main\.scss)/
+                },
+                {
+                    test: /(vendor\.scss|global\.scss|main\.scss)/,
+                    loaders: ['style-loader', 'css-loader', 'postcss-loader', 'sass-loader']
+                },
+                {
+                    test: /\.css$/,
+                    loaders: ['to-string-loader', 'css-loader'],
+                    exclude: /(vendor\.css|global\.css|main\.css)/
+                },
+                {
+                    test: /(vendor\.css|global\.css|main\.css)/,
+                    loaders: ['style-loader', 'css-loader']
+                },
 				{
 					test: /\.(jpe?g|png|gif|svg|woff|woff2|ttf|eot)$/i,
 					loaders: [

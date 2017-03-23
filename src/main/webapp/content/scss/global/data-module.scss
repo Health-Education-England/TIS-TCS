@@ -1,0 +1,11 @@
+.data-module {
+	.element {
+		margin-bottom: 10px;
+	}
+	.title {
+		@include font-size($nhs-font-normal);
+	}
+	.data {
+		@include font-size($nhs-font-medium);
+	}
+}
