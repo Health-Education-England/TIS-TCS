@@ -26,13 +26,13 @@ export class ProgrammeMembershipTisProgrammesDialogComponent implements OnInit {
 	trainingnumbers: TrainingNumberTisProgrammes[];
 
 	constructor(public activeModal: NgbActiveModal,
-	            private jhiLanguageService: JhiLanguageService,
-	            private alertService: AlertService,
-	            private programmeMembershipService: ProgrammeMembershipTisProgrammesService,
-	            private programmeService: ProgrammeTisProgrammesService,
-	            private curriculumService: CurriculumTisProgrammesService,
-	            private trainingNumberService: TrainingNumberTisProgrammesService,
-	            private eventManager: EventManager) {
+				private jhiLanguageService: JhiLanguageService,
+				private alertService: AlertService,
+				private programmeMembershipService: ProgrammeMembershipTisProgrammesService,
+				private programmeService: ProgrammeTisProgrammesService,
+				private curriculumService: CurriculumTisProgrammesService,
+				private trainingNumberService: TrainingNumberTisProgrammesService,
+				private eventManager: EventManager) {
 		this.jhiLanguageService.setLocations(['programmeMembership', 'programmeMembershipType']);
 	}
 
@@ -108,7 +108,7 @@ export class ProgrammeMembershipTisProgrammesPopupComponent implements OnInit, O
 	routeSub: any;
 
 	constructor(private route: ActivatedRoute,
-	            private programmeMembershipPopupService: ProgrammeMembershipTisProgrammesPopupService) {
+				private programmeMembershipPopupService: ProgrammeMembershipTisProgrammesPopupService) {
 	}
 
 	ngOnInit() {

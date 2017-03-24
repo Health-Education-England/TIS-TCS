@@ -20,11 +20,11 @@ export class ProgrammeTisProgrammesDialogComponent implements OnInit {
 	programmememberships: ProgrammeMembershipTisProgrammes[];
 
 	constructor(public activeModal: NgbActiveModal,
-	            private jhiLanguageService: JhiLanguageService,
-	            private alertService: AlertService,
-	            private programmeService: ProgrammeTisProgrammesService,
-	            private programmeMembershipService: ProgrammeMembershipTisProgrammesService,
-	            private eventManager: EventManager) {
+				private jhiLanguageService: JhiLanguageService,
+				private alertService: AlertService,
+				private programmeService: ProgrammeTisProgrammesService,
+				private programmeMembershipService: ProgrammeMembershipTisProgrammesService,
+				private eventManager: EventManager) {
 		this.jhiLanguageService.setLocations(['programme', 'status']);
 	}
 
@@ -84,7 +84,7 @@ export class ProgrammeTisProgrammesPopupComponent implements OnInit, OnDestroy {
 	routeSub: any;
 
 	constructor(private route: ActivatedRoute,
-	            private programmePopupService: ProgrammeTisProgrammesPopupService) {
+				private programmePopupService: ProgrammeTisProgrammesPopupService) {
 	}
 
 	ngOnInit() {

@@ -16,8 +16,8 @@ export class JhiMetricsMonitoringComponent implements OnInit {
 	JCACHE_KEY: string;
 
 	constructor(private jhiLanguageService: JhiLanguageService,
-	            private modalService: NgbModal,
-	            private metricsService: JhiMetricsService) {
+				private modalService: NgbModal,
+				private metricsService: JhiMetricsService) {
 		this.JCACHE_KEY = 'jcache.statistics';
 		this.jhiLanguageService.setLocations(['metrics']);
 	}

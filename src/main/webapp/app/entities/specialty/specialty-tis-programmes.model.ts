@@ -16,11 +16,11 @@ const enum SpecialtyType {
 ;
 export class SpecialtyTisProgrammes {
 	constructor(public id?: number,
-	            public status?: Status,
-	            public college?: string,
-	            public nhsSpecialtyCode?: string,
-	            public specialtyType?: SpecialtyType,
-	            public curriculumId?: number,
-	            public specialtyGroupId?: number,) {
+				public status?: Status,
+				public college?: string,
+				public nhsSpecialtyCode?: string,
+				public specialtyType?: SpecialtyType,
+				public curriculumId?: number,
+				public specialtyGroupId?: number,) {
 	}
 }

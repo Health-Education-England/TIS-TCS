@@ -8,8 +8,8 @@ export class SpecialtyTisProgrammesPopupService {
 	private isOpen = false;
 
 	constructor(private modalService: NgbModal,
-	            private router: Router,
-	            private specialtyService: SpecialtyTisProgrammesService) {
+				private router: Router,
+				private specialtyService: SpecialtyTisProgrammesService) {
 	}
 
 	open(component: Component, id?: number | any): NgbModalRef {

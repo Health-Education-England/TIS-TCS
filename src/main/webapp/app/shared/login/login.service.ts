@@ -7,8 +7,8 @@ import {AuthServerProvider} from "../auth/auth-jwt.service";
 export class LoginService {
 
 	constructor(private languageService: JhiLanguageService,
-	            private principal: Principal,
-	            private authServerProvider: AuthServerProvider) {
+				private principal: Principal,
+				private authServerProvider: AuthServerProvider) {
 	}
 
 	login(credentials, callback?) {

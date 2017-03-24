@@ -1,10 +1,10 @@
 // Add percentage of white to a color
-@function tint($color, $percent){
+@function tint($color, $percent) {
   @return mix(white, $color, $percent);
 }
 
 // Add percentage of black to a color
-@function shade($color, $percent){
+@function shade($color, $percent) {
   @return mix(black, $color, $percent);
 }
 
@@ -72,13 +72,13 @@ $active-grad-start: #4f90c7;
 $active-grad-end: #1f71b8;
 $table-row-hover: #b9cfe1;
 
-$nhs-color-map:(
-	nhs-blue: $nhs-blue,
-	nhs-red: $nhs-red,
-	nhs-orange: $nhs-orange,
-	nhs-lb: $nhs-lb,
-	nhs-ruby: $nhs-ruby,
-	nhs-green: $nhs-green,
-	nhs-dark-grey: $nhs-dark-grey
+$nhs-color-map: (
+        nhs-blue: $nhs-blue,
+        nhs-red: $nhs-red,
+        nhs-orange: $nhs-orange,
+        nhs-lb: $nhs-lb,
+        nhs-ruby: $nhs-ruby,
+        nhs-green: $nhs-green,
+        nhs-dark-grey: $nhs-dark-grey
 );
-$nhs-color-names:nhs-blue nhs-red nhs-orange nhs-lb nhs-ruby nhs-green nhs-dark-grey;
+$nhs-color-names: nhs-blue nhs-red nhs-orange nhs-lb nhs-ruby nhs-green nhs-dark-grey;

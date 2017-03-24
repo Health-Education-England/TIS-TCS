@@ -14,8 +14,8 @@ export class ProgrammeMembershipTisProgrammesDetailComponent implements OnInit, 
 	private subscription: any;
 
 	constructor(private jhiLanguageService: JhiLanguageService,
-	            private programmeMembershipService: ProgrammeMembershipTisProgrammesService,
-	            private route: ActivatedRoute) {
+				private programmeMembershipService: ProgrammeMembershipTisProgrammesService,
+				private route: ActivatedRoute) {
 		this.jhiLanguageService.setLocations(['programmeMembership', 'programmeMembershipType']);
 	}
 

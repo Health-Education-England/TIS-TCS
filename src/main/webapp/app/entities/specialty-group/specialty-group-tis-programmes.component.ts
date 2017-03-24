@@ -16,10 +16,10 @@ export class SpecialtyGroupTisProgrammesComponent implements OnInit, OnDestroy {
 	eventSubscriber: Subscription;
 
 	constructor(private jhiLanguageService: JhiLanguageService,
-	            private specialtyGroupService: SpecialtyGroupTisProgrammesService,
-	            private alertService: AlertService,
-	            private eventManager: EventManager,
-	            private principal: Principal) {
+				private specialtyGroupService: SpecialtyGroupTisProgrammesService,
+				private alertService: AlertService,
+				private eventManager: EventManager,
+				private principal: Principal) {
 		this.jhiLanguageService.setLocations(['specialtyGroup']);
 	}
 

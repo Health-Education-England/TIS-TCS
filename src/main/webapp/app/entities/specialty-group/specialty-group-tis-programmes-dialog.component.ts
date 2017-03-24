@@ -17,10 +17,10 @@ export class SpecialtyGroupTisProgrammesDialogComponent implements OnInit {
 	isSaving: boolean;
 
 	constructor(public activeModal: NgbActiveModal,
-	            private jhiLanguageService: JhiLanguageService,
-	            private alertService: AlertService,
-	            private specialtyGroupService: SpecialtyGroupTisProgrammesService,
-	            private eventManager: EventManager) {
+				private jhiLanguageService: JhiLanguageService,
+				private alertService: AlertService,
+				private specialtyGroupService: SpecialtyGroupTisProgrammesService,
+				private eventManager: EventManager) {
 		this.jhiLanguageService.setLocations(['specialtyGroup']);
 	}
 
@@ -72,7 +72,7 @@ export class SpecialtyGroupTisProgrammesPopupComponent implements OnInit, OnDest
 	routeSub: any;
 
 	constructor(private route: ActivatedRoute,
-	            private specialtyGroupPopupService: SpecialtyGroupTisProgrammesPopupService) {
+				private specialtyGroupPopupService: SpecialtyGroupTisProgrammesPopupService) {
 	}
 
 	ngOnInit() {

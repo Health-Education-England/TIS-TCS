@@ -14,8 +14,8 @@ export class CurriculumTisProgrammesDetailComponent implements OnInit, OnDestroy
 	private subscription: any;
 
 	constructor(private jhiLanguageService: JhiLanguageService,
-	            private curriculumService: CurriculumTisProgrammesService,
-	            private route: ActivatedRoute) {
+				private curriculumService: CurriculumTisProgrammesService,
+				private route: ActivatedRoute) {
 		this.jhiLanguageService.setLocations(['curriculum', 'curriculumSubType', 'assessmentType']);
 	}
 

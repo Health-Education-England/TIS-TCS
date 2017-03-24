@@ -14,8 +14,8 @@ export class SpecialtyGroupTisProgrammesDetailComponent implements OnInit, OnDes
 	private subscription: any;
 
 	constructor(private jhiLanguageService: JhiLanguageService,
-	            private specialtyGroupService: SpecialtyGroupTisProgrammesService,
-	            private route: ActivatedRoute) {
+				private specialtyGroupService: SpecialtyGroupTisProgrammesService,
+				private route: ActivatedRoute) {
 		this.jhiLanguageService.setLocations(['specialtyGroup']);
 	}
 

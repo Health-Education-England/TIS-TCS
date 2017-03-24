@@ -20,11 +20,11 @@ export class GradeTisProgrammesDialogComponent implements OnInit {
 	curricula: CurriculumTisProgrammes[];
 
 	constructor(public activeModal: NgbActiveModal,
-	            private jhiLanguageService: JhiLanguageService,
-	            private alertService: AlertService,
-	            private gradeService: GradeTisProgrammesService,
-	            private curriculumService: CurriculumTisProgrammesService,
-	            private eventManager: EventManager) {
+				private jhiLanguageService: JhiLanguageService,
+				private alertService: AlertService,
+				private gradeService: GradeTisProgrammesService,
+				private curriculumService: CurriculumTisProgrammesService,
+				private eventManager: EventManager) {
 		this.jhiLanguageService.setLocations(['grade']);
 	}
 
@@ -95,7 +95,7 @@ export class GradeTisProgrammesPopupComponent implements OnInit, OnDestroy {
 	routeSub: any;
 
 	constructor(private route: ActivatedRoute,
-	            private gradePopupService: GradeTisProgrammesPopupService) {
+				private gradePopupService: GradeTisProgrammesPopupService) {
 	}
 
 	ngOnInit() {

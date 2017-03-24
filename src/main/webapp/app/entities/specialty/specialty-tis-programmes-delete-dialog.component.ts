@@ -15,9 +15,9 @@ export class SpecialtyTisProgrammesDeleteDialogComponent {
 	specialty: SpecialtyTisProgrammes;
 
 	constructor(private jhiLanguageService: JhiLanguageService,
-	            private specialtyService: SpecialtyTisProgrammesService,
-	            public activeModal: NgbActiveModal,
-	            private eventManager: EventManager) {
+				private specialtyService: SpecialtyTisProgrammesService,
+				public activeModal: NgbActiveModal,
+				private eventManager: EventManager) {
 		this.jhiLanguageService.setLocations(['specialty', 'status', 'specialtyType']);
 	}
 
@@ -46,7 +46,7 @@ export class SpecialtyTisProgrammesDeletePopupComponent implements OnInit, OnDes
 	routeSub: any;
 
 	constructor(private route: ActivatedRoute,
-	            private specialtyPopupService: SpecialtyTisProgrammesPopupService) {
+				private specialtyPopupService: SpecialtyTisProgrammesPopupService) {
 	}
 
 	ngOnInit() {

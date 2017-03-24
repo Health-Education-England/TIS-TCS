@@ -26,13 +26,13 @@ export class CurriculumTisProgrammesDialogComponent implements OnInit {
 	specialties: SpecialtyTisProgrammes[];
 
 	constructor(public activeModal: NgbActiveModal,
-	            private jhiLanguageService: JhiLanguageService,
-	            private alertService: AlertService,
-	            private curriculumService: CurriculumTisProgrammesService,
-	            private programmeMembershipService: ProgrammeMembershipTisProgrammesService,
-	            private gradeService: GradeTisProgrammesService,
-	            private specialtyService: SpecialtyTisProgrammesService,
-	            private eventManager: EventManager) {
+				private jhiLanguageService: JhiLanguageService,
+				private alertService: AlertService,
+				private curriculumService: CurriculumTisProgrammesService,
+				private programmeMembershipService: ProgrammeMembershipTisProgrammesService,
+				private gradeService: GradeTisProgrammesService,
+				private specialtyService: SpecialtyTisProgrammesService,
+				private eventManager: EventManager) {
 		this.jhiLanguageService.setLocations(['curriculum', 'curriculumSubType', 'assessmentType']);
 	}
 
@@ -119,7 +119,7 @@ export class CurriculumTisProgrammesPopupComponent implements OnInit, OnDestroy 
 	routeSub: any;
 
 	constructor(private route: ActivatedRoute,
-	            private curriculumPopupService: CurriculumTisProgrammesPopupService) {
+				private curriculumPopupService: CurriculumTisProgrammesPopupService) {
 	}
 
 	ngOnInit() {

@@ -20,11 +20,11 @@ export class TrainingNumberTisProgrammesDialogComponent implements OnInit {
 	programmememberships: ProgrammeMembershipTisProgrammes[];
 
 	constructor(public activeModal: NgbActiveModal,
-	            private jhiLanguageService: JhiLanguageService,
-	            private alertService: AlertService,
-	            private trainingNumberService: TrainingNumberTisProgrammesService,
-	            private programmeMembershipService: ProgrammeMembershipTisProgrammesService,
-	            private eventManager: EventManager) {
+				private jhiLanguageService: JhiLanguageService,
+				private alertService: AlertService,
+				private trainingNumberService: TrainingNumberTisProgrammesService,
+				private programmeMembershipService: ProgrammeMembershipTisProgrammesService,
+				private eventManager: EventManager) {
 		this.jhiLanguageService.setLocations(['trainingNumber', 'trainingNumberType']);
 	}
 
@@ -84,7 +84,7 @@ export class TrainingNumberTisProgrammesPopupComponent implements OnInit, OnDest
 	routeSub: any;
 
 	constructor(private route: ActivatedRoute,
-	            private trainingNumberPopupService: TrainingNumberTisProgrammesPopupService) {
+				private trainingNumberPopupService: TrainingNumberTisProgrammesPopupService) {
 	}
 
 	ngOnInit() {

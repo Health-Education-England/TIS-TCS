@@ -8,8 +8,8 @@ export class GradeTisProgrammesPopupService {
 	private isOpen = false;
 
 	constructor(private modalService: NgbModal,
-	            private router: Router,
-	            private gradeService: GradeTisProgrammesService) {
+				private router: Router,
+				private gradeService: GradeTisProgrammesService) {
 	}
 
 	open(component: Component, id?: number | any): NgbModalRef {

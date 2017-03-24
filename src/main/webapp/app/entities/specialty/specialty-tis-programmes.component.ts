@@ -30,15 +30,15 @@ export class SpecialtyTisProgrammesComponent implements OnInit, OnDestroy {
 	reverse: any;
 
 	constructor(private jhiLanguageService: JhiLanguageService,
-	            private specialtyService: SpecialtyTisProgrammesService,
-	            private parseLinks: ParseLinks,
-	            private alertService: AlertService,
-	            private principal: Principal,
-	            private activatedRoute: ActivatedRoute,
-	            private router: Router,
-	            private eventManager: EventManager,
-	            private paginationUtil: PaginationUtil,
-	            private paginationConfig: PaginationConfig) {
+				private specialtyService: SpecialtyTisProgrammesService,
+				private parseLinks: ParseLinks,
+				private alertService: AlertService,
+				private principal: Principal,
+				private activatedRoute: ActivatedRoute,
+				private router: Router,
+				private eventManager: EventManager,
+				private paginationUtil: PaginationUtil,
+				private paginationConfig: PaginationConfig) {
 		this.itemsPerPage = ITEMS_PER_PAGE;
 		this.routeData = this.activatedRoute.data.subscribe(data => {
 			this.page = data['pagingParams'].page;

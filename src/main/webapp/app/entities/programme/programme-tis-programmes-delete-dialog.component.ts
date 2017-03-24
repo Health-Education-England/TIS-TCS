@@ -15,9 +15,9 @@ export class ProgrammeTisProgrammesDeleteDialogComponent {
 	programme: ProgrammeTisProgrammes;
 
 	constructor(private jhiLanguageService: JhiLanguageService,
-	            private programmeService: ProgrammeTisProgrammesService,
-	            public activeModal: NgbActiveModal,
-	            private eventManager: EventManager) {
+				private programmeService: ProgrammeTisProgrammesService,
+				public activeModal: NgbActiveModal,
+				private eventManager: EventManager) {
 		this.jhiLanguageService.setLocations(['programme', 'status']);
 	}
 
@@ -46,7 +46,7 @@ export class ProgrammeTisProgrammesDeletePopupComponent implements OnInit, OnDes
 	routeSub: any;
 
 	constructor(private route: ActivatedRoute,
-	            private programmePopupService: ProgrammeTisProgrammesPopupService) {
+				private programmePopupService: ProgrammeTisProgrammesPopupService) {
 	}
 
 	ngOnInit() {

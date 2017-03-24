@@ -23,12 +23,12 @@ export class NavbarComponent implements OnInit {
 	version: string;
 
 	constructor(private loginService: LoginService,
-	            private languageHelper: JhiLanguageHelper,
-	            private languageService: JhiLanguageService,
-	            private principal: Principal,
-	            private loginModalService: LoginModalService,
-	            private profileService: ProfileService,
-	            private router: Router) {
+				private languageHelper: JhiLanguageHelper,
+				private languageService: JhiLanguageService,
+				private principal: Principal,
+				private loginModalService: LoginModalService,
+				private profileService: ProfileService,
+				private router: Router) {
 		this.version = DEBUG_INFO_ENABLED ? 'v' + VERSION : '';
 		this.isNavbarCollapsed = true;
 		this.languageService.addLocation('home');

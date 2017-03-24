@@ -14,8 +14,8 @@ export class TrainingNumberTisProgrammesDetailComponent implements OnInit, OnDes
 	private subscription: any;
 
 	constructor(private jhiLanguageService: JhiLanguageService,
-	            private trainingNumberService: TrainingNumberTisProgrammesService,
-	            private route: ActivatedRoute) {
+				private trainingNumberService: TrainingNumberTisProgrammesService,
+				private route: ActivatedRoute) {
 		this.jhiLanguageService.setLocations(['trainingNumber', 'trainingNumberType']);
 	}
 

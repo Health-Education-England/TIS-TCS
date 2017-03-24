@@ -23,12 +23,12 @@ export class SpecialtyTisProgrammesDialogComponent implements OnInit {
 	specialtygroups: SpecialtyGroupTisProgrammes[];
 
 	constructor(public activeModal: NgbActiveModal,
-	            private jhiLanguageService: JhiLanguageService,
-	            private alertService: AlertService,
-	            private specialtyService: SpecialtyTisProgrammesService,
-	            private curriculumService: CurriculumTisProgrammesService,
-	            private specialtyGroupService: SpecialtyGroupTisProgrammesService,
-	            private eventManager: EventManager) {
+				private jhiLanguageService: JhiLanguageService,
+				private alertService: AlertService,
+				private specialtyService: SpecialtyTisProgrammesService,
+				private curriculumService: CurriculumTisProgrammesService,
+				private specialtyGroupService: SpecialtyGroupTisProgrammesService,
+				private eventManager: EventManager) {
 		this.jhiLanguageService.setLocations(['specialty', 'status', 'specialtyType']);
 	}
 
@@ -96,7 +96,7 @@ export class SpecialtyTisProgrammesPopupComponent implements OnInit, OnDestroy {
 	routeSub: any;
 
 	constructor(private route: ActivatedRoute,
-	            private specialtyPopupService: SpecialtyTisProgrammesPopupService) {
+				private specialtyPopupService: SpecialtyTisProgrammesPopupService) {
 	}
 
 	ngOnInit() {

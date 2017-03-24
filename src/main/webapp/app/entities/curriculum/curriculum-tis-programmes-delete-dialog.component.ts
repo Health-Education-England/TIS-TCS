@@ -15,9 +15,9 @@ export class CurriculumTisProgrammesDeleteDialogComponent {
 	curriculum: CurriculumTisProgrammes;
 
 	constructor(private jhiLanguageService: JhiLanguageService,
-	            private curriculumService: CurriculumTisProgrammesService,
-	            public activeModal: NgbActiveModal,
-	            private eventManager: EventManager) {
+				private curriculumService: CurriculumTisProgrammesService,
+				public activeModal: NgbActiveModal,
+				private eventManager: EventManager) {
 		this.jhiLanguageService.setLocations(['curriculum', 'curriculumSubType', 'assessmentType']);
 	}
 
@@ -46,7 +46,7 @@ export class CurriculumTisProgrammesDeletePopupComponent implements OnInit, OnDe
 	routeSub: any;
 
 	constructor(private route: ActivatedRoute,
-	            private curriculumPopupService: CurriculumTisProgrammesPopupService) {
+				private curriculumPopupService: CurriculumTisProgrammesPopupService) {
 	}
 
 	ngOnInit() {

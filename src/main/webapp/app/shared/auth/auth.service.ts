@@ -8,9 +8,9 @@ import {StateStorageService} from "./state-storage.service";
 export class AuthService {
 
 	constructor(private principal: Principal,
-	            private stateStorageService: StateStorageService,
-	            private loginModalService: LoginModalService,
-	            private router: Router) {
+				private stateStorageService: StateStorageService,
+				private loginModalService: LoginModalService,
+				private router: Router) {
 	}
 
 	authorize(force) {

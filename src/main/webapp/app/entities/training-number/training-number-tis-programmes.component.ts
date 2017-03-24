@@ -16,10 +16,10 @@ export class TrainingNumberTisProgrammesComponent implements OnInit, OnDestroy {
 	eventSubscriber: Subscription;
 
 	constructor(private jhiLanguageService: JhiLanguageService,
-	            private trainingNumberService: TrainingNumberTisProgrammesService,
-	            private alertService: AlertService,
-	            private eventManager: EventManager,
-	            private principal: Principal) {
+				private trainingNumberService: TrainingNumberTisProgrammesService,
+				private alertService: AlertService,
+				private eventManager: EventManager,
+				private principal: Principal) {
 		this.jhiLanguageService.setLocations(['trainingNumber', 'trainingNumberType']);
 	}
 

@@ -15,9 +15,9 @@ export class GradeTisProgrammesDeleteDialogComponent {
 	grade: GradeTisProgrammes;
 
 	constructor(private jhiLanguageService: JhiLanguageService,
-	            private gradeService: GradeTisProgrammesService,
-	            public activeModal: NgbActiveModal,
-	            private eventManager: EventManager) {
+				private gradeService: GradeTisProgrammesService,
+				public activeModal: NgbActiveModal,
+				private eventManager: EventManager) {
 		this.jhiLanguageService.setLocations(['grade']);
 	}
 
@@ -46,7 +46,7 @@ export class GradeTisProgrammesDeletePopupComponent implements OnInit, OnDestroy
 	routeSub: any;
 
 	constructor(private route: ActivatedRoute,
-	            private gradePopupService: GradeTisProgrammesPopupService) {
+				private gradePopupService: GradeTisProgrammesPopupService) {
 	}
 
 	ngOnInit() {

@@ -13,8 +13,8 @@ export class JhiHealthCheckComponent implements OnInit {
 	updatingHealth: boolean;
 
 	constructor(private jhiLanguageService: JhiLanguageService,
-	            private modalService: NgbModal,
-	            private healthService: JhiHealthService) {
+				private modalService: NgbModal,
+				private healthService: JhiHealthService) {
 		this.jhiLanguageService.setLocations(['health']);
 
 	}

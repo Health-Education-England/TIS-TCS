@@ -14,18 +14,18 @@ export class User {
 	public password?: string;
 
 	constructor(id?: any,
-	            login?: string,
-	            firstName?: string,
-	            lastName?: string,
-	            email?: string,
-	            activated?: Boolean,
-	            langKey?: string,
-	            authorities?: any[],
-	            createdBy?: string,
-	            createdDate?: Date,
-	            lastModifiedBy?: string,
-	            lastModifiedDate?: Date,
-	            password?: string) {
+				login?: string,
+				firstName?: string,
+				lastName?: string,
+				email?: string,
+				activated?: Boolean,
+				langKey?: string,
+				authorities?: any[],
+				createdBy?: string,
+				createdDate?: Date,
+				lastModifiedBy?: string,
+				lastModifiedDate?: Date,
+				password?: string) {
 		this.id = id ? id : null;
 		this.login = login ? login : null;
 		this.firstName = firstName ? firstName : null;

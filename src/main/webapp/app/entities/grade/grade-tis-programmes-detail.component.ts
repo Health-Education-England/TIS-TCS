@@ -14,8 +14,8 @@ export class GradeTisProgrammesDetailComponent implements OnInit, OnDestroy {
 	private subscription: any;
 
 	constructor(private jhiLanguageService: JhiLanguageService,
-	            private gradeService: GradeTisProgrammesService,
-	            private route: ActivatedRoute) {
+				private gradeService: GradeTisProgrammesService,
+				private route: ActivatedRoute) {
 		this.jhiLanguageService.setLocations(['grade']);
 	}
 

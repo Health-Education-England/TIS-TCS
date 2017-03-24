@@ -8,8 +8,8 @@ export class CurriculumTisProgrammesPopupService {
 	private isOpen = false;
 
 	constructor(private modalService: NgbModal,
-	            private router: Router,
-	            private curriculumService: CurriculumTisProgrammesService) {
+				private router: Router,
+				private curriculumService: CurriculumTisProgrammesService) {
 	}
 
 	open(component: Component, id?: number | any): NgbModalRef {

@@ -16,10 +16,10 @@ export class GradeTisProgrammesComponent implements OnInit, OnDestroy {
 	eventSubscriber: Subscription;
 
 	constructor(private jhiLanguageService: JhiLanguageService,
-	            private gradeService: GradeTisProgrammesService,
-	            private alertService: AlertService,
-	            private eventManager: EventManager,
-	            private principal: Principal) {
+				private gradeService: GradeTisProgrammesService,
+				private alertService: AlertService,
+				private eventManager: EventManager,
+				private principal: Principal) {
 		this.jhiLanguageService.setLocations(['grade']);
 	}
 

@@ -15,9 +15,9 @@ export class ProgrammeMembershipTisProgrammesDeleteDialogComponent {
 	programmeMembership: ProgrammeMembershipTisProgrammes;
 
 	constructor(private jhiLanguageService: JhiLanguageService,
-	            private programmeMembershipService: ProgrammeMembershipTisProgrammesService,
-	            public activeModal: NgbActiveModal,
-	            private eventManager: EventManager) {
+				private programmeMembershipService: ProgrammeMembershipTisProgrammesService,
+				public activeModal: NgbActiveModal,
+				private eventManager: EventManager) {
 		this.jhiLanguageService.setLocations(['programmeMembership', 'programmeMembershipType']);
 	}
 
@@ -46,7 +46,7 @@ export class ProgrammeMembershipTisProgrammesDeletePopupComponent implements OnI
 	routeSub: any;
 
 	constructor(private route: ActivatedRoute,
-	            private programmeMembershipPopupService: ProgrammeMembershipTisProgrammesPopupService) {
+				private programmeMembershipPopupService: ProgrammeMembershipTisProgrammesPopupService) {
 	}
 
 	ngOnInit() {

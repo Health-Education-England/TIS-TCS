@@ -16,9 +16,9 @@ export class HomeComponent implements OnInit {
 	modalRef: NgbModalRef;
 
 	constructor(private jhiLanguageService: JhiLanguageService,
-	            private principal: Principal,
-	            private loginModalService: LoginModalService,
-	            private eventManager: EventManager) {
+				private principal: Principal,
+				private loginModalService: LoginModalService,
+				private eventManager: EventManager) {
 		this.jhiLanguageService.setLocations(['home']);
 	}
 

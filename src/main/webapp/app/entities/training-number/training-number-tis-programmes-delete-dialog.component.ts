@@ -15,9 +15,9 @@ export class TrainingNumberTisProgrammesDeleteDialogComponent {
 	trainingNumber: TrainingNumberTisProgrammes;
 
 	constructor(private jhiLanguageService: JhiLanguageService,
-	            private trainingNumberService: TrainingNumberTisProgrammesService,
-	            public activeModal: NgbActiveModal,
-	            private eventManager: EventManager) {
+				private trainingNumberService: TrainingNumberTisProgrammesService,
+				public activeModal: NgbActiveModal,
+				private eventManager: EventManager) {
 		this.jhiLanguageService.setLocations(['trainingNumber', 'trainingNumberType']);
 	}
 
@@ -46,7 +46,7 @@ export class TrainingNumberTisProgrammesDeletePopupComponent implements OnInit, 
 	routeSub: any;
 
 	constructor(private route: ActivatedRoute,
-	            private trainingNumberPopupService: TrainingNumberTisProgrammesPopupService) {
+				private trainingNumberPopupService: TrainingNumberTisProgrammesPopupService) {
 	}
 
 	ngOnInit() {
