@@ -2,22 +2,22 @@
 
 	<div class="modal-header">
 		<h4 class="modal-title" id="myProgrammeMembershipLabel"
-		    jhiTranslate="tcsApp.programmeMembership.home.createOrEditLabel">Create or edit a Programme Membership</h4>
+			jhiTranslate="tcsApp.programmeMembership.home.createOrEditLabel">Create or edit a Programme Membership</h4>
 		<button type="button" class="close" data-dismiss="modal" aria-hidden="true"
-		        (click)="clear()">&times;</button>
+				(click)="clear()">&times;</button>
 	</div>
 	<div class="modal-body">
 		<jhi-alert-error></jhi-alert-error>
 		<div class="form-group" [hidden]="!programmeMembership.id">
 			<label for="id" jhiTranslate="global.field.id">ID</label>
 			<input type="text" class="form-control" id="id" name="id"
-			       [(ngModel)]="programmeMembership.id" readonly/>
+				   [(ngModel)]="programmeMembership.id" readonly/>
 		</div>
 		<div class="form-group">
 			<label class="form-control-label" jhiTranslate="tcsApp.programmeMembership.programmeMembershipType"
-			       for="field_programmeMembershipType">Programme Membership Type</label>
+				   for="field_programmeMembershipType">Programme Membership Type</label>
 			<select class="form-control" name="programmeMembershipType"
-			        [(ngModel)]="programmeMembership.programmeMembershipType" id="field_programmeMembershipType">
+					[(ngModel)]="programmeMembership.programmeMembershipType" id="field_programmeMembershipType">
 				<option value="SUBSTANTIVE" jhiTranslate="tcsApp.ProgrammeMembershipType.SUBSTANTIVE">SUBSTANTIVE
 				</option>
 				<option value="LAT" jhiTranslate="tcsApp.ProgrammeMembershipType.LAT">LAT</option>
@@ -29,111 +29,111 @@
 		<div class="form-group">
 			<label class="form-control-label" jhiTranslate="tcsApp.programmeMembership.rotation" for="field_rotation">Rotation</label>
 			<input type="text" class="form-control" name="rotation" id="field_rotation"
-			       [(ngModel)]="programmeMembership.rotation"
+				   [(ngModel)]="programmeMembership.rotation"
 			/>
 		</div>
 		<div class="form-group">
 			<label class="form-control-label" jhiTranslate="tcsApp.programmeMembership.curriculumStartDate"
-			       for="field_curriculumStartDate">Curriculum Start Date</label>
+				   for="field_curriculumStartDate">Curriculum Start Date</label>
 			<div class="input-group">
 				<input id="field_curriculumStartDate" type="text" class="form-control" name="curriculumStartDate"
-				       ngbDatepicker #curriculumStartDateDp="ngbDatepicker"
-				       [(ngModel)]="programmeMembership.curriculumStartDate"
+					   ngbDatepicker #curriculumStartDateDp="ngbDatepicker"
+					   [(ngModel)]="programmeMembership.curriculumStartDate"
 				/>
 				<span class="input-group-btn">
                     <button type="button" class="btn btn-default" (click)="curriculumStartDateDp.toggle()"><i
-		                    class="fa fa-calendar"></i></button>
+							class="fa fa-calendar"></i></button>
                 </span>
 			</div>
 		</div>
 		<div class="form-group">
 			<label class="form-control-label" jhiTranslate="tcsApp.programmeMembership.curriculumEndDate"
-			       for="field_curriculumEndDate">Curriculum End Date</label>
+				   for="field_curriculumEndDate">Curriculum End Date</label>
 			<div class="input-group">
 				<input id="field_curriculumEndDate" type="text" class="form-control" name="curriculumEndDate"
-				       ngbDatepicker #curriculumEndDateDp="ngbDatepicker"
-				       [(ngModel)]="programmeMembership.curriculumEndDate"
+					   ngbDatepicker #curriculumEndDateDp="ngbDatepicker"
+					   [(ngModel)]="programmeMembership.curriculumEndDate"
 				/>
 				<span class="input-group-btn">
                     <button type="button" class="btn btn-default" (click)="curriculumEndDateDp.toggle()"><i
-		                    class="fa fa-calendar"></i></button>
+							class="fa fa-calendar"></i></button>
                 </span>
 			</div>
 		</div>
 		<div class="form-group">
 			<label class="form-control-label" jhiTranslate="tcsApp.programmeMembership.periodOfGrace"
-			       for="field_periodOfGrace">Period Of Grace</label>
+				   for="field_periodOfGrace">Period Of Grace</label>
 			<input type="number" class="form-control" name="periodOfGrace" id="field_periodOfGrace"
-			       [(ngModel)]="programmeMembership.periodOfGrace"
+				   [(ngModel)]="programmeMembership.periodOfGrace"
 			/>
 		</div>
 		<div class="form-group">
 			<label class="form-control-label" jhiTranslate="tcsApp.programmeMembership.programmeStartDate"
-			       for="field_programmeStartDate">Programme Start Date</label>
+				   for="field_programmeStartDate">Programme Start Date</label>
 			<div class="input-group">
 				<input id="field_programmeStartDate" type="text" class="form-control" name="programmeStartDate"
-				       ngbDatepicker #programmeStartDateDp="ngbDatepicker"
-				       [(ngModel)]="programmeMembership.programmeStartDate"
+					   ngbDatepicker #programmeStartDateDp="ngbDatepicker"
+					   [(ngModel)]="programmeMembership.programmeStartDate"
 				/>
 				<span class="input-group-btn">
                     <button type="button" class="btn btn-default" (click)="programmeStartDateDp.toggle()"><i
-		                    class="fa fa-calendar"></i></button>
+							class="fa fa-calendar"></i></button>
                 </span>
 			</div>
 		</div>
 		<div class="form-group">
 			<label class="form-control-label" jhiTranslate="tcsApp.programmeMembership.curriculumCompletionDate"
-			       for="field_curriculumCompletionDate">Curriculum Completion Date</label>
+				   for="field_curriculumCompletionDate">Curriculum Completion Date</label>
 			<div class="input-group">
 				<input id="field_curriculumCompletionDate" type="text" class="form-control"
-				       name="curriculumCompletionDate" ngbDatepicker #curriculumCompletionDateDp="ngbDatepicker"
-				       [(ngModel)]="programmeMembership.curriculumCompletionDate"
+					   name="curriculumCompletionDate" ngbDatepicker #curriculumCompletionDateDp="ngbDatepicker"
+					   [(ngModel)]="programmeMembership.curriculumCompletionDate"
 				/>
 				<span class="input-group-btn">
                     <button type="button" class="btn btn-default" (click)="curriculumCompletionDateDp.toggle()"><i
-		                    class="fa fa-calendar"></i></button>
+							class="fa fa-calendar"></i></button>
                 </span>
 			</div>
 		</div>
 		<div class="form-group">
 			<label class="form-control-label" jhiTranslate="tcsApp.programmeMembership.programmeEndDate"
-			       for="field_programmeEndDate">Programme End Date</label>
+				   for="field_programmeEndDate">Programme End Date</label>
 			<div class="input-group">
 				<input id="field_programmeEndDate" type="text" class="form-control" name="programmeEndDate"
-				       ngbDatepicker #programmeEndDateDp="ngbDatepicker"
-				       [(ngModel)]="programmeMembership.programmeEndDate"
+					   ngbDatepicker #programmeEndDateDp="ngbDatepicker"
+					   [(ngModel)]="programmeMembership.programmeEndDate"
 				/>
 				<span class="input-group-btn">
                     <button type="button" class="btn btn-default" (click)="programmeEndDateDp.toggle()"><i
-		                    class="fa fa-calendar"></i></button>
+							class="fa fa-calendar"></i></button>
                 </span>
 			</div>
 		</div>
 		<div class="form-group">
 			<label class="form-control-label" jhiTranslate="tcsApp.programmeMembership.leavingDestination"
-			       for="field_leavingDestination">Leaving Destination</label>
+				   for="field_leavingDestination">Leaving Destination</label>
 			<input type="text" class="form-control" name="leavingDestination" id="field_leavingDestination"
-			       [(ngModel)]="programmeMembership.leavingDestination"
+				   [(ngModel)]="programmeMembership.leavingDestination"
 			/>
 		</div>
 
 		<div class="form-group">
 			<label jhiTranslate="tcsApp.programmeMembership.programme" for="field_programme">Programme</label>
 			<select class="form-control" id="field_programme" name="programme"
-			        [(ngModel)]="programmeMembership.programmeId">
+					[(ngModel)]="programmeMembership.programmeId">
 				<option [ngValue]="null"></option>
 				<option [ngValue]="programmeOption.id"
-				        *ngFor="let programmeOption of programmes; trackBy: trackProgrammeById">{{programmeOption.id}}
+						*ngFor="let programmeOption of programmes; trackBy: trackProgrammeById">{{programmeOption.id}}
 				</option>
 			</select>
 		</div>
 		<div class="form-group">
 			<label jhiTranslate="tcsApp.programmeMembership.curriculum" for="field_curriculum">Curriculum</label>
 			<select class="form-control" id="field_curriculum" name="curriculum"
-			        [(ngModel)]="programmeMembership.curriculumId">
+					[(ngModel)]="programmeMembership.curriculumId">
 				<option [ngValue]="null"></option>
 				<option [ngValue]="curriculumOption.id"
-				        *ngFor="let curriculumOption of curricula; trackBy: trackCurriculumById">{{curriculumOption.id}}
+						*ngFor="let curriculumOption of curricula; trackBy: trackCurriculumById">{{curriculumOption.id}}
 				</option>
 			</select>
 		</div>
@@ -141,10 +141,10 @@
 			<label jhiTranslate="tcsApp.programmeMembership.trainingNumber" for="field_trainingNumber">Training
 				Number</label>
 			<select class="form-control" id="field_trainingNumber" name="trainingNumber"
-			        [(ngModel)]="programmeMembership.trainingNumberId">
+					[(ngModel)]="programmeMembership.trainingNumberId">
 				<option [ngValue]="null"></option>
 				<option [ngValue]="trainingNumberOption.id"
-				        *ngFor="let trainingNumberOption of trainingnumbers; trackBy: trackTrainingNumberById">
+						*ngFor="let trainingNumberOption of trainingnumbers; trackBy: trackTrainingNumberById">
 					{{trainingNumberOption.id}}
 				</option>
 			</select>

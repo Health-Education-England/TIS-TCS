@@ -8,11 +8,11 @@ import {ErrorHandlerInterceptor} from "./errorhandler.interceptor";
 import {NotificationInterceptor} from "./notification.interceptor";
 
 export function interceptableFactory(backend: XHRBackend,
-									 defaultOptions: RequestOptions,
-									 localStorage: LocalStorageService,
-									 sessionStorage: SessionStorageService,
-									 injector: Injector,
-									 eventManager: EventManager) {
+									defaultOptions: RequestOptions,
+									localStorage: LocalStorageService,
+									sessionStorage: SessionStorageService,
+									injector: Injector,
+									eventManager: EventManager) {
 	return new InterceptableHttp(
 		backend,
 		defaultOptions,

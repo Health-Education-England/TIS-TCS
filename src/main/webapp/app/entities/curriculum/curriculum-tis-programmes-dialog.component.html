@@ -4,50 +4,50 @@
 		<h4 class="modal-title" id="myCurriculumLabel" jhiTranslate="tcsApp.curriculum.home.createOrEditLabel">Create or
 			edit a Curriculum</h4>
 		<button type="button" class="close" data-dismiss="modal" aria-hidden="true"
-		        (click)="clear()">&times;</button>
+				(click)="clear()">&times;</button>
 	</div>
 	<div class="modal-body">
 		<jhi-alert-error></jhi-alert-error>
 		<div class="form-group" [hidden]="!curriculum.id">
 			<label for="id" jhiTranslate="global.field.id">ID</label>
 			<input type="text" class="form-control" id="id" name="id"
-			       [(ngModel)]="curriculum.id" readonly/>
+					[(ngModel)]="curriculum.id" readonly/>
 		</div>
 		<div class="form-group">
 			<label class="form-control-label" jhiTranslate="tcsApp.curriculum.name" for="field_name">Name</label>
 			<input type="text" class="form-control" name="name" id="field_name"
-			       [(ngModel)]="curriculum.name"
+					[(ngModel)]="curriculum.name"
 			/>
 		</div>
 		<div class="form-group">
 			<label class="form-control-label" jhiTranslate="tcsApp.curriculum.start" for="field_start">Start</label>
 			<div class="input-group">
 				<input id="field_start" type="text" class="form-control" name="start" ngbDatepicker
-				       #startDp="ngbDatepicker" [(ngModel)]="curriculum.start"
+					#startDp="ngbDatepicker" [(ngModel)]="curriculum.start"
 				/>
 				<span class="input-group-btn">
-                    <button type="button" class="btn btn-default" (click)="startDp.toggle()"><i
-		                    class="fa fa-calendar"></i></button>
-                </span>
+					<button type="button" class="btn btn-default" (click)="startDp.toggle()"><i
+							class="fa fa-calendar"></i></button>
+				</span>
 			</div>
 		</div>
 		<div class="form-group">
 			<label class="form-control-label" jhiTranslate="tcsApp.curriculum.end" for="field_end">End</label>
 			<div class="input-group">
 				<input id="field_end" type="text" class="form-control" name="end" ngbDatepicker #endDp="ngbDatepicker"
-				       [(ngModel)]="curriculum.end"
+					[(ngModel)]="curriculum.end"
 				/>
 				<span class="input-group-btn">
-                    <button type="button" class="btn btn-default" (click)="endDp.toggle()"><i
-		                    class="fa fa-calendar"></i></button>
-                </span>
+					<button type="button" class="btn btn-default" (click)="endDp.toggle()"><i
+							class="fa fa-calendar"></i></button>
+				</span>
 			</div>
 		</div>
 		<div class="form-group">
 			<label class="form-control-label" jhiTranslate="tcsApp.curriculum.curriculumSubType"
-			       for="field_curriculumSubType">Curriculum Sub Type</label>
+					for="field_curriculumSubType">Curriculum Sub Type</label>
 			<select class="form-control" name="curriculumSubType" [(ngModel)]="curriculum.curriculumSubType"
-			        id="field_curriculumSubType">
+					id="field_curriculumSubType">
 				<option value="MEDICAL_CURRICULUM" jhiTranslate="tcsApp.CurriculumSubType.MEDICAL_CURRICULUM">
 					MEDICAL_CURRICULUM
 				</option>
@@ -73,10 +73,10 @@
 					CLINICAL_LECTURER
 				</option>
 				<option value="CLINICAL_TEACHING_FELLOW"
-				        jhiTranslate="tcsApp.CurriculumSubType.CLINICAL_TEACHING_FELLOW">CLINICAL_TEACHING_FELLOW
+						jhiTranslate="tcsApp.CurriculumSubType.CLINICAL_TEACHING_FELLOW">CLINICAL_TEACHING_FELLOW
 				</option>
 				<option value="CLINICAL_RESEARCH_FELLOW"
-				        jhiTranslate="tcsApp.CurriculumSubType.CLINICAL_RESEARCH_FELLOW">CLINICAL_RESEARCH_FELLOW
+						jhiTranslate="tcsApp.CurriculumSubType.CLINICAL_RESEARCH_FELLOW">CLINICAL_RESEARCH_FELLOW
 				</option>
 				<option value="ACFNIHR_FUNDING" jhiTranslate="tcsApp.CurriculumSubType.ACFNIHR_FUNDING">
 					ACFNIHR_FUNDING
@@ -91,9 +91,9 @@
 		</div>
 		<div class="form-group">
 			<label class="form-control-label" jhiTranslate="tcsApp.curriculum.assessmentType"
-			       for="field_assessmentType">Assessment Type</label>
+				   for="field_assessmentType">Assessment Type</label>
 			<select class="form-control" name="assessmentType" [(ngModel)]="curriculum.assessmentType"
-			        id="field_assessmentType">
+					id="field_assessmentType">
 				<option value="ARCP" jhiTranslate="tcsApp.AssessmentType.ARCP">ARCP</option>
 				<option value="RITA" jhiTranslate="tcsApp.AssessmentType.RITA">RITA</option>
 				<option value="ACADEMIC" jhiTranslate="tcsApp.AssessmentType.ACADEMIC">ACADEMIC</option>
@@ -101,17 +101,17 @@
 		</div>
 		<div class="form-group">
 			<label class="form-control-label" jhiTranslate="tcsApp.curriculum.doesThisCurriculumLeadToCct"
-			       for="field_doesThisCurriculumLeadToCct">Does This Curriculum Lead To Cct</label>
+				   for="field_doesThisCurriculumLeadToCct">Does This Curriculum Lead To Cct</label>
 			<input type="checkbox" class="form-control" name="doesThisCurriculumLeadToCct"
-			       id="field_doesThisCurriculumLeadToCct"
-			       [(ngModel)]="curriculum.doesThisCurriculumLeadToCct"
+				   id="field_doesThisCurriculumLeadToCct"
+				   [(ngModel)]="curriculum.doesThisCurriculumLeadToCct"
 			/>
 		</div>
 		<div class="form-group">
 			<label class="form-control-label" jhiTranslate="tcsApp.curriculum.periodOfGrace" for="field_periodOfGrace">Period
 				Of Grace</label>
 			<input type="number" class="form-control" name="periodOfGrace" id="field_periodOfGrace"
-			       [(ngModel)]="curriculum.periodOfGrace"
+					[(ngModel)]="curriculum.periodOfGrace"
 			/>
 		</div>
 
@@ -119,7 +119,7 @@
 			<label jhiTranslate="tcsApp.curriculum.grade" for="field_grade">Grade</label>
 			<select class="form-control" id="field_grade" multiple name="grade" [(ngModel)]="curriculum.grades">
 				<option [ngValue]="getSelected(curriculum.grades, gradeOption)"
-				        *ngFor="let gradeOption of grades; trackBy: trackGradeById">{{gradeOption.id}}
+						*ngFor="let gradeOption of grades; trackBy: trackGradeById">{{gradeOption.id}}
 				</option>
 			</select>
 		</div>
@@ -128,7 +128,7 @@
 			<select class="form-control" id="field_specialty" name="specialty" [(ngModel)]="curriculum.specialtyId">
 				<option [ngValue]="null"></option>
 				<option [ngValue]="specialtyOption.id"
-				        *ngFor="let specialtyOption of specialties; trackBy: trackSpecialtyById">{{specialtyOption.id}}
+						*ngFor="let specialtyOption of specialties; trackBy: trackSpecialtyById">{{specialtyOption.id}}
 				</option>
 			</select>
 		</div>

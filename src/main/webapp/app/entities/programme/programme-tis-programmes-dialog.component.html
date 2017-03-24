@@ -4,14 +4,14 @@
 		<h4 class="modal-title" id="myProgrammeLabel" jhiTranslate="tcsApp.programme.home.createOrEditLabel">Create or
 			edit a Programme</h4>
 		<button type="button" class="close" data-dismiss="modal" aria-hidden="true"
-		        (click)="clear()">&times;</button>
+				(click)="clear()">&times;</button>
 	</div>
 	<div class="modal-body">
 		<jhi-alert-error></jhi-alert-error>
 		<div class="form-group" [hidden]="!programme.id">
 			<label for="id" jhiTranslate="global.field.id">ID</label>
 			<input type="text" class="form-control" id="id" name="id"
-			       [(ngModel)]="programme.id" readonly/>
+				   [(ngModel)]="programme.id" readonly/>
 		</div>
 		<div class="form-group">
 			<label class="form-control-label" jhiTranslate="tcsApp.programme.status" for="field_status">Status</label>
@@ -23,30 +23,30 @@
 		</div>
 		<div class="form-group">
 			<label class="form-control-label" jhiTranslate="tcsApp.programme.managingDeanery"
-			       for="field_managingDeanery">Managing Deanery</label>
+				   for="field_managingDeanery">Managing Deanery</label>
 			<input type="text" class="form-control" name="managingDeanery" id="field_managingDeanery"
-			       [(ngModel)]="programme.managingDeanery"
+				   [(ngModel)]="programme.managingDeanery"
 			/>
 		</div>
 		<div class="form-group">
 			<label class="form-control-label" jhiTranslate="tcsApp.programme.programmeName" for="field_programmeName">Programme
 				Name</label>
 			<input type="text" class="form-control" name="programmeName" id="field_programmeName"
-			       [(ngModel)]="programme.programmeName"
+				   [(ngModel)]="programme.programmeName"
 			/>
 		</div>
 		<div class="form-group">
 			<label class="form-control-label" jhiTranslate="tcsApp.programme.programmeNumber"
-			       for="field_programmeNumber">Programme Number</label>
+				   for="field_programmeNumber">Programme Number</label>
 			<input type="text" class="form-control" name="programmeNumber" id="field_programmeNumber"
-			       [(ngModel)]="programme.programmeNumber"
+				   [(ngModel)]="programme.programmeNumber"
 			/>
 		</div>
 		<div class="form-group">
 			<label class="form-control-label" jhiTranslate="tcsApp.programme.leadProvider" for="field_leadProvider">Lead
 				Provider</label>
 			<input type="text" class="form-control" name="leadProvider" id="field_leadProvider"
-			       [(ngModel)]="programme.leadProvider"
+				   [(ngModel)]="programme.leadProvider"
 			/>
 		</div>
 

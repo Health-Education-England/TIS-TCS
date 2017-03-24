@@ -27,17 +27,17 @@ const enum AssessmentType {
 }
 ;
 export class CurriculumTisProgrammes {
-	constructor(public id?: number,
-				public name?: string,
-				public start?: any,
-				public end?: any,
-				public curriculumSubType?: CurriculumSubType,
-				public assessmentType?: AssessmentType,
-				public doesThisCurriculumLeadToCct?: boolean,
-				public periodOfGrace?: number,
-				public programmeMembershipId?: number,
-				public gradeId?: number,
-				public specialtyId?: number,) {
+	constructor(public id ?: number,
+				public name ?: string,
+				public start ?: any,
+				public end ?: any,
+				public curriculumSubType ?: CurriculumSubType,
+				public assessmentType ?: AssessmentType,
+				public doesThisCurriculumLeadToCct ?: boolean,
+				public periodOfGrace ?: number,
+				public programmeMembershipId ?: number,
+				public gradeId ?: number,
+				public specialtyId ?: number) {
 		this.doesThisCurriculumLeadToCct = false;
 	}
 }

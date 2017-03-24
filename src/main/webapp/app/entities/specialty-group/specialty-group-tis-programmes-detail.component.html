@@ -10,15 +10,15 @@
 	</dl>
 
 	<button type="submit"
-	        (click)="previousState()"
-	        class="btn btn-info">
+			(click)="previousState()"
+			class="btn btn-info">
 		<span class="fa fa-arrow-left"></span>&nbsp;<span jhiTranslate="entity.action.back"> Back</span>
 	</button>
 
 	<button type="button"
-	        [routerLink]="['/', { outlets: { popup: 'specialty-group-tis-programmes/'+ specialtyGroup.id + '/edit'} }]"
-	        replaceUrl="true"
-	        class="btn tis-btn-nhs-blue">
+			[routerLink]="['/', { outlets: { popup: 'specialty-group-tis-programmes/'+ specialtyGroup.id + '/edit'} }]"
+			replaceUrl="true"
+			class="btn tis-btn-nhs-blue">
 		<span class="fa fa-pencil"></span>&nbsp;<span jhiTranslate="entity.action.edit"> Edit</span>
 	</button>
 </div>

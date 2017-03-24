@@ -20,19 +20,19 @@
 			</td>
 			<td>
 				<button (click)="changeLevel(logger.name, 'TRACE')"
-				        [ngClass]="(logger.level=='TRACE') ? 'btn-danger' : 'btn-secondary'" class="btn btn-sm">TRACE
+						[ngClass]="(logger.level=='TRACE') ? 'btn-danger' : 'btn-secondary'" class="btn btn-sm">TRACE
 				</button>
 				<button (click)="changeLevel(logger.name, 'DEBUG')"
-				        [ngClass]="(logger.level=='DEBUG') ? 'btn-warning' : 'btn-secondary'" class="btn btn-sm">DEBUG
+						[ngClass]="(logger.level=='DEBUG') ? 'btn-warning' : 'btn-secondary'" class="btn btn-sm">DEBUG
 				</button>
 				<button (click)="changeLevel(logger.name, 'INFO')"
-				        [ngClass]="(logger.level=='INFO') ? 'btn-info' : 'btn-secondary'" class="btn btn-sm">INFO
+						[ngClass]="(logger.level=='INFO') ? 'btn-info' : 'btn-secondary'" class="btn btn-sm">INFO
 				</button>
 				<button (click)="changeLevel(logger.name, 'WARN')"
-				        [ngClass]="(logger.level=='WARN') ? 'btn-success' : 'btn-secondary'" class="btn btn-sm">WARN
+						[ngClass]="(logger.level=='WARN') ? 'btn-success' : 'btn-secondary'" class="btn btn-sm">WARN
 				</button>
 				<button (click)="changeLevel(logger.name, 'ERROR')"
-				        [ngClass]="(logger.level=='ERROR') ? 'btn-primary' : 'btn-secondary'" class="btn btn-sm">ERROR
+						[ngClass]="(logger.level=='ERROR') ? 'btn-primary' : 'btn-secondary'" class="btn btn-sm">ERROR
 				</button>
 			</td>
 		</tr>

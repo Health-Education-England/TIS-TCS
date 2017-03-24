@@ -2,7 +2,7 @@
 	<h2>
 		<span jhiTranslate="tcsApp.programmeMembership.home.title">Programme Memberships</span>
 		<button class="btn tis-btn-nhs-blue float-right create-programme-membership-tis-programmes"
-		        [routerLink]="['/', { outlets: { popup: ['programme-membership-tis-programmes-new'] } }]">
+				[routerLink]="['/', { outlets: { popup: ['programme-membership-tis-programmes-new'] } }]">
 			<span class="fa fa-plus"></span>
 			<span jhiTranslate="tcsApp.programmeMembership.home.createLabel">
             Create new Programme Membership
@@ -81,22 +81,22 @@
 				<td class="text-right">
 					<div class="btn-group flex-btn-group-container">
 						<button type="submit"
-						        [routerLink]="['../programme-membership-tis-programmes', programmeMembership.id ]"
-						        class="btn btn-info btn-sm">
+								[routerLink]="['../programme-membership-tis-programmes', programmeMembership.id ]"
+								class="btn btn-info btn-sm">
 							<span class="fa fa-eye"></span>
 							<span class="hidden-md-down" jhiTranslate="entity.action.view">View</span>
 						</button>
 						<button type="submit"
-						        [routerLink]="['/', { outlets: { popup: 'programme-membership-tis-programmes/'+ programmeMembership.id + '/edit'} }]"
-						        replaceUrl="true"
-						        class="btn tis-btn-nhs-blue btn-sm">
+								[routerLink]="['/', { outlets: { popup: 'programme-membership-tis-programmes/'+ programmeMembership.id + '/edit'} }]"
+								replaceUrl="true"
+								class="btn tis-btn-nhs-blue btn-sm">
 							<span class="fa fa-pencil"></span>
 							<span class="hidden-md-down" jhiTranslate="entity.action.edit">Edit</span>
 						</button>
 						<button type="submit"
-						        [routerLink]="['/', { outlets: { popup: 'programme-membership-tis-programmes/'+ programmeMembership.id + '/delete'} }]"
-						        replaceUrl="true"
-						        class="btn btn-danger btn-sm">
+								[routerLink]="['/', { outlets: { popup: 'programme-membership-tis-programmes/'+ programmeMembership.id + '/delete'} }]"
+								replaceUrl="true"
+								class="btn btn-danger btn-sm">
 							<span class="fa fa-remove"></span>
 							<span class="hidden-md-down" jhiTranslate="entity.action.delete">Delete</span>
 						</button>
@@ -112,7 +112,7 @@
 		</div>
 		<div class="row justify-content-center">
 			<ngb-pagination [collectionSize]="totalItems" [(page)]="page"
-			                (pageChange)="loadPage(page)"></ngb-pagination>
+							(pageChange)="loadPage(page)"></ngb-pagination>
 		</div>
 	</div>
 </div>

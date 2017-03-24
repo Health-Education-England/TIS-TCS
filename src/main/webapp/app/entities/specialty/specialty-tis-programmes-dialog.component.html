@@ -4,14 +4,14 @@
 		<h4 class="modal-title" id="mySpecialtyLabel" jhiTranslate="tcsApp.specialty.home.createOrEditLabel">Create or
 			edit a Specialty</h4>
 		<button type="button" class="close" data-dismiss="modal" aria-hidden="true"
-		        (click)="clear()">&times;</button>
+				(click)="clear()">&times;</button>
 	</div>
 	<div class="modal-body">
 		<jhi-alert-error></jhi-alert-error>
 		<div class="form-group" [hidden]="!specialty.id">
 			<label for="id" jhiTranslate="global.field.id">ID</label>
 			<input type="text" class="form-control" id="id" name="id"
-			       [(ngModel)]="specialty.id" readonly/>
+				   [(ngModel)]="specialty.id" readonly/>
 		</div>
 		<div class="form-group">
 			<label class="form-control-label" jhiTranslate="tcsApp.specialty.status" for="field_status">Status</label>
@@ -23,23 +23,23 @@
 		</div>
 		<div class="form-group">
 			<label class="form-control-label" jhiTranslate="tcsApp.specialty.college"
-			       for="field_college">College</label>
+				   for="field_college">College</label>
 			<input type="text" class="form-control" name="college" id="field_college"
-			       [(ngModel)]="specialty.college"
+				   [(ngModel)]="specialty.college"
 			/>
 		</div>
 		<div class="form-group">
 			<label class="form-control-label" jhiTranslate="tcsApp.specialty.nhsSpecialtyCode"
-			       for="field_nhsSpecialtyCode">Nhs Specialty Code</label>
+				   for="field_nhsSpecialtyCode">Nhs Specialty Code</label>
 			<input type="text" class="form-control" name="nhsSpecialtyCode" id="field_nhsSpecialtyCode"
-			       [(ngModel)]="specialty.nhsSpecialtyCode"
+				   [(ngModel)]="specialty.nhsSpecialtyCode"
 			/>
 		</div>
 		<div class="form-group">
 			<label class="form-control-label" jhiTranslate="tcsApp.specialty.specialtyType" for="field_specialtyType">Specialty
 				Type</label>
 			<select class="form-control" name="specialtyType" [(ngModel)]="specialty.specialtyType"
-			        id="field_specialtyType">
+					id="field_specialtyType">
 				<option value="CURRICULUM" jhiTranslate="tcsApp.SpecialtyType.CURRICULUM">CURRICULUM</option>
 				<option value="POST" jhiTranslate="tcsApp.SpecialtyType.POST">POST</option>
 				<option value="PLACEMENT" jhiTranslate="tcsApp.SpecialtyType.PLACEMENT">PLACEMENT</option>
@@ -50,10 +50,10 @@
 		<div class="form-group">
 			<label jhiTranslate="tcsApp.specialty.specialtyGroup" for="field_specialtyGroup">Specialty Group</label>
 			<select class="form-control" id="field_specialtyGroup" name="specialtyGroup"
-			        [(ngModel)]="specialty.specialtyGroupId">
+					[(ngModel)]="specialty.specialtyGroupId">
 				<option [ngValue]="null"></option>
 				<option [ngValue]="specialtyGroupOption.id"
-				        *ngFor="let specialtyGroupOption of specialtygroups; trackBy: trackSpecialtyGroupById">
+						*ngFor="let specialtyGroupOption of specialtygroups; trackBy: trackSpecialtyGroupById">
 					{{specialtyGroupOption.id}}
 				</option>
 			</select>

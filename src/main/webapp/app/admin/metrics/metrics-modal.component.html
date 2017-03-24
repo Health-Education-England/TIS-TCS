@@ -11,7 +11,7 @@
 	<span class="badge badge-info" (click)="threadDumpFilter = {threadState: 'WAITING'}">Waiting&nbsp;<span
 			class="badge badge-pill badge-default">{{threadDumpWaiting}}</span></span>&nbsp;
 	<span class="badge badge-warning"
-	      (click)="threadDumpFilter = {threadState: 'TIMED_WAITING'}">Timed Waiting&nbsp;<span
+		  (click)="threadDumpFilter = {threadState: 'TIMED_WAITING'}">Timed Waiting&nbsp;<span
 			class="badge badge-pill badge-default">{{threadDumpTimedWaiting}}</span></span>&nbsp;
 	<span class="badge badge-danger" (click)="threadDumpFilter = {threadState: 'BLOCKED'}">Blocked&nbsp;<span
 			class="badge badge-pill badge-default">{{threadDumpBlocked}}</span></span>&nbsp;
@@ -60,6 +60,6 @@
 </div>
 <div class="modal-footer">
 	<button type="button" class="btn btn-secondary pull-left" data-dismiss="modal"
-	        (click)="activeModal.dismiss('closed')">Done
+			(click)="activeModal.dismiss('closed')">Done
 	</button>
 </div>
