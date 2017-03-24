@@ -78,11 +78,11 @@
 						<a [routerLink]="['../training-number-tis-programmes', programmeMembership.trainingNumberId  ]">{{programmeMembership.trainingNumberId}}</a>
 					</div>
 				</td>
-				<td class="text-right">
-					<div class="btn-group flex-btn-group-container">
+				<td class="text-center">
+					<div class="btn-group">
 						<button type="submit"
 								[routerLink]="['../programme-membership-tis-programmes', programmeMembership.id ]"
-								class="btn btn-info btn-sm">
+								class="btn tis-btn-nhs-lb btn-sm">
 							<span class="fa fa-eye"></span>
 							<span class="hidden-md-down" jhiTranslate="entity.action.view">View</span>
 						</button>
@@ -96,7 +96,7 @@
 						<button type="submit"
 								[routerLink]="['/', { outlets: { popup: 'programme-membership-tis-programmes/'+ programmeMembership.id + '/delete'} }]"
 								replaceUrl="true"
-								class="btn btn-danger btn-sm">
+								class="btn tis-btn-nhs-ruby btn-sm">
 							<span class="fa fa-remove"></span>
 							<span class="hidden-md-down" jhiTranslate="entity.action.delete">Delete</span>
 						</button>
