@@ -27,14 +27,13 @@
 		"register": "Register"
 	  },
 	  "admin": {
-		"main": "Administration",
+		"main": "Monitoring",
 		"userManagement": "User management",
 		"tracker": "User tracker",
 		"metrics": "Metrics",
 		"health": "Health",
 		"configuration": "Configuration",
 		"logs": "Logs",
-		"audits": "Audits",
 		"apidocs": "API",
 		"database": "Database",
 		"jhipster-needle-menu-add-admin-element": "JHipster will add additional menu entries here (do not translate!)"
@@ -135,5 +134,5 @@
 	"emailexists": "E-mail is already in use!",
 	"idexists": "A new {{ entityName }} cannot already have an ID"
   },
-  "footer": "TIS V.0.0.1"
+  "footer": "TCS V.0.0.2"
 }

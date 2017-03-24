@@ -3,13 +3,6 @@ import {RouterModule} from "@angular/router";
 import {TcsSharedModule} from "../shared";
 import {
 	adminState,
-	AuditsComponent,
-	UserMgmtComponent,
-	UserDialogComponent,
-	UserDeleteDialogComponent,
-	UserMgmtDetailComponent,
-	UserMgmtDialogComponent,
-	UserMgmtDeleteDialogComponent,
 	LogsComponent,
 	JhiMetricsMonitoringModalComponent,
 	JhiMetricsMonitoringComponent,
@@ -17,14 +10,10 @@ import {
 	JhiHealthCheckComponent,
 	JhiConfigurationComponent,
 	JhiDocsComponent,
-	AuditsService,
 	JhiConfigurationService,
 	JhiHealthService,
 	JhiMetricsService,
-	LogsService,
-	UserResolvePagingParams,
-	UserResolve,
-	UserModalService
+	LogsService
 } from "./";
 
 
@@ -34,13 +23,6 @@ import {
 		RouterModule.forRoot(adminState, {useHash: true})
 	],
 	declarations: [
-		AuditsComponent,
-		UserMgmtComponent,
-		UserDialogComponent,
-		UserDeleteDialogComponent,
-		UserMgmtDetailComponent,
-		UserMgmtDialogComponent,
-		UserMgmtDeleteDialogComponent,
 		LogsComponent,
 		JhiConfigurationComponent,
 		JhiHealthCheckComponent,
@@ -50,20 +32,14 @@ import {
 		JhiMetricsMonitoringModalComponent
 	],
 	entryComponents: [
-		UserMgmtDialogComponent,
-		UserMgmtDeleteDialogComponent,
 		JhiHealthModalComponent,
 		JhiMetricsMonitoringModalComponent,
 	],
 	providers: [
-		AuditsService,
 		JhiConfigurationService,
 		JhiHealthService,
 		JhiMetricsService,
-		LogsService,
-		UserResolvePagingParams,
-		UserResolve,
-		UserModalService
+		LogsService
 	],
 	schemas: [CUSTOM_ELEMENTS_SCHEMA]
 })

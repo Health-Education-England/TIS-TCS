@@ -5,7 +5,6 @@ import {Ng2Webstorage} from "ng2-webstorage";
 import {TcsSharedModule, UserRouteAccessService} from "./shared";
 import {TcsHomeModule} from "./home/home.module";
 import {TcsAdminModule} from "./admin/admin.module";
-import {TcsAccountModule} from "./account/account.module";
 import {TcsEntityModule} from "./entities/entity.module";
 import {
 	LayoutRoutingModule,
@@ -29,7 +28,6 @@ import {PaginationConfig} from "./blocks/config/uib-pagination.config";
 		TcsSharedModule,
 		TcsHomeModule,
 		TcsAdminModule,
-		TcsAccountModule,
 		TcsEntityModule
 	],
 	declarations: [

@@ -15,9 +15,9 @@
 # ===================================================================
 
 management:
-    security:
-        roles: ADMIN
     context-path: /management
+    security:
+        enabled: false
     health:
         mail:
             enabled: false # When using the MailService, configure an SMTP server and set this to true
@@ -74,6 +74,9 @@ flyway:
 security:
     basic:
         enabled: false
+    user:
+        name: admin
+        password: admin
 
 server:
     session:
