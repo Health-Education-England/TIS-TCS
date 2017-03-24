@@ -1,5 +1,5 @@
 html {
-  font-size: 62.5%;
+	@include font-size($nhs-font-normal);
 }
 
 body {

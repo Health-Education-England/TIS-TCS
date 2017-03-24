@@ -4,11 +4,12 @@
 // font family
 $nhs-font: Arial, Helvetica, sans-serif;
 
-// font-sizes
-$nhs-font-tiny: 1.0;
-$nhs-font-small: 1.2;
-$nhs-font-normal: 1.4;
-$nhs-font-medium: 1.6;
-$nhs-font-large: 1.8;
-$nhs-font-xlarge: 2.0;
-$nhs-font-xxlarge: 2.4;
+// font-sizes Assumes the browser default, typically `16px`;
+// We are using root 14px
+$nhs-font-tiny:    0.7143; //10px
+$nhs-font-small:   0.8571; //12px;
+$nhs-font-normal:  0.875; //14px; *** ROOT *** 
+$nhs-font-medium:  1.143; //16px
+$nhs-font-large:   1.286; // 18px
+$nhs-font-xlarge:  1.429; //20px;
+$nhs-font-xxlarge: 1.5; // 24px;
