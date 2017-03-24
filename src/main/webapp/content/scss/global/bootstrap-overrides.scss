@@ -1,9 +1,9 @@
 html {
-  @include font-size($nhs-font-normal);
+  @include font-size($nhs-font-medium);
 }
 
 body {
-  @include font-size($nhs-font-normal);
+  @include font-size($nhs-font-medium);
   padding: 0;
   font-family: $nhs-font;
 }

@@ -198,3 +198,8 @@
 .dropdown-panel {
   @include dropdown-panel();
 }
+
+.version-indicator {
+  color: $nhs-blue;
+  bottom: 10px;
+}
