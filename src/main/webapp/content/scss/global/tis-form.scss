@@ -8,7 +8,7 @@
       color: #fff;
     }
     &-#{$color}:hover {
-      background-color: $nhs-blue-80pct; //lighten(map-get($nhs-color-map, $color), 20%);
+      background-color: tint(map-get($nhs-color-map, $color), 20%);
       color: #fff;
     }
   ;
