@@ -9,12 +9,12 @@
 	<div class="modal-body">
 		<jhi-alert-error></jhi-alert-error>
 		<div class="form-group" [hidden]="!trainingNumber.id">
-			<label for="id" jhiTranslate="global.field.id">ID</label>
+			<label class="front-nhs-lb"  for="id" jhiTranslate="global.field.id">ID</label>
 			<input type="text" class="form-control" id="id" name="id"
 				   [(ngModel)]="trainingNumber.id" readonly/>
 		</div>
 		<div class="form-group">
-			<label class="form-control-label" jhiTranslate="tcsApp.trainingNumber.trainingNumberType"
+			<label class="form-control-label front-nhs-lb" jhiTranslate="tcsApp.trainingNumber.trainingNumberType"
 				   for="field_trainingNumberType">Training Number Type</label>
 			<select class="form-control" name="trainingNumberType" [(ngModel)]="trainingNumber.trainingNumberType"
 					id="field_trainingNumberType">
@@ -23,35 +23,35 @@
 			</select>
 		</div>
 		<div class="form-group">
-			<label class="form-control-label" jhiTranslate="tcsApp.trainingNumber.localOffice" for="field_localOffice">Local
+			<label class="form-control-label front-nhs-lb" jhiTranslate="tcsApp.trainingNumber.localOffice" for="field_localOffice">Local
 				Office</label>
 			<input type="text" class="form-control" name="localOffice" id="field_localOffice"
 				   [(ngModel)]="trainingNumber.localOffice"
 			/>
 		</div>
 		<div class="form-group">
-			<label class="form-control-label" jhiTranslate="tcsApp.trainingNumber.number"
+			<label class="form-control-label front-nhs-lb" jhiTranslate="tcsApp.trainingNumber.number"
 				   for="field_number">Number</label>
 			<input type="number" class="form-control" name="number" id="field_number"
 				   [(ngModel)]="trainingNumber.number"
 			/>
 		</div>
 		<div class="form-group">
-			<label class="form-control-label" jhiTranslate="tcsApp.trainingNumber.appointmentYear"
+			<label class="form-control-label front-nhs-lb" jhiTranslate="tcsApp.trainingNumber.appointmentYear"
 				   for="field_appointmentYear">Appointment Year</label>
 			<input type="number" class="form-control" name="appointmentYear" id="field_appointmentYear"
 				   [(ngModel)]="trainingNumber.appointmentYear"
 			/>
 		</div>
 		<div class="form-group">
-			<label class="form-control-label" jhiTranslate="tcsApp.trainingNumber.typeOfContract"
+			<label class="form-control-label front-nhs-lb" jhiTranslate="tcsApp.trainingNumber.typeOfContract"
 				   for="field_typeOfContract">Type Of Contract</label>
 			<input type="text" class="form-control" name="typeOfContract" id="field_typeOfContract"
 				   [(ngModel)]="trainingNumber.typeOfContract"
 			/>
 		</div>
 		<div class="form-group">
-			<label class="form-control-label" jhiTranslate="tcsApp.trainingNumber.suffix"
+			<label class="form-control-label front-nhs-lb" jhiTranslate="tcsApp.trainingNumber.suffix"
 				   for="field_suffix">Suffix</label>
 			<input type="text" class="form-control" name="suffix" id="field_suffix"
 				   [(ngModel)]="trainingNumber.suffix"

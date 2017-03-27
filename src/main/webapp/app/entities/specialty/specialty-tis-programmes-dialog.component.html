@@ -9,12 +9,12 @@
 	<div class="modal-body">
 		<jhi-alert-error></jhi-alert-error>
 		<div class="form-group" [hidden]="!specialty.id">
-			<label for="id" jhiTranslate="global.field.id">ID</label>
+			<label class="front-nhs-lb"  for="id" jhiTranslate="global.field.id">ID</label>
 			<input type="text" class="form-control" id="id" name="id"
 				   [(ngModel)]="specialty.id" readonly/>
 		</div>
 		<div class="form-group">
-			<label class="form-control-label" jhiTranslate="tcsApp.specialty.status" for="field_status">Status</label>
+			<label class="form-control-label front-nhs-lb" jhiTranslate="tcsApp.specialty.status" for="field_status">Status</label>
 			<select class="form-control" name="status" [(ngModel)]="specialty.status" id="field_status">
 				<option value="CURRENT" jhiTranslate="tcsApp.Status.CURRENT">CURRENT</option>
 				<option value="INACTIVE" jhiTranslate="tcsApp.Status.INACTIVE">INACTIVE</option>
@@ -22,21 +22,21 @@
 			</select>
 		</div>
 		<div class="form-group">
-			<label class="form-control-label" jhiTranslate="tcsApp.specialty.college"
+			<label class="form-control-label front-nhs-lb" jhiTranslate="tcsApp.specialty.college"
 				   for="field_college">College</label>
 			<input type="text" class="form-control" name="college" id="field_college"
 				   [(ngModel)]="specialty.college"
 			/>
 		</div>
 		<div class="form-group">
-			<label class="form-control-label" jhiTranslate="tcsApp.specialty.nhsSpecialtyCode"
+			<label class="form-control-label front-nhs-lb" jhiTranslate="tcsApp.specialty.nhsSpecialtyCode"
 				   for="field_nhsSpecialtyCode">Nhs Specialty Code</label>
 			<input type="text" class="form-control" name="nhsSpecialtyCode" id="field_nhsSpecialtyCode"
 				   [(ngModel)]="specialty.nhsSpecialtyCode"
 			/>
 		</div>
 		<div class="form-group">
-			<label class="form-control-label" jhiTranslate="tcsApp.specialty.specialtyType" for="field_specialtyType">Specialty
+			<label class="form-control-label front-nhs-lb" jhiTranslate="tcsApp.specialty.specialtyType" for="field_specialtyType">Specialty
 				Type</label>
 			<select class="form-control" name="specialtyType" [(ngModel)]="specialty.specialtyType"
 					id="field_specialtyType">
@@ -48,7 +48,7 @@
 		</div>
 
 		<div class="form-group">
-			<label jhiTranslate="tcsApp.specialty.specialtyGroup" for="field_specialtyGroup">Specialty Group</label>
+			<label class="front-nhs-lb" jhiTranslate="tcsApp.specialty.specialtyGroup" for="field_specialtyGroup">Specialty Group</label>
 			<select class="form-control" id="field_specialtyGroup" name="specialtyGroup"
 					[(ngModel)]="specialty.specialtyGroupId">
 				<option [ngValue]="null"></option>
