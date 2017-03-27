@@ -3,23 +3,23 @@
 	<hr>
 	<jhi-alert-error></jhi-alert-error>
 	<dl class="row-md jh-entity-details">
-		<dt><span jhiTranslate="tcsApp.programme.status">Status</span></dt>
+		<dt><span class="front-nhs-lb" jhiTranslate="tcsApp.programme.status">Status</span></dt>
 		<dd>
 			<span jhiTranslate="{{'tcsApp.Status.' + programme.status}}">{{programme.status}}</span>
 		</dd>
-		<dt><span jhiTranslate="tcsApp.programme.managingDeanery">Managing Deanery</span></dt>
+		<dt><span class="front-nhs-lb" jhiTranslate="tcsApp.programme.managingDeanery">Managing Deanery</span></dt>
 		<dd>
 			<span>{{programme.managingDeanery}}</span>
 		</dd>
-		<dt><span jhiTranslate="tcsApp.programme.programmeName">Programme Name</span></dt>
+		<dt><span class="front-nhs-lb" jhiTranslate="tcsApp.programme.programmeName">Programme Name</span></dt>
 		<dd>
 			<span>{{programme.programmeName}}</span>
 		</dd>
-		<dt><span jhiTranslate="tcsApp.programme.programmeNumber">Programme Number</span></dt>
+		<dt><span class="front-nhs-lb" jhiTranslate="tcsApp.programme.programmeNumber">Programme Number</span></dt>
 		<dd>
 			<span>{{programme.programmeNumber}}</span>
 		</dd>
-		<dt><span jhiTranslate="tcsApp.programme.leadProvider">Lead Provider</span></dt>
+		<dt><span class="front-nhs-lb" jhiTranslate="tcsApp.programme.leadProvider">Lead Provider</span></dt>
 		<dd>
 			<span>{{programme.leadProvider}}</span>
 		</dd>
@@ -27,7 +27,7 @@
 
 	<button type="submit"
 			(click)="previousState()"
-			class="btn btn-info">
+			class="btn tis-btn-nhs-lb">
 		<span class="fa fa-arrow-left"></span>&nbsp;<span jhiTranslate="entity.action.back"> Back</span>
 	</button>
 

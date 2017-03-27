@@ -3,42 +3,42 @@
 	<hr>
 	<jhi-alert-error></jhi-alert-error>
 	<dl class="row-md jh-entity-details">
-		<dt><span jhiTranslate="tcsApp.curriculum.name">Name</span></dt>
+		<dt><span class="front-nhs-lb" jhiTranslate="tcsApp.curriculum.name">Name</span></dt>
 		<dd>
 			<span>{{curriculum.name}}</span>
 		</dd>
-		<dt><span jhiTranslate="tcsApp.curriculum.start">Start</span></dt>
+		<dt><span class="front-nhs-lb" jhiTranslate="tcsApp.curriculum.start">Start</span></dt>
 		<dd>
 			<span>{{curriculum.start | date:'mediumDate'}}</span>
 		</dd>
-		<dt><span jhiTranslate="tcsApp.curriculum.end">End</span></dt>
+		<dt><span class="front-nhs-lb" jhiTranslate="tcsApp.curriculum.end">End</span></dt>
 		<dd>
 			<span>{{curriculum.end | date:'mediumDate'}}</span>
 		</dd>
-		<dt><span jhiTranslate="tcsApp.curriculum.curriculumSubType">Curriculum Sub Type</span></dt>
+		<dt><span class="front-nhs-lb" jhiTranslate="tcsApp.curriculum.curriculumSubType">Curriculum Sub Type</span></dt>
 		<dd>
 			<span jhiTranslate="{{'tcsApp.CurriculumSubType.' + curriculum.curriculumSubType}}">{{curriculum.curriculumSubType}}</span>
 		</dd>
-		<dt><span jhiTranslate="tcsApp.curriculum.assessmentType">Assessment Type</span></dt>
+		<dt><span class="front-nhs-lb" jhiTranslate="tcsApp.curriculum.assessmentType">Assessment Type</span></dt>
 		<dd>
 			<span jhiTranslate="{{'tcsApp.AssessmentType.' + curriculum.assessmentType}}">{{curriculum.assessmentType}}</span>
 		</dd>
-		<dt><span jhiTranslate="tcsApp.curriculum.doesThisCurriculumLeadToCct">Does This Curriculum Lead To Cct</span>
+		<dt><span class="front-nhs-lb" jhiTranslate="tcsApp.curriculum.doesThisCurriculumLeadToCct">Does This Curriculum Lead To Cct</span>
 		</dt>
 		<dd>
 			<span>{{curriculum.doesThisCurriculumLeadToCct}}</span>
 		</dd>
-		<dt><span jhiTranslate="tcsApp.curriculum.periodOfGrace">Period Of Grace</span></dt>
+		<dt><span class="front-nhs-lb" jhiTranslate="tcsApp.curriculum.periodOfGrace">Period Of Grace</span></dt>
 		<dd>
 			<span>{{curriculum.periodOfGrace}}</span>
 		</dd>
-		<dt><span jhiTranslate="tcsApp.curriculum.grade">Grade</span></dt>
+		<dt><span class="front-nhs-lb" jhiTranslate="tcsApp.curriculum.grade">Grade</span></dt>
 		<dd>
             <span *ngFor="let grade of curriculum.grades; let last = last">
                 <a [routerLink]="['/grade-tis-programmes', grade?.id ]">{{grade.id}}</a>{{last ? '' : ', '}}
             </span>
 		</dd>
-		<dt><span jhiTranslate="tcsApp.curriculum.specialty">Specialty</span></dt>
+		<dt><span class="front-nhs-lb" jhiTranslate="tcsApp.curriculum.specialty">Specialty</span></dt>
 		<dd>
 			<div *ngIf="curriculum.specialtyId">
 				<a [routerLink]="['/specialty-tis-programmes', curriculum.specialtyId]">{{curriculum.specialtyId}}</a>
@@ -48,7 +48,7 @@
 
 	<button type="submit"
 			(click)="previousState()"
-			class="btn btn-info">
+			class="btn tis-btn-nhs-lb">
 		<span class="fa fa-arrow-left"></span>&nbsp;<span jhiTranslate="entity.action.back"> Back</span>
 	</button>
 

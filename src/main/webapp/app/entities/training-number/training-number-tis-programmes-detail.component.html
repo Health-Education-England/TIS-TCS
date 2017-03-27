@@ -3,27 +3,27 @@
 	<hr>
 	<jhi-alert-error></jhi-alert-error>
 	<dl class="row-md jh-entity-details">
-		<dt><span jhiTranslate="tcsApp.trainingNumber.trainingNumberType">Training Number Type</span></dt>
+		<dt><span class="front-nhs-lb" jhiTranslate="tcsApp.trainingNumber.trainingNumberType">Training Number Type</span></dt>
 		<dd>
 			<span jhiTranslate="{{'tcsApp.TrainingNumberType.' + trainingNumber.trainingNumberType}}">{{trainingNumber.trainingNumberType}}</span>
 		</dd>
-		<dt><span jhiTranslate="tcsApp.trainingNumber.localOffice">Local Office</span></dt>
+		<dt><span class="front-nhs-lb" jhiTranslate="tcsApp.trainingNumber.localOffice">Local Office</span></dt>
 		<dd>
 			<span>{{trainingNumber.localOffice}}</span>
 		</dd>
-		<dt><span jhiTranslate="tcsApp.trainingNumber.number">Number</span></dt>
+		<dt><span class="front-nhs-lb" jhiTranslate="tcsApp.trainingNumber.number">Number</span></dt>
 		<dd>
 			<span>{{trainingNumber.number}}</span>
 		</dd>
-		<dt><span jhiTranslate="tcsApp.trainingNumber.appointmentYear">Appointment Year</span></dt>
+		<dt><span class="front-nhs-lb" jhiTranslate="tcsApp.trainingNumber.appointmentYear">Appointment Year</span></dt>
 		<dd>
 			<span>{{trainingNumber.appointmentYear}}</span>
 		</dd>
-		<dt><span jhiTranslate="tcsApp.trainingNumber.typeOfContract">Type Of Contract</span></dt>
+		<dt><span class="front-nhs-lb" jhiTranslate="tcsApp.trainingNumber.typeOfContract">Type Of Contract</span></dt>
 		<dd>
 			<span>{{trainingNumber.typeOfContract}}</span>
 		</dd>
-		<dt><span jhiTranslate="tcsApp.trainingNumber.suffix">Suffix</span></dt>
+		<dt><span class="front-nhs-lb" jhiTranslate="tcsApp.trainingNumber.suffix">Suffix</span></dt>
 		<dd>
 			<span>{{trainingNumber.suffix}}</span>
 		</dd>
@@ -31,7 +31,7 @@
 
 	<button type="submit"
 			(click)="previousState()"
-			class="btn btn-info">
+			class="btn tis-btn-nhs-lb">
 		<span class="fa fa-arrow-left"></span>&nbsp;<span jhiTranslate="entity.action.back"> Back</span>
 	</button>
 
