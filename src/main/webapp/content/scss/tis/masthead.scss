@@ -37,9 +37,9 @@
       // border-right: 1px solid #fff;
     }
     li {
-      display: block;
-      float: left;
-      list-style: none;
+      // display: block;
+      // float: left;
+      // list-style: none;
       padding: 10px 15px;
       // border-right: 1px solid $bk-dark-grey;
       // border-left: 1px solid #fff;
@@ -161,5 +161,12 @@
     line-height: 18px;
     border-radius: 50%;
     box-shadow: 0 0 1px #333;
+  }
+
+  .dropdown-menu{
+    a:hover{
+      color: #fff;
+      background-color: $nhs-blue;
+    }
   }
 }
