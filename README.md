@@ -1,6 +1,25 @@
 # tcs
 This application was generated using JHipster 4.0.8, you can find documentation and help at [https://jhipster.github.io/documentation-archive/v4.0.8](https://jhipster.github.io/documentation-archive/v4.0.8).
 
+## Setting up local proxy paths
+
+You will need to set up your local proxy to work with the app. For nginx do:
+
+    cd /usr/local/etc/nginx
+    vi nginx.conf 
+Then copy paste in the following:
+
+    location ~ ^/tcs/(api|management|swagger-resources|v2) {
+        proxy_pass http://127.0.0.1:8093;
+        proxy_set_header OIDC_access_token $token;
+        proxy_pass_request_headers on;
+    }
+
+    location /tcs {
+        proxy_pass http://127.0.0.1:9093;
+        proxy_pass_request_headers on;
+    }
+
 ## Development
 
 Before you can build this project, you must install and configure the following dependencies on your machine:
@@ -30,6 +49,32 @@ specifying a newer version in [package.json](package.json). You can also run `ya
 Add the `help` flag on any command to see how you can use it. For example, `yarn help update`.
 
 The `yarn run` command will list all of the scripts available to run for this project.
+
+## Building for production
+
+To optimize the tcs application for production, for the server side run:
+
+    ./mvnw -Pprod clean package
+
+For the UI run: 
+
+    yarn prod
+
+This will concatenate and minify the client CSS and JavaScript files. It will also modify `index.html` so it references these new files.
+The ui build will be in the /ui-build folder in your workspace.
+To ensure everything worked, run:
+
+    java -jar target/*.war
+
+And for the UI, if you have not done so already install http-server, then run: 
+
+    npm install http-server -g
+
+    http-server /Users/Alex/ws/hee_tis/TIS-CORE-SERVICES/ui-build -p 9093 -d false
+
+With the proxy server up and configured, then navigate to [http://local.alxd.com/tcs/](http://local.alxd.com/tcs/) in your browser.
+
+Refer to [Using JHipster in production][] for more details.
 
 ### Managing dependencies
 
@@ -70,21 +115,6 @@ will generate few files:
     create src/main/webapp/app/my-component/my-component.component.html
     create src/main/webapp/app/my-component/my-component.component.ts
     update src/main/webapp/app/app.module.ts
-
-## Building for production
-
-To optimize the tcs application for production, run:
-
-    ./mvnw -Pprod clean package
-
-This will concatenate and minify the client CSS and JavaScript files. It will also modify `index.html` so it references these new files.
-To ensure everything worked, run:
-
-    java -jar target/*.war
-
-Then navigate to [http://localhost:8093](http://localhost:8093) in your browser.
-
-Refer to [Using JHipster in production][] for more details.
 
 ## Testing
 

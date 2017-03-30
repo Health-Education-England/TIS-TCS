@@ -6,7 +6,7 @@
   "apps": [
 	{
 	  "root": "src/main/webapp/",
-	  "outDir": "target/www/app",
+	  "outDir": "ui-build/tcs/app",
 	  "assets": [
 		"content",
 		"favicon.ico"

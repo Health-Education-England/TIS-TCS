@@ -92,7 +92,7 @@ public class WebConfigurer implements ServletContextInitializer, EmbeddedServlet
 	private void setLocationForStaticAssets(ConfigurableEmbeddedServletContainer container) {
 		File root;
 		String prefixPath = resolvePathPrefix();
-		root = new File(prefixPath + "target/www/");
+		root = new File(prefixPath + "ui-build/tcs/");
 		if (root.exists() && root.isDirectory()) {
 			container.setDocumentRoot(root);
 		}

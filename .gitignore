@@ -71,6 +71,7 @@ local.properties
 /log/
 /target/
 
+/ui-build/
 ######################
 # Gradle
 ######################

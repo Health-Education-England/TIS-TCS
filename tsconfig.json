@@ -9,7 +9,7 @@
 	"removeComments": false,
 	"noImplicitAny": false,
 	"suppressImplicitAnyIndexErrors": true,
-	"outDir": "target/www/app",
+	"outDir": "ui-build/tcs/app",
 	"lib": [
 	  "es6",
 	  "dom"

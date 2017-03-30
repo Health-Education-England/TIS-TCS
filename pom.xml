@@ -59,7 +59,7 @@
 		<sonar-maven-plugin.version>3.2</sonar-maven-plugin.version>
 
 		<sonar.exclusions>src/main/webapp/content/**/*.*, src/main/webapp/bower_components/**/*.*,
-			src/main/webapp/i18n/*.js, target/www/**/*.*
+			src/main/webapp/i18n/*.js, ui-build/tcs/**/*.*
 		</sonar.exclusions>
 
 		<sonar.issue.ignore.multicriteria>S3437,UndocumentedApi,BoldAndItalicTagsCheck
@@ -408,14 +408,6 @@
 			</plugin>
 			<plugin>
 				<groupId>org.apache.maven.plugins</groupId>
-				<artifactId>maven-eclipse-plugin</artifactId>
-				<configuration>
-					<downloadSources>true</downloadSources>
-					<downloadJavadocs>true</downloadJavadocs>
-				</configuration>
-			</plugin>
-			<plugin>
-				<groupId>org.apache.maven.plugins</groupId>
 				<artifactId>maven-enforcer-plugin</artifactId>
 				<version>${maven-enforcer-plugin.version}</version>
 				<executions>
@@ -554,57 +546,6 @@
 			</plugin>
 			<!-- jhipster-needle-maven-add-plugin -->
 		</plugins>
-		<pluginManagement>
-			<plugins>
-				<!--
-					This plugin's configuration is used to store Eclipse m2e settings only.
-					It has no influence on the Maven build itself.
-					Remove when the m2e plugin can correctly bind to Maven lifecycle
-				-->
-				<plugin>
-					<groupId>org.eclipse.m2e</groupId>
-					<artifactId>lifecycle-mapping</artifactId>
-					<version>1.0.0</version>
-					<configuration>
-						<lifecycleMappingMetadata>
-							<pluginExecutions>
-								<pluginExecution>
-									<pluginExecutionFilter>
-										<groupId>org.jacoco</groupId>
-										<artifactId>
-											jacoco-maven-plugin
-										</artifactId>
-										<versionRange>
-											${jacoco-maven-plugin.version}
-										</versionRange>
-										<goals>
-											<goal>prepare-agent</goal>
-										</goals>
-									</pluginExecutionFilter>
-									<action>
-										<ignore/>
-									</action>
-								</pluginExecution>
-								<pluginExecution>
-									<pluginExecutionFilter>
-										<groupId>com.github.eirslett</groupId>
-										<artifactId>frontend-maven-plugin</artifactId>
-										<versionRange>${frontend.maven.plugin.version}</versionRange>
-										<goals>
-											<goal>install-node-and-yarn</goal>
-											<goal>yarn</goal>
-										</goals>
-									</pluginExecutionFilter>
-									<action>
-										<ignore/>
-									</action>
-								</pluginExecution>
-							</pluginExecutions>
-						</lifecycleMappingMetadata>
-					</configuration>
-				</plugin>
-			</plugins>
-		</pluginManagement>
 	</build>
 	<profiles>
 		<profile>
@@ -612,40 +553,6 @@
 			<properties>
 				<profile.swagger>,swagger</profile.swagger>
 			</properties>
-		</profile>
-		<profile>
-			<id>webpack</id>
-			<build>
-				<plugins>
-					<plugin>
-						<groupId>com.github.eirslett</groupId>
-						<artifactId>frontend-maven-plugin</artifactId>
-						<version>${frontend.maven.plugin.version}</version>
-						<executions>
-							<execution>
-								<id>install node and yarn</id>
-								<goals>
-									<goal>install-node-and-yarn</goal>
-								</goals>
-								<configuration>
-									<nodeVersion>${node.version}</nodeVersion>
-									<yarnVersion>${yarn.version}</yarnVersion>
-								</configuration>
-							</execution>
-							<execution>
-								<id>webpack build dev</id>
-								<goals>
-									<goal>yarn</goal>
-								</goals>
-								<phase>generate-resources</phase>
-								<configuration>
-									<arguments>run webpack:build:dev</arguments>
-								</configuration>
-							</execution>
-						</executions>
-					</plugin>
-				</plugins>
-			</build>
 		</profile>
 		<profile>
 			<id>dev</id>
@@ -659,17 +566,6 @@
 					<optional>true</optional>
 				</dependency>
 			</dependencies>
-			<build>
-				<plugins>
-					<plugin>
-						<groupId>org.apache.maven.plugins</groupId>
-						<artifactId>maven-war-plugin</artifactId>
-						<configuration>
-							<warSourceDirectory>src/main/webapp/</warSourceDirectory>
-						</configuration>
-					</plugin>
-				</plugins>
-			</build>
 			<properties>
 				<!-- log configuration -->
 				<logback.loglevel>DEBUG</logback.loglevel>
@@ -681,23 +577,6 @@
 			<id>prod</id>
 			<build>
 				<plugins>
-					<plugin>
-						<artifactId>maven-clean-plugin</artifactId>
-						<configuration>
-							<filesets>
-								<fileset>
-									<directory>target/www/</directory>
-								</fileset>
-							</filesets>
-						</configuration>
-					</plugin>
-					<plugin>
-						<groupId>org.apache.maven.plugins</groupId>
-						<artifactId>maven-war-plugin</artifactId>
-						<configuration>
-							<warSourceDirectory>target/www/</warSourceDirectory>
-						</configuration>
-					</plugin>
 					<plugin>
 						<groupId>org.springframework.boot</groupId>
 						<artifactId>spring-boot-maven-plugin</artifactId>
@@ -712,42 +591,6 @@
 							</execution>
 						</executions>
 					</plugin>
-					<plugin>
-						<groupId>com.github.eirslett</groupId>
-						<artifactId>frontend-maven-plugin</artifactId>
-						<version>${frontend.maven.plugin.version}</version>
-						<executions>
-							<execution>
-								<id>install node and yarn</id>
-								<goals>
-									<goal>install-node-and-yarn</goal>
-								</goals>
-								<configuration>
-									<nodeVersion>${node.version}</nodeVersion>
-									<yarnVersion>${yarn.version}</yarnVersion>
-								</configuration>
-							</execution>
-							<execution>
-								<id>yarn install</id>
-								<goals>
-									<goal>yarn</goal>
-								</goals>
-								<configuration>
-									<arguments>install --force</arguments>
-								</configuration>
-							</execution>
-							<execution>
-								<id>webpack build prod</id>
-								<goals>
-									<goal>yarn</goal>
-								</goals>
-								<phase>generate-resources</phase>
-								<configuration>
-									<arguments>run webpack:prod</arguments>
-								</configuration>
-							</execution>
-						</executions>
-					</plugin>
 				</plugins>
 			</build>
 			<properties>
@@ -755,69 +598,6 @@
 				<logback.loglevel>INFO</logback.loglevel>
 				<!-- default Spring profiles -->
 				<spring.profiles.active>prod${profile.swagger}</spring.profiles.active>
-			</properties>
-		</profile>
-		<profile>
-			<!--
-				Profile for doing "continuous compilation" with the Scala Maven plugin.
-				It allows automatic compilation of Java classes as soon as they are saved.
-				To use it, run in 3 terminals:
-				- './mvnw -Pcc scala:cc' for continous compilation of your classes
-				- './mvnw -Pcc' for hot reload of Spring boot
-				- 'gulp' for hot reload of the HTML/JavaScript assets
-				Everything should hot reload automatically!
-			-->
-			<id>cc</id>
-			<dependencies>
-				<dependency>
-					<groupId>org.springframework.boot</groupId>
-					<artifactId>spring-boot-devtools</artifactId>
-					<optional>true</optional>
-				</dependency>
-			</dependencies>
-			<build>
-				<plugins>
-					<plugin>
-						<groupId>org.apache.maven.plugins</groupId>
-						<artifactId>maven-war-plugin</artifactId>
-						<configuration>
-							<warSourceDirectory>src/main/webapp/</warSourceDirectory>
-						</configuration>
-					</plugin>
-					<plugin>
-						<groupId>org.springframework.boot</groupId>
-						<artifactId>spring-boot-maven-plugin</artifactId>
-						<configuration>
-							<executable>true</executable>
-							<fork>true</fork>
-							<addResources>true</addResources>
-							<!--
-							Enable the line below to have remote debugging of your application on port 5005
-							<jvmArguments>-agentlib:jdwp=transport=dt_socket,server=y,suspend=n,address=5005</jvmArguments>
-							-->
-						</configuration>
-					</plugin>
-					<plugin>
-						<groupId>org.apache.maven.plugins</groupId>
-						<artifactId>maven-compiler-plugin</artifactId>
-						<executions>
-							<execution>
-								<id>default-compile</id>
-								<phase>none</phase>
-							</execution>
-							<execution>
-								<id>default-testCompile</id>
-								<phase>none</phase>
-							</execution>
-						</executions>
-					</plugin>
-				</plugins>
-			</build>
-			<properties>
-				<!-- log configuration -->
-				<logback.loglevel>DEBUG</logback.loglevel>
-				<!-- default Spring profiles -->
-				<spring.profiles.active>dev,swagger</spring.profiles.active>
 			</properties>
 		</profile>
 		<profile>

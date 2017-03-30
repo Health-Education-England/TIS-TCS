@@ -82,6 +82,7 @@ server:
     session:
         cookie:
             http-only: true
+    context-path: /tcs
 
 info:
     project:

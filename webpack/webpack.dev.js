@@ -8,7 +8,7 @@ const ExtractTextPlugin = require("extract-text-webpack-plugin");
 const ENV = 'dev';
 const execSync = require('child_process').execSync;
 const fs = require('fs');
-const ddlPath = './target/www/vendor.json';
+const ddlPath = './ui-build/tcs/vendor.json';
 
 if (!fs.existsSync(ddlPath)) {
 	execSync('webpack --config webpack/webpack.vendor.js');
@@ -17,21 +17,10 @@ if (!fs.existsSync(ddlPath)) {
 module.exports = webpackMerge(commonConfig({env: ENV}), {
 	devtool: 'inline-source-map',
 	devServer: {
-		contentBase: './target/www',
-		proxy: [{
-			context: [
-				'/api',
-				'/management',
-				'/swagger-resources',
-				'/v2/api-docs',
-				'/h2-console'
-			],
-			target: 'http://127.0.0.1:8093',
-			secure: false
-		}]
+		contentBase: './ui-build'
 	},
 	output: {
-		path: path.resolve('target/www'),
+		path: path.resolve('ui-build/tcs'),
 		filename: '[name].bundle.js',
 		chunkFilename: '[id].chunk.js'
 	},
@@ -47,7 +36,7 @@ module.exports = webpackMerge(commonConfig({env: ENV}), {
 	plugins: [
 		new BrowserSyncPlugin({
 			host: 'localhost',
-			port: 9000,
+			port: 9093,
 			proxy: {
 				target: 'http://localhost:9060'
 			}

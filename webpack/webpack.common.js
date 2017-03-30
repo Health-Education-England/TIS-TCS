@@ -38,23 +38,23 @@ module.exports = function (options) {
 					exclude: ['./src/main/webapp/index.html']
 				},
 				{
-                    test: /\.scss$/,
-                    loaders: ['to-string-loader', 'css-loader', 'sass-loader'],
-                    exclude: /(vendor\.scss|global\.scss|main\.scss)/
-                },
-                {
-                    test: /(vendor\.scss|global\.scss|main\.scss)/,
-                    loaders: ['style-loader', 'css-loader', 'postcss-loader', 'sass-loader']
-                },
-                {
-                    test: /\.css$/,
-                    loaders: ['to-string-loader', 'css-loader'],
-                    exclude: /(vendor\.css|global\.css|main\.css)/
-                },
-                {
-                    test: /(vendor\.css|global\.css|main\.css)/,
-                    loaders: ['style-loader', 'css-loader']
-                },
+					test: /\.scss$/,
+					loaders: ['to-string-loader', 'css-loader', 'sass-loader'],
+					exclude: /(vendor\.scss|global\.scss|main\.scss)/
+				},
+				{
+					test: /(vendor\.scss|global\.scss|main\.scss)/,
+					loaders: ['style-loader', 'css-loader', 'postcss-loader', 'sass-loader']
+				},
+				{
+					test: /\.css$/,
+					loaders: ['to-string-loader', 'css-loader'],
+					exclude: /(vendor\.css|global\.css|main\.css)/
+				},
+				{
+					test: /(vendor\.css|global\.css|main\.css)/,
+					loaders: ['style-loader', 'css-loader']
+				},
 				{
 					test: /\.(jpe?g|png|gif|svg|woff|woff2|ttf|eot)$/i,
 					loaders: [
@@ -90,7 +90,7 @@ module.exports = function (options) {
 			}),
 			new webpack.DllReferencePlugin({
 				context: './',
-				manifest: require(path.resolve('./target/www/vendor.json')),
+				manifest: require(path.resolve('./ui-build/tcs/vendor.json')),
 			}),
 			new CopyWebpackPlugin([
 				{from: './node_modules/swagger-ui/dist', to: 'swagger-ui/dist'},
@@ -110,7 +110,7 @@ module.exports = function (options) {
 				inject: 'body'
 			}),
 			new AddAssetHtmlPlugin([
-				{filepath: path.resolve('./target/www/vendor.dll.js'), includeSourcemap: false}
+				{filepath: path.resolve('./ui-build/tcs/vendor.dll.js'), includeSourcemap: false}
 			]),
 			new StringReplacePlugin()
 		]
