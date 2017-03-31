@@ -13,7 +13,7 @@ CREATE TABLE `Specialty` (
   `specialtyGroupId` bigint(20) DEFAULT NULL,
   PRIMARY KEY (`id`),
   KEY `fk_specialty_specialty_group_id` (`specialtyGroupId`),
-  CONSTRAINT `fk_specialty_specialty_group_id` FOREIGN KEY (`specialtyGroupId`) REFERENCES `specialtygroup` (`id`)
+  CONSTRAINT `fk_specialty_specialty_group_id` FOREIGN KEY (`specialtyGroupId`) REFERENCES `SpecialtyGroup` (`id`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8;
 
 CREATE TABLE `TrainingNumber` (
@@ -55,7 +55,7 @@ CREATE TABLE `Curriculum` (
   `specialtyId` bigint(20) DEFAULT NULL,
   PRIMARY KEY (`id`),
   KEY `fk_curriculum_specialty_id` (`specialtyId`),
-  CONSTRAINT `fk_curriculum_specialty_id` FOREIGN KEY (`specialtyId`) REFERENCES `specialty` (`id`)
+  CONSTRAINT `fk_curriculum_specialty_id` FOREIGN KEY (`specialtyId`) REFERENCES `Specialty` (`id`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8;
 
 CREATE TABLE `CurriculumGrade` (
@@ -63,8 +63,8 @@ CREATE TABLE `CurriculumGrade` (
   `curriculaId` bigint(20) NOT NULL,
   PRIMARY KEY (`curriculaId`,`gradesId`),
   KEY `fk_curriculum_grade_grades_id` (`gradesId`),
-  CONSTRAINT `fk_curriculum_grade_curricula_id` FOREIGN KEY (`curriculaId`) REFERENCES `curriculum` (`id`),
-  CONSTRAINT `fk_curriculum_grade_grades_id` FOREIGN KEY (`gradesId`) REFERENCES `grade` (`id`)
+  CONSTRAINT `fk_curriculum_grade_curricula_id` FOREIGN KEY (`curriculaId`) REFERENCES `Curriculum` (`id`),
+  CONSTRAINT `fk_curriculum_grade_grades_id` FOREIGN KEY (`gradesId`) REFERENCES `Grade` (`id`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8;
 
 CREATE TABLE `ProgrammeMembership` (
@@ -85,7 +85,7 @@ CREATE TABLE `ProgrammeMembership` (
   KEY `fk_programme_membership_programme_id` (`programmeId`),
   KEY `fk_programme_membership_curriculum_id` (`curriculumId`),
   KEY `fk_programme_membership_training_number_id` (`trainingNumberId`),
-  CONSTRAINT `fk_programme_membership_curriculum_id` FOREIGN KEY (`curriculumId`) REFERENCES `curriculum` (`id`),
-  CONSTRAINT `fk_programme_membership_programme_id` FOREIGN KEY (`programmeId`) REFERENCES `programme` (`id`),
-  CONSTRAINT `fk_programme_membership_training_number_id` FOREIGN KEY (`trainingNumberId`) REFERENCES `trainingnumber` (`id`)
+  CONSTRAINT `fk_programme_membership_curriculum_id` FOREIGN KEY (`curriculumId`) REFERENCES `Curriculum` (`id`),
+  CONSTRAINT `fk_programme_membership_programme_id` FOREIGN KEY (`programmeId`) REFERENCES `Programme` (`id`),
+  CONSTRAINT `fk_programme_membership_training_number_id` FOREIGN KEY (`trainingNumberId`) REFERENCES `TrainingNumber` (`id`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8;
