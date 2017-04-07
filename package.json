@@ -80,8 +80,6 @@
     "tslint-loader": "3.4.1",
     "typescript": "2.1.6",
     "webpack": "2.2.1",
-    "webpack-archive-plugin": "^3.0.0",
-    "webpack-clean-plugin": "^0.2.3",
     "webpack-dev-server": "2.3.0",
     "webpack-merge": "2.6.1",
     "webpack-visualizer-plugin": "0.1.10",

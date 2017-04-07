@@ -1,6 +1,5 @@
 const commonConfig = require('./webpack.common.js');
 const webpackMerge = require('webpack-merge');
-const ArchivePlugin = require('webpack-archive-plugin');
 const ExtractTextPlugin = require("extract-text-webpack-plugin");
 const Visualizer = require('webpack-visualizer-plugin');
 const ENV = 'prod';
@@ -17,7 +16,6 @@ module.exports = webpackMerge(commonConfig({env: ENV}), {
 		new Visualizer({
 			// Webpack statistics in target folder
 			filename: '../stats.html'
-		}),
-		new ArchivePlugin()
+		})
 	]
 });
