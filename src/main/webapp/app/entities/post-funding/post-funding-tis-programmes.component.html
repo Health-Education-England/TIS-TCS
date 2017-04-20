@@ -1,0 +1,78 @@
+<div>
+	<h2>
+		<span jhiTranslate="tcsApp.postFunding.home.title">Post Fundings</span>
+		<button class="btn btn-primary float-right create-post-funding-tis-programmes"
+				[routerLink]="['/', { outlets: { popup: ['post-funding-tis-programmes-new'] } }]">
+			<span class="fa fa-plus"></span>
+			<span jhiTranslate="tcsApp.postFunding.home.createLabel">
+            Create new Post Funding
+            </span>
+		</button>
+	</h2>
+	<jhi-alert></jhi-alert>
+	<div class="row">
+	</div>
+	<br/>
+	<div class="table-responsive" *ngIf="postFundings">
+		<table class="table table-striped">
+			<thead>
+			<tr jhiSort [(predicate)]="predicate" [(ascending)]="reverse" [callback]="transition.bind(this)">
+				<th jhiSortBy="id"><span jhiTranslate="global.field.id">ID</span> <span class="fa fa-sort"></span></th>
+				<th jhiSortBy="fundingId"><span jhiTranslate="tcsApp.postFunding.funding">Funding</span> <span
+						class="fa fa-sort"></span></th>
+				<th jhiSortBy="fundingComponentsId"><span jhiTranslate="tcsApp.postFunding.fundingComponents">Funding Components</span>
+					<span class="fa fa-sort"></span></th>
+				<th></th>
+			</tr>
+			</thead>
+			<tbody>
+			<tr *ngFor="let postFunding of postFundings ;trackBy: trackId">
+				<td><a [routerLink]="['../post-funding-tis-programmes', postFunding.id ]">{{postFunding.id}}</a></td>
+				<td>
+					<div *ngIf="postFunding.fundingId">
+						<a [routerLink]="['../funding-tis-programmes', postFunding.fundingId  ]">{{postFunding.fundingId}}</a>
+					</div>
+				</td>
+				<td>
+					<div *ngIf="postFunding.fundingComponentsId">
+						<a [routerLink]="['../funding-components-tis-programmes', postFunding.fundingComponentsId  ]">{{postFunding.fundingComponentsId}}</a>
+					</div>
+				</td>
+				<td class="text-right">
+					<div class="btn-group flex-btn-group-container">
+						<button type="submit"
+								[routerLink]="['../post-funding-tis-programmes', postFunding.id ]"
+								class="btn btn-info btn-sm">
+							<span class="fa fa-eye"></span>
+							<span class="hidden-md-down" jhiTranslate="entity.action.view">View</span>
+						</button>
+						<button type="submit"
+								[routerLink]="['/', { outlets: { popup: 'post-funding-tis-programmes/'+ postFunding.id + '/edit'} }]"
+								replaceUrl="true"
+								class="btn btn-primary btn-sm">
+							<span class="fa fa-pencil"></span>
+							<span class="hidden-md-down" jhiTranslate="entity.action.edit">Edit</span>
+						</button>
+						<button type="submit"
+								[routerLink]="['/', { outlets: { popup: 'post-funding-tis-programmes/'+ postFunding.id + '/delete'} }]"
+								replaceUrl="true"
+								class="btn btn-danger btn-sm">
+							<span class="fa fa-remove"></span>
+							<span class="hidden-md-down" jhiTranslate="entity.action.delete">Delete</span>
+						</button>
+					</div>
+				</td>
+			</tr>
+			</tbody>
+		</table>
+	</div>
+	<div *ngIf="postFundings && postFundings.length">
+		<div class="row justify-content-center">
+			<jhi-item-count [page]="page" [total]="queryCount" [itemsPerPage]="itemsPerPage"></jhi-item-count>
+		</div>
+		<div class="row justify-content-center">
+			<ngb-pagination [collectionSize]="totalItems" [(page)]="page"
+							(pageChange)="loadPage(page)"></ngb-pagination>
+		</div>
+	</div>
+</div>

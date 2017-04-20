@@ -1,0 +1,15 @@
+{
+  "tcsApp": {
+    "PlacementType": {
+      "null": "",
+      "INPOSTSTANDARD": "INPOSTSTANDARD",
+      "INPOSTEXTENSION": "INPOSTEXTENSION",
+      "OOPC": "OOPC",
+      "OOPE": "OOPE",
+      "OOPR": "OOPR",
+      "OOPT": "OOPT",
+      "PARENTALLEAVE": "PARENTALLEAVE",
+      "SICKLEAVE": "SICKLEAVE"
+    }
+  }
+}

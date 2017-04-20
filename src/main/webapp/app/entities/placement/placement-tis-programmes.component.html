@@ -1,0 +1,96 @@
+<div>
+	<h2>
+		<span jhiTranslate="tcsApp.placement.home.title">Placements</span>
+		<button class="btn btn-primary float-right create-placement-tis-programmes"
+				[routerLink]="['/', { outlets: { popup: ['placement-tis-programmes-new'] } }]">
+			<span class="fa fa-plus"></span>
+			<span jhiTranslate="tcsApp.placement.home.createLabel">
+            Create new Placement
+            </span>
+		</button>
+	</h2>
+	<jhi-alert></jhi-alert>
+	<div class="row">
+	</div>
+	<br/>
+	<div class="table-responsive" *ngIf="placements">
+		<table class="table table-striped">
+			<thead>
+			<tr jhiSort [(predicate)]="predicate" [(ascending)]="reverse" [callback]="transition.bind(this)">
+				<th jhiSortBy="id"><span jhiTranslate="global.field.id">ID</span> <span class="fa fa-sort"></span></th>
+				<th jhiSortBy="status"><span jhiTranslate="tcsApp.placement.status">Status</span> <span
+						class="fa fa-sort"></span></th>
+				<th jhiSortBy="nationalPostNumber"><span jhiTranslate="tcsApp.placement.nationalPostNumber">National Post Number</span>
+					<span class="fa fa-sort"></span></th>
+				<th jhiSortBy="site"><span jhiTranslate="tcsApp.placement.site">Site</span> <span
+						class="fa fa-sort"></span></th>
+				<th jhiSortBy="grade"><span jhiTranslate="tcsApp.placement.grade">Grade</span> <span
+						class="fa fa-sort"></span></th>
+				<th jhiSortBy="specialty"><span jhiTranslate="tcsApp.placement.specialty">Specialty</span> <span
+						class="fa fa-sort"></span></th>
+				<th jhiSortBy="dateFrom"><span jhiTranslate="tcsApp.placement.dateFrom">Date From</span> <span
+						class="fa fa-sort"></span></th>
+				<th jhiSortBy="dateTo"><span jhiTranslate="tcsApp.placement.dateTo">Date To</span> <span
+						class="fa fa-sort"></span></th>
+				<th jhiSortBy="placementType"><span jhiTranslate="tcsApp.placement.placementType">Placement Type</span>
+					<span class="fa fa-sort"></span></th>
+				<th jhiSortBy="placementWholeTimeEquivalent"><span
+						jhiTranslate="tcsApp.placement.placementWholeTimeEquivalent">Placement Whole Time Equivalent</span>
+					<span class="fa fa-sort"></span></th>
+				<th jhiSortBy="slotShare"><span jhiTranslate="tcsApp.placement.slotShare">Slot Share</span> <span
+						class="fa fa-sort"></span></th>
+				<th></th>
+			</tr>
+			</thead>
+			<tbody>
+			<tr *ngFor="let placement of placements ;trackBy: trackId">
+				<td><a [routerLink]="['../placement-tis-programmes', placement.id ]">{{placement.id}}</a></td>
+				<td>{{placement.status}}</td>
+				<td>{{placement.nationalPostNumber}}</td>
+				<td>{{placement.site}}</td>
+				<td>{{placement.grade}}</td>
+				<td>{{placement.specialty}}</td>
+				<td>{{placement.dateFrom | date:'mediumDate'}}</td>
+				<td>{{placement.dateTo | date:'mediumDate'}}</td>
+				<td jhiTranslate="{{'tcsApp.PlacementType.' + placement.placementType}}">{{placement.placementType}}
+				</td>
+				<td>{{placement.placementWholeTimeEquivalent}}</td>
+				<td>{{placement.slotShare}}</td>
+				<td class="text-right">
+					<div class="btn-group flex-btn-group-container">
+						<button type="submit"
+								[routerLink]="['../placement-tis-programmes', placement.id ]"
+								class="btn btn-info btn-sm">
+							<span class="fa fa-eye"></span>
+							<span class="hidden-md-down" jhiTranslate="entity.action.view">View</span>
+						</button>
+						<button type="submit"
+								[routerLink]="['/', { outlets: { popup: 'placement-tis-programmes/'+ placement.id + '/edit'} }]"
+								replaceUrl="true"
+								class="btn btn-primary btn-sm">
+							<span class="fa fa-pencil"></span>
+							<span class="hidden-md-down" jhiTranslate="entity.action.edit">Edit</span>
+						</button>
+						<button type="submit"
+								[routerLink]="['/', { outlets: { popup: 'placement-tis-programmes/'+ placement.id + '/delete'} }]"
+								replaceUrl="true"
+								class="btn btn-danger btn-sm">
+							<span class="fa fa-remove"></span>
+							<span class="hidden-md-down" jhiTranslate="entity.action.delete">Delete</span>
+						</button>
+					</div>
+				</td>
+			</tr>
+			</tbody>
+		</table>
+	</div>
+	<div *ngIf="placements && placements.length">
+		<div class="row justify-content-center">
+			<jhi-item-count [page]="page" [total]="queryCount" [itemsPerPage]="itemsPerPage"></jhi-item-count>
+		</div>
+		<div class="row justify-content-center">
+			<ngb-pagination [collectionSize]="totalItems" [(page)]="page"
+							(pageChange)="loadPage(page)"></ngb-pagination>
+		</div>
+	</div>
+</div>

@@ -1,0 +1,33 @@
+{
+  "tcsApp": {
+    "post": {
+      "home": {
+        "title": "Posts",
+        "createLabel": "Create a new Post",
+        "createOrEditLabel": "Create or edit a Post"
+      },
+      "created": "A new Post is created with identifier {{ param }}",
+      "updated": "A Post is updated with identifier {{ param }}",
+      "deleted": "A Post is deleted with identifier {{ param }}",
+      "delete": {
+        "question": "Are you sure you want to delete Post {{ id }}?"
+      },
+      "detail": {
+        "title": "Post"
+      },
+      "nationalPostNumber": "National Post Number",
+      "status": "Status",
+      "postOwner": "Post Owner",
+      "mainSiteLocated": "Main Site Located",
+      "leadSite": "Lead Site",
+      "employingBody": "Employing Body",
+      "trainingBody": "Training Body",
+      "approvedGrade": "Approved Grade",
+      "postSpecialty": "Post Specialty",
+      "fullTimeEquivelent": "Full Time Equivelent",
+      "leadProvider": "Lead Provider",
+      "oldPost": "Old Post",
+      "newPost": "New Post"
+    }
+  }
+}

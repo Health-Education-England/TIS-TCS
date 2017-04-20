@@ -1,0 +1,23 @@
+{
+  "tcsApp": {
+    "fundingComponents": {
+      "home": {
+        "title": "Funding Components",
+        "createLabel": "Create a new Funding Components",
+        "createOrEditLabel": "Create or edit a Funding Components"
+      },
+      "created": "A new Funding Components is created with identifier {{ param }}",
+      "updated": "A Funding Components is updated with identifier {{ param }}",
+      "deleted": "A Funding Components is deleted with identifier {{ param }}",
+      "delete": {
+        "question": "Are you sure you want to delete Funding Components {{ id }}?"
+      },
+      "detail": {
+        "title": "Funding Components"
+      },
+      "percentage": "Percentage",
+      "amount": "Amount",
+      "fundingOrganisation": "Funding Organisation"
+    }
+  }
+}

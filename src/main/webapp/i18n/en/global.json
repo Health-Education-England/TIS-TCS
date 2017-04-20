@@ -15,6 +15,14 @@
 		"specialtyTisProgrammes": "Specialty",
 		"specialtyGroupTisProgrammes": "Specialty Group",
 		"trainingNumberTisProgrammes": "Training Number",
+		"fundingTisProgrammes": "Funding",
+		"fundingComponentsTisProgrammes": "Funding Components",
+		"placementFunderTisProgrammes": "Placement Funder",
+		"placementTisProgrammes": "Placement",
+		"postTisProgrammes": "Post",
+		"postFundingTisProgrammes": "Post Funding",
+		"tariffFundingTypeFieldsTisProgrammes": "Tariff Funding Type Fields",
+		"tariffRateTisProgrammes": "Tariff Rate",
 		"jhipster-needle-menu-add-entry": "JHipster will add additional entities here (do not translate!)"
 	  },
 	  "account": {
