@@ -1,0 +1,30 @@
+{
+  "tcsApp": {
+    "placement": {
+      "home": {
+        "title": "Placements",
+        "createLabel": "Create a new Placement",
+        "createOrEditLabel": "Create or edit a Placement"
+      },
+      "created": "A new Placement is created with identifier {{ param }}",
+      "updated": "A Placement is updated with identifier {{ param }}",
+      "deleted": "A Placement is deleted with identifier {{ param }}",
+      "delete": {
+        "question": "Are you sure you want to delete Placement {{ id }}?"
+      },
+      "detail": {
+        "title": "Placement"
+      },
+      "status": "Status",
+      "nationalPostNumber": "National Post Number",
+      "site": "Site",
+      "grade": "Grade",
+      "specialty": "Specialty",
+      "dateFrom": "Date From",
+      "dateTo": "Date To",
+      "placementType": "Placement Type",
+      "placementWholeTimeEquivalent": "Placement Whole Time Equivalent",
+      "slotShare": "Slot Share"
+    }
+  }
+}

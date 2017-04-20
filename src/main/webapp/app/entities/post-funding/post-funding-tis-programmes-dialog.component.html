@@ -1,0 +1,47 @@
+<form name="editForm" role="form" novalidate (ngSubmit)="save()" #editForm="ngForm">
+
+	<div class="modal-header">
+		<h4 class="modal-title" id="myPostFundingLabel" jhiTranslate="tcsApp.postFunding.home.createOrEditLabel">Create
+			or edit a Post Funding</h4>
+		<button type="button" class="close" data-dismiss="modal" aria-hidden="true"
+				(click)="clear()">&times;</button>
+	</div>
+	<div class="modal-body">
+		<jhi-alert-error></jhi-alert-error>
+		<div class="form-group" [hidden]="!postFunding.id">
+			<label for="id" jhiTranslate="global.field.id">ID</label>
+			<input type="text" class="form-control" id="id" name="id"
+				   [(ngModel)]="postFunding.id" readonly/>
+		</div>
+
+		<div class="form-group">
+			<label jhiTranslate="tcsApp.postFunding.funding" for="field_funding">Funding</label>
+			<select class="form-control" id="field_funding" name="funding" [(ngModel)]="postFunding.fundingId">
+				<option [ngValue]="null"></option>
+				<option [ngValue]="fundingOption.id" *ngFor="let fundingOption of fundings; trackBy: trackFundingById">
+					{{fundingOption.id}}
+				</option>
+			</select>
+		</div>
+		<div class="form-group">
+			<label jhiTranslate="tcsApp.postFunding.fundingComponents" for="field_fundingComponents">Funding
+				Components</label>
+			<select class="form-control" id="field_fundingComponents" name="fundingComponents"
+					[(ngModel)]="postFunding.fundingComponentsId">
+				<option [ngValue]="null"></option>
+				<option [ngValue]="fundingComponentsOption.id"
+						*ngFor="let fundingComponentsOption of fundingcomponents; trackBy: trackFundingComponentsById">
+					{{fundingComponentsOption.id}}
+				</option>
+			</select>
+		</div>
+	</div>
+	<div class="modal-footer">
+		<button type="button" class="btn btn-default" data-dismiss="modal" (click)="clear()">
+			<span class="fa fa-ban"></span>&nbsp;<span jhiTranslate="entity.action.cancel">Cancel</span>
+		</button>
+		<button type="submit" [disabled]="editForm.form.invalid || isSaving" class="btn btn-primary">
+			<span class="fa fa-save"></span>&nbsp;<span jhiTranslate="entity.action.save">Save</span>
+		</button>
+	</div>
+</form>

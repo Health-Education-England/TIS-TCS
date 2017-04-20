@@ -1,0 +1,32 @@
+<div *ngIf="postFunding">
+	<h2><span jhiTranslate="tcsApp.postFunding.detail.title">Post Funding</span> {{postFunding.id}}</h2>
+	<hr>
+	<jhi-alert-error></jhi-alert-error>
+	<dl class="row-md jh-entity-details">
+		<dt><span jhiTranslate="tcsApp.postFunding.funding">Funding</span></dt>
+		<dd>
+			<div *ngIf="postFunding.fundingId">
+				<a [routerLink]="['/funding-tis-programmes', postFunding.fundingId]">{{postFunding.fundingId}}</a>
+			</div>
+		</dd>
+		<dt><span jhiTranslate="tcsApp.postFunding.fundingComponents">Funding Components</span></dt>
+		<dd>
+			<div *ngIf="postFunding.fundingComponentsId">
+				<a [routerLink]="['/funding-components-tis-programmes', postFunding.fundingComponentsId]">{{postFunding.fundingComponentsId}}</a>
+			</div>
+		</dd>
+	</dl>
+
+	<button type="submit"
+			(click)="previousState()"
+			class="btn btn-info">
+		<span class="fa fa-arrow-left"></span>&nbsp;<span jhiTranslate="entity.action.back"> Back</span>
+	</button>
+
+	<button type="button"
+			[routerLink]="['/', { outlets: { popup: 'post-funding-tis-programmes/'+ postFunding.id + '/edit'} }]"
+			replaceUrl="true"
+			class="btn btn-primary">
+		<span class="fa fa-pencil"></span>&nbsp;<span jhiTranslate="entity.action.edit"> Edit</span>
+	</button>
+</div>

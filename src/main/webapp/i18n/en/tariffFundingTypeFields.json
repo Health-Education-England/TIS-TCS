@@ -1,0 +1,27 @@
+{
+  "tcsApp": {
+    "tariffFundingTypeFields": {
+      "home": {
+        "title": "Tariff Funding Type Fields",
+        "createLabel": "Create a new Tariff Funding Type Fields",
+        "createOrEditLabel": "Create or edit a Tariff Funding Type Fields"
+      },
+      "created": "A new Tariff Funding Type Fields is created with identifier {{ param }}",
+      "updated": "A Tariff Funding Type Fields is updated with identifier {{ param }}",
+      "deleted": "A Tariff Funding Type Fields is deleted with identifier {{ param }}",
+      "delete": {
+        "question": "Are you sure you want to delete Tariff Funding Type Fields {{ id }}?"
+      },
+      "detail": {
+        "title": "Tariff Funding Type Fields"
+      },
+      "effectiveDateFrom": "Effective Date From",
+      "effectiveDateTo": "Effective Date To",
+      "tariffRate": "Tariff Rate",
+      "placementRate": "Placement Rate",
+      "levelOfPost": "Level Of Post",
+      "placementRateFundedBy": "Placement Rate Funded By",
+      "placementRateProvidedTo": "Placement Rate Provided To"
+    }
+  }
+}

@@ -1,0 +1,22 @@
+{
+  "tcsApp": {
+    "postFunding": {
+      "home": {
+        "title": "Post Fundings",
+        "createLabel": "Create a new Post Funding",
+        "createOrEditLabel": "Create or edit a Post Funding"
+      },
+      "created": "A new Post Funding is created with identifier {{ param }}",
+      "updated": "A Post Funding is updated with identifier {{ param }}",
+      "deleted": "A Post Funding is deleted with identifier {{ param }}",
+      "delete": {
+        "question": "Are you sure you want to delete Post Funding {{ id }}?"
+      },
+      "detail": {
+        "title": "Post Funding"
+      },
+      "funding": "Funding",
+      "fundingComponents": "Funding Components"
+    }
+  }
+}
