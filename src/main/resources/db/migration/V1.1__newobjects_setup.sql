@@ -32,7 +32,7 @@ CREATE TABLE `FundingComponents` (
   `fundingOrganisationId` bigint(20) DEFAULT NULL,
   PRIMARY KEY (`id`),
   UNIQUE KEY `funding_organisation_id` (`fundingOrganisationId`),
-  CONSTRAINT `fk_funding_components_funding_organisation_id` FOREIGN KEY (`fundingOrganisationId`) REFERENCES `Placementfunder` (`id`)
+  CONSTRAINT `fk_funding_components_funding_organisation_id` FOREIGN KEY (`fundingOrganisationId`) REFERENCES `PlacementFunder` (`id`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8;
 
 CREATE TABLE `Placement` (
@@ -80,7 +80,7 @@ CREATE TABLE `PostFunding` (
   PRIMARY KEY (`id`),
   UNIQUE KEY `funding_components_id` (`fundingComponentsId`),
   UNIQUE KEY `funding_id` (`fundingId`),
-  CONSTRAINT `fk_post_funding_funding_components_id` FOREIGN KEY (`fundingComponentsId`) REFERENCES `Fundingcomponents` (`id`),
+  CONSTRAINT `fk_post_funding_funding_components_id` FOREIGN KEY (`fundingComponentsId`) REFERENCES `FundingComponents` (`id`),
   CONSTRAINT `fk_post_funding_funding_id` FOREIGN KEY (`fundingId`) REFERENCES `Funding` (`id`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8;
 
@@ -97,9 +97,9 @@ CREATE TABLE `TariffFundingTypeFields` (
   UNIQUE KEY `level_of_post_id` (`levelOfPostId`),
   UNIQUE KEY `placement_rate_funded_by_id` (`placementRateFundedById`),
   UNIQUE KEY `placement_rate_provided_to_id` (`placementRateProvidedToId`),
-  CONSTRAINT `fk_tariff_funding_type_fields_level_of_post_id` FOREIGN KEY (`levelOfPostId`) REFERENCES `Tariffrate` (`id`),
-  CONSTRAINT `fk_tariff_funding_type_fields_placement_rate_funded_by_id` FOREIGN KEY (`placementRateFundedById`) REFERENCES `Placementfunder` (`id`),
-  CONSTRAINT `fk_tariff_funding_type_fields_placement_rate_provided_to_id` FOREIGN KEY (`placementRateProvidedToId`) REFERENCES `Placementfunder` (`id`)
+  CONSTRAINT `fk_tariff_funding_type_fields_level_of_post_id` FOREIGN KEY (`levelOfPostId`) REFERENCES `TariffRate` (`id`),
+  CONSTRAINT `fk_tariff_funding_type_fields_placement_rate_funded_by_id` FOREIGN KEY (`placementRateFundedById`) REFERENCES `PlacementFunder` (`id`),
+  CONSTRAINT `fk_tariff_funding_type_fields_placement_rate_provided_to_id` FOREIGN KEY (`placementRateProvidedToId`) REFERENCES `PlacementFunder` (`id`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8;
 
 
