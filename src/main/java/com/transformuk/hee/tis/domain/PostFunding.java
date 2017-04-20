@@ -9,7 +9,6 @@ import java.util.Objects;
  * A PostFunding.
  */
 @Entity
-@Table(name = "postFunding")
 public class PostFunding implements Serializable {
 
 	private static final long serialVersionUID = 1L;

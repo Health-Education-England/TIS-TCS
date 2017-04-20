@@ -9,7 +9,6 @@ import java.util.Objects;
  * A Post.
  */
 @Entity
-@Table(name = "post")
 public class Post implements Serializable {
 
 	private static final long serialVersionUID = 1L;

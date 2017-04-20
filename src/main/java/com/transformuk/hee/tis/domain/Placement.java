@@ -12,7 +12,6 @@ import java.util.Objects;
  * A Placement.
  */
 @Entity
-@Table(name = "placement")
 public class Placement implements Serializable {
 
 	private static final long serialVersionUID = 1L;

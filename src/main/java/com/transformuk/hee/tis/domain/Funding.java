@@ -12,7 +12,6 @@ import java.util.Objects;
  * A Funding.
  */
 @Entity
-@Table(name = "funding")
 public class Funding implements Serializable {
 
 	private static final long serialVersionUID = 1L;

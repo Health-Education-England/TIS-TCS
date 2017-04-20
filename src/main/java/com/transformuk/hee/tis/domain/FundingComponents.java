@@ -10,7 +10,6 @@ import java.util.Objects;
  * A FundingComponents.
  */
 @Entity
-@Table(name = "fundingComponents")
 public class FundingComponents implements Serializable {
 
 	private static final long serialVersionUID = 1L;

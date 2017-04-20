@@ -9,7 +9,6 @@ import java.util.Objects;
  * A PlacementFunder.
  */
 @Entity
-@Table(name = "placementFunder")
 public class PlacementFunder implements Serializable {
 
 	private static final long serialVersionUID = 1L;
