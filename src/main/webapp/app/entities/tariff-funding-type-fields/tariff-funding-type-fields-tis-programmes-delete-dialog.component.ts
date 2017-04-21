@@ -20,7 +20,7 @@ export class TariffFundingTypeFieldsTisProgrammesDeleteDialogComponent {
 				private tariffFundingTypeFieldsService: TariffFundingTypeFieldsTisProgrammesService,
 				public activeModal: NgbActiveModal,
 				private eventManager: EventManager) {
-		this.jhiLanguageService.setLocations(['tariffFundingTypeFields']);
+		this.jhiLanguageService.addLocation('tariffFundingTypeFields');
 	}
 
 	clear() {

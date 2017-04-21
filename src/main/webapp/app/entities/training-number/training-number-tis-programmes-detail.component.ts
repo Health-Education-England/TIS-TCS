@@ -16,7 +16,8 @@ export class TrainingNumberTisProgrammesDetailComponent implements OnInit, OnDes
 	constructor(private jhiLanguageService: JhiLanguageService,
 				private trainingNumberService: TrainingNumberTisProgrammesService,
 				private route: ActivatedRoute) {
-		this.jhiLanguageService.setLocations(['trainingNumber', 'trainingNumberType']);
+		this.jhiLanguageService.addLocation('trainingNumber');
+		this.jhiLanguageService.addLocation('trainingNumberType');
 	}
 
 	ngOnInit() {

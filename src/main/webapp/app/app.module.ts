@@ -19,6 +19,7 @@ import {
 import {customHttpProvider} from "./blocks/interceptor/http.provider";
 import {PaginationConfig} from "./blocks/config/uib-pagination.config";
 
+import {TisHeaderModule} from "./tis-components/tis-header/tis-header.module";
 
 @NgModule({
 	imports: [
@@ -28,7 +29,8 @@ import {PaginationConfig} from "./blocks/config/uib-pagination.config";
 		TcsSharedModule,
 		TcsHomeModule,
 		TcsAdminModule,
-		TcsEntityModule
+		TcsEntityModule,
+		TisHeaderModule
 	],
 	declarations: [
 		JhiMainComponent,

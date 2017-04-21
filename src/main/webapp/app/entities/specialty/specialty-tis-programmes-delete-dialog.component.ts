@@ -18,7 +18,9 @@ export class SpecialtyTisProgrammesDeleteDialogComponent {
 				private specialtyService: SpecialtyTisProgrammesService,
 				public activeModal: NgbActiveModal,
 				private eventManager: EventManager) {
-		this.jhiLanguageService.setLocations(['specialty', 'status', 'specialtyType']);
+		this.jhiLanguageService.addLocation('specialty');
+		this.jhiLanguageService.addLocation('status');
+		this.jhiLanguageService.addLocation('specialtyType');
 	}
 
 	clear() {

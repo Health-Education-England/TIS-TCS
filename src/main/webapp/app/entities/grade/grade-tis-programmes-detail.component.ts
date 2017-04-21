@@ -16,7 +16,7 @@ export class GradeTisProgrammesDetailComponent implements OnInit, OnDestroy {
 	constructor(private jhiLanguageService: JhiLanguageService,
 				private gradeService: GradeTisProgrammesService,
 				private route: ActivatedRoute) {
-		this.jhiLanguageService.setLocations(['grade']);
+		this.jhiLanguageService.addLocation('grade');
 	}
 
 	ngOnInit() {

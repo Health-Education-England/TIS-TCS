@@ -18,7 +18,8 @@ export class TrainingNumberTisProgrammesDeleteDialogComponent {
 				private trainingNumberService: TrainingNumberTisProgrammesService,
 				public activeModal: NgbActiveModal,
 				private eventManager: EventManager) {
-		this.jhiLanguageService.setLocations(['trainingNumber', 'trainingNumberType']);
+		this.jhiLanguageService.addLocation('trainingNumber');
+		this.jhiLanguageService.addLocation('trainingNumberType');
 	}
 
 	clear() {

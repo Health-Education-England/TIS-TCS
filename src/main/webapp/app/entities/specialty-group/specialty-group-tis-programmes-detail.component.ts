@@ -16,7 +16,7 @@ export class SpecialtyGroupTisProgrammesDetailComponent implements OnInit, OnDes
 	constructor(private jhiLanguageService: JhiLanguageService,
 				private specialtyGroupService: SpecialtyGroupTisProgrammesService,
 				private route: ActivatedRoute) {
-		this.jhiLanguageService.setLocations(['specialtyGroup']);
+		this.jhiLanguageService.addLocation('specialtyGroup');
 	}
 
 	ngOnInit() {

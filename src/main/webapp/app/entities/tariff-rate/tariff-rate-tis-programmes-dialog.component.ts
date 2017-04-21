@@ -24,7 +24,7 @@ export class TariffRateTisProgrammesDialogComponent implements OnInit {
 				private alertService: AlertService,
 				private tariffRateService: TariffRateTisProgrammesService,
 				private eventManager: EventManager) {
-		this.jhiLanguageService.setLocations(['tariffRate']);
+		this.jhiLanguageService.addLocation('tariffRate');
 	}
 
 	ngOnInit() {

@@ -28,7 +28,8 @@ module.exports = function (options) {
 					test: /\.ts$/,
 					loaders: [
 						'angular2-template-loader',
-						'awesome-typescript-loader'
+						'awesome-typescript-loader',
+						'angular-router-loader'
 					],
 					exclude: ['node_modules/generator-jhipster']
 				},
@@ -94,6 +95,31 @@ module.exports = function (options) {
 			}),
 			new CopyWebpackPlugin([
 				{from: './node_modules/swagger-ui/dist', to: 'swagger-ui/dist'},
+				// {from: './node_modules/tis-header', to: '../../src/main/webapp/app/tis-components/tis-header'},
+				{from: './src/main/webapp/app/tis-common/fonts/icomoon/fonts/*', 
+					to: 'fonts',
+					flatten:true
+				},
+				{from: './src/main/webapp/app/tis-common/fonts/icomoon/fonts/*', 
+					to: '../../src/main/webapp/content/scss/fonts',
+					flatten:true
+				},
+				{from: './src/main/webapp/app/tis-common/**/*.scss', 
+					to: '../../src/main/webapp/content/scss/tis',
+					flatten:true
+				},
+				{from: './src/main/webapp/app/tis-components/**/*.scss', 
+					to: '../../src/main/webapp/content/scss/tis',
+					flatten:true
+				},
+				{from: './src/main/webapp/app/tis-components/**/images/*',
+					to: 'images',
+					flatten:true
+				},
+				{from: './src/main/webapp/app/tis-components/**/i18n/en/*',
+					to:  '../../src/main/webapp/i18n/en',
+					flatten:true
+				},
 				{from: './src/main/webapp/swagger-ui/', to: 'swagger-ui'},
 				{from: './src/main/webapp/favicon.ico', to: 'favicon.ico'},
 				{from: './src/main/webapp/robots.txt', to: 'robots.txt'},

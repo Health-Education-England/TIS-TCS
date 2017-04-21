@@ -7,6 +7,11 @@
 @import "src/main/webapp/content/scss/global/data-filter-tabs";
 @import "src/main/webapp/content/scss/global/data-module";
 @import "src/main/webapp/content/scss/global/left-nav";
-// tis
+
+// tis manually update those entries
+@import "src/main/webapp/app/tis-common/fonts/icomoon/hee-icons";
 @import "src/main/webapp/content/scss/tis/masthead";
+@import "src/main/webapp/app/tis-components/tis-header/assets/scss/tis-header";
+
+// global
 @import "src/main/webapp/content/scss/global";

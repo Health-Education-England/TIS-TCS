@@ -20,7 +20,7 @@ export class GradeTisProgrammesComponent implements OnInit, OnDestroy {
 				private alertService: AlertService,
 				private eventManager: EventManager,
 				private principal: Principal) {
-		this.jhiLanguageService.setLocations(['grade']);
+		this.jhiLanguageService.addLocation('grade');
 	}
 
 	loadAll() {

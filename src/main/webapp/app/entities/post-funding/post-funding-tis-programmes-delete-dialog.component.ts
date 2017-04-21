@@ -20,7 +20,7 @@ export class PostFundingTisProgrammesDeleteDialogComponent {
 				private postFundingService: PostFundingTisProgrammesService,
 				public activeModal: NgbActiveModal,
 				private eventManager: EventManager) {
-		this.jhiLanguageService.setLocations(['postFunding']);
+		this.jhiLanguageService.addLocation('postFunding');
 	}
 
 	clear() {

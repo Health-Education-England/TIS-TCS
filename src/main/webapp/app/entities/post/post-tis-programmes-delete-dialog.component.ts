@@ -20,7 +20,7 @@ export class PostTisProgrammesDeleteDialogComponent {
 				private postService: PostTisProgrammesService,
 				public activeModal: NgbActiveModal,
 				private eventManager: EventManager) {
-		this.jhiLanguageService.setLocations(['post']);
+		this.jhiLanguageService.addLocation('post');
 	}
 
 	clear() {

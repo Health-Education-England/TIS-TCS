@@ -23,7 +23,7 @@ export class TariffFundingTypeFieldsTisProgrammesComponent implements OnInit, On
 				private alertService: AlertService,
 				private eventManager: EventManager,
 				private principal: Principal) {
-		this.jhiLanguageService.setLocations(['tariffFundingTypeFields']);
+		this.jhiLanguageService.addLocation('tariffFundingTypeFields');
 	}
 
 	loadAll() {

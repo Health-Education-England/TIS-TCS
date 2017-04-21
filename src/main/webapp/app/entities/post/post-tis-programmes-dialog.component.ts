@@ -28,7 +28,7 @@ export class PostTisProgrammesDialogComponent implements OnInit {
 				private alertService: AlertService,
 				private postService: PostTisProgrammesService,
 				private eventManager: EventManager) {
-		this.jhiLanguageService.setLocations(['post']);
+		this.jhiLanguageService.addLocation('post');
 	}
 
 	ngOnInit() {

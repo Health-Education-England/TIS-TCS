@@ -20,7 +20,7 @@ export class PostFundingTisProgrammesDetailComponent implements OnInit, OnDestro
 				private jhiLanguageService: JhiLanguageService,
 				private postFundingService: PostFundingTisProgrammesService,
 				private route: ActivatedRoute) {
-		this.jhiLanguageService.setLocations(['postFunding']);
+		this.jhiLanguageService.addLocation('postFunding');
 	}
 
 	ngOnInit() {

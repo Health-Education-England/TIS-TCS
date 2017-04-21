@@ -20,7 +20,7 @@ export class TariffRateTisProgrammesDetailComponent implements OnInit, OnDestroy
 				private jhiLanguageService: JhiLanguageService,
 				private tariffRateService: TariffRateTisProgrammesService,
 				private route: ActivatedRoute) {
-		this.jhiLanguageService.setLocations(['tariffRate']);
+		this.jhiLanguageService.addLocation('tariffRate');
 	}
 
 	ngOnInit() {

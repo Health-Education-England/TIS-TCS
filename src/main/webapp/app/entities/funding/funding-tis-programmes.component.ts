@@ -47,7 +47,8 @@ export class FundingTisProgrammesComponent implements OnInit, OnDestroy {
 			this.reverse = data['pagingParams'].ascending;
 			this.predicate = data['pagingParams'].predicate;
 		});
-		this.jhiLanguageService.setLocations(['funding', 'fundingType']);
+		this.jhiLanguageService.addLocation('funding');
+		this.jhiLanguageService.addLocation('fundingType');
 	}
 
 	loadAll() {

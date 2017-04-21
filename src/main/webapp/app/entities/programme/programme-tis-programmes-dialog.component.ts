@@ -25,7 +25,8 @@ export class ProgrammeTisProgrammesDialogComponent implements OnInit {
 				private programmeService: ProgrammeTisProgrammesService,
 				private programmeMembershipService: ProgrammeMembershipTisProgrammesService,
 				private eventManager: EventManager) {
-		this.jhiLanguageService.setLocations(['programme', 'status']);
+		this.jhiLanguageService.addLocation('programme');
+		this.jhiLanguageService.addLocation('status');
 	}
 
 	ngOnInit() {

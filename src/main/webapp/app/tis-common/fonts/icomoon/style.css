@@ -1,0 +1,117 @@
+@font-face {
+  font-family: 'icomoon';
+  src:  url('fonts/icomoon.eot?2c96e7');
+  src:  url('fonts/icomoon.eot?2c96e7#iefix') format('embedded-opentype'),
+    url('fonts/icomoon.ttf?2c96e7') format('truetype'),
+    url('fonts/icomoon.woff?2c96e7') format('woff'),
+    url('fonts/icomoon.svg?2c96e7#icomoon') format('svg');
+  font-weight: normal;
+  font-style: normal;
+}
+
+[class^="hee-icon-"], [class*=" hee-icon-"] {
+  /* use !important to prevent issues with browser extensions that change fonts */
+  font-family: 'icomoon' !important;
+  speak: none;
+  font-style: normal;
+  font-weight: normal;
+  font-variant: normal;
+  text-transform: none;
+  line-height: 1;
+
+  /* Better Font Rendering =========== */
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+}
+
+.hee-icon-jira-feedback:before {
+  content: "\e91b";
+}
+.hee-icon-notification:before {
+  content: "\e91c";
+}
+.hee-icon-envelope:before {
+  content: "\e918";
+}
+.hee-icon-chevron-left:before {
+  content: "\e919";
+}
+.hee-icon-chevron-right:before {
+  content: "\e91a";
+}
+.hee-icon-right-arrow:before {
+  content: "\e916";
+}
+.hee-icon-deferred:before {
+  content: "\e900";
+}
+.hee-icon-submitted:before {
+  content: "\e901";
+}
+.hee-icon-inprogress:before {
+  content: "\e902";
+}
+.hee-icon-revalidated:before {
+  content: "\e903";
+}
+.hee-icon-paused:before {
+  content: "\e904";
+}
+.hee-icon-trainees:before {
+  content: "\e905";
+}
+.hee-icon-programmes:before {
+  content: "\e906";
+}
+.hee-icon-trainers:before {
+  content: "\e907";
+}
+.hee-icon-planning:before {
+  content: "\e908";
+}
+.hee-icon-reporting:before {
+  content: "\e909";
+}
+.hee-icon-watch-trainee:before {
+  content: "\e90a";
+}
+.hee-icon-unwatch-trainee:before {
+  content: "\e90b";
+}
+.hee-icon-logout:before {
+  content: "\e90c";
+}
+.hee-icon-popout:before {
+  content: "\e90d";
+}
+.hee-icon-notes:before {
+  content: "\e90e";
+}
+.hee-icon-concern:before {
+  content: "\e90f";
+}
+.hee-icon-back-and-up-arrow:before {
+  content: "\e910";
+}
+.hee-icon-column-edit:before {
+  content: "\e911";
+}
+.hee-icon-down-triangle:before {
+  content: "\e912";
+}
+.hee-icon-up-triangle:before {
+  content: "\e913";
+}
+.hee-icon-warning:before {
+  content: "\e914";
+}
+.hee-icon-left-arrow:before {
+  content: "\e917";
+}
+.hee-icon-cross:before {
+  content: "\ea0f";
+}
+.hee-icon-tick:before {
+  content: "\ea10";
+}
+

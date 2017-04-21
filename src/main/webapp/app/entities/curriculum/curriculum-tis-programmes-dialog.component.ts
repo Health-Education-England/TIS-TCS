@@ -33,7 +33,9 @@ export class CurriculumTisProgrammesDialogComponent implements OnInit {
 				private gradeService: GradeTisProgrammesService,
 				private specialtyService: SpecialtyTisProgrammesService,
 				private eventManager: EventManager) {
-		this.jhiLanguageService.setLocations(['curriculum', 'curriculumSubType', 'assessmentType']);
+		this.jhiLanguageService.addLocation('curriculum');
+		this.jhiLanguageService.addLocation('curriculumSubType');
+		this.jhiLanguageService.addLocation('assessmentType');
 	}
 
 	ngOnInit() {

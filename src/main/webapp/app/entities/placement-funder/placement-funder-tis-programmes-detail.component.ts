@@ -20,7 +20,7 @@ export class PlacementFunderTisProgrammesDetailComponent implements OnInit, OnDe
 				private jhiLanguageService: JhiLanguageService,
 				private placementFunderService: PlacementFunderTisProgrammesService,
 				private route: ActivatedRoute) {
-		this.jhiLanguageService.setLocations(['placementFunder']);
+		this.jhiLanguageService.addLocation('placementFunder');
 	}
 
 	ngOnInit() {

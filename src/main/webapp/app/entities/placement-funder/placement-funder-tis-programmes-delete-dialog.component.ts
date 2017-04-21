@@ -20,7 +20,7 @@ export class PlacementFunderTisProgrammesDeleteDialogComponent {
 				private placementFunderService: PlacementFunderTisProgrammesService,
 				public activeModal: NgbActiveModal,
 				private eventManager: EventManager) {
-		this.jhiLanguageService.setLocations(['placementFunder']);
+		this.jhiLanguageService.addLocation('placementFunder');
 	}
 
 	clear() {

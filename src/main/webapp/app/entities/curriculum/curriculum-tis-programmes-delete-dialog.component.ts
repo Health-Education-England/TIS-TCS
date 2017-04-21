@@ -18,7 +18,9 @@ export class CurriculumTisProgrammesDeleteDialogComponent {
 				private curriculumService: CurriculumTisProgrammesService,
 				public activeModal: NgbActiveModal,
 				private eventManager: EventManager) {
-		this.jhiLanguageService.setLocations(['curriculum', 'curriculumSubType', 'assessmentType']);
+		this.jhiLanguageService.addLocation('curriculum');
+		this.jhiLanguageService.addLocation('curriculumSubType');
+		this.jhiLanguageService.addLocation('assessmentType');
 	}
 
 	clear() {

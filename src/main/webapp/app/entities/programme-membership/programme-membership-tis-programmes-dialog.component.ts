@@ -33,7 +33,8 @@ export class ProgrammeMembershipTisProgrammesDialogComponent implements OnInit {
 				private curriculumService: CurriculumTisProgrammesService,
 				private trainingNumberService: TrainingNumberTisProgrammesService,
 				private eventManager: EventManager) {
-		this.jhiLanguageService.setLocations(['programmeMembership', 'programmeMembershipType']);
+		this.jhiLanguageService.addLocation('programmeMembership');
+		this.jhiLanguageService.addLocation('programmeMembershipType');
 	}
 
 	ngOnInit() {

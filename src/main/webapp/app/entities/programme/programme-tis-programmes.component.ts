@@ -46,7 +46,8 @@ export class ProgrammeTisProgrammesComponent implements OnInit, OnDestroy {
 			this.reverse = data['pagingParams'].ascending;
 			this.predicate = data['pagingParams'].predicate;
 		});
-		this.jhiLanguageService.setLocations(['programme', 'status']);
+		this.jhiLanguageService.addLocation('programme');
+		this.jhiLanguageService.addLocation('status');
 	}
 
 	loadAll() {

@@ -47,7 +47,7 @@ export class PostFundingTisProgrammesComponent implements OnInit, OnDestroy {
 			this.reverse = data['pagingParams'].ascending;
 			this.predicate = data['pagingParams'].predicate;
 		});
-		this.jhiLanguageService.setLocations(['postFunding']);
+		this.jhiLanguageService.addLocation('postFunding');
 	}
 
 	loadAll() {

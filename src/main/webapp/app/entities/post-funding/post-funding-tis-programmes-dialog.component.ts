@@ -32,7 +32,7 @@ export class PostFundingTisProgrammesDialogComponent implements OnInit {
 				private fundingService: FundingTisProgrammesService,
 				private fundingComponentsService: FundingComponentsTisProgrammesService,
 				private eventManager: EventManager) {
-		this.jhiLanguageService.setLocations(['postFunding']);
+		this.jhiLanguageService.addLocation('postFunding');
 	}
 
 	ngOnInit() {

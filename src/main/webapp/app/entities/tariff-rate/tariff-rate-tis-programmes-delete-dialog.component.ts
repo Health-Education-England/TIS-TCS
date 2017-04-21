@@ -20,7 +20,7 @@ export class TariffRateTisProgrammesDeleteDialogComponent {
 				private tariffRateService: TariffRateTisProgrammesService,
 				public activeModal: NgbActiveModal,
 				private eventManager: EventManager) {
-		this.jhiLanguageService.setLocations(['tariffRate']);
+		this.jhiLanguageService.addLocation('tariffRate');
 	}
 
 	clear() {

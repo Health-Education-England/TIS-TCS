@@ -18,7 +18,8 @@ export class ProgrammeTisProgrammesDeleteDialogComponent {
 				private programmeService: ProgrammeTisProgrammesService,
 				public activeModal: NgbActiveModal,
 				private eventManager: EventManager) {
-		this.jhiLanguageService.setLocations(['programme', 'status']);
+		this.jhiLanguageService.addLocation('programme');
+		this.jhiLanguageService.addLocation('status');
 	}
 
 	clear() {

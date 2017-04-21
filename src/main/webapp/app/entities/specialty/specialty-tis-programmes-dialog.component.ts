@@ -29,7 +29,9 @@ export class SpecialtyTisProgrammesDialogComponent implements OnInit {
 				private curriculumService: CurriculumTisProgrammesService,
 				private specialtyGroupService: SpecialtyGroupTisProgrammesService,
 				private eventManager: EventManager) {
-		this.jhiLanguageService.setLocations(['specialty', 'status', 'specialtyType']);
+		this.jhiLanguageService.addLocation('specialty');
+		this.jhiLanguageService.addLocation('status');
+		this.jhiLanguageService.addLocation('specialtyType');
 	}
 
 	ngOnInit() {
