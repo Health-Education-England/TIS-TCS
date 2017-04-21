@@ -8,6 +8,7 @@ import io.github.jhipster.web.util.ResponseUtil;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
 
 import java.net.URI;
@@ -39,6 +40,7 @@ public class SpecialtyGroupResource {
 	 */
 	@PostMapping("/specialty-groups")
 	@Timed
+	@PreAuthorize("hasAuthority('tcs:add:modify:entities')")
 	public ResponseEntity<SpecialtyGroupDTO> createSpecialtyGroup(@RequestBody SpecialtyGroupDTO specialtyGroupDTO) throws URISyntaxException {
 		log.debug("REST request to save SpecialtyGroup : {}", specialtyGroupDTO);
 		if (specialtyGroupDTO.getId() != null) {
@@ -61,6 +63,7 @@ public class SpecialtyGroupResource {
 	 */
 	@PutMapping("/specialty-groups")
 	@Timed
+	@PreAuthorize("hasAuthority('tcs:add:modify:entities')")
 	public ResponseEntity<SpecialtyGroupDTO> updateSpecialtyGroup(@RequestBody SpecialtyGroupDTO specialtyGroupDTO) throws URISyntaxException {
 		log.debug("REST request to update SpecialtyGroup : {}", specialtyGroupDTO);
 		if (specialtyGroupDTO.getId() == null) {
@@ -79,6 +82,7 @@ public class SpecialtyGroupResource {
 	 */
 	@GetMapping("/specialty-groups")
 	@Timed
+	@PreAuthorize("hasAuthority('tcs:view:entities')")
 	public List<SpecialtyGroupDTO> getAllSpecialtyGroups() {
 		log.debug("REST request to get all SpecialtyGroups");
 		return specialtyGroupService.findAll();
@@ -92,6 +96,7 @@ public class SpecialtyGroupResource {
 	 */
 	@GetMapping("/specialty-groups/{id}")
 	@Timed
+	@PreAuthorize("hasAuthority('tcs:view:entities')")
 	public ResponseEntity<SpecialtyGroupDTO> getSpecialtyGroup(@PathVariable Long id) {
 		log.debug("REST request to get SpecialtyGroup : {}", id);
 		SpecialtyGroupDTO specialtyGroupDTO = specialtyGroupService.findOne(id);
@@ -106,6 +111,7 @@ public class SpecialtyGroupResource {
 	 */
 	@DeleteMapping("/specialty-groups/{id}")
 	@Timed
+	@PreAuthorize("hasAuthority('tcs:delete:entities')")
 	public ResponseEntity<Void> deleteSpecialtyGroup(@PathVariable Long id) {
 		log.debug("REST request to delete SpecialtyGroup : {}", id);
 		specialtyGroupService.delete(id);

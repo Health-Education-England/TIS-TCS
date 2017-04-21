@@ -14,6 +14,7 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
 
 import java.net.URI;
@@ -47,6 +48,7 @@ public class FundingResource {
 	 */
 	@PostMapping("/fundings")
 	@Timed
+	@PreAuthorize("hasAuthority('tcs:add:modify:entities')")
 	public ResponseEntity<FundingDTO> createFunding(@RequestBody FundingDTO fundingDTO) throws URISyntaxException {
 		log.debug("REST request to save Funding : {}", fundingDTO);
 		if (fundingDTO.getId() != null) {
@@ -69,6 +71,7 @@ public class FundingResource {
 	 */
 	@PutMapping("/fundings")
 	@Timed
+	@PreAuthorize("hasAuthority('tcs:add:modify:entities')")
 	public ResponseEntity<FundingDTO> updateFunding(@RequestBody FundingDTO fundingDTO) throws URISyntaxException {
 		log.debug("REST request to update Funding : {}", fundingDTO);
 		if (fundingDTO.getId() == null) {
@@ -88,6 +91,7 @@ public class FundingResource {
 	 */
 	@GetMapping("/fundings")
 	@Timed
+	@PreAuthorize("hasAuthority('tcs:view:entities')")
 	public ResponseEntity<List<FundingDTO>> getAllFundings(@ApiParam Pageable pageable) {
 		log.debug("REST request to get a page of Fundings");
 		Page<FundingDTO> page = fundingService.findAll(pageable);
@@ -103,6 +107,7 @@ public class FundingResource {
 	 */
 	@GetMapping("/fundings/{id}")
 	@Timed
+	@PreAuthorize("hasAuthority('tcs:view:entities')")
 	public ResponseEntity<FundingDTO> getFunding(@PathVariable Long id) {
 		log.debug("REST request to get Funding : {}", id);
 		FundingDTO fundingDTO = fundingService.findOne(id);
@@ -117,6 +122,7 @@ public class FundingResource {
 	 */
 	@DeleteMapping("/fundings/{id}")
 	@Timed
+	@PreAuthorize("hasAuthority('tcs:delete:entities')")
 	public ResponseEntity<Void> deleteFunding(@PathVariable Long id) {
 		log.debug("REST request to delete Funding : {}", id);
 		fundingService.delete(id);

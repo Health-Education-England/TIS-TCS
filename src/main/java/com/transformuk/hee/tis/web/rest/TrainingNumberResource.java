@@ -8,6 +8,7 @@ import io.github.jhipster.web.util.ResponseUtil;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
 
 import java.net.URI;
@@ -39,6 +40,7 @@ public class TrainingNumberResource {
 	 */
 	@PostMapping("/training-numbers")
 	@Timed
+	@PreAuthorize("hasAuthority('tcs:add:modify:entities')")
 	public ResponseEntity<TrainingNumberDTO> createTrainingNumber(@RequestBody TrainingNumberDTO trainingNumberDTO) throws URISyntaxException {
 		log.debug("REST request to save TrainingNumber : {}", trainingNumberDTO);
 		if (trainingNumberDTO.getId() != null) {
@@ -61,6 +63,7 @@ public class TrainingNumberResource {
 	 */
 	@PutMapping("/training-numbers")
 	@Timed
+	@PreAuthorize("hasAuthority('tcs:add:modify:entities')")
 	public ResponseEntity<TrainingNumberDTO> updateTrainingNumber(@RequestBody TrainingNumberDTO trainingNumberDTO) throws URISyntaxException {
 		log.debug("REST request to update TrainingNumber : {}", trainingNumberDTO);
 		if (trainingNumberDTO.getId() == null) {
@@ -79,6 +82,7 @@ public class TrainingNumberResource {
 	 */
 	@GetMapping("/training-numbers")
 	@Timed
+	@PreAuthorize("hasAuthority('tcs:view:entities')")
 	public List<TrainingNumberDTO> getAllTrainingNumbers() {
 		log.debug("REST request to get all TrainingNumbers");
 		return trainingNumberService.findAll();
@@ -92,6 +96,7 @@ public class TrainingNumberResource {
 	 */
 	@GetMapping("/training-numbers/{id}")
 	@Timed
+	@PreAuthorize("hasAuthority('tcs:view:entities')")
 	public ResponseEntity<TrainingNumberDTO> getTrainingNumber(@PathVariable Long id) {
 		log.debug("REST request to get TrainingNumber : {}", id);
 		TrainingNumberDTO trainingNumberDTO = trainingNumberService.findOne(id);
@@ -106,6 +111,7 @@ public class TrainingNumberResource {
 	 */
 	@DeleteMapping("/training-numbers/{id}")
 	@Timed
+	@PreAuthorize("hasAuthority('tcs:delete:entities')")
 	public ResponseEntity<Void> deleteTrainingNumber(@PathVariable Long id) {
 		log.debug("REST request to delete TrainingNumber : {}", id);
 		trainingNumberService.delete(id);

@@ -14,6 +14,7 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
 
 import java.net.URI;
@@ -47,6 +48,7 @@ public class PostResource {
 	 */
 	@PostMapping("/posts")
 	@Timed
+	@PreAuthorize("hasAuthority('tcs:add:modify:entities')")
 	public ResponseEntity<PostDTO> createPost(@RequestBody PostDTO postDTO) throws URISyntaxException {
 		log.debug("REST request to save Post : {}", postDTO);
 		if (postDTO.getId() != null) {
@@ -69,6 +71,7 @@ public class PostResource {
 	 */
 	@PutMapping("/posts")
 	@Timed
+	@PreAuthorize("hasAuthority('tcs:add:modify:entities')")
 	public ResponseEntity<PostDTO> updatePost(@RequestBody PostDTO postDTO) throws URISyntaxException {
 		log.debug("REST request to update Post : {}", postDTO);
 		if (postDTO.getId() == null) {
@@ -88,6 +91,7 @@ public class PostResource {
 	 */
 	@GetMapping("/posts")
 	@Timed
+	@PreAuthorize("hasAuthority('tcs:view:entities')")
 	public ResponseEntity<List<PostDTO>> getAllPosts(@ApiParam Pageable pageable) {
 		log.debug("REST request to get a page of Posts");
 		Page<PostDTO> page = postService.findAll(pageable);
@@ -103,6 +107,7 @@ public class PostResource {
 	 */
 	@GetMapping("/posts/{id}")
 	@Timed
+	@PreAuthorize("hasAuthority('tcs:view:entities')")
 	public ResponseEntity<PostDTO> getPost(@PathVariable Long id) {
 		log.debug("REST request to get Post : {}", id);
 		PostDTO postDTO = postService.findOne(id);
@@ -117,6 +122,7 @@ public class PostResource {
 	 */
 	@DeleteMapping("/posts/{id}")
 	@Timed
+	@PreAuthorize("hasAuthority('tcs:delete:entities')")
 	public ResponseEntity<Void> deletePost(@PathVariable Long id) {
 		log.debug("REST request to delete Post : {}", id);
 		postService.delete(id);

@@ -8,6 +8,7 @@ import io.github.jhipster.web.util.ResponseUtil;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
 
 import java.net.URI;
@@ -41,6 +42,7 @@ public class TariffFundingTypeFieldsResource {
 	 */
 	@PostMapping("/tariff-funding-type-fields")
 	@Timed
+	@PreAuthorize("hasAuthority('tcs:add:modify:entities')")
 	public ResponseEntity<TariffFundingTypeFieldsDTO> createTariffFundingTypeFields(@RequestBody TariffFundingTypeFieldsDTO tariffFundingTypeFieldsDTO) throws URISyntaxException {
 		log.debug("REST request to save TariffFundingTypeFields : {}", tariffFundingTypeFieldsDTO);
 		if (tariffFundingTypeFieldsDTO.getId() != null) {
@@ -63,6 +65,7 @@ public class TariffFundingTypeFieldsResource {
 	 */
 	@PutMapping("/tariff-funding-type-fields")
 	@Timed
+	@PreAuthorize("hasAuthority('tcs:add:modify:entities')")
 	public ResponseEntity<TariffFundingTypeFieldsDTO> updateTariffFundingTypeFields(@RequestBody TariffFundingTypeFieldsDTO tariffFundingTypeFieldsDTO) throws URISyntaxException {
 		log.debug("REST request to update TariffFundingTypeFields : {}", tariffFundingTypeFieldsDTO);
 		if (tariffFundingTypeFieldsDTO.getId() == null) {
@@ -81,6 +84,7 @@ public class TariffFundingTypeFieldsResource {
 	 */
 	@GetMapping("/tariff-funding-type-fields")
 	@Timed
+	@PreAuthorize("hasAuthority('tcs:view:entities')")
 	public List<TariffFundingTypeFieldsDTO> getAllTariffFundingTypeFields() {
 		log.debug("REST request to get all TariffFundingTypeFields");
 		return tariffFundingTypeFieldsService.findAll();
@@ -94,6 +98,7 @@ public class TariffFundingTypeFieldsResource {
 	 */
 	@GetMapping("/tariff-funding-type-fields/{id}")
 	@Timed
+	@PreAuthorize("hasAuthority('tcs:view:entities')")
 	public ResponseEntity<TariffFundingTypeFieldsDTO> getTariffFundingTypeFields(@PathVariable Long id) {
 		log.debug("REST request to get TariffFundingTypeFields : {}", id);
 		TariffFundingTypeFieldsDTO tariffFundingTypeFieldsDTO = tariffFundingTypeFieldsService.findOne(id);
@@ -108,6 +113,7 @@ public class TariffFundingTypeFieldsResource {
 	 */
 	@DeleteMapping("/tariff-funding-type-fields/{id}")
 	@Timed
+	@PreAuthorize("hasAuthority('tcs:delete:entities')")
 	public ResponseEntity<Void> deleteTariffFundingTypeFields(@PathVariable Long id) {
 		log.debug("REST request to delete TariffFundingTypeFields : {}", id);
 		tariffFundingTypeFieldsService.delete(id);

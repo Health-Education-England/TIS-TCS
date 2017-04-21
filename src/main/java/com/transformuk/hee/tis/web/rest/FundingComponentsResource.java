@@ -14,6 +14,7 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
 
 import java.net.URI;
@@ -47,6 +48,7 @@ public class FundingComponentsResource {
 	 */
 	@PostMapping("/funding-components")
 	@Timed
+	@PreAuthorize("hasAuthority('tcs:add:modify:entities')")
 	public ResponseEntity<FundingComponentsDTO> createFundingComponents(@RequestBody FundingComponentsDTO fundingComponentsDTO) throws URISyntaxException {
 		log.debug("REST request to save FundingComponents : {}", fundingComponentsDTO);
 		if (fundingComponentsDTO.getId() != null) {
@@ -69,6 +71,7 @@ public class FundingComponentsResource {
 	 */
 	@PutMapping("/funding-components")
 	@Timed
+	@PreAuthorize("hasAuthority('tcs:add:modify:entities')")
 	public ResponseEntity<FundingComponentsDTO> updateFundingComponents(@RequestBody FundingComponentsDTO fundingComponentsDTO) throws URISyntaxException {
 		log.debug("REST request to update FundingComponents : {}", fundingComponentsDTO);
 		if (fundingComponentsDTO.getId() == null) {
@@ -88,6 +91,7 @@ public class FundingComponentsResource {
 	 */
 	@GetMapping("/funding-components")
 	@Timed
+	@PreAuthorize("hasAuthority('tcs:view:entities')")
 	public ResponseEntity<List<FundingComponentsDTO>> getAllFundingComponents(@ApiParam Pageable pageable) {
 		log.debug("REST request to get a page of FundingComponents");
 		Page<FundingComponentsDTO> page = fundingComponentsService.findAll(pageable);
@@ -103,6 +107,7 @@ public class FundingComponentsResource {
 	 */
 	@GetMapping("/funding-components/{id}")
 	@Timed
+	@PreAuthorize("hasAuthority('tcs:view:entities')")
 	public ResponseEntity<FundingComponentsDTO> getFundingComponents(@PathVariable Long id) {
 		log.debug("REST request to get FundingComponents : {}", id);
 		FundingComponentsDTO fundingComponentsDTO = fundingComponentsService.findOne(id);
@@ -117,6 +122,7 @@ public class FundingComponentsResource {
 	 */
 	@DeleteMapping("/funding-components/{id}")
 	@Timed
+	@PreAuthorize("hasAuthority('tcs:delete:entities')")
 	public ResponseEntity<Void> deleteFundingComponents(@PathVariable Long id) {
 		log.debug("REST request to delete FundingComponents : {}", id);
 		fundingComponentsService.delete(id);
