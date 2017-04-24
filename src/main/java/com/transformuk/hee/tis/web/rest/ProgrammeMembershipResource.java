@@ -14,6 +14,7 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
 
 import java.net.URI;
@@ -45,6 +46,7 @@ public class ProgrammeMembershipResource {
 	 */
 	@PostMapping("/programme-memberships")
 	@Timed
+	@PreAuthorize("hasAuthority('tcs:add:modify:entities')")
 	public ResponseEntity<ProgrammeMembershipDTO> createProgrammeMembership(@RequestBody ProgrammeMembershipDTO programmeMembershipDTO) throws URISyntaxException {
 		log.debug("REST request to save ProgrammeMembership : {}", programmeMembershipDTO);
 		if (programmeMembershipDTO.getId() != null) {
@@ -67,6 +69,7 @@ public class ProgrammeMembershipResource {
 	 */
 	@PutMapping("/programme-memberships")
 	@Timed
+	@PreAuthorize("hasAuthority('tcs:add:modify:entities')")
 	public ResponseEntity<ProgrammeMembershipDTO> updateProgrammeMembership(@RequestBody ProgrammeMembershipDTO programmeMembershipDTO) throws URISyntaxException {
 		log.debug("REST request to update ProgrammeMembership : {}", programmeMembershipDTO);
 		if (programmeMembershipDTO.getId() == null) {
@@ -87,6 +90,7 @@ public class ProgrammeMembershipResource {
 	 */
 	@GetMapping("/programme-memberships")
 	@Timed
+	@PreAuthorize("hasAuthority('tcs:view:entities')")
 	public ResponseEntity<List<ProgrammeMembershipDTO>> getAllProgrammeMemberships(@ApiParam Pageable pageable) {
 		log.debug("REST request to get a page of ProgrammeMemberships");
 		Page<ProgrammeMembershipDTO> page = programmeMembershipService.findAll(pageable);
@@ -102,6 +106,7 @@ public class ProgrammeMembershipResource {
 	 */
 	@GetMapping("/programme-memberships/{id}")
 	@Timed
+	@PreAuthorize("hasAuthority('tcs:view:entities')")
 	public ResponseEntity<ProgrammeMembershipDTO> getProgrammeMembership(@PathVariable Long id) {
 		log.debug("REST request to get ProgrammeMembership : {}", id);
 		ProgrammeMembershipDTO programmeMembershipDTO = programmeMembershipService.findOne(id);
@@ -116,6 +121,7 @@ public class ProgrammeMembershipResource {
 	 */
 	@DeleteMapping("/programme-memberships/{id}")
 	@Timed
+	@PreAuthorize("hasAuthority('tcs:delete:entities')")
 	public ResponseEntity<Void> deleteProgrammeMembership(@PathVariable Long id) {
 		log.debug("REST request to delete ProgrammeMembership : {}", id);
 		programmeMembershipService.delete(id);

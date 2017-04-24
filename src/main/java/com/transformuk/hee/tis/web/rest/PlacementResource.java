@@ -14,6 +14,7 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
 
 import java.net.URI;
@@ -47,6 +48,7 @@ public class PlacementResource {
 	 */
 	@PostMapping("/placements")
 	@Timed
+	@PreAuthorize("hasAuthority('tcs:add:modify:entities')")
 	public ResponseEntity<PlacementDTO> createPlacement(@RequestBody PlacementDTO placementDTO) throws URISyntaxException {
 		log.debug("REST request to save Placement : {}", placementDTO);
 		if (placementDTO.getId() != null) {
@@ -69,6 +71,7 @@ public class PlacementResource {
 	 */
 	@PutMapping("/placements")
 	@Timed
+	@PreAuthorize("hasAuthority('tcs:add:modify:entities')")
 	public ResponseEntity<PlacementDTO> updatePlacement(@RequestBody PlacementDTO placementDTO) throws URISyntaxException {
 		log.debug("REST request to update Placement : {}", placementDTO);
 		if (placementDTO.getId() == null) {
@@ -88,6 +91,7 @@ public class PlacementResource {
 	 */
 	@GetMapping("/placements")
 	@Timed
+	@PreAuthorize("hasAuthority('tcs:view:entities')")
 	public ResponseEntity<List<PlacementDTO>> getAllPlacements(@ApiParam Pageable pageable) {
 		log.debug("REST request to get a page of Placements");
 		Page<PlacementDTO> page = placementService.findAll(pageable);
@@ -103,6 +107,7 @@ public class PlacementResource {
 	 */
 	@GetMapping("/placements/{id}")
 	@Timed
+	@PreAuthorize("hasAuthority('tcs:view:entities')")
 	public ResponseEntity<PlacementDTO> getPlacement(@PathVariable Long id) {
 		log.debug("REST request to get Placement : {}", id);
 		PlacementDTO placementDTO = placementService.findOne(id);
@@ -117,6 +122,7 @@ public class PlacementResource {
 	 */
 	@DeleteMapping("/placements/{id}")
 	@Timed
+	@PreAuthorize("hasAuthority('tcs:delete:entities')")
 	public ResponseEntity<Void> deletePlacement(@PathVariable Long id) {
 		log.debug("REST request to delete Placement : {}", id);
 		placementService.delete(id);

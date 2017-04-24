@@ -8,6 +8,7 @@ import io.github.jhipster.web.util.ResponseUtil;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
 
 import java.net.URI;
@@ -41,6 +42,7 @@ public class TariffRateResource {
 	 */
 	@PostMapping("/tariff-rates")
 	@Timed
+	@PreAuthorize("hasAuthority('tcs:add:modify:entities')")
 	public ResponseEntity<TariffRateDTO> createTariffRate(@RequestBody TariffRateDTO tariffRateDTO) throws URISyntaxException {
 		log.debug("REST request to save TariffRate : {}", tariffRateDTO);
 		if (tariffRateDTO.getId() != null) {
@@ -63,6 +65,7 @@ public class TariffRateResource {
 	 */
 	@PutMapping("/tariff-rates")
 	@Timed
+	@PreAuthorize("hasAuthority('tcs:add:modify:entities')")
 	public ResponseEntity<TariffRateDTO> updateTariffRate(@RequestBody TariffRateDTO tariffRateDTO) throws URISyntaxException {
 		log.debug("REST request to update TariffRate : {}", tariffRateDTO);
 		if (tariffRateDTO.getId() == null) {
@@ -81,6 +84,7 @@ public class TariffRateResource {
 	 */
 	@GetMapping("/tariff-rates")
 	@Timed
+	@PreAuthorize("hasAuthority('tcs:view:entities')")
 	public List<TariffRateDTO> getAllTariffRates() {
 		log.debug("REST request to get all TariffRates");
 		return tariffRateService.findAll();
@@ -94,6 +98,7 @@ public class TariffRateResource {
 	 */
 	@GetMapping("/tariff-rates/{id}")
 	@Timed
+	@PreAuthorize("hasAuthority('tcs:view:entities')")
 	public ResponseEntity<TariffRateDTO> getTariffRate(@PathVariable Long id) {
 		log.debug("REST request to get TariffRate : {}", id);
 		TariffRateDTO tariffRateDTO = tariffRateService.findOne(id);
@@ -108,6 +113,7 @@ public class TariffRateResource {
 	 */
 	@DeleteMapping("/tariff-rates/{id}")
 	@Timed
+	@PreAuthorize("hasAuthority('tcs:delete:entities')")
 	public ResponseEntity<Void> deleteTariffRate(@PathVariable Long id) {
 		log.debug("REST request to delete TariffRate : {}", id);
 		tariffRateService.delete(id);

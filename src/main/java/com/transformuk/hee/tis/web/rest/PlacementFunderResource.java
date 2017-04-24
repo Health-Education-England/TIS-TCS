@@ -14,6 +14,7 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
 
 import java.net.URI;
@@ -47,6 +48,7 @@ public class PlacementFunderResource {
 	 */
 	@PostMapping("/placement-funders")
 	@Timed
+	@PreAuthorize("hasAuthority('tcs:add:modify:entities')")
 	public ResponseEntity<PlacementFunderDTO> createPlacementFunder(@RequestBody PlacementFunderDTO placementFunderDTO) throws URISyntaxException {
 		log.debug("REST request to save PlacementFunder : {}", placementFunderDTO);
 		if (placementFunderDTO.getId() != null) {
@@ -69,6 +71,7 @@ public class PlacementFunderResource {
 	 */
 	@PutMapping("/placement-funders")
 	@Timed
+	@PreAuthorize("hasAuthority('tcs:add:modify:entities')")
 	public ResponseEntity<PlacementFunderDTO> updatePlacementFunder(@RequestBody PlacementFunderDTO placementFunderDTO) throws URISyntaxException {
 		log.debug("REST request to update PlacementFunder : {}", placementFunderDTO);
 		if (placementFunderDTO.getId() == null) {
@@ -88,6 +91,7 @@ public class PlacementFunderResource {
 	 */
 	@GetMapping("/placement-funders")
 	@Timed
+	@PreAuthorize("hasAuthority('tcs:view:entities')")
 	public ResponseEntity<List<PlacementFunderDTO>> getAllPlacementFunders(@ApiParam Pageable pageable) {
 		log.debug("REST request to get a page of PlacementFunders");
 		Page<PlacementFunderDTO> page = placementFunderService.findAll(pageable);
@@ -103,6 +107,7 @@ public class PlacementFunderResource {
 	 */
 	@GetMapping("/placement-funders/{id}")
 	@Timed
+	@PreAuthorize("hasAuthority('tcs:view:entities')")
 	public ResponseEntity<PlacementFunderDTO> getPlacementFunder(@PathVariable Long id) {
 		log.debug("REST request to get PlacementFunder : {}", id);
 		PlacementFunderDTO placementFunderDTO = placementFunderService.findOne(id);
@@ -117,6 +122,7 @@ public class PlacementFunderResource {
 	 */
 	@DeleteMapping("/placement-funders/{id}")
 	@Timed
+	@PreAuthorize("hasAuthority('tcs:delete:entities')")
 	public ResponseEntity<Void> deletePlacementFunder(@PathVariable Long id) {
 		log.debug("REST request to delete PlacementFunder : {}", id);
 		placementFunderService.delete(id);

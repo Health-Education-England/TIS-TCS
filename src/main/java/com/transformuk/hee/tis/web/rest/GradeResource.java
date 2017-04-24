@@ -10,6 +10,7 @@ import io.github.jhipster.web.util.ResponseUtil;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
 
 import java.net.URI;
@@ -44,6 +45,7 @@ public class GradeResource {
 	 */
 	@PostMapping("/grades")
 	@Timed
+	@PreAuthorize("hasAuthority('tcs:add:modify:entities')")
 	public ResponseEntity<GradeDTO> createGrade(@RequestBody GradeDTO gradeDTO) throws URISyntaxException {
 		log.debug("REST request to save Grade : {}", gradeDTO);
 		if (gradeDTO.getId() != null) {
@@ -68,6 +70,7 @@ public class GradeResource {
 	 */
 	@PutMapping("/grades")
 	@Timed
+	@PreAuthorize("hasAuthority('tcs:add:modify:entities')")
 	public ResponseEntity<GradeDTO> updateGrade(@RequestBody GradeDTO gradeDTO) throws URISyntaxException {
 		log.debug("REST request to update Grade : {}", gradeDTO);
 		if (gradeDTO.getId() == null) {
@@ -88,6 +91,7 @@ public class GradeResource {
 	 */
 	@GetMapping("/grades")
 	@Timed
+	@PreAuthorize("hasAuthority('tcs:view:entities')")
 	public List<GradeDTO> getAllGrades() {
 		log.debug("REST request to get all Grades");
 		List<Grade> grades = gradeRepository.findAll();
@@ -102,6 +106,7 @@ public class GradeResource {
 	 */
 	@GetMapping("/grades/{id}")
 	@Timed
+	@PreAuthorize("hasAuthority('tcs:view:entities')")
 	public ResponseEntity<GradeDTO> getGrade(@PathVariable Long id) {
 		log.debug("REST request to get Grade : {}", id);
 		Grade grade = gradeRepository.findOne(id);
@@ -117,6 +122,7 @@ public class GradeResource {
 	 */
 	@DeleteMapping("/grades/{id}")
 	@Timed
+	@PreAuthorize("hasAuthority('tcs:delete:entities')")
 	public ResponseEntity<Void> deleteGrade(@PathVariable Long id) {
 		log.debug("REST request to delete Grade : {}", id);
 		gradeRepository.delete(id);

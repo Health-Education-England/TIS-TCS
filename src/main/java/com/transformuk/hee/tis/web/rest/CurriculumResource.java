@@ -14,6 +14,7 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
 
 import java.net.URI;
@@ -45,6 +46,7 @@ public class CurriculumResource {
 	 */
 	@PostMapping("/curricula")
 	@Timed
+	@PreAuthorize("hasAuthority('tcs:add:modify:entities')")
 	public ResponseEntity<CurriculumDTO> createCurriculum(@RequestBody CurriculumDTO curriculumDTO) throws URISyntaxException {
 		log.debug("REST request to save Curriculum : {}", curriculumDTO);
 		if (curriculumDTO.getId() != null) {
@@ -67,6 +69,7 @@ public class CurriculumResource {
 	 */
 	@PutMapping("/curricula")
 	@Timed
+	@PreAuthorize("hasAuthority('tcs:add:modify:entities')")
 	public ResponseEntity<CurriculumDTO> updateCurriculum(@RequestBody CurriculumDTO curriculumDTO) throws URISyntaxException {
 		log.debug("REST request to update Curriculum : {}", curriculumDTO);
 		if (curriculumDTO.getId() == null) {
@@ -87,6 +90,7 @@ public class CurriculumResource {
 	 */
 	@GetMapping("/curricula")
 	@Timed
+	@PreAuthorize("hasAuthority('tcs:view:entities')")
 	public ResponseEntity<List<CurriculumDTO>> getAllCurricula(@ApiParam Pageable pageable) {
 		log.debug("REST request to get a page of Curricula");
 		Page<CurriculumDTO> page = curriculumService.findAll(pageable);
@@ -102,6 +106,7 @@ public class CurriculumResource {
 	 */
 	@GetMapping("/curricula/{id}")
 	@Timed
+	@PreAuthorize("hasAuthority('tcs:view:entities')")
 	public ResponseEntity<CurriculumDTO> getCurriculum(@PathVariable Long id) {
 		log.debug("REST request to get Curriculum : {}", id);
 		CurriculumDTO curriculumDTO = curriculumService.findOne(id);
@@ -116,6 +121,7 @@ public class CurriculumResource {
 	 */
 	@DeleteMapping("/curricula/{id}")
 	@Timed
+	@PreAuthorize("hasAuthority('tcs:delete:entities')")
 	public ResponseEntity<Void> deleteCurriculum(@PathVariable Long id) {
 		log.debug("REST request to delete Curriculum : {}", id);
 		curriculumService.delete(id);

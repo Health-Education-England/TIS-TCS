@@ -14,6 +14,7 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
 
 import java.net.URI;
@@ -47,6 +48,7 @@ public class PostFundingResource {
 	 */
 	@PostMapping("/post-fundings")
 	@Timed
+	@PreAuthorize("hasAuthority('tcs:add:modify:entities')")
 	public ResponseEntity<PostFundingDTO> createPostFunding(@RequestBody PostFundingDTO postFundingDTO) throws URISyntaxException {
 		log.debug("REST request to save PostFunding : {}", postFundingDTO);
 		if (postFundingDTO.getId() != null) {
@@ -69,6 +71,7 @@ public class PostFundingResource {
 	 */
 	@PutMapping("/post-fundings")
 	@Timed
+	@PreAuthorize("hasAuthority('tcs:add:modify:entities')")
 	public ResponseEntity<PostFundingDTO> updatePostFunding(@RequestBody PostFundingDTO postFundingDTO) throws URISyntaxException {
 		log.debug("REST request to update PostFunding : {}", postFundingDTO);
 		if (postFundingDTO.getId() == null) {
@@ -88,6 +91,7 @@ public class PostFundingResource {
 	 */
 	@GetMapping("/post-fundings")
 	@Timed
+	@PreAuthorize("hasAuthority('tcs:view:entities')")
 	public ResponseEntity<List<PostFundingDTO>> getAllPostFundings(@ApiParam Pageable pageable) {
 		log.debug("REST request to get a page of PostFundings");
 		Page<PostFundingDTO> page = postFundingService.findAll(pageable);
@@ -103,6 +107,7 @@ public class PostFundingResource {
 	 */
 	@GetMapping("/post-fundings/{id}")
 	@Timed
+	@PreAuthorize("hasAuthority('tcs:view:entities')")
 	public ResponseEntity<PostFundingDTO> getPostFunding(@PathVariable Long id) {
 		log.debug("REST request to get PostFunding : {}", id);
 		PostFundingDTO postFundingDTO = postFundingService.findOne(id);
@@ -117,6 +122,7 @@ public class PostFundingResource {
 	 */
 	@DeleteMapping("/post-fundings/{id}")
 	@Timed
+	@PreAuthorize("hasAuthority('tcs:delete:entities')")
 	public ResponseEntity<Void> deletePostFunding(@PathVariable Long id) {
 		log.debug("REST request to delete PostFunding : {}", id);
 		postFundingService.delete(id);
