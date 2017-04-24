@@ -14,6 +14,7 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
 
 import java.net.URI;
@@ -45,6 +46,7 @@ public class SpecialtyResource {
 	 */
 	@PostMapping("/specialties")
 	@Timed
+	@PreAuthorize("hasAuthority('tcs:add:modify:entities')")
 	public ResponseEntity<SpecialtyDTO> createSpecialty(@RequestBody SpecialtyDTO specialtyDTO) throws URISyntaxException {
 		log.debug("REST request to save Specialty : {}", specialtyDTO);
 		if (specialtyDTO.getId() != null) {
@@ -67,6 +69,7 @@ public class SpecialtyResource {
 	 */
 	@PutMapping("/specialties")
 	@Timed
+	@PreAuthorize("hasAuthority('tcs:add:modify:entities')")
 	public ResponseEntity<SpecialtyDTO> updateSpecialty(@RequestBody SpecialtyDTO specialtyDTO) throws URISyntaxException {
 		log.debug("REST request to update Specialty : {}", specialtyDTO);
 		if (specialtyDTO.getId() == null) {
@@ -87,6 +90,7 @@ public class SpecialtyResource {
 	 */
 	@GetMapping("/specialties")
 	@Timed
+	@PreAuthorize("hasAuthority('tcs:view:entities')")
 	public ResponseEntity<List<SpecialtyDTO>> getAllSpecialties(@ApiParam Pageable pageable) {
 		log.debug("REST request to get a page of Specialties");
 		Page<SpecialtyDTO> page = specialtyService.findAll(pageable);
@@ -102,6 +106,7 @@ public class SpecialtyResource {
 	 */
 	@GetMapping("/specialties/{id}")
 	@Timed
+	@PreAuthorize("hasAuthority('tcs:view:entities')")
 	public ResponseEntity<SpecialtyDTO> getSpecialty(@PathVariable Long id) {
 		log.debug("REST request to get Specialty : {}", id);
 		SpecialtyDTO specialtyDTO = specialtyService.findOne(id);
@@ -116,6 +121,7 @@ public class SpecialtyResource {
 	 */
 	@DeleteMapping("/specialties/{id}")
 	@Timed
+	@PreAuthorize("hasAuthority('tcs:delete:entities')")
 	public ResponseEntity<Void> deleteSpecialty(@PathVariable Long id) {
 		log.debug("REST request to delete Specialty : {}", id);
 		specialtyService.delete(id);
