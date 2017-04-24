@@ -1,42 +1,35 @@
 <div id="tis-header">
-	<div class="row">
-		<div class="col-md-4">
-			<div class="logo">
-				<!-- the onerror bit is for browsers who do not support SVG -->
-				<img src="images/logo.v.2.svg"
-					onerror="this.src='images/logo.v.2'; this.onerror=null;"/>
-			</div>
-		</div>
-		<div class="col-md-8 right-wrapper">
-			<nav class="navbar navbar-toggleable-md navbar-light pull-right">
-				<span class="title" jhiTranslate="tisHeader.title"></span>
+	<nav class="navbar navbar-toggleable-md navbar-light">
+		<button class="navbar-toggler navbar-toggler-right collapsed"
+			type="button"
+			data-toggle="collapse"
+			data-target="#navbarCollapse"
+			aria-controls="navbarCollapse"
+			aria-expanded="false"
+			aria-label="Toggle navigation">
+			<span class="navbar-toggler-icon"></span>
+		</button>
 
-				<button class="navbar-toggler navbar-toggler-right" type="button"
-					data-toggle="collapse"
-					data-target="#navbarNavAltMarkup"
-					aria-controls="navbarNavAltMarkup"
-					aria-expanded="false" aria-label="Toggle navigation">
-					<span class="navbar-toggler-icon"></span>
-				</button>
+		<div class="navbar-brand">
+			<img src="images/logo.v.2.svg" onerror="this.src='images/logo.v.2'; this.onerror=null;" /></div>
 
-				<div class="collapse navbar-collapse" id="navbarNavAltMarkup">
-					<ul class="navbar-nav">
-						<li class="nav-item">
-							<i class="hee-icon hee-icon-jira-feedback front-nhs-blue"></i>
-						</li>
-						<li class="nav-item">
-							<i class="hee-icon hee-icon-notification front-nhs-orange"></i>
-						</li>
-						<li class="nav-item username">
-							{{username}}
-						</li>
-						<li class="nav-item">
-							<a class="nav-item nav-link disabled" href="#">
-								<i class="hee-icon hee-icon-logout front-nhs-blue"></i></a>
-						</li>
-					</ul>
-				</div>
-			</nav>
+		<div class="navbar-collapse collapse" id="navbarCollapse" aria-expanded="false">
+			<ul class="nav navbar-nav ml-auto">
+				<span class="navbar-text" jhiTranslate="tisHeader.title"></span>
+				<li class="nav-item">
+					<i class="hee-icon hee-icon-jira-feedback front-nhs-blue"></i>
+				</li>
+				<li class="nav-item">
+					<i class="hee-icon hee-icon-notification front-nhs-orange"></i>
+				</li>
+				<li class="nav-item username">
+					{{username}}
+				</li>
+				<li class="nav-item">
+					<a class="nav-item nav-link disabled" href="#">
+						<i class="hee-icon hee-icon-logout front-nhs-blue"></i></a>
+				</li>
+			</ul>
 		</div>
-	</div>
+	</nav>
 </div>

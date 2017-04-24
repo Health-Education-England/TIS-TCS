@@ -2,7 +2,7 @@
   height: 4.125rem;
   @include box-shadow(0px, 15px, 12px, -7px, #ccc);
   margin-bottom: 1.250em;
-  
+
   .wrapper {
     border-top: 1px solid $bk-dark-grey;
     border-bottom: 1px solid $bk-dark-grey;
@@ -11,47 +11,59 @@
     z-index: 1;
   }
 
-  .logo {
+  .navbar-brand {
     // 15px 21px
-    padding:0.938rem 0rem 0.750rem 1.313rem;
+    display: block;
+    padding: 0;
+    margin: 0.9375rem 0 0 1.313rem;
+    // padding:0.938rem 0rem 0.750rem 1.313rem;
   }
 
   .right-wrapper{
-    margin-top: 2rem;
+    margin-top: 1.75rem;
   }
 
   .navbar{
     padding: 0;
     margin: 0;
     font-weight: bold;
-    height: 2.250rem;
+    // height: 4.125em;
 
-    .title{
-      font-size: 0.856rem;
-      padding-right: 20px;
+    button.navbar-toggler{
+      margin-top: 1em;
     }
 
-    .navbar-collapse{
-      width: auto;
+    .navbar-text{
+      font-size: 0.856rem;
+      padding-right: 20px;
+      line-height: 3.9rem;
+      color: #000;
     }
 
     .navbar-nav{
-      font-size: 0.919rem;
+      // margin-top: 2.32rem;
+      height: 2.250rem;
+      line-height: 2.250rem;
+      font-size: 0.813rem;
       li{
+        margin-top: 1.188rem;
+        height: 2.250rem;
         border-left: 1px solid #ddd;
         i {
           padding: 0px 15px 0px 15px;
           font-size:1.125rem;
-          line-height: 1.438rem;
+          // line-height: 1.438rem;
+          line-height: 2.250rem;
         }
       }
     }
 
     .username{
-      font-size: 0.919rem;
+      font-size: 0.865rem;
       padding: 0px 20px 0px 20px;
+      // line-height: 2.5em;
     }
-    
+
     .front-admin a {
       color: black;
 
@@ -69,19 +81,8 @@
       color: $nhs-blue;
     }
     .nav-link{
-         padding: 0; 
+         padding: 0;
       }
-  }
-
-  .nhs-logo {
-    float: right;
-    padding-right: 15px;
-    margin-top: 10px;
-
-    img {
-      height: 35px;
-      width: 179px;
-    }
   }
 
   .login-info {
@@ -176,4 +177,14 @@
       background-color: $nhs-blue;
     }
   }
+
+  // for small screens mobile
+  // @include media-breakpoint-down(xs){
+
+  // }
+
+  // // medium screens
+  //  @include media-breakpoint-down(md){
+
+  // }
 }
