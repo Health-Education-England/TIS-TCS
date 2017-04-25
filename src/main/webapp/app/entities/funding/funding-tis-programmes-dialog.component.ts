@@ -24,7 +24,8 @@ export class FundingTisProgrammesDialogComponent implements OnInit {
 				private alertService: AlertService,
 				private fundingService: FundingTisProgrammesService,
 				private eventManager: EventManager) {
-		this.jhiLanguageService.setLocations(['funding', 'fundingType']);
+		this.jhiLanguageService.addLocation('funding');
+		this.jhiLanguageService.addLocation('fundingType');
 	}
 
 	ngOnInit() {

@@ -1,18 +1,8 @@
 <jhi-page-ribbon></jhi-page-ribbon>
-<div class="container-fluid">
-	<div class="masthead">
-		<div class="row">
-			<div class="col-md-12">
-				<div class="tis-logo" jhiTranslate="global.headerTitle"></div>
-				<div class="nhs-logo">
-					<!-- the onerror bit is for browsers who do not support SVG -->
-					<img src="images/logo.svg"
-						onerror="this.src='images/logo.png'; this.onerror=null;"/>
-				</div>
-			</div>
-		</div>
-		<router-outlet name="navbar"></router-outlet>
-	</div>
+<div class="container">
+	<jhi-tis-header></jhi-tis-header>
+
+	<router-outlet name="navbar"></router-outlet>
 	<div>
 		<div class="card jh-card">
 			<router-outlet></router-outlet>

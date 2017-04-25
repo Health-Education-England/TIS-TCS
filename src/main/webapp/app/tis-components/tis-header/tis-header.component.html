@@ -1,0 +1,39 @@
+<div id="tis-header">
+	<nav class="navbar navbar-toggleable-md navbar-light">
+		<button class="navbar-toggler navbar-toggler-right collapsed"
+			type="button"
+			(click)="isCollapsed = !isCollapsed"
+          	[attr.aria-expanded]="!isCollapsed"
+			aria-controls="collapseExample"
+			aria-label="Toggle navigation">
+			<span class="navbar-toggler-icon"></span>
+		</button>
+
+		<div class="navbar-brand">
+			<img src="images/logo.v.2.svg" onerror="this.src='images/logo.v.2'; this.onerror=null;" /></div>
+
+		<div class="navbar-collapse collapse" id="navbarCollapse"
+			[ngbCollapse]="isCollapsed"
+			aria-expanded="false">
+			<ul class="nav navbar-nav ml-auto">
+				<span class="navbar-text hidden-md-down" jhiTranslate="tisHeader.title"></span>
+				<li class="nav-item">
+					<i class="hee-icon hee-icon-jira-feedback front-nhs-blue"></i>
+					<span class="hidden-lg-up">Help</span>
+				</li>
+				<li class="nav-item">
+					<i class="hee-icon hee-icon-notification front-nhs-orange"></i>
+					<span class="hidden-lg-up">Notifications</span>
+				</li>
+				<li class="nav-item username hidden-md-down">
+					{{username}}
+				</li>
+				<li class="nav-item">
+					<a class="nav-item nav-link disabled" href="#">
+						<i class="hee-icon hee-icon-logout front-nhs-blue"></i>
+						<span class="hidden-lg-up">Log out</span></a>
+				</li>
+			</ul>
+		</div>
+	</nav>
+</div>

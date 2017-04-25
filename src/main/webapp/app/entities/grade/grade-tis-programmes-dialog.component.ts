@@ -25,7 +25,7 @@ export class GradeTisProgrammesDialogComponent implements OnInit {
 				private gradeService: GradeTisProgrammesService,
 				private curriculumService: CurriculumTisProgrammesService,
 				private eventManager: EventManager) {
-		this.jhiLanguageService.setLocations(['grade']);
+		this.jhiLanguageService.addLocation('grade');
 	}
 
 	ngOnInit() {

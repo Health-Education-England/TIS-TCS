@@ -24,7 +24,7 @@ export class PlacementFunderTisProgrammesDialogComponent implements OnInit {
 				private alertService: AlertService,
 				private placementFunderService: PlacementFunderTisProgrammesService,
 				private eventManager: EventManager) {
-		this.jhiLanguageService.setLocations(['placementFunder']);
+		this.jhiLanguageService.addLocation('placementFunder');
 	}
 
 	ngOnInit() {

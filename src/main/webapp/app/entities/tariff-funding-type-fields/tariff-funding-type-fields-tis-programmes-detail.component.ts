@@ -20,7 +20,7 @@ export class TariffFundingTypeFieldsTisProgrammesDetailComponent implements OnIn
 				private jhiLanguageService: JhiLanguageService,
 				private tariffFundingTypeFieldsService: TariffFundingTypeFieldsTisProgrammesService,
 				private route: ActivatedRoute) {
-		this.jhiLanguageService.setLocations(['tariffFundingTypeFields']);
+		this.jhiLanguageService.addLocation('tariffFundingTypeFields');
 	}
 
 	ngOnInit() {

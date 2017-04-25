@@ -20,7 +20,8 @@ export class TrainingNumberTisProgrammesComponent implements OnInit, OnDestroy {
 				private alertService: AlertService,
 				private eventManager: EventManager,
 				private principal: Principal) {
-		this.jhiLanguageService.setLocations(['trainingNumber', 'trainingNumberType']);
+		this.jhiLanguageService.addLocation('trainingNumber');
+		this.jhiLanguageService.addLocation('trainingNumberType');
 	}
 
 	loadAll() {

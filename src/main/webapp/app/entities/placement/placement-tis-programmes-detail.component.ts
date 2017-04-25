@@ -20,7 +20,8 @@ export class PlacementTisProgrammesDetailComponent implements OnInit, OnDestroy 
 				private jhiLanguageService: JhiLanguageService,
 				private placementService: PlacementTisProgrammesService,
 				private route: ActivatedRoute) {
-		this.jhiLanguageService.setLocations(['placement', 'placementType']);
+		this.jhiLanguageService.addLocation('placement');
+		this.jhiLanguageService.addLocation('placementType');
 	}
 
 	ngOnInit() {

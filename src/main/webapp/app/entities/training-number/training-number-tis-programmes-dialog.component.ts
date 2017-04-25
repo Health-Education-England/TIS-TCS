@@ -25,7 +25,8 @@ export class TrainingNumberTisProgrammesDialogComponent implements OnInit {
 				private trainingNumberService: TrainingNumberTisProgrammesService,
 				private programmeMembershipService: ProgrammeMembershipTisProgrammesService,
 				private eventManager: EventManager) {
-		this.jhiLanguageService.setLocations(['trainingNumber', 'trainingNumberType']);
+		this.jhiLanguageService.addLocation('trainingNumber');
+		this.jhiLanguageService.addLocation('trainingNumberType');
 	}
 
 	ngOnInit() {

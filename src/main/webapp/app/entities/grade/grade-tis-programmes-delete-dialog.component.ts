@@ -18,7 +18,7 @@ export class GradeTisProgrammesDeleteDialogComponent {
 				private gradeService: GradeTisProgrammesService,
 				public activeModal: NgbActiveModal,
 				private eventManager: EventManager) {
-		this.jhiLanguageService.setLocations(['grade']);
+		this.jhiLanguageService.addLocation('grade');
 	}
 
 	clear() {

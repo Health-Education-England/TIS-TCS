@@ -20,7 +20,8 @@ export class FundingTisProgrammesDetailComponent implements OnInit, OnDestroy {
 				private jhiLanguageService: JhiLanguageService,
 				private fundingService: FundingTisProgrammesService,
 				private route: ActivatedRoute) {
-		this.jhiLanguageService.setLocations(['funding', 'fundingType']);
+		this.jhiLanguageService.addLocation('funding');
+		this.jhiLanguageService.addLocation('fundingType');
 	}
 
 	ngOnInit() {

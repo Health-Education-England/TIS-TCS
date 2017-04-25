@@ -16,7 +16,9 @@ export class SpecialtyTisProgrammesDetailComponent implements OnInit, OnDestroy 
 	constructor(private jhiLanguageService: JhiLanguageService,
 				private specialtyService: SpecialtyTisProgrammesService,
 				private route: ActivatedRoute) {
-		this.jhiLanguageService.setLocations(['specialty', 'status', 'specialtyType']);
+		this.jhiLanguageService.addLocation('specialty');
+		this.jhiLanguageService.addLocation('status');
+		this.jhiLanguageService.addLocation('specialtyType');
 	}
 
 	ngOnInit() {

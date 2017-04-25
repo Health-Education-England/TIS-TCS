@@ -8,9 +8,15 @@ let LAYOUT_ROUTES = [
 	...errorRoute
 ];
 
+const CHILD_ROUTES = [
+	// { path: '...', loadChildren: '../tis-components/tis-.../tis-....module#Tis...Module' },
+];
+
 @NgModule({
 	imports: [
-		RouterModule.forRoot(LAYOUT_ROUTES, {useHash: true})
+		RouterModule.forRoot(LAYOUT_ROUTES, {useHash: true}),
+		RouterModule.forChild(CHILD_ROUTES)
+
 	],
 	exports: [
 		RouterModule

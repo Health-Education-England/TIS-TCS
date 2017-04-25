@@ -20,7 +20,8 @@ export class FundingTisProgrammesDeleteDialogComponent {
 				private fundingService: FundingTisProgrammesService,
 				public activeModal: NgbActiveModal,
 				private eventManager: EventManager) {
-		this.jhiLanguageService.setLocations(['funding', 'fundingType']);
+		this.jhiLanguageService.addLocation('funding');
+		this.jhiLanguageService.addLocation('fundingType');
 	}
 
 	clear() {

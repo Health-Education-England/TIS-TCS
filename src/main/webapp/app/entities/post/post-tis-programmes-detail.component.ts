@@ -20,7 +20,7 @@ export class PostTisProgrammesDetailComponent implements OnInit, OnDestroy {
 				private jhiLanguageService: JhiLanguageService,
 				private postService: PostTisProgrammesService,
 				private route: ActivatedRoute) {
-		this.jhiLanguageService.setLocations(['post']);
+		this.jhiLanguageService.addLocation('post');
 	}
 
 	ngOnInit() {

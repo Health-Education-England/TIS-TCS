@@ -46,7 +46,9 @@ export class SpecialtyTisProgrammesComponent implements OnInit, OnDestroy {
 			this.reverse = data['pagingParams'].ascending;
 			this.predicate = data['pagingParams'].predicate;
 		});
-		this.jhiLanguageService.setLocations(['specialty', 'status', 'specialtyType']);
+		this.jhiLanguageService.addLocation('specialty');
+		this.jhiLanguageService.addLocation('status');
+		this.jhiLanguageService.addLocation('specialtyType');
 	}
 
 	loadAll() {

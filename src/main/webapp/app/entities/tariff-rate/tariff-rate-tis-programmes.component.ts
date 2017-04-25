@@ -23,7 +23,7 @@ export class TariffRateTisProgrammesComponent implements OnInit, OnDestroy {
 				private alertService: AlertService,
 				private eventManager: EventManager,
 				private principal: Principal) {
-		this.jhiLanguageService.setLocations(['tariffRate']);
+		this.jhiLanguageService.addLocation('tariffRate');
 	}
 
 	loadAll() {

@@ -20,7 +20,8 @@ export class PlacementTisProgrammesDeleteDialogComponent {
 				private placementService: PlacementTisProgrammesService,
 				public activeModal: NgbActiveModal,
 				private eventManager: EventManager) {
-		this.jhiLanguageService.setLocations(['placement', 'placementType']);
+		this.jhiLanguageService.addLocation('placement');
+		this.jhiLanguageService.addLocation('placementType');
 	}
 
 	clear() {

@@ -18,7 +18,8 @@ export class ProgrammeMembershipTisProgrammesDeleteDialogComponent {
 				private programmeMembershipService: ProgrammeMembershipTisProgrammesService,
 				public activeModal: NgbActiveModal,
 				private eventManager: EventManager) {
-		this.jhiLanguageService.setLocations(['programmeMembership', 'programmeMembershipType']);
+		this.jhiLanguageService.addLocation('programmeMembership');
+		this.jhiLanguageService.addLocation('programmeMembershipType');
 	}
 
 	clear() {

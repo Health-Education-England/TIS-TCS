@@ -47,7 +47,7 @@ export class PlacementFunderTisProgrammesComponent implements OnInit, OnDestroy 
 			this.reverse = data['pagingParams'].ascending;
 			this.predicate = data['pagingParams'].predicate;
 		});
-		this.jhiLanguageService.setLocations(['placementFunder']);
+		this.jhiLanguageService.addLocation('placementFunder');
 	}
 
 	loadAll() {

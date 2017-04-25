@@ -47,7 +47,8 @@ export class PlacementTisProgrammesComponent implements OnInit, OnDestroy {
 			this.reverse = data['pagingParams'].ascending;
 			this.predicate = data['pagingParams'].predicate;
 		});
-		this.jhiLanguageService.setLocations(['placement', 'placementType']);
+		this.jhiLanguageService.addLocation('placement');
+		this.jhiLanguageService.addLocation('placementType');
 	}
 
 	loadAll() {

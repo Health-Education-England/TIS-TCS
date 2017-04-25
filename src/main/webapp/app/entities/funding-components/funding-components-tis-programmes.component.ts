@@ -47,7 +47,7 @@ export class FundingComponentsTisProgrammesComponent implements OnInit, OnDestro
 			this.reverse = data['pagingParams'].ascending;
 			this.predicate = data['pagingParams'].predicate;
 		});
-		this.jhiLanguageService.setLocations(['fundingComponents']);
+		this.jhiLanguageService.addLocation('fundingComponents');
 	}
 
 	loadAll() {

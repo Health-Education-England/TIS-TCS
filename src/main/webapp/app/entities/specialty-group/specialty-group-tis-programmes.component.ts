@@ -20,7 +20,7 @@ export class SpecialtyGroupTisProgrammesComponent implements OnInit, OnDestroy {
 				private alertService: AlertService,
 				private eventManager: EventManager,
 				private principal: Principal) {
-		this.jhiLanguageService.setLocations(['specialtyGroup']);
+		this.jhiLanguageService.addLocation('specialtyGroup');
 	}
 
 	loadAll() {

@@ -46,7 +46,9 @@ export class CurriculumTisProgrammesComponent implements OnInit, OnDestroy {
 			this.reverse = data['pagingParams'].ascending;
 			this.predicate = data['pagingParams'].predicate;
 		});
-		this.jhiLanguageService.setLocations(['curriculum', 'curriculumSubType', 'assessmentType']);
+		this.jhiLanguageService.addLocation('curriculum');
+		this.jhiLanguageService.addLocation('curriculumSubType');
+		this.jhiLanguageService.addLocation('assessmentType');
 	}
 
 	loadAll() {

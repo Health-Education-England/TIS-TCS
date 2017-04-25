@@ -28,7 +28,7 @@ export class FundingComponentsTisProgrammesDialogComponent implements OnInit {
 				private fundingComponentsService: FundingComponentsTisProgrammesService,
 				private placementFunderService: PlacementFunderTisProgrammesService,
 				private eventManager: EventManager) {
-		this.jhiLanguageService.setLocations(['fundingComponents']);
+		this.jhiLanguageService.addLocation('fundingComponents');
 	}
 
 	ngOnInit() {

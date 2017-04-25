@@ -16,7 +16,8 @@ export class ProgrammeTisProgrammesDetailComponent implements OnInit, OnDestroy 
 	constructor(private jhiLanguageService: JhiLanguageService,
 				private programmeService: ProgrammeTisProgrammesService,
 				private route: ActivatedRoute) {
-		this.jhiLanguageService.setLocations(['programme', 'status']);
+		this.jhiLanguageService.addLocation('programme');
+		this.jhiLanguageService.addLocation('status');
 	}
 
 	ngOnInit() {

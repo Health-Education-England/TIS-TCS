@@ -34,7 +34,7 @@ export class TariffFundingTypeFieldsTisProgrammesDialogComponent implements OnIn
 				private tariffRateService: TariffRateTisProgrammesService,
 				private placementFunderService: PlacementFunderTisProgrammesService,
 				private eventManager: EventManager) {
-		this.jhiLanguageService.setLocations(['tariffFundingTypeFields']);
+		this.jhiLanguageService.addLocation('tariffFundingTypeFields');
 	}
 
 	ngOnInit() {

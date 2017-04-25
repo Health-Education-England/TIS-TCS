@@ -46,7 +46,8 @@ export class ProgrammeMembershipTisProgrammesComponent implements OnInit, OnDest
 			this.reverse = data['pagingParams'].ascending;
 			this.predicate = data['pagingParams'].predicate;
 		});
-		this.jhiLanguageService.setLocations(['programmeMembership', 'programmeMembershipType']);
+		this.jhiLanguageService.addLocation('programmeMembership');
+		this.jhiLanguageService.addLocation('programmeMembershipType');
 	}
 
 	loadAll() {

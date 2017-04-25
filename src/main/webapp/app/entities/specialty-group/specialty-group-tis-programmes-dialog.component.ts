@@ -21,7 +21,7 @@ export class SpecialtyGroupTisProgrammesDialogComponent implements OnInit {
 				private alertService: AlertService,
 				private specialtyGroupService: SpecialtyGroupTisProgrammesService,
 				private eventManager: EventManager) {
-		this.jhiLanguageService.setLocations(['specialtyGroup']);
+		this.jhiLanguageService.addLocation('specialtyGroup');
 	}
 
 	ngOnInit() {

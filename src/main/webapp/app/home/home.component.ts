@@ -19,7 +19,7 @@ export class HomeComponent implements OnInit {
 				private principal: Principal,
 				private loginModalService: LoginModalService,
 				private eventManager: EventManager) {
-		this.jhiLanguageService.setLocations(['home']);
+		this.jhiLanguageService.addLocation('home');
 	}
 
 	ngOnInit() {

@@ -20,7 +20,7 @@ export class FundingComponentsTisProgrammesDetailComponent implements OnInit, On
 				private jhiLanguageService: JhiLanguageService,
 				private fundingComponentsService: FundingComponentsTisProgrammesService,
 				private route: ActivatedRoute) {
-		this.jhiLanguageService.setLocations(['fundingComponents']);
+		this.jhiLanguageService.addLocation('fundingComponents');
 	}
 
 	ngOnInit() {
