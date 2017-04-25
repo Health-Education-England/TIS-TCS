@@ -230,6 +230,11 @@
 			<version>1.0.7</version>
 		</dependency>
 		<dependency>
+			<groupId>com.transformuk.hee</groupId>
+			<artifactId>audit</artifactId>
+			<version>LATEST</version>
+		</dependency>
+		<dependency>
 			<groupId>commons-io</groupId>
 			<artifactId>commons-io</artifactId>
 			<version>${commons-io.version}</version>
