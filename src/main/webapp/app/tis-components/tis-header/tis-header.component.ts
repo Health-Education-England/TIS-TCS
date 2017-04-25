@@ -10,6 +10,7 @@ import {JhiLanguageService} from "ng-jhipster";
 export class TisHeaderComponent implements OnInit {
 
 	username = "";
+	isCollapsed = true;
 
 	constructor(
 		private jhiLanguageService: JhiLanguageService

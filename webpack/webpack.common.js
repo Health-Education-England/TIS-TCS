@@ -23,7 +23,10 @@ module.exports = function (options) {
 		},
 		module: {
 			rules: [
-				{test: /bootstrap\/dist\/js\/umd\//, loader: 'imports-loader?jQuery=jquery'},
+				{
+					test: /bootstrap\/dist\/js\/umd\//,
+					loader: 'imports-loader?jQuery=jquery'
+				},
 				{
 					test: /\.ts$/,
 					loaders: [
@@ -96,19 +99,19 @@ module.exports = function (options) {
 			new CopyWebpackPlugin([
 				{from: './node_modules/swagger-ui/dist', to: 'swagger-ui/dist'},
 				// {from: './node_modules/tis-header', to: '../../src/main/webapp/app/tis-components/tis-header'},
-				{from: './src/main/webapp/app/tis-common/fonts/icomoon/fonts/*', 
+				{from: './src/main/webapp/app/tis-common/fonts/icomoon/fonts/*',
 					to: 'fonts',
 					flatten:true
 				},
-				{from: './src/main/webapp/app/tis-common/fonts/icomoon/fonts/*', 
+				{from: './src/main/webapp/app/tis-common/fonts/icomoon/fonts/*',
 					to: '../../src/main/webapp/content/scss/fonts',
 					flatten:true
 				},
-				{from: './src/main/webapp/app/tis-common/**/*.scss', 
+				{from: './src/main/webapp/app/tis-common/**/*.scss',
 					to: '../../src/main/webapp/content/scss/tis',
 					flatten:true
 				},
-				{from: './src/main/webapp/app/tis-components/**/*.scss', 
+				{from: './src/main/webapp/app/tis-components/**/*.scss',
 					to: '../../src/main/webapp/content/scss/tis',
 					flatten:true
 				},
