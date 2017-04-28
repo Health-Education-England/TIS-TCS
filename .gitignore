@@ -1,143 +1,39 @@
-######################
-# Project Specific
-######################
-/src/main/webapp/content/css/main.css
-/target/www/**
-/src/test/javascript/coverage/
-/src/test/javascript/PhantomJS*/
+# Created by .ignore support plugin (hsz.mobi)
+*/target/
+*.class
+*.tar.gz
+node_modules
+*/node_modules
+*/node
+*/node_modules
+*/yarn.lock
+*/ui-build
+*/node/*
+.DS_Store
+.tmp/
+*/js/tests/
+*/js/app/scripts/templates.js
+*/js/app/components/masthead/
+*/js/app/components/server-error-modal/
+*/js/app/components/common/
+*/js/app/scripts/services/
+*/js/app/components/common/common.i18n.en.json
+*/js/app/components/version-indicator/
+*/js/bower_components/
+*/js/app/components/common/date-picker/
+*/js/app/scripts/services/configuration-service.js
+*/npm-debug.log
+*/js/app/styles/main.css
+*/js/app/styles/main.css.map
+*/src/main/resources/static/
+*/bdd/dist/
+*/bdd/e2e/reports/
+*/bdd/node_modules/
+*/bdd/phantomjsdriver.log
+*/bower_components/
 
-######################
-# Node
-######################
-/node/
-node_tmp/
-node_modules/
-npm-debug.log.*
 
-######################
-# SASS
-######################
-.sass-cache/
-
-######################
-# Eclipse
-######################
-*.pydevproject
-.project
-.metadata
-tmp/
-tmp/**/*
-*.tmp
-*.bak
-*.swp
-*~.nib
-local.properties
-.classpath
-.settings/
-.loadpath
-.factorypath
-/src/main/resources/rebel.xml
-
-# External tool builders
-.externalToolBuilders/**
-
-# Locally stored "Eclipse launch configurations"
-*.launch
-
-# CDT-specific
-.cproject
-
-# PDT-specific
-.buildpath
-
-######################
-# Intellij
+# IDEA files #
 ######################
 .idea/
-*.iml
-*.iws
-*.ipr
-*.ids
-*.orig
-
-######################
-# Visual Studio Code
-######################
-.vscode/
-
-######################
-# Maven
-######################
-/log/
-/target/
-
-/ui-build/
-######################
-# Gradle
-######################
-.gradle/
-/build/
-
-######################
-# Package Files
-######################
-*.jar
-*.war
-*.ear
-*.db
-
-######################
-# Windows
-######################
-# Windows image file caches
-Thumbs.db
-
-# Folder config file
-Desktop.ini
-
-######################
-# Mac OSX
-######################
-.DS_Store
-.svn
-
-# Thumbnails
-._*
-
-# Files that might appear on external disk
-.Spotlight-V100
-.Trashes
-
-######################
-# Directories
-######################
-/bin/
-/deploy/
-
-######################
-# Logs
-######################
-*.log
-
-######################
-# Others
-######################
-*.class
-*.*~
-*~
-.merge_file*
-
-######################
-# Gradle Wrapper
-######################
-!gradle/wrapper/gradle-wrapper.jar
-
-######################
-# Maven Wrapper
-######################
-!.mvn/wrapper/maven-wrapper.jar
-
-######################
-# ESLint
-######################
-.eslintcache
+**/*.iml
