@@ -2,11 +2,11 @@ package com.transformuk.hee.tis.web.rest;
 
 import com.transformuk.hee.tis.TcsApp;
 import com.transformuk.hee.tis.domain.Placement;
-import com.transformuk.hee.tis.domain.enumeration.PlacementType;
 import com.transformuk.hee.tis.repository.PlacementRepository;
 import com.transformuk.hee.tis.service.PlacementService;
-import com.transformuk.hee.tis.service.dto.PlacementDTO;
 import com.transformuk.hee.tis.service.mapper.PlacementMapper;
+import com.transformuk.hee.tis.tcs.api.dto.PlacementDTO;
+import com.transformuk.hee.tis.tcs.api.enumeration.PlacementType;
 import com.transformuk.hee.tis.web.rest.errors.ExceptionTranslator;
 import org.junit.Before;
 import org.junit.Test;

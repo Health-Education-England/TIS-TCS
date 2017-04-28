@@ -1,6 +1,7 @@
 package com.transformuk.hee.tis.service;
 
-import com.transformuk.hee.tis.service.dto.SpecialtyGroupDTO;
+
+import com.transformuk.hee.tis.tcs.api.dto.SpecialtyGroupDTO;
 
 import java.util.List;
 

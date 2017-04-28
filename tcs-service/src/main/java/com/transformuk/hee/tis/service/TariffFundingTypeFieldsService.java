@@ -1,6 +1,7 @@
 package com.transformuk.hee.tis.service;
 
-import com.transformuk.hee.tis.service.dto.TariffFundingTypeFieldsDTO;
+
+import com.transformuk.hee.tis.tcs.api.dto.TariffFundingTypeFieldsDTO;
 
 import java.util.List;
 

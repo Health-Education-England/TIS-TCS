@@ -1,7 +1,7 @@
 package com.transformuk.hee.tis.service.mapper;
 
 import com.transformuk.hee.tis.domain.Programme;
-import com.transformuk.hee.tis.service.dto.ProgrammeDTO;
+import com.transformuk.hee.tis.tcs.api.dto.ProgrammeDTO;
 import org.mapstruct.Mapper;
 import org.mapstruct.Mapping;
 

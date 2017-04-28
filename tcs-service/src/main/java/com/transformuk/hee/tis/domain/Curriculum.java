@@ -1,8 +1,8 @@
 package com.transformuk.hee.tis.domain;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
-import com.transformuk.hee.tis.domain.enumeration.AssessmentType;
-import com.transformuk.hee.tis.domain.enumeration.CurriculumSubType;
+import com.transformuk.hee.tis.tcs.api.enumeration.AssessmentType;
+import com.transformuk.hee.tis.tcs.api.enumeration.CurriculumSubType;
 
 import javax.persistence.*;
 import java.io.Serializable;

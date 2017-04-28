@@ -1,7 +1,7 @@
 package com.transformuk.hee.tis.service.mapper;
 
 import com.transformuk.hee.tis.domain.SpecialtyGroup;
-import com.transformuk.hee.tis.service.dto.SpecialtyGroupDTO;
+import com.transformuk.hee.tis.tcs.api.dto.SpecialtyGroupDTO;
 import org.mapstruct.Mapper;
 
 import java.util.List;

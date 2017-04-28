@@ -1,8 +1,7 @@
-package com.transformuk.hee.tis.service.dto;
+package com.transformuk.hee.tis.tcs.api.dto;
 
-
-import com.transformuk.hee.tis.domain.enumeration.SpecialtyType;
-import com.transformuk.hee.tis.domain.enumeration.Status;
+import com.transformuk.hee.tis.tcs.api.enumeration.SpecialtyType;
+import com.transformuk.hee.tis.tcs.api.enumeration.Status;
 
 import java.io.Serializable;
 import java.util.Objects;

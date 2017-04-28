@@ -2,7 +2,7 @@ package com.transformuk.hee.tis.web.rest;
 
 import com.codahale.metrics.annotation.Timed;
 import com.transformuk.hee.tis.service.TariffRateService;
-import com.transformuk.hee.tis.service.dto.TariffRateDTO;
+import com.transformuk.hee.tis.tcs.api.dto.TariffRateDTO;
 import com.transformuk.hee.tis.web.rest.util.HeaderUtil;
 import io.github.jhipster.web.util.ResponseUtil;
 import org.slf4j.Logger;

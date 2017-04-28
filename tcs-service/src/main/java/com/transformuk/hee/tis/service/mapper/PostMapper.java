@@ -1,7 +1,7 @@
 package com.transformuk.hee.tis.service.mapper;
 
 import com.transformuk.hee.tis.domain.*;
-import com.transformuk.hee.tis.service.dto.PostDTO;
+import com.transformuk.hee.tis.tcs.api.dto.PostDTO;
 import org.mapstruct.Mapper;
 import org.mapstruct.Mapping;
 
@@ -15,7 +15,7 @@ public interface PostMapper {
 
 	@Mapping(source = "oldPost.id", target = "oldPostId")
 	@Mapping(source = "newPost.id", target = "newPostId")
-	PostDTO postToPostDTO(Post post);
+    PostDTO postToPostDTO(Post post);
 
 	List<PostDTO> postsToPostDTOs(List<Post> posts);
 

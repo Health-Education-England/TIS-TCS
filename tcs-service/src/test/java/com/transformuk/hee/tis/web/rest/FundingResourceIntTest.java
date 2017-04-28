@@ -2,11 +2,11 @@ package com.transformuk.hee.tis.web.rest;
 
 import com.transformuk.hee.tis.TcsApp;
 import com.transformuk.hee.tis.domain.Funding;
-import com.transformuk.hee.tis.domain.enumeration.FundingType;
 import com.transformuk.hee.tis.repository.FundingRepository;
 import com.transformuk.hee.tis.service.FundingService;
-import com.transformuk.hee.tis.service.dto.FundingDTO;
 import com.transformuk.hee.tis.service.mapper.FundingMapper;
+import com.transformuk.hee.tis.tcs.api.dto.FundingDTO;
+import com.transformuk.hee.tis.tcs.api.enumeration.FundingType;
 import com.transformuk.hee.tis.web.rest.errors.ExceptionTranslator;
 import org.junit.Before;
 import org.junit.Test;

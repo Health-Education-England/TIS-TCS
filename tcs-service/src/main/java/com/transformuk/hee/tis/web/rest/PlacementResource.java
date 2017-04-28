@@ -2,7 +2,7 @@ package com.transformuk.hee.tis.web.rest;
 
 import com.codahale.metrics.annotation.Timed;
 import com.transformuk.hee.tis.service.PlacementService;
-import com.transformuk.hee.tis.service.dto.PlacementDTO;
+import com.transformuk.hee.tis.tcs.api.dto.PlacementDTO;
 import com.transformuk.hee.tis.web.rest.util.HeaderUtil;
 import com.transformuk.hee.tis.web.rest.util.PaginationUtil;
 import io.github.jhipster.web.util.ResponseUtil;

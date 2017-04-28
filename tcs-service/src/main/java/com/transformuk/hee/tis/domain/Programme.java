@@ -1,7 +1,7 @@
 package com.transformuk.hee.tis.domain;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
-import com.transformuk.hee.tis.domain.enumeration.Status;
+import com.transformuk.hee.tis.tcs.api.enumeration.Status;
 
 import javax.persistence.*;
 import java.io.Serializable;

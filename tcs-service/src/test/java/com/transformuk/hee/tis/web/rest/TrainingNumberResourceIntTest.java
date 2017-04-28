@@ -2,11 +2,11 @@ package com.transformuk.hee.tis.web.rest;
 
 import com.transformuk.hee.tis.TcsApp;
 import com.transformuk.hee.tis.domain.TrainingNumber;
-import com.transformuk.hee.tis.domain.enumeration.TrainingNumberType;
 import com.transformuk.hee.tis.repository.TrainingNumberRepository;
 import com.transformuk.hee.tis.service.TrainingNumberService;
-import com.transformuk.hee.tis.service.dto.TrainingNumberDTO;
 import com.transformuk.hee.tis.service.mapper.TrainingNumberMapper;
+import com.transformuk.hee.tis.tcs.api.dto.TrainingNumberDTO;
+import com.transformuk.hee.tis.tcs.api.enumeration.TrainingNumberType;
 import com.transformuk.hee.tis.web.rest.errors.ExceptionTranslator;
 import org.junit.Before;
 import org.junit.Test;

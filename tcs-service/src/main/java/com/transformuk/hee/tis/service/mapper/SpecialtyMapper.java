@@ -2,7 +2,7 @@ package com.transformuk.hee.tis.service.mapper;
 
 import com.transformuk.hee.tis.domain.Specialty;
 import com.transformuk.hee.tis.domain.SpecialtyGroup;
-import com.transformuk.hee.tis.service.dto.SpecialtyDTO;
+import com.transformuk.hee.tis.tcs.api.dto.SpecialtyDTO;
 import org.mapstruct.Mapper;
 import org.mapstruct.Mapping;
 
@@ -15,7 +15,7 @@ import java.util.List;
 public interface SpecialtyMapper {
 
 	@Mapping(source = "specialtyGroup.id", target = "specialtyGroupId")
-	SpecialtyDTO specialtyToSpecialtyDTO(Specialty specialty);
+    SpecialtyDTO specialtyToSpecialtyDTO(Specialty specialty);
 
 	List<SpecialtyDTO> specialtiesToSpecialtyDTOs(List<Specialty> specialties);
 

@@ -2,11 +2,11 @@ package com.transformuk.hee.tis.web.rest;
 
 import com.transformuk.hee.tis.TcsApp;
 import com.transformuk.hee.tis.domain.ProgrammeMembership;
-import com.transformuk.hee.tis.domain.enumeration.ProgrammeMembershipType;
 import com.transformuk.hee.tis.repository.ProgrammeMembershipRepository;
 import com.transformuk.hee.tis.service.ProgrammeMembershipService;
-import com.transformuk.hee.tis.service.dto.ProgrammeMembershipDTO;
 import com.transformuk.hee.tis.service.mapper.ProgrammeMembershipMapper;
+import com.transformuk.hee.tis.tcs.api.dto.ProgrammeMembershipDTO;
+import com.transformuk.hee.tis.tcs.api.enumeration.ProgrammeMembershipType;
 import com.transformuk.hee.tis.web.rest.errors.ExceptionTranslator;
 import org.junit.Before;
 import org.junit.Test;

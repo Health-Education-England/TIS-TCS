@@ -1,6 +1,7 @@
 package com.transformuk.hee.tis.service;
 
-import com.transformuk.hee.tis.service.dto.TrainingNumberDTO;
+
+import com.transformuk.hee.tis.tcs.api.dto.TrainingNumberDTO;
 
 import java.util.List;
 

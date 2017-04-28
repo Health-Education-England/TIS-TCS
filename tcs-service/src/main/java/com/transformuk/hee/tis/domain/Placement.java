@@ -1,7 +1,6 @@
 package com.transformuk.hee.tis.domain;
 
-
-import com.transformuk.hee.tis.domain.enumeration.PlacementType;
+import com.transformuk.hee.tis.tcs.api.enumeration.PlacementType;
 
 import javax.persistence.*;
 import java.io.Serializable;

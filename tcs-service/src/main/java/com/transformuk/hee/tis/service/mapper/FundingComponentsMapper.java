@@ -1,7 +1,7 @@
 package com.transformuk.hee.tis.service.mapper;
 
 import com.transformuk.hee.tis.domain.*;
-import com.transformuk.hee.tis.service.dto.FundingComponentsDTO;
+import com.transformuk.hee.tis.tcs.api.dto.FundingComponentsDTO;
 import org.mapstruct.Mapper;
 import org.mapstruct.Mapping;
 
@@ -14,7 +14,7 @@ import java.util.List;
 public interface FundingComponentsMapper {
 
 	@Mapping(source = "fundingOrganisation.id", target = "fundingOrganisationId")
-	FundingComponentsDTO fundingComponentsToFundingComponentsDTO(FundingComponents fundingComponents);
+    FundingComponentsDTO fundingComponentsToFundingComponentsDTO(FundingComponents fundingComponents);
 
 	List<FundingComponentsDTO> fundingComponentsToFundingComponentsDTOs(List<FundingComponents> fundingComponents);
 

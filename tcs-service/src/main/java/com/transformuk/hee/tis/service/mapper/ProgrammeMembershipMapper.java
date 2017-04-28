@@ -4,7 +4,7 @@ import com.transformuk.hee.tis.domain.Curriculum;
 import com.transformuk.hee.tis.domain.Programme;
 import com.transformuk.hee.tis.domain.ProgrammeMembership;
 import com.transformuk.hee.tis.domain.TrainingNumber;
-import com.transformuk.hee.tis.service.dto.ProgrammeMembershipDTO;
+import com.transformuk.hee.tis.tcs.api.dto.ProgrammeMembershipDTO;
 import org.mapstruct.Mapper;
 import org.mapstruct.Mapping;
 
@@ -19,7 +19,7 @@ public interface ProgrammeMembershipMapper {
 	@Mapping(source = "programme.id", target = "programmeId")
 	@Mapping(source = "curriculum.id", target = "curriculumId")
 	@Mapping(source = "trainingNumber.id", target = "trainingNumberId")
-	ProgrammeMembershipDTO programmeMembershipToProgrammeMembershipDTO(ProgrammeMembership programmeMembership);
+    ProgrammeMembershipDTO programmeMembershipToProgrammeMembershipDTO(ProgrammeMembership programmeMembership);
 
 	List<ProgrammeMembershipDTO> programmeMembershipsToProgrammeMembershipDTOs(List<ProgrammeMembership> programmeMemberships);
 

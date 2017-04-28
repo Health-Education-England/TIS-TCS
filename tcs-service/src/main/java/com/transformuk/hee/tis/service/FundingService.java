@@ -1,6 +1,6 @@
 package com.transformuk.hee.tis.service;
 
-import com.transformuk.hee.tis.service.dto.FundingDTO;
+import com.transformuk.hee.tis.tcs.api.dto.FundingDTO;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 

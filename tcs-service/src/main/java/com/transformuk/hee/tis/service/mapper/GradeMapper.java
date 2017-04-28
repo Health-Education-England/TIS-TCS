@@ -1,7 +1,7 @@
 package com.transformuk.hee.tis.service.mapper;
 
 import com.transformuk.hee.tis.domain.Grade;
-import com.transformuk.hee.tis.service.dto.GradeDTO;
+import com.transformuk.hee.tis.tcs.api.dto.GradeDTO;
 import org.mapstruct.Mapper;
 import org.mapstruct.Mapping;
 

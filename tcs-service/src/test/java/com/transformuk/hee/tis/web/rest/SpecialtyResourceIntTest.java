@@ -1,13 +1,14 @@
+
 package com.transformuk.hee.tis.web.rest;
 
 import com.transformuk.hee.tis.TcsApp;
 import com.transformuk.hee.tis.domain.Specialty;
-import com.transformuk.hee.tis.domain.enumeration.SpecialtyType;
-import com.transformuk.hee.tis.domain.enumeration.Status;
 import com.transformuk.hee.tis.repository.SpecialtyRepository;
 import com.transformuk.hee.tis.service.SpecialtyService;
-import com.transformuk.hee.tis.service.dto.SpecialtyDTO;
 import com.transformuk.hee.tis.service.mapper.SpecialtyMapper;
+import com.transformuk.hee.tis.tcs.api.dto.SpecialtyDTO;
+import com.transformuk.hee.tis.tcs.api.enumeration.SpecialtyType;
+import com.transformuk.hee.tis.tcs.api.enumeration.Status;
 import com.transformuk.hee.tis.web.rest.errors.ExceptionTranslator;
 import org.junit.Before;
 import org.junit.Test;

@@ -2,12 +2,12 @@ package com.transformuk.hee.tis.web.rest;
 
 import com.transformuk.hee.tis.TcsApp;
 import com.transformuk.hee.tis.domain.Curriculum;
-import com.transformuk.hee.tis.domain.enumeration.AssessmentType;
-import com.transformuk.hee.tis.domain.enumeration.CurriculumSubType;
 import com.transformuk.hee.tis.repository.CurriculumRepository;
 import com.transformuk.hee.tis.service.CurriculumService;
-import com.transformuk.hee.tis.service.dto.CurriculumDTO;
 import com.transformuk.hee.tis.service.mapper.CurriculumMapper;
+import com.transformuk.hee.tis.tcs.api.dto.CurriculumDTO;
+import com.transformuk.hee.tis.tcs.api.enumeration.AssessmentType;
+import com.transformuk.hee.tis.tcs.api.enumeration.CurriculumSubType;
 import com.transformuk.hee.tis.web.rest.errors.ExceptionTranslator;
 import org.junit.Before;
 import org.junit.Test;

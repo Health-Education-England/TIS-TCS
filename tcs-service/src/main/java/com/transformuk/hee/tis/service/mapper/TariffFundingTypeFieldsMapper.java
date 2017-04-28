@@ -1,7 +1,7 @@
 package com.transformuk.hee.tis.service.mapper;
 
 import com.transformuk.hee.tis.domain.*;
-import com.transformuk.hee.tis.service.dto.TariffFundingTypeFieldsDTO;
+import com.transformuk.hee.tis.tcs.api.dto.TariffFundingTypeFieldsDTO;
 import org.mapstruct.Mapper;
 import org.mapstruct.Mapping;
 
@@ -16,7 +16,7 @@ public interface TariffFundingTypeFieldsMapper {
 	@Mapping(source = "levelOfPost.id", target = "levelOfPostId")
 	@Mapping(source = "placementRateFundedBy.id", target = "placementRateFundedById")
 	@Mapping(source = "placementRateProvidedTo.id", target = "placementRateProvidedToId")
-	TariffFundingTypeFieldsDTO tariffFundingTypeFieldsToTariffFundingTypeFieldsDTO(TariffFundingTypeFields tariffFundingTypeFields);
+    TariffFundingTypeFieldsDTO tariffFundingTypeFieldsToTariffFundingTypeFieldsDTO(TariffFundingTypeFields tariffFundingTypeFields);
 
 	List<TariffFundingTypeFieldsDTO> tariffFundingTypeFieldsToTariffFundingTypeFieldsDTOs(List<TariffFundingTypeFields> tariffFundingTypeFields);
 

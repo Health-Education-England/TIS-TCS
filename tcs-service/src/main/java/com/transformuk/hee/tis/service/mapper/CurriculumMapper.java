@@ -3,7 +3,7 @@ package com.transformuk.hee.tis.service.mapper;
 import com.transformuk.hee.tis.domain.Curriculum;
 import com.transformuk.hee.tis.domain.Grade;
 import com.transformuk.hee.tis.domain.Specialty;
-import com.transformuk.hee.tis.service.dto.CurriculumDTO;
+import com.transformuk.hee.tis.tcs.api.dto.CurriculumDTO;
 import org.mapstruct.Mapper;
 import org.mapstruct.Mapping;
 
@@ -16,7 +16,7 @@ import java.util.List;
 public interface CurriculumMapper {
 
 	@Mapping(source = "specialty.id", target = "specialtyId")
-	CurriculumDTO curriculumToCurriculumDTO(Curriculum curriculum);
+    CurriculumDTO curriculumToCurriculumDTO(Curriculum curriculum);
 
 	List<CurriculumDTO> curriculaToCurriculumDTOs(List<Curriculum> curricula);
 

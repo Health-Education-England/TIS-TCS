@@ -1,7 +1,7 @@
-package com.transformuk.hee.tis.service.dto;
+package com.transformuk.hee.tis.tcs.api.dto;
 
-import com.transformuk.hee.tis.domain.enumeration.AssessmentType;
-import com.transformuk.hee.tis.domain.enumeration.CurriculumSubType;
+import com.transformuk.hee.tis.tcs.api.enumeration.AssessmentType;
+import com.transformuk.hee.tis.tcs.api.enumeration.CurriculumSubType;
 
 import java.io.Serializable;
 import java.time.LocalDate;

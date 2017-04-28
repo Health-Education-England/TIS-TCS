@@ -1,7 +1,6 @@
 package com.transformuk.hee.tis.domain;
 
-
-import com.transformuk.hee.tis.domain.enumeration.ProgrammeMembershipType;
+import com.transformuk.hee.tis.tcs.api.enumeration.ProgrammeMembershipType;
 
 import javax.persistence.*;
 import java.io.Serializable;

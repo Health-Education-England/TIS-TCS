@@ -1,6 +1,6 @@
 package com.transformuk.hee.tis.service;
 
-import com.transformuk.hee.tis.service.dto.CurriculumDTO;
+import com.transformuk.hee.tis.tcs.api.dto.CurriculumDTO;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 

@@ -1,7 +1,6 @@
-package com.transformuk.hee.tis.service.dto;
+package com.transformuk.hee.tis.tcs.api.dto;
 
-
-import com.transformuk.hee.tis.domain.enumeration.TrainingNumberType;
+import com.transformuk.hee.tis.tcs.api.enumeration.TrainingNumberType;
 
 import java.io.Serializable;
 import java.util.Objects;

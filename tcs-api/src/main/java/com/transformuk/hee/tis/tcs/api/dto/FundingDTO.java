@@ -1,6 +1,6 @@
-package com.transformuk.hee.tis.service.dto;
+package com.transformuk.hee.tis.tcs.api.dto;
 
-import com.transformuk.hee.tis.domain.enumeration.FundingType;
+import com.transformuk.hee.tis.tcs.api.enumeration.FundingType;
 
 import java.io.Serializable;
 import java.time.LocalDate;

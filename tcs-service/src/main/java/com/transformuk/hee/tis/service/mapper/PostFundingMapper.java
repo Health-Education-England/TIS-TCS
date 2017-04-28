@@ -1,7 +1,7 @@
 package com.transformuk.hee.tis.service.mapper;
 
 import com.transformuk.hee.tis.domain.PostFunding;
-import com.transformuk.hee.tis.service.dto.PostFundingDTO;
+import com.transformuk.hee.tis.tcs.api.dto.PostFundingDTO;
 import org.mapstruct.Mapper;
 import org.mapstruct.Mapping;
 
@@ -15,7 +15,7 @@ public interface PostFundingMapper {
 
 	@Mapping(source = "funding.id", target = "fundingId")
 	@Mapping(source = "fundingComponents.id", target = "fundingComponentsId")
-	PostFundingDTO postFundingToPostFundingDTO(PostFunding postFunding);
+    PostFundingDTO postFundingToPostFundingDTO(PostFunding postFunding);
 
 	List<PostFundingDTO> postFundingsToPostFundingDTOs(List<PostFunding> postFundings);
 

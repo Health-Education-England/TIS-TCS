@@ -2,7 +2,7 @@ package com.transformuk.hee.tis.web.rest;
 
 import com.codahale.metrics.annotation.Timed;
 import com.transformuk.hee.tis.service.TrainingNumberService;
-import com.transformuk.hee.tis.service.dto.TrainingNumberDTO;
+import com.transformuk.hee.tis.tcs.api.dto.TrainingNumberDTO;
 import com.transformuk.hee.tis.web.rest.util.HeaderUtil;
 import io.github.jhipster.web.util.ResponseUtil;
 import org.slf4j.Logger;

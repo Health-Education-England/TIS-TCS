@@ -1,4 +1,4 @@
-package com.transformuk.hee.tis.domain.enumeration;
+package com.transformuk.hee.tis.tcs.api.enumeration;
 
 /**
  * The PlacementType enumeration.

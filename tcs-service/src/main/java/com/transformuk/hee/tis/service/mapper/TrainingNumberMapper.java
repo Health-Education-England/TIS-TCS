@@ -1,7 +1,7 @@
 package com.transformuk.hee.tis.service.mapper;
 
 import com.transformuk.hee.tis.domain.TrainingNumber;
-import com.transformuk.hee.tis.service.dto.TrainingNumberDTO;
+import com.transformuk.hee.tis.tcs.api.dto.TrainingNumberDTO;
 import org.mapstruct.Mapper;
 import org.mapstruct.Mapping;
 

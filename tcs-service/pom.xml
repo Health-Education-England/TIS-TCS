@@ -110,6 +110,11 @@
 
     <dependencies>
         <dependency>
+            <groupId>com.transformuk.hee.tis</groupId>
+            <artifactId>tcs-api</artifactId>
+            <version>1.0.0</version>
+        </dependency>
+        <dependency>
             <groupId>io.github.jhipster</groupId>
             <artifactId>jhipster</artifactId>
             <version>${jhipster.server.version}</version>

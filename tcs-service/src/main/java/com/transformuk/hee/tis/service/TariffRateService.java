@@ -1,6 +1,7 @@
 package com.transformuk.hee.tis.service;
 
-import com.transformuk.hee.tis.service.dto.TariffRateDTO;
+
+import com.transformuk.hee.tis.tcs.api.dto.TariffRateDTO;
 
 import java.util.List;
 
