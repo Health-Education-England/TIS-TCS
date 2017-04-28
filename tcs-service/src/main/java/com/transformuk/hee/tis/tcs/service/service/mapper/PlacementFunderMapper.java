@@ -1,6 +1,7 @@
 package com.transformuk.hee.tis.tcs.service.service.mapper;
 
 import com.transformuk.hee.tis.tcs.api.dto.PlacementFunderDTO;
+import com.transformuk.hee.tis.tcs.service.domain.PlacementFunder;
 import org.mapstruct.Mapper;
 
 import java.util.List;

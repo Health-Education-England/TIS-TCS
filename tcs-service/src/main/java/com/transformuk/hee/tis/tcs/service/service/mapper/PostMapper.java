@@ -1,6 +1,7 @@
 package com.transformuk.hee.tis.tcs.service.service.mapper;
 
 import com.transformuk.hee.tis.tcs.api.dto.PostDTO;
+import com.transformuk.hee.tis.tcs.service.domain.Post;
 import org.mapstruct.Mapper;
 import org.mapstruct.Mapping;
 
