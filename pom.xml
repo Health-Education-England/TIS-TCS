@@ -1,27 +1,11 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
-		 xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
+<project xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns="http://maven.apache.org/POM/4.0.0"
+         xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/maven-v4_0_0.xsd">
 	<modelVersion>4.0.0</modelVersion>
-
-	<modules>
-		<module>tcs-api</module>
-		<module>tcs-client</module>
-		<module>tcs-service</module>
-		<module>tcs-ui</module>
-	</modules>
-
-	<groupId>com.transformuk.hee.tis</groupId>
-	<artifactId>tcs</artifactId>
-	<version>1.0.0</version>
-	<packaging>pom</packaging>
-
-	<name>HEE TIS TCS</name>
-	<description>HEE TIS TCS</description>
-
-	<scm>
-		<developerConnection>scm:git:git@github.com:Health-Education-England/TIS-TCS.git</developerConnection>
-		<tag>HEAD</tag>
-	</scm>
-
-
+    <modules>
+        <module>tcs-api</module>
+        <module>tcs-client</module>
+        <module>tcs-service</module>
+        <module>tcs-ui</module>
+    </modules>
 </project>
