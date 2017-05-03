@@ -1,8 +1,7 @@
 
-package com.transformuk.hee.tis.tcs.service.web.rest;
+package com.transformuk.hee.tis.tcs.service.api;
 
 import com.transformuk.hee.tis.tcs.service.Application;
-import com.transformuk.hee.tis.tcs.service.api.SpecialtyResource;
 import com.transformuk.hee.tis.tcs.service.exception.ExceptionTranslator;
 import com.transformuk.hee.tis.tcs.service.model.Specialty;
 import com.transformuk.hee.tis.tcs.service.repository.SpecialtyRepository;

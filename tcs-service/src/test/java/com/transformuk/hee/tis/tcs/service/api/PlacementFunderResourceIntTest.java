@@ -1,7 +1,6 @@
-package com.transformuk.hee.tis.tcs.service.web.rest;
+package com.transformuk.hee.tis.tcs.service.api;
 
 import com.transformuk.hee.tis.tcs.service.Application;
-import com.transformuk.hee.tis.tcs.service.api.PlacementFunderResource;
 import com.transformuk.hee.tis.tcs.service.exception.ExceptionTranslator;
 import com.transformuk.hee.tis.tcs.service.model.PlacementFunder;
 import com.transformuk.hee.tis.tcs.service.repository.PlacementFunderRepository;
