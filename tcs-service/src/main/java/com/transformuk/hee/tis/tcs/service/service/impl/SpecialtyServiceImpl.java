@@ -1,6 +1,6 @@
 package com.transformuk.hee.tis.tcs.service.service.impl;
 
-import com.transformuk.hee.tis.tcs.service.domain.Specialty;
+import com.transformuk.hee.tis.tcs.service.model.Specialty;
 import com.transformuk.hee.tis.tcs.service.repository.SpecialtyRepository;
 import com.transformuk.hee.tis.tcs.service.service.SpecialtyService;
 import com.transformuk.hee.tis.tcs.service.service.mapper.SpecialtyMapper;

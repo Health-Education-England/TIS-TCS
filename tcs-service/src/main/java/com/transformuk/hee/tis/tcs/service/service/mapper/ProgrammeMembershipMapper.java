@@ -1,9 +1,9 @@
 package com.transformuk.hee.tis.tcs.service.service.mapper;
 
-import com.transformuk.hee.tis.tcs.service.domain.Curriculum;
-import com.transformuk.hee.tis.tcs.service.domain.Programme;
-import com.transformuk.hee.tis.tcs.service.domain.ProgrammeMembership;
-import com.transformuk.hee.tis.tcs.service.domain.TrainingNumber;
+import com.transformuk.hee.tis.tcs.service.model.Curriculum;
+import com.transformuk.hee.tis.tcs.service.model.Programme;
+import com.transformuk.hee.tis.tcs.service.model.ProgrammeMembership;
+import com.transformuk.hee.tis.tcs.service.model.TrainingNumber;
 import com.transformuk.hee.tis.tcs.api.dto.ProgrammeMembershipDTO;
 import org.mapstruct.Mapper;
 import org.mapstruct.Mapping;

@@ -1,7 +1,7 @@
 package com.transformuk.hee.tis.tcs.service.service.mapper;
 
-import com.transformuk.hee.tis.tcs.service.domain.Specialty;
-import com.transformuk.hee.tis.tcs.service.domain.SpecialtyGroup;
+import com.transformuk.hee.tis.tcs.service.model.Specialty;
+import com.transformuk.hee.tis.tcs.service.model.SpecialtyGroup;
 import com.transformuk.hee.tis.tcs.api.dto.SpecialtyDTO;
 import org.mapstruct.Mapper;
 import org.mapstruct.Mapping;

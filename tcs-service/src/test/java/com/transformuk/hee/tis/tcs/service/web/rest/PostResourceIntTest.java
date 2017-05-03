@@ -1,12 +1,13 @@
 package com.transformuk.hee.tis.tcs.service.web.rest;
 
 import com.transformuk.hee.tis.tcs.service.Application;
-import com.transformuk.hee.tis.tcs.service.domain.Post;
+import com.transformuk.hee.tis.tcs.service.api.PostResource;
+import com.transformuk.hee.tis.tcs.service.exception.ExceptionTranslator;
+import com.transformuk.hee.tis.tcs.service.model.Post;
 import com.transformuk.hee.tis.tcs.service.repository.PostRepository;
 import com.transformuk.hee.tis.tcs.service.service.PostService;
 import com.transformuk.hee.tis.tcs.service.service.mapper.PostMapper;
 import com.transformuk.hee.tis.tcs.api.dto.PostDTO;
-import com.transformuk.hee.tis.tcs.service.web.rest.errors.ExceptionTranslator;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;

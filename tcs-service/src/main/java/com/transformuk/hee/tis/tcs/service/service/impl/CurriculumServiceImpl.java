@@ -1,6 +1,6 @@
 package com.transformuk.hee.tis.tcs.service.service.impl;
 
-import com.transformuk.hee.tis.tcs.service.domain.Curriculum;
+import com.transformuk.hee.tis.tcs.service.model.Curriculum;
 import com.transformuk.hee.tis.tcs.service.repository.CurriculumRepository;
 import com.transformuk.hee.tis.tcs.service.service.CurriculumService;
 import com.transformuk.hee.tis.tcs.service.service.mapper.CurriculumMapper;

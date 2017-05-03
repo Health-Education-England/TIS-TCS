@@ -1,12 +1,13 @@
 package com.transformuk.hee.tis.tcs.service.web.rest;
 
 import com.transformuk.hee.tis.tcs.service.Application;
-import com.transformuk.hee.tis.tcs.service.domain.FundingComponents;
+import com.transformuk.hee.tis.tcs.service.api.FundingComponentsResource;
+import com.transformuk.hee.tis.tcs.service.exception.ExceptionTranslator;
+import com.transformuk.hee.tis.tcs.service.model.FundingComponents;
 import com.transformuk.hee.tis.tcs.service.repository.FundingComponentsRepository;
 import com.transformuk.hee.tis.tcs.service.service.FundingComponentsService;
 import com.transformuk.hee.tis.tcs.service.service.mapper.FundingComponentsMapper;
 import com.transformuk.hee.tis.tcs.api.dto.FundingComponentsDTO;
-import com.transformuk.hee.tis.tcs.service.web.rest.errors.ExceptionTranslator;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;

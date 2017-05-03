@@ -1,14 +1,15 @@
 package com.transformuk.hee.tis.tcs.service.web.rest;
 
 import com.transformuk.hee.tis.tcs.service.Application;
-import com.transformuk.hee.tis.tcs.service.domain.Curriculum;
+import com.transformuk.hee.tis.tcs.service.api.CurriculumResource;
+import com.transformuk.hee.tis.tcs.service.exception.ExceptionTranslator;
+import com.transformuk.hee.tis.tcs.service.model.Curriculum;
 import com.transformuk.hee.tis.tcs.service.repository.CurriculumRepository;
 import com.transformuk.hee.tis.tcs.service.service.CurriculumService;
 import com.transformuk.hee.tis.tcs.service.service.mapper.CurriculumMapper;
 import com.transformuk.hee.tis.tcs.api.dto.CurriculumDTO;
 import com.transformuk.hee.tis.tcs.api.enumeration.AssessmentType;
 import com.transformuk.hee.tis.tcs.api.enumeration.CurriculumSubType;
-import com.transformuk.hee.tis.tcs.service.web.rest.errors.ExceptionTranslator;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;

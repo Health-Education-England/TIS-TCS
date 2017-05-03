@@ -1,6 +1,6 @@
 package com.transformuk.hee.tis.tcs.service.service.impl;
 
-import com.transformuk.hee.tis.tcs.service.domain.TrainingNumber;
+import com.transformuk.hee.tis.tcs.service.model.TrainingNumber;
 import com.transformuk.hee.tis.tcs.service.repository.TrainingNumberRepository;
 import com.transformuk.hee.tis.tcs.service.service.TrainingNumberService;
 import com.transformuk.hee.tis.tcs.service.service.mapper.TrainingNumberMapper;

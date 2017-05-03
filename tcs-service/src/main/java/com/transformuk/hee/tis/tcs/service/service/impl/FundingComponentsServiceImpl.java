@@ -1,6 +1,6 @@
 package com.transformuk.hee.tis.tcs.service.service.impl;
 
-import com.transformuk.hee.tis.tcs.service.domain.FundingComponents;
+import com.transformuk.hee.tis.tcs.service.model.FundingComponents;
 import com.transformuk.hee.tis.tcs.service.repository.FundingComponentsRepository;
 import com.transformuk.hee.tis.tcs.service.service.FundingComponentsService;
 import com.transformuk.hee.tis.tcs.service.service.mapper.FundingComponentsMapper;

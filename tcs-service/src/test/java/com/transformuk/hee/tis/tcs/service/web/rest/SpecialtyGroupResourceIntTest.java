@@ -1,12 +1,13 @@
 package com.transformuk.hee.tis.tcs.service.web.rest;
 
 import com.transformuk.hee.tis.tcs.service.Application;
-import com.transformuk.hee.tis.tcs.service.domain.SpecialtyGroup;
+import com.transformuk.hee.tis.tcs.service.api.SpecialtyGroupResource;
+import com.transformuk.hee.tis.tcs.service.exception.ExceptionTranslator;
+import com.transformuk.hee.tis.tcs.service.model.SpecialtyGroup;
 import com.transformuk.hee.tis.tcs.service.repository.SpecialtyGroupRepository;
 import com.transformuk.hee.tis.tcs.service.service.SpecialtyGroupService;
 import com.transformuk.hee.tis.tcs.service.service.mapper.SpecialtyGroupMapper;
 import com.transformuk.hee.tis.tcs.api.dto.SpecialtyGroupDTO;
-import com.transformuk.hee.tis.tcs.service.web.rest.errors.ExceptionTranslator;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;

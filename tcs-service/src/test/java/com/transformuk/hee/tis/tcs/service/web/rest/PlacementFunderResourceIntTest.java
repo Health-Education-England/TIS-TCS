@@ -1,12 +1,13 @@
 package com.transformuk.hee.tis.tcs.service.web.rest;
 
 import com.transformuk.hee.tis.tcs.service.Application;
-import com.transformuk.hee.tis.tcs.service.domain.PlacementFunder;
+import com.transformuk.hee.tis.tcs.service.api.PlacementFunderResource;
+import com.transformuk.hee.tis.tcs.service.exception.ExceptionTranslator;
+import com.transformuk.hee.tis.tcs.service.model.PlacementFunder;
 import com.transformuk.hee.tis.tcs.service.repository.PlacementFunderRepository;
 import com.transformuk.hee.tis.tcs.service.service.PlacementFunderService;
 import com.transformuk.hee.tis.tcs.service.service.mapper.PlacementFunderMapper;
 import com.transformuk.hee.tis.tcs.api.dto.PlacementFunderDTO;
-import com.transformuk.hee.tis.tcs.service.web.rest.errors.ExceptionTranslator;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;

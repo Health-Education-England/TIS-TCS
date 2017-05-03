@@ -1,6 +1,6 @@
 package com.transformuk.hee.tis.tcs.service.repository;
 
-import com.transformuk.hee.tis.tcs.service.domain.TariffRate;
+import com.transformuk.hee.tis.tcs.service.model.TariffRate;
 import org.springframework.data.jpa.repository.JpaRepository;
 
 /**

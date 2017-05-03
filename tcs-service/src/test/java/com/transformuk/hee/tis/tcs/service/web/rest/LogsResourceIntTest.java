@@ -1,7 +1,8 @@
 package com.transformuk.hee.tis.tcs.service.web.rest;
 
 import com.transformuk.hee.tis.tcs.service.Application;
-import com.transformuk.hee.tis.tcs.service.web.rest.vm.LoggerVM;
+import com.transformuk.hee.tis.tcs.service.api.LogsResource;
+import com.transformuk.hee.tis.tcs.service.api.vm.LoggerVM;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;

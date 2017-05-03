@@ -1,7 +1,7 @@
 package com.transformuk.hee.tis.tcs.service.service.mapper;
 
 import com.transformuk.hee.tis.tcs.api.dto.TariffFundingTypeFieldsDTO;
-import com.transformuk.hee.tis.tcs.service.domain.TariffFundingTypeFields;
+import com.transformuk.hee.tis.tcs.service.model.TariffFundingTypeFields;
 import org.mapstruct.Mapper;
 import org.mapstruct.Mapping;
 

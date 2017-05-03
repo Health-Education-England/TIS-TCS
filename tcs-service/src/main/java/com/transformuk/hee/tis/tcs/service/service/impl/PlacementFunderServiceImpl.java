@@ -1,6 +1,6 @@
 package com.transformuk.hee.tis.tcs.service.service.impl;
 
-import com.transformuk.hee.tis.tcs.service.domain.PlacementFunder;
+import com.transformuk.hee.tis.tcs.service.model.PlacementFunder;
 import com.transformuk.hee.tis.tcs.service.repository.PlacementFunderRepository;
 import com.transformuk.hee.tis.tcs.service.service.PlacementFunderService;
 import com.transformuk.hee.tis.tcs.service.service.mapper.PlacementFunderMapper;

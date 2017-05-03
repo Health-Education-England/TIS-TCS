@@ -1,6 +1,6 @@
 package com.transformuk.hee.tis.tcs.service.repository;
 
-import com.transformuk.hee.tis.tcs.service.domain.FundingComponents;
+import com.transformuk.hee.tis.tcs.service.model.FundingComponents;
 import org.springframework.data.jpa.repository.JpaRepository;
 
 /**

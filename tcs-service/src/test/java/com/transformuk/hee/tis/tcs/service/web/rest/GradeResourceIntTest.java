@@ -1,11 +1,12 @@
 package com.transformuk.hee.tis.tcs.service.web.rest;
 
 import com.transformuk.hee.tis.tcs.service.Application;
-import com.transformuk.hee.tis.tcs.service.domain.Grade;
+import com.transformuk.hee.tis.tcs.service.api.GradeResource;
+import com.transformuk.hee.tis.tcs.service.exception.ExceptionTranslator;
+import com.transformuk.hee.tis.tcs.service.model.Grade;
 import com.transformuk.hee.tis.tcs.service.repository.GradeRepository;
 import com.transformuk.hee.tis.tcs.service.service.mapper.GradeMapper;
 import com.transformuk.hee.tis.tcs.api.dto.GradeDTO;
-import com.transformuk.hee.tis.tcs.service.web.rest.errors.ExceptionTranslator;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;

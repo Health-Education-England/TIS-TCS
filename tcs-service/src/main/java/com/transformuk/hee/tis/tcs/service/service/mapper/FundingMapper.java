@@ -1,7 +1,7 @@
 package com.transformuk.hee.tis.tcs.service.service.mapper;
 
 import com.transformuk.hee.tis.tcs.api.dto.FundingDTO;
-import com.transformuk.hee.tis.tcs.service.domain.Funding;
+import com.transformuk.hee.tis.tcs.service.model.Funding;
 import org.mapstruct.Mapper;
 
 import java.util.List;

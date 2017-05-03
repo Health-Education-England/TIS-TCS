@@ -1,6 +1,6 @@
 package com.transformuk.hee.tis.tcs.service.service.impl;
 
-import com.transformuk.hee.tis.tcs.service.domain.PostFunding;
+import com.transformuk.hee.tis.tcs.service.model.PostFunding;
 import com.transformuk.hee.tis.tcs.service.repository.PostFundingRepository;
 import com.transformuk.hee.tis.tcs.service.service.PostFundingService;
 import com.transformuk.hee.tis.tcs.service.service.mapper.PostFundingMapper;

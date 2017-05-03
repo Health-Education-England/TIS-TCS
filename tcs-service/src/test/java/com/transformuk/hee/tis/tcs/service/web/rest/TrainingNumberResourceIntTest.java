@@ -1,13 +1,14 @@
 package com.transformuk.hee.tis.tcs.service.web.rest;
 
 import com.transformuk.hee.tis.tcs.service.Application;
-import com.transformuk.hee.tis.tcs.service.domain.TrainingNumber;
+import com.transformuk.hee.tis.tcs.service.api.TrainingNumberResource;
+import com.transformuk.hee.tis.tcs.service.exception.ExceptionTranslator;
+import com.transformuk.hee.tis.tcs.service.model.TrainingNumber;
 import com.transformuk.hee.tis.tcs.service.repository.TrainingNumberRepository;
 import com.transformuk.hee.tis.tcs.service.service.TrainingNumberService;
 import com.transformuk.hee.tis.tcs.service.service.mapper.TrainingNumberMapper;
 import com.transformuk.hee.tis.tcs.api.dto.TrainingNumberDTO;
 import com.transformuk.hee.tis.tcs.api.enumeration.TrainingNumberType;
-import com.transformuk.hee.tis.tcs.service.web.rest.errors.ExceptionTranslator;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;

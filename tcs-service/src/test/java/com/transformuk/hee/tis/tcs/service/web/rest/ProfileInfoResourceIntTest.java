@@ -1,6 +1,7 @@
 package com.transformuk.hee.tis.tcs.service.web.rest;
 
 import com.transformuk.hee.tis.tcs.service.Application;
+import com.transformuk.hee.tis.tcs.service.api.ProfileInfoResource;
 import io.github.jhipster.config.JHipsterProperties;
 import org.junit.Before;
 import org.junit.Test;

@@ -1,6 +1,6 @@
 package com.transformuk.hee.tis.tcs.service.service.mapper;
 
-import com.transformuk.hee.tis.tcs.service.domain.PostFunding;
+import com.transformuk.hee.tis.tcs.service.model.PostFunding;
 import com.transformuk.hee.tis.tcs.api.dto.PostFundingDTO;
 import org.mapstruct.Mapper;
 import org.mapstruct.Mapping;

@@ -1,7 +1,7 @@
 package com.transformuk.hee.tis.tcs.service.service.mapper;
 
 import com.transformuk.hee.tis.tcs.api.dto.FundingComponentsDTO;
-import com.transformuk.hee.tis.tcs.service.domain.FundingComponents;
+import com.transformuk.hee.tis.tcs.service.model.FundingComponents;
 import org.mapstruct.Mapper;
 import org.mapstruct.Mapping;
 

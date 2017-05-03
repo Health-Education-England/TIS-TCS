@@ -1,6 +1,6 @@
 package com.transformuk.hee.tis.tcs.service.service.impl;
 
-import com.transformuk.hee.tis.tcs.service.domain.TariffRate;
+import com.transformuk.hee.tis.tcs.service.model.TariffRate;
 import com.transformuk.hee.tis.tcs.service.repository.TariffRateRepository;
 import com.transformuk.hee.tis.tcs.service.service.TariffRateService;
 import com.transformuk.hee.tis.tcs.service.service.mapper.TariffRateMapper;

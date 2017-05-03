@@ -1,6 +1,6 @@
 package com.transformuk.hee.tis.tcs.service.service.impl;
 
-import com.transformuk.hee.tis.tcs.service.domain.TariffFundingTypeFields;
+import com.transformuk.hee.tis.tcs.service.model.TariffFundingTypeFields;
 import com.transformuk.hee.tis.tcs.service.repository.TariffFundingTypeFieldsRepository;
 import com.transformuk.hee.tis.tcs.service.service.TariffFundingTypeFieldsService;
 import com.transformuk.hee.tis.tcs.service.service.mapper.TariffFundingTypeFieldsMapper;

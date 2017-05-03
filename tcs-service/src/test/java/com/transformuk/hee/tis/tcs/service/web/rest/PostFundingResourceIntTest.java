@@ -1,12 +1,13 @@
 package com.transformuk.hee.tis.tcs.service.web.rest;
 
 import com.transformuk.hee.tis.tcs.service.Application;
-import com.transformuk.hee.tis.tcs.service.domain.PostFunding;
+import com.transformuk.hee.tis.tcs.service.api.PostFundingResource;
+import com.transformuk.hee.tis.tcs.service.exception.ExceptionTranslator;
+import com.transformuk.hee.tis.tcs.service.model.PostFunding;
 import com.transformuk.hee.tis.tcs.service.repository.PostFundingRepository;
 import com.transformuk.hee.tis.tcs.service.service.PostFundingService;
 import com.transformuk.hee.tis.tcs.service.service.mapper.PostFundingMapper;
 import com.transformuk.hee.tis.tcs.api.dto.PostFundingDTO;
-import com.transformuk.hee.tis.tcs.service.web.rest.errors.ExceptionTranslator;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;

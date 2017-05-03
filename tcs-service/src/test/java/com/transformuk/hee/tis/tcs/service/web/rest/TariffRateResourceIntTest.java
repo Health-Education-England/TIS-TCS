@@ -1,12 +1,13 @@
 package com.transformuk.hee.tis.tcs.service.web.rest;
 
 import com.transformuk.hee.tis.tcs.service.Application;
-import com.transformuk.hee.tis.tcs.service.domain.TariffRate;
+import com.transformuk.hee.tis.tcs.service.api.TariffRateResource;
+import com.transformuk.hee.tis.tcs.service.exception.ExceptionTranslator;
+import com.transformuk.hee.tis.tcs.service.model.TariffRate;
 import com.transformuk.hee.tis.tcs.service.repository.TariffRateRepository;
 import com.transformuk.hee.tis.tcs.service.service.TariffRateService;
 import com.transformuk.hee.tis.tcs.service.service.mapper.TariffRateMapper;
 import com.transformuk.hee.tis.tcs.api.dto.TariffRateDTO;
-import com.transformuk.hee.tis.tcs.service.web.rest.errors.ExceptionTranslator;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;

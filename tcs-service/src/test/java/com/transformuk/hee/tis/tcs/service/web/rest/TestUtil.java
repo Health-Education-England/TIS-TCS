@@ -69,7 +69,7 @@ public class TestUtil {
 	}
 
 	/**
-	 * Verifies the equals/hashcode contract on the domain object.
+	 * Verifies the equals/hashcode contract on the model object.
 	 */
 	public static void equalsVerifier(Class clazz) throws Exception {
 		Object domainObject1 = clazz.getConstructor().newInstance();
