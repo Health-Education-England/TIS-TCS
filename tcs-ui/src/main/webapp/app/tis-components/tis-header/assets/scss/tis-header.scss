@@ -2,7 +2,7 @@
   height: 4.125rem;
   @include box-shadow(0px, 15px, 12px, -7px, #ccc);
   margin-bottom: 1.250em;
-  z-index: 999999;
+  z-index: 1;
   position: relative;
 
   .wrapper {
