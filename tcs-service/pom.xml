@@ -584,7 +584,7 @@
                 <!-- log configuration -->
                 <logback.loglevel>DEBUG</logback.loglevel>
                 <!-- default Spring profiles -->
-                <spring.profiles.active>dev</spring.profiles.active>
+                <spring.profiles.active>dev,prometheus</spring.profiles.active>
             </properties>
         </profile>
         <profile>
