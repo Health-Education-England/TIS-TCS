@@ -99,7 +99,7 @@ jhipster:
             port: 2003
             prefix: tcs
         prometheus: # Use the "prometheus" Maven profile to have the Prometheus dependencies
-            enabled: false
+            enabled: true
             endpoint: /prometheusMetrics
         logs: # Reports Dropwizard metrics in the logs
             enabled: false

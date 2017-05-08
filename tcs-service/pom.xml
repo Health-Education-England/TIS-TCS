@@ -611,7 +611,7 @@
                 <!-- log configuration -->
                 <logback.loglevel>INFO</logback.loglevel>
                 <!-- default Spring profiles -->
-                <spring.profiles.active>prod${profile.swagger}</spring.profiles.active>
+                <spring.profiles.active>prod,prometheus${profile.swagger}</spring.profiles.active>
             </properties>
         </profile>
         <profile>
