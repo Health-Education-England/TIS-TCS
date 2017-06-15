@@ -1,6 +1,6 @@
 package com.transformuk.hee.tis.tcs.service.config;
 
-import com.transformuk.hee.tis.profile.client.config.ProfileClientConfig;
+import com.transformuk.hee.tis.profile.client.config.JwtSpringSecurityConfig;
 import com.transformuk.hee.tis.security.JwtAuthenticationEntryPoint;
 import com.transformuk.hee.tis.security.JwtAuthenticationProvider;
 import com.transformuk.hee.tis.security.JwtAuthenticationSuccessHandler;
@@ -26,7 +26,7 @@ import java.util.Arrays;
 @EnableWebSecurity
 @EnableAutoConfiguration
 @EnableGlobalMethodSecurity(prePostEnabled = true)
-@Import(ProfileClientConfig.class)
+@Import(JwtSpringSecurityConfig.class)
 public class WebSecurityConfig extends WebSecurityConfigurerAdapter {
 
 	@Autowired
