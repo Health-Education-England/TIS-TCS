@@ -1,12 +1,15 @@
 package com.transformuk.hee.tis.tcs.service.api;
 
 import com.codahale.metrics.annotation.Timed;
+import com.transformuk.hee.tis.tcs.api.dto.FundingComponentsDTO;
 import com.transformuk.hee.tis.tcs.service.service.PlacementFunderService;
 import com.transformuk.hee.tis.tcs.api.dto.PlacementFunderDTO;
 import com.transformuk.hee.tis.tcs.service.api.util.HeaderUtil;
 import com.transformuk.hee.tis.tcs.service.api.util.PaginationUtil;
 import io.github.jhipster.web.util.ResponseUtil;
+import io.jsonwebtoken.lang.Collections;
 import io.swagger.annotations.ApiParam;
+import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.data.domain.Page;
@@ -17,10 +20,12 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
 
+import javax.validation.Valid;
 import java.net.URI;
 import java.net.URISyntaxException;
 import java.util.List;
 import java.util.Optional;
+import java.util.stream.Collectors;
 
 /**
  * REST controller for managing PlacementFunder.
@@ -129,4 +134,63 @@ public class PlacementFunderResource {
 		return ResponseEntity.ok().headers(HeaderUtil.createEntityDeletionAlert(ENTITY_NAME, id.toString())).build();
 	}
 
+    /**
+     * POST  /bulk-placement-funders : Bulk create a new Placement Funders.
+     *
+     * @param placementFunderDTOS List of the placementFunderDTOS to create
+     * @return the ResponseEntity with status 200 (Created) and with body the new placementFunderDTOS, or with status 400 (Bad Request) if the FundingComponents has already an ID
+     * @throws URISyntaxException if the Location URI syntax is incorrect
+     */
+    @PostMapping("/bulk-placement-funders")
+    @Timed
+    @PreAuthorize("hasAuthority('tcs:add:modify:entities')")
+    public ResponseEntity<List<PlacementFunderDTO>> bulkCreatePlacementFunders(@Valid @RequestBody List<PlacementFunderDTO> placementFunderDTOS) throws URISyntaxException {
+        log.debug("REST request to bulk save Placement Funders : {}", placementFunderDTOS);
+        if (!Collections.isEmpty(placementFunderDTOS)) {
+            List<Long> entityIds = placementFunderDTOS.stream()
+                .filter(p -> p.getId() != null)
+                .map(p -> p.getId())
+                .collect(Collectors.toList());
+            if (!Collections.isEmpty(entityIds)) {
+                return ResponseEntity.badRequest().headers(HeaderUtil.createFailureAlert(StringUtils.join(entityIds, ","), "ids.exist", "A new PlacementFunder cannot already have an ID")).body(null);
+            }
+        }
+        List<PlacementFunderDTO> result = placementFunderService.save(placementFunderDTOS);
+        List<Long> ids = result.stream().map(r -> r.getId()).collect(Collectors.toList());
+        return ResponseEntity.ok()
+            .headers(HeaderUtil.createEntityCreationAlert(ENTITY_NAME, StringUtils.join(ids, ",")))
+            .body(result);
+    }
+
+    /**
+     * PUT  /bulk-placement-funders : Updates an existing Funding Components.
+     *
+     * @param placementFunderDTOS List of the placementFunderDTOS to update
+     * @return the ResponseEntity with status 200 (OK) and with body the updated placementFunderDTOS,
+     * or with status 400 (Bad Request) if the placementFunderDTOS is not valid,
+     * or with status 500 (Internal Server Error) if the placementFunderDTOS couldnt be updated
+     * @throws URISyntaxException if the Location URI syntax is incorrect
+     */
+    @PutMapping("/bulk-placement-funders")
+    @Timed
+    @PreAuthorize("hasAuthority('tcs:add:modify:entities')")
+    public ResponseEntity<List<PlacementFunderDTO>> bulkUpdatePlacementFunders(@Valid @RequestBody List<PlacementFunderDTO> placementFunderDTOS) throws URISyntaxException {
+        log.debug("REST request to bulk update Placement Funders : {}", placementFunderDTOS);
+        if (Collections.isEmpty(placementFunderDTOS)) {
+            return ResponseEntity.badRequest().headers(HeaderUtil.createFailureAlert(ENTITY_NAME, "request.body.empty",
+                "The request body for this end point cannot be empty")).body(null);
+        } else if (!Collections.isEmpty(placementFunderDTOS)) {
+            List<PlacementFunderDTO> entitiesWithNoId = placementFunderDTOS.stream().filter(p -> p.getId() == null).collect(Collectors.toList());
+            if (!Collections.isEmpty(entitiesWithNoId)) {
+                return ResponseEntity.badRequest().headers(HeaderUtil.createFailureAlert(StringUtils.join(entitiesWithNoId, ","),
+                    "bulk.update.failed.noId", "Some DTOs you've provided have no Id, cannot update entities that dont exist")).body(entitiesWithNoId);
+            }
+        }
+
+        List<PlacementFunderDTO> results = placementFunderService.save(placementFunderDTOS);
+        List<Long> ids = results.stream().map(r -> r.getId()).collect(Collectors.toList());
+        return ResponseEntity.ok()
+            .headers(HeaderUtil.createEntityUpdateAlert(ENTITY_NAME, StringUtils.join(ids, ",")))
+            .body(results);
+    }
 }

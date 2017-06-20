@@ -1,20 +1,25 @@
 package com.transformuk.hee.tis.tcs.service.api;
 
 import com.codahale.metrics.annotation.Timed;
+import com.transformuk.hee.tis.tcs.api.dto.ProgrammeDTO;
 import com.transformuk.hee.tis.tcs.service.service.SpecialtyGroupService;
 import com.transformuk.hee.tis.tcs.api.dto.SpecialtyGroupDTO;
 import com.transformuk.hee.tis.tcs.service.api.util.HeaderUtil;
 import io.github.jhipster.web.util.ResponseUtil;
+import io.jsonwebtoken.lang.Collections;
+import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
 
+import javax.validation.Valid;
 import java.net.URI;
 import java.net.URISyntaxException;
 import java.util.List;
 import java.util.Optional;
+import java.util.stream.Collectors;
 
 /**
  * REST controller for managing SpecialtyGroup.
@@ -117,5 +122,65 @@ public class SpecialtyGroupResource {
 		specialtyGroupService.delete(id);
 		return ResponseEntity.ok().headers(HeaderUtil.createEntityDeletionAlert(ENTITY_NAME, id.toString())).build();
 	}
+
+    /**
+     * POST  /bulk-specialty-groups : Bulk create a Specialty Groups.
+     *
+     * @param specialtyGroupDTOS List of the specialtyGroupDTOS to create
+     * @return the ResponseEntity with status 200 (Created) and with body the new specialtyGroupDTOS, or with status 400 (Bad Request) if the Specialty Group has already an ID
+     * @throws URISyntaxException if the Location URI syntax is incorrect
+     */
+    @PostMapping("/bulk-specialty-groups")
+    @Timed
+    @PreAuthorize("hasAuthority('tcs:add:modify:entities')")
+    public ResponseEntity<List<SpecialtyGroupDTO>> bulkCreateSpecialtyGroups(@Valid @RequestBody List<SpecialtyGroupDTO> specialtyGroupDTOS) throws URISyntaxException {
+        log.debug("REST request to bulk save Specialty Groups : {}", specialtyGroupDTOS);
+        if (!Collections.isEmpty(specialtyGroupDTOS)) {
+            List<Long> entityIds = specialtyGroupDTOS.stream()
+                .filter(sg -> sg.getId() != null)
+                .map(sg -> sg.getId())
+                .collect(Collectors.toList());
+            if (!Collections.isEmpty(entityIds)) {
+                return ResponseEntity.badRequest().headers(HeaderUtil.createFailureAlert(StringUtils.join(entityIds, ","), "ids.exist", "A new Specialty Group cannot already have an ID")).body(null);
+            }
+        }
+        List<SpecialtyGroupDTO> result = specialtyGroupService.save(specialtyGroupDTOS);
+        List<Long> ids = result.stream().map(r -> r.getId()).collect(Collectors.toList());
+        return ResponseEntity.ok()
+            .headers(HeaderUtil.createEntityCreationAlert(ENTITY_NAME, StringUtils.join(ids, ",")))
+            .body(result);
+    }
+
+    /**
+     * PUT  /bulk-specialty-groups : Updates an existing Specialty Group.
+     *
+     * @param specialtyGroupDTOS List of the specialtyGroupDTOS to update
+     * @return the ResponseEntity with status 200 (OK) and with body the updated specialtyGroupDTOS,
+     * or with status 400 (Bad Request) if the specialtyGroupDTOS is not valid,
+     * or with status 500 (Internal Server Error) if the specialtyGroupDTOS couldnt be updated
+     * @throws URISyntaxException if the Location URI syntax is incorrect
+     */
+    @PutMapping("/bulk-specialty-groups")
+    @Timed
+    @PreAuthorize("hasAuthority('tcs:add:modify:entities')")
+    public ResponseEntity<List<SpecialtyGroupDTO>> bulkUpdateSpecialtyGroups(@Valid @RequestBody List<SpecialtyGroupDTO> specialtyGroupDTOS) throws URISyntaxException {
+        log.debug("REST request to bulk update Specialty Groups : {}", specialtyGroupDTOS);
+        if (Collections.isEmpty(specialtyGroupDTOS)) {
+            return ResponseEntity.badRequest().headers(HeaderUtil.createFailureAlert(ENTITY_NAME, "request.body.empty",
+                "The request body for this end point cannot be empty")).body(null);
+        } else if (!Collections.isEmpty(specialtyGroupDTOS)) {
+            List<SpecialtyGroupDTO> entitiesWithNoId = specialtyGroupDTOS.stream().filter(sg -> sg.getId() == null).collect(Collectors.toList());
+            if (!Collections.isEmpty(entitiesWithNoId)) {
+                return ResponseEntity.badRequest().headers(HeaderUtil.createFailureAlert(StringUtils.join(entitiesWithNoId, ","),
+                    "bulk.update.failed.noId", "Some DTOs you've provided have no Id, cannot update entities that dont exist")).body(entitiesWithNoId);
+            }
+        }
+
+        List<SpecialtyGroupDTO> results = specialtyGroupService.save(specialtyGroupDTOS);
+        List<Long> ids = results.stream().map(r -> r.getId()).collect(Collectors.toList());
+        return ResponseEntity.ok()
+            .headers(HeaderUtil.createEntityUpdateAlert(ENTITY_NAME, StringUtils.join(ids, ",")))
+            .body(results);
+    }
 
 }
