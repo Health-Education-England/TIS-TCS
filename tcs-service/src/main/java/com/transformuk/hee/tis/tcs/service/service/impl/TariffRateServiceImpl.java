@@ -47,7 +47,22 @@ public class TariffRateServiceImpl implements TariffRateService {
 		return result;
 	}
 
-	/**
+    /**
+     * Save a list of tariffRate.
+     *
+     * @param tariffRateDTO the entities to save
+     * @return the list of persisted entities
+     */
+    @Override
+    public List<TariffRateDTO> save(List<TariffRateDTO> tariffRateDTO) {
+        log.debug("Request to save TariffRate : {}", tariffRateDTO);
+        List<TariffRate> tariffRate = tariffRateMapper.tariffRateDTOsToTariffRates(tariffRateDTO);
+        tariffRate = tariffRateRepository.save(tariffRate);
+        List<TariffRateDTO> result = tariffRateMapper.tariffRatesToTariffRateDTOs(tariffRate);
+        return result;
+    }
+
+    /**
 	 * Get all the tariffRates.
 	 *
 	 * @return the list of entities

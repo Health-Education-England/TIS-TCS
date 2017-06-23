@@ -12,6 +12,8 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.util.List;
+
 /**
  * Service Implementation for managing Funding.
  */
@@ -45,7 +47,21 @@ public class FundingServiceImpl implements FundingService {
 		return result;
 	}
 
-	/**
+    /**
+     * Save a list of funding
+     * @param fundingDTO tje list of entities to save
+     * @return the persisted entities
+     */
+    @Override
+    public List<FundingDTO> save(List<FundingDTO> fundingDTO) {
+        log.debug("Request to save Fundings : {}", fundingDTO);
+        List<Funding> funding = fundingMapper.fundingDTOsToFundings(fundingDTO);
+        funding = fundingRepository.save(funding);
+        List<FundingDTO> result = fundingMapper.fundingsToFundingDTOs(funding);
+        return result;
+    }
+
+    /**
 	 * Get all the fundings.
 	 *
 	 * @param pageable the pagination information

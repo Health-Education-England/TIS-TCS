@@ -12,6 +12,8 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.util.List;
+
 /**
  * Service Implementation for managing ProgrammeMembership.
  */
@@ -45,7 +47,22 @@ public class ProgrammeMembershipServiceImpl implements ProgrammeMembershipServic
 		return result;
 	}
 
-	/**
+    /**
+     * Save a list of programmeMembership.
+     *
+     * @param programmeMembershipDTO the list of entities to save
+     * @return the list of persisted entities
+     */
+    @Override
+    public List<ProgrammeMembershipDTO> save(List<ProgrammeMembershipDTO> programmeMembershipDTO) {
+        log.debug("Request to save ProgrammeMembership : {}", programmeMembershipDTO);
+        List<ProgrammeMembership> programmeMembership = programmeMembershipMapper.programmeMembershipDTOsToProgrammeMemberships(programmeMembershipDTO);
+        programmeMembership = programmeMembershipRepository.save(programmeMembership);
+        List<ProgrammeMembershipDTO> result = programmeMembershipMapper.programmeMembershipsToProgrammeMembershipDTOs(programmeMembership);
+        return result;
+    }
+
+    /**
 	 * Get all the programmeMemberships.
 	 *
 	 * @param pageable the pagination information

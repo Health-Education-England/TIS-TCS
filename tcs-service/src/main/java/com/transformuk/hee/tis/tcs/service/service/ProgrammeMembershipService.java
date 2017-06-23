@@ -4,6 +4,8 @@ import com.transformuk.hee.tis.tcs.api.dto.ProgrammeMembershipDTO;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 
+import java.util.List;
+
 /**
  * Service Interface for managing ProgrammeMembership.
  */
@@ -16,6 +18,14 @@ public interface ProgrammeMembershipService {
 	 * @return the persisted entity
 	 */
 	ProgrammeMembershipDTO save(ProgrammeMembershipDTO programmeMembershipDTO);
+
+    /**
+     * Save a list of programmeMembership.
+     *
+     * @param programmeMembershipDTO the list of entities to save
+     * @return the list of persisted entities
+     */
+	List<ProgrammeMembershipDTO> save(List<ProgrammeMembershipDTO> programmeMembershipDTO);
 
 	/**
 	 * Get all the programmeMemberships.

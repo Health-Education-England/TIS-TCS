@@ -12,6 +12,8 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.util.List;
+
 /**
  * Service Implementation for managing PostFunding.
  */
@@ -45,7 +47,22 @@ public class PostFundingServiceImpl implements PostFundingService {
 		return result;
 	}
 
-	/**
+    /**
+     * Save a list of postFunding.
+     *
+     * @param postFundingDTO the entities to save
+     * @return the list of persisted entities
+     */
+    @Override
+    public List<PostFundingDTO> save(List<PostFundingDTO> postFundingDTO) {
+        log.debug("Request to save PostFunding : {}", postFundingDTO);
+        List<PostFunding> postFunding = postFundingMapper.postFundingDTOsToPostFundings(postFundingDTO);
+        postFunding = postFundingRepository.save(postFunding);
+        List<PostFundingDTO> result = postFundingMapper.postFundingsToPostFundingDTOs(postFunding);
+        return result;
+    }
+
+    /**
 	 * Get all the postFundings.
 	 *
 	 * @param pageable the pagination information

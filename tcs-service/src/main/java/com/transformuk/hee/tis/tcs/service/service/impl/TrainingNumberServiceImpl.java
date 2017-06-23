@@ -47,7 +47,22 @@ public class TrainingNumberServiceImpl implements TrainingNumberService {
 		return result;
 	}
 
-	/**
+    /**
+     * Save a list of trainingNumbers.
+     *
+     * @param trainingNumberDTO the entities to save
+     * @return the list of persisted entities
+     */
+    @Override
+    public List<TrainingNumberDTO> save(List<TrainingNumberDTO> trainingNumberDTO) {
+        log.debug("Request to save TrainingNumber : {}", trainingNumberDTO);
+        List<TrainingNumber> trainingNumber = trainingNumberMapper.trainingNumberDTOsToTrainingNumbers(trainingNumberDTO);
+        trainingNumber = trainingNumberRepository.save(trainingNumber);
+        List<TrainingNumberDTO> result = trainingNumberMapper.trainingNumbersToTrainingNumberDTOs(trainingNumber);
+        return result;
+    }
+
+    /**
 	 * Get all the trainingNumbers.
 	 *
 	 * @return the list of entities

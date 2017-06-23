@@ -12,6 +12,8 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.util.List;
+
 /**
  * Service Implementation for managing PlacementFunder.
  */
@@ -45,7 +47,22 @@ public class PlacementFunderServiceImpl implements PlacementFunderService {
 		return result;
 	}
 
-	/**
+    /**
+     * Save a list of placementFunder.
+     *
+     * @param placementFunderDTO the list of entities to save
+     * @return the list of persisted entities
+     */
+    @Override
+    public List<PlacementFunderDTO> save(List<PlacementFunderDTO> placementFunderDTO) {
+        log.debug("Request to save PlacementFunder : {}", placementFunderDTO);
+        List<PlacementFunder> placementFunder = placementFunderMapper.placementFunderDTOsToPlacementFunders(placementFunderDTO);
+        placementFunder = placementFunderRepository.save(placementFunder);
+        List<PlacementFunderDTO> result = placementFunderMapper.placementFundersToPlacementFunderDTOs(placementFunder);
+        return result;
+    }
+
+    /**
 	 * Get all the placementFunders.
 	 *
 	 * @param pageable the pagination information

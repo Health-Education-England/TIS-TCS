@@ -1,20 +1,25 @@
 package com.transformuk.hee.tis.tcs.service.api;
 
 import com.codahale.metrics.annotation.Timed;
+import com.transformuk.hee.tis.tcs.api.dto.TariffRateDTO;
 import com.transformuk.hee.tis.tcs.service.service.TrainingNumberService;
 import com.transformuk.hee.tis.tcs.api.dto.TrainingNumberDTO;
 import com.transformuk.hee.tis.tcs.service.api.util.HeaderUtil;
 import io.github.jhipster.web.util.ResponseUtil;
+import io.jsonwebtoken.lang.Collections;
+import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
 
+import javax.validation.Valid;
 import java.net.URI;
 import java.net.URISyntaxException;
 import java.util.List;
 import java.util.Optional;
+import java.util.stream.Collectors;
 
 /**
  * REST controller for managing TrainingNumber.
@@ -117,5 +122,66 @@ public class TrainingNumberResource {
 		trainingNumberService.delete(id);
 		return ResponseEntity.ok().headers(HeaderUtil.createEntityDeletionAlert(ENTITY_NAME, id.toString())).build();
 	}
+
+
+    /**
+     * POST  /bulk-training-numbers : Bulk create Training Numbers.
+     *
+     * @param trainingNumberDTOS List of the trainingNumberDTOS to create
+     * @return the ResponseEntity with status 200 (Created) and with body the new trainingNumberDTOS, or with status 400 (Bad Request) if the Training Number has already an ID
+     * @throws URISyntaxException if the Location URI syntax is incorrect
+     */
+    @PostMapping("/bulk-training-numbers")
+    @Timed
+    @PreAuthorize("hasAuthority('tcs:add:modify:entities')")
+    public ResponseEntity<List<TrainingNumberDTO>> bulkCreateTrainingNumbers(@Valid @RequestBody List<TrainingNumberDTO> trainingNumberDTOS) throws URISyntaxException {
+        log.debug("REST request to bulk save Training Numbers : {}", trainingNumberDTOS);
+        if (!Collections.isEmpty(trainingNumberDTOS)) {
+            List<Long> entityIds = trainingNumberDTOS.stream()
+                .filter(tn -> tn.getId() != null)
+                .map(tr -> tr.getId())
+                .collect(Collectors.toList());
+            if (!Collections.isEmpty(entityIds)) {
+                return ResponseEntity.badRequest().headers(HeaderUtil.createFailureAlert(StringUtils.join(entityIds, ","), "ids.exist", "A new Training Numbers cannot already have an ID")).body(null);
+            }
+        }
+        List<TrainingNumberDTO> result = trainingNumberService.save(trainingNumberDTOS);
+        List<Long> ids = result.stream().map(r -> r.getId()).collect(Collectors.toList());
+        return ResponseEntity.ok()
+            .headers(HeaderUtil.createEntityCreationAlert(ENTITY_NAME, StringUtils.join(ids, ",")))
+            .body(result);
+    }
+
+    /**
+     * PUT  /bulk-training-numbers : Updates an existing Training Numbers.
+     *
+     * @param trainingNumberDTOS List of the trainingNumberDTOS to update
+     * @return the ResponseEntity with status 200 (OK) and with body the updated trainingNumberDTOS,
+     * or with status 400 (Bad Request) if the trainingNumberDTOS is not valid,
+     * or with status 500 (Internal Server Error) if the trainingNumberDTOS couldnt be updated
+     * @throws URISyntaxException if the Location URI syntax is incorrect
+     */
+    @PutMapping("/bulk-training-numbers")
+    @Timed
+    @PreAuthorize("hasAuthority('tcs:add:modify:entities')")
+    public ResponseEntity<List<TrainingNumberDTO>> bulkUpdateTrainingNumbers(@Valid @RequestBody List<TrainingNumberDTO> trainingNumberDTOS) throws URISyntaxException {
+        log.debug("REST request to bulk update Training Numbers : {}", trainingNumberDTOS);
+        if (Collections.isEmpty(trainingNumberDTOS)) {
+            return ResponseEntity.badRequest().headers(HeaderUtil.createFailureAlert(ENTITY_NAME, "request.body.empty",
+                "The request body for this end point cannot be empty")).body(null);
+        } else if (!Collections.isEmpty(trainingNumberDTOS)) {
+            List<TrainingNumberDTO> entitiesWithNoId = trainingNumberDTOS.stream().filter(tn -> tn.getId() == null).collect(Collectors.toList());
+            if (!Collections.isEmpty(entitiesWithNoId)) {
+                return ResponseEntity.badRequest().headers(HeaderUtil.createFailureAlert(StringUtils.join(entitiesWithNoId, ","),
+                    "bulk.update.failed.noId", "Some DTOs you've provided have no Id, cannot update entities that dont exist")).body(entitiesWithNoId);
+            }
+        }
+
+        List<TrainingNumberDTO> results = trainingNumberService.save(trainingNumberDTOS);
+        List<Long> ids = results.stream().map(r -> r.getId()).collect(Collectors.toList());
+        return ResponseEntity.ok()
+            .headers(HeaderUtil.createEntityUpdateAlert(ENTITY_NAME, StringUtils.join(ids, ",")))
+            .body(results);
+    }
 
 }

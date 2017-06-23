@@ -18,6 +18,14 @@ public interface TrainingNumberService {
 	 */
 	TrainingNumberDTO save(TrainingNumberDTO trainingNumberDTO);
 
+    /**
+     * Save a list of trainingNumbers.
+     *
+     * @param trainingNumberDTO the entities to save
+     * @return the list of persisted entities
+     */
+    List<TrainingNumberDTO> save(List<TrainingNumberDTO> trainingNumberDTO);
+
 	/**
 	 * Get all the trainingNumbers.
 	 *

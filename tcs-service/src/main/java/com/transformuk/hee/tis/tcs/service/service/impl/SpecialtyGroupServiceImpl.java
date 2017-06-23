@@ -47,7 +47,16 @@ public class SpecialtyGroupServiceImpl implements SpecialtyGroupService {
 		return result;
 	}
 
-	/**
+    @Override
+    public List<SpecialtyGroupDTO> save(List<SpecialtyGroupDTO> specialtyGroupDTO) {
+        log.debug("Request to save SpecialtyGroup : {}", specialtyGroupDTO);
+        List<SpecialtyGroup> specialtyGroup = specialtyGroupMapper.specialtyGroupDTOsToSpecialtyGroups(specialtyGroupDTO);
+        specialtyGroup = specialtyGroupRepository.save(specialtyGroup);
+        List<SpecialtyGroupDTO> result = specialtyGroupMapper.specialtyGroupsToSpecialtyGroupDTOs(specialtyGroup);
+        return result;
+    }
+
+    /**
 	 * Get all the specialtyGroups.
 	 *
 	 * @return the list of entities

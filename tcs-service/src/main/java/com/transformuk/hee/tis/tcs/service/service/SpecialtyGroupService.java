@@ -18,6 +18,14 @@ public interface SpecialtyGroupService {
 	 */
 	SpecialtyGroupDTO save(SpecialtyGroupDTO specialtyGroupDTO);
 
+    /**
+     * Save a list of specialtyGroup.
+     *
+     * @param specialtyGroupDTO the entities to save
+     * @return the list of persisted entities
+     */
+	List<SpecialtyGroupDTO> save(List<SpecialtyGroupDTO> specialtyGroupDTO);
+
 	/**
 	 * Get all the specialtyGroups.
 	 *

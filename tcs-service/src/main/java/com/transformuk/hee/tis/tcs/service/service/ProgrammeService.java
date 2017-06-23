@@ -4,6 +4,8 @@ import com.transformuk.hee.tis.tcs.api.dto.ProgrammeDTO;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 
+import java.util.List;
+
 /**
  * Service Interface for managing Programme.
  */
@@ -16,6 +18,14 @@ public interface ProgrammeService {
 	 * @return the persisted entity
 	 */
 	ProgrammeDTO save(ProgrammeDTO programmeDTO);
+
+    /**
+     * Save a list of programmes.
+     *
+     * @param programmeDTO the list of entities to save
+     * @return the list of persisted entities
+     */
+    List<ProgrammeDTO> save(List<ProgrammeDTO> programmeDTO);
 
 	/**
 	 * Get all the programmes.

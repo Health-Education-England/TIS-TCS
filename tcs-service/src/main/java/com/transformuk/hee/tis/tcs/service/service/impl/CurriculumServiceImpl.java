@@ -12,6 +12,8 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.util.List;
+
 /**
  * Service Implementation for managing Curriculum.
  */
@@ -45,7 +47,16 @@ public class CurriculumServiceImpl implements CurriculumService {
 		return result;
 	}
 
-	/**
+    @Override
+    public List<CurriculumDTO> save(List<CurriculumDTO> curriculumDTOs) {
+        log.debug("Request to save Curriculum : {}", curriculumDTOs);
+        List<Curriculum> curriculums = curriculumMapper.curriculumDTOsToCurricula(curriculumDTOs);
+        curriculums = curriculumRepository.save(curriculums);
+        List<CurriculumDTO> result = curriculumMapper.curriculaToCurriculumDTOs(curriculums);
+        return result;
+    }
+
+    /**
 	 * Get all the curricula.
 	 *
 	 * @param pageable the pagination information

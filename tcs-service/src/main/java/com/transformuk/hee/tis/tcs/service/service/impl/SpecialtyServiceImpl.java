@@ -12,6 +12,8 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.util.List;
+
 /**
  * Service Implementation for managing Specialty.
  */
@@ -45,7 +47,22 @@ public class SpecialtyServiceImpl implements SpecialtyService {
 		return result;
 	}
 
-	/**
+    /**
+     * Save a list of specialties.
+     *
+     * @param specialtyDTO the entities to save
+     * @return the list of persisted entities
+     */
+    @Override
+    public List<SpecialtyDTO> save(List<SpecialtyDTO> specialtyDTO) {
+        log.debug("Request to save Specialties : {}", specialtyDTO);
+        List<Specialty> specialty = specialtyMapper.specialtyDTOsToSpecialties(specialtyDTO);
+        specialty = specialtyRepository.save(specialty);
+        List<SpecialtyDTO> result = specialtyMapper.specialtiesToSpecialtyDTOs(specialty);
+        return result;
+    }
+
+    /**
 	 * Get all the specialties.
 	 *
 	 * @param pageable the pagination information

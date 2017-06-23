@@ -12,6 +12,8 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.util.List;
+
 /**
  * Service Implementation for managing Post.
  */
@@ -45,7 +47,22 @@ public class PostServiceImpl implements PostService {
 		return result;
 	}
 
-	/**
+    /**
+     * Save a list of post.
+     *
+     * @param postDTO the list of entities to save
+     * @return the list of persisted entities
+     */
+    @Override
+    public List<PostDTO> save(List<PostDTO> postDTO) {
+        log.debug("Request to save Post : {}", postDTO);
+        List<Post> post = postMapper.postDTOsToPosts(postDTO);
+        post = postRepository.save(post);
+        List<PostDTO> result = postMapper.postsToPostDTOs(post);
+        return result;
+    }
+
+    /**
 	 * Get all the posts.
 	 *
 	 * @param pageable the pagination information

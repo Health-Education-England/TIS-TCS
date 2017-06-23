@@ -4,6 +4,8 @@ import com.transformuk.hee.tis.tcs.api.dto.PostFundingDTO;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 
+import java.util.List;
+
 /**
  * Service Interface for managing PostFunding.
  */
@@ -16,6 +18,14 @@ public interface PostFundingService {
 	 * @return the persisted entity
 	 */
 	PostFundingDTO save(PostFundingDTO postFundingDTO);
+
+    /**
+     * Save a list of postFunding.
+     *
+     * @param postFundingDTO the entities to save
+     * @return the list of persisted entities
+     */
+	List<PostFundingDTO> save(List<PostFundingDTO> postFundingDTO);
 
 	/**
 	 * Get all the postFundings.

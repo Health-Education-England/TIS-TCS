@@ -12,6 +12,8 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.util.List;
+
 /**
  * Service Implementation for managing Placement.
  */
@@ -45,7 +47,22 @@ public class PlacementServiceImpl implements PlacementService {
 		return result;
 	}
 
-	/**
+    /**
+     * Save a list of placements.
+     *
+     * @param placementDTO the list of entities to save
+     * @return the list of persisted entities
+     */
+    @Override
+    public List<PlacementDTO> save(List<PlacementDTO> placementDTO) {
+        log.debug("Request to save Placements : {}", placementDTO);
+        List<Placement> placement = placementMapper.placementDTOsToPlacements(placementDTO);
+        placement = placementRepository.save(placement);
+        List<PlacementDTO> result = placementMapper.placementsToPlacementDTOs(placement);
+        return result;
+    }
+
+    /**
 	 * Get all the placements.
 	 *
 	 * @param pageable the pagination information
