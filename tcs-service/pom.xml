@@ -12,7 +12,7 @@
 
     <groupId>com.transformuk.hee.tis</groupId>
     <artifactId>tcs-service</artifactId>
-    <version>2.0.3</version>
+    <version>2.0.4</version>
     <packaging>war</packaging>
     <name>tcs-service</name>
 
@@ -385,13 +385,13 @@
     <build>
         <defaultGoal>spring-boot:run</defaultGoal>
         <plugins>
-			<plugin>
-				<artifactId>maven-war-plugin</artifactId>
-				<version>2.1.1</version>
-				<configuration>
-					<attachClasses>true</attachClasses>
-				</configuration>
-			</plugin>
+            <plugin>
+                <artifactId>maven-war-plugin</artifactId>
+                <version>2.1.1</version>
+                <configuration>
+                    <attachClasses>true</attachClasses>
+                </configuration>
+            </plugin>
             <plugin>
                 <groupId>com.github.ekryd.sortpom</groupId>
                 <artifactId>sortpom-maven-plugin</artifactId>
