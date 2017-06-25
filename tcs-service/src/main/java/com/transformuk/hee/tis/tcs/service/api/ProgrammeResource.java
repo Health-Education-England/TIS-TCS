@@ -1,12 +1,23 @@
 package com.transformuk.hee.tis.tcs.service.api;
 
 import com.codahale.metrics.annotation.Timed;
-import com.transformuk.hee.tis.tcs.service.service.ProgrammeService;
+import com.fasterxml.jackson.core.type.TypeReference;
+import com.fasterxml.jackson.databind.ObjectMapper;
+import com.transformuk.hee.tis.security.model.UserProfile;
 import com.transformuk.hee.tis.tcs.api.dto.ProgrammeDTO;
+import com.transformuk.hee.tis.tcs.api.enumeration.Status;
 import com.transformuk.hee.tis.tcs.service.api.util.HeaderUtil;
 import com.transformuk.hee.tis.tcs.service.api.util.PaginationUtil;
+import com.transformuk.hee.tis.tcs.service.model.ColumnFilter;
+import com.transformuk.hee.tis.tcs.service.service.ProgrammeService;
 import io.github.jhipster.web.util.ResponseUtil;
+import io.swagger.annotations.ApiOperation;
 import io.swagger.annotations.ApiParam;
+import io.swagger.annotations.ApiResponse;
+import io.swagger.annotations.ApiResponses;
+import org.apache.commons.codec.DecoderException;
+import org.apache.commons.codec.net.URLCodec;
+import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.data.domain.Page;
@@ -17,10 +28,17 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
 
+import java.io.IOException;
 import java.net.URI;
 import java.net.URISyntaxException;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 import java.util.Optional;
+
+import static com.transformuk.hee.tis.security.util.TisSecurityHelper.getProfileFromContext;
+import static java.util.Collections.EMPTY_LIST;
+import static java.util.stream.Collectors.toList;
 
 /**
  * REST controller for managing Programme.
@@ -32,6 +50,8 @@ public class ProgrammeResource {
 	private static final String ENTITY_NAME = "programme";
 	private final Logger log = LoggerFactory.getLogger(ProgrammeResource.class);
 	private final ProgrammeService programmeService;
+
+	private ObjectMapper mapper = new ObjectMapper();
 
 	public ProgrammeResource(ProgrammeService programmeService) {
 		this.programmeService = programmeService;
@@ -46,7 +66,7 @@ public class ProgrammeResource {
 	 */
 	@PostMapping("/programmes")
 	@Timed
-	@PreAuthorize("hasAuthority('tcs:add:modify:entities')")
+	@PreAuthorize("hasAuthority('programme:add:modify')")
 	public ResponseEntity<ProgrammeDTO> createProgramme(@RequestBody ProgrammeDTO programmeDTO) throws URISyntaxException {
 		log.debug("REST request to save Programme : {}", programmeDTO);
 		if (programmeDTO.getId() != null) {
@@ -69,7 +89,7 @@ public class ProgrammeResource {
 	 */
 	@PutMapping("/programmes")
 	@Timed
-	@PreAuthorize("hasAuthority('tcs:add:modify:entities')")
+	@PreAuthorize("hasAuthority('programme:add:modify')")
 	public ResponseEntity<ProgrammeDTO> updateProgramme(@RequestBody ProgrammeDTO programmeDTO) throws URISyntaxException {
 		log.debug("REST request to update Programme : {}", programmeDTO);
 		if (programmeDTO.getId() == null) {
@@ -81,6 +101,18 @@ public class ProgrammeResource {
 				.body(result);
 	}
 
+
+	@ApiOperation(value = "Lists Programmes data",
+			notes = "Returns a list of Programmes with support for pagination, sorting, smart search and column filters \r\n" +
+					"page amd size should be greater than 0 \r\n" +
+					"order should con valid column followed by either 'asc' or 'desc'. \r\n" +
+					"searchQuery any wildcard string to be searched. \r\n" +
+					"columnFilters json object by column name and value. \r\n" +
+					"(Eg: columnFilters={ \"managingDeanery\": [\"dean1\", \"dean2\"], \"dbc\": " +
+					"[\"dbc1\"] }",
+			response = ResponseEntity.class, responseContainer = "Programmes list")
+	@ApiResponses(value = {
+			@ApiResponse(code = 200, message = "Programmes list", response = ResponseEntity.class)})
 	/**
 	 * GET  /programmes : get all the programmes.
 	 *
@@ -90,10 +122,22 @@ public class ProgrammeResource {
 	 */
 	@GetMapping("/programmes")
 	@Timed
-	@PreAuthorize("hasAuthority('tcs:view:entities')")
-	public ResponseEntity<List<ProgrammeDTO>> getAllProgrammes(@ApiParam Pageable pageable) {
+	@PreAuthorize("hasAuthority('programme:view')")
+	public ResponseEntity<List<ProgrammeDTO>> getAllProgrammes(
+			@ApiParam Pageable pageable,
+			@RequestParam(value = "searchQuery", required = false) String searchQuery,
+			@RequestParam(value = "columnFilters", required = false) String columnFilterJson) throws IOException {
 		log.debug("REST request to get a page of Programmes");
-		Page<ProgrammeDTO> page = programmeService.findAll(pageable);
+
+		UserProfile userProfile = getProfileFromContext();
+		List<ColumnFilter> columnFilters = getColumnFilters(columnFilterJson);
+		Page<ProgrammeDTO> page;
+		if (StringUtils.isEmpty(searchQuery) && StringUtils.isEmpty(columnFilterJson)) {
+			page = programmeService.findAll(userProfile.getDesignatedBodyCodes(), pageable);
+		} else {
+			page = programmeService.advancedSearch(
+					userProfile.getDesignatedBodyCodes(), searchQuery, columnFilters, pageable);
+		}
 		HttpHeaders headers = PaginationUtil.generatePaginationHttpHeaders(page, "/api/programmes");
 		return new ResponseEntity<>(page.getContent(), headers, HttpStatus.OK);
 	}
@@ -106,7 +150,7 @@ public class ProgrammeResource {
 	 */
 	@GetMapping("/programmes/{id}")
 	@Timed
-	@PreAuthorize("hasAuthority('tcs:view:entities')")
+	@PreAuthorize("hasAuthority('programme:view')")
 	public ResponseEntity<ProgrammeDTO> getProgramme(@PathVariable Long id) {
 		log.debug("REST request to get Programme : {}", id);
 		ProgrammeDTO programmeDTO = programmeService.findOne(id);
@@ -126,6 +170,35 @@ public class ProgrammeResource {
 		log.debug("REST request to delete Programme : {}", id);
 		programmeService.delete(id);
 		return ResponseEntity.ok().headers(HeaderUtil.createEntityDeletionAlert(ENTITY_NAME, id.toString())).build();
+	}
+
+	private List<ColumnFilter> getColumnFilters(String columnFilterJson) throws IOException {
+		if (columnFilterJson != null) {
+			if (!columnFilterJson.startsWith("{")) {
+				//attempt to decode
+				try {
+					columnFilterJson = new URLCodec().decode(columnFilterJson);
+				} catch (DecoderException e) {
+					log.error(e.getMessage(), e);
+					throw new IllegalArgumentException("Cannot interpret column filters: " + columnFilterJson);
+				}
+			}
+			TypeReference<HashMap<String, List<String>>> typeRef = new TypeReference<HashMap<String, List<String>>>() {
+			};
+			Map<String, List<String>> columns = mapper.readValue(columnFilterJson, typeRef);
+			try {
+				return columns.entrySet().stream()
+						.map(e -> new ColumnFilter(e.getKey(),
+								e.getKey().equals("status") ?
+										e.getValue().stream().map(v -> Status.valueOf(v)).collect(toList()) :
+										e.getValue().stream().collect(toList())))
+						.collect(toList());
+			} catch (Exception e) {
+				log.error(e.getMessage(), e);
+				throw new IllegalArgumentException("Cannot interpret column filters: " + columnFilterJson);
+			}
+		}
+		return EMPTY_LIST;
 	}
 
 }

@@ -1,5 +1,6 @@
 package com.transformuk.hee.tis.tcs.service.api;
 
+import com.transformuk.hee.tis.tcs.TestUtils;
 import com.transformuk.hee.tis.tcs.service.Application;
 import com.transformuk.hee.tis.tcs.service.exception.ExceptionTranslator;
 import com.transformuk.hee.tis.tcs.service.model.Programme;
@@ -8,6 +9,7 @@ import com.transformuk.hee.tis.tcs.service.service.ProgrammeService;
 import com.transformuk.hee.tis.tcs.service.service.mapper.ProgrammeMapper;
 import com.transformuk.hee.tis.tcs.api.dto.ProgrammeDTO;
 import com.transformuk.hee.tis.tcs.api.enumeration.Status;
+import org.apache.commons.codec.net.URLCodec;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -42,8 +44,8 @@ public class ProgrammeResourceIntTest {
 	private static final Status DEFAULT_STATUS = Status.CURRENT;
 	private static final Status UPDATED_STATUS = Status.INACTIVE;
 
-	private static final String DEFAULT_MANAGING_DEANERY = "AAAAAAAAAA";
-	private static final String UPDATED_MANAGING_DEANERY = "BBBBBBBBBB";
+	private static final String DEFAULT_MANAGING_DEANERY = "Health Education England Kent, Surrey and Sussex";
+	private static final String UPDATED_MANAGING_DEANERY = "Health Education England North West London";
 
 	private static final String DEFAULT_PROGRAMME_NAME = "AAAAAAAAAA";
 	private static final String UPDATED_PROGRAMME_NAME = "BBBBBBBBBB";
@@ -72,9 +74,6 @@ public class ProgrammeResourceIntTest {
 	@Autowired
 	private ExceptionTranslator exceptionTranslator;
 
-	@Autowired
-	private EntityManager em;
-
 	private MockMvc restProgrammeMockMvc;
 
 	private Programme programme;
@@ -85,7 +84,7 @@ public class ProgrammeResourceIntTest {
 	 * This is a static method, as tests for other entities might also need it,
 	 * if they test an entity which requires the current entity.
 	 */
-	public static Programme createEntity(EntityManager em) {
+	public static Programme createEntity() {
 		Programme programme = new Programme()
 				.status(DEFAULT_STATUS)
 				.managingDeanery(DEFAULT_MANAGING_DEANERY)
@@ -103,11 +102,12 @@ public class ProgrammeResourceIntTest {
 				.setCustomArgumentResolvers(pageableArgumentResolver)
 				.setControllerAdvice(exceptionTranslator)
 				.setMessageConverters(jacksonMessageConverter).build();
+		TestUtils.mockUserprofile("jamesh", "1-AIIDR8", "1-AIIDWA");
 	}
 
 	@Before
 	public void initTest() {
-		programme = createEntity(em);
+		programme = createEntity();
 	}
 
 	@Test
@@ -247,6 +247,107 @@ public class ProgrammeResourceIntTest {
 		// Validate the Programme in the database
 		List<Programme> programmeList = programmeRepository.findAll();
 		assertThat(programmeList).hasSize(databaseSizeBeforeUpdate + 1);
+	}
+
+	@Test
+	@Transactional
+	public void shouldFilterByDeaneries() throws Exception {
+		//given
+		// Initialize the database
+		programmeRepository.saveAndFlush(programme);
+		Programme otherDeaneryProgramme = createEntity();
+		otherDeaneryProgramme.setManagingDeanery("Health Education England West Midlands");
+		programmeRepository.saveAndFlush(otherDeaneryProgramme);
+
+		//when & then
+		// Get all the programmeList
+		restProgrammeMockMvc.perform(get("/api/programmes?sort=id,desc"))
+				.andExpect(status().isOk())
+				.andExpect(content().contentType(MediaType.APPLICATION_JSON_UTF8_VALUE))
+				.andExpect(jsonPath("$.[*].id").value(hasItem(programme.getId().intValue())))
+				.andExpect(jsonPath("$.[*].status").value(hasItem(DEFAULT_STATUS.toString())))
+				.andExpect(jsonPath("$.[*].managingDeanery").value(hasItem(DEFAULT_MANAGING_DEANERY.toString())))
+				.andExpect(jsonPath("$.[*].programmeName").value(hasItem(DEFAULT_PROGRAMME_NAME.toString())))
+				.andExpect(jsonPath("$.[*].programmeNumber").value(hasItem(DEFAULT_PROGRAMME_NUMBER.toString())))
+				.andExpect(jsonPath("$.[*].leadProvider").value(hasItem(DEFAULT_LEAD_PROVIDER.toString())));
+		assertThat(programmeRepository.findAll()).hasSize(2);
+	}
+
+	@Test
+	@Transactional
+	public void shouldTextSearch() throws Exception {
+		//given
+		// Initialize the database
+		programmeRepository.saveAndFlush(programme);
+		Programme otherDeaneryProgramme = createEntity();
+		otherDeaneryProgramme.setManagingDeanery("Health Education England West Midlands");
+		programmeRepository.saveAndFlush(otherDeaneryProgramme);
+		Programme otherNameProgramme = createEntity();
+		otherNameProgramme.setProgrammeName("other name");
+		programmeRepository.saveAndFlush(otherNameProgramme);
+		//when & then
+		// Get all the programmeList
+		restProgrammeMockMvc.perform(get("/api/programmes?sort=id,desc&searchQuery=other"))
+				.andExpect(status().isOk())
+				.andExpect(jsonPath("$.[*].programmeName").value("other name"));
+	}
+
+	@Test
+	@Transactional
+	public void shouldFilterColumns() throws Exception {
+		//given
+		// Initialize the database
+		programmeRepository.saveAndFlush(programme);
+		programmeRepository.saveAndFlush(createEntity());
+		Programme otherStatusProgramme = createEntity();
+		otherStatusProgramme.setStatus(Status.INACTIVE);
+		programmeRepository.saveAndFlush(otherStatusProgramme);
+
+		//when & then
+		String colFilters = new URLCodec().encode("{\"status\":[\"INACTIVE\"],\"managingDeanery\":[\"" +
+				DEFAULT_MANAGING_DEANERY + "\"]}");
+		// Get all the programmeList
+		restProgrammeMockMvc.perform(get("/api/programmes?sort=id,desc&columnFilters=" +
+				colFilters))
+				.andExpect(status().isOk())
+				.andExpect(jsonPath("$.[*].status").value("INACTIVE"));
+	}
+
+	@Test
+	@Transactional
+	public void shouldTextSearchAndFilterColumns() throws Exception {
+		//given
+		// Initialize the database
+		programmeRepository.saveAndFlush(programme);
+		Programme otherDeaneryProgramme = createEntity();
+		programmeRepository.saveAndFlush(otherDeaneryProgramme);
+		Programme otherStatusProgramme = createEntity();
+		otherStatusProgramme.setStatus(Status.INACTIVE);
+		programmeRepository.saveAndFlush(otherStatusProgramme);
+		Programme otherNameProgramme = createEntity();
+		otherNameProgramme.setProgrammeName("other name");
+		otherNameProgramme.setStatus(Status.INACTIVE);
+		programmeRepository.saveAndFlush(otherNameProgramme);
+		//when & then
+		String colFilters = new URLCodec().encode("{\"status\":[\"INACTIVE\"],\"managingDeanery\":[\"" +
+				DEFAULT_MANAGING_DEANERY + "\"]}");
+		// Get all the programmeList
+		restProgrammeMockMvc.perform(get("/api/programmes?sort=id,desc&searchQuery=other&columnFilters=" +
+				colFilters))
+				.andExpect(status().isOk())
+				.andExpect(jsonPath("$.[*].status").value("INACTIVE"));
+	}
+
+	@Test
+	public void shouldComplainIfBadRequest() throws Exception {
+		//given
+		URLCodec codec = new URLCodec();
+		String colFilters = codec.encode("{\"status\":[\"bad\"]}");
+		//when & then
+		// Get all the programmeList
+		restProgrammeMockMvc.perform(get("/api/programmes?sort=id,desc&columnFilters=" + colFilters))
+				.andExpect(status().isBadRequest())
+				.andExpect(jsonPath("$.message").value("Bad request"));
 	}
 
 	@Test

@@ -1,16 +1,31 @@
 package com.transformuk.hee.tis.tcs.service.service.impl;
 
+import com.transformuk.hee.tis.tcs.api.dto.ProgrammeDTO;
+import com.transformuk.hee.tis.tcs.api.enumeration.Status;
+import com.transformuk.hee.tis.tcs.service.model.ColumnFilter;
 import com.transformuk.hee.tis.tcs.service.model.Programme;
 import com.transformuk.hee.tis.tcs.service.repository.ProgrammeRepository;
 import com.transformuk.hee.tis.tcs.service.service.ProgrammeService;
+import com.transformuk.hee.tis.tcs.service.service.mapper.DesignatedBodyMapper;
 import com.transformuk.hee.tis.tcs.service.service.mapper.ProgrammeMapper;
-import com.transformuk.hee.tis.tcs.api.dto.ProgrammeDTO;
+import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
+import org.springframework.data.jpa.domain.Specification;
+import org.springframework.data.jpa.domain.Specifications;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+
+import javax.persistence.EntityManager;
+import java.util.ArrayList;
+import java.util.List;
+import java.util.Set;
+import java.util.stream.Collectors;
+
+import static com.transformuk.hee.tis.tcs.service.service.impl.SpecificationFactory.containsLike;
+import static com.transformuk.hee.tis.tcs.service.service.impl.SpecificationFactory.in;
 
 /**
  * Service Implementation for managing Programme.
@@ -25,13 +40,16 @@ public class ProgrammeServiceImpl implements ProgrammeService {
 
 	private final ProgrammeMapper programmeMapper;
 
-	public ProgrammeServiceImpl(ProgrammeRepository programmeRepository, ProgrammeMapper programmeMapper) {
+	private EntityManager em;
+
+	public ProgrammeServiceImpl(ProgrammeRepository programmeRepository, ProgrammeMapper programmeMapper, EntityManager em) {
 		this.programmeRepository = programmeRepository;
 		this.programmeMapper = programmeMapper;
+		this.em = em;
 	}
 
 	/**
-	 * Save a programme.
+	 * Save a programme.sma
 	 *
 	 * @param programmeDTO the entity to save
 	 * @return the persisted entity
@@ -53,9 +71,41 @@ public class ProgrammeServiceImpl implements ProgrammeService {
 	 */
 	@Override
 	@Transactional(readOnly = true)
-	public Page<ProgrammeDTO> findAll(Pageable pageable) {
+	public Page<ProgrammeDTO> findAll(Set<String> dbcs, Pageable pageable) {
 		log.debug("Request to get all Programmes");
-		Page<Programme> result = programmeRepository.findAll(pageable);
+
+		Set<String> deaneries = DesignatedBodyMapper.map(dbcs);
+		Page<Programme> result = programmeRepository.findByManagingDeaneryIn(deaneries, pageable);
+		return result.map(programme -> programmeMapper.programmeToProgrammeDTO(programme));
+	}
+
+	@Override
+	@Transactional(readOnly = true)
+	public Page<ProgrammeDTO> advancedSearch(
+			Set<String> dbcs, String searchString, List<ColumnFilter> columnFilters, Pageable pageable) {
+
+		Set<String> deaneries = DesignatedBodyMapper.map(dbcs);
+		List<Specification<Programme>> specs = new ArrayList<>();
+		//add the text search criteria
+		if (StringUtils.isNotEmpty(searchString)) {
+			specs.add(Specifications.where(containsLike("programmeName", searchString)).
+					or(containsLike("managingDeanery", searchString)).
+					or(containsLike("programmeNumber", searchString)).
+					or(containsLike("leadProvider", searchString)));
+		}
+		//add the column filters criteria
+		if (columnFilters != null && !columnFilters.isEmpty()) {
+			columnFilters.forEach(cf -> specs.add(in(cf.getName(), cf.getValues())));
+		}
+		//finally filter by deaneries
+		specs.add(in("managingDeanery", deaneries.stream().collect(Collectors.toList())));
+		Specifications<Programme> fullSpec = Specifications.where(specs.get(0));
+		//add the rest of the specs that made it in
+		for (int i = 1; i < specs.size(); i++) {
+			fullSpec = fullSpec.and(specs.get(i));
+		}
+		Page<Programme> result = programmeRepository.findAll(fullSpec, pageable);
+
 		return result.map(programme -> programmeMapper.programmeToProgrammeDTO(programme));
 	}
 

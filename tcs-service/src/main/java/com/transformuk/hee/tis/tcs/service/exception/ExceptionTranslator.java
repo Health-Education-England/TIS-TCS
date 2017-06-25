@@ -14,6 +14,7 @@ import org.springframework.web.bind.annotation.ControllerAdvice;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.ResponseBody;
 import org.springframework.web.bind.annotation.ResponseStatus;
+import org.springframework.web.servlet.mvc.method.annotation.ResponseEntityExceptionHandler;
 
 import java.util.List;
 
@@ -69,6 +70,13 @@ public class ExceptionTranslator {
 	@ResponseStatus(HttpStatus.METHOD_NOT_ALLOWED)
 	public ErrorVM processMethodNotSupportedException(HttpRequestMethodNotSupportedException exception) {
 		return new ErrorVM(ErrorConstants.ERR_METHOD_NOT_SUPPORTED, exception.getMessage());
+	}
+
+	@ExceptionHandler(IllegalArgumentException.class)
+	public ResponseEntity<ErrorVM> processIllegalArgumentException(Exception ex) {
+		BodyBuilder builder = ResponseEntity.status(HttpStatus.BAD_REQUEST);
+		ErrorVM errorVM = new ErrorVM("Bad request", ex.getMessage());
+		return builder.body(errorVM);
 	}
 
 	@ExceptionHandler(Exception.class)
