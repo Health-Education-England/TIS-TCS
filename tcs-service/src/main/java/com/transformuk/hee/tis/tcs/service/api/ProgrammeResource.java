@@ -103,13 +103,7 @@ public class ProgrammeResource {
 
 
 	@ApiOperation(value = "Lists Programmes data",
-			notes = "Returns a list of Programmes with support for pagination, sorting, smart search and column filters \r\n" +
-					"page amd size should be greater than 0 \r\n" +
-					"order should con valid column followed by either 'asc' or 'desc'. \r\n" +
-					"searchQuery any wildcard string to be searched. \r\n" +
-					"columnFilters json object by column name and value. \r\n" +
-					"(Eg: columnFilters={ \"managingDeanery\": [\"dean1\", \"dean2\"], \"dbc\": " +
-					"[\"dbc1\"] }",
+			notes = "Returns a list of Programmes with support for pagination, sorting, smart search and column filters \n",
 			response = ResponseEntity.class, responseContainer = "Programmes list")
 	@ApiResponses(value = {
 			@ApiResponse(code = 200, message = "Programmes list", response = ResponseEntity.class)})
@@ -125,7 +119,9 @@ public class ProgrammeResource {
 	@PreAuthorize("hasAuthority('programme:view')")
 	public ResponseEntity<List<ProgrammeDTO>> getAllProgrammes(
 			@ApiParam Pageable pageable,
+			@ApiParam(value = "any wildcard string to be searched")
 			@RequestParam(value = "searchQuery", required = false) String searchQuery,
+			@ApiParam(value = "json object by column name and value. (Eg: columnFilters={ \"managingDeanery\": [\"dean1\", \"dean2\"], \"dbc\":[\"dbc1\"] }\"")
 			@RequestParam(value = "columnFilters", required = false) String columnFilterJson) throws IOException {
 		log.debug("REST request to get a page of Programmes");
 
