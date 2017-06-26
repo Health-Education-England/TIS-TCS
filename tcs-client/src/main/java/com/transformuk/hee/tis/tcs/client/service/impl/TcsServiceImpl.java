@@ -6,6 +6,8 @@ import com.transformuk.hee.tis.tcs.api.dto.*;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.core.ParameterizedTypeReference;
+import org.springframework.http.HttpMethod;
+import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
 import org.springframework.web.client.RestTemplate;
 
@@ -41,6 +43,19 @@ public class TcsServiceImpl extends AbstractClientService {
 
 	@Value("${tcs.service.url}")
 	private String serviceUrl;
+
+	private ParameterizedTypeReference<List<JsonPatchDTO>> getJsonPatchDtoReference() {
+		return new ParameterizedTypeReference<List<JsonPatchDTO>>() {
+		};
+	}
+
+	@Override
+	public List<JsonPatchDTO> getJsonPathByTableDtoNameOrderByDateAddedAsc(String endpointUrl, Class objectDTO){
+		ParameterizedTypeReference<List<JsonPatchDTO>> typeReference = getJsonPatchDtoReference();
+		ResponseEntity<List<JsonPatchDTO>> response = tcsRestTemplate.exchange(serviceUrl + endpointUrl + objectDTO.getSimpleName(),
+				HttpMethod.GET, null, typeReference);
+		return response.getBody();
+	}
 
 	@Override
 	public RestTemplate getRestTemplate() {
