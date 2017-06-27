@@ -17,6 +17,7 @@ import io.swagger.annotations.ApiResponse;
 import io.swagger.annotations.ApiResponses;
 import org.apache.commons.codec.DecoderException;
 import org.apache.commons.codec.net.URLCodec;
+import org.apache.commons.lang3.EnumUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -31,14 +32,12 @@ import org.springframework.web.bind.annotation.*;
 import java.io.IOException;
 import java.net.URI;
 import java.net.URISyntaxException;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
-import java.util.Optional;
+import java.util.*;
 
 import static com.transformuk.hee.tis.security.util.TisSecurityHelper.getProfileFromContext;
 import static java.util.Collections.EMPTY_LIST;
 import static java.util.stream.Collectors.toList;
+import static com.transformuk.hee.tis.tcs.service.api.util.StringUtil.sanitize;
 
 /**
  * REST controller for managing Programme.
@@ -125,6 +124,7 @@ public class ProgrammeResource {
 			@RequestParam(value = "columnFilters", required = false) String columnFilterJson) throws IOException {
 		log.debug("REST request to get a page of Programmes");
 
+		searchQuery = sanitize(searchQuery);
 		UserProfile userProfile = getProfileFromContext();
 		List<ColumnFilter> columnFilters = getColumnFilters(columnFilterJson);
 		Page<ProgrammeDTO> page;
@@ -181,14 +181,24 @@ public class ProgrammeResource {
 			}
 			TypeReference<HashMap<String, List<String>>> typeRef = new TypeReference<HashMap<String, List<String>>>() {
 			};
-			Map<String, List<String>> columns = mapper.readValue(columnFilterJson, typeRef);
+
 			try {
-				return columns.entrySet().stream()
-						.map(e -> new ColumnFilter(e.getKey(),
-								e.getKey().equals("status") ?
-										e.getValue().stream().map(v -> Status.valueOf(v)).collect(toList()) :
-										e.getValue().stream().collect(toList())))
-						.collect(toList());
+				Map<String, List<String>> columns = mapper.readValue(columnFilterJson, typeRef);
+				List<ColumnFilter> cfList = new ArrayList<>(columns.size());
+
+				for (Map.Entry<String, List<String>> e : columns.entrySet()) {
+					if (e.getKey().equals("status")) {
+						List<Object> values = e.getValue().stream().filter(v -> EnumUtils.isValidEnum(Status.class, v)).
+								map(v -> Status.valueOf(v)).collect(toList());
+						if (!values.isEmpty()) {
+							cfList.add(new ColumnFilter(e.getKey(), values));
+						}
+					} else {
+						List<Object> values = e.getValue().stream().map(v -> sanitize(v)).collect(toList());
+						cfList.add(new ColumnFilter(e.getKey(), values));
+					}
+				}
+				return cfList;
 			} catch (Exception e) {
 				log.error(e.getMessage(), e);
 				throw new IllegalArgumentException("Cannot interpret column filters: " + columnFilterJson);

@@ -24,7 +24,6 @@ import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.setup.MockMvcBuilders;
 import org.springframework.transaction.annotation.Transactional;
 
-import javax.persistence.EntityManager;
 import java.util.List;
 
 import static org.assertj.core.api.Assertions.assertThat;
@@ -342,7 +341,7 @@ public class ProgrammeResourceIntTest {
 	public void shouldComplainIfBadRequest() throws Exception {
 		//given
 		URLCodec codec = new URLCodec();
-		String colFilters = codec.encode("{\"status\":[\"bad\"]}");
+		String colFilters = codec.encode("{\"status\":[\"malformed json\"");
 		//when & then
 		// Get all the programmeList
 		restProgrammeMockMvc.perform(get("/api/programmes?sort=id,desc&columnFilters=" + colFilters))

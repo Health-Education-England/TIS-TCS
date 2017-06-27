@@ -19,9 +19,4 @@ public interface ProgrammeRepository extends JpaRepository<Programme, Long>, Jpa
 
 	Page<Programme> findByManagingDeaneryIn(Set<String> deaneries, Pageable pageable);
 
-	@Query(value = "select prog.id, prog.leadProvider, prog.managingDeanery, prog.programmeName, prog.programmeNumber, prog.status " +
-			"from Programme prog where prog.managingDeanery IN (:deaneries) " +
-			"AND  prog.programmeName like %:searchString%")
-	Page<Programme> smartSearch( @Param("searchString") String searchString,
-								 @Param("deaneries") Set<String> deaneries, Pageable pageable);
 }
