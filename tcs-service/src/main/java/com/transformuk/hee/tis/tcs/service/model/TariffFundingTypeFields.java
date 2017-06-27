@@ -31,16 +31,16 @@ public class TariffFundingTypeFields implements Serializable {
 	@Column(name = "placementRate", precision = 10, scale = 2)
 	private BigDecimal placementRate;
 
-	@OneToOne
-	@JoinColumn(unique = true)
+    @OneToOne(cascade = CascadeType.DETACH, fetch = FetchType.EAGER)
+	@JoinColumn(unique = true, name = "levelOfPostId")
 	private TariffRate levelOfPost;
 
-	@OneToOne
-	@JoinColumn(unique = true)
+    @OneToOne(cascade = CascadeType.DETACH, fetch = FetchType.EAGER)
+	@JoinColumn(unique = true, name = "placementRateFundedById")
 	private PlacementFunder placementRateFundedBy;
 
-	@OneToOne
-	@JoinColumn(unique = true)
+    @OneToOne(cascade = CascadeType.DETACH, fetch = FetchType.EAGER)
+	@JoinColumn(unique = true, name = "placementRateProvidedToId")
 	private PlacementFunder placementRateProvidedTo;
 
 	public Long getId() {
