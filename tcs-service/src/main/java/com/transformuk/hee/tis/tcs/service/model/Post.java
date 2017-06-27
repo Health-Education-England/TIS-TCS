@@ -50,13 +50,13 @@ public class Post implements Serializable {
 	@Column(name = "leadProvider")
 	private String leadProvider;
 
-	@OneToOne
-	@JoinColumn(unique = true)
-	private Post oldPost;
+    @OneToOne(cascade = CascadeType.DETACH, fetch = FetchType.EAGER)
+    @JoinColumn(unique = true, name = "oldPostId")
+    private Post oldPost;
 
-	@OneToOne
-	@JoinColumn(unique = true)
-	private Post newPost;
+    @OneToOne(cascade = CascadeType.DETACH, fetch = FetchType.EAGER)
+    @JoinColumn(unique = true, name = "newPostId")
+    private Post newPost;
 
 	public Long getId() {
 		return id;
