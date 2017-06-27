@@ -6,7 +6,7 @@
 
 	<groupId>com.transformuk.hee.tis</groupId>
 	<artifactId>tcs-api</artifactId>
-	<version>1.0.0</version>
+	<version>1.1.0</version>
 	<packaging>jar</packaging>
 
 	<properties>
@@ -23,6 +23,11 @@
 			<artifactId>tis-parent-api</artifactId>
 			<version>1.0.1</version>
 			<type>pom</type>
+		</dependency>
+		<dependency>
+			<groupId>javax.validation</groupId>
+			<artifactId>validation-api</artifactId>
+			<version>1.1.0.Final</version>
 		</dependency>
 	</dependencies>
 </project>
