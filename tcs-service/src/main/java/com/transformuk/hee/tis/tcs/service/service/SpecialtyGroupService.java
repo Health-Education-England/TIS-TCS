@@ -2,6 +2,8 @@ package com.transformuk.hee.tis.tcs.service.service;
 
 
 import com.transformuk.hee.tis.tcs.api.dto.SpecialtyGroupDTO;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 
 import java.util.List;
 
@@ -18,20 +20,21 @@ public interface SpecialtyGroupService {
 	 */
 	SpecialtyGroupDTO save(SpecialtyGroupDTO specialtyGroupDTO);
 
-    /**
-     * Save a list of specialtyGroup.
-     *
-     * @param specialtyGroupDTO the entities to save
-     * @return the list of persisted entities
-     */
+	/**
+	 * Save a list of specialtyGroup.
+	 *
+	 * @param specialtyGroupDTO the entities to save
+	 * @return the list of persisted entities
+	 */
 	List<SpecialtyGroupDTO> save(List<SpecialtyGroupDTO> specialtyGroupDTO);
 
 	/**
 	 * Get all the specialtyGroups.
 	 *
+	 * @param pageable the pagination information
 	 * @return the list of entities
 	 */
-	List<SpecialtyGroupDTO> findAll();
+	Page<SpecialtyGroupDTO> findAll(Pageable pageable);
 
 	/**
 	 * Get the "id" specialtyGroup.

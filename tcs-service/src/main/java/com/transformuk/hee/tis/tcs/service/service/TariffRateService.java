@@ -2,6 +2,8 @@ package com.transformuk.hee.tis.tcs.service.service;
 
 
 import com.transformuk.hee.tis.tcs.api.dto.TariffRateDTO;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 
 import java.util.List;
 
@@ -18,20 +20,21 @@ public interface TariffRateService {
 	 */
 	TariffRateDTO save(TariffRateDTO tariffRateDTO);
 
-    /**
-     * Save a list of tariffRate.
-     *
-     * @param tariffRateDTO the entities to save
-     * @return the list of persisted entities
-     */
+	/**
+	 * Save a list of tariffRate.
+	 *
+	 * @param tariffRateDTO the entities to save
+	 * @return the list of persisted entities
+	 */
 	List<TariffRateDTO> save(List<TariffRateDTO> tariffRateDTO);
 
 	/**
 	 * Get all the tariffRates.
 	 *
+	 * @param pageable the pagination information
 	 * @return the list of entities
 	 */
-	List<TariffRateDTO> findAll();
+	Page<TariffRateDTO> findAll(Pageable pageable);
 
 	/**
 	 * Get the "id" tariffRate.

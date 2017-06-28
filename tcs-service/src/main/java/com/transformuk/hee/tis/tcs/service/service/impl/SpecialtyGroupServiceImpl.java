@@ -1,18 +1,18 @@
 package com.transformuk.hee.tis.tcs.service.service.impl;
 
+import com.transformuk.hee.tis.tcs.api.dto.SpecialtyGroupDTO;
 import com.transformuk.hee.tis.tcs.service.model.SpecialtyGroup;
 import com.transformuk.hee.tis.tcs.service.repository.SpecialtyGroupRepository;
 import com.transformuk.hee.tis.tcs.service.service.SpecialtyGroupService;
 import com.transformuk.hee.tis.tcs.service.service.mapper.SpecialtyGroupMapper;
-import com.transformuk.hee.tis.tcs.api.dto.SpecialtyGroupDTO;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
-import java.util.LinkedList;
 import java.util.List;
-import java.util.stream.Collectors;
 
 /**
  * Service Implementation for managing SpecialtyGroup.
@@ -47,29 +47,27 @@ public class SpecialtyGroupServiceImpl implements SpecialtyGroupService {
 		return result;
 	}
 
-    @Override
-    public List<SpecialtyGroupDTO> save(List<SpecialtyGroupDTO> specialtyGroupDTO) {
-        log.debug("Request to save SpecialtyGroup : {}", specialtyGroupDTO);
-        List<SpecialtyGroup> specialtyGroup = specialtyGroupMapper.specialtyGroupDTOsToSpecialtyGroups(specialtyGroupDTO);
-        specialtyGroup = specialtyGroupRepository.save(specialtyGroup);
-        List<SpecialtyGroupDTO> result = specialtyGroupMapper.specialtyGroupsToSpecialtyGroupDTOs(specialtyGroup);
-        return result;
-    }
+	@Override
+	public List<SpecialtyGroupDTO> save(List<SpecialtyGroupDTO> specialtyGroupDTO) {
+		log.debug("Request to save SpecialtyGroup : {}", specialtyGroupDTO);
+		List<SpecialtyGroup> specialtyGroup = specialtyGroupMapper.specialtyGroupDTOsToSpecialtyGroups(specialtyGroupDTO);
+		specialtyGroup = specialtyGroupRepository.save(specialtyGroup);
+		List<SpecialtyGroupDTO> result = specialtyGroupMapper.specialtyGroupsToSpecialtyGroupDTOs(specialtyGroup);
+		return result;
+	}
 
-    /**
+	/**
 	 * Get all the specialtyGroups.
 	 *
+	 * @param pageable the pagination information
 	 * @return the list of entities
 	 */
 	@Override
 	@Transactional(readOnly = true)
-	public List<SpecialtyGroupDTO> findAll() {
+	public Page<SpecialtyGroupDTO> findAll(Pageable pageable) {
 		log.debug("Request to get all SpecialtyGroups");
-		List<SpecialtyGroupDTO> result = specialtyGroupRepository.findAll().stream()
-				.map(specialtyGroupMapper::specialtyGroupToSpecialtyGroupDTO)
-				.collect(Collectors.toCollection(LinkedList::new));
-
-		return result;
+		Page<SpecialtyGroup> specialtyGroupPage = specialtyGroupRepository.findAll(pageable);
+		return specialtyGroupPage.map(specialtyGroup -> specialtyGroupMapper.specialtyGroupToSpecialtyGroupDTO(specialtyGroup));
 	}
 
 	/**

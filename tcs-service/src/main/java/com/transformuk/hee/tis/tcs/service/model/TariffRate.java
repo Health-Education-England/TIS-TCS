@@ -9,7 +9,6 @@ import java.util.Objects;
  * A TariffRate.
  */
 @Entity
-@Table(name = "tariffRate")
 public class TariffRate implements Serializable {
 
 	private static final long serialVersionUID = 1L;
