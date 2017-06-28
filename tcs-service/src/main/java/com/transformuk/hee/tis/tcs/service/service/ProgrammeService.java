@@ -21,6 +21,14 @@ public interface ProgrammeService {
 	 */
 	ProgrammeDTO save(ProgrammeDTO programmeDTO);
 
+    /**
+     * Save a list of programmes.
+     *
+     * @param programmeDTO the list of entities to save
+     * @return the list of persisted entities
+     */
+    List<ProgrammeDTO> save(List<ProgrammeDTO> programmeDTO);
+
 	/**
 	 * Get all the programmes within the given designated body codes.
 	 *

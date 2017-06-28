@@ -17,12 +17,12 @@ public class PostFunding implements Serializable {
 	@GeneratedValue(strategy = GenerationType.IDENTITY)
 	private Long id;
 
-	@OneToOne
-	@JoinColumn(unique = true)
+    @OneToOne(cascade = CascadeType.DETACH, fetch = FetchType.EAGER)
+	@JoinColumn(unique = true, name = "fundingId")
 	private Funding funding;
 
-	@OneToOne
-	@JoinColumn(unique = true)
+    @OneToOne(cascade = CascadeType.DETACH, fetch = FetchType.EAGER)
+	@JoinColumn(unique = true, name = "fundingComponentsId")
 	private FundingComponents fundingComponents;
 
 	public Long getId() {

@@ -4,6 +4,8 @@ import com.transformuk.hee.tis.tcs.api.dto.PlacementFunderDTO;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 
+import java.util.List;
+
 /**
  * Service Interface for managing PlacementFunder.
  */
@@ -16,6 +18,14 @@ public interface PlacementFunderService {
 	 * @return the persisted entity
 	 */
 	PlacementFunderDTO save(PlacementFunderDTO placementFunderDTO);
+
+    /**
+     * Save a list of placementFunder.
+     *
+     * @param placementFunderDTO the list of entities to save
+     * @return the list of persisted entities
+     */
+	List<PlacementFunderDTO> save(List<PlacementFunderDTO> placementFunderDTO);
 
 	/**
 	 * Get all the placementFunders.

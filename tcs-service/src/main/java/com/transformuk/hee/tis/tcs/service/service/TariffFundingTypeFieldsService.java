@@ -18,6 +18,14 @@ public interface TariffFundingTypeFieldsService {
 	 */
 	TariffFundingTypeFieldsDTO save(TariffFundingTypeFieldsDTO tariffFundingTypeFieldsDTO);
 
+    /**
+     * Save a list of tariffFundingTypeFields.
+     *
+     * @param tariffFundingTypeFieldsDTO the entities to save
+     * @return the list of persisted entities
+     */
+    List<TariffFundingTypeFieldsDTO> save(List<TariffFundingTypeFieldsDTO> tariffFundingTypeFieldsDTO);
+
 	/**
 	 * Get all the tariffFundingTypeFields.
 	 *

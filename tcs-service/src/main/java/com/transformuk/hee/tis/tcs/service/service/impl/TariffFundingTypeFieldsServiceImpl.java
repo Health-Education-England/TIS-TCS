@@ -47,7 +47,22 @@ public class TariffFundingTypeFieldsServiceImpl implements TariffFundingTypeFiel
 		return result;
 	}
 
-	/**
+    /**
+     * Save a list of tariffFundingTypeFields.
+     *
+     * @param tariffFundingTypeFieldsDTO the entities to save
+     * @return the list of persisted entities
+     */
+    @Override
+    public List<TariffFundingTypeFieldsDTO> save(List<TariffFundingTypeFieldsDTO> tariffFundingTypeFieldsDTO) {
+        log.debug("Request to save TariffFundingTypeFields : {}", tariffFundingTypeFieldsDTO);
+        List<TariffFundingTypeFields> tariffFundingTypeFields = tariffFundingTypeFieldsMapper.tariffFundingTypeFieldsDTOsToTariffFundingTypeFields(tariffFundingTypeFieldsDTO);
+        tariffFundingTypeFields = tariffFundingTypeFieldsRepository.save(tariffFundingTypeFields);
+        List<TariffFundingTypeFieldsDTO> result = tariffFundingTypeFieldsMapper.tariffFundingTypeFieldsToTariffFundingTypeFieldsDTOs(tariffFundingTypeFields);
+        return result;
+    }
+
+    /**
 	 * Get all the tariffFundingTypeFields.
 	 *
 	 * @return the list of entities

@@ -18,6 +18,14 @@ public interface TariffRateService {
 	 */
 	TariffRateDTO save(TariffRateDTO tariffRateDTO);
 
+    /**
+     * Save a list of tariffRate.
+     *
+     * @param tariffRateDTO the entities to save
+     * @return the list of persisted entities
+     */
+	List<TariffRateDTO> save(List<TariffRateDTO> tariffRateDTO);
+
 	/**
 	 * Get all the tariffRates.
 	 *

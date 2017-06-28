@@ -1,12 +1,14 @@
 package com.transformuk.hee.tis.tcs.service.api;
 
 import com.codahale.metrics.annotation.Timed;
-import com.transformuk.hee.tis.tcs.service.service.CurriculumService;
 import com.transformuk.hee.tis.tcs.api.dto.CurriculumDTO;
 import com.transformuk.hee.tis.tcs.service.api.util.HeaderUtil;
 import com.transformuk.hee.tis.tcs.service.api.util.PaginationUtil;
+import com.transformuk.hee.tis.tcs.service.service.CurriculumService;
 import io.github.jhipster.web.util.ResponseUtil;
+import io.jsonwebtoken.lang.Collections;
 import io.swagger.annotations.ApiParam;
+import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.data.domain.Page;
@@ -17,10 +19,12 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
 
+import javax.validation.Valid;
 import java.net.URI;
 import java.net.URISyntaxException;
 import java.util.List;
 import java.util.Optional;
+import java.util.stream.Collectors;
 
 /**
  * REST controller for managing Curriculum.
@@ -127,5 +131,66 @@ public class CurriculumResource {
 		curriculumService.delete(id);
 		return ResponseEntity.ok().headers(HeaderUtil.createEntityDeletionAlert(ENTITY_NAME, id.toString())).build();
 	}
+
+
+    /**
+     * POST  /bulk-curricula : Bulk create a new curricula.
+     *
+     * @param curriculumDTOS List of the curriculumDTOS to create
+     * @return the ResponseEntity with status 200 (Created) and with body the new curriculumDTOS, or with status 400 (Bad Request) if the EqualityAndDiversity has already an ID
+     * @throws URISyntaxException if the Location URI syntax is incorrect
+     */
+    @PostMapping("/bulk-curricula")
+    @Timed
+    @PreAuthorize("hasAuthority('tcs:add:modify:entities')")
+    public ResponseEntity<List<CurriculumDTO>> bulkCreateCurricula(@Valid @RequestBody List<CurriculumDTO> curriculumDTOS) throws URISyntaxException {
+        log.debug("REST request to bulk save Curricula : {}", curriculumDTOS);
+        if (!Collections.isEmpty(curriculumDTOS)) {
+            List<Long> entityIds = curriculumDTOS.stream()
+                .filter(c -> c.getId() != null)
+                .map(c -> c.getId())
+                .collect(Collectors.toList());
+            if (!Collections.isEmpty(entityIds)) {
+                return ResponseEntity.badRequest().headers(HeaderUtil.createFailureAlert(StringUtils.join(entityIds, ","), "ids.exist", "A new Curricula cannot already have an ID")).body(null);
+            }
+        }
+        List<CurriculumDTO> result = curriculumService.save(curriculumDTOS);
+        List<Long> ids = result.stream().map(c -> c.getId()).collect(Collectors.toList());
+        return ResponseEntity.ok()
+            .headers(HeaderUtil.createEntityCreationAlert(ENTITY_NAME, StringUtils.join(ids, ",")))
+            .body(result);
+    }
+
+    /**
+     * PUT  /bulk-curricula : Updates an existing curricula.
+     *
+     * @param curriculumDTOS List of the curriculumDTOS to update
+     * @return the ResponseEntity with status 200 (OK) and with body the updated curriculumDTOS,
+     * or with status 400 (Bad Request) if the curriculumDTOS is not valid,
+     * or with status 500 (Internal Server Error) if the curriculumDTOS couldnt be updated
+     * @throws URISyntaxException if the Location URI syntax is incorrect
+     */
+    @PutMapping("/bulk-curricula")
+    @Timed
+    @PreAuthorize("hasAuthority('tcs:add:modify:entities')")
+    public ResponseEntity<List<CurriculumDTO>> bulkUpdateCurricula(@Valid @RequestBody List<CurriculumDTO> curriculumDTOS) throws URISyntaxException {
+        log.debug("REST request to bulk update Curricula : {}", curriculumDTOS);
+        if (Collections.isEmpty(curriculumDTOS)) {
+            return ResponseEntity.badRequest().headers(HeaderUtil.createFailureAlert(ENTITY_NAME, "request.body.empty",
+                "The request body for this end point cannot be empty")).body(null);
+        } else if (!Collections.isEmpty(curriculumDTOS)) {
+            List<CurriculumDTO> entitiesWithNoId = curriculumDTOS.stream().filter(c -> c.getId() == null).collect(Collectors.toList());
+            if (!Collections.isEmpty(entitiesWithNoId)) {
+                return ResponseEntity.badRequest().headers(HeaderUtil.createFailureAlert(StringUtils.join(entitiesWithNoId, ","),
+                    "bulk.update.failed.noId", "Some DTOs you've provided have no Id, cannot update entities that dont exist")).body(entitiesWithNoId);
+            }
+        }
+
+        List<CurriculumDTO> results = curriculumService.save(curriculumDTOS);
+        List<Long> ids = results.stream().map(r -> r.getId()).collect(Collectors.toList());
+        return ResponseEntity.ok()
+            .headers(HeaderUtil.createEntityUpdateAlert(ENTITY_NAME, StringUtils.join(ids, ",")))
+            .body(results);
+    }
 
 }

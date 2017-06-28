@@ -1,12 +1,15 @@
 package com.transformuk.hee.tis.tcs.service.api;
 
 import com.codahale.metrics.annotation.Timed;
+import com.transformuk.hee.tis.tcs.api.dto.PostDTO;
 import com.transformuk.hee.tis.tcs.service.service.ProgrammeMembershipService;
 import com.transformuk.hee.tis.tcs.api.dto.ProgrammeMembershipDTO;
 import com.transformuk.hee.tis.tcs.service.api.util.HeaderUtil;
 import com.transformuk.hee.tis.tcs.service.api.util.PaginationUtil;
 import io.github.jhipster.web.util.ResponseUtil;
+import io.jsonwebtoken.lang.Collections;
 import io.swagger.annotations.ApiParam;
+import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.data.domain.Page;
@@ -17,10 +20,12 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
 
+import javax.validation.Valid;
 import java.net.URI;
 import java.net.URISyntaxException;
 import java.util.List;
 import java.util.Optional;
+import java.util.stream.Collectors;
 
 /**
  * REST controller for managing ProgrammeMembership.
@@ -127,5 +132,66 @@ public class ProgrammeMembershipResource {
 		programmeMembershipService.delete(id);
 		return ResponseEntity.ok().headers(HeaderUtil.createEntityDeletionAlert(ENTITY_NAME, id.toString())).build();
 	}
+
+
+    /**
+     * POST  /bulk-programme-memberships : Bulk create a Programme Membership.
+     *
+     * @param programmeMembershipDTOS List of the programmeMembershipDTOS to create
+     * @return the ResponseEntity with status 200 (Created) and with body the new programmeMembershipDTOS, or with status 400 (Bad Request) if the Programme Membership has already an ID
+     * @throws URISyntaxException if the Location URI syntax is incorrect
+     */
+    @PostMapping("/bulk-programme-memberships")
+    @Timed
+    @PreAuthorize("hasAuthority('tcs:add:modify:entities')")
+    public ResponseEntity<List<ProgrammeMembershipDTO>> bulkCreateProgrammeMemberships(@Valid @RequestBody List<ProgrammeMembershipDTO> programmeMembershipDTOS) throws URISyntaxException {
+        log.debug("REST request to bulk save Programme Memebership : {}", programmeMembershipDTOS);
+        if (!Collections.isEmpty(programmeMembershipDTOS)) {
+            List<Long> entityIds = programmeMembershipDTOS.stream()
+                .filter(p -> p.getId() != null)
+                .map(p -> p.getId())
+                .collect(Collectors.toList());
+            if (!Collections.isEmpty(entityIds)) {
+                return ResponseEntity.badRequest().headers(HeaderUtil.createFailureAlert(StringUtils.join(entityIds, ","), "ids.exist", "A new Programme Membership cannot already have an ID")).body(null);
+            }
+        }
+        List<ProgrammeMembershipDTO> result = programmeMembershipService.save(programmeMembershipDTOS);
+        List<Long> ids = result.stream().map(r -> r.getId()).collect(Collectors.toList());
+        return ResponseEntity.ok()
+            .headers(HeaderUtil.createEntityCreationAlert(ENTITY_NAME, StringUtils.join(ids, ",")))
+            .body(result);
+    }
+
+    /**
+     * PUT  /bulk-programme-memberships : Updates an existing Programme Memberships.
+     *
+     * @param programmeMembershipDTOS List of the programmeMembershipDTOS to update
+     * @return the ResponseEntity with status 200 (OK) and with body the updated programmeMembershipDTOS,
+     * or with status 400 (Bad Request) if the programmeMembershipDTOS is not valid,
+     * or with status 500 (Internal Server Error) if the programmeMembershipDTOS couldnt be updated
+     * @throws URISyntaxException if the Location URI syntax is incorrect
+     */
+    @PutMapping("/bulk-programme-memberships")
+    @Timed
+    @PreAuthorize("hasAuthority('tcs:add:modify:entities')")
+    public ResponseEntity<List<ProgrammeMembershipDTO>> bulkUpdateProgrammeMemberships(@Valid @RequestBody List<ProgrammeMembershipDTO> programmeMembershipDTOS) throws URISyntaxException {
+        log.debug("REST request to bulk update Programme Memberships : {}", programmeMembershipDTOS);
+        if (Collections.isEmpty(programmeMembershipDTOS)) {
+            return ResponseEntity.badRequest().headers(HeaderUtil.createFailureAlert(ENTITY_NAME, "request.body.empty",
+                "The request body for this end point cannot be empty")).body(null);
+        } else if (!Collections.isEmpty(programmeMembershipDTOS)) {
+            List<ProgrammeMembershipDTO> entitiesWithNoId = programmeMembershipDTOS.stream().filter(p -> p.getId() == null).collect(Collectors.toList());
+            if (!Collections.isEmpty(entitiesWithNoId)) {
+                return ResponseEntity.badRequest().headers(HeaderUtil.createFailureAlert(StringUtils.join(entitiesWithNoId, ","),
+                    "bulk.update.failed.noId", "Some DTOs you've provided have no Id, cannot update entities that dont exist")).body(entitiesWithNoId);
+            }
+        }
+
+        List<ProgrammeMembershipDTO> results = programmeMembershipService.save(programmeMembershipDTOS);
+        List<Long> ids = results.stream().map(r -> r.getId()).collect(Collectors.toList());
+        return ResponseEntity.ok()
+            .headers(HeaderUtil.createEntityUpdateAlert(ENTITY_NAME, StringUtils.join(ids, ",")))
+            .body(results);
+    }
 
 }

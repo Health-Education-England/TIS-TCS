@@ -4,6 +4,8 @@ import com.transformuk.hee.tis.tcs.api.dto.SpecialtyDTO;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 
+import java.util.List;
+
 /**
  * Service Interface for managing Specialty.
  */
@@ -16,6 +18,14 @@ public interface SpecialtyService {
 	 * @return the persisted entity
 	 */
 	SpecialtyDTO save(SpecialtyDTO specialtyDTO);
+
+    /**
+     * Save a list of specialties.
+     *
+     * @param specialtyDTO the entities to save
+     * @return the list of persisted entities
+     */
+	List<SpecialtyDTO> save(List<SpecialtyDTO> specialtyDTO);
 
 	/**
 	 * Get all the specialties.

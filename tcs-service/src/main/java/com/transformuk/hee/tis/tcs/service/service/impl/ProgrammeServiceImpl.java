@@ -49,7 +49,7 @@ public class ProgrammeServiceImpl implements ProgrammeService {
 	}
 
 	/**
-	 * Save a programme.sma
+	 * Save a programme
 	 *
 	 * @param programmeDTO the entity to save
 	 * @return the persisted entity
@@ -63,7 +63,22 @@ public class ProgrammeServiceImpl implements ProgrammeService {
 		return result;
 	}
 
-	/**
+    /**
+     * Save a list of programmes.
+     *
+     * @param programmeDTO the list of entities to save
+     * @return the list of persisted entities
+     */
+    @Override
+    public List<ProgrammeDTO> save(List<ProgrammeDTO> programmeDTO) {
+        log.debug("Request to save Programme : {}", programmeDTO);
+        List<Programme> programme = programmeMapper.programmeDTOsToProgrammes(programmeDTO);
+        programme = programmeRepository.save(programme);
+        List<ProgrammeDTO> result = programmeMapper.programmesToProgrammeDTOs(programme);
+        return result;
+    }
+
+    /**
 	 * Get all the programmes.
 	 *
 	 * @param pageable the pagination information
