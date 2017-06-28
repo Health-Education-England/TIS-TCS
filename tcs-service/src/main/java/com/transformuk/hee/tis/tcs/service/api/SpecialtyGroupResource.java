@@ -86,16 +86,9 @@ public class SpecialtyGroupResource {
 	}
 
 	/**
-	 *
-	 *
-	 * @return
-	 */
-
-
-	/**
 	 * GET  /specialty-groups : get all the specialtyGroups.
 	 *
-	 * @param pageable
+	 * @param pageable the pagination information
 	 * @return the ResponseEntity with status 200 (OK) and the list of specialtyGroups in body
 	 */
 	@GetMapping("/specialty-groups")

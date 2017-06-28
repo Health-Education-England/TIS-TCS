@@ -88,6 +88,7 @@ public class TariffFundingTypeFieldsResource {
 	/**
 	 * GET  /tariff-funding-type-fields : get all the tariffFundingTypeFields.
 	 *
+	 * @param pageable the pagination information
 	 * @return the ResponseEntity with status 200 (OK) and the list of tariffFundingTypeFields in body
 	 */
 	@GetMapping("/tariff-funding-type-fields")

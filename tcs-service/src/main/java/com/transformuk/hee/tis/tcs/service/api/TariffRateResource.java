@@ -88,6 +88,7 @@ public class TariffRateResource {
 	/**
 	 * GET  /tariff-rates : get all the tariffRates.
 	 *
+	 * @param pageable the pagination information
 	 * @return the ResponseEntity with status 200 (OK) and the list of tariffRates in body
 	 */
 	@GetMapping("/tariff-rates")

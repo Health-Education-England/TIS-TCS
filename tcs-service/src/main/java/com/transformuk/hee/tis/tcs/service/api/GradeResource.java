@@ -97,6 +97,7 @@ public class GradeResource {
 	/**
 	 * GET  /grades : get all the grades.
 	 *
+	 * @param pageable the pagination information
 	 * @return the ResponseEntity with status 200 (OK) and the list of grades in body
 	 */
 	@GetMapping("/grades")
