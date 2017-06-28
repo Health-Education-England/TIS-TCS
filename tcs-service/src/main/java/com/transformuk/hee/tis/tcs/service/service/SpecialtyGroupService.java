@@ -2,6 +2,8 @@ package com.transformuk.hee.tis.tcs.service.service;
 
 
 import com.transformuk.hee.tis.tcs.api.dto.SpecialtyGroupDTO;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 
 import java.util.List;
 
@@ -31,7 +33,7 @@ public interface SpecialtyGroupService {
 	 *
 	 * @return the list of entities
 	 */
-	List<SpecialtyGroupDTO> findAll();
+	Page<SpecialtyGroupDTO> findAll(Pageable pageable);
 
 	/**
 	 * Get the "id" specialtyGroup.

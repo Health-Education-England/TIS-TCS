@@ -7,6 +7,8 @@ import com.transformuk.hee.tis.tcs.service.service.mapper.TrainingNumberMapper;
 import com.transformuk.hee.tis.tcs.api.dto.TrainingNumberDTO;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -69,13 +71,10 @@ public class TrainingNumberServiceImpl implements TrainingNumberService {
 	 */
 	@Override
 	@Transactional(readOnly = true)
-	public List<TrainingNumberDTO> findAll() {
+	public Page<TrainingNumberDTO> findAll(Pageable pageable) {
 		log.debug("Request to get all TrainingNumbers");
-		List<TrainingNumberDTO> result = trainingNumberRepository.findAll().stream()
-				.map(trainingNumberMapper::trainingNumberToTrainingNumberDTO)
-				.collect(Collectors.toCollection(LinkedList::new));
-
-		return result;
+        Page<TrainingNumber> trainingNumberPage = trainingNumberRepository.findAll(pageable);
+		return trainingNumberPage.map(trainingNumber -> trainingNumberMapper.trainingNumberToTrainingNumberDTO(trainingNumber));
 	}
 
 	/**

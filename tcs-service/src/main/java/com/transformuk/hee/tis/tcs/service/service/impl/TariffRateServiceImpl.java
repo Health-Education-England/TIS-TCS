@@ -1,18 +1,18 @@
 package com.transformuk.hee.tis.tcs.service.service.impl;
 
+import com.transformuk.hee.tis.tcs.api.dto.TariffRateDTO;
 import com.transformuk.hee.tis.tcs.service.model.TariffRate;
 import com.transformuk.hee.tis.tcs.service.repository.TariffRateRepository;
 import com.transformuk.hee.tis.tcs.service.service.TariffRateService;
 import com.transformuk.hee.tis.tcs.service.service.mapper.TariffRateMapper;
-import com.transformuk.hee.tis.tcs.api.dto.TariffRateDTO;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
-import java.util.LinkedList;
 import java.util.List;
-import java.util.stream.Collectors;
 
 /**
  * Service Implementation for managing TariffRate.
@@ -69,13 +69,10 @@ public class TariffRateServiceImpl implements TariffRateService {
 	 */
 	@Override
 	@Transactional(readOnly = true)
-	public List<TariffRateDTO> findAll() {
+	public Page<TariffRateDTO> findAll(Pageable pageable) {
 		log.debug("Request to get all TariffRates");
-		List<TariffRateDTO> result = tariffRateRepository.findAll().stream()
-				.map(tariffRateMapper::tariffRateToTariffRateDTO)
-				.collect(Collectors.toCollection(LinkedList::new));
-
-		return result;
+        Page<TariffRate> tariffRatesPage = tariffRateRepository.findAll(pageable);
+        return tariffRatesPage.map(tariffRate -> tariffRateMapper.tariffRateToTariffRateDTO(tariffRate));
 	}
 
 	/**

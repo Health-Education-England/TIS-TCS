@@ -7,6 +7,8 @@ import com.transformuk.hee.tis.tcs.service.service.mapper.TariffFundingTypeField
 import com.transformuk.hee.tis.tcs.api.dto.TariffFundingTypeFieldsDTO;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -69,13 +71,10 @@ public class TariffFundingTypeFieldsServiceImpl implements TariffFundingTypeFiel
 	 */
 	@Override
 	@Transactional(readOnly = true)
-	public List<TariffFundingTypeFieldsDTO> findAll() {
+	public Page<TariffFundingTypeFieldsDTO> findAll(Pageable pageable) {
 		log.debug("Request to get all TariffFundingTypeFields");
-		List<TariffFundingTypeFieldsDTO> result = tariffFundingTypeFieldsRepository.findAll().stream()
-				.map(tariffFundingTypeFieldsMapper::tariffFundingTypeFieldsToTariffFundingTypeFieldsDTO)
-				.collect(Collectors.toCollection(LinkedList::new));
-
-		return result;
+        Page<TariffFundingTypeFields> page = tariffFundingTypeFieldsRepository.findAll(pageable);
+        return page.map(tftf -> tariffFundingTypeFieldsMapper.tariffFundingTypeFieldsToTariffFundingTypeFieldsDTO(tftf));
 	}
 
 	/**
