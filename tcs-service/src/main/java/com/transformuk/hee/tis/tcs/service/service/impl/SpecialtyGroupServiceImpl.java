@@ -47,25 +47,26 @@ public class SpecialtyGroupServiceImpl implements SpecialtyGroupService {
 		return result;
 	}
 
-    @Override
-    public List<SpecialtyGroupDTO> save(List<SpecialtyGroupDTO> specialtyGroupDTO) {
-        log.debug("Request to save SpecialtyGroup : {}", specialtyGroupDTO);
-        List<SpecialtyGroup> specialtyGroup = specialtyGroupMapper.specialtyGroupDTOsToSpecialtyGroups(specialtyGroupDTO);
-        specialtyGroup = specialtyGroupRepository.save(specialtyGroup);
-        List<SpecialtyGroupDTO> result = specialtyGroupMapper.specialtyGroupsToSpecialtyGroupDTOs(specialtyGroup);
-        return result;
-    }
+	@Override
+	public List<SpecialtyGroupDTO> save(List<SpecialtyGroupDTO> specialtyGroupDTO) {
+		log.debug("Request to save SpecialtyGroup : {}", specialtyGroupDTO);
+		List<SpecialtyGroup> specialtyGroup = specialtyGroupMapper.specialtyGroupDTOsToSpecialtyGroups(specialtyGroupDTO);
+		specialtyGroup = specialtyGroupRepository.save(specialtyGroup);
+		List<SpecialtyGroupDTO> result = specialtyGroupMapper.specialtyGroupsToSpecialtyGroupDTOs(specialtyGroup);
+		return result;
+	}
 
-    /**
+	/**
 	 * Get all the specialtyGroups.
 	 *
+	 * @param pageable the pagination information
 	 * @return the list of entities
 	 */
 	@Override
 	@Transactional(readOnly = true)
 	public Page<SpecialtyGroupDTO> findAll(Pageable pageable) {
 		log.debug("Request to get all SpecialtyGroups");
-        Page<SpecialtyGroup> specialtyGroupPage = specialtyGroupRepository.findAll(pageable);
+		Page<SpecialtyGroup> specialtyGroupPage = specialtyGroupRepository.findAll(pageable);
 		return specialtyGroupPage.map(specialtyGroup -> specialtyGroupMapper.specialtyGroupToSpecialtyGroupDTO(specialtyGroup));
 	}
 
