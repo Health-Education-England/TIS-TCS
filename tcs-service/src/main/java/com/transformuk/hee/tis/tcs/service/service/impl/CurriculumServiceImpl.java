@@ -80,7 +80,7 @@ public class CurriculumServiceImpl implements CurriculumService {
 	@Transactional(readOnly = true)
 	public CurriculumDTO findOne(Long id) {
 		log.debug("Request to get Curriculum : {}", id);
-		Curriculum curriculum = curriculumRepository.findOneWithEagerRelationships(id);
+		Curriculum curriculum = curriculumRepository.findOne(id);
 		CurriculumDTO curriculumDTO = curriculumMapper.curriculumToCurriculumDTO(curriculum);
 		return curriculumDTO;
 	}

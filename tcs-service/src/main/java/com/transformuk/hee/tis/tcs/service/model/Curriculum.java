@@ -23,6 +23,8 @@ public class Curriculum implements Serializable {
 	@GeneratedValue(strategy = GenerationType.IDENTITY)
 	private Long id;
 
+	private String intrepidId;
+
 	private String name;
 
 	private LocalDate start;
@@ -43,12 +45,6 @@ public class Curriculum implements Serializable {
 	@JsonIgnore
 	private Set<ProgrammeMembership> programmeMemberships = new HashSet<>();
 
-	@ManyToMany
-	@JoinTable(name = "CurriculumGrade",
-			joinColumns = @JoinColumn(name = "curriculaId", referencedColumnName = "id"),
-			inverseJoinColumns = @JoinColumn(name = "gradesId", referencedColumnName = "id"))
-	private Set<Grade> grades = new HashSet<>();
-
 	@ManyToOne
 	@JoinColumn(name = "specialtyId")
 	private Specialty specialty;
@@ -59,6 +55,19 @@ public class Curriculum implements Serializable {
 
 	public void setId(Long id) {
 		this.id = id;
+	}
+
+	public String getIntrepidId() {
+		return intrepidId;
+	}
+
+	public Curriculum intrepidId(String intrepidId) {
+		this.intrepidId = intrepidId;
+		return this;
+	}
+
+	public void setIntrepidId(String intrepidId) {
+		this.intrepidId = intrepidId;
 	}
 
 	public String getName() {
@@ -177,31 +186,6 @@ public class Curriculum implements Serializable {
 		return this;
 	}
 
-	public Set<Grade> getGrades() {
-		return grades;
-	}
-
-	public void setGrades(Set<Grade> grades) {
-		this.grades = grades;
-	}
-
-	public Curriculum grades(Set<Grade> grades) {
-		this.grades = grades;
-		return this;
-	}
-
-	public Curriculum addGrade(Grade grade) {
-		this.grades.add(grade);
-		grade.getCurriculumIds().add(this);
-		return this;
-	}
-
-	public Curriculum removeGrade(Grade grade) {
-		this.grades.remove(grade);
-		grade.getCurriculumIds().remove(this);
-		return this;
-	}
-
 	public Specialty getSpecialty() {
 		return specialty;
 	}
@@ -239,6 +223,7 @@ public class Curriculum implements Serializable {
 	public String toString() {
 		return "Curriculum{" +
 				"id=" + id +
+				", intrepidId=" + intrepidId +
 				", name='" + name + "'" +
 				", start='" + start + "'" +
 				", end='" + end + "'" +

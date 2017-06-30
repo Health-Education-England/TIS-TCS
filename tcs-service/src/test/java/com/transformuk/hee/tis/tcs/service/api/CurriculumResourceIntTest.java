@@ -45,6 +45,9 @@ public class CurriculumResourceIntTest {
 	private static final String DEFAULT_NAME = "AAAAAAAAAA";
 	private static final String UPDATED_NAME = "BBBBBBBBBB";
 
+	private static final String DEFAULT_INTREPID_ID= "1234";
+	private static final String UPDATED_INTREPID_ID= "4567";
+
 	private static final LocalDate DEFAULT_START = LocalDate.ofEpochDay(0L);
 	private static final LocalDate UPDATED_START = LocalDate.now(ZoneId.systemDefault());
 
@@ -97,6 +100,7 @@ public class CurriculumResourceIntTest {
 	public static Curriculum createEntity(EntityManager em) {
 		Curriculum curriculum = new Curriculum()
 				.name(DEFAULT_NAME)
+				.intrepidId(DEFAULT_INTREPID_ID)
 				.start(DEFAULT_START)
 				.end(DEFAULT_END)
 				.curriculumSubType(DEFAULT_CURRICULUM_SUB_TYPE)
@@ -137,6 +141,7 @@ public class CurriculumResourceIntTest {
 		List<Curriculum> curriculumList = curriculumRepository.findAll();
 		assertThat(curriculumList).hasSize(databaseSizeBeforeCreate + 1);
 		Curriculum testCurriculum = curriculumList.get(curriculumList.size() - 1);
+		assertThat(testCurriculum.getIntrepidId()).isEqualTo(DEFAULT_INTREPID_ID);
 		assertThat(testCurriculum.getName()).isEqualTo(DEFAULT_NAME);
 		assertThat(testCurriculum.getStart()).isEqualTo(DEFAULT_START);
 		assertThat(testCurriculum.getEnd()).isEqualTo(DEFAULT_END);
@@ -177,6 +182,7 @@ public class CurriculumResourceIntTest {
 				.andExpect(status().isOk())
 				.andExpect(content().contentType(MediaType.APPLICATION_JSON_UTF8_VALUE))
 				.andExpect(jsonPath("$.[*].id").value(hasItem(curriculum.getId().intValue())))
+				.andExpect(jsonPath("$.[*].intrepidId").value(hasItem(DEFAULT_INTREPID_ID.toString())))
 				.andExpect(jsonPath("$.[*].name").value(hasItem(DEFAULT_NAME.toString())))
 				.andExpect(jsonPath("$.[*].start").value(hasItem(DEFAULT_START.toString())))
 				.andExpect(jsonPath("$.[*].end").value(hasItem(DEFAULT_END.toString())))
@@ -197,6 +203,7 @@ public class CurriculumResourceIntTest {
 				.andExpect(status().isOk())
 				.andExpect(content().contentType(MediaType.APPLICATION_JSON_UTF8_VALUE))
 				.andExpect(jsonPath("$.id").value(curriculum.getId().intValue()))
+				.andExpect(jsonPath("$.intrepidId").value(DEFAULT_INTREPID_ID.toString()))
 				.andExpect(jsonPath("$.name").value(DEFAULT_NAME.toString()))
 				.andExpect(jsonPath("$.start").value(DEFAULT_START.toString()))
 				.andExpect(jsonPath("$.end").value(DEFAULT_END.toString()))

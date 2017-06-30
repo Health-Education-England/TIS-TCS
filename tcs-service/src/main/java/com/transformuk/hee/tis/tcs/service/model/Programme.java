@@ -21,6 +21,8 @@ public class Programme implements Serializable {
 	@GeneratedValue(strategy = GenerationType.IDENTITY)
 	private Long id;
 
+	private String intrepidId;
+
 	@Enumerated(EnumType.STRING)
 	private Status status;
 
@@ -42,6 +44,19 @@ public class Programme implements Serializable {
 
 	public void setId(Long id) {
 		this.id = id;
+	}
+
+	public String getIntrepidId() {
+		return intrepidId;
+	}
+
+	public Programme intrepidId(String intrepidId) {
+		this.intrepidId = intrepidId;
+		return this;
+	}
+
+	public void setIntrepidId(String intrepidId) {
+		this.intrepidId = intrepidId;
 	}
 
 	public Status getStatus() {
@@ -158,6 +173,7 @@ public class Programme implements Serializable {
 	public String toString() {
 		return "Programme{" +
 				"id=" + id +
+				", intrepidId=" + intrepidId +
 				", status='" + status + "'" +
 				", managingDeanery='" + managingDeanery + "'" +
 				", programmeName='" + programmeName + "'" +

@@ -13,10 +13,4 @@ import java.util.List;
 @SuppressWarnings("unused")
 public interface CurriculumRepository extends JpaRepository<Curriculum, Long> {
 
-	@Query("select distinct curriculum from Curriculum curriculum left join fetch curriculum.grades")
-	List<Curriculum> findAllWithEagerRelationships();
-
-	@Query("select curriculum from Curriculum curriculum left join fetch curriculum.grades where curriculum.id =:id")
-	Curriculum findOneWithEagerRelationships(@Param("id") Long id);
-
 }

@@ -12,6 +12,8 @@ public class ProgrammeDTO implements Serializable {
 
 	private Long id;
 
+	private String intrepidId;
+
 	private Status status;
 
 	private String managingDeanery;
@@ -28,6 +30,14 @@ public class ProgrammeDTO implements Serializable {
 
 	public void setId(Long id) {
 		this.id = id;
+	}
+
+	public String getIntrepidId() {
+		return intrepidId;
+	}
+
+	public void setIntrepidId(String intrepidId) {
+		this.intrepidId = intrepidId;
 	}
 
 	public Status getStatus() {
@@ -97,6 +107,7 @@ public class ProgrammeDTO implements Serializable {
 	public String toString() {
 		return "ProgrammeDTO{" +
 				"id=" + id +
+				", intrepidId=" + intrepidId +
 				", status='" + status + "'" +
 				", managingDeanery='" + managingDeanery + "'" +
 				", programmeName='" + programmeName + "'" +

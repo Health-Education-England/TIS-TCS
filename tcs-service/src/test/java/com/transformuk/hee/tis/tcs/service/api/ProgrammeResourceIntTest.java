@@ -43,6 +43,9 @@ public class ProgrammeResourceIntTest {
 	private static final Status DEFAULT_STATUS = Status.CURRENT;
 	private static final Status UPDATED_STATUS = Status.INACTIVE;
 
+	private static final String DEFAULT_INTREPID_ID= "1234";
+	private static final String UPDATED_INTREPID_ID= "4567";
+
 	private static final String DEFAULT_MANAGING_DEANERY = "Health Education England Kent, Surrey and Sussex";
 	private static final String UPDATED_MANAGING_DEANERY = "Health Education England North West London";
 
@@ -86,6 +89,7 @@ public class ProgrammeResourceIntTest {
 	public static Programme createEntity() {
 		Programme programme = new Programme()
 				.status(DEFAULT_STATUS)
+				.intrepidId(DEFAULT_INTREPID_ID)
 				.managingDeanery(DEFAULT_MANAGING_DEANERY)
 				.programmeName(DEFAULT_PROGRAMME_NAME)
 				.programmeNumber(DEFAULT_PROGRAMME_NUMBER)
@@ -126,6 +130,7 @@ public class ProgrammeResourceIntTest {
 		assertThat(programmeList).hasSize(databaseSizeBeforeCreate + 1);
 		Programme testProgramme = programmeList.get(programmeList.size() - 1);
 		assertThat(testProgramme.getStatus()).isEqualTo(DEFAULT_STATUS);
+		assertThat(testProgramme.getIntrepidId()).isEqualTo(DEFAULT_INTREPID_ID);
 		assertThat(testProgramme.getManagingDeanery()).isEqualTo(DEFAULT_MANAGING_DEANERY);
 		assertThat(testProgramme.getProgrammeName()).isEqualTo(DEFAULT_PROGRAMME_NAME);
 		assertThat(testProgramme.getProgrammeNumber()).isEqualTo(DEFAULT_PROGRAMME_NUMBER);
@@ -163,6 +168,7 @@ public class ProgrammeResourceIntTest {
 				.andExpect(status().isOk())
 				.andExpect(content().contentType(MediaType.APPLICATION_JSON_UTF8_VALUE))
 				.andExpect(jsonPath("$.[*].id").value(hasItem(programme.getId().intValue())))
+				.andExpect(jsonPath("$.[*].intrepidId").value(hasItem(DEFAULT_INTREPID_ID.toString())))
 				.andExpect(jsonPath("$.[*].status").value(hasItem(DEFAULT_STATUS.toString())))
 				.andExpect(jsonPath("$.[*].managingDeanery").value(hasItem(DEFAULT_MANAGING_DEANERY.toString())))
 				.andExpect(jsonPath("$.[*].programmeName").value(hasItem(DEFAULT_PROGRAMME_NAME.toString())))
@@ -181,6 +187,7 @@ public class ProgrammeResourceIntTest {
 				.andExpect(status().isOk())
 				.andExpect(content().contentType(MediaType.APPLICATION_JSON_UTF8_VALUE))
 				.andExpect(jsonPath("$.id").value(programme.getId().intValue()))
+				.andExpect(jsonPath("$.intrepidId").value(DEFAULT_INTREPID_ID.toString()))
 				.andExpect(jsonPath("$.status").value(DEFAULT_STATUS.toString()))
 				.andExpect(jsonPath("$.managingDeanery").value(DEFAULT_MANAGING_DEANERY.toString()))
 				.andExpect(jsonPath("$.programmeName").value(DEFAULT_PROGRAMME_NAME.toString()))
@@ -207,6 +214,7 @@ public class ProgrammeResourceIntTest {
 		Programme updatedProgramme = programmeRepository.findOne(programme.getId());
 		updatedProgramme
 				.status(UPDATED_STATUS)
+				.intrepidId(UPDATED_INTREPID_ID)
 				.managingDeanery(UPDATED_MANAGING_DEANERY)
 				.programmeName(UPDATED_PROGRAMME_NAME)
 				.programmeNumber(UPDATED_PROGRAMME_NUMBER)
@@ -223,6 +231,7 @@ public class ProgrammeResourceIntTest {
 		assertThat(programmeList).hasSize(databaseSizeBeforeUpdate);
 		Programme testProgramme = programmeList.get(programmeList.size() - 1);
 		assertThat(testProgramme.getStatus()).isEqualTo(UPDATED_STATUS);
+		assertThat(testProgramme.getIntrepidId()).isEqualTo(UPDATED_INTREPID_ID);
 		assertThat(testProgramme.getManagingDeanery()).isEqualTo(UPDATED_MANAGING_DEANERY);
 		assertThat(testProgramme.getProgrammeName()).isEqualTo(UPDATED_PROGRAMME_NAME);
 		assertThat(testProgramme.getProgrammeNumber()).isEqualTo(UPDATED_PROGRAMME_NUMBER);
@@ -265,11 +274,11 @@ public class ProgrammeResourceIntTest {
 				.andExpect(content().contentType(MediaType.APPLICATION_JSON_UTF8_VALUE))
 				.andExpect(jsonPath("$.[*].id").value(hasItem(programme.getId().intValue())))
 				.andExpect(jsonPath("$.[*].status").value(hasItem(DEFAULT_STATUS.toString())))
+				.andExpect(jsonPath("$.[*].intrepidId").value(hasItem(DEFAULT_INTREPID_ID.toString())))
 				.andExpect(jsonPath("$.[*].managingDeanery").value(hasItem(DEFAULT_MANAGING_DEANERY.toString())))
 				.andExpect(jsonPath("$.[*].programmeName").value(hasItem(DEFAULT_PROGRAMME_NAME.toString())))
 				.andExpect(jsonPath("$.[*].programmeNumber").value(hasItem(DEFAULT_PROGRAMME_NUMBER.toString())))
 				.andExpect(jsonPath("$.[*].leadProvider").value(hasItem(DEFAULT_LEAD_PROVIDER.toString())));
-		assertThat(programmeRepository.findAll()).hasSize(2);
 	}
 
 	@Test
