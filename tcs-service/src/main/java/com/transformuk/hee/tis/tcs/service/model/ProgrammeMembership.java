@@ -38,17 +38,11 @@ public class ProgrammeMembership implements Serializable {
 
 	private String leavingDestination;
 
-	@ManyToOne
-	@JoinColumn(name="programmeId")
-	private Programme programme;
+	private String programmeId;
 
-	@ManyToOne
-	@JoinColumn(name="curriculumId")
-	private Curriculum curriculum;
+	private String curriculumId;
 
-	@ManyToOne
-	@JoinColumn(name="trainingNumberId")
-	private TrainingNumber trainingNumber;
+	private String trainingNumberId;
 
 	public Long getId() {
 		return id;
@@ -175,43 +169,28 @@ public class ProgrammeMembership implements Serializable {
 		return this;
 	}
 
-	public Programme getProgramme() {
-		return programme;
+	public String getProgrammeId() {
+		return programmeId;
 	}
 
-	public void setProgramme(Programme programme) {
-		this.programme = programme;
+	public void setProgrammeId(String programmeId) {
+		this.programmeId = programmeId;
 	}
 
-	public ProgrammeMembership programme(Programme programme) {
-		this.programme = programme;
-		return this;
+	public String getCurriculumId() {
+		return curriculumId;
 	}
 
-	public Curriculum getCurriculum() {
-		return curriculum;
+	public void setCurriculumId(String curriculumId) {
+		this.curriculumId = curriculumId;
 	}
 
-	public void setCurriculum(Curriculum curriculum) {
-		this.curriculum = curriculum;
+	public String getTrainingNumberId() {
+		return trainingNumberId;
 	}
 
-	public ProgrammeMembership curriculum(Curriculum curriculum) {
-		this.curriculum = curriculum;
-		return this;
-	}
-
-	public TrainingNumber getTrainingNumber() {
-		return trainingNumber;
-	}
-
-	public void setTrainingNumber(TrainingNumber trainingNumber) {
-		this.trainingNumber = trainingNumber;
-	}
-
-	public ProgrammeMembership trainingNumber(TrainingNumber trainingNumber) {
-		this.trainingNumber = trainingNumber;
-		return this;
+	public void setTrainingNumberId(String trainingNumberId) {
+		this.trainingNumberId = trainingNumberId;
 	}
 
 	@Override

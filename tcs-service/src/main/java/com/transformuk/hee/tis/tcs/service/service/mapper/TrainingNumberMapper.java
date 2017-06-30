@@ -17,7 +17,6 @@ public interface TrainingNumberMapper {
 
 	List<TrainingNumberDTO> trainingNumbersToTrainingNumberDTOs(List<TrainingNumber> trainingNumbers);
 
-	@Mapping(target = "programmeMemberships", ignore = true)
 	TrainingNumber trainingNumberDTOToTrainingNumber(TrainingNumberDTO trainingNumberDTO);
 
 	List<TrainingNumber> trainingNumberDTOsToTrainingNumbers(List<TrainingNumberDTO> trainingNumberDTOs);
