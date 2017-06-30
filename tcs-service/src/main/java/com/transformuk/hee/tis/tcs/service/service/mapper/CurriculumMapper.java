@@ -1,7 +1,6 @@
 package com.transformuk.hee.tis.tcs.service.service.mapper;
 
 import com.transformuk.hee.tis.tcs.service.model.Curriculum;
-import com.transformuk.hee.tis.tcs.service.model.Grade;
 import com.transformuk.hee.tis.tcs.service.model.Specialty;
 import com.transformuk.hee.tis.tcs.api.dto.CurriculumDTO;
 import org.mapstruct.Mapper;
@@ -12,7 +11,7 @@ import java.util.List;
 /**
  * Mapper for the entity Curriculum and its DTO CurriculumDTO.
  */
-@Mapper(componentModel = "spring", uses = {GradeMapper.class,})
+@Mapper(componentModel = "spring")
 public interface CurriculumMapper {
 
 	@Mapping(source = "specialty.id", target = "specialtyId")
@@ -25,15 +24,6 @@ public interface CurriculumMapper {
 	Curriculum curriculumDTOToCurriculum(CurriculumDTO curriculumDTO);
 
 	List<Curriculum> curriculumDTOsToCurricula(List<CurriculumDTO> curriculumDTOs);
-
-	default Grade gradeFromId(Long id) {
-		if (id == null) {
-			return null;
-		}
-		Grade grade = new Grade();
-		grade.setId(id);
-		return grade;
-	}
 
 	default Specialty specialtyFromId(Long id) {
 		if (id == null) {

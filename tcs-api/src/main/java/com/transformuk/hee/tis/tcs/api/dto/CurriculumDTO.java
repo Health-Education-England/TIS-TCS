@@ -16,6 +16,8 @@ public class CurriculumDTO implements Serializable {
 
 	private Long id;
 
+	private String intrepidId;
+
 	private String name;
 
 	private LocalDate start;
@@ -30,8 +32,6 @@ public class CurriculumDTO implements Serializable {
 
 	private Integer periodOfGrace;
 
-	private Set<GradeDTO> grades = new HashSet<>();
-
 	private Long specialtyId;
 
 	public Long getId() {
@@ -40,6 +40,14 @@ public class CurriculumDTO implements Serializable {
 
 	public void setId(Long id) {
 		this.id = id;
+	}
+
+	public String getIntrepidId() {
+		return intrepidId;
+	}
+
+	public void setIntrepidId(String intrepidId) {
+		this.intrepidId = intrepidId;
 	}
 
 	public String getName() {
@@ -98,14 +106,6 @@ public class CurriculumDTO implements Serializable {
 		this.periodOfGrace = periodOfGrace;
 	}
 
-	public Set<GradeDTO> getGrades() {
-		return grades;
-	}
-
-	public void setGrades(Set<GradeDTO> grades) {
-		this.grades = grades;
-	}
-
 	public Long getSpecialtyId() {
 		return specialtyId;
 	}
@@ -141,6 +141,7 @@ public class CurriculumDTO implements Serializable {
 	public String toString() {
 		return "CurriculumDTO{" +
 				"id=" + id +
+				", intrepidId=" + intrepidId +
 				", name='" + name + "'" +
 				", start='" + start + "'" +
 				", end='" + end + "'" +
