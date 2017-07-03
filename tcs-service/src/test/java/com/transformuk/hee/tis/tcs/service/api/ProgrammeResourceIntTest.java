@@ -1,14 +1,18 @@
 package com.transformuk.hee.tis.tcs.service.api;
 
+import com.google.common.collect.Lists;
+import com.google.common.collect.Sets;
 import com.transformuk.hee.tis.tcs.TestUtils;
+import com.transformuk.hee.tis.tcs.api.dto.ProgrammeDTO;
+import com.transformuk.hee.tis.tcs.api.enumeration.Status;
 import com.transformuk.hee.tis.tcs.service.Application;
 import com.transformuk.hee.tis.tcs.service.exception.ExceptionTranslator;
+import com.transformuk.hee.tis.tcs.service.model.Curriculum;
 import com.transformuk.hee.tis.tcs.service.model.Programme;
+import com.transformuk.hee.tis.tcs.service.repository.CurriculumRepository;
 import com.transformuk.hee.tis.tcs.service.repository.ProgrammeRepository;
 import com.transformuk.hee.tis.tcs.service.service.ProgrammeService;
 import com.transformuk.hee.tis.tcs.service.service.mapper.ProgrammeMapper;
-import com.transformuk.hee.tis.tcs.api.dto.ProgrammeDTO;
-import com.transformuk.hee.tis.tcs.api.enumeration.Status;
 import org.apache.commons.codec.net.URLCodec;
 import org.junit.Before;
 import org.junit.Test;
@@ -25,6 +29,7 @@ import org.springframework.test.web.servlet.setup.MockMvcBuilders;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.util.List;
+import java.util.stream.Collectors;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.hamcrest.Matchers.hasItem;
@@ -60,6 +65,8 @@ public class ProgrammeResourceIntTest {
 
 	@Autowired
 	private ProgrammeRepository programmeRepository;
+	@Autowired
+	private CurriculumRepository curriculumRepository;
 
 	@Autowired
 	private ProgrammeMapper programmeMapper;
@@ -79,6 +86,7 @@ public class ProgrammeResourceIntTest {
 	private MockMvc restProgrammeMockMvc;
 
 	private Programme programme;
+	private Curriculum curriculum;
 
 	/**
 	 * Create an entity for this test.
@@ -111,6 +119,7 @@ public class ProgrammeResourceIntTest {
 	@Before
 	public void initTest() {
 		programme = createEntity();
+		curriculum = CurriculumResourceIntTest.createEntity();
 	}
 
 	@Test
@@ -135,6 +144,99 @@ public class ProgrammeResourceIntTest {
 		assertThat(testProgramme.getProgrammeName()).isEqualTo(DEFAULT_PROGRAMME_NAME);
 		assertThat(testProgramme.getProgrammeNumber()).isEqualTo(DEFAULT_PROGRAMME_NUMBER);
 		assertThat(testProgramme.getLeadProvider()).isEqualTo(DEFAULT_LEAD_PROVIDER);
+	}
+
+	@Test
+	@Transactional
+	public void createProgrammeWithCurricula() throws Exception {
+		int databaseSizeBeforeCreate = programmeRepository.findAll().size();
+		Programme programme = createEntity();
+		Curriculum curriculum1 = curriculumRepository.saveAndFlush(CurriculumResourceIntTest.createEntity());
+		Curriculum curriculum2 = curriculumRepository.saveAndFlush(CurriculumResourceIntTest.createEntity());
+		programme.setCurricula(Sets.newHashSet(curriculum1, curriculum2));
+
+		// Create the Programme
+		ProgrammeDTO programmeDTO = programmeMapper.programmeToProgrammeDTO(programme);
+		restProgrammeMockMvc.perform(post("/api/programmes")
+				.contentType(TestUtil.APPLICATION_JSON_UTF8)
+				.content(TestUtil.convertObjectToJsonBytes(programmeDTO)))
+				.andExpect(status().isCreated());
+
+		// Validate the Programme in the database
+		List<Programme> programmeList = programmeRepository.findAll();
+		assertThat(programmeList).hasSize(databaseSizeBeforeCreate + 1);
+		Programme testProgramme = programmeList.get(programmeList.size() - 1);
+		assertThat(testProgramme.getStatus()).isEqualTo(DEFAULT_STATUS);
+		assertThat(testProgramme.getIntrepidId()).isEqualTo(DEFAULT_INTREPID_ID);
+		assertThat(testProgramme.getManagingDeanery()).isEqualTo(DEFAULT_MANAGING_DEANERY);
+		assertThat(testProgramme.getProgrammeName()).isEqualTo(DEFAULT_PROGRAMME_NAME);
+		assertThat(testProgramme.getProgrammeNumber()).isEqualTo(DEFAULT_PROGRAMME_NUMBER);
+		assertThat(testProgramme.getLeadProvider()).isEqualTo(DEFAULT_LEAD_PROVIDER);
+		assertThat(testProgramme.getCurricula().size()).isEqualTo(2);
+		assertThat(testProgramme.getCurricula().stream().map(c -> c.getId()).collect(Collectors.toSet())).
+				containsAll(Sets.newHashSet(curriculum1.getId(), curriculum2.getId()));
+	}
+
+	@Test
+	public void shouldComplainIfBadProgrammeWithCurriculaRequest() throws Exception {
+		//given
+		Programme programme = createEntity();
+		Curriculum curriculum1 = curriculumRepository.saveAndFlush(CurriculumResourceIntTest.createEntity());
+		Curriculum curriculum2 = curriculumRepository.saveAndFlush(CurriculumResourceIntTest.createEntity());
+		curriculum1.setId(-1L);
+		curriculum2.setId(-2L);
+		programme.setCurricula(Sets.newHashSet(curriculum1, curriculum2));
+
+		//when & then
+		ProgrammeDTO programmeDTO = programmeMapper.programmeToProgrammeDTO(programme);
+		restProgrammeMockMvc.perform(post("/api/programmes")
+				.contentType(TestUtil.APPLICATION_JSON_UTF8)
+				.content(TestUtil.convertObjectToJsonBytes(programmeDTO)))
+				.andExpect(status().isBadRequest())
+				.andExpect(jsonPath("$.message").value("Bad request"));
+	}
+
+	@Test
+	@Transactional
+	public void bulkCreateProgrammeWithCurricula() throws Exception {
+		int databaseSizeBeforeCreate = programmeRepository.findAll().size();
+		Programme programme = createEntity();
+		Curriculum curriculum1 = curriculumRepository.saveAndFlush(CurriculumResourceIntTest.createEntity());
+		Curriculum curriculum2 = curriculumRepository.saveAndFlush(CurriculumResourceIntTest.createEntity());
+		programme.setCurricula(Sets.newHashSet(curriculum1, curriculum2));
+
+		// Create the Programme
+		ProgrammeDTO programmeDTO1 = programmeMapper.programmeToProgrammeDTO(programme);
+		ProgrammeDTO programmeDTO2 = programmeMapper.programmeToProgrammeDTO(programme);
+		restProgrammeMockMvc.perform(post("/api/bulk-programmes")
+				.contentType(TestUtil.APPLICATION_JSON_UTF8)
+				.content(TestUtil.convertObjectToJsonBytes(Lists.newArrayList(programmeDTO1, programmeDTO2))))
+				.andExpect(status().isOk());
+
+		// Validate the Programme in the database
+		List<Programme> programmeList = programmeRepository.findAll();
+		assertThat(programmeList).hasSize(databaseSizeBeforeCreate + 2);
+		Programme testProgramme2 = programmeList.get(programmeList.size() - 1);
+		Programme testProgramme1 = programmeList.get(programmeList.size() - 2);
+		assertThat(testProgramme1.getStatus()).isEqualTo(DEFAULT_STATUS);
+		assertThat(testProgramme1.getIntrepidId()).isEqualTo(DEFAULT_INTREPID_ID);
+		assertThat(testProgramme1.getManagingDeanery()).isEqualTo(DEFAULT_MANAGING_DEANERY);
+		assertThat(testProgramme1.getProgrammeName()).isEqualTo(DEFAULT_PROGRAMME_NAME);
+		assertThat(testProgramme1.getProgrammeNumber()).isEqualTo(DEFAULT_PROGRAMME_NUMBER);
+		assertThat(testProgramme1.getLeadProvider()).isEqualTo(DEFAULT_LEAD_PROVIDER);
+		assertThat(testProgramme1.getCurricula().size()).isEqualTo(2);
+		assertThat(testProgramme1.getCurricula().stream().map(c -> c.getId()).collect(Collectors.toSet())).
+				containsAll(Sets.newHashSet(curriculum1.getId(), curriculum2.getId()));
+
+		assertThat(testProgramme2.getStatus()).isEqualTo(DEFAULT_STATUS);
+		assertThat(testProgramme2.getIntrepidId()).isEqualTo(DEFAULT_INTREPID_ID);
+		assertThat(testProgramme2.getManagingDeanery()).isEqualTo(DEFAULT_MANAGING_DEANERY);
+		assertThat(testProgramme2.getProgrammeName()).isEqualTo(DEFAULT_PROGRAMME_NAME);
+		assertThat(testProgramme2.getProgrammeNumber()).isEqualTo(DEFAULT_PROGRAMME_NUMBER);
+		assertThat(testProgramme2.getLeadProvider()).isEqualTo(DEFAULT_LEAD_PROVIDER);
+		assertThat(testProgramme2.getCurricula().size()).isEqualTo(2);
+		assertThat(testProgramme2.getCurricula().stream().map(c -> c.getId()).collect(Collectors.toSet())).
+				containsAll(Sets.newHashSet(curriculum1.getId(), curriculum2.getId()));
 	}
 
 	@Test
@@ -236,6 +338,120 @@ public class ProgrammeResourceIntTest {
 		assertThat(testProgramme.getProgrammeName()).isEqualTo(UPDATED_PROGRAMME_NAME);
 		assertThat(testProgramme.getProgrammeNumber()).isEqualTo(UPDATED_PROGRAMME_NUMBER);
 		assertThat(testProgramme.getLeadProvider()).isEqualTo(UPDATED_LEAD_PROVIDER);
+	}
+
+
+	@Test
+	@Transactional
+	public void updateProgrammeWithCurricula() throws Exception {
+		// Initialize the database
+		Programme programme = createEntity();
+		Curriculum curriculum1 = curriculumRepository.saveAndFlush(CurriculumResourceIntTest.createEntity());
+		Curriculum curriculum2 = curriculumRepository.saveAndFlush(CurriculumResourceIntTest.createEntity());
+		Curriculum curriculum3 = curriculumRepository.saveAndFlush(CurriculumResourceIntTest.createEntity());
+		programme.setCurricula(Sets.newHashSet(curriculum1, curriculum2));
+
+		programmeRepository.saveAndFlush(programme);
+		int databaseSizeBeforeUpdate = programmeRepository.findAll().size();
+
+		// Update the programme
+		Programme updatedProgramme = programmeRepository.findOne(programme.getId());
+		updatedProgramme
+				.status(UPDATED_STATUS)
+				.intrepidId(UPDATED_INTREPID_ID)
+				.managingDeanery(UPDATED_MANAGING_DEANERY)
+				.programmeName(UPDATED_PROGRAMME_NAME)
+				.programmeNumber(UPDATED_PROGRAMME_NUMBER)
+				.leadProvider(UPDATED_LEAD_PROVIDER)
+				.curricula(Sets.newHashSet(curriculum2, curriculum3));
+		ProgrammeDTO programmeDTO = programmeMapper.programmeToProgrammeDTO(updatedProgramme);
+
+		restProgrammeMockMvc.perform(put("/api/programmes")
+				.contentType(TestUtil.APPLICATION_JSON_UTF8)
+				.content(TestUtil.convertObjectToJsonBytes(programmeDTO)))
+				.andExpect(status().isOk());
+
+		// Validate the Programme in the database
+		List<Programme> programmeList = programmeRepository.findAll();
+		assertThat(programmeList).hasSize(databaseSizeBeforeUpdate);
+		Programme testProgramme = programmeList.get(programmeList.size() - 1);
+		assertThat(testProgramme.getStatus()).isEqualTo(UPDATED_STATUS);
+		assertThat(testProgramme.getIntrepidId()).isEqualTo(UPDATED_INTREPID_ID);
+		assertThat(testProgramme.getManagingDeanery()).isEqualTo(UPDATED_MANAGING_DEANERY);
+		assertThat(testProgramme.getProgrammeName()).isEqualTo(UPDATED_PROGRAMME_NAME);
+		assertThat(testProgramme.getProgrammeNumber()).isEqualTo(UPDATED_PROGRAMME_NUMBER);
+		assertThat(testProgramme.getLeadProvider()).isEqualTo(UPDATED_LEAD_PROVIDER);
+		assertThat(testProgramme.getCurricula().size()).isEqualTo(2);
+		assertThat(testProgramme.getCurricula().stream().map(c -> c.getId()).collect(Collectors.toSet())).
+				containsAll(Sets.newHashSet(curriculum2.getId(), curriculum3.getId()));
+	}
+
+	@Test
+	@Transactional
+	public void bulkUpdateProgrammeWithCurricula() throws Exception {
+		int databaseSizeBeforeCreate = programmeRepository.findAll().size();
+		Programme programme1 = createEntity();
+		Curriculum curriculum1 = curriculumRepository.saveAndFlush(CurriculumResourceIntTest.createEntity());
+		Curriculum curriculum2 = curriculumRepository.saveAndFlush(CurriculumResourceIntTest.createEntity());
+		Curriculum curriculum3 = curriculumRepository.saveAndFlush(CurriculumResourceIntTest.createEntity());
+		programme1.setCurricula(Sets.newHashSet(curriculum1, curriculum2));
+		Programme programme2 = createEntity();
+		programme1.setCurricula(Sets.newHashSet(curriculum2, curriculum3));
+		programmeRepository.saveAndFlush(programme1);
+		programmeRepository.saveAndFlush(programme2);
+
+		// Update the programme
+		Programme updatedProgramme1 = programmeRepository.findOne(programme1.getId());
+		updatedProgramme1
+				.status(UPDATED_STATUS)
+				.intrepidId(UPDATED_INTREPID_ID)
+				.managingDeanery(UPDATED_MANAGING_DEANERY)
+				.programmeName(UPDATED_PROGRAMME_NAME)
+				.programmeNumber(UPDATED_PROGRAMME_NUMBER)
+				.leadProvider(UPDATED_LEAD_PROVIDER)
+				.curricula(Sets.newHashSet(curriculum2));
+		ProgrammeDTO programmeDTO1 = programmeMapper.programmeToProgrammeDTO(updatedProgramme1);
+		Programme updatedProgramme2 = programmeRepository.findOne(programme2.getId());
+		updatedProgramme2
+				.status(UPDATED_STATUS)
+				.intrepidId(UPDATED_INTREPID_ID)
+				.managingDeanery(UPDATED_MANAGING_DEANERY)
+				.programmeName(UPDATED_PROGRAMME_NAME)
+				.programmeNumber(UPDATED_PROGRAMME_NUMBER)
+				.leadProvider(UPDATED_LEAD_PROVIDER)
+				.curricula(Sets.newHashSet(curriculum3));
+		ProgrammeDTO programmeDTO2 = programmeMapper.programmeToProgrammeDTO(updatedProgramme1);
+
+		// Bulk update the Programmes
+		restProgrammeMockMvc.perform(put("/api/bulk-programmes")
+				.contentType(TestUtil.APPLICATION_JSON_UTF8)
+				.content(TestUtil.convertObjectToJsonBytes(Lists.newArrayList(programmeDTO1, programmeDTO2))))
+				.andExpect(status().isOk());
+
+		// Validate the Programme in the database
+		List<Programme> programmeList = programmeRepository.findAll();
+		assertThat(programmeList).hasSize(databaseSizeBeforeCreate + 2);
+		Programme testProgramme2 = programmeList.get(programmeList.size() - 1);
+		Programme testProgramme1 = programmeList.get(programmeList.size() - 2);
+		assertThat(testProgramme1.getStatus()).isEqualTo(UPDATED_STATUS);
+		assertThat(testProgramme1.getIntrepidId()).isEqualTo(UPDATED_INTREPID_ID);
+		assertThat(testProgramme1.getManagingDeanery()).isEqualTo(UPDATED_MANAGING_DEANERY);
+		assertThat(testProgramme1.getProgrammeName()).isEqualTo(UPDATED_PROGRAMME_NAME);
+		assertThat(testProgramme1.getProgrammeNumber()).isEqualTo(UPDATED_PROGRAMME_NUMBER);
+		assertThat(testProgramme1.getLeadProvider()).isEqualTo(UPDATED_LEAD_PROVIDER);
+		assertThat(testProgramme1.getCurricula().size()).isEqualTo(1);
+		assertThat(testProgramme1.getCurricula().stream().map(c -> c.getId()).collect(Collectors.toSet())).
+				containsAll(Sets.newHashSet(curriculum2.getId()));
+
+		assertThat(testProgramme2.getStatus()).isEqualTo(UPDATED_STATUS);
+		assertThat(testProgramme2.getIntrepidId()).isEqualTo(UPDATED_INTREPID_ID);
+		assertThat(testProgramme2.getManagingDeanery()).isEqualTo(UPDATED_MANAGING_DEANERY);
+		assertThat(testProgramme2.getProgrammeName()).isEqualTo(UPDATED_PROGRAMME_NAME);
+		assertThat(testProgramme2.getProgrammeNumber()).isEqualTo(UPDATED_PROGRAMME_NUMBER);
+		assertThat(testProgramme2.getLeadProvider()).isEqualTo(UPDATED_LEAD_PROVIDER);
+		assertThat(testProgramme2.getCurricula().size()).isEqualTo(1);
+		assertThat(testProgramme2.getCurricula().stream().map(c -> c.getId()).collect(Collectors.toSet())).
+				containsAll(Sets.newHashSet(curriculum3.getId()));
 	}
 
 	@Test

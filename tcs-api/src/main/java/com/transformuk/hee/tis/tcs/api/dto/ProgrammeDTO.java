@@ -4,6 +4,7 @@ import com.transformuk.hee.tis.tcs.api.enumeration.Status;
 
 import java.io.Serializable;
 import java.util.Objects;
+import java.util.Set;
 
 /**
  * A DTO for the Programme entity.
@@ -23,6 +24,8 @@ public class ProgrammeDTO implements Serializable {
 	private String programmeNumber;
 
 	private String leadProvider;
+
+	private Set<CurriculumDTO> curricula;
 
 	public Long getId() {
 		return id;
@@ -80,6 +83,14 @@ public class ProgrammeDTO implements Serializable {
 		this.leadProvider = leadProvider;
 	}
 
+	public Set<CurriculumDTO> getCurricula() {
+		return curricula;
+	}
+
+	public void setCurricula(Set<CurriculumDTO> curricula) {
+		this.curricula = curricula;
+	}
+
 	@Override
 	public boolean equals(Object o) {
 		if (this == o) {
@@ -113,6 +124,7 @@ public class ProgrammeDTO implements Serializable {
 				", programmeName='" + programmeName + "'" +
 				", programmeNumber='" + programmeNumber + "'" +
 				", leadProvider='" + leadProvider + "'" +
+				", curricula='" + curricula + "'" +
 				'}';
 	}
 }

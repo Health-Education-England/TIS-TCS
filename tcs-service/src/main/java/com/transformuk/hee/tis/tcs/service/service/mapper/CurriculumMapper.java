@@ -15,11 +15,10 @@ import java.util.List;
 public interface CurriculumMapper {
 
 	@Mapping(source = "specialty.id", target = "specialtyId")
-    CurriculumDTO curriculumToCurriculumDTO(Curriculum curriculum);
+	CurriculumDTO curriculumToCurriculumDTO(Curriculum curriculum);
 
 	List<CurriculumDTO> curriculaToCurriculumDTOs(List<Curriculum> curricula);
 
-	@Mapping(target = "programmeMemberships", ignore = true)
 	@Mapping(source = "specialtyId", target = "specialty")
 	Curriculum curriculumDTOToCurriculum(CurriculumDTO curriculumDTO);
 
