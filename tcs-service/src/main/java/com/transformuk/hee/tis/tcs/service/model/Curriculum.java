@@ -41,10 +41,6 @@ public class Curriculum implements Serializable {
 
 	private Integer periodOfGrace;
 
-	@OneToMany(mappedBy = "curriculum")
-	@JsonIgnore
-	private Set<ProgrammeMembership> programmeMemberships = new HashSet<>();
-
 	@ManyToOne
 	@JoinColumn(name = "specialtyId")
 	private Specialty specialty;
@@ -158,31 +154,6 @@ public class Curriculum implements Serializable {
 
 	public Curriculum periodOfGrace(Integer periodOfGrace) {
 		this.periodOfGrace = periodOfGrace;
-		return this;
-	}
-
-	public Set<ProgrammeMembership> getProgrammeMemberships() {
-		return programmeMemberships;
-	}
-
-	public void setProgrammeMemberships(Set<ProgrammeMembership> programmeMemberships) {
-		this.programmeMemberships = programmeMemberships;
-	}
-
-	public Curriculum programmeMemberships(Set<ProgrammeMembership> programmeMemberships) {
-		this.programmeMemberships = programmeMemberships;
-		return this;
-	}
-
-	public Curriculum addProgrammeMembership(ProgrammeMembership programmeMembership) {
-		this.programmeMemberships.add(programmeMembership);
-		programmeMembership.setCurriculum(this);
-		return this;
-	}
-
-	public Curriculum removeProgrammeMembership(ProgrammeMembership programmeMembership) {
-		this.programmeMemberships.remove(programmeMembership);
-		programmeMembership.setCurriculum(null);
 		return this;
 	}
 

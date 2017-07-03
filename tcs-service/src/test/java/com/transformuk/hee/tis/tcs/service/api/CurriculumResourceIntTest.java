@@ -1,14 +1,14 @@
 package com.transformuk.hee.tis.tcs.service.api;
 
+import com.transformuk.hee.tis.tcs.api.dto.CurriculumDTO;
+import com.transformuk.hee.tis.tcs.api.enumeration.AssessmentType;
+import com.transformuk.hee.tis.tcs.api.enumeration.CurriculumSubType;
 import com.transformuk.hee.tis.tcs.service.Application;
 import com.transformuk.hee.tis.tcs.service.exception.ExceptionTranslator;
 import com.transformuk.hee.tis.tcs.service.model.Curriculum;
 import com.transformuk.hee.tis.tcs.service.repository.CurriculumRepository;
 import com.transformuk.hee.tis.tcs.service.service.CurriculumService;
 import com.transformuk.hee.tis.tcs.service.service.mapper.CurriculumMapper;
-import com.transformuk.hee.tis.tcs.api.dto.CurriculumDTO;
-import com.transformuk.hee.tis.tcs.api.enumeration.AssessmentType;
-import com.transformuk.hee.tis.tcs.api.enumeration.CurriculumSubType;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -23,7 +23,6 @@ import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.setup.MockMvcBuilders;
 import org.springframework.transaction.annotation.Transactional;
 
-import javax.persistence.EntityManager;
 import java.time.LocalDate;
 import java.time.ZoneId;
 import java.util.List;
@@ -84,9 +83,6 @@ public class CurriculumResourceIntTest {
 	@Autowired
 	private ExceptionTranslator exceptionTranslator;
 
-	@Autowired
-	private EntityManager em;
-
 	private MockMvc restCurriculumMockMvc;
 
 	private Curriculum curriculum;
@@ -97,7 +93,7 @@ public class CurriculumResourceIntTest {
 	 * This is a static method, as tests for other entities might also need it,
 	 * if they test an entity which requires the current entity.
 	 */
-	public static Curriculum createEntity(EntityManager em) {
+	public static Curriculum createEntity() {
 		Curriculum curriculum = new Curriculum()
 				.name(DEFAULT_NAME)
 				.intrepidId(DEFAULT_INTREPID_ID)
@@ -122,7 +118,7 @@ public class CurriculumResourceIntTest {
 
 	@Before
 	public void initTest() {
-		curriculum = createEntity(em);
+		curriculum = createEntity();
 	}
 
 	@Test

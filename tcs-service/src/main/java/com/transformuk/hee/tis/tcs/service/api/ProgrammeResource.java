@@ -4,8 +4,6 @@ import com.codahale.metrics.annotation.Timed;
 import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.transformuk.hee.tis.security.model.UserProfile;
-import com.transformuk.hee.tis.tcs.api.dto.ProgrammeMembershipDTO;
-import com.transformuk.hee.tis.tcs.service.service.ProgrammeService;
 import com.transformuk.hee.tis.tcs.api.dto.ProgrammeDTO;
 import com.transformuk.hee.tis.tcs.api.enumeration.Status;
 import com.transformuk.hee.tis.tcs.service.api.util.HeaderUtil;
@@ -13,8 +11,8 @@ import com.transformuk.hee.tis.tcs.service.api.util.PaginationUtil;
 import com.transformuk.hee.tis.tcs.service.model.ColumnFilter;
 import com.transformuk.hee.tis.tcs.service.service.ProgrammeService;
 import io.github.jhipster.web.util.ResponseUtil;
-import io.swagger.annotations.ApiOperation;
 import io.jsonwebtoken.lang.Collections;
+import io.swagger.annotations.ApiOperation;
 import io.swagger.annotations.ApiParam;
 import io.swagger.annotations.ApiResponse;
 import io.swagger.annotations.ApiResponses;
@@ -22,9 +20,9 @@ import org.apache.commons.codec.DecoderException;
 import org.apache.commons.codec.net.URLCodec;
 import org.apache.commons.lang3.EnumUtils;
 import org.apache.commons.lang3.StringUtils;
-import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.http.HttpHeaders;
@@ -38,13 +36,12 @@ import java.io.IOException;
 import java.net.URI;
 import java.net.URISyntaxException;
 import java.util.*;
-import java.util.Optional;
 import java.util.stream.Collectors;
 
 import static com.transformuk.hee.tis.security.util.TisSecurityHelper.getProfileFromContext;
+import static com.transformuk.hee.tis.tcs.service.api.util.StringUtil.sanitize;
 import static java.util.Collections.EMPTY_LIST;
 import static java.util.stream.Collectors.toList;
-import static com.transformuk.hee.tis.tcs.service.api.util.StringUtil.sanitize;
 
 /**
  * REST controller for managing Programme.
@@ -75,13 +72,18 @@ public class ProgrammeResource {
 	@PreAuthorize("hasAuthority('programme:add:modify')")
 	public ResponseEntity<ProgrammeDTO> createProgramme(@RequestBody ProgrammeDTO programmeDTO) throws URISyntaxException {
 		log.debug("REST request to save Programme : {}", programmeDTO);
-		if (programmeDTO.getId() != null) {
-			return ResponseEntity.badRequest().headers(HeaderUtil.createFailureAlert(ENTITY_NAME, "idexists", "A new programme cannot already have an ID")).body(null);
+		try {
+			if (programmeDTO.getId() != null) {
+				return ResponseEntity.badRequest().headers(HeaderUtil.createFailureAlert(ENTITY_NAME, "idexists", "A new programme cannot already have an ID")).body(null);
+			}
+			ProgrammeDTO result = programmeService.save(programmeDTO);
+			return ResponseEntity.created(new URI("/api/programmes/" + result.getId()))
+					.headers(HeaderUtil.createEntityCreationAlert(ENTITY_NAME, result.getId().toString()))
+					.body(result);
+		} catch (DataIntegrityViolationException e) {
+			log.error(e.getMessage(), e);
+			throw new IllegalArgumentException("Cannot create programme with the given curricula");
 		}
-		ProgrammeDTO result = programmeService.save(programmeDTO);
-		return ResponseEntity.created(new URI("/api/programmes/" + result.getId()))
-				.headers(HeaderUtil.createEntityCreationAlert(ENTITY_NAME, result.getId().toString()))
-				.body(result);
 	}
 
 	/**
@@ -98,13 +100,18 @@ public class ProgrammeResource {
 	@PreAuthorize("hasAuthority('programme:add:modify')")
 	public ResponseEntity<ProgrammeDTO> updateProgramme(@RequestBody ProgrammeDTO programmeDTO) throws URISyntaxException {
 		log.debug("REST request to update Programme : {}", programmeDTO);
-		if (programmeDTO.getId() == null) {
-			return createProgramme(programmeDTO);
+		try {
+			if (programmeDTO.getId() == null) {
+				return createProgramme(programmeDTO);
+			}
+			ProgrammeDTO result = programmeService.save(programmeDTO);
+			return ResponseEntity.ok()
+					.headers(HeaderUtil.createEntityUpdateAlert(ENTITY_NAME, programmeDTO.getId().toString()))
+					.body(result);
+		} catch (DataIntegrityViolationException e) {
+			log.error(e.getMessage(), e);
+			throw new IllegalArgumentException("Cannot update programme with the given curricula");
 		}
-		ProgrammeDTO result = programmeService.save(programmeDTO);
-		return ResponseEntity.ok()
-				.headers(HeaderUtil.createEntityUpdateAlert(ENTITY_NAME, programmeDTO.getId().toString()))
-				.body(result);
 	}
 
 
@@ -187,20 +194,25 @@ public class ProgrammeResource {
 	@PreAuthorize("hasAuthority('tcs:add:modify:entities')")
 	public ResponseEntity<List<ProgrammeDTO>> bulkCreateProgrammes(@Valid @RequestBody List<ProgrammeDTO> programmeDTOS) throws URISyntaxException {
 		log.debug("REST request to bulk save Programmes : {}", programmeDTOS);
-		if (!Collections.isEmpty(programmeDTOS)) {
-			List<Long> entityIds = programmeDTOS.stream()
-					.filter(p -> p.getId() != null)
-					.map(p -> p.getId())
-					.collect(Collectors.toList());
-			if (!Collections.isEmpty(entityIds)) {
-				return ResponseEntity.badRequest().headers(HeaderUtil.createFailureAlert(StringUtils.join(entityIds, ","), "ids.exist", "A new Programme cannot already have an ID")).body(null);
+		try {
+			if (!Collections.isEmpty(programmeDTOS)) {
+				List<Long> entityIds = programmeDTOS.stream()
+						.filter(p -> p.getId() != null)
+						.map(p -> p.getId())
+						.collect(Collectors.toList());
+				if (!Collections.isEmpty(entityIds)) {
+					return ResponseEntity.badRequest().headers(HeaderUtil.createFailureAlert(StringUtils.join(entityIds, ","), "ids.exist", "A new Programme cannot already have an ID")).body(null);
+				}
 			}
+			List<ProgrammeDTO> result = programmeService.save(programmeDTOS);
+			List<Long> ids = result.stream().map(r -> r.getId()).collect(Collectors.toList());
+			return ResponseEntity.ok()
+					.headers(HeaderUtil.createEntityCreationAlert(ENTITY_NAME, StringUtils.join(ids, ",")))
+					.body(result);
+		} catch (DataIntegrityViolationException e) {
+			log.error(e.getMessage(), e);
+			throw new IllegalArgumentException("Cannot create programmes with the given curricula");
 		}
-		List<ProgrammeDTO> result = programmeService.save(programmeDTOS);
-		List<Long> ids = result.stream().map(r -> r.getId()).collect(Collectors.toList());
-		return ResponseEntity.ok()
-				.headers(HeaderUtil.createEntityCreationAlert(ENTITY_NAME, StringUtils.join(ids, ",")))
-				.body(result);
 	}
 
 	/**
@@ -217,22 +229,27 @@ public class ProgrammeResource {
 	@PreAuthorize("hasAuthority('tcs:add:modify:entities')")
 	public ResponseEntity<List<ProgrammeDTO>> bulkUpdateProgrammes(@Valid @RequestBody List<ProgrammeDTO> programmeDTOS) throws URISyntaxException {
 		log.debug("REST request to bulk update Programme : {}", programmeDTOS);
-		if (Collections.isEmpty(programmeDTOS)) {
-			return ResponseEntity.badRequest().headers(HeaderUtil.createFailureAlert(ENTITY_NAME, "request.body.empty",
-					"The request body for this end point cannot be empty")).body(null);
-		} else if (!Collections.isEmpty(programmeDTOS)) {
-			List<ProgrammeDTO> entitiesWithNoId = programmeDTOS.stream().filter(p -> p.getId() == null).collect(Collectors.toList());
-			if (!Collections.isEmpty(entitiesWithNoId)) {
-				return ResponseEntity.badRequest().headers(HeaderUtil.createFailureAlert(StringUtils.join(entitiesWithNoId, ","),
-						"bulk.update.failed.noId", "Some DTOs you've provided have no Id, cannot update entities that dont exist")).body(entitiesWithNoId);
+		try {
+			if (Collections.isEmpty(programmeDTOS)) {
+				return ResponseEntity.badRequest().headers(HeaderUtil.createFailureAlert(ENTITY_NAME, "request.body.empty",
+						"The request body for this end point cannot be empty")).body(null);
+			} else if (!Collections.isEmpty(programmeDTOS)) {
+				List<ProgrammeDTO> entitiesWithNoId = programmeDTOS.stream().filter(p -> p.getId() == null).collect(Collectors.toList());
+				if (!Collections.isEmpty(entitiesWithNoId)) {
+					return ResponseEntity.badRequest().headers(HeaderUtil.createFailureAlert(StringUtils.join(entitiesWithNoId, ","),
+							"bulk.update.failed.noId", "Some DTOs you've provided have no Id, cannot update entities that dont exist")).body(entitiesWithNoId);
+				}
 			}
-		}
 
-		List<ProgrammeDTO> results = programmeService.save(programmeDTOS);
-		List<Long> ids = results.stream().map(r -> r.getId()).collect(Collectors.toList());
-		return ResponseEntity.ok()
-				.headers(HeaderUtil.createEntityUpdateAlert(ENTITY_NAME, StringUtils.join(ids, ",")))
-				.body(results);
+			List<ProgrammeDTO> results = programmeService.save(programmeDTOS);
+			List<Long> ids = results.stream().map(r -> r.getId()).collect(Collectors.toList());
+			return ResponseEntity.ok()
+					.headers(HeaderUtil.createEntityUpdateAlert(ENTITY_NAME, StringUtils.join(ids, ",")))
+					.body(results);
+		} catch (DataIntegrityViolationException e) {
+			log.error(e.getMessage(), e);
+			throw new IllegalArgumentException("Cannot update programmes with the given curricula");
+		}
 	}
 
 	private List<ColumnFilter> getColumnFilters(String columnFilterJson) throws IOException {

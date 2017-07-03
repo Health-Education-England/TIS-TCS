@@ -1,6 +1,5 @@
 package com.transformuk.hee.tis.tcs.service.model;
 
-import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.transformuk.hee.tis.tcs.api.enumeration.Status;
 
 import javax.persistence.*;
@@ -34,9 +33,34 @@ public class Programme implements Serializable {
 
 	private String leadProvider;
 
-	@OneToMany(mappedBy = "programme")
-	@JsonIgnore
-	private Set<ProgrammeMembership> programmeMemberships = new HashSet<>();
+	@ManyToMany
+	@JoinTable(name = "ProgrammeCurriculum",
+			joinColumns = @JoinColumn(name = "programmeId", referencedColumnName = "id"),
+			inverseJoinColumns = @JoinColumn(name = "curriculumId", referencedColumnName = "id"))
+	private Set<Curriculum> curricula = new HashSet<>();
+
+	public Set<Curriculum> getCurricula() {
+		return curricula;
+	}
+
+	public void setCurricula(Set<Curriculum> curricula) {
+		this.curricula = curricula;
+	}
+
+	public Programme curricula(Set<Curriculum> curricula) {
+		this.curricula = curricula;
+		return this;
+	}
+
+	public Programme addCurriculum(Curriculum curriculum) {
+		this.curricula.add(curriculum);
+		return this;
+	}
+
+	public Programme removeCurriculum(Curriculum curriculum) {
+		this.curricula.remove(curriculum);
+		return this;
+	}
 
 	public Long getId() {
 		return id;
@@ -121,31 +145,6 @@ public class Programme implements Serializable {
 
 	public Programme leadProvider(String leadProvider) {
 		this.leadProvider = leadProvider;
-		return this;
-	}
-
-	public Set<ProgrammeMembership> getProgrammeMemberships() {
-		return programmeMemberships;
-	}
-
-	public void setProgrammeMemberships(Set<ProgrammeMembership> programmeMemberships) {
-		this.programmeMemberships = programmeMemberships;
-	}
-
-	public Programme programmeMemberships(Set<ProgrammeMembership> programmeMemberships) {
-		this.programmeMemberships = programmeMemberships;
-		return this;
-	}
-
-	public Programme addProgrammeMembership(ProgrammeMembership programmeMembership) {
-		this.programmeMemberships.add(programmeMembership);
-		programmeMembership.setProgramme(this);
-		return this;
-	}
-
-	public Programme removeProgrammeMembership(ProgrammeMembership programmeMembership) {
-		this.programmeMemberships.remove(programmeMembership);
-		programmeMembership.setProgramme(null);
 		return this;
 	}
 

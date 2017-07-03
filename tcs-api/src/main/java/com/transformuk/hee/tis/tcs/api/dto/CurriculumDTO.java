@@ -5,9 +5,7 @@ import com.transformuk.hee.tis.tcs.api.enumeration.CurriculumSubType;
 
 import java.io.Serializable;
 import java.time.LocalDate;
-import java.util.HashSet;
 import java.util.Objects;
-import java.util.Set;
 
 /**
  * A DTO for the Curriculum entity.
