@@ -17,13 +17,11 @@ public class PostFunding implements Serializable {
 	@GeneratedValue(strategy = GenerationType.IDENTITY)
 	private Long id;
 
-    @OneToOne(cascade = CascadeType.DETACH, fetch = FetchType.EAGER)
-	@JoinColumn(unique = true, name = "fundingId")
-	private Funding funding;
+	@Column(name = "fundingId")
+	private String fundingId;
 
-    @OneToOne(cascade = CascadeType.DETACH, fetch = FetchType.EAGER)
-	@JoinColumn(unique = true, name = "fundingComponentsId")
-	private FundingComponents fundingComponents;
+	@Column(name = "fundingComponentsId")
+	private String fundingComponentsId;
 
 	public Long getId() {
 		return id;
@@ -33,30 +31,20 @@ public class PostFunding implements Serializable {
 		this.id = id;
 	}
 
-	public Funding getFunding() {
-		return funding;
+	public String getFundingId() {
+		return fundingId;
 	}
 
-	public PostFunding funding(Funding funding) {
-		this.funding = funding;
-		return this;
+	public void setFundingId(String fundingId) {
+		this.fundingId = fundingId;
 	}
 
-	public void setFunding(Funding funding) {
-		this.funding = funding;
+	public String getFundingComponentsId() {
+		return fundingComponentsId;
 	}
 
-	public FundingComponents getFundingComponents() {
-		return fundingComponents;
-	}
-
-	public PostFunding fundingComponents(FundingComponents fundingComponents) {
-		this.fundingComponents = fundingComponents;
-		return this;
-	}
-
-	public void setFundingComponents(FundingComponents fundingComponents) {
-		this.fundingComponents = fundingComponents;
+	public void setFundingComponentsId(String fundingComponentsId) {
+		this.fundingComponentsId = fundingComponentsId;
 	}
 
 	@Override

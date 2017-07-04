@@ -14,12 +14,10 @@ import java.util.List;
 @Mapper(componentModel = "spring")
 public interface CurriculumMapper {
 
-	@Mapping(source = "specialty.id", target = "specialtyId")
-	CurriculumDTO curriculumToCurriculumDTO(Curriculum curriculum);
+    CurriculumDTO curriculumToCurriculumDTO(Curriculum curriculum);
 
 	List<CurriculumDTO> curriculaToCurriculumDTOs(List<Curriculum> curricula);
 
-	@Mapping(source = "specialtyId", target = "specialty")
 	Curriculum curriculumDTOToCurriculum(CurriculumDTO curriculumDTO);
 
 	List<Curriculum> curriculumDTOsToCurricula(List<CurriculumDTO> curriculumDTOs);

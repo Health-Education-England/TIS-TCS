@@ -50,13 +50,11 @@ public class Post implements Serializable {
 	@Column(name = "leadProvider")
 	private String leadProvider;
 
-    @OneToOne(cascade = CascadeType.DETACH, fetch = FetchType.EAGER)
-    @JoinColumn(unique = true, name = "oldPostId")
-    private Post oldPost;
+	@Column(name = "oldPostId")
+	private String oldPostId;
 
-    @OneToOne(cascade = CascadeType.DETACH, fetch = FetchType.EAGER)
-    @JoinColumn(unique = true, name = "newPostId")
-    private Post newPost;
+	@Column(name = "newPostId")
+	private String newPostId;
 
 	public Long getId() {
 		return id;
@@ -70,17 +68,21 @@ public class Post implements Serializable {
 		return nationalPostNumber;
 	}
 
+	public void setNationalPostNumber(String nationalPostNumber) {
+		this.nationalPostNumber = nationalPostNumber;
+	}
+
 	public Post nationalPostNumber(String nationalPostNumber) {
 		this.nationalPostNumber = nationalPostNumber;
 		return this;
 	}
 
-	public void setNationalPostNumber(String nationalPostNumber) {
-		this.nationalPostNumber = nationalPostNumber;
-	}
-
 	public String getStatus() {
 		return status;
+	}
+
+	public void setStatus(String status) {
+		this.status = status;
 	}
 
 	public Post status(String status) {
@@ -88,12 +90,12 @@ public class Post implements Serializable {
 		return this;
 	}
 
-	public void setStatus(String status) {
-		this.status = status;
-	}
-
 	public String getPostOwner() {
 		return postOwner;
+	}
+
+	public void setPostOwner(String postOwner) {
+		this.postOwner = postOwner;
 	}
 
 	public Post postOwner(String postOwner) {
@@ -101,12 +103,12 @@ public class Post implements Serializable {
 		return this;
 	}
 
-	public void setPostOwner(String postOwner) {
-		this.postOwner = postOwner;
-	}
-
 	public String getMainSiteLocated() {
 		return mainSiteLocated;
+	}
+
+	public void setMainSiteLocated(String mainSiteLocated) {
+		this.mainSiteLocated = mainSiteLocated;
 	}
 
 	public Post mainSiteLocated(String mainSiteLocated) {
@@ -114,12 +116,12 @@ public class Post implements Serializable {
 		return this;
 	}
 
-	public void setMainSiteLocated(String mainSiteLocated) {
-		this.mainSiteLocated = mainSiteLocated;
-	}
-
 	public String getLeadSite() {
 		return leadSite;
+	}
+
+	public void setLeadSite(String leadSite) {
+		this.leadSite = leadSite;
 	}
 
 	public Post leadSite(String leadSite) {
@@ -127,12 +129,12 @@ public class Post implements Serializable {
 		return this;
 	}
 
-	public void setLeadSite(String leadSite) {
-		this.leadSite = leadSite;
-	}
-
 	public String getEmployingBody() {
 		return employingBody;
+	}
+
+	public void setEmployingBody(String employingBody) {
+		this.employingBody = employingBody;
 	}
 
 	public Post employingBody(String employingBody) {
@@ -140,12 +142,12 @@ public class Post implements Serializable {
 		return this;
 	}
 
-	public void setEmployingBody(String employingBody) {
-		this.employingBody = employingBody;
-	}
-
 	public String getTrainingBody() {
 		return trainingBody;
+	}
+
+	public void setTrainingBody(String trainingBody) {
+		this.trainingBody = trainingBody;
 	}
 
 	public Post trainingBody(String trainingBody) {
@@ -153,12 +155,12 @@ public class Post implements Serializable {
 		return this;
 	}
 
-	public void setTrainingBody(String trainingBody) {
-		this.trainingBody = trainingBody;
-	}
-
 	public String getApprovedGrade() {
 		return approvedGrade;
+	}
+
+	public void setApprovedGrade(String approvedGrade) {
+		this.approvedGrade = approvedGrade;
 	}
 
 	public Post approvedGrade(String approvedGrade) {
@@ -166,12 +168,12 @@ public class Post implements Serializable {
 		return this;
 	}
 
-	public void setApprovedGrade(String approvedGrade) {
-		this.approvedGrade = approvedGrade;
-	}
-
 	public String getPostSpecialty() {
 		return postSpecialty;
+	}
+
+	public void setPostSpecialty(String postSpecialty) {
+		this.postSpecialty = postSpecialty;
 	}
 
 	public Post postSpecialty(String postSpecialty) {
@@ -179,12 +181,12 @@ public class Post implements Serializable {
 		return this;
 	}
 
-	public void setPostSpecialty(String postSpecialty) {
-		this.postSpecialty = postSpecialty;
-	}
-
 	public Float getFullTimeEquivelent() {
 		return fullTimeEquivelent;
+	}
+
+	public void setFullTimeEquivelent(Float fullTimeEquivelent) {
+		this.fullTimeEquivelent = fullTimeEquivelent;
 	}
 
 	public Post fullTimeEquivelent(Float fullTimeEquivelent) {
@@ -192,12 +194,12 @@ public class Post implements Serializable {
 		return this;
 	}
 
-	public void setFullTimeEquivelent(Float fullTimeEquivelent) {
-		this.fullTimeEquivelent = fullTimeEquivelent;
-	}
-
 	public String getLeadProvider() {
 		return leadProvider;
+	}
+
+	public void setLeadProvider(String leadProvider) {
+		this.leadProvider = leadProvider;
 	}
 
 	public Post leadProvider(String leadProvider) {
@@ -205,34 +207,20 @@ public class Post implements Serializable {
 		return this;
 	}
 
-	public void setLeadProvider(String leadProvider) {
-		this.leadProvider = leadProvider;
+	public String getOldPostId() {
+		return oldPostId;
 	}
 
-	public Post getOldPost() {
-		return oldPost;
+	public void setOldPostId(String oldPostId) {
+		this.oldPostId = oldPostId;
 	}
 
-	public Post oldPost(Post post) {
-		this.oldPost = post;
-		return this;
+	public String getNewPostId() {
+		return newPostId;
 	}
 
-	public void setOldPost(Post post) {
-		this.oldPost = post;
-	}
-
-	public Post getNewPost() {
-		return newPost;
-	}
-
-	public Post newPost(Post post) {
-		this.newPost = post;
-		return this;
-	}
-
-	public void setNewPost(Post post) {
-		this.newPost = post;
+	public void setNewPostId(String newPostId) {
+		this.newPostId = newPostId;
 	}
 
 	@Override

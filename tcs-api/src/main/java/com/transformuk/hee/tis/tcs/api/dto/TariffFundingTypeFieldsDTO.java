@@ -20,11 +20,11 @@ public class TariffFundingTypeFieldsDTO implements Serializable {
 
 	private BigDecimal placementRate;
 
-	private Long levelOfPostId;
+	private String levelOfPostId;
 
-	private Long placementRateFundedById;
+	private String placementRateFundedById;
 
-	private Long placementRateProvidedToId;
+	private String placementRateProvidedToId;
 
 	public Long getId() {
 		return id;
@@ -66,27 +66,27 @@ public class TariffFundingTypeFieldsDTO implements Serializable {
 		this.placementRate = placementRate;
 	}
 
-	public Long getLevelOfPostId() {
+	public String getLevelOfPostId() {
 		return levelOfPostId;
 	}
 
-	public void setLevelOfPostId(Long tariffRateId) {
+	public void setLevelOfPostId(String tariffRateId) {
 		this.levelOfPostId = tariffRateId;
 	}
 
-	public Long getPlacementRateFundedById() {
+	public String getPlacementRateFundedById() {
 		return placementRateFundedById;
 	}
 
-	public void setPlacementRateFundedById(Long placementFunderId) {
+	public void setPlacementRateFundedById(String placementFunderId) {
 		this.placementRateFundedById = placementFunderId;
 	}
 
-	public Long getPlacementRateProvidedToId() {
+	public String getPlacementRateProvidedToId() {
 		return placementRateProvidedToId;
 	}
 
-	public void setPlacementRateProvidedToId(Long placementFunderId) {
+	public void setPlacementRateProvidedToId(String placementFunderId) {
 		this.placementRateProvidedToId = placementFunderId;
 	}
 

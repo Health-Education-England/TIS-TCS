@@ -23,12 +23,16 @@ public class Curriculum implements Serializable {
 	@GeneratedValue(strategy = GenerationType.IDENTITY)
 	private Long id;
 
+	@Column(name = "intrepidId")
 	private String intrepidId;
 
+	@Column(name = "name")
 	private String name;
 
+	@Column(name = "start")
 	private LocalDate start;
 
+	@Column(name = "end")
 	private LocalDate end;
 
 	@Enumerated(EnumType.STRING)
@@ -37,13 +41,14 @@ public class Curriculum implements Serializable {
 	@Enumerated(EnumType.STRING)
 	private AssessmentType assessmentType;
 
+	@Column(name = "doesThisCurriculumLeadToCct")
 	private Boolean doesThisCurriculumLeadToCct;
 
+	@Column(name = "periodOfGrace")
 	private Integer periodOfGrace;
 
-	@ManyToOne
-	@JoinColumn(name = "specialtyId")
-	private Specialty specialty;
+	@Column(name = "specialtyId")
+	private String specialtyId;
 
 	public Long getId() {
 		return id;
@@ -157,17 +162,12 @@ public class Curriculum implements Serializable {
 		return this;
 	}
 
-	public Specialty getSpecialty() {
-		return specialty;
+	public String getSpecialtyId() {
+		return specialtyId;
 	}
 
-	public void setSpecialty(Specialty specialty) {
-		this.specialty = specialty;
-	}
-
-	public Curriculum specialty(Specialty specialty) {
-		this.specialty = specialty;
-		return this;
+	public void setSpecialtyId(String specialtyId) {
+		this.specialtyId = specialtyId;
 	}
 
 	@Override
