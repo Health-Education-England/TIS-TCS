@@ -25,12 +25,6 @@ CREATE TABLE `TrainingNumber` (
   PRIMARY KEY (`id`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8;
 
-CREATE TABLE `Grade` (
-  `id` bigint(20) NOT NULL AUTO_INCREMENT,
-  `name` varchar(255) DEFAULT NULL,
-  PRIMARY KEY (`id`)
-) ENGINE=InnoDB DEFAULT CHARSET=utf8;
-
 CREATE TABLE `Programme` (
   `id` bigint(20) NOT NULL AUTO_INCREMENT,
   `status` varchar(255) DEFAULT NULL,
@@ -52,12 +46,6 @@ CREATE TABLE `Curriculum` (
   `periodOfGrace` int(11) DEFAULT NULL,
   `specialtyId` varchar(255) DEFAULT NULL,
   PRIMARY KEY (`id`)
-) ENGINE=InnoDB DEFAULT CHARSET=utf8;
-
-CREATE TABLE `CurriculumGrade` (
-  `gradesId` varchar(255) NOT NULL,
-  `curriculaId` varchar(255) NOT NULL,
-  PRIMARY KEY (`curriculaId`,`gradesId`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8;
 
 CREATE TABLE `ProgrammeMembership` (

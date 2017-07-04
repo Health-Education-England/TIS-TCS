@@ -2,10 +2,8 @@
 
 SET FOREIGN_KEY_CHECKS = 0;
 DROP TABLE Curriculum;
-DROP TABLE CurriculumGrade;
 DROP TABLE Funding;
 DROP TABLE FundingComponents;
-DROP TABLE Grade;
 DROP TABLE Placement;
 DROP TABLE PlacementFunder;
 DROP TABLE Post;
