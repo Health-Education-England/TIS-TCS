@@ -25,20 +25,17 @@ public class Specialty implements Serializable {
 	@Enumerated(EnumType.STRING)
 	private Status status;
 
+	@Column(name = "college")
 	private String college;
 
+	@Column(name = "nhsSpecialtyCode")
 	private String nhsSpecialtyCode;
 
 	@Enumerated(EnumType.STRING)
 	private SpecialtyType specialtyType;
 
-	@OneToMany(mappedBy = "specialty")
-	@JsonIgnore
-	private Set<Curriculum> curricula = new HashSet<>();
-
-	@ManyToOne
-	@JoinColumn(name = "specialtyGroupId")
-	private SpecialtyGroup specialtyGroup;
+	@Column(name = "specialtyGroupId")
+	private String specialtyGroupId;
 
 	public Long getId() {
 		return id;
@@ -100,43 +97,14 @@ public class Specialty implements Serializable {
 		return this;
 	}
 
-	public Set<Curriculum> getCurricula() {
-		return curricula;
+	public String getspecialtyGroupId() {
+		return specialtyGroupId;
 	}
 
-	public void setCurricula(Set<Curriculum> curricula) {
-		this.curricula = curricula;
+	public void setspecialtyGroupId(String specialtyGroupId) {
+		this.specialtyGroupId = specialtyGroupId;
 	}
 
-	public Specialty curricula(Set<Curriculum> curricula) {
-		this.curricula = curricula;
-		return this;
-	}
-
-	public Specialty addCurriculum(Curriculum curriculum) {
-		this.curricula.add(curriculum);
-		curriculum.setSpecialty(this);
-		return this;
-	}
-
-	public Specialty removeCurriculum(Curriculum curriculum) {
-		this.curricula.remove(curriculum);
-		curriculum.setSpecialty(null);
-		return this;
-	}
-
-	public SpecialtyGroup getSpecialtyGroup() {
-		return specialtyGroup;
-	}
-
-	public void setSpecialtyGroup(SpecialtyGroup specialtyGroup) {
-		this.specialtyGroup = specialtyGroup;
-	}
-
-	public Specialty specialtyGroup(SpecialtyGroup specialtyGroup) {
-		this.specialtyGroup = specialtyGroup;
-		return this;
-	}
 
 	@Override
 	public boolean equals(Object o) {

@@ -30,7 +30,7 @@ public class CurriculumDTO implements Serializable {
 
 	private Integer periodOfGrace;
 
-	private Long specialtyId;
+	private String specialtyId;
 
 	public Long getId() {
 		return id;
@@ -104,11 +104,11 @@ public class CurriculumDTO implements Serializable {
 		this.periodOfGrace = periodOfGrace;
 	}
 
-	public Long getSpecialtyId() {
+	public String getSpecialtyId() {
 		return specialtyId;
 	}
 
-	public void setSpecialtyId(Long specialtyId) {
+	public void setSpecialtyId(String specialtyId) {
 		this.specialtyId = specialtyId;
 	}
 

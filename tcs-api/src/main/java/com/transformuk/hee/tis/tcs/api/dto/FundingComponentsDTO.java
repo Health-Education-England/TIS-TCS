@@ -16,7 +16,7 @@ public class FundingComponentsDTO implements Serializable {
 
 	private BigDecimal amount;
 
-	private Long fundingOrganisationId;
+	private String fundingOrganisationId;
 
 	public Long getId() {
 		return id;
@@ -42,11 +42,11 @@ public class FundingComponentsDTO implements Serializable {
 		this.amount = amount;
 	}
 
-	public Long getFundingOrganisationId() {
+	public String getFundingOrganisationId() {
 		return fundingOrganisationId;
 	}
 
-	public void setFundingOrganisationId(Long placementFunderId) {
+	public void setFundingOrganisationId(String placementFunderId) {
 		this.fundingOrganisationId = placementFunderId;
 	}
 

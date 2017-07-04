@@ -27,6 +27,7 @@ public class TcsServiceImpl extends AbstractClientService {
 		classToParamTypeRefMap.put(PlacementDTO.class, new ParameterizedTypeReference<List<PlacementDTO>>() {});
 		classToParamTypeRefMap.put(PlacementFunderDTO.class, new ParameterizedTypeReference<List<PlacementFunderDTO>>() {});
 		classToParamTypeRefMap.put(PostDTO.class, new ParameterizedTypeReference<List<PostDTO>>() {});
+		classToParamTypeRefMap.put(PostFundingDTO.class, new ParameterizedTypeReference<List<PostFundingDTO>>() {});
 		classToParamTypeRefMap.put(PlacementFunderDTO.class, new ParameterizedTypeReference<List<PlacementFunderDTO>>() {});
 		classToParamTypeRefMap.put(ProgrammeDTO.class, new ParameterizedTypeReference<List<ProgrammeDTO>>() {});
 		classToParamTypeRefMap.put(ProgrammeMembershipDTO.class, new ParameterizedTypeReference<List<ProgrammeMembershipDTO>>() {});

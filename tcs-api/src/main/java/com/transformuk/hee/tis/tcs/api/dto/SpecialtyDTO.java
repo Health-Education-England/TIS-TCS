@@ -21,7 +21,7 @@ public class SpecialtyDTO implements Serializable {
 
 	private SpecialtyType specialtyType;
 
-	private Long specialtyGroupId;
+	private String specialtyGroupId;
 
 	public Long getId() {
 		return id;
@@ -63,11 +63,11 @@ public class SpecialtyDTO implements Serializable {
 		this.specialtyType = specialtyType;
 	}
 
-	public Long getSpecialtyGroupId() {
+	public String getSpecialtyGroupId() {
 		return specialtyGroupId;
 	}
 
-	public void setSpecialtyGroupId(Long specialtyGroupId) {
+	public void setSpecialtyGroupId(String specialtyGroupId) {
 		this.specialtyGroupId = specialtyGroupId;
 	}
 

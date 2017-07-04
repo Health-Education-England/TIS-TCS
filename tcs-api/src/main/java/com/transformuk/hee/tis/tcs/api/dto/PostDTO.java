@@ -33,9 +33,9 @@ public class PostDTO implements Serializable {
 
 	private String leadProvider;
 
-	private Long oldPostId;
+	private String oldPostId;
 
-	private Long newPostId;
+	private String newPostId;
 
 	public Long getId() {
 		return id;
@@ -133,19 +133,19 @@ public class PostDTO implements Serializable {
 		this.leadProvider = leadProvider;
 	}
 
-	public Long getOldPostId() {
+	public String getOldPostId() {
 		return oldPostId;
 	}
 
-	public void setOldPostId(Long postId) {
+	public void setOldPostId(String postId) {
 		this.oldPostId = postId;
 	}
 
-	public Long getNewPostId() {
+	public String getNewPostId() {
 		return newPostId;
 	}
 
-	public void setNewPostId(Long postId) {
+	public void setNewPostId(String postId) {
 		this.newPostId = postId;
 	}
 

@@ -34,10 +34,6 @@ public class TrainingNumber implements Serializable {
 
 	private String suffix;
 
-	@OneToMany(mappedBy = "trainingNumber")
-	@JsonIgnore
-	private Set<ProgrammeMembership> programmeMemberships = new HashSet<>();
-
 	public Long getId() {
 		return id;
 	}
@@ -121,31 +117,6 @@ public class TrainingNumber implements Serializable {
 
 	public TrainingNumber suffix(String suffix) {
 		this.suffix = suffix;
-		return this;
-	}
-
-	public Set<ProgrammeMembership> getProgrammeMemberships() {
-		return programmeMemberships;
-	}
-
-	public void setProgrammeMemberships(Set<ProgrammeMembership> programmeMemberships) {
-		this.programmeMemberships = programmeMemberships;
-	}
-
-	public TrainingNumber programmeMemberships(Set<ProgrammeMembership> programmeMemberships) {
-		this.programmeMemberships = programmeMemberships;
-		return this;
-	}
-
-	public TrainingNumber addProgrammeMembership(ProgrammeMembership programmeMembership) {
-		this.programmeMemberships.add(programmeMembership);
-		programmeMembership.setTrainingNumber(this);
-		return this;
-	}
-
-	public TrainingNumber removeProgrammeMembership(ProgrammeMembership programmeMembership) {
-		this.programmeMemberships.remove(programmeMembership);
-		programmeMembership.setTrainingNumber(null);
 		return this;
 	}
 

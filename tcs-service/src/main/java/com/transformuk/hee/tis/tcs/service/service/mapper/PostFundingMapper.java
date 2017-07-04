@@ -13,14 +13,10 @@ import java.util.List;
 @Mapper(componentModel = "spring", uses = {FundingMapper.class, FundingComponentsMapper.class,})
 public interface PostFundingMapper {
 
-	@Mapping(source = "funding.id", target = "fundingId")
-	@Mapping(source = "fundingComponents.id", target = "fundingComponentsId")
     PostFundingDTO postFundingToPostFundingDTO(PostFunding postFunding);
 
 	List<PostFundingDTO> postFundingsToPostFundingDTOs(List<PostFunding> postFundings);
 
-	@Mapping(source = "fundingId", target = "funding")
-	@Mapping(source = "fundingComponentsId", target = "fundingComponents")
 	PostFunding postFundingDTOToPostFunding(PostFundingDTO postFundingDTO);
 
 	List<PostFunding> postFundingDTOsToPostFundings(List<PostFundingDTO> postFundingDTOs);

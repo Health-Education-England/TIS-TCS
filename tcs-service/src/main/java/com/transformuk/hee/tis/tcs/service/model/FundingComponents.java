@@ -24,9 +24,8 @@ public class FundingComponents implements Serializable {
 	@Column(name = "amount", precision = 10, scale = 2)
 	private BigDecimal amount;
 
-	@OneToOne
-	@JoinColumn(name = "fundingOrganisationId", referencedColumnName = "id")
-	private PlacementFunder fundingOrganisation;
+	@Column(name = "fundingOrganisationId")
+	private String fundingOrganisationId;
 
 	public Long getId() {
 		return id;
@@ -62,17 +61,12 @@ public class FundingComponents implements Serializable {
 		this.amount = amount;
 	}
 
-	public PlacementFunder getFundingOrganisation() {
-		return fundingOrganisation;
+	public String getFundingOrganisationId() {
+		return fundingOrganisationId;
 	}
 
-	public FundingComponents fundingOrganisation(PlacementFunder placementFunder) {
-		this.fundingOrganisation = placementFunder;
-		return this;
-	}
-
-	public void setFundingOrganisation(PlacementFunder placementFunder) {
-		this.fundingOrganisation = placementFunder;
+	public void setFundingOrganisationId(String fundingOrganisationId) {
+		this.fundingOrganisationId = fundingOrganisationId;
 	}
 
 	@Override

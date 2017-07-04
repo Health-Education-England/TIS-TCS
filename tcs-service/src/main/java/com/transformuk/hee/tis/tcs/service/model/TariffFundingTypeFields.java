@@ -31,17 +31,14 @@ public class TariffFundingTypeFields implements Serializable {
 	@Column(name = "placementRate", precision = 10, scale = 2)
 	private BigDecimal placementRate;
 
-    @OneToOne(cascade = CascadeType.DETACH, fetch = FetchType.EAGER)
-	@JoinColumn(unique = true, name = "levelOfPostId")
-	private TariffRate levelOfPost;
+	@Column(name = "levelOfPostId")
+	private String levelOfPostId;
 
-    @OneToOne(cascade = CascadeType.DETACH, fetch = FetchType.EAGER)
-	@JoinColumn(unique = true, name = "placementRateFundedById")
-	private PlacementFunder placementRateFundedBy;
+	@Column(name = "placementRateFundedById")
+	private String placementRateFundedById;
 
-    @OneToOne(cascade = CascadeType.DETACH, fetch = FetchType.EAGER)
-	@JoinColumn(unique = true, name = "placementRateProvidedToId")
-	private PlacementFunder placementRateProvidedTo;
+	@Column(name = "placementRateProvidedToId")
+	private String placementRateProvidedToId;
 
 	public Long getId() {
 		return id;
@@ -103,43 +100,28 @@ public class TariffFundingTypeFields implements Serializable {
 		this.placementRate = placementRate;
 	}
 
-	public TariffRate getLevelOfPost() {
-		return levelOfPost;
+	public String getLevelOfPostId() {
+		return levelOfPostId;
 	}
 
-	public TariffFundingTypeFields levelOfPost(TariffRate tariffRate) {
-		this.levelOfPost = tariffRate;
-		return this;
+	public void setLevelOfPostId(String levelOfPostId) {
+		this.levelOfPostId = levelOfPostId;
 	}
 
-	public void setLevelOfPost(TariffRate tariffRate) {
-		this.levelOfPost = tariffRate;
+	public String getPlacementRateFundedById() {
+		return placementRateFundedById;
 	}
 
-	public PlacementFunder getPlacementRateFundedBy() {
-		return placementRateFundedBy;
+	public void setPlacementRateFundedById(String placementRateFundedById) {
+		this.placementRateFundedById = placementRateFundedById;
 	}
 
-	public TariffFundingTypeFields placementRateFundedBy(PlacementFunder placementFunder) {
-		this.placementRateFundedBy = placementFunder;
-		return this;
+	public String getPlacementRateProvidedToId() {
+		return placementRateProvidedToId;
 	}
 
-	public void setPlacementRateFundedBy(PlacementFunder placementFunder) {
-		this.placementRateFundedBy = placementFunder;
-	}
-
-	public PlacementFunder getPlacementRateProvidedTo() {
-		return placementRateProvidedTo;
-	}
-
-	public TariffFundingTypeFields placementRateProvidedTo(PlacementFunder placementFunder) {
-		this.placementRateProvidedTo = placementFunder;
-		return this;
-	}
-
-	public void setPlacementRateProvidedTo(PlacementFunder placementFunder) {
-		this.placementRateProvidedTo = placementFunder;
+	public void setPlacementRateProvidedToId(String placementRateProvidedToId) {
+		this.placementRateProvidedToId = placementRateProvidedToId;
 	}
 
 	@Override

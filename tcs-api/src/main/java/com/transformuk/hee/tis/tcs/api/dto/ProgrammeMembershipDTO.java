@@ -31,11 +31,11 @@ public class ProgrammeMembershipDTO implements Serializable {
 
 	private String leavingDestination;
 
-	private Long programmeId;
+	private String programmeId;
 
-	private Long curriculumId;
+	private String curriculumId;
 
-	private Long trainingNumberId;
+	private String trainingNumberId;
 
 	public Long getId() {
 		return id;
@@ -117,27 +117,27 @@ public class ProgrammeMembershipDTO implements Serializable {
 		this.leavingDestination = leavingDestination;
 	}
 
-	public Long getProgrammeId() {
+	public String getProgrammeId() {
 		return programmeId;
 	}
 
-	public void setProgrammeId(Long programmeId) {
+	public void setProgrammeId(String programmeId) {
 		this.programmeId = programmeId;
 	}
 
-	public Long getCurriculumId() {
+	public String getCurriculumId() {
 		return curriculumId;
 	}
 
-	public void setCurriculumId(Long curriculumId) {
+	public void setCurriculumId(String curriculumId) {
 		this.curriculumId = curriculumId;
 	}
 
-	public Long getTrainingNumberId() {
+	public String getTrainingNumberId() {
 		return trainingNumberId;
 	}
 
-	public void setTrainingNumberId(Long trainingNumberId) {
+	public void setTrainingNumberId(String trainingNumberId) {
 		this.trainingNumberId = trainingNumberId;
 	}
 

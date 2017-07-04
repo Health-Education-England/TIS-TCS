@@ -13,16 +13,10 @@ import java.util.List;
 @Mapper(componentModel = "spring", uses = {TariffRateMapper.class, PlacementFunderMapper.class,})
 public interface TariffFundingTypeFieldsMapper {
 
-	@Mapping(source = "levelOfPost.id", target = "levelOfPostId")
-	@Mapping(source = "placementRateFundedBy.id", target = "placementRateFundedById")
-	@Mapping(source = "placementRateProvidedTo.id", target = "placementRateProvidedToId")
     TariffFundingTypeFieldsDTO tariffFundingTypeFieldsToTariffFundingTypeFieldsDTO(TariffFundingTypeFields tariffFundingTypeFields);
 
 	List<TariffFundingTypeFieldsDTO> tariffFundingTypeFieldsToTariffFundingTypeFieldsDTOs(List<TariffFundingTypeFields> tariffFundingTypeFields);
 
-	@Mapping(source = "levelOfPostId", target = "levelOfPost")
-	@Mapping(source = "placementRateFundedById", target = "placementRateFundedBy")
-	@Mapping(source = "placementRateProvidedToId", target = "placementRateProvidedTo")
 	TariffFundingTypeFields tariffFundingTypeFieldsDTOToTariffFundingTypeFields(TariffFundingTypeFieldsDTO tariffFundingTypeFieldsDTO);
 
 	List<TariffFundingTypeFields> tariffFundingTypeFieldsDTOsToTariffFundingTypeFields(List<TariffFundingTypeFieldsDTO> tariffFundingTypeFieldsDTOs);

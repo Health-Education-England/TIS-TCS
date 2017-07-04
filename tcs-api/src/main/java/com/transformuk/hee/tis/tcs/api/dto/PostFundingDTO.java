@@ -11,9 +11,9 @@ public class PostFundingDTO implements Serializable {
 
 	private Long id;
 
-	private Long fundingId;
+	private String fundingId;
 
-	private Long fundingComponentsId;
+	private String fundingComponentsId;
 
 	public Long getId() {
 		return id;
@@ -23,19 +23,19 @@ public class PostFundingDTO implements Serializable {
 		this.id = id;
 	}
 
-	public Long getFundingId() {
+	public String getFundingId() {
 		return fundingId;
 	}
 
-	public void setFundingId(Long fundingId) {
+	public void setFundingId(String fundingId) {
 		this.fundingId = fundingId;
 	}
 
-	public Long getFundingComponentsId() {
+	public String getFundingComponentsId() {
 		return fundingComponentsId;
 	}
 
-	public void setFundingComponentsId(Long fundingComponentsId) {
+	public void setFundingComponentsId(String fundingComponentsId) {
 		this.fundingComponentsId = fundingComponentsId;
 	}
 
