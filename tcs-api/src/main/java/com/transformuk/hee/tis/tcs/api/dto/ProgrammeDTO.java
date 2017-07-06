@@ -1,7 +1,13 @@
 package com.transformuk.hee.tis.tcs.api.dto;
 
+import com.transformuk.hee.tis.tcs.api.dto.validation.Create;
+import com.transformuk.hee.tis.tcs.api.dto.validation.Update;
 import com.transformuk.hee.tis.tcs.api.enumeration.Status;
 
+import javax.validation.constraints.DecimalMin;
+import javax.validation.constraints.NotNull;
+import javax.validation.constraints.Null;
+import javax.validation.constraints.Pattern;
 import java.io.Serializable;
 import java.util.Objects;
 import java.util.Set;
@@ -11,16 +17,30 @@ import java.util.Set;
  */
 public class ProgrammeDTO implements Serializable {
 
+	@NotNull(groups = Update.class, message = "Id must not be null when updating a programme")
+	@DecimalMin(value = "0", groups = Update.class, message = "Id must not be negative")
+	@Null(groups = Create.class, message = "Id must be null when creating a new programme")
 	private Long id;
 
 	private String intrepidId;
 
+	@NotNull(message = "Status is required", groups = {Update.class, Create.class})
+	//mandatory and must be a valid ENUM value
 	private Status status;
 
+	@NotNull(message = "Managing deanery is required", groups = {Update.class, Create.class})
+	//mandatory, must be a valid local team and the user must have permission to create a
+	//programme within that local team
 	private String managingDeanery;
 
+	@NotNull(message = "Programme name is required", groups = {Update.class, Create.class})
 	private String programmeName;
 
+	@NotNull(message = "Programme number is required", groups = {Update.class, Create.class})
+	@Pattern(regexp = "^[a-zA-Z0-9\\s/]*$",
+			message = "Programme number can only contain letters, numbers, whitespace or / characters",
+			groups = {Update.class, Create.class})
+	//mandatory, unique, only certain letters
 	private String programmeNumber;
 
 	private String leadProvider;

@@ -5,9 +5,12 @@ import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.transformuk.hee.tis.security.model.UserProfile;
 import com.transformuk.hee.tis.tcs.api.dto.ProgrammeDTO;
+import com.transformuk.hee.tis.tcs.api.dto.validation.Create;
+import com.transformuk.hee.tis.tcs.api.dto.validation.Update;
 import com.transformuk.hee.tis.tcs.api.enumeration.Status;
 import com.transformuk.hee.tis.tcs.service.api.util.HeaderUtil;
 import com.transformuk.hee.tis.tcs.service.api.util.PaginationUtil;
+import com.transformuk.hee.tis.tcs.service.api.validation.ProgrammeValidator;
 import com.transformuk.hee.tis.tcs.service.model.ColumnFilter;
 import com.transformuk.hee.tis.tcs.service.service.ProgrammeService;
 import io.github.jhipster.web.util.ResponseUtil;
@@ -29,6 +32,8 @@ import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
+import org.springframework.validation.annotation.Validated;
+import org.springframework.web.bind.MethodArgumentNotValidException;
 import org.springframework.web.bind.annotation.*;
 
 import javax.validation.Valid;
@@ -48,16 +53,19 @@ import static java.util.stream.Collectors.toList;
  */
 @RestController
 @RequestMapping("/api")
+@Validated
 public class ProgrammeResource {
 
 	private static final String ENTITY_NAME = "programme";
 	private final Logger log = LoggerFactory.getLogger(ProgrammeResource.class);
 	private final ProgrammeService programmeService;
+	private final ProgrammeValidator programmeValidator;
 
 	private ObjectMapper mapper = new ObjectMapper();
 
-	public ProgrammeResource(ProgrammeService programmeService) {
+	public ProgrammeResource(ProgrammeService programmeService, ProgrammeValidator programmeValidator) {
 		this.programmeService = programmeService;
+		this.programmeValidator = programmeValidator;
 	}
 
 	/**
@@ -70,8 +78,10 @@ public class ProgrammeResource {
 	@PostMapping("/programmes")
 	@Timed
 	@PreAuthorize("hasAuthority('programme:add:modify')")
-	public ResponseEntity<ProgrammeDTO> createProgramme(@RequestBody ProgrammeDTO programmeDTO) throws URISyntaxException {
+	public ResponseEntity<ProgrammeDTO> createProgramme(@RequestBody @Validated(Create.class) ProgrammeDTO programmeDTO)
+			throws URISyntaxException, MethodArgumentNotValidException {
 		log.debug("REST request to save Programme : {}", programmeDTO);
+		programmeValidator.validate(programmeDTO, getProfileFromContext());
 		try {
 			if (programmeDTO.getId() != null) {
 				return ResponseEntity.badRequest().headers(HeaderUtil.createFailureAlert(ENTITY_NAME, "idexists", "A new programme cannot already have an ID")).body(null);
@@ -98,8 +108,10 @@ public class ProgrammeResource {
 	@PutMapping("/programmes")
 	@Timed
 	@PreAuthorize("hasAuthority('programme:add:modify')")
-	public ResponseEntity<ProgrammeDTO> updateProgramme(@RequestBody ProgrammeDTO programmeDTO) throws URISyntaxException {
+	public ResponseEntity<ProgrammeDTO> updateProgramme(@RequestBody @Validated(Update.class) ProgrammeDTO programmeDTO)
+			throws URISyntaxException, MethodArgumentNotValidException {
 		log.debug("REST request to update Programme : {}", programmeDTO);
+		programmeValidator.validate(programmeDTO, getProfileFromContext());
 		try {
 			if (programmeDTO.getId() == null) {
 				return createProgramme(programmeDTO);
@@ -191,8 +203,9 @@ public class ProgrammeResource {
 	 */
 	@PostMapping("/bulk-programmes")
 	@Timed
-	@PreAuthorize("hasAuthority('tcs:add:modify:entities')")
-	public ResponseEntity<List<ProgrammeDTO>> bulkCreateProgrammes(@Valid @RequestBody List<ProgrammeDTO> programmeDTOS) throws URISyntaxException {
+	@PreAuthorize("hasAuthority('programme:bulk:add:modify')")
+	public ResponseEntity<List<ProgrammeDTO>> bulkCreateProgrammes(@RequestBody List<ProgrammeDTO> programmeDTOS)
+			throws URISyntaxException, MethodArgumentNotValidException {
 		log.debug("REST request to bulk save Programmes : {}", programmeDTOS);
 		try {
 			if (!Collections.isEmpty(programmeDTOS)) {
@@ -226,7 +239,7 @@ public class ProgrammeResource {
 	 */
 	@PutMapping("/bulk-programmes")
 	@Timed
-	@PreAuthorize("hasAuthority('tcs:add:modify:entities')")
+	@PreAuthorize("hasAuthority('programme:bulk:add:modify')")
 	public ResponseEntity<List<ProgrammeDTO>> bulkUpdateProgrammes(@Valid @RequestBody List<ProgrammeDTO> programmeDTOS) throws URISyntaxException {
 		log.debug("REST request to bulk update Programme : {}", programmeDTOS);
 		try {

@@ -6,6 +6,7 @@ import com.transformuk.hee.tis.tcs.TestUtils;
 import com.transformuk.hee.tis.tcs.api.dto.ProgrammeDTO;
 import com.transformuk.hee.tis.tcs.api.enumeration.Status;
 import com.transformuk.hee.tis.tcs.service.Application;
+import com.transformuk.hee.tis.tcs.service.api.validation.ProgrammeValidator;
 import com.transformuk.hee.tis.tcs.service.exception.ExceptionTranslator;
 import com.transformuk.hee.tis.tcs.service.model.Curriculum;
 import com.transformuk.hee.tis.tcs.service.model.Programme;
@@ -14,6 +15,7 @@ import com.transformuk.hee.tis.tcs.service.repository.ProgrammeRepository;
 import com.transformuk.hee.tis.tcs.service.service.ProgrammeService;
 import com.transformuk.hee.tis.tcs.service.service.mapper.ProgrammeMapper;
 import org.apache.commons.codec.net.URLCodec;
+import org.hamcrest.core.StringContains;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -32,7 +34,7 @@ import java.util.List;
 import java.util.stream.Collectors;
 
 import static org.assertj.core.api.Assertions.assertThat;
-import static org.hamcrest.Matchers.hasItem;
+import static org.hamcrest.Matchers.*;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.*;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.*;
 
@@ -73,6 +75,8 @@ public class ProgrammeResourceIntTest {
 
 	@Autowired
 	private ProgrammeService programmeService;
+	@Autowired
+	private ProgrammeValidator programmeValidator;
 
 	@Autowired
 	private MappingJackson2HttpMessageConverter jacksonMessageConverter;
@@ -108,7 +112,7 @@ public class ProgrammeResourceIntTest {
 	@Before
 	public void setup() {
 		MockitoAnnotations.initMocks(this);
-		ProgrammeResource programmeResource = new ProgrammeResource(programmeService);
+		ProgrammeResource programmeResource = new ProgrammeResource(programmeService, programmeValidator);
 		this.restProgrammeMockMvc = MockMvcBuilders.standaloneSetup(programmeResource)
 				.setCustomArgumentResolvers(pageableArgumentResolver)
 				.setControllerAdvice(exceptionTranslator)
@@ -144,6 +148,109 @@ public class ProgrammeResourceIntTest {
 		assertThat(testProgramme.getProgrammeName()).isEqualTo(DEFAULT_PROGRAMME_NAME);
 		assertThat(testProgramme.getProgrammeNumber()).isEqualTo(DEFAULT_PROGRAMME_NUMBER);
 		assertThat(testProgramme.getLeadProvider()).isEqualTo(DEFAULT_LEAD_PROVIDER);
+	}
+
+	@Test
+	@Transactional
+	public void shouldValidateMandatoryFieldsWhenCreating() throws Exception {
+		//given
+		ProgrammeDTO programmeDTO = new ProgrammeDTO();
+
+		//when & then
+		restProgrammeMockMvc.perform(post("/api/programmes")
+				.contentType(TestUtil.APPLICATION_JSON_UTF8)
+				.content(TestUtil.convertObjectToJsonBytes(programmeDTO)))
+				.andExpect(status().isBadRequest())
+				.andExpect(jsonPath("$.message").value("error.validation"))
+				.andExpect(jsonPath("$.fieldErrors[*].field").
+						value(containsInAnyOrder("managingDeanery","programmeName","status","programmeNumber")));
+	}
+
+	@Test
+	@Transactional
+	public void shouldValidateMandatoryFieldsWhenUpdating() throws Exception {
+		//given
+		ProgrammeDTO programmeDTO = new ProgrammeDTO();
+		programmeDTO.setId(1L);
+
+		//when & then
+		restProgrammeMockMvc.perform(put("/api/programmes")
+				.contentType(TestUtil.APPLICATION_JSON_UTF8)
+				.content(TestUtil.convertObjectToJsonBytes(programmeDTO)))
+				.andExpect(status().isBadRequest())
+				.andExpect(jsonPath("$.message").value("error.validation"))
+				.andExpect(jsonPath("$.fieldErrors[*].field").
+						value(containsInAnyOrder("managingDeanery","programmeName","status","programmeNumber")));
+	}
+
+	@Test
+	@Transactional
+	public void shouldValidateIdWhenCreating() throws Exception {
+		//given
+		ProgrammeDTO programmeDTO = programmeMapper.programmeToProgrammeDTO(createEntity());
+		programmeDTO.setId(-1L);
+
+		//when & then
+		restProgrammeMockMvc.perform(post("/api/programmes")
+				.contentType(TestUtil.APPLICATION_JSON_UTF8)
+				.content(TestUtil.convertObjectToJsonBytes(programmeDTO)))
+				.andExpect(status().isBadRequest())
+				.andExpect(jsonPath("$.message").value("error.validation"))
+				.andExpect(jsonPath("$.fieldErrors[0].field").value("id"));
+	}
+
+	@Test
+	@Transactional
+	public void shouldValidateProgrammeNumberContentsWhenCreating() throws Exception {
+		//given
+		ProgrammeDTO programmeDTO = programmeMapper.programmeToProgrammeDTO(createEntity());
+		programmeDTO.setProgrammeNumber("#%$^&**(");
+		//when & then
+		restProgrammeMockMvc.perform(post("/api/programmes")
+				.contentType(TestUtil.APPLICATION_JSON_UTF8)
+				.content(TestUtil.convertObjectToJsonBytes(programmeDTO)))
+				.andExpect(status().isBadRequest())
+				.andExpect(jsonPath("$.message").value("error.validation"))
+				.andExpect(jsonPath("$.fieldErrors[0].field").value("programmeNumber"));
+	}
+
+	@Test
+	@Transactional
+	public void shouldValidateProgrammeNumberUniqueWhenCreating() throws Exception {
+		//given we have an exiting programme with DEFAULT_PROGRAMME_NUMBER
+		programmeRepository.saveAndFlush(createEntity());
+		ProgrammeDTO programmeDTO = programmeMapper.programmeToProgrammeDTO(createEntity());
+
+		//when & then
+		restProgrammeMockMvc.perform(post("/api/programmes")
+				.contentType(TestUtil.APPLICATION_JSON_UTF8)
+				.content(TestUtil.convertObjectToJsonBytes(programmeDTO)))
+				.andExpect(status().isBadRequest())
+				.andExpect(jsonPath("$.message").value("error.validation"))
+				.andExpect(jsonPath("$.fieldErrors[0].field").value("programmeNumber"))
+				.andExpect(jsonPath("$.fieldErrors[0].message").value(StringContains.containsString("unique")));
+	}
+
+	@Test
+	@Transactional
+	public void shouldValidateProgrammeNumberUniqueWhenUpdating() throws Exception {
+		//given we have an exiting programme with DEFAULT_PROGRAMME_NUMBER
+		//and we update a second programme using the same nr
+		programmeRepository.saveAndFlush(createEntity());
+		Programme p = createEntity();
+		p.setProgrammeNumber("number2");
+		p = programmeRepository.saveAndFlush(p);
+		ProgrammeDTO programmeDTO = programmeMapper.programmeToProgrammeDTO(p);
+		programmeDTO.setProgrammeNumber(DEFAULT_PROGRAMME_NUMBER);
+
+		//when & then
+		restProgrammeMockMvc.perform(put("/api/programmes")
+				.contentType(TestUtil.APPLICATION_JSON_UTF8)
+				.content(TestUtil.convertObjectToJsonBytes(programmeDTO)))
+				.andExpect(status().isBadRequest())
+				.andExpect(jsonPath("$.message").value("error.validation"))
+				.andExpect(jsonPath("$.fieldErrors[0].field").value("programmeNumber"))
+				.andExpect(jsonPath("$.fieldErrors[0].message").value(StringContains.containsString("unique")));
 	}
 
 	@Test
@@ -193,7 +300,7 @@ public class ProgrammeResourceIntTest {
 				.contentType(TestUtil.APPLICATION_JSON_UTF8)
 				.content(TestUtil.convertObjectToJsonBytes(programmeDTO)))
 				.andExpect(status().isBadRequest())
-				.andExpect(jsonPath("$.message").value("Bad request"));
+				.andExpect(jsonPath("$.message").value("error.validation"));
 	}
 
 	@Test
@@ -457,20 +564,18 @@ public class ProgrammeResourceIntTest {
 	@Test
 	@Transactional
 	public void updateNonExistingProgramme() throws Exception {
+		//given
 		int databaseSizeBeforeUpdate = programmeRepository.findAll().size();
-
-		// Create the Programme
 		ProgrammeDTO programmeDTO = programmeMapper.programmeToProgrammeDTO(programme);
 
-		// If the entity doesn't have an ID, it will be created instead of just being updated
+		//when and then
 		restProgrammeMockMvc.perform(put("/api/programmes")
 				.contentType(TestUtil.APPLICATION_JSON_UTF8)
 				.content(TestUtil.convertObjectToJsonBytes(programmeDTO)))
-				.andExpect(status().isCreated());
+				.andExpect(status().isBadRequest());
 
-		// Validate the Programme in the database
 		List<Programme> programmeList = programmeRepository.findAll();
-		assertThat(programmeList).hasSize(databaseSizeBeforeUpdate + 1);
+		assertThat(programmeList).hasSize(databaseSizeBeforeUpdate);
 	}
 
 	@Test

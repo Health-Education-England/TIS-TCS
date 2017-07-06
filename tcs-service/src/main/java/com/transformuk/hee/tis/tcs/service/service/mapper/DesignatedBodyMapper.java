@@ -33,6 +33,8 @@ public class DesignatedBodyMapper {
 			.put("1-AIIDMY", Lists.newArrayList("Health Education England West Midlands"))
 			.build();
 
+	private static Set<String> allLocalOffices = null;
+
 	/**
 	 * @param dbcs a list of designated body codes not null
 	 * @return the list of managing deaneries that match the given list of codes
@@ -46,5 +48,16 @@ public class DesignatedBodyMapper {
 			}
 		});
 		return deaneries;
+	}
+
+	/**
+	 * @return all currently known local offices
+	 */
+	public static Set<String> getAllLocalOffices() {
+		if (allLocalOffices == null) {
+			allLocalOffices = new HashSet<>();
+			dbcToMangingDeaneryMap.values().forEach( v -> allLocalOffices.addAll(v));
+		}
+		return allLocalOffices;
 	}
 }
