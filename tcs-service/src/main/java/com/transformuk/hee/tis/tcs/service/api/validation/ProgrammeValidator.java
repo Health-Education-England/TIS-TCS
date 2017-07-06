@@ -15,7 +15,6 @@ import org.springframework.web.bind.MethodArgumentNotValidException;
 
 import java.util.ArrayList;
 import java.util.List;
-import java.util.stream.Collectors;
 
 /**
  * Holds more complex custom validation for a {@link ProgrammeDTO} that
@@ -47,34 +46,19 @@ public class ProgrammeValidator {
 	public void validate(ProgrammeDTO programmeDTO, UserProfile userProfile) throws MethodArgumentNotValidException {
 
 		List<FieldError> fieldErrors = new ArrayList<>();
-		//first check if the local office is valid
-		if (!DesignatedBodyMapper.getAllLocalOffices().contains(programmeDTO.getManagingDeanery())) {
-			fieldErrors.add(new FieldError("ProgrammeDTO", "managingDeanery",
-					"Unknown local office: " + programmeDTO.getManagingDeanery()));
-		} else {
-			//if the local office is valid, then check if the user has the rights to it
-			if (!DesignatedBodyMapper.
-					map(userProfile.getDesignatedBodyCodes()).contains(programmeDTO.getManagingDeanery())) {
-				fieldErrors.add(new FieldError("ProgrammeDTO", "managingDeanery",
-						"You do not have permission to create or modify a programme in the Local office: " +
-								programmeDTO.getManagingDeanery()));
-			}
-		}
-		// then check the curricula
-		if (programmeDTO.getCurricula() != null && !programmeDTO.getCurricula().isEmpty()) {
-			for (CurriculumDTO c : programmeDTO.getCurricula()) {
-				if (c.getId() == null || c.getId() < 0) {
-					fieldErrors.add(new FieldError("ProgrammeDTO", "curricula",
-							"Curriculum ID cannot be null or negative"));
-				} else {
-					if (!curriculumRepository.exists(c.getId())) {
-						fieldErrors.add(new FieldError("ProgrammeDTO", "curricula",
-								String.format("Curricula with id %d does not exist", c.getId())));
-					}
-				}
-			}
-		}
+		fieldErrors.addAll(checkLocalOffice(programmeDTO, userProfile));
+		fieldErrors.addAll(checkCurricula(programmeDTO));
+		fieldErrors.addAll(checkProgrammeNumber(programmeDTO));
 
+		if (!fieldErrors.isEmpty()) {
+			BeanPropertyBindingResult bindingResult = new BeanPropertyBindingResult(programmeDTO, "ProgrammeDTO");
+			fieldErrors.forEach(bindingResult::addError);
+			throw new MethodArgumentNotValidException(null, bindingResult);
+		}
+	}
+
+	private List<FieldError> checkProgrammeNumber(ProgrammeDTO programmeDTO) {
+		List<FieldError> fieldErrors = new ArrayList<>();
 		//check if the programme number is unique
 		//if we update a programme
 		if (programmeDTO.getId() != null) {
@@ -101,11 +85,43 @@ public class ProgrammeValidator {
 								programmeDTO.getProgrammeNumber(), programmeList.get(0))));
 			}
 		}
+		return fieldErrors;
+	}
 
-		if (!fieldErrors.isEmpty()) {
-			BeanPropertyBindingResult bindingResult = new BeanPropertyBindingResult(programmeDTO, "ProgrammeDTO");
-			fieldErrors.forEach(bindingResult::addError);
-			throw new MethodArgumentNotValidException(null, bindingResult);
+	private List<FieldError> checkCurricula(ProgrammeDTO programmeDTO) {
+		List<FieldError> fieldErrors = new ArrayList<>();
+		// then check the curricula
+		if (programmeDTO.getCurricula() != null && !programmeDTO.getCurricula().isEmpty()) {
+			for (CurriculumDTO c : programmeDTO.getCurricula()) {
+				if (c.getId() == null || c.getId() < 0) {
+					fieldErrors.add(new FieldError("ProgrammeDTO", "curricula",
+							"Curriculum ID cannot be null or negative"));
+				} else {
+					if (!curriculumRepository.exists(c.getId())) {
+						fieldErrors.add(new FieldError("ProgrammeDTO", "curricula",
+								String.format("Curricula with id %d does not exist", c.getId())));
+					}
+				}
+			}
 		}
+		return fieldErrors;
+	}
+
+	private List<FieldError> checkLocalOffice(ProgrammeDTO programmeDTO, UserProfile userProfile) {
+		List<FieldError> fieldErrors = new ArrayList<>();
+		//first check if the local office is valid
+		if (!DesignatedBodyMapper.getAllLocalOffices().contains(programmeDTO.getManagingDeanery())) {
+			fieldErrors.add(new FieldError("ProgrammeDTO", "managingDeanery",
+					"Unknown local office: " + programmeDTO.getManagingDeanery()));
+		} else {
+			//if the local office is valid, then check if the user has the rights to it
+			if (!DesignatedBodyMapper.
+					map(userProfile.getDesignatedBodyCodes()).contains(programmeDTO.getManagingDeanery())) {
+				fieldErrors.add(new FieldError("ProgrammeDTO", "managingDeanery",
+						"You do not have permission to create or modify a programme in the Local office: " +
+								programmeDTO.getManagingDeanery()));
+			}
+		}
+		return fieldErrors;
 	}
 }
