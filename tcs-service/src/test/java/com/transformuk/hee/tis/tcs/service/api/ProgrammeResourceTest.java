@@ -26,7 +26,7 @@ import static org.mockito.Matchers.*;
 @RunWith(MockitoJUnitRunner.class)
 public class ProgrammeResourceTest {
 
-	public static final String DBC = "DBC";
+	public static final String DBC = "1-AIIDR8";
 	public static final String USER_ID = "James H";
 
 	@Mock
@@ -51,7 +51,7 @@ public class ProgrammeResourceTest {
 		given(programmeService.advancedSearch(anySet(), searchStringCaptor.capture(), anyList(), eq(p))).willReturn(page);
 
 		// when
-		controller.getAllProgrammes(p, "#$$)alp%*h(&^)a ./.?'';;\\numer1`~c", null);
+		controller.getAllProgrammes(p, "#$$)alp%*h(&^)a ..?'';;\\numer1`~c", null);
 
 		// then
 		assertThat(searchStringCaptor.getValue()).isEqualTo("alpha numer1c");

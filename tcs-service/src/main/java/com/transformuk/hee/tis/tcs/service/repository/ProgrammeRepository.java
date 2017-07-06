@@ -19,4 +19,6 @@ public interface ProgrammeRepository extends JpaRepository<Programme, Long>, Jpa
 
 	Page<Programme> findByManagingDeaneryIn(Set<String> deaneries, Pageable pageable);
 
+	List<Programme> findByProgrammeNumber(String programmeNumber);
+
 }

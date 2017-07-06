@@ -39,4 +39,21 @@ public class DesignatedBodyMapperTest {
 		//When
 		DesignatedBodyMapper.map(null);
 	}
+
+	@Test
+	public void shouldProvideAllLocalOffices() {
+		//when
+		Set<String> localOfficeSet = DesignatedBodyMapper.getAllLocalOffices();
+
+		//then
+		assertThat(localOfficeSet).contains("Health Education England Kent, Surrey and Sussex", "London LETBs",
+				"Health Education England North Central and East London",
+				"Health Education England South London",
+				"Health Education England East Midlands",
+				"Health Education England East of England",
+				"Health Education England North East",
+				"Health Education England Thames Valley",
+				"Health Education England Yorkshire and the Humber",
+				"Health Education England West Midlands");
+	}
 }

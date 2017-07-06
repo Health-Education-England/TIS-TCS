@@ -2,10 +2,10 @@ package com.transformuk.hee.tis.tcs.service.exception;
 
 import org.springframework.core.annotation.AnnotationUtils;
 import org.springframework.dao.ConcurrencyFailureException;
-import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.http.ResponseEntity.BodyBuilder;
+import org.springframework.http.converter.HttpMessageNotReadableException;
 import org.springframework.security.access.AccessDeniedException;
 import org.springframework.validation.BindingResult;
 import org.springframework.validation.FieldError;
@@ -15,7 +15,6 @@ import org.springframework.web.bind.annotation.ControllerAdvice;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.ResponseBody;
 import org.springframework.web.bind.annotation.ResponseStatus;
-import org.springframework.web.servlet.mvc.method.annotation.ResponseEntityExceptionHandler;
 
 import java.util.List;
 
@@ -42,6 +41,22 @@ public class ExceptionTranslator {
 		return processFieldErrors(fieldErrors);
 	}
 
+	/**
+	 * This exception occurs if we have an enum in a DTO such as
+	 * {@link com.transformuk.hee.tis.tcs.api.dto.ProgrammeDTO#status} and the REST request coming in
+	 * does not provide the proper ENUM value.
+	 * @param ex the exception to intercept
+	 * @return the error object to return to the user
+	 */
+	@ExceptionHandler(HttpMessageNotReadableException.class)
+	@ResponseStatus(HttpStatus.BAD_REQUEST)
+	@ResponseBody
+	public ErrorVM processBadEnumError(HttpMessageNotReadableException ex) {
+		ErrorVM dto = new ErrorVM(ErrorConstants.ERR_VALIDATION);
+		dto.add(null, null, ex.getMessage());
+		return dto;
+	}
+
 	@ExceptionHandler(CustomParameterizedException.class)
 	@ResponseStatus(HttpStatus.BAD_REQUEST)
 	@ResponseBody
@@ -60,7 +75,7 @@ public class ExceptionTranslator {
 		ErrorVM dto = new ErrorVM(ErrorConstants.ERR_VALIDATION);
 
 		for (FieldError fieldError : fieldErrors) {
-			dto.add(fieldError.getObjectName(), fieldError.getField(), fieldError.getCode());
+			dto.add(fieldError.getObjectName(), fieldError.getField(), fieldError.getDefaultMessage());
 		}
 
 		return dto;
