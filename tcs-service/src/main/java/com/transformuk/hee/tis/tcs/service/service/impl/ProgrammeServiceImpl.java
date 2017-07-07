@@ -94,6 +94,20 @@ public class ProgrammeServiceImpl implements ProgrammeService {
 		return result.map(programme -> programmeMapper.programmeToProgrammeDTO(programme));
 	}
 
+	/**
+	 * Get all the programmes.
+	 *
+	 * @param pageable the pagination information
+	 * @return the list of entities
+	 */
+	@Override
+	@Transactional(readOnly = true)
+	public Page<ProgrammeDTO> findAll(Pageable pageable) {
+		log.debug("Request to get all Programmes");
+		Page<Programme> result = programmeRepository.findAll(pageable);
+		return result.map(programme -> programmeMapper.programmeToProgrammeDTO(programme));
+	}
+
 	@Override
 	@Transactional(readOnly = true)
 	public Page<ProgrammeDTO> advancedSearch(

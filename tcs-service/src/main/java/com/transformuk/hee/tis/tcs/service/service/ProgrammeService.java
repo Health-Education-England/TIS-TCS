@@ -39,6 +39,14 @@ public interface ProgrammeService {
 	Page<ProgrammeDTO> findAll(Set<String> dbcs, Pageable pageable);
 
 	/**
+	 * Get all the programmes.
+	 *
+	 * @param pageable the pagination information
+	 * @return the list of entities
+	 */
+	Page<ProgrammeDTO> findAll(Pageable pageable);
+
+	/**
 	 * Get all the programmes within the given designated body codes using the
 	 * given smart search string.
 	 *
