@@ -1,15 +1,12 @@
 package com.transformuk.hee.tis.tcs.service.model;
 
-import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.transformuk.hee.tis.tcs.api.enumeration.AssessmentType;
 import com.transformuk.hee.tis.tcs.api.enumeration.CurriculumSubType;
 
 import javax.persistence.*;
 import java.io.Serializable;
 import java.time.LocalDate;
-import java.util.HashSet;
 import java.util.Objects;
-import java.util.Set;
 
 /**
  * A Curriculum.
@@ -35,9 +32,11 @@ public class Curriculum implements Serializable {
 	@Column(name = "end")
 	private LocalDate end;
 
+	@Column(name="curriculumSubType")
 	@Enumerated(EnumType.STRING)
 	private CurriculumSubType curriculumSubType;
 
+	@Column(name="assessmentType")
 	@Enumerated(EnumType.STRING)
 	private AssessmentType assessmentType;
 
@@ -47,8 +46,9 @@ public class Curriculum implements Serializable {
 	@Column(name = "periodOfGrace")
 	private Integer periodOfGrace;
 
-	@Column(name = "specialtyId")
-	private String specialtyId;
+	@ManyToOne(fetch = FetchType.EAGER)
+	@JoinColumn(name = "specialtyId", referencedColumnName = "id")
+	private Specialty specialty;
 
 	public Long getId() {
 		return id;
@@ -162,12 +162,12 @@ public class Curriculum implements Serializable {
 		return this;
 	}
 
-	public String getSpecialtyId() {
-		return specialtyId;
+	public Specialty getSpecialty() {
+		return specialty;
 	}
 
-	public void setSpecialtyId(String specialtyId) {
-		this.specialtyId = specialtyId;
+	public void setSpecialty(Specialty specialty) {
+		this.specialty = specialty;
 	}
 
 	@Override

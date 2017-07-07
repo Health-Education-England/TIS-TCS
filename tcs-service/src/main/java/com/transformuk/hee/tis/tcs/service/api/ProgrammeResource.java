@@ -1,13 +1,14 @@
 package com.transformuk.hee.tis.tcs.service.api;
 
 import com.codahale.metrics.annotation.Timed;
-import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.google.common.collect.Lists;
 import com.transformuk.hee.tis.security.model.UserProfile;
 import com.transformuk.hee.tis.tcs.api.dto.ProgrammeDTO;
 import com.transformuk.hee.tis.tcs.api.dto.validation.Create;
 import com.transformuk.hee.tis.tcs.api.dto.validation.Update;
 import com.transformuk.hee.tis.tcs.api.enumeration.Status;
+import com.transformuk.hee.tis.tcs.service.api.util.ColumnFilterUtil;
 import com.transformuk.hee.tis.tcs.service.api.util.HeaderUtil;
 import com.transformuk.hee.tis.tcs.service.api.util.PaginationUtil;
 import com.transformuk.hee.tis.tcs.service.api.validation.ProgrammeValidator;
@@ -19,9 +20,6 @@ import io.swagger.annotations.ApiOperation;
 import io.swagger.annotations.ApiParam;
 import io.swagger.annotations.ApiResponse;
 import io.swagger.annotations.ApiResponses;
-import org.apache.commons.codec.DecoderException;
-import org.apache.commons.codec.net.URLCodec;
-import org.apache.commons.lang3.EnumUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -40,13 +38,12 @@ import javax.validation.Valid;
 import java.io.IOException;
 import java.net.URI;
 import java.net.URISyntaxException;
-import java.util.*;
+import java.util.List;
+import java.util.Optional;
 import java.util.stream.Collectors;
 
 import static com.transformuk.hee.tis.security.util.TisSecurityHelper.getProfileFromContext;
 import static com.transformuk.hee.tis.tcs.service.api.util.StringUtil.sanitize;
-import static java.util.Collections.EMPTY_LIST;
-import static java.util.stream.Collectors.toList;
 
 /**
  * REST controller for managing Programme.
@@ -152,7 +149,8 @@ public class ProgrammeResource {
 
 		searchQuery = sanitize(searchQuery);
 		UserProfile userProfile = getProfileFromContext();
-		List<ColumnFilter> columnFilters = getColumnFilters(columnFilterJson);
+		List<Class> filterEnumList = Lists.newArrayList(Status.class);
+		List<ColumnFilter> columnFilters = ColumnFilterUtil.getColumnFilters(columnFilterJson,filterEnumList);
 		Page<ProgrammeDTO> page;
 		if (StringUtils.isEmpty(searchQuery) && StringUtils.isEmpty(columnFilterJson)) {
 			page = programmeService.findAll(userProfile.getDesignatedBodyCodes(), pageable);
@@ -263,44 +261,5 @@ public class ProgrammeResource {
 			log.error(e.getMessage(), e);
 			throw new IllegalArgumentException("Cannot update programmes with the given curricula");
 		}
-	}
-
-	private List<ColumnFilter> getColumnFilters(String columnFilterJson) throws IOException {
-		if (columnFilterJson != null) {
-			if (!columnFilterJson.startsWith("{")) {
-				//attempt to decode
-				try {
-					columnFilterJson = new URLCodec().decode(columnFilterJson);
-				} catch (DecoderException e) {
-					log.error(e.getMessage(), e);
-					throw new IllegalArgumentException("Cannot interpret column filters: " + columnFilterJson);
-				}
-			}
-			TypeReference<HashMap<String, List<String>>> typeRef = new TypeReference<HashMap<String, List<String>>>() {
-			};
-
-			try {
-				Map<String, List<String>> columns = mapper.readValue(columnFilterJson, typeRef);
-				List<ColumnFilter> cfList = new ArrayList<>(columns.size());
-
-				for (Map.Entry<String, List<String>> e : columns.entrySet()) {
-					if (e.getKey().equals("status")) {
-						List<Object> values = e.getValue().stream().filter(v -> EnumUtils.isValidEnum(Status.class, v)).
-								map(v -> Status.valueOf(v)).collect(toList());
-						if (!values.isEmpty()) {
-							cfList.add(new ColumnFilter(e.getKey(), values));
-						}
-					} else {
-						List<Object> values = e.getValue().stream().map(v -> sanitize(v)).collect(toList());
-						cfList.add(new ColumnFilter(e.getKey(), values));
-					}
-				}
-				return cfList;
-			} catch (Exception e) {
-				log.error(e.getMessage(), e);
-				throw new IllegalArgumentException("Cannot interpret column filters: " + columnFilterJson);
-			}
-		}
-		return EMPTY_LIST;
 	}
 }
