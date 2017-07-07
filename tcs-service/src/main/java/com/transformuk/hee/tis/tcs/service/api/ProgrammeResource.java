@@ -169,7 +169,7 @@ public class ProgrammeResource {
 	 */
 	@GetMapping("/bulk-programmes")
 	@Timed
-	@PreAuthorize("hasAuthority('tcs:bulk:view:entities')")
+	@PreAuthorize("hasAuthority('tcs:view:entities')")
 	public ResponseEntity<List<ProgrammeDTO>> getAllProgrammesForETL(@ApiParam Pageable pageable) {
 		log.debug("REST request to get a page of Programmes");
 		Page<ProgrammeDTO> page = programmeService.findAll(pageable);
