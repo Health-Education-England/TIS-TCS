@@ -58,8 +58,6 @@ public class ProgrammeResource {
 	private final ProgrammeService programmeService;
 	private final ProgrammeValidator programmeValidator;
 
-	private ObjectMapper mapper = new ObjectMapper();
-
 	public ProgrammeResource(ProgrammeService programmeService, ProgrammeValidator programmeValidator) {
 		this.programmeService = programmeService;
 		this.programmeValidator = programmeValidator;

@@ -49,8 +49,6 @@ public class CurriculumResource {
 	private final Logger log = LoggerFactory.getLogger(CurriculumResource.class);
 	private final CurriculumService curriculumService;
 
-	private ObjectMapper mapper = new ObjectMapper();
-
 	public CurriculumResource(CurriculumService curriculumService) {
 		this.curriculumService = curriculumService;
 	}

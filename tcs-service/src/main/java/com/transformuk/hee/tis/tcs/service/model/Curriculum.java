@@ -194,14 +194,15 @@ public class Curriculum implements Serializable {
 	public String toString() {
 		return "Curriculum{" +
 				"id=" + id +
-				", intrepidId=" + intrepidId +
-				", name='" + name + "'" +
-				", start='" + start + "'" +
-				", end='" + end + "'" +
-				", curriculumSubType='" + curriculumSubType + "'" +
-				", assessmentType='" + assessmentType + "'" +
-				", doesThisCurriculumLeadToCct='" + doesThisCurriculumLeadToCct + "'" +
-				", periodOfGrace='" + periodOfGrace + "'" +
+				", intrepidId='" + intrepidId + '\'' +
+				", name='" + name + '\'' +
+				", start=" + start +
+				", end=" + end +
+				", curriculumSubType=" + curriculumSubType +
+				", assessmentType=" + assessmentType +
+				", doesThisCurriculumLeadToCct=" + doesThisCurriculumLeadToCct +
+				", periodOfGrace=" + periodOfGrace +
+				", specialty=" + specialty +
 				'}';
 	}
 }

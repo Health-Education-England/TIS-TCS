@@ -18,6 +18,8 @@ import static java.util.stream.Collectors.toList;
 
 /**
  * Utility class for Column filters
+ * JPA is expecting Enum type if the entity column is Enum, this class checks for filter then convert string to Enum if
+ * the column is type of Enum
  */
 public final class ColumnFilterUtil {
 
@@ -29,9 +31,10 @@ public final class ColumnFilterUtil {
 	}
 
 	/**
-	 * Parse json string to column filter list
+	 * Parse json string to column filter list and checks for filter column if enum then converts string to Enum
 	 *
-	 * @param columnFilterJson
+	 * @param columnFilterJson json string to parse
+	 * @param enumList list of enums as column filter for the entity
 	 * @return
 	 * @throws IOException
 	 */
@@ -57,6 +60,8 @@ public final class ColumnFilterUtil {
 					// Find the enum type from given list
 					Optional<Class> selectedEnumClass = enumList.stream()
 							.filter(en -> e.getKey().equalsIgnoreCase(en.getSimpleName())).findFirst();
+
+					// if columnFilter is enum and value is not null
 					if (selectedEnumClass.isPresent()) {
 						addToCfList(cfList, e, selectedEnumClass.get());
 					} else {
@@ -73,6 +78,12 @@ public final class ColumnFilterUtil {
 		return EMPTY_LIST;
 	}
 
+	/**
+	 * Checks for column filter is valid enum then add into columnFilter list with Enum object
+	 * @param cfList
+	 * @param e
+	 * @param en
+	 */
 	private static void addToCfList(List<ColumnFilter> cfList, Map.Entry<String, List<String>> e, Class en) {
 		List<Object> values = new ArrayList<>();
 		e.getValue().forEach(v -> {

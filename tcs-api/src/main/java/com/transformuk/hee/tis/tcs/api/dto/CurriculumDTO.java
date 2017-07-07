@@ -139,14 +139,15 @@ public class CurriculumDTO implements Serializable {
 	public String toString() {
 		return "CurriculumDTO{" +
 				"id=" + id +
-				", intrepidId=" + intrepidId +
-				", name='" + name + "'" +
-				", start='" + start + "'" +
-				", end='" + end + "'" +
-				", curriculumSubType='" + curriculumSubType + "'" +
-				", assessmentType='" + assessmentType + "'" +
-				", doesThisCurriculumLeadToCct='" + doesThisCurriculumLeadToCct + "'" +
-				", periodOfGrace='" + periodOfGrace + "'" +
+				", intrepidId='" + intrepidId + '\'' +
+				", name='" + name + '\'' +
+				", start=" + start +
+				", end=" + end +
+				", curriculumSubType=" + curriculumSubType +
+				", assessmentType=" + assessmentType +
+				", doesThisCurriculumLeadToCct=" + doesThisCurriculumLeadToCct +
+				", periodOfGrace=" + periodOfGrace +
+				", specialty=" + specialty +
 				'}';
 	}
 }
