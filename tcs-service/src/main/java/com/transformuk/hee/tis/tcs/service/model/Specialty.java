@@ -1,14 +1,11 @@
 package com.transformuk.hee.tis.tcs.service.model;
 
-import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.transformuk.hee.tis.tcs.api.enumeration.SpecialtyType;
 import com.transformuk.hee.tis.tcs.api.enumeration.Status;
 
 import javax.persistence.*;
 import java.io.Serializable;
-import java.util.HashSet;
 import java.util.Objects;
-import java.util.Set;
 
 /**
  * A Specialty.
@@ -104,7 +101,6 @@ public class Specialty implements Serializable {
 	public void setspecialtyGroupId(String specialtyGroupId) {
 		this.specialtyGroupId = specialtyGroupId;
 	}
-
 
 	@Override
 	public boolean equals(Object o) {

@@ -9,6 +9,7 @@ import com.transformuk.hee.tis.tcs.service.model.Curriculum;
 import com.transformuk.hee.tis.tcs.service.repository.CurriculumRepository;
 import com.transformuk.hee.tis.tcs.service.service.CurriculumService;
 import com.transformuk.hee.tis.tcs.service.service.mapper.CurriculumMapper;
+import org.apache.commons.codec.net.URLCodec;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -44,8 +45,8 @@ public class CurriculumResourceIntTest {
 	private static final String DEFAULT_NAME = "AAAAAAAAAA";
 	private static final String UPDATED_NAME = "BBBBBBBBBB";
 
-	private static final String DEFAULT_INTREPID_ID= "1234";
-	private static final String UPDATED_INTREPID_ID= "4567";
+	private static final String DEFAULT_INTREPID_ID = "1234";
+	private static final String UPDATED_INTREPID_ID = "4567";
 
 	private static final LocalDate DEFAULT_START = LocalDate.ofEpochDay(0L);
 	private static final LocalDate UPDATED_START = LocalDate.now(ZoneId.systemDefault());
@@ -207,6 +208,76 @@ public class CurriculumResourceIntTest {
 				.andExpect(jsonPath("$.assessmentType").value(DEFAULT_ASSESSMENT_TYPE.toString()))
 				.andExpect(jsonPath("$.doesThisCurriculumLeadToCct").value(DEFAULT_DOES_THIS_CURRICULUM_LEAD_TO_CCT.booleanValue()))
 				.andExpect(jsonPath("$.periodOfGrace").value(DEFAULT_PERIOD_OF_GRACE));
+	}
+
+	@Test
+	@Transactional
+	public void shouldTextSearch() throws Exception {
+		//given
+		// Initialize the database
+		curriculumRepository.saveAndFlush(curriculum);
+		Curriculum otherNameCurriculum = createEntity();
+		otherNameCurriculum.setName("other name");
+		curriculumRepository.saveAndFlush(otherNameCurriculum);
+		//when & then
+		// Get all the curriculumList
+		restCurriculumMockMvc.perform(get("/api/curricula?sort=id,desc&searchQuery=other"))
+				.andExpect(status().isOk())
+				.andExpect(jsonPath("$.[*].name").value("other name"));
+	}
+
+	@Test
+	@Transactional
+	public void shouldFilterColumns() throws Exception {
+		//given
+		// Initialize the database
+		curriculumRepository.saveAndFlush(curriculum);
+		curriculumRepository.saveAndFlush(createEntity());
+		Curriculum otherCurriculumSubTypeCurriculum = createEntity();
+		otherCurriculumSubTypeCurriculum.setCurriculumSubType(CurriculumSubType.ACL);
+		curriculumRepository.saveAndFlush(otherCurriculumSubTypeCurriculum);
+
+		//when & then
+		String colFilters = new URLCodec().encode("{\"curriculumSubType\":[\"ACL\"]}");
+		// Get all the curriculumList
+		restCurriculumMockMvc.perform(get("/api/curricula?sort=id,desc&columnFilters=" +
+				colFilters))
+				.andExpect(status().isOk())
+				.andExpect(jsonPath("$.[*].curriculumSubType").value("ACL"));
+	}
+
+	@Test
+	@Transactional
+	public void shouldTextSearchAndFilterColumns() throws Exception {
+		//given
+		// Initialize the database
+		curriculumRepository.saveAndFlush(curriculum);
+		Curriculum otherCurriculumSubTypeCurriculum = createEntity();
+		otherCurriculumSubTypeCurriculum.setCurriculumSubType(CurriculumSubType.ACL);
+		curriculumRepository.saveAndFlush(otherCurriculumSubTypeCurriculum);
+		Curriculum otherNameCurriculum = createEntity();
+		otherNameCurriculum.setName("other name");
+		otherNameCurriculum.setCurriculumSubType(CurriculumSubType.DENTAL_CURRICULUM);
+		curriculumRepository.saveAndFlush(otherNameCurriculum);
+		//when & then
+		String colFilters = new URLCodec().encode("{\"curriculumSubType\":[\"DENTAL_CURRICULUM\"]}");
+		// Get all the curriculumList
+		restCurriculumMockMvc.perform(get("/api/curricula?sort=id,desc&searchQuery=other&columnFilters=" +
+				colFilters))
+				.andExpect(status().isOk())
+				.andExpect(jsonPath("$.[*].curriculumSubType").value("DENTAL_CURRICULUM"));
+	}
+
+	@Test
+	public void shouldComplainIfBadRequest() throws Exception {
+		//given
+		URLCodec codec = new URLCodec();
+		String colFilters = codec.encode("{\"curriculumSubType\":[\"malformed json\"");
+		//when & then
+		// Get all the programmeList
+		restCurriculumMockMvc.perform(get("/api/curricula?sort=id,desc&columnFilters=" + colFilters))
+				.andExpect(status().isBadRequest())
+				.andExpect(jsonPath("$.message").value("Bad request"));
 	}
 
 	@Test
