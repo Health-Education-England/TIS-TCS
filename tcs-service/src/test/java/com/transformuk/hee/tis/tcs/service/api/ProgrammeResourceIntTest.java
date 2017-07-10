@@ -387,6 +387,25 @@ public class ProgrammeResourceIntTest {
 
 	@Test
 	@Transactional
+	public void getAllProgrammesForETL() throws Exception {
+		// Initialize the database
+		programmeRepository.saveAndFlush(programme);
+
+		// Get all the programmeList
+		restProgrammeMockMvc.perform(get("/api/bulk-programmes?pageNumber=0,pageSize=100"))
+				.andExpect(status().isOk())
+				.andExpect(content().contentType(MediaType.APPLICATION_JSON_UTF8_VALUE))
+				.andExpect(jsonPath("$.[*].id").value(hasItem(programme.getId().intValue())))
+				.andExpect(jsonPath("$.[*].intrepidId").value(hasItem(DEFAULT_INTREPID_ID.toString())))
+				.andExpect(jsonPath("$.[*].status").value(hasItem(DEFAULT_STATUS.toString())))
+				.andExpect(jsonPath("$.[*].managingDeanery").value(hasItem(DEFAULT_MANAGING_DEANERY.toString())))
+				.andExpect(jsonPath("$.[*].programmeName").value(hasItem(DEFAULT_PROGRAMME_NAME.toString())))
+				.andExpect(jsonPath("$.[*].programmeNumber").value(hasItem(DEFAULT_PROGRAMME_NUMBER.toString())))
+				.andExpect(jsonPath("$.[*].leadProvider").value(hasItem(DEFAULT_LEAD_PROVIDER.toString())));
+	}
+
+	@Test
+	@Transactional
 	public void getProgramme() throws Exception {
 		// Initialize the database
 		programmeRepository.saveAndFlush(programme);
