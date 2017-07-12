@@ -97,7 +97,7 @@ public class SpecialtyResource {
 	 * GET  /specialties : get all the specialties.
 	 *
 	 * @param pageable the pagination information
-	 * @return the ResponseEntity with status 200 (OK) and the list of curricula in body
+	 * @return the ResponseEntity with status 200 (OK) and the list of specialty in body
 	 * @throws URISyntaxException if there is an error to generate the pagination HTTP headers
 	 */
 	@GetMapping("/specialties")
