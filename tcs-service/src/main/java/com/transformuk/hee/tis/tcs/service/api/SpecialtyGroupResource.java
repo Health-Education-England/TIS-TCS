@@ -50,7 +50,7 @@ public class SpecialtyGroupResource {
 	 */
 	@PostMapping("/specialty-groups")
 	@Timed
-	@PreAuthorize("hasAuthority('tcs:add:modify:entities')")
+	@PreAuthorize("hasAuthority('specialty-group:add:modify')")
 	public ResponseEntity<SpecialtyGroupDTO> createSpecialtyGroup(@RequestBody SpecialtyGroupDTO specialtyGroupDTO) throws URISyntaxException {
 		log.debug("REST request to save SpecialtyGroup : {}", specialtyGroupDTO);
 		if (specialtyGroupDTO.getId() != null) {
@@ -73,7 +73,7 @@ public class SpecialtyGroupResource {
 	 */
 	@PutMapping("/specialty-groups")
 	@Timed
-	@PreAuthorize("hasAuthority('tcs:add:modify:entities')")
+	@PreAuthorize("hasAuthority('specialty-group:add:modify')")
 	public ResponseEntity<SpecialtyGroupDTO> updateSpecialtyGroup(@RequestBody SpecialtyGroupDTO specialtyGroupDTO) throws URISyntaxException {
 		log.debug("REST request to update SpecialtyGroup : {}", specialtyGroupDTO);
 		if (specialtyGroupDTO.getId() == null) {
@@ -93,7 +93,7 @@ public class SpecialtyGroupResource {
 	 */
 	@GetMapping("/specialty-groups")
 	@Timed
-	@PreAuthorize("hasAuthority('tcs:view:entities')")
+	@PreAuthorize("hasAuthority('specialty-group:view')")
 	public ResponseEntity<List<SpecialtyGroupDTO>> getAllSpecialtyGroups(@ApiParam Pageable pageable) {
 		log.debug("REST request to get all SpecialtyGroups");
 		Page<SpecialtyGroupDTO> page = specialtyGroupService.findAll(pageable);
@@ -110,7 +110,7 @@ public class SpecialtyGroupResource {
 	 */
 	@GetMapping("/specialty-groups/{id}")
 	@Timed
-	@PreAuthorize("hasAuthority('tcs:view:entities')")
+	@PreAuthorize("hasAuthority('specialty-group:view')")
 	public ResponseEntity<SpecialtyGroupDTO> getSpecialtyGroup(@PathVariable Long id) {
 		log.debug("REST request to get SpecialtyGroup : {}", id);
 		SpecialtyGroupDTO specialtyGroupDTO = specialtyGroupService.findOne(id);
@@ -141,7 +141,7 @@ public class SpecialtyGroupResource {
 	 */
 	@PostMapping("/bulk-specialty-groups")
 	@Timed
-	@PreAuthorize("hasAuthority('tcs:add:modify:entities')")
+	@PreAuthorize("hasAuthority('specialty-group:bulk:add:modify')")
 	public ResponseEntity<List<SpecialtyGroupDTO>> bulkCreateSpecialtyGroups(@Valid @RequestBody List<SpecialtyGroupDTO> specialtyGroupDTOS) throws URISyntaxException {
 		log.debug("REST request to bulk save Specialty Groups : {}", specialtyGroupDTOS);
 		if (!Collections.isEmpty(specialtyGroupDTOS)) {
@@ -171,7 +171,7 @@ public class SpecialtyGroupResource {
 	 */
 	@PutMapping("/bulk-specialty-groups")
 	@Timed
-	@PreAuthorize("hasAuthority('tcs:add:modify:entities')")
+	@PreAuthorize("hasAuthority('specialty-group:bulk:add:modify')")
 	public ResponseEntity<List<SpecialtyGroupDTO>> bulkUpdateSpecialtyGroups(@Valid @RequestBody List<SpecialtyGroupDTO> specialtyGroupDTOS) throws URISyntaxException {
 		log.debug("REST request to bulk update Specialty Groups : {}", specialtyGroupDTOS);
 		if (Collections.isEmpty(specialtyGroupDTOS)) {

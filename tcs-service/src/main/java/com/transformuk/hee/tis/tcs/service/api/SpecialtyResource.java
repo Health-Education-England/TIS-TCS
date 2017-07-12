@@ -58,7 +58,7 @@ public class SpecialtyResource {
 	 */
 	@PostMapping("/specialties")
 	@Timed
-	@PreAuthorize("hasAuthority('tcs:add:modify:entities')")
+	@PreAuthorize("hasAuthority('specialty:add:modify')")
 	public ResponseEntity<SpecialtyDTO> createSpecialty(@RequestBody SpecialtyDTO specialtyDTO) throws URISyntaxException {
 		log.debug("REST request to save Specialty : {}", specialtyDTO);
 		if (specialtyDTO.getId() != null) {
@@ -81,7 +81,7 @@ public class SpecialtyResource {
 	 */
 	@PutMapping("/specialties")
 	@Timed
-	@PreAuthorize("hasAuthority('tcs:add:modify:entities')")
+	@PreAuthorize("hasAuthority('specialty:add:modify')")
 	public ResponseEntity<SpecialtyDTO> updateSpecialty(@RequestBody SpecialtyDTO specialtyDTO) throws URISyntaxException {
 		log.debug("REST request to update Specialty : {}", specialtyDTO);
 		if (specialtyDTO.getId() == null) {
@@ -102,7 +102,7 @@ public class SpecialtyResource {
 	 */
 	@GetMapping("/specialties")
 	@Timed
-	@PreAuthorize("hasAuthority('tcs:view:entities')")
+	@PreAuthorize("hasAuthority('specialty:view')")
 	public ResponseEntity<List<SpecialtyDTO>> getAllSpecialties(
 			@ApiParam Pageable pageable,
 			@ApiParam(value = "any wildcard string to be searched")
@@ -133,7 +133,7 @@ public class SpecialtyResource {
 	 */
 	@GetMapping("/specialties/{id}")
 	@Timed
-	@PreAuthorize("hasAuthority('tcs:view:entities')")
+	@PreAuthorize("hasAuthority('specialty:view')")
 	public ResponseEntity<SpecialtyDTO> getSpecialty(@PathVariable Long id) {
 		log.debug("REST request to get Specialty : {}", id);
 		SpecialtyDTO specialtyDTO = specialtyService.findOne(id);
@@ -165,7 +165,7 @@ public class SpecialtyResource {
 	 */
 	@PostMapping("/bulk-specialties")
 	@Timed
-	@PreAuthorize("hasAuthority('tcs:add:modify:entities')")
+	@PreAuthorize("hasAuthority('specialty:bulk:add:modify')")
 	public ResponseEntity<List<SpecialtyDTO>> bulkCreateSpecialties(@Valid @RequestBody List<SpecialtyDTO> specialtyDTOS) throws URISyntaxException {
 		log.debug("REST request to bulk save Specialties : {}", specialtyDTOS);
 		if (!Collections.isEmpty(specialtyDTOS)) {
@@ -195,7 +195,7 @@ public class SpecialtyResource {
 	 */
 	@PutMapping("/bulk-specialties")
 	@Timed
-	@PreAuthorize("hasAuthority('tcs:add:modify:entities')")
+	@PreAuthorize("hasAuthority('specialty:bulk:add:modify')")
 	public ResponseEntity<List<SpecialtyDTO>> bulkUpdateSpecialties(@Valid @RequestBody List<SpecialtyDTO> specialtyDTOS) throws URISyntaxException {
 		log.debug("REST request to bulk update Specialties : {}", specialtyDTOS);
 		if (Collections.isEmpty(specialtyDTOS)) {
