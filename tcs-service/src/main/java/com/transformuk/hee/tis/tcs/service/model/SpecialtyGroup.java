@@ -1,7 +1,10 @@
 package com.transformuk.hee.tis.tcs.service.model;
 
 
-import javax.persistence.*;
+import javax.persistence.Entity;
+import javax.persistence.GeneratedValue;
+import javax.persistence.GenerationType;
+import javax.persistence.Id;
 import java.io.Serializable;
 import java.util.Objects;
 
@@ -37,6 +40,11 @@ public class SpecialtyGroup implements Serializable {
 		this.name = name;
 	}
 
+	public SpecialtyGroup name(String name) {
+		this.name = name;
+		return this;
+	}
+
 	public String getIntrepidId() {
 		return intrepidId;
 	}
@@ -45,8 +53,8 @@ public class SpecialtyGroup implements Serializable {
 		this.intrepidId = intrepidId;
 	}
 
-	public SpecialtyGroup name(String name) {
-		this.name = name;
+	public SpecialtyGroup intrepidId(String intrepidId) {
+		this.intrepidId = intrepidId;
 		return this;
 	}
 

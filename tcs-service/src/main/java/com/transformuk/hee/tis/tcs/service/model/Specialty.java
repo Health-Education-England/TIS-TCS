@@ -105,12 +105,22 @@ public class Specialty implements Serializable {
 		this.intrepidId = intrepidId;
 	}
 
+	public Specialty intrepidId(String intrepidId) {
+		this.intrepidId = intrepidId;
+		return this;
+	}
+
 	public SpecialtyGroup getSpecialtyGroup() {
 		return specialtyGroup;
 	}
 
 	public void setSpecialtyGroup(SpecialtyGroup specialtyGroup) {
 		this.specialtyGroup = specialtyGroup;
+	}
+
+	public Specialty specialtyGroup(SpecialtyGroup specialtyGroup) {
+		this.specialtyGroup = specialtyGroup;
+		return this;
 	}
 
 	@Override

@@ -54,6 +54,7 @@ public class SpecialtyResourceIntTest {
 	private static final String UPDATED_NHS_SPECIALTY_CODE = "BBBBBBBBBB";
 
 	private static final String DEFAULT_SPECIALTYGROUP_NAME = "DEFAULT GROUP";
+	private static final String DEFAULT_INTREPID_ID = "123456";
 
 	private static final SpecialtyType DEFAULT_SPECIALTY_TYPE = SpecialtyType.SUB_SPECIALTY;
 	private static final SpecialtyType UPDATED_SPECIALTY_TYPE = SpecialtyType.POST;
@@ -97,7 +98,8 @@ public class SpecialtyResourceIntTest {
 				.status(DEFAULT_STATUS)
 				.college(DEFAULT_COLLEGE)
 				.nhsSpecialtyCode(DEFAULT_NHS_SPECIALTY_CODE)
-				.specialtyType(DEFAULT_SPECIALTY_TYPE);
+				.specialtyType(DEFAULT_SPECIALTY_TYPE)
+				.intrepidId(DEFAULT_INTREPID_ID);
 		return specialty;
 	}
 
@@ -191,7 +193,6 @@ public class SpecialtyResourceIntTest {
 				.andExpect(jsonPath("$.nhsSpecialtyCode").value(DEFAULT_NHS_SPECIALTY_CODE.toString()))
 				.andExpect(jsonPath("$.specialtyType").value(DEFAULT_SPECIALTY_TYPE.toString()));
 	}
-
 
 	@Test
 	@Transactional
