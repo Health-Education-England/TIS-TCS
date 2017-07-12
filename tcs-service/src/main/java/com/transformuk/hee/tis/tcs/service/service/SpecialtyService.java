@@ -1,7 +1,6 @@
 package com.transformuk.hee.tis.tcs.service.service;
 
 import com.transformuk.hee.tis.tcs.api.dto.SpecialtyDTO;
-import com.transformuk.hee.tis.tcs.service.model.ColumnFilter;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 
@@ -20,23 +19,13 @@ public interface SpecialtyService {
 	 */
 	SpecialtyDTO save(SpecialtyDTO specialtyDTO);
 
-	/**
-	 * Save a list of specialties.
-	 *
-	 * @param specialtyDTO the entities to save
-	 * @return the list of persisted entities
-	 */
+    /**
+     * Save a list of specialties.
+     *
+     * @param specialtyDTO the entities to save
+     * @return the list of persisted entities
+     */
 	List<SpecialtyDTO> save(List<SpecialtyDTO> specialtyDTO);
-
-	/**
-	 * Get all the specialties within the given smart search string.
-	 *
-	 * @param searchString the search string to match, can be null
-	 * @param columnFilers the exact key value filters to apply, can be null
-	 * @param pageable     the pagination information
-	 * @return the list of entities
-	 */
-	Page<SpecialtyDTO> advancedSearch(String searchString, List<ColumnFilter> columnFilers, Pageable pageable);
 
 	/**
 	 * Get all the specialties.

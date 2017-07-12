@@ -13,8 +13,6 @@ public class SpecialtyDTO implements Serializable {
 
 	private Long id;
 
-	private String intrepidId;
-
 	private Status status;
 
 	private String college;
@@ -23,7 +21,7 @@ public class SpecialtyDTO implements Serializable {
 
 	private SpecialtyType specialtyType;
 
-	private SpecialtyGroupDTO specialtyGroup;
+	private String specialtyGroupId;
 
 	public Long getId() {
 		return id;
@@ -65,20 +63,12 @@ public class SpecialtyDTO implements Serializable {
 		this.specialtyType = specialtyType;
 	}
 
-	public String getIntrepidId() {
-		return intrepidId;
+	public String getSpecialtyGroupId() {
+		return specialtyGroupId;
 	}
 
-	public void setIntrepidId(String intrepidId) {
-		this.intrepidId = intrepidId;
-	}
-
-	public SpecialtyGroupDTO getSpecialtyGroup() {
-		return specialtyGroup;
-	}
-
-	public void setSpecialtyGroup(SpecialtyGroupDTO specialtyGroup) {
-		this.specialtyGroup = specialtyGroup;
+	public void setSpecialtyGroupId(String specialtyGroupId) {
+		this.specialtyGroupId = specialtyGroupId;
 	}
 
 	@Override
@@ -108,12 +98,10 @@ public class SpecialtyDTO implements Serializable {
 	public String toString() {
 		return "SpecialtyDTO{" +
 				"id=" + id +
-				", intrepidId='" + intrepidId + '\'' +
-				", status=" + status +
-				", college='" + college + '\'' +
-				", nhsSpecialtyCode='" + nhsSpecialtyCode + '\'' +
-				", specialtyType=" + specialtyType +
-				", specialtyGroup=" + specialtyGroup +
+				", status='" + status + "'" +
+				", college='" + college + "'" +
+				", nhsSpecialtyCode='" + nhsSpecialtyCode + "'" +
+				", specialtyType='" + specialtyType + "'" +
 				'}';
 	}
 }

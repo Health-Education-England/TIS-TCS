@@ -17,8 +17,6 @@ public class SpecialtyGroup implements Serializable {
 	@GeneratedValue(strategy = GenerationType.IDENTITY)
 	private Long id;
 
-	private String intrepidId;
-
 	private String name;
 
 	public Long getId() {
@@ -35,14 +33,6 @@ public class SpecialtyGroup implements Serializable {
 
 	public void setName(String name) {
 		this.name = name;
-	}
-
-	public String getIntrepidId() {
-		return intrepidId;
-	}
-
-	public void setIntrepidId(String intrepidId) {
-		this.intrepidId = intrepidId;
 	}
 
 	public SpecialtyGroup name(String name) {
@@ -74,8 +64,7 @@ public class SpecialtyGroup implements Serializable {
 	public String toString() {
 		return "SpecialtyGroup{" +
 				"id=" + id +
-				", intrepidId='" + intrepidId + '\'' +
-				", name='" + name + '\'' +
+				", name='" + name + "'" +
 				'}';
 	}
 }

@@ -11,8 +11,6 @@ public class SpecialtyGroupDTO implements Serializable {
 
 	private Long id;
 
-	private String intrepidId;
-
 	private String name;
 
 	public Long getId() {
@@ -29,14 +27,6 @@ public class SpecialtyGroupDTO implements Serializable {
 
 	public void setName(String name) {
 		this.name = name;
-	}
-
-	public String getIntrepidId() {
-		return intrepidId;
-	}
-
-	public void setIntrepidId(String intrepidId) {
-		this.intrepidId = intrepidId;
 	}
 
 	@Override
@@ -66,8 +56,7 @@ public class SpecialtyGroupDTO implements Serializable {
 	public String toString() {
 		return "SpecialtyGroupDTO{" +
 				"id=" + id +
-				", intrepidId='" + intrepidId + '\'' +
-				", name='" + name + '\'' +
+				", name='" + name + "'" +
 				'}';
 	}
 }

@@ -19,8 +19,6 @@ public class Specialty implements Serializable {
 	@GeneratedValue(strategy = GenerationType.IDENTITY)
 	private Long id;
 
-	private String intrepidId;
-
 	@Enumerated(EnumType.STRING)
 	private Status status;
 
@@ -33,9 +31,8 @@ public class Specialty implements Serializable {
 	@Enumerated(EnumType.STRING)
 	private SpecialtyType specialtyType;
 
-	@ManyToOne(fetch = FetchType.EAGER)
-	@JoinColumn(name = "specialtyGroupId", referencedColumnName = "id")
-	private SpecialtyGroup specialtyGroup;
+	@Column(name = "specialtyGroupId")
+	private String specialtyGroupId;
 
 	public Long getId() {
 		return id;
@@ -97,20 +94,12 @@ public class Specialty implements Serializable {
 		return this;
 	}
 
-	public String getIntrepidId() {
-		return intrepidId;
+	public String getspecialtyGroupId() {
+		return specialtyGroupId;
 	}
 
-	public void setIntrepidId(String intrepidId) {
-		this.intrepidId = intrepidId;
-	}
-
-	public SpecialtyGroup getSpecialtyGroup() {
-		return specialtyGroup;
-	}
-
-	public void setSpecialtyGroup(SpecialtyGroup specialtyGroup) {
-		this.specialtyGroup = specialtyGroup;
+	public void setspecialtyGroupId(String specialtyGroupId) {
+		this.specialtyGroupId = specialtyGroupId;
 	}
 
 	@Override
@@ -137,12 +126,10 @@ public class Specialty implements Serializable {
 	public String toString() {
 		return "Specialty{" +
 				"id=" + id +
-				", intrepidId='" + intrepidId + '\'' +
-				", status=" + status +
-				", college='" + college + '\'' +
-				", nhsSpecialtyCode='" + nhsSpecialtyCode + '\'' +
-				", specialtyType=" + specialtyType +
-				", specialtyGroup=" + specialtyGroup +
+				", status='" + status + "'" +
+				", college='" + college + "'" +
+				", nhsSpecialtyCode='" + nhsSpecialtyCode + "'" +
+				", specialtyType='" + specialtyType + "'" +
 				'}';
 	}
 }
