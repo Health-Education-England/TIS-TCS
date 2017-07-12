@@ -41,6 +41,8 @@ public class SpecialtyGroupResourceIntTest {
 	private static final String DEFAULT_NAME = "AAAAAAAAAA";
 	private static final String UPDATED_NAME = "BBBBBBBBBB";
 
+	private static final String DEFAULT_INTREPID_ID = "123456";
+
 	@Autowired
 	private SpecialtyGroupRepository specialtyGroupRepository;
 
@@ -74,7 +76,8 @@ public class SpecialtyGroupResourceIntTest {
 	 */
 	public static SpecialtyGroup createEntity(EntityManager em) {
 		SpecialtyGroup specialtyGroup = new SpecialtyGroup()
-				.name(DEFAULT_NAME);
+				.name(DEFAULT_NAME)
+				.intrepidId(DEFAULT_INTREPID_ID);
 		return specialtyGroup;
 	}
 

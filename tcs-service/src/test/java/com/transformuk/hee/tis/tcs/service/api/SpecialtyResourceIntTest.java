@@ -1,15 +1,18 @@
 
 package com.transformuk.hee.tis.tcs.service.api;
 
-import com.transformuk.hee.tis.tcs.service.Application;
-import com.transformuk.hee.tis.tcs.service.exception.ExceptionTranslator;
-import com.transformuk.hee.tis.tcs.service.model.Specialty;
-import com.transformuk.hee.tis.tcs.service.repository.SpecialtyRepository;
-import com.transformuk.hee.tis.tcs.service.service.SpecialtyService;
-import com.transformuk.hee.tis.tcs.service.service.mapper.SpecialtyMapper;
 import com.transformuk.hee.tis.tcs.api.dto.SpecialtyDTO;
 import com.transformuk.hee.tis.tcs.api.enumeration.SpecialtyType;
 import com.transformuk.hee.tis.tcs.api.enumeration.Status;
+import com.transformuk.hee.tis.tcs.service.Application;
+import com.transformuk.hee.tis.tcs.service.exception.ExceptionTranslator;
+import com.transformuk.hee.tis.tcs.service.model.Specialty;
+import com.transformuk.hee.tis.tcs.service.model.SpecialtyGroup;
+import com.transformuk.hee.tis.tcs.service.repository.SpecialtyGroupRepository;
+import com.transformuk.hee.tis.tcs.service.repository.SpecialtyRepository;
+import com.transformuk.hee.tis.tcs.service.service.SpecialtyService;
+import com.transformuk.hee.tis.tcs.service.service.mapper.SpecialtyMapper;
+import org.apache.commons.codec.net.URLCodec;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -50,11 +53,17 @@ public class SpecialtyResourceIntTest {
 	private static final String DEFAULT_NHS_SPECIALTY_CODE = "AAAAAAAAAA";
 	private static final String UPDATED_NHS_SPECIALTY_CODE = "BBBBBBBBBB";
 
-	private static final SpecialtyType DEFAULT_SPECIALTY_TYPE = SpecialtyType.CURRICULUM;
+	private static final String DEFAULT_SPECIALTYGROUP_NAME = "DEFAULT GROUP";
+	private static final String DEFAULT_INTREPID_ID = "123456";
+
+	private static final SpecialtyType DEFAULT_SPECIALTY_TYPE = SpecialtyType.SUB_SPECIALTY;
 	private static final SpecialtyType UPDATED_SPECIALTY_TYPE = SpecialtyType.POST;
 
 	@Autowired
 	private SpecialtyRepository specialtyRepository;
+
+	@Autowired
+	private SpecialtyGroupRepository specialtyGroupRepository;
 
 	@Autowired
 	private SpecialtyMapper specialtyMapper;
@@ -84,12 +93,13 @@ public class SpecialtyResourceIntTest {
 	 * This is a static method, as tests for other entities might also need it,
 	 * if they test an entity which requires the current entity.
 	 */
-	public static Specialty createEntity(EntityManager em) {
+	public static Specialty createEntity() {
 		Specialty specialty = new Specialty()
 				.status(DEFAULT_STATUS)
 				.college(DEFAULT_COLLEGE)
 				.nhsSpecialtyCode(DEFAULT_NHS_SPECIALTY_CODE)
-				.specialtyType(DEFAULT_SPECIALTY_TYPE);
+				.specialtyType(DEFAULT_SPECIALTY_TYPE)
+				.intrepidId(DEFAULT_INTREPID_ID);
 		return specialty;
 	}
 
@@ -105,7 +115,7 @@ public class SpecialtyResourceIntTest {
 
 	@Before
 	public void initTest() {
-		specialty = createEntity(em);
+		specialty = createEntity();
 	}
 
 	@Test
@@ -182,6 +192,100 @@ public class SpecialtyResourceIntTest {
 				.andExpect(jsonPath("$.college").value(DEFAULT_COLLEGE.toString()))
 				.andExpect(jsonPath("$.nhsSpecialtyCode").value(DEFAULT_NHS_SPECIALTY_CODE.toString()))
 				.andExpect(jsonPath("$.specialtyType").value(DEFAULT_SPECIALTY_TYPE.toString()));
+	}
+
+	@Test
+	@Transactional
+	public void shouldTextSearch() throws Exception {
+		//given
+		// Initialize the database
+		specialtyRepository.saveAndFlush(specialty);
+		Specialty otherNameSpecialty = createEntity();
+		otherNameSpecialty.college("other college");
+		specialtyRepository.saveAndFlush(otherNameSpecialty);
+		//when & then
+		// Get all the specialtyList
+		restSpecialtyMockMvc.perform(get("/api/specialties?sort=id,desc&searchQuery=other"))
+				.andExpect(status().isOk())
+				.andExpect(jsonPath("$.[*].college").value("other college"));
+	}
+
+	@Test
+	@Transactional
+	public void shouldFilterColumns() throws Exception {
+		//given
+		// Initialize the database
+		specialtyRepository.saveAndFlush(specialty);
+		Specialty otherSpecialtyTypeSpecialty = createEntity();
+		otherSpecialtyTypeSpecialty.setSpecialtyType(SpecialtyType.CURRICULUM);
+		specialtyRepository.saveAndFlush(otherSpecialtyTypeSpecialty);
+
+		//when & then
+		String colFilters = new URLCodec().encode("{\"specialtyType\":[\"CURRICULUM\"]}");
+		// Get all the specialtyList
+		restSpecialtyMockMvc.perform(get("/api/specialties?sort=id,desc&columnFilters=" +
+				colFilters))
+				.andExpect(status().isOk())
+				.andExpect(jsonPath("$.[*].specialtyType").value("CURRICULUM"));
+	}
+
+	@Test
+	@Transactional
+	public void shouldFilterSpecialtyGroupColumns() throws Exception {
+		//given
+		// Initialize the database
+		SpecialtyGroup specialtyGroup = new SpecialtyGroup();
+		specialtyGroup.setName(DEFAULT_SPECIALTYGROUP_NAME);
+		specialtyGroupRepository.saveAndFlush(specialtyGroup);
+
+		specialtyRepository.saveAndFlush(specialty);
+		Specialty otherSpecialtyTypeSpecialty = createEntity();
+
+		otherSpecialtyTypeSpecialty.setSpecialtyGroup(specialtyGroup);
+		otherSpecialtyTypeSpecialty.setSpecialtyType(SpecialtyType.CURRICULUM);
+		specialtyRepository.saveAndFlush(otherSpecialtyTypeSpecialty);
+
+		//when & then
+		String colFilters = new URLCodec().encode("{\"specialtyGroup.name\":[\"" + DEFAULT_SPECIALTYGROUP_NAME + "\"]}");
+		// Get all the specialtyList
+		restSpecialtyMockMvc.perform(get("/api/specialties?sort=id,desc&columnFilters=" +
+				colFilters))
+				.andExpect(status().isOk())
+				.andExpect(jsonPath("$.[*].specialtyGroup.name").value(DEFAULT_SPECIALTYGROUP_NAME));
+	}
+
+	@Test
+	@Transactional
+	public void shouldTextSearchAndFilterColumns() throws Exception {
+		//given
+		// Initialize the database
+		specialtyRepository.saveAndFlush(specialty);
+		Specialty otherSpecialtyTypeSpecialty = createEntity();
+		otherSpecialtyTypeSpecialty.setSpecialtyType(SpecialtyType.PLACEMENT);
+		specialtyRepository.saveAndFlush(otherSpecialtyTypeSpecialty);
+		Specialty otherCollegeSpecialty = createEntity();
+		otherCollegeSpecialty.setCollege("other college");
+		otherCollegeSpecialty.setSpecialtyType(SpecialtyType.PLACEMENT);
+		specialtyRepository.saveAndFlush(otherCollegeSpecialty);
+		//when & then
+		String colFilters = new URLCodec().encode("{\"specialtyType\":[\"PLACEMENT\"]}");
+		// Get all the specialtyList
+		restSpecialtyMockMvc.perform(get("/api/specialties?sort=id,desc&searchQuery=other&columnFilters=" +
+				colFilters))
+				.andExpect(status().isOk())
+				.andExpect(jsonPath("$.[*].specialtyType").value("PLACEMENT"));
+	}
+
+	@Test
+	public void shouldComplainIfBadRequest() throws Exception {
+		//given
+		URLCodec codec = new URLCodec();
+		String colFilters = codec.encode("{\"status\":[\"malformed json\"");
+		//when & then
+		// Get all the programmeList
+		restSpecialtyMockMvc.perform(get("/api/specialties?sort=id,desc&columnFilters=" + colFilters))
+				.andExpect(status().isBadRequest())
+				.andExpect(jsonPath("$.message").value("Bad request"));
 	}
 
 	@Test

@@ -1,7 +1,10 @@
 package com.transformuk.hee.tis.tcs.service.model;
 
 
-import javax.persistence.*;
+import javax.persistence.Entity;
+import javax.persistence.GeneratedValue;
+import javax.persistence.GenerationType;
+import javax.persistence.Id;
 import java.io.Serializable;
 import java.util.Objects;
 
@@ -16,6 +19,8 @@ public class SpecialtyGroup implements Serializable {
 	@Id
 	@GeneratedValue(strategy = GenerationType.IDENTITY)
 	private Long id;
+
+	private String intrepidId;
 
 	private String name;
 
@@ -37,6 +42,19 @@ public class SpecialtyGroup implements Serializable {
 
 	public SpecialtyGroup name(String name) {
 		this.name = name;
+		return this;
+	}
+
+	public String getIntrepidId() {
+		return intrepidId;
+	}
+
+	public void setIntrepidId(String intrepidId) {
+		this.intrepidId = intrepidId;
+	}
+
+	public SpecialtyGroup intrepidId(String intrepidId) {
+		this.intrepidId = intrepidId;
 		return this;
 	}
 
@@ -64,7 +82,8 @@ public class SpecialtyGroup implements Serializable {
 	public String toString() {
 		return "SpecialtyGroup{" +
 				"id=" + id +
-				", name='" + name + "'" +
+				", intrepidId='" + intrepidId + '\'' +
+				", name='" + name + '\'' +
 				'}';
 	}
 }
