@@ -1,14 +1,16 @@
 package com.transformuk.hee.tis.tcs.service.api;
 
 import com.codahale.metrics.annotation.Timed;
-import com.fasterxml.jackson.databind.ObjectMapper;
 import com.google.common.collect.Lists;
 import com.transformuk.hee.tis.tcs.api.dto.CurriculumDTO;
+import com.transformuk.hee.tis.tcs.api.dto.validation.Create;
+import com.transformuk.hee.tis.tcs.api.dto.validation.Update;
 import com.transformuk.hee.tis.tcs.api.enumeration.AssessmentType;
 import com.transformuk.hee.tis.tcs.api.enumeration.CurriculumSubType;
 import com.transformuk.hee.tis.tcs.service.api.util.ColumnFilterUtil;
 import com.transformuk.hee.tis.tcs.service.api.util.HeaderUtil;
 import com.transformuk.hee.tis.tcs.service.api.util.PaginationUtil;
+import com.transformuk.hee.tis.tcs.service.api.validation.CurriculumValidator;
 import com.transformuk.hee.tis.tcs.service.model.ColumnFilter;
 import com.transformuk.hee.tis.tcs.service.service.CurriculumService;
 import io.github.jhipster.web.util.ResponseUtil;
@@ -20,12 +22,15 @@ import io.swagger.annotations.ApiResponses;
 import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
+import org.springframework.validation.annotation.Validated;
+import org.springframework.web.bind.MethodArgumentNotValidException;
 import org.springframework.web.bind.annotation.*;
 
 import javax.validation.Valid;
@@ -43,14 +48,23 @@ import static com.transformuk.hee.tis.tcs.service.api.util.StringUtil.sanitize;
  */
 @RestController
 @RequestMapping("/api")
+@Validated
 public class CurriculumResource {
 
 	private static final String ENTITY_NAME = "curriculum";
 	private final Logger log = LoggerFactory.getLogger(CurriculumResource.class);
 	private final CurriculumService curriculumService;
+	private final CurriculumValidator curriculumValidator;
 
-	public CurriculumResource(CurriculumService curriculumService) {
+	public CurriculumResource(CurriculumService curriculumService, CurriculumValidator curriculumValidator) {
 		this.curriculumService = curriculumService;
+		this.curriculumValidator = curriculumValidator;
+	}
+
+	@PostMapping("/curricula/derp")
+	@Timed
+	public ResponseEntity<CurriculumDTO> derp(@RequestBody @Validated(Create.class) CurriculumDTO curriculumDTO) throws URISyntaxException {
+		return new ResponseEntity<>(curriculumDTO, HttpStatus.OK);
 	}
 
 	/**
@@ -63,19 +77,25 @@ public class CurriculumResource {
 	@PostMapping("/curricula")
 	@Timed
 	@PreAuthorize("hasAuthority('curriculum:add:modify')")
-	public ResponseEntity<CurriculumDTO> createCurriculum(@RequestBody CurriculumDTO curriculumDTO) throws URISyntaxException {
+	public ResponseEntity<CurriculumDTO> createCurriculum(@RequestBody @Validated(Create.class) CurriculumDTO curriculumDTO) throws URISyntaxException, MethodArgumentNotValidException {
 		log.debug("REST request to save Curriculum : {}", curriculumDTO);
+		curriculumValidator.validate(curriculumDTO);
 		if (curriculumDTO.getId() != null) {
 			return ResponseEntity.badRequest().headers(HeaderUtil.createFailureAlert(ENTITY_NAME, "idexists", "A new curriculum cannot already have an ID")).body(null);
 		}
-		CurriculumDTO result = curriculumService.save(curriculumDTO);
-		return ResponseEntity.created(new URI("/api/curricula/" + result.getId()))
-				.headers(HeaderUtil.createEntityCreationAlert(ENTITY_NAME, result.getId().toString()))
-				.body(result);
+		try {
+			CurriculumDTO result = curriculumService.save(curriculumDTO);
+			return ResponseEntity.created(new URI("/api/curricula/" + result.getId()))
+					.headers(HeaderUtil.createEntityCreationAlert(ENTITY_NAME, result.getId().toString()))
+					.body(result);
+		} catch (DataIntegrityViolationException dive) {
+			log.error(dive.getMessage(), dive);
+			throw new IllegalArgumentException("Cannot create curriculum with the given specialty");
+		}
 	}
 
 	/**
-	 * PUT  /curricula : Updates an existing curriculum.
+	 * PUT  /curricula : Updates an existing curriculum or Creates if it doesn't exist.
 	 *
 	 * @param curriculumDTO the curriculumDTO to update
 	 * @return the ResponseEntity with status 200 (OK) and with body the updated curriculumDTO,
@@ -86,15 +106,22 @@ public class CurriculumResource {
 	@PutMapping("/curricula")
 	@Timed
 	@PreAuthorize("hasAuthority('curriculum:add:modify')")
-	public ResponseEntity<CurriculumDTO> updateCurriculum(@RequestBody CurriculumDTO curriculumDTO) throws URISyntaxException {
+	public ResponseEntity<CurriculumDTO> updateCurriculum(@RequestBody @Validated(Update.class) CurriculumDTO curriculumDTO) throws URISyntaxException, MethodArgumentNotValidException {
 		log.debug("REST request to update Curriculum : {}", curriculumDTO);
-		if (curriculumDTO.getId() == null) {
-			return createCurriculum(curriculumDTO);
+		curriculumValidator.validate(curriculumDTO);
+			try {
+			if (curriculumDTO.getId() == null) {
+				return createCurriculum(curriculumDTO);
+			}
+			CurriculumDTO result = curriculumService.save(curriculumDTO);
+			return ResponseEntity.ok()
+					.headers(HeaderUtil.createEntityUpdateAlert(ENTITY_NAME, curriculumDTO.getId().toString()))
+					.body(result);
+		} catch (DataIntegrityViolationException dive) {
+			log.error(dive.getMessage(), dive);
+			throw new IllegalArgumentException("Cannot update curriculum with the given specialty");
+
 		}
-		CurriculumDTO result = curriculumService.save(curriculumDTO);
-		return ResponseEntity.ok()
-				.headers(HeaderUtil.createEntityUpdateAlert(ENTITY_NAME, curriculumDTO.getId().toString()))
-				.body(result);
 	}
 
 	@ApiOperation(value = "Lists Curriculum data",
@@ -122,8 +149,8 @@ public class CurriculumResource {
 		log.debug("REST request to get a page of Curricula");
 
 		searchQuery = sanitize(searchQuery);
-		List<Class> filterEnumList = Lists.newArrayList(CurriculumSubType.class,AssessmentType.class);
-		List<ColumnFilter> columnFilters = ColumnFilterUtil.getColumnFilters(columnFilterJson,filterEnumList);
+		List<Class> filterEnumList = Lists.newArrayList(CurriculumSubType.class, AssessmentType.class);
+		List<ColumnFilter> columnFilters = ColumnFilterUtil.getColumnFilters(columnFilterJson, filterEnumList);
 		Page<CurriculumDTO> page;
 		if (StringUtils.isEmpty(searchQuery) && StringUtils.isEmpty(columnFilterJson)) {
 			page = curriculumService.findAll(pageable);
