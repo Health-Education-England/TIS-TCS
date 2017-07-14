@@ -17,6 +17,7 @@ import com.transformuk.hee.tis.tcs.service.service.CurriculumService;
 import com.transformuk.hee.tis.tcs.service.service.mapper.CurriculumMapper;
 import com.transformuk.hee.tis.tcs.service.service.mapper.SpecialtyMapper;
 import org.apache.commons.codec.net.URLCodec;
+import org.assertj.core.util.Lists;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -50,9 +51,11 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 public class CurriculumResourceIntTest {
 
 	private static final String DEFAULT_NAME = "AAAAAAAAAA";
+	private static final String DEFAULT_NAME_2 = "Another Curriculum Name";
 	private static final String UPDATED_NAME = "BBBBBBBBBB";
 
 	private static final String DEFAULT_INTREPID_ID = "1234";
+	private static final String DEFAULT_INTREPID_ID_2 = "1111";
 	private static final String UPDATED_INTREPID_ID = "4567";
 
 	private static final LocalDate DEFAULT_START = LocalDate.ofEpochDay(0L);
@@ -131,7 +134,25 @@ public class CurriculumResourceIntTest {
 		return curriculum;
 	}
 
-	public static Specialty createSpecialtyEntity(){
+	public static Curriculum createCurriculumEntity(String name, String intrepidId, LocalDate startDate,
+	                                                LocalDate endDate, CurriculumSubType curriculumSubType,
+	                                                AssessmentType assessmentType, Boolean doesThisCurrLeadToCct,
+	                                                Integer periodOfGrace) {
+		Curriculum curriculum = new Curriculum()
+				.name(name)
+				.intrepidId(intrepidId)
+				.start(startDate)
+				.end(endDate)
+				.curriculumSubType(curriculumSubType)
+				.assessmentType(assessmentType)
+				.doesThisCurriculumLeadToCct(doesThisCurrLeadToCct)
+				.periodOfGrace(periodOfGrace);
+
+		return curriculum;
+	}
+
+
+	public static Specialty createSpecialtyEntity() {
 		Specialty specialty = new Specialty()
 				.intrepidId(SPECIALTY_INTREPID_ID)
 				.status(Status.CURRENT)
@@ -153,7 +174,9 @@ public class CurriculumResourceIntTest {
 
 	@Before
 	public void initTest() {
-		curriculum = createCurriculumEntity();
+		curriculum = createCurriculumEntity(DEFAULT_NAME, DEFAULT_INTREPID_ID, DEFAULT_START, DEFAULT_END,
+				DEFAULT_CURRICULUM_SUB_TYPE, DEFAULT_ASSESSMENT_TYPE, DEFAULT_DOES_THIS_CURRICULUM_LEAD_TO_CCT,
+				DEFAULT_PERIOD_OF_GRACE);
 		specialty = createSpecialtyEntity();
 	}
 
@@ -351,7 +374,6 @@ public class CurriculumResourceIntTest {
 		curriculumList = curriculumRepository.findAll();
 		assertThat(curriculumList).hasSize(databaseSizeBeforeCreate);
 	}
-
 
 
 	@Test
@@ -638,6 +660,148 @@ public class CurriculumResourceIntTest {
 	@Transactional
 	public void equalsVerifier() throws Exception {
 		TestUtil.equalsVerifier(Curriculum.class);
+	}
+
+
+	@Test
+	@Transactional
+	public void bulkCreateShouldSucceedWhenDataIsValid() throws Exception {
+		Curriculum anotherCurriculum = new Curriculum()
+				.name(DEFAULT_NAME_2)
+				.intrepidId(DEFAULT_INTREPID_ID_2)
+				.start(DEFAULT_START)
+				.end(DEFAULT_END)
+				.curriculumSubType(DEFAULT_CURRICULUM_SUB_TYPE)
+				.assessmentType(DEFAULT_ASSESSMENT_TYPE)
+				.doesThisCurriculumLeadToCct(DEFAULT_DOES_THIS_CURRICULUM_LEAD_TO_CCT)
+				.periodOfGrace(DEFAULT_PERIOD_OF_GRACE);
+
+		int databaseSizeBeforeBulkCreate = curriculumRepository.findAll().size();
+		int expectedDatabaseSizeAfterBulkCreate = databaseSizeBeforeBulkCreate + 2;
+
+		Specialty savedSpecialty = specialtyRepository.save(specialty);
+		CurriculumDTO curriculumDTO = linkCurriculumToSpecialty(curriculum, savedSpecialty.getId());
+		CurriculumDTO curriculum2DTO = linkCurriculumToSpecialty(anotherCurriculum, savedSpecialty.getId());
+
+		List<CurriculumDTO> payload = Lists.newArrayList(curriculumDTO, curriculum2DTO);
+		restCurriculumMockMvc.perform(post("/api/bulk-curricula")
+				.contentType(TestUtil.APPLICATION_JSON_UTF8)
+				.content(TestUtil.convertObjectToJsonBytes(payload)))
+				.andExpect(status().isOk());
+
+		// Validate that both Curricula are in the database
+		List<Curriculum> curriculumList = curriculumRepository.findAll();
+		assertThat(curriculumList).hasSize(expectedDatabaseSizeAfterBulkCreate);
+	}
+
+	@Test
+	@Transactional
+	public void bulkCreateShouldFailWhenDataIsHasAtLeastOneInvalidDto() throws Exception {
+		Curriculum anotherCurriculum = new Curriculum()
+				.name(DEFAULT_NAME_2)
+				.intrepidId(DEFAULT_INTREPID_ID_2)
+				.start(DEFAULT_START)
+				.end(DEFAULT_END)
+				.curriculumSubType(DEFAULT_CURRICULUM_SUB_TYPE)
+				.assessmentType(DEFAULT_ASSESSMENT_TYPE)
+				.doesThisCurriculumLeadToCct(DEFAULT_DOES_THIS_CURRICULUM_LEAD_TO_CCT)
+				.periodOfGrace(DEFAULT_PERIOD_OF_GRACE);
+
+		//set id to make this curricula invalid for creation
+		anotherCurriculum.setId(123456L);
+
+		int expectedDatabaseSizeAfterBulkCreate = curriculumRepository.findAll().size();
+
+		Specialty savedSpecialty = specialtyRepository.save(specialty);
+		CurriculumDTO curriculumDTO = linkCurriculumToSpecialty(curriculum, savedSpecialty.getId());
+		CurriculumDTO curriculum2DTO = linkCurriculumToSpecialty(anotherCurriculum, savedSpecialty.getId());
+
+		List<CurriculumDTO> payload = Lists.newArrayList(curriculumDTO, curriculum2DTO);
+		restCurriculumMockMvc.perform(post("/api/bulk-curricula")
+				.contentType(TestUtil.APPLICATION_JSON_UTF8)
+				.content(TestUtil.convertObjectToJsonBytes(payload)))
+				.andExpect(status().isBadRequest());
+
+		// Validate that both Curricula are in the database
+		List<Curriculum> curriculumList = curriculumRepository.findAll();
+		assertThat(curriculumList).hasSize(expectedDatabaseSizeAfterBulkCreate);
+	}
+
+	@Test
+	@Transactional
+	public void bulkUpdateShouldSucceedWhenDataIsValid() throws Exception {
+		Curriculum anotherCurriculum = new Curriculum()
+				.name(DEFAULT_NAME_2)
+				.intrepidId(DEFAULT_INTREPID_ID_2)
+				.start(DEFAULT_START)
+				.end(DEFAULT_END)
+				.curriculumSubType(DEFAULT_CURRICULUM_SUB_TYPE)
+				.assessmentType(DEFAULT_ASSESSMENT_TYPE)
+				.doesThisCurriculumLeadToCct(DEFAULT_DOES_THIS_CURRICULUM_LEAD_TO_CCT)
+				.periodOfGrace(DEFAULT_PERIOD_OF_GRACE);
+
+		Specialty savedSpecialty = specialtyRepository.save(specialty);
+		CurriculumDTO curriculumDTO = linkCurriculumToSpecialty(curriculum, savedSpecialty.getId());
+		CurriculumDTO curriculum2DTO = linkCurriculumToSpecialty(anotherCurriculum, savedSpecialty.getId());
+
+		//ensure curricula is in the database before an update
+		Curriculum savedCurriculum = curriculumRepository.saveAndFlush(this.curriculum);
+		Curriculum anotherSavedCurriculum = curriculumRepository.saveAndFlush(anotherCurriculum);
+
+		//set the ids for the Dtos
+		curriculumDTO.setId(savedCurriculum.getId());
+		curriculum2DTO.setId(anotherSavedCurriculum.getId());
+
+		int expectedDatabaseSizeAfterBulkCreate = curriculumRepository.findAll().size();
+
+		List<CurriculumDTO> payload = Lists.newArrayList(curriculumDTO, curriculum2DTO);
+		restCurriculumMockMvc.perform(put("/api/bulk-curricula")
+				.contentType(TestUtil.APPLICATION_JSON_UTF8)
+				.content(TestUtil.convertObjectToJsonBytes(payload)))
+				.andExpect(status().isOk());
+
+		// Validate that both Curricula are still in the database
+		List<Curriculum> curriculumList = curriculumRepository.findAll();
+		assertThat(curriculumList).hasSize(expectedDatabaseSizeAfterBulkCreate);
+	}
+
+	@Test
+	@Transactional
+	public void bulkUpdateShouldFailWhenDataHasAtLeastOneInvalidDto() throws Exception {
+		Curriculum anotherCurriculum = new Curriculum()
+				.name(DEFAULT_NAME_2)
+				.intrepidId(DEFAULT_INTREPID_ID_2)
+				.start(DEFAULT_START)
+				.end(DEFAULT_END)
+				.curriculumSubType(DEFAULT_CURRICULUM_SUB_TYPE)
+				.assessmentType(DEFAULT_ASSESSMENT_TYPE)
+				.doesThisCurriculumLeadToCct(DEFAULT_DOES_THIS_CURRICULUM_LEAD_TO_CCT)
+				.periodOfGrace(DEFAULT_PERIOD_OF_GRACE);
+
+		Specialty savedSpecialty = specialtyRepository.save(specialty);
+		CurriculumDTO curriculumDTO = linkCurriculumToSpecialty(curriculum, savedSpecialty.getId());
+		CurriculumDTO curriculum2DTO = linkCurriculumToSpecialty(anotherCurriculum, savedSpecialty.getId());
+
+		//ensure curricula is in the database before an update
+		Curriculum savedCurriculum = curriculumRepository.saveAndFlush(this.curriculum);
+		Curriculum anotherSavedCurriculum = curriculumRepository.saveAndFlush(anotherCurriculum);
+
+		//set the ids for the Dtos
+		curriculumDTO.setId(savedCurriculum.getId());
+		//make this curricula invalid
+		curriculum2DTO.setId(null);
+
+		int expectedDatabaseSizeAfterBulkCreate = curriculumRepository.findAll().size();
+
+		List<CurriculumDTO> payload = Lists.newArrayList(curriculumDTO, curriculum2DTO);
+		restCurriculumMockMvc.perform(put("/api/bulk-curricula")
+				.contentType(TestUtil.APPLICATION_JSON_UTF8)
+				.content(TestUtil.convertObjectToJsonBytes(payload)))
+				.andExpect(status().isBadRequest());
+
+		// Validate that both Curricula are still in the database
+		List<Curriculum> curriculumList = curriculumRepository.findAll();
+		assertThat(curriculumList).hasSize(expectedDatabaseSizeAfterBulkCreate);
 	}
 
 	private CurriculumDTO linkCurriculumToSpecialty(Curriculum curriculum, Long specialtyId) {
