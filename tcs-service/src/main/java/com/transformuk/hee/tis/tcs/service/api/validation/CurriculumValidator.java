@@ -27,6 +27,13 @@ public class CurriculumValidator {
 		this.specialtyRepository = specialtyRepository;
 	}
 
+	/**
+	 * Custom validator used during create and update rest calls. Most structural validation is already on the DTO itself.
+	 * This validation checks that the provided specialty is valid and that it exists
+	 *
+	 * @param curriculumDTO The provided curriculum to validate
+	 * @throws MethodArgumentNotValidException
+	 */
 	public void validate(CurriculumDTO curriculumDTO) throws MethodArgumentNotValidException {
 		List<FieldError> fieldErrors = new ArrayList<>();
 		fieldErrors.addAll(checkSpecialty(curriculumDTO));
@@ -40,7 +47,6 @@ public class CurriculumValidator {
 
 	private List<FieldError> checkSpecialty(CurriculumDTO curriculumDTO) {
 		List<FieldError> fieldErrors = new ArrayList<>();
-		// then check the curricula
 		SpecialtyDTO specialty = curriculumDTO.getSpecialty();
 		if (specialty != null ) {
 			if(specialty.getId() == null || specialty.getId() < 0){
