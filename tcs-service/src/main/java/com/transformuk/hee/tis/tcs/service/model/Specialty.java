@@ -169,6 +169,7 @@ public class Specialty implements Serializable {
 				", nhsSpecialtyCode='" + nhsSpecialtyCode + '\'' +
 				", specialtyType=" + specialtyType +
 				", specialtyGroup=" + specialtyGroup +
+				", name=" + name +
 				'}';
 	}
 }

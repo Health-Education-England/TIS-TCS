@@ -138,6 +138,7 @@ public class SpecialtyDTO implements Serializable {
 				", nhsSpecialtyCode='" + nhsSpecialtyCode + '\'' +
 				", specialtyType=" + specialtyType +
 				", specialtyGroup=" + specialtyGroup +
+				", name=" + name +
 				'}';
 	}
 }
