@@ -2,6 +2,7 @@ package com.transformuk.hee.tis.tcs.service.api;
 
 import com.transformuk.hee.tis.tcs.api.enumeration.AssessmentType;
 import com.transformuk.hee.tis.tcs.api.enumeration.CurriculumSubType;
+import com.transformuk.hee.tis.tcs.api.enumeration.SpecialtyType;
 import io.swagger.annotations.ApiOperation;
 import io.swagger.annotations.ApiResponse;
 import io.swagger.annotations.ApiResponses;
@@ -40,5 +41,15 @@ public class EnumTypeResource {
 		return new ResponseEntity<>(CurriculumSubType.values(), HttpStatus.OK);
 	}
 
+	@ApiOperation(value = "Lists all Specialty Types",
+			notes = "Returns a list of all available Specialty Types",
+			response = ResponseEntity.class, responseContainer = "List")
+	@ApiResponses(value = {
+			@ApiResponse(code = 200, message = "All Specialty Types", response = ResponseEntity.class)})
+	@RequestMapping("/specialty-types")
+	@PreAuthorize("hasAuthority('tcs:view:entities')")
+	public ResponseEntity<SpecialtyType[]> getAllSpecialtyTypes(){
+		return new ResponseEntity<>(SpecialtyType.values(), HttpStatus.OK);
+	}
 
 }

@@ -1,8 +1,14 @@
 package com.transformuk.hee.tis.tcs.api.dto;
 
+import com.transformuk.hee.tis.tcs.api.dto.validation.Create;
+import com.transformuk.hee.tis.tcs.api.dto.validation.Update;
 import com.transformuk.hee.tis.tcs.api.enumeration.SpecialtyType;
 import com.transformuk.hee.tis.tcs.api.enumeration.Status;
 
+import javax.validation.constraints.DecimalMin;
+import javax.validation.constraints.NotNull;
+import javax.validation.constraints.Null;
+import javax.validation.constraints.Size;
 import java.io.Serializable;
 import java.util.Objects;
 
@@ -11,19 +17,29 @@ import java.util.Objects;
  */
 public class SpecialtyDTO implements Serializable {
 
+	@NotNull(groups = Update.class, message = "Id cannot be null when updating")
+	@Null(groups = Create.class, message = "Id must be null when creating")
+	@DecimalMin(value = "0", groups = Update.class, message = "Id must not be negative")
 	private Long id;
 
 	private String intrepidId;
 
+	@NotNull(groups = Update.class, message = "Status cannot be null when updating")
 	private Status status;
 
 	private String college;
 
+	@NotNull(groups = {Create.class, Update.class}, message = "nhsSpecialtyCode cannot be null")
 	private String nhsSpecialtyCode;
 
+	@NotNull(groups = {Create.class, Update.class}, message = "SpecialtyType cannot be null")
 	private SpecialtyType specialtyType;
 
 	private SpecialtyGroupDTO specialtyGroup;
+
+	@NotNull(groups = {Create.class, Update.class}, message = "Name cannot be null")
+	@Size(groups = {Create.class, Update.class}, min = 1, max = 100, message = "Name cannot be less than 1 and more than 100 characters")
+	private String name;
 
 	public Long getId() {
 		return id;
@@ -79,6 +95,14 @@ public class SpecialtyDTO implements Serializable {
 
 	public void setSpecialtyGroup(SpecialtyGroupDTO specialtyGroup) {
 		this.specialtyGroup = specialtyGroup;
+	}
+
+	public String getName() {
+		return name;
+	}
+
+	public void setName(String name) {
+		this.name = name;
 	}
 
 	@Override

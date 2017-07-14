@@ -108,7 +108,6 @@ public class CurriculumResource {
 		} catch (DataIntegrityViolationException dive) {
 			log.error(dive.getMessage(), dive);
 			throw new IllegalArgumentException("Cannot update curriculum with the given specialty");
-
 		}
 	}
 
