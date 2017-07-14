@@ -1,8 +1,13 @@
 package com.transformuk.hee.tis.tcs.api.dto;
 
+import com.transformuk.hee.tis.tcs.api.dto.validation.Create;
+import com.transformuk.hee.tis.tcs.api.dto.validation.Update;
 import com.transformuk.hee.tis.tcs.api.enumeration.AssessmentType;
 import com.transformuk.hee.tis.tcs.api.enumeration.CurriculumSubType;
 
+import javax.validation.constraints.DecimalMin;
+import javax.validation.constraints.NotNull;
+import javax.validation.constraints.Null;
 import java.io.Serializable;
 import java.time.LocalDate;
 import java.util.Objects;
@@ -12,10 +17,14 @@ import java.util.Objects;
  */
 public class CurriculumDTO implements Serializable {
 
+	@NotNull(groups = Update.class, message = "Id must not be null when updating a curriculum")
+	@DecimalMin(value = "0", groups = Update.class, message = "Id must not be negative")
+	@Null(groups = Create.class, message = "Id must be null when creating a new curriculum")
 	private Long id;
 
 	private String intrepidId;
 
+	@NotNull(groups = {Create.class, Update.class}, message = "name must not be null")
 	private String name;
 
 	private LocalDate start;
@@ -24,12 +33,17 @@ public class CurriculumDTO implements Serializable {
 
 	private CurriculumSubType curriculumSubType;
 
+	@NotNull(groups = {Create.class, Update.class}, message = "assessmentType must not be null")
 	private AssessmentType assessmentType;
 
+	@NotNull(groups = {Create.class, Update.class}, message = "doesThisCurriculumLeadToCct must not be null")
 	private Boolean doesThisCurriculumLeadToCct;
 
+	@DecimalMin(value = "0", groups = {Create.class, Update.class}, message = "periodOfGrace must not be negative")
+	@NotNull(groups = {Create.class, Update.class}, message = "periodOfGrace must not be null")
 	private Integer periodOfGrace;
 
+	@NotNull(groups = {Create.class, Update.class}, message = "specialty must not be null")
 	private SpecialtyDTO specialty;
 
 	public Long getId() {

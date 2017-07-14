@@ -123,7 +123,7 @@ public class ProgrammeResourceIntTest {
 	@Before
 	public void initTest() {
 		programme = createEntity();
-		curriculum = CurriculumResourceIntTest.createEntity();
+		curriculum = CurriculumResourceIntTest.createCurriculumEntity();
 	}
 
 	@Test
@@ -258,8 +258,8 @@ public class ProgrammeResourceIntTest {
 	public void createProgrammeWithCurricula() throws Exception {
 		int databaseSizeBeforeCreate = programmeRepository.findAll().size();
 		Programme programme = createEntity();
-		Curriculum curriculum1 = curriculumRepository.saveAndFlush(CurriculumResourceIntTest.createEntity());
-		Curriculum curriculum2 = curriculumRepository.saveAndFlush(CurriculumResourceIntTest.createEntity());
+		Curriculum curriculum1 = curriculumRepository.saveAndFlush(CurriculumResourceIntTest.createCurriculumEntity());
+		Curriculum curriculum2 = curriculumRepository.saveAndFlush(CurriculumResourceIntTest.createCurriculumEntity());
 		programme.setCurricula(Sets.newHashSet(curriculum1, curriculum2));
 
 		// Create the Programme
@@ -288,8 +288,8 @@ public class ProgrammeResourceIntTest {
 	public void shouldComplainIfBadProgrammeWithCurriculaRequest() throws Exception {
 		//given
 		Programme programme = createEntity();
-		Curriculum curriculum1 = curriculumRepository.saveAndFlush(CurriculumResourceIntTest.createEntity());
-		Curriculum curriculum2 = curriculumRepository.saveAndFlush(CurriculumResourceIntTest.createEntity());
+		Curriculum curriculum1 = curriculumRepository.saveAndFlush(CurriculumResourceIntTest.createCurriculumEntity());
+		Curriculum curriculum2 = curriculumRepository.saveAndFlush(CurriculumResourceIntTest.createCurriculumEntity());
 		curriculum1.setId(-1L);
 		curriculum2.setId(-2L);
 		programme.setCurricula(Sets.newHashSet(curriculum1, curriculum2));
@@ -308,8 +308,8 @@ public class ProgrammeResourceIntTest {
 	public void bulkCreateProgrammeWithCurricula() throws Exception {
 		int databaseSizeBeforeCreate = programmeRepository.findAll().size();
 		Programme programme = createEntity();
-		Curriculum curriculum1 = curriculumRepository.saveAndFlush(CurriculumResourceIntTest.createEntity());
-		Curriculum curriculum2 = curriculumRepository.saveAndFlush(CurriculumResourceIntTest.createEntity());
+		Curriculum curriculum1 = curriculumRepository.saveAndFlush(CurriculumResourceIntTest.createCurriculumEntity());
+		Curriculum curriculum2 = curriculumRepository.saveAndFlush(CurriculumResourceIntTest.createCurriculumEntity());
 		programme.setCurricula(Sets.newHashSet(curriculum1, curriculum2));
 
 		// Create the Programme
@@ -472,9 +472,9 @@ public class ProgrammeResourceIntTest {
 	public void updateProgrammeWithCurricula() throws Exception {
 		// Initialize the database
 		Programme programme = createEntity();
-		Curriculum curriculum1 = curriculumRepository.saveAndFlush(CurriculumResourceIntTest.createEntity());
-		Curriculum curriculum2 = curriculumRepository.saveAndFlush(CurriculumResourceIntTest.createEntity());
-		Curriculum curriculum3 = curriculumRepository.saveAndFlush(CurriculumResourceIntTest.createEntity());
+		Curriculum curriculum1 = curriculumRepository.saveAndFlush(CurriculumResourceIntTest.createCurriculumEntity());
+		Curriculum curriculum2 = curriculumRepository.saveAndFlush(CurriculumResourceIntTest.createCurriculumEntity());
+		Curriculum curriculum3 = curriculumRepository.saveAndFlush(CurriculumResourceIntTest.createCurriculumEntity());
 		programme.setCurricula(Sets.newHashSet(curriculum1, curriculum2));
 
 		programmeRepository.saveAndFlush(programme);
@@ -517,9 +517,9 @@ public class ProgrammeResourceIntTest {
 	public void bulkUpdateProgrammeWithCurricula() throws Exception {
 		int databaseSizeBeforeCreate = programmeRepository.findAll().size();
 		Programme programme1 = createEntity();
-		Curriculum curriculum1 = curriculumRepository.saveAndFlush(CurriculumResourceIntTest.createEntity());
-		Curriculum curriculum2 = curriculumRepository.saveAndFlush(CurriculumResourceIntTest.createEntity());
-		Curriculum curriculum3 = curriculumRepository.saveAndFlush(CurriculumResourceIntTest.createEntity());
+		Curriculum curriculum1 = curriculumRepository.saveAndFlush(CurriculumResourceIntTest.createCurriculumEntity());
+		Curriculum curriculum2 = curriculumRepository.saveAndFlush(CurriculumResourceIntTest.createCurriculumEntity());
+		Curriculum curriculum3 = curriculumRepository.saveAndFlush(CurriculumResourceIntTest.createCurriculumEntity());
 		programme1.setCurricula(Sets.newHashSet(curriculum1, curriculum2));
 		Programme programme2 = createEntity();
 		programme1.setCurricula(Sets.newHashSet(curriculum2, curriculum3));
