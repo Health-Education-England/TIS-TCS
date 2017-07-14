@@ -61,12 +61,6 @@ public class CurriculumResource {
 		this.curriculumValidator = curriculumValidator;
 	}
 
-	@PostMapping("/curricula/derp")
-	@Timed
-	public ResponseEntity<CurriculumDTO> derp(@RequestBody @Validated(Create.class) CurriculumDTO curriculumDTO) throws URISyntaxException {
-		return new ResponseEntity<>(curriculumDTO, HttpStatus.OK);
-	}
-
 	/**
 	 * POST  /curricula : Create a new curriculum.
 	 *
