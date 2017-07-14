@@ -74,9 +74,6 @@ public class CurriculumResource {
 	public ResponseEntity<CurriculumDTO> createCurriculum(@RequestBody @Validated(Create.class) CurriculumDTO curriculumDTO) throws URISyntaxException, MethodArgumentNotValidException {
 		log.debug("REST request to save Curriculum : {}", curriculumDTO);
 		curriculumValidator.validate(curriculumDTO);
-		if (curriculumDTO.getId() != null) {
-			return ResponseEntity.badRequest().headers(HeaderUtil.createFailureAlert(ENTITY_NAME, "idexists", "A new curriculum cannot already have an ID")).body(null);
-		}
 		try {
 			CurriculumDTO result = curriculumService.save(curriculumDTO);
 			return ResponseEntity.created(new URI("/api/curricula/" + result.getId()))
