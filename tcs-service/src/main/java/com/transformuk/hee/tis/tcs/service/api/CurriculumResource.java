@@ -103,10 +103,7 @@ public class CurriculumResource {
 	public ResponseEntity<CurriculumDTO> updateCurriculum(@RequestBody @Validated(Update.class) CurriculumDTO curriculumDTO) throws URISyntaxException, MethodArgumentNotValidException {
 		log.debug("REST request to update Curriculum : {}", curriculumDTO);
 		curriculumValidator.validate(curriculumDTO);
-			try {
-			if (curriculumDTO.getId() == null) {
-				return createCurriculum(curriculumDTO);
-			}
+		try {
 			CurriculumDTO result = curriculumService.save(curriculumDTO);
 			return ResponseEntity.ok()
 					.headers(HeaderUtil.createEntityUpdateAlert(ENTITY_NAME, curriculumDTO.getId().toString()))
