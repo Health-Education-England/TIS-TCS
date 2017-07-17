@@ -195,7 +195,16 @@ public class SpecialtyResourceIntTest {
 		List<Specialty> specialtyList = specialtyRepository.findAll();
 		assertThat(specialtyList).hasSize(databaseSizeBeforeCreate);
 
-		//when specialty code is blank
+
+	}
+
+	@Test
+	@Transactional
+	public void createSpecialtyShouldFailWithBlankSpecialtyCode() throws Exception {
+		int databaseSizeBeforeCreate = specialtyRepository.findAll().size();
+		SpecialtyGroup specialtyGroupEntity = createSpecialtyGroupEntity();
+		specialtyGroupEntity = specialtyGroupRepository.saveAndFlush(specialtyGroupEntity);
+		SpecialtyDTO specialtyDTO = linkSpecialtyToSpecialtyGroup(specialty, specialtyGroupEntity.getId());
 		specialtyDTO.setNhsSpecialtyCode("             ");
 
 		// An entity with no nhs specialty code cannot be created
@@ -206,10 +215,9 @@ public class SpecialtyResourceIntTest {
 				.andExpect(status().isBadRequest());
 
 		// Validate that there are no new entities created
-		specialtyList = specialtyRepository.findAll();
+		List<Specialty> specialtyList = specialtyRepository.findAll();
 		assertThat(specialtyList).hasSize(databaseSizeBeforeCreate);
 	}
-
 
 	@Test
 	@Transactional
@@ -253,7 +261,16 @@ public class SpecialtyResourceIntTest {
 		assertThat(specialtyList).hasSize(databaseSizeBeforeCreate);
 
 
-		//when name is blank
+	}
+
+	@Test
+	@Transactional
+	public void createSpecialtyShouldFailWithBlankName() throws Exception {
+		int databaseSizeBeforeCreate = specialtyRepository.findAll().size();
+		SpecialtyGroup specialtyGroupEntity = createSpecialtyGroupEntity();
+		specialtyGroupEntity = specialtyGroupRepository.saveAndFlush(specialtyGroupEntity);
+
+		SpecialtyDTO specialtyDTO = linkSpecialtyToSpecialtyGroup(specialty, specialtyGroupEntity.getId());
 		specialtyDTO.setName("         ");
 
 		// An entity cannot be created with name as spaces
@@ -264,7 +281,7 @@ public class SpecialtyResourceIntTest {
 				.andExpect(status().isBadRequest());
 
 		// Validate that there are no new entities created
-		specialtyList = specialtyRepository.findAll();
+		List<Specialty> specialtyList = specialtyRepository.findAll();
 		assertThat(specialtyList).hasSize(databaseSizeBeforeCreate);
 	}
 
