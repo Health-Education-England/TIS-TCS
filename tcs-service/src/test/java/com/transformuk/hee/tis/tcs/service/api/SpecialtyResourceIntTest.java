@@ -1,4 +1,3 @@
-
 package com.transformuk.hee.tis.tcs.service.api;
 
 import com.google.common.collect.Lists;
@@ -47,23 +46,19 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 @SpringBootTest(classes = Application.class)
 public class SpecialtyResourceIntTest {
 
+	private static final String VERY_LONG_STRING = "qwertyuioplkjhgfdsazxcvbnmqwertyuioplkjhgfdsazxcvbnmqwertyuioplkjhgfdsazxcvbnmqwertyuioplkjhgfdsazxcvbnmqwertyuioplkjhgfdsazxcvbnm";
 	private static final Status DEFAULT_STATUS = Status.CURRENT;
 	private static final Status UPDATED_STATUS = Status.INACTIVE;
-
 	private static final String DEFAULT_COLLEGE = "AAAAAAAAAA";
 	private static final String UPDATED_COLLEGE = "BBBBBBBBBB";
-
 	private static final String DEFAULT_NHS_SPECIALTY_CODE = "AAAAAAAAAA";
 	private static final String UPDATED_NHS_SPECIALTY_CODE = "BBBBBBBBBB";
-
 	private static final String DEFAULT_SPECIALTYGROUP_NAME = "DEFAULT GROUP";
 	private static final String DEFAULT_INTREPID_ID = "123456";
 	private static final String DEFAULT_NAME = "SPECIALTY_NAME";
-
 	private static final SpecialtyType DEFAULT_SPECIALTY_TYPE = SpecialtyType.SUB_SPECIALTY;
 	private static final SpecialtyType UPDATED_SPECIALTY_TYPE = SpecialtyType.POST;
 	private static final String UPDATED_NAME = "UPDATED NAME";
-	public static final String VERY_LONG_STRING = "qwertyuioplkjhgfdsazxcvbnmqwertyuioplkjhgfdsazxcvbnmqwertyuioplkjhgfdsazxcvbnmqwertyuioplkjhgfdsazxcvbnmqwertyuioplkjhgfdsazxcvbnm";
 
 	@Autowired
 	private SpecialtyRepository specialtyRepository;
@@ -113,7 +108,7 @@ public class SpecialtyResourceIntTest {
 		return specialty;
 	}
 
-	public static SpecialtyGroup createSpecialtyGroupEntity(){
+	public static SpecialtyGroup createSpecialtyGroupEntity() {
 		SpecialtyGroup specialtyGroup = new SpecialtyGroup()
 				.intrepidId("123333");
 
@@ -185,18 +180,33 @@ public class SpecialtyResourceIntTest {
 	public void createSpecialtyShouldFailWithNoSpecialtyCode() throws Exception {
 		int databaseSizeBeforeCreate = specialtyRepository.findAll().size();
 		SpecialtyGroup specialtyGroupEntity = createSpecialtyGroupEntity();
+		specialtyGroupEntity = specialtyGroupRepository.saveAndFlush(specialtyGroupEntity);
 		SpecialtyDTO specialtyDTO = linkSpecialtyToSpecialtyGroup(specialty, specialtyGroupEntity.getId());
 		specialtyDTO.setNhsSpecialtyCode(null);
 
-		// An entity with an existing ID cannot be created, so this API call must fail
+		// An entity with no nhs specialty code cannot be created
 		restSpecialtyMockMvc.perform(post("/api/specialties")
 				.contentType(TestUtil.APPLICATION_JSON_UTF8)
 				.content(TestUtil.convertObjectToJsonBytes(specialtyDTO)))
 				.andExpect(jsonPath("$.fieldErrors[:1].field").value("nhsSpecialtyCode"))
 				.andExpect(status().isBadRequest());
 
-		// Validate the Alice in the database
+		// Validate that there are no new entities created
 		List<Specialty> specialtyList = specialtyRepository.findAll();
+		assertThat(specialtyList).hasSize(databaseSizeBeforeCreate);
+
+		//when specialty code is blank
+		specialtyDTO.setNhsSpecialtyCode("             ");
+
+		// An entity with no nhs specialty code cannot be created
+		restSpecialtyMockMvc.perform(post("/api/specialties")
+				.contentType(TestUtil.APPLICATION_JSON_UTF8)
+				.content(TestUtil.convertObjectToJsonBytes(specialtyDTO)))
+				.andExpect(jsonPath("$.fieldErrors[:1].field").value("nhsSpecialtyCode"))
+				.andExpect(status().isBadRequest());
+
+		// Validate that there are no new entities created
+		specialtyList = specialtyRepository.findAll();
 		assertThat(specialtyList).hasSize(databaseSizeBeforeCreate);
 	}
 
@@ -209,14 +219,14 @@ public class SpecialtyResourceIntTest {
 		SpecialtyDTO specialtyDTO = linkSpecialtyToSpecialtyGroup(specialty, specialtyGroupEntity.getId());
 		specialtyDTO.setSpecialtyType(null);
 
-		// An entity with an existing ID cannot be created, so this API call must fail
+		// An entity with no specialty type cannot be created
 		restSpecialtyMockMvc.perform(post("/api/specialties")
 				.contentType(TestUtil.APPLICATION_JSON_UTF8)
 				.content(TestUtil.convertObjectToJsonBytes(specialtyDTO)))
 				.andExpect(jsonPath("$.fieldErrors[:1].field").value("specialtyType"))
 				.andExpect(status().isBadRequest());
 
-		// Validate the Alice in the database
+		// Validate that there are no new entities created
 		List<Specialty> specialtyList = specialtyRepository.findAll();
 		assertThat(specialtyList).hasSize(databaseSizeBeforeCreate);
 	}
@@ -226,18 +236,35 @@ public class SpecialtyResourceIntTest {
 	public void createSpecialtyShouldFailWithNoName() throws Exception {
 		int databaseSizeBeforeCreate = specialtyRepository.findAll().size();
 		SpecialtyGroup specialtyGroupEntity = createSpecialtyGroupEntity();
+		specialtyGroupEntity = specialtyGroupRepository.saveAndFlush(specialtyGroupEntity);
+
 		SpecialtyDTO specialtyDTO = linkSpecialtyToSpecialtyGroup(specialty, specialtyGroupEntity.getId());
 		specialtyDTO.setName(null);
 
-		// An entity with an existing ID cannot be created, so this API call must fail
+		// An entity with no name cannot be created
 		restSpecialtyMockMvc.perform(post("/api/specialties")
 				.contentType(TestUtil.APPLICATION_JSON_UTF8)
 				.content(TestUtil.convertObjectToJsonBytes(specialtyDTO)))
 				.andExpect(jsonPath("$.fieldErrors[:1].field").value("name"))
 				.andExpect(status().isBadRequest());
 
-		// Validate the Alice in the database
+		// Validate that there are no new entities created
 		List<Specialty> specialtyList = specialtyRepository.findAll();
+		assertThat(specialtyList).hasSize(databaseSizeBeforeCreate);
+
+
+		//when name is blank
+		specialtyDTO.setName("         ");
+
+		// An entity cannot be created with name as spaces
+		restSpecialtyMockMvc.perform(post("/api/specialties")
+				.contentType(TestUtil.APPLICATION_JSON_UTF8)
+				.content(TestUtil.convertObjectToJsonBytes(specialtyDTO)))
+				.andExpect(jsonPath("$.fieldErrors[:1].field").value("name"))
+				.andExpect(status().isBadRequest());
+
+		// Validate that there are no new entities created
+		specialtyList = specialtyRepository.findAll();
 		assertThat(specialtyList).hasSize(databaseSizeBeforeCreate);
 	}
 
