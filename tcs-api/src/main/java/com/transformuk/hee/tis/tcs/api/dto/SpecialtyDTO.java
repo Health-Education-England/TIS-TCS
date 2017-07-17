@@ -31,7 +31,6 @@ public class SpecialtyDTO implements Serializable {
 	private String college;
 
 	@NotBlank(groups = {Create.class, Update.class}, message = "nhsSpecialtyCode cannot be blank")
-	@NotNull(groups = {Create.class, Update.class}, message = "nhsSpecialtyCode cannot be null")
 	private String nhsSpecialtyCode;
 
 	@NotNull(groups = {Create.class, Update.class}, message = "SpecialtyType cannot be null")
@@ -40,7 +39,6 @@ public class SpecialtyDTO implements Serializable {
 	private SpecialtyGroupDTO specialtyGroup;
 
 	@NotBlank(groups = {Create.class, Update.class}, message = "Name cannot be blank")
-	@NotNull(groups = {Create.class, Update.class}, message = "Name cannot be null")
 	@Size(groups = {Create.class, Update.class}, min = 1, max = 100, message = "Name cannot be less than 1 and more than 100 characters")
 	private String name;
 
