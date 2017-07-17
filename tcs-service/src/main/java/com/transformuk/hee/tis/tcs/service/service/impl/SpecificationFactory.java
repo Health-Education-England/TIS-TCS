@@ -13,6 +13,8 @@ import java.util.Collection;
 public final class SpecificationFactory {
 
 	private final static String DOT = ".";
+	private final static String TRUE = "true";
+	private final static String FALSE = "false";
 
 	public static Specification containsLike(String attribute, String value) {
 		return (root, query, cb) -> cb.like(root.get(attribute), "%" + value + "%");
@@ -28,7 +30,13 @@ public final class SpecificationFactory {
 			else {
 				cbi = cb.in(root.get(attribute));
 			}
-			values.forEach(v -> cbi.value(v));
+			values.forEach(v -> {
+				//handle booleans
+				if (v.equals(TRUE) || v.equals(FALSE)) {
+					v = new Boolean(v.toString());
+				}
+				cbi.value(v);
+			});
 			return cbi;
 		};
 	}

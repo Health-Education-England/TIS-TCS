@@ -24,7 +24,7 @@ public class EnumTypeResource {
 	@ApiResponses(value = {
 			@ApiResponse(code = 200, message = "All Assessment Types", response = ResponseEntity.class)})
 	@RequestMapping("/assessment-types")
-	@PreAuthorize("hasAuthority('tcs:view:entities')")
+	@PreAuthorize("hasAuthority('curriculum:view')")
 	public ResponseEntity<AssessmentType[]> getAllAssessmentTypes() {
 		return new ResponseEntity<>(AssessmentType.values(), HttpStatus.OK);
 	}
@@ -35,7 +35,7 @@ public class EnumTypeResource {
 	@ApiResponses(value = {
 			@ApiResponse(code = 200, message = "All Curriculum Sub Types", response = ResponseEntity.class)})
 	@RequestMapping("/curriculum-sub-types")
-	@PreAuthorize("hasAuthority('tcs:view:entities')")
+	@PreAuthorize("hasAuthority('curriculum:view')")
 	public ResponseEntity<CurriculumSubType[]> getAllCurriculumSubTypes() {
 		return new ResponseEntity<>(CurriculumSubType.values(), HttpStatus.OK);
 	}

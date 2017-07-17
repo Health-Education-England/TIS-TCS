@@ -78,14 +78,19 @@ public class CurriculumServiceImpl implements CurriculumService {
 		if (columnFilters != null && !columnFilters.isEmpty()) {
 			columnFilters.forEach(cf -> specs.add(in(cf.getName(), cf.getValues())));
 		}
-		Specifications<Curriculum> fullSpec = Specifications.where(specs.get(0));
-		//add the rest of the specs that made it in
-		for (int i = 1; i < specs.size(); i++) {
-			fullSpec = fullSpec.and(specs.get(i));
-		}
-		Page<Curriculum> result = curriculumRepository.findAll(fullSpec, pageable);
 
-		return result.map(curriculum -> curriculumMapper.curriculumToCurriculumDTO(curriculum));
+		//specs may be empty if passing an empty column filters object
+		if (specs.isEmpty()) {
+			return findAll(pageable);
+		} else {
+			Specifications<Curriculum> fullSpec = Specifications.where(specs.get(0));
+			//add the rest of the specs that made it in
+			for (int i = 1; i < specs.size(); i++) {
+				fullSpec = fullSpec.and(specs.get(i));
+			}
+			Page<Curriculum> result = curriculumRepository.findAll(fullSpec, pageable);
+			return result.map(curriculum -> curriculumMapper.curriculumToCurriculumDTO(curriculum));
+		}
 	}
 
 	/**
