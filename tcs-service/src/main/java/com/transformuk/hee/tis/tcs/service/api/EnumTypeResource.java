@@ -47,7 +47,7 @@ public class EnumTypeResource {
 	@ApiResponses(value = {
 			@ApiResponse(code = 200, message = "All Specialty Types", response = ResponseEntity.class)})
 	@RequestMapping("/specialty-types")
-	@PreAuthorize("hasAuthority('tcs:view:entities')")
+	@PreAuthorize("hasAuthority('specialty:view')")
 	public ResponseEntity<SpecialtyType[]> getAllSpecialtyTypes(){
 		return new ResponseEntity<>(SpecialtyType.values(), HttpStatus.OK);
 	}

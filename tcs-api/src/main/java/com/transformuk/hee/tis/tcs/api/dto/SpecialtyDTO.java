@@ -4,6 +4,7 @@ import com.transformuk.hee.tis.tcs.api.dto.validation.Create;
 import com.transformuk.hee.tis.tcs.api.dto.validation.Update;
 import com.transformuk.hee.tis.tcs.api.enumeration.SpecialtyType;
 import com.transformuk.hee.tis.tcs.api.enumeration.Status;
+import org.hibernate.validator.constraints.NotBlank;
 
 import javax.validation.constraints.DecimalMin;
 import javax.validation.constraints.NotNull;
@@ -29,6 +30,7 @@ public class SpecialtyDTO implements Serializable {
 
 	private String college;
 
+	@NotBlank(groups = {Create.class, Update.class}, message = "nhsSpecialtyCode cannot be empty")
 	@NotNull(groups = {Create.class, Update.class}, message = "nhsSpecialtyCode cannot be null")
 	private String nhsSpecialtyCode;
 
@@ -37,6 +39,7 @@ public class SpecialtyDTO implements Serializable {
 
 	private SpecialtyGroupDTO specialtyGroup;
 
+	@NotBlank(groups = {Create.class, Update.class}, message = "Name cannot be empty")
 	@NotNull(groups = {Create.class, Update.class}, message = "Name cannot be null")
 	@Size(groups = {Create.class, Update.class}, min = 1, max = 100, message = "Name cannot be less than 1 and more than 100 characters")
 	private String name;
