@@ -37,6 +37,9 @@ public class Specialty implements Serializable {
 	@JoinColumn(name = "specialtyGroupId", referencedColumnName = "id")
 	private SpecialtyGroup specialtyGroup;
 
+	@Column(name = "name")
+	private String name;
+
 	public Long getId() {
 		return id;
 	}
@@ -123,6 +126,19 @@ public class Specialty implements Serializable {
 		return this;
 	}
 
+	public String getName() {
+		return name;
+	}
+
+	public void setName(String name) {
+		this.name = name;
+	}
+
+	public Specialty name(String name) {
+		this.name = name;
+		return this;
+	}
+
 	@Override
 	public boolean equals(Object o) {
 		if (this == o) {
@@ -153,6 +169,7 @@ public class Specialty implements Serializable {
 				", nhsSpecialtyCode='" + nhsSpecialtyCode + '\'' +
 				", specialtyType=" + specialtyType +
 				", specialtyGroup=" + specialtyGroup +
+				", name=" + name +
 				'}';
 	}
 }

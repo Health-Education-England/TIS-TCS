@@ -3,11 +3,14 @@ package com.transformuk.hee.tis.tcs.service.api;
 import com.codahale.metrics.annotation.Timed;
 import com.google.common.collect.Lists;
 import com.transformuk.hee.tis.tcs.api.dto.SpecialtyDTO;
+import com.transformuk.hee.tis.tcs.api.dto.validation.Create;
+import com.transformuk.hee.tis.tcs.api.dto.validation.Update;
 import com.transformuk.hee.tis.tcs.api.enumeration.SpecialtyType;
 import com.transformuk.hee.tis.tcs.api.enumeration.Status;
 import com.transformuk.hee.tis.tcs.service.api.util.ColumnFilterUtil;
 import com.transformuk.hee.tis.tcs.service.api.util.HeaderUtil;
 import com.transformuk.hee.tis.tcs.service.api.util.PaginationUtil;
+import com.transformuk.hee.tis.tcs.service.api.validation.SpecialtyValidator;
 import com.transformuk.hee.tis.tcs.service.model.ColumnFilter;
 import com.transformuk.hee.tis.tcs.service.service.SpecialtyService;
 import io.github.jhipster.web.util.ResponseUtil;
@@ -16,12 +19,15 @@ import io.swagger.annotations.ApiParam;
 import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
+import org.springframework.validation.annotation.Validated;
+import org.springframework.web.bind.MethodArgumentNotValidException;
 import org.springframework.web.bind.annotation.*;
 
 import javax.validation.Valid;
@@ -39,14 +45,17 @@ import static com.transformuk.hee.tis.tcs.service.api.util.StringUtil.sanitize;
  */
 @RestController
 @RequestMapping("/api")
+@Validated
 public class SpecialtyResource {
 
 	private static final String ENTITY_NAME = "specialty";
 	private final Logger log = LoggerFactory.getLogger(SpecialtyResource.class);
 	private final SpecialtyService specialtyService;
+	private final SpecialtyValidator specialtyValidator;
 
-	public SpecialtyResource(SpecialtyService specialtyService) {
+	public SpecialtyResource(SpecialtyService specialtyService, SpecialtyValidator specialtyValidator) {
 		this.specialtyService = specialtyService;
+		this.specialtyValidator = specialtyValidator;
 	}
 
 	/**
@@ -59,15 +68,18 @@ public class SpecialtyResource {
 	@PostMapping("/specialties")
 	@Timed
 	@PreAuthorize("hasAuthority('specialty:add:modify')")
-	public ResponseEntity<SpecialtyDTO> createSpecialty(@RequestBody SpecialtyDTO specialtyDTO) throws URISyntaxException {
+	public ResponseEntity<SpecialtyDTO> createSpecialty(@RequestBody @Validated(Create.class) SpecialtyDTO specialtyDTO) throws URISyntaxException, MethodArgumentNotValidException {
 		log.debug("REST request to save Specialty : {}", specialtyDTO);
-		if (specialtyDTO.getId() != null) {
-			return ResponseEntity.badRequest().headers(HeaderUtil.createFailureAlert(ENTITY_NAME, "idexists", "A new specialty cannot already have an ID")).body(null);
+		specialtyValidator.validate(specialtyDTO);
+		try {
+			SpecialtyDTO result = specialtyService.save(specialtyDTO);
+			return ResponseEntity.created(new URI("/api/specialties/" + result.getId()))
+					.headers(HeaderUtil.createEntityCreationAlert(ENTITY_NAME, result.getId().toString()))
+					.body(result);
+		} catch (DataIntegrityViolationException dive) {
+			log.error(dive.getMessage(), dive);
+			throw new IllegalArgumentException("Cannot create Specialty with the given specialtyGroup");
 		}
-		SpecialtyDTO result = specialtyService.save(specialtyDTO);
-		return ResponseEntity.created(new URI("/api/specialties/" + result.getId()))
-				.headers(HeaderUtil.createEntityCreationAlert(ENTITY_NAME, result.getId().toString()))
-				.body(result);
 	}
 
 	/**
@@ -82,15 +94,18 @@ public class SpecialtyResource {
 	@PutMapping("/specialties")
 	@Timed
 	@PreAuthorize("hasAuthority('specialty:add:modify')")
-	public ResponseEntity<SpecialtyDTO> updateSpecialty(@RequestBody SpecialtyDTO specialtyDTO) throws URISyntaxException {
+	public ResponseEntity<SpecialtyDTO> updateSpecialty(@RequestBody @Validated(Update.class) SpecialtyDTO specialtyDTO) throws URISyntaxException, MethodArgumentNotValidException {
 		log.debug("REST request to update Specialty : {}", specialtyDTO);
-		if (specialtyDTO.getId() == null) {
-			return createSpecialty(specialtyDTO);
+		specialtyValidator.validate(specialtyDTO);
+		try {
+			SpecialtyDTO result = specialtyService.save(specialtyDTO);
+			return ResponseEntity.ok()
+					.headers(HeaderUtil.createEntityUpdateAlert(ENTITY_NAME, specialtyDTO.getId().toString()))
+					.body(result);
+		} catch (DataIntegrityViolationException dive) {
+			log.error(dive.getMessage(), dive);
+			throw new IllegalArgumentException("Cannot update Specialty with the given specialtyGroup");
 		}
-		SpecialtyDTO result = specialtyService.save(specialtyDTO);
-		return ResponseEntity.ok()
-				.headers(HeaderUtil.createEntityUpdateAlert(ENTITY_NAME, specialtyDTO.getId().toString()))
-				.body(result);
 	}
 
 	/**

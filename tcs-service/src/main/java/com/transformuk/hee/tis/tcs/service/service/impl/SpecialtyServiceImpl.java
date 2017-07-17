@@ -1,6 +1,7 @@
 package com.transformuk.hee.tis.tcs.service.service.impl;
 
 import com.transformuk.hee.tis.tcs.api.dto.SpecialtyDTO;
+import com.transformuk.hee.tis.tcs.api.enumeration.Status;
 import com.transformuk.hee.tis.tcs.service.model.ColumnFilter;
 import com.transformuk.hee.tis.tcs.service.model.Specialty;
 import com.transformuk.hee.tis.tcs.service.repository.SpecialtyRepository;
@@ -43,6 +44,7 @@ public class SpecialtyServiceImpl implements SpecialtyService {
 	/**
 	 * Save a specialty.
 	 *
+	 * Specialties have a default status value of @see com.transformuk.hee.tis.tcs.api.enumeration.Status#CURRENT
 	 * @param specialtyDTO the entity to save
 	 * @return the persisted entity
 	 */
@@ -50,6 +52,9 @@ public class SpecialtyServiceImpl implements SpecialtyService {
 	public SpecialtyDTO save(SpecialtyDTO specialtyDTO) {
 		log.debug("Request to save Specialty : {}", specialtyDTO);
 		Specialty specialty = specialtyMapper.specialtyDTOToSpecialty(specialtyDTO);
+		if(specialty.getStatus() == null) {
+			specialty.setStatus(Status.CURRENT);
+		}
 		specialty = specialtyRepository.save(specialty);
 		SpecialtyDTO result = specialtyMapper.specialtyToSpecialtyDTO(specialty);
 		return result;
