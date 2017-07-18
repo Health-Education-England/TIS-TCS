@@ -26,12 +26,6 @@ public class Curriculum implements Serializable {
 	@Column(name = "name")
 	private String name;
 
-	@Column(name = "start")
-	private LocalDate start;
-
-	@Column(name = "end")
-	private LocalDate end;
-
 	@Column(name="curriculumSubType")
 	@Enumerated(EnumType.STRING)
 	private CurriculumSubType curriculumSubType;
@@ -81,32 +75,6 @@ public class Curriculum implements Serializable {
 
 	public Curriculum name(String name) {
 		this.name = name;
-		return this;
-	}
-
-	public LocalDate getStart() {
-		return start;
-	}
-
-	public void setStart(LocalDate start) {
-		this.start = start;
-	}
-
-	public Curriculum start(LocalDate start) {
-		this.start = start;
-		return this;
-	}
-
-	public LocalDate getEnd() {
-		return end;
-	}
-
-	public void setEnd(LocalDate end) {
-		this.end = end;
-	}
-
-	public Curriculum end(LocalDate end) {
-		this.end = end;
 		return this;
 	}
 
@@ -196,8 +164,6 @@ public class Curriculum implements Serializable {
 				"id=" + id +
 				", intrepidId='" + intrepidId + '\'' +
 				", name='" + name + '\'' +
-				", start=" + start +
-				", end=" + end +
 				", curriculumSubType=" + curriculumSubType +
 				", assessmentType=" + assessmentType +
 				", doesThisCurriculumLeadToCct=" + doesThisCurriculumLeadToCct +
