@@ -130,7 +130,19 @@ public class CurriculumResource {
 			@ApiParam Pageable pageable,
 			@ApiParam(value = "any wildcard string to be searched")
 			@RequestParam(value = "searchQuery", required = false) String searchQuery,
-			@ApiParam(value = "json object by column name and value. (Eg: columnFilters={ \"name\": [\"Orthodontics\", \"Core Medical Training\"], \"curriculumSubType\":[\"ACL\"] }\"")
+			@ApiParam(value = "columns by which to filter by in a string representation of the json. \n\n" +
+					"Eg: \n\n" +
+					"```" +
+					"columnFilters={" +
+					"\"name\": [\"Orthodontics\", \"Core Medical Training\"]," +
+					"\"curriculumSubType\":[\"ACL\"] }\"" +
+					"```\n\n" +
+					"The following fields are currently supported: \n" +
+					"+ id (Number) \n" +
+					"+ name (String) \n" +
+					"+ curriculumSubType Please see endpoint: /api/curriculum-sub-types \n\n" +
+					"+ assessmentType (ARCP|RITA|ACADEMIC) \n" +
+					"+ doesThisCurriculumLeadToCct (Boolean) \n")
 			@RequestParam(value = "columnFilters", required = false) String columnFilterJson) throws IOException {
 
 		log.debug("REST request to get a page of Curricula");
