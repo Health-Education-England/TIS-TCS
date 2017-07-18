@@ -27,10 +27,6 @@ public class CurriculumDTO implements Serializable {
 	@NotNull(groups = {Create.class, Update.class}, message = "name must not be null")
 	private String name;
 
-	private LocalDate start;
-
-	private LocalDate end;
-
 	private CurriculumSubType curriculumSubType;
 
 	@NotNull(groups = {Create.class, Update.class}, message = "assessmentType must not be null")
@@ -68,22 +64,6 @@ public class CurriculumDTO implements Serializable {
 
 	public void setName(String name) {
 		this.name = name;
-	}
-
-	public LocalDate getStart() {
-		return start;
-	}
-
-	public void setStart(LocalDate start) {
-		this.start = start;
-	}
-
-	public LocalDate getEnd() {
-		return end;
-	}
-
-	public void setEnd(LocalDate end) {
-		this.end = end;
 	}
 
 	public CurriculumSubType getCurriculumSubType() {
@@ -155,8 +135,6 @@ public class CurriculumDTO implements Serializable {
 				"id=" + id +
 				", intrepidId='" + intrepidId + '\'' +
 				", name='" + name + '\'' +
-				", start=" + start +
-				", end=" + end +
 				", curriculumSubType=" + curriculumSubType +
 				", assessmentType=" + assessmentType +
 				", doesThisCurriculumLeadToCct=" + doesThisCurriculumLeadToCct +
