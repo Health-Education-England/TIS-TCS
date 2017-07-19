@@ -56,13 +56,6 @@ public class CurriculumResourceIntTest {
 
 	private static final String DEFAULT_INTREPID_ID = "1234";
 	private static final String DEFAULT_INTREPID_ID_2 = "1111";
-	private static final String UPDATED_INTREPID_ID = "4567";
-
-	private static final LocalDate DEFAULT_START = LocalDate.ofEpochDay(0L);
-	private static final LocalDate UPDATED_START = LocalDate.now(ZoneId.systemDefault());
-
-	private static final LocalDate DEFAULT_END = LocalDate.ofEpochDay(0L);
-	private static final LocalDate UPDATED_END = LocalDate.now(ZoneId.systemDefault());
 
 	private static final CurriculumSubType DEFAULT_CURRICULUM_SUB_TYPE = CurriculumSubType.MEDICAL_CURRICULUM;
 	private static final CurriculumSubType UPDATED_CURRICULUM_SUB_TYPE = CurriculumSubType.MEDICAL_SPR;
@@ -124,8 +117,6 @@ public class CurriculumResourceIntTest {
 		Curriculum curriculum = new Curriculum()
 				.name(DEFAULT_NAME)
 				.intrepidId(DEFAULT_INTREPID_ID)
-				.start(DEFAULT_START)
-				.end(DEFAULT_END)
 				.curriculumSubType(DEFAULT_CURRICULUM_SUB_TYPE)
 				.assessmentType(DEFAULT_ASSESSMENT_TYPE)
 				.doesThisCurriculumLeadToCct(DEFAULT_DOES_THIS_CURRICULUM_LEAD_TO_CCT)
@@ -134,15 +125,12 @@ public class CurriculumResourceIntTest {
 		return curriculum;
 	}
 
-	public static Curriculum createCurriculumEntity(String name, String intrepidId, LocalDate startDate,
-	                                                LocalDate endDate, CurriculumSubType curriculumSubType,
+	public static Curriculum createCurriculumEntity(String name, String intrepidId, CurriculumSubType curriculumSubType,
 	                                                AssessmentType assessmentType, Boolean doesThisCurrLeadToCct,
 	                                                Integer periodOfGrace) {
 		Curriculum curriculum = new Curriculum()
 				.name(name)
 				.intrepidId(intrepidId)
-				.start(startDate)
-				.end(endDate)
 				.curriculumSubType(curriculumSubType)
 				.assessmentType(assessmentType)
 				.doesThisCurriculumLeadToCct(doesThisCurrLeadToCct)
@@ -174,7 +162,7 @@ public class CurriculumResourceIntTest {
 
 	@Before
 	public void initTest() {
-		curriculum = createCurriculumEntity(DEFAULT_NAME, DEFAULT_INTREPID_ID, DEFAULT_START, DEFAULT_END,
+		curriculum = createCurriculumEntity(DEFAULT_NAME, DEFAULT_INTREPID_ID,
 				DEFAULT_CURRICULUM_SUB_TYPE, DEFAULT_ASSESSMENT_TYPE, DEFAULT_DOES_THIS_CURRICULUM_LEAD_TO_CCT,
 				DEFAULT_PERIOD_OF_GRACE);
 		specialty = createSpecialtyEntity();
@@ -199,8 +187,6 @@ public class CurriculumResourceIntTest {
 		Curriculum testCurriculum = curriculumList.get(curriculumList.size() - 1);
 		assertThat(testCurriculum.getIntrepidId()).isEqualTo(DEFAULT_INTREPID_ID);
 		assertThat(testCurriculum.getName()).isEqualTo(DEFAULT_NAME);
-		assertThat(testCurriculum.getStart()).isEqualTo(DEFAULT_START);
-		assertThat(testCurriculum.getEnd()).isEqualTo(DEFAULT_END);
 		assertThat(testCurriculum.getCurriculumSubType()).isEqualTo(DEFAULT_CURRICULUM_SUB_TYPE);
 		assertThat(testCurriculum.getAssessmentType()).isEqualTo(DEFAULT_ASSESSMENT_TYPE);
 		assertThat(testCurriculum.isDoesThisCurriculumLeadToCct()).isEqualTo(DEFAULT_DOES_THIS_CURRICULUM_LEAD_TO_CCT);
@@ -445,8 +431,6 @@ public class CurriculumResourceIntTest {
 				.andExpect(jsonPath("$.[*].id").value(hasItem(curriculum.getId().intValue())))
 				.andExpect(jsonPath("$.[*].intrepidId").value(hasItem(DEFAULT_INTREPID_ID.toString())))
 				.andExpect(jsonPath("$.[*].name").value(hasItem(DEFAULT_NAME.toString())))
-				.andExpect(jsonPath("$.[*].start").value(hasItem(DEFAULT_START.toString())))
-				.andExpect(jsonPath("$.[*].end").value(hasItem(DEFAULT_END.toString())))
 				.andExpect(jsonPath("$.[*].curriculumSubType").value(hasItem(DEFAULT_CURRICULUM_SUB_TYPE.toString())))
 				.andExpect(jsonPath("$.[*].assessmentType").value(hasItem(DEFAULT_ASSESSMENT_TYPE.toString())))
 				.andExpect(jsonPath("$.[*].doesThisCurriculumLeadToCct").value(hasItem(DEFAULT_DOES_THIS_CURRICULUM_LEAD_TO_CCT.booleanValue())))
@@ -466,8 +450,6 @@ public class CurriculumResourceIntTest {
 				.andExpect(jsonPath("$.id").value(curriculum.getId().intValue()))
 				.andExpect(jsonPath("$.intrepidId").value(DEFAULT_INTREPID_ID.toString()))
 				.andExpect(jsonPath("$.name").value(DEFAULT_NAME.toString()))
-				.andExpect(jsonPath("$.start").value(DEFAULT_START.toString()))
-				.andExpect(jsonPath("$.end").value(DEFAULT_END.toString()))
 				.andExpect(jsonPath("$.curriculumSubType").value(DEFAULT_CURRICULUM_SUB_TYPE.toString()))
 				.andExpect(jsonPath("$.assessmentType").value(DEFAULT_ASSESSMENT_TYPE.toString()))
 				.andExpect(jsonPath("$.doesThisCurriculumLeadToCct").value(DEFAULT_DOES_THIS_CURRICULUM_LEAD_TO_CCT.booleanValue()))
@@ -564,8 +546,6 @@ public class CurriculumResourceIntTest {
 		Curriculum updatedCurriculum = curriculumRepository.findOne(curriculum.getId());
 		updatedCurriculum
 				.name(UPDATED_NAME)
-				.start(UPDATED_START)
-				.end(UPDATED_END)
 				.curriculumSubType(UPDATED_CURRICULUM_SUB_TYPE)
 				.assessmentType(UPDATED_ASSESSMENT_TYPE)
 				.doesThisCurriculumLeadToCct(UPDATED_DOES_THIS_CURRICULUM_LEAD_TO_CCT)
@@ -584,8 +564,6 @@ public class CurriculumResourceIntTest {
 		assertThat(curriculumList).hasSize(databaseSizeBeforeUpdate);
 		Curriculum testCurriculum = curriculumList.get(curriculumList.size() - 1);
 		assertThat(testCurriculum.getName()).isEqualTo(UPDATED_NAME);
-		assertThat(testCurriculum.getStart()).isEqualTo(UPDATED_START);
-		assertThat(testCurriculum.getEnd()).isEqualTo(UPDATED_END);
 		assertThat(testCurriculum.getCurriculumSubType()).isEqualTo(UPDATED_CURRICULUM_SUB_TYPE);
 		assertThat(testCurriculum.getAssessmentType()).isEqualTo(UPDATED_ASSESSMENT_TYPE);
 		assertThat(testCurriculum.isDoesThisCurriculumLeadToCct()).isEqualTo(UPDATED_DOES_THIS_CURRICULUM_LEAD_TO_CCT);
@@ -669,8 +647,6 @@ public class CurriculumResourceIntTest {
 		Curriculum anotherCurriculum = new Curriculum()
 				.name(DEFAULT_NAME_2)
 				.intrepidId(DEFAULT_INTREPID_ID_2)
-				.start(DEFAULT_START)
-				.end(DEFAULT_END)
 				.curriculumSubType(DEFAULT_CURRICULUM_SUB_TYPE)
 				.assessmentType(DEFAULT_ASSESSMENT_TYPE)
 				.doesThisCurriculumLeadToCct(DEFAULT_DOES_THIS_CURRICULUM_LEAD_TO_CCT)
@@ -700,8 +676,6 @@ public class CurriculumResourceIntTest {
 		Curriculum anotherCurriculum = new Curriculum()
 				.name(DEFAULT_NAME_2)
 				.intrepidId(DEFAULT_INTREPID_ID_2)
-				.start(DEFAULT_START)
-				.end(DEFAULT_END)
 				.curriculumSubType(DEFAULT_CURRICULUM_SUB_TYPE)
 				.assessmentType(DEFAULT_ASSESSMENT_TYPE)
 				.doesThisCurriculumLeadToCct(DEFAULT_DOES_THIS_CURRICULUM_LEAD_TO_CCT)
@@ -733,8 +707,6 @@ public class CurriculumResourceIntTest {
 		Curriculum anotherCurriculum = new Curriculum()
 				.name(DEFAULT_NAME_2)
 				.intrepidId(DEFAULT_INTREPID_ID_2)
-				.start(DEFAULT_START)
-				.end(DEFAULT_END)
 				.curriculumSubType(DEFAULT_CURRICULUM_SUB_TYPE)
 				.assessmentType(DEFAULT_ASSESSMENT_TYPE)
 				.doesThisCurriculumLeadToCct(DEFAULT_DOES_THIS_CURRICULUM_LEAD_TO_CCT)
@@ -771,8 +743,6 @@ public class CurriculumResourceIntTest {
 		Curriculum anotherCurriculum = new Curriculum()
 				.name(DEFAULT_NAME_2)
 				.intrepidId(DEFAULT_INTREPID_ID_2)
-				.start(DEFAULT_START)
-				.end(DEFAULT_END)
 				.curriculumSubType(DEFAULT_CURRICULUM_SUB_TYPE)
 				.assessmentType(DEFAULT_ASSESSMENT_TYPE)
 				.doesThisCurriculumLeadToCct(DEFAULT_DOES_THIS_CURRICULUM_LEAD_TO_CCT)
