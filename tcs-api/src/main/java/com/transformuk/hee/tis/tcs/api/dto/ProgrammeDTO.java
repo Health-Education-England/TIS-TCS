@@ -43,8 +43,6 @@ public class ProgrammeDTO implements Serializable {
 	//mandatory, unique, only certain letters
 	private String programmeNumber;
 
-	private String leadProvider;
-
 	private Set<CurriculumDTO> curricula;
 
 	public Long getId() {
@@ -95,14 +93,6 @@ public class ProgrammeDTO implements Serializable {
 		this.programmeNumber = programmeNumber;
 	}
 
-	public String getLeadProvider() {
-		return leadProvider;
-	}
-
-	public void setLeadProvider(String leadProvider) {
-		this.leadProvider = leadProvider;
-	}
-
 	public Set<CurriculumDTO> getCurricula() {
 		return curricula;
 	}
@@ -143,7 +133,6 @@ public class ProgrammeDTO implements Serializable {
 				", managingDeanery='" + managingDeanery + "'" +
 				", programmeName='" + programmeName + "'" +
 				", programmeNumber='" + programmeNumber + "'" +
-				", leadProvider='" + leadProvider + "'" +
 				", curricula='" + curricula + "'" +
 				'}';
 	}

@@ -1,7 +1,6 @@
 package com.transformuk.hee.tis.tcs.service.api;
 
 import com.codahale.metrics.annotation.Timed;
-import com.fasterxml.jackson.databind.ObjectMapper;
 import com.google.common.collect.Lists;
 import com.transformuk.hee.tis.security.model.UserProfile;
 import com.transformuk.hee.tis.tcs.api.dto.ProgrammeDTO;
@@ -122,11 +121,6 @@ public class ProgrammeResource {
 	}
 
 
-	@ApiOperation(value = "Lists Programmes data",
-			notes = "Returns a list of Programmes with support for pagination, sorting, smart search and column filters \n",
-			response = ResponseEntity.class, responseContainer = "Programmes list")
-	@ApiResponses(value = {
-			@ApiResponse(code = 200, message = "Programmes list", response = ResponseEntity.class)})
 	/**
 	 * GET  /programmes : get all the programmes.
 	 *
@@ -134,6 +128,11 @@ public class ProgrammeResource {
 	 * @return the ResponseEntity with status 200 (OK) and the list of programmes in body
 	 * @throws URISyntaxException if there is an error to generate the pagination HTTP headers
 	 */
+	@ApiOperation(value = "Lists Programmes data",
+			notes = "Returns a list of Programmes with support for pagination, sorting, smart search and column filters \n",
+			response = ResponseEntity.class, responseContainer = "Programmes list")
+	@ApiResponses(value = {
+			@ApiResponse(code = 200, message = "Programmes list", response = ResponseEntity.class)})
 	@GetMapping("/programmes")
 	@Timed
 	@PreAuthorize("hasAuthority('programme:view')")
@@ -148,7 +147,7 @@ public class ProgrammeResource {
 		searchQuery = sanitize(searchQuery);
 		UserProfile userProfile = getProfileFromContext();
 		List<Class> filterEnumList = Lists.newArrayList(Status.class);
-		List<ColumnFilter> columnFilters = ColumnFilterUtil.getColumnFilters(columnFilterJson,filterEnumList);
+		List<ColumnFilter> columnFilters = ColumnFilterUtil.getColumnFilters(columnFilterJson, filterEnumList);
 		Page<ProgrammeDTO> page;
 		if (StringUtils.isEmpty(searchQuery) && StringUtils.isEmpty(columnFilterJson)) {
 			page = programmeService.findAll(userProfile.getDesignatedBodyCodes(), pageable);

@@ -119,8 +119,7 @@ public class ProgrammeServiceImpl implements ProgrammeService {
 		if (StringUtils.isNotEmpty(searchString)) {
 			specs.add(Specifications.where(containsLike("programmeName", searchString)).
 					or(containsLike("managingDeanery", searchString)).
-					or(containsLike("programmeNumber", searchString)).
-					or(containsLike("leadProvider", searchString)));
+					or(containsLike("programmeNumber", searchString)));
 		}
 		//add the column filters criteria
 		if (columnFilters != null && !columnFilters.isEmpty()) {
