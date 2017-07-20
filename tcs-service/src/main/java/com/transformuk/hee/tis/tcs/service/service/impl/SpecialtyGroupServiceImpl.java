@@ -69,9 +69,7 @@ public class SpecialtyGroupServiceImpl implements SpecialtyGroupService {
 
 		List<Specification<SpecialtyGroup>> specs = new ArrayList<>();
 		//add the text search criteria
-		if (StringUtils.isNotEmpty(searchString)) {
-			specs.add(Specifications.where(containsLike("name", searchString)));
-		}
+		specs.add(Specifications.where(containsLike("name", searchString)));
 
 		Specifications<SpecialtyGroup> fullSpec = Specifications.where(specs.get(0));
 		//add the rest of the specs that made it in
