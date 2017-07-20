@@ -31,8 +31,6 @@ public class Programme implements Serializable {
 
 	private String programmeNumber;
 
-	private String leadProvider;
-
 	@ManyToMany
 	@JoinTable(name = "ProgrammeCurriculum",
 			joinColumns = @JoinColumn(name = "programmeId", referencedColumnName = "id"),
@@ -135,19 +133,6 @@ public class Programme implements Serializable {
 		return this;
 	}
 
-	public String getLeadProvider() {
-		return leadProvider;
-	}
-
-	public void setLeadProvider(String leadProvider) {
-		this.leadProvider = leadProvider;
-	}
-
-	public Programme leadProvider(String leadProvider) {
-		this.leadProvider = leadProvider;
-		return this;
-	}
-
 	@Override
 	public boolean equals(Object o) {
 		if (this == o) {
@@ -177,7 +162,6 @@ public class Programme implements Serializable {
 				", managingDeanery='" + managingDeanery + "'" +
 				", programmeName='" + programmeName + "'" +
 				", programmeNumber='" + programmeNumber + "'" +
-				", leadProvider='" + leadProvider + "'" +
 				'}';
 	}
 }
