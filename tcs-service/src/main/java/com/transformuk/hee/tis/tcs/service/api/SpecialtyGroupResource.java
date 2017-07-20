@@ -20,11 +20,14 @@ import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
 
 import javax.validation.Valid;
+import java.io.IOException;
 import java.net.URI;
 import java.net.URISyntaxException;
 import java.util.List;
 import java.util.Optional;
 import java.util.stream.Collectors;
+
+import static com.transformuk.hee.tis.tcs.service.api.util.StringUtil.sanitize;
 
 /**
  * REST controller for managing SpecialtyGroup.
@@ -90,13 +93,24 @@ public class SpecialtyGroupResource {
 	 *
 	 * @param pageable the pagination information
 	 * @return the ResponseEntity with status 200 (OK) and the list of specialtyGroups in body
+	 * @throws URISyntaxException if there is an error to generate the pagination HTTP headers
 	 */
 	@GetMapping("/specialty-groups")
 	@Timed
 	@PreAuthorize("hasAuthority('specialty-group:view')")
-	public ResponseEntity<List<SpecialtyGroupDTO>> getAllSpecialtyGroups(@ApiParam Pageable pageable) {
+	public ResponseEntity<List<SpecialtyGroupDTO>> getAllSpecialtyGroups(
+			@ApiParam Pageable pageable,
+			@ApiParam(value = "any wildcard string to be searched")
+			@RequestParam(value = "searchQuery", required = false) String searchQuery) throws IOException {
+
 		log.debug("REST request to get all SpecialtyGroups");
-		Page<SpecialtyGroupDTO> page = specialtyGroupService.findAll(pageable);
+		searchQuery = sanitize(searchQuery);
+		Page<SpecialtyGroupDTO> page;
+		if (StringUtils.isEmpty(searchQuery)) {
+			page = specialtyGroupService.findAll(pageable);
+		} else {
+			page = specialtyGroupService.advancedSearch(searchQuery, pageable);
+		}
 		HttpHeaders headers = PaginationUtil.generatePaginationHttpHeaders(page, "/api/specialty-groups");
 		return new ResponseEntity<>(page.getContent(), headers, HttpStatus.OK);
 

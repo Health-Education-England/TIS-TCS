@@ -1,12 +1,12 @@
 package com.transformuk.hee.tis.tcs.service.api;
 
+import com.transformuk.hee.tis.tcs.api.dto.SpecialtyGroupDTO;
 import com.transformuk.hee.tis.tcs.service.Application;
 import com.transformuk.hee.tis.tcs.service.exception.ExceptionTranslator;
 import com.transformuk.hee.tis.tcs.service.model.SpecialtyGroup;
 import com.transformuk.hee.tis.tcs.service.repository.SpecialtyGroupRepository;
 import com.transformuk.hee.tis.tcs.service.service.SpecialtyGroupService;
 import com.transformuk.hee.tis.tcs.service.service.mapper.SpecialtyGroupMapper;
-import com.transformuk.hee.tis.tcs.api.dto.SpecialtyGroupDTO;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -74,7 +74,7 @@ public class SpecialtyGroupResourceIntTest {
 	 * This is a static method, as tests for other entities might also need it,
 	 * if they test an entity which requires the current entity.
 	 */
-	public static SpecialtyGroup createEntity(EntityManager em) {
+	public static SpecialtyGroup createEntity() {
 		SpecialtyGroup specialtyGroup = new SpecialtyGroup()
 				.name(DEFAULT_NAME)
 				.intrepidId(DEFAULT_INTREPID_ID);
@@ -93,7 +93,7 @@ public class SpecialtyGroupResourceIntTest {
 
 	@Before
 	public void initTest() {
-		specialtyGroup = createEntity(em);
+		specialtyGroup = createEntity();
 	}
 
 	@Test
@@ -147,6 +147,22 @@ public class SpecialtyGroupResourceIntTest {
 				.andExpect(content().contentType(MediaType.APPLICATION_JSON_UTF8_VALUE))
 				.andExpect(jsonPath("$.[*].id").value(hasItem(specialtyGroup.getId().intValue())))
 				.andExpect(jsonPath("$.[*].name").value(hasItem(DEFAULT_NAME.toString())));
+	}
+
+	@Test
+	@Transactional
+	public void shouldTextSearch() throws Exception {
+		//given
+		// Initialize the database
+		specialtyGroupRepository.saveAndFlush(specialtyGroup);
+		SpecialtyGroup otherNameSpecialtyGroup = createEntity();
+		otherNameSpecialtyGroup.setName("other name");
+		specialtyGroupRepository.saveAndFlush(otherNameSpecialtyGroup);
+		//when & then
+		// Get all the specialtyGroupList
+		restSpecialtyGroupMockMvc.perform(get("/api/specialty-groups?sort=id,desc&searchQuery=other"))
+				.andExpect(status().isOk())
+				.andExpect(jsonPath("$.[*].name").value("other name"));
 	}
 
 	@Test
