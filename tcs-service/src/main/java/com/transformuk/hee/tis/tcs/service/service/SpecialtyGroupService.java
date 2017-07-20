@@ -29,6 +29,15 @@ public interface SpecialtyGroupService {
 	List<SpecialtyGroupDTO> save(List<SpecialtyGroupDTO> specialtyGroupDTO);
 
 	/**
+	 * Get all the specialtyGroup within the given smart search string.
+	 *
+	 * @param searchString the search string to match, can be null
+	 * @param pageable     the pagination information
+	 * @return the list of entities
+	 */
+	Page<SpecialtyGroupDTO> advancedSearch(String searchString, Pageable pageable);
+
+	/**
 	 * Get all the specialtyGroups.
 	 *
 	 * @param pageable the pagination information

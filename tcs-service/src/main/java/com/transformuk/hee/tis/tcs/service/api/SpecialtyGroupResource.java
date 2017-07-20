@@ -20,11 +20,14 @@ import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
 
 import javax.validation.Valid;
+import java.io.IOException;
 import java.net.URI;
 import java.net.URISyntaxException;
 import java.util.List;
 import java.util.Optional;
 import java.util.stream.Collectors;
+
+import static com.transformuk.hee.tis.tcs.service.api.util.StringUtil.sanitize;
 
 /**
  * REST controller for managing SpecialtyGroup.
@@ -50,7 +53,7 @@ public class SpecialtyGroupResource {
 	 */
 	@PostMapping("/specialty-groups")
 	@Timed
-	@PreAuthorize("hasAuthority('specialty-group:add:modify')")
+	@PreAuthorize("hasAuthority('specialty:add:modify')")
 	public ResponseEntity<SpecialtyGroupDTO> createSpecialtyGroup(@RequestBody SpecialtyGroupDTO specialtyGroupDTO) throws URISyntaxException {
 		log.debug("REST request to save SpecialtyGroup : {}", specialtyGroupDTO);
 		if (specialtyGroupDTO.getId() != null) {
@@ -73,7 +76,7 @@ public class SpecialtyGroupResource {
 	 */
 	@PutMapping("/specialty-groups")
 	@Timed
-	@PreAuthorize("hasAuthority('specialty-group:add:modify')")
+	@PreAuthorize("hasAuthority('specialty:add:modify')")
 	public ResponseEntity<SpecialtyGroupDTO> updateSpecialtyGroup(@RequestBody SpecialtyGroupDTO specialtyGroupDTO) throws URISyntaxException {
 		log.debug("REST request to update SpecialtyGroup : {}", specialtyGroupDTO);
 		if (specialtyGroupDTO.getId() == null) {
@@ -90,13 +93,24 @@ public class SpecialtyGroupResource {
 	 *
 	 * @param pageable the pagination information
 	 * @return the ResponseEntity with status 200 (OK) and the list of specialtyGroups in body
+	 * @throws URISyntaxException if there is an error to generate the pagination HTTP headers
 	 */
 	@GetMapping("/specialty-groups")
 	@Timed
-	@PreAuthorize("hasAuthority('specialty-group:view')")
-	public ResponseEntity<List<SpecialtyGroupDTO>> getAllSpecialtyGroups(@ApiParam Pageable pageable) {
+	@PreAuthorize("hasAuthority('specialty:view')")
+	public ResponseEntity<List<SpecialtyGroupDTO>> getAllSpecialtyGroups(
+			@ApiParam Pageable pageable,
+			@ApiParam(value = "any wildcard string to be searched")
+			@RequestParam(value = "searchQuery", required = false) String searchQuery) throws IOException {
+
 		log.debug("REST request to get all SpecialtyGroups");
-		Page<SpecialtyGroupDTO> page = specialtyGroupService.findAll(pageable);
+		searchQuery = sanitize(searchQuery);
+		Page<SpecialtyGroupDTO> page;
+		if (StringUtils.isEmpty(searchQuery)) {
+			page = specialtyGroupService.findAll(pageable);
+		} else {
+			page = specialtyGroupService.advancedSearch(searchQuery, pageable);
+		}
 		HttpHeaders headers = PaginationUtil.generatePaginationHttpHeaders(page, "/api/specialty-groups");
 		return new ResponseEntity<>(page.getContent(), headers, HttpStatus.OK);
 
@@ -110,7 +124,7 @@ public class SpecialtyGroupResource {
 	 */
 	@GetMapping("/specialty-groups/{id}")
 	@Timed
-	@PreAuthorize("hasAuthority('specialty-group:view')")
+	@PreAuthorize("hasAuthority('specialty:view')")
 	public ResponseEntity<SpecialtyGroupDTO> getSpecialtyGroup(@PathVariable Long id) {
 		log.debug("REST request to get SpecialtyGroup : {}", id);
 		SpecialtyGroupDTO specialtyGroupDTO = specialtyGroupService.findOne(id);
@@ -141,7 +155,7 @@ public class SpecialtyGroupResource {
 	 */
 	@PostMapping("/bulk-specialty-groups")
 	@Timed
-	@PreAuthorize("hasAuthority('specialty-group:bulk:add:modify')")
+	@PreAuthorize("hasAuthority('specialty:bulk:add:modify')")
 	public ResponseEntity<List<SpecialtyGroupDTO>> bulkCreateSpecialtyGroups(@Valid @RequestBody List<SpecialtyGroupDTO> specialtyGroupDTOS) throws URISyntaxException {
 		log.debug("REST request to bulk save Specialty Groups : {}", specialtyGroupDTOS);
 		if (!Collections.isEmpty(specialtyGroupDTOS)) {
@@ -171,7 +185,7 @@ public class SpecialtyGroupResource {
 	 */
 	@PutMapping("/bulk-specialty-groups")
 	@Timed
-	@PreAuthorize("hasAuthority('specialty-group:bulk:add:modify')")
+	@PreAuthorize("hasAuthority('specialty:bulk:add:modify')")
 	public ResponseEntity<List<SpecialtyGroupDTO>> bulkUpdateSpecialtyGroups(@Valid @RequestBody List<SpecialtyGroupDTO> specialtyGroupDTOS) throws URISyntaxException {
 		log.debug("REST request to bulk update Specialty Groups : {}", specialtyGroupDTOS);
 		if (Collections.isEmpty(specialtyGroupDTOS)) {
