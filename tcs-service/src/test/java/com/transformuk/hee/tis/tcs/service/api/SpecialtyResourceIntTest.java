@@ -326,13 +326,13 @@ public class SpecialtyResourceIntTest {
 		// Initialize the database
 		specialtyRepository.saveAndFlush(specialty);
 		Specialty otherNameSpecialty = createEntity();
-		otherNameSpecialty.college("other college");
+		otherNameSpecialty.name("other college");
 		specialtyRepository.saveAndFlush(otherNameSpecialty);
 		//when & then
 		// Get all the specialtyList
 		restSpecialtyMockMvc.perform(get("/api/specialties?sort=id,desc&searchQuery=other"))
 				.andExpect(status().isOk())
-				.andExpect(jsonPath("$.[*].college").value("other college"));
+				.andExpect(jsonPath("$.[*].name").value("other college"));
 	}
 
 	@Test

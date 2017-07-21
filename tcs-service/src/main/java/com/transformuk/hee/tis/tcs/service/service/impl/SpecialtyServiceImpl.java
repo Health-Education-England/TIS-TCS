@@ -84,7 +84,8 @@ public class SpecialtyServiceImpl implements SpecialtyService {
 		//add the text search criteria
 		if (StringUtils.isNotEmpty(searchString)) {
 			specs.add(Specifications.where(containsLike("college", searchString)).
-					or(containsLike("nhsSpecialtyCode", searchString)));
+					or(containsLike("nhsSpecialtyCode", searchString)).
+					or(containsLike("name", searchString)));
 		}
 		//add the column filters criteria
 		if (columnFilters != null && !columnFilters.isEmpty()) {

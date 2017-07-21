@@ -5,13 +5,12 @@
 
 	<groupId>com.transformuk.hee.tis</groupId>
 	<artifactId>tcs</artifactId>
-	<version>1.0.2</version>
+	<version>1.1.0</version>
 	<packaging>pom</packaging>
 
 	<modules>
 		<module>tcs-api</module>
 		<module>tcs-client</module>
 		<module>tcs-service</module>
-		<module>tcs-ui</module>
 	</modules>
 </project>
