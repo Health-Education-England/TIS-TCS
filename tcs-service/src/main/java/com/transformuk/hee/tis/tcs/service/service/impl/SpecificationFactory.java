@@ -20,7 +20,7 @@ public final class SpecificationFactory {
 		return (root, query, cb) -> cb.like(root.get(attribute), "%" + value + "%");
 	}
 
-	public static Specification in(String attribute, Collection<Object> values) {
+	public static Specification in(String attribute, Collection<? extends Object> values) {
 		return (root, query, cb) -> {
 			CriteriaBuilder.In cbi;
 			if(StringUtils.isNoneEmpty(attribute) && attribute.contains(DOT)){
@@ -32,10 +32,12 @@ public final class SpecificationFactory {
 			}
 			values.forEach(v -> {
 				//handle booleans
-				if (v.equals(TRUE) || v.equals(FALSE)) {
-					v = new Boolean(v.toString());
+				if ((v instanceof String) && (v.equals(TRUE) || v.equals(FALSE))) {
+					cbi.value(new Boolean(v.toString()));
 				}
-				cbi.value(v);
+				else {
+					cbi.value(v);
+				}
 			});
 			return cbi;
 		};
