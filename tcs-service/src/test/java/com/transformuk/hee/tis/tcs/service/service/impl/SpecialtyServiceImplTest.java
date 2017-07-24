@@ -18,9 +18,7 @@ import org.mockito.Captor;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.runners.MockitoJUnitRunner;
-import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.domain.Specification;
-import org.springframework.data.jpa.domain.Specifications;
 
 import java.util.List;
 
@@ -49,7 +47,7 @@ public class SpecialtyServiceImplTest {
 
 	@Captor
 	private ArgumentCaptor<Status> statusCaptor;
-	
+
 	private SpecialtyDTO specialtyDTO;
 
 	@Before
