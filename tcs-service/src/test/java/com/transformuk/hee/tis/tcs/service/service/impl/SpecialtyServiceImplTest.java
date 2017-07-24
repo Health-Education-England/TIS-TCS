@@ -4,9 +4,11 @@ import com.transformuk.hee.tis.tcs.api.dto.SpecialtyDTO;
 import com.transformuk.hee.tis.tcs.api.dto.SpecialtyGroupDTO;
 import com.transformuk.hee.tis.tcs.api.enumeration.SpecialtyType;
 import com.transformuk.hee.tis.tcs.api.enumeration.Status;
+import com.transformuk.hee.tis.tcs.service.model.ColumnFilter;
 import com.transformuk.hee.tis.tcs.service.model.Specialty;
 import com.transformuk.hee.tis.tcs.service.repository.SpecialtyRepository;
 import com.transformuk.hee.tis.tcs.service.service.mapper.SpecialtyMapper;
+import org.assertj.core.util.Lists;
 import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Test;
@@ -16,6 +18,9 @@ import org.mockito.Captor;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.runners.MockitoJUnitRunner;
+import org.springframework.data.jpa.domain.Specification;
+
+import java.util.List;
 
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
@@ -94,5 +99,16 @@ public class SpecialtyServiceImplTest {
 
 		verify(specialtyRepositoryMock).save(specialtyMock);
 		verify(specialtyMapperMock).specialtyToSpecialtyDTO(specialtyMock);
+	}
+
+	@Test
+	public void addColumnFilterSpecsShouldAddColumnFilters() {
+		ColumnFilter statusColumnFilter = new ColumnFilter("status", Lists.newArrayList(Status.CURRENT));
+		List<ColumnFilter> columnFilters = Lists.newArrayList(statusColumnFilter);
+		List<Specification<Specialty>> specs = Lists.newArrayList();
+
+		testObj.addColumnFilterSpecs(columnFilters, specs);
+
+		Assert.assertEquals(1, specs.size());
 	}
 }
