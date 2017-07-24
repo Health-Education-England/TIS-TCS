@@ -47,15 +47,9 @@ public class SpecialtyServiceImplTest {
 	@Mock
 	private Specialty specialtyMock;
 
-	@Mock
-	private Pageable pageableMock;
-
 	@Captor
 	private ArgumentCaptor<Status> statusCaptor;
-
-	@Captor
-	private ArgumentCaptor<Specifications> specificationsArgumentCaptor;
-
+	
 	private SpecialtyDTO specialtyDTO;
 
 	@Before
