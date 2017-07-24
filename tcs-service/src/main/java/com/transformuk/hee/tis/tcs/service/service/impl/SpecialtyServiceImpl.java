@@ -112,7 +112,7 @@ public class SpecialtyServiceImpl implements SpecialtyService {
 	 * @param columnFilters List of filters originally parsed from JSON
 	 * @param specs         The List of specs
 	 */
-	private void addColumnFilterSpecs(List<ColumnFilter> columnFilters, List<Specification<Specialty>> specs) {
+	protected void addColumnFilterSpecs(List<ColumnFilter> columnFilters, List<Specification<Specialty>> specs) {
 		if (columnFilters != null && !columnFilters.isEmpty()) {
 			ColumnFilter specialtyGroupCF = null;
 			for (ColumnFilter cf : columnFilters) {
