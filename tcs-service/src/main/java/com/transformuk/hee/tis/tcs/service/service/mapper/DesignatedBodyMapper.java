@@ -31,6 +31,9 @@ public class DesignatedBodyMapper {
 			.put("1-AIIDH1", Lists.newArrayList("Health Education England Thames Valley"))
 			.put("1-AIIDQQ", Lists.newArrayList("Health Education England Yorkshire and the Humber"))
 			.put("1-AIIDMY", Lists.newArrayList("Health Education England West Midlands"))
+			.put("1-AIIDMQ", Lists.newArrayList("Health Education England South West"))
+			.put("1-AIIDHJ", Lists.newArrayList("Health Education England Wessex"))
+			.put("1-AIIDNQ", Lists.newArrayList("Health Education England North West"))
 			.build();
 
 	private static Set<String> allLocalOffices = null;
