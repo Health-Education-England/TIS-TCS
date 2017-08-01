@@ -12,40 +12,39 @@ import java.util.Collection;
  */
 public final class SpecificationFactory {
 
-	private final static String DOT = ".";
-	private final static String TRUE = "true";
-	private final static String FALSE = "false";
+  private final static String DOT = ".";
+  private final static String TRUE = "true";
+  private final static String FALSE = "false";
 
-	public static Specification containsLike(String attribute, String value) {
-		return (root, query, cb) -> cb.like(root.get(attribute), "%" + value + "%");
-	}
+  public static Specification containsLike(String attribute, String value) {
+    return (root, query, cb) -> cb.like(root.get(attribute), "%" + value + "%");
+  }
 
-	public static Specification in(String attribute, Collection<Object> values) {
-		return (root, query, cb) -> {
-			CriteriaBuilder.In cbi;
-			if(StringUtils.isNoneEmpty(attribute) && attribute.contains(DOT)){
-				String[] joinTable = StringUtils.split(attribute,DOT);
-				cbi = cb.in(root.join(joinTable[0]).get(joinTable[1]));
-			}
-			else {
-				cbi = cb.in(root.get(attribute));
-			}
-			values.forEach(v -> {
-				//handle booleans
-				if (v.equals(TRUE) || v.equals(FALSE)) {
-					v = new Boolean(v.toString());
-				}
-				cbi.value(v);
-			});
-			return cbi;
-		};
-	}
+  public static Specification in(String attribute, Collection<Object> values) {
+    return (root, query, cb) -> {
+      CriteriaBuilder.In cbi;
+      if (StringUtils.isNoneEmpty(attribute) && attribute.contains(DOT)) {
+        String[] joinTable = StringUtils.split(attribute, DOT);
+        cbi = cb.in(root.join(joinTable[0]).get(joinTable[1]));
+      } else {
+        cbi = cb.in(root.get(attribute));
+      }
+      values.forEach(v -> {
+        //handle booleans
+        if (v.equals(TRUE) || v.equals(FALSE)) {
+          v = new Boolean(v.toString());
+        }
+        cbi.value(v);
+      });
+      return cbi;
+    };
+  }
 
-	public static Specification isBetween(String attribute, int min, int max) {
-		return (root, query, cb) -> cb.between(root.get(attribute), min, max);
-	}
+  public static Specification isBetween(String attribute, int min, int max) {
+    return (root, query, cb) -> cb.between(root.get(attribute), min, max);
+  }
 
-	public static Specification isBetween(String attribute, double min, double max) {
-		return (root, query, cb) -> cb.between(root.get(attribute), min, max);
-	}
+  public static Specification isBetween(String attribute, double min, double max) {
+    return (root, query, cb) -> cb.between(root.get(attribute), min, max);
+  }
 }

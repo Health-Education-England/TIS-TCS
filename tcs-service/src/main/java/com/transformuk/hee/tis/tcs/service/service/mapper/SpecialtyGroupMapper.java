@@ -1,7 +1,7 @@
 package com.transformuk.hee.tis.tcs.service.service.mapper;
 
-import com.transformuk.hee.tis.tcs.service.model.SpecialtyGroup;
 import com.transformuk.hee.tis.tcs.api.dto.SpecialtyGroupDTO;
+import com.transformuk.hee.tis.tcs.service.model.SpecialtyGroup;
 import org.mapstruct.Mapper;
 
 import java.util.List;
@@ -12,11 +12,11 @@ import java.util.List;
 @Mapper(componentModel = "spring", uses = {})
 public interface SpecialtyGroupMapper {
 
-	SpecialtyGroupDTO specialtyGroupToSpecialtyGroupDTO(SpecialtyGroup specialtyGroup);
+  SpecialtyGroupDTO specialtyGroupToSpecialtyGroupDTO(SpecialtyGroup specialtyGroup);
 
-	List<SpecialtyGroupDTO> specialtyGroupsToSpecialtyGroupDTOs(List<SpecialtyGroup> specialtyGroups);
+  List<SpecialtyGroupDTO> specialtyGroupsToSpecialtyGroupDTOs(List<SpecialtyGroup> specialtyGroups);
 
-	SpecialtyGroup specialtyGroupDTOToSpecialtyGroup(SpecialtyGroupDTO specialtyGroupDTO);
+  SpecialtyGroup specialtyGroupDTOToSpecialtyGroup(SpecialtyGroupDTO specialtyGroupDTO);
 
-	List<SpecialtyGroup> specialtyGroupDTOsToSpecialtyGroups(List<SpecialtyGroupDTO> specialtyGroupDTOs);
+  List<SpecialtyGroup> specialtyGroupDTOsToSpecialtyGroups(List<SpecialtyGroupDTO> specialtyGroupDTOs);
 }

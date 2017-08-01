@@ -26,8 +26,13 @@ import java.util.List;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.hamcrest.Matchers.hasItem;
-import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.*;
-import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.*;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.delete;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.put;
+import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.content;
+import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
+import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
 /**
  * Test class for the SpecialtyGroupResource REST controller.
@@ -38,219 +43,219 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 @SpringBootTest(classes = Application.class)
 public class SpecialtyGroupResourceIntTest {
 
-	private static final String DEFAULT_NAME = "AAAAAAAAAA";
-	private static final String UPDATED_NAME = "BBBBBBBBBB";
+  private static final String DEFAULT_NAME = "AAAAAAAAAA";
+  private static final String UPDATED_NAME = "BBBBBBBBBB";
 
-	private static final String DEFAULT_INTREPID_ID = "123456";
+  private static final String DEFAULT_INTREPID_ID = "123456";
 
-	@Autowired
-	private SpecialtyGroupRepository specialtyGroupRepository;
+  @Autowired
+  private SpecialtyGroupRepository specialtyGroupRepository;
 
-	@Autowired
-	private SpecialtyGroupMapper specialtyGroupMapper;
+  @Autowired
+  private SpecialtyGroupMapper specialtyGroupMapper;
 
-	@Autowired
-	private SpecialtyGroupService specialtyGroupService;
+  @Autowired
+  private SpecialtyGroupService specialtyGroupService;
 
-	@Autowired
-	private MappingJackson2HttpMessageConverter jacksonMessageConverter;
+  @Autowired
+  private MappingJackson2HttpMessageConverter jacksonMessageConverter;
 
-	@Autowired
-	private PageableHandlerMethodArgumentResolver pageableArgumentResolver;
+  @Autowired
+  private PageableHandlerMethodArgumentResolver pageableArgumentResolver;
 
-	@Autowired
-	private ExceptionTranslator exceptionTranslator;
+  @Autowired
+  private ExceptionTranslator exceptionTranslator;
 
-	@Autowired
-	private EntityManager em;
+  @Autowired
+  private EntityManager em;
 
-	private MockMvc restSpecialtyGroupMockMvc;
+  private MockMvc restSpecialtyGroupMockMvc;
 
-	private SpecialtyGroup specialtyGroup;
+  private SpecialtyGroup specialtyGroup;
 
-	/**
-	 * Create an entity for this test.
-	 * <p>
-	 * This is a static method, as tests for other entities might also need it,
-	 * if they test an entity which requires the current entity.
-	 */
-	public static SpecialtyGroup createEntity() {
-		SpecialtyGroup specialtyGroup = new SpecialtyGroup()
-				.name(DEFAULT_NAME)
-				.intrepidId(DEFAULT_INTREPID_ID);
-		return specialtyGroup;
-	}
+  /**
+   * Create an entity for this test.
+   * <p>
+   * This is a static method, as tests for other entities might also need it,
+   * if they test an entity which requires the current entity.
+   */
+  public static SpecialtyGroup createEntity() {
+    SpecialtyGroup specialtyGroup = new SpecialtyGroup()
+        .name(DEFAULT_NAME)
+        .intrepidId(DEFAULT_INTREPID_ID);
+    return specialtyGroup;
+  }
 
-	@Before
-	public void setup() {
-		MockitoAnnotations.initMocks(this);
-		SpecialtyGroupResource specialtyGroupResource = new SpecialtyGroupResource(specialtyGroupService);
-		this.restSpecialtyGroupMockMvc = MockMvcBuilders.standaloneSetup(specialtyGroupResource)
-				.setCustomArgumentResolvers(pageableArgumentResolver)
-				.setControllerAdvice(exceptionTranslator)
-				.setMessageConverters(jacksonMessageConverter).build();
-	}
+  @Before
+  public void setup() {
+    MockitoAnnotations.initMocks(this);
+    SpecialtyGroupResource specialtyGroupResource = new SpecialtyGroupResource(specialtyGroupService);
+    this.restSpecialtyGroupMockMvc = MockMvcBuilders.standaloneSetup(specialtyGroupResource)
+        .setCustomArgumentResolvers(pageableArgumentResolver)
+        .setControllerAdvice(exceptionTranslator)
+        .setMessageConverters(jacksonMessageConverter).build();
+  }
 
-	@Before
-	public void initTest() {
-		specialtyGroup = createEntity();
-	}
+  @Before
+  public void initTest() {
+    specialtyGroup = createEntity();
+  }
 
-	@Test
-	@Transactional
-	public void createSpecialtyGroup() throws Exception {
-		int databaseSizeBeforeCreate = specialtyGroupRepository.findAll().size();
+  @Test
+  @Transactional
+  public void createSpecialtyGroup() throws Exception {
+    int databaseSizeBeforeCreate = specialtyGroupRepository.findAll().size();
 
-		// Create the SpecialtyGroup
-		SpecialtyGroupDTO specialtyGroupDTO = specialtyGroupMapper.specialtyGroupToSpecialtyGroupDTO(specialtyGroup);
-		restSpecialtyGroupMockMvc.perform(post("/api/specialty-groups")
-				.contentType(TestUtil.APPLICATION_JSON_UTF8)
-				.content(TestUtil.convertObjectToJsonBytes(specialtyGroupDTO)))
-				.andExpect(status().isCreated());
+    // Create the SpecialtyGroup
+    SpecialtyGroupDTO specialtyGroupDTO = specialtyGroupMapper.specialtyGroupToSpecialtyGroupDTO(specialtyGroup);
+    restSpecialtyGroupMockMvc.perform(post("/api/specialty-groups")
+        .contentType(TestUtil.APPLICATION_JSON_UTF8)
+        .content(TestUtil.convertObjectToJsonBytes(specialtyGroupDTO)))
+        .andExpect(status().isCreated());
 
-		// Validate the SpecialtyGroup in the database
-		List<SpecialtyGroup> specialtyGroupList = specialtyGroupRepository.findAll();
-		assertThat(specialtyGroupList).hasSize(databaseSizeBeforeCreate + 1);
-		SpecialtyGroup testSpecialtyGroup = specialtyGroupList.get(specialtyGroupList.size() - 1);
-		assertThat(testSpecialtyGroup.getName()).isEqualTo(DEFAULT_NAME);
-	}
+    // Validate the SpecialtyGroup in the database
+    List<SpecialtyGroup> specialtyGroupList = specialtyGroupRepository.findAll();
+    assertThat(specialtyGroupList).hasSize(databaseSizeBeforeCreate + 1);
+    SpecialtyGroup testSpecialtyGroup = specialtyGroupList.get(specialtyGroupList.size() - 1);
+    assertThat(testSpecialtyGroup.getName()).isEqualTo(DEFAULT_NAME);
+  }
 
-	@Test
-	@Transactional
-	public void createSpecialtyGroupWithExistingId() throws Exception {
-		int databaseSizeBeforeCreate = specialtyGroupRepository.findAll().size();
+  @Test
+  @Transactional
+  public void createSpecialtyGroupWithExistingId() throws Exception {
+    int databaseSizeBeforeCreate = specialtyGroupRepository.findAll().size();
 
-		// Create the SpecialtyGroup with an existing ID
-		specialtyGroup.setId(1L);
-		SpecialtyGroupDTO specialtyGroupDTO = specialtyGroupMapper.specialtyGroupToSpecialtyGroupDTO(specialtyGroup);
+    // Create the SpecialtyGroup with an existing ID
+    specialtyGroup.setId(1L);
+    SpecialtyGroupDTO specialtyGroupDTO = specialtyGroupMapper.specialtyGroupToSpecialtyGroupDTO(specialtyGroup);
 
-		// An entity with an existing ID cannot be created, so this API call must fail
-		restSpecialtyGroupMockMvc.perform(post("/api/specialty-groups")
-				.contentType(TestUtil.APPLICATION_JSON_UTF8)
-				.content(TestUtil.convertObjectToJsonBytes(specialtyGroupDTO)))
-				.andExpect(status().isBadRequest());
+    // An entity with an existing ID cannot be created, so this API call must fail
+    restSpecialtyGroupMockMvc.perform(post("/api/specialty-groups")
+        .contentType(TestUtil.APPLICATION_JSON_UTF8)
+        .content(TestUtil.convertObjectToJsonBytes(specialtyGroupDTO)))
+        .andExpect(status().isBadRequest());
 
-		// Validate the Alice in the database
-		List<SpecialtyGroup> specialtyGroupList = specialtyGroupRepository.findAll();
-		assertThat(specialtyGroupList).hasSize(databaseSizeBeforeCreate);
-	}
+    // Validate the Alice in the database
+    List<SpecialtyGroup> specialtyGroupList = specialtyGroupRepository.findAll();
+    assertThat(specialtyGroupList).hasSize(databaseSizeBeforeCreate);
+  }
 
-	@Test
-	@Transactional
-	public void getAllSpecialtyGroups() throws Exception {
-		// Initialize the database
-		specialtyGroupRepository.saveAndFlush(specialtyGroup);
+  @Test
+  @Transactional
+  public void getAllSpecialtyGroups() throws Exception {
+    // Initialize the database
+    specialtyGroupRepository.saveAndFlush(specialtyGroup);
 
-		// Get all the specialtyGroupList
-		restSpecialtyGroupMockMvc.perform(get("/api/specialty-groups?sort=id,desc"))
-				.andExpect(status().isOk())
-				.andExpect(content().contentType(MediaType.APPLICATION_JSON_UTF8_VALUE))
-				.andExpect(jsonPath("$.[*].id").value(hasItem(specialtyGroup.getId().intValue())))
-				.andExpect(jsonPath("$.[*].name").value(hasItem(DEFAULT_NAME.toString())));
-	}
+    // Get all the specialtyGroupList
+    restSpecialtyGroupMockMvc.perform(get("/api/specialty-groups?sort=id,desc"))
+        .andExpect(status().isOk())
+        .andExpect(content().contentType(MediaType.APPLICATION_JSON_UTF8_VALUE))
+        .andExpect(jsonPath("$.[*].id").value(hasItem(specialtyGroup.getId().intValue())))
+        .andExpect(jsonPath("$.[*].name").value(hasItem(DEFAULT_NAME.toString())));
+  }
 
-	@Test
-	@Transactional
-	public void shouldTextSearch() throws Exception {
-		//given
-		// Initialize the database
-		specialtyGroupRepository.saveAndFlush(specialtyGroup);
-		SpecialtyGroup otherNameSpecialtyGroup = createEntity();
-		otherNameSpecialtyGroup.setName("other name");
-		specialtyGroupRepository.saveAndFlush(otherNameSpecialtyGroup);
-		//when & then
-		// Get all the specialtyGroupList
-		restSpecialtyGroupMockMvc.perform(get("/api/specialty-groups?sort=id,desc&searchQuery=other"))
-				.andExpect(status().isOk())
-				.andExpect(jsonPath("$.[*].name").value("other name"));
-	}
+  @Test
+  @Transactional
+  public void shouldTextSearch() throws Exception {
+    //given
+    // Initialize the database
+    specialtyGroupRepository.saveAndFlush(specialtyGroup);
+    SpecialtyGroup otherNameSpecialtyGroup = createEntity();
+    otherNameSpecialtyGroup.setName("other name");
+    specialtyGroupRepository.saveAndFlush(otherNameSpecialtyGroup);
+    //when & then
+    // Get all the specialtyGroupList
+    restSpecialtyGroupMockMvc.perform(get("/api/specialty-groups?sort=id,desc&searchQuery=other"))
+        .andExpect(status().isOk())
+        .andExpect(jsonPath("$.[*].name").value("other name"));
+  }
 
-	@Test
-	@Transactional
-	public void getSpecialtyGroup() throws Exception {
-		// Initialize the database
-		specialtyGroupRepository.saveAndFlush(specialtyGroup);
+  @Test
+  @Transactional
+  public void getSpecialtyGroup() throws Exception {
+    // Initialize the database
+    specialtyGroupRepository.saveAndFlush(specialtyGroup);
 
-		// Get the specialtyGroup
-		restSpecialtyGroupMockMvc.perform(get("/api/specialty-groups/{id}", specialtyGroup.getId()))
-				.andExpect(status().isOk())
-				.andExpect(content().contentType(MediaType.APPLICATION_JSON_UTF8_VALUE))
-				.andExpect(jsonPath("$.id").value(specialtyGroup.getId().intValue()))
-				.andExpect(jsonPath("$.name").value(DEFAULT_NAME.toString()));
-	}
+    // Get the specialtyGroup
+    restSpecialtyGroupMockMvc.perform(get("/api/specialty-groups/{id}", specialtyGroup.getId()))
+        .andExpect(status().isOk())
+        .andExpect(content().contentType(MediaType.APPLICATION_JSON_UTF8_VALUE))
+        .andExpect(jsonPath("$.id").value(specialtyGroup.getId().intValue()))
+        .andExpect(jsonPath("$.name").value(DEFAULT_NAME.toString()));
+  }
 
-	@Test
-	@Transactional
-	public void getNonExistingSpecialtyGroup() throws Exception {
-		// Get the specialtyGroup
-		restSpecialtyGroupMockMvc.perform(get("/api/specialty-groups/{id}", Long.MAX_VALUE))
-				.andExpect(status().isNotFound());
-	}
+  @Test
+  @Transactional
+  public void getNonExistingSpecialtyGroup() throws Exception {
+    // Get the specialtyGroup
+    restSpecialtyGroupMockMvc.perform(get("/api/specialty-groups/{id}", Long.MAX_VALUE))
+        .andExpect(status().isNotFound());
+  }
 
-	@Test
-	@Transactional
-	public void updateSpecialtyGroup() throws Exception {
-		// Initialize the database
-		specialtyGroupRepository.saveAndFlush(specialtyGroup);
-		int databaseSizeBeforeUpdate = specialtyGroupRepository.findAll().size();
+  @Test
+  @Transactional
+  public void updateSpecialtyGroup() throws Exception {
+    // Initialize the database
+    specialtyGroupRepository.saveAndFlush(specialtyGroup);
+    int databaseSizeBeforeUpdate = specialtyGroupRepository.findAll().size();
 
-		// Update the specialtyGroup
-		SpecialtyGroup updatedSpecialtyGroup = specialtyGroupRepository.findOne(specialtyGroup.getId());
-		updatedSpecialtyGroup
-				.name(UPDATED_NAME);
-		SpecialtyGroupDTO specialtyGroupDTO = specialtyGroupMapper.specialtyGroupToSpecialtyGroupDTO(updatedSpecialtyGroup);
+    // Update the specialtyGroup
+    SpecialtyGroup updatedSpecialtyGroup = specialtyGroupRepository.findOne(specialtyGroup.getId());
+    updatedSpecialtyGroup
+        .name(UPDATED_NAME);
+    SpecialtyGroupDTO specialtyGroupDTO = specialtyGroupMapper.specialtyGroupToSpecialtyGroupDTO(updatedSpecialtyGroup);
 
-		restSpecialtyGroupMockMvc.perform(put("/api/specialty-groups")
-				.contentType(TestUtil.APPLICATION_JSON_UTF8)
-				.content(TestUtil.convertObjectToJsonBytes(specialtyGroupDTO)))
-				.andExpect(status().isOk());
+    restSpecialtyGroupMockMvc.perform(put("/api/specialty-groups")
+        .contentType(TestUtil.APPLICATION_JSON_UTF8)
+        .content(TestUtil.convertObjectToJsonBytes(specialtyGroupDTO)))
+        .andExpect(status().isOk());
 
-		// Validate the SpecialtyGroup in the database
-		List<SpecialtyGroup> specialtyGroupList = specialtyGroupRepository.findAll();
-		assertThat(specialtyGroupList).hasSize(databaseSizeBeforeUpdate);
-		SpecialtyGroup testSpecialtyGroup = specialtyGroupList.get(specialtyGroupList.size() - 1);
-		assertThat(testSpecialtyGroup.getName()).isEqualTo(UPDATED_NAME);
-	}
+    // Validate the SpecialtyGroup in the database
+    List<SpecialtyGroup> specialtyGroupList = specialtyGroupRepository.findAll();
+    assertThat(specialtyGroupList).hasSize(databaseSizeBeforeUpdate);
+    SpecialtyGroup testSpecialtyGroup = specialtyGroupList.get(specialtyGroupList.size() - 1);
+    assertThat(testSpecialtyGroup.getName()).isEqualTo(UPDATED_NAME);
+  }
 
-	@Test
-	@Transactional
-	public void updateNonExistingSpecialtyGroup() throws Exception {
-		int databaseSizeBeforeUpdate = specialtyGroupRepository.findAll().size();
+  @Test
+  @Transactional
+  public void updateNonExistingSpecialtyGroup() throws Exception {
+    int databaseSizeBeforeUpdate = specialtyGroupRepository.findAll().size();
 
-		// Create the SpecialtyGroup
-		SpecialtyGroupDTO specialtyGroupDTO = specialtyGroupMapper.specialtyGroupToSpecialtyGroupDTO(specialtyGroup);
+    // Create the SpecialtyGroup
+    SpecialtyGroupDTO specialtyGroupDTO = specialtyGroupMapper.specialtyGroupToSpecialtyGroupDTO(specialtyGroup);
 
-		// If the entity doesn't have an ID, it will be created instead of just being updated
-		restSpecialtyGroupMockMvc.perform(put("/api/specialty-groups")
-				.contentType(TestUtil.APPLICATION_JSON_UTF8)
-				.content(TestUtil.convertObjectToJsonBytes(specialtyGroupDTO)))
-				.andExpect(status().isCreated());
+    // If the entity doesn't have an ID, it will be created instead of just being updated
+    restSpecialtyGroupMockMvc.perform(put("/api/specialty-groups")
+        .contentType(TestUtil.APPLICATION_JSON_UTF8)
+        .content(TestUtil.convertObjectToJsonBytes(specialtyGroupDTO)))
+        .andExpect(status().isCreated());
 
-		// Validate the SpecialtyGroup in the database
-		List<SpecialtyGroup> specialtyGroupList = specialtyGroupRepository.findAll();
-		assertThat(specialtyGroupList).hasSize(databaseSizeBeforeUpdate + 1);
-	}
+    // Validate the SpecialtyGroup in the database
+    List<SpecialtyGroup> specialtyGroupList = specialtyGroupRepository.findAll();
+    assertThat(specialtyGroupList).hasSize(databaseSizeBeforeUpdate + 1);
+  }
 
-	@Test
-	@Transactional
-	public void deleteSpecialtyGroup() throws Exception {
-		// Initialize the database
-		specialtyGroupRepository.saveAndFlush(specialtyGroup);
-		int databaseSizeBeforeDelete = specialtyGroupRepository.findAll().size();
+  @Test
+  @Transactional
+  public void deleteSpecialtyGroup() throws Exception {
+    // Initialize the database
+    specialtyGroupRepository.saveAndFlush(specialtyGroup);
+    int databaseSizeBeforeDelete = specialtyGroupRepository.findAll().size();
 
-		// Get the specialtyGroup
-		restSpecialtyGroupMockMvc.perform(delete("/api/specialty-groups/{id}", specialtyGroup.getId())
-				.accept(TestUtil.APPLICATION_JSON_UTF8))
-				.andExpect(status().isOk());
+    // Get the specialtyGroup
+    restSpecialtyGroupMockMvc.perform(delete("/api/specialty-groups/{id}", specialtyGroup.getId())
+        .accept(TestUtil.APPLICATION_JSON_UTF8))
+        .andExpect(status().isOk());
 
-		// Validate the database is empty
-		List<SpecialtyGroup> specialtyGroupList = specialtyGroupRepository.findAll();
-		assertThat(specialtyGroupList).hasSize(databaseSizeBeforeDelete - 1);
-	}
+    // Validate the database is empty
+    List<SpecialtyGroup> specialtyGroupList = specialtyGroupRepository.findAll();
+    assertThat(specialtyGroupList).hasSize(databaseSizeBeforeDelete - 1);
+  }
 
-	@Test
-	@Transactional
-	public void equalsVerifier() throws Exception {
-		TestUtil.equalsVerifier(SpecialtyGroup.class);
-	}
+  @Test
+  @Transactional
+  public void equalsVerifier() throws Exception {
+    TestUtil.equalsVerifier(SpecialtyGroup.class);
+  }
 }

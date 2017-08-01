@@ -11,98 +11,98 @@ import java.util.Objects;
  */
 public class FundingDTO implements Serializable {
 
-	private Long id;
+  private Long id;
 
-	private String status;
+  private String status;
 
-	private LocalDate startDate;
+  private LocalDate startDate;
 
-	private LocalDate endDate;
+  private LocalDate endDate;
 
-	private FundingType fundingType;
+  private FundingType fundingType;
 
-	private String fundingIssue;
+  private String fundingIssue;
 
-	public Long getId() {
-		return id;
-	}
+  public Long getId() {
+    return id;
+  }
 
-	public void setId(Long id) {
-		this.id = id;
-	}
+  public void setId(Long id) {
+    this.id = id;
+  }
 
-	public String getStatus() {
-		return status;
-	}
+  public String getStatus() {
+    return status;
+  }
 
-	public void setStatus(String status) {
-		this.status = status;
-	}
+  public void setStatus(String status) {
+    this.status = status;
+  }
 
-	public LocalDate getStartDate() {
-		return startDate;
-	}
+  public LocalDate getStartDate() {
+    return startDate;
+  }
 
-	public void setStartDate(LocalDate startDate) {
-		this.startDate = startDate;
-	}
+  public void setStartDate(LocalDate startDate) {
+    this.startDate = startDate;
+  }
 
-	public LocalDate getEndDate() {
-		return endDate;
-	}
+  public LocalDate getEndDate() {
+    return endDate;
+  }
 
-	public void setEndDate(LocalDate endDate) {
-		this.endDate = endDate;
-	}
+  public void setEndDate(LocalDate endDate) {
+    this.endDate = endDate;
+  }
 
-	public FundingType getFundingType() {
-		return fundingType;
-	}
+  public FundingType getFundingType() {
+    return fundingType;
+  }
 
-	public void setFundingType(FundingType fundingType) {
-		this.fundingType = fundingType;
-	}
+  public void setFundingType(FundingType fundingType) {
+    this.fundingType = fundingType;
+  }
 
-	public String getFundingIssue() {
-		return fundingIssue;
-	}
+  public String getFundingIssue() {
+    return fundingIssue;
+  }
 
-	public void setFundingIssue(String fundingIssue) {
-		this.fundingIssue = fundingIssue;
-	}
+  public void setFundingIssue(String fundingIssue) {
+    this.fundingIssue = fundingIssue;
+  }
 
-	@Override
-	public boolean equals(Object o) {
-		if (this == o) {
-			return true;
-		}
-		if (o == null || getClass() != o.getClass()) {
-			return false;
-		}
+  @Override
+  public boolean equals(Object o) {
+    if (this == o) {
+      return true;
+    }
+    if (o == null || getClass() != o.getClass()) {
+      return false;
+    }
 
-		FundingDTO fundingDTO = (FundingDTO) o;
+    FundingDTO fundingDTO = (FundingDTO) o;
 
-		if (!Objects.equals(id, fundingDTO.id)) {
-			return false;
-		}
+    if (!Objects.equals(id, fundingDTO.id)) {
+      return false;
+    }
 
-		return true;
-	}
+    return true;
+  }
 
-	@Override
-	public int hashCode() {
-		return Objects.hashCode(id);
-	}
+  @Override
+  public int hashCode() {
+    return Objects.hashCode(id);
+  }
 
-	@Override
-	public String toString() {
-		return "FundingDTO{" +
-				"id=" + id +
-				", status='" + status + "'" +
-				", startDate='" + startDate + "'" +
-				", endDate='" + endDate + "'" +
-				", fundingType='" + fundingType + "'" +
-				", fundingIssue='" + fundingIssue + "'" +
-				'}';
-	}
+  @Override
+  public String toString() {
+    return "FundingDTO{" +
+        "id=" + id +
+        ", status='" + status + "'" +
+        ", startDate='" + startDate + "'" +
+        ", endDate='" + endDate + "'" +
+        ", fundingType='" + fundingType + "'" +
+        ", fundingIssue='" + fundingIssue + "'" +
+        '}';
+  }
 }

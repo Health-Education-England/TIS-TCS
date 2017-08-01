@@ -12,52 +12,52 @@ import java.util.List;
  */
 public interface SpecialtyService {
 
-	/**
-	 * Save a specialty.
-	 *
-	 * @param specialtyDTO the entity to save
-	 * @return the persisted entity
-	 */
-	SpecialtyDTO save(SpecialtyDTO specialtyDTO);
+  /**
+   * Save a specialty.
+   *
+   * @param specialtyDTO the entity to save
+   * @return the persisted entity
+   */
+  SpecialtyDTO save(SpecialtyDTO specialtyDTO);
 
-	/**
-	 * Save a list of specialties.
-	 *
-	 * @param specialtyDTO the entities to save
-	 * @return the list of persisted entities
-	 */
-	List<SpecialtyDTO> save(List<SpecialtyDTO> specialtyDTO);
+  /**
+   * Save a list of specialties.
+   *
+   * @param specialtyDTO the entities to save
+   * @return the list of persisted entities
+   */
+  List<SpecialtyDTO> save(List<SpecialtyDTO> specialtyDTO);
 
-	/**
-	 * Get all the specialties within the given smart search string.
-	 *
-	 * @param searchString the search string to match, can be null
-	 * @param columnFilers the exact key value filters to apply, can be null
-	 * @param pageable     the pagination information
-	 * @return the list of entities
-	 */
-	Page<SpecialtyDTO> advancedSearch(String searchString, List<ColumnFilter> columnFilers, Pageable pageable);
+  /**
+   * Get all the specialties within the given smart search string.
+   *
+   * @param searchString the search string to match, can be null
+   * @param columnFilers the exact key value filters to apply, can be null
+   * @param pageable     the pagination information
+   * @return the list of entities
+   */
+  Page<SpecialtyDTO> advancedSearch(String searchString, List<ColumnFilter> columnFilers, Pageable pageable);
 
-	/**
-	 * Get all the specialties.
-	 *
-	 * @param pageable the pagination information
-	 * @return the list of entities
-	 */
-	Page<SpecialtyDTO> findAll(Pageable pageable);
+  /**
+   * Get all the specialties.
+   *
+   * @param pageable the pagination information
+   * @return the list of entities
+   */
+  Page<SpecialtyDTO> findAll(Pageable pageable);
 
-	/**
-	 * Get the "id" specialty.
-	 *
-	 * @param id the id of the entity
-	 * @return the entity
-	 */
-	SpecialtyDTO findOne(Long id);
+  /**
+   * Get the "id" specialty.
+   *
+   * @param id the id of the entity
+   * @return the entity
+   */
+  SpecialtyDTO findOne(Long id);
 
-	/**
-	 * Delete the "id" specialty.
-	 *
-	 * @param id the id of the entity
-	 */
-	void delete(Long id);
+  /**
+   * Delete the "id" specialty.
+   *
+   * @param id the id of the entity
+   */
+  void delete(Long id);
 }

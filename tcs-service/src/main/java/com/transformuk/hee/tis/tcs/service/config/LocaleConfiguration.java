@@ -13,22 +13,22 @@ import org.springframework.web.servlet.i18n.LocaleChangeInterceptor;
 @Configuration
 public class LocaleConfiguration extends WebMvcConfigurerAdapter implements EnvironmentAware {
 
-	@Override
-	public void setEnvironment(Environment environment) {
-		// unused
-	}
+  @Override
+  public void setEnvironment(Environment environment) {
+    // unused
+  }
 
-	@Bean(name = "localeResolver")
-	public LocaleResolver localeResolver() {
-		AngularCookieLocaleResolver cookieLocaleResolver = new AngularCookieLocaleResolver();
-		cookieLocaleResolver.setCookieName("NG_TRANSLATE_LANG_KEY");
-		return cookieLocaleResolver;
-	}
+  @Bean(name = "localeResolver")
+  public LocaleResolver localeResolver() {
+    AngularCookieLocaleResolver cookieLocaleResolver = new AngularCookieLocaleResolver();
+    cookieLocaleResolver.setCookieName("NG_TRANSLATE_LANG_KEY");
+    return cookieLocaleResolver;
+  }
 
-	@Override
-	public void addInterceptors(InterceptorRegistry registry) {
-		LocaleChangeInterceptor localeChangeInterceptor = new LocaleChangeInterceptor();
-		localeChangeInterceptor.setParamName("language");
-		registry.addInterceptor(localeChangeInterceptor);
-	}
+  @Override
+  public void addInterceptors(InterceptorRegistry registry) {
+    LocaleChangeInterceptor localeChangeInterceptor = new LocaleChangeInterceptor();
+    localeChangeInterceptor.setParamName("language");
+    registry.addInterceptor(localeChangeInterceptor);
+  }
 }

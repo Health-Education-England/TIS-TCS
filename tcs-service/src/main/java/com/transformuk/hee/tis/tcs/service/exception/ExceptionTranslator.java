@@ -24,89 +24,90 @@ import java.util.List;
 @ControllerAdvice
 public class ExceptionTranslator {
 
-	@ExceptionHandler(ConcurrencyFailureException.class)
-	@ResponseStatus(HttpStatus.CONFLICT)
-	@ResponseBody
-	public ErrorVM processConcurrencyError(ConcurrencyFailureException ex) {
-		return new ErrorVM(ErrorConstants.ERR_CONCURRENCY_FAILURE);
-	}
+  @ExceptionHandler(ConcurrencyFailureException.class)
+  @ResponseStatus(HttpStatus.CONFLICT)
+  @ResponseBody
+  public ErrorVM processConcurrencyError(ConcurrencyFailureException ex) {
+    return new ErrorVM(ErrorConstants.ERR_CONCURRENCY_FAILURE);
+  }
 
-	@ExceptionHandler(MethodArgumentNotValidException.class)
-	@ResponseStatus(HttpStatus.BAD_REQUEST)
-	@ResponseBody
-	public ErrorVM processValidationError(MethodArgumentNotValidException ex) {
-		BindingResult result = ex.getBindingResult();
-		List<FieldError> fieldErrors = result.getFieldErrors();
+  @ExceptionHandler(MethodArgumentNotValidException.class)
+  @ResponseStatus(HttpStatus.BAD_REQUEST)
+  @ResponseBody
+  public ErrorVM processValidationError(MethodArgumentNotValidException ex) {
+    BindingResult result = ex.getBindingResult();
+    List<FieldError> fieldErrors = result.getFieldErrors();
 
-		return processFieldErrors(fieldErrors);
-	}
+    return processFieldErrors(fieldErrors);
+  }
 
-	/**
-	 * This exception occurs if we have an enum in a DTO such as
-	 * {@link com.transformuk.hee.tis.tcs.api.dto.ProgrammeDTO#status} and the REST request coming in
-	 * does not provide the proper ENUM value.
-	 * @param ex the exception to intercept
-	 * @return the error object to return to the user
-	 */
-	@ExceptionHandler(HttpMessageNotReadableException.class)
-	@ResponseStatus(HttpStatus.BAD_REQUEST)
-	@ResponseBody
-	public ErrorVM processBadEnumError(HttpMessageNotReadableException ex) {
-		ErrorVM dto = new ErrorVM(ErrorConstants.ERR_VALIDATION);
-		dto.add(null, null, ex.getMessage());
-		return dto;
-	}
+  /**
+   * This exception occurs if we have an enum in a DTO such as
+   * {@link com.transformuk.hee.tis.tcs.api.dto.ProgrammeDTO#status} and the REST request coming in
+   * does not provide the proper ENUM value.
+   *
+   * @param ex the exception to intercept
+   * @return the error object to return to the user
+   */
+  @ExceptionHandler(HttpMessageNotReadableException.class)
+  @ResponseStatus(HttpStatus.BAD_REQUEST)
+  @ResponseBody
+  public ErrorVM processBadEnumError(HttpMessageNotReadableException ex) {
+    ErrorVM dto = new ErrorVM(ErrorConstants.ERR_VALIDATION);
+    dto.add(null, null, ex.getMessage());
+    return dto;
+  }
 
-	@ExceptionHandler(CustomParameterizedException.class)
-	@ResponseStatus(HttpStatus.BAD_REQUEST)
-	@ResponseBody
-	public ParameterizedErrorVM processParameterizedValidationError(CustomParameterizedException ex) {
-		return ex.getErrorVM();
-	}
+  @ExceptionHandler(CustomParameterizedException.class)
+  @ResponseStatus(HttpStatus.BAD_REQUEST)
+  @ResponseBody
+  public ParameterizedErrorVM processParameterizedValidationError(CustomParameterizedException ex) {
+    return ex.getErrorVM();
+  }
 
-	@ExceptionHandler(AccessDeniedException.class)
-	@ResponseStatus(HttpStatus.FORBIDDEN)
-	@ResponseBody
-	public ErrorVM processAccessDeniedException(AccessDeniedException e) {
-		return new ErrorVM(ErrorConstants.ERR_ACCESS_DENIED, e.getMessage());
-	}
+  @ExceptionHandler(AccessDeniedException.class)
+  @ResponseStatus(HttpStatus.FORBIDDEN)
+  @ResponseBody
+  public ErrorVM processAccessDeniedException(AccessDeniedException e) {
+    return new ErrorVM(ErrorConstants.ERR_ACCESS_DENIED, e.getMessage());
+  }
 
-	private ErrorVM processFieldErrors(List<FieldError> fieldErrors) {
-		ErrorVM dto = new ErrorVM(ErrorConstants.ERR_VALIDATION);
+  private ErrorVM processFieldErrors(List<FieldError> fieldErrors) {
+    ErrorVM dto = new ErrorVM(ErrorConstants.ERR_VALIDATION);
 
-		for (FieldError fieldError : fieldErrors) {
-			dto.add(fieldError.getObjectName(), fieldError.getField(), fieldError.getDefaultMessage());
-		}
+    for (FieldError fieldError : fieldErrors) {
+      dto.add(fieldError.getObjectName(), fieldError.getField(), fieldError.getDefaultMessage());
+    }
 
-		return dto;
-	}
+    return dto;
+  }
 
-	@ExceptionHandler(HttpRequestMethodNotSupportedException.class)
-	@ResponseBody
-	@ResponseStatus(HttpStatus.METHOD_NOT_ALLOWED)
-	public ErrorVM processMethodNotSupportedException(HttpRequestMethodNotSupportedException exception) {
-		return new ErrorVM(ErrorConstants.ERR_METHOD_NOT_SUPPORTED, exception.getMessage());
-	}
+  @ExceptionHandler(HttpRequestMethodNotSupportedException.class)
+  @ResponseBody
+  @ResponseStatus(HttpStatus.METHOD_NOT_ALLOWED)
+  public ErrorVM processMethodNotSupportedException(HttpRequestMethodNotSupportedException exception) {
+    return new ErrorVM(ErrorConstants.ERR_METHOD_NOT_SUPPORTED, exception.getMessage());
+  }
 
-	@ExceptionHandler(IllegalArgumentException.class)
-	public ResponseEntity<ErrorVM> processIllegalArgumentException(Exception ex) {
-		BodyBuilder builder = ResponseEntity.status(HttpStatus.BAD_REQUEST);
-		ErrorVM errorVM = new ErrorVM("Bad request", ex.getMessage());
-		return builder.body(errorVM);
-	}
+  @ExceptionHandler(IllegalArgumentException.class)
+  public ResponseEntity<ErrorVM> processIllegalArgumentException(Exception ex) {
+    BodyBuilder builder = ResponseEntity.status(HttpStatus.BAD_REQUEST);
+    ErrorVM errorVM = new ErrorVM("Bad request", ex.getMessage());
+    return builder.body(errorVM);
+  }
 
-	@ExceptionHandler(Exception.class)
-	public ResponseEntity<ErrorVM> processRuntimeException(Exception ex) {
-		BodyBuilder builder;
-		ErrorVM errorVM;
-		ResponseStatus responseStatus = AnnotationUtils.findAnnotation(ex.getClass(), ResponseStatus.class);
-		if (responseStatus != null) {
-			builder = ResponseEntity.status(responseStatus.value());
-			errorVM = new ErrorVM("error." + responseStatus.value().value(), responseStatus.reason());
-		} else {
-			builder = ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR);
-			errorVM = new ErrorVM(ErrorConstants.ERR_INTERNAL_SERVER_ERROR, "Internal server error");
-		}
-		return builder.body(errorVM);
-	}
+  @ExceptionHandler(Exception.class)
+  public ResponseEntity<ErrorVM> processRuntimeException(Exception ex) {
+    BodyBuilder builder;
+    ErrorVM errorVM;
+    ResponseStatus responseStatus = AnnotationUtils.findAnnotation(ex.getClass(), ResponseStatus.class);
+    if (responseStatus != null) {
+      builder = ResponseEntity.status(responseStatus.value());
+      errorVM = new ErrorVM("error." + responseStatus.value().value(), responseStatus.reason());
+    } else {
+      builder = ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR);
+      errorVM = new ErrorVM(ErrorConstants.ERR_INTERNAL_SERVER_ERROR, "Internal server error");
+    }
+    return builder.body(errorVM);
+  }
 }

@@ -18,26 +18,26 @@ import springfox.documentation.swagger2.annotations.EnableSwagger2;
 @EnableSwagger2
 public class SwaggerDocumentationConfig {
 
-	ApiInfo apiInfo() {
-		return new ApiInfoBuilder()
-				.title("TIS Reference API")
-				.description("Programme Curriculum Specialty Service REST API")
-				.license("")
-				.licenseUrl("")
-				.termsOfServiceUrl("")
-				.version("1.0.0")
-				.contact(new Contact("Transform","http://transformuk.com/", "info@transformuk,com"))
-				.build();
-	}
+  ApiInfo apiInfo() {
+    return new ApiInfoBuilder()
+        .title("TIS Reference API")
+        .description("Programme Curriculum Specialty Service REST API")
+        .license("")
+        .licenseUrl("")
+        .termsOfServiceUrl("")
+        .version("1.0.0")
+        .contact(new Contact("Transform", "http://transformuk.com/", "info@transformuk,com"))
+        .build();
+  }
 
-	@Bean
-	public Docket customImplementation(){
-		return new Docket(DocumentationType.SWAGGER_2)
-				.groupName("PCS")
-				.apiInfo(apiInfo())
-				.select()
-				.apis(RequestHandlerSelectors.basePackage("com.transformuk.hee.tis.tcs.service.api"))
-				.build()
-				.apiInfo(apiInfo());
-	}
+  @Bean
+  public Docket customImplementation() {
+    return new Docket(DocumentationType.SWAGGER_2)
+        .groupName("PCS")
+        .apiInfo(apiInfo())
+        .select()
+        .apis(RequestHandlerSelectors.basePackage("com.transformuk.hee.tis.tcs.service.api"))
+        .build()
+        .apiInfo(apiInfo());
+  }
 }

@@ -14,53 +14,53 @@ import java.util.Set;
  */
 public class DesignatedBodyMapper {
 
-	/**
-	 * Maps between a designated body code and the managing deaneries that are considered matches to that code,
-	 * please note that London LETBs is considered a match for all london DBC's
-	 */
-	private static final Map<String, List<String>> dbcToMangingDeaneryMap = ImmutableMap.<String, List<String>>builder()
-			//London LETBs match any of the london DBC's
-			.put("1-AIIDR8", Lists.newArrayList("Health Education England Kent, Surrey and Sussex", "London LETBs"))
-			.put("1-AIIDWA", Lists.newArrayList("Health Education England North West London", "London LETBs"))
-			.put("1-AIIDVS", Lists.newArrayList("Health Education England North Central and East London", "London LETBs"))
-			.put("1-AIIDWI", Lists.newArrayList("Health Education England South London", "London LETBs"))
+  /**
+   * Maps between a designated body code and the managing deaneries that are considered matches to that code,
+   * please note that London LETBs is considered a match for all london DBC's
+   */
+  private static final Map<String, List<String>> dbcToMangingDeaneryMap = ImmutableMap.<String, List<String>>builder()
+      //London LETBs match any of the london DBC's
+      .put("1-AIIDR8", Lists.newArrayList("Health Education England Kent, Surrey and Sussex", "London LETBs"))
+      .put("1-AIIDWA", Lists.newArrayList("Health Education England North West London", "London LETBs"))
+      .put("1-AIIDVS", Lists.newArrayList("Health Education England North Central and East London", "London LETBs"))
+      .put("1-AIIDWI", Lists.newArrayList("Health Education England South London", "London LETBs"))
 
-			.put("1-AIIDSA", Lists.newArrayList("Health Education England East Midlands"))
-			.put("1-AIIDWT", Lists.newArrayList("Health Education England East of England"))
-			.put("1-AIIDSI", Lists.newArrayList("Health Education England North East"))
-			.put("1-AIIDH1", Lists.newArrayList("Health Education England Thames Valley"))
-			.put("1-AIIDQQ", Lists.newArrayList("Health Education England Yorkshire and the Humber"))
-			.put("1-AIIDMY", Lists.newArrayList("Health Education England West Midlands"))
-			.put("1-AIIDMQ", Lists.newArrayList("Health Education England South West"))
-			.put("1-AIIDHJ", Lists.newArrayList("Health Education England Wessex"))
-			.put("1-AIIDNQ", Lists.newArrayList("Health Education England North West"))
-			.build();
+      .put("1-AIIDSA", Lists.newArrayList("Health Education England East Midlands"))
+      .put("1-AIIDWT", Lists.newArrayList("Health Education England East of England"))
+      .put("1-AIIDSI", Lists.newArrayList("Health Education England North East"))
+      .put("1-AIIDH1", Lists.newArrayList("Health Education England Thames Valley"))
+      .put("1-AIIDQQ", Lists.newArrayList("Health Education England Yorkshire and the Humber"))
+      .put("1-AIIDMY", Lists.newArrayList("Health Education England West Midlands"))
+      .put("1-AIIDMQ", Lists.newArrayList("Health Education England South West"))
+      .put("1-AIIDHJ", Lists.newArrayList("Health Education England Wessex"))
+      .put("1-AIIDNQ", Lists.newArrayList("Health Education England North West"))
+      .build();
 
-	private static Set<String> allLocalOffices = null;
+  private static Set<String> allLocalOffices = null;
 
-	/**
-	 * @param dbcs a list of designated body codes not null
-	 * @return the list of managing deaneries that match the given list of codes
-	 */
-	public static Set<String> map(Set<String> dbcs) {
-		Preconditions.checkNotNull(dbcs);
-		Set<String> deaneries = new HashSet<>();
-		dbcs.forEach(dbc -> {
-			if (dbcToMangingDeaneryMap.containsKey(dbc)) {
-				deaneries.addAll(dbcToMangingDeaneryMap.get(dbc));
-			}
-		});
-		return deaneries;
-	}
+  /**
+   * @param dbcs a list of designated body codes not null
+   * @return the list of managing deaneries that match the given list of codes
+   */
+  public static Set<String> map(Set<String> dbcs) {
+    Preconditions.checkNotNull(dbcs);
+    Set<String> deaneries = new HashSet<>();
+    dbcs.forEach(dbc -> {
+      if (dbcToMangingDeaneryMap.containsKey(dbc)) {
+        deaneries.addAll(dbcToMangingDeaneryMap.get(dbc));
+      }
+    });
+    return deaneries;
+  }
 
-	/**
-	 * @return all currently known local offices
-	 */
-	public static Set<String> getAllLocalOffices() {
-		if (allLocalOffices == null) {
-			allLocalOffices = new HashSet<>();
-			dbcToMangingDeaneryMap.values().forEach( v -> allLocalOffices.addAll(v));
-		}
-		return allLocalOffices;
-	}
+  /**
+   * @return all currently known local offices
+   */
+  public static Set<String> getAllLocalOffices() {
+    if (allLocalOffices == null) {
+      allLocalOffices = new HashSet<>();
+      dbcToMangingDeaneryMap.values().forEach(v -> allLocalOffices.addAll(v));
+    }
+    return allLocalOffices;
+  }
 }

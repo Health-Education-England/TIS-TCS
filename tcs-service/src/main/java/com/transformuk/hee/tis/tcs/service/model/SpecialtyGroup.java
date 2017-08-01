@@ -14,76 +14,76 @@ import java.util.Objects;
 @Entity
 public class SpecialtyGroup implements Serializable {
 
-	private static final long serialVersionUID = 1L;
+  private static final long serialVersionUID = 1L;
 
-	@Id
-	@GeneratedValue(strategy = GenerationType.IDENTITY)
-	private Long id;
+  @Id
+  @GeneratedValue(strategy = GenerationType.IDENTITY)
+  private Long id;
 
-	private String intrepidId;
+  private String intrepidId;
 
-	private String name;
+  private String name;
 
-	public Long getId() {
-		return id;
-	}
+  public Long getId() {
+    return id;
+  }
 
-	public void setId(Long id) {
-		this.id = id;
-	}
+  public void setId(Long id) {
+    this.id = id;
+  }
 
-	public String getName() {
-		return name;
-	}
+  public String getName() {
+    return name;
+  }
 
-	public void setName(String name) {
-		this.name = name;
-	}
+  public void setName(String name) {
+    this.name = name;
+  }
 
-	public SpecialtyGroup name(String name) {
-		this.name = name;
-		return this;
-	}
+  public SpecialtyGroup name(String name) {
+    this.name = name;
+    return this;
+  }
 
-	public String getIntrepidId() {
-		return intrepidId;
-	}
+  public String getIntrepidId() {
+    return intrepidId;
+  }
 
-	public void setIntrepidId(String intrepidId) {
-		this.intrepidId = intrepidId;
-	}
+  public void setIntrepidId(String intrepidId) {
+    this.intrepidId = intrepidId;
+  }
 
-	public SpecialtyGroup intrepidId(String intrepidId) {
-		this.intrepidId = intrepidId;
-		return this;
-	}
+  public SpecialtyGroup intrepidId(String intrepidId) {
+    this.intrepidId = intrepidId;
+    return this;
+  }
 
-	@Override
-	public boolean equals(Object o) {
-		if (this == o) {
-			return true;
-		}
-		if (o == null || getClass() != o.getClass()) {
-			return false;
-		}
-		SpecialtyGroup specialtyGroup = (SpecialtyGroup) o;
-		if (specialtyGroup.id == null || id == null) {
-			return false;
-		}
-		return Objects.equals(id, specialtyGroup.id);
-	}
+  @Override
+  public boolean equals(Object o) {
+    if (this == o) {
+      return true;
+    }
+    if (o == null || getClass() != o.getClass()) {
+      return false;
+    }
+    SpecialtyGroup specialtyGroup = (SpecialtyGroup) o;
+    if (specialtyGroup.id == null || id == null) {
+      return false;
+    }
+    return Objects.equals(id, specialtyGroup.id);
+  }
 
-	@Override
-	public int hashCode() {
-		return Objects.hashCode(id);
-	}
+  @Override
+  public int hashCode() {
+    return Objects.hashCode(id);
+  }
 
-	@Override
-	public String toString() {
-		return "SpecialtyGroup{" +
-				"id=" + id +
-				", intrepidId='" + intrepidId + '\'' +
-				", name='" + name + '\'' +
-				'}';
-	}
+  @Override
+  public String toString() {
+    return "SpecialtyGroup{" +
+        "id=" + id +
+        ", intrepidId='" + intrepidId + '\'' +
+        ", name='" + name + '\'' +
+        '}';
+  }
 }

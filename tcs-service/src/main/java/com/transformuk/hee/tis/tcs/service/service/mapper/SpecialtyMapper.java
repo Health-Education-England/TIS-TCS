@@ -14,15 +14,15 @@ import java.util.List;
 @Mapper(componentModel = "spring", uses = {})
 public interface SpecialtyMapper {
 
-	SpecialtyDTO specialtyToSpecialtyDTO(Specialty specialty);
+  SpecialtyDTO specialtyToSpecialtyDTO(Specialty specialty);
 
-	List<SpecialtyDTO> specialtiesToSpecialtyDTOs(List<Specialty> specialties);
+  List<SpecialtyDTO> specialtiesToSpecialtyDTOs(List<Specialty> specialties);
 
-	Specialty specialtyDTOToSpecialty(SpecialtyDTO specialtyDTO);
+  Specialty specialtyDTOToSpecialty(SpecialtyDTO specialtyDTO);
 
-	List<Specialty> specialtyDTOsToSpecialties(List<SpecialtyDTO> specialtyDTOs);
+  List<Specialty> specialtyDTOsToSpecialties(List<SpecialtyDTO> specialtyDTOs);
 
-	SpecialtyGroupDTO map(SpecialtyGroup specialtyGroup);
+  SpecialtyGroupDTO map(SpecialtyGroup specialtyGroup);
 
-	SpecialtyGroup map(SpecialtyGroupDTO specialtyGroupDTO);
+  SpecialtyGroup map(SpecialtyGroupDTO specialtyGroupDTO);
 }

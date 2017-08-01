@@ -9,184 +9,184 @@ import java.util.Objects;
  */
 public class PostDTO implements Serializable {
 
-	private Long id;
+  private Long id;
 
-	private String nationalPostNumber;
+  private String nationalPostNumber;
 
-	private String status;
+  private String status;
 
-	private String postOwner;
+  private String postOwner;
 
-	private String mainSiteLocated;
+  private String mainSiteLocated;
 
-	private String leadSite;
+  private String leadSite;
 
-	private String employingBody;
+  private String employingBody;
 
-	private String trainingBody;
+  private String trainingBody;
 
-	private String approvedGrade;
+  private String approvedGrade;
 
-	private String postSpecialty;
+  private String postSpecialty;
 
-	private Float fullTimeEquivelent;
+  private Float fullTimeEquivelent;
 
-	private String leadProvider;
+  private String leadProvider;
 
-	private String oldPostId;
+  private String oldPostId;
 
-	private String newPostId;
+  private String newPostId;
 
-	public Long getId() {
-		return id;
-	}
+  public Long getId() {
+    return id;
+  }
 
-	public void setId(Long id) {
-		this.id = id;
-	}
+  public void setId(Long id) {
+    this.id = id;
+  }
 
-	public String getNationalPostNumber() {
-		return nationalPostNumber;
-	}
+  public String getNationalPostNumber() {
+    return nationalPostNumber;
+  }
 
-	public void setNationalPostNumber(String nationalPostNumber) {
-		this.nationalPostNumber = nationalPostNumber;
-	}
+  public void setNationalPostNumber(String nationalPostNumber) {
+    this.nationalPostNumber = nationalPostNumber;
+  }
 
-	public String getStatus() {
-		return status;
-	}
+  public String getStatus() {
+    return status;
+  }
 
-	public void setStatus(String status) {
-		this.status = status;
-	}
+  public void setStatus(String status) {
+    this.status = status;
+  }
 
-	public String getPostOwner() {
-		return postOwner;
-	}
+  public String getPostOwner() {
+    return postOwner;
+  }
 
-	public void setPostOwner(String postOwner) {
-		this.postOwner = postOwner;
-	}
+  public void setPostOwner(String postOwner) {
+    this.postOwner = postOwner;
+  }
 
-	public String getMainSiteLocated() {
-		return mainSiteLocated;
-	}
+  public String getMainSiteLocated() {
+    return mainSiteLocated;
+  }
 
-	public void setMainSiteLocated(String mainSiteLocated) {
-		this.mainSiteLocated = mainSiteLocated;
-	}
+  public void setMainSiteLocated(String mainSiteLocated) {
+    this.mainSiteLocated = mainSiteLocated;
+  }
 
-	public String getLeadSite() {
-		return leadSite;
-	}
+  public String getLeadSite() {
+    return leadSite;
+  }
 
-	public void setLeadSite(String leadSite) {
-		this.leadSite = leadSite;
-	}
+  public void setLeadSite(String leadSite) {
+    this.leadSite = leadSite;
+  }
 
-	public String getEmployingBody() {
-		return employingBody;
-	}
+  public String getEmployingBody() {
+    return employingBody;
+  }
 
-	public void setEmployingBody(String employingBody) {
-		this.employingBody = employingBody;
-	}
+  public void setEmployingBody(String employingBody) {
+    this.employingBody = employingBody;
+  }
 
-	public String getTrainingBody() {
-		return trainingBody;
-	}
+  public String getTrainingBody() {
+    return trainingBody;
+  }
 
-	public void setTrainingBody(String trainingBody) {
-		this.trainingBody = trainingBody;
-	}
+  public void setTrainingBody(String trainingBody) {
+    this.trainingBody = trainingBody;
+  }
 
-	public String getApprovedGrade() {
-		return approvedGrade;
-	}
+  public String getApprovedGrade() {
+    return approvedGrade;
+  }
 
-	public void setApprovedGrade(String approvedGrade) {
-		this.approvedGrade = approvedGrade;
-	}
+  public void setApprovedGrade(String approvedGrade) {
+    this.approvedGrade = approvedGrade;
+  }
 
-	public String getPostSpecialty() {
-		return postSpecialty;
-	}
+  public String getPostSpecialty() {
+    return postSpecialty;
+  }
 
-	public void setPostSpecialty(String postSpecialty) {
-		this.postSpecialty = postSpecialty;
-	}
+  public void setPostSpecialty(String postSpecialty) {
+    this.postSpecialty = postSpecialty;
+  }
 
-	public Float getFullTimeEquivelent() {
-		return fullTimeEquivelent;
-	}
+  public Float getFullTimeEquivelent() {
+    return fullTimeEquivelent;
+  }
 
-	public void setFullTimeEquivelent(Float fullTimeEquivelent) {
-		this.fullTimeEquivelent = fullTimeEquivelent;
-	}
+  public void setFullTimeEquivelent(Float fullTimeEquivelent) {
+    this.fullTimeEquivelent = fullTimeEquivelent;
+  }
 
-	public String getLeadProvider() {
-		return leadProvider;
-	}
+  public String getLeadProvider() {
+    return leadProvider;
+  }
 
-	public void setLeadProvider(String leadProvider) {
-		this.leadProvider = leadProvider;
-	}
+  public void setLeadProvider(String leadProvider) {
+    this.leadProvider = leadProvider;
+  }
 
-	public String getOldPostId() {
-		return oldPostId;
-	}
+  public String getOldPostId() {
+    return oldPostId;
+  }
 
-	public void setOldPostId(String postId) {
-		this.oldPostId = postId;
-	}
+  public void setOldPostId(String postId) {
+    this.oldPostId = postId;
+  }
 
-	public String getNewPostId() {
-		return newPostId;
-	}
+  public String getNewPostId() {
+    return newPostId;
+  }
 
-	public void setNewPostId(String postId) {
-		this.newPostId = postId;
-	}
+  public void setNewPostId(String postId) {
+    this.newPostId = postId;
+  }
 
-	@Override
-	public boolean equals(Object o) {
-		if (this == o) {
-			return true;
-		}
-		if (o == null || getClass() != o.getClass()) {
-			return false;
-		}
+  @Override
+  public boolean equals(Object o) {
+    if (this == o) {
+      return true;
+    }
+    if (o == null || getClass() != o.getClass()) {
+      return false;
+    }
 
-		PostDTO postDTO = (PostDTO) o;
+    PostDTO postDTO = (PostDTO) o;
 
-		if (!Objects.equals(id, postDTO.id)) {
-			return false;
-		}
+    if (!Objects.equals(id, postDTO.id)) {
+      return false;
+    }
 
-		return true;
-	}
+    return true;
+  }
 
-	@Override
-	public int hashCode() {
-		return Objects.hashCode(id);
-	}
+  @Override
+  public int hashCode() {
+    return Objects.hashCode(id);
+  }
 
-	@Override
-	public String toString() {
-		return "PostDTO{" +
-				"id=" + id +
-				", nationalPostNumber='" + nationalPostNumber + "'" +
-				", status='" + status + "'" +
-				", postOwner='" + postOwner + "'" +
-				", mainSiteLocated='" + mainSiteLocated + "'" +
-				", leadSite='" + leadSite + "'" +
-				", employingBody='" + employingBody + "'" +
-				", trainingBody='" + trainingBody + "'" +
-				", approvedGrade='" + approvedGrade + "'" +
-				", postSpecialty='" + postSpecialty + "'" +
-				", fullTimeEquivelent='" + fullTimeEquivelent + "'" +
-				", leadProvider='" + leadProvider + "'" +
-				'}';
-	}
+  @Override
+  public String toString() {
+    return "PostDTO{" +
+        "id=" + id +
+        ", nationalPostNumber='" + nationalPostNumber + "'" +
+        ", status='" + status + "'" +
+        ", postOwner='" + postOwner + "'" +
+        ", mainSiteLocated='" + mainSiteLocated + "'" +
+        ", leadSite='" + leadSite + "'" +
+        ", employingBody='" + employingBody + "'" +
+        ", trainingBody='" + trainingBody + "'" +
+        ", approvedGrade='" + approvedGrade + "'" +
+        ", postSpecialty='" + postSpecialty + "'" +
+        ", fullTimeEquivelent='" + fullTimeEquivelent + "'" +
+        ", leadProvider='" + leadProvider + "'" +
+        '}';
+  }
 }

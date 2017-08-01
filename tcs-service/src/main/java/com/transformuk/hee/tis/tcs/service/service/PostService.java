@@ -11,42 +11,42 @@ import java.util.List;
  */
 public interface PostService {
 
-	/**
-	 * Save a post.
-	 *
-	 * @param postDTO the entity to save
-	 * @return the persisted entity
-	 */
-	PostDTO save(PostDTO postDTO);
+  /**
+   * Save a post.
+   *
+   * @param postDTO the entity to save
+   * @return the persisted entity
+   */
+  PostDTO save(PostDTO postDTO);
 
-    /**
-     * Save a list of post.
-     *
-     * @param postDTO the list of entities to save
-     * @return the list of persisted entities
-     */
-    List<PostDTO> save(List<PostDTO> postDTO);
+  /**
+   * Save a list of post.
+   *
+   * @param postDTO the list of entities to save
+   * @return the list of persisted entities
+   */
+  List<PostDTO> save(List<PostDTO> postDTO);
 
-	/**
-	 * Get all the posts.
-	 *
-	 * @param pageable the pagination information
-	 * @return the list of entities
-	 */
-	Page<PostDTO> findAll(Pageable pageable);
+  /**
+   * Get all the posts.
+   *
+   * @param pageable the pagination information
+   * @return the list of entities
+   */
+  Page<PostDTO> findAll(Pageable pageable);
 
-	/**
-	 * Get the "id" post.
-	 *
-	 * @param id the id of the entity
-	 * @return the entity
-	 */
-	PostDTO findOne(Long id);
+  /**
+   * Get the "id" post.
+   *
+   * @param id the id of the entity
+   * @return the entity
+   */
+  PostDTO findOne(Long id);
 
-	/**
-	 * Delete the "id" post.
-	 *
-	 * @param id the id of the entity
-	 */
-	void delete(Long id);
+  /**
+   * Delete the "id" post.
+   *
+   * @param id the id of the entity
+   */
+  void delete(Long id);
 }

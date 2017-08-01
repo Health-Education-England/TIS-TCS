@@ -12,11 +12,11 @@ import java.util.List;
 @Mapper(componentModel = "spring", uses = {})
 public interface JsonPatchMapper {
 
-	JsonPatchDTO jsonPatchToJsonPatchDTO(JsonPatch jsonPatch);
+  JsonPatchDTO jsonPatchToJsonPatchDTO(JsonPatch jsonPatch);
 
-	List<JsonPatchDTO> jsonPatchesToJsonPatchDTOs(List<JsonPatch> jsonPatches);
+  List<JsonPatchDTO> jsonPatchesToJsonPatchDTOs(List<JsonPatch> jsonPatches);
 
-	JsonPatch jsonPatchDTOToJsonPatch(JsonPatchDTO jsonPatchDTO);
+  JsonPatch jsonPatchDTOToJsonPatch(JsonPatchDTO jsonPatchDTO);
 
-	List<JsonPatch> jsonPatchDTOsToJsonPatches(List<JsonPatchDTO> jsonPatchDTOs);
+  List<JsonPatch> jsonPatchDTOsToJsonPatches(List<JsonPatchDTO> jsonPatchDTOs);
 }

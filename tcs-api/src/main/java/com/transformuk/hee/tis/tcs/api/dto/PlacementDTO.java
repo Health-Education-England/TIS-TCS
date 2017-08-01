@@ -11,153 +11,153 @@ import java.util.Objects;
  */
 public class PlacementDTO implements Serializable {
 
-	private Long id;
+  private Long id;
 
-	private String status;
+  private String status;
 
-	private String nationalPostNumber;
+  private String nationalPostNumber;
 
-	private String site;
+  private String site;
 
-	private String grade;
+  private String grade;
 
-	private String specialty;
+  private String specialty;
 
-	private LocalDate dateFrom;
+  private LocalDate dateFrom;
 
-	private LocalDate dateTo;
+  private LocalDate dateTo;
 
-	private PlacementType placementType;
+  private PlacementType placementType;
 
-	private Float placementWholeTimeEquivalent;
+  private Float placementWholeTimeEquivalent;
 
-	private Boolean slotShare;
+  private Boolean slotShare;
 
-	public Long getId() {
-		return id;
-	}
+  public Long getId() {
+    return id;
+  }
 
-	public void setId(Long id) {
-		this.id = id;
-	}
+  public void setId(Long id) {
+    this.id = id;
+  }
 
-	public String getStatus() {
-		return status;
-	}
+  public String getStatus() {
+    return status;
+  }
 
-	public void setStatus(String status) {
-		this.status = status;
-	}
+  public void setStatus(String status) {
+    this.status = status;
+  }
 
-	public String getNationalPostNumber() {
-		return nationalPostNumber;
-	}
+  public String getNationalPostNumber() {
+    return nationalPostNumber;
+  }
 
-	public void setNationalPostNumber(String nationalPostNumber) {
-		this.nationalPostNumber = nationalPostNumber;
-	}
+  public void setNationalPostNumber(String nationalPostNumber) {
+    this.nationalPostNumber = nationalPostNumber;
+  }
 
-	public String getSite() {
-		return site;
-	}
+  public String getSite() {
+    return site;
+  }
 
-	public void setSite(String site) {
-		this.site = site;
-	}
+  public void setSite(String site) {
+    this.site = site;
+  }
 
-	public String getGrade() {
-		return grade;
-	}
+  public String getGrade() {
+    return grade;
+  }
 
-	public void setGrade(String grade) {
-		this.grade = grade;
-	}
+  public void setGrade(String grade) {
+    this.grade = grade;
+  }
 
-	public String getSpecialty() {
-		return specialty;
-	}
+  public String getSpecialty() {
+    return specialty;
+  }
 
-	public void setSpecialty(String specialty) {
-		this.specialty = specialty;
-	}
+  public void setSpecialty(String specialty) {
+    this.specialty = specialty;
+  }
 
-	public LocalDate getDateFrom() {
-		return dateFrom;
-	}
+  public LocalDate getDateFrom() {
+    return dateFrom;
+  }
 
-	public void setDateFrom(LocalDate dateFrom) {
-		this.dateFrom = dateFrom;
-	}
+  public void setDateFrom(LocalDate dateFrom) {
+    this.dateFrom = dateFrom;
+  }
 
-	public LocalDate getDateTo() {
-		return dateTo;
-	}
+  public LocalDate getDateTo() {
+    return dateTo;
+  }
 
-	public void setDateTo(LocalDate dateTo) {
-		this.dateTo = dateTo;
-	}
+  public void setDateTo(LocalDate dateTo) {
+    this.dateTo = dateTo;
+  }
 
-	public PlacementType getPlacementType() {
-		return placementType;
-	}
+  public PlacementType getPlacementType() {
+    return placementType;
+  }
 
-	public void setPlacementType(PlacementType placementType) {
-		this.placementType = placementType;
-	}
+  public void setPlacementType(PlacementType placementType) {
+    this.placementType = placementType;
+  }
 
-	public Float getPlacementWholeTimeEquivalent() {
-		return placementWholeTimeEquivalent;
-	}
+  public Float getPlacementWholeTimeEquivalent() {
+    return placementWholeTimeEquivalent;
+  }
 
-	public void setPlacementWholeTimeEquivalent(Float placementWholeTimeEquivalent) {
-		this.placementWholeTimeEquivalent = placementWholeTimeEquivalent;
-	}
+  public void setPlacementWholeTimeEquivalent(Float placementWholeTimeEquivalent) {
+    this.placementWholeTimeEquivalent = placementWholeTimeEquivalent;
+  }
 
-	public Boolean getSlotShare() {
-		return slotShare;
-	}
+  public Boolean getSlotShare() {
+    return slotShare;
+  }
 
-	public void setSlotShare(Boolean slotShare) {
-		this.slotShare = slotShare;
-	}
+  public void setSlotShare(Boolean slotShare) {
+    this.slotShare = slotShare;
+  }
 
-	@Override
-	public boolean equals(Object o) {
-		if (this == o) {
-			return true;
-		}
-		if (o == null || getClass() != o.getClass()) {
-			return false;
-		}
+  @Override
+  public boolean equals(Object o) {
+    if (this == o) {
+      return true;
+    }
+    if (o == null || getClass() != o.getClass()) {
+      return false;
+    }
 
-		PlacementDTO placementDTO = (PlacementDTO) o;
+    PlacementDTO placementDTO = (PlacementDTO) o;
 
-		if (!Objects.equals(id, placementDTO.id)) {
-			return false;
-		}
+    if (!Objects.equals(id, placementDTO.id)) {
+      return false;
+    }
 
-		return true;
-	}
+    return true;
+  }
 
-	@Override
-	public int hashCode() {
-		return Objects.hashCode(id);
-	}
+  @Override
+  public int hashCode() {
+    return Objects.hashCode(id);
+  }
 
-	@Override
-	public String toString() {
-		return "PlacementDTO{" +
-				"id=" + id +
-				", status='" + status + "'" +
-				", nationalPostNumber='" + nationalPostNumber + "'" +
-				", site='" + site + "'" +
-				", grade='" + grade + "'" +
-				", specialty='" + specialty + "'" +
-				", dateFrom='" + dateFrom + "'" +
-				", dateTo='" + dateTo + "'" +
-				", placementType='" + placementType + "'" +
-				", placementWholeTimeEquivalent='" + placementWholeTimeEquivalent + "'" +
-				", slotShare='" + slotShare + "'" +
-				'}';
-	}
+  @Override
+  public String toString() {
+    return "PlacementDTO{" +
+        "id=" + id +
+        ", status='" + status + "'" +
+        ", nationalPostNumber='" + nationalPostNumber + "'" +
+        ", site='" + site + "'" +
+        ", grade='" + grade + "'" +
+        ", specialty='" + specialty + "'" +
+        ", dateFrom='" + dateFrom + "'" +
+        ", dateTo='" + dateTo + "'" +
+        ", placementType='" + placementType + "'" +
+        ", placementWholeTimeEquivalent='" + placementWholeTimeEquivalent + "'" +
+        ", slotShare='" + slotShare + "'" +
+        '}';
+  }
 }

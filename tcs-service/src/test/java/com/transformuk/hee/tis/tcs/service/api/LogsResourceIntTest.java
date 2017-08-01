@@ -26,34 +26,34 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 @SpringBootTest(classes = Application.class)
 public class LogsResourceIntTest {
 
-	private MockMvc restLogsMockMvc;
+  private MockMvc restLogsMockMvc;
 
-	@Before
-	public void setup() {
-		MockitoAnnotations.initMocks(this);
+  @Before
+  public void setup() {
+    MockitoAnnotations.initMocks(this);
 
-		LogsResource logsResource = new LogsResource();
-		this.restLogsMockMvc = MockMvcBuilders
-				.standaloneSetup(logsResource)
-				.build();
-	}
+    LogsResource logsResource = new LogsResource();
+    this.restLogsMockMvc = MockMvcBuilders
+        .standaloneSetup(logsResource)
+        .build();
+  }
 
-	@Test
-	public void getAllLogs() throws Exception {
-		restLogsMockMvc.perform(get("/management/logs"))
-				.andExpect(status().isOk())
-				.andExpect(content().contentType(MediaType.APPLICATION_JSON_UTF8_VALUE));
-	}
+  @Test
+  public void getAllLogs() throws Exception {
+    restLogsMockMvc.perform(get("/management/logs"))
+        .andExpect(status().isOk())
+        .andExpect(content().contentType(MediaType.APPLICATION_JSON_UTF8_VALUE));
+  }
 
-	@Test
-	public void changeLogs() throws Exception {
-		LoggerVM logger = new LoggerVM();
-		logger.setLevel("INFO");
-		logger.setName("ROOT");
+  @Test
+  public void changeLogs() throws Exception {
+    LoggerVM logger = new LoggerVM();
+    logger.setLevel("INFO");
+    logger.setName("ROOT");
 
-		restLogsMockMvc.perform(put("/management/logs")
-				.contentType(TestUtil.APPLICATION_JSON_UTF8)
-				.content(TestUtil.convertObjectToJsonBytes(logger)))
-				.andExpect(status().isNoContent());
-	}
+    restLogsMockMvc.perform(put("/management/logs")
+        .contentType(TestUtil.APPLICATION_JSON_UTF8)
+        .content(TestUtil.convertObjectToJsonBytes(logger)))
+        .andExpect(status().isNoContent());
+  }
 }

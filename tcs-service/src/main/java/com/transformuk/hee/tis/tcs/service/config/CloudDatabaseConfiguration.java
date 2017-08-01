@@ -14,11 +14,11 @@ import javax.sql.DataSource;
 @Profile(JHipsterConstants.SPRING_PROFILE_CLOUD)
 public class CloudDatabaseConfiguration extends AbstractCloudConfig {
 
-	private final Logger log = LoggerFactory.getLogger(CloudDatabaseConfiguration.class);
+  private final Logger log = LoggerFactory.getLogger(CloudDatabaseConfiguration.class);
 
-	@Bean
-	public DataSource dataSource() {
-		log.info("Configuring JDBC datasource from a cloud provider");
-		return connectionFactory().dataSource();
-	}
+  @Bean
+  public DataSource dataSource() {
+    log.info("Configuring JDBC datasource from a cloud provider");
+    return connectionFactory().dataSource();
+  }
 }

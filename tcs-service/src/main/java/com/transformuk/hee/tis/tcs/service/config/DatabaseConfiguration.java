@@ -14,16 +14,16 @@ import org.springframework.transaction.annotation.EnableTransactionManagement;
 @EnableTransactionManagement
 public class DatabaseConfiguration {
 
-	private final Logger log = LoggerFactory.getLogger(DatabaseConfiguration.class);
+  private final Logger log = LoggerFactory.getLogger(DatabaseConfiguration.class);
 
-	private final Environment env;
+  private final Environment env;
 
-	public DatabaseConfiguration(Environment env) {
-		this.env = env;
-	}
+  public DatabaseConfiguration(Environment env) {
+    this.env = env;
+  }
 
-	@Bean
-	public Hibernate5Module hibernate5Module() {
-		return new Hibernate5Module();
-	}
+  @Bean
+  public Hibernate5Module hibernate5Module() {
+    return new Hibernate5Module();
+  }
 }

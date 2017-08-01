@@ -11,42 +11,43 @@ import java.util.List;
  */
 public interface FundingService {
 
-	/**
-	 * Save a funding.
-	 *
-	 * @param fundingDTO the entity to save
-	 * @return the persisted entity
-	 */
-	FundingDTO save(FundingDTO fundingDTO);
+  /**
+   * Save a funding.
+   *
+   * @param fundingDTO the entity to save
+   * @return the persisted entity
+   */
+  FundingDTO save(FundingDTO fundingDTO);
 
 
-    /**
-     * Save a list of funding
-     * @param fundingDTO tje list of entities to save
-     * @return the persisted entities
-     */
-	List<FundingDTO> save(List<FundingDTO> fundingDTO);
+  /**
+   * Save a list of funding
+   *
+   * @param fundingDTO tje list of entities to save
+   * @return the persisted entities
+   */
+  List<FundingDTO> save(List<FundingDTO> fundingDTO);
 
-	/**
-	 * Get all the fundings.
-	 *
-	 * @param pageable the pagination information
-	 * @return the list of entities
-	 */
-	Page<FundingDTO> findAll(Pageable pageable);
+  /**
+   * Get all the fundings.
+   *
+   * @param pageable the pagination information
+   * @return the list of entities
+   */
+  Page<FundingDTO> findAll(Pageable pageable);
 
-	/**
-	 * Get the "id" funding.
-	 *
-	 * @param id the id of the entity
-	 * @return the entity
-	 */
-	FundingDTO findOne(Long id);
+  /**
+   * Get the "id" funding.
+   *
+   * @param id the id of the entity
+   * @return the entity
+   */
+  FundingDTO findOne(Long id);
 
-	/**
-	 * Delete the "id" funding.
-	 *
-	 * @param id the id of the entity
-	 */
-	void delete(Long id);
+  /**
+   * Delete the "id" funding.
+   *
+   * @param id the id of the entity
+   */
+  void delete(Long id);
 }

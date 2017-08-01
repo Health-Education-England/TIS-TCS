@@ -16,20 +16,20 @@ import java.util.List;
 @Mapper(componentModel = "spring", uses = {})
 public interface CurriculumMapper {
 
-	CurriculumDTO curriculumToCurriculumDTO(Curriculum curriculum);
+  CurriculumDTO curriculumToCurriculumDTO(Curriculum curriculum);
 
-	List<CurriculumDTO> curriculaToCurriculumDTOs(List<Curriculum> curricula);
+  List<CurriculumDTO> curriculaToCurriculumDTOs(List<Curriculum> curricula);
 
-	Curriculum curriculumDTOToCurriculum(CurriculumDTO curriculumDTO);
+  Curriculum curriculumDTOToCurriculum(CurriculumDTO curriculumDTO);
 
-	List<Curriculum> curriculumDTOsToCurricula(List<CurriculumDTO> curriculumDTOs);
+  List<Curriculum> curriculumDTOsToCurricula(List<CurriculumDTO> curriculumDTOs);
 
-	SpecialtyDTO map(Specialty specialty);
+  SpecialtyDTO map(Specialty specialty);
 
-	Specialty map(SpecialtyDTO specialtyDTO);
+  Specialty map(SpecialtyDTO specialtyDTO);
 
-	SpecialtyGroupDTO map(SpecialtyGroup specialtyGroup);
+  SpecialtyGroupDTO map(SpecialtyGroup specialtyGroup);
 
-	SpecialtyGroup map(SpecialtyGroupDTO specialtyGroupDTO);
+  SpecialtyGroup map(SpecialtyGroupDTO specialtyGroupDTO);
 
 }

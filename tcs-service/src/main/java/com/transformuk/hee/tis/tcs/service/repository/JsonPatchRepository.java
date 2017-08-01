@@ -11,20 +11,20 @@ import java.util.List;
 @SuppressWarnings("unused")
 public interface JsonPatchRepository extends JpaRepository<JsonPatch, Long> {
 
-	/**
-	 * Query to get all json patches to update for given dto
-	 *
-	 * @param tableDtoName
-	 * @return
-	 */
-	List<JsonPatch> findByTableDtoNameAndPatchIdIsNotNullOrderByDateAddedAsc(String tableDtoName);
+  /**
+   * Query to get all json patches to update for given dto
+   *
+   * @param tableDtoName
+   * @return
+   */
+  List<JsonPatch> findByTableDtoNameAndPatchIdIsNotNullOrderByDateAddedAsc(String tableDtoName);
 
-	/**
-	 * Query to get all json pathes to insert for given dto
-	 *
-	 * @param tableDtoName
-	 * @return
-	 */
-	List<JsonPatch> findByTableDtoNameAndEnabledTrueAndPatchIdIsNullOrderByDateAddedAsc(String tableDtoName);
+  /**
+   * Query to get all json pathes to insert for given dto
+   *
+   * @param tableDtoName
+   * @return
+   */
+  List<JsonPatch> findByTableDtoNameAndEnabledTrueAndPatchIdIsNullOrderByDateAddedAsc(String tableDtoName);
 
 }

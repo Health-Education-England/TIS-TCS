@@ -21,96 +21,99 @@ import java.util.List;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.mockito.BDDMockito.given;
-import static org.mockito.Matchers.*;
+import static org.mockito.Matchers.anyList;
+import static org.mockito.Matchers.anySet;
+import static org.mockito.Matchers.anyString;
+import static org.mockito.Matchers.eq;
 
 @RunWith(MockitoJUnitRunner.class)
 public class ProgrammeResourceTest {
 
-	public static final String DBC = "1-AIIDR8";
-	public static final String USER_ID = "James H";
+  public static final String DBC = "1-AIIDR8";
+  public static final String USER_ID = "James H";
 
-	@Mock
-	private ProgrammeService programmeService;
+  @Mock
+  private ProgrammeService programmeService;
 
-	@InjectMocks
-	private ProgrammeResource controller;
+  @InjectMocks
+  private ProgrammeResource controller;
 
 
-	@Before
-	public void setup() {
-		TestUtils.mockUserprofile(USER_ID, DBC);
-	}
+  @Before
+  public void setup() {
+    TestUtils.mockUserprofile(USER_ID, DBC);
+  }
 
-	@Test
-	public void shouldExcludeNonAlphanumericFromSearchInput() throws Exception {
-		// given
-		Pageable p = new PageRequest(1, 20);
-		PageImpl<ProgrammeDTO> page = new PageImpl<>(Lists.newArrayList(new ProgrammeDTO()));
+  @Test
+  public void shouldExcludeNonAlphanumericFromSearchInput() throws Exception {
+    // given
+    Pageable p = new PageRequest(1, 20);
+    PageImpl<ProgrammeDTO> page = new PageImpl<>(Lists.newArrayList(new ProgrammeDTO()));
 
-		ArgumentCaptor<String> searchStringCaptor = ArgumentCaptor.forClass(String.class);
-		given(programmeService.advancedSearch(anySet(), searchStringCaptor.capture(), anyList(), eq(p))).willReturn(page);
+    ArgumentCaptor<String> searchStringCaptor = ArgumentCaptor.forClass(String.class);
+    given(programmeService.advancedSearch(anySet(), searchStringCaptor.capture(), anyList(), eq(p))).willReturn(page);
 
-		// when
-		controller.getAllProgrammes(p, "#$$)alp%*h(&^)a ..?'';;\\numer1`~c", null);
+    // when
+    controller.getAllProgrammes(p, "#$$)alp%*h(&^)a ..?'';;\\numer1`~c", null);
 
-		// then
-		assertThat(searchStringCaptor.getValue()).isEqualTo("alpha numer1c");
-	}
+    // then
+    assertThat(searchStringCaptor.getValue()).isEqualTo("alpha numer1c");
+  }
 
-	@Test
-	public void shouldExcludeNonAlphanumericFromColumnFilters() throws Exception {
-		// given
-		Pageable p = new PageRequest(1, 20);
-		PageImpl<ProgrammeDTO> page = new PageImpl<>(Lists.newArrayList(new ProgrammeDTO()));
-		String colFilter = "{\"managingDeanery\":[\"Health Ed:uc#%ation §±England@$% West Mid^la*nds\"]}";
+  @Test
+  public void shouldExcludeNonAlphanumericFromColumnFilters() throws Exception {
+    // given
+    Pageable p = new PageRequest(1, 20);
+    PageImpl<ProgrammeDTO> page = new PageImpl<>(Lists.newArrayList(new ProgrammeDTO()));
+    String colFilter = "{\"managingDeanery\":[\"Health Ed:uc#%ation §±England@$% West Mid^la*nds\"]}";
 
-		ArgumentCaptor<List> searchStringCaptor = ArgumentCaptor.forClass(List.class);
-		given(programmeService.advancedSearch(anySet(), anyString(), searchStringCaptor.capture(), eq(p))).willReturn(page);
+    ArgumentCaptor<List> searchStringCaptor = ArgumentCaptor.forClass(List.class);
+    given(programmeService.advancedSearch(anySet(), anyString(), searchStringCaptor.capture(), eq(p))).willReturn(page);
 
-		// when
-		controller.getAllProgrammes(p, null, colFilter);
+    // when
+    controller.getAllProgrammes(p, null, colFilter);
 
-		// then
-		ColumnFilter f = ((ColumnFilter) searchStringCaptor.getValue().get(0));
-		assertThat(f.getName()).isEqualTo("managingDeanery");
-		assertThat(f.getValues().size()).isEqualTo(1);
-		assertThat(f.getValues().get(0)).isEqualTo("Health Education England West Midlands");
-	}
+    // then
+    ColumnFilter f = ((ColumnFilter) searchStringCaptor.getValue().get(0));
+    assertThat(f.getName()).isEqualTo("managingDeanery");
+    assertThat(f.getValues().size()).isEqualTo(1);
+    assertThat(f.getValues().get(0)).isEqualTo("Health Education England West Midlands");
+  }
 
-	@Test
-	public void shouldIgnoreBadStatusColumnFilters() throws Exception {
-		// given
-		Pageable p = new PageRequest(1, 20);
-		PageImpl<ProgrammeDTO> page = new PageImpl<>(Lists.newArrayList(new ProgrammeDTO()));
-		String colFilter = "{\"status\":[\"badstatus\",\"CURRENT\"]}";
+  @Test
+  public void shouldIgnoreBadStatusColumnFilters() throws Exception {
+    // given
+    Pageable p = new PageRequest(1, 20);
+    PageImpl<ProgrammeDTO> page = new PageImpl<>(Lists.newArrayList(new ProgrammeDTO()));
+    String colFilter = "{\"status\":[\"badstatus\",\"CURRENT\"]}";
 
-		ArgumentCaptor<List> searchStringCaptor = ArgumentCaptor.forClass(List.class);
-		given(programmeService.advancedSearch(anySet(), anyString(), searchStringCaptor.capture(), eq(p))).willReturn(page);
+    ArgumentCaptor<List> searchStringCaptor = ArgumentCaptor.forClass(List.class);
+    given(programmeService.advancedSearch(anySet(), anyString(), searchStringCaptor.capture(), eq(p))).willReturn(page);
 
-		// when
-		controller.getAllProgrammes(p, null, colFilter);
+    // when
+    controller.getAllProgrammes(p, null, colFilter);
 
-		// then
-		ColumnFilter f = ((ColumnFilter) searchStringCaptor.getValue().get(0));
-		assertThat(f.getName()).isEqualTo("status");
-		assertThat(f.getValues().size()).isEqualTo(1);
-		assertThat(f.getValues().get(0)).isEqualTo(Status.CURRENT);
-	}
+    // then
+    ColumnFilter f = ((ColumnFilter) searchStringCaptor.getValue().get(0));
+    assertThat(f.getName()).isEqualTo("status");
+    assertThat(f.getValues().size()).isEqualTo(1);
+    assertThat(f.getValues().get(0)).isEqualTo(Status.CURRENT);
+  }
 
-	@Test
-	public void shouldIgnoreBadEmptyColumnFilters() throws Exception {
-		// given
-		Pageable p = new PageRequest(1, 20);
-		PageImpl<ProgrammeDTO> page = new PageImpl<>(Lists.newArrayList(new ProgrammeDTO()));
-		String colFilter = "{\"status\":[\"badstatus\"]}";
+  @Test
+  public void shouldIgnoreBadEmptyColumnFilters() throws Exception {
+    // given
+    Pageable p = new PageRequest(1, 20);
+    PageImpl<ProgrammeDTO> page = new PageImpl<>(Lists.newArrayList(new ProgrammeDTO()));
+    String colFilter = "{\"status\":[\"badstatus\"]}";
 
-		ArgumentCaptor<List> searchStringCaptor = ArgumentCaptor.forClass(List.class);
-		given(programmeService.advancedSearch(anySet(), anyString(), searchStringCaptor.capture(), eq(p))).willReturn(page);
+    ArgumentCaptor<List> searchStringCaptor = ArgumentCaptor.forClass(List.class);
+    given(programmeService.advancedSearch(anySet(), anyString(), searchStringCaptor.capture(), eq(p))).willReturn(page);
 
-		// when
-		controller.getAllProgrammes(p, null, colFilter);
+    // when
+    controller.getAllProgrammes(p, null, colFilter);
 
-		// then
-		assertThat(searchStringCaptor.getValue()).isEmpty();
-	}
+    // then
+    assertThat(searchStringCaptor.getValue()).isEmpty();
+  }
 }

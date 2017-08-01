@@ -9,65 +9,65 @@ import java.util.Objects;
  */
 public class SpecialtyGroupDTO implements Serializable {
 
-	private Long id;
+  private Long id;
 
-	private String intrepidId;
+  private String intrepidId;
 
-	private String name;
+  private String name;
 
-	public Long getId() {
-		return id;
-	}
+  public Long getId() {
+    return id;
+  }
 
-	public void setId(Long id) {
-		this.id = id;
-	}
+  public void setId(Long id) {
+    this.id = id;
+  }
 
-	public String getName() {
-		return name;
-	}
+  public String getName() {
+    return name;
+  }
 
-	public void setName(String name) {
-		this.name = name;
-	}
+  public void setName(String name) {
+    this.name = name;
+  }
 
-	public String getIntrepidId() {
-		return intrepidId;
-	}
+  public String getIntrepidId() {
+    return intrepidId;
+  }
 
-	public void setIntrepidId(String intrepidId) {
-		this.intrepidId = intrepidId;
-	}
+  public void setIntrepidId(String intrepidId) {
+    this.intrepidId = intrepidId;
+  }
 
-	@Override
-	public boolean equals(Object o) {
-		if (this == o) {
-			return true;
-		}
-		if (o == null || getClass() != o.getClass()) {
-			return false;
-		}
+  @Override
+  public boolean equals(Object o) {
+    if (this == o) {
+      return true;
+    }
+    if (o == null || getClass() != o.getClass()) {
+      return false;
+    }
 
-		SpecialtyGroupDTO specialtyGroupDTO = (SpecialtyGroupDTO) o;
+    SpecialtyGroupDTO specialtyGroupDTO = (SpecialtyGroupDTO) o;
 
-		if (!Objects.equals(id, specialtyGroupDTO.id)) {
-			return false;
-		}
+    if (!Objects.equals(id, specialtyGroupDTO.id)) {
+      return false;
+    }
 
-		return true;
-	}
+    return true;
+  }
 
-	@Override
-	public int hashCode() {
-		return Objects.hashCode(id);
-	}
+  @Override
+  public int hashCode() {
+    return Objects.hashCode(id);
+  }
 
-	@Override
-	public String toString() {
-		return "SpecialtyGroupDTO{" +
-				"id=" + id +
-				", intrepidId='" + intrepidId + '\'' +
-				", name='" + name + '\'' +
-				'}';
-	}
+  @Override
+  public String toString() {
+    return "SpecialtyGroupDTO{" +
+        "id=" + id +
+        ", intrepidId='" + intrepidId + '\'' +
+        ", name='" + name + '\'' +
+        '}';
+  }
 }
