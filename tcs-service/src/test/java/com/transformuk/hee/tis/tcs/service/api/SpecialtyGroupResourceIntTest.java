@@ -1,5 +1,6 @@
 package com.transformuk.hee.tis.tcs.service.api;
 
+import com.transformuk.hee.tis.tcs.api.dto.ProgrammeDTO;
 import com.transformuk.hee.tis.tcs.api.dto.SpecialtyGroupDTO;
 import com.transformuk.hee.tis.tcs.service.Application;
 import com.transformuk.hee.tis.tcs.service.exception.ExceptionTranslator;
@@ -251,6 +252,101 @@ public class SpecialtyGroupResourceIntTest {
     // Validate the database is empty
     List<SpecialtyGroup> specialtyGroupList = specialtyGroupRepository.findAll();
     assertThat(specialtyGroupList).hasSize(databaseSizeBeforeDelete - 1);
+  }
+
+  @Test
+  @Transactional
+  public void shouldValidateNameExistsWhenCreating() throws Exception {
+    //given
+    SpecialtyGroupDTO specialtyGroupDTO = specialtyGroupMapper.specialtyGroupToSpecialtyGroupDTO(createEntity());
+    specialtyGroupDTO.setName("");
+    //when & then
+    restSpecialtyGroupMockMvc.perform(post("/api/specialty-groups")
+        .contentType(TestUtil.APPLICATION_JSON_UTF8)
+        .content(TestUtil.convertObjectToJsonBytes(specialtyGroupDTO)))
+        .andExpect(status().isBadRequest())
+        .andExpect(jsonPath("$.message").value("error.validation"))
+        .andExpect(jsonPath("$.fieldErrors[0].field").value("name"));
+  }
+
+  @Test
+  @Transactional
+  public void shouldValidateNameLengthWhenCreating() throws Exception {
+    //given
+    SpecialtyGroupDTO specialtyGroupDTO = specialtyGroupMapper.specialtyGroupToSpecialtyGroupDTO(createEntity());
+    specialtyGroupDTO.setName(
+        "more_than_100_chars_more_than_100_chars_more_than_100_chars_more_than_100_chars_more_than_100_chars_1");
+    //when & then
+    restSpecialtyGroupMockMvc.perform(post("/api/specialty-groups")
+        .contentType(TestUtil.APPLICATION_JSON_UTF8)
+        .content(TestUtil.convertObjectToJsonBytes(specialtyGroupDTO)))
+        .andExpect(status().isBadRequest())
+        .andExpect(jsonPath("$.message").value("error.validation"))
+        .andExpect(jsonPath("$.fieldErrors[0].field").value("name"));
+  }
+
+  @Test
+  @Transactional
+  public void shouldValidateNameContentsWhenCreating() throws Exception {
+    //given
+    SpecialtyGroupDTO specialtyGroupDTO = specialtyGroupMapper.specialtyGroupToSpecialtyGroupDTO(createEntity());
+    specialtyGroupDTO.setName("$^%&*()_");
+    //when & then
+    restSpecialtyGroupMockMvc.perform(post("/api/specialty-groups")
+        .contentType(TestUtil.APPLICATION_JSON_UTF8)
+        .content(TestUtil.convertObjectToJsonBytes(specialtyGroupDTO)))
+        .andExpect(status().isBadRequest())
+        .andExpect(jsonPath("$.message").value("error.validation"))
+        .andExpect(jsonPath("$.fieldErrors[0].field").value("name"));
+  }
+
+  @Test
+  @Transactional
+  public void shouldValidateNameExistsWhenUpdating() throws Exception {
+    //given
+    SpecialtyGroupDTO specialtyGroupDTO = specialtyGroupMapper.specialtyGroupToSpecialtyGroupDTO(createEntity());
+    specialtyGroupDTO.setName("");
+    specialtyGroupDTO.setId(1L);
+    //when & then
+    restSpecialtyGroupMockMvc.perform(put("/api/specialty-groups")
+        .contentType(TestUtil.APPLICATION_JSON_UTF8)
+        .content(TestUtil.convertObjectToJsonBytes(specialtyGroupDTO)))
+        .andExpect(status().isBadRequest())
+        .andExpect(jsonPath("$.message").value("error.validation"))
+        .andExpect(jsonPath("$.fieldErrors[0].field").value("name"));
+  }
+
+  @Test
+  @Transactional
+  public void shouldValidateNameLengthWhenUpdating() throws Exception {
+    //given
+    SpecialtyGroupDTO specialtyGroupDTO = specialtyGroupMapper.specialtyGroupToSpecialtyGroupDTO(createEntity());
+    specialtyGroupDTO.setName(
+        "more_than_100_chars_more_than_100_chars_more_than_100_chars_more_than_100_chars_more_than_100_chars_1");
+    specialtyGroupDTO.setId(1L);
+    //when & then
+    restSpecialtyGroupMockMvc.perform(put("/api/specialty-groups")
+        .contentType(TestUtil.APPLICATION_JSON_UTF8)
+        .content(TestUtil.convertObjectToJsonBytes(specialtyGroupDTO)))
+        .andExpect(status().isBadRequest())
+        .andExpect(jsonPath("$.message").value("error.validation"))
+        .andExpect(jsonPath("$.fieldErrors[0].field").value("name"));
+  }
+
+  @Test
+  @Transactional
+  public void shouldValidateNameContentsWhenUpdating() throws Exception {
+    //given
+    SpecialtyGroupDTO specialtyGroupDTO = specialtyGroupMapper.specialtyGroupToSpecialtyGroupDTO(createEntity());
+    specialtyGroupDTO.setName("$^%&*()_");
+    specialtyGroupDTO.setId(1L);
+    //when & then
+    restSpecialtyGroupMockMvc.perform(put("/api/specialty-groups")
+        .contentType(TestUtil.APPLICATION_JSON_UTF8)
+        .content(TestUtil.convertObjectToJsonBytes(specialtyGroupDTO)))
+        .andExpect(status().isBadRequest())
+        .andExpect(jsonPath("$.message").value("error.validation"))
+        .andExpect(jsonPath("$.fieldErrors[0].field").value("name"));
   }
 
   @Test
