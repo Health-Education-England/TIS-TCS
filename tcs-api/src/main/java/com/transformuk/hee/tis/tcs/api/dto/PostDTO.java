@@ -1,8 +1,12 @@
 package com.transformuk.hee.tis.tcs.api.dto;
 
 
+import com.transformuk.hee.tis.tcs.api.enumeration.PostSuffix;
+import com.transformuk.hee.tis.tcs.api.enumeration.Status;
+
 import java.io.Serializable;
 import java.util.Objects;
+import java.util.Set;
 
 /**
  * A DTO for the Post entity.
@@ -13,29 +17,44 @@ public class PostDTO implements Serializable {
 
   private String nationalPostNumber;
 
-  private String status;
+  private Status status;
 
-  private String postOwner;
+  private PostSuffix suffix;
 
-  private String mainSiteLocated;
+  private String managingLocalOffice;
 
-  private String leadSite;
+  private String postFamily;
 
-  private String employingBody;
+  private PostDTO oldPost;
 
-  private String trainingBody;
+  private PostDTO newPost;
 
-  private String approvedGrade;
+  private String mainSiteLocatedId;
 
-  private String postSpecialty;
+  private Set<String> otherSiteIds;
 
-  private Float fullTimeEquivelent;
+  private String employingBodyId;
 
-  private String leadProvider;
+  private String trainingBodyId;
 
-  private String oldPostId;
+  private String approvedGradeId;
 
-  private String newPostId;
+  private Set<String> otherGradeIds;
+
+  private SpecialtyDTO specialty;
+
+  private Set<SpecialtyDTO> otherSpecialties;
+
+  private SpecialtyDTO subspecialty;
+
+  private String trainingDescription;
+
+  private String localPostNumber;
+
+  private Set<PlacementDTO> placementHistory;
+
+  private ProgrammeDTO programmes;
+
 
   public Long getId() {
     return id;
@@ -53,100 +72,156 @@ public class PostDTO implements Serializable {
     this.nationalPostNumber = nationalPostNumber;
   }
 
-  public String getStatus() {
+  public Status getStatus() {
     return status;
   }
 
-  public void setStatus(String status) {
+  public void setStatus(Status status) {
     this.status = status;
   }
 
-  public String getPostOwner() {
-    return postOwner;
+  public PostSuffix getSuffix() {
+    return suffix;
   }
 
-  public void setPostOwner(String postOwner) {
-    this.postOwner = postOwner;
+  public void setSuffix(PostSuffix suffix) {
+    this.suffix = suffix;
   }
 
-  public String getMainSiteLocated() {
-    return mainSiteLocated;
+  public String getManagingLocalOffice() {
+    return managingLocalOffice;
   }
 
-  public void setMainSiteLocated(String mainSiteLocated) {
-    this.mainSiteLocated = mainSiteLocated;
+  public void setManagingLocalOffice(String managingLocalOffice) {
+    this.managingLocalOffice = managingLocalOffice;
   }
 
-  public String getLeadSite() {
-    return leadSite;
+  public String getPostFamily() {
+    return postFamily;
   }
 
-  public void setLeadSite(String leadSite) {
-    this.leadSite = leadSite;
+  public void setPostFamily(String postFamily) {
+    this.postFamily = postFamily;
   }
 
-  public String getEmployingBody() {
-    return employingBody;
+  public PostDTO getOldPost() {
+    return oldPost;
   }
 
-  public void setEmployingBody(String employingBody) {
-    this.employingBody = employingBody;
+  public void setOldPost(PostDTO oldPost) {
+    this.oldPost = oldPost;
   }
 
-  public String getTrainingBody() {
-    return trainingBody;
+  public PostDTO getNewPost() {
+    return newPost;
   }
 
-  public void setTrainingBody(String trainingBody) {
-    this.trainingBody = trainingBody;
+  public void setNewPost(PostDTO newPost) {
+    this.newPost = newPost;
   }
 
-  public String getApprovedGrade() {
-    return approvedGrade;
+  public String getMainSiteLocatedId() {
+    return mainSiteLocatedId;
   }
 
-  public void setApprovedGrade(String approvedGrade) {
-    this.approvedGrade = approvedGrade;
+  public void setMainSiteLocatedId(String mainSiteLocatedId) {
+    this.mainSiteLocatedId = mainSiteLocatedId;
   }
 
-  public String getPostSpecialty() {
-    return postSpecialty;
+  public Set<String> getOtherSiteIds() {
+    return otherSiteIds;
   }
 
-  public void setPostSpecialty(String postSpecialty) {
-    this.postSpecialty = postSpecialty;
+  public void setOtherSiteIds(Set<String> otherSiteIds) {
+    this.otherSiteIds = otherSiteIds;
   }
 
-  public Float getFullTimeEquivelent() {
-    return fullTimeEquivelent;
+  public String getEmployingBodyId() {
+    return employingBodyId;
   }
 
-  public void setFullTimeEquivelent(Float fullTimeEquivelent) {
-    this.fullTimeEquivelent = fullTimeEquivelent;
+  public void setEmployingBodyId(String employingBodyId) {
+    this.employingBodyId = employingBodyId;
   }
 
-  public String getLeadProvider() {
-    return leadProvider;
+  public String getTrainingBodyId() {
+    return trainingBodyId;
   }
 
-  public void setLeadProvider(String leadProvider) {
-    this.leadProvider = leadProvider;
+  public void setTrainingBodyId(String trainingBodyId) {
+    this.trainingBodyId = trainingBodyId;
   }
 
-  public String getOldPostId() {
-    return oldPostId;
+  public String getApprovedGradeId() {
+    return approvedGradeId;
   }
 
-  public void setOldPostId(String postId) {
-    this.oldPostId = postId;
+  public void setApprovedGradeId(String approvedGradeId) {
+    this.approvedGradeId = approvedGradeId;
   }
 
-  public String getNewPostId() {
-    return newPostId;
+  public Set<String> getOtherGradeIds() {
+    return otherGradeIds;
   }
 
-  public void setNewPostId(String postId) {
-    this.newPostId = postId;
+  public void setOtherGradeIds(Set<String> otherGradeIds) {
+    this.otherGradeIds = otherGradeIds;
+  }
+
+  public SpecialtyDTO getSpecialty() {
+    return specialty;
+  }
+
+  public void setSpecialty(SpecialtyDTO specialty) {
+    this.specialty = specialty;
+  }
+
+  public Set<SpecialtyDTO> getOtherSpecialties() {
+    return otherSpecialties;
+  }
+
+  public void setOtherSpecialties(Set<SpecialtyDTO> otherSpecialties) {
+    this.otherSpecialties = otherSpecialties;
+  }
+
+  public SpecialtyDTO getSubspecialty() {
+    return subspecialty;
+  }
+
+  public void setSubspecialty(SpecialtyDTO subspecialty) {
+    this.subspecialty = subspecialty;
+  }
+
+  public String getTrainingDescription() {
+    return trainingDescription;
+  }
+
+  public void setTrainingDescription(String trainingDescription) {
+    this.trainingDescription = trainingDescription;
+  }
+
+  public String getLocalPostNumber() {
+    return localPostNumber;
+  }
+
+  public void setLocalPostNumber(String localPostNumber) {
+    this.localPostNumber = localPostNumber;
+  }
+
+  public Set<PlacementDTO> getPlacementHistory() {
+    return placementHistory;
+  }
+
+  public void setPlacementHistory(Set<PlacementDTO> placementHistory) {
+    this.placementHistory = placementHistory;
+  }
+
+  public ProgrammeDTO getProgrammes() {
+    return programmes;
+  }
+
+  public void setProgrammes(ProgrammeDTO programmes) {
+    this.programmes = programmes;
   }
 
   @Override
@@ -176,17 +251,26 @@ public class PostDTO implements Serializable {
   public String toString() {
     return "PostDTO{" +
         "id=" + id +
-        ", nationalPostNumber='" + nationalPostNumber + "'" +
-        ", status='" + status + "'" +
-        ", postOwner='" + postOwner + "'" +
-        ", mainSiteLocated='" + mainSiteLocated + "'" +
-        ", leadSite='" + leadSite + "'" +
-        ", employingBody='" + employingBody + "'" +
-        ", trainingBody='" + trainingBody + "'" +
-        ", approvedGrade='" + approvedGrade + "'" +
-        ", postSpecialty='" + postSpecialty + "'" +
-        ", fullTimeEquivelent='" + fullTimeEquivelent + "'" +
-        ", leadProvider='" + leadProvider + "'" +
+        ", nationalPostNumber='" + nationalPostNumber + '\'' +
+        ", status=" + status +
+        ", suffix=" + suffix +
+        ", managingLocalOffice='" + managingLocalOffice + '\'' +
+        ", postFamily='" + postFamily + '\'' +
+        ", oldPost=" + oldPost +
+        ", newPost=" + newPost +
+        ", mainSiteLocatedId='" + mainSiteLocatedId + '\'' +
+        ", otherSiteIds=" + otherSiteIds +
+        ", employingBodyId='" + employingBodyId + '\'' +
+        ", trainingBodyId='" + trainingBodyId + '\'' +
+        ", approvedGradeId='" + approvedGradeId + '\'' +
+        ", otherGradeIds=" + otherGradeIds +
+        ", specialty=" + specialty +
+        ", otherSpecialties=" + otherSpecialties +
+        ", subspecialty=" + subspecialty +
+        ", trainingDescription='" + trainingDescription + '\'' +
+        ", localPostNumber='" + localPostNumber + '\'' +
+        ", placementHistory=" + placementHistory +
+        ", programmes=" + programmes +
         '}';
   }
 }

@@ -9,7 +9,9 @@ import java.util.List;
 /**
  * Mapper for the entity Post and its DTO PostDTO.
  */
-@Mapper(componentModel = "spring", uses = {})
+@Mapper(componentModel = "spring", uses = {
+    SpecialtyMapper.class, PlacementMapper.class, ProgrammeMapper.class
+})
 public interface PostMapper {
 
   PostDTO postToPostDTO(Post post);
