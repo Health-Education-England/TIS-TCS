@@ -221,20 +221,19 @@ public class SpecialtyGroupResourceIntTest {
   @Test
   @Transactional
   public void updateNonExistingSpecialtyGroup() throws Exception {
+    //given
     int databaseSizeBeforeUpdate = specialtyGroupRepository.findAll().size();
-
-    // Create the SpecialtyGroup
     SpecialtyGroupDTO specialtyGroupDTO = specialtyGroupMapper.specialtyGroupToSpecialtyGroupDTO(specialtyGroup);
 
-    // If the entity doesn't have an ID, it will be created instead of just being updated
+    //when and then
     restSpecialtyGroupMockMvc.perform(put("/api/specialty-groups")
         .contentType(TestUtil.APPLICATION_JSON_UTF8)
         .content(TestUtil.convertObjectToJsonBytes(specialtyGroupDTO)))
-        .andExpect(status().isCreated());
+        .andExpect(status().isBadRequest());
 
     // Validate the SpecialtyGroup in the database
     List<SpecialtyGroup> specialtyGroupList = specialtyGroupRepository.findAll();
-    assertThat(specialtyGroupList).hasSize(databaseSizeBeforeUpdate + 1);
+    assertThat(specialtyGroupList).hasSize(databaseSizeBeforeUpdate);
   }
 
   @Test
