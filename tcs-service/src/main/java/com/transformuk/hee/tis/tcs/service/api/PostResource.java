@@ -239,42 +239,41 @@ public class PostResource {
     Programme programme = programmeRepository.findOne(1L);
     post.setProgrammes(programme);
 
-//
-//    PostSite site1 = new PostSite();
-////    site1.setPostId(save1);
-//    site1.setSiteId("siteId1");
-//    site1.setPostSiteType(PostSiteType.PRIMARY);
-//
-//    PostSite site2 = new PostSite();
-////    site2.setPostId(save1);
-//    site2.setSiteId("siteId2");
-//    site2.setPostSiteType(PostSiteType.OTHER);
-//
-//    PostSite site3 = new PostSite();
-////    site3.setPostId(save1);
-//    site3.setSiteId("siteId3");
-//    site3.setPostSiteType(PostSiteType.OTHER);
-//
-//
-//    post.setSites(Sets.newHashSet(site1, site2, site3));
-//
-//    PostGrade postGrade1 = new PostGrade();
-//    postGrade1.setGradeId("grade1");
-////    postGrade1.setPostId(save1);
-//    postGrade1.setPostGradeType(PostGradeType.APPROVED);
-//
-//    PostGrade postGrade2 = new PostGrade();
-//    postGrade2.setGradeId("grade2");
-////    postGrade2.setPostId(save1);
-//    postGrade2.setPostGradeType(PostGradeType.OTHER);
-//
-//    PostGrade postGrade3 = new PostGrade();
-//    postGrade3.setGradeId("grade3");
-////    postGrade3.setPostId(save1);
-//    postGrade3.setPostGradeType(PostGradeType.OTHER);
-//
-//    post.setGrades(Sets.newHashSet(postGrade1, postGrade2, postGrade3));
-//
+
+    PostSite site1 = new PostSite();
+    site1.setPost(post);
+    site1.setSiteId("siteId1");
+    site1.setPostSiteType(PostSiteType.PRIMARY);
+
+    PostSite site2 = new PostSite();
+    site2.setPost(post);
+    site2.setSiteId("siteId2");
+    site2.setPostSiteType(PostSiteType.OTHER);
+
+    PostSite site3 = new PostSite();
+    site3.setPost(post);
+    site3.setSiteId("siteId3");
+    site3.setPostSiteType(PostSiteType.OTHER);
+
+    post.setSites(Sets.newHashSet(site1, site2, site3));
+
+    PostGrade postGrade1 = new PostGrade();
+    postGrade1.setGradeId("grade1");
+    postGrade1.setPost(post);
+    postGrade1.setPostGradeType(PostGradeType.APPROVED);
+
+    PostGrade postGrade2 = new PostGrade();
+    postGrade2.setGradeId("grade2");
+    postGrade2.setPost(post);
+    postGrade2.setPostGradeType(PostGradeType.OTHER);
+
+    PostGrade postGrade3 = new PostGrade();
+    postGrade3.setGradeId("grade3");
+    postGrade3.setPost(post);
+    postGrade3.setPostGradeType(PostGradeType.OTHER);
+
+    post.setGrades(Sets.newHashSet(postGrade1, postGrade2, postGrade3));
+
     PostSpecialty postSpecialty1 = new PostSpecialty();
     postSpecialty1.setPost(post);
     postSpecialty1.setPostSpecialtyType(PostSpecialtyType.PRIMARY);

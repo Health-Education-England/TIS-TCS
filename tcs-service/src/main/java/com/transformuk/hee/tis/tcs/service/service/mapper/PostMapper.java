@@ -53,30 +53,30 @@ public class PostMapper {
     result.setLocalPostNumber(post.getLocalPostNumber());
 
 
-//    if (CollectionUtils.isNotEmpty(post.getSites())) {
-//      Set<PostSiteDTO> sites = Sets.newHashSet();
-//      for (PostSite postSite : post.getSites()) {
-//        PostSiteDTO siteDTO = new PostSiteDTO();
-//        siteDTO.setPostId(postSite.getPostId().getId());
-//        siteDTO.setSiteId(postSite.getSiteId());
-//        siteDTO.setPostSiteType(postSite.getPostSiteType());
-//        sites.add(siteDTO);
-//      }
-//      result.setSites(sites);
-//    }
+    if (CollectionUtils.isNotEmpty(post.getSites())) {
+      Set<PostSiteDTO> sites = Sets.newHashSet();
+      for (PostSite postSite : post.getSites()) {
+        PostSiteDTO siteDTO = new PostSiteDTO();
+        siteDTO.setPostId(postSite.getPost().getId());
+        siteDTO.setSiteId(postSite.getSiteId());
+        siteDTO.setPostSiteType(postSite.getPostSiteType());
+        sites.add(siteDTO);
+      }
+      result.setSites(sites);
+    }
 
 
-//    if (CollectionUtils.isNotEmpty(post.getGrades())) {
-//      Set<PostGradeDTO> grades = Sets.newHashSet();
-//      for (PostGrade postGrade : post.getGrades()) {
-//        PostGradeDTO postGradeDTO = new PostGradeDTO();
-//        postGradeDTO.setPostId(postGrade.getPostId().getId());
-//        postGradeDTO.setGradeId(postGrade.getGradeId());
-//        postGradeDTO.setPostGradeType(postGrade.getPostGradeType());
-//        grades.add(postGradeDTO);
-//      }
-//      result.setGrades(grades);
-//    }
+    if (CollectionUtils.isNotEmpty(post.getGrades())) {
+      Set<PostGradeDTO> grades = Sets.newHashSet();
+      for (PostGrade postGrade : post.getGrades()) {
+        PostGradeDTO postGradeDTO = new PostGradeDTO();
+        postGradeDTO.setPostId(postGrade.getPost().getId());
+        postGradeDTO.setGradeId(postGrade.getGradeId());
+        postGradeDTO.setPostGradeType(postGrade.getPostGradeType());
+        grades.add(postGradeDTO);
+      }
+      result.setGrades(grades);
+    }
 
     if (CollectionUtils.isNotEmpty(post.getSpecialties())) {
       Set<PostSpecialtyDTO> specialties = Sets.newHashSet();

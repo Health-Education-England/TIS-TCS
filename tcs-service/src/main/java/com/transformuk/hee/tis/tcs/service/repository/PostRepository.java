@@ -11,11 +11,4 @@ import org.springframework.data.repository.query.Param;
 @SuppressWarnings("unused")
 public interface PostRepository extends JpaRepository<Post, Long> {
 
-//  @Query(
-//      "SELECT p " +
-//          "FROM Post p " +
-//          "JOIN FETCH p.specialties sp " +
-//          "WHERE p.id = :postId"
-//  )
-//  Post findFullPostDetailsByPostId(@Param("postId") Long postId);
 }
