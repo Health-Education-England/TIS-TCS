@@ -29,23 +29,15 @@ public class PostDTO implements Serializable {
 
   private PostDTO newPost;
 
-  private String mainSiteLocatedId;
-
-  private Set<String> otherSiteIds;
+  private Set<PostSiteDTO> sites;
 
   private String employingBodyId;
 
   private String trainingBodyId;
 
-  private String approvedGradeId;
+  private Set<PostGradeDTO> grades;
 
-  private Set<String> otherGradeIds;
-
-  private SpecialtyDTO specialty;
-
-  private Set<SpecialtyDTO> otherSpecialties;
-
-  private SpecialtyDTO subspecialty;
+  private Set<PostSpecialtyDTO> specialties;
 
   private String trainingDescription;
 
@@ -120,22 +112,6 @@ public class PostDTO implements Serializable {
     this.newPost = newPost;
   }
 
-  public String getMainSiteLocatedId() {
-    return mainSiteLocatedId;
-  }
-
-  public void setMainSiteLocatedId(String mainSiteLocatedId) {
-    this.mainSiteLocatedId = mainSiteLocatedId;
-  }
-
-  public Set<String> getOtherSiteIds() {
-    return otherSiteIds;
-  }
-
-  public void setOtherSiteIds(Set<String> otherSiteIds) {
-    this.otherSiteIds = otherSiteIds;
-  }
-
   public String getEmployingBodyId() {
     return employingBodyId;
   }
@@ -150,46 +126,6 @@ public class PostDTO implements Serializable {
 
   public void setTrainingBodyId(String trainingBodyId) {
     this.trainingBodyId = trainingBodyId;
-  }
-
-  public String getApprovedGradeId() {
-    return approvedGradeId;
-  }
-
-  public void setApprovedGradeId(String approvedGradeId) {
-    this.approvedGradeId = approvedGradeId;
-  }
-
-  public Set<String> getOtherGradeIds() {
-    return otherGradeIds;
-  }
-
-  public void setOtherGradeIds(Set<String> otherGradeIds) {
-    this.otherGradeIds = otherGradeIds;
-  }
-
-  public SpecialtyDTO getSpecialty() {
-    return specialty;
-  }
-
-  public void setSpecialty(SpecialtyDTO specialty) {
-    this.specialty = specialty;
-  }
-
-  public Set<SpecialtyDTO> getOtherSpecialties() {
-    return otherSpecialties;
-  }
-
-  public void setOtherSpecialties(Set<SpecialtyDTO> otherSpecialties) {
-    this.otherSpecialties = otherSpecialties;
-  }
-
-  public SpecialtyDTO getSubspecialty() {
-    return subspecialty;
-  }
-
-  public void setSubspecialty(SpecialtyDTO subspecialty) {
-    this.subspecialty = subspecialty;
   }
 
   public String getTrainingDescription() {
@@ -224,27 +160,83 @@ public class PostDTO implements Serializable {
     this.programmes = programmes;
   }
 
+  public Set<PostSiteDTO> getSites() {
+    return sites;
+  }
+
+  public void setSites(Set<PostSiteDTO> sites) {
+    this.sites = sites;
+  }
+
+  public Set<PostGradeDTO> getGrades() {
+    return grades;
+  }
+
+  public void setGrades(Set<PostGradeDTO> grades) {
+    this.grades = grades;
+  }
+
+  public Set<PostSpecialtyDTO> getSpecialties() {
+    return specialties;
+  }
+
+  public void setSpecialties(Set<PostSpecialtyDTO> specialties) {
+    this.specialties = specialties;
+  }
+
   @Override
   public boolean equals(Object o) {
-    if (this == o) {
-      return true;
-    }
-    if (o == null || getClass() != o.getClass()) {
-      return false;
-    }
+    if (this == o) return true;
+    if (o == null || getClass() != o.getClass()) return false;
 
     PostDTO postDTO = (PostDTO) o;
 
-    if (!Objects.equals(id, postDTO.id)) {
+    if (id != null ? !id.equals(postDTO.id) : postDTO.id != null) return false;
+    if (nationalPostNumber != null ? !nationalPostNumber.equals(postDTO.nationalPostNumber) : postDTO.nationalPostNumber != null)
       return false;
-    }
-
-    return true;
+    if (status != postDTO.status) return false;
+    if (suffix != postDTO.suffix) return false;
+    if (managingLocalOffice != null ? !managingLocalOffice.equals(postDTO.managingLocalOffice) : postDTO.managingLocalOffice != null)
+      return false;
+    if (postFamily != null ? !postFamily.equals(postDTO.postFamily) : postDTO.postFamily != null) return false;
+    if (oldPost != null ? !oldPost.equals(postDTO.oldPost) : postDTO.oldPost != null) return false;
+    if (newPost != null ? !newPost.equals(postDTO.newPost) : postDTO.newPost != null) return false;
+    if (sites != null ? !sites.equals(postDTO.sites) : postDTO.sites != null) return false;
+    if (employingBodyId != null ? !employingBodyId.equals(postDTO.employingBodyId) : postDTO.employingBodyId != null)
+      return false;
+    if (trainingBodyId != null ? !trainingBodyId.equals(postDTO.trainingBodyId) : postDTO.trainingBodyId != null)
+      return false;
+    if (grades != null ? !grades.equals(postDTO.grades) : postDTO.grades != null) return false;
+    if (specialties != null ? !specialties.equals(postDTO.specialties) : postDTO.specialties != null) return false;
+    if (trainingDescription != null ? !trainingDescription.equals(postDTO.trainingDescription) : postDTO.trainingDescription != null)
+      return false;
+    if (localPostNumber != null ? !localPostNumber.equals(postDTO.localPostNumber) : postDTO.localPostNumber != null)
+      return false;
+    if (placementHistory != null ? !placementHistory.equals(postDTO.placementHistory) : postDTO.placementHistory != null)
+      return false;
+    return programmes != null ? programmes.equals(postDTO.programmes) : postDTO.programmes == null;
   }
 
   @Override
   public int hashCode() {
-    return Objects.hashCode(id);
+    int result = id != null ? id.hashCode() : 0;
+    result = 31 * result + (nationalPostNumber != null ? nationalPostNumber.hashCode() : 0);
+    result = 31 * result + (status != null ? status.hashCode() : 0);
+    result = 31 * result + (suffix != null ? suffix.hashCode() : 0);
+    result = 31 * result + (managingLocalOffice != null ? managingLocalOffice.hashCode() : 0);
+    result = 31 * result + (postFamily != null ? postFamily.hashCode() : 0);
+    result = 31 * result + (oldPost != null ? oldPost.hashCode() : 0);
+    result = 31 * result + (newPost != null ? newPost.hashCode() : 0);
+    result = 31 * result + (sites != null ? sites.hashCode() : 0);
+    result = 31 * result + (employingBodyId != null ? employingBodyId.hashCode() : 0);
+    result = 31 * result + (trainingBodyId != null ? trainingBodyId.hashCode() : 0);
+    result = 31 * result + (grades != null ? grades.hashCode() : 0);
+    result = 31 * result + (specialties != null ? specialties.hashCode() : 0);
+    result = 31 * result + (trainingDescription != null ? trainingDescription.hashCode() : 0);
+    result = 31 * result + (localPostNumber != null ? localPostNumber.hashCode() : 0);
+    result = 31 * result + (placementHistory != null ? placementHistory.hashCode() : 0);
+    result = 31 * result + (programmes != null ? programmes.hashCode() : 0);
+    return result;
   }
 
   @Override
@@ -258,15 +250,11 @@ public class PostDTO implements Serializable {
         ", postFamily='" + postFamily + '\'' +
         ", oldPost=" + oldPost +
         ", newPost=" + newPost +
-        ", mainSiteLocatedId='" + mainSiteLocatedId + '\'' +
-        ", otherSiteIds=" + otherSiteIds +
+        ", sites=" + sites +
         ", employingBodyId='" + employingBodyId + '\'' +
         ", trainingBodyId='" + trainingBodyId + '\'' +
-        ", approvedGradeId='" + approvedGradeId + '\'' +
-        ", otherGradeIds=" + otherGradeIds +
-        ", specialty=" + specialty +
-        ", otherSpecialties=" + otherSpecialties +
-        ", subspecialty=" + subspecialty +
+        ", grades=" + grades +
+        ", specialties=" + specialties +
         ", trainingDescription='" + trainingDescription + '\'' +
         ", localPostNumber='" + localPostNumber + '\'' +
         ", placementHistory=" + placementHistory +

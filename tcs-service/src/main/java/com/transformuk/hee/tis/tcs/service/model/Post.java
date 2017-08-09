@@ -5,6 +5,7 @@ import com.transformuk.hee.tis.tcs.api.enumeration.Status;
 
 import javax.persistence.*;
 import java.io.Serializable;
+import java.util.HashSet;
 import java.util.Objects;
 import java.util.Set;
 
@@ -12,6 +13,7 @@ import java.util.Set;
  * A Post.
  */
 @Entity
+@Table(name = "Post")
 public class Post implements Serializable {
 
   private static final long serialVersionUID = 1L;
@@ -47,16 +49,8 @@ public class Post implements Serializable {
   private Post newPost;
 
   // Entity Site defined in the Reference service
-  @Column(name = "mainSiteLocatedId")
-  private String mainSiteLocatedId;
-
-  // Entity Site defined in the Reference service
-  @ElementCollection
-  @CollectionTable(
-      name = "PostOtherSites",
-      joinColumns = @JoinColumn(name = "postId", referencedColumnName = "id"))
-  @Column(name = "siteId")
-  private Set<String> otherSiteIds;
+  @OneToMany(mappedBy = "post", cascade = CascadeType.ALL)
+  private Set<PostSite> sites = new HashSet<>();
 
   // Entity Trust defined in the Reference service
   @Column(name = "employingBodyId")
@@ -66,30 +60,11 @@ public class Post implements Serializable {
   @Column(name = "trainingBodyId")
   private String trainingBodyId;
 
-  // Entity Grade defined in the Reference service
-  @Column(name = "approvedGradeId")
-  private String approvedGradeId;
+  @OneToMany(mappedBy = "post", cascade = CascadeType.ALL)
+  private Set<PostGrade> grades = new HashSet<>();
 
-  @ElementCollection
-  @CollectionTable(
-      name = "PostOtherGrades",
-      joinColumns = @JoinColumn(name = "postId", referencedColumnName = "id"))
-  @Column(name = "gradeId")
-  private Set<String> otherGradeIds;
-
-  @OneToOne
-  @JoinColumn(name = "specialtyId")
-  private Specialty specialty;
-
-  @OneToMany
-  @JoinTable(name = "PostOtherSpecialties",
-      joinColumns = @JoinColumn(name = "postId", referencedColumnName = "id"),
-      inverseJoinColumns = @JoinColumn(name = "specialtyId", referencedColumnName = "id"))
-  private Set<Specialty> otherSpecialties;
-
-  @OneToOne
-  @JoinColumn(name = "subspecialtyId")
-  private Specialty subspecialty;
+  @OneToMany(mappedBy = "post", cascade = CascadeType.ALL)
+  private Set<PostSpecialty> specialties = new HashSet<>();
 
   @Column(name = "trainingDescription")
   private String trainingDescription;
@@ -97,11 +72,11 @@ public class Post implements Serializable {
   @Column(name = "localPostNumber")
   private String localPostNumber;
 
-  @OneToMany
+  @OneToMany(fetch = FetchType.EAGER)
   @JoinTable(name = "PostPlacementHistory",
       joinColumns = @JoinColumn(name = "postId", referencedColumnName = "id"),
       inverseJoinColumns = @JoinColumn(name = "placementId", referencedColumnName = "id"))
-  private Set<Placement> placementHistory;
+  private Set<Placement> placementHistory = new HashSet<>();
 
   @OneToOne
   @JoinColumn(name = "programmeId")
@@ -207,32 +182,6 @@ public class Post implements Serializable {
     return this;
   }
 
-  public String getMainSiteLocatedId() {
-    return mainSiteLocatedId;
-  }
-
-  public void setMainSiteLocatedId(String mainSiteLocatedId) {
-    this.mainSiteLocatedId = mainSiteLocatedId;
-  }
-
-  public Post mainSiteLocatedId(String mainSiteLocatedId) {
-    this.mainSiteLocatedId = mainSiteLocatedId;
-    return this;
-  }
-
-  public Set<String> getOtherSiteIds() {
-    return otherSiteIds;
-  }
-
-  public void setOtherSiteIds(Set<String> otherSiteIds) {
-    this.otherSiteIds = otherSiteIds;
-  }
-
-  public Post otherSiteIds(Set<String> otherSiteIds) {
-    this.otherSiteIds = otherSiteIds;
-    return this;
-  }
-
   public String getEmployingBodyId() {
     return employingBodyId;
   }
@@ -259,70 +208,6 @@ public class Post implements Serializable {
     return this;
   }
 
-  public String getApprovedGradeId() {
-    return approvedGradeId;
-  }
-
-  public void setApprovedGradeId(String approvedGradeId) {
-    this.approvedGradeId = approvedGradeId;
-  }
-
-  public Post approvedGradeId(String approvedGradeId) {
-    this.approvedGradeId = approvedGradeId;
-    return this;
-  }
-
-  public Set<String> getOtherGradeIds() {
-    return otherGradeIds;
-  }
-
-  public void setOtherGradeIds(Set<String> otherGradeIds) {
-    this.otherGradeIds = otherGradeIds;
-  }
-
-  public Post otherGradeIds(Set<String> otherGradeIds) {
-    this.otherGradeIds = otherGradeIds;
-    return this;
-  }
-
-  public Specialty getSpecialty() {
-    return specialty;
-  }
-
-  public void setSpecialty(Specialty specialty) {
-    this.specialty = specialty;
-  }
-
-  public Post specialty(Specialty specialty) {
-    this.specialty = specialty;
-    return this;
-  }
-
-  public Set<Specialty> getOtherSpecialties() {
-    return otherSpecialties;
-  }
-
-  public void setOtherSpecialties(Set<Specialty> otherSpecialties) {
-    this.otherSpecialties = otherSpecialties;
-  }
-
-  public Post otherSpecialties(Set<Specialty> otherSpecialties) {
-    this.otherSpecialties = otherSpecialties;
-    return this;
-  }
-
-  public Specialty getSubspecialty() {
-    return subspecialty;
-  }
-
-  public void setSubspecialty(Specialty subspecialty) {
-    this.subspecialty = subspecialty;
-  }
-
-  public Post subspecialty(Specialty subspecialty) {
-    this.subspecialty = subspecialty;
-    return this;
-  }
 
   public String getTrainingDescription() {
     return trainingDescription;
@@ -376,6 +261,45 @@ public class Post implements Serializable {
     return this;
   }
 
+  public Set<PostSite> getSites() {
+    return sites;
+  }
+
+  public void setSites(Set<PostSite> sites) {
+    this.sites = sites;
+  }
+
+  public Post sites(Set<PostSite> sites) {
+    this.sites = sites;
+    return this;
+  }
+
+  public Set<PostGrade> getGrades() {
+    return grades;
+  }
+
+  public void setGrades(Set<PostGrade> grades) {
+    this.grades = grades;
+  }
+
+  public Post grades(Set<PostGrade> grades) {
+    this.grades = grades;
+    return this;
+  }
+
+  public Set<PostSpecialty> getSpecialties() {
+    return specialties;
+  }
+
+  public void setSpecialties(Set<PostSpecialty> specialties) {
+    this.specialties = specialties;
+  }
+
+  public Post specialties(Set<PostSpecialty> specialties) {
+    this.specialties = specialties;
+    return this;
+  }
+
   @Override
   public boolean equals(Object o) {
     if (this == o) {
@@ -407,15 +331,11 @@ public class Post implements Serializable {
         ", postFamily='" + postFamily + '\'' +
         ", oldPost=" + oldPost +
         ", newPost=" + newPost +
-        ", mainSiteLocatedId='" + mainSiteLocatedId + '\'' +
-        ", otherSiteIds=" + otherSiteIds +
+        ", sites=" + sites +
         ", employingBodyId='" + employingBodyId + '\'' +
         ", trainingBodyId='" + trainingBodyId + '\'' +
-        ", approvedGradeId='" + approvedGradeId + '\'' +
-        ", otherGradeIds=" + otherGradeIds +
-        ", specialty=" + specialty +
-        ", otherSpecialties=" + otherSpecialties +
-        ", subspecialty=" + subspecialty +
+        ", grades=" + grades +
+        ", specialties=" + specialties +
         ", trainingDescription='" + trainingDescription + '\'' +
         ", localPostNumber='" + localPostNumber + '\'' +
         ", placementHistory=" + placementHistory +
