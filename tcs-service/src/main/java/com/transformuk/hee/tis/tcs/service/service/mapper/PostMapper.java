@@ -12,6 +12,12 @@ import java.util.Set;
 
 /**
  * Mapper for the entity Post and its DTO PostDTO.
+ *
+ * This mapper was created as mapstruct was having difficulty with some of the relationships within posts
+ * It was having issues with the parent/child relationship between old/new post records causing stack overflows
+ * and causing NPE's when trying to traverse through joins outside the JPA session.
+ *
+ * This mapper gives more control over what details are converted
  */
 @Component
 public class PostMapper {
@@ -22,14 +28,26 @@ public class PostMapper {
   }
 
   public List<Post> postDTOsToPosts(List<PostDTO> postDTOs) {
-    return Lists.newArrayList();
+    List<Post> result =  Lists.newArrayList();
+
+    for (PostDTO postDTO : postDTOs) {
+      result.add(postDTOToPost(postDTO));
+    }
+
+    return result;
   }
 
   public List<PostDTO> postsToPostDTOs(List<Post> posts) {
-    return Lists.newArrayList();
+    List<PostDTO> result =  Lists.newArrayList();
+
+    for (Post post : posts) {
+      result.add(postToPostDTO(post));
+    }
+
+    return result;
   }
 
-  private PostDTO postToPostDTO(Post post, boolean followPostLinks) {
+  private PostDTO postToPostDTO(Post post, boolean traverseRelatedPosts) {
     PostDTO result = new PostDTO();
 
     result.setId(post.getId());
@@ -38,7 +56,12 @@ public class PostMapper {
     result.setSuffix(post.getSuffix());
     result.setManagingLocalOffice(post.getManagingLocalOffice());
     result.setPostFamily(post.getPostFamily());
-    if (followPostLinks) {
+    result.setEmployingBodyId(post.getEmployingBodyId());
+    result.setTrainingBodyId(post.getTrainingBodyId());
+    result.setTrainingDescription(post.getTrainingDescription());
+    result.setLocalPostNumber(post.getLocalPostNumber());
+
+    if (traverseRelatedPosts) {
       if (post.getOldPost() != null) {
         result.setOldPost(postToPostDTO(post.getOldPost(), false));
       }
@@ -46,12 +69,6 @@ public class PostMapper {
         result.setNewPost(postToPostDTO(post.getNewPost(), false));
       }
     }
-
-    result.setEmployingBodyId(post.getEmployingBodyId());
-    result.setTrainingBodyId(post.getTrainingBodyId());
-    result.setTrainingDescription(post.getTrainingDescription());
-    result.setLocalPostNumber(post.getLocalPostNumber());
-
 
     if (CollectionUtils.isNotEmpty(post.getSites())) {
       Set<PostSiteDTO> sites = Sets.newHashSet();
@@ -64,7 +81,6 @@ public class PostMapper {
       }
       result.setSites(sites);
     }
-
 
     if (CollectionUtils.isNotEmpty(post.getGrades())) {
       Set<PostGradeDTO> grades = Sets.newHashSet();
@@ -90,7 +106,6 @@ public class PostMapper {
       }
       result.setSpecialties(specialties);
     }
-
 
     if (CollectionUtils.isNotEmpty(post.getPlacementHistory())) {
       Set<PlacementDTO> placements = Sets.newHashSet();
@@ -149,7 +164,121 @@ public class PostMapper {
   }
 
   public Post postDTOToPost(PostDTO postDTO) {
-    return null;
+    Post result = postDTOToPost(postDTO, true);
+    return result;
   }
 
+  private Post postDTOToPost(PostDTO postDTO, boolean traverseRelatedPosts) {
+    Post result = new Post();
+    result.setId(postDTO.getId());
+    result.setNationalPostNumber(postDTO.getNationalPostNumber());
+    result.setStatus(postDTO.getStatus());
+    result.setSuffix(postDTO.getSuffix());
+    result.setManagingLocalOffice(postDTO.getManagingLocalOffice());
+    result.setPostFamily(postDTO.getPostFamily());
+    result.setEmployingBodyId(postDTO.getEmployingBodyId());
+    result.setTrainingBodyId(postDTO.getTrainingBodyId());
+    result.setTrainingDescription(postDTO.getTrainingDescription());
+    result.setLocalPostNumber(postDTO.getLocalPostNumber());
+
+    if (traverseRelatedPosts) {
+      if (postDTO.getOldPost() != null) {
+        result.setOldPost(postDTOToPost(postDTO.getOldPost(), false));
+      }
+      if (postDTO.getNewPost() != null) {
+        result.setNewPost(postDTOToPost(postDTO.getNewPost(), false));
+      }
+    }
+
+    if (CollectionUtils.isNotEmpty(postDTO.getSites())) {
+      Set<PostSite> sites = Sets.newHashSet();
+      for (PostSiteDTO postSiteDTO : postDTO.getSites()) {
+        PostSite site = new PostSite();
+        site.setPost(result);
+        site.setSiteId(postSiteDTO.getSiteId());
+        site.setPostSiteType(postSiteDTO.getPostSiteType());
+        sites.add(site);
+      }
+      result.setSites(sites);
+    }
+
+    if (CollectionUtils.isNotEmpty(postDTO.getGrades())) {
+      Set<PostGrade> grades = Sets.newHashSet();
+      for (PostGradeDTO postGradeDTO : postDTO.getGrades()) {
+        PostGrade postGrade = new PostGrade();
+        postGrade.setPost(result);
+        postGrade.setGradeId(postGradeDTO.getGradeId());
+        postGrade.setPostGradeType(postGradeDTO.getPostGradeType());
+        grades.add(postGrade);
+      }
+      result.setGrades(grades);
+    }
+
+    if (CollectionUtils.isNotEmpty(postDTO.getSpecialties())) {
+      Set<PostSpecialty> specialties = Sets.newHashSet();
+      for (PostSpecialtyDTO postSpecialtyDTO : postDTO.getSpecialties()) {
+        PostSpecialty postSpecialty = new PostSpecialty();
+        postSpecialty.setPost(result);
+        postSpecialty.setSpecialty(specialtyDTOToSpecialty(postSpecialtyDTO.getSpecialty()));
+        postSpecialty.setPostSpecialtyType(postSpecialtyDTO.getPostSpecialtyType());
+        specialties.add(postSpecialty);
+      }
+      result.setSpecialties(specialties);
+    }
+
+    if (CollectionUtils.isNotEmpty(postDTO.getPlacementHistory())) {
+      Set<Placement> placements = Sets.newHashSet();
+      for (PlacementDTO placementDTO : postDTO.getPlacementHistory()) {
+        placements.add(placementDTOToPlacement(placementDTO));
+      }
+      result.setPlacementHistory(placements);
+    }
+
+    result.setProgrammes(programmeDTOToProgramme(postDTO.getProgrammes()));
+
+    return result;
+  }
+
+  private Specialty specialtyDTOToSpecialty(SpecialtyDTO specialtyDTO) {
+    Specialty result = null;
+    if (specialtyDTO != null) {
+      result = new Specialty();
+      result.setId(specialtyDTO.getId());
+      result.setName(specialtyDTO.getName());
+      result.setSpecialtyType(specialtyDTO.getSpecialtyType());
+      result.setNhsSpecialtyCode(specialtyDTO.getNhsSpecialtyCode());
+      result.setStatus(specialtyDTO.getStatus());
+    }
+    return result;
+  }
+
+  private Placement placementDTOToPlacement(PlacementDTO placementDTO) {
+    Placement result = null;
+    if (placementDTO != null) {
+      result = new Placement();
+
+      result.setId(placementDTO.getId());
+      result.setPlacementType(placementDTO.getPlacementType());
+      result.setStatus(placementDTO.getStatus());
+      result.setSpecialty(placementDTO.getSpecialty());
+      result.setNationalPostNumber(placementDTO.getNationalPostNumber());
+      result.setGrade(placementDTO.getGrade());
+    }
+    return result;
+  }
+
+  private Programme programmeDTOToProgramme(ProgrammeDTO programmeDTO) {
+    Programme result = null;
+    if (programmeDTO != null) {
+      result = new Programme();
+
+      result.setId(programmeDTO.getId());
+      result.setIntrepidId(programmeDTO.getIntrepidId());
+      result.setProgrammeNumber(programmeDTO.getProgrammeNumber());
+      result.setProgrammeName(programmeDTO.getProgrammeName());
+      result.setManagingDeanery(programmeDTO.getManagingDeanery());
+      result.setStatus(programmeDTO.getStatus());
+    }
+    return result;
+  }
 }
