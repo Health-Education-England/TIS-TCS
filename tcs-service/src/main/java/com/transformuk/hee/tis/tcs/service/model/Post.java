@@ -49,7 +49,7 @@ public class Post implements Serializable {
   private Post newPost;
 
   // Entity Site defined in the Reference service
-  @OneToMany(mappedBy = "post", cascade = CascadeType.ALL)
+  @OneToMany(mappedBy = "post", cascade = CascadeType.ALL, fetch = FetchType.EAGER)
   private Set<PostSite> sites = new HashSet<>();
 
   // Entity Trust defined in the Reference service
@@ -60,10 +60,10 @@ public class Post implements Serializable {
   @Column(name = "trainingBodyId")
   private String trainingBodyId;
 
-  @OneToMany(mappedBy = "post", cascade = CascadeType.ALL)
+  @OneToMany(mappedBy = "post", cascade = CascadeType.ALL, fetch = FetchType.EAGER)
   private Set<PostGrade> grades = new HashSet<>();
 
-  @OneToMany(mappedBy = "post", cascade = CascadeType.ALL)
+  @OneToMany(mappedBy = "post", cascade = CascadeType.ALL, fetch = FetchType.EAGER)
   private Set<PostSpecialty> specialties = new HashSet<>();
 
   @Column(name = "trainingDescription")

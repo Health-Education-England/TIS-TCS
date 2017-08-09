@@ -1,7 +1,6 @@
 package com.transformuk.hee.tis.tcs.service.model;
 
 import com.transformuk.hee.tis.tcs.api.enumeration.PostSiteType;
-import com.transformuk.hee.tis.tcs.service.model.wrappper.SiteWrapper;
 
 import javax.persistence.*;
 import java.io.Serializable;
@@ -16,9 +15,8 @@ public class PostSite implements Serializable {
   private Post post;
 
   @Id
-  @ManyToOne
   @JoinColumn(name = "siteId")
-  private SiteWrapper site;
+  private String siteId;
 
   @Enumerated(EnumType.STRING)
   @Column(name = "postSiteType")
@@ -32,12 +30,12 @@ public class PostSite implements Serializable {
     this.post = post;
   }
 
-  public SiteWrapper getSite() {
-    return site;
+  public String getSiteId() {
+    return siteId;
   }
 
-  public void setSite(SiteWrapper site) {
-    this.site = site;
+  public void setSiteId(String siteId) {
+    this.siteId = siteId;
   }
 
   public PostSiteType getPostSiteType() {
@@ -57,14 +55,14 @@ public class PostSite implements Serializable {
     PostSite postSite = (PostSite) o;
 
     if (post != null ? !post.equals(postSite.post) : postSite.post != null) return false;
-    if (site != null ? !site.equals(postSite.site) : postSite.site != null) return false;
+    if (siteId != null ? !siteId.equals(postSite.siteId) : postSite.siteId != null) return false;
     return postSiteType == postSite.postSiteType;
   }
 
   @Override
   public int hashCode() {
     int result = post != null ? post.hashCode() : 0;
-    result = 31 * result + (site != null ? site.hashCode() : 0);
+    result = 31 * result + (siteId != null ? siteId.hashCode() : 0);
     result = 31 * result + (postSiteType != null ? postSiteType.hashCode() : 0);
     return result;
   }

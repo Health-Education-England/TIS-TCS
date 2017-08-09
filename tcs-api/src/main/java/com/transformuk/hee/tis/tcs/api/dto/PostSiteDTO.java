@@ -6,16 +6,16 @@ import java.io.Serializable;
 
 public class PostSiteDTO implements Serializable {
 
-  private PostDTO post;
+  private Long postId;
   private String siteId;
   private PostSiteType postSiteType;
 
-  public PostDTO getPost() {
-    return post;
+  public Long getPostId() {
+    return postId;
   }
 
-  public void setPost(PostDTO post) {
-    this.post = post;
+  public void setPostId(Long postId) {
+    this.postId = postId;
   }
 
   public String getSiteId() {
@@ -41,14 +41,14 @@ public class PostSiteDTO implements Serializable {
 
     PostSiteDTO that = (PostSiteDTO) o;
 
-    if (post != null ? !post.equals(that.post) : that.post != null) return false;
+    if (postId != null ? !postId.equals(that.postId) : that.postId != null) return false;
     if (siteId != null ? !siteId.equals(that.siteId) : that.siteId != null) return false;
     return postSiteType == that.postSiteType;
   }
 
   @Override
   public int hashCode() {
-    int result = post != null ? post.hashCode() : 0;
+    int result = postId != null ? postId.hashCode() : 0;
     result = 31 * result + (siteId != null ? siteId.hashCode() : 0);
     result = 31 * result + (postSiteType != null ? postSiteType.hashCode() : 0);
     return result;
@@ -57,7 +57,7 @@ public class PostSiteDTO implements Serializable {
   @Override
   public String toString() {
     return "PostSiteDTO{" +
-        "post=" + post +
+        "postId=" + postId +
         ", siteId='" + siteId + '\'' +
         ", postSiteType=" + postSiteType +
         '}';

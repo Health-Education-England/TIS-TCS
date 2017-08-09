@@ -1,26 +1,10 @@
--- Wrapper Site table
-CREATE TABLE `Site` (
-  `id` varchar(255) NOT NULL,
-  PRIMARY KEY (`id`)
-) ENGINE=InnoDB DEFAULT CHARSET=utf8;
-
-
 -- Post sites join table - many to many join table
 CREATE TABLE `PostSite` (
   `postId` bigint(20) NOT NULL,
   `siteId` varchar(255) DEFAULT NULL,
   `postSiteType` varchar(255) DEFAULT NULL,
   KEY `fk_post_postsite_post_id` (`postId`),
-  CONSTRAINT `fk_post_postsite_post_id` FOREIGN KEY (`postId`) REFERENCES `Post` (`id`),
-  KEY `fk_site_postsite_site_id` (`siteId`),
-  CONSTRAINT `fk_site_postsite_site_id` FOREIGN KEY (`siteId`) REFERENCES `Site` (`id`)
-) ENGINE=InnoDB DEFAULT CHARSET=utf8;
-
-
--- Wrapper Grade table
-CREATE TABLE `Grade` (
-  `id` varchar(255) NOT NULL,
-  PRIMARY KEY (`id`)
+  CONSTRAINT `fk_post_postsite_post_id` FOREIGN KEY (`postId`) REFERENCES `Post` (`id`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8;
 
 
@@ -30,9 +14,7 @@ CREATE TABLE `PostGrade` (
   `gradeId` varchar(255) DEFAULT NULL,
   `postGradeType` varchar(255) DEFAULT NULL,
   KEY `fk_post_postgrade_post_id` (`postId`),
-  CONSTRAINT `fk_post_postgrade_post_id` FOREIGN KEY (`postId`) REFERENCES `Post` (`id`),
-  KEY `fk_grade_postgrade_grade_id` (`gradeId`),
-  CONSTRAINT `fk_grade_postgrade_grade_id` FOREIGN KEY (`gradeId`) REFERENCES `Grade` (`id`)
+  CONSTRAINT `fk_post_postgrade_post_id` FOREIGN KEY (`postId`) REFERENCES `Post` (`id`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8;
 
 

@@ -244,7 +244,7 @@
 //
 //  @Test
 //  @Transactional
-//  public void getPost() throws Exception {
+//  public void getPostId() throws Exception {
 //    // Initialize the database
 //    postRepository.saveAndFlush(post);
 //

@@ -1,7 +1,6 @@
 package com.transformuk.hee.tis.tcs.service.model;
 
 import com.transformuk.hee.tis.tcs.api.enumeration.PostGradeType;
-import com.transformuk.hee.tis.tcs.service.model.wrappper.GradeWrapper;
 
 import javax.persistence.*;
 import java.io.Serializable;
@@ -17,9 +16,8 @@ public class PostGrade implements Serializable {
   private Post post;
 
   @Id
-  @ManyToOne
   @JoinColumn(name = "gradeId")
-  private GradeWrapper grade;
+  private String gradeId;
 
   @Enumerated(EnumType.STRING)
   @Column(name = "postGradeType")
@@ -33,12 +31,12 @@ public class PostGrade implements Serializable {
     this.post = post;
   }
 
-  public GradeWrapper getGrade() {
-    return grade;
+  public String getGradeId() {
+    return gradeId;
   }
 
-  public void setGrade(GradeWrapper grade) {
-    this.grade = grade;
+  public void setGradeId(String gradeId) {
+    this.gradeId = gradeId;
   }
 
   public PostGradeType getPostGradeType() {
@@ -58,14 +56,14 @@ public class PostGrade implements Serializable {
     PostGrade postGrade = (PostGrade) o;
 
     if (post != null ? !post.equals(postGrade.post) : postGrade.post != null) return false;
-    if (grade != null ? !grade.equals(postGrade.grade) : postGrade.grade != null) return false;
+    if (gradeId != null ? !gradeId.equals(postGrade.gradeId) : postGrade.gradeId != null) return false;
     return postGradeType == postGrade.postGradeType;
   }
 
   @Override
   public int hashCode() {
     int result = post != null ? post.hashCode() : 0;
-    result = 31 * result + (grade != null ? grade.hashCode() : 0);
+    result = 31 * result + (gradeId != null ? gradeId.hashCode() : 0);
     result = 31 * result + (postGradeType != null ? postGradeType.hashCode() : 0);
     return result;
   }

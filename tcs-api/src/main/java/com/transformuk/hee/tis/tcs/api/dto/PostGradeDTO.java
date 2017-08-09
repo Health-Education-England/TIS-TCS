@@ -6,16 +6,16 @@ import java.io.Serializable;
 
 public class PostGradeDTO implements Serializable {
 
-  private PostDTO post;
+  private Long postId;
   private String gradeId;
   private PostGradeType postGradeType;
 
-  public PostDTO getPost() {
-    return post;
+  public Long getPostId() {
+    return postId;
   }
 
-  public void setPost(PostDTO post) {
-    this.post = post;
+  public void setPostId(Long postId) {
+    this.postId = postId;
   }
 
   public String getGradeId() {
@@ -41,14 +41,14 @@ public class PostGradeDTO implements Serializable {
 
     PostGradeDTO that = (PostGradeDTO) o;
 
-    if (post != null ? !post.equals(that.post) : that.post != null) return false;
+    if (postId != null ? !postId.equals(that.postId) : that.postId != null) return false;
     if (gradeId != null ? !gradeId.equals(that.gradeId) : that.gradeId != null) return false;
     return postGradeType == that.postGradeType;
   }
 
   @Override
   public int hashCode() {
-    int result = post != null ? post.hashCode() : 0;
+    int result = postId != null ? postId.hashCode() : 0;
     result = 31 * result + (gradeId != null ? gradeId.hashCode() : 0);
     result = 31 * result + (postGradeType != null ? postGradeType.hashCode() : 0);
     return result;
@@ -57,7 +57,7 @@ public class PostGradeDTO implements Serializable {
   @Override
   public String toString() {
     return "PostGradeDTO{" +
-        "post=" + post +
+        "postId=" + postId +
         ", gradeId='" + gradeId + '\'' +
         ", postGradeType=" + postGradeType +
         '}';
