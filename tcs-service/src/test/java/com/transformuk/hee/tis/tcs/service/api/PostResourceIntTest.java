@@ -1,132 +1,132 @@
-//package com.transformuk.hee.tis.tcs.service.api;
-//
-//import com.google.common.collect.Sets;
-//import com.transformuk.hee.tis.tcs.api.dto.PostDTO;
-//import com.transformuk.hee.tis.tcs.api.enumeration.PostGradeType;
-//import com.transformuk.hee.tis.tcs.api.enumeration.PostSiteType;
-//import com.transformuk.hee.tis.tcs.api.enumeration.PostSpecialtyType;
-//import com.transformuk.hee.tis.tcs.api.enumeration.Status;
-//import com.transformuk.hee.tis.tcs.service.Application;
-//import com.transformuk.hee.tis.tcs.service.exception.ExceptionTranslator;
-//import com.transformuk.hee.tis.tcs.service.model.*;
-//import com.transformuk.hee.tis.tcs.service.repository.PlacementRepository;
-//import com.transformuk.hee.tis.tcs.service.repository.PostRepository;
-//import com.transformuk.hee.tis.tcs.service.repository.ProgrammeRepository;
-//import com.transformuk.hee.tis.tcs.service.repository.SpecialtyRepository;
-//import com.transformuk.hee.tis.tcs.service.service.PostService;
-//import com.transformuk.hee.tis.tcs.service.service.mapper.PostMapper;
-//import org.junit.Before;
-//import org.junit.Test;
-//import org.junit.runner.RunWith;
-//import org.mockito.MockitoAnnotations;
-//import org.springframework.beans.factory.annotation.Autowired;
-//import org.springframework.boot.test.context.SpringBootTest;
-//import org.springframework.data.web.PageableHandlerMethodArgumentResolver;
-//import org.springframework.http.MediaType;
-//import org.springframework.http.converter.json.MappingJackson2HttpMessageConverter;
-//import org.springframework.test.context.junit4.SpringRunner;
-//import org.springframework.test.web.servlet.MockMvc;
-//import org.springframework.test.web.servlet.setup.MockMvcBuilders;
-//import org.springframework.transaction.annotation.Transactional;
-//
-//import javax.persistence.EntityManager;
-//import java.util.List;
-//import java.util.Set;
-//
-//import static org.assertj.core.api.Assertions.assertThat;
-//import static org.hamcrest.Matchers.hasItem;
-//import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.delete;
-//import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
-//import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
-//import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.put;
-//import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.content;
-//import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
-//import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
-//
-///**
-// * Test class for the PostResource REST controller.
-// *
-// * @see PostResource
-// */
-//@RunWith(SpringRunner.class)
-//@SpringBootTest(classes = Application.class)
-//public class PostResourceIntTest {
-//
-//  private static final String DEFAULT_NATIONAL_POST_NUMBER = "AAAAAAAAAA";
-//  private static final String UPDATED_NATIONAL_POST_NUMBER = "BBBBBBBBBB";
-//
-//  private static final Status DEFAULT_STATUS = Status.CURRENT;
-//  private static final Status UPDATED_STATUS = Status.INACTIVE;
-//
-//  private static final String DEFAULT_POST_OWNER = "AAAAAAAAAA";
-//  private static final String UPDATED_POST_OWNER = "BBBBBBBBBB";
-//
-//  private static final String DEFAULT_MAIN_SITE_LOCATED = "AAAAAAAAAA";
-//  private static final String UPDATED_MAIN_SITE_LOCATED = "BBBBBBBBBB";
-//
-//  private static final String DEFAULT_LEAD_SITE = "AAAAAAAAAA";
-//  private static final String UPDATED_LEAD_SITE = "BBBBBBBBBB";
-//
-//  private static final String DEFAULT_EMPLOYING_BODY = "AAAAAAAAAA";
-//  private static final String UPDATED_EMPLOYING_BODY = "BBBBBBBBBB";
-//
-//  private static final String DEFAULT_TRAINING_BODY = "AAAAAAAAAA";
-//  private static final String UPDATED_TRAINING_BODY = "BBBBBBBBBB";
-//
-//  private static final String DEFAULT_APPROVED_GRADE = "AAAAAAAAAA";
-//  private static final String UPDATED_APPROVED_GRADE = "BBBBBBBBBB";
-//
-//  private static final String DEFAULT_POST_SPECIALTY = "AAAAAAAAAA";
-//  private static final String UPDATED_POST_SPECIALTY = "BBBBBBBBBB";
-//
-//  private static final Float DEFAULT_FULL_TIME_EQUIVELENT = 1F;
-//  private static final Float UPDATED_FULL_TIME_EQUIVELENT = 2F;
-//
-//  private static final String DEFAULT_LEAD_PROVIDER = "AAAAAAAAAA";
-//  private static final String UPDATED_LEAD_PROVIDER = "BBBBBBBBBB";
-//
-//  private static final Long SPECIALTY_ID = 12345L;
-//
-//  @Autowired
-//  private PostRepository postRepository;
-//
-//  @Autowired
-//  private SpecialtyRepository specialtyRepository;
-//
-//  @Autowired
-//  private PlacementRepository placementRepository;
-//
-//  @Autowired
-//  private ProgrammeRepository programmeRepository;
-//
-//  @Autowired
-//  private PostMapper postMapper;
-//
-//  @Autowired
-//  private PostService postService;
-//
-//  @Autowired
-//  private MappingJackson2HttpMessageConverter jacksonMessageConverter;
-//
-//  @Autowired
-//  private PageableHandlerMethodArgumentResolver pageableArgumentResolver;
-//
-//  @Autowired
-//  private ExceptionTranslator exceptionTranslator;
-//
-//  @Autowired
-//  private EntityManager em;
-//
-//  private MockMvc restPostMockMvc;
-//
-//  private Post post;
-//
-//  /**
-//   * Create an entity for this test.
-//   * <p>
-//   * This is a static method, as tests for other entities might also need it,
-//   * if they test an entity which requires the current entity.
-//   */
+package com.transformuk.hee.tis.tcs.service.api;
+
+import com.google.common.collect.Sets;
+import com.transformuk.hee.tis.tcs.api.dto.PostDTO;
+import com.transformuk.hee.tis.tcs.api.enumeration.PostGradeType;
+import com.transformuk.hee.tis.tcs.api.enumeration.PostSiteType;
+import com.transformuk.hee.tis.tcs.api.enumeration.PostSpecialtyType;
+import com.transformuk.hee.tis.tcs.api.enumeration.Status;
+import com.transformuk.hee.tis.tcs.service.Application;
+import com.transformuk.hee.tis.tcs.service.exception.ExceptionTranslator;
+import com.transformuk.hee.tis.tcs.service.model.*;
+import com.transformuk.hee.tis.tcs.service.repository.PlacementRepository;
+import com.transformuk.hee.tis.tcs.service.repository.PostRepository;
+import com.transformuk.hee.tis.tcs.service.repository.ProgrammeRepository;
+import com.transformuk.hee.tis.tcs.service.repository.SpecialtyRepository;
+import com.transformuk.hee.tis.tcs.service.service.PostService;
+import com.transformuk.hee.tis.tcs.service.service.mapper.PostMapper;
+import org.junit.Before;
+import org.junit.Test;
+import org.junit.runner.RunWith;
+import org.mockito.MockitoAnnotations;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.boot.test.context.SpringBootTest;
+import org.springframework.data.web.PageableHandlerMethodArgumentResolver;
+import org.springframework.http.MediaType;
+import org.springframework.http.converter.json.MappingJackson2HttpMessageConverter;
+import org.springframework.test.context.junit4.SpringRunner;
+import org.springframework.test.web.servlet.MockMvc;
+import org.springframework.test.web.servlet.setup.MockMvcBuilders;
+import org.springframework.transaction.annotation.Transactional;
+
+import javax.persistence.EntityManager;
+import java.util.List;
+import java.util.Set;
+
+import static org.assertj.core.api.Assertions.assertThat;
+import static org.hamcrest.Matchers.hasItem;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.delete;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.put;
+import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.content;
+import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
+import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
+
+/**
+ * Test class for the PostResource REST controller.
+ *
+ * @see PostResource
+ */
+@RunWith(SpringRunner.class)
+@SpringBootTest(classes = Application.class)
+public class PostResourceIntTest {
+
+  private static final String DEFAULT_NATIONAL_POST_NUMBER = "AAAAAAAAAA";
+  private static final String UPDATED_NATIONAL_POST_NUMBER = "BBBBBBBBBB";
+
+  private static final Status DEFAULT_STATUS = Status.CURRENT;
+  private static final Status UPDATED_STATUS = Status.INACTIVE;
+
+  private static final String DEFAULT_POST_OWNER = "AAAAAAAAAA";
+  private static final String UPDATED_POST_OWNER = "BBBBBBBBBB";
+
+  private static final String DEFAULT_MAIN_SITE_LOCATED = "AAAAAAAAAA";
+  private static final String UPDATED_MAIN_SITE_LOCATED = "BBBBBBBBBB";
+
+  private static final String DEFAULT_LEAD_SITE = "AAAAAAAAAA";
+  private static final String UPDATED_LEAD_SITE = "BBBBBBBBBB";
+
+  private static final String DEFAULT_EMPLOYING_BODY = "AAAAAAAAAA";
+  private static final String UPDATED_EMPLOYING_BODY = "BBBBBBBBBB";
+
+  private static final String DEFAULT_TRAINING_BODY = "AAAAAAAAAA";
+  private static final String UPDATED_TRAINING_BODY = "BBBBBBBBBB";
+
+  private static final String DEFAULT_APPROVED_GRADE = "AAAAAAAAAA";
+  private static final String UPDATED_APPROVED_GRADE = "BBBBBBBBBB";
+
+  private static final String DEFAULT_POST_SPECIALTY = "AAAAAAAAAA";
+  private static final String UPDATED_POST_SPECIALTY = "BBBBBBBBBB";
+
+  private static final Float DEFAULT_FULL_TIME_EQUIVELENT = 1F;
+  private static final Float UPDATED_FULL_TIME_EQUIVELENT = 2F;
+
+  private static final String DEFAULT_LEAD_PROVIDER = "AAAAAAAAAA";
+  private static final String UPDATED_LEAD_PROVIDER = "BBBBBBBBBB";
+
+  private static final Long SPECIALTY_ID = 12345L;
+
+  @Autowired
+  private PostRepository postRepository;
+
+  @Autowired
+  private SpecialtyRepository specialtyRepository;
+
+  @Autowired
+  private PlacementRepository placementRepository;
+
+  @Autowired
+  private ProgrammeRepository programmeRepository;
+
+  @Autowired
+  private PostMapper postMapper;
+
+  @Autowired
+  private PostService postService;
+
+  @Autowired
+  private MappingJackson2HttpMessageConverter jacksonMessageConverter;
+
+  @Autowired
+  private PageableHandlerMethodArgumentResolver pageableArgumentResolver;
+
+  @Autowired
+  private ExceptionTranslator exceptionTranslator;
+
+  @Autowired
+  private EntityManager em;
+
+  private MockMvc restPostMockMvc;
+
+  private Post post;
+
+  /**
+   * Create an entity for this test.
+   * <p>
+   * This is a static method, as tests for other entities might also need it,
+   * if they test an entity which requires the current entity.
+   */
 //  public static Post createEntity(EntityManager em) {
 //    PostSite postSite = new PostSite();
 //    postSite.setSiteId(DEFAULT_MAIN_SITE_LOCATED);
@@ -359,4 +359,4 @@
 //  public void equalsVerifier() throws Exception {
 //    TestUtil.equalsVerifier(Post.class);
 //  }
-//}
+}

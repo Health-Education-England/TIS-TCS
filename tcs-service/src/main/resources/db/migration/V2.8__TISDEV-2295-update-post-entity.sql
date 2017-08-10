@@ -1,8 +1,9 @@
 -- Post sites join table - many to many join table
 CREATE TABLE `PostSite` (
   `postId` bigint(20) NOT NULL,
-  `siteId` varchar(255) DEFAULT NULL,
-  `postSiteType` varchar(255) DEFAULT NULL,
+  `siteId` varchar(255) NOT NULL,
+  `postSiteType` varchar(255) NOT NULL,
+  PRIMARY KEY (`postId`, `siteId`),
   KEY `fk_post_postsite_post_id` (`postId`),
   CONSTRAINT `fk_post_postsite_post_id` FOREIGN KEY (`postId`) REFERENCES `Post` (`id`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8;
@@ -11,8 +12,9 @@ CREATE TABLE `PostSite` (
 -- other Grades join table
 CREATE TABLE `PostGrade` (
   `postId` bigint(20) NOT NULL,
-  `gradeId` varchar(255) DEFAULT NULL,
-  `postGradeType` varchar(255) DEFAULT NULL,
+  `gradeId` varchar(255) NOT NULL,
+  `postGradeType` varchar(255) NOT NULL,
+  PRIMARY KEY (`postId`, `gradeId`),
   KEY `fk_post_postgrade_post_id` (`postId`),
   CONSTRAINT `fk_post_postgrade_post_id` FOREIGN KEY (`postId`) REFERENCES `Post` (`id`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8;
@@ -21,8 +23,9 @@ CREATE TABLE `PostGrade` (
 -- post specialties join table - many to many join table
 CREATE TABLE `PostSpecialty` (
   `postId` bigint(20) NOT NULL,
-  `specialtyId` bigint(20) DEFAULT NULL,
-  `postSpecialtyType` varchar(255) DEFAULT NULL,
+  `specialtyId` bigint(20) NOT NULL,
+  `postSpecialtyType` varchar(255) NOT NULL,
+  PRIMARY KEY (`postId`, `specialtyId`),
   KEY `fk_post_postspecialty_post_id` (`postId`),
   CONSTRAINT `fk_post_postspecialty_post_id` FOREIGN KEY (`postId`) REFERENCES `Post` (`id`),
   KEY `fk_post_postspecialty_specialty_id` (`specialtyId`),

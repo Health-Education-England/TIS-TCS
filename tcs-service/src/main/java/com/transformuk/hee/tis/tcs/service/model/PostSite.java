@@ -10,7 +10,7 @@ import java.io.Serializable;
 public class PostSite implements Serializable {
 
   @Id
-  @ManyToOne
+  @ManyToOne(optional = false, targetEntity = Post.class)
   @JoinColumn(name = "postId")
   private Post post;
 

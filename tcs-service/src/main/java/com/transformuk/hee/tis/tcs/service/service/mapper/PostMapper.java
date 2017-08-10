@@ -23,8 +23,7 @@ import java.util.Set;
 public class PostMapper {
 
   public PostDTO postToPostDTO(Post post) {
-    PostDTO result = postToPostDTO(post, true);
-    return result;
+    return postToPostDTO(post, true);
   }
 
   public List<Post> postDTOsToPosts(List<PostDTO> postDTOs) {
