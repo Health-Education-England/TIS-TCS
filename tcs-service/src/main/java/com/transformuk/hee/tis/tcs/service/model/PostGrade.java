@@ -11,7 +11,7 @@ import java.io.Serializable;
 public class PostGrade implements Serializable {
 
   @Id
-  @ManyToOne(optional = false, targetEntity = Post.class)
+  @ManyToOne(optional = false, targetEntity = Post.class, fetch = FetchType.LAZY)
   @JoinColumn(name = "postId")
   private Post post;
 
