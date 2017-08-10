@@ -11,17 +11,28 @@ import java.io.Serializable;
 public class PostGrade implements Serializable {
 
   @Id
+  @GeneratedValue(strategy = GenerationType.IDENTITY)
+  @Column(name = "id")
+  private Long id;
+
   @ManyToOne(optional = false, targetEntity = Post.class, fetch = FetchType.LAZY)
   @JoinColumn(name = "postId")
   private Post post;
 
-  @Id
-  @JoinColumn(name = "gradeId")
+  @Column(name = "gradeId")
   private String gradeId;
 
   @Enumerated(EnumType.STRING)
   @Column(name = "postGradeType")
   private PostGradeType postGradeType;
+
+  public Long getId() {
+    return id;
+  }
+
+  public void setId(Long id) {
+    this.id = id;
+  }
 
   public Post getPost() {
     return post;

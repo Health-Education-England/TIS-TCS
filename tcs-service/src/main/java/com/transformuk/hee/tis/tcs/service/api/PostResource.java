@@ -44,21 +44,9 @@ public class PostResource {
   private static final String ENTITY_NAME = "post";
   private final Logger log = LoggerFactory.getLogger(PostResource.class);
   private final PostService postService;
-  private final SpecialtyRepository specialtyRepository;
-  private final PostRepository postRepository;
-  private final PlacementRepository placementRepository;
-  private final ProgrammeRepository programmeRepository;
-  private final PostMapper postMapper;
 
-  public PostResource(PostService postService, SpecialtyRepository specialtyRepository, PostRepository postRepository,
-                      PlacementRepository placementRepository, ProgrammeRepository programmeRepository,
-                      PostMapper postMapper) {
+  public PostResource(PostService postService) {
     this.postService = postService;
-    this.specialtyRepository = specialtyRepository;
-    this.postRepository = postRepository;
-    this.placementRepository = placementRepository;
-    this.programmeRepository = programmeRepository;
-    this.postMapper = postMapper;
   }
 
   /**
@@ -99,7 +87,7 @@ public class PostResource {
     if (postDTO.getId() == null) {
       return createPost(postDTO);
     }
-    PostDTO result = postService.save(postDTO);
+    PostDTO result = postService.update(postDTO);
     return ResponseEntity.ok()
         .headers(HeaderUtil.createEntityUpdateAlert(ENTITY_NAME, postDTO.getId().toString()))
         .body(result);

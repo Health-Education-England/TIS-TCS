@@ -6,9 +6,18 @@ import java.io.Serializable;
 
 public class PostSiteDTO implements Serializable {
 
+  private Long id;
   private Long postId;
   private String siteId;
   private PostSiteType postSiteType;
+
+  public Long getId() {
+    return id;
+  }
+
+  public void setId(Long id) {
+    this.id = id;
+  }
 
   public Long getPostId() {
     return postId;
@@ -39,16 +48,18 @@ public class PostSiteDTO implements Serializable {
     if (this == o) return true;
     if (o == null || getClass() != o.getClass()) return false;
 
-    PostSiteDTO that = (PostSiteDTO) o;
+    PostSiteDTO siteDTO = (PostSiteDTO) o;
 
-    if (postId != null ? !postId.equals(that.postId) : that.postId != null) return false;
-    if (siteId != null ? !siteId.equals(that.siteId) : that.siteId != null) return false;
-    return postSiteType == that.postSiteType;
+    if (id != null ? !id.equals(siteDTO.id) : siteDTO.id != null) return false;
+    if (postId != null ? !postId.equals(siteDTO.postId) : siteDTO.postId != null) return false;
+    if (siteId != null ? !siteId.equals(siteDTO.siteId) : siteDTO.siteId != null) return false;
+    return postSiteType == siteDTO.postSiteType;
   }
 
   @Override
   public int hashCode() {
-    int result = postId != null ? postId.hashCode() : 0;
+    int result = id != null ? id.hashCode() : 0;
+    result = 31 * result + (postId != null ? postId.hashCode() : 0);
     result = 31 * result + (siteId != null ? siteId.hashCode() : 0);
     result = 31 * result + (postSiteType != null ? postSiteType.hashCode() : 0);
     return result;
@@ -57,7 +68,8 @@ public class PostSiteDTO implements Serializable {
   @Override
   public String toString() {
     return "PostSiteDTO{" +
-        "postId=" + postId +
+        "id=" + id +
+        ", postId=" + postId +
         ", siteId='" + siteId + '\'' +
         ", postSiteType=" + postSiteType +
         '}';

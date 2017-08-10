@@ -6,9 +6,18 @@ import java.io.Serializable;
 
 public class PostSpecialtyDTO implements Serializable {
 
+  private Long id;
   private Long postId;
   private SpecialtyDTO specialty;
   private PostSpecialtyType postSpecialtyType;
+
+  public Long getId() {
+    return id;
+  }
+
+  public void setId(Long id) {
+    this.id = id;
+  }
 
   public Long getPostId() {
     return postId;
@@ -41,6 +50,7 @@ public class PostSpecialtyDTO implements Serializable {
 
     PostSpecialtyDTO that = (PostSpecialtyDTO) o;
 
+    if (id != null ? !id.equals(that.id) : that.id != null) return false;
     if (postId != null ? !postId.equals(that.postId) : that.postId != null) return false;
     if (specialty != null ? !specialty.equals(that.specialty) : that.specialty != null) return false;
     return postSpecialtyType == that.postSpecialtyType;
@@ -48,7 +58,8 @@ public class PostSpecialtyDTO implements Serializable {
 
   @Override
   public int hashCode() {
-    int result = postId != null ? postId.hashCode() : 0;
+    int result = id != null ? id.hashCode() : 0;
+    result = 31 * result + (postId != null ? postId.hashCode() : 0);
     result = 31 * result + (specialty != null ? specialty.hashCode() : 0);
     result = 31 * result + (postSpecialtyType != null ? postSpecialtyType.hashCode() : 0);
     return result;
@@ -57,7 +68,8 @@ public class PostSpecialtyDTO implements Serializable {
   @Override
   public String toString() {
     return "PostSpecialtyDTO{" +
-        "postId=" + postId +
+        "id=" + id +
+        ", postId=" + postId +
         ", specialty=" + specialty +
         ", postSpecialtyType=" + postSpecialtyType +
         '}';

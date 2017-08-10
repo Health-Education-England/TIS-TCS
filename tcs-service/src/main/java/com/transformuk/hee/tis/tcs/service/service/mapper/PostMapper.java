@@ -73,6 +73,7 @@ public class PostMapper {
       Set<PostSiteDTO> sites = Sets.newHashSet();
       for (PostSite postSite : post.getSites()) {
         PostSiteDTO siteDTO = new PostSiteDTO();
+        siteDTO.setId(postSite.getId());
         siteDTO.setPostId(postSite.getPost().getId());
         siteDTO.setSiteId(postSite.getSiteId());
         siteDTO.setPostSiteType(postSite.getPostSiteType());
@@ -85,6 +86,7 @@ public class PostMapper {
       Set<PostGradeDTO> grades = Sets.newHashSet();
       for (PostGrade postGrade : post.getGrades()) {
         PostGradeDTO postGradeDTO = new PostGradeDTO();
+        postGradeDTO.setId(postGrade.getId());
         postGradeDTO.setPostId(postGrade.getPost().getId());
         postGradeDTO.setGradeId(postGrade.getGradeId());
         postGradeDTO.setPostGradeType(postGrade.getPostGradeType());
@@ -97,8 +99,8 @@ public class PostMapper {
       Set<PostSpecialtyDTO> specialties = Sets.newHashSet();
       for (PostSpecialty postSpecialty : post.getSpecialties()) {
         PostSpecialtyDTO postSpecialtyDTO = new PostSpecialtyDTO();
+        postSpecialtyDTO.setId(postSpecialty.getId());
         postSpecialtyDTO.setPostId(postSpecialty.getPost().getId());
-
         postSpecialtyDTO.setSpecialty(specialtyToSpecialtyDTO(postSpecialty.getSpecialty()));
         postSpecialtyDTO.setPostSpecialtyType(postSpecialty.getPostSpecialtyType());
         specialties.add(postSpecialtyDTO);

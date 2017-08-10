@@ -27,6 +27,8 @@ public interface PostService {
    */
   List<PostDTO> save(List<PostDTO> postDTO);
 
+  PostDTO update(PostDTO postDTO);
+
   /**
    * Get all the posts.
    *

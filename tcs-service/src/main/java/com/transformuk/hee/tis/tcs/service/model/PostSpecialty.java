@@ -10,11 +10,14 @@ import java.io.Serializable;
 public class PostSpecialty implements Serializable {
 
   @Id
+  @GeneratedValue(strategy = GenerationType.IDENTITY)
+  @Column(name = "id")
+  private Long id;
+
   @ManyToOne(optional = false, targetEntity = Post.class, fetch = FetchType.LAZY)
   @JoinColumn(name = "postId")
   private Post post;
 
-  @Id
   @ManyToOne
   @JoinColumn(name = "specialtyId")
   private Specialty specialty;
@@ -22,6 +25,14 @@ public class PostSpecialty implements Serializable {
   @Enumerated(EnumType.STRING)
   @Column(name = "postSpecialtyType")
   private PostSpecialtyType postSpecialtyType;
+
+  public Long getId() {
+    return id;
+  }
+
+  public void setId(Long id) {
+    this.id = id;
+  }
 
   public Post getPost() {
     return post;
@@ -54,6 +65,7 @@ public class PostSpecialty implements Serializable {
 
     PostSpecialty that = (PostSpecialty) o;
 
+    if (id != null ? !id.equals(that.id) : that.id != null) return false;
     if (post != null ? !post.equals(that.post) : that.post != null) return false;
     if (specialty != null ? !specialty.equals(that.specialty) : that.specialty != null) return false;
     return postSpecialtyType == that.postSpecialtyType;
@@ -61,9 +73,20 @@ public class PostSpecialty implements Serializable {
 
   @Override
   public int hashCode() {
-    int result = post != null ? post.hashCode() : 0;
+    int result = id != null ? id.hashCode() : 0;
+    result = 31 * result + (post != null ? post.hashCode() : 0);
     result = 31 * result + (specialty != null ? specialty.hashCode() : 0);
     result = 31 * result + (postSpecialtyType != null ? postSpecialtyType.hashCode() : 0);
     return result;
+  }
+
+  @Override
+  public String toString() {
+    return "PostSpecialty{" +
+        "id=" + id +
+        ", post=" + post +
+        ", specialty=" + specialty +
+        ", postSpecialtyType=" + postSpecialtyType +
+        '}';
   }
 }
