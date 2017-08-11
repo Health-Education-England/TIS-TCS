@@ -2,6 +2,8 @@ package com.transformuk.hee.tis.tcs.service.api;
 
 import com.codahale.metrics.annotation.Timed;
 import com.transformuk.hee.tis.tcs.api.dto.SpecialtyGroupDTO;
+import com.transformuk.hee.tis.tcs.api.dto.validation.Create;
+import com.transformuk.hee.tis.tcs.api.dto.validation.Update;
 import com.transformuk.hee.tis.tcs.service.api.util.HeaderUtil;
 import com.transformuk.hee.tis.tcs.service.api.util.PaginationUtil;
 import com.transformuk.hee.tis.tcs.service.service.SpecialtyGroupService;
@@ -17,6 +19,7 @@ import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
+import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
@@ -28,7 +31,6 @@ import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
 import javax.validation.Valid;
-import java.io.IOException;
 import java.net.URI;
 import java.net.URISyntaxException;
 import java.util.List;
@@ -56,16 +58,19 @@ public class SpecialtyGroupResource {
    * POST  /specialty-groups : Create a new specialtyGroup.
    *
    * @param specialtyGroupDTO the specialtyGroupDTO to create
-   * @return the ResponseEntity with status 201 (Created) and with body the new specialtyGroupDTO, or with status 400 (Bad Request) if the specialtyGroup has already an ID
+   * @return the ResponseEntity with status 201 (Created) and with body the new specialtyGroupDTO,
+   * or with status 400 (Bad Request) if the specialtyGroup has already an ID
    * @throws URISyntaxException if the Location URI syntax is incorrect
    */
   @PostMapping("/specialty-groups")
   @Timed
   @PreAuthorize("hasAuthority('specialty:add:modify')")
-  public ResponseEntity<SpecialtyGroupDTO> createSpecialtyGroup(@RequestBody SpecialtyGroupDTO specialtyGroupDTO) throws URISyntaxException {
+  public ResponseEntity<SpecialtyGroupDTO> createSpecialtyGroup(
+      @RequestBody @Validated(Create.class) SpecialtyGroupDTO specialtyGroupDTO) throws URISyntaxException {
     log.debug("REST request to save SpecialtyGroup : {}", specialtyGroupDTO);
     if (specialtyGroupDTO.getId() != null) {
-      return ResponseEntity.badRequest().headers(HeaderUtil.createFailureAlert(ENTITY_NAME, "idexists", "A new specialtyGroup cannot already have an ID")).body(null);
+      return ResponseEntity.badRequest().headers(HeaderUtil.createFailureAlert(ENTITY_NAME, "idexists",
+          "A new specialtyGroup cannot already have an ID")).body(null);
     }
     SpecialtyGroupDTO result = specialtyGroupService.save(specialtyGroupDTO);
     return ResponseEntity.created(new URI("/api/specialty-groups/" + result.getId()))
@@ -85,7 +90,8 @@ public class SpecialtyGroupResource {
   @PutMapping("/specialty-groups")
   @Timed
   @PreAuthorize("hasAuthority('specialty:add:modify')")
-  public ResponseEntity<SpecialtyGroupDTO> updateSpecialtyGroup(@RequestBody SpecialtyGroupDTO specialtyGroupDTO) throws URISyntaxException {
+  public ResponseEntity<SpecialtyGroupDTO> updateSpecialtyGroup(
+      @RequestBody @Validated(Update.class) SpecialtyGroupDTO specialtyGroupDTO) throws URISyntaxException {
     log.debug("REST request to update SpecialtyGroup : {}", specialtyGroupDTO);
     if (specialtyGroupDTO.getId() == null) {
       return createSpecialtyGroup(specialtyGroupDTO);
@@ -109,15 +115,15 @@ public class SpecialtyGroupResource {
   public ResponseEntity<List<SpecialtyGroupDTO>> getAllSpecialtyGroups(
       @ApiParam Pageable pageable,
       @ApiParam(value = "any wildcard string to be searched")
-      @RequestParam(value = "searchQuery", required = false) String searchQuery) throws IOException {
+      @RequestParam(value = "searchQuery", required = false) String searchQuery) {
 
     log.debug("REST request to get all SpecialtyGroups");
-    searchQuery = sanitize(searchQuery);
+    String sanitizedSearchQuery = sanitize(searchQuery);
     Page<SpecialtyGroupDTO> page;
-    if (StringUtils.isEmpty(searchQuery)) {
+    if (StringUtils.isEmpty(sanitizedSearchQuery)) {
       page = specialtyGroupService.findAll(pageable);
     } else {
-      page = specialtyGroupService.advancedSearch(searchQuery, pageable);
+      page = specialtyGroupService.advancedSearch(sanitizedSearchQuery, pageable);
     }
     HttpHeaders headers = PaginationUtil.generatePaginationHttpHeaders(page, "/api/specialty-groups");
     return new ResponseEntity<>(page.getContent(), headers, HttpStatus.OK);
@@ -164,19 +170,19 @@ public class SpecialtyGroupResource {
   @PostMapping("/bulk-specialty-groups")
   @Timed
   @PreAuthorize("hasAuthority('specialty:bulk:add:modify')")
-  public ResponseEntity<List<SpecialtyGroupDTO>> bulkCreateSpecialtyGroups(@Valid @RequestBody List<SpecialtyGroupDTO> specialtyGroupDTOS) throws URISyntaxException {
+  public ResponseEntity<List<SpecialtyGroupDTO>> bulkCreateSpecialtyGroups(@Valid @RequestBody List<SpecialtyGroupDTO> specialtyGroupDTOS) {
     log.debug("REST request to bulk save Specialty Groups : {}", specialtyGroupDTOS);
     if (!Collections.isEmpty(specialtyGroupDTOS)) {
       List<Long> entityIds = specialtyGroupDTOS.stream()
           .filter(sg -> sg.getId() != null)
-          .map(sg -> sg.getId())
+          .map(SpecialtyGroupDTO::getId)
           .collect(Collectors.toList());
       if (!Collections.isEmpty(entityIds)) {
         return ResponseEntity.badRequest().headers(HeaderUtil.createFailureAlert(StringUtils.join(entityIds, ","), "ids.exist", "A new Specialty Group cannot already have an ID")).body(null);
       }
     }
     List<SpecialtyGroupDTO> result = specialtyGroupService.save(specialtyGroupDTOS);
-    List<Long> ids = result.stream().map(r -> r.getId()).collect(Collectors.toList());
+    List<Long> ids = result.stream().map(SpecialtyGroupDTO::getId).collect(Collectors.toList());
     return ResponseEntity.ok()
         .headers(HeaderUtil.createEntityCreationAlert(ENTITY_NAME, StringUtils.join(ids, ",")))
         .body(result);
@@ -194,7 +200,7 @@ public class SpecialtyGroupResource {
   @PutMapping("/bulk-specialty-groups")
   @Timed
   @PreAuthorize("hasAuthority('specialty:bulk:add:modify')")
-  public ResponseEntity<List<SpecialtyGroupDTO>> bulkUpdateSpecialtyGroups(@Valid @RequestBody List<SpecialtyGroupDTO> specialtyGroupDTOS) throws URISyntaxException {
+  public ResponseEntity<List<SpecialtyGroupDTO>> bulkUpdateSpecialtyGroups(@Valid @RequestBody List<SpecialtyGroupDTO> specialtyGroupDTOS) {
     log.debug("REST request to bulk update Specialty Groups : {}", specialtyGroupDTOS);
     if (Collections.isEmpty(specialtyGroupDTOS)) {
       return ResponseEntity.badRequest().headers(HeaderUtil.createFailureAlert(ENTITY_NAME, "request.body.empty",
@@ -208,7 +214,7 @@ public class SpecialtyGroupResource {
     }
 
     List<SpecialtyGroupDTO> results = specialtyGroupService.save(specialtyGroupDTOS);
-    List<Long> ids = results.stream().map(r -> r.getId()).collect(Collectors.toList());
+    List<Long> ids = results.stream().map(SpecialtyGroupDTO::getId).collect(Collectors.toList());
     return ResponseEntity.ok()
         .headers(HeaderUtil.createEntityUpdateAlert(ENTITY_NAME, StringUtils.join(ids, ",")))
         .body(results);
