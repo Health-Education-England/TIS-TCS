@@ -1,16 +1,12 @@
 package com.transformuk.hee.tis.tcs.service.service.impl;
 
-import com.google.common.collect.Sets;
 import com.transformuk.hee.tis.tcs.api.dto.PostDTO;
-import com.transformuk.hee.tis.tcs.api.dto.PostGradeDTO;
 import com.transformuk.hee.tis.tcs.service.model.Post;
-import com.transformuk.hee.tis.tcs.service.model.PostGrade;
 import com.transformuk.hee.tis.tcs.service.repository.PostGradeRepository;
 import com.transformuk.hee.tis.tcs.service.repository.PostRepository;
 import com.transformuk.hee.tis.tcs.service.repository.PostSiteRepository;
 import com.transformuk.hee.tis.tcs.service.repository.PostSpecialtyRepository;
 import com.transformuk.hee.tis.tcs.service.service.PostService;
-import com.transformuk.hee.tis.tcs.service.service.mapper.PostGradeMapper;
 import com.transformuk.hee.tis.tcs.service.service.mapper.PostMapper;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -19,11 +15,7 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
-import java.awt.*;
-import java.util.HashSet;
 import java.util.List;
-import java.util.Set;
-import java.util.stream.Collectors;
 
 /**
  * Service Implementation for managing Post.
@@ -39,17 +31,15 @@ public class PostServiceImpl implements PostService {
   private final PostSiteRepository postSiteRepository;
   private final PostSpecialtyRepository postSpecialtyRepository;
   private final PostMapper postMapper;
-  private final PostGradeMapper postGradeMapper;
 
   public PostServiceImpl(PostRepository postRepository, PostGradeRepository postGradeRepository,
                          PostSiteRepository postSiteRepository, PostSpecialtyRepository postSpecialtyRepository,
-                         PostMapper postMapper, PostGradeMapper postGradeMapper) {
+                         PostMapper postMapper) {
     this.postRepository = postRepository;
     this.postGradeRepository = postGradeRepository;
     this.postSiteRepository = postSiteRepository;
     this.postSpecialtyRepository = postSpecialtyRepository;
     this.postMapper = postMapper;
-    this.postGradeMapper= postGradeMapper;
   }
 
   /**
@@ -70,13 +60,13 @@ public class PostServiceImpl implements PostService {
   /**
    * Save a list of post.
    *
-   * @param postDTO the list of entities to save
+   * @param postDTOs the list of entities to save
    * @return the list of persisted entities
    */
   @Override
-  public List<PostDTO> save(List<PostDTO> postDTO) {
-    log.debug("Request to save Post : {}", postDTO);
-    List<Post> post = postMapper.postDTOsToPosts(postDTO);
+  public List<PostDTO> save(List<PostDTO> postDTOs) {
+    log.debug("Request to save Post : {}", postDTOs);
+    List<Post> post = postMapper.postDTOsToPosts(postDTOs);
     post = postRepository.save(post);
     List<PostDTO> result = postMapper.postsToPostDTOs(post);
     return result;
