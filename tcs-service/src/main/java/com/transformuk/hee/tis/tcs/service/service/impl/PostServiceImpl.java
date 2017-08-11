@@ -2,11 +2,15 @@ package com.transformuk.hee.tis.tcs.service.service.impl;
 
 import com.transformuk.hee.tis.tcs.api.dto.PostDTO;
 import com.transformuk.hee.tis.tcs.service.model.Post;
+import com.transformuk.hee.tis.tcs.service.repository.PostGradeRepository;
 import com.transformuk.hee.tis.tcs.service.repository.PostRepository;
+import com.transformuk.hee.tis.tcs.service.repository.PostSiteRepository;
+import com.transformuk.hee.tis.tcs.service.repository.PostSpecialtyRepository;
 import com.transformuk.hee.tis.tcs.service.service.PostService;
 import com.transformuk.hee.tis.tcs.service.service.mapper.PostMapper;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
@@ -21,16 +25,18 @@ import java.util.List;
 @Transactional
 public class PostServiceImpl implements PostService {
 
-  private final Logger log = LoggerFactory.getLogger(PostServiceImpl.class);
+  private static final Logger log = LoggerFactory.getLogger(PostServiceImpl.class);
 
-  private final PostRepository postRepository;
-
-  private final PostMapper postMapper;
-
-  public PostServiceImpl(PostRepository postRepository, PostMapper postMapper) {
-    this.postRepository = postRepository;
-    this.postMapper = postMapper;
-  }
+  @Autowired
+  private PostRepository postRepository;
+  @Autowired
+  private PostGradeRepository postGradeRepository;
+  @Autowired
+  private PostSiteRepository postSiteRepository;
+  @Autowired
+  private PostSpecialtyRepository postSpecialtyRepository;
+  @Autowired
+  private PostMapper postMapper;
 
   /**
    * Save a post.
@@ -50,16 +56,31 @@ public class PostServiceImpl implements PostService {
   /**
    * Save a list of post.
    *
-   * @param postDTO the list of entities to save
+   * @param postDTOs the list of entities to save
    * @return the list of persisted entities
    */
   @Override
-  public List<PostDTO> save(List<PostDTO> postDTO) {
-    log.debug("Request to save Post : {}", postDTO);
-    List<Post> post = postMapper.postDTOsToPosts(postDTO);
+  public List<PostDTO> save(List<PostDTO> postDTOs) {
+    log.debug("Request to save Post : {}", postDTOs);
+    List<Post> post = postMapper.postDTOsToPosts(postDTOs);
     post = postRepository.save(post);
     List<PostDTO> result = postMapper.postsToPostDTOs(post);
     return result;
+  }
+
+
+  @Override
+  public PostDTO update(PostDTO postDTO) {
+    Post post = postRepository.findOne(postDTO.getId());
+
+    //clear all the relations
+    postGradeRepository.delete(post.getGrades());
+    postSiteRepository.delete(post.getSites());
+    postSpecialtyRepository.delete(post.getSpecialties());
+
+    post = postMapper.postDTOToPost(postDTO);
+    post = postRepository.save(post);
+    return postMapper.postToPostDTO(post);
   }
 
   /**

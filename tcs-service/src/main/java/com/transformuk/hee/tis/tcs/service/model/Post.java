@@ -1,64 +1,87 @@
 package com.transformuk.hee.tis.tcs.service.model;
 
+import com.transformuk.hee.tis.tcs.api.enumeration.PostSuffix;
+import com.transformuk.hee.tis.tcs.api.enumeration.Status;
 
-import javax.persistence.Column;
-import javax.persistence.Entity;
-import javax.persistence.GeneratedValue;
-import javax.persistence.GenerationType;
-import javax.persistence.Id;
+import javax.persistence.*;
 import java.io.Serializable;
+import java.util.HashSet;
 import java.util.Objects;
+import java.util.Set;
 
 /**
  * A Post.
  */
 @Entity
+@Table(name = "Post")
 public class Post implements Serializable {
 
   private static final long serialVersionUID = 1L;
 
   @Id
   @GeneratedValue(strategy = GenerationType.IDENTITY)
+  @Column(name = "id")
   private Long id;
 
   @Column(name = "nationalPostNumber")
   private String nationalPostNumber;
 
+  @Enumerated(EnumType.STRING)
   @Column(name = "status")
-  private String status;
+  private Status status;
 
-  @Column(name = "postOwner")
-  private String postOwner;
+  @Enumerated(EnumType.STRING)
+  @Column(name = "suffix")
+  private PostSuffix suffix;
 
-  @Column(name = "mainSiteLocated")
-  private String mainSiteLocated;
+  @Column(name = "managingLocalOffice")
+  private String managingLocalOffice;
 
-  @Column(name = "leadSite")
-  private String leadSite;
+  @Column(name = "postFamily")
+  private String postFamily;
 
-  @Column(name = "employingBody")
-  private String employingBody;
+  // Entity Trust defined in the Reference service
+  @Column(name = "employingBodyId")
+  private String employingBodyId;
 
-  @Column(name = "trainingBody")
-  private String trainingBody;
+  // Entity Trust defined in the Reference service
+  @Column(name = "trainingBodyId")
+  private String trainingBodyId;
 
-  @Column(name = "approvedGrade")
-  private String approvedGrade;
+  @Column(name = "trainingDescription")
+  private String trainingDescription;
 
-  @Column(name = "postSpecialty")
-  private String postSpecialty;
+  @Column(name = "localPostNumber")
+  private String localPostNumber;
 
-  @Column(name = "fullTimeEquivelent")
-  private Float fullTimeEquivelent;
+  @OneToOne
+  @JoinColumn(name = "oldPostId")
+  private Post oldPost;
 
-  @Column(name = "leadProvider")
-  private String leadProvider;
+  @OneToOne
+  @JoinColumn(name = "newPostId")
+  private Post newPost;
 
-  @Column(name = "oldPostId")
-  private String oldPostId;
+  @OneToOne
+  @JoinColumn(name = "programmeId")
+  private Programme programmes;
 
-  @Column(name = "newPostId")
-  private String newPostId;
+  // Entity Site defined in the Reference service
+  @OneToMany(mappedBy = "post", cascade = CascadeType.ALL, fetch = FetchType.LAZY)
+  private Set<PostSite> sites = new HashSet<>();
+
+  @OneToMany(mappedBy = "post", cascade = CascadeType.ALL, fetch = FetchType.LAZY)
+  private Set<PostGrade> grades = new HashSet<>();
+
+  @OneToMany(mappedBy = "post", cascade = CascadeType.ALL, fetch = FetchType.LAZY)
+  private Set<PostSpecialty> specialties = new HashSet<>();
+
+  @OneToMany(fetch = FetchType.EAGER)
+  @JoinTable(name = "PostPlacementHistory",
+      joinColumns = @JoinColumn(name = "postId", referencedColumnName = "id"),
+      inverseJoinColumns = @JoinColumn(name = "placementId", referencedColumnName = "id"))
+  private Set<Placement> placementHistory = new HashSet<>();
+
 
   public Long getId() {
     return id;
@@ -81,150 +104,200 @@ public class Post implements Serializable {
     return this;
   }
 
-  public String getStatus() {
+  public Status getStatus() {
     return status;
   }
 
-  public void setStatus(String status) {
+  public void setStatus(Status status) {
     this.status = status;
   }
 
-  public Post status(String status) {
+  public Post status(Status status) {
     this.status = status;
     return this;
   }
 
-  public String getPostOwner() {
-    return postOwner;
+  public PostSuffix getSuffix() {
+    return suffix;
   }
 
-  public void setPostOwner(String postOwner) {
-    this.postOwner = postOwner;
+  public void setSuffix(PostSuffix suffix) {
+    this.suffix = suffix;
   }
 
-  public Post postOwner(String postOwner) {
-    this.postOwner = postOwner;
+  public Post suffix(PostSuffix suffix) {
+    this.suffix = suffix;
     return this;
   }
 
-  public String getMainSiteLocated() {
-    return mainSiteLocated;
+  public String getManagingLocalOffice() {
+    return managingLocalOffice;
   }
 
-  public void setMainSiteLocated(String mainSiteLocated) {
-    this.mainSiteLocated = mainSiteLocated;
+  public void setManagingLocalOffice(String managingLocalOffice) {
+    this.managingLocalOffice = managingLocalOffice;
   }
 
-  public Post mainSiteLocated(String mainSiteLocated) {
-    this.mainSiteLocated = mainSiteLocated;
+  public Post managingLocalOffice(String managingLocalOffice) {
+    this.managingLocalOffice = managingLocalOffice;
     return this;
   }
 
-  public String getLeadSite() {
-    return leadSite;
+  public String getPostFamily() {
+    return postFamily;
   }
 
-  public void setLeadSite(String leadSite) {
-    this.leadSite = leadSite;
+  public void setPostFamily(String postFamily) {
+    this.postFamily = postFamily;
   }
 
-  public Post leadSite(String leadSite) {
-    this.leadSite = leadSite;
+  public Post postFamily(String postFamily) {
+    this.postFamily = postFamily;
     return this;
   }
 
-  public String getEmployingBody() {
-    return employingBody;
+  public Post getOldPost() {
+    return oldPost;
   }
 
-  public void setEmployingBody(String employingBody) {
-    this.employingBody = employingBody;
+  public void setOldPost(Post oldPost) {
+    this.oldPost = oldPost;
   }
 
-  public Post employingBody(String employingBody) {
-    this.employingBody = employingBody;
+  public Post oldPost(Post oldPost) {
+    this.oldPost = oldPost;
     return this;
   }
 
-  public String getTrainingBody() {
-    return trainingBody;
+  public Post getNewPost() {
+    return newPost;
   }
 
-  public void setTrainingBody(String trainingBody) {
-    this.trainingBody = trainingBody;
+  public void setNewPost(Post newPost) {
+    this.newPost = newPost;
   }
 
-  public Post trainingBody(String trainingBody) {
-    this.trainingBody = trainingBody;
+  public Post newPost(Post newPost) {
+    this.newPost = newPost;
     return this;
   }
 
-  public String getApprovedGrade() {
-    return approvedGrade;
+  public String getEmployingBodyId() {
+    return employingBodyId;
   }
 
-  public void setApprovedGrade(String approvedGrade) {
-    this.approvedGrade = approvedGrade;
+  public void setEmployingBodyId(String employingBodyId) {
+    this.employingBodyId = employingBodyId;
   }
 
-  public Post approvedGrade(String approvedGrade) {
-    this.approvedGrade = approvedGrade;
+  public Post employingBodyId(String employingBodyId) {
+    this.employingBodyId = employingBodyId;
     return this;
   }
 
-  public String getPostSpecialty() {
-    return postSpecialty;
+  public String getTrainingBodyId() {
+    return trainingBodyId;
   }
 
-  public void setPostSpecialty(String postSpecialty) {
-    this.postSpecialty = postSpecialty;
+  public void setTrainingBodyId(String trainingBodyId) {
+    this.trainingBodyId = trainingBodyId;
   }
 
-  public Post postSpecialty(String postSpecialty) {
-    this.postSpecialty = postSpecialty;
+  public Post trainingBodyId(String trainingBodyId) {
+    this.trainingBodyId = trainingBodyId;
     return this;
   }
 
-  public Float getFullTimeEquivelent() {
-    return fullTimeEquivelent;
+
+  public String getTrainingDescription() {
+    return trainingDescription;
   }
 
-  public void setFullTimeEquivelent(Float fullTimeEquivelent) {
-    this.fullTimeEquivelent = fullTimeEquivelent;
+  public void setTrainingDescription(String trainingDescription) {
+    this.trainingDescription = trainingDescription;
   }
 
-  public Post fullTimeEquivelent(Float fullTimeEquivelent) {
-    this.fullTimeEquivelent = fullTimeEquivelent;
+  public Post trainingDescription(String trainingDescription) {
+    this.trainingDescription = trainingDescription;
     return this;
   }
 
-  public String getLeadProvider() {
-    return leadProvider;
+  public String getLocalPostNumber() {
+    return localPostNumber;
   }
 
-  public void setLeadProvider(String leadProvider) {
-    this.leadProvider = leadProvider;
+  public void setLocalPostNumber(String localPostNumber) {
+    this.localPostNumber = localPostNumber;
   }
 
-  public Post leadProvider(String leadProvider) {
-    this.leadProvider = leadProvider;
+  public Post localPostNumber(String localPostNumber) {
+    this.localPostNumber = localPostNumber;
     return this;
   }
 
-  public String getOldPostId() {
-    return oldPostId;
+  public Set<Placement> getPlacementHistory() {
+    return placementHistory;
   }
 
-  public void setOldPostId(String oldPostId) {
-    this.oldPostId = oldPostId;
+  public void setPlacementHistory(Set<Placement> placementHistory) {
+    this.placementHistory = placementHistory;
   }
 
-  public String getNewPostId() {
-    return newPostId;
+  public Post placementHistory(Set<Placement> placementHistory) {
+    this.placementHistory = placementHistory;
+    return this;
   }
 
-  public void setNewPostId(String newPostId) {
-    this.newPostId = newPostId;
+  public Programme getProgrammes() {
+    return programmes;
+  }
+
+  public void setProgrammes(Programme programmes) {
+    this.programmes = programmes;
+  }
+
+  public Post programmes(Programme programmes) {
+    this.programmes = programmes;
+    return this;
+  }
+
+  public Set<PostSite> getSites() {
+    return sites;
+  }
+
+  public void setSites(Set<PostSite> sites) {
+    this.sites = sites;
+  }
+
+  public Post sites(Set<PostSite> sites) {
+    this.sites = sites;
+    return this;
+  }
+
+  public Set<PostGrade> getGrades() {
+    return grades;
+  }
+
+  public void setGrades(Set<PostGrade> grades) {
+    this.grades = grades;
+  }
+
+  public Post grades(Set<PostGrade> grades) {
+    this.grades = grades;
+    return this;
+  }
+
+  public Set<PostSpecialty> getSpecialties() {
+    return specialties;
+  }
+
+  public void setSpecialties(Set<PostSpecialty> specialties) {
+    this.specialties = specialties;
+  }
+
+  public Post specialties(Set<PostSpecialty> specialties) {
+    this.specialties = specialties;
+    return this;
   }
 
   @Override
@@ -251,17 +324,19 @@ public class Post implements Serializable {
   public String toString() {
     return "Post{" +
         "id=" + id +
-        ", nationalPostNumber='" + nationalPostNumber + "'" +
-        ", status='" + status + "'" +
-        ", postOwner='" + postOwner + "'" +
-        ", mainSiteLocated='" + mainSiteLocated + "'" +
-        ", leadSite='" + leadSite + "'" +
-        ", employingBody='" + employingBody + "'" +
-        ", trainingBody='" + trainingBody + "'" +
-        ", approvedGrade='" + approvedGrade + "'" +
-        ", postSpecialty='" + postSpecialty + "'" +
-        ", fullTimeEquivelent='" + fullTimeEquivelent + "'" +
-        ", leadProvider='" + leadProvider + "'" +
+        ", nationalPostNumber='" + nationalPostNumber + '\'' +
+        ", status=" + status +
+        ", suffix=" + suffix +
+        ", managingLocalOffice='" + managingLocalOffice + '\'' +
+        ", postFamily='" + postFamily + '\'' +
+        ", oldPost=" + oldPost +
+        ", newPost=" + newPost +
+        ", employingBodyId='" + employingBodyId + '\'' +
+        ", trainingBodyId='" + trainingBodyId + '\'' +
+        ", trainingDescription='" + trainingDescription + '\'' +
+        ", localPostNumber='" + localPostNumber + '\'' +
+        ", placementHistory=" + placementHistory +
+        ", programmes=" + programmes +
         '}';
   }
 }
