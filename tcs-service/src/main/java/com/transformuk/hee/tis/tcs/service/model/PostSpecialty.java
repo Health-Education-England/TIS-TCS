@@ -14,7 +14,7 @@ public class PostSpecialty implements Serializable {
   @Column(name = "id")
   private Long id;
 
-  @ManyToOne(optional = false, targetEntity = Post.class, fetch = FetchType.LAZY)
+  @ManyToOne(targetEntity = Post.class, fetch = FetchType.LAZY)
   @JoinColumn(name = "postId")
   private Post post;
 

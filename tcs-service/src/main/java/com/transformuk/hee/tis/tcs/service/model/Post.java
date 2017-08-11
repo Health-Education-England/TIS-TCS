@@ -40,18 +40,6 @@ public class Post implements Serializable {
   @Column(name = "postFamily")
   private String postFamily;
 
-  @OneToOne
-  @JoinColumn(name = "oldPostId")
-  private Post oldPost;
-
-  @OneToOne
-  @JoinColumn(name = "newPostId")
-  private Post newPost;
-
-  // Entity Site defined in the Reference service
-  @OneToMany(mappedBy = "post", cascade = CascadeType.ALL, fetch = FetchType.LAZY)
-  private Set<PostSite> sites = new HashSet<>();
-
   // Entity Trust defined in the Reference service
   @Column(name = "employingBodyId")
   private String employingBodyId;
@@ -60,27 +48,39 @@ public class Post implements Serializable {
   @Column(name = "trainingBodyId")
   private String trainingBodyId;
 
-  @OneToMany(mappedBy = "post", cascade = CascadeType.ALL, fetch = FetchType.LAZY)
-  private Set<PostGrade> grades = new HashSet<>();
-
-  @OneToMany(mappedBy = "post", cascade = CascadeType.ALL, fetch = FetchType.LAZY)
-  private Set<PostSpecialty> specialties = new HashSet<>();
-
   @Column(name = "trainingDescription")
   private String trainingDescription;
 
   @Column(name = "localPostNumber")
   private String localPostNumber;
 
+  @OneToOne
+  @JoinColumn(name = "oldPostId")
+  private Post oldPost;
+
+  @OneToOne
+  @JoinColumn(name = "newPostId")
+  private Post newPost;
+
+  @OneToOne
+  @JoinColumn(name = "programmeId")
+  private Programme programmes;
+
+  // Entity Site defined in the Reference service
+  @OneToMany(mappedBy = "post", cascade = CascadeType.ALL, fetch = FetchType.LAZY)
+  private Set<PostSite> sites = new HashSet<>();
+
+  @OneToMany(mappedBy = "post", cascade = CascadeType.ALL, fetch = FetchType.LAZY)
+  private Set<PostGrade> grades = new HashSet<>();
+
+  @OneToMany(mappedBy = "post", cascade = CascadeType.ALL, fetch = FetchType.LAZY)
+  private Set<PostSpecialty> specialties = new HashSet<>();
+
   @OneToMany(fetch = FetchType.EAGER)
   @JoinTable(name = "PostPlacementHistory",
       joinColumns = @JoinColumn(name = "postId", referencedColumnName = "id"),
       inverseJoinColumns = @JoinColumn(name = "placementId", referencedColumnName = "id"))
   private Set<Placement> placementHistory = new HashSet<>();
-
-  @OneToOne
-  @JoinColumn(name = "programmeId")
-  private Programme programmes;
 
 
   public Long getId() {
