@@ -1,5 +1,6 @@
 package com.transformuk.hee.tis.tcs.service.api;
 
+import com.google.common.collect.Lists;
 import com.google.common.collect.Sets;
 import com.transformuk.hee.tis.tcs.api.dto.PostDTO;
 import com.transformuk.hee.tis.tcs.api.enumeration.*;
@@ -391,4 +392,90 @@ public class PostResourceIntTest {
   public void equalsVerifier() throws Exception {
     TestUtil.equalsVerifier(Post.class);
   }
+
+
+  @Test
+  @Transactional
+  public void bulkCreateShouldSucceedWhenDataIsValid() throws Exception {
+    PostDTO postDTO = new PostDTO()
+        .nationalPostNumber(UPDATED_NATIONAL_POST_NUMBER)
+        .status(UPDATED_STATUS)
+        .suffix(UPDATED_SUFFIX)
+        .managingLocalOffice(UPDATED_MANAGING_OFFICE)
+        .postFamily(UPDATED_POST_FAMILY)
+        .employingBodyId(UPDATED_EMPLOYING_BODY)
+        .trainingBodyId(UPDATED_TRAINING_BODY)
+        .trainingDescription(UPDATED_TRAINING_DESCRIPTION)
+        .localPostNumber(UPDATED_LOCAL_POST_NUMBER);
+
+    PostDTO anotherPostDTO = new PostDTO()
+        .nationalPostNumber(UPDATED_NATIONAL_POST_NUMBER)
+        .status(UPDATED_STATUS)
+        .suffix(UPDATED_SUFFIX)
+        .managingLocalOffice(UPDATED_MANAGING_OFFICE)
+        .postFamily(UPDATED_POST_FAMILY)
+        .employingBodyId(UPDATED_EMPLOYING_BODY)
+        .trainingBodyId(UPDATED_TRAINING_BODY)
+        .trainingDescription(UPDATED_TRAINING_DESCRIPTION)
+        .localPostNumber(UPDATED_LOCAL_POST_NUMBER);
+
+    int databaseSizeBeforeBulkCreate = postRepository.findAll().size();
+    int expectedDatabaseSizeAfterBulkCreate = databaseSizeBeforeBulkCreate + 2;
+
+    List<PostDTO> payload = Lists.newArrayList(postDTO, anotherPostDTO);
+    restPostMockMvc.perform(post("/api/bulk-posts")
+        .contentType(TestUtil.APPLICATION_JSON_UTF8)
+        .content(TestUtil.convertObjectToJsonBytes(payload)))
+        .andExpect(status().isOk());
+
+    // Validate that both Post are in the database
+    List<Post> postList = postRepository.findAll();
+    assertThat(postList).hasSize(expectedDatabaseSizeAfterBulkCreate);
+  }
+
+
+  @Test
+  @Transactional
+  public void bulkUpdateShouldSucceedWhenDataIsValid() throws Exception {
+    PostDTO postDTO = new PostDTO()
+        .id(post.getId())
+        .nationalPostNumber(UPDATED_NATIONAL_POST_NUMBER)
+        .status(UPDATED_STATUS)
+        .suffix(UPDATED_SUFFIX)
+        .managingLocalOffice(UPDATED_MANAGING_OFFICE)
+        .postFamily(UPDATED_POST_FAMILY)
+        .employingBodyId(UPDATED_EMPLOYING_BODY)
+        .trainingBodyId(UPDATED_TRAINING_BODY)
+        .trainingDescription(UPDATED_TRAINING_DESCRIPTION)
+        .localPostNumber(UPDATED_LOCAL_POST_NUMBER);
+
+    Post anotherPost = createEntity();
+    em.persist(anotherPost);
+
+    PostDTO anotherPostDTO = new PostDTO()
+        .id(anotherPost.getId())
+        .nationalPostNumber(UPDATED_NATIONAL_POST_NUMBER)
+        .status(UPDATED_STATUS)
+        .suffix(UPDATED_SUFFIX)
+        .managingLocalOffice(UPDATED_MANAGING_OFFICE)
+        .postFamily(UPDATED_POST_FAMILY)
+        .employingBodyId(UPDATED_EMPLOYING_BODY)
+        .trainingBodyId(UPDATED_TRAINING_BODY)
+        .trainingDescription(UPDATED_TRAINING_DESCRIPTION)
+        .localPostNumber(UPDATED_LOCAL_POST_NUMBER);
+
+    int expectedDatabaseSizeAfterBulkUpdate = postRepository.findAll().size();
+
+    List<PostDTO> payload = Lists.newArrayList(postDTO, anotherPostDTO);
+    restPostMockMvc.perform(put("/api/bulk-posts")
+        .contentType(TestUtil.APPLICATION_JSON_UTF8)
+        .content(TestUtil.convertObjectToJsonBytes(payload)))
+        .andExpect(status().isOk());
+
+    // Validate that both Post are still in the database
+    List<Post> postList = postRepository.findAll();
+    assertThat(postList).hasSize(expectedDatabaseSizeAfterBulkUpdate);
+  }
+
+
 }

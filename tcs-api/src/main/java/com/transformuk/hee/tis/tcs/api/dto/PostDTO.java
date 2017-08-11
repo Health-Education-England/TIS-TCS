@@ -56,12 +56,22 @@ public class PostDTO implements Serializable {
     this.id = id;
   }
 
+  public PostDTO id(Long id) {
+    this.id = id;
+    return this;
+  }
+
   public String getNationalPostNumber() {
     return nationalPostNumber;
   }
 
   public void setNationalPostNumber(String nationalPostNumber) {
     this.nationalPostNumber = nationalPostNumber;
+  }
+
+  public PostDTO nationalPostNumber(String nationalPostNumber) {
+    this.nationalPostNumber = nationalPostNumber;
+    return this;
   }
 
   public Status getStatus() {
@@ -72,12 +82,22 @@ public class PostDTO implements Serializable {
     this.status = status;
   }
 
+  public PostDTO status(Status status) {
+    this.status = status;
+    return this;
+  }
+
   public PostSuffix getSuffix() {
     return suffix;
   }
 
   public void setSuffix(PostSuffix suffix) {
     this.suffix = suffix;
+  }
+
+  public PostDTO suffix(PostSuffix suffix) {
+    this.suffix = suffix;
+    return this;
   }
 
   public String getManagingLocalOffice() {
@@ -88,12 +108,22 @@ public class PostDTO implements Serializable {
     this.managingLocalOffice = managingLocalOffice;
   }
 
+  public PostDTO managingLocalOffice(String managingLocalOffice) {
+    this.managingLocalOffice = managingLocalOffice;
+    return this;
+  }
+
   public String getPostFamily() {
     return postFamily;
   }
 
   public void setPostFamily(String postFamily) {
     this.postFamily = postFamily;
+  }
+
+  public PostDTO postFamily(String postFamily) {
+    this.postFamily = postFamily;
+    return this;
   }
 
   public PostDTO getOldPost() {
@@ -104,12 +134,22 @@ public class PostDTO implements Serializable {
     this.oldPost = oldPost;
   }
 
+  public PostDTO oldPost(PostDTO oldPost) {
+    this.oldPost = oldPost;
+    return this;
+  }
+
   public PostDTO getNewPost() {
     return newPost;
   }
 
   public void setNewPost(PostDTO newPost) {
     this.newPost = newPost;
+  }
+
+  public PostDTO newPost(PostDTO newPost) {
+    this.newPost = newPost;
+    return this;
   }
 
   public String getEmployingBodyId() {
@@ -120,12 +160,22 @@ public class PostDTO implements Serializable {
     this.employingBodyId = employingBodyId;
   }
 
+  public PostDTO employingBodyId(String employingBodyId) {
+    this.employingBodyId = employingBodyId;
+    return this;
+  }
+
   public String getTrainingBodyId() {
     return trainingBodyId;
   }
 
   public void setTrainingBodyId(String trainingBodyId) {
     this.trainingBodyId = trainingBodyId;
+  }
+
+  public PostDTO trainingBodyId(String trainingBodyId) {
+    this.trainingBodyId = trainingBodyId;
+    return this;
   }
 
   public String getTrainingDescription() {
@@ -136,12 +186,22 @@ public class PostDTO implements Serializable {
     this.trainingDescription = trainingDescription;
   }
 
+  public PostDTO trainingDescription(String trainingDescription) {
+    this.trainingDescription = trainingDescription;
+    return this;
+  }
+
   public String getLocalPostNumber() {
     return localPostNumber;
   }
 
   public void setLocalPostNumber(String localPostNumber) {
     this.localPostNumber = localPostNumber;
+  }
+
+  public PostDTO localPostNumber(String localPostNumber) {
+    this.localPostNumber = localPostNumber;
+    return this;
   }
 
   public Set<PlacementDTO> getPlacementHistory() {
@@ -152,12 +212,22 @@ public class PostDTO implements Serializable {
     this.placementHistory = placementHistory;
   }
 
+  public PostDTO placementHistory(Set<PlacementDTO> placementHistory) {
+    this.placementHistory = placementHistory;
+    return this;
+  }
+
   public ProgrammeDTO getProgrammes() {
     return programmes;
   }
 
   public void setProgrammes(ProgrammeDTO programmes) {
     this.programmes = programmes;
+  }
+
+  public PostDTO programmes(ProgrammeDTO programmes) {
+    this.programmes = programmes;
+    return this;
   }
 
   public Set<PostSiteDTO> getSites() {
@@ -168,6 +238,11 @@ public class PostDTO implements Serializable {
     this.sites = sites;
   }
 
+  public PostDTO sites(Set<PostSiteDTO> sites) {
+    this.sites = sites;
+    return this;
+  }
+
   public Set<PostGradeDTO> getGrades() {
     return grades;
   }
@@ -176,12 +251,22 @@ public class PostDTO implements Serializable {
     this.grades = grades;
   }
 
+  public PostDTO grades(Set<PostGradeDTO> grades) {
+    this.grades = grades;
+    return this;
+  }
+
   public Set<PostSpecialtyDTO> getSpecialties() {
     return specialties;
   }
 
   public void setSpecialties(Set<PostSpecialtyDTO> specialties) {
     this.specialties = specialties;
+  }
+
+  public PostDTO specialties(Set<PostSpecialtyDTO> specialties) {
+    this.specialties = specialties;
+    return this;
   }
 
   @Override
