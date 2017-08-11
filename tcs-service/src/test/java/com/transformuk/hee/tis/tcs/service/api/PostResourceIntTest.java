@@ -56,32 +56,11 @@ public class PostResourceIntTest {
   private static final Status DEFAULT_STATUS = Status.CURRENT;
   private static final Status UPDATED_STATUS = Status.INACTIVE;
 
-  private static final String DEFAULT_POST_OWNER = "AAAAAAAAAA";
-  private static final String UPDATED_POST_OWNER = "BBBBBBBBBB";
-
-  private static final String DEFAULT_MAIN_SITE_LOCATED = "AAAAAAAAAA";
-  private static final String UPDATED_MAIN_SITE_LOCATED = "BBBBBBBBBB";
-
-  private static final String DEFAULT_LEAD_SITE = "AAAAAAAAAA";
-  private static final String UPDATED_LEAD_SITE = "BBBBBBBBBB";
-
   private static final String DEFAULT_EMPLOYING_BODY = "AAAAAAAAAA";
   private static final String UPDATED_EMPLOYING_BODY = "BBBBBBBBBB";
 
   private static final String DEFAULT_TRAINING_BODY_ID = "training body id";
   private static final String UPDATED_TRAINING_BODY = "BBBBBBBBBB";
-
-  private static final String DEFAULT_APPROVED_GRADE = "AAAAAAAAAA";
-  private static final String UPDATED_APPROVED_GRADE = "BBBBBBBBBB";
-
-  private static final String DEFAULT_POST_SPECIALTY = "AAAAAAAAAA";
-  private static final String UPDATED_POST_SPECIALTY = "BBBBBBBBBB";
-
-  private static final Float DEFAULT_FULL_TIME_EQUIVELENT = 1F;
-  private static final Float UPDATED_FULL_TIME_EQUIVELENT = 2F;
-
-  private static final String DEFAULT_LEAD_PROVIDER = "AAAAAAAAAA";
-  private static final String UPDATED_LEAD_PROVIDER = "BBBBBBBBBB";
 
   private static final Long SPECIALTY_ID = 12345L;
   private static final String SPECIALTY_COLLEGE = "Specialty College";
@@ -89,12 +68,20 @@ public class PostResourceIntTest {
   private static final String INTREPID_ID = "Intrepid ID";
 
   private static final PostSuffix DEFAULT_SUFFIX = PostSuffix.ACADEMIC;
+  private static final PostSuffix UPDATED_SUFFIX = PostSuffix.MILITARY;
 
   private static final String DEFAULT_MANAGING_OFFICE = "managing office";
+  private static final String UPDATED_MANAGING_OFFICE = "updated managing office";
 
   private static final String DEFAULT_POST_FAMILY = "post family";
+  private static final String UPDATED_POST_FAMILY = "Updated post family";
+
   private static final String DEFAULT_TRAINING_DESCRIPTION = "training description";
+  private static final String UPDATED_TRAINING_DESCRIPTION = "Updated training description";
+
   private static final String DEFAULT_LOCAL_POST_NUMBER = "local post number";
+  private static final String UPDATED_LOCAL_POST_NUMBER = "Updated local post number";
+
   private static final String GRADE_ID = "Grade id";
   private static final String SITE_ID = "site id";
 
@@ -321,74 +308,72 @@ public class PostResourceIntTest {
         .andExpect(status().isNotFound());
   }
 
-//  @Test
-//  @Transactional
-//  public void updatePost() throws Exception {
-//    // Initialize the database
-//    postRepository.saveAndFlush(post);
-//    int databaseSizeBeforeUpdate = postRepository.findAll().size();
-//
-//    // Update the post
-//    Post updatedPost = postRepository.findOne(post.getId());
-//    updatedPost
-//        .nationalPostNumber(UPDATED_NATIONAL_POST_NUMBER)
-//        .status(UPDATED_STATUS)
-//        .mainSiteLocated(UPDATED_MAIN_SITE_LOCATED)
-//        .leadSite(UPDATED_LEAD_SITE)
-//        .employingBody(UPDATED_EMPLOYING_BODY)
-//        .trainingBody(UPDATED_TRAINING_BODY)
-//        .approvedGrade(UPDATED_APPROVED_GRADE)
-//        .postSpecialty(UPDATED_POST_SPECIALTY)
-//        .fullTimeEquivelent(UPDATED_FULL_TIME_EQUIVELENT)
-//        .leadProvider(UPDATED_LEAD_PROVIDER);
-//    PostDTO postDTO = postMapper.postToPostDTO(updatedPost);
-//
-//    restPostMockMvc.perform(put("/api/posts")
-//        .contentType(TestUtil.APPLICATION_JSON_UTF8)
-//        .content(TestUtil.convertObjectToJsonBytes(postDTO)))
-//        .andExpect(status().isOk());
-//
-//    // Validate the Post in the database
-//    List<Post> postList = postRepository.findAll();
-//    assertThat(postList).hasSize(databaseSizeBeforeUpdate);
-//    Post testPost = postList.get(postList.size() - 1);
-//    assertThat(testPost.getNationalPostNumber()).isEqualTo(UPDATED_NATIONAL_POST_NUMBER);
-//    assertThat(testPost.getStatus()).isEqualTo(UPDATED_STATUS);
-//    assertThat(testPost.getPostOwner()).isEqualTo(UPDATED_POST_OWNER);
-//    assertThat(testPost.getMainSiteLocated()).isEqualTo(UPDATED_MAIN_SITE_LOCATED);
-//    assertThat(testPost.getLeadSite()).isEqualTo(UPDATED_LEAD_SITE);
-//    assertThat(testPost.getEmployingBody()).isEqualTo(UPDATED_EMPLOYING_BODY);
-//    assertThat(testPost.getTrainingBody()).isEqualTo(UPDATED_TRAINING_BODY);
-//    assertThat(testPost.getApprovedGrade()).isEqualTo(UPDATED_APPROVED_GRADE);
-//    assertThat(testPost.getPostSpecialty()).isEqualTo(UPDATED_POST_SPECIALTY);
-//    assertThat(testPost.getFullTimeEquivelent()).isEqualTo(UPDATED_FULL_TIME_EQUIVELENT);
-//    assertThat(testPost.getLeadProvider()).isEqualTo(UPDATED_LEAD_PROVIDER);
-//  }
-
   @Test
   @Transactional
-  public void updateNonExistingPost() throws Exception {
+  public void updatePost() throws Exception {
+    // Initialize the database
+    postRepository.saveAndFlush(post);
     int databaseSizeBeforeUpdate = postRepository.findAll().size();
 
-    // Create the Post
-    PostDTO postDTO = postMapper.postToPostDTO(post);
+    // Update the post
+    Post updatedPost = postRepository.findOne(post.getId());
+    updatedPost
+        .nationalPostNumber(UPDATED_NATIONAL_POST_NUMBER)
+        .status(UPDATED_STATUS)
+        .suffix(UPDATED_SUFFIX)
+        .managingLocalOffice(UPDATED_MANAGING_OFFICE)
+        .postFamily(UPDATED_POST_FAMILY)
+        .employingBodyId(UPDATED_EMPLOYING_BODY)
+        .trainingBodyId(UPDATED_TRAINING_BODY)
+        .trainingDescription(UPDATED_TRAINING_DESCRIPTION)
+        .localPostNumber(UPDATED_LOCAL_POST_NUMBER);
+    PostDTO postDTO = postMapper.postToPostDTO(updatedPost);
 
-    // If the entity doesn't have an ID, it will be created instead of just being updated
     restPostMockMvc.perform(put("/api/posts")
         .contentType(TestUtil.APPLICATION_JSON_UTF8)
         .content(TestUtil.convertObjectToJsonBytes(postDTO)))
-        .andExpect(status().isCreated());
+        .andExpect(status().isOk());
 
     // Validate the Post in the database
     List<Post> postList = postRepository.findAll();
-    assertThat(postList).hasSize(databaseSizeBeforeUpdate + 1);
+    assertThat(postList).hasSize(databaseSizeBeforeUpdate);
+    Post testPost = postList.get(postList.size() - 1);
+    assertThat(testPost.getNationalPostNumber()).isEqualTo(UPDATED_NATIONAL_POST_NUMBER);
+    assertThat(testPost.getStatus()).isEqualTo(UPDATED_STATUS);
+    assertThat(testPost.getSuffix()).isEqualTo(UPDATED_SUFFIX);
+    assertThat(testPost.getManagingLocalOffice()).isEqualTo(UPDATED_MANAGING_OFFICE);
+    assertThat(testPost.getPostFamily()).isEqualTo(UPDATED_POST_FAMILY);
+    assertThat(testPost.getEmployingBodyId()).isEqualTo(UPDATED_EMPLOYING_BODY);
+    assertThat(testPost.getTrainingBodyId()).isEqualTo(UPDATED_TRAINING_BODY);
+    assertThat(testPost.getTrainingDescription()).isEqualTo(UPDATED_TRAINING_DESCRIPTION);
+    assertThat(testPost.getLocalPostNumber()).isEqualTo(UPDATED_LOCAL_POST_NUMBER);
   }
+
+  //This test will need to be updated once validation comes in.
+  //This should be update fails when post does not exist
+//  @Test
+//  @Transactional
+//  public void updateNonExistingPost() throws Exception {
+//    int databaseSizeBeforeUpdate = postRepository.findAll().size();
+//
+//    // Create the Post
+//    PostDTO postDTO = postMapper.postToPostDTO(post);
+//
+//    // If the entity doesn't have an ID, it will be created instead of just being updated
+//    restPostMockMvc.perform(put("/api/posts")
+//        .contentType(TestUtil.APPLICATION_JSON_UTF8)
+//        .content(TestUtil.convertObjectToJsonBytes(postDTO)))
+//        .andExpect(status().isCreated());
+//
+//    // Validate the Post in the database
+//    List<Post> postList = postRepository.findAll();
+//    assertThat(postList).hasSize(databaseSizeBeforeUpdate + 1);
+//  }
 
   @Test
   @Transactional
   public void deletePost() throws Exception {
     // Initialize the database
-    postRepository.saveAndFlush(post);
     int databaseSizeBeforeDelete = postRepository.findAll().size();
 
     // Get the post

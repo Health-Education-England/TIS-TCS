@@ -27,6 +27,12 @@ public interface PostService {
    */
   List<PostDTO> save(List<PostDTO> postDTO);
 
+  /**
+   * Update a single post
+   *
+   * @param postDTO the entity to update
+   * @return the entity saved in DTO form
+   */
   PostDTO update(PostDTO postDTO);
 
   /**
