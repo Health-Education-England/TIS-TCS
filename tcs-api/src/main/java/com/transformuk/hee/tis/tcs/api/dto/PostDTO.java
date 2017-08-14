@@ -5,7 +5,6 @@ import com.transformuk.hee.tis.tcs.api.enumeration.PostSuffix;
 import com.transformuk.hee.tis.tcs.api.enumeration.Status;
 
 import java.io.Serializable;
-import java.util.Objects;
 import java.util.Set;
 
 /**
@@ -14,6 +13,8 @@ import java.util.Set;
 public class PostDTO implements Serializable {
 
   private Long id;
+
+  private String intrepidId;
 
   private String nationalPostNumber;
 
@@ -58,6 +59,19 @@ public class PostDTO implements Serializable {
 
   public PostDTO id(Long id) {
     this.id = id;
+    return this;
+  }
+
+  public String getIntrepidId() {
+    return intrepidId;
+  }
+
+  public void setIntrepidId(String intrepidId) {
+    this.intrepidId = intrepidId;
+  }
+
+  public PostDTO intrepidId(String intrepidId) {
+    this.intrepidId = intrepidId;
     return this;
   }
 
