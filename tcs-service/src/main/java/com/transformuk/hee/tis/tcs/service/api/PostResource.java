@@ -1,18 +1,10 @@
 package com.transformuk.hee.tis.tcs.service.api;
 
 import com.codahale.metrics.annotation.Timed;
-import com.google.common.collect.Sets;
-import com.transformuk.hee.tis.tcs.api.dto.*;
-import com.transformuk.hee.tis.tcs.api.enumeration.*;
+import com.transformuk.hee.tis.tcs.api.dto.PostDTO;
 import com.transformuk.hee.tis.tcs.service.api.util.HeaderUtil;
 import com.transformuk.hee.tis.tcs.service.api.util.PaginationUtil;
-import com.transformuk.hee.tis.tcs.service.model.*;
-import com.transformuk.hee.tis.tcs.service.repository.PlacementRepository;
-import com.transformuk.hee.tis.tcs.service.repository.PostRepository;
-import com.transformuk.hee.tis.tcs.service.repository.ProgrammeRepository;
-import com.transformuk.hee.tis.tcs.service.repository.SpecialtyRepository;
 import com.transformuk.hee.tis.tcs.service.service.PostService;
-import com.transformuk.hee.tis.tcs.service.service.mapper.PostMapper;
 import io.github.jhipster.web.util.ResponseUtil;
 import io.jsonwebtoken.lang.Collections;
 import io.swagger.annotations.ApiParam;
@@ -25,7 +17,14 @@ import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
-import org.springframework.web.bind.annotation.*;
+import org.springframework.web.bind.annotation.DeleteMapping;
+import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PathVariable;
+import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.PutMapping;
+import org.springframework.web.bind.annotation.RequestBody;
+import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RestController;
 
 import javax.validation.Valid;
 import java.net.URI;
@@ -58,7 +57,7 @@ public class PostResource {
    */
   @PostMapping("/posts")
   @Timed
-  @PreAuthorize("hasAuthority('tcs:add:modify:entities')")
+  @PreAuthorize("hasAuthority('post:add:modify')")
   public ResponseEntity<PostDTO> createPost(@RequestBody PostDTO postDTO) throws URISyntaxException {
     log.debug("REST request to save Post : {}", postDTO);
     if (postDTO.getId() != null) {
@@ -81,7 +80,7 @@ public class PostResource {
    */
   @PutMapping("/posts")
   @Timed
-  @PreAuthorize("hasAuthority('tcs:add:modify:entities')")
+  @PreAuthorize("hasAuthority('post:add:modify')")
   public ResponseEntity<PostDTO> updatePost(@RequestBody PostDTO postDTO) throws URISyntaxException {
     log.debug("REST request to update Post : {}", postDTO);
     if (postDTO.getId() == null) {
@@ -101,7 +100,7 @@ public class PostResource {
    */
   @GetMapping("/posts")
   @Timed
-  @PreAuthorize("hasAuthority('tcs:view:entities')")
+  @PreAuthorize("hasAuthority('post:view')")
   public ResponseEntity<List<PostDTO>> getAllPosts(@ApiParam Pageable pageable) {
     log.debug("REST request to get a page of Posts");
     Page<PostDTO> page = postService.findAll(pageable);
@@ -117,7 +116,7 @@ public class PostResource {
    */
   @GetMapping("/posts/{id}")
   @Timed
-  @PreAuthorize("hasAuthority('tcs:view:entities')")
+  @PreAuthorize("hasAuthority('post:view')")
   public ResponseEntity<PostDTO> getPost(@PathVariable Long id) {
     log.debug("REST request to get Post : {}", id);
     PostDTO postDTO = postService.findOne(id);
@@ -149,7 +148,7 @@ public class PostResource {
    */
   @PostMapping("/bulk-posts")
   @Timed
-  @PreAuthorize("hasAuthority('tcs:add:modify:entities')")
+  @PreAuthorize("hasAuthority('post:bulk:add:modify')")
   public ResponseEntity<List<PostDTO>> bulkCreatePosts(@Valid @RequestBody List<PostDTO> postDTOS) throws URISyntaxException {
     log.debug("REST request to bulk save Post : {}", postDTOS);
     if (!Collections.isEmpty(postDTOS)) {
@@ -179,7 +178,7 @@ public class PostResource {
    */
   @PutMapping("/bulk-posts")
   @Timed
-  @PreAuthorize("hasAuthority('tcs:add:modify:entities')")
+  @PreAuthorize("hasAuthority('post:bulk:add:modify')")
   public ResponseEntity<List<PostDTO>> bulkUpdatePosts(@Valid @RequestBody List<PostDTO> postDTOS) throws URISyntaxException {
     log.debug("REST request to bulk update Posts : {}", postDTOS);
     if (Collections.isEmpty(postDTOS)) {
