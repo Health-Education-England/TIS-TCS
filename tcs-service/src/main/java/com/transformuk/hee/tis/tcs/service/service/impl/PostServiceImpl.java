@@ -1,5 +1,7 @@
 package com.transformuk.hee.tis.tcs.service.service.impl;
 
+import com.google.common.collect.Lists;
+import com.transformuk.hee.tis.tcs.api.dto.PostRelationshipsDTO;
 import com.transformuk.hee.tis.tcs.api.dto.PostDTO;
 import com.transformuk.hee.tis.tcs.service.model.Post;
 import com.transformuk.hee.tis.tcs.service.repository.PostGradeRepository;
@@ -68,6 +70,36 @@ public class PostServiceImpl implements PostService {
     return result;
   }
 
+  /**
+   * Update a list of post so that the links to old/new posts are saved. its important to note that if a related post
+   * cannot be found, the existing post is cleared but if related post id is null then it isnt cleared
+   *
+   * @param postRelationshipsDTOS the list of entities to save
+   * @return the list of persisted entities
+   */
+  @Override
+  public List<PostDTO> updateOldNewPosts(List<PostRelationshipsDTO> postRelationshipsDTOS) {
+    List<Post> postsToSave = Lists.newArrayList();
+    for (PostRelationshipsDTO dto : postRelationshipsDTOS) {
+
+      Post post = postRepository.findPostByIntrepidId(dto.getPostIntrepidId());
+      if(post != null) {
+        Post oldPost = postRepository.findPostByIntrepidId(dto.getOldPostIntrepidId());
+        Post newPost = postRepository.findPostByIntrepidId(dto.getNewPostIntrepidId());
+        if (dto.getOldPostIntrepidId() != null) {
+          post.setOldPost(oldPost);
+        }
+        if (dto.getNewPostIntrepidId() != null) {
+          post.setNewPost(newPost);
+        }
+        postsToSave.add(post);
+      }
+    }
+
+    List<Post> savedPosts = postRepository.save(postsToSave);
+
+    return postMapper.postsToPostDTOs(savedPosts);
+  }
 
   @Override
   public PostDTO update(PostDTO postDTO) {

@@ -1,18 +1,10 @@
 package com.transformuk.hee.tis.tcs.service.api;
 
 import com.codahale.metrics.annotation.Timed;
-import com.google.common.collect.Sets;
 import com.transformuk.hee.tis.tcs.api.dto.*;
-import com.transformuk.hee.tis.tcs.api.enumeration.*;
 import com.transformuk.hee.tis.tcs.service.api.util.HeaderUtil;
 import com.transformuk.hee.tis.tcs.service.api.util.PaginationUtil;
-import com.transformuk.hee.tis.tcs.service.model.*;
-import com.transformuk.hee.tis.tcs.service.repository.PlacementRepository;
-import com.transformuk.hee.tis.tcs.service.repository.PostRepository;
-import com.transformuk.hee.tis.tcs.service.repository.ProgrammeRepository;
-import com.transformuk.hee.tis.tcs.service.repository.SpecialtyRepository;
 import com.transformuk.hee.tis.tcs.service.service.PostService;
-import com.transformuk.hee.tis.tcs.service.service.mapper.PostMapper;
 import io.github.jhipster.web.util.ResponseUtil;
 import io.jsonwebtoken.lang.Collections;
 import io.swagger.annotations.ApiParam;
@@ -194,6 +186,46 @@ public class PostResource {
     }
 
     List<PostDTO> results = postService.save(postDTOS);
+    List<Long> ids = results.stream().map(r -> r.getId()).collect(Collectors.toList());
+    return ResponseEntity.ok()
+        .headers(HeaderUtil.createEntityUpdateAlert(ENTITY_NAME, StringUtils.join(ids, ",")))
+        .body(results);
+  }
+
+
+  /**
+   * PATCH  /bulk-link-posts : Updates the Old post and New post relationship on an existing Posts.
+   *
+   * @param postRelationshipsDto List of the PostRelationshipsDTO to update their old and new Posts
+   * @return the ResponseEntity with status 200 (OK) and with body the updated postDTOS,
+   * or with status 400 (Bad Request) if the postDTOS is not valid,
+   * or with status 500 (Internal Server Error) if the postDTOS couldnt be updated
+   * @throws URISyntaxException if the Location URI syntax is incorrect
+   */
+  @PatchMapping("/bulk-update-new-old-posts")
+  @Timed
+  @PreAuthorize("hasAuthority('tcs:add:modify:entities')")
+  public ResponseEntity<List<PostDTO>> bulkUpdateNewOldPosts(@Valid @RequestBody List<PostRelationshipsDTO> postRelationshipsDto) throws URISyntaxException {
+    log.debug("REST request to bulk link old/new Posts : {}", postRelationshipsDto);
+    if (Collections.isEmpty(postRelationshipsDto)) {
+      return ResponseEntity.badRequest().headers(HeaderUtil.createFailureAlert(ENTITY_NAME, "request.body.empty",
+          "The request body for this end point cannot be empty")).body(null);
+    } else if (!Collections.isEmpty(postRelationshipsDto)) {
+      List<PostDTO> entitiesWithNoId = postRelationshipsDto.stream()
+          .filter(p -> p.getPostIntrepidId() == null)
+          .map(post -> {
+            PostDTO postDTO = new PostDTO();
+            postDTO.setIntrepidId(post.getPostIntrepidId());
+            return postDTO;
+          })
+          .collect(Collectors.toList());
+      if (!Collections.isEmpty(entitiesWithNoId)) {
+        return ResponseEntity.badRequest().headers(HeaderUtil.createFailureAlert(StringUtils.join(entitiesWithNoId, ","),
+            "bulk.update.failed.noId", "Some DTOs you've provided have no Id, cannot update entities that dont exist")).body(entitiesWithNoId);
+      }
+    }
+
+    List<PostDTO> results = postService.updateOldNewPosts(postRelationshipsDto);
     List<Long> ids = results.stream().map(r -> r.getId()).collect(Collectors.toList());
     return ResponseEntity.ok()
         .headers(HeaderUtil.createEntityUpdateAlert(ENTITY_NAME, StringUtils.join(ids, ",")))

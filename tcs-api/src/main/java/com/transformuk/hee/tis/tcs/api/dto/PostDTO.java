@@ -283,6 +283,7 @@ public class PostDTO implements Serializable {
     return this;
   }
 
+
   @Override
   public boolean equals(Object o) {
     if (this == o) return true;
@@ -291,6 +292,7 @@ public class PostDTO implements Serializable {
     PostDTO postDTO = (PostDTO) o;
 
     if (id != null ? !id.equals(postDTO.id) : postDTO.id != null) return false;
+    if (intrepidId != null ? !intrepidId.equals(postDTO.intrepidId) : postDTO.intrepidId != null) return false;
     if (nationalPostNumber != null ? !nationalPostNumber.equals(postDTO.nationalPostNumber) : postDTO.nationalPostNumber != null)
       return false;
     if (status != postDTO.status) return false;
@@ -319,6 +321,7 @@ public class PostDTO implements Serializable {
   @Override
   public int hashCode() {
     int result = id != null ? id.hashCode() : 0;
+    result = 31 * result + (intrepidId != null ? intrepidId.hashCode() : 0);
     result = 31 * result + (nationalPostNumber != null ? nationalPostNumber.hashCode() : 0);
     result = 31 * result + (status != null ? status.hashCode() : 0);
     result = 31 * result + (suffix != null ? suffix.hashCode() : 0);
@@ -342,6 +345,7 @@ public class PostDTO implements Serializable {
   public String toString() {
     return "PostDTO{" +
         "id=" + id +
+        ", intrepidId='" + intrepidId + '\'' +
         ", nationalPostNumber='" + nationalPostNumber + '\'' +
         ", status=" + status +
         ", suffix=" + suffix +

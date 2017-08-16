@@ -54,6 +54,7 @@ public class PostMapper {
     PostDTO result = new PostDTO();
 
     result.setId(post.getId());
+    result.setIntrepidId(post.getIntrepidId());
     result.setNationalPostNumber(post.getNationalPostNumber());
     result.setStatus(post.getStatus());
     result.setSuffix(post.getSuffix());
@@ -176,6 +177,7 @@ public class PostMapper {
   private Post postDTOToPost(PostDTO postDTO, boolean traverseRelatedPosts) {
     Post result = new Post();
     result.setId(postDTO.getId());
+    result.setIntrepidId(postDTO.getIntrepidId());
     result.setNationalPostNumber(postDTO.getNationalPostNumber());
     result.setStatus(postDTO.getStatus());
     result.setSuffix(postDTO.getSuffix());

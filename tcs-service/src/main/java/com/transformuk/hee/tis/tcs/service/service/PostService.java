@@ -1,5 +1,6 @@
 package com.transformuk.hee.tis.tcs.service.service;
 
+import com.transformuk.hee.tis.tcs.api.dto.PostRelationshipsDTO;
 import com.transformuk.hee.tis.tcs.api.dto.PostDTO;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
@@ -26,6 +27,15 @@ public interface PostService {
    * @return the list of persisted entities
    */
   List<PostDTO> save(List<PostDTO> postDTO);
+
+  /**
+   * Update a list of post so that the links to old/new posts are saved. its important to note that if a related post
+   * cannot be found, the existing post is cleared but if related post id is null then it isnt cleared
+   *
+   * @param postRelationshipsDTOS the list of entities to save
+   * @return the list of persisted entities
+   */
+  List<PostDTO> updateOldNewPosts(List<PostRelationshipsDTO> postRelationshipsDTOS);
 
   /**
    * Update a single post

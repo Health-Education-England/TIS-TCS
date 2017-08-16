@@ -11,4 +11,6 @@ import org.springframework.data.repository.query.Param;
 @SuppressWarnings("unused")
 public interface PostRepository extends JpaRepository<Post, Long> {
 
+  Post findPostByIntrepidId(String intrepidId);
+
 }
