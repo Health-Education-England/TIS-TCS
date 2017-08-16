@@ -29,8 +29,8 @@ import java.util.List;
 import java.util.Set;
 import java.util.stream.Collectors;
 
+import static com.transformuk.hee.tis.tcs.service.service.impl.SpecificationFactory.cbEqual;
 import static com.transformuk.hee.tis.tcs.service.service.impl.SpecificationFactory.containsLike;
-import static com.transformuk.hee.tis.tcs.service.service.impl.SpecificationFactory.equal;
 import static com.transformuk.hee.tis.tcs.service.service.impl.SpecificationFactory.in;
 
 /**
@@ -67,8 +67,7 @@ public class PostServiceImpl implements PostService {
     log.debug("Request to save Post : {}", postDTO);
     Post post = postMapper.postDTOToPost(postDTO);
     post = postRepository.save(post);
-    PostDTO result = postMapper.postToPostDTO(post);
-    return result;
+    return postMapper.postToPostDTO(post);
   }
 
   /**
@@ -82,8 +81,7 @@ public class PostServiceImpl implements PostService {
     log.debug("Request to save Post : {}", postDTOs);
     List<Post> post = postMapper.postDTOsToPosts(postDTOs);
     post = postRepository.save(post);
-    List<PostDTO> result = postMapper.postsToPostDTOs(post);
-    return result;
+    return postMapper.postsToPostDTOs(post);
   }
 
 
@@ -147,13 +145,13 @@ public class PostServiceImpl implements PostService {
       columnFilters.forEach(cf -> {
         specs.add(in(cf.getName(), cf.getValues()));
         if (cf.getName().contains(SPECIALTIES)) {
-          specs.add(equal(SPECIALTIES, "postSpecialtyType", PostSpecialtyType.PRIMARY));
+          specs.add(cbEqual(SPECIALTIES, "postSpecialtyType", PostSpecialtyType.PRIMARY));
         }
         if (cf.getName().contains(GRADES)) {
-          specs.add(equal(GRADES, "postGradeType", PostGradeType.APPROVED));
+          specs.add(cbEqual(GRADES, "postGradeType", PostGradeType.APPROVED));
         }
         if (cf.getName().contains(SITES)) {
-          specs.add(equal(SITES, "postSiteType", PostSiteType.PRIMARY));
+          specs.add(cbEqual(SITES, "postSiteType", PostSiteType.PRIMARY));
         }
       });
     }
@@ -180,8 +178,7 @@ public class PostServiceImpl implements PostService {
   public PostDTO findOne(Long id) {
     log.debug("Request to get Post : {}", id);
     Post post = postRepository.findOne(id);
-    PostDTO postDTO = postMapper.postToPostDTO(post);
-    return postDTO;
+    return postMapper.postToPostDTO(post);
   }
 
   /**

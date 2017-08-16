@@ -14,9 +14,12 @@ import java.util.Collection;
  */
 public final class SpecificationFactory {
 
-  private final static String DOT = ".";
-  private final static String TRUE = "true";
-  private final static String FALSE = "false";
+  private static final String DOT = ".";
+  private static final String TRUE = "true";
+  private static final String FALSE = "false";
+
+  private SpecificationFactory() {
+  }
 
   public static Specification containsLike(String attribute, String value) {
     return (root, query, cb) -> cb.like(root.get(attribute), "%" + value + "%");
@@ -57,7 +60,7 @@ public final class SpecificationFactory {
     };
   }
 
-  public static Specification equal(String subTable, String attribute, Object value) {
+  public static Specification cbEqual(String subTable, String attribute, Object value) {
     return (root, query, cb) -> cb.equal(root.join(subTable, JoinType.INNER).get(attribute), value);
   }
 
