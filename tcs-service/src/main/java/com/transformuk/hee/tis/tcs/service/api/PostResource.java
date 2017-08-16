@@ -1,9 +1,17 @@
 package com.transformuk.hee.tis.tcs.service.api;
 
 import com.codahale.metrics.annotation.Timed;
+import com.google.common.collect.Lists;
+import com.transformuk.hee.tis.security.model.UserProfile;
 import com.transformuk.hee.tis.tcs.api.dto.PostDTO;
+import com.transformuk.hee.tis.tcs.api.enumeration.PostGradeType;
+import com.transformuk.hee.tis.tcs.api.enumeration.PostSpecialtyType;
+import com.transformuk.hee.tis.tcs.api.enumeration.PostSuffix;
+import com.transformuk.hee.tis.tcs.api.enumeration.Status;
+import com.transformuk.hee.tis.tcs.service.api.util.ColumnFilterUtil;
 import com.transformuk.hee.tis.tcs.service.api.util.HeaderUtil;
 import com.transformuk.hee.tis.tcs.service.api.util.PaginationUtil;
+import com.transformuk.hee.tis.tcs.service.model.ColumnFilter;
 import com.transformuk.hee.tis.tcs.service.service.PostService;
 import io.github.jhipster.web.util.ResponseUtil;
 import io.jsonwebtoken.lang.Collections;
@@ -24,14 +32,19 @@ import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.PutMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
 import javax.validation.Valid;
+import java.io.IOException;
 import java.net.URI;
 import java.net.URISyntaxException;
 import java.util.List;
 import java.util.Optional;
 import java.util.stream.Collectors;
+
+import static com.transformuk.hee.tis.security.util.TisSecurityHelper.getProfileFromContext;
+import static com.transformuk.hee.tis.tcs.service.api.util.StringUtil.sanitize;
 
 /**
  * REST controller for managing Post.
@@ -101,9 +114,25 @@ public class PostResource {
   @GetMapping("/posts")
   @Timed
   @PreAuthorize("hasAuthority('post:view')")
-  public ResponseEntity<List<PostDTO>> getAllPosts(@ApiParam Pageable pageable) {
+  public ResponseEntity<List<PostDTO>> getAllPosts(
+      @ApiParam Pageable pageable,
+      @ApiParam(value = "any wildcard string to be searched")
+      @RequestParam(value = "searchQuery", required = false) String searchQuery,
+      @ApiParam(value = "json object by column name and value. (Eg: columnFilters={ \"managingLocalOffice\": [\"dean1\", \"dean2\"]," +
+          " \"sites.siteId\":[\"123\"],\"trainingBodyId\":[\"11\"],\"grades.gradeId\":[\"11\"],\"specialties.specialty.name\":[\"Test Specialty\"]}\"")
+      @RequestParam(value = "columnFilters", required = false) String columnFilterJson) throws IOException {
     log.debug("REST request to get a page of Posts");
-    Page<PostDTO> page = postService.findAll(pageable);
+    searchQuery = sanitize(searchQuery);
+    UserProfile userProfile = getProfileFromContext();
+    List<Class> filterEnumList = Lists.newArrayList(Status.class, PostSuffix.class, PostGradeType.class, PostSpecialtyType.class);
+    List<ColumnFilter> columnFilters = ColumnFilterUtil.getColumnFilters(columnFilterJson, filterEnumList);
+    Page<PostDTO> page;
+    if (StringUtils.isEmpty(searchQuery) && StringUtils.isEmpty(columnFilterJson)) {
+      page = postService.findAll(pageable);
+    } else {
+      page = postService.advancedSearch(
+          userProfile.getDesignatedBodyCodes(), searchQuery, columnFilters, pageable);
+    }
     HttpHeaders headers = PaginationUtil.generatePaginationHttpHeaders(page, "/api/posts");
     return new ResponseEntity<>(page.getContent(), headers, HttpStatus.OK);
   }
