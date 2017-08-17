@@ -200,7 +200,7 @@ public class ProgrammeResourceIntTest {
 
   @Test
   @Transactional
-  public void shouldValidateProgrammeNumberContentsWhenCreating() throws Exception {
+  public void shouldAllowProgrammeNumberContentsWhenCreatingNowAllCharactersAreAllowed() throws Exception {
     //given
     ProgrammeDTO programmeDTO = programmeMapper.programmeToProgrammeDTO(createEntity());
     programmeDTO.setProgrammeNumber("#%$^&**(");
@@ -208,9 +208,7 @@ public class ProgrammeResourceIntTest {
     restProgrammeMockMvc.perform(post("/api/programmes")
         .contentType(TestUtil.APPLICATION_JSON_UTF8)
         .content(TestUtil.convertObjectToJsonBytes(programmeDTO)))
-        .andExpect(status().isBadRequest())
-        .andExpect(jsonPath("$.message").value("error.validation"))
-        .andExpect(jsonPath("$.fieldErrors[0].field").value("programmeNumber"));
+        .andExpect(status().isCreated());
   }
 
   @Test

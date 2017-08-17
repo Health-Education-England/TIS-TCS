@@ -37,10 +37,7 @@ public class ProgrammeDTO implements Serializable {
   private String programmeName;
 
   @NotNull(message = "Programme number is required", groups = {Update.class, Create.class})
-  @Pattern(regexp = "^[a-zA-Z0-9\\s/]*$",
-      message = "Programme number can only contain letters, numbers, whitespace or / characters",
-      groups = {Update.class, Create.class})
-  //mandatory, unique, only certain letters
+  //mandatory, unique
   private String programmeNumber;
 
   private Set<CurriculumDTO> curricula;
