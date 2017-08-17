@@ -2,10 +2,12 @@ package com.transformuk.hee.tis.tcs.service.service;
 
 import com.transformuk.hee.tis.tcs.api.dto.PostRelationshipsDTO;
 import com.transformuk.hee.tis.tcs.api.dto.PostDTO;
+import com.transformuk.hee.tis.tcs.service.model.ColumnFilter;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 
 import java.util.List;
+import java.util.Set;
 
 /**
  * Service Interface for managing Post.
@@ -46,12 +48,35 @@ public interface PostService {
   PostDTO update(PostDTO postDTO);
 
   /**
+   * Get all the post by dbcs
+   *
+   * @param dbcs
+   * @param pageable
+   * @return
+   */
+  Page<PostDTO> findAll(Set<String> dbcs, Pageable pageable);
+
+  /**
    * Get all the posts.
    *
    * @param pageable the pagination information
    * @return the list of entities
    */
   Page<PostDTO> findAll(Pageable pageable);
+
+  /**
+   * Get all the posts within the given designated body codes using the
+   * given smart search string.
+   *
+   * @param dbcs         the designated body codes to search through not null
+   * @param searchString the search string to match, can be null
+   * @param columnFilers the exact key value filters to apply, can be null
+   * @param pageable     the pagination information
+   * @return the list of entities
+   */
+  Page<PostDTO> advancedSearch(
+      Set<String> dbcs, String searchString, List<ColumnFilter> columnFilers, Pageable pageable);
+
 
   /**
    * Get the "id" post.

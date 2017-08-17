@@ -2,17 +2,27 @@ package com.transformuk.hee.tis.tcs.service.api;
 
 import com.google.common.collect.Lists;
 import com.google.common.collect.Sets;
+import com.transformuk.hee.tis.tcs.TestUtils;
 import com.transformuk.hee.tis.tcs.api.dto.PostDTO;
-import com.transformuk.hee.tis.tcs.api.enumeration.*;
+import com.transformuk.hee.tis.tcs.api.enumeration.PostGradeType;
+import com.transformuk.hee.tis.tcs.api.enumeration.PostSiteType;
+import com.transformuk.hee.tis.tcs.api.enumeration.PostSpecialtyType;
+import com.transformuk.hee.tis.tcs.api.enumeration.PostSuffix;
+import com.transformuk.hee.tis.tcs.api.enumeration.Status;
 import com.transformuk.hee.tis.tcs.service.Application;
 import com.transformuk.hee.tis.tcs.service.exception.ExceptionTranslator;
-import com.transformuk.hee.tis.tcs.service.model.*;
+import com.transformuk.hee.tis.tcs.service.model.Post;
+import com.transformuk.hee.tis.tcs.service.model.PostGrade;
+import com.transformuk.hee.tis.tcs.service.model.PostSite;
+import com.transformuk.hee.tis.tcs.service.model.PostSpecialty;
+import com.transformuk.hee.tis.tcs.service.model.Specialty;
 import com.transformuk.hee.tis.tcs.service.repository.PlacementRepository;
 import com.transformuk.hee.tis.tcs.service.repository.PostRepository;
 import com.transformuk.hee.tis.tcs.service.repository.ProgrammeRepository;
 import com.transformuk.hee.tis.tcs.service.repository.SpecialtyRepository;
 import com.transformuk.hee.tis.tcs.service.service.PostService;
 import com.transformuk.hee.tis.tcs.service.service.mapper.PostMapper;
+import org.apache.commons.codec.net.URLCodec;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -33,7 +43,6 @@ import java.util.Set;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.hamcrest.Matchers.hasItem;
-import static org.hamcrest.Matchers.is;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.delete;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
@@ -85,6 +94,8 @@ public class PostResourceIntTest {
 
   private static final String GRADE_ID = "Grade id";
   private static final String SITE_ID = "site id";
+  public static final String TEST_POST_NUMBER = "TESTPOST";
+  public static final String MANAGING_LOCAL_OFFICE = "Health Education England Kent, Surrey and Sussex";
 
   @Autowired
   private PostRepository postRepository;
@@ -151,7 +162,7 @@ public class PostResourceIntTest {
     return post;
   }
 
-    public static Specialty createSpecialty() {
+  public static Specialty createSpecialty() {
     Specialty specialty = new Specialty();
     specialty.setCollege(SPECIALTY_COLLEGE);
     specialty.setName(TEST_SPECIALTY);
@@ -191,11 +202,13 @@ public class PostResourceIntTest {
         .setCustomArgumentResolvers(pageableArgumentResolver)
         .setControllerAdvice(exceptionTranslator)
         .setMessageConverters(jacksonMessageConverter).build();
+    TestUtils.mockUserprofile("jamesh", "1-AIIDR8", "1-AIIDWA");
   }
 
   @Before
   public void initTest() {
     post = createEntity();
+    post.setManagingLocalOffice(MANAGING_LOCAL_OFFICE);
     em.persist(post);
     specialty = createSpecialty();
     em.persist(specialty);
@@ -204,7 +217,7 @@ public class PostResourceIntTest {
     postSite = createPostSite(SITE_ID, PostSiteType.PRIMARY, post);
     postSpecialty = createPostSpecialty(specialty, PostSpecialtyType.PRIMARY, post);
 
-    post = linkEntities(post, Sets.newHashSet(postSite),Sets.newHashSet(postGrade), Sets.newHashSet(postSpecialty));
+    post = linkEntities(post, Sets.newHashSet(postSite), Sets.newHashSet(postGrade), Sets.newHashSet(postSpecialty));
 
     em.persist(post);
   }
@@ -275,13 +288,146 @@ public class PostResourceIntTest {
         .andExpect(jsonPath("$.[*].nationalPostNumber").value(hasItem(DEFAULT_NATIONAL_POST_NUMBER)))
         .andExpect(jsonPath("$.[*].status").value(hasItem(DEFAULT_STATUS.toString())))
         .andExpect(jsonPath("$.[*].suffix").value(hasItem(DEFAULT_SUFFIX.toString())))
-        .andExpect(jsonPath("$.[*].managingLocalOffice").value(hasItem(DEFAULT_MANAGING_OFFICE)))
+        .andExpect(jsonPath("$.[*].managingLocalOffice").value(hasItem(MANAGING_LOCAL_OFFICE)))
         .andExpect(jsonPath("$.[*].postFamily").value(hasItem(DEFAULT_POST_FAMILY)))
         .andExpect(jsonPath("$.[*].employingBodyId").value(hasItem(DEFAULT_EMPLOYING_BODY)))
         .andExpect(jsonPath("$.[*].trainingBodyId").value(hasItem(DEFAULT_TRAINING_BODY_ID)))
         .andExpect(jsonPath("$.[*].trainingDescription").value(hasItem(DEFAULT_TRAINING_DESCRIPTION)))
         .andExpect(jsonPath("$.[*].localPostNumber").value(hasItem(DEFAULT_LOCAL_POST_NUMBER)));
   }
+
+  @Test
+  @Transactional
+  public void shouldTextSearch() throws Exception {
+    Post anotherPost = createEntity();
+    anotherPost.setNationalPostNumber(TEST_POST_NUMBER);
+    anotherPost.setManagingLocalOffice(MANAGING_LOCAL_OFFICE);
+    postRepository.saveAndFlush(anotherPost);
+
+    restPostMockMvc.perform(get("/api/posts?searchQuery=TEST"))
+        .andExpect(status().isOk())
+        .andExpect(content().contentType(MediaType.APPLICATION_JSON_UTF8_VALUE))
+        .andExpect(jsonPath("$.[*].id").value(hasItem(anotherPost.getId().intValue())))
+        .andExpect(jsonPath("$.[*].nationalPostNumber").value(hasItem(TEST_POST_NUMBER)))
+        .andExpect(jsonPath("$.[*].status").value(hasItem(DEFAULT_STATUS.toString())))
+        .andExpect(jsonPath("$.[*].suffix").value(hasItem(DEFAULT_SUFFIX.toString())))
+        .andExpect(jsonPath("$.[*].managingLocalOffice").value(hasItem(MANAGING_LOCAL_OFFICE)))
+        .andExpect(jsonPath("$.[*].postFamily").value(hasItem(DEFAULT_POST_FAMILY)))
+        .andExpect(jsonPath("$.[*].employingBodyId").value(hasItem(DEFAULT_EMPLOYING_BODY)))
+        .andExpect(jsonPath("$.[*].trainingBodyId").value(hasItem(DEFAULT_TRAINING_BODY_ID)))
+        .andExpect(jsonPath("$.[*].trainingDescription").value(hasItem(DEFAULT_TRAINING_DESCRIPTION)))
+        .andExpect(jsonPath("$.[*].localPostNumber").value(hasItem(DEFAULT_LOCAL_POST_NUMBER)));
+  }
+
+  @Test
+  @Transactional
+  public void shouldFilterColumns() throws Exception {
+    //given
+    // Initialize the database
+    Post otherStatusPost = createEntity();
+    otherStatusPost.setStatus(Status.INACTIVE);
+    otherStatusPost.setManagingLocalOffice(MANAGING_LOCAL_OFFICE);
+    postRepository.saveAndFlush(otherStatusPost);
+
+    //when & then
+    String colFilters = new URLCodec().encode("{\"status\":[\"INACTIVE\"],\"managingLocalOffice\":[\"" +
+        MANAGING_LOCAL_OFFICE + "\"]}");
+    // Get all the programmeList
+    restPostMockMvc.perform(get("/api/posts?sort=id,desc&columnFilters=" +
+        colFilters))
+        .andExpect(status().isOk())
+        .andExpect(jsonPath("$.[*].status").value("INACTIVE"))
+        .andExpect(jsonPath("$.[*].managingLocalOffice").value(hasItem(MANAGING_LOCAL_OFFICE)));
+  }
+
+  @Test
+  @Transactional
+  public void shouldFilterColumnsBySiteId() throws Exception {
+
+    String siteId = post.getSites().iterator().next().getSiteId();
+    //when & then
+    String colFilters = new URLCodec().encode("{\"sites.siteId\":[\"" + siteId + "\"],\"managingLocalOffice\":[\"" +
+        MANAGING_LOCAL_OFFICE + "\"]}");
+    // Get all the programmeList
+    restPostMockMvc.perform(get("/api/posts?sort=id,desc&columnFilters=" +
+        colFilters))
+        .andExpect(status().isOk())
+        .andExpect(jsonPath("$.[*].sites[*].siteId").value(hasItem(siteId)))
+        .andExpect(jsonPath("$.[*].managingLocalOffice").value(hasItem(MANAGING_LOCAL_OFFICE)));
+  }
+
+  @Test
+  @Transactional
+  public void shouldFilterColumnsByGradeId() throws Exception {
+
+    String gradeId = post.getGrades().iterator().next().getGradeId();
+    //when & then
+    String colFilters = new URLCodec().encode("{\"grades.gradeId\":[\"" + gradeId + "\"],\"managingLocalOffice\":[\"" +
+        MANAGING_LOCAL_OFFICE + "\"]}");
+    // Get all the programmeList
+    restPostMockMvc.perform(get("/api/posts?sort=id,desc&columnFilters=" +
+        colFilters))
+        .andExpect(status().isOk())
+        .andExpect(jsonPath("$.[*].grades[*].gradeId").value(hasItem(gradeId)))
+        .andExpect(jsonPath("$.[*].managingLocalOffice").value(hasItem(MANAGING_LOCAL_OFFICE)));
+  }
+
+  @Test
+  @Transactional
+  public void shouldFilterColumnsByTrainingBodyId() throws Exception {
+
+    //when & then
+    String colFilters = new URLCodec().encode("{\"trainingBodyId\":[\"" + post.getTrainingBodyId() + "\"],\"managingLocalOffice\":[\"" +
+        MANAGING_LOCAL_OFFICE + "\"]}");
+    // Get all the programmeList
+    restPostMockMvc.perform(get("/api/posts?sort=id,desc&columnFilters=" +
+        colFilters))
+        .andExpect(status().isOk())
+        .andExpect(jsonPath("$.[*].trainingBodyId").value(hasItem(post.getTrainingBodyId())))
+        .andExpect(jsonPath("$.[*].managingLocalOffice").value(hasItem(MANAGING_LOCAL_OFFICE)));
+  }
+
+  @Test
+  @Transactional
+  public void shouldFilterColumnsBySpecialtyName() throws Exception {
+
+    String specialtyName = post.getSpecialties().iterator().next().getSpecialty().getName();
+    //when & then
+    String colFilters = new URLCodec().encode("{\"specialties.specialty.name\":[\"" + specialtyName + "\"]}");
+    // Get all the programmeList
+    restPostMockMvc.perform(get("/api/posts?sort=id,desc&columnFilters=" +
+        colFilters))
+        .andExpect(status().isOk())
+        .andExpect(jsonPath("$.[*].specialties[*].specialty.name").value(hasItem(specialtyName)))
+        .andExpect(jsonPath("$.[*].managingLocalOffice").value(hasItem(MANAGING_LOCAL_OFFICE)));
+  }
+
+  @Test
+  @Transactional
+  public void shouldTextSearchAndFilterColumns() throws Exception {
+    //given
+    // Initialize the database
+    postRepository.saveAndFlush(post);
+    postRepository.saveAndFlush(createEntity());
+    Post otherStatusPost = createEntity();
+    otherStatusPost.setManagingLocalOffice(MANAGING_LOCAL_OFFICE);
+    otherStatusPost.setStatus(Status.INACTIVE);
+    postRepository.saveAndFlush(otherStatusPost);
+    Post otherNumberPost = createEntity();
+    otherNumberPost.setNationalPostNumber(TEST_POST_NUMBER);
+    otherNumberPost.setStatus(Status.INACTIVE);
+    otherNumberPost.setManagingLocalOffice(MANAGING_LOCAL_OFFICE);
+    postRepository.saveAndFlush(otherNumberPost);
+    //when & then
+    String colFilters = new URLCodec().encode("{\"status\":[\"INACTIVE\"],\"managingLocalOffice\":[\"" +
+        MANAGING_LOCAL_OFFICE + "\"]}");
+    // Get all the programmeList
+    restPostMockMvc.perform(get("/api/posts?sort=id,desc&searchQuery=TEST&columnFilters=" +
+        colFilters))
+        .andExpect(status().isOk())
+        .andExpect(jsonPath("$.[*].status").value("INACTIVE"));
+  }
+
 
   @Test
   @Transactional
@@ -295,7 +441,7 @@ public class PostResourceIntTest {
         .andExpect(jsonPath("$.nationalPostNumber").value(DEFAULT_NATIONAL_POST_NUMBER))
         .andExpect(jsonPath("$.status").value(DEFAULT_STATUS.toString()))
         .andExpect(jsonPath("$.suffix").value(DEFAULT_SUFFIX.toString()))
-        .andExpect(jsonPath("$.managingLocalOffice").value(DEFAULT_MANAGING_OFFICE))
+        .andExpect(jsonPath("$.managingLocalOffice").value(MANAGING_LOCAL_OFFICE))
         .andExpect(jsonPath("$.postFamily").value(DEFAULT_POST_FAMILY))
         .andExpect(jsonPath("$.employingBodyId").value(DEFAULT_EMPLOYING_BODY))
         .andExpect(jsonPath("$.trainingBodyId").value(DEFAULT_TRAINING_BODY_ID));
@@ -442,7 +588,7 @@ public class PostResourceIntTest {
         .nationalPostNumber(UPDATED_NATIONAL_POST_NUMBER)
         .status(UPDATED_STATUS)
         .suffix(UPDATED_SUFFIX)
-        .managingLocalOffice(UPDATED_MANAGING_OFFICE)
+        .managingLocalOffice(MANAGING_LOCAL_OFFICE)
         .postFamily(UPDATED_POST_FAMILY)
         .employingBodyId(UPDATED_EMPLOYING_BODY)
         .trainingBodyId(UPDATED_TRAINING_BODY)
@@ -457,7 +603,7 @@ public class PostResourceIntTest {
         .nationalPostNumber(UPDATED_NATIONAL_POST_NUMBER)
         .status(UPDATED_STATUS)
         .suffix(UPDATED_SUFFIX)
-        .managingLocalOffice(UPDATED_MANAGING_OFFICE)
+        .managingLocalOffice(MANAGING_LOCAL_OFFICE)
         .postFamily(UPDATED_POST_FAMILY)
         .employingBodyId(UPDATED_EMPLOYING_BODY)
         .trainingBodyId(UPDATED_TRAINING_BODY)

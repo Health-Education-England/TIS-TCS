@@ -1,3 +1,7 @@
+SET FOREIGN_KEY_CHECKS = 0;
+TRUNCATE TABLE Post;
+SET FOREIGN_KEY_CHECKS = 1;
+
 -- Post sites join table - many to many join table
 CREATE TABLE `PostSite` (
   `id` bigint(20) NOT NULL AUTO_INCREMENT,
