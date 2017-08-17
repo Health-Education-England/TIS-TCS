@@ -40,6 +40,22 @@ public interface PostService {
   List<PostDTO> updateOldNewPosts(List<PostRelationshipsDTO> postRelationshipsDTOS);
 
   /**
+   * Update a list of post so that the links to sites are saved.
+   *
+   * @param postRelationshipsDTOS the list of entities to save
+   * @return the list of persisted entities
+   */
+  List<PostDTO> updatePostSites(List<PostRelationshipsDTO> postRelationshipsDTOS);
+
+  /**
+   * Update a list of post so that the links to grades are saved.
+   *
+   * @param postRelationshipsDTOS the list of entities to save
+   * @return the list of persisted entities
+   */
+  List<PostDTO> updatePostGrades(List<PostRelationshipsDTO> postRelationshipsDTOS);
+
+  /**
    * Update a single post
    *
    * @param postDTO the entity to update

@@ -50,7 +50,6 @@ public class PostSpecialtyDTO implements Serializable {
 
     PostSpecialtyDTO that = (PostSpecialtyDTO) o;
 
-    if (id != null ? !id.equals(that.id) : that.id != null) return false;
     if (postId != null ? !postId.equals(that.postId) : that.postId != null) return false;
     if (specialty != null ? !specialty.equals(that.specialty) : that.specialty != null) return false;
     return postSpecialtyType == that.postSpecialtyType;
@@ -58,8 +57,7 @@ public class PostSpecialtyDTO implements Serializable {
 
   @Override
   public int hashCode() {
-    int result = id != null ? id.hashCode() : 0;
-    result = 31 * result + (postId != null ? postId.hashCode() : 0);
+    int result = postId != null ? postId.hashCode() : 0;
     result = 31 * result + (specialty != null ? specialty.hashCode() : 0);
     result = 31 * result + (postSpecialtyType != null ? postSpecialtyType.hashCode() : 0);
     return result;

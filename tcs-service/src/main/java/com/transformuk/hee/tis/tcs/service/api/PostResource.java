@@ -261,4 +261,82 @@ public class PostResource {
         .body(results);
   }
 
+  /**
+   * PATCH  /bulk-update-post-sites : Patches a Post to link it to a site
+   *
+   * @param postRelationshipsDto List of the PostRelationshipsDTO to update their old and new Posts
+   * @return the ResponseEntity with status 200 (OK) and with body the updated postDTOS,
+   * or with status 400 (Bad Request) if the postDTOS is not valid,
+   * or with status 500 (Internal Server Error) if the postDTOS couldnt be updated
+   * @throws URISyntaxException if the Location URI syntax is incorrect
+   */
+  @PatchMapping("/bulk-update-post-sites")
+  @Timed
+  @PreAuthorize("hasAuthority('tcs:add:modify:entities')")
+  public ResponseEntity<List<PostDTO>> bulkUpdatePostSites(@Valid @RequestBody List<PostRelationshipsDTO> postRelationshipsDto) throws URISyntaxException {
+    log.debug("REST request to bulk link old/new Posts : {}", postRelationshipsDto);
+    if (Collections.isEmpty(postRelationshipsDto)) {
+      return ResponseEntity.badRequest().headers(HeaderUtil.createFailureAlert(ENTITY_NAME, "request.body.empty",
+          "The request body for this end point cannot be empty")).body(null);
+    } else if (!Collections.isEmpty(postRelationshipsDto)) {
+      List<PostDTO> entitiesWithNoId = postRelationshipsDto.stream()
+          .filter(p -> p.getPostIntrepidId() == null)
+          .map(post -> {
+            PostDTO postDTO = new PostDTO();
+            postDTO.setIntrepidId(post.getPostIntrepidId());
+            return postDTO;
+          })
+          .collect(Collectors.toList());
+      if (!Collections.isEmpty(entitiesWithNoId)) {
+        return ResponseEntity.badRequest().headers(HeaderUtil.createFailureAlert(StringUtils.join(entitiesWithNoId, ","),
+            "bulk.update.failed.noId", "Some DTOs you've provided have no Id, cannot update entities that dont exist")).body(entitiesWithNoId);
+      }
+    }
+
+    List<PostDTO> results = postService.updatePostSites(postRelationshipsDto);
+    List<Long> ids = results.stream().map(r -> r.getId()).collect(Collectors.toList());
+    return ResponseEntity.ok()
+        .headers(HeaderUtil.createEntityUpdateAlert(ENTITY_NAME, StringUtils.join(ids, ",")))
+        .body(results);
+  }
+
+  /**
+   * PATCH  /bulk-update-post-grades : Patches a Post to link it to a grade
+   *
+   * @param postRelationshipsDto List of the PostRelationshipsDTO to update their old and new Posts
+   * @return the ResponseEntity with status 200 (OK) and with body the updated postDTOS,
+   * or with status 400 (Bad Request) if the postDTOS is not valid,
+   * or with status 500 (Internal Server Error) if the postDTOS couldnt be updated
+   * @throws URISyntaxException if the Location URI syntax is incorrect
+   */
+  @PatchMapping("/bulk-update-post-grades")
+  @Timed
+  @PreAuthorize("hasAuthority('tcs:add:modify:entities')")
+  public ResponseEntity<List<PostDTO>> bulkUpdatePostGrades(@Valid @RequestBody List<PostRelationshipsDTO> postRelationshipsDto) throws URISyntaxException {
+    log.debug("REST request to bulk link old/new Posts : {}", postRelationshipsDto);
+    if (Collections.isEmpty(postRelationshipsDto)) {
+      return ResponseEntity.badRequest().headers(HeaderUtil.createFailureAlert(ENTITY_NAME, "request.body.empty",
+          "The request body for this end point cannot be empty")).body(null);
+    } else if (!Collections.isEmpty(postRelationshipsDto)) {
+      List<PostDTO> entitiesWithNoId = postRelationshipsDto.stream()
+          .filter(p -> p.getPostIntrepidId() == null)
+          .map(post -> {
+            PostDTO postDTO = new PostDTO();
+            postDTO.setIntrepidId(post.getPostIntrepidId());
+            return postDTO;
+          })
+          .collect(Collectors.toList());
+      if (!Collections.isEmpty(entitiesWithNoId)) {
+        return ResponseEntity.badRequest().headers(HeaderUtil.createFailureAlert(StringUtils.join(entitiesWithNoId, ","),
+            "bulk.update.failed.noId", "Some DTOs you've provided have no Id, cannot update entities that dont exist")).body(entitiesWithNoId);
+      }
+    }
+
+    List<PostDTO> results = postService.updatePostGrades(postRelationshipsDto);
+    List<Long> ids = results.stream().map(r -> r.getId()).collect(Collectors.toList());
+    return ResponseEntity.ok()
+        .headers(HeaderUtil.createEntityUpdateAlert(ENTITY_NAME, StringUtils.join(ids, ",")))
+        .body(results);
+  }
+
 }

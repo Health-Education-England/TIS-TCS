@@ -1,20 +1,27 @@
 package com.transformuk.hee.tis.tcs.service.service.impl;
 
 import com.google.common.collect.Lists;
-import com.transformuk.hee.tis.tcs.api.dto.PostRelationshipsDTO;
+import com.google.common.collect.Sets;
 import com.transformuk.hee.tis.tcs.api.dto.PostDTO;
+import com.transformuk.hee.tis.tcs.api.dto.PostGradeDTO;
+import com.transformuk.hee.tis.tcs.api.dto.PostRelationshipsDTO;
+import com.transformuk.hee.tis.tcs.api.dto.PostSiteDTO;
 import com.transformuk.hee.tis.tcs.api.enumeration.PostGradeType;
 import com.transformuk.hee.tis.tcs.api.enumeration.PostSiteType;
 import com.transformuk.hee.tis.tcs.api.enumeration.PostSpecialtyType;
 import com.transformuk.hee.tis.tcs.service.model.ColumnFilter;
 import com.transformuk.hee.tis.tcs.service.model.Post;
+import com.transformuk.hee.tis.tcs.service.model.PostGrade;
+import com.transformuk.hee.tis.tcs.service.model.PostSite;
 import com.transformuk.hee.tis.tcs.service.repository.PostGradeRepository;
 import com.transformuk.hee.tis.tcs.service.repository.PostRepository;
 import com.transformuk.hee.tis.tcs.service.repository.PostSiteRepository;
 import com.transformuk.hee.tis.tcs.service.repository.PostSpecialtyRepository;
 import com.transformuk.hee.tis.tcs.service.service.PostService;
 import com.transformuk.hee.tis.tcs.service.service.mapper.DesignatedBodyMapper;
+import com.transformuk.hee.tis.tcs.service.service.mapper.PostGradeMapper;
 import com.transformuk.hee.tis.tcs.service.service.mapper.PostMapper;
+import com.transformuk.hee.tis.tcs.service.service.mapper.PostSiteMapper;
 import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -27,13 +34,12 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.util.ArrayList;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
 import java.util.stream.Collectors;
 
-import static com.transformuk.hee.tis.tcs.service.service.impl.SpecificationFactory.cbEqual;
-import static com.transformuk.hee.tis.tcs.service.service.impl.SpecificationFactory.containsLike;
-import static com.transformuk.hee.tis.tcs.service.service.impl.SpecificationFactory.in;
+import static com.transformuk.hee.tis.tcs.service.service.impl.SpecificationFactory.*;
 
 /**
  * Service Implementation for managing Post.
@@ -42,10 +48,10 @@ import static com.transformuk.hee.tis.tcs.service.service.impl.SpecificationFact
 @Transactional
 public class PostServiceImpl implements PostService {
 
+  private static final String SPECIALTIES = "specialties";
+  private static final String GRADES = "grades";
+  private static final String SITES = "sites";
   private static final Logger log = LoggerFactory.getLogger(PostServiceImpl.class);
-  public static final String SPECIALTIES = "specialties";
-  public static final String GRADES = "grades";
-  public static final String SITES = "sites";
 
   @Autowired
   private PostRepository postRepository;
@@ -57,6 +63,10 @@ public class PostServiceImpl implements PostService {
   private PostSpecialtyRepository postSpecialtyRepository;
   @Autowired
   private PostMapper postMapper;
+  @Autowired
+  private PostSiteMapper postSiteMapper;
+  @Autowired
+  private PostGradeMapper postGradeMapper;
 
   /**
    * Save a post.
@@ -99,7 +109,7 @@ public class PostServiceImpl implements PostService {
     for (PostRelationshipsDTO dto : postRelationshipsDTOS) {
 
       Post post = postRepository.findPostByIntrepidId(dto.getPostIntrepidId());
-      if(post != null) {
+      if (post != null) {
         Post oldPost = postRepository.findPostByIntrepidId(dto.getOldPostIntrepidId());
         Post newPost = postRepository.findPostByIntrepidId(dto.getNewPostIntrepidId());
         if (dto.getOldPostIntrepidId() != null) {
@@ -111,9 +121,53 @@ public class PostServiceImpl implements PostService {
         postsToSave.add(post);
       }
     }
-
     List<Post> savedPosts = postRepository.save(postsToSave);
+    return postMapper.postsToPostDTOs(savedPosts);
+  }
 
+  @Override
+  public List<PostDTO> updatePostSites(List<PostRelationshipsDTO> postRelationshipsDTOS) {
+    List<Post> postsToSave = Lists.newArrayList();
+    for (PostRelationshipsDTO dto : postRelationshipsDTOS) {
+
+      Post post = postRepository.findPostByIntrepidId(dto.getPostIntrepidId());
+      if (post != null) {
+        Set<PostSite> sites = post.getSites();
+        for (PostSiteDTO siteDTO : dto.getSites()) {
+          PostSite postSite = new PostSite();
+          postSite.setPost(post);
+          postSite.setPostSiteType(siteDTO.getPostSiteType());
+          postSite.setSiteId(siteDTO.getSiteId());
+          sites.add(postSite);
+        }
+        post.setSites(sites);
+        postsToSave.add(post);
+      }
+    }
+    List<Post> savedPosts = postRepository.save(postsToSave);
+    return postMapper.postsToPostDTOs(savedPosts);
+  }
+
+  @Override
+  public List<PostDTO> updatePostGrades(List<PostRelationshipsDTO> postRelationshipsDTOS) {
+    List<Post> postsToSave = Lists.newArrayList();
+    for (PostRelationshipsDTO dto : postRelationshipsDTOS) {
+
+      Post post = postRepository.findPostByIntrepidId(dto.getPostIntrepidId());
+      Set<PostGrade> postGrades = post.getGrades();
+      if (post != null) {
+        for (PostGradeDTO postGradeDTO : dto.getGrades()) {
+          PostGrade postGrade = new PostGrade();
+          postGrade.setPost(post);
+          postGrade.setPostGradeType(postGradeDTO.getPostGradeType());
+          postGrade.setGradeId(postGradeDTO.getGradeId());
+          postGrades.add(postGrade);
+        }
+        post.setGrades(postGrades);
+        postsToSave.add(post);
+      }
+    }
+    List<Post> savedPosts = postRepository.save(postsToSave);
     return postMapper.postsToPostDTOs(savedPosts);
   }
 
