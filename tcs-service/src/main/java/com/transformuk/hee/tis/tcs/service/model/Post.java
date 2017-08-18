@@ -14,6 +14,15 @@ import java.util.Set;
  */
 @Entity
 @Table(name = "Post")
+@NamedEntityGraph(name="all.oldNewPost.programmes.sites.grades.specialties.placementHistory", attributeNodes = {
+    @NamedAttributeNode("oldPost"),
+    @NamedAttributeNode("newPost"),
+    @NamedAttributeNode("programmes"),
+    @NamedAttributeNode("sites"),
+    @NamedAttributeNode("grades"),
+    @NamedAttributeNode("specialties"),
+    @NamedAttributeNode("placementHistory")
+})
 public class Post implements Serializable {
 
   private static final long serialVersionUID = 1L;
@@ -54,26 +63,26 @@ public class Post implements Serializable {
   @Column(name = "localPostNumber")
   private String localPostNumber;
 
-  @OneToOne
+  @OneToOne(fetch = FetchType.EAGER)
   @JoinColumn(name = "oldPostId")
   private Post oldPost;
 
-  @OneToOne
+  @OneToOne(fetch = FetchType.EAGER)
   @JoinColumn(name = "newPostId")
   private Post newPost;
 
-  @OneToOne
+  @OneToOne(fetch = FetchType.EAGER)
   @JoinColumn(name = "programmeId")
   private Programme programmes;
 
   // Entity Site defined in the Reference service
-  @OneToMany(mappedBy = "post", cascade = CascadeType.ALL, fetch = FetchType.LAZY)
+  @OneToMany(mappedBy = "post", cascade = CascadeType.ALL, fetch = FetchType.EAGER)
   private Set<PostSite> sites = new HashSet<>();
 
-  @OneToMany(mappedBy = "post", cascade = CascadeType.ALL, fetch = FetchType.LAZY)
+  @OneToMany(mappedBy = "post", cascade = CascadeType.ALL, fetch = FetchType.EAGER)
   private Set<PostGrade> grades = new HashSet<>();
 
-  @OneToMany(mappedBy = "post", cascade = CascadeType.ALL, fetch = FetchType.LAZY)
+  @OneToMany(mappedBy = "post", cascade = CascadeType.ALL, fetch = FetchType.EAGER)
   private Set<PostSpecialty> specialties = new HashSet<>();
 
   @OneToMany(fetch = FetchType.EAGER)
