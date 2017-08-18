@@ -1,6 +1,5 @@
 package com.transformuk.hee.tis.tcs.service.service;
 
-import com.transformuk.hee.tis.tcs.api.dto.PostRelationshipsDTO;
 import com.transformuk.hee.tis.tcs.api.dto.PostDTO;
 import com.transformuk.hee.tis.tcs.service.model.ColumnFilter;
 import org.springframework.data.domain.Page;
@@ -37,7 +36,7 @@ public interface PostService {
    * @param postRelationshipsDTOS the list of entities to save
    * @return the list of persisted entities
    */
-  List<PostDTO> updateOldNewPosts(List<PostRelationshipsDTO> postRelationshipsDTOS);
+  List<PostDTO> updateOldNewPosts(List<PostDTO> postRelationshipsDTOS);
 
   /**
    * Update a list of post so that the links to sites are saved.
@@ -45,7 +44,7 @@ public interface PostService {
    * @param postRelationshipsDTOS the list of entities to save
    * @return the list of persisted entities
    */
-  List<PostDTO> updatePostSites(List<PostRelationshipsDTO> postRelationshipsDTOS);
+  List<PostDTO> updatePostSites(List<PostDTO> postRelationshipsDTOS);
 
   /**
    * Update a list of post so that the links to grades are saved.
@@ -53,7 +52,24 @@ public interface PostService {
    * @param postRelationshipsDTOS the list of entities to save
    * @return the list of persisted entities
    */
-  List<PostDTO> updatePostGrades(List<PostRelationshipsDTO> postRelationshipsDTOS);
+  List<PostDTO> updatePostGrades(List<PostDTO> postRelationshipsDTOS);
+
+  /**
+   * patch a list of post so that the links to grades are saved.
+   *
+   * @param postDTOList the list of entities to patch
+   * @return the list of persisted entities
+   */
+  List<PostDTO> patchPostProgrammes(List<PostDTO> postDTOList);
+
+  /**
+   * patch a list of post so that the links to specialties are saved.
+   *
+   * @param postDTOList the list of entities to patch
+   * @return the list of persisted entities
+   */
+  List<PostDTO> patchPostSpecialties(List<PostDTO> postDTOList);
+
 
   /**
    * Update a single post

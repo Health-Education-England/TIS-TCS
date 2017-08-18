@@ -4,19 +4,13 @@ import com.google.common.collect.Lists;
 import com.google.common.collect.Sets;
 import com.transformuk.hee.tis.tcs.api.dto.PostDTO;
 import com.transformuk.hee.tis.tcs.api.dto.PostGradeDTO;
-import com.transformuk.hee.tis.tcs.api.dto.PostRelationshipsDTO;
 import com.transformuk.hee.tis.tcs.api.dto.PostSiteDTO;
+import com.transformuk.hee.tis.tcs.api.dto.PostSpecialtyDTO;
 import com.transformuk.hee.tis.tcs.api.enumeration.PostGradeType;
 import com.transformuk.hee.tis.tcs.api.enumeration.PostSiteType;
 import com.transformuk.hee.tis.tcs.api.enumeration.PostSpecialtyType;
-import com.transformuk.hee.tis.tcs.service.model.ColumnFilter;
-import com.transformuk.hee.tis.tcs.service.model.Post;
-import com.transformuk.hee.tis.tcs.service.model.PostGrade;
-import com.transformuk.hee.tis.tcs.service.model.PostSite;
-import com.transformuk.hee.tis.tcs.service.repository.PostGradeRepository;
-import com.transformuk.hee.tis.tcs.service.repository.PostRepository;
-import com.transformuk.hee.tis.tcs.service.repository.PostSiteRepository;
-import com.transformuk.hee.tis.tcs.service.repository.PostSpecialtyRepository;
+import com.transformuk.hee.tis.tcs.service.model.*;
+import com.transformuk.hee.tis.tcs.service.repository.*;
 import com.transformuk.hee.tis.tcs.service.service.PostService;
 import com.transformuk.hee.tis.tcs.service.service.mapper.DesignatedBodyMapper;
 import com.transformuk.hee.tis.tcs.service.service.mapper.PostGradeMapper;
@@ -34,7 +28,6 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.util.ArrayList;
-import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
 import java.util.stream.Collectors;
@@ -61,6 +54,10 @@ public class PostServiceImpl implements PostService {
   private PostSiteRepository postSiteRepository;
   @Autowired
   private PostSpecialtyRepository postSpecialtyRepository;
+  @Autowired
+  private ProgrammeRepository programmeRepository;
+  @Autowired
+  private SpecialtyRepository specialtyRepository;
   @Autowired
   private PostMapper postMapper;
   @Autowired
@@ -104,18 +101,26 @@ public class PostServiceImpl implements PostService {
    * @return the list of persisted entities
    */
   @Override
-  public List<PostDTO> updateOldNewPosts(List<PostRelationshipsDTO> postRelationshipsDTOS) {
+  public List<PostDTO> updateOldNewPosts(List<PostDTO> postRelationshipsDTOS) {
     List<Post> postsToSave = Lists.newArrayList();
-    for (PostRelationshipsDTO dto : postRelationshipsDTOS) {
+    for (PostDTO dto : postRelationshipsDTOS) {
 
-      Post post = postRepository.findPostByIntrepidId(dto.getPostIntrepidId());
+      Post post = postRepository.findPostByIntrepidId(dto.getIntrepidId());
       if (post != null) {
-        Post oldPost = postRepository.findPostByIntrepidId(dto.getOldPostIntrepidId());
-        Post newPost = postRepository.findPostByIntrepidId(dto.getNewPostIntrepidId());
-        if (dto.getOldPostIntrepidId() != null) {
+        Post oldPost = null;
+        String oldPostIntrepidId = dto.getOldPost().getIntrepidId();
+        if (dto.getOldPost() != null && oldPostIntrepidId != null) {
+          oldPost = postRepository.findPostByIntrepidId(oldPostIntrepidId);
+        }
+        Post newPost = null;
+        String newPostIntrepidId = dto.getNewPost().getIntrepidId();
+        if (dto.getNewPost() != null && newPostIntrepidId != null) {
+          newPost = postRepository.findPostByIntrepidId(newPostIntrepidId);
+        }
+        if (oldPostIntrepidId != null) {
           post.setOldPost(oldPost);
         }
-        if (dto.getNewPostIntrepidId() != null) {
+        if (newPostIntrepidId != null) {
           post.setNewPost(newPost);
         }
         postsToSave.add(post);
@@ -126,11 +131,11 @@ public class PostServiceImpl implements PostService {
   }
 
   @Override
-  public List<PostDTO> updatePostSites(List<PostRelationshipsDTO> postRelationshipsDTOS) {
+  public List<PostDTO> updatePostSites(List<PostDTO> postRelationshipsDTOS) {
     List<Post> postsToSave = Lists.newArrayList();
-    for (PostRelationshipsDTO dto : postRelationshipsDTOS) {
+    for (PostDTO dto : postRelationshipsDTOS) {
 
-      Post post = postRepository.findPostByIntrepidId(dto.getPostIntrepidId());
+      Post post = postRepository.findPostByIntrepidId(dto.getIntrepidId());
       if (post != null) {
         Set<PostSite> sites = post.getSites();
         for (PostSiteDTO siteDTO : dto.getSites()) {
@@ -149,11 +154,11 @@ public class PostServiceImpl implements PostService {
   }
 
   @Override
-  public List<PostDTO> updatePostGrades(List<PostRelationshipsDTO> postRelationshipsDTOS) {
+  public List<PostDTO> updatePostGrades(List<PostDTO> postRelationshipsDTOS) {
     List<Post> postsToSave = Lists.newArrayList();
-    for (PostRelationshipsDTO dto : postRelationshipsDTOS) {
+    for (PostDTO dto : postRelationshipsDTOS) {
 
-      Post post = postRepository.findPostByIntrepidId(dto.getPostIntrepidId());
+      Post post = postRepository.findPostByIntrepidId(dto.getIntrepidId());
       Set<PostGrade> postGrades = post.getGrades();
       if (post != null) {
         for (PostGradeDTO postGradeDTO : dto.getGrades()) {
@@ -168,6 +173,46 @@ public class PostServiceImpl implements PostService {
       }
     }
     List<Post> savedPosts = postRepository.save(postsToSave);
+    return postMapper.postsToPostDTOs(savedPosts);
+  }
+
+  @Override
+  public List<PostDTO> patchPostProgrammes(List<PostDTO> postDTOList) {
+    Set<Post> posts = Sets.newHashSet();
+    for (PostDTO dto : postDTOList) {
+      Post post = postRepository.findPostByIntrepidId(dto.getIntrepidId());
+      if (post != null) {
+        Programme programme = programmeRepository.findOne(dto.getProgrammes().getId());
+        post.setProgrammes(programme);
+        posts.add(post);
+      }
+    }
+    List<Post> savedPosts = postRepository.save(posts);
+    return postMapper.postsToPostDTOs(savedPosts);
+  }
+
+  @Override
+  public List<PostDTO> patchPostSpecialties(List<PostDTO> postDTOList) {
+    Set<Post> posts = Sets.newHashSet();
+    for (PostDTO dto : postDTOList) {
+      Post post = postRepository.findPostByIntrepidId(dto.getIntrepidId());
+      if (post != null) {
+        Set<PostSpecialty> attachedSpecialties = post.getSpecialties();
+        for (PostSpecialtyDTO postSpecialtyDTO : dto.getSpecialties()) {
+          Specialty specialty = specialtyRepository.findOne(postSpecialtyDTO.getSpecialty().getId());
+          if (specialty != null) {
+            PostSpecialty postSpecialty = new PostSpecialty();
+            postSpecialty.setPostSpecialtyType(postSpecialtyDTO.getPostSpecialtyType());
+            postSpecialty.setPost(post);
+            postSpecialty.setSpecialty(specialty);
+            attachedSpecialties.add(postSpecialty);
+          }
+        }
+        post.setSpecialties(attachedSpecialties);
+        posts.add(post);
+      }
+    }
+    List<Post> savedPosts = postRepository.save(posts);
     return postMapper.postsToPostDTOs(savedPosts);
   }
 

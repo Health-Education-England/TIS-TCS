@@ -1,7 +1,6 @@
 package com.transformuk.hee.tis.tcs.client.service.impl;
 
 import com.google.common.collect.Maps;
-import com.transformuk.hee.tis.tcs.api.dto.PostRelationshipsDTO;
 import com.transformuk.hee.tis.tcs.api.dto.PostDTO;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
@@ -23,8 +22,6 @@ public class PostRelationshipsService<DTO> {
 
   static {
     classToParamTypeRefMap.put(PostDTO.class, new ParameterizedTypeReference<List<PostDTO>>() {
-    });
-    classToParamTypeRefMap.put(PostRelationshipsDTO.class, new ParameterizedTypeReference<List<PostDTO>>() {
     });
   }
 
