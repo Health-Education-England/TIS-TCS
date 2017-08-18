@@ -15,7 +15,7 @@ public class PostGrade implements Serializable {
   @Column(name = "id")
   private Long id;
 
-  @ManyToOne(targetEntity = Post.class, fetch = FetchType.LAZY)
+  @ManyToOne(targetEntity = Post.class, fetch = FetchType.EAGER)
   @JoinColumn(name = "postId")
   private Post post;
 
