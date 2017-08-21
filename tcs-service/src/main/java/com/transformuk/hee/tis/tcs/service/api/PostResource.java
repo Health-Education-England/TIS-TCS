@@ -253,7 +253,7 @@ public class PostResource {
       }
     }
 
-    List<PostDTO> results = postService.updateOldNewPosts(postDTOS);
+    List<PostDTO> results = postService.patchOldNewPosts(postDTOS);
     List<Long> ids = results.stream().map(r -> r.getId()).collect(Collectors.toList());
     return ResponseEntity.ok()
         .headers(HeaderUtil.createEntityUpdateAlert(ENTITY_NAME, StringUtils.join(ids, ",")))
@@ -292,7 +292,7 @@ public class PostResource {
       }
     }
 
-    List<PostDTO> results = postService.updatePostSites(postDTOS);
+    List<PostDTO> results = postService.patchPostSites(postDTOS);
     List<Long> ids = results.stream().map(r -> r.getId()).collect(Collectors.toList());
     return ResponseEntity.ok()
         .headers(HeaderUtil.createEntityUpdateAlert(ENTITY_NAME, StringUtils.join(ids, ",")))
@@ -331,7 +331,7 @@ public class PostResource {
       }
     }
 
-    List<PostDTO> results = postService.updatePostGrades(postRelationshipsDto);
+    List<PostDTO> results = postService.patchPostGrades(postRelationshipsDto);
     List<Long> ids = results.stream().map(r -> r.getId()).collect(Collectors.toList());
     return ResponseEntity.ok()
         .headers(HeaderUtil.createEntityUpdateAlert(ENTITY_NAME, StringUtils.join(ids, ",")))

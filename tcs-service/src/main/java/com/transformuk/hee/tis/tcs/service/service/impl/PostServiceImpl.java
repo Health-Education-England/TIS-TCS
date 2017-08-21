@@ -24,9 +24,7 @@ import org.springframework.data.jpa.domain.Specifications;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Set;
+import java.util.*;
 import java.util.stream.Collectors;
 
 import static com.transformuk.hee.tis.tcs.service.service.impl.SpecificationFactory.*;
@@ -94,34 +92,53 @@ public class PostServiceImpl implements PostService {
 
   /**
    * Update a list of post so that the links to old/new posts are saved. its important to note that if a related post
-   * cannot be found, the existing post is cleared but if related post id  is null then it isnt cleared
+   * cannot be found, the existing post is cleared but if related post id  is null then it isnt cleared, this is to ensure
+   * that calls that dont send id's wont clear previously set links
+   * <p>
+   * This method does try to be performant by compiling the collection of post ids together before doing a
+   * query (rather than doing singular find by id).
    *
-   * @param postRelationshipsDTOS the list of entities to save
+   * @param postDTOList the list of entities to save
    * @return the list of persisted entities
    */
   @Override
-  public List<PostDTO> updateOldNewPosts(List<PostDTO> postRelationshipsDTOS) {
+  public List<PostDTO> patchOldNewPosts(List<PostDTO> postDTOList) {
     List<Post> postsToSave = Lists.newArrayList();
-    for (PostDTO dto : postRelationshipsDTOS) {
 
-      Post post = postRepository.findPostByIntrepidId(dto.getIntrepidId());
+    Set<String> postIntrepidIds = postDTOList.stream().map(PostDTO::getIntrepidId).collect(Collectors.toSet());
+    Set<String> oldPostIntrepidIds = postDTOList.stream()
+        .map(PostDTO::getOldPost)
+        .filter(Objects::nonNull)
+        .map(PostDTO::getIntrepidId)
+        .collect(Collectors.toSet());
+
+    Set<String> newPostIntrepidIds = postDTOList.stream()
+        .map(PostDTO::getNewPost)
+        .filter(Objects::nonNull)
+        .map(PostDTO::getIntrepidId)
+        .collect(Collectors.toSet());
+
+    Set<String> postIntredpidIds = Sets.newHashSet(postIntrepidIds);
+    postIntredpidIds.addAll(oldPostIntrepidIds);
+    postIntredpidIds.addAll(newPostIntrepidIds);
+
+    Map<String, Post> intrepidIdToPost = postRepository.findPostByIntrepidIdIn(postIntredpidIds)
+        .stream().collect(Collectors.toMap(Post::getIntrepidId, p -> p));
+
+    for (PostDTO dto : postDTOList) {
+
+      Post post = intrepidIdToPost.get(dto.getIntrepidId());
       if (post != null) {
-        Post oldPost = null;
-        String oldPostIntrepidId = dto.getOldPost().getIntrepidId();
-        if (dto.getOldPost() != null && oldPostIntrepidId != null) {
-          oldPost = postRepository.findPostByIntrepidId(oldPostIntrepidId);
-        }
-        Post newPost = null;
-        String newPostIntrepidId = dto.getNewPost().getIntrepidId();
-        if (dto.getNewPost() != null && newPostIntrepidId != null) {
-          newPost = postRepository.findPostByIntrepidId(newPostIntrepidId);
-        }
-        if (oldPostIntrepidId != null) {
+        if (dto.getOldPost() != null && dto.getOldPost().getIntrepidId() != null) {
+          Post oldPost = intrepidIdToPost.get(dto.getOldPost().getIntrepidId());
           post.setOldPost(oldPost);
         }
-        if (newPostIntrepidId != null) {
+
+        if (dto.getNewPost() != null && dto.getNewPost().getIntrepidId() != null) {
+          Post newPost = intrepidIdToPost.get(dto.getNewPost().getIntrepidId());
           post.setNewPost(newPost);
         }
+
         postsToSave.add(post);
       }
     }
@@ -130,11 +147,13 @@ public class PostServiceImpl implements PostService {
   }
 
   @Override
-  public List<PostDTO> updatePostSites(List<PostDTO> postRelationshipsDTOS) {
+  public List<PostDTO> patchPostSites(List<PostDTO> postDTOList) {
     List<Post> postsToSave = Lists.newArrayList();
-    for (PostDTO dto : postRelationshipsDTOS) {
+    Map<String, Post> intrepidIdToPost = getPostsByIntrepidId(postDTOList);
 
-      Post post = postRepository.findPostByIntrepidId(dto.getIntrepidId());
+    for (PostDTO dto : postDTOList) {
+
+      Post post = intrepidIdToPost.get(dto.getIntrepidId());
       if (post != null) {
         Set<PostSite> sites = post.getSites();
         for (PostSiteDTO siteDTO : dto.getSites()) {
@@ -153,11 +172,12 @@ public class PostServiceImpl implements PostService {
   }
 
   @Override
-  public List<PostDTO> updatePostGrades(List<PostDTO> postRelationshipsDTOS) {
+  public List<PostDTO> patchPostGrades(List<PostDTO> postDTOList) {
     List<Post> postsToSave = Lists.newArrayList();
-    for (PostDTO dto : postRelationshipsDTOS) {
+    Map<String, Post> intrepidIdToPost = getPostsByIntrepidId(postDTOList);
 
-      Post post = postRepository.findPostByIntrepidId(dto.getIntrepidId());
+    for (PostDTO dto : postDTOList) {
+      Post post = intrepidIdToPost.get(dto.getIntrepidId());
       Set<PostGrade> postGrades = post.getGrades();
       if (post != null) {
         for (PostGradeDTO postGradeDTO : dto.getGrades()) {
@@ -178,10 +198,20 @@ public class PostServiceImpl implements PostService {
   @Override
   public List<PostDTO> patchPostProgrammes(List<PostDTO> postDTOList) {
     Set<Post> posts = Sets.newHashSet();
+    Map<String, Post> intrepidIdToPost = getPostsByIntrepidId(postDTOList);
+
+    Set<Long> programmeIds = postDTOList
+        .stream()
+        .map(PostDTO::getProgrammes)
+        .map(ProgrammeDTO::getId)
+        .collect(Collectors.toSet());
+
+    Map<Long, Programme> idToProgramme = programmeRepository.findAll(programmeIds).stream().collect(Collectors.toMap(Programme::getId, p -> p));
+
     for (PostDTO dto : postDTOList) {
-      Post post = postRepository.findPostByIntrepidId(dto.getIntrepidId());
-      if (post != null) {
-        Programme programme = programmeRepository.findOne(dto.getProgrammes().getId());
+      Post post = intrepidIdToPost.get(dto.getIntrepidId());
+      Programme programme = idToProgramme.get(dto.getProgrammes().getId());
+      if (post != null && programme != null) {
         post.setProgrammes(programme);
         posts.add(post);
       }
@@ -193,12 +223,23 @@ public class PostServiceImpl implements PostService {
   @Override
   public List<PostDTO> patchPostSpecialties(List<PostDTO> postDTOList) {
     Set<Post> posts = Sets.newHashSet();
+    Map<String, Post> intrepidIdToPost = getPostsByIntrepidId(postDTOList);
+
+    Set<Long> specialtyIds = postDTOList
+        .stream()
+        .map(PostDTO::getSpecialties)
+        .flatMap(Collection::stream)
+        .map(PostSpecialtyDTO::getSpecialty)
+        .map(SpecialtyDTO::getId)
+        .collect(Collectors.toSet());
+
+    Map<Long, Specialty> idToSpecialty = specialtyRepository.findAll(specialtyIds).stream().collect(Collectors.toMap(Specialty::getId, sp -> sp));
     for (PostDTO dto : postDTOList) {
-      Post post = postRepository.findPostByIntrepidId(dto.getIntrepidId());
+      Post post = intrepidIdToPost.get(dto.getIntrepidId());
       if (post != null) {
         Set<PostSpecialty> attachedSpecialties = post.getSpecialties();
         for (PostSpecialtyDTO postSpecialtyDTO : dto.getSpecialties()) {
-          Specialty specialty = specialtyRepository.findOne(postSpecialtyDTO.getSpecialty().getId());
+          Specialty specialty = idToSpecialty.get(postSpecialtyDTO.getSpecialty().getId());
           if (specialty != null) {
             PostSpecialty postSpecialty = new PostSpecialty();
             postSpecialty.setPostSpecialtyType(postSpecialtyDTO.getPostSpecialtyType());
@@ -215,15 +256,34 @@ public class PostServiceImpl implements PostService {
     return postMapper.postsToPostDTOs(savedPosts);
   }
 
+  private Map<String, Post> getPostsByIntrepidId(List<PostDTO> postDtoList) {
+    Set<String> postIntrepidIds = postDtoList.stream().map(PostDTO::getIntrepidId).collect(Collectors.toSet());
+    return postRepository.findPostByIntrepidIdIn(postIntrepidIds).stream().collect(
+        Collectors.toMap(Post::getIntrepidId, post -> post)
+    );
+  }
+
   @Override
   public List<PostDTO> patchPostPlacements(List<PostDTO> postDTOList) {
     Set<Post> posts = Sets.newHashSet();
+    Map<String, Post> intrepidIdToPost = getPostsByIntrepidId(postDTOList);
+
+    Set<String> postPlamementIntrepidIds = postDTOList
+        .stream()
+        .map(PostDTO::getPlacementHistory)
+        .flatMap(Collection::stream)
+        .map(PlacementDTO::getIntrepidId)
+        .collect(Collectors.toSet());
+
+    Map<String, Placement> placementIntrepidIdToPlacements = placementRepository.findByIntrepidIdIn(postPlamementIntrepidIds)
+        .stream().collect(Collectors.toMap(Placement::getIntrepidId, p -> p));
+
     for (PostDTO dto : postDTOList) {
-      Post post = postRepository.findPostByIntrepidId(dto.getIntrepidId());
+      Post post = intrepidIdToPost.get(dto.getIntrepidId());
       if (post != null) {
         Set<Placement> placements = post.getPlacementHistory();
         for (PlacementDTO placementDTO : dto.getPlacementHistory()) {
-          Placement Placement = placementRepository.findByIntrepidId(placementDTO.getIntrepidId());
+          Placement Placement = placementIntrepidIdToPlacements.get(placementDTO.getIntrepidId());
           if (Placement != null) {
             placements.add(Placement);
           }
