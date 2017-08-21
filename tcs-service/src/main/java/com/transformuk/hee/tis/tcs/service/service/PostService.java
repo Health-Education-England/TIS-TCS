@@ -70,6 +70,14 @@ public interface PostService {
    */
   List<PostDTO> patchPostSpecialties(List<PostDTO> postDTOList);
 
+  /**
+   * patch a list of post so that the links to placements are saved.
+   *
+   * @param postDTOList the list of entities to patch
+   * @return the list of persisted entities
+   */
+  List<PostDTO> patchPostPlacements(List<PostDTO> postDTOList);
+
 
   /**
    * Update a single post

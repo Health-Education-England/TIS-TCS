@@ -9,4 +9,6 @@ import org.springframework.data.jpa.repository.JpaRepository;
 @SuppressWarnings("unused")
 public interface PlacementRepository extends JpaRepository<Placement, Long> {
 
+  Placement findByIntrepidId(String intrepidId);
+
 }

@@ -416,4 +416,42 @@ public class PostResource {
         .body(results);
   }
 
+  /**
+   * PATCH  /bulk-patch-post-placements : Patches a Post to link it to placements
+   *
+   * @param postRelationshipsDto List of the PostRelationshipsDTO to update their old and new Posts
+   * @return the ResponseEntity with status 200 (OK) and with body the updated postDTOS,
+   * or with status 400 (Bad Request) if the postDTOS is not valid,
+   * or with status 500 (Internal Server Error) if the postDTOS couldnt be updated
+   * @throws URISyntaxException if the Location URI syntax is incorrect
+   */
+  @PatchMapping("/bulk-patch-post-placements")
+  @Timed
+  @PreAuthorize("hasAuthority('tcs:add:modify:entities')")
+  public ResponseEntity<List<PostDTO>> bulkPatchPostPlacements(@Valid @RequestBody List<PostDTO> postRelationshipsDto) throws URISyntaxException {
+    log.debug("REST request to bulk link placements to Posts : {}", postRelationshipsDto);
+    if (Collections.isEmpty(postRelationshipsDto)) {
+      return ResponseEntity.badRequest().headers(HeaderUtil.createFailureAlert(ENTITY_NAME, "request.body.empty",
+          "The request body for this end point cannot be empty")).body(null);
+    } else if (!Collections.isEmpty(postRelationshipsDto)) {
+      List<PostDTO> entitiesWithNoId = postRelationshipsDto.stream()
+          .filter(p -> p.getIntrepidId() == null)
+          .map(post -> {
+            PostDTO postDTO = new PostDTO();
+            postDTO.setIntrepidId(post.getIntrepidId());
+            return postDTO;
+          })
+          .collect(Collectors.toList());
+      if (!Collections.isEmpty(entitiesWithNoId)) {
+        return ResponseEntity.badRequest().headers(HeaderUtil.createFailureAlert(StringUtils.join(entitiesWithNoId, ","),
+            "bulk.update.failed.noId", "Some DTOs you've provided have no Id, cannot update entities that dont exist")).body(entitiesWithNoId);
+      }
+    }
+
+    List<PostDTO> results = postService.patchPostPlacements(postRelationshipsDto);
+    List<Long> ids = results.stream().map(r -> r.getId()).collect(Collectors.toList());
+    return ResponseEntity.ok()
+        .headers(HeaderUtil.createEntityUpdateAlert(ENTITY_NAME, StringUtils.join(ids, ",")))
+        .body(results);
+  }
 }

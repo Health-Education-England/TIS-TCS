@@ -2,10 +2,7 @@ package com.transformuk.hee.tis.tcs.service.service.impl;
 
 import com.google.common.collect.Lists;
 import com.google.common.collect.Sets;
-import com.transformuk.hee.tis.tcs.api.dto.PostDTO;
-import com.transformuk.hee.tis.tcs.api.dto.PostGradeDTO;
-import com.transformuk.hee.tis.tcs.api.dto.PostSiteDTO;
-import com.transformuk.hee.tis.tcs.api.dto.PostSpecialtyDTO;
+import com.transformuk.hee.tis.tcs.api.dto.*;
 import com.transformuk.hee.tis.tcs.api.enumeration.PostGradeType;
 import com.transformuk.hee.tis.tcs.api.enumeration.PostSiteType;
 import com.transformuk.hee.tis.tcs.api.enumeration.PostSpecialtyType;
@@ -59,6 +56,8 @@ public class PostServiceImpl implements PostService {
   @Autowired
   private SpecialtyRepository specialtyRepository;
   @Autowired
+  private PlacementRepository placementRepository;
+  @Autowired
   private PostMapper postMapper;
   @Autowired
   private PostSiteMapper postSiteMapper;
@@ -95,7 +94,7 @@ public class PostServiceImpl implements PostService {
 
   /**
    * Update a list of post so that the links to old/new posts are saved. its important to note that if a related post
-   * cannot be found, the existing post is cleared but if related post id is null then it isnt cleared
+   * cannot be found, the existing post is cleared but if related post id  is null then it isnt cleared
    *
    * @param postRelationshipsDTOS the list of entities to save
    * @return the list of persisted entities
@@ -209,6 +208,27 @@ public class PostServiceImpl implements PostService {
           }
         }
         post.setSpecialties(attachedSpecialties);
+        posts.add(post);
+      }
+    }
+    List<Post> savedPosts = postRepository.save(posts);
+    return postMapper.postsToPostDTOs(savedPosts);
+  }
+
+  @Override
+  public List<PostDTO> patchPostPlacements(List<PostDTO> postDTOList) {
+    Set<Post> posts = Sets.newHashSet();
+    for (PostDTO dto : postDTOList) {
+      Post post = postRepository.findPostByIntrepidId(dto.getIntrepidId());
+      if (post != null) {
+        Set<Placement> placements = post.getPlacementHistory();
+        for (PlacementDTO placementDTO : dto.getPlacementHistory()) {
+          Placement Placement = placementRepository.findByIntrepidId(placementDTO.getIntrepidId());
+          if (Placement != null) {
+            placements.add(Placement);
+          }
+        }
+        post.setPlacementHistory(placements);
         posts.add(post);
       }
     }
