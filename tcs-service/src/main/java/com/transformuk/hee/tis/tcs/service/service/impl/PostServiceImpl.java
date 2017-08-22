@@ -199,7 +199,7 @@ public class PostServiceImpl implements PostService {
 
   @Override
   public List<PostDTO> patchPostProgrammes(List<PostDTO> postDTOList) {
-    Set<Post> posts = Sets.newHashSet();
+    List<Post> posts = Lists.newArrayList();
     Map<String, Post> intrepidIdToPost = getPostsByIntrepidId(postDTOList);
 
     Set<Long> programmeIds = postDTOList
@@ -208,7 +208,8 @@ public class PostServiceImpl implements PostService {
         .map(ProgrammeDTO::getId)
         .collect(Collectors.toSet());
 
-    Map<Long, Programme> idToProgramme = programmeRepository.findAll(programmeIds).stream().collect(Collectors.toMap(Programme::getId, p -> p));
+    Map<Long, Programme> idToProgramme = programmeRepository.findAll(programmeIds)
+        .stream().collect(Collectors.toMap(Programme::getId, p -> p));
 
     for (PostDTO dto : postDTOList) {
       Post post = intrepidIdToPost.get(dto.getIntrepidId());
@@ -224,7 +225,7 @@ public class PostServiceImpl implements PostService {
 
   @Override
   public List<PostDTO> patchPostSpecialties(List<PostDTO> postDTOList) {
-    Set<Post> posts = Sets.newHashSet();
+    List<Post> posts = Lists.newArrayList();
     Map<String, Post> intrepidIdToPost = getPostsByIntrepidId(postDTOList);
 
     Set<Long> specialtyIds = postDTOList
@@ -262,7 +263,7 @@ public class PostServiceImpl implements PostService {
     Set<String> postIntrepidIds = postDtoList.stream().map(PostDTO::getIntrepidId).collect(Collectors.toSet());
     Set<Post> postsFound = postRepository.findPostByIntrepidIdIn(postIntrepidIds);
     Map<String, Post> result = Maps.newHashMap();
-    if(CollectionUtils.isNotEmpty(postsFound)) {
+    if (CollectionUtils.isNotEmpty(postsFound)) {
       result = postsFound.stream().collect(
           Collectors.toMap(Post::getIntrepidId, post -> post)
       );
@@ -272,7 +273,7 @@ public class PostServiceImpl implements PostService {
 
   @Override
   public List<PostDTO> patchPostPlacements(List<PostDTO> postDTOList) {
-    Set<Post> posts = Sets.newHashSet();
+    List<Post> posts = Lists.newArrayList();
     Map<String, Post> intrepidIdToPost = getPostsByIntrepidId(postDTOList);
 
     Set<String> postPlamementIntrepidIds = postDTOList
