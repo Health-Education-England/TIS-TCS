@@ -3,19 +3,11 @@ package com.transformuk.hee.tis.tcs.service.api;
 import com.google.common.collect.Lists;
 import com.google.common.collect.Sets;
 import com.transformuk.hee.tis.tcs.TestUtils;
-import com.transformuk.hee.tis.tcs.api.dto.PostDTO;
-import com.transformuk.hee.tis.tcs.api.enumeration.PostGradeType;
-import com.transformuk.hee.tis.tcs.api.enumeration.PostSiteType;
-import com.transformuk.hee.tis.tcs.api.enumeration.PostSpecialtyType;
-import com.transformuk.hee.tis.tcs.api.enumeration.PostSuffix;
-import com.transformuk.hee.tis.tcs.api.enumeration.Status;
+import com.transformuk.hee.tis.tcs.api.dto.*;
+import com.transformuk.hee.tis.tcs.api.enumeration.*;
 import com.transformuk.hee.tis.tcs.service.Application;
 import com.transformuk.hee.tis.tcs.service.exception.ExceptionTranslator;
-import com.transformuk.hee.tis.tcs.service.model.Post;
-import com.transformuk.hee.tis.tcs.service.model.PostGrade;
-import com.transformuk.hee.tis.tcs.service.model.PostSite;
-import com.transformuk.hee.tis.tcs.service.model.PostSpecialty;
-import com.transformuk.hee.tis.tcs.service.model.Specialty;
+import com.transformuk.hee.tis.tcs.service.model.*;
 import com.transformuk.hee.tis.tcs.service.repository.PlacementRepository;
 import com.transformuk.hee.tis.tcs.service.repository.PostRepository;
 import com.transformuk.hee.tis.tcs.service.repository.ProgrammeRepository;
@@ -43,13 +35,8 @@ import java.util.Set;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.hamcrest.Matchers.hasItem;
-import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.delete;
-import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
-import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
-import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.put;
-import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.content;
-import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
-import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.*;
+import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.*;
 
 /**
  * Test class for the PostResource REST controller.
@@ -60,43 +47,36 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 @SpringBootTest(classes = Application.class)
 public class PostResourceIntTest {
 
+  private static final String SPECIALTY_INTREPID_ID = "SPECIALTY INTREPID ID";
+  private static final String PROGRAMME_INTREPID_ID = "programme intrepid id";
+  private static final String PROGRAMME_NAME = "programme name";
+  private static final String PROGRAMME_NUMBER = "123456";
   private static final String DEFAULT_NATIONAL_POST_NUMBER = "AAAAAAAAAA";
   private static final String UPDATED_NATIONAL_POST_NUMBER = "BBBBBBBBBB";
-
   private static final Status DEFAULT_STATUS = Status.CURRENT;
   private static final Status UPDATED_STATUS = Status.INACTIVE;
-
   private static final String DEFAULT_EMPLOYING_BODY = "AAAAAAAAAA";
   private static final String UPDATED_EMPLOYING_BODY = "BBBBBBBBBB";
-
   private static final String DEFAULT_TRAINING_BODY_ID = "training body id";
   private static final String UPDATED_TRAINING_BODY = "BBBBBBBBBB";
-
-  private static final Long SPECIALTY_ID = 12345L;
   private static final String SPECIALTY_COLLEGE = "Specialty College";
   private static final String TEST_SPECIALTY = "Test Specialty";
-  private static final String INTREPID_ID = "Intrepid ID";
-
   private static final PostSuffix DEFAULT_SUFFIX = PostSuffix.ACADEMIC;
   private static final PostSuffix UPDATED_SUFFIX = PostSuffix.MILITARY;
-
   private static final String DEFAULT_MANAGING_OFFICE = "managing office";
   private static final String UPDATED_MANAGING_OFFICE = "updated managing office";
-
   private static final String DEFAULT_POST_FAMILY = "post family";
   private static final String UPDATED_POST_FAMILY = "Updated post family";
-
   private static final String DEFAULT_TRAINING_DESCRIPTION = "training description";
   private static final String UPDATED_TRAINING_DESCRIPTION = "Updated training description";
-
   private static final String DEFAULT_LOCAL_POST_NUMBER = "local post number";
   private static final String UPDATED_LOCAL_POST_NUMBER = "Updated local post number";
-
+  private static final String DEFAULT_INTREPID_ID = "intrepidNumber";
+  private static final String UPDATED_INTREPID_ID = "updated intrepidNumber";
   private static final String GRADE_ID = "Grade id";
   private static final String SITE_ID = "site id";
-  public static final String TEST_POST_NUMBER = "TESTPOST";
-  public static final String MANAGING_LOCAL_OFFICE = "Health Education England Kent, Surrey and Sussex";
-
+  private static final String TEST_POST_NUMBER = "TESTPOST";
+  private static final String MANAGING_LOCAL_OFFICE = "Health Education England Kent, Surrey and Sussex";
   @Autowired
   private PostRepository postRepository;
 
@@ -134,6 +114,8 @@ public class PostResourceIntTest {
   private PostGrade postGrade;
   private PostSite postSite;
   private PostSpecialty postSpecialty;
+  private Programme programme;
+
 
   /**
    * Create an entity for this test.
@@ -158,7 +140,9 @@ public class PostResourceIntTest {
         .employingBodyId(DEFAULT_EMPLOYING_BODY)
         .trainingBodyId(DEFAULT_TRAINING_BODY_ID)
         .trainingDescription(DEFAULT_TRAINING_DESCRIPTION)
-        .localPostNumber(DEFAULT_LOCAL_POST_NUMBER);
+        .localPostNumber(DEFAULT_LOCAL_POST_NUMBER)
+        .intrepidId(DEFAULT_INTREPID_ID);
+
     return post;
   }
 
@@ -166,7 +150,7 @@ public class PostResourceIntTest {
     Specialty specialty = new Specialty();
     specialty.setCollege(SPECIALTY_COLLEGE);
     specialty.setName(TEST_SPECIALTY);
-    specialty.setIntrepidId(INTREPID_ID);
+    specialty.setIntrepidId(SPECIALTY_INTREPID_ID);
     return specialty;
   }
 
@@ -192,6 +176,15 @@ public class PostResourceIntTest {
     postSite.setSiteId(siteId);
     postSite.setPost(post);
     return postSite;
+  }
+
+  public static Programme createProgramme() {
+    Programme programme = new Programme();
+    programme.setIntrepidId(PROGRAMME_INTREPID_ID);
+    programme.setProgrammeName(PROGRAMME_NAME);
+    programme.setProgrammeNumber(PROGRAMME_NUMBER);
+    programme.setStatus(Status.CURRENT);
+    return programme;
   }
 
   @Before
@@ -220,6 +213,9 @@ public class PostResourceIntTest {
     post = linkEntities(post, Sets.newHashSet(postSite), Sets.newHashSet(postGrade), Sets.newHashSet(postSpecialty));
 
     em.persist(post);
+
+    programme = createProgramme();
+    em.persist(programme);
   }
 
   @Test
@@ -623,5 +619,424 @@ public class PostResourceIntTest {
     assertThat(postList).hasSize(expectedDatabaseSizeAfterBulkUpdate);
   }
 
+  @Test
+  @Transactional
+  public void bulkPatchNewOldPostShouldSucceedWhenDataIsValid() throws Exception {
+    PostDTO postDTO = new PostDTO()
+        .id(post.getId())
+        .nationalPostNumber(UPDATED_NATIONAL_POST_NUMBER)
+        .status(UPDATED_STATUS)
+        .suffix(UPDATED_SUFFIX)
+        .managingLocalOffice(MANAGING_LOCAL_OFFICE)
+        .postFamily(UPDATED_POST_FAMILY)
+        .employingBodyId(UPDATED_EMPLOYING_BODY)
+        .trainingBodyId(UPDATED_TRAINING_BODY)
+        .trainingDescription(UPDATED_TRAINING_DESCRIPTION)
+        .localPostNumber(UPDATED_LOCAL_POST_NUMBER)
+        .intrepidId(UPDATED_INTREPID_ID);
 
+    Post oldPost = createEntity();
+    em.persist(oldPost);
+
+    PostDTO oldPostDTO = new PostDTO()
+        .id(oldPost.getId())
+        .nationalPostNumber(UPDATED_NATIONAL_POST_NUMBER)
+        .status(UPDATED_STATUS)
+        .suffix(UPDATED_SUFFIX)
+        .managingLocalOffice(MANAGING_LOCAL_OFFICE)
+        .postFamily(UPDATED_POST_FAMILY)
+        .employingBodyId(UPDATED_EMPLOYING_BODY)
+        .trainingBodyId(UPDATED_TRAINING_BODY)
+        .trainingDescription(UPDATED_TRAINING_DESCRIPTION)
+        .localPostNumber(UPDATED_LOCAL_POST_NUMBER);
+
+    postDTO.setNewPost(oldPostDTO);
+
+    int expectedDatabaseSizeAfterBulkUpdate = postRepository.findAll().size();
+
+    List<PostDTO> payload = Lists.newArrayList(postDTO);
+    restPostMockMvc.perform(patch("/api/bulk-patch-new-old-posts")
+        .contentType(TestUtil.APPLICATION_JSON_UTF8)
+        .content(TestUtil.convertObjectToJsonBytes(payload)))
+        .andExpect(status().isOk());
+
+    // Validate that both Post are still in the database
+    List<Post> postList = postRepository.findAll();
+    assertThat(postList).hasSize(expectedDatabaseSizeAfterBulkUpdate);
+  }
+
+  @Test
+  @Transactional
+  public void bulkPatchNewOldPostShouldFailWhenNoDataIsSent() throws Exception {
+    int expectedDatabaseSizeAfterBulkUpdate = postRepository.findAll().size();
+
+    List<PostDTO> payload = Lists.newArrayList();
+    restPostMockMvc.perform(patch("/api/bulk-patch-new-old-posts")
+        .contentType(TestUtil.APPLICATION_JSON_UTF8)
+        .content(TestUtil.convertObjectToJsonBytes(payload)))
+        .andExpect(status().isBadRequest());
+
+    // Validate that both Post are still in the database
+    List<Post> postList = postRepository.findAll();
+    assertThat(postList).hasSize(expectedDatabaseSizeAfterBulkUpdate);
+  }
+
+  @Test
+  @Transactional
+  public void bulkPatchNewOldPostShouldFailWhenDataIsSentWithNoId() throws Exception {
+    int expectedDatabaseSizeAfterBulkUpdate = postRepository.findAll().size();
+
+    PostDTO postDTO = new PostDTO();
+    postDTO.setTrainingDescription("RANDOM DATA");
+
+    List<PostDTO> payload = Lists.newArrayList(postDTO);
+    restPostMockMvc.perform(patch("/api/bulk-patch-new-old-posts")
+        .contentType(TestUtil.APPLICATION_JSON_UTF8)
+        .content(TestUtil.convertObjectToJsonBytes(payload)))
+        .andExpect(status().isBadRequest());
+
+    // Validate that both Post are still in the database
+    List<Post> postList = postRepository.findAll();
+    assertThat(postList).hasSize(expectedDatabaseSizeAfterBulkUpdate);
+  }
+
+  @Test
+  @Transactional
+  public void bulkPatchPostSitesShouldSucceedWhenDataIsValid() throws Exception {
+    PostDTO postDTO = new PostDTO()
+        .intrepidId(UPDATED_INTREPID_ID);
+
+    Post oldPost = createEntity();
+    em.persist(oldPost);
+
+    PostSiteDTO postSiteDTO = new PostSiteDTO();
+    postSiteDTO.setPostSiteType(PostSiteType.PRIMARY);
+    postSiteDTO.setSiteId("NewSiteId");
+
+    postDTO.setSites(Sets.newHashSet(postSiteDTO));
+
+    int expectedDatabaseSizeAfterBulkUpdate = postRepository.findAll().size();
+
+    List<PostDTO> payload = Lists.newArrayList(postDTO);
+    restPostMockMvc.perform(patch("/api/bulk-patch-post-sites")
+        .contentType(TestUtil.APPLICATION_JSON_UTF8)
+        .content(TestUtil.convertObjectToJsonBytes(payload)))
+        .andExpect(status().isOk());
+
+    // Validate that both Post are still in the database
+    List<Post> postList = postRepository.findAll();
+    assertThat(postList).hasSize(expectedDatabaseSizeAfterBulkUpdate);
+  }
+
+  @Test
+  @Transactional
+  public void bulkPatchPostSiteshouldFailWhenNoDataIsSent() throws Exception {
+    int expectedDatabaseSizeAfterBulkUpdate = postRepository.findAll().size();
+
+    List<PostDTO> payload = Lists.newArrayList();
+    restPostMockMvc.perform(patch("/api/bulk-patch-post-sites")
+        .contentType(TestUtil.APPLICATION_JSON_UTF8)
+        .content(TestUtil.convertObjectToJsonBytes(payload)))
+        .andExpect(status().isBadRequest());
+
+    // Validate that both Post are still in the database
+    List<Post> postList = postRepository.findAll();
+    assertThat(postList).hasSize(expectedDatabaseSizeAfterBulkUpdate);
+  }
+
+  @Test
+  @Transactional
+  public void bulkPatchPostSiteShouldFailWhenDataIsSentWithNoId() throws Exception {
+    int expectedDatabaseSizeAfterBulkUpdate = postRepository.findAll().size();
+
+    PostDTO postDTO = new PostDTO();
+    postDTO.setTrainingDescription("RANDOM DATA");
+
+    List<PostDTO> payload = Lists.newArrayList(postDTO);
+    restPostMockMvc.perform(patch("/api/bulk-patch-post-sites")
+        .contentType(TestUtil.APPLICATION_JSON_UTF8)
+        .content(TestUtil.convertObjectToJsonBytes(payload)))
+        .andExpect(status().isBadRequest());
+
+    // Validate that both Post are still in the database
+    List<Post> postList = postRepository.findAll();
+    assertThat(postList).hasSize(expectedDatabaseSizeAfterBulkUpdate);
+  }
+
+
+  @Test
+  @Transactional
+  public void bulkPatchPostGradesShouldSucceedWhenDataIsValid() throws Exception {
+    PostDTO postDTO = new PostDTO()
+        .intrepidId(DEFAULT_INTREPID_ID);
+
+    PostGradeDTO postGradeDTO = new PostGradeDTO();
+    postGradeDTO.setPostGradeType(PostGradeType.APPROVED);
+    postGradeDTO.setGradeId("NewGradeId");
+
+    postDTO.setGrades(Sets.newHashSet(postGradeDTO));
+
+    int expectedDatabaseSizeAfterBulkUpdate = postRepository.findAll().size();
+
+    List<PostDTO> payload = Lists.newArrayList(postDTO);
+    restPostMockMvc.perform(patch("/api/bulk-patch-post-grades")
+        .contentType(TestUtil.APPLICATION_JSON_UTF8)
+        .content(TestUtil.convertObjectToJsonBytes(payload)))
+        .andExpect(status().isOk());
+
+    // Validate that both Post are still in the database
+    List<Post> postList = postRepository.findAll();
+    assertThat(postList).hasSize(expectedDatabaseSizeAfterBulkUpdate);
+  }
+
+  @Test
+  @Transactional
+  public void bulkPatchPostGradesShouldFailWhenNoDataIsSent() throws Exception {
+    int expectedDatabaseSizeAfterBulkUpdate = postRepository.findAll().size();
+
+    List<PostDTO> payload = Lists.newArrayList();
+    restPostMockMvc.perform(patch("/api/bulk-patch-post-grades")
+        .contentType(TestUtil.APPLICATION_JSON_UTF8)
+        .content(TestUtil.convertObjectToJsonBytes(payload)))
+        .andExpect(status().isBadRequest());
+
+    // Validate that both Post are still in the database
+    List<Post> postList = postRepository.findAll();
+    assertThat(postList).hasSize(expectedDatabaseSizeAfterBulkUpdate);
+  }
+
+  @Test
+  @Transactional
+  public void bulkPatchPostGradesShouldFailWhenDataIsSentWithNoId() throws Exception {
+    int expectedDatabaseSizeAfterBulkUpdate = postRepository.findAll().size();
+
+    PostDTO postDTO = new PostDTO();
+    postDTO.setTrainingDescription("RANDOM DATA");
+
+    List<PostDTO> payload = Lists.newArrayList(postDTO);
+    restPostMockMvc.perform(patch("/api/bulk-patch-post-grades")
+        .contentType(TestUtil.APPLICATION_JSON_UTF8)
+        .content(TestUtil.convertObjectToJsonBytes(payload)))
+        .andExpect(status().isBadRequest());
+
+    // Validate that both Post are still in the database
+    List<Post> postList = postRepository.findAll();
+    assertThat(postList).hasSize(expectedDatabaseSizeAfterBulkUpdate);
+  }
+
+
+  @Test
+  @Transactional
+  public void bulkPatchPostProgrammesShouldSucceedWhenDataIsValid() throws Exception {
+    PostDTO postDTO = new PostDTO()
+        .intrepidId(DEFAULT_INTREPID_ID);
+
+    ProgrammeDTO programmeDTO = new ProgrammeDTO();
+    programmeDTO.setId(programme.getId());
+    programmeDTO.setProgrammeName(programme.getProgrammeName());
+    programmeDTO.setProgrammeNumber(programme.getProgrammeNumber());
+    programmeDTO.setStatus(programme.getStatus());
+    programmeDTO.setIntrepidId(programme.getIntrepidId());
+
+    postDTO.setProgrammes(programmeDTO);
+
+    int expectedDatabaseSizeAfterBulkUpdate = postRepository.findAll().size();
+
+    List<PostDTO> payload = Lists.newArrayList(postDTO);
+    restPostMockMvc.perform(patch("/api/bulk-patch-post-programmes")
+        .contentType(TestUtil.APPLICATION_JSON_UTF8)
+        .content(TestUtil.convertObjectToJsonBytes(payload)))
+        .andExpect(status().isOk())
+        .andExpect(jsonPath("$").isArray())
+        .andExpect(jsonPath("$.[*].programmes.id").isArray())
+        .andExpect(jsonPath("$.[*].programmes.id").isNotEmpty())
+        .andExpect(jsonPath("$.[*].programmes.id").value(hasItem(programme.getId().intValue())));
+
+    // Validate that both Post are still in the database
+    List<Post> postList = postRepository.findAll();
+    assertThat(postList).hasSize(expectedDatabaseSizeAfterBulkUpdate);
+  }
+
+
+  @Test
+  @Transactional
+  public void bulkPatchPostProgrammesShouldFailWhenNoDataIsSent() throws Exception {
+    int expectedDatabaseSizeAfterBulkUpdate = postRepository.findAll().size();
+
+    List<PostDTO> payload = Lists.newArrayList();
+    restPostMockMvc.perform(patch("/api/bulk-patch-post-programmes")
+        .contentType(TestUtil.APPLICATION_JSON_UTF8)
+        .content(TestUtil.convertObjectToJsonBytes(payload)))
+        .andExpect(status().isBadRequest());
+
+    // Validate that both Post are still in the database
+    List<Post> postList = postRepository.findAll();
+    assertThat(postList).hasSize(expectedDatabaseSizeAfterBulkUpdate);
+  }
+
+  @Test
+  @Transactional
+  public void bulkPatchPostProgrammesShouldFailWhenDataIsSentWithNoId() throws Exception {
+    int expectedDatabaseSizeAfterBulkUpdate = postRepository.findAll().size();
+
+    PostDTO postDTO = new PostDTO();
+    postDTO.setTrainingDescription("RANDOM DATA");
+
+    List<PostDTO> payload = Lists.newArrayList(postDTO);
+    restPostMockMvc.perform(patch("/api/bulk-patch-post-programmes")
+        .contentType(TestUtil.APPLICATION_JSON_UTF8)
+        .content(TestUtil.convertObjectToJsonBytes(payload)))
+        .andExpect(status().isBadRequest());
+
+    // Validate that both Post are still in the database
+    List<Post> postList = postRepository.findAll();
+    assertThat(postList).hasSize(expectedDatabaseSizeAfterBulkUpdate);
+  }
+
+
+
+  @Test
+  @Transactional
+  public void bulkPatchPostSpecialtiesShouldSucceedWhenDataIsValid() throws Exception {
+    PostDTO postDTO = new PostDTO()
+        .intrepidId(DEFAULT_INTREPID_ID);
+
+    Specialty newSpecialty = new Specialty();
+    newSpecialty.setName("new specialty");
+    em.persist(newSpecialty);
+
+    PostSpecialtyDTO postSpecialtyDTO = new PostSpecialtyDTO();
+    postSpecialtyDTO.setPostSpecialtyType(PostSpecialtyType.PRIMARY);
+    SpecialtyDTO specialtyDTO = new SpecialtyDTO();
+    specialtyDTO.setId(newSpecialty.getId());
+    postSpecialtyDTO.setSpecialty(specialtyDTO);
+
+    postDTO.setSpecialties(Sets.newHashSet(postSpecialtyDTO));
+
+    int expectedDatabaseSizeAfterBulkUpdate = postRepository.findAll().size();
+
+    List<PostDTO> payload = Lists.newArrayList(postDTO);
+    restPostMockMvc.perform(patch("/api/bulk-patch-post-specialties")
+        .contentType(TestUtil.APPLICATION_JSON_UTF8)
+        .content(TestUtil.convertObjectToJsonBytes(payload)))
+        .andExpect(status().isOk())
+        .andExpect(jsonPath("$").isArray())
+        .andExpect(jsonPath("$.[*].specialties.[*].id").isArray())
+        .andExpect(jsonPath("$.[*].specialties.[*].id").isNotEmpty())
+        .andExpect(jsonPath("$.[*].specialties.[*].id").value(hasItem(newSpecialty.getId().intValue())));
+
+    // Validate that both Post are still in the database
+    List<Post> postList = postRepository.findAll();
+    assertThat(postList).hasSize(expectedDatabaseSizeAfterBulkUpdate);
+  }
+
+
+  @Test
+  @Transactional
+  public void bulkPatchPostSpecialtiesShouldFailWhenNoDataIsSent() throws Exception {
+    int expectedDatabaseSizeAfterBulkUpdate = postRepository.findAll().size();
+
+    List<PostDTO> payload = Lists.newArrayList();
+    restPostMockMvc.perform(patch("/api/bulk-patch-post-specialties")
+        .contentType(TestUtil.APPLICATION_JSON_UTF8)
+        .content(TestUtil.convertObjectToJsonBytes(payload)))
+        .andExpect(status().isBadRequest());
+
+    // Validate that both Post are still in the database
+    List<Post> postList = postRepository.findAll();
+    assertThat(postList).hasSize(expectedDatabaseSizeAfterBulkUpdate);
+  }
+
+  @Test
+  @Transactional
+  public void bulkPatchPostSpecialtiesShouldFailWhenDataIsSentWithNoId() throws Exception {
+    int expectedDatabaseSizeAfterBulkUpdate = postRepository.findAll().size();
+
+    PostDTO postDTO = new PostDTO();
+    postDTO.setTrainingDescription("RANDOM DATA");
+
+    List<PostDTO> payload = Lists.newArrayList(postDTO);
+    restPostMockMvc.perform(patch("/api/bulk-patch-post-specialties")
+        .contentType(TestUtil.APPLICATION_JSON_UTF8)
+        .content(TestUtil.convertObjectToJsonBytes(payload)))
+        .andExpect(status().isBadRequest());
+
+    // Validate that both Post are still in the database
+    List<Post> postList = postRepository.findAll();
+    assertThat(postList).hasSize(expectedDatabaseSizeAfterBulkUpdate);
+  }
+
+
+  @Test
+  @Transactional
+  public void bulkPatchPostPlacementsShouldSucceedWhenDataIsValid() throws Exception {
+    PostDTO postDTO = new PostDTO()
+        .intrepidId(DEFAULT_INTREPID_ID);
+
+    Placement newPlacement = new Placement();
+    newPlacement.setGrade("CT");
+    newPlacement.setNationalPostNumber("post no");
+    newPlacement.setSite("St Toms");
+    newPlacement.setPlacementType(PlacementType.PARENTALLEAVE);
+    newPlacement.setIntrepidId("12345");
+    em.persist(newPlacement);
+
+    PlacementDTO placementDTO = new PlacementDTO();
+    placementDTO.setId(newPlacement.getId());
+    placementDTO.setIntrepidId("12345");
+
+    postDTO.setPlacementHistory(Sets.newHashSet(placementDTO));
+
+    int expectedDatabaseSizeAfterBulkUpdate = postRepository.findAll().size();
+
+    List<PostDTO> payload = Lists.newArrayList(postDTO);
+    restPostMockMvc.perform(patch("/api/bulk-patch-post-placements")
+        .contentType(TestUtil.APPLICATION_JSON_UTF8)
+        .content(TestUtil.convertObjectToJsonBytes(payload)))
+        .andExpect(status().isOk())
+        .andExpect(jsonPath("$").isArray())
+        .andExpect(jsonPath("$.[*].placementHistory.[*].id").isArray())
+        .andExpect(jsonPath("$.[*].placementHistory.[*].id").isNotEmpty())
+        .andExpect(jsonPath("$.[*].placementHistory.[*].id").value(hasItem(newPlacement.getId().intValue())));
+
+    // Validate that both Post are still in the database
+    List<Post> postList = postRepository.findAll();
+    assertThat(postList).hasSize(expectedDatabaseSizeAfterBulkUpdate);
+  }
+
+
+  @Test
+  @Transactional
+  public void bulkPatchPostPlacementsShouldFailWhenNoDataIsSent() throws Exception {
+    int expectedDatabaseSizeAfterBulkUpdate = postRepository.findAll().size();
+
+    List<PostDTO> payload = Lists.newArrayList();
+    restPostMockMvc.perform(patch("/api/bulk-patch-post-placements")
+        .contentType(TestUtil.APPLICATION_JSON_UTF8)
+        .content(TestUtil.convertObjectToJsonBytes(payload)))
+        .andExpect(status().isBadRequest());
+
+    // Validate that both Post are still in the database
+    List<Post> postList = postRepository.findAll();
+    assertThat(postList).hasSize(expectedDatabaseSizeAfterBulkUpdate);
+  }
+
+  @Test
+  @Transactional
+  public void bulkPatchPostPlacementsShouldFailWhenDataIsSentWithNoId() throws Exception {
+    int expectedDatabaseSizeAfterBulkUpdate = postRepository.findAll().size();
+
+    PostDTO postDTO = new PostDTO();
+    postDTO.setTrainingDescription("RANDOM DATA");
+
+    List<PostDTO> payload = Lists.newArrayList(postDTO);
+    restPostMockMvc.perform(patch("/api/bulk-patch-post-placements")
+        .contentType(TestUtil.APPLICATION_JSON_UTF8)
+        .content(TestUtil.convertObjectToJsonBytes(payload)))
+        .andExpect(status().isBadRequest());
+
+    // Validate that both Post are still in the database
+    List<Post> postList = postRepository.findAll();
+    assertThat(postList).hasSize(expectedDatabaseSizeAfterBulkUpdate);
+  }
 }

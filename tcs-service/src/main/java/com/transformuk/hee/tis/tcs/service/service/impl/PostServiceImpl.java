@@ -1,6 +1,7 @@
 package com.transformuk.hee.tis.tcs.service.service.impl;
 
 import com.google.common.collect.Lists;
+import com.google.common.collect.Maps;
 import com.google.common.collect.Sets;
 import com.transformuk.hee.tis.tcs.api.dto.*;
 import com.transformuk.hee.tis.tcs.api.enumeration.PostGradeType;
@@ -13,6 +14,7 @@ import com.transformuk.hee.tis.tcs.service.service.mapper.DesignatedBodyMapper;
 import com.transformuk.hee.tis.tcs.service.service.mapper.PostGradeMapper;
 import com.transformuk.hee.tis.tcs.service.service.mapper.PostMapper;
 import com.transformuk.hee.tis.tcs.service.service.mapper.PostSiteMapper;
+import org.apache.commons.collections4.CollectionUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -258,9 +260,14 @@ public class PostServiceImpl implements PostService {
 
   private Map<String, Post> getPostsByIntrepidId(List<PostDTO> postDtoList) {
     Set<String> postIntrepidIds = postDtoList.stream().map(PostDTO::getIntrepidId).collect(Collectors.toSet());
-    return postRepository.findPostByIntrepidIdIn(postIntrepidIds).stream().collect(
-        Collectors.toMap(Post::getIntrepidId, post -> post)
-    );
+    Set<Post> postsFound = postRepository.findPostByIntrepidIdIn(postIntrepidIds);
+    Map<String, Post> result = Maps.newHashMap();
+    if(CollectionUtils.isNotEmpty(postsFound)) {
+      result = postsFound.stream().collect(
+          Collectors.toMap(Post::getIntrepidId, post -> post)
+      );
+    }
+    return result;
   }
 
   @Override

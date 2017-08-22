@@ -102,6 +102,11 @@ public class Post implements Serializable {
     this.intrepidId = intrepidId;
   }
 
+  public Post intrepidId(String intrepidId) {
+    this.intrepidId = intrepidId;
+    return this;
+  }
+
   public String getNationalPostNumber() {
     return nationalPostNumber;
   }
