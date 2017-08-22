@@ -1,0 +1,307 @@
+package com.transformuk.hee.tis.tcs.service.model;
+
+
+import javax.persistence.Entity;
+import javax.persistence.FetchType;
+import javax.persistence.GeneratedValue;
+import javax.persistence.GenerationType;
+import javax.persistence.Id;
+import javax.persistence.JoinColumn;
+import javax.persistence.OneToOne;
+import java.io.Serializable;
+import java.time.LocalDate;
+import java.util.Objects;
+
+/**
+ * A Person.
+ */
+@Entity
+public class Person implements Serializable {
+
+  private static final long serialVersionUID = 1L;
+
+  @Id
+  @GeneratedValue(strategy = GenerationType.IDENTITY)
+  private Long id;
+
+  private String intrepidId;
+
+  private LocalDate addedDate;
+
+  private LocalDate amendedDate;
+
+  private String role;
+
+  private String status;
+
+  private String comments;
+
+  private LocalDate inactiveDate;
+
+  private String inactiveNotes;
+
+  private String publicHealthNumber;
+
+  @OneToOne(fetch = FetchType.EAGER)
+  @JoinColumn(unique = true, name = "id")
+  private ContactDetails contactDetails;
+
+  @OneToOne(fetch = FetchType.EAGER)
+  @JoinColumn(unique = true, name = "id")
+  private PersonalDetails personalDetails;
+
+  @OneToOne(fetch = FetchType.EAGER)
+  @JoinColumn(unique = true, name = "id")
+  private GmcDetails gmcDetails;
+
+  @OneToOne(fetch = FetchType.EAGER)
+  @JoinColumn(unique = true, name = "id")
+  private GdcDetails gdcDetails;
+
+  @OneToOne(fetch = FetchType.EAGER)
+  @JoinColumn(unique = true, name = "id")
+  private Qualification qualification;
+
+  @OneToOne(fetch = FetchType.EAGER)
+  @JoinColumn(unique = true, name = "id")
+  private RightToWork rightToWork;
+
+  public Long getId() {
+    return id;
+  }
+
+  public void setId(Long id) {
+    this.id = id;
+  }
+
+  public String getIntrepidId() {
+    return intrepidId;
+  }
+
+  public void setIntrepidId(String intrepidId) {
+    this.intrepidId = intrepidId;
+  }
+
+  public Person intrepidId(String intrepidId) {
+    this.intrepidId = intrepidId;
+    return this;
+  }
+
+  public LocalDate getAddedDate() {
+    return addedDate;
+  }
+
+  public void setAddedDate(LocalDate addedDate) {
+    this.addedDate = addedDate;
+  }
+
+  public Person addedDate(LocalDate addedDate) {
+    this.addedDate = addedDate;
+    return this;
+  }
+
+  public LocalDate getAmendedDate() {
+    return amendedDate;
+  }
+
+  public void setAmendedDate(LocalDate amendedDate) {
+    this.amendedDate = amendedDate;
+  }
+
+  public Person amendedDate(LocalDate amendedDate) {
+    this.amendedDate = amendedDate;
+    return this;
+  }
+
+  public String getRole() {
+    return role;
+  }
+
+  public void setRole(String role) {
+    this.role = role;
+  }
+
+  public Person role(String role) {
+    this.role = role;
+    return this;
+  }
+
+  public String getStatus() {
+    return status;
+  }
+
+  public void setStatus(String status) {
+    this.status = status;
+  }
+
+  public Person status(String status) {
+    this.status = status;
+    return this;
+  }
+
+  public String getComments() {
+    return comments;
+  }
+
+  public void setComments(String comments) {
+    this.comments = comments;
+  }
+
+  public Person comments(String comments) {
+    this.comments = comments;
+    return this;
+  }
+
+  public LocalDate getInactiveDate() {
+    return inactiveDate;
+  }
+
+  public void setInactiveDate(LocalDate inactiveDate) {
+    this.inactiveDate = inactiveDate;
+  }
+
+  public Person inactiveDate(LocalDate inactiveDate) {
+    this.inactiveDate = inactiveDate;
+    return this;
+  }
+
+  public String getInactiveNotes() {
+    return inactiveNotes;
+  }
+
+  public void setInactiveNotes(String inactiveNotes) {
+    this.inactiveNotes = inactiveNotes;
+  }
+
+  public Person inactiveNotes(String inactiveNotes) {
+    this.inactiveNotes = inactiveNotes;
+    return this;
+  }
+
+  public String getPublicHealthNumber() {
+    return publicHealthNumber;
+  }
+
+  public void setPublicHealthNumber(String publicHealthNumber) {
+    this.publicHealthNumber = publicHealthNumber;
+  }
+
+  public Person publicHealthNumber(String publicHealthNumber) {
+    this.publicHealthNumber = publicHealthNumber;
+    return this;
+  }
+
+  public ContactDetails getContactDetails() {
+    return contactDetails;
+  }
+
+  public void setContactDetails(ContactDetails contactDetails) {
+    this.contactDetails = contactDetails;
+  }
+
+  public Person contactDetails(ContactDetails contactDetails) {
+    this.contactDetails = contactDetails;
+    return this;
+  }
+
+  public PersonalDetails getPersonalDetails() {
+    return personalDetails;
+  }
+
+  public void setPersonalDetails(PersonalDetails personalDetails) {
+    this.personalDetails = personalDetails;
+  }
+
+  public Person personalDetails(PersonalDetails personalDetails) {
+    this.personalDetails = personalDetails;
+    return this;
+  }
+
+  public GmcDetails getGmcDetails() {
+    return gmcDetails;
+  }
+
+  public void setGmcDetails(GmcDetails gmcDetails) {
+    this.gmcDetails = gmcDetails;
+  }
+
+  public Person gmcDetails(GmcDetails gmcDetails) {
+    this.gmcDetails = gmcDetails;
+    return this;
+  }
+
+  public GdcDetails getGdcDetails() {
+    return gdcDetails;
+  }
+
+  public void setGdcDetails(GdcDetails gdcDetails) {
+    this.gdcDetails = gdcDetails;
+  }
+
+  public Person gdcDetails(GdcDetails gdcDetails) {
+    this.gdcDetails = gdcDetails;
+    return this;
+  }
+
+  public Qualification getQualification() {
+    return qualification;
+  }
+
+  public void setQualification(Qualification qualification) {
+    this.qualification = qualification;
+  }
+
+  public Person qualification(Qualification qualification) {
+    this.qualification = qualification;
+    return this;
+  }
+
+  public RightToWork getRightToWork() {
+    return rightToWork;
+  }
+
+  public void setRightToWork(RightToWork rightToWork) {
+    this.rightToWork = rightToWork;
+  }
+
+  public Person rightToWork(RightToWork rightToWork) {
+    this.rightToWork = rightToWork;
+    return this;
+  }
+
+  @Override
+  public boolean equals(Object o) {
+    if (this == o) {
+      return true;
+    }
+    if (o == null || getClass() != o.getClass()) {
+      return false;
+    }
+    Person person = (Person) o;
+    if (person.getId() == null || getId() == null) {
+      return false;
+    }
+    return Objects.equals(getId(), person.getId());
+  }
+
+  @Override
+  public int hashCode() {
+    return Objects.hashCode(getId());
+  }
+
+  @Override
+  public String toString() {
+    return "Person{" +
+        "id=" + getId() +
+        ", intrepidId='" + getIntrepidId() + "'" +
+        ", addedDate='" + getAddedDate() + "'" +
+        ", amendedDate='" + getAmendedDate() + "'" +
+        ", role='" + getRole() + "'" +
+        ", status='" + getStatus() + "'" +
+        ", comments='" + getComments() + "'" +
+        ", inactiveDate='" + getInactiveDate() + "'" +
+        ", inactiveNotes='" + getInactiveNotes() + "'" +
+        ", publicHealthNumber='" + getPublicHealthNumber() + "'" +
+        "}";
+  }
+}
