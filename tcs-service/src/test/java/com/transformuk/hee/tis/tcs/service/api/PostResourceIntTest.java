@@ -901,14 +901,10 @@ public class PostResourceIntTest {
     PostDTO postDTO = new PostDTO()
         .intrepidId(DEFAULT_INTREPID_ID);
 
-    Specialty newSpecialty = new Specialty();
-    newSpecialty.setName("new specialty");
-    em.persist(newSpecialty);
-
     PostSpecialtyDTO postSpecialtyDTO = new PostSpecialtyDTO();
     postSpecialtyDTO.setPostSpecialtyType(PostSpecialtyType.PRIMARY);
     SpecialtyDTO specialtyDTO = new SpecialtyDTO();
-    specialtyDTO.setId(newSpecialty.getId());
+    specialtyDTO.setId(specialty.getId());
     postSpecialtyDTO.setSpecialty(specialtyDTO);
 
     postDTO.setSpecialties(Sets.newHashSet(postSpecialtyDTO));
@@ -923,7 +919,8 @@ public class PostResourceIntTest {
         .andExpect(jsonPath("$").isArray())
         .andExpect(jsonPath("$.[*].specialties.[*].id").isArray())
         .andExpect(jsonPath("$.[*].specialties.[*].id").isNotEmpty())
-        .andExpect(jsonPath("$.[*].specialties.[*].id").value(hasItem(newSpecialty.getId().intValue())));
+        .andExpect(jsonPath("$.[*].specialties.[*].specialty.id").value(hasItem(specialty.getId().intValue())))
+        .andExpect(jsonPath("$.[*].specialties.[*].postSpecialtyType").value(postSpecialtyDTO.getPostSpecialtyType().toString()));
 
     // Validate that both Post are still in the database
     List<Post> postList = postRepository.findAll();
