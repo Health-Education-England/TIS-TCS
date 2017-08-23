@@ -32,6 +32,9 @@ public class Post implements Serializable {
   @Column(name = "id")
   private Long id;
 
+  @Column(name = "intrepidId")
+  private String intrepidId;
+
   @Column(name = "nationalPostNumber")
   private String nationalPostNumber;
 
@@ -98,6 +101,19 @@ public class Post implements Serializable {
 
   public void setId(Long id) {
     this.id = id;
+  }
+
+  public String getIntrepidId() {
+    return intrepidId;
+  }
+
+  public void setIntrepidId(String intrepidId) {
+    this.intrepidId = intrepidId;
+  }
+
+  public Post intrepidId(String intrepidId) {
+    this.intrepidId = intrepidId;
+    return this;
   }
 
   public String getNationalPostNumber() {
@@ -333,6 +349,7 @@ public class Post implements Serializable {
   public String toString() {
     return "Post{" +
         "id=" + id +
+        ", intrepidId='" + intrepidId + '\'' +
         ", nationalPostNumber='" + nationalPostNumber + '\'' +
         ", status=" + status +
         ", suffix=" + suffix +

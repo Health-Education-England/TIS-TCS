@@ -8,6 +8,7 @@ import org.springframework.data.jpa.repository.EntityGraph;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.JpaSpecificationExecutor;
 
+import java.util.List;
 import java.util.Set;
 
 /**
@@ -23,6 +24,10 @@ public interface PostRepository extends JpaRepository<Post, Long>, JpaSpecificat
   @EntityGraph(value = "all.oldNewPost.programmes.sites.grades.specialties.placementHistory", type= EntityGraph.EntityGraphType.FETCH)
   @Override
   Page<Post> findAll(Specification<Post> specification, Pageable pageable);
+
+  Post findPostByIntrepidId(String intrepidId);
+
+  Set<Post> findPostByIntrepidIdIn(Set<String> intrepidIds);
 
   Page<Post> findByManagingLocalOfficeIn(Set<String> deaneries, Pageable pageable);
 }

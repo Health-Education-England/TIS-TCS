@@ -13,6 +13,8 @@ public class PlacementDTO implements Serializable {
 
   private Long id;
 
+  private String intrepidId;
+
   private String status;
 
   private String nationalPostNumber;
@@ -39,6 +41,14 @@ public class PlacementDTO implements Serializable {
 
   public void setId(Long id) {
     this.id = id;
+  }
+
+  public String getIntrepidId() {
+    return intrepidId;
+  }
+
+  public void setIntrepidId(String intrepidId) {
+    this.intrepidId = intrepidId;
   }
 
   public String getStatus() {

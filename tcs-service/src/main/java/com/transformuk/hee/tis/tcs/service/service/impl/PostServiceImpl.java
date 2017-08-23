@@ -1,18 +1,20 @@
 package com.transformuk.hee.tis.tcs.service.service.impl;
 
-import com.transformuk.hee.tis.tcs.api.dto.PostDTO;
+import com.google.common.collect.Lists;
+import com.google.common.collect.Maps;
+import com.google.common.collect.Sets;
+import com.transformuk.hee.tis.tcs.api.dto.*;
 import com.transformuk.hee.tis.tcs.api.enumeration.PostGradeType;
 import com.transformuk.hee.tis.tcs.api.enumeration.PostSiteType;
 import com.transformuk.hee.tis.tcs.api.enumeration.PostSpecialtyType;
-import com.transformuk.hee.tis.tcs.service.model.ColumnFilter;
-import com.transformuk.hee.tis.tcs.service.model.Post;
-import com.transformuk.hee.tis.tcs.service.repository.PostGradeRepository;
-import com.transformuk.hee.tis.tcs.service.repository.PostRepository;
-import com.transformuk.hee.tis.tcs.service.repository.PostSiteRepository;
-import com.transformuk.hee.tis.tcs.service.repository.PostSpecialtyRepository;
+import com.transformuk.hee.tis.tcs.service.model.*;
+import com.transformuk.hee.tis.tcs.service.repository.*;
 import com.transformuk.hee.tis.tcs.service.service.PostService;
 import com.transformuk.hee.tis.tcs.service.service.mapper.DesignatedBodyMapper;
+import com.transformuk.hee.tis.tcs.service.service.mapper.PostGradeMapper;
 import com.transformuk.hee.tis.tcs.service.service.mapper.PostMapper;
+import com.transformuk.hee.tis.tcs.service.service.mapper.PostSiteMapper;
+import org.apache.commons.collections4.CollectionUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -24,14 +26,10 @@ import org.springframework.data.jpa.domain.Specifications;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Set;
+import java.util.*;
 import java.util.stream.Collectors;
 
-import static com.transformuk.hee.tis.tcs.service.service.impl.SpecificationFactory.cbEqual;
-import static com.transformuk.hee.tis.tcs.service.service.impl.SpecificationFactory.containsLike;
-import static com.transformuk.hee.tis.tcs.service.service.impl.SpecificationFactory.in;
+import static com.transformuk.hee.tis.tcs.service.service.impl.SpecificationFactory.*;
 
 /**
  * Service Implementation for managing Post.
@@ -40,10 +38,10 @@ import static com.transformuk.hee.tis.tcs.service.service.impl.SpecificationFact
 @Transactional
 public class PostServiceImpl implements PostService {
 
+  private static final String SPECIALTIES = "specialties";
+  private static final String GRADES = "grades";
+  private static final String SITES = "sites";
   private static final Logger log = LoggerFactory.getLogger(PostServiceImpl.class);
-  public static final String SPECIALTIES = "specialties";
-  public static final String GRADES = "grades";
-  public static final String SITES = "sites";
 
   @Autowired
   private PostRepository postRepository;
@@ -54,7 +52,17 @@ public class PostServiceImpl implements PostService {
   @Autowired
   private PostSpecialtyRepository postSpecialtyRepository;
   @Autowired
+  private ProgrammeRepository programmeRepository;
+  @Autowired
+  private SpecialtyRepository specialtyRepository;
+  @Autowired
+  private PlacementRepository placementRepository;
+  @Autowired
   private PostMapper postMapper;
+  @Autowired
+  private PostSiteMapper postSiteMapper;
+  @Autowired
+  private PostGradeMapper postGradeMapper;
 
   /**
    * Save a post.
@@ -84,6 +92,217 @@ public class PostServiceImpl implements PostService {
     return postMapper.postsToPostDTOs(post);
   }
 
+  /**
+   * Update a list of post so that the links to old/new posts are saved. its important to note that if a related post
+   * cannot be found, the existing post is cleared but if related post id  is null then it isnt cleared, this is to ensure
+   * that calls that dont send id's wont clear previously set links
+   * <p>
+   * This method does try to be performant by compiling the collection of post ids together before doing a
+   * query (rather than doing singular find by id).
+   *
+   * @param postDTOList the list of entities to save
+   * @return the list of persisted entities
+   */
+  @Override
+  public List<PostDTO> patchOldNewPosts(List<PostDTO> postDTOList) {
+    List<Post> postsToSave = Lists.newArrayList();
+
+    Set<String> postIntrepidIds = postDTOList.stream().map(PostDTO::getIntrepidId).collect(Collectors.toSet());
+    Set<String> oldPostIntrepidIds = postDTOList.stream()
+        .map(PostDTO::getOldPost)
+        .filter(Objects::nonNull)
+        .map(PostDTO::getIntrepidId)
+        .collect(Collectors.toSet());
+
+    Set<String> newPostIntrepidIds = postDTOList.stream()
+        .map(PostDTO::getNewPost)
+        .filter(Objects::nonNull)
+        .map(PostDTO::getIntrepidId)
+        .collect(Collectors.toSet());
+
+    Set<String> postIntredpidIds = Sets.newHashSet(postIntrepidIds);
+    postIntredpidIds.addAll(oldPostIntrepidIds);
+    postIntredpidIds.addAll(newPostIntrepidIds);
+
+    Map<String, Post> intrepidIdToPost = postRepository.findPostByIntrepidIdIn(postIntredpidIds)
+        .stream().collect(Collectors.toMap(Post::getIntrepidId, p -> p));
+
+    for (PostDTO dto : postDTOList) {
+
+      Post post = intrepidIdToPost.get(dto.getIntrepidId());
+      if (post != null) {
+        if (dto.getOldPost() != null && dto.getOldPost().getIntrepidId() != null) {
+          Post oldPost = intrepidIdToPost.get(dto.getOldPost().getIntrepidId());
+          post.setOldPost(oldPost);
+        }
+
+        if (dto.getNewPost() != null && dto.getNewPost().getIntrepidId() != null) {
+          Post newPost = intrepidIdToPost.get(dto.getNewPost().getIntrepidId());
+          post.setNewPost(newPost);
+        }
+
+        postsToSave.add(post);
+      }
+    }
+    List<Post> savedPosts = postRepository.save(postsToSave);
+    return postMapper.postsToPostDTOs(savedPosts);
+  }
+
+  @Override
+  public List<PostDTO> patchPostSites(List<PostDTO> postDTOList) {
+    List<Post> postsToSave = Lists.newArrayList();
+    Map<String, Post> intrepidIdToPost = getPostsByIntrepidId(postDTOList);
+
+    for (PostDTO dto : postDTOList) {
+
+      Post post = intrepidIdToPost.get(dto.getIntrepidId());
+      if (post != null) {
+        Set<PostSite> sites = post.getSites();
+        for (PostSiteDTO siteDTO : dto.getSites()) {
+          PostSite postSite = new PostSite();
+          postSite.setPost(post);
+          postSite.setPostSiteType(siteDTO.getPostSiteType());
+          postSite.setSiteId(siteDTO.getSiteId());
+          sites.add(postSite);
+        }
+        post.setSites(sites);
+        postsToSave.add(post);
+      }
+    }
+    List<Post> savedPosts = postRepository.save(postsToSave);
+    return postMapper.postsToPostDTOs(savedPosts);
+  }
+
+  @Override
+  public List<PostDTO> patchPostGrades(List<PostDTO> postDTOList) {
+    List<Post> postsToSave = Lists.newArrayList();
+    Map<String, Post> intrepidIdToPost = getPostsByIntrepidId(postDTOList);
+
+    for (PostDTO dto : postDTOList) {
+      Post post = intrepidIdToPost.get(dto.getIntrepidId());
+      Set<PostGrade> postGrades = post.getGrades();
+      if (post != null) {
+        for (PostGradeDTO postGradeDTO : dto.getGrades()) {
+          PostGrade postGrade = new PostGrade();
+          postGrade.setPost(post);
+          postGrade.setPostGradeType(postGradeDTO.getPostGradeType());
+          postGrade.setGradeId(postGradeDTO.getGradeId());
+          postGrades.add(postGrade);
+        }
+        post.setGrades(postGrades);
+        postsToSave.add(post);
+      }
+    }
+    List<Post> savedPosts = postRepository.save(postsToSave);
+    return postMapper.postsToPostDTOs(savedPosts);
+  }
+
+  @Override
+  public List<PostDTO> patchPostProgrammes(List<PostDTO> postDTOList) {
+    List<Post> posts = Lists.newArrayList();
+    Map<String, Post> intrepidIdToPost = getPostsByIntrepidId(postDTOList);
+
+    Set<Long> programmeIds = postDTOList
+        .stream()
+        .map(PostDTO::getProgrammes)
+        .map(ProgrammeDTO::getId)
+        .collect(Collectors.toSet());
+
+    Map<Long, Programme> idToProgramme = programmeRepository.findAll(programmeIds)
+        .stream().collect(Collectors.toMap(Programme::getId, p -> p));
+
+    for (PostDTO dto : postDTOList) {
+      Post post = intrepidIdToPost.get(dto.getIntrepidId());
+      Programme programme = idToProgramme.get(dto.getProgrammes().getId());
+      if (post != null && programme != null) {
+        post.setProgrammes(programme);
+        posts.add(post);
+      }
+    }
+    List<Post> savedPosts = postRepository.save(posts);
+    return postMapper.postsToPostDTOs(savedPosts);
+  }
+
+  @Override
+  public List<PostDTO> patchPostSpecialties(List<PostDTO> postDTOList) {
+    List<Post> posts = Lists.newArrayList();
+    Map<String, Post> intrepidIdToPost = getPostsByIntrepidId(postDTOList);
+
+    Set<Long> specialtyIds = postDTOList
+        .stream()
+        .map(PostDTO::getSpecialties)
+        .flatMap(Collection::stream)
+        .map(PostSpecialtyDTO::getSpecialty)
+        .map(SpecialtyDTO::getId)
+        .collect(Collectors.toSet());
+
+    Map<Long, Specialty> idToSpecialty = specialtyRepository.findAll(specialtyIds).stream().collect(Collectors.toMap(Specialty::getId, sp -> sp));
+    for (PostDTO dto : postDTOList) {
+      Post post = intrepidIdToPost.get(dto.getIntrepidId());
+      if (post != null) {
+        Set<PostSpecialty> attachedSpecialties = post.getSpecialties();
+        for (PostSpecialtyDTO postSpecialtyDTO : dto.getSpecialties()) {
+          Specialty specialty = idToSpecialty.get(postSpecialtyDTO.getSpecialty().getId());
+          if (specialty != null) {
+            PostSpecialty postSpecialty = new PostSpecialty();
+            postSpecialty.setPostSpecialtyType(postSpecialtyDTO.getPostSpecialtyType());
+            postSpecialty.setPost(post);
+            postSpecialty.setSpecialty(specialty);
+            attachedSpecialties.add(postSpecialty);
+          }
+        }
+        post.setSpecialties(attachedSpecialties);
+        posts.add(post);
+      }
+    }
+    List<Post> savedPosts = postRepository.save(posts);
+    return postMapper.postsToPostDTOs(savedPosts);
+  }
+
+  private Map<String, Post> getPostsByIntrepidId(List<PostDTO> postDtoList) {
+    Set<String> postIntrepidIds = postDtoList.stream().map(PostDTO::getIntrepidId).collect(Collectors.toSet());
+    Set<Post> postsFound = postRepository.findPostByIntrepidIdIn(postIntrepidIds);
+    Map<String, Post> result = Maps.newHashMap();
+    if (CollectionUtils.isNotEmpty(postsFound)) {
+      result = postsFound.stream().collect(
+          Collectors.toMap(Post::getIntrepidId, post -> post)
+      );
+    }
+    return result;
+  }
+
+  @Override
+  public List<PostDTO> patchPostPlacements(List<PostDTO> postDTOList) {
+    List<Post> posts = Lists.newArrayList();
+    Map<String, Post> intrepidIdToPost = getPostsByIntrepidId(postDTOList);
+
+    Set<String> postPlamementIntrepidIds = postDTOList
+        .stream()
+        .map(PostDTO::getPlacementHistory)
+        .flatMap(Collection::stream)
+        .map(PlacementDTO::getIntrepidId)
+        .collect(Collectors.toSet());
+
+    Map<String, Placement> placementIntrepidIdToPlacements = placementRepository.findByIntrepidIdIn(postPlamementIntrepidIds)
+        .stream().collect(Collectors.toMap(Placement::getIntrepidId, p -> p));
+
+    for (PostDTO dto : postDTOList) {
+      Post post = intrepidIdToPost.get(dto.getIntrepidId());
+      if (post != null) {
+        Set<Placement> placements = post.getPlacementHistory();
+        for (PlacementDTO placementDTO : dto.getPlacementHistory()) {
+          Placement Placement = placementIntrepidIdToPlacements.get(placementDTO.getIntrepidId());
+          if (Placement != null) {
+            placements.add(Placement);
+          }
+        }
+        post.setPlacementHistory(placements);
+        posts.add(post);
+      }
+    }
+    List<Post> savedPosts = postRepository.save(posts);
+    return postMapper.postsToPostDTOs(savedPosts);
+  }
 
   @Override
   public PostDTO update(PostDTO postDTO) {
