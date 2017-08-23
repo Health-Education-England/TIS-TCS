@@ -26,8 +26,6 @@ public class TrainingNumber implements Serializable {
   @Enumerated(EnumType.STRING)
   private TrainingNumberType trainingNumberType;
 
-  private String localOffice;
-
   private Integer number;
 
   private Integer appointmentYear;
@@ -54,19 +52,6 @@ public class TrainingNumber implements Serializable {
 
   public TrainingNumber trainingNumberType(TrainingNumberType trainingNumberType) {
     this.trainingNumberType = trainingNumberType;
-    return this;
-  }
-
-  public String getLocalOffice() {
-    return localOffice;
-  }
-
-  public void setLocalOffice(String localOffice) {
-    this.localOffice = localOffice;
-  }
-
-  public TrainingNumber localOffice(String localOffice) {
-    this.localOffice = localOffice;
     return this;
   }
 
@@ -147,7 +132,6 @@ public class TrainingNumber implements Serializable {
     return "TrainingNumber{" +
         "id=" + id +
         ", trainingNumberType='" + trainingNumberType + "'" +
-        ", localOffice='" + localOffice + "'" +
         ", number='" + number + "'" +
         ", appointmentYear='" + appointmentYear + "'" +
         ", typeOfContract='" + typeOfContract + "'" +

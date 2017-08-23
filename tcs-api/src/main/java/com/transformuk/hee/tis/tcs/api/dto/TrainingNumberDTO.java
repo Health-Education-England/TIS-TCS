@@ -14,8 +14,6 @@ public class TrainingNumberDTO implements Serializable {
 
   private TrainingNumberType trainingNumberType;
 
-  private String localOffice;
-
   private Integer number;
 
   private Integer appointmentYear;
@@ -38,14 +36,6 @@ public class TrainingNumberDTO implements Serializable {
 
   public void setTrainingNumberType(TrainingNumberType trainingNumberType) {
     this.trainingNumberType = trainingNumberType;
-  }
-
-  public String getLocalOffice() {
-    return localOffice;
-  }
-
-  public void setLocalOffice(String localOffice) {
-    this.localOffice = localOffice;
   }
 
   public Integer getNumber() {
@@ -108,7 +98,6 @@ public class TrainingNumberDTO implements Serializable {
     return "TrainingNumberDTO{" +
         "id=" + id +
         ", trainingNumberType='" + trainingNumberType + "'" +
-        ", localOffice='" + localOffice + "'" +
         ", number='" + number + "'" +
         ", appointmentYear='" + appointmentYear + "'" +
         ", typeOfContract='" + typeOfContract + "'" +
