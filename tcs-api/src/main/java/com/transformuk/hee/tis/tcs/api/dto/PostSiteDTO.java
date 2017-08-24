@@ -50,7 +50,6 @@ public class PostSiteDTO implements Serializable {
 
     PostSiteDTO siteDTO = (PostSiteDTO) o;
 
-    if (id != null ? !id.equals(siteDTO.id) : siteDTO.id != null) return false;
     if (postId != null ? !postId.equals(siteDTO.postId) : siteDTO.postId != null) return false;
     if (siteId != null ? !siteId.equals(siteDTO.siteId) : siteDTO.siteId != null) return false;
     return postSiteType == siteDTO.postSiteType;
@@ -58,8 +57,7 @@ public class PostSiteDTO implements Serializable {
 
   @Override
   public int hashCode() {
-    int result = id != null ? id.hashCode() : 0;
-    result = 31 * result + (postId != null ? postId.hashCode() : 0);
+    int result = postId != null ? postId.hashCode() : 0;
     result = 31 * result + (siteId != null ? siteId.hashCode() : 0);
     result = 31 * result + (postSiteType != null ? postSiteType.hashCode() : 0);
     return result;

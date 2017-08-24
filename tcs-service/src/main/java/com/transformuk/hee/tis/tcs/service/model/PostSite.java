@@ -64,7 +64,6 @@ public class PostSite implements Serializable {
 
     PostSite postSite = (PostSite) o;
 
-    if (id != null ? !id.equals(postSite.id) : postSite.id != null) return false;
     if (post != null ? !post.equals(postSite.post) : postSite.post != null) return false;
     if (siteId != null ? !siteId.equals(postSite.siteId) : postSite.siteId != null) return false;
     return postSiteType == postSite.postSiteType;
@@ -72,8 +71,7 @@ public class PostSite implements Serializable {
 
   @Override
   public int hashCode() {
-    int result = id != null ? id.hashCode() : 0;
-    result = 31 * result + (post != null ? post.hashCode() : 0);
+    int result = post != null ? post.hashCode() : 0;
     result = 31 * result + (siteId != null ? siteId.hashCode() : 0);
     result = 31 * result + (postSiteType != null ? postSiteType.hashCode() : 0);
     return result;

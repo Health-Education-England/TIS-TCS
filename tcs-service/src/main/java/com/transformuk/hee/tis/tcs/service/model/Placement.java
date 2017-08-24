@@ -25,6 +25,9 @@ public class Placement implements Serializable {
   @GeneratedValue(strategy = GenerationType.IDENTITY)
   private Long id;
 
+  @Column(name = "intrepidId")
+  private String intrepidId;
+
   @Column(name = "status")
   private String status;
 
@@ -62,6 +65,14 @@ public class Placement implements Serializable {
 
   public void setId(Long id) {
     this.id = id;
+  }
+
+  public String getIntrepidId() {
+    return intrepidId;
+  }
+
+  public void setIntrepidId(String intrepidId) {
+    this.intrepidId = intrepidId;
   }
 
   public String getStatus() {

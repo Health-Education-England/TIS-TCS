@@ -30,6 +30,56 @@ public interface PostService {
   List<PostDTO> save(List<PostDTO> postDTO);
 
   /**
+   * Patch a list of post so that the links to old/new posts are saved. its important to note that if a related post
+   * cannot be found, the existing post is cleared but if related post id is null then it isnt cleared
+   *
+   * @param postDTOList the list of entities to save
+   * @return the list of persisted entities
+   */
+  List<PostDTO> patchOldNewPosts(List<PostDTO> postDTOList);
+
+  /**
+   * Patch a list of post so that the links to sites are saved.
+   *
+   * @param postDTOList the list of entities to save
+   * @return the list of persisted entities
+   */
+  List<PostDTO> patchPostSites(List<PostDTO> postDTOList);
+
+  /**
+   * Patch a list of post so that the links to grades are saved.
+   *
+   * @param postDTOList the list of entities to save
+   * @return the list of persisted entities
+   */
+  List<PostDTO> patchPostGrades(List<PostDTO> postDTOList);
+
+  /**
+   * Patch a list of post so that the links to grades are saved.
+   *
+   * @param postDTOList the list of entities to patch
+   * @return the list of persisted entities
+   */
+  List<PostDTO> patchPostProgrammes(List<PostDTO> postDTOList);
+
+  /**
+   * Patch a list of post so that the links to specialties are saved.
+   *
+   * @param postDTOList the list of entities to patch
+   * @return the list of persisted entities
+   */
+  List<PostDTO> patchPostSpecialties(List<PostDTO> postDTOList);
+
+  /**
+   * Patch a list of post so that the links to placements are saved.
+   *
+   * @param postDTOList the list of entities to patch
+   * @return the list of persisted entities
+   */
+  List<PostDTO> patchPostPlacements(List<PostDTO> postDTOList);
+
+
+  /**
    * Update a single post
    *
    * @param postDTO the entity to update

@@ -65,7 +65,6 @@ public class PostSpecialty implements Serializable {
 
     PostSpecialty that = (PostSpecialty) o;
 
-    if (id != null ? !id.equals(that.id) : that.id != null) return false;
     if (post != null ? !post.equals(that.post) : that.post != null) return false;
     if (specialty != null ? !specialty.equals(that.specialty) : that.specialty != null) return false;
     return postSpecialtyType == that.postSpecialtyType;
@@ -73,8 +72,7 @@ public class PostSpecialty implements Serializable {
 
   @Override
   public int hashCode() {
-    int result = id != null ? id.hashCode() : 0;
-    result = 31 * result + (post != null ? post.hashCode() : 0);
+    int result = post != null ? post.hashCode() : 0;
     result = 31 * result + (specialty != null ? specialty.hashCode() : 0);
     result = 31 * result + (postSpecialtyType != null ? postSpecialtyType.hashCode() : 0);
     return result;
