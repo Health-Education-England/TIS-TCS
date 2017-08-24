@@ -47,9 +47,6 @@ public class TrainingNumberResourceIntTest {
   private static final TrainingNumberType DEFAULT_TRAINING_NUMBER_TYPE = TrainingNumberType.NTN;
   private static final TrainingNumberType UPDATED_TRAINING_NUMBER_TYPE = TrainingNumberType.DRN;
 
-  private static final String DEFAULT_LOCAL_OFFICE = "AAAAAAAAAA";
-  private static final String UPDATED_LOCAL_OFFICE = "BBBBBBBBBB";
-
   private static final Integer DEFAULT_NUMBER = 1;
   private static final Integer UPDATED_NUMBER = 2;
 
@@ -96,7 +93,6 @@ public class TrainingNumberResourceIntTest {
   public static TrainingNumber createEntity(EntityManager em) {
     TrainingNumber trainingNumber = new TrainingNumber()
         .trainingNumberType(DEFAULT_TRAINING_NUMBER_TYPE)
-        .localOffice(DEFAULT_LOCAL_OFFICE)
         .number(DEFAULT_NUMBER)
         .appointmentYear(DEFAULT_APPOINTMENT_YEAR)
         .typeOfContract(DEFAULT_TYPE_OF_CONTRACT)
@@ -136,7 +132,6 @@ public class TrainingNumberResourceIntTest {
     assertThat(trainingNumberList).hasSize(databaseSizeBeforeCreate + 1);
     TrainingNumber testTrainingNumber = trainingNumberList.get(trainingNumberList.size() - 1);
     assertThat(testTrainingNumber.getTrainingNumberType()).isEqualTo(DEFAULT_TRAINING_NUMBER_TYPE);
-    assertThat(testTrainingNumber.getLocalOffice()).isEqualTo(DEFAULT_LOCAL_OFFICE);
     assertThat(testTrainingNumber.getNumber()).isEqualTo(DEFAULT_NUMBER);
     assertThat(testTrainingNumber.getAppointmentYear()).isEqualTo(DEFAULT_APPOINTMENT_YEAR);
     assertThat(testTrainingNumber.getTypeOfContract()).isEqualTo(DEFAULT_TYPE_OF_CONTRACT);
@@ -175,7 +170,6 @@ public class TrainingNumberResourceIntTest {
         .andExpect(content().contentType(MediaType.APPLICATION_JSON_UTF8_VALUE))
         .andExpect(jsonPath("$.[*].id").value(hasItem(trainingNumber.getId().intValue())))
         .andExpect(jsonPath("$.[*].trainingNumberType").value(hasItem(DEFAULT_TRAINING_NUMBER_TYPE.toString())))
-        .andExpect(jsonPath("$.[*].localOffice").value(hasItem(DEFAULT_LOCAL_OFFICE.toString())))
         .andExpect(jsonPath("$.[*].number").value(hasItem(DEFAULT_NUMBER)))
         .andExpect(jsonPath("$.[*].appointmentYear").value(hasItem(DEFAULT_APPOINTMENT_YEAR)))
         .andExpect(jsonPath("$.[*].typeOfContract").value(hasItem(DEFAULT_TYPE_OF_CONTRACT.toString())))
@@ -194,7 +188,6 @@ public class TrainingNumberResourceIntTest {
         .andExpect(content().contentType(MediaType.APPLICATION_JSON_UTF8_VALUE))
         .andExpect(jsonPath("$.id").value(trainingNumber.getId().intValue()))
         .andExpect(jsonPath("$.trainingNumberType").value(DEFAULT_TRAINING_NUMBER_TYPE.toString()))
-        .andExpect(jsonPath("$.localOffice").value(DEFAULT_LOCAL_OFFICE.toString()))
         .andExpect(jsonPath("$.number").value(DEFAULT_NUMBER))
         .andExpect(jsonPath("$.appointmentYear").value(DEFAULT_APPOINTMENT_YEAR))
         .andExpect(jsonPath("$.typeOfContract").value(DEFAULT_TYPE_OF_CONTRACT.toString()))
@@ -220,7 +213,6 @@ public class TrainingNumberResourceIntTest {
     TrainingNumber updatedTrainingNumber = trainingNumberRepository.findOne(trainingNumber.getId());
     updatedTrainingNumber
         .trainingNumberType(UPDATED_TRAINING_NUMBER_TYPE)
-        .localOffice(UPDATED_LOCAL_OFFICE)
         .number(UPDATED_NUMBER)
         .appointmentYear(UPDATED_APPOINTMENT_YEAR)
         .typeOfContract(UPDATED_TYPE_OF_CONTRACT)
@@ -237,7 +229,6 @@ public class TrainingNumberResourceIntTest {
     assertThat(trainingNumberList).hasSize(databaseSizeBeforeUpdate);
     TrainingNumber testTrainingNumber = trainingNumberList.get(trainingNumberList.size() - 1);
     assertThat(testTrainingNumber.getTrainingNumberType()).isEqualTo(UPDATED_TRAINING_NUMBER_TYPE);
-    assertThat(testTrainingNumber.getLocalOffice()).isEqualTo(UPDATED_LOCAL_OFFICE);
     assertThat(testTrainingNumber.getNumber()).isEqualTo(UPDATED_NUMBER);
     assertThat(testTrainingNumber.getAppointmentYear()).isEqualTo(UPDATED_APPOINTMENT_YEAR);
     assertThat(testTrainingNumber.getTypeOfContract()).isEqualTo(UPDATED_TYPE_OF_CONTRACT);
