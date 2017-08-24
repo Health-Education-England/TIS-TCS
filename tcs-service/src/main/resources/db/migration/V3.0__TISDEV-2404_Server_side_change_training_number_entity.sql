@@ -1,14 +1,10 @@
-ALTER TABLE `trainingNumber`
+ALTER TABLE `TrainingNumber`
 DROP COLUMN `localOffice`;
 
-ALTER TABLE `trainingNumber`
-ADD programmeID BIGINT(20);
+ALTER TABLE `TrainingNumber`
+ADD programmeId BIGINT(20);
 
-SET foreign_key_checks=0;
-
-ALTER TABLE `trainingNumber`
+ALTER TABLE `TrainingNumber`
 ADD CONSTRAINT FK_Programme_trainingNumber_Ref
-FOREIGN KEY (`programmeID`)
+FOREIGN KEY (`programmeId`)
 REFERENCES `Programme`(`Id`);
-
-SET foreign_key_checks=1;
