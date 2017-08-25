@@ -14,15 +14,6 @@ import java.util.Set;
  */
 @Entity
 @Table(name = "Post")
-@NamedEntityGraph(name="all.oldNewPost.programmes.sites.grades.specialties.placementHistory", attributeNodes = {
-    @NamedAttributeNode("oldPost"),
-    @NamedAttributeNode("newPost"),
-    @NamedAttributeNode("programmes"),
-    @NamedAttributeNode("sites"),
-    @NamedAttributeNode("grades"),
-    @NamedAttributeNode("specialties"),
-    @NamedAttributeNode("placementHistory")
-})
 public class Post implements Serializable {
 
   private static final long serialVersionUID = 1L;

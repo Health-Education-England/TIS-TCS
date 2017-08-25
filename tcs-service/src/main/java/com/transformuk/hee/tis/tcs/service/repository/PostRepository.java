@@ -17,14 +17,6 @@ import java.util.Set;
 @SuppressWarnings("unused")
 public interface PostRepository extends JpaRepository<Post, Long>, JpaSpecificationExecutor<Post> {
 
-  @EntityGraph(value = "all.oldNewPost.programmes.sites.grades.specialties.placementHistory", type= EntityGraph.EntityGraphType.FETCH)
-  @Override
-  Page<Post> findAll(Pageable pageable);
-
-  @EntityGraph(value = "all.oldNewPost.programmes.sites.grades.specialties.placementHistory", type= EntityGraph.EntityGraphType.FETCH)
-  @Override
-  Page<Post> findAll(Specification<Post> specification, Pageable pageable);
-
   Post findPostByIntrepidId(String intrepidId);
 
   Set<Post> findPostByIntrepidIdIn(Set<String> intrepidIds);
