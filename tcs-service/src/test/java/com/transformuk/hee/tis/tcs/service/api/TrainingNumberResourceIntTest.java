@@ -3,11 +3,13 @@ package com.transformuk.hee.tis.tcs.service.api;
 import com.transformuk.hee.tis.tcs.api.dto.TrainingNumberDTO;
 import com.transformuk.hee.tis.tcs.api.enumeration.TrainingNumberType;
 import com.transformuk.hee.tis.tcs.service.Application;
+import com.transformuk.hee.tis.tcs.service.api.validation.TrainingNumberValidator;
 import com.transformuk.hee.tis.tcs.service.exception.ExceptionTranslator;
 import com.transformuk.hee.tis.tcs.service.model.TrainingNumber;
 import com.transformuk.hee.tis.tcs.service.repository.TrainingNumberRepository;
 import com.transformuk.hee.tis.tcs.service.service.TrainingNumberService;
 import com.transformuk.hee.tis.tcs.service.service.mapper.TrainingNumberMapper;
+import org.hamcrest.core.StringContains;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -26,6 +28,7 @@ import javax.persistence.EntityManager;
 import java.util.List;
 
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.hamcrest.Matchers.containsInAnyOrder;
 import static org.hamcrest.Matchers.hasItem;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.delete;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
@@ -69,6 +72,9 @@ public class TrainingNumberResourceIntTest {
   private TrainingNumberService trainingNumberService;
 
   @Autowired
+  private TrainingNumberValidator trainingNumberValidator;
+
+  @Autowired
   private MappingJackson2HttpMessageConverter jacksonMessageConverter;
 
   @Autowired
@@ -103,7 +109,7 @@ public class TrainingNumberResourceIntTest {
   @Before
   public void setup() {
     MockitoAnnotations.initMocks(this);
-    TrainingNumberResource trainingNumberResource = new TrainingNumberResource(trainingNumberService);
+    TrainingNumberResource trainingNumberResource = new TrainingNumberResource(trainingNumberService, trainingNumberValidator);
     this.restTrainingNumberMockMvc = MockMvcBuilders.standaloneSetup(trainingNumberResource)
         .setCustomArgumentResolvers(pageableArgumentResolver)
         .setControllerAdvice(exceptionTranslator)
@@ -136,6 +142,78 @@ public class TrainingNumberResourceIntTest {
     assertThat(testTrainingNumber.getAppointmentYear()).isEqualTo(DEFAULT_APPOINTMENT_YEAR);
     assertThat(testTrainingNumber.getTypeOfContract()).isEqualTo(DEFAULT_TYPE_OF_CONTRACT);
     assertThat(testTrainingNumber.getSuffix()).isEqualTo(DEFAULT_SUFFIX);
+  }
+
+  @Test
+  @Transactional
+  public void shouldValidateMandatoryFieldsWhenCreating() throws Exception {
+    //given
+    TrainingNumberDTO trainingNumberDTO = new TrainingNumberDTO();
+
+    //when & then
+    restTrainingNumberMockMvc.perform(post("/api/training-numbers")
+        .contentType(TestUtil.APPLICATION_JSON_UTF8)
+        .content(TestUtil.convertObjectToJsonBytes(trainingNumberDTO)))
+        .andExpect(status().isBadRequest())
+        .andExpect(jsonPath("$.message").value("error.validation"))
+        .andExpect(jsonPath("$.fieldErrors[*].field").
+                value(containsInAnyOrder("trainingNumberType", "number", "appointmentYear", "typeOfContract")));
+  }
+
+  @Test
+  @Transactional
+  public void shouldValidateMandatoryFieldsWhenUpdating() throws Exception {
+    //given
+    TrainingNumberDTO trainingNumberDTO = new TrainingNumberDTO();
+    trainingNumberDTO.setId(1L);
+
+    //when & then
+    restTrainingNumberMockMvc.perform(put("/api/training-numbers")
+        .contentType(TestUtil.APPLICATION_JSON_UTF8)
+        .content(TestUtil.convertObjectToJsonBytes(trainingNumberDTO)))
+        .andExpect(status().isBadRequest())
+        .andExpect(jsonPath("$.message").value("error.validation"))
+        .andExpect(jsonPath("$.fieldErrors[*].field").
+                value(containsInAnyOrder("trainingNumberType", "number", "appointmentYear", "typeOfContract")));
+  }
+
+  @Test
+  @Transactional
+  public void shouldValidateNumberUniqueWhenCreating() throws Exception {
+    //given we have an exiting training number with DEFAULT_NUMBER
+    trainingNumberRepository.saveAndFlush(createEntity(em));
+    TrainingNumberDTO trainingNumberDTO = trainingNumberMapper.trainingNumberToTrainingNumberDTO(createEntity(em));
+
+    //when & then
+    restTrainingNumberMockMvc.perform(post("/api/training-numbers")
+        .contentType(TestUtil.APPLICATION_JSON_UTF8)
+        .content(TestUtil.convertObjectToJsonBytes(trainingNumberDTO)))
+        .andExpect(status().isBadRequest())
+        .andExpect(jsonPath("$.message").value("error.validation"))
+        .andExpect(jsonPath("$.fieldErrors[0].field").value("number"))
+        .andExpect(jsonPath("$.fieldErrors[0].message").value(StringContains.containsString("unique")));
+  }
+
+  @Test
+  @Transactional
+  public void shouldValidateProgrammeNumberUniqueWhenUpdating() throws Exception {
+    //given we have an exiting training number with DEFAULT_NUMBER
+    //and we update a second number using the same nr
+    trainingNumberRepository.saveAndFlush(createEntity(em));
+    TrainingNumber t = createEntity(em);
+    t.setNumber(2);
+    t = trainingNumberRepository.saveAndFlush(t);
+    TrainingNumberDTO trainingNumberDTO = trainingNumberMapper.trainingNumberToTrainingNumberDTO(t);
+    trainingNumberDTO.setNumber(DEFAULT_NUMBER);
+
+    //when & then
+    restTrainingNumberMockMvc.perform(put("/api/training-numbers")
+        .contentType(TestUtil.APPLICATION_JSON_UTF8)
+        .content(TestUtil.convertObjectToJsonBytes(trainingNumberDTO)))
+        .andExpect(status().isBadRequest())
+        .andExpect(jsonPath("$.message").value("error.validation"))
+        .andExpect(jsonPath("$.fieldErrors[0].field").value("number"))
+        .andExpect(jsonPath("$.fieldErrors[0].message").value(StringContains.containsString("unique")));
   }
 
   @Test
@@ -241,13 +319,14 @@ public class TrainingNumberResourceIntTest {
     int databaseSizeBeforeUpdate = trainingNumberRepository.findAll().size();
 
     // Create the TrainingNumber
+    trainingNumber.setId(1l);
     TrainingNumberDTO trainingNumberDTO = trainingNumberMapper.trainingNumberToTrainingNumberDTO(trainingNumber);
 
     // If the entity doesn't have an ID, it will be created instead of just being updated
     restTrainingNumberMockMvc.perform(put("/api/training-numbers")
         .contentType(TestUtil.APPLICATION_JSON_UTF8)
         .content(TestUtil.convertObjectToJsonBytes(trainingNumberDTO)))
-        .andExpect(status().isCreated());
+        .andExpect(status().isOk());
 
     // Validate the TrainingNumber in the database
     List<TrainingNumber> trainingNumberList = trainingNumberRepository.findAll();

@@ -1,7 +1,12 @@
 package com.transformuk.hee.tis.tcs.api.dto;
 
+import com.transformuk.hee.tis.tcs.api.dto.validation.Create;
+import com.transformuk.hee.tis.tcs.api.dto.validation.Update;
 import com.transformuk.hee.tis.tcs.api.enumeration.TrainingNumberType;
 
+import javax.validation.constraints.DecimalMin;
+import javax.validation.constraints.NotNull;
+import javax.validation.constraints.Null;
 import java.io.Serializable;
 import java.util.Objects;
 
@@ -10,14 +15,25 @@ import java.util.Objects;
  */
 public class TrainingNumberDTO implements Serializable {
 
+  @NotNull(groups = Update.class, message = "Id must not be null when updating a training number")
+  @DecimalMin(value = "0", groups = Update.class, message = "Id must not be negative")
+  @Null(groups = Create.class, message = "Id must be null when creating a new training number")
   private Long id;
 
+  @NotNull(message = "Training number type is required", groups = {Update.class, Create.class})
+  //mandatory
   private TrainingNumberType trainingNumberType;
 
+  @NotNull(message = "Training number is required", groups = {Update.class, Create.class})
+  //mandatory and unique
   private Integer number;
 
+  @NotNull(message = "Appointment year is required", groups = {Update.class, Create.class})
+  //mandatory
   private Integer appointmentYear;
 
+  @NotNull(message = "Type of contract is required", groups = {Update.class, Create.class})
+  //mandatory
   private String typeOfContract;
 
   private String suffix;
