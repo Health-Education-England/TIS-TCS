@@ -49,7 +49,6 @@ public class TrainingNumberValidator {
         //check if the  number is unique
         //if we update a number
         if (trainingNumberDTO.getId() != null) {
-            TrainingNumber p = trainingNumberRepository.findOne(trainingNumberDTO.getId());
             List<TrainingNumber> trainingNumberList = trainingNumberRepository.findByNumber(trainingNumberDTO.getNumber());
             if (trainingNumberList.size() > 1) {
                 fieldErrors.add(new FieldError("TrainingNumberDTO", "number",
@@ -57,7 +56,7 @@ public class TrainingNumberValidator {
                                 trainingNumberDTO.getNumber(), trainingNumberList.size(),
                                 trainingNumberList)));
             } else if (trainingNumberList.size() == 1) {
-                if (!p.getId().equals(trainingNumberList.get(0).getId())) {
+                if (!trainingNumberDTO.getId().equals(trainingNumberList.get(0).getId())) {
                     fieldErrors.add(new FieldError("TrainingNumberDTO", "number",
                             String.format("Number %s is not unique, there is currently one training number with this number: %s",
                                     trainingNumberDTO.getNumber(), trainingNumberList.get(0))));

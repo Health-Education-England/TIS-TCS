@@ -15,9 +15,9 @@ import java.util.Objects;
  */
 public class TrainingNumberDTO implements Serializable {
 
-  @NotNull(groups = Update.class, message = "Id must not be null when updating a programme")
-  @DecimalMin(value = "0", groups = Update.class, message = "Id must not be negative")
-  @Null(groups = Create.class, message = "Id must be null when creating a new programme")
+  @NotNull(groups = Update.class, message = "Id must not be null when updating a training number")
+  @DecimalMin(value = "0", groups = Update.class, message = "Id must not be training number")
+  @Null(groups = Create.class, message = "Id must be null when creating a new training number")
   private Long id;
 
   @NotNull(message = "Training number type is required", groups = {Update.class, Create.class})
