@@ -319,13 +319,14 @@ public class TrainingNumberResourceIntTest {
     int databaseSizeBeforeUpdate = trainingNumberRepository.findAll().size();
 
     // Create the TrainingNumber
+    trainingNumber.setId(1l);
     TrainingNumberDTO trainingNumberDTO = trainingNumberMapper.trainingNumberToTrainingNumberDTO(trainingNumber);
 
     // If the entity doesn't have an ID, it will be created instead of just being updated
     restTrainingNumberMockMvc.perform(put("/api/training-numbers")
         .contentType(TestUtil.APPLICATION_JSON_UTF8)
         .content(TestUtil.convertObjectToJsonBytes(trainingNumberDTO)))
-        .andExpect(status().isCreated());
+        .andExpect(status().isOk());
 
     // Validate the TrainingNumber in the database
     List<TrainingNumber> trainingNumberList = trainingNumberRepository.findAll();
