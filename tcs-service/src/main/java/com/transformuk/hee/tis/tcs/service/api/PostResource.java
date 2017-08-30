@@ -2,7 +2,6 @@ package com.transformuk.hee.tis.tcs.service.api;
 
 import com.codahale.metrics.annotation.Timed;
 import com.google.common.collect.Lists;
-import com.transformuk.hee.tis.security.model.UserProfile;
 import com.transformuk.hee.tis.tcs.api.dto.PostDTO;
 import com.transformuk.hee.tis.tcs.api.enumeration.PostGradeType;
 import com.transformuk.hee.tis.tcs.api.enumeration.PostSpecialtyType;
@@ -25,7 +24,16 @@ import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
-import org.springframework.web.bind.annotation.*;
+import org.springframework.web.bind.annotation.DeleteMapping;
+import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PatchMapping;
+import org.springframework.web.bind.annotation.PathVariable;
+import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.PutMapping;
+import org.springframework.web.bind.annotation.RequestBody;
+import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestParam;
+import org.springframework.web.bind.annotation.RestController;
 
 import javax.validation.Valid;
 import java.io.IOException;
@@ -35,7 +43,6 @@ import java.util.List;
 import java.util.Optional;
 import java.util.stream.Collectors;
 
-import static com.transformuk.hee.tis.security.util.TisSecurityHelper.getProfileFromContext;
 import static com.transformuk.hee.tis.tcs.service.api.util.StringUtil.sanitize;
 
 /**
@@ -115,15 +122,13 @@ public class PostResource {
       @RequestParam(value = "columnFilters", required = false) String columnFilterJson) throws IOException {
     log.debug("REST request to get a page of Posts");
     searchQuery = sanitize(searchQuery);
-    UserProfile userProfile = getProfileFromContext();
     List<Class> filterEnumList = Lists.newArrayList(Status.class, PostSuffix.class, PostGradeType.class, PostSpecialtyType.class);
     List<ColumnFilter> columnFilters = ColumnFilterUtil.getColumnFilters(columnFilterJson, filterEnumList);
     Page<PostDTO> page;
     if (StringUtils.isEmpty(searchQuery) && StringUtils.isEmpty(columnFilterJson)) {
       page = postService.findAll(pageable);
     } else {
-      page = postService.advancedSearch(
-          userProfile.getDesignatedBodyCodes(), searchQuery, columnFilters, pageable);
+      page = postService.advancedSearch(searchQuery, columnFilters, pageable);
     }
     HttpHeaders headers = PaginationUtil.generatePaginationHttpHeaders(page, "/api/posts");
     return new ResponseEntity<>(page.getContent(), headers, HttpStatus.OK);

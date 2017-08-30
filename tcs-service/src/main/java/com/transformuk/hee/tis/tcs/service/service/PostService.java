@@ -105,17 +105,14 @@ public interface PostService {
   Page<PostDTO> findAll(Pageable pageable);
 
   /**
-   * Get all the posts within the given designated body codes using the
-   * given smart search string.
+   * Get all the posts using the given smart search string and filters.
    *
-   * @param dbcs         the designated body codes to search through not null
    * @param searchString the search string to match, can be null
    * @param columnFilers the exact key value filters to apply, can be null
    * @param pageable     the pagination information
    * @return the list of entities
    */
-  Page<PostDTO> advancedSearch(
-      Set<String> dbcs, String searchString, List<ColumnFilter> columnFilers, Pageable pageable);
+  Page<PostDTO> advancedSearch(String searchString, List<ColumnFilter> columnFilers, Pageable pageable);
 
 
   /**
