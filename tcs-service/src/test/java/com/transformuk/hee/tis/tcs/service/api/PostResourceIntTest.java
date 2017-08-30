@@ -35,6 +35,7 @@ import java.util.Set;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.hamcrest.Matchers.hasItem;
+import static org.hamcrest.Matchers.hasSize;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.*;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.*;
 
@@ -76,7 +77,10 @@ public class PostResourceIntTest {
   private static final String GRADE_ID = "Grade id";
   private static final String SITE_ID = "site id";
   private static final String TEST_POST_NUMBER = "TESTPOST";
+  private static final String DEFAULT_POST_NUMBER = "DEFAULTPOST";
   private static final String MANAGING_LOCAL_OFFICE = "Health Education England Kent, Surrey and Sussex";
+  private static final String MANAGING_LOCAL_OFFICE_NORTH_EAST = "Health Education England North East";
+
   @Autowired
   private PostRepository postRepository;
 
@@ -290,6 +294,36 @@ public class PostResourceIntTest {
         .andExpect(jsonPath("$.[*].trainingBodyId").value(hasItem(DEFAULT_TRAINING_BODY_ID)))
         .andExpect(jsonPath("$.[*].trainingDescription").value(hasItem(DEFAULT_TRAINING_DESCRIPTION)))
         .andExpect(jsonPath("$.[*].localPostNumber").value(hasItem(DEFAULT_LOCAL_POST_NUMBER)));
+  }
+
+  @Test
+  @Transactional
+  public void shouldReturnAllPostsWithoutLocalOfficeFilter() throws Exception {
+
+    // another post with different managing local office
+    Post anotherPost = createEntity();
+    anotherPost.setNationalPostNumber(DEFAULT_POST_NUMBER);
+    anotherPost.setManagingLocalOffice(MANAGING_LOCAL_OFFICE_NORTH_EAST);
+    postRepository.saveAndFlush(anotherPost);
+
+    int databaseSize = postRepository.findAll().size();
+    // Get all the postList
+    restPostMockMvc.perform(get("/api/posts?sort=id,desc"))
+        .andExpect(status().isOk())
+        .andExpect(jsonPath("$", hasSize(databaseSize))) // checking the size of the post
+        .andExpect(content().contentType(MediaType.APPLICATION_JSON_UTF8_VALUE))
+        .andExpect(jsonPath("$.[*].id").value(hasItem(post.getId().intValue())))
+        .andExpect(jsonPath("$.[*].nationalPostNumber").value(hasItem(DEFAULT_NATIONAL_POST_NUMBER)))
+        .andExpect(jsonPath("$.[*].status").value(hasItem(DEFAULT_STATUS.toString())))
+        .andExpect(jsonPath("$.[*].suffix").value(hasItem(DEFAULT_SUFFIX.toString())))
+        .andExpect(jsonPath("$.[*].managingLocalOffice").value(hasItem(MANAGING_LOCAL_OFFICE)))
+        .andExpect(jsonPath("$.[*].managingLocalOffice").value(hasItem(MANAGING_LOCAL_OFFICE_NORTH_EAST)))
+        .andExpect(jsonPath("$.[*].postFamily").value(hasItem(DEFAULT_POST_FAMILY)))
+        .andExpect(jsonPath("$.[*].employingBodyId").value(hasItem(DEFAULT_EMPLOYING_BODY)))
+        .andExpect(jsonPath("$.[*].trainingBodyId").value(hasItem(DEFAULT_TRAINING_BODY_ID)))
+        .andExpect(jsonPath("$.[*].trainingDescription").value(hasItem(DEFAULT_TRAINING_DESCRIPTION)))
+        .andExpect(jsonPath("$.[*].localPostNumber").value(hasItem(DEFAULT_LOCAL_POST_NUMBER)));
+
   }
 
   @Test
