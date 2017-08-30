@@ -350,10 +350,8 @@ public class PostServiceImpl implements PostService {
 
   @Override
   @Transactional(readOnly = true)
-  public Page<PostDTO> advancedSearch(
-      Set<String> dbcs, String searchString, List<ColumnFilter> columnFilters, Pageable pageable) {
+  public Page<PostDTO> advancedSearch(String searchString, List<ColumnFilter> columnFilters, Pageable pageable) {
 
-    Set<String> localOffices = DesignatedBodyMapper.map(dbcs);
     List<Specification<Post>> specs = new ArrayList<>();
     //add the text search criteria
     if (StringUtils.isNotEmpty(searchString)) {
@@ -374,8 +372,7 @@ public class PostServiceImpl implements PostService {
         }
       });
     }
-    //finally filter by deaneries
-    specs.add(in("managingLocalOffice", localOffices.stream().collect(Collectors.toList())));
+
     Specifications<Post> fullSpec = Specifications.where(specs.get(0));
     //add the rest of the specs that made it in
     for (int i = 1; i < specs.size(); i++) {
