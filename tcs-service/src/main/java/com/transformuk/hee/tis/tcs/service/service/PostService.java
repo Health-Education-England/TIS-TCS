@@ -105,8 +105,7 @@ public interface PostService {
   Page<PostDTO> findAll(Pageable pageable);
 
   /**
-   * Get all the posts within the given designated body codes using the
-   * given smart search string.
+   * Get all the posts using the given smart search string and filters.
    *
    * @param searchString the search string to match, can be null
    * @param columnFilers the exact key value filters to apply, can be null
