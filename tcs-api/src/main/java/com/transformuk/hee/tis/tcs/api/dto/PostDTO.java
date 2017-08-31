@@ -1,9 +1,14 @@
 package com.transformuk.hee.tis.tcs.api.dto;
 
 
+import com.transformuk.hee.tis.tcs.api.dto.validation.Create;
+import com.transformuk.hee.tis.tcs.api.dto.validation.Update;
 import com.transformuk.hee.tis.tcs.api.enumeration.PostSuffix;
 import com.transformuk.hee.tis.tcs.api.enumeration.Status;
 
+import javax.validation.constraints.DecimalMin;
+import javax.validation.constraints.NotNull;
+import javax.validation.constraints.Null;
 import java.io.Serializable;
 import java.util.Set;
 
@@ -12,16 +17,23 @@ import java.util.Set;
  */
 public class PostDTO implements Serializable {
 
+
+  @NotNull(groups = Update.class, message = "Id must not be null when updating a post")
+  @DecimalMin(value = "0", groups = Update.class, message = "Id must not be negative")
+  @Null(groups = Create.class, message = "Id must be null when creating a new post")
   private Long id;
 
   private String intrepidId;
 
+  @NotNull(message = "National post number is required", groups = {Update.class, Create.class})
   private String nationalPostNumber;
 
+  @NotNull(message = "Status is required", groups = {Update.class, Create.class})
   private Status status;
 
   private PostSuffix suffix;
 
+  @NotNull(message = "Managing local office is required", groups = {Update.class, Create.class})
   private String managingLocalOffice;
 
   private String postFamily;

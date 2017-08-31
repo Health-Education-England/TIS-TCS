@@ -22,4 +22,6 @@ public interface PostRepository extends JpaRepository<Post, Long>, JpaSpecificat
   Set<Post> findPostByIntrepidIdIn(Set<String> intrepidIds);
 
   Page<Post> findByManagingLocalOfficeIn(Set<String> deaneries, Pageable pageable);
+
+  List<Post> findByNationalPostNumber(String nationalPostNumber);
 }

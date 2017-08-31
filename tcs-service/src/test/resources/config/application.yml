@@ -17,6 +17,8 @@
 spring:
     application:
         name: tcs
+    profiles:
+        active: dev
     jackson:
         serialization.write_dates_as_timestamps: false
     cache:
