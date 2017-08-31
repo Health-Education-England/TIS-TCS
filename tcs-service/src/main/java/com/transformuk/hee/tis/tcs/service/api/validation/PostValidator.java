@@ -1,5 +1,6 @@
 package com.transformuk.hee.tis.tcs.service.api.validation;
 
+import com.google.common.collect.Lists;
 import com.transformuk.hee.tis.reference.client.impl.ReferenceServiceImpl;
 import com.transformuk.hee.tis.tcs.api.dto.PlacementDTO;
 import com.transformuk.hee.tis.tcs.api.dto.PostDTO;
@@ -16,12 +17,14 @@ import com.transformuk.hee.tis.tcs.service.repository.SpecialtyRepository;
 import com.transformuk.hee.tis.tcs.service.service.mapper.DesignatedBodyMapper;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
+import org.springframework.util.CollectionUtils;
 import org.springframework.validation.BeanPropertyBindingResult;
 import org.springframework.validation.FieldError;
 import org.springframework.web.bind.MethodArgumentNotValidException;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Map;
 
 /**
  * Holds more complex custom validation for a {@link PostDTO} that
@@ -134,17 +137,20 @@ public class PostValidator {
     List<FieldError> fieldErrors = new ArrayList<>();
     // then check the sites
     if (postDTO.getSites() != null && !postDTO.getSites().isEmpty()) {
+      List<Long> siteIds = Lists.newArrayList();
       for (PostSiteDTO ps : postDTO.getSites()) {
         if (ps.getSiteId() == null || Long.valueOf(ps.getSiteId()) < 0) {
           fieldErrors.add(new FieldError(POST_DTO_NAME, "sites",
               "Site ID cannot be null or negative"));
         } else {
-          if (!referenceService.siteExists(Long.valueOf(ps.getSiteId()))) {
-            fieldErrors.add(new FieldError(POST_DTO_NAME, "sites",
-                String.format("Site with id %s does not exist", ps.getSiteId())));
-          }
+            siteIds.add(Long.valueOf(ps.getSiteId()));
         }
       }
+      if(!CollectionUtils.isEmpty(siteIds)){
+        Map<Long,Boolean> siteIdsExistsMap = referenceService.siteExists(siteIds);
+        notExistsFieldErrors(fieldErrors, siteIdsExistsMap,"sites","Site");
+      }
+
     }
     return fieldErrors;
   }
@@ -153,19 +159,31 @@ public class PostValidator {
     List<FieldError> fieldErrors = new ArrayList<>();
     // then check the grades
     if (postDTO.getGrades() != null && !postDTO.getGrades().isEmpty()) {
+      List<Long> gradeIds = Lists.newArrayList();
       for (PostGradeDTO pg : postDTO.getGrades()) {
         if (pg.getGradeId() == null || Long.valueOf(pg.getGradeId()) < 0) {
           fieldErrors.add(new FieldError(POST_DTO_NAME, "grades",
               "Grade ID cannot be null or negative"));
         } else {
-          if (!referenceService.gradeExists(Long.valueOf(pg.getGradeId()))) {
-            fieldErrors.add(new FieldError(POST_DTO_NAME, "grades",
-                String.format("Grade with id %s does not exist", pg.getGradeId())));
-          }
+          gradeIds.add(Long.valueOf(pg.getGradeId()));
         }
+      }
+      if(!CollectionUtils.isEmpty(gradeIds)){
+        Map<Long,Boolean> gradeIdsExistsMap = referenceService.gradeExists(gradeIds);
+        notExistsFieldErrors(fieldErrors, gradeIdsExistsMap,"grades","Grade");
       }
     }
     return fieldErrors;
+  }
+
+  private void notExistsFieldErrors(List<FieldError> fieldErrors, Map<Long, Boolean> gradeIdsExistsMap,
+                                    String field,String entityName) {
+    gradeIdsExistsMap.forEach((k,v) -> {
+      if(!v){
+        fieldErrors.add(new FieldError(POST_DTO_NAME, field,
+            String.format("%s with id %s does not exist",entityName, k)));
+      }
+    });
   }
 
   private List<FieldError> checkSpecialties(PostDTO postDTO) {
