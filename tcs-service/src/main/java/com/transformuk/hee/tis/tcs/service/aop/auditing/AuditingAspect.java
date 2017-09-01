@@ -50,7 +50,7 @@ public class AuditingAspect {
   /**
    * Pointcut that matches all rest call for create method.
    */
-  @Pointcut("execution(* com.transformuk.hee.tis.tcs.api.*.create*(..))")
+  @Pointcut("execution(* com.transformuk.hee.tis.tcs.service.api.*.create*(..))")
   public void auditingCreatePointcut() {
     // Method is empty as this is just a Pointcut, the implementations are in the advices.
   }
@@ -58,7 +58,7 @@ public class AuditingAspect {
   /**
    * Pointcut that matches all rest call for update method.
    */
-  @Pointcut("execution(* com.transformuk.hee.tis.tcs.api.*.update*(..))")
+  @Pointcut("execution(* com.transformuk.hee.tis.tcs.service.api.*.update*(..))")
   public void auditingUpdatePointcut() {
     // Method is empty as this is just a Pointcut, the implementations are in the advices.
   }
@@ -66,7 +66,7 @@ public class AuditingAspect {
   /**
    * Pointcut that matches all rest call for delete method.
    */
-  @Pointcut("execution(* com.transformuk.hee.tis.tcs.api.*.delete*(..))")
+  @Pointcut("execution(* com.transformuk.hee.tis.tcs.service.api.*.delete*(..))")
   public void auditingDeletePointcut() {
     // Method is empty as this is just a Pointcut, the implementations are in the advices.
   }
@@ -75,7 +75,7 @@ public class AuditingAspect {
    * Advice that Audit method before execution
    * check if any modification then its creating a jsonPatch and stored into JsonPatch table
    */
-  @Before("execution(* com.transformuk.hee.tis.tcs.api.*.update*(..))")
+  @Before("execution(* com.transformuk.hee.tis.tcs.service.api.*.update*(..))")
   public void auditUpdateBeforeExecution(JoinPoint joinPoint) throws Throwable {
     // store old value to map, wait until the update process
     UserProfile userPofile = getProfileFromContext();
