@@ -3,6 +3,8 @@ package com.transformuk.hee.tis.tcs.service.api;
 import com.codahale.metrics.annotation.Timed;
 import com.google.common.collect.Lists;
 import com.transformuk.hee.tis.tcs.api.dto.PostDTO;
+import com.transformuk.hee.tis.tcs.api.dto.validation.Create;
+import com.transformuk.hee.tis.tcs.api.dto.validation.Update;
 import com.transformuk.hee.tis.tcs.api.enumeration.PostGradeType;
 import com.transformuk.hee.tis.tcs.api.enumeration.PostSpecialtyType;
 import com.transformuk.hee.tis.tcs.api.enumeration.PostSuffix;
@@ -10,6 +12,7 @@ import com.transformuk.hee.tis.tcs.api.enumeration.Status;
 import com.transformuk.hee.tis.tcs.service.api.util.ColumnFilterUtil;
 import com.transformuk.hee.tis.tcs.service.api.util.HeaderUtil;
 import com.transformuk.hee.tis.tcs.service.api.util.PaginationUtil;
+import com.transformuk.hee.tis.tcs.service.api.validation.PostValidator;
 import com.transformuk.hee.tis.tcs.service.model.ColumnFilter;
 import com.transformuk.hee.tis.tcs.service.service.PostService;
 import io.github.jhipster.web.util.ResponseUtil;
@@ -24,6 +27,8 @@ import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
+import org.springframework.validation.annotation.Validated;
+import org.springframework.web.bind.MethodArgumentNotValidException;
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PatchMapping;
@@ -55,9 +60,11 @@ public class PostResource {
   private static final String ENTITY_NAME = "post";
   private final Logger log = LoggerFactory.getLogger(PostResource.class);
   private final PostService postService;
+  private final PostValidator postValidator;
 
-  public PostResource(PostService postService) {
+  public PostResource(PostService postService, PostValidator postValidator) {
     this.postService = postService;
+    this.postValidator = postValidator;
   }
 
   /**
@@ -70,8 +77,10 @@ public class PostResource {
   @PostMapping("/posts")
   @Timed
   @PreAuthorize("hasAuthority('post:add:modify')")
-  public ResponseEntity<PostDTO> createPost(@RequestBody PostDTO postDTO) throws URISyntaxException {
+  public ResponseEntity<PostDTO> createPost(@RequestBody @Validated(Create.class) PostDTO postDTO) throws URISyntaxException,
+      MethodArgumentNotValidException {
     log.debug("REST request to save Post : {}", postDTO);
+    postValidator.validate(postDTO);
     if (postDTO.getId() != null) {
       return ResponseEntity.badRequest().headers(HeaderUtil.createFailureAlert(ENTITY_NAME, "idexists", "A new post cannot already have an ID")).body(null);
     }
@@ -93,8 +102,10 @@ public class PostResource {
   @PutMapping("/posts")
   @Timed
   @PreAuthorize("hasAuthority('post:add:modify')")
-  public ResponseEntity<PostDTO> updatePost(@RequestBody PostDTO postDTO) throws URISyntaxException {
+  public ResponseEntity<PostDTO> updatePost(@RequestBody @Validated(Update.class) PostDTO postDTO) throws URISyntaxException,
+      MethodArgumentNotValidException {
     log.debug("REST request to update Post : {}", postDTO);
+    postValidator.validate(postDTO);
     if (postDTO.getId() == null) {
       return createPost(postDTO);
     }

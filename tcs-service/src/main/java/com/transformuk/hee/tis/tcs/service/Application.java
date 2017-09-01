@@ -20,12 +20,13 @@ import java.net.UnknownHostException;
 import java.util.Arrays;
 import java.util.Collection;
 
-@ComponentScan
+@ComponentScan(basePackages = {"com.transformuk.hee.tis.tcs.service","com.transformuk.hee.tis.reference"})
 @EnableAutoConfiguration(exclude = {MetricFilterAutoConfiguration.class, MetricRepositoryAutoConfiguration.class})
 @EnableConfigurationProperties({ApplicationProperties.class})
 @PropertySource({
     "classpath:/config/application.properties",
-    "classpath:/config/profileclientapplication.properties"
+    "classpath:/config/profileclientapplication.properties",
+    "classpath:/config/referenceclientapplication.properties"
 })
 public class Application {
 
