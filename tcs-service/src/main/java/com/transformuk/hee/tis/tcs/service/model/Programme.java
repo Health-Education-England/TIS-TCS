@@ -2,17 +2,10 @@ package com.transformuk.hee.tis.tcs.service.model;
 
 import com.transformuk.hee.tis.tcs.api.enumeration.Status;
 
-import javax.persistence.Entity;
-import javax.persistence.EnumType;
-import javax.persistence.Enumerated;
-import javax.persistence.GeneratedValue;
-import javax.persistence.GenerationType;
-import javax.persistence.Id;
-import javax.persistence.JoinColumn;
-import javax.persistence.JoinTable;
-import javax.persistence.ManyToMany;
+import javax.persistence.*;
 import java.io.Serializable;
 import java.util.HashSet;
+import java.util.LinkedHashSet;
 import java.util.Objects;
 import java.util.Set;
 
@@ -65,6 +58,32 @@ public class Programme implements Serializable {
 
   public Programme removeCurriculum(Curriculum curriculum) {
     this.curricula.remove(curriculum);
+    return this;
+  }
+
+  @OneToMany(cascade = CascadeType.ALL, fetch = FetchType.LAZY, mappedBy = "programmeId")
+  private Set<TrainingNumber> trainingNumber = new HashSet<>();
+
+  public Set<TrainingNumber> getTrainingNumber() {
+    return trainingNumber;
+  }
+
+  public void setTrainingNumber(Set<TrainingNumber> trainingNumber) {
+    this.trainingNumber = trainingNumber;
+  }
+
+  public Programme trainingNumber(Set<TrainingNumber> trainingNumber) {
+    this.trainingNumber = trainingNumber;
+    return this;
+  }
+
+  public Programme addTrainingNumber(TrainingNumber trainingNumbers) {
+    this.trainingNumber.add(trainingNumbers);
+    return this;
+  }
+
+  public Programme removeTrainingNumber(TrainingNumber trainingNumbers) {
+    this.trainingNumber.remove(trainingNumbers);
     return this;
   }
 

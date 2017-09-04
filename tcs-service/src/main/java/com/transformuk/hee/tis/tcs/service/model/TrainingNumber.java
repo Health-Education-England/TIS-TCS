@@ -2,12 +2,7 @@ package com.transformuk.hee.tis.tcs.service.model;
 
 import com.transformuk.hee.tis.tcs.api.enumeration.TrainingNumberType;
 
-import javax.persistence.Entity;
-import javax.persistence.EnumType;
-import javax.persistence.Enumerated;
-import javax.persistence.GeneratedValue;
-import javax.persistence.GenerationType;
-import javax.persistence.Id;
+import javax.persistence.*;
 import java.io.Serializable;
 import java.util.Objects;
 
@@ -33,6 +28,9 @@ public class TrainingNumber implements Serializable {
   private String typeOfContract;
 
   private String suffix;
+
+  @ManyToOne
+  private Programme programmeId;
 
   public Long getId() {
     return id;
@@ -107,6 +105,19 @@ public class TrainingNumber implements Serializable {
     return this;
   }
 
+  public Programme getProgrammeId() {
+        return programmeId;
+  }
+
+  public void setProgrammeId(Programme programmeId) {
+        this.programmeId = programmeId;
+  }
+
+  public TrainingNumber programmeId(Programme programmeId) {
+        this.programmeId = programmeId;
+        return this;
+  }
+
   @Override
   public boolean equals(Object o) {
     if (this == o) {
@@ -136,6 +147,7 @@ public class TrainingNumber implements Serializable {
         ", appointmentYear='" + appointmentYear + "'" +
         ", typeOfContract='" + typeOfContract + "'" +
         ", suffix='" + suffix + "'" +
+        ", programmeID='" + programmeId + "'" +
         '}';
   }
 }

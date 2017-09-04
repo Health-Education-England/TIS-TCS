@@ -23,14 +23,7 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.MethodArgumentNotValidException;
-import org.springframework.web.bind.annotation.DeleteMapping;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.PathVariable;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.PutMapping;
-import org.springframework.web.bind.annotation.RequestBody;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
 
 import javax.validation.Valid;
 import java.net.URI;
@@ -223,4 +216,42 @@ public class TrainingNumberResource {
         .body(results);
   }
 
+  /**
+   * PATCH  /bulk-patch-post-programmes : Patches a Training number to link it to a programme
+   *
+   * @param trainingNumberRelationshipsDto List of the TrainingNumberRelationshipsDTO to update their old and new Training Numbers
+   * @return the ResponseEntity with status 200 (OK) and with body the updated trainingNumberDTOS,
+   * or with status 400 (Bad Request) if the postDTOS is not valid,
+   * or with status 500 (Internal Server Error) if the postDTOS couldnt be updated
+   * @throws URISyntaxException if the Location URI syntax is incorrect
+   */
+  @PatchMapping("/bulk-patch-post-programmes")
+  @Timed
+  @PreAuthorize("hasAuthority('tcs:add:modify:entities')")
+  public ResponseEntity<List<TrainingNumberDTO>> bulkPatchTrainingNumberProgrammes(@Valid @RequestBody List<TrainingNumberDTO> trainingNumberRelationshipsDto) throws URISyntaxException {
+    log.debug("REST request to bulk link programmes to Training Numbers : {}", trainingNumberRelationshipsDto);
+    if (Collections.isEmpty(trainingNumberRelationshipsDto)) {
+      return ResponseEntity.badRequest().headers(HeaderUtil.createFailureAlert(ENTITY_NAME, "request.body.empty",
+              "The request body for this end point cannot be empty")).body(null);
+    } else if (!Collections.isEmpty(trainingNumberRelationshipsDto)) {
+      List<TrainingNumberDTO> entitiesWithNoId = trainingNumberRelationshipsDto.stream()
+              .filter(p -> p.getId() == null)
+              .map(post -> {
+                TrainingNumberDTO trainingNumberDTO = new TrainingNumberDTO();
+                trainingNumberDTO.setId(post.getId());
+                return trainingNumberDTO;
+              })
+              .collect(Collectors.toList());
+      if (!Collections.isEmpty(entitiesWithNoId)) {
+        return ResponseEntity.badRequest().headers(HeaderUtil.createFailureAlert(StringUtils.join(entitiesWithNoId, ","),
+                "bulk.update.failed.noId", "Some DTOs you've provided have no Id, cannot update entities that dont exist")).body(entitiesWithNoId);
+      }
+    }
+
+    List<TrainingNumberDTO> results = trainingNumberService.patchTrainingNumberProgrammes(trainingNumberRelationshipsDto);
+    List<Long> ids = results.stream().map(r -> r.getId()).collect(Collectors.toList());
+    return ResponseEntity.ok()
+            .headers(HeaderUtil.createEntityUpdateAlert(ENTITY_NAME, StringUtils.join(ids, ",")))
+            .body(results);
+  }
 }

@@ -10,7 +10,7 @@ import java.util.List;
 /**
  * Mapper for the entity Programme and its DTO ProgrammeDTO.
  */
-@Mapper(componentModel = "spring", uses = {CurriculumMapper.class})
+@Mapper(componentModel = "spring", uses = {CurriculumMapper.class, TrainingNumberMapper.class})
 public interface ProgrammeMapper {
 
   ProgrammeDTO programmeToProgrammeDTO(Programme programme);
