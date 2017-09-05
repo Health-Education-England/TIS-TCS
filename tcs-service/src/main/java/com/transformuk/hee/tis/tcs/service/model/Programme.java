@@ -61,7 +61,7 @@ public class Programme implements Serializable {
     return this;
   }
 
-  @OneToMany(cascade = CascadeType.ALL, fetch = FetchType.LAZY, mappedBy = "programmeId")
+  @OneToMany(mappedBy = "programme")
   private Set<TrainingNumber> trainingNumber = new HashSet<>();
 
   public Set<TrainingNumber> getTrainingNumber() {

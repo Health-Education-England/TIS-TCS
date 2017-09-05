@@ -14,7 +14,4 @@ import java.util.Set;
 public interface TrainingNumberRepository extends JpaRepository<TrainingNumber, Long>,JpaSpecificationExecutor<TrainingNumber> {
 
     List<TrainingNumber> findByNumber(Integer number);
-
-    Set<TrainingNumber> findTrainingNumberById(Set<Long> ids);
-
 }

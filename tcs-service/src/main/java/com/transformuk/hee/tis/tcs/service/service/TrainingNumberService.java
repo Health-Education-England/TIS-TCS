@@ -49,12 +49,4 @@ public interface TrainingNumberService {
    * @param id the id of the entity
    */
   void delete(Long id);
-
-  /**
-   * Patch a list of post so that the links to grades are saved.
-   *
-   * @param trainingNumberDTOList the list of entities to patch
-   * @return the list of persisted entities
-   */
-  List<TrainingNumberDTO> patchTrainingNumberProgrammes(List<TrainingNumberDTO> trainingNumberDTOList);
 }

@@ -38,9 +38,7 @@ public class TrainingNumberDTO implements Serializable {
 
   private String suffix;
 
-  private Long programmeId;
-
-  private ProgrammeDTO programmes;
+  private ProgrammeDTO programme;
 
   public Long getId() {
     return id;
@@ -50,25 +48,17 @@ public class TrainingNumberDTO implements Serializable {
     this.id = id;
   }
 
-  public Long getProgrammeId() {
-    return programmeId;
+  public ProgrammeDTO getProgramme() {
+    return programme;
   }
 
-  public ProgrammeDTO getProgrammes() {
-    return programmes;
+  public void setProgramme(ProgrammeDTO programmes) {
+    this.programme = programmes;
   }
 
-  public void setProgrammes(ProgrammeDTO programmes) {
-    this.programmes = programmes;
-  }
-
-  public TrainingNumberDTO programmes(ProgrammeDTO programmes) {
-    this.programmes = programmes;
+  public TrainingNumberDTO programme(ProgrammeDTO programmes) {
+    this.programme = programmes;
     return this;
-  }
-
-  public void setProgrammeId(Long programmeId) {
-    this.programmeId = programmeId;
   }
 
   public TrainingNumberType getTrainingNumberType() {
@@ -143,7 +133,7 @@ public class TrainingNumberDTO implements Serializable {
         ", appointmentYear='" + appointmentYear + "'" +
         ", typeOfContract='" + typeOfContract + "'" +
         ", suffix='" + suffix + "'" +
-        ", programmeId='" + programmeId + "'" +
+        ", programme='" + programme + "'" +
         '}';
   }
 }

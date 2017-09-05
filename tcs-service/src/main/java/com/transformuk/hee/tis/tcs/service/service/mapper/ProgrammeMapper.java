@@ -3,6 +3,7 @@ package com.transformuk.hee.tis.tcs.service.service.mapper;
 import com.transformuk.hee.tis.tcs.api.dto.ProgrammeDTO;
 import com.transformuk.hee.tis.tcs.service.model.Curriculum;
 import com.transformuk.hee.tis.tcs.service.model.Programme;
+import com.transformuk.hee.tis.tcs.service.model.TrainingNumber;
 import org.mapstruct.Mapper;
 
 import java.util.List;
@@ -28,5 +29,14 @@ public interface ProgrammeMapper {
     Curriculum curriculum = new Curriculum();
     curriculum.setId(id);
     return curriculum;
+  }
+
+  default TrainingNumber trainingNumberFromId(Long id){
+    if(id == null){
+      return null;
+    }
+    TrainingNumber trainingNumber = new TrainingNumber();
+    trainingNumber.setId(id);
+    return trainingNumber;
   }
 }

@@ -107,18 +107,6 @@ public class ProgrammeDTO implements Serializable {
     this.trainingNumber = trainingNumber;
   }
 
-  public Long setProgrammeId() {
-    return id;
-  }
-
-  public  Long getProgrammeId() {
-    return id;
-  }
-
-  public void setProgrammeId(Long id) {
-    this.id = id;
-  }
-
   @Override
   public boolean equals(Object o) {
     if (this == o) {

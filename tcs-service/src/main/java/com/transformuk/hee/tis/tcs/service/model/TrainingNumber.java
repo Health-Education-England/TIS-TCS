@@ -29,8 +29,9 @@ public class TrainingNumber implements Serializable {
 
   private String suffix;
 
-  @ManyToOne
-  private Programme programmeId;
+  @ManyToOne(fetch=FetchType.LAZY)
+  @JoinColumn(name="programmeID")
+  private Programme programme;
 
   public Long getId() {
     return id;
@@ -105,16 +106,16 @@ public class TrainingNumber implements Serializable {
     return this;
   }
 
-  public Programme getProgrammeId() {
-        return programmeId;
+  public Programme getProgramme() {
+        return programme;
   }
 
-  public void setProgrammeId(Programme programmeId) {
-        this.programmeId = programmeId;
+  public void setProgramme(Programme programme) {
+        this.programme = programme;
   }
 
-  public TrainingNumber programmeId(Programme programmeId) {
-        this.programmeId = programmeId;
+  public TrainingNumber programme(Programme programme) {
+        this.programme = programme;
         return this;
   }
 
@@ -147,7 +148,7 @@ public class TrainingNumber implements Serializable {
         ", appointmentYear='" + appointmentYear + "'" +
         ", typeOfContract='" + typeOfContract + "'" +
         ", suffix='" + suffix + "'" +
-        ", programmeID='" + programmeId + "'" +
+        ", programme='" + programme + "'" +
         '}';
   }
 }
