@@ -5,7 +5,6 @@ import com.transformuk.hee.tis.tcs.api.enumeration.Status;
 import javax.persistence.*;
 import java.io.Serializable;
 import java.util.HashSet;
-import java.util.LinkedHashSet;
 import java.util.Objects;
 import java.util.Set;
 
@@ -61,7 +60,7 @@ public class Programme implements Serializable {
     return this;
   }
 
-  @OneToMany(mappedBy = "programme")
+  @OneToMany(mappedBy = "programme", fetch = FetchType.LAZY)
   private Set<TrainingNumber> trainingNumber = new HashSet<>();
 
   public Set<TrainingNumber> getTrainingNumber() {

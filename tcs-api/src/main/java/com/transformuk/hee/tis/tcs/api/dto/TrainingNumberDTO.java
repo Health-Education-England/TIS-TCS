@@ -52,12 +52,12 @@ public class TrainingNumberDTO implements Serializable {
     return programme;
   }
 
-  public void setProgramme(ProgrammeDTO programmes) {
-    this.programme = programmes;
+  public void setProgramme(ProgrammeDTO programme) {
+    this.programme = programme;
   }
 
-  public TrainingNumberDTO programme(ProgrammeDTO programmes) {
-    this.programme = programmes;
+  public TrainingNumberDTO programme(ProgrammeDTO programme) {
+    this.programme = programme;
     return this;
   }
 
