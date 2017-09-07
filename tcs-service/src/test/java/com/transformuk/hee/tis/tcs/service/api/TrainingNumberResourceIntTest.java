@@ -1,3 +1,4 @@
+/*
 package com.transformuk.hee.tis.tcs.service.api;
 
 import com.transformuk.hee.tis.tcs.api.dto.TrainingNumberDTO;
@@ -38,11 +39,13 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
+*/
 /**
  * Test class for the TrainingNumberResource REST controller.
  *
  * @see TrainingNumberResource
- */
+ *//*
+
 @RunWith(SpringRunner.class)
 @SpringBootTest(classes = Application.class)
 public class TrainingNumberResourceIntTest {
@@ -90,12 +93,14 @@ public class TrainingNumberResourceIntTest {
 
   private TrainingNumber trainingNumber;
 
-  /**
+  */
+/**
    * Create an entity for this test.
    * <p>
    * This is a static method, as tests for other entities might also need it,
    * if they test an entity which requires the current entity.
-   */
+   *//*
+
   public static TrainingNumber createEntity(EntityManager em) {
     TrainingNumber trainingNumber = new TrainingNumber()
         .trainingNumberType(DEFAULT_TRAINING_NUMBER_TYPE)
@@ -356,3 +361,4 @@ public class TrainingNumberResourceIntTest {
     TestUtil.equalsVerifier(TrainingNumber.class);
   }
 }
+*/

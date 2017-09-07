@@ -29,8 +29,8 @@ public class TrainingNumber implements Serializable {
 
   private String suffix;
 
-  @ManyToOne
-  @JoinColumn(name="programmeID")
+  @ManyToOne(cascade = CascadeType.ALL, fetch = FetchType.LAZY)
+  @JoinColumn(name = "programmeID")
   private Programme programme;
 
   public Long getId() {

@@ -8,6 +8,8 @@ import java.util.HashSet;
 import java.util.Objects;
 import java.util.Set;
 
+import static javax.persistence.CascadeType.ALL;
+
 /**
  * A Programme.
  */
@@ -59,8 +61,7 @@ public class Programme implements Serializable {
     this.curricula.remove(curriculum);
     return this;
   }
-
-  @OneToMany(mappedBy = "programme", fetch = FetchType.LAZY)
+  @OneToMany(mappedBy = "programme", cascade = CascadeType.ALL, orphanRemoval = true)
   private Set<TrainingNumber> trainingNumber = new HashSet<>();
 
   public Set<TrainingNumber> getTrainingNumber() {
@@ -71,19 +72,20 @@ public class Programme implements Serializable {
     this.trainingNumber = trainingNumber;
   }
 
+
   public Programme trainingNumber(Set<TrainingNumber> trainingNumber) {
     this.trainingNumber = trainingNumber;
     return this;
   }
 
-  public Programme addTrainingNumber(TrainingNumber trainingNumbers) {
-    this.trainingNumber.add(trainingNumbers);
-    return this;
+  public void addTrainingNumber(TrainingNumber trainingnumber) {
+    this.trainingNumber.add(trainingnumber);
+    trainingnumber.setProgramme(this);
   }
 
-  public Programme removeTrainingNumber(TrainingNumber trainingNumbers) {
-    this.trainingNumber.remove(trainingNumbers);
-    return this;
+  public void removeTrainingNumber(TrainingNumber trainingnumber) {
+    this.trainingNumber.remove(trainingnumber);
+    trainingnumber.setProgramme(null);
   }
 
   public Long getId() {

@@ -38,7 +38,7 @@ public class TrainingNumberDTO implements Serializable {
 
   private String suffix;
 
-  private ProgrammeDTO programme;
+  private Long programme;
 
   public Long getId() {
     return id;
@@ -48,15 +48,15 @@ public class TrainingNumberDTO implements Serializable {
     this.id = id;
   }
 
-  public ProgrammeDTO getProgramme() {
+  public Long getProgramme() {
     return programme;
   }
 
-  public void setProgramme(ProgrammeDTO programme) {
+  public void setProgramme(Long programme) {
     this.programme = programme;
   }
 
-  public TrainingNumberDTO programme(ProgrammeDTO programme) {
+  public TrainingNumberDTO programme(Long programme) {
     this.programme = programme;
     return this;
   }

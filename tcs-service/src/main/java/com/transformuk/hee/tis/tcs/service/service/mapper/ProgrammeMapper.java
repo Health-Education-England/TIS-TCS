@@ -36,7 +36,7 @@ public interface ProgrammeMapper {
       return null;
     }
     TrainingNumber trainingNumber = new TrainingNumber();
-    trainingNumber.setId(id);
+    trainingNumber.setId(id);;
     return trainingNumber;
   }
 }

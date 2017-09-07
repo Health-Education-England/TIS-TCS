@@ -4,8 +4,10 @@ import com.google.common.collect.Lists;
 import com.google.common.collect.Sets;
 import com.transformuk.hee.tis.tcs.api.dto.*;
 import com.transformuk.hee.tis.tcs.service.model.*;
+import com.transformuk.hee.tis.tcs.service.repository.ProgrammeRepository;
 import org.apache.commons.collections4.CollectionUtils;
 import org.mapstruct.Mapper;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
 import java.util.List;
@@ -16,6 +18,9 @@ import java.util.Set;
  */
 @Component
 public class TrainingNumberMapper {
+
+  @Autowired
+  private ProgrammeRepository programmeRepository;
 
   public TrainingNumberDTO trainingNumberToTrainingNumberDTO(TrainingNumber trainingNumber){
     TrainingNumberDTO result = null;
@@ -59,7 +64,12 @@ public class TrainingNumberMapper {
     result.setSuffix(trainingNumber.getSuffix());
     result.setTrainingNumberType(trainingNumber.getTrainingNumberType());
     result.setTypeOfContract(trainingNumber.getTypeOfContract());
-    result.setProgramme(programmeToProgrammeDTO(trainingNumber.getProgramme()));
+    if(trainingNumber.getProgramme() == null){
+      result.setProgramme(null);
+    }
+    else {
+      result.setProgramme(trainingNumber.getProgramme().getId());
+    }
     return result;
   }
 
@@ -99,8 +109,17 @@ public class TrainingNumberMapper {
     result.setSuffix(trainingNumberDTO.getSuffix());
     result.setTrainingNumberType(trainingNumberDTO.getTrainingNumberType());
     result.setTypeOfContract(trainingNumberDTO.getTypeOfContract());
-    result.setProgramme(programmeDTOToProgramme(trainingNumberDTO.getProgramme()));
+    result.setProgramme(programmeFromId(trainingNumberDTO.getProgramme()));
     return result;
+  }
+
+
+  private Programme programmeFromId(Long id) {
+    if (id == null) {
+      return null;
+    }
+    Programme programme = programmeRepository.findOne(id);
+    return programme;
   }
 
 }
