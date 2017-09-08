@@ -61,7 +61,7 @@ public class Programme implements Serializable {
     this.curricula.remove(curriculum);
     return this;
   }
-  @OneToMany(mappedBy = "programme", cascade = CascadeType.ALL, orphanRemoval = true)
+  @OneToMany(mappedBy = "programme", cascade = CascadeType.ALL)
   private Set<TrainingNumber> trainingNumber = new HashSet<>();
 
   public Set<TrainingNumber> getTrainingNumber() {
