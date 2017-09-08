@@ -174,9 +174,7 @@ public class Programme implements Serializable {
       return false;
     if (programmeName != null ? !programmeName.equals(programme.programmeName) : programme.programmeName != null)
       return false;
-    if (programmeNumber != null ? !programmeNumber.equals(programme.programmeNumber) : programme.programmeNumber != null)
-      return false;
-    return (curricula != null ? !curricula.equals(programme.curricula) : programme.curricula != null);
+    return  (programmeNumber != null ? !programmeNumber.equals(programme.programmeNumber) : programme.programmeNumber != null);
   }
 
   @Override
@@ -186,7 +184,6 @@ public class Programme implements Serializable {
     result = 31 * result + (managingDeanery != null ? managingDeanery.hashCode() : 0);
     result = 31 * result + (programmeName != null ? programmeName.hashCode() : 0);
     result = 31 * result + (programmeNumber != null ? programmeNumber.hashCode() : 0);
-    result = 31 * result + (curricula != null ? curricula.hashCode() : 0);
     return result;
   }
 
