@@ -168,18 +168,20 @@ public class Programme implements Serializable {
 
     Programme programme = (Programme) o;
 
+    if (id != null ? !id.equals(programme.id) : programme.id != null) return false;
     if (intrepidId != null ? !intrepidId.equals(programme.intrepidId) : programme.intrepidId != null) return false;
     if (status != programme.status) return false;
     if (managingDeanery != null ? !managingDeanery.equals(programme.managingDeanery) : programme.managingDeanery != null)
       return false;
     if (programmeName != null ? !programmeName.equals(programme.programmeName) : programme.programmeName != null)
       return false;
-    return  (programmeNumber != null ? !programmeNumber.equals(programme.programmeNumber) : programme.programmeNumber != null);
+    return programmeNumber != null ? programmeNumber.equals(programme.programmeNumber) : programme.programmeNumber == null;
   }
 
   @Override
   public int hashCode() {
-    int result = intrepidId != null ? intrepidId.hashCode() : 0;
+    int result = id != null ? id.hashCode() : 0;
+    result = 31 * result + (intrepidId != null ? intrepidId.hashCode() : 0);
     result = 31 * result + (status != null ? status.hashCode() : 0);
     result = 31 * result + (managingDeanery != null ? managingDeanery.hashCode() : 0);
     result = 31 * result + (programmeName != null ? programmeName.hashCode() : 0);
