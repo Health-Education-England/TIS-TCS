@@ -19,9 +19,6 @@ import java.util.Set;
 @Component
 public class TrainingNumberMapper {
 
-  @Autowired
-  private ProgrammeRepository programmeRepository;
-
   public TrainingNumberDTO trainingNumberToTrainingNumberDTO(TrainingNumber trainingNumber){
     TrainingNumberDTO result = null;
     if(trainingNumber != null){
@@ -118,7 +115,8 @@ public class TrainingNumberMapper {
     if (id == null) {
       return null;
     }
-    Programme programme = programmeRepository.findOne(id);
+    Programme programme = new Programme();
+    programme.setId(id);
     return programme;
   }
 

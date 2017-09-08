@@ -30,13 +30,4 @@ public interface ProgrammeMapper {
     curriculum.setId(id);
     return curriculum;
   }
-
-  default TrainingNumber trainingNumberFromId(Long id){
-    if(id == null){
-      return null;
-    }
-    TrainingNumber trainingNumber = new TrainingNumber();
-    trainingNumber.setId(id);;
-    return trainingNumber;
-  }
 }

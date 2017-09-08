@@ -163,22 +163,31 @@ public class Programme implements Serializable {
 
   @Override
   public boolean equals(Object o) {
-    if (this == o) {
-      return true;
-    }
-    if (o == null || getClass() != o.getClass()) {
-      return false;
-    }
+    if (this == o) return true;
+    if (o == null || getClass() != o.getClass()) return false;
+
     Programme programme = (Programme) o;
-    if (programme.id == null || id == null) {
+
+    if (intrepidId != null ? !intrepidId.equals(programme.intrepidId) : programme.intrepidId != null) return false;
+    if (status != programme.status) return false;
+    if (managingDeanery != null ? !managingDeanery.equals(programme.managingDeanery) : programme.managingDeanery != null)
       return false;
-    }
-    return Objects.equals(id, programme.id);
+    if (programmeName != null ? !programmeName.equals(programme.programmeName) : programme.programmeName != null)
+      return false;
+    if (programmeNumber != null ? !programmeNumber.equals(programme.programmeNumber) : programme.programmeNumber != null)
+      return false;
+    return (curricula != null ? !curricula.equals(programme.curricula) : programme.curricula != null);
   }
 
   @Override
   public int hashCode() {
-    return Objects.hashCode(id);
+    int result = intrepidId != null ? intrepidId.hashCode() : 0;
+    result = 31 * result + (status != null ? status.hashCode() : 0);
+    result = 31 * result + (managingDeanery != null ? managingDeanery.hashCode() : 0);
+    result = 31 * result + (programmeName != null ? programmeName.hashCode() : 0);
+    result = 31 * result + (programmeNumber != null ? programmeNumber.hashCode() : 0);
+    result = 31 * result + (curricula != null ? curricula.hashCode() : 0);
+    return result;
   }
 
   @Override

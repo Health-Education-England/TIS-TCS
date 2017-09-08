@@ -29,7 +29,7 @@ public class TrainingNumber implements Serializable {
 
   private String suffix;
 
-  @ManyToOne(cascade = CascadeType.ALL, fetch = FetchType.LAZY)
+  @ManyToOne(fetch = FetchType.LAZY)
   @JoinColumn(name = "programmeID")
   private Programme programme;
 
@@ -121,22 +121,30 @@ public class TrainingNumber implements Serializable {
 
   @Override
   public boolean equals(Object o) {
-    if (this == o) {
-      return true;
-    }
-    if (o == null || getClass() != o.getClass()) {
+    if (this == o) return true;
+    if (o == null || getClass() != o.getClass()) return false;
+
+    TrainingNumber that = (TrainingNumber) o;
+
+    if (trainingNumberType != that.trainingNumberType) return false;
+    if (number != null ? !number.equals(that.number) : that.number != null) return false;
+    if (appointmentYear != null ? !appointmentYear.equals(that.appointmentYear) : that.appointmentYear != null)
       return false;
-    }
-    TrainingNumber trainingNumber = (TrainingNumber) o;
-    if (trainingNumber.id == null || id == null) {
+    if (typeOfContract != null ? !typeOfContract.equals(that.typeOfContract) : that.typeOfContract != null)
       return false;
-    }
-    return Objects.equals(id, trainingNumber.id);
+    if (suffix != null ? !suffix.equals(that.suffix) : that.suffix != null) return false;
+    return programme != null ? programme.equals(that.programme) : that.programme == null;
   }
 
   @Override
   public int hashCode() {
-    return Objects.hashCode(id);
+    int result = trainingNumberType != null ? trainingNumberType.hashCode() : 0;
+    result = 31 * result + (number != null ? number.hashCode() : 0);
+    result = 31 * result + (appointmentYear != null ? appointmentYear.hashCode() : 0);
+    result = 31 * result + (typeOfContract != null ? typeOfContract.hashCode() : 0);
+    result = 31 * result + (suffix != null ? suffix.hashCode() : 0);
+    result = 31 * result + (programme != null ? programme.hashCode() : 0);
+    return result;
   }
 
   @Override
