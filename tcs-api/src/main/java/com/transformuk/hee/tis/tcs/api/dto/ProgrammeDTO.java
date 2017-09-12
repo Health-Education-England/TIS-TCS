@@ -3,7 +3,6 @@ package com.transformuk.hee.tis.tcs.api.dto;
 import com.transformuk.hee.tis.tcs.api.dto.validation.Create;
 import com.transformuk.hee.tis.tcs.api.dto.validation.Update;
 import com.transformuk.hee.tis.tcs.api.enumeration.Status;
-import org.springframework.validation.annotation.Validated;
 
 import javax.validation.constraints.DecimalMin;
 import javax.validation.constraints.NotNull;
@@ -42,7 +41,7 @@ public class ProgrammeDTO implements Serializable {
 
   private Set<CurriculumDTO> curricula;
 
-  private Set<TrainingNumberDTO> trainingNumber;
+  private Set<TrainingNumberDTO> trainingNumbers;
 
   public Long getId() {
     return id;
@@ -100,12 +99,12 @@ public class ProgrammeDTO implements Serializable {
     this.curricula = curricula;
   }
 
-  public  Set<TrainingNumberDTO> getTrainingNumber() {
-    return trainingNumber;
+  public  Set<TrainingNumberDTO> getTrainingNumbers() {
+    return trainingNumbers;
   }
 
-  public void setTrainingNumber (Set<TrainingNumberDTO> trainingNumber) {
-    this.trainingNumber = trainingNumber;
+  public void setTrainingNumbers(Set<TrainingNumberDTO> trainingNumbers) {
+    this.trainingNumbers = trainingNumbers;
   }
 
   @Override
@@ -141,7 +140,7 @@ public class ProgrammeDTO implements Serializable {
         ", programmeName='" + programmeName + "'" +
         ", programmeNumber='" + programmeNumber + "'" +
         ", curricula='" + curricula + "'" +
-        ", trainingNumber'" + trainingNumber + "'" +
+        ", trainingNumbers'" + trainingNumbers + "'" +
         '}';
   }
 }

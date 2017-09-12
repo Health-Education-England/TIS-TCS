@@ -5,10 +5,7 @@ import com.transformuk.hee.tis.tcs.api.enumeration.Status;
 import javax.persistence.*;
 import java.io.Serializable;
 import java.util.HashSet;
-import java.util.Objects;
 import java.util.Set;
-
-import static javax.persistence.CascadeType.ALL;
 
 /**
  * A Programme.
@@ -62,29 +59,29 @@ public class Programme implements Serializable {
     return this;
   }
   @OneToMany(mappedBy = "programme", cascade = CascadeType.ALL)
-  private Set<TrainingNumber> trainingNumber = new HashSet<>();
+  private Set<TrainingNumber> trainingNumbers = new HashSet<>();
 
-  public Set<TrainingNumber> getTrainingNumber() {
-    return trainingNumber;
+  public Set<TrainingNumber> getTrainingNumbers() {
+    return trainingNumbers;
   }
 
-  public void setTrainingNumber(Set<TrainingNumber> trainingNumber) {
-    this.trainingNumber = trainingNumber;
+  public void setTrainingNumbers(Set<TrainingNumber> trainingNumbers) {
+    this.trainingNumbers = trainingNumbers;
   }
 
 
   public Programme trainingNumber(Set<TrainingNumber> trainingNumber) {
-    this.trainingNumber = trainingNumber;
+    this.trainingNumbers = trainingNumber;
     return this;
   }
 
   public void addTrainingNumber(TrainingNumber trainingnumber) {
-    this.trainingNumber.add(trainingnumber);
+    this.trainingNumbers.add(trainingnumber);
     trainingnumber.setProgramme(this);
   }
 
   public void removeTrainingNumber(TrainingNumber trainingnumber) {
-    this.trainingNumber.remove(trainingnumber);
+    this.trainingNumbers.remove(trainingnumber);
     trainingnumber.setProgramme(null);
   }
 

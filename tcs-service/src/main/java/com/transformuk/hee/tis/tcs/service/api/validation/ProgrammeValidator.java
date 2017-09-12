@@ -110,10 +110,10 @@ public class ProgrammeValidator {
 
   private List<FieldError> checkTrainingNumber(ProgrammeDTO programmeDTO) {
     List<FieldError> fieldErrors = new ArrayList<>();
-      for (TrainingNumberDTO trainingNumber : programmeDTO.getTrainingNumber()) {
+      for (TrainingNumberDTO trainingNumber : programmeDTO.getTrainingNumbers()) {
         if (trainingNumber.getProgramme() != null && trainingNumber.getProgramme() != programmeDTO.getId()) {
           fieldErrors.add(new FieldError("ProgrammeDTO", "training-number",
-                  String.format("trainingNumber %s is already linked.", trainingNumber.getProgramme())));
+                  String.format("Training number with id: %s is already linked.", trainingNumber.getId())));
         }
       }
     return fieldErrors;
