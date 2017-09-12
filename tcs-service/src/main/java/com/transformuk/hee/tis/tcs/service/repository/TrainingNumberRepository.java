@@ -19,4 +19,6 @@ public interface TrainingNumberRepository extends JpaRepository<TrainingNumber, 
     Set<TrainingNumber> findBy(TrainingNumberDTO trainingNumber);
 
     List<TrainingNumber> findByProgrammeId(Long programme);
+
+    TrainingNumber findOneById(Long id);
 }

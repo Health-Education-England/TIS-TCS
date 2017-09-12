@@ -29,7 +29,7 @@ public class TrainingNumber implements Serializable {
 
   private String suffix;
 
-  @ManyToOne(fetch = FetchType.LAZY)
+  @ManyToOne(fetch = FetchType.EAGER)
   @JoinColumn(name = "programmeID")
   private Programme programme;
 

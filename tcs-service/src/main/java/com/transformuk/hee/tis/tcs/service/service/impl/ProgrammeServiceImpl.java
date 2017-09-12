@@ -57,7 +57,7 @@ public class ProgrammeServiceImpl implements ProgrammeService {
   public ProgrammeDTO save(ProgrammeDTO programmeDTO) {
     log.debug("Request to save Programme : {}", programmeDTO);
     Programme programme = programmeMapper.programmeDTOToProgramme(programmeDTO);
-    programme = programmeRepository.save(programme);
+    programme = programmeRepository.saveAndFlush(programme);
     ProgrammeDTO result = programmeMapper.programmeToProgrammeDTO(programme);
     return result;
   }

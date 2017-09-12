@@ -69,16 +69,6 @@ public class Programme implements Serializable {
     this.trainingNumbers = trainingNumbers;
   }
 
-  public void addTrainingNumber(TrainingNumber trainingNumber) {
-    this.trainingNumbers.add(trainingNumber);
-    trainingNumber.setProgramme(this);
-  }
-
-  public void removeTrainingNumber(TrainingNumber trainingNumber) {
-    this.trainingNumbers.remove(trainingNumber);
-    trainingNumber.setProgramme(null);
-  }
-
   public Long getId() {
     return id;
   }

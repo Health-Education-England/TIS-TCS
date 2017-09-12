@@ -5,8 +5,10 @@ import com.transformuk.hee.tis.tcs.api.dto.CurriculumDTO;
 import com.transformuk.hee.tis.tcs.api.dto.ProgrammeDTO;
 import com.transformuk.hee.tis.tcs.api.dto.TrainingNumberDTO;
 import com.transformuk.hee.tis.tcs.service.model.Programme;
+import com.transformuk.hee.tis.tcs.service.model.TrainingNumber;
 import com.transformuk.hee.tis.tcs.service.repository.CurriculumRepository;
 import com.transformuk.hee.tis.tcs.service.repository.ProgrammeRepository;
+import com.transformuk.hee.tis.tcs.service.repository.TrainingNumberRepository;
 import com.transformuk.hee.tis.tcs.service.service.mapper.DesignatedBodyMapper;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
@@ -25,11 +27,13 @@ public class ProgrammeValidator {
 
   private CurriculumRepository curriculumRepository;
   private ProgrammeRepository programmeRepository;
+  private TrainingNumberRepository trainingNumberRepository;
 
   @Autowired
-  public ProgrammeValidator(CurriculumRepository curriculumRepository, ProgrammeRepository programmeRepository) {
+  public ProgrammeValidator(CurriculumRepository curriculumRepository, ProgrammeRepository programmeRepository, TrainingNumberRepository trainingNumberRepository) {
     this.curriculumRepository = curriculumRepository;
     this.programmeRepository = programmeRepository;
+    this.trainingNumberRepository = trainingNumberRepository;
   }
 
   /**
@@ -49,7 +53,7 @@ public class ProgrammeValidator {
     fieldErrors.addAll(checkLocalOffice(programmeDTO, userProfile));
     fieldErrors.addAll(checkCurricula(programmeDTO));
     fieldErrors.addAll(checkProgrammeNumber(programmeDTO));
-    fieldErrors.addAll(checkTrainingNumber(programmeDTO));
+    fieldErrors.addAll(checkTrainingNumbers(programmeDTO));
 
     if (!fieldErrors.isEmpty()) {
       BeanPropertyBindingResult bindingResult = new BeanPropertyBindingResult(programmeDTO, "ProgrammeDTO");
@@ -108,10 +112,12 @@ public class ProgrammeValidator {
     return fieldErrors;
   }
 
-  private List<FieldError> checkTrainingNumber(ProgrammeDTO programmeDTO) {
+  private List<FieldError> checkTrainingNumbers(ProgrammeDTO programmeDTO) {
     List<FieldError> fieldErrors = new ArrayList<>();
       for (TrainingNumberDTO trainingNumber : programmeDTO.getTrainingNumbers()) {
-        if (trainingNumber.getProgramme() != null && trainingNumber.getProgramme() != programmeDTO.getId()) {
+        if (trainingNumber.getProgramme() != null) {
+          TrainingNumber currentTrainingNumber = trainingNumberRepository.findOneById(trainingNumber.getId());
+          if (currentTrainingNumber != null && currentTrainingNumber.getProgramme() != null && currentTrainingNumber.getProgramme().getId() != programmeDTO.getId())
           fieldErrors.add(new FieldError("ProgrammeDTO", "training-number",
                   String.format("Training number with id: %s is already linked.", trainingNumber.getId())));
         }
