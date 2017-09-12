@@ -23,8 +23,7 @@ public class TrainingNumberMapper {
   }
 
   public TrainingNumber trainingNumberDTOToTrainingNumber(TrainingNumberDTO trainingNumberDTO) {
-    TrainingNumber result = toEntity(trainingNumberDTO);
-    return result;
+    return toEntity(trainingNumberDTO);
   }
 
   public List<TrainingNumber> trainingNumberDTOsToTrainingNumbers(List<TrainingNumberDTO> trainingNumberDTOs) {

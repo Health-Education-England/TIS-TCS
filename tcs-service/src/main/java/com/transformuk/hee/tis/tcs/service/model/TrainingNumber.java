@@ -114,11 +114,6 @@ public class TrainingNumber implements Serializable {
         this.programme = programme;
   }
 
-  public TrainingNumber programme(Programme programme) {
-        this.programme = programme;
-        return this;
-  }
-
   @Override
   public boolean equals(Object o) {
     if (this == o) return true;

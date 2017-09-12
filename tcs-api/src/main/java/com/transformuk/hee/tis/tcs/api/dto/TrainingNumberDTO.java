@@ -57,11 +57,6 @@ public class TrainingNumberDTO implements Serializable {
     this.programmeId = programme;
   }
 
-  public TrainingNumberDTO programme(Long programme) {
-    this.programmeId = programme;
-    return this;
-  }
-
   public TrainingNumberType getTrainingNumberType() {
     return trainingNumberType;
   }
