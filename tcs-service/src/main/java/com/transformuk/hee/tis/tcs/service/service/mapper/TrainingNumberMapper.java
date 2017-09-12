@@ -1,17 +1,12 @@
 package com.transformuk.hee.tis.tcs.service.service.mapper;
 
 import com.google.common.collect.Lists;
-import com.google.common.collect.Sets;
 import com.transformuk.hee.tis.tcs.api.dto.*;
 import com.transformuk.hee.tis.tcs.service.model.*;
-import com.transformuk.hee.tis.tcs.service.repository.ProgrammeRepository;
-import org.apache.commons.collections4.CollectionUtils;
-import org.mapstruct.Mapper;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
+import java.util.ArrayList;
 import java.util.List;
-import java.util.Set;
 
 /**
  * Mapper for the entity TrainingNumber and its DTO TrainingNumberDTO.

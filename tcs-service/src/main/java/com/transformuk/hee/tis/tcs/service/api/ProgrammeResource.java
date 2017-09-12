@@ -4,6 +4,7 @@ import com.codahale.metrics.annotation.Timed;
 import com.google.common.collect.Lists;
 import com.transformuk.hee.tis.security.model.UserProfile;
 import com.transformuk.hee.tis.tcs.api.dto.ProgrammeDTO;
+import com.transformuk.hee.tis.tcs.api.dto.TrainingNumberDTO;
 import com.transformuk.hee.tis.tcs.api.dto.validation.Create;
 import com.transformuk.hee.tis.tcs.api.dto.validation.Update;
 import com.transformuk.hee.tis.tcs.api.enumeration.Status;
@@ -45,8 +46,7 @@ import javax.validation.Valid;
 import java.io.IOException;
 import java.net.URI;
 import java.net.URISyntaxException;
-import java.util.List;
-import java.util.Optional;
+import java.util.*;
 import java.util.stream.Collectors;
 
 import static com.transformuk.hee.tis.security.util.TisSecurityHelper.getProfileFromContext;
@@ -111,7 +111,7 @@ public class ProgrammeResource {
   @Timed
   @PreAuthorize("hasAuthority('programme:add:modify')")
   public ResponseEntity<ProgrammeDTO> updateProgramme(@RequestBody @Validated(Update.class) ProgrammeDTO programmeDTO)
-      throws URISyntaxException, MethodArgumentNotValidException {
+          throws URISyntaxException, MethodArgumentNotValidException, Error {
     log.debug("REST request to update Programme : {}", programmeDTO);
     programmeValidator.validate(programmeDTO, getProfileFromContext());
     try {

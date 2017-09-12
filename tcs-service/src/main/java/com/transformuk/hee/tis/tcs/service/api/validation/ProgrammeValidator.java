@@ -3,6 +3,7 @@ package com.transformuk.hee.tis.tcs.service.api.validation;
 import com.transformuk.hee.tis.security.model.UserProfile;
 import com.transformuk.hee.tis.tcs.api.dto.CurriculumDTO;
 import com.transformuk.hee.tis.tcs.api.dto.ProgrammeDTO;
+import com.transformuk.hee.tis.tcs.api.dto.TrainingNumberDTO;
 import com.transformuk.hee.tis.tcs.service.model.Programme;
 import com.transformuk.hee.tis.tcs.service.repository.CurriculumRepository;
 import com.transformuk.hee.tis.tcs.service.repository.ProgrammeRepository;
@@ -13,8 +14,7 @@ import org.springframework.validation.BeanPropertyBindingResult;
 import org.springframework.validation.FieldError;
 import org.springframework.web.bind.MethodArgumentNotValidException;
 
-import java.util.ArrayList;
-import java.util.List;
+import java.util.*;
 
 /**
  * Holds more complex custom validation for a {@link ProgrammeDTO} that
@@ -49,6 +49,7 @@ public class ProgrammeValidator {
     fieldErrors.addAll(checkLocalOffice(programmeDTO, userProfile));
     fieldErrors.addAll(checkCurricula(programmeDTO));
     fieldErrors.addAll(checkProgrammeNumber(programmeDTO));
+    fieldErrors.addAll(checkTrainingNumber(programmeDTO));
 
     if (!fieldErrors.isEmpty()) {
       BeanPropertyBindingResult bindingResult = new BeanPropertyBindingResult(programmeDTO, "ProgrammeDTO");
@@ -104,6 +105,17 @@ public class ProgrammeValidator {
         }
       }
     }
+    return fieldErrors;
+  }
+
+  private List<FieldError> checkTrainingNumber(ProgrammeDTO programmeDTO) {
+    List<FieldError> fieldErrors = new ArrayList<>();
+      for (TrainingNumberDTO trainingNumber : programmeDTO.getTrainingNumber()) {
+        if (trainingNumber.getProgramme() != null && trainingNumber.getProgramme() != programmeDTO.getId()) {
+          fieldErrors.add(new FieldError("ProgrammeDTO", "training-number",
+                  String.format("trainingNumber %s is already linked.", trainingNumber.getProgramme())));
+        }
+      }
     return fieldErrors;
   }
 

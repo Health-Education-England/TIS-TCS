@@ -3,6 +3,7 @@ package com.transformuk.hee.tis.tcs.api.dto;
 import com.transformuk.hee.tis.tcs.api.dto.validation.Create;
 import com.transformuk.hee.tis.tcs.api.dto.validation.Update;
 import com.transformuk.hee.tis.tcs.api.enumeration.TrainingNumberType;
+import org.springframework.validation.annotation.Validated;
 
 import javax.validation.constraints.DecimalMin;
 import javax.validation.constraints.NotNull;
@@ -38,7 +39,7 @@ public class TrainingNumberDTO implements Serializable {
 
   private String suffix;
 
-  private Long programme;
+  private Long programmeId;
 
   public Long getId() {
     return id;
@@ -49,15 +50,15 @@ public class TrainingNumberDTO implements Serializable {
   }
 
   public Long getProgramme() {
-    return programme;
+    return programmeId;
   }
 
   public void setProgramme(Long programme) {
-    this.programme = programme;
+    this.programmeId = programme;
   }
 
   public TrainingNumberDTO programme(Long programme) {
-    this.programme = programme;
+    this.programmeId = programme;
     return this;
   }
 
@@ -133,7 +134,7 @@ public class TrainingNumberDTO implements Serializable {
         ", appointmentYear='" + appointmentYear + "'" +
         ", typeOfContract='" + typeOfContract + "'" +
         ", suffix='" + suffix + "'" +
-        ", programme='" + programme + "'" +
+        ", programmeId='" + programmeId + "'" +
         '}';
   }
 }

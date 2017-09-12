@@ -1,4 +1,3 @@
-/*
 package com.transformuk.hee.tis.tcs.service.api;
 
 import com.transformuk.hee.tis.tcs.api.dto.TrainingNumberDTO;
@@ -12,6 +11,7 @@ import com.transformuk.hee.tis.tcs.service.service.TrainingNumberService;
 import com.transformuk.hee.tis.tcs.service.service.mapper.TrainingNumberMapper;
 import org.hamcrest.core.StringContains;
 import org.junit.Before;
+import org.junit.Ignore;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.mockito.MockitoAnnotations;
@@ -39,12 +39,11 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
-*/
 /**
  * Test class for the TrainingNumberResource REST controller.
  *
- * @see TrainingNumberResource
- *//*
+ * @see TrainingNumberResource*/
+
 
 @RunWith(SpringRunner.class)
 @SpringBootTest(classes = Application.class)
@@ -93,13 +92,12 @@ public class TrainingNumberResourceIntTest {
 
   private TrainingNumber trainingNumber;
 
-  */
 /**
    * Create an entity for this test.
    * <p>
    * This is a static method, as tests for other entities might also need it,
-   * if they test an entity which requires the current entity.
-   *//*
+   * if they test an entity which requires the current entity.*/
+
 
   public static TrainingNumber createEntity(EntityManager em) {
     TrainingNumber trainingNumber = new TrainingNumber()
@@ -355,10 +353,10 @@ public class TrainingNumberResourceIntTest {
     assertThat(trainingNumberList).hasSize(databaseSizeBeforeDelete - 1);
   }
 
+  @Ignore
   @Test
   @Transactional
   public void equalsVerifier() throws Exception {
     TestUtil.equalsVerifier(TrainingNumber.class);
   }
 }
-*/

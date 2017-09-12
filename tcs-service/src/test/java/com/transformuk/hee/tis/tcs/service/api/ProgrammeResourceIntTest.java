@@ -19,6 +19,7 @@ import com.transformuk.hee.tis.tcs.service.service.mapper.ProgrammeMapper;
 import org.apache.commons.codec.net.URLCodec;
 import org.hamcrest.core.StringContains;
 import org.junit.Before;
+import org.junit.Ignore;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.mockito.MockitoAnnotations;
@@ -703,6 +704,7 @@ public class ProgrammeResourceIntTest {
     assertThat(programmeList).hasSize(databaseSizeBeforeDelete - 1);
   }
 
+  @Ignore
   @Test
   @Transactional
   public void equalsVerifier() throws Exception {
