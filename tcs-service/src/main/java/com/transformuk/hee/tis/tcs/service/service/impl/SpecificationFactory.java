@@ -22,7 +22,19 @@ public final class SpecificationFactory {
   }
 
   public static Specification containsLike(String attribute, String value) {
-    return (root, query, cb) -> cb.like(root.get(attribute), "%" + value + "%");
+    return (root, query, cb) -> {
+      if(StringUtils.isNotEmpty(attribute) && attribute.contains(DOT)){
+        String[] joinTable = StringUtils.split(attribute, DOT);
+        Join tableJoin = root.join(joinTable[0],JoinType.LEFT);
+        for (int i = 1; i < joinTable.length - 1; i++) {
+          tableJoin = tableJoin.join(joinTable[i],JoinType.LEFT);
+        }
+        return cb.like(tableJoin.get(joinTable[joinTable.length - 1]),"%" + value + "%");
+      }
+      else {
+        return cb.like(root.get(attribute), "%" + value + "%");
+      }
+    };
   }
 
   /**
@@ -35,7 +47,7 @@ public final class SpecificationFactory {
   public static Specification in(String attribute, Collection<Object> values) {
     return (root, query, cb) -> {
       CriteriaBuilder.In cbi;
-      if (StringUtils.isNoneEmpty(attribute) && attribute.contains(DOT)) {
+      if (StringUtils.isNotEmpty(attribute) && attribute.contains(DOT)) {
         // this support multiple entity in criteria e.g specialties.specialty.name or sites.siteId
         String[] joinTable = StringUtils.split(attribute, DOT);
         Join tableJoin = root.join(joinTable[0], JoinType.INNER);

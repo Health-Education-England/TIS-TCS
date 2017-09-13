@@ -175,7 +175,7 @@ public class RightToWorkResourceIntTest {
     //check that Person with ID 1 exists otherwise create it
     Person person = personRepository.findOne(1L);
     if (person == null) {
-      person = PersonResourceIntTest.createEntity(em);
+      person = PersonResourceIntTest.createEntity();
       person.setId(1L);
       personRepository.save(person);
     }

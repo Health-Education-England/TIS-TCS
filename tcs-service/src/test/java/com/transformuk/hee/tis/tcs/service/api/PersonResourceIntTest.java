@@ -1,12 +1,21 @@
 package com.transformuk.hee.tis.tcs.service.api;
 
 import com.transformuk.hee.tis.tcs.api.dto.PersonDTO;
+import com.transformuk.hee.tis.tcs.api.enumeration.Status;
 import com.transformuk.hee.tis.tcs.service.Application;
 import com.transformuk.hee.tis.tcs.service.exception.ExceptionTranslator;
+import com.transformuk.hee.tis.tcs.service.model.ContactDetails;
+import com.transformuk.hee.tis.tcs.service.model.GdcDetails;
+import com.transformuk.hee.tis.tcs.service.model.GmcDetails;
 import com.transformuk.hee.tis.tcs.service.model.Person;
+import com.transformuk.hee.tis.tcs.service.model.Programme;
+import com.transformuk.hee.tis.tcs.service.repository.ContactDetailsRepository;
+import com.transformuk.hee.tis.tcs.service.repository.GdcDetailsRepository;
+import com.transformuk.hee.tis.tcs.service.repository.GmcDetailsRepository;
 import com.transformuk.hee.tis.tcs.service.repository.PersonRepository;
 import com.transformuk.hee.tis.tcs.service.service.PersonService;
 import com.transformuk.hee.tis.tcs.service.service.mapper.PersonMapper;
+import org.apache.commons.codec.net.URLCodec;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -57,8 +66,8 @@ public class PersonResourceIntTest {
   private static final String DEFAULT_ROLE = "AAAAAAAAAA";
   private static final String UPDATED_ROLE = "BBBBBBBBBB";
 
-  private static final String DEFAULT_STATUS = "AAAAAAAAAA";
-  private static final String UPDATED_STATUS = "BBBBBBBBBB";
+  private static final Status DEFAULT_STATUS = Status.CURRENT;
+  private static final Status UPDATED_STATUS = Status.INACTIVE;
 
   private static final String DEFAULT_COMMENTS = "AAAAAAAAAA";
   private static final String UPDATED_COMMENTS = "BBBBBBBBBB";
@@ -72,8 +81,21 @@ public class PersonResourceIntTest {
   private static final String DEFAULT_PUBLIC_HEALTH_NUMBER = "AAAAAAAAAA";
   private static final String UPDATED_PUBLIC_HEALTH_NUMBER = "BBBBBBBBBB";
 
+  private static final String PERSON_SURNANME = "Hudson";
+  private static final String GMC_NUMBER = "1000000";
+  private static final String GDC_NUMBER = "2000000";
+
   @Autowired
   private PersonRepository personRepository;
+
+  @Autowired
+  private ContactDetailsRepository contactDetailsRepository;
+
+  @Autowired
+  private GmcDetailsRepository gmcDetailsRepository;
+
+  @Autowired
+  private GdcDetailsRepository gdcDetailsRepository;
 
   @Autowired
   private PersonMapper personMapper;
@@ -113,7 +135,7 @@ public class PersonResourceIntTest {
    * This is a static method, as tests for other entities might also need it,
    * if they test an entity which requires the current entity.
    */
-  public static Person createEntity(EntityManager em) {
+  public static Person createEntity() {
     Person person = new Person()
         .intrepidId(DEFAULT_INTREPID_ID)
         .addedDate(DEFAULT_ADDED_DATE)
@@ -129,7 +151,7 @@ public class PersonResourceIntTest {
 
   @Before
   public void initTest() {
-    person = createEntity(em);
+    person = createEntity();
   }
 
   @Test
@@ -250,6 +272,7 @@ public class PersonResourceIntTest {
         .inactiveDate(UPDATED_INACTIVE_DATE)
         .inactiveNotes(UPDATED_INACTIVE_NOTES)
         .publicHealthNumber(UPDATED_PUBLIC_HEALTH_NUMBER);
+
     PersonDTO personDTO = personMapper.toDto(updatedPerson);
 
     restPersonMockMvc.perform(put("/api/people")
@@ -289,6 +312,189 @@ public class PersonResourceIntTest {
     // Validate the Person in the database
     List<Person> personList = personRepository.findAll();
     assertThat(personList).hasSize(databaseSizeBeforeUpdate + 1);
+  }
+
+  @Test
+  @Transactional
+  public void shouldTextSearchSurname() throws Exception {
+    Person anotherPerson = createEntity();
+    personRepository.saveAndFlush(anotherPerson);
+    ContactDetails contactDetails = new ContactDetails();
+    contactDetails.setId(anotherPerson.getId());
+    contactDetails.setSurname(PERSON_SURNANME);
+    contactDetailsRepository.saveAndFlush(contactDetails);
+    anotherPerson.setContactDetails(contactDetails);
+
+    restPersonMockMvc.perform(get("/api/people?searchQuery=" + PERSON_SURNANME))
+        .andExpect(status().isOk())
+        .andExpect(content().contentType(MediaType.APPLICATION_JSON_UTF8_VALUE))
+        .andExpect(jsonPath("$.[*].id").value(anotherPerson.getId().intValue()))
+        .andExpect(jsonPath("$.[*].contactDetails.surname").value(PERSON_SURNANME))
+        .andExpect(jsonPath("$.[*].intrepidId").value(DEFAULT_INTREPID_ID.toString()))
+        .andExpect(jsonPath("$.[*].addedDate").value(DEFAULT_ADDED_DATE.toString()))
+        .andExpect(jsonPath("$.[*].amendedDate").value(DEFAULT_AMENDED_DATE.toString()))
+        .andExpect(jsonPath("$.[*].role").value(DEFAULT_ROLE.toString()))
+        .andExpect(jsonPath("$.[*].status").value(DEFAULT_STATUS.toString()))
+        .andExpect(jsonPath("$.[*].comments").value(DEFAULT_COMMENTS.toString()))
+        .andExpect(jsonPath("$.[*].inactiveDate").value(DEFAULT_INACTIVE_DATE.toString()))
+        .andExpect(jsonPath("$.[*].inactiveNotes").value(DEFAULT_INACTIVE_NOTES.toString()))
+        .andExpect(jsonPath("$.[*].publicHealthNumber").value(DEFAULT_PUBLIC_HEALTH_NUMBER.toString()));
+  }
+
+  @Test
+  @Transactional
+  public void shouldTextSearchGmcDetails() throws Exception {
+    Person anotherPerson = createEntity();
+    personRepository.saveAndFlush(anotherPerson);
+    GmcDetails gmcDetails = new GmcDetails();
+    gmcDetails.setId(anotherPerson.getId());
+    gmcDetails.setGmcNumber(GMC_NUMBER);
+    gmcDetailsRepository.saveAndFlush(gmcDetails);
+    anotherPerson.setGmcDetails(gmcDetails);
+
+    restPersonMockMvc.perform(get("/api/people?searchQuery=" + GMC_NUMBER))
+        .andExpect(status().isOk())
+        .andExpect(content().contentType(MediaType.APPLICATION_JSON_UTF8_VALUE))
+        .andExpect(jsonPath("$.[*].id").value(anotherPerson.getId().intValue()))
+        .andExpect(jsonPath("$.[*].gmcDetails.gmcNumber").value(GMC_NUMBER))
+        .andExpect(jsonPath("$.[*].intrepidId").value(DEFAULT_INTREPID_ID.toString()))
+        .andExpect(jsonPath("$.[*].addedDate").value(DEFAULT_ADDED_DATE.toString()))
+        .andExpect(jsonPath("$.[*].amendedDate").value(DEFAULT_AMENDED_DATE.toString()))
+        .andExpect(jsonPath("$.[*].role").value(DEFAULT_ROLE.toString()))
+        .andExpect(jsonPath("$.[*].status").value(DEFAULT_STATUS.toString()))
+        .andExpect(jsonPath("$.[*].comments").value(DEFAULT_COMMENTS.toString()))
+        .andExpect(jsonPath("$.[*].inactiveDate").value(DEFAULT_INACTIVE_DATE.toString()))
+        .andExpect(jsonPath("$.[*].inactiveNotes").value(DEFAULT_INACTIVE_NOTES.toString()))
+        .andExpect(jsonPath("$.[*].publicHealthNumber").value(DEFAULT_PUBLIC_HEALTH_NUMBER.toString()));
+  }
+
+  @Test
+  @Transactional
+  public void shouldTextSearchGdcDetails() throws Exception {
+    Person anotherPerson = createEntity();
+    personRepository.saveAndFlush(anotherPerson);
+    GdcDetails gdcDetails = new GdcDetails();
+    gdcDetails.setId(anotherPerson.getId());
+    gdcDetails.setGdcNumber(GDC_NUMBER);
+    gdcDetailsRepository.saveAndFlush(gdcDetails);
+    anotherPerson.setGdcDetails(gdcDetails);
+
+    restPersonMockMvc.perform(get("/api/people?searchQuery=" + GDC_NUMBER))
+        .andExpect(status().isOk())
+        .andExpect(content().contentType(MediaType.APPLICATION_JSON_UTF8_VALUE))
+        .andExpect(jsonPath("$.[*].id").value(anotherPerson.getId().intValue()))
+        .andExpect(jsonPath("$.[*].gdcDetails.gdcNumber").value(GDC_NUMBER))
+        .andExpect(jsonPath("$.[*].intrepidId").value(DEFAULT_INTREPID_ID.toString()))
+        .andExpect(jsonPath("$.[*].addedDate").value(DEFAULT_ADDED_DATE.toString()))
+        .andExpect(jsonPath("$.[*].amendedDate").value(DEFAULT_AMENDED_DATE.toString()))
+        .andExpect(jsonPath("$.[*].role").value(DEFAULT_ROLE.toString()))
+        .andExpect(jsonPath("$.[*].status").value(DEFAULT_STATUS.toString()))
+        .andExpect(jsonPath("$.[*].comments").value(DEFAULT_COMMENTS.toString()))
+        .andExpect(jsonPath("$.[*].inactiveDate").value(DEFAULT_INACTIVE_DATE.toString()))
+        .andExpect(jsonPath("$.[*].inactiveNotes").value(DEFAULT_INACTIVE_NOTES.toString()))
+        .andExpect(jsonPath("$.[*].publicHealthNumber").value(DEFAULT_PUBLIC_HEALTH_NUMBER.toString()));
+  }
+
+  @Test
+  @Transactional
+  public void shouldTextSearchPublicHealthNumber() throws Exception {
+    Person anotherPerson = createEntity();
+    personRepository.saveAndFlush(anotherPerson);
+
+    restPersonMockMvc.perform(get("/api/people?searchQuery=" + DEFAULT_PUBLIC_HEALTH_NUMBER))
+        .andExpect(status().isOk())
+        .andExpect(content().contentType(MediaType.APPLICATION_JSON_UTF8_VALUE))
+        .andExpect(jsonPath("$.[*].id").value(anotherPerson.getId().intValue()))
+        .andExpect(jsonPath("$.[*].intrepidId").value(DEFAULT_INTREPID_ID.toString()))
+        .andExpect(jsonPath("$.[*].addedDate").value(DEFAULT_ADDED_DATE.toString()))
+        .andExpect(jsonPath("$.[*].amendedDate").value(DEFAULT_AMENDED_DATE.toString()))
+        .andExpect(jsonPath("$.[*].role").value(DEFAULT_ROLE.toString()))
+        .andExpect(jsonPath("$.[*].status").value(DEFAULT_STATUS.toString()))
+        .andExpect(jsonPath("$.[*].comments").value(DEFAULT_COMMENTS.toString()))
+        .andExpect(jsonPath("$.[*].inactiveDate").value(DEFAULT_INACTIVE_DATE.toString()))
+        .andExpect(jsonPath("$.[*].inactiveNotes").value(DEFAULT_INACTIVE_NOTES.toString()))
+        .andExpect(jsonPath("$.[*].publicHealthNumber").value(DEFAULT_PUBLIC_HEALTH_NUMBER.toString()));
+  }
+
+  @Test
+  @Transactional
+  public void shouldTextSearch() throws Exception {
+    Person anotherPerson = createEntity();
+    personRepository.saveAndFlush(anotherPerson);
+    ContactDetails contactDetails = new ContactDetails();
+    contactDetails.setId(anotherPerson.getId());
+    contactDetails.setSurname(PERSON_SURNANME);
+    contactDetailsRepository.saveAndFlush(contactDetails);
+
+    GmcDetails gmcDetails = new GmcDetails();
+    gmcDetails.setId(anotherPerson.getId());
+    gmcDetails.setGmcNumber(GMC_NUMBER);
+    gmcDetailsRepository.saveAndFlush(gmcDetails);
+    anotherPerson.setGmcDetails(gmcDetails);
+    anotherPerson.setContactDetails(contactDetails);
+
+    restPersonMockMvc.perform(get("/api/people?searchQuery=" + PERSON_SURNANME))
+        .andExpect(status().isOk())
+        .andExpect(content().contentType(MediaType.APPLICATION_JSON_UTF8_VALUE))
+        .andExpect(jsonPath("$.[*].id").value(anotherPerson.getId().intValue()))
+        .andExpect(jsonPath("$.[*].contactDetails.surname").value(PERSON_SURNANME))
+        .andExpect(jsonPath("$.[*].intrepidId").value(DEFAULT_INTREPID_ID.toString()))
+        .andExpect(jsonPath("$.[*].addedDate").value(DEFAULT_ADDED_DATE.toString()))
+        .andExpect(jsonPath("$.[*].amendedDate").value(DEFAULT_AMENDED_DATE.toString()))
+        .andExpect(jsonPath("$.[*].role").value(DEFAULT_ROLE.toString()))
+        .andExpect(jsonPath("$.[*].status").value(DEFAULT_STATUS.toString()))
+        .andExpect(jsonPath("$.[*].comments").value(DEFAULT_COMMENTS.toString()))
+        .andExpect(jsonPath("$.[*].inactiveDate").value(DEFAULT_INACTIVE_DATE.toString()))
+        .andExpect(jsonPath("$.[*].inactiveNotes").value(DEFAULT_INACTIVE_NOTES.toString()))
+        .andExpect(jsonPath("$.[*].publicHealthNumber").value(DEFAULT_PUBLIC_HEALTH_NUMBER.toString()));
+  }
+
+  @Test
+  @Transactional
+  public void shouldFilterColumns() throws Exception {
+    //given
+    // Initialize the database
+    personRepository.saveAndFlush(person);
+    Person otherStatusPerson = createEntity();
+    otherStatusPerson.setStatus(Status.INACTIVE);
+    personRepository.saveAndFlush(otherStatusPerson);
+
+    //when & then
+    String colFilters = new URLCodec().encode("{\"status\":[\"INACTIVE\"]}");
+    // Get all the programmeList
+    restPersonMockMvc.perform(get("/api/people?sort=id,desc&columnFilters=" +
+        colFilters))
+        .andExpect(status().isOk())
+        .andExpect(jsonPath("$.[*].status").value("INACTIVE"));
+  }
+
+  @Test
+  @Transactional
+  public void shouldTextSearchAndFilterColumns() throws Exception {
+    //given
+    // Initialize the database
+    personRepository.saveAndFlush(person);
+    Person otherStatusPerson = createEntity();
+    otherStatusPerson.setStatus(Status.INACTIVE);
+    personRepository.saveAndFlush(otherStatusPerson);
+
+    Person otherNamePerson = createEntity();
+    otherNamePerson.setStatus(Status.INACTIVE);
+    personRepository.saveAndFlush(otherNamePerson);
+    ContactDetails contactDetails = new ContactDetails();
+    contactDetails.setId(otherNamePerson.getId());
+    contactDetails.setSurname(PERSON_SURNANME);
+    contactDetailsRepository.saveAndFlush(contactDetails);
+    otherNamePerson.setContactDetails(contactDetails);
+
+    //when & then
+    String colFilters = new URLCodec().encode("{\"status\":[\"INACTIVE\"]}");
+    // Get all the programmeList
+    restPersonMockMvc.perform(get("/api/people?sort=id,desc&searchQuery=" + PERSON_SURNANME + "&columnFilters=" +
+        colFilters))
+        .andExpect(status().isOk())
+        .andExpect(jsonPath("$.[*].status").value("INACTIVE"))
+        .andExpect(jsonPath("$.[*].contactDetails.surname").value(PERSON_SURNANME));
   }
 
   @Test
