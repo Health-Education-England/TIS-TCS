@@ -1,6 +1,8 @@
 package com.transformuk.hee.tis.tcs.api.dto;
 
 
+import com.transformuk.hee.tis.tcs.api.enumeration.Status;
+
 import java.io.Serializable;
 import java.time.LocalDate;
 import java.util.Objects;
@@ -20,7 +22,7 @@ public class PersonDTO implements Serializable {
 
   private String role;
 
-  private String status;
+  private Status status;
 
   private String comments;
 
@@ -82,11 +84,11 @@ public class PersonDTO implements Serializable {
     this.role = role;
   }
 
-  public String getStatus() {
+  public Status getStatus() {
     return status;
   }
 
-  public void setStatus(String status) {
+  public void setStatus(Status status) {
     this.status = status;
   }
 

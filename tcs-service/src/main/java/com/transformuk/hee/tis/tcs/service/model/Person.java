@@ -1,7 +1,11 @@
 package com.transformuk.hee.tis.tcs.service.model;
 
 
+import com.transformuk.hee.tis.tcs.api.enumeration.Status;
+
 import javax.persistence.Entity;
+import javax.persistence.EnumType;
+import javax.persistence.Enumerated;
 import javax.persistence.FetchType;
 import javax.persistence.GeneratedValue;
 import javax.persistence.GenerationType;
@@ -32,7 +36,8 @@ public class Person implements Serializable {
 
   private String role;
 
-  private String status;
+  @Enumerated(EnumType.STRING)
+  private Status status;
 
   private String comments;
 
@@ -126,15 +131,15 @@ public class Person implements Serializable {
     return this;
   }
 
-  public String getStatus() {
+  public Status getStatus() {
     return status;
   }
 
-  public void setStatus(String status) {
+  public void setStatus(Status status) {
     this.status = status;
   }
 
-  public Person status(String status) {
+  public Person status(Status status) {
     this.status = status;
     return this;
   }

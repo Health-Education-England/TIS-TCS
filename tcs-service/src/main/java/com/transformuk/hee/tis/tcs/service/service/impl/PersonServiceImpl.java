@@ -1,16 +1,26 @@
 package com.transformuk.hee.tis.tcs.service.service.impl;
 
 import com.transformuk.hee.tis.tcs.api.dto.PersonDTO;
+import com.transformuk.hee.tis.tcs.service.model.ColumnFilter;
 import com.transformuk.hee.tis.tcs.service.model.Person;
 import com.transformuk.hee.tis.tcs.service.repository.PersonRepository;
 import com.transformuk.hee.tis.tcs.service.service.PersonService;
 import com.transformuk.hee.tis.tcs.service.service.mapper.PersonMapper;
+import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
+import org.springframework.data.jpa.domain.Specification;
+import org.springframework.data.jpa.domain.Specifications;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+
+import java.util.ArrayList;
+import java.util.List;
+
+import static com.transformuk.hee.tis.tcs.service.service.impl.SpecificationFactory.containsLike;
+import static com.transformuk.hee.tis.tcs.service.service.impl.SpecificationFactory.in;
 
 
 /**
@@ -57,6 +67,34 @@ public class PersonServiceImpl implements PersonService {
     log.debug("Request to get all People");
     return personRepository.findAll(pageable)
         .map(personMapper::toDto);
+  }
+
+  @Override
+  @Transactional(readOnly = true)
+  public Page<PersonDTO> advancedSearch(String searchString, List<ColumnFilter> columnFilters, Pageable pageable) {
+
+    List<Specification<Person>> specs = new ArrayList<>();
+    //add the text search criteria
+    if (StringUtils.isNotEmpty(searchString)) {
+      specs.add(Specifications.where(containsLike("publicHealthNumber", searchString)).
+          or(containsLike("contactDetails.surname", searchString)).
+          or(containsLike("contactDetails.forenames", searchString)).
+          or(containsLike("gmcDetails.gmcNumber", searchString)).
+          or(containsLike("gdcDetails.gdcNumber", searchString)));
+    }
+    //add the column filters criteria
+    if (columnFilters != null && !columnFilters.isEmpty()) {
+      columnFilters.forEach(cf -> specs.add(in(cf.getName(), cf.getValues())));
+    }
+
+    Specifications<Person> fullSpec = Specifications.where(specs.get(0));
+    //add the rest of the specs that made it in
+    for (int i = 1; i < specs.size(); i++) {
+      fullSpec = fullSpec.and(specs.get(i));
+    }
+    Page<Person> result = personRepository.findAll(fullSpec, pageable);
+
+    return result.map(person -> personMapper.toDto(person));
   }
 
   /**
