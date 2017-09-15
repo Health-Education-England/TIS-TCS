@@ -3,7 +3,9 @@ package com.transformuk.hee.tis.tcs.service.service.impl;
 import com.transformuk.hee.tis.tcs.api.dto.ProgrammeDTO;
 import com.transformuk.hee.tis.tcs.service.model.ColumnFilter;
 import com.transformuk.hee.tis.tcs.service.model.Programme;
+import com.transformuk.hee.tis.tcs.service.model.TrainingNumber;
 import com.transformuk.hee.tis.tcs.service.repository.ProgrammeRepository;
+import com.transformuk.hee.tis.tcs.service.repository.TrainingNumberRepository;
 import com.transformuk.hee.tis.tcs.service.service.ProgrammeService;
 import com.transformuk.hee.tis.tcs.service.service.mapper.DesignatedBodyMapper;
 import com.transformuk.hee.tis.tcs.service.service.mapper.ProgrammeMapper;
@@ -37,12 +39,16 @@ public class ProgrammeServiceImpl implements ProgrammeService {
 
   private final ProgrammeRepository programmeRepository;
 
+  private final TrainingNumberRepository trainingNumberRepository;
+
   private final ProgrammeMapper programmeMapper;
 
   private EntityManager em;
 
-  public ProgrammeServiceImpl(ProgrammeRepository programmeRepository, ProgrammeMapper programmeMapper, EntityManager em) {
+  public ProgrammeServiceImpl(ProgrammeRepository programmeRepository, TrainingNumberRepository trainingNumberRepository,
+                              ProgrammeMapper programmeMapper, EntityManager em) {
     this.programmeRepository = programmeRepository;
+    this.trainingNumberRepository = trainingNumberRepository;
     this.programmeMapper = programmeMapper;
     this.em = em;
   }
@@ -57,7 +63,31 @@ public class ProgrammeServiceImpl implements ProgrammeService {
   public ProgrammeDTO save(ProgrammeDTO programmeDTO) {
     log.debug("Request to save Programme : {}", programmeDTO);
     Programme programme = programmeMapper.programmeDTOToProgramme(programmeDTO);
-    programme = programmeRepository.saveAndFlush(programme);
+    programme = programmeRepository.save(programme);
+    ProgrammeDTO result = programmeMapper.programmeToProgrammeDTO(programme);
+    return result;
+  }
+
+  /**
+   * Update a programme
+   *
+   * @param programmeDTO the entity to update
+   * @return the persisted entity
+   */
+  @Override
+  public ProgrammeDTO update(ProgrammeDTO programmeDTO) {
+    log.debug("Request to update Programme : {}", programmeDTO);
+    Programme programme = programmeRepository.findOne(programmeDTO.getId());
+
+    //clear all the relations
+    Set<TrainingNumber> trainingNumbers = programme.getTrainingNumbers();
+    for (TrainingNumber trainingNumber : trainingNumbers) {
+      trainingNumber.setProgramme(null);
+    }
+    trainingNumberRepository.save(trainingNumbers);
+
+    programme = programmeMapper.programmeDTOToProgramme(programmeDTO);
+    programme = programmeRepository.save(programme);
     ProgrammeDTO result = programmeMapper.programmeToProgrammeDTO(programme);
     return result;
   }

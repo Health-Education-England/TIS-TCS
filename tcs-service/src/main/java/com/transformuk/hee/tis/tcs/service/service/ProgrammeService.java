@@ -22,6 +22,14 @@ public interface ProgrammeService {
   ProgrammeDTO save(ProgrammeDTO programmeDTO);
 
   /**
+   * Update a programme.
+   *
+   * @param programmeDTO the entity to update
+   * @return the persisted entity
+   */
+  ProgrammeDTO update(ProgrammeDTO programmeDTO);
+
+  /**
    * Save a list of programmes.
    *
    * @param programmeDTO the list of entities to save

@@ -1,11 +1,12 @@
 package com.transformuk.hee.tis.tcs.service.service.mapper;
 
 import com.google.common.collect.Lists;
-import com.transformuk.hee.tis.tcs.api.dto.*;
-import com.transformuk.hee.tis.tcs.service.model.*;
+import com.transformuk.hee.tis.tcs.api.dto.ProgrammeDTO;
+import com.transformuk.hee.tis.tcs.api.dto.TrainingNumberDTO;
+import com.transformuk.hee.tis.tcs.service.model.Programme;
+import com.transformuk.hee.tis.tcs.service.model.TrainingNumber;
 import org.springframework.stereotype.Component;
 
-import java.util.ArrayList;
 import java.util.List;
 
 /**

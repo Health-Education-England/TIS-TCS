@@ -16,7 +16,8 @@ import org.springframework.validation.BeanPropertyBindingResult;
 import org.springframework.validation.FieldError;
 import org.springframework.web.bind.MethodArgumentNotValidException;
 
-import java.util.*;
+import java.util.ArrayList;
+import java.util.List;
 
 /**
  * Holds more complex custom validation for a {@link ProgrammeDTO} that
@@ -114,14 +115,14 @@ public class ProgrammeValidator {
 
   private List<FieldError> checkTrainingNumbers(ProgrammeDTO programmeDTO) {
     List<FieldError> fieldErrors = new ArrayList<>();
-      for (TrainingNumberDTO trainingNumber : programmeDTO.getTrainingNumbers()) {
-        if (trainingNumber.getProgramme() != null) {
-          TrainingNumber currentTrainingNumber = trainingNumberRepository.findOneById(trainingNumber.getId());
-          if (currentTrainingNumber != null && currentTrainingNumber.getProgramme() != null && currentTrainingNumber.getProgramme().getId() != programmeDTO.getId())
+    for (TrainingNumberDTO trainingNumber : programmeDTO.getTrainingNumbers()) {
+      if (trainingNumber.getProgramme() != null) {
+        TrainingNumber currentTrainingNumber = trainingNumberRepository.findOneById(trainingNumber.getId());
+        if (currentTrainingNumber != null && currentTrainingNumber.getProgramme() != null && currentTrainingNumber.getProgramme().getId() != programmeDTO.getId())
           fieldErrors.add(new FieldError("ProgrammeDTO", "training-number",
-                  String.format("Training number with id: %s is already linked.", trainingNumber.getId())));
-        }
+              String.format("Training number with id: %s is already linked.", trainingNumber.getId())));
       }
+    }
     return fieldErrors;
   }
 

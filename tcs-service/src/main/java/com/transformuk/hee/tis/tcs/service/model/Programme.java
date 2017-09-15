@@ -2,7 +2,17 @@ package com.transformuk.hee.tis.tcs.service.model;
 
 import com.transformuk.hee.tis.tcs.api.enumeration.Status;
 
-import javax.persistence.*;
+import javax.persistence.CascadeType;
+import javax.persistence.Entity;
+import javax.persistence.EnumType;
+import javax.persistence.Enumerated;
+import javax.persistence.GeneratedValue;
+import javax.persistence.GenerationType;
+import javax.persistence.Id;
+import javax.persistence.JoinColumn;
+import javax.persistence.JoinTable;
+import javax.persistence.ManyToMany;
+import javax.persistence.OneToMany;
 import java.io.Serializable;
 import java.util.HashSet;
 import java.util.Set;
@@ -58,7 +68,8 @@ public class Programme implements Serializable {
     this.curricula.remove(curriculum);
     return this;
   }
-  @OneToMany(mappedBy = "programme", cascade = CascadeType.ALL)
+
+  @OneToMany(mappedBy = "programme", cascade = CascadeType.ALL, orphanRemoval = false)
   private Set<TrainingNumber> trainingNumbers = new HashSet<>();
 
   public Set<TrainingNumber> getTrainingNumbers() {
