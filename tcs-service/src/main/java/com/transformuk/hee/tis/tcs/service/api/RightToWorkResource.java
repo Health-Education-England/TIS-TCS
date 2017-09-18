@@ -7,7 +7,6 @@ import com.transformuk.hee.tis.tcs.api.dto.validation.Update;
 import com.transformuk.hee.tis.tcs.service.api.util.HeaderUtil;
 import com.transformuk.hee.tis.tcs.service.api.util.PaginationUtil;
 import com.transformuk.hee.tis.tcs.service.api.validation.RightToWorkValidator;
-import com.transformuk.hee.tis.tcs.service.model.RightToWork;
 import com.transformuk.hee.tis.tcs.service.service.RightToWorkService;
 import io.github.jhipster.web.util.ResponseUtil;
 import io.swagger.annotations.ApiParam;
@@ -49,7 +48,7 @@ public class RightToWorkResource {
   private final RightToWorkService rightToWorkService;
   private final RightToWorkValidator rightToWorkValidator;
 
-  public RightToWorkResource(RightToWorkService rightToWorkService,RightToWorkValidator rightToWorkValidator) {
+  public RightToWorkResource(RightToWorkService rightToWorkService, RightToWorkValidator rightToWorkValidator) {
     this.rightToWorkService = rightToWorkService;
     this.rightToWorkValidator = rightToWorkValidator;
   }
