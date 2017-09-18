@@ -10,7 +10,6 @@ import com.transformuk.hee.tis.tcs.service.api.validation.ProgrammeValidator;
 import com.transformuk.hee.tis.tcs.service.exception.ExceptionTranslator;
 import com.transformuk.hee.tis.tcs.service.model.Curriculum;
 import com.transformuk.hee.tis.tcs.service.model.Programme;
-import com.transformuk.hee.tis.tcs.service.model.TrainingNumber;
 import com.transformuk.hee.tis.tcs.service.repository.CurriculumRepository;
 import com.transformuk.hee.tis.tcs.service.repository.ProgrammeRepository;
 import com.transformuk.hee.tis.tcs.service.repository.TrainingNumberRepository;
@@ -19,7 +18,6 @@ import com.transformuk.hee.tis.tcs.service.service.mapper.ProgrammeMapper;
 import org.apache.commons.codec.net.URLCodec;
 import org.hamcrest.core.StringContains;
 import org.junit.Before;
-import org.junit.Ignore;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.mockito.MockitoAnnotations;
@@ -702,12 +700,5 @@ public class ProgrammeResourceIntTest {
     // Validate the database is empty
     List<Programme> programmeList = programmeRepository.findAll();
     assertThat(programmeList).hasSize(databaseSizeBeforeDelete - 1);
-  }
-
-  @Ignore
-  @Test
-  @Transactional
-  public void equalsVerifier() throws Exception {
-    TestUtil.equalsVerifier(Programme.class);
   }
 }

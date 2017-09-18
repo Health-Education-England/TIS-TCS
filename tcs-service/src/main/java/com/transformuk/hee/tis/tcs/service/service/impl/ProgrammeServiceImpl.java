@@ -19,7 +19,6 @@ import org.springframework.data.jpa.domain.Specifications;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
-import javax.persistence.EntityManager;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Set;
@@ -43,14 +42,11 @@ public class ProgrammeServiceImpl implements ProgrammeService {
 
   private final ProgrammeMapper programmeMapper;
 
-  private EntityManager em;
-
   public ProgrammeServiceImpl(ProgrammeRepository programmeRepository, TrainingNumberRepository trainingNumberRepository,
-                              ProgrammeMapper programmeMapper, EntityManager em) {
+                              ProgrammeMapper programmeMapper) {
     this.programmeRepository = programmeRepository;
     this.trainingNumberRepository = trainingNumberRepository;
     this.programmeMapper = programmeMapper;
-    this.em = em;
   }
 
   /**
@@ -81,9 +77,7 @@ public class ProgrammeServiceImpl implements ProgrammeService {
 
     //clear all the relations
     Set<TrainingNumber> trainingNumbers = programme.getTrainingNumbers();
-    for (TrainingNumber trainingNumber : trainingNumbers) {
-      trainingNumber.setProgramme(null);
-    }
+    trainingNumbers.stream().forEach(t -> t.setProgramme(null));
     trainingNumberRepository.save(trainingNumbers);
 
     programme = programmeMapper.programmeDTOToProgramme(programmeDTO);

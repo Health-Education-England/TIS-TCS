@@ -2,9 +2,16 @@ package com.transformuk.hee.tis.tcs.service.model;
 
 import com.transformuk.hee.tis.tcs.api.enumeration.TrainingNumberType;
 
-import javax.persistence.*;
+import javax.persistence.Entity;
+import javax.persistence.EnumType;
+import javax.persistence.Enumerated;
+import javax.persistence.FetchType;
+import javax.persistence.GeneratedValue;
+import javax.persistence.GenerationType;
+import javax.persistence.Id;
+import javax.persistence.JoinColumn;
+import javax.persistence.ManyToOne;
 import java.io.Serializable;
-import java.util.Objects;
 
 /**
  * A TrainingNumber.
@@ -107,11 +114,11 @@ public class TrainingNumber implements Serializable {
   }
 
   public Programme getProgramme() {
-        return programme;
+    return programme;
   }
 
   public void setProgramme(Programme programme) {
-        this.programme = programme;
+    this.programme = programme;
   }
 
   @Override

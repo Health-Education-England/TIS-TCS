@@ -7,7 +7,6 @@ import com.transformuk.hee.tis.tcs.api.dto.validation.Update;
 import com.transformuk.hee.tis.tcs.service.api.util.HeaderUtil;
 import com.transformuk.hee.tis.tcs.service.api.util.PaginationUtil;
 import com.transformuk.hee.tis.tcs.service.api.validation.TrainingNumberValidator;
-import com.transformuk.hee.tis.tcs.service.model.TrainingNumber;
 import com.transformuk.hee.tis.tcs.service.service.TrainingNumberService;
 import io.github.jhipster.web.util.ResponseUtil;
 import io.jsonwebtoken.lang.Collections;
@@ -24,16 +23,21 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.MethodArgumentNotValidException;
-import org.springframework.web.bind.annotation.*;
+import org.springframework.web.bind.annotation.DeleteMapping;
+import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PathVariable;
+import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.PutMapping;
+import org.springframework.web.bind.annotation.RequestBody;
+import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RestController;
 
 import javax.validation.Valid;
 import java.net.URI;
 import java.net.URISyntaxException;
-import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
 import java.util.stream.Collectors;
-
 
 /**
  * REST controller for managing TrainingNumber.
@@ -72,8 +76,8 @@ public class TrainingNumberResource {
       }
       TrainingNumberDTO result = trainingNumberService.save(trainingNumberDTO);
       return ResponseEntity.created(new URI("/api/training-numbers/" + result.getId()))
-              .headers(HeaderUtil.createEntityCreationAlert(ENTITY_NAME, result.getId().toString()))
-              .body(result);
+          .headers(HeaderUtil.createEntityCreationAlert(ENTITY_NAME, result.getId().toString()))
+          .body(result);
     } catch (DataIntegrityViolationException e) {
       log.error(e.getMessage(), e);
       throw new IllegalArgumentException("Cannot create training number  with the given fields");
@@ -102,8 +106,8 @@ public class TrainingNumberResource {
       }
       TrainingNumberDTO result = trainingNumberService.save(trainingNumberDTO);
       return ResponseEntity.ok()
-              .headers(HeaderUtil.createEntityUpdateAlert(ENTITY_NAME, trainingNumberDTO.getId().toString()))
-              .body(result);
+          .headers(HeaderUtil.createEntityUpdateAlert(ENTITY_NAME, trainingNumberDTO.getId().toString()))
+          .body(result);
     } catch (DataIntegrityViolationException e) {
       log.error(e.getMessage(), e);
       throw new IllegalArgumentException("Cannot update training number with the given fields");

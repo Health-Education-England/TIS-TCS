@@ -11,7 +11,6 @@ import com.transformuk.hee.tis.tcs.service.service.TrainingNumberService;
 import com.transformuk.hee.tis.tcs.service.service.mapper.TrainingNumberMapper;
 import org.hamcrest.core.StringContains;
 import org.junit.Before;
-import org.junit.Ignore;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.mockito.MockitoAnnotations;
@@ -351,12 +350,5 @@ public class TrainingNumberResourceIntTest {
     // Validate the database is empty
     List<TrainingNumber> trainingNumberList = trainingNumberRepository.findAll();
     assertThat(trainingNumberList).hasSize(databaseSizeBeforeDelete - 1);
-  }
-
-  @Ignore
-  @Test
-  @Transactional
-  public void equalsVerifier() throws Exception {
-    TestUtil.equalsVerifier(TrainingNumber.class);
   }
 }
