@@ -118,7 +118,7 @@ public class ProgrammeResource {
       if (programmeDTO.getId() == null) {
         return createProgramme(programmeDTO);
       }
-      ProgrammeDTO result = programmeService.save(programmeDTO);
+      ProgrammeDTO result = programmeService.update(programmeDTO);
       return ResponseEntity.ok()
           .headers(HeaderUtil.createEntityUpdateAlert(ENTITY_NAME, programmeDTO.getId().toString()))
           .body(result);

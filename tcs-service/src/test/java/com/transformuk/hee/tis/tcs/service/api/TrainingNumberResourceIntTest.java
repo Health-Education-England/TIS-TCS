@@ -41,8 +41,9 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 /**
  * Test class for the TrainingNumberResource REST controller.
  *
- * @see TrainingNumberResource
- */
+ * @see TrainingNumberResource*/
+
+
 @RunWith(SpringRunner.class)
 @SpringBootTest(classes = Application.class)
 public class TrainingNumberResourceIntTest {
@@ -90,12 +91,13 @@ public class TrainingNumberResourceIntTest {
 
   private TrainingNumber trainingNumber;
 
-  /**
+/**
    * Create an entity for this test.
    * <p>
    * This is a static method, as tests for other entities might also need it,
-   * if they test an entity which requires the current entity.
-   */
+   * if they test an entity which requires the current entity.*/
+
+
   public static TrainingNumber createEntity(EntityManager em) {
     TrainingNumber trainingNumber = new TrainingNumber()
         .trainingNumberType(DEFAULT_TRAINING_NUMBER_TYPE)
@@ -348,11 +350,5 @@ public class TrainingNumberResourceIntTest {
     // Validate the database is empty
     List<TrainingNumber> trainingNumberList = trainingNumberRepository.findAll();
     assertThat(trainingNumberList).hasSize(databaseSizeBeforeDelete - 1);
-  }
-
-  @Test
-  @Transactional
-  public void equalsVerifier() throws Exception {
-    TestUtil.equalsVerifier(TrainingNumber.class);
   }
 }

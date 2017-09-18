@@ -7,7 +7,6 @@ import com.transformuk.hee.tis.tcs.api.enumeration.Status;
 import javax.validation.constraints.DecimalMin;
 import javax.validation.constraints.NotNull;
 import javax.validation.constraints.Null;
-import javax.validation.constraints.Pattern;
 import java.io.Serializable;
 import java.util.Objects;
 import java.util.Set;
@@ -41,6 +40,8 @@ public class ProgrammeDTO implements Serializable {
   private String programmeNumber;
 
   private Set<CurriculumDTO> curricula;
+
+  private Set<TrainingNumberDTO> trainingNumbers;
 
   public Long getId() {
     return id;
@@ -98,6 +99,14 @@ public class ProgrammeDTO implements Serializable {
     this.curricula = curricula;
   }
 
+  public  Set<TrainingNumberDTO> getTrainingNumbers() {
+    return trainingNumbers;
+  }
+
+  public void setTrainingNumbers(Set<TrainingNumberDTO> trainingNumbers) {
+    this.trainingNumbers = trainingNumbers;
+  }
+
   @Override
   public boolean equals(Object o) {
     if (this == o) {
@@ -131,6 +140,7 @@ public class ProgrammeDTO implements Serializable {
         ", programmeName='" + programmeName + "'" +
         ", programmeNumber='" + programmeNumber + "'" +
         ", curricula='" + curricula + "'" +
+        ", trainingNumbers'" + trainingNumbers + "'" +
         '}';
   }
 }

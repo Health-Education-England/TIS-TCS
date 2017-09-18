@@ -2,6 +2,7 @@ package com.transformuk.hee.tis.tcs.service.model;
 
 import com.transformuk.hee.tis.tcs.api.enumeration.Status;
 
+import javax.persistence.CascadeType;
 import javax.persistence.Entity;
 import javax.persistence.EnumType;
 import javax.persistence.Enumerated;
@@ -11,9 +12,9 @@ import javax.persistence.Id;
 import javax.persistence.JoinColumn;
 import javax.persistence.JoinTable;
 import javax.persistence.ManyToMany;
+import javax.persistence.OneToMany;
 import java.io.Serializable;
 import java.util.HashSet;
-import java.util.Objects;
 import java.util.Set;
 
 /**
@@ -66,6 +67,17 @@ public class Programme implements Serializable {
   public Programme removeCurriculum(Curriculum curriculum) {
     this.curricula.remove(curriculum);
     return this;
+  }
+
+  @OneToMany(mappedBy = "programme", cascade = CascadeType.ALL, orphanRemoval = false)
+  private Set<TrainingNumber> trainingNumbers = new HashSet<>();
+
+  public Set<TrainingNumber> getTrainingNumbers() {
+    return trainingNumbers;
+  }
+
+  public void setTrainingNumbers(Set<TrainingNumber> trainingNumbers) {
+    this.trainingNumbers = trainingNumbers;
   }
 
   public Long getId() {
@@ -143,22 +155,30 @@ public class Programme implements Serializable {
 
   @Override
   public boolean equals(Object o) {
-    if (this == o) {
-      return true;
-    }
-    if (o == null || getClass() != o.getClass()) {
-      return false;
-    }
+    if (this == o) return true;
+    if (o == null || getClass() != o.getClass()) return false;
+
     Programme programme = (Programme) o;
-    if (programme.id == null || id == null) {
+
+    if (id != null ? !id.equals(programme.id) : programme.id != null) return false;
+    if (intrepidId != null ? !intrepidId.equals(programme.intrepidId) : programme.intrepidId != null) return false;
+    if (status != programme.status) return false;
+    if (managingDeanery != null ? !managingDeanery.equals(programme.managingDeanery) : programme.managingDeanery != null)
       return false;
-    }
-    return Objects.equals(id, programme.id);
+    if (programmeName != null ? !programmeName.equals(programme.programmeName) : programme.programmeName != null)
+      return false;
+    return programmeNumber != null ? programmeNumber.equals(programme.programmeNumber) : programme.programmeNumber == null;
   }
 
   @Override
   public int hashCode() {
-    return Objects.hashCode(id);
+    int result = id != null ? id.hashCode() : 0;
+    result = 31 * result + (intrepidId != null ? intrepidId.hashCode() : 0);
+    result = 31 * result + (status != null ? status.hashCode() : 0);
+    result = 31 * result + (managingDeanery != null ? managingDeanery.hashCode() : 0);
+    result = 31 * result + (programmeName != null ? programmeName.hashCode() : 0);
+    result = 31 * result + (programmeNumber != null ? programmeNumber.hashCode() : 0);
+    return result;
   }
 
   @Override
