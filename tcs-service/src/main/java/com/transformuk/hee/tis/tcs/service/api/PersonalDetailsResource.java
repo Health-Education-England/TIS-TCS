@@ -2,6 +2,8 @@ package com.transformuk.hee.tis.tcs.service.api;
 
 import com.codahale.metrics.annotation.Timed;
 import com.transformuk.hee.tis.tcs.api.dto.PersonalDetailsDTO;
+import com.transformuk.hee.tis.tcs.api.dto.validation.Create;
+import com.transformuk.hee.tis.tcs.api.dto.validation.Update;
 import com.transformuk.hee.tis.tcs.service.api.util.HeaderUtil;
 import com.transformuk.hee.tis.tcs.service.api.util.PaginationUtil;
 import com.transformuk.hee.tis.tcs.service.service.PersonalDetailsService;
@@ -14,6 +16,8 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.access.prepost.PreAuthorize;
+import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
@@ -54,7 +58,8 @@ public class PersonalDetailsResource {
    */
   @PostMapping("/personal-details")
   @Timed
-  public ResponseEntity<PersonalDetailsDTO> createPersonalDetails(@RequestBody PersonalDetailsDTO personalDetailsDTO) throws URISyntaxException {
+  @PreAuthorize("hasPermission('tis:people::person:', 'Create')")
+  public ResponseEntity<PersonalDetailsDTO> createPersonalDetails(@RequestBody @Validated(Create.class) PersonalDetailsDTO personalDetailsDTO) throws URISyntaxException {
     log.debug("REST request to save PersonalDetails : {}", personalDetailsDTO);
 
     PersonalDetailsDTO result = personalDetailsService.save(personalDetailsDTO);
@@ -74,7 +79,8 @@ public class PersonalDetailsResource {
    */
   @PutMapping("/personal-details")
   @Timed
-  public ResponseEntity<PersonalDetailsDTO> updatePersonalDetails(@RequestBody PersonalDetailsDTO personalDetailsDTO) throws URISyntaxException {
+  @PreAuthorize("hasPermission('tis:people::person:', 'Update')")
+  public ResponseEntity<PersonalDetailsDTO> updatePersonalDetails(@RequestBody @Validated(Update.class) PersonalDetailsDTO personalDetailsDTO) throws URISyntaxException {
     log.debug("REST request to update PersonalDetails : {}", personalDetailsDTO);
     if (personalDetailsDTO.getId() == null) {
       return ResponseEntity.badRequest().headers(HeaderUtil.createFailureAlert(ENTITY_NAME, "must_provide_id",
@@ -94,6 +100,7 @@ public class PersonalDetailsResource {
    */
   @GetMapping("/personal-details")
   @Timed
+  @PreAuthorize("hasPermission('tis:people::person:', 'View')")
   public ResponseEntity<List<PersonalDetailsDTO>> getAllPersonalDetails(@ApiParam Pageable pageable) {
     log.debug("REST request to get a page of PersonalDetails");
     Page<PersonalDetailsDTO> page = personalDetailsService.findAll(pageable);
@@ -109,6 +116,7 @@ public class PersonalDetailsResource {
    */
   @GetMapping("/personal-details/{id}")
   @Timed
+  @PreAuthorize("hasPermission('tis:people::person:', 'View')")
   public ResponseEntity<PersonalDetailsDTO> getPersonalDetails(@PathVariable Long id) {
     log.debug("REST request to get PersonalDetails : {}", id);
     PersonalDetailsDTO personalDetailsDTO = personalDetailsService.findOne(id);
@@ -123,6 +131,7 @@ public class PersonalDetailsResource {
    */
   @DeleteMapping("/personal-details/{id}")
   @Timed
+  @PreAuthorize("hasAuthority('tcs:delete:entities')")
   public ResponseEntity<Void> deletePersonalDetails(@PathVariable Long id) {
     log.debug("REST request to delete PersonalDetails : {}", id);
     personalDetailsService.delete(id);

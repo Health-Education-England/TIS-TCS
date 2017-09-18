@@ -2,6 +2,7 @@ package com.transformuk.hee.tis.tcs.service.api;
 
 import com.transformuk.hee.tis.tcs.api.dto.RightToWorkDTO;
 import com.transformuk.hee.tis.tcs.service.Application;
+import com.transformuk.hee.tis.tcs.service.api.validation.RightToWorkValidator;
 import com.transformuk.hee.tis.tcs.service.exception.ExceptionTranslator;
 import com.transformuk.hee.tis.tcs.service.model.Person;
 import com.transformuk.hee.tis.tcs.service.model.RightToWork;
@@ -29,6 +30,7 @@ import java.time.ZoneId;
 import java.util.List;
 
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.hamcrest.Matchers.containsInAnyOrder;
 import static org.hamcrest.Matchers.hasItem;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.delete;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
@@ -86,6 +88,9 @@ public class RightToWorkResourceIntTest {
   private ExceptionTranslator exceptionTranslator;
 
   @Autowired
+  private RightToWorkValidator rightToWorkValidator;
+
+  @Autowired
   private EntityManager em;
 
   private MockMvc restRightToWorkMockMvc;
@@ -95,7 +100,7 @@ public class RightToWorkResourceIntTest {
   @Before
   public void setup() {
     MockitoAnnotations.initMocks(this);
-    RightToWorkResource rightToWorkResource = new RightToWorkResource(rightToWorkService);
+    RightToWorkResource rightToWorkResource = new RightToWorkResource(rightToWorkService, rightToWorkValidator);
     this.restRightToWorkMockMvc = MockMvcBuilders.standaloneSetup(rightToWorkResource)
         .setCustomArgumentResolvers(pageableArgumentResolver)
         .setControllerAdvice(exceptionTranslator)
@@ -147,6 +152,87 @@ public class RightToWorkResourceIntTest {
     assertThat(testRightToWork.getVisaIssued()).isEqualTo(DEFAULT_VISA_ISSUED);
     assertThat(testRightToWork.getVisaValidTo()).isEqualTo(DEFAULT_VISA_VALID_TO);
     assertThat(testRightToWork.getVisaDetails()).isEqualTo(DEFAULT_VISA_DETAILS);
+  }
+
+  @Test
+  @Transactional
+  public void shouldValidateMandatoryFieldsWhenCreating() throws Exception {
+    //given
+    RightToWorkDTO rightToWorkDTO = new RightToWorkDTO();
+
+    //when & then
+    restRightToWorkMockMvc.perform(post("/api/right-to-works")
+        .contentType(TestUtil.APPLICATION_JSON_UTF8)
+        .content(TestUtil.convertObjectToJsonBytes(rightToWorkDTO)))
+        .andExpect(status().isBadRequest())
+        .andExpect(jsonPath("$.message").value("error.validation"))
+        .andExpect(jsonPath("$.fieldErrors[*].field").
+            value(containsInAnyOrder("id")));
+  }
+
+  @Test
+  @Transactional
+  public void shouldValidateMandatoryFieldsWhenUpdating() throws Exception {
+    //given
+    RightToWorkDTO rightToWorkDTO = new RightToWorkDTO();
+
+    //when & then
+    restRightToWorkMockMvc.perform(put("/api/right-to-works")
+        .contentType(TestUtil.APPLICATION_JSON_UTF8)
+        .content(TestUtil.convertObjectToJsonBytes(rightToWorkDTO)))
+        .andExpect(status().isBadRequest())
+        .andExpect(jsonPath("$.message").value("error.validation"))
+        .andExpect(jsonPath("$.fieldErrors[*].field").
+            value(containsInAnyOrder("id")));
+  }
+
+  @Test
+  @Transactional
+  public void shouldCreatedSettledIfNotEeaResident() throws Exception {
+    //given
+    RightToWorkDTO rightToWorkDTO = new RightToWorkDTO();
+    rightToWorkDTO.setId(1L);
+    rightToWorkDTO.setSettled("YES");
+    //when & then
+    restRightToWorkMockMvc.perform(post("/api/right-to-works")
+        .contentType(TestUtil.APPLICATION_JSON_UTF8)
+        .content(TestUtil.convertObjectToJsonBytes(rightToWorkDTO)))
+        .andExpect(status().isCreated());
+
+  }
+
+  @Test
+  @Transactional
+  public void shouldValidateSettledIfNotEeaResident() throws Exception {
+    //given
+    RightToWorkDTO rightToWorkDTO = new RightToWorkDTO();
+    rightToWorkDTO.setId(1L);
+    rightToWorkDTO.setSettled("NO");
+    //when & then
+    restRightToWorkMockMvc.perform(post("/api/right-to-works")
+        .contentType(TestUtil.APPLICATION_JSON_UTF8)
+        .content(TestUtil.convertObjectToJsonBytes(rightToWorkDTO)))
+        .andExpect(status().isBadRequest())
+        .andExpect(jsonPath("$.message").value("error.validation"))
+        .andExpect(jsonPath("$.fieldErrors[*].field").
+            value(containsInAnyOrder("visaIssued", "visaValidTo", "visaDetails")));
+
+  }
+
+  @Test
+  @Transactional
+  public void shouldValidateVisaIfNotEeaResidentAndNotSettled() throws Exception {
+    //given
+    RightToWorkDTO rightToWorkDTO = new RightToWorkDTO();
+    rightToWorkDTO.setId(1L);
+    //when & then
+    restRightToWorkMockMvc.perform(post("/api/right-to-works")
+        .contentType(TestUtil.APPLICATION_JSON_UTF8)
+        .content(TestUtil.convertObjectToJsonBytes(rightToWorkDTO)))
+        .andExpect(status().isBadRequest())
+        .andExpect(jsonPath("$.message").value("error.validation"))
+        .andExpect(jsonPath("$.fieldErrors[*].field").
+            value(containsInAnyOrder("visaIssued", "visaValidTo", "visaDetails")));
   }
 
   @Test

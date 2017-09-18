@@ -2,6 +2,7 @@ package com.transformuk.hee.tis.tcs.service.api;
 
 import com.transformuk.hee.tis.tcs.api.dto.GdcDetailsDTO;
 import com.transformuk.hee.tis.tcs.service.Application;
+import com.transformuk.hee.tis.tcs.service.api.validation.GdcDetailsValidator;
 import com.transformuk.hee.tis.tcs.service.exception.ExceptionTranslator;
 import com.transformuk.hee.tis.tcs.service.model.GdcDetails;
 import com.transformuk.hee.tis.tcs.service.repository.GdcDetailsRepository;
@@ -27,6 +28,7 @@ import java.time.ZoneId;
 import java.util.List;
 
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.hamcrest.Matchers.containsInAnyOrder;
 import static org.hamcrest.Matchers.hasItem;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.delete;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
@@ -76,6 +78,9 @@ public class GdcDetailsResourceIntTest {
   private ExceptionTranslator exceptionTranslator;
 
   @Autowired
+  private GdcDetailsValidator gdcDetailsValidator;
+
+  @Autowired
   private EntityManager em;
 
   private MockMvc restGdcDetailsMockMvc;
@@ -85,7 +90,7 @@ public class GdcDetailsResourceIntTest {
   @Before
   public void setup() {
     MockitoAnnotations.initMocks(this);
-    GdcDetailsResource gdcDetailsResource = new GdcDetailsResource(gdcDetailsService);
+    GdcDetailsResource gdcDetailsResource = new GdcDetailsResource(gdcDetailsService, gdcDetailsValidator);
     this.restGdcDetailsMockMvc = MockMvcBuilders.standaloneSetup(gdcDetailsResource)
         .setCustomArgumentResolvers(pageableArgumentResolver)
         .setControllerAdvice(exceptionTranslator)
@@ -133,6 +138,55 @@ public class GdcDetailsResourceIntTest {
     assertThat(testGdcDetails.getGdcStatus()).isEqualTo(DEFAULT_GDC_STATUS);
     assertThat(testGdcDetails.getGdcStartDate()).isEqualTo(DEFAULT_GDC_START_DATE);
     assertThat(testGdcDetails.getGdcEndDate()).isEqualTo(DEFAULT_GDC_END_DATE);
+  }
+
+  @Test
+  @Transactional
+  public void shouldValidateMandatoryFieldsWhenCreating() throws Exception {
+    //given
+    GdcDetailsDTO gdcDetailsDTO = new GdcDetailsDTO();
+
+    //when & then
+    restGdcDetailsMockMvc.perform(post("/api/gdc-details")
+        .contentType(TestUtil.APPLICATION_JSON_UTF8)
+        .content(TestUtil.convertObjectToJsonBytes(gdcDetailsDTO)))
+        .andExpect(status().isBadRequest())
+        .andExpect(jsonPath("$.message").value("error.validation"))
+        .andExpect(jsonPath("$.fieldErrors[*].field").
+            value(containsInAnyOrder("id")));
+  }
+
+  @Test
+  @Transactional
+  public void shouldValidateMandatoryFieldsWhenUpdating() throws Exception {
+    //given
+    GdcDetailsDTO gdcDetailsDTO = new GdcDetailsDTO();
+
+    //when & then
+    restGdcDetailsMockMvc.perform(put("/api/gdc-details")
+        .contentType(TestUtil.APPLICATION_JSON_UTF8)
+        .content(TestUtil.convertObjectToJsonBytes(gdcDetailsDTO)))
+        .andExpect(status().isBadRequest())
+        .andExpect(jsonPath("$.message").value("error.validation"))
+        .andExpect(jsonPath("$.fieldErrors[*].field").
+            value(containsInAnyOrder("id")));
+  }
+
+  @Test
+  @Transactional
+  public void shouldValidateGdcStatusWhenGdcNumberIsEntered() throws Exception {
+    //given
+    GdcDetailsDTO gdcDetailsDTO = new GdcDetailsDTO();
+    gdcDetailsDTO.setId(1L);
+    gdcDetailsDTO.setGdcNumber(DEFAULT_GDC_NUMBER);
+    //when & then
+    restGdcDetailsMockMvc.perform(post("/api/gdc-details")
+        .contentType(TestUtil.APPLICATION_JSON_UTF8)
+        .content(TestUtil.convertObjectToJsonBytes(gdcDetailsDTO)))
+        .andExpect(status().isBadRequest())
+        .andExpect(jsonPath("$.message").value("error.validation"))
+        .andExpect(jsonPath("$.fieldErrors[*].field").
+            value(containsInAnyOrder("gdcStatus")));
   }
 
   @Test
