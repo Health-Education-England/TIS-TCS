@@ -12,6 +12,7 @@ import com.transformuk.hee.tis.tcs.service.model.Curriculum;
 import com.transformuk.hee.tis.tcs.service.model.Programme;
 import com.transformuk.hee.tis.tcs.service.repository.CurriculumRepository;
 import com.transformuk.hee.tis.tcs.service.repository.ProgrammeRepository;
+import com.transformuk.hee.tis.tcs.service.repository.TrainingNumberRepository;
 import com.transformuk.hee.tis.tcs.service.service.ProgrammeService;
 import com.transformuk.hee.tis.tcs.service.service.mapper.ProgrammeMapper;
 import org.apache.commons.codec.net.URLCodec;
@@ -70,8 +71,12 @@ public class ProgrammeResourceIntTest {
 
   @Autowired
   private ProgrammeRepository programmeRepository;
+
   @Autowired
   private CurriculumRepository curriculumRepository;
+
+  @Autowired
+  private TrainingNumberRepository trainingNumberRepository;
 
   @Autowired
   private ProgrammeMapper programmeMapper;
@@ -695,11 +700,5 @@ public class ProgrammeResourceIntTest {
     // Validate the database is empty
     List<Programme> programmeList = programmeRepository.findAll();
     assertThat(programmeList).hasSize(databaseSizeBeforeDelete - 1);
-  }
-
-  @Test
-  @Transactional
-  public void equalsVerifier() throws Exception {
-    TestUtil.equalsVerifier(Programme.class);
   }
 }

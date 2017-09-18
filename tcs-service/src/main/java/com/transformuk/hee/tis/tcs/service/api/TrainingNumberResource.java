@@ -39,7 +39,6 @@ import java.util.List;
 import java.util.Optional;
 import java.util.stream.Collectors;
 
-
 /**
  * REST controller for managing TrainingNumber.
  */
@@ -77,8 +76,8 @@ public class TrainingNumberResource {
       }
       TrainingNumberDTO result = trainingNumberService.save(trainingNumberDTO);
       return ResponseEntity.created(new URI("/api/training-numbers/" + result.getId()))
-              .headers(HeaderUtil.createEntityCreationAlert(ENTITY_NAME, result.getId().toString()))
-              .body(result);
+          .headers(HeaderUtil.createEntityCreationAlert(ENTITY_NAME, result.getId().toString()))
+          .body(result);
     } catch (DataIntegrityViolationException e) {
       log.error(e.getMessage(), e);
       throw new IllegalArgumentException("Cannot create training number  with the given fields");
@@ -107,8 +106,8 @@ public class TrainingNumberResource {
       }
       TrainingNumberDTO result = trainingNumberService.save(trainingNumberDTO);
       return ResponseEntity.ok()
-              .headers(HeaderUtil.createEntityUpdateAlert(ENTITY_NAME, trainingNumberDTO.getId().toString()))
-              .body(result);
+          .headers(HeaderUtil.createEntityUpdateAlert(ENTITY_NAME, trainingNumberDTO.getId().toString()))
+          .body(result);
     } catch (DataIntegrityViolationException e) {
       log.error(e.getMessage(), e);
       throw new IllegalArgumentException("Cannot update training number with the given fields");
@@ -222,5 +221,4 @@ public class TrainingNumberResource {
         .headers(HeaderUtil.createEntityUpdateAlert(ENTITY_NAME, StringUtils.join(ids, ",")))
         .body(results);
   }
-
 }
