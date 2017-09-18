@@ -18,6 +18,8 @@ import org.springframework.web.bind.MethodArgumentNotValidException;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Optional;
+import java.util.stream.Collectors;
 
 /**
  * Holds more complex custom validation for a {@link ProgrammeDTO} that
@@ -115,13 +117,21 @@ public class ProgrammeValidator {
 
   private List<FieldError> checkTrainingNumbers(ProgrammeDTO programmeDTO) {
     List<FieldError> fieldErrors = new ArrayList<>();
-    for (TrainingNumberDTO trainingNumber : programmeDTO.getTrainingNumbers()) {
-      if (trainingNumber.getProgramme() != null) {
-        TrainingNumber currentTrainingNumber = trainingNumberRepository.findOneById(trainingNumber.getId());
-        if (currentTrainingNumber != null && currentTrainingNumber.getProgramme() != null && currentTrainingNumber.getProgramme().getId() != programmeDTO.getId())
-          fieldErrors.add(new FieldError("ProgrammeDTO", "training-number",
-              String.format("Training number with id: %s is already linked.", trainingNumber.getId())));
-      }
+    if (programmeDTO.getTrainingNumbers() != null) {
+      List<TrainingNumberDTO> trainingNumbersWithProgramme = programmeDTO.getTrainingNumbers().stream().filter(
+          t -> t.getProgramme() != null).collect(Collectors.toList());
+
+      List<TrainingNumber> currentTrainingNumbers = trainingNumberRepository.findByIdIn(
+          trainingNumbersWithProgramme.stream().map(TrainingNumberDTO::getId).collect(Collectors.toSet()));
+
+      programmeDTO.getTrainingNumbers().stream().filter(t -> t.getProgramme() != null).forEach(trainingNumber -> {
+            Optional<TrainingNumber> currentTrainingNumber = currentTrainingNumbers.stream().filter(t -> t.getId() == trainingNumber.getId()).findFirst();
+            if (currentTrainingNumber.isPresent() && currentTrainingNumber.get().getProgramme() != null
+                && currentTrainingNumber.get().getProgramme().getId() != programmeDTO.getId())
+              fieldErrors.add(new FieldError("ProgrammeDTO", "training-number",
+                  String.format("Training number with id: %s is already linked.", trainingNumber.getId())));
+          }
+      );
     }
     return fieldErrors;
   }

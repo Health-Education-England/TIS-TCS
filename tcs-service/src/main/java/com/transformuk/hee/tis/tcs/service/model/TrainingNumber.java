@@ -5,7 +5,6 @@ import com.transformuk.hee.tis.tcs.api.enumeration.TrainingNumberType;
 import javax.persistence.Entity;
 import javax.persistence.EnumType;
 import javax.persistence.Enumerated;
-import javax.persistence.FetchType;
 import javax.persistence.GeneratedValue;
 import javax.persistence.GenerationType;
 import javax.persistence.Id;
@@ -36,7 +35,7 @@ public class TrainingNumber implements Serializable {
 
   private String suffix;
 
-  @ManyToOne(fetch = FetchType.EAGER)
+  @ManyToOne
   @JoinColumn(name = "programmeID")
   private Programme programme;
 

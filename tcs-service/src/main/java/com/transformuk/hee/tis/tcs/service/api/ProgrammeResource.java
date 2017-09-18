@@ -111,7 +111,7 @@ public class ProgrammeResource {
   @Timed
   @PreAuthorize("hasAuthority('programme:add:modify')")
   public ResponseEntity<ProgrammeDTO> updateProgramme(@RequestBody @Validated(Update.class) ProgrammeDTO programmeDTO)
-          throws URISyntaxException, MethodArgumentNotValidException, Error {
+      throws URISyntaxException, MethodArgumentNotValidException {
     log.debug("REST request to update Programme : {}", programmeDTO);
     programmeValidator.validate(programmeDTO, getProfileFromContext());
     try {

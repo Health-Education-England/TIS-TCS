@@ -77,7 +77,7 @@ public class ProgrammeServiceImpl implements ProgrammeService {
 
     //clear all the relations
     Set<TrainingNumber> trainingNumbers = programme.getTrainingNumbers();
-    trainingNumbers.stream().forEach(t -> t.setProgramme(null));
+    trainingNumbers.forEach(t -> t.setProgramme(null));
     trainingNumberRepository.save(trainingNumbers);
 
     programme = programmeMapper.programmeDTOToProgramme(programmeDTO);
