@@ -70,7 +70,7 @@ public class PersonResource {
    */
   @PostMapping("/people")
   @Timed
-  @PreAuthorize("hasAuthority('person:add:modify')")
+  @PreAuthorize("hasPermission('tis:people::person:', 'Create')")
   public ResponseEntity<PersonDTO> createPerson(@RequestBody @Validated(Create.class) PersonDTO personDTO) throws URISyntaxException {
     log.debug("REST request to save Person : {}", personDTO);
     if (personDTO.getId() != null) {
@@ -93,7 +93,7 @@ public class PersonResource {
    */
   @PutMapping("/people")
   @Timed
-  @PreAuthorize("hasAuthority('person:add:modify')")
+  @PreAuthorize("hasPermission('tis:people::person:', 'Update')")
   public ResponseEntity<PersonDTO> updatePerson(@RequestBody @Validated(Update.class) PersonDTO personDTO) throws URISyntaxException {
     log.debug("REST request to update Person : {}", personDTO);
     if (personDTO.getId() == null) {
@@ -118,7 +118,7 @@ public class PersonResource {
       @ApiResponse(code = 200, message = "Person list", response = ResponseEntity.class)})
   @GetMapping("/people")
   @Timed
-  @PreAuthorize("hasAuthority('person:view')")
+  @PreAuthorize("hasPermission('tis:people::person:', 'View')")
   public ResponseEntity<List<PersonDTO>> getAllPeople(
       @ApiParam Pageable pageable,
       @ApiParam(value = "any wildcard string to be searched")
@@ -147,7 +147,7 @@ public class PersonResource {
    */
   @GetMapping("/people/{id}")
   @Timed
-  @PreAuthorize("hasAuthority('person:view')")
+  @PreAuthorize("hasPermission('tis:people::person:', 'View')")
   public ResponseEntity<PersonDTO> getPerson(@PathVariable Long id) {
     log.debug("REST request to get Person : {}", id);
     PersonDTO personDTO = personService.findOne(id);

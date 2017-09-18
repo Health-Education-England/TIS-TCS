@@ -62,7 +62,7 @@ public class GdcDetailsResource {
    */
   @PostMapping("/gdc-details")
   @Timed
-  @PreAuthorize("hasAuthority('person:add:modify')")
+  @PreAuthorize("hasPermission('tis:people::person:', 'Create')")
   public ResponseEntity<GdcDetailsDTO> createGdcDetails(@RequestBody @Validated(Create.class) GdcDetailsDTO gdcDetailsDTO)
       throws URISyntaxException, MethodArgumentNotValidException {
     log.debug("REST request to save GdcDetails : {}", gdcDetailsDTO);
@@ -84,7 +84,7 @@ public class GdcDetailsResource {
    */
   @PutMapping("/gdc-details")
   @Timed
-  @PreAuthorize("hasAuthority('person:add:modify')")
+  @PreAuthorize("hasPermission('tis:people::person:', 'Update')")
   public ResponseEntity<GdcDetailsDTO> updateGdcDetails(@RequestBody @Validated(Update.class) GdcDetailsDTO gdcDetailsDTO)
       throws URISyntaxException, MethodArgumentNotValidException {
     log.debug("REST request to update GdcDetails : {}", gdcDetailsDTO);
@@ -107,7 +107,7 @@ public class GdcDetailsResource {
    */
   @GetMapping("/gdc-details")
   @Timed
-  @PreAuthorize("hasAuthority('person:view')")
+  @PreAuthorize("hasPermission('tis:people::person:', 'View')")
   public ResponseEntity<List<GdcDetailsDTO>> getAllGdcDetails(@ApiParam Pageable pageable) {
     log.debug("REST request to get a page of GdcDetails");
     Page<GdcDetailsDTO> page = gdcDetailsService.findAll(pageable);
@@ -123,7 +123,7 @@ public class GdcDetailsResource {
    */
   @GetMapping("/gdc-details/{id}")
   @Timed
-  @PreAuthorize("hasAuthority('person:view')")
+  @PreAuthorize("hasPermission('tis:people::person:', 'View')")
   public ResponseEntity<GdcDetailsDTO> getGdcDetails(@PathVariable Long id) {
     log.debug("REST request to get GdcDetails : {}", id);
     GdcDetailsDTO gdcDetailsDTO = gdcDetailsService.findOne(id);

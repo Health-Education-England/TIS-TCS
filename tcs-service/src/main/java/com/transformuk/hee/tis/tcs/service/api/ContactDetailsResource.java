@@ -58,7 +58,7 @@ public class ContactDetailsResource {
    */
   @PostMapping("/contact-details")
   @Timed
-  @PreAuthorize("hasAuthority('person:add:modify')")
+  @PreAuthorize("hasPermission('tis:people::person:', 'Create')")
   public ResponseEntity<ContactDetailsDTO> createContactDetails(@RequestBody @Validated(Create.class) ContactDetailsDTO contactDetailsDTO) throws URISyntaxException {
     log.debug("REST request to save ContactDetails : {}", contactDetailsDTO);
 
@@ -79,7 +79,7 @@ public class ContactDetailsResource {
    */
   @PutMapping("/contact-details")
   @Timed
-  @PreAuthorize("hasAuthority('person:add:modify')")
+  @PreAuthorize("hasPermission('tis:people::person:', 'Update')")
   public ResponseEntity<ContactDetailsDTO> updateContactDetails(@RequestBody @Validated(Update.class) ContactDetailsDTO contactDetailsDTO) throws URISyntaxException {
     log.debug("REST request to update ContactDetails : {}", contactDetailsDTO);
     if (contactDetailsDTO.getId() == null) {
@@ -100,7 +100,7 @@ public class ContactDetailsResource {
    */
   @GetMapping("/contact-details")
   @Timed
-  @PreAuthorize("hasAuthority('person:view')")
+  @PreAuthorize("hasPermission('tis:people::person:', 'View')")
   public ResponseEntity<List<ContactDetailsDTO>> getAllContactDetails(@ApiParam Pageable pageable) {
     log.debug("REST request to get a page of ContactDetails");
     Page<ContactDetailsDTO> page = contactDetailsService.findAll(pageable);
@@ -116,7 +116,7 @@ public class ContactDetailsResource {
    */
   @GetMapping("/contact-details/{id}")
   @Timed
-  @PreAuthorize("hasAuthority('person:view')")
+  @PreAuthorize("hasPermission('tis:people::person:', 'View')")
   public ResponseEntity<ContactDetailsDTO> getContactDetails(@PathVariable Long id) {
     log.debug("REST request to get ContactDetails : {}", id);
     ContactDetailsDTO contactDetailsDTO = contactDetailsService.findOne(id);

@@ -25,7 +25,6 @@ import java.util.Arrays;
 @Configuration
 @EnableWebSecurity
 @EnableAutoConfiguration
-@EnableGlobalMethodSecurity(prePostEnabled = true)
 @Import(JwtSpringSecurityConfig.class)
 public class WebSecurityConfig extends WebSecurityConfigurerAdapter {
 

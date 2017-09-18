@@ -62,7 +62,7 @@ public class RightToWorkResource {
    */
   @PostMapping("/right-to-works")
   @Timed
-  @PreAuthorize("hasAuthority('person:add:modify')")
+  @PreAuthorize("hasPermission('tis:people::person:', 'Create')")
   public ResponseEntity<RightToWorkDTO> createRightToWork(@RequestBody @Validated(Create.class) RightToWorkDTO rightToWorkDTO)
       throws URISyntaxException, MethodArgumentNotValidException {
     log.debug("REST request to save RightToWork : {}", rightToWorkDTO);
@@ -84,7 +84,7 @@ public class RightToWorkResource {
    */
   @PutMapping("/right-to-works")
   @Timed
-  @PreAuthorize("hasAuthority('person:add:modify')")
+  @PreAuthorize("hasPermission('tis:people::person:', 'Update')")
   public ResponseEntity<RightToWorkDTO> updateRightToWork(@RequestBody @Validated(Update.class) RightToWorkDTO rightToWorkDTO)
       throws URISyntaxException, MethodArgumentNotValidException {
     log.debug("REST request to update RightToWork : {}", rightToWorkDTO);
@@ -107,7 +107,7 @@ public class RightToWorkResource {
    */
   @GetMapping("/right-to-works")
   @Timed
-  @PreAuthorize("hasAuthority('person:view')")
+  @PreAuthorize("hasPermission('tis:people::person:', 'View')")
   public ResponseEntity<List<RightToWorkDTO>> getAllRightToWorks(@ApiParam Pageable pageable) {
     log.debug("REST request to get a page of RightToWorks");
     Page<RightToWorkDTO> page = rightToWorkService.findAll(pageable);
@@ -123,7 +123,7 @@ public class RightToWorkResource {
    */
   @GetMapping("/right-to-works/{id}")
   @Timed
-  @PreAuthorize("hasAuthority('person:view')")
+  @PreAuthorize("hasPermission('tis:people::person:', 'View')")
   public ResponseEntity<RightToWorkDTO> getRightToWork(@PathVariable Long id) {
     log.debug("REST request to get RightToWork : {}", id);
     RightToWorkDTO rightToWorkDTO = rightToWorkService.findOne(id);

@@ -58,7 +58,7 @@ public class QualificationResource {
    */
   @PostMapping("/qualifications")
   @Timed
-  @PreAuthorize("hasAuthority('person:add:modify')")
+  @PreAuthorize("hasPermission('tis:people::person:', 'Create')")
   public ResponseEntity<QualificationDTO> createQualification(@RequestBody @Validated(Create.class) QualificationDTO qualificationDTO) throws URISyntaxException {
     log.debug("REST request to save Qualification : {}", qualificationDTO);
 
@@ -79,7 +79,7 @@ public class QualificationResource {
    */
   @PutMapping("/qualifications")
   @Timed
-  @PreAuthorize("hasAuthority('person:add:modify')")
+  @PreAuthorize("hasPermission('tis:people::person:', 'Update')")
   public ResponseEntity<QualificationDTO> updateQualification(@RequestBody @Validated(Update.class) QualificationDTO qualificationDTO) throws URISyntaxException {
     log.debug("REST request to update Qualification : {}", qualificationDTO);
     if (qualificationDTO.getId() == null) {
@@ -100,7 +100,7 @@ public class QualificationResource {
    */
   @GetMapping("/qualifications")
   @Timed
-  @PreAuthorize("hasAuthority('person:view')")
+  @PreAuthorize("hasPermission('tis:people::person:', 'View')")
   public ResponseEntity<List<QualificationDTO>> getAllQualifications(@ApiParam Pageable pageable) {
     log.debug("REST request to get a page of Qualifications");
     Page<QualificationDTO> page = qualificationService.findAll(pageable);
@@ -116,7 +116,7 @@ public class QualificationResource {
    */
   @GetMapping("/qualifications/{id}")
   @Timed
-  @PreAuthorize("hasAuthority('person:view')")
+  @PreAuthorize("hasPermission('tis:people::person:', 'View')")
   public ResponseEntity<QualificationDTO> getQualification(@PathVariable Long id) {
     log.debug("REST request to get Qualification : {}", id);
     QualificationDTO qualificationDTO = qualificationService.findOne(id);
