@@ -2,8 +2,11 @@ package com.transformuk.hee.tis.tcs.service.api;
 
 import com.codahale.metrics.annotation.Timed;
 import com.transformuk.hee.tis.tcs.api.dto.GdcDetailsDTO;
+import com.transformuk.hee.tis.tcs.api.dto.validation.Create;
+import com.transformuk.hee.tis.tcs.api.dto.validation.Update;
 import com.transformuk.hee.tis.tcs.service.api.util.HeaderUtil;
 import com.transformuk.hee.tis.tcs.service.api.util.PaginationUtil;
+import com.transformuk.hee.tis.tcs.service.api.validation.GdcDetailsValidator;
 import com.transformuk.hee.tis.tcs.service.service.GdcDetailsService;
 import io.github.jhipster.web.util.ResponseUtil;
 import io.swagger.annotations.ApiParam;
@@ -14,6 +17,9 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.access.prepost.PreAuthorize;
+import org.springframework.validation.annotation.Validated;
+import org.springframework.web.bind.MethodArgumentNotValidException;
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
@@ -40,9 +46,11 @@ public class GdcDetailsResource {
   private static final String ENTITY_NAME = "gdcDetails";
 
   private final GdcDetailsService gdcDetailsService;
+  private final GdcDetailsValidator gdcDetailsValidator;
 
-  public GdcDetailsResource(GdcDetailsService gdcDetailsService) {
+  public GdcDetailsResource(GdcDetailsService gdcDetailsService, GdcDetailsValidator gdcDetailsValidator) {
     this.gdcDetailsService = gdcDetailsService;
+    this.gdcDetailsValidator = gdcDetailsValidator;
   }
 
   /**
@@ -54,9 +62,11 @@ public class GdcDetailsResource {
    */
   @PostMapping("/gdc-details")
   @Timed
-  public ResponseEntity<GdcDetailsDTO> createGdcDetails(@RequestBody GdcDetailsDTO gdcDetailsDTO) throws URISyntaxException {
+  @PreAuthorize("hasAuthority('person:add:modify')")
+  public ResponseEntity<GdcDetailsDTO> createGdcDetails(@RequestBody @Validated(Create.class) GdcDetailsDTO gdcDetailsDTO)
+      throws URISyntaxException, MethodArgumentNotValidException {
     log.debug("REST request to save GdcDetails : {}", gdcDetailsDTO);
-
+    gdcDetailsValidator.validate(gdcDetailsDTO);
     GdcDetailsDTO result = gdcDetailsService.save(gdcDetailsDTO);
     return ResponseEntity.created(new URI("/api/gdc-details/" + result.getId()))
         .headers(HeaderUtil.createEntityCreationAlert(ENTITY_NAME, result.getId().toString()))
@@ -74,8 +84,11 @@ public class GdcDetailsResource {
    */
   @PutMapping("/gdc-details")
   @Timed
-  public ResponseEntity<GdcDetailsDTO> updateGdcDetails(@RequestBody GdcDetailsDTO gdcDetailsDTO) throws URISyntaxException {
+  @PreAuthorize("hasAuthority('person:add:modify')")
+  public ResponseEntity<GdcDetailsDTO> updateGdcDetails(@RequestBody @Validated(Update.class) GdcDetailsDTO gdcDetailsDTO)
+      throws URISyntaxException, MethodArgumentNotValidException {
     log.debug("REST request to update GdcDetails : {}", gdcDetailsDTO);
+    gdcDetailsValidator.validate(gdcDetailsDTO);
     if (gdcDetailsDTO.getId() == null) {
       return ResponseEntity.badRequest().headers(HeaderUtil.createFailureAlert(ENTITY_NAME, "must_provide_id",
           "You must provide an ID when updating GDC details")).body(null);
@@ -94,6 +107,7 @@ public class GdcDetailsResource {
    */
   @GetMapping("/gdc-details")
   @Timed
+  @PreAuthorize("hasAuthority('person:view')")
   public ResponseEntity<List<GdcDetailsDTO>> getAllGdcDetails(@ApiParam Pageable pageable) {
     log.debug("REST request to get a page of GdcDetails");
     Page<GdcDetailsDTO> page = gdcDetailsService.findAll(pageable);
@@ -109,6 +123,7 @@ public class GdcDetailsResource {
    */
   @GetMapping("/gdc-details/{id}")
   @Timed
+  @PreAuthorize("hasAuthority('person:view')")
   public ResponseEntity<GdcDetailsDTO> getGdcDetails(@PathVariable Long id) {
     log.debug("REST request to get GdcDetails : {}", id);
     GdcDetailsDTO gdcDetailsDTO = gdcDetailsService.findOne(id);
@@ -123,6 +138,7 @@ public class GdcDetailsResource {
    */
   @DeleteMapping("/gdc-details/{id}")
   @Timed
+  @PreAuthorize("hasAuthority('tcs:delete:entities')")
   public ResponseEntity<Void> deleteGdcDetails(@PathVariable Long id) {
     log.debug("REST request to delete GdcDetails : {}", id);
     gdcDetailsService.delete(id);

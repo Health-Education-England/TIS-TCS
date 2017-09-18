@@ -1,6 +1,11 @@
 package com.transformuk.hee.tis.tcs.api.dto;
 
 
+import com.transformuk.hee.tis.tcs.api.dto.validation.Create;
+import com.transformuk.hee.tis.tcs.api.dto.validation.Update;
+
+import javax.validation.constraints.DecimalMin;
+import javax.validation.constraints.NotNull;
 import java.io.Serializable;
 import java.time.LocalDate;
 import java.util.Objects;
@@ -10,14 +15,19 @@ import java.util.Objects;
  */
 public class PersonalDetailsDTO implements Serializable {
 
+  @NotNull(message = "Id is required", groups = {Update.class, Create.class})
+  @DecimalMin(value = "0", groups = {Update.class, Create.class}, message = "Id must not be negative")
   private Long id;
 
   private String maritalStatus;
 
+  @NotNull(message = "Date Of Birth is required", groups = {Update.class, Create.class})
   private LocalDate dateOfBirth;
 
+  @NotNull(message = "Gender is required", groups = {Update.class, Create.class})
   private String gender;
 
+  @NotNull(message = "Nationality is required", groups = {Update.class, Create.class})
   private String nationality;
 
   private String dualNationality;
@@ -26,6 +36,7 @@ public class PersonalDetailsDTO implements Serializable {
 
   private String religiousBelief;
 
+  @NotNull(message = "Ethnic Origin is required", groups = {Update.class, Create.class})
   private String ethnicOrigin;
 
   private String disability;

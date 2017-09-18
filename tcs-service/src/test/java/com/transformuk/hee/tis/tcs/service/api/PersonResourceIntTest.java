@@ -8,7 +8,6 @@ import com.transformuk.hee.tis.tcs.service.model.ContactDetails;
 import com.transformuk.hee.tis.tcs.service.model.GdcDetails;
 import com.transformuk.hee.tis.tcs.service.model.GmcDetails;
 import com.transformuk.hee.tis.tcs.service.model.Person;
-import com.transformuk.hee.tis.tcs.service.model.Programme;
 import com.transformuk.hee.tis.tcs.service.repository.ContactDetailsRepository;
 import com.transformuk.hee.tis.tcs.service.repository.GdcDetailsRepository;
 import com.transformuk.hee.tis.tcs.service.repository.GmcDetailsRepository;
@@ -36,6 +35,7 @@ import java.time.ZoneId;
 import java.util.List;
 
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.hamcrest.Matchers.containsInAnyOrder;
 import static org.hamcrest.Matchers.hasItem;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.delete;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
@@ -183,6 +183,38 @@ public class PersonResourceIntTest {
 
   @Test
   @Transactional
+  public void shouldValidateMandatoryFieldsWhenCreating() throws Exception {
+    //given
+    PersonDTO personDTO = new PersonDTO();
+
+    //when & then
+    restPersonMockMvc.perform(post("/api/people")
+        .contentType(TestUtil.APPLICATION_JSON_UTF8)
+        .content(TestUtil.convertObjectToJsonBytes(personDTO)))
+        .andExpect(status().isBadRequest())
+        .andExpect(jsonPath("$.message").value("error.validation"))
+        .andExpect(jsonPath("$.fieldErrors[*].field").
+            value(containsInAnyOrder("status")));
+  }
+
+  @Test
+  @Transactional
+  public void shouldValidateMandatoryFieldsWhenUpdating() throws Exception {
+    //given
+    PersonDTO personDTO = new PersonDTO();
+
+    //when & then
+    restPersonMockMvc.perform(put("/api/people")
+        .contentType(TestUtil.APPLICATION_JSON_UTF8)
+        .content(TestUtil.convertObjectToJsonBytes(personDTO)))
+        .andExpect(status().isBadRequest())
+        .andExpect(jsonPath("$.message").value("error.validation"))
+        .andExpect(jsonPath("$.fieldErrors[*].field").
+            value(containsInAnyOrder("id","status")));
+  }
+
+  @Test
+  @Transactional
   public void createPersonWithExistingId() throws Exception {
     int databaseSizeBeforeCreate = personRepository.findAll().size();
 
@@ -307,11 +339,14 @@ public class PersonResourceIntTest {
     restPersonMockMvc.perform(put("/api/people")
         .contentType(TestUtil.APPLICATION_JSON_UTF8)
         .content(TestUtil.convertObjectToJsonBytes(personDTO)))
-        .andExpect(status().isCreated());
+        .andExpect(status().isBadRequest())
+        .andExpect(jsonPath("$.message").value("error.validation"))
+        .andExpect(jsonPath("$.fieldErrors[*].field").
+            value(containsInAnyOrder("id")));
 
     // Validate the Person in the database
     List<Person> personList = personRepository.findAll();
-    assertThat(personList).hasSize(databaseSizeBeforeUpdate + 1);
+    assertThat(personList).hasSize(databaseSizeBeforeUpdate);
   }
 
   @Test

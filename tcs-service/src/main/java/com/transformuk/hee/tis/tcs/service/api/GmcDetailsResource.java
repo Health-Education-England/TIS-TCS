@@ -2,8 +2,11 @@ package com.transformuk.hee.tis.tcs.service.api;
 
 import com.codahale.metrics.annotation.Timed;
 import com.transformuk.hee.tis.tcs.api.dto.GmcDetailsDTO;
+import com.transformuk.hee.tis.tcs.api.dto.validation.Create;
+import com.transformuk.hee.tis.tcs.api.dto.validation.Update;
 import com.transformuk.hee.tis.tcs.service.api.util.HeaderUtil;
 import com.transformuk.hee.tis.tcs.service.api.util.PaginationUtil;
+import com.transformuk.hee.tis.tcs.service.api.validation.GmcDetailsValidator;
 import com.transformuk.hee.tis.tcs.service.service.GmcDetailsService;
 import io.github.jhipster.web.util.ResponseUtil;
 import io.swagger.annotations.ApiParam;
@@ -14,6 +17,9 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.access.prepost.PreAuthorize;
+import org.springframework.validation.annotation.Validated;
+import org.springframework.web.bind.MethodArgumentNotValidException;
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
@@ -40,9 +46,11 @@ public class GmcDetailsResource {
   private static final String ENTITY_NAME = "gmcDetails";
 
   private final GmcDetailsService gmcDetailsService;
+  private final GmcDetailsValidator gmcDetailsValidator;
 
-  public GmcDetailsResource(GmcDetailsService gmcDetailsService) {
+  public GmcDetailsResource(GmcDetailsService gmcDetailsService, GmcDetailsValidator gmcDetailsValidator) {
     this.gmcDetailsService = gmcDetailsService;
+    this.gmcDetailsValidator = gmcDetailsValidator;
   }
 
   /**
@@ -54,9 +62,11 @@ public class GmcDetailsResource {
    */
   @PostMapping("/gmc-details")
   @Timed
-  public ResponseEntity<GmcDetailsDTO> createGmcDetails(@RequestBody GmcDetailsDTO gmcDetailsDTO) throws URISyntaxException {
+  @PreAuthorize("hasAuthority('person:add:modify')")
+  public ResponseEntity<GmcDetailsDTO> createGmcDetails(@RequestBody @Validated(Create.class) GmcDetailsDTO gmcDetailsDTO)
+      throws URISyntaxException, MethodArgumentNotValidException {
     log.debug("REST request to save GmcDetails : {}", gmcDetailsDTO);
-
+    gmcDetailsValidator.validate(gmcDetailsDTO);
     GmcDetailsDTO result = gmcDetailsService.save(gmcDetailsDTO);
     return ResponseEntity.created(new URI("/api/gmc-details/" + result.getId()))
         .headers(HeaderUtil.createEntityCreationAlert(ENTITY_NAME, result.getId().toString()))
@@ -74,8 +84,11 @@ public class GmcDetailsResource {
    */
   @PutMapping("/gmc-details")
   @Timed
-  public ResponseEntity<GmcDetailsDTO> updateGmcDetails(@RequestBody GmcDetailsDTO gmcDetailsDTO) throws URISyntaxException {
+  @PreAuthorize("hasAuthority('person:add:modify')")
+  public ResponseEntity<GmcDetailsDTO> updateGmcDetails(@RequestBody @Validated(Update.class) GmcDetailsDTO gmcDetailsDTO)
+      throws URISyntaxException, MethodArgumentNotValidException {
     log.debug("REST request to update GmcDetails : {}", gmcDetailsDTO);
+    gmcDetailsValidator.validate(gmcDetailsDTO);
     if (gmcDetailsDTO.getId() == null) {
       return ResponseEntity.badRequest().headers(HeaderUtil.createFailureAlert(ENTITY_NAME, "must_provide_id",
           "You must provide an ID when updating GMC details")).body(null);
@@ -94,6 +107,7 @@ public class GmcDetailsResource {
    */
   @GetMapping("/gmc-details")
   @Timed
+  @PreAuthorize("hasAuthority('person:view')")
   public ResponseEntity<List<GmcDetailsDTO>> getAllGmcDetails(@ApiParam Pageable pageable) {
     log.debug("REST request to get a page of GmcDetails");
     Page<GmcDetailsDTO> page = gmcDetailsService.findAll(pageable);
@@ -109,6 +123,7 @@ public class GmcDetailsResource {
    */
   @GetMapping("/gmc-details/{id}")
   @Timed
+  @PreAuthorize("hasAuthority('person:view')")
   public ResponseEntity<GmcDetailsDTO> getGmcDetails(@PathVariable Long id) {
     log.debug("REST request to get GmcDetails : {}", id);
     GmcDetailsDTO gmcDetailsDTO = gmcDetailsService.findOne(id);
@@ -123,6 +138,7 @@ public class GmcDetailsResource {
    */
   @DeleteMapping("/gmc-details/{id}")
   @Timed
+  @PreAuthorize("hasAuthority('tcs:delete:entities')")
   public ResponseEntity<Void> deleteGmcDetails(@PathVariable Long id) {
     log.debug("REST request to delete GmcDetails : {}", id);
     gmcDetailsService.delete(id);

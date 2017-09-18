@@ -2,6 +2,7 @@ package com.transformuk.hee.tis.tcs.service.api;
 
 import com.transformuk.hee.tis.tcs.api.dto.GmcDetailsDTO;
 import com.transformuk.hee.tis.tcs.service.Application;
+import com.transformuk.hee.tis.tcs.service.api.validation.GmcDetailsValidator;
 import com.transformuk.hee.tis.tcs.service.exception.ExceptionTranslator;
 import com.transformuk.hee.tis.tcs.service.model.GmcDetails;
 import com.transformuk.hee.tis.tcs.service.repository.GmcDetailsRepository;
@@ -27,6 +28,7 @@ import java.time.ZoneId;
 import java.util.List;
 
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.hamcrest.Matchers.containsInAnyOrder;
 import static org.hamcrest.Matchers.hasItem;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.delete;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
@@ -76,6 +78,9 @@ public class GmcDetailsResourceIntTest {
   private ExceptionTranslator exceptionTranslator;
 
   @Autowired
+  private GmcDetailsValidator gmcDetailsValidator;
+
+  @Autowired
   private EntityManager em;
 
   private MockMvc restGmcDetailsMockMvc;
@@ -85,7 +90,7 @@ public class GmcDetailsResourceIntTest {
   @Before
   public void setup() {
     MockitoAnnotations.initMocks(this);
-    GmcDetailsResource gmcDetailsResource = new GmcDetailsResource(gmcDetailsService);
+    GmcDetailsResource gmcDetailsResource = new GmcDetailsResource(gmcDetailsService, gmcDetailsValidator);
     this.restGmcDetailsMockMvc = MockMvcBuilders.standaloneSetup(gmcDetailsResource)
         .setCustomArgumentResolvers(pageableArgumentResolver)
         .setControllerAdvice(exceptionTranslator)
@@ -133,6 +138,55 @@ public class GmcDetailsResourceIntTest {
     assertThat(testGmcDetails.getGmcStatus()).isEqualTo(DEFAULT_GMC_STATUS);
     assertThat(testGmcDetails.getGmcStartDate()).isEqualTo(DEFAULT_GMC_START_DATE);
     assertThat(testGmcDetails.getGmcEndDate()).isEqualTo(DEFAULT_GMC_END_DATE);
+  }
+
+  @Test
+  @Transactional
+  public void shouldValidateMandatoryFieldsWhenCreating() throws Exception {
+    //given
+    GmcDetailsDTO gmcDetailsDTO = new GmcDetailsDTO();
+
+    //when & then
+    restGmcDetailsMockMvc.perform(post("/api/gmc-details")
+        .contentType(TestUtil.APPLICATION_JSON_UTF8)
+        .content(TestUtil.convertObjectToJsonBytes(gmcDetailsDTO)))
+        .andExpect(status().isBadRequest())
+        .andExpect(jsonPath("$.message").value("error.validation"))
+        .andExpect(jsonPath("$.fieldErrors[*].field").
+            value(containsInAnyOrder("id")));
+  }
+
+  @Test
+  @Transactional
+  public void shouldValidateMandatoryFieldsWhenUpdating() throws Exception {
+    //given
+    GmcDetailsDTO gmcDetailsDTO = new GmcDetailsDTO();
+
+    //when & then
+    restGmcDetailsMockMvc.perform(put("/api/gmc-details")
+        .contentType(TestUtil.APPLICATION_JSON_UTF8)
+        .content(TestUtil.convertObjectToJsonBytes(gmcDetailsDTO)))
+        .andExpect(status().isBadRequest())
+        .andExpect(jsonPath("$.message").value("error.validation"))
+        .andExpect(jsonPath("$.fieldErrors[*].field").
+            value(containsInAnyOrder("id")));
+  }
+
+  @Test
+  @Transactional
+  public void shouldValidateGmcStatusWhenGmcNumberIsEntered() throws Exception {
+    //given
+    GmcDetailsDTO gmcDetailsDTO = new GmcDetailsDTO();
+    gmcDetailsDTO.setId(1L);
+    gmcDetailsDTO.setGmcNumber(DEFAULT_GMC_NUMBER);
+    //when & then
+    restGmcDetailsMockMvc.perform(post("/api/gmc-details")
+        .contentType(TestUtil.APPLICATION_JSON_UTF8)
+        .content(TestUtil.convertObjectToJsonBytes(gmcDetailsDTO)))
+        .andExpect(status().isBadRequest())
+        .andExpect(jsonPath("$.message").value("error.validation"))
+        .andExpect(jsonPath("$.fieldErrors[*].field").
+            value(containsInAnyOrder("gmcStatus")));
   }
 
   @Test

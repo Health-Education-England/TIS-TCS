@@ -2,6 +2,8 @@ package com.transformuk.hee.tis.tcs.service.api;
 
 import com.codahale.metrics.annotation.Timed;
 import com.transformuk.hee.tis.tcs.api.dto.QualificationDTO;
+import com.transformuk.hee.tis.tcs.api.dto.validation.Create;
+import com.transformuk.hee.tis.tcs.api.dto.validation.Update;
 import com.transformuk.hee.tis.tcs.service.api.util.HeaderUtil;
 import com.transformuk.hee.tis.tcs.service.api.util.PaginationUtil;
 import com.transformuk.hee.tis.tcs.service.service.QualificationService;
@@ -14,6 +16,8 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.access.prepost.PreAuthorize;
+import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
@@ -54,7 +58,8 @@ public class QualificationResource {
    */
   @PostMapping("/qualifications")
   @Timed
-  public ResponseEntity<QualificationDTO> createQualification(@RequestBody QualificationDTO qualificationDTO) throws URISyntaxException {
+  @PreAuthorize("hasAuthority('person:add:modify')")
+  public ResponseEntity<QualificationDTO> createQualification(@RequestBody @Validated(Create.class) QualificationDTO qualificationDTO) throws URISyntaxException {
     log.debug("REST request to save Qualification : {}", qualificationDTO);
 
     QualificationDTO result = qualificationService.save(qualificationDTO);
@@ -74,7 +79,8 @@ public class QualificationResource {
    */
   @PutMapping("/qualifications")
   @Timed
-  public ResponseEntity<QualificationDTO> updateQualification(@RequestBody QualificationDTO qualificationDTO) throws URISyntaxException {
+  @PreAuthorize("hasAuthority('person:add:modify')")
+  public ResponseEntity<QualificationDTO> updateQualification(@RequestBody @Validated(Update.class) QualificationDTO qualificationDTO) throws URISyntaxException {
     log.debug("REST request to update Qualification : {}", qualificationDTO);
     if (qualificationDTO.getId() == null) {
       return ResponseEntity.badRequest().headers(HeaderUtil.createFailureAlert(ENTITY_NAME, "must_provide_id",
@@ -94,6 +100,7 @@ public class QualificationResource {
    */
   @GetMapping("/qualifications")
   @Timed
+  @PreAuthorize("hasAuthority('person:view')")
   public ResponseEntity<List<QualificationDTO>> getAllQualifications(@ApiParam Pageable pageable) {
     log.debug("REST request to get a page of Qualifications");
     Page<QualificationDTO> page = qualificationService.findAll(pageable);
@@ -109,6 +116,7 @@ public class QualificationResource {
    */
   @GetMapping("/qualifications/{id}")
   @Timed
+  @PreAuthorize("hasAuthority('person:view')")
   public ResponseEntity<QualificationDTO> getQualification(@PathVariable Long id) {
     log.debug("REST request to get Qualification : {}", id);
     QualificationDTO qualificationDTO = qualificationService.findOne(id);
@@ -123,6 +131,7 @@ public class QualificationResource {
    */
   @DeleteMapping("/qualifications/{id}")
   @Timed
+  @PreAuthorize("hasAuthority('tcs:delete:entities')")
   public ResponseEntity<Void> deleteQualification(@PathVariable Long id) {
     log.debug("REST request to delete Qualification : {}", id);
     qualificationService.delete(id);

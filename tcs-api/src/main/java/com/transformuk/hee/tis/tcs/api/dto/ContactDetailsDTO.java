@@ -1,6 +1,12 @@
 package com.transformuk.hee.tis.tcs.api.dto;
 
 
+import com.transformuk.hee.tis.tcs.api.dto.validation.Create;
+import com.transformuk.hee.tis.tcs.api.dto.validation.Update;
+import org.hibernate.validator.constraints.Email;
+
+import javax.validation.constraints.DecimalMin;
+import javax.validation.constraints.NotNull;
 import java.io.Serializable;
 import java.util.Objects;
 
@@ -9,30 +15,41 @@ import java.util.Objects;
  */
 public class ContactDetailsDTO implements Serializable {
 
+  @NotNull(message = "Id is required", groups = {Update.class, Create.class})
+  @DecimalMin(value = "0", groups = {Update.class, Create.class}, message = "Id must not be negative")
   private Long id;
 
+  @NotNull(message = "Surname is required", groups = {Update.class, Create.class})
   private String surname;
 
+  @NotNull(message = "Forenames is required", groups = {Update.class, Create.class})
   private String forenames;
 
   private String knownAs;
 
   private String maidenName;
 
+  @NotNull(message = "Initials is required", groups = {Update.class, Create.class})
   private String initials;
 
+  @NotNull(message = "Title is required", groups = {Update.class, Create.class})
   private String title;
 
   private String contactPhoneNr1;
 
   private String contactPhoneNr2;
 
+  @NotNull(message = "Email is required", groups = {Update.class, Create.class})
+  @Email(message = "Valid email is required", groups = {Update.class, Create.class})
   private String email;
 
+  @Email(message = "Valid email is required", groups = {Update.class, Create.class})
   private String workEmail;
 
+  @NotNull(message = "Address is required", groups = {Update.class, Create.class})
   private String address;
 
+  @NotNull(message = "PostCode is required", groups = {Update.class, Create.class})
   private String postCode;
 
   public Long getId() {

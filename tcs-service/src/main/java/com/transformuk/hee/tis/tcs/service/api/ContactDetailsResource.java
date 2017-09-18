@@ -2,6 +2,8 @@ package com.transformuk.hee.tis.tcs.service.api;
 
 import com.codahale.metrics.annotation.Timed;
 import com.transformuk.hee.tis.tcs.api.dto.ContactDetailsDTO;
+import com.transformuk.hee.tis.tcs.api.dto.validation.Create;
+import com.transformuk.hee.tis.tcs.api.dto.validation.Update;
 import com.transformuk.hee.tis.tcs.service.api.util.HeaderUtil;
 import com.transformuk.hee.tis.tcs.service.api.util.PaginationUtil;
 import com.transformuk.hee.tis.tcs.service.service.ContactDetailsService;
@@ -14,6 +16,8 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.access.prepost.PreAuthorize;
+import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
@@ -54,7 +58,8 @@ public class ContactDetailsResource {
    */
   @PostMapping("/contact-details")
   @Timed
-  public ResponseEntity<ContactDetailsDTO> createContactDetails(@RequestBody ContactDetailsDTO contactDetailsDTO) throws URISyntaxException {
+  @PreAuthorize("hasAuthority('person:add:modify')")
+  public ResponseEntity<ContactDetailsDTO> createContactDetails(@RequestBody @Validated(Create.class) ContactDetailsDTO contactDetailsDTO) throws URISyntaxException {
     log.debug("REST request to save ContactDetails : {}", contactDetailsDTO);
 
     ContactDetailsDTO result = contactDetailsService.save(contactDetailsDTO);
@@ -74,7 +79,8 @@ public class ContactDetailsResource {
    */
   @PutMapping("/contact-details")
   @Timed
-  public ResponseEntity<ContactDetailsDTO> updateContactDetails(@RequestBody ContactDetailsDTO contactDetailsDTO) throws URISyntaxException {
+  @PreAuthorize("hasAuthority('person:add:modify')")
+  public ResponseEntity<ContactDetailsDTO> updateContactDetails(@RequestBody @Validated(Update.class) ContactDetailsDTO contactDetailsDTO) throws URISyntaxException {
     log.debug("REST request to update ContactDetails : {}", contactDetailsDTO);
     if (contactDetailsDTO.getId() == null) {
       return ResponseEntity.badRequest().headers(HeaderUtil.createFailureAlert(ENTITY_NAME, "must_provide_id",
@@ -94,6 +100,7 @@ public class ContactDetailsResource {
    */
   @GetMapping("/contact-details")
   @Timed
+  @PreAuthorize("hasAuthority('person:view')")
   public ResponseEntity<List<ContactDetailsDTO>> getAllContactDetails(@ApiParam Pageable pageable) {
     log.debug("REST request to get a page of ContactDetails");
     Page<ContactDetailsDTO> page = contactDetailsService.findAll(pageable);
@@ -109,6 +116,7 @@ public class ContactDetailsResource {
    */
   @GetMapping("/contact-details/{id}")
   @Timed
+  @PreAuthorize("hasAuthority('person:view')")
   public ResponseEntity<ContactDetailsDTO> getContactDetails(@PathVariable Long id) {
     log.debug("REST request to get ContactDetails : {}", id);
     ContactDetailsDTO contactDetailsDTO = contactDetailsService.findOne(id);
@@ -123,6 +131,7 @@ public class ContactDetailsResource {
    */
   @DeleteMapping("/contact-details/{id}")
   @Timed
+  @PreAuthorize("hasAuthority('tcs:delete:entities')")
   public ResponseEntity<Void> deleteContactDetails(@PathVariable Long id) {
     log.debug("REST request to delete ContactDetails : {}", id);
     contactDetailsService.delete(id);

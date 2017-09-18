@@ -27,6 +27,7 @@ import java.time.ZoneId;
 import java.util.List;
 
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.hamcrest.Matchers.containsInAnyOrder;
 import static org.hamcrest.Matchers.hasItem;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.delete;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
@@ -138,6 +139,38 @@ public class QualificationResourceIntTest {
     assertThat(testQualification.getQualifiactionAttainedDate()).isEqualTo(DEFAULT_QUALIFIACTION_ATTAINED_DATE);
     assertThat(testQualification.getMedicalSchool()).isEqualTo(DEFAULT_MEDICAL_SCHOOL);
     assertThat(testQualification.getCountryOfQualification()).isEqualTo(DEFAULT_COUNTRY_OF_QUALIFICATION);
+  }
+
+  @Test
+  @Transactional
+  public void shouldValidateMandatoryFieldsWhenCreating() throws Exception {
+    //given
+    QualificationDTO qualificationDTO = new QualificationDTO();
+
+    //when & then
+    restQualificationMockMvc.perform(post("/api/qualifications")
+        .contentType(TestUtil.APPLICATION_JSON_UTF8)
+        .content(TestUtil.convertObjectToJsonBytes(qualificationDTO)))
+        .andExpect(status().isBadRequest())
+        .andExpect(jsonPath("$.message").value("error.validation"))
+        .andExpect(jsonPath("$.fieldErrors[*].field").
+            value(containsInAnyOrder("id", "qualification", "medicalSchool", "countryOfQualification")));
+  }
+
+  @Test
+  @Transactional
+  public void shouldValidateMandatoryFieldsWhenUpdating() throws Exception {
+    //given
+    QualificationDTO qualificationDTO = new QualificationDTO();
+
+    //when & then
+    restQualificationMockMvc.perform(put("/api/qualifications")
+        .contentType(TestUtil.APPLICATION_JSON_UTF8)
+        .content(TestUtil.convertObjectToJsonBytes(qualificationDTO)))
+        .andExpect(status().isBadRequest())
+        .andExpect(jsonPath("$.message").value("error.validation"))
+        .andExpect(jsonPath("$.fieldErrors[*].field").
+            value(containsInAnyOrder("id", "qualification", "medicalSchool", "countryOfQualification")));
   }
 
   @Test

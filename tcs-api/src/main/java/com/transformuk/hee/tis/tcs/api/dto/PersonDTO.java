@@ -1,8 +1,13 @@
 package com.transformuk.hee.tis.tcs.api.dto;
 
 
+import com.transformuk.hee.tis.tcs.api.dto.validation.Create;
+import com.transformuk.hee.tis.tcs.api.dto.validation.Update;
 import com.transformuk.hee.tis.tcs.api.enumeration.Status;
 
+import javax.validation.constraints.DecimalMin;
+import javax.validation.constraints.NotNull;
+import javax.validation.constraints.Null;
 import java.io.Serializable;
 import java.time.LocalDate;
 import java.util.Objects;
@@ -12,6 +17,9 @@ import java.util.Objects;
  */
 public class PersonDTO implements Serializable {
 
+  @NotNull(groups = Update.class, message = "Id must not be null when updating a person")
+  @DecimalMin(value = "0", groups = Update.class, message = "Id must not be negative")
+  @Null(groups = Create.class, message = "Id must be null when creating a new person")
   private Long id;
 
   private String intrepidId;
@@ -22,6 +30,7 @@ public class PersonDTO implements Serializable {
 
   private String role;
 
+  @NotNull(message = "Status is required", groups = {Update.class, Create.class})
   private Status status;
 
   private String comments;

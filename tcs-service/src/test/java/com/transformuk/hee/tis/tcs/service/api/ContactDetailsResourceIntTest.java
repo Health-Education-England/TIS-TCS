@@ -25,11 +25,12 @@ import javax.persistence.EntityManager;
 import java.util.List;
 
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.hamcrest.Matchers.containsInAnyOrder;
 import static org.hamcrest.Matchers.hasItem;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.delete;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.put;
-import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.delete;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.content;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
@@ -67,11 +68,11 @@ public class ContactDetailsResourceIntTest {
   private static final String DEFAULT_CONTACT_PHONE_NR_2 = "AAAAAAAAAA";
   private static final String UPDATED_CONTACT_PHONE_NR_2 = "BBBBBBBBBB";
 
-  private static final String DEFAULT_EMAIL = "AAAAAAAAAA";
-  private static final String UPDATED_EMAIL = "BBBBBBBBBB";
+  private static final String DEFAULT_EMAIL = "AAAAAAAAAA@test.com";
+  private static final String UPDATED_EMAIL = "BBBBBBBBBB@test.com";
 
-  private static final String DEFAULT_WORK_EMAIL = "AAAAAAAAAA";
-  private static final String UPDATED_WORK_EMAIL = "BBBBBBBBBB";
+  private static final String DEFAULT_WORK_EMAIL = "AAAAAAAAAA@test.com";
+  private static final String UPDATED_WORK_EMAIL = "BBBBBBBBBB@test.com";
 
   private static final String DEFAULT_ADDRESS = "AAAAAAAAAA";
   private static final String UPDATED_ADDRESS = "BBBBBBBBBB";
@@ -171,6 +172,57 @@ public class ContactDetailsResourceIntTest {
     assertThat(testContactDetails.getWorkEmail()).isEqualTo(DEFAULT_WORK_EMAIL);
     assertThat(testContactDetails.getAddress()).isEqualTo(DEFAULT_ADDRESS);
     assertThat(testContactDetails.getPostCode()).isEqualTo(DEFAULT_POST_CODE);
+  }
+
+  @Test
+  @Transactional
+  public void shouldValidateMandatoryFieldsWhenCreating() throws Exception {
+    //given
+    ContactDetailsDTO contactDetailsDTO = new ContactDetailsDTO();
+
+    //when & then
+    restContactDetailsMockMvc.perform(post("/api/contact-details")
+        .contentType(TestUtil.APPLICATION_JSON_UTF8)
+        .content(TestUtil.convertObjectToJsonBytes(contactDetailsDTO)))
+        .andExpect(status().isBadRequest())
+        .andExpect(jsonPath("$.message").value("error.validation"))
+        .andExpect(jsonPath("$.fieldErrors[*].field").
+            value(containsInAnyOrder("id", "surname", "forenames", "initials",
+                "title", "email", "address", "postCode")));
+  }
+
+  @Test
+  @Transactional
+  public void shouldValidateMandatoryFieldsWhenUpdating() throws Exception {
+    //given
+    ContactDetailsDTO contactDetailsDTO = new ContactDetailsDTO();
+
+    //when & then
+    restContactDetailsMockMvc.perform(put("/api/contact-details")
+        .contentType(TestUtil.APPLICATION_JSON_UTF8)
+        .content(TestUtil.convertObjectToJsonBytes(contactDetailsDTO)))
+        .andExpect(status().isBadRequest())
+        .andExpect(jsonPath("$.message").value("error.validation"))
+        .andExpect(jsonPath("$.fieldErrors[*].field").
+            value(containsInAnyOrder("id", "surname", "forenames", "initials",
+                "title", "email", "address", "postCode")));
+  }
+
+  @Test
+  @Transactional
+  public void shouldValidateValidEmailField() throws Exception {
+    //given
+    ContactDetailsDTO contactDetailsDTO = contactDetailsMapper.toDto(contactDetails);
+    contactDetailsDTO.setEmail("test");
+
+    //when & then
+    restContactDetailsMockMvc.perform(put("/api/contact-details")
+        .contentType(TestUtil.APPLICATION_JSON_UTF8)
+        .content(TestUtil.convertObjectToJsonBytes(contactDetailsDTO)))
+        .andExpect(status().isBadRequest())
+        .andExpect(jsonPath("$.message").value("error.validation"))
+        .andExpect(jsonPath("$.fieldErrors[*].field").
+            value(containsInAnyOrder("email")));
   }
 
   @Test
