@@ -22,8 +22,12 @@ public class ContactDetailsDTO implements Serializable {
   @NotNull(message = "Surname is required", groups = {Update.class, Create.class})
   private String surname;
 
+  private String legalSurname;
+
   @NotNull(message = "Forenames is required", groups = {Update.class, Create.class})
   private String forenames;
+
+  private String legalForenames;
 
   private String knownAs;
 
@@ -156,6 +160,22 @@ public class ContactDetailsDTO implements Serializable {
     this.postCode = postCode;
   }
 
+  public String getLegalSurname() {
+    return legalSurname;
+  }
+
+  public void setLegalSurname(String legalSurname) {
+    this.legalSurname = legalSurname;
+  }
+
+  public String getLegalForenames() {
+    return legalForenames;
+  }
+
+  public void setLegalForenames(String legalForenames) {
+    this.legalForenames = legalForenames;
+  }
+
   @Override
   public boolean equals(Object o) {
     if (this == o) {
@@ -180,19 +200,21 @@ public class ContactDetailsDTO implements Serializable {
   @Override
   public String toString() {
     return "ContactDetailsDTO{" +
-        "id=" + getId() +
-        ", surname='" + getSurname() + "'" +
-        ", forenames='" + getForenames() + "'" +
-        ", knownAs='" + getKnownAs() + "'" +
-        ", maidenName='" + getMaidenName() + "'" +
-        ", initials='" + getInitials() + "'" +
-        ", title='" + getTitle() + "'" +
-        ", contactPhoneNr1='" + getContactPhoneNr1() + "'" +
-        ", contactPhoneNr2='" + getContactPhoneNr2() + "'" +
-        ", email='" + getEmail() + "'" +
-        ", workEmail='" + getWorkEmail() + "'" +
-        ", address='" + getAddress() + "'" +
-        ", postCode='" + getPostCode() + "'" +
-        "}";
+        "id=" + id +
+        ", surname='" + surname + '\'' +
+        ", legalSurname='" + legalSurname + '\'' +
+        ", forenames='" + forenames + '\'' +
+        ", legalForenames='" + legalForenames + '\'' +
+        ", knownAs='" + knownAs + '\'' +
+        ", maidenName='" + maidenName + '\'' +
+        ", initials='" + initials + '\'' +
+        ", title='" + title + '\'' +
+        ", contactPhoneNr1='" + contactPhoneNr1 + '\'' +
+        ", contactPhoneNr2='" + contactPhoneNr2 + '\'' +
+        ", email='" + email + '\'' +
+        ", workEmail='" + workEmail + '\'' +
+        ", address='" + address + '\'' +
+        ", postCode='" + postCode + '\'' +
+        '}';
   }
 }

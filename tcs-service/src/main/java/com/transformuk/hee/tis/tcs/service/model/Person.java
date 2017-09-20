@@ -47,6 +47,8 @@ public class Person implements Serializable {
 
   private String publicHealthNumber;
 
+  private String regulator;
+
   @OneToOne(fetch = FetchType.EAGER)
   @JoinColumn(unique = true, name = "id")
   private ContactDetails contactDetails;
@@ -196,6 +198,11 @@ public class Person implements Serializable {
     return this;
   }
 
+  public Person regulator(String regulator) {
+    this.regulator = regulator;
+    return this;
+  }
+
   public ContactDetails getContactDetails() {
     return contactDetails;
   }
@@ -274,6 +281,14 @@ public class Person implements Serializable {
     return this;
   }
 
+  public String getRegulator() {
+    return regulator;
+  }
+
+  public void setRegulator(String regulator) {
+    this.regulator = regulator;
+  }
+
   @Override
   public boolean equals(Object o) {
     if (this == o) {
@@ -307,6 +322,7 @@ public class Person implements Serializable {
         ", inactiveDate='" + getInactiveDate() + "'" +
         ", inactiveNotes='" + getInactiveNotes() + "'" +
         ", publicHealthNumber='" + getPublicHealthNumber() + "'" +
+        ", regulator='" + getRegulator() + "'" +
         "}";
   }
 }

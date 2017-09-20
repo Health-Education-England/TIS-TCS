@@ -85,6 +85,9 @@ public class PersonResourceIntTest {
   private static final String GMC_NUMBER = "1000000";
   private static final String GDC_NUMBER = "2000000";
 
+  private static final String DEFAULT_REGULATOR = "AAAAAAAAAA";
+  private static final String UPDATED_REGULATOR = "BBBBBBBBBB";
+
   @Autowired
   private PersonRepository personRepository;
 
@@ -145,7 +148,8 @@ public class PersonResourceIntTest {
         .comments(DEFAULT_COMMENTS)
         .inactiveDate(DEFAULT_INACTIVE_DATE)
         .inactiveNotes(DEFAULT_INACTIVE_NOTES)
-        .publicHealthNumber(DEFAULT_PUBLIC_HEALTH_NUMBER);
+        .publicHealthNumber(DEFAULT_PUBLIC_HEALTH_NUMBER)
+        .regulator(DEFAULT_REGULATOR);
     return person;
   }
 
@@ -179,6 +183,7 @@ public class PersonResourceIntTest {
     assertThat(testPerson.getInactiveDate()).isEqualTo(DEFAULT_INACTIVE_DATE);
     assertThat(testPerson.getInactiveNotes()).isEqualTo(DEFAULT_INACTIVE_NOTES);
     assertThat(testPerson.getPublicHealthNumber()).isEqualTo(DEFAULT_PUBLIC_HEALTH_NUMBER);
+    assertThat(testPerson.getRegulator()).isEqualTo(DEFAULT_REGULATOR);
   }
 
   @Test
@@ -252,7 +257,8 @@ public class PersonResourceIntTest {
         .andExpect(jsonPath("$.[*].comments").value(hasItem(DEFAULT_COMMENTS.toString())))
         .andExpect(jsonPath("$.[*].inactiveDate").value(hasItem(DEFAULT_INACTIVE_DATE.toString())))
         .andExpect(jsonPath("$.[*].inactiveNotes").value(hasItem(DEFAULT_INACTIVE_NOTES.toString())))
-        .andExpect(jsonPath("$.[*].publicHealthNumber").value(hasItem(DEFAULT_PUBLIC_HEALTH_NUMBER.toString())));
+        .andExpect(jsonPath("$.[*].publicHealthNumber").value(hasItem(DEFAULT_PUBLIC_HEALTH_NUMBER.toString())))
+        .andExpect(jsonPath("$.[*].regulator").value(hasItem(DEFAULT_REGULATOR.toString())));
   }
 
   @Test
@@ -274,7 +280,8 @@ public class PersonResourceIntTest {
         .andExpect(jsonPath("$.comments").value(DEFAULT_COMMENTS.toString()))
         .andExpect(jsonPath("$.inactiveDate").value(DEFAULT_INACTIVE_DATE.toString()))
         .andExpect(jsonPath("$.inactiveNotes").value(DEFAULT_INACTIVE_NOTES.toString()))
-        .andExpect(jsonPath("$.publicHealthNumber").value(DEFAULT_PUBLIC_HEALTH_NUMBER.toString()));
+        .andExpect(jsonPath("$.publicHealthNumber").value(DEFAULT_PUBLIC_HEALTH_NUMBER.toString()))
+        .andExpect(jsonPath("$.regulator").value(DEFAULT_REGULATOR.toString()));
   }
 
   @Test
@@ -303,7 +310,8 @@ public class PersonResourceIntTest {
         .comments(UPDATED_COMMENTS)
         .inactiveDate(UPDATED_INACTIVE_DATE)
         .inactiveNotes(UPDATED_INACTIVE_NOTES)
-        .publicHealthNumber(UPDATED_PUBLIC_HEALTH_NUMBER);
+        .publicHealthNumber(UPDATED_PUBLIC_HEALTH_NUMBER)
+        .regulator(UPDATED_REGULATOR);
 
     PersonDTO personDTO = personMapper.toDto(updatedPerson);
 
@@ -325,6 +333,7 @@ public class PersonResourceIntTest {
     assertThat(testPerson.getInactiveDate()).isEqualTo(UPDATED_INACTIVE_DATE);
     assertThat(testPerson.getInactiveNotes()).isEqualTo(UPDATED_INACTIVE_NOTES);
     assertThat(testPerson.getPublicHealthNumber()).isEqualTo(UPDATED_PUBLIC_HEALTH_NUMBER);
+    assertThat(testPerson.getRegulator()).isEqualTo(UPDATED_REGULATOR);
   }
 
   @Test
@@ -373,7 +382,8 @@ public class PersonResourceIntTest {
         .andExpect(jsonPath("$.[*].comments").value(DEFAULT_COMMENTS.toString()))
         .andExpect(jsonPath("$.[*].inactiveDate").value(DEFAULT_INACTIVE_DATE.toString()))
         .andExpect(jsonPath("$.[*].inactiveNotes").value(DEFAULT_INACTIVE_NOTES.toString()))
-        .andExpect(jsonPath("$.[*].publicHealthNumber").value(DEFAULT_PUBLIC_HEALTH_NUMBER.toString()));
+        .andExpect(jsonPath("$.[*].publicHealthNumber").value(DEFAULT_PUBLIC_HEALTH_NUMBER.toString()))
+        .andExpect(jsonPath("$.[*].regulator").value(DEFAULT_REGULATOR.toString()));
   }
 
   @Test
@@ -400,7 +410,8 @@ public class PersonResourceIntTest {
         .andExpect(jsonPath("$.[*].comments").value(DEFAULT_COMMENTS.toString()))
         .andExpect(jsonPath("$.[*].inactiveDate").value(DEFAULT_INACTIVE_DATE.toString()))
         .andExpect(jsonPath("$.[*].inactiveNotes").value(DEFAULT_INACTIVE_NOTES.toString()))
-        .andExpect(jsonPath("$.[*].publicHealthNumber").value(DEFAULT_PUBLIC_HEALTH_NUMBER.toString()));
+        .andExpect(jsonPath("$.[*].publicHealthNumber").value(DEFAULT_PUBLIC_HEALTH_NUMBER.toString()))
+        .andExpect(jsonPath("$.[*].regulator").value(DEFAULT_REGULATOR.toString()));
   }
 
   @Test
@@ -427,7 +438,8 @@ public class PersonResourceIntTest {
         .andExpect(jsonPath("$.[*].comments").value(DEFAULT_COMMENTS.toString()))
         .andExpect(jsonPath("$.[*].inactiveDate").value(DEFAULT_INACTIVE_DATE.toString()))
         .andExpect(jsonPath("$.[*].inactiveNotes").value(DEFAULT_INACTIVE_NOTES.toString()))
-        .andExpect(jsonPath("$.[*].publicHealthNumber").value(DEFAULT_PUBLIC_HEALTH_NUMBER.toString()));
+        .andExpect(jsonPath("$.[*].publicHealthNumber").value(DEFAULT_PUBLIC_HEALTH_NUMBER.toString()))
+        .andExpect(jsonPath("$.[*].regulator").value(DEFAULT_REGULATOR.toString()));
   }
 
   @Test
@@ -448,7 +460,8 @@ public class PersonResourceIntTest {
         .andExpect(jsonPath("$.[*].comments").value(DEFAULT_COMMENTS.toString()))
         .andExpect(jsonPath("$.[*].inactiveDate").value(DEFAULT_INACTIVE_DATE.toString()))
         .andExpect(jsonPath("$.[*].inactiveNotes").value(DEFAULT_INACTIVE_NOTES.toString()))
-        .andExpect(jsonPath("$.[*].publicHealthNumber").value(DEFAULT_PUBLIC_HEALTH_NUMBER.toString()));
+        .andExpect(jsonPath("$.[*].publicHealthNumber").value(DEFAULT_PUBLIC_HEALTH_NUMBER.toString()))
+        .andExpect(jsonPath("$.[*].regulator").value(DEFAULT_REGULATOR.toString()));
   }
 
   @Test
@@ -481,7 +494,8 @@ public class PersonResourceIntTest {
         .andExpect(jsonPath("$.[*].comments").value(DEFAULT_COMMENTS.toString()))
         .andExpect(jsonPath("$.[*].inactiveDate").value(DEFAULT_INACTIVE_DATE.toString()))
         .andExpect(jsonPath("$.[*].inactiveNotes").value(DEFAULT_INACTIVE_NOTES.toString()))
-        .andExpect(jsonPath("$.[*].publicHealthNumber").value(DEFAULT_PUBLIC_HEALTH_NUMBER.toString()));
+        .andExpect(jsonPath("$.[*].publicHealthNumber").value(DEFAULT_PUBLIC_HEALTH_NUMBER.toString()))
+        .andExpect(jsonPath("$.[*].regulator").value(DEFAULT_REGULATOR.toString()));
   }
 
   @Test
