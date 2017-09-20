@@ -19,7 +19,11 @@ public class ContactDetails implements Serializable {
 
   private String surname;
 
+  private String legalSurname;
+
   private String forenames;
+
+  private String legalForenames;
 
   private String knownAs;
 
@@ -210,6 +214,32 @@ public class ContactDetails implements Serializable {
     return this;
   }
 
+  public String getLegalSurname() {
+    return legalSurname;
+  }
+
+  public void setLegalSurname(String legalSurname) {
+    this.legalSurname = legalSurname;
+  }
+
+  public ContactDetails legalSurname(String legalSurname) {
+    this.legalSurname = legalSurname;
+    return this;
+  }
+
+  public String getLegalForenames() {
+    return legalForenames;
+  }
+
+  public void setLegalForenames(String legalForenames) {
+    this.legalForenames = legalForenames;
+  }
+
+  public ContactDetails legalForenames(String legalForenames) {
+    this.legalForenames = legalForenames;
+    return this;
+  }
+
   @Override
   public boolean equals(Object o) {
     if (this == o) {
@@ -233,19 +263,21 @@ public class ContactDetails implements Serializable {
   @Override
   public String toString() {
     return "ContactDetails{" +
-        "id=" + getId() +
-        ", surname='" + getSurname() + "'" +
-        ", forenames='" + getForenames() + "'" +
-        ", knownAs='" + getKnownAs() + "'" +
-        ", maidenName='" + getMaidenName() + "'" +
-        ", initials='" + getInitials() + "'" +
-        ", title='" + getTitle() + "'" +
-        ", contactPhoneNr1='" + getContactPhoneNr1() + "'" +
-        ", contactPhoneNr2='" + getContactPhoneNr2() + "'" +
-        ", email='" + getEmail() + "'" +
-        ", workEmail='" + getWorkEmail() + "'" +
-        ", address='" + getAddress() + "'" +
-        ", postCode='" + getPostCode() + "'" +
-        "}";
+        "id=" + id +
+        ", surname='" + surname + '\'' +
+        ", legalSurname='" + legalSurname + '\'' +
+        ", forenames='" + forenames + '\'' +
+        ", legalForenames='" + legalForenames + '\'' +
+        ", knownAs='" + knownAs + '\'' +
+        ", maidenName='" + maidenName + '\'' +
+        ", initials='" + initials + '\'' +
+        ", title='" + title + '\'' +
+        ", contactPhoneNr1='" + contactPhoneNr1 + '\'' +
+        ", contactPhoneNr2='" + contactPhoneNr2 + '\'' +
+        ", email='" + email + '\'' +
+        ", workEmail='" + workEmail + '\'' +
+        ", address='" + address + '\'' +
+        ", postCode='" + postCode + '\'' +
+        '}';
   }
 }

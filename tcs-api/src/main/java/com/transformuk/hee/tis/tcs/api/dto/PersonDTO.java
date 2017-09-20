@@ -10,7 +10,6 @@ import javax.validation.constraints.NotNull;
 import javax.validation.constraints.Null;
 import java.io.Serializable;
 import java.time.LocalDate;
-import java.util.Objects;
 
 /**
  * A DTO for the Person entity.
@@ -40,6 +39,8 @@ public class PersonDTO implements Serializable {
   private String inactiveNotes;
 
   private String publicHealthNumber;
+
+  private String regulator;
 
   private ContactDetailsDTO contactDetails;
 
@@ -181,6 +182,14 @@ public class PersonDTO implements Serializable {
     this.rightToWork = rightToWork;
   }
 
+  public String getRegulator() {
+    return regulator;
+  }
+
+  public void setRegulator(String regulator) {
+    this.regulator = regulator;
+  }
+
   @Override
   public boolean equals(Object o) {
     if (this == o) return true;
@@ -200,6 +209,8 @@ public class PersonDTO implements Serializable {
     if (inactiveNotes != null ? !inactiveNotes.equals(personDTO.inactiveNotes) : personDTO.inactiveNotes != null)
       return false;
     if (publicHealthNumber != null ? !publicHealthNumber.equals(personDTO.publicHealthNumber) : personDTO.publicHealthNumber != null)
+      return false;
+    if (regulator != null ? !regulator.equals(personDTO.regulator) : personDTO.regulator != null)
       return false;
     if (contactDetails != null ? !contactDetails.equals(personDTO.contactDetails) : personDTO.contactDetails != null)
       return false;
@@ -224,6 +235,7 @@ public class PersonDTO implements Serializable {
     result = 31 * result + (inactiveDate != null ? inactiveDate.hashCode() : 0);
     result = 31 * result + (inactiveNotes != null ? inactiveNotes.hashCode() : 0);
     result = 31 * result + (publicHealthNumber != null ? publicHealthNumber.hashCode() : 0);
+    result = 31 * result + (regulator != null ? regulator.hashCode() : 0);
     result = 31 * result + (contactDetails != null ? contactDetails.hashCode() : 0);
     result = 31 * result + (personalDetails != null ? personalDetails.hashCode() : 0);
     result = 31 * result + (gmcDetails != null ? gmcDetails.hashCode() : 0);
@@ -246,6 +258,7 @@ public class PersonDTO implements Serializable {
         ", inactiveDate=" + inactiveDate +
         ", inactiveNotes='" + inactiveNotes + '\'' +
         ", publicHealthNumber='" + publicHealthNumber + '\'' +
+        ", regulator='" + regulator + '\'' +
         ", contactDetails=" + contactDetails +
         ", personalDetails=" + personalDetails +
         ", gmcDetails=" + gmcDetails +
