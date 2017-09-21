@@ -6,6 +6,7 @@ import com.transformuk.hee.tis.tcs.api.dto.validation.Create;
 import com.transformuk.hee.tis.tcs.api.dto.validation.Update;
 import com.transformuk.hee.tis.tcs.service.api.util.HeaderUtil;
 import com.transformuk.hee.tis.tcs.service.api.util.PaginationUtil;
+import com.transformuk.hee.tis.tcs.service.api.validation.QualificationValidator;
 import com.transformuk.hee.tis.tcs.service.service.QualificationService;
 import io.github.jhipster.web.util.ResponseUtil;
 import io.swagger.annotations.ApiParam;
@@ -18,6 +19,7 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.validation.annotation.Validated;
+import org.springframework.web.bind.MethodArgumentNotValidException;
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
@@ -45,8 +47,11 @@ public class QualificationResource {
 
   private final QualificationService qualificationService;
 
-  public QualificationResource(QualificationService qualificationService) {
+  private final QualificationValidator qualificationValidator;
+
+  public QualificationResource(QualificationService qualificationService, QualificationValidator qualificationValidator) {
     this.qualificationService = qualificationService;
+    this.qualificationValidator = qualificationValidator;
   }
 
   /**
@@ -59,9 +64,10 @@ public class QualificationResource {
   @PostMapping("/qualifications")
   @Timed
   @PreAuthorize("hasPermission('tis:people::person:', 'Create')")
-  public ResponseEntity<QualificationDTO> createQualification(@RequestBody @Validated(Create.class) QualificationDTO qualificationDTO) throws URISyntaxException {
+  public ResponseEntity<QualificationDTO> createQualification(@RequestBody @Validated(Create.class) QualificationDTO qualificationDTO)
+      throws URISyntaxException, MethodArgumentNotValidException {
     log.debug("REST request to save Qualification : {}", qualificationDTO);
-
+    qualificationValidator.validate(qualificationDTO);
     QualificationDTO result = qualificationService.save(qualificationDTO);
     return ResponseEntity.created(new URI("/api/qualifications/" + result.getId()))
         .headers(HeaderUtil.createEntityCreationAlert(ENTITY_NAME, result.getId().toString()))
@@ -80,8 +86,10 @@ public class QualificationResource {
   @PutMapping("/qualifications")
   @Timed
   @PreAuthorize("hasPermission('tis:people::person:', 'Update')")
-  public ResponseEntity<QualificationDTO> updateQualification(@RequestBody @Validated(Update.class) QualificationDTO qualificationDTO) throws URISyntaxException {
+  public ResponseEntity<QualificationDTO> updateQualification(@RequestBody @Validated(Update.class) QualificationDTO qualificationDTO)
+      throws URISyntaxException, MethodArgumentNotValidException {
     log.debug("REST request to update Qualification : {}", qualificationDTO);
+    qualificationValidator.validate(qualificationDTO);
     if (qualificationDTO.getId() == null) {
       return ResponseEntity.badRequest().headers(HeaderUtil.createFailureAlert(ENTITY_NAME, "must_provide_id",
           "You must provide an ID when updating a qualification")).body(null);
