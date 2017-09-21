@@ -1,5 +1,6 @@
 package com.transformuk.hee.tis.tcs.service.api;
 
+import com.transformuk.hee.tis.reference.client.impl.ReferenceServiceImpl;
 import com.transformuk.hee.tis.tcs.api.dto.PersonDTO;
 import com.transformuk.hee.tis.tcs.api.dto.QualificationDTO;
 import com.transformuk.hee.tis.tcs.api.enumeration.QualificationType;
@@ -13,12 +14,15 @@ import com.transformuk.hee.tis.tcs.service.repository.QualificationRepository;
 import com.transformuk.hee.tis.tcs.service.service.QualificationService;
 import com.transformuk.hee.tis.tcs.service.service.mapper.PersonMapper;
 import com.transformuk.hee.tis.tcs.service.service.mapper.QualificationMapper;
+import org.assertj.core.util.Lists;
+import org.assertj.core.util.Maps;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.mockito.MockitoAnnotations;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
+import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.data.web.PageableHandlerMethodArgumentResolver;
 import org.springframework.http.MediaType;
 import org.springframework.http.converter.json.MappingJackson2HttpMessageConverter;
@@ -31,10 +35,12 @@ import javax.persistence.EntityManager;
 import java.time.LocalDate;
 import java.time.ZoneId;
 import java.util.List;
+import java.util.Map;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.hamcrest.Matchers.containsInAnyOrder;
 import static org.hamcrest.Matchers.hasItem;
+import static org.mockito.BDDMockito.given;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.delete;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
@@ -80,7 +86,6 @@ public class QualificationResourceIntTest {
   @Autowired
   private QualificationService qualificationService;
 
-  @Autowired
   private QualificationValidator qualificationValidator;
 
   @Autowired
@@ -101,6 +106,9 @@ public class QualificationResourceIntTest {
   @Autowired
   private EntityManager em;
 
+  @MockBean
+  private ReferenceServiceImpl referenceService;
+
   private MockMvc restQualificationMockMvc;
 
   private Qualification qualification;
@@ -110,6 +118,7 @@ public class QualificationResourceIntTest {
   @Before
   public void setup() {
     MockitoAnnotations.initMocks(this);
+    qualificationValidator = new QualificationValidator(personRepository, referenceService);
     QualificationResource qualificationResource = new QualificationResource(qualificationService, qualificationValidator);
     this.restQualificationMockMvc = MockMvcBuilders.standaloneSetup(qualificationResource)
         .setCustomArgumentResolvers(pageableArgumentResolver)
@@ -252,6 +261,9 @@ public class QualificationResourceIntTest {
     QualificationDTO qualificationDTO = qualificationMapper.toDto(qualification);
     qualificationDTO.setPerson(personMapper.toDto(person));
 
+    Map<String, Boolean> exists = Maps.newHashMap(NOT_EXISTS_MEDICAL_SCHOOL, false);
+    given(referenceService.medicalSchoolsExists(Lists.newArrayList(NOT_EXISTS_MEDICAL_SCHOOL))).willReturn(exists);
+
     //when & then
     restQualificationMockMvc.perform(post("/api/qualifications")
         .contentType(TestUtil.APPLICATION_JSON_UTF8)
@@ -260,7 +272,7 @@ public class QualificationResourceIntTest {
         .andExpect(jsonPath("$.message").value("error.validation"))
         .andExpect(jsonPath("$.fieldErrors[0].field").value("medicalSchool"))
         .andExpect(jsonPath("$.fieldErrors[0].message").
-            value(String.format("qualification with id %s does not exist",NOT_EXISTS_MEDICAL_SCHOOL)));
+            value(String.format("qualification with id %s does not exist", NOT_EXISTS_MEDICAL_SCHOOL)));
   }
 
   @Test
@@ -272,6 +284,9 @@ public class QualificationResourceIntTest {
     QualificationDTO qualificationDTO = qualificationMapper.toDto(qualification);
     qualificationDTO.setPerson(personMapper.toDto(person));
 
+    Map<String, Boolean> exists = Maps.newHashMap(NOT_EXISTS_COUNTRY, false);
+    given(referenceService.countryExists(Lists.newArrayList(NOT_EXISTS_COUNTRY))).willReturn(exists);
+
     //when & then
     restQualificationMockMvc.perform(post("/api/qualifications")
         .contentType(TestUtil.APPLICATION_JSON_UTF8)
@@ -280,13 +295,14 @@ public class QualificationResourceIntTest {
         .andExpect(jsonPath("$.message").value("error.validation"))
         .andExpect(jsonPath("$.fieldErrors[0].field").value("countryOfQualification"))
         .andExpect(jsonPath("$.fieldErrors[0].message").
-            value(String.format("countryOfQualification with id %s does not exist",NOT_EXISTS_COUNTRY)));
+            value(String.format("countryOfQualification with id %s does not exist", NOT_EXISTS_COUNTRY)));
   }
 
   @Test
   @Transactional
   public void shouldValidatePersonWhenPersonIsNotExists() throws Exception {
     //given
+
     QualificationDTO qualificationDTO = qualificationMapper.toDto(qualification);
 
     qualificationDTO.setPerson(new PersonDTO());
