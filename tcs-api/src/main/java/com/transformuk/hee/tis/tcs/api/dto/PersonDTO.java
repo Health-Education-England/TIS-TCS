@@ -10,6 +10,8 @@ import javax.validation.constraints.NotNull;
 import javax.validation.constraints.Null;
 import java.io.Serializable;
 import java.time.LocalDate;
+import java.util.HashSet;
+import java.util.Set;
 
 /**
  * A DTO for the Person entity.
@@ -50,7 +52,7 @@ public class PersonDTO implements Serializable {
 
   private GdcDetailsDTO gdcDetails;
 
-  private QualificationDTO qualification;
+  private Set<QualificationDTO> qualifications = new HashSet<>();
 
   private RightToWorkDTO rightToWork;
 
@@ -166,12 +168,12 @@ public class PersonDTO implements Serializable {
     this.gdcDetails = gdcDetails;
   }
 
-  public QualificationDTO getQualification() {
-    return qualification;
+  public Set<QualificationDTO> getQualifications() {
+    return qualifications;
   }
 
-  public void setQualification(QualificationDTO qualification) {
-    this.qualification = qualification;
+  public void setQualifications(Set<QualificationDTO> qualifications) {
+    this.qualifications = qualifications;
   }
 
   public RightToWorkDTO getRightToWork() {
@@ -218,7 +220,7 @@ public class PersonDTO implements Serializable {
       return false;
     if (gmcDetails != null ? !gmcDetails.equals(personDTO.gmcDetails) : personDTO.gmcDetails != null) return false;
     if (gdcDetails != null ? !gdcDetails.equals(personDTO.gdcDetails) : personDTO.gdcDetails != null) return false;
-    if (qualification != null ? !qualification.equals(personDTO.qualification) : personDTO.qualification != null)
+    if (qualifications != null ? !qualifications.equals(personDTO.qualifications) : personDTO.qualifications != null)
       return false;
     return rightToWork != null ? rightToWork.equals(personDTO.rightToWork) : personDTO.rightToWork == null;
   }
@@ -240,7 +242,7 @@ public class PersonDTO implements Serializable {
     result = 31 * result + (personalDetails != null ? personalDetails.hashCode() : 0);
     result = 31 * result + (gmcDetails != null ? gmcDetails.hashCode() : 0);
     result = 31 * result + (gdcDetails != null ? gdcDetails.hashCode() : 0);
-    result = 31 * result + (qualification != null ? qualification.hashCode() : 0);
+    result = 31 * result + (qualifications != null ? qualifications.hashCode() : 0);
     result = 31 * result + (rightToWork != null ? rightToWork.hashCode() : 0);
     return result;
   }
@@ -253,7 +255,7 @@ public class PersonDTO implements Serializable {
         ", addedDate=" + addedDate +
         ", amendedDate=" + amendedDate +
         ", role='" + role + '\'' +
-        ", status='" + status + '\'' +
+        ", status=" + status +
         ", comments='" + comments + '\'' +
         ", inactiveDate=" + inactiveDate +
         ", inactiveNotes='" + inactiveNotes + '\'' +
@@ -263,7 +265,7 @@ public class PersonDTO implements Serializable {
         ", personalDetails=" + personalDetails +
         ", gmcDetails=" + gmcDetails +
         ", gdcDetails=" + gdcDetails +
-        ", qualification=" + qualification +
+        ", qualifications=" + qualifications +
         ", rightToWork=" + rightToWork +
         '}';
   }

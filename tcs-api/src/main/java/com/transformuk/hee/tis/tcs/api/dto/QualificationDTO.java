@@ -3,9 +3,11 @@ package com.transformuk.hee.tis.tcs.api.dto;
 
 import com.transformuk.hee.tis.tcs.api.dto.validation.Create;
 import com.transformuk.hee.tis.tcs.api.dto.validation.Update;
+import com.transformuk.hee.tis.tcs.api.enumeration.QualificationType;
 
 import javax.validation.constraints.DecimalMin;
 import javax.validation.constraints.NotNull;
+import javax.validation.constraints.Null;
 import java.io.Serializable;
 import java.time.LocalDate;
 import java.util.Objects;
@@ -15,16 +17,19 @@ import java.util.Objects;
  */
 public class QualificationDTO implements Serializable {
 
-  @NotNull(message = "Id is required", groups = {Update.class, Create.class})
-  @DecimalMin(value = "0", groups = {Update.class, Create.class}, message = "Id must not be negative")
+  @NotNull(groups = Update.class, message = "Id must not be null when updating a qualification")
+  @DecimalMin(value = "0", groups = Update.class, message = "Id must not be negative")
+  @Null(groups = Create.class, message = "Id must be null when creating a new qualification")
   private Long id;
 
   @NotNull(message = "Qualification is required", groups = {Update.class, Create.class})
   private String qualification;
 
-  private String qualificationType;
+  private PersonDTO person;
 
-  private LocalDate qualifiactionAttainedDate;
+  private QualificationType qualificationType;
+
+  private LocalDate qualificationAttainedDate;
 
   @NotNull(message = "Medical School is required", groups = {Update.class, Create.class})
   private String medicalSchool;
@@ -48,20 +53,20 @@ public class QualificationDTO implements Serializable {
     this.qualification = qualification;
   }
 
-  public String getQualificationType() {
+  public QualificationType getQualificationType() {
     return qualificationType;
   }
 
-  public void setQualificationType(String qualificationType) {
+  public void setQualificationType(QualificationType qualificationType) {
     this.qualificationType = qualificationType;
   }
 
-  public LocalDate getQualifiactionAttainedDate() {
-    return qualifiactionAttainedDate;
+  public LocalDate getQualificationAttainedDate() {
+    return qualificationAttainedDate;
   }
 
-  public void setQualifiactionAttainedDate(LocalDate qualifiactionAttainedDate) {
-    this.qualifiactionAttainedDate = qualifiactionAttainedDate;
+  public void setQualificationAttainedDate(LocalDate qualificationAttainedDate) {
+    this.qualificationAttainedDate = qualificationAttainedDate;
   }
 
   public String getMedicalSchool() {
@@ -78,6 +83,14 @@ public class QualificationDTO implements Serializable {
 
   public void setCountryOfQualification(String countryOfQualification) {
     this.countryOfQualification = countryOfQualification;
+  }
+
+  public PersonDTO getPerson() {
+    return person;
+  }
+
+  public void setPerson(PersonDTO person) {
+    this.person = person;
   }
 
   @Override
@@ -107,9 +120,10 @@ public class QualificationDTO implements Serializable {
         "id=" + getId() +
         ", qualification='" + getQualification() + "'" +
         ", qualificationType='" + getQualificationType() + "'" +
-        ", qualifiactionAttainedDate='" + getQualifiactionAttainedDate() + "'" +
+        ", qualifiactionAttainedDate='" + getQualificationAttainedDate() + "'" +
         ", medicalSchool='" + getMedicalSchool() + "'" +
         ", countryOfQualification='" + getCountryOfQualification() + "'" +
+        ", person='" + getPerson() + "'" +
         "}";
   }
 }

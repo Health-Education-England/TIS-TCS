@@ -21,8 +21,6 @@ public interface PersonMapper extends EntityMapper<PersonDTO, Person> {
 
   @Mapping(source = "id", target = "gdcDetails")
 
-  @Mapping(source = "id", target = "qualification")
-
   @Mapping(source = "id", target = "rightToWork")
   Person toEntity(PersonDTO personDTO);
 

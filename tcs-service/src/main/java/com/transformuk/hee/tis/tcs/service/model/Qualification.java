@@ -1,8 +1,14 @@
 package com.transformuk.hee.tis.tcs.service.model;
 
 
+import com.transformuk.hee.tis.tcs.api.enumeration.QualificationType;
+
 import javax.persistence.Entity;
+import javax.persistence.GeneratedValue;
+import javax.persistence.GenerationType;
 import javax.persistence.Id;
+import javax.persistence.JoinColumn;
+import javax.persistence.ManyToOne;
 import java.io.Serializable;
 import java.time.LocalDate;
 import java.util.Objects;
@@ -16,13 +22,18 @@ public class Qualification implements Serializable {
   private static final long serialVersionUID = 1L;
 
   @Id
+  @GeneratedValue(strategy = GenerationType.IDENTITY)
   private Long id;
+
+  @ManyToOne
+  @JoinColumn(name = "personId")
+  private Person person;
 
   private String qualification;
 
-  private String qualificationType;
+  private QualificationType qualificationType;
 
-  private LocalDate qualifiactionAttainedDate;
+  private LocalDate qualificationAttainedDate;
 
   private String medicalSchool;
 
@@ -54,29 +65,29 @@ public class Qualification implements Serializable {
     return this;
   }
 
-  public String getQualificationType() {
+  public QualificationType getQualificationType() {
     return qualificationType;
   }
 
-  public void setQualificationType(String qualificationType) {
+  public void setQualificationType(QualificationType qualificationType) {
     this.qualificationType = qualificationType;
   }
 
-  public Qualification qualificationType(String qualificationType) {
+  public Qualification qualificationType(QualificationType qualificationType) {
     this.qualificationType = qualificationType;
     return this;
   }
 
-  public LocalDate getQualifiactionAttainedDate() {
-    return qualifiactionAttainedDate;
+  public LocalDate getQualificationAttainedDate() {
+    return qualificationAttainedDate;
   }
 
-  public void setQualifiactionAttainedDate(LocalDate qualifiactionAttainedDate) {
-    this.qualifiactionAttainedDate = qualifiactionAttainedDate;
+  public void setQualificationAttainedDate(LocalDate qualificationAttainedDate) {
+    this.qualificationAttainedDate = qualificationAttainedDate;
   }
 
-  public Qualification qualifiactionAttainedDate(LocalDate qualifiactionAttainedDate) {
-    this.qualifiactionAttainedDate = qualifiactionAttainedDate;
+  public Qualification qualificationAttainedDate(LocalDate qualifiactionAttainedDate) {
+    this.qualificationAttainedDate = qualifiactionAttainedDate;
     return this;
   }
 
@@ -106,6 +117,14 @@ public class Qualification implements Serializable {
     return this;
   }
 
+  public Person getPerson() {
+    return person;
+  }
+
+  public void setPerson(Person person) {
+    this.person = person;
+  }
+
   @Override
   public boolean equals(Object o) {
     if (this == o) {
@@ -132,7 +151,7 @@ public class Qualification implements Serializable {
         "id=" + getId() +
         ", qualification='" + getQualification() + "'" +
         ", qualificationType='" + getQualificationType() + "'" +
-        ", qualifiactionAttainedDate='" + getQualifiactionAttainedDate() + "'" +
+        ", qualificationAttainedDate='" + getQualificationAttainedDate() + "'" +
         ", medicalSchool='" + getMedicalSchool() + "'" +
         ", countryOfQualification='" + getCountryOfQualification() + "'" +
         "}";

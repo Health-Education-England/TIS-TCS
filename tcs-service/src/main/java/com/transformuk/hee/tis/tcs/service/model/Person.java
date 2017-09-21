@@ -3,6 +3,7 @@ package com.transformuk.hee.tis.tcs.service.model;
 
 import com.transformuk.hee.tis.tcs.api.enumeration.Status;
 
+import javax.persistence.CascadeType;
 import javax.persistence.Entity;
 import javax.persistence.EnumType;
 import javax.persistence.Enumerated;
@@ -11,10 +12,13 @@ import javax.persistence.GeneratedValue;
 import javax.persistence.GenerationType;
 import javax.persistence.Id;
 import javax.persistence.JoinColumn;
+import javax.persistence.OneToMany;
 import javax.persistence.OneToOne;
 import java.io.Serializable;
 import java.time.LocalDate;
+import java.util.HashSet;
 import java.util.Objects;
+import java.util.Set;
 
 /**
  * A Person.
@@ -65,9 +69,8 @@ public class Person implements Serializable {
   @JoinColumn(unique = true, name = "id")
   private GdcDetails gdcDetails;
 
-  @OneToOne(fetch = FetchType.EAGER)
-  @JoinColumn(unique = true, name = "id")
-  private Qualification qualification;
+  @OneToMany(mappedBy = "person", cascade = CascadeType.ALL, orphanRemoval = true)
+  private Set<Qualification> qualifications = new HashSet<>();
 
   @OneToOne(fetch = FetchType.EAGER)
   @JoinColumn(unique = true, name = "id")
@@ -255,16 +258,16 @@ public class Person implements Serializable {
     return this;
   }
 
-  public Qualification getQualification() {
-    return qualification;
+  public Set<Qualification> getQualifications() {
+    return qualifications;
   }
 
-  public void setQualification(Qualification qualification) {
-    this.qualification = qualification;
+  public void setQualifications(Set<Qualification> qualifications) {
+    this.qualifications = qualifications;
   }
 
-  public Person qualification(Qualification qualification) {
-    this.qualification = qualification;
+  public Person qualifications(Set<Qualification> qualifications) {
+    this.qualifications = qualifications;
     return this;
   }
 
