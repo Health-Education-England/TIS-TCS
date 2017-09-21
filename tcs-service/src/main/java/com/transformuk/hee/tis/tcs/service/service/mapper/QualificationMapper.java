@@ -120,15 +120,6 @@ public class QualificationMapper {
   }
 
 
-  /*private Programme programmeFromId(Long id) {
-    if (id == null) {
-      return null;
-    }
-    Programme programme = new Programme();
-    programme.setId(id);
-    return programme;
-  }*/
-
   public Qualification fromId(Long id) {
     if (id == null) {
       return null;

@@ -58,7 +58,7 @@ public class QualificationValidator {
 
   private List<FieldError> checkPerson(QualificationDTO qualificationDTO) {
     List<FieldError> fieldErrors = new ArrayList<>();
-    // then check the curricula
+    // check the Person
     if (qualificationDTO.getPerson() == null || qualificationDTO.getPerson().getId() == null) {
       requireFieldErrors(fieldErrors, "person");
     } else if (qualificationDTO.getPerson() != null && qualificationDTO.getPerson().getId() != null) {
@@ -72,7 +72,7 @@ public class QualificationValidator {
 
   private List<FieldError> checkMedicalSchool(QualificationDTO qualificationDTO) {
     List<FieldError> fieldErrors = new ArrayList<>();
-    // then check the sites
+    // check the MedicalSchool
     if (StringUtils.isNotEmpty(qualificationDTO.getMedicalSchool())) {
       List<String> medicalSchools = Lists.newArrayList(qualificationDTO.getMedicalSchool());
 
@@ -93,7 +93,7 @@ public class QualificationValidator {
 
   private List<FieldError> checkCountryOfQualification(QualificationDTO qualificationDTO) {
     List<FieldError> fieldErrors = new ArrayList<>();
-    // then check the sites
+    // check the CountryOfQualification
     if (StringUtils.isNotEmpty(qualificationDTO.getCountryOfQualification())) {
       List<String> countryOfQualifications = Lists.newArrayList(qualificationDTO.getCountryOfQualification());
 
