@@ -104,35 +104,45 @@ public class PersonServiceImpl implements PersonService {
 
     final PersonDTO updatedPersonDTO = personMapper.toDto(person);
 
-    if (contactDetailsDTO == null) {
+    if (contactDetailsDTO == null && personDTO.getId() == null) {
       contactDetailsDTO = new ContactDetailsDTO();
     }
-    contactDetailsDTO.setId(personId);
-    updatedPersonDTO.setContactDetails(contactDetailsService.save(contactDetailsDTO));
+    if (contactDetailsDTO != null) {
+      contactDetailsDTO.setId(personId);
+      updatedPersonDTO.setContactDetails(contactDetailsService.save(contactDetailsDTO));
+    }
 
-    if (personalDetailsDTO == null) {
+    if (personalDetailsDTO == null && personDTO.getId() == null) {
       personalDetailsDTO = new PersonalDetailsDTO();
     }
-    personalDetailsDTO.setId(personId);
-    updatedPersonDTO.setPersonalDetails(personalDetailsService.save(personalDetailsDTO));
+    if (personalDetailsDTO != null) {
+      personalDetailsDTO.setId(personId);
+      updatedPersonDTO.setPersonalDetails(personalDetailsService.save(personalDetailsDTO));
+    }
 
-    if (gmcDetailsDTO == null) {
+    if (gmcDetailsDTO == null && personDTO.getId() == null) {
       gmcDetailsDTO = new GmcDetailsDTO();
     }
-    gmcDetailsDTO.setId(personId);
-    updatedPersonDTO.setGmcDetails(gmcDetailsService.save(gmcDetailsDTO));
+    if (gmcDetailsDTO != null) {
+      gmcDetailsDTO.setId(personId);
+      updatedPersonDTO.setGmcDetails(gmcDetailsService.save(gmcDetailsDTO));
+    }
 
-    if (gdcDetailsDTO == null) {
+    if (gdcDetailsDTO == null && personDTO.getId() == null) {
       gdcDetailsDTO = new GdcDetailsDTO();
     }
-    gdcDetailsDTO.setId(personId);
-    updatedPersonDTO.setGdcDetails(gdcDetailsService.save(gdcDetailsDTO));
+    if (gdcDetailsDTO != null) {
+      gdcDetailsDTO.setId(personId);
+      updatedPersonDTO.setGdcDetails(gdcDetailsService.save(gdcDetailsDTO));
+    }
 
-    if (rightToWorkDTO == null) {
+    if (rightToWorkDTO == null && personDTO.getId() == null) {
       rightToWorkDTO = new RightToWorkDTO();
     }
-    rightToWorkDTO.setId(personId);
-    updatedPersonDTO.setRightToWork(rightToWorkService.save(rightToWorkDTO));
+    if (rightToWorkDTO != null) {
+      rightToWorkDTO.setId(personId);
+      updatedPersonDTO.setRightToWork(rightToWorkService.save(rightToWorkDTO));
+    }
 
     if (qualificationDTOs != null) {
       qualificationDTOs.forEach(q -> q.setPerson(updatedPersonDTO));
