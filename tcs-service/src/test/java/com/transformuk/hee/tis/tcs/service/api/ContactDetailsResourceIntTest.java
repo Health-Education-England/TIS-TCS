@@ -436,11 +436,4 @@ public class ContactDetailsResourceIntTest {
     contactDetailsDTO1.setId(null);
     assertThat(contactDetailsDTO1).isNotEqualTo(contactDetailsDTO2);
   }
-
-  @Test
-  @Transactional
-  public void testEntityFromId() {
-    assertThat(contactDetailsMapper.fromId(42L).getId()).isEqualTo(42);
-    assertThat(contactDetailsMapper.fromId(null)).isNull();
-  }
 }

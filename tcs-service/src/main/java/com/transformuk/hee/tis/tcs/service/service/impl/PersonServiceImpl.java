@@ -1,14 +1,29 @@
 package com.transformuk.hee.tis.tcs.service.service.impl;
 
+import com.google.common.collect.Lists;
+import com.google.common.collect.Sets;
+import com.transformuk.hee.tis.tcs.api.dto.ContactDetailsDTO;
+import com.transformuk.hee.tis.tcs.api.dto.GdcDetailsDTO;
+import com.transformuk.hee.tis.tcs.api.dto.GmcDetailsDTO;
 import com.transformuk.hee.tis.tcs.api.dto.PersonDTO;
+import com.transformuk.hee.tis.tcs.api.dto.PersonalDetailsDTO;
+import com.transformuk.hee.tis.tcs.api.dto.QualificationDTO;
+import com.transformuk.hee.tis.tcs.api.dto.RightToWorkDTO;
 import com.transformuk.hee.tis.tcs.service.model.ColumnFilter;
 import com.transformuk.hee.tis.tcs.service.model.Person;
 import com.transformuk.hee.tis.tcs.service.repository.PersonRepository;
+import com.transformuk.hee.tis.tcs.service.service.ContactDetailsService;
+import com.transformuk.hee.tis.tcs.service.service.GdcDetailsService;
+import com.transformuk.hee.tis.tcs.service.service.GmcDetailsService;
 import com.transformuk.hee.tis.tcs.service.service.PersonService;
+import com.transformuk.hee.tis.tcs.service.service.PersonalDetailsService;
+import com.transformuk.hee.tis.tcs.service.service.QualificationService;
+import com.transformuk.hee.tis.tcs.service.service.RightToWorkService;
 import com.transformuk.hee.tis.tcs.service.service.mapper.PersonMapper;
 import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.domain.Specification;
@@ -18,6 +33,8 @@ import org.springframework.transaction.annotation.Transactional;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Set;
+import java.util.stream.Collectors;
 
 import static com.transformuk.hee.tis.tcs.service.service.impl.SpecificationFactory.containsLike;
 import static com.transformuk.hee.tis.tcs.service.service.impl.SpecificationFactory.in;
@@ -32,14 +49,29 @@ public class PersonServiceImpl implements PersonService {
 
   private final Logger log = LoggerFactory.getLogger(PersonServiceImpl.class);
 
-  private final PersonRepository personRepository;
+  @Autowired
+  private PersonRepository personRepository;
 
-  private final PersonMapper personMapper;
+  @Autowired
+  private ContactDetailsService contactDetailsService;
 
-  public PersonServiceImpl(PersonRepository personRepository, PersonMapper personMapper) {
-    this.personRepository = personRepository;
-    this.personMapper = personMapper;
-  }
+  @Autowired
+  private GmcDetailsService gmcDetailsService;
+
+  @Autowired
+  private GdcDetailsService gdcDetailsService;
+
+  @Autowired
+  private QualificationService qualificationService;
+
+  @Autowired
+  private RightToWorkService rightToWorkService;
+
+  @Autowired
+  private PersonalDetailsService personalDetailsService;
+
+  @Autowired
+  private PersonMapper personMapper;
 
   /**
    * Save a person.
@@ -50,9 +82,76 @@ public class PersonServiceImpl implements PersonService {
   @Override
   public PersonDTO save(PersonDTO personDTO) {
     log.debug("Request to save Person : {}", personDTO);
+
+    ContactDetailsDTO contactDetailsDTO = personDTO.getContactDetails();
+    PersonalDetailsDTO personalDetailsDTO = personDTO.getPersonalDetails();
+    GmcDetailsDTO gmcDetailsDTO = personDTO.getGmcDetails();
+    GdcDetailsDTO gdcDetailsDTO = personDTO.getGdcDetails();
+    RightToWorkDTO rightToWorkDTO = personDTO.getRightToWork();
+    Set<QualificationDTO> qualificationDTOs = personDTO.getQualifications();
+
+    personDTO.setContactDetails(null);
+    personDTO.setPersonalDetails(null);
+    personDTO.setGmcDetails(null);
+    personDTO.setGdcDetails(null);
+    personDTO.setRightToWork(null);
+    personDTO.setQualifications(null);
+
     Person person = personMapper.toEntity(personDTO);
     person = personRepository.save(person);
-    return personMapper.toDto(person);
+
+    final Long personId = person.getId();
+
+    final PersonDTO updatedPersonDTO = personMapper.toDto(person);
+
+    if (contactDetailsDTO == null) {
+      contactDetailsDTO = new ContactDetailsDTO();
+    }
+    contactDetailsDTO.setId(personId);
+    updatedPersonDTO.setContactDetails(contactDetailsService.save(contactDetailsDTO));
+
+    if (personalDetailsDTO == null) {
+      personalDetailsDTO = new PersonalDetailsDTO();
+    }
+    personalDetailsDTO.setId(personId);
+    updatedPersonDTO.setPersonalDetails(personalDetailsService.save(personalDetailsDTO));
+
+    if (gmcDetailsDTO == null) {
+      gmcDetailsDTO = new GmcDetailsDTO();
+    }
+    gmcDetailsDTO.setId(personId);
+    updatedPersonDTO.setGmcDetails(gmcDetailsService.save(gmcDetailsDTO));
+
+    if (gdcDetailsDTO == null) {
+      gdcDetailsDTO = new GdcDetailsDTO();
+    }
+    gdcDetailsDTO.setId(personId);
+    updatedPersonDTO.setGdcDetails(gdcDetailsService.save(gdcDetailsDTO));
+
+    if (rightToWorkDTO == null) {
+      rightToWorkDTO = new RightToWorkDTO();
+    }
+    rightToWorkDTO.setId(personId);
+    updatedPersonDTO.setRightToWork(rightToWorkService.save(rightToWorkDTO));
+
+    if (qualificationDTOs != null) {
+      qualificationDTOs.forEach(q -> q.setPerson(updatedPersonDTO));
+      updatedPersonDTO.setQualifications(Sets.newHashSet(qualificationService.save(Lists.newArrayList(qualificationDTOs))));
+    }
+
+    return updatedPersonDTO;
+  }
+
+  /**
+   * Save a list of persons
+   *
+   * @param personDTOs the list of entities to save
+   * @return a list of persisted entities
+   */
+  @Override
+  public List<PersonDTO> save(List<PersonDTO> personDTOs) {
+    log.debug("Request to save Persons : {}", personDTOs);
+    return personDTOs.stream().map(this::save).collect(Collectors.toList());
   }
 
   /**

@@ -28,6 +28,7 @@ import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PatchMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.PutMapping;
@@ -36,11 +37,13 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
+import javax.validation.Valid;
 import java.io.IOException;
 import java.net.URI;
 import java.net.URISyntaxException;
 import java.util.List;
 import java.util.Optional;
+import java.util.stream.Collectors;
 
 import static com.transformuk.hee.tis.tcs.service.api.util.StringUtil.sanitize;
 
@@ -167,5 +170,24 @@ public class PersonResource {
     log.debug("REST request to delete Person : {}", id);
     personService.delete(id);
     return ResponseEntity.ok().headers(HeaderUtil.createEntityDeletionAlert(ENTITY_NAME, id.toString())).build();
+  }
+
+  /**
+   * POST  /people : Bulk patch people.
+   *
+   * @param personDTOs the personDTOs to create/update
+   * @return the ResponseEntity with status 200 (Created) and with body the new personDTOs, or with status 400 (Bad Request) if the Persons has an ID already
+   * @throws URISyntaxException if the Location URI syntax is incorrect
+   */
+  @PatchMapping("/people")
+  @Timed
+  @PreAuthorize("hasPermission('tis:people::person:', 'Update')")
+  public ResponseEntity<List<PersonDTO>> patchPersons(@Valid @RequestBody List<PersonDTO> personDTOs) throws URISyntaxException {
+    log.debug("REST request to patch Persons: {}", personDTOs);
+    List<PersonDTO> result = personService.save(personDTOs);
+    List<Long> ids = result.stream().map(PersonDTO::getId).collect(Collectors.toList());
+    return ResponseEntity.ok()
+        .headers(HeaderUtil.createEntityCreationAlert(ENTITY_NAME, StringUtils.join(ids, ",")))
+        .body(result);
   }
 }

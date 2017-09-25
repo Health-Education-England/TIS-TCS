@@ -1,5 +1,6 @@
 package com.transformuk.hee.tis.tcs.service.api;
 
+import com.google.common.collect.Lists;
 import com.transformuk.hee.tis.tcs.api.dto.PersonDTO;
 import com.transformuk.hee.tis.tcs.api.enumeration.Status;
 import com.transformuk.hee.tis.tcs.service.Application;
@@ -29,7 +30,6 @@ import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.setup.MockMvcBuilders;
 import org.springframework.transaction.annotation.Transactional;
 
-import javax.persistence.EntityManager;
 import java.time.LocalDate;
 import java.time.ZoneId;
 import java.util.List;
@@ -39,6 +39,7 @@ import static org.hamcrest.Matchers.containsInAnyOrder;
 import static org.hamcrest.Matchers.hasItem;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.delete;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.patch;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.put;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.content;
@@ -115,9 +116,6 @@ public class PersonResourceIntTest {
   @Autowired
   private ExceptionTranslator exceptionTranslator;
 
-  @Autowired
-  private EntityManager em;
-
   private MockMvc restPersonMockMvc;
 
   private Person person;
@@ -130,6 +128,8 @@ public class PersonResourceIntTest {
         .setCustomArgumentResolvers(pageableArgumentResolver)
         .setControllerAdvice(exceptionTranslator)
         .setMessageConverters(jacksonMessageConverter).build();
+
+    personRepository.deleteAllInBatch();
   }
 
   /**
@@ -161,8 +161,6 @@ public class PersonResourceIntTest {
   @Test
   @Transactional
   public void createPerson() throws Exception {
-    int databaseSizeBeforeCreate = personRepository.findAll().size();
-
     // Create the Person
     PersonDTO personDTO = personMapper.toDto(person);
     restPersonMockMvc.perform(post("/api/people")
@@ -172,8 +170,8 @@ public class PersonResourceIntTest {
 
     // Validate the Person in the database
     List<Person> personList = personRepository.findAll();
-    assertThat(personList).hasSize(databaseSizeBeforeCreate + 1);
-    Person testPerson = personList.get(personList.size() - 1);
+    assertThat(personList).hasSize(1);
+    Person testPerson = personList.get(0);
     assertThat(testPerson.getIntrepidId()).isEqualTo(DEFAULT_INTREPID_ID);
     assertThat(testPerson.getAddedDate()).isEqualTo(DEFAULT_ADDED_DATE);
     assertThat(testPerson.getAmendedDate()).isEqualTo(DEFAULT_AMENDED_DATE);
@@ -215,14 +213,12 @@ public class PersonResourceIntTest {
         .andExpect(status().isBadRequest())
         .andExpect(jsonPath("$.message").value("error.validation"))
         .andExpect(jsonPath("$.fieldErrors[*].field").
-            value(containsInAnyOrder("id","status")));
+            value(containsInAnyOrder("id", "status")));
   }
 
   @Test
   @Transactional
   public void createPersonWithExistingId() throws Exception {
-    int databaseSizeBeforeCreate = personRepository.findAll().size();
-
     // Create the Person with an existing ID
     person.setId(1L);
     PersonDTO personDTO = personMapper.toDto(person);
@@ -235,7 +231,7 @@ public class PersonResourceIntTest {
 
     // Validate the Alice in the database
     List<Person> personList = personRepository.findAll();
-    assertThat(personList).hasSize(databaseSizeBeforeCreate);
+    assertThat(personList).hasSize(0);
   }
 
   @Test
@@ -297,7 +293,6 @@ public class PersonResourceIntTest {
   public void updatePerson() throws Exception {
     // Initialize the database
     personRepository.saveAndFlush(person);
-    int databaseSizeBeforeUpdate = personRepository.findAll().size();
 
     // Update the person
     Person updatedPerson = personRepository.findOne(person.getId());
@@ -322,8 +317,8 @@ public class PersonResourceIntTest {
 
     // Validate the Person in the database
     List<Person> personList = personRepository.findAll();
-    assertThat(personList).hasSize(databaseSizeBeforeUpdate);
-    Person testPerson = personList.get(personList.size() - 1);
+    assertThat(personList).hasSize(1);
+    Person testPerson = personList.get(0);
     assertThat(testPerson.getIntrepidId()).isEqualTo(UPDATED_INTREPID_ID);
     assertThat(testPerson.getAddedDate()).isEqualTo(UPDATED_ADDED_DATE);
     assertThat(testPerson.getAmendedDate()).isEqualTo(UPDATED_AMENDED_DATE);
@@ -339,8 +334,6 @@ public class PersonResourceIntTest {
   @Test
   @Transactional
   public void updateNonExistingPerson() throws Exception {
-    int databaseSizeBeforeUpdate = personRepository.findAll().size();
-
     // Create the Person
     PersonDTO personDTO = personMapper.toDto(person);
 
@@ -355,7 +348,7 @@ public class PersonResourceIntTest {
 
     // Validate the Person in the database
     List<Person> personList = personRepository.findAll();
-    assertThat(personList).hasSize(databaseSizeBeforeUpdate);
+    assertThat(personList).hasSize(0);
   }
 
   @Test
@@ -551,7 +544,6 @@ public class PersonResourceIntTest {
   public void deletePerson() throws Exception {
     // Initialize the database
     personRepository.saveAndFlush(person);
-    int databaseSizeBeforeDelete = personRepository.findAll().size();
 
     // Get the person
     restPersonMockMvc.perform(delete("/api/people/{id}", person.getId())
@@ -560,7 +552,54 @@ public class PersonResourceIntTest {
 
     // Validate the database is empty
     List<Person> personList = personRepository.findAll();
-    assertThat(personList).hasSize(databaseSizeBeforeDelete - 1);
+    assertThat(personList).hasSize(0);
+  }
+
+  @Test
+  @Transactional
+  public void patchPersons() throws Exception {
+    // Initialize the database
+    personRepository.saveAndFlush(person);
+
+    // Update the person
+    Person updatedPerson = personRepository.findOne(person.getId());
+    updatedPerson
+        .intrepidId(UPDATED_INTREPID_ID)
+        .addedDate(UPDATED_ADDED_DATE)
+        .amendedDate(UPDATED_AMENDED_DATE)
+        .role(UPDATED_ROLE)
+        .status(UPDATED_STATUS)
+        .comments(UPDATED_COMMENTS)
+        .inactiveDate(UPDATED_INACTIVE_DATE)
+        .inactiveNotes(UPDATED_INACTIVE_NOTES)
+        .publicHealthNumber(UPDATED_PUBLIC_HEALTH_NUMBER)
+        .regulator(UPDATED_REGULATOR);
+
+    PersonDTO personDTO = personMapper.toDto(updatedPerson);
+
+    Person person2 = createEntity();
+    PersonDTO personDTO2 = personMapper.toDto(person2);
+    personDTO2.setId(null);
+
+    restPersonMockMvc.perform(patch("/api/people")
+        .contentType(TestUtil.APPLICATION_JSON_UTF8)
+        .content(TestUtil.convertObjectToJsonBytes(Lists.newArrayList(personDTO, personDTO2))))
+        .andExpect(status().isOk());
+
+    // Validate the Person in the database
+    List<Person> personList = personRepository.findAll();
+    assertThat(personList).hasSize(2);
+    Person testPerson = personList.get(0);
+    assertThat(testPerson.getIntrepidId()).isEqualTo(UPDATED_INTREPID_ID);
+    assertThat(testPerson.getAddedDate()).isEqualTo(UPDATED_ADDED_DATE);
+    assertThat(testPerson.getAmendedDate()).isEqualTo(UPDATED_AMENDED_DATE);
+    assertThat(testPerson.getRole()).isEqualTo(UPDATED_ROLE);
+    assertThat(testPerson.getStatus()).isEqualTo(UPDATED_STATUS);
+    assertThat(testPerson.getComments()).isEqualTo(UPDATED_COMMENTS);
+    assertThat(testPerson.getInactiveDate()).isEqualTo(UPDATED_INACTIVE_DATE);
+    assertThat(testPerson.getInactiveNotes()).isEqualTo(UPDATED_INACTIVE_NOTES);
+    assertThat(testPerson.getPublicHealthNumber()).isEqualTo(UPDATED_PUBLIC_HEALTH_NUMBER);
+    assertThat(testPerson.getRegulator()).isEqualTo(UPDATED_REGULATOR);
   }
 
   @Test
@@ -591,12 +630,5 @@ public class PersonResourceIntTest {
     assertThat(personDTO1).isNotEqualTo(personDTO2);
     personDTO1.setId(null);
     assertThat(personDTO1).isNotEqualTo(personDTO2);
-  }
-
-  @Test
-  @Transactional
-  public void testEntityFromId() {
-    assertThat(personMapper.fromId(42L).getId()).isEqualTo(42);
-    assertThat(personMapper.fromId(null)).isNull();
   }
 }

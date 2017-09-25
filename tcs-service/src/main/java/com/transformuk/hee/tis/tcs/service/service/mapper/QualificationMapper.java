@@ -118,15 +118,4 @@ public class QualificationMapper {
     }
     return result;
   }
-
-
-  public Qualification fromId(Long id) {
-    if (id == null) {
-      return null;
-    }
-    Qualification qualification = new Qualification();
-    qualification.setId(id);
-    return qualification;
-  }
-
 }

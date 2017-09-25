@@ -9,14 +9,4 @@ import org.mapstruct.Mapper;
  */
 @Mapper(componentModel = "spring")
 public interface ContactDetailsMapper extends EntityMapper<ContactDetailsDTO, ContactDetails> {
-
-
-  default ContactDetails fromId(Long id) {
-    if (id == null) {
-      return null;
-    }
-    ContactDetails contactDetails = new ContactDetails();
-    contactDetails.setId(id);
-    return contactDetails;
-  }
 }

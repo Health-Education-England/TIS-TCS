@@ -488,11 +488,4 @@ public class QualificationResourceIntTest {
     qualificationDTO1.setId(null);
     assertThat(qualificationDTO1).isNotEqualTo(qualificationDTO2);
   }
-
-  @Test
-  @Transactional
-  public void testEntityFromId() {
-    assertThat(qualificationMapper.fromId(42L).getId()).isEqualTo(42);
-    assertThat(qualificationMapper.fromId(null)).isNull();
-  }
 }

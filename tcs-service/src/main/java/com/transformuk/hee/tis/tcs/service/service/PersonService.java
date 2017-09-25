@@ -21,6 +21,14 @@ public interface PersonService {
   PersonDTO save(PersonDTO personDTO);
 
   /**
+   * Save a list of persons
+   *
+   * @param personDTOs the list of entities to save
+   * @return a list of persisted entities
+   */
+  List<PersonDTO> save(List<PersonDTO> personDTOs);
+
+  /**
    * Get all the people.
    *
    * @param pageable the pagination information

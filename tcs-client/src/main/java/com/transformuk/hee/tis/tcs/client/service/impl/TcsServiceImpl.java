@@ -6,6 +6,7 @@ import com.transformuk.hee.tis.tcs.api.dto.CurriculumDTO;
 import com.transformuk.hee.tis.tcs.api.dto.FundingComponentsDTO;
 import com.transformuk.hee.tis.tcs.api.dto.FundingDTO;
 import com.transformuk.hee.tis.tcs.api.dto.JsonPatchDTO;
+import com.transformuk.hee.tis.tcs.api.dto.PersonDTO;
 import com.transformuk.hee.tis.tcs.api.dto.PlacementDTO;
 import com.transformuk.hee.tis.tcs.api.dto.PlacementFunderDTO;
 import com.transformuk.hee.tis.tcs.api.dto.PostDTO;
@@ -64,6 +65,8 @@ public class TcsServiceImpl extends AbstractClientService {
     classToParamTypeRefMap.put(TariffRateDTO.class, new ParameterizedTypeReference<List<TariffRateDTO>>() {
     });
     classToParamTypeRefMap.put(TrainingNumberDTO.class, new ParameterizedTypeReference<List<TrainingNumberDTO>>() {
+    });
+    classToParamTypeRefMap.put(PersonDTO.class, new ParameterizedTypeReference<List<PersonDTO>>() {
     });
   }
 

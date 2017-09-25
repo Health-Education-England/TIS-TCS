@@ -349,11 +349,4 @@ public class GmcDetailsResourceIntTest {
     gmcDetailsDTO1.setId(null);
     assertThat(gmcDetailsDTO1).isNotEqualTo(gmcDetailsDTO2);
   }
-
-  @Test
-  @Transactional
-  public void testEntityFromId() {
-    assertThat(gmcDetailsMapper.fromId(42L).getId()).isEqualTo(42);
-    assertThat(gmcDetailsMapper.fromId(null)).isNull();
-  }
 }

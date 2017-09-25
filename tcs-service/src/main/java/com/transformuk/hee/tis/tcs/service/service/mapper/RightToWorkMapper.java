@@ -9,14 +9,4 @@ import org.mapstruct.Mapper;
  */
 @Mapper(componentModel = "spring", uses = {})
 public interface RightToWorkMapper extends EntityMapper<RightToWorkDTO, RightToWork> {
-
-
-  default RightToWork fromId(Long id) {
-    if (id == null) {
-      return null;
-    }
-    RightToWork rightToWork = new RightToWork();
-    rightToWork.setId(id);
-    return rightToWork;
-  }
 }
