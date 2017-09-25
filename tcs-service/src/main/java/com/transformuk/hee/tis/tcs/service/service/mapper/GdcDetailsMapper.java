@@ -9,14 +9,4 @@ import org.mapstruct.Mapper;
  */
 @Mapper(componentModel = "spring")
 public interface GdcDetailsMapper extends EntityMapper<GdcDetailsDTO, GdcDetails> {
-
-
-  default GdcDetails fromId(Long id) {
-    if (id == null) {
-      return null;
-    }
-    GdcDetails gdcDetails = new GdcDetails();
-    gdcDetails.setId(id);
-    return gdcDetails;
-  }
 }

@@ -415,11 +415,4 @@ public class RightToWorkResourceIntTest {
     rightToWorkDTO1.setId(null);
     assertThat(rightToWorkDTO1).isNotEqualTo(rightToWorkDTO2);
   }
-
-  @Test
-  @Transactional
-  public void testEntityFromId() {
-    assertThat(rightToWorkMapper.fromId(42L).getId()).isEqualTo(42);
-    assertThat(rightToWorkMapper.fromId(null)).isNull();
-  }
 }

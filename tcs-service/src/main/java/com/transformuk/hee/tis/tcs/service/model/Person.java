@@ -7,7 +7,6 @@ import javax.persistence.CascadeType;
 import javax.persistence.Entity;
 import javax.persistence.EnumType;
 import javax.persistence.Enumerated;
-import javax.persistence.FetchType;
 import javax.persistence.GeneratedValue;
 import javax.persistence.GenerationType;
 import javax.persistence.Id;
@@ -53,26 +52,26 @@ public class Person implements Serializable {
 
   private String regulator;
 
-  @OneToOne(fetch = FetchType.EAGER)
+  @OneToOne
   @JoinColumn(unique = true, name = "id")
   private ContactDetails contactDetails;
 
-  @OneToOne(fetch = FetchType.EAGER)
+  @OneToOne
   @JoinColumn(unique = true, name = "id")
   private PersonalDetails personalDetails;
 
-  @OneToOne(fetch = FetchType.EAGER)
+  @OneToOne
   @JoinColumn(unique = true, name = "id")
   private GmcDetails gmcDetails;
 
-  @OneToOne(fetch = FetchType.EAGER)
+  @OneToOne
   @JoinColumn(unique = true, name = "id")
   private GdcDetails gdcDetails;
 
   @OneToMany(mappedBy = "person", cascade = CascadeType.ALL, orphanRemoval = true)
   private Set<Qualification> qualifications = new HashSet<>();
 
-  @OneToOne(fetch = FetchType.EAGER)
+  @OneToOne
   @JoinColumn(unique = true, name = "id")
   private RightToWork rightToWork;
 

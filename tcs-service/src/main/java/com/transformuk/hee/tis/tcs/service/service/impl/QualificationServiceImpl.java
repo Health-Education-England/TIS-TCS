@@ -12,6 +12,8 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.util.List;
+
 
 /**
  * Service Implementation for managing Qualification.
@@ -43,6 +45,20 @@ public class QualificationServiceImpl implements QualificationService {
     Qualification qualification = qualificationMapper.toEntity(qualificationDTO);
     qualification = qualificationRepository.save(qualification);
     return qualificationMapper.toDto(qualification);
+  }
+
+  /**
+   * Save a list of qualifications.
+   *
+   * @param qualificationDTOs the entities to save
+   * @return the persisted entities
+   */
+  @Override
+  public List<QualificationDTO> save(List<QualificationDTO> qualificationDTOs) {
+    log.debug("Request to save Qualifications : {}", qualificationDTOs);
+    List<Qualification> qualifications = qualificationMapper.toEntities(qualificationDTOs);
+    qualifications = qualificationRepository.save(qualifications);
+    return qualificationMapper.toDTOs(qualifications);
   }
 
   /**
