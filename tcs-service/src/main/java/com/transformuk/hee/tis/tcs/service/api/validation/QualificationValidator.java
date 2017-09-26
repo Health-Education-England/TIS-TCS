@@ -7,8 +7,6 @@ import com.transformuk.hee.tis.tcs.api.dto.QualificationDTO;
 import com.transformuk.hee.tis.tcs.service.model.Qualification;
 import com.transformuk.hee.tis.tcs.service.repository.PersonRepository;
 import org.apache.commons.lang3.StringUtils;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 import org.springframework.util.CollectionUtils;
@@ -16,8 +14,6 @@ import org.springframework.validation.BeanPropertyBindingResult;
 import org.springframework.validation.FieldError;
 import org.springframework.web.bind.MethodArgumentNotValidException;
 
-import java.lang.reflect.Method;
-import java.lang.reflect.Modifier;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
@@ -29,7 +25,6 @@ import java.util.Map;
 @Component
 public class QualificationValidator {
 
-  private final Logger log = LoggerFactory.getLogger(QualificationValidator.class);
   private static final String QUALIFICATION_DTO_NAME = "QualificationDTO";
 
   private PersonRepository personRepository;
@@ -51,13 +46,9 @@ public class QualificationValidator {
   public void validate(QualificationDTO qualificationDTO) throws MethodArgumentNotValidException {
 
     List<FieldError> fieldErrors = new ArrayList<>();
-    log.debug("Before checkPerson ");
     fieldErrors.addAll(checkPerson(qualificationDTO));
-    log.debug("After checkPerson ");
     fieldErrors.addAll(checkMedicalSchool(qualificationDTO));
-    log.debug("After checkMedicalSchool ");
     fieldErrors.addAll(checkCountryOfQualification(qualificationDTO));
-    log.debug("After checkCountryOfQualification ");
     if (!fieldErrors.isEmpty()) {
       BeanPropertyBindingResult bindingResult = new BeanPropertyBindingResult(qualificationDTO, QUALIFICATION_DTO_NAME);
       fieldErrors.forEach(bindingResult::addError);
@@ -82,21 +73,11 @@ public class QualificationValidator {
   private List<FieldError> checkMedicalSchool(QualificationDTO qualificationDTO) {
     List<FieldError> fieldErrors = new ArrayList<>();
     // check the MedicalSchool
-    log.debug("In medical school check");
     if (StringUtils.isNotEmpty(qualificationDTO.getMedicalSchool())) {
       List<String> medicalSchools = Lists.newArrayList(qualificationDTO.getMedicalSchool());
 
       if (!CollectionUtils.isEmpty(medicalSchools)) {
-        log.debug("Before calling reference medical school");
-        Class c = referenceService.getClass();
-        for (Method method : c.getDeclaredMethods()) {
-          int modifiers = method.getModifiers();
-          if (Modifier.isPublic(modifiers)) {
-            log.debug("Method name of reference service " + method.getName());
-          }
-        }
         Map<String, Boolean> medicalSchoolExistsMap = referenceService.medicalSchoolsExists(medicalSchools);
-        log.debug("After calling reference medical school");
         medicalSchoolExistsMap.forEach((k, v) -> {
           if (!v) {
             fieldErrors.add(new FieldError(QUALIFICATION_DTO_NAME, "medicalSchool",
