@@ -67,7 +67,9 @@ public class QualificationResource {
   public ResponseEntity<QualificationDTO> createQualification(@RequestBody @Validated(Create.class) QualificationDTO qualificationDTO)
       throws URISyntaxException, MethodArgumentNotValidException {
     log.debug("REST request to save Qualification : {}", qualificationDTO);
+    log.debug("qualificationValidator == ", qualificationValidator);
     qualificationValidator.validate(qualificationDTO);
+    log.debug("After validation");
     QualificationDTO result = qualificationService.save(qualificationDTO);
     return ResponseEntity.created(new URI("/api/qualifications/" + result.getId()))
         .headers(HeaderUtil.createEntityCreationAlert(ENTITY_NAME, result.getId().toString()))

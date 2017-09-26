@@ -7,6 +7,8 @@ import com.transformuk.hee.tis.tcs.api.dto.QualificationDTO;
 import com.transformuk.hee.tis.tcs.service.model.Qualification;
 import com.transformuk.hee.tis.tcs.service.repository.PersonRepository;
 import org.apache.commons.lang3.StringUtils;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 import org.springframework.util.CollectionUtils;
@@ -25,6 +27,7 @@ import java.util.Map;
 @Component
 public class QualificationValidator {
 
+  private final Logger log = LoggerFactory.getLogger(QualificationValidator.class);
   private static final String QUALIFICATION_DTO_NAME = "QualificationDTO";
 
   private PersonRepository personRepository;
@@ -46,9 +49,13 @@ public class QualificationValidator {
   public void validate(QualificationDTO qualificationDTO) throws MethodArgumentNotValidException {
 
     List<FieldError> fieldErrors = new ArrayList<>();
+    log.debug("Before checkPerson ");
     fieldErrors.addAll(checkPerson(qualificationDTO));
+    log.debug("After checkPerson ");
     fieldErrors.addAll(checkMedicalSchool(qualificationDTO));
+    log.debug("After checkMedicalSchool ");
     fieldErrors.addAll(checkCountryOfQualification(qualificationDTO));
+    log.debug("After checkCountryOfQualification ");
     if (!fieldErrors.isEmpty()) {
       BeanPropertyBindingResult bindingResult = new BeanPropertyBindingResult(qualificationDTO, QUALIFICATION_DTO_NAME);
       fieldErrors.forEach(bindingResult::addError);
