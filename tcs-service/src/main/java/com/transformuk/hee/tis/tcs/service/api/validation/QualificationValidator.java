@@ -16,6 +16,8 @@ import org.springframework.validation.BeanPropertyBindingResult;
 import org.springframework.validation.FieldError;
 import org.springframework.web.bind.MethodArgumentNotValidException;
 
+import java.lang.reflect.Method;
+import java.lang.reflect.Modifier;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
@@ -80,11 +82,21 @@ public class QualificationValidator {
   private List<FieldError> checkMedicalSchool(QualificationDTO qualificationDTO) {
     List<FieldError> fieldErrors = new ArrayList<>();
     // check the MedicalSchool
+    log.debug("In medical school check");
     if (StringUtils.isNotEmpty(qualificationDTO.getMedicalSchool())) {
       List<String> medicalSchools = Lists.newArrayList(qualificationDTO.getMedicalSchool());
 
       if (!CollectionUtils.isEmpty(medicalSchools)) {
+        log.debug("Before calling reference medical school");
+        Class c = referenceService.getClass();
+        for (Method method : c.getDeclaredMethods()) {
+          int modifiers = method.getModifiers();
+          if (Modifier.isPublic(modifiers)) {
+            log.debug("Method name of reference service " + method.getName());
+          }
+        }
         Map<String, Boolean> medicalSchoolExistsMap = referenceService.medicalSchoolsExists(medicalSchools);
+        log.debug("After calling reference medical school");
         medicalSchoolExistsMap.forEach((k, v) -> {
           if (!v) {
             fieldErrors.add(new FieldError(QUALIFICATION_DTO_NAME, "medicalSchool",
