@@ -7,6 +7,6 @@ import org.mapstruct.Mapper;
 /**
  * Mapper for the entity Person and its DTO PersonDTO.
  */
-@Mapper(componentModel = "spring", uses = {ContactDetailsMapper.class, PersonalDetailsMapper.class, GmcDetailsMapper.class, GdcDetailsMapper.class, QualificationMapper.class, RightToWorkMapper.class,})
+@Mapper(componentModel = "spring", uses = {ContactDetailsMapper.class, PersonalDetailsMapper.class, GmcDetailsMapper.class, GdcDetailsMapper.class, QualificationMapper.class, RightToWorkMapper.class,ProgrammeMembershipMapper.class})
 public interface PersonMapper extends EntityMapper<PersonDTO, Person> {
 }

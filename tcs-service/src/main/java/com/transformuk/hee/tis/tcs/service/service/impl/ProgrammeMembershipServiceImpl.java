@@ -41,9 +41,9 @@ public class ProgrammeMembershipServiceImpl implements ProgrammeMembershipServic
   @Override
   public ProgrammeMembershipDTO save(ProgrammeMembershipDTO programmeMembershipDTO) {
     log.debug("Request to save ProgrammeMembership : {}", programmeMembershipDTO);
-    ProgrammeMembership programmeMembership = programmeMembershipMapper.programmeMembershipDTOToProgrammeMembership(programmeMembershipDTO);
+    ProgrammeMembership programmeMembership = programmeMembershipMapper.toEntity(programmeMembershipDTO);
     programmeMembership = programmeMembershipRepository.save(programmeMembership);
-    ProgrammeMembershipDTO result = programmeMembershipMapper.programmeMembershipToProgrammeMembershipDTO(programmeMembership);
+    ProgrammeMembershipDTO result = programmeMembershipMapper.toDto(programmeMembership);
     return result;
   }
 
@@ -73,7 +73,7 @@ public class ProgrammeMembershipServiceImpl implements ProgrammeMembershipServic
   public Page<ProgrammeMembershipDTO> findAll(Pageable pageable) {
     log.debug("Request to get all ProgrammeMemberships");
     Page<ProgrammeMembership> result = programmeMembershipRepository.findAll(pageable);
-    return result.map(programmeMembership -> programmeMembershipMapper.programmeMembershipToProgrammeMembershipDTO(programmeMembership));
+    return result.map(programmeMembership -> programmeMembershipMapper.toDto(programmeMembership));
   }
 
   /**
@@ -87,7 +87,7 @@ public class ProgrammeMembershipServiceImpl implements ProgrammeMembershipServic
   public ProgrammeMembershipDTO findOne(Long id) {
     log.debug("Request to get ProgrammeMembership : {}", id);
     ProgrammeMembership programmeMembership = programmeMembershipRepository.findOne(id);
-    ProgrammeMembershipDTO programmeMembershipDTO = programmeMembershipMapper.programmeMembershipToProgrammeMembershipDTO(programmeMembership);
+    ProgrammeMembershipDTO programmeMembershipDTO = programmeMembershipMapper.toDto(programmeMembership);
     return programmeMembershipDTO;
   }
 

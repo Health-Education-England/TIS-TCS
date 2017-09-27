@@ -71,6 +71,9 @@ public class Person implements Serializable {
   @OneToMany(mappedBy = "person", cascade = CascadeType.ALL, orphanRemoval = true)
   private Set<Qualification> qualifications = new HashSet<>();
 
+  @OneToMany(mappedBy = "person", cascade = CascadeType.ALL, orphanRemoval = true)
+  private Set<ProgrammeMembership> programmeMemberships = new HashSet<>();
+
   @OneToOne
   @JoinColumn(unique = true, name = "id")
   private RightToWork rightToWork;
@@ -269,6 +272,21 @@ public class Person implements Serializable {
     this.qualifications = qualifications;
     return this;
   }
+
+
+  public Set<ProgrammeMembership> getProgrammeMemberships() {
+    return programmeMemberships;
+  }
+
+  public void setProgrammeMemberships(Set<ProgrammeMembership> programmeMemberships) {
+    this.programmeMemberships = programmeMemberships;
+  }
+
+  public Person programmeMemberships(Set<ProgrammeMembership> programmeMemberships) {
+    this.programmeMemberships = programmeMemberships;
+    return this;
+  }
+
 
   public RightToWork getRightToWork() {
     return rightToWork;
