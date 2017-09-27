@@ -167,7 +167,7 @@ public class ProgrammeMembershipResource {
    */
   @PostMapping("/bulk-programme-memberships")
   @Timed
-  @PreAuthorize("hasPermission('tis:profile::user:consolidated_etl', 'Create')")
+  @PreAuthorize("hasPermission('tis:people::person:', 'Create')")
   public ResponseEntity<List<ProgrammeMembershipDTO>> bulkCreateProgrammeMemberships(
       @Valid @RequestBody List<ProgrammeMembershipDTO> programmeMembershipDTOS) throws URISyntaxException {
     log.debug("REST request to bulk save Programme Memebership : {}", programmeMembershipDTOS);
@@ -200,7 +200,7 @@ public class ProgrammeMembershipResource {
    */
   @PutMapping("/bulk-programme-memberships")
   @Timed
-  @PreAuthorize("hasPermission('tis:profile::user:consolidated_etl', 'Update')")
+  @PreAuthorize("hasPermission('tis:people::person:', 'Update')")
   public ResponseEntity<List<ProgrammeMembershipDTO>> bulkUpdateProgrammeMemberships(
       @Valid @RequestBody List<ProgrammeMembershipDTO> programmeMembershipDTOS) throws URISyntaxException {
     log.debug("REST request to bulk update Programme Memberships : {}", programmeMembershipDTOS);
