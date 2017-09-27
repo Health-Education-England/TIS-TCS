@@ -66,7 +66,7 @@ public class ProgrammeMembershipResource {
    */
   @PostMapping("/programme-memberships")
   @Timed
-  @PreAuthorize("hasAuthority('tcs:add:modify:entities')")
+  @PreAuthorize("hasPermission('tis:people::person:', 'Create')")
   public ResponseEntity<ProgrammeMembershipDTO> createProgrammeMembership(
       @RequestBody @Validated(Create.class) ProgrammeMembershipDTO programmeMembershipDTO)
       throws URISyntaxException, MethodArgumentNotValidException {
@@ -94,7 +94,7 @@ public class ProgrammeMembershipResource {
    */
   @PutMapping("/programme-memberships")
   @Timed
-  @PreAuthorize("hasAuthority('tcs:add:modify:entities')")
+  @PreAuthorize("hasPermission('tis:people::person:', 'Update')")
   public ResponseEntity<ProgrammeMembershipDTO> updateProgrammeMembership(
       @RequestBody @Validated(Update.class) ProgrammeMembershipDTO programmeMembershipDTO)
       throws URISyntaxException, MethodArgumentNotValidException {
@@ -118,7 +118,7 @@ public class ProgrammeMembershipResource {
    */
   @GetMapping("/programme-memberships")
   @Timed
-  @PreAuthorize("hasAuthority('tcs:view:entities')")
+  @PreAuthorize("hasPermission('tis:people::person:', 'View')")
   public ResponseEntity<List<ProgrammeMembershipDTO>> getAllProgrammeMemberships(@ApiParam Pageable pageable) {
     log.debug("REST request to get a page of ProgrammeMemberships");
     Page<ProgrammeMembershipDTO> page = programmeMembershipService.findAll(pageable);
@@ -134,7 +134,7 @@ public class ProgrammeMembershipResource {
    */
   @GetMapping("/programme-memberships/{id}")
   @Timed
-  @PreAuthorize("hasAuthority('tcs:view:entities')")
+  @PreAuthorize("hasPermission('tis:people::person:', 'View')")
   public ResponseEntity<ProgrammeMembershipDTO> getProgrammeMembership(@PathVariable Long id) {
     log.debug("REST request to get ProgrammeMembership : {}", id);
     ProgrammeMembershipDTO programmeMembershipDTO = programmeMembershipService.findOne(id);
@@ -167,7 +167,7 @@ public class ProgrammeMembershipResource {
    */
   @PostMapping("/bulk-programme-memberships")
   @Timed
-  @PreAuthorize("hasAuthority('tcs:add:modify:entities')")
+  @PreAuthorize("hasPermission('tis:profile::user:consolidated_etl', 'Create')")
   public ResponseEntity<List<ProgrammeMembershipDTO>> bulkCreateProgrammeMemberships(
       @Valid @RequestBody List<ProgrammeMembershipDTO> programmeMembershipDTOS) throws URISyntaxException {
     log.debug("REST request to bulk save Programme Memebership : {}", programmeMembershipDTOS);
@@ -200,7 +200,7 @@ public class ProgrammeMembershipResource {
    */
   @PutMapping("/bulk-programme-memberships")
   @Timed
-  @PreAuthorize("hasAuthority('tcs:add:modify:entities')")
+  @PreAuthorize("hasPermission('tis:profile::user:consolidated_etl', 'Update')")
   public ResponseEntity<List<ProgrammeMembershipDTO>> bulkUpdateProgrammeMemberships(
       @Valid @RequestBody List<ProgrammeMembershipDTO> programmeMembershipDTOS) throws URISyntaxException {
     log.debug("REST request to bulk update Programme Memberships : {}", programmeMembershipDTOS);
