@@ -127,16 +127,13 @@ public class ProgrammeMembershipValidator {
    * @param curriculumId
    */
   private void checkProgrammeCurriculumAssociation(List<FieldError> fieldErrors, String programmeId, String curriculumId) {
-    Programme programme = programmeRepository.findOne(Long.valueOf(programmeId));
-    if (programme != null && programme.getCurricula() != null) {
-      Set<Curriculum> curricula = programme.getCurricula();
-      Optional<Curriculum> optional = curricula.stream().
-          filter(c -> c.getId().equals(Long.valueOf(curriculumId))).findFirst();
-      if (!optional.isPresent()) {
+
+    boolean isExists = programmeRepository.programmeCurriculumAssociationExists(Long.valueOf(programmeId),
+        Long.valueOf(curriculumId));
+    if (!isExists) {
         fieldErrors.add(new FieldError(PROGRAMME_MEMBERSHIP_DTO_NAME, "curriculumId",
             String.format("Curriculum with id %s does associated with programme", curriculumId)));
       }
-    }
   }
 
   /**
