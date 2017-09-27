@@ -2,8 +2,11 @@ package com.transformuk.hee.tis.tcs.service.api;
 
 import com.codahale.metrics.annotation.Timed;
 import com.transformuk.hee.tis.tcs.api.dto.ProgrammeMembershipDTO;
+import com.transformuk.hee.tis.tcs.api.dto.validation.Create;
+import com.transformuk.hee.tis.tcs.api.dto.validation.Update;
 import com.transformuk.hee.tis.tcs.service.api.util.HeaderUtil;
 import com.transformuk.hee.tis.tcs.service.api.util.PaginationUtil;
+import com.transformuk.hee.tis.tcs.service.api.validation.ProgrammeMembershipValidator;
 import com.transformuk.hee.tis.tcs.service.service.ProgrammeMembershipService;
 import io.github.jhipster.web.util.ResponseUtil;
 import io.jsonwebtoken.lang.Collections;
@@ -17,6 +20,8 @@ import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
+import org.springframework.validation.annotation.Validated;
+import org.springframework.web.bind.MethodArgumentNotValidException;
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
@@ -43,25 +48,34 @@ public class ProgrammeMembershipResource {
   private static final String ENTITY_NAME = "programmeMembership";
   private final Logger log = LoggerFactory.getLogger(ProgrammeMembershipResource.class);
   private final ProgrammeMembershipService programmeMembershipService;
+  private final ProgrammeMembershipValidator programmeMembershipValidator;
 
-  public ProgrammeMembershipResource(ProgrammeMembershipService programmeMembershipService) {
+  public ProgrammeMembershipResource(ProgrammeMembershipService programmeMembershipService,
+                                     ProgrammeMembershipValidator programmeMembershipValidator) {
     this.programmeMembershipService = programmeMembershipService;
+    this.programmeMembershipValidator = programmeMembershipValidator;
   }
 
   /**
    * POST  /programme-memberships : Create a new programmeMembership.
    *
    * @param programmeMembershipDTO the programmeMembershipDTO to create
-   * @return the ResponseEntity with status 201 (Created) and with body the new programmeMembershipDTO, or with status 400 (Bad Request) if the programmeMembership has already an ID
+   * @return the ResponseEntity with status 201 (Created) and with body the new programmeMembershipDTO,
+   * or with status 400 (Bad Request) if the programmeMembership has already an ID
    * @throws URISyntaxException if the Location URI syntax is incorrect
    */
   @PostMapping("/programme-memberships")
   @Timed
-  @PreAuthorize("hasAuthority('tcs:add:modify:entities')")
-  public ResponseEntity<ProgrammeMembershipDTO> createProgrammeMembership(@RequestBody ProgrammeMembershipDTO programmeMembershipDTO) throws URISyntaxException {
+  @PreAuthorize("hasPermission('tis:people::person:', 'Create')")
+  public ResponseEntity<ProgrammeMembershipDTO> createProgrammeMembership(
+      @RequestBody @Validated(Create.class) ProgrammeMembershipDTO programmeMembershipDTO)
+      throws URISyntaxException, MethodArgumentNotValidException {
     log.debug("REST request to save ProgrammeMembership : {}", programmeMembershipDTO);
+    programmeMembershipValidator.validate(programmeMembershipDTO);
     if (programmeMembershipDTO.getId() != null) {
-      return ResponseEntity.badRequest().headers(HeaderUtil.createFailureAlert(ENTITY_NAME, "idexists", "A new programmeMembership cannot already have an ID")).body(null);
+      return ResponseEntity.badRequest().headers(HeaderUtil.
+          createFailureAlert(ENTITY_NAME, "idexists",
+              "A new programmeMembership cannot already have an ID")).body(null);
     }
     ProgrammeMembershipDTO result = programmeMembershipService.save(programmeMembershipDTO);
     return ResponseEntity.created(new URI("/api/programme-memberships/" + result.getId()))
@@ -80,9 +94,12 @@ public class ProgrammeMembershipResource {
    */
   @PutMapping("/programme-memberships")
   @Timed
-  @PreAuthorize("hasAuthority('tcs:add:modify:entities')")
-  public ResponseEntity<ProgrammeMembershipDTO> updateProgrammeMembership(@RequestBody ProgrammeMembershipDTO programmeMembershipDTO) throws URISyntaxException {
+  @PreAuthorize("hasPermission('tis:people::person:', 'Update')")
+  public ResponseEntity<ProgrammeMembershipDTO> updateProgrammeMembership(
+      @RequestBody @Validated(Update.class) ProgrammeMembershipDTO programmeMembershipDTO)
+      throws URISyntaxException, MethodArgumentNotValidException {
     log.debug("REST request to update ProgrammeMembership : {}", programmeMembershipDTO);
+    programmeMembershipValidator.validate(programmeMembershipDTO);
     if (programmeMembershipDTO.getId() == null) {
       return createProgrammeMembership(programmeMembershipDTO);
     }
@@ -101,7 +118,7 @@ public class ProgrammeMembershipResource {
    */
   @GetMapping("/programme-memberships")
   @Timed
-  @PreAuthorize("hasAuthority('tcs:view:entities')")
+  @PreAuthorize("hasPermission('tis:people::person:', 'View')")
   public ResponseEntity<List<ProgrammeMembershipDTO>> getAllProgrammeMemberships(@ApiParam Pageable pageable) {
     log.debug("REST request to get a page of ProgrammeMemberships");
     Page<ProgrammeMembershipDTO> page = programmeMembershipService.findAll(pageable);
@@ -117,7 +134,7 @@ public class ProgrammeMembershipResource {
    */
   @GetMapping("/programme-memberships/{id}")
   @Timed
-  @PreAuthorize("hasAuthority('tcs:view:entities')")
+  @PreAuthorize("hasPermission('tis:people::person:', 'View')")
   public ResponseEntity<ProgrammeMembershipDTO> getProgrammeMembership(@PathVariable Long id) {
     log.debug("REST request to get ProgrammeMembership : {}", id);
     ProgrammeMembershipDTO programmeMembershipDTO = programmeMembershipService.findOne(id);
@@ -144,13 +161,15 @@ public class ProgrammeMembershipResource {
    * POST  /bulk-programme-memberships : Bulk create a Programme Membership.
    *
    * @param programmeMembershipDTOS List of the programmeMembershipDTOS to create
-   * @return the ResponseEntity with status 200 (Created) and with body the new programmeMembershipDTOS, or with status 400 (Bad Request) if the Programme Membership has already an ID
+   * @return the ResponseEntity with status 200 (Created) and with body the new programmeMembershipDTOS,
+   * or with status 400 (Bad Request) if the Programme Membership has already an ID
    * @throws URISyntaxException if the Location URI syntax is incorrect
    */
   @PostMapping("/bulk-programme-memberships")
   @Timed
-  @PreAuthorize("hasAuthority('tcs:add:modify:entities')")
-  public ResponseEntity<List<ProgrammeMembershipDTO>> bulkCreateProgrammeMemberships(@Valid @RequestBody List<ProgrammeMembershipDTO> programmeMembershipDTOS) throws URISyntaxException {
+  @PreAuthorize("hasPermission('tis:people::person:', 'Create')")
+  public ResponseEntity<List<ProgrammeMembershipDTO>> bulkCreateProgrammeMemberships(
+      @Valid @RequestBody List<ProgrammeMembershipDTO> programmeMembershipDTOS) throws URISyntaxException {
     log.debug("REST request to bulk save Programme Memebership : {}", programmeMembershipDTOS);
     if (!Collections.isEmpty(programmeMembershipDTOS)) {
       List<Long> entityIds = programmeMembershipDTOS.stream()
@@ -158,7 +177,9 @@ public class ProgrammeMembershipResource {
           .map(p -> p.getId())
           .collect(Collectors.toList());
       if (!Collections.isEmpty(entityIds)) {
-        return ResponseEntity.badRequest().headers(HeaderUtil.createFailureAlert(StringUtils.join(entityIds, ","), "ids.exist", "A new Programme Membership cannot already have an ID")).body(null);
+        return ResponseEntity.badRequest().headers(HeaderUtil.
+            createFailureAlert(StringUtils.join(entityIds, ","), "ids.exist",
+                "A new Programme Membership cannot already have an ID")).body(null);
       }
     }
     List<ProgrammeMembershipDTO> result = programmeMembershipService.save(programmeMembershipDTOS);
@@ -179,17 +200,20 @@ public class ProgrammeMembershipResource {
    */
   @PutMapping("/bulk-programme-memberships")
   @Timed
-  @PreAuthorize("hasAuthority('tcs:add:modify:entities')")
-  public ResponseEntity<List<ProgrammeMembershipDTO>> bulkUpdateProgrammeMemberships(@Valid @RequestBody List<ProgrammeMembershipDTO> programmeMembershipDTOS) throws URISyntaxException {
+  @PreAuthorize("hasPermission('tis:people::person:', 'Update')")
+  public ResponseEntity<List<ProgrammeMembershipDTO>> bulkUpdateProgrammeMemberships(
+      @Valid @RequestBody List<ProgrammeMembershipDTO> programmeMembershipDTOS) throws URISyntaxException {
     log.debug("REST request to bulk update Programme Memberships : {}", programmeMembershipDTOS);
     if (Collections.isEmpty(programmeMembershipDTOS)) {
       return ResponseEntity.badRequest().headers(HeaderUtil.createFailureAlert(ENTITY_NAME, "request.body.empty",
           "The request body for this end point cannot be empty")).body(null);
     } else if (!Collections.isEmpty(programmeMembershipDTOS)) {
-      List<ProgrammeMembershipDTO> entitiesWithNoId = programmeMembershipDTOS.stream().filter(p -> p.getId() == null).collect(Collectors.toList());
+      List<ProgrammeMembershipDTO> entitiesWithNoId = programmeMembershipDTOS.stream().filter(p -> p.getId() == null).
+          collect(Collectors.toList());
       if (!Collections.isEmpty(entitiesWithNoId)) {
         return ResponseEntity.badRequest().headers(HeaderUtil.createFailureAlert(StringUtils.join(entitiesWithNoId, ","),
-            "bulk.update.failed.noId", "Some DTOs you've provided have no Id, cannot update entities that dont exist")).body(entitiesWithNoId);
+            "bulk.update.failed.noId",
+            "Some DTOs you've provided have no Id, cannot update entities that dont exist")).body(entitiesWithNoId);
       }
     }
 

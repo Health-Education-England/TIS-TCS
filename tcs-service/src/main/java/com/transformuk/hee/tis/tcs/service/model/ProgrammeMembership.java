@@ -8,6 +8,8 @@ import javax.persistence.Enumerated;
 import javax.persistence.GeneratedValue;
 import javax.persistence.GenerationType;
 import javax.persistence.Id;
+import javax.persistence.JoinColumn;
+import javax.persistence.ManyToOne;
 import java.io.Serializable;
 import java.time.LocalDate;
 import java.util.Objects;
@@ -23,6 +25,12 @@ public class ProgrammeMembership implements Serializable {
   @Id
   @GeneratedValue(strategy = GenerationType.IDENTITY)
   private Long id;
+
+  private String intrepidId;
+
+  @ManyToOne
+  @JoinColumn(name = "personId")
+  private Person person;
 
   @Enumerated(EnumType.STRING)
   private ProgrammeMembershipType programmeMembershipType;
@@ -55,6 +63,19 @@ public class ProgrammeMembership implements Serializable {
 
   public void setId(Long id) {
     this.id = id;
+  }
+
+  public String getIntrepidId() {
+    return intrepidId;
+  }
+
+  public void setIntrepidId(String intrepidId) {
+    this.intrepidId = intrepidId;
+  }
+
+  public ProgrammeMembership intrepidId(String intrepidId) {
+    this.intrepidId = intrepidId;
+    return this;
   }
 
   public ProgrammeMembershipType getProgrammeMembershipType() {
@@ -198,6 +219,14 @@ public class ProgrammeMembership implements Serializable {
     this.trainingNumberId = trainingNumberId;
   }
 
+  public Person getPerson() {
+    return person;
+  }
+
+  public void setPerson(Person person) {
+    this.person = person;
+  }
+
   @Override
   public boolean equals(Object o) {
     if (this == o) {
@@ -222,6 +251,7 @@ public class ProgrammeMembership implements Serializable {
   public String toString() {
     return "ProgrammeMembership{" +
         "id=" + id +
+        ", intrepidId='" + intrepidId + "'" +
         ", programmeMembershipType='" + programmeMembershipType + "'" +
         ", rotation='" + rotation + "'" +
         ", curriculumStartDate='" + curriculumStartDate + "'" +

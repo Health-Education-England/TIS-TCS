@@ -54,6 +54,8 @@ public class PersonDTO implements Serializable {
 
   private Set<QualificationDTO> qualifications = new HashSet<>();
 
+  private Set<ProgrammeMembershipDTO> programmeMemberships = new HashSet<>();
+
   private RightToWorkDTO rightToWork;
 
   public Long getId() {
@@ -192,6 +194,14 @@ public class PersonDTO implements Serializable {
     this.regulator = regulator;
   }
 
+  public Set<ProgrammeMembershipDTO> getProgrammeMemberships() {
+    return programmeMemberships;
+  }
+
+  public void setProgrammeMemberships(Set<ProgrammeMembershipDTO> programmeMemberships) {
+    this.programmeMemberships = programmeMemberships;
+  }
+
   @Override
   public boolean equals(Object o) {
     if (this == o) return true;
@@ -222,6 +232,8 @@ public class PersonDTO implements Serializable {
     if (gdcDetails != null ? !gdcDetails.equals(personDTO.gdcDetails) : personDTO.gdcDetails != null) return false;
     if (qualifications != null ? !qualifications.equals(personDTO.qualifications) : personDTO.qualifications != null)
       return false;
+    if (programmeMemberships != null ? !programmeMemberships.equals(personDTO.programmeMemberships) : personDTO.programmeMemberships != null)
+      return false;
     return rightToWork != null ? rightToWork.equals(personDTO.rightToWork) : personDTO.rightToWork == null;
   }
 
@@ -243,6 +255,7 @@ public class PersonDTO implements Serializable {
     result = 31 * result + (gmcDetails != null ? gmcDetails.hashCode() : 0);
     result = 31 * result + (gdcDetails != null ? gdcDetails.hashCode() : 0);
     result = 31 * result + (qualifications != null ? qualifications.hashCode() : 0);
+    result = 31 * result + (programmeMemberships != null ? programmeMemberships.hashCode() : 0);
     result = 31 * result + (rightToWork != null ? rightToWork.hashCode() : 0);
     return result;
   }
@@ -266,6 +279,7 @@ public class PersonDTO implements Serializable {
         ", gmcDetails=" + gmcDetails +
         ", gdcDetails=" + gdcDetails +
         ", qualifications=" + qualifications +
+        ", programmeMemberships=" + programmeMemberships +
         ", rightToWork=" + rightToWork +
         '}';
   }
