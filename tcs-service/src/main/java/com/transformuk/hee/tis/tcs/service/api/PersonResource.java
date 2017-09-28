@@ -176,7 +176,7 @@ public class PersonResource {
    * POST  /people : Bulk patch people.
    *
    * @param personDTOs the personDTOs to create/update
-   * @return the ResponseEntity with status 200 (Created) and with body the new personDTOs, or with status 400 (Bad Request) if the Persons has an ID already
+   * @return the ResponseEntity with status 200 and with body the new personDTOs
    * @throws URISyntaxException if the Location URI syntax is incorrect
    */
   @PatchMapping("/people")
@@ -187,7 +187,7 @@ public class PersonResource {
     List<PersonDTO> result = personService.save(personDTOs);
     List<Long> ids = result.stream().map(PersonDTO::getId).collect(Collectors.toList());
     return ResponseEntity.ok()
-        .headers(HeaderUtil.createEntityCreationAlert(ENTITY_NAME, StringUtils.join(ids, ",")))
+        .headers(HeaderUtil.createEntityUpdateAlert(ENTITY_NAME, StringUtils.join(ids, ",")))
         .body(result);
   }
 }
