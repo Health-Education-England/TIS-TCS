@@ -51,11 +51,11 @@ public class ProgrammeMembership implements Serializable {
 
   private String leavingDestination;
 
-  private String programmeId;
+  private Long programmeId;
 
-  private String curriculumId;
+  private Long curriculumId;
 
-  private String trainingNumberId;
+  private Long trainingNumberId;
 
   public Long getId() {
     return id;
@@ -195,27 +195,27 @@ public class ProgrammeMembership implements Serializable {
     return this;
   }
 
-  public String getProgrammeId() {
+  public Long getProgrammeId() {
     return programmeId;
   }
 
-  public void setProgrammeId(String programmeId) {
+  public void setProgrammeId(Long programmeId) {
     this.programmeId = programmeId;
   }
 
-  public String getCurriculumId() {
+  public Long getCurriculumId() {
     return curriculumId;
   }
 
-  public void setCurriculumId(String curriculumId) {
+  public void setCurriculumId(Long curriculumId) {
     this.curriculumId = curriculumId;
   }
 
-  public String getTrainingNumberId() {
+  public Long getTrainingNumberId() {
     return trainingNumberId;
   }
 
-  public void setTrainingNumberId(String trainingNumberId) {
+  public void setTrainingNumberId(Long trainingNumberId) {
     this.trainingNumberId = trainingNumberId;
   }
 
