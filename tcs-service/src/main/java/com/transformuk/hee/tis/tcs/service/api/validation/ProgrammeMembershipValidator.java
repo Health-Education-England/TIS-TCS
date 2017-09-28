@@ -2,8 +2,6 @@ package com.transformuk.hee.tis.tcs.service.api.validation;
 
 
 import com.transformuk.hee.tis.tcs.api.dto.ProgrammeMembershipDTO;
-import com.transformuk.hee.tis.tcs.service.model.Curriculum;
-import com.transformuk.hee.tis.tcs.service.model.Programme;
 import com.transformuk.hee.tis.tcs.service.model.ProgrammeMembership;
 import com.transformuk.hee.tis.tcs.service.repository.CurriculumRepository;
 import com.transformuk.hee.tis.tcs.service.repository.PersonRepository;
@@ -16,8 +14,6 @@ import org.springframework.web.bind.MethodArgumentNotValidException;
 
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Optional;
-import java.util.Set;
 
 /**
  * Holds more complex custom validation for a {@link ProgrammeMembership} that
@@ -89,9 +85,9 @@ public class ProgrammeMembershipValidator {
    */
   private List<FieldError> checkProgramme(ProgrammeMembershipDTO programmeMembershipDTO) {
     List<FieldError> fieldErrors = new ArrayList<>();
-    String programmeId = programmeMembershipDTO.getProgrammeId();
+    Long programmeId = programmeMembershipDTO.getProgrammeId();
     if (programmeId != null) {
-      if (!programmeRepository.exists(Long.valueOf(programmeId))) {
+      if (!programmeRepository.exists(programmeId)) {
         fieldErrors.add(new FieldError(PROGRAMME_MEMBERSHIP_DTO_NAME, "programmeId",
             String.format("Programme with id %s does not exist", programmeId)));
       }
@@ -107,9 +103,9 @@ public class ProgrammeMembershipValidator {
    */
   private List<FieldError> checkCurriculum(ProgrammeMembershipDTO programmeMembershipDTO) {
     List<FieldError> fieldErrors = new ArrayList<>();
-    String curriculumId = programmeMembershipDTO.getCurriculumId();
+    Long curriculumId = programmeMembershipDTO.getCurriculumId();
     if (curriculumId != null) {
-      if (!curriculumRepository.exists(Long.valueOf(curriculumId))) {
+      if (!curriculumRepository.exists(curriculumId)) {
         fieldErrors.add(new FieldError(PROGRAMME_MEMBERSHIP_DTO_NAME, "curriculumId",
             String.format("Curriculum with id %s does not exist", curriculumId)));
       } else {
@@ -126,14 +122,14 @@ public class ProgrammeMembershipValidator {
    * @param programmeId
    * @param curriculumId
    */
-  private void checkProgrammeCurriculumAssociation(List<FieldError> fieldErrors, String programmeId, String curriculumId) {
+  private void checkProgrammeCurriculumAssociation(List<FieldError> fieldErrors, Long programmeId, Long curriculumId) {
 
-    boolean isExists = programmeRepository.programmeCurriculumAssociationExists(Long.valueOf(programmeId),
-        Long.valueOf(curriculumId));
+    boolean isExists = programmeRepository.programmeCurriculumAssociationExists(programmeId,
+        curriculumId);
     if (!isExists) {
-        fieldErrors.add(new FieldError(PROGRAMME_MEMBERSHIP_DTO_NAME, "curriculumId",
-            String.format("Curriculum with id %s does associated with programme", curriculumId)));
-      }
+      fieldErrors.add(new FieldError(PROGRAMME_MEMBERSHIP_DTO_NAME, "curriculumId",
+          String.format("Curriculum with id %s does associated with programme", curriculumId)));
+    }
   }
 
   /**
