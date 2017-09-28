@@ -165,7 +165,7 @@ public class ProgrammeMembershipResource {
   @PatchMapping("/programme-memberships")
   @Timed
   @PreAuthorize("hasPermission('tis:people::person:', 'Update')")
-  public ResponseEntity<List<ProgrammeMembershipDTO>> bulkUpdateProgrammeMemberships(
+  public ResponseEntity<List<ProgrammeMembershipDTO>> patchProgrammeMemberships(
       @Valid @RequestBody List<ProgrammeMembershipDTO> programmeMembershipDTOS) {
     log.debug("REST request to bulk patch Programme Memberships : {}", programmeMembershipDTOS);
 
