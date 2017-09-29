@@ -51,7 +51,13 @@ public class ContactDetailsDTO implements Serializable {
   private String workEmail;
 
   @NotNull(message = "Address is required", groups = {Update.class, Create.class})
-  private String address;
+  private String address1;
+
+  private String address2;
+
+  private String address3;
+
+  private String address4;
 
   @NotNull(message = "PostCode is required", groups = {Update.class, Create.class})
   private String postCode;
@@ -144,12 +150,36 @@ public class ContactDetailsDTO implements Serializable {
     this.workEmail = workEmail;
   }
 
-  public String getAddress() {
-    return address;
+  public String getAddress1() {
+    return address1;
   }
 
-  public void setAddress(String address) {
-    this.address = address;
+  public void setAddress1(String address1) {
+    this.address1 = address1;
+  }
+
+  public String getAddress2() {
+    return address2;
+  }
+
+  public void setAddress2(String address2) {
+    this.address2 = address2;
+  }
+
+  public String getAddress3() {
+    return address3;
+  }
+
+  public void setAddress3(String address3) {
+    this.address3 = address3;
+  }
+
+  public String getAddress4() {
+    return address4;
+  }
+
+  public void setAddress4(String address4) {
+    this.address4 = address4;
   }
 
   public String getPostCode() {
@@ -213,7 +243,10 @@ public class ContactDetailsDTO implements Serializable {
         ", contactPhoneNr2='" + contactPhoneNr2 + '\'' +
         ", email='" + email + '\'' +
         ", workEmail='" + workEmail + '\'' +
-        ", address='" + address + '\'' +
+        ", address1='" + address1 + '\'' +
+        ", address2='" + address2 + '\'' +
+        ", address3='" + address3 + '\'' +
+        ", address4='" + address4 + '\'' +
         ", postCode='" + postCode + '\'' +
         '}';
   }
