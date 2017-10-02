@@ -1,6 +1,8 @@
 package com.transformuk.hee.tis.tcs.service.api;
 
+import com.transformuk.hee.tis.reference.client.impl.ReferenceServiceImpl;
 import com.transformuk.hee.tis.tcs.api.dto.ProgrammeMembershipDTO;
+import com.transformuk.hee.tis.tcs.api.dto.QualificationDTO;
 import com.transformuk.hee.tis.tcs.api.enumeration.ProgrammeMembershipType;
 import com.transformuk.hee.tis.tcs.service.Application;
 import com.transformuk.hee.tis.tcs.service.api.validation.ProgrammeMembershipValidator;
@@ -17,10 +19,12 @@ import com.transformuk.hee.tis.tcs.service.service.ProgrammeMembershipService;
 import com.transformuk.hee.tis.tcs.service.service.mapper.PersonMapper;
 import com.transformuk.hee.tis.tcs.service.service.mapper.ProgrammeMembershipMapper;
 import org.assertj.core.util.Lists;
+import org.assertj.core.util.Maps;
 import org.assertj.core.util.Sets;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
+import org.mockito.Mock;
 import org.mockito.MockitoAnnotations;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
@@ -36,10 +40,12 @@ import javax.persistence.EntityManager;
 import java.time.LocalDate;
 import java.time.ZoneId;
 import java.util.List;
+import java.util.Map;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.hamcrest.Matchers.containsInAnyOrder;
 import static org.hamcrest.Matchers.hasItem;
+import static org.mockito.BDDMockito.given;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.delete;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
@@ -90,6 +96,8 @@ public class ProgrammeMembershipResourceIntTest {
   private static final Long NOT_EXISTS_PROGRAMME_ID = 10101010l;
   private static final Long NOT_EXISTS_CURRICULUM_ID = 20202020l;
 
+  private static final String NOT_EXISTS_ROTATION = "XYZ";
+
   @Autowired
   private ProgrammeMembershipRepository programmeMembershipRepository;
 
@@ -117,7 +125,6 @@ public class ProgrammeMembershipResourceIntTest {
   @Autowired
   private ExceptionTranslator exceptionTranslator;
 
-  @Autowired
   private ProgrammeMembershipValidator programmeMembershipValidator;
 
   @Autowired
@@ -125,6 +132,9 @@ public class ProgrammeMembershipResourceIntTest {
 
   @Autowired
   private PersonMapper personMapper;
+
+  @Mock
+  private ReferenceServiceImpl referenceService;
 
   private Person person;
 
@@ -172,6 +182,7 @@ public class ProgrammeMembershipResourceIntTest {
   @Before
   public void setup() {
     MockitoAnnotations.initMocks(this);
+    programmeMembershipValidator = new ProgrammeMembershipValidator(personRepository,programmeRepository,curriculumRepository,referenceService);
     ProgrammeMembershipResource programmeMembershipResource = new ProgrammeMembershipResource(programmeMembershipService,
         programmeMembershipValidator);
     this.restProgrammeMembershipMockMvc = MockMvcBuilders.standaloneSetup(programmeMembershipResource)
@@ -378,6 +389,34 @@ public class ProgrammeMembershipResourceIntTest {
         .andExpect(jsonPath("$.fieldErrors[0].field").value("curriculumId"))
         .andExpect(jsonPath("$.fieldErrors[0].message").
             value(String.format("Curriculum with id %s does associated with programme", String.valueOf(notAssociatedCurriculum.getId()))));
+  }
+
+  @Test
+  @Transactional
+  public void shouldValidateRotation() throws Exception {
+    //given
+    personRepository.saveAndFlush(person);
+    curriculumRepository.saveAndFlush(curriculum);
+    programme.setCurricula(Sets.newHashSet(Lists.newArrayList(curriculum)));
+    programmeRepository.saveAndFlush(programme);
+    programmeMembership.setPerson(person);
+    programmeMembership.setProgrammeId(programme.getId());
+    programmeMembership.setCurriculumId(programme.getCurricula().iterator().next().getId());
+    ProgrammeMembershipDTO programmeMembershipDTO = programmeMembershipMapper.toDto(programmeMembership);
+    programmeMembershipDTO.setRotation(NOT_EXISTS_ROTATION); // this rotation not exists in reference service
+
+    Map<String, Boolean> exists = Maps.newHashMap(NOT_EXISTS_ROTATION, false);
+    given(referenceService.rotationExists(Lists.newArrayList(NOT_EXISTS_ROTATION))).willReturn(exists);
+
+    //when & then
+    restProgrammeMembershipMockMvc.perform(post("/api/programme-memberships")
+        .contentType(TestUtil.APPLICATION_JSON_UTF8)
+        .content(TestUtil.convertObjectToJsonBytes(programmeMembershipDTO)))
+        .andExpect(status().isBadRequest())
+        .andExpect(jsonPath("$.message").value("error.validation"))
+        .andExpect(jsonPath("$.fieldErrors[0].field").value("rotation"))
+        .andExpect(jsonPath("$.fieldErrors[0].message").
+            value(String.format("rotation with label %s does not exist", NOT_EXISTS_ROTATION)));
   }
 
   @Test
