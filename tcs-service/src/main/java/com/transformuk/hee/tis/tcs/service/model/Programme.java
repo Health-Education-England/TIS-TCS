@@ -69,17 +69,6 @@ public class Programme implements Serializable {
     return this;
   }
 
-  @OneToMany(mappedBy = "programme", cascade = CascadeType.ALL, orphanRemoval = false)
-  private Set<TrainingNumber> trainingNumbers = new HashSet<>();
-
-  public Set<TrainingNumber> getTrainingNumbers() {
-    return trainingNumbers;
-  }
-
-  public void setTrainingNumbers(Set<TrainingNumber> trainingNumbers) {
-    this.trainingNumbers = trainingNumbers;
-  }
-
   public Long getId() {
     return id;
   }

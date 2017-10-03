@@ -56,7 +56,6 @@ public class ProgrammeValidator {
     fieldErrors.addAll(checkLocalOffice(programmeDTO, userProfile));
     fieldErrors.addAll(checkCurricula(programmeDTO));
     fieldErrors.addAll(checkProgrammeNumber(programmeDTO));
-    fieldErrors.addAll(checkTrainingNumbers(programmeDTO));
 
     if (!fieldErrors.isEmpty()) {
       BeanPropertyBindingResult bindingResult = new BeanPropertyBindingResult(programmeDTO, "ProgrammeDTO");
@@ -111,27 +110,6 @@ public class ProgrammeValidator {
           }
         }
       }
-    }
-    return fieldErrors;
-  }
-
-  private List<FieldError> checkTrainingNumbers(ProgrammeDTO programmeDTO) {
-    List<FieldError> fieldErrors = new ArrayList<>();
-    if (programmeDTO.getTrainingNumbers() != null) {
-      List<TrainingNumberDTO> trainingNumbersWithProgramme = programmeDTO.getTrainingNumbers().stream().filter(
-          t -> t.getProgramme() != null).collect(Collectors.toList());
-
-      List<TrainingNumber> currentTrainingNumbers = trainingNumberRepository.findByIdIn(
-          trainingNumbersWithProgramme.stream().map(TrainingNumberDTO::getId).collect(Collectors.toSet()));
-
-      programmeDTO.getTrainingNumbers().stream().filter(t -> t.getProgramme() != null).forEach(trainingNumber -> {
-            Optional<TrainingNumber> currentTrainingNumber = currentTrainingNumbers.stream().filter(t -> t.getId() == trainingNumber.getId()).findFirst();
-            if (currentTrainingNumber.isPresent() && currentTrainingNumber.get().getProgramme() != null
-                && currentTrainingNumber.get().getProgramme().getId() != programmeDTO.getId())
-              fieldErrors.add(new FieldError("ProgrammeDTO", "training-number",
-                  String.format("Training number with id: %s is already linked.", trainingNumber.getId())));
-          }
-      );
     }
     return fieldErrors;
   }
