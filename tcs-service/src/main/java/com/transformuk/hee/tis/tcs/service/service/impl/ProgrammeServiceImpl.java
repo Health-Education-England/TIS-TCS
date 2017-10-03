@@ -3,9 +3,7 @@ package com.transformuk.hee.tis.tcs.service.service.impl;
 import com.transformuk.hee.tis.tcs.api.dto.ProgrammeDTO;
 import com.transformuk.hee.tis.tcs.service.model.ColumnFilter;
 import com.transformuk.hee.tis.tcs.service.model.Programme;
-import com.transformuk.hee.tis.tcs.service.model.TrainingNumber;
 import com.transformuk.hee.tis.tcs.service.repository.ProgrammeRepository;
-import com.transformuk.hee.tis.tcs.service.repository.TrainingNumberRepository;
 import com.transformuk.hee.tis.tcs.service.service.ProgrammeService;
 import com.transformuk.hee.tis.tcs.service.service.mapper.DesignatedBodyMapper;
 import com.transformuk.hee.tis.tcs.service.service.mapper.ProgrammeMapper;
@@ -38,14 +36,10 @@ public class ProgrammeServiceImpl implements ProgrammeService {
 
   private final ProgrammeRepository programmeRepository;
 
-  private final TrainingNumberRepository trainingNumberRepository;
-
   private final ProgrammeMapper programmeMapper;
 
-  public ProgrammeServiceImpl(ProgrammeRepository programmeRepository, TrainingNumberRepository trainingNumberRepository,
-                              ProgrammeMapper programmeMapper) {
+  public ProgrammeServiceImpl(ProgrammeRepository programmeRepository, ProgrammeMapper programmeMapper) {
     this.programmeRepository = programmeRepository;
-    this.trainingNumberRepository = trainingNumberRepository;
     this.programmeMapper = programmeMapper;
   }
 
@@ -73,17 +67,10 @@ public class ProgrammeServiceImpl implements ProgrammeService {
   @Override
   public ProgrammeDTO update(ProgrammeDTO programmeDTO) {
     log.debug("Request to update Programme : {}", programmeDTO);
-    Programme programme = programmeRepository.findOne(programmeDTO.getId());
 
-    //clear all the relations
-    Set<TrainingNumber> trainingNumbers = programme.getTrainingNumbers();
-    trainingNumbers.forEach(t -> t.setProgramme(null));
-    trainingNumberRepository.save(trainingNumbers);
-
-    programme = programmeMapper.programmeDTOToProgramme(programmeDTO);
+    Programme programme = programmeMapper.programmeDTOToProgramme(programmeDTO);
     programme = programmeRepository.save(programme);
-    ProgrammeDTO result = programmeMapper.programmeToProgrammeDTO(programme);
-    return result;
+    return programmeMapper.programmeToProgrammeDTO(programme);
   }
 
   /**
