@@ -64,6 +64,7 @@ public class ProgrammeMembershipMapper {
     result.setLeavingDestination(programmeMembership.getLeavingDestination());
     result.setProgrammeId(programmeMembership.getProgrammeId());
     result.setCurriculumId(programmeMembership.getCurriculumId());
+    result.setAmendedDate(programmeMembership.getAmendedDate());
 
     if (programmeMembership.getPerson() == null) {
       result.setPerson(null);
@@ -88,6 +89,7 @@ public class ProgrammeMembershipMapper {
     result.setLeavingDestination(programmeMembershipDTO.getLeavingDestination());
     result.setProgrammeId(programmeMembershipDTO.getProgrammeId());
     result.setCurriculumId(programmeMembershipDTO.getCurriculumId());
+    result.setAmendedDate(programmeMembershipDTO.getAmendedDate());
 
     if (programmeMembershipDTO.getPerson() == null) {
       result.setPerson(null);

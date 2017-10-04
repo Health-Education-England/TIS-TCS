@@ -23,6 +23,7 @@ import org.springframework.transaction.annotation.Transactional;
 
 import javax.persistence.EntityManager;
 import java.time.LocalDate;
+import java.time.LocalDateTime;
 import java.time.ZoneId;
 import java.util.List;
 
@@ -75,6 +76,8 @@ public class PersonalDetailsResourceIntTest {
 
   private static final String DEFAULT_DISABILITY_DETAILS = "AAAAAAAAAA";
   private static final String UPDATED_DISABILITY_DETAILS = "BBBBBBBBBB";
+
+  private static final LocalDateTime DEFAULT_AMENDED_DATE = LocalDateTime.now(ZoneId.systemDefault());
 
   @Autowired
   private PersonalDetailsRepository personalDetailsRepository;
@@ -164,6 +167,7 @@ public class PersonalDetailsResourceIntTest {
     assertThat(testPersonalDetails.getEthnicOrigin()).isEqualTo(DEFAULT_ETHNIC_ORIGIN);
     assertThat(testPersonalDetails.getDisability()).isEqualTo(DEFAULT_DISABILITY);
     assertThat(testPersonalDetails.getDisabilityDetails()).isEqualTo(DEFAULT_DISABILITY_DETAILS);
+    assertThat(testPersonalDetails.getAmendedDate()).isAfter(DEFAULT_AMENDED_DATE);
   }
 
   @Test
@@ -238,7 +242,8 @@ public class PersonalDetailsResourceIntTest {
         .andExpect(jsonPath("$.[*].religiousBelief").value(hasItem(DEFAULT_RELIGIOUS_BELIEF.toString())))
         .andExpect(jsonPath("$.[*].ethnicOrigin").value(hasItem(DEFAULT_ETHNIC_ORIGIN.toString())))
         .andExpect(jsonPath("$.[*].disability").value(hasItem(DEFAULT_DISABILITY.toString())))
-        .andExpect(jsonPath("$.[*].disabilityDetails").value(hasItem(DEFAULT_DISABILITY_DETAILS.toString())));
+        .andExpect(jsonPath("$.[*].disabilityDetails").value(hasItem(DEFAULT_DISABILITY_DETAILS.toString())))
+        .andExpect(jsonPath("$.[*].amendedDate").isNotEmpty());
   }
 
   @Test
@@ -261,7 +266,8 @@ public class PersonalDetailsResourceIntTest {
         .andExpect(jsonPath("$.religiousBelief").value(DEFAULT_RELIGIOUS_BELIEF.toString()))
         .andExpect(jsonPath("$.ethnicOrigin").value(DEFAULT_ETHNIC_ORIGIN.toString()))
         .andExpect(jsonPath("$.disability").value(DEFAULT_DISABILITY.toString()))
-        .andExpect(jsonPath("$.disabilityDetails").value(DEFAULT_DISABILITY_DETAILS.toString()));
+        .andExpect(jsonPath("$.disabilityDetails").value(DEFAULT_DISABILITY_DETAILS.toString()))
+        .andExpect(jsonPath("$.amendedDate").isNotEmpty());
   }
 
   @Test
@@ -313,6 +319,7 @@ public class PersonalDetailsResourceIntTest {
     assertThat(testPersonalDetails.getEthnicOrigin()).isEqualTo(UPDATED_ETHNIC_ORIGIN);
     assertThat(testPersonalDetails.getDisability()).isEqualTo(UPDATED_DISABILITY);
     assertThat(testPersonalDetails.getDisabilityDetails()).isEqualTo(UPDATED_DISABILITY_DETAILS);
+    assertThat(testPersonalDetails.getAmendedDate()).isAfter(DEFAULT_AMENDED_DATE);
   }
 
   @Test

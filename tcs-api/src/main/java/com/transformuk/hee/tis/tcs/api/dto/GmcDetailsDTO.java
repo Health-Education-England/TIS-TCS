@@ -8,6 +8,7 @@ import javax.validation.constraints.DecimalMin;
 import javax.validation.constraints.NotNull;
 import java.io.Serializable;
 import java.time.LocalDate;
+import java.time.LocalDateTime;
 import java.util.Objects;
 
 /**
@@ -26,6 +27,8 @@ public class GmcDetailsDTO implements Serializable {
   private LocalDate gmcStartDate;
 
   private LocalDate gmcEndDate;
+
+  private LocalDateTime amendedDate;
 
   public Long getId() {
     return id;
@@ -67,6 +70,14 @@ public class GmcDetailsDTO implements Serializable {
     this.gmcEndDate = gmcEndDate;
   }
 
+  public LocalDateTime getAmendedDate() {
+    return amendedDate;
+  }
+
+  public void setAmendedDate(LocalDateTime amendedDate) {
+    this.amendedDate = amendedDate;
+  }
+
   @Override
   public boolean equals(Object o) {
     if (this == o) {
@@ -96,6 +107,7 @@ public class GmcDetailsDTO implements Serializable {
         ", gmcStatus='" + getGmcStatus() + "'" +
         ", gmcStartDate='" + getGmcStartDate() + "'" +
         ", gmcEndDate='" + getGmcEndDate() + "'" +
+        ", amendedDate='" + getAmendedDate() + "'" +
         "}";
   }
 }

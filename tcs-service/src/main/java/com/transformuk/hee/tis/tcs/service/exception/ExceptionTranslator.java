@@ -28,7 +28,8 @@ public class ExceptionTranslator {
   @ResponseStatus(HttpStatus.CONFLICT)
   @ResponseBody
   public ErrorVM processConcurrencyError(ConcurrencyFailureException ex) {
-    return new ErrorVM(ErrorConstants.ERR_CONCURRENCY_FAILURE);
+    return new ErrorVM(ErrorConstants.ERR_CONCURRENCY_FAILURE,
+        "You are acting on stale data, please refresh");
   }
 
   @ExceptionHandler(MethodArgumentNotValidException.class)

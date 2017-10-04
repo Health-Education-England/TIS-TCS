@@ -30,7 +30,7 @@ import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.setup.MockMvcBuilders;
 import org.springframework.transaction.annotation.Transactional;
 
-import java.time.LocalDate;
+import java.time.LocalDateTime;
 import java.time.ZoneId;
 import java.util.List;
 
@@ -58,11 +58,11 @@ public class PersonResourceIntTest {
   private static final String DEFAULT_INTREPID_ID = "AAAAAAAAAA";
   private static final String UPDATED_INTREPID_ID = "BBBBBBBBBB";
 
-  private static final LocalDate DEFAULT_ADDED_DATE = LocalDate.ofEpochDay(0L);
-  private static final LocalDate UPDATED_ADDED_DATE = LocalDate.now(ZoneId.systemDefault());
+  private static final LocalDateTime DEFAULT_ADDED_DATE = LocalDateTime.now(ZoneId.systemDefault());
+  private static final LocalDateTime UPDATED_ADDED_DATE = LocalDateTime.now(ZoneId.systemDefault()).plusDays(1);
 
-  private static final LocalDate DEFAULT_AMENDED_DATE = LocalDate.ofEpochDay(0L);
-  private static final LocalDate UPDATED_AMENDED_DATE = LocalDate.now(ZoneId.systemDefault());
+  private static final LocalDateTime DEFAULT_AMENDED_DATE = LocalDateTime.now(ZoneId.systemDefault());
+  private static final LocalDateTime UPDATED_AMENDED_DATE = LocalDateTime.now(ZoneId.systemDefault()).plusDays(1);
 
   private static final String DEFAULT_ROLE = "AAAAAAAAAA";
   private static final String UPDATED_ROLE = "BBBBBBBBBB";
@@ -73,8 +73,8 @@ public class PersonResourceIntTest {
   private static final String DEFAULT_COMMENTS = "AAAAAAAAAA";
   private static final String UPDATED_COMMENTS = "BBBBBBBBBB";
 
-  private static final LocalDate DEFAULT_INACTIVE_DATE = LocalDate.ofEpochDay(0L);
-  private static final LocalDate UPDATED_INACTIVE_DATE = LocalDate.now(ZoneId.systemDefault());
+  private static final LocalDateTime DEFAULT_INACTIVE_DATE = LocalDateTime.now(ZoneId.systemDefault());
+  private static final LocalDateTime UPDATED_INACTIVE_DATE = LocalDateTime.now(ZoneId.systemDefault()).plusDays(1);
 
   private static final String DEFAULT_INACTIVE_NOTES = "AAAAAAAAAA";
   private static final String UPDATED_INACTIVE_NOTES = "BBBBBBBBBB";
@@ -142,7 +142,6 @@ public class PersonResourceIntTest {
     Person person = new Person()
         .intrepidId(DEFAULT_INTREPID_ID)
         .addedDate(DEFAULT_ADDED_DATE)
-        .amendedDate(DEFAULT_AMENDED_DATE)
         .role(DEFAULT_ROLE)
         .status(DEFAULT_STATUS)
         .comments(DEFAULT_COMMENTS)
@@ -174,7 +173,7 @@ public class PersonResourceIntTest {
     Person testPerson = personList.get(0);
     assertThat(testPerson.getIntrepidId()).isEqualTo(DEFAULT_INTREPID_ID);
     assertThat(testPerson.getAddedDate()).isEqualTo(DEFAULT_ADDED_DATE);
-    assertThat(testPerson.getAmendedDate()).isEqualTo(DEFAULT_AMENDED_DATE);
+    assertThat(testPerson.getAmendedDate()).isAfter(DEFAULT_AMENDED_DATE);
     assertThat(testPerson.getRole()).isEqualTo(DEFAULT_ROLE);
     assertThat(testPerson.getStatus()).isEqualTo(DEFAULT_STATUS);
     assertThat(testPerson.getComments()).isEqualTo(DEFAULT_COMMENTS);
@@ -247,7 +246,7 @@ public class PersonResourceIntTest {
         .andExpect(jsonPath("$.[*].id").value(hasItem(person.getId().intValue())))
         .andExpect(jsonPath("$.[*].intrepidId").value(hasItem(DEFAULT_INTREPID_ID.toString())))
         .andExpect(jsonPath("$.[*].addedDate").value(hasItem(DEFAULT_ADDED_DATE.toString())))
-        .andExpect(jsonPath("$.[*].amendedDate").value(hasItem(DEFAULT_AMENDED_DATE.toString())))
+        .andExpect(jsonPath("$.[*].amendedDate").isNotEmpty())
         .andExpect(jsonPath("$.[*].role").value(hasItem(DEFAULT_ROLE.toString())))
         .andExpect(jsonPath("$.[*].status").value(hasItem(DEFAULT_STATUS.toString())))
         .andExpect(jsonPath("$.[*].comments").value(hasItem(DEFAULT_COMMENTS.toString())))
@@ -270,7 +269,7 @@ public class PersonResourceIntTest {
         .andExpect(jsonPath("$.id").value(person.getId().intValue()))
         .andExpect(jsonPath("$.intrepidId").value(DEFAULT_INTREPID_ID.toString()))
         .andExpect(jsonPath("$.addedDate").value(DEFAULT_ADDED_DATE.toString()))
-        .andExpect(jsonPath("$.amendedDate").value(DEFAULT_AMENDED_DATE.toString()))
+        .andExpect(jsonPath("$.amendedDate").isNotEmpty())
         .andExpect(jsonPath("$.role").value(DEFAULT_ROLE.toString()))
         .andExpect(jsonPath("$.status").value(DEFAULT_STATUS.toString()))
         .andExpect(jsonPath("$.comments").value(DEFAULT_COMMENTS.toString()))
@@ -299,7 +298,6 @@ public class PersonResourceIntTest {
     updatedPerson
         .intrepidId(UPDATED_INTREPID_ID)
         .addedDate(UPDATED_ADDED_DATE)
-        .amendedDate(UPDATED_AMENDED_DATE)
         .role(UPDATED_ROLE)
         .status(UPDATED_STATUS)
         .comments(UPDATED_COMMENTS)
@@ -321,7 +319,7 @@ public class PersonResourceIntTest {
     Person testPerson = personList.get(0);
     assertThat(testPerson.getIntrepidId()).isEqualTo(UPDATED_INTREPID_ID);
     assertThat(testPerson.getAddedDate()).isEqualTo(UPDATED_ADDED_DATE);
-    assertThat(testPerson.getAmendedDate()).isEqualTo(UPDATED_AMENDED_DATE);
+    assertThat(testPerson.getAmendedDate()).isAfter(DEFAULT_ADDED_DATE);
     assertThat(testPerson.getRole()).isEqualTo(UPDATED_ROLE);
     assertThat(testPerson.getStatus()).isEqualTo(UPDATED_STATUS);
     assertThat(testPerson.getComments()).isEqualTo(UPDATED_COMMENTS);
@@ -369,7 +367,7 @@ public class PersonResourceIntTest {
         .andExpect(jsonPath("$.[*].contactDetails.surname").value(PERSON_SURNANME))
         .andExpect(jsonPath("$.[*].intrepidId").value(DEFAULT_INTREPID_ID.toString()))
         .andExpect(jsonPath("$.[*].addedDate").value(DEFAULT_ADDED_DATE.toString()))
-        .andExpect(jsonPath("$.[*].amendedDate").value(DEFAULT_AMENDED_DATE.toString()))
+        .andExpect(jsonPath("$.[*].amendedDate").isNotEmpty())
         .andExpect(jsonPath("$.[*].role").value(DEFAULT_ROLE.toString()))
         .andExpect(jsonPath("$.[*].status").value(DEFAULT_STATUS.toString()))
         .andExpect(jsonPath("$.[*].comments").value(DEFAULT_COMMENTS.toString()))
@@ -397,7 +395,7 @@ public class PersonResourceIntTest {
         .andExpect(jsonPath("$.[*].gmcDetails.gmcNumber").value(GMC_NUMBER))
         .andExpect(jsonPath("$.[*].intrepidId").value(DEFAULT_INTREPID_ID.toString()))
         .andExpect(jsonPath("$.[*].addedDate").value(DEFAULT_ADDED_DATE.toString()))
-        .andExpect(jsonPath("$.[*].amendedDate").value(DEFAULT_AMENDED_DATE.toString()))
+        .andExpect(jsonPath("$.[*].amendedDate").isNotEmpty())
         .andExpect(jsonPath("$.[*].role").value(DEFAULT_ROLE.toString()))
         .andExpect(jsonPath("$.[*].status").value(DEFAULT_STATUS.toString()))
         .andExpect(jsonPath("$.[*].comments").value(DEFAULT_COMMENTS.toString()))
@@ -425,7 +423,7 @@ public class PersonResourceIntTest {
         .andExpect(jsonPath("$.[*].gdcDetails.gdcNumber").value(GDC_NUMBER))
         .andExpect(jsonPath("$.[*].intrepidId").value(DEFAULT_INTREPID_ID.toString()))
         .andExpect(jsonPath("$.[*].addedDate").value(DEFAULT_ADDED_DATE.toString()))
-        .andExpect(jsonPath("$.[*].amendedDate").value(DEFAULT_AMENDED_DATE.toString()))
+        .andExpect(jsonPath("$.[*].amendedDate").exists())
         .andExpect(jsonPath("$.[*].role").value(DEFAULT_ROLE.toString()))
         .andExpect(jsonPath("$.[*].status").value(DEFAULT_STATUS.toString()))
         .andExpect(jsonPath("$.[*].comments").value(DEFAULT_COMMENTS.toString()))
@@ -447,7 +445,7 @@ public class PersonResourceIntTest {
         .andExpect(jsonPath("$.[*].id").value(anotherPerson.getId().intValue()))
         .andExpect(jsonPath("$.[*].intrepidId").value(DEFAULT_INTREPID_ID.toString()))
         .andExpect(jsonPath("$.[*].addedDate").value(DEFAULT_ADDED_DATE.toString()))
-        .andExpect(jsonPath("$.[*].amendedDate").value(DEFAULT_AMENDED_DATE.toString()))
+        .andExpect(jsonPath("$.[*].amendedDate").isNotEmpty())
         .andExpect(jsonPath("$.[*].role").value(DEFAULT_ROLE.toString()))
         .andExpect(jsonPath("$.[*].status").value(DEFAULT_STATUS.toString()))
         .andExpect(jsonPath("$.[*].comments").value(DEFAULT_COMMENTS.toString()))
@@ -481,7 +479,7 @@ public class PersonResourceIntTest {
         .andExpect(jsonPath("$.[*].contactDetails.surname").value(PERSON_SURNANME))
         .andExpect(jsonPath("$.[*].intrepidId").value(DEFAULT_INTREPID_ID.toString()))
         .andExpect(jsonPath("$.[*].addedDate").value(DEFAULT_ADDED_DATE.toString()))
-        .andExpect(jsonPath("$.[*].amendedDate").value(DEFAULT_AMENDED_DATE.toString()))
+        .andExpect(jsonPath("$.[*].amendedDate").isNotEmpty())
         .andExpect(jsonPath("$.[*].role").value(DEFAULT_ROLE.toString()))
         .andExpect(jsonPath("$.[*].status").value(DEFAULT_STATUS.toString()))
         .andExpect(jsonPath("$.[*].comments").value(DEFAULT_COMMENTS.toString()))
@@ -592,7 +590,7 @@ public class PersonResourceIntTest {
     Person testPerson = personList.get(0);
     assertThat(testPerson.getIntrepidId()).isEqualTo(UPDATED_INTREPID_ID);
     assertThat(testPerson.getAddedDate()).isEqualTo(UPDATED_ADDED_DATE);
-    assertThat(testPerson.getAmendedDate()).isEqualTo(UPDATED_AMENDED_DATE);
+    assertThat(testPerson.getAmendedDate()).isAfter(DEFAULT_ADDED_DATE);
     assertThat(testPerson.getRole()).isEqualTo(UPDATED_ROLE);
     assertThat(testPerson.getStatus()).isEqualTo(UPDATED_STATUS);
     assertThat(testPerson.getComments()).isEqualTo(UPDATED_COMMENTS);

@@ -24,6 +24,7 @@ import org.springframework.transaction.annotation.Transactional;
 
 import javax.persistence.EntityManager;
 import java.time.LocalDate;
+import java.time.LocalDateTime;
 import java.time.ZoneId;
 import java.util.List;
 
@@ -58,6 +59,8 @@ public class GmcDetailsResourceIntTest {
 
   private static final LocalDate DEFAULT_GMC_END_DATE = LocalDate.ofEpochDay(0L);
   private static final LocalDate UPDATED_GMC_END_DATE = LocalDate.now(ZoneId.systemDefault());
+
+  private static final LocalDateTime DEFAULT_AMENDED_DATE = LocalDateTime.now(ZoneId.systemDefault());
 
   @Autowired
   private GmcDetailsRepository gmcDetailsRepository;
@@ -138,6 +141,7 @@ public class GmcDetailsResourceIntTest {
     assertThat(testGmcDetails.getGmcStatus()).isEqualTo(DEFAULT_GMC_STATUS);
     assertThat(testGmcDetails.getGmcStartDate()).isEqualTo(DEFAULT_GMC_START_DATE);
     assertThat(testGmcDetails.getGmcEndDate()).isEqualTo(DEFAULT_GMC_END_DATE);
+    assertThat(testGmcDetails.getAmendedDate()).isAfter(DEFAULT_AMENDED_DATE);
   }
 
   @Test
@@ -223,7 +227,8 @@ public class GmcDetailsResourceIntTest {
         .andExpect(jsonPath("$.[*].gmcNumber").value(hasItem(DEFAULT_GMC_NUMBER.toString())))
         .andExpect(jsonPath("$.[*].gmcStatus").value(hasItem(DEFAULT_GMC_STATUS.toString())))
         .andExpect(jsonPath("$.[*].gmcStartDate").value(hasItem(DEFAULT_GMC_START_DATE.toString())))
-        .andExpect(jsonPath("$.[*].gmcEndDate").value(hasItem(DEFAULT_GMC_END_DATE.toString())));
+        .andExpect(jsonPath("$.[*].gmcEndDate").value(hasItem(DEFAULT_GMC_END_DATE.toString())))
+        .andExpect(jsonPath("$.[*].amendedDate").isNotEmpty());
   }
 
   @Test
@@ -240,7 +245,8 @@ public class GmcDetailsResourceIntTest {
         .andExpect(jsonPath("$.gmcNumber").value(DEFAULT_GMC_NUMBER.toString()))
         .andExpect(jsonPath("$.gmcStatus").value(DEFAULT_GMC_STATUS.toString()))
         .andExpect(jsonPath("$.gmcStartDate").value(DEFAULT_GMC_START_DATE.toString()))
-        .andExpect(jsonPath("$.gmcEndDate").value(DEFAULT_GMC_END_DATE.toString()));
+        .andExpect(jsonPath("$.gmcEndDate").value(DEFAULT_GMC_END_DATE.toString()))
+        .andExpect(jsonPath("$.amendedDate").isNotEmpty());
   }
 
   @Test
@@ -280,6 +286,7 @@ public class GmcDetailsResourceIntTest {
     assertThat(testGmcDetails.getGmcStatus()).isEqualTo(UPDATED_GMC_STATUS);
     assertThat(testGmcDetails.getGmcStartDate()).isEqualTo(UPDATED_GMC_START_DATE);
     assertThat(testGmcDetails.getGmcEndDate()).isEqualTo(UPDATED_GMC_END_DATE);
+    assertThat(testGmcDetails.getAmendedDate()).isAfter(DEFAULT_AMENDED_DATE);
   }
 
   @Test

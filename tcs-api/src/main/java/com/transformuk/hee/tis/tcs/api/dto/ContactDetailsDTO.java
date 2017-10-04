@@ -8,6 +8,7 @@ import org.hibernate.validator.constraints.Email;
 import javax.validation.constraints.DecimalMin;
 import javax.validation.constraints.NotNull;
 import java.io.Serializable;
+import java.time.LocalDateTime;
 import java.util.Objects;
 
 /**
@@ -61,6 +62,8 @@ public class ContactDetailsDTO implements Serializable {
 
   @NotNull(message = "PostCode is required", groups = {Update.class, Create.class})
   private String postCode;
+
+  private LocalDateTime amendedDate;
 
   public Long getId() {
     return id;
@@ -206,6 +209,14 @@ public class ContactDetailsDTO implements Serializable {
     this.legalForenames = legalForenames;
   }
 
+  public LocalDateTime getAmendedDate() {
+    return amendedDate;
+  }
+
+  public void setAmendedDate(LocalDateTime amendedDate) {
+    this.amendedDate = amendedDate;
+  }
+
   @Override
   public boolean equals(Object o) {
     if (this == o) {
@@ -248,6 +259,7 @@ public class ContactDetailsDTO implements Serializable {
         ", address3='" + address3 + '\'' +
         ", address4='" + address4 + '\'' +
         ", postCode='" + postCode + '\'' +
+        ", amendedDate='" + amendedDate + '\'' +
         '}';
   }
 }

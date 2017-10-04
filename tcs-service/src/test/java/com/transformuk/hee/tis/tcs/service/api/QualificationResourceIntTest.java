@@ -33,6 +33,7 @@ import org.springframework.transaction.annotation.Transactional;
 
 import javax.persistence.EntityManager;
 import java.time.LocalDate;
+import java.time.LocalDateTime;
 import java.time.ZoneId;
 import java.util.List;
 import java.util.Map;
@@ -76,6 +77,8 @@ public class QualificationResourceIntTest {
   private static final String UPDATED_COUNTRY_OF_QUALIFICATION = "New Zealand";
   private static final String NOT_EXISTS_COUNTRY = "XYZ";
   private static final String NOT_EXISTS_MEDICAL_SCHOOL = "ABC";
+
+  private static final LocalDateTime DEFAULT_AMENDED_DATE = LocalDateTime.now(ZoneId.systemDefault());
 
   @Autowired
   private QualificationRepository qualificationRepository;
@@ -182,6 +185,7 @@ public class QualificationResourceIntTest {
     assertThat(testQualification.getQualificationAttainedDate()).isEqualTo(DEFAULT_QUALIFICATION_ATTAINED_DATE);
     assertThat(testQualification.getMedicalSchool()).isEqualTo(DEFAULT_MEDICAL_SCHOOL);
     assertThat(testQualification.getCountryOfQualification()).isEqualTo(DEFAULT_COUNTRY_OF_QUALIFICATION);
+    assertThat(testQualification.getAmendedDate()).isAfter(DEFAULT_AMENDED_DATE);
   }
 
   @Test
@@ -355,7 +359,8 @@ public class QualificationResourceIntTest {
         .andExpect(jsonPath("$.[*].qualificationType").value(hasItem(DEFAULT_QUALIFICATION_TYPE.toString())))
         .andExpect(jsonPath("$.[*].qualificationAttainedDate").value(hasItem(DEFAULT_QUALIFICATION_ATTAINED_DATE.toString())))
         .andExpect(jsonPath("$.[*].medicalSchool").value(hasItem(DEFAULT_MEDICAL_SCHOOL.toString())))
-        .andExpect(jsonPath("$.[*].countryOfQualification").value(hasItem(DEFAULT_COUNTRY_OF_QUALIFICATION.toString())));
+        .andExpect(jsonPath("$.[*].countryOfQualification").value(hasItem(DEFAULT_COUNTRY_OF_QUALIFICATION.toString())))
+        .andExpect(jsonPath("$.[*].amendedDate").isNotEmpty());
   }
 
   @Test
@@ -375,7 +380,8 @@ public class QualificationResourceIntTest {
         .andExpect(jsonPath("$.qualificationType").value(DEFAULT_QUALIFICATION_TYPE.toString()))
         .andExpect(jsonPath("$.qualificationAttainedDate").value(DEFAULT_QUALIFICATION_ATTAINED_DATE.toString()))
         .andExpect(jsonPath("$.medicalSchool").value(DEFAULT_MEDICAL_SCHOOL.toString()))
-        .andExpect(jsonPath("$.countryOfQualification").value(DEFAULT_COUNTRY_OF_QUALIFICATION.toString()));
+        .andExpect(jsonPath("$.countryOfQualification").value(DEFAULT_COUNTRY_OF_QUALIFICATION.toString()))
+        .andExpect(jsonPath("$.amendedDate").isNotEmpty());
   }
 
   @Test
@@ -419,6 +425,7 @@ public class QualificationResourceIntTest {
     assertThat(testQualification.getQualificationAttainedDate()).isEqualTo(UPDATED_QUALIFICATION_ATTAINED_DATE);
     assertThat(testQualification.getMedicalSchool()).isEqualTo(UPDATED_MEDICAL_SCHOOL);
     assertThat(testQualification.getCountryOfQualification()).isEqualTo(UPDATED_COUNTRY_OF_QUALIFICATION);
+    assertThat(testQualification.getAmendedDate()).isAfter(DEFAULT_AMENDED_DATE);
   }
 
   @Test

@@ -8,6 +8,7 @@ import javax.validation.constraints.DecimalMin;
 import javax.validation.constraints.NotNull;
 import java.io.Serializable;
 import java.time.LocalDate;
+import java.time.LocalDateTime;
 import java.util.Objects;
 
 /**
@@ -42,6 +43,8 @@ public class PersonalDetailsDTO implements Serializable {
   private String disability;
 
   private String disabilityDetails;
+
+  private LocalDateTime amendedDate;
 
   public Long getId() {
     return id;
@@ -131,6 +134,14 @@ public class PersonalDetailsDTO implements Serializable {
     this.disabilityDetails = disabilityDetails;
   }
 
+  public LocalDateTime getAmendedDate() {
+    return amendedDate;
+  }
+
+  public void setAmendedDate(LocalDateTime amendedDate) {
+    this.amendedDate = amendedDate;
+  }
+
   @Override
   public boolean equals(Object o) {
     if (this == o) {
@@ -166,6 +177,7 @@ public class PersonalDetailsDTO implements Serializable {
         ", ethnicOrigin='" + getEthnicOrigin() + "'" +
         ", disability='" + getDisability() + "'" +
         ", disabilityDetails='" + getDisabilityDetails() + "'" +
+        ", amendedDate='" + getAmendedDate() + "'" +
         "}";
   }
 }
