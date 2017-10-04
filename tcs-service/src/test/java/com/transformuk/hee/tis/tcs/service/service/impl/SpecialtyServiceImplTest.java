@@ -1,5 +1,6 @@
 package com.transformuk.hee.tis.tcs.service.service.impl;
 
+import com.google.common.collect.Sets;
 import com.transformuk.hee.tis.tcs.api.dto.SpecialtyDTO;
 import com.transformuk.hee.tis.tcs.api.dto.SpecialtyGroupDTO;
 import com.transformuk.hee.tis.tcs.api.enumeration.SpecialtyType;
@@ -50,7 +51,7 @@ public class SpecialtyServiceImplTest {
     specialtyDTO = new SpecialtyDTO();
     specialtyDTO.setSpecialtyGroup(new SpecialtyGroupDTO());
     specialtyDTO.setIntrepidId(INTREPID_ID);
-    specialtyDTO.setSpecialtyType(SUB_SPECIALTY);
+    specialtyDTO.setSpecialtyTypes(Sets.newHashSet(SUB_SPECIALTY));
     specialtyDTO.setNhsSpecialtyCode(NHS_CODE);
     specialtyDTO.setCollege(COLLEGE);
     specialtyDTO.setStatus(Status.INACTIVE);

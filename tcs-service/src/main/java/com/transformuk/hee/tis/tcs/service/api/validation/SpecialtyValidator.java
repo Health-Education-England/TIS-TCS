@@ -3,15 +3,17 @@ package com.transformuk.hee.tis.tcs.service.api.validation;
 import com.google.common.collect.Lists;
 import com.transformuk.hee.tis.tcs.api.dto.SpecialtyDTO;
 import com.transformuk.hee.tis.tcs.api.dto.SpecialtyGroupDTO;
+import com.transformuk.hee.tis.tcs.api.enumeration.SpecialtyType;
 import com.transformuk.hee.tis.tcs.service.repository.SpecialtyGroupRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 import org.springframework.validation.BeanPropertyBindingResult;
 import org.springframework.validation.FieldError;
-import org.springframework.web.bind.MethodArgumentNotValidException;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Objects;
+import java.util.Set;
 
 /**
  * Custom validator for validating requests to create and update Specialties.
@@ -30,15 +32,28 @@ public class SpecialtyValidator {
     this.specialtyGroupRepository = specialtyGroupRepository;
   }
 
-  public void validate(SpecialtyDTO specialtyDTO) throws MethodArgumentNotValidException {
+  public void validate(SpecialtyDTO specialtyDTO) throws ValidationException {
     List<FieldError> fieldErrors = new ArrayList<>();
+    fieldErrors.addAll(checkSpecialtyTypes(specialtyDTO.getSpecialtyTypes()));
     fieldErrors.addAll(checkSpecialtyGroup(specialtyDTO.getSpecialtyGroup()));
 
     if (!fieldErrors.isEmpty()) {
       BeanPropertyBindingResult bindingResult = new BeanPropertyBindingResult(specialtyDTO, "SpecialtyDTO");
       fieldErrors.forEach(bindingResult::addError);
-      throw new MethodArgumentNotValidException(null, bindingResult);
+      throw new ValidationException(bindingResult);
     }
+  }
+
+  private List<FieldError> checkSpecialtyTypes(Set<SpecialtyType> specialtyTypes) {
+    List<FieldError> fieldErrors = Lists.newArrayList();
+    if (specialtyTypes == null) {
+      fieldErrors.add(new FieldError("SpecialtyDTO", "specialtyTypes", "SpecialtyTypes cannot be null"));
+    } else if (specialtyTypes.isEmpty()) {
+      fieldErrors.add(new FieldError("SpecialtyDTO", "specialtyTypes", "SpecialtyTypes cannot be empty"));
+    } else if (specialtyTypes.stream().anyMatch(Objects::isNull)) {
+      fieldErrors.add(new FieldError("SpecialtyDTO", "specialtyTypes", "SpecialtyType cannot be empty"));
+    }
+    return fieldErrors;
   }
 
   private List<FieldError> checkSpecialtyGroup(SpecialtyGroupDTO specialtyGroup) {

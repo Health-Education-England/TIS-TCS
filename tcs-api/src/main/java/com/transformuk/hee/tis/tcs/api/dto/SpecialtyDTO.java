@@ -12,6 +12,7 @@ import javax.validation.constraints.Null;
 import javax.validation.constraints.Size;
 import java.io.Serializable;
 import java.util.Objects;
+import java.util.Set;
 
 /**
  * A DTO for the Specialty entity.
@@ -33,8 +34,7 @@ public class SpecialtyDTO implements Serializable {
   @NotBlank(groups = {Create.class, Update.class}, message = "nhsSpecialtyCode cannot be blank")
   private String nhsSpecialtyCode;
 
-  @NotNull(groups = {Create.class, Update.class}, message = "SpecialtyType cannot be null")
-  private SpecialtyType specialtyType;
+  private Set<SpecialtyType> specialtyTypes;
 
   private SpecialtyGroupDTO specialtyGroup;
 
@@ -74,12 +74,12 @@ public class SpecialtyDTO implements Serializable {
     this.nhsSpecialtyCode = nhsSpecialtyCode;
   }
 
-  public SpecialtyType getSpecialtyType() {
-    return specialtyType;
+  public Set<SpecialtyType> getSpecialtyTypes() {
+    return specialtyTypes;
   }
 
-  public void setSpecialtyType(SpecialtyType specialtyType) {
-    this.specialtyType = specialtyType;
+  public void setSpecialtyTypes(Set<SpecialtyType> specialtyTypes) {
+    this.specialtyTypes = specialtyTypes;
   }
 
   public String getIntrepidId() {
@@ -137,7 +137,7 @@ public class SpecialtyDTO implements Serializable {
         ", status=" + status +
         ", college='" + college + '\'' +
         ", nhsSpecialtyCode='" + nhsSpecialtyCode + '\'' +
-        ", specialtyType=" + specialtyType +
+        ", specialtyTypes=" + specialtyTypes +
         ", specialtyGroup=" + specialtyGroup +
         ", name=" + name +
         '}';
