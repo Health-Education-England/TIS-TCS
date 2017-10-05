@@ -583,10 +583,9 @@ public class ProgrammeResourceIntTest {
 
   @Test
   @Transactional
-  public void shouldFilterByDeaneries() throws Exception {
+  public void shouldNotFilterByDeaneries() throws Exception {
     //given
     // Initialize the database
-    programmeRepository.saveAndFlush(programme);
     Programme otherDeaneryProgramme = createEntity();
     otherDeaneryProgramme.setManagingDeanery("Health Education England West Midlands");
     programmeRepository.saveAndFlush(otherDeaneryProgramme);
@@ -596,10 +595,10 @@ public class ProgrammeResourceIntTest {
     restProgrammeMockMvc.perform(get("/api/programmes?sort=id,desc"))
         .andExpect(status().isOk())
         .andExpect(content().contentType(MediaType.APPLICATION_JSON_UTF8_VALUE))
-        .andExpect(jsonPath("$.[*].id").value(hasItem(programme.getId().intValue())))
+        .andExpect(jsonPath("$.[*].id").value(hasItem(otherDeaneryProgramme.getId().intValue())))
         .andExpect(jsonPath("$.[*].status").value(hasItem(DEFAULT_STATUS.toString())))
         .andExpect(jsonPath("$.[*].intrepidId").value(hasItem(DEFAULT_INTREPID_ID.toString())))
-        .andExpect(jsonPath("$.[*].managingDeanery").value(hasItem(DEFAULT_MANAGING_DEANERY.toString())))
+        .andExpect(jsonPath("$.[*].managingDeanery").value(hasItem("Health Education England West Midlands")))
         .andExpect(jsonPath("$.[*].programmeName").value(hasItem(DEFAULT_PROGRAMME_NAME.toString())))
         .andExpect(jsonPath("$.[*].programmeNumber").value(hasItem(DEFAULT_PROGRAMME_NUMBER.toString())));
   }
