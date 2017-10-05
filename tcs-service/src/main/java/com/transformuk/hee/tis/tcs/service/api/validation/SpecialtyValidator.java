@@ -48,8 +48,6 @@ public class SpecialtyValidator {
     List<FieldError> fieldErrors = Lists.newArrayList();
     if (specialtyTypes == null) {
       fieldErrors.add(new FieldError("SpecialtyDTO", "specialtyTypes", "SpecialtyTypes cannot be null"));
-    } else if (specialtyTypes.isEmpty()) {
-      fieldErrors.add(new FieldError("SpecialtyDTO", "specialtyTypes", "SpecialtyTypes cannot be empty"));
     } else if (specialtyTypes.stream().anyMatch(Objects::isNull)) {
       fieldErrors.add(new FieldError("SpecialtyDTO", "specialtyTypes", "SpecialtyType cannot be empty"));
     }
