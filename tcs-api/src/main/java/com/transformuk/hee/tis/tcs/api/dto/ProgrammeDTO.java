@@ -41,8 +41,6 @@ public class ProgrammeDTO implements Serializable {
 
   private Set<CurriculumDTO> curricula;
 
-  private Set<TrainingNumberDTO> trainingNumbers;
-
   public Long getId() {
     return id;
   }
@@ -99,14 +97,6 @@ public class ProgrammeDTO implements Serializable {
     this.curricula = curricula;
   }
 
-  public  Set<TrainingNumberDTO> getTrainingNumbers() {
-    return trainingNumbers;
-  }
-
-  public void setTrainingNumbers(Set<TrainingNumberDTO> trainingNumbers) {
-    this.trainingNumbers = trainingNumbers;
-  }
-
   @Override
   public boolean equals(Object o) {
     if (this == o) {
@@ -140,7 +130,6 @@ public class ProgrammeDTO implements Serializable {
         ", programmeName='" + programmeName + "'" +
         ", programmeNumber='" + programmeNumber + "'" +
         ", curricula='" + curricula + "'" +
-        ", trainingNumbers'" + trainingNumbers + "'" +
         '}';
   }
 }
