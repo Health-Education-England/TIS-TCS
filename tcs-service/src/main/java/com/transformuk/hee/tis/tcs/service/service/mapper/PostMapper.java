@@ -2,8 +2,20 @@ package com.transformuk.hee.tis.tcs.service.service.mapper;
 
 import com.google.common.collect.Lists;
 import com.google.common.collect.Sets;
-import com.transformuk.hee.tis.tcs.api.dto.*;
-import com.transformuk.hee.tis.tcs.service.model.*;
+import com.transformuk.hee.tis.tcs.api.dto.PlacementDTO;
+import com.transformuk.hee.tis.tcs.api.dto.PostDTO;
+import com.transformuk.hee.tis.tcs.api.dto.PostGradeDTO;
+import com.transformuk.hee.tis.tcs.api.dto.PostSiteDTO;
+import com.transformuk.hee.tis.tcs.api.dto.PostSpecialtyDTO;
+import com.transformuk.hee.tis.tcs.api.dto.ProgrammeDTO;
+import com.transformuk.hee.tis.tcs.api.dto.SpecialtyDTO;
+import com.transformuk.hee.tis.tcs.service.model.Placement;
+import com.transformuk.hee.tis.tcs.service.model.Post;
+import com.transformuk.hee.tis.tcs.service.model.PostGrade;
+import com.transformuk.hee.tis.tcs.service.model.PostSite;
+import com.transformuk.hee.tis.tcs.service.model.PostSpecialty;
+import com.transformuk.hee.tis.tcs.service.model.Programme;
+import com.transformuk.hee.tis.tcs.service.model.Specialty;
 import org.apache.commons.collections4.CollectionUtils;
 import org.springframework.stereotype.Component;
 
@@ -132,7 +144,7 @@ public class PostMapper {
       result = new SpecialtyDTO();
       result.setId(specialty.getId());
       result.setName(specialty.getName());
-      result.setSpecialtyType(specialty.getSpecialtyType());
+      result.setSpecialtyTypes(specialty.getSpecialtyTypes());
       result.setNhsSpecialtyCode(specialty.getNhsSpecialtyCode());
       result.setStatus(specialty.getStatus());
     }
@@ -252,7 +264,7 @@ public class PostMapper {
       result = new Specialty();
       result.setId(specialtyDTO.getId());
       result.setName(specialtyDTO.getName());
-      result.setSpecialtyType(specialtyDTO.getSpecialtyType());
+      result.setSpecialtyTypes(specialtyDTO.getSpecialtyTypes());
       result.setNhsSpecialtyCode(specialtyDTO.getNhsSpecialtyCode());
       result.setStatus(specialtyDTO.getStatus());
     }
