@@ -153,15 +153,13 @@ public class ProgrammeResource {
     log.debug("REST request to get a page of Programmes");
 
     searchQuery = sanitize(searchQuery);
-    UserProfile userProfile = getProfileFromContext();
     List<Class> filterEnumList = Lists.newArrayList(Status.class);
     List<ColumnFilter> columnFilters = ColumnFilterUtil.getColumnFilters(columnFilterJson, filterEnumList);
     Page<ProgrammeDTO> page;
     if (StringUtils.isEmpty(searchQuery) && StringUtils.isEmpty(columnFilterJson)) {
-      page = programmeService.findAll(userProfile.getDesignatedBodyCodes(), pageable);
+      page = programmeService.findAll(pageable);
     } else {
-      page = programmeService.advancedSearch(
-          userProfile.getDesignatedBodyCodes(), searchQuery, columnFilters, pageable);
+      page = programmeService.advancedSearch(searchQuery, columnFilters, pageable);
     }
     HttpHeaders headers = PaginationUtil.generatePaginationHttpHeaders(page, "/api/programmes");
     return new ResponseEntity<>(page.getContent(), headers, HttpStatus.OK);

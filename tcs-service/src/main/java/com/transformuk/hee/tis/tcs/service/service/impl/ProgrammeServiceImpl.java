@@ -5,7 +5,6 @@ import com.transformuk.hee.tis.tcs.service.model.ColumnFilter;
 import com.transformuk.hee.tis.tcs.service.model.Programme;
 import com.transformuk.hee.tis.tcs.service.repository.ProgrammeRepository;
 import com.transformuk.hee.tis.tcs.service.service.ProgrammeService;
-import com.transformuk.hee.tis.tcs.service.service.mapper.DesignatedBodyMapper;
 import com.transformuk.hee.tis.tcs.service.service.mapper.ProgrammeMapper;
 import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
@@ -19,8 +18,6 @@ import org.springframework.transaction.annotation.Transactional;
 
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Set;
-import java.util.stream.Collectors;
 
 import static com.transformuk.hee.tis.tcs.service.service.impl.SpecificationFactory.containsLike;
 import static com.transformuk.hee.tis.tcs.service.service.impl.SpecificationFactory.in;
@@ -54,8 +51,7 @@ public class ProgrammeServiceImpl implements ProgrammeService {
     log.debug("Request to save Programme : {}", programmeDTO);
     Programme programme = programmeMapper.programmeDTOToProgramme(programmeDTO);
     programme = programmeRepository.save(programme);
-    ProgrammeDTO result = programmeMapper.programmeToProgrammeDTO(programme);
-    return result;
+    return programmeMapper.programmeToProgrammeDTO(programme);
   }
 
   /**
@@ -84,24 +80,7 @@ public class ProgrammeServiceImpl implements ProgrammeService {
     log.debug("Request to save Programme : {}", programmeDTO);
     List<Programme> programme = programmeMapper.programmeDTOsToProgrammes(programmeDTO);
     programme = programmeRepository.save(programme);
-    List<ProgrammeDTO> result = programmeMapper.programmesToProgrammeDTOs(programme);
-    return result;
-  }
-
-  /**
-   * Get all the programmes.
-   *
-   * @param pageable the pagination information
-   * @return the list of entities
-   */
-  @Override
-  @Transactional(readOnly = true)
-  public Page<ProgrammeDTO> findAll(Set<String> dbcs, Pageable pageable) {
-    log.debug("Request to get all Programmes");
-
-    Set<String> deaneries = DesignatedBodyMapper.map(dbcs);
-    Page<Programme> result = programmeRepository.findByManagingDeaneryIn(deaneries, pageable);
-    return result.map(programme -> programmeMapper.programmeToProgrammeDTO(programme));
+    return programmeMapper.programmesToProgrammeDTOs(programme);
   }
 
   /**
@@ -114,16 +93,15 @@ public class ProgrammeServiceImpl implements ProgrammeService {
   @Transactional(readOnly = true)
   public Page<ProgrammeDTO> findAll(Pageable pageable) {
     log.debug("Request to get all Programmes");
+
     Page<Programme> result = programmeRepository.findAll(pageable);
-    return result.map(programme -> programmeMapper.programmeToProgrammeDTO(programme));
+    return result.map(programmeMapper::programmeToProgrammeDTO);
   }
 
   @Override
   @Transactional(readOnly = true)
-  public Page<ProgrammeDTO> advancedSearch(
-      Set<String> dbcs, String searchString, List<ColumnFilter> columnFilters, Pageable pageable) {
+  public Page<ProgrammeDTO> advancedSearch(String searchString, List<ColumnFilter> columnFilters, Pageable pageable) {
 
-    Set<String> deaneries = DesignatedBodyMapper.map(dbcs);
     List<Specification<Programme>> specs = new ArrayList<>();
     //add the text search criteria
     if (StringUtils.isNotEmpty(searchString)) {
@@ -135,16 +113,19 @@ public class ProgrammeServiceImpl implements ProgrammeService {
     if (columnFilters != null && !columnFilters.isEmpty()) {
       columnFilters.forEach(cf -> specs.add(in(cf.getName(), cf.getValues())));
     }
-    //finally filter by deaneries
-    specs.add(in("managingDeanery", deaneries.stream().collect(Collectors.toList())));
-    Specifications<Programme> fullSpec = Specifications.where(specs.get(0));
-    //add the rest of the specs that made it in
-    for (int i = 1; i < specs.size(); i++) {
-      fullSpec = fullSpec.and(specs.get(i));
+    Page<Programme> result;
+    if (!specs.isEmpty()) {
+      Specifications<Programme> fullSpec = Specifications.where(specs.get(0));
+      //add the rest of the specs that made it in
+      for (int i = 1; i < specs.size(); i++) {
+        fullSpec = fullSpec.and(specs.get(i));
+      }
+      result = programmeRepository.findAll(fullSpec, pageable);
+    } else {
+      result = programmeRepository.findAll(pageable);
     }
-    Page<Programme> result = programmeRepository.findAll(fullSpec, pageable);
 
-    return result.map(programme -> programmeMapper.programmeToProgrammeDTO(programme));
+    return result.map(programmeMapper::programmeToProgrammeDTO);
   }
 
   /**
@@ -158,8 +139,7 @@ public class ProgrammeServiceImpl implements ProgrammeService {
   public ProgrammeDTO findOne(Long id) {
     log.debug("Request to get Programme : {}", id);
     Programme programme = programmeRepository.findOne(id);
-    ProgrammeDTO programmeDTO = programmeMapper.programmeToProgrammeDTO(programme);
-    return programmeDTO;
+    return programmeMapper.programmeToProgrammeDTO(programme);
   }
 
   /**
