@@ -227,26 +227,6 @@ public class SpecialtyResourceIntTest {
 
   @Test
   @Transactional
-  public void createSpecialtyShouldFailWithNoSpecialtyType() throws Exception {
-    int databaseSizeBeforeCreate = specialtyRepository.findAll().size();
-    SpecialtyGroup specialtyGroupEntity = createSpecialtyGroupEntity();
-    SpecialtyDTO specialtyDTO = linkSpecialtyToSpecialtyGroup(specialty, specialtyGroupEntity.getId());
-    specialtyDTO.setSpecialtyTypes(newHashSet());
-
-    // An entity with no specialty type cannot be created
-    restSpecialtyMockMvc.perform(post("/api/specialties")
-        .contentType(TestUtil.APPLICATION_JSON_UTF8)
-        .content(TestUtil.convertObjectToJsonBytes(specialtyDTO)))
-        .andExpect(jsonPath("$.fieldErrors[:1].field").value("specialtyTypes"))
-        .andExpect(status().isBadRequest());
-
-    // Validate that there are no new entities created
-    List<Specialty> specialtyList = specialtyRepository.findAll();
-    assertThat(specialtyList).hasSize(databaseSizeBeforeCreate);
-  }
-
-  @Test
-  @Transactional
   public void createSpecialtyShouldFailWithNoName() throws Exception {
     int databaseSizeBeforeCreate = specialtyRepository.findAll().size();
     SpecialtyGroup specialtyGroupEntity = createSpecialtyGroupEntity();
