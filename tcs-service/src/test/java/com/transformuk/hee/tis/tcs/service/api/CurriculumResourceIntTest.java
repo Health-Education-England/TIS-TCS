@@ -149,7 +149,7 @@ public class CurriculumResourceIntTest {
         .intrepidId(SPECIALTY_INTREPID_ID)
         .status(Status.CURRENT)
         .college(SPECIALTY_COLLEGE)
-        .nhsSpecialtyCode(NHS_SPECIALTY_CODE)
+        .specialtyCode(NHS_SPECIALTY_CODE)
         .specialtyTypes(Sets.newHashSet(SpecialtyType.SUB_SPECIALTY));
     return specialty;
   }

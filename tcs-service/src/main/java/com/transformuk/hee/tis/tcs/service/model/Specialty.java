@@ -40,8 +40,8 @@ public class Specialty implements Serializable {
   @Column(name = "college")
   private String college;
 
-  @Column(name = "nhsSpecialtyCode")
-  private String nhsSpecialtyCode;
+  @Column(name = "specialtyCode")
+  private String specialtyCode;
 
   @ElementCollection(targetClass = SpecialtyType.class)
   @CollectionTable(name = "SpecialtyTypes", joinColumns = {@JoinColumn(name = "specialtyId")})
@@ -90,16 +90,16 @@ public class Specialty implements Serializable {
     return this;
   }
 
-  public String getNhsSpecialtyCode() {
-    return nhsSpecialtyCode;
+  public String getSpecialtyCode() {
+    return specialtyCode;
   }
 
-  public void setNhsSpecialtyCode(String nhsSpecialtyCode) {
-    this.nhsSpecialtyCode = nhsSpecialtyCode;
+  public void setSpecialtyCode(String specialtyCode) {
+    this.specialtyCode = specialtyCode;
   }
 
-  public Specialty nhsSpecialtyCode(String nhsSpecialtyCode) {
-    this.nhsSpecialtyCode = nhsSpecialtyCode;
+  public Specialty specialtyCode(String specialtyCode) {
+    this.specialtyCode = specialtyCode;
     return this;
   }
 
@@ -182,7 +182,7 @@ public class Specialty implements Serializable {
         ", intrepidId='" + intrepidId + '\'' +
         ", status=" + status +
         ", college='" + college + '\'' +
-        ", nhsSpecialtyCode='" + nhsSpecialtyCode + '\'' +
+        ", specialtyCode='" + specialtyCode + '\'' +
         ", specialtyTypes=" + specialtyTypes +
         ", specialtyGroup=" + specialtyGroup +
         ", name=" + name +
