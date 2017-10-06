@@ -10,6 +10,7 @@ import javax.validation.constraints.NotNull;
 import javax.validation.constraints.Null;
 import java.io.Serializable;
 import java.time.LocalDate;
+import java.time.LocalDateTime;
 import java.util.Objects;
 
 /**
@@ -36,6 +37,8 @@ public class QualificationDTO implements Serializable {
 
   @NotNull(message = "Country Of Qualification is required", groups = {Update.class, Create.class})
   private String countryOfQualification;
+
+  private LocalDateTime amendedDate;
 
   public Long getId() {
     return id;
@@ -93,6 +96,14 @@ public class QualificationDTO implements Serializable {
     this.person = person;
   }
 
+  public LocalDateTime getAmendedDate() {
+    return amendedDate;
+  }
+
+  public void setAmendedDate(LocalDateTime amendedDate) {
+    this.amendedDate = amendedDate;
+  }
+
   @Override
   public boolean equals(Object o) {
     if (this == o) {
@@ -124,6 +135,7 @@ public class QualificationDTO implements Serializable {
         ", medicalSchool='" + getMedicalSchool() + "'" +
         ", countryOfQualification='" + getCountryOfQualification() + "'" +
         ", person='" + getPerson() + "'" +
+        ", amendedDate='" + getAmendedDate() + "'" +
         "}";
   }
 }

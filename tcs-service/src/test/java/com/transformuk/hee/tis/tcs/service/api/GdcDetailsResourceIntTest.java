@@ -24,6 +24,7 @@ import org.springframework.transaction.annotation.Transactional;
 
 import javax.persistence.EntityManager;
 import java.time.LocalDate;
+import java.time.LocalDateTime;
 import java.time.ZoneId;
 import java.util.List;
 
@@ -58,6 +59,8 @@ public class GdcDetailsResourceIntTest {
 
   private static final LocalDate DEFAULT_GDC_END_DATE = LocalDate.ofEpochDay(0L);
   private static final LocalDate UPDATED_GDC_END_DATE = LocalDate.now(ZoneId.systemDefault());
+
+  private static final LocalDateTime DEFAULT_AMENDED_DATE = LocalDateTime.now(ZoneId.systemDefault());
 
   @Autowired
   private GdcDetailsRepository gdcDetailsRepository;
@@ -138,6 +141,7 @@ public class GdcDetailsResourceIntTest {
     assertThat(testGdcDetails.getGdcStatus()).isEqualTo(DEFAULT_GDC_STATUS);
     assertThat(testGdcDetails.getGdcStartDate()).isEqualTo(DEFAULT_GDC_START_DATE);
     assertThat(testGdcDetails.getGdcEndDate()).isEqualTo(DEFAULT_GDC_END_DATE);
+    assertThat(testGdcDetails.getAmendedDate()).isAfter(DEFAULT_AMENDED_DATE);
   }
 
   @Test
@@ -223,7 +227,8 @@ public class GdcDetailsResourceIntTest {
         .andExpect(jsonPath("$.[*].gdcNumber").value(hasItem(DEFAULT_GDC_NUMBER.toString())))
         .andExpect(jsonPath("$.[*].gdcStatus").value(hasItem(DEFAULT_GDC_STATUS.toString())))
         .andExpect(jsonPath("$.[*].gdcStartDate").value(hasItem(DEFAULT_GDC_START_DATE.toString())))
-        .andExpect(jsonPath("$.[*].gdcEndDate").value(hasItem(DEFAULT_GDC_END_DATE.toString())));
+        .andExpect(jsonPath("$.[*].gdcEndDate").value(hasItem(DEFAULT_GDC_END_DATE.toString())))
+        .andExpect(jsonPath("$.[*].amendedDate").isNotEmpty());
   }
 
   @Test
@@ -240,7 +245,8 @@ public class GdcDetailsResourceIntTest {
         .andExpect(jsonPath("$.gdcNumber").value(DEFAULT_GDC_NUMBER.toString()))
         .andExpect(jsonPath("$.gdcStatus").value(DEFAULT_GDC_STATUS.toString()))
         .andExpect(jsonPath("$.gdcStartDate").value(DEFAULT_GDC_START_DATE.toString()))
-        .andExpect(jsonPath("$.gdcEndDate").value(DEFAULT_GDC_END_DATE.toString()));
+        .andExpect(jsonPath("$.gdcEndDate").value(DEFAULT_GDC_END_DATE.toString()))
+        .andExpect(jsonPath("$.amendedDate").isNotEmpty());
   }
 
   @Test
@@ -280,6 +286,7 @@ public class GdcDetailsResourceIntTest {
     assertThat(testGdcDetails.getGdcStatus()).isEqualTo(UPDATED_GDC_STATUS);
     assertThat(testGdcDetails.getGdcStartDate()).isEqualTo(UPDATED_GDC_START_DATE);
     assertThat(testGdcDetails.getGdcEndDate()).isEqualTo(UPDATED_GDC_END_DATE);
+    assertThat(testGdcDetails.getAmendedDate()).isAfter(DEFAULT_AMENDED_DATE);
   }
 
   @Test

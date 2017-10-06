@@ -56,6 +56,7 @@ public class QualificationMapper {
     result.setQualificationAttainedDate(qualification.getQualificationAttainedDate());
     result.setCountryOfQualification(qualification.getCountryOfQualification());
     result.setMedicalSchool(qualification.getMedicalSchool());
+    result.setAmendedDate(qualification.getAmendedDate());
     if (qualification.getPerson() == null) {
       result.setPerson(null);
     } else {
@@ -111,6 +112,7 @@ public class QualificationMapper {
     result.setQualificationAttainedDate(qualificationDTO.getQualificationAttainedDate());
     result.setCountryOfQualification(qualificationDTO.getCountryOfQualification());
     result.setMedicalSchool(qualificationDTO.getMedicalSchool());
+    result.setAmendedDate(qualificationDTO.getAmendedDate());
     if (qualificationDTO.getPerson() == null) {
       result.setPerson(null);
     } else {

@@ -22,6 +22,8 @@ import org.springframework.test.web.servlet.setup.MockMvcBuilders;
 import org.springframework.transaction.annotation.Transactional;
 
 import javax.persistence.EntityManager;
+import java.time.LocalDateTime;
+import java.time.ZoneId;
 import java.util.List;
 
 import static org.assertj.core.api.Assertions.assertThat;
@@ -85,6 +87,8 @@ public class ContactDetailsResourceIntTest {
 
   private static final String DEFAULT_POST_CODE = "AAAAAAAAAA";
   private static final String UPDATED_POST_CODE = "BBBBBBBBBB";
+
+  private static final LocalDateTime DEFAULT_AMENDED_DATE = LocalDateTime.now(ZoneId.systemDefault());
 
   @Autowired
   private ContactDetailsRepository contactDetailsRepository;
@@ -182,6 +186,7 @@ public class ContactDetailsResourceIntTest {
     assertThat(testContactDetails.getPostCode()).isEqualTo(DEFAULT_POST_CODE);
     assertThat(testContactDetails.getLegalSurname()).isEqualTo(DEFAULT_LEGAL_SURNAME);
     assertThat(testContactDetails.getLegalForenames()).isEqualTo(DEFAULT_LEGAL_FORENAMES);
+    assertThat(testContactDetails.getAmendedDate()).isAfter(DEFAULT_AMENDED_DATE);
   }
 
   @Test
@@ -279,7 +284,8 @@ public class ContactDetailsResourceIntTest {
         .andExpect(jsonPath("$.[*].address1").value(hasItem(DEFAULT_ADDRESS.toString())))
         .andExpect(jsonPath("$.[*].postCode").value(hasItem(DEFAULT_POST_CODE.toString())))
         .andExpect(jsonPath("$.[*].legalSurname").value(hasItem(DEFAULT_LEGAL_SURNAME.toString())))
-        .andExpect(jsonPath("$.[*].legalForenames").value(hasItem(DEFAULT_LEGAL_FORENAMES.toString())));
+        .andExpect(jsonPath("$.[*].legalForenames").value(hasItem(DEFAULT_LEGAL_FORENAMES.toString())))
+        .andExpect(jsonPath("$.[*].amendedDate").isNotEmpty());
   }
 
   @Test
@@ -306,7 +312,8 @@ public class ContactDetailsResourceIntTest {
         .andExpect(jsonPath("$.address1").value(DEFAULT_ADDRESS.toString()))
         .andExpect(jsonPath("$.postCode").value(DEFAULT_POST_CODE.toString()))
         .andExpect(jsonPath("$.legalSurname").value(DEFAULT_LEGAL_SURNAME.toString()))
-        .andExpect(jsonPath("$.legalForenames").value(DEFAULT_LEGAL_FORENAMES.toString()));
+        .andExpect(jsonPath("$.legalForenames").value(DEFAULT_LEGAL_FORENAMES.toString()))
+        .andExpect(jsonPath("$.amendedDate").isNotEmpty());
 
   }
 
@@ -367,6 +374,7 @@ public class ContactDetailsResourceIntTest {
     assertThat(testContactDetails.getPostCode()).isEqualTo(UPDATED_POST_CODE);
     assertThat(testContactDetails.getLegalSurname()).isEqualTo(UPDATED_LEGAL_SURNAME);
     assertThat(testContactDetails.getLegalForenames()).isEqualTo(UPDATED_LEGAL_FORENAMES);
+    assertThat(testContactDetails.getAmendedDate()).isAfter(DEFAULT_AMENDED_DATE);
   }
 
   @Test

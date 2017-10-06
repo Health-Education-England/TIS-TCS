@@ -2,6 +2,7 @@ package com.transformuk.hee.tis.tcs.service.model;
 
 
 import com.transformuk.hee.tis.tcs.api.enumeration.Status;
+import org.springframework.data.annotation.CreatedDate;
 
 import javax.persistence.CascadeType;
 import javax.persistence.Entity;
@@ -13,8 +14,9 @@ import javax.persistence.Id;
 import javax.persistence.JoinColumn;
 import javax.persistence.OneToMany;
 import javax.persistence.OneToOne;
+import javax.persistence.Version;
 import java.io.Serializable;
-import java.time.LocalDate;
+import java.time.LocalDateTime;
 import java.util.HashSet;
 import java.util.Objects;
 import java.util.Set;
@@ -33,9 +35,11 @@ public class Person implements Serializable {
 
   private String intrepidId;
 
-  private LocalDate addedDate;
+  @CreatedDate
+  private LocalDateTime addedDate;
 
-  private LocalDate amendedDate;
+  @Version
+  private LocalDateTime amendedDate;
 
   private String role;
 
@@ -44,7 +48,7 @@ public class Person implements Serializable {
 
   private String comments;
 
-  private LocalDate inactiveDate;
+  private LocalDateTime inactiveDate;
 
   private String inactiveNotes;
 
@@ -99,28 +103,28 @@ public class Person implements Serializable {
     return this;
   }
 
-  public LocalDate getAddedDate() {
+  public LocalDateTime getAddedDate() {
     return addedDate;
   }
 
-  public void setAddedDate(LocalDate addedDate) {
+  public void setAddedDate(LocalDateTime addedDate) {
     this.addedDate = addedDate;
   }
 
-  public Person addedDate(LocalDate addedDate) {
+  public Person addedDate(LocalDateTime addedDate) {
     this.addedDate = addedDate;
     return this;
   }
 
-  public LocalDate getAmendedDate() {
+  public LocalDateTime getAmendedDate() {
     return amendedDate;
   }
 
-  public void setAmendedDate(LocalDate amendedDate) {
+  public void setAmendedDate(LocalDateTime amendedDate) {
     this.amendedDate = amendedDate;
   }
 
-  public Person amendedDate(LocalDate amendedDate) {
+  public Person amendedDate(LocalDateTime amendedDate) {
     this.amendedDate = amendedDate;
     return this;
   }
@@ -164,15 +168,15 @@ public class Person implements Serializable {
     return this;
   }
 
-  public LocalDate getInactiveDate() {
+  public LocalDateTime getInactiveDate() {
     return inactiveDate;
   }
 
-  public void setInactiveDate(LocalDate inactiveDate) {
+  public void setInactiveDate(LocalDateTime inactiveDate) {
     this.inactiveDate = inactiveDate;
   }
 
-  public Person inactiveDate(LocalDate inactiveDate) {
+  public Person inactiveDate(LocalDateTime inactiveDate) {
     this.inactiveDate = inactiveDate;
     return this;
   }
