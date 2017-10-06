@@ -1,5 +1,6 @@
 package com.transformuk.hee.tis.tcs.service.exception;
 
+import com.transformuk.hee.tis.tcs.service.api.validation.ValidationException;
 import org.springframework.core.annotation.AnnotationUtils;
 import org.springframework.dao.ConcurrencyFailureException;
 import org.springframework.http.HttpStatus;
@@ -36,6 +37,16 @@ public class ExceptionTranslator {
   @ResponseStatus(HttpStatus.BAD_REQUEST)
   @ResponseBody
   public ErrorVM processValidationError(MethodArgumentNotValidException ex) {
+    BindingResult result = ex.getBindingResult();
+    List<FieldError> fieldErrors = result.getFieldErrors();
+
+    return processFieldErrors(fieldErrors);
+  }
+
+  @ExceptionHandler(ValidationException.class)
+  @ResponseStatus(HttpStatus.BAD_REQUEST)
+  @ResponseBody
+  public ErrorVM processValidationError(ValidationException ex) {
     BindingResult result = ex.getBindingResult();
     List<FieldError> fieldErrors = result.getFieldErrors();
 

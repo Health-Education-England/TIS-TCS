@@ -12,6 +12,7 @@ import javax.validation.constraints.Null;
 import javax.validation.constraints.Size;
 import java.io.Serializable;
 import java.util.Objects;
+import java.util.Set;
 
 /**
  * A DTO for the Specialty entity.
@@ -30,11 +31,10 @@ public class SpecialtyDTO implements Serializable {
 
   private String college;
 
-  @NotBlank(groups = {Create.class, Update.class}, message = "nhsSpecialtyCode cannot be blank")
-  private String nhsSpecialtyCode;
+  @NotBlank(groups = {Create.class, Update.class}, message = "specialtyCode cannot be blank")
+  private String specialtyCode;
 
-  @NotNull(groups = {Create.class, Update.class}, message = "SpecialtyType cannot be null")
-  private SpecialtyType specialtyType;
+  private Set<SpecialtyType> specialtyTypes;
 
   private SpecialtyGroupDTO specialtyGroup;
 
@@ -66,20 +66,20 @@ public class SpecialtyDTO implements Serializable {
     this.college = college;
   }
 
-  public String getNhsSpecialtyCode() {
-    return nhsSpecialtyCode;
+  public String getSpecialtyCode() {
+    return specialtyCode;
   }
 
-  public void setNhsSpecialtyCode(String nhsSpecialtyCode) {
-    this.nhsSpecialtyCode = nhsSpecialtyCode;
+  public void setSpecialtyCode(String specialtyCode) {
+    this.specialtyCode = specialtyCode;
   }
 
-  public SpecialtyType getSpecialtyType() {
-    return specialtyType;
+  public Set<SpecialtyType> getSpecialtyTypes() {
+    return specialtyTypes;
   }
 
-  public void setSpecialtyType(SpecialtyType specialtyType) {
-    this.specialtyType = specialtyType;
+  public void setSpecialtyTypes(Set<SpecialtyType> specialtyTypes) {
+    this.specialtyTypes = specialtyTypes;
   }
 
   public String getIntrepidId() {
@@ -136,8 +136,8 @@ public class SpecialtyDTO implements Serializable {
         ", intrepidId='" + intrepidId + '\'' +
         ", status=" + status +
         ", college='" + college + '\'' +
-        ", nhsSpecialtyCode='" + nhsSpecialtyCode + '\'' +
-        ", specialtyType=" + specialtyType +
+        ", specialtyCode='" + specialtyCode + '\'' +
+        ", specialtyTypes=" + specialtyTypes +
         ", specialtyGroup=" + specialtyGroup +
         ", name=" + name +
         '}';

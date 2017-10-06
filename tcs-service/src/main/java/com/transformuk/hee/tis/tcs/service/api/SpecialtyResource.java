@@ -11,6 +11,7 @@ import com.transformuk.hee.tis.tcs.service.api.util.ColumnFilterUtil;
 import com.transformuk.hee.tis.tcs.service.api.util.HeaderUtil;
 import com.transformuk.hee.tis.tcs.service.api.util.PaginationUtil;
 import com.transformuk.hee.tis.tcs.service.api.validation.SpecialtyValidator;
+import com.transformuk.hee.tis.tcs.service.api.validation.ValidationException;
 import com.transformuk.hee.tis.tcs.service.model.ColumnFilter;
 import com.transformuk.hee.tis.tcs.service.service.SpecialtyService;
 import io.github.jhipster.web.util.ResponseUtil;
@@ -27,7 +28,6 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.validation.annotation.Validated;
-import org.springframework.web.bind.MethodArgumentNotValidException;
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
@@ -76,7 +76,7 @@ public class SpecialtyResource {
   @PostMapping("/specialties")
   @Timed
   @PreAuthorize("hasAuthority('specialty:add:modify')")
-  public ResponseEntity<SpecialtyDTO> createSpecialty(@RequestBody @Validated(Create.class) SpecialtyDTO specialtyDTO) throws URISyntaxException, MethodArgumentNotValidException {
+  public ResponseEntity<SpecialtyDTO> createSpecialty(@RequestBody @Validated(Create.class) SpecialtyDTO specialtyDTO) throws URISyntaxException, ValidationException {
     log.debug("REST request to save Specialty : {}", specialtyDTO);
     specialtyValidator.validate(specialtyDTO);
     try {
@@ -102,7 +102,7 @@ public class SpecialtyResource {
   @PutMapping("/specialties")
   @Timed
   @PreAuthorize("hasAuthority('specialty:add:modify')")
-  public ResponseEntity<SpecialtyDTO> updateSpecialty(@RequestBody @Validated(Update.class) SpecialtyDTO specialtyDTO) throws URISyntaxException, MethodArgumentNotValidException {
+  public ResponseEntity<SpecialtyDTO> updateSpecialty(@RequestBody @Validated(Update.class) SpecialtyDTO specialtyDTO) throws URISyntaxException, ValidationException {
     log.debug("REST request to update Specialty : {}", specialtyDTO);
     specialtyValidator.validate(specialtyDTO);
     try {
@@ -189,7 +189,7 @@ public class SpecialtyResource {
   @PostMapping("/bulk-specialties")
   @Timed
   @PreAuthorize("hasAuthority('specialty:bulk:add:modify')")
-  public ResponseEntity<List<SpecialtyDTO>> bulkCreateSpecialties(@Valid @RequestBody List<SpecialtyDTO> specialtyDTOS) throws URISyntaxException {
+  public ResponseEntity<List<SpecialtyDTO>> bulkCreateSpecialties(@Valid @RequestBody List<SpecialtyDTO> specialtyDTOS) throws URISyntaxException, ValidationException {
     log.debug("REST request to bulk save Specialties : {}", specialtyDTOS);
     if (!Collections.isEmpty(specialtyDTOS)) {
       List<Long> entityIds = specialtyDTOS.stream()
@@ -200,8 +200,12 @@ public class SpecialtyResource {
         return ResponseEntity.badRequest().headers(HeaderUtil.createFailureAlert(StringUtils.join(entityIds, ","), "ids.exist", "A new Specialty cannot already have an ID")).body(null);
       }
     }
+
+    for (SpecialtyDTO specialtyDTO : specialtyDTOS) {
+      specialtyValidator.validate(specialtyDTO);
+    }
     List<SpecialtyDTO> result = specialtyService.save(specialtyDTOS);
-    List<Long> ids = result.stream().map(r -> r.getId()).collect(Collectors.toList());
+    List<Long> ids = result.stream().map(SpecialtyDTO::getId).collect(Collectors.toList());
     return ResponseEntity.ok()
         .headers(HeaderUtil.createEntityCreationAlert(ENTITY_NAME, StringUtils.join(ids, ",")))
         .body(result);
@@ -219,7 +223,7 @@ public class SpecialtyResource {
   @PutMapping("/bulk-specialties")
   @Timed
   @PreAuthorize("hasAuthority('specialty:bulk:add:modify')")
-  public ResponseEntity<List<SpecialtyDTO>> bulkUpdateSpecialties(@Valid @RequestBody List<SpecialtyDTO> specialtyDTOS) throws URISyntaxException {
+  public ResponseEntity<List<SpecialtyDTO>> bulkUpdateSpecialties(@Valid @RequestBody List<SpecialtyDTO> specialtyDTOS) throws URISyntaxException, ValidationException {
     log.debug("REST request to bulk update Specialties : {}", specialtyDTOS);
     if (Collections.isEmpty(specialtyDTOS)) {
       return ResponseEntity.badRequest().headers(HeaderUtil.createFailureAlert(ENTITY_NAME, "request.body.empty",
@@ -232,6 +236,9 @@ public class SpecialtyResource {
       }
     }
 
+    for (SpecialtyDTO specialtyDTO : specialtyDTOS) {
+      specialtyValidator.validate(specialtyDTO);
+    }
     List<SpecialtyDTO> results = specialtyService.save(specialtyDTOS);
     List<Long> ids = results.stream().map(r -> r.getId()).collect(Collectors.toList());
     return ResponseEntity.ok()
