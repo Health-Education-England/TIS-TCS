@@ -41,7 +41,7 @@ public class ContactDetailsServiceImpl implements ContactDetailsService {
   public ContactDetailsDTO save(ContactDetailsDTO contactDetailsDTO) {
     log.debug("Request to save ContactDetails : {}", contactDetailsDTO);
     ContactDetails contactDetails = contactDetailsMapper.toEntity(contactDetailsDTO);
-    contactDetails = contactDetailsRepository.save(contactDetails);
+    contactDetails = contactDetailsRepository.saveAndFlush(contactDetails);
     return contactDetailsMapper.toDto(contactDetails);
   }
 

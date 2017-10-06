@@ -41,7 +41,7 @@ public class GdcDetailsServiceImpl implements GdcDetailsService {
   public GdcDetailsDTO save(GdcDetailsDTO gdcDetailsDTO) {
     log.debug("Request to save GdcDetails : {}", gdcDetailsDTO);
     GdcDetails gdcDetails = gdcDetailsMapper.toEntity(gdcDetailsDTO);
-    gdcDetails = gdcDetailsRepository.save(gdcDetails);
+    gdcDetails = gdcDetailsRepository.saveAndFlush(gdcDetails);
     return gdcDetailsMapper.toDto(gdcDetails);
   }
 

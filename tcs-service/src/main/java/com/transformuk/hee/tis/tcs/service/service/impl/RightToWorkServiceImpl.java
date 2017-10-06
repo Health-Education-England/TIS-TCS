@@ -41,7 +41,7 @@ public class RightToWorkServiceImpl implements RightToWorkService {
   public RightToWorkDTO save(RightToWorkDTO rightToWorkDTO) {
     log.debug("Request to save RightToWork : {}", rightToWorkDTO);
     RightToWork rightToWork = rightToWorkMapper.toEntity(rightToWorkDTO);
-    rightToWork = rightToWorkRepository.save(rightToWork);
+    rightToWork = rightToWorkRepository.saveAndFlush(rightToWork);
     return rightToWorkMapper.toDto(rightToWork);
   }
 
