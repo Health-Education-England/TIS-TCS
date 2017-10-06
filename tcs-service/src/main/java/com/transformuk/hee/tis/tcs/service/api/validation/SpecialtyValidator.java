@@ -19,8 +19,8 @@ import java.util.Set;
  * Custom validator for validating requests to create and update Specialties.
  * <p>
  * Initially created as part of https://hee-tis.atlassian.net/browse/TISDEV-2189 it validates that the
- * id, status, nhsSpecialtyCode, specialtyType and name are required during update while during creation,
- * status, nhsSpecialtyCode, specialtyType and name are required
+ * id, status, specialtyCode, specialtyType and name are required during update while during creation,
+ * status, specialtyCode, specialtyType and name are required
  */
 @Component
 public class SpecialtyValidator {
