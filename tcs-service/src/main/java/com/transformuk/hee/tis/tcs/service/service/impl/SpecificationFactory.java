@@ -6,7 +6,10 @@ import org.springframework.data.jpa.domain.Specification;
 import javax.persistence.criteria.CriteriaBuilder;
 import javax.persistence.criteria.Join;
 import javax.persistence.criteria.JoinType;
+import javax.persistence.criteria.Predicate;
+import java.util.ArrayList;
 import java.util.Collection;
+import java.util.List;
 
 /**
  * Contains convenience pieces used to build specifications as query building blocks.
@@ -23,17 +26,35 @@ public final class SpecificationFactory {
 
   public static Specification containsLike(String attribute, String value) {
     return (root, query, cb) -> {
-      if(StringUtils.isNotEmpty(attribute) && attribute.contains(DOT)){
+      if (StringUtils.isNotEmpty(attribute) && attribute.contains(DOT)) {
         String[] joinTable = StringUtils.split(attribute, DOT);
-        Join tableJoin = root.join(joinTable[0],JoinType.LEFT);
+        Join tableJoin = root.join(joinTable[0], JoinType.LEFT);
         for (int i = 1; i < joinTable.length - 1; i++) {
-          tableJoin = tableJoin.join(joinTable[i],JoinType.LEFT);
+          tableJoin = tableJoin.join(joinTable[i], JoinType.LEFT);
         }
-        return cb.like(tableJoin.get(joinTable[joinTable.length - 1]),"%" + value + "%");
-      }
-      else {
+        return cb.like(tableJoin.get(joinTable[joinTable.length - 1]), "%" + value + "%");
+      } else {
         return cb.like(root.get(attribute), "%" + value + "%");
       }
+    };
+  }
+
+  public static Specification inLike(String attribute, Collection<Object> values) {
+    return (root, query, cb) -> {
+      List<Predicate> predicates = new ArrayList<>();
+      if (StringUtils.isNotEmpty(attribute) && attribute.contains(DOT)) {
+        String[] joinTable = StringUtils.split(attribute, DOT);
+        Join tableJoin = root.join(joinTable[0], JoinType.LEFT);
+        for (int i = 1; i < joinTable.length - 1; i++) {
+          tableJoin = tableJoin.join(joinTable[i], JoinType.LEFT);
+        }
+        for (Object v : values) {
+          predicates.add(cb.like(tableJoin.get(joinTable[joinTable.length - 1]), "%" + v + "%"));
+        }
+      } else {
+        values.forEach(v -> predicates.add(cb.like(root.get(attribute), "%" + v + "%")));
+      }
+      return cb.or(predicates.toArray(new Predicate[predicates.size()]));
     };
   }
 
