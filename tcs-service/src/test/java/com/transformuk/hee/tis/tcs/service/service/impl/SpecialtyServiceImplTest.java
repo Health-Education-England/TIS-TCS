@@ -52,7 +52,7 @@ public class SpecialtyServiceImplTest {
     specialtyDTO.setSpecialtyGroup(new SpecialtyGroupDTO());
     specialtyDTO.setIntrepidId(INTREPID_ID);
     specialtyDTO.setSpecialtyTypes(Sets.newHashSet(SUB_SPECIALTY));
-    specialtyDTO.setNhsSpecialtyCode(NHS_CODE);
+    specialtyDTO.setSpecialtyCode(NHS_CODE);
     specialtyDTO.setCollege(COLLEGE);
     specialtyDTO.setStatus(Status.INACTIVE);
   }

@@ -31,8 +31,8 @@ public class SpecialtyDTO implements Serializable {
 
   private String college;
 
-  @NotBlank(groups = {Create.class, Update.class}, message = "nhsSpecialtyCode cannot be blank")
-  private String nhsSpecialtyCode;
+  @NotBlank(groups = {Create.class, Update.class}, message = "specialtyCode cannot be blank")
+  private String specialtyCode;
 
   private Set<SpecialtyType> specialtyTypes;
 
@@ -66,12 +66,12 @@ public class SpecialtyDTO implements Serializable {
     this.college = college;
   }
 
-  public String getNhsSpecialtyCode() {
-    return nhsSpecialtyCode;
+  public String getSpecialtyCode() {
+    return specialtyCode;
   }
 
-  public void setNhsSpecialtyCode(String nhsSpecialtyCode) {
-    this.nhsSpecialtyCode = nhsSpecialtyCode;
+  public void setSpecialtyCode(String specialtyCode) {
+    this.specialtyCode = specialtyCode;
   }
 
   public Set<SpecialtyType> getSpecialtyTypes() {
@@ -136,7 +136,7 @@ public class SpecialtyDTO implements Serializable {
         ", intrepidId='" + intrepidId + '\'' +
         ", status=" + status +
         ", college='" + college + '\'' +
-        ", nhsSpecialtyCode='" + nhsSpecialtyCode + '\'' +
+        ", specialtyCode='" + specialtyCode + '\'' +
         ", specialtyTypes=" + specialtyTypes +
         ", specialtyGroup=" + specialtyGroup +
         ", name=" + name +
