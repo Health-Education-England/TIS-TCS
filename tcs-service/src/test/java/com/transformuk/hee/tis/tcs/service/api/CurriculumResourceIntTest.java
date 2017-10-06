@@ -1,5 +1,6 @@
 package com.transformuk.hee.tis.tcs.service.api;
 
+import com.google.common.collect.Sets;
 import com.transformuk.hee.tis.tcs.api.dto.CurriculumDTO;
 import com.transformuk.hee.tis.tcs.api.dto.SpecialtyDTO;
 import com.transformuk.hee.tis.tcs.api.enumeration.AssessmentType;
@@ -148,8 +149,8 @@ public class CurriculumResourceIntTest {
         .intrepidId(SPECIALTY_INTREPID_ID)
         .status(Status.CURRENT)
         .college(SPECIALTY_COLLEGE)
-        .nhsSpecialtyCode(NHS_SPECIALTY_CODE)
-        .specialtyType(SpecialtyType.SUB_SPECIALTY);
+        .specialtyCode(NHS_SPECIALTY_CODE)
+        .specialtyTypes(Sets.newHashSet(SpecialtyType.SUB_SPECIALTY));
     return specialty;
   }
 

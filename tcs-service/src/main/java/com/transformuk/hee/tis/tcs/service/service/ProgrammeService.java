@@ -38,15 +38,6 @@ public interface ProgrammeService {
   List<ProgrammeDTO> save(List<ProgrammeDTO> programmeDTO);
 
   /**
-   * Get all the programmes within the given designated body codes.
-   *
-   * @param dbcs     the designated body codes to search through
-   * @param pageable the pagination information
-   * @return the list of entities
-   */
-  Page<ProgrammeDTO> findAll(Set<String> dbcs, Pageable pageable);
-
-  /**
    * Get all the programmes.
    *
    * @param pageable the pagination information
@@ -58,14 +49,12 @@ public interface ProgrammeService {
    * Get all the programmes within the given designated body codes using the
    * given smart search string.
    *
-   * @param dbcs         the designated body codes to search through not null
    * @param searchString the search string to match, can be null
    * @param columnFilers the exact key value filters to apply, can be null
    * @param pageable     the pagination information
    * @return the list of entities
    */
-  Page<ProgrammeDTO> advancedSearch(
-      Set<String> dbcs, String searchString, List<ColumnFilter> columnFilers, Pageable pageable);
+  Page<ProgrammeDTO> advancedSearch(String searchString, List<ColumnFilter> columnFilers, Pageable pageable);
 
   /**
    * Get the "id" programme.

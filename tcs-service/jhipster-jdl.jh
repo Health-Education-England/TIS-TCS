@@ -1,4 +1,5 @@
 entity Programme {
+entity Programme {
 	status Status,
     managingDeanery String
     programmeName String,
@@ -53,7 +54,7 @@ entity Specialty {
 	id String,
     status Status,
     college String,
-    nhsSpecialtyCode String,
+    specialtyCode String,
     specialtyType SpecialtyType
 }
 

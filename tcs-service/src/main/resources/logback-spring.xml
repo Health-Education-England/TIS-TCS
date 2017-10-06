@@ -3,7 +3,7 @@
   <property name="LOG_FILE_NAME" value="tcs.log"/>
   <include resource="org/springframework/boot/logging/logback/base.xml"/>
   <include resource="audit-logback.xml"/>
-  <logger name="com.transformuk.hee.tis" level="DEBUG"/>
+  <logger name="com.transformuk.hee.tis" level="INFO"/>
 
   <logger name="io.github.jhipster" level="DEBUG"/>
 

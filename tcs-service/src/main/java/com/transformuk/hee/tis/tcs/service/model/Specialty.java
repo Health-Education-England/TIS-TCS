@@ -3,8 +3,20 @@ package com.transformuk.hee.tis.tcs.service.model;
 import com.transformuk.hee.tis.tcs.api.enumeration.SpecialtyType;
 import com.transformuk.hee.tis.tcs.api.enumeration.Status;
 
-import javax.persistence.*;
+import javax.persistence.CollectionTable;
+import javax.persistence.Column;
+import javax.persistence.ElementCollection;
+import javax.persistence.Entity;
+import javax.persistence.EnumType;
+import javax.persistence.Enumerated;
+import javax.persistence.FetchType;
+import javax.persistence.GeneratedValue;
+import javax.persistence.GenerationType;
+import javax.persistence.Id;
+import javax.persistence.JoinColumn;
+import javax.persistence.ManyToOne;
 import java.io.Serializable;
+import java.util.HashSet;
 import java.util.Objects;
 import java.util.Set;
 
@@ -28,11 +40,14 @@ public class Specialty implements Serializable {
   @Column(name = "college")
   private String college;
 
-  @Column(name = "nhsSpecialtyCode")
-  private String nhsSpecialtyCode;
+  @Column(name = "specialtyCode")
+  private String specialtyCode;
 
+  @ElementCollection(targetClass = SpecialtyType.class)
+  @CollectionTable(name = "SpecialtyTypes", joinColumns = {@JoinColumn(name = "specialtyId")})
+  @Column(name = "specialtyType")
   @Enumerated(EnumType.STRING)
-  private SpecialtyType specialtyType;
+  private Set<SpecialtyType> specialtyTypes = new HashSet<>();
 
   @ManyToOne(fetch = FetchType.EAGER)
   @JoinColumn(name = "specialtyGroupId", referencedColumnName = "id")
@@ -75,29 +90,29 @@ public class Specialty implements Serializable {
     return this;
   }
 
-  public String getNhsSpecialtyCode() {
-    return nhsSpecialtyCode;
+  public String getSpecialtyCode() {
+    return specialtyCode;
   }
 
-  public void setNhsSpecialtyCode(String nhsSpecialtyCode) {
-    this.nhsSpecialtyCode = nhsSpecialtyCode;
+  public void setSpecialtyCode(String specialtyCode) {
+    this.specialtyCode = specialtyCode;
   }
 
-  public Specialty nhsSpecialtyCode(String nhsSpecialtyCode) {
-    this.nhsSpecialtyCode = nhsSpecialtyCode;
+  public Specialty specialtyCode(String specialtyCode) {
+    this.specialtyCode = specialtyCode;
     return this;
   }
 
-  public SpecialtyType getSpecialtyType() {
-    return specialtyType;
+  public Set<SpecialtyType> getSpecialtyTypes() {
+    return specialtyTypes;
   }
 
-  public void setSpecialtyType(SpecialtyType specialtyType) {
-    this.specialtyType = specialtyType;
+  public void setSpecialtyTypes(Set<SpecialtyType> specialtyTypes) {
+    this.specialtyTypes = specialtyTypes;
   }
 
-  public Specialty specialtyType(SpecialtyType specialtyType) {
-    this.specialtyType = specialtyType;
+  public Specialty specialtyTypes(Set<SpecialtyType> specialtyTypes) {
+    this.specialtyTypes = specialtyTypes;
     return this;
   }
 
@@ -167,8 +182,8 @@ public class Specialty implements Serializable {
         ", intrepidId='" + intrepidId + '\'' +
         ", status=" + status +
         ", college='" + college + '\'' +
-        ", nhsSpecialtyCode='" + nhsSpecialtyCode + '\'' +
-        ", specialtyType=" + specialtyType +
+        ", specialtyCode='" + specialtyCode + '\'' +
+        ", specialtyTypes=" + specialtyTypes +
         ", specialtyGroup=" + specialtyGroup +
         ", name=" + name +
         '}';
