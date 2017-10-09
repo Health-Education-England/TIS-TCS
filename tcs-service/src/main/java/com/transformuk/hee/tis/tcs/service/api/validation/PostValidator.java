@@ -2,12 +2,7 @@ package com.transformuk.hee.tis.tcs.service.api.validation;
 
 import com.google.common.collect.Lists;
 import com.transformuk.hee.tis.reference.client.impl.ReferenceServiceImpl;
-import com.transformuk.hee.tis.tcs.api.dto.PlacementDTO;
-import com.transformuk.hee.tis.tcs.api.dto.PostDTO;
-import com.transformuk.hee.tis.tcs.api.dto.PostGradeDTO;
-import com.transformuk.hee.tis.tcs.api.dto.PostSiteDTO;
-import com.transformuk.hee.tis.tcs.api.dto.PostSpecialtyDTO;
-import com.transformuk.hee.tis.tcs.api.dto.ProgrammeDTO;
+import com.transformuk.hee.tis.tcs.api.dto.*;
 import com.transformuk.hee.tis.tcs.api.enumeration.PostSpecialtyType;
 import com.transformuk.hee.tis.tcs.service.model.Post;
 import com.transformuk.hee.tis.tcs.service.repository.PlacementRepository;
@@ -15,6 +10,7 @@ import com.transformuk.hee.tis.tcs.service.repository.PostRepository;
 import com.transformuk.hee.tis.tcs.service.repository.ProgrammeRepository;
 import com.transformuk.hee.tis.tcs.service.repository.SpecialtyRepository;
 import com.transformuk.hee.tis.tcs.service.service.mapper.DesignatedBodyMapper;
+import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 import org.springframework.util.CollectionUtils;
@@ -36,6 +32,8 @@ public class PostValidator {
   public static final String POST_DTO_NAME = "PostDTO";
   public static final String NATIONAL_POST_NUMBER = "nationalPostNumber";
   public static final String SPECIALTIES = "specialties";
+  public static final String FUNDING_INFO = "fundingInfo";
+  public static final String OTHER_FUNDING_TYPE = "Other";
   private ProgrammeRepository programmeRepository;
   private PostRepository postRepository;
   private SpecialtyRepository specialtyRepository;
@@ -79,12 +77,23 @@ public class PostValidator {
     fieldErrors.addAll(checkSpecialties(postDTO));
     fieldErrors.addAll(checkPlacementHistory(postDTO));
     fieldErrors.addAll(checkNationalPostNumber(postDTO));
+    fieldErrors.addAll(checkFunding(postDTO));
 
     if (!fieldErrors.isEmpty()) {
       BeanPropertyBindingResult bindingResult = new BeanPropertyBindingResult(postDTO, POST_DTO_NAME);
       fieldErrors.forEach(bindingResult::addError);
       throw new MethodArgumentNotValidException(null, bindingResult);
     }
+  }
+
+  List<FieldError> checkFunding(PostDTO postDTO) {
+    List<FieldError> fieldErrors = new ArrayList<>();
+
+    if (StringUtils.equalsIgnoreCase(postDTO.getFundingType(), OTHER_FUNDING_TYPE) && StringUtils.isBlank(postDTO.getFundingInfo())) {
+      fieldErrors.add(new FieldError(POST_DTO_NAME, FUNDING_INFO, "fundingInfo cannot be empty when selecting Other as a Funding Type"));
+    }
+
+    return fieldErrors;
   }
 
   private List<FieldError> checkNationalPostNumber(PostDTO postDTO) {
@@ -143,12 +152,12 @@ public class PostValidator {
           fieldErrors.add(new FieldError(POST_DTO_NAME, "sites",
               "Site ID cannot be null or negative"));
         } else {
-            siteIds.add(Long.valueOf(ps.getSiteId()));
+          siteIds.add(Long.valueOf(ps.getSiteId()));
         }
       }
-      if(!CollectionUtils.isEmpty(siteIds)){
-        Map<Long,Boolean> siteIdsExistsMap = referenceService.siteExists(siteIds);
-        notExistsFieldErrors(fieldErrors, siteIdsExistsMap,"sites","Site");
+      if (!CollectionUtils.isEmpty(siteIds)) {
+        Map<Long, Boolean> siteIdsExistsMap = referenceService.siteExists(siteIds);
+        notExistsFieldErrors(fieldErrors, siteIdsExistsMap, "sites", "Site");
       }
 
     }
@@ -168,20 +177,20 @@ public class PostValidator {
           gradeIds.add(Long.valueOf(pg.getGradeId()));
         }
       }
-      if(!CollectionUtils.isEmpty(gradeIds)){
-        Map<Long,Boolean> gradeIdsExistsMap = referenceService.gradeExists(gradeIds);
-        notExistsFieldErrors(fieldErrors, gradeIdsExistsMap,"grades","Grade");
+      if (!CollectionUtils.isEmpty(gradeIds)) {
+        Map<Long, Boolean> gradeIdsExistsMap = referenceService.gradeExists(gradeIds);
+        notExistsFieldErrors(fieldErrors, gradeIdsExistsMap, "grades", "Grade");
       }
     }
     return fieldErrors;
   }
 
   private void notExistsFieldErrors(List<FieldError> fieldErrors, Map<Long, Boolean> gradeIdsExistsMap,
-                                    String field,String entityName) {
-    gradeIdsExistsMap.forEach((k,v) -> {
-      if(!v){
+                                    String field, String entityName) {
+    gradeIdsExistsMap.forEach((k, v) -> {
+      if (!v) {
         fieldErrors.add(new FieldError(POST_DTO_NAME, field,
-            String.format("%s with id %s does not exist",entityName, k)));
+            String.format("%s with id %s does not exist", entityName, k)));
       }
     });
   }
