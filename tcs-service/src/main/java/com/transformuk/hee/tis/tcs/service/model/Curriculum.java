@@ -85,6 +85,11 @@ public class Curriculum implements Serializable {
     this.status = status;
   }
 
+  public Curriculum status(Status status) {
+    this.status = status;
+    return this;
+  }
+
   public String getName() {
     return name;
   }

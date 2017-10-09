@@ -138,7 +138,8 @@ public class CurriculumResourceIntTest {
         .curriculumSubType(curriculumSubType)
         .assessmentType(assessmentType)
         .doesThisCurriculumLeadToCct(doesThisCurrLeadToCct)
-        .periodOfGrace(periodOfGrace);
+        .periodOfGrace(periodOfGrace)
+        .status(Status.CURRENT);
 
     return curriculum;
   }
