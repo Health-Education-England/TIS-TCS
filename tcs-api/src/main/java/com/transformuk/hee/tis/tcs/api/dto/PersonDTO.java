@@ -10,6 +10,7 @@ import javax.validation.constraints.NotNull;
 import javax.validation.constraints.Null;
 import java.io.Serializable;
 import java.time.LocalDate;
+import java.time.LocalDateTime;
 import java.util.HashSet;
 import java.util.Set;
 
@@ -25,9 +26,9 @@ public class PersonDTO implements Serializable {
 
   private String intrepidId;
 
-  private LocalDate addedDate;
+  private LocalDateTime addedDate;
 
-  private LocalDate amendedDate;
+  private LocalDateTime amendedDate;
 
   private String role;
 
@@ -36,7 +37,7 @@ public class PersonDTO implements Serializable {
 
   private String comments;
 
-  private LocalDate inactiveDate;
+  private LocalDateTime inactiveDate;
 
   private String inactiveNotes;
 
@@ -74,19 +75,19 @@ public class PersonDTO implements Serializable {
     this.intrepidId = intrepidId;
   }
 
-  public LocalDate getAddedDate() {
+  public LocalDateTime getAddedDate() {
     return addedDate;
   }
 
-  public void setAddedDate(LocalDate addedDate) {
+  public void setAddedDate(LocalDateTime addedDate) {
     this.addedDate = addedDate;
   }
 
-  public LocalDate getAmendedDate() {
+  public LocalDateTime getAmendedDate() {
     return amendedDate;
   }
 
-  public void setAmendedDate(LocalDate amendedDate) {
+  public void setAmendedDate(LocalDateTime amendedDate) {
     this.amendedDate = amendedDate;
   }
 
@@ -114,11 +115,11 @@ public class PersonDTO implements Serializable {
     this.comments = comments;
   }
 
-  public LocalDate getInactiveDate() {
+  public LocalDateTime getInactiveDate() {
     return inactiveDate;
   }
 
-  public void setInactiveDate(LocalDate inactiveDate) {
+  public void setInactiveDate(LocalDateTime inactiveDate) {
     this.inactiveDate = inactiveDate;
   }
 

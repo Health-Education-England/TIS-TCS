@@ -42,7 +42,7 @@ public class ProgrammeMembershipServiceImpl implements ProgrammeMembershipServic
   public ProgrammeMembershipDTO save(ProgrammeMembershipDTO programmeMembershipDTO) {
     log.debug("Request to save ProgrammeMembership : {}", programmeMembershipDTO);
     ProgrammeMembership programmeMembership = programmeMembershipMapper.toEntity(programmeMembershipDTO);
-    programmeMembership = programmeMembershipRepository.save(programmeMembership);
+    programmeMembership = programmeMembershipRepository.saveAndFlush(programmeMembership);
     ProgrammeMembershipDTO result = programmeMembershipMapper.toDto(programmeMembership);
     return result;
   }

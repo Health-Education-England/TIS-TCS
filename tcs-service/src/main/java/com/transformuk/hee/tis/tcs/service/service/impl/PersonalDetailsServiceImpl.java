@@ -41,7 +41,7 @@ public class PersonalDetailsServiceImpl implements PersonalDetailsService {
   public PersonalDetailsDTO save(PersonalDetailsDTO personalDetailsDTO) {
     log.debug("Request to save PersonalDetails : {}", personalDetailsDTO);
     PersonalDetails personalDetails = personalDetailsMapper.toEntity(personalDetailsDTO);
-    personalDetails = personalDetailsRepository.save(personalDetails);
+    personalDetails = personalDetailsRepository.saveAndFlush(personalDetails);
     return personalDetailsMapper.toDto(personalDetails);
   }
 

@@ -8,6 +8,7 @@ import javax.validation.constraints.DecimalMin;
 import javax.validation.constraints.NotNull;
 import java.io.Serializable;
 import java.time.LocalDate;
+import java.time.LocalDateTime;
 import java.util.Objects;
 
 /**
@@ -30,6 +31,8 @@ public class RightToWorkDTO implements Serializable {
   private LocalDate visaValidTo;
 
   private String visaDetails;
+
+  private LocalDateTime amendedDate;
 
   public Long getId() {
     return id;
@@ -87,6 +90,14 @@ public class RightToWorkDTO implements Serializable {
     this.visaDetails = visaDetails;
   }
 
+  public LocalDateTime getAmendedDate() {
+    return amendedDate;
+  }
+
+  public void setAmendedDate(LocalDateTime amendedDate) {
+    this.amendedDate = amendedDate;
+  }
+
   @Override
   public boolean equals(Object o) {
     if (this == o) {
@@ -118,6 +129,7 @@ public class RightToWorkDTO implements Serializable {
         ", visaIssued='" + getVisaIssued() + "'" +
         ", visaValidTo='" + getVisaValidTo() + "'" +
         ", visaDetails='" + getVisaDetails() + "'" +
+        ", amendedDate='" + getAmendedDate() + "'" +
         "}";
   }
 }

@@ -107,7 +107,7 @@ public class SpecialtyResourceIntTest {
     Specialty specialty = new Specialty()
         .status(DEFAULT_STATUS)
         .college(DEFAULT_COLLEGE)
-        .nhsSpecialtyCode(DEFAULT_NHS_SPECIALTY_CODE)
+        .specialtyCode(DEFAULT_NHS_SPECIALTY_CODE)
         .specialtyTypes(newHashSet(DEFAULT_SPECIALTY_TYPE))
         .intrepidId(DEFAULT_INTREPID_ID)
         .name(DEFAULT_NAME);
@@ -157,7 +157,7 @@ public class SpecialtyResourceIntTest {
     Specialty testSpecialty = specialtyList.get(specialtyList.size() - 1);
     assertThat(testSpecialty.getStatus()).isEqualTo(DEFAULT_STATUS);
     assertThat(testSpecialty.getCollege()).isEqualTo(DEFAULT_COLLEGE);
-    assertThat(testSpecialty.getNhsSpecialtyCode()).isEqualTo(DEFAULT_NHS_SPECIALTY_CODE);
+    assertThat(testSpecialty.getSpecialtyCode()).isEqualTo(DEFAULT_NHS_SPECIALTY_CODE);
     assertThat(testSpecialty.getSpecialtyTypes()).isEqualTo(newHashSet(DEFAULT_SPECIALTY_TYPE));
   }
 
@@ -188,13 +188,13 @@ public class SpecialtyResourceIntTest {
     SpecialtyGroup specialtyGroupEntity = createSpecialtyGroupEntity();
     specialtyGroupEntity = specialtyGroupRepository.saveAndFlush(specialtyGroupEntity);
     SpecialtyDTO specialtyDTO = linkSpecialtyToSpecialtyGroup(specialty, specialtyGroupEntity.getId());
-    specialtyDTO.setNhsSpecialtyCode(null);
+    specialtyDTO.setSpecialtyCode(null);
 
     // An entity with no nhs specialty code cannot be created
     restSpecialtyMockMvc.perform(post("/api/specialties")
         .contentType(TestUtil.APPLICATION_JSON_UTF8)
         .content(TestUtil.convertObjectToJsonBytes(specialtyDTO)))
-        .andExpect(jsonPath("$.fieldErrors[:1].field").value("nhsSpecialtyCode"))
+        .andExpect(jsonPath("$.fieldErrors[:1].field").value("specialtyCode"))
         .andExpect(status().isBadRequest());
 
     // Validate that there are no new entities created
@@ -211,13 +211,13 @@ public class SpecialtyResourceIntTest {
     SpecialtyGroup specialtyGroupEntity = createSpecialtyGroupEntity();
     specialtyGroupEntity = specialtyGroupRepository.saveAndFlush(specialtyGroupEntity);
     SpecialtyDTO specialtyDTO = linkSpecialtyToSpecialtyGroup(specialty, specialtyGroupEntity.getId());
-    specialtyDTO.setNhsSpecialtyCode("             ");
+    specialtyDTO.setSpecialtyCode("             ");
 
     // An entity with no nhs specialty code cannot be created
     restSpecialtyMockMvc.perform(post("/api/specialties")
         .contentType(TestUtil.APPLICATION_JSON_UTF8)
         .content(TestUtil.convertObjectToJsonBytes(specialtyDTO)))
-        .andExpect(jsonPath("$.fieldErrors[:1].field").value("nhsSpecialtyCode"))
+        .andExpect(jsonPath("$.fieldErrors[:1].field").value("specialtyCode"))
         .andExpect(status().isBadRequest());
 
     // Validate that there are no new entities created
@@ -284,7 +284,7 @@ public class SpecialtyResourceIntTest {
         .andExpect(jsonPath("$.[*].id").value(hasItem(specialty.getId().intValue())))
         .andExpect(jsonPath("$.[*].status").value(hasItem(DEFAULT_STATUS.toString())))
         .andExpect(jsonPath("$.[*].college").value(hasItem(DEFAULT_COLLEGE.toString())))
-        .andExpect(jsonPath("$.[*].nhsSpecialtyCode").value(hasItem(DEFAULT_NHS_SPECIALTY_CODE.toString())))
+        .andExpect(jsonPath("$.[*].specialtyCode").value(hasItem(DEFAULT_NHS_SPECIALTY_CODE.toString())))
         .andExpect(jsonPath("$.[*].specialtyTypes[0]").value(DEFAULT_SPECIALTY_TYPE.toString()));
   }
 
@@ -301,7 +301,7 @@ public class SpecialtyResourceIntTest {
         .andExpect(jsonPath("$.id").value(specialty.getId().intValue()))
         .andExpect(jsonPath("$.status").value(DEFAULT_STATUS.toString()))
         .andExpect(jsonPath("$.college").value(DEFAULT_COLLEGE.toString()))
-        .andExpect(jsonPath("$.nhsSpecialtyCode").value(DEFAULT_NHS_SPECIALTY_CODE.toString()))
+        .andExpect(jsonPath("$.specialtyCode").value(DEFAULT_NHS_SPECIALTY_CODE.toString()))
         .andExpect(jsonPath("$.specialtyTypes[0]").value(DEFAULT_SPECIALTY_TYPE.toString()));
   }
 
@@ -371,20 +371,20 @@ public class SpecialtyResourceIntTest {
     //given
     // Initialize the database
     specialtyRepository.saveAndFlush(specialty);
-    Specialty otherNhsSpecialtyCode = createEntity();
-    otherNhsSpecialtyCode.setNhsSpecialtyCode("TestNhsSpecialtyCode");
-    specialtyRepository.saveAndFlush(otherNhsSpecialtyCode);
+    Specialty otherSpecialtyCode = createEntity();
+    otherSpecialtyCode.setSpecialtyCode("TestSpecialtyCode");
+    specialtyRepository.saveAndFlush(otherSpecialtyCode);
     Specialty otherCollegeSpecialty = createEntity();
     otherCollegeSpecialty.setCollege("other college");
-    otherCollegeSpecialty.setNhsSpecialtyCode("TestNhsSpecialtyCode");
+    otherCollegeSpecialty.setSpecialtyCode("TestSpecialtyCode");
     specialtyRepository.saveAndFlush(otherCollegeSpecialty);
     //when & then
-    String colFilters = new URLCodec().encode("{\"nhsSpecialtyCode\":[\"TestNhsSpecialtyCode\"]}");
+    String colFilters = new URLCodec().encode("{\"specialtyCode\":[\"TestSpecialtyCode\"]}");
     // Get all the specialtyList
     restSpecialtyMockMvc.perform(get("/api/specialties?sort=id,desc&searchQuery=other&columnFilters=" +
         colFilters))
         .andExpect(status().isOk())
-        .andExpect(jsonPath("$.[*].nhsSpecialtyCode").value("TestNhsSpecialtyCode"));
+        .andExpect(jsonPath("$.[*].specialtyCode").value("TestSpecialtyCode"));
   }
 
   @Test
@@ -422,7 +422,7 @@ public class SpecialtyResourceIntTest {
     updatedSpecialty
         .status(UPDATED_STATUS)
         .college(UPDATED_COLLEGE)
-        .nhsSpecialtyCode(UPDATED_NHS_SPECIALTY_CODE)
+        .specialtyCode(UPDATED_NHS_SPECIALTY_CODE)
         .specialtyTypes(newHashSet(UPDATED_SPECIALTY_TYPE))
         .name(UPDATED_NAME);
     SpecialtyDTO specialtyDTO = linkSpecialtyToSpecialtyGroup(updatedSpecialty, specialtyGroupEntity.getId());
@@ -438,7 +438,7 @@ public class SpecialtyResourceIntTest {
     Specialty testSpecialty = specialtyList.get(specialtyList.size() - 1);
     assertThat(testSpecialty.getStatus()).isEqualTo(UPDATED_STATUS);
     assertThat(testSpecialty.getCollege()).isEqualTo(UPDATED_COLLEGE);
-    assertThat(testSpecialty.getNhsSpecialtyCode()).isEqualTo(UPDATED_NHS_SPECIALTY_CODE);
+    assertThat(testSpecialty.getSpecialtyCode()).isEqualTo(UPDATED_NHS_SPECIALTY_CODE);
     assertThat(testSpecialty.getSpecialtyTypes()).isEqualTo(newHashSet(UPDATED_SPECIALTY_TYPE));
   }
 
@@ -500,11 +500,11 @@ public class SpecialtyResourceIntTest {
     SpecialtyDTO specialtyDTO = linkSpecialtyToSpecialtyGroup(this.specialty, specialtyGroup.getId());
 
     // When status is null
-    specialtyDTO.setNhsSpecialtyCode(null);
+    specialtyDTO.setSpecialtyCode(null);
     restSpecialtyMockMvc.perform(put("/api/specialties")
         .contentType(TestUtil.APPLICATION_JSON_UTF8)
         .content(TestUtil.convertObjectToJsonBytes(specialtyDTO)))
-        .andExpect(jsonPath("$.fieldErrors[:1].field").value("nhsSpecialtyCode"))
+        .andExpect(jsonPath("$.fieldErrors[:1].field").value("specialtyCode"))
         .andExpect(status().isBadRequest());
   }
 
@@ -593,7 +593,7 @@ public class SpecialtyResourceIntTest {
     Specialty anotherSpecialty = new Specialty()
         .name("Name2")
         .intrepidId("IntrepidId2")
-        .nhsSpecialtyCode("specialtyCode")
+        .specialtyCode("specialtyCode")
         .name("name")
         .specialtyTypes(newHashSet(SpecialtyType.SUB_SPECIALTY))
         .college("a college");
@@ -623,7 +623,7 @@ public class SpecialtyResourceIntTest {
     Specialty anotherSpecialty = new Specialty()
         .name("Name2")
         .intrepidId("IntrepidId2")
-        .nhsSpecialtyCode("specialtyCode")
+        .specialtyCode("specialtyCode")
         .name("name")
         .specialtyTypes(newHashSet(SpecialtyType.SUB_SPECIALTY))
         .college("a college");
@@ -654,7 +654,7 @@ public class SpecialtyResourceIntTest {
     Specialty anotherSpecialty = new Specialty()
         .name("Name2")
         .intrepidId("IntrepidId2")
-        .nhsSpecialtyCode("specialtyCode")
+        .specialtyCode("specialtyCode")
         .name("name")
         .specialtyTypes(newHashSet(SpecialtyType.SUB_SPECIALTY))
         .college("a college");
@@ -691,7 +691,7 @@ public class SpecialtyResourceIntTest {
     Specialty anotherSpecialty = new Specialty()
         .name("Name2")
         .intrepidId("IntrepidId2")
-        .nhsSpecialtyCode("specialtyCode")
+        .specialtyCode("specialtyCode")
         .name("name")
         .specialtyTypes(newHashSet(SpecialtyType.SUB_SPECIALTY))
         .college("a college");

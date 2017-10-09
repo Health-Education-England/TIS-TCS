@@ -26,6 +26,7 @@ import org.springframework.transaction.annotation.Transactional;
 
 import javax.persistence.EntityManager;
 import java.time.LocalDate;
+import java.time.LocalDateTime;
 import java.time.ZoneId;
 import java.util.List;
 
@@ -66,6 +67,8 @@ public class RightToWorkResourceIntTest {
 
   private static final String DEFAULT_VISA_DETAILS = "AAAAAAAAAA";
   private static final String UPDATED_VISA_DETAILS = "BBBBBBBBBB";
+
+  private static final LocalDateTime DEFAULT_AMENDED_DATE = LocalDateTime.now(ZoneId.systemDefault());
 
   @Autowired
   private RightToWorkRepository rightToWorkRepository;
@@ -152,6 +155,7 @@ public class RightToWorkResourceIntTest {
     assertThat(testRightToWork.getVisaIssued()).isEqualTo(DEFAULT_VISA_ISSUED);
     assertThat(testRightToWork.getVisaValidTo()).isEqualTo(DEFAULT_VISA_VALID_TO);
     assertThat(testRightToWork.getVisaDetails()).isEqualTo(DEFAULT_VISA_DETAILS);
+    assertThat(testRightToWork.getAmendedDate()).isAfter(DEFAULT_AMENDED_DATE);
   }
 
   @Test
@@ -283,7 +287,8 @@ public class RightToWorkResourceIntTest {
         .andExpect(jsonPath("$.[*].settled").value(hasItem(DEFAULT_SETTLED.toString())))
         .andExpect(jsonPath("$.[*].visaIssued").value(hasItem(DEFAULT_VISA_ISSUED.toString())))
         .andExpect(jsonPath("$.[*].visaValidTo").value(hasItem(DEFAULT_VISA_VALID_TO.toString())))
-        .andExpect(jsonPath("$.[*].visaDetails").value(hasItem(DEFAULT_VISA_DETAILS.toString())));
+        .andExpect(jsonPath("$.[*].visaDetails").value(hasItem(DEFAULT_VISA_DETAILS.toString())))
+        .andExpect(jsonPath("$.[*].amendedDate").isNotEmpty());
   }
 
   @Test
@@ -302,7 +307,8 @@ public class RightToWorkResourceIntTest {
         .andExpect(jsonPath("$.settled").value(DEFAULT_SETTLED.toString()))
         .andExpect(jsonPath("$.visaIssued").value(DEFAULT_VISA_ISSUED.toString()))
         .andExpect(jsonPath("$.visaValidTo").value(DEFAULT_VISA_VALID_TO.toString()))
-        .andExpect(jsonPath("$.visaDetails").value(DEFAULT_VISA_DETAILS.toString()));
+        .andExpect(jsonPath("$.visaDetails").value(DEFAULT_VISA_DETAILS.toString()))
+        .andExpect(jsonPath("$.amendedDate").isNotEmpty());
   }
 
   @Test
@@ -346,6 +352,7 @@ public class RightToWorkResourceIntTest {
     assertThat(testRightToWork.getVisaIssued()).isEqualTo(UPDATED_VISA_ISSUED);
     assertThat(testRightToWork.getVisaValidTo()).isEqualTo(UPDATED_VISA_VALID_TO);
     assertThat(testRightToWork.getVisaDetails()).isEqualTo(UPDATED_VISA_DETAILS);
+    assertThat(testRightToWork.getAmendedDate()).isAfter(DEFAULT_AMENDED_DATE);
   }
 
   @Test

@@ -7,16 +7,19 @@ import com.transformuk.hee.tis.tcs.api.dto.GdcDetailsDTO;
 import com.transformuk.hee.tis.tcs.api.dto.GmcDetailsDTO;
 import com.transformuk.hee.tis.tcs.api.dto.PersonDTO;
 import com.transformuk.hee.tis.tcs.api.dto.PersonalDetailsDTO;
+import com.transformuk.hee.tis.tcs.api.dto.ProgrammeMembershipDTO;
 import com.transformuk.hee.tis.tcs.api.dto.QualificationDTO;
 import com.transformuk.hee.tis.tcs.api.dto.RightToWorkDTO;
 import com.transformuk.hee.tis.tcs.service.model.ColumnFilter;
 import com.transformuk.hee.tis.tcs.service.model.Person;
+import com.transformuk.hee.tis.tcs.service.model.ProgrammeMembership;
 import com.transformuk.hee.tis.tcs.service.repository.PersonRepository;
 import com.transformuk.hee.tis.tcs.service.service.ContactDetailsService;
 import com.transformuk.hee.tis.tcs.service.service.GdcDetailsService;
 import com.transformuk.hee.tis.tcs.service.service.GmcDetailsService;
 import com.transformuk.hee.tis.tcs.service.service.PersonService;
 import com.transformuk.hee.tis.tcs.service.service.PersonalDetailsService;
+import com.transformuk.hee.tis.tcs.service.service.ProgrammeMembershipService;
 import com.transformuk.hee.tis.tcs.service.service.QualificationService;
 import com.transformuk.hee.tis.tcs.service.service.RightToWorkService;
 import com.transformuk.hee.tis.tcs.service.service.mapper.PersonMapper;
@@ -65,6 +68,9 @@ public class PersonServiceImpl implements PersonService {
   private QualificationService qualificationService;
 
   @Autowired
+  private ProgrammeMembershipService programmeMembershipService;
+
+  @Autowired
   private RightToWorkService rightToWorkService;
 
   @Autowired
@@ -89,6 +95,7 @@ public class PersonServiceImpl implements PersonService {
     GdcDetailsDTO gdcDetailsDTO = personDTO.getGdcDetails();
     RightToWorkDTO rightToWorkDTO = personDTO.getRightToWork();
     Set<QualificationDTO> qualificationDTOs = personDTO.getQualifications();
+    Set<ProgrammeMembershipDTO> programmeMembershipDTOs = personDTO.getProgrammeMemberships();
 
     personDTO.setContactDetails(null);
     personDTO.setPersonalDetails(null);
@@ -96,9 +103,10 @@ public class PersonServiceImpl implements PersonService {
     personDTO.setGdcDetails(null);
     personDTO.setRightToWork(null);
     personDTO.setQualifications(null);
+    personDTO.setProgrammeMemberships(null);
 
     Person person = personMapper.toEntity(personDTO);
-    person = personRepository.save(person);
+    person = personRepository.saveAndFlush(person);
 
     final Long personId = person.getId();
 
@@ -149,7 +157,12 @@ public class PersonServiceImpl implements PersonService {
       updatedPersonDTO.setQualifications(Sets.newHashSet(qualificationService.save(Lists.newArrayList(qualificationDTOs))));
     }
 
-    return updatedPersonDTO;
+    if (programmeMembershipDTOs != null) {
+      programmeMembershipDTOs.forEach(p -> p.setPerson(updatedPersonDTO));
+      updatedPersonDTO.setProgrammeMemberships(Sets.newHashSet(programmeMembershipService.save(Lists.newArrayList(programmeMembershipDTOs))));
+    }
+
+    return findOne(updatedPersonDTO.getId());
   }
 
   /**

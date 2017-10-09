@@ -2,7 +2,6 @@ package com.transformuk.hee.tis.tcs.service.api;
 
 import com.transformuk.hee.tis.reference.client.impl.ReferenceServiceImpl;
 import com.transformuk.hee.tis.tcs.api.dto.ProgrammeMembershipDTO;
-import com.transformuk.hee.tis.tcs.api.dto.QualificationDTO;
 import com.transformuk.hee.tis.tcs.api.enumeration.ProgrammeMembershipType;
 import com.transformuk.hee.tis.tcs.service.Application;
 import com.transformuk.hee.tis.tcs.service.api.validation.ProgrammeMembershipValidator;
@@ -38,6 +37,7 @@ import org.springframework.transaction.annotation.Transactional;
 
 import javax.persistence.EntityManager;
 import java.time.LocalDate;
+import java.time.LocalDateTime;
 import java.time.ZoneId;
 import java.util.List;
 import java.util.Map;
@@ -97,6 +97,8 @@ public class ProgrammeMembershipResourceIntTest {
   private static final Long NOT_EXISTS_CURRICULUM_ID = 20202020l;
 
   private static final String NOT_EXISTS_ROTATION = "XYZ";
+
+  private static final LocalDateTime DEFAULT_AMENDED_DATE = LocalDateTime.now(ZoneId.systemDefault());
 
   @Autowired
   private ProgrammeMembershipRepository programmeMembershipRepository;
@@ -182,7 +184,7 @@ public class ProgrammeMembershipResourceIntTest {
   @Before
   public void setup() {
     MockitoAnnotations.initMocks(this);
-    programmeMembershipValidator = new ProgrammeMembershipValidator(personRepository,programmeRepository,curriculumRepository,referenceService);
+    programmeMembershipValidator = new ProgrammeMembershipValidator(personRepository, programmeRepository, curriculumRepository, referenceService);
     ProgrammeMembershipResource programmeMembershipResource = new ProgrammeMembershipResource(programmeMembershipService,
         programmeMembershipValidator);
     this.restProgrammeMembershipMockMvc = MockMvcBuilders.standaloneSetup(programmeMembershipResource)
@@ -466,7 +468,8 @@ public class ProgrammeMembershipResourceIntTest {
         .andExpect(jsonPath("$.[*].programmeStartDate").value(hasItem(DEFAULT_PROGRAMME_START_DATE.toString())))
         .andExpect(jsonPath("$.[*].curriculumCompletionDate").value(hasItem(DEFAULT_CURRICULUM_COMPLETION_DATE.toString())))
         .andExpect(jsonPath("$.[*].programmeEndDate").value(hasItem(DEFAULT_PROGRAMME_END_DATE.toString())))
-        .andExpect(jsonPath("$.[*].leavingDestination").value(hasItem(DEFAULT_LEAVING_DESTINATION.toString())));
+        .andExpect(jsonPath("$.[*].leavingDestination").value(hasItem(DEFAULT_LEAVING_DESTINATION.toString())))
+        .andExpect(jsonPath("$.[*].amendedDate").isNotEmpty());
   }
 
   @Test
@@ -489,7 +492,8 @@ public class ProgrammeMembershipResourceIntTest {
         .andExpect(jsonPath("$.programmeStartDate").value(DEFAULT_PROGRAMME_START_DATE.toString()))
         .andExpect(jsonPath("$.curriculumCompletionDate").value(DEFAULT_CURRICULUM_COMPLETION_DATE.toString()))
         .andExpect(jsonPath("$.programmeEndDate").value(DEFAULT_PROGRAMME_END_DATE.toString()))
-        .andExpect(jsonPath("$.leavingDestination").value(DEFAULT_LEAVING_DESTINATION.toString()));
+        .andExpect(jsonPath("$.leavingDestination").value(DEFAULT_LEAVING_DESTINATION.toString()))
+        .andExpect(jsonPath("$.amendedDate").isNotEmpty());
   }
 
   @Test
@@ -548,6 +552,7 @@ public class ProgrammeMembershipResourceIntTest {
     assertThat(testProgrammeMembership.getCurriculumCompletionDate()).isEqualTo(UPDATED_CURRICULUM_COMPLETION_DATE);
     assertThat(testProgrammeMembership.getProgrammeEndDate()).isEqualTo(UPDATED_PROGRAMME_END_DATE);
     assertThat(testProgrammeMembership.getLeavingDestination()).isEqualTo(UPDATED_LEAVING_DESTINATION);
+    assertThat(testProgrammeMembership.getAmendedDate()).isAfter(DEFAULT_AMENDED_DATE);
   }
 
   @Test

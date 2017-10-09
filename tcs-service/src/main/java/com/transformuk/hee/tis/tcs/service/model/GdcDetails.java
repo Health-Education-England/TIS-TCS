@@ -3,8 +3,10 @@ package com.transformuk.hee.tis.tcs.service.model;
 
 import javax.persistence.Entity;
 import javax.persistence.Id;
+import javax.persistence.Version;
 import java.io.Serializable;
 import java.time.LocalDate;
+import java.time.LocalDateTime;
 import java.util.Objects;
 
 /**
@@ -25,6 +27,9 @@ public class GdcDetails implements Serializable {
   private LocalDate gdcStartDate;
 
   private LocalDate gdcEndDate;
+
+  @Version
+  private LocalDateTime amendedDate;
 
   public Long getId() {
     return id;
@@ -91,6 +96,14 @@ public class GdcDetails implements Serializable {
     return this;
   }
 
+  public LocalDateTime getAmendedDate() {
+    return amendedDate;
+  }
+
+  public void setAmendedDate(LocalDateTime amendedDate) {
+    this.amendedDate = amendedDate;
+  }
+
   @Override
   public boolean equals(Object o) {
     if (this == o) {
@@ -119,6 +132,7 @@ public class GdcDetails implements Serializable {
         ", gdcStatus='" + getGdcStatus() + "'" +
         ", gdcStartDate='" + getGdcStartDate() + "'" +
         ", gdcEndDate='" + getGdcEndDate() + "'" +
+        ", amendedDate='" + getAmendedDate() + "'" +
         "}";
   }
 }

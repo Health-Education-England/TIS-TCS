@@ -41,7 +41,7 @@ public class GmcDetailsServiceImpl implements GmcDetailsService {
   public GmcDetailsDTO save(GmcDetailsDTO gmcDetailsDTO) {
     log.debug("Request to save GmcDetails : {}", gmcDetailsDTO);
     GmcDetails gmcDetails = gmcDetailsMapper.toEntity(gmcDetailsDTO);
-    gmcDetails = gmcDetailsRepository.save(gmcDetails);
+    gmcDetails = gmcDetailsRepository.saveAndFlush(gmcDetails);
     return gmcDetailsMapper.toDto(gmcDetails);
   }
 

@@ -145,7 +145,7 @@ public class PostMapper {
       result.setId(specialty.getId());
       result.setName(specialty.getName());
       result.setSpecialtyTypes(specialty.getSpecialtyTypes());
-      result.setNhsSpecialtyCode(specialty.getNhsSpecialtyCode());
+      result.setSpecialtyCode(specialty.getSpecialtyCode());
       result.setStatus(specialty.getStatus());
     }
     return result;
@@ -265,7 +265,7 @@ public class PostMapper {
       result.setId(specialtyDTO.getId());
       result.setName(specialtyDTO.getName());
       result.setSpecialtyTypes(specialtyDTO.getSpecialtyTypes());
-      result.setNhsSpecialtyCode(specialtyDTO.getNhsSpecialtyCode());
+      result.setSpecialtyCode(specialtyDTO.getSpecialtyCode());
       result.setStatus(specialtyDTO.getStatus());
     }
     return result;

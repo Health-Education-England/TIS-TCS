@@ -43,7 +43,7 @@ public class QualificationServiceImpl implements QualificationService {
   public QualificationDTO save(QualificationDTO qualificationDTO) {
     log.debug("Request to save Qualification : {}", qualificationDTO);
     Qualification qualification = qualificationMapper.toEntity(qualificationDTO);
-    qualification = qualificationRepository.save(qualification);
+    qualification = qualificationRepository.saveAndFlush(qualification);
     return qualificationMapper.toDto(qualification);
   }
 
