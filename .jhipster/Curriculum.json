@@ -23,6 +23,11 @@
 	}
   ],
   "fields": [
+    {
+      "fieldName": "status",
+      "fieldType": "Status",
+      "fieldValues": "CURRENT,INACTIVE,DELETE"
+    },
 	{
 	  "fieldName": "name",
 	  "fieldType": "String"

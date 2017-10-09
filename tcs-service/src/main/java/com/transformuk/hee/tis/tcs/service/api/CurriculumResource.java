@@ -7,6 +7,7 @@ import com.transformuk.hee.tis.tcs.api.dto.validation.Create;
 import com.transformuk.hee.tis.tcs.api.dto.validation.Update;
 import com.transformuk.hee.tis.tcs.api.enumeration.AssessmentType;
 import com.transformuk.hee.tis.tcs.api.enumeration.CurriculumSubType;
+import com.transformuk.hee.tis.tcs.api.enumeration.Status;
 import com.transformuk.hee.tis.tcs.service.api.util.ColumnFilterUtil;
 import com.transformuk.hee.tis.tcs.service.api.util.HeaderUtil;
 import com.transformuk.hee.tis.tcs.service.api.util.PaginationUtil;
@@ -156,7 +157,7 @@ public class CurriculumResource {
     log.debug("REST request to get a page of Curricula");
 
     searchQuery = sanitize(searchQuery);
-    List<Class> filterEnumList = Lists.newArrayList(CurriculumSubType.class, AssessmentType.class);
+    List<Class> filterEnumList = Lists.newArrayList(CurriculumSubType.class, AssessmentType.class, Status.class);
     List<ColumnFilter> columnFilters = ColumnFilterUtil.getColumnFilters(columnFilterJson, filterEnumList);
     Page<CurriculumDTO> page;
     if (StringUtils.isEmpty(searchQuery) && StringUtils.isEmpty(columnFilterJson)) {
