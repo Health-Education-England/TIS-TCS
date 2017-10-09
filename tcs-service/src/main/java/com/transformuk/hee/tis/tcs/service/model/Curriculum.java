@@ -2,6 +2,7 @@ package com.transformuk.hee.tis.tcs.service.model;
 
 import com.transformuk.hee.tis.tcs.api.enumeration.AssessmentType;
 import com.transformuk.hee.tis.tcs.api.enumeration.CurriculumSubType;
+import com.transformuk.hee.tis.tcs.api.enumeration.Status;
 
 import javax.persistence.Column;
 import javax.persistence.Entity;
@@ -30,6 +31,9 @@ public class Curriculum implements Serializable {
 
   @Column(name = "intrepidId")
   private String intrepidId;
+
+  @Enumerated(EnumType.STRING)
+  private Status status;
 
   @Column(name = "name")
   private String name;
@@ -71,6 +75,14 @@ public class Curriculum implements Serializable {
   public Curriculum intrepidId(String intrepidId) {
     this.intrepidId = intrepidId;
     return this;
+  }
+
+  public Status getStatus() {
+    return status;
+  }
+
+  public void setStatus(Status status) {
+    this.status = status;
   }
 
   public String getName() {
@@ -171,6 +183,7 @@ public class Curriculum implements Serializable {
     return "Curriculum{" +
         "id=" + id +
         ", intrepidId='" + intrepidId + '\'' +
+        ", status='" + status + "'" +
         ", name='" + name + '\'' +
         ", curriculumSubType=" + curriculumSubType +
         ", assessmentType=" + assessmentType +
