@@ -4,6 +4,7 @@ import com.transformuk.hee.tis.tcs.api.dto.validation.Create;
 import com.transformuk.hee.tis.tcs.api.dto.validation.Update;
 import com.transformuk.hee.tis.tcs.api.enumeration.AssessmentType;
 import com.transformuk.hee.tis.tcs.api.enumeration.CurriculumSubType;
+import com.transformuk.hee.tis.tcs.api.enumeration.Status;
 
 import javax.validation.constraints.DecimalMin;
 import javax.validation.constraints.NotNull;
@@ -22,6 +23,10 @@ public class CurriculumDTO implements Serializable {
   private Long id;
 
   private String intrepidId;
+
+  @NotNull(message = "Status is required", groups = {Update.class, Create.class})
+  //mandatory and must be a valid ENUM value
+  private Status status;
 
   @NotNull(groups = {Create.class, Update.class}, message = "name must not be null")
   private String name;
@@ -55,6 +60,14 @@ public class CurriculumDTO implements Serializable {
 
   public void setIntrepidId(String intrepidId) {
     this.intrepidId = intrepidId;
+  }
+
+  public Status getStatus() {
+    return status;
+  }
+
+  public void setStatus(Status status) {
+    this.status = status;
   }
 
   public String getName() {
