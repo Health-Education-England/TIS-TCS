@@ -19,6 +19,9 @@ ALTER TABLE `PostFunding`
 ADD COLUMN `fundingType` VARCHAR(255) DEFAULT NULL;
 
 ALTER TABLE `PostFunding`
+ADD COLUMN `info` VARCHAR(255) DEFAULT NULL;
+
+ALTER TABLE `PostFunding`
 DROP COLUMN `fundingId`;
 
 ALTER TABLE `PostFunding`
