@@ -76,6 +76,8 @@ public class PostMapper {
     result.setTrainingBodyId(post.getTrainingBodyId());
     result.setTrainingDescription(post.getTrainingDescription());
     result.setLocalPostNumber(post.getLocalPostNumber());
+    result.setFundingType(post.getFundingType());
+    result.setFundingInfo(post.getFundingInfo());
 
     if (traverseRelatedPosts) {
       if (post.getOldPost() != null) {
@@ -199,6 +201,8 @@ public class PostMapper {
     result.setTrainingBodyId(postDTO.getTrainingBodyId());
     result.setTrainingDescription(postDTO.getTrainingDescription());
     result.setLocalPostNumber(postDTO.getLocalPostNumber());
+    result.setFundingType(postDTO.getFundingType());
+    result.setFundingInfo(postDTO.getFundingInfo());
 
     if (traverseRelatedPosts) {
       if (postDTO.getOldPost() != null) {

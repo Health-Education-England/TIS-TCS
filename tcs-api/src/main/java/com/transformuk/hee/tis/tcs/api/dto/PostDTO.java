@@ -3,6 +3,7 @@ package com.transformuk.hee.tis.tcs.api.dto;
 
 import com.transformuk.hee.tis.tcs.api.dto.validation.Create;
 import com.transformuk.hee.tis.tcs.api.dto.validation.Update;
+import com.transformuk.hee.tis.tcs.api.enumeration.FundingType;
 import com.transformuk.hee.tis.tcs.api.enumeration.PostSuffix;
 import com.transformuk.hee.tis.tcs.api.enumeration.Status;
 
@@ -60,6 +61,9 @@ public class PostDTO implements Serializable {
 
   private ProgrammeDTO programmes;
 
+  private String fundingType;
+
+  private String fundingInfo;
 
   public Long getId() {
     return id;
@@ -295,6 +299,31 @@ public class PostDTO implements Serializable {
     return this;
   }
 
+  public String getFundingType() {
+    return fundingType;
+  }
+
+  public void setFundingType(String fundingType) {
+    this.fundingType = fundingType;
+  }
+
+  public PostDTO fundingType(String fundingType) {
+    this.fundingType = fundingType;
+    return this;
+  }
+
+  public String getFundingInfo() {
+    return fundingInfo;
+  }
+
+  public void setFundingInfo(String fundingInfo) {
+    this.fundingInfo = fundingInfo;
+  }
+
+  public PostDTO fundingInfo(String fundingInfo) {
+    this.fundingInfo = fundingInfo;
+    return this;
+  }
 
   @Override
   public boolean equals(Object o) {
@@ -327,7 +356,8 @@ public class PostDTO implements Serializable {
       return false;
     if (placementHistory != null ? !placementHistory.equals(postDTO.placementHistory) : postDTO.placementHistory != null)
       return false;
-    return programmes != null ? programmes.equals(postDTO.programmes) : postDTO.programmes == null;
+    if (programmes != null ? !programmes.equals(postDTO.programmes) : postDTO.programmes != null) return false;
+    return fundingType == postDTO.fundingType;
   }
 
   @Override
@@ -350,6 +380,7 @@ public class PostDTO implements Serializable {
     result = 31 * result + (localPostNumber != null ? localPostNumber.hashCode() : 0);
     result = 31 * result + (placementHistory != null ? placementHistory.hashCode() : 0);
     result = 31 * result + (programmes != null ? programmes.hashCode() : 0);
+    result = 31 * result + (fundingType != null ? fundingType.hashCode() : 0);
     return result;
   }
 
@@ -374,6 +405,7 @@ public class PostDTO implements Serializable {
         ", localPostNumber='" + localPostNumber + '\'' +
         ", placementHistory=" + placementHistory +
         ", programmes=" + programmes +
+        ", fundingType=" + fundingType +
         '}';
   }
 }

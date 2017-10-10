@@ -1,5 +1,6 @@
 package com.transformuk.hee.tis.tcs.service.model;
 
+import com.transformuk.hee.tis.tcs.api.enumeration.FundingType;
 import com.transformuk.hee.tis.tcs.api.enumeration.PostSuffix;
 import com.transformuk.hee.tis.tcs.api.enumeration.Status;
 
@@ -56,6 +57,12 @@ public class Post implements Serializable {
 
   @Column(name = "localPostNumber")
   private String localPostNumber;
+
+  @Column(name = "fundingType")
+  private String fundingType;
+
+  @Column(name = "fundingInfo")
+  private String fundingInfo;
 
   @OneToOne(fetch = FetchType.EAGER)
   @JoinColumn(name = "oldPostId")
@@ -251,6 +258,32 @@ public class Post implements Serializable {
     return this;
   }
 
+  public String getFundingType() {
+    return fundingType;
+  }
+
+  public void setFundingType(String fundingType) {
+    this.fundingType = fundingType;
+  }
+
+  public Post fundingType(String fundingType) {
+    this.fundingType = fundingType;
+    return this;
+  }
+
+  public String getFundingInfo() {
+    return fundingInfo;
+  }
+
+  public void setFundingInfo(String fundingInfo) {
+    this.fundingInfo = fundingInfo;
+  }
+
+  public Post fundingInfo(String fundingInfo) {
+    this.fundingInfo = fundingInfo;
+    return this;
+  }
+
   public Set<Placement> getPlacementHistory() {
     return placementHistory;
   }
@@ -354,6 +387,8 @@ public class Post implements Serializable {
         ", localPostNumber='" + localPostNumber + '\'' +
         ", placementHistory=" + placementHistory +
         ", programmes=" + programmes +
+        ", fundingType=" + fundingType +
+        ", fundingInfo=" + fundingInfo +
         '}';
   }
 }
