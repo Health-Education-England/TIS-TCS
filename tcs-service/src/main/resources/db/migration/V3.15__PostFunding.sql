@@ -10,6 +10,8 @@ ADD COLUMN `intrepidId` VARCHAR(255) DEFAULT NULL;
 ALTER TABLE `PostFunding`
 ADD COLUMN `postId` BIGINT(20) NOT NULL;
 
+TRUNCATE TABLE PostFunding;
+
 ALTER TABLE `PostFunding`
 ADD CONSTRAINT `fk_post` FOREIGN KEY (`postId`) REFERENCES `Post` (`id`);
 
