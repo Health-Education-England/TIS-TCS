@@ -1,0 +1,7 @@
+ALTER TABLE `PostFunding`
+ADD COLUMN `startDate` DATE DEFAULT NULL;
+
+ALTER TABLE `PostFunding`
+ADD COLUMN `endDate` DATE DEFAULT NULL;
+
+

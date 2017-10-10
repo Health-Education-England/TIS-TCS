@@ -2,6 +2,7 @@ package com.transformuk.hee.tis.tcs.api.dto;
 
 
 import java.io.Serializable;
+import java.time.LocalDate;
 import java.util.Objects;
 
 /**
@@ -14,6 +15,10 @@ public class PostFundingDTO implements Serializable {
   private String fundingId;
 
   private String fundingComponentsId;
+
+  private LocalDate startDate;
+
+  private LocalDate endDate;
 
   public Long getId() {
     return id;
@@ -37,6 +42,22 @@ public class PostFundingDTO implements Serializable {
 
   public void setFundingComponentsId(String fundingComponentsId) {
     this.fundingComponentsId = fundingComponentsId;
+  }
+
+  public LocalDate getEndDate() {
+    return endDate;
+  }
+
+  public void setEndDate(LocalDate endDate) {
+    this.endDate = endDate;
+  }
+
+  public LocalDate getStartDate() {
+    return startDate;
+  }
+
+  public void setStartDate(LocalDate startDate) {
+    this.startDate = startDate;
   }
 
   @Override

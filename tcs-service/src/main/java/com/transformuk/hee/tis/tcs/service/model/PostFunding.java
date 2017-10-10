@@ -7,6 +7,7 @@ import javax.persistence.GeneratedValue;
 import javax.persistence.GenerationType;
 import javax.persistence.Id;
 import java.io.Serializable;
+import java.time.LocalDate;
 import java.util.Objects;
 
 /**
@@ -26,6 +27,12 @@ public class PostFunding implements Serializable {
 
   @Column(name = "fundingComponentsId")
   private String fundingComponentsId;
+
+  @Column(name = "startDate")
+  private LocalDate startDate;
+
+  @Column(name = "endDate")
+  private LocalDate endDate;
 
   public Long getId() {
     return id;
@@ -49,6 +56,22 @@ public class PostFunding implements Serializable {
 
   public void setFundingComponentsId(String fundingComponentsId) {
     this.fundingComponentsId = fundingComponentsId;
+  }
+
+  public LocalDate getStartDate() {
+    return startDate;
+  }
+
+  public void setStartDate(LocalDate startDate) {
+    this.startDate = startDate;
+  }
+
+  public LocalDate getEndDate() {
+    return endDate;
+  }
+
+  public void setEndDate(LocalDate endDate) {
+    this.endDate = endDate;
   }
 
   @Override
