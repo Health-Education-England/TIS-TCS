@@ -17,7 +17,6 @@ import org.springframework.validation.FieldError;
 import java.util.List;
 
 import static com.transformuk.hee.tis.tcs.service.api.validation.PostValidator.OTHER_FUNDING_TYPE;
-import static org.junit.Assert.*;
 
 @RunWith(MockitoJUnitRunner.class)
 public class PostValidatorTest {
@@ -38,7 +37,7 @@ public class PostValidatorTest {
 
 
   @Test
-  public void checkFundingShouldReturnErrorsWhenOtherSelectedAndNoInfo(){
+  public void checkFundingShouldReturnErrorsWhenOtherSelectedAndNoInfo() {
     PostDTO postDTO = new PostDTO();
     postDTO.setFundingType(OTHER_FUNDING_TYPE);
 
@@ -48,7 +47,7 @@ public class PostValidatorTest {
   }
 
   @Test
-  public void checkFundingShouldReturnNoErrorsWhenOtherSelectedAndInfoProvided(){
+  public void checkFundingShouldReturnNoErrorsWhenOtherSelectedAndInfoProvided() {
     PostDTO postDTO = new PostDTO();
     postDTO.setFundingType(OTHER_FUNDING_TYPE);
     postDTO.setFundingInfo("Additional Information");
@@ -59,7 +58,7 @@ public class PostValidatorTest {
   }
 
   @Test
-  public void checkFundingShouldReturnNoErrorsWhenFundingTypeIsNotOtherAndNoInfoProvided(){
+  public void checkFundingShouldReturnNoErrorsWhenFundingTypeIsNotOtherAndNoInfoProvided() {
     PostDTO postDTO = new PostDTO();
     postDTO.setFundingType("Tariff");
 

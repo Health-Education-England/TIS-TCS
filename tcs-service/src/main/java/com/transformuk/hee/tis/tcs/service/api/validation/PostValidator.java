@@ -2,7 +2,12 @@ package com.transformuk.hee.tis.tcs.service.api.validation;
 
 import com.google.common.collect.Lists;
 import com.transformuk.hee.tis.reference.client.impl.ReferenceServiceImpl;
-import com.transformuk.hee.tis.tcs.api.dto.*;
+import com.transformuk.hee.tis.tcs.api.dto.PlacementDTO;
+import com.transformuk.hee.tis.tcs.api.dto.PostDTO;
+import com.transformuk.hee.tis.tcs.api.dto.PostGradeDTO;
+import com.transformuk.hee.tis.tcs.api.dto.PostSiteDTO;
+import com.transformuk.hee.tis.tcs.api.dto.PostSpecialtyDTO;
+import com.transformuk.hee.tis.tcs.api.dto.ProgrammeDTO;
 import com.transformuk.hee.tis.tcs.api.enumeration.PostSpecialtyType;
 import com.transformuk.hee.tis.tcs.service.model.Post;
 import com.transformuk.hee.tis.tcs.service.repository.PlacementRepository;
