@@ -33,7 +33,6 @@ import com.transformuk.hee.tis.tcs.service.repository.SpecialtyRepository;
 import com.transformuk.hee.tis.tcs.service.service.PostService;
 import com.transformuk.hee.tis.tcs.service.service.mapper.PostMapper;
 import org.apache.commons.codec.net.URLCodec;
-import org.apache.commons.lang3.StringUtils;
 import org.hamcrest.core.StringContains;
 import org.junit.Before;
 import org.junit.Test;
@@ -53,7 +52,6 @@ import javax.persistence.EntityManager;
 import java.util.List;
 import java.util.Set;
 
-import static com.transformuk.hee.tis.tcs.service.api.validation.PostValidator.OTHER_FUNDING_TYPE;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.hamcrest.Matchers.containsInAnyOrder;
 import static org.hamcrest.Matchers.hasItem;
@@ -100,8 +98,6 @@ public class PostResourceIntTest {
   private static final String UPDATED_LOCAL_POST_NUMBER = "Updated local post number";
   private static final String DEFAULT_INTREPID_ID = "intrepidNumber";
   private static final String UPDATED_INTREPID_ID = "updated intrepidNumber";
-  private static final String DEFAULT_FUNDING_TYPE = "Tariff";
-  private static final String UPDATED_FUNDING_TYPE = "Other";
   private static final String GRADE_ID = "Grade id";
   private static final String SITE_ID = "site id";
   private static final String TEST_POST_NUMBER = "TESTPOST";
@@ -178,8 +174,7 @@ public class PostResourceIntTest {
         .trainingBodyId(DEFAULT_TRAINING_BODY_ID)
         .trainingDescription(DEFAULT_TRAINING_DESCRIPTION)
         .localPostNumber(DEFAULT_LOCAL_POST_NUMBER)
-        .intrepidId(DEFAULT_INTREPID_ID)
-        .fundingType(DEFAULT_FUNDING_TYPE);
+        .intrepidId(DEFAULT_INTREPID_ID);
 
     return post;
   }
@@ -285,8 +280,6 @@ public class PostResourceIntTest {
     assertThat(testPost.getTrainingBodyId()).isEqualTo(DEFAULT_TRAINING_BODY_ID);
     assertThat(testPost.getTrainingDescription()).isEqualTo(DEFAULT_TRAINING_DESCRIPTION);
     assertThat(testPost.getLocalPostNumber()).isEqualTo(DEFAULT_LOCAL_POST_NUMBER);
-    assertThat(testPost.getFundingType()).isEqualTo(DEFAULT_FUNDING_TYPE);
-    assertThat(testPost.getFundingInfo()).isEqualTo(null);
 
     assertThat(testPost.getSpecialties()).isEmpty();
     assertThat(testPost.getGrades()).isEmpty();
@@ -371,40 +364,6 @@ public class PostResourceIntTest {
         .andExpect(jsonPath("$.fieldErrors[0].field").value("nationalPostNumber"))
         .andExpect(jsonPath("$.fieldErrors[0].message").value(StringContains.containsString("unique")));
   }
-
-  @Test
-  @Transactional
-  public void shouldValidateFundingInfoWhenCreatingWithOtherAsFundingTypeAndNoFundingInfo() throws Exception {
-    PostDTO postDTO = postMapper.postToPostDTO(createEntity());
-    postDTO.setNationalPostNumber("ANY");
-    postDTO.setFundingType(OTHER_FUNDING_TYPE);
-
-    //when & then
-    restPostMockMvc.perform(post("/api/posts")
-        .contentType(TestUtil.APPLICATION_JSON_UTF8)
-        .content(TestUtil.convertObjectToJsonBytes(postDTO)))
-        .andExpect(status().isBadRequest())
-        .andExpect(jsonPath("$.message").value("error.validation"))
-        .andExpect(jsonPath("$.fieldErrors[0].field").value("fundingInfo"))
-        .andExpect(jsonPath("$.fieldErrors[0].message").value(StringContains.containsString("fundingInfo")));
-  }
-
-  @Test
-  @Transactional
-  public void shouldValidateFundingInfoWhenCreatingWithOtherAsFundingType() throws Exception {
-    PostDTO postDTO = postMapper.postToPostDTO(createEntity());
-    postDTO.setNationalPostNumber("ANY");
-    postDTO.setFundingType(OTHER_FUNDING_TYPE);
-    postDTO.setFundingInfo("Funding info");
-
-    //when & then
-    restPostMockMvc.perform(post("/api/posts")
-        .contentType(TestUtil.APPLICATION_JSON_UTF8)
-        .content(TestUtil.convertObjectToJsonBytes(postDTO)))
-        .andExpect(status().isCreated());
-  }
-
-
 
   @Test
   @Transactional

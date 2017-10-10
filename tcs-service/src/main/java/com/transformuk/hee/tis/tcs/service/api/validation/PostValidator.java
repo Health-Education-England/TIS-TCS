@@ -15,7 +15,6 @@ import com.transformuk.hee.tis.tcs.service.repository.PostRepository;
 import com.transformuk.hee.tis.tcs.service.repository.ProgrammeRepository;
 import com.transformuk.hee.tis.tcs.service.repository.SpecialtyRepository;
 import com.transformuk.hee.tis.tcs.service.service.mapper.DesignatedBodyMapper;
-import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 import org.springframework.util.CollectionUtils;
@@ -37,8 +36,6 @@ public class PostValidator {
   public static final String POST_DTO_NAME = "PostDTO";
   public static final String NATIONAL_POST_NUMBER = "nationalPostNumber";
   public static final String SPECIALTIES = "specialties";
-  public static final String FUNDING_INFO = "fundingInfo";
-  public static final String OTHER_FUNDING_TYPE = "Other";
   private ProgrammeRepository programmeRepository;
   private PostRepository postRepository;
   private SpecialtyRepository specialtyRepository;
@@ -82,23 +79,12 @@ public class PostValidator {
     fieldErrors.addAll(checkSpecialties(postDTO));
     fieldErrors.addAll(checkPlacementHistory(postDTO));
     fieldErrors.addAll(checkNationalPostNumber(postDTO));
-    fieldErrors.addAll(checkFunding(postDTO));
 
     if (!fieldErrors.isEmpty()) {
       BeanPropertyBindingResult bindingResult = new BeanPropertyBindingResult(postDTO, POST_DTO_NAME);
       fieldErrors.forEach(bindingResult::addError);
       throw new MethodArgumentNotValidException(null, bindingResult);
     }
-  }
-
-  List<FieldError> checkFunding(PostDTO postDTO) {
-    List<FieldError> fieldErrors = new ArrayList<>();
-
-    if (StringUtils.equalsIgnoreCase(postDTO.getFundingType(), OTHER_FUNDING_TYPE) && StringUtils.isBlank(postDTO.getFundingInfo())) {
-      fieldErrors.add(new FieldError(POST_DTO_NAME, FUNDING_INFO, "fundingInfo cannot be empty when selecting Other as a Funding Type"));
-    }
-
-    return fieldErrors;
   }
 
   private List<FieldError> checkNationalPostNumber(PostDTO postDTO) {

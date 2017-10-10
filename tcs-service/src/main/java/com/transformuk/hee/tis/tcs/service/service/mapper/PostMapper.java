@@ -4,6 +4,7 @@ import com.google.common.collect.Lists;
 import com.google.common.collect.Sets;
 import com.transformuk.hee.tis.tcs.api.dto.PlacementDTO;
 import com.transformuk.hee.tis.tcs.api.dto.PostDTO;
+import com.transformuk.hee.tis.tcs.api.dto.PostFundingDTO;
 import com.transformuk.hee.tis.tcs.api.dto.PostGradeDTO;
 import com.transformuk.hee.tis.tcs.api.dto.PostSiteDTO;
 import com.transformuk.hee.tis.tcs.api.dto.PostSpecialtyDTO;
@@ -11,6 +12,7 @@ import com.transformuk.hee.tis.tcs.api.dto.ProgrammeDTO;
 import com.transformuk.hee.tis.tcs.api.dto.SpecialtyDTO;
 import com.transformuk.hee.tis.tcs.service.model.Placement;
 import com.transformuk.hee.tis.tcs.service.model.Post;
+import com.transformuk.hee.tis.tcs.service.model.PostFunding;
 import com.transformuk.hee.tis.tcs.service.model.PostGrade;
 import com.transformuk.hee.tis.tcs.service.model.PostSite;
 import com.transformuk.hee.tis.tcs.service.model.PostSpecialty;
@@ -21,14 +23,15 @@ import org.springframework.stereotype.Component;
 
 import java.util.List;
 import java.util.Set;
+import java.util.stream.Collectors;
 
 /**
  * Mapper for the entity Post and its DTO PostDTO.
- *
+ * <p>
  * This mapper was created as mapstruct was having difficulty with some of the relationships within posts
  * It was having issues with the parent/child relationship between old/new post records causing stack overflows
  * and causing NPE's when trying to traverse through joins outside the JPA session.
- *
+ * <p>
  * This mapper gives more control over what details are converted
  */
 @Component
@@ -36,14 +39,14 @@ public class PostMapper {
 
   public PostDTO postToPostDTO(Post post) {
     PostDTO result = null;
-    if(post != null){
+    if (post != null) {
       result = postToPostDTO(post, true);
     }
     return result;
   }
 
   public List<Post> postDTOsToPosts(List<PostDTO> postDTOs) {
-    List<Post> result =  Lists.newArrayList();
+    List<Post> result = Lists.newArrayList();
 
     for (PostDTO postDTO : postDTOs) {
       result.add(postDTOToPost(postDTO));
@@ -53,7 +56,7 @@ public class PostMapper {
   }
 
   public List<PostDTO> postsToPostDTOs(List<Post> posts) {
-    List<PostDTO> result =  Lists.newArrayList();
+    List<PostDTO> result = Lists.newArrayList();
 
     for (Post post : posts) {
       result.add(postToPostDTO(post));
@@ -76,8 +79,6 @@ public class PostMapper {
     result.setTrainingBodyId(post.getTrainingBodyId());
     result.setTrainingDescription(post.getTrainingDescription());
     result.setLocalPostNumber(post.getLocalPostNumber());
-    result.setFundingType(post.getFundingType());
-    result.setFundingInfo(post.getFundingInfo());
 
     if (traverseRelatedPosts) {
       if (post.getOldPost() != null) {
@@ -135,8 +136,26 @@ public class PostMapper {
       result.setPlacementHistory(placements);
     }
 
+    if (CollectionUtils.isNotEmpty(post.getFundings())) {
+      result.setFundings(post.getFundings().stream().map(this::fundingToFundingDTO).collect(Collectors.toSet()));
+    }
+
     result.setProgrammes(programmeToProgrammeDTO(post.getProgrammes()));
 
+    return result;
+  }
+
+  private PostFundingDTO fundingToFundingDTO(PostFunding postFunding) {
+    PostFundingDTO result = null;
+    if (postFunding != null) {
+      result = new PostFundingDTO();
+      result.setId(postFunding.getId());
+      result.setFundingType(postFunding.getFundingType());
+      result.setInfo(postFunding.getInfo());
+      result.setStartDate(postFunding.getStartDate());
+      result.setEndDate(postFunding.getEndDate());
+      result.setIntrepidId(postFunding.getIntrepidId());
+    }
     return result;
   }
 
@@ -201,8 +220,6 @@ public class PostMapper {
     result.setTrainingBodyId(postDTO.getTrainingBodyId());
     result.setTrainingDescription(postDTO.getTrainingDescription());
     result.setLocalPostNumber(postDTO.getLocalPostNumber());
-    result.setFundingType(postDTO.getFundingType());
-    result.setFundingInfo(postDTO.getFundingInfo());
 
     if (traverseRelatedPosts) {
       if (postDTO.getOldPost() != null) {
@@ -257,6 +274,14 @@ public class PostMapper {
       result.setPlacementHistory(placements);
     }
 
+    if (CollectionUtils.isNotEmpty(postDTO.getFundings())) {
+      result.setFundings(postDTO.getFundings().stream().map(f -> {
+        PostFunding postFunding = fundingDTOToFunding(f);
+        postFunding.setPost(result);
+        return postFunding;
+      }).collect(Collectors.toSet()));
+    }
+
     result.setProgrammes(programmeDTOToProgramme(postDTO.getProgrammes()));
 
     return result;
@@ -301,6 +326,20 @@ public class PostMapper {
       result.setProgrammeName(programmeDTO.getProgrammeName());
       result.setManagingDeanery(programmeDTO.getManagingDeanery());
       result.setStatus(programmeDTO.getStatus());
+    }
+    return result;
+  }
+
+  private PostFunding fundingDTOToFunding(PostFundingDTO postFundingDTO) {
+    PostFunding result = null;
+    if (postFundingDTO != null) {
+      result = new PostFunding();
+      result.setId(postFundingDTO.getId());
+      result.setFundingType(postFundingDTO.getFundingType());
+      result.setInfo(postFundingDTO.getInfo());
+      result.setStartDate(postFundingDTO.getStartDate());
+      result.setEndDate(postFundingDTO.getEndDate());
+      result.setIntrepidId(postFundingDTO.getIntrepidId());
     }
     return result;
   }

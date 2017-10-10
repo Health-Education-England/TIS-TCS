@@ -1,10 +1,22 @@
 package com.transformuk.hee.tis.tcs.service.model;
 
-import com.transformuk.hee.tis.tcs.api.enumeration.FundingType;
 import com.transformuk.hee.tis.tcs.api.enumeration.PostSuffix;
 import com.transformuk.hee.tis.tcs.api.enumeration.Status;
 
-import javax.persistence.*;
+import javax.persistence.CascadeType;
+import javax.persistence.Column;
+import javax.persistence.Entity;
+import javax.persistence.EnumType;
+import javax.persistence.Enumerated;
+import javax.persistence.FetchType;
+import javax.persistence.GeneratedValue;
+import javax.persistence.GenerationType;
+import javax.persistence.Id;
+import javax.persistence.JoinColumn;
+import javax.persistence.JoinTable;
+import javax.persistence.OneToMany;
+import javax.persistence.OneToOne;
+import javax.persistence.Table;
 import java.io.Serializable;
 import java.util.HashSet;
 import java.util.Objects;
@@ -58,12 +70,6 @@ public class Post implements Serializable {
   @Column(name = "localPostNumber")
   private String localPostNumber;
 
-  @Column(name = "fundingType")
-  private String fundingType;
-
-  @Column(name = "fundingInfo")
-  private String fundingInfo;
-
   @OneToOne(fetch = FetchType.EAGER)
   @JoinColumn(name = "oldPostId")
   private Post oldPost;
@@ -85,6 +91,9 @@ public class Post implements Serializable {
 
   @OneToMany(mappedBy = "post", cascade = CascadeType.ALL, fetch = FetchType.EAGER)
   private Set<PostSpecialty> specialties = new HashSet<>();
+
+  @OneToMany(mappedBy = "post", cascade = CascadeType.ALL, fetch = FetchType.EAGER)
+  private Set<PostFunding> fundings = new HashSet<>();
 
   @OneToMany(fetch = FetchType.EAGER)
   @JoinTable(name = "PostPlacementHistory",
@@ -258,30 +267,12 @@ public class Post implements Serializable {
     return this;
   }
 
-  public String getFundingType() {
-    return fundingType;
+  public Set<PostFunding> getFundings() {
+    return fundings;
   }
 
-  public void setFundingType(String fundingType) {
-    this.fundingType = fundingType;
-  }
-
-  public Post fundingType(String fundingType) {
-    this.fundingType = fundingType;
-    return this;
-  }
-
-  public String getFundingInfo() {
-    return fundingInfo;
-  }
-
-  public void setFundingInfo(String fundingInfo) {
-    this.fundingInfo = fundingInfo;
-  }
-
-  public Post fundingInfo(String fundingInfo) {
-    this.fundingInfo = fundingInfo;
-    return this;
+  public void setFundings(Set<PostFunding> fundings) {
+    this.fundings = fundings;
   }
 
   public Set<Placement> getPlacementHistory() {
@@ -387,8 +378,7 @@ public class Post implements Serializable {
         ", localPostNumber='" + localPostNumber + '\'' +
         ", placementHistory=" + placementHistory +
         ", programmes=" + programmes +
-        ", fundingType=" + fundingType +
-        ", fundingInfo=" + fundingInfo +
+        ", fundings=" + fundings +
         '}';
   }
 }
