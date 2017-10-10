@@ -3,9 +3,12 @@ package com.transformuk.hee.tis.tcs.service.model;
 
 import javax.persistence.Column;
 import javax.persistence.Entity;
+import javax.persistence.FetchType;
 import javax.persistence.GeneratedValue;
 import javax.persistence.GenerationType;
 import javax.persistence.Id;
+import javax.persistence.JoinColumn;
+import javax.persistence.ManyToOne;
 import java.io.Serializable;
 import java.time.LocalDate;
 import java.util.Objects;
@@ -22,11 +25,18 @@ public class PostFunding implements Serializable {
   @GeneratedValue(strategy = GenerationType.IDENTITY)
   private Long id;
 
-  @Column(name = "fundingId")
-  private String fundingId;
+  @Column(name = "intrepidId")
+  private String intrepidId;
 
-  @Column(name = "fundingComponentsId")
-  private String fundingComponentsId;
+  @ManyToOne(targetEntity = Post.class, fetch = FetchType.EAGER)
+  @JoinColumn(name = "postId")
+  private Post post;
+
+  @Column(name = "fundingType")
+  private String fundingType;
+
+  @Column(name = "info")
+  private String info;
 
   @Column(name = "startDate")
   private LocalDate startDate;
@@ -42,20 +52,36 @@ public class PostFunding implements Serializable {
     this.id = id;
   }
 
-  public String getFundingId() {
-    return fundingId;
+  public String getIntrepidId() {
+    return intrepidId;
   }
 
-  public void setFundingId(String fundingId) {
-    this.fundingId = fundingId;
+  public void setIntrepidId(String intrepidId) {
+    this.intrepidId = intrepidId;
   }
 
-  public String getFundingComponentsId() {
-    return fundingComponentsId;
+  public Post getPost() {
+    return post;
   }
 
-  public void setFundingComponentsId(String fundingComponentsId) {
-    this.fundingComponentsId = fundingComponentsId;
+  public void setPost(Post post) {
+    this.post = post;
+  }
+
+  public String getFundingType() {
+    return fundingType;
+  }
+
+  public void setFundingType(String fundingType) {
+    this.fundingType = fundingType;
+  }
+
+  public String getInfo() {
+    return info;
+  }
+
+  public void setInfo(String info) {
+    this.info = info;
   }
 
   public LocalDate getStartDate() {

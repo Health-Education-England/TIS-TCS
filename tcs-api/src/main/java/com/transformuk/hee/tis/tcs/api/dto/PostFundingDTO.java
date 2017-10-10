@@ -12,9 +12,11 @@ public class PostFundingDTO implements Serializable {
 
   private Long id;
 
-  private String fundingId;
+  private String intrepidId;
 
-  private String fundingComponentsId;
+  private String fundingType;
+
+  private String info;
 
   private LocalDate startDate;
 
@@ -28,20 +30,28 @@ public class PostFundingDTO implements Serializable {
     this.id = id;
   }
 
-  public String getFundingId() {
-    return fundingId;
+  public String getIntrepidId() {
+    return intrepidId;
   }
 
-  public void setFundingId(String fundingId) {
-    this.fundingId = fundingId;
+  public void setIntrepidId(String intrepidId) {
+    this.intrepidId = intrepidId;
   }
 
-  public String getFundingComponentsId() {
-    return fundingComponentsId;
+  public String getFundingType() {
+    return fundingType;
   }
 
-  public void setFundingComponentsId(String fundingComponentsId) {
-    this.fundingComponentsId = fundingComponentsId;
+  public void setFundingType(String fundingType) {
+    this.fundingType = fundingType;
+  }
+
+  public String getInfo() {
+    return info;
+  }
+
+  public void setInfo(String info) {
+    this.info = info;
   }
 
   public LocalDate getEndDate() {
