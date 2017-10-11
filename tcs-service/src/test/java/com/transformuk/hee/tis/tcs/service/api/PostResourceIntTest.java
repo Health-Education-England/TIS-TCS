@@ -299,7 +299,7 @@ public class PostResourceIntTest {
         .andExpect(status().isBadRequest())
         .andExpect(jsonPath("$.message").value("error.validation"))
         .andExpect(jsonPath("$.fieldErrors[*].field").
-            value(containsInAnyOrder("managingLocalOffice", "status", "nationalPostNumber")));
+            value(containsInAnyOrder("managingLocalOffice", "status")));
   }
 
   @Test
@@ -316,7 +316,7 @@ public class PostResourceIntTest {
         .andExpect(status().isBadRequest())
         .andExpect(jsonPath("$.message").value("error.validation"))
         .andExpect(jsonPath("$.fieldErrors[*].field").
-            value(containsInAnyOrder("managingLocalOffice", "status", "nationalPostNumber")));
+            value(containsInAnyOrder("managingLocalOffice", "status")));
   }
 
   @Test
@@ -357,28 +357,6 @@ public class PostResourceIntTest {
 
     //when & then
     restPostMockMvc.perform(post("/api/posts")
-        .contentType(TestUtil.APPLICATION_JSON_UTF8)
-        .content(TestUtil.convertObjectToJsonBytes(postDTO)))
-        .andExpect(status().isBadRequest())
-        .andExpect(jsonPath("$.message").value("error.validation"))
-        .andExpect(jsonPath("$.fieldErrors[0].field").value("nationalPostNumber"))
-        .andExpect(jsonPath("$.fieldErrors[0].message").value(StringContains.containsString("unique")));
-  }
-
-  @Test
-  @Transactional
-  public void shouldValidateNationalPostNumberUniqueWhenUpdating() throws Exception {
-    //given we have an exiting post with default DEFAULT_NATIONAL_POST_NUMBER
-    //and we update a second post using the same nr
-    postRepository.saveAndFlush(createEntity());
-    Post p = createEntity();
-    p.setNationalPostNumber("number2");
-    p = postRepository.saveAndFlush(p);
-    PostDTO postDTO = postMapper.postToPostDTO(p);
-    postDTO.setNationalPostNumber(DEFAULT_NATIONAL_POST_NUMBER);
-
-    //when & then
-    restPostMockMvc.perform(put("/api/posts")
         .contentType(TestUtil.APPLICATION_JSON_UTF8)
         .content(TestUtil.convertObjectToJsonBytes(postDTO)))
         .andExpect(status().isBadRequest())
