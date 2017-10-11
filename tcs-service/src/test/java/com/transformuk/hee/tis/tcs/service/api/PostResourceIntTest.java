@@ -350,23 +350,6 @@ public class PostResourceIntTest {
 
   @Test
   @Transactional
-  public void shouldValidateNationalPostNumberUniqueWhenCreating() throws Exception {
-    //given we have an exiting post with default DEFAULT_NATIONAL_POST_NUMBER
-    postRepository.saveAndFlush(createEntity());
-    PostDTO postDTO = postMapper.postToPostDTO(createEntity());
-
-    //when & then
-    restPostMockMvc.perform(post("/api/posts")
-        .contentType(TestUtil.APPLICATION_JSON_UTF8)
-        .content(TestUtil.convertObjectToJsonBytes(postDTO)))
-        .andExpect(status().isBadRequest())
-        .andExpect(jsonPath("$.message").value("error.validation"))
-        .andExpect(jsonPath("$.fieldErrors[0].field").value("nationalPostNumber"))
-        .andExpect(jsonPath("$.fieldErrors[0].message").value(StringContains.containsString("unique")));
-  }
-
-  @Test
-  @Transactional
   public void shouldNotAllowTwoPrimarySpecialties() throws Exception{
     post = createEntity();
     postRepository.saveAndFlush(post);
