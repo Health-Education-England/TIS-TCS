@@ -1,12 +1,16 @@
 package com.transformuk.hee.tis.tcs.service.api;
 
 import com.codahale.metrics.annotation.Timed;
+import com.transformuk.hee.tis.tcs.api.dto.SpecialtyDTO;
 import com.transformuk.hee.tis.tcs.api.dto.SpecialtyGroupDTO;
 import com.transformuk.hee.tis.tcs.api.dto.validation.Create;
 import com.transformuk.hee.tis.tcs.api.dto.validation.Update;
 import com.transformuk.hee.tis.tcs.service.api.util.HeaderUtil;
 import com.transformuk.hee.tis.tcs.service.api.util.PaginationUtil;
+import com.transformuk.hee.tis.tcs.service.model.Specialty;
+import com.transformuk.hee.tis.tcs.service.repository.SpecialtyRepository;
 import com.transformuk.hee.tis.tcs.service.service.SpecialtyGroupService;
+import com.transformuk.hee.tis.tcs.service.service.mapper.SpecialtyMapper;
 import io.github.jhipster.web.util.ResponseUtil;
 import io.jsonwebtoken.lang.Collections;
 import io.swagger.annotations.ApiParam;
@@ -19,6 +23,7 @@ import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
+import org.springframework.transaction.annotation.Transactional;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -49,9 +54,14 @@ public class SpecialtyGroupResource {
   private static final String ENTITY_NAME = "specialtyGroup";
   private final Logger log = LoggerFactory.getLogger(SpecialtyGroupResource.class);
   private final SpecialtyGroupService specialtyGroupService;
+  private final SpecialtyRepository specialtyRepository;
+  private final SpecialtyMapper specialtyMapper;
 
-  public SpecialtyGroupResource(SpecialtyGroupService specialtyGroupService) {
+  public SpecialtyGroupResource(SpecialtyGroupService specialtyGroupService, SpecialtyRepository specialtyRepository,
+                                SpecialtyMapper specialtyMapper) {
     this.specialtyGroupService = specialtyGroupService;
+    this.specialtyRepository = specialtyRepository;
+    this.specialtyMapper = specialtyMapper;
   }
 
   /**
@@ -143,6 +153,23 @@ public class SpecialtyGroupResource {
     log.debug("REST request to get SpecialtyGroup : {}", id);
     SpecialtyGroupDTO specialtyGroupDTO = specialtyGroupService.findOne(id);
     return ResponseUtil.wrapOrNotFound(Optional.ofNullable(specialtyGroupDTO));
+  }
+
+  /**
+   * GET  /specialty-groups/specialties/:id : get all the specialties attached to the specialtyGroup
+   * @param id the id of the specialtyGroup
+   * @return the ResponseEntity with status 200 (OK) and the list of specialtyDTOs in body
+   * @throws URISyntaxException if there is an error to generate the pagination HTTP headers
+   */
+  @GetMapping("/specialty-groups/specialties/{id}")
+  @Timed
+  @PreAuthorize("hasAuthority('specialty:view')")
+  @Transactional
+  public ResponseEntity<List<SpecialtyDTO>> getAllSpecialtyGroupSpecialties(@PathVariable Long id, @ApiParam Pageable pageable) throws URISyntaxException {
+    log.debug("REST request to get all specialties linked to specialtyGroup : {}", id);
+      Page<Specialty> specialtyPage = specialtyRepository.findBySpecialtyGroupIdIn(id, pageable);
+      HttpHeaders headers = PaginationUtil.generatePaginationHttpHeaders(specialtyPage, "/api/specialty-groups/specialties");
+      return new ResponseEntity<List<SpecialtyDTO>>(specialtyMapper.specialtiesToSpecialtyDTOs(specialtyPage.getContent()), headers, HttpStatus.OK);
   }
 
   /**

@@ -3,10 +3,13 @@ package com.transformuk.hee.tis.tcs.service.api;
 import com.transformuk.hee.tis.tcs.api.dto.SpecialtyGroupDTO;
 import com.transformuk.hee.tis.tcs.service.Application;
 import com.transformuk.hee.tis.tcs.service.exception.ExceptionTranslator;
+import com.transformuk.hee.tis.tcs.service.model.Specialty;
 import com.transformuk.hee.tis.tcs.service.model.SpecialtyGroup;
 import com.transformuk.hee.tis.tcs.service.repository.SpecialtyGroupRepository;
+import com.transformuk.hee.tis.tcs.service.repository.SpecialtyRepository;
 import com.transformuk.hee.tis.tcs.service.service.SpecialtyGroupService;
 import com.transformuk.hee.tis.tcs.service.service.mapper.SpecialtyGroupMapper;
+import com.transformuk.hee.tis.tcs.service.service.mapper.SpecialtyMapper;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -26,6 +29,8 @@ import java.util.List;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.hamcrest.Matchers.hasItem;
+import static org.hamcrest.Matchers.contains;
+import static org.hamcrest.Matchers.not;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.delete;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
@@ -45,6 +50,7 @@ public class SpecialtyGroupResourceIntTest {
 
   private static final String DEFAULT_NAME = "AAAAAAAAAA";
   private static final String UPDATED_NAME = "BBBBBBBBBB";
+  private static final String WRONG_SPECIALTY_NAME = "ZZZZZZZZZZ";
 
   private static final String DEFAULT_INTREPID_ID = "123456";
 
@@ -56,6 +62,12 @@ public class SpecialtyGroupResourceIntTest {
 
   @Autowired
   private SpecialtyGroupService specialtyGroupService;
+
+  @Autowired
+  private SpecialtyMapper specialtyMapper;
+
+  @Autowired
+  private SpecialtyRepository specialtyRepository;
 
   @Autowired
   private MappingJackson2HttpMessageConverter jacksonMessageConverter;
@@ -73,6 +85,8 @@ public class SpecialtyGroupResourceIntTest {
 
   private SpecialtyGroup specialtyGroup;
 
+  private Specialty specialty;
+
   /**
    * Create an entity for this test.
    * <p>
@@ -86,10 +100,17 @@ public class SpecialtyGroupResourceIntTest {
     return specialtyGroup;
   }
 
+  public Specialty createSpecialty() {
+    Specialty specialty = new Specialty()
+        .name(DEFAULT_NAME)
+        .specialtyGroup(specialtyGroup);
+    return specialty;
+  }
+
   @Before
   public void setup() {
     MockitoAnnotations.initMocks(this);
-    SpecialtyGroupResource specialtyGroupResource = new SpecialtyGroupResource(specialtyGroupService);
+    SpecialtyGroupResource specialtyGroupResource = new SpecialtyGroupResource(specialtyGroupService, specialtyRepository, specialtyMapper);
     this.restSpecialtyGroupMockMvc = MockMvcBuilders.standaloneSetup(specialtyGroupResource)
         .setCustomArgumentResolvers(pageableArgumentResolver)
         .setControllerAdvice(exceptionTranslator)
@@ -99,6 +120,7 @@ public class SpecialtyGroupResourceIntTest {
   @Before
   public void initTest() {
     specialtyGroup = createEntity();
+    specialty = createSpecialty();
   }
 
   @Test
@@ -168,6 +190,42 @@ public class SpecialtyGroupResourceIntTest {
     restSpecialtyGroupMockMvc.perform(get("/api/specialty-groups?sort=id,desc&searchQuery=other"))
         .andExpect(status().isOk())
         .andExpect(jsonPath("$.[*].name").value("other name"));
+  }
+
+  @Test
+  @Transactional
+  public void shouldGetAllSpecialtiesAttachedToGroup() throws Exception {
+    // given
+    // Initialise the database and get the specialty group ID
+    specialtyGroupRepository.saveAndFlush(specialtyGroup);
+    specialtyRepository.saveAndFlush(specialty);
+    Long groupID = specialtyGroup.getId();
+
+    // Add another specialtyGroup (one with a specialty we don't expect to see in the test)
+    SpecialtyGroup wrongSpecialtyGroup = createEntity();
+    wrongSpecialtyGroup.setName("Wrong Group");
+    specialtyGroupRepository.saveAndFlush(wrongSpecialtyGroup);
+
+    // Add a second specialty (one we expect)
+    Specialty otherSpecialty = createSpecialty();
+    otherSpecialty.setName("Other Specialty");
+    specialtyRepository.saveAndFlush(otherSpecialty);
+
+    // Add another specialty to the "Wrong Group"
+    Specialty wrongSpecialty = createSpecialty();
+    wrongSpecialty.setName(WRONG_SPECIALTY_NAME);
+    wrongSpecialty.setSpecialtyGroup(wrongSpecialtyGroup);
+    specialtyRepository.saveAndFlush(wrongSpecialty);
+
+    //when & then
+    restSpecialtyGroupMockMvc.perform(get("/api/specialty-groups/specialties/" + groupID))
+        .andExpect(status().isOk())
+        .andExpect(content().contentType(MediaType.APPLICATION_JSON_UTF8_VALUE))
+        .andExpect(jsonPath("$.[*].id").value(hasItem(specialty.getId().intValue())))
+        .andExpect(jsonPath("$.[*].id").value(hasItem(otherSpecialty.getId().intValue())))
+        .andExpect(jsonPath("$.[*].name").value(hasItem(DEFAULT_NAME)))
+        .andExpect(jsonPath("$.[*].name").value(hasItem(otherSpecialty.getName())))
+        .andExpect(jsonPath("$.[*].name").value(not(contains(wrongSpecialty.getName()))));
   }
 
   @Test
