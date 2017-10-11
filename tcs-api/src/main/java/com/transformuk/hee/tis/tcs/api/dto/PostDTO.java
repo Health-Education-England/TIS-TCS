@@ -25,7 +25,6 @@ public class PostDTO implements Serializable {
 
   private String intrepidId;
 
-  @NotNull(message = "National post number is required", groups = {Update.class, Create.class})
   private String nationalPostNumber;
 
   @NotNull(message = "Status is required", groups = {Update.class, Create.class})
