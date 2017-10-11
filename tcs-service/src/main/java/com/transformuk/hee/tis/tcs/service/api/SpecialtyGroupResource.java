@@ -192,7 +192,7 @@ public class SpecialtyGroupResource {
    *
    * @param specialtyGroupDTOS List of the specialtyGroupDTOS to create
    * @return the ResponseEntity with status 200 (Created) and with body the new specialtyGroupDTOS, or with status 400 (Bad Request) if the Specialty Group has already an ID
-   * @throws URISyntaxException if the Location URI syntax is ResponseEntity<List<SpecialtyDTO>>incorrect
+   * @throws URISyntaxException if the Location URI syntax is incorrect
    */
   @PostMapping("/bulk-specialty-groups")
   @Timed
