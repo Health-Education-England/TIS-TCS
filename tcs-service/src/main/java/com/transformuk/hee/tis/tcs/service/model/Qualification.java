@@ -71,6 +71,11 @@ public class Qualification implements Serializable {
     this.intrepidId = intrepidId;
   }
 
+  public Qualification intrepidId(String intrepidId) {
+    this.intrepidId = intrepidId;
+    return this;
+  }
+
   public String getQualification() {
     return qualification;
   }
