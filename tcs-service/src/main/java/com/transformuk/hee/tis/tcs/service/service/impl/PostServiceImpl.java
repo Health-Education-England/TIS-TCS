@@ -150,27 +150,29 @@ public class PostServiceImpl implements PostService {
 
   @Override
   public List<PostDTO> patchPostSites(List<PostDTO> postDTOList) {
-    List<Post> postsToSave = Lists.newArrayList();
     Map<String, Post> intrepidIdToPost = getPostsByIntrepidId(postDTOList);
 
+    List<PostSite> sitesToSave = Lists.newArrayList();
+    List<Post> postsModified = Lists.newArrayList();
     for (PostDTO dto : postDTOList) {
 
       Post post = intrepidIdToPost.get(dto.getIntrepidId());
       if (post != null) {
-        Set<PostSite> sites = post.getSites();
         for (PostSiteDTO siteDTO : dto.getSites()) {
           PostSite postSite = new PostSite();
           postSite.setPost(post);
           postSite.setPostSiteType(siteDTO.getPostSiteType());
           postSite.setSiteId(siteDTO.getSiteId());
-          sites.add(postSite);
+          sitesToSave.add(postSite);
         }
-        post.setSites(sites);
-        postsToSave.add(post);
       }
+
+      List<PostSite> savedPostSite = postSiteRepository.save(sitesToSave);
+      post.setSites(Sets.newHashSet(savedPostSite));
+      postsModified.add(post);
     }
-    List<Post> savedPosts = postRepository.save(postsToSave);
-    return postMapper.postsToPostDTOs(savedPosts);
+
+    return postMapper.postsToPostDTOs(postsModified);
   }
 
   @Override

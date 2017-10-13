@@ -4,7 +4,7 @@ import com.transformuk.hee.tis.tcs.api.dto.PostSiteDTO;
 import com.transformuk.hee.tis.tcs.service.model.PostSite;
 import org.mapstruct.Mapper;
 
-import java.util.Set;
+import java.util.List;
 
 @Mapper(componentModel = "spring", uses = {})
 public interface PostSiteMapper {
@@ -13,7 +13,7 @@ public interface PostSiteMapper {
 
   PostSite postSiteDTOToPostSite(PostSiteDTO postSiteDTO);
 
-  Set<PostSiteDTO> postSitesToPostSiteDTOs(Set<PostSite> postSite);
+  List<PostSiteDTO> postSitesToPostSiteDTOs(List<PostSite> postSite);
 
-  Set<PostSite> postSiteDTOsToPostSites(Set<PostSiteDTO> postSiteDTO);
+  List<PostSite> postSiteDTOsToPostSites(List<PostSiteDTO> postSiteDTO);
 }
