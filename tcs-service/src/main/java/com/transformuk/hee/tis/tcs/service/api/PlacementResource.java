@@ -2,8 +2,12 @@ package com.transformuk.hee.tis.tcs.service.api;
 
 import com.codahale.metrics.annotation.Timed;
 import com.transformuk.hee.tis.tcs.api.dto.PlacementDTO;
+import com.transformuk.hee.tis.tcs.api.dto.validation.Create;
+import com.transformuk.hee.tis.tcs.api.dto.validation.Update;
 import com.transformuk.hee.tis.tcs.service.api.util.HeaderUtil;
 import com.transformuk.hee.tis.tcs.service.api.util.PaginationUtil;
+import com.transformuk.hee.tis.tcs.service.api.validation.PlacementValidator;
+import com.transformuk.hee.tis.tcs.service.api.validation.ValidationException;
 import com.transformuk.hee.tis.tcs.service.service.PlacementService;
 import io.github.jhipster.web.util.ResponseUtil;
 import io.jsonwebtoken.lang.Collections;
@@ -17,6 +21,7 @@ import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
+import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
@@ -43,9 +48,11 @@ public class PlacementResource {
   private static final String ENTITY_NAME = "placement";
   private final Logger log = LoggerFactory.getLogger(PlacementResource.class);
   private final PlacementService placementService;
+  private final PlacementValidator placementValidator;
 
-  public PlacementResource(PlacementService placementService) {
+  public PlacementResource(PlacementService placementService, PlacementValidator placementValidator) {
     this.placementService = placementService;
+    this.placementValidator = placementValidator;
   }
 
   /**
@@ -58,8 +65,9 @@ public class PlacementResource {
   @PostMapping("/placements")
   @Timed
   @PreAuthorize("hasAuthority('tcs:add:modify:entities')")
-  public ResponseEntity<PlacementDTO> createPlacement(@RequestBody PlacementDTO placementDTO) throws URISyntaxException {
+  public ResponseEntity<PlacementDTO> createPlacement(@RequestBody @Validated(Create.class) PlacementDTO placementDTO)throws URISyntaxException, ValidationException {
     log.debug("REST request to save Placement : {}", placementDTO);
+    placementValidator.validate(placementDTO);
     if (placementDTO.getId() != null) {
       return ResponseEntity.badRequest().headers(HeaderUtil.createFailureAlert(ENTITY_NAME, "idexists", "A new placement cannot already have an ID")).body(null);
     }
@@ -81,8 +89,9 @@ public class PlacementResource {
   @PutMapping("/placements")
   @Timed
   @PreAuthorize("hasAuthority('tcs:add:modify:entities')")
-  public ResponseEntity<PlacementDTO> updatePlacement(@RequestBody PlacementDTO placementDTO) throws URISyntaxException {
+  public ResponseEntity<PlacementDTO> updatePlacement(@RequestBody @Validated(Update.class) PlacementDTO placementDTO) throws URISyntaxException, ValidationException {
     log.debug("REST request to update Placement : {}", placementDTO);
+    placementValidator.validate(placementDTO);
     if (placementDTO.getId() == null) {
       return createPlacement(placementDTO);
     }

@@ -1,17 +1,24 @@
 package com.transformuk.hee.tis.tcs.service.model;
 
 import com.transformuk.hee.tis.tcs.api.enumeration.PlacementType;
+import com.transformuk.hee.tis.tcs.api.enumeration.Status;
 
+import javax.persistence.CascadeType;
 import javax.persistence.Column;
 import javax.persistence.Entity;
 import javax.persistence.EnumType;
 import javax.persistence.Enumerated;
+import javax.persistence.FetchType;
 import javax.persistence.GeneratedValue;
 import javax.persistence.GenerationType;
 import javax.persistence.Id;
+import javax.persistence.JoinColumn;
+import javax.persistence.ManyToOne;
+import javax.persistence.OneToMany;
 import java.io.Serializable;
 import java.time.LocalDate;
 import java.util.Objects;
+import java.util.Set;
 
 /**
  * A Placement.
@@ -25,23 +32,35 @@ public class Placement implements Serializable {
   @GeneratedValue(strategy = GenerationType.IDENTITY)
   private Long id;
 
+  @ManyToOne
+  @JoinColumn(name = "traineeId")
+  private Person trainee;
+
+  @ManyToOne
+  @JoinColumn(name = "clinicalSupervisorId")
+  private Person clinicalSupervisor;
+
   @Column(name = "intrepidId")
   private String intrepidId;
 
-  @Column(name = "status")
-  private String status;
+  @Enumerated(EnumType.STRING)
+  private Status status;
 
-  @Column(name = "nationalPostNumber")
-  private String nationalPostNumber;
+  @ManyToOne
+  @JoinColumn(name = "postId")
+  private Post post;
 
-  @Column(name = "site")
-  private String site;
+  @Column(name = "siteId")
+  private Long siteId;
 
-  @Column(name = "grade")
-  private String grade;
+  @Column(name = "managingLocalOffice")
+  private String managingLocalOffice;
 
-  @Column(name = "specialty")
-  private String specialty;
+  @Column(name = "gradeId")
+  private Long gradeId;
+
+  @OneToMany(mappedBy = "placement", cascade = CascadeType.ALL, fetch = FetchType.EAGER)
+  private Set<PlacementSpecialty> specialties;
 
   @Column(name = "dateFrom")
   private LocalDate dateFrom;
@@ -56,8 +75,11 @@ public class Placement implements Serializable {
   @Column(name = "placementWholeTimeEquivalent")
   private Float placementWholeTimeEquivalent;
 
-  @Column(name = "slotShare")
-  private Boolean slotShare;
+  @Column(name = "trainingDescription")
+  private String trainingDescription;
+
+  @Column(name = "localPostNumber")
+  private String localPostNumber;
 
   public Long getId() {
     return id;
@@ -75,69 +97,84 @@ public class Placement implements Serializable {
     this.intrepidId = intrepidId;
   }
 
-  public String getStatus() {
+  public Person getTrainee() {
+    return trainee;
+  }
+
+  public void setTrainee(Person trainee) {
+    this.trainee = trainee;
+  }
+
+  public Person getClinicalSupervisor() {
+    return clinicalSupervisor;
+  }
+
+  public void setClinicalSupervisor(Person clinicalSupervisor) {
+    this.clinicalSupervisor = clinicalSupervisor;
+  }
+
+  public Status getStatus() {
     return status;
   }
 
-  public void setStatus(String status) {
+  public void setStatus(Status status) {
     this.status = status;
   }
 
-  public Placement status(String status) {
-    this.status = status;
-    return this;
+  public Post getPost() {
+    return post;
   }
 
-  public String getNationalPostNumber() {
-    return nationalPostNumber;
+  public void setPost(Post post) {
+    this.post = post;
   }
 
-  public void setNationalPostNumber(String nationalPostNumber) {
-    this.nationalPostNumber = nationalPostNumber;
+  public Set<PlacementSpecialty> getSpecialties() {
+    return specialties;
   }
 
-  public Placement nationalPostNumber(String nationalPostNumber) {
-    this.nationalPostNumber = nationalPostNumber;
-    return this;
+  public void setSpecialties(Set<PlacementSpecialty> specialties) {
+    this.specialties = specialties;
   }
 
-  public String getSite() {
-    return site;
+  public Long getSiteId() {
+    return siteId;
   }
 
-  public void setSite(String site) {
-    this.site = site;
+  public void setSiteId(Long siteId) {
+    this.siteId = siteId;
   }
 
-  public Placement site(String site) {
-    this.site = site;
-    return this;
+  public Long getGradeId() {
+    return gradeId;
   }
 
-  public String getGrade() {
-    return grade;
+  public void setGradeId(Long gradeId) {
+    this.gradeId = gradeId;
   }
 
-  public void setGrade(String grade) {
-    this.grade = grade;
+  public String getManagingLocalOffice() {
+    return managingLocalOffice;
   }
 
-  public Placement grade(String grade) {
-    this.grade = grade;
-    return this;
+  public void setManagingLocalOffice(String managingLocalOffice) {
+    this.managingLocalOffice = managingLocalOffice;
   }
 
-  public String getSpecialty() {
-    return specialty;
+  public String getTrainingDescription() {
+    return trainingDescription;
   }
 
-  public void setSpecialty(String specialty) {
-    this.specialty = specialty;
+  public void setTrainingDescription(String trainingDescription) {
+    this.trainingDescription = trainingDescription;
   }
 
-  public Placement specialty(String specialty) {
-    this.specialty = specialty;
-    return this;
+  public String getLocalPostNumber() {
+    return localPostNumber;
+  }
+
+  public void setLocalPostNumber(String localPostNumber) {
+    this.localPostNumber = localPostNumber;
   }
 
   public LocalDate getDateFrom() {
@@ -148,22 +185,12 @@ public class Placement implements Serializable {
     this.dateFrom = dateFrom;
   }
 
-  public Placement dateFrom(LocalDate dateFrom) {
-    this.dateFrom = dateFrom;
-    return this;
-  }
-
   public LocalDate getDateTo() {
     return dateTo;
   }
 
   public void setDateTo(LocalDate dateTo) {
     this.dateTo = dateTo;
-  }
-
-  public Placement dateTo(LocalDate dateTo) {
-    this.dateTo = dateTo;
-    return this;
   }
 
   public PlacementType getPlacementType() {
@@ -174,35 +201,12 @@ public class Placement implements Serializable {
     this.placementType = placementType;
   }
 
-  public Placement placementType(PlacementType placementType) {
-    this.placementType = placementType;
-    return this;
-  }
-
   public Float getPlacementWholeTimeEquivalent() {
     return placementWholeTimeEquivalent;
   }
 
   public void setPlacementWholeTimeEquivalent(Float placementWholeTimeEquivalent) {
     this.placementWholeTimeEquivalent = placementWholeTimeEquivalent;
-  }
-
-  public Placement placementWholeTimeEquivalent(Float placementWholeTimeEquivalent) {
-    this.placementWholeTimeEquivalent = placementWholeTimeEquivalent;
-    return this;
-  }
-
-  public Boolean isSlotShare() {
-    return slotShare;
-  }
-
-  public Placement slotShare(Boolean slotShare) {
-    this.slotShare = slotShare;
-    return this;
-  }
-
-  public void setSlotShare(Boolean slotShare) {
-    this.slotShare = slotShare;
   }
 
   @Override
@@ -230,15 +234,14 @@ public class Placement implements Serializable {
     return "Placement{" +
         "id=" + id +
         ", status='" + status + "'" +
-        ", nationalPostNumber='" + nationalPostNumber + "'" +
-        ", site='" + site + "'" +
-        ", grade='" + grade + "'" +
-        ", specialty='" + specialty + "'" +
+        ", post='" + post + "'" +
+        ", siteId='" + siteId + "'" +
+        ", gradeId='" + gradeId + "'" +
+        ", specialties='" + specialties + "'" +
         ", dateFrom='" + dateFrom + "'" +
         ", dateTo='" + dateTo + "'" +
         ", placementType='" + placementType + "'" +
         ", placementWholeTimeEquivalent='" + placementWholeTimeEquivalent + "'" +
-        ", slotShare='" + slotShare + "'" +
         '}';
   }
 }

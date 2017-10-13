@@ -19,6 +19,7 @@ import com.transformuk.hee.tis.tcs.service.model.PostSpecialty;
 import com.transformuk.hee.tis.tcs.service.model.Programme;
 import com.transformuk.hee.tis.tcs.service.model.Specialty;
 import org.apache.commons.collections4.CollectionUtils;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
 import java.util.List;
@@ -36,6 +37,9 @@ import java.util.stream.Collectors;
  */
 @Component
 public class PostMapper {
+
+  @Autowired
+  private PlacementMapper placementMapper;
 
   public PostDTO postToPostDTO(Post post) {
     PostDTO result = null;
@@ -131,7 +135,7 @@ public class PostMapper {
     if (CollectionUtils.isNotEmpty(post.getPlacementHistory())) {
       Set<PlacementDTO> placements = Sets.newHashSet();
       for (Placement placement : post.getPlacementHistory()) {
-        placements.add(placementToPlacementDTO(placement));
+        placements.add(placementMapper.placementToPlacementDTO(placement));
       }
       result.setPlacementHistory(placements);
     }
@@ -183,21 +187,6 @@ public class PostMapper {
       result.setProgrammeName(programme.getProgrammeName());
       result.setManagingDeanery(programme.getManagingDeanery());
       result.setStatus(programme.getStatus());
-    }
-    return result;
-  }
-
-  private PlacementDTO placementToPlacementDTO(Placement placement) {
-    PlacementDTO result = null;
-    if (placement != null) {
-      result = new PlacementDTO();
-
-      result.setId(placement.getId());
-      result.setPlacementType(placement.getPlacementType());
-      result.setStatus(placement.getStatus());
-      result.setSpecialty(placement.getSpecialty());
-      result.setNationalPostNumber(placement.getNationalPostNumber());
-      result.setGrade(placement.getGrade());
     }
     return result;
   }
@@ -269,7 +258,7 @@ public class PostMapper {
     if (CollectionUtils.isNotEmpty(postDTO.getPlacementHistory())) {
       Set<Placement> placements = Sets.newHashSet();
       for (PlacementDTO placementDTO : postDTO.getPlacementHistory()) {
-        placements.add(placementDTOToPlacement(placementDTO));
+        placements.add(placementMapper.placementDTOToPlacement(placementDTO));
       }
       result.setPlacementHistory(placements);
     }
@@ -296,21 +285,6 @@ public class PostMapper {
       result.setSpecialtyTypes(specialtyDTO.getSpecialtyTypes());
       result.setSpecialtyCode(specialtyDTO.getSpecialtyCode());
       result.setStatus(specialtyDTO.getStatus());
-    }
-    return result;
-  }
-
-  private Placement placementDTOToPlacement(PlacementDTO placementDTO) {
-    Placement result = null;
-    if (placementDTO != null) {
-      result = new Placement();
-
-      result.setId(placementDTO.getId());
-      result.setPlacementType(placementDTO.getPlacementType());
-      result.setStatus(placementDTO.getStatus());
-      result.setSpecialty(placementDTO.getSpecialty());
-      result.setNationalPostNumber(placementDTO.getNationalPostNumber());
-      result.setGrade(placementDTO.getGrade());
     }
     return result;
   }

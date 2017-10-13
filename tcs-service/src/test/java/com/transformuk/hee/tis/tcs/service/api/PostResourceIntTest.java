@@ -1186,9 +1186,8 @@ public class PostResourceIntTest {
         .intrepidId(DEFAULT_INTREPID_ID);
 
     Placement newPlacement = new Placement();
-    newPlacement.setGrade("CT");
-    newPlacement.setNationalPostNumber("post no");
-    newPlacement.setSite("St Toms");
+    newPlacement.setGradeId(12l);
+    newPlacement.setSiteId(1l);
     newPlacement.setPlacementType(PlacementType.PARENTALLEAVE);
     newPlacement.setIntrepidId("12345");
     em.persist(newPlacement);
