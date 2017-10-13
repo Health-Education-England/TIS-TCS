@@ -4,6 +4,8 @@ import com.transformuk.hee.tis.tcs.api.dto.GmcDetailsDTO;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 
+import java.util.List;
+
 /**
  * Service Interface for managing GmcDetails.
  */
@@ -16,6 +18,14 @@ public interface GmcDetailsService {
    * @return the persisted entity
    */
   GmcDetailsDTO save(GmcDetailsDTO gmcDetailsDTO);
+
+  /**
+   * Save a list of gmcDetails
+   *
+   * @param gmcDetailsDTOs the list of entities to save
+   * @return a list of persisted entities
+   */
+  List<GmcDetailsDTO> save(List<GmcDetailsDTO> gmcDetailsDTOs);
 
   /**
    * Get all the gmcDetails.

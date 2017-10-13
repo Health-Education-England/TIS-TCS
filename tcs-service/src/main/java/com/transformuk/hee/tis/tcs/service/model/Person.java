@@ -72,10 +72,10 @@ public class Person implements Serializable {
   @JoinColumn(unique = true, name = "id")
   private GdcDetails gdcDetails;
 
-  @OneToMany(mappedBy = "person", cascade = CascadeType.ALL, orphanRemoval = true)
+  @OneToMany(mappedBy = "person", cascade = {CascadeType.REMOVE,CascadeType.REFRESH}, orphanRemoval = true)
   private Set<Qualification> qualifications = new HashSet<>();
 
-  @OneToMany(mappedBy = "person", cascade = CascadeType.ALL, orphanRemoval = true)
+  @OneToMany(mappedBy = "person", cascade = {CascadeType.REMOVE,CascadeType.REFRESH}, orphanRemoval = true)
   private Set<ProgrammeMembership> programmeMemberships = new HashSet<>();
 
   @OneToOne

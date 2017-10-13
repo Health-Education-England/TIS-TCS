@@ -23,6 +23,8 @@ public class QualificationDTO implements Serializable {
   @Null(groups = Create.class, message = "Id must be null when creating a new qualification")
   private Long id;
 
+  private String intrepidId;
+
   @NotNull(message = "Qualification is required", groups = {Update.class, Create.class})
   private String qualification;
 
@@ -46,6 +48,14 @@ public class QualificationDTO implements Serializable {
 
   public void setId(Long id) {
     this.id = id;
+  }
+
+  public String getIntrepidId() {
+    return intrepidId;
+  }
+
+  public void setIntrepidId(String intrepidId) {
+    this.intrepidId = intrepidId;
   }
 
   public String getQualification() {
@@ -129,6 +139,7 @@ public class QualificationDTO implements Serializable {
   public String toString() {
     return "QualificationDTO{" +
         "id=" + getId() +
+        ", intrepidId='" + getIntrepidId() +  "'" +
         ", qualification='" + getQualification() + "'" +
         ", qualificationType='" + getQualificationType() + "'" +
         ", qualifiactionAttainedDate='" + getQualificationAttainedDate() + "'" +
