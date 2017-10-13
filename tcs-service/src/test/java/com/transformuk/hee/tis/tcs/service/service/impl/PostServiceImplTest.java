@@ -23,6 +23,8 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
 
+import static org.mockito.Matchers.anyList;
+import static org.mockito.Matchers.anySet;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
@@ -211,7 +213,7 @@ public class PostServiceImplTest {
   }
 
   @Test
-  public void pathPostSites() {
+  public void patchPostSites() {
     List<Long> postIds = Lists.newArrayList(1L);
     List<String> intrepidIds = Lists.newArrayList("intrepid1");
 
@@ -242,7 +244,7 @@ public class PostServiceImplTest {
     List<PostDTO> result = testObj.patchPostSites(Lists.newArrayList(sendPostData));
 
     verify(postRepositoryMock).findPostByIntrepidIdIn(Sets.newHashSet(intrepidIds));
-    verify(postRepositoryMock).save(Lists.newArrayList(currentPost));
+    verify(postSiteRepositoryMock).save(anyList());
     verify(postMapperMock).postsToPostDTOs(savedPosts);
 
     Assert.assertSame(transformedPosts, result);
