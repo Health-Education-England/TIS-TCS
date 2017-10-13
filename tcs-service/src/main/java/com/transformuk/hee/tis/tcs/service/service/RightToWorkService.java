@@ -4,6 +4,8 @@ import com.transformuk.hee.tis.tcs.api.dto.RightToWorkDTO;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 
+import java.util.List;
+
 /**
  * Service Interface for managing RightToWork.
  */
@@ -16,6 +18,14 @@ public interface RightToWorkService {
    * @return the persisted entity
    */
   RightToWorkDTO save(RightToWorkDTO rightToWorkDTO);
+
+  /**
+   * Save a list of rightToWork
+   *
+   * @param rightToWorkDTOs the list of entities to save
+   * @return a list of persisted entities
+   */
+  List<RightToWorkDTO> save(List<RightToWorkDTO> rightToWorkDTOs);
 
   /**
    * Get all the rightToWorks.

@@ -12,6 +12,8 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.util.List;
+
 
 /**
  * Service Implementation for managing GmcDetails.
@@ -43,6 +45,20 @@ public class GmcDetailsServiceImpl implements GmcDetailsService {
     GmcDetails gmcDetails = gmcDetailsMapper.toEntity(gmcDetailsDTO);
     gmcDetails = gmcDetailsRepository.saveAndFlush(gmcDetails);
     return gmcDetailsMapper.toDto(gmcDetails);
+  }
+
+  /**
+   * Save a list of gmcDetails
+   *
+   * @param gmcDetailsDTOs the list of entities to save
+   * @return a list of persisted entities
+   */
+  @Override
+  public List<GmcDetailsDTO> save(List<GmcDetailsDTO> gmcDetailsDTOs) {
+    log.debug("Request to save GmcDetails : {}", gmcDetailsDTOs);
+    List<GmcDetails> gmcDetailsList = gmcDetailsMapper.toEntity(gmcDetailsDTOs);
+    gmcDetailsList = gmcDetailsRepository.save(gmcDetailsList);
+    return gmcDetailsMapper.toDto(gmcDetailsList);
   }
 
   /**

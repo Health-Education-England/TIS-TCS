@@ -51,6 +51,7 @@ public class QualificationMapper {
     QualificationDTO result = new QualificationDTO();
 
     result.setId(qualification.getId());
+    result.setIntrepidId(qualification.getIntrepidId());
     result.setQualification(qualification.getQualification());
     result.setQualificationType(qualification.getQualificationType());
     result.setQualificationAttainedDate(qualification.getQualificationAttainedDate());
@@ -107,6 +108,7 @@ public class QualificationMapper {
   private Qualification qualificationDTOToQualification(QualificationDTO qualificationDTO) {
     Qualification result = new Qualification();
     result.setId(qualificationDTO.getId());
+    result.setIntrepidId(qualificationDTO.getIntrepidId());
     result.setQualification(qualificationDTO.getQualification());
     result.setQualificationType(qualificationDTO.getQualificationType());
     result.setQualificationAttainedDate(qualificationDTO.getQualificationAttainedDate());

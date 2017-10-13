@@ -12,6 +12,8 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.util.List;
+
 
 /**
  * Service Implementation for managing PersonalDetails.
@@ -43,6 +45,20 @@ public class PersonalDetailsServiceImpl implements PersonalDetailsService {
     PersonalDetails personalDetails = personalDetailsMapper.toEntity(personalDetailsDTO);
     personalDetails = personalDetailsRepository.saveAndFlush(personalDetails);
     return personalDetailsMapper.toDto(personalDetails);
+  }
+
+  /**
+   * Save a list of personalDetails
+   *
+   * @param personalDetailsDTOs the list of entities to save
+   * @return a list of persisted entities
+   */
+  @Override
+  public List<PersonalDetailsDTO> save(List<PersonalDetailsDTO> personalDetailsDTOs) {
+    log.debug("Request to save personalDetails : {}", personalDetailsDTOs);
+    List<PersonalDetails> personalDetailsList = personalDetailsMapper.toEntity(personalDetailsDTOs);
+    personalDetailsList = personalDetailsRepository.save(personalDetailsList);
+    return personalDetailsMapper.toDto(personalDetailsList);
   }
 
   /**
