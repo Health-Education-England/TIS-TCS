@@ -1,81 +1,48 @@
-package com.transformuk.hee.tis.tcs.service.model;
+package com.transformuk.hee.tis.tcs.api.dto;
 
 import com.transformuk.hee.tis.tcs.api.enumeration.PlacementType;
 import com.transformuk.hee.tis.tcs.api.enumeration.Status;
 
-import javax.persistence.CascadeType;
-import javax.persistence.Column;
-import javax.persistence.Entity;
-import javax.persistence.EnumType;
-import javax.persistence.Enumerated;
-import javax.persistence.FetchType;
-import javax.persistence.GeneratedValue;
-import javax.persistence.GenerationType;
-import javax.persistence.Id;
-import javax.persistence.JoinColumn;
-import javax.persistence.ManyToOne;
-import javax.persistence.OneToMany;
 import java.io.Serializable;
 import java.time.LocalDate;
 import java.util.Objects;
 import java.util.Set;
 
 /**
- * A Placement.
+ * A DTO for the Placement entity.
  */
-@Entity
-public class Placement implements Serializable {
+public class PlacementViewDTO implements Serializable {
 
-  private static final long serialVersionUID = 1L;
-
-  @Id
-  @GeneratedValue(strategy = GenerationType.IDENTITY)
   private Long id;
 
-  @ManyToOne
-  @JoinColumn(name = "traineeId")
-  private Person trainee;
-
-  @ManyToOne
-  @JoinColumn(name = "clinicalSupervisorId")
-  private Person clinicalSupervisor;
-
-  @Column(name = "intrepidId")
   private String intrepidId;
 
-  @Enumerated(EnumType.STRING)
   private Status status;
 
-  @ManyToOne
-  @JoinColumn(name = "postId")
-  private Post post;
+  private PersonDTO trainee;
 
-  @Column(name = "siteId")
+  private PersonDTO clinicalSupervisor;
+
+  private PostDTO post;
+
   private Long siteId;
 
-  @Column(name = "gradeId")
+  private String managingLocalOffice;
+
   private Long gradeId;
 
-  @OneToMany(mappedBy = "placement", cascade = CascadeType.ALL, fetch = FetchType.EAGER)
-  private Set<PlacementSpecialty> specialties;
+  private Set<PlacementSpecialtyDTO> specialties;
 
-  @Column(name = "dateFrom")
   private LocalDate dateFrom;
 
-  @Column(name = "dateTo")
   private LocalDate dateTo;
 
-  @Enumerated(EnumType.STRING)
-  @Column(name = "placementType")
   private PlacementType placementType;
 
-  @Column(name = "placementWholeTimeEquivalent")
   private Float placementWholeTimeEquivalent;
 
-  @Column(name = "trainingDescription")
   private String trainingDescription;
 
-  @Column(name = "localPostNumber")
   private String localPostNumber;
 
   public Long getId() {
@@ -94,22 +61,6 @@ public class Placement implements Serializable {
     this.intrepidId = intrepidId;
   }
 
-  public Person getTrainee() {
-    return trainee;
-  }
-
-  public void setTrainee(Person trainee) {
-    this.trainee = trainee;
-  }
-
-  public Person getClinicalSupervisor() {
-    return clinicalSupervisor;
-  }
-
-  public void setClinicalSupervisor(Person clinicalSupervisor) {
-    this.clinicalSupervisor = clinicalSupervisor;
-  }
-
   public Status getStatus() {
     return status;
   }
@@ -118,20 +69,28 @@ public class Placement implements Serializable {
     this.status = status;
   }
 
-  public Post getPost() {
+  public PersonDTO getTrainee() {
+    return trainee;
+  }
+
+  public void setTrainee(PersonDTO trainee) {
+    this.trainee = trainee;
+  }
+
+  public PersonDTO getClinicalSupervisor() {
+    return clinicalSupervisor;
+  }
+
+  public void setClinicalSupervisor(PersonDTO clinicalSupervisor) {
+    this.clinicalSupervisor = clinicalSupervisor;
+  }
+
+  public PostDTO getPost() {
     return post;
   }
 
-  public void setPost(Post post) {
+  public void setPost(PostDTO post) {
     this.post = post;
-  }
-
-  public Set<PlacementSpecialty> getSpecialties() {
-    return specialties;
-  }
-
-  public void setSpecialties(Set<PlacementSpecialty> specialties) {
-    this.specialties = specialties;
   }
 
   public Long getSiteId() {
@@ -140,6 +99,14 @@ public class Placement implements Serializable {
 
   public void setSiteId(Long siteId) {
     this.siteId = siteId;
+  }
+
+  public String getManagingLocalOffice() {
+    return managingLocalOffice;
+  }
+
+  public void setManagingLocalOffice(String managingLocalOffice) {
+    this.managingLocalOffice = managingLocalOffice;
   }
 
   public Long getGradeId() {
@@ -198,6 +165,14 @@ public class Placement implements Serializable {
     this.placementWholeTimeEquivalent = placementWholeTimeEquivalent;
   }
 
+  public Set<PlacementSpecialtyDTO> getSpecialties() {
+    return specialties;
+  }
+
+  public void setSpecialties(Set<PlacementSpecialtyDTO> specialties) {
+    this.specialties = specialties;
+  }
+
   @Override
   public boolean equals(Object o) {
     if (this == o) {
@@ -206,11 +181,14 @@ public class Placement implements Serializable {
     if (o == null || getClass() != o.getClass()) {
       return false;
     }
-    Placement placement = (Placement) o;
-    if (placement.id == null || id == null) {
+
+    PlacementViewDTO placementViewDTO = (PlacementViewDTO) o;
+
+    if (!Objects.equals(id, placementViewDTO.id)) {
       return false;
     }
-    return Objects.equals(id, placement.id);
+
+    return true;
   }
 
   @Override
@@ -220,20 +198,23 @@ public class Placement implements Serializable {
 
   @Override
   public String toString() {
-    return "Placement{" +
+    return "PlacementViewDTO{" +
         "id=" + id +
         ", status='" + status + "'" +
-        ", post='" + post + "'" +
-        ", siteId='" + siteId + "'" +
+        ", intrepidId='" + intrepidId + "'" +
         ", trainee='" + trainee + "'" +
         ", clinicalSupervisor='" + clinicalSupervisor + "'" +
+        ", post='" + post + "'" +
+        ", siteId='" + siteId + "'" +
         ", gradeId='" + gradeId + "'" +
         ", specialties='" + specialties + "'" +
+        ", managingLocalOffice='" + managingLocalOffice + "'" +
         ", dateFrom='" + dateFrom + "'" +
         ", dateTo='" + dateTo + "'" +
         ", placementType='" + placementType + "'" +
         ", placementWholeTimeEquivalent='" + placementWholeTimeEquivalent + "'" +
         ", localPostNumber='" + localPostNumber + "'" +
+        ", trainingDescription='" + trainingDescription + "'" +
         '}';
   }
 }

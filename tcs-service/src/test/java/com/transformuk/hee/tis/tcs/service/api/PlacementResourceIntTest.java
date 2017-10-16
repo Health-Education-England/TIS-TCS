@@ -1,16 +1,31 @@
 package com.transformuk.hee.tis.tcs.service.api;
 
+import com.google.common.collect.Sets;
+import com.transformuk.hee.tis.reference.client.impl.ReferenceServiceImpl;
 import com.transformuk.hee.tis.tcs.api.dto.PlacementDTO;
 import com.transformuk.hee.tis.tcs.api.enumeration.PlacementType;
+import com.transformuk.hee.tis.tcs.api.enumeration.PostSpecialtyType;
+import com.transformuk.hee.tis.tcs.api.enumeration.Status;
 import com.transformuk.hee.tis.tcs.service.Application;
+import com.transformuk.hee.tis.tcs.service.api.validation.PlacementValidator;
 import com.transformuk.hee.tis.tcs.service.exception.ExceptionTranslator;
+import com.transformuk.hee.tis.tcs.service.model.Person;
 import com.transformuk.hee.tis.tcs.service.model.Placement;
+import com.transformuk.hee.tis.tcs.service.model.PlacementSpecialty;
+import com.transformuk.hee.tis.tcs.service.model.Post;
+import com.transformuk.hee.tis.tcs.service.model.Specialty;
+import com.transformuk.hee.tis.tcs.service.repository.PersonRepository;
 import com.transformuk.hee.tis.tcs.service.repository.PlacementRepository;
+import com.transformuk.hee.tis.tcs.service.repository.PostRepository;
+import com.transformuk.hee.tis.tcs.service.repository.SpecialtyRepository;
 import com.transformuk.hee.tis.tcs.service.service.PlacementService;
 import com.transformuk.hee.tis.tcs.service.service.mapper.PlacementMapper;
+import org.assertj.core.util.Lists;
+import org.assertj.core.util.Maps;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
+import org.mockito.Mock;
 import org.mockito.MockitoAnnotations;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
@@ -28,7 +43,9 @@ import java.time.ZoneId;
 import java.util.List;
 
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.hamcrest.Matchers.containsInAnyOrder;
 import static org.hamcrest.Matchers.hasItem;
+import static org.mockito.BDDMockito.given;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.delete;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
@@ -46,20 +63,17 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 @SpringBootTest(classes = Application.class)
 public class PlacementResourceIntTest {
 
-  private static final String DEFAULT_STATUS = "AAAAAAAAAA";
-  private static final String UPDATED_STATUS = "BBBBBBBBBB";
+  private static final Long DEFAULT_SITE = 123L;
+  private static final Long UPDATED_SITE = 321L;
 
-  private static final String DEFAULT_NATIONAL_POST_NUMBER = "AAAAAAAAAA";
-  private static final String UPDATED_NATIONAL_POST_NUMBER = "BBBBBBBBBB";
+  private static final Long DEFAULT_GRADE = 1234L;
+  private static final Long UPDATED_GRADE = 4321L;
 
-  private static final String DEFAULT_SITE = "AAAAAAAAAA";
-  private static final String UPDATED_SITE = "BBBBBBBBBB";
+  private static final String DEFAULT_LOCAL_POST_NUMBER = "LOCAL_POST_NUMBER";
+  private static final String UPDATED_LOCAL_POST_NUMBER = "NEW_LOCAL_POST_NUMBER";
 
-  private static final String DEFAULT_GRADE = "AAAAAAAAAA";
-  private static final String UPDATED_GRADE = "BBBBBBBBBB";
-
-  private static final String DEFAULT_SPECIALTY = "AAAAAAAAAA";
-  private static final String UPDATED_SPECIALTY = "BBBBBBBBBB";
+  private static final String DEFAULT_TRAINING_DESCRIPTION = "TRAINING";
+  private static final String UPDATED_TRAINING_DESCRPTION = "NEW_TRAINING";
 
   private static final LocalDate DEFAULT_DATE_FROM = LocalDate.ofEpochDay(0L);
   private static final LocalDate UPDATED_DATE_FROM = LocalDate.now(ZoneId.systemDefault());
@@ -73,17 +87,26 @@ public class PlacementResourceIntTest {
   private static final Float DEFAULT_PLACEMENT_WHOLE_TIME_EQUIVALENT = 1F;
   private static final Float UPDATED_PLACEMENT_WHOLE_TIME_EQUIVALENT = 2F;
 
-  private static final Boolean DEFAULT_SLOT_SHARE = false;
-  private static final Boolean UPDATED_SLOT_SHARE = true;
-
   @Autowired
   private PlacementRepository placementRepository;
+
+  @Autowired
+  private SpecialtyRepository specialtyRepository;
+
+  @Autowired
+  private PostRepository postRepository;
+
+  @Autowired
+  private PersonRepository personRepository;
 
   @Autowired
   private PlacementMapper placementMapper;
 
   @Autowired
   private PlacementService placementService;
+
+  @Autowired
+  private PlacementValidator placementValidator;
 
   @Autowired
   private MappingJackson2HttpMessageConverter jacksonMessageConverter;
@@ -94,8 +117,11 @@ public class PlacementResourceIntTest {
   @Autowired
   private ExceptionTranslator exceptionTranslator;
 
+  @Mock
+  private ReferenceServiceImpl referenceService;
+
   @Autowired
-  private EntityManager em;
+  private EntityManager entityManager;
 
   private MockMvc restPlacementMockMvc;
 
@@ -107,34 +133,96 @@ public class PlacementResourceIntTest {
    * This is a static method, as tests for other entities might also need it,
    * if they test an entity which requires the current entity.
    */
-  public static Placement createEntity(EntityManager em) {
-    Placement placement = new Placement()
-        .status(DEFAULT_STATUS)
-        .nationalPostNumber(DEFAULT_NATIONAL_POST_NUMBER)
-        .site(DEFAULT_SITE)
-        .grade(DEFAULT_GRADE)
-        .specialty(DEFAULT_SPECIALTY)
-        .dateFrom(DEFAULT_DATE_FROM)
-        .dateTo(DEFAULT_DATE_TO)
-        .placementType(DEFAULT_PLACEMENT_TYPE)
-        .placementWholeTimeEquivalent(DEFAULT_PLACEMENT_WHOLE_TIME_EQUIVALENT)
-        .slotShare(DEFAULT_SLOT_SHARE);
+  public static Placement createEntity() {
+    Placement placement = new Placement();
+    placement.setStatus(Status.CURRENT);
+    placement.setSiteId(DEFAULT_SITE);
+    placement.setGradeId(DEFAULT_GRADE);
+    placement.setSpecialties(Sets.newHashSet());
+    placement.setDateFrom(DEFAULT_DATE_FROM);
+    placement.setDateTo(DEFAULT_DATE_TO);
+    placement.setPlacementType(DEFAULT_PLACEMENT_TYPE);
+    placement.setPlacementWholeTimeEquivalent(DEFAULT_PLACEMENT_WHOLE_TIME_EQUIVALENT);
+    placement.setLocalPostNumber(DEFAULT_LOCAL_POST_NUMBER);
+    placement.setTrainingDescription(DEFAULT_TRAINING_DESCRIPTION);
     return placement;
   }
 
   @Before
   public void setup() {
     MockitoAnnotations.initMocks(this);
-    PlacementResource placementResource = new PlacementResource(placementService);
+    placementValidator = new PlacementValidator(specialtyRepository, referenceService, postRepository, personRepository);
+    PlacementResource placementResource = new PlacementResource(placementService, placementValidator);
     this.restPlacementMockMvc = MockMvcBuilders.standaloneSetup(placementResource)
         .setCustomArgumentResolvers(pageableArgumentResolver)
         .setControllerAdvice(exceptionTranslator)
         .setMessageConverters(jacksonMessageConverter).build();
+    given(referenceService.siteExists(Lists.newArrayList(DEFAULT_SITE))).willReturn(Maps.newHashMap(DEFAULT_SITE, true));
+    given(referenceService.siteExists(Lists.newArrayList(UPDATED_SITE))).willReturn(Maps.newHashMap(UPDATED_SITE, true));
+    given(referenceService.gradeExists(Lists.newArrayList(DEFAULT_GRADE))).willReturn(Maps.newHashMap(DEFAULT_GRADE, true));
+    given(referenceService.gradeExists(Lists.newArrayList(UPDATED_GRADE))).willReturn(Maps.newHashMap(UPDATED_GRADE, true));
   }
 
   @Before
   public void initTest() {
-    placement = createEntity(em);
+    Person trainee = new Person();
+    entityManager.persist(trainee);
+
+    Person clinicalSupervisor = new Person();
+    entityManager.persist(clinicalSupervisor);
+
+    Post post = new Post();
+    entityManager.persist(post);
+
+    Specialty specialty = new Specialty();
+    entityManager.persist(specialty);
+
+    placement = createEntity();
+
+    PlacementSpecialty placementSpecialty = new PlacementSpecialty();
+    placementSpecialty.setPlacement(placement);
+    placementSpecialty.setPlacementSpecialtyType(PostSpecialtyType.PRIMARY);
+    placementSpecialty.setSpecialty(specialty);
+
+    placement.setPost(post);
+    placement.setTrainee(trainee);
+    placement.setClinicalSupervisor(clinicalSupervisor);
+    placement.setSpecialties(Sets.newHashSet(placementSpecialty));
+  }
+
+  @Test
+  @Transactional
+  public void shouldValidateMandatoryFieldsWhenCreating() throws Exception {
+    //given
+    PlacementDTO placementDTO = new PlacementDTO();
+
+    //when & then
+    restPlacementMockMvc.perform(post("/api/placements")
+        .contentType(TestUtil.APPLICATION_JSON_UTF8)
+        .content(TestUtil.convertObjectToJsonBytes(placementDTO)))
+        .andExpect(status().isBadRequest())
+        .andExpect(jsonPath("$.message").value("error.validation"))
+        .andExpect(jsonPath("$.fieldErrors[*].field").
+            value(containsInAnyOrder( "status", "dateFrom", "dateTo",
+                "traineeId", "clinicalSupervisorId", "postId", "gradeId", "siteId")));
+  }
+
+  @Test
+  @Transactional
+  public void shouldValidateMandatoryFieldsWhenUpdating() throws Exception {
+    //given
+    PlacementDTO placementDTO = new PlacementDTO();
+    placementDTO.setId(1L);
+
+    //when & then
+    restPlacementMockMvc.perform(put("/api/placements")
+        .contentType(TestUtil.APPLICATION_JSON_UTF8)
+        .content(TestUtil.convertObjectToJsonBytes(placementDTO)))
+        .andExpect(status().isBadRequest())
+        .andExpect(jsonPath("$.message").value("error.validation"))
+        .andExpect(jsonPath("$.fieldErrors[*].field").
+            value(containsInAnyOrder("status", "dateFrom", "dateTo",
+                "traineeId", "clinicalSupervisorId", "postId", "gradeId", "siteId")));
   }
 
   @Test
@@ -153,16 +241,20 @@ public class PlacementResourceIntTest {
     List<Placement> placementList = placementRepository.findAll();
     assertThat(placementList).hasSize(databaseSizeBeforeCreate + 1);
     Placement testPlacement = placementList.get(placementList.size() - 1);
-    assertThat(testPlacement.getStatus()).isEqualTo(DEFAULT_STATUS);
-    assertThat(testPlacement.getNationalPostNumber()).isEqualTo(DEFAULT_NATIONAL_POST_NUMBER);
-    assertThat(testPlacement.getSite()).isEqualTo(DEFAULT_SITE);
-    assertThat(testPlacement.getGrade()).isEqualTo(DEFAULT_GRADE);
-    assertThat(testPlacement.getSpecialty()).isEqualTo(DEFAULT_SPECIALTY);
+    assertThat(testPlacement.getStatus()).isEqualTo(Status.CURRENT);
+    assertThat(testPlacement.getSiteId()).isEqualTo(DEFAULT_SITE);
+    assertThat(testPlacement.getGradeId()).isEqualTo(DEFAULT_GRADE);
+    assertThat(testPlacement.getSpecialties().iterator().next().getPlacementSpecialtyType()).isEqualTo(placement.getSpecialties().iterator().next().getPlacementSpecialtyType());
+    assertThat(testPlacement.getSpecialties().iterator().next().getSpecialty()).isEqualTo(placement.getSpecialties().iterator().next().getSpecialty());
     assertThat(testPlacement.getDateFrom()).isEqualTo(DEFAULT_DATE_FROM);
     assertThat(testPlacement.getDateTo()).isEqualTo(DEFAULT_DATE_TO);
+    assertThat(testPlacement.getPost()).isEqualTo(placement.getPost());
+    assertThat(testPlacement.getTrainee()).isEqualTo(placement.getTrainee());
+    assertThat(testPlacement.getClinicalSupervisor()).isEqualTo(placement.getClinicalSupervisor());
+    assertThat(testPlacement.getLocalPostNumber()).isEqualTo(DEFAULT_LOCAL_POST_NUMBER);
+    assertThat(testPlacement.getTrainingDescription()).isEqualTo(DEFAULT_TRAINING_DESCRIPTION);
     assertThat(testPlacement.getPlacementType()).isEqualTo(DEFAULT_PLACEMENT_TYPE);
     assertThat(testPlacement.getPlacementWholeTimeEquivalent()).isEqualTo(DEFAULT_PLACEMENT_WHOLE_TIME_EQUIVALENT);
-    assertThat(testPlacement.isSlotShare()).isEqualTo(DEFAULT_SLOT_SHARE);
   }
 
   @Test
@@ -196,16 +288,19 @@ public class PlacementResourceIntTest {
         .andExpect(status().isOk())
         .andExpect(content().contentType(MediaType.APPLICATION_JSON_UTF8_VALUE))
         .andExpect(jsonPath("$.[*].id").value(hasItem(placement.getId().intValue())))
-        .andExpect(jsonPath("$.[*].status").value(hasItem(DEFAULT_STATUS.toString())))
-        .andExpect(jsonPath("$.[*].nationalPostNumber").value(hasItem(DEFAULT_NATIONAL_POST_NUMBER.toString())))
-        .andExpect(jsonPath("$.[*].site").value(hasItem(DEFAULT_SITE.toString())))
-        .andExpect(jsonPath("$.[*].grade").value(hasItem(DEFAULT_GRADE.toString())))
-        .andExpect(jsonPath("$.[*].specialty").value(hasItem(DEFAULT_SPECIALTY.toString())))
-        .andExpect(jsonPath("$.[*].dateFrom").value(hasItem(DEFAULT_DATE_FROM.toString())))
-        .andExpect(jsonPath("$.[*].dateTo").value(hasItem(DEFAULT_DATE_TO.toString())))
-        .andExpect(jsonPath("$.[*].placementType").value(hasItem(DEFAULT_PLACEMENT_TYPE.toString())))
-        .andExpect(jsonPath("$.[*].placementWholeTimeEquivalent").value(hasItem(DEFAULT_PLACEMENT_WHOLE_TIME_EQUIVALENT.doubleValue())))
-        .andExpect(jsonPath("$.[*].slotShare").value(hasItem(DEFAULT_SLOT_SHARE.booleanValue())));
+        .andExpect(jsonPath("$.[*].trainee.id").value(placement.getTrainee().getId().intValue()))
+        .andExpect(jsonPath("$.[*].clinicalSupervisor.id").value(placement.getClinicalSupervisor().getId().intValue()))
+        .andExpect(jsonPath("$.[*].post.id").value(placement.getPost().getId().intValue()))
+        .andExpect(jsonPath("$.[*].status").value(Status.CURRENT.toString()))
+        .andExpect(jsonPath("$.[*].siteId").value(DEFAULT_SITE.intValue()))
+        .andExpect(jsonPath("$.[*].gradeId").value(DEFAULT_GRADE.intValue()))
+        .andExpect(jsonPath("$.[*].specialties[0].id").value(placement.getSpecialties().iterator().next().getId().intValue()))
+        .andExpect(jsonPath("$.[*].dateFrom").value(DEFAULT_DATE_FROM.toString()))
+        .andExpect(jsonPath("$.[*].dateTo").value(DEFAULT_DATE_TO.toString()))
+        .andExpect(jsonPath("$.[*].placementType").value(DEFAULT_PLACEMENT_TYPE.toString()))
+        .andExpect(jsonPath("$.[*].localPostNumber").value(DEFAULT_LOCAL_POST_NUMBER))
+        .andExpect(jsonPath("$.[*].trainingDescription").value(DEFAULT_TRAINING_DESCRIPTION))
+        .andExpect(jsonPath("$.[*].placementWholeTimeEquivalent").value(DEFAULT_PLACEMENT_WHOLE_TIME_EQUIVALENT.doubleValue()));
   }
 
   @Test
@@ -219,16 +314,19 @@ public class PlacementResourceIntTest {
         .andExpect(status().isOk())
         .andExpect(content().contentType(MediaType.APPLICATION_JSON_UTF8_VALUE))
         .andExpect(jsonPath("$.id").value(placement.getId().intValue()))
-        .andExpect(jsonPath("$.status").value(DEFAULT_STATUS.toString()))
-        .andExpect(jsonPath("$.nationalPostNumber").value(DEFAULT_NATIONAL_POST_NUMBER.toString()))
-        .andExpect(jsonPath("$.site").value(DEFAULT_SITE.toString()))
-        .andExpect(jsonPath("$.grade").value(DEFAULT_GRADE.toString()))
-        .andExpect(jsonPath("$.specialty").value(DEFAULT_SPECIALTY.toString()))
+        .andExpect(jsonPath("$.trainee.id").value(placement.getTrainee().getId().intValue()))
+        .andExpect(jsonPath("$.clinicalSupervisor.id").value(placement.getClinicalSupervisor().getId().intValue()))
+        .andExpect(jsonPath("$.post.id").value(placement.getPost().getId().intValue()))
+        .andExpect(jsonPath("$.status").value(Status.CURRENT.toString()))
+        .andExpect(jsonPath("$.siteId").value(DEFAULT_SITE.intValue()))
+        .andExpect(jsonPath("$.gradeId").value(DEFAULT_GRADE.intValue()))
+        .andExpect(jsonPath("$.specialties[0].id").value(placement.getSpecialties().iterator().next().getId().intValue()))
         .andExpect(jsonPath("$.dateFrom").value(DEFAULT_DATE_FROM.toString()))
         .andExpect(jsonPath("$.dateTo").value(DEFAULT_DATE_TO.toString()))
         .andExpect(jsonPath("$.placementType").value(DEFAULT_PLACEMENT_TYPE.toString()))
-        .andExpect(jsonPath("$.placementWholeTimeEquivalent").value(DEFAULT_PLACEMENT_WHOLE_TIME_EQUIVALENT.doubleValue()))
-        .andExpect(jsonPath("$.slotShare").value(DEFAULT_SLOT_SHARE.booleanValue()));
+        .andExpect(jsonPath("$.localPostNumber").value(DEFAULT_LOCAL_POST_NUMBER))
+        .andExpect(jsonPath("$.trainingDescription").value(DEFAULT_TRAINING_DESCRIPTION))
+        .andExpect(jsonPath("$.placementWholeTimeEquivalent").value(DEFAULT_PLACEMENT_WHOLE_TIME_EQUIVALENT.doubleValue()));
   }
 
   @Test
@@ -248,17 +346,16 @@ public class PlacementResourceIntTest {
 
     // Update the placement
     Placement updatedPlacement = placementRepository.findOne(placement.getId());
-    updatedPlacement
-        .status(UPDATED_STATUS)
-        .nationalPostNumber(UPDATED_NATIONAL_POST_NUMBER)
-        .site(UPDATED_SITE)
-        .grade(UPDATED_GRADE)
-        .specialty(UPDATED_SPECIALTY)
-        .dateFrom(UPDATED_DATE_FROM)
-        .dateTo(UPDATED_DATE_TO)
-        .placementType(UPDATED_PLACEMENT_TYPE)
-        .placementWholeTimeEquivalent(UPDATED_PLACEMENT_WHOLE_TIME_EQUIVALENT)
-        .slotShare(UPDATED_SLOT_SHARE);
+    updatedPlacement.setStatus(Status.INACTIVE);
+    updatedPlacement.setSiteId(UPDATED_SITE);
+    updatedPlacement.setGradeId(UPDATED_GRADE);
+    updatedPlacement.setSpecialties(Sets.newHashSet());
+    updatedPlacement.setDateFrom(UPDATED_DATE_FROM);
+    updatedPlacement.setDateTo(UPDATED_DATE_TO);
+    updatedPlacement.setLocalPostNumber(UPDATED_LOCAL_POST_NUMBER);
+    updatedPlacement.setTrainingDescription(UPDATED_TRAINING_DESCRPTION);
+    updatedPlacement.setPlacementType(UPDATED_PLACEMENT_TYPE);
+    updatedPlacement.setPlacementWholeTimeEquivalent(UPDATED_PLACEMENT_WHOLE_TIME_EQUIVALENT);
     PlacementDTO placementDTO = placementMapper.placementToPlacementDTO(updatedPlacement);
 
     restPlacementMockMvc.perform(put("/api/placements")
@@ -270,35 +367,16 @@ public class PlacementResourceIntTest {
     List<Placement> placementList = placementRepository.findAll();
     assertThat(placementList).hasSize(databaseSizeBeforeUpdate);
     Placement testPlacement = placementList.get(placementList.size() - 1);
-    assertThat(testPlacement.getStatus()).isEqualTo(UPDATED_STATUS);
-    assertThat(testPlacement.getNationalPostNumber()).isEqualTo(UPDATED_NATIONAL_POST_NUMBER);
-    assertThat(testPlacement.getSite()).isEqualTo(UPDATED_SITE);
-    assertThat(testPlacement.getGrade()).isEqualTo(UPDATED_GRADE);
-    assertThat(testPlacement.getSpecialty()).isEqualTo(UPDATED_SPECIALTY);
+    assertThat(testPlacement.getStatus()).isEqualTo(Status.INACTIVE);
+    assertThat(testPlacement.getSiteId()).isEqualTo(UPDATED_SITE);
+    assertThat(testPlacement.getGradeId()).isEqualTo(UPDATED_GRADE);
+    assertThat(testPlacement.getSpecialties()).isEqualTo(placement.getSpecialties());
     assertThat(testPlacement.getDateFrom()).isEqualTo(UPDATED_DATE_FROM);
     assertThat(testPlacement.getDateTo()).isEqualTo(UPDATED_DATE_TO);
+    assertThat(testPlacement.getLocalPostNumber()).isEqualTo(UPDATED_LOCAL_POST_NUMBER);
+    assertThat(testPlacement.getTrainingDescription()).isEqualTo(UPDATED_TRAINING_DESCRPTION);
     assertThat(testPlacement.getPlacementType()).isEqualTo(UPDATED_PLACEMENT_TYPE);
     assertThat(testPlacement.getPlacementWholeTimeEquivalent()).isEqualTo(UPDATED_PLACEMENT_WHOLE_TIME_EQUIVALENT);
-    assertThat(testPlacement.isSlotShare()).isEqualTo(UPDATED_SLOT_SHARE);
-  }
-
-  @Test
-  @Transactional
-  public void updateNonExistingPlacement() throws Exception {
-    int databaseSizeBeforeUpdate = placementRepository.findAll().size();
-
-    // Create the Placement
-    PlacementDTO placementDTO = placementMapper.placementToPlacementDTO(placement);
-
-    // If the entity doesn't have an ID, it will be created instead of just being updated
-    restPlacementMockMvc.perform(put("/api/placements")
-        .contentType(TestUtil.APPLICATION_JSON_UTF8)
-        .content(TestUtil.convertObjectToJsonBytes(placementDTO)))
-        .andExpect(status().isCreated());
-
-    // Validate the Placement in the database
-    List<Placement> placementList = placementRepository.findAll();
-    assertThat(placementList).hasSize(databaseSizeBeforeUpdate + 1);
   }
 
   @Test

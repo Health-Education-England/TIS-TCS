@@ -3,7 +3,7 @@ package com.transformuk.hee.tis.tcs.service.service.impl;
 import com.google.common.collect.Lists;
 import com.google.common.collect.Maps;
 import com.google.common.collect.Sets;
-import com.transformuk.hee.tis.tcs.api.dto.PlacementDTO;
+import com.transformuk.hee.tis.tcs.api.dto.PlacementViewDTO;
 import com.transformuk.hee.tis.tcs.api.dto.PostDTO;
 import com.transformuk.hee.tis.tcs.api.dto.PostGradeDTO;
 import com.transformuk.hee.tis.tcs.api.dto.PostSiteDTO;
@@ -307,7 +307,7 @@ public class PostServiceImpl implements PostService {
         .stream()
         .map(PostDTO::getPlacementHistory)
         .flatMap(Collection::stream)
-        .map(PlacementDTO::getIntrepidId)
+        .map(PlacementViewDTO::getIntrepidId)
         .collect(Collectors.toSet());
 
     Map<String, Placement> placementIntrepidIdToPlacements = placementRepository.findByIntrepidIdIn(postPlamementIntrepidIds)
@@ -317,8 +317,8 @@ public class PostServiceImpl implements PostService {
       Post post = intrepidIdToPost.get(dto.getIntrepidId());
       if (post != null) {
         Set<Placement> placements = post.getPlacementHistory();
-        for (PlacementDTO placementDTO : dto.getPlacementHistory()) {
-          Placement Placement = placementIntrepidIdToPlacements.get(placementDTO.getIntrepidId());
+        for (PlacementViewDTO placementViewDTO : dto.getPlacementHistory()) {
+          Placement Placement = placementIntrepidIdToPlacements.get(placementViewDTO.getIntrepidId());
           if (Placement != null) {
             placements.add(Placement);
           }
