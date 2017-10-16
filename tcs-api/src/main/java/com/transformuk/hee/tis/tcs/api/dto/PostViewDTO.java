@@ -21,7 +21,7 @@ public class PostViewDTO implements Serializable {
 
   private String approvedGradeId;
 
-    private Long primarySpecialtyId;
+  private Long primarySpecialtyId;
 
   private String programmeName;
 

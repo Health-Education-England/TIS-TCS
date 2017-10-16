@@ -6,6 +6,7 @@ import com.transformuk.hee.tis.tcs.api.dto.PostDTO;
 import com.transformuk.hee.tis.tcs.api.dto.PostViewDTO;
 import com.transformuk.hee.tis.tcs.api.dto.validation.Create;
 import com.transformuk.hee.tis.tcs.api.dto.validation.Update;
+import com.transformuk.hee.tis.tcs.api.enumeration.FundingType;
 import com.transformuk.hee.tis.tcs.api.enumeration.PostGradeType;
 import com.transformuk.hee.tis.tcs.api.enumeration.PostSpecialtyType;
 import com.transformuk.hee.tis.tcs.api.enumeration.PostSuffix;
@@ -138,7 +139,8 @@ public class PostResource {
       @RequestParam(value = "columnFilters", required = false) String columnFilterJson) throws IOException {
     log.debug("REST request to get a page of Posts");
     searchQuery = sanitize(searchQuery);
-    List<Class> filterEnumList = Lists.newArrayList(Status.class, PostSuffix.class, PostGradeType.class, PostSpecialtyType.class);
+    List<Class> filterEnumList = Lists.newArrayList(Status.class, FundingType.class, PostSuffix.class,
+        PostGradeType.class, PostSpecialtyType.class);
     List<ColumnFilter> columnFilters = ColumnFilterUtil.getColumnFilters(columnFilterJson, filterEnumList);
     Page<PostViewDTO> page;
     if (StringUtils.isEmpty(searchQuery) && StringUtils.isEmpty(columnFilterJson)) {
