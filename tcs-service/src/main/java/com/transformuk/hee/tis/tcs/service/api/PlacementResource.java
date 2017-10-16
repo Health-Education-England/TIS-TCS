@@ -1,7 +1,9 @@
 package com.transformuk.hee.tis.tcs.service.api;
 
 import com.codahale.metrics.annotation.Timed;
+import com.google.common.collect.Lists;
 import com.transformuk.hee.tis.tcs.api.dto.PlacementDTO;
+import com.transformuk.hee.tis.tcs.api.dto.PlacementViewDTO;
 import com.transformuk.hee.tis.tcs.api.dto.validation.Create;
 import com.transformuk.hee.tis.tcs.api.dto.validation.Update;
 import com.transformuk.hee.tis.tcs.service.api.util.HeaderUtil;
@@ -65,13 +67,13 @@ public class PlacementResource {
   @PostMapping("/placements")
   @Timed
   @PreAuthorize("hasAuthority('tcs:add:modify:entities')")
-  public ResponseEntity<PlacementDTO> createPlacement(@RequestBody @Validated(Create.class) PlacementDTO placementDTO)throws URISyntaxException, ValidationException {
+  public ResponseEntity<PlacementViewDTO> createPlacement(@RequestBody @Validated(Create.class) PlacementDTO placementDTO) throws URISyntaxException, ValidationException {
     log.debug("REST request to save Placement : {}", placementDTO);
     placementValidator.validate(placementDTO);
     if (placementDTO.getId() != null) {
       return ResponseEntity.badRequest().headers(HeaderUtil.createFailureAlert(ENTITY_NAME, "idexists", "A new placement cannot already have an ID")).body(null);
     }
-    PlacementDTO result = placementService.save(placementDTO);
+    PlacementViewDTO result = placementService.save(placementDTO);
     return ResponseEntity.created(new URI("/api/placements/" + result.getId()))
         .headers(HeaderUtil.createEntityCreationAlert(ENTITY_NAME, result.getId().toString()))
         .body(result);
@@ -89,13 +91,13 @@ public class PlacementResource {
   @PutMapping("/placements")
   @Timed
   @PreAuthorize("hasAuthority('tcs:add:modify:entities')")
-  public ResponseEntity<PlacementDTO> updatePlacement(@RequestBody @Validated(Update.class) PlacementDTO placementDTO) throws URISyntaxException, ValidationException {
+  public ResponseEntity<PlacementViewDTO> updatePlacement(@RequestBody @Validated(Update.class) PlacementDTO placementDTO) throws URISyntaxException, ValidationException {
     log.debug("REST request to update Placement : {}", placementDTO);
     placementValidator.validate(placementDTO);
     if (placementDTO.getId() == null) {
       return createPlacement(placementDTO);
     }
-    PlacementDTO result = placementService.save(placementDTO);
+    PlacementViewDTO result = placementService.save(placementDTO);
     return ResponseEntity.ok()
         .headers(HeaderUtil.createEntityUpdateAlert(ENTITY_NAME, placementDTO.getId().toString()))
         .body(result);
@@ -110,9 +112,9 @@ public class PlacementResource {
   @GetMapping("/placements")
   @Timed
   @PreAuthorize("hasAuthority('tcs:view:entities')")
-  public ResponseEntity<List<PlacementDTO>> getAllPlacements(@ApiParam Pageable pageable) {
+  public ResponseEntity<List<PlacementViewDTO>> getAllPlacements(@ApiParam Pageable pageable) {
     log.debug("REST request to get a page of Placements");
-    Page<PlacementDTO> page = placementService.findAll(pageable);
+    Page<PlacementViewDTO> page = placementService.findAll(pageable);
     HttpHeaders headers = PaginationUtil.generatePaginationHttpHeaders(page, "/api/placements");
     return new ResponseEntity<>(page.getContent(), headers, HttpStatus.OK);
   }
@@ -126,10 +128,10 @@ public class PlacementResource {
   @GetMapping("/placements/{id}")
   @Timed
   @PreAuthorize("hasAuthority('tcs:view:entities')")
-  public ResponseEntity<PlacementDTO> getPlacement(@PathVariable Long id) {
+  public ResponseEntity<PlacementViewDTO> getPlacement(@PathVariable Long id) {
     log.debug("REST request to get Placement : {}", id);
-    PlacementDTO placementDTO = placementService.findOne(id);
-    return ResponseUtil.wrapOrNotFound(Optional.ofNullable(placementDTO));
+    PlacementViewDTO placementViewDTO = placementService.findOne(id);
+    return ResponseUtil.wrapOrNotFound(Optional.ofNullable(placementViewDTO));
   }
 
   /**
@@ -158,7 +160,7 @@ public class PlacementResource {
   @PostMapping("/bulk-placements")
   @Timed
   @PreAuthorize("hasAuthority('tcs:add:modify:entities')")
-  public ResponseEntity<List<PlacementDTO>> bulkCreatePlacements(@Valid @RequestBody List<PlacementDTO> placementDTOS) throws URISyntaxException {
+  public ResponseEntity<List<PlacementViewDTO>> bulkCreatePlacements(@Valid @RequestBody List<PlacementDTO> placementDTOS) throws URISyntaxException {
     log.debug("REST request to bulk save Placement : {}", placementDTOS);
     if (!Collections.isEmpty(placementDTOS)) {
       List<Long> entityIds = placementDTOS.stream()
@@ -169,7 +171,7 @@ public class PlacementResource {
         return ResponseEntity.badRequest().headers(HeaderUtil.createFailureAlert(StringUtils.join(entityIds, ","), "ids.exist", "A new Placement cannot already have an ID")).body(null);
       }
     }
-    List<PlacementDTO> result = placementService.save(placementDTOS);
+    List<PlacementViewDTO> result = placementService.save(placementDTOS);
     List<Long> ids = result.stream().map(r -> r.getId()).collect(Collectors.toList());
     return ResponseEntity.ok()
         .headers(HeaderUtil.createEntityCreationAlert(ENTITY_NAME, StringUtils.join(ids, ",")))
@@ -188,7 +190,7 @@ public class PlacementResource {
   @PutMapping("/bulk-placements")
   @Timed
   @PreAuthorize("hasAuthority('tcs:add:modify:entities')")
-  public ResponseEntity<List<PlacementDTO>> bulkUpdatePlacements(@Valid @RequestBody List<PlacementDTO> placementDTOS) throws URISyntaxException {
+  public ResponseEntity<List<PlacementViewDTO>> bulkUpdatePlacements(@Valid @RequestBody List<PlacementDTO> placementDTOS) throws URISyntaxException {
     log.debug("REST request to bulk update Placement : {}", placementDTOS);
     if (Collections.isEmpty(placementDTOS)) {
       return ResponseEntity.badRequest().headers(HeaderUtil.createFailureAlert(ENTITY_NAME, "request.body.empty",
@@ -197,11 +199,11 @@ public class PlacementResource {
       List<PlacementDTO> entitiesWithNoId = placementDTOS.stream().filter(p -> p.getId() == null).collect(Collectors.toList());
       if (!Collections.isEmpty(entitiesWithNoId)) {
         return ResponseEntity.badRequest().headers(HeaderUtil.createFailureAlert(StringUtils.join(entitiesWithNoId, ","),
-            "bulk.update.failed.noId", "Some DTOs you've provided have no Id, cannot update entities that dont exist")).body(entitiesWithNoId);
+            "bulk.update.failed.noId", "Some DTOs you've provided have no Id, cannot update entities that dont exist")).body(Lists.newArrayList());
       }
     }
 
-    List<PlacementDTO> results = placementService.save(placementDTOS);
+    List<PlacementViewDTO> results = placementService.save(placementDTOS);
     List<Long> ids = results.stream().map(r -> r.getId()).collect(Collectors.toList());
     return ResponseEntity.ok()
         .headers(HeaderUtil.createEntityUpdateAlert(ENTITY_NAME, StringUtils.join(ids, ",")))

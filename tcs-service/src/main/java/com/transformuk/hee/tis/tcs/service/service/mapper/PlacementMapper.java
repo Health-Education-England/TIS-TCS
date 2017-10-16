@@ -31,6 +31,9 @@ public class PlacementMapper {
   @Autowired
   private SpecialtyRepository specialtyRepository;
 
+  @Autowired
+  private PlacementSpecialtyMapper placementSpecialtyMapper;
+
   public PlacementDTO placementToPlacementDTO(Placement placement) {
     PlacementDTO placementDTO = null;
     if (placement != null) {
@@ -51,17 +54,7 @@ public class PlacementMapper {
       placementDTO.setTrainingDescription(placement.getTrainingDescription());
       placementDTO.setPlacementWholeTimeEquivalent(placement.getPlacementWholeTimeEquivalent());
 
-      if (CollectionUtils.isNotEmpty(placement.getSpecialties())) {
-        Set<PlacementSpecialtyDTO> specialties = Sets.newHashSet();
-        for (PlacementSpecialty placementSpecialty : placement.getSpecialties()) {
-          PlacementSpecialtyDTO placementSpecialtyDTO = new PlacementSpecialtyDTO();
-          placementSpecialtyDTO.setId(placementSpecialty.getId());
-          placementSpecialtyDTO.setPlacementSpecialtyType(placementSpecialty.getPlacementSpecialtyType());
-          placementSpecialtyDTO.setSpecialtyId(placementSpecialty.getSpecialty().getId());
-          specialties.add(placementSpecialtyDTO);
-        }
-        placementDTO.setSpecialties(specialties);
-      }
+      placementDTO.setSpecialties(placementSpecialtyMapper.toDTOs(placement.getSpecialties()));
     }
     return placementDTO;
   }

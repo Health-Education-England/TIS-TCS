@@ -1,13 +1,8 @@
 package com.transformuk.hee.tis.tcs.api.dto;
 
-import com.transformuk.hee.tis.tcs.api.dto.validation.Create;
-import com.transformuk.hee.tis.tcs.api.dto.validation.Update;
 import com.transformuk.hee.tis.tcs.api.enumeration.PlacementType;
 import com.transformuk.hee.tis.tcs.api.enumeration.Status;
 
-import javax.validation.constraints.DecimalMin;
-import javax.validation.constraints.NotNull;
-import javax.validation.constraints.Null;
 import java.io.Serializable;
 import java.time.LocalDate;
 import java.util.Objects;
@@ -16,42 +11,30 @@ import java.util.Set;
 /**
  * A DTO for the Placement entity.
  */
-public class PlacementDTO implements Serializable {
+public class PlacementViewDTO implements Serializable {
 
-  @NotNull(groups = Update.class, message = "Id must not be null when updating a placement")
-  @DecimalMin(value = "0", groups = Update.class, message = "Id must not be negative")
-  @Null(groups = Create.class, message = "Id must be null when creating a new placement")
   private Long id;
 
   private String intrepidId;
 
-  @NotNull(message = "Status is required", groups = {Update.class, Create.class})
   private Status status;
 
-  @NotNull(message = "TraineeId is required", groups = {Update.class, Create.class})
-  private Long traineeId;
+  private PersonDTO trainee;
 
-  @NotNull(message = "ClinicalSupervisorId is required", groups = {Update.class, Create.class})
-  private Long clinicalSupervisorId;
+  private PersonDTO clinicalSupervisor;
 
-  @NotNull(message = "PostId is required", groups = {Update.class, Create.class})
-  private Long postId;
+  private PostDTO post;
 
-  @NotNull(message = "SiteId is required", groups = {Update.class, Create.class})
   private Long siteId;
 
-  @NotNull(message = "Managing local team is required", groups = {Update.class, Create.class})
   private String managingLocalOffice;
 
-  @NotNull(message = "GradeId is required", groups = {Update.class, Create.class})
   private Long gradeId;
 
   private Set<PlacementSpecialtyDTO> specialties;
 
-  @NotNull(message = "Date from is required", groups = {Update.class, Create.class})
   private LocalDate dateFrom;
 
-  @NotNull(message = "Date to is required", groups = {Update.class, Create.class})
   private LocalDate dateTo;
 
   private PlacementType placementType;
@@ -86,28 +69,28 @@ public class PlacementDTO implements Serializable {
     this.status = status;
   }
 
-  public Long getClinicalSupervisorId() {
-    return clinicalSupervisorId;
+  public PersonDTO getTrainee() {
+    return trainee;
   }
 
-  public void setClinicalSupervisorId(Long clinicalSupervisorId) {
-    this.clinicalSupervisorId = clinicalSupervisorId;
+  public void setTrainee(PersonDTO trainee) {
+    this.trainee = trainee;
   }
 
-  public Long getTraineeId() {
-    return traineeId;
+  public PersonDTO getClinicalSupervisor() {
+    return clinicalSupervisor;
   }
 
-  public void setTraineeId(Long traineeId) {
-    this.traineeId = traineeId;
+  public void setClinicalSupervisor(PersonDTO clinicalSupervisor) {
+    this.clinicalSupervisor = clinicalSupervisor;
   }
 
-  public Long getPostId() {
-    return postId;
+  public PostDTO getPost() {
+    return post;
   }
 
-  public void setPostId(Long postId) {
-    this.postId = postId;
+  public void setPost(PostDTO post) {
+    this.post = post;
   }
 
   public Long getSiteId() {
@@ -199,9 +182,9 @@ public class PlacementDTO implements Serializable {
       return false;
     }
 
-    PlacementDTO placementDTO = (PlacementDTO) o;
+    PlacementViewDTO placementViewDTO = (PlacementViewDTO) o;
 
-    if (!Objects.equals(id, placementDTO.id)) {
+    if (!Objects.equals(id, placementViewDTO.id)) {
       return false;
     }
 
@@ -219,9 +202,9 @@ public class PlacementDTO implements Serializable {
         "id=" + id +
         ", status='" + status + "'" +
         ", intrepidId='" + intrepidId + "'" +
-        ", traineeId='" + traineeId + "'" +
-        ", clinicalSupervisorId='" + clinicalSupervisorId + "'" +
-        ", postId='" + postId + "'" +
+        ", trainee='" + trainee + "'" +
+        ", clinicalSupervisor='" + clinicalSupervisor + "'" +
+        ", post='" + post + "'" +
         ", siteId='" + siteId + "'" +
         ", gradeId='" + gradeId + "'" +
         ", specialties='" + specialties + "'" +

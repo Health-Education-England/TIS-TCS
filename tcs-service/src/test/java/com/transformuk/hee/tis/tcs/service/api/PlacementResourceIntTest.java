@@ -43,6 +43,7 @@ import java.time.ZoneId;
 import java.util.List;
 
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.hamcrest.Matchers.containsInAnyOrder;
 import static org.hamcrest.Matchers.hasItem;
 import static org.mockito.BDDMockito.given;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.delete;
@@ -62,11 +63,11 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 @SpringBootTest(classes = Application.class)
 public class PlacementResourceIntTest {
 
-  private static final Long DEFAULT_SITE = 123l;
-  private static final Long UPDATED_SITE = 321l;
+  private static final Long DEFAULT_SITE = 123L;
+  private static final Long UPDATED_SITE = 321L;
 
-  private static final Long DEFAULT_GRADE = 1234l;
-  private static final Long UPDATED_GRADE = 4321l;
+  private static final Long DEFAULT_GRADE = 1234L;
+  private static final Long UPDATED_GRADE = 4321L;
 
   private static final String DEFAULT_MANAGING_LOCAL_OFFICE = "Health Education England East Midlands";
   private static final String UPDATED_MANAGING_LOCAL_OFFICE = "Health Education England East of England";
@@ -195,6 +196,41 @@ public class PlacementResourceIntTest {
 
   @Test
   @Transactional
+  public void shouldValidateMandatoryFieldsWhenCreating() throws Exception {
+    //given
+    PlacementDTO placementDTO = new PlacementDTO();
+
+    //when & then
+    restPlacementMockMvc.perform(post("/api/placements")
+        .contentType(TestUtil.APPLICATION_JSON_UTF8)
+        .content(TestUtil.convertObjectToJsonBytes(placementDTO)))
+        .andExpect(status().isBadRequest())
+        .andExpect(jsonPath("$.message").value("error.validation"))
+        .andExpect(jsonPath("$.fieldErrors[*].field").
+            value(containsInAnyOrder("managingLocalOffice", "status", "dateFrom", "dateTo",
+                "traineeId", "clinicalSupervisorId", "postId", "gradeId", "siteId")));
+  }
+
+  @Test
+  @Transactional
+  public void shouldValidateMandatoryFieldsWhenUpdating() throws Exception {
+    //given
+    PlacementDTO placementDTO = new PlacementDTO();
+    placementDTO.setId(1L);
+
+    //when & then
+    restPlacementMockMvc.perform(put("/api/placements")
+        .contentType(TestUtil.APPLICATION_JSON_UTF8)
+        .content(TestUtil.convertObjectToJsonBytes(placementDTO)))
+        .andExpect(status().isBadRequest())
+        .andExpect(jsonPath("$.message").value("error.validation"))
+        .andExpect(jsonPath("$.fieldErrors[*].field").
+            value(containsInAnyOrder("managingLocalOffice", "status", "dateFrom", "dateTo",
+                "traineeId", "clinicalSupervisorId", "postId", "gradeId", "siteId")));
+  }
+
+  @Test
+  @Transactional
   public void createPlacement() throws Exception {
     int databaseSizeBeforeCreate = placementRepository.findAll().size();
 
@@ -257,9 +293,9 @@ public class PlacementResourceIntTest {
         .andExpect(status().isOk())
         .andExpect(content().contentType(MediaType.APPLICATION_JSON_UTF8_VALUE))
         .andExpect(jsonPath("$.[*].id").value(hasItem(placement.getId().intValue())))
-        .andExpect(jsonPath("$.[*].traineeId").value(placement.getTrainee().getId().intValue()))
-        .andExpect(jsonPath("$.[*].clinicalSupervisorId").value(placement.getClinicalSupervisor().getId().intValue()))
-        .andExpect(jsonPath("$.[*].postId").value(placement.getPost().getId().intValue()))
+        .andExpect(jsonPath("$.[*].trainee.id").value(placement.getTrainee().getId().intValue()))
+        .andExpect(jsonPath("$.[*].clinicalSupervisor.id").value(placement.getClinicalSupervisor().getId().intValue()))
+        .andExpect(jsonPath("$.[*].post.id").value(placement.getPost().getId().intValue()))
         .andExpect(jsonPath("$.[*].status").value(Status.CURRENT.toString()))
         .andExpect(jsonPath("$.[*].siteId").value(DEFAULT_SITE.intValue()))
         .andExpect(jsonPath("$.[*].gradeId").value(DEFAULT_GRADE.intValue()))
@@ -284,9 +320,9 @@ public class PlacementResourceIntTest {
         .andExpect(status().isOk())
         .andExpect(content().contentType(MediaType.APPLICATION_JSON_UTF8_VALUE))
         .andExpect(jsonPath("$.id").value(placement.getId().intValue()))
-        .andExpect(jsonPath("$.traineeId").value(placement.getTrainee().getId().intValue()))
-        .andExpect(jsonPath("$.clinicalSupervisorId").value(placement.getClinicalSupervisor().getId().intValue()))
-        .andExpect(jsonPath("$.postId").value(placement.getPost().getId().intValue()))
+        .andExpect(jsonPath("$.trainee.id").value(placement.getTrainee().getId().intValue()))
+        .andExpect(jsonPath("$.clinicalSupervisor.id").value(placement.getClinicalSupervisor().getId().intValue()))
+        .andExpect(jsonPath("$.post.id").value(placement.getPost().getId().intValue()))
         .andExpect(jsonPath("$.status").value(Status.CURRENT.toString()))
         .andExpect(jsonPath("$.siteId").value(DEFAULT_SITE.intValue()))
         .andExpect(jsonPath("$.gradeId").value(DEFAULT_GRADE.intValue()))

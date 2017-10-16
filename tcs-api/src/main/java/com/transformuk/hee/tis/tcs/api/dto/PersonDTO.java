@@ -9,7 +9,6 @@ import javax.validation.constraints.DecimalMin;
 import javax.validation.constraints.NotNull;
 import javax.validation.constraints.Null;
 import java.io.Serializable;
-import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.util.HashSet;
 import java.util.Set;
@@ -58,6 +57,8 @@ public class PersonDTO implements Serializable {
   private Set<ProgrammeMembershipDTO> programmeMemberships = new HashSet<>();
 
   private RightToWorkDTO rightToWork;
+
+  private Set<PlacementViewDTO> placements;
 
   public Long getId() {
     return id;
@@ -203,6 +204,14 @@ public class PersonDTO implements Serializable {
     this.programmeMemberships = programmeMemberships;
   }
 
+  public Set<PlacementViewDTO> getPlacements() {
+    return placements;
+  }
+
+  public void setPlacements(Set<PlacementViewDTO> placements) {
+    this.placements = placements;
+  }
+
   @Override
   public boolean equals(Object o) {
     if (this == o) return true;
@@ -235,6 +244,8 @@ public class PersonDTO implements Serializable {
       return false;
     if (programmeMemberships != null ? !programmeMemberships.equals(personDTO.programmeMemberships) : personDTO.programmeMemberships != null)
       return false;
+    if (placements != null ? !placements.equals(personDTO.placements) : personDTO.placements != null)
+      return false;
     return rightToWork != null ? rightToWork.equals(personDTO.rightToWork) : personDTO.rightToWork == null;
   }
 
@@ -258,6 +269,7 @@ public class PersonDTO implements Serializable {
     result = 31 * result + (qualifications != null ? qualifications.hashCode() : 0);
     result = 31 * result + (programmeMemberships != null ? programmeMemberships.hashCode() : 0);
     result = 31 * result + (rightToWork != null ? rightToWork.hashCode() : 0);
+    result = 31 * result + (placements != null ? placements.hashCode() : 0);
     return result;
   }
 
@@ -281,6 +293,7 @@ public class PersonDTO implements Serializable {
         ", gdcDetails=" + gdcDetails +
         ", qualifications=" + qualifications +
         ", programmeMemberships=" + programmeMemberships +
+        ", placements=" + placements +
         ", rightToWork=" + rightToWork +
         '}';
   }

@@ -2,12 +2,30 @@ package com.transformuk.hee.tis.tcs.service.service.impl;
 
 import com.google.common.collect.Lists;
 import com.google.common.collect.Sets;
-import com.transformuk.hee.tis.tcs.api.dto.*;
+import com.transformuk.hee.tis.tcs.api.dto.PlacementViewDTO;
+import com.transformuk.hee.tis.tcs.api.dto.PostDTO;
+import com.transformuk.hee.tis.tcs.api.dto.PostGradeDTO;
+import com.transformuk.hee.tis.tcs.api.dto.PostSiteDTO;
+import com.transformuk.hee.tis.tcs.api.dto.PostSpecialtyDTO;
+import com.transformuk.hee.tis.tcs.api.dto.ProgrammeDTO;
+import com.transformuk.hee.tis.tcs.api.dto.SpecialtyDTO;
 import com.transformuk.hee.tis.tcs.api.enumeration.PostGradeType;
 import com.transformuk.hee.tis.tcs.api.enumeration.PostSiteType;
 import com.transformuk.hee.tis.tcs.api.enumeration.PostSpecialtyType;
-import com.transformuk.hee.tis.tcs.service.model.*;
-import com.transformuk.hee.tis.tcs.service.repository.*;
+import com.transformuk.hee.tis.tcs.service.model.Placement;
+import com.transformuk.hee.tis.tcs.service.model.Post;
+import com.transformuk.hee.tis.tcs.service.model.PostGrade;
+import com.transformuk.hee.tis.tcs.service.model.PostSite;
+import com.transformuk.hee.tis.tcs.service.model.PostSpecialty;
+import com.transformuk.hee.tis.tcs.service.model.Programme;
+import com.transformuk.hee.tis.tcs.service.model.Specialty;
+import com.transformuk.hee.tis.tcs.service.repository.PlacementRepository;
+import com.transformuk.hee.tis.tcs.service.repository.PostGradeRepository;
+import com.transformuk.hee.tis.tcs.service.repository.PostRepository;
+import com.transformuk.hee.tis.tcs.service.repository.PostSiteRepository;
+import com.transformuk.hee.tis.tcs.service.repository.PostSpecialtyRepository;
+import com.transformuk.hee.tis.tcs.service.repository.ProgrammeRepository;
+import com.transformuk.hee.tis.tcs.service.repository.SpecialtyRepository;
 import com.transformuk.hee.tis.tcs.service.service.mapper.PostMapper;
 import org.junit.Assert;
 import org.junit.Test;
@@ -24,7 +42,6 @@ import java.util.List;
 import java.util.Set;
 
 import static org.mockito.Matchers.anyList;
-import static org.mockito.Matchers.anySet;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
@@ -397,16 +414,16 @@ public class PostServiceImplTest {
     List<Long> postIds = Lists.newArrayList(1L);
     List<String> intrepidIds = Lists.newArrayList("intrepid1");
 
-    PlacementDTO placementDTO = new PlacementDTO();
-    placementDTO.setId(1L);
-    placementDTO.setIntrepidId("placement intrepid id");
+    PlacementViewDTO placementViewDTO = new PlacementViewDTO();
+    placementViewDTO.setId(1L);
+    placementViewDTO.setIntrepidId("placement intrepid id");
 
     Placement placement = new Placement();
     placement.setId(1L);
     placement.setIntrepidId("placement intrepid id");
 
     PostDTO sendPostData = new PostDTO();
-    sendPostData.id(postIds.get(0)).intrepidId(intrepidIds.get(0)).placementHistory(Sets.newHashSet(placementDTO));
+    sendPostData.id(postIds.get(0)).intrepidId(intrepidIds.get(0)).placementHistory(Sets.newHashSet(placementViewDTO));
 
     Post currentPost = new Post();
     currentPost.setId(postIds.get(0));
@@ -416,7 +433,7 @@ public class PostServiceImplTest {
     List<Post> savedPosts = Lists.newArrayList(currentPost);
 
     PostDTO expectedDTO = new PostDTO();
-    expectedDTO.id(sendPostData.getId()).intrepidId(currentPost.getIntrepidId()).placementHistory(Sets.newHashSet(placementDTO));
+    expectedDTO.id(sendPostData.getId()).intrepidId(currentPost.getIntrepidId()).placementHistory(Sets.newHashSet(placementViewDTO));
 
     List<PostDTO> transformedPosts = Lists.newArrayList(expectedDTO);
     Set<String> placementIds = Sets.newHashSet("placement intrepid id");
@@ -434,6 +451,6 @@ public class PostServiceImplTest {
 
     Assert.assertSame(transformedPosts, result);
     Assert.assertEquals(expectedDTO, result.get(0));
-    Assert.assertEquals(Sets.newHashSet(placementDTO), result.get(0).getPlacementHistory());
+    Assert.assertEquals(Sets.newHashSet(placementViewDTO), result.get(0).getPlacementHistory());
   }
 }

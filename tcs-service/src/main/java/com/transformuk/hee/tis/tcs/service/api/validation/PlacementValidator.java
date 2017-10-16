@@ -3,6 +3,7 @@ package com.transformuk.hee.tis.tcs.service.api.validation;
 import com.transformuk.hee.tis.reference.client.impl.ReferenceServiceImpl;
 import com.transformuk.hee.tis.tcs.api.dto.PlacementDTO;
 import com.transformuk.hee.tis.tcs.api.dto.PlacementSpecialtyDTO;
+import com.transformuk.hee.tis.tcs.api.dto.PlacementViewDTO;
 import com.transformuk.hee.tis.tcs.api.enumeration.PostSpecialtyType;
 import com.transformuk.hee.tis.tcs.service.repository.PersonRepository;
 import com.transformuk.hee.tis.tcs.service.repository.PostRepository;
@@ -17,14 +18,16 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 
+import static com.google.common.collect.Lists.newArrayList;
+
 /**
- * Holds more complex custom validation for a {@link PlacementDTO} that
+ * Holds more complex custom validation for a {@link PlacementViewDTO} that
  * cannot be easily done via annotations
  */
 @Component
 public class PlacementValidator {
 
-  public static final String PLACEMENT_DTO_NAME = "PlacementDTO";
+  public static final String PLACEMENT_DTO_NAME = "PlacementViewDTO";
   private final SpecialtyRepository specialtyRepository;
   private final ReferenceServiceImpl referenceService;
   private final PostRepository postRepository;
@@ -96,7 +99,7 @@ public class PlacementValidator {
           "Site ID cannot be null or negative"));
     } else {
       Map<Long, Boolean> siteIdsExistsMap = referenceService.siteExists(newArrayList(placementDTO.getSiteId()));
-      notExistsFieldErrors(fieldErrors, siteIdsExistsMap, "sites", "Site");
+      notExistsFieldErrors(fieldErrors, siteIdsExistsMap, "siteId", "Site");
     }
     return fieldErrors;
   }
@@ -104,11 +107,11 @@ public class PlacementValidator {
   private List<FieldError> checkGrade(PlacementDTO placementDTO) {
     List<FieldError> fieldErrors = new ArrayList<>();
     if (placementDTO.getGradeId() == null || placementDTO.getGradeId() < 0) {
-      fieldErrors.add(new FieldError(PLACEMENT_DTO_NAME, "grades",
+      fieldErrors.add(new FieldError(PLACEMENT_DTO_NAME, "gradeId",
           "Grade ID cannot be null or negative"));
     } else {
       Map<Long, Boolean> gradeIdsExistsMap = referenceService.gradeExists(newArrayList(placementDTO.getGradeId()));
-      notExistsFieldErrors(fieldErrors, gradeIdsExistsMap, "grades", "Grade");
+      notExistsFieldErrors(fieldErrors, gradeIdsExistsMap, "gradeId", "Grade");
     }
     return fieldErrors;
   }

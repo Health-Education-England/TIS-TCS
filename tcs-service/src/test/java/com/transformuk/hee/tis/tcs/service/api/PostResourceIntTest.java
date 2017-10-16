@@ -3,7 +3,7 @@ package com.transformuk.hee.tis.tcs.service.api;
 import com.google.common.collect.Lists;
 import com.google.common.collect.Sets;
 import com.transformuk.hee.tis.tcs.TestUtils;
-import com.transformuk.hee.tis.tcs.api.dto.PlacementDTO;
+import com.transformuk.hee.tis.tcs.api.dto.PlacementViewDTO;
 import com.transformuk.hee.tis.tcs.api.dto.PostDTO;
 import com.transformuk.hee.tis.tcs.api.dto.PostGradeDTO;
 import com.transformuk.hee.tis.tcs.api.dto.PostSiteDTO;
@@ -1192,11 +1192,11 @@ public class PostResourceIntTest {
     newPlacement.setIntrepidId("12345");
     em.persist(newPlacement);
 
-    PlacementDTO placementDTO = new PlacementDTO();
-    placementDTO.setId(newPlacement.getId());
-    placementDTO.setIntrepidId("12345");
+    PlacementViewDTO placementViewDTO = new PlacementViewDTO();
+    placementViewDTO.setId(newPlacement.getId());
+    placementViewDTO.setIntrepidId("12345");
 
-    postDTO.setPlacementHistory(Sets.newHashSet(placementDTO));
+    postDTO.setPlacementHistory(Sets.newHashSet(placementViewDTO));
 
     int expectedDatabaseSizeAfterBulkUpdate = postRepository.findAll().size();
 

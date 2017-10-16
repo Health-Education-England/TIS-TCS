@@ -2,7 +2,7 @@ package com.transformuk.hee.tis.tcs.service.service.mapper;
 
 import com.google.common.collect.Lists;
 import com.google.common.collect.Sets;
-import com.transformuk.hee.tis.tcs.api.dto.PlacementDTO;
+import com.transformuk.hee.tis.tcs.api.dto.PlacementViewDTO;
 import com.transformuk.hee.tis.tcs.api.dto.PostDTO;
 import com.transformuk.hee.tis.tcs.api.dto.PostFundingDTO;
 import com.transformuk.hee.tis.tcs.api.dto.PostGradeDTO;
@@ -39,12 +39,20 @@ import java.util.stream.Collectors;
 public class PostMapper {
 
   @Autowired
-  private PlacementMapper placementMapper;
+  private PlacementViewMapper placementMapper;
 
   public PostDTO postToPostDTO(Post post) {
     PostDTO result = null;
     if (post != null) {
-      result = postToPostDTO(post, true);
+      result = postToPostDTO(post, true, true);
+    }
+    return result;
+  }
+
+  public PostDTO postToPostDTO(Post post, Boolean includePlacements) {
+    PostDTO result = null;
+    if (post != null) {
+      result = postToPostDTO(post, true, includePlacements);
     }
     return result;
   }
@@ -69,7 +77,7 @@ public class PostMapper {
     return result;
   }
 
-  private PostDTO postToPostDTO(Post post, boolean traverseRelatedPosts) {
+  private PostDTO postToPostDTO(Post post, boolean traverseRelatedPosts, boolean includePlacements) {
     PostDTO result = new PostDTO();
 
     result.setId(post.getId());
@@ -86,10 +94,10 @@ public class PostMapper {
 
     if (traverseRelatedPosts) {
       if (post.getOldPost() != null) {
-        result.setOldPost(postToPostDTO(post.getOldPost(), false));
+        result.setOldPost(postToPostDTO(post.getOldPost(), false, includePlacements));
       }
       if (post.getNewPost() != null) {
-        result.setNewPost(postToPostDTO(post.getNewPost(), false));
+        result.setNewPost(postToPostDTO(post.getNewPost(), false, includePlacements));
       }
     }
 
@@ -132,12 +140,14 @@ public class PostMapper {
       result.setSpecialties(specialties);
     }
 
-    if (CollectionUtils.isNotEmpty(post.getPlacementHistory())) {
-      Set<PlacementDTO> placements = Sets.newHashSet();
-      for (Placement placement : post.getPlacementHistory()) {
-        placements.add(placementMapper.placementToPlacementDTO(placement));
+    if (includePlacements) {
+      if (CollectionUtils.isNotEmpty(post.getPlacementHistory())) {
+        Set<PlacementViewDTO> placements = Sets.newHashSet();
+        for (Placement placement : post.getPlacementHistory()) {
+          placements.add(placementMapper.placementToPlacementViewDTO(placement, false, true));
+        }
+        result.setPlacementHistory(placements);
       }
-      result.setPlacementHistory(placements);
     }
 
     if (CollectionUtils.isNotEmpty(post.getFundings())) {
@@ -253,14 +263,6 @@ public class PostMapper {
         specialties.add(postSpecialty);
       }
       result.setSpecialties(specialties);
-    }
-
-    if (CollectionUtils.isNotEmpty(postDTO.getPlacementHistory())) {
-      Set<Placement> placements = Sets.newHashSet();
-      for (PlacementDTO placementDTO : postDTO.getPlacementHistory()) {
-        placements.add(placementMapper.placementDTOToPlacement(placementDTO));
-      }
-      result.setPlacementHistory(placements);
     }
 
     if (CollectionUtils.isNotEmpty(postDTO.getFundings())) {
