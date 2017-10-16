@@ -42,6 +42,9 @@ public class Curriculum implements Serializable {
   @Enumerated(EnumType.STRING)
   private CurriculumSubType curriculumSubType;
 
+  @Column(name = "length")
+  private Integer length;
+
   @Column(name = "assessmentType")
   @Enumerated(EnumType.STRING)
   private AssessmentType assessmentType;
@@ -113,6 +116,19 @@ public class Curriculum implements Serializable {
 
   public Curriculum curriculumSubType(CurriculumSubType curriculumSubType) {
     this.curriculumSubType = curriculumSubType;
+    return this;
+  }
+
+  public Integer getLength() {
+    return length;
+  }
+
+  public void setLength(Integer length) {
+    this.length = length;
+  }
+
+  public Curriculum length(Integer length) {
+    this.length = length;
     return this;
   }
 
@@ -191,6 +207,7 @@ public class Curriculum implements Serializable {
         ", status='" + status + "'" +
         ", name='" + name + '\'' +
         ", curriculumSubType=" + curriculumSubType +
+        ", length=" + length +
         ", assessmentType=" + assessmentType +
         ", doesThisCurriculumLeadToCct=" + doesThisCurriculumLeadToCct +
         ", periodOfGrace=" + periodOfGrace +
