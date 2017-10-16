@@ -35,6 +35,7 @@ public class PlacementValidatorTest {
   private static final Long DEFAULT_POST = 123L;
   private static final Long DEFAULT_SITE = 1234L;
   private static final Long DEFAULT_GRADE = 12345L;
+  private static final String DEFAULT_LOCAL_POST_NUMBER = "LOCAL_POST_NUMBER";
   private static final String DEFAULT_TRAINING_DESCRIPTION = "TRAINING";
   private static final LocalDate DEFAULT_DATE_FROM = LocalDate.ofEpochDay(0L);
   private static final LocalDate DEFAULT_DATE_TO = LocalDate.ofEpochDay(0L);
@@ -69,6 +70,7 @@ public class PlacementValidatorTest {
     placementDTO.setDateTo(DEFAULT_DATE_TO);
     placementDTO.setPlacementType(DEFAULT_PLACEMENT_TYPE);
     placementDTO.setPlacementWholeTimeEquivalent(DEFAULT_PLACEMENT_WHOLE_TIME_EQUIVALENT);
+    placementDTO.setLocalPostNumber(DEFAULT_LOCAL_POST_NUMBER);
     placementDTO.setTrainingDescription(DEFAULT_TRAINING_DESCRIPTION);
     placementDTO.setTraineeId(DEFAULT_TRAINEE);
     placementDTO.setClinicalSupervisorId(DEFAULT_CLINICAL_SUPERVISOR);

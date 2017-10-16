@@ -75,6 +75,9 @@ public class Placement implements Serializable {
   @Column(name = "trainingDescription")
   private String trainingDescription;
 
+  @Column(name = "localPostNumber")
+  private String localPostNumber;
+
   public Long getId() {
     return id;
   }
@@ -155,6 +158,14 @@ public class Placement implements Serializable {
     this.trainingDescription = trainingDescription;
   }
 
+  public String getLocalPostNumber() {
+    return localPostNumber;
+  }
+
+  public void setLocalPostNumber(String localPostNumber) {
+    this.localPostNumber = localPostNumber;
+  }
+
   public LocalDate getDateFrom() {
     return dateFrom;
   }
@@ -214,12 +225,15 @@ public class Placement implements Serializable {
         ", status='" + status + "'" +
         ", post='" + post + "'" +
         ", siteId='" + siteId + "'" +
+        ", trainee='" + trainee + "'" +
+        ", clinicalSupervisor='" + clinicalSupervisor + "'" +
         ", gradeId='" + gradeId + "'" +
         ", specialties='" + specialties + "'" +
         ", dateFrom='" + dateFrom + "'" +
         ", dateTo='" + dateTo + "'" +
         ", placementType='" + placementType + "'" +
         ", placementWholeTimeEquivalent='" + placementWholeTimeEquivalent + "'" +
+        ", localPostNumber='" + localPostNumber + "'" +
         '}';
   }
 }

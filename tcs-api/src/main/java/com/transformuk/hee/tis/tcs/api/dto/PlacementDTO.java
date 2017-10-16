@@ -57,6 +57,8 @@ public class PlacementDTO implements Serializable {
 
   private String trainingDescription;
 
+  private String localPostNumber;
+
   public Long getId() {
     return id;
   }
@@ -127,6 +129,14 @@ public class PlacementDTO implements Serializable {
 
   public void setTrainingDescription(String trainingDescription) {
     this.trainingDescription = trainingDescription;
+  }
+
+  public String getLocalPostNumber() {
+    return localPostNumber;
+  }
+
+  public void setLocalPostNumber(String localPostNumber) {
+    this.localPostNumber = localPostNumber;
   }
 
   public LocalDate getDateFrom() {
@@ -208,6 +218,7 @@ public class PlacementDTO implements Serializable {
         ", dateTo='" + dateTo + "'" +
         ", placementType='" + placementType + "'" +
         ", placementWholeTimeEquivalent='" + placementWholeTimeEquivalent + "'" +
+        ", localPostNumber='" + localPostNumber + "'" +
         ", trainingDescription='" + trainingDescription + "'" +
         '}';
   }

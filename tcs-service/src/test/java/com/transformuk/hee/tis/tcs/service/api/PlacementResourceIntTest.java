@@ -69,6 +69,9 @@ public class PlacementResourceIntTest {
   private static final Long DEFAULT_GRADE = 1234L;
   private static final Long UPDATED_GRADE = 4321L;
 
+  private static final String DEFAULT_LOCAL_POST_NUMBER = "LOCAL_POST_NUMBER";
+  private static final String UPDATED_LOCAL_POST_NUMBER = "NEW_LOCAL_POST_NUMBER";
+
   private static final String DEFAULT_TRAINING_DESCRIPTION = "TRAINING";
   private static final String UPDATED_TRAINING_DESCRPTION = "NEW_TRAINING";
 
@@ -140,6 +143,7 @@ public class PlacementResourceIntTest {
     placement.setDateTo(DEFAULT_DATE_TO);
     placement.setPlacementType(DEFAULT_PLACEMENT_TYPE);
     placement.setPlacementWholeTimeEquivalent(DEFAULT_PLACEMENT_WHOLE_TIME_EQUIVALENT);
+    placement.setLocalPostNumber(DEFAULT_LOCAL_POST_NUMBER);
     placement.setTrainingDescription(DEFAULT_TRAINING_DESCRIPTION);
     return placement;
   }
@@ -247,6 +251,7 @@ public class PlacementResourceIntTest {
     assertThat(testPlacement.getPost()).isEqualTo(placement.getPost());
     assertThat(testPlacement.getTrainee()).isEqualTo(placement.getTrainee());
     assertThat(testPlacement.getClinicalSupervisor()).isEqualTo(placement.getClinicalSupervisor());
+    assertThat(testPlacement.getLocalPostNumber()).isEqualTo(DEFAULT_LOCAL_POST_NUMBER);
     assertThat(testPlacement.getTrainingDescription()).isEqualTo(DEFAULT_TRAINING_DESCRIPTION);
     assertThat(testPlacement.getPlacementType()).isEqualTo(DEFAULT_PLACEMENT_TYPE);
     assertThat(testPlacement.getPlacementWholeTimeEquivalent()).isEqualTo(DEFAULT_PLACEMENT_WHOLE_TIME_EQUIVALENT);
@@ -293,6 +298,7 @@ public class PlacementResourceIntTest {
         .andExpect(jsonPath("$.[*].dateFrom").value(DEFAULT_DATE_FROM.toString()))
         .andExpect(jsonPath("$.[*].dateTo").value(DEFAULT_DATE_TO.toString()))
         .andExpect(jsonPath("$.[*].placementType").value(DEFAULT_PLACEMENT_TYPE.toString()))
+        .andExpect(jsonPath("$.[*].localPostNumber").value(DEFAULT_LOCAL_POST_NUMBER))
         .andExpect(jsonPath("$.[*].trainingDescription").value(DEFAULT_TRAINING_DESCRIPTION))
         .andExpect(jsonPath("$.[*].placementWholeTimeEquivalent").value(DEFAULT_PLACEMENT_WHOLE_TIME_EQUIVALENT.doubleValue()));
   }
@@ -318,6 +324,7 @@ public class PlacementResourceIntTest {
         .andExpect(jsonPath("$.dateFrom").value(DEFAULT_DATE_FROM.toString()))
         .andExpect(jsonPath("$.dateTo").value(DEFAULT_DATE_TO.toString()))
         .andExpect(jsonPath("$.placementType").value(DEFAULT_PLACEMENT_TYPE.toString()))
+        .andExpect(jsonPath("$.localPostNumber").value(DEFAULT_LOCAL_POST_NUMBER))
         .andExpect(jsonPath("$.trainingDescription").value(DEFAULT_TRAINING_DESCRIPTION))
         .andExpect(jsonPath("$.placementWholeTimeEquivalent").value(DEFAULT_PLACEMENT_WHOLE_TIME_EQUIVALENT.doubleValue()));
   }
@@ -345,6 +352,7 @@ public class PlacementResourceIntTest {
     updatedPlacement.setSpecialties(Sets.newHashSet());
     updatedPlacement.setDateFrom(UPDATED_DATE_FROM);
     updatedPlacement.setDateTo(UPDATED_DATE_TO);
+    updatedPlacement.setLocalPostNumber(UPDATED_LOCAL_POST_NUMBER);
     updatedPlacement.setTrainingDescription(UPDATED_TRAINING_DESCRPTION);
     updatedPlacement.setPlacementType(UPDATED_PLACEMENT_TYPE);
     updatedPlacement.setPlacementWholeTimeEquivalent(UPDATED_PLACEMENT_WHOLE_TIME_EQUIVALENT);
@@ -365,6 +373,7 @@ public class PlacementResourceIntTest {
     assertThat(testPlacement.getSpecialties()).isEqualTo(placement.getSpecialties());
     assertThat(testPlacement.getDateFrom()).isEqualTo(UPDATED_DATE_FROM);
     assertThat(testPlacement.getDateTo()).isEqualTo(UPDATED_DATE_TO);
+    assertThat(testPlacement.getLocalPostNumber()).isEqualTo(UPDATED_LOCAL_POST_NUMBER);
     assertThat(testPlacement.getTrainingDescription()).isEqualTo(UPDATED_TRAINING_DESCRPTION);
     assertThat(testPlacement.getPlacementType()).isEqualTo(UPDATED_PLACEMENT_TYPE);
     assertThat(testPlacement.getPlacementWholeTimeEquivalent()).isEqualTo(UPDATED_PLACEMENT_WHOLE_TIME_EQUIVALENT);
