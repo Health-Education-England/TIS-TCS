@@ -40,9 +40,6 @@ public class PlacementDTO implements Serializable {
   @NotNull(message = "SiteId is required", groups = {Update.class, Create.class})
   private Long siteId;
 
-  @NotNull(message = "Managing local team is required", groups = {Update.class, Create.class})
-  private String managingLocalOffice;
-
   @NotNull(message = "GradeId is required", groups = {Update.class, Create.class})
   private Long gradeId;
 
@@ -59,8 +56,6 @@ public class PlacementDTO implements Serializable {
   private Float placementWholeTimeEquivalent;
 
   private String trainingDescription;
-
-  private String localPostNumber;
 
   public Long getId() {
     return id;
@@ -118,14 +113,6 @@ public class PlacementDTO implements Serializable {
     this.siteId = siteId;
   }
 
-  public String getManagingLocalOffice() {
-    return managingLocalOffice;
-  }
-
-  public void setManagingLocalOffice(String managingLocalOffice) {
-    this.managingLocalOffice = managingLocalOffice;
-  }
-
   public Long getGradeId() {
     return gradeId;
   }
@@ -140,14 +127,6 @@ public class PlacementDTO implements Serializable {
 
   public void setTrainingDescription(String trainingDescription) {
     this.trainingDescription = trainingDescription;
-  }
-
-  public String getLocalPostNumber() {
-    return localPostNumber;
-  }
-
-  public void setLocalPostNumber(String localPostNumber) {
-    this.localPostNumber = localPostNumber;
   }
 
   public LocalDate getDateFrom() {
@@ -225,12 +204,10 @@ public class PlacementDTO implements Serializable {
         ", siteId='" + siteId + "'" +
         ", gradeId='" + gradeId + "'" +
         ", specialties='" + specialties + "'" +
-        ", managingLocalOffice='" + managingLocalOffice + "'" +
         ", dateFrom='" + dateFrom + "'" +
         ", dateTo='" + dateTo + "'" +
         ", placementType='" + placementType + "'" +
         ", placementWholeTimeEquivalent='" + placementWholeTimeEquivalent + "'" +
-        ", localPostNumber='" + localPostNumber + "'" +
         ", trainingDescription='" + trainingDescription + "'" +
         '}';
   }

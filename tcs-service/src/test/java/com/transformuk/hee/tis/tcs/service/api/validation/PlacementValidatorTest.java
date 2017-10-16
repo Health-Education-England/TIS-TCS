@@ -35,8 +35,6 @@ public class PlacementValidatorTest {
   private static final Long DEFAULT_POST = 123L;
   private static final Long DEFAULT_SITE = 1234L;
   private static final Long DEFAULT_GRADE = 12345L;
-  private static final String DEFAULT_MANAGING_LOCAL_OFFICE = "Health Education England East Midlands";
-  private static final String DEFAULT_LOCAL_POST_NUMBER = "LOCAL_POST_NUMBER";
   private static final String DEFAULT_TRAINING_DESCRIPTION = "TRAINING";
   private static final LocalDate DEFAULT_DATE_FROM = LocalDate.ofEpochDay(0L);
   private static final LocalDate DEFAULT_DATE_TO = LocalDate.ofEpochDay(0L);
@@ -71,8 +69,6 @@ public class PlacementValidatorTest {
     placementDTO.setDateTo(DEFAULT_DATE_TO);
     placementDTO.setPlacementType(DEFAULT_PLACEMENT_TYPE);
     placementDTO.setPlacementWholeTimeEquivalent(DEFAULT_PLACEMENT_WHOLE_TIME_EQUIVALENT);
-    placementDTO.setLocalPostNumber(DEFAULT_LOCAL_POST_NUMBER);
-    placementDTO.setManagingLocalOffice(DEFAULT_MANAGING_LOCAL_OFFICE);
     placementDTO.setTrainingDescription(DEFAULT_TRAINING_DESCRIPTION);
     placementDTO.setTraineeId(DEFAULT_TRAINEE);
     placementDTO.setClinicalSupervisorId(DEFAULT_CLINICAL_SUPERVISOR);
@@ -83,18 +79,6 @@ public class PlacementValidatorTest {
     given(postRepository.exists(DEFAULT_POST)).willReturn(true);
     given(referenceService.siteExists(Lists.newArrayList(DEFAULT_SITE))).willReturn(Maps.newHashMap(DEFAULT_SITE, true));
     given(referenceService.gradeExists(Lists.newArrayList(DEFAULT_GRADE))).willReturn(Maps.newHashMap(DEFAULT_GRADE, true));
-  }
-
-  @Test
-  public void testValidateFailsIfManagingLocalOfficeIsInvalid() {
-    try {
-      placementDTO.setManagingLocalOffice("Test");
-      placementValidator.validate(placementDTO);
-      fail("ValidationException expected.");
-    } catch (ValidationException ex) {
-      assertThat(ex.getBindingResult().getErrorCount(), is(1));
-      assertThat(ex.getBindingResult().getFieldError("managingLocalOffice"), is(notNullValue()));
-    }
   }
 
   @Test

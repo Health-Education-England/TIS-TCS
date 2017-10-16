@@ -8,7 +8,6 @@ import com.transformuk.hee.tis.tcs.api.enumeration.PostSpecialtyType;
 import com.transformuk.hee.tis.tcs.service.repository.PersonRepository;
 import com.transformuk.hee.tis.tcs.service.repository.PostRepository;
 import com.transformuk.hee.tis.tcs.service.repository.SpecialtyRepository;
-import com.transformuk.hee.tis.tcs.service.service.mapper.DesignatedBodyMapper;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 import org.springframework.validation.BeanPropertyBindingResult;
@@ -47,7 +46,6 @@ public class PlacementValidator {
   public void validate(PlacementDTO placementDTO) throws ValidationException {
 
     List<FieldError> fieldErrors = new ArrayList<>();
-    fieldErrors.addAll(checkLocalOffice(placementDTO));
     fieldErrors.addAll(checkPost(placementDTO));
     fieldErrors.addAll(checkSite(placementDTO));
     fieldErrors.addAll(checkGrade(placementDTO));
@@ -161,15 +159,5 @@ public class PlacementValidator {
       fieldErrors.add(new FieldError(PLACEMENT_DTO_NAME, "specialties",
           String.format("Only one Specialty of type %s allowed", PostSpecialtyType.SUB_SPECIALTY)));
     }
-  }
-
-  private List<FieldError> checkLocalOffice(PlacementDTO placementDTO) {
-    List<FieldError> fieldErrors = new ArrayList<>();
-    //first check if the local office is valid
-    if (!DesignatedBodyMapper.getAllLocalOffices().contains(placementDTO.getManagingLocalOffice())) {
-      fieldErrors.add(new FieldError("placementDTO", "managingLocalOffice",
-          "Unknown local office: " + placementDTO.getManagingLocalOffice()));
-    }
-    return fieldErrors;
   }
 }

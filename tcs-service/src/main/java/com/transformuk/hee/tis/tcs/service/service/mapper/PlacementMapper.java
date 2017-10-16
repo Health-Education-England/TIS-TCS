@@ -47,8 +47,6 @@ public class PlacementMapper {
       placementDTO.setDateFrom(placement.getDateFrom());
       placementDTO.setDateTo(placement.getDateTo());
       placementDTO.setIntrepidId(placement.getIntrepidId());
-      placementDTO.setLocalPostNumber(placement.getLocalPostNumber());
-      placementDTO.setManagingLocalOffice(placement.getManagingLocalOffice());
       placementDTO.setPlacementType(placement.getPlacementType());
       placementDTO.setStatus(placement.getStatus());
       placementDTO.setTrainingDescription(placement.getTrainingDescription());
@@ -76,8 +74,6 @@ public class PlacementMapper {
       placement.setDateFrom(placementDTO.getDateFrom());
       placement.setDateTo(placementDTO.getDateTo());
       placement.setIntrepidId(placementDTO.getIntrepidId());
-      placement.setLocalPostNumber(placementDTO.getLocalPostNumber());
-      placement.setManagingLocalOffice(placementDTO.getManagingLocalOffice());
       placement.setPlacementType(placementDTO.getPlacementType());
       placement.setStatus(placementDTO.getStatus());
       placement.setTrainingDescription(placementDTO.getTrainingDescription());

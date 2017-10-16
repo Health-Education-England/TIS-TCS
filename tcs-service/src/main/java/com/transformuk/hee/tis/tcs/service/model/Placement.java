@@ -53,9 +53,6 @@ public class Placement implements Serializable {
   @Column(name = "siteId")
   private Long siteId;
 
-  @Column(name = "managingLocalOffice")
-  private String managingLocalOffice;
-
   @Column(name = "gradeId")
   private Long gradeId;
 
@@ -77,9 +74,6 @@ public class Placement implements Serializable {
 
   @Column(name = "trainingDescription")
   private String trainingDescription;
-
-  @Column(name = "localPostNumber")
-  private String localPostNumber;
 
   public Long getId() {
     return id;
@@ -153,28 +147,12 @@ public class Placement implements Serializable {
     this.gradeId = gradeId;
   }
 
-  public String getManagingLocalOffice() {
-    return managingLocalOffice;
-  }
-
-  public void setManagingLocalOffice(String managingLocalOffice) {
-    this.managingLocalOffice = managingLocalOffice;
-  }
-
   public String getTrainingDescription() {
     return trainingDescription;
   }
 
   public void setTrainingDescription(String trainingDescription) {
     this.trainingDescription = trainingDescription;
-  }
-
-  public String getLocalPostNumber() {
-    return localPostNumber;
-  }
-
-  public void setLocalPostNumber(String localPostNumber) {
-    this.localPostNumber = localPostNumber;
   }
 
   public LocalDate getDateFrom() {

@@ -40,8 +40,6 @@ public class PlacementViewMapper {
       placementDTO.setDateFrom(placement.getDateFrom());
       placementDTO.setDateTo(placement.getDateTo());
       placementDTO.setIntrepidId(placement.getIntrepidId());
-      placementDTO.setLocalPostNumber(placement.getLocalPostNumber());
-      placementDTO.setManagingLocalOffice(placement.getManagingLocalOffice());
       placementDTO.setPlacementType(placement.getPlacementType());
       placementDTO.setStatus(placement.getStatus());
       placementDTO.setTrainingDescription(placement.getTrainingDescription());
