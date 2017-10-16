@@ -9,6 +9,7 @@ import com.transformuk.hee.tis.tcs.service.api.util.PaginationUtil;
 import com.transformuk.hee.tis.tcs.service.service.PersonalDetailsService;
 import io.github.jhipster.web.util.ResponseUtil;
 import io.swagger.annotations.ApiParam;
+import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.data.domain.Page;
@@ -20,6 +21,7 @@ import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PatchMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.PutMapping;
@@ -27,10 +29,12 @@ import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
+import javax.validation.Valid;
 import java.net.URI;
 import java.net.URISyntaxException;
 import java.util.List;
 import java.util.Optional;
+import java.util.stream.Collectors;
 
 /**
  * REST controller for managing PersonalDetails.
@@ -136,5 +140,24 @@ public class PersonalDetailsResource {
     log.debug("REST request to delete PersonalDetails : {}", id);
     personalDetailsService.delete(id);
     return ResponseEntity.ok().headers(HeaderUtil.createEntityDeletionAlert(ENTITY_NAME, id.toString())).build();
+  }
+
+  /**
+   * PATCH  /personal-details : Bulk patch personalDetails.
+   *
+   * @param personalDetailsDTOs the personalDetailsDTOs to create/update
+   * @return the ResponseEntity with status 200 and with body the new personalDetails
+   * @throws URISyntaxException if the Location URI syntax is incorrect
+   */
+  @PatchMapping("/personal-details")
+  @Timed
+  @PreAuthorize("hasPermission('tis:people::person:', 'Update')")
+  public ResponseEntity<List<PersonalDetailsDTO>> patchPersonalDetails(@Valid @RequestBody List<PersonalDetailsDTO> personalDetailsDTOs) throws URISyntaxException {
+    log.debug("REST request to patch personalDetails: {}", personalDetailsDTOs);
+    List<PersonalDetailsDTO> result = personalDetailsService.save(personalDetailsDTOs);
+    List<Long> ids = result.stream().map(PersonalDetailsDTO::getId).collect(Collectors.toList());
+    return ResponseEntity.ok()
+        .headers(HeaderUtil.createEntityUpdateAlert(ENTITY_NAME, StringUtils.join(ids, ",")))
+        .body(result);
   }
 }

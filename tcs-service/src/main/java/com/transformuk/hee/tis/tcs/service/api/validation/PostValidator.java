@@ -9,7 +9,6 @@ import com.transformuk.hee.tis.tcs.api.dto.PostSiteDTO;
 import com.transformuk.hee.tis.tcs.api.dto.PostSpecialtyDTO;
 import com.transformuk.hee.tis.tcs.api.dto.ProgrammeDTO;
 import com.transformuk.hee.tis.tcs.api.enumeration.PostSpecialtyType;
-import com.transformuk.hee.tis.tcs.service.model.Post;
 import com.transformuk.hee.tis.tcs.service.repository.PlacementRepository;
 import com.transformuk.hee.tis.tcs.service.repository.PostRepository;
 import com.transformuk.hee.tis.tcs.service.repository.ProgrammeRepository;
@@ -78,41 +77,12 @@ public class PostValidator {
     fieldErrors.addAll(checkGrades(postDTO));
     fieldErrors.addAll(checkSpecialties(postDTO));
     fieldErrors.addAll(checkPlacementHistory(postDTO));
-    fieldErrors.addAll(checkNationalPostNumber(postDTO));
 
     if (!fieldErrors.isEmpty()) {
       BeanPropertyBindingResult bindingResult = new BeanPropertyBindingResult(postDTO, POST_DTO_NAME);
       fieldErrors.forEach(bindingResult::addError);
       throw new MethodArgumentNotValidException(null, bindingResult);
     }
-  }
-
-  private List<FieldError> checkNationalPostNumber(PostDTO postDTO) {
-    List<FieldError> fieldErrors = new ArrayList<>();
-    //check if the national post number is unique
-    //if we update a post
-    if (postDTO.getId() != null) {
-      List<Post> postList = postRepository.findByNationalPostNumber(postDTO.getNationalPostNumber());
-      if (postList.size() > 1) {
-        fieldErrors.add(new FieldError(POST_DTO_NAME, NATIONAL_POST_NUMBER,
-            String.format("nationalPostNumber %s is not unique, there are currently %d post with this number: %s",
-                postDTO.getNationalPostNumber(), postList.size(),
-                postList)));
-      } else if (postList.size() == 1 && !postDTO.getId().equals(postList.get(0).getId())) {
-        fieldErrors.add(new FieldError(POST_DTO_NAME, NATIONAL_POST_NUMBER,
-            String.format("nationalPostNumber %s is not unique, there is currently one post with this number: %s",
-                postDTO.getNationalPostNumber(), postList.get(0))));
-      }
-    } else {
-      //if we create a post
-      List<Post> postList = postRepository.findByNationalPostNumber(postDTO.getNationalPostNumber());
-      if (!postList.isEmpty()) {
-        fieldErrors.add(new FieldError(POST_DTO_NAME, NATIONAL_POST_NUMBER,
-            String.format("nationalPostNumber %s is not unique, there is currently one post with this number: %s",
-                postDTO.getNationalPostNumber(), postList.get(0))));
-      }
-    }
-    return fieldErrors;
   }
 
   private List<FieldError> checkProgramme(PostDTO postDTO) {

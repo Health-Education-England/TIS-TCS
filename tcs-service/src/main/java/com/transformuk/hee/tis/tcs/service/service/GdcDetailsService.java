@@ -4,6 +4,8 @@ import com.transformuk.hee.tis.tcs.api.dto.GdcDetailsDTO;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 
+import java.util.List;
+
 /**
  * Service Interface for managing GdcDetails.
  */
@@ -16,6 +18,14 @@ public interface GdcDetailsService {
    * @return the persisted entity
    */
   GdcDetailsDTO save(GdcDetailsDTO gdcDetailsDTO);
+
+  /**
+   * Save a list of gdcDetails
+   *
+   * @param gdcDetailsDTOs the list of entities to save
+   * @return a list of persisted entities
+   */
+  List<GdcDetailsDTO> save(List<GdcDetailsDTO> gdcDetailsDTOs);
 
   /**
    * Get all the gdcDetails.

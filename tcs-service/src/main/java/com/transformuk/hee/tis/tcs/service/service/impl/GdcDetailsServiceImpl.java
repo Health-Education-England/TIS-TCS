@@ -12,6 +12,8 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.util.List;
+
 
 /**
  * Service Implementation for managing GdcDetails.
@@ -43,6 +45,20 @@ public class GdcDetailsServiceImpl implements GdcDetailsService {
     GdcDetails gdcDetails = gdcDetailsMapper.toEntity(gdcDetailsDTO);
     gdcDetails = gdcDetailsRepository.saveAndFlush(gdcDetails);
     return gdcDetailsMapper.toDto(gdcDetails);
+  }
+
+  /**
+   * Save a list of gdcDetails
+   *
+   * @param gdcDetailsDTOs the list of entities to save
+   * @return a list of persisted entities
+   */
+  @Override
+  public List<GdcDetailsDTO> save(List<GdcDetailsDTO> gdcDetailsDTOs) {
+    log.debug("Request to save GdcDetails : {}", gdcDetailsDTOs);
+    List<GdcDetails> gdcDetailsList = gdcDetailsMapper.toEntity(gdcDetailsDTOs);
+    gdcDetailsList = gdcDetailsRepository.save(gdcDetailsList);
+    return gdcDetailsMapper.toDto(gdcDetailsList);
   }
 
   /**

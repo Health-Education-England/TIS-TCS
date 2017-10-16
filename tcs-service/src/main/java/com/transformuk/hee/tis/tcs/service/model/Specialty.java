@@ -43,7 +43,7 @@ public class Specialty implements Serializable {
   @Column(name = "specialtyCode")
   private String specialtyCode;
 
-  @ElementCollection(targetClass = SpecialtyType.class)
+  @ElementCollection(targetClass = SpecialtyType.class, fetch = FetchType.EAGER)
   @CollectionTable(name = "SpecialtyTypes", joinColumns = {@JoinColumn(name = "specialtyId")})
   @Column(name = "specialtyType")
   @Enumerated(EnumType.STRING)

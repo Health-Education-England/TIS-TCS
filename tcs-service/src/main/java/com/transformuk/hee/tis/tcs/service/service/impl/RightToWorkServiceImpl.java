@@ -12,6 +12,8 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.util.List;
+
 
 /**
  * Service Implementation for managing RightToWork.
@@ -43,6 +45,20 @@ public class RightToWorkServiceImpl implements RightToWorkService {
     RightToWork rightToWork = rightToWorkMapper.toEntity(rightToWorkDTO);
     rightToWork = rightToWorkRepository.saveAndFlush(rightToWork);
     return rightToWorkMapper.toDto(rightToWork);
+  }
+
+  /**
+   * Save a list of rightToWork
+   *
+   * @param rightToWorkDTOs the list of entities to save
+   * @return a list of persisted entities
+   */
+  @Override
+  public List<RightToWorkDTO> save(List<RightToWorkDTO> rightToWorkDTOs) {
+    log.debug("Request to save RightToWork : {}", rightToWorkDTOs);
+    List<RightToWork> rightToWorks = rightToWorkMapper.toEntity(rightToWorkDTOs);
+    rightToWorks = rightToWorkRepository.save(rightToWorks);
+    return rightToWorkMapper.toDto(rightToWorks);
   }
 
   /**

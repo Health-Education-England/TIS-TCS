@@ -24,6 +24,10 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.transaction.annotation.Transactional;
+import org.springframework.util.CollectionUtils;
+import org.springframework.transaction.annotation.Transactional;
+import org.springframework.util.CollectionUtils;
+import org.springframework.transaction.annotation.Transactional;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -39,6 +43,7 @@ import javax.validation.Valid;
 import java.net.URI;
 import java.net.URISyntaxException;
 import java.util.List;
+import java.util.Objects;
 import java.util.Optional;
 import java.util.stream.Collectors;
 
@@ -192,7 +197,7 @@ public class SpecialtyGroupResource {
    *
    * @param specialtyGroupDTOS List of the specialtyGroupDTOS to create
    * @return the ResponseEntity with status 200 (Created) and with body the new specialtyGroupDTOS, or with status 400 (Bad Request) if the Specialty Group has already an ID
-   * @throws URISyntaxException if the Location URI syntax is incorrect
+   * @throws URISyntaxException if the Location URI syntax is ResponseEntity<List<SpecialtyDTO>>incorrect
    */
   @PostMapping("/bulk-specialty-groups")
   @Timed
