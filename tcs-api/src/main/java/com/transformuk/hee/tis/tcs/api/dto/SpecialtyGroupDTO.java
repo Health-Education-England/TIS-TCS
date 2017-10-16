@@ -12,6 +12,7 @@ import javax.validation.constraints.Null;
 import javax.validation.constraints.Pattern;
 import java.io.Serializable;
 import java.util.Objects;
+import java.util.Set;
 
 /**
  * A DTO for the SpecialtyGroup entity.
@@ -32,6 +33,8 @@ public class SpecialtyGroupDTO implements Serializable {
       message = "Specialty group name must be alphanumeric",
       groups = {Update.class, Create.class})
   private String name;
+
+  private Set<SpecialtyDTO> groupSpecialties;
 
   public Long getId() {
     return id;
@@ -55,6 +58,14 @@ public class SpecialtyGroupDTO implements Serializable {
 
   public void setIntrepidId(String intrepidId) {
     this.intrepidId = intrepidId;
+  }
+
+  public Set<SpecialtyDTO> getSpecialty() {
+    return groupSpecialties;
+  }
+
+  public void setSpecialties(Set<SpecialtyDTO> specialties) {
+    this.groupSpecialties = specialties;
   }
 
   @Override

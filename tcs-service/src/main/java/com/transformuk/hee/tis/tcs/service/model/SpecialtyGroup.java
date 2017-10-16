@@ -5,13 +5,20 @@ import javax.persistence.Entity;
 import javax.persistence.GeneratedValue;
 import javax.persistence.GenerationType;
 import javax.persistence.Id;
+import javax.persistence.JoinTable;
+import javax.persistence.OneToMany;
+import javax.persistence.Table;
 import java.io.Serializable;
+import java.util.HashSet;
 import java.util.Objects;
+import java.util.Set;
 
 /**
  * A SpecialtyGroup.
  */
+
 @Entity
+@Table(name = "SpecialtyGroup")
 public class SpecialtyGroup implements Serializable {
 
   private static final long serialVersionUID = 1L;
@@ -23,6 +30,36 @@ public class SpecialtyGroup implements Serializable {
   private String intrepidId;
 
   private String name;
+
+  @OneToMany(mappedBy = "specialtyGroup")
+
+  //@JoinTable(name = "Specialty")
+  //joinColumns = @JoinColumn(name = "specialtyGroupId", referencedColumnName = "id"))
+
+  private Set<Specialty> specialties = new HashSet<>();
+
+  public Set<Specialty> getSpecialties() {
+    return specialties;
+  }
+
+  public void setSpecialties(Set<Specialty> specialties) {
+    this.specialties = specialties;
+  }
+
+  public SpecialtyGroup specialties(Set<Specialty> specialties) {
+    this.specialties = specialties;
+    return this;
+  }
+
+  public SpecialtyGroup addSpecialty(Specialty specialty) {
+    this.specialties.add(specialty);
+    return this;
+  }
+
+  public SpecialtyGroup removeSpecialty(Specialty specialty) {
+    this.specialties.remove(specialty);
+    return this;
+  }
 
   public Long getId() {
     return id;
