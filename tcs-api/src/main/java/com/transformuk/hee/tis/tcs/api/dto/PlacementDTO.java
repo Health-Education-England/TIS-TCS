@@ -3,7 +3,6 @@ package com.transformuk.hee.tis.tcs.api.dto;
 import com.transformuk.hee.tis.tcs.api.dto.validation.Create;
 import com.transformuk.hee.tis.tcs.api.dto.validation.Update;
 import com.transformuk.hee.tis.tcs.api.enumeration.PlacementType;
-import com.transformuk.hee.tis.tcs.api.enumeration.Status;
 
 import javax.validation.constraints.DecimalMin;
 import javax.validation.constraints.NotNull;
@@ -24,9 +23,6 @@ public class PlacementDTO implements Serializable {
   private Long id;
 
   private String intrepidId;
-
-  @NotNull(message = "Status is required", groups = {Update.class, Create.class})
-  private Status status;
 
   @NotNull(message = "TraineeId is required", groups = {Update.class, Create.class})
   private Long traineeId;
@@ -73,14 +69,6 @@ public class PlacementDTO implements Serializable {
 
   public void setIntrepidId(String intrepidId) {
     this.intrepidId = intrepidId;
-  }
-
-  public Status getStatus() {
-    return status;
-  }
-
-  public void setStatus(Status status) {
-    this.status = status;
   }
 
   public Long getClinicalSupervisorId() {
@@ -206,7 +194,6 @@ public class PlacementDTO implements Serializable {
   public String toString() {
     return "PlacementViewDTO{" +
         "id=" + id +
-        ", status='" + status + "'" +
         ", intrepidId='" + intrepidId + "'" +
         ", traineeId='" + traineeId + "'" +
         ", clinicalSupervisorId='" + clinicalSupervisorId + "'" +

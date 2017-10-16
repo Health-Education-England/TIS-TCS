@@ -1,7 +1,6 @@
 package com.transformuk.hee.tis.tcs.service.model;
 
 import com.transformuk.hee.tis.tcs.api.enumeration.PlacementType;
-import com.transformuk.hee.tis.tcs.api.enumeration.Status;
 
 import javax.persistence.CascadeType;
 import javax.persistence.Column;
@@ -42,9 +41,6 @@ public class Placement implements Serializable {
 
   @Column(name = "intrepidId")
   private String intrepidId;
-
-  @Enumerated(EnumType.STRING)
-  private Status status;
 
   @ManyToOne
   @JoinColumn(name = "postId")
@@ -108,14 +104,6 @@ public class Placement implements Serializable {
 
   public void setClinicalSupervisor(Person clinicalSupervisor) {
     this.clinicalSupervisor = clinicalSupervisor;
-  }
-
-  public Status getStatus() {
-    return status;
-  }
-
-  public void setStatus(Status status) {
-    this.status = status;
   }
 
   public Post getPost() {
@@ -222,7 +210,6 @@ public class Placement implements Serializable {
   public String toString() {
     return "Placement{" +
         "id=" + id +
-        ", status='" + status + "'" +
         ", post='" + post + "'" +
         ", siteId='" + siteId + "'" +
         ", trainee='" + trainee + "'" +

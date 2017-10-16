@@ -5,7 +5,6 @@ import com.transformuk.hee.tis.reference.client.impl.ReferenceServiceImpl;
 import com.transformuk.hee.tis.tcs.api.dto.PlacementDTO;
 import com.transformuk.hee.tis.tcs.api.enumeration.PlacementType;
 import com.transformuk.hee.tis.tcs.api.enumeration.PostSpecialtyType;
-import com.transformuk.hee.tis.tcs.api.enumeration.Status;
 import com.transformuk.hee.tis.tcs.service.Application;
 import com.transformuk.hee.tis.tcs.service.api.validation.PlacementValidator;
 import com.transformuk.hee.tis.tcs.service.exception.ExceptionTranslator;
@@ -135,7 +134,6 @@ public class PlacementResourceIntTest {
    */
   public static Placement createEntity() {
     Placement placement = new Placement();
-    placement.setStatus(Status.CURRENT);
     placement.setSiteId(DEFAULT_SITE);
     placement.setGradeId(DEFAULT_GRADE);
     placement.setSpecialties(Sets.newHashSet());
@@ -203,7 +201,7 @@ public class PlacementResourceIntTest {
         .andExpect(status().isBadRequest())
         .andExpect(jsonPath("$.message").value("error.validation"))
         .andExpect(jsonPath("$.fieldErrors[*].field").
-            value(containsInAnyOrder( "status", "dateFrom", "dateTo",
+            value(containsInAnyOrder("dateFrom", "dateTo",
                 "traineeId", "clinicalSupervisorId", "postId", "gradeId", "siteId")));
   }
 
@@ -221,7 +219,7 @@ public class PlacementResourceIntTest {
         .andExpect(status().isBadRequest())
         .andExpect(jsonPath("$.message").value("error.validation"))
         .andExpect(jsonPath("$.fieldErrors[*].field").
-            value(containsInAnyOrder("status", "dateFrom", "dateTo",
+            value(containsInAnyOrder("dateFrom", "dateTo",
                 "traineeId", "clinicalSupervisorId", "postId", "gradeId", "siteId")));
   }
 
@@ -241,7 +239,6 @@ public class PlacementResourceIntTest {
     List<Placement> placementList = placementRepository.findAll();
     assertThat(placementList).hasSize(databaseSizeBeforeCreate + 1);
     Placement testPlacement = placementList.get(placementList.size() - 1);
-    assertThat(testPlacement.getStatus()).isEqualTo(Status.CURRENT);
     assertThat(testPlacement.getSiteId()).isEqualTo(DEFAULT_SITE);
     assertThat(testPlacement.getGradeId()).isEqualTo(DEFAULT_GRADE);
     assertThat(testPlacement.getSpecialties().iterator().next().getPlacementSpecialtyType()).isEqualTo(placement.getSpecialties().iterator().next().getPlacementSpecialtyType());
@@ -291,7 +288,6 @@ public class PlacementResourceIntTest {
         .andExpect(jsonPath("$.[*].trainee.id").value(placement.getTrainee().getId().intValue()))
         .andExpect(jsonPath("$.[*].clinicalSupervisor.id").value(placement.getClinicalSupervisor().getId().intValue()))
         .andExpect(jsonPath("$.[*].post.id").value(placement.getPost().getId().intValue()))
-        .andExpect(jsonPath("$.[*].status").value(Status.CURRENT.toString()))
         .andExpect(jsonPath("$.[*].siteId").value(DEFAULT_SITE.intValue()))
         .andExpect(jsonPath("$.[*].gradeId").value(DEFAULT_GRADE.intValue()))
         .andExpect(jsonPath("$.[*].specialties[0].id").value(placement.getSpecialties().iterator().next().getId().intValue()))
@@ -317,7 +313,6 @@ public class PlacementResourceIntTest {
         .andExpect(jsonPath("$.trainee.id").value(placement.getTrainee().getId().intValue()))
         .andExpect(jsonPath("$.clinicalSupervisor.id").value(placement.getClinicalSupervisor().getId().intValue()))
         .andExpect(jsonPath("$.post.id").value(placement.getPost().getId().intValue()))
-        .andExpect(jsonPath("$.status").value(Status.CURRENT.toString()))
         .andExpect(jsonPath("$.siteId").value(DEFAULT_SITE.intValue()))
         .andExpect(jsonPath("$.gradeId").value(DEFAULT_GRADE.intValue()))
         .andExpect(jsonPath("$.specialties[0].id").value(placement.getSpecialties().iterator().next().getId().intValue()))
@@ -346,7 +341,6 @@ public class PlacementResourceIntTest {
 
     // Update the placement
     Placement updatedPlacement = placementRepository.findOne(placement.getId());
-    updatedPlacement.setStatus(Status.INACTIVE);
     updatedPlacement.setSiteId(UPDATED_SITE);
     updatedPlacement.setGradeId(UPDATED_GRADE);
     updatedPlacement.setSpecialties(Sets.newHashSet());
@@ -367,7 +361,6 @@ public class PlacementResourceIntTest {
     List<Placement> placementList = placementRepository.findAll();
     assertThat(placementList).hasSize(databaseSizeBeforeUpdate);
     Placement testPlacement = placementList.get(placementList.size() - 1);
-    assertThat(testPlacement.getStatus()).isEqualTo(Status.INACTIVE);
     assertThat(testPlacement.getSiteId()).isEqualTo(UPDATED_SITE);
     assertThat(testPlacement.getGradeId()).isEqualTo(UPDATED_GRADE);
     assertThat(testPlacement.getSpecialties()).isEqualTo(placement.getSpecialties());

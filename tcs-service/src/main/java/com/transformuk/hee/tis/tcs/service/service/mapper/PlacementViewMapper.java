@@ -42,7 +42,6 @@ public class PlacementViewMapper {
       placementDTO.setIntrepidId(placement.getIntrepidId());
       placementDTO.setLocalPostNumber(placement.getLocalPostNumber());
       placementDTO.setPlacementType(placement.getPlacementType());
-      placementDTO.setStatus(placement.getStatus());
       placementDTO.setTrainingDescription(placement.getTrainingDescription());
       placementDTO.setPlacementWholeTimeEquivalent(placement.getPlacementWholeTimeEquivalent());
       placementDTO.setSpecialties(placementSpecialtyMapper.toDTOs(placement.getSpecialties()));

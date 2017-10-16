@@ -7,7 +7,6 @@ import com.transformuk.hee.tis.tcs.api.dto.PlacementDTO;
 import com.transformuk.hee.tis.tcs.api.dto.PlacementSpecialtyDTO;
 import com.transformuk.hee.tis.tcs.api.enumeration.PlacementType;
 import com.transformuk.hee.tis.tcs.api.enumeration.PostSpecialtyType;
-import com.transformuk.hee.tis.tcs.api.enumeration.Status;
 import com.transformuk.hee.tis.tcs.service.repository.PersonRepository;
 import com.transformuk.hee.tis.tcs.service.repository.PostRepository;
 import com.transformuk.hee.tis.tcs.service.repository.SpecialtyRepository;
@@ -62,7 +61,6 @@ public class PlacementValidatorTest {
   @Before
   public void setup() {
     placementDTO = new PlacementDTO();
-    placementDTO.setStatus(Status.CURRENT);
     placementDTO.setSiteId(DEFAULT_SITE);
     placementDTO.setGradeId(DEFAULT_GRADE);
     placementDTO.setSpecialties(Sets.newHashSet());
