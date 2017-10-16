@@ -33,6 +33,10 @@ public class CurriculumDTO implements Serializable {
 
   private CurriculumSubType curriculumSubType;
 
+  @DecimalMin(value = "0", groups = {Create.class, Update.class}, message = "length must not be negative")
+  @NotNull(groups = {Create.class, Update.class}, message = "length must not be null")
+  private Integer length;
+
   @NotNull(groups = {Create.class, Update.class}, message = "assessmentType must not be null")
   private AssessmentType assessmentType;
 
@@ -84,6 +88,14 @@ public class CurriculumDTO implements Serializable {
 
   public void setCurriculumSubType(CurriculumSubType curriculumSubType) {
     this.curriculumSubType = curriculumSubType;
+  }
+
+  public Integer getLength() {
+    return length;
+  }
+
+  public void setLength(Integer length) {
+    this.length = length;
   }
 
   public AssessmentType getAssessmentType() {
@@ -148,6 +160,7 @@ public class CurriculumDTO implements Serializable {
         ", intrepidId='" + intrepidId + '\'' +
         ", name='" + name + '\'' +
         ", curriculumSubType=" + curriculumSubType +
+        ", length=" + length +
         ", assessmentType=" + assessmentType +
         ", doesThisCurriculumLeadToCct=" + doesThisCurriculumLeadToCct +
         ", periodOfGrace=" + periodOfGrace +
