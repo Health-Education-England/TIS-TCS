@@ -4,6 +4,8 @@ import com.transformuk.hee.tis.tcs.api.dto.ContactDetailsDTO;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 
+import java.util.List;
+
 /**
  * Service Interface for managing ContactDetails.
  */
@@ -16,6 +18,14 @@ public interface ContactDetailsService {
    * @return the persisted entity
    */
   ContactDetailsDTO save(ContactDetailsDTO contactDetailsDTO);
+
+  /**
+   * Bulk Save contactDetails.
+   *
+   * @param contactDetailsDTOs the entity to save
+   * @return the persisted entity
+   */
+  List<ContactDetailsDTO> save(List<ContactDetailsDTO> contactDetailsDTOs);
 
   /**
    * Get all the contactDetails.

@@ -4,6 +4,8 @@ package com.transformuk.hee.tis.tcs.service.model;
 import com.transformuk.hee.tis.tcs.api.enumeration.QualificationType;
 
 import javax.persistence.Entity;
+import javax.persistence.EnumType;
+import javax.persistence.Enumerated;
 import javax.persistence.GeneratedValue;
 import javax.persistence.GenerationType;
 import javax.persistence.Id;
@@ -27,12 +29,15 @@ public class Qualification implements Serializable {
   @GeneratedValue(strategy = GenerationType.IDENTITY)
   private Long id;
 
+  private String intrepidId;
+
   @ManyToOne
   @JoinColumn(name = "personId")
   private Person person;
 
   private String qualification;
 
+  @Enumerated(EnumType.STRING)
   private QualificationType qualificationType;
 
   private LocalDate qualificationAttainedDate;
@@ -55,6 +60,19 @@ public class Qualification implements Serializable {
 
   public Qualification id(Long id) {
     this.id = id;
+    return this;
+  }
+
+  public String getIntrepidId() {
+    return intrepidId;
+  }
+
+  public void setIntrepidId(String intrepidId) {
+    this.intrepidId = intrepidId;
+  }
+
+  public Qualification intrepidId(String intrepidId) {
+    this.intrepidId = intrepidId;
     return this;
   }
 
@@ -163,6 +181,7 @@ public class Qualification implements Serializable {
   public String toString() {
     return "Qualification{" +
         "id=" + getId() +
+        ", intrepidId='" + getIntrepidId() +  "'" +
         ", qualification='" + getQualification() + "'" +
         ", qualificationType='" + getQualificationType() + "'" +
         ", qualificationAttainedDate='" + getQualificationAttainedDate() + "'" +

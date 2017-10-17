@@ -2,7 +2,7 @@ package com.transformuk.hee.tis.tcs.service.api.validation;
 
 import com.google.common.collect.Lists;
 import com.transformuk.hee.tis.reference.client.impl.ReferenceServiceImpl;
-import com.transformuk.hee.tis.tcs.api.dto.PlacementDTO;
+import com.transformuk.hee.tis.tcs.api.dto.PlacementViewDTO;
 import com.transformuk.hee.tis.tcs.api.dto.PostDTO;
 import com.transformuk.hee.tis.tcs.api.dto.PostGradeDTO;
 import com.transformuk.hee.tis.tcs.api.dto.PostSiteDTO;
@@ -197,7 +197,7 @@ public class PostValidator {
     List<FieldError> fieldErrors = new ArrayList<>();
     // then check the placement
     if (postDTO.getPlacementHistory() != null && !postDTO.getPlacementHistory().isEmpty()) {
-      for (PlacementDTO ps : postDTO.getPlacementHistory()) {
+      for (PlacementViewDTO ps : postDTO.getPlacementHistory()) {
         if (ps.getId() == null || ps.getId() < 0) {
           fieldErrors.add(new FieldError(POST_DTO_NAME, "placementHistory",
               "Placement ID cannot be null or negative"));

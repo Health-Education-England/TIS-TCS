@@ -1,39 +1,59 @@
 package com.transformuk.hee.tis.tcs.api.dto;
 
+import com.transformuk.hee.tis.tcs.api.dto.validation.Create;
+import com.transformuk.hee.tis.tcs.api.dto.validation.Update;
 import com.transformuk.hee.tis.tcs.api.enumeration.PlacementType;
 
+import javax.validation.constraints.DecimalMin;
+import javax.validation.constraints.NotNull;
+import javax.validation.constraints.Null;
 import java.io.Serializable;
 import java.time.LocalDate;
 import java.util.Objects;
+import java.util.Set;
 
 /**
  * A DTO for the Placement entity.
  */
 public class PlacementDTO implements Serializable {
 
+  @NotNull(groups = Update.class, message = "Id must not be null when updating a placement")
+  @DecimalMin(value = "0", groups = Update.class, message = "Id must not be negative")
+  @Null(groups = Create.class, message = "Id must be null when creating a new placement")
   private Long id;
 
   private String intrepidId;
 
-  private String status;
+  @NotNull(message = "TraineeId is required", groups = {Update.class, Create.class})
+  private Long traineeId;
 
-  private String nationalPostNumber;
+  @NotNull(message = "ClinicalSupervisorId is required", groups = {Update.class, Create.class})
+  private Long clinicalSupervisorId;
 
-  private String site;
+  @NotNull(message = "PostId is required", groups = {Update.class, Create.class})
+  private Long postId;
 
-  private String grade;
+  @NotNull(message = "SiteId is required", groups = {Update.class, Create.class})
+  private Long siteId;
 
-  private String specialty;
+  @NotNull(message = "GradeId is required", groups = {Update.class, Create.class})
+  private Long gradeId;
 
+  private Set<PlacementSpecialtyDTO> specialties;
+
+  @NotNull(message = "Date from is required", groups = {Update.class, Create.class})
   private LocalDate dateFrom;
 
+  @NotNull(message = "Date to is required", groups = {Update.class, Create.class})
   private LocalDate dateTo;
 
   private PlacementType placementType;
 
   private Float placementWholeTimeEquivalent;
 
-  private Boolean slotShare;
+  private String trainingDescription;
+
+  private String localPostNumber;
 
   public Long getId() {
     return id;
@@ -51,44 +71,60 @@ public class PlacementDTO implements Serializable {
     this.intrepidId = intrepidId;
   }
 
-  public String getStatus() {
-    return status;
+  public Long getClinicalSupervisorId() {
+    return clinicalSupervisorId;
   }
 
-  public void setStatus(String status) {
-    this.status = status;
+  public void setClinicalSupervisorId(Long clinicalSupervisorId) {
+    this.clinicalSupervisorId = clinicalSupervisorId;
   }
 
-  public String getNationalPostNumber() {
-    return nationalPostNumber;
+  public Long getTraineeId() {
+    return traineeId;
   }
 
-  public void setNationalPostNumber(String nationalPostNumber) {
-    this.nationalPostNumber = nationalPostNumber;
+  public void setTraineeId(Long traineeId) {
+    this.traineeId = traineeId;
   }
 
-  public String getSite() {
-    return site;
+  public Long getPostId() {
+    return postId;
   }
 
-  public void setSite(String site) {
-    this.site = site;
+  public void setPostId(Long postId) {
+    this.postId = postId;
   }
 
-  public String getGrade() {
-    return grade;
+  public Long getSiteId() {
+    return siteId;
   }
 
-  public void setGrade(String grade) {
-    this.grade = grade;
+  public void setSiteId(Long siteId) {
+    this.siteId = siteId;
   }
 
-  public String getSpecialty() {
-    return specialty;
+  public Long getGradeId() {
+    return gradeId;
   }
 
-  public void setSpecialty(String specialty) {
-    this.specialty = specialty;
+  public void setGradeId(Long gradeId) {
+    this.gradeId = gradeId;
+  }
+
+  public String getTrainingDescription() {
+    return trainingDescription;
+  }
+
+  public void setTrainingDescription(String trainingDescription) {
+    this.trainingDescription = trainingDescription;
+  }
+
+  public String getLocalPostNumber() {
+    return localPostNumber;
+  }
+
+  public void setLocalPostNumber(String localPostNumber) {
+    this.localPostNumber = localPostNumber;
   }
 
   public LocalDate getDateFrom() {
@@ -123,12 +159,12 @@ public class PlacementDTO implements Serializable {
     this.placementWholeTimeEquivalent = placementWholeTimeEquivalent;
   }
 
-  public Boolean getSlotShare() {
-    return slotShare;
+  public Set<PlacementSpecialtyDTO> getSpecialties() {
+    return specialties;
   }
 
-  public void setSlotShare(Boolean slotShare) {
-    this.slotShare = slotShare;
+  public void setSpecialties(Set<PlacementSpecialtyDTO> specialties) {
+    this.specialties = specialties;
   }
 
   @Override
@@ -156,18 +192,21 @@ public class PlacementDTO implements Serializable {
 
   @Override
   public String toString() {
-    return "PlacementDTO{" +
+    return "PlacementViewDTO{" +
         "id=" + id +
-        ", status='" + status + "'" +
-        ", nationalPostNumber='" + nationalPostNumber + "'" +
-        ", site='" + site + "'" +
-        ", grade='" + grade + "'" +
-        ", specialty='" + specialty + "'" +
+        ", intrepidId='" + intrepidId + "'" +
+        ", traineeId='" + traineeId + "'" +
+        ", clinicalSupervisorId='" + clinicalSupervisorId + "'" +
+        ", postId='" + postId + "'" +
+        ", siteId='" + siteId + "'" +
+        ", gradeId='" + gradeId + "'" +
+        ", specialties='" + specialties + "'" +
         ", dateFrom='" + dateFrom + "'" +
         ", dateTo='" + dateTo + "'" +
         ", placementType='" + placementType + "'" +
         ", placementWholeTimeEquivalent='" + placementWholeTimeEquivalent + "'" +
-        ", slotShare='" + slotShare + "'" +
+        ", localPostNumber='" + localPostNumber + "'" +
+        ", trainingDescription='" + trainingDescription + "'" +
         '}';
   }
 }

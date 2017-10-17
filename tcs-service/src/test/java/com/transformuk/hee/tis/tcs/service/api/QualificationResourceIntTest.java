@@ -60,6 +60,7 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 public class QualificationResourceIntTest {
 
   private static final String DEFAULT_INTREPID_ID = "AAAAAAAAAA";
+  private static final String UPDATED_INTREPID_ID = "BBBBBBBBBB";
 
   private static final String DEFAULT_QUALIFICATION = "AAAAAAAAAA";
   private static final String UPDATED_QUALIFICATION = "BBBBBBBBBB";
@@ -137,6 +138,7 @@ public class QualificationResourceIntTest {
    */
   public static Qualification createEntity(EntityManager em) {
     Qualification qualification = new Qualification()
+        .intrepidId(DEFAULT_INTREPID_ID)
         .qualification(DEFAULT_QUALIFICATION)
         .qualificationType(DEFAULT_QUALIFICATION_TYPE)
         .qualificationAttainedDate(DEFAULT_QUALIFICATION_ATTAINED_DATE)
@@ -180,6 +182,7 @@ public class QualificationResourceIntTest {
     List<Qualification> qualificationList = qualificationRepository.findAll();
     assertThat(qualificationList).hasSize(databaseSizeBeforeCreate + 1);
     Qualification testQualification = qualificationList.get(qualificationList.size() - 1);
+    assertThat(testQualification.getIntrepidId()).isEqualTo(DEFAULT_INTREPID_ID);
     assertThat(testQualification.getQualification()).isEqualTo(DEFAULT_QUALIFICATION);
     assertThat(testQualification.getQualificationType()).isEqualTo(DEFAULT_QUALIFICATION_TYPE);
     assertThat(testQualification.getQualificationAttainedDate()).isEqualTo(DEFAULT_QUALIFICATION_ATTAINED_DATE);
@@ -355,6 +358,7 @@ public class QualificationResourceIntTest {
         .andExpect(status().isOk())
         .andExpect(content().contentType(MediaType.APPLICATION_JSON_UTF8_VALUE))
         .andExpect(jsonPath("$.[*].id").value(hasItem(qualification.getId().intValue())))
+        .andExpect(jsonPath("$.[*].intrepidId").value(hasItem(DEFAULT_INTREPID_ID.toString())))
         .andExpect(jsonPath("$.[*].qualification").value(hasItem(DEFAULT_QUALIFICATION.toString())))
         .andExpect(jsonPath("$.[*].qualificationType").value(hasItem(DEFAULT_QUALIFICATION_TYPE.toString())))
         .andExpect(jsonPath("$.[*].qualificationAttainedDate").value(hasItem(DEFAULT_QUALIFICATION_ATTAINED_DATE.toString())))
@@ -376,6 +380,7 @@ public class QualificationResourceIntTest {
         .andExpect(status().isOk())
         .andExpect(content().contentType(MediaType.APPLICATION_JSON_UTF8_VALUE))
         .andExpect(jsonPath("$.id").value(qualification.getId().intValue()))
+        .andExpect(jsonPath("$.intrepidId").value(DEFAULT_INTREPID_ID.toString()))
         .andExpect(jsonPath("$.qualification").value(DEFAULT_QUALIFICATION.toString()))
         .andExpect(jsonPath("$.qualificationType").value(DEFAULT_QUALIFICATION_TYPE.toString()))
         .andExpect(jsonPath("$.qualificationAttainedDate").value(DEFAULT_QUALIFICATION_ATTAINED_DATE.toString()))
@@ -404,6 +409,7 @@ public class QualificationResourceIntTest {
     // Update the qualification
     Qualification updatedQualification = qualificationRepository.findOne(qualification.getId());
     updatedQualification
+        .intrepidId(UPDATED_INTREPID_ID)
         .qualification(UPDATED_QUALIFICATION)
         .qualificationType(UPDATED_QUALIFICATION_TYPE)
         .qualificationAttainedDate(UPDATED_QUALIFICATION_ATTAINED_DATE)
@@ -420,6 +426,7 @@ public class QualificationResourceIntTest {
     List<Qualification> qualificationList = qualificationRepository.findAll();
     assertThat(qualificationList).hasSize(databaseSizeBeforeUpdate);
     Qualification testQualification = qualificationList.get(qualificationList.size() - 1);
+    assertThat(testQualification.getIntrepidId()).isEqualTo(UPDATED_INTREPID_ID);
     assertThat(testQualification.getQualification()).isEqualTo(UPDATED_QUALIFICATION);
     assertThat(testQualification.getQualificationType()).isEqualTo(UPDATED_QUALIFICATION_TYPE);
     assertThat(testQualification.getQualificationAttainedDate()).isEqualTo(UPDATED_QUALIFICATION_ATTAINED_DATE);

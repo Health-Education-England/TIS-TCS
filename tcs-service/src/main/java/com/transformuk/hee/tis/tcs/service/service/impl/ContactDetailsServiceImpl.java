@@ -12,6 +12,8 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.util.List;
+
 
 /**
  * Service Implementation for managing ContactDetails.
@@ -42,6 +44,20 @@ public class ContactDetailsServiceImpl implements ContactDetailsService {
     log.debug("Request to save ContactDetails : {}", contactDetailsDTO);
     ContactDetails contactDetails = contactDetailsMapper.toEntity(contactDetailsDTO);
     contactDetails = contactDetailsRepository.saveAndFlush(contactDetails);
+    return contactDetailsMapper.toDto(contactDetails);
+  }
+
+  /**
+   * Save list of contactDetails.
+   *
+   * @param contactDetailsDTOs the list of entity to save
+   * @return the persisted list of entity
+   */
+  @Override
+  public List<ContactDetailsDTO> save(List<ContactDetailsDTO> contactDetailsDTOs) {
+    log.debug("Request to save ContactDetails : {}", contactDetailsDTOs);
+    List<ContactDetails> contactDetails = contactDetailsMapper.toEntity(contactDetailsDTOs);
+    contactDetails = contactDetailsRepository.save(contactDetails);
     return contactDetailsMapper.toDto(contactDetails);
   }
 

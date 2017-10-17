@@ -55,7 +55,7 @@ public class PostDTO implements Serializable {
 
   private String localPostNumber;
 
-  private Set<PlacementDTO> placementHistory;
+  private Set<PlacementViewDTO> placementHistory;
 
   private ProgrammeDTO programmes;
 
@@ -230,15 +230,15 @@ public class PostDTO implements Serializable {
     return this;
   }
 
-  public Set<PlacementDTO> getPlacementHistory() {
+  public Set<PlacementViewDTO> getPlacementHistory() {
     return placementHistory;
   }
 
-  public void setPlacementHistory(Set<PlacementDTO> placementHistory) {
+  public void setPlacementHistory(Set<PlacementViewDTO> placementHistory) {
     this.placementHistory = placementHistory;
   }
 
-  public PostDTO placementHistory(Set<PlacementDTO> placementHistory) {
+  public PostDTO placementHistory(Set<PlacementViewDTO> placementHistory) {
     this.placementHistory = placementHistory;
     return this;
   }

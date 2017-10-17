@@ -4,6 +4,7 @@ import com.google.common.collect.Lists;
 import com.google.common.collect.Maps;
 import com.google.common.collect.Sets;
 import com.transformuk.hee.tis.tcs.api.dto.PlacementDTO;
+import com.transformuk.hee.tis.tcs.api.dto.PlacementViewDTO;
 import com.transformuk.hee.tis.tcs.api.dto.PostDTO;
 import com.transformuk.hee.tis.tcs.api.dto.PostGradeDTO;
 import com.transformuk.hee.tis.tcs.api.dto.PostSiteDTO;
@@ -171,27 +172,28 @@ public class PostServiceImpl implements PostService {
 
   @Override
   public List<PostDTO> patchPostSites(List<PostDTO> postDTOList) {
-    List<Post> postsToSave = Lists.newArrayList();
     Map<String, Post> intrepidIdToPost = getPostsByIntrepidId(postDTOList);
 
+    List<Post> postsModified = Lists.newArrayList();
     for (PostDTO dto : postDTOList) {
-
+      List<PostSite> sitesToSave = Lists.newArrayList();
       Post post = intrepidIdToPost.get(dto.getIntrepidId());
       if (post != null) {
-        Set<PostSite> sites = post.getSites();
         for (PostSiteDTO siteDTO : dto.getSites()) {
           PostSite postSite = new PostSite();
           postSite.setPost(post);
           postSite.setPostSiteType(siteDTO.getPostSiteType());
           postSite.setSiteId(siteDTO.getSiteId());
-          sites.add(postSite);
+          sitesToSave.add(postSite);
         }
-        post.setSites(sites);
-        postsToSave.add(post);
+        List<PostSite> savedPostSite = postSiteRepository.save(sitesToSave);
+        post.setSites(Sets.newHashSet(savedPostSite));
+        postsModified.add(post);
       }
+
     }
-    List<Post> savedPosts = postRepository.save(postsToSave);
-    return postMapper.postsToPostDTOs(savedPosts);
+
+    return postMapper.postsToPostDTOs(postsModified);
   }
 
   @Override
@@ -301,7 +303,7 @@ public class PostServiceImpl implements PostService {
         .stream()
         .map(PostDTO::getPlacementHistory)
         .flatMap(Collection::stream)
-        .map(PlacementDTO::getIntrepidId)
+        .map(PlacementViewDTO::getIntrepidId)
         .collect(Collectors.toSet());
 
     Map<String, Placement> placementIntrepidIdToPlacements = placementRepository.findByIntrepidIdIn(postPlamementIntrepidIds)
@@ -311,10 +313,10 @@ public class PostServiceImpl implements PostService {
       Post post = intrepidIdToPost.get(dto.getIntrepidId());
       if (post != null) {
         Set<Placement> placements = post.getPlacementHistory();
-        for (PlacementDTO placementDTO : dto.getPlacementHistory()) {
-          Placement placement = placementIntrepidIdToPlacements.get(placementDTO.getIntrepidId());
-          if (placement != null) {
-            placements.add(placement);
+        for (PlacementViewDTO placementViewDTO : dto.getPlacementHistory()) {
+          Placement Placement = placementIntrepidIdToPlacements.get(placementViewDTO.getIntrepidId());
+          if (Placement != null) {
+            placements.add(Placement);
           }
         }
         post.setPlacementHistory(placements);

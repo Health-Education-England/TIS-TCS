@@ -1,0 +1,2 @@
+ALTER TABLE `Curriculum`
+ADD COLUMN `length` INT NOT NULL DEFAULT 0;

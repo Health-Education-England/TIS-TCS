@@ -61,6 +61,9 @@ public class CurriculumResourceIntTest {
   private static final String DEFAULT_INTREPID_ID = "1234";
   private static final String DEFAULT_INTREPID_ID_2 = "1111";
 
+  private static final Integer DEFAULT_LENGTH = 1;
+  private static final Integer UPDATED_LENGTH = 6;
+
   private static final CurriculumSubType DEFAULT_CURRICULUM_SUB_TYPE = CurriculumSubType.MEDICAL_CURRICULUM;
   private static final CurriculumSubType UPDATED_CURRICULUM_SUB_TYPE = CurriculumSubType.MEDICAL_SPR;
 
@@ -122,6 +125,7 @@ public class CurriculumResourceIntTest {
         .name(DEFAULT_NAME)
         .intrepidId(DEFAULT_INTREPID_ID)
         .curriculumSubType(DEFAULT_CURRICULUM_SUB_TYPE)
+        .length(DEFAULT_LENGTH)
         .assessmentType(DEFAULT_ASSESSMENT_TYPE)
         .doesThisCurriculumLeadToCct(DEFAULT_DOES_THIS_CURRICULUM_LEAD_TO_CCT)
         .periodOfGrace(DEFAULT_PERIOD_OF_GRACE);
@@ -130,12 +134,13 @@ public class CurriculumResourceIntTest {
   }
 
   public static Curriculum createCurriculumEntity(String name, String intrepidId, CurriculumSubType curriculumSubType,
-                                                  AssessmentType assessmentType, Boolean doesThisCurrLeadToCct,
+                                                  Integer length, AssessmentType assessmentType, Boolean doesThisCurrLeadToCct,
                                                   Integer periodOfGrace) {
     Curriculum curriculum = new Curriculum()
         .name(name)
         .intrepidId(intrepidId)
         .curriculumSubType(curriculumSubType)
+        .length(length)
         .assessmentType(assessmentType)
         .doesThisCurriculumLeadToCct(doesThisCurrLeadToCct)
         .periodOfGrace(periodOfGrace)
@@ -168,7 +173,7 @@ public class CurriculumResourceIntTest {
   @Before
   public void initTest() {
     curriculum = createCurriculumEntity(DEFAULT_NAME, DEFAULT_INTREPID_ID,
-        DEFAULT_CURRICULUM_SUB_TYPE, DEFAULT_ASSESSMENT_TYPE, DEFAULT_DOES_THIS_CURRICULUM_LEAD_TO_CCT,
+        DEFAULT_CURRICULUM_SUB_TYPE,DEFAULT_LENGTH, DEFAULT_ASSESSMENT_TYPE, DEFAULT_DOES_THIS_CURRICULUM_LEAD_TO_CCT,
         DEFAULT_PERIOD_OF_GRACE);
     specialty = createSpecialtyEntity();
   }
@@ -193,6 +198,7 @@ public class CurriculumResourceIntTest {
     assertThat(testCurriculum.getIntrepidId()).isEqualTo(DEFAULT_INTREPID_ID);
     assertThat(testCurriculum.getName()).isEqualTo(DEFAULT_NAME);
     assertThat(testCurriculum.getCurriculumSubType()).isEqualTo(DEFAULT_CURRICULUM_SUB_TYPE);
+    assertThat(testCurriculum.getLength()).isEqualTo(DEFAULT_LENGTH);
     assertThat(testCurriculum.getAssessmentType()).isEqualTo(DEFAULT_ASSESSMENT_TYPE);
     assertThat(testCurriculum.isDoesThisCurriculumLeadToCct()).isEqualTo(DEFAULT_DOES_THIS_CURRICULUM_LEAD_TO_CCT);
     assertThat(testCurriculum.getPeriodOfGrace()).isEqualTo(DEFAULT_PERIOD_OF_GRACE);
@@ -437,6 +443,7 @@ public class CurriculumResourceIntTest {
         .andExpect(jsonPath("$.[*].intrepidId").value(hasItem(DEFAULT_INTREPID_ID.toString())))
         .andExpect(jsonPath("$.[*].name").value(hasItem(DEFAULT_NAME.toString())))
         .andExpect(jsonPath("$.[*].curriculumSubType").value(hasItem(DEFAULT_CURRICULUM_SUB_TYPE.toString())))
+        .andExpect(jsonPath("$.[*].length").value(hasItem(DEFAULT_LENGTH)))
         .andExpect(jsonPath("$.[*].assessmentType").value(hasItem(DEFAULT_ASSESSMENT_TYPE.toString())))
         .andExpect(jsonPath("$.[*].doesThisCurriculumLeadToCct").value(hasItem(DEFAULT_DOES_THIS_CURRICULUM_LEAD_TO_CCT.booleanValue())))
         .andExpect(jsonPath("$.[*].periodOfGrace").value(hasItem(DEFAULT_PERIOD_OF_GRACE)));
@@ -456,6 +463,7 @@ public class CurriculumResourceIntTest {
         .andExpect(jsonPath("$.intrepidId").value(DEFAULT_INTREPID_ID.toString()))
         .andExpect(jsonPath("$.name").value(DEFAULT_NAME.toString()))
         .andExpect(jsonPath("$.curriculumSubType").value(DEFAULT_CURRICULUM_SUB_TYPE.toString()))
+        .andExpect(jsonPath("$.length").value(DEFAULT_LENGTH))
         .andExpect(jsonPath("$.assessmentType").value(DEFAULT_ASSESSMENT_TYPE.toString()))
         .andExpect(jsonPath("$.doesThisCurriculumLeadToCct").value(DEFAULT_DOES_THIS_CURRICULUM_LEAD_TO_CCT.booleanValue()))
         .andExpect(jsonPath("$.periodOfGrace").value(DEFAULT_PERIOD_OF_GRACE));
@@ -552,6 +560,7 @@ public class CurriculumResourceIntTest {
     updatedCurriculum
         .name(UPDATED_NAME)
         .curriculumSubType(UPDATED_CURRICULUM_SUB_TYPE)
+        .length(UPDATED_LENGTH)
         .assessmentType(UPDATED_ASSESSMENT_TYPE)
         .doesThisCurriculumLeadToCct(UPDATED_DOES_THIS_CURRICULUM_LEAD_TO_CCT)
         .periodOfGrace(UPDATED_PERIOD_OF_GRACE);
@@ -570,6 +579,7 @@ public class CurriculumResourceIntTest {
     Curriculum testCurriculum = curriculumList.get(curriculumList.size() - 1);
     assertThat(testCurriculum.getName()).isEqualTo(UPDATED_NAME);
     assertThat(testCurriculum.getCurriculumSubType()).isEqualTo(UPDATED_CURRICULUM_SUB_TYPE);
+    assertThat(testCurriculum.getLength()).isEqualTo(UPDATED_LENGTH);
     assertThat(testCurriculum.getAssessmentType()).isEqualTo(UPDATED_ASSESSMENT_TYPE);
     assertThat(testCurriculum.isDoesThisCurriculumLeadToCct()).isEqualTo(UPDATED_DOES_THIS_CURRICULUM_LEAD_TO_CCT);
     assertThat(testCurriculum.getPeriodOfGrace()).isEqualTo(UPDATED_PERIOD_OF_GRACE);
@@ -652,6 +662,7 @@ public class CurriculumResourceIntTest {
     Curriculum anotherCurriculum = new Curriculum()
         .name(DEFAULT_NAME_2)
         .intrepidId(DEFAULT_INTREPID_ID_2)
+        .length(DEFAULT_LENGTH)
         .curriculumSubType(DEFAULT_CURRICULUM_SUB_TYPE)
         .assessmentType(DEFAULT_ASSESSMENT_TYPE)
         .doesThisCurriculumLeadToCct(DEFAULT_DOES_THIS_CURRICULUM_LEAD_TO_CCT)
@@ -680,6 +691,7 @@ public class CurriculumResourceIntTest {
   public void bulkCreateShouldFailWhenDataIsHasAtLeastOneInvalidDto() throws Exception {
     Curriculum anotherCurriculum = new Curriculum()
         .name(DEFAULT_NAME_2)
+        .length(DEFAULT_LENGTH)
         .intrepidId(DEFAULT_INTREPID_ID_2)
         .curriculumSubType(DEFAULT_CURRICULUM_SUB_TYPE)
         .assessmentType(DEFAULT_ASSESSMENT_TYPE)
@@ -711,6 +723,7 @@ public class CurriculumResourceIntTest {
   public void bulkUpdateShouldSucceedWhenDataIsValid() throws Exception {
     Curriculum anotherCurriculum = new Curriculum()
         .name(DEFAULT_NAME_2)
+        .length(DEFAULT_LENGTH)
         .intrepidId(DEFAULT_INTREPID_ID_2)
         .curriculumSubType(DEFAULT_CURRICULUM_SUB_TYPE)
         .assessmentType(DEFAULT_ASSESSMENT_TYPE)
@@ -747,6 +760,7 @@ public class CurriculumResourceIntTest {
   public void bulkUpdateShouldFailWhenDataHasAtLeastOneInvalidDto() throws Exception {
     Curriculum anotherCurriculum = new Curriculum()
         .name(DEFAULT_NAME_2)
+        .length(DEFAULT_LENGTH)
         .intrepidId(DEFAULT_INTREPID_ID_2)
         .curriculumSubType(DEFAULT_CURRICULUM_SUB_TYPE)
         .assessmentType(DEFAULT_ASSESSMENT_TYPE)

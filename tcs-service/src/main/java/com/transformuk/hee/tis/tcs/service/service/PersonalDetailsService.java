@@ -4,6 +4,8 @@ import com.transformuk.hee.tis.tcs.api.dto.PersonalDetailsDTO;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 
+import java.util.List;
+
 /**
  * Service Interface for managing PersonalDetails.
  */
@@ -16,6 +18,14 @@ public interface PersonalDetailsService {
    * @return the persisted entity
    */
   PersonalDetailsDTO save(PersonalDetailsDTO personalDetailsDTO);
+
+  /**
+   * Save a list of personalDetails
+   *
+   * @param personalDetailsDTOs the list of entities to save
+   * @return a list of persisted entities
+   */
+  List<PersonalDetailsDTO> save(List<PersonalDetailsDTO> personalDetailsDTOs);
 
   /**
    * Get all the personalDetails.
