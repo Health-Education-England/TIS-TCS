@@ -36,7 +36,7 @@ public class PersonMapper {
   private ProgrammeMembershipMapper programmeMembershipMapper;
 
   @Autowired
-  private PlacementViewMapper placementViewMapper;
+  private PlacementMapper placementMapper;
 
   public Person toEntity(PersonDTO dto) {
     if (dto == null) {
@@ -109,8 +109,8 @@ public class PersonMapper {
       );
     }
     if (entity.getPlacements() != null && includePlacements) {
-      personDTO.setPlacements(placementViewMapper.placementsToPlacementViewDTOs(
-          entity.getPlacements().stream().collect(Collectors.toList()), true, false).stream().collect(Collectors.toSet())
+      personDTO.setPlacements(placementMapper.placementsToPlacementDTOs(
+          entity.getPlacements().stream().collect(Collectors.toList())).stream().collect(Collectors.toSet())
       );
     }
 

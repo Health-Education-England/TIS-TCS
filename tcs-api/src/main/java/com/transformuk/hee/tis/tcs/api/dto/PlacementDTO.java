@@ -2,7 +2,7 @@ package com.transformuk.hee.tis.tcs.api.dto;
 
 import com.transformuk.hee.tis.tcs.api.dto.validation.Create;
 import com.transformuk.hee.tis.tcs.api.dto.validation.Update;
-import com.transformuk.hee.tis.tcs.api.enumeration.PlacementType;
+import com.transformuk.hee.tis.tcs.api.enumeration.PlacementStatus;
 
 import javax.validation.constraints.DecimalMin;
 import javax.validation.constraints.NotNull;
@@ -24,11 +24,13 @@ public class PlacementDTO implements Serializable {
 
   private String intrepidId;
 
+  private PlacementStatus status;
+
   @NotNull(message = "TraineeId is required", groups = {Update.class, Create.class})
   private Long traineeId;
 
   @NotNull(message = "ClinicalSupervisorId is required", groups = {Update.class, Create.class})
-  private Long clinicalSupervisorId;
+  private Set<Long> clinicalSupervisorIds;
 
   @NotNull(message = "PostId is required", groups = {Update.class, Create.class})
   private Long postId;
@@ -47,7 +49,8 @@ public class PlacementDTO implements Serializable {
   @NotNull(message = "Date to is required", groups = {Update.class, Create.class})
   private LocalDate dateTo;
 
-  private PlacementType placementType;
+  @NotNull(message = "PlacementTypeId is required", groups = {Update.class, Create.class})
+  private Long placementTypeId;
 
   private Float placementWholeTimeEquivalent;
 
@@ -63,6 +66,14 @@ public class PlacementDTO implements Serializable {
     this.id = id;
   }
 
+  public PlacementStatus getStatus() {
+    return status;
+  }
+
+  public void setStatus(PlacementStatus status) {
+    this.status = status;
+  }
+
   public String getIntrepidId() {
     return intrepidId;
   }
@@ -71,12 +82,12 @@ public class PlacementDTO implements Serializable {
     this.intrepidId = intrepidId;
   }
 
-  public Long getClinicalSupervisorId() {
-    return clinicalSupervisorId;
+  public Set<Long> getClinicalSupervisorIds() {
+    return clinicalSupervisorIds;
   }
 
-  public void setClinicalSupervisorId(Long clinicalSupervisorId) {
-    this.clinicalSupervisorId = clinicalSupervisorId;
+  public void setClinicalSupervisorIds(Set<Long> clinicalSupervisorIds) {
+    this.clinicalSupervisorIds = clinicalSupervisorIds;
   }
 
   public Long getTraineeId() {
@@ -143,12 +154,12 @@ public class PlacementDTO implements Serializable {
     this.dateTo = dateTo;
   }
 
-  public PlacementType getPlacementType() {
-    return placementType;
+  public Long getPlacementTypeId() {
+    return placementTypeId;
   }
 
-  public void setPlacementType(PlacementType placementType) {
-    this.placementType = placementType;
+  public void setPlacementTypeId(Long placementTypeId) {
+    this.placementTypeId = placementTypeId;
   }
 
   public Float getPlacementWholeTimeEquivalent() {
@@ -192,18 +203,18 @@ public class PlacementDTO implements Serializable {
 
   @Override
   public String toString() {
-    return "PlacementViewDTO{" +
+    return "PlacementDTO{" +
         "id=" + id +
         ", intrepidId='" + intrepidId + "'" +
         ", traineeId='" + traineeId + "'" +
-        ", clinicalSupervisorId='" + clinicalSupervisorId + "'" +
+        ", clinicalSupervisorIds='" + clinicalSupervisorIds + "'" +
         ", postId='" + postId + "'" +
         ", siteId='" + siteId + "'" +
         ", gradeId='" + gradeId + "'" +
         ", specialties='" + specialties + "'" +
         ", dateFrom='" + dateFrom + "'" +
         ", dateTo='" + dateTo + "'" +
-        ", placementType='" + placementType + "'" +
+        ", placementTypeId='" + placementTypeId + "'" +
         ", placementWholeTimeEquivalent='" + placementWholeTimeEquivalent + "'" +
         ", localPostNumber='" + localPostNumber + "'" +
         ", trainingDescription='" + trainingDescription + "'" +

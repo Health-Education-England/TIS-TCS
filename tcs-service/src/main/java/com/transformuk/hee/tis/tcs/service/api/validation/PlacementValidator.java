@@ -3,7 +3,6 @@ package com.transformuk.hee.tis.tcs.service.api.validation;
 import com.transformuk.hee.tis.reference.client.impl.ReferenceServiceImpl;
 import com.transformuk.hee.tis.tcs.api.dto.PlacementDTO;
 import com.transformuk.hee.tis.tcs.api.dto.PlacementSpecialtyDTO;
-import com.transformuk.hee.tis.tcs.api.dto.PlacementViewDTO;
 import com.transformuk.hee.tis.tcs.api.enumeration.PostSpecialtyType;
 import com.transformuk.hee.tis.tcs.service.repository.PersonRepository;
 import com.transformuk.hee.tis.tcs.service.repository.PostRepository;
@@ -20,13 +19,13 @@ import java.util.Map;
 import static com.google.common.collect.Lists.newArrayList;
 
 /**
- * Holds more complex custom validation for a {@link PlacementViewDTO} that
+ * Holds more complex custom validation for a {@link PlacementDTO} that
  * cannot be easily done via annotations
  */
 @Component
 public class PlacementValidator {
 
-  public static final String PLACEMENT_DTO_NAME = "PlacementViewDTO";
+  public static final String PLACEMENT_DTO_NAME = "PlacementDTO";
   private final SpecialtyRepository specialtyRepository;
   private final ReferenceServiceImpl referenceService;
   private final PostRepository postRepository;
@@ -49,6 +48,7 @@ public class PlacementValidator {
     fieldErrors.addAll(checkPost(placementDTO));
     fieldErrors.addAll(checkSite(placementDTO));
     fieldErrors.addAll(checkGrade(placementDTO));
+    fieldErrors.addAll(checkPlacementType(placementDTO));
     fieldErrors.addAll(checkSpecialties(placementDTO));
     fieldErrors.addAll(checkPersons(placementDTO));
 
@@ -80,12 +80,19 @@ public class PlacementValidator {
       fieldErrors.add(new FieldError(PLACEMENT_DTO_NAME, "traineeId",
           String.format("Trainee with id %d does not exist", placementDTO.getTraineeId())));
     }
-    if (placementDTO.getClinicalSupervisorId() == null || placementDTO.getClinicalSupervisorId() < 0) {
-      fieldErrors.add(new FieldError(PLACEMENT_DTO_NAME, "clinicalSupervisorId",
-          "Clinical Supervisor ID cannot be null or negative"));
-    } else if (!personRepository.exists(placementDTO.getClinicalSupervisorId())) {
-      fieldErrors.add(new FieldError(PLACEMENT_DTO_NAME, "clinicalSupervisorId",
-          String.format("Clinical Supervisor with id %d does not exist", placementDTO.getClinicalSupervisorId())));
+    if (placementDTO.getClinicalSupervisorIds() == null || placementDTO.getClinicalSupervisorIds().isEmpty()) {
+      fieldErrors.add(new FieldError(PLACEMENT_DTO_NAME, "clinicalSupervisorIds",
+          "Clinical Supervisor IDs cannot be empty"));
+    } else {
+      for (Long clinicalSupervisorId : placementDTO.getClinicalSupervisorIds()) {
+        if (clinicalSupervisorId == null || clinicalSupervisorId < 0) {
+          fieldErrors.add(new FieldError(PLACEMENT_DTO_NAME, "clinicalSupervisorIds",
+              "Clinical Supervisor ID cannot be null or negative"));
+        } else if (!personRepository.exists(clinicalSupervisorId)) {
+          fieldErrors.add(new FieldError(PLACEMENT_DTO_NAME, "clinicalSupervisorIds",
+              String.format("Clinical Supervisor with id %d does not exist", clinicalSupervisorId)));
+        }
+      }
     }
     return fieldErrors;
   }
@@ -110,6 +117,18 @@ public class PlacementValidator {
     } else {
       Map<Long, Boolean> gradeIdsExistsMap = referenceService.gradeExists(newArrayList(placementDTO.getGradeId()));
       notExistsFieldErrors(fieldErrors, gradeIdsExistsMap, "gradeId", "Grade");
+    }
+    return fieldErrors;
+  }
+
+  private List<FieldError> checkPlacementType(PlacementDTO placementDTO) {
+    List<FieldError> fieldErrors = new ArrayList<>();
+    if (placementDTO.getPlacementTypeId() == null || placementDTO.getPlacementTypeId() < 0) {
+      fieldErrors.add(new FieldError(PLACEMENT_DTO_NAME, "placementTypeId",
+          "PlacementType ID cannot be null or negative"));
+    } else {
+      Map<Long, Boolean> placementTypeIdsExistsMap = referenceService.placementTypeExists(newArrayList(placementDTO.getPlacementTypeId()));
+      notExistsFieldErrors(fieldErrors, placementTypeIdsExistsMap, "placementTypeId", "PlacementType");
     }
     return fieldErrors;
   }

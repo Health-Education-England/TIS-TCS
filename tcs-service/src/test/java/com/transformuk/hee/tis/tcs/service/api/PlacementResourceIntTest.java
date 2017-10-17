@@ -3,7 +3,6 @@ package com.transformuk.hee.tis.tcs.service.api;
 import com.google.common.collect.Sets;
 import com.transformuk.hee.tis.reference.client.impl.ReferenceServiceImpl;
 import com.transformuk.hee.tis.tcs.api.dto.PlacementDTO;
-import com.transformuk.hee.tis.tcs.api.enumeration.PlacementType;
 import com.transformuk.hee.tis.tcs.api.enumeration.PostSpecialtyType;
 import com.transformuk.hee.tis.tcs.service.Application;
 import com.transformuk.hee.tis.tcs.service.api.validation.PlacementValidator;
@@ -11,6 +10,7 @@ import com.transformuk.hee.tis.tcs.service.exception.ExceptionTranslator;
 import com.transformuk.hee.tis.tcs.service.model.Person;
 import com.transformuk.hee.tis.tcs.service.model.Placement;
 import com.transformuk.hee.tis.tcs.service.model.PlacementSpecialty;
+import com.transformuk.hee.tis.tcs.service.model.PlacementSupervisor;
 import com.transformuk.hee.tis.tcs.service.model.Post;
 import com.transformuk.hee.tis.tcs.service.model.Specialty;
 import com.transformuk.hee.tis.tcs.service.repository.PersonRepository;
@@ -80,8 +80,8 @@ public class PlacementResourceIntTest {
   private static final LocalDate DEFAULT_DATE_TO = LocalDate.ofEpochDay(0L);
   private static final LocalDate UPDATED_DATE_TO = LocalDate.now(ZoneId.systemDefault());
 
-  private static final PlacementType DEFAULT_PLACEMENT_TYPE = PlacementType.INPOSTSTANDARD;
-  private static final PlacementType UPDATED_PLACEMENT_TYPE = PlacementType.INPOSTEXTENSION;
+  private static final Long DEFAULT_PLACEMENT_TYPE = 12345L;
+  private static final Long UPDATED_PLACEMENT_TYPE = 54321L;
 
   private static final Float DEFAULT_PLACEMENT_WHOLE_TIME_EQUIVALENT = 1F;
   private static final Float UPDATED_PLACEMENT_WHOLE_TIME_EQUIVALENT = 2F;
@@ -139,7 +139,7 @@ public class PlacementResourceIntTest {
     placement.setSpecialties(Sets.newHashSet());
     placement.setDateFrom(DEFAULT_DATE_FROM);
     placement.setDateTo(DEFAULT_DATE_TO);
-    placement.setPlacementType(DEFAULT_PLACEMENT_TYPE);
+    placement.setPlacementTypeId(DEFAULT_PLACEMENT_TYPE);
     placement.setPlacementWholeTimeEquivalent(DEFAULT_PLACEMENT_WHOLE_TIME_EQUIVALENT);
     placement.setLocalPostNumber(DEFAULT_LOCAL_POST_NUMBER);
     placement.setTrainingDescription(DEFAULT_TRAINING_DESCRIPTION);
@@ -182,9 +182,13 @@ public class PlacementResourceIntTest {
     placementSpecialty.setPlacementSpecialtyType(PostSpecialtyType.PRIMARY);
     placementSpecialty.setSpecialty(specialty);
 
+    PlacementSupervisor placementSupervisor = new PlacementSupervisor();
+    placementSupervisor.setClinicalSupervisor(clinicalSupervisor);
+    placementSupervisor.setPlacement(placement);
+
     placement.setPost(post);
     placement.setTrainee(trainee);
-    placement.setClinicalSupervisor(clinicalSupervisor);
+    placement.setClinicalSupervisors(Sets.newHashSet(placementSupervisor));
     placement.setSpecialties(Sets.newHashSet(placementSpecialty));
   }
 
@@ -201,8 +205,8 @@ public class PlacementResourceIntTest {
         .andExpect(status().isBadRequest())
         .andExpect(jsonPath("$.message").value("error.validation"))
         .andExpect(jsonPath("$.fieldErrors[*].field").
-            value(containsInAnyOrder("dateFrom", "dateTo",
-                "traineeId", "clinicalSupervisorId", "postId", "gradeId", "siteId")));
+            value(containsInAnyOrder("dateFrom", "dateTo", "placementTypeId",
+                "traineeId", "clinicalSupervisorIds", "postId", "gradeId", "siteId")));
   }
 
   @Test
@@ -219,8 +223,8 @@ public class PlacementResourceIntTest {
         .andExpect(status().isBadRequest())
         .andExpect(jsonPath("$.message").value("error.validation"))
         .andExpect(jsonPath("$.fieldErrors[*].field").
-            value(containsInAnyOrder("dateFrom", "dateTo",
-                "traineeId", "clinicalSupervisorId", "postId", "gradeId", "siteId")));
+            value(containsInAnyOrder("dateFrom", "dateTo", "placementTypeId",
+                "traineeId", "clinicalSupervisorIds", "postId", "gradeId", "siteId")));
   }
 
   @Test
@@ -247,10 +251,10 @@ public class PlacementResourceIntTest {
     assertThat(testPlacement.getDateTo()).isEqualTo(DEFAULT_DATE_TO);
     assertThat(testPlacement.getPost()).isEqualTo(placement.getPost());
     assertThat(testPlacement.getTrainee()).isEqualTo(placement.getTrainee());
-    assertThat(testPlacement.getClinicalSupervisor()).isEqualTo(placement.getClinicalSupervisor());
+    assertThat(testPlacement.getClinicalSupervisors().iterator().next().getClinicalSupervisor()).isEqualTo(placement.getClinicalSupervisors().iterator().next().getClinicalSupervisor());
     assertThat(testPlacement.getLocalPostNumber()).isEqualTo(DEFAULT_LOCAL_POST_NUMBER);
     assertThat(testPlacement.getTrainingDescription()).isEqualTo(DEFAULT_TRAINING_DESCRIPTION);
-    assertThat(testPlacement.getPlacementType()).isEqualTo(DEFAULT_PLACEMENT_TYPE);
+    assertThat(testPlacement.getPlacementTypeId()).isEqualTo(DEFAULT_PLACEMENT_TYPE);
     assertThat(testPlacement.getPlacementWholeTimeEquivalent()).isEqualTo(DEFAULT_PLACEMENT_WHOLE_TIME_EQUIVALENT);
   }
 
@@ -285,15 +289,15 @@ public class PlacementResourceIntTest {
         .andExpect(status().isOk())
         .andExpect(content().contentType(MediaType.APPLICATION_JSON_UTF8_VALUE))
         .andExpect(jsonPath("$.[*].id").value(hasItem(placement.getId().intValue())))
-        .andExpect(jsonPath("$.[*].trainee.id").value(placement.getTrainee().getId().intValue()))
-        .andExpect(jsonPath("$.[*].clinicalSupervisor.id").value(placement.getClinicalSupervisor().getId().intValue()))
-        .andExpect(jsonPath("$.[*].post.id").value(placement.getPost().getId().intValue()))
+        .andExpect(jsonPath("$.[*].traineeId").value(placement.getTrainee().getId().intValue()))
+        .andExpect(jsonPath("$.[*].clinicalSupervisorIds[0]").value(placement.getClinicalSupervisors().iterator().next().getClinicalSupervisor().getId().intValue()))
+        .andExpect(jsonPath("$.[*].postId").value(placement.getPost().getId().intValue()))
         .andExpect(jsonPath("$.[*].siteId").value(DEFAULT_SITE.intValue()))
         .andExpect(jsonPath("$.[*].gradeId").value(DEFAULT_GRADE.intValue()))
         .andExpect(jsonPath("$.[*].specialties[0].id").value(placement.getSpecialties().iterator().next().getId().intValue()))
         .andExpect(jsonPath("$.[*].dateFrom").value(DEFAULT_DATE_FROM.toString()))
         .andExpect(jsonPath("$.[*].dateTo").value(DEFAULT_DATE_TO.toString()))
-        .andExpect(jsonPath("$.[*].placementType").value(DEFAULT_PLACEMENT_TYPE.toString()))
+        .andExpect(jsonPath("$.[*].placementTypeId").value(DEFAULT_PLACEMENT_TYPE.intValue()))
         .andExpect(jsonPath("$.[*].localPostNumber").value(DEFAULT_LOCAL_POST_NUMBER))
         .andExpect(jsonPath("$.[*].trainingDescription").value(DEFAULT_TRAINING_DESCRIPTION))
         .andExpect(jsonPath("$.[*].placementWholeTimeEquivalent").value(DEFAULT_PLACEMENT_WHOLE_TIME_EQUIVALENT.doubleValue()));
@@ -310,15 +314,15 @@ public class PlacementResourceIntTest {
         .andExpect(status().isOk())
         .andExpect(content().contentType(MediaType.APPLICATION_JSON_UTF8_VALUE))
         .andExpect(jsonPath("$.id").value(placement.getId().intValue()))
-        .andExpect(jsonPath("$.trainee.id").value(placement.getTrainee().getId().intValue()))
-        .andExpect(jsonPath("$.clinicalSupervisor.id").value(placement.getClinicalSupervisor().getId().intValue()))
-        .andExpect(jsonPath("$.post.id").value(placement.getPost().getId().intValue()))
+        .andExpect(jsonPath("$.traineeId").value(placement.getTrainee().getId().intValue()))
+        .andExpect(jsonPath("$.clinicalSupervisorIds[0]").value(placement.getClinicalSupervisors().iterator().next().getClinicalSupervisor().getId().intValue()))
+        .andExpect(jsonPath("$.postId").value(placement.getPost().getId().intValue()))
         .andExpect(jsonPath("$.siteId").value(DEFAULT_SITE.intValue()))
         .andExpect(jsonPath("$.gradeId").value(DEFAULT_GRADE.intValue()))
         .andExpect(jsonPath("$.specialties[0].id").value(placement.getSpecialties().iterator().next().getId().intValue()))
         .andExpect(jsonPath("$.dateFrom").value(DEFAULT_DATE_FROM.toString()))
         .andExpect(jsonPath("$.dateTo").value(DEFAULT_DATE_TO.toString()))
-        .andExpect(jsonPath("$.placementType").value(DEFAULT_PLACEMENT_TYPE.toString()))
+        .andExpect(jsonPath("$.placementTypeId").value(DEFAULT_PLACEMENT_TYPE.intValue()))
         .andExpect(jsonPath("$.localPostNumber").value(DEFAULT_LOCAL_POST_NUMBER))
         .andExpect(jsonPath("$.trainingDescription").value(DEFAULT_TRAINING_DESCRIPTION))
         .andExpect(jsonPath("$.placementWholeTimeEquivalent").value(DEFAULT_PLACEMENT_WHOLE_TIME_EQUIVALENT.doubleValue()));
@@ -348,7 +352,7 @@ public class PlacementResourceIntTest {
     updatedPlacement.setDateTo(UPDATED_DATE_TO);
     updatedPlacement.setLocalPostNumber(UPDATED_LOCAL_POST_NUMBER);
     updatedPlacement.setTrainingDescription(UPDATED_TRAINING_DESCRPTION);
-    updatedPlacement.setPlacementType(UPDATED_PLACEMENT_TYPE);
+    updatedPlacement.setPlacementTypeId(UPDATED_PLACEMENT_TYPE);
     updatedPlacement.setPlacementWholeTimeEquivalent(UPDATED_PLACEMENT_WHOLE_TIME_EQUIVALENT);
     PlacementDTO placementDTO = placementMapper.placementToPlacementDTO(updatedPlacement);
 
@@ -368,7 +372,7 @@ public class PlacementResourceIntTest {
     assertThat(testPlacement.getDateTo()).isEqualTo(UPDATED_DATE_TO);
     assertThat(testPlacement.getLocalPostNumber()).isEqualTo(UPDATED_LOCAL_POST_NUMBER);
     assertThat(testPlacement.getTrainingDescription()).isEqualTo(UPDATED_TRAINING_DESCRPTION);
-    assertThat(testPlacement.getPlacementType()).isEqualTo(UPDATED_PLACEMENT_TYPE);
+    assertThat(testPlacement.getPlacementTypeId()).isEqualTo(UPDATED_PLACEMENT_TYPE);
     assertThat(testPlacement.getPlacementWholeTimeEquivalent()).isEqualTo(UPDATED_PLACEMENT_WHOLE_TIME_EQUIVALENT);
   }
 

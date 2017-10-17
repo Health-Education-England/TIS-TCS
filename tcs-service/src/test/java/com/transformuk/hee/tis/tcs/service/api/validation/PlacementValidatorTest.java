@@ -5,7 +5,6 @@ import com.google.common.collect.Sets;
 import com.transformuk.hee.tis.reference.client.impl.ReferenceServiceImpl;
 import com.transformuk.hee.tis.tcs.api.dto.PlacementDTO;
 import com.transformuk.hee.tis.tcs.api.dto.PlacementSpecialtyDTO;
-import com.transformuk.hee.tis.tcs.api.enumeration.PlacementType;
 import com.transformuk.hee.tis.tcs.api.enumeration.PostSpecialtyType;
 import com.transformuk.hee.tis.tcs.service.repository.PersonRepository;
 import com.transformuk.hee.tis.tcs.service.repository.PostRepository;
@@ -38,7 +37,7 @@ public class PlacementValidatorTest {
   private static final String DEFAULT_TRAINING_DESCRIPTION = "TRAINING";
   private static final LocalDate DEFAULT_DATE_FROM = LocalDate.ofEpochDay(0L);
   private static final LocalDate DEFAULT_DATE_TO = LocalDate.ofEpochDay(0L);
-  private static final PlacementType DEFAULT_PLACEMENT_TYPE = PlacementType.INPOSTSTANDARD;
+  private static final Long DEFAULT_PLACEMENT_TYPE = 123456L;
   private static final Float DEFAULT_PLACEMENT_WHOLE_TIME_EQUIVALENT = 1F;
 
   private PlacementDTO placementDTO;
@@ -66,12 +65,12 @@ public class PlacementValidatorTest {
     placementDTO.setSpecialties(Sets.newHashSet());
     placementDTO.setDateFrom(DEFAULT_DATE_FROM);
     placementDTO.setDateTo(DEFAULT_DATE_TO);
-    placementDTO.setPlacementType(DEFAULT_PLACEMENT_TYPE);
+    placementDTO.setPlacementTypeId(DEFAULT_PLACEMENT_TYPE);
     placementDTO.setPlacementWholeTimeEquivalent(DEFAULT_PLACEMENT_WHOLE_TIME_EQUIVALENT);
     placementDTO.setLocalPostNumber(DEFAULT_LOCAL_POST_NUMBER);
     placementDTO.setTrainingDescription(DEFAULT_TRAINING_DESCRIPTION);
     placementDTO.setTraineeId(DEFAULT_TRAINEE);
-    placementDTO.setClinicalSupervisorId(DEFAULT_CLINICAL_SUPERVISOR);
+    placementDTO.setClinicalSupervisorIds(Sets.newHashSet(DEFAULT_CLINICAL_SUPERVISOR));
     placementDTO.setPostId(DEFAULT_POST);
 
     given(personRepository.exists(DEFAULT_TRAINEE)).willReturn(true);
@@ -79,6 +78,7 @@ public class PlacementValidatorTest {
     given(postRepository.exists(DEFAULT_POST)).willReturn(true);
     given(referenceService.siteExists(Lists.newArrayList(DEFAULT_SITE))).willReturn(Maps.newHashMap(DEFAULT_SITE, true));
     given(referenceService.gradeExists(Lists.newArrayList(DEFAULT_GRADE))).willReturn(Maps.newHashMap(DEFAULT_GRADE, true));
+    given(referenceService.placementTypeExists(Lists.newArrayList(DEFAULT_PLACEMENT_TYPE))).willReturn(Maps.newHashMap(DEFAULT_PLACEMENT_TYPE, true));
   }
 
   @Test
@@ -104,6 +104,19 @@ public class PlacementValidatorTest {
     } catch (ValidationException ex) {
       assertThat(ex.getBindingResult().getErrorCount(), is(1));
       assertThat(ex.getBindingResult().getFieldError("gradeId"), is(notNullValue()));
+    }
+  }
+
+  @Test
+  public void testValidateFailsIfPlacementTypeIsInvalid() {
+    try {
+      given(referenceService.placementTypeExists(Lists.newArrayList(321L))).willReturn(Maps.newHashMap(321L, false));
+      placementDTO.setPlacementTypeId(321L);
+      placementValidator.validate(placementDTO);
+      fail("ValidationException expected.");
+    } catch (ValidationException ex) {
+      assertThat(ex.getBindingResult().getErrorCount(), is(1));
+      assertThat(ex.getBindingResult().getFieldError("placementTypeId"), is(notNullValue()));
     }
   }
 
@@ -137,12 +150,12 @@ public class PlacementValidatorTest {
   public void testValidateFailsIfClinicalSupervisorIsInvalid() {
     try {
       given(personRepository.exists(321L)).willReturn(false);
-      placementDTO.setClinicalSupervisorId(321L);
+      placementDTO.setClinicalSupervisorIds(Sets.newHashSet(321L));
       placementValidator.validate(placementDTO);
       fail("ValidationException expected.");
     } catch (ValidationException ex) {
       assertThat(ex.getBindingResult().getErrorCount(), is(1));
-      assertThat(ex.getBindingResult().getFieldError("clinicalSupervisorId"), is(notNullValue()));
+      assertThat(ex.getBindingResult().getFieldError("clinicalSupervisorIds"), is(notNullValue()));
     }
   }
 

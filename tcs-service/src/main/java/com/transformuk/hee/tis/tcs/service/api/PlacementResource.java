@@ -2,7 +2,6 @@ package com.transformuk.hee.tis.tcs.service.api;
 
 import com.codahale.metrics.annotation.Timed;
 import com.transformuk.hee.tis.tcs.api.dto.PlacementDTO;
-import com.transformuk.hee.tis.tcs.api.dto.PlacementViewDTO;
 import com.transformuk.hee.tis.tcs.api.dto.validation.Create;
 import com.transformuk.hee.tis.tcs.api.dto.validation.Update;
 import com.transformuk.hee.tis.tcs.service.api.util.HeaderUtil;
@@ -65,13 +64,13 @@ public class PlacementResource {
   @PostMapping("/placements")
   @Timed
   @PreAuthorize("hasAuthority('tcs:add:modify:entities')")
-  public ResponseEntity<PlacementViewDTO> createPlacement(@RequestBody @Validated(Create.class) PlacementDTO placementDTO) throws URISyntaxException, ValidationException {
+  public ResponseEntity<PlacementDTO> createPlacement(@RequestBody @Validated(Create.class) PlacementDTO placementDTO) throws URISyntaxException, ValidationException {
     log.debug("REST request to save Placement : {}", placementDTO);
     placementValidator.validate(placementDTO);
     if (placementDTO.getId() != null) {
       return ResponseEntity.badRequest().headers(HeaderUtil.createFailureAlert(ENTITY_NAME, "idexists", "A new placement cannot already have an ID")).body(null);
     }
-    PlacementViewDTO result = placementService.save(placementDTO);
+    PlacementDTO result = placementService.save(placementDTO);
     return ResponseEntity.created(new URI("/api/placements/" + result.getId()))
         .headers(HeaderUtil.createEntityCreationAlert(ENTITY_NAME, result.getId().toString()))
         .body(result);
@@ -89,13 +88,13 @@ public class PlacementResource {
   @PutMapping("/placements")
   @Timed
   @PreAuthorize("hasAuthority('tcs:add:modify:entities')")
-  public ResponseEntity<PlacementViewDTO> updatePlacement(@RequestBody @Validated(Update.class) PlacementDTO placementDTO) throws URISyntaxException, ValidationException {
+  public ResponseEntity<PlacementDTO> updatePlacement(@RequestBody @Validated(Update.class) PlacementDTO placementDTO) throws URISyntaxException, ValidationException {
     log.debug("REST request to update Placement : {}", placementDTO);
     placementValidator.validate(placementDTO);
     if (placementDTO.getId() == null) {
       return createPlacement(placementDTO);
     }
-    PlacementViewDTO result = placementService.save(placementDTO);
+    PlacementDTO result = placementService.save(placementDTO);
     return ResponseEntity.ok()
         .headers(HeaderUtil.createEntityUpdateAlert(ENTITY_NAME, placementDTO.getId().toString()))
         .body(result);
@@ -110,9 +109,9 @@ public class PlacementResource {
   @GetMapping("/placements")
   @Timed
   @PreAuthorize("hasAuthority('tcs:view:entities')")
-  public ResponseEntity<List<PlacementViewDTO>> getAllPlacements(@ApiParam Pageable pageable) {
+  public ResponseEntity<List<PlacementDTO>> getAllPlacements(@ApiParam Pageable pageable) {
     log.debug("REST request to get a page of Placements");
-    Page<PlacementViewDTO> page = placementService.findAll(pageable);
+    Page<PlacementDTO> page = placementService.findAll(pageable);
     HttpHeaders headers = PaginationUtil.generatePaginationHttpHeaders(page, "/api/placements");
     return new ResponseEntity<>(page.getContent(), headers, HttpStatus.OK);
   }
@@ -126,9 +125,9 @@ public class PlacementResource {
   @GetMapping("/placements/{id}")
   @Timed
   @PreAuthorize("hasAuthority('tcs:view:entities')")
-  public ResponseEntity<PlacementViewDTO> getPlacement(@PathVariable Long id) {
+  public ResponseEntity<PlacementDTO> getPlacement(@PathVariable Long id) {
     log.debug("REST request to get Placement : {}", id);
-    PlacementViewDTO placementViewDTO = placementService.findOne(id);
+    PlacementDTO placementViewDTO = placementService.findOne(id);
     return ResponseUtil.wrapOrNotFound(Optional.ofNullable(placementViewDTO));
   }
 
@@ -158,10 +157,10 @@ public class PlacementResource {
   @PatchMapping("/placements")
   @Timed
   @PreAuthorize("hasAuthority('tcs:add:modify:entities')")
-  public ResponseEntity<List<PlacementViewDTO>> patchPlacements(@RequestBody List<PlacementDTO> placementDTOS) throws URISyntaxException {
+  public ResponseEntity<List<PlacementDTO>> patchPlacements(@RequestBody List<PlacementDTO> placementDTOS) throws URISyntaxException {
     log.debug("REST request to bulk save Placement : {}", placementDTOS);
-    List<PlacementViewDTO> result = placementService.save(placementDTOS);
-    List<Long> ids = result.stream().map(PlacementViewDTO::getId).collect(Collectors.toList());
+    List<PlacementDTO> result = placementService.save(placementDTOS);
+    List<Long> ids = result.stream().map(PlacementDTO::getId).collect(Collectors.toList());
     return ResponseEntity.ok()
         .headers(HeaderUtil.createEntityUpdateAlert(ENTITY_NAME, StringUtils.join(ids, ",")))
         .body(result);

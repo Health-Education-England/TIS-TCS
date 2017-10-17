@@ -58,7 +58,7 @@ public class PersonDTO implements Serializable {
 
   private RightToWorkDTO rightToWork;
 
-  private Set<PlacementViewDTO> placements;
+  private Set<PlacementDTO> placements;
 
   public Long getId() {
     return id;
@@ -204,11 +204,11 @@ public class PersonDTO implements Serializable {
     this.programmeMemberships = programmeMemberships;
   }
 
-  public Set<PlacementViewDTO> getPlacements() {
+  public Set<PlacementDTO> getPlacements() {
     return placements;
   }
 
-  public void setPlacements(Set<PlacementViewDTO> placements) {
+  public void setPlacements(Set<PlacementDTO> placements) {
     this.placements = placements;
   }
 

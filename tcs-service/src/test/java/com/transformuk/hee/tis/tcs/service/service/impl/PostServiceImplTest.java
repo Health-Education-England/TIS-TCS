@@ -2,7 +2,7 @@ package com.transformuk.hee.tis.tcs.service.service.impl;
 
 import com.google.common.collect.Lists;
 import com.google.common.collect.Sets;
-import com.transformuk.hee.tis.tcs.api.dto.PlacementViewDTO;
+import com.transformuk.hee.tis.tcs.api.dto.PlacementDTO;
 import com.transformuk.hee.tis.tcs.api.dto.PostDTO;
 import com.transformuk.hee.tis.tcs.api.dto.PostGradeDTO;
 import com.transformuk.hee.tis.tcs.api.dto.PostSiteDTO;
@@ -371,7 +371,6 @@ public class PostServiceImplTest {
   }
 
 
-
   @Test
   public void pathPostSpecialties() {
     List<Long> postIds = Lists.newArrayList(1L);
@@ -430,16 +429,16 @@ public class PostServiceImplTest {
     List<Long> postIds = Lists.newArrayList(1L);
     List<String> intrepidIds = Lists.newArrayList("intrepid1");
 
-    PlacementViewDTO placementViewDTO = new PlacementViewDTO();
-    placementViewDTO.setId(1L);
-    placementViewDTO.setIntrepidId("placement intrepid id");
+    PlacementDTO placementDTO = new PlacementDTO();
+    placementDTO.setId(1L);
+    placementDTO.setIntrepidId("placement intrepid id");
 
     Placement placement = new Placement();
     placement.setId(1L);
     placement.setIntrepidId("placement intrepid id");
 
     PostDTO sendPostData = new PostDTO();
-    sendPostData.id(postIds.get(0)).intrepidId(intrepidIds.get(0)).placementHistory(Sets.newHashSet(placementViewDTO));
+    sendPostData.id(postIds.get(0)).intrepidId(intrepidIds.get(0)).placementHistory(Sets.newHashSet(placementDTO));
 
     Post currentPost = new Post();
     currentPost.setId(postIds.get(0));
@@ -449,7 +448,7 @@ public class PostServiceImplTest {
     List<Post> savedPosts = Lists.newArrayList(currentPost);
 
     PostDTO expectedDTO = new PostDTO();
-    expectedDTO.id(sendPostData.getId()).intrepidId(currentPost.getIntrepidId()).placementHistory(Sets.newHashSet(placementViewDTO));
+    expectedDTO.id(sendPostData.getId()).intrepidId(currentPost.getIntrepidId()).placementHistory(Sets.newHashSet(placementDTO));
 
     List<PostDTO> transformedPosts = Lists.newArrayList(expectedDTO);
     Set<String> placementIds = Sets.newHashSet("placement intrepid id");
@@ -467,6 +466,6 @@ public class PostServiceImplTest {
 
     Assert.assertSame(transformedPosts, result);
     Assert.assertEquals(expectedDTO, result.get(0));
-    Assert.assertEquals(Sets.newHashSet(placementViewDTO), result.get(0).getPlacementHistory());
+    Assert.assertEquals(Sets.newHashSet(placementDTO), result.get(0).getPlacementHistory());
   }
 }

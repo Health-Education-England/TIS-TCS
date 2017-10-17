@@ -1,7 +1,6 @@
 package com.transformuk.hee.tis.tcs.service.service;
 
 import com.transformuk.hee.tis.tcs.api.dto.PlacementDTO;
-import com.transformuk.hee.tis.tcs.api.dto.PlacementViewDTO;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 
@@ -18,7 +17,7 @@ public interface PlacementService {
    * @param placementDTO the entity to save
    * @return the persisted entity
    */
-  PlacementViewDTO save(PlacementDTO placementDTO);
+  PlacementDTO save(PlacementDTO placementDTO);
 
   /**
    * Save a list of placements.
@@ -26,7 +25,7 @@ public interface PlacementService {
    * @param placementDTO the list of entities to save
    * @return the list of persisted entities
    */
-  List<PlacementViewDTO> save(List<PlacementDTO> placementDTO);
+  List<PlacementDTO> save(List<PlacementDTO> placementDTO);
 
   /**
    * Get all the placements.
@@ -34,7 +33,7 @@ public interface PlacementService {
    * @param pageable the pagination information
    * @return the list of entities
    */
-  Page<PlacementViewDTO> findAll(Pageable pageable);
+  Page<PlacementDTO> findAll(Pageable pageable);
 
   /**
    * Get the "id" placement.
@@ -42,7 +41,7 @@ public interface PlacementService {
    * @param id the id of the entity
    * @return the entity
    */
-  PlacementViewDTO findOne(Long id);
+  PlacementDTO findOne(Long id);
 
   /**
    * Delete the "id" placement.

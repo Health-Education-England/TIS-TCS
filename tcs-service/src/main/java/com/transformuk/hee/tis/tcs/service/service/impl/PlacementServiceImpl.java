@@ -1,12 +1,10 @@
 package com.transformuk.hee.tis.tcs.service.service.impl;
 
 import com.transformuk.hee.tis.tcs.api.dto.PlacementDTO;
-import com.transformuk.hee.tis.tcs.api.dto.PlacementViewDTO;
 import com.transformuk.hee.tis.tcs.service.model.Placement;
 import com.transformuk.hee.tis.tcs.service.repository.PlacementRepository;
 import com.transformuk.hee.tis.tcs.service.service.PlacementService;
 import com.transformuk.hee.tis.tcs.service.service.mapper.PlacementMapper;
-import com.transformuk.hee.tis.tcs.service.service.mapper.PlacementViewMapper;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.data.domain.Page;
@@ -29,14 +27,10 @@ public class PlacementServiceImpl implements PlacementService {
 
   private final PlacementMapper placementMapper;
 
-  private final PlacementViewMapper placementViewMapper;
-
   public PlacementServiceImpl(PlacementRepository placementRepository,
-                              PlacementMapper placementMapper,
-                              PlacementViewMapper placementViewMapper) {
+                              PlacementMapper placementMapper) {
     this.placementRepository = placementRepository;
     this.placementMapper = placementMapper;
-    this.placementViewMapper = placementViewMapper;
   }
 
   /**
@@ -46,11 +40,11 @@ public class PlacementServiceImpl implements PlacementService {
    * @return the persisted entity
    */
   @Override
-  public PlacementViewDTO save(PlacementDTO placementDTO) {
+  public PlacementDTO save(PlacementDTO placementDTO) {
     log.debug("Request to save Placement : {}", placementDTO);
     Placement placement = placementMapper.placementDTOToPlacement(placementDTO);
     placement = placementRepository.save(placement);
-    PlacementViewDTO result = placementViewMapper.placementToPlacementViewDTO(placement, true, true);
+    PlacementDTO result = placementMapper.placementToPlacementDTO(placement);
     return result;
   }
 
@@ -61,11 +55,11 @@ public class PlacementServiceImpl implements PlacementService {
    * @return the list of persisted entities
    */
   @Override
-  public List<PlacementViewDTO> save(List<PlacementDTO> placementDTO) {
+  public List<PlacementDTO> save(List<PlacementDTO> placementDTO) {
     log.debug("Request to save Placements : {}", placementDTO);
     List<Placement> placements = placementMapper.placementDTOsToPlacements(placementDTO);
     placements = placementRepository.save(placements);
-    List<PlacementViewDTO> result = placementViewMapper.placementsToPlacementViewDTOs(placements, true, true);
+    List<PlacementDTO> result = placementMapper.placementsToPlacementDTOs(placements);
     return result;
   }
 
@@ -77,10 +71,10 @@ public class PlacementServiceImpl implements PlacementService {
    */
   @Override
   @Transactional(readOnly = true)
-  public Page<PlacementViewDTO> findAll(Pageable pageable) {
+  public Page<PlacementDTO> findAll(Pageable pageable) {
     log.debug("Request to get all Placements");
     Page<Placement> result = placementRepository.findAll(pageable);
-    return result.map(placement -> placementViewMapper.placementToPlacementViewDTO(placement, true, true));
+    return result.map(placement -> placementMapper.placementToPlacementDTO(placement));
   }
 
   /**
@@ -91,10 +85,10 @@ public class PlacementServiceImpl implements PlacementService {
    */
   @Override
   @Transactional(readOnly = true)
-  public PlacementViewDTO findOne(Long id) {
+  public PlacementDTO findOne(Long id) {
     log.debug("Request to get Placement : {}", id);
     Placement placement = placementRepository.findOne(id);
-    PlacementViewDTO placementViewDTO = placementViewMapper.placementToPlacementViewDTO(placement, true, true);
+    PlacementDTO placementViewDTO = placementMapper.placementToPlacementDTO(placement);
     return placementViewDTO;
   }
 

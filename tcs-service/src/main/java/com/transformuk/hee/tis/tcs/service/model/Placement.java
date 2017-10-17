@@ -1,12 +1,8 @@
 package com.transformuk.hee.tis.tcs.service.model;
 
-import com.transformuk.hee.tis.tcs.api.enumeration.PlacementType;
-
 import javax.persistence.CascadeType;
 import javax.persistence.Column;
 import javax.persistence.Entity;
-import javax.persistence.EnumType;
-import javax.persistence.Enumerated;
 import javax.persistence.FetchType;
 import javax.persistence.GeneratedValue;
 import javax.persistence.GenerationType;
@@ -16,6 +12,7 @@ import javax.persistence.ManyToOne;
 import javax.persistence.OneToMany;
 import java.io.Serializable;
 import java.time.LocalDate;
+import java.util.HashSet;
 import java.util.Objects;
 import java.util.Set;
 
@@ -35,9 +32,8 @@ public class Placement implements Serializable {
   @JoinColumn(name = "traineeId")
   private Person trainee;
 
-  @ManyToOne
-  @JoinColumn(name = "clinicalSupervisorId")
-  private Person clinicalSupervisor;
+  @OneToMany(mappedBy = "placement", cascade = CascadeType.ALL, fetch = FetchType.EAGER)
+  private Set<PlacementSupervisor> clinicalSupervisors = new HashSet<>();
 
   @Column(name = "intrepidId")
   private String intrepidId;
@@ -53,7 +49,7 @@ public class Placement implements Serializable {
   private Long gradeId;
 
   @OneToMany(mappedBy = "placement", cascade = CascadeType.ALL, fetch = FetchType.EAGER)
-  private Set<PlacementSpecialty> specialties;
+  private Set<PlacementSpecialty> specialties = new HashSet<>();
 
   @Column(name = "dateFrom")
   private LocalDate dateFrom;
@@ -61,9 +57,8 @@ public class Placement implements Serializable {
   @Column(name = "dateTo")
   private LocalDate dateTo;
 
-  @Enumerated(EnumType.STRING)
-  @Column(name = "placementType")
-  private PlacementType placementType;
+  @Column(name = "placementTypeId")
+  private Long placementTypeId;
 
   @Column(name = "placementWholeTimeEquivalent")
   private Float placementWholeTimeEquivalent;
@@ -98,12 +93,12 @@ public class Placement implements Serializable {
     this.trainee = trainee;
   }
 
-  public Person getClinicalSupervisor() {
-    return clinicalSupervisor;
+  public Set<PlacementSupervisor> getClinicalSupervisors() {
+    return clinicalSupervisors;
   }
 
-  public void setClinicalSupervisor(Person clinicalSupervisor) {
-    this.clinicalSupervisor = clinicalSupervisor;
+  public void setClinicalSupervisors(Set<PlacementSupervisor> clinicalSupervisors) {
+    this.clinicalSupervisors = clinicalSupervisors;
   }
 
   public Post getPost() {
@@ -170,12 +165,12 @@ public class Placement implements Serializable {
     this.dateTo = dateTo;
   }
 
-  public PlacementType getPlacementType() {
-    return placementType;
+  public Long getPlacementTypeId() {
+    return placementTypeId;
   }
 
-  public void setPlacementType(PlacementType placementType) {
-    this.placementType = placementType;
+  public void setPlacementTypeId(Long placementTypeId) {
+    this.placementTypeId = placementTypeId;
   }
 
   public Float getPlacementWholeTimeEquivalent() {
@@ -213,12 +208,12 @@ public class Placement implements Serializable {
         ", post='" + post + "'" +
         ", siteId='" + siteId + "'" +
         ", trainee='" + trainee + "'" +
-        ", clinicalSupervisor='" + clinicalSupervisor + "'" +
+        ", clinicalSupervisors='" + clinicalSupervisors + "'" +
         ", gradeId='" + gradeId + "'" +
         ", specialties='" + specialties + "'" +
         ", dateFrom='" + dateFrom + "'" +
         ", dateTo='" + dateTo + "'" +
-        ", placementType='" + placementType + "'" +
+        ", placementTypeId='" + placementTypeId + "'" +
         ", placementWholeTimeEquivalent='" + placementWholeTimeEquivalent + "'" +
         ", localPostNumber='" + localPostNumber + "'" +
         '}';

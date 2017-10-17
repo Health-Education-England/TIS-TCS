@@ -2,7 +2,7 @@ package com.transformuk.hee.tis.tcs.service.service.mapper;
 
 import com.google.common.collect.Lists;
 import com.google.common.collect.Sets;
-import com.transformuk.hee.tis.tcs.api.dto.PlacementViewDTO;
+import com.transformuk.hee.tis.tcs.api.dto.PlacementDTO;
 import com.transformuk.hee.tis.tcs.api.dto.PostDTO;
 import com.transformuk.hee.tis.tcs.api.dto.PostFundingDTO;
 import com.transformuk.hee.tis.tcs.api.dto.PostGradeDTO;
@@ -39,7 +39,7 @@ import java.util.stream.Collectors;
 public class PostMapper {
 
   @Autowired
-  private PlacementViewMapper placementMapper;
+  private PlacementMapper placementMapper;
 
   public PostDTO postToPostDTO(Post post) {
     PostDTO result = null;
@@ -142,9 +142,9 @@ public class PostMapper {
 
     if (includePlacements) {
       if (CollectionUtils.isNotEmpty(post.getPlacementHistory())) {
-        Set<PlacementViewDTO> placements = Sets.newHashSet();
+        Set<PlacementDTO> placements = Sets.newHashSet();
         for (Placement placement : post.getPlacementHistory()) {
-          placements.add(placementMapper.placementToPlacementViewDTO(placement, false, true));
+          placements.add(placementMapper.placementToPlacementDTO(placement));
         }
         result.setPlacementHistory(placements);
       }

@@ -3,14 +3,13 @@ package com.transformuk.hee.tis.tcs.service.api;
 import com.google.common.collect.Lists;
 import com.google.common.collect.Sets;
 import com.transformuk.hee.tis.tcs.TestUtils;
-import com.transformuk.hee.tis.tcs.api.dto.PlacementViewDTO;
+import com.transformuk.hee.tis.tcs.api.dto.PlacementDTO;
 import com.transformuk.hee.tis.tcs.api.dto.PostDTO;
 import com.transformuk.hee.tis.tcs.api.dto.PostGradeDTO;
 import com.transformuk.hee.tis.tcs.api.dto.PostSiteDTO;
 import com.transformuk.hee.tis.tcs.api.dto.PostSpecialtyDTO;
 import com.transformuk.hee.tis.tcs.api.dto.ProgrammeDTO;
 import com.transformuk.hee.tis.tcs.api.dto.SpecialtyDTO;
-import com.transformuk.hee.tis.tcs.api.enumeration.PlacementType;
 import com.transformuk.hee.tis.tcs.api.enumeration.PostGradeType;
 import com.transformuk.hee.tis.tcs.api.enumeration.PostSiteType;
 import com.transformuk.hee.tis.tcs.api.enumeration.PostSpecialtyType;
@@ -241,7 +240,7 @@ public class PostResourceIntTest {
   @Before
   public void setup() {
     MockitoAnnotations.initMocks(this);
-    PostResource postResource = new PostResource(postService,postValidator);
+    PostResource postResource = new PostResource(postService, postValidator);
     this.restPostMockMvc = MockMvcBuilders.standaloneSetup(postResource)
         .setCustomArgumentResolvers(pageableArgumentResolver)
         .setControllerAdvice(exceptionTranslator)
@@ -370,7 +369,7 @@ public class PostResourceIntTest {
 
   @Test
   @Transactional
-  public void shouldNotAllowTwoPrimarySpecialties() throws Exception{
+  public void shouldNotAllowTwoPrimarySpecialties() throws Exception {
     post = createEntity();
     postRepository.saveAndFlush(post);
     // Update the post
@@ -380,9 +379,9 @@ public class PostResourceIntTest {
     Specialty secondSpeciality = createSpecialty();
     specialtyRepository.saveAndFlush(secondSpeciality);
 
-    PostSpecialty firstPostSpecialty = createPostSpecialty(firstSpeciality,PostSpecialtyType.PRIMARY,updatedPost);
-    PostSpecialty secondPostSpecialty = createPostSpecialty(secondSpeciality,PostSpecialtyType.PRIMARY,updatedPost);
-    updatedPost.setSpecialties(Sets.newHashSet(firstPostSpecialty,secondPostSpecialty));
+    PostSpecialty firstPostSpecialty = createPostSpecialty(firstSpeciality, PostSpecialtyType.PRIMARY, updatedPost);
+    PostSpecialty secondPostSpecialty = createPostSpecialty(secondSpeciality, PostSpecialtyType.PRIMARY, updatedPost);
+    updatedPost.setSpecialties(Sets.newHashSet(firstPostSpecialty, secondPostSpecialty));
     PostDTO postDTO = postMapper.postToPostDTO(updatedPost);
 
     //when & then
@@ -399,7 +398,7 @@ public class PostResourceIntTest {
 
   @Test
   @Transactional
-  public void shouldNotAllowTwoSubSpecialties() throws Exception{
+  public void shouldNotAllowTwoSubSpecialties() throws Exception {
     post = createEntity();
     postRepository.saveAndFlush(post);
     // Update the post
@@ -409,9 +408,9 @@ public class PostResourceIntTest {
     Specialty secondSpeciality = createSpecialty();
     specialtyRepository.saveAndFlush(secondSpeciality);
 
-    PostSpecialty firstPostSpecialty = createPostSpecialty(firstSpeciality,PostSpecialtyType.SUB_SPECIALTY,updatedPost);
-    PostSpecialty secondPostSpecialty = createPostSpecialty(secondSpeciality,PostSpecialtyType.SUB_SPECIALTY,updatedPost);
-    updatedPost.setSpecialties(Sets.newHashSet(firstPostSpecialty,secondPostSpecialty));
+    PostSpecialty firstPostSpecialty = createPostSpecialty(firstSpeciality, PostSpecialtyType.SUB_SPECIALTY, updatedPost);
+    PostSpecialty secondPostSpecialty = createPostSpecialty(secondSpeciality, PostSpecialtyType.SUB_SPECIALTY, updatedPost);
+    updatedPost.setSpecialties(Sets.newHashSet(firstPostSpecialty, secondPostSpecialty));
     PostDTO postDTO = postMapper.postToPostDTO(updatedPost);
 
     //when & then
@@ -428,7 +427,7 @@ public class PostResourceIntTest {
 
   @Test
   @Transactional
-  public void shouldAllowMMultipleOtherSpecialties() throws Exception{
+  public void shouldAllowMMultipleOtherSpecialties() throws Exception {
     post = createEntity();
     post.setNationalPostNumber("number2");
     postRepository.saveAndFlush(post);
@@ -439,9 +438,9 @@ public class PostResourceIntTest {
     Specialty secondSpeciality = createSpecialty();
     specialtyRepository.saveAndFlush(secondSpeciality);
 
-    PostSpecialty firstPostSpecialty = createPostSpecialty(firstSpeciality,PostSpecialtyType.OTHER,updatedPost);
-    PostSpecialty secondPostSpecialty = createPostSpecialty(secondSpeciality,PostSpecialtyType.OTHER,updatedPost);
-    updatedPost.setSpecialties(Sets.newHashSet(firstPostSpecialty,secondPostSpecialty));
+    PostSpecialty firstPostSpecialty = createPostSpecialty(firstSpeciality, PostSpecialtyType.OTHER, updatedPost);
+    PostSpecialty secondPostSpecialty = createPostSpecialty(secondSpeciality, PostSpecialtyType.OTHER, updatedPost);
+    updatedPost.setSpecialties(Sets.newHashSet(firstPostSpecialty, secondPostSpecialty));
     PostDTO postDTO = postMapper.postToPostDTO(updatedPost);
 
     //when & then
@@ -1095,7 +1094,6 @@ public class PostResourceIntTest {
   }
 
 
-
   @Test
   @Transactional
   public void bulkPatchPostSpecialtiesShouldSucceedWhenDataIsValid() throws Exception {
@@ -1172,17 +1170,17 @@ public class PostResourceIntTest {
         .intrepidId(DEFAULT_INTREPID_ID);
 
     Placement newPlacement = new Placement();
-    newPlacement.setGradeId(12l);
-    newPlacement.setSiteId(1l);
-    newPlacement.setPlacementType(PlacementType.PARENTALLEAVE);
+    newPlacement.setGradeId(12L);
+    newPlacement.setSiteId(1L);
+    newPlacement.setPlacementTypeId(123L);
     newPlacement.setIntrepidId("12345");
     em.persist(newPlacement);
 
-    PlacementViewDTO placementViewDTO = new PlacementViewDTO();
-    placementViewDTO.setId(newPlacement.getId());
-    placementViewDTO.setIntrepidId("12345");
+    PlacementDTO placementDTO = new PlacementDTO();
+    placementDTO.setId(newPlacement.getId());
+    placementDTO.setIntrepidId("12345");
 
-    postDTO.setPlacementHistory(Sets.newHashSet(placementViewDTO));
+    postDTO.setPlacementHistory(Sets.newHashSet(placementDTO));
 
     int expectedDatabaseSizeAfterBulkUpdate = postRepository.findAll().size();
 
