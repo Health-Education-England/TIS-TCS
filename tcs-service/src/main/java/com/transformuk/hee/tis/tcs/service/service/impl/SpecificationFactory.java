@@ -72,10 +72,6 @@ public final class SpecificationFactory {
     };
   }
 
-  public static Specification cbEqual(String subTable, String attribute, Object value) {
-    return (root, query, cb) -> cb.equal(root.join(subTable, JoinType.INNER).get(attribute), value);
-  }
-
   public static Specification isBetween(String attribute, int min, int max) {
     return (root, query, cb) -> cb.between(root.get(attribute), min, max);
   }

@@ -7,6 +7,7 @@ import com.transformuk.hee.tis.tcs.api.dto.PostDTO;
 import com.transformuk.hee.tis.tcs.api.dto.PostGradeDTO;
 import com.transformuk.hee.tis.tcs.api.dto.PostSiteDTO;
 import com.transformuk.hee.tis.tcs.api.dto.PostSpecialtyDTO;
+import com.transformuk.hee.tis.tcs.api.dto.PostViewDTO;
 import com.transformuk.hee.tis.tcs.api.dto.ProgrammeDTO;
 import com.transformuk.hee.tis.tcs.api.dto.SpecialtyDTO;
 import com.transformuk.hee.tis.tcs.api.enumeration.PostGradeType;
@@ -17,6 +18,7 @@ import com.transformuk.hee.tis.tcs.service.model.Post;
 import com.transformuk.hee.tis.tcs.service.model.PostGrade;
 import com.transformuk.hee.tis.tcs.service.model.PostSite;
 import com.transformuk.hee.tis.tcs.service.model.PostSpecialty;
+import com.transformuk.hee.tis.tcs.service.model.PostView;
 import com.transformuk.hee.tis.tcs.service.model.Programme;
 import com.transformuk.hee.tis.tcs.service.model.Specialty;
 import com.transformuk.hee.tis.tcs.service.repository.PlacementRepository;
@@ -24,9 +26,11 @@ import com.transformuk.hee.tis.tcs.service.repository.PostGradeRepository;
 import com.transformuk.hee.tis.tcs.service.repository.PostRepository;
 import com.transformuk.hee.tis.tcs.service.repository.PostSiteRepository;
 import com.transformuk.hee.tis.tcs.service.repository.PostSpecialtyRepository;
+import com.transformuk.hee.tis.tcs.service.repository.PostViewRepository;
 import com.transformuk.hee.tis.tcs.service.repository.ProgrammeRepository;
 import com.transformuk.hee.tis.tcs.service.repository.SpecialtyRepository;
 import com.transformuk.hee.tis.tcs.service.service.mapper.PostMapper;
+import com.transformuk.hee.tis.tcs.service.service.mapper.PostViewMapper;
 import org.junit.Assert;
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -54,6 +58,8 @@ public class PostServiceImplTest {
   @Mock
   private PostRepository postRepositoryMock;
   @Mock
+  private PostViewRepository postViewRepositoryMock;
+  @Mock
   private PostGradeRepository postGradeRepositoryMock;
   @Mock
   private PostSiteRepository postSiteRepositoryMock;
@@ -67,11 +73,21 @@ public class PostServiceImplTest {
   private PlacementRepository placementRepositoryMock;
   @Mock
   private PostMapper postMapperMock;
+  @Mock
+  private PostViewMapper postViewMapperMock;
 
   @Mock
   private PostDTO postDTOMock1, postDTOMock2, postMappedDTOMock1, postMappedDTOMock2;
+
+  @Mock
+  private PostViewDTO postViewDTOMock1;
+
   @Mock
   private Post postMock1, postMock2, postSaveMock1, postSaveMock2;
+
+  @Mock
+  private PostView postViewMock1;
+
   @Mock
   private Pageable pageableMock;
 
@@ -144,19 +160,19 @@ public class PostServiceImplTest {
 
   @Test
   public void findAllShouldRetrieveAllInstances() {
-    List<Post> posts = Lists.newArrayList(postMock1);
-    List<PostDTO> mappedPosts = Lists.newArrayList(postDTOMock1);
-    Page<Post> page = new PageImpl<>(posts);
-    when(postRepositoryMock.findAll(pageableMock)).thenReturn(page);
-    when(postMapperMock.postToPostDTO(postMock1)).thenReturn(postDTOMock1);
+    List<PostView> posts = Lists.newArrayList(postViewMock1);
+    List<PostViewDTO> mappedPosts = Lists.newArrayList(postViewDTOMock1);
+    Page<PostView> page = new PageImpl<>(posts);
+    when(postViewRepositoryMock.findAll(pageableMock)).thenReturn(page);
+    when(postViewMapperMock.postViewToPostViewDTO(postViewMock1)).thenReturn(postViewDTOMock1);
 
-    Page<PostDTO> result = testObj.findAll(pageableMock);
+    Page<PostViewDTO> result = testObj.findAll(pageableMock);
 
     Assert.assertEquals(1, result.getTotalPages());
     Assert.assertEquals(mappedPosts, result.getContent());
 
-    verify(postRepositoryMock).findAll(pageableMock);
-    verify(postMapperMock).postToPostDTO(postMock1);
+    verify(postViewRepositoryMock).findAll(pageableMock);
+    verify(postViewMapperMock).postViewToPostViewDTO(postViewMock1);
   }
 
   @Test

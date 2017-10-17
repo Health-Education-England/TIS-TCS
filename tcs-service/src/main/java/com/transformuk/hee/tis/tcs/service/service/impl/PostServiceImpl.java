@@ -3,22 +3,22 @@ package com.transformuk.hee.tis.tcs.service.service.impl;
 import com.google.common.collect.Lists;
 import com.google.common.collect.Maps;
 import com.google.common.collect.Sets;
+import com.transformuk.hee.tis.tcs.api.dto.PlacementDTO;
 import com.transformuk.hee.tis.tcs.api.dto.PlacementViewDTO;
 import com.transformuk.hee.tis.tcs.api.dto.PostDTO;
 import com.transformuk.hee.tis.tcs.api.dto.PostGradeDTO;
 import com.transformuk.hee.tis.tcs.api.dto.PostSiteDTO;
 import com.transformuk.hee.tis.tcs.api.dto.PostSpecialtyDTO;
+import com.transformuk.hee.tis.tcs.api.dto.PostViewDTO;
 import com.transformuk.hee.tis.tcs.api.dto.ProgrammeDTO;
 import com.transformuk.hee.tis.tcs.api.dto.SpecialtyDTO;
-import com.transformuk.hee.tis.tcs.api.enumeration.PostGradeType;
-import com.transformuk.hee.tis.tcs.api.enumeration.PostSiteType;
-import com.transformuk.hee.tis.tcs.api.enumeration.PostSpecialtyType;
 import com.transformuk.hee.tis.tcs.service.model.ColumnFilter;
 import com.transformuk.hee.tis.tcs.service.model.Placement;
 import com.transformuk.hee.tis.tcs.service.model.Post;
 import com.transformuk.hee.tis.tcs.service.model.PostGrade;
 import com.transformuk.hee.tis.tcs.service.model.PostSite;
 import com.transformuk.hee.tis.tcs.service.model.PostSpecialty;
+import com.transformuk.hee.tis.tcs.service.model.PostView;
 import com.transformuk.hee.tis.tcs.service.model.Programme;
 import com.transformuk.hee.tis.tcs.service.model.Specialty;
 import com.transformuk.hee.tis.tcs.service.repository.PlacementRepository;
@@ -26,13 +26,13 @@ import com.transformuk.hee.tis.tcs.service.repository.PostGradeRepository;
 import com.transformuk.hee.tis.tcs.service.repository.PostRepository;
 import com.transformuk.hee.tis.tcs.service.repository.PostSiteRepository;
 import com.transformuk.hee.tis.tcs.service.repository.PostSpecialtyRepository;
+import com.transformuk.hee.tis.tcs.service.repository.PostViewRepository;
 import com.transformuk.hee.tis.tcs.service.repository.ProgrammeRepository;
 import com.transformuk.hee.tis.tcs.service.repository.SpecialtyRepository;
 import com.transformuk.hee.tis.tcs.service.service.PostService;
 import com.transformuk.hee.tis.tcs.service.service.mapper.DesignatedBodyMapper;
-import com.transformuk.hee.tis.tcs.service.service.mapper.PostGradeMapper;
 import com.transformuk.hee.tis.tcs.service.service.mapper.PostMapper;
-import com.transformuk.hee.tis.tcs.service.service.mapper.PostSiteMapper;
+import com.transformuk.hee.tis.tcs.service.service.mapper.PostViewMapper;
 import org.apache.commons.collections4.CollectionUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
@@ -53,7 +53,6 @@ import java.util.Objects;
 import java.util.Set;
 import java.util.stream.Collectors;
 
-import static com.transformuk.hee.tis.tcs.service.service.impl.SpecificationFactory.cbEqual;
 import static com.transformuk.hee.tis.tcs.service.service.impl.SpecificationFactory.containsLike;
 import static com.transformuk.hee.tis.tcs.service.service.impl.SpecificationFactory.in;
 
@@ -64,13 +63,12 @@ import static com.transformuk.hee.tis.tcs.service.service.impl.SpecificationFact
 @Transactional
 public class PostServiceImpl implements PostService {
 
-  private static final String SPECIALTIES = "specialties";
-  private static final String GRADES = "grades";
-  private static final String SITES = "sites";
   private static final Logger log = LoggerFactory.getLogger(PostServiceImpl.class);
 
   @Autowired
   private PostRepository postRepository;
+  @Autowired
+  private PostViewRepository postViewRepository;
   @Autowired
   private PostGradeRepository postGradeRepository;
   @Autowired
@@ -86,9 +84,7 @@ public class PostServiceImpl implements PostService {
   @Autowired
   private PostMapper postMapper;
   @Autowired
-  private PostSiteMapper postSiteMapper;
-  @Autowired
-  private PostGradeMapper postGradeMapper;
+  private PostViewMapper postViewMapper;
 
   /**
    * Save a post.
@@ -369,45 +365,39 @@ public class PostServiceImpl implements PostService {
    */
   @Override
   @Transactional(readOnly = true)
-  public Page<PostDTO> findAll(Pageable pageable) {
+  public Page<PostViewDTO> findAll(Pageable pageable) {
     log.debug("Request to get all Posts");
-    Page<Post> result = postRepository.findAll(pageable);
-    return result.map(post -> postMapper.postToPostDTO(post));
+    Page<PostView> result = postViewRepository.findAll(pageable);
+    return result.map(postView -> postViewMapper.postViewToPostViewDTO(postView));
   }
 
   @Override
   @Transactional(readOnly = true)
-  public Page<PostDTO> advancedSearch(String searchString, List<ColumnFilter> columnFilters, Pageable pageable) {
+  public Page<PostViewDTO> advancedSearch(String searchString, List<ColumnFilter> columnFilters, Pageable pageable) {
 
-    List<Specification<Post>> specs = new ArrayList<>();
+    List<Specification<PostView>> specs = new ArrayList<>();
     //add the text search criteria
     if (StringUtils.isNotEmpty(searchString)) {
       specs.add(Specifications.where(containsLike("nationalPostNumber", searchString)));
     }
     //add the column filters criteria
     if (columnFilters != null && !columnFilters.isEmpty()) {
-      columnFilters.forEach(cf -> {
-        specs.add(in(cf.getName(), cf.getValues()));
-        if (cf.getName().contains(SPECIALTIES)) {
-          specs.add(cbEqual(SPECIALTIES, "postSpecialtyType", PostSpecialtyType.PRIMARY));
-        }
-        if (cf.getName().contains(GRADES)) {
-          specs.add(cbEqual(GRADES, "postGradeType", PostGradeType.APPROVED));
-        }
-        if (cf.getName().contains(SITES)) {
-          specs.add(cbEqual(SITES, "postSiteType", PostSiteType.PRIMARY));
-        }
-      });
+      columnFilters.forEach(cf -> specs.add(in(cf.getName(), cf.getValues())));
     }
 
-    Specifications<Post> fullSpec = Specifications.where(specs.get(0));
-    //add the rest of the specs that made it in
-    for (int i = 1; i < specs.size(); i++) {
-      fullSpec = fullSpec.and(specs.get(i));
+    Page<PostView> result;
+    if (!specs.isEmpty()) {
+      Specifications<PostView> fullSpec = Specifications.where(specs.get(0));
+      //add the rest of the specs that made it in
+      for (int i = 1; i < specs.size(); i++) {
+        fullSpec = fullSpec.and(specs.get(i));
+      }
+      result = postViewRepository.findAll(fullSpec, pageable);
+    } else {
+      result = postViewRepository.findAll(pageable);
     }
-    Page<Post> result = postRepository.findAll(fullSpec, pageable);
 
-    return result.map(post -> postMapper.postToPostDTO(post));
+    return result.map(postView -> postViewMapper.postViewToPostViewDTO(postView));
   }
 
   /**
