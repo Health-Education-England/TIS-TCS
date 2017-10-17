@@ -66,9 +66,13 @@ public class PlacementMapper {
     if (placementDTO != null) {
       placement = new Placement();
       placement.setId(placementDTO.getId());
-      placement.setClinicalSupervisor(personRepository.findOne(placementDTO.getClinicalSupervisorId()));
+      if (placementDTO.getClinicalSupervisorId() != null) {
+        placement.setClinicalSupervisor(personRepository.findOne(placementDTO.getClinicalSupervisorId()));
+      }
       placement.setTrainee(personRepository.findOne(placementDTO.getTraineeId()));
-      placement.setPost(postRepository.findOne(placementDTO.getPostId()));
+      if (placementDTO.getPostId() != null) {
+        placement.setPost(postRepository.findOne(placementDTO.getPostId()));
+      }
       placement.setGradeId(placementDTO.getGradeId());
       placement.setSiteId(placementDTO.getSiteId());
       placement.setDateFrom(placementDTO.getDateFrom());
