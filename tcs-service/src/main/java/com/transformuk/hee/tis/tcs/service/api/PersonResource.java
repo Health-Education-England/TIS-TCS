@@ -3,6 +3,7 @@ package com.transformuk.hee.tis.tcs.service.api;
 import com.codahale.metrics.annotation.Timed;
 import com.google.common.collect.Lists;
 import com.transformuk.hee.tis.tcs.api.dto.PersonDTO;
+import com.transformuk.hee.tis.tcs.api.dto.PlacementDTO;
 import com.transformuk.hee.tis.tcs.api.dto.validation.Create;
 import com.transformuk.hee.tis.tcs.api.dto.validation.Update;
 import com.transformuk.hee.tis.tcs.api.enumeration.Status;
@@ -43,6 +44,7 @@ import java.net.URI;
 import java.net.URISyntaxException;
 import java.util.List;
 import java.util.Optional;
+import java.util.Set;
 import java.util.stream.Collectors;
 
 import static com.transformuk.hee.tis.tcs.service.api.util.StringUtil.sanitize;
@@ -170,6 +172,21 @@ public class PersonResource {
     log.debug("REST request to delete Person : {}", id);
     personService.delete(id);
     return ResponseEntity.ok().headers(HeaderUtil.createEntityDeletionAlert(ENTITY_NAME, id.toString())).build();
+  }
+
+  /**
+   * GET  /people/{id}/placements : get all the placements for a trainee.
+   *
+   * @param id the trainee Id
+   * @return the ResponseEntity with status 200 (OK) and the list of placements in body
+   */
+  @GetMapping("/people/{id}/placements")
+  @Timed
+  @PreAuthorize("hasPermission('tis:people::person:', 'View')")
+  public ResponseEntity<Set<PlacementDTO>> getPlacementsForTrainee(@PathVariable Long id) {
+    log.debug("REST request to get a page of Placements");
+    PersonDTO person = personService.findOne(id);
+    return ResponseUtil.wrapOrNotFound(Optional.ofNullable(person != null ? person.getPlacements() : null));
   }
 
   /**

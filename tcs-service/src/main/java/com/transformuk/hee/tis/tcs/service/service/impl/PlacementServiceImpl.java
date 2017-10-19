@@ -27,7 +27,8 @@ public class PlacementServiceImpl implements PlacementService {
 
   private final PlacementMapper placementMapper;
 
-  public PlacementServiceImpl(PlacementRepository placementRepository, PlacementMapper placementMapper) {
+  public PlacementServiceImpl(PlacementRepository placementRepository,
+                              PlacementMapper placementMapper) {
     this.placementRepository = placementRepository;
     this.placementMapper = placementMapper;
   }
@@ -56,9 +57,9 @@ public class PlacementServiceImpl implements PlacementService {
   @Override
   public List<PlacementDTO> save(List<PlacementDTO> placementDTO) {
     log.debug("Request to save Placements : {}", placementDTO);
-    List<Placement> placement = placementMapper.placementDTOsToPlacements(placementDTO);
-    placement = placementRepository.save(placement);
-    List<PlacementDTO> result = placementMapper.placementsToPlacementDTOs(placement);
+    List<Placement> placements = placementMapper.placementDTOsToPlacements(placementDTO);
+    placements = placementRepository.save(placements);
+    List<PlacementDTO> result = placementMapper.placementsToPlacementDTOs(placements);
     return result;
   }
 
@@ -87,8 +88,8 @@ public class PlacementServiceImpl implements PlacementService {
   public PlacementDTO findOne(Long id) {
     log.debug("Request to get Placement : {}", id);
     Placement placement = placementRepository.findOne(id);
-    PlacementDTO placementDTO = placementMapper.placementToPlacementDTO(placement);
-    return placementDTO;
+    PlacementDTO placementViewDTO = placementMapper.placementToPlacementDTO(placement);
+    return placementViewDTO;
   }
 
   /**

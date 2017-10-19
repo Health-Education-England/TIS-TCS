@@ -1,39 +1,62 @@
 package com.transformuk.hee.tis.tcs.api.dto;
 
-import com.transformuk.hee.tis.tcs.api.enumeration.PlacementType;
+import com.transformuk.hee.tis.tcs.api.dto.validation.Create;
+import com.transformuk.hee.tis.tcs.api.dto.validation.Update;
+import com.transformuk.hee.tis.tcs.api.enumeration.PlacementStatus;
 
+import javax.validation.constraints.DecimalMin;
+import javax.validation.constraints.NotNull;
+import javax.validation.constraints.Null;
 import java.io.Serializable;
 import java.time.LocalDate;
 import java.util.Objects;
+import java.util.Set;
 
 /**
  * A DTO for the Placement entity.
  */
 public class PlacementDTO implements Serializable {
 
+  @NotNull(groups = Update.class, message = "Id must not be null when updating a placement")
+  @DecimalMin(value = "0", groups = Update.class, message = "Id must not be negative")
+  @Null(groups = Create.class, message = "Id must be null when creating a new placement")
   private Long id;
 
   private String intrepidId;
 
-  private String status;
+  private PlacementStatus status;
 
-  private String nationalPostNumber;
+  @NotNull(message = "TraineeId is required", groups = {Update.class, Create.class})
+  private Long traineeId;
 
-  private String site;
+  @NotNull(message = "ClinicalSupervisorId is required", groups = {Update.class, Create.class})
+  private Set<Long> clinicalSupervisorIds;
 
-  private String grade;
+  @NotNull(message = "PostId is required", groups = {Update.class, Create.class})
+  private Long postId;
 
-  private String specialty;
+  @NotNull(message = "SiteId is required", groups = {Update.class, Create.class})
+  private Long siteId;
 
+  @NotNull(message = "GradeId is required", groups = {Update.class, Create.class})
+  private Long gradeId;
+
+  private Set<PlacementSpecialtyDTO> specialties;
+
+  @NotNull(message = "Date from is required", groups = {Update.class, Create.class})
   private LocalDate dateFrom;
 
+  @NotNull(message = "Date to is required", groups = {Update.class, Create.class})
   private LocalDate dateTo;
 
-  private PlacementType placementType;
+  @NotNull(message = "PlacementTypeId is required", groups = {Update.class, Create.class})
+  private Long placementTypeId;
 
   private Float placementWholeTimeEquivalent;
 
-  private Boolean slotShare;
+  private String trainingDescription;
+
+  private String localPostNumber;
 
   public Long getId() {
     return id;
@@ -41,6 +64,14 @@ public class PlacementDTO implements Serializable {
 
   public void setId(Long id) {
     this.id = id;
+  }
+
+  public PlacementStatus getStatus() {
+    return status;
+  }
+
+  public void setStatus(PlacementStatus status) {
+    this.status = status;
   }
 
   public String getIntrepidId() {
@@ -51,44 +82,60 @@ public class PlacementDTO implements Serializable {
     this.intrepidId = intrepidId;
   }
 
-  public String getStatus() {
-    return status;
+  public Set<Long> getClinicalSupervisorIds() {
+    return clinicalSupervisorIds;
   }
 
-  public void setStatus(String status) {
-    this.status = status;
+  public void setClinicalSupervisorIds(Set<Long> clinicalSupervisorIds) {
+    this.clinicalSupervisorIds = clinicalSupervisorIds;
   }
 
-  public String getNationalPostNumber() {
-    return nationalPostNumber;
+  public Long getTraineeId() {
+    return traineeId;
   }
 
-  public void setNationalPostNumber(String nationalPostNumber) {
-    this.nationalPostNumber = nationalPostNumber;
+  public void setTraineeId(Long traineeId) {
+    this.traineeId = traineeId;
   }
 
-  public String getSite() {
-    return site;
+  public Long getPostId() {
+    return postId;
   }
 
-  public void setSite(String site) {
-    this.site = site;
+  public void setPostId(Long postId) {
+    this.postId = postId;
   }
 
-  public String getGrade() {
-    return grade;
+  public Long getSiteId() {
+    return siteId;
   }
 
-  public void setGrade(String grade) {
-    this.grade = grade;
+  public void setSiteId(Long siteId) {
+    this.siteId = siteId;
   }
 
-  public String getSpecialty() {
-    return specialty;
+  public Long getGradeId() {
+    return gradeId;
   }
 
-  public void setSpecialty(String specialty) {
-    this.specialty = specialty;
+  public void setGradeId(Long gradeId) {
+    this.gradeId = gradeId;
+  }
+
+  public String getTrainingDescription() {
+    return trainingDescription;
+  }
+
+  public void setTrainingDescription(String trainingDescription) {
+    this.trainingDescription = trainingDescription;
+  }
+
+  public String getLocalPostNumber() {
+    return localPostNumber;
+  }
+
+  public void setLocalPostNumber(String localPostNumber) {
+    this.localPostNumber = localPostNumber;
   }
 
   public LocalDate getDateFrom() {
@@ -107,12 +154,12 @@ public class PlacementDTO implements Serializable {
     this.dateTo = dateTo;
   }
 
-  public PlacementType getPlacementType() {
-    return placementType;
+  public Long getPlacementTypeId() {
+    return placementTypeId;
   }
 
-  public void setPlacementType(PlacementType placementType) {
-    this.placementType = placementType;
+  public void setPlacementTypeId(Long placementTypeId) {
+    this.placementTypeId = placementTypeId;
   }
 
   public Float getPlacementWholeTimeEquivalent() {
@@ -123,12 +170,12 @@ public class PlacementDTO implements Serializable {
     this.placementWholeTimeEquivalent = placementWholeTimeEquivalent;
   }
 
-  public Boolean getSlotShare() {
-    return slotShare;
+  public Set<PlacementSpecialtyDTO> getSpecialties() {
+    return specialties;
   }
 
-  public void setSlotShare(Boolean slotShare) {
-    this.slotShare = slotShare;
+  public void setSpecialties(Set<PlacementSpecialtyDTO> specialties) {
+    this.specialties = specialties;
   }
 
   @Override
@@ -158,16 +205,19 @@ public class PlacementDTO implements Serializable {
   public String toString() {
     return "PlacementDTO{" +
         "id=" + id +
-        ", status='" + status + "'" +
-        ", nationalPostNumber='" + nationalPostNumber + "'" +
-        ", site='" + site + "'" +
-        ", grade='" + grade + "'" +
-        ", specialty='" + specialty + "'" +
+        ", intrepidId='" + intrepidId + "'" +
+        ", traineeId='" + traineeId + "'" +
+        ", clinicalSupervisorIds='" + clinicalSupervisorIds + "'" +
+        ", postId='" + postId + "'" +
+        ", siteId='" + siteId + "'" +
+        ", gradeId='" + gradeId + "'" +
+        ", specialties='" + specialties + "'" +
         ", dateFrom='" + dateFrom + "'" +
         ", dateTo='" + dateTo + "'" +
-        ", placementType='" + placementType + "'" +
+        ", placementTypeId='" + placementTypeId + "'" +
         ", placementWholeTimeEquivalent='" + placementWholeTimeEquivalent + "'" +
-        ", slotShare='" + slotShare + "'" +
+        ", localPostNumber='" + localPostNumber + "'" +
+        ", trainingDescription='" + trainingDescription + "'" +
         '}';
   }
 }

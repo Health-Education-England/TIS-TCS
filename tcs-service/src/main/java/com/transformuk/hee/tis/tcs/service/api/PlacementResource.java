@@ -2,11 +2,14 @@ package com.transformuk.hee.tis.tcs.service.api;
 
 import com.codahale.metrics.annotation.Timed;
 import com.transformuk.hee.tis.tcs.api.dto.PlacementDTO;
+import com.transformuk.hee.tis.tcs.api.dto.validation.Create;
+import com.transformuk.hee.tis.tcs.api.dto.validation.Update;
 import com.transformuk.hee.tis.tcs.service.api.util.HeaderUtil;
 import com.transformuk.hee.tis.tcs.service.api.util.PaginationUtil;
+import com.transformuk.hee.tis.tcs.service.api.validation.PlacementValidator;
+import com.transformuk.hee.tis.tcs.service.api.validation.ValidationException;
 import com.transformuk.hee.tis.tcs.service.service.PlacementService;
 import io.github.jhipster.web.util.ResponseUtil;
-import io.jsonwebtoken.lang.Collections;
 import io.swagger.annotations.ApiParam;
 import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
@@ -17,8 +20,10 @@ import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
+import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PatchMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.PutMapping;
@@ -26,7 +31,6 @@ import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
-import javax.validation.Valid;
 import java.net.URI;
 import java.net.URISyntaxException;
 import java.util.List;
@@ -43,9 +47,11 @@ public class PlacementResource {
   private static final String ENTITY_NAME = "placement";
   private final Logger log = LoggerFactory.getLogger(PlacementResource.class);
   private final PlacementService placementService;
+  private final PlacementValidator placementValidator;
 
-  public PlacementResource(PlacementService placementService) {
+  public PlacementResource(PlacementService placementService, PlacementValidator placementValidator) {
     this.placementService = placementService;
+    this.placementValidator = placementValidator;
   }
 
   /**
@@ -58,8 +64,9 @@ public class PlacementResource {
   @PostMapping("/placements")
   @Timed
   @PreAuthorize("hasAuthority('tcs:add:modify:entities')")
-  public ResponseEntity<PlacementDTO> createPlacement(@RequestBody PlacementDTO placementDTO) throws URISyntaxException {
+  public ResponseEntity<PlacementDTO> createPlacement(@RequestBody @Validated(Create.class) PlacementDTO placementDTO) throws URISyntaxException, ValidationException {
     log.debug("REST request to save Placement : {}", placementDTO);
+    placementValidator.validate(placementDTO);
     if (placementDTO.getId() != null) {
       return ResponseEntity.badRequest().headers(HeaderUtil.createFailureAlert(ENTITY_NAME, "idexists", "A new placement cannot already have an ID")).body(null);
     }
@@ -81,8 +88,9 @@ public class PlacementResource {
   @PutMapping("/placements")
   @Timed
   @PreAuthorize("hasAuthority('tcs:add:modify:entities')")
-  public ResponseEntity<PlacementDTO> updatePlacement(@RequestBody PlacementDTO placementDTO) throws URISyntaxException {
+  public ResponseEntity<PlacementDTO> updatePlacement(@RequestBody @Validated(Update.class) PlacementDTO placementDTO) throws URISyntaxException, ValidationException {
     log.debug("REST request to update Placement : {}", placementDTO);
+    placementValidator.validate(placementDTO);
     if (placementDTO.getId() == null) {
       return createPlacement(placementDTO);
     }
@@ -119,8 +127,8 @@ public class PlacementResource {
   @PreAuthorize("hasAuthority('tcs:view:entities')")
   public ResponseEntity<PlacementDTO> getPlacement(@PathVariable Long id) {
     log.debug("REST request to get Placement : {}", id);
-    PlacementDTO placementDTO = placementService.findOne(id);
-    return ResponseUtil.wrapOrNotFound(Optional.ofNullable(placementDTO));
+    PlacementDTO placementViewDTO = placementService.findOne(id);
+    return ResponseUtil.wrapOrNotFound(Optional.ofNullable(placementViewDTO));
   }
 
   /**
@@ -140,63 +148,21 @@ public class PlacementResource {
 
 
   /**
-   * POST  /bulk-placements : Bulk create a new Placements.
+   * PATCH  /placements : Bulk patch Placements.
    *
    * @param placementDTOS List of the placementDTOS to create
-   * @return the ResponseEntity with status 200 (Created) and with body the new placementDTOS, or with status 400 (Bad Request) if the Placement has already an ID
+   * @return the ResponseEntity with status 200 (OK) and with body the new placementDTOS
    * @throws URISyntaxException if the Location URI syntax is incorrect
    */
-  @PostMapping("/bulk-placements")
+  @PatchMapping("/placements")
   @Timed
   @PreAuthorize("hasAuthority('tcs:add:modify:entities')")
-  public ResponseEntity<List<PlacementDTO>> bulkCreatePlacements(@Valid @RequestBody List<PlacementDTO> placementDTOS) throws URISyntaxException {
+  public ResponseEntity<List<PlacementDTO>> patchPlacements(@RequestBody List<PlacementDTO> placementDTOS) throws URISyntaxException {
     log.debug("REST request to bulk save Placement : {}", placementDTOS);
-    if (!Collections.isEmpty(placementDTOS)) {
-      List<Long> entityIds = placementDTOS.stream()
-          .filter(p -> p.getId() != null)
-          .map(p -> p.getId())
-          .collect(Collectors.toList());
-      if (!Collections.isEmpty(entityIds)) {
-        return ResponseEntity.badRequest().headers(HeaderUtil.createFailureAlert(StringUtils.join(entityIds, ","), "ids.exist", "A new Placement cannot already have an ID")).body(null);
-      }
-    }
     List<PlacementDTO> result = placementService.save(placementDTOS);
-    List<Long> ids = result.stream().map(r -> r.getId()).collect(Collectors.toList());
-    return ResponseEntity.ok()
-        .headers(HeaderUtil.createEntityCreationAlert(ENTITY_NAME, StringUtils.join(ids, ",")))
-        .body(result);
-  }
-
-  /**
-   * PUT  /bulk-placements : Updates an existing Placements.
-   *
-   * @param placementDTOS List of the placementDTOS to update
-   * @return the ResponseEntity with status 200 (OK) and with body the updated placementDTOS,
-   * or with status 400 (Bad Request) if the placementDTOS is not valid,
-   * or with status 500 (Internal Server Error) if the placementDTOS couldnt be updated
-   * @throws URISyntaxException if the Location URI syntax is incorrect
-   */
-  @PutMapping("/bulk-placements")
-  @Timed
-  @PreAuthorize("hasAuthority('tcs:add:modify:entities')")
-  public ResponseEntity<List<PlacementDTO>> bulkUpdatePlacements(@Valid @RequestBody List<PlacementDTO> placementDTOS) throws URISyntaxException {
-    log.debug("REST request to bulk update Placement : {}", placementDTOS);
-    if (Collections.isEmpty(placementDTOS)) {
-      return ResponseEntity.badRequest().headers(HeaderUtil.createFailureAlert(ENTITY_NAME, "request.body.empty",
-          "The request body for this end point cannot be empty")).body(null);
-    } else if (!Collections.isEmpty(placementDTOS)) {
-      List<PlacementDTO> entitiesWithNoId = placementDTOS.stream().filter(p -> p.getId() == null).collect(Collectors.toList());
-      if (!Collections.isEmpty(entitiesWithNoId)) {
-        return ResponseEntity.badRequest().headers(HeaderUtil.createFailureAlert(StringUtils.join(entitiesWithNoId, ","),
-            "bulk.update.failed.noId", "Some DTOs you've provided have no Id, cannot update entities that dont exist")).body(entitiesWithNoId);
-      }
-    }
-
-    List<PlacementDTO> results = placementService.save(placementDTOS);
-    List<Long> ids = results.stream().map(r -> r.getId()).collect(Collectors.toList());
+    List<Long> ids = result.stream().map(PlacementDTO::getId).collect(Collectors.toList());
     return ResponseEntity.ok()
         .headers(HeaderUtil.createEntityUpdateAlert(ENTITY_NAME, StringUtils.join(ids, ",")))
-        .body(results);
+        .body(result);
   }
-
 }
