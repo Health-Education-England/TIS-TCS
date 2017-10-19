@@ -15,6 +15,14 @@ public class PostViewDTO implements Serializable {
 
   private Long id;
 
+  private Long currentTraineeId;
+
+  private String currentTraineeGmcNumber;
+
+  private String currentTraineeSurname;
+
+  private String currentTraineeForenames;
+
   private String nationalPostNumber;
 
   private String primarySiteId;
@@ -41,6 +49,38 @@ public class PostViewDTO implements Serializable {
 
   public void setId(Long id) {
     this.id = id;
+  }
+
+  public Long getCurrentTraineeId() {
+    return currentTraineeId;
+  }
+
+  public void setCurrentTraineeId(Long currentTraineeId) {
+    this.currentTraineeId = currentTraineeId;
+  }
+
+  public String getCurrentTraineeGmcNumber() {
+    return currentTraineeGmcNumber;
+  }
+
+  public void setCurrentTraineeGmcNumber(String currentTraineeGmcNumber) {
+    this.currentTraineeGmcNumber = currentTraineeGmcNumber;
+  }
+
+  public String getCurrentTraineeSurname() {
+    return currentTraineeSurname;
+  }
+
+  public void setCurrentTraineeSurname(String currentTraineeSurname) {
+    this.currentTraineeSurname = currentTraineeSurname;
+  }
+
+  public String getCurrentTraineeForenames() {
+    return currentTraineeForenames;
+  }
+
+  public void setCurrentTraineeForenames(String currentTraineeForenames) {
+    this.currentTraineeForenames = currentTraineeForenames;
   }
 
   public String getNationalPostNumber() {
@@ -115,6 +155,14 @@ public class PostViewDTO implements Serializable {
     PostViewDTO that = (PostViewDTO) o;
 
     if (!id.equals(that.id)) return false;
+    if (currentTraineeId != null ? !currentTraineeId.equals(that.currentTraineeId) : that.currentTraineeId != null)
+      return false;
+    if (currentTraineeGmcNumber != null ? !currentTraineeGmcNumber.equals(that.currentTraineeGmcNumber) : that.currentTraineeGmcNumber != null)
+      return false;
+    if (currentTraineeSurname != null ? !currentTraineeSurname.equals(that.currentTraineeSurname) : that.currentTraineeSurname != null)
+      return false;
+    if (currentTraineeForenames != null ? !currentTraineeForenames.equals(that.currentTraineeForenames) : that.currentTraineeForenames != null)
+      return false;
     if (nationalPostNumber != null ? !nationalPostNumber.equals(that.nationalPostNumber) : that.nationalPostNumber != null)
       return false;
     if (primarySiteId != null ? !primarySiteId.equals(that.primarySiteId) : that.primarySiteId != null) return false;
@@ -131,6 +179,10 @@ public class PostViewDTO implements Serializable {
   @Override
   public int hashCode() {
     int result = id.hashCode();
+    result = 31 * result + (currentTraineeId != null ? currentTraineeId.hashCode() : 0);
+    result = 31 * result + (currentTraineeGmcNumber != null ? currentTraineeGmcNumber.hashCode() : 0);
+    result = 31 * result + (currentTraineeSurname != null ? currentTraineeSurname.hashCode() : 0);
+    result = 31 * result + (currentTraineeForenames != null ? currentTraineeForenames.hashCode() : 0);
     result = 31 * result + (nationalPostNumber != null ? nationalPostNumber.hashCode() : 0);
     result = 31 * result + (primarySiteId != null ? primarySiteId.hashCode() : 0);
     result = 31 * result + (approvedGradeId != null ? approvedGradeId.hashCode() : 0);
@@ -146,6 +198,10 @@ public class PostViewDTO implements Serializable {
   public String toString() {
     return "PostViewDTO{" +
         "id=" + id +
+        ", currentTraineeId=" + currentTraineeId +
+        ", currentTraineeGmcNumber='" + currentTraineeGmcNumber + '\'' +
+        ", currentTraineeSurname='" + currentTraineeSurname + '\'' +
+        ", currentTraineeForenames='" + currentTraineeForenames + '\'' +
         ", nationalPostNumber='" + nationalPostNumber + '\'' +
         ", primarySiteId='" + primarySiteId + '\'' +
         ", approvedGradeId='" + approvedGradeId + '\'' +
