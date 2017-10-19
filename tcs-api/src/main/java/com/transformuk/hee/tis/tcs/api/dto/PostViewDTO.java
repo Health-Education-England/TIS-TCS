@@ -39,6 +39,8 @@ public class PostViewDTO implements Serializable {
 
   private String managingLocalOffice;
 
+  private String intrepidId;
+
   public static long getSerialVersionUID() {
     return serialVersionUID;
   }
@@ -147,6 +149,14 @@ public class PostViewDTO implements Serializable {
     this.managingLocalOffice = managingLocalOffice;
   }
 
+  public String getIntrepidId() {
+    return intrepidId;
+  }
+
+  public void setIntrepidId(String intrepidId) {
+    this.intrepidId = intrepidId;
+  }
+
   @Override
   public boolean equals(Object o) {
     if (this == o) return true;
@@ -171,6 +181,7 @@ public class PostViewDTO implements Serializable {
     if (primarySpecialtyId != null ? !primarySpecialtyId.equals(that.primarySpecialtyId) : that.primarySpecialtyId != null)
       return false;
     if (programmeName != null ? !programmeName.equals(that.programmeName) : that.programmeName != null) return false;
+    if (intrepidId != null ? !intrepidId.equals(that.intrepidId) : that.intrepidId != null) return false;
     if (status != that.status) return false;
     if (fundingType != that.fundingType) return false;
     return managingLocalOffice != null ? managingLocalOffice.equals(that.managingLocalOffice) : that.managingLocalOffice == null;
@@ -191,6 +202,7 @@ public class PostViewDTO implements Serializable {
     result = 31 * result + status.hashCode();
     result = 31 * result + (fundingType != null ? fundingType.hashCode() : 0);
     result = 31 * result + (managingLocalOffice != null ? managingLocalOffice.hashCode() : 0);
+    result = 31 * result + (intrepidId != null ? intrepidId.hashCode() : 0);
     return result;
   }
 
@@ -210,6 +222,7 @@ public class PostViewDTO implements Serializable {
         ", status=" + status +
         ", fundingType=" + fundingType +
         ", managingLocalOffice='" + managingLocalOffice + '\'' +
+        ", intrepidId='" + intrepidId + '\'' +
         '}';
   }
 }
