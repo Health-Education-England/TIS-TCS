@@ -60,7 +60,7 @@ public class SpecialtyGroupDTO implements Serializable {
     this.intrepidId = intrepidId;
   }
 
-  public Set<SpecialtyDTO> getSpecialty() {
+  public Set<SpecialtyDTO> getSpecialties() {
     return groupSpecialties;
   }
 

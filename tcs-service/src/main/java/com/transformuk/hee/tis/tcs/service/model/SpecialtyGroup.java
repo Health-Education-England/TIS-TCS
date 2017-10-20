@@ -1,6 +1,7 @@
 package com.transformuk.hee.tis.tcs.service.model;
 
 
+import javax.persistence.CascadeType;
 import javax.persistence.Entity;
 import javax.persistence.GeneratedValue;
 import javax.persistence.GenerationType;
@@ -32,6 +33,7 @@ public class SpecialtyGroup implements Serializable {
   private String name;
 
   @OneToMany(mappedBy = "specialtyGroup")
+  //, cascade = CascadeType.ALL)
 
   //@JoinTable(name = "Specialty")
   //joinColumns = @JoinColumn(name = "specialtyGroupId", referencedColumnName = "id"))

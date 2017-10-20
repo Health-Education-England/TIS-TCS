@@ -10,6 +10,7 @@ import com.transformuk.hee.tis.tcs.service.repository.SpecialtyRepository;
 import com.transformuk.hee.tis.tcs.service.service.SpecialtyGroupService;
 import com.transformuk.hee.tis.tcs.service.service.mapper.SpecialtyGroupMapper;
 import com.transformuk.hee.tis.tcs.service.service.mapper.SpecialtyMapper;
+import org.assertj.core.util.Sets;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -21,13 +22,17 @@ import org.springframework.http.MediaType;
 import org.springframework.http.converter.json.MappingJackson2HttpMessageConverter;
 import org.springframework.test.context.junit4.SpringRunner;
 import org.springframework.test.web.servlet.MockMvc;
+import org.springframework.test.web.servlet.ResultActions;
 import org.springframework.test.web.servlet.setup.MockMvcBuilders;
 import org.springframework.transaction.annotation.Transactional;
 
 import javax.persistence.EntityManager;
+import java.util.HashSet;
 import java.util.List;
+import java.util.Set;
 
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.hamcrest.Matchers.equalTo;
 import static org.hamcrest.Matchers.hasItem;
 import static org.hamcrest.Matchers.contains;
 import static org.hamcrest.Matchers.not;
@@ -107,6 +112,12 @@ public class SpecialtyGroupResourceIntTest {
     return specialty;
   }
 
+  public Specialty createOrphanSpecialty() {
+    Specialty specialty = new Specialty()
+        .name(DEFAULT_NAME);
+          return specialty;
+  }
+
   @Before
   public void setup() {
     MockitoAnnotations.initMocks(this);
@@ -175,6 +186,145 @@ public class SpecialtyGroupResourceIntTest {
         .andExpect(jsonPath("$.[*].id").value(hasItem(specialtyGroup.getId().intValue())))
         .andExpect(jsonPath("$.[*].name").value(hasItem(DEFAULT_NAME.toString())));
   }
+
+
+  @Test
+  @Transactional
+  public void checkSpecialtyGroupsSpecialtiesRelationship() throws Exception {
+    // Create a set of Specialties and add to a Specialty Group
+    specialtyGroup = specialtyGroupRepository.saveAndFlush(specialtyGroup);
+
+    specialty.setName("specialty1");
+    specialty.setSpecialtyGroup(specialtyGroup);
+    specialty = specialtyRepository.saveAndFlush(specialty);
+
+    Specialty specialty2 = createSpecialty();
+    specialty2.setName("specialty2");
+    specialty2.setSpecialtyGroup(specialtyGroup);
+    specialty2 = specialtyRepository.saveAndFlush(specialty2);
+
+    Set<Specialty> specialtiesSet = Sets.newLinkedHashSet(specialty, specialty2);
+    specialtyGroup.setSpecialties(specialtiesSet);
+
+    // Get the group and inspect the result
+    restSpecialtyGroupMockMvc.perform(get("/api/specialty-groups/"))
+        .andExpect(status().isOk())
+        .andExpect(content().contentType(MediaType.APPLICATION_JSON_UTF8_VALUE))
+        .andExpect(jsonPath("$.[*].specialties.[*].name").value(hasItem("specialty1")))
+        .andExpect(jsonPath("$.[*].specialties.[*].name").value(hasItem("specialty2")))
+        .andExpect(jsonPath("$.[*].name").value((hasItem(DEFAULT_NAME))));
+  }
+
+  @Test
+  @Transactional
+  public void addSpecialtyToSpecialtyGroupShouldSave() throws Exception {
+    // given
+    // Initialise the database
+    // Add a specialty group
+    SpecialtyGroup addSpecialtySpecialtyGroup = createEntity();
+    addSpecialtySpecialtyGroup.setName("addSpecialtySpecialtyGroup");
+    specialtyGroupRepository.saveAndFlush(addSpecialtySpecialtyGroup);
+
+    // add a specialty
+    Specialty addSpecialty1 = createSpecialty();
+    addSpecialty1.setName("addSpecialty1");
+    addSpecialty1.setSpecialtyGroup(addSpecialtySpecialtyGroup);
+    specialtyRepository.saveAndFlush(addSpecialty1);
+
+    // add another specialty
+    Specialty addSpecialty2 = createSpecialty();
+    addSpecialty2.setName("addSpecialty2");
+    addSpecialty2.setSpecialtyGroup(addSpecialtySpecialtyGroup);
+    specialtyRepository.saveAndFlush(addSpecialty2);
+
+    // add a third specialty but don't add to specialty group
+    Specialty addedSpecialty = createOrphanSpecialty();
+    addedSpecialty.setName("addedSpecialty");
+    //addedSpecialty.setSpecialtyGroup(anotherSpecialtyGroup);
+    specialtyRepository.save(addedSpecialty);
+
+    // add the specialties to a set and add to the specialty group
+    Set<Specialty> specialtySet = Sets.newLinkedHashSet(addSpecialty1, addSpecialty2);
+    addSpecialtySpecialtyGroup.setSpecialties(specialtySet);
+    specialtyGroupRepository.saveAndFlush(addSpecialtySpecialtyGroup);
+
+    // check entities have been correctly added to DB
+    Long specialtyGroupId = addSpecialtySpecialtyGroup.getId();
+    String url = "/api/specialty-groups/" + specialtyGroupId.toString();
+    restSpecialtyGroupMockMvc.perform(get(url))
+        //.andExpect(jsonPath("$.[*]").value(hasItem("chicken")))
+        .andExpect(jsonPath("$.name").value(equalTo("addSpecialtySpecialtyGroup")))
+        .andExpect(jsonPath("$.specialties.[*].name").value(hasItem("addSpecialty1")))
+        .andExpect(jsonPath("$.specialties.[*].name").value(hasItem("addSpecialty2")));
+
+    // now add specialty to the specialty group and save the specialty group
+
+    addSpecialtySpecialtyGroup.addSpecialty(addedSpecialty);
+    SpecialtyGroupDTO addSpecialtySpecialtyGroupDTO = specialtyGroupMapper.specialtyGroupToSpecialtyGroupDTO(addSpecialtySpecialtyGroup);
+    //specialtyGroupRepository.saveAndFlush(addSpecialtySpecialtyGroup);
+    restSpecialtyGroupMockMvc.perform(put("/api/specialty-groups/")
+        .contentType(TestUtil.APPLICATION_JSON_UTF8)
+        .content(TestUtil.convertObjectToJsonBytes(addSpecialtySpecialtyGroupDTO)))
+        .andExpect(status().isOk());
+
+    // verify that the DB has the updated Specialty Group
+    SpecialtyGroup testGroup = specialtyGroupRepository.findOne(specialtyGroupId);
+    assertThat(testGroup.getSpecialties().contains(addedSpecialty));
+    assertThat(testGroup.getSpecialties().contains(addSpecialty1));
+    assertThat(testGroup.getSpecialties().contains(addSpecialty2));
+  }
+
+  @Test
+  @Transactional
+  public void removeSpecialtyFromSpecialtyGroupShouldSave() throws Exception {
+    // given
+    // Initialise the database
+    // Add a specialty group
+    SpecialtyGroup removeSpecialtySpecialtyGroup = createEntity();
+    removeSpecialtySpecialtyGroup.setName("removeSpecialtySpecialtyGroup");
+    specialtyGroupRepository.saveAndFlush(removeSpecialtySpecialtyGroup);
+
+    // add a specialty
+    Specialty addSpecialty1 = createSpecialty();
+    addSpecialty1.setName("addSpecialty1");
+    addSpecialty1.setSpecialtyGroup(removeSpecialtySpecialtyGroup);
+    specialtyRepository.saveAndFlush(addSpecialty1);
+
+    // add another specialty
+    Specialty addSpecialty2 = createSpecialty();
+    addSpecialty2.setName("addSpecialty2");
+    addSpecialty2.setSpecialtyGroup(removeSpecialtySpecialtyGroup);
+    specialtyRepository.saveAndFlush(addSpecialty2);
+
+    // add the specialties to a set and add to the specialty group
+    Set<Specialty> specialtySet = Sets.newLinkedHashSet(addSpecialty1, addSpecialty2);
+    removeSpecialtySpecialtyGroup.setSpecialties(specialtySet);
+    specialtyGroupRepository.saveAndFlush(removeSpecialtySpecialtyGroup);
+
+    // check entities have been correctly added to DB
+    Long specialtyGroupId = removeSpecialtySpecialtyGroup.getId();
+    String url = "/api/specialty-groups/" + specialtyGroupId.toString();
+    restSpecialtyGroupMockMvc.perform(get(url))
+        //.andExpect(jsonPath("$.[*]").value(hasItem("chicken")))
+        .andExpect(jsonPath("$.name").value(equalTo("removeSpecialtySpecialtyGroup")))
+        .andExpect(jsonPath("$.specialties.[*].name").value(hasItem("addSpecialty1")))
+        .andExpect(jsonPath("$.specialties.[*].name").value(hasItem("addSpecialty2")));
+
+    // remove a specialty from specialty group
+    removeSpecialtySpecialtyGroup.removeSpecialty(addSpecialty2);
+    SpecialtyGroupDTO removeSpecialtyGroupDTO = specialtyGroupMapper.specialtyGroupToSpecialtyGroupDTO(removeSpecialtySpecialtyGroup);
+    restSpecialtyGroupMockMvc.perform(put("/api/specialty-groups/")
+        .contentType(TestUtil.APPLICATION_JSON_UTF8)
+        .content(TestUtil.convertObjectToJsonBytes(removeSpecialtyGroupDTO)))
+        .andExpect(status().isOk());
+
+    // verify it has been removed in the database
+    SpecialtyGroup testGroup = specialtyGroupRepository.findOne(specialtyGroupId);
+    assertThat(testGroup.getSpecialties().contains(addSpecialty1));
+    assertThat(testGroup.getSpecialties().contains(not(addSpecialty2)));
+
+  }
+
 
   @Test
   @Transactional
