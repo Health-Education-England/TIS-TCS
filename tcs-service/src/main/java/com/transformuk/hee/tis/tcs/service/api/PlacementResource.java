@@ -10,6 +10,7 @@ import com.transformuk.hee.tis.tcs.service.api.validation.PlacementValidator;
 import com.transformuk.hee.tis.tcs.service.api.validation.ValidationException;
 import com.transformuk.hee.tis.tcs.service.service.PlacementService;
 import io.github.jhipster.web.util.ResponseUtil;
+import io.jsonwebtoken.lang.Collections;
 import io.swagger.annotations.ApiParam;
 import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
@@ -45,6 +46,10 @@ import java.util.stream.Collectors;
 public class PlacementResource {
 
   private static final String ENTITY_NAME = "placement";
+  private static final String REQUEST_BODY_EMPTY = "request.body.empty";
+  private static final String REQUEST_BODY_CANNOT_BE_EMPTY = "The request body for this end point cannot be empty";
+  private static final String BULK_UPDATE_FAILED_NOID = "bulk.update.failed.noId";
+  private static final String NOID_ERR_MSG = "Some DTOs you've provided have no Id, cannot update entities that don't exist";
   private final Logger log = LoggerFactory.getLogger(PlacementResource.class);
   private final PlacementService placementService;
   private final PlacementValidator placementValidator;
@@ -164,5 +169,83 @@ public class PlacementResource {
     return ResponseEntity.ok()
         .headers(HeaderUtil.createEntityUpdateAlert(ENTITY_NAME, StringUtils.join(ids, ",")))
         .body(result);
+  }
+
+  /**
+   * PATCH  /placements/specialties : Patches a Placement to link it to specialties
+   *
+   * @param placementRelationshipsDto List of the PlacementRelationshipsDTO to update their specialties
+   * @return the ResponseEntity with status 200 (OK) and with body the updated placementDTOS,
+   * or with status 400 (Bad Request) if the placementRelationshipsDto is not valid,
+   * or with status 500 (Internal Server Error) if the placementRelationshipsDto couldn't be updated
+   * @throws URISyntaxException if the Location URI syntax is incorrect
+   */
+  @PatchMapping("/placements/specialties")
+  @Timed
+  @PreAuthorize("hasAuthority('tcs:add:modify:entities')")
+  public ResponseEntity<List<PlacementDTO>> patchPlacementSpecialties(@RequestBody List<PlacementDTO> placementRelationshipsDto) {
+    log.debug("REST request to bulk link specialties to Placements : {}", placementRelationshipsDto);
+    if (Collections.isEmpty(placementRelationshipsDto)) {
+      return ResponseEntity.badRequest().headers(HeaderUtil.createFailureAlert(ENTITY_NAME, REQUEST_BODY_EMPTY,
+          REQUEST_BODY_CANNOT_BE_EMPTY)).body(null);
+    } else {
+      List<PlacementDTO> entitiesWithNoId = placementRelationshipsDto.stream()
+          .filter(p -> p.getIntrepidId() == null)
+          .map(placement -> {
+            PlacementDTO placementDTO = new PlacementDTO();
+            placementDTO.setIntrepidId(placement.getIntrepidId());
+            return placementDTO;
+          })
+          .collect(Collectors.toList());
+      if (!Collections.isEmpty(entitiesWithNoId)) {
+        return ResponseEntity.badRequest().headers(HeaderUtil.createFailureAlert(StringUtils.join(entitiesWithNoId, ","),
+            BULK_UPDATE_FAILED_NOID, NOID_ERR_MSG)).body(entitiesWithNoId);
+      }
+    }
+
+    List<PlacementDTO> results = placementService.patchPlacementSpecialties(placementRelationshipsDto);
+    List<Long> ids = results.stream().map(PlacementDTO::getId).collect(Collectors.toList());
+    return ResponseEntity.ok()
+        .headers(HeaderUtil.createEntityUpdateAlert(ENTITY_NAME, StringUtils.join(ids, ",")))
+        .body(results);
+  }
+
+  /**
+   * PATCH  /placements/clinical-supervisors : Patches a Placement to link it to Clinical supervisors
+   *
+   * @param placementRelationshipsDto List of the PlacementRelationshipsDTO to update their Clinical supervisors
+   * @return the ResponseEntity with status 200 (OK) and with body the updated placementDTOS,
+   * or with status 400 (Bad Request) if the placementRelationshipsDto is not valid,
+   * or with status 500 (Internal Server Error) if the placementRelationshipsDto couldn't be updated
+   * @throws URISyntaxException if the Location URI syntax is incorrect
+   */
+  @PatchMapping("/placements/clinical-supervisors")
+  @Timed
+  @PreAuthorize("hasAuthority('tcs:add:modify:entities')")
+  public ResponseEntity<List<PlacementDTO>> patchPlacementClinicalSupervisors(@RequestBody List<PlacementDTO> placementRelationshipsDto) {
+    log.debug("REST request to bulk link Clinical supervisors to Placements : {}", placementRelationshipsDto);
+    if (Collections.isEmpty(placementRelationshipsDto)) {
+      return ResponseEntity.badRequest().headers(HeaderUtil.createFailureAlert(ENTITY_NAME, REQUEST_BODY_EMPTY,
+          REQUEST_BODY_CANNOT_BE_EMPTY)).body(null);
+    } else {
+      List<PlacementDTO> entitiesWithNoId = placementRelationshipsDto.stream()
+          .filter(p -> p.getIntrepidId() == null)
+          .map(placement -> {
+            PlacementDTO placementDTO = new PlacementDTO();
+            placementDTO.setIntrepidId(placement.getIntrepidId());
+            return placementDTO;
+          })
+          .collect(Collectors.toList());
+      if (!Collections.isEmpty(entitiesWithNoId)) {
+        return ResponseEntity.badRequest().headers(HeaderUtil.createFailureAlert(StringUtils.join(entitiesWithNoId, ","),
+            BULK_UPDATE_FAILED_NOID, NOID_ERR_MSG)).body(entitiesWithNoId);
+      }
+    }
+
+    List<PlacementDTO> results = placementService.patchPlacementClinicalSupervisors(placementRelationshipsDto);
+    List<Long> ids = results.stream().map(PlacementDTO::getId).collect(Collectors.toList());
+    return ResponseEntity.ok()
+        .headers(HeaderUtil.createEntityUpdateAlert(ENTITY_NAME, StringUtils.join(ids, ",")))
+        .body(results);
   }
 }

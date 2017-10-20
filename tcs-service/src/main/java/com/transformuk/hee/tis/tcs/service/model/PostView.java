@@ -65,6 +65,8 @@ public class PostView implements Serializable {
   @Column(name = "managingLocalOffice")
   private String managingLocalOffice;
 
+  @Column(name = "intrepidId")
+  private String intrepidId;
 
   public static long getSerialVersionUID() {
     return serialVersionUID;
@@ -174,6 +176,14 @@ public class PostView implements Serializable {
     this.managingLocalOffice = managingLocalOffice;
   }
 
+  public String getIntrepidId() {
+    return intrepidId;
+  }
+
+  public void setIntrepidId(String intrepidId) {
+    this.intrepidId = intrepidId;
+  }
+
   @Override
   public boolean equals(Object o) {
     if (this == o) return true;
@@ -200,6 +210,8 @@ public class PostView implements Serializable {
       return false;
     if (programmeName != null ? !programmeName.equals(postView.programmeName) : postView.programmeName != null)
       return false;
+    if (intrepidId != null ? !intrepidId.equals(postView.intrepidId) : postView.intrepidId != null)
+      return false;
     if (status != postView.status) return false;
     if (fundingType != postView.fundingType) return false;
     return managingLocalOffice != null ? managingLocalOffice.equals(postView.managingLocalOffice) : postView.managingLocalOffice == null;
@@ -220,6 +232,7 @@ public class PostView implements Serializable {
     result = 31 * result + status.hashCode();
     result = 31 * result + (fundingType != null ? fundingType.hashCode() : 0);
     result = 31 * result + (managingLocalOffice != null ? managingLocalOffice.hashCode() : 0);
+    result = 31 * result + (intrepidId != null ? intrepidId.hashCode() : 0);
     return result;
   }
 
@@ -239,6 +252,7 @@ public class PostView implements Serializable {
         ", status=" + status +
         ", fundingType=" + fundingType +
         ", managingLocalOffice='" + managingLocalOffice + '\'' +
+        ", intrepidId='" + intrepidId + '\'' +
         '}';
   }
 }
