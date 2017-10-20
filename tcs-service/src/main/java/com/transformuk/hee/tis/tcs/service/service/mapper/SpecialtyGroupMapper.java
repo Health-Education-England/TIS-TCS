@@ -6,7 +6,6 @@ import com.transformuk.hee.tis.tcs.service.model.Specialty;
 import com.transformuk.hee.tis.tcs.service.model.SpecialtyGroup;
 import org.mapstruct.Mapper;
 import org.springframework.stereotype.Component;
-//import org.springframework.util.CollectionUtils;
 import org.apache.commons.collections4.CollectionUtils;
 
 import java.util.ArrayList;

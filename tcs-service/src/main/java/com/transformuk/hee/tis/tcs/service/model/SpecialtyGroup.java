@@ -33,10 +33,6 @@ public class SpecialtyGroup implements Serializable {
   private String name;
 
   @OneToMany(mappedBy = "specialtyGroup")
-  //, cascade = CascadeType.ALL)
-
-  //@JoinTable(name = "Specialty")
-  //joinColumns = @JoinColumn(name = "specialtyGroupId", referencedColumnName = "id"))
 
   private Set<Specialty> specialties = new HashSet<>();
 
