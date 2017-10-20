@@ -49,4 +49,20 @@ public interface PlacementService {
    * @param id the id of the entity
    */
   void delete(Long id);
+
+  /**
+   * Patch a list of Placement specialties
+   *
+   * @param placementDTOList
+   * @return
+   */
+  List<PlacementDTO> patchPlacementSpecialties(List<PlacementDTO> placementDTOList);
+
+  /**
+   * Patch a list of Placement clinical supervisors
+   *
+   * @param placementDTOList
+   * @return
+   */
+  List<PlacementDTO> patchPlacementClinicalSupervisors(List<PlacementDTO> placementDTOList);
 }

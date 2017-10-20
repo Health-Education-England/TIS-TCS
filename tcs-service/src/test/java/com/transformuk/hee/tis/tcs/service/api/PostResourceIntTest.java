@@ -105,6 +105,7 @@ public class PostResourceIntTest {
   private static final String DEFAULT_POST_NUMBER = "DEFAULTPOST";
   private static final String MANAGING_LOCAL_OFFICE = "Health Education England Kent, Surrey and Sussex";
   private static final String MANAGING_LOCAL_OFFICE_NORTH_EAST = "Health Education England North East";
+  private static final String CURRENT_TRAINEE_SURNAME = "Smith";
 
   private static final String UPDATED_MANAGING_LOCAL_OFFICE = "Health Education England North West London";
 
@@ -526,6 +527,23 @@ public class PostResourceIntTest {
         .andExpect(jsonPath("$.[*].nationalPostNumber").value(hasItem(TEST_POST_NUMBER)))
         .andExpect(jsonPath("$.[*].status").value(hasItem(DEFAULT_STATUS.toString())))
         .andExpect(jsonPath("$.[*].managingLocalOffice").value(hasItem(MANAGING_LOCAL_OFFICE)));
+  }
+
+  @Test
+  @Transactional
+  public void shouldTextSearchOnCurrentTrainee() throws Exception {
+    PostView anotherPostView = createPostView(specialty.getId());
+    anotherPostView.setNationalPostNumber(TEST_POST_NUMBER);
+    anotherPostView.setCurrentTraineeSurname(CURRENT_TRAINEE_SURNAME);
+    postViewRepository.saveAndFlush(anotherPostView);
+
+    restPostMockMvc.perform(get("/api/posts?searchQuery=Smith"))
+        .andExpect(status().isOk())
+        .andExpect(content().contentType(MediaType.APPLICATION_JSON_UTF8_VALUE))
+        .andExpect(jsonPath("$.[*].id").value(hasItem(anotherPostView.getId().intValue())))
+        .andExpect(jsonPath("$.[*].nationalPostNumber").value(hasItem(TEST_POST_NUMBER)))
+        .andExpect(jsonPath("$.[*].status").value(hasItem(DEFAULT_STATUS.toString())))
+        .andExpect(jsonPath("$.[*].currentTraineeSurname").value(hasItem(CURRENT_TRAINEE_SURNAME)));
   }
 
   @Test

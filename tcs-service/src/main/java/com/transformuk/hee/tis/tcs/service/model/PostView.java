@@ -27,6 +27,18 @@ public class PostView implements Serializable {
   @Column(name = "id")
   private Long id;
 
+  @Column(name = "currentTraineeId")
+  private Long currentTraineeId;
+
+  @Column(name = "currentTraineeGmcNumber")
+  private String currentTraineeGmcNumber;
+
+  @Column(name = "currentTraineeSurname")
+  private String currentTraineeSurname;
+
+  @Column(name = "currentTraineeForenames")
+  private String currentTraineeForenames;
+
   @Column(name = "nationalPostNumber")
   private String nationalPostNumber;
 
@@ -53,6 +65,8 @@ public class PostView implements Serializable {
   @Column(name = "managingLocalOffice")
   private String managingLocalOffice;
 
+  @Column(name = "intrepidId")
+  private String intrepidId;
 
   public static long getSerialVersionUID() {
     return serialVersionUID;
@@ -64,6 +78,38 @@ public class PostView implements Serializable {
 
   public void setId(Long id) {
     this.id = id;
+  }
+
+  public Long getCurrentTraineeId() {
+    return currentTraineeId;
+  }
+
+  public void setCurrentTraineeId(Long currentTraineeId) {
+    this.currentTraineeId = currentTraineeId;
+  }
+
+  public String getCurrentTraineeGmcNumber() {
+    return currentTraineeGmcNumber;
+  }
+
+  public void setCurrentTraineeGmcNumber(String currentTraineeGmcNumber) {
+    this.currentTraineeGmcNumber = currentTraineeGmcNumber;
+  }
+
+  public String getCurrentTraineeSurname() {
+    return currentTraineeSurname;
+  }
+
+  public void setCurrentTraineeSurname(String currentTraineeSurname) {
+    this.currentTraineeSurname = currentTraineeSurname;
+  }
+
+  public String getCurrentTraineeForenames() {
+    return currentTraineeForenames;
+  }
+
+  public void setCurrentTraineeForenames(String currentTraineeForenames) {
+    this.currentTraineeForenames = currentTraineeForenames;
   }
 
   public String getNationalPostNumber() {
@@ -130,6 +176,14 @@ public class PostView implements Serializable {
     this.managingLocalOffice = managingLocalOffice;
   }
 
+  public String getIntrepidId() {
+    return intrepidId;
+  }
+
+  public void setIntrepidId(String intrepidId) {
+    this.intrepidId = intrepidId;
+  }
+
   @Override
   public boolean equals(Object o) {
     if (this == o) return true;
@@ -138,6 +192,14 @@ public class PostView implements Serializable {
     PostView postView = (PostView) o;
 
     if (!id.equals(postView.id)) return false;
+    if (currentTraineeId != null ? !currentTraineeId.equals(postView.currentTraineeId) : postView.currentTraineeId != null)
+      return false;
+    if (currentTraineeGmcNumber != null ? !currentTraineeGmcNumber.equals(postView.currentTraineeGmcNumber) : postView.currentTraineeGmcNumber != null)
+      return false;
+    if (currentTraineeSurname != null ? !currentTraineeSurname.equals(postView.currentTraineeSurname) : postView.currentTraineeSurname != null)
+      return false;
+    if (currentTraineeForenames != null ? !currentTraineeForenames.equals(postView.currentTraineeForenames) : postView.currentTraineeForenames != null)
+      return false;
     if (nationalPostNumber != null ? !nationalPostNumber.equals(postView.nationalPostNumber) : postView.nationalPostNumber != null)
       return false;
     if (primarySiteId != null ? !primarySiteId.equals(postView.primarySiteId) : postView.primarySiteId != null)
@@ -148,6 +210,8 @@ public class PostView implements Serializable {
       return false;
     if (programmeName != null ? !programmeName.equals(postView.programmeName) : postView.programmeName != null)
       return false;
+    if (intrepidId != null ? !intrepidId.equals(postView.intrepidId) : postView.intrepidId != null)
+      return false;
     if (status != postView.status) return false;
     if (fundingType != postView.fundingType) return false;
     return managingLocalOffice != null ? managingLocalOffice.equals(postView.managingLocalOffice) : postView.managingLocalOffice == null;
@@ -156,6 +220,10 @@ public class PostView implements Serializable {
   @Override
   public int hashCode() {
     int result = id.hashCode();
+    result = 31 * result + (currentTraineeId != null ? currentTraineeId.hashCode() : 0);
+    result = 31 * result + (currentTraineeGmcNumber != null ? currentTraineeGmcNumber.hashCode() : 0);
+    result = 31 * result + (currentTraineeSurname != null ? currentTraineeSurname.hashCode() : 0);
+    result = 31 * result + (currentTraineeForenames != null ? currentTraineeForenames.hashCode() : 0);
     result = 31 * result + (nationalPostNumber != null ? nationalPostNumber.hashCode() : 0);
     result = 31 * result + (primarySiteId != null ? primarySiteId.hashCode() : 0);
     result = 31 * result + (approvedGradeId != null ? approvedGradeId.hashCode() : 0);
@@ -164,6 +232,7 @@ public class PostView implements Serializable {
     result = 31 * result + status.hashCode();
     result = 31 * result + (fundingType != null ? fundingType.hashCode() : 0);
     result = 31 * result + (managingLocalOffice != null ? managingLocalOffice.hashCode() : 0);
+    result = 31 * result + (intrepidId != null ? intrepidId.hashCode() : 0);
     return result;
   }
 
@@ -171,6 +240,10 @@ public class PostView implements Serializable {
   public String toString() {
     return "PostView{" +
         "id=" + id +
+        ", currentTraineeId=" + currentTraineeId +
+        ", currentTraineeGmcNumber='" + currentTraineeGmcNumber + '\'' +
+        ", currentTraineeSurname='" + currentTraineeSurname + '\'' +
+        ", currentTraineeForenames='" + currentTraineeForenames + '\'' +
         ", nationalPostNumber='" + nationalPostNumber + '\'' +
         ", primarySiteId='" + primarySiteId + '\'' +
         ", approvedGradeId='" + approvedGradeId + '\'' +
@@ -179,6 +252,7 @@ public class PostView implements Serializable {
         ", status=" + status +
         ", fundingType=" + fundingType +
         ", managingLocalOffice='" + managingLocalOffice + '\'' +
+        ", intrepidId='" + intrepidId + '\'' +
         '}';
   }
 }

@@ -1,10 +1,20 @@
 package com.transformuk.hee.tis.tcs.service.service.impl;
 
+import com.google.common.collect.Lists;
+import com.google.common.collect.Maps;
 import com.transformuk.hee.tis.tcs.api.dto.PlacementDTO;
+import com.transformuk.hee.tis.tcs.api.dto.PlacementSpecialtyDTO;
+import com.transformuk.hee.tis.tcs.service.model.Person;
 import com.transformuk.hee.tis.tcs.service.model.Placement;
+import com.transformuk.hee.tis.tcs.service.model.PlacementSpecialty;
+import com.transformuk.hee.tis.tcs.service.model.PlacementSupervisor;
+import com.transformuk.hee.tis.tcs.service.model.Specialty;
+import com.transformuk.hee.tis.tcs.service.repository.PersonRepository;
 import com.transformuk.hee.tis.tcs.service.repository.PlacementRepository;
+import com.transformuk.hee.tis.tcs.service.repository.SpecialtyRepository;
 import com.transformuk.hee.tis.tcs.service.service.PlacementService;
 import com.transformuk.hee.tis.tcs.service.service.mapper.PlacementMapper;
+import org.apache.commons.collections4.CollectionUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.data.domain.Page;
@@ -12,7 +22,11 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.util.Collection;
 import java.util.List;
+import java.util.Map;
+import java.util.Set;
+import java.util.stream.Collectors;
 
 /**
  * Service Implementation for managing Placement.
@@ -27,10 +41,18 @@ public class PlacementServiceImpl implements PlacementService {
 
   private final PlacementMapper placementMapper;
 
+  private final SpecialtyRepository specialtyRepository;
+
+  private final PersonRepository personRepository;
+
   public PlacementServiceImpl(PlacementRepository placementRepository,
-                              PlacementMapper placementMapper) {
+                              PlacementMapper placementMapper,
+                              SpecialtyRepository specialtyRepository,
+                              PersonRepository personRepository) {
     this.placementRepository = placementRepository;
     this.placementMapper = placementMapper;
+    this.specialtyRepository = specialtyRepository;
+    this.personRepository = personRepository;
   }
 
   /**
@@ -101,5 +123,87 @@ public class PlacementServiceImpl implements PlacementService {
   public void delete(Long id) {
     log.debug("Request to delete Placement : {}", id);
     placementRepository.delete(id);
+  }
+
+  private Map<String, Placement> getPlacementsByIntrepidId(List<PlacementDTO> placementDtoList) {
+    Set<String> placementIntrepidIds = placementDtoList.stream().map(PlacementDTO::getIntrepidId).collect(Collectors.toSet());
+    Set<Placement> placementsFound = placementRepository.findByIntrepidIdIn(placementIntrepidIds);
+    Map<String, Placement> result = Maps.newHashMap();
+    if (CollectionUtils.isNotEmpty(placementsFound)) {
+      result = placementsFound.stream().collect(
+          Collectors.toMap(Placement::getIntrepidId, post -> post)
+      );
+    }
+    return result;
+  }
+
+  @Override
+  public List<PlacementDTO> patchPlacementSpecialties(List<PlacementDTO> placementDTOList) {
+    List<Placement> placements = Lists.newArrayList();
+    Map<String, Placement> intrepidIdToPlacement = getPlacementsByIntrepidId(placementDTOList);
+
+    Set<Long> specialtyIds = placementDTOList
+        .stream()
+        .map(PlacementDTO::getSpecialties)
+        .flatMap(Collection::stream)
+        .map(PlacementSpecialtyDTO::getSpecialtyId)
+        .collect(Collectors.toSet());
+
+    Map<Long, Specialty> idToSpecialty = specialtyRepository.findAll(specialtyIds).stream().collect(Collectors.toMap(Specialty::getId, sp -> sp));
+    for (PlacementDTO dto : placementDTOList) {
+      Placement placement = intrepidIdToPlacement.get(dto.getIntrepidId());
+      if (placement != null) {
+        Set<PlacementSpecialty> attachedSpecialties = placement.getSpecialties();
+        Set<Long> attachedSpecialtyIds = attachedSpecialties.stream().map(ps -> ps.getSpecialty().getId()).collect(Collectors.toSet());
+        for (PlacementSpecialtyDTO placementSpecialtyDTO : dto.getSpecialties()) {
+          Specialty specialty = idToSpecialty.get(placementSpecialtyDTO.getSpecialtyId());
+          if (specialty != null && !attachedSpecialtyIds.contains(specialty.getId())) {
+            PlacementSpecialty placementSpecialty = new PlacementSpecialty();
+            placementSpecialty.setPlacementSpecialtyType(placementSpecialtyDTO.getPlacementSpecialtyType());
+            placementSpecialty.setPlacement(placement);
+            placementSpecialty.setSpecialty(specialty);
+            attachedSpecialties.add(placementSpecialty);
+          }
+        }
+        placement.setSpecialties(attachedSpecialties);
+        placements.add(placement);
+      }
+    }
+    List<Placement> savedPlacements = placementRepository.save(placements);
+    return placementMapper.placementsToPlacementDTOs(savedPlacements);
+  }
+
+  @Override
+  public List<PlacementDTO> patchPlacementClinicalSupervisors(List<PlacementDTO> placementDTOList) {
+    List<Placement> placements = Lists.newArrayList();
+    Map<String, Placement> intrepidIdToPlacement = getPlacementsByIntrepidId(placementDTOList);
+
+    Set<Long> clinicalSupervisorIds = placementDTOList
+        .stream()
+        .map(PlacementDTO::getClinicalSupervisorIds)
+        .flatMap(Collection::stream)
+        .collect(Collectors.toSet());
+
+    Map<Long, Person> idToPerson = personRepository.findAll(clinicalSupervisorIds).stream().collect(Collectors.toMap(Person::getId, p -> p));
+    for (PlacementDTO dto : placementDTOList) {
+      Placement placement = intrepidIdToPlacement.get(dto.getIntrepidId());
+      if (placement != null) {
+        Set<PlacementSupervisor> attachedClinicalSupervisors = placement.getClinicalSupervisors();
+        Set<Long> attachedClinicalSupervisorIds = attachedClinicalSupervisors.stream().map(ps -> ps.getClinicalSupervisor().getId()).collect(Collectors.toSet());
+        for (Long clinicalSupervisorId : dto.getClinicalSupervisorIds()) {
+          Person person = idToPerson.get(clinicalSupervisorId);
+          if (person != null && !attachedClinicalSupervisorIds.contains(clinicalSupervisorId)) {
+            PlacementSupervisor placementSupervisor = new PlacementSupervisor();
+            placementSupervisor.setPlacement(placement);
+            placementSupervisor.setClinicalSupervisor(person);
+            attachedClinicalSupervisors.add(placementSupervisor);
+          }
+        }
+        placement.setClinicalSupervisors(attachedClinicalSupervisors);
+        placements.add(placement);
+      }
+    }
+    List<Placement> savedPlacements = placementRepository.save(placements);
+    return placementMapper.placementsToPlacementDTOs(savedPlacements);
   }
 }
