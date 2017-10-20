@@ -1,12 +1,10 @@
 package com.transformuk.hee.tis.tcs.service.model;
 
 
-import javax.persistence.CascadeType;
 import javax.persistence.Entity;
 import javax.persistence.GeneratedValue;
 import javax.persistence.GenerationType;
 import javax.persistence.Id;
-import javax.persistence.JoinTable;
 import javax.persistence.OneToMany;
 import javax.persistence.Table;
 import java.io.Serializable;
@@ -33,7 +31,6 @@ public class SpecialtyGroup implements Serializable {
   private String name;
 
   @OneToMany(mappedBy = "specialtyGroup")
-
   private Set<Specialty> specialties = new HashSet<>();
 
   public Set<Specialty> getSpecialties() {

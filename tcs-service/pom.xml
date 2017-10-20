@@ -174,7 +174,7 @@
     <dependency>
       <groupId>com.transformuk.hee.tis</groupId>
       <artifactId>tcs-api</artifactId>
-      <version>1.5.3</version>
+      <version>1.5.4</version>
     </dependency>
     <dependency>
       <groupId>com.zaxxer</groupId>

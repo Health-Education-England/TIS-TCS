@@ -130,7 +130,7 @@ public class SpecialtyGroupResource {
   public ResponseEntity<List<SpecialtyGroupDTO>> getAllSpecialtyGroups(
       @ApiParam Pageable pageable,
       @ApiParam(value = "any wildcard string to be searched")
-      @RequestParam(value = "searchQuery", required = false) String searchQuery) {
+      @RequestParam(value = "searchQuery", required = false) String searchQuery) throws URISyntaxException {
 
     log.debug("REST request to get all SpecialtyGroups");
     String sanitizedSearchQuery = sanitize(searchQuery);
@@ -197,12 +197,12 @@ public class SpecialtyGroupResource {
    *
    * @param specialtyGroupDTOS List of the specialtyGroupDTOS to create
    * @return the ResponseEntity with status 200 (Created) and with body the new specialtyGroupDTOS, or with status 400 (Bad Request) if the Specialty Group has already an ID
-   * @throws URISyntaxException if the Location URI syntax is ResponseEntity<List<SpecialtyDTO>>incorrect
+   * @throws URISyntaxException if the Location URI syntax is ResponseEntity<List<SpecialtyGroupDTO>>incorrect
    */
   @PostMapping("/bulk-specialty-groups")
   @Timed
   @PreAuthorize("hasAuthority('specialty:bulk:add:modify')")
-  public ResponseEntity<List<SpecialtyGroupDTO>> bulkCreateSpecialtyGroups(@Valid @RequestBody List<SpecialtyGroupDTO> specialtyGroupDTOS) {
+  public ResponseEntity<List<SpecialtyGroupDTO>> bulkCreateSpecialtyGroups(@Valid @RequestBody List<SpecialtyGroupDTO> specialtyGroupDTOS) throws URISyntaxException {
     log.debug("REST request to bulk save Specialty Groups : {}", specialtyGroupDTOS);
     if (!Collections.isEmpty(specialtyGroupDTOS)) {
       List<Long> entityIds = specialtyGroupDTOS.stream()
@@ -232,7 +232,7 @@ public class SpecialtyGroupResource {
   @PutMapping("/bulk-specialty-groups")
   @Timed
   @PreAuthorize("hasAuthority('specialty:bulk:add:modify')")
-  public ResponseEntity<List<SpecialtyGroupDTO>> bulkUpdateSpecialtyGroups(@Valid @RequestBody List<SpecialtyGroupDTO> specialtyGroupDTOS) {
+  public ResponseEntity<List<SpecialtyGroupDTO>> bulkUpdateSpecialtyGroups(@Valid @RequestBody List<SpecialtyGroupDTO> specialtyGroupDTOS) throws URISyntaxException {
     log.debug("REST request to bulk update Specialty Groups : {}", specialtyGroupDTOS);
     if (Collections.isEmpty(specialtyGroupDTOS)) {
       return ResponseEntity.badRequest().headers(HeaderUtil.createFailureAlert(ENTITY_NAME, "request.body.empty",
