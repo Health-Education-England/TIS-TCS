@@ -9,7 +9,7 @@ import org.springframework.data.jpa.repository.JpaSpecificationExecutor;
 /**
  * Spring Data JPA repository for the Specialty entity.
  */
-@SuppressWarnings("unused")
+
 public interface SpecialtyRepository extends JpaRepository<Specialty, Long>, JpaSpecificationExecutor<Specialty> {
 
   Page<Specialty> findBySpecialtyGroupIdIn(Long groupId, Pageable pageable);
