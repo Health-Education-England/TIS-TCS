@@ -1,12 +1,16 @@
 package com.transformuk.hee.tis.tcs.service.service.impl;
 
 import com.transformuk.hee.tis.tcs.api.dto.SpecialtyDTO;
+import com.transformuk.hee.tis.tcs.api.dto.SpecialtySimpleDTO;
 import com.transformuk.hee.tis.tcs.api.enumeration.Status;
 import com.transformuk.hee.tis.tcs.service.model.ColumnFilter;
 import com.transformuk.hee.tis.tcs.service.model.Specialty;
+import com.transformuk.hee.tis.tcs.service.model.SpecialtySimple;
 import com.transformuk.hee.tis.tcs.service.repository.SpecialtyRepository;
+import com.transformuk.hee.tis.tcs.service.repository.SpecialtySimpleRepository;
 import com.transformuk.hee.tis.tcs.service.service.SpecialtyService;
 import com.transformuk.hee.tis.tcs.service.service.mapper.SpecialtyMapper;
+import com.transformuk.hee.tis.tcs.service.service.mapper.SpecialtySimpleMapper;
 import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -34,11 +38,19 @@ public class SpecialtyServiceImpl implements SpecialtyService {
 
   private final SpecialtyRepository specialtyRepository;
 
+  private final SpecialtySimpleRepository specialtySimpleRepository;
+
   private final SpecialtyMapper specialtyMapper;
 
-  public SpecialtyServiceImpl(SpecialtyRepository specialtyRepository, SpecialtyMapper specialtyMapper) {
+  private final SpecialtySimpleMapper specialtySimpleMapper;
+
+  public SpecialtyServiceImpl(SpecialtyRepository specialtyRepository, SpecialtyMapper specialtyMapper,
+                              SpecialtySimpleRepository specialtySimpleRepository,
+                              SpecialtySimpleMapper specialtySimpleMapper) {
     this.specialtyRepository = specialtyRepository;
     this.specialtyMapper = specialtyMapper;
+    this.specialtySimpleRepository = specialtySimpleRepository;
+    this.specialtySimpleMapper = specialtySimpleMapper;
   }
 
   /**
@@ -57,8 +69,7 @@ public class SpecialtyServiceImpl implements SpecialtyService {
       specialty.setStatus(Status.CURRENT);
     }
     specialty = specialtyRepository.save(specialty);
-    SpecialtyDTO result = specialtyMapper.specialtyToSpecialtyDTO(specialty);
-    return result;
+    return specialtyMapper.specialtyToSpecialtyDTO(specialty);
   }
 
   /**
@@ -72,8 +83,7 @@ public class SpecialtyServiceImpl implements SpecialtyService {
     log.debug("Request to save Specialties : {}", specialtyDTO);
     List<Specialty> specialty = specialtyMapper.specialtyDTOsToSpecialties(specialtyDTO);
     specialty = specialtyRepository.save(specialty);
-    List<SpecialtyDTO> result = specialtyMapper.specialtiesToSpecialtyDTOs(specialty);
-    return result;
+    return specialtyMapper.specialtiesToSpecialtyDTOs(specialty);
   }
 
   @Override
@@ -113,7 +123,21 @@ public class SpecialtyServiceImpl implements SpecialtyService {
   public Page<SpecialtyDTO> findAll(Pageable pageable) {
     log.debug("Request to get all Specialties");
     Page<Specialty> result = specialtyRepository.findAll(pageable);
-    return result.map(specialty -> specialtyMapper.specialtyToSpecialtyDTO(specialty));
+    return result.map(specialtyMapper::specialtyToSpecialtyDTO);
+  }
+
+  /**
+   * Looks for specialties given their ID's
+   *
+   * @param ids the id's to look for
+   * @return the list of specialties found
+   */
+  @Override
+  @Transactional(readOnly = true)
+  public List<SpecialtySimpleDTO> findByIdIn(List<Long> ids) {
+    log.debug("Request to get all Specialties");
+    List<SpecialtySimple> result = specialtySimpleRepository.findByIdIn(ids);
+    return specialtySimpleMapper.specialtiesSimpleToSpecialtyDTOs(result);
   }
 
   /**
@@ -127,8 +151,7 @@ public class SpecialtyServiceImpl implements SpecialtyService {
   public SpecialtyDTO findOne(Long id) {
     log.debug("Request to get Specialty : {}", id);
     Specialty specialty = specialtyRepository.findOne(id);
-    SpecialtyDTO specialtyDTO = specialtyMapper.specialtyToSpecialtyDTO(specialty);
-    return specialtyDTO;
+    return specialtyMapper.specialtyToSpecialtyDTO(specialty);
   }
 
   /**

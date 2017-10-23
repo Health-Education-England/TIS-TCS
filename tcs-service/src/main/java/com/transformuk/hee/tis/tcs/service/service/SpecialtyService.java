@@ -1,7 +1,9 @@
 package com.transformuk.hee.tis.tcs.service.service;
 
 import com.transformuk.hee.tis.tcs.api.dto.SpecialtyDTO;
+import com.transformuk.hee.tis.tcs.api.dto.SpecialtySimpleDTO;
 import com.transformuk.hee.tis.tcs.service.model.ColumnFilter;
+import com.transformuk.hee.tis.tcs.service.model.SpecialtySimple;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 
@@ -45,6 +47,14 @@ public interface SpecialtyService {
    * @return the list of entities
    */
   Page<SpecialtyDTO> findAll(Pageable pageable);
+
+
+  /**
+   * Looks for specialties given their ID's
+   * @param ids the id's to look for
+   * @return the list of specialties found
+   */
+  List<SpecialtySimpleDTO> findByIdIn(List<Long> ids);
 
   /**
    * Get the "id" specialty.

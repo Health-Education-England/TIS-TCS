@@ -4,6 +4,7 @@ import com.transformuk.hee.tis.tcs.api.dto.SpecialtyDTO;
 import com.transformuk.hee.tis.tcs.api.dto.SpecialtyGroupDTO;
 import com.transformuk.hee.tis.tcs.service.model.Specialty;
 import com.transformuk.hee.tis.tcs.service.model.SpecialtyGroup;
+import com.transformuk.hee.tis.tcs.service.model.SpecialtySimple;
 import org.mapstruct.Mapper;
 
 import java.util.List;

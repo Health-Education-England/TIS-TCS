@@ -3,6 +3,7 @@ package com.transformuk.hee.tis.tcs.service.api;
 import com.codahale.metrics.annotation.Timed;
 import com.google.common.collect.Lists;
 import com.transformuk.hee.tis.tcs.api.dto.SpecialtyDTO;
+import com.transformuk.hee.tis.tcs.api.dto.SpecialtySimpleDTO;
 import com.transformuk.hee.tis.tcs.api.dto.validation.Create;
 import com.transformuk.hee.tis.tcs.api.dto.validation.Update;
 import com.transformuk.hee.tis.tcs.api.enumeration.SpecialtyType;
@@ -13,6 +14,7 @@ import com.transformuk.hee.tis.tcs.service.api.util.PaginationUtil;
 import com.transformuk.hee.tis.tcs.service.api.validation.SpecialtyValidator;
 import com.transformuk.hee.tis.tcs.service.api.validation.ValidationException;
 import com.transformuk.hee.tis.tcs.service.model.ColumnFilter;
+import com.transformuk.hee.tis.tcs.service.model.SpecialtySimple;
 import com.transformuk.hee.tis.tcs.service.service.SpecialtyService;
 import io.github.jhipster.web.util.ResponseUtil;
 import io.jsonwebtoken.lang.Collections;
@@ -42,6 +44,7 @@ import javax.validation.Valid;
 import java.io.IOException;
 import java.net.URI;
 import java.net.URISyntaxException;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
 import java.util.stream.Collectors;
@@ -146,6 +149,43 @@ public class SpecialtyResource {
     }
     HttpHeaders headers = PaginationUtil.generatePaginationHttpHeaders(page, "/api/specialties");
     return new ResponseEntity<>(page.getContent(), headers, HttpStatus.OK);
+  }
+
+  /**
+   * GET  /specialties/bulkFind : get all the specialties given their ID's.
+   * This implementation ignores malformed ID's and does not return entities not found.
+   * So it may return an empty list if no entities are found.
+   *
+   * @param ids the ids to use to find specialties
+   * @return the ResponseEntity with status 200 (OK) and the list of specialty in body
+   * @throws URISyntaxException if there is an error to generate the pagination HTTP headers
+   */
+  @GetMapping("/specialties/bulkFind/{ids}")
+  @Timed
+  @PreAuthorize("hasAuthority('specialty:view')")
+  public ResponseEntity<List<SpecialtySimpleDTO>> findByIds(
+      @ApiParam(value = "the ids to use to find specialties")
+      @PathVariable String ids) throws IOException {
+
+    log.debug("REST request to bulk find  Specialties");
+    List<SpecialtySimpleDTO> resp = new ArrayList<>();
+    List<Long> idList = new ArrayList<>();
+    // parse the IDs into Long ignoring malformed ones
+    for (String idStr : ids.split(",")) {
+      try {
+        idList.add(Long.parseLong(idStr));
+      } catch (NumberFormatException e) {
+        // we ignore malformed ids
+        log.warn("Invalid Id passed to /specialties/bulkFind %s", idStr);
+      }
+    }
+
+    if (!idList.isEmpty()) {
+      resp = specialtyService.findByIdIn(idList);
+      return new ResponseEntity<>(resp, HttpStatus.FOUND);
+    } else {
+      return new ResponseEntity<>(resp, HttpStatus.OK);
+    }
   }
 
   /**

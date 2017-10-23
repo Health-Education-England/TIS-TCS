@@ -290,6 +290,34 @@ public class SpecialtyResourceIntTest {
 
   @Test
   @Transactional
+  public void shouldBulkFind() throws Exception {
+    // Initialize the database
+    specialtyRepository.saveAndFlush(specialty);
+
+    // Get all the specialtyList
+    restSpecialtyMockMvc.perform(get("/api/specialties/bulkFind/" + specialty.getId() + "," + 123))
+        .andExpect(status().isFound())
+        .andExpect(content().contentType(MediaType.APPLICATION_JSON_UTF8_VALUE))
+        .andExpect(jsonPath("$.[*].id").value(hasItem(specialty.getId().intValue())))
+        .andExpect(jsonPath("$.[*].status").value(hasItem(DEFAULT_STATUS.toString())))
+        .andExpect(jsonPath("$.[*].college").value(hasItem(DEFAULT_COLLEGE.toString())));
+  }
+
+  @Test
+  @Transactional
+  public void shouldIgnoreInvalidIdsWhenBulkFind() throws Exception {
+    // Initialize the database
+    specialtyRepository.saveAndFlush(specialty);
+
+    // Get all the specialtyList
+    restSpecialtyMockMvc.perform(get("/api/specialties/bulkFind/invalid"))
+        .andExpect(status().isOk())
+        .andExpect(content().contentType(MediaType.APPLICATION_JSON_UTF8_VALUE));
+  }
+
+
+  @Test
+  @Transactional
   public void getSpecialty() throws Exception {
     // Initialize the database
     specialtyRepository.saveAndFlush(specialty);

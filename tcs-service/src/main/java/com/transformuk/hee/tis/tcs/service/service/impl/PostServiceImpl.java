@@ -378,6 +378,7 @@ public class PostServiceImpl implements PostService {
     //add the text search criteria
     if (StringUtils.isNotEmpty(searchString)) {
       specs.add(Specifications.where(containsLike("nationalPostNumber", searchString)).
+          or(containsLike("programmeName", searchString)).
           or(containsLike("currentTraineeGmcNumber", searchString)).
           or(containsLike("currentTraineeSurname", searchString)).
           or(containsLike("currentTraineeForenames", searchString)));
