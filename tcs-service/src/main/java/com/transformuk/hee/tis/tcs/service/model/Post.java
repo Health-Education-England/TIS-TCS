@@ -13,7 +13,6 @@ import javax.persistence.GeneratedValue;
 import javax.persistence.GenerationType;
 import javax.persistence.Id;
 import javax.persistence.JoinColumn;
-import javax.persistence.JoinTable;
 import javax.persistence.OneToMany;
 import javax.persistence.OneToOne;
 import javax.persistence.Table;
@@ -95,12 +94,8 @@ public class Post implements Serializable {
   @OneToMany(mappedBy = "post", cascade = CascadeType.ALL, fetch = FetchType.EAGER)
   private Set<PostFunding> fundings = new HashSet<>();
 
-  @OneToMany(fetch = FetchType.EAGER)
-  @JoinTable(name = "PostPlacementHistory",
-      joinColumns = @JoinColumn(name = "postId", referencedColumnName = "id"),
-      inverseJoinColumns = @JoinColumn(name = "placementId", referencedColumnName = "id"))
+  @OneToMany(mappedBy = "post", cascade = CascadeType.ALL, fetch = FetchType.EAGER)
   private Set<Placement> placementHistory = new HashSet<>();
-
 
   public Long getId() {
     return id;
