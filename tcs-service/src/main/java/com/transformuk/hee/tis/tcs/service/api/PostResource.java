@@ -2,6 +2,7 @@ package com.transformuk.hee.tis.tcs.service.api;
 
 import com.codahale.metrics.annotation.Timed;
 import com.google.common.collect.Lists;
+import com.transformuk.hee.tis.tcs.api.dto.PlacementDTO;
 import com.transformuk.hee.tis.tcs.api.dto.PostDTO;
 import com.transformuk.hee.tis.tcs.api.dto.PostViewDTO;
 import com.transformuk.hee.tis.tcs.api.dto.validation.Create;
@@ -48,6 +49,7 @@ import java.net.URI;
 import java.net.URISyntaxException;
 import java.util.List;
 import java.util.Optional;
+import java.util.Set;
 import java.util.stream.Collectors;
 
 import static com.transformuk.hee.tis.tcs.service.api.util.StringUtil.sanitize;
@@ -165,6 +167,21 @@ public class PostResource {
     log.debug("REST request to get Post : {}", id);
     PostDTO postDTO = postService.findOne(id);
     return ResponseUtil.wrapOrNotFound(Optional.ofNullable(postDTO));
+  }
+
+  /**
+   * GET  /posts/:id/placements : get the placements for a post.
+   *
+   * @param id the id of the postDTO to retrieve placements
+   * @return the ResponseEntity with status 200 (OK) and with body the postDTO, or with status 404 (Not Found)
+   */
+  @GetMapping("/posts/{id}/placements")
+  @Timed
+  @PreAuthorize("hasAuthority('post:view')")
+  public ResponseEntity<Set<PlacementDTO>> getPostPlacements(@PathVariable Long id) {
+    log.debug("REST request to get Post Placements: {}", id);
+    PostDTO postDTO = postService.findOne(id);
+    return ResponseUtil.wrapOrNotFound(Optional.ofNullable(postDTO != null ? postDTO.getPlacementHistory() : null));
   }
 
   /**
