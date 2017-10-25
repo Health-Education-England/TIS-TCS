@@ -1,6 +1,7 @@
 package com.transformuk.hee.tis.tcs.service.api;
 
 import com.transformuk.hee.tis.tcs.api.dto.RightToWorkDTO;
+import com.transformuk.hee.tis.tcs.api.enumeration.PermitToWorkType;
 import com.transformuk.hee.tis.tcs.service.Application;
 import com.transformuk.hee.tis.tcs.service.api.validation.RightToWorkValidator;
 import com.transformuk.hee.tis.tcs.service.exception.ExceptionTranslator;
@@ -53,8 +54,8 @@ public class RightToWorkResourceIntTest {
   private static final String DEFAULT_EEA_RESIDENT = "AAAAAAAAAA";
   private static final String UPDATED_EEA_RESIDENT = "BBBBBBBBBB";
 
-  private static final String DEFAULT_PERMIT_TO_WORK = "AAAAAAAAAA";
-  private static final String UPDATED_PERMIT_TO_WORK = "BBBBBBBBBB";
+  private static final PermitToWorkType DEFAULT_PERMIT_TO_WORK = PermitToWorkType.WORK_PERMIT;
+  private static final PermitToWorkType UPDATED_PERMIT_TO_WORK = PermitToWorkType.INDEFINITE_LEAVE_TO_REMAIN;
 
   private static final String DEFAULT_SETTLED = "AAAAAAAAAA";
   private static final String UPDATED_SETTLED = "BBBBBBBBBB";
