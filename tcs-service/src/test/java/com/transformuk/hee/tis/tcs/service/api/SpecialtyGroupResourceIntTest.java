@@ -250,7 +250,6 @@ public class SpecialtyGroupResourceIntTest {
     Long specialtyGroupId = addSpecialtySpecialtyGroup.getId();
     String url = "/api/specialty-groups/" + specialtyGroupId.toString();
     restSpecialtyGroupMockMvc.perform(get(url))
-        //.andExpect(jsonPath("$.[*]").value(hasItem("chicken")))
         .andExpect(jsonPath("$.name").value(equalTo("addSpecialtySpecialtyGroup")))
         .andExpect(jsonPath("$.specialties.[*].name").value(hasItem("addSpecialty1")))
         .andExpect(jsonPath("$.specialties.[*].name").value(hasItem("addSpecialty2")));

@@ -319,9 +319,15 @@ public class SpecialtyResourceIntTest {
   @Test
   @Transactional
   public void getSpecialty() throws Exception {
+    // Given
     // Initialize the database
+    // Add a specialty group to the specialty
+    SpecialtyGroup specialtyGroup = createSpecialtyGroupEntity();
+    specialtyGroupRepository.saveAndFlush(specialtyGroup);
+    specialty.setSpecialtyGroup(specialtyGroup);
     specialtyRepository.saveAndFlush(specialty);
 
+    // When and then
     // Get the specialty
     restSpecialtyMockMvc.perform(get("/api/specialties/{id}", specialty.getId()))
         .andExpect(status().isOk())
@@ -330,7 +336,8 @@ public class SpecialtyResourceIntTest {
         .andExpect(jsonPath("$.status").value(DEFAULT_STATUS.toString()))
         .andExpect(jsonPath("$.college").value(DEFAULT_COLLEGE.toString()))
         .andExpect(jsonPath("$.specialtyCode").value(DEFAULT_NHS_SPECIALTY_CODE.toString()))
-        .andExpect(jsonPath("$.specialtyTypes[0]").value(DEFAULT_SPECIALTY_TYPE.toString()));
+        .andExpect(jsonPath("$.specialtyTypes[0]").value(DEFAULT_SPECIALTY_TYPE.toString()))
+        .andExpect(jsonPath("$.specialtyGroup.id").value(specialtyGroup.getId().intValue()));
   }
 
   @Test
@@ -342,6 +349,7 @@ public class SpecialtyResourceIntTest {
     Specialty otherNameSpecialty = createEntity();
     otherNameSpecialty.name("other college");
     specialtyRepository.saveAndFlush(otherNameSpecialty);
+
     //when & then
     // Get all the specialtyList
     restSpecialtyMockMvc.perform(get("/api/specialties?sort=id,desc&searchQuery=other"))
@@ -406,6 +414,7 @@ public class SpecialtyResourceIntTest {
     otherCollegeSpecialty.setCollege("other college");
     otherCollegeSpecialty.setSpecialtyCode("TestSpecialtyCode");
     specialtyRepository.saveAndFlush(otherCollegeSpecialty);
+
     //when & then
     String colFilters = new URLCodec().encode("{\"specialtyCode\":[\"TestSpecialtyCode\"]}");
     // Get all the specialtyList
