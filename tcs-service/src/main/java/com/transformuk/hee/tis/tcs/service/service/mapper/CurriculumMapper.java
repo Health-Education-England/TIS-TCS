@@ -13,7 +13,7 @@ import java.util.List;
 /**
  * Mapper for the entity Curriculum and its DTO CurriculumDTO.
  */
-@Mapper(componentModel = "spring", uses = {})
+@Mapper(componentModel = "spring", uses = {SpecialtyMapper.class})
 public interface CurriculumMapper {
 
   CurriculumDTO curriculumToCurriculumDTO(Curriculum curriculum);
@@ -23,13 +23,5 @@ public interface CurriculumMapper {
   Curriculum curriculumDTOToCurriculum(CurriculumDTO curriculumDTO);
 
   List<Curriculum> curriculumDTOsToCurricula(List<CurriculumDTO> curriculumDTOs);
-
-  SpecialtyDTO map(Specialty specialty);
-
-  Specialty map(SpecialtyDTO specialtyDTO);
-
-  SpecialtyGroupDTO map(SpecialtyGroup specialtyGroup);
-
-  SpecialtyGroup map(SpecialtyGroupDTO specialtyGroupDTO);
 
 }
