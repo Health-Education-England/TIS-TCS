@@ -4,26 +4,88 @@ import com.transformuk.hee.tis.tcs.api.dto.SpecialtyDTO;
 import com.transformuk.hee.tis.tcs.api.dto.SpecialtyGroupDTO;
 import com.transformuk.hee.tis.tcs.service.model.Specialty;
 import com.transformuk.hee.tis.tcs.service.model.SpecialtyGroup;
-import com.transformuk.hee.tis.tcs.service.model.SpecialtySimple;
 import org.mapstruct.Mapper;
 
+import java.util.ArrayList;
 import java.util.List;
 
 /**
  * Mapper for the entity Specialty and its DTO SpecialtyDTO.
  */
 @Mapper(componentModel = "spring", uses = {})
-public interface SpecialtyMapper {
+public class SpecialtyMapper {
 
-  SpecialtyDTO specialtyToSpecialtyDTO(Specialty specialty);
+  public SpecialtyDTO specialtyToSpecialtyDTO(Specialty specialty) {
+    SpecialtyDTO result = null;
 
-  List<SpecialtyDTO> specialtiesToSpecialtyDTOs(List<Specialty> specialties);
+    if (specialty != null) {
+      result = new SpecialtyDTO();
+      result.setId(specialty.getId());
+      result.setName(specialty.getName());
+      result.setCollege(specialty.getCollege());
+      result.setIntrepidId(specialty.getIntrepidId());
+      result.setSpecialtyCode(specialty.getSpecialtyCode());
+      result.setSpecialtyTypes(specialty.getSpecialtyTypes());
+      result.setStatus(specialty.getStatus());
+      result.setSpecialtyGroup(specialtyGroupToSpecialtyGroupDTO(specialty.getSpecialtyGroup()));
+    }
+    return result;
+  }
 
-  Specialty specialtyDTOToSpecialty(SpecialtyDTO specialtyDTO);
+  public List<SpecialtyDTO> specialtiesToSpecialtyDTOs(List<Specialty> specialties) {
+    List<SpecialtyDTO> result = new ArrayList<>();
+    for (Specialty specialty : specialties) {
+      result.add(specialtyToSpecialtyDTO(specialty));
+    }
+    return result;
+  }
 
-  List<Specialty> specialtyDTOsToSpecialties(List<SpecialtyDTO> specialtyDTOs);
+  public Specialty specialtyDTOToSpecialty(SpecialtyDTO specialtyDTO) {
+    Specialty result = null;
 
-  SpecialtyGroupDTO map(SpecialtyGroup specialtyGroup);
+    if (specialtyDTO != null) {
+      result = new Specialty();
+      result.setId(specialtyDTO.getId());
+      result.setName(specialtyDTO.getName());
+      result.setCollege(specialtyDTO.getCollege());
+      result.setIntrepidId(specialtyDTO.getIntrepidId());
+      result.setSpecialtyCode(specialtyDTO.getSpecialtyCode());
+      result.setSpecialtyTypes(specialtyDTO.getSpecialtyTypes());
+      result.setStatus(specialtyDTO.getStatus());
+      result.setSpecialtyGroup(specialtyGroupDTOToSpecialtyGroup(specialtyDTO.getSpecialtyGroup()));
 
-  SpecialtyGroup map(SpecialtyGroupDTO specialtyGroupDTO);
+    }
+    return result;
+  }
+
+  public List<Specialty> specialtyDTOsToSpecialties(List<SpecialtyDTO> specialtyDTOs) {
+    List<Specialty> result = new ArrayList<>();
+    for (SpecialtyDTO specialtyDTO: specialtyDTOs) {
+      result.add(specialtyDTOToSpecialty(specialtyDTO));
+    }
+
+    return result;
+  }
+
+  private SpecialtyGroupDTO specialtyGroupToSpecialtyGroupDTO(SpecialtyGroup specialtyGroup) {
+    SpecialtyGroupDTO result = null;
+    if (specialtyGroup != null) {
+      result = new SpecialtyGroupDTO();
+      result.setId(specialtyGroup.getId());
+      result.setName(specialtyGroup.getName());
+      result.setIntrepidId(specialtyGroup.getIntrepidId());
+    }
+    return result;
+  }
+
+  private SpecialtyGroup specialtyGroupDTOToSpecialtyGroup(SpecialtyGroupDTO specialtyGroupDTO) {
+    SpecialtyGroup result = null;
+    if (specialtyGroupDTO != null) {
+      result = new SpecialtyGroup();
+      result.setId(specialtyGroupDTO.getId());
+      result.setName(specialtyGroupDTO.getName());
+      result.setIntrepidId(specialtyGroupDTO.getIntrepidId());
+    }
+    return result;
+  }
 }
