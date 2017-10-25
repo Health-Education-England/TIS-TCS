@@ -3,6 +3,7 @@ package com.transformuk.hee.tis.tcs.api.dto;
 
 import com.transformuk.hee.tis.tcs.api.dto.validation.Create;
 import com.transformuk.hee.tis.tcs.api.dto.validation.Update;
+import com.transformuk.hee.tis.tcs.api.enumeration.PermitToWorkType;
 
 import javax.validation.constraints.DecimalMin;
 import javax.validation.constraints.NotNull;
@@ -22,7 +23,7 @@ public class RightToWorkDTO implements Serializable {
 
   private String eeaResident;
 
-  private String permitToWork;
+  private PermitToWorkType permitToWork;
 
   private String settled;
 
@@ -50,11 +51,11 @@ public class RightToWorkDTO implements Serializable {
     this.eeaResident = eeaResident;
   }
 
-  public String getPermitToWork() {
+  public PermitToWorkType getPermitToWork() {
     return permitToWork;
   }
 
-  public void setPermitToWork(String permitToWork) {
+  public void setPermitToWork(PermitToWorkType permitToWork) {
     this.permitToWork = permitToWork;
   }
 
