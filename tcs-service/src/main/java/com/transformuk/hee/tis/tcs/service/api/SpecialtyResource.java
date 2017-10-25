@@ -152,7 +152,7 @@ public class SpecialtyResource {
   }
 
   /**
-   * GET  /specialties/bulkFind : get all the specialties given their ID's.
+   * GET  /specialties/in : get all the specialties given their ID's.
    * This implementation ignores malformed ID's and does not return entities not found.
    * So it may return an empty list if no entities are found.
    *
@@ -160,14 +160,14 @@ public class SpecialtyResource {
    * @return the ResponseEntity with status 200 (OK) and the list of specialty in body
    * @throws URISyntaxException if there is an error to generate the pagination HTTP headers
    */
-  @GetMapping("/specialties/bulkFind/{ids}")
+  @GetMapping("/specialties/in/{ids}")
   @Timed
   @PreAuthorize("hasAuthority('specialty:view')")
   public ResponseEntity<List<SpecialtySimpleDTO>> findByIds(
       @ApiParam(value = "the ids to use to find specialties")
       @PathVariable String ids) throws IOException {
 
-    log.debug("REST request to bulk find  Specialties");
+    log.debug("REST request to find several Specialties");
     List<SpecialtySimpleDTO> resp = new ArrayList<>();
     List<Long> idList = new ArrayList<>();
     // parse the IDs into Long ignoring malformed ones
@@ -176,7 +176,7 @@ public class SpecialtyResource {
         idList.add(Long.parseLong(idStr));
       } catch (NumberFormatException e) {
         // we ignore malformed ids
-        log.warn("Invalid Id passed to /specialties/bulkFind %s", idStr);
+        log.warn("Invalid Id passed to /specialties/in %s", idStr);
       }
     }
 
