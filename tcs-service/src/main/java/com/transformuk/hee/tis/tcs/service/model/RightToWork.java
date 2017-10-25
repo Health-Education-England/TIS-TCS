@@ -1,7 +1,11 @@
 package com.transformuk.hee.tis.tcs.service.model;
 
 
+import com.transformuk.hee.tis.tcs.api.enumeration.PermitToWorkType;
+
 import javax.persistence.Entity;
+import javax.persistence.EnumType;
+import javax.persistence.Enumerated;
 import javax.persistence.Id;
 import javax.persistence.Version;
 import java.io.Serializable;
@@ -22,7 +26,8 @@ public class RightToWork implements Serializable {
 
   private String eeaResident;
 
-  private String permitToWork;
+  @Enumerated(EnumType.STRING)
+  private PermitToWorkType permitToWork;
 
   private String settled;
 
@@ -62,15 +67,15 @@ public class RightToWork implements Serializable {
     return this;
   }
 
-  public String getPermitToWork() {
+  public PermitToWorkType getPermitToWork() {
     return permitToWork;
   }
 
-  public void setPermitToWork(String permitToWork) {
+  public void setPermitToWork(PermitToWorkType permitToWork) {
     this.permitToWork = permitToWork;
   }
 
-  public RightToWork permitToWork(String permitToWork) {
+  public RightToWork permitToWork(PermitToWorkType permitToWork) {
     this.permitToWork = permitToWork;
     return this;
   }
