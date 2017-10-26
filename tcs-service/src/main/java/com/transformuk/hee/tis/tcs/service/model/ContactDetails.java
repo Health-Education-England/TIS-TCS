@@ -35,9 +35,9 @@ public class ContactDetails implements Serializable {
 
   private String title;
 
-  private String contactPhoneNr1;
+  private String telephoneNumber;
 
-  private String contactPhoneNr2;
+  private String mobileNumber;
 
   private String email;
 
@@ -148,29 +148,29 @@ public class ContactDetails implements Serializable {
     return this;
   }
 
-  public String getContactPhoneNr1() {
-    return contactPhoneNr1;
+  public String getTelephoneNumber() {
+    return telephoneNumber;
   }
 
-  public void setContactPhoneNr1(String contactPhoneNr1) {
-    this.contactPhoneNr1 = contactPhoneNr1;
+  public void setTelephoneNumber(String telephoneNumber) {
+    this.telephoneNumber = telephoneNumber;
   }
 
-  public ContactDetails contactPhoneNr1(String contactPhoneNr1) {
-    this.contactPhoneNr1 = contactPhoneNr1;
+  public ContactDetails telephoneNumber(String telephoneNumber) {
+    this.telephoneNumber = telephoneNumber;
     return this;
   }
 
-  public String getContactPhoneNr2() {
-    return contactPhoneNr2;
+  public String getMobileNumber() {
+    return mobileNumber;
   }
 
-  public void setContactPhoneNr2(String contactPhoneNr2) {
-    this.contactPhoneNr2 = contactPhoneNr2;
+  public void setMobileNumber(String mobileNumber) {
+    this.mobileNumber = mobileNumber;
   }
 
-  public ContactDetails contactPhoneNr2(String contactPhoneNr2) {
-    this.contactPhoneNr2 = contactPhoneNr2;
+  public ContactDetails mobileNumber(String mobileNumber) {
+    this.mobileNumber = mobileNumber;
     return this;
   }
 
@@ -316,8 +316,8 @@ public class ContactDetails implements Serializable {
         ", maidenName='" + maidenName + '\'' +
         ", initials='" + initials + '\'' +
         ", title='" + title + '\'' +
-        ", contactPhoneNr1='" + contactPhoneNr1 + '\'' +
-        ", contactPhoneNr2='" + contactPhoneNr2 + '\'' +
+        ", telephoneNumber='" + telephoneNumber + '\'' +
+        ", mobileNumber='" + mobileNumber + '\'' +
         ", email='" + email + '\'' +
         ", workEmail='" + workEmail + '\'' +
         ", address1='" + address1 + '\'' +

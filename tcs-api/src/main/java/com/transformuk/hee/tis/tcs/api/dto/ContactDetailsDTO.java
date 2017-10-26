@@ -40,9 +40,9 @@ public class ContactDetailsDTO implements Serializable {
   @NotNull(message = "Title is required", groups = {Update.class, Create.class})
   private String title;
 
-  private String contactPhoneNr1;
+  private String telephoneNumber;
 
-  private String contactPhoneNr2;
+  private String mobileNumber;
 
   @NotNull(message = "Email is required", groups = {Update.class, Create.class})
   @Email(message = "Valid email is required", groups = {Update.class, Create.class})
@@ -121,20 +121,20 @@ public class ContactDetailsDTO implements Serializable {
     this.title = title;
   }
 
-  public String getContactPhoneNr1() {
-    return contactPhoneNr1;
+  public String getTelephoneNumber() {
+    return telephoneNumber;
   }
 
-  public void setContactPhoneNr1(String contactPhoneNr1) {
-    this.contactPhoneNr1 = contactPhoneNr1;
+  public void setTelephoneNumber(String telephoneNumber) {
+    this.telephoneNumber = telephoneNumber;
   }
 
-  public String getContactPhoneNr2() {
-    return contactPhoneNr2;
+  public String getMobileNumber() {
+    return mobileNumber;
   }
 
-  public void setContactPhoneNr2(String contactPhoneNr2) {
-    this.contactPhoneNr2 = contactPhoneNr2;
+  public void setMobileNumber(String mobileNumber) {
+    this.mobileNumber = mobileNumber;
   }
 
   public String getEmail() {
@@ -250,8 +250,8 @@ public class ContactDetailsDTO implements Serializable {
         ", maidenName='" + maidenName + '\'' +
         ", initials='" + initials + '\'' +
         ", title='" + title + '\'' +
-        ", contactPhoneNr1='" + contactPhoneNr1 + '\'' +
-        ", contactPhoneNr2='" + contactPhoneNr2 + '\'' +
+        ", telephoneNumber='" + telephoneNumber + '\'' +
+        ", mobileNumber='" + mobileNumber + '\'' +
         ", email='" + email + '\'' +
         ", workEmail='" + workEmail + '\'' +
         ", address1='" + address1 + '\'' +
