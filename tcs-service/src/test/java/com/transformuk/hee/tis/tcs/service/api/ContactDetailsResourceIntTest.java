@@ -140,8 +140,8 @@ public class ContactDetailsResourceIntTest {
         .maidenName(DEFAULT_MAIDEN_NAME)
         .initials(DEFAULT_INITIALS)
         .title(DEFAULT_TITLE)
-        .contactPhoneNr1(DEFAULT_CONTACT_PHONE_NR_1)
-        .contactPhoneNr2(DEFAULT_CONTACT_PHONE_NR_2)
+        .telephoneNumber(DEFAULT_CONTACT_PHONE_NR_1)
+        .mobileNumber(DEFAULT_CONTACT_PHONE_NR_2)
         .email(DEFAULT_EMAIL)
         .workEmail(DEFAULT_WORK_EMAIL)
         .address1(DEFAULT_ADDRESS)
@@ -178,8 +178,8 @@ public class ContactDetailsResourceIntTest {
     assertThat(testContactDetails.getMaidenName()).isEqualTo(DEFAULT_MAIDEN_NAME);
     assertThat(testContactDetails.getInitials()).isEqualTo(DEFAULT_INITIALS);
     assertThat(testContactDetails.getTitle()).isEqualTo(DEFAULT_TITLE);
-    assertThat(testContactDetails.getContactPhoneNr1()).isEqualTo(DEFAULT_CONTACT_PHONE_NR_1);
-    assertThat(testContactDetails.getContactPhoneNr2()).isEqualTo(DEFAULT_CONTACT_PHONE_NR_2);
+    assertThat(testContactDetails.getTelephoneNumber()).isEqualTo(DEFAULT_CONTACT_PHONE_NR_1);
+    assertThat(testContactDetails.getMobileNumber()).isEqualTo(DEFAULT_CONTACT_PHONE_NR_2);
     assertThat(testContactDetails.getEmail()).isEqualTo(DEFAULT_EMAIL);
     assertThat(testContactDetails.getWorkEmail()).isEqualTo(DEFAULT_WORK_EMAIL);
     assertThat(testContactDetails.getAddress1()).isEqualTo(DEFAULT_ADDRESS);
@@ -277,8 +277,8 @@ public class ContactDetailsResourceIntTest {
         .andExpect(jsonPath("$.[*].maidenName").value(hasItem(DEFAULT_MAIDEN_NAME.toString())))
         .andExpect(jsonPath("$.[*].initials").value(hasItem(DEFAULT_INITIALS.toString())))
         .andExpect(jsonPath("$.[*].title").value(hasItem(DEFAULT_TITLE.toString())))
-        .andExpect(jsonPath("$.[*].contactPhoneNr1").value(hasItem(DEFAULT_CONTACT_PHONE_NR_1.toString())))
-        .andExpect(jsonPath("$.[*].contactPhoneNr2").value(hasItem(DEFAULT_CONTACT_PHONE_NR_2.toString())))
+        .andExpect(jsonPath("$.[*].telephoneNumber").value(hasItem(DEFAULT_CONTACT_PHONE_NR_1.toString())))
+        .andExpect(jsonPath("$.[*].mobileNumber").value(hasItem(DEFAULT_CONTACT_PHONE_NR_2.toString())))
         .andExpect(jsonPath("$.[*].email").value(hasItem(DEFAULT_EMAIL.toString())))
         .andExpect(jsonPath("$.[*].workEmail").value(hasItem(DEFAULT_WORK_EMAIL.toString())))
         .andExpect(jsonPath("$.[*].address1").value(hasItem(DEFAULT_ADDRESS.toString())))
@@ -305,8 +305,8 @@ public class ContactDetailsResourceIntTest {
         .andExpect(jsonPath("$.maidenName").value(DEFAULT_MAIDEN_NAME.toString()))
         .andExpect(jsonPath("$.initials").value(DEFAULT_INITIALS.toString()))
         .andExpect(jsonPath("$.title").value(DEFAULT_TITLE.toString()))
-        .andExpect(jsonPath("$.contactPhoneNr1").value(DEFAULT_CONTACT_PHONE_NR_1.toString()))
-        .andExpect(jsonPath("$.contactPhoneNr2").value(DEFAULT_CONTACT_PHONE_NR_2.toString()))
+        .andExpect(jsonPath("$.telephoneNumber").value(DEFAULT_CONTACT_PHONE_NR_1.toString()))
+        .andExpect(jsonPath("$.mobileNumber").value(DEFAULT_CONTACT_PHONE_NR_2.toString()))
         .andExpect(jsonPath("$.email").value(DEFAULT_EMAIL.toString()))
         .andExpect(jsonPath("$.workEmail").value(DEFAULT_WORK_EMAIL.toString()))
         .andExpect(jsonPath("$.address1").value(DEFAULT_ADDRESS.toString()))
@@ -341,8 +341,8 @@ public class ContactDetailsResourceIntTest {
         .maidenName(UPDATED_MAIDEN_NAME)
         .initials(UPDATED_INITIALS)
         .title(UPDATED_TITLE)
-        .contactPhoneNr1(UPDATED_CONTACT_PHONE_NR_1)
-        .contactPhoneNr2(UPDATED_CONTACT_PHONE_NR_2)
+        .telephoneNumber(UPDATED_CONTACT_PHONE_NR_1)
+        .mobileNumber(UPDATED_CONTACT_PHONE_NR_2)
         .email(UPDATED_EMAIL)
         .workEmail(UPDATED_WORK_EMAIL)
         .address1(UPDATED_ADDRESS)
@@ -366,8 +366,8 @@ public class ContactDetailsResourceIntTest {
     assertThat(testContactDetails.getMaidenName()).isEqualTo(UPDATED_MAIDEN_NAME);
     assertThat(testContactDetails.getInitials()).isEqualTo(UPDATED_INITIALS);
     assertThat(testContactDetails.getTitle()).isEqualTo(UPDATED_TITLE);
-    assertThat(testContactDetails.getContactPhoneNr1()).isEqualTo(UPDATED_CONTACT_PHONE_NR_1);
-    assertThat(testContactDetails.getContactPhoneNr2()).isEqualTo(UPDATED_CONTACT_PHONE_NR_2);
+    assertThat(testContactDetails.getTelephoneNumber()).isEqualTo(UPDATED_CONTACT_PHONE_NR_1);
+    assertThat(testContactDetails.getMobileNumber()).isEqualTo(UPDATED_CONTACT_PHONE_NR_2);
     assertThat(testContactDetails.getEmail()).isEqualTo(UPDATED_EMAIL);
     assertThat(testContactDetails.getWorkEmail()).isEqualTo(UPDATED_WORK_EMAIL);
     assertThat(testContactDetails.getAddress1()).isEqualTo(UPDATED_ADDRESS);
