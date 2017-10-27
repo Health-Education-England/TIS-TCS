@@ -34,6 +34,8 @@ import com.transformuk.hee.tis.tcs.service.service.mapper.PostViewMapper;
 import org.junit.Assert;
 import org.junit.Test;
 import org.junit.runner.RunWith;
+import org.mockito.ArgumentCaptor;
+import org.mockito.Captor;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.runners.MockitoJUnitRunner;
@@ -90,6 +92,9 @@ public class PostServiceImplTest {
 
   @Mock
   private Pageable pageableMock;
+
+  @Captor
+  private ArgumentCaptor<Set<PostSpecialty>> postSpecialtyArgumentCaptor;
 
   @Test
   public void saveShouldSavePost() {
@@ -415,8 +420,14 @@ public class PostServiceImplTest {
     List<PostDTO> result = testObj.patchPostSpecialties(Lists.newArrayList(sendPostData));
 
     verify(postRepositoryMock).findPostByIntrepidIdIn(Sets.newHashSet(intrepidIds));
-    verify(postRepositoryMock).save(Lists.newArrayList(currentPost));
+    verify(postSpecialtyRepositoryMock).save(postSpecialtyArgumentCaptor.capture());
     verify(postMapperMock).postsToPostDTOs(savedPosts);
+
+    Set<PostSpecialty> postSpecialtyValueSet = postSpecialtyArgumentCaptor.getValue();
+    PostSpecialty postSpecialtyValue = postSpecialtyValueSet.iterator().next();
+    Assert.assertEquals(postSpecialtyDTO.getPostSpecialtyType(), postSpecialtyValue.getPostSpecialtyType());
+    Assert.assertEquals(currentPost.getId(), postSpecialtyValue.getPost().getId());
+    Assert.assertEquals(postSpecialtyDTO.getSpecialty().getId(), postSpecialtyValue.getSpecialty().getId());
 
     Assert.assertSame(transformedPosts, result);
     Assert.assertEquals(expectedDTO, result.get(0));
