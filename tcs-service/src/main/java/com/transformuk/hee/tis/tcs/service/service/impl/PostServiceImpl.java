@@ -252,21 +252,12 @@ public class PostServiceImpl implements PostService {
     List<Post> posts = Lists.newArrayList();
     Map<String, Post> intrepidIdToPost = getPostsByIntrepidId(postDTOList);
 
-    Set<Long> specialtyIds = postDTOList
-        .stream()
-        .map(PostDTO::getSpecialties)
-        .flatMap(Collection::stream)
-        .map(PostSpecialtyDTO::getSpecialty)
-        .map(SpecialtyDTO::getId)
-        .collect(Collectors.toSet());
-
-//    Map<Long, Specialty> idToSpecialty = specialtyRepository.findAll(specialtyIds).stream().collect(Collectors.toMap(Specialty::getId, sp -> sp));
     for (PostDTO dto : postDTOList) {
       Post post = intrepidIdToPost.get(dto.getIntrepidId());
       if (post != null) {
         Set<PostSpecialty> attachedSpecialties = post.getSpecialties();
         for (PostSpecialtyDTO postSpecialtyDTO : dto.getSpecialties()) {
-//          Specialty specialty = idToSpecialty.get(postSpecialtyDTO.getSpecialty().getId());
+
           Specialty specialty = new Specialty();
           specialty.setId(postSpecialtyDTO.getSpecialty().getId());
 
