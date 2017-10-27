@@ -175,9 +175,10 @@ public class PostServiceImpl implements PostService {
 
     List<Post> postsModified = Lists.newArrayList();
     for (PostDTO dto : postDTOList) {
-      List<PostSite> sitesToSave = Lists.newArrayList();
+      Set<PostSite> sitesToSave = Sets.newHashSet();
       Post post = intrepidIdToPost.get(dto.getIntrepidId());
       if (post != null) {
+        sitesToSave = post.getSites();
         for (PostSiteDTO siteDTO : dto.getSites()) {
           PostSite postSite = new PostSite();
           postSite.setPost(post);
@@ -211,7 +212,8 @@ public class PostServiceImpl implements PostService {
           postGrade.setGradeId(postGradeDTO.getGradeId());
           postGrades.add(postGrade);
         }
-        post.setGrades(postGrades);
+        List<PostGrade> savedGrades = postGradeRepository.save(postGrades);
+        post.setGrades(Sets.newHashSet(savedGrades));
         postsToSave.add(post);
       }
     }
@@ -258,13 +260,16 @@ public class PostServiceImpl implements PostService {
         .map(SpecialtyDTO::getId)
         .collect(Collectors.toSet());
 
-    Map<Long, Specialty> idToSpecialty = specialtyRepository.findAll(specialtyIds).stream().collect(Collectors.toMap(Specialty::getId, sp -> sp));
+//    Map<Long, Specialty> idToSpecialty = specialtyRepository.findAll(specialtyIds).stream().collect(Collectors.toMap(Specialty::getId, sp -> sp));
     for (PostDTO dto : postDTOList) {
       Post post = intrepidIdToPost.get(dto.getIntrepidId());
       if (post != null) {
         Set<PostSpecialty> attachedSpecialties = post.getSpecialties();
         for (PostSpecialtyDTO postSpecialtyDTO : dto.getSpecialties()) {
-          Specialty specialty = idToSpecialty.get(postSpecialtyDTO.getSpecialty().getId());
+//          Specialty specialty = idToSpecialty.get(postSpecialtyDTO.getSpecialty().getId());
+          Specialty specialty = new Specialty();
+          specialty.setId(postSpecialtyDTO.getSpecialty().getId());
+
           if (specialty != null) {
             PostSpecialty postSpecialty = new PostSpecialty();
             postSpecialty.setPostSpecialtyType(postSpecialtyDTO.getPostSpecialtyType());
@@ -273,12 +278,12 @@ public class PostServiceImpl implements PostService {
             attachedSpecialties.add(postSpecialty);
           }
         }
-        post.setSpecialties(attachedSpecialties);
+        List<PostSpecialty> savedSpecialties = postSpecialtyRepository.save(attachedSpecialties);
+        post.setSpecialties(Sets.newHashSet(savedSpecialties));
         posts.add(post);
       }
     }
-    List<Post> savedPosts = postRepository.save(posts);
-    return postMapper.postsToPostDTOs(savedPosts);
+    return postMapper.postsToPostDTOs(posts);
   }
 
   private Map<String, Post> getPostsByIntrepidId(List<PostDTO> postDtoList) {

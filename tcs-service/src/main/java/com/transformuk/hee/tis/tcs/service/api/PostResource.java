@@ -359,11 +359,6 @@ public class PostResource {
     } else if (!Collections.isEmpty(postRelationshipsDto)) {
       List<PostDTO> entitiesWithNoId = postRelationshipsDto.stream()
           .filter(p -> p.getIntrepidId() == null)
-          .map(post -> {
-            PostDTO postDTO = new PostDTO();
-            postDTO.setIntrepidId(post.getIntrepidId());
-            return postDTO;
-          })
           .collect(Collectors.toList());
       if (!Collections.isEmpty(entitiesWithNoId)) {
         return ResponseEntity.badRequest().headers(HeaderUtil.createFailureAlert(StringUtils.join(entitiesWithNoId, ","),
@@ -398,11 +393,6 @@ public class PostResource {
     } else if (!Collections.isEmpty(postRelationshipsDto)) {
       List<PostDTO> entitiesWithNoId = postRelationshipsDto.stream()
           .filter(p -> p.getIntrepidId() == null)
-          .map(post -> {
-            PostDTO postDTO = new PostDTO();
-            postDTO.setIntrepidId(post.getIntrepidId());
-            return postDTO;
-          })
           .collect(Collectors.toList());
       if (!Collections.isEmpty(entitiesWithNoId)) {
         return ResponseEntity.badRequest().headers(HeaderUtil.createFailureAlert(StringUtils.join(entitiesWithNoId, ","),
@@ -437,11 +427,6 @@ public class PostResource {
     } else if (!Collections.isEmpty(postRelationshipsDto)) {
       List<PostDTO> entitiesWithNoId = postRelationshipsDto.stream()
           .filter(p -> p.getIntrepidId() == null)
-          .map(post -> {
-            PostDTO postDTO = new PostDTO();
-            postDTO.setIntrepidId(post.getIntrepidId());
-            return postDTO;
-          })
           .collect(Collectors.toList());
       if (!Collections.isEmpty(entitiesWithNoId)) {
         return ResponseEntity.badRequest().headers(HeaderUtil.createFailureAlert(StringUtils.join(entitiesWithNoId, ","),
@@ -476,11 +461,6 @@ public class PostResource {
     } else if (!Collections.isEmpty(postRelationshipsDto)) {
       List<PostDTO> entitiesWithNoId = postRelationshipsDto.stream()
           .filter(p -> p.getIntrepidId() == null)
-          .map(post -> {
-            PostDTO postDTO = new PostDTO();
-            postDTO.setIntrepidId(post.getIntrepidId());
-            return postDTO;
-          })
           .collect(Collectors.toList());
       if (!Collections.isEmpty(entitiesWithNoId)) {
         return ResponseEntity.badRequest().headers(HeaderUtil.createFailureAlert(StringUtils.join(entitiesWithNoId, ","),
