@@ -55,6 +55,14 @@ public interface PersonService {
   PersonDTO findOne(Long id);
 
   /**
+   * Get a person by Gmc Id
+   *
+   * @param gmcId the GMC Id of the entity
+   * @return the entity
+   */
+  PersonDTO findOneByGmcId(String gmcId);
+
+  /**
    * Delete the "id" person.
    *
    * @param id the id of the entity

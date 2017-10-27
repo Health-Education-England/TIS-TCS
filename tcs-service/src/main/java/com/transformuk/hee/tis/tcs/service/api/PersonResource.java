@@ -190,6 +190,21 @@ public class PersonResource {
   }
 
   /**
+   * GET  /people/{id}/placements : get all the placements for a trainee.
+   *
+   * @param gmcId the trainee GMC Id
+   * @return the ResponseEntity with status 200 (OK) and the list of placements in body
+   */
+  @GetMapping("/people/gmc/{gmcId}/placements")
+  @Timed
+  @PreAuthorize("hasPermission('tis:people::person:', 'View')")
+  public ResponseEntity<Set<PlacementDTO>> getPlacementsForTraineeByGmcId(@PathVariable String gmcId) {
+    log.debug("REST request to get a page of Placements");
+    PersonDTO person = personService.findOneByGmcId(gmcId);
+    return ResponseUtil.wrapOrNotFound(Optional.ofNullable(person != null ? person.getPlacements() : null));
+  }
+
+  /**
    * POST  /people : Bulk patch people.
    *
    * @param personDTOs the personDTOs to create/update

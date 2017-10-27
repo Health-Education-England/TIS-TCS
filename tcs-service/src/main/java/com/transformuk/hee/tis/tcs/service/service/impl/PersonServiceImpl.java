@@ -124,6 +124,20 @@ public class PersonServiceImpl implements PersonService {
   }
 
   /**
+   * Get one person by GMC Id.
+   *
+   * @param gmcId the Gmc Id of the entity
+   * @return the entity
+   */
+  @Override
+  @Transactional(readOnly = true)
+  public PersonDTO findOneByGmcId(String gmcId) {
+    log.debug("Request to get Person by GMC Id : {}", gmcId);
+    Person person = personRepository.findOneByGmcDetailsGmcNumber(gmcId);
+    return personMapper.toDto(person);
+  }
+
+  /**
    * Delete the  person by id.
    *
    * @param id the id of the entity
