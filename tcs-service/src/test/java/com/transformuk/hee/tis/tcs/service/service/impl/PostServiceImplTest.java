@@ -377,57 +377,65 @@ public class PostServiceImplTest {
 
 
   @Test
-  public void pathPostSpecialties() {
+  public void patchPostSpecialties() {
     List<Long> postIds = Lists.newArrayList(1L);
     List<String> intrepidIds = Lists.newArrayList("intrepid1");
 
-    PostSpecialtyDTO postSpecialtyDTO = new PostSpecialtyDTO();
-    postSpecialtyDTO.setPostSpecialtyType(PostSpecialtyType.PRIMARY);
-    SpecialtyDTO specialtyDTO = new SpecialtyDTO();
-    specialtyDTO.setId(2L);
-    postSpecialtyDTO.setSpecialty(specialtyDTO);
+    PostSpecialtyDTO newPostSpecialtyDTO = new PostSpecialtyDTO();
+    newPostSpecialtyDTO.setPostSpecialtyType(PostSpecialtyType.OTHER);
+    SpecialtyDTO newSpecialtyDTO = new SpecialtyDTO();
+    newSpecialtyDTO.setId(2L);
+    newPostSpecialtyDTO.setSpecialty(newSpecialtyDTO);
 
-    PostDTO sendPostData = new PostDTO();
-    sendPostData.id(postIds.get(0)).intrepidId(intrepidIds.get(0)).specialties(Sets.newHashSet(postSpecialtyDTO));
+    PostDTO postDTOToSend = new PostDTO();
+    postDTOToSend.id(postIds.get(0)).intrepidId(intrepidIds.get(0)).specialties(Sets.newHashSet(newPostSpecialtyDTO));
 
-    Specialty specialty = new Specialty();
-    specialty.setId(2L);
-    PostSpecialty postSpecialty = new PostSpecialty();
-    postSpecialty.setPostSpecialtyType(PostSpecialtyType.PRIMARY);
-    postSpecialty.setSpecialty(specialty);
+    Specialty primarySpecialty = new Specialty();
+    primarySpecialty.setId(2L);
+    PostSpecialty primaryPostSpecialty = new PostSpecialty();
+    primaryPostSpecialty.setPostSpecialtyType(PostSpecialtyType.PRIMARY);
+    primaryPostSpecialty.setSpecialty(primarySpecialty);
 
-    Post currentPost = new Post();
-    currentPost.setId(postIds.get(0));
-    currentPost.setIntrepidId(intrepidIds.get(0));
-    currentPost.setSpecialties(Sets.newHashSet(postSpecialty));
+    Post postInRepository = new Post();
+    postInRepository.setId(postIds.get(0));
+    postInRepository.setIntrepidId(intrepidIds.get(0));
+    postInRepository.setSpecialties(Sets.newHashSet(primaryPostSpecialty));
 
-    Set<Post> postsFromRepository = Sets.newHashSet(currentPost);
-    List<Post> savedPosts = Lists.newArrayList(currentPost);
+    Set<Post> postsFromRepository = Sets.newHashSet(postInRepository);
+    List<Post> savedPosts = Lists.newArrayList(postInRepository);
 
     PostDTO expectedDTO = new PostDTO();
-    Set<PostSpecialtyDTO> expectedSpecialties = Sets.newHashSet(postSpecialtyDTO);
-    expectedDTO.id(sendPostData.getId()).intrepidId(currentPost.getIntrepidId()).specialties(expectedSpecialties);
+    Set<PostSpecialtyDTO> expectedSpecialties = Sets.newHashSet(newPostSpecialtyDTO);
+    expectedDTO.id(postDTOToSend.getId()).intrepidId(postInRepository.getIntrepidId()).specialties(expectedSpecialties);
 
     List<PostDTO> transformedPosts = Lists.newArrayList(expectedDTO);
     Set<Long> specialtyIds = Sets.newHashSet(2L);
 
 
     when(postRepositoryMock.findPostByIntrepidIdIn(Sets.newHashSet(intrepidIds))).thenReturn(postsFromRepository);
-    when(specialtyRepositoryMock.findAll(specialtyIds)).thenReturn(Lists.newArrayList(specialty));
-    when(postRepositoryMock.save(Lists.newArrayList(currentPost))).thenReturn(savedPosts);
+    when(specialtyRepositoryMock.findAll(specialtyIds)).thenReturn(Lists.newArrayList(primarySpecialty));
+    when(postRepositoryMock.save(Lists.newArrayList(postInRepository))).thenReturn(savedPosts);
     when(postMapperMock.postsToPostDTOs(savedPosts)).thenReturn(transformedPosts);
 
-    List<PostDTO> result = testObj.patchPostSpecialties(Lists.newArrayList(sendPostData));
+    List<PostDTO> result = testObj.patchPostSpecialties(Lists.newArrayList(postDTOToSend));
 
     verify(postRepositoryMock).findPostByIntrepidIdIn(Sets.newHashSet(intrepidIds));
     verify(postSpecialtyRepositoryMock).save(postSpecialtyArgumentCaptor.capture());
     verify(postMapperMock).postsToPostDTOs(savedPosts);
 
     Set<PostSpecialty> postSpecialtyValueSet = postSpecialtyArgumentCaptor.getValue();
-    PostSpecialty postSpecialtyValue = postSpecialtyValueSet.iterator().next();
-    Assert.assertEquals(postSpecialtyDTO.getPostSpecialtyType(), postSpecialtyValue.getPostSpecialtyType());
-    Assert.assertEquals(currentPost.getId(), postSpecialtyValue.getPost().getId());
-    Assert.assertEquals(postSpecialtyDTO.getSpecialty().getId(), postSpecialtyValue.getSpecialty().getId());
+
+    PostSpecialty postSpecialtyValue = null;
+    for (PostSpecialty savedLink : postSpecialtyValueSet) {
+      if(PostSpecialtyType.OTHER.equals(savedLink.getPostSpecialtyType())){
+        postSpecialtyValue = savedLink;
+        break;
+      }
+    }
+
+    Assert.assertEquals(PostSpecialtyType.OTHER, postSpecialtyValue.getPostSpecialtyType());
+    Assert.assertEquals(postInRepository.getId(), postSpecialtyValue.getPost().getId());
+    Assert.assertEquals(newPostSpecialtyDTO.getSpecialty().getId(), postSpecialtyValue.getSpecialty().getId());
 
     Assert.assertSame(transformedPosts, result);
     Assert.assertEquals(expectedDTO, result.get(0));
