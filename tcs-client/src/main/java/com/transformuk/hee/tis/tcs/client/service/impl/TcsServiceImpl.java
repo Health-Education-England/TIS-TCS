@@ -96,6 +96,11 @@ public class TcsServiceImpl extends AbstractClientService {
   @Value("${tcs.service.url}")
   private String serviceUrl;
 
+  public TcsServiceImpl(@Value("${tcs.client.rate.limit}") double standardRequestsPerSecondLimit,
+                        @Value("${tcs.client.bulk.rate.limit}") double bulkRequestsPerSecondLimit) {
+    super(standardRequestsPerSecondLimit, bulkRequestsPerSecondLimit);
+  }
+
   private ParameterizedTypeReference<List<JsonPatchDTO>> getJsonPatchDtoReference() {
     return new ParameterizedTypeReference<List<JsonPatchDTO>>() {
     };
