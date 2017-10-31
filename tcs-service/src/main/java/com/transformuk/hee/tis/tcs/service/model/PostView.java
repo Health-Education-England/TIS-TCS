@@ -42,14 +42,20 @@ public class PostView implements Serializable {
   @Column(name = "nationalPostNumber")
   private String nationalPostNumber;
 
-  @Column(name = "primarySiteId")
-  private String primarySiteId;
+  @Column(name = "primarySiteCode")
+  private String primarySiteCode;
 
-  @Column(name = "approvedGradeId")
-  private String approvedGradeId;
+  @Column(name = "approvedGradeCode")
+  private String approvedGradeCode;
 
   @Column(name = "primarySpecialtyId")
   private Long primarySpecialtyId;
+
+  @Column(name = "primarySpecialtyCode")
+  private String primarySpecialtyCode;
+
+  @Column(name = "primarySpecialtyName")
+  private String primarySpecialtyName;
 
   @Column(name = "programmeName")
   private String programmeName;
@@ -120,20 +126,20 @@ public class PostView implements Serializable {
     this.nationalPostNumber = nationalPostNumber;
   }
 
-  public String getPrimarySiteId() {
-    return primarySiteId;
+  public String getPrimarySiteCode() {
+    return primarySiteCode;
   }
 
-  public void setPrimarySiteId(String primarySiteId) {
-    this.primarySiteId = primarySiteId;
+  public void setPrimarySiteCode(String primarySiteCode) {
+    this.primarySiteCode = primarySiteCode;
   }
 
-  public String getApprovedGradeId() {
-    return approvedGradeId;
+  public String getApprovedGradeCode() {
+    return approvedGradeCode;
   }
 
-  public void setApprovedGradeId(String approvedGradeId) {
-    this.approvedGradeId = approvedGradeId;
+  public void setApprovedGradeCode(String approvedGradeCode) {
+    this.approvedGradeCode = approvedGradeCode;
   }
 
   public Long getPrimarySpecialtyId() {
@@ -142,6 +148,22 @@ public class PostView implements Serializable {
 
   public void setPrimarySpecialtyId(Long primarySpecialtyId) {
     this.primarySpecialtyId = primarySpecialtyId;
+  }
+
+  public String getPrimarySpecialtyCode() {
+    return primarySpecialtyCode;
+  }
+
+  public void setPrimarySpecialtyCode(String primarySpecialtyCode) {
+    this.primarySpecialtyCode = primarySpecialtyCode;
+  }
+
+  public String getPrimarySpecialtyName() {
+    return primarySpecialtyName;
+  }
+
+  public void setPrimarySpecialtyName(String primarySpecialtyName) {
+    this.primarySpecialtyName = primarySpecialtyName;
   }
 
   public String getProgrammeName() {
@@ -202,19 +224,23 @@ public class PostView implements Serializable {
       return false;
     if (nationalPostNumber != null ? !nationalPostNumber.equals(postView.nationalPostNumber) : postView.nationalPostNumber != null)
       return false;
-    if (primarySiteId != null ? !primarySiteId.equals(postView.primarySiteId) : postView.primarySiteId != null)
+    if (primarySiteCode != null ? !primarySiteCode.equals(postView.primarySiteCode) : postView.primarySiteCode != null)
       return false;
-    if (approvedGradeId != null ? !approvedGradeId.equals(postView.approvedGradeId) : postView.approvedGradeId != null)
+    if (approvedGradeCode != null ? !approvedGradeCode.equals(postView.approvedGradeCode) : postView.approvedGradeCode != null)
       return false;
     if (primarySpecialtyId != null ? !primarySpecialtyId.equals(postView.primarySpecialtyId) : postView.primarySpecialtyId != null)
       return false;
-    if (programmeName != null ? !programmeName.equals(postView.programmeName) : postView.programmeName != null)
+    if (primarySpecialtyCode != null ? !primarySpecialtyCode.equals(postView.primarySpecialtyCode) : postView.primarySpecialtyCode != null)
       return false;
-    if (intrepidId != null ? !intrepidId.equals(postView.intrepidId) : postView.intrepidId != null)
+    if (primarySpecialtyName != null ? !primarySpecialtyName.equals(postView.primarySpecialtyName) : postView.primarySpecialtyName != null)
+      return false;
+    if (programmeName != null ? !programmeName.equals(postView.programmeName) : postView.programmeName != null)
       return false;
     if (status != postView.status) return false;
     if (fundingType != postView.fundingType) return false;
-    return managingLocalOffice != null ? managingLocalOffice.equals(postView.managingLocalOffice) : postView.managingLocalOffice == null;
+    if (managingLocalOffice != null ? !managingLocalOffice.equals(postView.managingLocalOffice) : postView.managingLocalOffice != null)
+      return false;
+    return intrepidId != null ? intrepidId.equals(postView.intrepidId) : postView.intrepidId == null;
   }
 
   @Override
@@ -225,9 +251,11 @@ public class PostView implements Serializable {
     result = 31 * result + (currentTraineeSurname != null ? currentTraineeSurname.hashCode() : 0);
     result = 31 * result + (currentTraineeForenames != null ? currentTraineeForenames.hashCode() : 0);
     result = 31 * result + (nationalPostNumber != null ? nationalPostNumber.hashCode() : 0);
-    result = 31 * result + (primarySiteId != null ? primarySiteId.hashCode() : 0);
-    result = 31 * result + (approvedGradeId != null ? approvedGradeId.hashCode() : 0);
+    result = 31 * result + (primarySiteCode != null ? primarySiteCode.hashCode() : 0);
+    result = 31 * result + (approvedGradeCode != null ? approvedGradeCode.hashCode() : 0);
     result = 31 * result + (primarySpecialtyId != null ? primarySpecialtyId.hashCode() : 0);
+    result = 31 * result + (primarySpecialtyCode != null ? primarySpecialtyCode.hashCode() : 0);
+    result = 31 * result + (primarySpecialtyName != null ? primarySpecialtyName.hashCode() : 0);
     result = 31 * result + (programmeName != null ? programmeName.hashCode() : 0);
     result = 31 * result + status.hashCode();
     result = 31 * result + (fundingType != null ? fundingType.hashCode() : 0);
@@ -245,9 +273,11 @@ public class PostView implements Serializable {
         ", currentTraineeSurname='" + currentTraineeSurname + '\'' +
         ", currentTraineeForenames='" + currentTraineeForenames + '\'' +
         ", nationalPostNumber='" + nationalPostNumber + '\'' +
-        ", primarySiteId='" + primarySiteId + '\'' +
-        ", approvedGradeId='" + approvedGradeId + '\'' +
+        ", primarySiteCode='" + primarySiteCode + '\'' +
+        ", approvedGradeCode='" + approvedGradeCode + '\'' +
         ", primarySpecialtyId=" + primarySpecialtyId +
+        ", primarySpecialtyCode='" + primarySpecialtyCode + '\'' +
+        ", primarySpecialtyName='" + primarySpecialtyName + '\'' +
         ", programmeName='" + programmeName + '\'' +
         ", status=" + status +
         ", fundingType=" + fundingType +

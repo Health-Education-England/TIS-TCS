@@ -16,6 +16,7 @@ import com.transformuk.hee.tis.tcs.api.enumeration.PostSpecialtyType;
 import com.transformuk.hee.tis.tcs.api.enumeration.PostSuffix;
 import com.transformuk.hee.tis.tcs.api.enumeration.Status;
 import com.transformuk.hee.tis.tcs.service.Application;
+import com.transformuk.hee.tis.tcs.service.api.decorator.PostViewDecorator;
 import com.transformuk.hee.tis.tcs.service.api.validation.PostValidator;
 import com.transformuk.hee.tis.tcs.service.exception.ExceptionTranslator;
 import com.transformuk.hee.tis.tcs.service.model.Placement;
@@ -116,6 +117,9 @@ public class PostResourceIntTest {
   private PostViewRepository postViewRepository;
 
   @Autowired
+  private PostViewDecorator postViewDecorator;
+
+  @Autowired
   private SpecialtyRepository specialtyRepository;
 
   @Autowired
@@ -190,8 +194,8 @@ public class PostResourceIntTest {
     postView.setNationalPostNumber(DEFAULT_NATIONAL_POST_NUMBER);
     postView.setStatus(DEFAULT_STATUS);
     postView.setManagingLocalOffice(MANAGING_LOCAL_OFFICE);
-    postView.setApprovedGradeId(GRADE_ID);
-    postView.setPrimarySiteId(SITE_ID);
+    postView.setApprovedGradeCode(GRADE_ID);
+    postView.setPrimarySiteCode(SITE_ID);
     postView.setPrimarySpecialtyId(specialtyId);
 
     return postView;
@@ -573,13 +577,13 @@ public class PostResourceIntTest {
 
     String siteId = post.getSites().iterator().next().getSiteId();
     //when & then
-    String colFilters = new URLCodec().encode("{\"primarySiteId\":[\"" + siteId + "\"],\"managingLocalOffice\":[\"" +
+    String colFilters = new URLCodec().encode("{\"primarySiteCode\":[\"" + siteId + "\"],\"managingLocalOffice\":[\"" +
         MANAGING_LOCAL_OFFICE + "\"]}");
     // Get all the programmeList
     restPostMockMvc.perform(get("/api/posts?sort=id,desc&columnFilters=" +
         colFilters))
         .andExpect(status().isOk())
-        .andExpect(jsonPath("$.[*].primarySiteId").value(hasItem(siteId)))
+        .andExpect(jsonPath("$.[*].primarySiteCode").value(hasItem(siteId)))
         .andExpect(jsonPath("$.[*].managingLocalOffice").value(hasItem(MANAGING_LOCAL_OFFICE)));
   }
 
@@ -589,13 +593,13 @@ public class PostResourceIntTest {
 
     String gradeId = post.getGrades().iterator().next().getGradeId();
     //when & then
-    String colFilters = new URLCodec().encode("{\"approvedGradeId\":[\"" + gradeId + "\"],\"managingLocalOffice\":[\"" +
+    String colFilters = new URLCodec().encode("{\"approvedGradeCode\":[\"" + gradeId + "\"],\"managingLocalOffice\":[\"" +
         MANAGING_LOCAL_OFFICE + "\"]}");
     // Get all the programmeList
     restPostMockMvc.perform(get("/api/posts?sort=id,desc&columnFilters=" +
         colFilters))
         .andExpect(status().isOk())
-        .andExpect(jsonPath("$.[*].approvedGradeId").value(hasItem(gradeId)))
+        .andExpect(jsonPath("$.[*].approvedGradeCode").value(hasItem(gradeId)))
         .andExpect(jsonPath("$.[*].managingLocalOffice").value(hasItem(MANAGING_LOCAL_OFFICE)));
   }
 

@@ -25,11 +25,19 @@ public class PostViewDTO implements Serializable {
 
   private String nationalPostNumber;
 
-  private String primarySiteId;
+  private String primarySiteCode;
 
-  private String approvedGradeId;
+  private String primarySiteName;
+
+  private String approvedGradeCode;
+
+  private String approvedGradeName;
 
   private Long primarySpecialtyId;
+
+  private String primarySpecialtyCode;
+
+  private String primarySpecialtyName;
 
   private String programmeName;
 
@@ -93,20 +101,36 @@ public class PostViewDTO implements Serializable {
     this.nationalPostNumber = nationalPostNumber;
   }
 
-  public String getPrimarySiteId() {
-    return primarySiteId;
+  public String getPrimarySiteCode() {
+    return primarySiteCode;
   }
 
-  public void setPrimarySiteId(String primarySiteId) {
-    this.primarySiteId = primarySiteId;
+  public void setPrimarySiteCode(String primarySiteCode) {
+    this.primarySiteCode = primarySiteCode;
   }
 
-  public String getApprovedGradeId() {
-    return approvedGradeId;
+  public String getPrimarySiteName() {
+    return primarySiteName;
   }
 
-  public void setApprovedGradeId(String approvedGradeId) {
-    this.approvedGradeId = approvedGradeId;
+  public void setPrimarySiteName(String primarySiteName) {
+    this.primarySiteName = primarySiteName;
+  }
+
+  public String getApprovedGradeCode() {
+    return approvedGradeCode;
+  }
+
+  public void setApprovedGradeCode(String approvedGradeCode) {
+    this.approvedGradeCode = approvedGradeCode;
+  }
+
+  public String getApprovedGradeName() {
+    return approvedGradeName;
+  }
+
+  public void setApprovedGradeName(String approvedGradeName) {
+    this.approvedGradeName = approvedGradeName;
   }
 
   public Long getPrimarySpecialtyId() {
@@ -115,6 +139,22 @@ public class PostViewDTO implements Serializable {
 
   public void setPrimarySpecialtyId(Long primarySpecialtyId) {
     this.primarySpecialtyId = primarySpecialtyId;
+  }
+
+  public String getPrimarySpecialtyCode() {
+    return primarySpecialtyCode;
+  }
+
+  public void setPrimarySpecialtyCode(String primarySpecialtyCode) {
+    this.primarySpecialtyCode = primarySpecialtyCode;
+  }
+
+  public String getPrimarySpecialtyName() {
+    return primarySpecialtyName;
+  }
+
+  public void setPrimarySpecialtyName(String primarySpecialtyName) {
+    this.primarySpecialtyName = primarySpecialtyName;
   }
 
   public String getProgrammeName() {
@@ -157,6 +197,7 @@ public class PostViewDTO implements Serializable {
     this.intrepidId = intrepidId;
   }
 
+
   @Override
   public boolean equals(Object o) {
     if (this == o) return true;
@@ -175,16 +216,25 @@ public class PostViewDTO implements Serializable {
       return false;
     if (nationalPostNumber != null ? !nationalPostNumber.equals(that.nationalPostNumber) : that.nationalPostNumber != null)
       return false;
-    if (primarySiteId != null ? !primarySiteId.equals(that.primarySiteId) : that.primarySiteId != null) return false;
-    if (approvedGradeId != null ? !approvedGradeId.equals(that.approvedGradeId) : that.approvedGradeId != null)
+    if (primarySiteCode != null ? !primarySiteCode.equals(that.primarySiteCode) : that.primarySiteCode != null) return false;
+    if (primarySiteName != null ? !primarySiteName.equals(that.primarySiteName) : that.primarySiteName != null)
+      return false;
+    if (approvedGradeCode != null ? !approvedGradeCode.equals(that.approvedGradeCode) : that.approvedGradeCode != null)
+      return false;
+    if (approvedGradeName != null ? !approvedGradeName.equals(that.approvedGradeName) : that.approvedGradeName != null)
       return false;
     if (primarySpecialtyId != null ? !primarySpecialtyId.equals(that.primarySpecialtyId) : that.primarySpecialtyId != null)
       return false;
+    if (primarySpecialtyCode != null ? !primarySpecialtyCode.equals(that.primarySpecialtyCode) : that.primarySpecialtyCode != null)
+      return false;
+    if (primarySpecialtyName != null ? !primarySpecialtyName.equals(that.primarySpecialtyName) : that.primarySpecialtyName != null)
+      return false;
     if (programmeName != null ? !programmeName.equals(that.programmeName) : that.programmeName != null) return false;
-    if (intrepidId != null ? !intrepidId.equals(that.intrepidId) : that.intrepidId != null) return false;
     if (status != that.status) return false;
     if (fundingType != that.fundingType) return false;
-    return managingLocalOffice != null ? managingLocalOffice.equals(that.managingLocalOffice) : that.managingLocalOffice == null;
+    if (managingLocalOffice != null ? !managingLocalOffice.equals(that.managingLocalOffice) : that.managingLocalOffice != null)
+      return false;
+    return intrepidId != null ? intrepidId.equals(that.intrepidId) : that.intrepidId == null;
   }
 
   @Override
@@ -195,9 +245,13 @@ public class PostViewDTO implements Serializable {
     result = 31 * result + (currentTraineeSurname != null ? currentTraineeSurname.hashCode() : 0);
     result = 31 * result + (currentTraineeForenames != null ? currentTraineeForenames.hashCode() : 0);
     result = 31 * result + (nationalPostNumber != null ? nationalPostNumber.hashCode() : 0);
-    result = 31 * result + (primarySiteId != null ? primarySiteId.hashCode() : 0);
-    result = 31 * result + (approvedGradeId != null ? approvedGradeId.hashCode() : 0);
+    result = 31 * result + (primarySiteCode != null ? primarySiteCode.hashCode() : 0);
+    result = 31 * result + (primarySiteName != null ? primarySiteName.hashCode() : 0);
+    result = 31 * result + (approvedGradeCode != null ? approvedGradeCode.hashCode() : 0);
+    result = 31 * result + (approvedGradeName != null ? approvedGradeName.hashCode() : 0);
     result = 31 * result + (primarySpecialtyId != null ? primarySpecialtyId.hashCode() : 0);
+    result = 31 * result + (primarySpecialtyCode != null ? primarySpecialtyCode.hashCode() : 0);
+    result = 31 * result + (primarySpecialtyName != null ? primarySpecialtyName.hashCode() : 0);
     result = 31 * result + (programmeName != null ? programmeName.hashCode() : 0);
     result = 31 * result + status.hashCode();
     result = 31 * result + (fundingType != null ? fundingType.hashCode() : 0);
@@ -215,9 +269,13 @@ public class PostViewDTO implements Serializable {
         ", currentTraineeSurname='" + currentTraineeSurname + '\'' +
         ", currentTraineeForenames='" + currentTraineeForenames + '\'' +
         ", nationalPostNumber='" + nationalPostNumber + '\'' +
-        ", primarySiteId='" + primarySiteId + '\'' +
-        ", approvedGradeId='" + approvedGradeId + '\'' +
+        ", primarySiteCode='" + primarySiteCode + '\'' +
+        ", primarySiteName='" + primarySiteName + '\'' +
+        ", approvedGradeCode='" + approvedGradeCode + '\'' +
+        ", approvedGradeName='" + approvedGradeName + '\'' +
         ", primarySpecialtyId=" + primarySpecialtyId +
+        ", primarySpecialtyCode='" + primarySpecialtyCode + '\'' +
+        ", primarySpecialtyName='" + primarySpecialtyName + '\'' +
         ", programmeName='" + programmeName + '\'' +
         ", status=" + status +
         ", fundingType=" + fundingType +
