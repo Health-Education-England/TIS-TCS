@@ -11,6 +11,7 @@ import com.transformuk.hee.tis.tcs.api.dto.PostSpecialtyDTO;
 import com.transformuk.hee.tis.tcs.api.dto.PostViewDTO;
 import com.transformuk.hee.tis.tcs.api.dto.ProgrammeDTO;
 import com.transformuk.hee.tis.tcs.api.dto.SpecialtyDTO;
+import com.transformuk.hee.tis.tcs.service.api.decorator.PostViewDecorator;
 import com.transformuk.hee.tis.tcs.service.model.ColumnFilter;
 import com.transformuk.hee.tis.tcs.service.model.Placement;
 import com.transformuk.hee.tis.tcs.service.model.Post;
@@ -84,6 +85,8 @@ public class PostServiceImpl implements PostService {
   private PostMapper postMapper;
   @Autowired
   private PostViewMapper postViewMapper;
+  @Autowired
+  private PostViewDecorator postViewDecorator;
 
   /**
    * Save a post.
@@ -363,7 +366,9 @@ public class PostServiceImpl implements PostService {
   public Page<PostViewDTO> findAll(Pageable pageable) {
     log.debug("Request to get all Posts");
     Page<PostView> result = postViewRepository.findAll(pageable);
-    return result.map(postView -> postViewMapper.postViewToPostViewDTO(postView));
+    Page<PostViewDTO> dtoPage = result.map(postView -> postViewMapper.postViewToPostViewDTO(postView));
+    postViewDecorator.decorate(dtoPage.getContent());
+    return dtoPage;
   }
 
   @Override
@@ -396,7 +401,9 @@ public class PostServiceImpl implements PostService {
       result = postViewRepository.findAll(pageable);
     }
 
-    return result.map(postView -> postViewMapper.postViewToPostViewDTO(postView));
+    Page<PostViewDTO> dtoPage = result.map(postView -> postViewMapper.postViewToPostViewDTO(postView));
+    postViewDecorator.decorate(dtoPage.getContent());
+    return dtoPage;
   }
 
   /**
