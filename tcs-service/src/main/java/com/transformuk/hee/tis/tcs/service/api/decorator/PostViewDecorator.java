@@ -15,6 +15,7 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
+import java.util.concurrent.CountDownLatch;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
@@ -28,13 +29,14 @@ import java.util.stream.Collectors;
 @Component
 public class PostViewDecorator {
 
-  public static final int EXECUTOR_THREAD_POOL_SIZE = 3;
   private static final Logger log = LoggerFactory.getLogger(PostViewDecorator.class);
   private ReferenceService referenceService;
+  private DelegatingSecurityContextExecutorService executorService;
 
   @Autowired
-  public PostViewDecorator(ReferenceService referenceService) {
+  public PostViewDecorator(ReferenceService referenceService, DelegatingSecurityContextExecutorService executorService) {
     this.referenceService = referenceService;
+    this.executorService = executorService;
   }
 
   /**
@@ -54,71 +56,54 @@ public class PostViewDecorator {
         siteCodes.add(postView.getPrimarySiteCode());
       }
     });
-    DelegatingSecurityContextExecutorService executorService = new DelegatingSecurityContextExecutorService(
-        Executors.newFixedThreadPool(EXECUTOR_THREAD_POOL_SIZE));
 
-    Future<Map<String, SiteDTO>> sitesFuture = getSitesFuture(siteCodes, executorService);
-    Future<Map<String, GradeDTO>> gradesFuture = getGradesFuture(gradeCodes, executorService);
-
-    decorateGradesOnPost(gradesFuture, executorService, postViews);
-    decorateSiteOnPost(sitesFuture, executorService, postViews);
+    CountDownLatch latch = new CountDownLatch(2);
+    decorateGradesOnPost(gradeCodes, executorService, postViews, latch);
+    decorateSiteOnPost(siteCodes, executorService, postViews, latch);
 
     try {
-      executorService.awaitTermination(5L, TimeUnit.SECONDS);
+      latch.await();
     } catch (InterruptedException e) {
       log.error("Exception occurred while waiting for executor service to shutdown {}", e);
     }
   }
 
-  private Future<Map<String, GradeDTO>> getGradesFuture(Set<String> gradeCodes, ExecutorService executorService) {
-    return executorService.submit(() -> {
-      List<GradeDTO> grades = Lists.newArrayList();
-      try {
-        referenceService.findGradesIn(gradeCodes);
-      } catch (Exception e) {
-        log.warn("Reference decorator call to grades failed", e);
-      }
-      return grades.stream().collect(Collectors.toMap(GradeDTO::getAbbreviation, g -> g));
-    });
-  }
 
-  private Future<Map<String, SiteDTO>> getSitesFuture(Set<String> siteCodes, ExecutorService executorService) {
-    return executorService.submit(() -> {
-      List<SiteDTO> sites = Lists.newArrayList();
-      try {
-        sites = referenceService.findSitesIn(siteCodes);
-      } catch (Exception e) {
-        log.warn("Reference decorator call to sites failed", e);
-      }
-      return sites.stream().collect(Collectors.toMap(SiteDTO::getSiteCode, s -> s));
-    });
-  }
-
-  private void decorateGradesOnPost(Future<Map<String, GradeDTO>> gradesFuture, ExecutorService executorService,
-                                    List<PostViewDTO> postViews) {
-    Runnable postGradeDecoratorRunnable = new PostGradeDecoratorRunnable(gradesFuture, postViews);
+  private void decorateGradesOnPost(Set<String> gradeCodes, ExecutorService executorService,
+                                    List<PostViewDTO> postViews, CountDownLatch latch) {
+    Runnable postGradeDecoratorRunnable = new PostGradeDecoratorRunnable(gradeCodes, postViews, latch);
     executorService.submit(postGradeDecoratorRunnable);
   }
 
-  private void decorateSiteOnPost(Future<Map<String, SiteDTO>> sitesFuture, ExecutorService executorService,
-                                  List<PostViewDTO> postViews) {
-    Runnable postSiteDecoratorRunnable = new PostSiteDecoratorRunnable(sitesFuture, postViews);
+  private void decorateSiteOnPost(Set<String> siteCodes, ExecutorService executorService,
+                                  List<PostViewDTO> postViews, CountDownLatch latch) {
+    Runnable postSiteDecoratorRunnable = new PostSiteDecoratorRunnable(siteCodes, postViews, latch);
     executorService.submit(postSiteDecoratorRunnable);
   }
 
-  class PostGradeDecoratorRunnable implements Runnable {
-    private Future<Map<String, GradeDTO>> gradesFuture;
-    private List<PostViewDTO> postViews;
 
-    public PostGradeDecoratorRunnable(Future<Map<String, GradeDTO>> gradesFuture, List<PostViewDTO> postViews) {
-      this.gradesFuture = gradesFuture;
+
+
+
+
+  class PostGradeDecoratorRunnable implements Runnable {
+    private Set<String> gradeCodes;
+    private List<PostViewDTO> postViews;
+    private CountDownLatch latch;
+
+    public PostGradeDecoratorRunnable(Set<String> gradeCodes, List<PostViewDTO> postViews, CountDownLatch latch) {
+      this.gradeCodes = gradeCodes;
       this.postViews = postViews;
+      this.latch = latch;
     }
 
     @Override
     public void run() {
+
+      List<GradeDTO> grades = Lists.newArrayList();
       try {
-        Map<String, GradeDTO> gradeMap = gradesFuture.get();
+        referenceService.findGradesIn(gradeCodes);
+        Map<String, GradeDTO> gradeMap = grades.stream().collect(Collectors.toMap(GradeDTO::getAbbreviation, g -> g));
         for (PostViewDTO postView : postViews) {
           if (postView.getApprovedGradeCode() != null && !postView.getApprovedGradeCode().isEmpty()) {
             if (gradeMap.containsKey(postView.getApprovedGradeCode())) {
@@ -126,29 +111,32 @@ public class PostViewDecorator {
             }
           }
         }
-      } catch (InterruptedException e) {
-        e.printStackTrace();
-      } catch (ExecutionException e) {
-        e.printStackTrace();
+        latch.countDown();
+      } catch (Exception e) {
+        log.warn("Reference decorator call to grades failed", e);
+        latch.countDown();
       }
-
     }
   }
 
   class PostSiteDecoratorRunnable implements Runnable {
 
-    private Future<Map<String, SiteDTO>> sitesFuture;
+    private Set<String> siteCodes;
     private List<PostViewDTO> postViews;
+    private CountDownLatch latch;
 
-    public PostSiteDecoratorRunnable(Future<Map<String, SiteDTO>> sitesFuture, List<PostViewDTO> postViews) {
-      this.sitesFuture = sitesFuture;
+    public PostSiteDecoratorRunnable(Set<String> siteCodes, List<PostViewDTO> postViews, CountDownLatch latch) {
+      this.siteCodes = siteCodes;
       this.postViews = postViews;
+      this.latch = latch;
     }
 
     @Override
     public void run() {
       try {
-        Map<String, SiteDTO> siteMap = sitesFuture.get();
+        List<SiteDTO> sites = referenceService.findSitesIn(siteCodes);
+        Map<String, SiteDTO> siteMap = sites.stream().collect(Collectors.toMap(SiteDTO::getSiteCode, s -> s));
+
         for (PostViewDTO postView : postViews) {
           if (postView.getPrimarySiteCode() != null && !postView.getPrimarySiteCode().isEmpty()) {
             if (siteMap.containsKey(postView.getPrimarySiteCode())) {
@@ -156,10 +144,10 @@ public class PostViewDecorator {
             }
           }
         }
-      } catch (InterruptedException e) {
+        latch.countDown();
+      } catch (Exception e) {
         e.printStackTrace();
-      } catch (ExecutionException e) {
-        e.printStackTrace();
+        latch.countDown();
       }
     }
   }
