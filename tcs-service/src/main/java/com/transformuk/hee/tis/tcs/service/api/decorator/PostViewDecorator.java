@@ -5,6 +5,7 @@ import com.transformuk.hee.tis.reference.api.dto.GradeDTO;
 import com.transformuk.hee.tis.reference.api.dto.SiteDTO;
 import com.transformuk.hee.tis.reference.client.ReferenceService;
 import com.transformuk.hee.tis.tcs.api.dto.PostViewDTO;
+import org.apache.commons.lang.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -49,10 +50,10 @@ public class PostViewDecorator {
     Set<String> gradeCodes = new HashSet<>();
     Set<String> siteCodes = new HashSet<>();
     postViews.forEach(postView -> {
-      if (postView.getApprovedGradeCode() != null && !postView.getApprovedGradeCode().isEmpty()) {
+      if (StringUtils.isNotBlank(postView.getApprovedGradeCode())) {
         gradeCodes.add(postView.getApprovedGradeCode());
       }
-      if (postView.getPrimarySiteCode() != null && !postView.getPrimarySiteCode().isEmpty()) {
+      if (StringUtils.isNotBlank(postView.getPrimarySiteCode())) {
         siteCodes.add(postView.getPrimarySiteCode());
       }
     });

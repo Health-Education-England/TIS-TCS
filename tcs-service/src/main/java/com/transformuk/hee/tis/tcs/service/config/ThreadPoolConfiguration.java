@@ -13,7 +13,7 @@ public class ThreadPoolConfiguration {
 
   @Bean
   public DelegatingSecurityContextExecutorService executorService(){
-    return new DelegatingSecurityContextExecutorService(Executors.newWorkStealingPool(EXECUTOR_THREAD_POOL_SIZE));
+    return new DelegatingSecurityContextExecutorService(Executors.newCachedThreadPool());
 
   }
 }
