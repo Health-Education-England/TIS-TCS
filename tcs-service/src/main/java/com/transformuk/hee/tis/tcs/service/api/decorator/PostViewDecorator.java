@@ -99,10 +99,8 @@ public class PostViewDecorator {
 
     @Override
     public void run() {
-
-      List<GradeDTO> grades = Lists.newArrayList();
       try {
-        referenceService.findGradesIn(gradeCodes);
+        List<GradeDTO> grades = referenceService.findGradesIn(gradeCodes);
         Map<String, GradeDTO> gradeMap = grades.stream().collect(Collectors.toMap(GradeDTO::getAbbreviation, g -> g));
         for (PostViewDTO postView : postViews) {
           if (postView.getApprovedGradeCode() != null && !postView.getApprovedGradeCode().isEmpty()) {
