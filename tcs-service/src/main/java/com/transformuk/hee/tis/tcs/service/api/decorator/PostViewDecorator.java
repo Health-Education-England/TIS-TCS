@@ -8,14 +8,13 @@ import com.transformuk.hee.tis.tcs.api.dto.PostViewDTO;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.security.concurrent.DelegatingSecurityContextExecutorService;
 import org.springframework.stereotype.Component;
 
-import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
-import java.util.concurrent.Callable;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
@@ -29,9 +28,8 @@ import java.util.stream.Collectors;
 @Component
 public class PostViewDecorator {
 
-  private static final Logger log = LoggerFactory.getLogger(PostViewDecorator.class);
   public static final int EXECUTOR_THREAD_POOL_SIZE = 3;
-
+  private static final Logger log = LoggerFactory.getLogger(PostViewDecorator.class);
   private ReferenceService referenceService;
 
   @Autowired
@@ -56,8 +54,8 @@ public class PostViewDecorator {
         siteCodes.add(postView.getPrimarySiteCode());
       }
     });
-
-    ExecutorService executorService = Executors.newFixedThreadPool(EXECUTOR_THREAD_POOL_SIZE);
+    DelegatingSecurityContextExecutorService executorService = new DelegatingSecurityContextExecutorService(
+        Executors.newFixedThreadPool(EXECUTOR_THREAD_POOL_SIZE));
 
     Future<Map<String, SiteDTO>> sitesFuture = getSitesFuture(siteCodes, executorService);
     Future<Map<String, GradeDTO>> gradesFuture = getGradesFuture(gradeCodes, executorService);
@@ -74,26 +72,26 @@ public class PostViewDecorator {
 
   private Future<Map<String, GradeDTO>> getGradesFuture(Set<String> gradeCodes, ExecutorService executorService) {
     return executorService.submit(() -> {
-        List<GradeDTO> grades = Lists.newArrayList();
-        try {
-          referenceService.findGradesIn(gradeCodes);
-        } catch (Exception e) {
-          log.warn("Reference decorator call to grades failed", e);
-        }
-        return grades.stream().collect(Collectors.toMap(GradeDTO::getAbbreviation, g -> g));
-      });
+      List<GradeDTO> grades = Lists.newArrayList();
+      try {
+        referenceService.findGradesIn(gradeCodes);
+      } catch (Exception e) {
+        log.warn("Reference decorator call to grades failed", e);
+      }
+      return grades.stream().collect(Collectors.toMap(GradeDTO::getAbbreviation, g -> g));
+    });
   }
 
   private Future<Map<String, SiteDTO>> getSitesFuture(Set<String> siteCodes, ExecutorService executorService) {
     return executorService.submit(() -> {
-        List<SiteDTO> sites = Lists.newArrayList();
-        try {
-          sites = referenceService.findSitesIn(siteCodes);
-        } catch (Exception e) {
-          log.warn("Reference decorator call to sites failed", e);
-        }
-        return sites.stream().collect(Collectors.toMap(SiteDTO::getSiteCode, s -> s));
-      });
+      List<SiteDTO> sites = Lists.newArrayList();
+      try {
+        sites = referenceService.findSitesIn(siteCodes);
+      } catch (Exception e) {
+        log.warn("Reference decorator call to sites failed", e);
+      }
+      return sites.stream().collect(Collectors.toMap(SiteDTO::getSiteCode, s -> s));
+    });
   }
 
   private void decorateGradesOnPost(Future<Map<String, GradeDTO>> gradesFuture, ExecutorService executorService,
