@@ -6,109 +6,93 @@ import com.transformuk.hee.tis.reference.api.dto.GradeDTO;
 import com.transformuk.hee.tis.reference.api.dto.SiteDTO;
 import com.transformuk.hee.tis.reference.client.ReferenceService;
 import com.transformuk.hee.tis.tcs.api.dto.PostViewDTO;
+import com.transformuk.hee.tis.tcs.service.runnable.PostDecoratorRunnable;
+import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
+import org.mockito.Spy;
 import org.mockito.runners.MockitoJUnitRunner;
 
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Set;
+import java.util.concurrent.CompletableFuture;
+import java.util.concurrent.CountDownLatch;
+import java.util.concurrent.ExecutionException;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Future;
+import java.util.concurrent.TimeUnit;
+import java.util.concurrent.TimeoutException;
 
+import static com.transformuk.hee.tis.tcs.service.api.decorator.PostViewDecorator.LATCH_COUNT;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNull;
 import static org.mockito.BDDMockito.given;
+import static org.mockito.Matchers.any;
+import static org.mockito.Matchers.eq;
+import static org.mockito.Mockito.doReturn;
+import static org.mockito.Mockito.times;
+import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.when;
 
 @RunWith(MockitoJUnitRunner.class)
 public class PostViewDecoratorTest {
 
-  @Mock
-  private ReferenceService referenceService;
+  private static final String PRIMARY_SITE_CODE_1 = "site1";
+  private static final String APPROVED_GRADE_CODE_1 = "grade1";
 
-
+  @Spy
   @InjectMocks
-  private PostViewDecorator postViewDecorator;
+  private PostViewDecorator testObj;
+  @Mock
+  private ReferenceService referenceServiceMock;
+  @Mock
+  private ExecutorService executorServiceMock;
+  @Mock
+  private PostDecoratorRunnable gradeDecoratorRunnableMock, siteDecoratorRunnableMock;
 
+  private List<PostViewDTO> postViewsList;
+  private Set<String> siteCodesSet, gradeCodeSet;
+  private PostViewDTO postView1, postViewWithNoGradeOrSite2;
+  private CountDownLatch countDownLatch;
 
-  @Test
-  public void shouldDecorateIfSitesGradesFound() {
-    // given
-    Set<String> gradeCodes = Sets.newHashSet("grade1", "grade2");
-    GradeDTO gradeDTO1 = new GradeDTO();
-    gradeDTO1.setAbbreviation("grade1");
-    gradeDTO1.setName("gradeName1");
-    GradeDTO gradeDTO2 = new GradeDTO();
-    gradeDTO2.setAbbreviation("grade2");
-    gradeDTO2.setName("gradeName2");
-    given(referenceService.findGradesIn(gradeCodes)).willReturn(Lists.newArrayList(gradeDTO1, gradeDTO2));
+  @Before
+  public void setup() {
+    postView1 = new PostViewDTO();
+    postView1.setPrimarySiteCode(PRIMARY_SITE_CODE_1);
+    postView1.setApprovedGradeCode(APPROVED_GRADE_CODE_1);
 
-    Set<String> siteCodes = Sets.newHashSet("site1", "site2");
-    SiteDTO siteDTO1 = new SiteDTO();
-    siteDTO1.setSiteCode("site1");
-    siteDTO1.setSiteName("siteName1");
-    SiteDTO siteDTO2 = new SiteDTO();
-    siteDTO2.setSiteCode("site2");
-    siteDTO2.setSiteName("siteName2");
-    given(referenceService.findSitesIn(siteCodes)).willReturn(Lists.newArrayList(siteDTO1, siteDTO2));
+    postViewWithNoGradeOrSite2 = new PostViewDTO();
 
-    PostViewDTO postViewDTO1 = new PostViewDTO();
-    postViewDTO1.setApprovedGradeCode("grade1");
-    postViewDTO1.setPrimarySiteCode("site1");
-    PostViewDTO postViewDTO2 = new PostViewDTO();
-    postViewDTO2.setApprovedGradeCode("grade2");
-    postViewDTO2.setPrimarySiteCode("site2");
-    List<PostViewDTO> postViewDTOList = Lists.newArrayList(postViewDTO1, postViewDTO2);
+    postViewsList = Lists.newArrayList(postView1, postViewWithNoGradeOrSite2);
+    siteCodesSet = Sets.newHashSet(PRIMARY_SITE_CODE_1);
+    gradeCodeSet = Sets.newHashSet(APPROVED_GRADE_CODE_1);
 
-    // when
-    postViewDecorator.decorate(postViewDTOList);
-
-    // then
-    PostViewDTO decoratedPostViewDTO1 = postViewDTOList.get(0);
-    PostViewDTO decoratedPostViewDTO2 = postViewDTOList.get(1);
-
-    assertEquals(decoratedPostViewDTO1.getApprovedGradeCode(), "grade1");
-    assertEquals(decoratedPostViewDTO1.getApprovedGradeName(), "gradeName1");
-    assertEquals(decoratedPostViewDTO1.getPrimarySiteCode(), "site1");
-    assertEquals(decoratedPostViewDTO1.getPrimarySiteName(), "siteName1");
-    assertEquals(decoratedPostViewDTO2.getApprovedGradeCode(), "grade2");
-    assertEquals(decoratedPostViewDTO2.getApprovedGradeName(), "gradeName2");
-    assertEquals(decoratedPostViewDTO2.getPrimarySiteCode(), "site2");
-    assertEquals(decoratedPostViewDTO2.getPrimarySiteName(), "siteName2");
+    countDownLatch = new CountDownLatch(LATCH_COUNT);
   }
 
-  @Test
-  public void shouldDecorateIfSitesGradesNotFound() {
-    // given
-    Set<String> gradeCodes = Sets.newHashSet("grade1", "grade2");
-    given(referenceService.findGradesIn(gradeCodes)).willReturn(new ArrayList<>());
+  @Test(timeout = 5000L)
+  public void decorateShouldSetGradesAndPosts() {
 
-    Set<String> siteCodes = Sets.newHashSet("site1", "site2");
-    given(referenceService.findSitesIn(siteCodes)).willReturn(new ArrayList<>());
+    doReturn(countDownLatch).when(testObj).getCountDownLatch(LATCH_COUNT);
+    doReturn(gradeDecoratorRunnableMock).when(testObj).createGradesDecorator(eq(gradeCodeSet), eq(postViewsList), any(CountDownLatch.class));
+    doReturn(siteDecoratorRunnableMock).when(testObj).createSiteDecorator(eq(siteCodesSet), eq(postViewsList), any(CountDownLatch.class));
+    when(executorServiceMock.submit(gradeDecoratorRunnableMock)).then((mock) -> {
+      countDownLatch.countDown();
+      return CompletableFuture.completedFuture("");
+    });
+    when(executorServiceMock.submit(siteDecoratorRunnableMock)).then((mock) -> {
+      countDownLatch.countDown();
+      return CompletableFuture.completedFuture("");
+    });
+    when(executorServiceMock.submit(siteDecoratorRunnableMock)).thenReturn(null);
 
-    PostViewDTO postViewDTO1 = new PostViewDTO();
-    postViewDTO1.setApprovedGradeCode("grade1");
-    postViewDTO1.setPrimarySiteCode("site1");
-    PostViewDTO postViewDTO2 = new PostViewDTO();
-    postViewDTO2.setApprovedGradeCode("grade2");
-    postViewDTO2.setPrimarySiteCode("site2");
-    List<PostViewDTO> postViewDTOList = Lists.newArrayList(postViewDTO1, postViewDTO2);
+    testObj.decorate(postViewsList);
 
-    // when
-    postViewDecorator.decorate(postViewDTOList);
+    verify(executorServiceMock, times(2)).submit(any(PostDecoratorRunnable.class));
 
-    // then
-    PostViewDTO decoratedPostViewDTO1 = postViewDTOList.get(0);
-    PostViewDTO decoratedPostViewDTO2 = postViewDTOList.get(1);
-
-    assertEquals(decoratedPostViewDTO1.getApprovedGradeCode(), "grade1");
-    assertNull(decoratedPostViewDTO1.getApprovedGradeName());
-    assertEquals(decoratedPostViewDTO1.getPrimarySiteCode(), "site1");
-    assertNull(decoratedPostViewDTO1.getPrimarySiteName());
-    assertEquals(decoratedPostViewDTO2.getApprovedGradeCode(), "grade2");
-    assertNull(decoratedPostViewDTO2.getApprovedGradeName());
-    assertEquals(decoratedPostViewDTO2.getPrimarySiteCode(), "site2");
-    assertNull(decoratedPostViewDTO2.getPrimarySiteName());
   }
 
 }
