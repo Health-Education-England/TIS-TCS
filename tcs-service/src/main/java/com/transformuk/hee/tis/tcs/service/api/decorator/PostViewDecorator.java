@@ -1,10 +1,10 @@
 package com.transformuk.hee.tis.tcs.service.api.decorator;
 
-import com.google.common.collect.Lists;
 import com.transformuk.hee.tis.reference.api.dto.GradeDTO;
 import com.transformuk.hee.tis.reference.api.dto.SiteDTO;
 import com.transformuk.hee.tis.reference.client.ReferenceService;
 import com.transformuk.hee.tis.tcs.api.dto.PostViewDTO;
+import com.transformuk.hee.tis.tcs.service.runnable.PostDecoratorRunnable;
 import org.apache.commons.lang.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -17,11 +17,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 import java.util.concurrent.CountDownLatch;
-import java.util.concurrent.ExecutionException;
 import java.util.concurrent.ExecutorService;
-import java.util.concurrent.Executors;
-import java.util.concurrent.Future;
-import java.util.concurrent.TimeUnit;
 import java.util.stream.Collectors;
 
 /**
@@ -72,82 +68,52 @@ public class PostViewDecorator {
 
   private void decorateGradesOnPost(Set<String> gradeCodes, ExecutorService executorService,
                                     List<PostViewDTO> postViews, CountDownLatch latch) {
-    Runnable postGradeDecoratorRunnable = new PostGradeDecoratorRunnable(gradeCodes, postViews, latch);
-    executorService.submit(postGradeDecoratorRunnable);
+
+    PostDecoratorRunnable gradeDecoratorRunnable = new PostDecoratorRunnable(gradeCodes, postViews, latch) {
+      @Override
+      public void run() {
+        try {
+          List<GradeDTO> grades = referenceService.findGradesIn(getCodes());
+          Map<String, GradeDTO> gradeMap = grades.stream().collect(Collectors.toMap(GradeDTO::getAbbreviation, g -> g));
+          for (PostViewDTO postView : getPostViews()) {
+            if (StringUtils.isNotBlank(postView.getApprovedGradeCode()) && gradeMap.containsKey(postView.getApprovedGradeCode())) {
+              postView.setApprovedGradeName(gradeMap.get(postView.getApprovedGradeCode()).getName());
+            }
+          }
+        } catch (Exception e) {
+          log.warn("Reference decorator call to grades failed", e);
+        }
+        getLatch().countDown();
+      }
+    };
+
+    executorService.submit(gradeDecoratorRunnable);
   }
 
   private void decorateSiteOnPost(Set<String> siteCodes, ExecutorService executorService,
                                   List<PostViewDTO> postViews, CountDownLatch latch) {
-    Runnable postSiteDecoratorRunnable = new PostSiteDecoratorRunnable(siteCodes, postViews, latch);
-    executorService.submit(postSiteDecoratorRunnable);
-  }
 
+    PostDecoratorRunnable siteDecoratorRunnable = new PostDecoratorRunnable(siteCodes, postViews, latch) {
+      @Override
+      public void run() {
+        try {
+          List<SiteDTO> sites = referenceService.findSitesIn(getCodes());
+          Map<String, SiteDTO> siteMap = sites.stream().collect(Collectors.toMap(SiteDTO::getSiteCode, s -> s));
 
-
-
-
-
-  class PostGradeDecoratorRunnable implements Runnable {
-    private Set<String> gradeCodes;
-    private List<PostViewDTO> postViews;
-    private CountDownLatch latch;
-
-    public PostGradeDecoratorRunnable(Set<String> gradeCodes, List<PostViewDTO> postViews, CountDownLatch latch) {
-      this.gradeCodes = gradeCodes;
-      this.postViews = postViews;
-      this.latch = latch;
-    }
-
-    @Override
-    public void run() {
-      try {
-        List<GradeDTO> grades = referenceService.findGradesIn(gradeCodes);
-        Map<String, GradeDTO> gradeMap = grades.stream().collect(Collectors.toMap(GradeDTO::getAbbreviation, g -> g));
-        for (PostViewDTO postView : postViews) {
-          if (postView.getApprovedGradeCode() != null && !postView.getApprovedGradeCode().isEmpty()) {
-            if (gradeMap.containsKey(postView.getApprovedGradeCode())) {
-              postView.setApprovedGradeName(gradeMap.get(postView.getApprovedGradeCode()).getName());
-            }
-          }
-        }
-        latch.countDown();
-      } catch (Exception e) {
-        log.warn("Reference decorator call to grades failed", e);
-        latch.countDown();
-      }
-    }
-  }
-
-  class PostSiteDecoratorRunnable implements Runnable {
-
-    private Set<String> siteCodes;
-    private List<PostViewDTO> postViews;
-    private CountDownLatch latch;
-
-    public PostSiteDecoratorRunnable(Set<String> siteCodes, List<PostViewDTO> postViews, CountDownLatch latch) {
-      this.siteCodes = siteCodes;
-      this.postViews = postViews;
-      this.latch = latch;
-    }
-
-    @Override
-    public void run() {
-      try {
-        List<SiteDTO> sites = referenceService.findSitesIn(siteCodes);
-        Map<String, SiteDTO> siteMap = sites.stream().collect(Collectors.toMap(SiteDTO::getSiteCode, s -> s));
-
-        for (PostViewDTO postView : postViews) {
-          if (postView.getPrimarySiteCode() != null && !postView.getPrimarySiteCode().isEmpty()) {
-            if (siteMap.containsKey(postView.getPrimarySiteCode())) {
+          for (PostViewDTO postView : getPostViews()) {
+            if (StringUtils.isNotBlank(postView.getPrimarySiteCode()) && siteMap.containsKey(postView.getPrimarySiteCode())) {
               postView.setPrimarySiteName(siteMap.get(postView.getPrimarySiteCode()).getSiteName());
             }
           }
+        } catch (Exception e) {
+          e.printStackTrace();
         }
-        latch.countDown();
-      } catch (Exception e) {
-        e.printStackTrace();
-        latch.countDown();
+        getLatch().countDown();
       }
-    }
+    };
+
+    executorService.submit(siteDecoratorRunnable);
+
   }
+
 }
