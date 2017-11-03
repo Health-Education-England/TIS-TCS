@@ -107,17 +107,17 @@ public class PostValidator {
     List<FieldError> fieldErrors = new ArrayList<>();
     // then check the sites
     if (postDTO.getSites() != null && !postDTO.getSites().isEmpty()) {
-      List<Long> siteIds = Lists.newArrayList();
+      List<String> siteIds = Lists.newArrayList();
       for (PostSiteDTO ps : postDTO.getSites()) {
         if (ps.getSiteId() == null || Long.valueOf(ps.getSiteId()) < 0) {
           fieldErrors.add(new FieldError(POST_DTO_NAME, "sites",
               "Site ID cannot be null or negative"));
         } else {
-          siteIds.add(Long.valueOf(ps.getSiteId()));
+          siteIds.add(ps.getSiteId());
         }
       }
       if (!CollectionUtils.isEmpty(siteIds)) {
-        Map<Long, Boolean> siteIdsExistsMap = referenceService.siteExists(siteIds);
+        Map<String, Boolean> siteIdsExistsMap = referenceService.siteExists(siteIds);
         notExistsFieldErrors(fieldErrors, siteIdsExistsMap, "sites", "Site");
       }
 
@@ -129,24 +129,24 @@ public class PostValidator {
     List<FieldError> fieldErrors = new ArrayList<>();
     // then check the grades
     if (postDTO.getGrades() != null && !postDTO.getGrades().isEmpty()) {
-      List<Long> gradeIds = Lists.newArrayList();
+      List<String> gradeIds = Lists.newArrayList();
       for (PostGradeDTO pg : postDTO.getGrades()) {
         if (pg.getGradeId() == null || Long.valueOf(pg.getGradeId()) < 0) {
           fieldErrors.add(new FieldError(POST_DTO_NAME, "grades",
               "Grade ID cannot be null or negative"));
         } else {
-          gradeIds.add(Long.valueOf(pg.getGradeId()));
+          gradeIds.add(pg.getGradeId());
         }
       }
       if (!CollectionUtils.isEmpty(gradeIds)) {
-        Map<Long, Boolean> gradeIdsExistsMap = referenceService.gradeExists(gradeIds);
+        Map<String, Boolean> gradeIdsExistsMap = referenceService.gradeExists(gradeIds);
         notExistsFieldErrors(fieldErrors, gradeIdsExistsMap, "grades", "Grade");
       }
     }
     return fieldErrors;
   }
 
-  private void notExistsFieldErrors(List<FieldError> fieldErrors, Map<Long, Boolean> gradeIdsExistsMap,
+  private void notExistsFieldErrors(List<FieldError> fieldErrors, Map<String, Boolean> gradeIdsExistsMap,
                                     String field, String entityName) {
     gradeIdsExistsMap.forEach((k, v) -> {
       if (!v) {

@@ -35,11 +35,11 @@ public class PlacementDTO implements Serializable {
   @NotNull(message = "PostId is required", groups = {Update.class, Create.class})
   private Long postId;
 
-  @NotNull(message = "SiteId is required", groups = {Update.class, Create.class})
-  private Long siteId;
+  @NotNull(message = "SiteCode is required", groups = {Update.class, Create.class})
+  private String siteCode;
 
-  @NotNull(message = "GradeId is required", groups = {Update.class, Create.class})
-  private Long gradeId;
+  @NotNull(message = "GradeAbbreviation is required", groups = {Update.class, Create.class})
+  private String gradeAbbreviation;
 
   private Set<PlacementSpecialtyDTO> specialties;
 
@@ -106,20 +106,20 @@ public class PlacementDTO implements Serializable {
     this.postId = postId;
   }
 
-  public Long getSiteId() {
-    return siteId;
+  public String getSiteCode() {
+    return siteCode;
   }
 
-  public void setSiteId(Long siteId) {
-    this.siteId = siteId;
+  public void setSiteCode(String siteCode) {
+    this.siteCode = siteCode;
   }
 
-  public Long getGradeId() {
-    return gradeId;
+  public String getGradeAbbreviation() {
+    return gradeAbbreviation;
   }
 
-  public void setGradeId(Long gradeId) {
-    this.gradeId = gradeId;
+  public void setGradeAbbreviation(String gradeAbbreviation) {
+    this.gradeAbbreviation = gradeAbbreviation;
   }
 
   public String getTrainingDescription() {
@@ -209,8 +209,8 @@ public class PlacementDTO implements Serializable {
         ", traineeId='" + traineeId + "'" +
         ", clinicalSupervisorIds='" + clinicalSupervisorIds + "'" +
         ", postId='" + postId + "'" +
-        ", siteId='" + siteId + "'" +
-        ", gradeId='" + gradeId + "'" +
+        ", siteCode='" + siteCode + "'" +
+        ", gradeAbbreviation='" + gradeAbbreviation + "'" +
         ", specialties='" + specialties + "'" +
         ", dateFrom='" + dateFrom + "'" +
         ", dateTo='" + dateTo + "'" +

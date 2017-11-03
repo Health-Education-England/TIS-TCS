@@ -26,7 +26,7 @@ relationship OneToMany {
 }
 
 relationship ManyToMany {
-	Curriculum{gradeId(id)} to Grade{curriculumId}
+	Curriculum{gradeAbbreviation(id)} to Grade{curriculumId}
 }
 
 relationship ManyToOne {

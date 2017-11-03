@@ -62,11 +62,11 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 @SpringBootTest(classes = Application.class)
 public class PlacementResourceIntTest {
 
-  private static final Long DEFAULT_SITE = 123L;
-  private static final Long UPDATED_SITE = 321L;
+  private static final String DEFAULT_SITE = "123L";
+  private static final String UPDATED_SITE = "321L";
 
-  private static final Long DEFAULT_GRADE = 1234L;
-  private static final Long UPDATED_GRADE = 4321L;
+  private static final String DEFAULT_GRADE = "1234L";
+  private static final String UPDATED_GRADE = "4321L";
 
   private static final String DEFAULT_LOCAL_POST_NUMBER = "LOCAL_POST_NUMBER";
   private static final String UPDATED_LOCAL_POST_NUMBER = "NEW_LOCAL_POST_NUMBER";
@@ -134,8 +134,8 @@ public class PlacementResourceIntTest {
    */
   public static Placement createEntity() {
     Placement placement = new Placement();
-    placement.setSiteId(DEFAULT_SITE);
-    placement.setGradeId(DEFAULT_GRADE);
+    placement.setSiteCode(DEFAULT_SITE);
+    placement.setGradeAbbreviation(DEFAULT_GRADE);
     placement.setSpecialties(Sets.newHashSet());
     placement.setDateFrom(DEFAULT_DATE_FROM);
     placement.setDateTo(DEFAULT_DATE_TO);
@@ -206,7 +206,7 @@ public class PlacementResourceIntTest {
         .andExpect(jsonPath("$.message").value("error.validation"))
         .andExpect(jsonPath("$.fieldErrors[*].field").
             value(containsInAnyOrder("dateFrom", "dateTo", "placementTypeId",
-                "traineeId", "clinicalSupervisorIds", "postId", "gradeId", "siteId")));
+                "traineeId", "clinicalSupervisorIds", "postId", "gradeAbbreviation", "siteCode")));
   }
 
   @Test
@@ -224,7 +224,7 @@ public class PlacementResourceIntTest {
         .andExpect(jsonPath("$.message").value("error.validation"))
         .andExpect(jsonPath("$.fieldErrors[*].field").
             value(containsInAnyOrder("dateFrom", "dateTo", "placementTypeId",
-                "traineeId", "clinicalSupervisorIds", "postId", "gradeId", "siteId")));
+                "traineeId", "clinicalSupervisorIds", "postId", "gradeAbbreviation", "siteCode")));
   }
 
   @Test
@@ -243,8 +243,8 @@ public class PlacementResourceIntTest {
     List<Placement> placementList = placementRepository.findAll();
     assertThat(placementList).hasSize(databaseSizeBeforeCreate + 1);
     Placement testPlacement = placementList.get(placementList.size() - 1);
-    assertThat(testPlacement.getSiteId()).isEqualTo(DEFAULT_SITE);
-    assertThat(testPlacement.getGradeId()).isEqualTo(DEFAULT_GRADE);
+    assertThat(testPlacement.getSiteCode()).isEqualTo(DEFAULT_SITE);
+    assertThat(testPlacement.getGradeAbbreviation()).isEqualTo(DEFAULT_GRADE);
     assertThat(testPlacement.getSpecialties().iterator().next().getPlacementSpecialtyType()).isEqualTo(placement.getSpecialties().iterator().next().getPlacementSpecialtyType());
     assertThat(testPlacement.getSpecialties().iterator().next().getSpecialty()).isEqualTo(placement.getSpecialties().iterator().next().getSpecialty());
     assertThat(testPlacement.getDateFrom()).isEqualTo(DEFAULT_DATE_FROM);
@@ -292,8 +292,8 @@ public class PlacementResourceIntTest {
         .andExpect(jsonPath("$.[*].traineeId").value(placement.getTrainee().getId().intValue()))
         .andExpect(jsonPath("$.[*].clinicalSupervisorIds[0]").value(placement.getClinicalSupervisors().iterator().next().getClinicalSupervisor().getId().intValue()))
         .andExpect(jsonPath("$.[*].postId").value(placement.getPost().getId().intValue()))
-        .andExpect(jsonPath("$.[*].siteId").value(DEFAULT_SITE.intValue()))
-        .andExpect(jsonPath("$.[*].gradeId").value(DEFAULT_GRADE.intValue()))
+        .andExpect(jsonPath("$.[*].siteCode").value(DEFAULT_SITE))
+        .andExpect(jsonPath("$.[*].gradeAbbreviation").value(DEFAULT_GRADE))
         .andExpect(jsonPath("$.[*].specialties[0].id").value(placement.getSpecialties().iterator().next().getId().intValue()))
         .andExpect(jsonPath("$.[*].dateFrom").value(DEFAULT_DATE_FROM.toString()))
         .andExpect(jsonPath("$.[*].dateTo").value(DEFAULT_DATE_TO.toString()))
@@ -317,8 +317,8 @@ public class PlacementResourceIntTest {
         .andExpect(jsonPath("$.traineeId").value(placement.getTrainee().getId().intValue()))
         .andExpect(jsonPath("$.clinicalSupervisorIds[0]").value(placement.getClinicalSupervisors().iterator().next().getClinicalSupervisor().getId().intValue()))
         .andExpect(jsonPath("$.postId").value(placement.getPost().getId().intValue()))
-        .andExpect(jsonPath("$.siteId").value(DEFAULT_SITE.intValue()))
-        .andExpect(jsonPath("$.gradeId").value(DEFAULT_GRADE.intValue()))
+        .andExpect(jsonPath("$.siteCode").value(DEFAULT_SITE))
+        .andExpect(jsonPath("$.gradeAbbreviation").value(DEFAULT_GRADE))
         .andExpect(jsonPath("$.specialties[0].id").value(placement.getSpecialties().iterator().next().getId().intValue()))
         .andExpect(jsonPath("$.dateFrom").value(DEFAULT_DATE_FROM.toString()))
         .andExpect(jsonPath("$.dateTo").value(DEFAULT_DATE_TO.toString()))
@@ -345,8 +345,8 @@ public class PlacementResourceIntTest {
 
     // Update the placement
     Placement updatedPlacement = placementRepository.findOne(placement.getId());
-    updatedPlacement.setSiteId(UPDATED_SITE);
-    updatedPlacement.setGradeId(UPDATED_GRADE);
+    updatedPlacement.setSiteCode(UPDATED_SITE);
+    updatedPlacement.setGradeAbbreviation(UPDATED_GRADE);
     updatedPlacement.setSpecialties(Sets.newHashSet());
     updatedPlacement.setDateFrom(UPDATED_DATE_FROM);
     updatedPlacement.setDateTo(UPDATED_DATE_TO);
@@ -365,8 +365,8 @@ public class PlacementResourceIntTest {
     List<Placement> placementList = placementRepository.findAll();
     assertThat(placementList).hasSize(databaseSizeBeforeUpdate);
     Placement testPlacement = placementList.get(placementList.size() - 1);
-    assertThat(testPlacement.getSiteId()).isEqualTo(UPDATED_SITE);
-    assertThat(testPlacement.getGradeId()).isEqualTo(UPDATED_GRADE);
+    assertThat(testPlacement.getSiteCode()).isEqualTo(UPDATED_SITE);
+    assertThat(testPlacement.getGradeAbbreviation()).isEqualTo(UPDATED_GRADE);
     assertThat(testPlacement.getSpecialties()).isEqualTo(placement.getSpecialties());
     assertThat(testPlacement.getDateFrom()).isEqualTo(UPDATED_DATE_FROM);
     assertThat(testPlacement.getDateTo()).isEqualTo(UPDATED_DATE_TO);

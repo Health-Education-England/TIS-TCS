@@ -42,11 +42,11 @@ public class Placement implements Serializable {
   @JoinColumn(name = "postId")
   private Post post;
 
-  @Column(name = "siteId")
-  private Long siteId;
+  @Column(name = "siteCode")
+  private String siteCode;
 
-  @Column(name = "gradeId")
-  private Long gradeId;
+  @Column(name = "gradeAbbreviation")
+  private String gradeAbbreviation;
 
   @OneToMany(mappedBy = "placement", cascade = CascadeType.ALL, fetch = FetchType.EAGER)
   private Set<PlacementSpecialty> specialties = new HashSet<>();
@@ -117,20 +117,20 @@ public class Placement implements Serializable {
     this.specialties = specialties;
   }
 
-  public Long getSiteId() {
-    return siteId;
+  public String getSiteCode() {
+    return siteCode;
   }
 
-  public void setSiteId(Long siteId) {
-    this.siteId = siteId;
+  public void setSiteCode(String siteCode) {
+    this.siteCode = siteCode;
   }
 
-  public Long getGradeId() {
-    return gradeId;
+  public String getGradeAbbreviation() {
+    return gradeAbbreviation;
   }
 
-  public void setGradeId(Long gradeId) {
-    this.gradeId = gradeId;
+  public void setGradeAbbreviation(String gradeAbbreviation) {
+    this.gradeAbbreviation = gradeAbbreviation;
   }
 
   public String getTrainingDescription() {
@@ -206,10 +206,10 @@ public class Placement implements Serializable {
     return "Placement{" +
         "id=" + id +
         ", post='" + post + "'" +
-        ", siteId='" + siteId + "'" +
+        ", siteCode='" + siteCode + "'" +
         ", trainee='" + trainee + "'" +
         ", clinicalSupervisors='" + clinicalSupervisors + "'" +
-        ", gradeId='" + gradeId + "'" +
+        ", gradeAbbreviation='" + gradeAbbreviation + "'" +
         ", specialties='" + specialties + "'" +
         ", dateFrom='" + dateFrom + "'" +
         ", dateTo='" + dateTo + "'" +
