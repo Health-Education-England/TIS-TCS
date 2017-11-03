@@ -1192,8 +1192,8 @@ public class PostResourceIntTest {
         .intrepidId(DEFAULT_INTREPID_ID);
 
     Placement newPlacement = new Placement();
-    newPlacement.setGradeId(12L);
-    newPlacement.setSiteId(1L);
+    newPlacement.setGradeAbbreviation("12L");
+    newPlacement.setSiteCode("1L");
     newPlacement.setPlacementTypeId(123L);
     newPlacement.setIntrepidId("12345");
     em.persist(newPlacement);

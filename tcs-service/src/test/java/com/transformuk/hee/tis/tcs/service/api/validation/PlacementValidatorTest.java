@@ -31,8 +31,8 @@ public class PlacementValidatorTest {
   private static final Long DEFAULT_TRAINEE = 1L;
   private static final Long DEFAULT_CLINICAL_SUPERVISOR = 12L;
   private static final Long DEFAULT_POST = 123L;
-  private static final Long DEFAULT_SITE = 1234L;
-  private static final Long DEFAULT_GRADE = 12345L;
+  private static final String DEFAULT_SITE = "1234L";
+  private static final String DEFAULT_GRADE = "12345L";
   private static final String DEFAULT_LOCAL_POST_NUMBER = "LOCAL_POST_NUMBER";
   private static final String DEFAULT_TRAINING_DESCRIPTION = "TRAINING";
   private static final LocalDate DEFAULT_DATE_FROM = LocalDate.ofEpochDay(0L);
@@ -60,8 +60,8 @@ public class PlacementValidatorTest {
   @Before
   public void setup() {
     placementDTO = new PlacementDTO();
-    placementDTO.setSiteId(DEFAULT_SITE);
-    placementDTO.setGradeId(DEFAULT_GRADE);
+    placementDTO.setSiteCode(DEFAULT_SITE);
+    placementDTO.setGradeAbbreviation(DEFAULT_GRADE);
     placementDTO.setSpecialties(Sets.newHashSet());
     placementDTO.setDateFrom(DEFAULT_DATE_FROM);
     placementDTO.setDateTo(DEFAULT_DATE_TO);
@@ -84,8 +84,8 @@ public class PlacementValidatorTest {
   @Test
   public void testValidateFailsIfSiteIsInvalid() {
     try {
-      given(referenceService.siteExists(Lists.newArrayList(321L))).willReturn(Maps.newHashMap(321L, false));
-      placementDTO.setSiteId(321L);
+      given(referenceService.siteExists(Lists.newArrayList("321L"))).willReturn(Maps.newHashMap("321L", false));
+      placementDTO.setSiteCode("321L");
       placementValidator.validate(placementDTO);
       fail("ValidationException expected.");
     } catch (ValidationException ex) {
@@ -97,8 +97,8 @@ public class PlacementValidatorTest {
   @Test
   public void testValidateFailsIfGradeIsInvalid() {
     try {
-      given(referenceService.gradeExists(Lists.newArrayList(321L))).willReturn(Maps.newHashMap(321L, false));
-      placementDTO.setGradeId(321L);
+      given(referenceService.gradeExists(Lists.newArrayList("321L"))).willReturn(Maps.newHashMap("321L", false));
+      placementDTO.setGradeAbbreviation("321L");
       placementValidator.validate(placementDTO);
       fail("ValidationException expected.");
     } catch (ValidationException ex) {
