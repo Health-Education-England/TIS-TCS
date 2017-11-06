@@ -4,23 +4,19 @@ import com.transformuk.hee.tis.reference.api.dto.GradeDTO;
 import com.transformuk.hee.tis.reference.api.dto.SiteDTO;
 import com.transformuk.hee.tis.reference.client.ReferenceService;
 import com.transformuk.hee.tis.tcs.api.dto.PostViewDTO;
-import com.transformuk.hee.tis.tcs.service.runnable.PostDecoratorRunnable;
-import com.transformuk.hee.tis.tcs.service.runnable.PostGradeDecoratorRunnable;
-import com.transformuk.hee.tis.tcs.service.runnable.PostSiteDecoratorRunnable;
+import org.apache.commons.collections4.CollectionUtils;
 import org.apache.commons.lang.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.security.concurrent.DelegatingSecurityContextExecutorService;
+import org.springframework.scheduling.annotation.Async;
 import org.springframework.stereotype.Component;
 
 import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
-import java.util.concurrent.CountDownLatch;
-import java.util.concurrent.ExecutorService;
-import java.util.concurrent.Future;
+import java.util.concurrent.CompletableFuture;
 import java.util.stream.Collectors;
 
 /**
@@ -32,12 +28,10 @@ public class PostViewDecorator {
   public static final int LATCH_COUNT = 2;
   private static final Logger log = LoggerFactory.getLogger(PostViewDecorator.class);
   private ReferenceService referenceService;
-  private ExecutorService executorService;
 
   @Autowired
-  public PostViewDecorator(ReferenceService referenceService, ExecutorService executorService) {
+  public PostViewDecorator(ReferenceService referenceService) {
     this.referenceService = referenceService;
-    this.executorService = executorService;
   }
 
   /**
@@ -58,32 +52,48 @@ public class PostViewDecorator {
       }
     });
 
-    CountDownLatch latch = getCountDownLatch(LATCH_COUNT);
-    PostDecoratorRunnable gradesDecorator  = createGradesDecorator(gradeCodes, postViews, latch);
-    executorService.submit(gradesDecorator);
+    CompletableFuture<Void> gradesFuture = decorateGradesOnPost(gradeCodes, postViews);
+    CompletableFuture<Void> sitesFuture = decorateSitesOnPost(siteCodes, postViews);
 
-    PostDecoratorRunnable sitesDecorator = createSiteDecorator(siteCodes, postViews, latch);
-    executorService.submit(sitesDecorator);
+    CompletableFuture.allOf(gradesFuture, sitesFuture).join();
 
-    try {
-      latch.await();
-    } catch (InterruptedException e) {
-      log.error("Exception occurred while waiting for executor service to shutdown {}", e);
+  }
+
+  @Async
+  protected CompletableFuture<Void> decorateGradesOnPost(Set<String> codes, List<PostViewDTO> postViewDTOS) {
+    if (CollectionUtils.isNotEmpty(codes)) {
+      try {
+        List<GradeDTO> grades = referenceService.findGradesIn(codes);
+        Map<String, GradeDTO> gradeMap = grades.stream().collect(Collectors.toMap(GradeDTO::getAbbreviation, g -> g));
+        for (PostViewDTO postView : postViewDTOS) {
+          if (StringUtils.isNotBlank(postView.getApprovedGradeCode()) && gradeMap.containsKey(postView.getApprovedGradeCode())) {
+            postView.setApprovedGradeName(gradeMap.get(postView.getApprovedGradeCode()).getName());
+          }
+        }
+      } catch (Exception e) {
+        log.warn("Reference decorator call to grades failed", e);
+      }
     }
+    return CompletableFuture.completedFuture(null);
   }
 
-  protected CountDownLatch getCountDownLatch(int count) {
-    return new CountDownLatch(count);
-  }
+  @Async
+  protected CompletableFuture<Void> decorateSitesOnPost(Set<String> codes, List<PostViewDTO> postViewDTOS) {
+    if (CollectionUtils.isNotEmpty(codes)) {
+      try {
+        List<SiteDTO> sites = referenceService.findSitesIn(codes);
+        Map<String, SiteDTO> siteMap = sites.stream().collect(Collectors.toMap(SiteDTO::getSiteCode, s -> s));
 
-  protected PostDecoratorRunnable createGradesDecorator(Set<String> gradeCodes, List<PostViewDTO> postViews,
-                                                      CountDownLatch latch) {
-    return new PostGradeDecoratorRunnable(gradeCodes, postViews, latch, referenceService);
-  }
-
-  protected PostDecoratorRunnable createSiteDecorator(Set<String> siteCodes, List<PostViewDTO> postViews,
-                                                      CountDownLatch latch) {
-    return new PostSiteDecoratorRunnable(siteCodes, postViews, latch, referenceService);
+        for (PostViewDTO postView : postViewDTOS) {
+          if (StringUtils.isNotBlank(postView.getPrimarySiteCode()) && siteMap.containsKey(postView.getPrimarySiteCode())) {
+            postView.setPrimarySiteName(siteMap.get(postView.getPrimarySiteCode()).getSiteName());
+          }
+        }
+      } catch (Exception e) {
+        log.warn("Reference decorator call to sites failed", e);
+      }
+    }
+    return CompletableFuture.completedFuture(null);
   }
 
 }

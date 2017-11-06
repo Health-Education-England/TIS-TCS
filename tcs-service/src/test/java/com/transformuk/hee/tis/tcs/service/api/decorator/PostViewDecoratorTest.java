@@ -6,7 +6,6 @@ import com.transformuk.hee.tis.reference.api.dto.GradeDTO;
 import com.transformuk.hee.tis.reference.api.dto.SiteDTO;
 import com.transformuk.hee.tis.reference.client.ReferenceService;
 import com.transformuk.hee.tis.tcs.api.dto.PostViewDTO;
-import com.transformuk.hee.tis.tcs.service.runnable.PostDecoratorRunnable;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -15,26 +14,19 @@ import org.mockito.Mock;
 import org.mockito.Spy;
 import org.mockito.runners.MockitoJUnitRunner;
 
-import java.util.ArrayList;
 import java.util.List;
 import java.util.Set;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.CountDownLatch;
-import java.util.concurrent.ExecutionException;
 import java.util.concurrent.ExecutorService;
-import java.util.concurrent.Future;
-import java.util.concurrent.TimeUnit;
-import java.util.concurrent.TimeoutException;
 
 import static com.transformuk.hee.tis.tcs.service.api.decorator.PostViewDecorator.LATCH_COUNT;
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertNull;
-import static org.mockito.BDDMockito.given;
 import static org.mockito.Matchers.any;
-import static org.mockito.Matchers.eq;
 import static org.mockito.Mockito.doReturn;
-import static org.mockito.Mockito.times;
+import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.verifyZeroInteractions;
 import static org.mockito.Mockito.when;
 
 @RunWith(MockitoJUnitRunner.class)
@@ -42,6 +34,10 @@ public class PostViewDecoratorTest {
 
   private static final String PRIMARY_SITE_CODE_1 = "site1";
   private static final String APPROVED_GRADE_CODE_1 = "grade1";
+  private static final String GRADE_ABBR = "GRADE_ABBR";
+  private static final String SITE_CODE = "SITE_CODE";
+  private static final String GRADE_NAME = "GRADE NAME";
+  private static final String PRIMARY_SITE_NAME = "PRIMARY SITE NAME";
 
   @Spy
   @InjectMocks
@@ -49,14 +45,13 @@ public class PostViewDecoratorTest {
   @Mock
   private ReferenceService referenceServiceMock;
   @Mock
-  private ExecutorService executorServiceMock;
+  private PostViewDTO postViewDTO1Mock, postViewDTO2Mock;
   @Mock
-  private PostDecoratorRunnable gradeDecoratorRunnableMock, siteDecoratorRunnableMock;
+  private CompletableFuture<Void> gradesFutureMock, siteFutureMock;
 
   private List<PostViewDTO> postViewsList;
   private Set<String> siteCodesSet, gradeCodeSet;
   private PostViewDTO postView1, postViewWithNoGradeOrSite2;
-  private CountDownLatch countDownLatch;
 
   @Before
   public void setup() {
@@ -70,29 +65,57 @@ public class PostViewDecoratorTest {
     siteCodesSet = Sets.newHashSet(PRIMARY_SITE_CODE_1);
     gradeCodeSet = Sets.newHashSet(APPROVED_GRADE_CODE_1);
 
-    countDownLatch = new CountDownLatch(LATCH_COUNT);
+
+    when(postViewDTO1Mock.getApprovedGradeCode()).thenReturn(GRADE_ABBR);
+    when(postViewDTO1Mock.getApprovedGradeName()).thenReturn(GRADE_NAME);
+    when(postViewDTO1Mock.getPrimarySiteCode()).thenReturn(SITE_CODE);
+    when(postViewDTO1Mock.getPrimarySiteName()).thenReturn(PRIMARY_SITE_NAME);
   }
 
   @Test(timeout = 5000L)
   public void decorateShouldSetGradesAndPosts() {
 
-    doReturn(countDownLatch).when(testObj).getCountDownLatch(LATCH_COUNT);
-    doReturn(gradeDecoratorRunnableMock).when(testObj).createGradesDecorator(eq(gradeCodeSet), eq(postViewsList), any(CountDownLatch.class));
-    doReturn(siteDecoratorRunnableMock).when(testObj).createSiteDecorator(eq(siteCodesSet), eq(postViewsList), any(CountDownLatch.class));
-    when(executorServiceMock.submit(gradeDecoratorRunnableMock)).then((mock) -> {
-      countDownLatch.countDown();
-      return CompletableFuture.completedFuture("");
-    });
-    when(executorServiceMock.submit(siteDecoratorRunnableMock)).then((mock) -> {
-      countDownLatch.countDown();
-      return CompletableFuture.completedFuture("");
-    });
-    when(executorServiceMock.submit(siteDecoratorRunnableMock)).thenReturn(null);
+    CompletableFuture<Class<Void>> gradesCompletedFuture = CompletableFuture.completedFuture(Void.class);
+    CompletableFuture<Class<Void>> sitesCompletedFuture = CompletableFuture.completedFuture(Void.class);
+    doReturn(gradesCompletedFuture).when(testObj).decorateGradesOnPost(gradeCodeSet, postViewsList);
+    doReturn(sitesCompletedFuture).when(testObj).decorateSitesOnPost(siteCodesSet, postViewsList);
 
     testObj.decorate(postViewsList);
 
-    verify(executorServiceMock, times(2)).submit(any(PostDecoratorRunnable.class));
+    verify(testObj).decorateGradesOnPost(gradeCodeSet, postViewsList);
+    verify(testObj).decorateSitesOnPost(siteCodesSet, postViewsList);
+  }
 
+  @Test
+  public void decorateGradesOnPostShouldCallReferenceAndPopulatePost() {
+    GradeDTO gradeDTO = new GradeDTO();
+    gradeDTO.setAbbreviation(GRADE_ABBR);
+    gradeDTO.setName(GRADE_NAME);
+    List<GradeDTO> gradesDTO = Lists.newArrayList(gradeDTO);
+    List<PostViewDTO> postViewDTOS = Lists.newArrayList(postViewDTO1Mock, postViewDTO2Mock);
+
+    when(referenceServiceMock.findGradesIn(gradeCodeSet)).thenReturn(gradesDTO);
+
+    testObj.decorateGradesOnPost(gradeCodeSet, postViewDTOS);
+
+    verify(postViewDTO1Mock).setApprovedGradeName(GRADE_NAME);
+    verify(postViewDTO2Mock, never()).setApprovedGradeName(any());
+  }
+
+  @Test
+  public void decorateSitesOnPostShouldCallReferenceAndPopulatePost() {
+    SiteDTO siteDTO = new SiteDTO();
+    siteDTO.setSiteCode(SITE_CODE);
+    siteDTO.setSiteName(PRIMARY_SITE_NAME);
+    List<SiteDTO> siteDTOS = Lists.newArrayList(siteDTO);
+    List<PostViewDTO> postViewDTOS = Lists.newArrayList(postViewDTO1Mock, postViewDTO2Mock);
+
+    when(referenceServiceMock.findSitesIn(siteCodesSet)).thenReturn(siteDTOS);
+
+    testObj.decorateSitesOnPost(siteCodesSet, postViewDTOS);
+
+    verify(postViewDTO1Mock).setPrimarySiteName(PRIMARY_SITE_NAME);
+    verify(postViewDTO2Mock, never()).setPrimarySiteName(any());
   }
 
 }
