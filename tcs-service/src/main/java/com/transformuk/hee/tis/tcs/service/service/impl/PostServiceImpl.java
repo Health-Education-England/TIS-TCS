@@ -117,6 +117,30 @@ public class PostServiceImpl implements PostService {
   }
 
   /**
+   * Updates a list of post.
+   * It clears the relationships as they are saved during the other bulk patch endpoints
+   *
+   * @param postDTOs the list of entities to save
+   * @return the list of persisted entities
+   */
+  @Override
+  public List<PostDTO> bulkUpdate(List<PostDTO> postDTOs) {
+    log.debug("Request to save Post : {}", postDTOs);
+    List<Post> posts = postMapper.postDTOsToPosts(postDTOs);
+
+    for(Post post : posts) {
+      post.setGrades(Sets.newHashSet());
+      post.setSites(Sets.newHashSet());
+      post.setSpecialties(Sets.newHashSet());
+      post.setFundings(Sets.newHashSet());
+    }
+
+    posts = postRepository.save(posts);
+    return postMapper.postsToPostDTOs(posts);
+  }
+
+
+  /**
    * Update a list of post so that the links to old/new posts are saved. its important to note that if a related post
    * cannot be found, the existing post is cleared but if related post id  is null then it isnt cleared, this is to ensure
    * that calls that dont send id's wont clear previously set links
