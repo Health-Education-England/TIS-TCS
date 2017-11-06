@@ -1,6 +1,5 @@
 package com.transformuk.hee.tis.tcs.service.config;
 
-import io.github.jhipster.async.ExceptionHandlingAsyncTaskExecutor;
 import io.github.jhipster.config.JHipsterProperties;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -11,7 +10,9 @@ import org.springframework.context.annotation.Configuration;
 import org.springframework.scheduling.annotation.AsyncConfigurer;
 import org.springframework.scheduling.annotation.EnableAsync;
 import org.springframework.scheduling.annotation.EnableScheduling;
+import org.springframework.scheduling.concurrent.DefaultManagedTaskExecutor;
 import org.springframework.scheduling.concurrent.ThreadPoolTaskExecutor;
+import org.springframework.security.task.DelegatingSecurityContextAsyncTaskExecutor;
 
 import java.util.concurrent.Executor;
 
@@ -37,7 +38,8 @@ public class AsyncConfiguration implements AsyncConfigurer {
     executor.setMaxPoolSize(jHipsterProperties.getAsync().getMaxPoolSize());
     executor.setQueueCapacity(jHipsterProperties.getAsync().getQueueCapacity());
     executor.setThreadNamePrefix("tcs-Executor-");
-    return new ExceptionHandlingAsyncTaskExecutor(executor);
+    return new DelegatingSecurityContextAsyncTaskExecutor(new DefaultManagedTaskExecutor());
+
   }
 
   @Override
