@@ -25,7 +25,6 @@ import java.util.stream.Collectors;
 @Component
 public class PostViewDecorator {
 
-  public static final int LATCH_COUNT = 2;
   private static final Logger log = LoggerFactory.getLogger(PostViewDecorator.class);
   private ReferenceService referenceService;
 
