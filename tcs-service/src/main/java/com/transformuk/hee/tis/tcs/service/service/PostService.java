@@ -31,15 +31,6 @@ public interface PostService {
   List<PostDTO> save(List<PostDTO> postDTO);
 
   /**
-   * Update a list of posts
-   * ensures that the relationships aren't duplicated
-   *
-   * @param postDTOs the list of entities to update
-   * @return
-   */
-  List<PostDTO> bulkUpdate(List<PostDTO> postDTOs);
-
-  /**
    * Patch a list of post so that the links to old/new posts are saved. its important to note that if a related post
    * cannot be found, the existing post is cleared but if related post id is null then it isnt cleared
    *

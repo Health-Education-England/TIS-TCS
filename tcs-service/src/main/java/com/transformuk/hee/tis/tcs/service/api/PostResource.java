@@ -253,7 +253,7 @@ public class PostResource {
       }
     }
 
-    List<PostDTO> results = postService.bulkUpdate(postDTOS);
+    List<PostDTO> results = postService.save(postDTOS);
     List<Long> ids = results.stream().map(PostDTO::getId).collect(Collectors.toList());
     return ResponseEntity.ok()
         .headers(HeaderUtil.createEntityUpdateAlert(ENTITY_NAME, StringUtils.join(ids, ",")))

@@ -10,7 +10,6 @@ import com.transformuk.hee.tis.tcs.api.dto.PostSiteDTO;
 import com.transformuk.hee.tis.tcs.api.dto.PostSpecialtyDTO;
 import com.transformuk.hee.tis.tcs.api.dto.PostViewDTO;
 import com.transformuk.hee.tis.tcs.api.dto.ProgrammeDTO;
-import com.transformuk.hee.tis.tcs.api.dto.SpecialtyDTO;
 import com.transformuk.hee.tis.tcs.service.api.decorator.PostViewDecorator;
 import com.transformuk.hee.tis.tcs.service.model.ColumnFilter;
 import com.transformuk.hee.tis.tcs.service.model.Placement;
@@ -104,6 +103,11 @@ public class PostServiceImpl implements PostService {
 
   /**
    * Save a list of post.
+   * <p>
+   * Used ONLY by the ETL to bulk save a list of posts. It has to clear the posts relationships as the relationships
+   * could have been changed since the last ETL run and we wont get that update so a complete clear down is required
+   * <p>
+   * The ETL will then PATCH the relationships in a later step
    *
    * @param postDTOs the list of entities to save
    * @return the list of persisted entities
@@ -111,29 +115,17 @@ public class PostServiceImpl implements PostService {
   @Override
   public List<PostDTO> save(List<PostDTO> postDTOs) {
     log.debug("Request to save Post : {}", postDTOs);
-    List<Post> post = postMapper.postDTOsToPosts(postDTOs);
-    post = postRepository.save(post);
-    return postMapper.postsToPostDTOs(post);
-  }
-
-  /**
-   * Updates a list of post.
-   * It clears the relationships as they are saved during the other bulk patch endpoints
-   *
-   * @param postDTOs the list of entities to save
-   * @return the list of persisted entities
-   */
-  @Override
-  public List<PostDTO> bulkUpdate(List<PostDTO> postDTOs) {
-    log.debug("Request to save Post : {}", postDTOs);
     List<Post> posts = postMapper.postDTOsToPosts(postDTOs);
 
-    for(Post post : posts) {
-      post.setGrades(Sets.newHashSet());
-      post.setSites(Sets.newHashSet());
-      post.setSpecialties(Sets.newHashSet());
-      post.setFundings(Sets.newHashSet());
-    }
+    Set<String> postIntrepidIds = posts.stream().map(Post::getIntrepidId).collect(Collectors.toSet());
+    Set<Post> postByIntrepidIds = postRepository.findPostByIntrepidIdIn(postIntrepidIds);
+    Set<PostGrade> allPostGrades = postByIntrepidIds.stream().flatMap(post -> post.getGrades().stream()).collect(Collectors.toSet());
+    Set<PostSite> allPostSites = postByIntrepidIds.stream().flatMap(post -> post.getSites().stream()).collect(Collectors.toSet());
+    Set<PostSpecialty> allPostSpecialties = postByIntrepidIds.stream().flatMap(post -> post.getSpecialties().stream()).collect(Collectors.toSet());
+
+    postGradeRepository.delete(allPostGrades);
+    postSiteRepository.delete(allPostSites);
+    postSpecialtyRepository.delete(allPostSpecialties);
 
     posts = postRepository.save(posts);
     return postMapper.postsToPostDTOs(posts);
