@@ -170,9 +170,9 @@ public class PostResource {
           " \"sites.siteId\":[\"123\"],\"trainingBodyId\":[\"11\"],\"grades.gradeId\":[\"11\"],\"specialties.specialty.name\":[\"Test Specialty\"]}\"")
       @RequestBody List<ColumnFilterDTO> filters) throws IOException {
     log.debug("REST request to filter a page of Posts");
-    Page<PostViewDTO> page = postService.advancedSearch(null, filters.stream().map(f -> {
-      return new ColumnFilter(f.getName(), Lists.newArrayList(f.getValues()));
-    }).collect(Collectors.toList()), pageable);
+    Page<PostViewDTO> page = postService.advancedSearch(null, filters.stream().map(f ->
+        new ColumnFilter(f.getName(), Lists.newArrayList(f.getValues()))
+    ).collect(Collectors.toList()), pageable);
     HttpHeaders headers = PaginationUtil.generatePaginationHttpHeaders(page, "/api/posts/filter");
     return new ResponseEntity<>(page.getContent(), headers, HttpStatus.OK);
   }
