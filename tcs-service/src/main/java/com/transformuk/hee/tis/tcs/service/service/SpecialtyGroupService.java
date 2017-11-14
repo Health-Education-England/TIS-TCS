@@ -21,6 +21,14 @@ public interface SpecialtyGroupService {
   SpecialtyGroupDTO save(SpecialtyGroupDTO specialtyGroupDTO);
 
   /**
+   * Update a specialtyGroup.
+   *
+   * @param specialtyGroupDTO the entity to update
+   * @return the persisted entity
+   */
+  SpecialtyGroupDTO update(SpecialtyGroupDTO specialtyGroupDTO);
+
+  /**
    * Save a list of specialtyGroup.
    *
    * @param specialtyGroupDTO the entities to save

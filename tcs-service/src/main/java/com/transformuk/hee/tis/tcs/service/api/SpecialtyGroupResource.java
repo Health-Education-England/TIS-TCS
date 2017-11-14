@@ -111,7 +111,7 @@ public class SpecialtyGroupResource {
     if (specialtyGroupDTO.getId() == null) {
       return createSpecialtyGroup(specialtyGroupDTO);
     }
-    SpecialtyGroupDTO result = specialtyGroupService.save(specialtyGroupDTO);
+    SpecialtyGroupDTO result = specialtyGroupService.update(specialtyGroupDTO);
     return ResponseEntity.ok()
         .headers(HeaderUtil.createEntityUpdateAlert(ENTITY_NAME, specialtyGroupDTO.getId().toString()))
         .body(result);

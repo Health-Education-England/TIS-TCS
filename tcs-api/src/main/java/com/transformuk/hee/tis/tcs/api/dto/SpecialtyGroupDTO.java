@@ -34,7 +34,7 @@ public class SpecialtyGroupDTO implements Serializable {
       groups = {Update.class, Create.class})
   private String name;
 
-  private Set<SpecialtyDTO> groupSpecialties;
+  private Set<SpecialtyDTO> specialties;
 
   public Long getId() {
     return id;
@@ -61,11 +61,11 @@ public class SpecialtyGroupDTO implements Serializable {
   }
 
   public Set<SpecialtyDTO> getSpecialties() {
-    return groupSpecialties;
+    return specialties;
   }
 
   public void setSpecialties(Set<SpecialtyDTO> specialties) {
-    this.groupSpecialties = specialties;
+    this.specialties = specialties;
   }
 
   @Override
@@ -97,6 +97,7 @@ public class SpecialtyGroupDTO implements Serializable {
         "id=" + id +
         ", intrepidId='" + intrepidId + '\'' +
         ", name='" + name + '\'' +
+        ", specialties=" + specialties +
         '}';
   }
 }
