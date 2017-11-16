@@ -49,23 +49,16 @@ public class SpecialtyGroupServiceImpl implements SpecialtyGroupService {
    * @param specialtyGroupDTO the entity to save
    * @return the persisted entity
    */
+//  @Override
+//  public SpecialtyGroupDTO save(SpecialtyGroupDTO specialtyGroupDTO) {
+//    log.debug("Request to save SpecialtyGroup : {}", specialtyGroupDTO);
+//    SpecialtyGroup specialtyGroup = specialtyGroupMapper.specialtyGroupDTOToSpecialtyGroup(specialtyGroupDTO);
+//    specialtyGroup = specialtyGroupRepository.save(specialtyGroup);
+//    SpecialtyGroupDTO result = specialtyGroupMapper.specialtyGroupToSpecialtyGroupDTO(specialtyGroup);
+//    return result;
+//  }
   @Override
   public SpecialtyGroupDTO save(SpecialtyGroupDTO specialtyGroupDTO) {
-    log.debug("Request to save SpecialtyGroup : {}", specialtyGroupDTO);
-    SpecialtyGroup specialtyGroup = specialtyGroupMapper.specialtyGroupDTOToSpecialtyGroup(specialtyGroupDTO);
-    specialtyGroup = specialtyGroupRepository.save(specialtyGroup);
-    SpecialtyGroupDTO result = specialtyGroupMapper.specialtyGroupToSpecialtyGroupDTO(specialtyGroup);
-    return result;
-  }
-
-  /**
-   * Update a specialtyGroup
-   *
-   * @param specialtyGroupDTO the entity to update
-   * @return the persisted entity
-   */
-  @Override
-  public SpecialtyGroupDTO update(SpecialtyGroupDTO specialtyGroupDTO) {
     log.debug("Request to update specialtyGroup : {}", specialtyGroupDTO);
 
     SpecialtyGroup specialtyGroup =specialtyGroupMapper.specialtyGroupDTOToSpecialtyGroup(specialtyGroupDTO);

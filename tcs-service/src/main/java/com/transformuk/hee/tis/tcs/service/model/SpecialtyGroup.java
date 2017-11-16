@@ -1,6 +1,9 @@
 package com.transformuk.hee.tis.tcs.service.model;
 
 
+import org.hibernate.annotations.Cascade;
+import org.hibernate.annotations.Fetch;
+
 import javax.persistence.Entity;
 import javax.persistence.GeneratedValue;
 import javax.persistence.GenerationType;
