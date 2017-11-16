@@ -1,6 +1,5 @@
 package com.transformuk.hee.tis.tcs.service.service.impl;
 
-import com.sun.el.lang.ELArithmetic;
 import com.transformuk.hee.tis.tcs.api.dto.SpecialtyGroupDTO;
 import com.transformuk.hee.tis.tcs.service.model.Specialty;
 import com.transformuk.hee.tis.tcs.service.model.SpecialtyGroup;
@@ -18,7 +17,6 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.util.ArrayList;
-import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
 
@@ -49,14 +47,7 @@ public class SpecialtyGroupServiceImpl implements SpecialtyGroupService {
    * @param specialtyGroupDTO the entity to save
    * @return the persisted entity
    */
-//  @Override
-//  public SpecialtyGroupDTO save(SpecialtyGroupDTO specialtyGroupDTO) {
-//    log.debug("Request to save SpecialtyGroup : {}", specialtyGroupDTO);
-//    SpecialtyGroup specialtyGroup = specialtyGroupMapper.specialtyGroupDTOToSpecialtyGroup(specialtyGroupDTO);
-//    specialtyGroup = specialtyGroupRepository.save(specialtyGroup);
-//    SpecialtyGroupDTO result = specialtyGroupMapper.specialtyGroupToSpecialtyGroupDTO(specialtyGroup);
-//    return result;
-//  }
+
   @Override
   public SpecialtyGroupDTO save(SpecialtyGroupDTO specialtyGroupDTO) {
     log.debug("Request to update specialtyGroup : {}", specialtyGroupDTO);
