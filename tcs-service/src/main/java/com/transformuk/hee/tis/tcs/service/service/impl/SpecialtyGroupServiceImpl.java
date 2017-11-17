@@ -51,7 +51,6 @@ public class SpecialtyGroupServiceImpl implements SpecialtyGroupService {
   @Override
   public SpecialtyGroupDTO save(SpecialtyGroupDTO specialtyGroupDTO) {
     log.debug("Request to update specialtyGroup : {}", specialtyGroupDTO);
-
     SpecialtyGroup specialtyGroup =specialtyGroupMapper.specialtyGroupDTOToSpecialtyGroup(specialtyGroupDTO);
     Set<Specialty> groupSpecialties = specialtyGroup.getSpecialties();
     Long groupID = specialtyGroup.getId();
