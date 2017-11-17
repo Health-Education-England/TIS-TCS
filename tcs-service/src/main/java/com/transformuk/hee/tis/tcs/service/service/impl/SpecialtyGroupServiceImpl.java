@@ -55,20 +55,31 @@ public class SpecialtyGroupServiceImpl implements SpecialtyGroupService {
     SpecialtyGroup specialtyGroup =specialtyGroupMapper.specialtyGroupDTOToSpecialtyGroup(specialtyGroupDTO);
     Set<Specialty> groupSpecialties = specialtyGroup.getSpecialties();
     Long groupID = specialtyGroup.getId();
-    Set<Specialty> beforeSaveSet = specialtyRepository.findBySpecialtyGroupIdIn(groupID);
-    // Set the specialty groups to null on the specialties
-    for (Specialty specialty:beforeSaveSet) {
-      specialty.setSpecialtyGroup(null);
+    // Update
+    if (groupID != null) {
+      Set<Specialty> beforeSaveSet = specialtyRepository.findBySpecialtyGroupIdIn(groupID);
+      // Set the specialty groups to null on the specialties
+      for (Specialty specialty : beforeSaveSet) {
+        specialty.setSpecialtyGroup(null);
+      }
+      // Set the new specialties' specialtyGroups
+      for (Specialty specialty : groupSpecialties) {
+        // Remove any previous links between specialty and groups
+        specialty.setSpecialtyGroup(null);
+        // Set the new group
+        specialty.setSpecialtyGroup(specialtyGroup);
+        specialtyRepository.save(specialty);
+      }
+      specialtyGroup = specialtyGroupRepository.save(specialtyGroup);
     }
-    // Set the new specialties' specialtyGroups
-    for (Specialty specialty:groupSpecialties) {
-      // Remove any previous links between specialty and groups
-      specialty.setSpecialtyGroup(null);
-      // Set the new group
-      specialty.setSpecialtyGroup(specialtyGroup);
-      specialtyRepository.save(specialty);
+    // Create
+    else {
+      specialtyGroup = specialtyGroupRepository.save(specialtyGroup);
+      for (Specialty specialty : groupSpecialties) {
+        specialty.setSpecialtyGroup(specialtyGroup);
+        specialtyRepository.save(specialty);
+      }
     }
-    specialtyGroup = specialtyGroupRepository.save(specialtyGroup);
     return specialtyGroupMapper.specialtyGroupToSpecialtyGroupDTO(specialtyGroup);
   }
 

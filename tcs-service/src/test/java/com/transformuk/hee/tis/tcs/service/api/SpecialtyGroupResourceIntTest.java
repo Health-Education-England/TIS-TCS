@@ -138,6 +138,8 @@ public class SpecialtyGroupResourceIntTest {
     int databaseSizeBeforeCreate = specialtyGroupRepository.findAll().size();
 
     // Create the SpecialtyGroup
+    Set<Specialty> specialties = Sets.newLinkedHashSet(specialty);
+    specialtyGroup.setSpecialties(specialties);
     SpecialtyGroupDTO specialtyGroupDTO = specialtyGroupMapper.specialtyGroupToSpecialtyGroupDTO(specialtyGroup);
     restSpecialtyGroupMockMvc.perform(post("/api/specialty-groups")
         .contentType(TestUtil.APPLICATION_JSON_UTF8)
