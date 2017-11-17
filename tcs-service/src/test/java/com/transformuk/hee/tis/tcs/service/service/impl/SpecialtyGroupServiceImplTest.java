@@ -105,14 +105,17 @@ public class SpecialtyGroupServiceImplTest {
 
   @Test
   public void shouldSaveSpecialtyGroup() {
+    // Given
     SpecialtyGroupDTO expectedSpecialtyGroupDTO = specialtyGroupDTO;
 
+    // When
     when(specialtyGroupMapperMock.specialtyGroupDTOToSpecialtyGroup(specialtyGroupDTO)).thenReturn(specialtyGroupMock);
     when(specialtyGroupRepositoryMock.save(specialtyGroupMock)).thenReturn(specialtyGroupMock);
     when(specialtyGroupMapperMock.specialtyGroupToSpecialtyGroupDTO(specialtyGroupMock)).thenReturn(expectedSpecialtyGroupDTO);
 
     SpecialtyGroupDTO result = specialtyGroupServiceImpl.save(expectedSpecialtyGroupDTO);
 
+    // Then
     Assert.assertEquals(expectedSpecialtyGroupDTO, result);
     verify(specialtyGroupMapperMock).specialtyGroupDTOToSpecialtyGroup(specialtyGroupDTO);
     verify(specialtyGroupRepositoryMock).save(specialtyGroupMock);
@@ -121,8 +124,10 @@ public class SpecialtyGroupServiceImplTest {
 
   @Test
   public void shouldUpdateSpecialtiesInSpecialtyGroupAddSpecialty() {
+    // Given
     SpecialtyGroupDTO expectedSpecialtyGroupDTO = specialtyGroupDTO;
 
+    // When
     when(specialtyGroupMapperMock.specialtyGroupDTOToSpecialtyGroup(specialtyGroupDTO)).thenReturn(specialtyGroupMock);
     when(specialtyGroupRepositoryMock.save(specialtyGroupMock)).thenReturn(specialtyGroupMock);
     when(specialtyGroupMapperMock.specialtyGroupToSpecialtyGroupDTO(specialtyGroupMock)).thenReturn(expectedSpecialtyGroupDTO);
@@ -140,13 +145,18 @@ public class SpecialtyGroupServiceImplTest {
 
     // Update in repository
     SpecialtyGroupDTO updatedResult = specialtyGroupServiceImpl.save(expectedSpecialtyGroupDTO);
+
+    //Then
     Assert.assertEquals(expectedSpecialtyGroupDTO, updatedResult);
     Assert.assertEquals(updatedResult.getSpecialties(), specialtyDTOS);
   }
 
   @Test
   public void shouldUpdateSpecialtiesInSpecialtyGroupDeleteSpecialty() {
+    // Given
     SpecialtyGroupDTO expectedSpecialtyGroupDTO = specialtyGroupDTO;
+
+    // When
     when(specialtyGroupMapperMock.specialtyGroupDTOToSpecialtyGroup(specialtyGroupDTO)).thenReturn(specialtyGroupMock);
     when(specialtyGroupRepositoryMock.save(specialtyGroupMock)).thenReturn(specialtyGroupMock);
     when(specialtyGroupMapperMock.specialtyGroupToSpecialtyGroupDTO(specialtyGroupMock)).thenReturn(expectedSpecialtyGroupDTO);
@@ -160,6 +170,8 @@ public class SpecialtyGroupServiceImplTest {
 
     // Update in repository
     SpecialtyGroupDTO updatedResult = specialtyGroupServiceImpl.save(expectedSpecialtyGroupDTO);
+
+    //Then
     Assert.assertEquals(expectedSpecialtyGroupDTO, updatedResult);
     Assert.assertEquals(updatedResult.getSpecialties(), specialtyDTOS);
   }
