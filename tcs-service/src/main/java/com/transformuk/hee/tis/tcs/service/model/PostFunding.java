@@ -44,6 +44,9 @@ public class PostFunding implements Serializable {
   @Column(name = "endDate")
   private LocalDate endDate;
 
+  @Column(name = "fundingBodyId")
+  private String fundingBodyId;
+
   public Long getId() {
     return id;
   }
@@ -99,6 +102,10 @@ public class PostFunding implements Serializable {
   public void setEndDate(LocalDate endDate) {
     this.endDate = endDate;
   }
+
+  public String getFundingBodyId() {return fundingBodyId; }
+
+  public void setFundingBodyId(String fundingBodyId) {this.fundingBodyId = fundingBodyId; }
 
   @Override
   public boolean equals(Object o) {

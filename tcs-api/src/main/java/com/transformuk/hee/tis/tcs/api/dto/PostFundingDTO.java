@@ -22,6 +22,8 @@ public class PostFundingDTO implements Serializable {
 
   private LocalDate endDate;
 
+  private String fundingBodyId;
+
   public Long getId() {
     return id;
   }
@@ -69,6 +71,10 @@ public class PostFundingDTO implements Serializable {
   public void setStartDate(LocalDate startDate) {
     this.startDate = startDate;
   }
+
+  public String getFundingBodyId() {return fundingBodyId; }
+
+  public void setFundingBodyId(String fundingBodyId) {this.fundingBodyId = fundingBodyId; }
 
   @Override
   public boolean equals(Object o) {
