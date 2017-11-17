@@ -6,6 +6,8 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.JpaSpecificationExecutor;
 
+import java.util.Set;
+
 /**
  * Spring Data JPA repository for the Specialty entity.
  */
@@ -13,5 +15,7 @@ import org.springframework.data.jpa.repository.JpaSpecificationExecutor;
 public interface SpecialtyRepository extends JpaRepository<Specialty, Long>, JpaSpecificationExecutor<Specialty> {
 
   Page<Specialty> findBySpecialtyGroupIdIn(Long groupId, Pageable pageable);
+
+  Set<Specialty> findBySpecialtyGroupIdIn(Long groupId);
 
 }
