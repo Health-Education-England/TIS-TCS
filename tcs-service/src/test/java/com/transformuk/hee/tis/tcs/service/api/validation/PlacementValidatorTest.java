@@ -37,7 +37,7 @@ public class PlacementValidatorTest {
   private static final String DEFAULT_TRAINING_DESCRIPTION = "TRAINING";
   private static final LocalDate DEFAULT_DATE_FROM = LocalDate.ofEpochDay(0L);
   private static final LocalDate DEFAULT_DATE_TO = LocalDate.ofEpochDay(0L);
-  private static final Long DEFAULT_PLACEMENT_TYPE = 123456L;
+  private static final String DEFAULT_PLACEMENT_TYPE = "OOPT";
   private static final Float DEFAULT_PLACEMENT_WHOLE_TIME_EQUIVALENT = 1F;
 
   private PlacementDTO placementDTO;
@@ -65,7 +65,7 @@ public class PlacementValidatorTest {
     placementDTO.setSpecialties(Sets.newHashSet());
     placementDTO.setDateFrom(DEFAULT_DATE_FROM);
     placementDTO.setDateTo(DEFAULT_DATE_TO);
-    placementDTO.setPlacementTypeId(DEFAULT_PLACEMENT_TYPE);
+    placementDTO.setPlacementType(DEFAULT_PLACEMENT_TYPE);
     placementDTO.setPlacementWholeTimeEquivalent(DEFAULT_PLACEMENT_WHOLE_TIME_EQUIVALENT);
     placementDTO.setLocalPostNumber(DEFAULT_LOCAL_POST_NUMBER);
     placementDTO.setTrainingDescription(DEFAULT_TRAINING_DESCRIPTION);
@@ -110,13 +110,13 @@ public class PlacementValidatorTest {
   @Test
   public void testValidateFailsIfPlacementTypeIsInvalid() {
     try {
-      given(referenceService.placementTypeExists(Lists.newArrayList(321L))).willReturn(Maps.newHashMap(321L, false));
-      placementDTO.setPlacementTypeId(321L);
+      given(referenceService.placementTypeExists(Lists.newArrayList("OOPC"))).willReturn(Maps.newHashMap("OOPC", false));
+      placementDTO.setPlacementType("OOPC");
       placementValidator.validate(placementDTO);
       fail("ValidationException expected.");
     } catch (ValidationException ex) {
       assertThat(ex.getBindingResult().getErrorCount(), is(1));
-      assertThat(ex.getBindingResult().getFieldError("placementTypeId"), is(notNullValue()));
+      assertThat(ex.getBindingResult().getFieldError("placementType"), is(notNullValue()));
     }
   }
 

@@ -52,7 +52,7 @@ public class PlacementMapper {
       placementDTO.setDateTo(placement.getDateTo());
       placementDTO.setIntrepidId(placement.getIntrepidId());
       placementDTO.setLocalPostNumber(placement.getLocalPostNumber());
-      placementDTO.setPlacementTypeId(placement.getPlacementTypeId());
+      placementDTO.setPlacementType(placement.getPlacementType());
       placementDTO.setTrainingDescription(placement.getTrainingDescription());
       placementDTO.setPlacementWholeTimeEquivalent(placement.getPlacementWholeTimeEquivalent());
       placementDTO.setStatus(getStatus(placement.getDateFrom(), placement.getDateTo()));
@@ -90,7 +90,7 @@ public class PlacementMapper {
     placement.setDateTo(placementDTO.getDateTo());
     placement.setIntrepidId(placementDTO.getIntrepidId());
     placement.setLocalPostNumber(placementDTO.getLocalPostNumber());
-    placement.setPlacementTypeId(placementDTO.getPlacementTypeId());
+    placement.setPlacementType(placementDTO.getPlacementType());
     placement.setTrainingDescription(placementDTO.getTrainingDescription());
     placement.setPlacementWholeTimeEquivalent(placementDTO.getPlacementWholeTimeEquivalent());
 
@@ -98,7 +98,6 @@ public class PlacementMapper {
       Set<PlacementSpecialty> specialties = Sets.newHashSet();
       for (PlacementSpecialtyDTO placementSpecialtyDTO : placementDTO.getSpecialties()) {
         PlacementSpecialty placementSpecialty = new PlacementSpecialty();
-        placementSpecialty.setId(placementSpecialtyDTO.getId());
         placementSpecialty.setPlacementSpecialtyType(placementSpecialtyDTO.getPlacementSpecialtyType());
         placementSpecialty.setPlacement(placement);
         placementSpecialty.setSpecialty(specialtyRepository.findOne(placementSpecialtyDTO.getSpecialtyId()));

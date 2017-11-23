@@ -124,13 +124,10 @@ public class PlacementValidator {
 
   private List<FieldError> checkPlacementType(PlacementDTO placementDTO) {
     List<FieldError> fieldErrors = new ArrayList<>();
-    if (placementDTO.getPlacementTypeId() == null || placementDTO.getPlacementTypeId() < 0) {
-      fieldErrors.add(new FieldError(PLACEMENT_DTO_NAME, "placementTypeId",
-          "PlacementType ID cannot be null or negative"));
-    } else {
-      Map<Long, Boolean> placementTypeIdsExistsMap = referenceService.placementTypeExists(newArrayList(placementDTO.getPlacementTypeId()));
-      notExistsFieldForLongIdsErrors(fieldErrors, placementTypeIdsExistsMap, "placementTypeId", "PlacementType");
-    }
+
+    Map<String, Boolean> placementTypeCodesExistsMap = referenceService.placementTypeExists(newArrayList(placementDTO.getPlacementType()));
+    notExistsFieldErrors(fieldErrors, placementTypeCodesExistsMap, "placementType", "PlacementType");
+
     return fieldErrors;
   }
 

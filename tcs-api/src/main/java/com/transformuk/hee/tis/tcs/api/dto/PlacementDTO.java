@@ -49,8 +49,8 @@ public class PlacementDTO implements Serializable {
   @NotNull(message = "Date to is required", groups = {Update.class, Create.class})
   private LocalDate dateTo;
 
-  @NotNull(message = "PlacementTypeId is required", groups = {Update.class, Create.class})
-  private Long placementTypeId;
+  @NotNull(message = "PlacementType is required", groups = {Update.class, Create.class})
+  private String placementType;
 
   private Float placementWholeTimeEquivalent;
 
@@ -154,12 +154,12 @@ public class PlacementDTO implements Serializable {
     this.dateTo = dateTo;
   }
 
-  public Long getPlacementTypeId() {
-    return placementTypeId;
+  public String getPlacementType() {
+    return placementType;
   }
 
-  public void setPlacementTypeId(Long placementTypeId) {
-    this.placementTypeId = placementTypeId;
+  public void setPlacementType(String placementType) {
+    this.placementType = placementType;
   }
 
   public Float getPlacementWholeTimeEquivalent() {
@@ -214,7 +214,7 @@ public class PlacementDTO implements Serializable {
         ", specialties='" + specialties + "'" +
         ", dateFrom='" + dateFrom + "'" +
         ", dateTo='" + dateTo + "'" +
-        ", placementTypeId='" + placementTypeId + "'" +
+        ", placementType='" + placementType + "'" +
         ", placementWholeTimeEquivalent='" + placementWholeTimeEquivalent + "'" +
         ", localPostNumber='" + localPostNumber + "'" +
         ", trainingDescription='" + trainingDescription + "'" +

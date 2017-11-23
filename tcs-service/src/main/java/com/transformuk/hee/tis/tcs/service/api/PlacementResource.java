@@ -172,45 +172,6 @@ public class PlacementResource {
   }
 
   /**
-   * PATCH  /placements/specialties : Patches a Placement to link it to specialties
-   *
-   * @param placementRelationshipsDto List of the PlacementRelationshipsDTO to update their specialties
-   * @return the ResponseEntity with status 200 (OK) and with body the updated placementDTOS,
-   * or with status 400 (Bad Request) if the placementRelationshipsDto is not valid,
-   * or with status 500 (Internal Server Error) if the placementRelationshipsDto couldn't be updated
-   * @throws URISyntaxException if the Location URI syntax is incorrect
-   */
-  @PatchMapping("/placements/specialties")
-  @Timed
-  @PreAuthorize("hasAuthority('tcs:add:modify:entities')")
-  public ResponseEntity<List<PlacementDTO>> patchPlacementSpecialties(@RequestBody List<PlacementDTO> placementRelationshipsDto) {
-    log.debug("REST request to bulk link specialties to Placements : {}", placementRelationshipsDto);
-    if (Collections.isEmpty(placementRelationshipsDto)) {
-      return ResponseEntity.badRequest().headers(HeaderUtil.createFailureAlert(ENTITY_NAME, REQUEST_BODY_EMPTY,
-          REQUEST_BODY_CANNOT_BE_EMPTY)).body(null);
-    } else {
-      List<PlacementDTO> entitiesWithNoId = placementRelationshipsDto.stream()
-          .filter(p -> p.getIntrepidId() == null)
-          .map(placement -> {
-            PlacementDTO placementDTO = new PlacementDTO();
-            placementDTO.setIntrepidId(placement.getIntrepidId());
-            return placementDTO;
-          })
-          .collect(Collectors.toList());
-      if (!Collections.isEmpty(entitiesWithNoId)) {
-        return ResponseEntity.badRequest().headers(HeaderUtil.createFailureAlert(StringUtils.join(entitiesWithNoId, ","),
-            BULK_UPDATE_FAILED_NOID, NOID_ERR_MSG)).body(entitiesWithNoId);
-      }
-    }
-
-    List<PlacementDTO> results = placementService.patchPlacementSpecialties(placementRelationshipsDto);
-    List<Long> ids = results.stream().map(PlacementDTO::getId).collect(Collectors.toList());
-    return ResponseEntity.ok()
-        .headers(HeaderUtil.createEntityUpdateAlert(ENTITY_NAME, StringUtils.join(ids, ",")))
-        .body(results);
-  }
-
-  /**
    * PATCH  /placements/clinical-supervisors : Patches a Placement to link it to Clinical supervisors
    *
    * @param placementRelationshipsDto List of the PlacementRelationshipsDTO to update their Clinical supervisors
