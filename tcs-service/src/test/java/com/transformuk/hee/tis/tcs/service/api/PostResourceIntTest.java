@@ -78,6 +78,7 @@ public class PostResourceIntTest {
 
   private static final String SPECIALTY_INTREPID_ID = "SPECIALTY INTREPID ID";
   private static final String PROGRAMME_INTREPID_ID = "programme intrepid id";
+  private static final String POST_INTREPID_ID = "post intrepid id";
   private static final String PROGRAMME_NAME = "programme name";
   private static final String PROGRAMME_NUMBER = "123456";
   private static final String DEFAULT_NATIONAL_POST_NUMBER = "AAAAAAAAAA";
@@ -283,6 +284,7 @@ public class PostResourceIntTest {
 
     post = createEntity();
     post.setNationalPostNumber(expectedNationalPostNumber);
+    post.setIntrepidId(POST_INTREPID_ID);
 
     // Create the Post
     PostDTO postDTO = postMapper.postToPostDTO(post);
@@ -364,6 +366,7 @@ public class PostResourceIntTest {
   public void shouldAllowNationalPostNumberContentsWhenCreatingNowAllCharactersAreAllowed() throws Exception {
     //given
     PostDTO postDTO = postMapper.postToPostDTO(createEntity());
+    postDTO.setIntrepidId(POST_INTREPID_ID);
     postDTO.setNationalPostNumber("#%$^&**(");
     //when & then
     restPostMockMvc.perform(post("/api/posts")
@@ -376,6 +379,7 @@ public class PostResourceIntTest {
   @Transactional
   public void shouldNotAllowTwoPrimarySpecialties() throws Exception {
     post = createEntity();
+    post.setIntrepidId(POST_INTREPID_ID);
     postRepository.saveAndFlush(post);
     // Update the post
     Post updatedPost = postRepository.findOne(post.getId());
@@ -405,6 +409,7 @@ public class PostResourceIntTest {
   @Transactional
   public void shouldNotAllowTwoSubSpecialties() throws Exception {
     post = createEntity();
+    post.setIntrepidId(POST_INTREPID_ID);
     postRepository.saveAndFlush(post);
     // Update the post
     Post updatedPost = postRepository.findOne(post.getId());
@@ -434,6 +439,7 @@ public class PostResourceIntTest {
   @Transactional
   public void shouldAllowMMultipleOtherSpecialties() throws Exception {
     post = createEntity();
+    post.setIntrepidId(POST_INTREPID_ID);
     post.setNationalPostNumber("number2");
     postRepository.saveAndFlush(post);
     // Update the post
@@ -676,6 +682,7 @@ public class PostResourceIntTest {
   public void updatePost() throws Exception {
     // Initialize the database
     post = createEntity();
+    post.setIntrepidId(POST_INTREPID_ID);
     postRepository.saveAndFlush(post);
     int databaseSizeBeforeUpdate = postRepository.findAll().size();
 
@@ -814,6 +821,7 @@ public class PostResourceIntTest {
         .localPostNumber(UPDATED_LOCAL_POST_NUMBER);
 
     Post anotherPost = createEntity();
+    anotherPost.setIntrepidId(POST_INTREPID_ID);
     em.persist(anotherPost);
 
     PostDTO anotherPostDTO = new PostDTO()
@@ -858,6 +866,7 @@ public class PostResourceIntTest {
         .intrepidId(UPDATED_INTREPID_ID);
 
     Post oldPost = createEntity();
+    oldPost.setIntrepidId(POST_INTREPID_ID);
     em.persist(oldPost);
 
     PostDTO oldPostDTO = new PostDTO()
@@ -929,6 +938,7 @@ public class PostResourceIntTest {
         .intrepidId(UPDATED_INTREPID_ID);
 
     Post oldPost = createEntity();
+    oldPost.setIntrepidId(POST_INTREPID_ID);
     em.persist(oldPost);
 
     PostSiteDTO postSiteDTO = new PostSiteDTO();
@@ -1194,7 +1204,7 @@ public class PostResourceIntTest {
     Placement newPlacement = new Placement();
     newPlacement.setGradeAbbreviation("12L");
     newPlacement.setSiteCode("1L");
-    newPlacement.setPlacementTypeId(123L);
+    newPlacement.setPlacementType("OOPT");
     newPlacement.setIntrepidId("12345");
     em.persist(newPlacement);
 

@@ -57,8 +57,8 @@ public class Placement implements Serializable {
   @Column(name = "dateTo")
   private LocalDate dateTo;
 
-  @Column(name = "placementTypeId")
-  private Long placementTypeId;
+  @Column(name = "placementType")
+  private String placementType;
 
   @Column(name = "placementWholeTimeEquivalent")
   private Float placementWholeTimeEquivalent;
@@ -165,12 +165,12 @@ public class Placement implements Serializable {
     this.dateTo = dateTo;
   }
 
-  public Long getPlacementTypeId() {
-    return placementTypeId;
+  public String getPlacementType() {
+    return placementType;
   }
 
-  public void setPlacementTypeId(Long placementTypeId) {
-    this.placementTypeId = placementTypeId;
+  public void setPlacementType(String placementType) {
+    this.placementType = placementType;
   }
 
   public Float getPlacementWholeTimeEquivalent() {
@@ -213,7 +213,7 @@ public class Placement implements Serializable {
         ", specialties='" + specialties + "'" +
         ", dateFrom='" + dateFrom + "'" +
         ", dateTo='" + dateTo + "'" +
-        ", placementTypeId='" + placementTypeId + "'" +
+        ", placementType='" + placementType + "'" +
         ", placementWholeTimeEquivalent='" + placementWholeTimeEquivalent + "'" +
         ", localPostNumber='" + localPostNumber + "'" +
         '}';

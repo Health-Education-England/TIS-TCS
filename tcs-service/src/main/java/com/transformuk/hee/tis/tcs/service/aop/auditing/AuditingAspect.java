@@ -72,8 +72,9 @@ public class AuditingAspect {
   }
 
   /**
-   * Advice that Audit method before execution
-   * check if any modification then its creating a jsonPatch and stored into JsonPatch table
+   * This is the JSONPatch aspect. It listens to updates coming from the UI and stores a JSONPatch log of the update.
+   * The intention is to use this JSONPatch to persist user modifications when data gets re imported from intrepid.
+   *
    */
   @Before("execution(* com.transformuk.hee.tis.tcs.service.api.*.update*(..))")
   public void auditUpdateBeforeExecution(JoinPoint joinPoint) throws Throwable {

@@ -17,7 +17,7 @@ public class PlacementSpecialtyMapper {
       specialties = Sets.newHashSet();
       for (PlacementSpecialty placementSpecialty : placementSpecialties) {
         PlacementSpecialtyDTO placementSpecialtyDTO = new PlacementSpecialtyDTO();
-        placementSpecialtyDTO.setId(placementSpecialty.getId());
+        placementSpecialtyDTO.setPlacementId(placementSpecialty.getPlacement().getId());
         placementSpecialtyDTO.setPlacementSpecialtyType(placementSpecialty.getPlacementSpecialtyType());
         placementSpecialtyDTO.setSpecialtyId(placementSpecialty.getSpecialty().getId());
         specialties.add(placementSpecialtyDTO);

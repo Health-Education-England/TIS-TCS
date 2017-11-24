@@ -6,16 +6,16 @@ import java.io.Serializable;
 
 public class PlacementSpecialtyDTO implements Serializable {
 
-  private Long id;
+  private Long placementId;
   private Long specialtyId;
   private PostSpecialtyType placementSpecialtyType;
 
-  public Long getId() {
-    return id;
+  public Long getPlacementId() {
+    return placementId;
   }
 
-  public void setId(Long id) {
-    this.id = id;
+  public void setPlacementId(Long placementId) {
+    this.placementId = placementId;
   }
 
   public Long getSpecialtyId() {
@@ -41,21 +41,23 @@ public class PlacementSpecialtyDTO implements Serializable {
 
     PlacementSpecialtyDTO that = (PlacementSpecialtyDTO) o;
 
+    if (placementId != null ? !placementId.equals(that.placementId) : that.placementId != null) return false;
     if (specialtyId != null ? !specialtyId.equals(that.specialtyId) : that.specialtyId != null) return false;
     return placementSpecialtyType == that.placementSpecialtyType;
   }
 
   @Override
   public int hashCode() {
-    int result = 31 + (specialtyId != null ? specialtyId.hashCode() : 0);
+    int result = placementId != null ? placementId.hashCode() : 0;
+    result = 31 * result + (specialtyId != null ? specialtyId.hashCode() : 0);
     result = 31 * result + (placementSpecialtyType != null ? placementSpecialtyType.hashCode() : 0);
     return result;
   }
 
   @Override
   public String toString() {
-    return "PostSpecialtyDTO{" +
-        "id=" + id +
+    return "PlacementSpecialtyDTO{" +
+        "placementId=" + placementId +
         ", specialtyId=" + specialtyId +
         ", placementSpecialtyType=" + placementSpecialtyType +
         '}';
