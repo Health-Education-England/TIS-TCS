@@ -12,4 +12,6 @@ import org.springframework.stereotype.Repository;
 @Repository
 public interface GmcDetailsRepository extends JpaRepository<GmcDetails, Long> {
 
+  IdProjection findByGmcNumber(String gmcNumber);
+
 }

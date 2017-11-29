@@ -1,70 +1,38 @@
-package com.transformuk.hee.tis.tcs.service.model;
+package com.transformuk.hee.tis.tcs.api.dto;
 
 import com.transformuk.hee.tis.tcs.api.enumeration.PlacementStatus;
 
-import javax.persistence.Column;
-import javax.persistence.Entity;
-import javax.persistence.GeneratedValue;
-import javax.persistence.GenerationType;
-import javax.persistence.Id;
-import javax.persistence.Table;
 import java.io.Serializable;
 import java.time.LocalDate;
 
 /**
- * A Placement. Contains the fields necessary for presenting an item in a placement list.
+ * Holds the fields necessary for an item in a placement list
  */
-@Entity
-@Table (name = "Placement")
-public class PlacementView implements Serializable {
+public class PlacementViewDTO implements Serializable {
 
-  private static final long serialVersionUID = 1L;
-
-  @Id
-  @GeneratedValue(strategy = GenerationType.IDENTITY)
   private Long id;
 
-  @Column(name = "traineeId")
-  private Long traineeId;
-
-  @Column(name = "intrepidId")
   private String intrepidId;
 
-  @Column(name = "postId")
+  private PlacementStatus status;
+
+  private Long traineeId;
+
   private Long postId;
 
-  @Column(name = "siteCode")
   private String siteCode;
 
-  @Column(name = "gradeAbbreviation")
+  private String siteName;
+
   private String gradeAbbreviation;
 
-  @Column(name = "dateFrom")
+  private String gradeName;
+
   private LocalDate dateFrom;
 
-  @Column(name = "dateTo")
   private LocalDate dateTo;
 
-  @Column(name = "placementType")
   private String placementType;
-
-  /**
-   *
-   * @return the placement status based on dateFrom and dateTo
-   */
-  public PlacementStatus getStatus() {
-    if (this.dateFrom == null || this.dateTo == null) {
-      return null;
-    }
-
-    LocalDate today = LocalDate.now();
-    if (today.isBefore(this.dateFrom)) {
-      return PlacementStatus.FUTURE;
-    } else if (today.isAfter(this.dateTo)) {
-      return PlacementStatus.PAST;
-    }
-    return PlacementStatus.CURRENT;
-  }
 
   public Long getId() {
     return id;
@@ -74,12 +42,12 @@ public class PlacementView implements Serializable {
     this.id = id;
   }
 
-  public Long getTraineeId() {
-    return traineeId;
+  public PlacementStatus getStatus() {
+    return status;
   }
 
-  public void setTraineeId(Long traineeId) {
-    this.traineeId = traineeId;
+  public void setStatus(PlacementStatus status) {
+    this.status = status;
   }
 
   public String getIntrepidId() {
@@ -88,6 +56,14 @@ public class PlacementView implements Serializable {
 
   public void setIntrepidId(String intrepidId) {
     this.intrepidId = intrepidId;
+  }
+
+  public Long getTraineeId() {
+    return traineeId;
+  }
+
+  public void setTraineeId(Long traineeId) {
+    this.traineeId = traineeId;
   }
 
   public Long getPostId() {
@@ -104,6 +80,22 @@ public class PlacementView implements Serializable {
 
   public void setSiteCode(String siteCode) {
     this.siteCode = siteCode;
+  }
+
+  public String getSiteName() {
+    return siteName;
+  }
+
+  public void setSiteName(String siteName) {
+    this.siteName = siteName;
+  }
+
+  public String getGradeName() {
+    return gradeName;
+  }
+
+  public void setGradeName(String gradeName) {
+    this.gradeName = gradeName;
   }
 
   public String getGradeAbbreviation() {
@@ -143,15 +135,18 @@ public class PlacementView implements Serializable {
     if (this == o) return true;
     if (o == null || getClass() != o.getClass()) return false;
 
-    PlacementView that = (PlacementView) o;
+    PlacementViewDTO that = (PlacementViewDTO) o;
 
     if (id != null ? !id.equals(that.id) : that.id != null) return false;
-    if (traineeId != null ? !traineeId.equals(that.traineeId) : that.traineeId != null) return false;
     if (intrepidId != null ? !intrepidId.equals(that.intrepidId) : that.intrepidId != null) return false;
+    if (status != that.status) return false;
+    if (traineeId != null ? !traineeId.equals(that.traineeId) : that.traineeId != null) return false;
     if (postId != null ? !postId.equals(that.postId) : that.postId != null) return false;
     if (siteCode != null ? !siteCode.equals(that.siteCode) : that.siteCode != null) return false;
+    if (siteName != null ? !siteName.equals(that.siteName) : that.siteName != null) return false;
     if (gradeAbbreviation != null ? !gradeAbbreviation.equals(that.gradeAbbreviation) : that.gradeAbbreviation != null)
       return false;
+    if (gradeName != null ? !gradeName.equals(that.gradeName) : that.gradeName != null) return false;
     if (dateFrom != null ? !dateFrom.equals(that.dateFrom) : that.dateFrom != null) return false;
     if (dateTo != null ? !dateTo.equals(that.dateTo) : that.dateTo != null) return false;
     return placementType != null ? placementType.equals(that.placementType) : that.placementType == null;
@@ -160,11 +155,14 @@ public class PlacementView implements Serializable {
   @Override
   public int hashCode() {
     int result = id != null ? id.hashCode() : 0;
-    result = 31 * result + (traineeId != null ? traineeId.hashCode() : 0);
     result = 31 * result + (intrepidId != null ? intrepidId.hashCode() : 0);
+    result = 31 * result + (status != null ? status.hashCode() : 0);
+    result = 31 * result + (traineeId != null ? traineeId.hashCode() : 0);
     result = 31 * result + (postId != null ? postId.hashCode() : 0);
     result = 31 * result + (siteCode != null ? siteCode.hashCode() : 0);
+    result = 31 * result + (siteName != null ? siteName.hashCode() : 0);
     result = 31 * result + (gradeAbbreviation != null ? gradeAbbreviation.hashCode() : 0);
+    result = 31 * result + (gradeName != null ? gradeName.hashCode() : 0);
     result = 31 * result + (dateFrom != null ? dateFrom.hashCode() : 0);
     result = 31 * result + (dateTo != null ? dateTo.hashCode() : 0);
     result = 31 * result + (placementType != null ? placementType.hashCode() : 0);
@@ -173,13 +171,16 @@ public class PlacementView implements Serializable {
 
   @Override
   public String toString() {
-    return "PlacementView{" +
+    return "PlacementViewDTO{" +
         "id=" + id +
-        ", traineeId=" + traineeId +
         ", intrepidId='" + intrepidId + '\'' +
+        ", status=" + status +
+        ", traineeId=" + traineeId +
         ", postId=" + postId +
         ", siteCode='" + siteCode + '\'' +
+        ", siteName='" + siteName + '\'' +
         ", gradeAbbreviation='" + gradeAbbreviation + '\'' +
+        ", gradeName='" + gradeName + '\'' +
         ", dateFrom=" + dateFrom +
         ", dateTo=" + dateTo +
         ", placementType='" + placementType + '\'' +

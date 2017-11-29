@@ -1,6 +1,6 @@
 package com.transformuk.hee.tis.tcs.service.repository;
 
-import com.transformuk.hee.tis.tcs.service.model.Person;
+import com.transformuk.hee.tis.tcs.service.model.PersonBasicDetails;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.JpaSpecificationExecutor;
 import org.springframework.stereotype.Repository;
@@ -11,8 +11,7 @@ import org.springframework.stereotype.Repository;
  */
 @SuppressWarnings("unused")
 @Repository
-public interface PersonRepository extends JpaRepository<Person, Long>, JpaSpecificationExecutor<Person> {
+public interface PersonBasicDetailsRepository extends JpaRepository<PersonBasicDetails, Long>, JpaSpecificationExecutor<PersonBasicDetails> {
 
-  Long findOneIdByGmcDetailsGmcNumber(String gmcNumber);
 
 }
