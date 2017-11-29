@@ -4,17 +4,21 @@ import com.google.common.collect.Lists;
 import com.transformuk.hee.tis.tcs.api.dto.PersonDTO;
 import com.transformuk.hee.tis.tcs.api.enumeration.Status;
 import com.transformuk.hee.tis.tcs.service.Application;
+import com.transformuk.hee.tis.tcs.service.api.decorator.PlacementViewDecorator;
 import com.transformuk.hee.tis.tcs.service.exception.ExceptionTranslator;
 import com.transformuk.hee.tis.tcs.service.model.ContactDetails;
 import com.transformuk.hee.tis.tcs.service.model.GdcDetails;
 import com.transformuk.hee.tis.tcs.service.model.GmcDetails;
 import com.transformuk.hee.tis.tcs.service.model.Person;
+import com.transformuk.hee.tis.tcs.service.model.PersonalDetails;
 import com.transformuk.hee.tis.tcs.service.repository.ContactDetailsRepository;
 import com.transformuk.hee.tis.tcs.service.repository.GdcDetailsRepository;
 import com.transformuk.hee.tis.tcs.service.repository.GmcDetailsRepository;
 import com.transformuk.hee.tis.tcs.service.repository.PersonRepository;
+import com.transformuk.hee.tis.tcs.service.repository.PlacementViewRepository;
 import com.transformuk.hee.tis.tcs.service.service.PersonService;
 import com.transformuk.hee.tis.tcs.service.service.mapper.PersonMapper;
+import com.transformuk.hee.tis.tcs.service.service.mapper.PlacementViewMapper;
 import org.apache.commons.codec.net.URLCodec;
 import org.junit.Before;
 import org.junit.Test;
@@ -83,6 +87,7 @@ public class PersonResourceIntTest {
   private static final String UPDATED_PUBLIC_HEALTH_NUMBER = "BBBBBBBBBB";
 
   private static final String PERSON_SURNANME = "Hudson";
+  private static final String PERSON_FORENAMES = "James";
   private static final String GMC_NUMBER = "1000000";
   private static final String GDC_NUMBER = "2000000";
 
@@ -106,6 +111,12 @@ public class PersonResourceIntTest {
 
   @Autowired
   private PersonService personService;
+  @Autowired
+  private PlacementViewRepository placementViewRepository;
+  @Autowired
+  private PlacementViewMapper placementViewMapper;
+  @Autowired
+  private PlacementViewDecorator placementViewDecorator;
 
   @Autowired
   private MappingJackson2HttpMessageConverter jacksonMessageConverter;
@@ -123,7 +134,8 @@ public class PersonResourceIntTest {
   @Before
   public void setup() {
     MockitoAnnotations.initMocks(this);
-    PersonResource personResource = new PersonResource(personService);
+    PersonResource personResource = new PersonResource(personService, placementViewRepository, placementViewMapper,
+        placementViewDecorator);
     this.restPersonMockMvc = MockMvcBuilders.standaloneSetup(personResource)
         .setCustomArgumentResolvers(pageableArgumentResolver)
         .setControllerAdvice(exceptionTranslator)
@@ -235,6 +247,31 @@ public class PersonResourceIntTest {
 
   @Test
   @Transactional
+  public void shouldGetBasicDetails() throws Exception {
+    // given
+    personRepository.saveAndFlush(person);
+    GmcDetails gmcDetails = new GmcDetails();
+    gmcDetails.setId(person.getId());
+    gmcDetails.setGmcNumber(GMC_NUMBER);
+    gmcDetailsRepository.saveAndFlush(gmcDetails);
+    ContactDetails contactDetails = new ContactDetails();
+    contactDetails.setId(person.getId());
+    contactDetails.setSurname(PERSON_SURNANME);
+    contactDetails.setForenames(PERSON_FORENAMES);
+    contactDetailsRepository.saveAndFlush(contactDetails);
+
+    // when & then
+    restPersonMockMvc.perform(get("/api/people/" + person.getId() + "/basic"))
+        .andExpect(status().isOk())
+        .andExpect(content().contentType(MediaType.APPLICATION_JSON_UTF8_VALUE))
+        .andExpect(jsonPath("$.id").value(person.getId().intValue()))
+        .andExpect(jsonPath("$.firstName").value(PERSON_FORENAMES))
+        .andExpect(jsonPath("$.lastName").value(PERSON_SURNANME))
+        .andExpect(jsonPath("$.gmcNumber").value(GMC_NUMBER));
+  }
+
+  @Test
+  @Transactional
   public void getAllPeople() throws Exception {
     // Initialize the database
     personRepository.saveAndFlush(person);
@@ -254,6 +291,33 @@ public class PersonResourceIntTest {
         .andExpect(jsonPath("$.[*].inactiveNotes").value(hasItem(DEFAULT_INACTIVE_NOTES.toString())))
         .andExpect(jsonPath("$.[*].publicHealthNumber").value(hasItem(DEFAULT_PUBLIC_HEALTH_NUMBER.toString())))
         .andExpect(jsonPath("$.[*].regulator").value(hasItem(DEFAULT_REGULATOR.toString())));
+  }
+
+  @Test
+  @Transactional
+  public void shouldTextSearchBasicDetails() throws Exception {
+    Person anotherPerson = createEntity();
+    personRepository.saveAndFlush(anotherPerson);
+    GmcDetails gmcDetails = new GmcDetails();
+    gmcDetails.setId(anotherPerson.getId());
+    gmcDetails.setGmcNumber(GMC_NUMBER);
+    gmcDetailsRepository.saveAndFlush(gmcDetails);
+    anotherPerson.setGmcDetails(gmcDetails);
+    ContactDetails contactDetails = new ContactDetails();
+    contactDetails.setId(anotherPerson.getId());
+    contactDetails.setSurname(PERSON_SURNANME);
+    contactDetails.setForenames(PERSON_FORENAMES);
+    contactDetailsRepository.saveAndFlush(contactDetails);
+    anotherPerson.setContactDetails(contactDetails);
+
+
+    restPersonMockMvc.perform(get("/api/people/basic?searchQuery=" + GMC_NUMBER))
+        .andExpect(status().isOk())
+        .andExpect(content().contentType(MediaType.APPLICATION_JSON_UTF8_VALUE))
+        .andExpect(jsonPath("$.[*].id").value(anotherPerson.getId().intValue()))
+        .andExpect(jsonPath("$.[*].gmcNumber").value(GMC_NUMBER))
+        .andExpect(jsonPath("$.[*].firstName").value(PERSON_FORENAMES))
+        .andExpect(jsonPath("$.[*].lastName").value(PERSON_SURNANME));
   }
 
   @Test

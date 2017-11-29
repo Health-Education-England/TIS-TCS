@@ -3,16 +3,20 @@ package com.transformuk.hee.tis.tcs.service.service.impl;
 import com.google.common.collect.Lists;
 import com.google.common.collect.Maps;
 import com.transformuk.hee.tis.tcs.api.dto.PlacementDTO;
+import com.transformuk.hee.tis.tcs.api.dto.PlacementDetailsDTO;
 import com.transformuk.hee.tis.tcs.api.dto.PlacementSpecialtyDTO;
 import com.transformuk.hee.tis.tcs.service.model.Person;
 import com.transformuk.hee.tis.tcs.service.model.Placement;
+import com.transformuk.hee.tis.tcs.service.model.PlacementDetails;
 import com.transformuk.hee.tis.tcs.service.model.PlacementSpecialty;
 import com.transformuk.hee.tis.tcs.service.model.PlacementSupervisor;
 import com.transformuk.hee.tis.tcs.service.model.Specialty;
 import com.transformuk.hee.tis.tcs.service.repository.PersonRepository;
+import com.transformuk.hee.tis.tcs.service.repository.PlacementDetailsRepository;
 import com.transformuk.hee.tis.tcs.service.repository.PlacementRepository;
 import com.transformuk.hee.tis.tcs.service.repository.SpecialtyRepository;
 import com.transformuk.hee.tis.tcs.service.service.PlacementService;
+import com.transformuk.hee.tis.tcs.service.service.mapper.PlacementDetailsMapper;
 import com.transformuk.hee.tis.tcs.service.service.mapper.PlacementMapper;
 import org.apache.commons.collections4.CollectionUtils;
 import org.slf4j.Logger;
@@ -38,19 +42,22 @@ public class PlacementServiceImpl implements PlacementService {
   private final Logger log = LoggerFactory.getLogger(PlacementServiceImpl.class);
 
   private final PlacementRepository placementRepository;
-
+  private final PlacementDetailsRepository placementDetailsRepository;
   private final PlacementMapper placementMapper;
-
+  private final PlacementDetailsMapper placementDetailsMapper;
   private final SpecialtyRepository specialtyRepository;
-
   private final PersonRepository personRepository;
 
   public PlacementServiceImpl(PlacementRepository placementRepository,
+                              PlacementDetailsRepository placementDetailsRepository,
                               PlacementMapper placementMapper,
+                              PlacementDetailsMapper placementDetailsMapper,
                               SpecialtyRepository specialtyRepository,
                               PersonRepository personRepository) {
     this.placementRepository = placementRepository;
+    this.placementDetailsRepository = placementDetailsRepository;
     this.placementMapper = placementMapper;
+    this.placementDetailsMapper = placementDetailsMapper;
     this.specialtyRepository = specialtyRepository;
     this.personRepository = personRepository;
   }
@@ -66,8 +73,15 @@ public class PlacementServiceImpl implements PlacementService {
     log.debug("Request to save Placement : {}", placementDTO);
     Placement placement = placementMapper.placementDTOToPlacement(placementDTO);
     placement = placementRepository.save(placement);
-    PlacementDTO result = placementMapper.placementToPlacementDTO(placement);
-    return result;
+    return placementMapper.placementToPlacementDTO(placement);
+  }
+
+  @Override
+  public PlacementDetailsDTO saveDetails(PlacementDetailsDTO placementDetailsDTO) {
+    log.debug("Request to save Placement : {}", placementDetailsDTO);
+    PlacementDetails placementDetails = placementDetailsMapper.placementDetailsDTOToPlacementDetails(placementDetailsDTO);
+    placementDetails = placementDetailsRepository.save(placementDetails);
+    return placementDetailsMapper.placementDetailsToPlacementDetailsDTO(placementDetails);
   }
 
   /**
@@ -81,8 +95,7 @@ public class PlacementServiceImpl implements PlacementService {
     log.debug("Request to save Placements : {}", placementDTO);
     List<Placement> placements = placementMapper.placementDTOsToPlacements(placementDTO);
     placements = placementRepository.save(placements);
-    List<PlacementDTO> result = placementMapper.placementsToPlacementDTOs(placements);
-    return result;
+    return placementMapper.placementsToPlacementDTOs(placements);
   }
 
   /**
@@ -96,7 +109,7 @@ public class PlacementServiceImpl implements PlacementService {
   public Page<PlacementDTO> findAll(Pageable pageable) {
     log.debug("Request to get all Placements");
     Page<Placement> result = placementRepository.findAll(pageable);
-    return result.map(placement -> placementMapper.placementToPlacementDTO(placement));
+    return result.map(placementMapper::placementToPlacementDTO);
   }
 
   /**
@@ -110,8 +123,14 @@ public class PlacementServiceImpl implements PlacementService {
   public PlacementDTO findOne(Long id) {
     log.debug("Request to get Placement : {}", id);
     Placement placement = placementRepository.findOne(id);
-    PlacementDTO placementViewDTO = placementMapper.placementToPlacementDTO(placement);
-    return placementViewDTO;
+    return placementMapper.placementToPlacementDTO(placement);
+  }
+
+  @Override
+  @Transactional(readOnly = true)
+  public PlacementDetailsDTO getDetails(Long id) {
+    PlacementDetails pd = placementDetailsRepository.findOne(id);
+    return placementDetailsMapper.placementDetailsToPlacementDetailsDTO(pd);
   }
 
   /**

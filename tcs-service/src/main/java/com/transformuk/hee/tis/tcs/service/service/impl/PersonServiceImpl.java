@@ -1,16 +1,22 @@
 package com.transformuk.hee.tis.tcs.service.service.impl;
 
+import com.transformuk.hee.tis.tcs.api.dto.PersonBasicDetailsDTO;
 import com.transformuk.hee.tis.tcs.api.dto.PersonDTO;
 import com.transformuk.hee.tis.tcs.service.model.ColumnFilter;
 import com.transformuk.hee.tis.tcs.service.model.Person;
+import com.transformuk.hee.tis.tcs.service.model.PersonBasicDetails;
+import com.transformuk.hee.tis.tcs.service.repository.GmcDetailsRepository;
+import com.transformuk.hee.tis.tcs.service.repository.PersonBasicDetailsRepository;
 import com.transformuk.hee.tis.tcs.service.repository.PersonRepository;
 import com.transformuk.hee.tis.tcs.service.service.PersonService;
+import com.transformuk.hee.tis.tcs.service.service.mapper.PersonBasicDetailsMapper;
 import com.transformuk.hee.tis.tcs.service.service.mapper.PersonMapper;
 import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.domain.Specification;
 import org.springframework.data.jpa.domain.Specifications;
@@ -33,11 +39,18 @@ public class PersonServiceImpl implements PersonService {
 
   private final Logger log = LoggerFactory.getLogger(PersonServiceImpl.class);
 
-  @Autowired
-  private PersonRepository personRepository;
+  private static final int PERSON_BASIC_DETAILS_MAX_RESULTS = 100;
 
   @Autowired
+  private PersonRepository personRepository;
+  @Autowired
+  private GmcDetailsRepository gmcDetailsRepository;
+  @Autowired
   private PersonMapper personMapper;
+  @Autowired
+  private PersonBasicDetailsRepository personBasicDetailsRepository;
+  @Autowired
+  private PersonBasicDetailsMapper personBasicDetailsMapper;
 
   /**
    * Save a person.
@@ -109,6 +122,24 @@ public class PersonServiceImpl implements PersonService {
     return result.map(person -> personMapper.toDto(person));
   }
 
+  @Override
+  @Transactional(readOnly = true)
+  public List<PersonBasicDetailsDTO> basicDetailsSearch(String searchString) {
+    List<Specification<PersonBasicDetails>> specs = new ArrayList<>();
+    //add the text search criteria
+    if (StringUtils.isNotEmpty(searchString)) {
+      specs.add(Specifications.where(containsLike("firstName", searchString)).
+          or(containsLike("lastName", searchString)).
+          or(containsLike("gmcDetails.gmcNumber", searchString)));
+    }
+    Specifications<PersonBasicDetails> fullSpec = Specifications.where(specs.get(0));
+    Pageable pageable = new PageRequest(0, PERSON_BASIC_DETAILS_MAX_RESULTS);
+
+    Page<PersonBasicDetails> result = personBasicDetailsRepository.findAll(fullSpec, pageable);
+
+    return result.map(person -> personBasicDetailsMapper.toDto(person)).getContent();
+  }
+
   /**
    * Get one person by id.
    *
@@ -131,10 +162,19 @@ public class PersonServiceImpl implements PersonService {
    */
   @Override
   @Transactional(readOnly = true)
-  public PersonDTO findOneByGmcId(String gmcId) {
+  public Long findIdByGmcId(String gmcId) {
     log.debug("Request to get Person by GMC Id : {}", gmcId);
-    Person person = personRepository.findOneByGmcDetailsGmcNumber(gmcId);
-    return personMapper.toDto(person);
+    return gmcDetailsRepository.findByGmcNumber(gmcId).getId();
+  }
+
+  @Override
+  public PersonBasicDetailsDTO getBasicDetails(Long id) {
+    PersonBasicDetails details = personBasicDetailsRepository.findOne(id);
+    if (details != null) {
+      return personBasicDetailsMapper.toDto(details);
+    } else {
+      return null;
+    }
   }
 
   /**

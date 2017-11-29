@@ -1,6 +1,7 @@
 package com.transformuk.hee.tis.tcs.service.service;
 
 import com.transformuk.hee.tis.tcs.api.dto.PlacementDTO;
+import com.transformuk.hee.tis.tcs.api.dto.PlacementDetailsDTO;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 
@@ -42,6 +43,23 @@ public interface PlacementService {
    * @return the entity
    */
   PlacementDTO findOne(Long id);
+
+  /**
+   * Get the placement details given the placement ID
+   *
+   * @param id the placement ID
+   * @return the placement details if found
+   */
+  PlacementDetailsDTO getDetails(Long id);
+
+
+  /**
+   * Saves a new placement
+   *
+   * @param placementDetailsDTO the placement details to save
+   * @return the saved placement details
+   */
+  PlacementDetailsDTO saveDetails(PlacementDetailsDTO placementDetailsDTO);
 
   /**
    * Delete the "id" placement.

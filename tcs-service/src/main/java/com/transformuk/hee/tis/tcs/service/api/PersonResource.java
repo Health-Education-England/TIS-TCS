@@ -2,16 +2,21 @@ package com.transformuk.hee.tis.tcs.service.api;
 
 import com.codahale.metrics.annotation.Timed;
 import com.google.common.collect.Lists;
+import com.transformuk.hee.tis.tcs.api.dto.PersonBasicDetailsDTO;
 import com.transformuk.hee.tis.tcs.api.dto.PersonDTO;
-import com.transformuk.hee.tis.tcs.api.dto.PlacementDTO;
+import com.transformuk.hee.tis.tcs.api.dto.PlacementViewDTO;
 import com.transformuk.hee.tis.tcs.api.dto.validation.Create;
 import com.transformuk.hee.tis.tcs.api.dto.validation.Update;
 import com.transformuk.hee.tis.tcs.api.enumeration.Status;
+import com.transformuk.hee.tis.tcs.service.api.decorator.PlacementViewDecorator;
 import com.transformuk.hee.tis.tcs.service.api.util.ColumnFilterUtil;
 import com.transformuk.hee.tis.tcs.service.api.util.HeaderUtil;
 import com.transformuk.hee.tis.tcs.service.api.util.PaginationUtil;
 import com.transformuk.hee.tis.tcs.service.model.ColumnFilter;
+import com.transformuk.hee.tis.tcs.service.model.PlacementView;
+import com.transformuk.hee.tis.tcs.service.repository.PlacementViewRepository;
 import com.transformuk.hee.tis.tcs.service.service.PersonService;
+import com.transformuk.hee.tis.tcs.service.service.mapper.PlacementViewMapper;
 import io.github.jhipster.web.util.ResponseUtil;
 import io.swagger.annotations.ApiOperation;
 import io.swagger.annotations.ApiParam;
@@ -44,7 +49,6 @@ import java.net.URI;
 import java.net.URISyntaxException;
 import java.util.List;
 import java.util.Optional;
-import java.util.Set;
 import java.util.stream.Collectors;
 
 import static com.transformuk.hee.tis.tcs.service.api.util.StringUtil.sanitize;
@@ -61,9 +65,16 @@ public class PersonResource {
   private static final String ENTITY_NAME = "person";
 
   private final PersonService personService;
+  private final PlacementViewRepository placementViewRepository;
+  private final PlacementViewMapper placementViewMapper;
+  private final PlacementViewDecorator placementViewDecorator;
 
-  public PersonResource(PersonService personService) {
+  public PersonResource(PersonService personService, PlacementViewRepository placementViewRepository,
+                        PlacementViewMapper placementViewMapper, PlacementViewDecorator placementViewDecorator) {
     this.personService = personService;
+    this.placementViewRepository = placementViewRepository;
+    this.placementViewMapper = placementViewMapper;
+    this.placementViewDecorator = placementViewDecorator;
   }
 
   /**
@@ -145,6 +156,29 @@ public class PersonResource {
   }
 
   /**
+   * GET  /people/basic : search for people basic details. Automatically limited to 100 results.
+   *
+   * @return the ResponseEntity with status 200 (OK) and the list of people basic details in body
+   */
+  @ApiOperation(value = "Lists People basic details data",
+      notes = "Returns a list of people basic details with support for smart search \n",
+      response = ResponseEntity.class, responseContainer = "Person basic details list")
+  @ApiResponses(value = {
+      @ApiResponse(code = 200, message = "Person basic list", response = ResponseEntity.class)})
+  @GetMapping("/people/basic")
+  @Timed
+  @PreAuthorize("hasPermission('tis:people::person:', 'View')")
+  public ResponseEntity<List<PersonBasicDetailsDTO>> searchBasicDetails(
+      @ApiParam(value = "any wildcard string to be searched")
+      @RequestParam(value = "searchQuery", required = false) String searchQuery) {
+    log.debug("REST request to get a basic details page of People");
+    searchQuery = sanitize(searchQuery);
+
+    List<PersonBasicDetailsDTO> result = personService.basicDetailsSearch(searchQuery);
+    return new ResponseEntity<>(result, null, HttpStatus.OK);
+  }
+
+  /**
    * GET  /people/:id : get the "id" person.
    *
    * @param id the id of the personDTO to retrieve
@@ -175,6 +209,21 @@ public class PersonResource {
   }
 
   /**
+   * GET  /people/{id}/basicDetails : get a person's basic details
+   *
+   * @param id the trainee Id
+   * @return the ResponseEntity with status 200 (OK) and the list of placements in body
+   */
+  @GetMapping("/people/{id}/basic")
+  @Timed
+  @PreAuthorize("hasPermission('tis:people::person:', 'View')")
+  public ResponseEntity<PersonBasicDetailsDTO> getBasicDetails(@PathVariable Long id) {
+    log.debug("REST request to get basic details");
+    PersonBasicDetailsDTO basicDetails = personService.getBasicDetails(id);
+    return ResponseUtil.wrapOrNotFound(Optional.ofNullable(basicDetails));
+  }
+
+  /**
    * GET  /people/{id}/placements : get all the placements for a trainee.
    *
    * @param id the trainee Id
@@ -183,10 +232,12 @@ public class PersonResource {
   @GetMapping("/people/{id}/placements")
   @Timed
   @PreAuthorize("hasPermission('tis:people::person:', 'View')")
-  public ResponseEntity<Set<PlacementDTO>> getPlacementsForTrainee(@PathVariable Long id) {
+  public ResponseEntity<List<PlacementViewDTO>> getPlacementsForTrainee(@PathVariable Long id) {
     log.debug("REST request to get a page of Placements");
-    PersonDTO person = personService.findOne(id);
-    return ResponseUtil.wrapOrNotFound(Optional.ofNullable(person != null ? person.getPlacements() : null));
+    List<PlacementView> placementViews = placementViewRepository.findAllByTraineeIdOrderByDateToDesc(id);
+    return ResponseUtil.wrapOrNotFound(Optional.ofNullable(placementViews != null ?
+        placementViewDecorator.decorate(placementViewMapper.placementViewsToPlacementViewDTOs(placementViews)) :
+        null));
   }
 
   /**
@@ -198,10 +249,10 @@ public class PersonResource {
   @GetMapping("/people/gmc/{gmcId}/placements")
   @Timed
   @PreAuthorize("hasPermission('tis:people::person:', 'View')")
-  public ResponseEntity<Set<PlacementDTO>> getPlacementsForTraineeByGmcId(@PathVariable String gmcId) {
+  public ResponseEntity<List<PlacementViewDTO>> getPlacementsForTraineeByGmcId(@PathVariable String gmcId) {
     log.debug("REST request to get a page of Placements");
-    PersonDTO person = personService.findOneByGmcId(gmcId);
-    return ResponseUtil.wrapOrNotFound(Optional.ofNullable(person != null ? person.getPlacements() : null));
+    Long personId = personService.findIdByGmcId(gmcId);
+    return getPlacementsForTrainee(personId);
   }
 
   /**
@@ -214,7 +265,7 @@ public class PersonResource {
   @PatchMapping("/people")
   @Timed
   @PreAuthorize("hasPermission('tis:people::person:', 'Update')")
-  public ResponseEntity<List<PersonDTO>> patchPersons(@Valid @RequestBody List<PersonDTO> personDTOs) throws URISyntaxException {
+  public ResponseEntity<List<PersonDTO>> patchPersons(@Valid @RequestBody List<PersonDTO> personDTOs) {
     log.debug("REST request to patch Persons: {}", personDTOs);
     List<PersonDTO> result = personService.save(personDTOs);
     List<Long> ids = result.stream().map(PersonDTO::getId).collect(Collectors.toList());

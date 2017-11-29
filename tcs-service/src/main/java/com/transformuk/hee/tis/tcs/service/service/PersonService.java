@@ -1,5 +1,6 @@
 package com.transformuk.hee.tis.tcs.service.service;
 
+import com.transformuk.hee.tis.tcs.api.dto.PersonBasicDetailsDTO;
 import com.transformuk.hee.tis.tcs.api.dto.PersonDTO;
 import com.transformuk.hee.tis.tcs.service.model.ColumnFilter;
 import org.springframework.data.domain.Page;
@@ -47,6 +48,15 @@ public interface PersonService {
   Page<PersonDTO> advancedSearch(String searchString, List<ColumnFilter> columnFilers, Pageable pageable);
 
   /**
+   * Looks for person basic details with support of only smart search and automatically limited
+   * to 100 results.
+   *
+   * @param searchString the smart search string to compare basic details contents to
+   * @return the list of basic details found
+   */
+  List<PersonBasicDetailsDTO> basicDetailsSearch(String searchString);
+
+  /**
    * Get the "id" person.
    *
    * @param id the id of the entity
@@ -55,12 +65,20 @@ public interface PersonService {
   PersonDTO findOne(Long id);
 
   /**
-   * Get a person by Gmc Id
+   * Get a person's ID by Gmc Id
    *
    * @param gmcId the GMC Id of the entity
-   * @return the entity
+   * @return the tcs ID if found
    */
-  PersonDTO findOneByGmcId(String gmcId);
+  Long findIdByGmcId(String gmcId);
+
+  /**
+   * Retrieve the basic details of one person
+   *
+   * @param id the person ID
+   * @return the basic details if found
+   */
+  PersonBasicDetailsDTO getBasicDetails(Long id);
 
   /**
    * Delete the "id" person.

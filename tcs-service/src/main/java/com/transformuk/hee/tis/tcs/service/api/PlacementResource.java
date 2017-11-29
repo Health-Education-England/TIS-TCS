@@ -2,8 +2,10 @@ package com.transformuk.hee.tis.tcs.service.api;
 
 import com.codahale.metrics.annotation.Timed;
 import com.transformuk.hee.tis.tcs.api.dto.PlacementDTO;
+import com.transformuk.hee.tis.tcs.api.dto.PlacementDetailsDTO;
 import com.transformuk.hee.tis.tcs.api.dto.validation.Create;
 import com.transformuk.hee.tis.tcs.api.dto.validation.Update;
+import com.transformuk.hee.tis.tcs.service.api.decorator.PlacementDetailsDecorator;
 import com.transformuk.hee.tis.tcs.service.api.util.HeaderUtil;
 import com.transformuk.hee.tis.tcs.service.api.util.PaginationUtil;
 import com.transformuk.hee.tis.tcs.service.api.validation.PlacementValidator;
@@ -53,29 +55,33 @@ public class PlacementResource {
   private final Logger log = LoggerFactory.getLogger(PlacementResource.class);
   private final PlacementService placementService;
   private final PlacementValidator placementValidator;
+  private final PlacementDetailsDecorator placementDetailsDecorator;
 
-  public PlacementResource(PlacementService placementService, PlacementValidator placementValidator) {
+  public PlacementResource(PlacementService placementService, PlacementValidator placementValidator,
+                           PlacementDetailsDecorator placementDetailsDecorator) {
     this.placementService = placementService;
     this.placementValidator = placementValidator;
+    this.placementDetailsDecorator = placementDetailsDecorator;
   }
 
   /**
    * POST  /placements : Create a new placement.
    *
-   * @param placementDTO the placementDTO to create
+   * @param placementDetailsDTO the placementDTO to create
    * @return the ResponseEntity with status 201 (Created) and with body the new placementDTO, or with status 400 (Bad Request) if the placement has already an ID
    * @throws URISyntaxException if the Location URI syntax is incorrect
    */
   @PostMapping("/placements")
   @Timed
   @PreAuthorize("hasAuthority('tcs:add:modify:entities')")
-  public ResponseEntity<PlacementDTO> createPlacement(@RequestBody @Validated(Create.class) PlacementDTO placementDTO) throws URISyntaxException, ValidationException {
-    log.debug("REST request to save Placement : {}", placementDTO);
-    placementValidator.validate(placementDTO);
-    if (placementDTO.getId() != null) {
+  public ResponseEntity<PlacementDetailsDTO> createPlacement(@RequestBody @Validated(Create.class) PlacementDetailsDTO placementDetailsDTO) throws URISyntaxException, ValidationException {
+    log.debug("REST request to save Placement : {}", placementDetailsDTO);
+    placementValidator.validate(placementDetailsDTO);
+    if (placementDetailsDTO.getId() != null) {
       return ResponseEntity.badRequest().headers(HeaderUtil.createFailureAlert(ENTITY_NAME, "idexists", "A new placement cannot already have an ID")).body(null);
     }
-    PlacementDTO result = placementService.save(placementDTO);
+
+    PlacementDetailsDTO result = placementService.saveDetails(placementDetailsDTO);
     return ResponseEntity.created(new URI("/api/placements/" + result.getId()))
         .headers(HeaderUtil.createEntityCreationAlert(ENTITY_NAME, result.getId().toString()))
         .body(result);
@@ -84,7 +90,7 @@ public class PlacementResource {
   /**
    * PUT  /placements : Updates an existing placement.
    *
-   * @param placementDTO the placementDTO to update
+   * @param placementDetailsDTO the placementDTO to update
    * @return the ResponseEntity with status 200 (OK) and with body the updated placementDTO,
    * or with status 400 (Bad Request) if the placementDTO is not valid,
    * or with status 500 (Internal Server Error) if the placementDTO couldnt be updated
@@ -93,15 +99,15 @@ public class PlacementResource {
   @PutMapping("/placements")
   @Timed
   @PreAuthorize("hasAuthority('tcs:add:modify:entities')")
-  public ResponseEntity<PlacementDTO> updatePlacement(@RequestBody @Validated(Update.class) PlacementDTO placementDTO) throws URISyntaxException, ValidationException {
-    log.debug("REST request to update Placement : {}", placementDTO);
-    placementValidator.validate(placementDTO);
-    if (placementDTO.getId() == null) {
-      return createPlacement(placementDTO);
+  public ResponseEntity<PlacementDetailsDTO> updatePlacement(@RequestBody @Validated(Update.class) PlacementDetailsDTO placementDetailsDTO) throws URISyntaxException, ValidationException {
+    log.debug("REST request to update Placement : {}", placementDetailsDTO);
+    placementValidator.validate(placementDetailsDTO);
+    if (placementDetailsDTO.getId() == null) {
+      return createPlacement(placementDetailsDTO);
     }
-    PlacementDTO result = placementService.save(placementDTO);
+    PlacementDetailsDTO result = placementService.saveDetails(placementDetailsDTO);
     return ResponseEntity.ok()
-        .headers(HeaderUtil.createEntityUpdateAlert(ENTITY_NAME, placementDTO.getId().toString()))
+        .headers(HeaderUtil.createEntityUpdateAlert(ENTITY_NAME, result.getId().toString()))
         .body(result);
   }
 
@@ -130,10 +136,10 @@ public class PlacementResource {
   @GetMapping("/placements/{id}")
   @Timed
   @PreAuthorize("hasAuthority('tcs:view:entities')")
-  public ResponseEntity<PlacementDTO> getPlacement(@PathVariable Long id) {
+  public ResponseEntity<PlacementDetailsDTO> getPlacement(@PathVariable Long id) {
     log.debug("REST request to get Placement : {}", id);
-    PlacementDTO placementViewDTO = placementService.findOne(id);
-    return ResponseUtil.wrapOrNotFound(Optional.ofNullable(placementViewDTO));
+    PlacementDetailsDTO placementDetailsDTO = placementService.getDetails(id);
+    return ResponseUtil.wrapOrNotFound(Optional.ofNullable(placementDetailsDecorator.decorate(placementDetailsDTO)));
   }
 
   /**
@@ -162,7 +168,7 @@ public class PlacementResource {
   @PatchMapping("/placements")
   @Timed
   @PreAuthorize("hasAuthority('tcs:add:modify:entities')")
-  public ResponseEntity<List<PlacementDTO>> patchPlacements(@RequestBody List<PlacementDTO> placementDTOS) throws URISyntaxException {
+  public ResponseEntity<List<PlacementDTO>> patchPlacements(@RequestBody List<PlacementDTO> placementDTOS) {
     log.debug("REST request to bulk save Placement : {}", placementDTOS);
     List<PlacementDTO> result = placementService.save(placementDTOS);
     List<Long> ids = result.stream().map(PlacementDTO::getId).collect(Collectors.toList());
