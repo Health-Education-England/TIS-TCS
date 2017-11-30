@@ -16,6 +16,7 @@ import com.transformuk.hee.tis.tcs.api.enumeration.PostSpecialtyType;
 import com.transformuk.hee.tis.tcs.api.enumeration.PostSuffix;
 import com.transformuk.hee.tis.tcs.api.enumeration.Status;
 import com.transformuk.hee.tis.tcs.service.Application;
+import com.transformuk.hee.tis.tcs.service.api.decorator.PlacementViewDecorator;
 import com.transformuk.hee.tis.tcs.service.api.decorator.PostViewDecorator;
 import com.transformuk.hee.tis.tcs.service.api.validation.PostValidator;
 import com.transformuk.hee.tis.tcs.service.exception.ExceptionTranslator;
@@ -28,11 +29,13 @@ import com.transformuk.hee.tis.tcs.service.model.PostView;
 import com.transformuk.hee.tis.tcs.service.model.Programme;
 import com.transformuk.hee.tis.tcs.service.model.Specialty;
 import com.transformuk.hee.tis.tcs.service.repository.PlacementRepository;
+import com.transformuk.hee.tis.tcs.service.repository.PlacementViewRepository;
 import com.transformuk.hee.tis.tcs.service.repository.PostRepository;
 import com.transformuk.hee.tis.tcs.service.repository.PostViewRepository;
 import com.transformuk.hee.tis.tcs.service.repository.ProgrammeRepository;
 import com.transformuk.hee.tis.tcs.service.repository.SpecialtyRepository;
 import com.transformuk.hee.tis.tcs.service.service.PostService;
+import com.transformuk.hee.tis.tcs.service.service.mapper.PlacementViewMapper;
 import com.transformuk.hee.tis.tcs.service.service.mapper.PostMapper;
 import org.apache.commons.codec.net.URLCodec;
 import org.hamcrest.core.StringContains;
@@ -137,7 +140,12 @@ public class PostResourceIntTest {
 
   @Autowired
   private PostValidator postValidator;
-
+  @Autowired
+  private PlacementViewRepository placementViewRepository;
+  @Autowired
+  private PlacementViewDecorator placementViewDecorator;
+  @Autowired
+  private PlacementViewMapper placementViewMapper;
   @Autowired
   private MappingJackson2HttpMessageConverter jacksonMessageConverter;
 
@@ -246,7 +254,7 @@ public class PostResourceIntTest {
   @Before
   public void setup() {
     MockitoAnnotations.initMocks(this);
-    PostResource postResource = new PostResource(postService, postValidator);
+    PostResource postResource = new PostResource(postService, postValidator, placementViewRepository, placementViewDecorator, placementViewMapper);
     this.restPostMockMvc = MockMvcBuilders.standaloneSetup(postResource)
         .setCustomArgumentResolvers(pageableArgumentResolver)
         .setControllerAdvice(exceptionTranslator)

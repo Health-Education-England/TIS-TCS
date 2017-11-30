@@ -4,6 +4,7 @@ import com.codahale.metrics.annotation.Timed;
 import com.google.common.collect.Lists;
 import com.transformuk.hee.tis.tcs.api.dto.ColumnFilterDTO;
 import com.transformuk.hee.tis.tcs.api.dto.PlacementDTO;
+import com.transformuk.hee.tis.tcs.api.dto.PlacementViewDTO;
 import com.transformuk.hee.tis.tcs.api.dto.PostDTO;
 import com.transformuk.hee.tis.tcs.api.dto.PostViewDTO;
 import com.transformuk.hee.tis.tcs.api.dto.validation.Create;
@@ -13,12 +14,16 @@ import com.transformuk.hee.tis.tcs.api.enumeration.PostGradeType;
 import com.transformuk.hee.tis.tcs.api.enumeration.PostSpecialtyType;
 import com.transformuk.hee.tis.tcs.api.enumeration.PostSuffix;
 import com.transformuk.hee.tis.tcs.api.enumeration.Status;
+import com.transformuk.hee.tis.tcs.service.api.decorator.PlacementViewDecorator;
 import com.transformuk.hee.tis.tcs.service.api.util.ColumnFilterUtil;
 import com.transformuk.hee.tis.tcs.service.api.util.HeaderUtil;
 import com.transformuk.hee.tis.tcs.service.api.util.PaginationUtil;
 import com.transformuk.hee.tis.tcs.service.api.validation.PostValidator;
 import com.transformuk.hee.tis.tcs.service.model.ColumnFilter;
+import com.transformuk.hee.tis.tcs.service.model.PlacementView;
+import com.transformuk.hee.tis.tcs.service.repository.PlacementViewRepository;
 import com.transformuk.hee.tis.tcs.service.service.PostService;
+import com.transformuk.hee.tis.tcs.service.service.mapper.PlacementViewMapper;
 import io.github.jhipster.web.util.ResponseUtil;
 import io.jsonwebtoken.lang.Collections;
 import io.swagger.annotations.ApiParam;
@@ -66,14 +71,23 @@ public class PostResource {
   private final Logger log = LoggerFactory.getLogger(PostResource.class);
   private final PostService postService;
   private final PostValidator postValidator;
+  private final PlacementViewRepository placementViewRepository;
+  private final PlacementViewDecorator placementViewDecorator;
+  private final PlacementViewMapper placementViewMapper;
   private static final String REQUEST_BODY_EMPTY = "request.body.empty";
   private static final String REQUEST_BODY_CANNOT_BE_EMPTY = "The request body for this end point cannot be empty";
   private static final String BULK_UPDATE_FAILED_NOID = "bulk.update.failed.noId";
   private static final String NOID_ERR_MSG = "Some DTOs you've provided have no Id, cannot update entities that don't exist";
 
-  public PostResource(PostService postService, PostValidator postValidator) {
+  public PostResource(PostService postService, PostValidator postValidator,
+                      PlacementViewRepository placementViewRepository,
+                      PlacementViewDecorator placementViewDecorator,
+                      PlacementViewMapper placementViewMapper) {
     this.postService = postService;
     this.postValidator = postValidator;
+    this.placementViewRepository = placementViewRepository;
+    this.placementViewDecorator = placementViewDecorator;
+    this.placementViewMapper = placementViewMapper;
   }
 
   /**
@@ -201,11 +215,13 @@ public class PostResource {
   @GetMapping("/posts/{id}/placements")
   @Timed
   @PreAuthorize("hasAuthority('post:view')")
-  public ResponseEntity<Set<PlacementDTO>> getPostPlacements(@PathVariable Long id) {
+  public ResponseEntity<List<PlacementViewDTO>> getPostPlacements(@PathVariable Long id) {
     log.debug("REST request to get Post Placements: {}", id);
-    PostDTO postDTO = postService.findOne(id);
-    return ResponseUtil.wrapOrNotFound(Optional.ofNullable(postDTO != null ? postDTO.getPlacementHistory() : null));
-  }
+    List<PlacementView> placementViews = placementViewRepository.findAllByPostIdOrderByDateToDesc(id);
+    return ResponseUtil.wrapOrNotFound(Optional.ofNullable(placementViews != null ?
+        placementViewDecorator.decorate(placementViewMapper.placementViewsToPlacementViewDTOs(placementViews)) :
+        null));
+    }
 
   /**
    * DELETE  /posts/:id : delete the "id" post.

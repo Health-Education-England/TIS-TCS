@@ -18,6 +18,12 @@ public class PlacementViewDTO implements Serializable {
 
   private Long traineeId;
 
+  private String traineeFirstName;
+
+  private String traineeLastName;
+
+  private String traineeGmcNumber;
+
   private Long postId;
 
   private String siteCode;
@@ -60,6 +66,30 @@ public class PlacementViewDTO implements Serializable {
 
   public Long getTraineeId() {
     return traineeId;
+  }
+
+  public String getTraineeFirstName() {
+    return traineeFirstName;
+  }
+
+  public void setTraineeFirstName(String traineeFirstName) {
+    this.traineeFirstName = traineeFirstName;
+  }
+
+  public String getTraineeLastName() {
+    return traineeLastName;
+  }
+
+  public void setTraineeLastName(String traineeLastName) {
+    this.traineeLastName = traineeLastName;
+  }
+
+  public String getTraineeGmcNumber() {
+    return traineeGmcNumber;
+  }
+
+  public void setTraineeGmcNumber(String traineeGmcNumber) {
+    this.traineeGmcNumber = traineeGmcNumber;
   }
 
   public void setTraineeId(Long traineeId) {
@@ -141,6 +171,12 @@ public class PlacementViewDTO implements Serializable {
     if (intrepidId != null ? !intrepidId.equals(that.intrepidId) : that.intrepidId != null) return false;
     if (status != that.status) return false;
     if (traineeId != null ? !traineeId.equals(that.traineeId) : that.traineeId != null) return false;
+    if (traineeFirstName != null ? !traineeFirstName.equals(that.traineeFirstName) : that.traineeFirstName != null)
+      return false;
+    if (traineeLastName != null ? !traineeLastName.equals(that.traineeLastName) : that.traineeLastName != null)
+      return false;
+    if (traineeGmcNumber != null ? !traineeGmcNumber.equals(that.traineeGmcNumber) : that.traineeGmcNumber != null)
+      return false;
     if (postId != null ? !postId.equals(that.postId) : that.postId != null) return false;
     if (siteCode != null ? !siteCode.equals(that.siteCode) : that.siteCode != null) return false;
     if (siteName != null ? !siteName.equals(that.siteName) : that.siteName != null) return false;
@@ -158,6 +194,9 @@ public class PlacementViewDTO implements Serializable {
     result = 31 * result + (intrepidId != null ? intrepidId.hashCode() : 0);
     result = 31 * result + (status != null ? status.hashCode() : 0);
     result = 31 * result + (traineeId != null ? traineeId.hashCode() : 0);
+    result = 31 * result + (traineeFirstName != null ? traineeFirstName.hashCode() : 0);
+    result = 31 * result + (traineeLastName != null ? traineeLastName.hashCode() : 0);
+    result = 31 * result + (traineeGmcNumber != null ? traineeGmcNumber.hashCode() : 0);
     result = 31 * result + (postId != null ? postId.hashCode() : 0);
     result = 31 * result + (siteCode != null ? siteCode.hashCode() : 0);
     result = 31 * result + (siteName != null ? siteName.hashCode() : 0);
@@ -176,6 +215,9 @@ public class PlacementViewDTO implements Serializable {
         ", intrepidId='" + intrepidId + '\'' +
         ", status=" + status +
         ", traineeId=" + traineeId +
+        ", traineeFirstName='" + traineeFirstName + '\'' +
+        ", traineeLastName='" + traineeLastName + '\'' +
+        ", traineeGmcNumber='" + traineeGmcNumber + '\'' +
         ", postId=" + postId +
         ", siteCode='" + siteCode + '\'' +
         ", siteName='" + siteName + '\'' +

@@ -13,4 +13,6 @@ public interface PlacementViewRepository extends JpaRepository<PlacementView, Lo
 
   List<PlacementView> findAllByTraineeIdOrderByDateToDesc(Long traineeId);
 
+  List<PlacementView> findAllByPostIdOrderByDateToDesc(Long traineeId);
+
 }

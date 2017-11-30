@@ -4,6 +4,8 @@ import com.transformuk.hee.tis.reference.api.dto.GradeDTO;
 import com.transformuk.hee.tis.reference.api.dto.SiteDTO;
 import com.transformuk.hee.tis.reference.client.ReferenceService;
 import com.transformuk.hee.tis.tcs.api.dto.PlacementViewDTO;
+import com.transformuk.hee.tis.tcs.service.model.PersonBasicDetails;
+import com.transformuk.hee.tis.tcs.service.repository.PersonBasicDetailsRepository;
 import org.apache.commons.collections4.CollectionUtils;
 import org.apache.commons.lang.StringUtils;
 import org.slf4j.Logger;
@@ -27,10 +29,13 @@ public class PlacementViewDecorator {
 
   private static final Logger log = LoggerFactory.getLogger(PlacementViewDecorator.class);
   private ReferenceService referenceService;
+  private PersonBasicDetailsRepository personBasicDetailsRepository;
 
   @Autowired
-  public PlacementViewDecorator(ReferenceService referenceService) {
+  public PlacementViewDecorator(ReferenceService referenceService,
+                                PersonBasicDetailsRepository personBasicDetailsRepository) {
     this.referenceService = referenceService;
+    this.personBasicDetailsRepository = personBasicDetailsRepository;
   }
 
   /**
@@ -42,6 +47,7 @@ public class PlacementViewDecorator {
     // collect all the codes from the list
     Set<String> gradeCodes = new HashSet<>();
     Set<String> siteCodes = new HashSet<>();
+    Set<Long> traineeIds = new HashSet<>();
     placementViews.forEach(placementView -> {
       if (StringUtils.isNotBlank(placementView.getGradeAbbreviation())) {
         gradeCodes.add(placementView.getGradeAbbreviation());
@@ -49,12 +55,16 @@ public class PlacementViewDecorator {
       if (StringUtils.isNotBlank(placementView.getSiteCode())) {
         siteCodes.add(placementView.getSiteCode());
       }
+      if (placementView.getTraineeId() != null && placementView.getTraineeId() != 0) {
+        traineeIds.add(placementView.getTraineeId());
+      }
     });
 
     CompletableFuture<Void> gradesFuture = decorateGradesOnPlacement(gradeCodes, placementViews);
     CompletableFuture<Void> sitesFuture = decorateSitesOnPlacement(siteCodes, placementViews);
+    CompletableFuture<Void> traineeNameFuture = decorateTraineeName(traineeIds, placementViews);
 
-    CompletableFuture.allOf(gradesFuture, sitesFuture).join();
+    CompletableFuture.allOf(gradesFuture, sitesFuture, traineeNameFuture).join();
     return placementViews;
   }
 
@@ -92,6 +102,25 @@ public class PlacementViewDecorator {
         log.warn("Reference decorator call to sites failed", e);
       }
     }
+    return CompletableFuture.completedFuture(null);
+  }
+
+  @Async
+  protected CompletableFuture<Void> decorateTraineeName(Set<Long> traineeIds, List<PlacementViewDTO> placementViewDTOS) {
+    if (CollectionUtils.isNotEmpty(traineeIds)) {
+      List<PersonBasicDetails> details = personBasicDetailsRepository.findByIdIn(traineeIds);
+      Map<Long, PersonBasicDetails> detailsMap = details.stream().collect(Collectors.toMap(PersonBasicDetails::getId, d -> d));
+      for (PlacementViewDTO placementView : placementViewDTOS) {
+        Long traineeId = placementView.getTraineeId();
+        if (traineeId != null && traineeId != 0 && detailsMap.containsKey(traineeId)) {
+          PersonBasicDetails bd = detailsMap.get(placementView.getTraineeId());
+          placementView.setTraineeFirstName(bd.getFirstName());
+          placementView.setTraineeLastName(bd.getLastName());
+          placementView.setTraineeGmcNumber(bd.getGmcDetails() != null ? bd.getGmcDetails().getGmcNumber() : null);
+        }
+      }
+    }
+
     return CompletableFuture.completedFuture(null);
   }
 
