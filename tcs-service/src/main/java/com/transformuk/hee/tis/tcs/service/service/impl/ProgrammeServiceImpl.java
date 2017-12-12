@@ -106,7 +106,7 @@ public class ProgrammeServiceImpl implements ProgrammeService {
     //add the text search criteria
     if (StringUtils.isNotEmpty(searchString)) {
       specs.add(Specifications.where(containsLike("programmeName", searchString)).
-          or(containsLike("owner", searchString)).
+          or(containsLike("localOffice", searchString)).
           or(containsLike("programmeNumber", searchString)));
     }
     //add the column filters criteria

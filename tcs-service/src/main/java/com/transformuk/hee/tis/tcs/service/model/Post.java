@@ -49,7 +49,7 @@ public class Post implements Serializable {
   @Column(name = "suffix")
   private PostSuffix suffix;
 
-  @Column(name = "owner")
+  @Column(name = "localOffice")
   private String owner;
 
   @Column(name = "postFamily")
@@ -363,7 +363,7 @@ public class Post implements Serializable {
         ", nationalPostNumber='" + nationalPostNumber + '\'' +
         ", status=" + status +
         ", suffix=" + suffix +
-        ", owner='" + owner + '\'' +
+        ", localOffice='" + owner + '\'' +
         ", postFamily='" + postFamily + '\'' +
         ", oldPost=" + oldPost +
         ", newPost=" + newPost +

@@ -333,7 +333,7 @@ public class PostResourceIntTest {
         .andExpect(status().isBadRequest())
         .andExpect(jsonPath("$.message").value("error.validation"))
         .andExpect(jsonPath("$.fieldErrors[*].field").
-            value(containsInAnyOrder("owner", "status")));
+            value(containsInAnyOrder("localOffice", "status")));
   }
 
   @Test
@@ -350,7 +350,7 @@ public class PostResourceIntTest {
         .andExpect(status().isBadRequest())
         .andExpect(jsonPath("$.message").value("error.validation"))
         .andExpect(jsonPath("$.fieldErrors[*].field").
-            value(containsInAnyOrder("owner", "status")));
+            value(containsInAnyOrder("localOffice", "status")));
   }
 
   @Test
@@ -504,7 +504,7 @@ public class PostResourceIntTest {
         .andExpect(jsonPath("$.[*].id").value(hasItem(postView.getId().intValue())))
         .andExpect(jsonPath("$.[*].nationalPostNumber").value(hasItem(DEFAULT_NATIONAL_POST_NUMBER)))
         .andExpect(jsonPath("$.[*].status").value(hasItem(DEFAULT_STATUS.toString())))
-        .andExpect(jsonPath("$.[*].owner").value(hasItem(MANAGING_LOCAL_OFFICE)));
+        .andExpect(jsonPath("$.[*].localOffice").value(hasItem(MANAGING_LOCAL_OFFICE)));
   }
 
   @Test
@@ -526,8 +526,8 @@ public class PostResourceIntTest {
         .andExpect(jsonPath("$.[*].id").value(hasItem(postView.getId().intValue())))
         .andExpect(jsonPath("$.[*].nationalPostNumber").value(hasItem(DEFAULT_NATIONAL_POST_NUMBER)))
         .andExpect(jsonPath("$.[*].status").value(hasItem(DEFAULT_STATUS.toString())))
-        .andExpect(jsonPath("$.[*].owner").value(hasItem(MANAGING_LOCAL_OFFICE)))
-        .andExpect(jsonPath("$.[*].owner").value(hasItem(MANAGING_LOCAL_OFFICE_NORTH_EAST)));
+        .andExpect(jsonPath("$.[*].localOffice").value(hasItem(MANAGING_LOCAL_OFFICE)))
+        .andExpect(jsonPath("$.[*].localOffice").value(hasItem(MANAGING_LOCAL_OFFICE_NORTH_EAST)));
   }
 
   @Test
@@ -544,7 +544,7 @@ public class PostResourceIntTest {
         .andExpect(jsonPath("$.[*].id").value(hasItem(anotherPostView.getId().intValue())))
         .andExpect(jsonPath("$.[*].nationalPostNumber").value(hasItem(TEST_POST_NUMBER)))
         .andExpect(jsonPath("$.[*].status").value(hasItem(DEFAULT_STATUS.toString())))
-        .andExpect(jsonPath("$.[*].owner").value(hasItem(MANAGING_LOCAL_OFFICE)));
+        .andExpect(jsonPath("$.[*].localOffice").value(hasItem(MANAGING_LOCAL_OFFICE)));
   }
 
   @Test
@@ -575,14 +575,14 @@ public class PostResourceIntTest {
     postViewRepository.saveAndFlush(otherStatusPostView);
 
     //when & then
-    String colFilters = new URLCodec().encode("{\"status\":[\"INACTIVE\"],\"owner\":[\"" +
+    String colFilters = new URLCodec().encode("{\"status\":[\"INACTIVE\"],\"localOffice\":[\"" +
         MANAGING_LOCAL_OFFICE + "\"]}");
     // Get all the programmeList
     restPostMockMvc.perform(get("/api/posts?sort=id,desc&columnFilters=" +
         colFilters))
         .andExpect(status().isOk())
         .andExpect(jsonPath("$.[*].status").value("INACTIVE"))
-        .andExpect(jsonPath("$.[*].owner").value(hasItem(MANAGING_LOCAL_OFFICE)));
+        .andExpect(jsonPath("$.[*].localOffice").value(hasItem(MANAGING_LOCAL_OFFICE)));
   }
 
   @Test
@@ -591,14 +591,14 @@ public class PostResourceIntTest {
 
     String siteId = post.getSites().iterator().next().getSiteId();
     //when & then
-    String colFilters = new URLCodec().encode("{\"primarySiteCode\":[\"" + siteId + "\"],\"owner\":[\"" +
+    String colFilters = new URLCodec().encode("{\"primarySiteCode\":[\"" + siteId + "\"],\"localOffice\":[\"" +
         MANAGING_LOCAL_OFFICE + "\"]}");
     // Get all the programmeList
     restPostMockMvc.perform(get("/api/posts?sort=id,desc&columnFilters=" +
         colFilters))
         .andExpect(status().isOk())
         .andExpect(jsonPath("$.[*].primarySiteCode").value(hasItem(siteId)))
-        .andExpect(jsonPath("$.[*].owner").value(hasItem(MANAGING_LOCAL_OFFICE)));
+        .andExpect(jsonPath("$.[*].localOffice").value(hasItem(MANAGING_LOCAL_OFFICE)));
   }
 
   @Test
@@ -607,14 +607,14 @@ public class PostResourceIntTest {
 
     String gradeId = post.getGrades().iterator().next().getGradeId();
     //when & then
-    String colFilters = new URLCodec().encode("{\"approvedGradeCode\":[\"" + gradeId + "\"],\"owner\":[\"" +
+    String colFilters = new URLCodec().encode("{\"approvedGradeCode\":[\"" + gradeId + "\"],\"localOffice\":[\"" +
         MANAGING_LOCAL_OFFICE + "\"]}");
     // Get all the programmeList
     restPostMockMvc.perform(get("/api/posts?sort=id,desc&columnFilters=" +
         colFilters))
         .andExpect(status().isOk())
         .andExpect(jsonPath("$.[*].approvedGradeCode").value(hasItem(gradeId)))
-        .andExpect(jsonPath("$.[*].owner").value(hasItem(MANAGING_LOCAL_OFFICE)));
+        .andExpect(jsonPath("$.[*].localOffice").value(hasItem(MANAGING_LOCAL_OFFICE)));
   }
 
   @Test
@@ -629,7 +629,7 @@ public class PostResourceIntTest {
         colFilters))
         .andExpect(status().isOk())
         .andExpect(jsonPath("$.[*].primarySpecialtyId").value(hasItem(specialtyId.intValue())))
-        .andExpect(jsonPath("$.[*].owner").value(hasItem(MANAGING_LOCAL_OFFICE)));
+        .andExpect(jsonPath("$.[*].localOffice").value(hasItem(MANAGING_LOCAL_OFFICE)));
   }
 
   @Test
@@ -649,7 +649,7 @@ public class PostResourceIntTest {
     otherNumberPostView.setOwner(MANAGING_LOCAL_OFFICE);
     postViewRepository.saveAndFlush(otherNumberPostView);
     //when & then
-    String colFilters = new URLCodec().encode("{\"status\":[\"INACTIVE\"],\"owner\":[\"" +
+    String colFilters = new URLCodec().encode("{\"status\":[\"INACTIVE\"],\"localOffice\":[\"" +
         MANAGING_LOCAL_OFFICE + "\"]}");
     // Get all the programmeList
     restPostMockMvc.perform(get("/api/posts?sort=id,desc&searchQuery=TEST&columnFilters=" +
@@ -671,7 +671,7 @@ public class PostResourceIntTest {
         .andExpect(jsonPath("$.nationalPostNumber").value(DEFAULT_NATIONAL_POST_NUMBER))
         .andExpect(jsonPath("$.status").value(DEFAULT_STATUS.toString()))
         .andExpect(jsonPath("$.suffix").value(DEFAULT_SUFFIX.toString()))
-        .andExpect(jsonPath("$.owner").value(MANAGING_LOCAL_OFFICE))
+        .andExpect(jsonPath("$.localOffice").value(MANAGING_LOCAL_OFFICE))
         .andExpect(jsonPath("$.postFamily").value(DEFAULT_POST_FAMILY))
         .andExpect(jsonPath("$.employingBodyId").value(DEFAULT_EMPLOYING_BODY))
         .andExpect(jsonPath("$.trainingBodyId").value(DEFAULT_TRAINING_BODY_ID));

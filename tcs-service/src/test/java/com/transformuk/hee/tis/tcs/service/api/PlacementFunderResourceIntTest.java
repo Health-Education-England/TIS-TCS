@@ -82,7 +82,7 @@ public class PlacementFunderResourceIntTest {
    */
   public static PlacementFunder createEntity(EntityManager em) {
     PlacementFunder placementFunder = new PlacementFunder()
-        .owner(DEFAULT_LOCAL_OFFICE)
+        .localOffice(DEFAULT_LOCAL_OFFICE)
         .trust(DEFAULT_TRUST);
     return placementFunder;
   }
@@ -118,7 +118,7 @@ public class PlacementFunderResourceIntTest {
     List<PlacementFunder> placementFunderList = placementFunderRepository.findAll();
     assertThat(placementFunderList).hasSize(databaseSizeBeforeCreate + 1);
     PlacementFunder testPlacementFunder = placementFunderList.get(placementFunderList.size() - 1);
-    assertThat(testPlacementFunder.getOwner()).isEqualTo(DEFAULT_LOCAL_OFFICE);
+    assertThat(testPlacementFunder.getLocalOffice()).isEqualTo(DEFAULT_LOCAL_OFFICE);
     assertThat(testPlacementFunder.getTrust()).isEqualTo(DEFAULT_TRUST);
   }
 
@@ -153,7 +153,7 @@ public class PlacementFunderResourceIntTest {
         .andExpect(status().isOk())
         .andExpect(content().contentType(MediaType.APPLICATION_JSON_UTF8_VALUE))
         .andExpect(jsonPath("$.[*].id").value(hasItem(placementFunder.getId().intValue())))
-        .andExpect(jsonPath("$.[*].owner").value(hasItem(DEFAULT_LOCAL_OFFICE.toString())))
+        .andExpect(jsonPath("$.[*].localOffice").value(hasItem(DEFAULT_LOCAL_OFFICE.toString())))
         .andExpect(jsonPath("$.[*].trust").value(hasItem(DEFAULT_TRUST.toString())));
   }
 
@@ -168,7 +168,7 @@ public class PlacementFunderResourceIntTest {
         .andExpect(status().isOk())
         .andExpect(content().contentType(MediaType.APPLICATION_JSON_UTF8_VALUE))
         .andExpect(jsonPath("$.id").value(placementFunder.getId().intValue()))
-        .andExpect(jsonPath("$.owner").value(DEFAULT_LOCAL_OFFICE.toString()))
+        .andExpect(jsonPath("$.localOffice").value(DEFAULT_LOCAL_OFFICE.toString()))
         .andExpect(jsonPath("$.trust").value(DEFAULT_TRUST.toString()));
   }
 
@@ -190,7 +190,7 @@ public class PlacementFunderResourceIntTest {
     // Update the placementFunder
     PlacementFunder updatedPlacementFunder = placementFunderRepository.findOne(placementFunder.getId());
     updatedPlacementFunder
-        .owner(UPDATED_LOCAL_OFFICE)
+        .localOffice(UPDATED_LOCAL_OFFICE)
         .trust(UPDATED_TRUST);
     PlacementFunderDTO placementFunderDTO = placementFunderMapper.placementFunderToPlacementFunderDTO(updatedPlacementFunder);
 
@@ -203,7 +203,7 @@ public class PlacementFunderResourceIntTest {
     List<PlacementFunder> placementFunderList = placementFunderRepository.findAll();
     assertThat(placementFunderList).hasSize(databaseSizeBeforeUpdate);
     PlacementFunder testPlacementFunder = placementFunderList.get(placementFunderList.size() - 1);
-    assertThat(testPlacementFunder.getOwner()).isEqualTo(UPDATED_LOCAL_OFFICE);
+    assertThat(testPlacementFunder.getLocalOffice()).isEqualTo(UPDATED_LOCAL_OFFICE);
     assertThat(testPlacementFunder.getTrust()).isEqualTo(UPDATED_TRUST);
   }
 

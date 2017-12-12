@@ -174,7 +174,7 @@ public class Programme implements Serializable {
         "id=" + id +
         ", intrepidId=" + intrepidId +
         ", status='" + status + "'" +
-        ", owner='" + owner + "'" +
+        ", localOffice='" + owner + "'" +
         ", programmeName='" + programmeName + "'" +
         ", programmeNumber='" + programmeNumber + "'" +
         '}';

@@ -77,7 +77,7 @@ public class PlacementResourceIntTest {
 
   private static final String DEFAULT_TRAINEE_FIRST_NAME = "Default first name";
   private static final String DEFAULT_TRAINEE_LAST_NAME = "Default last name";
-  private static final String DEFAULT_OWNER = "Default owner";
+  private static final String DEFAULT_OWNER = "Default localOffice";
 
   private static final String DEFAULT_LOCAL_POST_NUMBER = "LOCAL_POST_NUMBER";
   private static final String UPDATED_LOCAL_POST_NUMBER = "NEW_LOCAL_POST_NUMBER";
@@ -370,7 +370,7 @@ public class PlacementResourceIntTest {
         .andExpect(jsonPath("$.traineeLastName").value(DEFAULT_TRAINEE_LAST_NAME))
         .andExpect(jsonPath("$.gradeName").value(DEFAULT_GRADE_NAME))
         .andExpect(jsonPath("$.siteName").value(DEFAULT_SITE_NAME))
-        .andExpect(jsonPath("$.owner").value(DEFAULT_OWNER))
+        .andExpect(jsonPath("$.localOffice").value(DEFAULT_OWNER))
         .andExpect(jsonPath("$.placementType").value(DEFAULT_PLACEMENT_TYPE))
         .andExpect(jsonPath("$.localPostNumber").value(DEFAULT_LOCAL_POST_NUMBER))
         .andExpect(jsonPath("$.trainingDescription").value(DEFAULT_TRAINING_DESCRIPTION))
