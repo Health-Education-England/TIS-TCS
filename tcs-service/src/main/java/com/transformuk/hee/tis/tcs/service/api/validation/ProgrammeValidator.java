@@ -3,9 +3,7 @@ package com.transformuk.hee.tis.tcs.service.api.validation;
 import com.transformuk.hee.tis.security.model.UserProfile;
 import com.transformuk.hee.tis.tcs.api.dto.CurriculumDTO;
 import com.transformuk.hee.tis.tcs.api.dto.ProgrammeDTO;
-import com.transformuk.hee.tis.tcs.api.dto.TrainingNumberDTO;
 import com.transformuk.hee.tis.tcs.service.model.Programme;
-import com.transformuk.hee.tis.tcs.service.model.TrainingNumber;
 import com.transformuk.hee.tis.tcs.service.repository.CurriculumRepository;
 import com.transformuk.hee.tis.tcs.service.repository.ProgrammeRepository;
 import com.transformuk.hee.tis.tcs.service.repository.TrainingNumberRepository;
@@ -18,8 +16,6 @@ import org.springframework.web.bind.MethodArgumentNotValidException;
 
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Optional;
-import java.util.stream.Collectors;
 
 /**
  * Holds more complex custom validation for a {@link ProgrammeDTO} that
@@ -41,9 +37,9 @@ public class ProgrammeValidator {
 
   /**
    * Custom validation on the programme DTO, this is meant to supplement the annotation based validation
-   * already in place. It checks that the LocalOffice and curricula are valid.
-   * A local office is valid if the text matches exactly the name of a known local office and if the current
-   * user making the call can create or modify a programme within that local office.
+   * already in place. It checks that the owner and curricula are valid.
+   * An owner is valid if the text matches exactly the name of a known owner and if the current
+   * user making the call can create or modify a programme within that owner.
    * Curricula are valid if the ID's supplied already exist in the database.
    *
    * @param programmeDTO the programme to check
@@ -53,7 +49,7 @@ public class ProgrammeValidator {
   public void validate(ProgrammeDTO programmeDTO, UserProfile userProfile) throws MethodArgumentNotValidException {
 
     List<FieldError> fieldErrors = new ArrayList<>();
-    fieldErrors.addAll(checkLocalOffice(programmeDTO, userProfile));
+    fieldErrors.addAll(checkOwner(programmeDTO, userProfile));
     fieldErrors.addAll(checkCurricula(programmeDTO));
     fieldErrors.addAll(checkProgrammeNumber(programmeDTO));
 
@@ -114,19 +110,19 @@ public class ProgrammeValidator {
     return fieldErrors;
   }
 
-  private List<FieldError> checkLocalOffice(ProgrammeDTO programmeDTO, UserProfile userProfile) {
+  private List<FieldError> checkOwner(ProgrammeDTO programmeDTO, UserProfile userProfile) {
     List<FieldError> fieldErrors = new ArrayList<>();
-    //first check if the local office is valid
-    if (!DesignatedBodyMapper.getAllLocalOffices().contains(programmeDTO.getManagingDeanery())) {
+    //first check if the owner is valid
+    if (!DesignatedBodyMapper.getAllOwners().contains(programmeDTO.getOwner())) {
       fieldErrors.add(new FieldError("ProgrammeDTO", "owner",
-          "Unknown local office: " + programmeDTO.getManagingDeanery()));
+          "Unknown owner: " + programmeDTO.getOwner()));
     } else {
-      //if the local office is valid, then check if the user has the rights to it
+      //if the owner is valid, then check if the user has the rights to it
       if (!DesignatedBodyMapper.
-          map(userProfile.getDesignatedBodyCodes()).contains(programmeDTO.getManagingDeanery())) {
+          map(userProfile.getDesignatedBodyCodes()).contains(programmeDTO.getOwner())) {
         fieldErrors.add(new FieldError("ProgrammeDTO", "owner",
-            "You do not have permission to create or modify a programme in the Local office: " +
-                programmeDTO.getManagingDeanery()));
+            "You do not have permission to create or modify a programme in the owner: " +
+                programmeDTO.getOwner()));
       }
     }
     return fieldErrors;

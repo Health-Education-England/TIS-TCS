@@ -21,8 +21,8 @@ public class PlacementFunder implements Serializable {
   @GeneratedValue(strategy = GenerationType.IDENTITY)
   private Long id;
 
-  @Column(name = "localOffice")
-  private String localOffice;
+  @Column(name = "owner")
+  private String owner;
 
   @Column(name = "trust")
   private String trust;
@@ -35,16 +35,16 @@ public class PlacementFunder implements Serializable {
     this.id = id;
   }
 
-  public String getLocalOffice() {
-    return localOffice;
+  public String getOwner() {
+    return owner;
   }
 
-  public void setLocalOffice(String localOffice) {
-    this.localOffice = localOffice;
+  public void setOwner(String owner) {
+    this.owner = owner;
   }
 
-  public PlacementFunder localOffice(String localOffice) {
-    this.localOffice = localOffice;
+  public PlacementFunder owner(String owner) {
+    this.owner = owner;
     return this;
   }
 
@@ -85,7 +85,7 @@ public class PlacementFunder implements Serializable {
   public String toString() {
     return "PlacementFunder{" +
         "id=" + id +
-        ", localOffice='" + localOffice + "'" +
+        ", owner='" + owner + "'" +
         ", trust='" + trust + "'" +
         '}';
   }

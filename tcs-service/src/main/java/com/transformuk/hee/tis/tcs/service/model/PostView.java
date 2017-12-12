@@ -69,7 +69,7 @@ public class PostView implements Serializable {
   private FundingType fundingType;
 
   @Column(name = "owner")
-  private String managingLocalOffice;
+  private String owner;
 
   @Column(name = "intrepidId")
   private String intrepidId;
@@ -190,12 +190,12 @@ public class PostView implements Serializable {
     this.fundingType = fundingType;
   }
 
-  public String getManagingLocalOffice() {
-    return managingLocalOffice;
+  public String getOwner() {
+    return owner;
   }
 
-  public void setManagingLocalOffice(String managingLocalOffice) {
-    this.managingLocalOffice = managingLocalOffice;
+  public void setOwner(String owner) {
+    this.owner = owner;
   }
 
   public String getIntrepidId() {
@@ -238,7 +238,7 @@ public class PostView implements Serializable {
       return false;
     if (status != postView.status) return false;
     if (fundingType != postView.fundingType) return false;
-    if (managingLocalOffice != null ? !managingLocalOffice.equals(postView.managingLocalOffice) : postView.managingLocalOffice != null)
+    if (owner != null ? !owner.equals(postView.owner) : postView.owner != null)
       return false;
     return intrepidId != null ? intrepidId.equals(postView.intrepidId) : postView.intrepidId == null;
   }
@@ -259,7 +259,7 @@ public class PostView implements Serializable {
     result = 31 * result + (programmeName != null ? programmeName.hashCode() : 0);
     result = 31 * result + status.hashCode();
     result = 31 * result + (fundingType != null ? fundingType.hashCode() : 0);
-    result = 31 * result + (managingLocalOffice != null ? managingLocalOffice.hashCode() : 0);
+    result = 31 * result + (owner != null ? owner.hashCode() : 0);
     result = 31 * result + (intrepidId != null ? intrepidId.hashCode() : 0);
     return result;
   }
@@ -281,7 +281,7 @@ public class PostView implements Serializable {
         ", programmeName='" + programmeName + '\'' +
         ", status=" + status +
         ", fundingType=" + fundingType +
-        ", owner='" + managingLocalOffice + '\'' +
+        ", owner='" + owner + '\'' +
         ", intrepidId='" + intrepidId + '\'' +
         '}';
   }

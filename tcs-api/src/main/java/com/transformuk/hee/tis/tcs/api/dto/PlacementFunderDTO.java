@@ -11,7 +11,7 @@ public class PlacementFunderDTO implements Serializable {
 
   private Long id;
 
-  private String localOffice;
+  private String owner;
 
   private String trust;
 
@@ -23,12 +23,12 @@ public class PlacementFunderDTO implements Serializable {
     this.id = id;
   }
 
-  public String getLocalOffice() {
-    return localOffice;
+  public String getOwner() {
+    return owner;
   }
 
-  public void setLocalOffice(String localOffice) {
-    this.localOffice = localOffice;
+  public void setOwner(String owner) {
+    this.owner = owner;
   }
 
   public String getTrust() {
@@ -66,7 +66,7 @@ public class PlacementFunderDTO implements Serializable {
   public String toString() {
     return "PlacementFunderDTO{" +
         "id=" + id +
-        ", localOffice='" + localOffice + "'" +
+        ", owner='" + owner + "'" +
         ", trust='" + trust + "'" +
         '}';
   }

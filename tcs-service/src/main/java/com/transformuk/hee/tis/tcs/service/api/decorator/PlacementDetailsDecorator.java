@@ -93,7 +93,7 @@ public class PlacementDetailsDecorator {
     if (placementDetailsDTO.getPostId() != null && placementDetailsDTO.getPostId() != 0) {
       OwnerProjection op = postRepository.findPostById(placementDetailsDTO.getPostId());
       if (op != null) {
-        placementDetailsDTO.setOwner(op.getManagingLocalOffice());
+        placementDetailsDTO.setOwner(op.getOwner());
         placementDetailsDTO.setNationalPostNumber(op.getNationalPostNumber());
       }
     }

@@ -85,7 +85,7 @@ public class PostMapper {
     result.setNationalPostNumber(post.getNationalPostNumber());
     result.setStatus(post.getStatus());
     result.setSuffix(post.getSuffix());
-    result.setManagingLocalOffice(post.getOwner());
+    result.setOwner(post.getOwner());
     result.setPostFamily(post.getPostFamily());
     result.setEmployingBodyId(post.getEmployingBodyId());
     result.setTrainingBodyId(post.getTrainingBodyId());
@@ -196,7 +196,7 @@ public class PostMapper {
       result.setIntrepidId(programme.getIntrepidId());
       result.setProgrammeNumber(programme.getProgrammeNumber());
       result.setProgrammeName(programme.getProgrammeName());
-      result.setManagingDeanery(programme.getOwner());
+      result.setOwner(programme.getOwner());
       result.setStatus(programme.getStatus());
     }
     return result;
@@ -214,7 +214,7 @@ public class PostMapper {
     result.setNationalPostNumber(postDTO.getNationalPostNumber());
     result.setStatus(postDTO.getStatus());
     result.setSuffix(postDTO.getSuffix());
-    result.setOwner(postDTO.getManagingLocalOffice());
+    result.setOwner(postDTO.getOwner());
     result.setPostFamily(postDTO.getPostFamily());
     result.setEmployingBodyId(postDTO.getEmployingBodyId());
     result.setTrainingBodyId(postDTO.getTrainingBodyId());
@@ -301,7 +301,7 @@ public class PostMapper {
       result.setIntrepidId(programmeDTO.getIntrepidId());
       result.setProgrammeNumber(programmeDTO.getProgrammeNumber());
       result.setProgrammeName(programmeDTO.getProgrammeName());
-      result.setOwner(programmeDTO.getManagingDeanery());
+      result.setOwner(programmeDTO.getOwner());
       result.setStatus(programmeDTO.getStatus());
     }
     return result;

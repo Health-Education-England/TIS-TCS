@@ -202,7 +202,7 @@ public class PostResourceIntTest {
     PostView postView = new PostView();
     postView.setNationalPostNumber(DEFAULT_NATIONAL_POST_NUMBER);
     postView.setStatus(DEFAULT_STATUS);
-    postView.setManagingLocalOffice(MANAGING_LOCAL_OFFICE);
+    postView.setOwner(MANAGING_LOCAL_OFFICE);
     postView.setApprovedGradeCode(GRADE_ID);
     postView.setPrimarySiteCode(SITE_ID);
     postView.setPrimarySpecialtyId(specialtyId);
@@ -509,12 +509,12 @@ public class PostResourceIntTest {
 
   @Test
   @Transactional
-  public void shouldReturnAllPostsWithoutLocalOfficeFilter() throws Exception {
+  public void shouldReturnAllPostsWithoutOwnerFilter() throws Exception {
 
     // another post with different managing local office
     PostView anotherPostView = createPostView(specialty.getId());
     anotherPostView.setNationalPostNumber(DEFAULT_POST_NUMBER);
-    anotherPostView.setManagingLocalOffice(MANAGING_LOCAL_OFFICE_NORTH_EAST);
+    anotherPostView.setOwner(MANAGING_LOCAL_OFFICE_NORTH_EAST);
     postViewRepository.saveAndFlush(anotherPostView);
 
     int databaseSize = postViewRepository.findAll().size();
@@ -535,7 +535,7 @@ public class PostResourceIntTest {
   public void shouldTextSearch() throws Exception {
     PostView anotherPostView = createPostView(specialty.getId());
     anotherPostView.setNationalPostNumber(TEST_POST_NUMBER);
-    anotherPostView.setManagingLocalOffice(MANAGING_LOCAL_OFFICE);
+    anotherPostView.setOwner(MANAGING_LOCAL_OFFICE);
     postViewRepository.saveAndFlush(anotherPostView);
 
     restPostMockMvc.perform(get("/api/posts?searchQuery=TEST"))
@@ -571,7 +571,7 @@ public class PostResourceIntTest {
     // Initialize the database
     PostView otherStatusPostView = createPostView(specialty.getId());
     otherStatusPostView.setStatus(Status.INACTIVE);
-    otherStatusPostView.setManagingLocalOffice(MANAGING_LOCAL_OFFICE);
+    otherStatusPostView.setOwner(MANAGING_LOCAL_OFFICE);
     postViewRepository.saveAndFlush(otherStatusPostView);
 
     //when & then
@@ -640,13 +640,13 @@ public class PostResourceIntTest {
     postViewRepository.saveAndFlush(postView);
     postViewRepository.saveAndFlush(createPostView(specialty.getId()));
     PostView otherStatusPostView = createPostView(specialty.getId());
-    otherStatusPostView.setManagingLocalOffice(MANAGING_LOCAL_OFFICE);
+    otherStatusPostView.setOwner(MANAGING_LOCAL_OFFICE);
     otherStatusPostView.setStatus(Status.INACTIVE);
     postViewRepository.saveAndFlush(otherStatusPostView);
     PostView otherNumberPostView = createPostView(specialty.getId());
     otherNumberPostView.setNationalPostNumber(TEST_POST_NUMBER);
     otherNumberPostView.setStatus(Status.INACTIVE);
-    otherNumberPostView.setManagingLocalOffice(MANAGING_LOCAL_OFFICE);
+    otherNumberPostView.setOwner(MANAGING_LOCAL_OFFICE);
     postViewRepository.saveAndFlush(otherNumberPostView);
     //when & then
     String colFilters = new URLCodec().encode("{\"status\":[\"INACTIVE\"],\"owner\":[\"" +
@@ -780,7 +780,7 @@ public class PostResourceIntTest {
         .nationalPostNumber(UPDATED_NATIONAL_POST_NUMBER)
         .status(UPDATED_STATUS)
         .suffix(UPDATED_SUFFIX)
-        .managingLocalOffice(UPDATED_MANAGING_LOCAL_OFFICE)
+        .owner(UPDATED_MANAGING_LOCAL_OFFICE)
         .postFamily(UPDATED_POST_FAMILY)
         .employingBodyId(UPDATED_EMPLOYING_BODY)
         .trainingBodyId(UPDATED_TRAINING_BODY)
@@ -791,7 +791,7 @@ public class PostResourceIntTest {
         .nationalPostNumber(UPDATED_NATIONAL_POST_NUMBER)
         .status(UPDATED_STATUS)
         .suffix(UPDATED_SUFFIX)
-        .managingLocalOffice(UPDATED_MANAGING_LOCAL_OFFICE)
+        .owner(UPDATED_MANAGING_LOCAL_OFFICE)
         .postFamily(UPDATED_POST_FAMILY)
         .employingBodyId(UPDATED_EMPLOYING_BODY)
         .trainingBodyId(UPDATED_TRAINING_BODY)
@@ -821,7 +821,7 @@ public class PostResourceIntTest {
         .nationalPostNumber(UPDATED_NATIONAL_POST_NUMBER)
         .status(UPDATED_STATUS)
         .suffix(UPDATED_SUFFIX)
-        .managingLocalOffice(MANAGING_LOCAL_OFFICE)
+        .owner(MANAGING_LOCAL_OFFICE)
         .postFamily(UPDATED_POST_FAMILY)
         .employingBodyId(UPDATED_EMPLOYING_BODY)
         .trainingBodyId(UPDATED_TRAINING_BODY)
@@ -837,7 +837,7 @@ public class PostResourceIntTest {
         .nationalPostNumber(UPDATED_NATIONAL_POST_NUMBER)
         .status(UPDATED_STATUS)
         .suffix(UPDATED_SUFFIX)
-        .managingLocalOffice(MANAGING_LOCAL_OFFICE)
+        .owner(MANAGING_LOCAL_OFFICE)
         .postFamily(UPDATED_POST_FAMILY)
         .employingBodyId(UPDATED_EMPLOYING_BODY)
         .trainingBodyId(UPDATED_TRAINING_BODY)
@@ -865,7 +865,7 @@ public class PostResourceIntTest {
         .nationalPostNumber(UPDATED_NATIONAL_POST_NUMBER)
         .status(UPDATED_STATUS)
         .suffix(UPDATED_SUFFIX)
-        .managingLocalOffice(MANAGING_LOCAL_OFFICE)
+        .owner(MANAGING_LOCAL_OFFICE)
         .postFamily(UPDATED_POST_FAMILY)
         .employingBodyId(UPDATED_EMPLOYING_BODY)
         .trainingBodyId(UPDATED_TRAINING_BODY)
@@ -882,7 +882,7 @@ public class PostResourceIntTest {
         .nationalPostNumber(UPDATED_NATIONAL_POST_NUMBER)
         .status(UPDATED_STATUS)
         .suffix(UPDATED_SUFFIX)
-        .managingLocalOffice(MANAGING_LOCAL_OFFICE)
+        .owner(MANAGING_LOCAL_OFFICE)
         .postFamily(UPDATED_POST_FAMILY)
         .employingBodyId(UPDATED_EMPLOYING_BODY)
         .trainingBodyId(UPDATED_TRAINING_BODY)

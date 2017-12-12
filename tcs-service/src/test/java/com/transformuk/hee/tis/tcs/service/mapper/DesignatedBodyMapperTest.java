@@ -41,12 +41,12 @@ public class DesignatedBodyMapperTest {
   }
 
   @Test
-  public void shouldProvideAllLocalOffices() {
+  public void shouldProvideAllOwners() {
     //when
-    Set<String> localOfficeSet = DesignatedBodyMapper.getAllLocalOffices();
+    Set<String> ownerSet = DesignatedBodyMapper.getAllOwners();
 
     //then
-    assertThat(localOfficeSet).contains("Health Education England Kent, Surrey and Sussex", "London LETBs",
+    assertThat(ownerSet).contains("Health Education England Kent, Surrey and Sussex", "London LETBs",
         "Health Education England North Central and East London",
         "Health Education England South London",
         "Health Education England East Midlands",

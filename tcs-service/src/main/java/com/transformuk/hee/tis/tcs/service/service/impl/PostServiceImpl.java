@@ -367,7 +367,7 @@ public class PostServiceImpl implements PostService {
     log.debug("Request to get all Posts");
 
     Set<String> deaneries = DesignatedBodyMapper.map(dbcs);
-    Page<Post> result = postRepository.findByManagingLocalOfficeIn(deaneries, pageable);
+    Page<Post> result = postRepository.findByOwnerIn(deaneries, pageable);
     return result.map(post -> postMapper.postToPostDTO(post));
   }
 
