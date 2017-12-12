@@ -118,13 +118,13 @@ public class ProgrammeValidator {
     List<FieldError> fieldErrors = new ArrayList<>();
     //first check if the local office is valid
     if (!DesignatedBodyMapper.getAllLocalOffices().contains(programmeDTO.getManagingDeanery())) {
-      fieldErrors.add(new FieldError("ProgrammeDTO", "managingDeanery",
+      fieldErrors.add(new FieldError("ProgrammeDTO", "owner",
           "Unknown local office: " + programmeDTO.getManagingDeanery()));
     } else {
       //if the local office is valid, then check if the user has the rights to it
       if (!DesignatedBodyMapper.
           map(userProfile.getDesignatedBodyCodes()).contains(programmeDTO.getManagingDeanery())) {
-        fieldErrors.add(new FieldError("ProgrammeDTO", "managingDeanery",
+        fieldErrors.add(new FieldError("ProgrammeDTO", "owner",
             "You do not have permission to create or modify a programme in the Local office: " +
                 programmeDTO.getManagingDeanery()));
       }

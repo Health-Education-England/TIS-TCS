@@ -216,7 +216,7 @@ public class PostValidator {
     List<FieldError> fieldErrors = new ArrayList<>();
     //first check if the local office is valid
     if (!DesignatedBodyMapper.getAllLocalOffices().contains(postDTO.getManagingLocalOffice())) {
-      fieldErrors.add(new FieldError("postDTO", "managingLocalOffice",
+      fieldErrors.add(new FieldError("postDTO", "owner",
           "Unknown local office: " + postDTO.getManagingLocalOffice()));
     }
     return fieldErrors;

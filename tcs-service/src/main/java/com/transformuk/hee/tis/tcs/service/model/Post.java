@@ -49,8 +49,8 @@ public class Post implements Serializable {
   @Column(name = "suffix")
   private PostSuffix suffix;
 
-  @Column(name = "managingLocalOffice")
-  private String managingLocalOffice;
+  @Column(name = "owner")
+  private String owner;
 
   @Column(name = "postFamily")
   private String postFamily;
@@ -157,16 +157,16 @@ public class Post implements Serializable {
     return this;
   }
 
-  public String getManagingLocalOffice() {
-    return managingLocalOffice;
+  public String getOwner() {
+    return owner;
   }
 
-  public void setManagingLocalOffice(String managingLocalOffice) {
-    this.managingLocalOffice = managingLocalOffice;
+  public void setOwner(String owner) {
+    this.owner = owner;
   }
 
-  public Post managingLocalOffice(String managingLocalOffice) {
-    this.managingLocalOffice = managingLocalOffice;
+  public Post owner(String owner) {
+    this.owner = owner;
     return this;
   }
 
@@ -363,7 +363,7 @@ public class Post implements Serializable {
         ", nationalPostNumber='" + nationalPostNumber + '\'' +
         ", status=" + status +
         ", suffix=" + suffix +
-        ", managingLocalOffice='" + managingLocalOffice + '\'' +
+        ", owner='" + owner + '\'' +
         ", postFamily='" + postFamily + '\'' +
         ", oldPost=" + oldPost +
         ", newPost=" + newPost +

@@ -73,7 +73,7 @@ public class TrainingNumberMapper {
       result.setIntrepidId(programme.getIntrepidId());
       result.setProgrammeNumber(programme.getProgrammeNumber());
       result.setProgrammeName(programme.getProgrammeName());
-      result.setManagingDeanery(programme.getManagingDeanery());
+      result.setManagingDeanery(programme.getOwner());
       result.setStatus(programme.getStatus());
     }
     return result;
@@ -87,7 +87,7 @@ public class TrainingNumberMapper {
       result.setIntrepidId(programmeDTO.getIntrepidId());
       result.setProgrammeNumber(programmeDTO.getProgrammeNumber());
       result.setProgrammeName(programmeDTO.getProgrammeName());
-      result.setManagingDeanery(programmeDTO.getManagingDeanery());
+      result.setOwner(programmeDTO.getManagingDeanery());
       result.setStatus(programmeDTO.getStatus());
     }
     return result;

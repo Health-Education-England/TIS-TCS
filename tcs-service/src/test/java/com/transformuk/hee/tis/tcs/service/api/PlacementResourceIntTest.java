@@ -341,7 +341,7 @@ public class PlacementResourceIntTest {
     given(referenceService.findGradesIn(Sets.newHashSet(DEFAULT_GRADE))).willReturn(Lists.newArrayList(grade));
 
     Post post = new Post();
-    post.setManagingLocalOffice(DEFAULT_OWNER);
+    post.setOwner(DEFAULT_OWNER);
     postRepository.saveAndFlush(post);
     Person person = new Person();
     personRepository.saveAndFlush(person);

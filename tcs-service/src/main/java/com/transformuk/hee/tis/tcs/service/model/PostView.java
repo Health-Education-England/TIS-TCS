@@ -68,7 +68,7 @@ public class PostView implements Serializable {
   @Column(name = "fundingType")
   private FundingType fundingType;
 
-  @Column(name = "managingLocalOffice")
+  @Column(name = "owner")
   private String managingLocalOffice;
 
   @Column(name = "intrepidId")
@@ -281,7 +281,7 @@ public class PostView implements Serializable {
         ", programmeName='" + programmeName + '\'' +
         ", status=" + status +
         ", fundingType=" + fundingType +
-        ", managingLocalOffice='" + managingLocalOffice + '\'' +
+        ", owner='" + managingLocalOffice + '\'' +
         ", intrepidId='" + intrepidId + '\'' +
         '}';
   }
