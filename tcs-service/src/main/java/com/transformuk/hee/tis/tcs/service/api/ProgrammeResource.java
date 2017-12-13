@@ -148,7 +148,7 @@ public class ProgrammeResource {
       @ApiParam Pageable pageable,
       @ApiParam(value = "any wildcard string to be searched")
       @RequestParam(value = "searchQuery", required = false) String searchQuery,
-      @ApiParam(value = "json object by column name and value. (Eg: columnFilters={ \"localOffice\": [\"dean1\", \"dean2\"], \"dbc\":[\"dbc1\"] }\"")
+      @ApiParam(value = "json object by column name and value. (Eg: columnFilters={ \"owner\": [\"dean1\", \"dean2\"], \"dbc\":[\"dbc1\"] }\"")
       @RequestParam(value = "columnFilters", required = false) String columnFilterJson) throws IOException {
     log.debug("REST request to get a page of Programmes");
 

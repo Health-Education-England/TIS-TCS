@@ -163,7 +163,7 @@ public class ProgrammeResourceIntTest {
         .andExpect(status().isBadRequest())
         .andExpect(jsonPath("$.message").value("error.validation"))
         .andExpect(jsonPath("$.fieldErrors[*].field").
-            value(containsInAnyOrder("localOffice", "programmeName", "status", "programmeNumber")));
+            value(containsInAnyOrder("owner", "programmeName", "status", "programmeNumber")));
   }
 
   @Test
@@ -180,7 +180,7 @@ public class ProgrammeResourceIntTest {
         .andExpect(status().isBadRequest())
         .andExpect(jsonPath("$.message").value("error.validation"))
         .andExpect(jsonPath("$.fieldErrors[*].field").
-            value(containsInAnyOrder("localOffice", "programmeName", "status", "programmeNumber")));
+            value(containsInAnyOrder("owner", "programmeName", "status", "programmeNumber")));
   }
 
   @Test
@@ -374,7 +374,7 @@ public class ProgrammeResourceIntTest {
         .andExpect(jsonPath("$.[*].id").value(hasItem(programme.getId().intValue())))
         .andExpect(jsonPath("$.[*].intrepidId").value(hasItem(DEFAULT_INTREPID_ID.toString())))
         .andExpect(jsonPath("$.[*].status").value(hasItem(DEFAULT_STATUS.toString())))
-        .andExpect(jsonPath("$.[*].localOffice").value(hasItem(DEFAULT_OWNER.toString())))
+        .andExpect(jsonPath("$.[*].owner").value(hasItem(DEFAULT_OWNER.toString())))
         .andExpect(jsonPath("$.[*].programmeName").value(hasItem(DEFAULT_PROGRAMME_NAME.toString())))
         .andExpect(jsonPath("$.[*].programmeNumber").value(hasItem(DEFAULT_PROGRAMME_NUMBER.toString())));
   }
@@ -392,7 +392,7 @@ public class ProgrammeResourceIntTest {
         .andExpect(jsonPath("$.[*].id").value(hasItem(programme.getId().intValue())))
         .andExpect(jsonPath("$.[*].intrepidId").value(hasItem(DEFAULT_INTREPID_ID.toString())))
         .andExpect(jsonPath("$.[*].status").value(hasItem(DEFAULT_STATUS.toString())))
-        .andExpect(jsonPath("$.[*].localOffice").value(hasItem(DEFAULT_OWNER.toString())))
+        .andExpect(jsonPath("$.[*].owner").value(hasItem(DEFAULT_OWNER.toString())))
         .andExpect(jsonPath("$.[*].programmeName").value(hasItem(DEFAULT_PROGRAMME_NAME.toString())))
         .andExpect(jsonPath("$.[*].programmeNumber").value(hasItem(DEFAULT_PROGRAMME_NUMBER.toString())));
   }
@@ -410,7 +410,7 @@ public class ProgrammeResourceIntTest {
         .andExpect(jsonPath("$.id").value(programme.getId().intValue()))
         .andExpect(jsonPath("$.intrepidId").value(DEFAULT_INTREPID_ID.toString()))
         .andExpect(jsonPath("$.status").value(DEFAULT_STATUS.toString()))
-        .andExpect(jsonPath("$.localOffice").value(DEFAULT_OWNER.toString()))
+        .andExpect(jsonPath("$.owner").value(DEFAULT_OWNER.toString()))
         .andExpect(jsonPath("$.programmeName").value(DEFAULT_PROGRAMME_NAME.toString()))
         .andExpect(jsonPath("$.programmeNumber").value(DEFAULT_PROGRAMME_NUMBER.toString()));
   }
@@ -598,7 +598,7 @@ public class ProgrammeResourceIntTest {
         .andExpect(jsonPath("$.[*].id").value(hasItem(otherDeaneryProgramme.getId().intValue())))
         .andExpect(jsonPath("$.[*].status").value(hasItem(DEFAULT_STATUS.toString())))
         .andExpect(jsonPath("$.[*].intrepidId").value(hasItem(DEFAULT_INTREPID_ID.toString())))
-        .andExpect(jsonPath("$.[*].localOffice").value(hasItem("Health Education England West Midlands")))
+        .andExpect(jsonPath("$.[*].owner").value(hasItem("Health Education England West Midlands")))
         .andExpect(jsonPath("$.[*].programmeName").value(hasItem(DEFAULT_PROGRAMME_NAME.toString())))
         .andExpect(jsonPath("$.[*].programmeNumber").value(hasItem(DEFAULT_PROGRAMME_NUMBER.toString())));
   }
@@ -634,7 +634,7 @@ public class ProgrammeResourceIntTest {
     programmeRepository.saveAndFlush(otherStatusProgramme);
 
     //when & then
-    String colFilters = new URLCodec().encode("{\"status\":[\"INACTIVE\"],\"localOffice\":[\"" +
+    String colFilters = new URLCodec().encode("{\"status\":[\"INACTIVE\"],\"owner\":[\"" +
         DEFAULT_OWNER + "\"]}");
     // Get all the programmeList
     restProgrammeMockMvc.perform(get("/api/programmes?sort=id,desc&columnFilters=" +
@@ -659,7 +659,7 @@ public class ProgrammeResourceIntTest {
     otherNameProgramme.setStatus(Status.INACTIVE);
     programmeRepository.saveAndFlush(otherNameProgramme);
     //when & then
-    String colFilters = new URLCodec().encode("{\"status\":[\"INACTIVE\"],\"localOffice\":[\"" +
+    String colFilters = new URLCodec().encode("{\"status\":[\"INACTIVE\"],\"owner\":[\"" +
         DEFAULT_OWNER + "\"]}");
     // Get all the programmeList
     restProgrammeMockMvc.perform(get("/api/programmes?sort=id,desc&searchQuery=other&columnFilters=" +

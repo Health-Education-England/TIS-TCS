@@ -370,7 +370,7 @@ public class PlacementResourceIntTest {
         .andExpect(jsonPath("$.traineeLastName").value(DEFAULT_TRAINEE_LAST_NAME))
         .andExpect(jsonPath("$.gradeName").value(DEFAULT_GRADE_NAME))
         .andExpect(jsonPath("$.siteName").value(DEFAULT_SITE_NAME))
-        .andExpect(jsonPath("$.localOffice").value(DEFAULT_OWNER))
+        .andExpect(jsonPath("$.owner").value(DEFAULT_OWNER))
         .andExpect(jsonPath("$.placementType").value(DEFAULT_PLACEMENT_TYPE))
         .andExpect(jsonPath("$.localPostNumber").value(DEFAULT_LOCAL_POST_NUMBER))
         .andExpect(jsonPath("$.trainingDescription").value(DEFAULT_TRAINING_DESCRIPTION))
