@@ -77,7 +77,7 @@ public class PlacementResourceIntTest {
 
   private static final String DEFAULT_TRAINEE_FIRST_NAME = "Default first name";
   private static final String DEFAULT_TRAINEE_LAST_NAME = "Default last name";
-  private static final String DEFAULT_OWNER = "Default localOffice";
+  private static final String DEFAULT_OWNER = "Default owner";
 
   private static final String DEFAULT_LOCAL_POST_NUMBER = "LOCAL_POST_NUMBER";
   private static final String UPDATED_LOCAL_POST_NUMBER = "NEW_LOCAL_POST_NUMBER";

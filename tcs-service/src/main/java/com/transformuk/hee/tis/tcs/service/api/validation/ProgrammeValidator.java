@@ -37,9 +37,9 @@ public class ProgrammeValidator {
 
   /**
    * Custom validation on the programme DTO, this is meant to supplement the annotation based validation
-   * already in place. It checks that the localOffice and curricula are valid.
-   * An localOffice is valid if the text matches exactly the name of a known localOffice and if the current
-   * user making the call can create or modify a programme within that localOffice.
+   * already in place. It checks that the owner and curricula are valid.
+   * An owner is valid if the text matches exactly the name of a known owner and if the current
+   * user making the call can create or modify a programme within that owner.
    * Curricula are valid if the ID's supplied already exist in the database.
    *
    * @param programmeDTO the programme to check
@@ -112,16 +112,16 @@ public class ProgrammeValidator {
 
   private List<FieldError> checkOwner(ProgrammeDTO programmeDTO, UserProfile userProfile) {
     List<FieldError> fieldErrors = new ArrayList<>();
-    //first check if the localOffice is valid
+    //first check if the owner is valid
     if (!DesignatedBodyMapper.getAllOwners().contains(programmeDTO.getOwner())) {
-      fieldErrors.add(new FieldError("ProgrammeDTO", "localOffice",
-          "Unknown localOffice: " + programmeDTO.getOwner()));
+      fieldErrors.add(new FieldError("ProgrammeDTO", "owner",
+          "Unknown owner: " + programmeDTO.getOwner()));
     } else {
-      //if the localOffice is valid, then check if the user has the rights to it
+      //if the owner is valid, then check if the user has the rights to it
       if (!DesignatedBodyMapper.
           map(userProfile.getDesignatedBodyCodes()).contains(programmeDTO.getOwner())) {
-        fieldErrors.add(new FieldError("ProgrammeDTO", "localOffice",
-            "You do not have permission to create or modify a programme in the localOffice: " +
+        fieldErrors.add(new FieldError("ProgrammeDTO", "owner",
+            "You do not have permission to create or modify a programme in the owner: " +
                 programmeDTO.getOwner()));
       }
     }

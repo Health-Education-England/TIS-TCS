@@ -57,8 +57,8 @@ public class PostValidator {
   /**
    * Custom validation on the post DTO, this is meant to supplement the annotation based validation
    * already in place. It checks that the Owner,Programme,Site,Grade,Specialty and Placement are valid.
-   * An localOffice is valid if the text matches exactly the name of a known localOffice and if the current
-   * user making the call can create or modify a post within that localOffice.
+   * An owner is valid if the text matches exactly the name of a known owner and if the current
+   * user making the call can create or modify a post within that owner.
    * Programmes is valid if the ID's supplied already exist in the database.
    * Sites are valid if the ID's supplied already exist in the database.
    * Grades are valid if the ID's supplied already exist in the database.
@@ -214,10 +214,10 @@ public class PostValidator {
 
   private List<FieldError> checkOwner(PostDTO postDTO) {
     List<FieldError> fieldErrors = new ArrayList<>();
-    //first check if the localOffice is valid
+    //first check if the owner is valid
     if (!DesignatedBodyMapper.getAllOwners().contains(postDTO.getOwner())) {
-      fieldErrors.add(new FieldError("postDTO", "localOffice",
-          "Unknown localOffice: " + postDTO.getOwner()));
+      fieldErrors.add(new FieldError("postDTO", "owner",
+          "Unknown owner: " + postDTO.getOwner()));
     }
     return fieldErrors;
   }

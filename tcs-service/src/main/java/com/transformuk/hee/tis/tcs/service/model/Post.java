@@ -363,7 +363,7 @@ public class Post implements Serializable {
         ", nationalPostNumber='" + nationalPostNumber + '\'' +
         ", status=" + status +
         ", suffix=" + suffix +
-        ", localOffice='" + owner + '\'' +
+        ", owner='" + owner + '\'' +
         ", postFamily='" + postFamily + '\'' +
         ", oldPost=" + oldPost +
         ", newPost=" + newPost +
