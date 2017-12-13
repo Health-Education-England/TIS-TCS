@@ -109,10 +109,10 @@ public class PostResourceIntTest {
   private static final String TEST_POST_NUMBER = "TESTPOST";
   private static final String DEFAULT_POST_NUMBER = "DEFAULTPOST";
   private static final String OWNER = "Health Education England Kent, Surrey and Sussex";
-  private static final String MANAGING_LOCAL_OFFICE_NORTH_EAST = "Health Education England North East";
+  private static final String OWNER_NORTH_EAST = "Health Education England North East";
   private static final String CURRENT_TRAINEE_SURNAME = "Smith";
 
-  private static final String UPDATED_MANAGING_LOCAL_OFFICE = "Health Education England North West London";
+  private static final String UPDATED_OWNER = "Health Education England North West London";
 
   @Autowired
   private PostRepository postRepository;
@@ -511,10 +511,10 @@ public class PostResourceIntTest {
   @Transactional
   public void shouldReturnAllPostsWithoutOwnerFilter() throws Exception {
 
-    // another post with different managing local office
+    // another post with different managing owner
     PostView anotherPostView = createPostView(specialty.getId());
     anotherPostView.setNationalPostNumber(DEFAULT_POST_NUMBER);
-    anotherPostView.setOwner(MANAGING_LOCAL_OFFICE_NORTH_EAST);
+    anotherPostView.setOwner(OWNER_NORTH_EAST);
     postViewRepository.saveAndFlush(anotherPostView);
 
     int databaseSize = postViewRepository.findAll().size();
@@ -527,7 +527,7 @@ public class PostResourceIntTest {
         .andExpect(jsonPath("$.[*].nationalPostNumber").value(hasItem(DEFAULT_NATIONAL_POST_NUMBER)))
         .andExpect(jsonPath("$.[*].status").value(hasItem(DEFAULT_STATUS.toString())))
         .andExpect(jsonPath("$.[*].owner").value(hasItem(OWNER)))
-        .andExpect(jsonPath("$.[*].owner").value(hasItem(MANAGING_LOCAL_OFFICE_NORTH_EAST)));
+        .andExpect(jsonPath("$.[*].owner").value(hasItem(OWNER_NORTH_EAST)));
   }
 
   @Test
@@ -700,7 +700,7 @@ public class PostResourceIntTest {
         .nationalPostNumber(UPDATED_NATIONAL_POST_NUMBER)
         .status(UPDATED_STATUS)
         .suffix(UPDATED_SUFFIX)
-        .owner(UPDATED_MANAGING_LOCAL_OFFICE)
+        .owner(UPDATED_OWNER)
         .postFamily(UPDATED_POST_FAMILY)
         .employingBodyId(UPDATED_EMPLOYING_BODY)
         .trainingBodyId(UPDATED_TRAINING_BODY)
@@ -720,7 +720,7 @@ public class PostResourceIntTest {
     assertThat(testPost.getNationalPostNumber()).isEqualTo(UPDATED_NATIONAL_POST_NUMBER);
     assertThat(testPost.getStatus()).isEqualTo(UPDATED_STATUS);
     assertThat(testPost.getSuffix()).isEqualTo(UPDATED_SUFFIX);
-    assertThat(testPost.getOwner()).isEqualTo(UPDATED_MANAGING_LOCAL_OFFICE);
+    assertThat(testPost.getOwner()).isEqualTo(UPDATED_OWNER);
     assertThat(testPost.getPostFamily()).isEqualTo(UPDATED_POST_FAMILY);
     assertThat(testPost.getEmployingBodyId()).isEqualTo(UPDATED_EMPLOYING_BODY);
     assertThat(testPost.getTrainingBodyId()).isEqualTo(UPDATED_TRAINING_BODY);
@@ -780,7 +780,7 @@ public class PostResourceIntTest {
         .nationalPostNumber(UPDATED_NATIONAL_POST_NUMBER)
         .status(UPDATED_STATUS)
         .suffix(UPDATED_SUFFIX)
-        .owner(UPDATED_MANAGING_LOCAL_OFFICE)
+        .owner(UPDATED_OWNER)
         .postFamily(UPDATED_POST_FAMILY)
         .employingBodyId(UPDATED_EMPLOYING_BODY)
         .trainingBodyId(UPDATED_TRAINING_BODY)
@@ -791,7 +791,7 @@ public class PostResourceIntTest {
         .nationalPostNumber(UPDATED_NATIONAL_POST_NUMBER)
         .status(UPDATED_STATUS)
         .suffix(UPDATED_SUFFIX)
-        .owner(UPDATED_MANAGING_LOCAL_OFFICE)
+        .owner(UPDATED_OWNER)
         .postFamily(UPDATED_POST_FAMILY)
         .employingBodyId(UPDATED_EMPLOYING_BODY)
         .trainingBodyId(UPDATED_TRAINING_BODY)
