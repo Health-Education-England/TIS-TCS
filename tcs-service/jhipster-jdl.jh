@@ -1,7 +1,7 @@
 entity Programme {
 entity Programme {
 	status Status,
-    localOffice String
+    owner String
     programmeName String,
     programmeNumber String,
     leadProvider String,
@@ -61,7 +61,7 @@ entity Specialty {
 entity TrainingNumber {
 	id String,
     trainingNumberType TrainingNumberType,
-    localOffice String,
+    owner String,
     number Integer,
     appointmentYear Integer,
     typeOfContract String,

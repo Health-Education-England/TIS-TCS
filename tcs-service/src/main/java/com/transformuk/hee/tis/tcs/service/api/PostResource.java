@@ -151,7 +151,7 @@ public class PostResource {
       @ApiParam Pageable pageable,
       @ApiParam(value = "any wildcard string to be searched")
       @RequestParam(value = "searchQuery", required = false) String searchQuery,
-      @ApiParam(value = "json object by column name and value. (Eg: columnFilters={ \"localOffice\": [\"dean1\", \"dean2\"]," +
+      @ApiParam(value = "json object by column name and value. (Eg: columnFilters={ \"owner\": [\"dean1\", \"dean2\"]," +
           " \"sites.siteId\":[\"123\"],\"trainingBodyId\":[\"11\"],\"grades.gradeId\":[\"11\"],\"specialties.specialty.name\":[\"Test Specialty\"]}\"")
       @RequestParam(value = "columnFilters", required = false) String columnFilterJson) throws IOException {
     log.debug("REST request to get a page of Posts");
@@ -180,7 +180,7 @@ public class PostResource {
   @PreAuthorize("hasAuthority('post:view')")
   public ResponseEntity<List<PostViewDTO>> filterPosts(
       @ApiParam Pageable pageable,
-      @ApiParam(value = "json object by column name and value. (Eg: columnFilters={ \"localOffice\": [\"dean1\", \"dean2\"]," +
+      @ApiParam(value = "json object by column name and value. (Eg: columnFilters={ \"owner\": [\"dean1\", \"dean2\"]," +
           " \"sites.siteId\":[\"123\"],\"trainingBodyId\":[\"11\"],\"grades.gradeId\":[\"11\"],\"specialties.specialty.name\":[\"Test Specialty\"]}\"")
       @RequestBody List<ColumnFilterDTO> filters) throws IOException {
     log.debug("REST request to filter a page of Posts");
