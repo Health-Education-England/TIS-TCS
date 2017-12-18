@@ -21,6 +21,7 @@ import com.transformuk.hee.tis.tcs.service.service.mapper.PersonMapper;
 import com.transformuk.hee.tis.tcs.service.service.mapper.PlacementViewMapper;
 import org.apache.commons.codec.net.URLCodec;
 import org.junit.Before;
+import org.junit.Ignore;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.mockito.MockitoAnnotations;
@@ -599,6 +600,23 @@ public class PersonResourceIntTest {
         .andExpect(status().isOk())
         .andExpect(jsonPath("$.[*].status").value("INACTIVE"))
         .andExpect(jsonPath("$.[*].contactDetails.surname").value(PERSON_SURNANME));
+  }
+
+  @Ignore("Stored procedure or function are not supported by H2 so ignoring it")
+  @Test
+  @Transactional
+  public void buildPersonLocalOffice() throws Exception {
+    // Initialize the database
+    personRepository.saveAndFlush(person);
+
+    // Get the person
+    restPersonMockMvc.perform(get("/api/people/ownership")
+            .accept(TestUtil.APPLICATION_JSON_UTF8))
+            .andExpect(status().isOk());
+
+    // Validate the database is empty
+    List<Person> personList = personRepository.findAll();
+    assertThat(personList).hasSize(0);
   }
 
   @Test

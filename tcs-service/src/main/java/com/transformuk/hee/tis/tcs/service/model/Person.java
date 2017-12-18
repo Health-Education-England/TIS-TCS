@@ -4,17 +4,7 @@ package com.transformuk.hee.tis.tcs.service.model;
 import com.transformuk.hee.tis.tcs.api.enumeration.Status;
 import org.springframework.data.annotation.CreatedDate;
 
-import javax.persistence.CascadeType;
-import javax.persistence.Entity;
-import javax.persistence.EnumType;
-import javax.persistence.Enumerated;
-import javax.persistence.GeneratedValue;
-import javax.persistence.GenerationType;
-import javax.persistence.Id;
-import javax.persistence.JoinColumn;
-import javax.persistence.OneToMany;
-import javax.persistence.OneToOne;
-import javax.persistence.Version;
+import javax.persistence.*;
 import java.io.Serializable;
 import java.time.LocalDateTime;
 import java.util.HashSet;
@@ -25,6 +15,10 @@ import java.util.Set;
  * A Person.
  */
 @Entity
+@NamedStoredProcedureQueries({
+        @NamedStoredProcedureQuery(name = "build_person_localoffice",
+                procedureName = "build_person_localoffice")
+})
 public class Person implements Serializable {
 
   private static final long serialVersionUID = 1L;
@@ -82,7 +76,7 @@ public class Person implements Serializable {
   @JoinColumn(unique = true, name = "id")
   private RightToWork rightToWork;
 
-  @OneToMany(mappedBy = "trainee", cascade = CascadeType.ALL, orphanRemoval = true)
+  @OneToMany(mappedBy = "trainee", cascade = {CascadeType.REMOVE,CascadeType.REFRESH}, orphanRemoval = true)
   private Set<Placement> placements = new HashSet<>();
 
   public Long getId() {
