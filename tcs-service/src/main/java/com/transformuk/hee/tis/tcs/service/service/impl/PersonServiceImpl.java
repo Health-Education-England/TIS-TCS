@@ -2,15 +2,19 @@ package com.transformuk.hee.tis.tcs.service.service.impl;
 
 import com.transformuk.hee.tis.tcs.api.dto.PersonBasicDetailsDTO;
 import com.transformuk.hee.tis.tcs.api.dto.PersonDTO;
+import com.transformuk.hee.tis.tcs.api.dto.PersonViewDTO;
 import com.transformuk.hee.tis.tcs.service.model.ColumnFilter;
 import com.transformuk.hee.tis.tcs.service.model.Person;
 import com.transformuk.hee.tis.tcs.service.model.PersonBasicDetails;
+import com.transformuk.hee.tis.tcs.service.model.PersonView;
 import com.transformuk.hee.tis.tcs.service.repository.GmcDetailsRepository;
 import com.transformuk.hee.tis.tcs.service.repository.PersonBasicDetailsRepository;
 import com.transformuk.hee.tis.tcs.service.repository.PersonRepository;
+import com.transformuk.hee.tis.tcs.service.repository.PersonViewRepository;
 import com.transformuk.hee.tis.tcs.service.service.PersonService;
 import com.transformuk.hee.tis.tcs.service.service.mapper.PersonBasicDetailsMapper;
 import com.transformuk.hee.tis.tcs.service.service.mapper.PersonMapper;
+import com.transformuk.hee.tis.tcs.service.service.mapper.PersonViewMapper;
 import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -51,6 +55,10 @@ public class PersonServiceImpl implements PersonService {
   private PersonBasicDetailsRepository personBasicDetailsRepository;
   @Autowired
   private PersonBasicDetailsMapper personBasicDetailsMapper;
+  @Autowired
+  private PersonViewRepository personViewRepository;
+  @Autowired
+  private PersonViewMapper personViewMapper;
 
   /**
    * Save a person.
@@ -88,38 +96,40 @@ public class PersonServiceImpl implements PersonService {
    */
   @Override
   @Transactional(readOnly = true)
-  public Page<PersonDTO> findAll(Pageable pageable) {
+  public Page<PersonViewDTO> findAll(Pageable pageable) {
     log.debug("Request to get all People");
-    return personRepository.findAll(pageable)
-        .map(personMapper::toDto);
+    return personViewRepository.findAll(pageable)
+        .map(personViewMapper::personViewToPersonViewDTO);
   }
 
   @Override
   @Transactional(readOnly = true)
-  public Page<PersonDTO> advancedSearch(String searchString, List<ColumnFilter> columnFilters, Pageable pageable) {
+  public Page<PersonViewDTO> advancedSearch(String searchString, List<ColumnFilter> columnFilters, Pageable pageable) {
 
-    List<Specification<Person>> specs = new ArrayList<>();
+    List<Specification<PersonView>> specs = new ArrayList<>();
     //add the text search criteria
     if (StringUtils.isNotEmpty(searchString)) {
       specs.add(Specifications.where(containsLike("publicHealthNumber", searchString)).
-          or(containsLike("contactDetails.surname", searchString)).
-          or(containsLike("contactDetails.forenames", searchString)).
-          or(containsLike("gmcDetails.gmcNumber", searchString)).
-          or(containsLike("gdcDetails.gdcNumber", searchString)));
+          or(containsLike("surname", searchString)).
+          or(containsLike("forenames", searchString)).
+          or(containsLike("gmcNumber", searchString)).
+          or(containsLike("gdcNumber", searchString)).
+          or(containsLike("placementType", searchString)).
+          or(containsLike("role", searchString)));
     }
     //add the column filters criteria
     if (columnFilters != null && !columnFilters.isEmpty()) {
       columnFilters.forEach(cf -> specs.add(in(cf.getName(), cf.getValues())));
     }
 
-    Specifications<Person> fullSpec = Specifications.where(specs.get(0));
+    Specifications<PersonView> fullSpec = Specifications.where(specs.get(0));
     //add the rest of the specs that made it in
     for (int i = 1; i < specs.size(); i++) {
       fullSpec = fullSpec.and(specs.get(i));
     }
-    Page<Person> result = personRepository.findAll(fullSpec, pageable);
+    Page<PersonView> result = personViewRepository.findAll(fullSpec, pageable);
 
-    return result.map(person -> personMapper.toDto(person));
+    return result.map(personViewMapper::personViewToPersonViewDTO);
   }
 
   @Override
@@ -130,7 +140,7 @@ public class PersonServiceImpl implements PersonService {
     if (StringUtils.isNotEmpty(searchString)) {
       specs.add(Specifications.where(containsLike("firstName", searchString)).
           or(containsLike("lastName", searchString)).
-          or(containsLike("gmcDetails.gmcNumber", searchString)));
+          or(containsLike("gmcNumber", searchString)));
     }
     Specifications<PersonBasicDetails> fullSpec = Specifications.where(specs.get(0));
     Pageable pageable = new PageRequest(0, PERSON_BASIC_DETAILS_MAX_RESULTS);

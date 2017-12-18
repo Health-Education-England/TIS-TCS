@@ -4,17 +4,20 @@ import com.google.common.collect.Lists;
 import com.transformuk.hee.tis.tcs.api.dto.PersonDTO;
 import com.transformuk.hee.tis.tcs.api.enumeration.Status;
 import com.transformuk.hee.tis.tcs.service.Application;
+import com.transformuk.hee.tis.tcs.service.api.decorator.PersonViewDecorator;
 import com.transformuk.hee.tis.tcs.service.api.decorator.PlacementViewDecorator;
 import com.transformuk.hee.tis.tcs.service.exception.ExceptionTranslator;
 import com.transformuk.hee.tis.tcs.service.model.ContactDetails;
 import com.transformuk.hee.tis.tcs.service.model.GdcDetails;
 import com.transformuk.hee.tis.tcs.service.model.GmcDetails;
 import com.transformuk.hee.tis.tcs.service.model.Person;
+import com.transformuk.hee.tis.tcs.service.model.PersonView;
 import com.transformuk.hee.tis.tcs.service.model.PersonalDetails;
 import com.transformuk.hee.tis.tcs.service.repository.ContactDetailsRepository;
 import com.transformuk.hee.tis.tcs.service.repository.GdcDetailsRepository;
 import com.transformuk.hee.tis.tcs.service.repository.GmcDetailsRepository;
 import com.transformuk.hee.tis.tcs.service.repository.PersonRepository;
+import com.transformuk.hee.tis.tcs.service.repository.PersonViewRepository;
 import com.transformuk.hee.tis.tcs.service.repository.PlacementViewRepository;
 import com.transformuk.hee.tis.tcs.service.service.PersonService;
 import com.transformuk.hee.tis.tcs.service.service.mapper.PersonMapper;
@@ -61,6 +64,7 @@ public class PersonResourceIntTest {
 
   private static final String DEFAULT_INTREPID_ID = "AAAAAAAAAA";
   private static final String UPDATED_INTREPID_ID = "BBBBBBBBBB";
+  private static final String OTHER_INTREPID_ID = "CCCCCCCCCCC";
 
   private static final LocalDateTime DEFAULT_ADDED_DATE = LocalDateTime.now(ZoneId.systemDefault());
   private static final LocalDateTime UPDATED_ADDED_DATE = LocalDateTime.now(ZoneId.systemDefault()).plusDays(1);
@@ -117,6 +121,10 @@ public class PersonResourceIntTest {
   private PlacementViewMapper placementViewMapper;
   @Autowired
   private PlacementViewDecorator placementViewDecorator;
+  @Autowired
+  private PersonViewDecorator personViewDecorator;
+  @Autowired
+  private PersonViewRepository personViewRepository;
 
   @Autowired
   private MappingJackson2HttpMessageConverter jacksonMessageConverter;
@@ -130,12 +138,13 @@ public class PersonResourceIntTest {
   private MockMvc restPersonMockMvc;
 
   private Person person;
+  private PersonView personView;
 
   @Before
   public void setup() {
     MockitoAnnotations.initMocks(this);
     PersonResource personResource = new PersonResource(personService, placementViewRepository, placementViewMapper,
-        placementViewDecorator);
+        placementViewDecorator, personViewDecorator);
     this.restPersonMockMvc = MockMvcBuilders.standaloneSetup(personResource)
         .setCustomArgumentResolvers(pageableArgumentResolver)
         .setControllerAdvice(exceptionTranslator)
@@ -164,9 +173,22 @@ public class PersonResourceIntTest {
     return person;
   }
 
+  public static PersonView createPersonView() {
+    PersonView personView = new PersonView();
+    personView.setIntrepidId(DEFAULT_INTREPID_ID);
+    personView.setRole(DEFAULT_ROLE);
+    personView.setStatus(DEFAULT_STATUS);
+    personView.setForenames(PERSON_FORENAMES);
+    personView.setSurname(PERSON_SURNANME);
+    personView.setGmcNumber(GMC_NUMBER);
+    personView.setGdcNumber(GDC_NUMBER);
+    return personView;
+  }
+
   @Before
   public void initTest() {
     person = createEntity();
+    personView = createPersonView();
   }
 
   @Test
@@ -274,23 +296,18 @@ public class PersonResourceIntTest {
   @Transactional
   public void getAllPeople() throws Exception {
     // Initialize the database
-    personRepository.saveAndFlush(person);
+    personViewRepository.saveAndFlush(personView);
 
     // Get all the personList
     restPersonMockMvc.perform(get("/api/people?sort=id,desc"))
         .andExpect(status().isOk())
         .andExpect(content().contentType(MediaType.APPLICATION_JSON_UTF8_VALUE))
         .andExpect(jsonPath("$.[*].id").value(hasItem(person.getId().intValue())))
-        .andExpect(jsonPath("$.[*].intrepidId").value(hasItem(DEFAULT_INTREPID_ID.toString())))
-        .andExpect(jsonPath("$.[*].addedDate").value(hasItem(DEFAULT_ADDED_DATE.toString())))
-        .andExpect(jsonPath("$.[*].amendedDate").isNotEmpty())
-        .andExpect(jsonPath("$.[*].role").value(hasItem(DEFAULT_ROLE.toString())))
-        .andExpect(jsonPath("$.[*].status").value(hasItem(DEFAULT_STATUS.toString())))
-        .andExpect(jsonPath("$.[*].comments").value(hasItem(DEFAULT_COMMENTS.toString())))
-        .andExpect(jsonPath("$.[*].inactiveDate").value(hasItem(DEFAULT_INACTIVE_DATE.toString())))
-        .andExpect(jsonPath("$.[*].inactiveNotes").value(hasItem(DEFAULT_INACTIVE_NOTES.toString())))
-        .andExpect(jsonPath("$.[*].publicHealthNumber").value(hasItem(DEFAULT_PUBLIC_HEALTH_NUMBER.toString())))
-        .andExpect(jsonPath("$.[*].regulator").value(hasItem(DEFAULT_REGULATOR.toString())));
+        .andExpect(jsonPath("$.[*].intrepidId").value(hasItem(DEFAULT_INTREPID_ID)))
+        .andExpect(jsonPath("$.[*].forenames").value(hasItem(PERSON_FORENAMES)))
+        .andExpect(jsonPath("$.[*].surname").value(hasItem(PERSON_SURNANME)))
+        .andExpect(jsonPath("$.[*].gmcNumber").value(hasItem(GMC_NUMBER)))
+        .andExpect(jsonPath("$.[*].gdcNumber").value(hasItem(GDC_NUMBER)));
   }
 
   @Test
@@ -428,17 +445,13 @@ public class PersonResourceIntTest {
         .andExpect(status().isOk())
         .andExpect(content().contentType(MediaType.APPLICATION_JSON_UTF8_VALUE))
         .andExpect(jsonPath("$.[*].id").value(anotherPerson.getId().intValue()))
-        .andExpect(jsonPath("$.[*].contactDetails.surname").value(PERSON_SURNANME))
+        .andExpect(jsonPath("$.[*].surname").value(PERSON_SURNANME))
         .andExpect(jsonPath("$.[*].intrepidId").value(DEFAULT_INTREPID_ID.toString()))
         .andExpect(jsonPath("$.[*].addedDate").value(DEFAULT_ADDED_DATE.toString()))
         .andExpect(jsonPath("$.[*].amendedDate").isNotEmpty())
         .andExpect(jsonPath("$.[*].role").value(DEFAULT_ROLE.toString()))
         .andExpect(jsonPath("$.[*].status").value(DEFAULT_STATUS.toString()))
-        .andExpect(jsonPath("$.[*].comments").value(DEFAULT_COMMENTS.toString()))
-        .andExpect(jsonPath("$.[*].inactiveDate").value(DEFAULT_INACTIVE_DATE.toString()))
-        .andExpect(jsonPath("$.[*].inactiveNotes").value(DEFAULT_INACTIVE_NOTES.toString()))
-        .andExpect(jsonPath("$.[*].publicHealthNumber").value(DEFAULT_PUBLIC_HEALTH_NUMBER.toString()))
-        .andExpect(jsonPath("$.[*].regulator").value(DEFAULT_REGULATOR.toString()));
+        .andExpect(jsonPath("$.[*].publicHealthNumber").value(DEFAULT_PUBLIC_HEALTH_NUMBER.toString()));
   }
 
   @Test
@@ -456,17 +469,12 @@ public class PersonResourceIntTest {
         .andExpect(status().isOk())
         .andExpect(content().contentType(MediaType.APPLICATION_JSON_UTF8_VALUE))
         .andExpect(jsonPath("$.[*].id").value(anotherPerson.getId().intValue()))
-        .andExpect(jsonPath("$.[*].gmcDetails.gmcNumber").value(GMC_NUMBER))
+        .andExpect(jsonPath("$.[*].gmcNumber").value(GMC_NUMBER))
         .andExpect(jsonPath("$.[*].intrepidId").value(DEFAULT_INTREPID_ID.toString()))
         .andExpect(jsonPath("$.[*].addedDate").value(DEFAULT_ADDED_DATE.toString()))
         .andExpect(jsonPath("$.[*].amendedDate").isNotEmpty())
         .andExpect(jsonPath("$.[*].role").value(DEFAULT_ROLE.toString()))
-        .andExpect(jsonPath("$.[*].status").value(DEFAULT_STATUS.toString()))
-        .andExpect(jsonPath("$.[*].comments").value(DEFAULT_COMMENTS.toString()))
-        .andExpect(jsonPath("$.[*].inactiveDate").value(DEFAULT_INACTIVE_DATE.toString()))
-        .andExpect(jsonPath("$.[*].inactiveNotes").value(DEFAULT_INACTIVE_NOTES.toString()))
-        .andExpect(jsonPath("$.[*].publicHealthNumber").value(DEFAULT_PUBLIC_HEALTH_NUMBER.toString()))
-        .andExpect(jsonPath("$.[*].regulator").value(DEFAULT_REGULATOR.toString()));
+        .andExpect(jsonPath("$.[*].status").value(DEFAULT_STATUS.toString()));
   }
 
   @Test
@@ -484,7 +492,7 @@ public class PersonResourceIntTest {
         .andExpect(status().isOk())
         .andExpect(content().contentType(MediaType.APPLICATION_JSON_UTF8_VALUE))
         .andExpect(jsonPath("$.[*].id").value(anotherPerson.getId().intValue()))
-        .andExpect(jsonPath("$.[*].gdcDetails.gdcNumber").value(GDC_NUMBER))
+        .andExpect(jsonPath("$.[*].gdcNumber").value(GDC_NUMBER))
         .andExpect(jsonPath("$.[*].intrepidId").value(DEFAULT_INTREPID_ID.toString()))
         .andExpect(jsonPath("$.[*].addedDate").value(DEFAULT_ADDED_DATE.toString()))
         .andExpect(jsonPath("$.[*].amendedDate").exists())
@@ -561,6 +569,7 @@ public class PersonResourceIntTest {
     personRepository.saveAndFlush(person);
     Person otherStatusPerson = createEntity();
     otherStatusPerson.setStatus(Status.INACTIVE);
+    otherStatusPerson.setIntrepidId(OTHER_INTREPID_ID);
     personRepository.saveAndFlush(otherStatusPerson);
 
     //when & then

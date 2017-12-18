@@ -4,10 +4,12 @@ import com.codahale.metrics.annotation.Timed;
 import com.google.common.collect.Lists;
 import com.transformuk.hee.tis.tcs.api.dto.PersonBasicDetailsDTO;
 import com.transformuk.hee.tis.tcs.api.dto.PersonDTO;
+import com.transformuk.hee.tis.tcs.api.dto.PersonViewDTO;
 import com.transformuk.hee.tis.tcs.api.dto.PlacementViewDTO;
 import com.transformuk.hee.tis.tcs.api.dto.validation.Create;
 import com.transformuk.hee.tis.tcs.api.dto.validation.Update;
 import com.transformuk.hee.tis.tcs.api.enumeration.Status;
+import com.transformuk.hee.tis.tcs.service.api.decorator.PersonViewDecorator;
 import com.transformuk.hee.tis.tcs.service.api.decorator.PlacementViewDecorator;
 import com.transformuk.hee.tis.tcs.service.api.util.ColumnFilterUtil;
 import com.transformuk.hee.tis.tcs.service.api.util.HeaderUtil;
@@ -68,13 +70,16 @@ public class PersonResource {
   private final PlacementViewRepository placementViewRepository;
   private final PlacementViewMapper placementViewMapper;
   private final PlacementViewDecorator placementViewDecorator;
+  private final PersonViewDecorator personViewDecorator;
 
   public PersonResource(PersonService personService, PlacementViewRepository placementViewRepository,
-                        PlacementViewMapper placementViewMapper, PlacementViewDecorator placementViewDecorator) {
+                        PlacementViewMapper placementViewMapper, PlacementViewDecorator placementViewDecorator,
+                        PersonViewDecorator personViewDecorator) {
     this.personService = personService;
     this.placementViewRepository = placementViewRepository;
     this.placementViewMapper = placementViewMapper;
     this.placementViewDecorator = placementViewDecorator;
+    this.personViewDecorator = personViewDecorator;
   }
 
   /**
@@ -135,7 +140,7 @@ public class PersonResource {
   @GetMapping("/people")
   @Timed
   @PreAuthorize("hasPermission('tis:people::person:', 'View')")
-  public ResponseEntity<List<PersonDTO>> getAllPeople(
+  public ResponseEntity<List<PersonViewDTO>> getAllPeople(
       @ApiParam Pageable pageable,
       @ApiParam(value = "any wildcard string to be searched")
       @RequestParam(value = "searchQuery", required = false) String searchQuery,
@@ -145,14 +150,14 @@ public class PersonResource {
     searchQuery = sanitize(searchQuery);
     List<Class> filterEnumList = Lists.newArrayList(Status.class);
     List<ColumnFilter> columnFilters = ColumnFilterUtil.getColumnFilters(columnFilterJson, filterEnumList);
-    Page<PersonDTO> page;
+    Page<PersonViewDTO> page;
     if (StringUtils.isEmpty(searchQuery) && StringUtils.isEmpty(columnFilterJson)) {
       page = personService.findAll(pageable);
     } else {
       page = personService.advancedSearch(searchQuery, columnFilters, pageable);
     }
     HttpHeaders headers = PaginationUtil.generatePaginationHttpHeaders(page, "/api/people");
-    return new ResponseEntity<>(page.getContent(), headers, HttpStatus.OK);
+    return new ResponseEntity<>(personViewDecorator.decorate(page.getContent()), headers, HttpStatus.OK);
   }
 
   /**
