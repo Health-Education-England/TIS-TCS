@@ -38,10 +38,8 @@ import static com.transformuk.hee.tis.tcs.service.service.impl.SpecificationFact
 @Transactional
 public class PersonServiceImpl implements PersonService {
 
-  private final Logger log = LoggerFactory.getLogger(PersonServiceImpl.class);
-
   private static final int PERSON_BASIC_DETAILS_MAX_RESULTS = 100;
-
+  private final Logger log = LoggerFactory.getLogger(PersonServiceImpl.class);
   @Autowired
   private PersonRepository personRepository;
   @Autowired
@@ -136,7 +134,7 @@ public class PersonServiceImpl implements PersonService {
     Pageable pageable = new PageRequest(0, PERSON_BASIC_DETAILS_MAX_RESULTS);
 
     Page<PersonBasicDetails> result;
-    if(Collections.isEmpty(specs)) {
+    if (Collections.isEmpty(specs)) {
       result = personBasicDetailsRepository.findAll(pageable);
     } else {
       Specifications<PersonBasicDetails> fullSpec = Specifications.where(specs.get(0));
