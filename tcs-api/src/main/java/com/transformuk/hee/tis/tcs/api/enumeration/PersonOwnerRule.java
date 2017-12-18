@@ -1,9 +1,9 @@
 package com.transformuk.hee.tis.tcs.api.enumeration;
 
 /**
- * Denotes the logical rule we used to determine if a person in in a local office
+ * Denotes the logical rule we used to determine if a person is in a local office
  */
-public enum LocalOfficeRule {
+public enum PersonOwnerRule {
   P1, // Current Programme ManagingDeanery via ProgrammeMembership
   P2, // Current Post ManagingDeaneryLETB via Placement
   P3, // Trust DeaneryLETB via PersonAssosciatedSite, Site and Trust

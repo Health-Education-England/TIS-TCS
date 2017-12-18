@@ -1,6 +1,6 @@
 package com.transformuk.hee.tis.tcs.api.dto;
 
-import com.transformuk.hee.tis.tcs.api.enumeration.LocalOfficeRule;
+import com.transformuk.hee.tis.tcs.api.enumeration.PersonOwnerRule;
 import com.transformuk.hee.tis.tcs.api.enumeration.Status;
 
 import java.io.Serializable;
@@ -49,9 +49,9 @@ public class PersonViewDTO implements Serializable {
 
   private Status status;
 
-  private String currentLocalOffice;
+  private String currentOwner;
 
-  private LocalOfficeRule currentLocalOfficeRule;
+  private PersonOwnerRule currentOwnerRule;
 
   public Long getId() {
     return id;
@@ -197,20 +197,20 @@ public class PersonViewDTO implements Serializable {
     this.status = status;
   }
 
-  public String getCurrentLocalOffice() {
-    return currentLocalOffice;
+  public String getCurrentOwner() {
+    return currentOwner;
   }
 
-  public void setCurrentLocalOffice(String currentLocalOffice) {
-    this.currentLocalOffice = currentLocalOffice;
+  public void setCurrentOwner(String currentOwner) {
+    this.currentOwner = currentOwner;
   }
 
-  public LocalOfficeRule getCurrentLocalOfficeRule() {
-    return currentLocalOfficeRule;
+  public PersonOwnerRule getCurrentOwnerRule() {
+    return currentOwnerRule;
   }
 
-  public void setCurrentLocalOfficeRule(LocalOfficeRule currentLocalOfficeRule) {
-    this.currentLocalOfficeRule = currentLocalOfficeRule;
+  public void setCurrentOwnerRule(PersonOwnerRule currentOwnerRule) {
+    this.currentOwnerRule = currentOwnerRule;
   }
 
   @Override
@@ -242,9 +242,9 @@ public class PersonViewDTO implements Serializable {
     if (placementType != null ? !placementType.equals(that.placementType) : that.placementType != null) return false;
     if (role != that.role) return false;
     if (status != that.status) return false;
-    if (currentLocalOffice != null ? !currentLocalOffice.equals(that.currentLocalOffice) : that.currentLocalOffice != null)
+    if (currentOwner != null ? !currentOwner.equals(that.currentOwner) : that.currentOwner != null)
       return false;
-    return currentLocalOfficeRule != null ? currentLocalOfficeRule.equals(that.currentLocalOfficeRule) : that.currentLocalOfficeRule == null;
+    return currentOwnerRule != null ? currentOwnerRule.equals(that.currentOwnerRule) : that.currentOwnerRule == null;
   }
 
   @Override
@@ -267,8 +267,8 @@ public class PersonViewDTO implements Serializable {
     result = 31 * result + (placementType != null ? placementType.hashCode() : 0);
     result = 31 * result + (role != null ? role.hashCode() : 0);
     result = 31 * result + (status != null ? status.hashCode() : 0);
-    result = 31 * result + (currentLocalOffice != null ? currentLocalOffice.hashCode() : 0);
-    result = 31 * result + (currentLocalOfficeRule != null ? currentLocalOfficeRule.hashCode() : 0);
+    result = 31 * result + (currentOwner != null ? currentOwner.hashCode() : 0);
+    result = 31 * result + (currentOwnerRule != null ? currentOwnerRule.hashCode() : 0);
     return result;
   }
 
@@ -293,8 +293,8 @@ public class PersonViewDTO implements Serializable {
         ", placementType='" + placementType + '\'' +
         ", role=" + role +
         ", status=" + status +
-        ", currentLocalOffice='" + currentLocalOffice + '\'' +
-        ", currentLocalOfficeRule='" + currentLocalOfficeRule + '\'' +
+        ", currentOwner='" + currentOwner + '\'' +
+        ", currentOwnerRule='" + currentOwnerRule + '\'' +
         '}';
   }
 }

@@ -140,7 +140,7 @@ public class PersonServiceImpl implements PersonService {
     if (StringUtils.isNotEmpty(searchString)) {
       specs.add(Specifications.where(containsLike("firstName", searchString)).
           or(containsLike("lastName", searchString)).
-          or(containsLike("gmcNumber", searchString)));
+          or(containsLike("gmcDetails.gmcNumber", searchString)));
     }
     Specifications<PersonBasicDetails> fullSpec = Specifications.where(specs.get(0));
     Pageable pageable = new PageRequest(0, PERSON_BASIC_DETAILS_MAX_RESULTS);
