@@ -133,10 +133,9 @@ public class PersonResource {
    * @return the ResponseEntity with status 200 (OK) and the list of people in body
    */
   @ApiOperation(value = "Lists People data",
-      notes = "Returns a list of people with support for pagination, sorting, smart search and column filters \n",
-      response = ResponseEntity.class, responseContainer = "Person list")
+      notes = "Returns a list of people with support for pagination, sorting, smart search and column filters \n")
   @ApiResponses(value = {
-      @ApiResponse(code = 200, message = "Person list", response = ResponseEntity.class)})
+      @ApiResponse(code = 200, message = "Person list")})
   @GetMapping("/people")
   @Timed
   @PreAuthorize("hasPermission('tis:people::person:', 'View')")
@@ -167,10 +166,9 @@ public class PersonResource {
    * @return the ResponseEntity with status 200 (OK) and the list of people basic details in body
    */
   @ApiOperation(value = "Lists People basic details data",
-      notes = "Returns a list of people basic details with support for smart search \n",
-      response = ResponseEntity.class, responseContainer = "Person basic details list")
+      notes = "Returns a list of people basic details with support for smart search \n")
   @ApiResponses(value = {
-      @ApiResponse(code = 200, message = "Person basic list", response = ResponseEntity.class)})
+      @ApiResponse(code = 200, message = "Person basic list")})
   @GetMapping("/people/basic")
   @Timed
   @PreAuthorize("hasPermission('tis:people::person:', 'View')")
