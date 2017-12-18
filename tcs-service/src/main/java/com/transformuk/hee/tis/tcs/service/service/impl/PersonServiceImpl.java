@@ -11,6 +11,7 @@ import com.transformuk.hee.tis.tcs.service.repository.PersonRepository;
 import com.transformuk.hee.tis.tcs.service.service.PersonService;
 import com.transformuk.hee.tis.tcs.service.service.mapper.PersonBasicDetailsMapper;
 import com.transformuk.hee.tis.tcs.service.service.mapper.PersonMapper;
+import io.jsonwebtoken.lang.Collections;
 import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -132,10 +133,15 @@ public class PersonServiceImpl implements PersonService {
           or(containsLike("lastName", searchString)).
           or(containsLike("gmcDetails.gmcNumber", searchString)));
     }
-    Specifications<PersonBasicDetails> fullSpec = Specifications.where(specs.get(0));
     Pageable pageable = new PageRequest(0, PERSON_BASIC_DETAILS_MAX_RESULTS);
 
-    Page<PersonBasicDetails> result = personBasicDetailsRepository.findAll(fullSpec, pageable);
+    Page<PersonBasicDetails> result;
+    if(Collections.isEmpty(specs)) {
+      result = personBasicDetailsRepository.findAll(pageable);
+    } else {
+      Specifications<PersonBasicDetails> fullSpec = Specifications.where(specs.get(0));
+      result = personBasicDetailsRepository.findAll(fullSpec, pageable);
+    }
 
     return result.map(person -> personBasicDetailsMapper.toDto(person)).getContent();
   }
