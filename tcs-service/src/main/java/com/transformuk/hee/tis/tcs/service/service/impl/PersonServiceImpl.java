@@ -14,6 +14,7 @@ import com.transformuk.hee.tis.tcs.service.repository.PersonViewRepository;
 import com.transformuk.hee.tis.tcs.service.service.PersonService;
 import com.transformuk.hee.tis.tcs.service.service.mapper.PersonBasicDetailsMapper;
 import com.transformuk.hee.tis.tcs.service.service.mapper.PersonMapper;
+import io.jsonwebtoken.lang.Collections;
 import com.transformuk.hee.tis.tcs.service.service.mapper.PersonViewMapper;
 import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
@@ -24,11 +25,13 @@ import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.domain.Specification;
 import org.springframework.data.jpa.domain.Specifications;
+import org.springframework.scheduling.annotation.Async;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.concurrent.CompletableFuture;
 
 import static com.transformuk.hee.tis.tcs.service.service.impl.SpecificationFactory.containsLike;
 import static com.transformuk.hee.tis.tcs.service.service.impl.SpecificationFactory.in;
@@ -41,10 +44,8 @@ import static com.transformuk.hee.tis.tcs.service.service.impl.SpecificationFact
 @Transactional
 public class PersonServiceImpl implements PersonService {
 
-  private final Logger log = LoggerFactory.getLogger(PersonServiceImpl.class);
-
   private static final int PERSON_BASIC_DETAILS_MAX_RESULTS = 100;
-
+  private final Logger log = LoggerFactory.getLogger(PersonServiceImpl.class);
   @Autowired
   private PersonRepository personRepository;
   @Autowired
@@ -142,10 +143,15 @@ public class PersonServiceImpl implements PersonService {
           or(containsLike("lastName", searchString)).
           or(containsLike("gmcDetails.gmcNumber", searchString)));
     }
-    Specifications<PersonBasicDetails> fullSpec = Specifications.where(specs.get(0));
     Pageable pageable = new PageRequest(0, PERSON_BASIC_DETAILS_MAX_RESULTS);
 
-    Page<PersonBasicDetails> result = personBasicDetailsRepository.findAll(fullSpec, pageable);
+    Page<PersonBasicDetails> result;
+    if (Collections.isEmpty(specs)) {
+      result = personBasicDetailsRepository.findAll(pageable);
+    } else {
+      Specifications<PersonBasicDetails> fullSpec = Specifications.where(specs.get(0));
+      result = personBasicDetailsRepository.findAll(fullSpec, pageable);
+    }
 
     return result.map(person -> personBasicDetailsMapper.toDto(person)).getContent();
   }
@@ -196,5 +202,18 @@ public class PersonServiceImpl implements PersonService {
   public void delete(Long id) {
     log.debug("Request to delete Person : {}", id);
     personRepository.delete(id);
+  }
+
+  /**
+   * Call Stored proc to build person local office
+   * @return
+   */
+  @Override
+  @Transactional
+  @Async
+  public CompletableFuture<Void> buildPersonLocalOffice(){
+    log.debug("Request to build Person local office");
+    personRepository.buildPersonLocalOffice();
+    return CompletableFuture.completedFuture(null);
   }
 }
