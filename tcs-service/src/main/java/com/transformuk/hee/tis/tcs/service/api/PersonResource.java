@@ -269,7 +269,7 @@ public class PersonResource {
    */
   @PatchMapping("/people")
   @Timed
-  @PreAuthorize("hasPermission('tis:people::person:', 'Update')")
+  @PreAuthorize("hasPermission('tis:people::person:consolidated_etl', 'Update')")
   public ResponseEntity<List<PersonDTO>> patchPersons(@Valid @RequestBody List<PersonDTO> personDTOs) {
     log.debug("REST request to patch Persons: {}", personDTOs);
     List<PersonDTO> result = personService.save(personDTOs);
@@ -291,7 +291,7 @@ public class PersonResource {
           @ApiResponse(code = 200, message = "Person list", response = ResponseEntity.class)})
   @PostMapping("/people/ownership")
   @Timed
-  @PreAuthorize("hasPermission('person:bulk:add:modify', 'Update')")
+  @PreAuthorize("hasPermission('tis:people::person:consolidated_etl', 'Update')")
   public ResponseEntity<Void> buildPersonsOwnership() {
     personService.buildPersonLocalOffice();
     return ResponseEntity.ok().headers(HeaderUtil.createEntityUpdateAlert(ENTITY_NAME, "procedure is underway")).build();
