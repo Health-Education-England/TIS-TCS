@@ -1,0 +1,2 @@
+-- Because our testing runs on an H2 in memory database and H2 does not like our PersonView syntax, we overwrite
+-- this database migration step with an empty SQL file, the table in the V3.35 file above replaces the view for testing

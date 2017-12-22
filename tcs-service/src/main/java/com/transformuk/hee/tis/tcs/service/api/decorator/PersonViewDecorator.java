@@ -49,6 +49,11 @@ public class PersonViewDecorator {
       if (StringUtils.isNotBlank(personView.getSiteCode())) {
         siteCodes.add(personView.getSiteCode());
       }
+      // fix the roles
+      if (StringUtils.isNotBlank(personView.getRole())) {
+        personView.setRole(personView.getRole().replaceAll(",",", "));
+      }
+
     });
 
     CompletableFuture<Void> gradesFuture = decorateGradesOnPerson(gradeCodes, personViews);
