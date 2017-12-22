@@ -42,7 +42,6 @@ public class ExceptionTranslator {
   @ResponseStatus(HttpStatus.BAD_REQUEST)
   @ResponseBody
   public ErrorVM processValidationError(MethodArgumentNotValidException ex) {
-    log.error(ex.getMessage(), ex);
     BindingResult result = ex.getBindingResult();
     List<FieldError> fieldErrors = result.getFieldErrors();
 
