@@ -1,12 +1,15 @@
 package com.transformuk.hee.tis.tcs.service.service.impl;
 
+import com.google.common.base.Preconditions;
 import com.transformuk.hee.tis.tcs.api.dto.ProgrammeMembershipDTO;
+import com.transformuk.hee.tis.tcs.service.model.Person;
 import com.transformuk.hee.tis.tcs.service.model.ProgrammeMembership;
 import com.transformuk.hee.tis.tcs.service.repository.ProgrammeMembershipRepository;
 import com.transformuk.hee.tis.tcs.service.service.ProgrammeMembershipService;
 import com.transformuk.hee.tis.tcs.service.service.mapper.ProgrammeMembershipMapper;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.data.domain.Example;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
@@ -100,5 +103,24 @@ public class ProgrammeMembershipServiceImpl implements ProgrammeMembershipServic
   public void delete(Long id) {
     log.debug("Request to delete ProgrammeMembership : {}", id);
     programmeMembershipRepository.delete(id);
+  }
+
+  @Transactional(readOnly = true)
+  @Override
+  public List<ProgrammeMembershipDTO> findProgrammeMembershipsForTraineeAndProgramme(Long traineeId, Long programmeId) {
+    Preconditions.checkNotNull(traineeId);
+    Preconditions.checkNotNull(programmeId);
+
+    ProgrammeMembership programmeMembership = new ProgrammeMembership();
+    Person person = new Person();
+    person.setId(traineeId);
+    programmeMembership.setPerson(person);
+    programmeMembership.setProgrammeId(programmeId);
+
+    Example<ProgrammeMembership> example = Example.of(programmeMembership);
+
+    List<ProgrammeMembership> foundProgrammeMemberships = programmeMembershipRepository.findAll(example);
+    return programmeMembershipMapper.programmeMembershipsToProgrammeMembershipDTOs(foundProgrammeMemberships);
+
   }
 }
