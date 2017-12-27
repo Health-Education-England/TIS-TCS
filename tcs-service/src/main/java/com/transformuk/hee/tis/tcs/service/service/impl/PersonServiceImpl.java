@@ -1,5 +1,6 @@
 package com.transformuk.hee.tis.tcs.service.service.impl;
 
+import com.google.common.collect.Lists;
 import com.transformuk.hee.tis.tcs.api.dto.PersonBasicDetailsDTO;
 import com.transformuk.hee.tis.tcs.api.dto.PersonDTO;
 import com.transformuk.hee.tis.tcs.api.dto.PersonViewDTO;
@@ -110,14 +111,19 @@ public class PersonServiceImpl implements PersonService {
     List<Specification<PersonView>> specs = new ArrayList<>();
     //add the text search criteria
     if (StringUtils.isNotEmpty(searchString)) {
-      specs.add(Specifications.where(containsLike("publicHealthNumber", searchString)).
+      Specifications innerSpecs = Specifications.where(containsLike("publicHealthNumber", searchString)).
           or(containsLike("surname", searchString)).
           or(containsLike("forenames", searchString)).
           or(containsLike("gmcNumber", searchString)).
           or(containsLike("gdcNumber", searchString)).
           or(containsLike("placementType", searchString)).
-          or(containsLike("role", searchString)));
+          or(containsLike("role", searchString));
+      if (StringUtils.isNumeric(searchString)) {
+        innerSpecs = innerSpecs.or(in("id", Lists.newArrayList(Long.parseLong(searchString))));
+      }
+      specs.add(innerSpecs);
     }
+
     //add the column filters criteria
     if (columnFilters != null && !columnFilters.isEmpty()) {
       columnFilters.forEach(cf -> specs.add(in(cf.getName(), cf.getValues())));
