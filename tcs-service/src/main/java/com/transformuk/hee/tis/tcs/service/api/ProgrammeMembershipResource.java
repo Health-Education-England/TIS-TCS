@@ -176,4 +176,20 @@ public class ProgrammeMembershipResource {
         .body(results);
   }
 
+
+  /**
+   * GET  /trainee/:traineeId/programme/:programmeId/programme-memberships : get all the programmeMemberships relating
+   * to a trainee and their programme.
+   *
+   * @return the ResponseEntity with status 200 (OK) and the list of programmeMemberships in body
+   */
+  @GetMapping("/trainee/{traineeId}/programme/{programmeId}/programme-memberships")
+  @Timed
+  @PreAuthorize("hasPermission('tis:people::person:', 'View')")
+  public ResponseEntity<List<ProgrammeMembershipDTO>> getProgrammeMembershipForTraineeAndProgramme(@PathVariable Long traineeId,
+                                                                                                   @PathVariable Long programmeId) {
+    log.debug("REST request to get ProgrammeMemberships for trainee {}, programme {}", traineeId, programmeId);
+    List<ProgrammeMembershipDTO> programmeMembershipDTOS = programmeMembershipService.findProgrammeMembershipsForTraineeAndProgramme(traineeId, programmeId);
+    return new ResponseEntity<>(programmeMembershipDTOS, HttpStatus.OK);
+  }
 }

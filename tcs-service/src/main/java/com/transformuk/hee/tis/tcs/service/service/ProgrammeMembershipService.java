@@ -49,4 +49,11 @@ public interface ProgrammeMembershipService {
    * @param id the id of the entity
    */
   void delete(Long id);
+
+  /**
+   * Get all the programmeMemberships for a trainee id and programme id.
+   *
+   * @return the list of entities
+   */
+  List<ProgrammeMembershipDTO> findProgrammeMembershipsForTraineeAndProgramme(Long traineeId, Long programmeId);
 }
