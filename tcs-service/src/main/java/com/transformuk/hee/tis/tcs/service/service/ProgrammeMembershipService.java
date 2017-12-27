@@ -1,5 +1,6 @@
 package com.transformuk.hee.tis.tcs.service.service;
 
+import com.transformuk.hee.tis.tcs.api.dto.ProgrammeMembershipCurriculaDTO;
 import com.transformuk.hee.tis.tcs.api.dto.ProgrammeMembershipDTO;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
@@ -55,5 +56,5 @@ public interface ProgrammeMembershipService {
    *
    * @return the list of entities
    */
-  List<ProgrammeMembershipDTO> findProgrammeMembershipsForTraineeAndProgramme(Long traineeId, Long programmeId);
+  List<ProgrammeMembershipCurriculaDTO> findProgrammeMembershipsForTraineeAndProgramme(Long traineeId, String programmeNumber);
 }
