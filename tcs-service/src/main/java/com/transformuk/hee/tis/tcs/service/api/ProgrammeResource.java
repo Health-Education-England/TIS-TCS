@@ -137,10 +137,7 @@ public class ProgrammeResource {
    * @throws URISyntaxException if there is an error to generate the pagination HTTP headers
    */
   @ApiOperation(value = "Lists Programmes data",
-      notes = "Returns a list of Programmes with support for pagination, sorting, smart search and column filters \n",
-      response = ResponseEntity.class, responseContainer = "Programmes list")
-  @ApiResponses(value = {
-      @ApiResponse(code = 200, message = "Programmes list", response = ResponseEntity.class)})
+      notes = "Returns a list of Programmes with support for pagination, sorting, smart search and column filters")
   @GetMapping("/programmes")
   @Timed
   @PreAuthorize("hasAuthority('programme:view')")
