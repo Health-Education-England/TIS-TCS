@@ -41,6 +41,7 @@ import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.domain.Specification;
 import org.springframework.data.jpa.domain.Specifications;
+import org.springframework.scheduling.annotation.Async;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -50,6 +51,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.Objects;
 import java.util.Set;
+import java.util.concurrent.CompletableFuture;
 import java.util.stream.Collectors;
 
 import static com.transformuk.hee.tis.tcs.service.service.impl.SpecificationFactory.containsLike;
@@ -194,7 +196,7 @@ public class PostServiceImpl implements PostService {
 
     List<Post> postsModified = Lists.newArrayList();
     for (PostDTO dto : postDTOList) {
-      Set<PostSite> sitesToSave = Sets.newHashSet();
+      Set<PostSite> sitesToSave;
       Post post = intrepidIdToPost.get(dto.getIntrepidId());
       if (post != null) {
         sitesToSave = post.getSites();
@@ -280,13 +282,11 @@ public class PostServiceImpl implements PostService {
           Specialty specialty = new Specialty();
           specialty.setId(postSpecialtyDTO.getSpecialty().getId());
 
-          if (specialty != null) {
-            PostSpecialty postSpecialty = new PostSpecialty();
-            postSpecialty.setPostSpecialtyType(postSpecialtyDTO.getPostSpecialtyType());
-            postSpecialty.setPost(post);
-            postSpecialty.setSpecialty(specialty);
-            attachedSpecialties.add(postSpecialty);
-          }
+          PostSpecialty postSpecialty = new PostSpecialty();
+          postSpecialty.setPostSpecialtyType(postSpecialtyDTO.getPostSpecialtyType());
+          postSpecialty.setPost(post);
+          postSpecialty.setSpecialty(specialty);
+          attachedSpecialties.add(postSpecialty);
         }
         List<PostSpecialty> savedSpecialties = postSpecialtyRepository.save(attachedSpecialties);
         post.setSpecialties(Sets.newHashSet(savedSpecialties));
@@ -328,9 +328,9 @@ public class PostServiceImpl implements PostService {
       if (post != null) {
         Set<Placement> placements = post.getPlacementHistory();
         for (PlacementDTO placementViewDTO : dto.getPlacementHistory()) {
-          Placement Placement = placementIntrepidIdToPlacements.get(placementViewDTO.getIntrepidId());
-          if (Placement != null) {
-            placements.add(Placement);
+          Placement placement = placementIntrepidIdToPlacements.get(placementViewDTO.getIntrepidId());
+          if (placement != null) {
+            placements.add(placement);
           }
         }
         post.setPlacementHistory(placements);
@@ -445,5 +445,18 @@ public class PostServiceImpl implements PostService {
   public void delete(Long id) {
     log.debug("Request to delete Post : {}", id);
     postRepository.delete(id);
+  }
+
+  /**
+   * Call Stored proc to build the post view
+   * @return
+   */
+  @Override
+  @Transactional
+  @Async
+  public CompletableFuture<Void> buildPostView(){
+    log.debug("Request to build Post view");
+    postRepository.buildPostView();
+    return CompletableFuture.completedFuture(null);
   }
 }

@@ -211,15 +211,15 @@ public class PersonServiceImpl implements PersonService {
   }
 
   /**
-   * Call Stored proc to build person local office
+   * Call Stored proc to build person view
    * @return
    */
   @Override
   @Transactional
   @Async
-  public CompletableFuture<Void> buildPersonLocalOffice(){
-    log.debug("Request to build Person local office");
-    personRepository.buildPersonLocalOffice();
+  public CompletableFuture<Void> buildPersonView(){
+    log.debug("Request to build Person view");
+    personRepository.buildPersonView();
     return CompletableFuture.completedFuture(null);
   }
 }

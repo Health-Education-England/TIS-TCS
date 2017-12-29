@@ -279,12 +279,12 @@ public class PersonResource {
   }
 
   /**
-   * POST  /people/ownership : Bulk patch people.
+   * POST  /people/ownership : Build the person view table
    *
    * @return the ResponseEntity with status 200 (OK)
    * @throws URISyntaxException if the Location URI syntax is incorrect
    */
-  @ApiOperation(value = "Run the stored procedure to build person localoffice",
+  @ApiOperation(value = "Run the stored procedure to build the person view",
           response = ResponseEntity.class, responseContainer = "void")
   @ApiResponses(value = {
           @ApiResponse(code = 200, message = "Person list", response = ResponseEntity.class)})
@@ -292,7 +292,7 @@ public class PersonResource {
   @Timed
   @PreAuthorize("hasPermission('tis:people::person:consolidated_etl', 'Update')")
   public ResponseEntity<Void> buildPersonsOwnership() {
-    personService.buildPersonLocalOffice();
+    personService.buildPersonView();
     return ResponseEntity.ok().headers(HeaderUtil.createEntityUpdateAlert(ENTITY_NAME, "procedure is underway")).build();
   }
 

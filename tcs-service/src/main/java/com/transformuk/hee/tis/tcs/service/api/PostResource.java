@@ -3,7 +3,6 @@ package com.transformuk.hee.tis.tcs.service.api;
 import com.codahale.metrics.annotation.Timed;
 import com.google.common.collect.Lists;
 import com.transformuk.hee.tis.tcs.api.dto.ColumnFilterDTO;
-import com.transformuk.hee.tis.tcs.api.dto.PlacementDTO;
 import com.transformuk.hee.tis.tcs.api.dto.PlacementViewDTO;
 import com.transformuk.hee.tis.tcs.api.dto.PostDTO;
 import com.transformuk.hee.tis.tcs.api.dto.PostViewDTO;
@@ -26,7 +25,10 @@ import com.transformuk.hee.tis.tcs.service.service.PostService;
 import com.transformuk.hee.tis.tcs.service.service.mapper.PlacementViewMapper;
 import io.github.jhipster.web.util.ResponseUtil;
 import io.jsonwebtoken.lang.Collections;
+import io.swagger.annotations.ApiOperation;
 import io.swagger.annotations.ApiParam;
+import io.swagger.annotations.ApiResponse;
+import io.swagger.annotations.ApiResponses;
 import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -55,7 +57,6 @@ import java.net.URI;
 import java.net.URISyntaxException;
 import java.util.List;
 import java.util.Optional;
-import java.util.Set;
 import java.util.stream.Collectors;
 
 import static com.transformuk.hee.tis.tcs.service.api.util.StringUtil.sanitize;
@@ -182,7 +183,7 @@ public class PostResource {
       @ApiParam Pageable pageable,
       @ApiParam(value = "json object by column name and value. (Eg: columnFilters={ \"managingLocalOffice\": [\"dean1\", \"dean2\"]," +
           " \"sites.siteId\":[\"123\"],\"trainingBodyId\":[\"11\"],\"grades.gradeId\":[\"11\"],\"specialties.specialty.name\":[\"Test Specialty\"]}\"")
-      @RequestBody List<ColumnFilterDTO> filters) throws IOException {
+      @RequestBody List<ColumnFilterDTO> filters) {
     log.debug("REST request to filter a page of Posts");
     Page<PostViewDTO> page = postService.advancedSearch(null, filters.stream().map(f ->
         new ColumnFilter(f.getName(), Lists.newArrayList(f.getValues()))
@@ -221,7 +222,7 @@ public class PostResource {
     return ResponseUtil.wrapOrNotFound(Optional.ofNullable(placementViews != null ?
         placementViewDecorator.decorate(placementViewMapper.placementViewsToPlacementViewDTOs(placementViews)) :
         null));
-    }
+  }
 
   /**
    * DELETE  /posts/:id : delete the "id" post.
@@ -297,6 +298,24 @@ public class PostResource {
     return ResponseEntity.ok()
         .headers(HeaderUtil.createEntityUpdateAlert(ENTITY_NAME, StringUtils.join(ids, ",")))
         .body(results);
+  }
+
+  /**
+   * POST  /build-post-view : Build the post view.
+   *
+   * @return the ResponseEntity with status 200 (OK)
+   * @throws URISyntaxException if the Location URI syntax is incorrect
+   */
+  @ApiOperation(value = "Run the stored procedure to build the post view",
+      response = ResponseEntity.class, responseContainer = "void")
+  @ApiResponses(value = {
+      @ApiResponse(code = 200, message = "Person list", response = ResponseEntity.class)})
+  @PostMapping("/posts/build-post-view")
+  @Timed
+  @PreAuthorize("hasAuthority('post:bulk:add:modify')")
+  public ResponseEntity<Void> buildPersonsOwnership() {
+    postService.buildPostView();
+    return ResponseEntity.ok().headers(HeaderUtil.createEntityUpdateAlert(ENTITY_NAME, "procedure is underway")).build();
   }
 
 

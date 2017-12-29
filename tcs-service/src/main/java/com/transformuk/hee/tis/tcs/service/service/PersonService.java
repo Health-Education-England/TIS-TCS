@@ -93,6 +93,6 @@ public interface PersonService {
    * build person ownership.
    *
    */
-  CompletableFuture<Void> buildPersonLocalOffice();
+  CompletableFuture<Void> buildPersonView();
 
 }

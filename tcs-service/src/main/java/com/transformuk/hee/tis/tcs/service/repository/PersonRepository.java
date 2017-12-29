@@ -15,7 +15,7 @@ import org.springframework.stereotype.Repository;
 public interface PersonRepository extends JpaRepository<Person, Long>, JpaSpecificationExecutor<Person> {
 
   @Procedure(name = "build_person_localoffice")
-  void buildPersonLocalOffice();
+  void buildPersonView();
 
   Long findOneIdByGmcDetailsGmcNumber(String gmcNumber);
 
