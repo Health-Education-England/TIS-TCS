@@ -65,7 +65,7 @@ public class ProgrammeResourceTest {
     // given
     Pageable p = new PageRequest(1, 20);
     PageImpl<ProgrammeDTO> page = new PageImpl<>(Lists.newArrayList(new ProgrammeDTO()));
-    String colFilter = "{\"managingDeanery\":[\"Health Ed:uc#%ation §±England@$% West Mid^la*nds\"]}";
+    String colFilter = "{\"owner\":[\"Health Ed:uc#%ation §±England@$% West Mid^la*nds\"]}";
 
     ArgumentCaptor<List> searchStringCaptor = ArgumentCaptor.forClass(List.class);
     given(programmeService.advancedSearch(anyString(), searchStringCaptor.capture(), eq(p))).willReturn(page);
@@ -75,7 +75,7 @@ public class ProgrammeResourceTest {
 
     // then
     ColumnFilter f = ((ColumnFilter) searchStringCaptor.getValue().get(0));
-    assertThat(f.getName()).isEqualTo("managingDeanery");
+    assertThat(f.getName()).isEqualTo("owner");
     assertThat(f.getValues().size()).isEqualTo(1);
     assertThat(f.getValues().get(0)).isEqualTo("Health Education England West Midlands");
   }

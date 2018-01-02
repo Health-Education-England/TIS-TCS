@@ -10,15 +10,15 @@ import java.util.Map;
 import java.util.Set;
 
 /**
- * Maps between a user's designated body code and managing deaneries
+ * Maps between a user's designated body code and owner
  */
 public class DesignatedBodyMapper {
 
   /**
-   * Maps between a designated body code and the managing deaneries that are considered matches to that code,
+   * Maps between a designated body code and the owners that are considered matches to that code,
    * please note that London LETBs is considered a match for all london DBC's
    */
-  private static final Map<String, List<String>> dbcToMangingDeaneryMap = ImmutableMap.<String, List<String>>builder()
+  private static final Map<String, List<String>> dbToOwnerMap = ImmutableMap.<String, List<String>>builder()
       //London LETBs match any of the london DBC's
       .put("1-AIIDR8", Lists.newArrayList("Health Education England Kent, Surrey and Sussex", "London LETBs"))
       .put("1-AIIDWA", Lists.newArrayList("Health Education England North West London", "London LETBs"))
@@ -36,31 +36,31 @@ public class DesignatedBodyMapper {
       .put("1-AIIDNQ", Lists.newArrayList("Health Education England North West"))
       .build();
 
-  private static Set<String> allLocalOffices = null;
+  private static Set<String> allOwners = null;
 
   /**
    * @param dbcs a list of designated body codes not null
-   * @return the list of managing deaneries that match the given list of codes
+   * @return the list of owners that match the given list of codes
    */
   public static Set<String> map(Set<String> dbcs) {
     Preconditions.checkNotNull(dbcs);
-    Set<String> deaneries = new HashSet<>();
+    Set<String> owners = new HashSet<>();
     dbcs.forEach(dbc -> {
-      if (dbcToMangingDeaneryMap.containsKey(dbc)) {
-        deaneries.addAll(dbcToMangingDeaneryMap.get(dbc));
+      if (dbToOwnerMap.containsKey(dbc)) {
+        owners.addAll(dbToOwnerMap.get(dbc));
       }
     });
-    return deaneries;
+    return owners;
   }
 
   /**
-   * @return all currently known local offices
+   * @return all currently known owners
    */
-  public static Set<String> getAllLocalOffices() {
-    if (allLocalOffices == null) {
-      allLocalOffices = new HashSet<>();
-      dbcToMangingDeaneryMap.values().forEach(v -> allLocalOffices.addAll(v));
+  public static Set<String> getAllOwners() {
+    if (allOwners == null) {
+      allOwners = new HashSet<>();
+      dbToOwnerMap.values().forEach(v -> allOwners.addAll(v));
     }
-    return allLocalOffices;
+    return allOwners;
   }
 }

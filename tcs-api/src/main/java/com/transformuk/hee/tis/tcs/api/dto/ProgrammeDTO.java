@@ -27,10 +27,10 @@ public class ProgrammeDTO implements Serializable {
   //mandatory and must be a valid ENUM value
   private Status status;
 
-  @NotNull(message = "Managing deanery is required", groups = {Update.class, Create.class})
+  @NotNull(message = "Owner is required", groups = {Update.class, Create.class})
   //mandatory, must be a valid local team and the user must have permission to create a
   //programme within that local team
-  private String managingDeanery;
+  private String owner;
 
   @NotNull(message = "Programme name is required", groups = {Update.class, Create.class})
   private String programmeName;
@@ -65,12 +65,12 @@ public class ProgrammeDTO implements Serializable {
     this.status = status;
   }
 
-  public String getManagingDeanery() {
-    return managingDeanery;
+  public String getOwner() {
+    return owner;
   }
 
-  public void setManagingDeanery(String managingDeanery) {
-    this.managingDeanery = managingDeanery;
+  public void setOwner(String owner) {
+    this.owner = owner;
   }
 
   public String getProgrammeName() {
@@ -126,7 +126,7 @@ public class ProgrammeDTO implements Serializable {
         "id=" + id +
         ", intrepidId=" + intrepidId +
         ", status='" + status + "'" +
-        ", managingDeanery='" + managingDeanery + "'" +
+        ", owner='" + owner + "'" +
         ", programmeName='" + programmeName + "'" +
         ", programmeNumber='" + programmeNumber + "'" +
         ", curricula='" + curricula + "'" +

@@ -2,7 +2,6 @@ package com.transformuk.hee.tis.tcs.service.model;
 
 import com.transformuk.hee.tis.tcs.api.enumeration.Status;
 
-import javax.persistence.CascadeType;
 import javax.persistence.Entity;
 import javax.persistence.EnumType;
 import javax.persistence.Enumerated;
@@ -12,7 +11,6 @@ import javax.persistence.Id;
 import javax.persistence.JoinColumn;
 import javax.persistence.JoinTable;
 import javax.persistence.ManyToMany;
-import javax.persistence.OneToMany;
 import java.io.Serializable;
 import java.util.HashSet;
 import java.util.Set;
@@ -34,7 +32,7 @@ public class Programme implements Serializable {
   @Enumerated(EnumType.STRING)
   private Status status;
 
-  private String managingDeanery;
+  private String owner;
 
   private String programmeName;
 
@@ -103,16 +101,16 @@ public class Programme implements Serializable {
     return this;
   }
 
-  public String getManagingDeanery() {
-    return managingDeanery;
+  public String getOwner() {
+    return owner;
   }
 
-  public void setManagingDeanery(String managingDeanery) {
-    this.managingDeanery = managingDeanery;
+  public void setOwner(String owner) {
+    this.owner = owner;
   }
 
-  public Programme managingDeanery(String managingDeanery) {
-    this.managingDeanery = managingDeanery;
+  public Programme owner(String owner) {
+    this.owner = owner;
     return this;
   }
 
@@ -152,7 +150,7 @@ public class Programme implements Serializable {
     if (id != null ? !id.equals(programme.id) : programme.id != null) return false;
     if (intrepidId != null ? !intrepidId.equals(programme.intrepidId) : programme.intrepidId != null) return false;
     if (status != programme.status) return false;
-    if (managingDeanery != null ? !managingDeanery.equals(programme.managingDeanery) : programme.managingDeanery != null)
+    if (owner != null ? !owner.equals(programme.owner) : programme.owner != null)
       return false;
     if (programmeName != null ? !programmeName.equals(programme.programmeName) : programme.programmeName != null)
       return false;
@@ -164,7 +162,7 @@ public class Programme implements Serializable {
     int result = id != null ? id.hashCode() : 0;
     result = 31 * result + (intrepidId != null ? intrepidId.hashCode() : 0);
     result = 31 * result + (status != null ? status.hashCode() : 0);
-    result = 31 * result + (managingDeanery != null ? managingDeanery.hashCode() : 0);
+    result = 31 * result + (owner != null ? owner.hashCode() : 0);
     result = 31 * result + (programmeName != null ? programmeName.hashCode() : 0);
     result = 31 * result + (programmeNumber != null ? programmeNumber.hashCode() : 0);
     return result;
@@ -176,7 +174,7 @@ public class Programme implements Serializable {
         "id=" + id +
         ", intrepidId=" + intrepidId +
         ", status='" + status + "'" +
-        ", managingDeanery='" + managingDeanery + "'" +
+        ", owner='" + owner + "'" +
         ", programmeName='" + programmeName + "'" +
         ", programmeNumber='" + programmeNumber + "'" +
         '}';

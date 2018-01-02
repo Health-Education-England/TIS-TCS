@@ -45,7 +45,7 @@ public class PostViewDTO implements Serializable {
 
   private FundingType fundingType;
 
-  private String managingLocalOffice;
+  private String owner;
 
   private String intrepidId;
 
@@ -181,12 +181,12 @@ public class PostViewDTO implements Serializable {
     this.fundingType = fundingType;
   }
 
-  public String getManagingLocalOffice() {
-    return managingLocalOffice;
+  public String getOwner() {
+    return owner;
   }
 
-  public void setManagingLocalOffice(String managingLocalOffice) {
-    this.managingLocalOffice = managingLocalOffice;
+  public void setOwner(String owner) {
+    this.owner = owner;
   }
 
   public String getIntrepidId() {
@@ -232,7 +232,7 @@ public class PostViewDTO implements Serializable {
     if (programmeName != null ? !programmeName.equals(that.programmeName) : that.programmeName != null) return false;
     if (status != that.status) return false;
     if (fundingType != that.fundingType) return false;
-    if (managingLocalOffice != null ? !managingLocalOffice.equals(that.managingLocalOffice) : that.managingLocalOffice != null)
+    if (owner != null ? !owner.equals(that.owner) : that.owner != null)
       return false;
     return intrepidId != null ? intrepidId.equals(that.intrepidId) : that.intrepidId == null;
   }
@@ -255,7 +255,7 @@ public class PostViewDTO implements Serializable {
     result = 31 * result + (programmeName != null ? programmeName.hashCode() : 0);
     result = 31 * result + status.hashCode();
     result = 31 * result + (fundingType != null ? fundingType.hashCode() : 0);
-    result = 31 * result + (managingLocalOffice != null ? managingLocalOffice.hashCode() : 0);
+    result = 31 * result + (owner != null ? owner.hashCode() : 0);
     result = 31 * result + (intrepidId != null ? intrepidId.hashCode() : 0);
     return result;
   }
@@ -279,7 +279,7 @@ public class PostViewDTO implements Serializable {
         ", programmeName='" + programmeName + '\'' +
         ", status=" + status +
         ", fundingType=" + fundingType +
-        ", managingLocalOffice='" + managingLocalOffice + '\'' +
+        ", owner='" + owner + '\'' +
         ", intrepidId='" + intrepidId + '\'' +
         '}';
   }

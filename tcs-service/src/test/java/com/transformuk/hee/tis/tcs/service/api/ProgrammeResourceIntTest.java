@@ -59,8 +59,8 @@ public class ProgrammeResourceIntTest {
   private static final String DEFAULT_INTREPID_ID = "1234";
   private static final String UPDATED_INTREPID_ID = "4567";
 
-  private static final String DEFAULT_MANAGING_DEANERY = "Health Education England Kent, Surrey and Sussex";
-  private static final String UPDATED_MANAGING_DEANERY = "Health Education England North West London";
+  private static final String DEFAULT_OWNER = "Health Education England Kent, Surrey and Sussex";
+  private static final String UPDATED_OWNER = "Health Education England North West London";
 
   private static final String DEFAULT_PROGRAMME_NAME = "AAAAAAAAAA";
   private static final String UPDATED_PROGRAMME_NAME = "BBBBBBBBBB";
@@ -105,7 +105,7 @@ public class ProgrammeResourceIntTest {
     Programme programme = new Programme()
         .status(DEFAULT_STATUS)
         .intrepidId(DEFAULT_INTREPID_ID)
-        .managingDeanery(DEFAULT_MANAGING_DEANERY)
+        .owner(DEFAULT_OWNER)
         .programmeName(DEFAULT_PROGRAMME_NAME)
         .programmeNumber(DEFAULT_PROGRAMME_NUMBER);
     return programme;
@@ -145,7 +145,7 @@ public class ProgrammeResourceIntTest {
     Programme testProgramme = programmeList.get(programmeList.size() - 1);
     assertThat(testProgramme.getStatus()).isEqualTo(DEFAULT_STATUS);
     assertThat(testProgramme.getIntrepidId()).isEqualTo(DEFAULT_INTREPID_ID);
-    assertThat(testProgramme.getManagingDeanery()).isEqualTo(DEFAULT_MANAGING_DEANERY);
+    assertThat(testProgramme.getOwner()).isEqualTo(DEFAULT_OWNER);
     assertThat(testProgramme.getProgrammeName()).isEqualTo(DEFAULT_PROGRAMME_NAME);
     assertThat(testProgramme.getProgrammeNumber()).isEqualTo(DEFAULT_PROGRAMME_NUMBER);
   }
@@ -163,7 +163,7 @@ public class ProgrammeResourceIntTest {
         .andExpect(status().isBadRequest())
         .andExpect(jsonPath("$.message").value("error.validation"))
         .andExpect(jsonPath("$.fieldErrors[*].field").
-            value(containsInAnyOrder("managingDeanery", "programmeName", "status", "programmeNumber")));
+            value(containsInAnyOrder("owner", "programmeName", "status", "programmeNumber")));
   }
 
   @Test
@@ -180,7 +180,7 @@ public class ProgrammeResourceIntTest {
         .andExpect(status().isBadRequest())
         .andExpect(jsonPath("$.message").value("error.validation"))
         .andExpect(jsonPath("$.fieldErrors[*].field").
-            value(containsInAnyOrder("managingDeanery", "programmeName", "status", "programmeNumber")));
+            value(containsInAnyOrder("owner", "programmeName", "status", "programmeNumber")));
   }
 
   @Test
@@ -273,7 +273,7 @@ public class ProgrammeResourceIntTest {
     Programme testProgramme = programmeList.get(programmeList.size() - 1);
     assertThat(testProgramme.getStatus()).isEqualTo(DEFAULT_STATUS);
     assertThat(testProgramme.getIntrepidId()).isEqualTo(DEFAULT_INTREPID_ID);
-    assertThat(testProgramme.getManagingDeanery()).isEqualTo(DEFAULT_MANAGING_DEANERY);
+    assertThat(testProgramme.getOwner()).isEqualTo(DEFAULT_OWNER);
     assertThat(testProgramme.getProgrammeName()).isEqualTo(DEFAULT_PROGRAMME_NAME);
     assertThat(testProgramme.getProgrammeNumber()).isEqualTo(DEFAULT_PROGRAMME_NUMBER);
     assertThat(testProgramme.getCurricula().size()).isEqualTo(2);
@@ -324,7 +324,7 @@ public class ProgrammeResourceIntTest {
     Programme testProgramme1 = programmeList.get(programmeList.size() - 2);
     assertThat(testProgramme1.getStatus()).isEqualTo(DEFAULT_STATUS);
     assertThat(testProgramme1.getIntrepidId()).isEqualTo(DEFAULT_INTREPID_ID);
-    assertThat(testProgramme1.getManagingDeanery()).isEqualTo(DEFAULT_MANAGING_DEANERY);
+    assertThat(testProgramme1.getOwner()).isEqualTo(DEFAULT_OWNER);
     assertThat(testProgramme1.getProgrammeName()).isEqualTo(DEFAULT_PROGRAMME_NAME);
     assertThat(testProgramme1.getProgrammeNumber()).isEqualTo(DEFAULT_PROGRAMME_NUMBER);
     assertThat(testProgramme1.getCurricula().size()).isEqualTo(2);
@@ -333,7 +333,7 @@ public class ProgrammeResourceIntTest {
 
     assertThat(testProgramme2.getStatus()).isEqualTo(DEFAULT_STATUS);
     assertThat(testProgramme2.getIntrepidId()).isEqualTo(DEFAULT_INTREPID_ID);
-    assertThat(testProgramme2.getManagingDeanery()).isEqualTo(DEFAULT_MANAGING_DEANERY);
+    assertThat(testProgramme2.getOwner()).isEqualTo(DEFAULT_OWNER);
     assertThat(testProgramme2.getProgrammeName()).isEqualTo(DEFAULT_PROGRAMME_NAME);
     assertThat(testProgramme2.getProgrammeNumber()).isEqualTo(DEFAULT_PROGRAMME_NUMBER);
     assertThat(testProgramme2.getCurricula().size()).isEqualTo(2);
@@ -374,7 +374,7 @@ public class ProgrammeResourceIntTest {
         .andExpect(jsonPath("$.[*].id").value(hasItem(programme.getId().intValue())))
         .andExpect(jsonPath("$.[*].intrepidId").value(hasItem(DEFAULT_INTREPID_ID.toString())))
         .andExpect(jsonPath("$.[*].status").value(hasItem(DEFAULT_STATUS.toString())))
-        .andExpect(jsonPath("$.[*].managingDeanery").value(hasItem(DEFAULT_MANAGING_DEANERY.toString())))
+        .andExpect(jsonPath("$.[*].owner").value(hasItem(DEFAULT_OWNER.toString())))
         .andExpect(jsonPath("$.[*].programmeName").value(hasItem(DEFAULT_PROGRAMME_NAME.toString())))
         .andExpect(jsonPath("$.[*].programmeNumber").value(hasItem(DEFAULT_PROGRAMME_NUMBER.toString())));
   }
@@ -392,7 +392,7 @@ public class ProgrammeResourceIntTest {
         .andExpect(jsonPath("$.[*].id").value(hasItem(programme.getId().intValue())))
         .andExpect(jsonPath("$.[*].intrepidId").value(hasItem(DEFAULT_INTREPID_ID.toString())))
         .andExpect(jsonPath("$.[*].status").value(hasItem(DEFAULT_STATUS.toString())))
-        .andExpect(jsonPath("$.[*].managingDeanery").value(hasItem(DEFAULT_MANAGING_DEANERY.toString())))
+        .andExpect(jsonPath("$.[*].owner").value(hasItem(DEFAULT_OWNER.toString())))
         .andExpect(jsonPath("$.[*].programmeName").value(hasItem(DEFAULT_PROGRAMME_NAME.toString())))
         .andExpect(jsonPath("$.[*].programmeNumber").value(hasItem(DEFAULT_PROGRAMME_NUMBER.toString())));
   }
@@ -410,7 +410,7 @@ public class ProgrammeResourceIntTest {
         .andExpect(jsonPath("$.id").value(programme.getId().intValue()))
         .andExpect(jsonPath("$.intrepidId").value(DEFAULT_INTREPID_ID.toString()))
         .andExpect(jsonPath("$.status").value(DEFAULT_STATUS.toString()))
-        .andExpect(jsonPath("$.managingDeanery").value(DEFAULT_MANAGING_DEANERY.toString()))
+        .andExpect(jsonPath("$.owner").value(DEFAULT_OWNER.toString()))
         .andExpect(jsonPath("$.programmeName").value(DEFAULT_PROGRAMME_NAME.toString()))
         .andExpect(jsonPath("$.programmeNumber").value(DEFAULT_PROGRAMME_NUMBER.toString()));
   }
@@ -435,7 +435,7 @@ public class ProgrammeResourceIntTest {
     updatedProgramme
         .status(UPDATED_STATUS)
         .intrepidId(UPDATED_INTREPID_ID)
-        .managingDeanery(UPDATED_MANAGING_DEANERY)
+        .owner(UPDATED_OWNER)
         .programmeName(UPDATED_PROGRAMME_NAME)
         .programmeNumber(UPDATED_PROGRAMME_NUMBER);
     ProgrammeDTO programmeDTO = programmeMapper.programmeToProgrammeDTO(updatedProgramme);
@@ -451,7 +451,7 @@ public class ProgrammeResourceIntTest {
     Programme testProgramme = programmeList.get(programmeList.size() - 1);
     assertThat(testProgramme.getStatus()).isEqualTo(UPDATED_STATUS);
     assertThat(testProgramme.getIntrepidId()).isEqualTo(UPDATED_INTREPID_ID);
-    assertThat(testProgramme.getManagingDeanery()).isEqualTo(UPDATED_MANAGING_DEANERY);
+    assertThat(testProgramme.getOwner()).isEqualTo(UPDATED_OWNER);
     assertThat(testProgramme.getProgrammeName()).isEqualTo(UPDATED_PROGRAMME_NAME);
     assertThat(testProgramme.getProgrammeNumber()).isEqualTo(UPDATED_PROGRAMME_NUMBER);
   }
@@ -475,7 +475,7 @@ public class ProgrammeResourceIntTest {
     updatedProgramme
         .status(UPDATED_STATUS)
         .intrepidId(UPDATED_INTREPID_ID)
-        .managingDeanery(UPDATED_MANAGING_DEANERY)
+        .owner(UPDATED_OWNER)
         .programmeName(UPDATED_PROGRAMME_NAME)
         .programmeNumber(UPDATED_PROGRAMME_NUMBER)
         .curricula(Sets.newHashSet(curriculum2, curriculum3));
@@ -492,7 +492,7 @@ public class ProgrammeResourceIntTest {
     Programme testProgramme = programmeList.get(programmeList.size() - 1);
     assertThat(testProgramme.getStatus()).isEqualTo(UPDATED_STATUS);
     assertThat(testProgramme.getIntrepidId()).isEqualTo(UPDATED_INTREPID_ID);
-    assertThat(testProgramme.getManagingDeanery()).isEqualTo(UPDATED_MANAGING_DEANERY);
+    assertThat(testProgramme.getOwner()).isEqualTo(UPDATED_OWNER);
     assertThat(testProgramme.getProgrammeName()).isEqualTo(UPDATED_PROGRAMME_NAME);
     assertThat(testProgramme.getProgrammeNumber()).isEqualTo(UPDATED_PROGRAMME_NUMBER);
     assertThat(testProgramme.getCurricula().size()).isEqualTo(2);
@@ -519,7 +519,7 @@ public class ProgrammeResourceIntTest {
     updatedProgramme1
         .status(UPDATED_STATUS)
         .intrepidId(UPDATED_INTREPID_ID)
-        .managingDeanery(UPDATED_MANAGING_DEANERY)
+        .owner(UPDATED_OWNER)
         .programmeName(UPDATED_PROGRAMME_NAME)
         .programmeNumber(UPDATED_PROGRAMME_NUMBER)
         .curricula(Sets.newHashSet(curriculum2));
@@ -528,7 +528,7 @@ public class ProgrammeResourceIntTest {
     updatedProgramme2
         .status(UPDATED_STATUS)
         .intrepidId(UPDATED_INTREPID_ID)
-        .managingDeanery(UPDATED_MANAGING_DEANERY)
+        .owner(UPDATED_OWNER)
         .programmeName(UPDATED_PROGRAMME_NAME)
         .programmeNumber(UPDATED_PROGRAMME_NUMBER)
         .curricula(Sets.newHashSet(curriculum3));
@@ -547,7 +547,7 @@ public class ProgrammeResourceIntTest {
     Programme testProgramme1 = programmeList.get(programmeList.size() - 2);
     assertThat(testProgramme1.getStatus()).isEqualTo(UPDATED_STATUS);
     assertThat(testProgramme1.getIntrepidId()).isEqualTo(UPDATED_INTREPID_ID);
-    assertThat(testProgramme1.getManagingDeanery()).isEqualTo(UPDATED_MANAGING_DEANERY);
+    assertThat(testProgramme1.getOwner()).isEqualTo(UPDATED_OWNER);
     assertThat(testProgramme1.getProgrammeName()).isEqualTo(UPDATED_PROGRAMME_NAME);
     assertThat(testProgramme1.getProgrammeNumber()).isEqualTo(UPDATED_PROGRAMME_NUMBER);
     assertThat(testProgramme1.getCurricula().size()).isEqualTo(1);
@@ -556,7 +556,7 @@ public class ProgrammeResourceIntTest {
 
     assertThat(testProgramme2.getStatus()).isEqualTo(UPDATED_STATUS);
     assertThat(testProgramme2.getIntrepidId()).isEqualTo(UPDATED_INTREPID_ID);
-    assertThat(testProgramme2.getManagingDeanery()).isEqualTo(UPDATED_MANAGING_DEANERY);
+    assertThat(testProgramme2.getOwner()).isEqualTo(UPDATED_OWNER);
     assertThat(testProgramme2.getProgrammeName()).isEqualTo(UPDATED_PROGRAMME_NAME);
     assertThat(testProgramme2.getProgrammeNumber()).isEqualTo(UPDATED_PROGRAMME_NUMBER);
     assertThat(testProgramme2.getCurricula().size()).isEqualTo(1);
@@ -587,7 +587,7 @@ public class ProgrammeResourceIntTest {
     //given
     // Initialize the database
     Programme otherDeaneryProgramme = createEntity();
-    otherDeaneryProgramme.setManagingDeanery("Health Education England West Midlands");
+    otherDeaneryProgramme.setOwner("Health Education England West Midlands");
     programmeRepository.saveAndFlush(otherDeaneryProgramme);
 
     //when & then
@@ -598,7 +598,7 @@ public class ProgrammeResourceIntTest {
         .andExpect(jsonPath("$.[*].id").value(hasItem(otherDeaneryProgramme.getId().intValue())))
         .andExpect(jsonPath("$.[*].status").value(hasItem(DEFAULT_STATUS.toString())))
         .andExpect(jsonPath("$.[*].intrepidId").value(hasItem(DEFAULT_INTREPID_ID.toString())))
-        .andExpect(jsonPath("$.[*].managingDeanery").value(hasItem("Health Education England West Midlands")))
+        .andExpect(jsonPath("$.[*].owner").value(hasItem("Health Education England West Midlands")))
         .andExpect(jsonPath("$.[*].programmeName").value(hasItem(DEFAULT_PROGRAMME_NAME.toString())))
         .andExpect(jsonPath("$.[*].programmeNumber").value(hasItem(DEFAULT_PROGRAMME_NUMBER.toString())));
   }
@@ -610,7 +610,7 @@ public class ProgrammeResourceIntTest {
     // Initialize the database
     programmeRepository.saveAndFlush(programme);
     Programme otherDeaneryProgramme = createEntity();
-    otherDeaneryProgramme.setManagingDeanery("Health Education England West Midlands");
+    otherDeaneryProgramme.setOwner("Health Education England West Midlands");
     programmeRepository.saveAndFlush(otherDeaneryProgramme);
     Programme otherNameProgramme = createEntity();
     otherNameProgramme.setProgrammeName("other name");
@@ -634,8 +634,8 @@ public class ProgrammeResourceIntTest {
     programmeRepository.saveAndFlush(otherStatusProgramme);
 
     //when & then
-    String colFilters = new URLCodec().encode("{\"status\":[\"INACTIVE\"],\"managingDeanery\":[\"" +
-        DEFAULT_MANAGING_DEANERY + "\"]}");
+    String colFilters = new URLCodec().encode("{\"status\":[\"INACTIVE\"],\"owner\":[\"" +
+        DEFAULT_OWNER + "\"]}");
     // Get all the programmeList
     restProgrammeMockMvc.perform(get("/api/programmes?sort=id,desc&columnFilters=" +
         colFilters))
@@ -659,8 +659,8 @@ public class ProgrammeResourceIntTest {
     otherNameProgramme.setStatus(Status.INACTIVE);
     programmeRepository.saveAndFlush(otherNameProgramme);
     //when & then
-    String colFilters = new URLCodec().encode("{\"status\":[\"INACTIVE\"],\"managingDeanery\":[\"" +
-        DEFAULT_MANAGING_DEANERY + "\"]}");
+    String colFilters = new URLCodec().encode("{\"status\":[\"INACTIVE\"],\"owner\":[\"" +
+        DEFAULT_OWNER + "\"]}");
     // Get all the programmeList
     restProgrammeMockMvc.perform(get("/api/programmes?sort=id,desc&searchQuery=other&columnFilters=" +
         colFilters))

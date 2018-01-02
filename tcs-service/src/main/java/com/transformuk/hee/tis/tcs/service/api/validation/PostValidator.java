@@ -56,9 +56,9 @@ public class PostValidator {
 
   /**
    * Custom validation on the post DTO, this is meant to supplement the annotation based validation
-   * already in place. It checks that the LocalOffice,Programme,Site,Grade,Specialty and Placement are valid.
-   * A local office is valid if the text matches exactly the name of a known local office and if the current
-   * user making the call can create or modify a post within that local office.
+   * already in place. It checks that the Owner,Programme,Site,Grade,Specialty and Placement are valid.
+   * An owner is valid if the text matches exactly the name of a known owner and if the current
+   * user making the call can create or modify a post within that owner.
    * Programmes is valid if the ID's supplied already exist in the database.
    * Sites are valid if the ID's supplied already exist in the database.
    * Grades are valid if the ID's supplied already exist in the database.
@@ -71,7 +71,7 @@ public class PostValidator {
   public void validate(PostDTO postDTO) throws MethodArgumentNotValidException {
 
     List<FieldError> fieldErrors = new ArrayList<>();
-    fieldErrors.addAll(checkLocalOffice(postDTO));
+    fieldErrors.addAll(checkOwner(postDTO));
     fieldErrors.addAll(checkProgramme(postDTO));
     fieldErrors.addAll(checkSites(postDTO));
     fieldErrors.addAll(checkGrades(postDTO));
@@ -212,12 +212,12 @@ public class PostValidator {
     return fieldErrors;
   }
 
-  private List<FieldError> checkLocalOffice(PostDTO postDTO) {
+  private List<FieldError> checkOwner(PostDTO postDTO) {
     List<FieldError> fieldErrors = new ArrayList<>();
-    //first check if the local office is valid
-    if (!DesignatedBodyMapper.getAllLocalOffices().contains(postDTO.getManagingLocalOffice())) {
-      fieldErrors.add(new FieldError("postDTO", "managingLocalOffice",
-          "Unknown local office: " + postDTO.getManagingLocalOffice()));
+    //first check if the owner is valid
+    if (!DesignatedBodyMapper.getAllOwners().contains(postDTO.getOwner())) {
+      fieldErrors.add(new FieldError("postDTO", "owner",
+          "Unknown owner: " + postDTO.getOwner()));
     }
     return fieldErrors;
   }

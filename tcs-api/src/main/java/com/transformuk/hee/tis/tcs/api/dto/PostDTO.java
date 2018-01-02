@@ -32,8 +32,8 @@ public class PostDTO implements Serializable {
 
   private PostSuffix suffix;
 
-  @NotNull(message = "Managing local office is required", groups = {Update.class, Create.class})
-  private String managingLocalOffice;
+  @NotNull(message = "Owner is required", groups = {Update.class, Create.class})
+  private String owner;
 
   private String postFamily;
 
@@ -126,16 +126,16 @@ public class PostDTO implements Serializable {
     return this;
   }
 
-  public String getManagingLocalOffice() {
-    return managingLocalOffice;
+  public String getOwner() {
+    return owner;
   }
 
-  public void setManagingLocalOffice(String managingLocalOffice) {
-    this.managingLocalOffice = managingLocalOffice;
+  public void setOwner(String owner) {
+    this.owner = owner;
   }
 
-  public PostDTO managingLocalOffice(String managingLocalOffice) {
-    this.managingLocalOffice = managingLocalOffice;
+  public PostDTO owner(String owner) {
+    this.owner = owner;
     return this;
   }
 
@@ -316,7 +316,7 @@ public class PostDTO implements Serializable {
       return false;
     if (status != postDTO.status) return false;
     if (suffix != postDTO.suffix) return false;
-    if (managingLocalOffice != null ? !managingLocalOffice.equals(postDTO.managingLocalOffice) : postDTO.managingLocalOffice != null)
+    if (owner != null ? !owner.equals(postDTO.owner) : postDTO.owner != null)
       return false;
     if (postFamily != null ? !postFamily.equals(postDTO.postFamily) : postDTO.postFamily != null) return false;
     if (oldPost != null ? !oldPost.equals(postDTO.oldPost) : postDTO.oldPost != null) return false;
@@ -345,7 +345,7 @@ public class PostDTO implements Serializable {
     result = 31 * result + (nationalPostNumber != null ? nationalPostNumber.hashCode() : 0);
     result = 31 * result + (status != null ? status.hashCode() : 0);
     result = 31 * result + (suffix != null ? suffix.hashCode() : 0);
-    result = 31 * result + (managingLocalOffice != null ? managingLocalOffice.hashCode() : 0);
+    result = 31 * result + (owner != null ? owner.hashCode() : 0);
     result = 31 * result + (postFamily != null ? postFamily.hashCode() : 0);
     result = 31 * result + (oldPost != null ? oldPost.hashCode() : 0);
     result = 31 * result + (newPost != null ? newPost.hashCode() : 0);
@@ -370,7 +370,7 @@ public class PostDTO implements Serializable {
         ", nationalPostNumber='" + nationalPostNumber + '\'' +
         ", status=" + status +
         ", suffix=" + suffix +
-        ", managingLocalOffice='" + managingLocalOffice + '\'' +
+        ", owner='" + owner + '\'' +
         ", postFamily='" + postFamily + '\'' +
         ", oldPost=" + oldPost +
         ", newPost=" + newPost +
