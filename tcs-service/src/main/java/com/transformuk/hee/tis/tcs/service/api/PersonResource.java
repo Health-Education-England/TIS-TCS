@@ -4,10 +4,12 @@ import com.codahale.metrics.annotation.Timed;
 import com.google.common.collect.Lists;
 import com.transformuk.hee.tis.tcs.api.dto.PersonBasicDetailsDTO;
 import com.transformuk.hee.tis.tcs.api.dto.PersonDTO;
+import com.transformuk.hee.tis.tcs.api.dto.PersonViewDTO;
 import com.transformuk.hee.tis.tcs.api.dto.PlacementViewDTO;
 import com.transformuk.hee.tis.tcs.api.dto.validation.Create;
 import com.transformuk.hee.tis.tcs.api.dto.validation.Update;
 import com.transformuk.hee.tis.tcs.api.enumeration.Status;
+import com.transformuk.hee.tis.tcs.service.api.decorator.PersonViewDecorator;
 import com.transformuk.hee.tis.tcs.service.api.decorator.PlacementViewDecorator;
 import com.transformuk.hee.tis.tcs.service.api.util.ColumnFilterUtil;
 import com.transformuk.hee.tis.tcs.service.api.util.HeaderUtil;
@@ -68,13 +70,16 @@ public class PersonResource {
   private final PlacementViewRepository placementViewRepository;
   private final PlacementViewMapper placementViewMapper;
   private final PlacementViewDecorator placementViewDecorator;
+  private final PersonViewDecorator personViewDecorator;
 
   public PersonResource(PersonService personService, PlacementViewRepository placementViewRepository,
-                        PlacementViewMapper placementViewMapper, PlacementViewDecorator placementViewDecorator) {
+                        PlacementViewMapper placementViewMapper, PlacementViewDecorator placementViewDecorator,
+                        PersonViewDecorator personViewDecorator) {
     this.personService = personService;
     this.placementViewRepository = placementViewRepository;
     this.placementViewMapper = placementViewMapper;
     this.placementViewDecorator = placementViewDecorator;
+    this.personViewDecorator = personViewDecorator;
   }
 
   /**
@@ -128,31 +133,31 @@ public class PersonResource {
    * @return the ResponseEntity with status 200 (OK) and the list of people in body
    */
   @ApiOperation(value = "Lists People data",
-      notes = "Returns a list of people with support for pagination, sorting, smart search and column filters \n",
-      response = ResponseEntity.class, responseContainer = "Person list")
+      notes = "Returns a list of people with support for pagination, sorting, smart search and column filters \n")
   @ApiResponses(value = {
-      @ApiResponse(code = 200, message = "Person list", response = ResponseEntity.class)})
+      @ApiResponse(code = 200, message = "Person list")})
   @GetMapping("/people")
   @Timed
   @PreAuthorize("hasPermission('tis:people::person:', 'View')")
-  public ResponseEntity<List<PersonDTO>> getAllPeople(
+  public ResponseEntity<List<PersonViewDTO>> getAllPeople(
       @ApiParam Pageable pageable,
       @ApiParam(value = "any wildcard string to be searched")
       @RequestParam(value = "searchQuery", required = false) String searchQuery,
       @ApiParam(value = "json object by column name and value. (Eg: columnFilters={ \"status\": [\"CURRENT\"]}\"")
       @RequestParam(value = "columnFilters", required = false) String columnFilterJson) throws IOException {
-    log.debug("REST request to get a page of People");
+    log.info("REST request to get a page of People begin");
     searchQuery = sanitize(searchQuery);
     List<Class> filterEnumList = Lists.newArrayList(Status.class);
     List<ColumnFilter> columnFilters = ColumnFilterUtil.getColumnFilters(columnFilterJson, filterEnumList);
-    Page<PersonDTO> page;
+    Page<PersonViewDTO> page;
     if (StringUtils.isEmpty(searchQuery) && StringUtils.isEmpty(columnFilterJson)) {
       page = personService.findAll(pageable);
     } else {
       page = personService.advancedSearch(searchQuery, columnFilters, pageable);
     }
     HttpHeaders headers = PaginationUtil.generatePaginationHttpHeaders(page, "/api/people");
-    return new ResponseEntity<>(page.getContent(), headers, HttpStatus.OK);
+    log.info("REST request to get a page of People completed successfully");
+    return new ResponseEntity<>(personViewDecorator.decorate(page.getContent()), headers, HttpStatus.OK);
   }
 
   /**
@@ -161,10 +166,9 @@ public class PersonResource {
    * @return the ResponseEntity with status 200 (OK) and the list of people basic details in body
    */
   @ApiOperation(value = "Lists People basic details data",
-      notes = "Returns a list of people basic details with support for smart search \n",
-      response = ResponseEntity.class, responseContainer = "Person basic details list")
+      notes = "Returns a list of people basic details with support for smart search \n")
   @ApiResponses(value = {
-      @ApiResponse(code = 200, message = "Person basic list", response = ResponseEntity.class)})
+      @ApiResponse(code = 200, message = "Person basic list")})
   @GetMapping("/people/basic")
   @Timed
   @PreAuthorize("hasPermission('tis:people::person:', 'View')")
@@ -264,7 +268,7 @@ public class PersonResource {
    */
   @PatchMapping("/people")
   @Timed
-  @PreAuthorize("hasPermission('tis:people::person:', 'Update')")
+  @PreAuthorize("hasPermission('tis:people::person:consolidated_etl', 'Update')")
   public ResponseEntity<List<PersonDTO>> patchPersons(@Valid @RequestBody List<PersonDTO> personDTOs) {
     log.debug("REST request to patch Persons: {}", personDTOs);
     List<PersonDTO> result = personService.save(personDTOs);
@@ -273,4 +277,23 @@ public class PersonResource {
         .headers(HeaderUtil.createEntityUpdateAlert(ENTITY_NAME, StringUtils.join(ids, ",")))
         .body(result);
   }
+
+  /**
+   * POST  /people/ownership : Build the person view table
+   *
+   * @return the ResponseEntity with status 200 (OK)
+   * @throws URISyntaxException if the Location URI syntax is incorrect
+   */
+  @ApiOperation(value = "Run the stored procedure to build the person view",
+          response = ResponseEntity.class, responseContainer = "void")
+  @ApiResponses(value = {
+          @ApiResponse(code = 200, message = "Person list", response = ResponseEntity.class)})
+  @PostMapping("/people/ownership")
+  @Timed
+  @PreAuthorize("hasPermission('tis:people::person:consolidated_etl', 'Update')")
+  public ResponseEntity<Void> buildPersonsOwnership() {
+    personService.buildPersonView();
+    return ResponseEntity.ok().headers(HeaderUtil.createEntityUpdateAlert(ENTITY_NAME, "procedure is underway")).build();
+  }
+
 }

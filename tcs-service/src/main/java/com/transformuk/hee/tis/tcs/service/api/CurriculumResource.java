@@ -121,10 +121,7 @@ public class CurriculumResource {
   }
 
   @ApiOperation(value = "Lists Curriculum data",
-      notes = "Returns a list of Curriculum with support for pagination, sorting, smart search and column filters \n",
-      response = ResponseEntity.class, responseContainer = "Curriculum list")
-  @ApiResponses(value = {
-      @ApiResponse(code = 200, message = "Curriculum list", response = ResponseEntity.class)})
+      notes = "Returns a list of Curriculum with support for pagination, sorting, smart search and column filters")
   /**
    * GET  /curricula : get all the curricula.
    *

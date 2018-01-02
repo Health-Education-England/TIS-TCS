@@ -131,3 +131,6 @@ jhipster:
 # ===================================================================
 
 application:
+
+logging:
+  file: ${LOG_DIR:${HOME}}/tcs.log

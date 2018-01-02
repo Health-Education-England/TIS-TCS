@@ -2,11 +2,13 @@ package com.transformuk.hee.tis.tcs.service.service;
 
 import com.transformuk.hee.tis.tcs.api.dto.PersonBasicDetailsDTO;
 import com.transformuk.hee.tis.tcs.api.dto.PersonDTO;
+import com.transformuk.hee.tis.tcs.api.dto.PersonViewDTO;
 import com.transformuk.hee.tis.tcs.service.model.ColumnFilter;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 
 import java.util.List;
+import java.util.concurrent.CompletableFuture;
 
 /**
  * Service Interface for managing Person.
@@ -35,7 +37,7 @@ public interface PersonService {
    * @param pageable the pagination information
    * @return the list of entities
    */
-  Page<PersonDTO> findAll(Pageable pageable);
+  Page<PersonViewDTO> findAll(Pageable pageable);
 
   /**
    * Get all the people using the given smart search string and filters.
@@ -45,7 +47,7 @@ public interface PersonService {
    * @param pageable     the pagination information
    * @return the list of entities
    */
-  Page<PersonDTO> advancedSearch(String searchString, List<ColumnFilter> columnFilers, Pageable pageable);
+  Page<PersonViewDTO> advancedSearch(String searchString, List<ColumnFilter> columnFilers, Pageable pageable);
 
   /**
    * Looks for person basic details with support of only smart search and automatically limited
@@ -86,4 +88,11 @@ public interface PersonService {
    * @param id the id of the entity
    */
   void delete(Long id);
+
+  /**
+   * build person ownership.
+   *
+   */
+  CompletableFuture<Void> buildPersonView();
+
 }

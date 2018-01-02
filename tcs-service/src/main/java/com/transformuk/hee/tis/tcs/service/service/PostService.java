@@ -8,6 +8,7 @@ import org.springframework.data.domain.Pageable;
 
 import java.util.List;
 import java.util.Set;
+import java.util.concurrent.CompletableFuture;
 
 /**
  * Service Interface for managing Post.
@@ -130,4 +131,9 @@ public interface PostService {
    * @param id the id of the entity
    */
   void delete(Long id);
+
+  /**
+   * Call Stored proc to build post view
+   */
+  CompletableFuture<Void> buildPostView();
 }

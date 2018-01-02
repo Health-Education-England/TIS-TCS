@@ -5,6 +5,7 @@ import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.JpaSpecificationExecutor;
+import org.springframework.data.jpa.repository.query.Procedure;
 
 import java.util.List;
 import java.util.Set;
@@ -14,6 +15,9 @@ import java.util.Set;
  */
 @SuppressWarnings("unused")
 public interface PostRepository extends JpaRepository<Post, Long>, JpaSpecificationExecutor<Post> {
+
+  @Procedure("build_post_view")
+  void buildPostView();
 
   Post findPostByIntrepidId(String intrepidId);
 

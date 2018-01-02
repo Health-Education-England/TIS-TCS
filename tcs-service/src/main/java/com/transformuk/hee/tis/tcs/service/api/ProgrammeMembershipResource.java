@@ -1,6 +1,7 @@
 package com.transformuk.hee.tis.tcs.service.api;
 
 import com.codahale.metrics.annotation.Timed;
+import com.transformuk.hee.tis.tcs.api.dto.ProgrammeMembershipCurriculaDTO;
 import com.transformuk.hee.tis.tcs.api.dto.ProgrammeMembershipDTO;
 import com.transformuk.hee.tis.tcs.api.dto.validation.Create;
 import com.transformuk.hee.tis.tcs.api.dto.validation.Update;
@@ -176,4 +177,21 @@ public class ProgrammeMembershipResource {
         .body(results);
   }
 
+
+  /**
+   * GET  /trainee/:traineeId/programme/:programmeNumber/programme-memberships : get all the programmeMemberships relating
+   * to a trainee and their programme.
+   *
+   * @return the ResponseEntity with status 200 (OK) and the list of programmeMemberships in body
+   */
+  @GetMapping("/trainee/{traineeId}/programme/{programmeNumber}/programme-memberships")
+  @Timed
+  @PreAuthorize("hasPermission('tis:people::person:', 'View')")
+  public ResponseEntity<List<ProgrammeMembershipCurriculaDTO>> getProgrammeMembershipForTraineeAndProgramme(@PathVariable Long traineeId,
+                                                                                                            @PathVariable String programmeNumber) {
+    log.debug("REST request to get ProgrammeMemberships for trainee {}, programme {}", traineeId, programmeNumber);
+    List<ProgrammeMembershipCurriculaDTO> programmeMembershipDTOS = programmeMembershipService.findProgrammeMembershipsForTraineeAndProgramme(traineeId, programmeNumber);
+
+    return new ResponseEntity<>(programmeMembershipDTOS, HttpStatus.OK);
+  }
 }

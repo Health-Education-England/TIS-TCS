@@ -1,6 +1,8 @@
 package com.transformuk.hee.tis.tcs.service.exception;
 
 import com.transformuk.hee.tis.tcs.service.api.validation.ValidationException;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.core.annotation.AnnotationUtils;
 import org.springframework.dao.ConcurrencyFailureException;
 import org.springframework.http.HttpStatus;
@@ -25,10 +27,13 @@ import java.util.List;
 @ControllerAdvice
 public class ExceptionTranslator {
 
+  private final Logger log = LoggerFactory.getLogger(ExceptionTranslator.class);
+
   @ExceptionHandler(ConcurrencyFailureException.class)
   @ResponseStatus(HttpStatus.CONFLICT)
   @ResponseBody
   public ErrorVM processConcurrencyError(ConcurrencyFailureException ex) {
+    log.error(ex.getMessage(), ex);
     return new ErrorVM(ErrorConstants.ERR_CONCURRENCY_FAILURE,
         "You are acting on stale data, please refresh");
   }
@@ -47,6 +52,7 @@ public class ExceptionTranslator {
   @ResponseStatus(HttpStatus.BAD_REQUEST)
   @ResponseBody
   public ErrorVM processValidationError(ValidationException ex) {
+    log.error(ex.getMessage(), ex);
     BindingResult result = ex.getBindingResult();
     List<FieldError> fieldErrors = result.getFieldErrors();
 
@@ -65,6 +71,7 @@ public class ExceptionTranslator {
   @ResponseStatus(HttpStatus.BAD_REQUEST)
   @ResponseBody
   public ErrorVM processBadEnumError(HttpMessageNotReadableException ex) {
+    log.error(ex.getMessage(), ex);
     ErrorVM dto = new ErrorVM(ErrorConstants.ERR_VALIDATION);
     dto.add(null, null, ex.getMessage());
     return dto;
@@ -74,6 +81,7 @@ public class ExceptionTranslator {
   @ResponseStatus(HttpStatus.BAD_REQUEST)
   @ResponseBody
   public ParameterizedErrorVM processParameterizedValidationError(CustomParameterizedException ex) {
+    log.error(ex.getMessage(), ex);
     return ex.getErrorVM();
   }
 
@@ -81,6 +89,7 @@ public class ExceptionTranslator {
   @ResponseStatus(HttpStatus.FORBIDDEN)
   @ResponseBody
   public ErrorVM processAccessDeniedException(AccessDeniedException e) {
+    log.error(e.getMessage(), e);
     return new ErrorVM(ErrorConstants.ERR_ACCESS_DENIED, e.getMessage());
   }
 
@@ -98,11 +107,13 @@ public class ExceptionTranslator {
   @ResponseBody
   @ResponseStatus(HttpStatus.METHOD_NOT_ALLOWED)
   public ErrorVM processMethodNotSupportedException(HttpRequestMethodNotSupportedException exception) {
+    log.error(exception.getMessage(), exception);
     return new ErrorVM(ErrorConstants.ERR_METHOD_NOT_SUPPORTED, exception.getMessage());
   }
 
   @ExceptionHandler(IllegalArgumentException.class)
   public ResponseEntity<ErrorVM> processIllegalArgumentException(Exception ex) {
+    log.error(ex.getMessage(), ex);
     BodyBuilder builder = ResponseEntity.status(HttpStatus.BAD_REQUEST);
     ErrorVM errorVM = new ErrorVM("Bad request", ex.getMessage());
     return builder.body(errorVM);
@@ -112,6 +123,7 @@ public class ExceptionTranslator {
   public ResponseEntity<ErrorVM> processRuntimeException(Exception ex) {
     BodyBuilder builder;
     ErrorVM errorVM;
+    log.error(ex.getMessage(), ex);
     ResponseStatus responseStatus = AnnotationUtils.findAnnotation(ex.getClass(), ResponseStatus.class);
     if (responseStatus != null) {
       builder = ResponseEntity.status(responseStatus.value());
