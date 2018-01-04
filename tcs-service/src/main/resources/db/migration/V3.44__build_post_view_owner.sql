@@ -27,7 +27,7 @@ begin
   pf.`fundingType`,
   p.`nationalPostNumber`,
   p.`status`,
-  p.`managingLocalOffice` as `owner`,
+  p.`owner`,
   p.`intrepidId`
   FROM `Post` p
   LEFT JOIN `PostGrade` pg on p.`id` = pg.`postId` AND pg.`postGradeType` = 'APPROVED'
