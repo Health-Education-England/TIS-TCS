@@ -58,8 +58,6 @@ public class PersonDTO implements Serializable {
 
   private RightToWorkDTO rightToWork;
 
-  private Set<PlacementDTO> placements;
-
   public Long getId() {
     return id;
   }
@@ -204,14 +202,6 @@ public class PersonDTO implements Serializable {
     this.programmeMemberships = programmeMemberships;
   }
 
-  public Set<PlacementDTO> getPlacements() {
-    return placements;
-  }
-
-  public void setPlacements(Set<PlacementDTO> placements) {
-    this.placements = placements;
-  }
-
   @Override
   public boolean equals(Object o) {
     if (this == o) return true;
@@ -244,8 +234,6 @@ public class PersonDTO implements Serializable {
       return false;
     if (programmeMemberships != null ? !programmeMemberships.equals(personDTO.programmeMemberships) : personDTO.programmeMemberships != null)
       return false;
-    if (placements != null ? !placements.equals(personDTO.placements) : personDTO.placements != null)
-      return false;
     return rightToWork != null ? rightToWork.equals(personDTO.rightToWork) : personDTO.rightToWork == null;
   }
 
@@ -269,7 +257,6 @@ public class PersonDTO implements Serializable {
     result = 31 * result + (qualifications != null ? qualifications.hashCode() : 0);
     result = 31 * result + (programmeMemberships != null ? programmeMemberships.hashCode() : 0);
     result = 31 * result + (rightToWork != null ? rightToWork.hashCode() : 0);
-    result = 31 * result + (placements != null ? placements.hashCode() : 0);
     return result;
   }
 
@@ -293,7 +280,6 @@ public class PersonDTO implements Serializable {
         ", gdcDetails=" + gdcDetails +
         ", qualifications=" + qualifications +
         ", programmeMemberships=" + programmeMemberships +
-        ", placements=" + placements +
         ", rightToWork=" + rightToWork +
         '}';
   }

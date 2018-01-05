@@ -76,9 +76,6 @@ public class Person implements Serializable {
   @JoinColumn(unique = true, name = "id")
   private RightToWork rightToWork;
 
-  @OneToMany(mappedBy = "trainee", cascade = {CascadeType.REMOVE,CascadeType.REFRESH}, orphanRemoval = true)
-  private Set<Placement> placements = new HashSet<>();
-
   public Long getId() {
     return id;
   }
@@ -308,14 +305,6 @@ public class Person implements Serializable {
 
   public void setRegulator(String regulator) {
     this.regulator = regulator;
-  }
-
-  public Set<Placement> getPlacements() {
-    return placements;
-  }
-
-  public void setPlacements(Set<Placement> placements) {
-    this.placements = placements;
   }
 
   @Override
