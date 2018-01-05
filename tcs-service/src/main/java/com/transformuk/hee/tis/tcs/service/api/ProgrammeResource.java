@@ -209,6 +209,21 @@ public class ProgrammeResource {
     return ResponseEntity.ok().headers(HeaderUtil.createEntityDeletionAlert(ENTITY_NAME, id.toString())).build();
   }
 
+
+  /**
+   * GET  /trainee/programmes : get a list of trainee programmes that they have been enrolled to.
+   *
+   * @return the ResponseEntity with status 200 (OK) and with body the programmeDTO, or with status 404 (Not Found)
+   */
+  @GetMapping("/trainee/{traineeId}/programmes")
+  @Timed
+  @PreAuthorize("hasAuthority('programme:view')")
+  public ResponseEntity<List<ProgrammeDTO>> getTraineeProgrammes(@PathVariable Long traineeId) {
+    log.debug("REST request to get Programmes for trainee: [{}]", traineeId);
+    List<ProgrammeDTO> traineeProgrammes = programmeService.findTraineeProgrammes(traineeId);
+    return ResponseEntity.ok(traineeProgrammes);
+  }
+
   /**
    * POST  /bulk-programmes : Bulk create a Programme.
    *
