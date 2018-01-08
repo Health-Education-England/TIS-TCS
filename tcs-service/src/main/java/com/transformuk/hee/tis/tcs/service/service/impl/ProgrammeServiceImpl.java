@@ -1,5 +1,6 @@
 package com.transformuk.hee.tis.tcs.service.service.impl;
 
+import com.google.common.base.Preconditions;
 import com.transformuk.hee.tis.tcs.api.dto.ProgrammeDTO;
 import com.transformuk.hee.tis.tcs.service.model.ColumnFilter;
 import com.transformuk.hee.tis.tcs.service.model.Programme;
@@ -140,6 +141,14 @@ public class ProgrammeServiceImpl implements ProgrammeService {
     log.debug("Request to get Programme : {}", id);
     Programme programme = programmeRepository.findOne(id);
     return programmeMapper.programmeToProgrammeDTO(programme);
+  }
+
+
+  @Override
+  public List<ProgrammeDTO> findTraineeProgrammes(Long traineeId) {
+    Preconditions.checkNotNull(traineeId);
+    List<Programme> traineeProgrammes = programmeRepository.findByProgrammeMembershipPersonId(traineeId);
+    return programmeMapper.programmesToProgrammeDTOs(traineeProgrammes);
   }
 
   /**

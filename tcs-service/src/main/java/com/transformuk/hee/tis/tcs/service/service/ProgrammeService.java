@@ -65,6 +65,13 @@ public interface ProgrammeService {
   ProgrammeDTO findOne(Long id);
 
   /**
+   * Find a list of programmes that a trainee has enrolled to
+   * @param traineeId
+   * @return
+   */
+  List<ProgrammeDTO> findTraineeProgrammes(Long traineeId);
+
+  /**
    * Delete the "id" programme.
    *
    * @param id the id of the entity
