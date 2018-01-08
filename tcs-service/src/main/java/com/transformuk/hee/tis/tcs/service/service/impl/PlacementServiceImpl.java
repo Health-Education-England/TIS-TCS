@@ -5,6 +5,9 @@ import com.google.common.collect.Maps;
 import com.transformuk.hee.tis.tcs.api.dto.PlacementDTO;
 import com.transformuk.hee.tis.tcs.api.dto.PlacementDetailsDTO;
 import com.transformuk.hee.tis.tcs.api.dto.PlacementSpecialtyDTO;
+import com.transformuk.hee.tis.tcs.api.enumeration.TCSDateColumns;
+import com.transformuk.hee.tis.tcs.service.api.util.ColumnFilterUtil;
+import com.transformuk.hee.tis.tcs.service.model.ColumnFilter;
 import com.transformuk.hee.tis.tcs.service.model.Person;
 import com.transformuk.hee.tis.tcs.service.model.Placement;
 import com.transformuk.hee.tis.tcs.service.model.PlacementDetails;
@@ -23,14 +26,23 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
+import org.springframework.data.jpa.domain.Specification;
+import org.springframework.data.jpa.domain.Specifications;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.io.IOException;
+import java.util.ArrayList;
 import java.util.Collection;
+import java.util.Collections;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
 import java.util.stream.Collectors;
+
+import static com.transformuk.hee.tis.tcs.service.api.util.DateUtil.getLocalDateFromString;
+import static com.transformuk.hee.tis.tcs.service.service.impl.SpecificationFactory.in;
+import static com.transformuk.hee.tis.tcs.service.service.impl.SpecificationFactory.isBetween;
 
 /**
  * Service Implementation for managing Placement.
@@ -224,5 +236,68 @@ public class PlacementServiceImpl implements PlacementService {
     }
     List<Placement> savedPlacements = placementRepository.save(placements);
     return placementMapper.placementsToPlacementDTOs(savedPlacements);
+  }
+
+  /**
+   * Get all placement details by given column filters.
+   *
+   * @param pageable the pagination information
+   * @return the list of entities
+   */
+  @Override
+  @Transactional(readOnly = true)
+  public Page<PlacementDetailsDTO> findAllPlacementDetails(Pageable pageable) {
+    log.debug("Request to get all Placements details");
+    Page<PlacementDetails> result = placementDetailsRepository.findAll(pageable);
+    return result.map(placementDetailsMapper::placementDetailsToPlacementDetailsDTO);
+  }
+
+
+  /**
+   * Get all placement details by given column filters.
+   *
+   * @param columnFilterJson column filters represented in json object
+   * @param pageable the pagination information
+   * @return the list of entities
+   * @throws IOException
+   */
+  @Override
+  @Transactional(readOnly = true)
+  public Page<PlacementDetailsDTO> findFilteredPlacements(String columnFilterJson, Pageable pageable) throws IOException {
+
+    log.debug("Request to get all Revalidations filtered by columns {}", columnFilterJson);
+    List<Class> filterEnumList = Collections.emptyList();
+    List<ColumnFilter> columnFilters = ColumnFilterUtil.getColumnFilters(columnFilterJson, filterEnumList);
+
+    List<Specification<PlacementDetails>> specs = new ArrayList<>();
+
+    //add the column filters criteria
+    if (columnFilters != null && !columnFilters.isEmpty()) {
+      columnFilters.forEach(cf -> {
+        if (TCSDateColumns.contains(cf.getName())) {
+          specs.add(isBetween(
+              cf.getName(),
+              getLocalDateFromString(cf.getValues().get(0).toString()),
+              getLocalDateFromString(cf.getValues().get(1).toString())
+              )
+          );
+        } else {
+          specs.add(in(cf.getName(), Collections.unmodifiableCollection(cf.getValues())));
+        }
+      });
+    }
+    Page<PlacementDetails> result;
+    if (!specs.isEmpty()) {
+      Specifications<PlacementDetails> fullSpec = Specifications.where(specs.get(0));
+      //add the rest of the specs that made it in
+      for (int i = 1; i < specs.size(); i++) {
+        fullSpec = fullSpec.and(specs.get(i));
+      }
+      result = placementDetailsRepository.findAll(fullSpec, pageable);
+    } else {
+      result = placementDetailsRepository.findAll(pageable);
+    }
+
+    return result.map(placementDetailsMapper::placementDetailsToPlacementDetailsDTO);
   }
 }

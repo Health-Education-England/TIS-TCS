@@ -2,6 +2,7 @@ package com.transformuk.hee.tis.tcs.service.api.util;
 
 import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.transformuk.hee.tis.tcs.api.enumeration.TCSDateColumns;
 import com.transformuk.hee.tis.tcs.service.model.ColumnFilter;
 import org.apache.commons.codec.DecoderException;
 import org.apache.commons.codec.net.URLCodec;
@@ -69,7 +70,12 @@ public final class ColumnFilterUtil {
           if (selectedEnumClass.isPresent()) {
             addToCfList(cfList, e, selectedEnumClass.get());
           } else {
-            List<Object> values = e.getValue().stream().map(v -> sanitize(v)).collect(toList());
+            List<Object> values = e.getValue().stream().map(v -> {
+              if (!TCSDateColumns.contains(e.getKey())) {
+                return sanitize(v);
+              }
+              return v;
+            }).collect(toList());
             cfList.add(new ColumnFilter(e.getKey(), values));
           }
         }
