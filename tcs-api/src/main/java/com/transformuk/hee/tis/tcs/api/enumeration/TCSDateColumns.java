@@ -7,13 +7,23 @@ package com.transformuk.hee.tis.tcs.api.enumeration;
 public enum TCSDateColumns {
 
   // Placement entity date columns
-  dateFrom,
-  dateTo;
+  DATE_FROM("dateFrom"),
+  DATE_TO("dateTo");
+
+  private String value;
+
+  TCSDateColumns(String dateFrom) {
+    this.value = dateFrom;
+  }
+
+  public String getValue() {
+    return value;
+  }
 
   public static boolean contains(String dateColumn) {
 
     for (TCSDateColumns c : TCSDateColumns.values()) {
-      if (c.name().equals(dateColumn)) {
+      if (c.getValue().equals(dateColumn)) {
         return true;
       }
     }

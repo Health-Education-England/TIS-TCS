@@ -7,6 +7,8 @@ import com.transformuk.hee.tis.tcs.api.dto.PlacementDetailsDTO;
 import com.transformuk.hee.tis.tcs.api.dto.PlacementSpecialtyDTO;
 import com.transformuk.hee.tis.tcs.api.enumeration.TCSDateColumns;
 import com.transformuk.hee.tis.tcs.service.api.util.ColumnFilterUtil;
+import com.transformuk.hee.tis.tcs.service.exception.DateRangeColumnFilterException;
+import com.transformuk.hee.tis.tcs.service.exception.InvalidDateException;
 import com.transformuk.hee.tis.tcs.service.model.ColumnFilter;
 import com.transformuk.hee.tis.tcs.service.model.Person;
 import com.transformuk.hee.tis.tcs.service.model.Placement;
@@ -32,6 +34,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.io.IOException;
+import java.time.format.DateTimeParseException;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
@@ -272,15 +275,18 @@ public class PlacementServiceImpl implements PlacementService {
     List<Specification<PlacementDetails>> specs = new ArrayList<>();
 
     //add the column filters criteria
-    if (columnFilters != null && !columnFilters.isEmpty()) {
+    if (CollectionUtils.isNotEmpty(columnFilters)) {
       columnFilters.forEach(cf -> {
         if (TCSDateColumns.contains(cf.getName())) {
+          if (cf.getValues().isEmpty() || cf.getValues().size() != 2) {
+            throw new DateRangeColumnFilterException("Invalid values or no values supplied for date range column filter");
+          }
           specs.add(isBetween(
               cf.getName(),
               getLocalDateFromString(cf.getValues().get(0).toString()),
               getLocalDateFromString(cf.getValues().get(1).toString())
               )
-          );
+            );
         } else {
           specs.add(in(cf.getName(), Collections.unmodifiableCollection(cf.getValues())));
         }

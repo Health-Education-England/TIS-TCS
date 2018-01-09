@@ -553,6 +553,23 @@ public class PlacementResourceIntTest {
         .andExpect(status().is5xxServerError());
   }
 
+  @Test
+  @Transactional
+  public void shouldErrorWhenValuesSuppliedForDateRangeColumnFilterIsNotOfSizeTwo() throws Exception {
+    // Initialize the database
+    LocalDate dateFrom = getLocalDateFromString("2018-06-01");
+    LocalDate dateTo = getLocalDateFromString("2018-09-01");
+    placement.setDateFrom(dateFrom);
+    placement.setDateTo(dateTo);
+    placementDetailsRepository.saveAndFlush(placement);
+
+    String dateRangeFilter = "{\"dateFrom\":[\"2018-02-01\", \"2018-05-01\", \"2018-05-01\"]}" ;
+    // Get filtered placements
+    restPlacementMockMvc.perform(get("/api/placements/filter?page=0&size=30&columnFilters=" + encodeDateRange(dateRangeFilter)))
+        .andExpect(status().is5xxServerError());
+  }
+
+
   private String encodeDateRange(String dateRangeFilter) throws EncoderException {
     URLCodec codec = new URLCodec();
     return codec.encode(dateRangeFilter);
