@@ -20,8 +20,10 @@ import org.springframework.web.bind.annotation.RestController;
 @RequestMapping("/api")
 public class EnumTypeResource {
 
+  @Deprecated
   @ApiOperation(value = "Lists all Assessment types that can be associated with Curricula",
-      notes = "Used by clients to retrieve all Assessment types that are currently available by this service. \n" +
+      notes = "Please see the AssessmentType entity in Reference service. \n" +
+          "Used by clients to retrieve all Assessment types that are currently available by this service. \n" +
           "This allows clients to dynamically list out all options for particular fields so that we do not \n" +
           "need to maintain a list on both the backend and client",
       httpMethod = "GET", produces = "application/json", protocols = "http, https")
