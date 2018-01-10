@@ -13,7 +13,10 @@ import com.transformuk.hee.tis.tcs.service.api.validation.ValidationException;
 import com.transformuk.hee.tis.tcs.service.service.PlacementService;
 import io.github.jhipster.web.util.ResponseUtil;
 import io.jsonwebtoken.lang.Collections;
+import io.swagger.annotations.ApiOperation;
 import io.swagger.annotations.ApiParam;
+import io.swagger.annotations.ApiResponse;
+import io.swagger.annotations.ApiResponses;
 import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -32,8 +35,10 @@ import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.PutMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
+import java.io.IOException;
 import java.net.URI;
 import java.net.URISyntaxException;
 import java.util.List;
@@ -214,5 +219,43 @@ public class PlacementResource {
     return ResponseEntity.ok()
         .headers(HeaderUtil.createEntityUpdateAlert(ENTITY_NAME, StringUtils.join(ids, ",")))
         .body(results);
+  }
+
+  /**
+   *  GET  /placements/filter : get filtered placements.
+   *
+   * @param pageable
+   * @param columnFilterJson
+   * @return the ResponseEntity with status 200 (OK) and with body the placementDTO, or with status 404 (Not Found)
+   * @throws IOException
+   */
+  @ApiOperation(value = "Gets filtered placement details based on supplied column filters",
+      notes = "Retrieves paginated placement details with support for pagination, sorting and column filters \n",
+      response = ResponseEntity.class,
+      responseContainer = "Placement details list")
+  @ApiResponses(value = {
+      @ApiResponse(
+          code = 200,
+          message = "Placement details list",
+          response = ResponseEntity.class)
+  })
+  @GetMapping("/placements/filter")
+  @Timed
+  @PreAuthorize("hasAuthority('tcs:view:entities')")
+  public ResponseEntity<List<PlacementDetailsDTO>> getFilteredPlacementDetails(
+      @ApiParam(value = "request parameters reflecting pagination filter. (Eg: page=2&size=25)")
+          Pageable pageable,
+      @ApiParam(value = "json object by column name and value. (Eg: columnFilters=" +
+          "{ \"proposedOutcomeCode\": [\"revalidate\", \"defer\"], \"dateFrom\":[\"10-10-2017\", \"20-10-2017\"] }\"")
+      @RequestParam(value = "columnFilters", required = false) String columnFilterJson) throws IOException {
+    log.debug("REST request to get Placements by filter : {}", columnFilterJson);
+    Page<PlacementDetailsDTO> page;
+    if (org.apache.commons.lang.StringUtils.isEmpty(columnFilterJson)) {
+      page = placementService.findAllPlacementDetails(pageable);
+    } else {
+      page = placementService.findFilteredPlacements(columnFilterJson, pageable);
+    }
+    HttpHeaders headers = PaginationUtil.generatePaginationHttpHeaders(page, "/api/placements/filter");
+    return new ResponseEntity<>(page.getContent(), headers, HttpStatus.OK);
   }
 }
