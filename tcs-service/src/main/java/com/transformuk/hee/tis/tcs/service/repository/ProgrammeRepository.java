@@ -25,4 +25,12 @@ public interface ProgrammeRepository extends JpaRepository<Programme, Long>, Jpa
       "Programme p join p.curricula c where p.id = :programmeId and c.id = :curriculumId ")
   boolean programmeCurriculumAssociationExists(@Param("programmeId") Long programmeId,
                                                @Param("curriculumId") Long curriculumId);
+
+  @Query(value =
+      "SELECT p " +
+      "FROM Programme p " +
+      "JOIN ProgrammeMembership pm " +
+      "ON p.id = pm.programmeId " +
+      "WHERE pm.person.id = :personId")
+  List<Programme> findByProgrammeMembershipPersonId(@Param("personId") Long personId);
 }

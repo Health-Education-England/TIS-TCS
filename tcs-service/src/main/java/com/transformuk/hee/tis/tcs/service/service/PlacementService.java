@@ -5,6 +5,7 @@ import com.transformuk.hee.tis.tcs.api.dto.PlacementDetailsDTO;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 
+import java.io.IOException;
 import java.util.List;
 
 /**
@@ -83,4 +84,20 @@ public interface PlacementService {
    * @return
    */
   List<PlacementDTO> patchPlacementClinicalSupervisors(List<PlacementDTO> placementDTOList);
+
+  /**
+   * Get filtered  the placement details.
+   *
+   * @param pageable the pagination information
+   * @return the list of entities
+   */
+  Page<PlacementDetailsDTO> findFilteredPlacements(String columnFilterJson, Pageable pageable) throws IOException;
+
+  /**
+   * Get all the placement details.
+   *
+   * @param pageable the pagination information
+   * @return the list of entities
+   */
+  Page<PlacementDetailsDTO> findAllPlacementDetails(Pageable pageable);
 }

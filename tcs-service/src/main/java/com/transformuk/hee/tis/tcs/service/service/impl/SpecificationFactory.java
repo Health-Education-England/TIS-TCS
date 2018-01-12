@@ -6,6 +6,7 @@ import org.springframework.data.jpa.domain.Specification;
 import javax.persistence.criteria.CriteriaBuilder;
 import javax.persistence.criteria.Join;
 import javax.persistence.criteria.JoinType;
+import java.time.LocalDate;
 import java.util.Collection;
 
 /**
@@ -78,5 +79,18 @@ public final class SpecificationFactory {
 
   public static Specification isBetween(String attribute, double min, double max) {
     return (root, query, cb) -> cb.between(root.get(attribute), min, max);
+  }
+
+
+  /**
+   * InBetween condition for an entity property used for filtering based on a date range.
+   *
+   * @param attribute
+   * @param from date
+   * @param to date
+   * @return
+   */
+  public static Specification isBetween(String attribute, LocalDate from, LocalDate to) {
+    return (root, query, cb) -> cb.between(root.get(attribute), from, to);
   }
 }

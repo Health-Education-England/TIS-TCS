@@ -21,6 +21,8 @@ import com.transformuk.hee.tis.tcs.service.model.Specialty;
 import com.transformuk.hee.tis.tcs.service.repository.*;
 import com.transformuk.hee.tis.tcs.service.service.PlacementService;
 import com.transformuk.hee.tis.tcs.service.service.mapper.PlacementDetailsMapper;
+import org.apache.commons.codec.EncoderException;
+import org.apache.commons.codec.net.URLCodec;
 import org.assertj.core.util.Lists;
 import org.assertj.core.util.Maps;
 import org.junit.Before;
@@ -35,7 +37,7 @@ import org.springframework.http.MediaType;
 import org.springframework.http.converter.json.MappingJackson2HttpMessageConverter;
 import org.springframework.test.context.junit4.SpringRunner;
 import org.springframework.test.web.servlet.MockMvc;
-import org.springframework.test.web.servlet.result.MockMvcResultHandlers;
+import org.springframework.test.web.servlet.ResultActions;
 import org.springframework.test.web.servlet.setup.MockMvcBuilders;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -44,6 +46,7 @@ import java.time.LocalDate;
 import java.time.ZoneId;
 import java.util.List;
 
+import static com.transformuk.hee.tis.tcs.service.api.util.DateUtil.getLocalDateFromString;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.hamcrest.Matchers.containsInAnyOrder;
 import static org.hamcrest.Matchers.hasItem;
@@ -451,4 +454,128 @@ public class PlacementResourceIntTest {
   public void equalsVerifier() throws Exception {
     TestUtil.equalsVerifier(Placement.class);
   }
+
+  @Test
+  @Transactional
+  public void shouldReturnAllPlacementsWhenNoFilter() throws Exception {
+
+    // Initialize the database
+    placementDetailsRepository.saveAndFlush(placement);
+
+    // Get all the placementList
+    restPlacementMockMvc.perform(get("/api/placements/filter"))
+        .andExpect(status().isOk())
+        .andExpect(content().contentType(MediaType.APPLICATION_JSON_UTF8_VALUE))
+        .andExpect(jsonPath("$.[*].id").value(hasItem(placement.getId().intValue())))
+        .andExpect(jsonPath("$.[*].traineeId").value(placement.getTraineeId().intValue()))
+        .andExpect(jsonPath("$.[*].postId").value(placement.getPostId().intValue()))
+        .andExpect(jsonPath("$.[*].siteCode").value(DEFAULT_SITE))
+        .andExpect(jsonPath("$.[*].gradeAbbreviation").value(DEFAULT_GRADE))
+        .andExpect(jsonPath("$.[*].dateFrom").value(DEFAULT_DATE_FROM.toString()))
+        .andExpect(jsonPath("$.[*].dateTo").value(DEFAULT_DATE_TO.toString()))
+        .andExpect(jsonPath("$.[*].placementType").value(DEFAULT_PLACEMENT_TYPE))
+        .andExpect(jsonPath("$.[*].localPostNumber").value(DEFAULT_LOCAL_POST_NUMBER));
+  }
+
+  @Test
+  @Transactional
+  public void shouldReturnNoPlacementsWhenDateFromIsInPastAndDateRangeDoesNotMatch() throws Exception {
+
+    // Initialize the database
+    placementDetailsRepository.saveAndFlush(placement);
+
+    String dateRangeFilter = "{\"dateFrom\":[\"2017-10-01\", \"2017-12-01\"]}" ;
+    // Get filtered placements
+    restPlacementMockMvc.perform(get("/api/placements/filter?page=0&size=30&columnFilters=" + encodeDateRange(dateRangeFilter)))
+        .andExpect(status().isOk())
+        .andExpect(content().string("[]"));
+  }
+
+  @Test
+  @Transactional
+  public void shouldReturnPlacementsWhenDateFromIsWithinDateRange() throws Exception {
+    // Initialize the database
+    LocalDate dateFrom = getLocalDateFromString("2018-03-01");
+    LocalDate dateTo = getLocalDateFromString("2018-05-01");
+    placement.setDateFrom(dateFrom);
+    placement.setDateTo(dateTo);
+    placementDetailsRepository.saveAndFlush(placement);
+
+    String dateRangeFilter = "{\"dateFrom\":[\"2018-02-01\", \"2018-05-01\"]}" ;
+
+    // Get filtered placements
+    ResultActions resultActions = restPlacementMockMvc.perform(get("/api/placements/filter?page=0&size=30&columnFilters=" + encodeDateRange(dateRangeFilter)))
+        .andExpect(status().isOk());
+    resultActions.andExpect(status().isOk())
+        .andExpect(content().contentType(MediaType.APPLICATION_JSON_UTF8_VALUE))
+        .andExpect(jsonPath("$.[*].id").value(hasItem(placement.getId().intValue())))
+        .andExpect(jsonPath("$.[*].traineeId").value(placement.getTraineeId().intValue()))
+        .andExpect(jsonPath("$.[*].postId").value(placement.getPostId().intValue()))
+        .andExpect(jsonPath("$.[*].siteCode").value(DEFAULT_SITE))
+        .andExpect(jsonPath("$.[*].gradeAbbreviation").value(DEFAULT_GRADE))
+        .andExpect(jsonPath("$.[*].dateFrom").value(dateFrom.toString()))
+        .andExpect(jsonPath("$.[*].dateTo").value(dateTo.toString()))
+        .andExpect(jsonPath("$.[*].placementType").value(DEFAULT_PLACEMENT_TYPE))
+        .andExpect(jsonPath("$.[*].localPostNumber").value(DEFAULT_LOCAL_POST_NUMBER))
+        .andExpect(jsonPath("$.[*].trainingDescription").value(DEFAULT_TRAINING_DESCRIPTION));
+
+  }
+
+  @Test
+  @Transactional
+  public void shouldNotReturnPlacementsWhenDateIsBeyondDateRange() throws Exception {
+
+    // Initialize the database
+    LocalDate dateFrom = getLocalDateFromString("2018-06-01");
+    LocalDate dateTo = getLocalDateFromString("2018-09-01");
+    placement.setDateFrom(dateFrom);
+    placement.setDateTo(dateTo);
+    placementDetailsRepository.saveAndFlush(placement);
+
+    String dateRangeFilter = "{\"dateFrom\":[\"2018-02-01\", \"2018-05-01\"]}" ;
+    // Get filtered placements
+    restPlacementMockMvc.perform(get("/api/placements/filter?page=0&size=30&columnFilters=" + encodeDateRange(dateRangeFilter)))
+        .andExpect(status().isOk())
+        .andExpect(content().string("[]"));
+
+  }
+
+  @Test
+  @Transactional
+  public void shouldErrorWhenDateFormatIsInvalid() throws Exception {
+    // Initialize the database
+    LocalDate dateFrom = getLocalDateFromString("2018-06-01");
+    LocalDate dateTo = getLocalDateFromString("2018-09-01");
+    placement.setDateFrom(dateFrom);
+    placement.setDateTo(dateTo);
+    placementDetailsRepository.saveAndFlush(placement);
+
+    String dateRangeFilter = "{\"dateFrom\":[\"201802-01\", \"2018-0501\"]}" ;
+    // Get filtered placements
+    restPlacementMockMvc.perform(get("/api/placements/filter?page=0&size=30&columnFilters=" + encodeDateRange(dateRangeFilter)))
+        .andExpect(status().is5xxServerError());
+  }
+
+  @Test
+  @Transactional
+  public void shouldErrorWhenValuesSuppliedForDateRangeColumnFilterIsNotOfSizeTwo() throws Exception {
+    // Initialize the database
+    LocalDate dateFrom = getLocalDateFromString("2018-06-01");
+    LocalDate dateTo = getLocalDateFromString("2018-09-01");
+    placement.setDateFrom(dateFrom);
+    placement.setDateTo(dateTo);
+    placementDetailsRepository.saveAndFlush(placement);
+
+    String dateRangeFilter = "{\"dateFrom\":[\"2018-02-01\", \"2018-05-01\", \"2018-05-01\"]}" ;
+    // Get filtered placements
+    restPlacementMockMvc.perform(get("/api/placements/filter?page=0&size=30&columnFilters=" + encodeDateRange(dateRangeFilter)))
+        .andExpect(status().is5xxServerError());
+  }
+
+
+  private String encodeDateRange(String dateRangeFilter) throws EncoderException {
+    URLCodec codec = new URLCodec();
+    return codec.encode(dateRangeFilter);
+  }
+
 }
