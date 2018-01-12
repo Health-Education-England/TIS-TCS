@@ -1,5 +1,6 @@
 package com.transformuk.hee.tis.tcs.service.api.validation;
 
+import com.transformuk.hee.tis.reference.client.ReferenceService;
 import com.transformuk.hee.tis.reference.client.impl.ReferenceServiceImpl;
 import com.transformuk.hee.tis.tcs.api.dto.PlacementDTO;
 import com.transformuk.hee.tis.tcs.api.dto.PlacementDetailsDTO;
@@ -28,13 +29,13 @@ public class PlacementValidator {
 
   private static final String PLACEMENT_DTO_NAME = "PlacementDTO";
   private final SpecialtyRepository specialtyRepository;
-  private final ReferenceServiceImpl referenceService;
+  private final ReferenceService referenceService;
   private final PostRepository postRepository;
   private final PersonRepository personRepository;
 
   @Autowired
   public PlacementValidator(SpecialtyRepository specialtyRepository,
-                            ReferenceServiceImpl referenceService,
+                            ReferenceService referenceService,
                             PostRepository postRepository,
                             PersonRepository personRepository) {
     this.specialtyRepository = specialtyRepository;

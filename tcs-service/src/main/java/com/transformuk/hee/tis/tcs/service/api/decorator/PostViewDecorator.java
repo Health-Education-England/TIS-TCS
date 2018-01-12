@@ -26,10 +26,10 @@ import java.util.stream.Collectors;
 public class PostViewDecorator {
 
   private static final Logger log = LoggerFactory.getLogger(PostViewDecorator.class);
-  private ReferenceService referenceService;
+  private AsyncReferenceService referenceService;
 
   @Autowired
-  public PostViewDecorator(ReferenceService referenceService) {
+  public PostViewDecorator(AsyncReferenceService referenceService) {
     this.referenceService = referenceService;
   }
 
@@ -51,48 +51,29 @@ public class PostViewDecorator {
       }
     });
 
-    CompletableFuture<Void> gradesFuture = decorateGradesOnPost(gradeCodes, postViews);
-    CompletableFuture<Void> sitesFuture = decorateSitesOnPost(siteCodes, postViews);
-
-    CompletableFuture.allOf(gradesFuture, sitesFuture).join();
-
+    CompletableFuture.allOf(
+            decorateGradesOnPost(gradeCodes, postViews),
+            decorateSitesOnPost(siteCodes, postViews))
+            .join();
   }
 
-  @Async
   protected CompletableFuture<Void> decorateGradesOnPost(Set<String> codes, List<PostViewDTO> postViewDTOS) {
-    if (CollectionUtils.isNotEmpty(codes)) {
-      try {
-        List<GradeDTO> grades = referenceService.findGradesIn(codes);
-        Map<String, GradeDTO> gradeMap = grades.stream().collect(Collectors.toMap(GradeDTO::getAbbreviation, g -> g));
-        for (PostViewDTO postView : postViewDTOS) {
-          if (StringUtils.isNotBlank(postView.getApprovedGradeCode()) && gradeMap.containsKey(postView.getApprovedGradeCode())) {
-            postView.setApprovedGradeName(gradeMap.get(postView.getApprovedGradeCode()).getName());
-          }
+    return referenceService.doWithGradesAsync(codes, gradeMap -> {
+      for (PostViewDTO postView : postViewDTOS) {
+        if (StringUtils.isNotBlank(postView.getApprovedGradeCode()) && gradeMap.containsKey(postView.getApprovedGradeCode())) {
+          postView.setApprovedGradeName(gradeMap.get(postView.getApprovedGradeCode()).getName());
         }
-      } catch (Exception e) {
-        log.warn("Reference decorator call to grades failed", e);
       }
-    }
-    return CompletableFuture.completedFuture(null);
+    });
   }
 
-  @Async
   protected CompletableFuture<Void> decorateSitesOnPost(Set<String> codes, List<PostViewDTO> postViewDTOS) {
-    if (CollectionUtils.isNotEmpty(codes)) {
-      try {
-        List<SiteDTO> sites = referenceService.findSitesIn(codes);
-        Map<String, SiteDTO> siteMap = sites.stream().collect(Collectors.toMap(SiteDTO::getSiteCode, s -> s));
-
-        for (PostViewDTO postView : postViewDTOS) {
-          if (StringUtils.isNotBlank(postView.getPrimarySiteCode()) && siteMap.containsKey(postView.getPrimarySiteCode())) {
-            postView.setPrimarySiteName(siteMap.get(postView.getPrimarySiteCode()).getSiteName());
-          }
+    return referenceService.doWithSitesAsync(codes, siteMap -> {
+      for (PostViewDTO postView : postViewDTOS) {
+        if (StringUtils.isNotBlank(postView.getPrimarySiteCode()) && siteMap.containsKey(postView.getPrimarySiteCode())) {
+          postView.setPrimarySiteName(siteMap.get(postView.getPrimarySiteCode()).getSiteName());
         }
-      } catch (Exception e) {
-        log.warn("Reference decorator call to sites failed", e);
       }
-    }
-    return CompletableFuture.completedFuture(null);
+    });
   }
-
 }
