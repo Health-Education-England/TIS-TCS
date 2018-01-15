@@ -1,25 +1,17 @@
 package com.transformuk.hee.tis.tcs.service.api.decorator;
 
-import com.transformuk.hee.tis.reference.api.dto.GradeDTO;
-import com.transformuk.hee.tis.reference.api.dto.SiteDTO;
-import com.transformuk.hee.tis.reference.client.ReferenceService;
 import com.transformuk.hee.tis.tcs.api.dto.PlacementViewDTO;
 import com.transformuk.hee.tis.tcs.service.model.PersonBasicDetails;
-import com.transformuk.hee.tis.tcs.service.repository.PersonBasicDetailsRepository;
-import org.apache.commons.collections4.CollectionUtils;
 import org.apache.commons.lang.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.scheduling.annotation.Async;
 import org.springframework.stereotype.Component;
 
 import java.util.HashSet;
 import java.util.List;
-import java.util.Map;
 import java.util.Set;
 import java.util.concurrent.CompletableFuture;
-import java.util.stream.Collectors;
 
 /**
  * Used to decorate the Placement View list with labels such as grade and site labels
@@ -28,12 +20,12 @@ import java.util.stream.Collectors;
 public class PlacementViewDecorator {
 
   private static final Logger log = LoggerFactory.getLogger(PlacementViewDecorator.class);
-  private ReferenceService referenceService;
-  private PersonBasicDetailsRepository personBasicDetailsRepository;
+  private AsyncReferenceService referenceService;
+  private PersonBasicDetailsRepositoryAccessor personBasicDetailsRepository;
 
   @Autowired
-  public PlacementViewDecorator(ReferenceService referenceService,
-                                PersonBasicDetailsRepository personBasicDetailsRepository) {
+  public PlacementViewDecorator(AsyncReferenceService referenceService,
+                                PersonBasicDetailsRepositoryAccessor personBasicDetailsRepository) {
     this.referenceService = referenceService;
     this.personBasicDetailsRepository = personBasicDetailsRepository;
   }
@@ -60,68 +52,48 @@ public class PlacementViewDecorator {
       }
     });
 
-    CompletableFuture<Void> gradesFuture = decorateGradesOnPlacement(gradeCodes, placementViews);
-    CompletableFuture<Void> sitesFuture = decorateSitesOnPlacement(siteCodes, placementViews);
-    CompletableFuture<Void> traineeNameFuture = decorateTraineeName(traineeIds, placementViews);
+    CompletableFuture<Void> futures = CompletableFuture.allOf(
+            decorateGradesOnPlacement(gradeCodes, placementViews),
+            decorateSitesOnPlacement(siteCodes, placementViews));
 
-    CompletableFuture.allOf(gradesFuture, sitesFuture, traineeNameFuture).join();
+    decorateTraineeName(traineeIds, placementViews);
+
+    futures.join();
+
     return placementViews;
   }
 
-  @Async
   protected CompletableFuture<Void> decorateGradesOnPlacement(Set<String> codes, List<PlacementViewDTO> placementViewDTOS) {
-    if (CollectionUtils.isNotEmpty(codes)) {
-      try {
-        List<GradeDTO> grades = referenceService.findGradesIn(codes);
-        Map<String, GradeDTO> gradeMap = grades.stream().collect(Collectors.toMap(GradeDTO::getAbbreviation, g -> g));
-        for (PlacementViewDTO placementView : placementViewDTOS) {
-          if (StringUtils.isNotBlank(placementView.getGradeAbbreviation()) && gradeMap.containsKey(placementView.getGradeAbbreviation())) {
-            placementView.setGradeName(gradeMap.get(placementView.getGradeAbbreviation()).getName());
-          }
+    return referenceService.doWithGradesAsync(codes, gradeMap -> {
+      for (PlacementViewDTO pv : placementViewDTOS) {
+        if (StringUtils.isNotBlank(pv.getGradeAbbreviation()) && gradeMap.containsKey(pv.getGradeAbbreviation())) {
+          pv.setGradeName(gradeMap.get(pv.getGradeAbbreviation()).getName());
         }
-      } catch (Exception e) {
-        log.warn("Reference decorator call to grades failed", e);
       }
-    }
-    return CompletableFuture.completedFuture(null);
+    });
   }
 
-  @Async
   protected CompletableFuture<Void> decorateSitesOnPlacement(Set<String> codes, List<PlacementViewDTO> placementViewDTOS) {
-    if (CollectionUtils.isNotEmpty(codes)) {
-      try {
-        List<SiteDTO> sites = referenceService.findSitesIn(codes);
-        Map<String, SiteDTO> siteMap = sites.stream().collect(Collectors.toMap(SiteDTO::getSiteCode, s -> s));
-
-        for (PlacementViewDTO placementView : placementViewDTOS) {
-          if (StringUtils.isNotBlank(placementView.getSiteCode()) && siteMap.containsKey(placementView.getSiteCode())) {
-            placementView.setSiteName(siteMap.get(placementView.getSiteCode()).getSiteName());
-          }
+    return referenceService.doWithSitesAsync(codes, siteMap -> {
+      for (PlacementViewDTO pv : placementViewDTOS) {
+        if (StringUtils.isNotBlank(pv.getSiteCode()) && siteMap.containsKey(pv.getSiteCode())) {
+          pv.setSiteName(siteMap.get(pv.getSiteCode()).getSiteName());
         }
-      } catch (Exception e) {
-        log.warn("Reference decorator call to sites failed", e);
       }
-    }
-    return CompletableFuture.completedFuture(null);
+    });
   }
 
-  @Async
-  protected CompletableFuture<Void> decorateTraineeName(Set<Long> traineeIds, List<PlacementViewDTO> placementViewDTOS) {
-    if (CollectionUtils.isNotEmpty(traineeIds)) {
-      List<PersonBasicDetails> details = personBasicDetailsRepository.findByIdIn(traineeIds);
-      Map<Long, PersonBasicDetails> detailsMap = details.stream().collect(Collectors.toMap(PersonBasicDetails::getId, d -> d));
-      for (PlacementViewDTO placementView : placementViewDTOS) {
-        Long traineeId = placementView.getTraineeId();
+  protected void decorateTraineeName(Set<Long> traineeIds, List<PlacementViewDTO> placementViewDTOS) {
+    personBasicDetailsRepository.doWithPersonBasicDetailsSet(traineeIds, detailsMap -> {
+      for (PlacementViewDTO pv : placementViewDTOS) {
+        Long traineeId = pv.getTraineeId();
         if (traineeId != null && traineeId != 0 && detailsMap.containsKey(traineeId)) {
-          PersonBasicDetails bd = detailsMap.get(placementView.getTraineeId());
-          placementView.setTraineeFirstName(bd.getFirstName());
-          placementView.setTraineeLastName(bd.getLastName());
-          placementView.setTraineeGmcNumber(bd.getGmcDetails() != null ? bd.getGmcDetails().getGmcNumber() : null);
+          PersonBasicDetails bd = detailsMap.get(pv.getTraineeId());
+          pv.setTraineeFirstName(bd.getFirstName());
+          pv.setTraineeLastName(bd.getLastName());
+          pv.setTraineeGmcNumber(bd.getGmcDetails() != null ? bd.getGmcDetails().getGmcNumber() : null);
         }
       }
-    }
-
-    return CompletableFuture.completedFuture(null);
+    });
   }
-
 }

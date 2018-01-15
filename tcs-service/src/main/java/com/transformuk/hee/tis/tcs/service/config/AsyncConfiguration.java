@@ -38,7 +38,8 @@ public class AsyncConfiguration implements AsyncConfigurer {
     executor.setMaxPoolSize(jHipsterProperties.getAsync().getMaxPoolSize());
     executor.setQueueCapacity(jHipsterProperties.getAsync().getQueueCapacity());
     executor.setThreadNamePrefix("tcs-Executor-");
-    return new DelegatingSecurityContextAsyncTaskExecutor(new DefaultManagedTaskExecutor());
+    executor.initialize();
+    return new DelegatingSecurityContextAsyncTaskExecutor(executor);
 
   }
 

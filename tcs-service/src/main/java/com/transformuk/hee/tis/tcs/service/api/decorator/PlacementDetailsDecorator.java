@@ -1,19 +1,13 @@
 package com.transformuk.hee.tis.tcs.service.api.decorator;
 
-import com.google.common.collect.Sets;
-import com.transformuk.hee.tis.reference.api.dto.GradeDTO;
-import com.transformuk.hee.tis.reference.api.dto.SiteDTO;
-import com.transformuk.hee.tis.reference.client.ReferenceService;
 import com.transformuk.hee.tis.tcs.api.dto.PlacementDetailsDTO;
-import com.transformuk.hee.tis.tcs.service.model.PersonBasicDetails;
 import com.transformuk.hee.tis.tcs.service.repository.OwnerProjection;
-import com.transformuk.hee.tis.tcs.service.repository.PersonBasicDetailsRepository;
 import com.transformuk.hee.tis.tcs.service.repository.PostRepository;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.scheduling.annotation.Async;
 import org.springframework.stereotype.Component;
+import org.springframework.util.StringUtils;
 
-import java.util.List;
+import java.util.Collections;
 import java.util.concurrent.CompletableFuture;
 
 /**
@@ -22,16 +16,16 @@ import java.util.concurrent.CompletableFuture;
 @Component
 public class PlacementDetailsDecorator {
 
-  private ReferenceService referenceService;
-  private PersonBasicDetailsRepository personBasicDetailsRepository;
   private PostRepository postRepository;
+  private AsyncReferenceService referenceService;
+  private PersonBasicDetailsRepositoryAccessor personDetailsRepo;
 
   @Autowired
-  public PlacementDetailsDecorator(ReferenceService referenceService, PersonBasicDetailsRepository personBasicDetailsRepository,
+  public PlacementDetailsDecorator(AsyncReferenceService asyncReferenceService, PersonBasicDetailsRepositoryAccessor personBasicDetailsRepositoryAccessor,
                                    PostRepository postRepository) {
-    this.referenceService = referenceService;
-    this.personBasicDetailsRepository = personBasicDetailsRepository;
+    this.personDetailsRepo = personBasicDetailsRepositoryAccessor;
     this.postRepository = postRepository;
+    this.referenceService = asyncReferenceService;
   }
 
   /**
@@ -42,62 +36,54 @@ public class PlacementDetailsDecorator {
   public PlacementDetailsDTO decorate(PlacementDetailsDTO placementDetailsDTO) {
     if (placementDetailsDTO == null) return null;
 
-    CompletableFuture<Void> traineeNameFuture = decorateTraineeName(placementDetailsDTO);
-    CompletableFuture<Void> siteNameFuture = decorateSiteName(placementDetailsDTO);
-    CompletableFuture<Void> gradeNameFuture = decorateGradeName(placementDetailsDTO);
-    CompletableFuture<Void> ownerFuture = decorateOwner(placementDetailsDTO);
+    CompletableFuture<Void> futures = CompletableFuture.allOf(
+            decorateSiteName(placementDetailsDTO),
+            decorateGradeName(placementDetailsDTO));
 
-    CompletableFuture.allOf(traineeNameFuture, siteNameFuture, gradeNameFuture, ownerFuture).join();
+    decorateTraineeName(placementDetailsDTO);
+    decorateOwner(placementDetailsDTO);
+
+    futures.join();
     return placementDetailsDTO;
   }
 
-  @Async
-  protected CompletableFuture<Void> decorateTraineeName(PlacementDetailsDTO placementDetailsDTO) {
-    if (placementDetailsDTO.getTraineeId() != null && placementDetailsDTO.getTraineeId() != 0) {
-      PersonBasicDetails bdt = personBasicDetailsRepository.findOne(placementDetailsDTO.getTraineeId());
-      if (bdt != null) {
-        placementDetailsDTO.setTraineeFirstName(bdt.getFirstName());
-        placementDetailsDTO.setTraineeLastName(bdt.getLastName());
-        if (bdt.getGmcDetails() != null) {
-          placementDetailsDTO.setTraineeGmcNumber(bdt.getGmcDetails().getGmcNumber());
-        }
+  protected void decorateTraineeName(PlacementDetailsDTO placementDetailsDTO) {
+    personDetailsRepo.doWithPersonBasicDetails(
+        placementDetailsDTO.getTraineeId(),
+        personDetails -> {
+          placementDetailsDTO.setTraineeFirstName(personDetails.getFirstName());
+          placementDetailsDTO.setTraineeLastName(personDetails.getLastName());
+          if (personDetails.getGmcDetails() != null) {
+            placementDetailsDTO.setTraineeGmcNumber(personDetails.getGmcDetails().getGmcNumber());
+          }
+        });
+  }
+  
+  protected void decorateOwner(PlacementDetailsDTO placementDetailsDTO) {
+    Long postId = placementDetailsDTO.getPostId();
+    if (postId != null && postId != 0) {
+      OwnerProjection ownerProjection = postRepository.findPostById(postId);
+      if (ownerProjection != null) {
+        placementDetailsDTO.setOwner(ownerProjection.getOwner());
+        placementDetailsDTO.setNationalPostNumber(ownerProjection.getNationalPostNumber());
       }
     }
-    return CompletableFuture.completedFuture(null);
   }
 
-  @Async
   protected CompletableFuture<Void> decorateSiteName(PlacementDetailsDTO placementDetailsDTO) {
-    if (placementDetailsDTO.getSiteCode() != null && !placementDetailsDTO.getSiteCode().isEmpty()) {
-      List<SiteDTO> sites = referenceService.findSitesIn(Sets.newHashSet(placementDetailsDTO.getSiteCode()));
-      if (sites != null && !sites.isEmpty()) {
-        placementDetailsDTO.setSiteName(sites.get(0).getSiteName());
-      }
-    }
-    return CompletableFuture.completedFuture(null);
+    return referenceService.doWithSitesAsync(
+            () -> !StringUtils.isEmpty(placementDetailsDTO.getSiteCode()),
+            Collections.singleton(placementDetailsDTO.getSiteCode()),
+            sites -> {
+              placementDetailsDTO.setSiteName(sites.values().iterator().next().getSiteName());
+            });
   }
 
-  @Async
   protected CompletableFuture<Void> decorateGradeName(PlacementDetailsDTO placementDetailsDTO) {
-    if (placementDetailsDTO.getGradeAbbreviation() != null && !placementDetailsDTO.getGradeAbbreviation().isEmpty()) {
-      List<GradeDTO> grades = referenceService.findGradesIn(Sets.newHashSet(placementDetailsDTO.getGradeAbbreviation()));
-      if (grades != null && !grades.isEmpty()) {
-        placementDetailsDTO.setGradeName(grades.get(0).getName());
-      }
-    }
-    return CompletableFuture.completedFuture(null);
+    return referenceService.doWithGradesAsync(
+            () -> !StringUtils.isEmpty(placementDetailsDTO.getGradeAbbreviation()),
+            Collections.singleton(placementDetailsDTO.getGradeAbbreviation()), grades -> {
+              placementDetailsDTO.setGradeName(grades.values().iterator().next().getName());
+            });
   }
-
-  @Async
-  protected CompletableFuture<Void> decorateOwner(PlacementDetailsDTO placementDetailsDTO) {
-    if (placementDetailsDTO.getPostId() != null && placementDetailsDTO.getPostId() != 0) {
-      OwnerProjection op = postRepository.findPostById(placementDetailsDTO.getPostId());
-      if (op != null) {
-        placementDetailsDTO.setOwner(op.getOwner());
-        placementDetailsDTO.setNationalPostNumber(op.getNationalPostNumber());
-      }
-    }
-    return CompletableFuture.completedFuture(null);
-  }
-
 }

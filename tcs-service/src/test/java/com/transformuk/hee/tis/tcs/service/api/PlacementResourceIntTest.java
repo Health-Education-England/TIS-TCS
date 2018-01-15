@@ -3,11 +3,13 @@ package com.transformuk.hee.tis.tcs.service.api;
 import com.google.common.collect.Sets;
 import com.transformuk.hee.tis.reference.api.dto.GradeDTO;
 import com.transformuk.hee.tis.reference.api.dto.SiteDTO;
-import com.transformuk.hee.tis.reference.client.impl.ReferenceServiceImpl;
+import com.transformuk.hee.tis.reference.client.ReferenceService;
 import com.transformuk.hee.tis.tcs.api.dto.PlacementDTO;
 import com.transformuk.hee.tis.tcs.api.dto.PlacementDetailsDTO;
 import com.transformuk.hee.tis.tcs.service.Application;
+import com.transformuk.hee.tis.tcs.service.api.decorator.PersonBasicDetailsRepositoryAccessor;
 import com.transformuk.hee.tis.tcs.service.api.decorator.PlacementDetailsDecorator;
+import com.transformuk.hee.tis.tcs.service.api.decorator.AsyncReferenceService;
 import com.transformuk.hee.tis.tcs.service.api.validation.PlacementValidator;
 import com.transformuk.hee.tis.tcs.service.exception.ExceptionTranslator;
 import com.transformuk.hee.tis.tcs.service.model.ContactDetails;
@@ -16,12 +18,7 @@ import com.transformuk.hee.tis.tcs.service.model.Placement;
 import com.transformuk.hee.tis.tcs.service.model.PlacementDetails;
 import com.transformuk.hee.tis.tcs.service.model.Post;
 import com.transformuk.hee.tis.tcs.service.model.Specialty;
-import com.transformuk.hee.tis.tcs.service.repository.ContactDetailsRepository;
-import com.transformuk.hee.tis.tcs.service.repository.PersonBasicDetailsRepository;
-import com.transformuk.hee.tis.tcs.service.repository.PersonRepository;
-import com.transformuk.hee.tis.tcs.service.repository.PlacementDetailsRepository;
-import com.transformuk.hee.tis.tcs.service.repository.PostRepository;
-import com.transformuk.hee.tis.tcs.service.repository.SpecialtyRepository;
+import com.transformuk.hee.tis.tcs.service.repository.*;
 import com.transformuk.hee.tis.tcs.service.service.PlacementService;
 import com.transformuk.hee.tis.tcs.service.service.mapper.PlacementDetailsMapper;
 import org.apache.commons.codec.EncoderException;
@@ -108,6 +105,8 @@ public class PlacementResourceIntTest {
   @Autowired
   private PersonBasicDetailsRepository personBasicDetailsRepository;
   @Autowired
+  private PersonBasicDetailsRepositoryAccessor asyncPersonBasicDetailsRepository;
+  @Autowired
   private ContactDetailsRepository contactDetailsRepository;
   @Autowired
   private PostRepository postRepository;
@@ -126,8 +125,11 @@ public class PlacementResourceIntTest {
   @Autowired
   private ExceptionTranslator exceptionTranslator;
 
+  private AsyncReferenceService asyncReferenceService;
+
   @Mock
-  private ReferenceServiceImpl referenceService;
+  private ReferenceService referenceService;
+
 
   @Autowired
   private EntityManager entityManager;
@@ -174,8 +176,9 @@ public class PlacementResourceIntTest {
   @Before
   public void setup() {
     MockitoAnnotations.initMocks(this);
+    asyncReferenceService = new AsyncReferenceService(referenceService);
     placementValidator = new PlacementValidator(specialtyRepository, referenceService, postRepository, personRepository);
-    placementDetailsDecorator = new PlacementDetailsDecorator(referenceService, personBasicDetailsRepository, postRepository);
+    placementDetailsDecorator = new PlacementDetailsDecorator(asyncReferenceService, asyncPersonBasicDetailsRepository, postRepository);
     PlacementResource placementResource = new PlacementResource(placementService, placementValidator, placementDetailsDecorator);
     this.restPlacementMockMvc = MockMvcBuilders.standaloneSetup(placementResource)
         .setCustomArgumentResolvers(pageableArgumentResolver)
