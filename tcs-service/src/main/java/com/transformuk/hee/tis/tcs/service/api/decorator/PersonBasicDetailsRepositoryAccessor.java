@@ -18,7 +18,6 @@ public class PersonBasicDetailsRepositoryAccessor {
 
     @Autowired
     public PersonBasicDetailsRepositoryAccessor(PersonBasicDetailsRepository personBasicDetailsRepository) {
-        System.out.println(personBasicDetailsRepository);
         this.personBasicDetailsRepository = personBasicDetailsRepository;
     }
 
