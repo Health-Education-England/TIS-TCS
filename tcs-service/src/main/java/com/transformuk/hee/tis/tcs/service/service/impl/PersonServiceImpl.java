@@ -135,7 +135,7 @@ public class PersonServiceImpl implements PersonService {
     queryParams.put("start", start);
     queryParams.put("end", end);
     List<PersonViewDTO> persons = namedParameterJdbcTemplate.query(query, queryParams, new PersonViewRowMapper());
-    return new PageImpl<>(persons.subList(start,end),pageable,persons.size());
+    return new PageImpl<>(persons.subList(start,end),pageable,personCount);
   }
 
   @Override
@@ -200,7 +200,7 @@ public class PersonServiceImpl implements PersonService {
     if(CollectionUtils.isEmpty(persons)){
       return new PageImpl<>(persons);
     }
-    return new PageImpl<>(persons.subList(start,end),pageable,persons.size());
+    return new PageImpl<>(persons.subList(start,end),pageable,personCount);
   }
 
   @Override
