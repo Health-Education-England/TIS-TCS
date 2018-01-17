@@ -1,9 +1,12 @@
 package com.transformuk.hee.tis.tcs.service.service.impl;
 
 import com.google.common.collect.Lists;
+import com.google.common.collect.Maps;
 import com.transformuk.hee.tis.tcs.api.dto.PersonBasicDetailsDTO;
 import com.transformuk.hee.tis.tcs.api.dto.PersonDTO;
 import com.transformuk.hee.tis.tcs.api.dto.PersonViewDTO;
+import com.transformuk.hee.tis.tcs.api.enumeration.PersonOwnerRule;
+import com.transformuk.hee.tis.tcs.api.enumeration.Status;
 import com.transformuk.hee.tis.tcs.service.model.ColumnFilter;
 import com.transformuk.hee.tis.tcs.service.model.Person;
 import com.transformuk.hee.tis.tcs.service.model.PersonBasicDetails;
@@ -13,6 +16,7 @@ import com.transformuk.hee.tis.tcs.service.repository.PersonBasicDetailsReposito
 import com.transformuk.hee.tis.tcs.service.repository.PersonRepository;
 import com.transformuk.hee.tis.tcs.service.repository.PersonViewRepository;
 import com.transformuk.hee.tis.tcs.service.service.PersonService;
+import com.transformuk.hee.tis.tcs.service.service.helper.SqlQuerySupplier;
 import com.transformuk.hee.tis.tcs.service.service.mapper.PersonBasicDetailsMapper;
 import com.transformuk.hee.tis.tcs.service.service.mapper.PersonMapper;
 import io.jsonwebtoken.lang.Collections;
@@ -21,17 +25,23 @@ import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.data.domain.Page;
-import org.springframework.data.domain.PageRequest;
-import org.springframework.data.domain.Pageable;
+import org.springframework.data.domain.*;
 import org.springframework.data.jpa.domain.Specification;
 import org.springframework.data.jpa.domain.Specifications;
+import org.springframework.jdbc.core.JdbcTemplate;
+import org.springframework.jdbc.core.RowMapper;
+import org.springframework.jdbc.core.namedparam.NamedParameterJdbcTemplate;
 import org.springframework.scheduling.annotation.Async;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+import org.springframework.util.CollectionUtils;
 
+import javax.persistence.EntityManager;
+import java.sql.ResultSet;
+import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Map;
 import java.util.concurrent.CompletableFuture;
 
 import static com.transformuk.hee.tis.tcs.service.service.impl.SpecificationFactory.containsLike;
@@ -61,6 +71,12 @@ public class PersonServiceImpl implements PersonService {
   private PersonViewRepository personViewRepository;
   @Autowired
   private PersonViewMapper personViewMapper;
+
+  @Autowired
+  private NamedParameterJdbcTemplate namedParameterJdbcTemplate;
+
+  @Autowired
+  private SqlQuerySupplier sqlQuerySupplier;
 
   /**
    * Save a person.
@@ -100,43 +116,91 @@ public class PersonServiceImpl implements PersonService {
   @Transactional(readOnly = true)
   public Page<PersonViewDTO> findAll(Pageable pageable) {
     log.debug("Request to get all People");
-    return personViewRepository.findAll(pageable)
-        .map(personViewMapper::personViewToPersonViewDTO);
+    Integer personCount = namedParameterJdbcTemplate.queryForObject("select count(1) from Person",
+            Maps.newHashMap(),Integer.class);
+
+    int start = pageable.getOffset();
+    int end = (start + pageable.getPageSize()) > personCount.intValue() ? personCount.intValue() : (start + pageable.getPageSize());
+
+    String query = sqlQuerySupplier.getQuery(SqlQuerySupplier.PERSON_VIEW);
+    query = query.replaceAll("WHERECLAUSE"," WHERE 1=1 ");
+    if(pageable.getSort() != null) {
+      String orderByClause = pageable.getSort().toString().replaceAll(":"," ");
+      query = query.replaceAll("ORDERBYCLAUSE", " ORDER BY cd." + orderByClause);
+    }
+    else{
+      query = query.replaceAll("ORDERBYCLAUSE", "");
+    }
+    Map<String, Object> queryParams = Maps.newHashMap();
+    queryParams.put("start", start);
+    queryParams.put("end", end);
+    List<PersonViewDTO> persons = namedParameterJdbcTemplate.query(query, queryParams, new PersonViewRowMapper());
+    return new PageImpl<>(persons.subList(start,end),pageable,persons.size());
   }
 
   @Override
   @Transactional(readOnly = true)
   public Page<PersonViewDTO> advancedSearch(String searchString, List<ColumnFilter> columnFilters, Pageable pageable) {
 
-    List<Specification<PersonView>> specs = new ArrayList<>();
-    //add the text search criteria
-    if (StringUtils.isNotEmpty(searchString)) {
-      Specifications innerSpecs = Specifications.where(containsLike("publicHealthNumber", searchString)).
-          or(containsLike("surname", searchString)).
-          or(containsLike("forenames", searchString)).
-          or(containsLike("gmcNumber", searchString)).
-          or(containsLike("gdcNumber", searchString)).
-          or(containsLike("placementType", searchString)).
-          or(containsLike("role", searchString));
-      if (StringUtils.isNumeric(searchString)) {
-        innerSpecs = innerSpecs.or(in("id", Lists.newArrayList(Long.parseLong(searchString))));
-      }
-      specs.add(innerSpecs);
-    }
+    StringBuilder countQuery = new StringBuilder();
+    countQuery.append("select count(1) from Person p" +
+            " left join ContactDetails cd on (cd.id = p.id)\n" +
+            " left join GmcDetails gmc on (gmc.id = p.id)\n" +
+            " left join GdcDetails gdc on (gdc.id = p.id) ");
+
+    StringBuilder whereClause = new StringBuilder();
+    whereClause.append(" WHERE 1=1 ");
 
     //add the column filters criteria
     if (columnFilters != null && !columnFilters.isEmpty()) {
-      columnFilters.forEach(cf -> specs.add(in(cf.getName(), cf.getValues())));
+      columnFilters.forEach(cf -> {
+        whereClause.append(" AND " + cf.getName() + " in (");
+        cf.getValues().stream().forEach( k -> whereClause.append("'" + k + "',"));
+        whereClause.deleteCharAt(whereClause.length() -1);
+        whereClause.append(")");
+      });
     }
 
-    Specifications<PersonView> fullSpec = Specifications.where(specs.get(0));
-    //add the rest of the specs that made it in
-    for (int i = 1; i < specs.size(); i++) {
-      fullSpec = fullSpec.and(specs.get(i));
+    if (StringUtils.isNotEmpty(searchString)) {
+      whereClause.append(" OR p.publicHealthNumber like ").append("'%" + searchString + "%'");
+      whereClause.append(" OR cd.surname like ").append("'%" + searchString + "%'");
+      whereClause.append(" OR cd.forenames like ").append("'%" + searchString + "%'");
+      whereClause.append(" OR gmc.gmcNumber like ").append("'%" + searchString + "%'");
+      whereClause.append(" OR gdc.gdcNumber like ").append("'%" + searchString + "%'");
+      whereClause.append(" OR p.role like ").append("'%" + searchString + "%'");
+      if(StringUtils.isNumeric(searchString)){
+        whereClause.append(" OR p.id in ").append("(" + Lists.newArrayList(Long.parseLong(searchString)).
+                toString().replace("[", "").replace("]", "") + ")");
+      }
     }
-    Page<PersonView> result = personViewRepository.findAll(fullSpec, pageable);
 
-    return result.map(personViewMapper::personViewToPersonViewDTO);
+
+
+    countQuery.append(whereClause);
+
+    Integer personCount = namedParameterJdbcTemplate.queryForObject(countQuery.toString(),
+            Maps.newHashMap(),Integer.class);
+
+    int start = pageable.getOffset();
+    int end = (start + pageable.getPageSize()) > personCount.intValue() ? personCount.intValue() : (start + pageable.getPageSize());
+
+    String query = sqlQuerySupplier.getQuery(SqlQuerySupplier.PERSON_VIEW);
+    query = query.replaceAll("WHERECLAUSE",whereClause.toString());
+    if(pageable.getSort() != null) {
+      String orderByClause = pageable.getSort().toString().replaceAll(":"," ");
+      query = query.replaceAll("ORDERBYCLAUSE", " ORDER BY cd." + orderByClause);
+    }
+    else{
+      query = query.replaceAll("ORDERBYCLAUSE", "");
+    }
+    Map<String, Object> queryParams = Maps.newHashMap();
+    queryParams.put("start", start);
+    queryParams.put("end", end);
+    List<PersonViewDTO> persons = namedParameterJdbcTemplate.query(query, queryParams, new PersonViewRowMapper());
+    if(CollectionUtils.isEmpty(persons)){
+      return new PageImpl<>(persons);
+    }
+    return new PageImpl<>(persons.subList(start,end),pageable,persons.size());
   }
 
   @Override
@@ -221,5 +285,39 @@ public class PersonServiceImpl implements PersonService {
     log.debug("Request to build Person view");
     personRepository.buildPersonView();
     return CompletableFuture.completedFuture(null);
+  }
+
+  private static class PersonViewRowMapper implements RowMapper<PersonViewDTO> {
+
+    @Override
+    public PersonViewDTO mapRow(ResultSet rs, int i) throws SQLException {
+      PersonViewDTO view = new PersonViewDTO();
+      view.setId(rs.getLong("id"));
+      view.setIntrepidId(rs.getString("intrepidId"));
+      view.setSurname(rs.getString("surname"));
+      view.setForenames(rs.getString("forenames"));
+      view.setGmcNumber(rs.getString("gmcNumber"));
+      view.setGdcNumber(rs.getString("gdcNumber"));
+      view.setPublicHealthNumber(rs.getString("publicHealthNumber"));
+      view.setProgrammeId(rs.getLong("programmeId"));
+      view.setProgrammeName(rs.getString("programmeName"));
+      view.setProgrammeNumber(rs.getString("programmeNumber"));
+      view.setTrainingNumber(rs.getString("trainingNumber"));
+      view.setGradeAbbreviation(rs.getString("gradeAbbreviation"));
+
+      view.setSiteCode(rs.getString("siteCode"));
+      view.setPlacementType(rs.getString("placementType"));
+      view.setRole(rs.getString("role"));
+      String status = rs.getString("status");
+      if(StringUtils.isNotEmpty(status)) {
+        view.setStatus(Status.valueOf(status));
+      }
+      view.setCurrentOwner(rs.getString("currentOwner"));
+      String ownerRule = rs.getString("currentOwnerRule");
+      if(StringUtils.isNotEmpty(ownerRule)) {
+        view.setCurrentOwnerRule(PersonOwnerRule.valueOf(ownerRule));
+      }
+      return view;
+    }
   }
 }

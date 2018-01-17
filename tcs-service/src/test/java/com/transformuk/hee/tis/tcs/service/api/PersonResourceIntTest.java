@@ -7,10 +7,7 @@ import com.transformuk.hee.tis.tcs.service.Application;
 import com.transformuk.hee.tis.tcs.service.api.decorator.PersonViewDecorator;
 import com.transformuk.hee.tis.tcs.service.api.decorator.PlacementViewDecorator;
 import com.transformuk.hee.tis.tcs.service.exception.ExceptionTranslator;
-import com.transformuk.hee.tis.tcs.service.model.ContactDetails;
-import com.transformuk.hee.tis.tcs.service.model.GmcDetails;
-import com.transformuk.hee.tis.tcs.service.model.Person;
-import com.transformuk.hee.tis.tcs.service.model.PersonView;
+import com.transformuk.hee.tis.tcs.service.model.*;
 import com.transformuk.hee.tis.tcs.service.repository.ContactDetailsRepository;
 import com.transformuk.hee.tis.tcs.service.repository.GdcDetailsRepository;
 import com.transformuk.hee.tis.tcs.service.repository.GmcDetailsRepository;
@@ -296,13 +293,26 @@ public class PersonResourceIntTest {
   @Transactional
   public void getAllPeople() throws Exception {
     // Initialize the database
-    personViewRepository.saveAndFlush(personView);
+    personRepository.saveAndFlush(person);
+    GmcDetails gmcDetails = new GmcDetails();
+    gmcDetails.setId(person.getId());
+    gmcDetails.setGmcNumber(GMC_NUMBER);
+    gmcDetailsRepository.saveAndFlush(gmcDetails);
+    GdcDetails gdcDetails = new GdcDetails();
+    gdcDetails.setId(person.getId());
+    gdcDetails.setGdcNumber(GDC_NUMBER);
+    gdcDetailsRepository.saveAndFlush(gdcDetails);
+    ContactDetails contactDetails = new ContactDetails();
+    contactDetails.setId(person.getId());
+    contactDetails.setSurname(PERSON_SURNANME);
+    contactDetails.setForenames(PERSON_FORENAMES);
+    contactDetailsRepository.saveAndFlush(contactDetails);
 
     // Get all the personList
     restPersonMockMvc.perform(get("/api/people?sort=id,desc"))
         .andExpect(status().isOk())
         .andExpect(content().contentType(MediaType.APPLICATION_JSON_UTF8_VALUE))
-        .andExpect(jsonPath("$.[*].id").value(hasItem(personView.getId().intValue())))
+        .andExpect(jsonPath("$.[*].id").value(hasItem(person.getId().intValue())))
         .andExpect(jsonPath("$.[*].intrepidId").value(hasItem(DEFAULT_INTREPID_ID)))
         .andExpect(jsonPath("$.[*].forenames").value(hasItem(PERSON_FORENAMES)))
         .andExpect(jsonPath("$.[*].surname").value(hasItem(PERSON_SURNANME)))
@@ -433,14 +443,19 @@ public class PersonResourceIntTest {
   @Test
   @Transactional
   public void shouldTextSearchSurname() throws Exception {
-    PersonView anotherPerson = createPersonView();
-    personViewRepository.saveAndFlush(anotherPerson);
+    Person anotherPerson = createEntity();
+    personRepository.saveAndFlush(anotherPerson);
+    ContactDetails contactDetails = new ContactDetails();
+    contactDetails.setId(anotherPerson.getId());
+    contactDetails.setSurname(PERSON_SURNANME);
+    contactDetails.setForenames(PERSON_FORENAMES);
+    contactDetailsRepository.saveAndFlush(contactDetails);
+    anotherPerson.setContactDetails(contactDetails);
 
     restPersonMockMvc.perform(get("/api/people?searchQuery=" + PERSON_SURNANME))
         .andExpect(status().isOk())
         .andExpect(content().contentType(MediaType.APPLICATION_JSON_UTF8_VALUE))
         .andExpect(jsonPath("$.[*].id").value(anotherPerson.getId().intValue()))
-        .andExpect(jsonPath("$.[*].gdcNumber").value(GDC_NUMBER))
         .andExpect(jsonPath("$.[*].forenames").value(hasItem(PERSON_FORENAMES)))
         .andExpect(jsonPath("$.[*].surname").value(hasItem(PERSON_SURNANME)))
         .andExpect(jsonPath("$.[*].intrepidId").value(DEFAULT_INTREPID_ID.toString()))
@@ -451,17 +466,19 @@ public class PersonResourceIntTest {
   @Test
   @Transactional
   public void shouldTextSearchGmcDetails() throws Exception {
-    PersonView anotherPerson = createPersonView();
-    personViewRepository.saveAndFlush(anotherPerson);
+    Person anotherPerson = createEntity();
+    personRepository.saveAndFlush(anotherPerson);
+    GmcDetails gmcDetails = new GmcDetails();
+    gmcDetails.setId(anotherPerson.getId());
+    gmcDetails.setGmcNumber(GMC_NUMBER);
+    gmcDetailsRepository.saveAndFlush(gmcDetails);
+    anotherPerson.setGmcDetails(gmcDetails);
 
     restPersonMockMvc.perform(get("/api/people?searchQuery=" + GMC_NUMBER))
         .andExpect(status().isOk())
         .andExpect(content().contentType(MediaType.APPLICATION_JSON_UTF8_VALUE))
         .andExpect(jsonPath("$.[*].id").value(anotherPerson.getId().intValue()))
         .andExpect(jsonPath("$.[*].gmcNumber").value(GMC_NUMBER))
-        .andExpect(jsonPath("$.[*].gdcNumber").value(GDC_NUMBER))
-        .andExpect(jsonPath("$.[*].forenames").value(hasItem(PERSON_FORENAMES)))
-        .andExpect(jsonPath("$.[*].surname").value(hasItem(PERSON_SURNANME)))
         .andExpect(jsonPath("$.[*].intrepidId").value(DEFAULT_INTREPID_ID.toString()))
         .andExpect(jsonPath("$.[*].role").value(DEFAULT_ROLE.toString()))
         .andExpect(jsonPath("$.[*].status").value(DEFAULT_STATUS.toString()));
@@ -470,8 +487,21 @@ public class PersonResourceIntTest {
   @Test
   @Transactional
   public void shouldTextSearchGdcDetails() throws Exception {
-    PersonView anotherPerson = createPersonView();
-    personViewRepository.saveAndFlush(anotherPerson);
+    Person anotherPerson = createEntity();
+    personRepository.saveAndFlush(anotherPerson);
+    GdcDetails gdcDetails = new GdcDetails();
+    gdcDetails.setId(anotherPerson.getId());
+    gdcDetails.setGdcNumber(GDC_NUMBER);
+    gdcDetailsRepository.saveAndFlush(gdcDetails);
+    anotherPerson.setGdcDetails(gdcDetails);
+
+    ContactDetails contactDetails = new ContactDetails();
+    contactDetails.setId(anotherPerson.getId());
+    contactDetails.setForenames(PERSON_FORENAMES);
+    contactDetails.setSurname(PERSON_SURNANME);
+    contactDetailsRepository.saveAndFlush(contactDetails);
+    anotherPerson.setContactDetails(contactDetails);
+
 
     restPersonMockMvc.perform(get("/api/people?searchQuery=" + GDC_NUMBER))
         .andExpect(status().isOk())
@@ -488,8 +518,8 @@ public class PersonResourceIntTest {
   @Test
   @Transactional
   public void shouldTextSearchPublicHealthNumber() throws Exception {
-    PersonView anotherPerson = createPersonView();
-    personViewRepository.saveAndFlush(anotherPerson);
+    Person anotherPerson = createEntity();
+    personRepository.saveAndFlush(anotherPerson);
 
     restPersonMockMvc.perform(get("/api/people?searchQuery=" + DEFAULT_PUBLIC_HEALTH_NUMBER))
         .andExpect(status().isOk())
@@ -504,8 +534,19 @@ public class PersonResourceIntTest {
   @Test
   @Transactional
   public void shouldTextSearch() throws Exception {
-    PersonView anotherPerson = createPersonView();
-    personViewRepository.saveAndFlush(anotherPerson);
+    Person anotherPerson = createEntity();
+    personRepository.saveAndFlush(anotherPerson);
+    ContactDetails contactDetails = new ContactDetails();
+    contactDetails.setId(anotherPerson.getId());
+    contactDetails.setSurname(PERSON_SURNANME);
+    contactDetailsRepository.saveAndFlush(contactDetails);
+
+    GmcDetails gmcDetails = new GmcDetails();
+    gmcDetails.setId(anotherPerson.getId());
+    gmcDetails.setGmcNumber(GMC_NUMBER);
+    gmcDetailsRepository.saveAndFlush(gmcDetails);
+    anotherPerson.setGmcDetails(gmcDetails);
+    anotherPerson.setContactDetails(contactDetails);
 
     restPersonMockMvc.perform(get("/api/people?searchQuery=" + PERSON_SURNANME))
         .andExpect(status().isOk())
@@ -522,11 +563,10 @@ public class PersonResourceIntTest {
   public void shouldFilterColumns() throws Exception {
     //given
     // Initialize the database
-    personViewRepository.saveAndFlush(personView);
-    PersonView otherStatusPerson = createPersonView();
+    personRepository.saveAndFlush(person);
+    Person otherStatusPerson = createEntity();
     otherStatusPerson.setStatus(Status.INACTIVE);
-    otherStatusPerson.setIntrepidId(OTHER_INTREPID_ID);
-    personViewRepository.saveAndFlush(otherStatusPerson);
+    personRepository.saveAndFlush(otherStatusPerson);
 
     //when & then
     String colFilters = new URLCodec().encode("{\"status\":[\"INACTIVE\"]}");
@@ -542,15 +582,19 @@ public class PersonResourceIntTest {
   public void shouldTextSearchAndFilterColumns() throws Exception {
     //given
     // Initialize the database
-    personViewRepository.saveAndFlush(personView);
-    PersonView otherStatusPerson = createPersonView();
+    personRepository.saveAndFlush(person);
+    Person otherStatusPerson = createEntity();
     otherStatusPerson.setStatus(Status.INACTIVE);
-    personViewRepository.saveAndFlush(otherStatusPerson);
+    personRepository.saveAndFlush(otherStatusPerson);
 
-    PersonView otherNamePerson = createPersonView();
+    Person otherNamePerson = createEntity();
     otherNamePerson.setStatus(Status.INACTIVE);
-    otherNamePerson.setSurname(PERSON_OHTER_SURNANME);
-    personViewRepository.saveAndFlush(otherNamePerson);
+    personRepository.saveAndFlush(otherNamePerson);
+    ContactDetails contactDetails = new ContactDetails();
+    contactDetails.setId(otherNamePerson.getId());
+    contactDetails.setSurname(PERSON_OHTER_SURNANME);
+    contactDetailsRepository.saveAndFlush(contactDetails);
+    otherNamePerson.setContactDetails(contactDetails);
 
     //when & then
     String colFilters = new URLCodec().encode("{\"status\":[\"INACTIVE\"]}");
@@ -558,8 +602,8 @@ public class PersonResourceIntTest {
     restPersonMockMvc.perform(get("/api/people?sort=id,desc&searchQuery=" + PERSON_OHTER_SURNANME +
         "&columnFilters=" + colFilters))
         .andExpect(status().isOk())
-        .andExpect(jsonPath("$.[*].status").value("INACTIVE"))
-        .andExpect(jsonPath("$.[*].surname").value(PERSON_OHTER_SURNANME));
+        .andExpect(jsonPath("$.[*].status").value(hasItem("INACTIVE")))
+        .andExpect(jsonPath("$.[*].surname").value(hasItem(PERSON_OHTER_SURNANME)));
   }
 
   @Test
