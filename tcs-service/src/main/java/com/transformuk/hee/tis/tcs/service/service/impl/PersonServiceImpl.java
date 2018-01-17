@@ -154,7 +154,7 @@ public class PersonServiceImpl implements PersonService {
     //add the column filters criteria
     if (columnFilters != null && !columnFilters.isEmpty()) {
       columnFilters.forEach(cf -> {
-        whereClause.append(" AND " + cf.getName() + " in (");
+        whereClause.append(" AND p." + cf.getName() + " in (");
         cf.getValues().stream().forEach( k -> whereClause.append("'" + k + "',"));
         whereClause.deleteCharAt(whereClause.length() -1);
         whereClause.append(")");
