@@ -162,7 +162,7 @@ public class PersonServiceImpl implements PersonService {
     }
 
     if (StringUtils.isNotEmpty(searchString)) {
-      whereClause.append(" OR p.publicHealthNumber like ").append("'%" + searchString + "%'");
+      whereClause.append(" AND ( p.publicHealthNumber like ").append("'%" + searchString + "%'");
       whereClause.append(" OR cd.surname like ").append("'%" + searchString + "%'");
       whereClause.append(" OR cd.forenames like ").append("'%" + searchString + "%'");
       whereClause.append(" OR gmc.gmcNumber like ").append("'%" + searchString + "%'");
@@ -172,6 +172,7 @@ public class PersonServiceImpl implements PersonService {
         whereClause.append(" OR p.id in ").append("(" + Lists.newArrayList(Long.parseLong(searchString)).
                 toString().replace("[", "").replace("]", "") + ")");
       }
+      whereClause.append(" ) ");
     }
 
 
