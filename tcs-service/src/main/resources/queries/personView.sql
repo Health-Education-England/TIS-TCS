@@ -17,10 +17,10 @@ select p.id,
      lo.owner as currentOwner,
      lo.rule as currentOwnerRule
 from Person p
-left join ContactDetails cd on (cd.id = p.id)
-left join GmcDetails gmc on (gmc.id = p.id)
-left join GdcDetails gdc on (gdc.id = p.id)
-left join (select pm.personid,
+join ContactDetails cd on (cd.id = p.id)
+join GmcDetails gmc on (gmc.id = p.id)
+join GdcDetails gdc on (gdc.id = p.id)
+join (select pm.personid,
         pm.programmeStartDate,
         pm.programmeEndDate,
                 pm.programmeId,
@@ -32,7 +32,7 @@ left join (select pm.personid,
          join Programme prg on (prg.id = pm.programmeId)
      ) pm on (pm.personId = p.id and curdate() between pm.programmeStartDate and pm.programmeEndDate)
 left join Placement pl on (pl.traineeId = p.id) and curdate() between pl.dateFrom and pl.dateTo
-join PersonOwner lo on (lo.id = p.id)
+left join PersonOwner lo on (lo.id = p.id)
  WHERECLAUSE
  ORDERBYCLAUSE
 limit  :start , :end;

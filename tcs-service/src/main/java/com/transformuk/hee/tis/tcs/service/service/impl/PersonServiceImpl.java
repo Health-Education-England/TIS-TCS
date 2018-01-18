@@ -144,9 +144,9 @@ public class PersonServiceImpl implements PersonService {
 
     StringBuilder countQuery = new StringBuilder();
     countQuery.append("select count(1) from Person p" +
-            " left join ContactDetails cd on (cd.id = p.id)\n" +
-            " left join GmcDetails gmc on (gmc.id = p.id)\n" +
-            " left join GdcDetails gdc on (gdc.id = p.id) ");
+            " join ContactDetails cd on (cd.id = p.id)\n" +
+            " join GmcDetails gmc on (gmc.id = p.id)\n" +
+            " join GdcDetails gdc on (gdc.id = p.id) ");
 
     StringBuilder whereClause = new StringBuilder();
     whereClause.append(" WHERE 1=1 ");
@@ -189,7 +189,7 @@ public class PersonServiceImpl implements PersonService {
     query = query.replaceAll("WHERECLAUSE",whereClause.toString());
     if(pageable.getSort() != null) {
       String orderByClause = pageable.getSort().toString().replaceAll(":"," ");
-      query = query.replaceAll("ORDERBYCLAUSE", " ORDER BY cd." + orderByClause);
+      query = query.replaceAll("ORDERBYCLAUSE", " ORDER BY " + orderByClause);
     }
     else{
       query = query.replaceAll("ORDERBYCLAUSE", "");

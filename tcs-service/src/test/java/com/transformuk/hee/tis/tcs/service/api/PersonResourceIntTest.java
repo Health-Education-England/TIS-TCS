@@ -169,6 +169,26 @@ public class PersonResourceIntTest {
     return person;
   }
 
+  private Person createPersonBlankSubSections(Person person){
+    Long id = person.getId();
+    ContactDetails contactDetails = new ContactDetails();
+    contactDetails.setId(id);
+    contactDetailsRepository.saveAndFlush(contactDetails);
+    person.setContactDetails(contactDetails);
+
+    GmcDetails gmcDetails = new GmcDetails();
+    gmcDetails.setId(id);
+    gmcDetailsRepository.saveAndFlush(gmcDetails);
+    person.setGmcDetails(gmcDetails);
+
+    GdcDetails gdcDetails = new GdcDetails();
+    gdcDetails.setId(id);
+    gdcDetailsRepository.saveAndFlush(gdcDetails);
+    person.setGdcDetails(gdcDetails);
+
+    return person;
+  }
+
   public static PersonView createPersonView() {
     PersonView personView = new PersonView();
     personView.setIntrepidId(DEFAULT_INTREPID_ID);
@@ -445,12 +465,11 @@ public class PersonResourceIntTest {
   public void shouldTextSearchSurname() throws Exception {
     Person anotherPerson = createEntity();
     personRepository.saveAndFlush(anotherPerson);
-    ContactDetails contactDetails = new ContactDetails();
-    contactDetails.setId(anotherPerson.getId());
+    anotherPerson = createPersonBlankSubSections(anotherPerson);
+    ContactDetails contactDetails =anotherPerson.getContactDetails();
     contactDetails.setSurname(PERSON_SURNANME);
     contactDetails.setForenames(PERSON_FORENAMES);
     contactDetailsRepository.saveAndFlush(contactDetails);
-    anotherPerson.setContactDetails(contactDetails);
 
     restPersonMockMvc.perform(get("/api/people?searchQuery=" + PERSON_SURNANME))
         .andExpect(status().isOk())
@@ -468,11 +487,10 @@ public class PersonResourceIntTest {
   public void shouldTextSearchGmcDetails() throws Exception {
     Person anotherPerson = createEntity();
     personRepository.saveAndFlush(anotherPerson);
-    GmcDetails gmcDetails = new GmcDetails();
-    gmcDetails.setId(anotherPerson.getId());
+    anotherPerson = createPersonBlankSubSections(anotherPerson);
+    GmcDetails gmcDetails = anotherPerson.getGmcDetails();
     gmcDetails.setGmcNumber(GMC_NUMBER);
     gmcDetailsRepository.saveAndFlush(gmcDetails);
-    anotherPerson.setGmcDetails(gmcDetails);
 
     restPersonMockMvc.perform(get("/api/people?searchQuery=" + GMC_NUMBER))
         .andExpect(status().isOk())
@@ -489,19 +507,15 @@ public class PersonResourceIntTest {
   public void shouldTextSearchGdcDetails() throws Exception {
     Person anotherPerson = createEntity();
     personRepository.saveAndFlush(anotherPerson);
-    GdcDetails gdcDetails = new GdcDetails();
-    gdcDetails.setId(anotherPerson.getId());
+    anotherPerson = createPersonBlankSubSections(anotherPerson);
+    GdcDetails gdcDetails = anotherPerson.getGdcDetails();
     gdcDetails.setGdcNumber(GDC_NUMBER);
     gdcDetailsRepository.saveAndFlush(gdcDetails);
-    anotherPerson.setGdcDetails(gdcDetails);
 
-    ContactDetails contactDetails = new ContactDetails();
-    contactDetails.setId(anotherPerson.getId());
+    ContactDetails contactDetails = anotherPerson.getContactDetails();
     contactDetails.setForenames(PERSON_FORENAMES);
     contactDetails.setSurname(PERSON_SURNANME);
     contactDetailsRepository.saveAndFlush(contactDetails);
-    anotherPerson.setContactDetails(contactDetails);
-
 
     restPersonMockMvc.perform(get("/api/people?searchQuery=" + GDC_NUMBER))
         .andExpect(status().isOk())
@@ -520,6 +534,7 @@ public class PersonResourceIntTest {
   public void shouldTextSearchPublicHealthNumber() throws Exception {
     Person anotherPerson = createEntity();
     personRepository.saveAndFlush(anotherPerson);
+    createPersonBlankSubSections(anotherPerson);
 
     restPersonMockMvc.perform(get("/api/people?searchQuery=" + DEFAULT_PUBLIC_HEALTH_NUMBER))
         .andExpect(status().isOk())
@@ -536,17 +551,14 @@ public class PersonResourceIntTest {
   public void shouldTextSearch() throws Exception {
     Person anotherPerson = createEntity();
     personRepository.saveAndFlush(anotherPerson);
-    ContactDetails contactDetails = new ContactDetails();
-    contactDetails.setId(anotherPerson.getId());
+    anotherPerson = createPersonBlankSubSections(anotherPerson);
+    ContactDetails contactDetails = anotherPerson.getContactDetails();
     contactDetails.setSurname(PERSON_SURNANME);
     contactDetailsRepository.saveAndFlush(contactDetails);
 
-    GmcDetails gmcDetails = new GmcDetails();
-    gmcDetails.setId(anotherPerson.getId());
+    GmcDetails gmcDetails =anotherPerson.getGmcDetails();
     gmcDetails.setGmcNumber(GMC_NUMBER);
     gmcDetailsRepository.saveAndFlush(gmcDetails);
-    anotherPerson.setGmcDetails(gmcDetails);
-    anotherPerson.setContactDetails(contactDetails);
 
     restPersonMockMvc.perform(get("/api/people?searchQuery=" + PERSON_SURNANME))
         .andExpect(status().isOk())
@@ -558,6 +570,7 @@ public class PersonResourceIntTest {
         .andExpect(jsonPath("$.[*].status").value(DEFAULT_STATUS.name()));
   }
 
+
   @Test
   @Transactional
   public void shouldFilterColumns() throws Exception {
@@ -567,6 +580,7 @@ public class PersonResourceIntTest {
     Person otherStatusPerson = createEntity();
     otherStatusPerson.setStatus(Status.INACTIVE);
     personRepository.saveAndFlush(otherStatusPerson);
+    createPersonBlankSubSections(otherStatusPerson);
 
     //when & then
     String colFilters = new URLCodec().encode("{\"status\":[\"INACTIVE\"]}");
@@ -583,18 +597,20 @@ public class PersonResourceIntTest {
     //given
     // Initialize the database
     personRepository.saveAndFlush(person);
+    createPersonBlankSubSections(person);
     Person otherStatusPerson = createEntity();
     otherStatusPerson.setStatus(Status.INACTIVE);
     personRepository.saveAndFlush(otherStatusPerson);
+    createPersonBlankSubSections(otherStatusPerson);
 
     Person otherNamePerson = createEntity();
     otherNamePerson.setStatus(Status.INACTIVE);
     personRepository.saveAndFlush(otherNamePerson);
-    ContactDetails contactDetails = new ContactDetails();
-    contactDetails.setId(otherNamePerson.getId());
+    otherNamePerson = createPersonBlankSubSections(otherNamePerson);
+
+    ContactDetails contactDetails = otherNamePerson.getContactDetails();
     contactDetails.setSurname(PERSON_OHTER_SURNANME);
     contactDetailsRepository.saveAndFlush(contactDetails);
-    otherNamePerson.setContactDetails(contactDetails);
 
     //when & then
     String colFilters = new URLCodec().encode("{\"status\":[\"INACTIVE\"]}");
