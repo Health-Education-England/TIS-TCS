@@ -20,7 +20,7 @@ from Person p
 join ContactDetails cd on (cd.id = p.id)
 join GmcDetails gmc on (gmc.id = p.id)
 join GdcDetails gdc on (gdc.id = p.id)
-join (select pm.personid,
+left join (select pm.personid,
         pm.programmeStartDate,
         pm.programmeEndDate,
                 pm.programmeId,
