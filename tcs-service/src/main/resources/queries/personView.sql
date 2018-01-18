@@ -17,9 +17,9 @@ select p.id,
      lo.owner as currentOwner,
      lo.rule as currentOwnerRule
 from Person p
-join ContactDetails cd on (cd.id = p.id)
-join GmcDetails gmc on (gmc.id = p.id)
-join GdcDetails gdc on (gdc.id = p.id)
+left join ContactDetails cd on (cd.id = p.id)
+left join GmcDetails gmc on (gmc.id = p.id)
+left join GdcDetails gdc on (gdc.id = p.id)
 left join (select pm.personid,
         pm.programmeStartDate,
         pm.programmeEndDate,
