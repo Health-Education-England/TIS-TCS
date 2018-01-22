@@ -6,9 +6,9 @@ select p.id,
      gdc.gdcNumber,
      p.publicHealthNumber,
      pm.programmeId,
-     pm.programmeName,
-     pm.programmeNumber,
-     pm.TrainingNumber as trainingNumber,
+     prg.programmeName,
+     prg.programmeNumber,
+     pm.TrainingNumberId as trainingNumber,
      pl.gradeAbbreviation,
      pl.siteCode,
      pl.placementType,
@@ -20,17 +20,8 @@ from Person p
 join ContactDetails cd on (cd.id = p.id)
 join GmcDetails gmc on (gmc.id = p.id)
 join GdcDetails gdc on (gdc.id = p.id)
-left join (select pm.personid,
-        pm.programmeStartDate,
-        pm.programmeEndDate,
-                pm.programmeId,
-        prg.programmeName,
-        prg.programmeNumber,
-                pm.TrainingNumberId as TrainingNumber,
-        prg.owner as lo
-     from ProgrammeMembership pm
-         join Programme prg on (prg.id = pm.programmeId)
-     ) pm on (pm.personId = p.id and curdate() between pm.programmeStartDate and pm.programmeEndDate)
+left join ProgrammeMembership pm on (pm.personId = p.id) and curdate() between pm.programmeStartDate and pm.programmeEndDate
+left join Programme prg on (prg.id = pm.programmeId)
 left join Placement pl on (pl.traineeId = p.id) and curdate() between pl.dateFrom and pl.dateTo
 left join PersonOwner lo on (lo.id = p.id)
  WHERECLAUSE
