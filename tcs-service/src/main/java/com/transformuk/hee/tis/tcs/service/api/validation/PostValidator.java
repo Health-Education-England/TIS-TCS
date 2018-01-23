@@ -14,6 +14,7 @@ import com.transformuk.hee.tis.tcs.service.repository.PostRepository;
 import com.transformuk.hee.tis.tcs.service.repository.ProgrammeRepository;
 import com.transformuk.hee.tis.tcs.service.repository.SpecialtyRepository;
 import com.transformuk.hee.tis.tcs.service.service.mapper.DesignatedBodyMapper;
+import org.apache.commons.lang.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 import org.springframework.util.CollectionUtils;
@@ -109,9 +110,9 @@ public class PostValidator {
     if (postDTO.getSites() != null && !postDTO.getSites().isEmpty()) {
       List<String> siteIds = Lists.newArrayList();
       for (PostSiteDTO ps : postDTO.getSites()) {
-        if (ps.getSiteId() == null || Long.valueOf(ps.getSiteId()) < 0) {
+        if (ps.getSiteId() == null || StringUtils.isBlank(ps.getSiteId())) {
           fieldErrors.add(new FieldError(POST_DTO_NAME, "sites",
-              "Site ID cannot be null or negative"));
+              "Site ID cannot be null or blank"));
         } else {
           siteIds.add(ps.getSiteId());
         }
@@ -131,9 +132,9 @@ public class PostValidator {
     if (postDTO.getGrades() != null && !postDTO.getGrades().isEmpty()) {
       List<String> gradeIds = Lists.newArrayList();
       for (PostGradeDTO pg : postDTO.getGrades()) {
-        if (pg.getGradeId() == null || Long.valueOf(pg.getGradeId()) < 0) {
+        if (pg.getGradeId() == null || StringUtils.isBlank(pg.getGradeId())) {
           fieldErrors.add(new FieldError(POST_DTO_NAME, "grades",
-              "Grade ID cannot be null or negative"));
+              "Grade ID cannot be null or blank"));
         } else {
           gradeIds.add(pg.getGradeId());
         }
