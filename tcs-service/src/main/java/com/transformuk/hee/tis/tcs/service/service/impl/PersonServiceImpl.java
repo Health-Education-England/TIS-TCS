@@ -116,7 +116,10 @@ public class PersonServiceImpl implements PersonService {
   @Transactional(readOnly = true)
   public Page<PersonViewDTO> findAll(Pageable pageable) {
     log.debug("Request to get all People");
-    Integer personCount = namedParameterJdbcTemplate.queryForObject("select count(1) from Person",
+    Integer personCount = namedParameterJdbcTemplate.queryForObject("select count(1) from Person p" +
+                    " join ContactDetails cd on (cd.id = p.id)\n" +
+                    " join GmcDetails gmc on (gmc.id = p.id)\n" +
+                    " join GdcDetails gdc on (gdc.id = p.id) ",
             Maps.newHashMap(),Integer.class);
 
     int start = pageable.getOffset();
@@ -126,7 +129,7 @@ public class PersonServiceImpl implements PersonService {
     query = query.replaceAll("WHERECLAUSE"," WHERE 1=1 ");
     if(pageable.getSort() != null) {
       String orderByClause = pageable.getSort().toString().replaceAll(":"," ");
-      query = query.replaceAll("ORDERBYCLAUSE", " ORDER BY cd." + orderByClause);
+      query = query.replaceAll("ORDERBYCLAUSE", " ORDER BY " + orderByClause);
     }
     else{
       query = query.replaceAll("ORDERBYCLAUSE", "");
