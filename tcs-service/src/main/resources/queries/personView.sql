@@ -26,4 +26,5 @@ left join Placement pl on (pl.traineeId = p.id) and curdate() between pl.dateFro
 left join PersonOwner lo on (lo.id = p.id)
  WHERECLAUSE
  ORDERBYCLAUSE
-limit  :start , :end;
+ LIMITCLAUSE
+;

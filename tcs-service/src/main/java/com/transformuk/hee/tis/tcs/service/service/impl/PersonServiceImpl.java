@@ -36,7 +36,6 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.util.CollectionUtils;
 
-import javax.persistence.EntityManager;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.util.ArrayList;
@@ -73,7 +72,7 @@ public class PersonServiceImpl implements PersonService {
   private PersonViewMapper personViewMapper;
 
   @Autowired
-  private NamedParameterJdbcTemplate namedParameterJdbcTemplate;
+  private JdbcTemplate jdbcTemplate;
 
   @Autowired
   private SqlQuerySupplier sqlQuerySupplier;
@@ -116,14 +115,14 @@ public class PersonServiceImpl implements PersonService {
   @Transactional(readOnly = true)
   public Page<PersonViewDTO> findAll(Pageable pageable) {
     log.debug("Request to get all People");
-    Integer personCount = namedParameterJdbcTemplate.queryForObject("select count(1) from Person p" +
+    Integer personCount = jdbcTemplate.queryForObject("select count(p.id) from Person p" +
                     " join ContactDetails cd on (cd.id = p.id)\n" +
                     " join GmcDetails gmc on (gmc.id = p.id)\n" +
                     " join GdcDetails gdc on (gdc.id = p.id) ",
-            Maps.newHashMap(),Integer.class);
+            Integer.class);
 
     int start = pageable.getOffset();
-    int end = (start + pageable.getPageSize()) > personCount.intValue() ? personCount.intValue() : (start + pageable.getPageSize());
+    int end = ((start + pageable.getPageSize()) > personCount) ? personCount : (start + pageable.getPageSize());
 
     String query = sqlQuerySupplier.getQuery(SqlQuerySupplier.PERSON_VIEW);
     query = query.replaceAll("WHERECLAUSE"," WHERE 1=1 ");
@@ -134,10 +133,12 @@ public class PersonServiceImpl implements PersonService {
     else{
       query = query.replaceAll("ORDERBYCLAUSE", "");
     }
-    Map<String, Object> queryParams = Maps.newHashMap();
-    queryParams.put("start", start);
-    queryParams.put("end", end);
-    List<PersonViewDTO> persons = namedParameterJdbcTemplate.query(query, queryParams, new PersonViewRowMapper());
+
+    query = query.replaceAll("LIMITCLAUSE","limit " + start + "," + end);
+    log.info("start {}", start);
+    log.info("end {}", end);
+
+    List<PersonViewDTO> persons = jdbcTemplate.query(query, new PersonViewRowMapper());
     return new PageImpl<>(persons.subList(start,end),pageable,personCount);
   }
 
@@ -146,7 +147,7 @@ public class PersonServiceImpl implements PersonService {
   public Page<PersonViewDTO> advancedSearch(String searchString, List<ColumnFilter> columnFilters, Pageable pageable) {
 
     StringBuilder countQuery = new StringBuilder();
-    countQuery.append("select count(1) from Person p" +
+    countQuery.append("select count(p.id) from Person p" +
             " join ContactDetails cd on (cd.id = p.id)\n" +
             " join GmcDetails gmc on (gmc.id = p.id)\n" +
             " join GdcDetails gdc on (gdc.id = p.id) ");
@@ -182,11 +183,11 @@ public class PersonServiceImpl implements PersonService {
 
     countQuery.append(whereClause);
 
-    Integer personCount = namedParameterJdbcTemplate.queryForObject(countQuery.toString(),
-            Maps.newHashMap(),Integer.class);
+    Integer personCount = jdbcTemplate.queryForObject(countQuery.toString(),
+            Integer.class);
 
     int start = pageable.getOffset();
-    int end = (start + pageable.getPageSize()) > personCount.intValue() ? personCount.intValue() : (start + pageable.getPageSize());
+    int end = ((start + pageable.getPageSize()) > personCount) ? personCount : (start + pageable.getPageSize());
 
     String query = sqlQuerySupplier.getQuery(SqlQuerySupplier.PERSON_VIEW);
     query = query.replaceAll("WHERECLAUSE",whereClause.toString());
@@ -197,10 +198,10 @@ public class PersonServiceImpl implements PersonService {
     else{
       query = query.replaceAll("ORDERBYCLAUSE", "");
     }
-    Map<String, Object> queryParams = Maps.newHashMap();
-    queryParams.put("start", start);
-    queryParams.put("end", end);
-    List<PersonViewDTO> persons = namedParameterJdbcTemplate.query(query, queryParams, new PersonViewRowMapper());
+
+    query = query.replaceAll("LIMITCLAUSE","limit " + start + "," + end);
+
+    List<PersonViewDTO> persons = jdbcTemplate.query(query, new PersonViewRowMapper());
     if(CollectionUtils.isEmpty(persons)){
       return new PageImpl<>(persons);
     }
