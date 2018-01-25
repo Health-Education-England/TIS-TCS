@@ -30,19 +30,19 @@ public class AsyncReferenceService {
     }
 
     @Async
-    public CompletableFuture<Void> doWithGradesAsync(Set<String> codes, Consumer<Map<String, GradeDTO>> consumer) {
-        return doWithGradesAsync(() -> true, codes, consumer);
+    public CompletableFuture<Void> doWithGradesAsync(Set<Long> ids, Consumer<Map<Long, GradeDTO>> consumer) {
+        return doWithGradesAsync(() -> true, ids, consumer);
     }
 
     @Async
-    public CompletableFuture<Void> doWithGradesAsync(Supplier<Boolean> precondition, Set<String> codes, Consumer<Map<String, GradeDTO>> consumer) {
+    public CompletableFuture<Void> doWithGradesAsync(Supplier<Boolean> precondition, Set<Long> ids, Consumer<Map<Long, GradeDTO>> consumer) {
         log.debug("Start grades {}", Thread.currentThread().getName());
-        if (CollectionUtils.isNotEmpty(codes) && precondition.get()) {
+        if (CollectionUtils.isNotEmpty(ids) && precondition.get()) {
             try {
-                List<GradeDTO> grades = referenceService.findGradesIn(codes);
+                List<GradeDTO> grades = referenceService.findGradesIdIn(ids);
 
                 if (CollectionUtils.isNotEmpty(grades)) {
-                    Map<String, GradeDTO> gradeMap = grades.stream().collect(Collectors.toMap(GradeDTO::getAbbreviation, g -> g));
+                    Map<Long, GradeDTO> gradeMap = grades.stream().collect(Collectors.toMap(GradeDTO::getId, g -> g));
                     consumer.accept(gradeMap);
                 }
             } catch (Exception e) {
@@ -53,16 +53,16 @@ public class AsyncReferenceService {
     }
 
     @Async
-    public CompletableFuture<Void> doWithSitesAsync(Set<String> codes, Consumer<Map<String, SiteDTO>> consumer) {
-        return doWithSitesAsync(() -> true, codes, consumer);
+    public CompletableFuture<Void> doWithSitesAsync(Set<Long> ids, Consumer<Map<Long, SiteDTO>> consumer) {
+        return doWithSitesAsync(() -> true, ids, consumer);
     }
     @Async
-    public CompletableFuture<Void> doWithSitesAsync(Supplier<Boolean> precondition, Set<String> codes, Consumer<Map<String, SiteDTO>> consumer) {
-        if (CollectionUtils.isNotEmpty(codes) && precondition.get()) {
+    public CompletableFuture<Void> doWithSitesAsync(Supplier<Boolean> precondition, Set<Long> ids, Consumer<Map<Long, SiteDTO>> consumer) {
+        if (CollectionUtils.isNotEmpty(ids) && precondition.get()) {
             try {
-                List<SiteDTO> sites = referenceService.findSitesIn(codes);
+                List<SiteDTO> sites = referenceService.findSitesIdIn(ids);
                 if (CollectionUtils.isNotEmpty(sites)) {
-                    Map<String, SiteDTO> siteMap = sites.stream().collect(Collectors.toMap(SiteDTO::getSiteCode, s -> s));
+                    Map<Long, SiteDTO> siteMap = sites.stream().collect(Collectors.toMap(SiteDTO::getId, s -> s));
                     consumer.accept(siteMap);
                 }
             } catch (Exception e) {

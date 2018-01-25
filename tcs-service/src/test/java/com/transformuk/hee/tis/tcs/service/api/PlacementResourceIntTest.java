@@ -68,10 +68,12 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 @SpringBootTest(classes = Application.class)
 public class PlacementResourceIntTest {
 
+  private static final Long DEFAULT_SITE_ID = 111L;
   private static final String DEFAULT_SITE = "123L";
   private static final String DEFAULT_SITE_NAME = "Default site name";
   private static final String UPDATED_SITE = "321L";
 
+  private static final Long DEFAULT_GRADE_ID = 2222L;
   private static final String DEFAULT_GRADE = "1234L";
   private static final String DEFAULT_GRADE_NAME = "Default grade name";
   private static final String UPDATED_GRADE = "4321L";
@@ -149,6 +151,8 @@ public class PlacementResourceIntTest {
   public static PlacementDetails createEntity() {
     PlacementDetails placement = new PlacementDetails();
     placement.setSiteCode(DEFAULT_SITE);
+    placement.setSiteId(DEFAULT_SITE_ID);
+    placement.setGradeId(DEFAULT_GRADE_ID);
     placement.setGradeAbbreviation(DEFAULT_GRADE);
     //placement.setSpecialties(Sets.newHashSet());
     placement.setDateFrom(DEFAULT_DATE_FROM);
@@ -236,7 +240,7 @@ public class PlacementResourceIntTest {
         .andExpect(jsonPath("$.message").value("error.validation"))
         .andExpect(jsonPath("$.fieldErrors[*].field").
             value(containsInAnyOrder("dateFrom", "dateTo", "placementType",
-                "traineeId", "postId", "gradeAbbreviation", "siteCode")));
+                "traineeId", "postId", "gradeId", "siteId")));
   }
 
   @Test
@@ -254,7 +258,7 @@ public class PlacementResourceIntTest {
         .andExpect(jsonPath("$.message").value("error.validation"))
         .andExpect(jsonPath("$.fieldErrors[*].field").
             value(containsInAnyOrder("dateFrom", "dateTo", "placementType",
-                "traineeId", "postId", "gradeAbbreviation", "siteCode")));
+                "traineeId", "postId", "gradeId", "siteId")));
   }
 
   @Test
@@ -340,12 +344,16 @@ public class PlacementResourceIntTest {
 
     SiteDTO site = new SiteDTO();
     site.setSiteCode(DEFAULT_SITE);
+    site.setId(DEFAULT_SITE_ID);
     site.setSiteName(DEFAULT_SITE_NAME);
     given(referenceService.findSitesIn(Sets.newHashSet(DEFAULT_SITE))).willReturn(Lists.newArrayList(site));
+    given(referenceService.findSitesIdIn(Sets.newHashSet(DEFAULT_SITE_ID))).willReturn(Lists.newArrayList(site));
     GradeDTO grade = new GradeDTO();
+    grade.setId(DEFAULT_GRADE_ID);
     grade.setAbbreviation(DEFAULT_GRADE);
     grade.setName(DEFAULT_GRADE_NAME);
     given(referenceService.findGradesIn(Sets.newHashSet(DEFAULT_GRADE))).willReturn(Lists.newArrayList(grade));
+    given(referenceService.findGradesIdIn(Sets.newHashSet(DEFAULT_GRADE_ID))).willReturn(Lists.newArrayList(grade));
 
     Post post = new Post();
     post.setOwner(DEFAULT_OWNER);

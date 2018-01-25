@@ -35,9 +35,13 @@ public class PersonViewDTO implements Serializable {
 
   private String trainingNumber;
 
+  private Long gradeId;
+
   private String gradeAbbreviation;
 
   private String gradeName;
+
+  private Long siteId;
 
   private String siteCode;
 
@@ -213,6 +217,22 @@ public class PersonViewDTO implements Serializable {
     this.currentOwnerRule = currentOwnerRule;
   }
 
+  public Long getGradeId() {
+    return gradeId;
+  }
+
+  public void setGradeId(Long gradeId) {
+    this.gradeId = gradeId;
+  }
+
+  public Long getSiteId() {
+    return siteId;
+  }
+
+  public void setSiteId(Long siteId) {
+    this.siteId = siteId;
+  }
+
   @Override
   public boolean equals(Object o) {
     if (this == o) return true;
@@ -286,15 +306,17 @@ public class PersonViewDTO implements Serializable {
         ", programmeName='" + programmeName + '\'' +
         ", programmeNumber='" + programmeNumber + '\'' +
         ", trainingNumber='" + trainingNumber + '\'' +
+        ", gradeId=" + gradeId +
         ", gradeAbbreviation='" + gradeAbbreviation + '\'' +
         ", gradeName='" + gradeName + '\'' +
+        ", siteId=" + siteId +
         ", siteCode='" + siteCode + '\'' +
         ", siteName='" + siteName + '\'' +
         ", placementType='" + placementType + '\'' +
-        ", role=" + role +
+        ", role='" + role + '\'' +
         ", status=" + status +
         ", currentOwner='" + currentOwner + '\'' +
-        ", currentOwnerRule='" + currentOwnerRule + '\'' +
+        ", currentOwnerRule=" + currentOwnerRule +
         '}';
   }
 }

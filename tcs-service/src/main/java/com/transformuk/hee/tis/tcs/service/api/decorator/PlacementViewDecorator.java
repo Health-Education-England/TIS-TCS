@@ -37,15 +37,15 @@ public class PlacementViewDecorator {
    */
   public List<PlacementViewDTO> decorate(List<PlacementViewDTO> placementViews) {
     // collect all the codes from the list
-    Set<String> gradeCodes = new HashSet<>();
-    Set<String> siteCodes = new HashSet<>();
+    Set<Long> gradeIds = new HashSet<>();
+    Set<Long> siteIds = new HashSet<>();
     Set<Long> traineeIds = new HashSet<>();
     placementViews.forEach(placementView -> {
-      if (StringUtils.isNotBlank(placementView.getGradeAbbreviation())) {
-        gradeCodes.add(placementView.getGradeAbbreviation());
+      if (placementView.getGradeId() != null) {
+        gradeIds.add(placementView.getGradeId());
       }
-      if (StringUtils.isNotBlank(placementView.getSiteCode())) {
-        siteCodes.add(placementView.getSiteCode());
+      if (placementView.getSiteId() != null) {
+        siteIds.add(placementView.getSiteId());
       }
       if (placementView.getTraineeId() != null && placementView.getTraineeId() != 0) {
         traineeIds.add(placementView.getTraineeId());
@@ -53,8 +53,8 @@ public class PlacementViewDecorator {
     });
 
     CompletableFuture<Void> futures = CompletableFuture.allOf(
-            decorateGradesOnPlacement(gradeCodes, placementViews),
-            decorateSitesOnPlacement(siteCodes, placementViews));
+            decorateGradesOnPlacement(gradeIds, placementViews),
+            decorateSitesOnPlacement(siteIds, placementViews));
 
     decorateTraineeName(traineeIds, placementViews);
 
@@ -63,21 +63,21 @@ public class PlacementViewDecorator {
     return placementViews;
   }
 
-  protected CompletableFuture<Void> decorateGradesOnPlacement(Set<String> codes, List<PlacementViewDTO> placementViewDTOS) {
-    return referenceService.doWithGradesAsync(codes, gradeMap -> {
+  protected CompletableFuture<Void> decorateGradesOnPlacement(Set<Long> ids, List<PlacementViewDTO> placementViewDTOS) {
+    return referenceService.doWithGradesAsync(ids, gradeMap -> {
       for (PlacementViewDTO pv : placementViewDTOS) {
-        if (StringUtils.isNotBlank(pv.getGradeAbbreviation()) && gradeMap.containsKey(pv.getGradeAbbreviation())) {
-          pv.setGradeName(gradeMap.get(pv.getGradeAbbreviation()).getName());
+        if (pv.getGradeId() != null && gradeMap.containsKey(pv.getGradeId())) {
+          pv.setGradeName(gradeMap.get(pv.getGradeId()).getName());
         }
       }
     });
   }
 
-  protected CompletableFuture<Void> decorateSitesOnPlacement(Set<String> codes, List<PlacementViewDTO> placementViewDTOS) {
-    return referenceService.doWithSitesAsync(codes, siteMap -> {
+  protected CompletableFuture<Void> decorateSitesOnPlacement(Set<Long> ids, List<PlacementViewDTO> placementViewDTOS) {
+    return referenceService.doWithSitesAsync(ids, siteMap -> {
       for (PlacementViewDTO pv : placementViewDTOS) {
-        if (StringUtils.isNotBlank(pv.getSiteCode()) && siteMap.containsKey(pv.getSiteCode())) {
-          pv.setSiteName(siteMap.get(pv.getSiteCode()).getSiteName());
+        if (pv.getSiteId() != null && siteMap.containsKey(pv.getSiteId())) {
+          pv.setSiteName(siteMap.get(pv.getSiteId()).getSiteName());
         }
       }
     });

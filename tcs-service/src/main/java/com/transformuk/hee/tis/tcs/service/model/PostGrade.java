@@ -20,7 +20,7 @@ public class PostGrade implements Serializable {
   private Post post;
 
   @Column(name = "gradeId")
-  private String gradeId;
+  private Long gradeId;
 
   @Enumerated(EnumType.STRING)
   @Column(name = "postGradeType")
@@ -42,11 +42,11 @@ public class PostGrade implements Serializable {
     this.post = post;
   }
 
-  public String getGradeId() {
+  public Long getGradeId() {
     return gradeId;
   }
 
-  public void setGradeId(String gradeId) {
+  public void setGradeId(Long gradeId) {
     this.gradeId = gradeId;
   }
 

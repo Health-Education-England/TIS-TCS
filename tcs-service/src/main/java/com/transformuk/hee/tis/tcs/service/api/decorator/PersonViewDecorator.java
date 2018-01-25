@@ -6,6 +6,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
+import org.springframework.util.NumberUtils;
 
 import java.util.HashSet;
 import java.util.List;
@@ -33,14 +34,14 @@ public class PersonViewDecorator {
    */
   public List<PersonViewDTO> decorate(List<PersonViewDTO> personViews) {
     // collect all the codes from the list
-    Set<String> gradeCodes = new HashSet<>();
-    Set<String> siteCodes = new HashSet<>();
+    Set<Long> gradeIds = new HashSet<>();
+    Set<Long> siteIds = new HashSet<>();
     personViews.forEach(personView -> {
-      if (StringUtils.isNotBlank(personView.getGradeAbbreviation())) {
-        gradeCodes.add(personView.getGradeAbbreviation());
+      if (personView.getGradeId() != null) {
+        gradeIds.add(personView.getGradeId());
       }
-      if (StringUtils.isNotBlank(personView.getSiteCode())) {
-        siteCodes.add(personView.getSiteCode());
+      if (personView.getSiteId() != null) {
+        siteIds.add(personView.getSiteId());
       }
       // fix the roles
       if (StringUtils.isNotBlank(personView.getRole())) {
@@ -49,28 +50,28 @@ public class PersonViewDecorator {
     });
 
     CompletableFuture.allOf(
-            decorateGradesOnPerson(gradeCodes, personViews),
-            decorateSitesOnPerson(siteCodes, personViews))
+            decorateGradesOnPerson(gradeIds, personViews),
+            decorateSitesOnPerson(siteIds, personViews))
             .join();
 
     return personViews;
   }
 
-  protected CompletableFuture<Void> decorateGradesOnPerson(Set<String> gradeCodes, List<PersonViewDTO> personViewDTOs) {
-    return asyncReferenceService.doWithGradesAsync(gradeCodes, gradeMap -> {
+  protected CompletableFuture<Void> decorateGradesOnPerson(Set<Long> gradeIds, List<PersonViewDTO> personViewDTOs) {
+    return asyncReferenceService.doWithGradesAsync(gradeIds, gradeMap -> {
       for (PersonViewDTO personView : personViewDTOs) {
-        if (StringUtils.isNotBlank(personView.getGradeAbbreviation()) && gradeMap.containsKey(personView.getGradeAbbreviation())) {
-          personView.setGradeName(gradeMap.get(personView.getGradeAbbreviation()).getName());
+        if (personView.getGradeId() != null && gradeMap.containsKey(personView.getGradeId())) {
+          personView.setGradeName(gradeMap.get(personView.getGradeId()).getName());
         }
       }
     });
   }
 
-  protected CompletableFuture<Void> decorateSitesOnPerson(Set<String> siteCodes, List<PersonViewDTO> personViewDTOs) {
-    return asyncReferenceService.doWithSitesAsync(siteCodes, siteMap -> {
+  protected CompletableFuture<Void> decorateSitesOnPerson(Set<Long> siteIds, List<PersonViewDTO> personViewDTOs) {
+    return asyncReferenceService.doWithSitesAsync(siteIds, siteMap -> {
       for (PersonViewDTO personView : personViewDTOs) {
-        if (StringUtils.isNotBlank(personView.getSiteCode()) && siteMap.containsKey(personView.getSiteCode())) {
-          personView.setSiteName(siteMap.get(personView.getSiteCode()).getSiteName());
+        if (personView.getSiteCode() != null && siteMap.containsKey(personView.getSiteId())) {
+          personView.setSiteName(siteMap.get(personView.getSiteId()).getSiteName());
         }
       }
     });

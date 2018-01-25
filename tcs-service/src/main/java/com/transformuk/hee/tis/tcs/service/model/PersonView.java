@@ -47,7 +47,11 @@ public class PersonView implements Serializable {
 
   private String trainingNumber;
 
+  private Long gradeId;
+
   private String gradeAbbreviation;
+
+  private Long siteId;
 
   private String siteCode;
 
@@ -208,6 +212,22 @@ public class PersonView implements Serializable {
     this.currentOwnerRule = currentOwnerRule;
   }
 
+  public Long getGradeId() {
+    return gradeId;
+  }
+
+  public void setGradeId(Long gradeId) {
+    this.gradeId = gradeId;
+  }
+
+  public Long getSiteId() {
+    return siteId;
+  }
+
+  public void setSiteId(Long siteId) {
+    this.siteId = siteId;
+  }
+
   @Override
   public boolean equals(Object o) {
     if (this == o) return true;
@@ -215,7 +235,7 @@ public class PersonView implements Serializable {
 
     PersonView that = (PersonView) o;
 
-    if (!id.equals(that.id)) return false;
+    if (id != null ? !id.equals(that.id) : that.id != null) return false;
     if (intrepidId != null ? !intrepidId.equals(that.intrepidId) : that.intrepidId != null) return false;
     if (surname != null ? !surname.equals(that.surname) : that.surname != null) return false;
     if (forenames != null ? !forenames.equals(that.forenames) : that.forenames != null) return false;
@@ -229,20 +249,21 @@ public class PersonView implements Serializable {
       return false;
     if (trainingNumber != null ? !trainingNumber.equals(that.trainingNumber) : that.trainingNumber != null)
       return false;
+    if (gradeId != null ? !gradeId.equals(that.gradeId) : that.gradeId != null) return false;
     if (gradeAbbreviation != null ? !gradeAbbreviation.equals(that.gradeAbbreviation) : that.gradeAbbreviation != null)
       return false;
+    if (siteId != null ? !siteId.equals(that.siteId) : that.siteId != null) return false;
     if (siteCode != null ? !siteCode.equals(that.siteCode) : that.siteCode != null) return false;
     if (placementType != null ? !placementType.equals(that.placementType) : that.placementType != null) return false;
-    if (role != that.role) return false;
+    if (role != null ? !role.equals(that.role) : that.role != null) return false;
     if (status != that.status) return false;
-    if (currentOwner != null ? !currentOwner.equals(that.currentOwner) : that.currentOwner != null)
-      return false;
+    if (currentOwner != null ? !currentOwner.equals(that.currentOwner) : that.currentOwner != null) return false;
     return currentOwnerRule == that.currentOwnerRule;
   }
 
   @Override
   public int hashCode() {
-    int result = id.hashCode();
+    int result = id != null ? id.hashCode() : 0;
     result = 31 * result + (intrepidId != null ? intrepidId.hashCode() : 0);
     result = 31 * result + (surname != null ? surname.hashCode() : 0);
     result = 31 * result + (forenames != null ? forenames.hashCode() : 0);
@@ -253,7 +274,9 @@ public class PersonView implements Serializable {
     result = 31 * result + (programmeName != null ? programmeName.hashCode() : 0);
     result = 31 * result + (programmeNumber != null ? programmeNumber.hashCode() : 0);
     result = 31 * result + (trainingNumber != null ? trainingNumber.hashCode() : 0);
+    result = 31 * result + (gradeId != null ? gradeId.hashCode() : 0);
     result = 31 * result + (gradeAbbreviation != null ? gradeAbbreviation.hashCode() : 0);
+    result = 31 * result + (siteId != null ? siteId.hashCode() : 0);
     result = 31 * result + (siteCode != null ? siteCode.hashCode() : 0);
     result = 31 * result + (placementType != null ? placementType.hashCode() : 0);
     result = 31 * result + (role != null ? role.hashCode() : 0);
@@ -277,10 +300,12 @@ public class PersonView implements Serializable {
         ", programmeName='" + programmeName + '\'' +
         ", programmeNumber='" + programmeNumber + '\'' +
         ", trainingNumber='" + trainingNumber + '\'' +
+        ", gradeId=" + gradeId +
         ", gradeAbbreviation='" + gradeAbbreviation + '\'' +
+        ", siteId=" + siteId +
         ", siteCode='" + siteCode + '\'' +
         ", placementType='" + placementType + '\'' +
-        ", role=" + role +
+        ", role='" + role + '\'' +
         ", status=" + status +
         ", currentOwner='" + currentOwner + '\'' +
         ", currentOwnerRule=" + currentOwnerRule +

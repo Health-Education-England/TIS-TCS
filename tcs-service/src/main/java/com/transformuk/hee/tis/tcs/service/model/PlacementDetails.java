@@ -36,7 +36,11 @@ public class PlacementDetails {
   @Column(name = "placementWholeTimeEquivalent")
   private Double wholeTimeEquivalent;
 
+  private Long siteId;
+
   private String siteCode;
+
+  private Long gradeId;
 
   private String gradeAbbreviation;
 
@@ -159,6 +163,22 @@ public class PlacementDetails {
     this.localPostNumber = localPostNumber;
   }
 
+  public Long getSiteId() {
+    return siteId;
+  }
+
+  public void setSiteId(Long siteId) {
+    this.siteId = siteId;
+  }
+
+  public Long getGradeId() {
+    return gradeId;
+  }
+
+  public void setGradeId(Long gradeId) {
+    this.gradeId = gradeId;
+  }
+
   @Override
   public boolean equals(Object o) {
     if (this == o) return true;
@@ -174,7 +194,9 @@ public class PlacementDetails {
     if (dateTo != null ? !dateTo.equals(that.dateTo) : that.dateTo != null) return false;
     if (wholeTimeEquivalent != null ? !wholeTimeEquivalent.equals(that.wholeTimeEquivalent) : that.wholeTimeEquivalent != null)
       return false;
+    if (siteId != null ? !siteId.equals(that.siteId) : that.siteId != null) return false;
     if (siteCode != null ? !siteCode.equals(that.siteCode) : that.siteCode != null) return false;
+    if (gradeId != null ? !gradeId.equals(that.gradeId) : that.gradeId != null) return false;
     if (gradeAbbreviation != null ? !gradeAbbreviation.equals(that.gradeAbbreviation) : that.gradeAbbreviation != null)
       return false;
     if (placementType != null ? !placementType.equals(that.placementType) : that.placementType != null) return false;
@@ -192,7 +214,9 @@ public class PlacementDetails {
     result = 31 * result + (dateFrom != null ? dateFrom.hashCode() : 0);
     result = 31 * result + (dateTo != null ? dateTo.hashCode() : 0);
     result = 31 * result + (wholeTimeEquivalent != null ? wholeTimeEquivalent.hashCode() : 0);
+    result = 31 * result + (siteId != null ? siteId.hashCode() : 0);
     result = 31 * result + (siteCode != null ? siteCode.hashCode() : 0);
+    result = 31 * result + (gradeId != null ? gradeId.hashCode() : 0);
     result = 31 * result + (gradeAbbreviation != null ? gradeAbbreviation.hashCode() : 0);
     result = 31 * result + (placementType != null ? placementType.hashCode() : 0);
     result = 31 * result + (trainingDescription != null ? trainingDescription.hashCode() : 0);
@@ -210,7 +234,9 @@ public class PlacementDetails {
         ", dateFrom=" + dateFrom +
         ", dateTo=" + dateTo +
         ", wholeTimeEquivalent=" + wholeTimeEquivalent +
+        ", siteId=" + siteId +
         ", siteCode='" + siteCode + '\'' +
+        ", gradeId=" + gradeId +
         ", gradeAbbreviation='" + gradeAbbreviation + '\'' +
         ", placementType='" + placementType + '\'' +
         ", trainingDescription='" + trainingDescription + '\'' +

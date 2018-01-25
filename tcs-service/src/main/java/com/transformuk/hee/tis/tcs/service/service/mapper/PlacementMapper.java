@@ -46,7 +46,9 @@ public class PlacementMapper {
           placement.getClinicalSupervisors().stream().map(ps -> ps.getClinicalSupervisor().getId()).collect(Collectors.toSet()) : null);
       placementDTO.setTraineeId(placement.getTrainee() != null ? placement.getTrainee().getId() : null);
       placementDTO.setPostId(placement.getPost() != null ? placement.getPost().getId() : null);
+      placementDTO.setGradeId(placement.getGradeId());
       placementDTO.setGradeAbbreviation(placement.getGradeAbbreviation());
+      placementDTO.setSiteId(placement.getSiteId());
       placementDTO.setSiteCode(placement.getSiteCode());
       placementDTO.setDateFrom(placement.getDateFrom());
       placementDTO.setDateTo(placement.getDateTo());
@@ -84,8 +86,10 @@ public class PlacementMapper {
     if (placementDTO.getPostId() != null) {
       placement.setPost(postRepository.findOne(placementDTO.getPostId()));
     }
+    placement.setGradeId(placementDTO.getGradeId());
     placement.setGradeAbbreviation(placementDTO.getGradeAbbreviation());
     placement.setSiteCode(placementDTO.getSiteCode());
+    placement.setSiteId(placementDTO.getSiteId());
     placement.setDateFrom(placementDTO.getDateFrom());
     placement.setDateTo(placementDTO.getDateTo());
     placement.setIntrepidId(placementDTO.getIntrepidId());

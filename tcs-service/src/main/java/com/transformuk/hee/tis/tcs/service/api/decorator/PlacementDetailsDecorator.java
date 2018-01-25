@@ -73,7 +73,7 @@ public class PlacementDetailsDecorator {
   protected CompletableFuture<Void> decorateSiteName(PlacementDetailsDTO placementDetailsDTO) {
     return referenceService.doWithSitesAsync(
             () -> !StringUtils.isEmpty(placementDetailsDTO.getSiteCode()),
-            Collections.singleton(placementDetailsDTO.getSiteCode()),
+            Collections.singleton(placementDetailsDTO.getSiteId()),
             sites -> {
               placementDetailsDTO.setSiteName(sites.values().iterator().next().getSiteName());
             });
@@ -82,7 +82,7 @@ public class PlacementDetailsDecorator {
   protected CompletableFuture<Void> decorateGradeName(PlacementDetailsDTO placementDetailsDTO) {
     return referenceService.doWithGradesAsync(
             () -> !StringUtils.isEmpty(placementDetailsDTO.getGradeAbbreviation()),
-            Collections.singleton(placementDetailsDTO.getGradeAbbreviation()), grades -> {
+            Collections.singleton(placementDetailsDTO.getGradeId()), grades -> {
               placementDetailsDTO.setGradeName(grades.values().iterator().next().getName());
             });
   }

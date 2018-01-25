@@ -26,9 +26,13 @@ public class PlacementViewDTO implements Serializable {
 
   private Long postId;
 
+  private Long siteId;
+
   private String siteCode;
 
   private String siteName;
+
+  private Long gradeId;
 
   private String gradeAbbreviation;
 
@@ -160,6 +164,22 @@ public class PlacementViewDTO implements Serializable {
     this.placementType = placementType;
   }
 
+  public Long getSiteId() {
+    return siteId;
+  }
+
+  public void setSiteId(Long siteId) {
+    this.siteId = siteId;
+  }
+
+  public Long getGradeId() {
+    return gradeId;
+  }
+
+  public void setGradeId(Long gradeId) {
+    this.gradeId = gradeId;
+  }
+
   @Override
   public boolean equals(Object o) {
     if (this == o) return true;
@@ -219,8 +239,10 @@ public class PlacementViewDTO implements Serializable {
         ", traineeLastName='" + traineeLastName + '\'' +
         ", traineeGmcNumber='" + traineeGmcNumber + '\'' +
         ", postId=" + postId +
+        ", siteId=" + siteId +
         ", siteCode='" + siteCode + '\'' +
         ", siteName='" + siteName + '\'' +
+        ", gradeId=" + gradeId +
         ", gradeAbbreviation='" + gradeAbbreviation + '\'' +
         ", gradeName='" + gradeName + '\'' +
         ", dateFrom=" + dateFrom +

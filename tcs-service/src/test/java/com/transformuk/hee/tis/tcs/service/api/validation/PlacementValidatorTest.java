@@ -34,8 +34,8 @@ public class PlacementValidatorTest {
   private static final Long DEFAULT_TRAINEE = 1L;
   private static final Long DEFAULT_CLINICAL_SUPERVISOR = 12L;
   private static final Long DEFAULT_POST = 123L;
-  private static final String DEFAULT_SITE = "1234L";
-  private static final String DEFAULT_GRADE = "12345L";
+  private static final Long DEFAULT_SITE = 1234L;
+  private static final Long DEFAULT_GRADE = 12345L;
   private static final String DEFAULT_LOCAL_POST_NUMBER = "LOCAL_POST_NUMBER";
   private static final String DEFAULT_TRAINING_DESCRIPTION = "TRAINING";
   private static final LocalDate DEFAULT_DATE_FROM = LocalDate.ofEpochDay(0L);
@@ -63,8 +63,8 @@ public class PlacementValidatorTest {
   @Before
   public void setup() {
     placementDTO = new PlacementDetailsDTO();
-    placementDTO.setSiteCode(DEFAULT_SITE);
-    placementDTO.setGradeAbbreviation(DEFAULT_GRADE);
+    placementDTO.setSiteId(DEFAULT_SITE);
+    placementDTO.setGradeId(DEFAULT_GRADE);
     //placementDTO.setSpecialties(Sets.newHashSet());
     placementDTO.setDateFrom(DEFAULT_DATE_FROM);
     placementDTO.setDateTo(DEFAULT_DATE_TO);
@@ -79,16 +79,16 @@ public class PlacementValidatorTest {
     given(personRepository.exists(DEFAULT_TRAINEE)).willReturn(true);
     given(personRepository.exists(DEFAULT_CLINICAL_SUPERVISOR)).willReturn(true);
     given(postRepository.exists(DEFAULT_POST)).willReturn(true);
-    given(referenceService.siteExists(Lists.newArrayList(DEFAULT_SITE))).willReturn(Maps.newHashMap(DEFAULT_SITE, true));
-    given(referenceService.gradeExists(Lists.newArrayList(DEFAULT_GRADE))).willReturn(Maps.newHashMap(DEFAULT_GRADE, true));
+    given(referenceService.siteIdExists(Lists.newArrayList(DEFAULT_SITE))).willReturn(Maps.newHashMap(DEFAULT_SITE, true));
+    given(referenceService.gradeIdsExists(Lists.newArrayList(DEFAULT_GRADE))).willReturn(Maps.newHashMap(DEFAULT_GRADE, true));
     given(referenceService.placementTypeExists(Lists.newArrayList(DEFAULT_PLACEMENT_TYPE))).willReturn(Maps.newHashMap(DEFAULT_PLACEMENT_TYPE, true));
   }
 
   @Test
   public void testValidateFailsIfSiteIsInvalid() {
     try {
-      given(referenceService.siteExists(Lists.newArrayList("321L"))).willReturn(Maps.newHashMap("321L", false));
-      placementDTO.setSiteCode("321L");
+      given(referenceService.siteIdExists(Lists.newArrayList(321L))).willReturn(Maps.newHashMap(321L, false));
+      placementDTO.setSiteId(321L);
       placementValidator.validate(placementDTO);
       fail("ValidationException expected.");
     } catch (ValidationException ex) {
@@ -100,8 +100,8 @@ public class PlacementValidatorTest {
   @Test
   public void testValidateFailsIfGradeIsInvalid() {
     try {
-      given(referenceService.gradeExists(Lists.newArrayList("321L"))).willReturn(Maps.newHashMap("321L", false));
-      placementDTO.setGradeAbbreviation("321L");
+      given(referenceService.gradeIdsExists(Lists.newArrayList(321L))).willReturn(Maps.newHashMap(321L, false));
+      placementDTO.setGradeId(321L);
       placementValidator.validate(placementDTO);
       fail("ValidationException expected.");
     } catch (ValidationException ex) {

@@ -40,38 +40,38 @@ public class PostViewDecorator {
    */
   public void decorate(List<PostViewDTO> postViews) {
     // collect all the codes from the list
-    Set<String> gradeCodes = new HashSet<>();
-    Set<String> siteCodes = new HashSet<>();
+    Set<Long> gradeIds = new HashSet<>();
+    Set<Long> siteIds = new HashSet<>();
     postViews.forEach(postView -> {
-      if (StringUtils.isNotBlank(postView.getApprovedGradeCode())) {
-        gradeCodes.add(postView.getApprovedGradeCode());
+      if (postView.getApprovedGradeId() != null) {
+        gradeIds.add(postView.getApprovedGradeId());
       }
-      if (StringUtils.isNotBlank(postView.getPrimarySiteCode())) {
-        siteCodes.add(postView.getPrimarySiteCode());
+      if (postView.getPrimarySiteId() != null) {
+        siteIds.add(postView.getPrimarySiteId());
       }
     });
 
     CompletableFuture.allOf(
-            decorateGradesOnPost(gradeCodes, postViews),
-            decorateSitesOnPost(siteCodes, postViews))
+            decorateGradesOnPost(gradeIds, postViews),
+            decorateSitesOnPost(siteIds, postViews))
             .join();
   }
 
-  protected CompletableFuture<Void> decorateGradesOnPost(Set<String> codes, List<PostViewDTO> postViewDTOS) {
-    return referenceService.doWithGradesAsync(codes, gradeMap -> {
+  protected CompletableFuture<Void> decorateGradesOnPost(Set<Long> ids, List<PostViewDTO> postViewDTOS) {
+    return referenceService.doWithGradesAsync(ids, gradeMap -> {
       for (PostViewDTO postView : postViewDTOS) {
-        if (StringUtils.isNotBlank(postView.getApprovedGradeCode()) && gradeMap.containsKey(postView.getApprovedGradeCode())) {
-          postView.setApprovedGradeName(gradeMap.get(postView.getApprovedGradeCode()).getName());
+        if (postView.getApprovedGradeId() != null && gradeMap.containsKey(postView.getApprovedGradeId())) {
+          postView.setApprovedGradeName(gradeMap.get(postView.getApprovedGradeId()).getName());
         }
       }
     });
   }
 
-  protected CompletableFuture<Void> decorateSitesOnPost(Set<String> codes, List<PostViewDTO> postViewDTOS) {
-    return referenceService.doWithSitesAsync(codes, siteMap -> {
+  protected CompletableFuture<Void> decorateSitesOnPost(Set<Long> ids, List<PostViewDTO> postViewDTOS) {
+    return referenceService.doWithSitesAsync(ids, siteMap -> {
       for (PostViewDTO postView : postViewDTOS) {
-        if (StringUtils.isNotBlank(postView.getPrimarySiteCode()) && siteMap.containsKey(postView.getPrimarySiteCode())) {
-          postView.setPrimarySiteName(siteMap.get(postView.getPrimarySiteCode()).getSiteName());
+        if (postView.getPrimarySiteId() != null && siteMap.containsKey(postView.getPrimarySiteId())) {
+          postView.setPrimarySiteName(siteMap.get(postView.getPrimarySiteId()).getSiteName());
         }
       }
     });

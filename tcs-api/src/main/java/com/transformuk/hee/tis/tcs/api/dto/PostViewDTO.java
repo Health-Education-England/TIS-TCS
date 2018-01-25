@@ -25,9 +25,13 @@ public class PostViewDTO implements Serializable {
 
   private String nationalPostNumber;
 
+  private Long primarySiteId;
+
   private String primarySiteCode;
 
   private String primarySiteName;
+
+  private Long approvedGradeId;
 
   private String approvedGradeCode;
 
@@ -197,6 +201,21 @@ public class PostViewDTO implements Serializable {
     this.intrepidId = intrepidId;
   }
 
+  public Long getPrimarySiteId() {
+    return primarySiteId;
+  }
+
+  public void setPrimarySiteId(Long primarySiteId) {
+    this.primarySiteId = primarySiteId;
+  }
+
+  public Long getApprovedGradeId() {
+    return approvedGradeId;
+  }
+
+  public void setApprovedGradeId(Long approvedGradeId) {
+    this.approvedGradeId = approvedGradeId;
+  }
 
   @Override
   public boolean equals(Object o) {
@@ -269,8 +288,10 @@ public class PostViewDTO implements Serializable {
         ", currentTraineeSurname='" + currentTraineeSurname + '\'' +
         ", currentTraineeForenames='" + currentTraineeForenames + '\'' +
         ", nationalPostNumber='" + nationalPostNumber + '\'' +
+        ", primarySiteId=" + primarySiteId +
         ", primarySiteCode='" + primarySiteCode + '\'' +
         ", primarySiteName='" + primarySiteName + '\'' +
+        ", approvedGradeId='" + approvedGradeId + '\'' +
         ", approvedGradeCode='" + approvedGradeCode + '\'' +
         ", approvedGradeName='" + approvedGradeName + '\'' +
         ", primarySpecialtyId=" + primarySpecialtyId +

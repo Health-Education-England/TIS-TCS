@@ -35,10 +35,14 @@ public class PlacementDTO implements Serializable {
   @NotNull(message = "PostId is required", groups = {Update.class, Create.class})
   private Long postId;
 
-  @NotNull(message = "SiteCode is required", groups = {Update.class, Create.class})
+  @NotNull(message = "SiteId is required", groups = {Update.class, Create.class})
+  private Long siteId;
+
   private String siteCode;
 
-  @NotNull(message = "GradeAbbreviation is required", groups = {Update.class, Create.class})
+  @NotNull(message = "GradeId is required", groups = {Update.class, Create.class})
+  private Long gradeId;
+
   private String gradeAbbreviation;
 
   private Set<PlacementSpecialtyDTO> specialties;
@@ -178,6 +182,22 @@ public class PlacementDTO implements Serializable {
     this.specialties = specialties;
   }
 
+  public Long getSiteId() {
+    return siteId;
+  }
+
+  public void setSiteId(Long siteId) {
+    this.siteId = siteId;
+  }
+
+  public Long getGradeId() {
+    return gradeId;
+  }
+
+  public void setGradeId(Long gradeId) {
+    this.gradeId = gradeId;
+  }
+
   @Override
   public boolean equals(Object o) {
     if (this == o) {
@@ -205,19 +225,22 @@ public class PlacementDTO implements Serializable {
   public String toString() {
     return "PlacementDTO{" +
         "id=" + id +
-        ", intrepidId='" + intrepidId + "'" +
-        ", traineeId='" + traineeId + "'" +
-        ", clinicalSupervisorIds='" + clinicalSupervisorIds + "'" +
-        ", postId='" + postId + "'" +
-        ", siteCode='" + siteCode + "'" +
-        ", gradeAbbreviation='" + gradeAbbreviation + "'" +
-        ", specialties='" + specialties + "'" +
-        ", dateFrom='" + dateFrom + "'" +
-        ", dateTo='" + dateTo + "'" +
-        ", placementType='" + placementType + "'" +
-        ", placementWholeTimeEquivalent='" + placementWholeTimeEquivalent + "'" +
-        ", localPostNumber='" + localPostNumber + "'" +
-        ", trainingDescription='" + trainingDescription + "'" +
+        ", intrepidId='" + intrepidId + '\'' +
+        ", status=" + status +
+        ", traineeId=" + traineeId +
+        ", clinicalSupervisorIds=" + clinicalSupervisorIds +
+        ", postId=" + postId +
+        ", siteId=" + siteId +
+        ", siteCode='" + siteCode + '\'' +
+        ", gradeId=" + gradeId +
+        ", gradeAbbreviation='" + gradeAbbreviation + '\'' +
+        ", specialties=" + specialties +
+        ", dateFrom=" + dateFrom +
+        ", dateTo=" + dateTo +
+        ", placementType='" + placementType + '\'' +
+        ", placementWholeTimeEquivalent=" + placementWholeTimeEquivalent +
+        ", trainingDescription='" + trainingDescription + '\'' +
+        ", localPostNumber='" + localPostNumber + '\'' +
         '}';
   }
 }
