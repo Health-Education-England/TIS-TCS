@@ -138,6 +138,7 @@ public class PersonServiceImpl implements PersonService {
 
     query = query.replaceAll("LIMITCLAUSE","limit " + start + "," + end);
 
+    log.info(query);
     log.info("start main query");
     List<PersonViewDTO> persons = jdbcTemplate.query(query, new PersonViewRowMapper());
     log.info("end main query");
@@ -206,6 +207,7 @@ public class PersonServiceImpl implements PersonService {
 
     query = query.replaceAll("LIMITCLAUSE","limit " + start + "," + end);
 
+    log.info(query);
     log.info("Start main query");
     List<PersonViewDTO> persons = jdbcTemplate.query(query, new PersonViewRowMapper());
     log.info("End main query");
