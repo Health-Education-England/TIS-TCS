@@ -129,8 +129,14 @@ public class PersonServiceImpl implements PersonService {
     String query = sqlQuerySupplier.getQuery(SqlQuerySupplier.PERSON_VIEW);
     query = query.replaceAll("WHERECLAUSE"," WHERE 1=1 ");
     if(pageable.getSort() != null) {
-      String orderByClause = pageable.getSort().toString().replaceAll(":"," ");
-      query = query.replaceAll("ORDERBYCLAUSE", " ORDER BY " + orderByClause);
+      if(pageable.getSort().iterator().hasNext()) {
+        String orderByFirstCriteria = pageable.getSort().iterator().next().toString();
+        String orderByClause = orderByFirstCriteria.replaceAll(":", " ");
+        query = query.replaceAll("ORDERBYCLAUSE", " ORDER BY " + orderByClause);
+      }
+      else{
+        query = query.replaceAll("ORDERBYCLAUSE", "");
+      }
     }
     else{
       query = query.replaceAll("ORDERBYCLAUSE", "");
@@ -142,6 +148,9 @@ public class PersonServiceImpl implements PersonService {
     log.info("start main query");
     List<PersonViewDTO> persons = jdbcTemplate.query(query, new PersonViewRowMapper());
     log.info("end main query");
+    if(CollectionUtils.isEmpty(persons)){
+      return new PageImpl<>(persons);
+    }
     return new PageImpl<>(persons.subList(start,end),pageable,personCount);
   }
 
@@ -198,8 +207,15 @@ public class PersonServiceImpl implements PersonService {
     String query = sqlQuerySupplier.getQuery(SqlQuerySupplier.PERSON_VIEW);
     query = query.replaceAll("WHERECLAUSE",whereClause.toString());
     if(pageable.getSort() != null) {
-      String orderByClause = pageable.getSort().toString().replaceAll(":"," ");
-      query = query.replaceAll("ORDERBYCLAUSE", " ORDER BY " + orderByClause);
+      if(pageable.getSort().iterator().hasNext()) {
+        String orderByFirstCriteria = pageable.getSort().iterator().next().toString();
+        String orderByClause = orderByFirstCriteria.replaceAll(":", " ");
+
+        query = query.replaceAll("ORDERBYCLAUSE", " ORDER BY " + orderByClause);
+      }
+      else{
+        query = query.replaceAll("ORDERBYCLAUSE", "");
+      }
     }
     else{
       query = query.replaceAll("ORDERBYCLAUSE", "");
