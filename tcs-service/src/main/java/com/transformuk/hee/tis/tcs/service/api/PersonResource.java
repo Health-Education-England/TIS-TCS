@@ -151,9 +151,13 @@ public class PersonResource {
     List<ColumnFilter> columnFilters = ColumnFilterUtil.getColumnFilters(columnFilterJson, filterEnumList);
     Page<PersonViewDTO> page;
     if (StringUtils.isEmpty(searchQuery) && StringUtils.isEmpty(columnFilterJson)) {
+      log.info("Start calling findAll");
       page = personService.findAll(pageable);
+      log.info("End calling findAll");
     } else {
+      log.info("Start calling advancedSearch");
       page = personService.advancedSearch(searchQuery, columnFilters, pageable);
+      log.info("End calling advancedSearch");
     }
     HttpHeaders headers = PaginationUtil.generatePaginationHttpHeaders(page, "/api/people");
     log.info("REST request to get a page of People completed successfully");

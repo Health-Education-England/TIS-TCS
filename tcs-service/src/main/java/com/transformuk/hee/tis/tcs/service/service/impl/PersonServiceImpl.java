@@ -115,12 +115,14 @@ public class PersonServiceImpl implements PersonService {
   @Transactional(readOnly = true)
   public Page<PersonViewDTO> findAll(Pageable pageable) {
     log.debug("Request to get all People");
+    log.info("Start count query");
     Integer personCount = jdbcTemplate.queryForObject("select count(p.id) from Person p" +
                     " join ContactDetails cd on (cd.id = p.id)\n" +
                     " join GmcDetails gmc on (gmc.id = p.id)\n" +
                     " join GdcDetails gdc on (gdc.id = p.id) ",
             Integer.class);
 
+    log.info("End count query");
     int start = pageable.getOffset();
     int end = ((start + pageable.getPageSize()) > personCount) ? personCount : (start + pageable.getPageSize());
 
@@ -135,16 +137,18 @@ public class PersonServiceImpl implements PersonService {
     }
 
     query = query.replaceAll("LIMITCLAUSE","limit " + start + "," + end);
-    log.info("start {}", start);
-    log.info("end {}", end);
 
+    log.info("start main query");
     List<PersonViewDTO> persons = jdbcTemplate.query(query, new PersonViewRowMapper());
+    log.info("end main query");
     return new PageImpl<>(persons.subList(start,end),pageable,personCount);
   }
 
   @Override
   @Transactional(readOnly = true)
   public Page<PersonViewDTO> advancedSearch(String searchString, List<ColumnFilter> columnFilters, Pageable pageable) {
+
+    log.info("Start advanced search");
 
     StringBuilder countQuery = new StringBuilder();
     countQuery.append("select count(p.id) from Person p" +
@@ -182,9 +186,10 @@ public class PersonServiceImpl implements PersonService {
 
 
     countQuery.append(whereClause);
-
+    log.info("Start count query");
     Integer personCount = jdbcTemplate.queryForObject(countQuery.toString(),
             Integer.class);
+    log.info("End count query");
 
     int start = pageable.getOffset();
     int end = ((start + pageable.getPageSize()) > personCount) ? personCount : (start + pageable.getPageSize());
@@ -201,7 +206,10 @@ public class PersonServiceImpl implements PersonService {
 
     query = query.replaceAll("LIMITCLAUSE","limit " + start + "," + end);
 
+    log.info("Start main query");
     List<PersonViewDTO> persons = jdbcTemplate.query(query, new PersonViewRowMapper());
+    log.info("End main query");
+
     if(CollectionUtils.isEmpty(persons)){
       return new PageImpl<>(persons);
     }
@@ -292,10 +300,11 @@ public class PersonServiceImpl implements PersonService {
     return CompletableFuture.completedFuture(null);
   }
 
-  private static class PersonViewRowMapper implements RowMapper<PersonViewDTO> {
+  private class PersonViewRowMapper implements RowMapper<PersonViewDTO> {
 
     @Override
     public PersonViewDTO mapRow(ResultSet rs, int i) throws SQLException {
+      log.info("mapRow Start ---");
       PersonViewDTO view = new PersonViewDTO();
       view.setId(rs.getLong("id"));
       view.setIntrepidId(rs.getString("intrepidId"));
@@ -322,6 +331,7 @@ public class PersonServiceImpl implements PersonService {
       if(StringUtils.isNotEmpty(ownerRule)) {
         view.setCurrentOwnerRule(PersonOwnerRule.valueOf(ownerRule));
       }
+      log.info("mapRow End ---");
       return view;
     }
   }
