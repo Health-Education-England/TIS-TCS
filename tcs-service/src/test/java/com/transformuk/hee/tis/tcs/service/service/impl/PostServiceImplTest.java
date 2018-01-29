@@ -55,6 +55,8 @@ import static org.mockito.Mockito.when;
 @RunWith(MockitoJUnitRunner.class)
 public class PostServiceImplTest {
 
+  private static final Long SITE_ID = 12345L;
+
   @InjectMocks
   private PostServiceImpl testObj;
 
@@ -260,7 +262,7 @@ public class PostServiceImplTest {
 
     PostSiteDTO postSiteDTO = new PostSiteDTO();
     postSiteDTO.setPostSiteType(PostSiteType.PRIMARY);
-    postSiteDTO.setSiteId("SiteID");
+    postSiteDTO.setSiteId(SITE_ID);
 
     PostDTO sendPostData = new PostDTO();
     sendPostData.id(postIds.get(0)).intrepidId(intrepidIds.get(0)).setSites(Sets.newHashSet(postSiteDTO));
@@ -300,7 +302,7 @@ public class PostServiceImplTest {
 
     PostGradeDTO postGradeDTO = new PostGradeDTO();
     postGradeDTO.setPostGradeType(PostGradeType.APPROVED);
-    postGradeDTO.setGradeId("GradeId");
+    postGradeDTO.setGradeId(SITE_ID);
 
     PostDTO sendPostData = new PostDTO();
     sendPostData.id(postIds.get(0)).intrepidId(intrepidIds.get(0)).grades(Sets.newHashSet(postGradeDTO));

@@ -8,7 +8,7 @@ public class PostSiteDTO implements Serializable {
 
   private Long id;
   private Long postId;
-  private String siteId;
+  private Long siteId;
   private PostSiteType postSiteType;
 
   public Long getId() {
@@ -27,11 +27,11 @@ public class PostSiteDTO implements Serializable {
     this.postId = postId;
   }
 
-  public String getSiteId() {
+  public Long getSiteId() {
     return siteId;
   }
 
-  public void setSiteId(String siteId) {
+  public void setSiteId(Long siteId) {
     this.siteId = siteId;
   }
 

@@ -104,8 +104,12 @@ public class PostResourceIntTest {
   private static final String UPDATED_LOCAL_POST_NUMBER = "Updated local post number";
   private static final String DEFAULT_INTREPID_ID = "intrepidNumber";
   private static final String UPDATED_INTREPID_ID = "updated intrepidNumber";
-  private static final String GRADE_ID = "Grade id";
-  private static final String SITE_ID = "site id";
+  private static final String GRADE_CODE = "GRADE CODE";
+  private static final Long GRADE_ID = 11111L;
+  private static final Long NEW_GRADE_ID = 11112L;
+  private static final String SITE_CODE = "SITE CODE";
+  private static final Long SITE_ID = 22222L;
+  private static final Long NEW_SITE_ID = 22223L;
   private static final String TEST_POST_NUMBER = "TESTPOST";
   private static final String DEFAULT_POST_NUMBER = "DEFAULTPOST";
   private static final String OWNER = "Health Education England Kent, Surrey and Sussex";
@@ -203,8 +207,10 @@ public class PostResourceIntTest {
     postView.setNationalPostNumber(DEFAULT_NATIONAL_POST_NUMBER);
     postView.setStatus(DEFAULT_STATUS);
     postView.setOwner(OWNER);
-    postView.setApprovedGradeCode(GRADE_ID);
-    postView.setPrimarySiteCode(SITE_ID);
+    postView.setApprovedGradeId(GRADE_ID);
+    postView.setApprovedGradeCode(GRADE_CODE);
+    postView.setPrimarySiteId(SITE_ID);
+    postView.setPrimarySiteCode(SITE_CODE);
     postView.setPrimarySpecialtyId(specialtyId);
 
     return postView;
@@ -226,7 +232,7 @@ public class PostResourceIntTest {
     return postSpecialty;
   }
 
-  public static PostGrade createPostGrade(String gradeId, PostGradeType postGradeType, Post post) {
+  public static PostGrade createPostGrade(Long gradeId, PostGradeType postGradeType, Post post) {
     PostGrade postGrade = new PostGrade();
     postGrade.setPostGradeType(postGradeType);
     postGrade.setGradeId(gradeId);
@@ -234,7 +240,7 @@ public class PostResourceIntTest {
     return postGrade;
   }
 
-  public static PostSite createPostSite(String siteId, PostSiteType postSiteType, Post post) {
+  public static PostSite createPostSite(Long siteId, PostSiteType postSiteType, Post post) {
     PostSite postSite = new PostSite();
     postSite.setPostSiteType(postSiteType);
     postSite.setSiteId(siteId);
@@ -589,15 +595,15 @@ public class PostResourceIntTest {
   @Transactional
   public void shouldFilterColumnsBySiteId() throws Exception {
 
-    String siteId = post.getSites().iterator().next().getSiteId();
+    Long siteId = post.getSites().iterator().next().getSiteId();
     //when & then
-    String colFilters = new URLCodec().encode("{\"primarySiteCode\":[\"" + siteId + "\"],\"owner\":[\"" +
+    String colFilters = new URLCodec().encode("{\"primarySiteId\":[\"" + siteId + "\"],\"owner\":[\"" +
         OWNER + "\"]}");
     // Get all the programmeList
     restPostMockMvc.perform(get("/api/posts?sort=id,desc&columnFilters=" +
         colFilters))
         .andExpect(status().isOk())
-        .andExpect(jsonPath("$.[*].primarySiteCode").value(hasItem(siteId)))
+        .andExpect(jsonPath("$.[*].primarySiteId").value(hasItem(siteId.intValue())))
         .andExpect(jsonPath("$.[*].owner").value(hasItem(OWNER)));
   }
 
@@ -605,15 +611,15 @@ public class PostResourceIntTest {
   @Transactional
   public void shouldFilterColumnsByGradeId() throws Exception {
 
-    String gradeId = post.getGrades().iterator().next().getGradeId();
+    Long gradeId = post.getGrades().iterator().next().getGradeId();
     //when & then
-    String colFilters = new URLCodec().encode("{\"approvedGradeCode\":[\"" + gradeId + "\"],\"owner\":[\"" +
+    String colFilters = new URLCodec().encode("{\"approvedGradeId\":[\"" + gradeId + "\"],\"owner\":[\"" +
         OWNER + "\"]}");
     // Get all the programmeList
     restPostMockMvc.perform(get("/api/posts?sort=id,desc&columnFilters=" +
         colFilters))
         .andExpect(status().isOk())
-        .andExpect(jsonPath("$.[*].approvedGradeCode").value(hasItem(gradeId)))
+        .andExpect(jsonPath("$.[*].approvedGradeId").value(hasItem(gradeId.intValue())))
         .andExpect(jsonPath("$.[*].owner").value(hasItem(OWNER)));
   }
 
@@ -951,7 +957,7 @@ public class PostResourceIntTest {
 
     PostSiteDTO postSiteDTO = new PostSiteDTO();
     postSiteDTO.setPostSiteType(PostSiteType.PRIMARY);
-    postSiteDTO.setSiteId("NewSiteId");
+    postSiteDTO.setSiteId(NEW_SITE_ID);
 
     postDTO.setSites(Sets.newHashSet(postSiteDTO));
 
@@ -1012,7 +1018,7 @@ public class PostResourceIntTest {
 
     PostGradeDTO postGradeDTO = new PostGradeDTO();
     postGradeDTO.setPostGradeType(PostGradeType.APPROVED);
-    postGradeDTO.setGradeId("NewGradeId");
+    postGradeDTO.setGradeId(NEW_GRADE_ID);
 
     postDTO.setGrades(Sets.newHashSet(postGradeDTO));
 
