@@ -67,6 +67,7 @@ public class PlacementViewDecorator {
     return referenceService.doWithGradesAsync(ids, gradeMap -> {
       for (PlacementViewDTO pv : placementViewDTOS) {
         if (pv.getGradeId() != null && gradeMap.containsKey(pv.getGradeId())) {
+          pv.setGradeAbbreviation(gradeMap.get(pv.getGradeId()).getAbbreviation());
           pv.setGradeName(gradeMap.get(pv.getGradeId()).getName());
         }
       }
@@ -77,6 +78,7 @@ public class PlacementViewDecorator {
     return referenceService.doWithSitesAsync(ids, siteMap -> {
       for (PlacementViewDTO pv : placementViewDTOS) {
         if (pv.getSiteId() != null && siteMap.containsKey(pv.getSiteId())) {
+          pv.setSiteCode(siteMap.get(pv.getSiteId()).getSiteCode());
           pv.setSiteName(siteMap.get(pv.getSiteId()).getSiteName());
         }
       }

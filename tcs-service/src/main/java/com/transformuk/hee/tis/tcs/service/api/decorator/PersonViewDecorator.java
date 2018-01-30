@@ -61,6 +61,7 @@ public class PersonViewDecorator {
     return asyncReferenceService.doWithGradesAsync(gradeIds, gradeMap -> {
       for (PersonViewDTO personView : personViewDTOs) {
         if (personView.getGradeId() != null && gradeMap.containsKey(personView.getGradeId())) {
+          personView.setGradeAbbreviation(gradeMap.get(personView.getGradeId()).getAbbreviation());
           personView.setGradeName(gradeMap.get(personView.getGradeId()).getName());
         }
       }
@@ -70,7 +71,8 @@ public class PersonViewDecorator {
   protected CompletableFuture<Void> decorateSitesOnPerson(Set<Long> siteIds, List<PersonViewDTO> personViewDTOs) {
     return asyncReferenceService.doWithSitesAsync(siteIds, siteMap -> {
       for (PersonViewDTO personView : personViewDTOs) {
-        if (personView.getSiteCode() != null && siteMap.containsKey(personView.getSiteId())) {
+        if (personView.getSiteId() != null && siteMap.containsKey(personView.getSiteId())) {
+          personView.setSiteCode(siteMap.get(personView.getSiteId()).getSiteCode());
           personView.setSiteName(siteMap.get(personView.getSiteId()).getSiteName());
         }
       }
