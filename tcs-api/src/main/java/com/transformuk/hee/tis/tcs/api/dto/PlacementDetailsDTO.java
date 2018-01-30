@@ -3,6 +3,7 @@ package com.transformuk.hee.tis.tcs.api.dto;
 import com.transformuk.hee.tis.tcs.api.dto.validation.Create;
 import com.transformuk.hee.tis.tcs.api.dto.validation.Update;
 import com.transformuk.hee.tis.tcs.api.enumeration.PlacementStatus;
+import io.swagger.annotations.ApiModelProperty;
 
 import javax.validation.constraints.DecimalMin;
 import javax.validation.constraints.NotNull;
@@ -41,13 +42,21 @@ public class PlacementDetailsDTO implements Serializable {
 
   private Double wholeTimeEquivalent;
 
-  @NotNull(message = "SiteCode is required", groups = {Update.class, Create.class})
+  @ApiModelProperty("The site code")
   private String siteCode;
+
+  @ApiModelProperty("The id of the site from the reference service")
+  @NotNull(message = "SiteId is required", groups = {Update.class, Create.class})
+  private Long siteId;
 
   private String siteName;
 
-  @NotNull(message = "GradeAbbreviation is required", groups = {Update.class, Create.class})
+  @ApiModelProperty("The Grade Abbr")
   private String gradeAbbreviation;
+
+  @ApiModelProperty("The Grade id from Reference service")
+  @NotNull(message = "GradeId is required", groups = {Update.class, Create.class})
+  private Long gradeId;
 
   private String gradeName;
 
@@ -225,6 +234,22 @@ public class PlacementDetailsDTO implements Serializable {
 
   public void setLocalPostNumber(String localPostNumber) {
     this.localPostNumber = localPostNumber;
+  }
+
+  public Long getSiteId() {
+    return siteId;
+  }
+
+  public void setSiteId(Long siteId) {
+    this.siteId = siteId;
+  }
+
+  public Long getGradeId() {
+    return gradeId;
+  }
+
+  public void setGradeId(Long gradeId) {
+    this.gradeId = gradeId;
   }
 
   @Override

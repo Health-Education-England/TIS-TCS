@@ -1,0 +1,4 @@
+-- Looking at the gmc index's in h2 it doesn't have one on the gmc number
+-- so this is commented out
+--ALTER TABLE `GmcDetails`
+--DROP INDEX `person_gmc_details_gmc_number`;

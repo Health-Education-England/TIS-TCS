@@ -321,9 +321,11 @@ public class PersonServiceImpl implements PersonService {
       view.setProgrammeName(rs.getString("programmeName"));
       view.setProgrammeNumber(rs.getString("programmeNumber"));
       view.setTrainingNumber(rs.getString("trainingNumber"));
+      view.setGradeId(rs.getLong("gradeId"));
       view.setGradeAbbreviation(rs.getString("gradeAbbreviation"));
 
       view.setSiteCode(rs.getString("siteCode"));
+      view.setSiteId(rs.getLong("siteId"));
       view.setPlacementType(rs.getString("placementType"));
       view.setRole(rs.getString("role"));
       String status = rs.getString("status");

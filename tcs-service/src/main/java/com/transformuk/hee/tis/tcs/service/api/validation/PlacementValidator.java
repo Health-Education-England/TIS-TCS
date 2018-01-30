@@ -1,14 +1,12 @@
 package com.transformuk.hee.tis.tcs.service.api.validation;
 
 import com.transformuk.hee.tis.reference.client.ReferenceService;
-import com.transformuk.hee.tis.reference.client.impl.ReferenceServiceImpl;
 import com.transformuk.hee.tis.tcs.api.dto.PlacementDTO;
 import com.transformuk.hee.tis.tcs.api.dto.PlacementDetailsDTO;
 import com.transformuk.hee.tis.tcs.api.enumeration.PostSpecialtyType;
 import com.transformuk.hee.tis.tcs.service.repository.PersonRepository;
 import com.transformuk.hee.tis.tcs.service.repository.PostRepository;
 import com.transformuk.hee.tis.tcs.service.repository.SpecialtyRepository;
-import org.apache.commons.lang.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 import org.springframework.validation.BeanPropertyBindingResult;
@@ -103,11 +101,11 @@ public class PlacementValidator {
 
   private List<FieldError> checkSite(PlacementDetailsDTO placementDetailsDTO) {
     List<FieldError> fieldErrors = new ArrayList<>();
-    if (StringUtils.isBlank(placementDetailsDTO.getSiteCode())) {
+    if (placementDetailsDTO.getSiteId() == null) {
       fieldErrors.add(new FieldError(PLACEMENT_DTO_NAME, "siteId",
           "Site ID cannot be null or negative"));
     } else {
-      Map<String, Boolean> siteIdsExistsMap = referenceService.siteExists(newArrayList(placementDetailsDTO.getSiteCode()));
+      Map<Long, Boolean> siteIdsExistsMap = referenceService.siteIdExists(newArrayList(placementDetailsDTO.getSiteId()));
       notExistsFieldErrors(fieldErrors, siteIdsExistsMap, "siteId", "Site");
     }
     return fieldErrors;
@@ -115,11 +113,11 @@ public class PlacementValidator {
 
   private List<FieldError> checkGrade(PlacementDetailsDTO placementDetailsDTO) {
     List<FieldError> fieldErrors = new ArrayList<>();
-    if (StringUtils.isBlank(placementDetailsDTO.getGradeAbbreviation())) {
+    if (placementDetailsDTO.getGradeId() == null) {
       fieldErrors.add(new FieldError(PLACEMENT_DTO_NAME, "gradeId",
           "Grade ID cannot be empty"));
     } else {
-      Map<String, Boolean> gradeIdsExistsMap = referenceService.gradeExists(newArrayList(placementDetailsDTO.getGradeAbbreviation()));
+      Map<Long, Boolean> gradeIdsExistsMap = referenceService.gradeIdsExists(newArrayList(placementDetailsDTO.getGradeId()));
       notExistsFieldErrors(fieldErrors, gradeIdsExistsMap, "gradeId", "Grade");
     }
     return fieldErrors;
@@ -130,13 +128,23 @@ public class PlacementValidator {
 
     Map<String, Boolean> placementTypeCodesExistsMap = referenceService.
         placementTypeExists(newArrayList(placementDetailsDTO.getPlacementType()));
-    notExistsFieldErrors(fieldErrors, placementTypeCodesExistsMap, "placementType", "PlacementType");
+    notExistsStringFieldErrors(fieldErrors, placementTypeCodesExistsMap, "placementType", "PlacementType");
 
     return fieldErrors;
   }
 
-  private void notExistsFieldErrors(List<FieldError> fieldErrors, Map<String, Boolean> gradeIdsExistsMap,
+  private void notExistsFieldErrors(List<FieldError> fieldErrors, Map<Long, Boolean> gradeIdsExistsMap,
                                     String field, String entityName) {
+    gradeIdsExistsMap.forEach((k, v) -> {
+      if (!v) {
+        fieldErrors.add(new FieldError(PLACEMENT_DTO_NAME, field,
+            String.format("%s with id %s does not exist", entityName, k)));
+      }
+    });
+  }
+
+  private void notExistsStringFieldErrors(List<FieldError> fieldErrors, Map<String, Boolean> gradeIdsExistsMap,
+                                          String field, String entityName) {
     gradeIdsExistsMap.forEach((k, v) -> {
       if (!v) {
         fieldErrors.add(new FieldError(PLACEMENT_DTO_NAME, field,

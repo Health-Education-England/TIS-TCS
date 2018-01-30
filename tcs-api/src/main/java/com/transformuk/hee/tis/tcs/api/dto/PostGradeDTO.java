@@ -8,7 +8,7 @@ public class PostGradeDTO implements Serializable {
 
   private Long id;
   private Long postId;
-  private String gradeId;
+  private Long gradeId;
   private PostGradeType postGradeType;
 
 
@@ -28,11 +28,11 @@ public class PostGradeDTO implements Serializable {
     this.postId = postId;
   }
 
-  public String getGradeId() {
+  public Long getGradeId() {
     return gradeId;
   }
 
-  public void setGradeId(String gradeId) {
+  public void setGradeId(Long gradeId) {
     this.gradeId = gradeId;
   }
 

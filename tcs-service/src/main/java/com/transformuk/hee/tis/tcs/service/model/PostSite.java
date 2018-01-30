@@ -19,7 +19,7 @@ public class PostSite implements Serializable {
   private Post post;
 
   @JoinColumn(name = "siteId")
-  private String siteId;
+  private Long siteId;
 
   @Enumerated(EnumType.STRING)
   @Column(name = "postSiteType")
@@ -41,11 +41,11 @@ public class PostSite implements Serializable {
     this.post = post;
   }
 
-  public String getSiteId() {
+  public Long getSiteId() {
     return siteId;
   }
 
-  public void setSiteId(String siteId) {
+  public void setSiteId(Long siteId) {
     this.siteId = siteId;
   }
 

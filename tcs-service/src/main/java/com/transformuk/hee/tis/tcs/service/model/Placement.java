@@ -42,11 +42,19 @@ public class Placement implements Serializable {
   @JoinColumn(name = "postId")
   private Post post;
 
+  //Please use site id, site codes from intrepid are NOT unique
   @Column(name = "siteCode")
   private String siteCode;
 
+  //Please use grade id
   @Column(name = "gradeAbbreviation")
   private String gradeAbbreviation;
+
+  @Column(name = "siteId")
+  private Long siteId;
+
+  @Column(name = "gradeId")
+  private Long gradeId;
 
   @OneToMany(mappedBy = "placement", cascade = CascadeType.ALL, fetch = FetchType.EAGER)
   private Set<PlacementSpecialty> specialties = new HashSet<>();
@@ -181,6 +189,22 @@ public class Placement implements Serializable {
     this.placementWholeTimeEquivalent = placementWholeTimeEquivalent;
   }
 
+  public Long getSiteId() {
+    return siteId;
+  }
+
+  public void setSiteId(Long siteId) {
+    this.siteId = siteId;
+  }
+
+  public Long getGradeId() {
+    return gradeId;
+  }
+
+  public void setGradeId(Long gradeId) {
+    this.gradeId = gradeId;
+  }
+
   @Override
   public boolean equals(Object o) {
     if (this == o) {
@@ -205,17 +229,21 @@ public class Placement implements Serializable {
   public String toString() {
     return "Placement{" +
         "id=" + id +
-        ", post='" + post + "'" +
-        ", siteCode='" + siteCode + "'" +
-        ", trainee='" + trainee + "'" +
-        ", clinicalSupervisors='" + clinicalSupervisors + "'" +
-        ", gradeAbbreviation='" + gradeAbbreviation + "'" +
-        ", specialties='" + specialties + "'" +
-        ", dateFrom='" + dateFrom + "'" +
-        ", dateTo='" + dateTo + "'" +
-        ", placementType='" + placementType + "'" +
-        ", placementWholeTimeEquivalent='" + placementWholeTimeEquivalent + "'" +
-        ", localPostNumber='" + localPostNumber + "'" +
+        ", trainee=" + trainee +
+        ", clinicalSupervisors=" + clinicalSupervisors +
+        ", intrepidId='" + intrepidId + '\'' +
+        ", post=" + post +
+        ", siteCode='" + siteCode + '\'' +
+        ", gradeAbbreviation='" + gradeAbbreviation + '\'' +
+        ", siteId='" + siteId + '\'' +
+        ", gradeId='" + gradeId + '\'' +
+        ", specialties=" + specialties +
+        ", dateFrom=" + dateFrom +
+        ", dateTo=" + dateTo +
+        ", placementType='" + placementType + '\'' +
+        ", placementWholeTimeEquivalent=" + placementWholeTimeEquivalent +
+        ", trainingDescription='" + trainingDescription + '\'' +
+        ", localPostNumber='" + localPostNumber + '\'' +
         '}';
   }
 }

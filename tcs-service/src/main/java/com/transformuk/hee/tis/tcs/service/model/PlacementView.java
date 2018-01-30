@@ -33,8 +33,14 @@ public class PlacementView implements Serializable {
   @Column(name = "postId")
   private Long postId;
 
+  @Column(name = "siteId")
+  private Long siteId;
+
   @Column(name = "siteCode")
   private String siteCode;
+
+  @Column(name = "gradeId")
+  private Long gradeId;
 
   @Column(name = "gradeAbbreviation")
   private String gradeAbbreviation;
@@ -138,6 +144,22 @@ public class PlacementView implements Serializable {
     this.placementType = placementType;
   }
 
+  public Long getSiteId() {
+    return siteId;
+  }
+
+  public void setSiteId(Long siteId) {
+    this.siteId = siteId;
+  }
+
+  public Long getGradeId() {
+    return gradeId;
+  }
+
+  public void setGradeId(Long gradeId) {
+    this.gradeId = gradeId;
+  }
+
   @Override
   public boolean equals(Object o) {
     if (this == o) return true;
@@ -149,7 +171,9 @@ public class PlacementView implements Serializable {
     if (traineeId != null ? !traineeId.equals(that.traineeId) : that.traineeId != null) return false;
     if (intrepidId != null ? !intrepidId.equals(that.intrepidId) : that.intrepidId != null) return false;
     if (postId != null ? !postId.equals(that.postId) : that.postId != null) return false;
+    if (siteId != null ? !siteId.equals(that.siteId) : that.siteId != null) return false;
     if (siteCode != null ? !siteCode.equals(that.siteCode) : that.siteCode != null) return false;
+    if (gradeId != null ? !gradeId.equals(that.gradeId) : that.gradeId != null) return false;
     if (gradeAbbreviation != null ? !gradeAbbreviation.equals(that.gradeAbbreviation) : that.gradeAbbreviation != null)
       return false;
     if (dateFrom != null ? !dateFrom.equals(that.dateFrom) : that.dateFrom != null) return false;
@@ -163,7 +187,9 @@ public class PlacementView implements Serializable {
     result = 31 * result + (traineeId != null ? traineeId.hashCode() : 0);
     result = 31 * result + (intrepidId != null ? intrepidId.hashCode() : 0);
     result = 31 * result + (postId != null ? postId.hashCode() : 0);
+    result = 31 * result + (siteId != null ? siteId.hashCode() : 0);
     result = 31 * result + (siteCode != null ? siteCode.hashCode() : 0);
+    result = 31 * result + (gradeId != null ? gradeId.hashCode() : 0);
     result = 31 * result + (gradeAbbreviation != null ? gradeAbbreviation.hashCode() : 0);
     result = 31 * result + (dateFrom != null ? dateFrom.hashCode() : 0);
     result = 31 * result + (dateTo != null ? dateTo.hashCode() : 0);
@@ -178,7 +204,9 @@ public class PlacementView implements Serializable {
         ", traineeId=" + traineeId +
         ", intrepidId='" + intrepidId + '\'' +
         ", postId=" + postId +
+        ", siteId=" + siteId +
         ", siteCode='" + siteCode + '\'' +
+        ", gradeId=" + gradeId +
         ", gradeAbbreviation='" + gradeAbbreviation + '\'' +
         ", dateFrom=" + dateFrom +
         ", dateTo=" + dateTo +

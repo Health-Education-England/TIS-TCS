@@ -42,8 +42,14 @@ public class PostView implements Serializable {
   @Column(name = "nationalPostNumber")
   private String nationalPostNumber;
 
+  @Column(name = "primarySiteId")
+  private Long primarySiteId;
+
   @Column(name = "primarySiteCode")
   private String primarySiteCode;
+
+  @Column(name = "approvedGradeId")
+  private Long approvedGradeId;
 
   @Column(name = "approvedGradeCode")
   private String approvedGradeCode;
@@ -206,6 +212,22 @@ public class PostView implements Serializable {
     this.intrepidId = intrepidId;
   }
 
+  public Long getPrimarySiteId() {
+    return primarySiteId;
+  }
+
+  public void setPrimarySiteId(Long primarySiteId) {
+    this.primarySiteId = primarySiteId;
+  }
+
+  public Long getApprovedGradeId() {
+    return approvedGradeId;
+  }
+
+  public void setApprovedGradeId(Long approvedGradeId) {
+    this.approvedGradeId = approvedGradeId;
+  }
+
   @Override
   public boolean equals(Object o) {
     if (this == o) return true;
@@ -273,7 +295,9 @@ public class PostView implements Serializable {
         ", currentTraineeSurname='" + currentTraineeSurname + '\'' +
         ", currentTraineeForenames='" + currentTraineeForenames + '\'' +
         ", nationalPostNumber='" + nationalPostNumber + '\'' +
+        ", primarySiteId=" + primarySiteId +
         ", primarySiteCode='" + primarySiteCode + '\'' +
+        ", approvedGradeId='" + approvedGradeId + '\'' +
         ", approvedGradeCode='" + approvedGradeCode + '\'' +
         ", primarySpecialtyId=" + primarySpecialtyId +
         ", primarySpecialtyCode='" + primarySpecialtyCode + '\'' +
@@ -281,7 +305,7 @@ public class PostView implements Serializable {
         ", programmeName='" + programmeName + '\'' +
         ", status=" + status +
         ", fundingType=" + fundingType +
-        ", localOffice='" + owner + '\'' +
+        ", owner='" + owner + '\'' +
         ", intrepidId='" + intrepidId + '\'' +
         '}';
   }
