@@ -7,6 +7,7 @@ import com.transformuk.hee.tis.tcs.service.model.ContactDetails;
 import com.transformuk.hee.tis.tcs.service.repository.ContactDetailsRepository;
 import com.transformuk.hee.tis.tcs.service.service.ContactDetailsService;
 import com.transformuk.hee.tis.tcs.service.service.mapper.ContactDetailsMapper;
+import org.apache.commons.lang3.StringUtils;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -22,6 +23,7 @@ import org.springframework.test.web.servlet.setup.MockMvcBuilders;
 import org.springframework.transaction.annotation.Transactional;
 
 import javax.persistence.EntityManager;
+import javax.persistence.Query;
 import java.time.LocalDateTime;
 import java.time.ZoneId;
 import java.util.List;
@@ -159,6 +161,15 @@ public class ContactDetailsResourceIntTest {
   @Test
   @Transactional
   public void createContactDetails() throws Exception {
+    Query nativeQuery = em.createNativeQuery("select * from information_schema.indexes;");
+    List<Object[]> authors = nativeQuery.getResultList();
+
+    for (Object[] a : authors) {
+//      System.out.println(a);
+      System.out.println(StringUtils.join(a, ", "));
+    }
+
+
     int databaseSizeBeforeCreate = contactDetailsRepository.findAll().size();
 
     // Create the ContactDetails
