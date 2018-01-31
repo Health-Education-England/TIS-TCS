@@ -258,4 +258,9 @@ public class PlacementResource {
     HttpHeaders headers = PaginationUtil.generatePaginationHttpHeaders(page, "/api/placements/filter");
     return new ResponseEntity<>(page.getContent(), headers, HttpStatus.OK);
   }
+
+  //Required for the auditing aspect
+  public ResponseEntity<PlacementDetailsDTO> getPlacementDetails(@PathVariable Long id) {
+    return getPlacement(id);
+  }
 }
