@@ -23,7 +23,7 @@ public class SwaggerDocumentationConfig {
 
   ApiInfo apiInfo() {
     return new ApiInfoBuilder()
-        .title("TIS Reference API")
+        .title("TIS TCS API")
         .description("Programme Curriculum Specialty Service REST API")
         .license("")
         .licenseUrl("")
