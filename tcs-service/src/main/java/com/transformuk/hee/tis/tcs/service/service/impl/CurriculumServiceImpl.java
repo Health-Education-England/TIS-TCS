@@ -1,6 +1,7 @@
 package com.transformuk.hee.tis.tcs.service.service.impl;
 
 import com.transformuk.hee.tis.tcs.api.dto.CurriculumDTO;
+import com.transformuk.hee.tis.tcs.api.enumeration.Status;
 import com.transformuk.hee.tis.tcs.service.model.ColumnFilter;
 import com.transformuk.hee.tis.tcs.service.model.Curriculum;
 import com.transformuk.hee.tis.tcs.service.repository.CurriculumRepository;
@@ -9,6 +10,7 @@ import com.transformuk.hee.tis.tcs.service.service.mapper.CurriculumMapper;
 import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.data.domain.Example;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.domain.Specification;
@@ -21,6 +23,7 @@ import java.util.List;
 
 import static com.transformuk.hee.tis.tcs.service.service.impl.SpecificationFactory.containsLike;
 import static com.transformuk.hee.tis.tcs.service.service.impl.SpecificationFactory.in;
+import static com.transformuk.hee.tis.tcs.service.service.impl.SpecificationFactory.isEqual;
 
 /**
  * Service Implementation for managing Curriculum.
@@ -67,13 +70,19 @@ public class CurriculumServiceImpl implements CurriculumService {
   @Override
   @Transactional(readOnly = true)
   public Page<CurriculumDTO> advancedSearch(
-      String searchString, List<ColumnFilter> columnFilters, Pageable pageable) {
+      String searchString, List<ColumnFilter> columnFilters, Pageable pageable, boolean current) {
 
     List<Specification<Curriculum>> specs = new ArrayList<>();
     //add the text search criteria
     if (StringUtils.isNotEmpty(searchString)) {
       specs.add(Specifications.where(containsLike("name", searchString)));
     }
+
+    //add status
+    if(current) {
+        specs.add(Specifications.where(isEqual("status", Status.CURRENT)));
+    }
+
     //add the column filters criteria
     if (columnFilters != null && !columnFilters.isEmpty()) {
       columnFilters.forEach(cf -> specs.add(in(cf.getName(), cf.getValues())));
@@ -104,6 +113,14 @@ public class CurriculumServiceImpl implements CurriculumService {
   public Page<CurriculumDTO> findAll(Pageable pageable) {
     log.debug("Request to get all Curricula");
     Page<Curriculum> result = curriculumRepository.findAll(pageable);
+    return result.map(curriculum -> curriculumMapper.curriculumToCurriculumDTO(curriculum));
+  }
+
+  @Override
+    public Page<CurriculumDTO> findAllCurrent(Pageable pageable) {
+    log.debug("Request to get all Curricula");
+    Curriculum example = new Curriculum().status(Status.CURRENT);
+    Page<Curriculum> result = curriculumRepository.findAll(Example.of(example), pageable);
     return result.map(curriculum -> curriculumMapper.curriculumToCurriculumDTO(curriculum));
   }
 

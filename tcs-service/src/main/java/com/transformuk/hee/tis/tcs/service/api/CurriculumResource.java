@@ -160,11 +160,59 @@ public class CurriculumResource {
     if (StringUtils.isEmpty(searchQuery) && StringUtils.isEmpty(columnFilterJson)) {
       page = curriculumService.findAll(pageable);
     } else {
-      page = curriculumService.advancedSearch(searchQuery, columnFilters, pageable);
+      page = curriculumService.advancedSearch(searchQuery, columnFilters, pageable, false);
     }
     HttpHeaders headers = PaginationUtil.generatePaginationHttpHeaders(page, "/api/curricula");
     return new ResponseEntity<>(page.getContent(), headers, HttpStatus.OK);
   }
+
+
+  @ApiOperation(value = "Lists Current Curriculum data",
+      notes = "Returns a list of Curriculum in the CURRENT STATUS with support for pagination, sorting, smart search and column filters")
+  /**
+   * GET  /current/curricula : get all the current curricula.
+   *
+   * @param pageable the pagination information
+   * @return the ResponseEntity with status 200 (OK) and the list of curricula in body
+   * @throws URISyntaxException if there is an error to generate the pagination HTTP headers
+   */
+  @GetMapping("/current/curricula")
+  @Timed
+  @PreAuthorize("hasAuthority('curriculum:view')")
+  public ResponseEntity<List<CurriculumDTO>> getAllCurrentCurricula(
+      @ApiParam Pageable pageable,
+      @ApiParam(value = "any wildcard string to be searched")
+      @RequestParam(value = "searchQuery", required = false) String searchQuery,
+      @ApiParam(value = "columns by which to filter by in a string representation of the json. \n\n" +
+          "Eg: \n\n" +
+          "```" +
+          "columnFilters={" +
+          "\"name\": [\"Orthodontics\", \"Core Medical Training\"]," +
+          "\"curriculumSubType\":[\"ACL\"] }\"" +
+          "```\n\n" +
+          "The following fields are currently supported: \n" +
+          "+ id (Number) \n" +
+          "+ name (String) \n" +
+          "+ curriculumSubType Please see endpoint: /api/curriculum-sub-types \n\n" +
+          "+ assessmentType (ARCP|RITA|ACADEMIC) \n" +
+          "+ doesThisCurriculumLeadToCct (Boolean) \n")
+      @RequestParam(value = "columnFilters", required = false) String columnFilterJson) throws IOException {
+
+    log.debug("REST request to get a page of current Curricula");
+
+    searchQuery = sanitize(searchQuery);
+    List<Class> filterEnumList = Lists.newArrayList(CurriculumSubType.class, AssessmentType.class, Status.class);
+    List<ColumnFilter> columnFilters = ColumnFilterUtil.getColumnFilters(columnFilterJson, filterEnumList);
+    Page<CurriculumDTO> page;
+    if (StringUtils.isEmpty(searchQuery) && StringUtils.isEmpty(columnFilterJson)) {
+      page = curriculumService.findAllCurrent(pageable);
+    } else {
+      page = curriculumService.advancedSearch(searchQuery, columnFilters, pageable, true);
+    }
+    HttpHeaders headers = PaginationUtil.generatePaginationHttpHeaders(page, "/api/curricula");
+    return new ResponseEntity<>(page.getContent(), headers, HttpStatus.OK);
+  }
+
 
   /**
    * GET  /curricula/:id : get the "id" curriculum.

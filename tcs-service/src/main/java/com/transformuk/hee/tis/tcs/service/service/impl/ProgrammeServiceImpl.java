@@ -2,6 +2,7 @@ package com.transformuk.hee.tis.tcs.service.service.impl;
 
 import com.google.common.base.Preconditions;
 import com.transformuk.hee.tis.tcs.api.dto.ProgrammeDTO;
+import com.transformuk.hee.tis.tcs.api.enumeration.Status;
 import com.transformuk.hee.tis.tcs.service.model.ColumnFilter;
 import com.transformuk.hee.tis.tcs.service.model.Programme;
 import com.transformuk.hee.tis.tcs.service.repository.ProgrammeRepository;
@@ -10,6 +11,7 @@ import com.transformuk.hee.tis.tcs.service.service.mapper.ProgrammeMapper;
 import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.data.domain.Example;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.domain.Specification;
@@ -22,6 +24,7 @@ import java.util.List;
 
 import static com.transformuk.hee.tis.tcs.service.service.impl.SpecificationFactory.containsLike;
 import static com.transformuk.hee.tis.tcs.service.service.impl.SpecificationFactory.in;
+import static com.transformuk.hee.tis.tcs.service.service.impl.SpecificationFactory.isEqual;
 
 /**
  * Service Implementation for managing Programme.
@@ -100,8 +103,16 @@ public class ProgrammeServiceImpl implements ProgrammeService {
   }
 
   @Override
+  public Page<ProgrammeDTO> findAllCurrent(Pageable pageable) {
+    log.debug("Request to get all current Programmes");
+    Programme example = new Programme().status(Status.CURRENT);
+    Page<Programme> result = programmeRepository.findAll(Example.of(example), pageable);
+    return result.map(programmeMapper::programmeToProgrammeDTO);
+  }
+
+  @Override
   @Transactional(readOnly = true)
-  public Page<ProgrammeDTO> advancedSearch(String searchString, List<ColumnFilter> columnFilters, Pageable pageable) {
+  public Page<ProgrammeDTO> advancedSearch(String searchString, List<ColumnFilter> columnFilters, Pageable pageable, boolean currentStatus) {
 
     List<Specification<Programme>> specs = new ArrayList<>();
     //add the text search criteria
@@ -110,6 +121,11 @@ public class ProgrammeServiceImpl implements ProgrammeService {
           or(containsLike("owner", searchString)).
           or(containsLike("programmeNumber", searchString)));
     }
+
+    if(currentStatus) {
+      specs.add(Specifications.where(isEqual("status", Status.CURRENT)));
+    }
+
     //add the column filters criteria
     if (columnFilters != null && !columnFilters.isEmpty()) {
       columnFilters.forEach(cf -> specs.add(in(cf.getName(), cf.getValues())));

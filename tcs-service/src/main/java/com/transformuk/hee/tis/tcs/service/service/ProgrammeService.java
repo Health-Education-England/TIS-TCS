@@ -46,6 +46,14 @@ public interface ProgrammeService {
   Page<ProgrammeDTO> findAll(Pageable pageable);
 
   /**
+   * Get all the programmes.
+   *
+   * @param pageable the pagination information
+   * @return the list of entities
+   */
+  Page<ProgrammeDTO> findAllCurrent(Pageable pageable);
+
+  /**
    * Get all the programmes within the given designated body codes using the
    * given smart search string.
    *
@@ -54,7 +62,7 @@ public interface ProgrammeService {
    * @param pageable     the pagination information
    * @return the list of entities
    */
-  Page<ProgrammeDTO> advancedSearch(String searchString, List<ColumnFilter> columnFilers, Pageable pageable);
+  Page<ProgrammeDTO> advancedSearch(String searchString, List<ColumnFilter> columnFilers, Pageable pageable, boolean currentStatus);
 
   /**
    * Get the "id" programme.

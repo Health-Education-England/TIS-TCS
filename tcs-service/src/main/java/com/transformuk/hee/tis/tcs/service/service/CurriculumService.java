@@ -1,6 +1,7 @@
 package com.transformuk.hee.tis.tcs.service.service;
 
 import com.transformuk.hee.tis.tcs.api.dto.CurriculumDTO;
+import com.transformuk.hee.tis.tcs.api.enumeration.Status;
 import com.transformuk.hee.tis.tcs.service.model.ColumnFilter;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
@@ -34,9 +35,10 @@ public interface CurriculumService {
    * @param searchString the search string to match, can be null
    * @param columnFilers the exact key value filters to apply, can be null
    * @param pageable     the pagination information
+   *
    * @return the list of entities
    */
-  Page<CurriculumDTO> advancedSearch(String searchString, List<ColumnFilter> columnFilers, Pageable pageable);
+  Page<CurriculumDTO> advancedSearch(String searchString, List<ColumnFilter> columnFilers, Pageable pageable, boolean current);
 
 
   /**
@@ -46,6 +48,15 @@ public interface CurriculumService {
    * @return the list of entities
    */
   Page<CurriculumDTO> findAll(Pageable pageable);
+
+  /**
+   * Get all the current curricula.
+   *
+   * @param pageable the pagination information
+   * @return the list of entities
+   */
+  Page<CurriculumDTO> findAllCurrent(Pageable pageable);
+
 
   /**
    * Get the "id" curriculum.
