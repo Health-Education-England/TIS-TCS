@@ -88,10 +88,10 @@ public class PostResourceIntTest {
   private static final String UPDATED_NATIONAL_POST_NUMBER = "BBBBBBBBBB";
   private static final Status DEFAULT_STATUS = Status.CURRENT;
   private static final Status UPDATED_STATUS = Status.INACTIVE;
-  private static final String DEFAULT_EMPLOYING_BODY = "AAAAAAAAAA";
-  private static final String UPDATED_EMPLOYING_BODY = "BBBBBBBBBB";
-  private static final String DEFAULT_TRAINING_BODY_ID = "training body id";
-  private static final String UPDATED_TRAINING_BODY = "BBBBBBBBBB";
+  private static final Long DEFAULT_EMPLOYING_BODY = 1L;
+  private static final Long UPDATED_EMPLOYING_BODY = 2L;
+  private static final Long DEFAULT_TRAINING_BODY_ID = 10L;
+  private static final Long UPDATED_TRAINING_BODY = 11L;
   private static final String SPECIALTY_COLLEGE = "Specialty College";
   private static final String TEST_SPECIALTY = "Test Specialty";
   private static final PostSuffix DEFAULT_SUFFIX = PostSuffix.ACADEMIC;
