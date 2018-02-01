@@ -5,11 +5,12 @@ begin
 
 -- This procedure is no longer used as the real time query works fast enough
 -- It is kept just in case we need to revert back to this solution
---	truncate table PersonOwner;
---
---	insert into PersonOwner(id,owner,rule)
---	select p.id, get_localoffice(id, 'LO') localoffice, get_localoffice(id, 'R') which_rule
---	from Person p;
+
+	truncate table PersonOwner;
+
+	insert into PersonOwner(id,owner,rule)
+	select p.id, get_localoffice(id, 'LO') localoffice, get_localoffice(id, 'R') which_rule
+	from Person p;
 --
 --  truncate table PersonView;
 --
