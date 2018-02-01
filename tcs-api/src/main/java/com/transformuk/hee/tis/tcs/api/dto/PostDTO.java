@@ -43,9 +43,9 @@ public class PostDTO implements Serializable {
 
   private Set<PostSiteDTO> sites;
 
-  private String employingBodyId;
+  private Long employingBodyId;
 
-  private String trainingBodyId;
+  private Long trainingBodyId;
 
   private Set<PostGradeDTO> grades;
 
@@ -178,28 +178,28 @@ public class PostDTO implements Serializable {
     return this;
   }
 
-  public String getEmployingBodyId() {
+  public Long getEmployingBodyId() {
     return employingBodyId;
   }
 
-  public void setEmployingBodyId(String employingBodyId) {
+  public void setEmployingBodyId(Long employingBodyId) {
     this.employingBodyId = employingBodyId;
   }
 
-  public PostDTO employingBodyId(String employingBodyId) {
+  public PostDTO employingBodyId(Long employingBodyId) {
     this.employingBodyId = employingBodyId;
     return this;
   }
 
-  public String getTrainingBodyId() {
+  public Long getTrainingBodyId() {
     return trainingBodyId;
   }
 
-  public void setTrainingBodyId(String trainingBodyId) {
+  public void setTrainingBodyId(Long trainingBodyId) {
     this.trainingBodyId = trainingBodyId;
   }
 
-  public PostDTO trainingBodyId(String trainingBodyId) {
+  public PostDTO trainingBodyId(Long trainingBodyId) {
     this.trainingBodyId = trainingBodyId;
     return this;
   }
