@@ -281,9 +281,7 @@ public class ProgrammeResource {
         }
       }
       List<ProgrammeDTO> result = programmeService.save(programmeDTOS);
-      List<Long> ids = result.stream().map(r -> r.getId()).collect(Collectors.toList());
       return ResponseEntity.ok()
-          .headers(HeaderUtil.createEntityCreationAlert(ENTITY_NAME, StringUtils.join(ids, ",")))
           .body(result);
     } catch (DataIntegrityViolationException e) {
       log.error(e.getMessage(), e);
@@ -318,9 +316,7 @@ public class ProgrammeResource {
       }
 
       List<ProgrammeDTO> results = programmeService.save(programmeDTOS);
-      List<Long> ids = results.stream().map(r -> r.getId()).collect(Collectors.toList());
       return ResponseEntity.ok()
-          .headers(HeaderUtil.createEntityUpdateAlert(ENTITY_NAME, StringUtils.join(ids, ",")))
           .body(results);
     } catch (DataIntegrityViolationException e) {
       log.error(e.getMessage(), e);
