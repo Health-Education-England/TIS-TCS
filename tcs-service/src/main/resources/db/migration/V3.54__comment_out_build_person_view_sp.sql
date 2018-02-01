@@ -3,14 +3,15 @@ drop procedure if exists build_person_localoffice//
 create procedure build_person_localoffice()
 begin
 
--- This procedure is no longer used as the real time query works fast enough
--- It is kept just in case we need to revert back to this solution
-
 	truncate table PersonOwner;
 
 	insert into PersonOwner(id,owner,rule)
 	select p.id, get_localoffice(id, 'LO') localoffice, get_localoffice(id, 'R') which_rule
 	from Person p;
+
+
+-- This procedure is no longer used as the real time query works fast enough
+-- It is kept just in case we need to revert back to this solution
 --
 --  truncate table PersonView;
 --
