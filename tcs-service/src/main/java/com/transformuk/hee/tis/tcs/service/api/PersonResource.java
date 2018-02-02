@@ -97,7 +97,7 @@ public class PersonResource {
     if (personDTO.getId() != null) {
       return ResponseEntity.badRequest().headers(HeaderUtil.createFailureAlert(ENTITY_NAME, "idexists", "A new person cannot already have an ID")).body(null);
     }
-    PersonDTO result = personService.save(personDTO);
+    PersonDTO result = personService.create(personDTO);
     return ResponseEntity.created(new URI("/api/people/" + result.getId()))
         .headers(HeaderUtil.createEntityCreationAlert(ENTITY_NAME, result.getId().toString()))
         .body(result);

@@ -24,6 +24,17 @@ public interface PersonService {
   PersonDTO save(PersonDTO personDTO);
 
   /**
+   * Create a person.
+   *
+   * Person is one of those entities that share the ID with the joining tables
+   * Save the person object and ensure we copy the generated id to the linked entities
+   *
+   * @param personDTO the entity to save
+   * @return the persisted entity
+   */
+  PersonDTO create(PersonDTO personDTO);
+
+  /**
    * Save a list of persons
    *
    * @param personDTOs the list of entities to save
