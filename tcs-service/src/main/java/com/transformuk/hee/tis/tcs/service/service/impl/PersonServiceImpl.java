@@ -118,7 +118,7 @@ public class PersonServiceImpl implements PersonService {
    * @return the persisted entity
    */
   @Override
-  @Transactional(rollbackFor = Exception.class, propagation = Propagation.NESTED)
+  @Transactional()
   public PersonDTO create(PersonDTO personDTO) {
     log.debug("Request to save Person : {}", personDTO);
     Person person = personMapper.toEntity(personDTO);
