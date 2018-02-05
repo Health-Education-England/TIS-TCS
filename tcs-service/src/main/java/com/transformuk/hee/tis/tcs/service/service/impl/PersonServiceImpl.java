@@ -42,6 +42,7 @@ import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.jdbc.core.RowMapper;
 import org.springframework.scheduling.annotation.Async;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Propagation;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.util.CollectionUtils;
 
@@ -117,6 +118,7 @@ public class PersonServiceImpl implements PersonService {
    * @return the persisted entity
    */
   @Override
+  @Transactional(rollbackFor = Exception.class, propagation = Propagation.NESTED)
   public PersonDTO create(PersonDTO personDTO) {
     log.debug("Request to save Person : {}", personDTO);
     Person person = personMapper.toEntity(personDTO);
@@ -395,5 +397,10 @@ public class PersonServiceImpl implements PersonService {
       }
       return view;
     }
+  }
+
+  @Override
+  public void setRightToWorkRepository(RightToWorkRepository rightToWorkRepository) {
+    this.rightToWorkRepository = rightToWorkRepository;
   }
 }

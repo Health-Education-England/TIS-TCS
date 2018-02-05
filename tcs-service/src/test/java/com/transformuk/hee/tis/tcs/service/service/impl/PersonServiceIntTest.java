@@ -6,6 +6,7 @@ import com.transformuk.hee.tis.tcs.api.dto.GmcDetailsDTO;
 import com.transformuk.hee.tis.tcs.api.dto.PersonDTO;
 import com.transformuk.hee.tis.tcs.api.dto.PersonalDetailsDTO;
 import com.transformuk.hee.tis.tcs.service.Application;
+import com.transformuk.hee.tis.tcs.service.model.RightToWork;
 import com.transformuk.hee.tis.tcs.service.repository.ContactDetailsRepository;
 import com.transformuk.hee.tis.tcs.service.repository.GdcDetailsRepository;
 import com.transformuk.hee.tis.tcs.service.repository.GmcDetailsRepository;
@@ -21,16 +22,21 @@ import org.junit.runner.RunWith;
 import org.mockito.MockitoAnnotations;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
+import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.test.context.junit4.SpringRunner;
 import org.springframework.transaction.annotation.Transactional;
+
+import static org.mockito.Matchers.any;
+import static org.mockito.Mockito.when;
 
 @RunWith(SpringRunner.class)
 @SpringBootTest(classes = Application.class)
 public class PersonServiceIntTest {
 
+  @MockBean
+  RightToWorkRepository rightToWorkRepositoryMock;
   @Autowired
   private PersonService personService;
-
   @Autowired
   private PersonMapper personMapper;
   @Autowired
@@ -45,7 +51,6 @@ public class PersonServiceIntTest {
   private PersonalDetailsRepository personalDetailsRepository;
   @Autowired
   private RightToWorkRepository rightToWorkRepository;
-
   private PersonDTO personDTO;
 
   @Before
@@ -91,7 +96,7 @@ public class PersonServiceIntTest {
     return gmcDetails;
   }
 
-  private GdcDetailsDTO buildGdcDetails(){
+  private GdcDetailsDTO buildGdcDetails() {
     GdcDetailsDTO gdcDetails = new GdcDetailsDTO();
     gdcDetails.setGdcNumber("gdc number");
     gdcDetails.setGdcStatus("gdc status");
@@ -121,6 +126,34 @@ public class PersonServiceIntTest {
     Assert.assertEquals(beforeContactSize + 1, contactDetailsRepository.findAll().size());
     Assert.assertEquals(beforePersonalDetailsSize + 1, personalDetailsRepository.findAll().size());
     Assert.assertEquals(beforeRightToWorkSize + 1, rightToWorkRepository.findAll().size());
+  }
+
+
+  @Test(expected = Exception.class)
+  @Transactional()
+  public void createShouldRollbackWhenCreationOfRelatedEntitiesFail() {
+    personService.setRightToWorkRepository(rightToWorkRepositoryMock);
+
+    when(rightToWorkRepository.save(any(RightToWork.class))).thenThrow(new RuntimeException("Random exception because of id"));
+
+    int beforeGdcSize = gdcDetailsRepository.findAll().size();
+    int beforeGmcSize = gmcDetailsRepository.findAll().size();
+    int beforeContactSize = contactDetailsRepository.findAll().size();
+    int beforePersonalDetailsSize = personalDetailsRepository.findAll().size();
+    int beforeRightToWorkSize = rightToWorkRepository.findAll().size();
+
+    PersonDTO result = null;
+    try {
+      result = personService.create(this.personDTO);
+    } catch (Exception e) {
+      Assert.assertNull(result);
+      Assert.assertEquals(beforeGdcSize, gdcDetailsRepository.findAll().size());
+      Assert.assertEquals(beforeGmcSize, gmcDetailsRepository.findAll().size());
+      Assert.assertEquals(beforeContactSize, contactDetailsRepository.findAll().size());
+      Assert.assertEquals(beforePersonalDetailsSize, personalDetailsRepository.findAll().size());
+      Assert.assertEquals(beforeRightToWorkSize, rightToWorkRepository.findAll().size());
+      throw e;
+    }
   }
 
 }

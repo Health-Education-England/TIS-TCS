@@ -4,6 +4,7 @@ import com.transformuk.hee.tis.tcs.api.dto.PersonBasicDetailsDTO;
 import com.transformuk.hee.tis.tcs.api.dto.PersonDTO;
 import com.transformuk.hee.tis.tcs.api.dto.PersonViewDTO;
 import com.transformuk.hee.tis.tcs.service.model.ColumnFilter;
+import com.transformuk.hee.tis.tcs.service.repository.RightToWorkRepository;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 
@@ -106,4 +107,5 @@ public interface PersonService {
    */
   CompletableFuture<Void> buildPersonView();
 
+  void setRightToWorkRepository(RightToWorkRepository rightToWorkRepository);
 }
