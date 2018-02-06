@@ -1,5 +1,6 @@
 package com.transformuk.hee.tis.tcs.service.service;
 
+import com.transformuk.hee.tis.tcs.api.dto.PlacementSummaryDTO;
 import com.transformuk.hee.tis.tcs.api.dto.PlacementDTO;
 import com.transformuk.hee.tis.tcs.api.dto.PlacementDetailsDTO;
 import org.springframework.data.domain.Page;
@@ -100,4 +101,18 @@ public interface PlacementService {
    * @return the list of entities
    */
   Page<PlacementDetailsDTO> findAllPlacementDetails(Pageable pageable);
+
+  /**
+   * Get all placements by trainee id
+   * @param traineeId the id of the trainee
+   * @return
+   */
+  List<PlacementSummaryDTO> getPlacementForTrainee(Long traineeId);
+
+  /**
+   * Get all placements by post id
+   * @param postId the id of the Post
+   * @return
+   */
+  List<PlacementSummaryDTO> getPlacementForPost(Long postId);
 }

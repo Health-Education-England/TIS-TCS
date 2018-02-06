@@ -4,11 +4,13 @@ import com.codahale.metrics.annotation.Timed;
 import com.google.common.collect.Lists;
 import com.transformuk.hee.tis.tcs.api.dto.PersonBasicDetailsDTO;
 import com.transformuk.hee.tis.tcs.api.dto.PersonDTO;
+import com.transformuk.hee.tis.tcs.api.dto.PlacementSummaryDTO;
 import com.transformuk.hee.tis.tcs.api.dto.PersonViewDTO;
 import com.transformuk.hee.tis.tcs.api.dto.PlacementViewDTO;
 import com.transformuk.hee.tis.tcs.api.dto.validation.Create;
 import com.transformuk.hee.tis.tcs.api.dto.validation.Update;
 import com.transformuk.hee.tis.tcs.api.enumeration.Status;
+import com.transformuk.hee.tis.tcs.service.api.decorator.PlacementSummaryDecorator;
 import com.transformuk.hee.tis.tcs.service.api.decorator.PersonViewDecorator;
 import com.transformuk.hee.tis.tcs.service.api.decorator.PlacementViewDecorator;
 import com.transformuk.hee.tis.tcs.service.api.util.ColumnFilterUtil;
@@ -18,6 +20,7 @@ import com.transformuk.hee.tis.tcs.service.model.ColumnFilter;
 import com.transformuk.hee.tis.tcs.service.model.PlacementView;
 import com.transformuk.hee.tis.tcs.service.repository.PlacementViewRepository;
 import com.transformuk.hee.tis.tcs.service.service.PersonService;
+import com.transformuk.hee.tis.tcs.service.service.PlacementService;
 import com.transformuk.hee.tis.tcs.service.service.mapper.PlacementViewMapper;
 import io.github.jhipster.web.util.ResponseUtil;
 import io.swagger.annotations.ApiOperation;
@@ -71,15 +74,20 @@ public class PersonResource {
   private final PlacementViewMapper placementViewMapper;
   private final PlacementViewDecorator placementViewDecorator;
   private final PersonViewDecorator personViewDecorator;
+  private final PlacementService placementService;
+  private final PlacementSummaryDecorator placementSummaryDecorator;
 
   public PersonResource(PersonService personService, PlacementViewRepository placementViewRepository,
                         PlacementViewMapper placementViewMapper, PlacementViewDecorator placementViewDecorator,
-                        PersonViewDecorator personViewDecorator) {
+                        PersonViewDecorator personViewDecorator, PlacementService placementService,
+                        PlacementSummaryDecorator placementSummaryDecorator) {
     this.personService = personService;
     this.placementViewRepository = placementViewRepository;
     this.placementViewMapper = placementViewMapper;
     this.placementViewDecorator = placementViewDecorator;
     this.personViewDecorator = personViewDecorator;
+    this.placementService = placementService;
+    this.placementSummaryDecorator = placementSummaryDecorator;
   }
 
   /**
@@ -258,6 +266,40 @@ public class PersonResource {
     Long personId = personService.findIdByGmcId(gmcId);
     return getPlacementsForTrainee(personId);
   }
+
+
+
+  /**
+   * GET  /people/{id}/placements : get all the placements for a trainee.
+   *
+   * @param id the trainee Id
+   * @return the ResponseEntity with status 200 (OK) and the list of placements in body
+   */
+  @GetMapping("/people/{id}/placements/new")
+  @Timed
+  @PreAuthorize("hasPermission('tis:people::person:', 'View')")
+  public ResponseEntity<List<PlacementSummaryDTO>> getPersonPlacements(@PathVariable Long id) {
+    log.debug("REST request to get a page of Placements");
+    List<PlacementSummaryDTO> placementForTrainee = placementService.getPlacementForTrainee(id);
+    return ResponseUtil.wrapOrNotFound(Optional.ofNullable(placementForTrainee != null ? placementSummaryDecorator.decorate(placementForTrainee) : null));
+  }
+
+
+  /**
+   * GET  /people/{id}/placements : get all the placements for a trainee.
+   *
+   * @param gmcId the trainee GMC Id
+   * @return the ResponseEntity with status 200 (OK) and the list of placements in body
+   */
+  @GetMapping("/people/gmc/{gmcId}/placements/new")
+  @Timed
+  @PreAuthorize("hasPermission('tis:people::person:', 'View')")
+  public ResponseEntity<List<PlacementSummaryDTO>> getPersonPlacementsByGmcId(@PathVariable String gmcId) {
+    log.debug("REST request to get a page of Placements");
+    Long personId = personService.findIdByGmcId(gmcId);
+    return getPersonPlacements(personId);
+  }
+
 
   /**
    * POST  /people : Bulk patch people.

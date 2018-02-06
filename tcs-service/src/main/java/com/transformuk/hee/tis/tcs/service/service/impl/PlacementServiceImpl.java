@@ -2,13 +2,14 @@ package com.transformuk.hee.tis.tcs.service.service.impl;
 
 import com.google.common.collect.Lists;
 import com.google.common.collect.Maps;
+import com.transformuk.hee.tis.tcs.api.dto.PlacementSummaryDTO;
 import com.transformuk.hee.tis.tcs.api.dto.PlacementDTO;
 import com.transformuk.hee.tis.tcs.api.dto.PlacementDetailsDTO;
 import com.transformuk.hee.tis.tcs.api.dto.PlacementSpecialtyDTO;
+import com.transformuk.hee.tis.tcs.api.enumeration.PostSpecialtyType;
 import com.transformuk.hee.tis.tcs.api.enumeration.TCSDateColumns;
 import com.transformuk.hee.tis.tcs.service.api.util.ColumnFilterUtil;
 import com.transformuk.hee.tis.tcs.service.exception.DateRangeColumnFilterException;
-import com.transformuk.hee.tis.tcs.service.exception.InvalidDateException;
 import com.transformuk.hee.tis.tcs.service.model.ColumnFilter;
 import com.transformuk.hee.tis.tcs.service.model.Person;
 import com.transformuk.hee.tis.tcs.service.model.Placement;
@@ -19,13 +20,17 @@ import com.transformuk.hee.tis.tcs.service.model.Specialty;
 import com.transformuk.hee.tis.tcs.service.repository.PersonRepository;
 import com.transformuk.hee.tis.tcs.service.repository.PlacementDetailsRepository;
 import com.transformuk.hee.tis.tcs.service.repository.PlacementRepository;
+import com.transformuk.hee.tis.tcs.service.repository.PlacementViewRepository;
 import com.transformuk.hee.tis.tcs.service.repository.SpecialtyRepository;
 import com.transformuk.hee.tis.tcs.service.service.PlacementService;
 import com.transformuk.hee.tis.tcs.service.service.mapper.PlacementDetailsMapper;
 import com.transformuk.hee.tis.tcs.service.service.mapper.PlacementMapper;
+import com.transformuk.hee.tis.tcs.service.service.mapper.PlacementViewMapper;
+import com.transformuk.hee.tis.tcs.service.service.mapper.SpecialtyMapper;
 import org.apache.commons.collections4.CollectionUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.domain.Specification;
@@ -33,8 +38,9 @@ import org.springframework.data.jpa.domain.Specifications;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import javax.persistence.EntityManager;
+import javax.persistence.Query;
 import java.io.IOException;
-import java.time.format.DateTimeParseException;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
@@ -56,26 +62,26 @@ public class PlacementServiceImpl implements PlacementService {
 
   private final Logger log = LoggerFactory.getLogger(PlacementServiceImpl.class);
 
-  private final PlacementRepository placementRepository;
-  private final PlacementDetailsRepository placementDetailsRepository;
-  private final PlacementMapper placementMapper;
-  private final PlacementDetailsMapper placementDetailsMapper;
-  private final SpecialtyRepository specialtyRepository;
-  private final PersonRepository personRepository;
-
-  public PlacementServiceImpl(PlacementRepository placementRepository,
-                              PlacementDetailsRepository placementDetailsRepository,
-                              PlacementMapper placementMapper,
-                              PlacementDetailsMapper placementDetailsMapper,
-                              SpecialtyRepository specialtyRepository,
-                              PersonRepository personRepository) {
-    this.placementRepository = placementRepository;
-    this.placementDetailsRepository = placementDetailsRepository;
-    this.placementMapper = placementMapper;
-    this.placementDetailsMapper = placementDetailsMapper;
-    this.specialtyRepository = specialtyRepository;
-    this.personRepository = personRepository;
-  }
+  @Autowired
+  private PlacementRepository placementRepository;
+  @Autowired
+  private PlacementDetailsRepository placementDetailsRepository;
+  @Autowired
+  private PlacementMapper placementMapper;
+  @Autowired
+  private PlacementDetailsMapper placementDetailsMapper;
+  @Autowired
+  private SpecialtyRepository specialtyRepository;
+  @Autowired
+  private SpecialtyMapper specialtyMapper;
+  @Autowired
+  private PersonRepository personRepository;
+  @Autowired
+  private PlacementViewRepository placementViewRepository;
+  @Autowired
+  private PlacementViewMapper placementViewMapper;
+  @Autowired
+  private EntityManager em;
 
   /**
    * Save a placement.
@@ -260,7 +266,7 @@ public class PlacementServiceImpl implements PlacementService {
    * Get all placement details by given column filters.
    *
    * @param columnFilterJson column filters represented in json object
-   * @param pageable the pagination information
+   * @param pageable         the pagination information
    * @return the list of entities
    * @throws IOException
    */
@@ -286,7 +292,7 @@ public class PlacementServiceImpl implements PlacementService {
               getLocalDateFromString(cf.getValues().get(0).toString()),
               getLocalDateFromString(cf.getValues().get(1).toString())
               )
-            );
+          );
         } else {
           specs.add(in(cf.getName(), Collections.unmodifiableCollection(cf.getValues())));
         }
@@ -305,5 +311,45 @@ public class PlacementServiceImpl implements PlacementService {
     }
 
     return result.map(placementDetailsMapper::placementDetailsToPlacementDetailsDTO);
+  }
+
+  @Transactional(readOnly = true)
+  @Override
+  public List<PlacementSummaryDTO> getPlacementForTrainee(Long traineeId) {
+    Query traineePlacementsQuery = em.createNativeQuery(
+        "SELECT p.*, s.name primarySpecialtyName, c.forenames, c.surname " +
+        "FROM Placement p " +
+        "LEFT JOIN PlacementSpecialty ps " +
+        "ON p.id = ps.placementId " +
+        "LEFT JOIN Specialty s " +
+        "ON s.id = ps.specialtyId " +
+        "LEFT JOIN ContactDetails c " +
+        "ON c.id = p.traineeId " +
+        "WHERE ps.placementSpecialtyType = :specialtyType " +
+        "AND p.traineeId = :traineeId " +
+        "ORDER BY dateTo DESC", "PlacementsSummary")
+        .setParameter("traineeId", traineeId)
+        .setParameter("specialtyType", PostSpecialtyType.PRIMARY.name());
+    return (List<PlacementSummaryDTO>)traineePlacementsQuery.getResultList();
+  }
+
+  @Transactional(readOnly = true)
+  @Override
+  public List<PlacementSummaryDTO> getPlacementForPost(Long postId) {
+    Query postPlacementsQuery = em.createNativeQuery(
+        "SELECT p.*, s.name primarySpecialtyName, c.forenames, c.surname " +
+            "FROM Placement p " +
+            "LEFT JOIN PlacementSpecialty ps " +
+            "ON p.id = ps.placementId " +
+            "LEFT JOIN Specialty s " +
+            "ON s.id = ps.specialtyId " +
+            "LEFT JOIN ContactDetails c " +
+            "ON c.id = p.traineeId " +
+            "WHERE ps.placementSpecialtyType = :specialtyType " +
+            "AND p.postId = :postId " +
+            "ORDER BY dateTo DESC", "PlacementsSummary")
+        .setParameter("postId", postId)
+        .setParameter("specialtyType", PostSpecialtyType.PRIMARY.name());
+    return (List<PlacementSummaryDTO>)postPlacementsQuery.getResultList();
   }
 }
