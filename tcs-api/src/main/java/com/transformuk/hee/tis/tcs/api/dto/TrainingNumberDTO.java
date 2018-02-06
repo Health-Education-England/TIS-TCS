@@ -43,6 +43,8 @@ public class TrainingNumberDTO implements Serializable {
 
   private Long programmeId;
 
+  private String intrepidId;
+
   public Long getId() {
     return id;
   }
@@ -107,6 +109,14 @@ public class TrainingNumberDTO implements Serializable {
     this.suffix = suffix;
   }
 
+  public String getIntrepidId() {
+    return intrepidId;
+  }
+
+  public void setIntrepidId(String intrepidId) {
+    this.intrepidId = intrepidId;
+  }
+
   @Override
   public boolean equals(Object o) {
     if (this == o) {
@@ -140,6 +150,7 @@ public class TrainingNumberDTO implements Serializable {
         ", appointmentYear='" + appointmentYear + "'" +
         ", typeOfContract='" + typeOfContract + "'" +
         ", suffix='" + suffix + "'" +
+        ", intrepidId='" + intrepidId + "'" +
         ", programmeId='" + programmeId + "'" +
         '}';
   }
