@@ -25,6 +25,8 @@ public class TrainingNumberDTO implements Serializable {
   //mandatory
   private TrainingNumberType trainingNumberType;
 
+  private String trainingNumber;
+
   @NotNull(message = "Training number is required", groups = {Update.class, Create.class})
   //mandatory and unique
   private Integer number;
@@ -47,6 +49,14 @@ public class TrainingNumberDTO implements Serializable {
 
   public void setId(Long id) {
     this.id = id;
+  }
+
+  public String getTrainingNumber() {
+    return trainingNumber;
+  }
+
+  public void setTrainingNumber(String trainingNumber) {
+    this.trainingNumber = trainingNumber;
   }
 
   public Long getProgramme() {
@@ -125,6 +135,7 @@ public class TrainingNumberDTO implements Serializable {
     return "TrainingNumberDTO{" +
         "id=" + id +
         ", trainingNumberType='" + trainingNumberType + "'" +
+        ", trainingNumber='" + trainingNumber + "'" +
         ", number='" + number + "'" +
         ", appointmentYear='" + appointmentYear + "'" +
         ", typeOfContract='" + typeOfContract + "'" +

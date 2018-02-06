@@ -1,0 +1,2 @@
+ALTER TABLE `TrainingNumber`
+ADD COLUMN `trainingNumber` VARCHAR(20) DEFAULT NULL;
