@@ -136,4 +136,14 @@ public interface PostService {
    * Call Stored proc to build post view
    */
   CompletableFuture<Void> buildPostView();
+
+  /**
+   * Generate a national post code thats current available
+   * @param localOfficeAbbr
+   * @param locationCode
+   * @param specialtyCode
+   * @param gradeAbbr
+   * @return
+   */
+  String generateNationalPostNumber(String localOfficeAbbr, String locationCode, String specialtyCode, String gradeAbbr);
 }

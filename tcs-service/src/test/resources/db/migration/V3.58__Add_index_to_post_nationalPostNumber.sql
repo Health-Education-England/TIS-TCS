@@ -1,0 +1,1 @@
+-- don't add index to h2 db

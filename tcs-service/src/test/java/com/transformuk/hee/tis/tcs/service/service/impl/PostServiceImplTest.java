@@ -492,4 +492,12 @@ public class PostServiceImplTest {
     Assert.assertEquals(expectedDTO, result.get(0));
     Assert.assertEquals(Sets.newHashSet(placementDTO), result.get(0).getPlacementHistory());
   }
+
+  @Test
+  public void generateNationalPostNumberShouldReturnNewUniquePostNumberWithCounterOneHigherThanCurrentHighest() {
+
+    when(postRepositoryMock.findPostNumberNumberLike("NTH/RTD01/007/STR/"))
+
+
+  }
 }

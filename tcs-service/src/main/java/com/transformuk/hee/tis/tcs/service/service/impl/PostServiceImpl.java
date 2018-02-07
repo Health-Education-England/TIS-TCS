@@ -1,5 +1,6 @@
 package com.transformuk.hee.tis.tcs.service.service.impl;
 
+import com.google.common.base.Preconditions;
 import com.google.common.collect.Lists;
 import com.google.common.collect.Maps;
 import com.google.common.collect.Sets;
@@ -34,6 +35,7 @@ import com.transformuk.hee.tis.tcs.service.service.mapper.PostMapper;
 import com.transformuk.hee.tis.tcs.service.service.mapper.PostViewMapper;
 import org.apache.commons.collections4.CollectionUtils;
 import org.apache.commons.lang3.StringUtils;
+import org.apache.commons.lang3.math.NumberUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -47,6 +49,7 @@ import org.springframework.transaction.annotation.Transactional;
 
 import java.util.ArrayList;
 import java.util.Collection;
+import java.util.Comparator;
 import java.util.List;
 import java.util.Map;
 import java.util.Objects;
@@ -65,6 +68,7 @@ import static com.transformuk.hee.tis.tcs.service.service.impl.SpecificationFact
 public class PostServiceImpl implements PostService {
 
   private static final Logger log = LoggerFactory.getLogger(PostServiceImpl.class);
+  public static final String SLASH = "/";
 
   @Autowired
   private PostRepository postRepository;
@@ -458,5 +462,36 @@ public class PostServiceImpl implements PostService {
     log.debug("Request to build Post view");
     postRepository.buildPostView();
     return CompletableFuture.completedFuture(null);
+  }
+
+  @Override
+  public String generateNationalPostNumber(String localOfficeAbbr, String locationCode, String specialtyCode, String gradeAbbr) {
+    Preconditions.checkNotNull(localOfficeAbbr);
+    Preconditions.checkNotNull(locationCode);
+    Preconditions.checkNotNull(specialtyCode);
+    Preconditions.checkNotNull(gradeAbbr);
+
+    String nationalPostNumberNoCounter = localOfficeAbbr + SLASH + locationCode + SLASH + specialtyCode + SLASH + gradeAbbr + SLASH;
+    Set<Post> postsWithSamePostNumber = postRepository.findPostNumberNumberLike(nationalPostNumberNoCounter);
+
+    Set<Integer> postNumberCounter = postsWithSamePostNumber.stream()
+        .map(Post::getNationalPostNumber)
+        .filter(StringUtils::isNotBlank)
+        .map(npn -> npn.split(SLASH))
+        .filter(npn -> npn.length > 1)
+        .map(npn -> npn[npn.length - 1])
+        .filter(NumberUtils::isDigits)
+        .map(Integer::parseInt)
+        .sorted(Comparator.reverseOrder())
+        .collect(Collectors.toSet());
+
+    if(CollectionUtils.isNotEmpty(postNumberCounter))
+    {
+      Integer currentHighestCounter = postNumberCounter.iterator().next();
+      return nationalPostNumberNoCounter + SLASH + (++currentHighestCounter);
+
+    } else {
+      return nationalPostNumberNoCounter + SLASH + "001";
+    }
   }
 }
