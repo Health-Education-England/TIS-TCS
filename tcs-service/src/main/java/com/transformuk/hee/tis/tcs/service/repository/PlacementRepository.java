@@ -2,7 +2,11 @@ package com.transformuk.hee.tis.tcs.service.repository;
 
 import com.transformuk.hee.tis.tcs.service.model.Placement;
 import org.springframework.data.jpa.repository.JpaRepository;
+import org.springframework.data.jpa.repository.Query;
+import org.springframework.data.repository.query.Param;
 
+import java.time.LocalDate;
+import java.util.List;
 import java.util.Set;
 
 /**
@@ -15,4 +19,10 @@ public interface PlacementRepository extends JpaRepository<Placement, Long> {
 
   Set<Placement> findByIntrepidIdIn(Set<String> intrepidId);
 
+  @Query(value =
+      "select pl from Placement pl where localPostNumber in " +
+          "(" +
+          "select distinct localPostNumber from Placement pl2 where pl2.dateFrom = :fromDate and pl2.placementType not like '%OOP%'" +
+          ") and (pl.dateFrom = :fromDate or pl.dateTo = :toDate)")
+  List<Placement> findPlacementsWithTraineesStartingOnTheDayAndFinishingOnPreviousDay(@Param("fromDate") LocalDate fromDate, @Param("toDate") LocalDate toDate);
 }
