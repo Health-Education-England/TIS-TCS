@@ -1,7 +1,11 @@
 package com.transformuk.hee.tis.tcs.service.model;
 
+import com.transformuk.hee.tis.tcs.api.dto.PlacementSummaryDTO;
+
 import javax.persistence.CascadeType;
 import javax.persistence.Column;
+import javax.persistence.ColumnResult;
+import javax.persistence.ConstructorResult;
 import javax.persistence.Entity;
 import javax.persistence.FetchType;
 import javax.persistence.GeneratedValue;
@@ -10,6 +14,7 @@ import javax.persistence.Id;
 import javax.persistence.JoinColumn;
 import javax.persistence.ManyToOne;
 import javax.persistence.OneToMany;
+import javax.persistence.SqlResultSetMapping;
 import java.io.Serializable;
 import java.time.LocalDate;
 import java.util.HashSet;
@@ -19,6 +24,20 @@ import java.util.Set;
 /**
  * A Placement.
  */
+@SqlResultSetMapping(name = "PlacementsSummary", classes = {
+    @ConstructorResult(targetClass = PlacementSummaryDTO.class,
+        columns = {
+            @ColumnResult(name = "dateFrom"),
+            @ColumnResult(name = "dateTo"),
+            @ColumnResult(name = "siteId"),
+            @ColumnResult(name = "primarySpecialtyName"),
+            @ColumnResult(name = "gradeId"),
+            @ColumnResult(name = "placementType"),
+            @ColumnResult(name = "status"),
+            @ColumnResult(name = "forenames"),
+            @ColumnResult(name = "surname")
+        })
+})
 @Entity
 public class Placement implements Serializable {
 

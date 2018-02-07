@@ -1,0 +1,2 @@
+ALTER TABLE `TrainingNumber`
+ADD COLUMN `intrepidId` VARCHAR(255) DEFAULT NULL;

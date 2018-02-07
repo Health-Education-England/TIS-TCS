@@ -4,6 +4,7 @@ import com.google.common.collect.Lists;
 import com.transformuk.hee.tis.tcs.api.dto.PersonDTO;
 import com.transformuk.hee.tis.tcs.api.enumeration.Status;
 import com.transformuk.hee.tis.tcs.service.Application;
+import com.transformuk.hee.tis.tcs.service.api.decorator.PlacementSummaryDecorator;
 import com.transformuk.hee.tis.tcs.service.api.decorator.PersonViewDecorator;
 import com.transformuk.hee.tis.tcs.service.api.decorator.PlacementViewDecorator;
 import com.transformuk.hee.tis.tcs.service.exception.ExceptionTranslator;
@@ -15,6 +16,7 @@ import com.transformuk.hee.tis.tcs.service.repository.PersonRepository;
 import com.transformuk.hee.tis.tcs.service.repository.PersonViewRepository;
 import com.transformuk.hee.tis.tcs.service.repository.PlacementViewRepository;
 import com.transformuk.hee.tis.tcs.service.service.PersonService;
+import com.transformuk.hee.tis.tcs.service.service.PlacementService;
 import com.transformuk.hee.tis.tcs.service.service.mapper.PersonMapper;
 import com.transformuk.hee.tis.tcs.service.service.mapper.PlacementViewMapper;
 import org.apache.commons.codec.net.URLCodec;
@@ -121,6 +123,10 @@ public class PersonResourceIntTest {
   private PersonViewDecorator personViewDecorator;
   @Autowired
   private PersonViewRepository personViewRepository;
+  @Autowired
+  private PlacementService placementService;
+  @Autowired
+  private PlacementSummaryDecorator placementSummaryDecorator;
 
   @Autowired
   private MappingJackson2HttpMessageConverter jacksonMessageConverter;
@@ -140,7 +146,7 @@ public class PersonResourceIntTest {
   public void setup() {
     MockitoAnnotations.initMocks(this);
     PersonResource personResource = new PersonResource(personService, placementViewRepository, placementViewMapper,
-        placementViewDecorator, personViewDecorator);
+        placementViewDecorator, personViewDecorator, placementService, placementSummaryDecorator);
     this.restPersonMockMvc = MockMvcBuilders.standaloneSetup(personResource)
         .setCustomArgumentResolvers(pageableArgumentResolver)
         .setControllerAdvice(exceptionTranslator)

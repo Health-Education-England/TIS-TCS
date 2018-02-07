@@ -16,6 +16,7 @@ import com.transformuk.hee.tis.tcs.api.enumeration.PostSpecialtyType;
 import com.transformuk.hee.tis.tcs.api.enumeration.PostSuffix;
 import com.transformuk.hee.tis.tcs.api.enumeration.Status;
 import com.transformuk.hee.tis.tcs.service.Application;
+import com.transformuk.hee.tis.tcs.service.api.decorator.PlacementSummaryDecorator;
 import com.transformuk.hee.tis.tcs.service.api.decorator.PlacementViewDecorator;
 import com.transformuk.hee.tis.tcs.service.api.decorator.PostViewDecorator;
 import com.transformuk.hee.tis.tcs.service.api.validation.PostValidator;
@@ -34,6 +35,7 @@ import com.transformuk.hee.tis.tcs.service.repository.PostRepository;
 import com.transformuk.hee.tis.tcs.service.repository.PostViewRepository;
 import com.transformuk.hee.tis.tcs.service.repository.ProgrammeRepository;
 import com.transformuk.hee.tis.tcs.service.repository.SpecialtyRepository;
+import com.transformuk.hee.tis.tcs.service.service.PlacementService;
 import com.transformuk.hee.tis.tcs.service.service.PostService;
 import com.transformuk.hee.tis.tcs.service.service.mapper.PlacementViewMapper;
 import com.transformuk.hee.tis.tcs.service.service.mapper.PostMapper;
@@ -88,10 +90,10 @@ public class PostResourceIntTest {
   private static final String UPDATED_NATIONAL_POST_NUMBER = "BBBBBBBBBB";
   private static final Status DEFAULT_STATUS = Status.CURRENT;
   private static final Status UPDATED_STATUS = Status.INACTIVE;
-  private static final String DEFAULT_EMPLOYING_BODY = "AAAAAAAAAA";
-  private static final String UPDATED_EMPLOYING_BODY = "BBBBBBBBBB";
-  private static final String DEFAULT_TRAINING_BODY_ID = "training body id";
-  private static final String UPDATED_TRAINING_BODY = "BBBBBBBBBB";
+  private static final Long DEFAULT_EMPLOYING_BODY = 1L;
+  private static final Long UPDATED_EMPLOYING_BODY = 2L;
+  private static final Long DEFAULT_TRAINING_BODY_ID = 10L;
+  private static final Long UPDATED_TRAINING_BODY = 11L;
   private static final String SPECIALTY_COLLEGE = "Specialty College";
   private static final String TEST_SPECIALTY = "Test Specialty";
   private static final PostSuffix DEFAULT_SUFFIX = PostSuffix.ACADEMIC;
@@ -150,6 +152,10 @@ public class PostResourceIntTest {
   private PlacementViewDecorator placementViewDecorator;
   @Autowired
   private PlacementViewMapper placementViewMapper;
+  @Autowired
+  private PlacementService placementService;
+  @Autowired
+  private PlacementSummaryDecorator placementSummaryDecorator;
   @Autowired
   private MappingJackson2HttpMessageConverter jacksonMessageConverter;
 
@@ -260,7 +266,8 @@ public class PostResourceIntTest {
   @Before
   public void setup() {
     MockitoAnnotations.initMocks(this);
-    PostResource postResource = new PostResource(postService, postValidator, placementViewRepository, placementViewDecorator, placementViewMapper);
+    PostResource postResource = new PostResource(postService, postValidator, placementViewRepository, placementViewDecorator,
+        placementViewMapper, placementService, placementSummaryDecorator);
     this.restPostMockMvc = MockMvcBuilders.standaloneSetup(postResource)
         .setCustomArgumentResolvers(pageableArgumentResolver)
         .setControllerAdvice(exceptionTranslator)

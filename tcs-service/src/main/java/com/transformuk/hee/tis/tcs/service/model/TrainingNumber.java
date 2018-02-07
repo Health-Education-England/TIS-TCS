@@ -27,6 +27,8 @@ public class TrainingNumber implements Serializable {
   @Enumerated(EnumType.STRING)
   private TrainingNumberType trainingNumberType;
 
+  private String trainingNumber;
+
   private Integer number;
 
   private Integer appointmentYear;
@@ -34,6 +36,8 @@ public class TrainingNumber implements Serializable {
   private String typeOfContract;
 
   private String suffix;
+
+  private String intrepidId;
 
   @ManyToOne
   @JoinColumn(name = "programmeID")
@@ -58,6 +62,14 @@ public class TrainingNumber implements Serializable {
   public TrainingNumber trainingNumberType(TrainingNumberType trainingNumberType) {
     this.trainingNumberType = trainingNumberType;
     return this;
+  }
+
+  public String getTrainingNumber() {
+    return trainingNumber;
+  }
+
+  public void setTrainingNumber(String trainingNumber) {
+    this.trainingNumber = trainingNumber;
   }
 
   public Integer getNumber() {
@@ -120,6 +132,14 @@ public class TrainingNumber implements Serializable {
     this.programme = programme;
   }
 
+  public String getIntrepidId() {
+    return intrepidId;
+  }
+
+  public void setIntrepidId(String intrepidId) {
+    this.intrepidId = intrepidId;
+  }
+
   @Override
   public boolean equals(Object o) {
     if (this == o) return true;
@@ -128,22 +148,26 @@ public class TrainingNumber implements Serializable {
     TrainingNumber that = (TrainingNumber) o;
 
     if (trainingNumberType != that.trainingNumberType) return false;
+    if (trainingNumber != null ? !trainingNumber.equals(that.trainingNumber) : that.trainingNumber != null) return false;
     if (number != null ? !number.equals(that.number) : that.number != null) return false;
     if (appointmentYear != null ? !appointmentYear.equals(that.appointmentYear) : that.appointmentYear != null)
       return false;
     if (typeOfContract != null ? !typeOfContract.equals(that.typeOfContract) : that.typeOfContract != null)
       return false;
     if (suffix != null ? !suffix.equals(that.suffix) : that.suffix != null) return false;
+    if (intrepidId != null ? !intrepidId.equals(that.intrepidId) : that.intrepidId != null) return false;
     return programme != null ? programme.equals(that.programme) : that.programme == null;
   }
 
   @Override
   public int hashCode() {
     int result = trainingNumberType != null ? trainingNumberType.hashCode() : 0;
+    result = 31 * result + (trainingNumber != null ? trainingNumber.hashCode() : 0);
     result = 31 * result + (number != null ? number.hashCode() : 0);
     result = 31 * result + (appointmentYear != null ? appointmentYear.hashCode() : 0);
     result = 31 * result + (typeOfContract != null ? typeOfContract.hashCode() : 0);
     result = 31 * result + (suffix != null ? suffix.hashCode() : 0);
+    result = 31 * result + (intrepidId != null ? intrepidId.hashCode() : 0);
     result = 31 * result + (programme != null ? programme.hashCode() : 0);
     return result;
   }
@@ -153,10 +177,12 @@ public class TrainingNumber implements Serializable {
     return "TrainingNumber{" +
         "id=" + id +
         ", trainingNumberType='" + trainingNumberType + "'" +
+        ", trainingNumber='" + trainingNumber + "'" +
         ", number='" + number + "'" +
         ", appointmentYear='" + appointmentYear + "'" +
         ", typeOfContract='" + typeOfContract + "'" +
         ", suffix='" + suffix + "'" +
+        ", intrepidId='" + intrepidId + "'" +
         ", programme='" + programme + "'" +
         '}';
   }

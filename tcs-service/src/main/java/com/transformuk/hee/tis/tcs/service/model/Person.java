@@ -29,7 +29,7 @@ public class Person implements Serializable {
 
   private String intrepidId;
 
-  @CreatedDate
+  @Column(name = "addedDate", updatable = false, insertable = false)
   private LocalDateTime addedDate;
 
   @Version

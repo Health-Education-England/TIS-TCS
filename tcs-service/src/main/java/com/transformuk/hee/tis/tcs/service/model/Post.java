@@ -57,11 +57,11 @@ public class Post implements Serializable {
 
   // Entity Trust defined in the Reference service
   @Column(name = "employingBodyId")
-  private String employingBodyId;
+  private Long employingBodyId;
 
   // Entity Trust defined in the Reference service
   @Column(name = "trainingBodyId")
-  private String trainingBodyId;
+  private Long trainingBodyId;
 
   @Column(name = "trainingDescription")
   private String trainingDescription;
@@ -209,28 +209,28 @@ public class Post implements Serializable {
     return this;
   }
 
-  public String getEmployingBodyId() {
+  public Long getEmployingBodyId() {
     return employingBodyId;
   }
 
-  public void setEmployingBodyId(String employingBodyId) {
+  public void setEmployingBodyId(Long employingBodyId) {
     this.employingBodyId = employingBodyId;
   }
 
-  public Post employingBodyId(String employingBodyId) {
+  public Post employingBodyId(Long employingBodyId) {
     this.employingBodyId = employingBodyId;
     return this;
   }
 
-  public String getTrainingBodyId() {
+  public Long getTrainingBodyId() {
     return trainingBodyId;
   }
 
-  public void setTrainingBodyId(String trainingBodyId) {
+  public void setTrainingBodyId(Long trainingBodyId) {
     this.trainingBodyId = trainingBodyId;
   }
 
-  public Post trainingBodyId(String trainingBodyId) {
+  public Post trainingBodyId(Long trainingBodyId) {
     this.trainingBodyId = trainingBodyId;
     return this;
   }

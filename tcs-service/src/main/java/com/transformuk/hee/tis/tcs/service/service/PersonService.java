@@ -4,6 +4,7 @@ import com.transformuk.hee.tis.tcs.api.dto.PersonBasicDetailsDTO;
 import com.transformuk.hee.tis.tcs.api.dto.PersonDTO;
 import com.transformuk.hee.tis.tcs.api.dto.PersonViewDTO;
 import com.transformuk.hee.tis.tcs.service.model.ColumnFilter;
+import com.transformuk.hee.tis.tcs.service.repository.RightToWorkRepository;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 
@@ -22,6 +23,17 @@ public interface PersonService {
    * @return the persisted entity
    */
   PersonDTO save(PersonDTO personDTO);
+
+  /**
+   * Create a person.
+   *
+   * Person is one of those entities that share the ID with the joining tables
+   * Save the person object and ensure we copy the generated id to the linked entities
+   *
+   * @param personDTO the entity to save
+   * @return the persisted entity
+   */
+  PersonDTO create(PersonDTO personDTO);
 
   /**
    * Save a list of persons
@@ -95,4 +107,5 @@ public interface PersonService {
    */
   CompletableFuture<Void> buildPersonView();
 
+  void setRightToWorkRepository(RightToWorkRepository rightToWorkRepository);
 }

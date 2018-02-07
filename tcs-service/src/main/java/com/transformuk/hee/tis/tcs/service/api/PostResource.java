@@ -3,6 +3,7 @@ package com.transformuk.hee.tis.tcs.service.api;
 import com.codahale.metrics.annotation.Timed;
 import com.google.common.collect.Lists;
 import com.transformuk.hee.tis.tcs.api.dto.ColumnFilterDTO;
+import com.transformuk.hee.tis.tcs.api.dto.PlacementSummaryDTO;
 import com.transformuk.hee.tis.tcs.api.dto.PlacementViewDTO;
 import com.transformuk.hee.tis.tcs.api.dto.PostDTO;
 import com.transformuk.hee.tis.tcs.api.dto.PostViewDTO;
@@ -13,6 +14,7 @@ import com.transformuk.hee.tis.tcs.api.enumeration.PostGradeType;
 import com.transformuk.hee.tis.tcs.api.enumeration.PostSpecialtyType;
 import com.transformuk.hee.tis.tcs.api.enumeration.PostSuffix;
 import com.transformuk.hee.tis.tcs.api.enumeration.Status;
+import com.transformuk.hee.tis.tcs.service.api.decorator.PlacementSummaryDecorator;
 import com.transformuk.hee.tis.tcs.service.api.decorator.PlacementViewDecorator;
 import com.transformuk.hee.tis.tcs.service.api.util.ColumnFilterUtil;
 import com.transformuk.hee.tis.tcs.service.api.util.HeaderUtil;
@@ -21,6 +23,7 @@ import com.transformuk.hee.tis.tcs.service.api.validation.PostValidator;
 import com.transformuk.hee.tis.tcs.service.model.ColumnFilter;
 import com.transformuk.hee.tis.tcs.service.model.PlacementView;
 import com.transformuk.hee.tis.tcs.service.repository.PlacementViewRepository;
+import com.transformuk.hee.tis.tcs.service.service.PlacementService;
 import com.transformuk.hee.tis.tcs.service.service.PostService;
 import com.transformuk.hee.tis.tcs.service.service.mapper.PlacementViewMapper;
 import io.github.jhipster.web.util.ResponseUtil;
@@ -75,6 +78,8 @@ public class PostResource {
   private final PlacementViewRepository placementViewRepository;
   private final PlacementViewDecorator placementViewDecorator;
   private final PlacementViewMapper placementViewMapper;
+  private final PlacementService placementService;
+  private final PlacementSummaryDecorator placementSummaryDecorator;
   private static final String REQUEST_BODY_EMPTY = "request.body.empty";
   private static final String REQUEST_BODY_CANNOT_BE_EMPTY = "The request body for this end point cannot be empty";
   private static final String BULK_UPDATE_FAILED_NOID = "bulk.update.failed.noId";
@@ -83,12 +88,16 @@ public class PostResource {
   public PostResource(PostService postService, PostValidator postValidator,
                       PlacementViewRepository placementViewRepository,
                       PlacementViewDecorator placementViewDecorator,
-                      PlacementViewMapper placementViewMapper) {
+                      PlacementViewMapper placementViewMapper,
+                      PlacementService placementService,
+                      PlacementSummaryDecorator placementSummaryDecorator) {
     this.postService = postService;
     this.postValidator = postValidator;
     this.placementViewRepository = placementViewRepository;
     this.placementViewDecorator = placementViewDecorator;
     this.placementViewMapper = placementViewMapper;
+    this.placementService = placementService;
+    this.placementSummaryDecorator = placementSummaryDecorator;
   }
 
   /**
@@ -222,6 +231,22 @@ public class PostResource {
     return ResponseUtil.wrapOrNotFound(Optional.ofNullable(placementViews != null ?
         placementViewDecorator.decorate(placementViewMapper.placementViewsToPlacementViewDTOs(placementViews)) :
         null));
+  }
+
+  /**
+   * GET  /posts/:postId/placements/new : get the placements for a post.
+   *
+   * @param postId the postId of the postDTO to retrieve placements
+   * @return the ResponseEntity with status 200 (OK) and with body the postDTO, or with status 404 (Not Found)
+   */
+  @GetMapping("/posts/{postId}/placements/new")
+  @Timed
+  @PreAuthorize("hasAuthority('post:view')")
+  public ResponseEntity<List<PlacementSummaryDTO>> getPlacementsForPosts(@PathVariable Long postId) {
+    log.debug("REST request to get Post Placements: {}", postId);
+    List<PlacementSummaryDTO> placementForPost = placementService.getPlacementForPost(postId);
+    return ResponseUtil.wrapOrNotFound(Optional.ofNullable(placementForPost != null ?
+        placementSummaryDecorator.decorate(placementForPost) : null));
   }
 
   /**

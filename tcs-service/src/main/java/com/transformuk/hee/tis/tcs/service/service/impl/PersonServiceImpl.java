@@ -1,38 +1,48 @@
 package com.transformuk.hee.tis.tcs.service.service.impl;
 
 import com.google.common.collect.Lists;
-import com.google.common.collect.Maps;
 import com.transformuk.hee.tis.tcs.api.dto.PersonBasicDetailsDTO;
 import com.transformuk.hee.tis.tcs.api.dto.PersonDTO;
 import com.transformuk.hee.tis.tcs.api.dto.PersonViewDTO;
 import com.transformuk.hee.tis.tcs.api.enumeration.PersonOwnerRule;
 import com.transformuk.hee.tis.tcs.api.enumeration.Status;
 import com.transformuk.hee.tis.tcs.service.model.ColumnFilter;
+import com.transformuk.hee.tis.tcs.service.model.ContactDetails;
+import com.transformuk.hee.tis.tcs.service.model.GdcDetails;
+import com.transformuk.hee.tis.tcs.service.model.GmcDetails;
 import com.transformuk.hee.tis.tcs.service.model.Person;
 import com.transformuk.hee.tis.tcs.service.model.PersonBasicDetails;
-import com.transformuk.hee.tis.tcs.service.model.PersonView;
+import com.transformuk.hee.tis.tcs.service.model.PersonalDetails;
+import com.transformuk.hee.tis.tcs.service.model.RightToWork;
+import com.transformuk.hee.tis.tcs.service.repository.ContactDetailsRepository;
+import com.transformuk.hee.tis.tcs.service.repository.GdcDetailsRepository;
 import com.transformuk.hee.tis.tcs.service.repository.GmcDetailsRepository;
 import com.transformuk.hee.tis.tcs.service.repository.PersonBasicDetailsRepository;
 import com.transformuk.hee.tis.tcs.service.repository.PersonRepository;
 import com.transformuk.hee.tis.tcs.service.repository.PersonViewRepository;
+import com.transformuk.hee.tis.tcs.service.repository.PersonalDetailsRepository;
+import com.transformuk.hee.tis.tcs.service.repository.RightToWorkRepository;
 import com.transformuk.hee.tis.tcs.service.service.PersonService;
 import com.transformuk.hee.tis.tcs.service.service.helper.SqlQuerySupplier;
 import com.transformuk.hee.tis.tcs.service.service.mapper.PersonBasicDetailsMapper;
 import com.transformuk.hee.tis.tcs.service.service.mapper.PersonMapper;
-import io.jsonwebtoken.lang.Collections;
 import com.transformuk.hee.tis.tcs.service.service.mapper.PersonViewMapper;
+import io.jsonwebtoken.lang.Collections;
 import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.data.domain.*;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageImpl;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.domain.Specification;
 import org.springframework.data.jpa.domain.Specifications;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.jdbc.core.RowMapper;
-import org.springframework.jdbc.core.namedparam.NamedParameterJdbcTemplate;
 import org.springframework.scheduling.annotation.Async;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Propagation;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.util.CollectionUtils;
 
@@ -40,11 +50,9 @@ import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Map;
 import java.util.concurrent.CompletableFuture;
 
 import static com.transformuk.hee.tis.tcs.service.service.impl.SpecificationFactory.containsLike;
-import static com.transformuk.hee.tis.tcs.service.service.impl.SpecificationFactory.in;
 
 
 /**
@@ -60,6 +68,14 @@ public class PersonServiceImpl implements PersonService {
   private PersonRepository personRepository;
   @Autowired
   private GmcDetailsRepository gmcDetailsRepository;
+  @Autowired
+  private GdcDetailsRepository gdcDetailsRepository;
+  @Autowired
+  private ContactDetailsRepository contactDetailsRepository;
+  @Autowired
+  private PersonalDetailsRepository personalDetailsRepository;
+  @Autowired
+  private RightToWorkRepository rightToWorkRepository;
   @Autowired
   private PersonMapper personMapper;
   @Autowired
@@ -91,6 +107,51 @@ public class PersonServiceImpl implements PersonService {
     return personMapper.toDto(person);
   }
 
+
+  /**
+   * Create a person.
+   * <p>
+   * Person is one of those entities that share the ID with the joining tables
+   * Save the person object and ensure we copy the generated id to the linked entities
+   *
+   * @param personDTO the entity to save
+   * @return the persisted entity
+   */
+  @Override
+  @Transactional()
+  public PersonDTO create(PersonDTO personDTO) {
+    log.debug("Request to save Person : {}", personDTO);
+    Person person = personMapper.toEntity(personDTO);
+    person = personRepository.save(person);
+
+    GdcDetails gdcDetails = person.getGdcDetails() != null ? person.getGdcDetails() : new GdcDetails();
+    gdcDetails.setId(person.getId());
+    gdcDetailsRepository.save(gdcDetails);
+    person.setGdcDetails(gdcDetails);
+
+    GmcDetails gmcDetails = person.getGmcDetails() != null ? person.getGmcDetails() : new GmcDetails();
+    gmcDetails.setId(person.getId());
+    gmcDetails = gmcDetailsRepository.save(gmcDetails);
+    person.setGmcDetails(gmcDetails);
+
+    ContactDetails contactDetails = person.getContactDetails() != null ? person.getContactDetails() : new ContactDetails();
+    contactDetails.setId(person.getId());
+    contactDetails = contactDetailsRepository.save(contactDetails);
+    person.setContactDetails(contactDetails);
+
+    PersonalDetails personalDetails = person.getPersonalDetails() != null ? person.getPersonalDetails() : new PersonalDetails();
+    personalDetails.setId(person.getId());
+    personalDetails = personalDetailsRepository.save(personalDetails);
+    person.setPersonalDetails(personalDetails);
+
+    RightToWork rightToWork = person.getRightToWork() != null ? person.getRightToWork() : new RightToWork();
+    rightToWork.setId(person.getId());
+    rightToWork = rightToWorkRepository.save(rightToWork);
+    person.setRightToWork(rightToWork);
+
+    return personMapper.toDto(person);
+  }
+
   /**
    * Save a list of persons
    *
@@ -116,37 +177,35 @@ public class PersonServiceImpl implements PersonService {
   public Page<PersonViewDTO> findAll(Pageable pageable) {
     log.debug("Request to get all People");
     Integer personCount = jdbcTemplate.queryForObject("select count(p.id) from Person p" +
-                    " join ContactDetails cd on (cd.id = p.id)\n" +
-                    " join GmcDetails gmc on (gmc.id = p.id)\n" +
-                    " join GdcDetails gdc on (gdc.id = p.id) ",
-            Integer.class);
+            " join ContactDetails cd on (cd.id = p.id)\n" +
+            " join GmcDetails gmc on (gmc.id = p.id)\n" +
+            " join GdcDetails gdc on (gdc.id = p.id) ",
+        Integer.class);
 
     int start = pageable.getOffset();
     int end = ((start + pageable.getPageSize()) > personCount) ? personCount : (start + pageable.getPageSize());
 
     String query = sqlQuerySupplier.getQuery(SqlQuerySupplier.PERSON_VIEW);
-    query = query.replaceAll("WHERECLAUSE"," WHERE 1=1 ");
-    if(pageable.getSort() != null) {
-      if(pageable.getSort().iterator().hasNext()) {
+    query = query.replaceAll("WHERECLAUSE", " WHERE 1=1 ");
+    if (pageable.getSort() != null) {
+      if (pageable.getSort().iterator().hasNext()) {
         String orderByFirstCriteria = pageable.getSort().iterator().next().toString();
         String orderByClause = orderByFirstCriteria.replaceAll(":", " ");
         query = query.replaceAll("ORDERBYCLAUSE", " ORDER BY " + orderByClause);
-      }
-      else{
+      } else {
         query = query.replaceAll("ORDERBYCLAUSE", "");
       }
-    }
-    else{
+    } else {
       query = query.replaceAll("ORDERBYCLAUSE", "");
     }
 
-    query = query.replaceAll("LIMITCLAUSE","limit " + start + "," + end);
+    query = query.replaceAll("LIMITCLAUSE", "limit " + start + "," + end);
 
     List<PersonViewDTO> persons = jdbcTemplate.query(query, new PersonViewRowMapper());
-    if(CollectionUtils.isEmpty(persons)){
+    if (CollectionUtils.isEmpty(persons)) {
       return new PageImpl<>(persons);
     }
-    return new PageImpl<>(persons.subList(start,end),pageable,personCount);
+    return new PageImpl<>(persons.subList(start, end), pageable, personCount);
   }
 
   @Override
@@ -155,9 +214,9 @@ public class PersonServiceImpl implements PersonService {
 
     StringBuilder countQuery = new StringBuilder();
     countQuery.append("select count(p.id) from Person p" +
-            " join ContactDetails cd on (cd.id = p.id)\n" +
-            " join GmcDetails gmc on (gmc.id = p.id)\n" +
-            " join GdcDetails gdc on (gdc.id = p.id) ");
+        " join ContactDetails cd on (cd.id = p.id)\n" +
+        " join GmcDetails gmc on (gmc.id = p.id)\n" +
+        " join GdcDetails gdc on (gdc.id = p.id) ");
 
     StringBuilder whereClause = new StringBuilder();
     whereClause.append(" WHERE 1=1 ");
@@ -166,8 +225,8 @@ public class PersonServiceImpl implements PersonService {
     if (columnFilters != null && !columnFilters.isEmpty()) {
       columnFilters.forEach(cf -> {
         whereClause.append(" AND p." + cf.getName() + " in (");
-        cf.getValues().stream().forEach( k -> whereClause.append("'" + k + "',"));
-        whereClause.deleteCharAt(whereClause.length() -1);
+        cf.getValues().stream().forEach(k -> whereClause.append("'" + k + "',"));
+        whereClause.deleteCharAt(whereClause.length() - 1);
         whereClause.append(")");
       });
     }
@@ -179,9 +238,9 @@ public class PersonServiceImpl implements PersonService {
       whereClause.append(" OR gmc.gmcNumber like ").append("'%" + searchString + "%'");
       whereClause.append(" OR gdc.gdcNumber like ").append("'%" + searchString + "%'");
       whereClause.append(" OR p.role like ").append("'%" + searchString + "%'");
-      if(StringUtils.isNumeric(searchString)){
+      if (StringUtils.isNumeric(searchString)) {
         whereClause.append(" OR p.id in ").append("(" + Lists.newArrayList(Long.parseLong(searchString)).
-                toString().replace("[", "").replace("]", "") + ")");
+            toString().replace("[", "").replace("]", "") + ")");
       }
       whereClause.append(" ) ");
     }
@@ -189,36 +248,34 @@ public class PersonServiceImpl implements PersonService {
 
     countQuery.append(whereClause);
     Integer personCount = jdbcTemplate.queryForObject(countQuery.toString(),
-            Integer.class);
+        Integer.class);
 
     int start = pageable.getOffset();
     int end = ((start + pageable.getPageSize()) > personCount) ? personCount : (start + pageable.getPageSize());
 
     String query = sqlQuerySupplier.getQuery(SqlQuerySupplier.PERSON_VIEW);
-    query = query.replaceAll("WHERECLAUSE",whereClause.toString());
-    if(pageable.getSort() != null) {
-      if(pageable.getSort().iterator().hasNext()) {
+    query = query.replaceAll("WHERECLAUSE", whereClause.toString());
+    if (pageable.getSort() != null) {
+      if (pageable.getSort().iterator().hasNext()) {
         String orderByFirstCriteria = pageable.getSort().iterator().next().toString();
         String orderByClause = orderByFirstCriteria.replaceAll(":", " ");
 
         query = query.replaceAll("ORDERBYCLAUSE", " ORDER BY " + orderByClause);
-      }
-      else{
+      } else {
         query = query.replaceAll("ORDERBYCLAUSE", "");
       }
-    }
-    else{
+    } else {
       query = query.replaceAll("ORDERBYCLAUSE", "");
     }
 
-    query = query.replaceAll("LIMITCLAUSE","limit " + start + "," + end);
+    query = query.replaceAll("LIMITCLAUSE", "limit " + start + "," + end);
 
     List<PersonViewDTO> persons = jdbcTemplate.query(query, new PersonViewRowMapper());
 
-    if(CollectionUtils.isEmpty(persons)){
+    if (CollectionUtils.isEmpty(persons)) {
       return new PageImpl<>(persons);
     }
-    return new PageImpl<>(persons.subList(start,end),pageable,personCount);
+    return new PageImpl<>(persons.subList(start, end), pageable, personCount);
   }
 
   @Override
@@ -294,12 +351,13 @@ public class PersonServiceImpl implements PersonService {
 
   /**
    * Call Stored proc to build person view
+   *
    * @return
    */
   @Override
   @Transactional
   @Async
-  public CompletableFuture<Void> buildPersonView(){
+  public CompletableFuture<Void> buildPersonView() {
     log.debug("Request to build Person view");
     personRepository.buildPersonView();
     return CompletableFuture.completedFuture(null);
@@ -329,15 +387,20 @@ public class PersonServiceImpl implements PersonService {
       view.setPlacementType(rs.getString("placementType"));
       view.setRole(rs.getString("role"));
       String status = rs.getString("status");
-      if(StringUtils.isNotEmpty(status)) {
+      if (StringUtils.isNotEmpty(status)) {
         view.setStatus(Status.valueOf(status));
       }
       view.setCurrentOwner(rs.getString("currentOwner"));
       String ownerRule = rs.getString("currentOwnerRule");
-      if(StringUtils.isNotEmpty(ownerRule)) {
+      if (StringUtils.isNotEmpty(ownerRule)) {
         view.setCurrentOwnerRule(PersonOwnerRule.valueOf(ownerRule));
       }
       return view;
     }
+  }
+
+  @Override
+  public void setRightToWorkRepository(RightToWorkRepository rightToWorkRepository) {
+    this.rightToWorkRepository = rightToWorkRepository;
   }
 }
