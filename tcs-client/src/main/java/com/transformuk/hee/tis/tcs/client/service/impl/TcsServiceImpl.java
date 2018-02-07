@@ -34,6 +34,7 @@ import org.springframework.web.client.RestTemplate;
 
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 
 @Service
 public class TcsServiceImpl extends AbstractClientService {
@@ -112,6 +113,13 @@ public class TcsServiceImpl extends AbstractClientService {
     ResponseEntity<List<JsonPatchDTO>> response = tcsRestTemplate.exchange(serviceUrl + endpointUrl + objectDTO.getSimpleName(),
         HttpMethod.GET, null, typeReference);
     return response.getBody();
+  }
+
+  public List<GmcDetailsDTO> findGmcDetailsIn(Set<String> gmcIds) {
+    String url = serviceUrl + "/api/gmc-details/in/" + String.join(",", gmcIds);
+    ResponseEntity<List<GmcDetailsDTO>> responseEntity = tcsRestTemplate.
+            exchange(url, HttpMethod.GET, null, new ParameterizedTypeReference<List<GmcDetailsDTO>>() {});
+    return responseEntity.getBody();
   }
 
   @Override
