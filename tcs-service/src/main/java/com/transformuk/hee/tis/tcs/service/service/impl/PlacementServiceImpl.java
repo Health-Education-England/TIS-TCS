@@ -317,7 +317,7 @@ public class PlacementServiceImpl implements PlacementService {
   @Override
   public List<PlacementSummaryDTO> getPlacementForTrainee(Long traineeId) {
     Query traineePlacementsQuery = em.createNativeQuery(
-        "SELECT p.*, s.name primarySpecialtyName, c.forenames, c.surname " +
+        "SELECT p.*, s.name primarySpecialtyName, c.forenames, c.surname, c.id traineeId, p.id placementId " +
         "FROM Placement p " +
         "LEFT JOIN PlacementSpecialty ps " +
         "ON p.id = ps.placementId " +
@@ -337,7 +337,7 @@ public class PlacementServiceImpl implements PlacementService {
   @Override
   public List<PlacementSummaryDTO> getPlacementForPost(Long postId) {
     Query postPlacementsQuery = em.createNativeQuery(
-        "SELECT p.*, s.name primarySpecialtyName, c.forenames, c.surname " +
+        "SELECT p.*, s.name primarySpecialtyName, c.forenames, c.surname, c.id traineeId, p.id placementId " +
             "FROM Placement p " +
             "LEFT JOIN PlacementSpecialty ps " +
             "ON p.id = ps.placementId " +

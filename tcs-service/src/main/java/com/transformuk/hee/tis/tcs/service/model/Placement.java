@@ -35,7 +35,9 @@ import java.util.Set;
             @ColumnResult(name = "placementType"),
             @ColumnResult(name = "status"),
             @ColumnResult(name = "forenames"),
-            @ColumnResult(name = "surname")
+            @ColumnResult(name = "surname"),
+            @ColumnResult(name = "traineeId"),
+            @ColumnResult(name = "placementId")
         })
 })
 @Entity
