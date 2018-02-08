@@ -49,6 +49,8 @@ public class PersonViewDTO implements Serializable {
 
   private String placementType;
 
+  private String specialty;
+
   private String role;
 
   private Status status;
@@ -185,6 +187,14 @@ public class PersonViewDTO implements Serializable {
     this.placementType = placementType;
   }
 
+  public String getSpecialty() {
+    return specialty;
+  }
+
+  public void setSpecialty(String specialty) {
+    this.specialty = specialty;
+  }
+
   public String getRole() {
     return role;
   }
@@ -260,6 +270,7 @@ public class PersonViewDTO implements Serializable {
     if (siteCode != null ? !siteCode.equals(that.siteCode) : that.siteCode != null) return false;
     if (siteName != null ? !siteName.equals(that.siteName) : that.siteName != null) return false;
     if (placementType != null ? !placementType.equals(that.placementType) : that.placementType != null) return false;
+    if (specialty != null ? !specialty.equals(that.specialty) : that.specialty != null) return false;
     if (role != that.role) return false;
     if (status != that.status) return false;
     if (currentOwner != null ? !currentOwner.equals(that.currentOwner) : that.currentOwner != null)
@@ -285,6 +296,7 @@ public class PersonViewDTO implements Serializable {
     result = 31 * result + (siteCode != null ? siteCode.hashCode() : 0);
     result = 31 * result + (siteName != null ? siteName.hashCode() : 0);
     result = 31 * result + (placementType != null ? placementType.hashCode() : 0);
+    result = 31 * result + (specialty != null ? specialty.hashCode() : 0);
     result = 31 * result + (role != null ? role.hashCode() : 0);
     result = 31 * result + (status != null ? status.hashCode() : 0);
     result = 31 * result + (currentOwner != null ? currentOwner.hashCode() : 0);
@@ -313,6 +325,7 @@ public class PersonViewDTO implements Serializable {
         ", siteCode='" + siteCode + '\'' +
         ", siteName='" + siteName + '\'' +
         ", placementType='" + placementType + '\'' +
+        ", specialty='" + specialty + '\'' +
         ", role='" + role + '\'' +
         ", status=" + status +
         ", currentOwner='" + currentOwner + '\'' +

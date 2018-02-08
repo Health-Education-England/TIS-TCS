@@ -1,4 +1,4 @@
-select p.id,
+select distinct ot.* from (select p.id,
      p.intrepidId,
      cd.surname,
      cd.forenames,
@@ -8,13 +8,14 @@ select p.id,
      pm.programmeId,
      prg.programmeName,
      prg.programmeNumber,
-     pm.TrainingNumberId as trainingNumber,
+     tn.trainingNumber as trainingNumber,
      pl.gradeId,
      pl.gradeAbbreviation,
      pl.siteId,
      pl.siteCode,
      pl.placementType,
      p.role,
+     s.name as specialty,
      p.status,
      lo.owner as currentOwner,
      lo.rule as currentOwnerRule
@@ -24,9 +25,13 @@ join GmcDetails gmc on (gmc.id = p.id)
 join GdcDetails gdc on (gdc.id = p.id)
 left join ProgrammeMembership pm on (pm.personId = p.id) and curdate() between pm.programmeStartDate and pm.programmeEndDate
 left join Programme prg on (prg.id = pm.programmeId)
+left join TrainingNumber tn on tn.id = pm.trainingNumberId
 left join Placement pl on (pl.traineeId = p.id) and curdate() between pl.dateFrom and pl.dateTo
+left join PlacementSpecialty ps on ps.placementId = pl.id and ps.placementSpecialtyType = 'PRIMARY'
+left join Specialty s on s.id = ps.specialtyId
 left join PersonOwner lo on (lo.id = p.id)
  WHERECLAUSE
  ORDERBYCLAUSE
  LIMITCLAUSE
+ ) as ot
 ;

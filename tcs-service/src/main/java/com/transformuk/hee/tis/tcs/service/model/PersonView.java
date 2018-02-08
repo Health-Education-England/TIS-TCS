@@ -57,6 +57,8 @@ public class PersonView implements Serializable {
 
   private String placementType;
 
+  private String specialty;
+
   private String role;
 
   @Enumerated(EnumType.STRING)
@@ -180,6 +182,14 @@ public class PersonView implements Serializable {
     this.placementType = placementType;
   }
 
+  public String getSpecialty() {
+    return specialty;
+  }
+
+  public void setSpecialty(String specialty) {
+    this.specialty = specialty;
+  }
+
   public String getRole() {
     return role;
   }
@@ -255,6 +265,7 @@ public class PersonView implements Serializable {
     if (siteId != null ? !siteId.equals(that.siteId) : that.siteId != null) return false;
     if (siteCode != null ? !siteCode.equals(that.siteCode) : that.siteCode != null) return false;
     if (placementType != null ? !placementType.equals(that.placementType) : that.placementType != null) return false;
+    if (specialty != null ? !specialty.equals(that.specialty) : that.specialty != null) return false;
     if (role != null ? !role.equals(that.role) : that.role != null) return false;
     if (status != that.status) return false;
     if (currentOwner != null ? !currentOwner.equals(that.currentOwner) : that.currentOwner != null) return false;
@@ -279,6 +290,7 @@ public class PersonView implements Serializable {
     result = 31 * result + (siteId != null ? siteId.hashCode() : 0);
     result = 31 * result + (siteCode != null ? siteCode.hashCode() : 0);
     result = 31 * result + (placementType != null ? placementType.hashCode() : 0);
+    result = 31 * result + (specialty != null ? specialty.hashCode() : 0);
     result = 31 * result + (role != null ? role.hashCode() : 0);
     result = 31 * result + (status != null ? status.hashCode() : 0);
     result = 31 * result + (currentOwner != null ? currentOwner.hashCode() : 0);
@@ -305,6 +317,7 @@ public class PersonView implements Serializable {
         ", siteId=" + siteId +
         ", siteCode='" + siteCode + '\'' +
         ", placementType='" + placementType + '\'' +
+        ", specialty='" + specialty + '\'' +
         ", role='" + role + '\'' +
         ", status=" + status +
         ", currentOwner='" + currentOwner + '\'' +

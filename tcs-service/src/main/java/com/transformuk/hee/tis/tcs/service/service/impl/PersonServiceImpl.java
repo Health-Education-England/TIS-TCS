@@ -385,6 +385,7 @@ public class PersonServiceImpl implements PersonService {
       view.setSiteCode(rs.getString("siteCode"));
       view.setSiteId(rs.getLong("siteId"));
       view.setPlacementType(rs.getString("placementType"));
+      view.setSpecialty(rs.getString("specialty"));
       view.setRole(rs.getString("role"));
       String status = rs.getString("status");
       if (StringUtils.isNotEmpty(status)) {

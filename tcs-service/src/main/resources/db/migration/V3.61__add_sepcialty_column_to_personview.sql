@@ -1,0 +1,2 @@
+ALTER TABLE `PersonView`
+ADD COLUMN `specialty` VARCHAR(255) DEFAULT NULL;
