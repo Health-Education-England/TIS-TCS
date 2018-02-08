@@ -1,4 +1,4 @@
-select distinct ot.* from (select p.id,
+select p.id,
      p.intrepidId,
      cd.surname,
      cd.forenames,
@@ -33,5 +33,4 @@ left join PersonOwner lo on (lo.id = p.id)
  WHERECLAUSE
  ORDERBYCLAUSE
  LIMITCLAUSE
- ) as ot
 ;

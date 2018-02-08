@@ -224,7 +224,7 @@ public class PersonServiceImpl implements PersonService {
     //add the column filters criteria
     if (columnFilters != null && !columnFilters.isEmpty()) {
       columnFilters.forEach(cf -> {
-        whereClause.append(" AND " + cf.getName() + " in (");
+        whereClause.append(" AND p." + cf.getName() + " in (");
         cf.getValues().stream().forEach(k -> whereClause.append("'" + k + "',"));
         whereClause.deleteCharAt(whereClause.length() - 1);
         whereClause.append(")");
@@ -232,14 +232,14 @@ public class PersonServiceImpl implements PersonService {
     }
 
     if (StringUtils.isNotEmpty(searchString)) {
-      whereClause.append(" AND ( publicHealthNumber like ").append("'%" + searchString + "%'");
-      whereClause.append(" OR surname like ").append("'%" + searchString + "%'");
-      whereClause.append(" OR forenames like ").append("'%" + searchString + "%'");
-      whereClause.append(" OR gmcNumber like ").append("'%" + searchString + "%'");
-      whereClause.append(" OR gdcNumber like ").append("'%" + searchString + "%'");
-      whereClause.append(" OR role like ").append("'%" + searchString + "%'");
+      whereClause.append(" AND ( p.publicHealthNumber like ").append("'%" + searchString + "%'");
+      whereClause.append(" OR cd.surname like ").append("'%" + searchString + "%'");
+      whereClause.append(" OR cd.forenames like ").append("'%" + searchString + "%'");
+      whereClause.append(" OR gmc.gmcNumber like ").append("'%" + searchString + "%'");
+      whereClause.append(" OR gdc.gdcNumber like ").append("'%" + searchString + "%'");
+      whereClause.append(" OR p.role like ").append("'%" + searchString + "%'");
       if (StringUtils.isNumeric(searchString)) {
-        whereClause.append(" OR id in ").append("(" + Lists.newArrayList(Long.parseLong(searchString)).
+        whereClause.append(" OR p.id in ").append("(" + Lists.newArrayList(Long.parseLong(searchString)).
             toString().replace("[", "").replace("]", "") + ")");
       }
       whereClause.append(" ) ");
