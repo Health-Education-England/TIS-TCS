@@ -2,10 +2,11 @@ package com.transformuk.hee.tis.tcs.service.service.impl;
 
 import com.google.common.collect.Lists;
 import com.google.common.collect.Maps;
-import com.transformuk.hee.tis.tcs.api.dto.PlacementSummaryDTO;
 import com.transformuk.hee.tis.tcs.api.dto.PlacementDTO;
 import com.transformuk.hee.tis.tcs.api.dto.PlacementDetailsDTO;
 import com.transformuk.hee.tis.tcs.api.dto.PlacementSpecialtyDTO;
+import com.transformuk.hee.tis.tcs.api.dto.PlacementSummaryDTO;
+import com.transformuk.hee.tis.tcs.api.enumeration.PlacementStatus;
 import com.transformuk.hee.tis.tcs.api.enumeration.PostSpecialtyType;
 import com.transformuk.hee.tis.tcs.api.enumeration.TCSDateColumns;
 import com.transformuk.hee.tis.tcs.service.api.util.ColumnFilterUtil;
@@ -44,6 +45,7 @@ import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
+import java.util.Date;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
@@ -318,19 +320,21 @@ public class PlacementServiceImpl implements PlacementService {
   public List<PlacementSummaryDTO> getPlacementForTrainee(Long traineeId) {
     Query traineePlacementsQuery = em.createNativeQuery(
         "SELECT p.*, s.name primarySpecialtyName, c.forenames, c.surname, c.id traineeId, p.id placementId " +
-        "FROM Placement p " +
-        "LEFT JOIN PlacementSpecialty ps " +
-        "ON p.id = ps.placementId " +
-        "LEFT JOIN Specialty s " +
-        "ON s.id = ps.specialtyId " +
-        "LEFT JOIN ContactDetails c " +
-        "ON c.id = p.traineeId " +
-        "WHERE ps.placementSpecialtyType = :specialtyType " +
-        "AND p.traineeId = :traineeId " +
-        "ORDER BY dateTo DESC", "PlacementsSummary")
+            "FROM Placement p " +
+            "LEFT JOIN PlacementSpecialty ps " +
+            "ON p.id = ps.placementId " +
+            "LEFT JOIN Specialty s " +
+            "ON s.id = ps.specialtyId " +
+            "LEFT JOIN ContactDetails c " +
+            "ON c.id = p.traineeId " +
+            "WHERE ps.placementSpecialtyType = :specialtyType " +
+            "AND p.traineeId = :traineeId " +
+            "ORDER BY dateTo DESC", "PlacementsSummary")
         .setParameter("traineeId", traineeId)
         .setParameter("specialtyType", PostSpecialtyType.PRIMARY.name());
-    return (List<PlacementSummaryDTO>)traineePlacementsQuery.getResultList();
+    List<PlacementSummaryDTO> resultList = traineePlacementsQuery.getResultList();
+    resultList.forEach(p -> p.setPlacementStatus(getPlacementStatus(p.getDateFrom(), p.getDateTo())));
+    return resultList;
   }
 
   @Transactional(readOnly = true)
@@ -350,6 +354,27 @@ public class PlacementServiceImpl implements PlacementService {
             "ORDER BY dateTo DESC", "PlacementsSummary")
         .setParameter("postId", postId)
         .setParameter("specialtyType", PostSpecialtyType.PRIMARY.name());
-    return (List<PlacementSummaryDTO>)postPlacementsQuery.getResultList();
+    List<PlacementSummaryDTO> resultList = postPlacementsQuery.getResultList();
+    resultList.forEach(p -> p.setPlacementStatus(getPlacementStatus(p.getDateFrom(), p.getDateTo())));
+    return resultList;
+  }
+
+  private String getPlacementStatus(Date dateFrom, Date dateTo) {
+
+    if (dateFrom == null || dateTo == null) {
+      return null;
+    }
+
+    long from = dateFrom.getTime();
+    long to = dateTo.getTime();
+    long now = new Date().getTime();
+
+    if (now < from) {
+      return PlacementStatus.FUTURE.name();
+    } else if (now > to) {
+      return PlacementStatus.PAST.name();
+    }
+    return PlacementStatus.CURRENT.name();
+
   }
 }
