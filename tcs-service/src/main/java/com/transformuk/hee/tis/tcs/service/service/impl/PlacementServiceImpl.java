@@ -24,6 +24,7 @@ import com.transformuk.hee.tis.tcs.service.repository.PlacementRepository;
 import com.transformuk.hee.tis.tcs.service.repository.PlacementViewRepository;
 import com.transformuk.hee.tis.tcs.service.repository.SpecialtyRepository;
 import com.transformuk.hee.tis.tcs.service.service.PlacementService;
+import com.transformuk.hee.tis.tcs.service.service.helper.SqlQuerySupplier;
 import com.transformuk.hee.tis.tcs.service.service.mapper.PlacementDetailsMapper;
 import com.transformuk.hee.tis.tcs.service.service.mapper.PlacementMapper;
 import com.transformuk.hee.tis.tcs.service.service.mapper.PlacementViewMapper;
@@ -42,6 +43,7 @@ import org.springframework.transaction.annotation.Transactional;
 import javax.persistence.EntityManager;
 import javax.persistence.Query;
 import java.io.IOException;
+import java.math.BigInteger;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
@@ -62,6 +64,7 @@ import static com.transformuk.hee.tis.tcs.service.service.impl.SpecificationFact
 @Transactional
 public class PlacementServiceImpl implements PlacementService {
 
+  public static final String PLACEMENTS_SUMMARY_MAPPER = "PlacementsSummary";
   private final Logger log = LoggerFactory.getLogger(PlacementServiceImpl.class);
 
   @Autowired
@@ -84,6 +87,9 @@ public class PlacementServiceImpl implements PlacementService {
   private PlacementViewMapper placementViewMapper;
   @Autowired
   private EntityManager em;
+  @Autowired
+  private SqlQuerySupplier sqlQuerySupplier;
+
 
   /**
    * Save a placement.
@@ -318,45 +324,54 @@ public class PlacementServiceImpl implements PlacementService {
   @Transactional(readOnly = true)
   @Override
   public List<PlacementSummaryDTO> getPlacementForTrainee(Long traineeId) {
-    Query traineePlacementsQuery = em.createNativeQuery(
-        "SELECT p.*, s.name primarySpecialtyName, c.forenames, c.surname, c.id traineeId, p.id placementId " +
-            "FROM Placement p " +
-            "LEFT JOIN PlacementSpecialty ps " +
-            "ON p.id = ps.placementId " +
-            "LEFT JOIN Specialty s " +
-            "ON s.id = ps.specialtyId " +
-            "LEFT JOIN ContactDetails c " +
-            "ON c.id = p.traineeId " +
-            "WHERE ps.placementSpecialtyType = :specialtyType " +
-            "AND p.traineeId = :traineeId " +
-            "ORDER BY dateTo DESC", "PlacementsSummary")
-        .setParameter("traineeId", traineeId)
-        .setParameter("specialtyType", PostSpecialtyType.PRIMARY.name());
+    String query = sqlQuerySupplier.getQuery(SqlQuerySupplier.TRAINEE_PLACEMENT_SUMMARY);
+
+    Query traineePlacementsQuery = em.createNativeQuery(query, PLACEMENTS_SUMMARY_MAPPER)
+        .setParameter("traineeId", traineeId);
+    // TODO: uncomment this when changes to the FE adds a specialty on creation
+//        .setParameter("specialtyType", PostSpecialtyType.PRIMARY.name());
     List<PlacementSummaryDTO> resultList = traineePlacementsQuery.getResultList();
     resultList.forEach(p -> p.setPlacementStatus(getPlacementStatus(p.getDateFrom(), p.getDateTo())));
+
+    resultList = filterPlacements(resultList);
     return resultList;
   }
 
   @Transactional(readOnly = true)
   @Override
   public List<PlacementSummaryDTO> getPlacementForPost(Long postId) {
-    Query postPlacementsQuery = em.createNativeQuery(
-        "SELECT p.*, s.name primarySpecialtyName, c.forenames, c.surname, c.id traineeId, p.id placementId " +
-            "FROM Placement p " +
-            "LEFT JOIN PlacementSpecialty ps " +
-            "ON p.id = ps.placementId " +
-            "LEFT JOIN Specialty s " +
-            "ON s.id = ps.specialtyId " +
-            "LEFT JOIN ContactDetails c " +
-            "ON c.id = p.traineeId " +
-            "WHERE ps.placementSpecialtyType = :specialtyType " +
-            "AND p.postId = :postId " +
-            "ORDER BY dateTo DESC", "PlacementsSummary")
-        .setParameter("postId", postId)
-        .setParameter("specialtyType", PostSpecialtyType.PRIMARY.name());
+    String query = sqlQuerySupplier.getQuery(SqlQuerySupplier.POST_PLACEMENT_SUMMARY);
+    Query postPlacementsQuery = em.createNativeQuery(query, PLACEMENTS_SUMMARY_MAPPER)
+        .setParameter("postId", postId);
+    // TODO: uncomment this when changes to the FE adds a specialty on creation
+//        .setParameter("specialtyType", PostSpecialtyType.PRIMARY.name());
     List<PlacementSummaryDTO> resultList = postPlacementsQuery.getResultList();
     resultList.forEach(p -> p.setPlacementStatus(getPlacementStatus(p.getDateFrom(), p.getDateTo())));
+    resultList = filterPlacements(resultList);
     return resultList;
+  }
+
+  /**
+   * this is a temporary method that filters out duplicates and preferring placements with specialties of type primary
+   * this and its usage should be removed after the PUT/POST endpoints to placements is updated with specialties
+   *
+   * @param resultList
+   * @return
+   */
+  private List<PlacementSummaryDTO> filterPlacements(List<PlacementSummaryDTO> resultList) {
+    Map<BigInteger, PlacementSummaryDTO> idsToPlacementSummary = Maps.newHashMap();
+    for (PlacementSummaryDTO placementSummaryDTO : resultList) {
+
+      BigInteger placementId = placementSummaryDTO.getPlacementId();
+      if (!idsToPlacementSummary.containsKey(placementId) ||
+          PostSpecialtyType.PRIMARY.name().equals(placementSummaryDTO.getPlacementSpecialtyType())) {
+        idsToPlacementSummary.put(placementId, placementSummaryDTO);
+      }
+    }
+
+    List<PlacementSummaryDTO> placementSummaryDTOS = Lists.newArrayList(idsToPlacementSummary.values());
+    placementSummaryDTOS.sort((o1, o2) -> o2.getDateTo().compareTo(o1.getDateTo()));
+    return placementSummaryDTOS;
   }
 
   private String getPlacementStatus(Date dateFrom, Date dateTo) {

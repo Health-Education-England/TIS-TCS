@@ -22,10 +22,11 @@ public class PlacementSummaryDTO {
   private BigInteger traineeId;
   private BigInteger placementId;
   private String placementStatus;
+  private String placementSpecialtyType;
 
   public PlacementSummaryDTO(Date dateFrom, Date dateTo, BigInteger siteId, String primarySpecialtyName,
                              BigInteger gradeId, String placementType, String status, String forenames, String surname,
-                             BigInteger traineeId, BigInteger placementId) {
+                             BigInteger traineeId, BigInteger placementId, String placementSpecialtyType) {
     this.dateFrom = dateFrom;
     this.dateTo = dateTo;
     this.siteId = siteId;
@@ -37,6 +38,7 @@ public class PlacementSummaryDTO {
     this.surname = surname;
     this.traineeId = traineeId;
     this.placementId = placementId;
+    this.placementSpecialtyType = placementSpecialtyType;
   }
 
   public Date getDateFrom() {
@@ -149,5 +151,13 @@ public class PlacementSummaryDTO {
 
   public void setPlacementStatus(String placementStatus) {
     this.placementStatus = placementStatus;
+  }
+
+  public String getPlacementSpecialtyType() {
+    return placementSpecialtyType;
+  }
+
+  public void setPlacementSpecialtyType(String placementSpecialtyType) {
+    this.placementSpecialtyType = placementSpecialtyType;
   }
 }
