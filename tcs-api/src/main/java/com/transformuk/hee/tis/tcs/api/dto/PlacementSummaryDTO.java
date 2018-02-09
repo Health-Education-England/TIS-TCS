@@ -21,6 +21,7 @@ public class PlacementSummaryDTO {
   private String surname;
   private BigInteger traineeId;
   private BigInteger placementId;
+  private String placementStatus;
 
   public PlacementSummaryDTO(Date dateFrom, Date dateTo, BigInteger siteId, String primarySpecialtyName,
                              BigInteger gradeId, String placementType, String status, String forenames, String surname,
@@ -140,5 +141,13 @@ public class PlacementSummaryDTO {
 
   public void setPlacementId(BigInteger placementId) {
     this.placementId = placementId;
+  }
+
+  public String getPlacementStatus() {
+    return placementStatus;
+  }
+
+  public void setPlacementStatus(String placementStatus) {
+    this.placementStatus = placementStatus;
   }
 }
