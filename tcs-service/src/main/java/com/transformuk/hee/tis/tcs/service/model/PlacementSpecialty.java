@@ -20,12 +20,12 @@ import java.io.Serializable;
 public class PlacementSpecialty implements Serializable {
 
   @Id
-  @ManyToOne(targetEntity = Placement.class, fetch = FetchType.EAGER)
+  @ManyToOne(targetEntity = Placement.class, fetch = FetchType.LAZY)
   @JoinColumn(name = "placementId")
   private Placement placement;
 
   @Id
-  @ManyToOne
+  @ManyToOne(targetEntity = Specialty.class, fetch = FetchType.LAZY)
   @JoinColumn(name = "specialtyId")
   private Specialty specialty;
 
@@ -65,16 +65,13 @@ public class PlacementSpecialty implements Serializable {
     PlacementSpecialty that = (PlacementSpecialty) o;
 
     if (placement != null ? !placement.equals(that.placement) : that.placement != null) return false;
-    if (specialty != null ? !specialty.equals(that.specialty) : that.specialty != null) return false;
-    return placementSpecialtyType == that.placementSpecialtyType;
+    return specialty != null ? specialty.equals(that.specialty) : that.specialty == null;
   }
 
   @Override
   public int hashCode() {
     int result = placement != null ? placement.hashCode() : 0;
     result = 31 * result + (specialty != null ? specialty.hashCode() : 0);
-    result = 31 * result + (placementSpecialtyType != null ? placementSpecialtyType.hashCode() : 0);
     return result;
   }
-
 }

@@ -10,6 +10,7 @@ import javax.validation.constraints.NotNull;
 import javax.validation.constraints.Null;
 import java.io.Serializable;
 import java.time.LocalDate;
+import java.util.Set;
 
 /**
  * Holds the fields necessary for an item in a placement list
@@ -75,6 +76,8 @@ public class PlacementDetailsDTO implements Serializable {
   private Long postId;
 
   private String localPostNumber;
+
+  private Set<PlacementSpecialtyDTO> specialties;
 
   public Long getId() {
     return id;
@@ -250,6 +253,14 @@ public class PlacementDetailsDTO implements Serializable {
 
   public void setGradeId(Long gradeId) {
     this.gradeId = gradeId;
+  }
+
+  public Set<PlacementSpecialtyDTO> getSpecialties() {
+    return specialties;
+  }
+
+  public void setSpecialties(Set<PlacementSpecialtyDTO> specialties) {
+    this.specialties = specialties;
   }
 
   @Override

@@ -619,12 +619,6 @@ public class SpecialtyResourceIntTest {
 
   @Test
   @Transactional
-  public void equalsVerifier() throws Exception {
-    TestUtil.equalsVerifier(Specialty.class);
-  }
-
-  @Test
-  @Transactional
   public void bulkCreateShouldSucceedWhenDataIsValid() throws Exception {
     SpecialtyGroup specialtyGroupEntity = createSpecialtyGroupEntity();
     Specialty anotherSpecialty = new Specialty()

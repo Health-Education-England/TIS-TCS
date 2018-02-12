@@ -457,11 +457,6 @@ public class PlacementResourceIntTest {
     assertThat(placementList).hasSize(databaseSizeBeforeDelete - 1);
   }
 
-  @Test
-  @Transactional
-  public void equalsVerifier() throws Exception {
-    TestUtil.equalsVerifier(Placement.class);
-  }
 
   @Test
   @Transactional

@@ -2,6 +2,7 @@ package com.transformuk.hee.tis.tcs.service.service.impl;
 
 import com.google.common.collect.Lists;
 import com.google.common.collect.Maps;
+import com.google.common.collect.Sets;
 import com.transformuk.hee.tis.tcs.api.dto.PlacementDTO;
 import com.transformuk.hee.tis.tcs.api.dto.PlacementDetailsDTO;
 import com.transformuk.hee.tis.tcs.api.dto.PlacementSpecialtyDTO;
@@ -21,12 +22,14 @@ import com.transformuk.hee.tis.tcs.service.model.Specialty;
 import com.transformuk.hee.tis.tcs.service.repository.PersonRepository;
 import com.transformuk.hee.tis.tcs.service.repository.PlacementDetailsRepository;
 import com.transformuk.hee.tis.tcs.service.repository.PlacementRepository;
+import com.transformuk.hee.tis.tcs.service.repository.PlacementSpecialtyRepository;
 import com.transformuk.hee.tis.tcs.service.repository.PlacementViewRepository;
 import com.transformuk.hee.tis.tcs.service.repository.SpecialtyRepository;
 import com.transformuk.hee.tis.tcs.service.service.PlacementService;
 import com.transformuk.hee.tis.tcs.service.service.helper.SqlQuerySupplier;
 import com.transformuk.hee.tis.tcs.service.service.mapper.PlacementDetailsMapper;
 import com.transformuk.hee.tis.tcs.service.service.mapper.PlacementMapper;
+import com.transformuk.hee.tis.tcs.service.service.mapper.PlacementSpecialtyMapper;
 import com.transformuk.hee.tis.tcs.service.service.mapper.PlacementViewMapper;
 import com.transformuk.hee.tis.tcs.service.service.mapper.SpecialtyMapper;
 import org.apache.commons.collections4.CollectionUtils;
@@ -48,6 +51,7 @@ import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.Date;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
@@ -89,6 +93,10 @@ public class PlacementServiceImpl implements PlacementService {
   private EntityManager em;
   @Autowired
   private SqlQuerySupplier sqlQuerySupplier;
+  @Autowired
+  private PlacementSpecialtyRepository placementSpecialtyRepository;
+  @Autowired
+  private PlacementSpecialtyMapper placementSpecialtyMapper;
 
 
   /**
@@ -105,12 +113,50 @@ public class PlacementServiceImpl implements PlacementService {
     return placementMapper.placementToPlacementDTO(placement);
   }
 
+  @Transactional
+  @Override
+  public PlacementDetailsDTO createDetails(PlacementDetailsDTO placementDetailsDTO) {
+    log.debug("Request to create Placement : {}", placementDetailsDTO);
+    PlacementDetails placementDetails = placementDetailsMapper.placementDetailsDTOToPlacementDetails(placementDetailsDTO);
+    placementDetails = placementDetailsRepository.save(placementDetails);
+
+    Set<PlacementSpecialty> placementSpecialties = linkPlacementSpecialties(placementDetailsDTO, placementDetails);
+    PlacementDetailsDTO placementDetailsDTO1 = placementDetailsMapper.placementDetailsToPlacementDetailsDTO(placementDetails);
+    placementDetailsDTO1.setSpecialties(placementSpecialtyMapper.toDTOs(placementSpecialties));
+    return placementDetailsDTO1;
+  }
+
+  @Transactional
   @Override
   public PlacementDetailsDTO saveDetails(PlacementDetailsDTO placementDetailsDTO) {
     log.debug("Request to save Placement : {}", placementDetailsDTO);
-    PlacementDetails placementDetails = placementDetailsMapper.placementDetailsDTOToPlacementDetails(placementDetailsDTO);
-    placementDetails = placementDetailsRepository.save(placementDetails);
-    return placementDetailsMapper.placementDetailsToPlacementDetailsDTO(placementDetails);
+
+    //clear any linked specialties before trying to save the placement
+    Placement placement = placementRepository.findOne(placementDetailsDTO.getId());
+    placementSpecialtyRepository.delete(placement.getSpecialties());
+    placement.setSpecialties(new HashSet<>());
+    placementRepository.saveAndFlush(placement);
+
+    return createDetails(placementDetailsDTO);
+  }
+
+  @Transactional
+  private Set<PlacementSpecialty> linkPlacementSpecialties(PlacementDetailsDTO placementDetailsDTO, PlacementDetails placementDetails) {
+    Placement placement = placementRepository.findOne(placementDetails.getId());
+    Set<PlacementSpecialty> placementSpecialties = Sets.newHashSet();
+    if(CollectionUtils.isNotEmpty(placementDetailsDTO.getSpecialties())) {
+      for (PlacementSpecialtyDTO placementSpecialtyDTO : placementDetailsDTO.getSpecialties()) {
+        PlacementSpecialty placementSpecialty = new PlacementSpecialty();
+        placementSpecialty.setPlacement(placement);
+        placementSpecialty.setSpecialty(specialtyRepository.findOne(placementSpecialtyDTO.getSpecialtyId()));
+        placementSpecialty.setPlacementSpecialtyType(placementSpecialtyDTO.getPlacementSpecialtyType());
+        placementSpecialties.add(placementSpecialty);
+      }
+    }
+
+    placement.setSpecialties(Sets.newHashSet(placementSpecialties));
+    placementRepository.save(placement);
+    return placementSpecialties;
   }
 
   /**

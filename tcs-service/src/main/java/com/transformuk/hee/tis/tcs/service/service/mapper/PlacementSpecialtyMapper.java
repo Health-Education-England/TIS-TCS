@@ -2,7 +2,9 @@ package com.transformuk.hee.tis.tcs.service.service.mapper;
 
 import com.google.common.collect.Sets;
 import com.transformuk.hee.tis.tcs.api.dto.PlacementSpecialtyDTO;
+import com.transformuk.hee.tis.tcs.service.model.Placement;
 import com.transformuk.hee.tis.tcs.service.model.PlacementSpecialty;
+import com.transformuk.hee.tis.tcs.service.model.Specialty;
 import org.apache.commons.collections4.CollectionUtils;
 import org.springframework.stereotype.Component;
 
@@ -24,5 +26,28 @@ public class PlacementSpecialtyMapper {
       }
     }
     return specialties;
+  }
+
+  public Set<PlacementSpecialty> toEntities(Set<PlacementSpecialtyDTO> placementSpecialtyDTOs) {
+    Set<PlacementSpecialty> placementSpecialties = null;
+    if (CollectionUtils.isNotEmpty(placementSpecialtyDTOs)) {
+      placementSpecialties = Sets.newHashSet();
+      for (PlacementSpecialtyDTO placementSpecialtyDTO : placementSpecialtyDTOs) {
+        PlacementSpecialty placementSpecialty = new PlacementSpecialty();
+
+        Placement placement = new Placement();
+        placement.setId(placementSpecialtyDTO.getPlacementId());
+        placementSpecialty.setPlacement(placement);
+
+        Specialty specialty = new Specialty();
+        specialty.setId(placementSpecialtyDTO.getSpecialtyId());
+        placementSpecialty.setSpecialty(specialty);
+
+        placementSpecialty.setPlacementSpecialtyType(placementSpecialtyDTO.getPlacementSpecialtyType());
+
+        placementSpecialties.add(placementSpecialty);
+      }
+    }
+    return placementSpecialties;
   }
 }

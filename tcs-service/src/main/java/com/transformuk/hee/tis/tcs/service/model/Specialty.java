@@ -17,7 +17,6 @@ import javax.persistence.JoinColumn;
 import javax.persistence.ManyToOne;
 import java.io.Serializable;
 import java.util.HashSet;
-import java.util.Objects;
 import java.util.Set;
 
 /**
@@ -157,22 +156,17 @@ public class Specialty implements Serializable {
 
   @Override
   public boolean equals(Object o) {
-    if (this == o) {
-      return true;
-    }
-    if (o == null || getClass() != o.getClass()) {
-      return false;
-    }
+    if (this == o) return true;
+    if (o == null || getClass() != o.getClass()) return false;
+
     Specialty specialty = (Specialty) o;
-    if (specialty.id == null || id == null) {
-      return false;
-    }
-    return Objects.equals(id, specialty.id);
+
+    return id != null ? id.equals(specialty.id) : specialty.id == null;
   }
 
   @Override
   public int hashCode() {
-    return Objects.hashCode(id);
+    return id != null ? id.hashCode() : 0;
   }
 
   @Override

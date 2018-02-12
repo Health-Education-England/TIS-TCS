@@ -37,14 +37,14 @@ public class PlacementSpecialtyPK implements Serializable {
 
     PlacementSpecialtyPK that = (PlacementSpecialtyPK) o;
 
-    if (!placement.equals(that.placement)) return false;
-    return specialty.equals(that.specialty);
+    if (placement != null ? !placement.equals(that.placement) : that.placement != null) return false;
+    return specialty != null ? specialty.equals(that.specialty) : that.specialty == null;
   }
 
   @Override
   public int hashCode() {
-    int result = placement.hashCode();
-    result = 31 * result + specialty.hashCode();
+    int result = placement != null ? placement.hashCode() : 0;
+    result = 31 * result + (specialty != null ? specialty.hashCode() : 0);
     return result;
   }
 }

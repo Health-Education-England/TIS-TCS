@@ -18,7 +18,6 @@ import javax.persistence.SqlResultSetMapping;
 import java.io.Serializable;
 import java.time.LocalDate;
 import java.util.HashSet;
-import java.util.Objects;
 import java.util.Set;
 
 /**
@@ -229,22 +228,17 @@ public class Placement implements Serializable {
 
   @Override
   public boolean equals(Object o) {
-    if (this == o) {
-      return true;
-    }
-    if (o == null || getClass() != o.getClass()) {
-      return false;
-    }
+    if (this == o) return true;
+    if (o == null || getClass() != o.getClass()) return false;
+
     Placement placement = (Placement) o;
-    if (placement.id == null || id == null) {
-      return false;
-    }
-    return Objects.equals(id, placement.id);
+
+    return id != null ? id.equals(placement.id) : placement.id == null;
   }
 
   @Override
   public int hashCode() {
-    return Objects.hashCode(id);
+    return id != null ? id.hashCode() : 0;
   }
 
   @Override
@@ -252,14 +246,11 @@ public class Placement implements Serializable {
     return "Placement{" +
         "id=" + id +
         ", trainee=" + trainee +
-        ", clinicalSupervisors=" + clinicalSupervisors +
         ", intrepidId='" + intrepidId + '\'' +
-        ", post=" + post +
         ", siteCode='" + siteCode + '\'' +
         ", gradeAbbreviation='" + gradeAbbreviation + '\'' +
         ", siteId='" + siteId + '\'' +
         ", gradeId='" + gradeId + '\'' +
-        ", specialties=" + specialties +
         ", dateFrom=" + dateFrom +
         ", dateTo=" + dateTo +
         ", placementType='" + placementType + '\'' +

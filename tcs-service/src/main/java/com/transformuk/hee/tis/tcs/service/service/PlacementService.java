@@ -56,12 +56,20 @@ public interface PlacementService {
 
 
   /**
-   * Saves a new placement
+   * Updates an existing placement
    *
    * @param placementDetailsDTO the placement details to save
    * @return the saved placement details
    */
   PlacementDetailsDTO saveDetails(PlacementDetailsDTO placementDetailsDTO);
+
+  /**
+   * Creates a new placement
+   *
+   * @param placementDetailsDTO the placement details to save
+   * @return the saved placement details
+   */
+  PlacementDetailsDTO createDetails(PlacementDetailsDTO placementDetailsDTO);
 
   /**
    * Delete the "id" placement.
