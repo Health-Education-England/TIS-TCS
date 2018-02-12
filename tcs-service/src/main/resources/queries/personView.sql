@@ -21,8 +21,8 @@ select p.id,
      lo.rule as currentOwnerRule
 from Person p
 join ContactDetails cd on (cd.id = p.id)
-join GmcDetails gmc on (gmc.id = p.id)
-join GdcDetails gdc on (gdc.id = p.id)
+left join GmcDetails gmc on (gmc.id = p.id)
+left join GdcDetails gdc on (gdc.id = p.id)
 left join ProgrammeMembership pm on (pm.personId = p.id) and curdate() between pm.programmeStartDate and pm.programmeEndDate
 left join Programme prg on (prg.id = pm.programmeId)
 left join TrainingNumber tn on tn.id = pm.trainingNumberId
