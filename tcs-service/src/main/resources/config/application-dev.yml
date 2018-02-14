@@ -16,9 +16,9 @@
 spring:
     profiles:
         active: dev
-        include:
-          - swagger
-          - prometheus
+#        include:
+#          - swagger
+#          - prometheus
     devtools:
         restart:
             enabled: true

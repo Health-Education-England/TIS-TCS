@@ -120,3 +120,16 @@ jhipster:
 # ===================================================================
 
 application:
+
+
+# ===================================================================
+# Azure block blob storage properties
+# ===================================================================
+azure:
+  accountName:
+  accountKey:
+  containerName:
+
+  storage:
+    container: prod
+    personFolder: person

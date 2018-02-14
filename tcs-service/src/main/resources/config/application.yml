@@ -28,7 +28,7 @@ spring:
         # The commented value for `active` can be replaced with valid Spring profiles to load.
         # Otherwise, it will be filled in by maven when building the WAR file
         # Either way, it can be overridden by `--spring.profiles.active` value passed in the commandline or `-Dspring.profiles.active` set in `JAVA_OPTS`
-        active: prod
+        active: dev
     jackson:
         serialization.write_dates_as_timestamps: false
     jpa:
@@ -43,6 +43,10 @@ spring:
     mvc:
         favicon:
             enabled: false
+    http:
+        multipart:
+          max-file-size: 10MB
+          max-request-size: 10MB
 
 flyway:
     baseline-description: #
@@ -134,3 +138,15 @@ application:
 
 logging:
   file: ${LOG_DIR:${HOME}}/tcs.log
+
+# ===================================================================
+# Azure block blob storage properties
+# ===================================================================
+azure:
+  accountName: ${CLOUD_BLOB_ACCOUNT_NAME:tisdevstor}
+  accountKey: ${CLOUD_BLOB_ACCOUNT_KEY:C+3kNX/Ttim1chPZUFcjyakUNY7Nx86YNZP5ftZIWzy17+zNlkAj9+uX3TdpJrE49To12DvD/VKx97JWeKPZnA==}
+  containerName: ${CLOUD_BLOB_CONTAINER_NAME:document_store}
+
+  storage:
+    container: dev
+    personFolder: person
