@@ -11,6 +11,11 @@ import com.transformuk.hee.tis.tcs.api.dto.PostSiteDTO;
 import com.transformuk.hee.tis.tcs.api.dto.PostSpecialtyDTO;
 import com.transformuk.hee.tis.tcs.api.dto.PostViewDTO;
 import com.transformuk.hee.tis.tcs.api.dto.ProgrammeDTO;
+import com.transformuk.hee.tis.tcs.api.enumeration.PostGradeType;
+import com.transformuk.hee.tis.tcs.api.enumeration.PostSiteType;
+import com.transformuk.hee.tis.tcs.api.enumeration.PostSpecialtyType;
+import com.transformuk.hee.tis.tcs.api.enumeration.PostSuffix;
+import com.transformuk.hee.tis.tcs.service.api.decorator.AsyncReferenceService;
 import com.transformuk.hee.tis.tcs.service.api.decorator.PostViewDecorator;
 import com.transformuk.hee.tis.tcs.service.model.ColumnFilter;
 import com.transformuk.hee.tis.tcs.service.model.Placement;
@@ -67,9 +72,14 @@ import static com.transformuk.hee.tis.tcs.service.service.impl.SpecificationFact
 @Transactional
 public class PostServiceImpl implements PostService {
 
+  public static final int LOCAL_OFFICE_ABBR_INDEX = 0;
+  public static final int LOCATION_CODE_INDEX = 1;
+  public static final int SPECIALTY_CODE_INDEX = 2;
+  public static final int GRADE_ABBR_INDEX = 3;
+  public static final int UNIQUE_COUNTER_INDEX = 4;
+  public static final int SUFFIX_INDEX = 5;
   private static final Logger log = LoggerFactory.getLogger(PostServiceImpl.class);
-  public static final String SLASH = "/";
-
+  private static final String SLASH = "/";
   @Autowired
   private PostRepository postRepository;
   @Autowired
@@ -92,6 +102,8 @@ public class PostServiceImpl implements PostService {
   private PostViewMapper postViewMapper;
   @Autowired
   private PostViewDecorator postViewDecorator;
+  @Autowired
+  private AsyncReferenceService asyncReferenceService;
 
   /**
    * Save a post.
@@ -102,6 +114,9 @@ public class PostServiceImpl implements PostService {
   @Override
   public PostDTO save(PostDTO postDTO) {
     log.debug("Request to save Post : {}", postDTO);
+    if (!postDTO.isBypassNPNGeneration() && requireNewNationalPostNumber(postDTO)) {
+      generateAndSetNewNationalPostNumber(postDTO);
+    }
     Post post = postMapper.postDTOToPost(postDTO);
     post = postRepository.save(post);
     return postMapper.postToPostDTO(post);
@@ -453,45 +468,179 @@ public class PostServiceImpl implements PostService {
 
   /**
    * Call Stored proc to build the post view
+   *
    * @return
    */
   @Override
   @Transactional
   @Async
-  public CompletableFuture<Void> buildPostView(){
+  public CompletableFuture<Void> buildPostView() {
     log.debug("Request to build Post view");
     postRepository.buildPostView();
     return CompletableFuture.completedFuture(null);
   }
 
+
+  /**
+   * Check the new post against the current post in the system. If there are changes in some of the values,
+   * a new national post number will need to be generated
+   *
+   * @param postDTO
+   * @return
+   */
+  @Transactional(readOnly = true)
+  boolean requireNewNationalPostNumber(PostDTO postDTO) {
+    Post currentPost = postRepository.findOne(postDTO.getId());
+    if (currentPost == null) {
+      return true;
+    } else {
+      boolean generateNewNumber = false;
+
+      String nationalPostNumber = currentPost.getNationalPostNumber();
+      String[] nationalPostNumberParts = nationalPostNumber.split(SLASH);
+      String localOfficeAbbr = getLocalOfficeAbbr();
+      String locationCode = getSiteCode(postDTO);
+      String specialtyCode = getPrimarySpecialtyCodeOrEmpty(postDTO);
+      String gradeAbbr = getApprovedGradeOrEmpty(postDTO);
+      String suffixValue = postDTO.getSuffix() != null ? postDTO.getSuffix().getSuffixValue() : StringUtils.EMPTY;
+
+      if (nationalPostNumberParts.length == 5 || nationalPostNumberParts.length == 6) { // does the national post number have the correct number of parts?
+        String postLocalOfficeAbbr = nationalPostNumberParts[LOCAL_OFFICE_ABBR_INDEX];
+        String postLocationCode = nationalPostNumberParts[LOCATION_CODE_INDEX];
+        String postSpecialtyCode = nationalPostNumberParts[SPECIALTY_CODE_INDEX];
+        String postGradeAbbr = nationalPostNumberParts[GRADE_ABBR_INDEX];
+        String postSuffix = StringUtils.EMPTY;
+        if (nationalPostNumberParts.length == 6) {
+          postSuffix = nationalPostNumberParts[SUFFIX_INDEX];
+        }
+
+        if (!localOfficeAbbr.equals(postLocalOfficeAbbr) || !locationCode.equals(postLocationCode) ||
+            !specialtyCode.equals(postSpecialtyCode) || !gradeAbbr.equals(postGradeAbbr) ||
+            !suffixValue.equals(postSuffix)) {
+          generateNewNumber = true;
+        }
+      }
+      return generateNewNumber;
+    }
+  }
+
+
   @Override
-  public String generateNationalPostNumber(String localOfficeAbbr, String locationCode, String specialtyCode, String gradeAbbr) {
+  public void generateAndSetNewNationalPostNumber(PostDTO postDTO) {
+    String newSpecialtyCode = getPrimarySpecialtyCodeOrEmpty(postDTO);
+    String newGradeCode = getApprovedGradeOrEmpty(postDTO);
+    String locationCode = getSiteCode(postDTO);
+
+    String nationalPostNumber = generateNationalPostNumber(getLocalOfficeAbbr(), locationCode, newSpecialtyCode, newGradeCode, postDTO.getSuffix());
+
+    postDTO.setNationalPostNumber(nationalPostNumber);
+  }
+
+  @Override
+  public String generateNationalPostNumber(String localOfficeAbbr, String siteCode, String specialtyCode,
+                                           String gradeAbbr, PostSuffix suffix) {
     Preconditions.checkNotNull(localOfficeAbbr);
-    Preconditions.checkNotNull(locationCode);
+    Preconditions.checkNotNull(siteCode);
     Preconditions.checkNotNull(specialtyCode);
     Preconditions.checkNotNull(gradeAbbr);
 
-    String nationalPostNumberNoCounter = localOfficeAbbr + SLASH + locationCode + SLASH + specialtyCode + SLASH + gradeAbbr + SLASH;
+    String nationalPostNumberNoCounter = localOfficeAbbr + SLASH + siteCode + SLASH + specialtyCode + SLASH + gradeAbbr;
+
     Set<Post> postsWithSamePostNumber = postRepository.findPostNumberNumberLike(nationalPostNumberNoCounter);
 
     Set<Integer> postNumberCounter = postsWithSamePostNumber.stream()
         .map(Post::getNationalPostNumber)
         .filter(StringUtils::isNotBlank)
+        .filter(npn -> {
+          if (suffix != null) {
+            return npn.endsWith(suffix.getSuffixValue()); //filter out any npn's that dont match the suffix we're trying to generate
+          } else {
+            String[] npnParts = npn.split("/");
+            String lastNpnPart = npnParts[npnParts.length - 1];
+            return NumberUtils.isDigits(lastNpnPart); //if no suffix is supplied, filter out any that end with non digit
+          }
+        })
         .map(npn -> npn.split(SLASH))
         .filter(npn -> npn.length > 1)
-        .map(npn -> npn[npn.length - 1])
+        .map(npn -> {
+          if (suffix != null) {
+            return npn[npn.length - 2]; //if we have a suffix, then the number component is second to last
+          } else {
+            return npn[npn.length - 1];
+          }
+        })
         .filter(NumberUtils::isDigits)
         .map(Integer::parseInt)
         .sorted(Comparator.reverseOrder())
         .collect(Collectors.toSet());
 
-    if(CollectionUtils.isNotEmpty(postNumberCounter))
-    {
+    String result;
+
+    // up the counter part of the NPN
+    if (CollectionUtils.isNotEmpty(postNumberCounter)) {
       Integer currentHighestCounter = postNumberCounter.iterator().next();
-      return nationalPostNumberNoCounter + SLASH + (++currentHighestCounter);
+      String leftPadded = StringUtils.leftPad(Integer.toString(++currentHighestCounter), 3, '0');
+      result = nationalPostNumberNoCounter + SLASH + leftPadded;
 
     } else {
-      return nationalPostNumberNoCounter + SLASH + "001";
+      result = nationalPostNumberNoCounter + SLASH + "001";
     }
+
+    // add suffix if provided
+    if (suffix != null) {
+      result += SLASH + suffix.getSuffixValue();
+    }
+
+    return result;
   }
+
+  //TODO implement this method
+  String getLocalOfficeAbbr() {
+    return "";
+  }
+
+
+  String getPrimarySpecialtyCodeOrEmpty(PostDTO postDTO) {
+    return postDTO.getSpecialties().stream()
+        .filter(sp -> PostSpecialtyType.PRIMARY.equals(sp.getPostSpecialtyType()))
+        .map(ps -> ps.getSpecialty().getSpecialtyCode())
+        .findAny().orElse(StringUtils.EMPTY);
+  }
+
+  String getApprovedGradeOrEmpty(PostDTO postDTO) {
+    Long gradeId = postDTO.getGrades().stream()
+        .filter(g -> PostGradeType.APPROVED.equals(g.getPostGradeType()))
+        .map(PostGradeDTO::getGradeId)
+        .findAny().orElse(null);
+
+    final List<String> newGradeAbbrList = Lists.newArrayList();
+    if (gradeId != null) {
+      asyncReferenceService.doWithGradesAsync(Sets.newHashSet(gradeId), gradeIdsToGrades -> {
+        newGradeAbbrList.add(gradeIdsToGrades.get(gradeId).getAbbreviation());
+      });
+    }
+
+    if (CollectionUtils.isNotEmpty(newGradeAbbrList)) {
+      return newGradeAbbrList.get(0);
+    }
+    return StringUtils.EMPTY;
+  }
+
+  String getSiteCode(PostDTO postDTO) {
+    Long siteCode = postDTO.getSites().stream().filter(s -> PostSiteType.PRIMARY.equals(s.getPostSiteType()))
+        .map(PostSiteDTO::getSiteId)
+        .findAny().orElse(null);
+    final List<String> siteCodeList = Lists.newArrayList();
+    if (siteCodeList != null) {
+      asyncReferenceService.doWithGradesAsync(Sets.newHashSet(siteCode), gradeIdsToGrades -> {
+        siteCodeList.add(gradeIdsToGrades.get(siteCode).getAbbreviation());
+      });
+
+    }
+    if (CollectionUtils.isNotEmpty(siteCodeList)) {
+      return siteCodeList.get(0);
+    }
+    return StringUtils.EMPTY;
+  }
+
 }

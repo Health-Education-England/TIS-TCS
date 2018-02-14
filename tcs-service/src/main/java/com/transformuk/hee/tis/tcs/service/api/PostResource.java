@@ -343,18 +343,6 @@ public class PostResource {
     return ResponseEntity.ok().headers(HeaderUtil.createEntityUpdateAlert(ENTITY_NAME, "procedure is underway")).build();
   }
 
-
-  @ApiOperation("Generate a National post number using the provided data")
-  @GetMapping("/posts/national-post-number")
-  @Timed
-  @PreAuthorize("hasAuthority('post:add:modify')")
-  public ResponseEntity<String> getNationalPostNumber(@RequestParam String localOfficeAbbr, @RequestParam String locationCode,
-                                                      @RequestParam String specialtyCode, @RequestParam String gradeAbbr) {
-    String generatedNumber = postService.generateNationalPostNumber(localOfficeAbbr, locationCode, specialtyCode, gradeAbbr);
-    return ResponseEntity.ok(generatedNumber);
-  }
-
-
   /**
    * PATCH  /bulk-patch-new-old-posts : Patches the Old post and New post relationship on an existing Posts.
    *

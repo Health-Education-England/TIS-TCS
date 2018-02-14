@@ -2,6 +2,7 @@ package com.transformuk.hee.tis.tcs.service.service;
 
 import com.transformuk.hee.tis.tcs.api.dto.PostDTO;
 import com.transformuk.hee.tis.tcs.api.dto.PostViewDTO;
+import com.transformuk.hee.tis.tcs.api.enumeration.PostSuffix;
 import com.transformuk.hee.tis.tcs.service.model.ColumnFilter;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
@@ -139,11 +140,15 @@ public interface PostService {
 
   /**
    * Generate a national post code thats current available
+   *
    * @param localOfficeAbbr
    * @param locationCode
    * @param specialtyCode
    * @param gradeAbbr
    * @return
    */
-  String generateNationalPostNumber(String localOfficeAbbr, String locationCode, String specialtyCode, String gradeAbbr);
+  String generateNationalPostNumber(String localOfficeAbbr, String locationCode, String specialtyCode, String gradeAbbr, PostSuffix suffix);
+
+  void generateAndSetNewNationalPostNumber(PostDTO postDTO);
+
 }

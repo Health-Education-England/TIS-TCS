@@ -45,7 +45,7 @@ public class Post implements Serializable {
   @Column(name = "status")
   private Status status;
 
-  @Enumerated(EnumType.STRING)
+  //PostSuffixConverter converts the value
   @Column(name = "suffix")
   private PostSuffix suffix;
 
