@@ -625,7 +625,7 @@ public class PostServiceImplTest {
     when(postMock1.getNationalPostNumber()).thenReturn(LOCAL_OFFICE_ABBR + SLASH + SITE_CODE + SLASH +
         SPECIALTY_CODE + SLASH + GRADE_ABBR + SLASH + UNIQUE_NUMBER + SLASH + MILITARY_SUFFIX);
     when(postMock1.getSuffix()).thenReturn(PostSuffix.MILITARY);
-    when(postRepositoryMock.findPostNumberNumberLike(LOCAL_OFFICE_ABBR + SLASH + SITE_CODE + SLASH +
+    when(postRepositoryMock.findByNationalPostNumberStartingWith(LOCAL_OFFICE_ABBR + SLASH + SITE_CODE + SLASH +
         SPECIALTY_CODE + SLASH + GRADE_ABBR)).thenReturn(Sets.newHashSet(postMock1));
 
     String result = testObj.generateNationalPostNumber(LOCAL_OFFICE_ABBR, SITE_CODE, SPECIALTY_CODE, GRADE_ABBR, PostSuffix.MILITARY);

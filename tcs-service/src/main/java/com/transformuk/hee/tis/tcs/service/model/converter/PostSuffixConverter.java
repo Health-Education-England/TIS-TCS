@@ -10,18 +10,21 @@ public class PostSuffixConverter implements AttributeConverter<PostSuffix, Strin
 
   @Override
   public String convertToDatabaseColumn(PostSuffix attribute) {
-    return attribute.getSuffixValue();
+    if(attribute != null){
+      return attribute.getSuffixValue();
+    }
+    return null;
   }
 
   @Override
   public PostSuffix convertToEntityAttribute(String dbData) {
     if (dbData != null) {
       switch (dbData) {
-        case "/S":
+        case "S":
           return PostSuffix.SUPERNUMERY;
-        case "/M":
+        case "M":
           return PostSuffix.MILITARY;
-        case "/A":
+        case "A":
           return PostSuffix.ACADEMIC;
         default:
           throw new IllegalArgumentException("Unknown PostSuffix from DB: " + dbData);

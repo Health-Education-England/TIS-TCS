@@ -106,7 +106,10 @@ public class PostServiceImpl implements PostService {
   private AsyncReferenceService asyncReferenceService;
 
   /**
-   * Save a post.
+   * Save a post. Used by both creation and update flows
+   * <p>
+   * If the post is new, we need to generate a new NPN, if its an update, then we check to see we require a new number
+   * to be generated AND that we're not bypassing the generation
    *
    * @param postDTO the entity to save
    * @return the persisted entity
@@ -114,7 +117,7 @@ public class PostServiceImpl implements PostService {
   @Override
   public PostDTO save(PostDTO postDTO) {
     log.debug("Request to save Post : {}", postDTO);
-    if (!postDTO.isBypassNPNGeneration() && requireNewNationalPostNumber(postDTO)) {
+    if (postDTO.getId() == null || (!postDTO.isBypassNPNGeneration() && requireNewNationalPostNumber(postDTO))) {
       generateAndSetNewNationalPostNumber(postDTO);
     }
     Post post = postMapper.postDTOToPost(postDTO);
@@ -546,7 +549,7 @@ public class PostServiceImpl implements PostService {
 
     String nationalPostNumberNoCounter = localOfficeAbbr + SLASH + siteCode + SLASH + specialtyCode + SLASH + gradeAbbr;
 
-    Set<Post> postsWithSamePostNumber = postRepository.findPostNumberNumberLike(nationalPostNumberNoCounter);
+    Set<Post> postsWithSamePostNumber = postRepository.findByNationalPostNumberStartingWith(nationalPostNumberNoCounter);
 
     Set<Integer> postNumberCounter = postsWithSamePostNumber.stream()
         .map(Post::getNationalPostNumber)
@@ -601,44 +604,51 @@ public class PostServiceImpl implements PostService {
 
 
   String getPrimarySpecialtyCodeOrEmpty(PostDTO postDTO) {
-    return postDTO.getSpecialties().stream()
-        .filter(sp -> PostSpecialtyType.PRIMARY.equals(sp.getPostSpecialtyType()))
-        .map(ps -> ps.getSpecialty().getSpecialtyCode())
-        .findAny().orElse(StringUtils.EMPTY);
+    if (CollectionUtils.isNotEmpty(postDTO.getSpecialties())) {
+      return postDTO.getSpecialties().stream()
+          .filter(sp -> PostSpecialtyType.PRIMARY.equals(sp.getPostSpecialtyType()))
+          .map(ps -> ps.getSpecialty().getSpecialtyCode())
+          .findAny().orElse(StringUtils.EMPTY);
+    }
+    return StringUtils.EMPTY;
   }
 
   String getApprovedGradeOrEmpty(PostDTO postDTO) {
-    Long gradeId = postDTO.getGrades().stream()
-        .filter(g -> PostGradeType.APPROVED.equals(g.getPostGradeType()))
-        .map(PostGradeDTO::getGradeId)
-        .findAny().orElse(null);
+    if (CollectionUtils.isNotEmpty(postDTO.getGrades())) {
+      Long gradeId = postDTO.getGrades().stream()
+          .filter(g -> PostGradeType.APPROVED.equals(g.getPostGradeType()))
+          .map(PostGradeDTO::getGradeId)
+          .findAny().orElse(null);
 
-    final List<String> newGradeAbbrList = Lists.newArrayList();
-    if (gradeId != null) {
-      asyncReferenceService.doWithGradesAsync(Sets.newHashSet(gradeId), gradeIdsToGrades -> {
-        newGradeAbbrList.add(gradeIdsToGrades.get(gradeId).getAbbreviation());
-      });
-    }
+      final List<String> newGradeAbbrList = Lists.newArrayList();
+      if (gradeId != null) {
+        asyncReferenceService.doWithGradesAsync(Sets.newHashSet(gradeId), gradeIdsToGrades -> {
+          newGradeAbbrList.add(gradeIdsToGrades.get(gradeId).getAbbreviation());
+        });
+      }
 
-    if (CollectionUtils.isNotEmpty(newGradeAbbrList)) {
-      return newGradeAbbrList.get(0);
+      if (CollectionUtils.isNotEmpty(newGradeAbbrList)) {
+        return newGradeAbbrList.get(0);
+      }
     }
     return StringUtils.EMPTY;
   }
 
   String getSiteCode(PostDTO postDTO) {
-    Long siteCode = postDTO.getSites().stream().filter(s -> PostSiteType.PRIMARY.equals(s.getPostSiteType()))
-        .map(PostSiteDTO::getSiteId)
-        .findAny().orElse(null);
-    final List<String> siteCodeList = Lists.newArrayList();
-    if (siteCodeList != null) {
-      asyncReferenceService.doWithGradesAsync(Sets.newHashSet(siteCode), gradeIdsToGrades -> {
-        siteCodeList.add(gradeIdsToGrades.get(siteCode).getAbbreviation());
-      });
+    if (CollectionUtils.isNotEmpty(postDTO.getSites())) {
+      Long siteCode = postDTO.getSites().stream().filter(s -> PostSiteType.PRIMARY.equals(s.getPostSiteType()))
+          .map(PostSiteDTO::getSiteId)
+          .findAny().orElse(null);
+      final List<String> siteCodeList = Lists.newArrayList();
+      if (siteCodeList != null) {
+        asyncReferenceService.doWithGradesAsync(Sets.newHashSet(siteCode), gradeIdsToGrades -> {
+          siteCodeList.add(gradeIdsToGrades.get(siteCode).getAbbreviation());
+        });
 
-    }
-    if (CollectionUtils.isNotEmpty(siteCodeList)) {
-      return siteCodeList.get(0);
+      }
+      if (CollectionUtils.isNotEmpty(siteCodeList)) {
+        return siteCodeList.get(0);
+      }
     }
     return StringUtils.EMPTY;
   }

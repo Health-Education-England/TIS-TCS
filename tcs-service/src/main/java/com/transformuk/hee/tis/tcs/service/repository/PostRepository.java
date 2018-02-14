@@ -31,6 +31,5 @@ public interface PostRepository extends JpaRepository<Post, Long>, JpaSpecificat
 
   OwnerProjection findPostById(Long id);
 
-  @Query("SELECT p FROM Post WHERE nationalPostNumber like '%:nationalPostNumberNoCounter'")
-  Set<Post> findPostNumberNumberLike(@Param("nationalPostNumberNoCounter") String nationalPostNumberNoCounter);
+  Set<Post> findByNationalPostNumberStartingWith(String nationalPostNumberNoCounter);
 }
