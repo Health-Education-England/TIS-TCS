@@ -45,7 +45,6 @@ spring:
             hibernate.cache.use_second_level_cache: false
             hibernate.cache.use_query_cache: false
             hibernate.generate_statistics: true
-            hibernate.hbm2ddl.auto: create-drop
     messages:
         basename: i18n/messages
     mvc:
@@ -117,3 +116,15 @@ jhipster:
 # ===================================================================
 
 application:
+
+# ===================================================================
+# Azure block blob storage properties
+# ===================================================================
+azure:
+  accountName: ${CLOUD_BLOB_ACCOUNT_NAME:tisdevstor}
+  accountKey: ${CLOUD_BLOB_ACCOUNT_KEY:C+3kNX/Ttim1chPZUFcjyakUNY7Nx86YNZP5ftZIWzy17+zNlkAj9+uX3TdpJrE49To12DvD/VKx97JWeKPZnA==}
+  containerName: ${CLOUD_BLOB_CONTAINER_NAME:document_store}
+
+  storage:
+    container: test
+    personFolder: person
