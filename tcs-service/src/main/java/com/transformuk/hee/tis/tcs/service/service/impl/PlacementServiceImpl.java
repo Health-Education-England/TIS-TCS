@@ -205,7 +205,14 @@ public class PlacementServiceImpl implements PlacementService {
   @Transactional(readOnly = true)
   public PlacementDetailsDTO getDetails(Long id) {
     PlacementDetails pd = placementDetailsRepository.findOne(id);
-    return placementDetailsMapper.placementDetailsToPlacementDetailsDTO(pd);
+    PlacementDetailsDTO placementDetailsDTO = null;
+    if (pd != null) {
+      Set<PlacementSpecialty> placementSpecialties = placementSpecialtyRepository.findByPlacementId(id);
+      Set<PlacementSpecialtyDTO> placementSpecialtyDTOS = placementSpecialtyMapper.toDTOs(placementSpecialties);
+      placementDetailsDTO = placementDetailsMapper.placementDetailsToPlacementDetailsDTO(pd);
+      placementDetailsDTO.setSpecialties(placementSpecialtyDTOS);
+    }
+    return placementDetailsDTO;
   }
 
   /**
