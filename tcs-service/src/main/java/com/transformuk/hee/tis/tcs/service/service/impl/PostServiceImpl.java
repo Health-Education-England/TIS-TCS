@@ -1,9 +1,14 @@
 package com.transformuk.hee.tis.tcs.service.service.impl;
 
 import com.google.common.base.Preconditions;
+import com.google.common.collect.ImmutableMap;
 import com.google.common.collect.Lists;
 import com.google.common.collect.Maps;
 import com.google.common.collect.Sets;
+import com.transformuk.hee.tis.reference.api.dto.GradeDTO;
+import com.transformuk.hee.tis.reference.api.dto.SiteDTO;
+import com.transformuk.hee.tis.security.model.UserProfile;
+import com.transformuk.hee.tis.security.util.TisSecurityHelper;
 import com.transformuk.hee.tis.tcs.api.dto.PlacementDTO;
 import com.transformuk.hee.tis.tcs.api.dto.PostDTO;
 import com.transformuk.hee.tis.tcs.api.dto.PostGradeDTO;
@@ -72,14 +77,31 @@ import static com.transformuk.hee.tis.tcs.service.service.impl.SpecificationFact
 @Transactional
 public class PostServiceImpl implements PostService {
 
-  public static final int LOCAL_OFFICE_ABBR_INDEX = 0;
-  public static final int LOCATION_CODE_INDEX = 1;
-  public static final int SPECIALTY_CODE_INDEX = 2;
-  public static final int GRADE_ABBR_INDEX = 3;
-  public static final int UNIQUE_COUNTER_INDEX = 4;
-  public static final int SUFFIX_INDEX = 5;
+  private static final int LOCAL_OFFICE_ABBR_INDEX = 0;
+  private static final int LOCATION_CODE_INDEX = 1;
+  private static final int SPECIALTY_CODE_INDEX = 2;
+  private static final int GRADE_ABBR_INDEX = 3;
+  private static final int UNIQUE_COUNTER_INDEX = 4;
+  private static final int SUFFIX_INDEX = 5;
   private static final Logger log = LoggerFactory.getLogger(PostServiceImpl.class);
   private static final String SLASH = "/";
+
+  private static final Map<String, String> dbcToLocalOfficeAbbrMap = ImmutableMap.<String, String>builder()
+      .put("1-AIIDR8", "LDN")
+      .put("1-AIIDWA", "LDN")
+      .put("1-AIIDVS", "LDN")
+      .put("1-AIIDWI", "LDN")
+      .put("1-AIIDSA", "EMD")
+      .put("1-AIIDWT", "EOE")
+      .put("1-AIIDSI", "NTH")
+      .put("1-AIIDH1", "OXF")
+      .put("1-AIIDQQ", "YHD")
+      .put("1-AIIDMY", "WMD")
+      .put("1-AIIDMQ", "SW")
+      .put("1-AIIDHJ", "WES")
+      .put("1-AIIDNQ", "NWN")
+      .build();
+
   @Autowired
   private PostRepository postRepository;
   @Autowired
@@ -106,7 +128,7 @@ public class PostServiceImpl implements PostService {
   private AsyncReferenceService asyncReferenceService;
 
   /**
-   * Save a post. Used by both creation and update flows
+   * Save a post.
    * <p>
    * If the post is new, we need to generate a new NPN, if its an update, then we check to see we require a new number
    * to be generated AND that we're not bypassing the generation
@@ -117,7 +139,9 @@ public class PostServiceImpl implements PostService {
   @Override
   public PostDTO save(PostDTO postDTO) {
     log.debug("Request to save Post : {}", postDTO);
-    if (postDTO.getId() == null || (!postDTO.isBypassNPNGeneration() && requireNewNationalPostNumber(postDTO))) {
+    if (postDTO.isBypassNPNGeneration()) {
+      //if we bypass do no do any of the generation logic
+    } else if (postDTO.getId() == null || requireNewNationalPostNumber(postDTO)) {
       generateAndSetNewNationalPostNumber(postDTO);
     }
     Post post = postMapper.postDTOToPost(postDTO);
@@ -372,6 +396,14 @@ public class PostServiceImpl implements PostService {
     postSiteRepository.delete(post.getSites());
     postSpecialtyRepository.delete(post.getSpecialties());
 
+    if (postDTO.isBypassNPNGeneration()) {
+      //if we bypass do no do any of the generation logic
+    } else if (requireNewNationalPostNumber(postDTO)) {
+      generateAndSetNewNationalPostNumber(postDTO);
+    } else if (!StringUtils.equals(post.getNationalPostNumber(), postDTO.getNationalPostNumber())) {
+      //if the user tries to manually change the npn without override, set it back
+      postDTO.setNationalPostNumber(post.getNationalPostNumber());
+    }
     post = postMapper.postDTOToPost(postDTO);
     post = postRepository.save(post);
     return postMapper.postToPostDTO(post);
@@ -483,6 +515,11 @@ public class PostServiceImpl implements PostService {
     return CompletableFuture.completedFuture(null);
   }
 
+  @Override
+  public boolean isValidLocalOfficeAbbr(String localOfficeAbbr) {
+    Collection<String> allLocalOfficeAbbr = dbcToLocalOfficeAbbrMap.values();
+    return allLocalOfficeAbbr.contains(localOfficeAbbr);
+  }
 
   /**
    * Check the new post against the current post in the system. If there are changes in some of the values,
@@ -499,27 +536,31 @@ public class PostServiceImpl implements PostService {
     } else {
       boolean generateNewNumber = false;
 
-      String nationalPostNumber = currentPost.getNationalPostNumber();
-      String[] nationalPostNumberParts = nationalPostNumber.split(SLASH);
       String localOfficeAbbr = getLocalOfficeAbbr();
-      String locationCode = getSiteCode(postDTO);
+      SiteDTO siteCodeContainer = new SiteDTO();
+      GradeDTO gradeAbbrContainer = new GradeDTO();
+      CompletableFuture.allOf(
+          getSiteCode(postDTO, siteCodeContainer),
+          getApprovedGradeOrEmpty(postDTO, gradeAbbrContainer))
+          .join();
       String specialtyCode = getPrimarySpecialtyCodeOrEmpty(postDTO);
-      String gradeAbbr = getApprovedGradeOrEmpty(postDTO);
       String suffixValue = postDTO.getSuffix() != null ? postDTO.getSuffix().getSuffixValue() : StringUtils.EMPTY;
 
-      if (nationalPostNumberParts.length == 5 || nationalPostNumberParts.length == 6) { // does the national post number have the correct number of parts?
-        String postLocalOfficeAbbr = nationalPostNumberParts[LOCAL_OFFICE_ABBR_INDEX];
-        String postLocationCode = nationalPostNumberParts[LOCATION_CODE_INDEX];
-        String postSpecialtyCode = nationalPostNumberParts[SPECIALTY_CODE_INDEX];
-        String postGradeAbbr = nationalPostNumberParts[GRADE_ABBR_INDEX];
-        String postSuffix = StringUtils.EMPTY;
-        if (nationalPostNumberParts.length == 6) {
-          postSuffix = nationalPostNumberParts[SUFFIX_INDEX];
+      String currentNationalPostNumber = currentPost.getNationalPostNumber();
+      String[] currentNationalPostNumberParts = currentNationalPostNumber.split(SLASH);
+      if (currentNationalPostNumberParts.length == 5 || currentNationalPostNumberParts.length == 6) { // does the national post number have the correct number of parts?
+        String currentPostLocalOfficeAbbr = currentNationalPostNumberParts[LOCAL_OFFICE_ABBR_INDEX];
+        String currentPostLocationCode = currentNationalPostNumberParts[LOCATION_CODE_INDEX];
+        String currentPostSpecialtyCode = currentNationalPostNumberParts[SPECIALTY_CODE_INDEX];
+        String currentPostGradeAbbr = currentNationalPostNumberParts[GRADE_ABBR_INDEX];
+        String currentPostSuffix = StringUtils.EMPTY;
+        if (currentNationalPostNumberParts.length == 6) {
+          currentPostSuffix = currentNationalPostNumberParts[SUFFIX_INDEX];
         }
 
-        if (!localOfficeAbbr.equals(postLocalOfficeAbbr) || !locationCode.equals(postLocationCode) ||
-            !specialtyCode.equals(postSpecialtyCode) || !gradeAbbr.equals(postGradeAbbr) ||
-            !suffixValue.equals(postSuffix)) {
+        if (!localOfficeAbbr.equals(currentPostLocalOfficeAbbr) || !siteCodeContainer.getSiteCode().equals(currentPostLocationCode) ||
+            !specialtyCode.equals(currentPostSpecialtyCode) || !gradeAbbrContainer.getAbbreviation().equals(currentPostGradeAbbr) ||
+            !suffixValue.equals(currentPostSuffix)) {
           generateNewNumber = true;
         }
       }
@@ -530,11 +571,16 @@ public class PostServiceImpl implements PostService {
 
   @Override
   public void generateAndSetNewNationalPostNumber(PostDTO postDTO) {
-    String newSpecialtyCode = getPrimarySpecialtyCodeOrEmpty(postDTO);
-    String newGradeCode = getApprovedGradeOrEmpty(postDTO);
-    String locationCode = getSiteCode(postDTO);
+    SiteDTO siteCodeContainer = new SiteDTO();
+    GradeDTO gradeAbbrContainer = new GradeDTO();
 
-    String nationalPostNumber = generateNationalPostNumber(getLocalOfficeAbbr(), locationCode, newSpecialtyCode, newGradeCode, postDTO.getSuffix());
+    CompletableFuture.allOf(getApprovedGradeOrEmpty(postDTO, gradeAbbrContainer), getSiteCode(postDTO, siteCodeContainer))
+        .join();
+
+    String newSpecialtyCode = getPrimarySpecialtyCodeOrEmpty(postDTO);
+
+    String nationalPostNumber = generateNationalPostNumber(getLocalOfficeAbbr(), siteCodeContainer.getSiteCode(),
+        newSpecialtyCode, gradeAbbrContainer.getAbbreviation(), postDTO.getSuffix());
 
     postDTO.setNationalPostNumber(nationalPostNumber);
   }
@@ -551,7 +597,7 @@ public class PostServiceImpl implements PostService {
 
     Set<Post> postsWithSamePostNumber = postRepository.findByNationalPostNumberStartingWith(nationalPostNumberNoCounter);
 
-    Set<Integer> postNumberCounter = postsWithSamePostNumber.stream()
+    List<Integer> postNumberCounter = postsWithSamePostNumber.stream()
         .map(Post::getNationalPostNumber)
         .filter(StringUtils::isNotBlank)
         .filter(npn -> {
@@ -575,7 +621,7 @@ public class PostServiceImpl implements PostService {
         .filter(NumberUtils::isDigits)
         .map(Integer::parseInt)
         .sorted(Comparator.reverseOrder())
-        .collect(Collectors.toSet());
+        .collect(Collectors.toList());
 
     String result;
 
@@ -597,60 +643,60 @@ public class PostServiceImpl implements PostService {
     return result;
   }
 
-  //TODO implement this method
   String getLocalOfficeAbbr() {
-    return "";
+    UserProfile userProfile = TisSecurityHelper.getProfileFromContext();
+    String dbc = userProfile.getDesignatedBodyCodes().stream().findFirst().orElse(StringUtils.EMPTY);
+    String localOfficeAbbr = dbcToLocalOfficeAbbrMap.get(dbc);
+    return localOfficeAbbr != null ? localOfficeAbbr : StringUtils.EMPTY;
   }
 
 
   String getPrimarySpecialtyCodeOrEmpty(PostDTO postDTO) {
     if (CollectionUtils.isNotEmpty(postDTO.getSpecialties())) {
-      return postDTO.getSpecialties().stream()
+      Long specialtyId = postDTO.getSpecialties().stream()
           .filter(sp -> PostSpecialtyType.PRIMARY.equals(sp.getPostSpecialtyType()))
-          .map(ps -> ps.getSpecialty().getSpecialtyCode())
-          .findAny().orElse(StringUtils.EMPTY);
+          .map(ps -> ps.getSpecialty().getId())
+          .findAny().orElse(null);
+
+      if (specialtyId != null) {
+        Specialty primarySpecialty = specialtyRepository.findOne(specialtyId);
+        return primarySpecialty != null ? primarySpecialty.getSpecialtyCode() : StringUtils.EMPTY;
+      }
     }
     return StringUtils.EMPTY;
   }
 
-  String getApprovedGradeOrEmpty(PostDTO postDTO) {
+  CompletableFuture<Void> getApprovedGradeOrEmpty(PostDTO postDTO, GradeDTO gradeDTO) {
     if (CollectionUtils.isNotEmpty(postDTO.getGrades())) {
       Long gradeId = postDTO.getGrades().stream()
           .filter(g -> PostGradeType.APPROVED.equals(g.getPostGradeType()))
           .map(PostGradeDTO::getGradeId)
           .findAny().orElse(null);
 
-      final List<String> newGradeAbbrList = Lists.newArrayList();
       if (gradeId != null) {
-        asyncReferenceService.doWithGradesAsync(Sets.newHashSet(gradeId), gradeIdsToGrades -> {
-          newGradeAbbrList.add(gradeIdsToGrades.get(gradeId).getAbbreviation());
+        return asyncReferenceService.doWithGradesAsync(Sets.newHashSet(gradeId), gradeIdsToGrades -> {
+          gradeDTO.setId(gradeId);
+          gradeDTO.setAbbreviation(gradeIdsToGrades.get(gradeId).getAbbreviation());
         });
       }
 
-      if (CollectionUtils.isNotEmpty(newGradeAbbrList)) {
-        return newGradeAbbrList.get(0);
-      }
     }
-    return StringUtils.EMPTY;
+    return CompletableFuture.completedFuture(null);
   }
 
-  String getSiteCode(PostDTO postDTO) {
+  CompletableFuture<Void> getSiteCode(PostDTO postDTO, SiteDTO siteDTO) {
     if (CollectionUtils.isNotEmpty(postDTO.getSites())) {
-      Long siteCode = postDTO.getSites().stream().filter(s -> PostSiteType.PRIMARY.equals(s.getPostSiteType()))
+      Long siteId = postDTO.getSites().stream().filter(s -> PostSiteType.PRIMARY.equals(s.getPostSiteType()))
           .map(PostSiteDTO::getSiteId)
           .findAny().orElse(null);
-      final List<String> siteCodeList = Lists.newArrayList();
-      if (siteCodeList != null) {
-        asyncReferenceService.doWithGradesAsync(Sets.newHashSet(siteCode), gradeIdsToGrades -> {
-          siteCodeList.add(gradeIdsToGrades.get(siteCode).getAbbreviation());
+      if (siteId != null) {
+        return asyncReferenceService.doWithSitesAsync(Sets.newHashSet(siteId), siteIdsToSites -> {
+          siteDTO.setId(siteId);
+          siteDTO.setSiteCode(siteIdsToSites.get(siteId).getSiteCode());
         });
-
-      }
-      if (CollectionUtils.isNotEmpty(siteCodeList)) {
-        return siteCodeList.get(0);
       }
     }
-    return StringUtils.EMPTY;
+    return CompletableFuture.completedFuture(null);
   }
 
 }

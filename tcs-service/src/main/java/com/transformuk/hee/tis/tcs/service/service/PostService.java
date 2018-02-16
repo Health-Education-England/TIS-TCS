@@ -138,6 +138,7 @@ public interface PostService {
    */
   CompletableFuture<Void> buildPostView();
 
+  boolean isValidLocalOfficeAbbr(String localOfficeAbbr);
   /**
    * Generate a national post code thats current available
    *
