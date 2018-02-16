@@ -341,11 +341,11 @@ public class EsrNotificationDTO implements Serializable {
     this.postSpeciality = postSpeciality;
   }
 
-  public double getWorkingHourIndicator() {
+  public Double getWorkingHourIndicator() {
     return workingHourIndicator;
   }
 
-  public void setWorkingHourIndicator(double workingHourIndicator) {
+  public void setWorkingHourIndicator(Double workingHourIndicator) {
     this.workingHourIndicator = workingHourIndicator;
   }
 

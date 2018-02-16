@@ -23,7 +23,7 @@ import java.util.List;
 @RequestMapping("/api")
 public class EsrNotificationResource {
 
-  private final Logger log = LoggerFactory.getLogger(EsrNotificationResource.class);
+  private static final Logger LOG = LoggerFactory.getLogger(EsrNotificationResource.class);
   private final EsrNotificationService esrNotificationService;
 
   public EsrNotificationResource(EsrNotificationService esrNotificationService) {
@@ -31,18 +31,57 @@ public class EsrNotificationResource {
   }
 
   /**
-   * POST  /notifications/load : get the "id" placement.
+   * GET  /notifications/load/next-to-current-trainee : get list of esrNotifications.
    *
    * @param fromDate date indicating placement start date.
-   * @return the ResponseEntity with status 200 (OK) and with body the placementDTO, or with status 404 (Not Found)
+   * @return the ResponseEntity with status 200 (OK) and with body the EsrNotificationDTO, or with status 404 (Not Found)
    */
-  @GetMapping("/notifications/load")
+  @GetMapping("/notifications/load/next-to-current-trainee")
   @Timed
   @PreAuthorize("hasAuthority('tcs:view:entities')")
   public ResponseEntity<List<EsrNotificationDTO>> loadNextTraineeToCurrentTraineeNotification(
       @RequestParam @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate fromDate) {
-    log.debug("REST request to load Next to current Trainee Notification for effective date : {}", fromDate);
+    LOG.debug("REST request to load Next to current Trainee Notification for effective date : {}", fromDate);
     List<EsrNotificationDTO> esrNotificationDTOS = esrNotificationService.loadNextTraineeToCurrentTraineeNotification(fromDate);
+    return ResponseEntity.ok().body(esrNotificationDTOS);
+  }
+  /**
+   * GET  /notifications/load : get list of esrNotifications.
+   *
+   * @param asOfDate date indicating placement start date.
+   * @return the ResponseEntity with status 200 (OK) and with body the EsrNotificationDTO, or with status 404 (Not Found)
+   */
+  @GetMapping("/notifications/load/vacant-posts")
+  @Timed
+  @PreAuthorize("hasAuthority('tcs:view:entities')")
+  public ResponseEntity<List<EsrNotificationDTO>> loadVacantPostsForNotification(
+      @RequestParam @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate asOfDate) {
+    LOG.debug("REST request to load Vacant Posts as of date : {}", asOfDate);
+    List<EsrNotificationDTO> esrNotificationDTOS = esrNotificationService.loadVacantPostsForNotification(asOfDate);
+    return ResponseEntity.ok().body(esrNotificationDTOS);
+  }
+
+  /**
+   * GET  /notifications : get list of esrNotifications.
+   *
+   * @param fromDate date indicating notifications as of date.
+   * @return the ResponseEntity with status 200 (OK) and with body the EsrNotificationDTO, or with status 404 (Not Found)
+   */
+  @GetMapping("/notifications")
+  @Timed
+  @PreAuthorize("hasAuthority('tcs:view:entities')")
+  public ResponseEntity<List<EsrNotificationDTO>> getNotifications(
+      @RequestParam String deanery,
+      @RequestParam(required = false) @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate fromDate
+      ) {
+
+    LOG.debug("REST request to get notifications for deanery {} from date : {}", deanery, fromDate);
+    List<EsrNotificationDTO> esrNotificationDTOS;
+    if (fromDate == null) {
+      esrNotificationDTOS = esrNotificationService.fetchLatestNotifications(deanery);
+    } else {
+      esrNotificationDTOS = esrNotificationService.fetchNotificationsFrom(deanery, fromDate);
+    }
     return ResponseEntity.ok().body(esrNotificationDTOS);
   }
 

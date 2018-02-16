@@ -27,4 +27,10 @@ public interface EsrNotificationService {
   List<EsrNotificationDTO> save(List<EsrNotificationDTO> esrNotificationDTOs);
 
   List<EsrNotificationDTO> loadNextTraineeToCurrentTraineeNotification(LocalDate fromDate);
+
+  List<EsrNotificationDTO> loadVacantPostsForNotification(LocalDate asOfDate);
+
+  List<EsrNotificationDTO> fetchLatestNotifications(String deanery);
+
+  List<EsrNotificationDTO> fetchNotificationsFrom(String deanery, LocalDate fromDate);
 }

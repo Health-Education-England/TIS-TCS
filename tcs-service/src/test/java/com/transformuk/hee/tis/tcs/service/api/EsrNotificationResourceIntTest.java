@@ -4,7 +4,6 @@ import com.transformuk.hee.tis.tcs.service.Application;
 import com.transformuk.hee.tis.tcs.service.model.ContactDetails;
 import com.transformuk.hee.tis.tcs.service.model.GmcDetails;
 import com.transformuk.hee.tis.tcs.service.model.Person;
-import com.transformuk.hee.tis.tcs.service.model.PersonalDetails;
 import com.transformuk.hee.tis.tcs.service.model.PlacementDetails;
 import com.transformuk.hee.tis.tcs.service.service.EsrNotificationService;
 import org.junit.Before;
@@ -134,13 +133,14 @@ public class EsrNotificationResourceIntTest {
     placement1.setTraineeId(trainee1.getId());
     placement2.setTraineeId(trainee2.getId());
 
-    placement1.setLocalPostNumber("localpost-01");
-    placement2.setLocalPostNumber("localpost-01");
+    String localPostNumber = "EOE/RGT00/021/FY1/013";
+    placement1.setLocalPostNumber(localPostNumber);
+    placement2.setLocalPostNumber(localPostNumber);
 
     entityManager.persist(placement1);
     entityManager.persist(placement2);
 
-    restEsrNotificationMockMvc.perform(get("/api/notifications/load")
+    restEsrNotificationMockMvc.perform(get("/api/notifications/load/next-to-current-trainee")
         .param("fromDate", from.toString()))
         .andExpect(status().isOk())
         .andExpect(content().contentType(MediaType.APPLICATION_JSON_UTF8_VALUE))
@@ -148,6 +148,7 @@ public class EsrNotificationResourceIntTest {
         .andExpect(jsonPath("$", hasSize(1)))
         .andExpect(jsonPath("$.[*].notificationTitleCode").value("1"))
         .andExpect(jsonPath("$.[*].deaneryPostNumber").value(placement1.getLocalPostNumber()))
+        .andExpect(jsonPath("$.[*].managingDeaneryBodyCode").value("EOE"))
         .andExpect(jsonPath("$.[*].currentTraineeFirstName").value(trainee2.getContactDetails().getLegalForenames()))
         .andExpect(jsonPath("$.[*].currentTraineeLastName").value(trainee2.getContactDetails().getLegalSurname()))
         .andExpect(jsonPath("$.[*].currentTraineeGmcNumber").value(trainee2GmcDetails.getGmcNumber()))
@@ -155,6 +156,74 @@ public class EsrNotificationResourceIntTest {
         .andExpect(jsonPath("$.[*].nextAppointmentTraineeLastName").value(trainee1.getContactDetails().getLegalSurname()))
         .andExpect(jsonPath("$.[*].nextAppointmentTraineeGmcNumber").value(trainee1GmcDetails.getGmcNumber()));
   }
+
+
+  @Test
+  @Transactional
+  public void shouldLoadVacantPostsAndCreateEsrNotificationRecord() throws Exception {
+
+    //given
+    Person trainee1 = new Person();
+    Person trainee2 = new Person();
+
+    entityManager.persist(trainee1);
+    entityManager.persist(trainee2);
+
+    ContactDetails trainee1ContactDetails = aContactDetail("trainee01-FN", "trainee01-LN");
+    trainee1ContactDetails.setId(trainee1.getId());
+    trainee1.setContactDetails(trainee1ContactDetails);
+
+    ContactDetails trainee2ContactDetails = aContactDetail("trainee02-FN", "trainee02-LN");
+    trainee2ContactDetails.setId(trainee2.getId());
+    trainee2.setContactDetails(trainee2ContactDetails);
+
+    entityManager.persist(trainee1ContactDetails);
+    entityManager.persist(trainee2ContactDetails);
+
+    GmcDetails trainee1GmcDetails = aGmcDetails("trainee01-gmcNumber");
+    GmcDetails trainee2GmcDetails = aGmcDetails("trainee02-gmcNumber");
+    trainee1GmcDetails.setId(trainee1.getId());
+    trainee2GmcDetails.setId(trainee2.getId());
+    trainee1.setGmcDetails(trainee1GmcDetails);
+    trainee2.setGmcDetails(trainee2GmcDetails);
+
+    entityManager.persist(trainee1GmcDetails);
+    entityManager.persist(trainee2GmcDetails);
+
+    LocalDate from = LocalDate.now();
+    PlacementDetails placement1 = createPlacementEntity(from.minusMonths(3), from.minusDays(1)); // post placement ended yesterday
+    PlacementDetails placement2 = createPlacementEntity(from.minusMonths(2), from.plusMonths(1)); // post with an active placement
+
+    placement1.setTraineeId(trainee1.getId());
+    placement2.setTraineeId(trainee2.getId());
+
+    String localPostNumber1 = "EOE/RGT00/021/FY1/013";
+    String localPostNumber2 = "YHD/RGT00/021/FY1/013";
+
+    placement1.setLocalPostNumber(localPostNumber1);
+    placement2.setLocalPostNumber(localPostNumber2);
+
+    entityManager.persist(placement1);
+    entityManager.persist(placement2);
+
+    restEsrNotificationMockMvc.perform(get("/api/notifications/load/vacant-posts")
+        .param("asOfDate", from.toString()))
+        .andExpect(status().isOk())
+        .andExpect(content().contentType(MediaType.APPLICATION_JSON_UTF8_VALUE))
+        .andExpect(jsonPath("$.*").isArray())
+        .andExpect(jsonPath("$", hasSize(1)))
+        .andExpect(jsonPath("$.[*].notificationTitleCode").value("1"))
+        .andExpect(jsonPath("$.[*].deaneryPostNumber").value(placement1.getLocalPostNumber()))
+        .andExpect(jsonPath("$.[*].managingDeaneryBodyCode").value("EOE"))
+        .andExpect(jsonPath("$.[*].postVacantAtNextRotation").value(true))
+        .andExpect(jsonPath("$.[*].currentTraineeFirstName").value(trainee1.getContactDetails().getLegalForenames()))
+        .andExpect(jsonPath("$.[*].currentTraineeLastName").value(trainee1.getContactDetails().getLegalSurname()))
+        .andExpect(jsonPath("$.[*].currentTraineeGmcNumber").value(trainee1GmcDetails.getGmcNumber()))
+        .andExpect(jsonPath("$.[0].nextAppointmentTraineeFirstName").doesNotExist())
+        .andExpect(jsonPath("$.[0].nextAppointmentTraineeLastName").doesNotExist())
+        .andExpect(jsonPath("$.[0].nextAppointmentTraineeGmcNumber").doesNotExist());
+  }
+
 
   private GmcDetails aGmcDetails(final String gmcNumber) {
 
