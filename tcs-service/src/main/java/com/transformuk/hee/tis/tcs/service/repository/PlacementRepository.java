@@ -25,4 +25,12 @@ public interface PlacementRepository extends JpaRepository<Placement, Long> {
           "select distinct localPostNumber from Placement pl2 where pl2.dateFrom = :fromDate and pl2.placementType not like '%OOP%'" +
           ") and (pl.dateFrom = :fromDate or pl.dateTo = :toDate)")
   List<Placement> findPlacementsWithTraineesStartingOnTheDayAndFinishingOnPreviousDay(@Param("fromDate") LocalDate fromDate, @Param("toDate") LocalDate toDate);
+
+
+  @Query(value =
+      "select P1.* from Placement as P1 inner join" +
+      " (select localPostNumber, max(dateTo) as dateTo from Placement as pl group by localPostNumber having max(dateTo) = :asOfDate) as P2" +
+      " on P1.localPostNumber = P2.localPostNumber " +
+      "and P1.dateTo = P2.dateTo", nativeQuery = true)
+  List<Placement> findPostsWithoutAnyCurrentOrFuturePlacements(@Param("asOfDate") LocalDate asOfDate);
 }
