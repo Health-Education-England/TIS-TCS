@@ -31,6 +31,8 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 import java.util.concurrent.CompletableFuture;
+import java.util.function.Function;
+import java.util.function.Predicate;
 import java.util.stream.Collectors;
 
 @Service
@@ -166,24 +168,10 @@ public class NationalPostNumberServiceImpl {
     List<Integer> postNumberCounter = postsWithSamePostNumber.stream()
         .map(Post::getNationalPostNumber)
         .filter(StringUtils::isNotBlank)
-        .filter(npn -> {
-          if (suffix != null) {
-            return npn.endsWith(suffix.getSuffixValue()); //filter out any npn's that dont match the suffix we're trying to generate
-          } else {
-            String[] npnParts = npn.split("/");
-            String lastNpnPart = npnParts[npnParts.length - 1];
-            return NumberUtils.isDigits(lastNpnPart); //if no suffix is supplied, filter out any that end with non digit
-          }
-        })
+        .filter(isPostNpnRightFormat(suffix))
         .map(npn -> npn.split(SLASH))
         .filter(npn -> npn.length > 1)
-        .map(npn -> {
-          if (suffix != null) {
-            return npn[npn.length - 2]; //if we have a suffix, then the number component is second to last
-          } else {
-            return npn[npn.length - 1];
-          }
-        })
+        .map(mapToUniqueCounter(suffix))
         .filter(NumberUtils::isDigits)
         .map(Integer::parseInt)
         .sorted(Comparator.reverseOrder())
@@ -209,11 +197,37 @@ public class NationalPostNumberServiceImpl {
     return result;
   }
 
+  private Function<String[], String> mapToUniqueCounter(PostSuffix suffix) {
+    return npn -> {
+      if (suffix != null) {
+        return npn[npn.length - 2]; //if we have a suffix, then the number component is second to last
+      } else {
+        return npn[npn.length - 1];
+      }
+    };
+  }
+
+  private Predicate<String> isPostNpnRightFormat(PostSuffix suffix) {
+    return npn -> {
+      if (suffix != null) {
+        return npn.endsWith(suffix.getSuffixValue()); //filter out any npn's that dont match the suffix we're trying to generate
+      } else {
+        String[] npnParts = npn.split("/");
+        String lastNpnPart = npnParts[npnParts.length - 1];
+        return NumberUtils.isDigits(lastNpnPart); //if no suffix is supplied, filter out any that end with non digit
+      }
+    };
+  }
+
   String getLocalOfficeAbbrOrEmpty() {
     UserProfile userProfile = getProfileFromContext();
-    String dbc = userProfile.getDesignatedBodyCodes().stream().findFirst().orElse(StringUtils.EMPTY);
-    String localOfficeAbbr = dbcToLocalOfficeAbbrMap.get(dbc);
-    return localOfficeAbbr != null ? localOfficeAbbr : StringUtils.EMPTY;
+    String dbc = userProfile.getDesignatedBodyCodes().stream().findFirst().orElse(null);
+    if (dbc != null) {
+      String localOfficeAbbr = dbcToLocalOfficeAbbrMap.get(dbc);
+      return localOfficeAbbr != null ? localOfficeAbbr : StringUtils.EMPTY;
+    } else {
+      throw new RuntimeException("No DBC code found for current logged in user:" + userProfile.getEmailAddress() + " - cannot generate full NPN");
+    }
   }
 
   /**
@@ -235,6 +249,8 @@ public class NationalPostNumberServiceImpl {
       if (specialtyId != null) {
         Specialty primarySpecialty = specialtyRepository.findOne(specialtyId);
         return primarySpecialty != null ? primarySpecialty.getSpecialtyCode() : StringUtils.EMPTY;
+      } else {
+        throw new RuntimeException("No Primary Specialty ID found for PostSpecialty relation - cannot generate full NPN");
       }
     }
     return StringUtils.EMPTY;
@@ -252,6 +268,8 @@ public class NationalPostNumberServiceImpl {
           gradeDTO.setId(gradeId);
           gradeDTO.setAbbreviation(gradeIdsToGrades.get(gradeId).getAbbreviation());
         });
+      } else {
+        throw new RuntimeException("No Approved Grade ID found for PostGrade relation - cannot generate full NPN");
       }
 
     }
@@ -268,6 +286,8 @@ public class NationalPostNumberServiceImpl {
           siteDTO.setId(siteId);
           siteDTO.setSiteCode(siteIdsToSites.get(siteId).getSiteCode());
         });
+      } else {
+        throw new RuntimeException("No Primary Site ID found for PostSite relation - cannot generate full NPN");
       }
     }
     return CompletableFuture.completedFuture(null);
