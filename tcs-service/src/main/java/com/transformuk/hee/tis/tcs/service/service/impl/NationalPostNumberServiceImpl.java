@@ -15,6 +15,7 @@ import com.transformuk.hee.tis.tcs.api.enumeration.PostSiteType;
 import com.transformuk.hee.tis.tcs.api.enumeration.PostSpecialtyType;
 import com.transformuk.hee.tis.tcs.api.enumeration.PostSuffix;
 import com.transformuk.hee.tis.tcs.service.api.decorator.AsyncReferenceService;
+import com.transformuk.hee.tis.tcs.service.exception.NationalPostNumberRuntimeException;
 import com.transformuk.hee.tis.tcs.service.model.Post;
 import com.transformuk.hee.tis.tcs.service.model.Specialty;
 import com.transformuk.hee.tis.tcs.service.repository.PostRepository;
@@ -85,14 +86,14 @@ public class NationalPostNumberServiceImpl {
     } else {
       boolean generateNewNumber = false;
 
-      String localOfficeAbbr = getLocalOfficeAbbrOrEmpty();
+      String localOfficeAbbr = getLocalOfficeAbbr();
       SiteDTO siteCodeContainer = new SiteDTO();
       GradeDTO gradeAbbrContainer = new GradeDTO();
       CompletableFuture.allOf(
-          getSiteCodeOrEmpty(postDTO, siteCodeContainer),
-          getApprovedGradeOrEmpty(postDTO, gradeAbbrContainer))
+          getSiteCode(postDTO, siteCodeContainer),
+          getApprovedGrade(postDTO, gradeAbbrContainer))
           .join();
-      String specialtyCode = getPrimarySpecialtyCodeOrEmpty(postDTO);
+      String specialtyCode = getPrimarySpecialtyCode(postDTO);
       String suffixValue = postDTO.getSuffix() != null ? postDTO.getSuffix().getSuffixValue() : StringUtils.EMPTY;
 
       String currentNationalPostNumber = currentPost.getNationalPostNumber();
@@ -143,12 +144,12 @@ public class NationalPostNumberServiceImpl {
     SiteDTO siteCodeContainer = new SiteDTO();
     GradeDTO gradeAbbrContainer = new GradeDTO();
 
-    CompletableFuture.allOf(getApprovedGradeOrEmpty(postDTO, gradeAbbrContainer), getSiteCodeOrEmpty(postDTO, siteCodeContainer))
+    CompletableFuture.allOf(getApprovedGrade(postDTO, gradeAbbrContainer), getSiteCode(postDTO, siteCodeContainer))
         .join();
 
-    String newSpecialtyCode = getPrimarySpecialtyCodeOrEmpty(postDTO);
+    String newSpecialtyCode = getPrimarySpecialtyCode(postDTO);
 
-    String nationalPostNumber = generateNationalPostNumber(getLocalOfficeAbbrOrEmpty(), siteCodeContainer.getSiteCode(),
+    String nationalPostNumber = generateNationalPostNumber(getLocalOfficeAbbr(), siteCodeContainer.getSiteCode(),
         newSpecialtyCode, gradeAbbrContainer.getAbbreviation(), postDTO.getSuffix());
 
     postDTO.setNationalPostNumber(nationalPostNumber);
@@ -219,15 +220,13 @@ public class NationalPostNumberServiceImpl {
     };
   }
 
-  String getLocalOfficeAbbrOrEmpty() {
+  String getLocalOfficeAbbr() {
     UserProfile userProfile = getProfileFromContext();
-    String dbc = userProfile.getDesignatedBodyCodes().stream().findFirst().orElse(null);
-    if (dbc != null) {
-      String localOfficeAbbr = dbcToLocalOfficeAbbrMap.get(dbc);
-      return localOfficeAbbr != null ? localOfficeAbbr : StringUtils.EMPTY;
-    } else {
-      throw new RuntimeException("No DBC code found for current logged in user:" + userProfile.getEmailAddress() + " - cannot generate full NPN");
-    }
+    String dbc = userProfile.getDesignatedBodyCodes().stream().findFirst().orElseGet(() -> {
+      throw new NationalPostNumberRuntimeException("No DBC code found for current logged in user:" + userProfile.getEmailAddress() + " - cannot generate full NPN");
+    });
+    String localOfficeAbbr = dbcToLocalOfficeAbbrMap.get(dbc);
+    return localOfficeAbbr != null ? localOfficeAbbr : StringUtils.EMPTY;
   }
 
   /**
@@ -239,56 +238,52 @@ public class NationalPostNumberServiceImpl {
     return TisSecurityHelper.getProfileFromContext();
   }
 
-  String getPrimarySpecialtyCodeOrEmpty(PostDTO postDTO) {
+  String getPrimarySpecialtyCode(PostDTO postDTO) {
     if (CollectionUtils.isNotEmpty(postDTO.getSpecialties())) {
       Long specialtyId = postDTO.getSpecialties().stream()
           .filter(sp -> PostSpecialtyType.PRIMARY.equals(sp.getPostSpecialtyType()))
           .map(ps -> ps.getSpecialty().getId())
-          .findAny().orElse(null);
+          .findAny().orElseGet(() -> {
+            throw new NationalPostNumberRuntimeException("No Primary Specialty ID found for PostSpecialty relation - cannot generate full NPN");
+          });
 
-      if (specialtyId != null) {
-        Specialty primarySpecialty = specialtyRepository.findOne(specialtyId);
-        return primarySpecialty != null ? primarySpecialty.getSpecialtyCode() : StringUtils.EMPTY;
-      } else {
-        throw new RuntimeException("No Primary Specialty ID found for PostSpecialty relation - cannot generate full NPN");
-      }
+      Specialty primarySpecialty = specialtyRepository.findOne(specialtyId);
+      return primarySpecialty != null ? primarySpecialty.getSpecialtyCode() : StringUtils.EMPTY;
+
     }
     return StringUtils.EMPTY;
   }
 
-  CompletableFuture<Void> getApprovedGradeOrEmpty(PostDTO postDTO, GradeDTO gradeDTO) {
+  CompletableFuture<Void> getApprovedGrade(PostDTO postDTO, GradeDTO gradeDTO) {
     if (CollectionUtils.isNotEmpty(postDTO.getGrades())) {
       Long gradeId = postDTO.getGrades().stream()
           .filter(g -> PostGradeType.APPROVED.equals(g.getPostGradeType()))
           .map(PostGradeDTO::getGradeId)
-          .findAny().orElse(null);
+          .findAny().orElseGet(() -> {
+            throw new NationalPostNumberRuntimeException("No Approved Grade ID found for PostGrade relation - cannot generate full NPN");
+          });
 
-      if (gradeId != null) {
-        return asyncReferenceService.doWithGradesAsync(Sets.newHashSet(gradeId), gradeIdsToGrades -> {
-          gradeDTO.setId(gradeId);
-          gradeDTO.setAbbreviation(gradeIdsToGrades.get(gradeId).getAbbreviation());
-        });
-      } else {
-        throw new RuntimeException("No Approved Grade ID found for PostGrade relation - cannot generate full NPN");
-      }
+      return asyncReferenceService.doWithGradesAsync(Sets.newHashSet(gradeId), gradeIdsToGrades -> {
+        gradeDTO.setId(gradeId);
+        gradeDTO.setAbbreviation(gradeIdsToGrades.get(gradeId).getAbbreviation());
+      });
 
     }
     return CompletableFuture.completedFuture(null);
   }
 
-  CompletableFuture<Void> getSiteCodeOrEmpty(PostDTO postDTO, SiteDTO siteDTO) {
+  CompletableFuture<Void> getSiteCode(PostDTO postDTO, SiteDTO siteDTO) {
     if (CollectionUtils.isNotEmpty(postDTO.getSites())) {
       Long siteId = postDTO.getSites().stream().filter(s -> PostSiteType.PRIMARY.equals(s.getPostSiteType()))
           .map(PostSiteDTO::getSiteId)
-          .findAny().orElse(null);
-      if (siteId != null) {
-        return asyncReferenceService.doWithSitesAsync(Sets.newHashSet(siteId), siteIdsToSites -> {
-          siteDTO.setId(siteId);
-          siteDTO.setSiteCode(siteIdsToSites.get(siteId).getSiteCode());
-        });
-      } else {
-        throw new RuntimeException("No Primary Site ID found for PostSite relation - cannot generate full NPN");
-      }
+          .findAny().orElseGet(() -> {
+            throw new NationalPostNumberRuntimeException("No Primary Site ID found for PostSite relation - cannot generate full NPN");
+          });
+
+      return asyncReferenceService.doWithSitesAsync(Sets.newHashSet(siteId), siteIdsToSites -> {
+        siteDTO.setId(siteId);
+        siteDTO.setSiteCode(siteIdsToSites.get(siteId).getSiteCode());
+      });
     }
     return CompletableFuture.completedFuture(null);
   }

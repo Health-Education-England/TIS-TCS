@@ -173,9 +173,9 @@ public class PostValidator {
           if (!specialtyRepository.exists(ps.getSpecialty().getId())) {
             fieldErrors.add(new FieldError(POST_DTO_NAME, SPECIALTIES,
                 String.format("Specialty with id %d does not exist", ps.getSpecialty().getId())));
-          } else if (ps.getPostSpecialtyType().equals(PostSpecialtyType.PRIMARY)) {
+          } else if (PostSpecialtyType.PRIMARY.equals(ps.getPostSpecialtyType())) {
             ++noOfPrimarySpecialtyCount;
-          } else if (ps.getPostSpecialtyType().equals(PostSpecialtyType.SUB_SPECIALTY)) {
+          } else if (PostSpecialtyType.SUB_SPECIALTY.equals(ps.getPostSpecialtyType())) {
             ++noOfSubSpecialtyCount;
           }
         }

@@ -135,7 +135,7 @@ public class NationalPostNumberServiceImplTest {
     when(userProfile.getDesignatedBodyCodes()).thenReturn(Sets.newHashSet("1-AIIDR8"));
     doReturn(userProfile).when(testObj).getProfileFromContext();
 
-    String result = testObj.getLocalOfficeAbbrOrEmpty();
+    String result = testObj.getLocalOfficeAbbr();
 
     Assert.assertEquals("LDN", result);
   }
@@ -146,7 +146,7 @@ public class NationalPostNumberServiceImplTest {
     when(userProfile.getDesignatedBodyCodes()).thenReturn(Sets.newHashSet("RANDOM_DBC_CODE"));
     doReturn(userProfile).when(testObj).getProfileFromContext();
 
-    String result = testObj.getLocalOfficeAbbrOrEmpty();
+    String result = testObj.getLocalOfficeAbbr();
 
     Assert.assertEquals(StringUtils.EMPTY, result);
   }
@@ -154,7 +154,7 @@ public class NationalPostNumberServiceImplTest {
   @Test
   public void getPrimarySpecialtyCodeOrEmptyShouldReturnAnEmptyStringWhenThereAreNoSpecialties() {
     when(postDTOMock1.getSpecialties()).thenReturn(null);
-    String result = testObj.getPrimarySpecialtyCodeOrEmpty(postDTOMock1);
+    String result = testObj.getPrimarySpecialtyCode(postDTOMock1);
     Assert.assertEquals(StringUtils.EMPTY, result);
   }
 
@@ -162,7 +162,7 @@ public class NationalPostNumberServiceImplTest {
   public void getPrimarySpecialtyCodeOrEmptyShouldReturnCode() {
     when(specialtyRepositoryMock.findOne(SPECIALTY_ID)).thenReturn(specialtyMock);
     when(specialtyMock.getSpecialtyCode()).thenReturn(SPECIALTY_CODE);
-    String result = testObj.getPrimarySpecialtyCodeOrEmpty(postDTOMock1);
+    String result = testObj.getPrimarySpecialtyCode(postDTOMock1);
     Assert.assertEquals(SPECIALTY_CODE, result);
   }
 
@@ -172,7 +172,7 @@ public class NationalPostNumberServiceImplTest {
     CompletableFuture<Void> expectedCompletedFuture = CompletableFuture.completedFuture(null);
     when(asyncReferenceServiceMock.doWithGradesAsync(any(), any())).thenReturn(expectedCompletedFuture);
 
-    CompletableFuture<Void> result = testObj.getApprovedGradeOrEmpty(postDTOMock1, gradeDTO);
+    CompletableFuture<Void> result = testObj.getApprovedGrade(postDTOMock1, gradeDTO);
     Assert.assertEquals(expectedCompletedFuture, result);
   }
 
@@ -182,7 +182,7 @@ public class NationalPostNumberServiceImplTest {
     CompletableFuture<Void> expectedCompletedFuture = CompletableFuture.completedFuture(null);
     when(asyncReferenceServiceMock.doWithSitesAsync(anySet(), any())).thenReturn(expectedCompletedFuture);
 
-    CompletableFuture<Void> result = testObj.getSiteCodeOrEmpty(postDTOMock1, siteDTO);
+    CompletableFuture<Void> result = testObj.getSiteCode(postDTOMock1, siteDTO);
     Assert.assertEquals(expectedCompletedFuture, result);
   }
 

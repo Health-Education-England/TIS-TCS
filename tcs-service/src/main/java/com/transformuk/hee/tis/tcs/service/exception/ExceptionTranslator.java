@@ -134,4 +134,13 @@ public class ExceptionTranslator {
     }
     return builder.body(errorVM);
   }
+
+  @ExceptionHandler(NationalPostNumberRuntimeException.class)
+  @ResponseStatus(HttpStatus.BAD_REQUEST)
+  @ResponseBody
+  public ErrorVM processNationalPostNumberException(MethodArgumentNotValidException ex) {
+    BindingResult result = ex.getBindingResult();
+    List<FieldError> fieldErrors = result.getFieldErrors();
+    return processFieldErrors(fieldErrors);
+  }
 }
