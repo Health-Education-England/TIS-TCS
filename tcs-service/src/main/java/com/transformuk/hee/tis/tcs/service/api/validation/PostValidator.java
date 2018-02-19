@@ -35,7 +35,6 @@ import java.util.Map;
 public class PostValidator {
 
   public static final String POST_DTO_NAME = "PostDTO";
-  public static final String NATIONAL_POST_NUMBER = "nationalPostNumber";
   public static final String SPECIALTIES = "specialties";
   private ProgrammeRepository programmeRepository;
   private PostRepository postRepository;
@@ -80,6 +79,7 @@ public class PostValidator {
     fieldErrors.addAll(checkSpecialties(postDTO));
     fieldErrors.addAll(checkPlacementHistory(postDTO));
     fieldErrors.addAll(checkNationalPostNumber(postDTO));
+    fieldErrors.addAll(checkLegacy(postDTO.getId()));
 
     if (!fieldErrors.isEmpty()) {
       BeanPropertyBindingResult bindingResult = new BeanPropertyBindingResult(postDTO, POST_DTO_NAME);
@@ -253,4 +253,17 @@ public class PostValidator {
     }
     return fieldErrors;
   }
+
+  private List<FieldError> checkLegacy(Long postId) {
+    List<FieldError> fieldErrors = new ArrayList<>();
+    if(postId != null) {
+      Post post = postRepository.findOne(postId);
+      if(post != null && post.isLegacy()){
+        fieldErrors.add(new FieldError("postDTO", "legacy",
+            "You cannot update a post that has been migrated from intrepid and marked as legacy"));
+      }
+    }
+    return fieldErrors;
+  }
+
 }
