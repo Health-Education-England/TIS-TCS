@@ -70,16 +70,6 @@ public class NationalPostNumberServiceImpl {
 
 
   /**
-   * Test abbreviation to see if its a valid local office abbr
-   * @param localOfficeAbbr
-   * @return
-   */
-  public boolean isValidLocalOfficeAbbr(String localOfficeAbbr) {
-    Collection<String> allLocalOfficeAbbr = dbcToLocalOfficeAbbrMap.values();
-    return allLocalOfficeAbbr.contains(localOfficeAbbr);
-  }
-
-  /**
    * Check the new post against the current post in the system. If there are changes in some of the values,
    * a new national post number will need to be generated
    *
@@ -94,11 +84,11 @@ public class NationalPostNumberServiceImpl {
     } else {
       boolean generateNewNumber = false;
 
-      String localOfficeAbbr = getLocalOfficeAbbr();
+      String localOfficeAbbr = getLocalOfficeAbbrOrEmpty();
       SiteDTO siteCodeContainer = new SiteDTO();
       GradeDTO gradeAbbrContainer = new GradeDTO();
       CompletableFuture.allOf(
-          getSiteCode(postDTO, siteCodeContainer),
+          getSiteCodeOrEmpty(postDTO, siteCodeContainer),
           getApprovedGradeOrEmpty(postDTO, gradeAbbrContainer))
           .join();
       String specialtyCode = getPrimarySpecialtyCodeOrEmpty(postDTO);
@@ -130,12 +120,12 @@ public class NationalPostNumberServiceImpl {
     SiteDTO siteCodeContainer = new SiteDTO();
     GradeDTO gradeAbbrContainer = new GradeDTO();
 
-    CompletableFuture.allOf(getApprovedGradeOrEmpty(postDTO, gradeAbbrContainer), getSiteCode(postDTO, siteCodeContainer))
+    CompletableFuture.allOf(getApprovedGradeOrEmpty(postDTO, gradeAbbrContainer), getSiteCodeOrEmpty(postDTO, siteCodeContainer))
         .join();
 
     String newSpecialtyCode = getPrimarySpecialtyCodeOrEmpty(postDTO);
 
-    String nationalPostNumber = generateNationalPostNumber(getLocalOfficeAbbr(), siteCodeContainer.getSiteCode(),
+    String nationalPostNumber = generateNationalPostNumber(getLocalOfficeAbbrOrEmpty(), siteCodeContainer.getSiteCode(),
         newSpecialtyCode, gradeAbbrContainer.getAbbreviation(), postDTO.getSuffix());
 
     postDTO.setNationalPostNumber(nationalPostNumber);
@@ -198,13 +188,20 @@ public class NationalPostNumberServiceImpl {
     return result;
   }
 
-  String getLocalOfficeAbbr() {
-    UserProfile userProfile = TisSecurityHelper.getProfileFromContext();
+  String getLocalOfficeAbbrOrEmpty() {
+    UserProfile userProfile = getProfileFromContext();
     String dbc = userProfile.getDesignatedBodyCodes().stream().findFirst().orElse(StringUtils.EMPTY);
     String localOfficeAbbr = dbcToLocalOfficeAbbrMap.get(dbc);
     return localOfficeAbbr != null ? localOfficeAbbr : StringUtils.EMPTY;
   }
 
+  /**
+   * Helper method for testing so that the result of the static call can be spied
+   * @return
+   */
+  UserProfile getProfileFromContext(){
+    return TisSecurityHelper.getProfileFromContext();
+  }
 
   String getPrimarySpecialtyCodeOrEmpty(PostDTO postDTO) {
     if (CollectionUtils.isNotEmpty(postDTO.getSpecialties())) {
@@ -239,7 +236,7 @@ public class NationalPostNumberServiceImpl {
     return CompletableFuture.completedFuture(null);
   }
 
-  CompletableFuture<Void> getSiteCode(PostDTO postDTO, SiteDTO siteDTO) {
+  CompletableFuture<Void> getSiteCodeOrEmpty(PostDTO postDTO, SiteDTO siteDTO) {
     if (CollectionUtils.isNotEmpty(postDTO.getSites())) {
       Long siteId = postDTO.getSites().stream().filter(s -> PostSiteType.PRIMARY.equals(s.getPostSiteType()))
           .map(PostSiteDTO::getSiteId)
