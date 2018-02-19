@@ -16,6 +16,6 @@ public final class StringUtil {
     if (str == null) {
       return null;
     }
-    return str.replaceAll("[^a-zA-Z0-9\\s,/]", "").trim();
+    return str.replaceAll("[^a-zA-Z0-9\\s,/\\-\\(\\)]", "").trim();
   }
 }

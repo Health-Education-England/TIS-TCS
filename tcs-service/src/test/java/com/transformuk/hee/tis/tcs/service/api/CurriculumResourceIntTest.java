@@ -755,6 +755,40 @@ public class CurriculumResourceIntTest {
     assertThat(curriculumList).hasSize(expectedDatabaseSizeAfterBulkCreate);
   }
 
+
+  @Test
+  @Transactional
+  public void shouldFindCurriculumByName() throws Exception {
+    Curriculum anotherCurriculum = new Curriculum()
+            .name(DEFAULT_NAME_2)
+            .status(Status.CURRENT)
+            .length(DEFAULT_LENGTH)
+            .intrepidId(DEFAULT_INTREPID_ID_2)
+            .curriculumSubType(DEFAULT_CURRICULUM_SUB_TYPE)
+            .assessmentType(DEFAULT_ASSESSMENT_TYPE)
+            .doesThisCurriculumLeadToCct(DEFAULT_DOES_THIS_CURRICULUM_LEAD_TO_CCT)
+            .periodOfGrace(DEFAULT_PERIOD_OF_GRACE);
+
+    Specialty savedSpecialty = specialtyRepository.save(specialty);
+    CurriculumDTO curriculumDTO = linkCurriculumToSpecialty(curriculum, savedSpecialty.getId());
+    CurriculumDTO curriculum2DTO = linkCurriculumToSpecialty(anotherCurriculum, savedSpecialty.getId());
+
+    //ensure curricula is in the database before an update
+    Curriculum savedCurriculum = curriculumRepository.saveAndFlush(this.curriculum);
+    Curriculum anotherSavedCurriculum = curriculumRepository.saveAndFlush(anotherCurriculum);
+
+    //set the ids for the Dtos
+    curriculumDTO.setId(savedCurriculum.getId());
+    curriculum2DTO.setId(anotherSavedCurriculum.getId());
+
+    String jsonQueryString = "{\"name\":[\"" + DEFAULT_NAME_2 + "\"]}";
+    String jsonQuerystringURLEncoded = new org.apache.commons.codec.net.URLCodec().encode(jsonQueryString);
+    restCurriculumMockMvc.perform(get("/api/curricula?columnFilters=" + jsonQuerystringURLEncoded))
+            .andExpect(status().isOk())
+            .andExpect(jsonPath("$.[*].name").isArray())
+            .andExpect(jsonPath("$.[0].name").value(DEFAULT_NAME_2));
+  }
+
   @Test
   @Transactional
   public void bulkUpdateShouldFailWhenDataHasAtLeastOneInvalidDto() throws Exception {
