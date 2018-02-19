@@ -26,7 +26,6 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
-import java.util.Collection;
 import java.util.Comparator;
 import java.util.List;
 import java.util.Map;
@@ -38,7 +37,7 @@ import java.util.stream.Collectors;
 public class NationalPostNumberServiceImpl {
 
   private static final int LOCAL_OFFICE_ABBR_INDEX = 0;
-  private static final int LOCATION_CODE_INDEX = 1;
+  private static final int SITE_CODE_INDEX = 1;
   private static final int SPECIALTY_CODE_INDEX = 2;
   private static final int GRADE_ABBR_INDEX = 3;
   private static final int UNIQUE_COUNTER_INDEX = 4;
@@ -98,7 +97,7 @@ public class NationalPostNumberServiceImpl {
       String[] currentNationalPostNumberParts = currentNationalPostNumber.split(SLASH);
       if (currentNationalPostNumberParts.length == 5 || currentNationalPostNumberParts.length == 6) { // does the national post number have the correct number of parts?
         String currentPostLocalOfficeAbbr = currentNationalPostNumberParts[LOCAL_OFFICE_ABBR_INDEX];
-        String currentPostLocationCode = currentNationalPostNumberParts[LOCATION_CODE_INDEX];
+        String currentPostSiteCode = currentNationalPostNumberParts[SITE_CODE_INDEX];
         String currentPostSpecialtyCode = currentNationalPostNumberParts[SPECIALTY_CODE_INDEX];
         String currentPostGradeAbbr = currentNationalPostNumberParts[GRADE_ABBR_INDEX];
         String currentPostSuffix = StringUtils.EMPTY;
@@ -106,14 +105,36 @@ public class NationalPostNumberServiceImpl {
           currentPostSuffix = currentNationalPostNumberParts[SUFFIX_INDEX];
         }
 
-        if (!localOfficeAbbr.equals(currentPostLocalOfficeAbbr) || !siteCodeContainer.getSiteCode().equals(currentPostLocationCode) ||
-            !specialtyCode.equals(currentPostSpecialtyCode) || !gradeAbbrContainer.getAbbreviation().equals(currentPostGradeAbbr) ||
-            !suffixValue.equals(currentPostSuffix)) {
+        if (hasLocalOfficeAbbrChanged(localOfficeAbbr, currentPostLocalOfficeAbbr) ||
+            hasSiteCodeChanged(siteCodeContainer, currentPostSiteCode) ||
+            hasSpecialtyCodeChanged(specialtyCode, currentPostSpecialtyCode) ||
+            hasGradeAbbrChanged(gradeAbbrContainer, currentPostGradeAbbr) ||
+            hasSuffixChanged(suffixValue, currentPostSuffix)) {
           generateNewNumber = true;
         }
       }
       return generateNewNumber;
     }
+  }
+
+  private boolean hasLocalOfficeAbbrChanged(String localOfficeAbbr, String currentPostLocalOfficeAbbr) {
+    return !localOfficeAbbr.equals(currentPostLocalOfficeAbbr);
+  }
+
+  private boolean hasSiteCodeChanged(SiteDTO siteCodeContainer, String currentPostLocationCode) {
+    return !siteCodeContainer.getSiteCode().equals(currentPostLocationCode);
+  }
+
+  private boolean hasSpecialtyCodeChanged(String specialtyCode, String currentPostSpecialtyCode) {
+    return !specialtyCode.equals(currentPostSpecialtyCode);
+  }
+
+  private boolean hasGradeAbbrChanged(GradeDTO gradeAbbrContainer, String currentPostGradeAbbr) {
+    return !gradeAbbrContainer.getAbbreviation().equals(currentPostGradeAbbr);
+  }
+
+  private boolean hasSuffixChanged(String suffixValue, String currentPostSuffix) {
+    return !suffixValue.equals(currentPostSuffix);
   }
 
   public void generateAndSetNewNationalPostNumber(PostDTO postDTO) {
@@ -197,9 +218,10 @@ public class NationalPostNumberServiceImpl {
 
   /**
    * Helper method for testing so that the result of the static call can be spied
+   *
    * @return
    */
-  UserProfile getProfileFromContext(){
+  UserProfile getProfileFromContext() {
     return TisSecurityHelper.getProfileFromContext();
   }
 
