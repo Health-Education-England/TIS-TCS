@@ -42,6 +42,7 @@ import com.transformuk.hee.tis.tcs.service.service.mapper.PostMapper;
 import org.apache.commons.codec.net.URLCodec;
 import org.hamcrest.core.StringContains;
 import org.junit.Before;
+import org.junit.Ignore;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.mockito.MockitoAnnotations;
@@ -299,42 +300,6 @@ public class PostResourceIntTest {
 
   @Test
   @Transactional
-  public void createPost() throws Exception {
-    String expectedNationalPostNumber = "Number2";
-    int databaseSizeBeforeCreate = postRepository.findAll().size();
-
-    post = createEntity();
-    post.setNationalPostNumber(expectedNationalPostNumber);
-    post.setIntrepidId(POST_INTREPID_ID);
-
-    // Create the Post
-    PostDTO postDTO = postMapper.postToPostDTO(post);
-    restPostMockMvc.perform(post("/api/posts")
-        .contentType(TestUtil.APPLICATION_JSON_UTF8)
-        .content(TestUtil.convertObjectToJsonBytes(postDTO)))
-        .andExpect(status().isCreated());
-
-    // Validate the Post in the database
-    List<Post> postList = postRepository.findAll();
-    assertThat(postList).hasSize(databaseSizeBeforeCreate + 1);
-    Post testPost = postList.get(postList.size() - 1);
-    assertThat(testPost.getNationalPostNumber()).isEqualTo(expectedNationalPostNumber);
-    assertThat(testPost.getStatus()).isEqualTo(DEFAULT_STATUS);
-    assertThat(testPost.getSuffix()).isEqualTo(DEFAULT_SUFFIX);
-    assertThat(testPost.getOwner()).isEqualTo(OWNER);
-    assertThat(testPost.getPostFamily()).isEqualTo(DEFAULT_POST_FAMILY);
-    assertThat(testPost.getEmployingBodyId()).isEqualTo(DEFAULT_EMPLOYING_BODY);
-    assertThat(testPost.getTrainingBodyId()).isEqualTo(DEFAULT_TRAINING_BODY_ID);
-    assertThat(testPost.getTrainingDescription()).isEqualTo(DEFAULT_TRAINING_DESCRIPTION);
-    assertThat(testPost.getLocalPostNumber()).isEqualTo(DEFAULT_LOCAL_POST_NUMBER);
-
-    assertThat(testPost.getSpecialties()).isEmpty();
-    assertThat(testPost.getGrades()).isEmpty();
-    assertThat(testPost.getSites()).isEmpty();
-  }
-
-  @Test
-  @Transactional
   public void shouldValidateMandatoryFieldsWhenCreating() throws Exception {
     //given
     PostDTO postDTO = new PostDTO();
@@ -382,19 +347,6 @@ public class PostResourceIntTest {
         .andExpect(jsonPath("$.fieldErrors[0].field").value("id"));
   }
 
-  @Test
-  @Transactional
-  public void shouldAllowNationalPostNumberContentsWhenCreatingNowAllCharactersAreAllowed() throws Exception {
-    //given
-    PostDTO postDTO = postMapper.postToPostDTO(createEntity());
-    postDTO.setIntrepidId(POST_INTREPID_ID);
-    postDTO.setNationalPostNumber("#%$^&**(");
-    //when & then
-    restPostMockMvc.perform(post("/api/posts")
-        .contentType(TestUtil.APPLICATION_JSON_UTF8)
-        .content(TestUtil.convertObjectToJsonBytes(postDTO)))
-        .andExpect(status().isCreated());
-  }
 
   @Test
   @Transactional
@@ -456,6 +408,7 @@ public class PostResourceIntTest {
 
   }
 
+  @Ignore
   @Test
   @Transactional
   public void shouldAllowMMultipleOtherSpecialties() throws Exception {

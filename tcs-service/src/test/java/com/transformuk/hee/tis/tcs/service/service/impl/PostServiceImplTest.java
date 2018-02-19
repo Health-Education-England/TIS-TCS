@@ -13,8 +13,6 @@ import com.transformuk.hee.tis.tcs.api.dto.SpecialtyDTO;
 import com.transformuk.hee.tis.tcs.api.enumeration.PostGradeType;
 import com.transformuk.hee.tis.tcs.api.enumeration.PostSiteType;
 import com.transformuk.hee.tis.tcs.api.enumeration.PostSpecialtyType;
-import com.transformuk.hee.tis.tcs.api.enumeration.PostSuffix;
-import com.transformuk.hee.tis.tcs.service.api.decorator.AsyncReferenceService;
 import com.transformuk.hee.tis.tcs.service.api.decorator.PostViewDecorator;
 import com.transformuk.hee.tis.tcs.service.model.Placement;
 import com.transformuk.hee.tis.tcs.service.model.Post;
@@ -52,23 +50,11 @@ import java.util.List;
 import java.util.Set;
 
 import static org.mockito.Matchers.anyList;
-import static org.mockito.Mockito.doReturn;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
 @RunWith(MockitoJUnitRunner.class)
 public class PostServiceImplTest {
-
-  private static final String SLASH = "/";
-  private static final String LOCAL_OFFICE_ABBR = "NTH";
-  private static final String SITE_CODE = "RTD01";
-  private static final String SPECIALTY_CODE = "007";
-  private static final String GRADE_ABBR = "STR";
-  private static final String UNIQUE_NUMBER = "006";
-  private static final String UNIQUE_NUMBER_PLUS_1 = "007";
-
-  private static final String CURRENT_NATIONAL_POST_NUMBER = LOCAL_OFFICE_ABBR + SLASH + SITE_CODE + SLASH +
-      SPECIALTY_CODE + SLASH + GRADE_ABBR + SLASH + UNIQUE_NUMBER;
 
   private static final Long SITE_ID = 12345L;
   @Spy
@@ -95,8 +81,6 @@ public class PostServiceImplTest {
   private PostMapper postMapperMock;
   @Mock
   private PostViewMapper postViewMapperMock;
-  @Mock
-  private PostViewDecorator postViewDecorator;
 
   @Mock
   private PostDTO postDTOMock1, postDTOMock2, postMappedDTOMock1, postMappedDTOMock2;
@@ -116,20 +100,9 @@ public class PostServiceImplTest {
   @Captor
   private ArgumentCaptor<Set<PostSpecialty>> postSpecialtyArgumentCaptor;
   @Mock
-  private PostGradeDTO postGradeDTOMock;
+  private PostViewDecorator postViewDecorator;
   @Mock
-  private PostSpecialtyDTO postSpecialtyDTOMock;
-  @Mock
-  private SpecialtyDTO specialtyDTOMock;
-  @Mock
-  private AsyncReferenceService asyncReferenceService;
-  @Mock
-  private PostSpecialty postSpecialtyMock;
-  @Mock
-  private Specialty specialtyMock;
-  @Mock
-  private PostGrade postGradeMock;
-
+  private NationalPostNumberServiceImpl nationalPostNumberServiceMock;
 
   @Test
   public void saveShouldSavePost() {
@@ -522,7 +495,6 @@ public class PostServiceImplTest {
     Assert.assertEquals(expectedDTO, result.get(0));
     Assert.assertEquals(Sets.newHashSet(placementDTO), result.get(0).getPlacementHistory());
   }
-
 
 
 }
