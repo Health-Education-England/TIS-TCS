@@ -14,15 +14,18 @@ import com.transformuk.hee.tis.tcs.service.repository.PlacementRepository;
 import com.transformuk.hee.tis.tcs.service.repository.PostRepository;
 import com.transformuk.hee.tis.tcs.service.repository.ProgrammeRepository;
 import com.transformuk.hee.tis.tcs.service.repository.SpecialtyRepository;
+import com.transformuk.hee.tis.tcs.service.service.impl.NationalPostNumberServiceImpl;
 import com.transformuk.hee.tis.tcs.service.service.mapper.DesignatedBodyMapper;
 import org.apache.commons.collections4.CollectionUtils;
 import org.apache.commons.lang.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.core.MethodParameter;
 import org.springframework.stereotype.Component;
 import org.springframework.validation.BeanPropertyBindingResult;
 import org.springframework.validation.FieldError;
 import org.springframework.web.bind.MethodArgumentNotValidException;
 
+import java.lang.reflect.Method;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
@@ -41,18 +44,20 @@ public class PostValidator {
   private SpecialtyRepository specialtyRepository;
   private PlacementRepository placementRepository;
   private ReferenceServiceImpl referenceService;
-
+  private NationalPostNumberServiceImpl nationalPostNumberServiceImpl;
   @Autowired
   public PostValidator(ProgrammeRepository programmeRepository,
                        PostRepository postRepository,
                        SpecialtyRepository specialtyRepository,
                        PlacementRepository placementRepository,
-                       ReferenceServiceImpl referenceService) {
+                       ReferenceServiceImpl referenceService,
+                       NationalPostNumberServiceImpl nationalPostNumberServiceImpl) {
     this.programmeRepository = programmeRepository;
     this.postRepository = postRepository;
     this.specialtyRepository = specialtyRepository;
     this.placementRepository = placementRepository;
     this.referenceService = referenceService;
+    this.nationalPostNumberServiceImpl = nationalPostNumberServiceImpl;
   }
 
   /**
@@ -84,7 +89,8 @@ public class PostValidator {
     if (!fieldErrors.isEmpty()) {
       BeanPropertyBindingResult bindingResult = new BeanPropertyBindingResult(postDTO, POST_DTO_NAME);
       fieldErrors.forEach(bindingResult::addError);
-      throw new MethodArgumentNotValidException(null, bindingResult);
+      Method method = this.getClass().getMethods()[0];
+      throw new MethodArgumentNotValidException(new MethodParameter(method, 0), bindingResult);
     }
   }
 
@@ -233,10 +239,17 @@ public class PostValidator {
       postWithSameNPN = postRepository.findByNationalPostNumber(postDTO.getNationalPostNumber());
     }
 
-    if (postDTO.getId() == null && CollectionUtils.isNotEmpty(postWithSameNPN)  && postDTO.isBypassNPNGeneration()) {
+    if (postDTO.getId() == null && CollectionUtils.isNotEmpty(postWithSameNPN) && postDTO.isBypassNPNGeneration()) {
       fieldErrors.add(new FieldError("postDTO", "nationalPostNumber",
           "Cannot create post with NPN override as the following posts have the same NPN: " +
               StringUtils.join(postWithSameNPN.stream().map(Post::getId).toArray(), ",")));
+    } else if (postDTO.getId() == null && CollectionUtils.isNotEmpty(postWithSameNPN) && !nationalPostNumberServiceImpl.isAutoGenNpnEnabled()) {
+      fieldErrors.add(new FieldError("postDTO", "nationalPostNumber",
+          "Cannot create post with NPN as the following posts have the same NPN: " +
+              StringUtils.join(postWithSameNPN.stream().map(Post::getId).toArray(), ",")));
+    } else if (postDTO.getId() == null && StringUtils.isEmpty(postDTO.getNationalPostNumber()) && !nationalPostNumberServiceImpl.isAutoGenNpnEnabled()) {
+      fieldErrors.add(new FieldError("postDTO", "nationalPostNumber",
+          "Cannot create new post with an empty NPN when auto generation is switched off"));
     } else if (postDTO.isBypassNPNGeneration()) {
       if (StringUtils.isBlank(postDTO.getNationalPostNumber())) {
         fieldErrors.add(new FieldError("postDTO", "nationalPostNumber",
@@ -256,9 +269,9 @@ public class PostValidator {
 
   private List<FieldError> checkLegacy(Long postId) {
     List<FieldError> fieldErrors = new ArrayList<>();
-    if(postId != null) {
+    if (postId != null) {
       Post post = postRepository.findOne(postId);
-      if(post != null && post.isLegacy()){
+      if (post != null && post.isLegacy()) {
         fieldErrors.add(new FieldError("postDTO", "legacy",
             "You cannot update a post that has been migrated from intrepid and marked as legacy"));
       }

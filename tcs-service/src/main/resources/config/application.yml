@@ -134,3 +134,5 @@ application:
 
 logging:
   file: ${LOG_DIR:${HOME}}/tcs.log
+
+auto.generate.npn: true
