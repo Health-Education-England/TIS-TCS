@@ -19,6 +19,7 @@ public class Document implements Serializable {
     private LocalDateTime addedDate;
     @Version
     private LocalDateTime amendedDate;
+    private LocalDateTime inactiveDate;
     private String uploadedBy;
     private String name;
     private String fileName;
@@ -85,6 +86,7 @@ public class Document implements Serializable {
                 "id=" + id +
                 ", addedDate=" + addedDate +
                 ", amendedDate=" + amendedDate +
+                ", inactiveDate=" + inactiveDate +
                 ", uploadedBy='" + uploadedBy + '\'' +
                 ", name='" + name + '\'' +
                 ", fileName='" + fileName + '\'' +
@@ -124,6 +126,14 @@ public class Document implements Serializable {
 
     public void setAmendedDate(final LocalDateTime amendedDate) {
         this.amendedDate = amendedDate;
+    }
+
+    public LocalDateTime getInactiveDate() {
+        return inactiveDate;
+    }
+
+    public void setInactiveDate(final LocalDateTime inactiveDate) {
+        this.inactiveDate = inactiveDate;
     }
 
     public String getUploadedBy() {
