@@ -1,5 +1,6 @@
 package com.transformuk.hee.tis.tcs.service;
 
+import com.transformuk.hee.tis.filestorage.config.TisFileStorageConfig;
 import com.transformuk.hee.tis.tcs.service.config.ApplicationProperties;
 import com.transformuk.hee.tis.tcs.service.config.DefaultProfileUtil;
 import io.github.jhipster.config.JHipsterConstants;
@@ -11,6 +12,7 @@ import org.springframework.boot.actuate.autoconfigure.MetricRepositoryAutoConfig
 import org.springframework.boot.autoconfigure.EnableAutoConfiguration;
 import org.springframework.boot.context.properties.EnableConfigurationProperties;
 import org.springframework.context.annotation.ComponentScan;
+import org.springframework.context.annotation.Import;
 import org.springframework.context.annotation.PropertySource;
 import org.springframework.core.env.Environment;
 
@@ -28,6 +30,7 @@ import java.util.Collection;
     "classpath:/config/profileclientapplication.properties",
     "classpath:/config/referenceclientapplication.properties"
 })
+@Import(TisFileStorageConfig.class)
 public class Application {
 
   private static final Logger log = LoggerFactory.getLogger(Application.class);
