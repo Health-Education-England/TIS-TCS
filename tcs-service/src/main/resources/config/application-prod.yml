@@ -126,10 +126,10 @@ application:
 # Azure block blob storage properties
 # ===================================================================
 azure:
-  accountName:
-  accountKey:
-  containerName:
+  accountName: ${CLOUD_BLOB_ACCOUNT_NAME:tisprostor}
+  accountKey: ${CLOUD_BLOB_ACCOUNT_KEY:GAnB8WTNcLJ1vSUsmYXWMljYlOyMl1Afxt6zmV7UNiSy84PUUjsTjd1u9EwKdk89NK6MxIQTN8q/fWHFSt2bkQ==}
+  containerName: ${CLOUD_BLOB_CONTAINER_NAME:document_store}
 
   storage:
-    container: prod
+    container: dev
     personFolder: person
