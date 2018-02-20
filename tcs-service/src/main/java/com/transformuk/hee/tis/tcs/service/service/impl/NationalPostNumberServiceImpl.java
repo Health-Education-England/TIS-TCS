@@ -23,7 +23,10 @@ import com.transformuk.hee.tis.tcs.service.repository.SpecialtyRepository;
 import org.apache.commons.collections4.CollectionUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.lang3.math.NumberUtils;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -39,6 +42,7 @@ import java.util.stream.Collectors;
 @Service
 public class NationalPostNumberServiceImpl {
 
+  private static final Logger LOG = LoggerFactory.getLogger(NationalPostNumberServiceImpl.class);
   private static final int LOCAL_OFFICE_ABBR_INDEX = 0;
   private static final int SITE_CODE_INDEX = 1;
   private static final int SPECIALTY_CODE_INDEX = 2;
@@ -63,6 +67,8 @@ public class NationalPostNumberServiceImpl {
       .put("1-AIIDNQ", "NWN")
       .build();
 
+  @Value("${auto.generate.npn:false}")
+  private boolean autoGenNpn;
   @Autowired
   private AsyncReferenceService asyncReferenceService;
   @Autowired
@@ -141,18 +147,21 @@ public class NationalPostNumberServiceImpl {
   }
 
   public void generateAndSetNewNationalPostNumber(PostDTO postDTO) {
-    SiteDTO siteCodeContainer = new SiteDTO();
-    GradeDTO gradeAbbrContainer = new GradeDTO();
+    if (autoGenNpn) {
+      LOG.debug("Auto generation flag switched on, generating and setting npn");
+      SiteDTO siteCodeContainer = new SiteDTO();
+      GradeDTO gradeAbbrContainer = new GradeDTO();
 
-    CompletableFuture.allOf(getApprovedGrade(postDTO, gradeAbbrContainer), getSiteCode(postDTO, siteCodeContainer))
-        .join();
+      CompletableFuture.allOf(getApprovedGrade(postDTO, gradeAbbrContainer), getSiteCode(postDTO, siteCodeContainer))
+          .join();
 
-    String newSpecialtyCode = getPrimarySpecialtyCode(postDTO);
+      String newSpecialtyCode = getPrimarySpecialtyCode(postDTO);
 
-    String nationalPostNumber = generateNationalPostNumber(getLocalOfficeAbbr(), siteCodeContainer.getSiteCode(),
-        newSpecialtyCode, gradeAbbrContainer.getAbbreviation(), postDTO.getSuffix());
+      String nationalPostNumber = generateNationalPostNumber(getLocalOfficeAbbr(), siteCodeContainer.getSiteCode(),
+          newSpecialtyCode, gradeAbbrContainer.getAbbreviation(), postDTO.getSuffix());
 
-    postDTO.setNationalPostNumber(nationalPostNumber);
+      postDTO.setNationalPostNumber(nationalPostNumber);
+    }
   }
 
   public String generateNationalPostNumber(String localOfficeAbbr, String siteCode, String specialtyCode,
@@ -288,5 +297,8 @@ public class NationalPostNumberServiceImpl {
     return CompletableFuture.completedFuture(null);
   }
 
+  public boolean isAutoGenNpnEnabled() {
+    return this.autoGenNpn;
+  }
 
 }

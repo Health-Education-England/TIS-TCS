@@ -150,3 +150,5 @@ azure:
   storage:
     container: dev
     personFolder: person
+
+auto.generate.npn: true
