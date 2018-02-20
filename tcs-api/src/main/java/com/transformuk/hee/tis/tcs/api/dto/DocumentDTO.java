@@ -4,6 +4,7 @@ package com.transformuk.hee.tis.tcs.api.dto;
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.transformuk.hee.tis.tcs.api.dto.validation.Create;
 import com.transformuk.hee.tis.tcs.api.dto.validation.Update;
+import com.transformuk.hee.tis.tcs.api.enumeration.Status;
 import io.swagger.annotations.ApiModel;
 import io.swagger.annotations.ApiModelProperty;
 
@@ -12,32 +13,88 @@ import javax.validation.constraints.NotNull;
 import javax.validation.constraints.Null;
 import java.io.Serializable;
 import java.time.LocalDateTime;
+import java.util.Objects;
+import java.util.Set;
 
 @ApiModel("Document")
 public class DocumentDTO implements Serializable {
-    @ApiModelProperty(hidden = true)
-    @JsonIgnore
     @NotNull(groups = Update.class, message = "Id must not be null when updating a document")
     @DecimalMin(value = "0", groups = Update.class, message = "Id must not be negative")
     @Null(groups = Create.class, message = "Id must be null when creating a new document")
     private Long id;
+    @ApiModelProperty(hidden = true)
+    @JsonIgnore
     private LocalDateTime addedDate;
+    @ApiModelProperty(hidden = true)
+    @JsonIgnore
     private LocalDateTime amendedDate;
+    @ApiModelProperty(hidden = true)
+    @JsonIgnore
     private LocalDateTime inactiveDate;
+    @ApiModelProperty(readOnly = true)
     private String uploadedBy;
+    @NotNull(groups = Update.class, message = "Name must not be null when updating a document")
     private String name;
+    @Null(groups = Update.class, message = "Filename must be null when creating a updating document")
+    @ApiModelProperty(readOnly = true)
     private String fileName;
+    @Null(groups = Update.class, message = "File Extension must be null when creating a updating document")
+    @ApiModelProperty(readOnly = true)
     private String fileExtension;
+    @ApiModelProperty(readOnly = true)
+    @Null(groups = Update.class, message = "Content Type must be null when creating a updating document")
     private String contentType;
+    @ApiModelProperty(readOnly = true)
+    @Null(groups = Update.class, message = "Size must be null when creating a updating document")
     private Long size;
+    @NotNull(groups = Update.class, message = "Person ID must not be null when updating a document")
     private Long personId;
+    @ApiModelProperty(hidden = true)
+    @JsonIgnore
     private String fileLocation;
-    private String status;
-    private Long version;
+    @NotNull(groups = Update.class, message = "Status must not be null when updating a document")
+    private Status status;
+    @NotNull(groups = Update.class, message = "Version must not be null when updating a document")
+    private Integer version;
     @ApiModelProperty(hidden = true)
     @JsonIgnore
     private byte[] bytes;
-//    private Collection<TagDTO> tags;
+    private Set<TagDTO> tags;
+
+    @Override
+    public boolean equals(final Object o) {
+        if (this == o) return true;
+        if (o == null || getClass() != o.getClass()) return false;
+        final DocumentDTO that = (DocumentDTO) o;
+        return Objects.equals(id, that.id);
+    }
+
+    @Override
+    public int hashCode() {
+
+        return Objects.hash(id);
+    }
+
+    @Override
+    public String toString() {
+        return "DocumentDTO{" +
+                "id=" + id +
+                ", addedDate=" + addedDate +
+                ", amendedDate=" + amendedDate +
+                ", inactiveDate=" + inactiveDate +
+                ", uploadedBy='" + uploadedBy + '\'' +
+                ", name='" + name + '\'' +
+                ", fileName='" + fileName + '\'' +
+                ", fileExtension='" + fileExtension + '\'' +
+                ", contentType='" + contentType + '\'' +
+                ", size=" + size +
+                ", personId=" + personId +
+                ", fileLocation='" + fileLocation + '\'' +
+                ", status=" + status +
+                ", version=" + version +
+                ", tags=" + tags +
+                '}';
+    }
 
     public Long getId() {
         return id;
@@ -135,19 +192,19 @@ public class DocumentDTO implements Serializable {
         this.fileLocation = fileLocation;
     }
 
-    public String getStatus() {
+    public Status getStatus() {
         return status;
     }
 
-    public void setStatus(final String status) {
+    public void setStatus(final Status status) {
         this.status = status;
     }
 
-    public Long getVersion() {
+    public Integer getVersion() {
         return version;
     }
 
-    public void setVersion(final Long version) {
+    public void setVersion(final Integer version) {
         this.version = version;
     }
 
@@ -157,5 +214,13 @@ public class DocumentDTO implements Serializable {
 
     public void setBytes(final byte[] bytes) {
         this.bytes = bytes;
+    }
+
+    public Set<TagDTO> getTags() {
+        return tags;
+    }
+
+    public void setTags(final Set<TagDTO> tags) {
+        this.tags = tags;
     }
 }

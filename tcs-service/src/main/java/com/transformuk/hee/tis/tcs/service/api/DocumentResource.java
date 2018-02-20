@@ -3,6 +3,7 @@ package com.transformuk.hee.tis.tcs.service.api;
 import com.transformuk.hee.tis.security.util.TisSecurityHelper;
 import com.transformuk.hee.tis.tcs.api.dto.DocumentDTO;
 import com.transformuk.hee.tis.tcs.api.dto.TagDTO;
+import com.transformuk.hee.tis.tcs.api.enumeration.Status;
 import com.transformuk.hee.tis.tcs.service.service.DocumentService;
 import io.swagger.annotations.*;
 import org.slf4j.Logger;
@@ -10,12 +11,13 @@ import org.slf4j.LoggerFactory;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
+import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
 
-import java.util.Collection;
-import java.util.List;
-import java.util.Optional;
+import java.util.*;
+import java.util.stream.Collectors;
+import java.util.stream.Stream;
 
 import static com.transformuk.hee.tis.tcs.service.api.DocumentResource.PATH_API;
 import static javax.ws.rs.core.MediaType.*;
@@ -70,7 +72,7 @@ public class DocumentResource {
     public ResponseEntity<DocumentDTO> getDocumentById(
             @ApiParam(value = "The document id", required = true)
             @PathVariable(value = "documentId") final Long documentId) {
-        return new ResponseEntity<>(HttpStatus.OK);
+        return ResponseEntity.ok(documentService.findOne(documentId));
     }
 
     @ApiOperation(value = "Downloads a specific document", response = String.class, produces = APPLICATION_OCTET_STREAM)
@@ -134,26 +136,6 @@ public class DocumentResource {
         return ResponseEntity.status(HttpStatus.CREATED).body(new DocumentId(documentDTO.getId()));
     }
 
-    private Optional<DocumentDTO> createDocument(final MultipartFile documentParam, final Long personId) {
-        final DocumentDTO document = new DocumentDTO();
-
-        try {
-            document.setUploadedBy(TisSecurityHelper.getProfileFromContext().getFirstName() + " " + TisSecurityHelper.getProfileFromContext().getLastName());
-            document.setPersonId(personId);
-            document.setFileName(Optional.of(documentParam.getOriginalFilename()).orElseThrow(() -> new Exception("DocumentDTO filename cannot be null")));
-            document.setName(Optional.of(documentParam.getName()).orElse(documentParam.getOriginalFilename()));
-            document.setFileExtension(documentParam.getOriginalFilename().substring(documentParam.getOriginalFilename().lastIndexOf('.') + 1));
-            document.setContentType(documentParam.getContentType());
-            document.setSize(documentParam.getSize());
-            document.setBytes(documentParam.getBytes());
-        } catch (final Exception ex) {
-            LOG.error("Error creating {} object from '{}' object '{}'",
-                    DocumentDTO.class.getSimpleName(), documentParam.getClass().getSimpleName(), documentParam.toString(), ex);
-            return Optional.empty();
-        }
-
-        return Optional.of(document);
-    }
 
     @ApiOperation(value = "Bulk update of documents", response = String.class, consumes = APPLICATION_JSON, produces = APPLICATION_JSON)
     @ApiResponses(value = {
@@ -161,13 +143,40 @@ public class DocumentResource {
             @ApiResponse(code = 400, message = "Invalid parameters or metadata", response = String.class),
             @ApiResponse(code = 401, message = "User not authenticated", response = String.class),
             @ApiResponse(code = 403, message = "User not authorised to perform operation", response = String.class),
-            @ApiResponse(code = 404, message = "DocumentDTO could not be found", response = String.class),
+            @ApiResponse(code = 404, message = "Document could not be found", response = String.class),
             @ApiResponse(code = 500, message = "Error occurred while performing operation", response = String.class)
     })
-    @PutMapping(value = PATH_DOCUMENTS, consumes = APPLICATION_JSON, produces = APPLICATION_JSON)
-    public ResponseEntity<Void> updateDocuments(
+    @PreAuthorize("hasPermission('tis:people::person:', 'Update')")
+    @PatchMapping(value = PATH_DOCUMENTS, consumes = APPLICATION_JSON, produces = APPLICATION_JSON)
+    public ResponseEntity<Void> bulkUpdateDocuments(
             @ApiParam(value = "The list of documents to update", required = true)
-            @RequestBody final Collection<DocumentDTO> documents) {
+            @RequestBody @Validated final Collection<DocumentDTO> documents) {
+
+        for (final DocumentDTO documentParam : documents) {
+            final DocumentDTO documentRepository = documentService.findOne(documentParam.getId());
+
+            if (documentRepository == null) {
+                return ResponseEntity.notFound().build();
+            }
+
+            final Set<TagDTO> combinedTags = documentRepository.getTags().stream()
+                    .filter(tag -> Optional.ofNullable(documentParam.getTags()).orElse(Collections.emptySet()).contains(new TagDTO(tag.getName())))
+                    .collect(Collectors.toSet());
+
+
+            final Stream<TagDTO> combinedTags2 = Stream.concat(
+                    Optional.ofNullable(combinedTags).orElse(Collections.emptySet()).stream(),
+                    Optional.ofNullable(documentParam.getTags()).orElse(Collections.emptySet()).stream()
+            );
+
+            documentRepository.setName(documentParam.getName());
+            documentRepository.setStatus(documentParam.getStatus());
+            documentRepository.setVersion(documentParam.getVersion());
+            documentRepository.setTags(combinedTags2.collect(Collectors.toSet()));
+
+            documentService.save(documentRepository);
+        }
+
         return ResponseEntity.ok().build();
     }
 
@@ -202,6 +211,33 @@ public class DocumentResource {
             @ApiParam(value = "Query to filter tags by")
             @RequestParam("query") final String query) {
         return new ResponseEntity<>(HttpStatus.OK);
+    }
+
+
+    private Optional<DocumentDTO> createDocument(final MultipartFile documentParam, final Long personId) {
+        final DocumentDTO document = new DocumentDTO();
+
+        if (!Optional.ofNullable(documentParam.getOriginalFilename()).isPresent() || !documentParam.getOriginalFilename().contains(".")) {
+            return Optional.empty();
+        }
+
+        try {
+            document.setUploadedBy(TisSecurityHelper.getProfileFromContext().getFirstName() + " " + TisSecurityHelper.getProfileFromContext().getLastName());
+            document.setPersonId(personId);
+            document.setFileName(documentParam.getOriginalFilename());
+            document.setName(Optional.ofNullable(documentParam.getName()).orElse(documentParam.getOriginalFilename()));
+            document.setFileExtension(documentParam.getOriginalFilename().substring(documentParam.getOriginalFilename().lastIndexOf('.') + 1));
+            document.setContentType(documentParam.getContentType());
+            document.setSize(documentParam.getSize());
+            document.setBytes(documentParam.getBytes());
+            document.setStatus(Status.CURRENT);
+        } catch (final Exception ex) {
+            LOG.error("Error creating {} object from '{}' object '{}'",
+                    DocumentDTO.class.getSimpleName(), documentParam.getClass().getSimpleName(), documentParam.toString(), ex);
+            return Optional.empty();
+        }
+
+        return Optional.of(document);
     }
 
     @ApiModel("DocumentId")

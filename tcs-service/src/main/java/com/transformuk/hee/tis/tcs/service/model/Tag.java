@@ -1,10 +1,13 @@
 package com.transformuk.hee.tis.tcs.service.model;
 
 import javax.persistence.*;
+import java.io.Serializable;
 import java.time.LocalDateTime;
+import java.util.Objects;
+import java.util.Set;
 
 @Entity
-public class Tag {
+public class Tag implements Serializable {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
@@ -12,14 +15,38 @@ public class Tag {
     private LocalDateTime addedDate;
     @Version
     private LocalDateTime amendedDate;
-    private Long userId;
+    @ManyToMany(mappedBy = "tags")
+    private Set<Document> documents;
     private String name;
+
+    @Override
+    public boolean equals(final Object o) {
+        if (this == o) return true;
+        if (o == null || getClass() != o.getClass()) return false;
+        final Tag tag = (Tag) o;
+        return Objects.equals(id, tag.id) || Objects.equals(name, tag.name);
+    }
+
+    @Override
+    public int hashCode() {
+        return Objects.hash(name);
+    }
+
+    @Override
+    public String toString() {
+        return "Tag{" +
+                "id=" + id +
+                ", addedDate=" + addedDate +
+                ", amendedDate=" + amendedDate +
+                ", name='" + name + '\'' +
+                '}';
+    }
 
     public Long getId() {
         return id;
     }
 
-    public void setId(Long id) {
+    public void setId(final Long id) {
         this.id = id;
     }
 
@@ -27,7 +54,7 @@ public class Tag {
         return addedDate;
     }
 
-    public void setAddedDate(LocalDateTime addedDate) {
+    public void setAddedDate(final LocalDateTime addedDate) {
         this.addedDate = addedDate;
     }
 
@@ -35,23 +62,23 @@ public class Tag {
         return amendedDate;
     }
 
-    public void setAmendedDate(LocalDateTime amendedDate) {
+    public void setAmendedDate(final LocalDateTime amendedDate) {
         this.amendedDate = amendedDate;
     }
 
-    public Long getUserId() {
-        return userId;
+    public Set<Document> getDocuments() {
+        return documents;
     }
 
-    public void setUserId(Long userId) {
-        this.userId = userId;
+    public void setDocuments(final Set<Document> documents) {
+        this.documents = documents;
     }
 
     public String getName() {
         return name;
     }
 
-    public void setName(String name) {
+    public void setName(final String name) {
         this.name = name;
     }
 }
