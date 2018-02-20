@@ -27,6 +27,7 @@ import com.transformuk.hee.tis.tcs.api.dto.TrainingNumberDTO;
 import org.apache.commons.codec.EncoderException;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.cache.annotation.Cacheable;
 import org.springframework.core.ParameterizedTypeReference;
 import org.springframework.http.HttpEntity;
 import org.springframework.http.HttpHeaders;
@@ -137,13 +138,15 @@ public class TcsServiceImpl extends AbstractClientService {
 				.getBody();
 	}
 
+	@Cacheable
 	public List<CurriculumDTO> getCurriculaByName(String name) {
 		return tcsRestTemplate
 				.exchange(serviceUrl + "/api/current/curricula?columnFilters=" + curriculumJsonQuerystringURLEncoded.replace("PARAMETER_NAME", name), HttpMethod.GET, null, new ParameterizedTypeReference<List<CurriculumDTO>>() {})
 				.getBody();
 	}
 
-	public List<ProgrammeDTO> getProgrammeByNameAndNumber(String name, String number) {
+	@Cacheable
+  public List<ProgrammeDTO> getProgrammeByNameAndNumber(String name, String number) {
 		return tcsRestTemplate
 				.exchange(serviceUrl + "/api/current/programmes?columnFilters=" +
 								programmeJsonQuerystringURLEncoded
