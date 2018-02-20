@@ -5,6 +5,7 @@ import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 
 import java.util.List;
+import java.util.Set;
 
 /**
  * Service Interface for managing GmcDetails.
@@ -34,6 +35,14 @@ public interface GmcDetailsService {
    * @return the list of entities
    */
   Page<GmcDetailsDTO> findAll(Pageable pageable);
+
+  /**
+   * Get a list of gmcDetails
+   *
+   * @param gmcIds the list of entities to retrieve
+   * @return the list of entities
+   */
+  List<GmcDetailsDTO> findByIdIn(List<String> gmcIds);
 
   /**
    * Get the "id" gmcDetails.

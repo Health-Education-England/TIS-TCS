@@ -34,6 +34,7 @@ import org.springframework.web.bind.annotation.RestController;
 import javax.validation.Valid;
 import java.net.URI;
 import java.net.URISyntaxException;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
 import java.util.stream.Collectors;
@@ -117,6 +118,32 @@ public class GmcDetailsResource {
     Page<GmcDetailsDTO> page = gmcDetailsService.findAll(pageable);
     HttpHeaders headers = PaginationUtil.generatePaginationHttpHeaders(page, "/api/gmc-details");
     return new ResponseEntity<>(page.getContent(), headers, HttpStatus.OK);
+  }
+
+  /**
+   * GET  /gmc-details/in/:gmcids : get gmcDetails given their ID's.
+   * Ignores malformed or not found gmc-details
+   *
+   * @param gmcids the gmcids to search by
+   * @return the ResponseEntity with status 200 (OK)  and the list of gmcDetails in body, or empty list
+   */
+  @GetMapping("/gmc-details/in/{gmcids}")
+  @Timed
+  public ResponseEntity<List<GmcDetailsDTO>> getGmcDetailsIn(@PathVariable String gmcids) {
+    log.debug("REST request to find several GmcDetails");
+    List<GmcDetailsDTO> resp = new ArrayList<>();
+    List<String> idList = new ArrayList<>();
+
+    for (String idStr : gmcids.split(",")) {
+        idList.add(idStr);
+    }
+
+    if (!idList.isEmpty()) {
+      resp = gmcDetailsService.findByIdIn(idList);
+      return new ResponseEntity<>(resp, HttpStatus.FOUND);
+    } else {
+      return new ResponseEntity<>(resp, HttpStatus.OK);
+    }
   }
 
   /**
