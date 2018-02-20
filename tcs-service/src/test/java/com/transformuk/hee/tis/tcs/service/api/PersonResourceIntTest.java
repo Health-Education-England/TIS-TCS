@@ -388,7 +388,7 @@ public class PersonResourceIntTest {
         .andExpect(jsonPath("$.addedDate").value(DEFAULT_ADDED_DATE.toString()))
         .andExpect(jsonPath("$.amendedDate").isNotEmpty())
         .andExpect(jsonPath("$.role").value(DEFAULT_ROLE.toString()))
-        .andExpect(jsonPath("$.status").value(DEFAULT_STATUS.toString()))
+        .andExpect(jsonPath("$.status").value(DEFAULT_STATUS.toString().toUpperCase()))
         .andExpect(jsonPath("$.comments").value(DEFAULT_COMMENTS.toString()))
         .andExpect(jsonPath("$.inactiveDate").value(DEFAULT_INACTIVE_DATE.toString()))
         .andExpect(jsonPath("$.inactiveNotes").value(DEFAULT_INACTIVE_NOTES.toString()))
@@ -485,7 +485,7 @@ public class PersonResourceIntTest {
         .andExpect(jsonPath("$.[*].surname").value(hasItem(PERSON_SURNANME)))
         .andExpect(jsonPath("$.[*].intrepidId").value(DEFAULT_INTREPID_ID.toString()))
         .andExpect(jsonPath("$.[*].role").value(DEFAULT_ROLE.toString()))
-        .andExpect(jsonPath("$.[*].status").value(DEFAULT_STATUS.toString()));
+        .andExpect(jsonPath("$.[*].status").value(DEFAULT_STATUS.toString().toUpperCase()));
   }
 
   @Test
@@ -505,7 +505,7 @@ public class PersonResourceIntTest {
         .andExpect(jsonPath("$.[*].gmcNumber").value(GMC_NUMBER))
         .andExpect(jsonPath("$.[*].intrepidId").value(DEFAULT_INTREPID_ID.toString()))
         .andExpect(jsonPath("$.[*].role").value(DEFAULT_ROLE.toString()))
-        .andExpect(jsonPath("$.[*].status").value(DEFAULT_STATUS.toString()));
+        .andExpect(jsonPath("$.[*].status").value(DEFAULT_STATUS.toString().toUpperCase()));
   }
 
   @Test

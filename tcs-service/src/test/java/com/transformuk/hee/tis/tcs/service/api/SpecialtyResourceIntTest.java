@@ -282,7 +282,7 @@ public class SpecialtyResourceIntTest {
         .andExpect(status().isOk())
         .andExpect(content().contentType(MediaType.APPLICATION_JSON_UTF8_VALUE))
         .andExpect(jsonPath("$.[*].id").value(hasItem(specialty.getId().intValue())))
-        .andExpect(jsonPath("$.[*].status").value(hasItem(DEFAULT_STATUS.toString())))
+        .andExpect(jsonPath("$.[*].status").value(hasItem(DEFAULT_STATUS.toString().toUpperCase())))
         .andExpect(jsonPath("$.[*].college").value(hasItem(DEFAULT_COLLEGE.toString())))
         .andExpect(jsonPath("$.[*].specialtyCode").value(hasItem(DEFAULT_NHS_SPECIALTY_CODE.toString())))
         .andExpect(jsonPath("$.[*].specialtyTypes[0]").value(DEFAULT_SPECIALTY_TYPE.toString()));
@@ -299,7 +299,7 @@ public class SpecialtyResourceIntTest {
         .andExpect(status().isFound())
         .andExpect(content().contentType(MediaType.APPLICATION_JSON_UTF8_VALUE))
         .andExpect(jsonPath("$.[*].id").value(hasItem(specialty.getId().intValue())))
-        .andExpect(jsonPath("$.[*].status").value(hasItem(DEFAULT_STATUS.toString())))
+        .andExpect(jsonPath("$.[*].status").value(hasItem(DEFAULT_STATUS.toString().toUpperCase())))
         .andExpect(jsonPath("$.[*].college").value(hasItem(DEFAULT_COLLEGE.toString())));
   }
 
@@ -333,7 +333,7 @@ public class SpecialtyResourceIntTest {
         .andExpect(status().isOk())
         .andExpect(content().contentType(MediaType.APPLICATION_JSON_UTF8_VALUE))
         .andExpect(jsonPath("$.id").value(specialty.getId().intValue()))
-        .andExpect(jsonPath("$.status").value(DEFAULT_STATUS.toString()))
+        .andExpect(jsonPath("$.status").value(DEFAULT_STATUS.toString().toUpperCase()))
         .andExpect(jsonPath("$.college").value(DEFAULT_COLLEGE.toString()))
         .andExpect(jsonPath("$.specialtyCode").value(DEFAULT_NHS_SPECIALTY_CODE.toString()))
         .andExpect(jsonPath("$.specialtyTypes[0]").value(DEFAULT_SPECIALTY_TYPE.toString()))

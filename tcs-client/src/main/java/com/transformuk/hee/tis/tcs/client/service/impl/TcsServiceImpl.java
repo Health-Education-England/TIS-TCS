@@ -24,9 +24,13 @@ import com.transformuk.hee.tis.tcs.api.dto.SpecialtyGroupDTO;
 import com.transformuk.hee.tis.tcs.api.dto.TariffFundingTypeFieldsDTO;
 import com.transformuk.hee.tis.tcs.api.dto.TariffRateDTO;
 import com.transformuk.hee.tis.tcs.api.dto.TrainingNumberDTO;
+import org.apache.commons.codec.EncoderException;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.cache.annotation.Cacheable;
 import org.springframework.core.ParameterizedTypeReference;
+import org.springframework.http.HttpEntity;
+import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpMethod;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
@@ -34,11 +38,23 @@ import org.springframework.web.client.RestTemplate;
 
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 
 @Service
 public class TcsServiceImpl extends AbstractClientService {
+	private static String curriculumJsonQuerystringURLEncoded, programmeJsonQuerystringURLEncoded;
 
-  private static final Map<Class, ParameterizedTypeReference> classToParamTypeRefMap;
+	static {
+		try {
+			curriculumJsonQuerystringURLEncoded = new org.apache.commons.codec.net.URLCodec().encode("{\"name\":[\"PARAMETER_NAME\"]}");
+			programmeJsonQuerystringURLEncoded  = new org.apache.commons.codec.net.URLCodec().encode("{\"programmeName\":[\"PARAMETER_NAME\"],\"programmeNumber\":[\"PARAMETER_NUMBER\"]}");
+		} catch (EncoderException e) {
+			e.printStackTrace();
+		}
+	}
+
+
+	private static final Map<Class, ParameterizedTypeReference> classToParamTypeRefMap;
 
   static {
     classToParamTypeRefMap = Maps.newHashMap();
@@ -106,7 +122,49 @@ public class TcsServiceImpl extends AbstractClientService {
     };
   }
 
-  @Override
+	public PersonDTO createPerson(PersonDTO personDTO) {
+		HttpHeaders headers = new HttpHeaders();
+		HttpEntity<PersonDTO> httpEntity = new HttpEntity<>(personDTO, headers);
+		return tcsRestTemplate
+				.exchange(serviceUrl + "/api/people/", HttpMethod.POST, httpEntity, new ParameterizedTypeReference<PersonDTO>() {})
+				.getBody();
+	}
+
+	public ProgrammeMembershipDTO createProgrammeMembership(ProgrammeMembershipDTO programmeMembershipDTO) {
+		HttpHeaders headers = new HttpHeaders();
+		HttpEntity<ProgrammeMembershipDTO> httpEntity = new HttpEntity<>(programmeMembershipDTO, headers);
+		return tcsRestTemplate
+				.exchange(serviceUrl + "/api/programme-memberships/", HttpMethod.POST, httpEntity, new ParameterizedTypeReference<ProgrammeMembershipDTO>() {})
+				.getBody();
+	}
+
+	@Cacheable
+	public List<CurriculumDTO> getCurriculaByName(String name) {
+		return tcsRestTemplate
+				.exchange(serviceUrl + "/api/current/curricula?columnFilters=" + curriculumJsonQuerystringURLEncoded.replace("PARAMETER_NAME", name), HttpMethod.GET, null, new ParameterizedTypeReference<List<CurriculumDTO>>() {})
+				.getBody();
+	}
+
+	@Cacheable
+  public List<ProgrammeDTO> getProgrammeByNameAndNumber(String name, String number) {
+		return tcsRestTemplate
+				.exchange(serviceUrl + "/api/current/programmes?columnFilters=" +
+								programmeJsonQuerystringURLEncoded
+										.replace("PARAMETER_NAME", name)
+										.replace("PARAMETER_NUMBER", number),
+						HttpMethod.GET,
+						null, new ParameterizedTypeReference<List<ProgrammeDTO>>() {})
+				.getBody();
+	}
+
+	public List<GmcDetailsDTO> findGmcDetailsIn(Set<String> gmcIds) {
+		String url = serviceUrl + "/api/gmc-details/in/" + String.join(",", gmcIds);
+		ResponseEntity<List<GmcDetailsDTO>> responseEntity = tcsRestTemplate.
+				exchange(url, HttpMethod.GET, null, new ParameterizedTypeReference<List<GmcDetailsDTO>>() {});
+		return responseEntity.getBody();
+	}
+
+	@Override
   public List<JsonPatchDTO> getJsonPathByTableDtoNameOrderByDateAddedAsc(String endpointUrl, Class objectDTO) {
     ParameterizedTypeReference<List<JsonPatchDTO>> typeReference = getJsonPatchDtoReference();
     ResponseEntity<List<JsonPatchDTO>> response = tcsRestTemplate.exchange(serviceUrl + endpointUrl + objectDTO.getSimpleName(),

@@ -41,7 +41,7 @@ public class ColumnFilterUtilTest {
     assertThat(columnFilters.get(0).getValues().size(), is(2));
     assertThat(columnFilters.get(1).getName(), is("status"));
     assertThat(columnFilters.get(1).getValues().size(), is(1));
-    assertThat(columnFilters.get(1).getValues().get(0).toString(), is("CURRENT"));
+    assertThat(columnFilters.get(1).getValues().get(0).toString(), is("current"));
   }
 
   @Test

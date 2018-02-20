@@ -13,6 +13,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.util.List;
+import java.util.Set;
 
 
 /**
@@ -73,6 +74,15 @@ public class GmcDetailsServiceImpl implements GmcDetailsService {
     log.debug("Request to get all GmcDetails");
     return gmcDetailsRepository.findAll(pageable)
         .map(gmcDetailsMapper::toDto);
+  }
+
+  @Override
+  @Transactional(readOnly = true)
+  public List<GmcDetailsDTO> findByIdIn(List<String> gmcIds) {
+    log.debug("Request to get all GmcDetails");
+
+    List<GmcDetails> byGmcIdsIn = gmcDetailsRepository.findByGmcIdsIn(gmcIds);
+    return gmcDetailsMapper.gmcDetailsToGmcDetailsDTO(byGmcIdsIn);
   }
 
   /**
