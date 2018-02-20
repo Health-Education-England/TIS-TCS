@@ -5,6 +5,7 @@ import com.transformuk.hee.tis.tcs.api.dto.validation.Create;
 import com.transformuk.hee.tis.tcs.api.dto.validation.Update;
 import com.transformuk.hee.tis.tcs.api.enumeration.PostSuffix;
 import com.transformuk.hee.tis.tcs.api.enumeration.Status;
+import io.swagger.annotations.ApiModelProperty;
 
 import javax.validation.constraints.DecimalMin;
 import javax.validation.constraints.NotNull;
@@ -60,6 +61,9 @@ public class PostDTO implements Serializable {
   private ProgrammeDTO programmes;
 
   private Set<PostFundingDTO> fundings;
+
+  @ApiModelProperty("Set this flag to true if you want to override the generated national post number and set your own")
+  private boolean bypassNPNGeneration;
 
   public Long getId() {
     return id;
@@ -303,6 +307,14 @@ public class PostDTO implements Serializable {
     this.fundings = fundings;
   }
 
+  public boolean isBypassNPNGeneration() {
+    return bypassNPNGeneration;
+  }
+
+  public void setBypassNPNGeneration(boolean bypassNPNGeneration) {
+    this.bypassNPNGeneration = bypassNPNGeneration;
+  }
+
   @Override
   public boolean equals(Object o) {
     if (this == o) return true;
@@ -310,14 +322,14 @@ public class PostDTO implements Serializable {
 
     PostDTO postDTO = (PostDTO) o;
 
+    if (bypassNPNGeneration != postDTO.bypassNPNGeneration) return false;
     if (id != null ? !id.equals(postDTO.id) : postDTO.id != null) return false;
     if (intrepidId != null ? !intrepidId.equals(postDTO.intrepidId) : postDTO.intrepidId != null) return false;
     if (nationalPostNumber != null ? !nationalPostNumber.equals(postDTO.nationalPostNumber) : postDTO.nationalPostNumber != null)
       return false;
     if (status != postDTO.status) return false;
     if (suffix != postDTO.suffix) return false;
-    if (owner != null ? !owner.equals(postDTO.owner) : postDTO.owner != null)
-      return false;
+    if (owner != null ? !owner.equals(postDTO.owner) : postDTO.owner != null) return false;
     if (postFamily != null ? !postFamily.equals(postDTO.postFamily) : postDTO.postFamily != null) return false;
     if (oldPost != null ? !oldPost.equals(postDTO.oldPost) : postDTO.oldPost != null) return false;
     if (newPost != null ? !newPost.equals(postDTO.newPost) : postDTO.newPost != null) return false;
@@ -335,7 +347,7 @@ public class PostDTO implements Serializable {
     if (placementHistory != null ? !placementHistory.equals(postDTO.placementHistory) : postDTO.placementHistory != null)
       return false;
     if (programmes != null ? !programmes.equals(postDTO.programmes) : postDTO.programmes != null) return false;
-    return (fundings != null ? !fundings.equals(postDTO.fundings) : postDTO.fundings != null);
+    return fundings != null ? fundings.equals(postDTO.fundings) : postDTO.fundings == null;
   }
 
   @Override
@@ -359,31 +371,7 @@ public class PostDTO implements Serializable {
     result = 31 * result + (placementHistory != null ? placementHistory.hashCode() : 0);
     result = 31 * result + (programmes != null ? programmes.hashCode() : 0);
     result = 31 * result + (fundings != null ? fundings.hashCode() : 0);
+    result = 31 * result + (bypassNPNGeneration ? 1 : 0);
     return result;
-  }
-
-  @Override
-  public String toString() {
-    return "PostDTO{" +
-        "id=" + id +
-        ", intrepidId='" + intrepidId + '\'' +
-        ", nationalPostNumber='" + nationalPostNumber + '\'' +
-        ", status=" + status +
-        ", suffix=" + suffix +
-        ", owner='" + owner + '\'' +
-        ", postFamily='" + postFamily + '\'' +
-        ", oldPost=" + oldPost +
-        ", newPost=" + newPost +
-        ", sites=" + sites +
-        ", employingBodyId='" + employingBodyId + '\'' +
-        ", trainingBodyId='" + trainingBodyId + '\'' +
-        ", grades=" + grades +
-        ", specialties=" + specialties +
-        ", trainingDescription='" + trainingDescription + '\'' +
-        ", localPostNumber='" + localPostNumber + '\'' +
-        ", placementHistory=" + placementHistory +
-        ", programmes=" + programmes +
-        ", fundings=" + fundings +
-        '}';
   }
 }

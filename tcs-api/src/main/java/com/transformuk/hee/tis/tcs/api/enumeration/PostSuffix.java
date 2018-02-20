@@ -2,7 +2,7 @@ package com.transformuk.hee.tis.tcs.api.enumeration;
 
 public enum PostSuffix {
 
-  SUPERNUMERY("/S"), MILITARY("/M"), ACADEMIC("/A");
+  SUPERNUMERY("S"), MILITARY("M"), ACADEMIC("A");
 
   private String suffixValue;
 

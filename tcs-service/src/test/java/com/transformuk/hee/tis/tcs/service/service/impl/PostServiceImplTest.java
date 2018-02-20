@@ -39,6 +39,7 @@ import org.mockito.ArgumentCaptor;
 import org.mockito.Captor;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
+import org.mockito.Spy;
 import org.mockito.runners.MockitoJUnitRunner;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageImpl;
@@ -56,7 +57,7 @@ import static org.mockito.Mockito.when;
 public class PostServiceImplTest {
 
   private static final Long SITE_ID = 12345L;
-
+  @Spy
   @InjectMocks
   private PostServiceImpl testObj;
 
@@ -80,8 +81,6 @@ public class PostServiceImplTest {
   private PostMapper postMapperMock;
   @Mock
   private PostViewMapper postViewMapperMock;
-  @Mock
-  private PostViewDecorator postViewDecorator;
 
   @Mock
   private PostDTO postDTOMock1, postDTOMock2, postMappedDTOMock1, postMappedDTOMock2;
@@ -100,6 +99,10 @@ public class PostServiceImplTest {
 
   @Captor
   private ArgumentCaptor<Set<PostSpecialty>> postSpecialtyArgumentCaptor;
+  @Mock
+  private PostViewDecorator postViewDecorator;
+  @Mock
+  private NationalPostNumberServiceImpl nationalPostNumberServiceMock;
 
   @Test
   public void saveShouldSavePost() {
@@ -432,7 +435,7 @@ public class PostServiceImplTest {
 
     PostSpecialty postSpecialtyValue = null;
     for (PostSpecialty savedLink : postSpecialtyValueSet) {
-      if(PostSpecialtyType.OTHER.equals(savedLink.getPostSpecialtyType())){
+      if (PostSpecialtyType.OTHER.equals(savedLink.getPostSpecialtyType())) {
         postSpecialtyValue = savedLink;
         break;
       }
@@ -492,4 +495,6 @@ public class PostServiceImplTest {
     Assert.assertEquals(expectedDTO, result.get(0));
     Assert.assertEquals(Sets.newHashSet(placementDTO), result.get(0).getPlacementHistory());
   }
+
+
 }

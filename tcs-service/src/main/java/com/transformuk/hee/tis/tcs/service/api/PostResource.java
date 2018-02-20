@@ -343,7 +343,6 @@ public class PostResource {
     return ResponseEntity.ok().headers(HeaderUtil.createEntityUpdateAlert(ENTITY_NAME, "procedure is underway")).build();
   }
 
-
   /**
    * PATCH  /bulk-patch-new-old-posts : Patches the Old post and New post relationship on an existing Posts.
    *

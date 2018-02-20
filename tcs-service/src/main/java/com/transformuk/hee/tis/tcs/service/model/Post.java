@@ -45,7 +45,7 @@ public class Post implements Serializable {
   @Column(name = "status")
   private Status status;
 
-  @Enumerated(EnumType.STRING)
+  //PostSuffixConverter converts the value
   @Column(name = "suffix")
   private PostSuffix suffix;
 
@@ -68,6 +68,9 @@ public class Post implements Serializable {
 
   @Column(name = "localPostNumber")
   private String localPostNumber;
+
+  @Column(name = "legacy")
+  private boolean legacy;
 
   @OneToOne(fetch = FetchType.EAGER)
   @JoinColumn(name = "oldPostId")
@@ -181,6 +184,14 @@ public class Post implements Serializable {
   public Post postFamily(String postFamily) {
     this.postFamily = postFamily;
     return this;
+  }
+
+  public boolean isLegacy() {
+    return legacy;
+  }
+
+  public void setLegacy(boolean legacy) {
+    this.legacy = legacy;
   }
 
   public Post getOldPost() {
@@ -374,6 +385,7 @@ public class Post implements Serializable {
         ", placementHistory=" + placementHistory +
         ", programmes=" + programmes +
         ", fundings=" + fundings +
+        ", legacy=" + legacy +
         '}';
   }
 }

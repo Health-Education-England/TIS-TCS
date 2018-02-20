@@ -9,15 +9,16 @@ import com.transformuk.hee.tis.tcs.api.dto.PostSiteDTO;
 import com.transformuk.hee.tis.tcs.api.dto.PostSpecialtyDTO;
 import com.transformuk.hee.tis.tcs.api.dto.ProgrammeDTO;
 import com.transformuk.hee.tis.tcs.api.enumeration.PostSpecialtyType;
+import com.transformuk.hee.tis.tcs.service.model.Post;
 import com.transformuk.hee.tis.tcs.service.repository.PlacementRepository;
 import com.transformuk.hee.tis.tcs.service.repository.PostRepository;
 import com.transformuk.hee.tis.tcs.service.repository.ProgrammeRepository;
 import com.transformuk.hee.tis.tcs.service.repository.SpecialtyRepository;
 import com.transformuk.hee.tis.tcs.service.service.mapper.DesignatedBodyMapper;
+import org.apache.commons.collections4.CollectionUtils;
 import org.apache.commons.lang.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
-import org.springframework.util.CollectionUtils;
 import org.springframework.validation.BeanPropertyBindingResult;
 import org.springframework.validation.FieldError;
 import org.springframework.web.bind.MethodArgumentNotValidException;
@@ -34,7 +35,6 @@ import java.util.Map;
 public class PostValidator {
 
   public static final String POST_DTO_NAME = "PostDTO";
-  public static final String NATIONAL_POST_NUMBER = "nationalPostNumber";
   public static final String SPECIALTIES = "specialties";
   private ProgrammeRepository programmeRepository;
   private PostRepository postRepository;
@@ -78,6 +78,8 @@ public class PostValidator {
     fieldErrors.addAll(checkGrades(postDTO));
     fieldErrors.addAll(checkSpecialties(postDTO));
     fieldErrors.addAll(checkPlacementHistory(postDTO));
+    fieldErrors.addAll(checkNationalPostNumber(postDTO));
+    fieldErrors.addAll(checkLegacy(postDTO.getId()));
 
     if (!fieldErrors.isEmpty()) {
       BeanPropertyBindingResult bindingResult = new BeanPropertyBindingResult(postDTO, POST_DTO_NAME);
@@ -171,9 +173,9 @@ public class PostValidator {
           if (!specialtyRepository.exists(ps.getSpecialty().getId())) {
             fieldErrors.add(new FieldError(POST_DTO_NAME, SPECIALTIES,
                 String.format("Specialty with id %d does not exist", ps.getSpecialty().getId())));
-          } else if (ps.getPostSpecialtyType().equals(PostSpecialtyType.PRIMARY)) {
+          } else if (PostSpecialtyType.PRIMARY.equals(ps.getPostSpecialtyType())) {
             ++noOfPrimarySpecialtyCount;
-          } else if (ps.getPostSpecialtyType().equals(PostSpecialtyType.SUB_SPECIALTY)) {
+          } else if (PostSpecialtyType.SUB_SPECIALTY.equals(ps.getPostSpecialtyType())) {
             ++noOfSubSpecialtyCount;
           }
         }
@@ -222,4 +224,46 @@ public class PostValidator {
     }
     return fieldErrors;
   }
+
+  private List<FieldError> checkNationalPostNumber(PostDTO postDTO) {
+    List<FieldError> fieldErrors = new ArrayList<>();
+    List<Post> postWithSameNPN = Lists.newArrayList();
+
+    if (StringUtils.isNotBlank(postDTO.getNationalPostNumber())) {
+      postWithSameNPN = postRepository.findByNationalPostNumber(postDTO.getNationalPostNumber());
+    }
+
+    if (postDTO.getId() == null && CollectionUtils.isNotEmpty(postWithSameNPN)  && postDTO.isBypassNPNGeneration()) {
+      fieldErrors.add(new FieldError("postDTO", "nationalPostNumber",
+          "Cannot create post with NPN override as the following posts have the same NPN: " +
+              StringUtils.join(postWithSameNPN.stream().map(Post::getId).toArray(), ",")));
+    } else if (postDTO.isBypassNPNGeneration()) {
+      if (StringUtils.isBlank(postDTO.getNationalPostNumber())) {
+        fieldErrors.add(new FieldError("postDTO", "nationalPostNumber",
+            "You cannot have an empty NPN if you are overriding auto generation"));
+      } else if (postWithSameNPN.size() > 1) {
+        fieldErrors.add(new FieldError("postDTO", "nationalPostNumber",
+            "Cannot update post with this NPN as the following posts have the same NPN: " +
+                StringUtils.join(postWithSameNPN.stream().map(Post::getId).toArray(), ",")));
+      } else if (postWithSameNPN.size() == 1 && !postWithSameNPN.get(0).getId().equals(postDTO.getId())) {
+        fieldErrors.add(new FieldError("postDTO", "nationalPostNumber",
+            "Cannot update post with this NPN as another post has the same NPN: " +
+                StringUtils.join(postWithSameNPN.stream().map(Post::getId).toArray(), ",")));
+      }
+    }
+    return fieldErrors;
+  }
+
+  private List<FieldError> checkLegacy(Long postId) {
+    List<FieldError> fieldErrors = new ArrayList<>();
+    if(postId != null) {
+      Post post = postRepository.findOne(postId);
+      if(post != null && post.isLegacy()){
+        fieldErrors.add(new FieldError("postDTO", "legacy",
+            "You cannot update a post that has been migrated from intrepid and marked as legacy"));
+      }
+    }
+    return fieldErrors;
+  }
+
 }

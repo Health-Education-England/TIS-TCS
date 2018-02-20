@@ -64,6 +64,7 @@ import static com.transformuk.hee.tis.tcs.service.service.impl.SpecificationFact
 @Transactional
 public class PostServiceImpl implements PostService {
 
+
   private static final Logger log = LoggerFactory.getLogger(PostServiceImpl.class);
 
   @Autowired
@@ -88,9 +89,14 @@ public class PostServiceImpl implements PostService {
   private PostViewMapper postViewMapper;
   @Autowired
   private PostViewDecorator postViewDecorator;
+  @Autowired
+  private NationalPostNumberServiceImpl nationalPostNumberService;
 
   /**
    * Save a post.
+   * <p>
+   * If the post is new, we need to generate a new NPN, if its an update, then we check to see we require a new number
+   * to be generated AND that we're not bypassing the generation
    *
    * @param postDTO the entity to save
    * @return the persisted entity
@@ -98,6 +104,11 @@ public class PostServiceImpl implements PostService {
   @Override
   public PostDTO save(PostDTO postDTO) {
     log.debug("Request to save Post : {}", postDTO);
+    if (postDTO.isBypassNPNGeneration()) {
+      //if we bypass do no do any of the generation logic
+    } else if (postDTO.getId() == null || nationalPostNumberService.requireNewNationalPostNumber(postDTO)) {
+      nationalPostNumberService.generateAndSetNewNationalPostNumber(postDTO);
+    }
     Post post = postMapper.postDTOToPost(postDTO);
     post = postRepository.save(post);
     return postMapper.postToPostDTO(post);
@@ -350,6 +361,14 @@ public class PostServiceImpl implements PostService {
     postSiteRepository.delete(post.getSites());
     postSpecialtyRepository.delete(post.getSpecialties());
 
+    if (postDTO.isBypassNPNGeneration()) {
+      //if we bypass do no do any of the generation logic
+    } else if (nationalPostNumberService.requireNewNationalPostNumber(postDTO)) {
+      nationalPostNumberService.generateAndSetNewNationalPostNumber(postDTO);
+    } else if (!StringUtils.equals(post.getNationalPostNumber(), postDTO.getNationalPostNumber())) {
+      //if the user tries to manually change the npn without override, set it back
+      postDTO.setNationalPostNumber(post.getNationalPostNumber());
+    }
     post = postMapper.postDTOToPost(postDTO);
     post = postRepository.save(post);
     return postMapper.postToPostDTO(post);
@@ -449,14 +468,16 @@ public class PostServiceImpl implements PostService {
 
   /**
    * Call Stored proc to build the post view
+   *
    * @return
    */
   @Override
   @Transactional
   @Async
-  public CompletableFuture<Void> buildPostView(){
+  public CompletableFuture<Void> buildPostView() {
     log.debug("Request to build Post view");
     postRepository.buildPostView();
     return CompletableFuture.completedFuture(null);
   }
+
 }
