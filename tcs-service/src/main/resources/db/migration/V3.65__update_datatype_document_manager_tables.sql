@@ -21,7 +21,7 @@ CREATE TABLE `Document` (
   `intrepidParentRecordId` varchar(255) DEFAULT NULL,
   `intrepidFolderPath` varchar(255) DEFAULT NULL,
   PRIMARY KEY (`id`),
-  CONSTRAINT `fk_document_person_id` FOREIGN KEY (`personId`) REFERENCES `person` (`id`),
+  CONSTRAINT `fk_document_person_id` FOREIGN KEY (`personId`) REFERENCES `Person` (`id`),
   CONSTRAINT `ck_document_status` CHECK (`status` IN ('CURRENT', 'INACTIVE', 'DELETE'))
 ) ENGINE=InnoDB AUTO_INCREMENT=1 DEFAULT CHARSET=utf8;
 
@@ -38,6 +38,6 @@ CREATE TABLE `DocumentTag` (
   `tagId` bigint(20) NOT NULL,
   `addedDate` datetime NOT NULL DEFAULT CURRENT_TIMESTAMP,
   PRIMARY KEY (`documentId`, `tagId`),
-  CONSTRAINT `fk_documenttag_document_id` FOREIGN KEY (`documentId`) REFERENCES `document` (`id`),
-  CONSTRAINT `fk_documenttag_tag_id` FOREIGN KEY (`tagId`) REFERENCES `tag` (`id`)
+  CONSTRAINT `fk_documenttag_document_id` FOREIGN KEY (`documentId`) REFERENCES `Document` (`id`),
+  CONSTRAINT `fk_documenttag_tag_id` FOREIGN KEY (`tagId`) REFERENCES `Tag` (`id`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8;
