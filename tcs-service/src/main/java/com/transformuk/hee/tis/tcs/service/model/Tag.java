@@ -1,5 +1,7 @@
 package com.transformuk.hee.tis.tcs.service.model;
 
+import com.google.common.base.Strings;
+
 import javax.persistence.*;
 import java.io.Serializable;
 import java.time.LocalDateTime;
@@ -24,7 +26,12 @@ public class Tag implements Serializable {
         if (this == o) return true;
         if (o == null || getClass() != o.getClass()) return false;
         final Tag tag = (Tag) o;
-        return Objects.equals(id, tag.id) || Objects.equals(name, tag.name);
+
+        if (Strings.isNullOrEmpty(name) || Strings.isNullOrEmpty(tag.name)) {
+            return false;
+        }
+
+        return Objects.equals(id, tag.id) || name.equalsIgnoreCase(tag.name);
     }
 
     @Override

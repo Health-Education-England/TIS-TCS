@@ -1,6 +1,7 @@
 package com.transformuk.hee.tis.tcs.api.dto;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
+import com.google.common.base.Strings;
 import com.transformuk.hee.tis.tcs.api.dto.validation.Update;
 import io.swagger.annotations.ApiModel;
 import io.swagger.annotations.ApiModelProperty;
@@ -28,21 +29,26 @@ public class TagDTO {
     public TagDTO() {
     }
 
-    public TagDTO(Long id, String name) {
+    public TagDTO(final Long id, final String name) {
         this.id = id;
         this.name = name;
     }
 
-    public TagDTO(String name) {
+    public TagDTO(final String name) {
         this.name = name;
     }
 
     @Override
-    public boolean equals(Object o) {
+    public boolean equals(final Object o) {
         if (this == o) return true;
         if (o == null || getClass() != o.getClass()) return false;
-        TagDTO tagDTO = (TagDTO) o;
-        return Objects.equals(id, tagDTO.id) || Objects.equals(name, tagDTO.name);
+        final TagDTO tagDTO = (TagDTO) o;
+
+        if (Strings.isNullOrEmpty(name) || Strings.isNullOrEmpty(tagDTO.name)) {
+            return false;
+        }
+
+        return Objects.equals(id, tagDTO.id) || name.equalsIgnoreCase(tagDTO.name);
     }
 
     @Override
