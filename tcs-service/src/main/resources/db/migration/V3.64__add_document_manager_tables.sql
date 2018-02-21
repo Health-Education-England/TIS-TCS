@@ -1,4 +1,4 @@
-CREATE TABLE `document` (
+CREATE TABLE `Document` (
   `id` bigint(20) NOT NULL AUTO_INCREMENT,
   `addedDate` datetime NOT NULL DEFAULT CURRENT_TIMESTAMP,
   `amendedDate` datetime(3) NOT NULL DEFAULT CURRENT_TIMESTAMP(3),
@@ -17,10 +17,10 @@ CREATE TABLE `document` (
   `intrepidParentRecordId` varchar(255) DEFAULT NULL,
   `intrepidFolderPath` varchar(255) DEFAULT NULL,
   PRIMARY KEY (`id`),
-  CONSTRAINT `fk_document_person_id` FOREIGN KEY (`personId`) REFERENCES `person` (`id`)
+  CONSTRAINT `fk_document_person_id` FOREIGN KEY (`personId`) REFERENCES `Person` (`id`)
 ) ENGINE=InnoDB AUTO_INCREMENT=1 DEFAULT CHARSET=utf8;
 
-CREATE TABLE `tag` (
+CREATE TABLE `Tag` (
   `id` bigint(20) NOT NULL AUTO_INCREMENT,
   `addedDate` datetime NOT NULL DEFAULT CURRENT_TIMESTAMP,
   `amendedDate` datetime(3) NOT NULL DEFAULT CURRENT_TIMESTAMP(3),
@@ -28,11 +28,11 @@ CREATE TABLE `tag` (
   PRIMARY KEY (`id`)
 ) ENGINE=InnoDB AUTO_INCREMENT=1 DEFAULT CHARSET=utf8;
 
-CREATE TABLE `documenttag` (
+CREATE TABLE `DocumentTag` (
   `documentId` bigint(20) NOT NULL,
   `tagId` bigint(20) NOT NULL,
   `addedDate` datetime NOT NULL DEFAULT CURRENT_TIMESTAMP,
   PRIMARY KEY (`documentId`, `tagId`),
-  CONSTRAINT `fk_documenttag_document_id` FOREIGN KEY (`documentId`) REFERENCES `document` (`id`),
-  CONSTRAINT `fk_documenttag_tag_id` FOREIGN KEY (`tagId`) REFERENCES `tag` (`id`)
+  CONSTRAINT `fk_documenttag_document_id` FOREIGN KEY (`documentId`) REFERENCES `Document` (`id`),
+  CONSTRAINT `fk_documenttag_tag_id` FOREIGN KEY (`tagId`) REFERENCES `Tag` (`id`)
 ) ENGINE=InnoDB AUTO_INCREMENT=1 DEFAULT CHARSET=utf8;
