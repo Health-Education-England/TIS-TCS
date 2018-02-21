@@ -21,6 +21,13 @@ public class Tag implements Serializable {
     private Set<Document> documents;
     private String name;
 
+    @PreUpdate
+    @PrePersist
+    @PostLoad
+    public void toLowerCase() {
+        name = name.toLowerCase();
+    }
+
     @Override
     public boolean equals(final Object o) {
         if (this == o) return true;
@@ -36,7 +43,7 @@ public class Tag implements Serializable {
 
     @Override
     public int hashCode() {
-        return Objects.hash(name);
+        return Objects.hash(name.toLowerCase());
     }
 
     @Override

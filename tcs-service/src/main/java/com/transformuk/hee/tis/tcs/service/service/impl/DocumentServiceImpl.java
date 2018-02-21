@@ -60,7 +60,7 @@ public class DocumentServiceImpl implements DocumentService {
             } catch (final Exception ex) {
                 // rollback
                 try {
-                    fileStorageRepository.deleteFile(document.getId(), azureProperties.getContainer() + "/" + azureProperties.getPersonFolder(), document.getFileName());
+                    fileStorageRepository.deleteFile(document.getId(), azureProperties.getContainerName() + "/" + azureProperties.getPersonFolder(), document.getFileName());
                 } catch (final Exception exx) {
                     LOG.warn("Error while rolling back; could not delete file from remote storage", exx);
                 }
@@ -102,7 +102,7 @@ public class DocumentServiceImpl implements DocumentService {
     }
 
     private String saveFile(final Document document) throws InvalidKeyException, StorageException, URISyntaxException {
-        return fileStorageRepository.store(document.getId(), azureProperties.getContainer() + "/" + azureProperties.getPersonFolder(), Lists.newArrayList(getFileAsMultipart(document)));
+        return fileStorageRepository.store(document.getId(), azureProperties.getContainerName() + "/" + azureProperties.getPersonFolder(), Lists.newArrayList(getFileAsMultipart(document)));
     }
 
     private Document saveMetadata(final Document document) {

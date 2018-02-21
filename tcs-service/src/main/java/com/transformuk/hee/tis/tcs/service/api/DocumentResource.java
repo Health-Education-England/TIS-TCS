@@ -159,20 +159,21 @@ public class DocumentResource {
                 return ResponseEntity.notFound().build();
             }
 
-            final Set<TagDTO> combinedTags = documentRepository.getTags().stream()
+            // filters deleted tags
+            final Set<TagDTO> deletedTags = documentRepository.getTags().stream()
                     .filter(tag -> Optional.ofNullable(documentParam.getTags()).orElse(Collections.emptySet()).contains(new TagDTO(tag.getName())))
                     .collect(Collectors.toSet());
 
-
-            final Stream<TagDTO> combinedTags2 = Stream.concat(
-                    Optional.ofNullable(combinedTags).orElse(Collections.emptySet()).stream(),
+            // combines added tags
+            final Stream<TagDTO> combinedTags = Stream.concat(
+                    Optional.ofNullable(deletedTags).orElse(Collections.emptySet()).stream(),
                     Optional.ofNullable(documentParam.getTags()).orElse(Collections.emptySet()).stream()
             );
 
             documentRepository.setName(documentParam.getName());
             documentRepository.setStatus(documentParam.getStatus());
             documentRepository.setVersion(documentParam.getVersion());
-            documentRepository.setTags(combinedTags2.collect(Collectors.toSet()));
+            documentRepository.setTags(combinedTags.collect(Collectors.toSet()));
 
             documentService.save(documentRepository);
         }
