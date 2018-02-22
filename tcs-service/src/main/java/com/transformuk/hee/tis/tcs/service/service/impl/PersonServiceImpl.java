@@ -205,7 +205,8 @@ public class PersonServiceImpl implements PersonService {
     if (CollectionUtils.isEmpty(persons)) {
       return new PageImpl<>(persons);
     }
-    return new PageImpl<>(persons.subList(start, end), pageable, personCount);
+    List<PersonViewDTO> personsPageList = persons.subList(start,(end > persons.size()) ? persons.size() : end);
+    return new PageImpl<>(personsPageList, pageable, personCount);
   }
 
   @Override
@@ -275,7 +276,8 @@ public class PersonServiceImpl implements PersonService {
     if (CollectionUtils.isEmpty(persons)) {
       return new PageImpl<>(persons);
     }
-    return new PageImpl<>(persons.subList(start, end), pageable, personCount);
+    List<PersonViewDTO> personsPageList = persons.subList(start,(end > persons.size()) ? persons.size() : end);
+    return new PageImpl<>(personsPageList, pageable, personCount);
   }
 
   @Override
