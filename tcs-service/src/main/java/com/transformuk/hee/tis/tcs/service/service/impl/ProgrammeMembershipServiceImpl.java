@@ -124,12 +124,12 @@ public class ProgrammeMembershipServiceImpl implements ProgrammeMembershipServic
 
   @Transactional(readOnly = true)
   @Override
-  public List<ProgrammeMembershipCurriculaDTO> findProgrammeMembershipsForTraineeAndProgramme(Long traineeId, String programmeNumber) {
+  public List<ProgrammeMembershipCurriculaDTO> findProgrammeMembershipsForTraineeAndProgramme(Long traineeId, Long programmeId) {
     Preconditions.checkNotNull(traineeId);
-    Preconditions.checkNotNull(programmeNumber);
+    Preconditions.checkNotNull(programmeId);
 
     List<ProgrammeMembership> foundProgrammeMemberships = programmeMembershipRepository
-        .findByTraineeIdAndProgrammeNumber(traineeId, programmeNumber);
+        .findByTraineeIdAndProgrammeNumber(traineeId, programmeId);
     List<ProgrammeMembershipDTO> programmeMembershipDTOS = programmeMembershipMapper.programmeMembershipsToProgrammeMembershipDTOs(foundProgrammeMemberships);
 
     //get all curriculum ids

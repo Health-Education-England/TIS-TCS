@@ -56,5 +56,5 @@ public interface ProgrammeMembershipService {
    *
    * @return the list of entities
    */
-  List<ProgrammeMembershipCurriculaDTO> findProgrammeMembershipsForTraineeAndProgramme(Long traineeId, String programmeNumber);
+  List<ProgrammeMembershipCurriculaDTO> findProgrammeMembershipsForTraineeAndProgramme(Long traineeId, Long programmeId);
 }
