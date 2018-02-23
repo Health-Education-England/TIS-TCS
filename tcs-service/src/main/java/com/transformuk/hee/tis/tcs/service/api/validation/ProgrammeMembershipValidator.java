@@ -133,11 +133,11 @@ public class ProgrammeMembershipValidator {
    */
   private void checkProgrammeCurriculumAssociation(List<FieldError> fieldErrors, Long programmeId, Long curriculumId) {
 
-    boolean isExists = programmeRepository.programmeCurriculumAssociationExists(programmeId,
-        curriculumId);
+    boolean isExists = programmeRepository.programmeCurriculumAssociationExists(programmeId, curriculumId);
     if (!isExists) {
       fieldErrors.add(new FieldError(PROGRAMME_MEMBERSHIP_DTO_NAME, "curriculumId",
-          String.format("Curriculum with id %s does associated with programme", curriculumId)));
+          String.format("The selected Programme and Curriculum are not linked. " +
+              "They must be linked before a Programme Membership can be made", curriculumId)));
     }
   }
 
