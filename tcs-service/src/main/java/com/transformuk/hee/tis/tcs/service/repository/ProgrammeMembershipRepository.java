@@ -19,7 +19,7 @@ public interface ProgrammeMembershipRepository extends JpaRepository<ProgrammeMe
       "ON pm.programmeId=p.id " +
       "WHERE personId = :traineeId " +
       "AND p.id = :programmeId")
-  List<ProgrammeMembership> findByTraineeIdAndProgrammeNumber(@Param("traineeId") Long traineeId,
+  List<ProgrammeMembership> findByTraineeIdAndProgrammeId(@Param("traineeId") Long traineeId,
                                                               @Param("programmeId") Long programmeId);
 
 }

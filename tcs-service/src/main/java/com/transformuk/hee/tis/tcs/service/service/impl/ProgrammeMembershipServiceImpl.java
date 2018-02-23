@@ -129,7 +129,7 @@ public class ProgrammeMembershipServiceImpl implements ProgrammeMembershipServic
     Preconditions.checkNotNull(programmeId);
 
     List<ProgrammeMembership> foundProgrammeMemberships = programmeMembershipRepository
-        .findByTraineeIdAndProgrammeNumber(traineeId, programmeId);
+        .findByTraineeIdAndProgrammeId(traineeId, programmeId);
     List<ProgrammeMembershipDTO> programmeMembershipDTOS = programmeMembershipMapper.programmeMembershipsToProgrammeMembershipDTOs(foundProgrammeMemberships);
 
     //get all curriculum ids
