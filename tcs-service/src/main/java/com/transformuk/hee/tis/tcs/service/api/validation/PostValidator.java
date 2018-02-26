@@ -241,12 +241,10 @@ public class PostValidator {
 
     if (postDTO.getId() == null && CollectionUtils.isNotEmpty(postWithSameNPN) && postDTO.isBypassNPNGeneration()) {
       fieldErrors.add(new FieldError("postDTO", "nationalPostNumber",
-          "Cannot create post with NPN override as the following posts have the same NPN: " +
-              StringUtils.join(postWithSameNPN.stream().map(Post::getId).toArray(), ",")));
+          "Cannot create post with NPN override there are other posts with the same NPN"));
     } else if (postDTO.getId() == null && CollectionUtils.isNotEmpty(postWithSameNPN) && !nationalPostNumberServiceImpl.isAutoGenNpnEnabled()) {
       fieldErrors.add(new FieldError("postDTO", "nationalPostNumber",
-          "Cannot create post with NPN as the following posts have the same NPN: " +
-              StringUtils.join(postWithSameNPN.stream().map(Post::getId).toArray(), ",")));
+          "Cannot create post with NPN as there are other posts with the same NPN"));
     } else if (postDTO.getId() == null && StringUtils.isEmpty(postDTO.getNationalPostNumber()) && !nationalPostNumberServiceImpl.isAutoGenNpnEnabled()) {
       fieldErrors.add(new FieldError("postDTO", "nationalPostNumber",
           "Cannot create new post with an empty NPN when auto generation is switched off"));
@@ -256,12 +254,10 @@ public class PostValidator {
             "You cannot have an empty NPN if you are overriding auto generation"));
       } else if (postWithSameNPN.size() > 1) {
         fieldErrors.add(new FieldError("postDTO", "nationalPostNumber",
-            "Cannot update post with this NPN as the following posts have the same NPN: " +
-                StringUtils.join(postWithSameNPN.stream().map(Post::getId).toArray(), ",")));
+            "Cannot update post with this NPN as there are other posts with the same NPN"));
       } else if (postWithSameNPN.size() == 1 && !postWithSameNPN.get(0).getId().equals(postDTO.getId())) {
         fieldErrors.add(new FieldError("postDTO", "nationalPostNumber",
-            "Cannot update post with this NPN as another post has the same NPN: " +
-                StringUtils.join(postWithSameNPN.stream().map(Post::getId).toArray(), ",")));
+            "Cannot update post with this NPN as there are other posts with the same NPN"));
       }
     }
     return fieldErrors;
