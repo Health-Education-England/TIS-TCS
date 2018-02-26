@@ -56,7 +56,10 @@ public class WebSecurityConfig extends WebSecurityConfigurerAdapter {
         .csrf().disable()
         .exceptionHandling().authenticationEntryPoint(unauthorizedHandler).accessDeniedHandler(accessDeniedHandler)
         .and()
-        // don't create session
+            .authorizeRequests()
+            .antMatchers("/swagger-resources/**").permitAll()
+         .and()
+            // don't create session
         .sessionManagement().sessionCreationPolicy(SessionCreationPolicy.STATELESS); //.and()
     // Custom JWT based security filter
     httpSecurity
