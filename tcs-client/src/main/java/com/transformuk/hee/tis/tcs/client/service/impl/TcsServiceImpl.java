@@ -25,6 +25,8 @@ import com.transformuk.hee.tis.tcs.api.dto.TariffFundingTypeFieldsDTO;
 import com.transformuk.hee.tis.tcs.api.dto.TariffRateDTO;
 import com.transformuk.hee.tis.tcs.api.dto.TrainingNumberDTO;
 import org.apache.commons.codec.EncoderException;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.cache.annotation.Cacheable;
@@ -42,6 +44,8 @@ import java.util.Set;
 
 @Service
 public class TcsServiceImpl extends AbstractClientService {
+	private static final Logger log = LoggerFactory.getLogger(TcsServiceImpl.class);
+
 	private static String curriculumJsonQuerystringURLEncoded, programmeJsonQuerystringURLEncoded;
 
 	static {
@@ -138,15 +142,17 @@ public class TcsServiceImpl extends AbstractClientService {
 				.getBody();
 	}
 
-	@Cacheable
+	@Cacheable("curricula")
 	public List<CurriculumDTO> getCurriculaByName(String name) {
+		log.debug("calling getCurriculaByName with {}", name);
 		return tcsRestTemplate
 				.exchange(serviceUrl + "/api/current/curricula?columnFilters=" + curriculumJsonQuerystringURLEncoded.replace("PARAMETER_NAME", name), HttpMethod.GET, null, new ParameterizedTypeReference<List<CurriculumDTO>>() {})
 				.getBody();
 	}
 
-	@Cacheable
+	@Cacheable("programme")
   public List<ProgrammeDTO> getProgrammeByNameAndNumber(String name, String number) {
+		log.debug("calling getProgrammeByNameAndNumber with {} and number {}", name, number);
 		return tcsRestTemplate
 				.exchange(serviceUrl + "/api/current/programmes?columnFilters=" +
 								programmeJsonQuerystringURLEncoded
@@ -155,6 +161,13 @@ public class TcsServiceImpl extends AbstractClientService {
 						HttpMethod.GET,
 						null, new ParameterizedTypeReference<List<ProgrammeDTO>>() {})
 				.getBody();
+	}
+
+	public List<GdcDetailsDTO> findGdcDetailsIn(Set<String> gdcIds) {
+		String url = serviceUrl + "/api/gdc-details/in/" + String.join(",", gdcIds);
+		ResponseEntity<List<GdcDetailsDTO>> responseEntity = tcsRestTemplate.
+				exchange(url, HttpMethod.GET, null, new ParameterizedTypeReference<List<GdcDetailsDTO>>() {});
+		return responseEntity.getBody();
 	}
 
 	public List<GmcDetailsDTO> findGmcDetailsIn(Set<String> gmcIds) {
