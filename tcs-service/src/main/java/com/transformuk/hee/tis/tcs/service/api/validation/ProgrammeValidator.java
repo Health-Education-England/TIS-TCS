@@ -51,7 +51,6 @@ public class ProgrammeValidator {
     List<FieldError> fieldErrors = new ArrayList<>();
     fieldErrors.addAll(checkOwner(programmeDTO, userProfile));
     fieldErrors.addAll(checkCurricula(programmeDTO));
-    fieldErrors.addAll(checkProgrammeNumber(programmeDTO));
 
     if (!fieldErrors.isEmpty()) {
       BeanPropertyBindingResult bindingResult = new BeanPropertyBindingResult(programmeDTO, "ProgrammeDTO");
@@ -60,36 +59,6 @@ public class ProgrammeValidator {
     }
   }
 
-  private List<FieldError> checkProgrammeNumber(ProgrammeDTO programmeDTO) {
-    List<FieldError> fieldErrors = new ArrayList<>();
-    //check if the programme number is unique
-    //if we update a programme
-    if (programmeDTO.getId() != null) {
-      Programme p = programmeRepository.findOne(programmeDTO.getId());
-      List<Programme> programmeList = programmeRepository.findByProgrammeNumber(programmeDTO.getProgrammeNumber());
-      if (programmeList.size() > 1) {
-        fieldErrors.add(new FieldError("ProgrammeDTO", "programmeNumber",
-            String.format("programmeNumber %s is not unique, there are currently %d programmes with this number: %s",
-                programmeDTO.getProgrammeNumber(), programmeList.size(),
-                programmeList)));
-      } else if (programmeList.size() == 1) {
-        if (!p.getId().equals(programmeList.get(0).getId())) {
-          fieldErrors.add(new FieldError("ProgrammeDTO", "programmeNumber",
-              String.format("programmeNumber %s is not unique, there is currently one programme with this number: %s",
-                  programmeDTO.getProgrammeNumber(), programmeList.get(0))));
-        }
-      }
-    } else {
-      //if we create a programme
-      List<Programme> programmeList = programmeRepository.findByProgrammeNumber(programmeDTO.getProgrammeNumber());
-      if (!programmeList.isEmpty()) {
-        fieldErrors.add(new FieldError("ProgrammeDTO", "programmeNumber",
-            String.format("programmeNumber %s is not unique, there is currently one programme with this number: %s",
-                programmeDTO.getProgrammeNumber(), programmeList.get(0))));
-      }
-    }
-    return fieldErrors;
-  }
 
   private List<FieldError> checkCurricula(ProgrammeDTO programmeDTO) {
     List<FieldError> fieldErrors = new ArrayList<>();

@@ -35,8 +35,6 @@ public class ProgrammeDTO implements Serializable {
   @NotNull(message = "Programme name is required", groups = {Update.class, Create.class})
   private String programmeName;
 
-  @NotNull(message = "Programme number is required", groups = {Update.class, Create.class})
-  //mandatory, unique
   private String programmeNumber;
 
   private Set<CurriculumDTO> curricula;
