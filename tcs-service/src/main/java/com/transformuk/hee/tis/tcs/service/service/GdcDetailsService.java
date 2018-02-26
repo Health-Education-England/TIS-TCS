@@ -1,6 +1,7 @@
 package com.transformuk.hee.tis.tcs.service.service;
 
 import com.transformuk.hee.tis.tcs.api.dto.GdcDetailsDTO;
+import com.transformuk.hee.tis.tcs.api.dto.GmcDetailsDTO;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 
@@ -34,6 +35,14 @@ public interface GdcDetailsService {
    * @return the list of entities
    */
   Page<GdcDetailsDTO> findAll(Pageable pageable);
+
+  /**
+   * Get a list of gdcDetails
+   *
+   * @param gdcIds the list of entities to retrieve
+   * @return the list of entities
+   */
+  List<GdcDetailsDTO> findByIdIn(List<String> gdcIds);
 
   /**
    * Get the "id" gdcDetails.
