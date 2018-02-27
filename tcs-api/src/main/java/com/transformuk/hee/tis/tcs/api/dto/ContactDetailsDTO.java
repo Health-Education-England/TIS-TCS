@@ -34,24 +34,20 @@ public class ContactDetailsDTO implements Serializable {
 
   private String maidenName;
 
-  @NotNull(message = "Initials is required", groups = {Update.class, Create.class})
   private String initials;
 
-  @NotNull(message = "Title is required", groups = {Update.class, Create.class})
   private String title;
 
   private String telephoneNumber;
 
   private String mobileNumber;
 
-  @NotNull(message = "Email is required", groups = {Update.class, Create.class})
   @Email(message = "Valid email is required", groups = {Update.class, Create.class})
   private String email;
 
   @Email(message = "Valid email is required", groups = {Update.class, Create.class})
   private String workEmail;
 
-  @NotNull(message = "Address is required", groups = {Update.class, Create.class})
   private String address1;
 
   private String address2;
@@ -60,7 +56,6 @@ public class ContactDetailsDTO implements Serializable {
 
   private String address4;
 
-  @NotNull(message = "PostCode is required", groups = {Update.class, Create.class})
   private String postCode;
 
   private LocalDateTime amendedDate;
