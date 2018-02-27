@@ -3,6 +3,8 @@ package com.transformuk.hee.tis.tcs.service.api.validation;
 
 import com.transformuk.hee.tis.tcs.api.dto.GdcDetailsDTO;
 import com.transformuk.hee.tis.tcs.service.model.GdcDetails;
+import com.transformuk.hee.tis.tcs.service.repository.GdcDetailsRepository;
+import com.transformuk.hee.tis.tcs.service.repository.IdProjection;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.stereotype.Component;
 import org.springframework.validation.BeanPropertyBindingResult;
@@ -20,7 +22,11 @@ import java.util.List;
 public class GdcDetailsValidator {
 
   private static final String GDC_DETAILS_DTO_NAME = "GdcDetailsDTO";
+  private GdcDetailsRepository gdcDetailsRepository;
 
+  public GdcDetailsValidator(GdcDetailsRepository gdcDetailsRepository) {
+    this.gdcDetailsRepository = gdcDetailsRepository;
+  }
 
   /**
    * Custom validation on the gdcDetailsDTO DTO, this is meant to supplement the annotation based validation
@@ -33,11 +39,51 @@ public class GdcDetailsValidator {
 
     List<FieldError> fieldErrors = new ArrayList<>();
 //    fieldErrors.addAll(checkGdcStatus(gdcDetailsDTO));
+    fieldErrors.addAll(checkGdcNumber(gdcDetailsDTO));
     if (!fieldErrors.isEmpty()) {
       BeanPropertyBindingResult bindingResult = new BeanPropertyBindingResult(gdcDetailsDTO, "GdcDetailsDTO");
       fieldErrors.forEach(bindingResult::addError);
       throw new MethodArgumentNotValidException(null, bindingResult);
     }
+  }
+
+  /**
+   * Check gdc number is already exists
+   *
+   * @param gdcDetailsDTO
+   * @return
+   */
+  private List<FieldError> checkGdcNumber(GdcDetailsDTO gdcDetailsDTO) {
+    List<FieldError> fieldErrors = new ArrayList<>();
+    String gdcNumber = gdcDetailsDTO.getGdcNumber();
+    if (gdcDetailsDTO.getId() != null) {
+      if (StringUtils.isNotEmpty(gdcNumber)) {
+        List<IdProjection> existingGdcDetails = gdcDetailsRepository.findByGdcNumber(gdcNumber);
+        if (existingGdcDetails.size() > 1) {
+          fieldErrors.add(new FieldError(GDC_DETAILS_DTO_NAME, "gdcNumber",
+                  String.format("gdcNumber %s is not unique, there are currently %d persons with this number: %s",
+                          gdcDetailsDTO.getGdcNumber(), existingGdcDetails.size(),
+                          existingGdcDetails)));
+        } else if (existingGdcDetails.size() == 1) {
+          if (!gdcDetailsDTO.getId().equals(existingGdcDetails.get(0).getId())) {
+            fieldErrors.add(new FieldError(GDC_DETAILS_DTO_NAME, "gdcNumber",
+                    String.format("gdcNumber %s is not unique, there is currently one person with this number: %s",
+                            gdcDetailsDTO.getGdcNumber(), existingGdcDetails.get(0))));
+          }
+        }
+      }
+    } else {
+      //if we create a gmc details
+      if (StringUtils.isNotEmpty(gdcNumber)) {
+        List<IdProjection> existingGdcDetails = gdcDetailsRepository.findByGdcNumber(gdcNumber);
+        if (!existingGdcDetails.isEmpty()) {
+          fieldErrors.add(new FieldError(GDC_DETAILS_DTO_NAME, "gdcNumber",
+                  String.format("gdcNumber %s is not unique, there is currently one person with this number: %s",
+                          gdcDetailsDTO.getGdcNumber(), existingGdcDetails.get(0))));
+        }
+      }
+    }
+    return fieldErrors;
   }
 
   private List<FieldError> checkGdcStatus(GdcDetailsDTO gdcDetailsDTO) {

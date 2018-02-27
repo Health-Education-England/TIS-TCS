@@ -16,6 +16,7 @@ import com.transformuk.hee.tis.tcs.service.api.decorator.PlacementViewDecorator;
 import com.transformuk.hee.tis.tcs.service.api.util.ColumnFilterUtil;
 import com.transformuk.hee.tis.tcs.service.api.util.HeaderUtil;
 import com.transformuk.hee.tis.tcs.service.api.util.PaginationUtil;
+import com.transformuk.hee.tis.tcs.service.api.validation.PersonValidator;
 import com.transformuk.hee.tis.tcs.service.model.ColumnFilter;
 import com.transformuk.hee.tis.tcs.service.model.PlacementView;
 import com.transformuk.hee.tis.tcs.service.repository.PlacementViewRepository;
@@ -37,6 +38,7 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.validation.annotation.Validated;
+import org.springframework.web.bind.MethodArgumentNotValidException;
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PatchMapping;
@@ -76,11 +78,12 @@ public class PersonResource {
   private final PersonViewDecorator personViewDecorator;
   private final PlacementService placementService;
   private final PlacementSummaryDecorator placementSummaryDecorator;
+  private final PersonValidator personValidator;
 
   public PersonResource(PersonService personService, PlacementViewRepository placementViewRepository,
                         PlacementViewMapper placementViewMapper, PlacementViewDecorator placementViewDecorator,
                         PersonViewDecorator personViewDecorator, PlacementService placementService,
-                        PlacementSummaryDecorator placementSummaryDecorator) {
+                        PlacementSummaryDecorator placementSummaryDecorator, PersonValidator personValidator) {
     this.personService = personService;
     this.placementViewRepository = placementViewRepository;
     this.placementViewMapper = placementViewMapper;
@@ -88,6 +91,7 @@ public class PersonResource {
     this.personViewDecorator = personViewDecorator;
     this.placementService = placementService;
     this.placementSummaryDecorator = placementSummaryDecorator;
+    this.personValidator = personValidator;
   }
 
   /**
@@ -100,11 +104,13 @@ public class PersonResource {
   @PostMapping("/people")
   @Timed
   @PreAuthorize("hasPermission('tis:people::person:', 'Create')")
-  public ResponseEntity<PersonDTO> createPerson(@RequestBody @Validated(Create.class) PersonDTO personDTO) throws URISyntaxException {
+  public ResponseEntity<PersonDTO> createPerson(@RequestBody @Validated(Create.class) PersonDTO personDTO)
+          throws URISyntaxException, MethodArgumentNotValidException {
     log.debug("REST request to save Person : {}", personDTO);
     if (personDTO.getId() != null) {
       return ResponseEntity.badRequest().headers(HeaderUtil.createFailureAlert(ENTITY_NAME, "idexists", "A new person cannot already have an ID")).body(null);
     }
+    personValidator.validate(personDTO);
     PersonDTO result = personService.create(personDTO);
     return ResponseEntity.created(new URI("/api/people/" + result.getId()))
         .headers(HeaderUtil.createEntityCreationAlert(ENTITY_NAME, result.getId().toString()))
@@ -123,11 +129,13 @@ public class PersonResource {
   @PutMapping("/people")
   @Timed
   @PreAuthorize("hasPermission('tis:people::person:', 'Update')")
-  public ResponseEntity<PersonDTO> updatePerson(@RequestBody @Validated(Update.class) PersonDTO personDTO) throws URISyntaxException {
+  public ResponseEntity<PersonDTO> updatePerson(@RequestBody @Validated(Update.class) PersonDTO personDTO)
+          throws URISyntaxException, MethodArgumentNotValidException {
     log.debug("REST request to update Person : {}", personDTO);
     if (personDTO.getId() == null) {
       return createPerson(personDTO);
     }
+    personValidator.validate(personDTO);
     PersonDTO result = personService.save(personDTO);
     return ResponseEntity.ok()
         .headers(HeaderUtil.createEntityUpdateAlert(ENTITY_NAME, personDTO.getId().toString()))

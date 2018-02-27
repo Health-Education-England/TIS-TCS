@@ -19,4 +19,5 @@ public interface GdcDetailsRepository extends JpaRepository<GdcDetails, Long> {
 	@Query("SELECT g.gdcNumber from GdcDetails g WHERE g.gdcNumber in :gdcIds")
 	List<GdcDetails> findByGdcIdsIn(@Param("gdcIds") List<String> gdcIds);
 
+  List<IdProjection> findByGdcNumber(String gdcNumber);
 }
