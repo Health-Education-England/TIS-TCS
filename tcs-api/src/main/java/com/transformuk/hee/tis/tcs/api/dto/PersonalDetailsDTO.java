@@ -22,13 +22,10 @@ public class PersonalDetailsDTO implements Serializable {
 
   private String maritalStatus;
 
-  @NotNull(message = "Date Of Birth is required", groups = {Update.class, Create.class})
   private LocalDate dateOfBirth;
 
-  @NotNull(message = "Gender is required", groups = {Update.class, Create.class})
   private String gender;
 
-  @NotNull(message = "Nationality is required", groups = {Update.class, Create.class})
   private String nationality;
 
   private String dualNationality;
@@ -37,7 +34,6 @@ public class PersonalDetailsDTO implements Serializable {
 
   private String religiousBelief;
 
-  @NotNull(message = "Ethnic Origin is required", groups = {Update.class, Create.class})
   private String ethnicOrigin;
 
   private String disability;
