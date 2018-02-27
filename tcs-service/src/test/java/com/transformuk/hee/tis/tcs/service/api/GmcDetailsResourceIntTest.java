@@ -176,22 +176,22 @@ public class GmcDetailsResourceIntTest {
             value(containsInAnyOrder("id")));
   }
 
-  @Test
-  @Transactional
-  public void shouldValidateGmcStatusWhenGmcNumberIsEntered() throws Exception {
-    //given
-    GmcDetailsDTO gmcDetailsDTO = new GmcDetailsDTO();
-    gmcDetailsDTO.setId(1L);
-    gmcDetailsDTO.setGmcNumber(DEFAULT_GMC_NUMBER);
-    //when & then
-    restGmcDetailsMockMvc.perform(post("/api/gmc-details")
-        .contentType(TestUtil.APPLICATION_JSON_UTF8)
-        .content(TestUtil.convertObjectToJsonBytes(gmcDetailsDTO)))
-        .andExpect(status().isBadRequest())
-        .andExpect(jsonPath("$.message").value("error.validation"))
-        .andExpect(jsonPath("$.fieldErrors[*].field").
-            value(containsInAnyOrder("gmcStatus")));
-  }
+//  @Test
+//  @Transactional
+//  public void shouldValidateGmcStatusWhenGmcNumberIsEntered() throws Exception {
+//    //given
+//    GmcDetailsDTO gmcDetailsDTO = new GmcDetailsDTO();
+//    gmcDetailsDTO.setId(1L);
+//    gmcDetailsDTO.setGmcNumber(DEFAULT_GMC_NUMBER);
+//    //when & then
+//    restGmcDetailsMockMvc.perform(post("/api/gmc-details")
+//        .contentType(TestUtil.APPLICATION_JSON_UTF8)
+//        .content(TestUtil.convertObjectToJsonBytes(gmcDetailsDTO)))
+//        .andExpect(status().isBadRequest())
+//        .andExpect(jsonPath("$.message").value("error.validation"))
+//        .andExpect(jsonPath("$.fieldErrors[*].field").
+//            value(containsInAnyOrder("gmcStatus")));
+//  }
 
   @Test
   @Transactional
