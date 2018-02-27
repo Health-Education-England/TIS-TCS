@@ -32,7 +32,7 @@ public class RightToWorkValidator {
   public void validate(RightToWorkDTO rightToWorkDTO) throws MethodArgumentNotValidException {
 
     List<FieldError> fieldErrors = new ArrayList<>();
-    fieldErrors.addAll(checkPermitToWork(rightToWorkDTO));
+//    fieldErrors.addAll(checkPermitToWork(rightToWorkDTO));
     if (!fieldErrors.isEmpty()) {
       BeanPropertyBindingResult bindingResult = new BeanPropertyBindingResult(rightToWorkDTO, "RightToWorkDTO");
       fieldErrors.forEach(bindingResult::addError);
