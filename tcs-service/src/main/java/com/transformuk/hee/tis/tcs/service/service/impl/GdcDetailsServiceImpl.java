@@ -1,7 +1,9 @@
 package com.transformuk.hee.tis.tcs.service.service.impl;
 
 import com.transformuk.hee.tis.tcs.api.dto.GdcDetailsDTO;
+import com.transformuk.hee.tis.tcs.api.dto.GmcDetailsDTO;
 import com.transformuk.hee.tis.tcs.service.model.GdcDetails;
+import com.transformuk.hee.tis.tcs.service.model.GmcDetails;
 import com.transformuk.hee.tis.tcs.service.repository.GdcDetailsRepository;
 import com.transformuk.hee.tis.tcs.service.service.GdcDetailsService;
 import com.transformuk.hee.tis.tcs.service.service.mapper.GdcDetailsMapper;
@@ -73,6 +75,15 @@ public class GdcDetailsServiceImpl implements GdcDetailsService {
     log.debug("Request to get all GdcDetails");
     return gdcDetailsRepository.findAll(pageable)
         .map(gdcDetailsMapper::toDto);
+  }
+
+  @Override
+  @Transactional(readOnly = true)
+  public List<GdcDetailsDTO> findByIdIn(List<String> gdcIds) {
+    log.debug("Request to get all GdcDetails");
+
+    List<GdcDetails> byGdcIdsIn = gdcDetailsRepository.findByGdcIdsIn(gdcIds);
+    return gdcDetailsMapper.gdcDetailsToGdcDetailsDTO(byGdcIdsIn);
   }
 
   /**

@@ -2,6 +2,7 @@ package com.transformuk.hee.tis.tcs.service.api;
 
 import com.codahale.metrics.annotation.Timed;
 import com.transformuk.hee.tis.tcs.api.dto.GdcDetailsDTO;
+import com.transformuk.hee.tis.tcs.api.dto.GmcDetailsDTO;
 import com.transformuk.hee.tis.tcs.api.dto.validation.Create;
 import com.transformuk.hee.tis.tcs.api.dto.validation.Update;
 import com.transformuk.hee.tis.tcs.service.api.util.HeaderUtil;
@@ -34,6 +35,7 @@ import org.springframework.web.bind.annotation.RestController;
 import javax.validation.Valid;
 import java.net.URI;
 import java.net.URISyntaxException;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
 import java.util.stream.Collectors;
@@ -132,6 +134,32 @@ public class GdcDetailsResource {
     log.debug("REST request to get GdcDetails : {}", id);
     GdcDetailsDTO gdcDetailsDTO = gdcDetailsService.findOne(id);
     return ResponseUtil.wrapOrNotFound(Optional.ofNullable(gdcDetailsDTO));
+  }
+
+  /**
+   * GET  /gdc-details/in/:gdcids : get gdcDetails given their ID's.
+   * Ignores malformed or not found gdc-details
+   *
+   * @param gdcids the gdcids to search by
+   * @return the ResponseEntity with status 200 (OK)  and the list of gdcDetails in body, or empty list
+   */
+  @GetMapping("/gdc-details/in/{gdcids}")
+  @Timed
+  public ResponseEntity<List<GdcDetailsDTO>> getGdcDetailsIn(@PathVariable String gdcids) {
+    log.debug("REST request to find several GdcDetails: {}", gdcids);
+    List<GdcDetailsDTO> resp = new ArrayList<>();
+    List<String> idList = new ArrayList<>();
+
+    for (String idStr : gdcids.split(",")) {
+      idList.add(idStr);
+    }
+
+    if (!idList.isEmpty()) {
+      resp = gdcDetailsService.findByIdIn(idList);
+      return new ResponseEntity<>(resp, HttpStatus.FOUND);
+    } else {
+      return new ResponseEntity<>(resp, HttpStatus.OK);
+    }
   }
 
   /**

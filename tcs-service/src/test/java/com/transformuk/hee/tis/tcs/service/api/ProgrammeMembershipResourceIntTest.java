@@ -390,7 +390,7 @@ public class ProgrammeMembershipResourceIntTest {
         .andExpect(jsonPath("$.message").value("error.validation"))
         .andExpect(jsonPath("$.fieldErrors[0].field").value("curriculumId"))
         .andExpect(jsonPath("$.fieldErrors[0].message").
-            value(String.format("Curriculum with id %s does associated with programme", String.valueOf(notAssociatedCurriculum.getId()))));
+            value(String.format("The selected Programme and Curriculum are not linked. They must be linked before a Programme Membership can be made", String.valueOf(notAssociatedCurriculum.getId()))));
   }
 
   @Test
