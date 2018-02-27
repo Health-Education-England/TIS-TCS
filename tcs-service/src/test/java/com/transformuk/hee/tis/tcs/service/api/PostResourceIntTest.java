@@ -378,36 +378,6 @@ public class PostResourceIntTest {
 
   }
 
-  @Test
-  @Transactional
-  public void shouldNotAllowTwoSubSpecialties() throws Exception {
-    post = createEntity();
-    post.setIntrepidId(POST_INTREPID_ID);
-    postRepository.saveAndFlush(post);
-    // Update the post
-    Post updatedPost = postRepository.findOne(post.getId());
-    Specialty firstSpeciality = createSpecialty();
-    specialtyRepository.saveAndFlush(firstSpeciality);
-    Specialty secondSpeciality = createSpecialty();
-    specialtyRepository.saveAndFlush(secondSpeciality);
-
-    PostSpecialty firstPostSpecialty = createPostSpecialty(firstSpeciality, PostSpecialtyType.SUB_SPECIALTY, updatedPost);
-    PostSpecialty secondPostSpecialty = createPostSpecialty(secondSpeciality, PostSpecialtyType.SUB_SPECIALTY, updatedPost);
-    updatedPost.setSpecialties(Sets.newHashSet(firstPostSpecialty, secondPostSpecialty));
-    PostDTO postDTO = postMapper.postToPostDTO(updatedPost);
-
-    //when & then
-    restPostMockMvc.perform(put("/api/posts")
-        .contentType(TestUtil.APPLICATION_JSON_UTF8)
-        .content(TestUtil.convertObjectToJsonBytes(postDTO)))
-        .andExpect(status().isBadRequest())
-        .andExpect(jsonPath("$.message").value("error.validation"))
-        .andExpect(jsonPath("$.fieldErrors[0].field").value("specialties"))
-        .andExpect(jsonPath("$.fieldErrors[0].message").value(StringContains.
-            containsString("Only one Specialty of type SUB_SPECIALTY allowed")));
-
-  }
-
   @Ignore
   @Test
   @Transactional
