@@ -32,7 +32,7 @@ public class GmcDetailsValidator {
   public void validate(GmcDetailsDTO gmcDetailsDTO) throws MethodArgumentNotValidException {
 
     List<FieldError> fieldErrors = new ArrayList<>();
-    fieldErrors.addAll(checkGmcStatus(gmcDetailsDTO));
+//    fieldErrors.addAll(checkGmcStatus(gmcDetailsDTO));
     if (!fieldErrors.isEmpty()) {
       BeanPropertyBindingResult bindingResult = new BeanPropertyBindingResult(gmcDetailsDTO, "GmcDetailsDTO");
       fieldErrors.forEach(bindingResult::addError);
