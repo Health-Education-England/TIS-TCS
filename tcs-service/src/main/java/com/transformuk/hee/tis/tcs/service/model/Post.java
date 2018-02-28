@@ -72,6 +72,9 @@ public class Post implements Serializable {
   @Column(name = "legacy")
   private boolean legacy;
 
+  @Column(name = "bypassNPNGeneration")
+  private boolean bypassNPNGeneration;
+
   @OneToOne(fetch = FetchType.EAGER)
   @JoinColumn(name = "oldPostId")
   private Post oldPost;
@@ -344,6 +347,14 @@ public class Post implements Serializable {
   public Post specialties(Set<PostSpecialty> specialties) {
     this.specialties = specialties;
     return this;
+  }
+
+  public boolean isBypassNPNGeneration() {
+    return bypassNPNGeneration;
+  }
+
+  public void setBypassNPNGeneration(boolean bypassNPNGeneration) {
+    this.bypassNPNGeneration = bypassNPNGeneration;
   }
 
   @Override
