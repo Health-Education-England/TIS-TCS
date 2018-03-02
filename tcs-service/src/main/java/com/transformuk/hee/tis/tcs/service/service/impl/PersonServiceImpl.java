@@ -42,7 +42,6 @@ import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.jdbc.core.RowMapper;
 import org.springframework.scheduling.annotation.Async;
 import org.springframework.stereotype.Service;
-import org.springframework.transaction.annotation.Propagation;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.util.CollectionUtils;
 
@@ -209,47 +208,28 @@ public class PersonServiceImpl implements PersonService {
     return new PageImpl<>(personsPageList, pageable, personCount);
   }
 
+  /**
+   * Advanced search for person list view.
+   *
+   * There are two queries that happen in this method, one to retrieve the data based on the search and column filters
+   * and the second to get the count so that we can support pagination
+   *
+   * @param searchString the search string to match, can be null
+   * @param columnFilters
+   * @param pageable     the pagination information
+   * @return
+   */
   @Override
   @Transactional(readOnly = true)
   public Page<PersonViewDTO> advancedSearch(String searchString, List<ColumnFilter> columnFilters, Pageable pageable) {
 
-    StringBuilder countQuery = new StringBuilder();
-    countQuery.append("select count(p.id) from Person p" +
-        " join ContactDetails cd on (cd.id = p.id)\n" +
-        " join GmcDetails gmc on (gmc.id = p.id)\n" +
-        " join GdcDetails gdc on (gdc.id = p.id) ");
-
     StringBuilder whereClause = new StringBuilder();
-    whereClause.append(" WHERE 1=1 ");
+    createWhereClause(searchString, columnFilters, whereClause);
 
-    //add the column filters criteria
-    if (columnFilters != null && !columnFilters.isEmpty()) {
-      columnFilters.forEach(cf -> {
-        whereClause.append(" AND p." + cf.getName() + " in (");
-        cf.getValues().stream().forEach(k -> whereClause.append("'" + k + "',"));
-        whereClause.deleteCharAt(whereClause.length() - 1);
-        whereClause.append(")");
-      });
-    }
+    String countQuery = sqlQuerySupplier.getQuery(SqlQuerySupplier.PERSON_VIEW_COUNT);
+    countQuery = countQuery.replaceAll("WHERECLAUSE", whereClause.toString());
 
-    if (StringUtils.isNotEmpty(searchString)) {
-      whereClause.append(" AND ( p.publicHealthNumber like ").append("'%" + searchString + "%'");
-      whereClause.append(" OR cd.surname like ").append("'%" + searchString + "%'");
-      whereClause.append(" OR cd.forenames like ").append("'%" + searchString + "%'");
-      whereClause.append(" OR gmc.gmcNumber like ").append("'%" + searchString + "%'");
-      whereClause.append(" OR gdc.gdcNumber like ").append("'%" + searchString + "%'");
-      whereClause.append(" OR p.role like ").append("'%" + searchString + "%'");
-      if (StringUtils.isNumeric(searchString)) {
-        whereClause.append(" OR p.id in ").append("(" + Lists.newArrayList(Long.parseLong(searchString)).
-            toString().replace("[", "").replace("]", "") + ")");
-      }
-      whereClause.append(" ) ");
-    }
-
-
-    countQuery.append(whereClause);
-    Integer personCount = jdbcTemplate.queryForObject(countQuery.toString(),
-        Integer.class);
+    Integer personCount = jdbcTemplate.queryForObject(countQuery.toString(), Integer.class);
 
     int start = pageable.getOffset();
     int end = ((start + pageable.getPageSize()) > personCount) ? personCount : (start + pageable.getPageSize());
@@ -278,6 +258,63 @@ public class PersonServiceImpl implements PersonService {
     }
     List<PersonViewDTO> personsPageList = persons.subList(start,(end > persons.size()) ? persons.size() : end);
     return new PageImpl<>(personsPageList, pageable, personCount);
+  }
+
+  private void createWhereClause(String searchString, List<ColumnFilter> columnFilters, StringBuilder whereClause) {
+    whereClause.append(" WHERE 1=1 ");
+
+    //add the column filters criteria
+    if (columnFilters != null && !columnFilters.isEmpty()) {
+      columnFilters.forEach(cf -> {
+
+        switch(cf.getName()){
+          case "programmeName":
+            whereClause.append(" AND prg.programmeName in (");
+            break;
+          case "gradeId":
+            whereClause.append(" AND pl.gradeId in (");
+            break;
+          case "specialty":
+            whereClause.append(" AND s.name in (");
+            break;
+          case "placementType":
+            whereClause.append(" AND pl.placementType in (");
+            break;
+          case "siteId":
+            whereClause.append(" AND pl.siteId in (");
+            break;
+          case "role":
+            whereClause.append(" AND p.role in (");
+            break;
+          case "currentOwner":
+            whereClause.append(" AND lo.owner in (");
+            break;
+          case "status":
+            whereClause.append(" AND p.status in (");
+            break;
+          default:
+            throw new IllegalArgumentException("Not accounted for column filter [" + cf.getName() +
+                "] you need to add an additional case statement or remove it from the request");
+        }
+        cf.getValues().stream().forEach(k -> whereClause.append("'" + k + "',"));
+        whereClause.deleteCharAt(whereClause.length() - 1);
+        whereClause.append(")");
+      });
+    }
+
+    if (StringUtils.isNotEmpty(searchString)) {
+      whereClause.append(" AND ( p.publicHealthNumber like ").append("'%" + searchString + "%'");
+      whereClause.append(" OR cd.surname like ").append("'%" + searchString + "%'");
+      whereClause.append(" OR cd.forenames like ").append("'%" + searchString + "%'");
+      whereClause.append(" OR gmc.gmcNumber like ").append("'%" + searchString + "%'");
+      whereClause.append(" OR gdc.gdcNumber like ").append("'%" + searchString + "%'");
+      whereClause.append(" OR p.role like ").append("'%" + searchString + "%'");
+      if (StringUtils.isNumeric(searchString)) {
+        whereClause.append(" OR p.id in ").append("(" + Lists.newArrayList(Long.parseLong(searchString)).
+            toString().replace("[", "").replace("]", "") + ")");
+      }
+      whereClause.append(" ) ");
+    }
   }
 
   @Override
