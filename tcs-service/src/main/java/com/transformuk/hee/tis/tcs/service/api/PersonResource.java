@@ -2,11 +2,7 @@ package com.transformuk.hee.tis.tcs.service.api;
 
 import com.codahale.metrics.annotation.Timed;
 import com.google.common.collect.Lists;
-import com.transformuk.hee.tis.tcs.api.dto.PersonBasicDetailsDTO;
-import com.transformuk.hee.tis.tcs.api.dto.PersonDTO;
-import com.transformuk.hee.tis.tcs.api.dto.PlacementSummaryDTO;
-import com.transformuk.hee.tis.tcs.api.dto.PersonViewDTO;
-import com.transformuk.hee.tis.tcs.api.dto.PlacementViewDTO;
+import com.transformuk.hee.tis.tcs.api.dto.*;
 import com.transformuk.hee.tis.tcs.api.dto.validation.Create;
 import com.transformuk.hee.tis.tcs.api.dto.validation.Update;
 import com.transformuk.hee.tis.tcs.api.enumeration.Status;
@@ -18,6 +14,7 @@ import com.transformuk.hee.tis.tcs.service.api.util.HeaderUtil;
 import com.transformuk.hee.tis.tcs.service.api.util.PaginationUtil;
 import com.transformuk.hee.tis.tcs.service.api.validation.PersonValidator;
 import com.transformuk.hee.tis.tcs.service.model.ColumnFilter;
+import com.transformuk.hee.tis.tcs.service.model.PersonBasicDetails;
 import com.transformuk.hee.tis.tcs.service.model.PlacementView;
 import com.transformuk.hee.tis.tcs.service.repository.PlacementViewRepository;
 import com.transformuk.hee.tis.tcs.service.service.PersonService;
@@ -54,8 +51,7 @@ import javax.validation.Valid;
 import java.io.IOException;
 import java.net.URI;
 import java.net.URISyntaxException;
-import java.util.List;
-import java.util.Optional;
+import java.util.*;
 import java.util.stream.Collectors;
 
 import static com.transformuk.hee.tis.tcs.service.api.util.StringUtil.sanitize;
@@ -174,6 +170,32 @@ public class PersonResource {
     HttpHeaders headers = PaginationUtil.generatePaginationHttpHeaders(page, "/api/people");
     log.info("REST request to get a page of People completed successfully");
     return new ResponseEntity<>(personViewDecorator.decorate(page.getContent()), headers, HttpStatus.OK);
+  }
+
+  /**
+   * GET  /people/in/:ids : get people given their ID's.
+   * Ignores malformed or not found people
+   *
+   * @param ids the ids to search by
+   * @return the ResponseEntity with status 200 (OK)  and the list of gmcDetails in body, or empty list
+   */
+  @GetMapping("/people/in/{ids}")
+  @Timed
+  public ResponseEntity<List<PersonBasicDetailsDTO>> getPersonsIn(@PathVariable String ids) {
+    log.debug("REST request to find several Person: {}", ids);
+    List<PersonBasicDetailsDTO> resp = new ArrayList<>();
+    Set<Long> idList = new HashSet<>();
+
+    for (String idStr : ids.split(",")) {
+      idList.add(Long.getLong(idStr));
+    }
+
+    if (!idList.isEmpty()) {
+      resp = personService.findByIdIn(idList);
+      return new ResponseEntity<>(resp, HttpStatus.FOUND);
+    } else {
+      return new ResponseEntity<>(resp, HttpStatus.OK);
+    }
   }
 
   /**

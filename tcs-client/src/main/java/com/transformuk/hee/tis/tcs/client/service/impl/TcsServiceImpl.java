@@ -24,6 +24,7 @@ import com.transformuk.hee.tis.tcs.api.dto.SpecialtyGroupDTO;
 import com.transformuk.hee.tis.tcs.api.dto.TariffFundingTypeFieldsDTO;
 import com.transformuk.hee.tis.tcs.api.dto.TariffRateDTO;
 import com.transformuk.hee.tis.tcs.api.dto.TrainingNumberDTO;
+import com.transformuk.hee.tis.tcs.api.dto.PersonBasicDetailsDTO;
 import org.apache.commons.codec.EncoderException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -134,6 +135,11 @@ public class TcsServiceImpl extends AbstractClientService {
 				.getBody();
 	}
 
+	public PersonDTO getPerson(String id) {
+		return tcsRestTemplate.exchange(serviceUrl + "/api/people/" + id,
+				HttpMethod.GET, null, new ParameterizedTypeReference<PersonDTO>() {}).getBody();
+	}
+
 	public ProgrammeMembershipDTO createProgrammeMembership(ProgrammeMembershipDTO programmeMembershipDTO) {
 		HttpHeaders headers = new HttpHeaders();
 		HttpEntity<ProgrammeMembershipDTO> httpEntity = new HttpEntity<>(programmeMembershipDTO, headers);
@@ -174,6 +180,13 @@ public class TcsServiceImpl extends AbstractClientService {
 		String url = serviceUrl + "/api/gmc-details/in/" + String.join(",", gmcIds);
 		ResponseEntity<List<GmcDetailsDTO>> responseEntity = tcsRestTemplate.
 				exchange(url, HttpMethod.GET, null, new ParameterizedTypeReference<List<GmcDetailsDTO>>() {});
+		return responseEntity.getBody();
+	}
+
+	public List<PersonBasicDetailsDTO> findPersonBasicDetailsIn(Set<String> ids) {
+		String url = serviceUrl + "/api/gmc-details/in/" + String.join(",", ids);
+		ResponseEntity<List<PersonBasicDetailsDTO>> responseEntity = tcsRestTemplate.
+				exchange(url, HttpMethod.GET, null, new ParameterizedTypeReference<List<PersonBasicDetailsDTO>>() {});
 		return responseEntity.getBody();
 	}
 

@@ -1,5 +1,6 @@
 package com.transformuk.hee.tis.tcs.service.service;
 
+import com.transformuk.hee.tis.tcs.api.dto.GmcDetailsDTO;
 import com.transformuk.hee.tis.tcs.api.dto.PersonBasicDetailsDTO;
 import com.transformuk.hee.tis.tcs.api.dto.PersonDTO;
 import com.transformuk.hee.tis.tcs.api.dto.PersonViewDTO;
@@ -9,6 +10,7 @@ import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 
 import java.util.List;
+import java.util.Set;
 import java.util.concurrent.CompletableFuture;
 
 /**
@@ -79,11 +81,19 @@ public interface PersonService {
   PersonDTO findOne(Long id);
 
   /**
-   * Get a person's ID by Gmc Id
+   * Retrieve the basic details of persons
    *
-   * @param gmcId the GMC Id of the entity
-   * @return the tcs ID if found
+   * @param ids the person IDs
+   * @return the basic details if found
    */
+  List<PersonBasicDetailsDTO> findByIdIn(Set<Long> ids);
+
+    /**
+		 * Get a person's ID by Gmc Id
+		 *
+		 * @param gmcId the GMC Id of the entity
+		 * @return the tcs ID if found
+		 */
   Long findIdByGmcId(String gmcId);
 
   /**
