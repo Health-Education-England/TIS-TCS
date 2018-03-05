@@ -207,23 +207,11 @@ public class PersonServiceImpl implements PersonService {
       return new PageImpl<>(persons);
     }
 
-    //pagination optimizations
     Integer personCount;
-//    if (start == 0 && persons.size() < pageable.getPageSize()) { //query returned less than 1 page and is on 1st page
-//      log.info("returning count of the size of the list");
-//      personCount = persons.size();
-//    }
-//    else {
-//      //if there are no filters, dont bother doing any count for pagination as no one will actually go through that many pages
-//      log.info("max int count being returned as no filters applied");
-//      personCount = MAX_PERSON_COUNT;
-//    }
-//     else {
-      log.debug("running count query");
-      String countQuery = "SELECT COUNT(1) from Person";
-      countQuery = countQuery.replaceAll("WHERECLAUSE", " WHERE 1=1 ");
-      personCount = jdbcTemplate.queryForObject(countQuery, Integer.class);
-//    }
+    log.debug("running count query");
+    String countQuery = "SELECT COUNT(1) from Person";
+    countQuery = countQuery.replaceAll("WHERECLAUSE", " WHERE 1=1 ");
+    personCount = jdbcTemplate.queryForObject(countQuery, Integer.class);
 
     return new PageImpl<>(persons, pageable, personCount);
   }
@@ -244,8 +232,18 @@ public class PersonServiceImpl implements PersonService {
   public Page<PersonViewDTO> advancedSearch(String searchString, List<ColumnFilter> columnFilters, Pageable pageable) {
 
     String whereClause = createWhereClause(searchString, columnFilters);
+
+    log.debug("running count query");
+    StopWatch stopWatch = new StopWatch();
+    stopWatch.start();
+    String countQuery = sqlQuerySupplier.getQuery(SqlQuerySupplier.PERSON_VIEW_COUNT);
+    countQuery = countQuery.replaceAll("WHERECLAUSE", whereClause);
+    Integer personCount = jdbcTemplate.queryForObject(countQuery, Integer.class);
+    stopWatch.stop();
+    log.debug("count query finished in: [{}]s", stopWatch.getTotalTimeSeconds());
+
     int start = pageable.getOffset();
-    int end = start + pageable.getPageSize();
+    int end = pageable.getPageSize();
 
     String query = sqlQuerySupplier.getQuery(SqlQuerySupplier.PERSON_VIEW);
     query = query.replaceAll("WHERECLAUSE", whereClause);
@@ -262,42 +260,19 @@ public class PersonServiceImpl implements PersonService {
       query = query.replaceAll("ORDERBYCLAUSE", "");
     }
 
+    //limit is 0 based
     query = query.replaceAll("LIMITCLAUSE", "limit " + start + "," + end);
 
     log.debug("running person query");
-    StopWatch stopWatch = new StopWatch();
+    stopWatch = new StopWatch();
     stopWatch.start();
     List<PersonViewDTO> persons = jdbcTemplate.query(query, new PersonViewRowMapper());
     stopWatch.stop();
     log.debug("person query finished in: [{}]s", stopWatch.getTotalTimeSeconds());
 
-
     if (CollectionUtils.isEmpty(persons)) {
       return new PageImpl<>(persons);
     }
-
-    //optimizations
-    Integer personCount;
-//    if (start == 0 && persons.size() < pageable.getPageSize()) { //query returned less than 1 page and is on 1st page
-//      log.info("returning count of the size of the list");
-//      personCount = persons.size();
-//    }
-//    else if (" WHERE 1=1 ".equalsIgnoreCase(whereClause)) {
-//      //if there are no filters, dont bother doing any count for pagination as no one will actually go through that many pages
-//      log.info("max int count being returned as no filters applied");
-//      personCount = MAX_PERSON_COUNT;
-//    }
-//    else {
-      log.debug("running count query");
-    stopWatch = new StopWatch();
-    stopWatch.start();
-    String countQuery = sqlQuerySupplier.getQuery(SqlQuerySupplier.PERSON_VIEW_COUNT);
-      countQuery = countQuery.replaceAll("WHERECLAUSE", whereClause);
-      personCount = jdbcTemplate.queryForObject(countQuery, Integer.class);
-    stopWatch.stop();
-    log.debug("count query finished in: [{}]s", stopWatch.getTotalTimeSeconds());
-
-//    }
 
     return new PageImpl<>(persons, pageable, personCount);
   }
