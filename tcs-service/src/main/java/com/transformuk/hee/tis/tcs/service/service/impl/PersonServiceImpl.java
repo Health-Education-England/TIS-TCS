@@ -42,9 +42,9 @@ import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.jdbc.core.RowMapper;
 import org.springframework.scheduling.annotation.Async;
 import org.springframework.stereotype.Service;
-import org.springframework.transaction.annotation.Propagation;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.util.CollectionUtils;
+import org.springframework.util.StopWatch;
 
 import java.sql.ResultSet;
 import java.sql.SQLException;
@@ -178,14 +178,9 @@ public class PersonServiceImpl implements PersonService {
   @Transactional(readOnly = true)
   public Page<PersonViewDTO> findAll(Pageable pageable) {
     log.debug("Request to get all People");
-    Integer personCount = jdbcTemplate.queryForObject("select count(p.id) from Person p" +
-            " join ContactDetails cd on (cd.id = p.id)\n" +
-            " join GmcDetails gmc on (gmc.id = p.id)\n" +
-            " join GdcDetails gdc on (gdc.id = p.id) ",
-        Integer.class);
 
     int start = pageable.getOffset();
-    int end = ((start + pageable.getPageSize()) > personCount) ? personCount : (start + pageable.getPageSize());
+    int end = start + pageable.getPageSize();
 
     String query = sqlQuerySupplier.getQuery(SqlQuerySupplier.PERSON_VIEW);
     query = query.replaceAll("WHERECLAUSE", " WHERE 1=1 ");
@@ -203,14 +198,37 @@ public class PersonServiceImpl implements PersonService {
 
     query = query.replaceAll("LIMITCLAUSE", "limit " + start + "," + end);
 
+    log.debug("running full person query with no filters");
+    StopWatch stopWatch = new StopWatch();
+    stopWatch.start();
     List<PersonViewDTO> persons = jdbcTemplate.query(query, new PersonViewRowMapper());
+    stopWatch.stop();
+    log.debug("full person query finished in: [{}]s", stopWatch.getTotalTimeSeconds());
+
     if (CollectionUtils.isEmpty(persons)) {
       return new PageImpl<>(persons);
     }
-    List<PersonViewDTO> personsPageList = persons.subList(start,(end > persons.size()) ? persons.size() : end);
-    return new PageImpl<>(personsPageList, pageable, personCount);
+
+    Integer personCount;
+    log.debug("running count query");
+    String countQuery = "SELECT COUNT(1) from Person";
+    countQuery = countQuery.replaceAll("WHERECLAUSE", " WHERE 1=1 ");
+    personCount = jdbcTemplate.queryForObject(countQuery, Integer.class);
+
+    return new PageImpl<>(persons, pageable, personCount);
   }
 
+  /**
+   * Advanced search for person list view.
+   * <p>
+   * There are two queries that happen in this method, one to retrieve the data based on the search and column filters
+   * and the second to get the count so that we can support pagination
+   *
+   * @param searchString  the search string to match, can be null
+   * @param columnFilters
+   * @param pageable      the pagination information
+   * @return
+   */
   @Override
   @Transactional(readOnly = true)
   public List<PersonBasicDetailsDTO> basicDetailsSearch(String searchString) {
@@ -238,19 +256,89 @@ public class PersonServiceImpl implements PersonService {
   @Transactional(readOnly = true)
   public Page<PersonViewDTO> advancedSearch(String searchString, List<ColumnFilter> columnFilters, Pageable pageable) {
 
-    StringBuilder countQuery = new StringBuilder();
-    countQuery.append("select count(p.id) from Person p" +
-        " join ContactDetails cd on (cd.id = p.id)\n" +
-        " join GmcDetails gmc on (gmc.id = p.id)\n" +
-        " join GdcDetails gdc on (gdc.id = p.id) ");
+    String whereClause = createWhereClause(searchString, columnFilters);
 
+    log.debug("running count query");
+    StopWatch stopWatch = new StopWatch();
+    stopWatch.start();
+    String countQuery = sqlQuerySupplier.getQuery(SqlQuerySupplier.PERSON_VIEW_COUNT);
+    countQuery = countQuery.replaceAll("WHERECLAUSE", whereClause);
+    Integer personCount = jdbcTemplate.queryForObject(countQuery, Integer.class);
+    stopWatch.stop();
+    log.debug("count query finished in: [{}]s", stopWatch.getTotalTimeSeconds());
+
+    int start = pageable.getOffset();
+    int end = pageable.getPageSize();
+
+    String query = sqlQuerySupplier.getQuery(SqlQuerySupplier.PERSON_VIEW);
+    query = query.replaceAll("WHERECLAUSE", whereClause);
+    if (pageable.getSort() != null) {
+      if (pageable.getSort().iterator().hasNext()) {
+        String orderByFirstCriteria = pageable.getSort().iterator().next().toString();
+        String orderByClause = orderByFirstCriteria.replaceAll(":", " ");
+
+        query = query.replaceAll("ORDERBYCLAUSE", " ORDER BY " + orderByClause);
+      } else {
+        query = query.replaceAll("ORDERBYCLAUSE", "");
+      }
+    } else {
+      query = query.replaceAll("ORDERBYCLAUSE", "");
+    }
+
+    //limit is 0 based
+    query = query.replaceAll("LIMITCLAUSE", "limit " + start + "," + end);
+
+    log.debug("running person query");
+    stopWatch = new StopWatch();
+    stopWatch.start();
+    List<PersonViewDTO> persons = jdbcTemplate.query(query, new PersonViewRowMapper());
+    stopWatch.stop();
+    log.debug("person query finished in: [{}]s", stopWatch.getTotalTimeSeconds());
+
+    if (CollectionUtils.isEmpty(persons)) {
+      return new PageImpl<>(persons);
+    }
+
+    return new PageImpl<>(persons, pageable, personCount);
+  }
+
+  private String createWhereClause(String searchString, List<ColumnFilter> columnFilters) {
     StringBuilder whereClause = new StringBuilder();
     whereClause.append(" WHERE 1=1 ");
 
     //add the column filters criteria
     if (columnFilters != null && !columnFilters.isEmpty()) {
       columnFilters.forEach(cf -> {
-        whereClause.append(" AND p." + cf.getName() + " in (");
+
+        switch (cf.getName()) {
+          case "programmeName":
+            whereClause.append(" AND prg.programmeName in (");
+            break;
+          case "gradeId":
+            whereClause.append(" AND pl.gradeId in (");
+            break;
+          case "specialty":
+            whereClause.append(" AND s.name in (");
+            break;
+          case "placementType":
+            whereClause.append(" AND pl.placementType in (");
+            break;
+          case "siteId":
+            whereClause.append(" AND pl.siteId in (");
+            break;
+          case "role":
+            whereClause.append(" AND p.role in (");
+            break;
+          case "currentOwner":
+            whereClause.append(" AND lo.owner in (");
+            break;
+          case "status":
+            whereClause.append(" AND p.status in (");
+            break;
+          default:
+            throw new IllegalArgumentException("Not accounted for column filter [" + cf.getName() +
+                "] you need to add an additional case statement or remove it from the request");
+        }
         cf.getValues().stream().forEach(k -> whereClause.append("'" + k + "',"));
         whereClause.deleteCharAt(whereClause.length() - 1);
         whereClause.append(")");
@@ -270,39 +358,7 @@ public class PersonServiceImpl implements PersonService {
       }
       whereClause.append(" ) ");
     }
-
-
-    countQuery.append(whereClause);
-    Integer personCount = jdbcTemplate.queryForObject(countQuery.toString(),
-        Integer.class);
-
-    int start = pageable.getOffset();
-    int end = ((start + pageable.getPageSize()) > personCount) ? personCount : (start + pageable.getPageSize());
-
-    String query = sqlQuerySupplier.getQuery(SqlQuerySupplier.PERSON_VIEW);
-    query = query.replaceAll("WHERECLAUSE", whereClause.toString());
-    if (pageable.getSort() != null) {
-      if (pageable.getSort().iterator().hasNext()) {
-        String orderByFirstCriteria = pageable.getSort().iterator().next().toString();
-        String orderByClause = orderByFirstCriteria.replaceAll(":", " ");
-
-        query = query.replaceAll("ORDERBYCLAUSE", " ORDER BY " + orderByClause);
-      } else {
-        query = query.replaceAll("ORDERBYCLAUSE", "");
-      }
-    } else {
-      query = query.replaceAll("ORDERBYCLAUSE", "");
-    }
-
-    query = query.replaceAll("LIMITCLAUSE", "limit " + start + "," + end);
-
-    List<PersonViewDTO> persons = jdbcTemplate.query(query, new PersonViewRowMapper());
-
-    if (CollectionUtils.isEmpty(persons)) {
-      return new PageImpl<>(persons);
-    }
-    List<PersonViewDTO> personsPageList = persons.subList(start,(end > persons.size()) ? persons.size() : end);
-    return new PageImpl<>(personsPageList, pageable, personCount);
+    return whereClause.toString();
   }
 
   /**
@@ -383,6 +439,11 @@ public class PersonServiceImpl implements PersonService {
     return CompletableFuture.completedFuture(null);
   }
 
+  @Override
+  public void setRightToWorkRepository(RightToWorkRepository rightToWorkRepository) {
+    this.rightToWorkRepository = rightToWorkRepository;
+  }
+
   private class PersonViewRowMapper implements RowMapper<PersonViewDTO> {
 
     @Override
@@ -418,10 +479,5 @@ public class PersonServiceImpl implements PersonService {
       }
       return view;
     }
-  }
-
-  @Override
-  public void setRightToWorkRepository(RightToWorkRepository rightToWorkRepository) {
-    this.rightToWorkRepository = rightToWorkRepository;
   }
 }
