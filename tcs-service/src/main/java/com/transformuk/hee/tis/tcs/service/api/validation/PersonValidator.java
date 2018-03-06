@@ -21,6 +21,8 @@ import java.util.List;
 public class PersonValidator {
 
   private static final String PERSON_DTO_NAME = "PersonDTO";
+  private static final String NA = "N/A";
+  private static final String UNKNOWN = "UNKNOWN";
   private PersonRepository personRepository;
 
   public PersonValidator(PersonRepository personRepository) {
@@ -54,6 +56,10 @@ public class PersonValidator {
   private List<FieldError> checkPublicHealthNumber(PersonDTO personDTO) {
     List<FieldError> fieldErrors = new ArrayList<>();
     String publicHealthNumber = personDTO.getPublicHealthNumber();
+    // Ignore if publicHealthNumber is N/A or UNKNOWN
+    if(NA.equalsIgnoreCase(publicHealthNumber) || UNKNOWN.equalsIgnoreCase(publicHealthNumber)){
+      return fieldErrors;
+    }
     if (personDTO.getId() != null) {
       if (StringUtils.isNotEmpty(publicHealthNumber)) {
         List<Person> existingPersons = personRepository.findByPublicHealthNumber(publicHealthNumber);

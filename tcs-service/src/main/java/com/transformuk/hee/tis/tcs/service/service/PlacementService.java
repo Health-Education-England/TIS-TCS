@@ -111,6 +111,14 @@ public interface PlacementService {
   Page<PlacementDetailsDTO> findAllPlacementDetails(Pageable pageable);
 
   /**
+   * Close a placement by marking the date to field as today
+   *
+   * @param placementId
+   * @return
+   */
+  PlacementDTO closePlacement(Long placementId);
+
+  /**
    * Get all placements by trainee id
    * @param traineeId the id of the trainee
    * @return

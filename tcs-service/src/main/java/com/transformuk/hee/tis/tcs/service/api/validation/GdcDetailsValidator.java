@@ -22,6 +22,9 @@ import java.util.List;
 public class GdcDetailsValidator {
 
   private static final String GDC_DETAILS_DTO_NAME = "GdcDetailsDTO";
+  private static final String NA = "N/A";
+  private static final String UNKNOWN = "UNKNOWN";
+
   private GdcDetailsRepository gdcDetailsRepository;
 
   public GdcDetailsValidator(GdcDetailsRepository gdcDetailsRepository) {
@@ -56,6 +59,10 @@ public class GdcDetailsValidator {
   private List<FieldError> checkGdcNumber(GdcDetailsDTO gdcDetailsDTO) {
     List<FieldError> fieldErrors = new ArrayList<>();
     String gdcNumber = gdcDetailsDTO.getGdcNumber();
+    // Ignore if gdcNumber is N/A or UNKNOWN
+    if(NA.equalsIgnoreCase(gdcNumber) || UNKNOWN.equalsIgnoreCase(gdcNumber)){
+      return fieldErrors;
+    }
     if (gdcDetailsDTO.getId() != null) {
       if (StringUtils.isNotEmpty(gdcNumber)) {
         List<IdProjection> existingGdcDetails = gdcDetailsRepository.findByGdcNumber(gdcNumber);

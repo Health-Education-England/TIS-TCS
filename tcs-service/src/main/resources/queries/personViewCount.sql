@@ -1,6 +1,5 @@
-select * from (
-  select distinct ot.*
-  from (
+select count(1) from (
+  select distinct ot.* from (
     select
       p.id,
       p.intrepidId,
@@ -25,7 +24,7 @@ select * from (
       lo.rule as currentOwnerRule
     from
       Person p
-    join ContactDetails cd on (cd.id = p.id)
+    left join ContactDetails cd on (cd.id = p.id)
     left join GmcDetails gmc on (gmc.id = p.id)
     left join GdcDetails gdc on (gdc.id = p.id)
     left join ProgrammeMembership pm on (pm.personId = p.id) and curdate() between pm.programmeStartDate and pm.programmeEndDate
@@ -36,8 +35,6 @@ select * from (
     left join Specialty s on s.id = ps.specialtyId
     left join PersonOwner lo on (lo.id = p.id)
     WHERECLAUSE
-    ORDERBYCLAUSE
-    ) as ot
-  ) as ot2
- LIMITCLAUSE
+  ) as ot
+) as ot2
 ;
