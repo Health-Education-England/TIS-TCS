@@ -33,4 +33,6 @@ public interface EsrNotificationService {
   List<EsrNotificationDTO> fetchLatestNotifications(String deanery);
 
   List<EsrNotificationDTO> fetchNotificationsFrom(String deanery, LocalDate fromDate);
+
+  List<EsrNotificationDTO> loadFullNotification(LocalDate asOfDate, List<String> deaneryNumbers, String deaneryBody);
 }
