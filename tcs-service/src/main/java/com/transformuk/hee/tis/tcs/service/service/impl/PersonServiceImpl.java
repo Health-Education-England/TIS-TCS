@@ -387,7 +387,7 @@ public class PersonServiceImpl implements PersonService {
   log.debug("Request to get all person basic details {} ", ids);
 
   return personBasicDetailsRepository.findByIdIn(ids).stream()
-      .map(person -> personBasicDetailsMapper.toDto(person))
+      .map(personBasicDetailsMapper::toDto)
       .collect(Collectors.toList());
 }
 

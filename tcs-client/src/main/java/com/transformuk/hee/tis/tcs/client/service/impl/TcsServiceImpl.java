@@ -127,6 +127,14 @@ public class TcsServiceImpl extends AbstractClientService {
     };
   }
 
+	public QualificationDTO createQualification(QualificationDTO qualificationDTO) {
+		HttpHeaders headers = new HttpHeaders();
+		HttpEntity<QualificationDTO> httpEntity = new HttpEntity<>(qualificationDTO, headers);
+		return tcsRestTemplate
+				.exchange(serviceUrl + "/api/qualifications/", HttpMethod.POST, httpEntity, new ParameterizedTypeReference<QualificationDTO>() {})
+				.getBody();
+	}
+
 	public PersonDTO createPerson(PersonDTO personDTO) {
 		HttpHeaders headers = new HttpHeaders();
 		HttpEntity<PersonDTO> httpEntity = new HttpEntity<>(personDTO, headers);
@@ -184,7 +192,7 @@ public class TcsServiceImpl extends AbstractClientService {
 	}
 
 	public List<PersonBasicDetailsDTO> findPersonBasicDetailsIn(Set<String> ids) {
-		String url = serviceUrl + "/api/gmc-details/in/" + String.join(",", ids);
+		String url = serviceUrl + "/api/people/in/" + String.join(",", ids);
 		ResponseEntity<List<PersonBasicDetailsDTO>> responseEntity = tcsRestTemplate.
 				exchange(url, HttpMethod.GET, null, new ParameterizedTypeReference<List<PersonBasicDetailsDTO>>() {});
 		return responseEntity.getBody();

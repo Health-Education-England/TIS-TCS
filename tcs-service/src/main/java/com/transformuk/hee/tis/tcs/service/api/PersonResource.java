@@ -187,7 +187,7 @@ public class PersonResource {
     Set<Long> idList = new HashSet<>();
 
     for (String idStr : ids.split(",")) {
-      idList.add(Long.getLong(idStr));
+      idList.add(Long.valueOf(idStr));
     }
 
     if (!idList.isEmpty()) {
