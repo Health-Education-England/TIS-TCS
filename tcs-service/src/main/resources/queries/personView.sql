@@ -36,8 +36,8 @@ select * from (
     left join Specialty s on s.id = ps.specialtyId
     left join PersonOwner lo on (lo.id = p.id)
     WHERECLAUSE
-    ORDERBYCLAUSE
     ) as ot
+  ORDERBYCLAUSE
   ) as ot2
  LIMITCLAUSE
 ;

@@ -210,10 +210,13 @@ public class PersonServiceImpl implements PersonService {
     }
 
     Integer personCount;
-    log.debug("running count query");
+    log.info("running count query");
+    stopWatch.start();
     String countQuery = "SELECT COUNT(1) from Person";
     countQuery = countQuery.replaceAll("WHERECLAUSE", " WHERE 1=1 ");
     personCount = jdbcTemplate.queryForObject(countQuery, Integer.class);
+    stopWatch.stop();
+    log.info("finished count query [{}]s", stopWatch.getTotalTimeSeconds());
 
     return new PageImpl<>(persons, pageable, personCount);
   }
@@ -258,14 +261,14 @@ public class PersonServiceImpl implements PersonService {
 
     String whereClause = createWhereClause(searchString, columnFilters);
 
-    log.debug("running count query");
+    log.info("running count query");
     StopWatch stopWatch = new StopWatch();
     stopWatch.start();
     String countQuery = sqlQuerySupplier.getQuery(SqlQuerySupplier.PERSON_VIEW_COUNT);
     countQuery = countQuery.replaceAll("WHERECLAUSE", whereClause);
     Integer personCount = jdbcTemplate.queryForObject(countQuery, Integer.class);
     stopWatch.stop();
-    log.debug("count query finished in: [{}]s", stopWatch.getTotalTimeSeconds());
+    log.info("count query finished in: [{}]s", stopWatch.getTotalTimeSeconds());
 
     int start = pageable.getOffset();
     int end = pageable.getPageSize();
@@ -288,12 +291,12 @@ public class PersonServiceImpl implements PersonService {
     //limit is 0 based
     query = query.replaceAll("LIMITCLAUSE", "limit " + start + "," + end);
 
-    log.debug("running person query");
+    log.info("running person query");
     stopWatch = new StopWatch();
     stopWatch.start();
     List<PersonViewDTO> persons = jdbcTemplate.query(query, new PersonViewRowMapper());
     stopWatch.stop();
-    log.debug("person query finished in: [{}]s", stopWatch.getTotalTimeSeconds());
+    log.info("person query finished in: [{}]s", stopWatch.getTotalTimeSeconds());
 
     if (CollectionUtils.isEmpty(persons)) {
       return new PageImpl<>(persons);

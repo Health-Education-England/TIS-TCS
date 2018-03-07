@@ -22,9 +22,13 @@ public interface PlacementRepository extends JpaRepository<Placement, Long> {
   @Query(value =
       "select pl from Placement pl where localPostNumber in " +
           "(" +
-          "select distinct localPostNumber from Placement pl2 where pl2.dateFrom = :fromDate and pl2.placementType not like '%OOP%'" +
+          "select distinct localPostNumber from Placement pl2 where pl2.dateFrom = :fromDate and pl2.placementType IN " +
+          "(:placementTypes)" +
           ") and (pl.dateFrom = :fromDate or pl.dateTo = :toDate)")
-  List<Placement> findPlacementsWithTraineesStartingOnTheDayAndFinishingOnPreviousDay(@Param("fromDate") LocalDate fromDate, @Param("toDate") LocalDate toDate);
+  List<Placement> findPlacementsWithTraineesStartingOnTheDayAndFinishingOnPreviousDay(
+      @Param("fromDate") LocalDate fromDate,
+      @Param("toDate") LocalDate toDate,
+      @Param("placementTypes") List<String> placementTypes);
 
 
   @Query(value =
@@ -33,4 +37,17 @@ public interface PlacementRepository extends JpaRepository<Placement, Long> {
       " on P1.localPostNumber = P2.localPostNumber " +
       "and P1.dateTo = P2.dateTo", nativeQuery = true)
   List<Placement> findPostsWithoutAnyCurrentOrFuturePlacements(@Param("asOfDate") LocalDate asOfDate);
+
+
+  @Query(value = "SELECT Pl.* from Placement as Pl WHERE " +
+      "Pl.placementType IN (:placementTypes)" +
+      "  AND localPostNumber IN (:deaneryNumbers)" +
+      "  AND (" +
+      "    (dateFrom <= :asOfDate and dateTo >= :asOfDate) OR " +
+      "    (dateFrom > DATE_ADD(:asOfDate, INTERVAL 2 DAY) and dateTo < DATE_ADD(:asOfDate, INTERVAL 3 MONTH))" +
+      "  )", nativeQuery = true)
+  List<Placement> findPostsWithCurrentAndFuturePlacements(
+      @Param("asOfDate") LocalDate asOfDate,
+      @Param("deaneryNumbers") List<String> deaneryNumbers,
+      @Param("placementTypes") List<String> placementTypes);
 }

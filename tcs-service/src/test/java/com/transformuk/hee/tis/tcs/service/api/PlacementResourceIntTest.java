@@ -47,6 +47,7 @@ import java.time.ZoneId;
 import java.util.List;
 
 import static com.transformuk.hee.tis.tcs.service.api.util.DateUtil.getLocalDateFromString;
+import static java.time.temporal.ChronoUnit.DAYS;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.hamcrest.Matchers.containsInAnyOrder;
 import static org.hamcrest.Matchers.hasItem;
@@ -115,6 +116,8 @@ public class PlacementResourceIntTest {
   @Autowired
   private PersonRepository personRepository;
   @Autowired
+  private PlacementRepository placementRepository;
+  @Autowired
   private PlacementDetailsMapper placementDetailsMapper;
   @Autowired
   private PlacementService placementService;
@@ -181,7 +184,7 @@ public class PlacementResourceIntTest {
   public void setup() {
     MockitoAnnotations.initMocks(this);
     asyncReferenceService = new AsyncReferenceService(referenceService);
-    placementValidator = new PlacementValidator(specialtyRepository, referenceService, postRepository, personRepository);
+    placementValidator = new PlacementValidator(specialtyRepository, referenceService, postRepository, personRepository, placementRepository);
     placementDetailsDecorator = new PlacementDetailsDecorator(asyncReferenceService, asyncPersonBasicDetailsRepository, postRepository);
     PlacementResource placementResource = new PlacementResource(placementService, placementValidator, placementDetailsDecorator);
     this.restPlacementMockMvc = MockMvcBuilders.standaloneSetup(placementResource)
@@ -444,6 +447,8 @@ public class PlacementResourceIntTest {
   @Transactional
   public void deletePlacement() throws Exception {
     // Initialize the database
+    LocalDate tomorrow = LocalDate.now().plus(1, DAYS);
+    placement.setDateFrom(tomorrow);
     placementDetailsRepository.saveAndFlush(placement);
     int databaseSizeBeforeDelete = placementDetailsRepository.findAll().size();
 
