@@ -9,6 +9,7 @@ import javax.validation.constraints.DecimalMin;
 import javax.validation.constraints.NotNull;
 import javax.validation.constraints.Null;
 import java.io.Serializable;
+import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.util.HashSet;
 import java.util.Set;
@@ -36,7 +37,7 @@ public class PersonDTO implements Serializable {
 
   private String comments;
 
-  private LocalDateTime inactiveDate;
+  private LocalDate inactiveDate;
 
   private String inactiveNotes;
 
@@ -114,11 +115,11 @@ public class PersonDTO implements Serializable {
     this.comments = comments;
   }
 
-  public LocalDateTime getInactiveDate() {
+  public LocalDate getInactiveDate() {
     return inactiveDate;
   }
 
-  public void setInactiveDate(LocalDateTime inactiveDate) {
+  public void setInactiveDate(LocalDate inactiveDate) {
     this.inactiveDate = inactiveDate;
   }
 
