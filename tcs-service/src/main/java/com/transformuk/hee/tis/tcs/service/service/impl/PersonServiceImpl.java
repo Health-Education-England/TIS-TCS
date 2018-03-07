@@ -389,7 +389,7 @@ public class PersonServiceImpl implements PersonService {
   public List<PersonBasicDetailsDTO> findByIdIn(Set<Long> ids) {
   log.debug("Request to get all person basic details {} ", ids);
 
-  return personBasicDetailsRepository.findByIdIn(ids).stream()
+  return personBasicDetailsRepository.findAll(ids).stream()
       .map(personBasicDetailsMapper::toDto)
       .collect(Collectors.toList());
 }

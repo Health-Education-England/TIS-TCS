@@ -18,6 +18,4 @@ import java.util.Set;
 @SuppressWarnings("unused")
 @Repository
 public interface PersonBasicDetailsRepository extends JpaRepository<PersonBasicDetails, Long>, JpaSpecificationExecutor<PersonBasicDetails> {
-    @Query("SELECT pbd FROM PersonBasicDetails pbd WHERE pbd.id in :ids")
-    List<PersonBasicDetails> findByIdIn(@Param("ids") Set<Long> ids);
 }

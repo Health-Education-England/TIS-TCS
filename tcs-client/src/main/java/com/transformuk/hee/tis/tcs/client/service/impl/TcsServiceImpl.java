@@ -143,6 +143,36 @@ public class TcsServiceImpl extends AbstractClientService {
 				.getBody();
 	}
 
+	public PersonDTO updatePersonForBulkWithAssociatedDTOs(PersonDTO personDTO) {
+		HttpHeaders headers = new HttpHeaders();
+
+		PersonDTO personDTOUpdated = tcsRestTemplate
+				.exchange(serviceUrl + "/api/people/", HttpMethod.PUT, new HttpEntity<>(personDTO, headers), new ParameterizedTypeReference<PersonDTO>() {})
+				.getBody();
+
+		personDTOUpdated.setGdcDetails(tcsRestTemplate
+				.exchange(serviceUrl + "/api/gdc-details/", HttpMethod.PUT, new HttpEntity<>(personDTO.getGdcDetails(), headers), new ParameterizedTypeReference<GdcDetailsDTO>() {})
+				.getBody());
+
+		personDTOUpdated.setGmcDetails(tcsRestTemplate
+				.exchange(serviceUrl + "/api/gmc-details/", HttpMethod.PUT, new HttpEntity<>(personDTO.getGmcDetails(), headers), new ParameterizedTypeReference<GmcDetailsDTO>() {})
+				.getBody());
+
+		personDTOUpdated.setContactDetails(tcsRestTemplate
+				.exchange(serviceUrl + "/api/contact-details", HttpMethod.PUT, new HttpEntity<>(personDTO.getContactDetails(), headers), new ParameterizedTypeReference<ContactDetailsDTO>() {})
+				.getBody());
+
+		personDTOUpdated.setPersonalDetails(tcsRestTemplate
+				.exchange(serviceUrl + "/api/personal-details/", HttpMethod.PUT, new HttpEntity<>(personDTO.getPersonalDetails(), headers), new ParameterizedTypeReference<PersonalDetailsDTO>() {})
+				.getBody());
+
+		personDTOUpdated.setRightToWork(tcsRestTemplate
+				.exchange(serviceUrl + "/api/right-to-works/", HttpMethod.PUT, new HttpEntity<>(personDTO.getRightToWork(), headers), new ParameterizedTypeReference<RightToWorkDTO>() {})
+				.getBody());
+
+		return personDTOUpdated;
+	}
+
 	public PersonDTO getPerson(String id) {
 		return tcsRestTemplate.exchange(serviceUrl + "/api/people/" + id,
 				HttpMethod.GET, null, new ParameterizedTypeReference<PersonDTO>() {}).getBody();
