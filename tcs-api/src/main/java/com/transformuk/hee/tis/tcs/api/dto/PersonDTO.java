@@ -37,7 +37,7 @@ public class PersonDTO implements Serializable {
 
   private String comments;
 
-  private LocalDate inactiveDate;
+  private LocalDateTime inactiveDate;
 
   private String inactiveNotes;
 
@@ -115,11 +115,11 @@ public class PersonDTO implements Serializable {
     this.comments = comments;
   }
 
-  public LocalDate getInactiveDate() {
+  public LocalDateTime getInactiveDate() {
     return inactiveDate;
   }
 
-  public void setInactiveDate(LocalDate inactiveDate) {
+  public void setInactiveDate(LocalDateTime inactiveDate) {
     this.inactiveDate = inactiveDate;
   }
 
