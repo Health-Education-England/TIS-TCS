@@ -47,6 +47,7 @@ import javax.persistence.EntityManager;
 import javax.persistence.Query;
 import java.io.IOException;
 import java.math.BigInteger;
+import java.time.LocalDate;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
@@ -221,6 +222,7 @@ public class PlacementServiceImpl implements PlacementService {
    * @param id the id of the entity
    */
   @Override
+  @Transactional
   public void delete(Long id) {
     log.debug("Request to delete Placement : {}", id);
     placementRepository.delete(id);
@@ -372,6 +374,17 @@ public class PlacementServiceImpl implements PlacementService {
     }
 
     return result.map(placementDetailsMapper::placementDetailsToPlacementDetailsDTO);
+  }
+
+
+  @Override
+  public PlacementDTO closePlacement(Long placementId) {
+    Placement placement = placementRepository.findOne(placementId);
+    if(placement != null) {
+      placement.setDateTo(LocalDate.now());
+      placement = placementRepository.saveAndFlush(placement);
+    }
+    return placementMapper.placementToPlacementDTO(placement);
   }
 
   @Transactional(readOnly = true)
