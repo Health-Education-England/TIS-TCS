@@ -14,6 +14,7 @@ import org.mockito.Mock;
 import org.mockito.runners.MockitoJUnitRunner;
 
 import java.time.LocalDate;
+import java.util.Arrays;
 import java.util.List;
 
 import static java.util.Arrays.asList;
@@ -38,6 +39,8 @@ public class EsrNotificationServiceImplTest {
   @Mock
   private PlacementRepository placementRepository;
 
+  private static final List<String> placementTypes = Arrays.asList("In post", "In Post - Acting Up", "In post - Extension", "Parental Leave", "Long-term sick", "Suspended", "Phased Return");
+
 
   @Test
   public void testLoadFullNotificationDoesNotFindAnyRecords() {
@@ -46,7 +49,7 @@ public class EsrNotificationServiceImplTest {
     List<String> deaneryNumbers = asList("dn-01", "dn-02");
     String deaneryBody = "EOE";
 
-    when(placementRepository.findPostsWithCurrentAndFuturePlacements(asOfDate, deaneryNumbers)).thenReturn(emptyList());
+    when(placementRepository.findPostsWithCurrentAndFuturePlacements(asOfDate, deaneryNumbers, placementTypes)).thenReturn(emptyList());
     when(esrNotificationRepository.save(anyListOf(EsrNotification.class))).thenReturn(emptyList());
 
     List<EsrNotificationDTO> esrNotificationDTOS = testService.loadFullNotification(asOfDate, deaneryNumbers, deaneryBody);
@@ -62,7 +65,7 @@ public class EsrNotificationServiceImplTest {
     List<String> deaneryNumbers = asList("dn-01", "dn-02");
     String deaneryBody = "EOE";
 
-    when(placementRepository.findPostsWithCurrentAndFuturePlacements(asOfDate, deaneryNumbers)).thenReturn(aListOfCurrentAndFuturePlacements());
+    when(placementRepository.findPostsWithCurrentAndFuturePlacements(asOfDate, deaneryNumbers, placementTypes)).thenReturn(aListOfCurrentAndFuturePlacements());
     List<EsrNotification> esrNotifications = savedNotifications();
     when(esrNotificationRepository.save(anyListOf(EsrNotification.class))).thenReturn(esrNotifications);
     when(esrNotificationMapper.esrNotificationsToPlacementDetailDTOs(esrNotifications)).thenReturn(aNotificationDTO());
@@ -72,7 +75,7 @@ public class EsrNotificationServiceImplTest {
     assertThat(esrNotificationDTOS).isNotEmpty();
     assertThat(esrNotificationDTOS.get(0).getDeaneryPostNumber()).isEqualTo("dn-01");
 
-    verify(placementRepository).findPostsWithCurrentAndFuturePlacements(asOfDate, deaneryNumbers);
+    verify(placementRepository).findPostsWithCurrentAndFuturePlacements(asOfDate, deaneryNumbers, placementTypes);
     verify(esrNotificationRepository).save(anyListOf(EsrNotification.class));
     verify(esrNotificationMapper).esrNotificationsToPlacementDetailDTOs(esrNotifications);
 

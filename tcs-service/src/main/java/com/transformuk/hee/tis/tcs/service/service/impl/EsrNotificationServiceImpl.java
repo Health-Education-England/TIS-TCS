@@ -15,6 +15,7 @@ import org.springframework.transaction.annotation.Transactional;
 import java.text.DecimalFormat;
 import java.time.LocalDate;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Comparator;
 import java.util.List;
 
@@ -36,6 +37,8 @@ public class EsrNotificationServiceImpl implements EsrNotificationService {
   private final PlacementRepository placementRepository;
 
   private static final DecimalFormat DECIMAL_FORMAT = new DecimalFormat("#.#");
+
+  private static final List<String> placementTypes = Arrays.asList("In post", "In Post - Acting Up", "In post - Extension", "Parental Leave", "Long-term sick", "Suspended", "Phased Return");
 
   public EsrNotificationServiceImpl(EsrNotificationRepository esrNotificationRepository,
                                     EsrNotificationMapper esrNotificationMapper,
@@ -84,7 +87,7 @@ public class EsrNotificationServiceImpl implements EsrNotificationService {
       fromDate = LocalDate.now();
     }
     LocalDate toDate = fromDate.minusDays(1);
-    List<Placement> placements = placementRepository.findPlacementsWithTraineesStartingOnTheDayAndFinishingOnPreviousDay(fromDate, toDate);
+    List<Placement> placements = placementRepository.findPlacementsWithTraineesStartingOnTheDayAndFinishingOnPreviousDay(fromDate, toDate, placementTypes);
 
     LOG.debug("Identified {} Placements with next to current trainees from {} to {} ", placements.size(), fromDate, toDate);
     // Have a separate mapper when time permits
@@ -134,7 +137,7 @@ public class EsrNotificationServiceImpl implements EsrNotificationService {
       asOfDate = LocalDate.now(); // find placements as of today.
     }
 
-    List<Placement> currentAndFuturePlacements = placementRepository.findPostsWithCurrentAndFuturePlacements(asOfDate, deaneryNumbers);
+    List<Placement> currentAndFuturePlacements = placementRepository.findPostsWithCurrentAndFuturePlacements(asOfDate, deaneryNumbers, placementTypes);
     LOG.debug("Identified {} Posts with current or future placements as of date {}", currentAndFuturePlacements.size(), asOfDate);
 
     List<EsrNotification> esrNotifications = mapCurrentAndFuturePlacementsToNotification(currentAndFuturePlacements, asOfDate);

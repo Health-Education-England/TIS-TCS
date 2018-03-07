@@ -23,9 +23,12 @@ public interface PlacementRepository extends JpaRepository<Placement, Long> {
       "select pl from Placement pl where localPostNumber in " +
           "(" +
           "select distinct localPostNumber from Placement pl2 where pl2.dateFrom = :fromDate and pl2.placementType IN " +
-          "('In post', 'In Post - Acting Up', 'In post - Extension', 'Parental Leave', 'Long-term sick', 'Suspended', 'Phased Return')" +
+          "(:placementTypes)" +
           ") and (pl.dateFrom = :fromDate or pl.dateTo = :toDate)")
-  List<Placement> findPlacementsWithTraineesStartingOnTheDayAndFinishingOnPreviousDay(@Param("fromDate") LocalDate fromDate, @Param("toDate") LocalDate toDate);
+  List<Placement> findPlacementsWithTraineesStartingOnTheDayAndFinishingOnPreviousDay(
+      @Param("fromDate") LocalDate fromDate,
+      @Param("toDate") LocalDate toDate,
+      @Param("placementTypes") List<String> placementTypes);
 
 
   @Query(value =
@@ -37,11 +40,14 @@ public interface PlacementRepository extends JpaRepository<Placement, Long> {
 
 
   @Query(value = "SELECT Pl.* from Placement as Pl WHERE " +
-      "Pl.placementType IN ('In post', 'In Post - Acting Up', 'In post - Extension', 'Parental Leave', 'Long-term sick', 'Suspended', 'Phased Return')" +
+      "Pl.placementType IN (:placementTypes)" +
       "  AND localPostNumber IN (:deaneryNumbers)" +
       "  AND (" +
       "    (dateFrom <= :asOfDate and dateTo >= :asOfDate) OR " +
       "    (dateFrom > DATE_ADD(:asOfDate, INTERVAL 2 DAY) and dateTo < DATE_ADD(:asOfDate, INTERVAL 3 MONTH))" +
       "  )", nativeQuery = true)
-  List<Placement> findPostsWithCurrentAndFuturePlacements(@Param("asOfDate") LocalDate asOfDate, @Param("deaneryNumbers") List<String> deaneryNumbers);
+  List<Placement> findPostsWithCurrentAndFuturePlacements(
+      @Param("asOfDate") LocalDate asOfDate,
+      @Param("deaneryNumbers") List<String> deaneryNumbers,
+      @Param("placementTypes") List<String> placementTypes);
 }
