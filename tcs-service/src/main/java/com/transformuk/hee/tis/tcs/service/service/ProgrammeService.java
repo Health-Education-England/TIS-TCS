@@ -62,7 +62,7 @@ public interface ProgrammeService {
    * @param pageable     the pagination information
    * @return the list of entities
    */
-  Page<ProgrammeDTO> advancedSearch(String searchString, List<ColumnFilter> columnFilers, Pageable pageable, boolean currentStatus);
+  Page<ProgrammeDTO> advancedSearch(String searchString, List<ColumnFilter> columnFilers, Pageable pageable);
 
   /**
    * Get the "id" programme.
