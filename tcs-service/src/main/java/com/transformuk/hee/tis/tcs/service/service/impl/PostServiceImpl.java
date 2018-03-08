@@ -408,7 +408,7 @@ public class PostServiceImpl implements PostService {
     int start = pageable.getOffset();
     int end = ((start + pageable.getPageSize()) > postCount) ? postCount : (start + pageable.getPageSize());*/
     int start = pageable.getOffset();
-    int end = start + pageable.getPageSize();
+    int end = start + pageable.getPageSize() + 1;
 
     String query = sqlQuerySupplier.getQuery(SqlQuerySupplier.POST_VIEW);
     // Where condition
@@ -430,8 +430,12 @@ public class PostServiceImpl implements PostService {
     if (CollectionUtils.isEmpty(posts)) {
       return new PageImpl<>(posts);
     }
-    List<PostViewDTO> postPageList = posts.subList(start,(end > posts.size()) ? posts.size() : end);
-    Page<PostViewDTO> dtoPage = new PageImpl<>(postPageList);
+    boolean hasNext = posts.size() > pageable.getPageSize();
+    if (hasNext) {
+      posts = posts.subList(0, pageable.getPageSize()); //ignore any additional
+    }
+    //List<PostViewDTO> postPageList = posts.subList(start,(end > posts.size()) ? posts.size() : end);
+    Page<PostViewDTO> dtoPage = new PageImpl<>(posts,pageable,pageable.getPageSize() + 1);
     postViewDecorator.decorate(dtoPage.getContent());
     return dtoPage;
   }
@@ -490,7 +494,8 @@ public class PostServiceImpl implements PostService {
       posts = posts.subList(0, pageable.getPageSize()); //ignore any additional
     }
     //List<PostViewDTO> postPageList = posts.subList(start,(end > posts.size()) ? posts.size() : end);
-    Page<PostViewDTO> dtoPage = new PageImpl<>(posts);
+
+    Page<PostViewDTO> dtoPage = new PageImpl<>(posts,pageable,pageable.getPageSize() + 1);
     postViewDecorator.decorate(dtoPage.getContent());
     return dtoPage;
   }
