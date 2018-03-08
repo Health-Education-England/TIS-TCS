@@ -431,11 +431,14 @@ public class PostServiceImpl implements PostService {
       return new PageImpl<>(posts);
     }
     boolean hasNext = posts.size() > pageable.getPageSize();
+    Page<PostViewDTO> dtoPage;
     if (hasNext) {
       posts = posts.subList(0, pageable.getPageSize()); //ignore any additional
+      dtoPage = new PageImpl<>(posts,pageable,end);
     }
-    //List<PostViewDTO> postPageList = posts.subList(start,(end > posts.size()) ? posts.size() : end);
-    Page<PostViewDTO> dtoPage = new PageImpl<>(posts,pageable,pageable.getPageSize() + 1);
+    else{
+      dtoPage = new PageImpl<>(posts,pageable,pageable.getPageSize());
+    }
     postViewDecorator.decorate(dtoPage.getContent());
     return dtoPage;
   }
@@ -490,12 +493,16 @@ public class PostServiceImpl implements PostService {
     }
 
     boolean hasNext = posts.size() > pageable.getPageSize();
+    Page<PostViewDTO> dtoPage;
     if (hasNext) {
       posts = posts.subList(0, pageable.getPageSize()); //ignore any additional
+      dtoPage = new PageImpl<>(posts,pageable,end);
+    }
+    else{
+      dtoPage = new PageImpl<>(posts,pageable,pageable.getPageSize());
     }
     //List<PostViewDTO> postPageList = posts.subList(start,(end > posts.size()) ? posts.size() : end);
-
-    Page<PostViewDTO> dtoPage = new PageImpl<>(posts,pageable,pageable.getPageSize() + 1);
+    //Page<PostViewDTO> dtoPage = new PageImpl<>(posts,pageable,pageable.getPageSize());
     postViewDecorator.decorate(dtoPage.getContent());
     return dtoPage;
   }
