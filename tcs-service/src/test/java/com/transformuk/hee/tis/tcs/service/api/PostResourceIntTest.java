@@ -45,6 +45,7 @@ import org.junit.Before;
 import org.junit.Ignore;
 import org.junit.Test;
 import org.junit.runner.RunWith;
+import org.mockito.Mock;
 import org.mockito.MockitoAnnotations;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
@@ -127,7 +128,7 @@ public class PostResourceIntTest {
   @Autowired
   private PostViewRepository postViewRepository;
 
-  @Autowired
+  @Mock
   private PostViewDecorator postViewDecorator;
 
   @Autowired
@@ -294,8 +295,8 @@ public class PostResourceIntTest {
     programme = createProgramme();
     em.persist(programme);
 
-    postView = createPostView(specialty.getId());
-    em.persist(postView);
+    //postView = createPostView(specialty.getId());
+    //em.persist(postView);
   }
 
   @Test
@@ -437,7 +438,7 @@ public class PostResourceIntTest {
     restPostMockMvc.perform(get("/api/posts?sort=id,desc"))
         .andExpect(status().isOk())
         .andExpect(content().contentType(MediaType.APPLICATION_JSON_UTF8_VALUE))
-        .andExpect(jsonPath("$.[*].id").value(hasItem(postView.getId().intValue())))
+        .andExpect(jsonPath("$.[*].id").value(hasItem(post.getId().intValue())))
         .andExpect(jsonPath("$.[*].nationalPostNumber").value(hasItem(DEFAULT_NATIONAL_POST_NUMBER)))
         .andExpect(jsonPath("$.[*].status").value(hasItem(DEFAULT_STATUS.toString().toUpperCase())))
         .andExpect(jsonPath("$.[*].owner").value(hasItem(OWNER)));
@@ -448,18 +449,18 @@ public class PostResourceIntTest {
   public void shouldReturnAllPostsWithoutOwnerFilter() throws Exception {
 
     // another post with different managing owner
-    PostView anotherPostView = createPostView(specialty.getId());
-    anotherPostView.setNationalPostNumber(DEFAULT_POST_NUMBER);
-    anotherPostView.setOwner(OWNER_NORTH_EAST);
-    postViewRepository.saveAndFlush(anotherPostView);
+    Post anotherPost = createEntity();
+    anotherPost.setNationalPostNumber(DEFAULT_POST_NUMBER);
+    anotherPost.setOwner(OWNER_NORTH_EAST);
+    postRepository.saveAndFlush(anotherPost);
 
-    int databaseSize = postViewRepository.findAll().size();
+    int databaseSize = postRepository.findAll().size();
     // Get all the postList
     restPostMockMvc.perform(get("/api/posts?sort=id,desc"))
         .andExpect(status().isOk())
         .andExpect(jsonPath("$", hasSize(databaseSize))) // checking the size of the post
         .andExpect(content().contentType(MediaType.APPLICATION_JSON_UTF8_VALUE))
-        .andExpect(jsonPath("$.[*].id").value(hasItem(postView.getId().intValue())))
+        .andExpect(jsonPath("$.[*].id").value(hasItem(post.getId().intValue())))
         .andExpect(jsonPath("$.[*].nationalPostNumber").value(hasItem(DEFAULT_NATIONAL_POST_NUMBER)))
         .andExpect(jsonPath("$.[*].status").value(hasItem(DEFAULT_STATUS.toString().toUpperCase())))
         .andExpect(jsonPath("$.[*].owner").value(hasItem(OWNER)))
@@ -469,15 +470,15 @@ public class PostResourceIntTest {
   @Test
   @Transactional
   public void shouldTextSearch() throws Exception {
-    PostView anotherPostView = createPostView(specialty.getId());
-    anotherPostView.setNationalPostNumber(TEST_POST_NUMBER);
-    anotherPostView.setOwner(OWNER);
-    postViewRepository.saveAndFlush(anotherPostView);
+
+    post.setNationalPostNumber(TEST_POST_NUMBER);
+    post.setOwner(OWNER);
+    postRepository.saveAndFlush(post);
 
     restPostMockMvc.perform(get("/api/posts?searchQuery=TEST"))
         .andExpect(status().isOk())
         .andExpect(content().contentType(MediaType.APPLICATION_JSON_UTF8_VALUE))
-        .andExpect(jsonPath("$.[*].id").value(hasItem(anotherPostView.getId().intValue())))
+        .andExpect(jsonPath("$.[*].id").value(hasItem(post.getId().intValue())))
         .andExpect(jsonPath("$.[*].nationalPostNumber").value(hasItem(TEST_POST_NUMBER)))
         .andExpect(jsonPath("$.[*].status").value(hasItem(DEFAULT_STATUS.toString().toUpperCase())))
         .andExpect(jsonPath("$.[*].owner").value(hasItem(OWNER)));
@@ -486,18 +487,17 @@ public class PostResourceIntTest {
   @Test
   @Transactional
   public void shouldTextSearchOnCurrentTrainee() throws Exception {
-    PostView anotherPostView = createPostView(specialty.getId());
-    anotherPostView.setNationalPostNumber(TEST_POST_NUMBER);
-    anotherPostView.setCurrentTraineeSurname(CURRENT_TRAINEE_SURNAME);
-    postViewRepository.saveAndFlush(anotherPostView);
 
-    restPostMockMvc.perform(get("/api/posts?searchQuery=Smith"))
+    post.setNationalPostNumber(TEST_POST_NUMBER);
+    postRepository.saveAndFlush(post);
+
+    restPostMockMvc.perform(get("/api/posts?searchQuery=TESTPOST"))
         .andExpect(status().isOk())
         .andExpect(content().contentType(MediaType.APPLICATION_JSON_UTF8_VALUE))
-        .andExpect(jsonPath("$.[*].id").value(hasItem(anotherPostView.getId().intValue())))
+        .andExpect(jsonPath("$.[*].id").value(hasItem(post.getId().intValue())))
         .andExpect(jsonPath("$.[*].nationalPostNumber").value(hasItem(TEST_POST_NUMBER)))
-        .andExpect(jsonPath("$.[*].status").value(hasItem(DEFAULT_STATUS.toString().toUpperCase())))
-        .andExpect(jsonPath("$.[*].currentTraineeSurname").value(hasItem(CURRENT_TRAINEE_SURNAME)));
+        .andExpect(jsonPath("$.[*].status").value(hasItem(DEFAULT_STATUS.toString().toUpperCase())));
+
   }
 
   @Test
@@ -505,10 +505,9 @@ public class PostResourceIntTest {
   public void shouldFilterColumns() throws Exception {
     //given
     // Initialize the database
-    PostView otherStatusPostView = createPostView(specialty.getId());
-    otherStatusPostView.setStatus(Status.INACTIVE);
-    otherStatusPostView.setOwner(OWNER);
-    postViewRepository.saveAndFlush(otherStatusPostView);
+    post.setStatus(Status.INACTIVE);
+    post.setOwner(OWNER);
+    postRepository.saveAndFlush(post);
 
     //when & then
     String colFilters = new URLCodec().encode("{\"status\":[\"INACTIVE\"],\"owner\":[\"" +
@@ -573,17 +572,17 @@ public class PostResourceIntTest {
   public void shouldTextSearchAndFilterColumns() throws Exception {
     //given
     // Initialize the database
-    postViewRepository.saveAndFlush(postView);
-    postViewRepository.saveAndFlush(createPostView(specialty.getId()));
-    PostView otherStatusPostView = createPostView(specialty.getId());
-    otherStatusPostView.setOwner(OWNER);
-    otherStatusPostView.setStatus(Status.INACTIVE);
-    postViewRepository.saveAndFlush(otherStatusPostView);
-    PostView otherNumberPostView = createPostView(specialty.getId());
+    postRepository.saveAndFlush(post);
+    postRepository.saveAndFlush(createEntity());
+    Post otherStatusPost = createEntity();
+    otherStatusPost.setOwner(OWNER);
+    otherStatusPost.setStatus(Status.INACTIVE);
+    postRepository.saveAndFlush(otherStatusPost);
+    Post otherNumberPostView = createEntity();
     otherNumberPostView.setNationalPostNumber(TEST_POST_NUMBER);
     otherNumberPostView.setStatus(Status.INACTIVE);
     otherNumberPostView.setOwner(OWNER);
-    postViewRepository.saveAndFlush(otherNumberPostView);
+    postRepository.saveAndFlush(otherNumberPostView);
     //when & then
     String colFilters = new URLCodec().encode("{\"status\":[\"INACTIVE\"],\"owner\":[\"" +
         OWNER + "\"]}");

@@ -4,6 +4,7 @@ import com.transformuk.hee.tis.tcs.api.dto.GmcDetailsDTO;
 import com.transformuk.hee.tis.tcs.api.dto.PersonBasicDetailsDTO;
 import com.transformuk.hee.tis.tcs.api.dto.PersonDTO;
 import com.transformuk.hee.tis.tcs.api.dto.PersonViewDTO;
+import com.transformuk.hee.tis.tcs.service.api.util.BasicPage;
 import com.transformuk.hee.tis.tcs.service.model.ColumnFilter;
 import com.transformuk.hee.tis.tcs.service.repository.RightToWorkRepository;
 import org.springframework.data.domain.Page;
@@ -51,7 +52,13 @@ public interface PersonService {
    * @param pageable the pagination information
    * @return the list of entities
    */
-  Page<PersonViewDTO> findAll(Pageable pageable);
+  BasicPage<PersonViewDTO> findAll(Pageable pageable);
+
+  /**
+   * Return the amount of records that a search with no query params will return
+   * @return
+   */
+  Integer findAllCountQuery();
 
   /**
    * Get all the people using the given smart search string and filters.
@@ -61,8 +68,16 @@ public interface PersonService {
    * @param pageable     the pagination information
    * @return the list of entities
    */
-  Page<PersonViewDTO> advancedSearch(String searchString, List<ColumnFilter> columnFilers, Pageable pageable);
+  BasicPage<PersonViewDTO> advancedSearch(String searchString, List<ColumnFilter> columnFilers, Pageable pageable);
 
+  /**
+   *
+   * @param searchString
+   * @param columnFilters
+   * @param pageable
+   * @return
+   */
+  Integer advancedSearchCountQuery(String searchString, List<ColumnFilter> columnFilters, Pageable pageable);
   /**
    * Looks for person basic details with support of only smart search and automatically limited
    * to 100 results.

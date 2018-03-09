@@ -3,13 +3,9 @@ package com.transformuk.hee.tis.tcs.service.service.impl;
 import com.google.common.collect.Lists;
 import com.google.common.collect.Maps;
 import com.google.common.collect.Sets;
-import com.transformuk.hee.tis.tcs.api.dto.PlacementDTO;
-import com.transformuk.hee.tis.tcs.api.dto.PostDTO;
-import com.transformuk.hee.tis.tcs.api.dto.PostGradeDTO;
-import com.transformuk.hee.tis.tcs.api.dto.PostSiteDTO;
-import com.transformuk.hee.tis.tcs.api.dto.PostSpecialtyDTO;
-import com.transformuk.hee.tis.tcs.api.dto.PostViewDTO;
-import com.transformuk.hee.tis.tcs.api.dto.ProgrammeDTO;
+import com.transformuk.hee.tis.tcs.api.dto.*;
+import com.transformuk.hee.tis.tcs.api.enumeration.FundingType;
+import com.transformuk.hee.tis.tcs.api.enumeration.Status;
 import com.transformuk.hee.tis.tcs.service.api.decorator.PostViewDecorator;
 import com.transformuk.hee.tis.tcs.service.model.ColumnFilter;
 import com.transformuk.hee.tis.tcs.service.model.Placement;
@@ -17,7 +13,6 @@ import com.transformuk.hee.tis.tcs.service.model.Post;
 import com.transformuk.hee.tis.tcs.service.model.PostGrade;
 import com.transformuk.hee.tis.tcs.service.model.PostSite;
 import com.transformuk.hee.tis.tcs.service.model.PostSpecialty;
-import com.transformuk.hee.tis.tcs.service.model.PostView;
 import com.transformuk.hee.tis.tcs.service.model.Programme;
 import com.transformuk.hee.tis.tcs.service.model.Specialty;
 import com.transformuk.hee.tis.tcs.service.repository.PlacementRepository;
@@ -29,6 +24,7 @@ import com.transformuk.hee.tis.tcs.service.repository.PostViewRepository;
 import com.transformuk.hee.tis.tcs.service.repository.ProgrammeRepository;
 import com.transformuk.hee.tis.tcs.service.repository.SpecialtyRepository;
 import com.transformuk.hee.tis.tcs.service.service.PostService;
+import com.transformuk.hee.tis.tcs.service.service.helper.SqlQuerySupplier;
 import com.transformuk.hee.tis.tcs.service.service.mapper.DesignatedBodyMapper;
 import com.transformuk.hee.tis.tcs.service.service.mapper.PostMapper;
 import com.transformuk.hee.tis.tcs.service.service.mapper.PostViewMapper;
@@ -38,13 +34,17 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageImpl;
 import org.springframework.data.domain.Pageable;
-import org.springframework.data.jpa.domain.Specification;
-import org.springframework.data.jpa.domain.Specifications;
+import org.springframework.jdbc.core.JdbcTemplate;
+import org.springframework.jdbc.core.RowMapper;
 import org.springframework.scheduling.annotation.Async;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+import org.springframework.util.StopWatch;
 
+import java.sql.ResultSet;
+import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
@@ -53,9 +53,6 @@ import java.util.Objects;
 import java.util.Set;
 import java.util.concurrent.CompletableFuture;
 import java.util.stream.Collectors;
-
-import static com.transformuk.hee.tis.tcs.service.service.impl.SpecificationFactory.containsLike;
-import static com.transformuk.hee.tis.tcs.service.service.impl.SpecificationFactory.in;
 
 /**
  * Service Implementation for managing Post.
@@ -91,6 +88,12 @@ public class PostServiceImpl implements PostService {
   private PostViewDecorator postViewDecorator;
   @Autowired
   private NationalPostNumberServiceImpl nationalPostNumberService;
+
+  @Autowired
+  private JdbcTemplate jdbcTemplate;
+
+  @Autowired
+  private SqlQuerySupplier sqlQuerySupplier;
 
   /**
    * Save a post.
@@ -400,8 +403,42 @@ public class PostServiceImpl implements PostService {
   @Transactional(readOnly = true)
   public Page<PostViewDTO> findAll(Pageable pageable) {
     log.debug("Request to get all Posts");
-    Page<PostView> result = postViewRepository.findAll(pageable);
-    Page<PostViewDTO> dtoPage = result.map(postView -> postViewMapper.postViewToPostViewDTO(postView));
+    /*Integer postCount = jdbcTemplate.queryForObject("select count(p.id) from Post p",
+            Integer.class);
+    int start = pageable.getOffset();
+    int end = ((start + pageable.getPageSize()) > postCount) ? postCount : (start + pageable.getPageSize());*/
+    int start = pageable.getOffset();
+    int end = start + pageable.getPageSize() + 1;
+
+    String query = sqlQuerySupplier.getQuery(SqlQuerySupplier.POST_VIEW);
+    // Where condition
+    query = query.replaceAll("WHERECLAUSE", " where 1=1 ");
+    if (pageable.getSort() != null) {
+      if (pageable.getSort().iterator().hasNext()) {
+        String orderByFirstCriteria = pageable.getSort().iterator().next().toString();
+        String orderByClause = orderByFirstCriteria.replaceAll(":", " ");
+        query = query.replaceAll("ORDERBYCLAUSE", " ORDER BY " + orderByClause);
+      } else {
+        query = query.replaceAll("ORDERBYCLAUSE", "");
+      }
+    } else {
+      query = query.replaceAll("ORDERBYCLAUSE", "");
+    }
+
+    query = query.replaceAll("LIMITCLAUSE", "limit " + start + "," + end);
+    List<PostViewDTO> posts = jdbcTemplate.query(query, new PostServiceImpl.PostViewRowMapper());
+    if (CollectionUtils.isEmpty(posts)) {
+      return new PageImpl<>(posts);
+    }
+    boolean hasNext = posts.size() > pageable.getPageSize();
+    Page<PostViewDTO> dtoPage;
+    if (hasNext) {
+      posts = posts.subList(0, pageable.getPageSize()); //ignore any additional
+      dtoPage = new PageImpl<>(posts,pageable,end);
+    }
+    else{
+      dtoPage = new PageImpl<>(posts,pageable,pageable.getPageSize());
+    }
     postViewDecorator.decorate(dtoPage.getContent());
     return dtoPage;
   }
@@ -410,33 +447,65 @@ public class PostServiceImpl implements PostService {
   @Transactional(readOnly = true)
   public Page<PostViewDTO> advancedSearch(String searchString, List<ColumnFilter> columnFilters, Pageable pageable) {
 
-    List<Specification<PostView>> specs = new ArrayList<>();
-    //add the text search criteria
-    if (StringUtils.isNotEmpty(searchString)) {
-      specs.add(Specifications.where(containsLike("nationalPostNumber", searchString)).
-          or(containsLike("programmeName", searchString)).
-          or(containsLike("currentTraineeGmcNumber", searchString)).
-          or(containsLike("currentTraineeSurname", searchString)).
-          or(containsLike("currentTraineeForenames", searchString)));
-    }
-    //add the column filters criteria
-    if (columnFilters != null && !columnFilters.isEmpty()) {
-      columnFilters.forEach(cf -> specs.add(in(cf.getName(), cf.getValues())));
-    }
+    String whereClause = createWhereClause(searchString, columnFilters);
 
-    Page<PostView> result;
-    if (!specs.isEmpty()) {
-      Specifications<PostView> fullSpec = Specifications.where(specs.get(0));
-      //add the rest of the specs that made it in
-      for (int i = 1; i < specs.size(); i++) {
-        fullSpec = fullSpec.and(specs.get(i));
+    StopWatch stopWatch = new StopWatch();
+    /*stopWatch.start();
+    String countQuery = sqlQuerySupplier.getQuery(SqlQuerySupplier.POST_VIEW_COUNT);
+    countQuery = countQuery.replaceAll("WHERECLAUSE", whereClause);
+    Integer postCount = jdbcTemplate.queryForObject(countQuery, Integer.class);
+    stopWatch.stop();
+    log.info("count query finished in: [{}]s", stopWatch.getTotalTimeSeconds());
+
+    int start = pageable.getOffset();
+    int end = pageable.getPageSize();
+*/
+    int start = pageable.getOffset();
+    int end = start + pageable.getPageSize() + 1;
+
+    String query = sqlQuerySupplier.getQuery(SqlQuerySupplier.POST_VIEW);
+    query = query.replaceAll("WHERECLAUSE", whereClause);
+    if (pageable.getSort() != null) {
+      if (pageable.getSort().iterator().hasNext()) {
+        String orderByFirstCriteria = pageable.getSort().iterator().next().toString();
+        String orderByClause = orderByFirstCriteria.replaceAll(":", " ");
+        if(orderByClause.contains("currentTraineeSurname")){
+          orderByClause = orderByClause.replaceAll("currentTraineeSurname","surnames");
+        }
+
+        query = query.replaceAll("ORDERBYCLAUSE", " ORDER BY " + orderByClause);
+      } else {
+        query = query.replaceAll("ORDERBYCLAUSE", "");
       }
-      result = postViewRepository.findAll(fullSpec, pageable);
     } else {
-      result = postViewRepository.findAll(pageable);
+      query = query.replaceAll("ORDERBYCLAUSE", "");
     }
 
-    Page<PostViewDTO> dtoPage = result.map(postView -> postViewMapper.postViewToPostViewDTO(postView));
+    //limit is 0 based
+    query = query.replaceAll("LIMITCLAUSE", "limit " + start + "," + end);
+
+    log.info("running post query");
+    stopWatch = new StopWatch();
+    stopWatch.start();
+    List<PostViewDTO> posts = jdbcTemplate.query(query, new PostServiceImpl.PostViewRowMapper());
+    stopWatch.stop();
+    log.info("post query finished in: [{}]s", stopWatch.getTotalTimeSeconds());
+
+    if (CollectionUtils.isEmpty(posts)) {
+      return new PageImpl<>(posts);
+    }
+
+    boolean hasNext = posts.size() > pageable.getPageSize();
+    Page<PostViewDTO> dtoPage;
+    if (hasNext) {
+      posts = posts.subList(0, pageable.getPageSize()); //ignore any additional
+      dtoPage = new PageImpl<>(posts,pageable,end);
+    }
+    else{
+      dtoPage = new PageImpl<>(posts,pageable,pageable.getPageSize());
+    }
+    //List<PostViewDTO> postPageList = posts.subList(start,(end > posts.size()) ? posts.size() : end);
+    //Page<PostViewDTO> dtoPage = new PageImpl<>(posts,pageable,pageable.getPageSize());
     postViewDecorator.decorate(dtoPage.getContent());
     return dtoPage;
   }
@@ -479,5 +548,96 @@ public class PostServiceImpl implements PostService {
     postRepository.buildPostView();
     return CompletableFuture.completedFuture(null);
   }
+
+  private class PostViewRowMapper implements RowMapper<PostViewDTO> {
+
+    @Override
+    public PostViewDTO mapRow(ResultSet rs, int i) throws SQLException {
+      PostViewDTO view = new PostViewDTO();
+      view.setId(rs.getLong("id"));
+
+      view.setApprovedGradeId(rs.getLong("approvedGradeId"));
+      view.setPrimarySpecialtyId(rs.getLong("primarySpecialtyId"));
+      view.setPrimarySpecialtyCode(rs.getString("primarySpecialtyCode"));
+      view.setPrimarySpecialtyName(rs.getString("primarySpecialtyName"));
+      view.setPrimarySiteId(rs.getLong("primarySiteId"));
+      view.setProgrammeName(rs.getString("programmeName"));
+      String fundingType = rs.getString("fundingType");
+      if(StringUtils.isNotEmpty(fundingType)){
+        view.setFundingType(FundingType.valueOf(fundingType));
+      }
+      view.setNationalPostNumber(rs.getString("nationalPostNumber"));
+      String status = rs.getString("status");
+      if (StringUtils.isNotEmpty(status)) {
+        view.setStatus(Status.valueOf(status));
+      }
+
+      view.setOwner(rs.getString("owner"));
+      view.setIntrepidId(rs.getString("intrepidId"));
+      view.setCurrentTraineeSurname(rs.getString("surnames"));
+      view.setCurrentTraineeForenames(rs.getString("forenames"));
+      return view;
+    }
+  }
+
+  private String createWhereClause(String searchString, List<ColumnFilter> columnFilters) {
+      StringBuilder whereClause = new StringBuilder();
+      whereClause.append(" WHERE 1=1 ");
+      //add the column filters criteria
+      if (columnFilters != null && !columnFilters.isEmpty()) {
+        columnFilters.forEach(cf -> {
+          switch (cf.getName()){
+            case "currentTraineeSurname":
+              whereClause.append(" AND surnames in (");
+              break;
+            case "currentTraineeForenames":
+              whereClause.append(" AND forenames in (");
+              break;
+            case "primarySpecialtyId":
+              whereClause.append(" AND specialtyId in (");
+              break;
+            case "primarySpecialtyCode":
+              whereClause.append(" AND specialtyCode in (");
+              break;
+            case "primarySpecialtyName":
+              whereClause.append(" AND name in (");
+              break;
+            case "programmeName":
+              whereClause.append(" AND programmeName in (");
+              break;
+            case "nationalPostNumber":
+              whereClause.append(" AND nationalPostNumber in (");
+              break;
+            case "status":
+              whereClause.append(" AND p.status in (");
+              break;
+            case "owner":
+              whereClause.append(" AND p.owner in (");
+              break;
+            case "primarySiteId":
+              whereClause.append(" AND siteId in (");
+              break;
+            case "approvedGradeId":
+              whereClause.append(" AND gradeId in (");
+              break;
+            default:
+              throw new IllegalArgumentException("Not accounted for column filter [" + cf.getName() +
+                      "] you need to add an additional case statement or remove it from the request");
+          }
+          cf.getValues().stream().forEach(k -> whereClause.append("'" + k + "',"));
+          whereClause.deleteCharAt(whereClause.length() - 1);
+          whereClause.append(")");
+        });
+      }
+
+      if (StringUtils.isNotEmpty(searchString)) {
+        whereClause.append(" AND ( nationalPostNumber like ").append("'%" + searchString + "%'");
+        whereClause.append(" OR programmeName like ").append("'%" + searchString + "%'");
+        whereClause.append(" OR surnames like ").append("'%" + searchString + "%'");
+        whereClause.append(" OR forenames like ").append("'%" + searchString + "%'");
+        whereClause.append(" ) ");
+      }
+    return whereClause.toString();
+    }
 
 }

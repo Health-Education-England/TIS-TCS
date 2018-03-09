@@ -6,6 +6,7 @@ import com.transformuk.hee.tis.tcs.api.dto.PersonDTO;
 import com.transformuk.hee.tis.tcs.api.dto.PersonViewDTO;
 import com.transformuk.hee.tis.tcs.api.enumeration.PersonOwnerRule;
 import com.transformuk.hee.tis.tcs.api.enumeration.Status;
+import com.transformuk.hee.tis.tcs.service.api.util.BasicPage;
 import com.transformuk.hee.tis.tcs.service.model.ColumnFilter;
 import com.transformuk.hee.tis.tcs.service.model.ContactDetails;
 import com.transformuk.hee.tis.tcs.service.model.GdcDetails;
@@ -33,7 +34,6 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
-import org.springframework.data.domain.PageImpl;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.domain.Specification;
@@ -176,7 +176,7 @@ public class PersonServiceImpl implements PersonService {
    */
   @Override
   @Transactional(readOnly = true)
-  public Page<PersonViewDTO> findAll(Pageable pageable) {
+  public BasicPage<PersonViewDTO> findAll(Pageable pageable) {
     log.debug("Request to get all People");
 
     int start = pageable.getOffset();
@@ -206,19 +206,22 @@ public class PersonServiceImpl implements PersonService {
     log.debug("full person query finished in: [{}]s", stopWatch.getTotalTimeSeconds());
 
     if (CollectionUtils.isEmpty(persons)) {
-      return new PageImpl<>(persons);
+      return new BasicPage<>(persons, pageable);
     }
+    return new BasicPage<>(persons, pageable);
+  }
 
+  public Integer findAllCountQuery() {
     Integer personCount;
     log.info("running count query");
+    StopWatch stopWatch = new StopWatch();
     stopWatch.start();
     String countQuery = "SELECT COUNT(1) from Person";
     countQuery = countQuery.replaceAll("WHERECLAUSE", " WHERE 1=1 ");
     personCount = jdbcTemplate.queryForObject(countQuery, Integer.class);
     stopWatch.stop();
     log.info("finished count query [{}]s", stopWatch.getTotalTimeSeconds());
-
-    return new PageImpl<>(persons, pageable, personCount);
+    return personCount;
   }
 
   /**
@@ -257,21 +260,10 @@ public class PersonServiceImpl implements PersonService {
 
   @Override
   @Transactional(readOnly = true)
-  public Page<PersonViewDTO> advancedSearch(String searchString, List<ColumnFilter> columnFilters, Pageable pageable) {
-
+  public BasicPage<PersonViewDTO> advancedSearch(String searchString, List<ColumnFilter> columnFilters, Pageable pageable) {
     String whereClause = createWhereClause(searchString, columnFilters);
-
-    log.info("running count query");
-    StopWatch stopWatch = new StopWatch();
-    stopWatch.start();
-    String countQuery = sqlQuerySupplier.getQuery(SqlQuerySupplier.PERSON_VIEW_COUNT);
-    countQuery = countQuery.replaceAll("WHERECLAUSE", whereClause);
-    Integer personCount = jdbcTemplate.queryForObject(countQuery, Integer.class);
-    stopWatch.stop();
-    log.info("count query finished in: [{}]s", stopWatch.getTotalTimeSeconds());
-
     int start = pageable.getOffset();
-    int end = pageable.getPageSize();
+    int end = pageable.getPageSize() + 1;
 
     String query = sqlQuerySupplier.getQuery(SqlQuerySupplier.PERSON_VIEW);
     query = query.replaceAll("WHERECLAUSE", whereClause);
@@ -292,17 +284,36 @@ public class PersonServiceImpl implements PersonService {
     query = query.replaceAll("LIMITCLAUSE", "limit " + start + "," + end);
 
     log.info("running person query");
-    stopWatch = new StopWatch();
+    StopWatch stopWatch = new StopWatch();
     stopWatch.start();
     List<PersonViewDTO> persons = jdbcTemplate.query(query, new PersonViewRowMapper());
+    boolean hasNext = persons.size() > pageable.getPageSize();
+    if (hasNext) {
+      persons = persons.subList(0, pageable.getPageSize()); //ignore any additional
+    }
     stopWatch.stop();
     log.info("person query finished in: [{}]s", stopWatch.getTotalTimeSeconds());
 
     if (CollectionUtils.isEmpty(persons)) {
-      return new PageImpl<>(persons);
+      return new BasicPage<>(persons, pageable);
     }
 
-    return new PageImpl<>(persons, pageable, personCount);
+    return new BasicPage<>(persons, pageable, hasNext);
+  }
+
+  @Override
+  @Transactional(readOnly = true)
+  public Integer advancedSearchCountQuery(String searchString, List<ColumnFilter> columnFilters, Pageable pageable) {
+    log.info("running count query");
+    String whereClause = createWhereClause(searchString, columnFilters);
+    StopWatch stopWatch = new StopWatch();
+    stopWatch.start();
+    String countQuery = sqlQuerySupplier.getQuery(SqlQuerySupplier.PERSON_VIEW_COUNT);
+    countQuery = countQuery.replaceAll("WHERECLAUSE", whereClause);
+    Integer personCount = jdbcTemplate.queryForObject(countQuery, Integer.class);
+    stopWatch.stop();
+    log.info("count query finished in: [{}]s", stopWatch.getTotalTimeSeconds());
+    return personCount;
   }
 
   private String createWhereClause(String searchString, List<ColumnFilter> columnFilters) {
