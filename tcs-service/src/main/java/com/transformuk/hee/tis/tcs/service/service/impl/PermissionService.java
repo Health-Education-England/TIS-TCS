@@ -9,10 +9,8 @@ import java.util.Set;
 @Service
 public class PermissionService {
 
-//  private static final String VIEW_SENSITIVE_DATA_ROLE = "personsensitive:view:entities";
-//  private static final String EDIT_SENSITIVE_DATA_ROLE = "personsensitive:add:modify:entities";
-  private static final String VIEW_SENSITIVE_DATA_ROLE = "revalidation:data:sync";
-  private static final String EDIT_SENSITIVE_DATA_ROLE = "revalidation:data:sync";
+  protected static final String VIEW_SENSITIVE_DATA_ROLE = "personsensitive:view:entities";
+  protected static final String EDIT_SENSITIVE_DATA_ROLE = "personsensitive:add:modify:entities";
 
   public boolean canViewSensitiveData() {
     UserProfile loggedInUserProfile = TisSecurityHelper.getProfileFromContext();
