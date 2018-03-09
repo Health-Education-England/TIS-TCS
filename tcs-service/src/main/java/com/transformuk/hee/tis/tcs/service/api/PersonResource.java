@@ -2,16 +2,12 @@ package com.transformuk.hee.tis.tcs.service.api;
 
 import com.codahale.metrics.annotation.Timed;
 import com.google.common.collect.Lists;
-import com.transformuk.hee.tis.tcs.api.dto.PersonBasicDetailsDTO;
-import com.transformuk.hee.tis.tcs.api.dto.PersonDTO;
-import com.transformuk.hee.tis.tcs.api.dto.PlacementSummaryDTO;
-import com.transformuk.hee.tis.tcs.api.dto.PersonViewDTO;
-import com.transformuk.hee.tis.tcs.api.dto.PlacementViewDTO;
+import com.transformuk.hee.tis.tcs.api.dto.*;
 import com.transformuk.hee.tis.tcs.api.dto.validation.Create;
 import com.transformuk.hee.tis.tcs.api.dto.validation.Update;
 import com.transformuk.hee.tis.tcs.api.enumeration.Status;
-import com.transformuk.hee.tis.tcs.service.api.decorator.PlacementSummaryDecorator;
 import com.transformuk.hee.tis.tcs.service.api.decorator.PersonViewDecorator;
+import com.transformuk.hee.tis.tcs.service.api.decorator.PlacementSummaryDecorator;
 import com.transformuk.hee.tis.tcs.service.api.decorator.PlacementViewDecorator;
 import com.transformuk.hee.tis.tcs.service.api.util.BasicPage;
 import com.transformuk.hee.tis.tcs.service.api.util.ColumnFilterUtil;
@@ -40,23 +36,16 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.MethodArgumentNotValidException;
-import org.springframework.web.bind.annotation.DeleteMapping;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.PatchMapping;
-import org.springframework.web.bind.annotation.PathVariable;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.PutMapping;
-import org.springframework.web.bind.annotation.RequestBody;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RequestParam;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
 
 import javax.validation.Valid;
 import java.io.IOException;
 import java.net.URI;
 import java.net.URISyntaxException;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
+import java.util.Set;
 import java.util.stream.Collectors;
 
 import static com.transformuk.hee.tis.tcs.service.api.util.StringUtil.sanitize;
@@ -212,6 +201,28 @@ public class PersonResource {
   }
 
 
+
+  /**
+   * GET  /people/in/{ids} : get people given their ID's.
+   * Ignores malformed or not found people
+   *
+   * @param ids the ids to search by
+   * @return the ResponseEntity with status 200 (OK)  and the list of gmcDetails in body, or empty list
+   */
+  @GetMapping("/people/in/{ids}")
+  @ApiOperation(value = "Get people by ids", notes = "Returns a list of people", responseContainer = "List")
+  @ApiResponses(value = {
+      @ApiResponse(code = 400, message = "Expects a list of ids as query parameters"),
+      @ApiResponse(code = 200, message = "Person list")})
+  @Timed
+  public ResponseEntity<List<PersonBasicDetailsDTO>> getPersonsIn(@ApiParam(name = "ids", allowMultiple = true) @PathVariable("ids") Set<Long> ids) {
+    log.debug("REST request to find several Person: {}", ids);
+    if (!ids.isEmpty()) {
+      return new ResponseEntity<>(personService.findByIdIn(ids), HttpStatus.FOUND);
+    } else {
+      return new ResponseEntity<>(new ArrayList<>(), HttpStatus.BAD_REQUEST);
+    }
+  }
 
   /**
    * GET  /people/basic : search for people basic details. Automatically limited to 100 results.

@@ -50,7 +50,9 @@ import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Set;
 import java.util.concurrent.CompletableFuture;
+import java.util.stream.Collectors;
 
 import static com.transformuk.hee.tis.tcs.service.service.impl.SpecificationFactory.containsLike;
 
@@ -235,8 +237,30 @@ public class PersonServiceImpl implements PersonService {
    */
   @Override
   @Transactional(readOnly = true)
-  public BasicPage<PersonViewDTO> advancedSearch(String searchString, List<ColumnFilter> columnFilters, Pageable pageable) {
+  public List<PersonBasicDetailsDTO> basicDetailsSearch(String searchString) {
+    List<Specification<PersonBasicDetails>> specs = new ArrayList<>();
+    if (StringUtils.isNotEmpty(searchString)) {
+  //add the text search criteria
+      specs.add(Specifications.where(containsLike("firstName", searchString)).
+          or(containsLike("lastName", searchString)).
+          or(containsLike("gmcDetails.gmcNumber", searchString)));
+    }
+    Pageable pageable = new PageRequest(0, PERSON_BASIC_DETAILS_MAX_RESULTS);
 
+    Page<PersonBasicDetails> result;
+    if (Collections.isEmpty(specs)) {
+      result = personBasicDetailsRepository.findAll(pageable);
+    } else {
+      Specifications<PersonBasicDetails> fullSpec = Specifications.where(specs.get(0));
+      result = personBasicDetailsRepository.findAll(fullSpec, pageable);
+    }
+
+    return result.map(person -> personBasicDetailsMapper.toDto(person)).getContent();
+  }
+
+  @Override
+  @Transactional(readOnly = true)
+  public BasicPage<PersonViewDTO> advancedSearch(String searchString, List<ColumnFilter> columnFilters, Pageable pageable) {
     String whereClause = createWhereClause(searchString, columnFilters);
     int start = pageable.getOffset();
     int end = pageable.getPageSize() + 1;
@@ -351,29 +375,6 @@ public class PersonServiceImpl implements PersonService {
     return whereClause.toString();
   }
 
-  @Override
-  @Transactional(readOnly = true)
-  public List<PersonBasicDetailsDTO> basicDetailsSearch(String searchString) {
-    List<Specification<PersonBasicDetails>> specs = new ArrayList<>();
-    //add the text search criteria
-    if (StringUtils.isNotEmpty(searchString)) {
-      specs.add(Specifications.where(containsLike("firstName", searchString)).
-          or(containsLike("lastName", searchString)).
-          or(containsLike("gmcDetails.gmcNumber", searchString)));
-    }
-    Pageable pageable = new PageRequest(0, PERSON_BASIC_DETAILS_MAX_RESULTS);
-
-    Page<PersonBasicDetails> result;
-    if (Collections.isEmpty(specs)) {
-      result = personBasicDetailsRepository.findAll(pageable);
-    } else {
-      Specifications<PersonBasicDetails> fullSpec = Specifications.where(specs.get(0));
-      result = personBasicDetailsRepository.findAll(fullSpec, pageable);
-    }
-
-    return result.map(person -> personBasicDetailsMapper.toDto(person)).getContent();
-  }
-
   /**
    * Get one person by id.
    *
@@ -387,6 +388,22 @@ public class PersonServiceImpl implements PersonService {
     Person person = personRepository.findOne(id);
     return personMapper.toDto(person);
   }
+
+  /**
+   * Get persons by ids.
+   *
+   * @param ids the Ids of the entities
+   * @return the entities
+   */
+  @Override
+  @Transactional(readOnly = true)
+  public List<PersonBasicDetailsDTO> findByIdIn(Set<Long> ids) {
+  log.debug("Request to get all person basic details {} ", ids);
+
+  return personBasicDetailsRepository.findAll(ids).stream()
+      .map(personBasicDetailsMapper::toDto)
+      .collect(Collectors.toList());
+}
 
   /**
    * Get one person by GMC Id.
