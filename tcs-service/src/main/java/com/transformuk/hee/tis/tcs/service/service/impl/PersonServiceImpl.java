@@ -4,6 +4,7 @@ import com.google.common.collect.Lists;
 import com.transformuk.hee.tis.tcs.api.dto.PersonBasicDetailsDTO;
 import com.transformuk.hee.tis.tcs.api.dto.PersonDTO;
 import com.transformuk.hee.tis.tcs.api.dto.PersonViewDTO;
+import com.transformuk.hee.tis.tcs.api.dto.PersonalDetailsDTO;
 import com.transformuk.hee.tis.tcs.api.enumeration.PersonOwnerRule;
 import com.transformuk.hee.tis.tcs.api.enumeration.Status;
 import com.transformuk.hee.tis.tcs.service.api.util.BasicPage;
@@ -88,6 +89,8 @@ public class PersonServiceImpl implements PersonService {
   private PersonViewRepository personViewRepository;
   @Autowired
   private PersonViewMapper personViewMapper;
+  @Autowired
+  private PermissionService permissionService;
 
   @Autowired
   private JdbcTemplate jdbcTemplate;
@@ -105,8 +108,27 @@ public class PersonServiceImpl implements PersonService {
   public PersonDTO save(PersonDTO personDTO) {
     log.debug("Request to save Person : {}", personDTO);
     Person person = personMapper.toEntity(personDTO);
+
+    Long personDtoId = personDTO.getId();
+    if (!permissionService.canEditSensitiveData() && personDtoId != null) {
+      Person originalPerson = personRepository.findOne(personDtoId);
+      if (originalPerson == null) { //this shouldn't happen
+        throw new IllegalArgumentException("The person record for id " + personDtoId + " could not be found");
+      }
+
+      PersonalDetails originalPersonalDetails = originalPerson.getPersonalDetails();
+      PersonalDetailsDTO personalDetails = personDTO.getPersonalDetails();
+      personalDetails.setDisability(originalPersonalDetails.getDisability());
+      personalDetails.setDisabilityDetails(originalPersonalDetails.getDisabilityDetails());
+      personalDetails.setReligiousBelief(originalPersonalDetails.getReligiousBelief());
+      personalDetails.setSexualOrientation(originalPersonalDetails.getSexualOrientation());
+    }
     person = personRepository.saveAndFlush(person);
-    return personMapper.toDto(person);
+    PersonDTO personDTO1 = personMapper.toDto(person);
+    if (!permissionService.canEditSensitiveData() && personDtoId != null) {
+      clearSensitiveData(personDTO1.getPersonalDetails());
+    }
+    return personDTO1;
   }
 
 
@@ -143,6 +165,9 @@ public class PersonServiceImpl implements PersonService {
 
     PersonalDetails personalDetails = person.getPersonalDetails() != null ? person.getPersonalDetails() : new PersonalDetails();
     personalDetails.setId(person.getId());
+    if (!permissionService.canEditSensitiveData()) {
+      clearSensitiveData(personalDetails);
+    }
     personalDetails = personalDetailsRepository.save(personalDetails);
     person.setPersonalDetails(personalDetails);
 
@@ -386,7 +411,26 @@ public class PersonServiceImpl implements PersonService {
   public PersonDTO findOne(Long id) {
     log.debug("Request to get Person : {}", id);
     Person person = personRepository.findOne(id);
+    boolean canViewSensitiveData = permissionService.canViewSensitiveData();
+    if (!canViewSensitiveData) {
+      PersonalDetails personalDetails = person.getPersonalDetails();
+      clearSensitiveData(personalDetails);
+    }
     return personMapper.toDto(person);
+  }
+
+  private void clearSensitiveData(PersonalDetails personalDetails) {
+    personalDetails.setDisability(null);
+    personalDetails.setDisabilityDetails(null);
+    personalDetails.setReligiousBelief(null);
+    personalDetails.setSexualOrientation(null);
+  }
+
+  private void clearSensitiveData(PersonalDetailsDTO personalDetailsDTO) {
+    personalDetailsDTO.setDisability(null);
+    personalDetailsDTO.setDisabilityDetails(null);
+    personalDetailsDTO.setReligiousBelief(null);
+    personalDetailsDTO.setSexualOrientation(null);
   }
 
   /**
@@ -494,4 +538,5 @@ public class PersonServiceImpl implements PersonService {
       return view;
     }
   }
+
 }
