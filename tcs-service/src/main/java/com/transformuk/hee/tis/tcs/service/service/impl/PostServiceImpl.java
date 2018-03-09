@@ -469,6 +469,9 @@ public class PostServiceImpl implements PostService {
       if (pageable.getSort().iterator().hasNext()) {
         String orderByFirstCriteria = pageable.getSort().iterator().next().toString();
         String orderByClause = orderByFirstCriteria.replaceAll(":", " ");
+        if(orderByClause.contains("currentTraineeSurname")){
+          orderByClause = orderByClause.replaceAll("currentTraineeSurname","surnames");
+        }
 
         query = query.replaceAll("ORDERBYCLAUSE", " ORDER BY " + orderByClause);
       } else {
