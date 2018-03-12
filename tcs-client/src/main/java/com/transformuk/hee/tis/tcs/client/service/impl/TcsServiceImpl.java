@@ -52,7 +52,7 @@ public class TcsServiceImpl extends AbstractClientService {
 	static {
 		try {
 			curriculumJsonQuerystringURLEncoded = new org.apache.commons.codec.net.URLCodec().encode("{\"name\":[\"PARAMETER_NAME\"]}");
-			programmeJsonQuerystringURLEncoded  = new org.apache.commons.codec.net.URLCodec().encode("{\"programmeName\":[\"PARAMETER_NAME\"],\"programmeNumber\":[\"PARAMETER_NUMBER\"]}");
+			programmeJsonQuerystringURLEncoded  = new org.apache.commons.codec.net.URLCodec().encode("{\"programmeName\":[\"PARAMETER_NAME\"],\"programmeNumber\":[\"PARAMETER_NUMBER\"],\"status\":[\"CURRENT\"]}");
 		} catch (EncoderException e) {
 			e.printStackTrace();
 		}
@@ -198,7 +198,7 @@ public class TcsServiceImpl extends AbstractClientService {
   public List<ProgrammeDTO> getProgrammeByNameAndNumber(String name, String number) {
 		log.debug("calling getProgrammeByNameAndNumber with {} and number {}", name, number);
 		return tcsRestTemplate
-				.exchange(serviceUrl + "/api/current/programmes?columnFilters=" +
+				.exchange(serviceUrl + "/api/programmes?columnFilters=" +
 								programmeJsonQuerystringURLEncoded
 										.replace("PARAMETER_NAME", name)
 										.replace("PARAMETER_NUMBER", number),
