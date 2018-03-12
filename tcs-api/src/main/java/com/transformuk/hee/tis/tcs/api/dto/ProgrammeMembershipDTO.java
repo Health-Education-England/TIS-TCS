@@ -189,25 +189,17 @@ public class ProgrammeMembershipDTO implements Serializable {
 
   @Override
   public boolean equals(Object o) {
-    if (this == o) {
-      return true;
-    }
-    if (o == null || getClass() != o.getClass()) {
-      return false;
-    }
-
-    ProgrammeMembershipDTO programmeMembershipDTO = (ProgrammeMembershipDTO) o;
-
-    if (!Objects.equals(id, programmeMembershipDTO.id)) {
-      return false;
-    }
-
-    return true;
+    if (this == o) return true;
+    if (o == null || getClass() != o.getClass()) return false;
+    ProgrammeMembershipDTO that = (ProgrammeMembershipDTO) o;
+    return Objects.equals(id, that.id) &&
+        Objects.equals(programmeId, that.programmeId) &&
+        Objects.equals(curriculumId, that.curriculumId);
   }
 
   @Override
   public int hashCode() {
-    return Objects.hashCode(id);
+    return Objects.hash(id, programmeId, curriculumId);
   }
 
   @Override
