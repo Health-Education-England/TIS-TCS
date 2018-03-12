@@ -4,6 +4,7 @@ import com.google.common.collect.Lists;
 import com.transformuk.hee.tis.tcs.api.dto.PersonBasicDetailsDTO;
 import com.transformuk.hee.tis.tcs.api.dto.PersonDTO;
 import com.transformuk.hee.tis.tcs.api.dto.PersonViewDTO;
+import com.transformuk.hee.tis.tcs.api.dto.PersonalDetailsDTO;
 import com.transformuk.hee.tis.tcs.api.enumeration.PersonOwnerRule;
 import com.transformuk.hee.tis.tcs.api.enumeration.Status;
 import com.transformuk.hee.tis.tcs.service.api.util.BasicPage;
@@ -50,7 +51,9 @@ import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Set;
 import java.util.concurrent.CompletableFuture;
+import java.util.stream.Collectors;
 
 import static com.transformuk.hee.tis.tcs.service.service.impl.SpecificationFactory.containsLike;
 
@@ -86,6 +89,8 @@ public class PersonServiceImpl implements PersonService {
   private PersonViewRepository personViewRepository;
   @Autowired
   private PersonViewMapper personViewMapper;
+  @Autowired
+  private PermissionService permissionService;
 
   @Autowired
   private JdbcTemplate jdbcTemplate;
@@ -103,8 +108,27 @@ public class PersonServiceImpl implements PersonService {
   public PersonDTO save(PersonDTO personDTO) {
     log.debug("Request to save Person : {}", personDTO);
     Person person = personMapper.toEntity(personDTO);
+
+    Long personDtoId = personDTO.getId();
+    if (!permissionService.canEditSensitiveData() && personDtoId != null) {
+      Person originalPerson = personRepository.findOne(personDtoId);
+      if (originalPerson == null) { //this shouldn't happen
+        throw new IllegalArgumentException("The person record for id " + personDtoId + " could not be found");
+      }
+
+      PersonalDetails originalPersonalDetails = originalPerson.getPersonalDetails();
+      PersonalDetailsDTO personalDetails = personDTO.getPersonalDetails();
+      personalDetails.setDisability(originalPersonalDetails.getDisability());
+      personalDetails.setDisabilityDetails(originalPersonalDetails.getDisabilityDetails());
+      personalDetails.setReligiousBelief(originalPersonalDetails.getReligiousBelief());
+      personalDetails.setSexualOrientation(originalPersonalDetails.getSexualOrientation());
+    }
     person = personRepository.saveAndFlush(person);
-    return personMapper.toDto(person);
+    PersonDTO personDTO1 = personMapper.toDto(person);
+    if (!permissionService.canEditSensitiveData() && personDtoId != null) {
+      clearSensitiveData(personDTO1.getPersonalDetails());
+    }
+    return personDTO1;
   }
 
 
@@ -141,6 +165,9 @@ public class PersonServiceImpl implements PersonService {
 
     PersonalDetails personalDetails = person.getPersonalDetails() != null ? person.getPersonalDetails() : new PersonalDetails();
     personalDetails.setId(person.getId());
+    if (!permissionService.canEditSensitiveData()) {
+      clearSensitiveData(personalDetails);
+    }
     personalDetails = personalDetailsRepository.save(personalDetails);
     person.setPersonalDetails(personalDetails);
 
@@ -235,8 +262,30 @@ public class PersonServiceImpl implements PersonService {
    */
   @Override
   @Transactional(readOnly = true)
-  public BasicPage<PersonViewDTO> advancedSearch(String searchString, List<ColumnFilter> columnFilters, Pageable pageable) {
+  public List<PersonBasicDetailsDTO> basicDetailsSearch(String searchString) {
+    List<Specification<PersonBasicDetails>> specs = new ArrayList<>();
+    if (StringUtils.isNotEmpty(searchString)) {
+  //add the text search criteria
+      specs.add(Specifications.where(containsLike("firstName", searchString)).
+          or(containsLike("lastName", searchString)).
+          or(containsLike("gmcDetails.gmcNumber", searchString)));
+    }
+    Pageable pageable = new PageRequest(0, PERSON_BASIC_DETAILS_MAX_RESULTS);
 
+    Page<PersonBasicDetails> result;
+    if (Collections.isEmpty(specs)) {
+      result = personBasicDetailsRepository.findAll(pageable);
+    } else {
+      Specifications<PersonBasicDetails> fullSpec = Specifications.where(specs.get(0));
+      result = personBasicDetailsRepository.findAll(fullSpec, pageable);
+    }
+
+    return result.map(person -> personBasicDetailsMapper.toDto(person)).getContent();
+  }
+
+  @Override
+  @Transactional(readOnly = true)
+  public BasicPage<PersonViewDTO> advancedSearch(String searchString, List<ColumnFilter> columnFilters, Pageable pageable) {
     String whereClause = createWhereClause(searchString, columnFilters);
     int start = pageable.getOffset();
     int end = pageable.getPageSize() + 1;
@@ -351,29 +400,6 @@ public class PersonServiceImpl implements PersonService {
     return whereClause.toString();
   }
 
-  @Override
-  @Transactional(readOnly = true)
-  public List<PersonBasicDetailsDTO> basicDetailsSearch(String searchString) {
-    List<Specification<PersonBasicDetails>> specs = new ArrayList<>();
-    //add the text search criteria
-    if (StringUtils.isNotEmpty(searchString)) {
-      specs.add(Specifications.where(containsLike("firstName", searchString)).
-          or(containsLike("lastName", searchString)).
-          or(containsLike("gmcDetails.gmcNumber", searchString)));
-    }
-    Pageable pageable = new PageRequest(0, PERSON_BASIC_DETAILS_MAX_RESULTS);
-
-    Page<PersonBasicDetails> result;
-    if (Collections.isEmpty(specs)) {
-      result = personBasicDetailsRepository.findAll(pageable);
-    } else {
-      Specifications<PersonBasicDetails> fullSpec = Specifications.where(specs.get(0));
-      result = personBasicDetailsRepository.findAll(fullSpec, pageable);
-    }
-
-    return result.map(person -> personBasicDetailsMapper.toDto(person)).getContent();
-  }
-
   /**
    * Get one person by id.
    *
@@ -385,8 +411,43 @@ public class PersonServiceImpl implements PersonService {
   public PersonDTO findOne(Long id) {
     log.debug("Request to get Person : {}", id);
     Person person = personRepository.findOne(id);
+    boolean canViewSensitiveData = permissionService.canViewSensitiveData();
+    if (!canViewSensitiveData) {
+      PersonalDetails personalDetails = person.getPersonalDetails();
+      clearSensitiveData(personalDetails);
+    }
     return personMapper.toDto(person);
   }
+
+  private void clearSensitiveData(PersonalDetails personalDetails) {
+    personalDetails.setDisability(null);
+    personalDetails.setDisabilityDetails(null);
+    personalDetails.setReligiousBelief(null);
+    personalDetails.setSexualOrientation(null);
+  }
+
+  private void clearSensitiveData(PersonalDetailsDTO personalDetailsDTO) {
+    personalDetailsDTO.setDisability(null);
+    personalDetailsDTO.setDisabilityDetails(null);
+    personalDetailsDTO.setReligiousBelief(null);
+    personalDetailsDTO.setSexualOrientation(null);
+  }
+
+  /**
+   * Get persons by ids.
+   *
+   * @param ids the Ids of the entities
+   * @return the entities
+   */
+  @Override
+  @Transactional(readOnly = true)
+  public List<PersonBasicDetailsDTO> findByIdIn(Set<Long> ids) {
+  log.debug("Request to get all person basic details {} ", ids);
+
+  return personBasicDetailsRepository.findAll(ids).stream()
+      .map(personBasicDetailsMapper::toDto)
+      .collect(Collectors.toList());
+}
 
   /**
    * Get one person by GMC Id.
@@ -477,4 +538,5 @@ public class PersonServiceImpl implements PersonService {
       return view;
     }
   }
+
 }

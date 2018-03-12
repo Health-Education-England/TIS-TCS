@@ -24,6 +24,7 @@ import org.mockito.Mockito;
 import org.mockito.MockitoAnnotations;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
+import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.test.context.junit4.SpringRunner;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -50,6 +51,9 @@ public class PersonServiceIntTest {
   private PersonalDetailsRepository personalDetailsRepository;
   @Autowired
   private RightToWorkRepository rightToWorkRepository;
+  @MockBean
+  private PermissionService permissionServiceMock;
+
   private PersonDTO personDTO;
 
   @Before
@@ -61,6 +65,9 @@ public class PersonServiceIntTest {
     personDTO.setGdcDetails(buildGdcDetails());
     personDTO.setContactDetails(buildContactDetails());
     personDTO.setPersonalDetails(buildPersonalDetails());
+
+    when(permissionServiceMock.canEditSensitiveData()).thenReturn(true);
+    when(permissionServiceMock.canEditSensitiveData()).thenReturn(true);
   }
 
   private PersonalDetailsDTO buildPersonalDetails() {

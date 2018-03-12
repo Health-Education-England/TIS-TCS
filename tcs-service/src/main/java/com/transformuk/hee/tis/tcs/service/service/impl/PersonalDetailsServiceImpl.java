@@ -7,6 +7,7 @@ import com.transformuk.hee.tis.tcs.service.service.PersonalDetailsService;
 import com.transformuk.hee.tis.tcs.service.service.mapper.PersonalDetailsMapper;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
@@ -24,14 +25,13 @@ public class PersonalDetailsServiceImpl implements PersonalDetailsService {
 
   private final Logger log = LoggerFactory.getLogger(PersonalDetailsServiceImpl.class);
 
-  private final PersonalDetailsRepository personalDetailsRepository;
+  @Autowired
+  private PersonalDetailsRepository personalDetailsRepository;
+  @Autowired
+  private PersonalDetailsMapper personalDetailsMapper;
+  @Autowired
+  private PermissionService permissionService;
 
-  private final PersonalDetailsMapper personalDetailsMapper;
-
-  public PersonalDetailsServiceImpl(PersonalDetailsRepository personalDetailsRepository, PersonalDetailsMapper personalDetailsMapper) {
-    this.personalDetailsRepository = personalDetailsRepository;
-    this.personalDetailsMapper = personalDetailsMapper;
-  }
 
   /**
    * Save a personalDetails.
@@ -43,8 +43,25 @@ public class PersonalDetailsServiceImpl implements PersonalDetailsService {
   public PersonalDetailsDTO save(PersonalDetailsDTO personalDetailsDTO) {
     log.debug("Request to save PersonalDetails : {}", personalDetailsDTO);
     PersonalDetails personalDetails = personalDetailsMapper.toEntity(personalDetailsDTO);
+    Long personDetailId = personalDetailsDTO.getId();
+    if (!permissionService.canEditSensitiveData()) {
+      PersonalDetails originalPersonDetail = personalDetailsRepository.findOne(personDetailId);
+      if (originalPersonDetail == null) { //during create
+        clearSensitiveData(personalDetails);
+      } else {
+        personalDetails.setDisability(originalPersonDetail.getDisability());
+        personalDetails.setDisabilityDetails(originalPersonDetail.getDisabilityDetails());
+        personalDetails.setReligiousBelief(originalPersonDetail.getReligiousBelief());
+        personalDetails.setSexualOrientation(originalPersonDetail.getSexualOrientation());
+      }
+    }
     personalDetails = personalDetailsRepository.saveAndFlush(personalDetails);
-    return personalDetailsMapper.toDto(personalDetails);
+    PersonalDetailsDTO personalDetailsDTO1 = personalDetailsMapper.toDto(personalDetails);
+
+    if (!permissionService.canEditSensitiveData()) {
+      clearSensitiveData(personalDetailsDTO1);
+    }
+    return personalDetailsDTO1;
   }
 
   /**
@@ -71,8 +88,16 @@ public class PersonalDetailsServiceImpl implements PersonalDetailsService {
   @Transactional(readOnly = true)
   public Page<PersonalDetailsDTO> findAll(Pageable pageable) {
     log.debug("Request to get all PersonalDetails");
-    return personalDetailsRepository.findAll(pageable)
+    Page<PersonalDetailsDTO> map = personalDetailsRepository.findAll(pageable)
         .map(personalDetailsMapper::toDto);
+
+    if (!permissionService.canViewSensitiveData()) {
+      for (PersonalDetailsDTO personalDetailDTO : map.getContent()) {
+        clearSensitiveData(personalDetailDTO);
+      }
+    }
+
+    return map;
   }
 
   /**
@@ -86,8 +111,28 @@ public class PersonalDetailsServiceImpl implements PersonalDetailsService {
   public PersonalDetailsDTO findOne(Long id) {
     log.debug("Request to get PersonalDetails : {}", id);
     PersonalDetails personalDetails = personalDetailsRepository.findOne(id);
-    return personalDetailsMapper.toDto(personalDetails);
+    PersonalDetailsDTO personalDetailsDTO = personalDetailsMapper.toDto(personalDetails);
+
+    if (!permissionService.canViewSensitiveData()) {
+      clearSensitiveData(personalDetailsDTO);
+    }
+    return personalDetailsDTO;
   }
+
+  private void clearSensitiveData(PersonalDetails personalDetails) {
+    personalDetails.setDisability(null);
+    personalDetails.setDisabilityDetails(null);
+    personalDetails.setReligiousBelief(null);
+    personalDetails.setSexualOrientation(null);
+  }
+
+  private void clearSensitiveData(PersonalDetailsDTO personalDetailsDTO) {
+    personalDetailsDTO.setDisability(null);
+    personalDetailsDTO.setDisabilityDetails(null);
+    personalDetailsDTO.setReligiousBelief(null);
+    personalDetailsDTO.setSexualOrientation(null);
+  }
+
 
   /**
    * Delete the  personalDetails by id.
