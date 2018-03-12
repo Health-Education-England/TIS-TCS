@@ -1,6 +1,7 @@
 package com.transformuk.hee.tis.tcs.service.service;
 
 import com.transformuk.hee.tis.tcs.api.dto.EsrNotificationDTO;
+import com.transformuk.hee.tis.tcs.api.dto.PlacementDetailsDTO;
 
 import java.time.LocalDate;
 import java.util.List;
@@ -35,4 +36,6 @@ public interface EsrNotificationService {
   List<EsrNotificationDTO> fetchNotificationsFrom(String deanery, LocalDate fromDate);
 
   List<EsrNotificationDTO> loadFullNotification(LocalDate asOfDate, List<String> deaneryNumbers, String deaneryBody);
+
+  void loadChangeOfPlacementDatesNotification(PlacementDetailsDTO changedPlacement) throws Exception;
 }

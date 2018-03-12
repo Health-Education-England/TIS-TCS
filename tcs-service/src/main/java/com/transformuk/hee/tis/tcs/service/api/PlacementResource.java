@@ -104,7 +104,7 @@ public class PlacementResource {
   @PutMapping("/placements")
   @Timed
   @PreAuthorize("hasAuthority('tcs:add:modify:entities')")
-  public ResponseEntity<PlacementDetailsDTO> updatePlacement(@RequestBody @Validated(Update.class) PlacementDetailsDTO placementDetailsDTO) throws URISyntaxException, ValidationException {
+  public ResponseEntity<PlacementDetailsDTO> updatePlacement(@RequestBody @Validated(Update.class) PlacementDetailsDTO placementDetailsDTO) throws Exception {
     log.debug("REST request to update Placement : {}", placementDetailsDTO);
     placementValidator.validate(placementDetailsDTO);
     if (placementDetailsDTO.getId() == null) {

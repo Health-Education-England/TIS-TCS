@@ -61,7 +61,7 @@ public interface PlacementService {
    * @param placementDetailsDTO the placement details to save
    * @return the saved placement details
    */
-  PlacementDetailsDTO saveDetails(PlacementDetailsDTO placementDetailsDTO);
+  PlacementDetailsDTO saveDetails(PlacementDetailsDTO placementDetailsDTO) throws Exception;
 
   /**
    * Creates a new placement

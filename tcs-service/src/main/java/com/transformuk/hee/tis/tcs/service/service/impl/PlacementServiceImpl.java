@@ -25,6 +25,7 @@ import com.transformuk.hee.tis.tcs.service.repository.PlacementRepository;
 import com.transformuk.hee.tis.tcs.service.repository.PlacementSpecialtyRepository;
 import com.transformuk.hee.tis.tcs.service.repository.PlacementViewRepository;
 import com.transformuk.hee.tis.tcs.service.repository.SpecialtyRepository;
+import com.transformuk.hee.tis.tcs.service.service.EsrNotificationService;
 import com.transformuk.hee.tis.tcs.service.service.PlacementService;
 import com.transformuk.hee.tis.tcs.service.service.helper.SqlQuerySupplier;
 import com.transformuk.hee.tis.tcs.service.service.mapper.PlacementDetailsMapper;
@@ -99,6 +100,8 @@ public class PlacementServiceImpl implements PlacementService {
   @Autowired
   private PlacementSpecialtyMapper placementSpecialtyMapper;
 
+  @Autowired
+  private EsrNotificationService esrNotificationService;
 
   /**
    * Save a placement.
@@ -129,16 +132,29 @@ public class PlacementServiceImpl implements PlacementService {
 
   @Transactional
   @Override
-  public PlacementDetailsDTO saveDetails(PlacementDetailsDTO placementDetailsDTO) {
+  public PlacementDetailsDTO saveDetails(PlacementDetailsDTO placementDetailsDTO) throws Exception {
     log.debug("Request to save Placement : {}", placementDetailsDTO);
 
     //clear any linked specialties before trying to save the placement
     Placement placement = placementRepository.findOne(placementDetailsDTO.getId());
+    handleEsrNotification(placement, placementDetailsDTO);
     placementSpecialtyRepository.delete(placement.getSpecialties());
     placement.setSpecialties(new HashSet<>());
     placementRepository.saveAndFlush(placement);
 
     return createDetails(placementDetailsDTO);
+  }
+
+  private void handleEsrNotification(Placement currentPlacement, PlacementDetailsDTO updatedPlacementDetails) throws Exception {
+
+    if (!currentPlacement.getDateFrom().equals(updatedPlacementDetails.getDateFrom()) ||
+        !currentPlacement.getDateTo().equals(updatedPlacementDetails.getDateTo())) {
+
+      // create NOT1 type record. Current and next trainee details for the post number.
+      // Create NOT4 type record
+      log.debug("Change in hire or end date. Marking for notification : {} ", updatedPlacementDetails.getLocalPostNumber());
+      esrNotificationService.loadChangeOfPlacementDatesNotification(updatedPlacementDetails);
+    }
   }
 
   @Transactional

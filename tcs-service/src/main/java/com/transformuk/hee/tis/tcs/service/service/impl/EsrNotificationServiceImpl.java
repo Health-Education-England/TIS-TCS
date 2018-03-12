@@ -1,6 +1,8 @@
 package com.transformuk.hee.tis.tcs.service.service.impl;
 
 import com.transformuk.hee.tis.tcs.api.dto.EsrNotificationDTO;
+import com.transformuk.hee.tis.tcs.api.dto.PlacementDetailsDTO;
+import com.transformuk.hee.tis.tcs.service.api.util.ObjectCloner;
 import com.transformuk.hee.tis.tcs.service.model.EsrNotification;
 import com.transformuk.hee.tis.tcs.service.model.Placement;
 import com.transformuk.hee.tis.tcs.service.repository.EsrNotificationRepository;
@@ -16,10 +18,13 @@ import java.text.DecimalFormat;
 import java.time.LocalDate;
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Collections;
 import java.util.Comparator;
 import java.util.List;
 
 import static java.lang.Double.parseDouble;
+import static java.util.Arrays.asList;
+import static java.util.Collections.singletonList;
 import static java.util.stream.Collectors.toList;
 
 /**
@@ -38,7 +43,7 @@ public class EsrNotificationServiceImpl implements EsrNotificationService {
 
   private static final DecimalFormat DECIMAL_FORMAT = new DecimalFormat("#.#");
 
-  private static final List<String> placementTypes = Arrays.asList("In post", "In Post - Acting Up", "In post - Extension", "Parental Leave", "Long-term sick", "Suspended", "Phased Return");
+  private static final List<String> placementTypes = asList("In post", "In Post - Acting Up", "In post - Extension", "Parental Leave", "Long-term sick", "Suspended", "Phased Return");
 
   public EsrNotificationServiceImpl(EsrNotificationRepository esrNotificationRepository,
                                     EsrNotificationMapper esrNotificationMapper,
@@ -137,7 +142,8 @@ public class EsrNotificationServiceImpl implements EsrNotificationService {
       asOfDate = LocalDate.now(); // find placements as of today.
     }
 
-    List<Placement> currentAndFuturePlacements = placementRepository.findPostsWithCurrentAndFuturePlacements(asOfDate, deaneryNumbers, placementTypes);
+    List<Placement> currentAndFuturePlacements = placementRepository.findPostsWithCurrentAndFuturePlacements(
+        asOfDate, asOfDate.plusDays(2), asOfDate.plusMonths(3), deaneryNumbers, placementTypes);
     LOG.debug("Identified {} Posts with current or future placements as of date {}", currentAndFuturePlacements.size(), asOfDate);
 
     List<EsrNotification> esrNotifications = mapCurrentAndFuturePlacementsToNotification(currentAndFuturePlacements, asOfDate);
@@ -145,6 +151,38 @@ public class EsrNotificationServiceImpl implements EsrNotificationService {
     LOG.debug("Saving ESR Notifications for full notifications scenario : {}", esrNotifications.size());
     List<EsrNotification> savedNotifications = esrNotificationRepository.save(esrNotifications);
     return esrNotificationMapper.esrNotificationsToPlacementDetailDTOs(savedNotifications);
+  }
+
+  @Override
+  public void loadChangeOfPlacementDatesNotification(PlacementDetailsDTO changedPlacement) throws Exception {
+
+    LocalDate asOfDate = LocalDate.now(); // find placements as of today.
+
+    // This is a silly way to work around for some of the tests using H2 DB for integration tests. You can't use
+    // database functions which H2 us unaware of. One of the many pains.
+    List<Placement> currentAndFuturePlacements = placementRepository.findPostsWithCurrentAndFuturePlacements(
+        asOfDate, asOfDate.plusDays(2), asOfDate.plusMonths(3), asList(changedPlacement.getLocalPostNumber()), placementTypes);
+    LOG.debug("Identified {} Posts with current or future placements as of date {}", currentAndFuturePlacements.size(), asOfDate);
+
+    List<EsrNotification> esrNotifications = mapCurrentAndFuturePlacementsToNotification(currentAndFuturePlacements, asOfDate);
+
+    if (esrNotifications.size() > 1 ) {
+      throw new RuntimeException("Returned more than one esr notification " + esrNotifications.size());
+    }
+
+    EsrNotification esrNotification = esrNotifications.get(0);
+    EsrNotification esrNotificationType4 = (EsrNotification)ObjectCloner.deepCopy(esrNotification);
+
+    esrNotificationType4.setNotificationTitleCode("4");
+    if (changedPlacement.getDateFrom().isAfter(LocalDate.now())) {
+      esrNotificationType4.setChangeOfProjectedHireDate(changedPlacement.getDateFrom());
+    }
+    esrNotificationType4.setChangeOfProjectedEndDate(changedPlacement.getDateTo());
+
+    LOG.debug("Saving ESR Notifications for full notifications scenario : {}", esrNotifications.size());
+    List<EsrNotification> savedNotifications = esrNotificationRepository.save(asList(esrNotification, esrNotificationType4));
+    LOG.debug("Saved {} ESR notifications for changed date scenario", savedNotifications.size());
+
   }
 
   private List<EsrNotification> mapCurrentAndFuturePlacementsToNotification(List<Placement> currentAndFuturePlacements, LocalDate asOfDate) {

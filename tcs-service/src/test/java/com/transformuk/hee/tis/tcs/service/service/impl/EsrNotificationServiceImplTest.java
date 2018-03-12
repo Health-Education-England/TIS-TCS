@@ -49,7 +49,7 @@ public class EsrNotificationServiceImplTest {
     List<String> deaneryNumbers = asList("dn-01", "dn-02");
     String deaneryBody = "EOE";
 
-    when(placementRepository.findPostsWithCurrentAndFuturePlacements(asOfDate, deaneryNumbers, placementTypes)).thenReturn(emptyList());
+    when(placementRepository.findPostsWithCurrentAndFuturePlacements(asOfDate, asOfDate.plusDays(2), asOfDate.plusMonths(3), deaneryNumbers, placementTypes)).thenReturn(emptyList());
     when(esrNotificationRepository.save(anyListOf(EsrNotification.class))).thenReturn(emptyList());
 
     List<EsrNotificationDTO> esrNotificationDTOS = testService.loadFullNotification(asOfDate, deaneryNumbers, deaneryBody);
@@ -65,7 +65,7 @@ public class EsrNotificationServiceImplTest {
     List<String> deaneryNumbers = asList("dn-01", "dn-02");
     String deaneryBody = "EOE";
 
-    when(placementRepository.findPostsWithCurrentAndFuturePlacements(asOfDate, deaneryNumbers, placementTypes)).thenReturn(aListOfCurrentAndFuturePlacements());
+    when(placementRepository.findPostsWithCurrentAndFuturePlacements(asOfDate, asOfDate.plusDays(2), asOfDate.plusMonths(3), deaneryNumbers, placementTypes)).thenReturn(aListOfCurrentAndFuturePlacements());
     List<EsrNotification> esrNotifications = savedNotifications();
     when(esrNotificationRepository.save(anyListOf(EsrNotification.class))).thenReturn(esrNotifications);
     when(esrNotificationMapper.esrNotificationsToPlacementDetailDTOs(esrNotifications)).thenReturn(aNotificationDTO());
@@ -75,7 +75,7 @@ public class EsrNotificationServiceImplTest {
     assertThat(esrNotificationDTOS).isNotEmpty();
     assertThat(esrNotificationDTOS.get(0).getDeaneryPostNumber()).isEqualTo("dn-01");
 
-    verify(placementRepository).findPostsWithCurrentAndFuturePlacements(asOfDate, deaneryNumbers, placementTypes);
+    verify(placementRepository).findPostsWithCurrentAndFuturePlacements(asOfDate, asOfDate.plusDays(2), asOfDate.plusMonths(3), deaneryNumbers, placementTypes);
     verify(esrNotificationRepository).save(anyListOf(EsrNotification.class));
     verify(esrNotificationMapper).esrNotificationsToPlacementDetailDTOs(esrNotifications);
 

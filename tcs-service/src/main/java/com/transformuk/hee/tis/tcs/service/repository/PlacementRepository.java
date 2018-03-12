@@ -44,10 +44,12 @@ public interface PlacementRepository extends JpaRepository<Placement, Long> {
       "  AND localPostNumber IN (:deaneryNumbers)" +
       "  AND (" +
       "    (dateFrom <= :asOfDate and dateTo >= :asOfDate) OR " +
-      "    (dateFrom > DATE_ADD(:asOfDate, INTERVAL 2 DAY) and dateTo < DATE_ADD(:asOfDate, INTERVAL 3 MONTH))" +
+      "    (dateFrom > :futureStartDate and dateTo < :futureEndDate)" +
       "  )", nativeQuery = true)
   List<Placement> findPostsWithCurrentAndFuturePlacements(
       @Param("asOfDate") LocalDate asOfDate,
+      @Param("futureStartDate") LocalDate futureStartDate,
+      @Param("futureEndDate") LocalDate futureEndDate,
       @Param("deaneryNumbers") List<String> deaneryNumbers,
       @Param("placementTypes") List<String> placementTypes);
 }
