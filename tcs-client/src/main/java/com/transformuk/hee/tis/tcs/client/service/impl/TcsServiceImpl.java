@@ -39,6 +39,7 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
 import org.springframework.web.client.RestTemplate;
 
+import java.lang.reflect.InvocationTargetException;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
@@ -209,22 +210,34 @@ public class TcsServiceImpl extends AbstractClientService {
 
 	public List<GdcDetailsDTO> findGdcDetailsIn(Set<String> gdcIds) {
 		String url = serviceUrl + "/api/gdc-details/in/" + String.join(",", gdcIds);
-		ResponseEntity<List<GdcDetailsDTO>> responseEntity = tcsRestTemplate.
-				exchange(url, HttpMethod.GET, null, new ParameterizedTypeReference<List<GdcDetailsDTO>>() {});
+		ResponseEntity<List<GdcDetailsDTO>> responseEntity;
+		try {
+			responseEntity = tcsRestTemplate.exchange(url, HttpMethod.GET, null, new ParameterizedTypeReference<List<GdcDetailsDTO>>() {});
+		} catch (Exception e){
+			throw new RuntimeException(e.getMessage());
+		}
 		return responseEntity.getBody();
 	}
 
-	public List<GmcDetailsDTO> findGmcDetailsIn(Set<String> gmcIds) {
+	public List<GmcDetailsDTO> findGmcDetailsIn(Set<String> gmcIds)  {
 		String url = serviceUrl + "/api/gmc-details/in/" + String.join(",", gmcIds);
-		ResponseEntity<List<GmcDetailsDTO>> responseEntity = tcsRestTemplate.
-				exchange(url, HttpMethod.GET, null, new ParameterizedTypeReference<List<GmcDetailsDTO>>() {});
+		ResponseEntity<List<GmcDetailsDTO>> responseEntity;
+		try {
+			responseEntity = tcsRestTemplate.exchange(url, HttpMethod.GET, null, new ParameterizedTypeReference<List<GmcDetailsDTO>>() {});
+		} catch (Exception e){
+			throw new RuntimeException(e.getMessage());
+		}
 		return responseEntity.getBody();
 	}
 
 	public List<PersonBasicDetailsDTO> findPersonBasicDetailsIn(Set<String> ids) {
 		String url = serviceUrl + "/api/people/in/" + String.join(",", ids);
-		ResponseEntity<List<PersonBasicDetailsDTO>> responseEntity = tcsRestTemplate.
-				exchange(url, HttpMethod.GET, null, new ParameterizedTypeReference<List<PersonBasicDetailsDTO>>() {});
+		ResponseEntity<List<PersonBasicDetailsDTO>> responseEntity;
+		try {
+			responseEntity = tcsRestTemplate.exchange(url, HttpMethod.GET, null, new ParameterizedTypeReference<List<PersonBasicDetailsDTO>>() {});
+		} catch (Exception e){
+			throw new RuntimeException(e.getMessage());
+		}
 		return responseEntity.getBody();
 	}
 
