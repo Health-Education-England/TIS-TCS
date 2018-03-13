@@ -14,17 +14,15 @@ import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.io.IOException;
 import java.text.DecimalFormat;
 import java.time.LocalDate;
 import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.Collections;
 import java.util.Comparator;
 import java.util.List;
 
 import static java.lang.Double.parseDouble;
 import static java.util.Arrays.asList;
-import static java.util.Collections.singletonList;
 import static java.util.stream.Collectors.toList;
 
 /**
@@ -154,7 +152,7 @@ public class EsrNotificationServiceImpl implements EsrNotificationService {
   }
 
   @Override
-  public void loadChangeOfPlacementDatesNotification(PlacementDetailsDTO changedPlacement) throws Exception {
+  public void loadChangeOfPlacementDatesNotification(PlacementDetailsDTO changedPlacement) throws IOException, ClassNotFoundException {
 
     LocalDate asOfDate = LocalDate.now(); // find placements as of today.
 
@@ -166,22 +164,21 @@ public class EsrNotificationServiceImpl implements EsrNotificationService {
 
     List<EsrNotification> esrNotifications = mapCurrentAndFuturePlacementsToNotification(currentAndFuturePlacements, asOfDate);
 
-    if (esrNotifications.size() > 1 ) {
-      throw new RuntimeException("Returned more than one esr notification " + esrNotifications.size());
+    if (esrNotifications.size() > 0 ) {
+
+      EsrNotification esrNotification = esrNotifications.get(0);
+      EsrNotification esrNotificationType4 = ObjectCloner.deepCopy(esrNotification);
+
+      esrNotificationType4.setNotificationTitleCode("4");
+      if (changedPlacement.getDateFrom().isAfter(LocalDate.now())) {
+        esrNotificationType4.setChangeOfProjectedHireDate(changedPlacement.getDateFrom());
+      }
+      esrNotificationType4.setChangeOfProjectedEndDate(changedPlacement.getDateTo());
+
+      LOG.debug("Saving ESR Notifications for full notifications scenario : {}", esrNotifications.size());
+      List<EsrNotification> savedNotifications = esrNotificationRepository.save(asList(esrNotification, esrNotificationType4));
+      LOG.debug("Saved {} ESR notifications for changed date scenario", savedNotifications.size());
     }
-
-    EsrNotification esrNotification = esrNotifications.get(0);
-    EsrNotification esrNotificationType4 = (EsrNotification)ObjectCloner.deepCopy(esrNotification);
-
-    esrNotificationType4.setNotificationTitleCode("4");
-    if (changedPlacement.getDateFrom().isAfter(LocalDate.now())) {
-      esrNotificationType4.setChangeOfProjectedHireDate(changedPlacement.getDateFrom());
-    }
-    esrNotificationType4.setChangeOfProjectedEndDate(changedPlacement.getDateTo());
-
-    LOG.debug("Saving ESR Notifications for full notifications scenario : {}", esrNotifications.size());
-    List<EsrNotification> savedNotifications = esrNotificationRepository.save(asList(esrNotification, esrNotificationType4));
-    LOG.debug("Saved {} ESR notifications for changed date scenario", savedNotifications.size());
 
   }
 

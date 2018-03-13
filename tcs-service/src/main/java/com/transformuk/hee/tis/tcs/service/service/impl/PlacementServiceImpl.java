@@ -132,7 +132,8 @@ public class PlacementServiceImpl implements PlacementService {
 
   @Transactional
   @Override
-  public PlacementDetailsDTO saveDetails(PlacementDetailsDTO placementDetailsDTO) throws Exception {
+  public PlacementDetailsDTO saveDetails(PlacementDetailsDTO placementDetailsDTO) {
+
     log.debug("Request to save Placement : {}", placementDetailsDTO);
 
     //clear any linked specialties before trying to save the placement
@@ -145,7 +146,7 @@ public class PlacementServiceImpl implements PlacementService {
     return createDetails(placementDetailsDTO);
   }
 
-  private void handleEsrNotification(Placement currentPlacement, PlacementDetailsDTO updatedPlacementDetails) throws Exception {
+  private void handleEsrNotification(Placement currentPlacement, PlacementDetailsDTO updatedPlacementDetails) {
 
     if (!currentPlacement.getDateFrom().equals(updatedPlacementDetails.getDateFrom()) ||
         !currentPlacement.getDateTo().equals(updatedPlacementDetails.getDateTo())) {
@@ -153,7 +154,13 @@ public class PlacementServiceImpl implements PlacementService {
       // create NOT1 type record. Current and next trainee details for the post number.
       // Create NOT4 type record
       log.debug("Change in hire or end date. Marking for notification : {} ", updatedPlacementDetails.getLocalPostNumber());
-      esrNotificationService.loadChangeOfPlacementDatesNotification(updatedPlacementDetails);
+      try {
+        esrNotificationService.loadChangeOfPlacementDatesNotification(updatedPlacementDetails);
+      } catch (Exception e) {
+        // Ideally it should fail the entire update. Keeping the impact minimal for go live and revisit after go live.
+        // Log and continue
+        log.error("Error loading Change of Placement Dates Notification : ", e);
+      }
     }
   }
 
