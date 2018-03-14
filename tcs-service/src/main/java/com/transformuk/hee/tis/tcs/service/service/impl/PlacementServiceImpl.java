@@ -49,14 +49,7 @@ import javax.persistence.Query;
 import java.io.IOException;
 import java.math.BigInteger;
 import java.time.LocalDate;
-import java.util.ArrayList;
-import java.util.Collection;
-import java.util.Collections;
-import java.util.Date;
-import java.util.HashSet;
-import java.util.List;
-import java.util.Map;
-import java.util.Set;
+import java.util.*;
 import java.util.stream.Collectors;
 
 import static com.transformuk.hee.tis.tcs.service.api.util.DateUtil.getLocalDateFromString;
@@ -459,14 +452,22 @@ public class PlacementServiceImpl implements PlacementService {
     }
 
     List<PlacementSummaryDTO> placementSummaryDTOS = Lists.newArrayList(idsToPlacementSummary.values());
-    placementSummaryDTOS.sort((o1, o2) -> o2.getDateTo().compareTo(o1.getDateTo()));
+    placementSummaryDTOS.sort(new Comparator<PlacementSummaryDTO>() {
+      @Override
+      public int compare(PlacementSummaryDTO o1, PlacementSummaryDTO o2) {
+        if(o2.getDateTo() != null && o1.getDateTo() != null) {
+          return o2.getDateTo().compareTo(o1.getDateTo());
+        }
+        return 0;
+      }
+    });
     return placementSummaryDTOS;
   }
 
   private String getPlacementStatus(Date dateFrom, Date dateTo) {
 
     if (dateFrom == null || dateTo == null) {
-      return null;
+      return PlacementStatus.PAST.name();
     }
 
     long from = dateFrom.getTime();
