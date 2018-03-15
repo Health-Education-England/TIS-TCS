@@ -120,7 +120,7 @@ public class QualificationDTO implements Serializable {
     if (o == null || getClass() != o.getClass()) return false;
     QualificationDTO that = (QualificationDTO) o;
     return Objects.equals(qualification, that.qualification) &&
-        Objects.equals(person, that.person) &&
+        Objects.equals(getPersonIdOrNull(), that.getPersonIdOrNull()) &&
         qualificationType == that.qualificationType &&
         Objects.equals(qualificationAttainedDate, that.qualificationAttainedDate) &&
         Objects.equals(medicalSchool, that.medicalSchool) &&
@@ -129,7 +129,11 @@ public class QualificationDTO implements Serializable {
 
   @Override
   public int hashCode() {
-    return Objects.hash(qualification, person, qualificationType, qualificationAttainedDate, medicalSchool, countryOfQualification);
+    return Objects.hash(qualification, getPersonIdOrNull(), qualificationType, qualificationAttainedDate, medicalSchool, countryOfQualification);
+  }
+
+  private Long getPersonIdOrNull() {
+    return person != null ? person.getId() : null;
   }
 
   @Override

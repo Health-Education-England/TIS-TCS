@@ -492,9 +492,13 @@ public class QualificationResourceIntTest {
   public void dtoEqualsVerifier() throws Exception {
     QualificationDTO qualificationDTO1 = new QualificationDTO();
     qualificationDTO1.setCountryOfQualification("UK");
+    PersonDTO personDTO = new PersonDTO();
+    personDTO.setId(1L);
+    qualificationDTO1.setPerson(personDTO);
     QualificationDTO qualificationDTO2 = new QualificationDTO();
     assertThat(qualificationDTO1).isNotEqualTo(qualificationDTO2);
     qualificationDTO2.setCountryOfQualification(qualificationDTO1.getCountryOfQualification());
+    qualificationDTO2.setPerson(personDTO);
     assertThat(qualificationDTO1).isEqualTo(qualificationDTO2);
     qualificationDTO2.setMedicalSchool("UCL");
     assertThat(qualificationDTO1).isNotEqualTo(qualificationDTO2);
