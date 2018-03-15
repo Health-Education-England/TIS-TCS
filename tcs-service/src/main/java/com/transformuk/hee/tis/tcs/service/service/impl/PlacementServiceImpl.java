@@ -34,6 +34,7 @@ import com.transformuk.hee.tis.tcs.service.service.mapper.PlacementSpecialtyMapp
 import com.transformuk.hee.tis.tcs.service.service.mapper.PlacementViewMapper;
 import com.transformuk.hee.tis.tcs.service.service.mapper.SpecialtyMapper;
 import org.apache.commons.collections4.CollectionUtils;
+import org.apache.commons.lang3.time.DateUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -470,9 +471,10 @@ public class PlacementServiceImpl implements PlacementService {
       return PlacementStatus.PAST.name();
     }
 
-    long from = dateFrom.getTime();
-    long to = dateTo.getTime();
-    long now = new Date().getTime();
+    // Truncating the hours,minutes,seconds
+    long from = DateUtils.truncate(dateFrom,Calendar.DATE).getTime();
+    long to = DateUtils.truncate(dateTo,Calendar.DATE).getTime();
+    long now = DateUtils.truncate(new Date(),Calendar.DATE).getTime();
 
     if (now < from) {
       return PlacementStatus.FUTURE.name();
