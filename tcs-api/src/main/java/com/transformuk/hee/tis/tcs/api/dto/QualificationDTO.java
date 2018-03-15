@@ -116,23 +116,20 @@ public class QualificationDTO implements Serializable {
 
   @Override
   public boolean equals(Object o) {
-    if (this == o) {
-      return true;
-    }
-    if (o == null || getClass() != o.getClass()) {
-      return false;
-    }
-
-    QualificationDTO qualificationDTO = (QualificationDTO) o;
-    if (qualificationDTO.getId() == null || getId() == null) {
-      return false;
-    }
-    return Objects.equals(getId(), qualificationDTO.getId());
+    if (this == o) return true;
+    if (o == null || getClass() != o.getClass()) return false;
+    QualificationDTO that = (QualificationDTO) o;
+    return Objects.equals(qualification, that.qualification) &&
+        Objects.equals(person, that.person) &&
+        qualificationType == that.qualificationType &&
+        Objects.equals(qualificationAttainedDate, that.qualificationAttainedDate) &&
+        Objects.equals(medicalSchool, that.medicalSchool) &&
+        Objects.equals(countryOfQualification, that.countryOfQualification);
   }
 
   @Override
   public int hashCode() {
-    return Objects.hashCode(getId());
+    return Objects.hash(qualification, person, qualificationType, qualificationAttainedDate, medicalSchool, countryOfQualification);
   }
 
   @Override
