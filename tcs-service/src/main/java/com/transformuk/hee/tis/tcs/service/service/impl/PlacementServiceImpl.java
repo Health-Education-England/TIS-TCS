@@ -13,6 +13,7 @@ import com.transformuk.hee.tis.tcs.api.enumeration.TCSDateColumns;
 import com.transformuk.hee.tis.tcs.service.api.util.ColumnFilterUtil;
 import com.transformuk.hee.tis.tcs.service.exception.DateRangeColumnFilterException;
 import com.transformuk.hee.tis.tcs.service.model.ColumnFilter;
+import com.transformuk.hee.tis.tcs.service.model.EsrNotification;
 import com.transformuk.hee.tis.tcs.service.model.Person;
 import com.transformuk.hee.tis.tcs.service.model.Placement;
 import com.transformuk.hee.tis.tcs.service.model.PlacementDetails;
@@ -121,6 +122,7 @@ public class PlacementServiceImpl implements PlacementService {
     Set<PlacementSpecialty> placementSpecialties = linkPlacementSpecialties(placementDetailsDTO, placementDetails);
     PlacementDetailsDTO placementDetailsDTO1 = placementDetailsMapper.placementDetailsToPlacementDetailsDTO(placementDetails);
     placementDetailsDTO1.setSpecialties(placementSpecialtyMapper.toDTOs(placementSpecialties));
+    handleEsrNewPlacementNotification(placementDetailsDTO, placementDetails);
     return placementDetailsDTO1;
   }
 
@@ -132,30 +134,12 @@ public class PlacementServiceImpl implements PlacementService {
 
     //clear any linked specialties before trying to save the placement
     Placement placement = placementRepository.findOne(placementDetailsDTO.getId());
-    handleEsrNotification(placement, placementDetailsDTO);
+    handleChangeOfPlacementDatesEsrNotification(placement, placementDetailsDTO);
     placementSpecialtyRepository.delete(placement.getSpecialties());
     placement.setSpecialties(new HashSet<>());
     placementRepository.saveAndFlush(placement);
 
     return createDetails(placementDetailsDTO);
-  }
-
-  private void handleEsrNotification(Placement currentPlacement, PlacementDetailsDTO updatedPlacementDetails) {
-
-    if (!currentPlacement.getDateFrom().equals(updatedPlacementDetails.getDateFrom()) ||
-        !currentPlacement.getDateTo().equals(updatedPlacementDetails.getDateTo())) {
-
-      // create NOT1 type record. Current and next trainee details for the post number.
-      // Create NOT4 type record
-      log.debug("Change in hire or end date. Marking for notification : {} ", updatedPlacementDetails.getLocalPostNumber());
-      try {
-        esrNotificationService.loadChangeOfPlacementDatesNotification(updatedPlacementDetails);
-      } catch (Exception e) {
-        // Ideally it should fail the entire update. Keeping the impact minimal for go live and revisit after go live.
-        // Log and continue
-        log.error("Error loading Change of Placement Dates Notification : ", e);
-      }
-    }
   }
 
   @Transactional
@@ -483,5 +467,42 @@ public class PlacementServiceImpl implements PlacementService {
     }
     return PlacementStatus.CURRENT.name();
 
+  }
+
+  private void handleChangeOfPlacementDatesEsrNotification(Placement currentPlacement, PlacementDetailsDTO updatedPlacementDetails) {
+
+    if (currentPlacement != null && updatedPlacementDetails != null &&
+        (!currentPlacement.getDateFrom().equals(updatedPlacementDetails.getDateFrom()) ||
+        !currentPlacement.getDateTo().equals(updatedPlacementDetails.getDateTo()))) {
+
+      // create NOT1 type record. Current and next trainee details for the post number.
+      // Create NOT4 type record
+      log.info("Change in hire or end date. Marking for notification : {} ", currentPlacement.getPost().getNationalPostNumber());
+      try {
+        esrNotificationService.loadChangeOfPlacementDatesNotification(updatedPlacementDetails, currentPlacement.getPost().getNationalPostNumber());
+      } catch (Exception e) {
+        // Ideally it should fail the entire update. Keeping the impact minimal for go live and revisit after go live.
+        // Log and continue
+        log.error("Error loading Change of Placement Dates Notification : ", e);
+      }
+    }
+  }
+
+  private void handleEsrNewPlacementNotification(final PlacementDetailsDTO placementDetailsDTO, PlacementDetails placementDetails) {
+
+    log.info("Handling ESR notifications for new placement creation for deanery number {}", placementDetailsDTO.getLocalPostNumber());
+    if (placementDetailsDTO.getId() == null) {
+      try {
+        Placement savedPlacement = placementRepository.findOne(placementDetails.getId());
+        log.info("Creating ESR notification for new placement creation for deanery number {}", savedPlacement.getPost().getNationalPostNumber());
+        List<EsrNotification> esrNotifications = esrNotificationService.handleNewPlacementEsrNotification(savedPlacement);
+        log.info("CREATED: ESR {} notifications for new placement creation for deanery number {}",
+            esrNotifications.size(), savedPlacement.getPost().getNationalPostNumber());
+      } catch (Exception e) {
+        // Ideally it should fail the entire update. Keeping the impact minimal for TCS and go live and revisit after go live.
+        // Log and continue
+        log.error("Error loading New Placement Notification : ", e);
+      }
+    }
   }
 }

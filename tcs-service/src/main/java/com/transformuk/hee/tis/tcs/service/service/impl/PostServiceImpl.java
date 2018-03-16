@@ -3,11 +3,18 @@ package com.transformuk.hee.tis.tcs.service.service.impl;
 import com.google.common.collect.Lists;
 import com.google.common.collect.Maps;
 import com.google.common.collect.Sets;
-import com.transformuk.hee.tis.tcs.api.dto.*;
+import com.transformuk.hee.tis.tcs.api.dto.PlacementDTO;
+import com.transformuk.hee.tis.tcs.api.dto.PostDTO;
+import com.transformuk.hee.tis.tcs.api.dto.PostGradeDTO;
+import com.transformuk.hee.tis.tcs.api.dto.PostSiteDTO;
+import com.transformuk.hee.tis.tcs.api.dto.PostSpecialtyDTO;
+import com.transformuk.hee.tis.tcs.api.dto.PostViewDTO;
+import com.transformuk.hee.tis.tcs.api.dto.ProgrammeDTO;
 import com.transformuk.hee.tis.tcs.api.enumeration.FundingType;
 import com.transformuk.hee.tis.tcs.api.enumeration.Status;
 import com.transformuk.hee.tis.tcs.service.api.decorator.PostViewDecorator;
 import com.transformuk.hee.tis.tcs.service.model.ColumnFilter;
+import com.transformuk.hee.tis.tcs.service.model.EsrNotification;
 import com.transformuk.hee.tis.tcs.service.model.Placement;
 import com.transformuk.hee.tis.tcs.service.model.Post;
 import com.transformuk.hee.tis.tcs.service.model.PostGrade;
@@ -23,6 +30,7 @@ import com.transformuk.hee.tis.tcs.service.repository.PostSpecialtyRepository;
 import com.transformuk.hee.tis.tcs.service.repository.PostViewRepository;
 import com.transformuk.hee.tis.tcs.service.repository.ProgrammeRepository;
 import com.transformuk.hee.tis.tcs.service.repository.SpecialtyRepository;
+import com.transformuk.hee.tis.tcs.service.service.EsrNotificationService;
 import com.transformuk.hee.tis.tcs.service.service.PostService;
 import com.transformuk.hee.tis.tcs.service.service.helper.SqlQuerySupplier;
 import com.transformuk.hee.tis.tcs.service.service.mapper.DesignatedBodyMapper;
@@ -45,7 +53,6 @@ import org.springframework.util.StopWatch;
 
 import java.sql.ResultSet;
 import java.sql.SQLException;
-import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
 import java.util.Map;
@@ -88,6 +95,8 @@ public class PostServiceImpl implements PostService {
   private PostViewDecorator postViewDecorator;
   @Autowired
   private NationalPostNumberServiceImpl nationalPostNumberService;
+  @Autowired
+  private EsrNotificationService esrNotificationService;
 
   @Autowired
   private JdbcTemplate jdbcTemplate;
@@ -114,6 +123,7 @@ public class PostServiceImpl implements PostService {
     }
     Post post = postMapper.postDTOToPost(postDTO);
     post = postRepository.save(post);
+    handleNewPostEsrNotification(postDTO);
     return postMapper.postToPostDTO(post);
   }
 
@@ -639,5 +649,16 @@ public class PostServiceImpl implements PostService {
       }
     return whereClause.toString();
     }
+
+  private void handleNewPostEsrNotification(PostDTO postDTO) {
+
+    log.info("HANDLE: new post esr notification");
+    if (postDTO.getId() == null ) {
+
+      EsrNotification esrNotification = esrNotificationService.handleEsrNewPositionNotification(postDTO);
+      log.info("SAVED: esr notification with id {} for newly created Post {}", esrNotification.getId(),
+          esrNotification.getDeaneryPostNumber());
+    }
+  }
 
 }
