@@ -288,6 +288,8 @@ public class EsrNotificationServiceImpl implements EsrNotificationService {
 
     for (String postNumber : postNumbers) {
 
+      List<Placement> matchedCurrentPlacementsToRemove = new ArrayList<>();
+
       List<Placement> currentPlacements = currentAndFuturePlacements.stream()
           .filter(placement -> placement.getPost().getNationalPostNumber().equals(postNumber) &&
               (placement.getDateFrom().isBefore(asOfDate) || placement.getDateFrom().equals(asOfDate)))
@@ -310,9 +312,11 @@ public class EsrNotificationServiceImpl implements EsrNotificationService {
           // remove future placement from the list. to handle any posts with no current placements but only future assigned.
           futurePlacements.remove(futurePlacement);
           // remove current placement from the list. to handle any posts with no future placements but only current assigned.
-          currentPlacements.remove(currentPlacement);
+          matchedCurrentPlacementsToRemove.add(currentPlacement);
         }
       });
+
+      currentPlacements.removeAll(matchedCurrentPlacementsToRemove);
 
       currentPlacements.stream().forEach(currentPlacement -> {
         LOG.debug("creating Current Placement only record for DPN {}", currentPlacement.getPost().getNationalPostNumber());
