@@ -192,14 +192,23 @@ public class ProgrammeMembershipDTO implements Serializable {
     if (this == o) return true;
     if (o == null || getClass() != o.getClass()) return false;
     ProgrammeMembershipDTO that = (ProgrammeMembershipDTO) o;
-    return Objects.equals(id, that.id) &&
+    return Objects.equals(getPersonIdOrNull(), that.getPersonIdOrNull()) &&
+        Objects.equals(curriculumStartDate, that.curriculumStartDate) &&
+        Objects.equals(curriculumEndDate, that.curriculumEndDate) &&
+        Objects.equals(programmeStartDate, that.programmeStartDate) &&
+        Objects.equals(curriculumCompletionDate, that.curriculumCompletionDate) &&
+        Objects.equals(programmeEndDate, that.programmeEndDate) &&
         Objects.equals(programmeId, that.programmeId) &&
         Objects.equals(curriculumId, that.curriculumId);
   }
 
   @Override
   public int hashCode() {
-    return Objects.hash(id, programmeId, curriculumId);
+    return Objects.hash(getPersonIdOrNull(), curriculumStartDate, curriculumEndDate, programmeStartDate, curriculumCompletionDate, programmeEndDate, programmeId, curriculumId);
+  }
+
+  private Long getPersonIdOrNull() {
+    return person != null ? person.getId() : null;
   }
 
   @Override
