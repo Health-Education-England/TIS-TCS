@@ -5,6 +5,7 @@ import com.transformuk.hee.tis.tcs.service.model.ContactDetails;
 import com.transformuk.hee.tis.tcs.service.model.GmcDetails;
 import com.transformuk.hee.tis.tcs.service.model.Person;
 import com.transformuk.hee.tis.tcs.service.model.PlacementDetails;
+import com.transformuk.hee.tis.tcs.service.model.Post;
 import com.transformuk.hee.tis.tcs.service.service.EsrNotificationService;
 import org.junit.Before;
 import org.junit.Test;
@@ -98,12 +99,17 @@ public class EsrNotificationResourceIntTest {
   @Transactional
   public void shouldLoadNextToCurrentTraineeAndCreateEsrNotificationRecord() throws Exception {
 
+    String localPostNumber = "EOE/RGT00/021/FY1/013";
     //given
     Person trainee1 = new Person();
     Person trainee2 = new Person();
 
     entityManager.persist(trainee1);
     entityManager.persist(trainee2);
+
+    Post post = new Post();
+    post.setNationalPostNumber(localPostNumber);
+    entityManager.persist(post);
 
     ContactDetails trainee1ContactDetails = aContactDetail("trainee01-FN", "trainee01-LN");
     trainee1ContactDetails.setId(trainee1.getId());
@@ -133,9 +139,10 @@ public class EsrNotificationResourceIntTest {
     placement1.setTraineeId(trainee1.getId());
     placement2.setTraineeId(trainee2.getId());
 
-    String localPostNumber = "EOE/RGT00/021/FY1/013";
-    placement1.setLocalPostNumber(localPostNumber);
-    placement2.setLocalPostNumber(localPostNumber);
+    placement1.setPostId(post.getId());
+    placement2.setPostId(post.getId());
+//    placement1.setLocalPostNumber(localPostNumber);
+//    placement2.setLocalPostNumber(localPostNumber);
 
     entityManager.persist(placement1);
     entityManager.persist(placement2);
@@ -147,7 +154,7 @@ public class EsrNotificationResourceIntTest {
         .andExpect(jsonPath("$.*").isArray())
         .andExpect(jsonPath("$", hasSize(1)))
         .andExpect(jsonPath("$.[*].notificationTitleCode").value("1"))
-        .andExpect(jsonPath("$.[*].deaneryPostNumber").value(placement1.getLocalPostNumber()))
+        .andExpect(jsonPath("$.[*].deaneryPostNumber").value(post.getNationalPostNumber()))
         .andExpect(jsonPath("$.[*].managingDeaneryBodyCode").value("EOE"))
         .andExpect(jsonPath("$.[*].currentTraineeFirstName").value(trainee2.getContactDetails().getLegalForenames()))
         .andExpect(jsonPath("$.[*].currentTraineeLastName").value(trainee2.getContactDetails().getLegalSurname()))
@@ -168,6 +175,18 @@ public class EsrNotificationResourceIntTest {
 
     entityManager.persist(trainee1);
     entityManager.persist(trainee2);
+
+    String localPostNumber1 = "EOE/RGT00/021/FY1/013";
+    String localPostNumber2 = "YHD/RGT00/021/FY1/013";
+
+    Post post1 = new Post();
+    post1.setNationalPostNumber(localPostNumber1);
+
+    Post post2 = new Post();
+    post2.setNationalPostNumber(localPostNumber2);
+
+    entityManager.persist(post1);
+    entityManager.persist(post2);
 
     ContactDetails trainee1ContactDetails = aContactDetail("trainee01-FN", "trainee01-LN");
     trainee1ContactDetails.setId(trainee1.getId());
@@ -197,11 +216,14 @@ public class EsrNotificationResourceIntTest {
     placement1.setTraineeId(trainee1.getId());
     placement2.setTraineeId(trainee2.getId());
 
-    String localPostNumber1 = "EOE/RGT00/021/FY1/013";
-    String localPostNumber2 = "YHD/RGT00/021/FY1/013";
+//    String localPostNumber1 = "EOE/RGT00/021/FY1/013";
+//    String localPostNumber2 = "YHD/RGT00/021/FY1/013";
 
-    placement1.setLocalPostNumber(localPostNumber1);
-    placement2.setLocalPostNumber(localPostNumber2);
+//    placement1.setLocalPostNumber(localPostNumber1);
+//    placement2.setLocalPostNumber(localPostNumber2);
+
+    placement1.setPostId(post1.getId());
+    placement2.setPostId(post2.getId());
 
     entityManager.persist(placement1);
     entityManager.persist(placement2);
@@ -213,7 +235,7 @@ public class EsrNotificationResourceIntTest {
         .andExpect(jsonPath("$.*").isArray())
         .andExpect(jsonPath("$", hasSize(1)))
         .andExpect(jsonPath("$.[*].notificationTitleCode").value("1"))
-        .andExpect(jsonPath("$.[*].deaneryPostNumber").value(placement1.getLocalPostNumber()))
+        .andExpect(jsonPath("$.[*].deaneryPostNumber").value(post1.getNationalPostNumber()))
         .andExpect(jsonPath("$.[*].managingDeaneryBodyCode").value("EOE"))
         .andExpect(jsonPath("$.[*].postVacantAtNextRotation").value(true))
         .andExpect(jsonPath("$.[*].currentTraineeFirstName").value(trainee1.getContactDetails().getLegalForenames()))

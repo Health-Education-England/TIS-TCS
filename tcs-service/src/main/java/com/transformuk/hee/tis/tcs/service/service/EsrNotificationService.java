@@ -2,6 +2,9 @@ package com.transformuk.hee.tis.tcs.service.service;
 
 import com.transformuk.hee.tis.tcs.api.dto.EsrNotificationDTO;
 import com.transformuk.hee.tis.tcs.api.dto.PlacementDetailsDTO;
+import com.transformuk.hee.tis.tcs.api.dto.PostDTO;
+import com.transformuk.hee.tis.tcs.service.model.EsrNotification;
+import com.transformuk.hee.tis.tcs.service.model.Placement;
 
 import java.io.IOException;
 import java.time.LocalDate;
@@ -38,5 +41,9 @@ public interface EsrNotificationService {
 
   List<EsrNotificationDTO> loadFullNotification(LocalDate asOfDate, List<String> deaneryNumbers, String deaneryBody);
 
-  void loadChangeOfPlacementDatesNotification(PlacementDetailsDTO changedPlacement) throws IOException, ClassNotFoundException ;
+  void loadChangeOfPlacementDatesNotification(PlacementDetailsDTO changedPlacement, String nationalPostNumber) throws IOException, ClassNotFoundException ;
+
+  EsrNotification handleEsrNewPositionNotification(PostDTO postDTO);
+
+  List<EsrNotification> handleNewPlacementEsrNotification(Placement placement) throws IOException, ClassNotFoundException;
 }
