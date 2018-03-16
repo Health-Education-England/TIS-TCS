@@ -108,7 +108,7 @@ public class EsrNotificationServiceImpl implements EsrNotificationService {
       asOfDate = LocalDate.now(); // find vacant posts as of today.
     }
 
-    List<Placement> vacantPostPlacements = placementRepository.findPostsWithoutAnyCurrentOrFuturePlacements(asOfDate.minusDays(1));
+    List<Placement> vacantPostPlacements = placementRepository.findPlacementsForPostsWithoutAnyCurrentOrFuturePlacements(asOfDate.minusDays(1));
     LOG.info("Identified {} Vacant Posts without current or future placements as of date {}", vacantPostPlacements.size(), asOfDate);
 
     List<EsrNotification> esrNotifications = mapVacantPostsToNotification(vacantPostPlacements);
@@ -143,7 +143,7 @@ public class EsrNotificationServiceImpl implements EsrNotificationService {
 
     // This is a silly way to work around for some of the tests using H2 DB for integration tests. You can't use
     // database functions which H2 is unaware of. One of the many pains.
-    List<Placement> currentAndFuturePlacements = placementRepository.findPostsWithCurrentAndFuturePlacements(
+    List<Placement> currentAndFuturePlacements = placementRepository.findCurrentAndFuturePlacementsForPosts(
         asOfDate, asOfDate.plusDays(2), asOfDate.plusMonths(3), deaneryNumbers, placementTypes);
     LOG.info("Identified {} Posts with current or future placements as of date {}", currentAndFuturePlacements.size(), asOfDate);
 
@@ -188,7 +188,7 @@ public class EsrNotificationServiceImpl implements EsrNotificationService {
 
   private void handleFuturePlacementEdit(PlacementDetailsDTO changedPlacement, String nationalPostNumber, LocalDate asOfDate, List<EsrNotification> allEsrNotifications) {
 
-    List<Placement> currentPlacements = placementRepository.findPostsWithCurrentPlacements(
+    List<Placement> currentPlacements = placementRepository.findCurrentPlacementsForPosts(
         asOfDate, asList(nationalPostNumber), placementTypes);
     LOG.info("Identified {} current Placements for post {} as of date {}", currentPlacements.size(), nationalPostNumber, asOfDate);
 
@@ -206,7 +206,7 @@ public class EsrNotificationServiceImpl implements EsrNotificationService {
 
   private void handleCurrentPlacementEdit(PlacementDetailsDTO changedPlacement, String nationalPostNumber, LocalDate asOfDate, List<EsrNotification> allEsrNotifications) {
 
-    List<Placement> futurePlacements = placementRepository.findPostsWithFuturePlacements(
+    List<Placement> futurePlacements = placementRepository.findFuturePlacementsForPosts(
         asOfDate.plusDays(2), asOfDate.plusMonths(3), asList(nationalPostNumber), placementTypes);
     LOG.info("Identified {} future Placements for post {} as of date {}", futurePlacements.size(), nationalPostNumber, asOfDate);
 
@@ -229,7 +229,7 @@ public class EsrNotificationServiceImpl implements EsrNotificationService {
     List<EsrNotification> allEsrNotifications = new ArrayList<>();
     String nationalPostNumber = newFuturePlacement.getPost().getNationalPostNumber();
 
-    List<Placement> currentPlacements = placementRepository.findPostsWithCurrentPlacements(
+    List<Placement> currentPlacements = placementRepository.findCurrentPlacementsForPosts(
         asOfDate, asList(nationalPostNumber), placementTypes);
 
     LOG.info("Identified {} current Placements for post {} as of date {}", currentPlacements.size(), nationalPostNumber, asOfDate);

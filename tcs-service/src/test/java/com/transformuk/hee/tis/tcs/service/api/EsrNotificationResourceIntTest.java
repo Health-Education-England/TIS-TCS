@@ -141,8 +141,6 @@ public class EsrNotificationResourceIntTest {
 
     placement1.setPostId(post.getId());
     placement2.setPostId(post.getId());
-//    placement1.setLocalPostNumber(localPostNumber);
-//    placement2.setLocalPostNumber(localPostNumber);
 
     entityManager.persist(placement1);
     entityManager.persist(placement2);
@@ -215,12 +213,6 @@ public class EsrNotificationResourceIntTest {
 
     placement1.setTraineeId(trainee1.getId());
     placement2.setTraineeId(trainee2.getId());
-
-//    String localPostNumber1 = "EOE/RGT00/021/FY1/013";
-//    String localPostNumber2 = "YHD/RGT00/021/FY1/013";
-
-//    placement1.setLocalPostNumber(localPostNumber1);
-//    placement2.setLocalPostNumber(localPostNumber2);
 
     placement1.setPostId(post1.getId());
     placement2.setPostId(post2.getId());

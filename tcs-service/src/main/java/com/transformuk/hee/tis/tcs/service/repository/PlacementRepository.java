@@ -36,7 +36,7 @@ public interface PlacementRepository extends JpaRepository<Placement, Long> {
           " (SELECT postId, max(dateTo) AS dateTo FROM Placement AS pl GROUP BY postId HAVING max(dateTo) = :asOfDate) AS P2" +
           " ON P1.postId = P2.postId " +
           "AND P1.dateTo = P2.dateTo", nativeQuery = true)
-  List<Placement> findPostsWithoutAnyCurrentOrFuturePlacements(@Param("asOfDate") LocalDate asOfDate);
+  List<Placement> findPlacementsForPostsWithoutAnyCurrentOrFuturePlacements(@Param("asOfDate") LocalDate asOfDate);
 
 
   @Query(value = "SELECT Pl.* FROM Placement AS Pl WHERE " +
@@ -48,7 +48,7 @@ public interface PlacementRepository extends JpaRepository<Placement, Long> {
       "    (dateFrom <= :asOfDate AND dateTo >= :asOfDate) OR " +
       "    (dateFrom > :futureStartDate AND dateFrom < :futureEndDate)" +
       "  )", nativeQuery = true)
-  List<Placement> findPostsWithCurrentAndFuturePlacements(
+  List<Placement> findCurrentAndFuturePlacementsForPosts(
       @Param("asOfDate") LocalDate asOfDate,
       @Param("futureStartDate") LocalDate futureStartDate,
       @Param("futureEndDate") LocalDate futureEndDate,
@@ -58,7 +58,7 @@ public interface PlacementRepository extends JpaRepository<Placement, Long> {
   @Query(value = "SELECT Pl.* FROM Placement Pl WHERE pl.placementType IN (:placementTypes) AND postId IN " +
       "(SELECT id FROM Post WHERE nationalPostNumber IN (:deaneryNumbers))" +
       "AND (dateFrom >= :futureStartDate AND dateFrom < :futureEndDate)", nativeQuery = true)
-  List<Placement> findPostsWithFuturePlacements(
+  List<Placement> findFuturePlacementsForPosts(
       @Param("futureStartDate") LocalDate futureStartDate,
       @Param("futureEndDate") LocalDate futureEndDate,
       @Param("deaneryNumbers") List<String> deaneryNumbers,
@@ -67,7 +67,7 @@ public interface PlacementRepository extends JpaRepository<Placement, Long> {
   @Query(value = "SELECT Pl.* FROM Placement Pl WHERE pl.placementType IN (:placementTypes) AND postId IN " +
       "(SELECT id FROM Post WHERE nationalPostNumber IN (:deaneryNumbers))" +
       "AND (dateFrom <= :asOfDate AND dateTo >= :asOfDate)", nativeQuery = true)
-  List<Placement> findPostsWithCurrentPlacements(
+  List<Placement> findCurrentPlacementsForPosts(
       @Param("asOfDate") LocalDate asOfDate,
       @Param("deaneryNumbers") List<String> deaneryNumbers,
       @Param("placementTypes") List<String> placementTypes);

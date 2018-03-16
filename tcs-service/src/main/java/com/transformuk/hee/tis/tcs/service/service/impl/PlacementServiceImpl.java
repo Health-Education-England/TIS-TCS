@@ -471,8 +471,9 @@ public class PlacementServiceImpl implements PlacementService {
 
   private void handleChangeOfPlacementDatesEsrNotification(Placement currentPlacement, PlacementDetailsDTO updatedPlacementDetails) {
 
-    if (!currentPlacement.getDateFrom().equals(updatedPlacementDetails.getDateFrom()) ||
-        !currentPlacement.getDateTo().equals(updatedPlacementDetails.getDateTo())) {
+    if (currentPlacement != null && updatedPlacementDetails != null &&
+        (!currentPlacement.getDateFrom().equals(updatedPlacementDetails.getDateFrom()) ||
+        !currentPlacement.getDateTo().equals(updatedPlacementDetails.getDateTo()))) {
 
       // create NOT1 type record. Current and next trainee details for the post number.
       // Create NOT4 type record

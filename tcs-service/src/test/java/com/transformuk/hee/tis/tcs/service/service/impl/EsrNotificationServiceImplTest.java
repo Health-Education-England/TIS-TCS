@@ -54,7 +54,7 @@ public class EsrNotificationServiceImplTest {
     List<String> deaneryNumbers = asList("dn-01", "dn-02");
     String deaneryBody = "EOE";
 
-    when(placementRepository.findPostsWithCurrentAndFuturePlacements(asOfDate, asOfDate.plusDays(2), asOfDate.plusMonths(3), deaneryNumbers, placementTypes)).thenReturn(emptyList());
+    when(placementRepository.findCurrentAndFuturePlacementsForPosts(asOfDate, asOfDate.plusDays(2), asOfDate.plusMonths(3), deaneryNumbers, placementTypes)).thenReturn(emptyList());
     when(esrNotificationRepository.save(anyListOf(EsrNotification.class))).thenReturn(emptyList());
 
     List<EsrNotificationDTO> esrNotificationDTOS = testService.loadFullNotification(asOfDate, deaneryNumbers, deaneryBody);
@@ -71,7 +71,7 @@ public class EsrNotificationServiceImplTest {
     List<String> deaneryNumbers = asList(deaneryNumber, "dn-02");
     String deaneryBody = "EOE";
 
-    when(placementRepository.findPostsWithCurrentAndFuturePlacements(asOfDate, asOfDate.plusDays(2), asOfDate.plusMonths(3), deaneryNumbers, placementTypes))
+    when(placementRepository.findCurrentAndFuturePlacementsForPosts(asOfDate, asOfDate.plusDays(2), asOfDate.plusMonths(3), deaneryNumbers, placementTypes))
         .thenReturn(aListOfCurrentAndFuturePlacements(deaneryNumber));
     List<EsrNotification> esrNotifications = savedNotifications();
     when(esrNotificationRepository.save(anyListOf(EsrNotification.class))).thenReturn(esrNotifications);
@@ -82,7 +82,7 @@ public class EsrNotificationServiceImplTest {
     assertThat(esrNotificationDTOS).isNotEmpty();
     assertThat(esrNotificationDTOS.get(0).getDeaneryPostNumber()).isEqualTo(deaneryNumber);
 
-    verify(placementRepository).findPostsWithCurrentAndFuturePlacements(asOfDate, asOfDate.plusDays(2), asOfDate.plusMonths(3), deaneryNumbers, placementTypes);
+    verify(placementRepository).findCurrentAndFuturePlacementsForPosts(asOfDate, asOfDate.plusDays(2), asOfDate.plusMonths(3), deaneryNumbers, placementTypes);
     verify(esrNotificationRepository).save(anyListOf(EsrNotification.class));
     verify(esrNotificationMapper).esrNotificationsToPlacementDetailDTOs(esrNotifications);
 
@@ -114,7 +114,7 @@ public class EsrNotificationServiceImplTest {
     LocalDate asOfDate = LocalDate.now();
     Placement placement = aPlacement(deaneryPostNumber);
 
-    when(placementRepository.findPostsWithCurrentPlacements(asOfDate, asList(deaneryPostNumber), placementTypes)).thenReturn(emptyList());
+    when(placementRepository.findCurrentPlacementsForPosts(asOfDate, asList(deaneryPostNumber), placementTypes)).thenReturn(emptyList());
     EsrNotification returnedNotification = anEsrNotification(deaneryPostNumber);
     when(esrNotificationRepository.save(any(List.class))).thenReturn(asList(returnedNotification));
 
@@ -125,7 +125,7 @@ public class EsrNotificationServiceImplTest {
     assertThat(mappedNotification.getId()).isEqualTo(returnedNotification.getId());
     assertThat(mappedNotification.getDeaneryPostNumber()).isEqualTo(returnedNotification.getDeaneryPostNumber());
 
-    verify(placementRepository).findPostsWithCurrentPlacements(asOfDate, asList(deaneryPostNumber), placementTypes);
+    verify(placementRepository).findCurrentPlacementsForPosts(asOfDate, asList(deaneryPostNumber), placementTypes);
     verify(esrNotificationRepository).save(any(List.class));
   }
 
