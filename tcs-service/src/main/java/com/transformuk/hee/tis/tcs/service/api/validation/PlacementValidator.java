@@ -71,7 +71,7 @@ public class PlacementValidator {
     Placement placement = placementRepository.findOne(id);
     LocalDate now = LocalDate.now();
     if (placement != null && placement.getDateFrom() != null && placement.getDateTo() != null) {
-      if (!(now.isAfter(placement.getDateFrom()) && now.isBefore(placement.getDateTo()))) {
+      if (!(now.isAfter(placement.getDateFrom()) && (now.isBefore(placement.getDateTo()) || now.isEqual(placement.getDateTo())))) {
         //if we're not currently between the start and end dates
         throw new IllegalArgumentException("cannot deactivate placement as it is not a current placement");
       }

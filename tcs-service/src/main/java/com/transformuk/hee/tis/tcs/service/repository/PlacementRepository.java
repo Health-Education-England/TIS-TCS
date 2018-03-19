@@ -39,8 +39,8 @@ public interface PlacementRepository extends JpaRepository<Placement, Long> {
   List<Placement> findPlacementsForPostsWithoutAnyCurrentOrFuturePlacements(@Param("asOfDate") LocalDate asOfDate);
 
 
-  @Query(value = "SELECT Pl.* FROM Placement AS Pl WHERE " +
-      "Pl.placementType IN (:placementTypes)" +
+  @Query(value = "SELECT pl.* FROM Placement AS pl WHERE " +
+      "pl.placementType IN (:placementTypes)" +
       "  AND postId IN (" +
       "   SELECT id FROM Post WHERE nationalPostNumber IN (:deaneryNumbers)" +
       ")" +
@@ -55,7 +55,7 @@ public interface PlacementRepository extends JpaRepository<Placement, Long> {
       @Param("deaneryNumbers") List<String> deaneryNumbers,
       @Param("placementTypes") List<String> placementTypes);
 
-  @Query(value = "SELECT Pl.* FROM Placement Pl WHERE pl.placementType IN (:placementTypes) AND postId IN " +
+  @Query(value = "SELECT pl.* FROM Placement pl WHERE pl.placementType IN (:placementTypes) AND postId IN " +
       "(SELECT id FROM Post WHERE nationalPostNumber IN (:deaneryNumbers))" +
       "AND (dateFrom >= :futureStartDate AND dateFrom < :futureEndDate)", nativeQuery = true)
   List<Placement> findFuturePlacementsForPosts(
@@ -64,7 +64,7 @@ public interface PlacementRepository extends JpaRepository<Placement, Long> {
       @Param("deaneryNumbers") List<String> deaneryNumbers,
       @Param("placementTypes") List<String> placementTypes);
 
-  @Query(value = "SELECT Pl.* FROM Placement Pl WHERE pl.placementType IN (:placementTypes) AND postId IN " +
+  @Query(value = "SELECT pl.* FROM Placement pl WHERE pl.placementType IN (:placementTypes) AND postId IN " +
       "(SELECT id FROM Post WHERE nationalPostNumber IN (:deaneryNumbers))" +
       "AND (dateFrom <= :asOfDate AND dateTo >= :asOfDate)", nativeQuery = true)
   List<Placement> findCurrentPlacementsForPosts(
