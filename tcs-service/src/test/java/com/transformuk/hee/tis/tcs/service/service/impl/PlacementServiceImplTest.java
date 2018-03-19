@@ -54,7 +54,7 @@ public class PlacementServiceImplTest {
     Assert.assertEquals(placementDTOMock, result);
 
     LocalDate toDateCapture = toDateCaptor.getValue();
-    Assert.assertEquals(LocalDate.now(), toDateCapture);
+    Assert.assertEquals(LocalDate.now().minusDays(1), toDateCapture);
 
   }
 
