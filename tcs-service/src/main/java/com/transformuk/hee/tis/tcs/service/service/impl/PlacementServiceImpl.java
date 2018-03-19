@@ -382,7 +382,7 @@ public class PlacementServiceImpl implements PlacementService {
   public PlacementDTO closePlacement(Long placementId) {
     Placement placement = placementRepository.findOne(placementId);
     if(placement != null) {
-      placement.setDateTo(LocalDate.now());
+      placement.setDateTo(LocalDate.now().minusDays(1));
       placement = placementRepository.saveAndFlush(placement);
     }
     return placementMapper.placementToPlacementDTO(placement);
