@@ -10,6 +10,7 @@ import com.transformuk.hee.tis.tcs.service.repository.EsrNotificationRepository;
 import com.transformuk.hee.tis.tcs.service.repository.PlacementRepository;
 import com.transformuk.hee.tis.tcs.service.service.EsrNotificationService;
 import com.transformuk.hee.tis.tcs.service.service.mapper.EsrNotificationMapper;
+import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Service;
@@ -275,8 +276,10 @@ public class EsrNotificationServiceImpl implements EsrNotificationService {
     EsrNotification esrNotification = new EsrNotification();
     esrNotification.setNotificationTitleCode("5");
     esrNotification.setDeaneryPostNumber(postDTO.getNationalPostNumber());
-    esrNotification.setManagingDeaneryBodyCode(
-        postDTO.getNationalPostNumber().substring(0, postDTO.getNationalPostNumber().indexOf('/')));
+    if(StringUtils.isNotEmpty(postDTO.getNationalPostNumber()) && postDTO.getNationalPostNumber().indexOf('/') > -1) {
+      esrNotification.setManagingDeaneryBodyCode(
+              postDTO.getNationalPostNumber().substring(0, postDTO.getNationalPostNumber().indexOf('/')));
+    }
     return esrNotification;
   }
 
@@ -428,7 +431,9 @@ public class EsrNotificationServiceImpl implements EsrNotificationService {
 
   private void setManagingDeaneryBodyCodeFromPlacement(Placement nextPlacement, EsrNotification esrNotification) {
     String nationalPostNumber = nextPlacement.getPost().getNationalPostNumber();
-    esrNotification.setManagingDeaneryBodyCode(nationalPostNumber.substring(0, nationalPostNumber.indexOf('/')));
+    if(StringUtils.isNotEmpty(nationalPostNumber) && nationalPostNumber.indexOf('/') > -1) {
+      esrNotification.setManagingDeaneryBodyCode(nationalPostNumber.substring(0, nationalPostNumber.indexOf('/')));
+    }
   }
 
   private void setWorkingHourIndicatorFromPlacement(Placement placement, EsrNotification esrNotification) {
