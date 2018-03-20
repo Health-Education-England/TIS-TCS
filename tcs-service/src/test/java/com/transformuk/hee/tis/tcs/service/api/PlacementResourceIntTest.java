@@ -7,18 +7,26 @@ import com.transformuk.hee.tis.reference.client.ReferenceService;
 import com.transformuk.hee.tis.tcs.api.dto.PlacementDTO;
 import com.transformuk.hee.tis.tcs.api.dto.PlacementDetailsDTO;
 import com.transformuk.hee.tis.tcs.service.Application;
+import com.transformuk.hee.tis.tcs.service.api.decorator.AsyncReferenceService;
 import com.transformuk.hee.tis.tcs.service.api.decorator.PersonBasicDetailsRepositoryAccessor;
 import com.transformuk.hee.tis.tcs.service.api.decorator.PlacementDetailsDecorator;
-import com.transformuk.hee.tis.tcs.service.api.decorator.AsyncReferenceService;
 import com.transformuk.hee.tis.tcs.service.api.validation.PlacementValidator;
 import com.transformuk.hee.tis.tcs.service.exception.ExceptionTranslator;
 import com.transformuk.hee.tis.tcs.service.model.ContactDetails;
+import com.transformuk.hee.tis.tcs.service.model.EsrNotification;
 import com.transformuk.hee.tis.tcs.service.model.Person;
-import com.transformuk.hee.tis.tcs.service.model.Placement;
 import com.transformuk.hee.tis.tcs.service.model.PlacementDetails;
 import com.transformuk.hee.tis.tcs.service.model.Post;
 import com.transformuk.hee.tis.tcs.service.model.Specialty;
-import com.transformuk.hee.tis.tcs.service.repository.*;
+import com.transformuk.hee.tis.tcs.service.repository.ContactDetailsRepository;
+import com.transformuk.hee.tis.tcs.service.repository.EsrNotificationRepository;
+import com.transformuk.hee.tis.tcs.service.repository.PersonBasicDetailsRepository;
+import com.transformuk.hee.tis.tcs.service.repository.PersonRepository;
+import com.transformuk.hee.tis.tcs.service.repository.PlacementDetailsRepository;
+import com.transformuk.hee.tis.tcs.service.repository.PlacementRepository;
+import com.transformuk.hee.tis.tcs.service.repository.PostRepository;
+import com.transformuk.hee.tis.tcs.service.repository.SpecialtyRepository;
+import com.transformuk.hee.tis.tcs.service.service.EsrNotificationService;
 import com.transformuk.hee.tis.tcs.service.service.PlacementService;
 import com.transformuk.hee.tis.tcs.service.service.mapper.PlacementDetailsMapper;
 import org.apache.commons.codec.EncoderException;
@@ -47,6 +55,8 @@ import java.time.ZoneId;
 import java.util.List;
 
 import static com.transformuk.hee.tis.tcs.service.api.util.DateUtil.getLocalDateFromString;
+import static java.time.temporal.ChronoUnit.DAYS;
+import static java.util.Arrays.asList;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.hamcrest.Matchers.containsInAnyOrder;
 import static org.hamcrest.Matchers.hasItem;
@@ -115,6 +125,10 @@ public class PlacementResourceIntTest {
   @Autowired
   private PersonRepository personRepository;
   @Autowired
+  private PlacementRepository placementRepository;
+  @Autowired
+  private EsrNotificationRepository esrNotificationRepository;
+  @Autowired
   private PlacementDetailsMapper placementDetailsMapper;
   @Autowired
   private PlacementService placementService;
@@ -131,6 +145,9 @@ public class PlacementResourceIntTest {
 
   @Mock
   private ReferenceService referenceService;
+
+  @Autowired
+  private EsrNotificationService esrNotificationService;
 
 
   @Autowired
@@ -181,7 +198,7 @@ public class PlacementResourceIntTest {
   public void setup() {
     MockitoAnnotations.initMocks(this);
     asyncReferenceService = new AsyncReferenceService(referenceService);
-    placementValidator = new PlacementValidator(specialtyRepository, referenceService, postRepository, personRepository);
+    placementValidator = new PlacementValidator(specialtyRepository, referenceService, postRepository, personRepository, placementRepository);
     placementDetailsDecorator = new PlacementDetailsDecorator(asyncReferenceService, asyncPersonBasicDetailsRepository, postRepository);
     PlacementResource placementResource = new PlacementResource(placementService, placementValidator, placementDetailsDecorator);
     this.restPlacementMockMvc = MockMvcBuilders.standaloneSetup(placementResource)
@@ -267,6 +284,18 @@ public class PlacementResourceIntTest {
     int databaseSizeBeforeCreate = placementDetailsRepository.findAll().size();
 
     // Create the Placement
+    String postNumber = "EOE/RGT00/021/FY1/010";
+    String placementType = "In Post";
+
+    placement.setDateFrom(UPDATED_DATE_FROM.plusMonths(1));
+    placement.setDateTo(UPDATED_DATE_TO.plusMonths(3));
+//    placement.setLocalPostNumber(postNumber);
+    placement.setPlacementType(placementType);
+
+    Post post = postRepository.findOne(placement.getPostId());
+    post.setNationalPostNumber(postNumber);
+    postRepository.saveAndFlush(post);
+
     PlacementDetailsDTO placementDetailsDTO = placementDetailsMapper.placementDetailsToPlacementDetailsDTO(placement);
     restPlacementMockMvc.perform(post("/api/placements")
         .contentType(TestUtil.APPLICATION_JSON_UTF8)
@@ -281,15 +310,23 @@ public class PlacementResourceIntTest {
     assertThat(testPlacement.getGradeAbbreviation()).isEqualTo(DEFAULT_GRADE);
     //assertThat(testPlacement.getSpecialties().iterator().next().getPlacementSpecialtyType()).isEqualTo(placement.getSpecialties().iterator().next().getPlacementSpecialtyType());
     //assertThat(testPlacement.getSpecialties().iterator().next().getSpecialty()).isEqualTo(placement.getSpecialties().iterator().next().getSpecialty());
-    assertThat(testPlacement.getDateFrom()).isEqualTo(DEFAULT_DATE_FROM);
-    assertThat(testPlacement.getDateTo()).isEqualTo(DEFAULT_DATE_TO);
+    assertThat(testPlacement.getDateFrom()).isEqualTo(UPDATED_DATE_FROM.plusMonths(1));
+    assertThat(testPlacement.getDateTo()).isEqualTo(UPDATED_DATE_TO.plusMonths(3));
     assertThat(testPlacement.getPostId()).isEqualTo(placement.getPostId());
     assertThat(testPlacement.getTraineeId()).isEqualTo(placement.getTraineeId());
     //assertThat(testPlacement.getClinicalSupervisors().iterator().next().getClinicalSupervisor()).isEqualTo(placement.getClinicalSupervisors().iterator().next().getClinicalSupervisor());
-    assertThat(testPlacement.getLocalPostNumber()).isEqualTo(DEFAULT_LOCAL_POST_NUMBER);
     assertThat(testPlacement.getTrainingDescription()).isEqualTo(DEFAULT_TRAINING_DESCRIPTION);
-    assertThat(testPlacement.getPlacementType()).isEqualTo(DEFAULT_PLACEMENT_TYPE);
+    assertThat(testPlacement.getPlacementType()).isEqualTo(placementType);
     assertThat(testPlacement.getWholeTimeEquivalent()).isEqualTo(DEFAULT_PLACEMENT_WHOLE_TIME_EQUIVALENT.floatValue());
+
+    // Validate that there is no ESR notification record created
+    List<EsrNotification> esrNotifications = esrNotificationRepository.findAll();
+    assertThat(esrNotifications).hasSize(1);
+    EsrNotification esrNotification = esrNotifications.get(0);
+    assertThat(esrNotification.getNotificationTitleCode()).isEqualTo("1");
+    assertThat(esrNotification.getDeaneryPostNumber()).isEqualTo(postNumber);
+    assertThat(esrNotification.getId()).isNotNull();
+
   }
 
   @Test
@@ -310,6 +347,10 @@ public class PlacementResourceIntTest {
     // Validate the Alice in the database
     List<PlacementDetails> placementList = placementDetailsRepository.findAll();
     assertThat(placementList).hasSize(databaseSizeBeforeCreate);
+
+    // Validate that there is no ESR notification record created
+    List<EsrNotification> esrNotifications = esrNotificationRepository.findAll();
+    assertThat(esrNotifications).hasSize(0);
   }
 
   @Test
@@ -412,8 +453,8 @@ public class PlacementResourceIntTest {
     updatedPlacement.setSiteCode(UPDATED_SITE);
     updatedPlacement.setGradeAbbreviation(UPDATED_GRADE);
     //updatedPlacement.setSpecialties(Sets.newHashSet());
-    updatedPlacement.setDateFrom(UPDATED_DATE_FROM);
-    updatedPlacement.setDateTo(UPDATED_DATE_TO);
+    updatedPlacement.setDateFrom(DEFAULT_DATE_FROM);
+    updatedPlacement.setDateTo(DEFAULT_DATE_TO);
     updatedPlacement.setLocalPostNumber(UPDATED_LOCAL_POST_NUMBER);
     updatedPlacement.setTrainingDescription(UPDATED_TRAINING_DESCRPTION);
     updatedPlacement.setPlacementType(UPDATED_PLACEMENT_TYPE);
@@ -432,18 +473,148 @@ public class PlacementResourceIntTest {
     assertThat(testPlacement.getSiteCode()).isEqualTo(UPDATED_SITE);
     assertThat(testPlacement.getGradeAbbreviation()).isEqualTo(UPDATED_GRADE);
     //assertThat(testPlacement.getSpecialties()).isEqualTo(placement.getSpecialties());
-    assertThat(testPlacement.getDateFrom()).isEqualTo(UPDATED_DATE_FROM);
-    assertThat(testPlacement.getDateTo()).isEqualTo(UPDATED_DATE_TO);
+    assertThat(testPlacement.getDateFrom()).isEqualTo(DEFAULT_DATE_FROM);
+    assertThat(testPlacement.getDateTo()).isEqualTo(DEFAULT_DATE_TO);
     assertThat(testPlacement.getLocalPostNumber()).isEqualTo(UPDATED_LOCAL_POST_NUMBER);
     assertThat(testPlacement.getTrainingDescription()).isEqualTo(UPDATED_TRAINING_DESCRPTION);
     assertThat(testPlacement.getPlacementType()).isEqualTo(UPDATED_PLACEMENT_TYPE);
     assertThat(testPlacement.getWholeTimeEquivalent()).isEqualTo(UPDATED_PLACEMENT_WHOLE_TIME_EQUIVALENT.floatValue());
+
+    // validate that no EsrNotification records are created in the database
+    List<EsrNotification> esrNotifications = esrNotificationRepository.findAll();
+    assertThat(esrNotifications).hasSize(0);
   }
+
+  @Test
+  @Transactional
+  public void updateCurrentPlacementWithDateChangeAndWithoutAnyFuturePlacementToTriggerNotification() throws Exception {
+    // Initialize the database
+    String localPostNumber = "EOE/RGT00/004/STR/704";
+    String placementType = "In Post";
+
+    placement.setDateFrom(UPDATED_DATE_FROM.minusMonths(2));
+    placement.setDateTo(UPDATED_DATE_TO.plusMonths(2));
+//    placement.setLocalPostNumber(localPostNumber);
+    placement.setPlacementType(placementType);
+    placementDetailsRepository.saveAndFlush(placement);
+
+    Post post = postRepository.findOne(placement.getPostId());
+    post.setNationalPostNumber(localPostNumber);
+    postRepository.saveAndFlush(post);
+
+    int databaseSizeBeforeUpdate = placementDetailsRepository.findAll().size();
+
+    // Update the placement
+    PlacementDetails updatedPlacement = placementDetailsRepository.findOne(placement.getId());
+    updatedPlacement.setSiteCode(UPDATED_SITE);
+    updatedPlacement.setGradeAbbreviation(UPDATED_GRADE);
+    //updatedPlacement.setSpecialties(Sets.newHashSet());
+//    updatedPlacement.setDateFrom(UPDATED_DATE_FROM);
+    updatedPlacement.setDateTo(UPDATED_DATE_TO);
+    updatedPlacement.setLocalPostNumber(localPostNumber);
+    updatedPlacement.setTrainingDescription(UPDATED_TRAINING_DESCRPTION);
+    updatedPlacement.setPlacementType(placementType);
+    updatedPlacement.setWholeTimeEquivalent(UPDATED_PLACEMENT_WHOLE_TIME_EQUIVALENT.doubleValue());
+    PlacementDetailsDTO placementDTO = placementDetailsMapper.placementDetailsToPlacementDetailsDTO(updatedPlacement);
+
+    restPlacementMockMvc.perform(put("/api/placements")
+        .contentType(TestUtil.APPLICATION_JSON_UTF8)
+        .content(TestUtil.convertObjectToJsonBytes(placementDTO)))
+        .andExpect(status().isOk());
+
+    // Validate the Placement in the database
+    List<PlacementDetails> placementList = placementDetailsRepository.findAll();
+    assertThat(placementList).hasSize(databaseSizeBeforeUpdate);
+    PlacementDetails testPlacement = placementList.get(placementList.size() - 1);
+    assertThat(testPlacement.getSiteCode()).isEqualTo(UPDATED_SITE);
+    assertThat(testPlacement.getGradeAbbreviation()).isEqualTo(UPDATED_GRADE);
+    //assertThat(testPlacement.getSpecialties()).isEqualTo(placement.getSpecialties());
+    assertThat(testPlacement.getDateFrom()).isEqualTo(UPDATED_DATE_FROM.minusMonths(2));
+    assertThat(testPlacement.getDateTo()).isEqualTo(UPDATED_DATE_TO);
+    assertThat(testPlacement.getLocalPostNumber()).isEqualTo(localPostNumber);
+    assertThat(testPlacement.getTrainingDescription()).isEqualTo(UPDATED_TRAINING_DESCRPTION);
+    assertThat(testPlacement.getPlacementType()).isEqualTo(placementType);
+    assertThat(testPlacement.getWholeTimeEquivalent()).isEqualTo(UPDATED_PLACEMENT_WHOLE_TIME_EQUIVALENT.floatValue());
+
+    // validate the EsrNotification in the database
+    List<EsrNotification> esrNotifications = esrNotificationRepository.findAll();
+    assertThat(esrNotifications).hasSize(2);
+    esrNotifications.stream().map(EsrNotification::getNotificationTitleCode).forEachOrdered(r -> asList("1", "4").contains(r));
+    esrNotifications.stream().filter(esrNotification -> esrNotification.getNotificationTitleCode().equals("4")).forEach(esrNotification -> {
+      assertThat(esrNotification.getChangeOfProjectedHireDate()).isNull();
+      assertThat(esrNotification.getChangeOfProjectedEndDate()).isEqualTo(UPDATED_DATE_TO);
+    });
+  }
+
+  @Test
+  @Transactional
+  public void updateFuturePlacementWithDateChangeAndWithoutAnyCurrentPlacementToTriggerNotification() throws Exception {
+    // Initialize the database
+    String localPostNumber = "EOE/RGT00/004/STR/704";
+    String placementType = "In Post";
+
+    placement.setDateFrom(UPDATED_DATE_FROM.plusMonths(2));
+    placement.setDateTo(UPDATED_DATE_TO.plusMonths(5));
+//    placement.setLocalPostNumber(localPostNumber);
+    placement.setPlacementType(placementType);
+    placementDetailsRepository.saveAndFlush(placement);
+
+    Post post = postRepository.findOne(placement.getPostId());
+    post.setNationalPostNumber(localPostNumber);
+    postRepository.saveAndFlush(post);
+
+    int databaseSizeBeforeUpdate = placementDetailsRepository.findAll().size();
+
+    // Update the placement
+    PlacementDetails updatedPlacement = placementDetailsRepository.findOne(placement.getId());
+    updatedPlacement.setSiteCode(UPDATED_SITE);
+    updatedPlacement.setGradeAbbreviation(UPDATED_GRADE);
+    //updatedPlacement.setSpecialties(Sets.newHashSet());
+    updatedPlacement.setDateFrom(UPDATED_DATE_FROM.plusMonths(1));
+    updatedPlacement.setDateTo(UPDATED_DATE_TO.plusMonths(6));
+    updatedPlacement.setLocalPostNumber(localPostNumber);
+    updatedPlacement.setTrainingDescription(UPDATED_TRAINING_DESCRPTION);
+    updatedPlacement.setPlacementType(placementType);
+    updatedPlacement.setWholeTimeEquivalent(UPDATED_PLACEMENT_WHOLE_TIME_EQUIVALENT.doubleValue());
+    PlacementDetailsDTO placementDTO = placementDetailsMapper.placementDetailsToPlacementDetailsDTO(updatedPlacement);
+
+    restPlacementMockMvc.perform(put("/api/placements")
+        .contentType(TestUtil.APPLICATION_JSON_UTF8)
+        .content(TestUtil.convertObjectToJsonBytes(placementDTO)))
+        .andExpect(status().isOk());
+
+    // Validate the Placement in the database
+    List<PlacementDetails> placementList = placementDetailsRepository.findAll();
+    assertThat(placementList).hasSize(databaseSizeBeforeUpdate);
+    PlacementDetails testPlacement = placementList.get(placementList.size() - 1);
+    assertThat(testPlacement.getSiteCode()).isEqualTo(UPDATED_SITE);
+    assertThat(testPlacement.getGradeAbbreviation()).isEqualTo(UPDATED_GRADE);
+    //assertThat(testPlacement.getSpecialties()).isEqualTo(placement.getSpecialties());
+    assertThat(testPlacement.getDateFrom()).isEqualTo(UPDATED_DATE_FROM.plusMonths(1));
+    assertThat(testPlacement.getDateTo()).isEqualTo(UPDATED_DATE_TO.plusMonths(6));
+    assertThat(testPlacement.getLocalPostNumber()).isEqualTo(localPostNumber);
+    assertThat(testPlacement.getTrainingDescription()).isEqualTo(UPDATED_TRAINING_DESCRPTION);
+    assertThat(testPlacement.getPlacementType()).isEqualTo(placementType);
+    assertThat(testPlacement.getWholeTimeEquivalent()).isEqualTo(UPDATED_PLACEMENT_WHOLE_TIME_EQUIVALENT.floatValue());
+
+    // validate the EsrNotification in the database
+    List<EsrNotification> esrNotifications = esrNotificationRepository.findAll();
+    assertThat(esrNotifications).hasSize(2);
+    esrNotifications.stream().map(EsrNotification::getNotificationTitleCode).forEachOrdered(r -> asList("1", "4").contains(r));
+    esrNotifications.stream().filter(esrNotification -> esrNotification.getNotificationTitleCode().equals("4")).forEach(esrNotification -> {
+      assertThat(esrNotification.getChangeOfProjectedHireDate()).isNotNull();
+      assertThat(esrNotification.getChangeOfProjectedHireDate()).isEqualTo(UPDATED_DATE_FROM.plusMonths(1));
+      assertThat(esrNotification.getChangeOfProjectedEndDate()).isEqualTo(UPDATED_DATE_TO.plusMonths(6));
+    });
+  }
+
 
   @Test
   @Transactional
   public void deletePlacement() throws Exception {
     // Initialize the database
+    LocalDate tomorrow = LocalDate.now().plus(1, DAYS);
+    placement.setDateFrom(tomorrow);
     placementDetailsRepository.saveAndFlush(placement);
     int databaseSizeBeforeDelete = placementDetailsRepository.findAll().size();
 

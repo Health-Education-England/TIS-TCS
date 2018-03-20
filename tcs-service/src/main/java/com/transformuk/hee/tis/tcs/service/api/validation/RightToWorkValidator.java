@@ -32,40 +32,12 @@ public class RightToWorkValidator {
   public void validate(RightToWorkDTO rightToWorkDTO) throws MethodArgumentNotValidException {
 
     List<FieldError> fieldErrors = new ArrayList<>();
-    fieldErrors.addAll(checkPermitToWork(rightToWorkDTO));
+
     if (!fieldErrors.isEmpty()) {
       BeanPropertyBindingResult bindingResult = new BeanPropertyBindingResult(rightToWorkDTO, "RightToWorkDTO");
       fieldErrors.forEach(bindingResult::addError);
       throw new MethodArgumentNotValidException(null, bindingResult);
     }
-  }
-
-  private List<FieldError> checkPermitToWork(RightToWorkDTO rightToWorkDTO) {
-    List<FieldError> fieldErrors = new ArrayList<>();
-    if (rightToWorkDTO != null) {
-      boolean isEeaResident = isEeaResident(rightToWorkDTO);
-      boolean isSettled = isSettled(rightToWorkDTO);
-      boolean isVisaIssued = (rightToWorkDTO.getVisaIssued() == null ? false : true);
-      boolean isVisaValidTo = (rightToWorkDTO.getVisaValidTo() == null ? false : true);
-      boolean isVisaDetails = (rightToWorkDTO.getVisaDetails() == null ? false : true);
-
-      if (!isEeaResident && !isSettled) {
-        if (!isVisaIssued) {
-          requireFieldErrors(fieldErrors, "visaIssued");
-        }
-        if (!isVisaValidTo) {
-          requireFieldErrors(fieldErrors, "visaValidTo");
-        }
-        if (!isVisaDetails) {
-          requireFieldErrors(fieldErrors, "visaDetails");
-        }
-        else{
-          requireFieldErrors(fieldErrors, "settled");
-        }
-      }
-
-    }
-    return fieldErrors;
   }
 
   private boolean isEeaResident(RightToWorkDTO rightToWorkDTO) {
@@ -76,9 +48,6 @@ public class RightToWorkValidator {
     return !(StringUtils.isEmpty(rightToWorkDTO.getSettled()) || NO.equalsIgnoreCase(rightToWorkDTO.getSettled()));
   }
 
-  private void requireFieldErrors(List<FieldError> fieldErrors, String field) {
-    fieldErrors.add(new FieldError(RIGHT_TO_WORK_DTO, field,
-        String.format("%s is required", field)));
-  }
+
 
 }

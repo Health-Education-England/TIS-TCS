@@ -91,6 +91,7 @@ public class PostMapper {
     result.setTrainingBodyId(post.getTrainingBodyId());
     result.setTrainingDescription(post.getTrainingDescription());
     result.setLocalPostNumber(post.getLocalPostNumber());
+    result.setBypassNPNGeneration(post.isBypassNPNGeneration());
 
     if (traverseRelatedPosts) {
       if (post.getOldPost() != null) {
@@ -220,6 +221,7 @@ public class PostMapper {
     result.setTrainingBodyId(postDTO.getTrainingBodyId());
     result.setTrainingDescription(postDTO.getTrainingDescription());
     result.setLocalPostNumber(postDTO.getLocalPostNumber());
+    result.setBypassNPNGeneration(postDTO.isBypassNPNGeneration());
 
     if (traverseRelatedPosts) {
       if (postDTO.getOldPost() != null) {

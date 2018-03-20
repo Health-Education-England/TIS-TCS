@@ -15,6 +15,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
 import java.time.LocalDate;
+import java.time.LocalDateTime;
 import java.util.List;
 import java.util.Set;
 import java.util.stream.Collectors;
@@ -121,10 +122,10 @@ public class PlacementMapper {
       return null;
     }
 
-    LocalDate today = LocalDate.now();
-    if (today.isBefore(dateFrom)) {
+    LocalDateTime today = LocalDateTime.now();
+    if (today.isBefore(dateFrom.atStartOfDay())) {
       return PlacementStatus.FUTURE;
-    } else if (today.isAfter(dateTo)) {
+    } else if (today.isAfter(dateTo.atStartOfDay())) {
       return PlacementStatus.PAST;
     }
     return PlacementStatus.CURRENT;

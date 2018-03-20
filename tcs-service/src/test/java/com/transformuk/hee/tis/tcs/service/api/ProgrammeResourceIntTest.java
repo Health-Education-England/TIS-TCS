@@ -163,7 +163,7 @@ public class ProgrammeResourceIntTest {
         .andExpect(status().isBadRequest())
         .andExpect(jsonPath("$.message").value("error.validation"))
         .andExpect(jsonPath("$.fieldErrors[*].field").
-            value(containsInAnyOrder("owner", "programmeName", "status", "programmeNumber")));
+            value(containsInAnyOrder("owner", "programmeName", "status")));
   }
 
   @Test
@@ -180,7 +180,7 @@ public class ProgrammeResourceIntTest {
         .andExpect(status().isBadRequest())
         .andExpect(jsonPath("$.message").value("error.validation"))
         .andExpect(jsonPath("$.fieldErrors[*].field").
-            value(containsInAnyOrder("owner", "programmeName", "status", "programmeNumber")));
+            value(containsInAnyOrder("owner", "programmeName", "status")));
   }
 
   @Test
@@ -212,44 +212,6 @@ public class ProgrammeResourceIntTest {
         .andExpect(status().isCreated());
   }
 
-  @Test
-  @Transactional
-  public void shouldValidateProgrammeNumberUniqueWhenCreating() throws Exception {
-    //given we have an exiting programme with DEFAULT_PROGRAMME_NUMBER
-    programmeRepository.saveAndFlush(createEntity());
-    ProgrammeDTO programmeDTO = programmeMapper.programmeToProgrammeDTO(createEntity());
-
-    //when & then
-    restProgrammeMockMvc.perform(post("/api/programmes")
-        .contentType(TestUtil.APPLICATION_JSON_UTF8)
-        .content(TestUtil.convertObjectToJsonBytes(programmeDTO)))
-        .andExpect(status().isBadRequest())
-        .andExpect(jsonPath("$.message").value("error.validation"))
-        .andExpect(jsonPath("$.fieldErrors[0].field").value("programmeNumber"))
-        .andExpect(jsonPath("$.fieldErrors[0].message").value(StringContains.containsString("unique")));
-  }
-
-  @Test
-  @Transactional
-  public void shouldValidateProgrammeNumberUniqueWhenUpdating() throws Exception {
-    //given we have an exiting programme with DEFAULT_PROGRAMME_NUMBER
-    //and we update a second programme using the same nr
-    programmeRepository.saveAndFlush(createEntity());
-    Programme p = createEntity();
-    p.setProgrammeNumber("number2");
-    p = programmeRepository.saveAndFlush(p);
-    ProgrammeDTO programmeDTO = programmeMapper.programmeToProgrammeDTO(p);
-    programmeDTO.setProgrammeNumber(DEFAULT_PROGRAMME_NUMBER);
-
-    //when & then
-    restProgrammeMockMvc.perform(put("/api/programmes")
-        .contentType(TestUtil.APPLICATION_JSON_UTF8)
-        .content(TestUtil.convertObjectToJsonBytes(programmeDTO)))
-        .andExpect(status().isBadRequest())
-        .andExpect(jsonPath("$.message").value("error.validation"))
-        .andExpect(jsonPath("$.fieldErrors[0].field").value("programmeNumber"))
-        .andExpect(jsonPath("$.fieldErrors[0].message").value(StringContains.containsString("unique")));
-  }
 
   @Test
   @Transactional

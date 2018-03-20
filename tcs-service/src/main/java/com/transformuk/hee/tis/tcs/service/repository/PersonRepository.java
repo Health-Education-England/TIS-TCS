@@ -6,6 +6,8 @@ import org.springframework.data.jpa.repository.JpaSpecificationExecutor;
 import org.springframework.data.jpa.repository.query.Procedure;
 import org.springframework.stereotype.Repository;
 
+import java.util.List;
+
 
 /**
  * Spring Data JPA repository for the Person entity.
@@ -18,5 +20,7 @@ public interface PersonRepository extends JpaRepository<Person, Long>, JpaSpecif
   void buildPersonView();
 
   Long findOneIdByGmcDetailsGmcNumber(String gmcNumber);
+
+  List<Person> findByPublicHealthNumber(String publicHealthNumber);
 
 }

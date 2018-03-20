@@ -156,40 +156,7 @@ public class ProgrammeResource {
     if (StringUtils.isEmpty(searchQuery) && StringUtils.isEmpty(columnFilterJson)) {
       page = programmeService.findAll(pageable);
     } else {
-      page = programmeService.advancedSearch(searchQuery, columnFilters, pageable, false);
-    }
-    HttpHeaders headers = PaginationUtil.generatePaginationHttpHeaders(page, "/api/programmes");
-    return new ResponseEntity<>(page.getContent(), headers, HttpStatus.OK);
-  }
-
-  /**
-   * GET  /current/programmes : get all the currrent programmes.
-   *
-   * @param pageable the pagination information
-   * @return the ResponseEntity with status 200 (OK) and the list of programmes in body
-   * @throws URISyntaxException if there is an error to generate the pagination HTTP headers
-   */
-  @ApiOperation(value = "Lists current Programmes data",
-      notes = "Returns a list of current Programmes with support for pagination, sorting, smart search and column filters")
-  @GetMapping("/current/programmes")
-  @Timed
-  @PreAuthorize("hasAuthority('programme:view')")
-  public ResponseEntity<List<ProgrammeDTO>> getAllCurrentProgrammes(
-      @ApiParam Pageable pageable,
-      @ApiParam(value = "any wildcard string to be searched")
-      @RequestParam(value = "searchQuery", required = false) String searchQuery,
-      @ApiParam(value = "json object by column name and value. (Eg: columnFilters={ \"owner\": [\"dean1\", \"dean2\"], \"dbc\":[\"dbc1\"] }\"")
-      @RequestParam(value = "columnFilters", required = false) String columnFilterJson) throws IOException {
-    log.debug("REST request to get a page of Programmes");
-
-    searchQuery = sanitize(searchQuery);
-    List<Class> filterEnumList = Lists.newArrayList(Status.class);
-    List<ColumnFilter> columnFilters = ColumnFilterUtil.getColumnFilters(columnFilterJson, filterEnumList);
-    Page<ProgrammeDTO> page;
-    if (StringUtils.isEmpty(searchQuery) && StringUtils.isEmpty(columnFilterJson)) {
-      page = programmeService.findAllCurrent(pageable);
-    } else {
-      page = programmeService.advancedSearch(searchQuery, columnFilters, pageable, true);
+      page = programmeService.advancedSearch(searchQuery, columnFilters, pageable);
     }
     HttpHeaders headers = PaginationUtil.generatePaginationHttpHeaders(page, "/api/programmes");
     return new ResponseEntity<>(page.getContent(), headers, HttpStatus.OK);

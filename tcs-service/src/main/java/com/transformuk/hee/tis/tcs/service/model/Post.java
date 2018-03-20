@@ -72,6 +72,9 @@ public class Post implements Serializable {
   @Column(name = "legacy")
   private boolean legacy;
 
+  @Column(name = "bypassNPNGeneration")
+  private boolean bypassNPNGeneration;
+
   @OneToOne(fetch = FetchType.EAGER)
   @JoinColumn(name = "oldPostId")
   private Post oldPost;
@@ -97,7 +100,7 @@ public class Post implements Serializable {
   @OneToMany(mappedBy = "post", cascade = CascadeType.ALL, fetch = FetchType.EAGER)
   private Set<PostFunding> fundings = new HashSet<>();
 
-  @OneToMany(mappedBy = "post", cascade = CascadeType.ALL, fetch = FetchType.EAGER)
+  @OneToMany(mappedBy = "post", fetch = FetchType.EAGER)
   private Set<Placement> placementHistory = new HashSet<>();
 
   public Long getId() {
@@ -344,6 +347,14 @@ public class Post implements Serializable {
   public Post specialties(Set<PostSpecialty> specialties) {
     this.specialties = specialties;
     return this;
+  }
+
+  public boolean isBypassNPNGeneration() {
+    return bypassNPNGeneration;
+  }
+
+  public void setBypassNPNGeneration(boolean bypassNPNGeneration) {
+    this.bypassNPNGeneration = bypassNPNGeneration;
   }
 
   @Override

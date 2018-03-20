@@ -213,8 +213,7 @@ public class ContactDetailsResourceIntTest {
         .andExpect(status().isBadRequest())
         .andExpect(jsonPath("$.message").value("error.validation"))
         .andExpect(jsonPath("$.fieldErrors[*].field").
-            value(containsInAnyOrder("id", "surname", "forenames", "initials",
-                "title", "email", "address1", "postCode")));
+            value(containsInAnyOrder("id", "surname", "forenames")));
   }
 
   @Test
@@ -230,8 +229,7 @@ public class ContactDetailsResourceIntTest {
         .andExpect(status().isBadRequest())
         .andExpect(jsonPath("$.message").value("error.validation"))
         .andExpect(jsonPath("$.fieldErrors[*].field").
-            value(containsInAnyOrder("id", "surname", "forenames", "initials",
-                "title", "email", "address1", "postCode")));
+            value(containsInAnyOrder("id", "surname", "forenames")));
   }
 
   @Test

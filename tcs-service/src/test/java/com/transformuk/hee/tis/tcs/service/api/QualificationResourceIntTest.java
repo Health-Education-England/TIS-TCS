@@ -490,16 +490,19 @@ public class QualificationResourceIntTest {
   @Test
   @Transactional
   public void dtoEqualsVerifier() throws Exception {
-    TestUtil.equalsVerifier(QualificationDTO.class);
     QualificationDTO qualificationDTO1 = new QualificationDTO();
-    qualificationDTO1.setId(1L);
+    qualificationDTO1.setCountryOfQualification("UK");
+    PersonDTO personDTO = new PersonDTO();
+    personDTO.setId(1L);
+    qualificationDTO1.setPerson(personDTO);
     QualificationDTO qualificationDTO2 = new QualificationDTO();
     assertThat(qualificationDTO1).isNotEqualTo(qualificationDTO2);
-    qualificationDTO2.setId(qualificationDTO1.getId());
+    qualificationDTO2.setCountryOfQualification(qualificationDTO1.getCountryOfQualification());
+    qualificationDTO2.setPerson(personDTO);
     assertThat(qualificationDTO1).isEqualTo(qualificationDTO2);
-    qualificationDTO2.setId(2L);
+    qualificationDTO2.setMedicalSchool("UCL");
     assertThat(qualificationDTO1).isNotEqualTo(qualificationDTO2);
-    qualificationDTO1.setId(null);
+    qualificationDTO1.setMedicalSchool(null);
     assertThat(qualificationDTO1).isNotEqualTo(qualificationDTO2);
   }
 }

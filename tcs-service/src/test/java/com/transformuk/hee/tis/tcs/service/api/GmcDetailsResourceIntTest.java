@@ -176,7 +176,74 @@ public class GmcDetailsResourceIntTest {
             value(containsInAnyOrder("id")));
   }
 
+//  @Test
+//  @Transactional
+//  public void shouldValidateGmcStatusWhenGmcNumberIsEntered() throws Exception {
+//    //given
+//    GmcDetailsDTO gmcDetailsDTO = new GmcDetailsDTO();
+//    gmcDetailsDTO.setId(1L);
+//    gmcDetailsDTO.setGmcNumber(DEFAULT_GMC_NUMBER);
+//    //when & then
+//    restGmcDetailsMockMvc.perform(post("/api/gmc-details")
+//        .contentType(TestUtil.APPLICATION_JSON_UTF8)
+//        .content(TestUtil.convertObjectToJsonBytes(gmcDetailsDTO)))
+//        .andExpect(status().isBadRequest())
+//        .andExpect(jsonPath("$.message").value("error.validation"))
+//        .andExpect(jsonPath("$.fieldErrors[*].field").
+//            value(containsInAnyOrder("gmcStatus")));
+//  }
   @Test
+  @Transactional
+  public void shouldValidateGmcNumberExistsWhenCreating() throws Exception {
+
+    gmcDetailsRepository.saveAndFlush(gmcDetails);
+
+    GmcDetailsDTO anotherGmcDetailsDTO = gmcDetailsMapper.toDto(gmcDetails);
+    anotherGmcDetailsDTO.setId(2L); // another new gmc details
+    anotherGmcDetailsDTO.setGmcNumber(DEFAULT_GMC_NUMBER);
+    anotherGmcDetailsDTO.setGmcStatus(DEFAULT_GMC_STATUS);
+
+    // Create the GmcDetails
+    restGmcDetailsMockMvc.perform(post("/api/gmc-details")
+            .contentType(TestUtil.APPLICATION_JSON_UTF8)
+            .content(TestUtil.convertObjectToJsonBytes(anotherGmcDetailsDTO)))
+            .andExpect(status().isBadRequest())
+            .andExpect(jsonPath("$.message").value("error.validation"))
+            .andExpect(jsonPath("$.fieldErrors[*].field").
+                    value(containsInAnyOrder("gmcNumber")));
+
+
+  }
+
+  @Test
+  @Transactional
+  public void shouldValidateGmcNumberExistsWhenUpdating() throws Exception {
+
+    // One gmc details with default gmc number
+    gmcDetailsRepository.saveAndFlush(gmcDetails);
+    GmcDetailsDTO anotherGmcDetailsDTO = gmcDetailsMapper.toDto(gmcDetails);
+    // another gmc details with updated gmc number
+    anotherGmcDetailsDTO.setId(2L);
+    anotherGmcDetailsDTO.setGmcNumber(UPDATED_GMC_NUMBER);
+    anotherGmcDetailsDTO.setGmcStatus(UPDATED_GMC_STATUS);
+    gmcDetailsRepository.saveAndFlush(gmcDetailsMapper.toEntity(anotherGmcDetailsDTO));
+
+    //Try to update second gmc details with default gmc number
+    anotherGmcDetailsDTO.setGmcNumber(DEFAULT_GMC_NUMBER);
+
+    // Create the GmcDetails
+    restGmcDetailsMockMvc.perform(post("/api/gmc-details")
+            .contentType(TestUtil.APPLICATION_JSON_UTF8)
+            .content(TestUtil.convertObjectToJsonBytes(anotherGmcDetailsDTO)))
+            .andExpect(status().isBadRequest())
+            .andExpect(jsonPath("$.message").value("error.validation"))
+            .andExpect(jsonPath("$.fieldErrors[*].field").
+                    value(containsInAnyOrder("gmcNumber")));
+
+
+  }
+
+  /*@Test
   @Transactional
   public void shouldValidateGmcStatusWhenGmcNumberIsEntered() throws Exception {
     //given
@@ -191,7 +258,7 @@ public class GmcDetailsResourceIntTest {
         .andExpect(jsonPath("$.message").value("error.validation"))
         .andExpect(jsonPath("$.fieldErrors[*].field").
             value(containsInAnyOrder("gmcStatus")));
-  }
+  }*/
 
   @Test
   @Transactional
@@ -266,16 +333,15 @@ public class GmcDetailsResourceIntTest {
 
     // Update the gmcDetails
     GmcDetails updatedGmcDetails = gmcDetailsRepository.findOne(gmcDetails.getId());
-    updatedGmcDetails
-        .gmcNumber(UPDATED_GMC_NUMBER)
-        .gmcStatus(UPDATED_GMC_STATUS)
-        .gmcStartDate(UPDATED_GMC_START_DATE)
-        .gmcEndDate(UPDATED_GMC_END_DATE);
-    GmcDetailsDTO gmcDetailsDTO = gmcDetailsMapper.toDto(updatedGmcDetails);
+    GmcDetailsDTO updatedGmcDetailsDTO = gmcDetailsMapper.toDto(updatedGmcDetails);
+    updatedGmcDetailsDTO.setGmcNumber(UPDATED_GMC_NUMBER);
+    updatedGmcDetailsDTO.setGmcStatus(UPDATED_GMC_STATUS);
+    updatedGmcDetailsDTO.setGmcStartDate(UPDATED_GMC_START_DATE);
+    updatedGmcDetailsDTO.setGmcEndDate(UPDATED_GMC_END_DATE);
 
     restGmcDetailsMockMvc.perform(put("/api/gmc-details")
         .contentType(TestUtil.APPLICATION_JSON_UTF8)
-        .content(TestUtil.convertObjectToJsonBytes(gmcDetailsDTO)))
+        .content(TestUtil.convertObjectToJsonBytes(updatedGmcDetailsDTO)))
         .andExpect(status().isOk());
 
     // Validate the GmcDetails in the database

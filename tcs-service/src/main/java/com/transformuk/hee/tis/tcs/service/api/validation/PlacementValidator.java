@@ -4,7 +4,9 @@ import com.transformuk.hee.tis.reference.client.ReferenceService;
 import com.transformuk.hee.tis.tcs.api.dto.PlacementDTO;
 import com.transformuk.hee.tis.tcs.api.dto.PlacementDetailsDTO;
 import com.transformuk.hee.tis.tcs.api.enumeration.PostSpecialtyType;
+import com.transformuk.hee.tis.tcs.service.model.Placement;
 import com.transformuk.hee.tis.tcs.service.repository.PersonRepository;
+import com.transformuk.hee.tis.tcs.service.repository.PlacementRepository;
 import com.transformuk.hee.tis.tcs.service.repository.PostRepository;
 import com.transformuk.hee.tis.tcs.service.repository.SpecialtyRepository;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -12,6 +14,7 @@ import org.springframework.stereotype.Component;
 import org.springframework.validation.BeanPropertyBindingResult;
 import org.springframework.validation.FieldError;
 
+import java.time.LocalDate;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
@@ -30,16 +33,19 @@ public class PlacementValidator {
   private final ReferenceService referenceService;
   private final PostRepository postRepository;
   private final PersonRepository personRepository;
+  private final PlacementRepository placementRepository;
 
   @Autowired
   public PlacementValidator(SpecialtyRepository specialtyRepository,
                             ReferenceService referenceService,
                             PostRepository postRepository,
-                            PersonRepository personRepository) {
+                            PersonRepository personRepository,
+                            PlacementRepository placementRepository) {
     this.specialtyRepository = specialtyRepository;
     this.referenceService = referenceService;
     this.personRepository = personRepository;
     this.postRepository = postRepository;
+    this.placementRepository = placementRepository;
   }
 
   public void validate(PlacementDetailsDTO placementDetailsDTO) throws ValidationException {
@@ -57,6 +63,30 @@ public class PlacementValidator {
       BeanPropertyBindingResult bindingResult = new BeanPropertyBindingResult(placementDetailsDTO, PLACEMENT_DTO_NAME);
       fieldErrors.forEach(bindingResult::addError);
       throw new ValidationException(bindingResult);
+    }
+  }
+
+  public void validatePlacementForClose(Long id) throws IllegalArgumentException {
+
+    Placement placement = placementRepository.findOne(id);
+    LocalDate now = LocalDate.now();
+    if (placement != null && placement.getDateFrom() != null && placement.getDateTo() != null) {
+      if (!(now.isAfter(placement.getDateFrom()) && (now.isBefore(placement.getDateTo()) || now.isEqual(placement.getDateTo())))) {
+        //if we're not currently between the start and end dates
+        throw new IllegalArgumentException("cannot deactivate placement as it is not a current placement");
+      }
+    } else {
+      throw new IllegalArgumentException(String.format("No Placement found for id: [%s]", id));
+    }
+  }
+
+  public void validatePlacementForDelete(Long id) throws IllegalArgumentException {
+    Placement placement = placementRepository.findOne(id);
+    LocalDate now = LocalDate.now();
+    if (placement == null) {
+      throw new IllegalArgumentException(String.format("No Placement found for id: [%s]", id));
+    } else if (!now.isBefore(placement.getDateFrom())) {
+      throw new IllegalArgumentException("Placement cannot be deleted as its not a future Placement");
     }
   }
 
@@ -200,4 +230,5 @@ public class PlacementValidator {
           String.format("Only one Specialty of type %s allowed", PostSpecialtyType.SUB_SPECIALTY)));
     }
   }
+
 }

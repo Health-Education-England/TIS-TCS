@@ -7,6 +7,7 @@ import com.transformuk.hee.tis.tcs.service.Application;
 import com.transformuk.hee.tis.tcs.service.api.decorator.PlacementSummaryDecorator;
 import com.transformuk.hee.tis.tcs.service.api.decorator.PersonViewDecorator;
 import com.transformuk.hee.tis.tcs.service.api.decorator.PlacementViewDecorator;
+import com.transformuk.hee.tis.tcs.service.api.validation.PersonValidator;
 import com.transformuk.hee.tis.tcs.service.exception.ExceptionTranslator;
 import com.transformuk.hee.tis.tcs.service.model.*;
 import com.transformuk.hee.tis.tcs.service.repository.ContactDetailsRepository;
@@ -17,6 +18,7 @@ import com.transformuk.hee.tis.tcs.service.repository.PersonViewRepository;
 import com.transformuk.hee.tis.tcs.service.repository.PlacementViewRepository;
 import com.transformuk.hee.tis.tcs.service.service.PersonService;
 import com.transformuk.hee.tis.tcs.service.service.PlacementService;
+import com.transformuk.hee.tis.tcs.service.service.impl.PermissionService;
 import com.transformuk.hee.tis.tcs.service.service.mapper.PersonMapper;
 import com.transformuk.hee.tis.tcs.service.service.mapper.PlacementViewMapper;
 import org.apache.commons.codec.net.URLCodec;
@@ -26,6 +28,7 @@ import org.junit.runner.RunWith;
 import org.mockito.MockitoAnnotations;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
+import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.data.web.PageableHandlerMethodArgumentResolver;
 import org.springframework.http.MediaType;
 import org.springframework.http.converter.json.MappingJackson2HttpMessageConverter;
@@ -41,6 +44,7 @@ import java.util.List;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.hamcrest.Matchers.containsInAnyOrder;
 import static org.hamcrest.Matchers.hasItem;
+import static org.mockito.Mockito.when;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.delete;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.patch;
@@ -136,6 +140,11 @@ public class PersonResourceIntTest {
 
   @Autowired
   private ExceptionTranslator exceptionTranslator;
+  @Autowired
+  private PersonValidator personValidator;
+
+  @MockBean
+  private PermissionService permissionServiceMock;
 
   private MockMvc restPersonMockMvc;
 
@@ -146,13 +155,16 @@ public class PersonResourceIntTest {
   public void setup() {
     MockitoAnnotations.initMocks(this);
     PersonResource personResource = new PersonResource(personService, placementViewRepository, placementViewMapper,
-        placementViewDecorator, personViewDecorator, placementService, placementSummaryDecorator);
+        placementViewDecorator, personViewDecorator, placementService, placementSummaryDecorator,personValidator);
     this.restPersonMockMvc = MockMvcBuilders.standaloneSetup(personResource)
         .setCustomArgumentResolvers(pageableArgumentResolver)
         .setControllerAdvice(exceptionTranslator)
         .setMessageConverters(jacksonMessageConverter).build();
 
     personRepository.deleteAllInBatch();
+
+    when(permissionServiceMock.canViewSensitiveData()).thenReturn(true);
+    when(permissionServiceMock.canEditSensitiveData()).thenReturn(true);
   }
 
   /**
@@ -412,22 +424,20 @@ public class PersonResourceIntTest {
 
     // Update the person
     Person updatedPerson = personRepository.findOne(person.getId());
-    updatedPerson
-        .intrepidId(UPDATED_INTREPID_ID)
-        .addedDate(UPDATED_ADDED_DATE)
-        .role(UPDATED_ROLE)
-        .status(UPDATED_STATUS)
-        .comments(UPDATED_COMMENTS)
-        .inactiveDate(UPDATED_INACTIVE_DATE)
-        .inactiveNotes(UPDATED_INACTIVE_NOTES)
-        .publicHealthNumber(UPDATED_PUBLIC_HEALTH_NUMBER)
-        .regulator(UPDATED_REGULATOR);
-
-    PersonDTO personDTO = personMapper.toDto(updatedPerson);
+    PersonDTO updatedPersonDTO = personMapper.toDto(updatedPerson);
+    updatedPersonDTO.setIntrepidId(UPDATED_INTREPID_ID);
+    updatedPersonDTO.setAddedDate(UPDATED_ADDED_DATE);
+    updatedPersonDTO.setRole(UPDATED_ROLE);
+    updatedPersonDTO.setStatus(UPDATED_STATUS);
+    updatedPersonDTO.setComments(UPDATED_COMMENTS);
+    updatedPersonDTO.setInactiveDate(UPDATED_INACTIVE_DATE);
+    updatedPersonDTO.setInactiveNotes(UPDATED_INACTIVE_NOTES);
+    updatedPersonDTO.setPublicHealthNumber(UPDATED_PUBLIC_HEALTH_NUMBER);
+    updatedPersonDTO.setRegulator(UPDATED_REGULATOR);
 
     restPersonMockMvc.perform(put("/api/people")
         .contentType(TestUtil.APPLICATION_JSON_UTF8)
-        .content(TestUtil.convertObjectToJsonBytes(personDTO)))
+        .content(TestUtil.convertObjectToJsonBytes(updatedPersonDTO)))
         .andExpect(status().isOk());
 
     // Validate the Person in the database

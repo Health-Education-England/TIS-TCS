@@ -130,7 +130,7 @@ public class GmcDetailsResource {
   @GetMapping("/gmc-details/in/{gmcids}")
   @Timed
   public ResponseEntity<List<GmcDetailsDTO>> getGmcDetailsIn(@PathVariable String gmcids) {
-    log.debug("REST request to find several GmcDetails");
+    log.debug("REST request to find several GmcDetails: {}", gmcids);
     List<GmcDetailsDTO> resp = new ArrayList<>();
     List<String> idList = new ArrayList<>();
 
