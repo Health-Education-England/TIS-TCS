@@ -56,6 +56,7 @@ public class DocumentResource {
             @RequestParam(value = "status", required = false) final String status,
             @ApiParam(value = "Tags to filter documents by")
             @RequestParam(value = "tags", required = false) final List<String> tags) {
+
         return new ResponseEntity<>(HttpStatus.OK);
     }
 
@@ -72,6 +73,7 @@ public class DocumentResource {
     public ResponseEntity<DocumentDTO> getDocumentById(
             @ApiParam(value = "The document id", required = true)
             @PathVariable(value = "documentId") final Long documentId) {
+
         return ResponseEntity.ok(documentService.findOne(documentId));
     }
 
@@ -88,6 +90,7 @@ public class DocumentResource {
     public ResponseEntity<Void> downloadDocumentById(
             @ApiParam(value = "The document id", required = true)
             @PathVariable(value = "documentId") final Long documentId) {
+
         // TODO: investigate the right way to download a file
         return ResponseEntity.ok().build();
     }
@@ -136,7 +139,6 @@ public class DocumentResource {
         return ResponseEntity.status(HttpStatus.CREATED).body(new DocumentId(documentDTO.getId()));
     }
 
-
     @ApiOperation(value = "Bulk update of documents", response = String.class, consumes = APPLICATION_JSON, produces = APPLICATION_JSON)
     @ApiResponses(value = {
             @ApiResponse(code = 200, message = "Operation performed successfully", response = String.class),
@@ -153,14 +155,14 @@ public class DocumentResource {
             @RequestBody @Validated final Collection<DocumentDTO> documents) {
 
         for (final DocumentDTO documentParam : documents) {
-            final DocumentDTO documentRepository = documentService.findOne(documentParam.getId());
+            final DocumentDTO existingDocument = documentService.findOne(documentParam.getId());
 
-            if (documentRepository == null) {
+            if (existingDocument == null) {
                 return ResponseEntity.notFound().build();
             }
 
             // filters deleted tags
-            final Set<TagDTO> deletedTags = documentRepository.getTags().stream()
+            final Set<TagDTO> deletedTags = existingDocument.getTags().stream()
                     .filter(tag -> Optional.ofNullable(documentParam.getTags()).orElse(Collections.emptySet()).contains(new TagDTO(tag.getName())))
                     .collect(Collectors.toSet());
 
@@ -170,12 +172,12 @@ public class DocumentResource {
                     Optional.ofNullable(documentParam.getTags()).orElse(Collections.emptySet()).stream()
             );
 
-            documentRepository.setName(documentParam.getName());
-            documentRepository.setStatus(documentParam.getStatus());
-            documentRepository.setVersion(documentParam.getVersion());
-            documentRepository.setTags(combinedTags.collect(Collectors.toSet()));
+            existingDocument.setName(documentParam.getName());
+            existingDocument.setStatus(documentParam.getStatus());
+            existingDocument.setVersion(documentParam.getVersion());
+            existingDocument.setTags(combinedTags.collect(Collectors.toSet()));
 
-            documentService.save(documentRepository);
+            documentService.save(existingDocument);
         }
 
         return ResponseEntity.ok().build();
@@ -194,6 +196,8 @@ public class DocumentResource {
     public ResponseEntity<Void> deleteAllDocuments(
             @ApiParam(value = "The list of documents to delete", required = true)
             @RequestBody final Collection<DocumentId> documents) {
+
+
         //receive in the body the document ids to delete
         return ResponseEntity.noContent().build();
     }
@@ -211,9 +215,10 @@ public class DocumentResource {
     public ResponseEntity<Collection<TagDTO>> getAllTags(
             @ApiParam(value = "Query to filter tags by")
             @RequestParam("query") final String query) {
+
+
         return new ResponseEntity<>(HttpStatus.OK);
     }
-
 
     private Optional<DocumentDTO> createDocument(final MultipartFile documentParam, final Long personId) {
         final DocumentDTO document = new DocumentDTO();
