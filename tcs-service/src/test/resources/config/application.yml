@@ -124,8 +124,7 @@ application:
 azure:
   accountName: ${CLOUD_BLOB_ACCOUNT_NAME:tisdevstor}
   accountKey: ${CLOUD_BLOB_ACCOUNT_KEY:C+3kNX/Ttim1chPZUFcjyakUNY7Nx86YNZP5ftZIWzy17+zNlkAj9+uX3TdpJrE49To12DvD/VKx97JWeKPZnA==}
-  containerName: ${CLOUD_BLOB_CONTAINER_NAME:document_store}
+  containerName: ${CLOUD_BLOB_CONTAINER_NAME:document-store}
 
   storage:
-    container: test
     personFolder: person

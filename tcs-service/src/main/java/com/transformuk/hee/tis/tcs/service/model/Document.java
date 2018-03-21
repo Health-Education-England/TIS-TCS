@@ -1,30 +1,25 @@
 package com.transformuk.hee.tis.tcs.service.model;
 
-import com.fasterxml.jackson.annotation.JsonIgnore;
+import com.transformuk.hee.tis.tcs.api.enumeration.Status;
 import io.swagger.annotations.ApiModel;
-import io.swagger.annotations.ApiModelProperty;
 
 import javax.persistence.*;
 import java.io.Serializable;
 import java.time.LocalDateTime;
-import java.util.Collection;
+import java.util.Objects;
+import java.util.Set;
 
 @ApiModel("Document")
 @Entity
 public class Document implements Serializable {
-    @ApiModelProperty(hidden = true)
-    @JsonIgnore
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
-    @ApiModelProperty(hidden = true)
-    @JsonIgnore
     @Column(name = "addedDate", updatable = false, insertable = false)
     private LocalDateTime addedDate;
-    @ApiModelProperty(hidden = true)
-    @JsonIgnore
     @Version
     private LocalDateTime amendedDate;
+    private LocalDateTime inactiveDate;
     private String uploadedBy;
     private String name;
     private String fileName;
@@ -33,38 +28,81 @@ public class Document implements Serializable {
     private Long size;
     private Long personId;
     private String fileLocation;
-    private String status;
-    private Long version;
+    @Enumerated(EnumType.STRING)
+    private Status status;
+    private Integer version;
     @Transient
     private byte[] bytes;
-    @ManyToMany
-    @JoinTable(
-            name = "documenttag",
-            joinColumns = @JoinColumn(name = "documentId", referencedColumnName = "id"),
-            inverseJoinColumns = @JoinColumn(name = "tagId", referencedColumnName = "id"))
-
-    @ApiModelProperty(hidden = true)
-    @JsonIgnore
-    private Collection<Tag> tags;
+    @ManyToMany(cascade = CascadeType.ALL)
+    @JoinTable(name = "DocumentTag",
+            joinColumns = @JoinColumn(name = "documentId"),
+            inverseJoinColumns = @JoinColumn(name = "tagId")
+    )
+    private Set<Tag> tags;
 
     /**
      * @deprecated TODO: To be removed after importing documents from Hicom
      */
-    @ApiModelProperty(hidden = true)
     @Deprecated
     private String intrepidDocumentUId;
     /**
      * @deprecated TODO: To be removed after importing documents from Hicom
      */
-    @ApiModelProperty(hidden = true)
     @Deprecated
     private String intrepidParentRecordId;
     /**
      * @deprecated TODO: To be removed after importing documents from Hicom
      */
-    @ApiModelProperty(hidden = true)
     @Deprecated
     private String intrepidFolderPath;
+
+    public void addTag(final Tag tag) {
+        tags.add(tag);
+        tag.getDocuments().add(this);
+    }
+
+    public void removeTag(final Tag tag) {
+        tags.remove(tag);
+        tag.getDocuments().remove(this);
+    }
+
+    @Override
+    public boolean equals(final Object o) {
+        if (this == o) return true;
+        if (o == null || getClass() != o.getClass()) return false;
+        final Document document = (Document) o;
+        return Objects.equals(id, document.id);
+    }
+
+    @Override
+    public int hashCode() {
+
+        return Objects.hash(id);
+    }
+
+    @Override
+    public String toString() {
+        return "Document{" +
+                "id=" + id +
+                ", addedDate=" + addedDate +
+                ", amendedDate=" + amendedDate +
+                ", inactiveDate=" + inactiveDate +
+                ", uploadedBy='" + uploadedBy + '\'' +
+                ", name='" + name + '\'' +
+                ", fileName='" + fileName + '\'' +
+                ", fileExtension='" + fileExtension + '\'' +
+                ", contentType='" + contentType + '\'' +
+                ", size=" + size +
+                ", personId=" + personId +
+                ", fileLocation='" + fileLocation + '\'' +
+                ", status=" + status +
+                ", version=" + version +
+                ", tags=" + tags +
+                ", intrepidDocumentUId='" + intrepidDocumentUId + '\'' +
+                ", intrepidParentRecordId='" + intrepidParentRecordId + '\'' +
+                ", intrepidFolderPath='" + intrepidFolderPath + '\'' +
+                '}';
+    }
 
     public Long getId() {
         return id;
@@ -88,6 +126,14 @@ public class Document implements Serializable {
 
     public void setAmendedDate(final LocalDateTime amendedDate) {
         this.amendedDate = amendedDate;
+    }
+
+    public LocalDateTime getInactiveDate() {
+        return inactiveDate;
+    }
+
+    public void setInactiveDate(final LocalDateTime inactiveDate) {
+        this.inactiveDate = inactiveDate;
     }
 
     public String getUploadedBy() {
@@ -154,19 +200,19 @@ public class Document implements Serializable {
         this.fileLocation = fileLocation;
     }
 
-    public String getStatus() {
+    public Status getStatus() {
         return status;
     }
 
-    public void setStatus(final String status) {
+    public void setStatus(final Status status) {
         this.status = status;
     }
 
-    public Long getVersion() {
+    public Integer getVersion() {
         return version;
     }
 
-    public void setVersion(final Long version) {
+    public void setVersion(final Integer version) {
         this.version = version;
     }
 
@@ -178,11 +224,11 @@ public class Document implements Serializable {
         this.bytes = bytes;
     }
 
-    public Collection<Tag> getTags() {
+    public Set<Tag> getTags() {
         return tags;
     }
 
-    public void setTags(final Collection<Tag> tags) {
+    public void setTags(final Set<Tag> tags) {
         this.tags = tags;
     }
 
