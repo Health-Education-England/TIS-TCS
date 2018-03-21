@@ -159,7 +159,7 @@ public class TcsServiceImpl extends AbstractClientService {
 				.getBody());
 
 		personDTOUpdated.setContactDetails(tcsRestTemplate
-				.exchange(serviceUrl + "/api/contact-details", HttpMethod.PUT, new HttpEntity<>(personDTO.getContactDetails(), headers), new ParameterizedTypeReference<ContactDetailsDTO>() {})
+				.exchange(serviceUrl + "/api/contact-details/", HttpMethod.PUT, new HttpEntity<>(personDTO.getContactDetails(), headers), new ParameterizedTypeReference<ContactDetailsDTO>() {})
 				.getBody());
 
 		personDTOUpdated.setPersonalDetails(tcsRestTemplate
