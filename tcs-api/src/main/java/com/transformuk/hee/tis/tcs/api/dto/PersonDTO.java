@@ -46,7 +46,6 @@ public class PersonDTO implements Serializable {
 
   private String regulator;
 
-  @Valid
   private ContactDetailsDTO contactDetails;
 
   private PersonalDetailsDTO personalDetails;

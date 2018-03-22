@@ -19,6 +19,7 @@ import com.transformuk.hee.tis.tcs.service.service.mapper.ContactDetailsMapper;
 import com.transformuk.hee.tis.tcs.service.service.mapper.PersonMapper;
 import com.transformuk.hee.tis.tcs.service.service.mapper.PlacementViewMapper;
 import org.junit.Before;
+import org.junit.Ignore;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.mockito.MockitoAnnotations;
@@ -122,6 +123,7 @@ public class ContactDetailsDTOValidatorTest {
 	}
 
 	@Test
+	@Ignore //have to revert the @Valid annotation, as it validates ContactDetails on id when creating a new person
 	public void validationIsInvokedBeforeCreatingContactViaPerson() throws Exception {
 		Person person = PersonResourceIntTest.createEntity();
 		PersonDTO personDTO = personMapper.toDto(person);
