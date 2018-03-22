@@ -1,10 +1,12 @@
 package com.transformuk.hee.tis.tcs.service.api;
 
+import com.google.common.base.Strings;
 import com.transformuk.hee.tis.security.util.TisSecurityHelper;
 import com.transformuk.hee.tis.tcs.api.dto.DocumentDTO;
 import com.transformuk.hee.tis.tcs.api.dto.TagDTO;
 import com.transformuk.hee.tis.tcs.api.enumeration.Status;
 import com.transformuk.hee.tis.tcs.service.service.DocumentService;
+import com.transformuk.hee.tis.tcs.service.service.TagService;
 import io.swagger.annotations.*;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -15,6 +17,7 @@ import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
 
+import javax.ws.rs.QueryParam;
 import java.util.*;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
@@ -32,9 +35,11 @@ public class DocumentResource {
     static final String PATH_TAGS = "/tags";
 
     private final DocumentService documentService;
+    private final TagService tagService;
 
-    DocumentResource(final DocumentService documentService) {
+    DocumentResource(final DocumentService documentService, final TagService tagService) {
         this.documentService = documentService;
+        this.tagService = tagService;
     }
 
     @ApiOperation(value = "Retrieves a list documents", response = DocumentDTO.class, responseContainer = "List", produces = APPLICATION_JSON)
@@ -214,10 +219,41 @@ public class DocumentResource {
     @GetMapping(value = PATH_DOCUMENTS + PATH_TAGS, produces = APPLICATION_JSON)
     public ResponseEntity<Collection<TagDTO>> getAllTags(
             @ApiParam(value = "Query to filter tags by")
-            @RequestParam("query") final String query) {
+            @QueryParam("query") final String query) {
 
+        LOG.info("Received 'SearchTags' request with query '{}'",
+                query);
 
-        return new ResponseEntity<>(HttpStatus.OK);
+        if (Strings.isNullOrEmpty(query)) {
+            LOG.warn("Received empty query to 'SearchTags'; rejecting request");
+            return new ResponseEntity<>(HttpStatus.BAD_REQUEST);
+        }
+
+        LOG.debug("Accessing service to find all '{}' with name starting with '{}'",
+                TagDTO.class.getSimpleName(), query);
+
+        final Collection<TagDTO> tags;
+
+        try {
+            tags = tagService.findByNameStartingWithOrderByName(query);
+        } catch (final Exception ex) {
+            LOG.error("Error while accessing service to find all '{}' with name starting with '{}'",
+                    TagDTO.class.getSimpleName(), query);
+
+            return new ResponseEntity<>(HttpStatus.INTERNAL_SERVER_ERROR);
+        }
+
+        if (tags.isEmpty()) {
+            LOG.debug("No '{}' found with name starting with '{}'",
+                    TagDTO.class.getSimpleName(), query);
+
+            return new ResponseEntity<>(HttpStatus.NOT_FOUND);
+        } else {
+            LOG.debug("Found '{}' '{}' with name starting with '{}'",
+                    tags.size(), TagDTO.class.getSimpleName(), query);
+
+            return ResponseEntity.status(HttpStatus.OK).body(tags);
+        }
     }
 
     private Optional<DocumentDTO> createDocument(final MultipartFile documentParam, final Long personId) {
