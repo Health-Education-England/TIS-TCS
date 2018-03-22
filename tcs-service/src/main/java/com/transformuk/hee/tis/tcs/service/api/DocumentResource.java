@@ -1,6 +1,5 @@
 package com.transformuk.hee.tis.tcs.service.api;
 
-import com.google.common.base.Strings;
 import com.transformuk.hee.tis.security.util.TisSecurityHelper;
 import com.transformuk.hee.tis.tcs.api.dto.DocumentDTO;
 import com.transformuk.hee.tis.tcs.api.dto.TagDTO;
@@ -8,6 +7,8 @@ import com.transformuk.hee.tis.tcs.api.enumeration.Status;
 import com.transformuk.hee.tis.tcs.service.service.DocumentService;
 import com.transformuk.hee.tis.tcs.service.service.TagService;
 import io.swagger.annotations.*;
+import org.apache.commons.collections4.CollectionUtils;
+import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.http.HttpStatus;
@@ -224,7 +225,7 @@ public class DocumentResource {
         LOG.info("Received 'SearchTags' request with query '{}'",
                 query);
 
-        if (Strings.isNullOrEmpty(query)) {
+        if (StringUtils.isEmpty(query)) {
             LOG.warn("Received empty query to 'SearchTags'; rejecting request");
             return new ResponseEntity<>(HttpStatus.BAD_REQUEST);
         }
@@ -243,7 +244,7 @@ public class DocumentResource {
             return new ResponseEntity<>(HttpStatus.INTERNAL_SERVER_ERROR);
         }
 
-        if (tags.isEmpty()) {
+        if (CollectionUtils.isEmpty(tags)) {
             LOG.debug("No '{}' found with name starting with '{}'",
                     TagDTO.class.getSimpleName(), query);
 
