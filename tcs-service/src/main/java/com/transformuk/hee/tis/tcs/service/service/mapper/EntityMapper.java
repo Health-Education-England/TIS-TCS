@@ -1,5 +1,6 @@
 package com.transformuk.hee.tis.tcs.service.service.mapper;
 
+import java.util.Collection;
 import java.util.List;
 
 /**
@@ -8,14 +9,16 @@ import java.util.List;
  * @param <D> - DTO type parameter.
  * @param <E> - Entity type parameter.
  */
-
 public interface EntityMapper<D, E> {
+    E toEntity(D dto);
 
-  public E toEntity(D dto);
+    D toDto(E entity);
 
-  public D toDto(E entity);
+    List<E> toEntity(List<D> dtoList);
 
-  public List<E> toEntity(List<D> dtoList);
+    List<D> toDto(List<E> entityList);
 
-  public List<D> toDto(List<E> entityList);
+    Collection<E> toEntity(Collection<D> dtoList);
+
+    Collection<D> toDto(Collection<E> entityList);
 }

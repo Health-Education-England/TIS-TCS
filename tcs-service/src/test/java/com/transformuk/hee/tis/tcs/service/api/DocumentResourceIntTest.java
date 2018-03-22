@@ -1,12 +1,15 @@
 package com.transformuk.hee.tis.tcs.service.api;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.google.gson.Gson;
+import com.google.gson.reflect.TypeToken;
 import com.transformuk.hee.tis.tcs.TestUtils;
 import com.transformuk.hee.tis.tcs.api.dto.DocumentDTO;
 import com.transformuk.hee.tis.tcs.api.dto.TagDTO;
 import com.transformuk.hee.tis.tcs.api.enumeration.Status;
 import com.transformuk.hee.tis.tcs.service.Application;
 import com.transformuk.hee.tis.tcs.service.service.DocumentService;
+import com.transformuk.hee.tis.tcs.service.service.TagService;
 import org.junit.Before;
 import org.junit.Ignore;
 import org.junit.Test;
@@ -24,11 +27,10 @@ import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.MvcResult;
 import org.springframework.test.web.servlet.setup.MockMvcBuilders;
 
+import java.lang.reflect.Type;
 import java.sql.Connection;
 import java.sql.SQLException;
-import java.util.Collections;
-import java.util.HashSet;
-import java.util.Set;
+import java.util.*;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.hamcrest.CoreMatchers.containsString;
@@ -42,11 +44,14 @@ public class DocumentResourceIntTest {
     private MockMvc mockMvc;
     @Autowired
     private DocumentService documentService;
+    @Autowired
+    private TagService tagService;
 
     @Autowired
     private JdbcTemplate jdbcTemplate;
     private static final long PERSON_BASE_ID = 10;
     private static final long DOCUMENT_BASE_ID = 100;
+    private static final long TAG_BASE_ID = 1000;
 
     private static final String SQL_INSERT_PERSON =
             " INSERT INTO `Person` (`id`, `intrepidId`, `addedDate`, `amendedDate`, `role`, `status`, `comments`, `inactiveDate`, `inactiveNotes`, `publicHealthNumber`, `regulator`) " +
@@ -57,12 +62,18 @@ public class DocumentResourceIntTest {
             "INSERT INTO `Document` (`id`, `addedDate`, `amendedDate`, `inactiveDate`, `uploadedBy`, `name`, `fileName`, `fileExtension`, `contentType`, `size`, `personId`, `fileLocation`, `status`, `version`, `intrepidDocumentUId`, `intrepidParentRecordId`, `intrepidFolderPath`) " +
                     " VALUES " +
                     " (%d, '2018-02-16 14:32:06', '2018-02-19 11:07:11.882', NULL, 'James Hudson', 'Test Update', 'LargeTestFile.txt', 'txt', 'text/plain', 512000, %d, '\"0x8D5754A0E0E2F93\"', 'INACTIVE', 1, NULL, NULL, NULL);";
+
+    private static final String SQL_INSERT_TAG =
+            "INSERT INTO `Tag` (`id`, `name`) " +
+                    " VALUES " +
+                    " (%d, '%s');";
+
     private static boolean loaded = false;
 
     @Before
     public void setup() throws SQLException {
         MockitoAnnotations.initMocks(this);
-        final DocumentResource documentResource = new DocumentResource(documentService);
+        final DocumentResource documentResource = new DocumentResource(documentService, tagService);
         mockMvc = MockMvcBuilders.standaloneSetup(documentResource).build();
 
         TestUtils.mockUserprofile("jamesh", "1-AIIDR8", "1-AIIDWA");
@@ -79,6 +90,13 @@ public class DocumentResourceIntTest {
 
         final Connection connection = jdbcTemplate.getDataSource().getConnection();
         ScriptUtils.executeSqlScript(connection, new ByteArrayResource(getSql(SQL_INSERT_PERSON, PERSON_BASE_ID).getBytes()));
+
+        long tagId = TAG_BASE_ID;
+
+        ScriptUtils.executeSqlScript(connection, new ByteArrayResource(getSql(SQL_INSERT_TAG, tagId++, "abcdef").getBytes()));
+        ScriptUtils.executeSqlScript(connection, new ByteArrayResource(getSql(SQL_INSERT_TAG, tagId++, "abcxyz").getBytes()));
+        ScriptUtils.executeSqlScript(connection, new ByteArrayResource(getSql(SQL_INSERT_TAG, tagId++, "xabcxyz").getBytes()));
+        ScriptUtils.executeSqlScript(connection, new ByteArrayResource(getSql(SQL_INSERT_TAG, tagId++, "ghijkl").getBytes()));
     }
 
     @Test
@@ -112,7 +130,7 @@ public class DocumentResourceIntTest {
                 .andExpect(content().string(containsString("{\"id\":")));
     }
 
-    // TODO Fix validations
+    // TODO fix validations
     @Ignore
     @Test
     public void bulkUpdateDocuments_shouldReturnHTTP400_WhenDocumentIsInvalid() throws Exception {
@@ -204,6 +222,45 @@ public class DocumentResourceIntTest {
         final DocumentDTO updatedDocumentWith1Tag = new ObjectMapper().readValue(response.getResponse().getContentAsString(), DocumentDTO.class);
 
         assertThat(updatedDocumentWith1Tag.getTags()).hasSize(2).containsAll(updatedDocumentWith2Tags.getTags());
+    }
+
+    @Test
+    public void getAllTags_shouldReturnTags_WhenQueryStartsWithOrderAsc() throws Exception {
+        final String query = "abc";
+
+        final MvcResult response = this.mockMvc.perform(get(DocumentResource.PATH_API + DocumentResource.PATH_DOCUMENTS + DocumentResource.PATH_TAGS + "/?query=" + query))
+                .andExpect(status().isOk())
+                .andReturn();
+
+        final Type tagDTOListType = new TypeToken<ArrayList<TagDTO>>() {
+        }.getType();
+
+        final List<TagDTO> responseBody = new Gson().fromJson(response.getResponse().getContentAsString(), tagDTOListType);
+
+        assertThat(responseBody).hasSize(2);
+        assertThat(responseBody).containsSequence(new TagDTO("abcdef"), new TagDTO("abcxyz"));
+    }
+
+    @Test
+    public void getAllTags_shouldNotReturnTags_WhenQueryDoesNotStartsWith() throws Exception {
+        final String query = "xyz";
+
+        final MvcResult response = this.mockMvc.perform(get(DocumentResource.PATH_API + DocumentResource.PATH_DOCUMENTS + DocumentResource.PATH_TAGS + "/?query=" + query))
+                .andExpect(status().isNotFound())
+                .andReturn();
+
+        assertThat(response.getResponse().getContentLength()).isZero();
+        assertThat(response.getResponse().getContentAsString()).isEmpty();
+    }
+
+    @Test
+    public void getAllTags_shouldReturnBadRequest_WhenQueryIsNullOrEmpty() throws Exception {
+        final String query = "";
+
+        this.mockMvc.perform(get(DocumentResource.PATH_API + DocumentResource.PATH_DOCUMENTS + DocumentResource.PATH_TAGS + "/?query=" + query))
+                .andExpect(status().isBadRequest())
+                .andExpect(content().string(""))
+                .andReturn();
     }
 
     private DocumentDTO updateMetadataWith2Tags(final long documentId) throws Exception {

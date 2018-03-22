@@ -41,6 +41,8 @@ public class DocumentServiceImpl implements DocumentService {
 
     @Override
     public DocumentDTO findOne(final Long id) {
+        LOG.debug("Received request to find one '{}' with ID '{}'", DocumentDTO.class.getSimpleName(), id);
+
         final Document document = documentRepository.findOne(id);
 
         return documentMapper.toDto(document);
@@ -148,7 +150,7 @@ public class DocumentServiceImpl implements DocumentService {
 
             @Override
             public void transferTo(final File dest) {
-
+                // intentionally left empty
             }
         };
     }
