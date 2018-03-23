@@ -95,13 +95,6 @@ public interface PersonService {
    */
   PersonDTO findOne(Long id);
 
-  /**
-   * Retrieve the basic details of persons
-   *
-   * @param ids the person IDs
-   * @return the basic details if found
-   */
-  List<PersonBasicDetailsDTO> findByIdIn(Set<Long> ids);
 
     /**
 		 * Get a person's ID by Gmc Id
@@ -110,6 +103,30 @@ public interface PersonService {
 		 * @return the tcs ID if found
 		 */
   Long findIdByGmcId(String gmcId);
+
+  /**
+   * Retrieve the persons based on public health numbers
+   *
+   * @param publicHealthNumbers the persons public Health Numbers
+   * @return the persons if found
+   */
+  List<PersonDTO> findPersonsByPublicHealthNumbersIn(Set<String> publicHealthNumbers);
+
+  /**
+   * Retrieve the basic details of persons
+   *
+   * @param ids the person IDs
+   * @return the basic details if found
+   */
+  List<PersonBasicDetailsDTO> findBasicDetailsByIdIn(Set<Long> ids);
+
+  /**
+   * Retrieve the persons
+   *
+   * @param ids the person IDs
+   * @return the persons if found
+   */
+  List<PersonDTO> findByIdIn(Set<Long> ids);
 
   /**
    * Retrieve the basic details of one person

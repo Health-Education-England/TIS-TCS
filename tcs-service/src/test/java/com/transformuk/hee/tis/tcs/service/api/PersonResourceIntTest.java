@@ -91,7 +91,7 @@ public class PersonResourceIntTest {
   private static final String DEFAULT_PUBLIC_HEALTH_NUMBER = "AAAAAAAAAA";
   private static final String UPDATED_PUBLIC_HEALTH_NUMBER = "BBBBBBBBBB";
 
-  private static final String PERSON_SURNANME = "Hudson";
+  private static final String PERSON_SURNAME = "Hudson";
   private static final String PERSON_OHTER_SURNANME = "Other Surname";
   private static final String PERSON_FORENAMES = "James";
   private static final String GMC_NUMBER = "1000000";
@@ -213,7 +213,7 @@ public class PersonResourceIntTest {
     personView.setRole(DEFAULT_ROLE);
     personView.setStatus(DEFAULT_STATUS);
     personView.setForenames(PERSON_FORENAMES);
-    personView.setSurname(PERSON_SURNANME);
+    personView.setSurname(PERSON_SURNAME);
     personView.setGmcNumber(GMC_NUMBER);
     personView.setGdcNumber(GDC_NUMBER);
     personView.setPublicHealthNumber(DEFAULT_PUBLIC_HEALTH_NUMBER);
@@ -313,7 +313,7 @@ public class PersonResourceIntTest {
     gmcDetailsRepository.saveAndFlush(gmcDetails);
     ContactDetails contactDetails = new ContactDetails();
     contactDetails.setId(person.getId());
-    contactDetails.setSurname(PERSON_SURNANME);
+    contactDetails.setSurname(PERSON_SURNAME);
     contactDetails.setForenames(PERSON_FORENAMES);
     contactDetailsRepository.saveAndFlush(contactDetails);
 
@@ -323,9 +323,67 @@ public class PersonResourceIntTest {
         .andExpect(content().contentType(MediaType.APPLICATION_JSON_UTF8_VALUE))
         .andExpect(jsonPath("$.id").value(person.getId().intValue()))
         .andExpect(jsonPath("$.firstName").value(PERSON_FORENAMES))
-        .andExpect(jsonPath("$.lastName").value(PERSON_SURNANME))
+        .andExpect(jsonPath("$.lastName").value(PERSON_SURNAME))
         .andExpect(jsonPath("$.gmcNumber").value(GMC_NUMBER));
   }
+
+  @Test
+  @Transactional
+  public void shouldGetMultipleBasicDetails() throws Exception {
+    // given
+    personRepository.saveAndFlush(person);
+    GmcDetails gmcDetails = new GmcDetails();
+    gmcDetails.setId(person.getId());
+    gmcDetails.setGmcNumber(GMC_NUMBER);
+    gmcDetailsRepository.saveAndFlush(gmcDetails);
+    ContactDetails contactDetails = new ContactDetails();
+    contactDetails.setId(person.getId());
+    contactDetails.setSurname(PERSON_SURNAME);
+    contactDetails.setForenames(PERSON_FORENAMES);
+    contactDetailsRepository.saveAndFlush(contactDetails);
+
+    Person person2 = createEntity();
+    personRepository.saveAndFlush(person2);
+    ContactDetails contactDetails2 = new ContactDetails();
+    contactDetails2.setId(person2.getId());
+    contactDetails2.setSurname(PERSON_SURNAME + 2);
+    contactDetails2.setForenames(PERSON_FORENAMES + 2);
+    contactDetailsRepository.saveAndFlush(contactDetails2);
+
+    String personsIDs = this.person.getId() + "," + person2.getId();
+
+    // when & then
+    restPersonMockMvc.perform(get("/api/people/in/" + personsIDs + "/basic"))
+        .andExpect(status().isFound())
+        .andExpect(content().contentType(MediaType.APPLICATION_JSON_UTF8_VALUE))
+        .andExpect(jsonPath("$[0].id").value(this.person.getId().intValue()))
+        .andExpect(jsonPath("$[0].firstName").value(PERSON_FORENAMES))
+        .andExpect(jsonPath("$[0].lastName").value(PERSON_SURNAME))
+        .andExpect(jsonPath("$[0].gmcNumber").value(GMC_NUMBER))
+        .andExpect(jsonPath("$[1].id").value(person2.getId().intValue()))
+        .andExpect(jsonPath("$[1].firstName").value(PERSON_FORENAMES + 2))
+        .andExpect(jsonPath("$[1].lastName").value(PERSON_SURNAME + 2));
+  }
+
+  @Test
+  @Transactional
+  public void shouldGetMultiplePersons() throws Exception {
+    // given
+    personRepository.saveAndFlush(person);
+
+    Person person2 = createEntity();
+    personRepository.saveAndFlush(person2);
+
+    String personsIDs = this.person.getId() + "," + person2.getId();
+
+    // when & then
+    restPersonMockMvc.perform(get("/api/people/in/" + personsIDs))
+        .andExpect(status().isFound())
+        .andExpect(content().contentType(MediaType.APPLICATION_JSON_UTF8_VALUE))
+        .andExpect(jsonPath("$[0].id").value(this.person.getId().intValue()))
+        .andExpect(jsonPath("$[1].id").value(person2.getId().intValue()));
+  }
+
 
   @Test
   @Transactional
@@ -342,7 +400,7 @@ public class PersonResourceIntTest {
     gdcDetailsRepository.saveAndFlush(gdcDetails);
     ContactDetails contactDetails = new ContactDetails();
     contactDetails.setId(person.getId());
-    contactDetails.setSurname(PERSON_SURNANME);
+    contactDetails.setSurname(PERSON_SURNAME);
     contactDetails.setForenames(PERSON_FORENAMES);
     contactDetailsRepository.saveAndFlush(contactDetails);
 
@@ -353,7 +411,7 @@ public class PersonResourceIntTest {
         .andExpect(jsonPath("$.[*].id").value(hasItem(person.getId().intValue())))
         .andExpect(jsonPath("$.[*].intrepidId").value(hasItem(DEFAULT_INTREPID_ID)))
         .andExpect(jsonPath("$.[*].forenames").value(hasItem(PERSON_FORENAMES)))
-        .andExpect(jsonPath("$.[*].surname").value(hasItem(PERSON_SURNANME)))
+        .andExpect(jsonPath("$.[*].surname").value(hasItem(PERSON_SURNAME)))
         .andExpect(jsonPath("$.[*].gmcNumber").value(hasItem(GMC_NUMBER)))
         .andExpect(jsonPath("$.[*].gdcNumber").value(hasItem(GDC_NUMBER)));
   }
@@ -370,7 +428,7 @@ public class PersonResourceIntTest {
     anotherPerson.setGmcDetails(gmcDetails);
     ContactDetails contactDetails = new ContactDetails();
     contactDetails.setId(anotherPerson.getId());
-    contactDetails.setSurname(PERSON_SURNANME);
+    contactDetails.setSurname(PERSON_SURNAME);
     contactDetails.setForenames(PERSON_FORENAMES);
     contactDetailsRepository.saveAndFlush(contactDetails);
     anotherPerson.setContactDetails(contactDetails);
@@ -382,7 +440,7 @@ public class PersonResourceIntTest {
         .andExpect(jsonPath("$.[*].id").value(anotherPerson.getId().intValue()))
         .andExpect(jsonPath("$.[*].gmcNumber").value(GMC_NUMBER))
         .andExpect(jsonPath("$.[*].firstName").value(PERSON_FORENAMES))
-        .andExpect(jsonPath("$.[*].lastName").value(PERSON_SURNANME));
+        .andExpect(jsonPath("$.[*].lastName").value(PERSON_SURNAME));
   }
 
   @Test
@@ -483,16 +541,16 @@ public class PersonResourceIntTest {
     personRepository.saveAndFlush(anotherPerson);
     anotherPerson = createPersonBlankSubSections(anotherPerson);
     ContactDetails contactDetails =anotherPerson.getContactDetails();
-    contactDetails.setSurname(PERSON_SURNANME);
+    contactDetails.setSurname(PERSON_SURNAME);
     contactDetails.setForenames(PERSON_FORENAMES);
     contactDetailsRepository.saveAndFlush(contactDetails);
 
-    restPersonMockMvc.perform(get("/api/people?searchQuery=" + PERSON_SURNANME))
+    restPersonMockMvc.perform(get("/api/people?searchQuery=" + PERSON_SURNAME))
         .andExpect(status().isOk())
         .andExpect(content().contentType(MediaType.APPLICATION_JSON_UTF8_VALUE))
         .andExpect(jsonPath("$.[*].id").value(anotherPerson.getId().intValue()))
         .andExpect(jsonPath("$.[*].forenames").value(hasItem(PERSON_FORENAMES)))
-        .andExpect(jsonPath("$.[*].surname").value(hasItem(PERSON_SURNANME)))
+        .andExpect(jsonPath("$.[*].surname").value(hasItem(PERSON_SURNAME)))
         .andExpect(jsonPath("$.[*].intrepidId").value(DEFAULT_INTREPID_ID.toString()))
         .andExpect(jsonPath("$.[*].role").value(DEFAULT_ROLE.toString()))
         .andExpect(jsonPath("$.[*].status").value(DEFAULT_STATUS.toString().toUpperCase()));
@@ -530,7 +588,7 @@ public class PersonResourceIntTest {
 
     ContactDetails contactDetails = anotherPerson.getContactDetails();
     contactDetails.setForenames(PERSON_FORENAMES);
-    contactDetails.setSurname(PERSON_SURNANME);
+    contactDetails.setSurname(PERSON_SURNAME);
     contactDetailsRepository.saveAndFlush(contactDetails);
 
     restPersonMockMvc.perform(get("/api/people?searchQuery=" + GDC_NUMBER))
@@ -539,7 +597,7 @@ public class PersonResourceIntTest {
         .andExpect(jsonPath("$.[*].id").value(anotherPerson.getId().intValue()))
         .andExpect(jsonPath("$.[*].gdcNumber").value(GDC_NUMBER))
         .andExpect(jsonPath("$.[*].forenames").value(hasItem(PERSON_FORENAMES)))
-        .andExpect(jsonPath("$.[*].surname").value(hasItem(PERSON_SURNANME)))
+        .andExpect(jsonPath("$.[*].surname").value(hasItem(PERSON_SURNAME)))
         .andExpect(jsonPath("$.[*].intrepidId").value(DEFAULT_INTREPID_ID))
         .andExpect(jsonPath("$.[*].role").value(DEFAULT_ROLE))
         .andExpect(jsonPath("$.[*].status").value(DEFAULT_STATUS.name()));
@@ -569,18 +627,18 @@ public class PersonResourceIntTest {
     personRepository.saveAndFlush(anotherPerson);
     anotherPerson = createPersonBlankSubSections(anotherPerson);
     ContactDetails contactDetails = anotherPerson.getContactDetails();
-    contactDetails.setSurname(PERSON_SURNANME);
+    contactDetails.setSurname(PERSON_SURNAME);
     contactDetailsRepository.saveAndFlush(contactDetails);
 
     GmcDetails gmcDetails =anotherPerson.getGmcDetails();
     gmcDetails.setGmcNumber(GMC_NUMBER);
     gmcDetailsRepository.saveAndFlush(gmcDetails);
 
-    restPersonMockMvc.perform(get("/api/people?searchQuery=" + PERSON_SURNANME))
+    restPersonMockMvc.perform(get("/api/people?searchQuery=" + PERSON_SURNAME))
         .andExpect(status().isOk())
         .andExpect(content().contentType(MediaType.APPLICATION_JSON_UTF8_VALUE))
         .andExpect(jsonPath("$.[*].id").value(anotherPerson.getId().intValue()))
-        .andExpect(jsonPath("$.[*].surname").value(PERSON_SURNANME))
+        .andExpect(jsonPath("$.[*].surname").value(PERSON_SURNAME))
         .andExpect(jsonPath("$.[*].intrepidId").value(DEFAULT_INTREPID_ID))
         .andExpect(jsonPath("$.[*].role").value(DEFAULT_ROLE))
         .andExpect(jsonPath("$.[*].status").value(DEFAULT_STATUS.name()));

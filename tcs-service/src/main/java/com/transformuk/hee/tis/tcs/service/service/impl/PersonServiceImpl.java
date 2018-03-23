@@ -256,8 +256,6 @@ public class PersonServiceImpl implements PersonService {
    * and the second to get the count so that we can support pagination
    *
    * @param searchString  the search string to match, can be null
-   * @param columnFilters
-   * @param pageable      the pagination information
    * @return
    */
   @Override
@@ -265,7 +263,6 @@ public class PersonServiceImpl implements PersonService {
   public List<PersonBasicDetailsDTO> basicDetailsSearch(String searchString) {
     List<Specification<PersonBasicDetails>> specs = new ArrayList<>();
     if (StringUtils.isNotEmpty(searchString)) {
-  //add the text search criteria
       specs.add(Specifications.where(containsLike("firstName", searchString)).
           or(containsLike("lastName", searchString)).
           or(containsLike("gmcDetails.gmcNumber", searchString)));
@@ -441,13 +438,29 @@ public class PersonServiceImpl implements PersonService {
    */
   @Override
   @Transactional(readOnly = true)
-  public List<PersonBasicDetailsDTO> findByIdIn(Set<Long> ids) {
+  public List<PersonBasicDetailsDTO> findBasicDetailsByIdIn(Set<Long> ids) {
   log.debug("Request to get all person basic details {} ", ids);
 
   return personBasicDetailsRepository.findAll(ids).stream()
       .map(personBasicDetailsMapper::toDto)
       .collect(Collectors.toList());
-}
+  }
+
+  /**
+   * Get persons by ids.
+   *
+   * @param ids the Ids of the entities
+   * @return the entities
+   */
+  @Override
+  @Transactional(readOnly = true)
+  public List<PersonDTO> findByIdIn(Set<Long> ids) {
+    log.debug("Request to get all persons {} ", ids);
+
+    return personRepository.findAll(ids).stream()
+        .map(personMapper::toDto)
+        .collect(Collectors.toList());
+  }
 
   /**
    * Get one person by GMC Id.
@@ -461,6 +474,12 @@ public class PersonServiceImpl implements PersonService {
     log.debug("Request to get Person by GMC Id : {}", gmcId);
     return gmcDetailsRepository.findByGmcNumber(gmcId).getId();
   }
+
+  @Override
+  public List<PersonDTO> findPersonsByPublicHealthNumbersIn(Set<String> publicHealthNumbers) {
+    return personRepository.findByPublicHealthNumberIn(publicHealthNumbers).stream()
+        .map(personMapper::toDto)
+        .collect(Collectors.toList());  }
 
   @Override
   public PersonBasicDetailsDTO getBasicDetails(Long id) {

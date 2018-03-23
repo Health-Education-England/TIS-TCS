@@ -82,7 +82,7 @@ public class GdcDetailsServiceImpl implements GdcDetailsService {
   public List<GdcDetailsDTO> findByIdIn(List<String> gdcIds) {
     log.debug("Request to get all GdcDetails");
 
-    List<GdcDetails> byGdcIdsIn = gdcDetailsRepository.findByGdcIdsIn(gdcIds);
+    List<GdcDetails> byGdcIdsIn = gdcDetailsRepository.findByGdcNumberIn(gdcIds);
     return gdcDetailsMapper.gdcDetailsToGdcDetailsDTO(byGdcIdsIn);
   }
 

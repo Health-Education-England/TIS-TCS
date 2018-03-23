@@ -41,7 +41,7 @@ import org.springframework.web.client.RestTemplate;
 
 import java.util.List;
 import java.util.Map;
-import java.util.Set;
+import java.util.stream.Collectors;
 
 @Service
 public class TcsServiceImpl extends AbstractClientService {
@@ -207,25 +207,45 @@ public class TcsServiceImpl extends AbstractClientService {
 				.getBody();
 	}
 
-	public List<GdcDetailsDTO> findGdcDetailsIn(Set<String> gdcIds) {
+	public List<GdcDetailsDTO> findGdcDetailsIn(List<String> gdcIds) {
 		String url = serviceUrl + "/api/gdc-details/in/" + String.join(",", gdcIds);
 		ResponseEntity<List<GdcDetailsDTO>> responseEntity = tcsRestTemplate.
 				exchange(url, HttpMethod.GET, null, new ParameterizedTypeReference<List<GdcDetailsDTO>>() {});
 		return responseEntity.getBody();
 	}
 
-	public List<GmcDetailsDTO> findGmcDetailsIn(Set<String> gmcIds) {
+	public List<GmcDetailsDTO> findGmcDetailsIn(List<String> gmcIds) {
 		String url = serviceUrl + "/api/gmc-details/in/" + String.join(",", gmcIds);
 		ResponseEntity<List<GmcDetailsDTO>> responseEntity = tcsRestTemplate.
 				exchange(url, HttpMethod.GET, null, new ParameterizedTypeReference<List<GmcDetailsDTO>>() {});
 		return responseEntity.getBody();
 	}
 
-	public List<PersonBasicDetailsDTO> findPersonBasicDetailsIn(Set<String> ids) {
-		String url = serviceUrl + "/api/people/in/" + String.join(",", ids);
+	public List<PersonDTO> findPeopleIn(List<Long> personIds) {
+		String url = serviceUrl + "/api/people/in/" + join(personIds);
+		ResponseEntity<List<PersonDTO>> responseEntity = tcsRestTemplate.
+				exchange(url, HttpMethod.GET, null, new ParameterizedTypeReference<List<PersonDTO>>() {});
+		return responseEntity.getBody();
+	}
+
+	public List<PersonDTO> findPeopleByPublicHealthNumbersIn(List<String> publicHealthNumbersIds) {
+		String url = serviceUrl + "/api/people/phn/in/" + String.join(",", publicHealthNumbersIds);
+		ResponseEntity<List<PersonDTO>> responseEntity = tcsRestTemplate.
+				exchange(url, HttpMethod.GET, null, new ParameterizedTypeReference<List<PersonDTO>>() {});
+		return responseEntity.getBody();
+	}
+
+	public List<PersonBasicDetailsDTO> findPersonBasicDetailsIn(List<Long> personIds) {
+		String url = serviceUrl + "/api/people/in/" + join(personIds) + "/basic";
 		ResponseEntity<List<PersonBasicDetailsDTO>> responseEntity = tcsRestTemplate.
 				exchange(url, HttpMethod.GET, null, new ParameterizedTypeReference<List<PersonBasicDetailsDTO>>() {});
 		return responseEntity.getBody();
+	}
+
+	public static String join(List<Long> ids) {
+		return ids.stream()
+				.map(Object::toString)
+				.collect(Collectors.joining(","));
 	}
 
 	@Override

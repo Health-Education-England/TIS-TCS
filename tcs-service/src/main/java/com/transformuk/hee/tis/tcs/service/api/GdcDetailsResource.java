@@ -2,7 +2,6 @@ package com.transformuk.hee.tis.tcs.service.api;
 
 import com.codahale.metrics.annotation.Timed;
 import com.transformuk.hee.tis.tcs.api.dto.GdcDetailsDTO;
-import com.transformuk.hee.tis.tcs.api.dto.GmcDetailsDTO;
 import com.transformuk.hee.tis.tcs.api.dto.validation.Create;
 import com.transformuk.hee.tis.tcs.api.dto.validation.Update;
 import com.transformuk.hee.tis.tcs.service.api.util.HeaderUtil;
@@ -22,15 +21,7 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.MethodArgumentNotValidException;
-import org.springframework.web.bind.annotation.DeleteMapping;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.PatchMapping;
-import org.springframework.web.bind.annotation.PathVariable;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.PutMapping;
-import org.springframework.web.bind.annotation.RequestBody;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
 
 import javax.validation.Valid;
 import java.net.URI;
@@ -137,28 +128,22 @@ public class GdcDetailsResource {
   }
 
   /**
-   * GET  /gdc-details/in/:gdcids : get gdcDetails given their ID's.
-   * Ignores malformed or not found gdc-details
+   * GET  /gdc-details/in/:gdcIds : get gdcDetails given their ID's.
+   * Ignores malformed or not found gdcDetails
    *
-   * @param gdcids the gdcids to search by
+   * @param gdcIds the gdcIds to search by
    * @return the ResponseEntity with status 200 (OK)  and the list of gdcDetails in body, or empty list
    */
-  @GetMapping("/gdc-details/in/{gdcids}")
+  @GetMapping("/gdc-details/in/{gdcIds}")
   @Timed
-  public ResponseEntity<List<GdcDetailsDTO>> getGdcDetailsIn(@PathVariable String gdcids) {
-    log.debug("REST request to find several GdcDetails: {}", gdcids);
-    List<GdcDetailsDTO> resp = new ArrayList<>();
-    List<String> idList = new ArrayList<>();
+  @PreAuthorize("hasPermission('tis:people::person:', 'View')")
+  public ResponseEntity<List<GdcDetailsDTO>> getGdcDetailsIn(@ApiParam(name = "gdcIds", allowMultiple = true) @PathVariable("gdcIds") List<String> gdcIds) {
+    log.debug("REST request to find several GdcDetails: {}", gdcIds);
 
-    for (String idStr : gdcids.split(",")) {
-      idList.add(idStr);
-    }
-
-    if (!idList.isEmpty()) {
-      resp = gdcDetailsService.findByIdIn(idList);
-      return new ResponseEntity<>(resp, HttpStatus.FOUND);
+    if (!gdcIds.isEmpty()) {
+      return new ResponseEntity<>(gdcDetailsService.findByIdIn(gdcIds), HttpStatus.FOUND);
     } else {
-      return new ResponseEntity<>(resp, HttpStatus.OK);
+      return new ResponseEntity<>(new ArrayList<>(), HttpStatus.OK);
     }
   }
 

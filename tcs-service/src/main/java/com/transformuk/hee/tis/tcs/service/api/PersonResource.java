@@ -28,7 +28,6 @@ import io.swagger.annotations.ApiResponses;
 import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
@@ -200,14 +199,35 @@ public class PersonResource {
     return new ResponseEntity<>(count, HttpStatus.OK);
   }
 
-
+  /**
+   * GET  /people/phn/in/{publicHealthNumbers} : get people given their ID's.
+   * Ignores malformed or not found people
+   *
+   * @param publicHealthNumbers the ids to search by
+   * @return the ResponseEntity with status 200 (OK)  and the list of people in body, or empty list
+   */
+  @GetMapping("/people/phn/in/{publicHealthNumbers}")
+  @ApiOperation(value = "Get people by public Health Numbers", notes = "Returns a list of people", responseContainer = "List")
+  @ApiResponses(value = {
+      @ApiResponse(code = 400, message = "Expects a list of ids as query parameters"),
+      @ApiResponse(code = 200, message = "Person list")})
+  @Timed
+  @PreAuthorize("hasPermission('tis:people::person:', 'View')")
+  public ResponseEntity<List<PersonDTO>> getPersonsWithPublicHealthNumbersIn(@ApiParam(name = "publicHealthNumbers", allowMultiple = true) @PathVariable("publicHealthNumbers") Set<String> publicHealthNumbers) {
+    log.debug("REST request to find several Person: {}", publicHealthNumbers);
+    if (!publicHealthNumbers.isEmpty()) {
+      return new ResponseEntity<>(personService.findPersonsByPublicHealthNumbersIn(publicHealthNumbers), HttpStatus.FOUND);
+    } else {
+      return new ResponseEntity<>(new ArrayList<>(), HttpStatus.BAD_REQUEST);
+    }
+  }
 
   /**
    * GET  /people/in/{ids} : get people given their ID's.
    * Ignores malformed or not found people
    *
    * @param ids the ids to search by
-   * @return the ResponseEntity with status 200 (OK)  and the list of gmcDetails in body, or empty list
+   * @return the ResponseEntity with status 200 (OK)  and the list of people in body, or empty list
    */
   @GetMapping("/people/in/{ids}")
   @ApiOperation(value = "Get people by ids", notes = "Returns a list of people", responseContainer = "List")
@@ -215,10 +235,34 @@ public class PersonResource {
       @ApiResponse(code = 400, message = "Expects a list of ids as query parameters"),
       @ApiResponse(code = 200, message = "Person list")})
   @Timed
-  public ResponseEntity<List<PersonBasicDetailsDTO>> getPersonsIn(@ApiParam(name = "ids", allowMultiple = true) @PathVariable("ids") Set<Long> ids) {
+  @PreAuthorize("hasPermission('tis:people::person:', 'View')")
+  public ResponseEntity<List<PersonDTO>> getPersonsIn(@ApiParam(name = "ids", allowMultiple = true) @PathVariable("ids") Set<Long> ids) {
     log.debug("REST request to find several Person: {}", ids);
     if (!ids.isEmpty()) {
       return new ResponseEntity<>(personService.findByIdIn(ids), HttpStatus.FOUND);
+    } else {
+      return new ResponseEntity<>(new ArrayList<>(), HttpStatus.BAD_REQUEST);
+    }
+  }
+
+  /**
+   * GET  /people/in/{ids}/basic : get people given their ID's.
+   * Ignores malformed or not found people
+   *
+   * @param ids the ids to search by
+   * @return the ResponseEntity with status 200 (OK)  and the list of personBasicDetails in body, or empty list
+   */
+  @GetMapping("/people/in/{ids}/basic")
+  @ApiOperation(value = "Get person basic details by ids", notes = "Returns a list of person basic details", responseContainer = "List")
+  @ApiResponses(value = {
+      @ApiResponse(code = 400, message = "Expects a list of ids as query parameters"),
+      @ApiResponse(code = 200, message = "Person basic details list")})
+  @Timed
+  @PreAuthorize("hasPermission('tis:people::person:', 'View')")
+  public ResponseEntity<List<PersonBasicDetailsDTO>> getPersonBasicDetailsIn(@ApiParam(name = "ids", allowMultiple = true) @PathVariable("ids") Set<Long> ids) {
+    log.debug("REST request to find several Person: {}", ids);
+    if (!ids.isEmpty()) {
+      return new ResponseEntity<>(personService.findBasicDetailsByIdIn(ids), HttpStatus.FOUND);
     } else {
       return new ResponseEntity<>(new ArrayList<>(), HttpStatus.BAD_REQUEST);
     }
@@ -277,7 +321,7 @@ public class PersonResource {
   }
 
   /**
-   * GET  /people/{id}/basicDetails : get a person's basic details
+   * GET  /people/{id}/basic : get a person's basic details
    *
    * @param id the trainee Id
    * @return the ResponseEntity with status 200 (OK) and the list of placements in body
