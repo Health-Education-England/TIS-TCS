@@ -54,7 +54,6 @@ import javax.persistence.EntityManager;
 import java.time.LocalDate;
 import java.time.ZoneId;
 import java.util.List;
-import java.util.stream.Collectors;
 
 import static com.transformuk.hee.tis.tcs.service.api.util.DateUtil.getLocalDateFromString;
 import static java.time.temporal.ChronoUnit.DAYS;
@@ -636,7 +635,7 @@ public class PlacementResourceIntTest {
 
   @Test
   @Transactional
-  public void deletePlacementSavesEsrNotification() throws Exception {
+  public void deleteFuturePlacementHavingNoCurrentPlacementSavesEsrNotification() throws Exception {
     String localPostNumber = "EOE/RGT00/004/STR/704";
 
     // Initialize the database
@@ -649,21 +648,9 @@ public class PlacementResourceIntTest {
     post.setNationalPostNumber(localPostNumber);
     postRepository.saveAndFlush(post);
 
-    ContactDetails cd = new ContactDetails();
-    cd.setId(placement.getTraineeId());
-    cd.setLegalForenames("TraineeFN");
-    cd.setLegalSurname("TraineeSN");
-    contactDetailsRepository.saveAndFlush(cd);
-
-    GmcDetails gmcDetails = new GmcDetails();
-    gmcDetails.setId(placement.getTraineeId());
-    gmcDetails.setGmcNumber("some-gmc-number");
-    entityManager.persist(gmcDetails);
-
-    Person person = personRepository.findOne(placement.getTraineeId());
-    person.setGmcDetails(gmcDetails);
-    person.setContactDetails(cd);
-    personRepository.saveAndFlush(person);
+    ContactDetails cd =     createContactDetails(placement, "TraineeFN", "TraineeSN");
+    GmcDetails gmcDetails = getGmcDetails(placement, "nextTraineeGmcNumber");
+    enhancePlacement(placement, cd, gmcDetails);
 
     int databaseSizeBeforeDelete = placementDetailsRepository.findAll().size();
 
@@ -693,6 +680,111 @@ public class PlacementResourceIntTest {
     assertThat(type2Notifications.get(0).getWithdrawnTraineeLastName()).isEqualTo(cd.getLegalSurname());
     assertThat(type2Notifications.get(0).getWithdrawnTraineeGmcNumber()).isEqualTo(gmcDetails.getGmcNumber());
 
+  }
+
+  @Test
+  @Transactional
+  public void deleteFuturePlacementHavingCurrentPlacementSavesEsrNotification() throws Exception {
+
+    String localPostNumber = "EOE/RGT00/004/STR/704";
+
+    // Initialize the database
+    // Create a future placement to delete
+    LocalDate tomorrow = LocalDate.now().plus(10, DAYS);
+
+    PlacementDetails futurePlacementToDelete = placement;
+
+    futurePlacementToDelete.setDateFrom(tomorrow);
+    futurePlacementToDelete.setLocalPostNumber(localPostNumber);
+    placementDetailsRepository.saveAndFlush(futurePlacementToDelete);
+
+    Post post = postRepository.findOne(futurePlacementToDelete.getPostId());
+    post.setNationalPostNumber(localPostNumber);
+    postRepository.saveAndFlush(post);
+
+    ContactDetails nextTraineeContactDetails = createContactDetails(futurePlacementToDelete, "nextTraineeFN", "nextTraineeSN");
+    GmcDetails nextTraineeGmcDetails = getGmcDetails(futurePlacementToDelete, "nextTraineeGmcNumber");
+    enhancePlacement(futurePlacementToDelete, nextTraineeContactDetails, nextTraineeGmcDetails);
+
+    // Create a current Placement
+    Person currentTrainee = new Person();
+    personRepository.saveAndFlush(currentTrainee);
+
+    PlacementDetails currentPlacement = new PlacementDetails();
+
+    LocalDate currentPlacementStart = LocalDate.now().minus(10, DAYS);
+    currentPlacement.setDateFrom(currentPlacementStart);
+    currentPlacement.setDateTo(currentPlacementStart.plusMonths(3));
+    currentPlacement.setLocalPostNumber(localPostNumber);
+    currentPlacement.setTraineeId(currentTrainee.getId());
+    currentPlacement.setPostId(post.getId());
+    currentPlacement.setPlacementType("In Post");
+    currentPlacement.setWholeTimeEquivalent(1.0);
+    placementDetailsRepository.saveAndFlush(currentPlacement);
+
+    ContactDetails currentTraineeContactDetails = createContactDetails(currentPlacement, "currentTraineeFN", "currentTraineeSN");
+    GmcDetails currentTraineeGmcDetails = getGmcDetails(currentPlacement, "currentTraineeGmcNumber");
+    enhancePlacement(currentPlacement, currentTraineeContactDetails, currentTraineeGmcDetails);
+
+    int databaseSizeBeforeDelete = placementDetailsRepository.findAll().size();
+
+    // Get the placement
+    restPlacementMockMvc.perform(delete("/api/placements/{id}", futurePlacementToDelete.getId())
+        .accept(TestUtil.APPLICATION_JSON_UTF8))
+        .andExpect(status().isOk());
+
+    // Validate the database is empty
+    List<PlacementDetails> placementList = placementDetailsRepository.findAll();
+
+    assertThat(placementList).hasSize(databaseSizeBeforeDelete - 1);
+
+    List<EsrNotification> esrNotifications = esrNotificationRepository.findAll();
+    assertThat(esrNotifications).hasSize(2);
+    List<EsrNotification> type2Notifications = esrNotifications.stream().filter(esrNotification -> esrNotification.getNotificationTitleCode().equals("2")).collect(toList());
+    List<EsrNotification> type1Notifications = esrNotifications.stream().filter(esrNotification -> esrNotification.getNotificationTitleCode().equals("1")).collect(toList());
+    assertThat(type1Notifications).hasSize(1);
+    assertThat(type2Notifications).hasSize(1);
+
+    assertThat(type1Notifications.get(0).getDeaneryPostNumber()).isEqualTo(localPostNumber);
+    // assert next Trainee
+    assertThat(type1Notifications.get(0).getNextAppointmentTraineeFirstName()).isEqualTo(nextTraineeContactDetails.getLegalForenames());
+    assertThat(type1Notifications.get(0).getNextAppointmentTraineeLastName()).isEqualTo(nextTraineeContactDetails.getLegalSurname());
+    assertThat(type1Notifications.get(0).getNextAppointmentTraineeGmcNumber()).isEqualTo(nextTraineeGmcDetails.getGmcNumber());
+    assertThat(type1Notifications.get(0).getNextAppointmentTraineeFirstName()).isEqualTo(nextTraineeContactDetails.getLegalForenames());
+    assertThat(type1Notifications.get(0).getNextAppointmentTraineeLastName()).isEqualTo(nextTraineeContactDetails.getLegalSurname());
+
+    assertThat(type2Notifications.get(0).getDeaneryPostNumber()).isEqualTo(localPostNumber);
+    assertThat(type2Notifications.get(0).getWithdrawalReason()).isEqualTo("3");
+    assertThat(type2Notifications.get(0).getNextAppointmentTraineeFirstName()).isNullOrEmpty();
+    // assert withdrawal Trainee
+    assertThat(type2Notifications.get(0).getWithdrawnTraineeFirstName()).isEqualTo(nextTraineeContactDetails.getLegalForenames());
+    assertThat(type2Notifications.get(0).getWithdrawnTraineeLastName()).isEqualTo(nextTraineeContactDetails.getLegalSurname());
+    assertThat(type2Notifications.get(0).getWithdrawnTraineeGmcNumber()).isEqualTo(nextTraineeGmcDetails.getGmcNumber());
+
+  }
+
+  private void enhancePlacement(PlacementDetails placement, ContactDetails contactDetails, GmcDetails gmcDetails) {
+    Person person = personRepository.findOne(placement.getTraineeId());
+    person.setGmcDetails(gmcDetails);
+    person.setContactDetails(contactDetails);
+    personRepository.saveAndFlush(person);
+  }
+
+  private GmcDetails getGmcDetails(PlacementDetails placement, String gmcNumber) {
+    GmcDetails gmcDetails = new GmcDetails();
+    gmcDetails.setId(placement.getTraineeId());
+    gmcDetails.setGmcNumber(gmcNumber);
+    entityManager.persist(gmcDetails);
+    return gmcDetails;
+  }
+
+  private ContactDetails createContactDetails(PlacementDetails placement, String traineeFN, String traineeSN) {
+    ContactDetails cd = new ContactDetails();
+    cd.setId(placement.getTraineeId());
+    cd.setLegalForenames(traineeFN);
+    cd.setLegalSurname(traineeSN);
+    contactDetailsRepository.saveAndFlush(cd);
+    return cd;
   }
 
 

@@ -253,24 +253,28 @@ public class EsrNotificationServiceImpl implements EsrNotificationService {
 
     LOG.info("Placement Delete: Identified {} current Placements for post {} as of date {}", currentPlacements.size(), nationalPostNumber, asOfDate);
 
-    List<Placement> matchedCurrentPlacements = currentPlacements.stream()
-        .filter(placement -> placement.getSiteCode().equalsIgnoreCase(placementToDelete.getSiteCode()))
-        .collect(toList());
-
-    if (matchedCurrentPlacements.isEmpty()) {
-      EsrNotification esrNotification = buildNotification(placementToDelete, null);
-      allEsrNotifications.add(esrNotification);
-      allEsrNotifications.add(buildWithdrawnNotification(esrNotification));
+    if (currentPlacements.isEmpty()) {
+      // build notification without current trainee details.
+      generateWithdrawalNotifications(placementToDelete, allEsrNotifications, null);
 
     } else {
-      matchedCurrentPlacements.forEach(currentPlacement -> {
-        EsrNotification esrNotification = buildNotification(placementToDelete, currentPlacement);
-        allEsrNotifications.add(esrNotification);
-        allEsrNotifications.add(buildWithdrawnNotification(esrNotification));
-      });
-    }
+      List<Placement> placementsWithSiteCode = currentPlacements.stream().filter(placement -> isNotEmpty(placement.getSiteCode())).collect(toList());
 
+      // if there is a site code match use that as priority and ignore the rest otherwise use available current placements
+      if (!placementsWithSiteCode.isEmpty()) {
+        placementsWithSiteCode.forEach(currentPlacement -> generateWithdrawalNotifications(placementToDelete, allEsrNotifications, currentPlacement));
+      } else {
+        currentPlacements.forEach(currentPlacement -> generateWithdrawalNotifications(placementToDelete, allEsrNotifications, currentPlacement));
+      }
+
+    }
     return allEsrNotifications;
+  }
+
+  private void generateWithdrawalNotifications(Placement placementToDelete, List<EsrNotification> allEsrNotifications, Placement currentPlacement) {
+    EsrNotification esrNotification = buildNotification(placementToDelete, currentPlacement);
+    allEsrNotifications.add(esrNotification);
+    allEsrNotifications.add(buildWithdrawnNotification(esrNotification));
   }
 
   private EsrNotification buildWithdrawnNotification(EsrNotification esrNotification) {
@@ -288,6 +292,7 @@ public class EsrNotificationServiceImpl implements EsrNotificationService {
     withdrawnEsrNotification.setWithdrawnTraineeFirstName(esrNotification.getNextAppointmentTraineeFirstName());
     withdrawnEsrNotification.setWithdrawnTraineeLastName(esrNotification.getNextAppointmentTraineeLastName());
     withdrawnEsrNotification.setWithdrawnTraineeGmcNumber(esrNotification.getNextAppointmentTraineeGmcNumber());
+    withdrawnEsrNotification.setPostVacantAtNextRotation(esrNotification.getPostVacantAtNextRotation());
     // There is no withdrawal reason in TIS as the withdrawn is handled by deleting future placement. Hence defaulting to other
     withdrawnEsrNotification.setWithdrawalReason(
         isNotEmpty(esrNotification.getWithdrawalReason()) ? esrNotification.getWithdrawalReason() : "3" );
