@@ -16,20 +16,12 @@ import java.util.List;
 public interface EsrNotificationService {
 
   /**
-   * Save a EsrNotification.
-   *
-   * @param esrNotificationDTO the entity to save
-   * @return the persisted entity
-   */
-  EsrNotificationDTO save(EsrNotificationDTO esrNotificationDTO);
-
-  /**
    * Save a list of EsrNotification.
    *
-   * @param esrNotificationDTOs the list of entities to save
+   * @param esrNotifications the list of entities to save
    * @return the list of persisted entities
    */
-  List<EsrNotificationDTO> save(List<EsrNotificationDTO> esrNotificationDTOs);
+  List<EsrNotification> save(List<EsrNotification> esrNotifications);
 
   List<EsrNotificationDTO> loadNextTraineeToCurrentTraineeNotification(LocalDate fromDate);
 
@@ -46,4 +38,6 @@ public interface EsrNotificationService {
   EsrNotification handleEsrNewPositionNotification(PostDTO postDTO);
 
   List<EsrNotification> handleNewPlacementEsrNotification(Placement placement) throws IOException, ClassNotFoundException;
+
+  List<EsrNotification> loadPlacementDeleteNotification(Placement placement, List<EsrNotification> allEsrNotifications);
 }
