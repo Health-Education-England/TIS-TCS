@@ -226,7 +226,25 @@ public class PlacementServiceImpl implements PlacementService {
   @Transactional
   public void delete(Long id) {
     log.debug("Request to delete Placement : {}", id);
+    // handle esr notification
+    handleEsrNotificationForPlacementDelete(id);
     placementRepository.delete(id);
+  }
+
+  private void handleEsrNotificationForPlacementDelete(Long id) {
+    List<EsrNotification> allEsrNotifications = new ArrayList<>();
+
+    Placement placementToDelete = placementRepository.findOne(id);
+    esrNotificationService.loadPlacementDeleteNotification(placementToDelete, allEsrNotifications);
+
+    for (EsrNotification esrNotification : allEsrNotifications) {
+      persistEsrNotificationsForPlacementDelete(placementToDelete, esrNotification);
+    }
+
+  }
+
+  private void persistEsrNotificationsForPlacementDelete(Placement placementToDelete, EsrNotification esrNotification) {
+
   }
 
   private Map<String, Placement> getPlacementsByIntrepidId(List<PlacementDTO> placementDtoList) {

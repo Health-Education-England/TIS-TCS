@@ -46,4 +46,6 @@ public interface EsrNotificationService {
   EsrNotification handleEsrNewPositionNotification(PostDTO postDTO);
 
   List<EsrNotification> handleNewPlacementEsrNotification(Placement placement) throws IOException, ClassNotFoundException;
+
+  List<EsrNotification> loadPlacementDeleteNotification(Placement placement, List<EsrNotification> allEsrNotifications);
 }

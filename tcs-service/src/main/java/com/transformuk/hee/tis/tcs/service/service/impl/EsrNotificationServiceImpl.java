@@ -260,6 +260,28 @@ public class EsrNotificationServiceImpl implements EsrNotificationService {
   }
 
   @Override
+  public List<EsrNotification> loadPlacementDeleteNotification(Placement placementToDelete, List<EsrNotification> allEsrNotifications) {
+
+    LocalDate asOfDate = LocalDate.now();
+    String nationalPostNumber = placementToDelete.getPost().getNationalPostNumber();
+    List<Placement> currentPlacements = placementRepository.findCurrentPlacementsForPosts(asOfDate, asList(nationalPostNumber), placementTypes);
+
+    LOG.info("Placement Delete: Identified {} current Placements for post {} as of date {}", currentPlacements.size(), nationalPostNumber, asOfDate);
+
+    List<Placement> matchedCurrentPlacements = currentPlacements.stream()
+        .filter(placement -> placement.getSiteCode().equalsIgnoreCase(placementToDelete.getSiteCode()))
+        .collect(toList());
+
+    if (matchedCurrentPlacements.isEmpty()) {
+      allEsrNotifications.add(buildNotification(placementToDelete, null));
+    } else {
+      matchedCurrentPlacements.forEach(currentPlacement -> allEsrNotifications.add(buildNotification(placementToDelete, currentPlacement)));
+    }
+
+    return allEsrNotifications;
+  }
+
+  @Override
   public EsrNotification handleEsrNewPositionNotification(PostDTO postDTO) {
 
     EsrNotification esrNotification = getEsrNotification(postDTO);
