@@ -235,15 +235,10 @@ public class PlacementServiceImpl implements PlacementService {
     List<EsrNotification> allEsrNotifications = new ArrayList<>();
 
     Placement placementToDelete = placementRepository.findOne(id);
-    esrNotificationService.loadPlacementDeleteNotification(placementToDelete, allEsrNotifications);
-
-    for (EsrNotification esrNotification : allEsrNotifications) {
-      persistEsrNotificationsForPlacementDelete(placementToDelete, esrNotification);
-    }
-
-  }
-
-  private void persistEsrNotificationsForPlacementDelete(Placement placementToDelete, EsrNotification esrNotification) {
+    List<EsrNotification> esrNotifications = esrNotificationService.loadPlacementDeleteNotification(placementToDelete, allEsrNotifications);
+    log.info("Placement Delete: PERSISTING: {} EsrNotifications for post {} being deleted", esrNotifications.size(), placementToDelete.getLocalPostNumber());
+    esrNotificationService.save(esrNotifications);
+    log.info("Placement Delete: PERSISTED: {} EsrNotifications for post {} being deleted", esrNotifications.size(), placementToDelete.getLocalPostNumber());
 
   }
 

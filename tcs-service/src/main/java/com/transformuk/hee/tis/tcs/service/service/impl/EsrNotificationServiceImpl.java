@@ -10,7 +10,6 @@ import com.transformuk.hee.tis.tcs.service.repository.EsrNotificationRepository;
 import com.transformuk.hee.tis.tcs.service.repository.PlacementRepository;
 import com.transformuk.hee.tis.tcs.service.service.EsrNotificationService;
 import com.transformuk.hee.tis.tcs.service.service.mapper.EsrNotificationMapper;
-import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Service;
@@ -26,6 +25,7 @@ import java.util.List;
 import static java.lang.Double.parseDouble;
 import static java.util.Arrays.asList;
 import static java.util.stream.Collectors.toList;
+import static org.apache.commons.lang3.StringUtils.isNotEmpty;
 
 /**
  * Service Implementation for managing Esr Notification.
@@ -54,31 +54,16 @@ public class EsrNotificationServiceImpl implements EsrNotificationService {
   }
 
   /**
-   * Save a EsrNotification.
-   *
-   * @param esrNotificationDTO the entity to save
-   * @return the persisted entity
-   */
-  @Override
-  public EsrNotificationDTO save(EsrNotificationDTO esrNotificationDTO) {
-    LOG.debug("Request to save Placement : {}", esrNotificationDTO);
-    EsrNotification notification = esrNotificationMapper.esrNotificationDTOToEsrNotification(esrNotificationDTO);
-    EsrNotification esrNotification = esrNotificationRepository.save(notification);
-    return esrNotificationMapper.esrNotificationToEsrNotificationDTO(esrNotification);
-  }
-
-  /**
    * Save a list of EsrNotifications.
    *
-   * @param esrNotificationDTO the list of entities to save
+   * @param esrNotifications the list of entities to save
    * @return the list of persisted entities
    */
   @Override
-  public List<EsrNotificationDTO> save(List<EsrNotificationDTO> esrNotificationDTO) {
-    LOG.debug("Request to save EsrNotifications : {}", esrNotificationDTO);
-    List<EsrNotification> notifications = esrNotificationMapper.esrNotificationDTOsToEsrNotifications(esrNotificationDTO);
-    esrNotificationRepository.save(notifications);
-    return esrNotificationMapper.esrNotificationsToPlacementDetailDTOs(notifications);
+  public List<EsrNotification> save(List<EsrNotification> esrNotifications) {
+    LOG.debug("Request to save EsrNotifications : {}", esrNotifications);
+    List<EsrNotification> notifications = esrNotificationRepository.save(esrNotifications);
+    return notifications;
   }
 
   /**
@@ -273,12 +258,41 @@ public class EsrNotificationServiceImpl implements EsrNotificationService {
         .collect(toList());
 
     if (matchedCurrentPlacements.isEmpty()) {
-      allEsrNotifications.add(buildNotification(placementToDelete, null));
+      EsrNotification esrNotification = buildNotification(placementToDelete, null);
+      allEsrNotifications.add(esrNotification);
+      allEsrNotifications.add(buildWithdrawnNotification(esrNotification));
+
     } else {
-      matchedCurrentPlacements.forEach(currentPlacement -> allEsrNotifications.add(buildNotification(placementToDelete, currentPlacement)));
+      matchedCurrentPlacements.forEach(currentPlacement -> {
+        EsrNotification esrNotification = buildNotification(placementToDelete, currentPlacement);
+        allEsrNotifications.add(esrNotification);
+        allEsrNotifications.add(buildWithdrawnNotification(esrNotification));
+      });
     }
 
     return allEsrNotifications;
+  }
+
+  private EsrNotification buildWithdrawnNotification(EsrNotification esrNotification) {
+
+    EsrNotification withdrawnEsrNotification = new EsrNotification();
+
+    withdrawnEsrNotification.setNotificationTitleCode("2");
+    withdrawnEsrNotification.setDeaneryPostNumber(esrNotification.getDeaneryPostNumber());
+    withdrawnEsrNotification.setManagingDeaneryBodyCode(esrNotification.getManagingDeaneryBodyCode());
+    withdrawnEsrNotification.setCurrentTraineeFirstName(esrNotification.getCurrentTraineeFirstName());
+    withdrawnEsrNotification.setCurrentTraineeLastName(esrNotification.getCurrentTraineeLastName());
+    withdrawnEsrNotification.setCurrentTraineeGmcNumber(esrNotification.getCurrentTraineeGmcNumber());
+    withdrawnEsrNotification.setCurrentTraineeProjectedEndDate(esrNotification.getCurrentTraineeProjectedEndDate());
+
+    withdrawnEsrNotification.setWithdrawnTraineeFirstName(esrNotification.getNextAppointmentTraineeFirstName());
+    withdrawnEsrNotification.setWithdrawnTraineeLastName(esrNotification.getNextAppointmentTraineeLastName());
+    withdrawnEsrNotification.setWithdrawnTraineeGmcNumber(esrNotification.getNextAppointmentTraineeGmcNumber());
+    // There is no withdrawal reason in TIS as the withdrawn is handled by deleting future placement. Hence defaulting to other
+    withdrawnEsrNotification.setWithdrawalReason(
+        isNotEmpty(esrNotification.getWithdrawalReason()) ? esrNotification.getWithdrawalReason() : "3" );
+
+    return withdrawnEsrNotification;
   }
 
   @Override
@@ -298,7 +312,7 @@ public class EsrNotificationServiceImpl implements EsrNotificationService {
     EsrNotification esrNotification = new EsrNotification();
     esrNotification.setNotificationTitleCode("5");
     esrNotification.setDeaneryPostNumber(postDTO.getNationalPostNumber());
-    if(StringUtils.isNotEmpty(postDTO.getNationalPostNumber()) && postDTO.getNationalPostNumber().indexOf('/') > -1) {
+    if(isNotEmpty(postDTO.getNationalPostNumber()) && postDTO.getNationalPostNumber().indexOf('/') > -1) {
       esrNotification.setManagingDeaneryBodyCode(
               postDTO.getNationalPostNumber().substring(0, postDTO.getNationalPostNumber().indexOf('/')));
     }
@@ -453,7 +467,7 @@ public class EsrNotificationServiceImpl implements EsrNotificationService {
 
   private void setManagingDeaneryBodyCodeFromPlacement(Placement nextPlacement, EsrNotification esrNotification) {
     String nationalPostNumber = nextPlacement.getPost().getNationalPostNumber();
-    if(StringUtils.isNotEmpty(nationalPostNumber) && nationalPostNumber.indexOf('/') > -1) {
+    if(isNotEmpty(nationalPostNumber) && nationalPostNumber.indexOf('/') > -1) {
       esrNotification.setManagingDeaneryBodyCode(nationalPostNumber.substring(0, nationalPostNumber.indexOf('/')));
     }
   }
