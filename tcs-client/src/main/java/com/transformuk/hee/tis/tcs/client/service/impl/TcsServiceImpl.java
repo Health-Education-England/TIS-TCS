@@ -39,6 +39,7 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
 import org.springframework.web.client.RestTemplate;
 
+import javax.annotation.PostConstruct;
 import java.util.List;
 import java.util.Map;
 import java.util.stream.Collectors;
@@ -120,6 +121,11 @@ public class TcsServiceImpl extends AbstractClientService {
   public TcsServiceImpl(@Value("${tcs.client.rate.limit}") double standardRequestsPerSecondLimit,
                         @Value("${tcs.client.bulk.rate.limit}") double bulkRequestsPerSecondLimit) {
     super(standardRequestsPerSecondLimit, bulkRequestsPerSecondLimit);
+  }
+
+  @PostConstruct
+  public void init() {
+	  tcsRestTemplate.setErrorHandler(new TCSClientErrorHandler());
   }
 
   private ParameterizedTypeReference<List<JsonPatchDTO>> getJsonPatchDtoReference() {
@@ -265,6 +271,10 @@ public class TcsServiceImpl extends AbstractClientService {
   public String getServiceUrl() {
     return this.serviceUrl;
   }
+
+  public void setServiceUrl(String serviceUrl) {
+		 this.serviceUrl = serviceUrl;
+	}
 
   @Override
   public Map<Class, ParameterizedTypeReference> getClassToParamTypeRefMap() {
