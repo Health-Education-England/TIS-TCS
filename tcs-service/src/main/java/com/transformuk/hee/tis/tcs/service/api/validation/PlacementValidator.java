@@ -85,8 +85,6 @@ public class PlacementValidator {
     LocalDate now = LocalDate.now();
     if (placement == null) {
       throw new IllegalArgumentException(String.format("No Placement found for id: [%s]", id));
-    } else if (!now.isBefore(placement.getDateFrom())) {
-      throw new IllegalArgumentException("Placement cannot be deleted as its not a future Placement");
     }
   }
 

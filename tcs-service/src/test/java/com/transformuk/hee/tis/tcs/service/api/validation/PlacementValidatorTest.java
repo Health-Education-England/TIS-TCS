@@ -288,15 +288,6 @@ public class PlacementValidatorTest {
     placementValidator.validatePlacementForDelete(PLACEMENT_ID);
   }
 
-  @Test(expected = IllegalArgumentException.class)
-  public void validatePlacementForDeleteShouldThrowExceptionWhenNotFuturePlacement() {
-    when(placementRepository.findOne(PLACEMENT_ID)).thenReturn(placementMock);
-    LocalDate yesterday = LocalDate.now().minus(1, DAYS);
-
-    when(placementMock.getDateFrom()).thenReturn(yesterday);
-
-    placementValidator.validatePlacementForDelete(PLACEMENT_ID);
-  }
 
   @Test
   public void validatePlacementForDeleteShouldValidate() {
