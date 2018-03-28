@@ -10,7 +10,7 @@ import java.util.Objects;
  * A RotationPerson.
  */
 @Entity
-@Table(name = "rotation_person")
+@Table(name = "RotationPerson")
 public class RotationPerson implements Serializable {
 
     private static final long serialVersionUID = 1L;
@@ -19,10 +19,10 @@ public class RotationPerson implements Serializable {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
-    @Column(name = "person_id")
+    @Column(name = "personId")
     private Long personId;
 
-    @Column(name = "rotation_id")
+    @Column(name = "rotationId")
     private Long rotationId;
 
     // jhipster-needle-entity-add-field - JHipster will add fields here, do not remove

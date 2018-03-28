@@ -10,7 +10,7 @@ import java.util.Objects;
  * A Rotation.
  */
 @Entity
-@Table(name = "rotation")
+@Table(name = "Rotation")
 public class Rotation implements Serializable {
 
     private static final long serialVersionUID = 1L;
@@ -19,7 +19,7 @@ public class Rotation implements Serializable {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
-    @Column(name = "programme_id")
+    @Column(name = "programmeId")
     private Long programmeId;
 
     @Column(name = "name")
