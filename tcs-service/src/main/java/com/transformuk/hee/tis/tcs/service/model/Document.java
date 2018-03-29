@@ -27,7 +27,6 @@ public class Document implements Serializable {
     private String contentType;
     private Long size;
     private Long personId;
-    private String fileLocation;
     @Enumerated(EnumType.STRING)
     private Status status;
     private Integer version;
@@ -94,7 +93,6 @@ public class Document implements Serializable {
                 ", contentType='" + contentType + '\'' +
                 ", size=" + size +
                 ", personId=" + personId +
-                ", fileLocation='" + fileLocation + '\'' +
                 ", status=" + status +
                 ", version=" + version +
                 ", tags=" + tags +
@@ -190,14 +188,6 @@ public class Document implements Serializable {
 
     public void setPersonId(final Long personId) {
         this.personId = personId;
-    }
-
-    public String getFileLocation() {
-        return fileLocation;
-    }
-
-    public void setFileLocation(final String fileLocation) {
-        this.fileLocation = fileLocation;
     }
 
     public Status getStatus() {
