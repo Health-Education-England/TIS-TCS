@@ -40,8 +40,11 @@ import org.springframework.stereotype.Service;
 import org.springframework.web.client.RestTemplate;
 
 import javax.annotation.PostConstruct;
+import java.io.UnsupportedEncodingException;
+import java.net.URLEncoder;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 import java.util.stream.Collectors;
 
 @Service
@@ -214,17 +217,29 @@ public class TcsServiceImpl extends AbstractClientService {
 	}
 
 	public List<GdcDetailsDTO> findGdcDetailsIn(List<String> gdcIds) {
-		String url = serviceUrl + "/api/gdc-details/in/" + String.join(",", gdcIds);
+		String url = serviceUrl + "/api/gdc-details/in/" + getIdsAsUrlEncodedCSVs(gdcIds);
 		ResponseEntity<List<GdcDetailsDTO>> responseEntity = tcsRestTemplate.
 				exchange(url, HttpMethod.GET, null, new ParameterizedTypeReference<List<GdcDetailsDTO>>() {});
 		return responseEntity.getBody();
 	}
 
 	public List<GmcDetailsDTO> findGmcDetailsIn(List<String> gmcIds) {
-		String url = serviceUrl + "/api/gmc-details/in/" + String.join(",", gmcIds);
+		String url = serviceUrl + "/api/gmc-details/in/" + getIdsAsUrlEncodedCSVs(gmcIds);
 		ResponseEntity<List<GmcDetailsDTO>> responseEntity = tcsRestTemplate.
 				exchange(url, HttpMethod.GET, null, new ParameterizedTypeReference<List<GmcDetailsDTO>>() {});
 		return responseEntity.getBody();
+	}
+
+	private String getIdsAsUrlEncodedCSVs(List<String> ids) {
+		Set<String> urlEncodedIds = ids.stream().map(s -> {
+			try {
+				return URLEncoder.encode(s, "UTF-8");
+			} catch (UnsupportedEncodingException e) {
+				throw new AssertionError("UTF-8 is unknown");
+			}
+		}).collect(Collectors.toSet());
+
+		return String.join(",", urlEncodedIds);
 	}
 
 	public List<PersonDTO> findPeopleIn(List<Long> personIds) {
@@ -235,7 +250,7 @@ public class TcsServiceImpl extends AbstractClientService {
 	}
 
 	public List<PersonDTO> findPeopleByPublicHealthNumbersIn(List<String> publicHealthNumbersIds) {
-		String url = serviceUrl + "/api/people/phn/in/" + String.join(",", publicHealthNumbersIds);
+		String url = serviceUrl + "/api/people/phn/in/" + getIdsAsUrlEncodedCSVs(publicHealthNumbersIds);
 		ResponseEntity<List<PersonDTO>> responseEntity = tcsRestTemplate.
 				exchange(url, HttpMethod.GET, null, new ParameterizedTypeReference<List<PersonDTO>>() {});
 		return responseEntity.getBody();
