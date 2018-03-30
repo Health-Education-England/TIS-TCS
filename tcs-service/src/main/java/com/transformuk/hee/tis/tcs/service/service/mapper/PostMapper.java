@@ -2,22 +2,8 @@ package com.transformuk.hee.tis.tcs.service.service.mapper;
 
 import com.google.common.collect.Lists;
 import com.google.common.collect.Sets;
-import com.transformuk.hee.tis.tcs.api.dto.PlacementDTO;
-import com.transformuk.hee.tis.tcs.api.dto.PostDTO;
-import com.transformuk.hee.tis.tcs.api.dto.PostFundingDTO;
-import com.transformuk.hee.tis.tcs.api.dto.PostGradeDTO;
-import com.transformuk.hee.tis.tcs.api.dto.PostSiteDTO;
-import com.transformuk.hee.tis.tcs.api.dto.PostSpecialtyDTO;
-import com.transformuk.hee.tis.tcs.api.dto.ProgrammeDTO;
-import com.transformuk.hee.tis.tcs.api.dto.SpecialtyDTO;
-import com.transformuk.hee.tis.tcs.service.model.Placement;
-import com.transformuk.hee.tis.tcs.service.model.Post;
-import com.transformuk.hee.tis.tcs.service.model.PostFunding;
-import com.transformuk.hee.tis.tcs.service.model.PostGrade;
-import com.transformuk.hee.tis.tcs.service.model.PostSite;
-import com.transformuk.hee.tis.tcs.service.model.PostSpecialty;
-import com.transformuk.hee.tis.tcs.service.model.Programme;
-import com.transformuk.hee.tis.tcs.service.model.Specialty;
+import com.transformuk.hee.tis.tcs.api.dto.*;
+import com.transformuk.hee.tis.tcs.service.model.*;
 import org.apache.commons.collections4.CollectionUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
@@ -188,19 +174,24 @@ public class PostMapper {
     return result;
   }
 
-  private ProgrammeDTO programmeToProgrammeDTO(Programme programme) {
-    ProgrammeDTO result = null;
-    if (programme != null) {
-      result = new ProgrammeDTO();
-
-      result.setId(programme.getId());
-      result.setIntrepidId(programme.getIntrepidId());
-      result.setProgrammeNumber(programme.getProgrammeNumber());
-      result.setProgrammeName(programme.getProgrammeName());
-      result.setOwner(programme.getOwner());
-      result.setStatus(programme.getStatus());
+  private Set<ProgrammeDTO> programmeToProgrammeDTO(final Set<Programme> programme) {
+    if (programme == null) {
+      return null;
     }
-    return result;
+
+    return programme.stream().map(this::createProgrammeDTO).collect(Collectors.toSet());
+  }
+
+  private ProgrammeDTO createProgrammeDTO(final Programme programme) {
+    final ProgrammeDTO programmeDTO = new ProgrammeDTO();
+    programmeDTO.setId(programme.getId());
+    programmeDTO.setIntrepidId(programme.getIntrepidId());
+    programmeDTO.setProgrammeNumber(programme.getProgrammeNumber());
+    programmeDTO.setProgrammeName(programme.getProgrammeName());
+    programmeDTO.setOwner(programme.getOwner());
+    programmeDTO.setStatus(programme.getStatus());
+
+    return programmeDTO;
   }
 
   public Post postDTOToPost(PostDTO postDTO) {
@@ -294,19 +285,24 @@ public class PostMapper {
     return result;
   }
 
-  private Programme programmeDTOToProgramme(ProgrammeDTO programmeDTO) {
-    Programme result = null;
-    if (programmeDTO != null) {
-      result = new Programme();
-
-      result.setId(programmeDTO.getId());
-      result.setIntrepidId(programmeDTO.getIntrepidId());
-      result.setProgrammeNumber(programmeDTO.getProgrammeNumber());
-      result.setProgrammeName(programmeDTO.getProgrammeName());
-      result.setOwner(programmeDTO.getOwner());
-      result.setStatus(programmeDTO.getStatus());
+  private Set<Programme> programmeDTOToProgramme(final Set<ProgrammeDTO> programmeDTO) {
+    if (programmeDTO == null) {
+      return null;
     }
-    return result;
+
+    return programmeDTO.stream().map(this::createProgramme).collect(Collectors.toSet());
+  }
+
+  private Programme createProgramme(final ProgrammeDTO programmeDTO) {
+    final Programme programme = new Programme();
+    programme.setId(programmeDTO.getId());
+    programme.setIntrepidId(programmeDTO.getIntrepidId());
+    programme.setProgrammeNumber(programmeDTO.getProgrammeNumber());
+    programme.setProgrammeName(programmeDTO.getProgrammeName());
+    programme.setOwner(programmeDTO.getOwner());
+    programme.setStatus(programmeDTO.getStatus());
+
+    return programme;
   }
 
   private PostFunding fundingDTOToFunding(PostFundingDTO postFundingDTO) {
