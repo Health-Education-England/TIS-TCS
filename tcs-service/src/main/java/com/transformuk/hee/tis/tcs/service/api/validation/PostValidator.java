@@ -96,19 +96,23 @@ public class PostValidator {
 
   private List<FieldError> checkProgramme(PostDTO postDTO) {
     List<FieldError> fieldErrors = new ArrayList<>();
-    // then check the Programme
-    if (postDTO.getProgrammes() != null) {
-      ProgrammeDTO programmeDTO = postDTO.getProgrammes();
+
+    if (postDTO.getProgrammes() == null || postDTO.getProgrammes().isEmpty()) {
+      return fieldErrors;
+    }
+
+    for (ProgrammeDTO programmeDTO : postDTO.getProgrammes()) {
       if (programmeDTO.getId() == null || programmeDTO.getId() < 0) {
         fieldErrors.add(new FieldError(POST_DTO_NAME, "programmes",
-            "Programme ID cannot be null or negative"));
+                "Programme ID cannot be null or negative"));
       } else {
         if (!programmeRepository.exists(programmeDTO.getId())) {
           fieldErrors.add(new FieldError(POST_DTO_NAME, "programmes",
-              String.format("Programme with id %d does not exist", programmeDTO.getId())));
+                  String.format("Programme with id %d does not exist", programmeDTO.getId())));
         }
       }
     }
+
     return fieldErrors;
   }
 

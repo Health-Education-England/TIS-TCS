@@ -52,10 +52,10 @@ public class Post implements Serializable {
     @OneToOne(fetch = FetchType.EAGER)
     @JoinColumn(name = "newPostId")
     private Post newPost;
-    @ManyToMany(cascade = CascadeType.ALL, fetch = FetchType.EAGER)
+    @ManyToMany(fetch = FetchType.EAGER)
     @JoinTable(name = "ProgrammePost",
             joinColumns = @JoinColumn(name = "postId"),
-            inverseJoinColumns = @JoinColumn(name = "programmeId")
+    inverseJoinColumns = @JoinColumn(name = "programmeId")
     )
     private Set<Programme> programmes = new HashSet<>();
     // Entity Site defined in the Reference service
