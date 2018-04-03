@@ -20,6 +20,7 @@ import com.transformuk.hee.tis.tcs.service.model.Post;
 import com.transformuk.hee.tis.tcs.service.model.PostGrade;
 import com.transformuk.hee.tis.tcs.service.model.PostSite;
 import com.transformuk.hee.tis.tcs.service.model.PostSpecialty;
+import com.transformuk.hee.tis.tcs.service.model.PostView;
 import com.transformuk.hee.tis.tcs.service.model.Programme;
 import com.transformuk.hee.tis.tcs.service.model.Specialty;
 import com.transformuk.hee.tis.tcs.service.repository.PlacementRepository;
@@ -44,6 +45,8 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageImpl;
 import org.springframework.data.domain.Pageable;
+import org.springframework.data.jpa.domain.Specification;
+import org.springframework.data.jpa.domain.Specifications;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.jdbc.core.RowMapper;
 import org.springframework.scheduling.annotation.Async;
@@ -53,6 +56,7 @@ import org.springframework.util.StopWatch;
 
 import java.sql.ResultSet;
 import java.sql.SQLException;
+import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
 import java.util.Map;
@@ -60,6 +64,9 @@ import java.util.Objects;
 import java.util.Set;
 import java.util.concurrent.CompletableFuture;
 import java.util.stream.Collectors;
+
+import static com.transformuk.hee.tis.tcs.service.service.impl.SpecificationFactory.containsLike;
+import static com.transformuk.hee.tis.tcs.service.service.impl.SpecificationFactory.in;
 
 /**
  * Service Implementation for managing Post.
@@ -516,6 +523,41 @@ public class PostServiceImpl implements PostService {
     }
     //List<PostViewDTO> postPageList = posts.subList(start,(end > posts.size()) ? posts.size() : end);
     //Page<PostViewDTO> dtoPage = new PageImpl<>(posts,pageable,pageable.getPageSize());
+    postViewDecorator.decorate(dtoPage.getContent());
+    return dtoPage;
+  }
+
+  @Override
+  @Transactional(readOnly = true)
+  public Page<PostViewDTO> advancedSearchBySpecification(String searchString, List<ColumnFilter> columnFilters, Pageable pageable) {
+
+    List<Specification<PostView>> specs = new ArrayList<>();
+    //add the text search criteria
+    if (StringUtils.isNotEmpty(searchString)) {
+      specs.add(Specifications.where(containsLike("nationalPostNumber", searchString)).
+          or(containsLike("programmeName", searchString)).
+          or(containsLike("currentTraineeGmcNumber", searchString)).
+          or(containsLike("currentTraineeSurname", searchString)).
+          or(containsLike("currentTraineeForenames", searchString)));
+    }
+    //add the column filters criteria
+    if (columnFilters != null && !columnFilters.isEmpty()) {
+      columnFilters.forEach(cf -> specs.add(in(cf.getName(), cf.getValues())));
+    }
+
+    Page<PostView> result;
+    if (!specs.isEmpty()) {
+      Specifications<PostView> fullSpec = Specifications.where(specs.get(0));
+      //add the rest of the specs that made it in
+      for (int i = 1; i < specs.size(); i++) {
+        fullSpec = fullSpec.and(specs.get(i));
+      }
+      result = postViewRepository.findAll(fullSpec, pageable);
+    } else {
+      result = postViewRepository.findAll(pageable);
+    }
+
+    Page<PostViewDTO> dtoPage = result.map(postView -> postViewMapper.postViewToPostViewDTO(postView));
     postViewDecorator.decorate(dtoPage.getContent());
     return dtoPage;
   }
