@@ -15,9 +15,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.multipart.MultipartFile;
 
-import java.io.ByteArrayInputStream;
-import java.io.File;
-import java.io.InputStream;
+import java.io.*;
 import java.net.URISyntaxException;
 import java.security.InvalidKeyException;
 import java.util.Optional;
@@ -40,16 +38,33 @@ public class DocumentServiceImpl implements DocumentService {
     }
 
     @Override
-    public DocumentDTO findOne(final Long id) {
+    public Optional<DocumentDTO> findOne(final Long id) {
         LOG.debug("Received request to find one '{}' with ID '{}'", DocumentDTO.class.getSimpleName(), id);
 
         final Document document = documentRepository.findOne(id);
 
-        return documentMapper.toDto(document);
+        if (document == null) {
+            return Optional.empty();
+        }
+
+        return Optional.ofNullable(documentMapper.toDto(document));
     }
 
     @Override
-    public DocumentDTO save(final DocumentDTO documentDTO) {
+    public void download(final DocumentDTO document, final OutputStream outputStream) throws IOException {
+        LOG.debug("Received request to download '{}' with ID '{}'", DocumentDTO.class.getSimpleName(), document.getId());
+
+        try {
+            fileStorageRepository.download(azureProperties.getContainerName(),
+                    azureProperties.getPersonFolder() + "/" + document.getId() + "/" + document.getFileName(),
+                    outputStream);
+        } catch (final URISyntaxException | InvalidKeyException | StorageException ex) {
+            throw new IOException(ex);
+        }
+    }
+
+    @Override
+    public DocumentDTO save(final DocumentDTO documentDTO) throws IOException {
         LOG.debug("Received request to save '{}' with name '{}'", documentDTO.getClass().getSimpleName(), documentDTO.getFileName());
 
         Document document = documentMapper.toEntity(documentDTO);
@@ -59,11 +74,11 @@ public class DocumentServiceImpl implements DocumentService {
 
             try {
                 document = create(document);
-            } catch (final Exception ex) {
+            } catch (final IOException ex) {
                 // rollback
                 try {
                     fileStorageRepository.deleteFile(document.getId(), azureProperties.getContainerName() + "/" + azureProperties.getPersonFolder(), document.getFileName());
-                } catch (final Exception exx) {
+                } catch (final URISyntaxException | InvalidKeyException | StorageException exx) {
                     LOG.warn("Error while rolling back; could not delete file from remote storage", exx);
                 }
 
@@ -78,23 +93,19 @@ public class DocumentServiceImpl implements DocumentService {
         return documentMapper.toDto(document);
     }
 
-    private Document create(final Document document) {
+    private Document create(final Document document) throws IOException {
         if (document.getBytes() == null && document.getBytes().length == 0) {
             LOG.warn("File is empty; not creating metadata nor saving file to storage");
-            throw new RuntimeException("File is empty");
+            throw new IOException("File is empty");
         }
 
-        document.setFileLocation(Optional.ofNullable(document.getFileLocation()).orElse("TemporaryFileLocation"));
         saveMetadata(document);
 
-        final String fileLocation;
         try {
-            fileLocation = saveFile(document);
-        } catch (final Exception ex) {
-            LOG.error("Failed to save document to storage", ex);
-            throw new RuntimeException("Failed to save document to storage");
+            saveFile(document);
+        } catch (final InvalidKeyException | StorageException | URISyntaxException ex) {
+            throw new IOException("Failed to save document to storage", ex);
         }
-        document.setFileLocation(fileLocation);
 
         return saveMetadata(document);
     }

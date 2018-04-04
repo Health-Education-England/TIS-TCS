@@ -49,9 +49,6 @@ public class DocumentDTO implements Serializable {
     private Long size;
     @NotNull(groups = Update.class, message = "Person ID must not be null when updating a document")
     private Long personId;
-    @ApiModelProperty(hidden = true)
-    @JsonIgnore
-    private String fileLocation;
     @NotNull(groups = Update.class, message = "Status must not be null when updating a document")
     private Status status;
     @NotNull(groups = Update.class, message = "Version must not be null when updating a document")
@@ -89,7 +86,6 @@ public class DocumentDTO implements Serializable {
                 ", contentType='" + contentType + '\'' +
                 ", size=" + size +
                 ", personId=" + personId +
-                ", fileLocation='" + fileLocation + '\'' +
                 ", status=" + status +
                 ", version=" + version +
                 ", tags=" + tags +
@@ -182,14 +178,6 @@ public class DocumentDTO implements Serializable {
 
     public void setPersonId(final Long personId) {
         this.personId = personId;
-    }
-
-    public String getFileLocation() {
-        return fileLocation;
-    }
-
-    public void setFileLocation(final String fileLocation) {
-        this.fileLocation = fileLocation;
     }
 
     public Status getStatus() {
