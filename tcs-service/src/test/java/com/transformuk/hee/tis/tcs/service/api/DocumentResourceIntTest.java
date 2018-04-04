@@ -3,11 +3,14 @@ package com.transformuk.hee.tis.tcs.service.api;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.google.gson.Gson;
 import com.google.gson.reflect.TypeToken;
+import com.microsoft.azure.storage.StorageException;
+import com.transformuk.hee.tis.filestorage.repository.FileStorageRepository;
 import com.transformuk.hee.tis.tcs.TestUtils;
 import com.transformuk.hee.tis.tcs.api.dto.DocumentDTO;
 import com.transformuk.hee.tis.tcs.api.dto.TagDTO;
 import com.transformuk.hee.tis.tcs.api.enumeration.Status;
 import com.transformuk.hee.tis.tcs.service.Application;
+import com.transformuk.hee.tis.tcs.service.config.AzureProperties;
 import com.transformuk.hee.tis.tcs.service.service.DocumentService;
 import com.transformuk.hee.tis.tcs.service.service.TagService;
 import org.junit.Before;
@@ -15,7 +18,6 @@ import org.junit.Ignore;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.mockito.MockitoAnnotations;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.core.io.ByteArrayResource;
 import org.springframework.http.MediaType;
@@ -25,9 +27,13 @@ import org.springframework.mock.web.MockMultipartFile;
 import org.springframework.test.context.junit4.SpringRunner;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.MvcResult;
+import org.springframework.test.web.servlet.ResultActions;
 import org.springframework.test.web.servlet.setup.MockMvcBuilders;
 
+import javax.annotation.Resource;
 import java.lang.reflect.Type;
+import java.net.URISyntaxException;
+import java.security.InvalidKeyException;
 import java.sql.Connection;
 import java.sql.SQLException;
 import java.util.*;
@@ -35,23 +41,33 @@ import java.util.*;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.hamcrest.CoreMatchers.containsString;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.*;
-import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.content;
-import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
+import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.*;
 
 @RunWith(SpringRunner.class)
 @SpringBootTest(classes = Application.class)
 public class DocumentResourceIntTest {
-    private MockMvc mockMvc;
-    @Autowired
-    private DocumentService documentService;
-    @Autowired
-    private TagService tagService;
-
-    @Autowired
-    private JdbcTemplate jdbcTemplate;
     private static final long PERSON_BASE_ID = 10;
     private static final long DOCUMENT_BASE_ID = 100;
     private static final long TAG_BASE_ID = 1000;
+    private static final byte[] TEST_FILE_CONTENT = "DataDataDataDataDataData".getBytes();
+    private static final String TEST_FILE_NAME = "document.txt";
+    private static final String TEST_FILE_CONTENT_TYPE = "text/plain";
+    private static final String TEST_FILE_FORM_FIELD_NAME = "document";
+
+    private MockMvc mockMvc;
+
+    @Resource
+    private DocumentService documentService;
+    @Resource
+    private TagService tagService;
+    @Resource
+    private JdbcTemplate jdbcTemplate;
+    @Resource
+    private AzureProperties azureProperties;
+
+    // fixme: replace with API endpoint when implemented
+    @Resource
+    private FileStorageRepository fileStorageRepository;
 
     private static final String SQL_INSERT_PERSON =
             " INSERT INTO `Person` (`id`, `intrepidId`, `addedDate`, `amendedDate`, `role`, `status`, `comments`, `inactiveDate`, `inactiveNotes`, `publicHealthNumber`, `regulator`) " +
@@ -59,9 +75,9 @@ public class DocumentResourceIntTest {
                     " (%d, '98798797987', '2012-06-20 00:00:00', '2012-06-20 00:00:00.000', 'AAAAA', 'CURRENT', 'XXXX', NULL, NULL, NULL, 'HEELIVE');";
 
     private static final String SQL_INSERT_DOCUMENT =
-            "INSERT INTO `Document` (`id`, `addedDate`, `amendedDate`, `inactiveDate`, `uploadedBy`, `name`, `fileName`, `fileExtension`, `contentType`, `size`, `personId`, `fileLocation`, `status`, `version`, `intrepidDocumentUId`, `intrepidParentRecordId`, `intrepidFolderPath`) " +
+            "INSERT INTO `Document` (`id`, `addedDate`, `amendedDate`, `inactiveDate`, `uploadedBy`, `name`, `fileName`, `fileExtension`, `contentType`, `size`, `personId`, `status`, `version`, `intrepidDocumentUId`, `intrepidParentRecordId`, `intrepidFolderPath`) " +
                     " VALUES " +
-                    " (%d, '2018-02-16 14:32:06', '2018-02-19 11:07:11.882', NULL, 'James Hudson', 'Test Update', 'LargeTestFile.txt', 'txt', 'text/plain', 512000, %d, '\"0x8D5754A0E0E2F93\"', 'INACTIVE', 1, NULL, NULL, NULL);";
+                    " (%d, '2018-02-16 14:32:06', '2018-02-19 11:07:11.882', NULL, 'James Hudson', 'Test Update', 'LargeTestFile.txt', 'txt', 'text/plain', 512000, %d, 'INACTIVE', 1, NULL, NULL, NULL);";
 
     private static final String SQL_INSERT_TAG =
             "INSERT INTO `Tag` (`id`, `name`) " +
@@ -101,7 +117,7 @@ public class DocumentResourceIntTest {
 
     @Test
     public void createDocument_shouldReturnHTTP400_WhenPersonIdIsMissing() throws Exception {
-        final MockMultipartFile mockFile = new MockMultipartFile("document", "document.jpg", "text/plain", "DataDataDataDataDataData".getBytes());
+        final MockMultipartFile mockFile = new MockMultipartFile(TEST_FILE_FORM_FIELD_NAME, TEST_FILE_NAME, TEST_FILE_CONTENT_TYPE, TEST_FILE_CONTENT);
 
         mockMvc.perform(fileUpload(DocumentResource.PATH_API + DocumentResource.PATH_DOCUMENTS)
                 .file(mockFile)
@@ -119,22 +135,26 @@ public class DocumentResourceIntTest {
 
     @Test
     public void createDocument_shouldReturnHTTP201WithId_WhenUploadingValidDocument() throws Exception {
-        final MockMultipartFile mockFile = new MockMultipartFile("document", "document.jpg", "text/plain", "DataDataDataDataDataData".getBytes());
+        final MockMultipartFile mockFile = new MockMultipartFile(TEST_FILE_FORM_FIELD_NAME, TEST_FILE_NAME, TEST_FILE_CONTENT_TYPE, TEST_FILE_CONTENT);
 
-        mockMvc.perform(fileUpload(DocumentResource.PATH_API + DocumentResource.PATH_DOCUMENTS)
+        final MvcResult uploadResponse = mockMvc.perform(fileUpload(DocumentResource.PATH_API + DocumentResource.PATH_DOCUMENTS)
                 .file(mockFile)
                 .param("personId", String.valueOf(PERSON_BASE_ID))
                 .contentType(MediaType.MULTIPART_FORM_DATA))
                 .andExpect(status().isCreated())
                 .andExpect(content().contentTypeCompatibleWith(MediaType.APPLICATION_JSON))
-                .andExpect(content().string(containsString("{\"id\":")));
+                .andExpect(content().string(containsString("{\"id\":"))).andReturn();
+
+        final DocumentId documentId = new Gson().fromJson(uploadResponse.getResponse().getContentAsString(), DocumentId.class);
+
+        deleteTestFile(documentId.getId());
     }
 
     // TODO fix validations
     @Ignore
     @Test
     public void bulkUpdateDocuments_shouldReturnHTTP400_WhenDocumentIsInvalid() throws Exception {
-        final long documentId = DOCUMENT_BASE_ID + 1;
+        final long documentId = DOCUMENT_BASE_ID + 10;
 
         final Connection connection = jdbcTemplate.getDataSource().getConnection();
         ScriptUtils.executeSqlScript(connection, new ByteArrayResource(getSql(SQL_INSERT_DOCUMENT, documentId, PERSON_BASE_ID).getBytes()));
@@ -165,7 +185,7 @@ public class DocumentResourceIntTest {
 
     @Test
     public void bulkUpdateDocuments_shouldReturnHTTP200_WhenMetadataIsUpdatedWith2Tags() throws Exception {
-        final long documentId = DOCUMENT_BASE_ID + 2;
+        final long documentId = DOCUMENT_BASE_ID + 20;
 
         final Connection connection = jdbcTemplate.getDataSource().getConnection();
         ScriptUtils.executeSqlScript(connection, new ByteArrayResource(getSql(getSql(SQL_INSERT_DOCUMENT, documentId, PERSON_BASE_ID)).getBytes()));
@@ -175,7 +195,7 @@ public class DocumentResourceIntTest {
 
     @Test
     public void bulkUpdateDocuments_shouldReturnHTTP200_WhenMetadataIsUpdatedWithNewTag() throws Exception {
-        final long documentId = DOCUMENT_BASE_ID + 3;
+        final long documentId = DOCUMENT_BASE_ID + 30;
 
         final Connection connection = jdbcTemplate.getDataSource().getConnection();
         ScriptUtils.executeSqlScript(connection, new ByteArrayResource(getSql(SQL_INSERT_DOCUMENT, documentId, PERSON_BASE_ID).getBytes()));
@@ -200,7 +220,7 @@ public class DocumentResourceIntTest {
 
     @Test
     public void bulkUpdateDocuments_shouldReturnHTTP200_WhenMetadataIsUpdatedWithNewAndDeletedTag() throws Exception {
-        final long documentId = DOCUMENT_BASE_ID + 5;
+        final long documentId = DOCUMENT_BASE_ID + 40;
 
         final Connection connection = jdbcTemplate.getDataSource().getConnection();
         ScriptUtils.executeSqlScript(connection, new ByteArrayResource(getSql(SQL_INSERT_DOCUMENT, documentId, PERSON_BASE_ID).getBytes()));
@@ -263,6 +283,53 @@ public class DocumentResourceIntTest {
                 .andReturn();
     }
 
+    @Test
+    public void downloadDocumentById_shouldReturn200OKFile_WhenDocumentIdDoesExist() throws Exception {
+        final MockMultipartFile mockFile = new MockMultipartFile(TEST_FILE_FORM_FIELD_NAME, TEST_FILE_NAME, TEST_FILE_CONTENT_TYPE, TEST_FILE_CONTENT);
+
+        final MvcResult uploadResponse = mockMvc.perform(fileUpload(DocumentResource.PATH_API + DocumentResource.PATH_DOCUMENTS)
+                .file(mockFile)
+                .param("personId", String.valueOf(PERSON_BASE_ID))
+                .contentType(MediaType.MULTIPART_FORM_DATA))
+                .andExpect(status().isCreated())
+                .andExpect(content().contentTypeCompatibleWith(MediaType.APPLICATION_JSON))
+                .andExpect(content().string(containsString("{\"id\":"))).andReturn();
+
+        final DocumentId documentId = new Gson().fromJson(uploadResponse.getResponse().getContentAsString(), DocumentId.class);
+
+        final ResultActions action = mockMvc.perform(get(DocumentResource.PATH_API + DocumentResource.PATH_DOCUMENTS + DocumentResource.PATH_DOWNLOADS + "/" + documentId.getId()).contentType(MediaType.APPLICATION_OCTET_STREAM));
+        action.andExpect(header().string("Content-Disposition", "attachment;filename=document.txt"));
+        action.andExpect(header().string("Content-Length", String.valueOf(TEST_FILE_CONTENT.length)));
+        action.andExpect(content().contentType(TEST_FILE_CONTENT_TYPE));
+        action.andExpect(content().bytes(TEST_FILE_CONTENT));
+        action.andExpect(status().isOk());
+
+        deleteTestFile(documentId.getId());
+    }
+
+    @Test
+    public void downloadDocumentById_shouldReturn404OKFile_WhenDocumentIdDoesNotExist() throws Exception {
+        final long documentId = DOCUMENT_BASE_ID + 999999999;
+
+        final ResultActions action = mockMvc.perform(get(DocumentResource.PATH_API + DocumentResource.PATH_DOCUMENTS + DocumentResource.PATH_DOWNLOADS + "/" + documentId).contentType(MediaType.APPLICATION_OCTET_STREAM));
+        action.andExpect(content().string(""));
+        action.andExpect(status().isNotFound());
+    }
+
+    @Test
+    public void downloadDocumentById_shouldReturn400OKFile_WhenDocumentIdIsEmpty() throws Exception {
+        final ResultActions action = mockMvc.perform(get(DocumentResource.PATH_API + DocumentResource.PATH_DOCUMENTS + DocumentResource.PATH_DOWNLOADS + "/" + "").contentType(MediaType.APPLICATION_OCTET_STREAM));
+        action.andExpect(content().string(""));
+        action.andExpect(status().isBadRequest());
+    }
+
+    @Test
+    public void downloadDocumentById_shouldReturn400OKFile_WhenDocumentIdIsNaN() throws Exception {
+        final ResultActions action = mockMvc.perform(get(DocumentResource.PATH_API + DocumentResource.PATH_DOCUMENTS + DocumentResource.PATH_DOWNLOADS + "/" + "NaN").contentType(MediaType.APPLICATION_OCTET_STREAM));
+        action.andExpect(content().string(""));
+        action.andExpect(status().isBadRequest());
+    }
+
     private DocumentDTO updateMetadataWith2Tags(final long documentId) throws Exception {
         final DocumentDTO document = new DocumentDTO();
         document.setId(documentId);
@@ -297,7 +364,23 @@ public class DocumentResourceIntTest {
         return updatedDocument;
     }
 
+    private void deleteTestFile(final long documentId) throws URISyntaxException, InvalidKeyException, StorageException {
+        fileStorageRepository.deleteFile(documentId, azureProperties.getContainerName() + "/" + azureProperties.getPersonFolder(), TEST_FILE_NAME);
+    }
+
     private String getSql(final String sql, final Object... args) {
         return String.format(sql, args);
+    }
+
+    private class DocumentId {
+        private final Long id;
+
+        public DocumentId(final Long id) {
+            this.id = id;
+        }
+
+        public Long getId() {
+            return id;
+        }
     }
 }

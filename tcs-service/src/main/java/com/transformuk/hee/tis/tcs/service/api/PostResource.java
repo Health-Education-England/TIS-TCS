@@ -194,7 +194,7 @@ public class PostResource {
           " \"sites.siteId\":[\"123\"],\"trainingBodyId\":[\"11\"],\"grades.gradeId\":[\"11\"],\"specialties.specialty.name\":[\"Test Specialty\"]}\"")
       @RequestBody List<ColumnFilterDTO> filters) {
     log.debug("REST request to filter a page of Posts");
-    Page<PostViewDTO> page = postService.advancedSearch(null, filters.stream().map(f ->
+    Page<PostViewDTO> page = postService.advancedSearchBySpecification(null, filters.stream().map(f ->
         new ColumnFilter(f.getName(), Lists.newArrayList(f.getValues()))
     ).collect(Collectors.toList()), pageable);
     HttpHeaders headers = PaginationUtil.generatePaginationHttpHeaders(page, "/api/posts/filter");
