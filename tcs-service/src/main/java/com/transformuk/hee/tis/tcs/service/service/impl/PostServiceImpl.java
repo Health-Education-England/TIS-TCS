@@ -3,34 +3,12 @@ package com.transformuk.hee.tis.tcs.service.service.impl;
 import com.google.common.collect.Lists;
 import com.google.common.collect.Maps;
 import com.google.common.collect.Sets;
-import com.transformuk.hee.tis.tcs.api.dto.PlacementDTO;
-import com.transformuk.hee.tis.tcs.api.dto.PostDTO;
-import com.transformuk.hee.tis.tcs.api.dto.PostGradeDTO;
-import com.transformuk.hee.tis.tcs.api.dto.PostSiteDTO;
-import com.transformuk.hee.tis.tcs.api.dto.PostSpecialtyDTO;
-import com.transformuk.hee.tis.tcs.api.dto.PostViewDTO;
-import com.transformuk.hee.tis.tcs.api.dto.ProgrammeDTO;
+import com.transformuk.hee.tis.tcs.api.dto.*;
 import com.transformuk.hee.tis.tcs.api.enumeration.FundingType;
 import com.transformuk.hee.tis.tcs.api.enumeration.Status;
 import com.transformuk.hee.tis.tcs.service.api.decorator.PostViewDecorator;
-import com.transformuk.hee.tis.tcs.service.model.ColumnFilter;
-import com.transformuk.hee.tis.tcs.service.model.EsrNotification;
-import com.transformuk.hee.tis.tcs.service.model.Placement;
-import com.transformuk.hee.tis.tcs.service.model.Post;
-import com.transformuk.hee.tis.tcs.service.model.PostGrade;
-import com.transformuk.hee.tis.tcs.service.model.PostSite;
-import com.transformuk.hee.tis.tcs.service.model.PostSpecialty;
-import com.transformuk.hee.tis.tcs.service.model.PostView;
-import com.transformuk.hee.tis.tcs.service.model.Programme;
-import com.transformuk.hee.tis.tcs.service.model.Specialty;
-import com.transformuk.hee.tis.tcs.service.repository.PlacementRepository;
-import com.transformuk.hee.tis.tcs.service.repository.PostGradeRepository;
-import com.transformuk.hee.tis.tcs.service.repository.PostRepository;
-import com.transformuk.hee.tis.tcs.service.repository.PostSiteRepository;
-import com.transformuk.hee.tis.tcs.service.repository.PostSpecialtyRepository;
-import com.transformuk.hee.tis.tcs.service.repository.PostViewRepository;
-import com.transformuk.hee.tis.tcs.service.repository.ProgrammeRepository;
-import com.transformuk.hee.tis.tcs.service.repository.SpecialtyRepository;
+import com.transformuk.hee.tis.tcs.service.model.*;
+import com.transformuk.hee.tis.tcs.service.repository.*;
 import com.transformuk.hee.tis.tcs.service.service.EsrNotificationService;
 import com.transformuk.hee.tis.tcs.service.service.PostService;
 import com.transformuk.hee.tis.tcs.service.service.helper.SqlQuerySupplier;
@@ -56,12 +34,7 @@ import org.springframework.util.StopWatch;
 
 import java.sql.ResultSet;
 import java.sql.SQLException;
-import java.util.ArrayList;
-import java.util.Collection;
-import java.util.List;
-import java.util.Map;
-import java.util.Objects;
-import java.util.Set;
+import java.util.*;
 import java.util.concurrent.CompletableFuture;
 import java.util.stream.Collectors;
 
@@ -276,25 +249,34 @@ public class PostServiceImpl implements PostService {
   @Override
   public List<PostDTO> patchPostProgrammes(List<PostDTO> postDTOList) {
     List<Post> posts = Lists.newArrayList();
+
+    // fixme why we using intrepidIDs and not TISIDs?
     Map<String, Post> intrepidIdToPost = getPostsByIntrepidId(postDTOList);
 
+    // fixme review this code with a developer that understands the business requirement for this method
     Set<Long> programmeIds = postDTOList
         .stream()
         .map(PostDTO::getProgrammes)
+        .flatMap(Collection::stream)
         .map(ProgrammeDTO::getId)
         .collect(Collectors.toSet());
 
     Map<Long, Programme> idToProgramme = programmeRepository.findAll(programmeIds)
         .stream().collect(Collectors.toMap(Programme::getId, p -> p));
 
-    for (PostDTO dto : postDTOList) {
-      Post post = intrepidIdToPost.get(dto.getIntrepidId());
-      Programme programme = idToProgramme.get(dto.getProgrammes().getId());
-      if (post != null && programme != null) {
-        post.setProgrammes(programme);
-        posts.add(post);
+    for (final PostDTO dto : postDTOList) {
+      final Post post = intrepidIdToPost.get(dto.getIntrepidId());
+
+      for (final ProgrammeDTO programmeDTO : dto.getProgrammes()) {
+        final Programme programme = idToProgramme.get(programmeDTO.getId());
+
+        if (post != null && programme != null) {
+          post.addProgramme(programme);
+          posts.add(post);
+        }
       }
     }
+
     List<Post> savedPosts = postRepository.save(posts);
     return postMapper.postsToPostDTOs(savedPosts);
   }
@@ -613,7 +595,8 @@ public class PostServiceImpl implements PostService {
       view.setPrimarySpecialtyCode(rs.getString("primarySpecialtyCode"));
       view.setPrimarySpecialtyName(rs.getString("primarySpecialtyName"));
       view.setPrimarySiteId(rs.getLong("primarySiteId"));
-      view.setProgrammeName(rs.getString("programmeName"));
+      // fixme change to "programmes"
+      view.setProgrammeName(rs.getString("programmes"));
       String fundingType = rs.getString("fundingType");
       if(StringUtils.isNotEmpty(fundingType)){
         view.setFundingType(FundingType.valueOf(fundingType));
@@ -640,56 +623,69 @@ public class PostServiceImpl implements PostService {
         columnFilters.forEach(cf -> {
           switch (cf.getName()){
             case "currentTraineeSurname":
-              whereClause.append(" AND surnames in (");
+              applyLikeFilter(whereClause, "surnames", cf.getValues());
               break;
             case "currentTraineeForenames":
-              whereClause.append(" AND forenames in (");
+              applyLikeFilter(whereClause, "forenames", cf.getValues());
               break;
             case "primarySpecialtyId":
-              whereClause.append(" AND specialtyId in (");
+              applyInFilter(whereClause, "specialtyId", cf.getValues());
               break;
             case "primarySpecialtyCode":
-              whereClause.append(" AND specialtyCode in (");
+              applyInFilter(whereClause, "specialtyCode", cf.getValues());
               break;
             case "primarySpecialtyName":
-              whereClause.append(" AND name in (");
+              applyInFilter(whereClause, "name", cf.getValues());
               break;
+              // fixme change to programmes
             case "programmeName":
-              whereClause.append(" AND programmeName in (");
+              applyLikeFilter(whereClause, "programmes", cf.getValues());
               break;
             case "nationalPostNumber":
-              whereClause.append(" AND nationalPostNumber in (");
+              applyInFilter(whereClause, "nationalPostNumber", cf.getValues());
               break;
             case "status":
-              whereClause.append(" AND p.status in (");
+              applyInFilter(whereClause, "p.status", cf.getValues());
               break;
             case "owner":
-              whereClause.append(" AND p.owner in (");
+              applyInFilter(whereClause, "p.owner", cf.getValues());
               break;
             case "primarySiteId":
-              whereClause.append(" AND siteId in (");
+              applyInFilter(whereClause, "siteId", cf.getValues());
               break;
             case "approvedGradeId":
-              whereClause.append(" AND gradeId in (");
+              applyInFilter(whereClause, "gradeId", cf.getValues());
               break;
             default:
               throw new IllegalArgumentException("Not accounted for column filter [" + cf.getName() +
                       "] you need to add an additional case statement or remove it from the request");
           }
-          cf.getValues().stream().forEach(k -> whereClause.append("'" + k + "',"));
-          whereClause.deleteCharAt(whereClause.length() - 1);
-          whereClause.append(")");
         });
       }
 
       if (StringUtils.isNotEmpty(searchString)) {
         whereClause.append(" AND ( nationalPostNumber like ").append("'%" + searchString + "%'");
-        whereClause.append(" OR programmeName like ").append("'%" + searchString + "%'");
+        whereClause.append(" OR programmes like ").append("'%" + searchString + "%'");
         whereClause.append(" OR surnames like ").append("'%" + searchString + "%'");
         whereClause.append(" OR forenames like ").append("'%" + searchString + "%'");
         whereClause.append(" ) ");
       }
     return whereClause.toString();
+    }
+
+    private void applyLikeFilter(StringBuilder whereClause, String columnName, List<Object> values) {
+      whereClause.append(" AND (");
+      values.forEach(value -> whereClause.append(columnName).append(" LIKE '%").append(value).append("%'").append(" OR "));
+      whereClause.delete(whereClause.length() - 4, whereClause.length());
+      whereClause.append(")");
+    }
+
+    private void applyInFilter(StringBuilder whereClause, String columnName, List<Object> values) {
+      whereClause.append(" AND (").append(columnName).append(" IN (");
+      values.forEach(k -> whereClause.append("'").append(k).append("',"));
+      whereClause.deleteCharAt(whereClause.length() - 1);
+      whereClause.append(")");
+      whereClause.append(")");
     }
 
   private void handleNewPostEsrNotification(PostDTO postDTO) {

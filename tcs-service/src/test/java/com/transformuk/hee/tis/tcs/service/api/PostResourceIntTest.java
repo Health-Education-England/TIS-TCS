@@ -59,6 +59,7 @@ import org.springframework.test.web.servlet.setup.MockMvcBuilders;
 import org.springframework.transaction.annotation.Transactional;
 
 import javax.persistence.EntityManager;
+import java.util.Collections;
 import java.util.Arrays;
 import java.util.List;
 import java.util.Set;
@@ -1019,7 +1020,7 @@ public class PostResourceIntTest {
     programmeDTO.setStatus(programme.getStatus());
     programmeDTO.setIntrepidId(programme.getIntrepidId());
 
-    postDTO.setProgrammes(programmeDTO);
+    postDTO.setProgrammes(Collections.singleton(programmeDTO));
 
     int expectedDatabaseSizeAfterBulkUpdate = postRepository.findAll().size();
 
@@ -1029,9 +1030,9 @@ public class PostResourceIntTest {
         .content(TestUtil.convertObjectToJsonBytes(payload)))
         .andExpect(status().isOk())
         .andExpect(jsonPath("$").isArray())
-        .andExpect(jsonPath("$.[*].programmes.id").isArray())
-        .andExpect(jsonPath("$.[*].programmes.id").isNotEmpty())
-        .andExpect(jsonPath("$.[*].programmes.id").value(hasItem(programme.getId().intValue())));
+        .andExpect(jsonPath("$.[*].programmes").isArray())
+        .andExpect(jsonPath("$.[*].programmes").isNotEmpty())
+        .andExpect(jsonPath("$.[*].programmes[0].id").value(hasItem(programme.getId().intValue())));
 
     // Validate that both Post are still in the database
     List<Post> postList = postRepository.findAll();
