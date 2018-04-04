@@ -5,7 +5,12 @@ SELECT count(p.id)
     LEFT JOIN `Specialty` sp on sp.`id` = ps.`specialtyId`
     LEFT JOIN `PostSite` pst on p.`id` = pst.`postId` AND pst.`postSiteType` = 'PRIMARY'
     LEFT JOIN `PostFunding` pf on p.`id` = pf.`postId`
-    LEFT JOIN `Programme` prg on p.`programmeId` = prg.`id`
+    LEFT JOIN (
+      SELECT pp.`postId`, GROUP_CONCAT(prg.`programmeName` SEPARATOR ', ') programmes
+      FROM `ProgrammePost` pp
+      INNER JOIN `Programme` prg on prg.`id` = pp.`programmeId`
+      GROUP BY pp.`postId`
+    ) ProgrammePost ON ProgrammePost.`postId` = p.`id`
     LEFT JOIN (
       SELECT curPlacement.postId, GROUP_CONCAT(curPlacement.surname SEPARATOR ', ') surnames, GROUP_CONCAT(curPlacement.forenames SEPARATOR ', ') forenames
     	FROM (
