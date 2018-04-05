@@ -595,8 +595,7 @@ public class PostServiceImpl implements PostService {
       view.setPrimarySpecialtyCode(rs.getString("primarySpecialtyCode"));
       view.setPrimarySpecialtyName(rs.getString("primarySpecialtyName"));
       view.setPrimarySiteId(rs.getLong("primarySiteId"));
-      // fixme change to "programmes"
-      view.setProgrammeName(rs.getString("programmes"));
+      view.setProgrammeNames(rs.getString("programmes"));
       String fundingType = rs.getString("fundingType");
       if(StringUtils.isNotEmpty(fundingType)){
         view.setFundingType(FundingType.valueOf(fundingType));
@@ -637,8 +636,7 @@ public class PostServiceImpl implements PostService {
             case "primarySpecialtyName":
               applyInFilter(whereClause, "name", cf.getValues());
               break;
-              // fixme change to programmes
-            case "programmeName":
+            case "programmeNames":
               applyLikeFilter(whereClause, "programmes", cf.getValues());
               break;
             case "nationalPostNumber":
