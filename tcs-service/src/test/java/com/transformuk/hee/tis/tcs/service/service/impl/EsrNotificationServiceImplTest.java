@@ -23,6 +23,7 @@ import java.util.List;
 
 import static java.util.Arrays.asList;
 import static java.util.Collections.emptyList;
+import static java.util.Collections.singletonList;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.mockito.Matchers.any;
 import static org.mockito.Mockito.anyListOf;
@@ -128,6 +129,66 @@ public class EsrNotificationServiceImplTest {
     verify(placementRepository).findCurrentPlacementsForPosts(asOfDate, asList(deaneryPostNumber), placementTypes);
     verify(esrNotificationRepository).save(any(List.class));
   }
+
+  @Test
+  public void handleNewPlacementEsrNotificationWithCurrentPlacementsSuccessfullyMapsAndSaves() throws IOException, ClassNotFoundException {
+
+    String deaneryPostNumber = "EOE/RGT00/021/FY1/010";
+    LocalDate asOfDate = LocalDate.now();
+    Placement placement = aPlacement(deaneryPostNumber);
+    placement.setSiteCode("SITE-01");
+
+    Placement currentPlacement = aPlacement(deaneryPostNumber);
+    currentPlacement.setDateFrom(asOfDate.minusMonths(1));
+    currentPlacement.setDateTo(asOfDate.plusMonths(2));
+    currentPlacement.setSiteCode("SITE-01");
+
+    when(placementRepository.findCurrentPlacementsForPosts(
+        asOfDate, asList(deaneryPostNumber), placementTypes)).thenReturn(singletonList(currentPlacement));
+    EsrNotification returnedNotification = anEsrNotification(deaneryPostNumber);
+    when(esrNotificationRepository.save(any(List.class))).thenReturn(asList(returnedNotification));
+
+    List<EsrNotification> mappedNotifications = testService.handleNewPlacementEsrNotification(placement);
+
+    assertThat(mappedNotifications).isNotEmpty();
+    EsrNotification mappedNotification = mappedNotifications.get(0);
+    assertThat(mappedNotification.getId()).isEqualTo(returnedNotification.getId());
+    assertThat(mappedNotification.getDeaneryPostNumber()).isEqualTo(returnedNotification.getDeaneryPostNumber());
+
+    verify(placementRepository).findCurrentPlacementsForPosts(asOfDate, asList(deaneryPostNumber), placementTypes);
+    verify(esrNotificationRepository).save(any(List.class));
+  }
+
+  @Test
+  public void handleNewPlacementEsrNotificationWithCurrentPlacementSiteCodeNullSuccessfullyMapsAndSaves() throws IOException, ClassNotFoundException {
+
+    String deaneryPostNumber = "EOE/RGT00/021/FY1/010";
+    LocalDate asOfDate = LocalDate.now();
+    Placement placement = aPlacement(deaneryPostNumber);
+    placement.setSiteCode("SITE-01");
+
+    Placement currentPlacement = aPlacement(deaneryPostNumber);
+    currentPlacement.setDateFrom(asOfDate.minusMonths(1));
+    currentPlacement.setDateTo(asOfDate.plusMonths(2));
+    currentPlacement.setSiteCode(null);
+
+    when(placementRepository.findCurrentPlacementsForPosts(
+        asOfDate, asList(deaneryPostNumber), placementTypes)).thenReturn(singletonList(currentPlacement));
+    EsrNotification returnedNotification = anEsrNotification(deaneryPostNumber);
+
+    when(esrNotificationRepository.save(any(List.class))).thenReturn(asList(returnedNotification));
+
+    List<EsrNotification> mappedNotifications = testService.handleNewPlacementEsrNotification(placement);
+
+    assertThat(mappedNotifications).isNotEmpty();
+    EsrNotification mappedNotification = mappedNotifications.get(0);
+    assertThat(mappedNotification.getId()).isEqualTo(returnedNotification.getId());
+    assertThat(mappedNotification.getDeaneryPostNumber()).isEqualTo(returnedNotification.getDeaneryPostNumber());
+
+    verify(placementRepository).findCurrentPlacementsForPosts(asOfDate, asList(deaneryPostNumber), placementTypes);
+    verify(esrNotificationRepository).save(any(List.class));
+  }
+
 
   private EsrNotification anEsrNotification(String deaneryPostNumber) {
     EsrNotification esrNotification = new EsrNotification();

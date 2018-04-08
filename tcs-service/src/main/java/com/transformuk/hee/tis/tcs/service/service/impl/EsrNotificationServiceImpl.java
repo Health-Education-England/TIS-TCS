@@ -220,9 +220,12 @@ public class EsrNotificationServiceImpl implements EsrNotificationService {
 
     LOG.info("Identified {} current Placements for post {} as of date {}", currentPlacements.size(), nationalPostNumber, asOfDate);
 
-    List<Placement> matchedCurrentPlacements = currentPlacements.stream()
-        .filter(placement -> placement.getSiteCode().equalsIgnoreCase(newFuturePlacement.getSiteCode()))
-        .collect(toList());
+    List<Placement> matchedCurrentPlacements = new ArrayList<>();
+        currentPlacements.forEach(placement -> {
+      if (isNotEmpty(placement.getSiteCode()) && placement.getSiteCode().equalsIgnoreCase(newFuturePlacement.getSiteCode())) {
+        matchedCurrentPlacements.add(placement);
+      }
+    });
 
     if (matchedCurrentPlacements.isEmpty()) {
       allEsrNotifications.add(buildNotification(newFuturePlacement, null));
