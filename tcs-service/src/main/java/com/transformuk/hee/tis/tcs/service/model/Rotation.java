@@ -1,6 +1,8 @@
 package com.transformuk.hee.tis.tcs.service.model;
 
 
+import com.transformuk.hee.tis.tcs.api.enumeration.Status;
+
 import javax.persistence.*;
 
 import java.io.Serializable;
@@ -24,9 +26,10 @@ public class Rotation implements Serializable {
 
     @Column(name = "name")
     private String name;
-
+    
+    @Enumerated(EnumType.STRING)
     @Column(name = "status")
-    private String status;
+    private Status status;
 
     // jhipster-needle-entity-add-field - JHipster will add fields here, do not remove
     public Long getId() {
@@ -63,16 +66,16 @@ public class Rotation implements Serializable {
         this.name = name;
     }
 
-    public String getStatus() {
+    public Status getStatus() {
         return status;
     }
 
-    public Rotation status(String status) {
+    public Rotation status(Status status) {
         this.status = status;
         return this;
     }
 
-    public void setStatus(String status) {
+    public void setStatus(Status status) {
         this.status = status;
     }
     // jhipster-needle-entity-add-getters-setters - JHipster will add getters and setters here, do not remove
