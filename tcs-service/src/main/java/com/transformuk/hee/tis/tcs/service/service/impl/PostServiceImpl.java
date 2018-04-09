@@ -3,32 +3,15 @@ package com.transformuk.hee.tis.tcs.service.service.impl;
 import com.google.common.collect.Lists;
 import com.google.common.collect.Maps;
 import com.google.common.collect.Sets;
-import com.transformuk.hee.tis.tcs.api.dto.PlacementDTO;
-import com.transformuk.hee.tis.tcs.api.dto.PostDTO;
-import com.transformuk.hee.tis.tcs.api.dto.PostGradeDTO;
-import com.transformuk.hee.tis.tcs.api.dto.PostSiteDTO;
-import com.transformuk.hee.tis.tcs.api.dto.PostSpecialtyDTO;
-import com.transformuk.hee.tis.tcs.api.dto.PostViewDTO;
-import com.transformuk.hee.tis.tcs.api.dto.ProgrammeDTO;
+import com.transformuk.hee.tis.tcs.api.dto.*;
+import com.transformuk.hee.tis.tcs.api.enumeration.FundingType;
+import com.transformuk.hee.tis.tcs.api.enumeration.Status;
 import com.transformuk.hee.tis.tcs.service.api.decorator.PostViewDecorator;
-import com.transformuk.hee.tis.tcs.service.model.ColumnFilter;
-import com.transformuk.hee.tis.tcs.service.model.Placement;
-import com.transformuk.hee.tis.tcs.service.model.Post;
-import com.transformuk.hee.tis.tcs.service.model.PostGrade;
-import com.transformuk.hee.tis.tcs.service.model.PostSite;
-import com.transformuk.hee.tis.tcs.service.model.PostSpecialty;
-import com.transformuk.hee.tis.tcs.service.model.PostView;
-import com.transformuk.hee.tis.tcs.service.model.Programme;
-import com.transformuk.hee.tis.tcs.service.model.Specialty;
-import com.transformuk.hee.tis.tcs.service.repository.PlacementRepository;
-import com.transformuk.hee.tis.tcs.service.repository.PostGradeRepository;
-import com.transformuk.hee.tis.tcs.service.repository.PostRepository;
-import com.transformuk.hee.tis.tcs.service.repository.PostSiteRepository;
-import com.transformuk.hee.tis.tcs.service.repository.PostSpecialtyRepository;
-import com.transformuk.hee.tis.tcs.service.repository.PostViewRepository;
-import com.transformuk.hee.tis.tcs.service.repository.ProgrammeRepository;
-import com.transformuk.hee.tis.tcs.service.repository.SpecialtyRepository;
+import com.transformuk.hee.tis.tcs.service.model.*;
+import com.transformuk.hee.tis.tcs.service.repository.*;
+import com.transformuk.hee.tis.tcs.service.service.EsrNotificationService;
 import com.transformuk.hee.tis.tcs.service.service.PostService;
+import com.transformuk.hee.tis.tcs.service.service.helper.SqlQuerySupplier;
 import com.transformuk.hee.tis.tcs.service.service.mapper.DesignatedBodyMapper;
 import com.transformuk.hee.tis.tcs.service.service.mapper.PostMapper;
 import com.transformuk.hee.tis.tcs.service.service.mapper.PostViewMapper;
@@ -38,19 +21,20 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageImpl;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.domain.Specification;
 import org.springframework.data.jpa.domain.Specifications;
+import org.springframework.jdbc.core.JdbcTemplate;
+import org.springframework.jdbc.core.RowMapper;
 import org.springframework.scheduling.annotation.Async;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+import org.springframework.util.StopWatch;
 
-import java.util.ArrayList;
-import java.util.Collection;
-import java.util.List;
-import java.util.Map;
-import java.util.Objects;
-import java.util.Set;
+import java.sql.ResultSet;
+import java.sql.SQLException;
+import java.util.*;
 import java.util.concurrent.CompletableFuture;
 import java.util.stream.Collectors;
 
@@ -91,6 +75,14 @@ public class PostServiceImpl implements PostService {
   private PostViewDecorator postViewDecorator;
   @Autowired
   private NationalPostNumberServiceImpl nationalPostNumberService;
+  @Autowired
+  private EsrNotificationService esrNotificationService;
+
+  @Autowired
+  private JdbcTemplate jdbcTemplate;
+
+  @Autowired
+  private SqlQuerySupplier sqlQuerySupplier;
 
   /**
    * Save a post.
@@ -111,6 +103,7 @@ public class PostServiceImpl implements PostService {
     }
     Post post = postMapper.postDTOToPost(postDTO);
     post = postRepository.save(post);
+    handleNewPostEsrNotification(postDTO);
     return postMapper.postToPostDTO(post);
   }
 
@@ -256,25 +249,34 @@ public class PostServiceImpl implements PostService {
   @Override
   public List<PostDTO> patchPostProgrammes(List<PostDTO> postDTOList) {
     List<Post> posts = Lists.newArrayList();
+
+    // fixme why we using intrepidIDs and not TISIDs?
     Map<String, Post> intrepidIdToPost = getPostsByIntrepidId(postDTOList);
 
+    // fixme review this code with a developer that understands the business requirement for this method
     Set<Long> programmeIds = postDTOList
         .stream()
         .map(PostDTO::getProgrammes)
+        .flatMap(Collection::stream)
         .map(ProgrammeDTO::getId)
         .collect(Collectors.toSet());
 
     Map<Long, Programme> idToProgramme = programmeRepository.findAll(programmeIds)
         .stream().collect(Collectors.toMap(Programme::getId, p -> p));
 
-    for (PostDTO dto : postDTOList) {
-      Post post = intrepidIdToPost.get(dto.getIntrepidId());
-      Programme programme = idToProgramme.get(dto.getProgrammes().getId());
-      if (post != null && programme != null) {
-        post.setProgrammes(programme);
-        posts.add(post);
+    for (final PostDTO dto : postDTOList) {
+      final Post post = intrepidIdToPost.get(dto.getIntrepidId());
+
+      for (final ProgrammeDTO programmeDTO : dto.getProgrammes()) {
+        final Programme programme = idToProgramme.get(programmeDTO.getId());
+
+        if (post != null && programme != null) {
+          post.addProgramme(programme);
+          posts.add(post);
+        }
       }
     }
+
     List<Post> savedPosts = postRepository.save(posts);
     return postMapper.postsToPostDTOs(savedPosts);
   }
@@ -400,8 +402,42 @@ public class PostServiceImpl implements PostService {
   @Transactional(readOnly = true)
   public Page<PostViewDTO> findAll(Pageable pageable) {
     log.debug("Request to get all Posts");
-    Page<PostView> result = postViewRepository.findAll(pageable);
-    Page<PostViewDTO> dtoPage = result.map(postView -> postViewMapper.postViewToPostViewDTO(postView));
+    /*Integer postCount = jdbcTemplate.queryForObject("select count(p.id) from Post p",
+            Integer.class);
+    int start = pageable.getOffset();
+    int end = ((start + pageable.getPageSize()) > postCount) ? postCount : (start + pageable.getPageSize());*/
+    int start = pageable.getOffset();
+    int end = start + pageable.getPageSize() + 1;
+
+    String query = sqlQuerySupplier.getQuery(SqlQuerySupplier.POST_VIEW);
+    // Where condition
+    query = query.replaceAll("WHERECLAUSE", " where 1=1 ");
+    if (pageable.getSort() != null) {
+      if (pageable.getSort().iterator().hasNext()) {
+        String orderByFirstCriteria = pageable.getSort().iterator().next().toString();
+        String orderByClause = orderByFirstCriteria.replaceAll(":", " ");
+        query = query.replaceAll("ORDERBYCLAUSE", " ORDER BY " + orderByClause);
+      } else {
+        query = query.replaceAll("ORDERBYCLAUSE", "");
+      }
+    } else {
+      query = query.replaceAll("ORDERBYCLAUSE", "");
+    }
+
+    query = query.replaceAll("LIMITCLAUSE", "limit " + start + "," + end);
+    List<PostViewDTO> posts = jdbcTemplate.query(query, new PostServiceImpl.PostViewRowMapper());
+    if (CollectionUtils.isEmpty(posts)) {
+      return new PageImpl<>(posts);
+    }
+    boolean hasNext = posts.size() > pageable.getPageSize();
+    Page<PostViewDTO> dtoPage;
+    if (hasNext) {
+      posts = posts.subList(0, pageable.getPageSize()); //ignore any additional
+      dtoPage = new PageImpl<>(posts,pageable,end);
+    }
+    else{
+      dtoPage = new PageImpl<>(posts,pageable,pageable.getPageSize());
+    }
     postViewDecorator.decorate(dtoPage.getContent());
     return dtoPage;
   }
@@ -409,6 +445,73 @@ public class PostServiceImpl implements PostService {
   @Override
   @Transactional(readOnly = true)
   public Page<PostViewDTO> advancedSearch(String searchString, List<ColumnFilter> columnFilters, Pageable pageable) {
+
+    String whereClause = createWhereClause(searchString, columnFilters);
+
+    StopWatch stopWatch = new StopWatch();
+    /*stopWatch.start();
+    String countQuery = sqlQuerySupplier.getQuery(SqlQuerySupplier.POST_VIEW_COUNT);
+    countQuery = countQuery.replaceAll("WHERECLAUSE", whereClause);
+    Integer postCount = jdbcTemplate.queryForObject(countQuery, Integer.class);
+    stopWatch.stop();
+    log.info("count query finished in: [{}]s", stopWatch.getTotalTimeSeconds());
+
+    int start = pageable.getOffset();
+    int end = pageable.getPageSize();
+*/
+    int start = pageable.getOffset();
+    int end = start + pageable.getPageSize() + 1;
+
+    String query = sqlQuerySupplier.getQuery(SqlQuerySupplier.POST_VIEW);
+    query = query.replaceAll("WHERECLAUSE", whereClause);
+    if (pageable.getSort() != null) {
+      if (pageable.getSort().iterator().hasNext()) {
+        String orderByFirstCriteria = pageable.getSort().iterator().next().toString();
+        String orderByClause = orderByFirstCriteria.replaceAll(":", " ");
+        if(orderByClause.contains("currentTraineeSurname")){
+          orderByClause = orderByClause.replaceAll("currentTraineeSurname","surnames");
+        }
+
+        query = query.replaceAll("ORDERBYCLAUSE", " ORDER BY " + orderByClause);
+      } else {
+        query = query.replaceAll("ORDERBYCLAUSE", "");
+      }
+    } else {
+      query = query.replaceAll("ORDERBYCLAUSE", "");
+    }
+
+    //limit is 0 based
+    query = query.replaceAll("LIMITCLAUSE", "limit " + start + "," + end);
+
+    log.info("running post query");
+    stopWatch = new StopWatch();
+    stopWatch.start();
+    List<PostViewDTO> posts = jdbcTemplate.query(query, new PostServiceImpl.PostViewRowMapper());
+    stopWatch.stop();
+    log.info("post query finished in: [{}]s", stopWatch.getTotalTimeSeconds());
+
+    if (CollectionUtils.isEmpty(posts)) {
+      return new PageImpl<>(posts);
+    }
+
+    boolean hasNext = posts.size() > pageable.getPageSize();
+    Page<PostViewDTO> dtoPage;
+    if (hasNext) {
+      posts = posts.subList(0, pageable.getPageSize()); //ignore any additional
+      dtoPage = new PageImpl<>(posts,pageable,end);
+    }
+    else{
+      dtoPage = new PageImpl<>(posts,pageable,pageable.getPageSize());
+    }
+    //List<PostViewDTO> postPageList = posts.subList(start,(end > posts.size()) ? posts.size() : end);
+    //Page<PostViewDTO> dtoPage = new PageImpl<>(posts,pageable,pageable.getPageSize());
+    postViewDecorator.decorate(dtoPage.getContent());
+    return dtoPage;
+  }
+
+  @Override
+  @Transactional(readOnly = true)
+  public Page<PostViewDTO> advancedSearchBySpecification(String searchString, List<ColumnFilter> columnFilters, Pageable pageable) {
 
     List<Specification<PostView>> specs = new ArrayList<>();
     //add the text search criteria
@@ -478,6 +581,120 @@ public class PostServiceImpl implements PostService {
     log.debug("Request to build Post view");
     postRepository.buildPostView();
     return CompletableFuture.completedFuture(null);
+  }
+
+  private class PostViewRowMapper implements RowMapper<PostViewDTO> {
+
+    @Override
+    public PostViewDTO mapRow(ResultSet rs, int i) throws SQLException {
+      PostViewDTO view = new PostViewDTO();
+      view.setId(rs.getLong("id"));
+
+      view.setApprovedGradeId(rs.getLong("approvedGradeId"));
+      view.setPrimarySpecialtyId(rs.getLong("primarySpecialtyId"));
+      view.setPrimarySpecialtyCode(rs.getString("primarySpecialtyCode"));
+      view.setPrimarySpecialtyName(rs.getString("primarySpecialtyName"));
+      view.setPrimarySiteId(rs.getLong("primarySiteId"));
+      view.setProgrammeNames(rs.getString("programmes"));
+      String fundingType = rs.getString("fundingType");
+      if(StringUtils.isNotEmpty(fundingType)){
+        view.setFundingType(FundingType.valueOf(fundingType));
+      }
+      view.setNationalPostNumber(rs.getString("nationalPostNumber"));
+      String status = rs.getString("status");
+      if (StringUtils.isNotEmpty(status)) {
+        view.setStatus(Status.valueOf(status));
+      }
+
+      view.setOwner(rs.getString("owner"));
+      view.setIntrepidId(rs.getString("intrepidId"));
+      view.setCurrentTraineeSurname(rs.getString("surnames"));
+      view.setCurrentTraineeForenames(rs.getString("forenames"));
+      return view;
+    }
+  }
+
+  private String createWhereClause(String searchString, List<ColumnFilter> columnFilters) {
+      StringBuilder whereClause = new StringBuilder();
+      whereClause.append(" WHERE 1=1 ");
+      //add the column filters criteria
+      if (columnFilters != null && !columnFilters.isEmpty()) {
+        columnFilters.forEach(cf -> {
+          switch (cf.getName()){
+            case "currentTraineeSurname":
+              applyLikeFilter(whereClause, "surnames", cf.getValues());
+              break;
+            case "currentTraineeForenames":
+              applyLikeFilter(whereClause, "forenames", cf.getValues());
+              break;
+            case "primarySpecialtyId":
+              applyInFilter(whereClause, "specialtyId", cf.getValues());
+              break;
+            case "primarySpecialtyCode":
+              applyInFilter(whereClause, "specialtyCode", cf.getValues());
+              break;
+            case "primarySpecialtyName":
+              applyInFilter(whereClause, "name", cf.getValues());
+              break;
+            case "programmeNames":
+              applyLikeFilter(whereClause, "programmes", cf.getValues());
+              break;
+            case "nationalPostNumber":
+              applyInFilter(whereClause, "nationalPostNumber", cf.getValues());
+              break;
+            case "status":
+              applyInFilter(whereClause, "p.status", cf.getValues());
+              break;
+            case "owner":
+              applyInFilter(whereClause, "p.owner", cf.getValues());
+              break;
+            case "primarySiteId":
+              applyInFilter(whereClause, "siteId", cf.getValues());
+              break;
+            case "approvedGradeId":
+              applyInFilter(whereClause, "gradeId", cf.getValues());
+              break;
+            default:
+              throw new IllegalArgumentException("Not accounted for column filter [" + cf.getName() +
+                      "] you need to add an additional case statement or remove it from the request");
+          }
+        });
+      }
+
+      if (StringUtils.isNotEmpty(searchString)) {
+        whereClause.append(" AND ( nationalPostNumber like ").append("'%" + searchString + "%'");
+        whereClause.append(" OR programmes like ").append("'%" + searchString + "%'");
+        whereClause.append(" OR surnames like ").append("'%" + searchString + "%'");
+        whereClause.append(" OR forenames like ").append("'%" + searchString + "%'");
+        whereClause.append(" ) ");
+      }
+    return whereClause.toString();
+    }
+
+    private void applyLikeFilter(StringBuilder whereClause, String columnName, List<Object> values) {
+      whereClause.append(" AND (");
+      values.forEach(value -> whereClause.append(columnName).append(" LIKE '%").append(value).append("%'").append(" OR "));
+      whereClause.delete(whereClause.length() - 4, whereClause.length());
+      whereClause.append(")");
+    }
+
+    private void applyInFilter(StringBuilder whereClause, String columnName, List<Object> values) {
+      whereClause.append(" AND (").append(columnName).append(" IN (");
+      values.forEach(k -> whereClause.append("'").append(k).append("',"));
+      whereClause.deleteCharAt(whereClause.length() - 1);
+      whereClause.append(")");
+      whereClause.append(")");
+    }
+
+  private void handleNewPostEsrNotification(PostDTO postDTO) {
+
+    log.info("HANDLE: new post esr notification");
+    if (postDTO.getId() == null ) {
+
+      EsrNotification esrNotification = esrNotificationService.handleEsrNewPositionNotification(postDTO);
+      log.info("SAVED: esr notification with id {} for newly created Post {}", esrNotification.getId(),
+          esrNotification.getDeaneryPostNumber());
+    }
   }
 
 }

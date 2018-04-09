@@ -21,7 +21,6 @@ public interface GmcDetailsRepository extends JpaRepository<GmcDetails, Long> {
 
   List<GmcDetails> findByGmcNumberOrderById(String gmcNumber);
 
-  @Query("SELECT g.gmcNumber from GmcDetails g WHERE g.gmcNumber in :gmcIds")
-  List<GmcDetails> findByGmcIdsIn(@Param("gmcIds") List<String> gmcIds);
+  List<GmcDetails> findByGmcNumberIn(List<String> gmcIds);
 
 }

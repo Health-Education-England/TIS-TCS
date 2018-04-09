@@ -112,19 +112,15 @@ public class ProgrammeServiceImpl implements ProgrammeService {
 
   @Override
   @Transactional(readOnly = true)
-  public Page<ProgrammeDTO> advancedSearch(String searchString, List<ColumnFilter> columnFilters, Pageable pageable, boolean currentStatus) {
+  public Page<ProgrammeDTO> advancedSearch(String searchString, List<ColumnFilter> columnFilters, Pageable pageable) {
 
     List<Specification<Programme>> specs = new ArrayList<>();
     //add the text search criteria
     if (StringUtils.isNotEmpty(searchString)) {
       specs.add(Specifications.where(containsLike("programmeName", searchString)).
-          or(containsLike("owner", searchString)).
           or(containsLike("programmeNumber", searchString)));
     }
 
-    if(currentStatus) {
-      specs.add(Specifications.where(isEqual("status", Status.CURRENT)));
-    }
 
     //add the column filters criteria
     if (columnFilters != null && !columnFilters.isEmpty()) {

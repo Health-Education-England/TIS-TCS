@@ -1,14 +1,13 @@
 package com.transformuk.hee.tis.tcs.service.api.validation;
 
 import com.google.common.collect.Lists;
-import com.google.common.collect.Sets;
 import com.transformuk.hee.tis.reference.client.impl.ReferenceServiceImpl;
-import com.transformuk.hee.tis.tcs.api.dto.PlacementDTO;
 import com.transformuk.hee.tis.tcs.api.dto.PlacementDetailsDTO;
 import com.transformuk.hee.tis.tcs.api.dto.PlacementSpecialtyDTO;
 import com.transformuk.hee.tis.tcs.api.enumeration.PostSpecialtyType;
-import com.transformuk.hee.tis.tcs.service.model.PlacementDetails;
+import com.transformuk.hee.tis.tcs.service.model.Placement;
 import com.transformuk.hee.tis.tcs.service.repository.PersonRepository;
+import com.transformuk.hee.tis.tcs.service.repository.PlacementRepository;
 import com.transformuk.hee.tis.tcs.service.repository.PostRepository;
 import com.transformuk.hee.tis.tcs.service.repository.SpecialtyRepository;
 import org.assertj.core.util.Maps;
@@ -22,15 +21,19 @@ import org.mockito.runners.MockitoJUnitRunner;
 
 import java.time.LocalDate;
 
+import static java.time.temporal.ChronoUnit.DAYS;
+import static java.time.temporal.ChronoUnit.YEARS;
 import static org.hamcrest.CoreMatchers.is;
 import static org.hamcrest.CoreMatchers.notNullValue;
 import static org.junit.Assert.assertThat;
 import static org.junit.Assert.fail;
 import static org.mockito.BDDMockito.given;
+import static org.mockito.Mockito.when;
 
 @RunWith(MockitoJUnitRunner.class)
 public class PlacementValidatorTest {
 
+  public static final long PLACEMENT_ID = 1L;
   private static final Long DEFAULT_TRAINEE = 1L;
   private static final Long DEFAULT_CLINICAL_SUPERVISOR = 12L;
   private static final Long DEFAULT_POST = 123L;
@@ -42,7 +45,6 @@ public class PlacementValidatorTest {
   private static final LocalDate DEFAULT_DATE_TO = LocalDate.ofEpochDay(0L);
   private static final String DEFAULT_PLACEMENT_TYPE = "OOPT";
   private static final Float DEFAULT_PLACEMENT_WHOLE_TIME_EQUIVALENT = 1F;
-
   private PlacementDetailsDTO placementDTO;
 
   @Mock
@@ -56,6 +58,12 @@ public class PlacementValidatorTest {
 
   @Mock
   private PersonRepository personRepository;
+
+  @Mock
+  private PlacementRepository placementRepository;
+
+  @Mock
+  private Placement placementMock;
 
   @InjectMocks
   private PlacementValidator placementValidator;
@@ -241,4 +249,54 @@ public class PlacementValidatorTest {
     //placementDTO.setSpecialties(Sets.newHashSet(placementSpecialtyDTO, placementSpecialtyDTO2));
     placementValidator.validate(placementDTO);
   }
+
+  @Test(expected = IllegalArgumentException.class)
+  public void validatePlacementForCloseShouldThrowExceptionWhenNotCurrentPlacement() {
+    when(placementRepository.findOne(PLACEMENT_ID)).thenReturn(placementMock);
+    LocalDate tomorrow = LocalDate.now().plus(1, DAYS);
+    LocalDate nextYear = LocalDate.now().plus(1, YEARS);
+
+    when(placementMock.getDateFrom()).thenReturn(tomorrow);
+    when(placementMock.getDateTo()).thenReturn(nextYear);
+
+    placementValidator.validatePlacementForClose(PLACEMENT_ID);
+  }
+
+  @Test(expected = IllegalArgumentException.class)
+  public void validatePlacementForCloseShouldThrowExceptionWhenCannotFindPlacement() {
+    when(placementRepository.findOne(PLACEMENT_ID)).thenReturn(null);
+
+    placementValidator.validatePlacementForClose(PLACEMENT_ID);
+  }
+
+  @Test
+  public void validatePlacementForCloseShouldValidateWithNoExceptions() {
+    when(placementRepository.findOne(PLACEMENT_ID)).thenReturn(placementMock);
+    LocalDate yesterday = LocalDate.now().minus(1, DAYS);
+    LocalDate nextYear = LocalDate.now().plus(1, YEARS);
+
+    when(placementMock.getDateFrom()).thenReturn(yesterday);
+    when(placementMock.getDateTo()).thenReturn(nextYear);
+
+    placementValidator.validatePlacementForClose(PLACEMENT_ID);
+  }
+
+  @Test(expected = IllegalArgumentException.class)
+  public void validatePlacementForDeleteShouldThrowExceptionWhenCannotFindPlacement() {
+    when(placementRepository.findOne(PLACEMENT_ID)).thenReturn(null);
+
+    placementValidator.validatePlacementForDelete(PLACEMENT_ID);
+  }
+
+
+  @Test
+  public void validatePlacementForDeleteShouldValidate() {
+    when(placementRepository.findOne(PLACEMENT_ID)).thenReturn(placementMock);
+    LocalDate tomorrow = LocalDate.now().plus(1, DAYS);
+
+    when(placementMock.getDateFrom()).thenReturn(tomorrow);
+
+    placementValidator.validatePlacementForDelete(PLACEMENT_ID);
+  }
+
 }

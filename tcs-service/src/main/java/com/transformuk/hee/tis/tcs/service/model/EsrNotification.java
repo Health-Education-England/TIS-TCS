@@ -5,6 +5,7 @@ import javax.persistence.GeneratedValue;
 import javax.persistence.GenerationType;
 import javax.persistence.Id;
 import javax.persistence.Table;
+import java.io.Serializable;
 import java.time.LocalDate;
 
 /**
@@ -14,7 +15,7 @@ import java.time.LocalDate;
 
 @Entity
 @Table(name = "EsrNotification")
-public class EsrNotification {
+public class EsrNotification implements Serializable {
 
   @Id
   @GeneratedValue(strategy = GenerationType.IDENTITY)

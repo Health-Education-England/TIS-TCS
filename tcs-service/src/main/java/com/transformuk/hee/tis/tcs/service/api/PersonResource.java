@@ -2,17 +2,14 @@ package com.transformuk.hee.tis.tcs.service.api;
 
 import com.codahale.metrics.annotation.Timed;
 import com.google.common.collect.Lists;
-import com.transformuk.hee.tis.tcs.api.dto.PersonBasicDetailsDTO;
-import com.transformuk.hee.tis.tcs.api.dto.PersonDTO;
-import com.transformuk.hee.tis.tcs.api.dto.PlacementSummaryDTO;
-import com.transformuk.hee.tis.tcs.api.dto.PersonViewDTO;
-import com.transformuk.hee.tis.tcs.api.dto.PlacementViewDTO;
+import com.transformuk.hee.tis.tcs.api.dto.*;
 import com.transformuk.hee.tis.tcs.api.dto.validation.Create;
 import com.transformuk.hee.tis.tcs.api.dto.validation.Update;
 import com.transformuk.hee.tis.tcs.api.enumeration.Status;
-import com.transformuk.hee.tis.tcs.service.api.decorator.PlacementSummaryDecorator;
 import com.transformuk.hee.tis.tcs.service.api.decorator.PersonViewDecorator;
+import com.transformuk.hee.tis.tcs.service.api.decorator.PlacementSummaryDecorator;
 import com.transformuk.hee.tis.tcs.service.api.decorator.PlacementViewDecorator;
+import com.transformuk.hee.tis.tcs.service.api.util.BasicPage;
 import com.transformuk.hee.tis.tcs.service.api.util.ColumnFilterUtil;
 import com.transformuk.hee.tis.tcs.service.api.util.HeaderUtil;
 import com.transformuk.hee.tis.tcs.service.api.util.PaginationUtil;
@@ -31,7 +28,6 @@ import io.swagger.annotations.ApiResponses;
 import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
@@ -39,23 +35,16 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.MethodArgumentNotValidException;
-import org.springframework.web.bind.annotation.DeleteMapping;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.PatchMapping;
-import org.springframework.web.bind.annotation.PathVariable;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.PutMapping;
-import org.springframework.web.bind.annotation.RequestBody;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RequestParam;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
 
 import javax.validation.Valid;
 import java.io.IOException;
 import java.net.URI;
 import java.net.URISyntaxException;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
+import java.util.Set;
 import java.util.stream.Collectors;
 
 import static com.transformuk.hee.tis.tcs.service.api.util.StringUtil.sanitize;
@@ -165,15 +154,118 @@ public class PersonResource {
     searchQuery = sanitize(searchQuery);
     List<Class> filterEnumList = Lists.newArrayList(Status.class);
     List<ColumnFilter> columnFilters = ColumnFilterUtil.getColumnFilters(columnFilterJson, filterEnumList);
-    Page<PersonViewDTO> page;
+    BasicPage<PersonViewDTO> page;
     if (StringUtils.isEmpty(searchQuery) && StringUtils.isEmpty(columnFilterJson)) {
       page = personService.findAll(pageable);
     } else {
       page = personService.advancedSearch(searchQuery, columnFilters, pageable);
     }
-    HttpHeaders headers = PaginationUtil.generatePaginationHttpHeaders(page, "/api/people");
+    HttpHeaders headers = PaginationUtil.generateBasicPaginationHttpHeaders(page, "/api/people");
     log.info("REST request to get a page of People completed successfully");
     return new ResponseEntity<>(personViewDecorator.decorate(page.getContent()), headers, HttpStatus.OK);
+  }
+
+
+  /**
+   * GET  /people : get all the people.
+   *
+   * @param pageable the pagination information
+   * @return the ResponseEntity with status 200 (OK) and the list of people in body
+   */
+  @ApiOperation(value = "Lists People data",
+      notes = "Returns a list of people with support for pagination, sorting, smart search and column filters \n")
+  @ApiResponses(value = {
+      @ApiResponse(code = 200, message = "Person list")})
+  @GetMapping("/people/count")
+  @Timed
+  @PreAuthorize("hasPermission('tis:people::person:', 'View')")
+  public ResponseEntity<Integer> getAllPeopleCount(
+      @ApiParam Pageable pageable,
+      @ApiParam(value = "any wildcard string to be searched")
+      @RequestParam(value = "searchQuery", required = false) String searchQuery,
+      @ApiParam(value = "json object by column name and value. (Eg: columnFilters={ \"status\": [\"CURRENT\"]}\"")
+      @RequestParam(value = "columnFilters", required = false) String columnFilterJson) throws IOException {
+    log.info("REST request to get a page of People begin");
+    searchQuery = sanitize(searchQuery);
+    List<Class> filterEnumList = Lists.newArrayList(Status.class);
+    List<ColumnFilter> columnFilters = ColumnFilterUtil.getColumnFilters(columnFilterJson, filterEnumList);
+    Integer count = 0;
+    if (StringUtils.isEmpty(searchQuery) && StringUtils.isEmpty(columnFilterJson)) {
+      count = personService.findAllCountQuery();
+    } else {
+      count = personService.advancedSearchCountQuery(searchQuery, columnFilters, pageable);
+    }
+    log.info("REST request to get a page of People completed successfully");
+    return new ResponseEntity<>(count, HttpStatus.OK);
+  }
+
+  /**
+   * GET  /people/phn/in/{publicHealthNumbers} : get people given their ID's.
+   * Ignores malformed or not found people
+   *
+   * @param publicHealthNumbers the ids to search by
+   * @return the ResponseEntity with status 200 (OK)  and the list of people in body, or empty list
+   */
+  @GetMapping("/people/phn/in/{publicHealthNumbers}")
+  @ApiOperation(value = "Get people by public Health Numbers", notes = "Returns a list of people", responseContainer = "List")
+  @ApiResponses(value = {
+      @ApiResponse(code = 400, message = "Expects a list of ids as query parameters"),
+      @ApiResponse(code = 200, message = "Person list")})
+  @Timed
+  @PreAuthorize("hasPermission('tis:people::person:', 'View')")
+  public ResponseEntity<List<PersonDTO>> getPersonsWithPublicHealthNumbersIn(@ApiParam(name = "publicHealthNumbers", allowMultiple = true) @PathVariable("publicHealthNumbers") Set<String> publicHealthNumbers) {
+    log.debug("REST request to find several Person: {}", publicHealthNumbers);
+    if (!publicHealthNumbers.isEmpty()) {
+      return new ResponseEntity<>(personService.findPersonsByPublicHealthNumbersIn(publicHealthNumbers), HttpStatus.FOUND);
+    } else {
+      return new ResponseEntity<>(new ArrayList<>(), HttpStatus.BAD_REQUEST);
+    }
+  }
+
+  /**
+   * GET  /people/in/{ids} : get people given their ID's.
+   * Ignores malformed or not found people
+   *
+   * @param ids the ids to search by
+   * @return the ResponseEntity with status 200 (OK)  and the list of people in body, or empty list
+   */
+  @GetMapping("/people/in/{ids}")
+  @ApiOperation(value = "Get people by ids", notes = "Returns a list of people", responseContainer = "List")
+  @ApiResponses(value = {
+      @ApiResponse(code = 400, message = "Expects a list of ids as query parameters"),
+      @ApiResponse(code = 200, message = "Person list")})
+  @Timed
+  @PreAuthorize("hasPermission('tis:people::person:', 'View')")
+  public ResponseEntity<List<PersonDTO>> getPersonsIn(@ApiParam(name = "ids", allowMultiple = true) @PathVariable("ids") Set<Long> ids) {
+    log.debug("REST request to find several Person: {}", ids);
+    if (!ids.isEmpty()) {
+      return new ResponseEntity<>(personService.findByIdIn(ids), HttpStatus.FOUND);
+    } else {
+      return new ResponseEntity<>(new ArrayList<>(), HttpStatus.BAD_REQUEST);
+    }
+  }
+
+  /**
+   * GET  /people/in/{ids}/basic : get people given their ID's.
+   * Ignores malformed or not found people
+   *
+   * @param ids the ids to search by
+   * @return the ResponseEntity with status 200 (OK)  and the list of personBasicDetails in body, or empty list
+   */
+  @GetMapping("/people/in/{ids}/basic")
+  @ApiOperation(value = "Get person basic details by ids", notes = "Returns a list of person basic details", responseContainer = "List")
+  @ApiResponses(value = {
+      @ApiResponse(code = 400, message = "Expects a list of ids as query parameters"),
+      @ApiResponse(code = 200, message = "Person basic details list")})
+  @Timed
+  @PreAuthorize("hasPermission('tis:people::person:', 'View')")
+  public ResponseEntity<List<PersonBasicDetailsDTO>> getPersonBasicDetailsIn(@ApiParam(name = "ids", allowMultiple = true) @PathVariable("ids") Set<Long> ids) {
+    log.debug("REST request to find several Person: {}", ids);
+    if (!ids.isEmpty()) {
+      return new ResponseEntity<>(personService.findBasicDetailsByIdIn(ids), HttpStatus.FOUND);
+    } else {
+      return new ResponseEntity<>(new ArrayList<>(), HttpStatus.BAD_REQUEST);
+    }
   }
 
   /**
@@ -229,7 +321,7 @@ public class PersonResource {
   }
 
   /**
-   * GET  /people/{id}/basicDetails : get a person's basic details
+   * GET  /people/{id}/basic : get a person's basic details
    *
    * @param id the trainee Id
    * @return the ResponseEntity with status 200 (OK) and the list of placements in body

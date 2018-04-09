@@ -104,7 +104,7 @@ public class PlacementResource {
   @PutMapping("/placements")
   @Timed
   @PreAuthorize("hasAuthority('tcs:add:modify:entities')")
-  public ResponseEntity<PlacementDetailsDTO> updatePlacement(@RequestBody @Validated(Update.class) PlacementDetailsDTO placementDetailsDTO) throws URISyntaxException, ValidationException {
+  public ResponseEntity<PlacementDetailsDTO> updatePlacement(@RequestBody @Validated(Update.class) PlacementDetailsDTO placementDetailsDTO) throws ValidationException, URISyntaxException {
     log.debug("REST request to update Placement : {}", placementDetailsDTO);
     placementValidator.validate(placementDetailsDTO);
     if (placementDetailsDTO.getId() == null) {
@@ -158,6 +158,7 @@ public class PlacementResource {
   @PreAuthorize("hasAuthority('tcs:delete:entities')")
   public ResponseEntity<Void> deletePlacement(@PathVariable Long id) {
     log.debug("REST request to delete Placement : {}", id);
+    placementValidator.validatePlacementForDelete(id);
     placementService.delete(id);
     return ResponseEntity.ok().headers(HeaderUtil.createEntityDeletionAlert(ENTITY_NAME, id.toString())).build();
   }
@@ -257,6 +258,15 @@ public class PlacementResource {
     }
     HttpHeaders headers = PaginationUtil.generatePaginationHttpHeaders(page, "/api/placements/filter");
     return new ResponseEntity<>(page.getContent(), headers, HttpStatus.OK);
+  }
+
+  @PutMapping("/placements/{id}/close")
+  @Timed
+  @PreAuthorize("hasAuthority('tcs:view:entities')")
+  public ResponseEntity<?> closePlacement(@PathVariable Long id) throws ValidationException {
+    placementValidator.validatePlacementForClose(id);
+    PlacementDTO refreshedPlacement = placementService.closePlacement(id);
+    return ResponseEntity.ok(refreshedPlacement);
   }
 
   //Required for the auditing aspect

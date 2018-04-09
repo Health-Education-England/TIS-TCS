@@ -63,8 +63,8 @@ public class PostView implements Serializable {
   @Column(name = "primarySpecialtyName")
   private String primarySpecialtyName;
 
-  @Column(name = "programmeName")
-  private String programmeName;
+  @Column(name = "programmeNames")
+  private String programmeNames;
 
   @Enumerated(EnumType.STRING)
   @Column(name = "status")
@@ -172,12 +172,12 @@ public class PostView implements Serializable {
     this.primarySpecialtyName = primarySpecialtyName;
   }
 
-  public String getProgrammeName() {
-    return programmeName;
+  public String getProgrammeNames() {
+    return programmeNames;
   }
 
-  public void setProgrammeName(String programmeName) {
-    this.programmeName = programmeName;
+  public void setProgrammeNames(String programmeNames) {
+    this.programmeNames = programmeNames;
   }
 
   public Status getStatus() {
@@ -256,7 +256,7 @@ public class PostView implements Serializable {
       return false;
     if (primarySpecialtyName != null ? !primarySpecialtyName.equals(postView.primarySpecialtyName) : postView.primarySpecialtyName != null)
       return false;
-    if (programmeName != null ? !programmeName.equals(postView.programmeName) : postView.programmeName != null)
+    if (programmeNames != null ? !programmeNames.equals(postView.programmeNames) : postView.programmeNames != null)
       return false;
     if (status != postView.status) return false;
     if (fundingType != postView.fundingType) return false;
@@ -278,7 +278,7 @@ public class PostView implements Serializable {
     result = 31 * result + (primarySpecialtyId != null ? primarySpecialtyId.hashCode() : 0);
     result = 31 * result + (primarySpecialtyCode != null ? primarySpecialtyCode.hashCode() : 0);
     result = 31 * result + (primarySpecialtyName != null ? primarySpecialtyName.hashCode() : 0);
-    result = 31 * result + (programmeName != null ? programmeName.hashCode() : 0);
+    result = 31 * result + (programmeNames != null ? programmeNames.hashCode() : 0);
     result = 31 * result + status.hashCode();
     result = 31 * result + (fundingType != null ? fundingType.hashCode() : 0);
     result = 31 * result + (owner != null ? owner.hashCode() : 0);
@@ -302,7 +302,7 @@ public class PostView implements Serializable {
         ", primarySpecialtyId=" + primarySpecialtyId +
         ", primarySpecialtyCode='" + primarySpecialtyCode + '\'' +
         ", primarySpecialtyName='" + primarySpecialtyName + '\'' +
-        ", programmeName='" + programmeName + '\'' +
+        ", programmeNames='" + programmeNames + '\'' +
         ", status=" + status +
         ", fundingType=" + fundingType +
         ", owner='" + owner + '\'' +

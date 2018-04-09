@@ -37,6 +37,7 @@ import java.net.URISyntaxException;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
+import java.util.Set;
 import java.util.stream.Collectors;
 
 /**
@@ -121,28 +122,22 @@ public class GmcDetailsResource {
   }
 
   /**
-   * GET  /gmc-details/in/:gmcids : get gmcDetails given their ID's.
+   * GET  /gmc-details/in/:gmcIds : get gmcDetails given their ID's.
    * Ignores malformed or not found gmc-details
    *
-   * @param gmcids the gmcids to search by
+   * @param gmcIds the gmcIds to search by
    * @return the ResponseEntity with status 200 (OK)  and the list of gmcDetails in body, or empty list
    */
-  @GetMapping("/gmc-details/in/{gmcids}")
+  @GetMapping("/gmc-details/in/{gmcIds}")
   @Timed
-  public ResponseEntity<List<GmcDetailsDTO>> getGmcDetailsIn(@PathVariable String gmcids) {
-    log.debug("REST request to find several GmcDetails: {}", gmcids);
-    List<GmcDetailsDTO> resp = new ArrayList<>();
-    List<String> idList = new ArrayList<>();
+  @PreAuthorize("hasPermission('tis:people::person:', 'View')")
+  public ResponseEntity<List<GmcDetailsDTO>> getGmcDetailsIn(@ApiParam(name = "gmcIds", allowMultiple = true) @PathVariable("gmcIds") List<String> gmcIds) {
+    log.debug("REST request to find several GmcDetails: {}", gmcIds);
 
-    for (String idStr : gmcids.split(",")) {
-        idList.add(idStr);
-    }
-
-    if (!idList.isEmpty()) {
-      resp = gmcDetailsService.findByIdIn(idList);
-      return new ResponseEntity<>(resp, HttpStatus.FOUND);
+    if (!gmcIds.isEmpty()) {
+      return new ResponseEntity<>(gmcDetailsService.findByIdIn(gmcIds), HttpStatus.FOUND);
     } else {
-      return new ResponseEntity<>(resp, HttpStatus.OK);
+      return new ResponseEntity<>(new ArrayList<>(), HttpStatus.OK);
     }
   }
 

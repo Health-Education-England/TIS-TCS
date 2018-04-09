@@ -44,7 +44,7 @@ public class PostViewDTO implements Serializable {
 
   private String primarySpecialtyName;
 
-  private String programmeName;
+  private String programmeNames;
 
   private Status status;
 
@@ -162,12 +162,12 @@ public class PostViewDTO implements Serializable {
     this.primarySpecialtyName = primarySpecialtyName;
   }
 
-  public String getProgrammeName() {
-    return programmeName;
+  public String getProgrammeNames() {
+    return programmeNames;
   }
 
-  public void setProgrammeName(String programmeName) {
-    this.programmeName = programmeName;
+  public void setProgrammeNames(String programmeNames) {
+    this.programmeNames = programmeNames;
   }
 
   public Status getStatus() {
@@ -249,7 +249,7 @@ public class PostViewDTO implements Serializable {
       return false;
     if (primarySpecialtyName != null ? !primarySpecialtyName.equals(that.primarySpecialtyName) : that.primarySpecialtyName != null)
       return false;
-    if (programmeName != null ? !programmeName.equals(that.programmeName) : that.programmeName != null) return false;
+    if (programmeNames != null ? !programmeNames.equals(that.programmeNames) : that.programmeNames != null) return false;
     if (status != that.status) return false;
     if (fundingType != that.fundingType) return false;
     if (owner != null ? !owner.equals(that.owner) : that.owner != null)
@@ -272,7 +272,7 @@ public class PostViewDTO implements Serializable {
     result = 31 * result + (primarySpecialtyId != null ? primarySpecialtyId.hashCode() : 0);
     result = 31 * result + (primarySpecialtyCode != null ? primarySpecialtyCode.hashCode() : 0);
     result = 31 * result + (primarySpecialtyName != null ? primarySpecialtyName.hashCode() : 0);
-    result = 31 * result + (programmeName != null ? programmeName.hashCode() : 0);
+    result = 31 * result + (programmeNames != null ? programmeNames.hashCode() : 0);
     result = 31 * result + status.hashCode();
     result = 31 * result + (fundingType != null ? fundingType.hashCode() : 0);
     result = 31 * result + (owner != null ? owner.hashCode() : 0);
@@ -298,7 +298,7 @@ public class PostViewDTO implements Serializable {
         ", primarySpecialtyId=" + primarySpecialtyId +
         ", primarySpecialtyCode='" + primarySpecialtyCode + '\'' +
         ", primarySpecialtyName='" + primarySpecialtyName + '\'' +
-        ", programmeName='" + programmeName + '\'' +
+        ", programmeNames='" + programmeNames + '\'' +
         ", status=" + status +
         ", fundingType=" + fundingType +
         ", owner='" + owner + '\'' +

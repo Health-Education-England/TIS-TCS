@@ -9,6 +9,8 @@ import org.springframework.format.annotation.DateTimeFormat;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
@@ -46,7 +48,7 @@ public class EsrNotificationResource {
     return ResponseEntity.ok().body(esrNotificationDTOS);
   }
   /**
-   * GET  /notifications/load : get list of esrNotifications.
+   * GET  /notifications/load/vacant-posts : get list of esrNotifications.
    *
    * @param asOfDate date indicating placement start date.
    * @return the ResponseEntity with status 200 (OK) and with body the EsrNotificationDTO, or with status 404 (Not Found)
@@ -58,6 +60,24 @@ public class EsrNotificationResource {
       @RequestParam @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate asOfDate) {
     LOG.debug("REST request to load Vacant Posts as of date : {}", asOfDate);
     List<EsrNotificationDTO> esrNotificationDTOS = esrNotificationService.loadVacantPostsForNotification(asOfDate);
+    return ResponseEntity.ok().body(esrNotificationDTOS);
+  }
+
+  /**
+   * POST  /notifications/load/full : get list of esrNotifications.
+   *
+   * @param asOfDate date indicating placement start date.
+   * @return the ResponseEntity with status 200 (OK) and with body the EsrNotificationDTO, or with status 404 (Not Found)
+   */
+  @PostMapping("/notifications/load/full")
+  @Timed
+  @PreAuthorize("hasAuthority('tcs:view:entities')")
+  public ResponseEntity<List<EsrNotificationDTO>> loadFullNotification(
+      @RequestParam(required = false) String deaneryBody,
+      @RequestBody List<String> deaneryNumbers,
+      @RequestParam @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate asOfDate) {
+    LOG.debug("REST request to load full notification recrods as of date : {}", asOfDate);
+    List<EsrNotificationDTO> esrNotificationDTOS = esrNotificationService.loadFullNotification(asOfDate, deaneryNumbers, deaneryBody);
     return ResponseEntity.ok().body(esrNotificationDTOS);
   }
 

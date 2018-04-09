@@ -24,6 +24,7 @@ import com.transformuk.hee.tis.tcs.api.dto.SpecialtyGroupDTO;
 import com.transformuk.hee.tis.tcs.api.dto.TariffFundingTypeFieldsDTO;
 import com.transformuk.hee.tis.tcs.api.dto.TariffRateDTO;
 import com.transformuk.hee.tis.tcs.api.dto.TrainingNumberDTO;
+import com.transformuk.hee.tis.tcs.api.dto.PersonBasicDetailsDTO;
 import org.apache.commons.codec.EncoderException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -38,9 +39,13 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
 import org.springframework.web.client.RestTemplate;
 
+import javax.annotation.PostConstruct;
+import java.io.UnsupportedEncodingException;
+import java.net.URLEncoder;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
+import java.util.stream.Collectors;
 
 @Service
 public class TcsServiceImpl extends AbstractClientService {
@@ -51,7 +56,7 @@ public class TcsServiceImpl extends AbstractClientService {
 	static {
 		try {
 			curriculumJsonQuerystringURLEncoded = new org.apache.commons.codec.net.URLCodec().encode("{\"name\":[\"PARAMETER_NAME\"]}");
-			programmeJsonQuerystringURLEncoded  = new org.apache.commons.codec.net.URLCodec().encode("{\"programmeName\":[\"PARAMETER_NAME\"],\"programmeNumber\":[\"PARAMETER_NUMBER\"]}");
+			programmeJsonQuerystringURLEncoded  = new org.apache.commons.codec.net.URLCodec().encode("{\"programmeName\":[\"PARAMETER_NAME\"],\"programmeNumber\":[\"PARAMETER_NUMBER\"],\"status\":[\"CURRENT\"]}");
 		} catch (EncoderException e) {
 			e.printStackTrace();
 		}
@@ -121,10 +126,23 @@ public class TcsServiceImpl extends AbstractClientService {
     super(standardRequestsPerSecondLimit, bulkRequestsPerSecondLimit);
   }
 
+  @PostConstruct
+  public void init() {
+	  tcsRestTemplate.setErrorHandler(new TCSClientErrorHandler());
+  }
+
   private ParameterizedTypeReference<List<JsonPatchDTO>> getJsonPatchDtoReference() {
     return new ParameterizedTypeReference<List<JsonPatchDTO>>() {
     };
   }
+
+	public QualificationDTO createQualification(QualificationDTO qualificationDTO) {
+		HttpHeaders headers = new HttpHeaders();
+		HttpEntity<QualificationDTO> httpEntity = new HttpEntity<>(qualificationDTO, headers);
+		return tcsRestTemplate
+				.exchange(serviceUrl + "/api/qualifications/", HttpMethod.POST, httpEntity, new ParameterizedTypeReference<QualificationDTO>() {})
+				.getBody();
+	}
 
 	public PersonDTO createPerson(PersonDTO personDTO) {
 		HttpHeaders headers = new HttpHeaders();
@@ -132,6 +150,41 @@ public class TcsServiceImpl extends AbstractClientService {
 		return tcsRestTemplate
 				.exchange(serviceUrl + "/api/people/", HttpMethod.POST, httpEntity, new ParameterizedTypeReference<PersonDTO>() {})
 				.getBody();
+	}
+
+	public PersonDTO updatePersonForBulkWithAssociatedDTOs(PersonDTO personDTO) {
+		HttpHeaders headers = new HttpHeaders();
+
+		PersonDTO personDTOUpdated = tcsRestTemplate
+				.exchange(serviceUrl + "/api/people/", HttpMethod.PUT, new HttpEntity<>(personDTO, headers), new ParameterizedTypeReference<PersonDTO>() {})
+				.getBody();
+
+		personDTOUpdated.setGdcDetails(tcsRestTemplate
+				.exchange(serviceUrl + "/api/gdc-details/", HttpMethod.PUT, new HttpEntity<>(personDTO.getGdcDetails(), headers), new ParameterizedTypeReference<GdcDetailsDTO>() {})
+				.getBody());
+
+		personDTOUpdated.setGmcDetails(tcsRestTemplate
+				.exchange(serviceUrl + "/api/gmc-details/", HttpMethod.PUT, new HttpEntity<>(personDTO.getGmcDetails(), headers), new ParameterizedTypeReference<GmcDetailsDTO>() {})
+				.getBody());
+
+		personDTOUpdated.setContactDetails(tcsRestTemplate
+				.exchange(serviceUrl + "/api/contact-details/", HttpMethod.PUT, new HttpEntity<>(personDTO.getContactDetails(), headers), new ParameterizedTypeReference<ContactDetailsDTO>() {})
+				.getBody());
+
+		personDTOUpdated.setPersonalDetails(tcsRestTemplate
+				.exchange(serviceUrl + "/api/personal-details/", HttpMethod.PUT, new HttpEntity<>(personDTO.getPersonalDetails(), headers), new ParameterizedTypeReference<PersonalDetailsDTO>() {})
+				.getBody());
+
+		personDTOUpdated.setRightToWork(tcsRestTemplate
+				.exchange(serviceUrl + "/api/right-to-works/", HttpMethod.PUT, new HttpEntity<>(personDTO.getRightToWork(), headers), new ParameterizedTypeReference<RightToWorkDTO>() {})
+				.getBody());
+
+		return personDTOUpdated;
+	}
+
+	public PersonDTO getPerson(String id) {
+		return tcsRestTemplate.exchange(serviceUrl + "/api/people/" + id,
+				HttpMethod.GET, null, new ParameterizedTypeReference<PersonDTO>() {}).getBody();
 	}
 
 	public ProgrammeMembershipDTO createProgrammeMembership(ProgrammeMembershipDTO programmeMembershipDTO) {
@@ -154,7 +207,7 @@ public class TcsServiceImpl extends AbstractClientService {
   public List<ProgrammeDTO> getProgrammeByNameAndNumber(String name, String number) {
 		log.debug("calling getProgrammeByNameAndNumber with {} and number {}", name, number);
 		return tcsRestTemplate
-				.exchange(serviceUrl + "/api/current/programmes?columnFilters=" +
+				.exchange(serviceUrl + "/api/programmes?columnFilters=" +
 								programmeJsonQuerystringURLEncoded
 										.replace("PARAMETER_NAME", name)
 										.replace("PARAMETER_NUMBER", number),
@@ -163,18 +216,57 @@ public class TcsServiceImpl extends AbstractClientService {
 				.getBody();
 	}
 
-	public List<GdcDetailsDTO> findGdcDetailsIn(Set<String> gdcIds) {
-		String url = serviceUrl + "/api/gdc-details/in/" + String.join(",", gdcIds);
+	public List<GdcDetailsDTO> findGdcDetailsIn(List<String> gdcIds) {
+		String url = serviceUrl + "/api/gdc-details/in/" + getIdsAsUrlEncodedCSVs(gdcIds);
 		ResponseEntity<List<GdcDetailsDTO>> responseEntity = tcsRestTemplate.
 				exchange(url, HttpMethod.GET, null, new ParameterizedTypeReference<List<GdcDetailsDTO>>() {});
 		return responseEntity.getBody();
 	}
 
-	public List<GmcDetailsDTO> findGmcDetailsIn(Set<String> gmcIds) {
-		String url = serviceUrl + "/api/gmc-details/in/" + String.join(",", gmcIds);
+	public List<GmcDetailsDTO> findGmcDetailsIn(List<String> gmcIds) {
+		String url = serviceUrl + "/api/gmc-details/in/" + getIdsAsUrlEncodedCSVs(gmcIds);
 		ResponseEntity<List<GmcDetailsDTO>> responseEntity = tcsRestTemplate.
 				exchange(url, HttpMethod.GET, null, new ParameterizedTypeReference<List<GmcDetailsDTO>>() {});
 		return responseEntity.getBody();
+	}
+
+	private String getIdsAsUrlEncodedCSVs(List<String> ids) {
+		Set<String> urlEncodedIds = ids.stream().map(s -> {
+			try {
+				return URLEncoder.encode(s, "UTF-8");
+			} catch (UnsupportedEncodingException e) {
+				throw new AssertionError("UTF-8 is unknown");
+			}
+		}).collect(Collectors.toSet());
+
+		return String.join(",", urlEncodedIds);
+	}
+
+	public List<PersonDTO> findPeopleIn(List<Long> personIds) {
+		String url = serviceUrl + "/api/people/in/" + join(personIds);
+		ResponseEntity<List<PersonDTO>> responseEntity = tcsRestTemplate.
+				exchange(url, HttpMethod.GET, null, new ParameterizedTypeReference<List<PersonDTO>>() {});
+		return responseEntity.getBody();
+	}
+
+	public List<PersonDTO> findPeopleByPublicHealthNumbersIn(List<String> publicHealthNumbersIds) {
+		String url = serviceUrl + "/api/people/phn/in/" + getIdsAsUrlEncodedCSVs(publicHealthNumbersIds);
+		ResponseEntity<List<PersonDTO>> responseEntity = tcsRestTemplate.
+				exchange(url, HttpMethod.GET, null, new ParameterizedTypeReference<List<PersonDTO>>() {});
+		return responseEntity.getBody();
+	}
+
+	public List<PersonBasicDetailsDTO> findPersonBasicDetailsIn(List<Long> personIds) {
+		String url = serviceUrl + "/api/people/in/" + join(personIds) + "/basic";
+		ResponseEntity<List<PersonBasicDetailsDTO>> responseEntity = tcsRestTemplate.
+				exchange(url, HttpMethod.GET, null, new ParameterizedTypeReference<List<PersonBasicDetailsDTO>>() {});
+		return responseEntity.getBody();
+	}
+
+	public static String join(List<Long> ids) {
+		return ids.stream()
+				.map(Object::toString)
+				.collect(Collectors.joining(","));
 	}
 
 	@Override
@@ -194,6 +286,10 @@ public class TcsServiceImpl extends AbstractClientService {
   public String getServiceUrl() {
     return this.serviceUrl;
   }
+
+  public void setServiceUrl(String serviceUrl) {
+		 this.serviceUrl = serviceUrl;
+	}
 
   @Override
   public Map<Class, ParameterizedTypeReference> getClassToParamTypeRefMap() {

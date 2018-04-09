@@ -21,6 +21,8 @@ import java.util.List;
 public class GmcDetailsValidator {
 
   private static final String GMC_DETAILS_DTO_NAME = "GmcDetailsDTO";
+  private static final String NA = "N/A";
+  private static final String UNKNOWN = "UNKNOWN";
   private GmcDetailsRepository gmcDetailsRepository;
 
   public GmcDetailsValidator(GmcDetailsRepository gmcDetailsRepository) {
@@ -55,6 +57,10 @@ public class GmcDetailsValidator {
   private List<FieldError> checkGmcNumber(GmcDetailsDTO gmcDetailsDTO) {
     List<FieldError> fieldErrors = new ArrayList<>();
     String gmcNumber = gmcDetailsDTO.getGmcNumber();
+    // Ignore if gmcNumber is N/A or UNKNOWN
+    if(NA.equalsIgnoreCase(gmcNumber) || UNKNOWN.equalsIgnoreCase(gmcNumber)){
+      return fieldErrors;
+    }
     if (gmcDetailsDTO.getId() != null) {
       if (StringUtils.isNotEmpty(gmcNumber)) {
         List<GmcDetails> existingGmcDetails = gmcDetailsRepository.findByGmcNumberOrderById(gmcNumber);

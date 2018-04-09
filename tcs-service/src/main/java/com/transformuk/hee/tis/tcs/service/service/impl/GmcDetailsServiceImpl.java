@@ -81,7 +81,7 @@ public class GmcDetailsServiceImpl implements GmcDetailsService {
   public List<GmcDetailsDTO> findByIdIn(List<String> gmcIds) {
     log.debug("Request to get all GmcDetails");
 
-    List<GmcDetails> byGmcIdsIn = gmcDetailsRepository.findByGmcIdsIn(gmcIds);
+    List<GmcDetails> byGmcIdsIn = gmcDetailsRepository.findByGmcNumberIn(gmcIds);
     return gmcDetailsMapper.gmcDetailsToGmcDetailsDTO(byGmcIdsIn);
   }
 

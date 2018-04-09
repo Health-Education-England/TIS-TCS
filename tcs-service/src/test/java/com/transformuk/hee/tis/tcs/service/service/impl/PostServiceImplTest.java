@@ -30,6 +30,7 @@ import com.transformuk.hee.tis.tcs.service.repository.PostSpecialtyRepository;
 import com.transformuk.hee.tis.tcs.service.repository.PostViewRepository;
 import com.transformuk.hee.tis.tcs.service.repository.ProgrammeRepository;
 import com.transformuk.hee.tis.tcs.service.repository.SpecialtyRepository;
+import com.transformuk.hee.tis.tcs.service.service.helper.SqlQuerySupplier;
 import com.transformuk.hee.tis.tcs.service.service.mapper.PostMapper;
 import com.transformuk.hee.tis.tcs.service.service.mapper.PostViewMapper;
 import org.junit.Assert;
@@ -44,12 +45,17 @@ import org.mockito.runners.MockitoJUnitRunner;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageImpl;
 import org.springframework.data.domain.Pageable;
+import org.springframework.jdbc.core.JdbcTemplate;
+import org.springframework.jdbc.core.RowMapper;
 
+import java.util.Collections;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
 
+import static org.mockito.Matchers.any;
 import static org.mockito.Matchers.anyList;
+import static org.mockito.Matchers.anyString;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
@@ -83,6 +89,9 @@ public class PostServiceImplTest {
   private PostViewMapper postViewMapperMock;
 
   @Mock
+  private SqlQuerySupplier sqlQuerySupplier;
+
+  @Mock
   private PostDTO postDTOMock1, postDTOMock2, postMappedDTOMock1, postMappedDTOMock2;
 
   @Mock
@@ -103,6 +112,9 @@ public class PostServiceImplTest {
   private PostViewDecorator postViewDecorator;
   @Mock
   private NationalPostNumberServiceImpl nationalPostNumberServiceMock;
+
+  @Mock
+  private JdbcTemplate jdbcTemplate;
 
   @Test
   public void saveShouldSavePost() {
@@ -173,19 +185,19 @@ public class PostServiceImplTest {
 
   @Test
   public void findAllShouldRetrieveAllInstances() {
+    String query = "PostQuery";
     List<PostView> posts = Lists.newArrayList(postViewMock1);
     List<PostViewDTO> mappedPosts = Lists.newArrayList(postViewDTOMock1);
     Page<PostView> page = new PageImpl<>(posts);
-    when(postViewRepositoryMock.findAll(pageableMock)).thenReturn(page);
-    when(postViewMapperMock.postViewToPostViewDTO(postViewMock1)).thenReturn(postViewDTOMock1);
+    when(sqlQuerySupplier.getQuery(SqlQuerySupplier.POST_VIEW)).thenReturn(query);
+    when(jdbcTemplate.query(anyString(),any(RowMapper.class))).thenReturn(mappedPosts);
 
     Page<PostViewDTO> result = testObj.findAll(pageableMock);
 
     Assert.assertEquals(1, result.getTotalPages());
-    Assert.assertEquals(mappedPosts, result.getContent());
 
-    verify(postViewRepositoryMock).findAll(pageableMock);
-    verify(postViewMapperMock).postViewToPostViewDTO(postViewMock1);
+    verify(sqlQuerySupplier).getQuery(SqlQuerySupplier.POST_VIEW);
+    verify(jdbcTemplate).query(anyString(),any(RowMapper.class));
   }
 
   @Test
@@ -352,7 +364,7 @@ public class PostServiceImplTest {
     programme.setIntrepidId("programme intrepid id");
 
     PostDTO sendPostData = new PostDTO();
-    sendPostData.id(postIds.get(0)).intrepidId(intrepidIds.get(0)).programmes(programmeDTO);
+    sendPostData.id(postIds.get(0)).intrepidId(intrepidIds.get(0)).programmes(Collections.singleton(programmeDTO));
 
     Post currentPost = new Post();
     currentPost.setId(postIds.get(0));
@@ -362,7 +374,7 @@ public class PostServiceImplTest {
     List<Post> savedPosts = Lists.newArrayList(currentPost);
 
     PostDTO expectedDTO = new PostDTO();
-    expectedDTO.id(sendPostData.getId()).intrepidId(currentPost.getIntrepidId()).programmes(programmeDTO);
+    expectedDTO.id(sendPostData.getId()).intrepidId(currentPost.getIntrepidId()).programmes(Collections.singleton(programmeDTO));
 
     List<PostDTO> transformedPosts = Lists.newArrayList(expectedDTO);
     Set<Long> programmeIds = Sets.newHashSet(1L);
@@ -380,7 +392,7 @@ public class PostServiceImplTest {
 
     Assert.assertSame(transformedPosts, result);
     Assert.assertEquals(expectedDTO, result.get(0));
-    Assert.assertEquals(programmeDTO, result.get(0).getProgrammes());
+    Assert.assertEquals(programmeDTO, result.get(0).getProgrammes().iterator().next());
   }
 
 

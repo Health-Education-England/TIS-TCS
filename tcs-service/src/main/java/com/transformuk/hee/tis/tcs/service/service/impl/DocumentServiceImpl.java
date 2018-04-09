@@ -15,9 +15,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.multipart.MultipartFile;
 
-import java.io.ByteArrayInputStream;
-import java.io.File;
-import java.io.InputStream;
+import java.io.*;
 import java.net.URISyntaxException;
 import java.security.InvalidKeyException;
 import java.util.Optional;
@@ -32,7 +30,7 @@ public class DocumentServiceImpl implements DocumentService {
     private final DocumentMapper documentMapper;
     private final AzureProperties azureProperties;
 
-    public DocumentServiceImpl(DocumentRepository documentRepository, FileStorageRepository fileStorageRepository, DocumentMapper documentMapper, AzureProperties azureProperties) {
+    public DocumentServiceImpl(final DocumentRepository documentRepository, final FileStorageRepository fileStorageRepository, final DocumentMapper documentMapper, final AzureProperties azureProperties) {
         this.documentRepository = documentRepository;
         this.fileStorageRepository = fileStorageRepository;
         this.documentMapper = documentMapper;
@@ -40,7 +38,33 @@ public class DocumentServiceImpl implements DocumentService {
     }
 
     @Override
-    public DocumentDTO save(DocumentDTO documentDTO) throws Exception {
+    public Optional<DocumentDTO> findOne(final Long id) {
+        LOG.debug("Received request to find one '{}' with ID '{}'", DocumentDTO.class.getSimpleName(), id);
+
+        final Document document = documentRepository.findOne(id);
+
+        if (document == null) {
+            return Optional.empty();
+        }
+
+        return Optional.ofNullable(documentMapper.toDto(document));
+    }
+
+    @Override
+    public void download(final DocumentDTO document, final OutputStream outputStream) throws IOException {
+        LOG.debug("Received request to download '{}' with ID '{}'", DocumentDTO.class.getSimpleName(), document.getId());
+
+        try {
+            fileStorageRepository.download(azureProperties.getContainerName(),
+                    azureProperties.getPersonFolder() + "/" + document.getId() + "/" + document.getFileName(),
+                    outputStream);
+        } catch (final URISyntaxException | InvalidKeyException | StorageException ex) {
+            throw new IOException(ex);
+        }
+    }
+
+    @Override
+    public DocumentDTO save(final DocumentDTO documentDTO) throws IOException {
         LOG.debug("Received request to save '{}' with name '{}'", documentDTO.getClass().getSimpleName(), documentDTO.getFileName());
 
         Document document = documentMapper.toEntity(documentDTO);
@@ -50,11 +74,11 @@ public class DocumentServiceImpl implements DocumentService {
 
             try {
                 document = create(document);
-            } catch (Exception ex) {
+            } catch (final IOException ex) {
                 // rollback
                 try {
-                    fileStorageRepository.deleteFile(document.getId(), azureProperties.getContainer() + "/" + azureProperties.getPersonFolder(), document.getFileName());
-                } catch (Exception exx) {
+                    fileStorageRepository.deleteFile(document.getId(), azureProperties.getContainerName() + "/" + azureProperties.getPersonFolder(), document.getFileName());
+                } catch (final URISyntaxException | InvalidKeyException | StorageException exx) {
                     LOG.warn("Error while rolling back; could not delete file from remote storage", exx);
                 }
 
@@ -69,40 +93,36 @@ public class DocumentServiceImpl implements DocumentService {
         return documentMapper.toDto(document);
     }
 
-    private Document create(Document document) {
+    private Document create(final Document document) throws IOException {
         if (document.getBytes() == null && document.getBytes().length == 0) {
             LOG.warn("File is empty; not creating metadata nor saving file to storage");
-            throw new RuntimeException("File is empty");
+            throw new IOException("File is empty");
         }
 
-        document.setFileLocation(Optional.ofNullable(document.getFileLocation()).orElse("TemporaryFileLocation"));
         saveMetadata(document);
 
-        String fileLocation;
         try {
-            fileLocation = saveFile(document);
-        } catch (Exception ex) {
-            LOG.error("Failed to save document to storage", ex);
-            throw new RuntimeException("Failed to save document to storage");
+            saveFile(document);
+        } catch (final InvalidKeyException | StorageException | URISyntaxException ex) {
+            throw new IOException("Failed to save document to storage", ex);
         }
-        document.setFileLocation(fileLocation);
 
         return saveMetadata(document);
     }
 
-    private Document update(Document document) {
+    private Document update(final Document document) {
         return saveMetadata(document);
     }
 
-    private String saveFile(Document document) throws InvalidKeyException, StorageException, URISyntaxException {
-        return fileStorageRepository.store(document.getId(), azureProperties.getContainer() + "/" + azureProperties.getPersonFolder(), Lists.newArrayList(getFileAsMultiplart(document)));
+    private String saveFile(final Document document) throws InvalidKeyException, StorageException, URISyntaxException {
+        return fileStorageRepository.store(document.getId(), azureProperties.getContainerName() + "/" + azureProperties.getPersonFolder(), Lists.newArrayList(getFileAsMultipart(document)));
     }
 
-    private Document saveMetadata(Document document) {
+    private Document saveMetadata(final Document document) {
         return documentRepository.saveAndFlush(document);
     }
 
-    private MultipartFile getFileAsMultiplart(Document document) {
+    private MultipartFile getFileAsMultipart(final Document document) {
         return new MultipartFile() {
             @Override
             public String getName() {
@@ -140,8 +160,8 @@ public class DocumentServiceImpl implements DocumentService {
             }
 
             @Override
-            public void transferTo(File dest) {
-
+            public void transferTo(final File dest) {
+                // intentionally left empty
             }
         };
     }

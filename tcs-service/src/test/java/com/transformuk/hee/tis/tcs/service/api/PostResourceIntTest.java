@@ -3,6 +3,7 @@ package com.transformuk.hee.tis.tcs.service.api;
 import com.google.common.collect.Lists;
 import com.google.common.collect.Sets;
 import com.transformuk.hee.tis.tcs.TestUtils;
+import com.transformuk.hee.tis.tcs.api.dto.ColumnFilterDTO;
 import com.transformuk.hee.tis.tcs.api.dto.PlacementDTO;
 import com.transformuk.hee.tis.tcs.api.dto.PostDTO;
 import com.transformuk.hee.tis.tcs.api.dto.PostGradeDTO;
@@ -45,6 +46,7 @@ import org.junit.Before;
 import org.junit.Ignore;
 import org.junit.Test;
 import org.junit.runner.RunWith;
+import org.mockito.Mock;
 import org.mockito.MockitoAnnotations;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
@@ -57,11 +59,16 @@ import org.springframework.test.web.servlet.setup.MockMvcBuilders;
 import org.springframework.transaction.annotation.Transactional;
 
 import javax.persistence.EntityManager;
+import java.util.Collections;
+import java.util.Arrays;
 import java.util.List;
 import java.util.Set;
 
+import static com.google.common.collect.Lists.newArrayList;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.hamcrest.Matchers.containsInAnyOrder;
+import static org.hamcrest.Matchers.containsString;
+import static org.hamcrest.Matchers.equalTo;
 import static org.hamcrest.Matchers.hasItem;
 import static org.hamcrest.Matchers.hasSize;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.delete;
@@ -70,6 +77,7 @@ import static org.springframework.test.web.servlet.request.MockMvcRequestBuilder
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.put;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.content;
+import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.header;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
@@ -127,7 +135,7 @@ public class PostResourceIntTest {
   @Autowired
   private PostViewRepository postViewRepository;
 
-  @Autowired
+  @Mock
   private PostViewDecorator postViewDecorator;
 
   @Autowired
@@ -294,8 +302,8 @@ public class PostResourceIntTest {
     programme = createProgramme();
     em.persist(programme);
 
-    postView = createPostView(specialty.getId());
-    em.persist(postView);
+    //postView = createPostView(specialty.getId());
+    //em.persist(postView);
   }
 
   @Test
@@ -437,7 +445,7 @@ public class PostResourceIntTest {
     restPostMockMvc.perform(get("/api/posts?sort=id,desc"))
         .andExpect(status().isOk())
         .andExpect(content().contentType(MediaType.APPLICATION_JSON_UTF8_VALUE))
-        .andExpect(jsonPath("$.[*].id").value(hasItem(postView.getId().intValue())))
+        .andExpect(jsonPath("$.[*].id").value(hasItem(post.getId().intValue())))
         .andExpect(jsonPath("$.[*].nationalPostNumber").value(hasItem(DEFAULT_NATIONAL_POST_NUMBER)))
         .andExpect(jsonPath("$.[*].status").value(hasItem(DEFAULT_STATUS.toString().toUpperCase())))
         .andExpect(jsonPath("$.[*].owner").value(hasItem(OWNER)));
@@ -448,18 +456,18 @@ public class PostResourceIntTest {
   public void shouldReturnAllPostsWithoutOwnerFilter() throws Exception {
 
     // another post with different managing owner
-    PostView anotherPostView = createPostView(specialty.getId());
-    anotherPostView.setNationalPostNumber(DEFAULT_POST_NUMBER);
-    anotherPostView.setOwner(OWNER_NORTH_EAST);
-    postViewRepository.saveAndFlush(anotherPostView);
+    Post anotherPost = createEntity();
+    anotherPost.setNationalPostNumber(DEFAULT_POST_NUMBER);
+    anotherPost.setOwner(OWNER_NORTH_EAST);
+    postRepository.saveAndFlush(anotherPost);
 
-    int databaseSize = postViewRepository.findAll().size();
+    int databaseSize = postRepository.findAll().size();
     // Get all the postList
     restPostMockMvc.perform(get("/api/posts?sort=id,desc"))
         .andExpect(status().isOk())
         .andExpect(jsonPath("$", hasSize(databaseSize))) // checking the size of the post
         .andExpect(content().contentType(MediaType.APPLICATION_JSON_UTF8_VALUE))
-        .andExpect(jsonPath("$.[*].id").value(hasItem(postView.getId().intValue())))
+        .andExpect(jsonPath("$.[*].id").value(hasItem(post.getId().intValue())))
         .andExpect(jsonPath("$.[*].nationalPostNumber").value(hasItem(DEFAULT_NATIONAL_POST_NUMBER)))
         .andExpect(jsonPath("$.[*].status").value(hasItem(DEFAULT_STATUS.toString().toUpperCase())))
         .andExpect(jsonPath("$.[*].owner").value(hasItem(OWNER)))
@@ -469,15 +477,15 @@ public class PostResourceIntTest {
   @Test
   @Transactional
   public void shouldTextSearch() throws Exception {
-    PostView anotherPostView = createPostView(specialty.getId());
-    anotherPostView.setNationalPostNumber(TEST_POST_NUMBER);
-    anotherPostView.setOwner(OWNER);
-    postViewRepository.saveAndFlush(anotherPostView);
+
+    post.setNationalPostNumber(TEST_POST_NUMBER);
+    post.setOwner(OWNER);
+    postRepository.saveAndFlush(post);
 
     restPostMockMvc.perform(get("/api/posts?searchQuery=TEST"))
         .andExpect(status().isOk())
         .andExpect(content().contentType(MediaType.APPLICATION_JSON_UTF8_VALUE))
-        .andExpect(jsonPath("$.[*].id").value(hasItem(anotherPostView.getId().intValue())))
+        .andExpect(jsonPath("$.[*].id").value(hasItem(post.getId().intValue())))
         .andExpect(jsonPath("$.[*].nationalPostNumber").value(hasItem(TEST_POST_NUMBER)))
         .andExpect(jsonPath("$.[*].status").value(hasItem(DEFAULT_STATUS.toString().toUpperCase())))
         .andExpect(jsonPath("$.[*].owner").value(hasItem(OWNER)));
@@ -486,18 +494,17 @@ public class PostResourceIntTest {
   @Test
   @Transactional
   public void shouldTextSearchOnCurrentTrainee() throws Exception {
-    PostView anotherPostView = createPostView(specialty.getId());
-    anotherPostView.setNationalPostNumber(TEST_POST_NUMBER);
-    anotherPostView.setCurrentTraineeSurname(CURRENT_TRAINEE_SURNAME);
-    postViewRepository.saveAndFlush(anotherPostView);
 
-    restPostMockMvc.perform(get("/api/posts?searchQuery=Smith"))
+    post.setNationalPostNumber(TEST_POST_NUMBER);
+    postRepository.saveAndFlush(post);
+
+    restPostMockMvc.perform(get("/api/posts?searchQuery=TESTPOST"))
         .andExpect(status().isOk())
         .andExpect(content().contentType(MediaType.APPLICATION_JSON_UTF8_VALUE))
-        .andExpect(jsonPath("$.[*].id").value(hasItem(anotherPostView.getId().intValue())))
+        .andExpect(jsonPath("$.[*].id").value(hasItem(post.getId().intValue())))
         .andExpect(jsonPath("$.[*].nationalPostNumber").value(hasItem(TEST_POST_NUMBER)))
-        .andExpect(jsonPath("$.[*].status").value(hasItem(DEFAULT_STATUS.toString().toUpperCase())))
-        .andExpect(jsonPath("$.[*].currentTraineeSurname").value(hasItem(CURRENT_TRAINEE_SURNAME)));
+        .andExpect(jsonPath("$.[*].status").value(hasItem(DEFAULT_STATUS.toString().toUpperCase())));
+
   }
 
   @Test
@@ -505,10 +512,9 @@ public class PostResourceIntTest {
   public void shouldFilterColumns() throws Exception {
     //given
     // Initialize the database
-    PostView otherStatusPostView = createPostView(specialty.getId());
-    otherStatusPostView.setStatus(Status.INACTIVE);
-    otherStatusPostView.setOwner(OWNER);
-    postViewRepository.saveAndFlush(otherStatusPostView);
+    post.setStatus(Status.INACTIVE);
+    post.setOwner(OWNER);
+    postRepository.saveAndFlush(post);
 
     //when & then
     String colFilters = new URLCodec().encode("{\"status\":[\"INACTIVE\"],\"owner\":[\"" +
@@ -573,17 +579,17 @@ public class PostResourceIntTest {
   public void shouldTextSearchAndFilterColumns() throws Exception {
     //given
     // Initialize the database
-    postViewRepository.saveAndFlush(postView);
-    postViewRepository.saveAndFlush(createPostView(specialty.getId()));
-    PostView otherStatusPostView = createPostView(specialty.getId());
-    otherStatusPostView.setOwner(OWNER);
-    otherStatusPostView.setStatus(Status.INACTIVE);
-    postViewRepository.saveAndFlush(otherStatusPostView);
-    PostView otherNumberPostView = createPostView(specialty.getId());
+    postRepository.saveAndFlush(post);
+    postRepository.saveAndFlush(createEntity());
+    Post otherStatusPost = createEntity();
+    otherStatusPost.setOwner(OWNER);
+    otherStatusPost.setStatus(Status.INACTIVE);
+    postRepository.saveAndFlush(otherStatusPost);
+    Post otherNumberPostView = createEntity();
     otherNumberPostView.setNationalPostNumber(TEST_POST_NUMBER);
     otherNumberPostView.setStatus(Status.INACTIVE);
     otherNumberPostView.setOwner(OWNER);
-    postViewRepository.saveAndFlush(otherNumberPostView);
+    postRepository.saveAndFlush(otherNumberPostView);
     //when & then
     String colFilters = new URLCodec().encode("{\"status\":[\"INACTIVE\"],\"owner\":[\"" +
         OWNER + "\"]}");
@@ -1014,7 +1020,7 @@ public class PostResourceIntTest {
     programmeDTO.setStatus(programme.getStatus());
     programmeDTO.setIntrepidId(programme.getIntrepidId());
 
-    postDTO.setProgrammes(programmeDTO);
+    postDTO.setProgrammes(Collections.singleton(programmeDTO));
 
     int expectedDatabaseSizeAfterBulkUpdate = postRepository.findAll().size();
 
@@ -1024,9 +1030,9 @@ public class PostResourceIntTest {
         .content(TestUtil.convertObjectToJsonBytes(payload)))
         .andExpect(status().isOk())
         .andExpect(jsonPath("$").isArray())
-        .andExpect(jsonPath("$.[*].programmes.id").isArray())
-        .andExpect(jsonPath("$.[*].programmes.id").isNotEmpty())
-        .andExpect(jsonPath("$.[*].programmes.id").value(hasItem(programme.getId().intValue())));
+        .andExpect(jsonPath("$.[*].programmes").isArray())
+        .andExpect(jsonPath("$.[*].programmes").isNotEmpty())
+        .andExpect(jsonPath("$.[*].programmes[0].id").value(hasItem(programme.getId().intValue())));
 
     // Validate that both Post are still in the database
     List<Post> postList = postRepository.findAll();
@@ -1210,4 +1216,65 @@ public class PostResourceIntTest {
     List<Post> postList = postRepository.findAll();
     assertThat(postList).hasSize(expectedDatabaseSizeAfterBulkUpdate);
   }
+
+  @Test
+  @Transactional
+  public void shouldFilterPostsWithPaginationLinks() throws Exception {
+
+    List<String> npns = preparePostViewRecords();
+
+    List<ColumnFilterDTO> filters = newArrayList(new ColumnFilterDTO("nationalPostNumber", npns));
+
+    restPostMockMvc.perform(post("/api/posts/filter")
+        .contentType(TestUtil.APPLICATION_JSON_UTF8)
+        .param("size", "2")
+        .content(TestUtil.convertObjectToJsonBytes(filters)))
+        .andExpect(status().isOk())
+        .andExpect(content().contentType(MediaType.APPLICATION_JSON_UTF8_VALUE))
+        .andExpect(jsonPath("$").isArray())
+        .andExpect(jsonPath("$", hasSize(2)))
+        .andExpect(header().string("X-Total-Count", equalTo("3")))
+        .andExpect(header().string("link", containsString("</api/posts/filter?page=1&size=2>;")));
+  }
+
+  @Test
+  @Transactional
+  public void shouldFilterPostsWithNoMorePaginationLinkValues() throws Exception {
+
+    List<String> npns = preparePostViewRecords();
+
+    List<ColumnFilterDTO> filters = newArrayList(new ColumnFilterDTO("nationalPostNumber", npns));
+
+    restPostMockMvc.perform(post("/api/posts/filter")
+        .contentType(TestUtil.APPLICATION_JSON_UTF8)
+        .param("size", "10")
+        .content(TestUtil.convertObjectToJsonBytes(filters)))
+        .andExpect(status().isOk())
+        .andExpect(content().contentType(MediaType.APPLICATION_JSON_UTF8_VALUE))
+        .andExpect(jsonPath("$").isArray())
+        .andExpect(jsonPath("$", hasSize(3)))
+        .andExpect(header().string("X-Total-Count", equalTo("3")))
+        .andExpect(header().string("link", containsString("</api/posts/filter?page=0&size=10>;")));
+  }
+
+  private List<String> preparePostViewRecords() {
+    List<String> npns = Arrays.asList("npn-01", "npn-02", "npn-03");
+
+    Specialty firstSpeciality = createSpecialty();
+    specialtyRepository.saveAndFlush(firstSpeciality);
+
+    PostView post1 = createPostView(firstSpeciality.getId());
+    post1.setNationalPostNumber(npns.get(0));
+    postViewRepository.saveAndFlush(post1);
+
+    PostView post2 = createPostView(firstSpeciality.getId());
+    post2.setNationalPostNumber(npns.get(1));
+    postViewRepository.saveAndFlush(post2);
+
+    PostView post3 = createPostView(firstSpeciality.getId());
+    post3.setNationalPostNumber(npns.get(2));
+    postViewRepository.saveAndFlush(post3);
+    return npns;
+  }
+
 }

@@ -13,6 +13,7 @@ import com.transformuk.hee.tis.tcs.api.enumeration.TCSDateColumns;
 import com.transformuk.hee.tis.tcs.service.api.util.ColumnFilterUtil;
 import com.transformuk.hee.tis.tcs.service.exception.DateRangeColumnFilterException;
 import com.transformuk.hee.tis.tcs.service.model.ColumnFilter;
+import com.transformuk.hee.tis.tcs.service.model.EsrNotification;
 import com.transformuk.hee.tis.tcs.service.model.Person;
 import com.transformuk.hee.tis.tcs.service.model.Placement;
 import com.transformuk.hee.tis.tcs.service.model.PlacementDetails;
@@ -25,6 +26,7 @@ import com.transformuk.hee.tis.tcs.service.repository.PlacementRepository;
 import com.transformuk.hee.tis.tcs.service.repository.PlacementSpecialtyRepository;
 import com.transformuk.hee.tis.tcs.service.repository.PlacementViewRepository;
 import com.transformuk.hee.tis.tcs.service.repository.SpecialtyRepository;
+import com.transformuk.hee.tis.tcs.service.service.EsrNotificationService;
 import com.transformuk.hee.tis.tcs.service.service.PlacementService;
 import com.transformuk.hee.tis.tcs.service.service.helper.SqlQuerySupplier;
 import com.transformuk.hee.tis.tcs.service.service.mapper.PlacementDetailsMapper;
@@ -33,6 +35,7 @@ import com.transformuk.hee.tis.tcs.service.service.mapper.PlacementSpecialtyMapp
 import com.transformuk.hee.tis.tcs.service.service.mapper.PlacementViewMapper;
 import com.transformuk.hee.tis.tcs.service.service.mapper.SpecialtyMapper;
 import org.apache.commons.collections4.CollectionUtils;
+import org.apache.commons.lang3.time.DateUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -47,9 +50,12 @@ import javax.persistence.EntityManager;
 import javax.persistence.Query;
 import java.io.IOException;
 import java.math.BigInteger;
+import java.time.LocalDate;
 import java.util.ArrayList;
+import java.util.Calendar;
 import java.util.Collection;
 import java.util.Collections;
+import java.util.Comparator;
 import java.util.Date;
 import java.util.HashSet;
 import java.util.List;
@@ -98,6 +104,8 @@ public class PlacementServiceImpl implements PlacementService {
   @Autowired
   private PlacementSpecialtyMapper placementSpecialtyMapper;
 
+  @Autowired
+  private EsrNotificationService esrNotificationService;
 
   /**
    * Save a placement.
@@ -123,16 +131,19 @@ public class PlacementServiceImpl implements PlacementService {
     Set<PlacementSpecialty> placementSpecialties = linkPlacementSpecialties(placementDetailsDTO, placementDetails);
     PlacementDetailsDTO placementDetailsDTO1 = placementDetailsMapper.placementDetailsToPlacementDetailsDTO(placementDetails);
     placementDetailsDTO1.setSpecialties(placementSpecialtyMapper.toDTOs(placementSpecialties));
+    handleEsrNewPlacementNotification(placementDetailsDTO, placementDetails);
     return placementDetailsDTO1;
   }
 
   @Transactional
   @Override
   public PlacementDetailsDTO saveDetails(PlacementDetailsDTO placementDetailsDTO) {
+
     log.debug("Request to save Placement : {}", placementDetailsDTO);
 
     //clear any linked specialties before trying to save the placement
     Placement placement = placementRepository.findOne(placementDetailsDTO.getId());
+    handleChangeOfPlacementDatesEsrNotification(placement, placementDetailsDTO);
     placementSpecialtyRepository.delete(placement.getSpecialties());
     placement.setSpecialties(new HashSet<>());
     placementRepository.saveAndFlush(placement);
@@ -221,9 +232,24 @@ public class PlacementServiceImpl implements PlacementService {
    * @param id the id of the entity
    */
   @Override
+  @Transactional
   public void delete(Long id) {
     log.debug("Request to delete Placement : {}", id);
+    // handle esr notification
+    handleEsrNotificationForPlacementDelete(id);
     placementRepository.delete(id);
+  }
+
+  private void handleEsrNotificationForPlacementDelete(Long id) {
+    List<EsrNotification> allEsrNotifications = new ArrayList<>();
+
+    Placement placementToDelete = placementRepository.findOne(id);
+    if (placementToDelete.getDateFrom() != null && placementToDelete.getDateFrom().isBefore(LocalDate.now().plusMonths(3))) {
+      List<EsrNotification> esrNotifications = esrNotificationService.loadPlacementDeleteNotification(placementToDelete, allEsrNotifications);
+      log.info("Placement Delete: PERSISTING: {} EsrNotifications for post {} being deleted", esrNotifications.size(), placementToDelete.getLocalPostNumber());
+      esrNotificationService.save(esrNotifications);
+      log.info("Placement Delete: PERSISTED: {} EsrNotifications for post {} being deleted", esrNotifications.size(), placementToDelete.getLocalPostNumber());
+    }
   }
 
   private Map<String, Placement> getPlacementsByIntrepidId(List<PlacementDTO> placementDtoList) {
@@ -374,6 +400,17 @@ public class PlacementServiceImpl implements PlacementService {
     return result.map(placementDetailsMapper::placementDetailsToPlacementDetailsDTO);
   }
 
+
+  @Override
+  public PlacementDTO closePlacement(Long placementId) {
+    Placement placement = placementRepository.findOne(placementId);
+    if(placement != null) {
+      placement.setDateTo(LocalDate.now().minusDays(1));
+      placement = placementRepository.saveAndFlush(placement);
+    }
+    return placementMapper.placementToPlacementDTO(placement);
+  }
+
   @Transactional(readOnly = true)
   @Override
   public List<PlacementSummaryDTO> getPlacementForTrainee(Long traineeId) {
@@ -423,19 +460,28 @@ public class PlacementServiceImpl implements PlacementService {
     }
 
     List<PlacementSummaryDTO> placementSummaryDTOS = Lists.newArrayList(idsToPlacementSummary.values());
-    placementSummaryDTOS.sort((o1, o2) -> o2.getDateTo().compareTo(o1.getDateTo()));
+    placementSummaryDTOS.sort(new Comparator<PlacementSummaryDTO>() {
+      @Override
+      public int compare(PlacementSummaryDTO o1, PlacementSummaryDTO o2) {
+        if(o2.getDateTo() != null && o1.getDateTo() != null) {
+          return o2.getDateTo().compareTo(o1.getDateTo());
+        }
+        return 0;
+      }
+    });
     return placementSummaryDTOS;
   }
 
   private String getPlacementStatus(Date dateFrom, Date dateTo) {
 
     if (dateFrom == null || dateTo == null) {
-      return null;
+      return PlacementStatus.PAST.name();
     }
 
-    long from = dateFrom.getTime();
-    long to = dateTo.getTime();
-    long now = new Date().getTime();
+    // Truncating the hours,minutes,seconds
+    long from = DateUtils.truncate(dateFrom,Calendar.DATE).getTime();
+    long to = DateUtils.truncate(dateTo,Calendar.DATE).getTime();
+    long now = DateUtils.truncate(new Date(),Calendar.DATE).getTime();
 
     if (now < from) {
       return PlacementStatus.FUTURE.name();
@@ -444,5 +490,51 @@ public class PlacementServiceImpl implements PlacementService {
     }
     return PlacementStatus.CURRENT.name();
 
+  }
+
+  private void handleChangeOfPlacementDatesEsrNotification(Placement currentPlacement, PlacementDetailsDTO updatedPlacementDetails) {
+
+    if (currentPlacement != null && updatedPlacementDetails != null &&
+        isEligibleForNotification(currentPlacement, updatedPlacementDetails)) {
+      // create NOT1 type record. Current and next trainee details for the post number.
+      // Create NOT4 type record
+      log.info("Change in hire or end date. Marking for notification : {} ", currentPlacement.getPost().getNationalPostNumber());
+      try {
+        esrNotificationService.loadChangeOfPlacementDatesNotification(updatedPlacementDetails, currentPlacement.getPost().getNationalPostNumber());
+      } catch (Exception e) {
+        // Ideally it should fail the entire update. Keeping the impact minimal for go live and revisit after go live.
+        // Log and continue
+        log.error("Error loading Change of Placement Dates Notification : ", e);
+      }
+    }
+  }
+
+  private boolean isEligibleForNotification(Placement currentPlacement, PlacementDetailsDTO updatedPlacementDetails) {
+    // I really do not like this null checks :-( but keeping it to work around the data from intrepid
+    return
+        ((currentPlacement.getDateFrom() != null && !currentPlacement.getDateFrom().equals(updatedPlacementDetails.getDateFrom())) ||
+            (currentPlacement.getDateTo() != null && !currentPlacement.getDateTo().equals(updatedPlacementDetails.getDateTo()))) &&
+        ((currentPlacement.getDateFrom() != null && currentPlacement.getDateFrom().isBefore(LocalDate.now().plusMonths(3))) ||
+            (updatedPlacementDetails.getDateFrom() != null && updatedPlacementDetails.getDateFrom().isBefore(LocalDate.now().plusMonths(3))));
+  }
+
+  private void handleEsrNewPlacementNotification(final PlacementDetailsDTO placementDetailsDTO, PlacementDetails placementDetails) {
+
+    log.info("Handling ESR notifications for new placement creation for deanery number {}", placementDetailsDTO.getLocalPostNumber());
+    if (placementDetailsDTO.getId() == null) {
+      try {
+        Placement savedPlacement = placementRepository.findOne(placementDetails.getId());
+        if (savedPlacement.getDateFrom() != null && savedPlacement.getDateFrom().isBefore(LocalDate.now().plusMonths(3))) {
+          log.info("Creating ESR notification for new placement creation for deanery number {}", savedPlacement.getPost().getNationalPostNumber());
+          List<EsrNotification> esrNotifications = esrNotificationService.handleNewPlacementEsrNotification(savedPlacement);
+          log.info("CREATED: ESR {} notifications for new placement creation for deanery number {}",
+              esrNotifications.size(), savedPlacement.getPost().getNationalPostNumber());
+        }
+      } catch (Exception e) {
+        // Ideally it should fail the entire update. Keeping the impact minimal for TCS and go live and revisit after go live.
+        // Log and continue
+        log.error("Error loading New Placement Notification : ", e);
+      }
+    }
   }
 }
