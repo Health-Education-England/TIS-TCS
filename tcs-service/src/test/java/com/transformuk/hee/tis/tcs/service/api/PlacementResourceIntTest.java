@@ -357,6 +357,51 @@ public class PlacementResourceIntTest {
 
   @Test
   @Transactional
+  public void createPlacementStartingAfter3MonthsShouldOnlyCreatePlacementWithoutEsrNotification() throws Exception {
+
+    int databaseSizeBeforeCreate = placementDetailsRepository.findAll().size();
+
+    // Create the Placement
+    String postNumber = "EOE/RGT00/021/FY1/010";
+    String placementType = "In Post";
+
+    placement.setDateFrom(UPDATED_DATE_FROM.plusMonths(5));
+    placement.setDateTo(UPDATED_DATE_TO.plusMonths(8));
+    placement.setPlacementType(placementType);
+
+    Post post = postRepository.findOne(placement.getPostId());
+    post.setNationalPostNumber(postNumber);
+    postRepository.saveAndFlush(post);
+
+    PlacementDetailsDTO placementDetailsDTO = placementDetailsMapper.placementDetailsToPlacementDetailsDTO(placement);
+    restPlacementMockMvc.perform(post("/api/placements")
+        .contentType(TestUtil.APPLICATION_JSON_UTF8)
+        .content(TestUtil.convertObjectToJsonBytes(placementDetailsDTO)))
+        .andExpect(status().isCreated());
+
+    // Validate the Placement in the database
+    List<PlacementDetails> placementList = placementDetailsRepository.findAll();
+    assertThat(placementList).hasSize(databaseSizeBeforeCreate + 1);
+    PlacementDetails testPlacement = placementList.get(placementList.size() - 1);
+    assertThat(testPlacement.getSiteCode()).isEqualTo(DEFAULT_SITE);
+    assertThat(testPlacement.getGradeAbbreviation()).isEqualTo(DEFAULT_GRADE);
+    assertThat(testPlacement.getDateFrom()).isEqualTo(UPDATED_DATE_FROM.plusMonths(5));
+    assertThat(testPlacement.getDateTo()).isEqualTo(UPDATED_DATE_TO.plusMonths(8));
+    assertThat(testPlacement.getPostId()).isEqualTo(placement.getPostId());
+    assertThat(testPlacement.getTraineeId()).isEqualTo(placement.getTraineeId());
+    assertThat(testPlacement.getTrainingDescription()).isEqualTo(DEFAULT_TRAINING_DESCRIPTION);
+    assertThat(testPlacement.getPlacementType()).isEqualTo(placementType);
+    assertThat(testPlacement.getWholeTimeEquivalent()).isEqualTo(DEFAULT_PLACEMENT_WHOLE_TIME_EQUIVALENT.floatValue());
+
+    // Validate that there is no ESR notification record created
+    List<EsrNotification> esrNotifications = esrNotificationRepository.findAll();
+    assertThat(esrNotifications).hasSize(0);
+
+  }
+
+
+  @Test
+  @Transactional
   public void getAllPlacements() throws Exception {
     // Initialize the database
     placementDetailsRepository.saveAndFlush(placement);
@@ -613,6 +658,61 @@ public class PlacementResourceIntTest {
     });
   }
 
+  @Test
+  @Transactional
+  public void updateFuturePlacementBeyond3MonthsShouldNotTriggerNotification() throws Exception {
+    // Initialize the database
+    String localPostNumber = "EOE/RGT00/004/STR/704";
+    String placementType = "In Post";
+
+    // prepare Placement to be starting after 3 months.
+    placement.setDateFrom(UPDATED_DATE_FROM.plusMonths(4));
+    placement.setDateTo(UPDATED_DATE_TO.plusMonths(6));
+    placement.setPlacementType(placementType);
+    placementDetailsRepository.saveAndFlush(placement);
+
+    Post post = postRepository.findOne(placement.getPostId());
+    post.setNationalPostNumber(localPostNumber);
+    postRepository.saveAndFlush(post);
+
+    int databaseSizeBeforeUpdate = placementDetailsRepository.findAll().size();
+
+    // Update the placement but still falls beyond the three months
+    PlacementDetails updatedPlacement = placementDetailsRepository.findOne(placement.getId());
+    updatedPlacement.setSiteCode(UPDATED_SITE);
+    updatedPlacement.setGradeAbbreviation(UPDATED_GRADE);
+    //updatedPlacement.setSpecialties(Sets.newHashSet());
+    updatedPlacement.setDateFrom(UPDATED_DATE_FROM.plusMonths(5));
+    updatedPlacement.setDateTo(UPDATED_DATE_TO.plusMonths(7));
+    updatedPlacement.setLocalPostNumber(localPostNumber);
+    updatedPlacement.setTrainingDescription(UPDATED_TRAINING_DESCRPTION);
+    updatedPlacement.setPlacementType(placementType);
+    updatedPlacement.setWholeTimeEquivalent(UPDATED_PLACEMENT_WHOLE_TIME_EQUIVALENT.doubleValue());
+    PlacementDetailsDTO placementDTO = placementDetailsMapper.placementDetailsToPlacementDetailsDTO(updatedPlacement);
+
+    restPlacementMockMvc.perform(put("/api/placements")
+        .contentType(TestUtil.APPLICATION_JSON_UTF8)
+        .content(TestUtil.convertObjectToJsonBytes(placementDTO)))
+        .andExpect(status().isOk());
+
+    // Validate the Placement in the database
+    List<PlacementDetails> placementList = placementDetailsRepository.findAll();
+    assertThat(placementList).hasSize(databaseSizeBeforeUpdate);
+    PlacementDetails testPlacement = placementList.get(placementList.size() - 1);
+    assertThat(testPlacement.getSiteCode()).isEqualTo(UPDATED_SITE);
+    assertThat(testPlacement.getGradeAbbreviation()).isEqualTo(UPDATED_GRADE);
+    //assertThat(testPlacement.getSpecialties()).isEqualTo(placement.getSpecialties());
+    assertThat(testPlacement.getDateFrom()).isEqualTo(UPDATED_DATE_FROM.plusMonths(5));
+    assertThat(testPlacement.getDateTo()).isEqualTo(UPDATED_DATE_TO.plusMonths(7));
+    assertThat(testPlacement.getLocalPostNumber()).isEqualTo(localPostNumber);
+    assertThat(testPlacement.getTrainingDescription()).isEqualTo(UPDATED_TRAINING_DESCRPTION);
+    assertThat(testPlacement.getPlacementType()).isEqualTo(placementType);
+    assertThat(testPlacement.getWholeTimeEquivalent()).isEqualTo(UPDATED_PLACEMENT_WHOLE_TIME_EQUIVALENT.floatValue());
+
+    // validate the EsrNotification in the database
+    List<EsrNotification> esrNotifications = esrNotificationRepository.findAll();
+    assertThat(esrNotifications).hasSize(0);
+  }
 
   @Test
   @Transactional
@@ -680,6 +780,41 @@ public class PlacementResourceIntTest {
     assertThat(type2Notifications.get(0).getWithdrawnTraineeLastName()).isEqualTo(cd.getLegalSurname());
     assertThat(type2Notifications.get(0).getWithdrawnTraineeGmcNumber()).isEqualTo(gmcDetails.getGmcNumber());
 
+  }
+
+  @Test
+  @Transactional
+  public void deleteFuturePlacementStartingAfter3MonthsShouldNotSaveEsrNotification() throws Exception {
+    String localPostNumber = "EOE/RGT00/004/STR/704";
+
+    // Initialize the database
+    LocalDate startDate = LocalDate.now().plusMonths(5);
+    placement.setDateFrom(startDate);
+    placement.setDateTo(startDate.plusMonths(3));
+    placement.setLocalPostNumber(localPostNumber);
+    placementDetailsRepository.saveAndFlush(placement);
+
+    Post post = postRepository.findOne(placement.getPostId());
+    post.setNationalPostNumber(localPostNumber);
+    postRepository.saveAndFlush(post);
+
+    ContactDetails cd =     createContactDetails(placement, "TraineeFN", "TraineeSN");
+    GmcDetails gmcDetails = getGmcDetails(placement, "nextTraineeGmcNumber");
+    enhancePlacement(placement, cd, gmcDetails);
+
+    int databaseSizeBeforeDelete = placementDetailsRepository.findAll().size();
+
+    // Get the placement
+    restPlacementMockMvc.perform(delete("/api/placements/{id}", placement.getId())
+        .accept(TestUtil.APPLICATION_JSON_UTF8))
+        .andExpect(status().isOk());
+
+    // Validate the database is empty
+    List<PlacementDetails> placementList = placementDetailsRepository.findAll();
+    assertThat(placementList).hasSize(databaseSizeBeforeDelete - 1);
+
+    List<EsrNotification> esrNotifications = esrNotificationRepository.findAll();
+    assertThat(esrNotifications).hasSize(0);
   }
 
   @Test

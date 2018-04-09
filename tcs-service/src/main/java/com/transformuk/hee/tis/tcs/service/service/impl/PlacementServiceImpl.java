@@ -51,7 +51,16 @@ import javax.persistence.Query;
 import java.io.IOException;
 import java.math.BigInteger;
 import java.time.LocalDate;
-import java.util.*;
+import java.util.ArrayList;
+import java.util.Calendar;
+import java.util.Collection;
+import java.util.Collections;
+import java.util.Comparator;
+import java.util.Date;
+import java.util.HashSet;
+import java.util.List;
+import java.util.Map;
+import java.util.Set;
 import java.util.stream.Collectors;
 
 import static com.transformuk.hee.tis.tcs.service.api.util.DateUtil.getLocalDateFromString;
@@ -235,11 +244,12 @@ public class PlacementServiceImpl implements PlacementService {
     List<EsrNotification> allEsrNotifications = new ArrayList<>();
 
     Placement placementToDelete = placementRepository.findOne(id);
-    List<EsrNotification> esrNotifications = esrNotificationService.loadPlacementDeleteNotification(placementToDelete, allEsrNotifications);
-    log.info("Placement Delete: PERSISTING: {} EsrNotifications for post {} being deleted", esrNotifications.size(), placementToDelete.getLocalPostNumber());
-    esrNotificationService.save(esrNotifications);
-    log.info("Placement Delete: PERSISTED: {} EsrNotifications for post {} being deleted", esrNotifications.size(), placementToDelete.getLocalPostNumber());
-
+    if (placementToDelete.getDateFrom() != null && placementToDelete.getDateFrom().isBefore(LocalDate.now().plusMonths(3))) {
+      List<EsrNotification> esrNotifications = esrNotificationService.loadPlacementDeleteNotification(placementToDelete, allEsrNotifications);
+      log.info("Placement Delete: PERSISTING: {} EsrNotifications for post {} being deleted", esrNotifications.size(), placementToDelete.getLocalPostNumber());
+      esrNotificationService.save(esrNotifications);
+      log.info("Placement Delete: PERSISTED: {} EsrNotifications for post {} being deleted", esrNotifications.size(), placementToDelete.getLocalPostNumber());
+    }
   }
 
   private Map<String, Placement> getPlacementsByIntrepidId(List<PlacementDTO> placementDtoList) {
@@ -485,9 +495,7 @@ public class PlacementServiceImpl implements PlacementService {
   private void handleChangeOfPlacementDatesEsrNotification(Placement currentPlacement, PlacementDetailsDTO updatedPlacementDetails) {
 
     if (currentPlacement != null && updatedPlacementDetails != null &&
-        (!currentPlacement.getDateFrom().equals(updatedPlacementDetails.getDateFrom()) ||
-        !currentPlacement.getDateTo().equals(updatedPlacementDetails.getDateTo()))) {
-
+        isEligibleForNotification(currentPlacement, updatedPlacementDetails)) {
       // create NOT1 type record. Current and next trainee details for the post number.
       // Create NOT4 type record
       log.info("Change in hire or end date. Marking for notification : {} ", currentPlacement.getPost().getNationalPostNumber());
@@ -501,16 +509,27 @@ public class PlacementServiceImpl implements PlacementService {
     }
   }
 
+  private boolean isEligibleForNotification(Placement currentPlacement, PlacementDetailsDTO updatedPlacementDetails) {
+    // I really do not like this null checks :-( but keeping it to work around the data from intrepid
+    return
+        ((currentPlacement.getDateFrom() != null && !currentPlacement.getDateFrom().equals(updatedPlacementDetails.getDateFrom())) ||
+            (currentPlacement.getDateTo() != null && !currentPlacement.getDateTo().equals(updatedPlacementDetails.getDateTo()))) &&
+        ((currentPlacement.getDateFrom() != null && currentPlacement.getDateFrom().isBefore(LocalDate.now().plusMonths(3))) ||
+            (updatedPlacementDetails.getDateFrom() != null && updatedPlacementDetails.getDateFrom().isBefore(LocalDate.now().plusMonths(3))));
+  }
+
   private void handleEsrNewPlacementNotification(final PlacementDetailsDTO placementDetailsDTO, PlacementDetails placementDetails) {
 
     log.info("Handling ESR notifications for new placement creation for deanery number {}", placementDetailsDTO.getLocalPostNumber());
     if (placementDetailsDTO.getId() == null) {
       try {
         Placement savedPlacement = placementRepository.findOne(placementDetails.getId());
-        log.info("Creating ESR notification for new placement creation for deanery number {}", savedPlacement.getPost().getNationalPostNumber());
-        List<EsrNotification> esrNotifications = esrNotificationService.handleNewPlacementEsrNotification(savedPlacement);
-        log.info("CREATED: ESR {} notifications for new placement creation for deanery number {}",
-            esrNotifications.size(), savedPlacement.getPost().getNationalPostNumber());
+        if (savedPlacement.getDateFrom() != null && savedPlacement.getDateFrom().isBefore(LocalDate.now().plusMonths(3))) {
+          log.info("Creating ESR notification for new placement creation for deanery number {}", savedPlacement.getPost().getNationalPostNumber());
+          List<EsrNotification> esrNotifications = esrNotificationService.handleNewPlacementEsrNotification(savedPlacement);
+          log.info("CREATED: ESR {} notifications for new placement creation for deanery number {}",
+              esrNotifications.size(), savedPlacement.getPost().getNationalPostNumber());
+        }
       } catch (Exception e) {
         // Ideally it should fail the entire update. Keeping the impact minimal for TCS and go live and revisit after go live.
         // Log and continue
