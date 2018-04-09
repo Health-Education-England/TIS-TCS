@@ -244,7 +244,7 @@ public class PlacementServiceImpl implements PlacementService {
     List<EsrNotification> allEsrNotifications = new ArrayList<>();
 
     Placement placementToDelete = placementRepository.findOne(id);
-    if (placementToDelete.getDateFrom().isBefore(LocalDate.now().plusMonths(3))) {
+    if (placementToDelete.getDateFrom() != null && placementToDelete.getDateFrom().isBefore(LocalDate.now().plusMonths(3))) {
       List<EsrNotification> esrNotifications = esrNotificationService.loadPlacementDeleteNotification(placementToDelete, allEsrNotifications);
       log.info("Placement Delete: PERSISTING: {} EsrNotifications for post {} being deleted", esrNotifications.size(), placementToDelete.getLocalPostNumber());
       esrNotificationService.save(esrNotifications);
@@ -510,11 +510,12 @@ public class PlacementServiceImpl implements PlacementService {
   }
 
   private boolean isEligibleForNotification(Placement currentPlacement, PlacementDetailsDTO updatedPlacementDetails) {
+    // I really do not like this null checks :-( but keeping it to work around the data from intrepid
     return
-        (!currentPlacement.getDateFrom().equals(updatedPlacementDetails.getDateFrom()) ||
-            !currentPlacement.getDateTo().equals(updatedPlacementDetails.getDateTo())) &&
-        (currentPlacement.getDateFrom().isBefore(LocalDate.now().plusMonths(3)) ||
-            updatedPlacementDetails.getDateFrom().isBefore(LocalDate.now().plusMonths(3)));
+        ((currentPlacement.getDateFrom() != null && !currentPlacement.getDateFrom().equals(updatedPlacementDetails.getDateFrom())) ||
+            (currentPlacement.getDateTo() != null && !currentPlacement.getDateTo().equals(updatedPlacementDetails.getDateTo()))) &&
+        ((currentPlacement.getDateFrom() != null && currentPlacement.getDateFrom().isBefore(LocalDate.now().plusMonths(3))) ||
+            (updatedPlacementDetails.getDateFrom() != null && updatedPlacementDetails.getDateFrom().isBefore(LocalDate.now().plusMonths(3))));
   }
 
   private void handleEsrNewPlacementNotification(final PlacementDetailsDTO placementDetailsDTO, PlacementDetails placementDetails) {
@@ -523,7 +524,7 @@ public class PlacementServiceImpl implements PlacementService {
     if (placementDetailsDTO.getId() == null) {
       try {
         Placement savedPlacement = placementRepository.findOne(placementDetails.getId());
-        if (savedPlacement.getDateFrom().isBefore(LocalDate.now().plusMonths(3))) {
+        if (savedPlacement.getDateFrom() != null && savedPlacement.getDateFrom().isBefore(LocalDate.now().plusMonths(3))) {
           log.info("Creating ESR notification for new placement creation for deanery number {}", savedPlacement.getPost().getNationalPostNumber());
           List<EsrNotification> esrNotifications = esrNotificationService.handleNewPlacementEsrNotification(savedPlacement);
           log.info("CREATED: ESR {} notifications for new placement creation for deanery number {}",
