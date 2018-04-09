@@ -17,6 +17,8 @@ import java.util.Set;
 @SuppressWarnings("unused")
 public interface ProgrammeRepository extends JpaRepository<Programme, Long>, JpaSpecificationExecutor<Programme> {
 
+  List<Programme> findByIdIn(Set<Long> ids);
+  
   Page<Programme> findByOwnerIn(Set<String> deaneries, Pageable pageable);
 
   List<Programme> findByProgrammeNumber(String programmeNumber);

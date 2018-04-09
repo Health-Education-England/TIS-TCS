@@ -1,9 +1,12 @@
 package com.transformuk.hee.tis.tcs.service.service.impl;
 
-import com.transformuk.hee.tis.tcs.service.service.RotationService;
-import com.transformuk.hee.tis.tcs.service.model.Rotation;
-import com.transformuk.hee.tis.tcs.service.repository.RotationRepository;
+import com.google.common.base.Functions;
 import com.transformuk.hee.tis.tcs.api.dto.RotationDTO;
+import com.transformuk.hee.tis.tcs.service.model.Programme;
+import com.transformuk.hee.tis.tcs.service.model.Rotation;
+import com.transformuk.hee.tis.tcs.service.repository.ProgrammeRepository;
+import com.transformuk.hee.tis.tcs.service.repository.RotationRepository;
+import com.transformuk.hee.tis.tcs.service.service.RotationService;
 import com.transformuk.hee.tis.tcs.service.service.mapper.RotationMapper;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -12,6 +15,11 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.util.Collections;
+import java.util.Map;
+import java.util.Set;
+import java.util.stream.Collectors;
+
 
 /**
  * Service Implementation for managing Rotation.
@@ -19,18 +27,21 @@ import org.springframework.transaction.annotation.Transactional;
 @Service
 @Transactional
 public class RotationServiceImpl implements RotationService {
-
+    
     private final Logger log = LoggerFactory.getLogger(RotationServiceImpl.class);
-
+    
     private final RotationRepository rotationRepository;
-
+    
+    private final ProgrammeRepository programmeRepository;
+    
     private final RotationMapper rotationMapper;
-
-    public RotationServiceImpl(RotationRepository rotationRepository, RotationMapper rotationMapper) {
+    
+    public RotationServiceImpl(RotationRepository rotationRepository, RotationMapper rotationMapper, ProgrammeRepository programmeRepository) {
         this.rotationRepository = rotationRepository;
         this.rotationMapper = rotationMapper;
+        this.programmeRepository = programmeRepository;
     }
-
+    
     /**
      * Save a rotation.
      *
@@ -44,7 +55,7 @@ public class RotationServiceImpl implements RotationService {
         rotation = rotationRepository.save(rotation);
         return rotationMapper.toDto(rotation);
     }
-
+    
     /**
      * Get all the rotations.
      *
@@ -55,10 +66,26 @@ public class RotationServiceImpl implements RotationService {
     @Transactional(readOnly = true)
     public Page<RotationDTO> findAll(Pageable pageable) {
         log.debug("Request to get all Rotations");
-        return rotationRepository.findAll(pageable)
-            .map(rotationMapper::toDto);
+        
+        Page<Rotation> page = rotationRepository.findAll(pageable);
+        
+        Set<Long> programmeIds = page.getContent().stream()
+                .map(Rotation::getProgrammeId)
+                .collect(Collectors.toSet());
+        Map<Long, Programme> programmeMap = !programmeIds.isEmpty() ?
+                programmeRepository.findByIdIn(programmeIds).stream()
+                .collect(Collectors.toMap(Programme::getId, Functions.identity()))
+                : Collections.emptyMap();
+        
+        return page.map(rotationMapper::toDto)
+                .map(rd -> {
+                    Programme p = programmeMap.get(rd.getProgrammeId());
+                    rd.setProgrammeName(p.getProgrammeName());
+                    rd.setProgrammeNumber(p.getProgrammeNumber());
+                    return rd;
+                });
     }
-
+    
     /**
      * Get one rotation by id.
      *
@@ -72,7 +99,7 @@ public class RotationServiceImpl implements RotationService {
         Rotation rotation = rotationRepository.findOne(id);
         return rotationMapper.toDto(rotation);
     }
-
+    
     /**
      * Delete the rotation by id.
      *

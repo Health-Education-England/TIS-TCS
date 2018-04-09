@@ -1,5 +1,6 @@
 CREATE TABLE `Rotation` (
   `id` bigint(20) NOT NULL AUTO_INCREMENT,
+  `intrepidId` bigint(20),
   `programmeId` bigint(20) NOT NULL,
   `name` varchar(255) NOT NULL,
   `status` varchar(255) NULL,
@@ -9,6 +10,7 @@ CREATE TABLE `Rotation` (
 
 CREATE TABLE `RotationPost` (
   `id` bigint(20) NOT NULL AUTO_INCREMENT,
+  `intrepidId` bigint(20),
   `postId` bigint(20) NOT NULL,
   `rotationId` bigint(20) NOT NULL,
   PRIMARY KEY (`id`),
@@ -18,6 +20,7 @@ CREATE TABLE `RotationPost` (
 
 CREATE TABLE `RotationPerson` (
   `id` bigint(20) NOT NULL AUTO_INCREMENT,
+  `intrepidId` bigint(20),
   `personId` bigint(20) NOT NULL,
   `rotationId` bigint(20) NOT NULL,
   PRIMARY KEY (`id`),

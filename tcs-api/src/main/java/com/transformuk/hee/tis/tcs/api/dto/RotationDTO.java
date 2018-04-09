@@ -12,6 +12,10 @@ public class RotationDTO implements Serializable {
     private Long id;
 
     private Long programmeId;
+    
+    private String programmeName;
+    
+    private String programmeNumber;
 
     private String name;
 
@@ -32,7 +36,23 @@ public class RotationDTO implements Serializable {
     public void setProgrammeId(Long programmeId) {
         this.programmeId = programmeId;
     }
-
+    
+    public String getProgrammeName() {
+        return programmeName;
+    }
+    
+    public void setProgrammeName(String programmeName) {
+        this.programmeName = programmeName;
+    }
+    
+    public String getProgrammeNumber() {
+        return programmeNumber;
+    }
+    
+    public void setProgrammeNumber(String programmeNumber) {
+        this.programmeNumber = programmeNumber;
+    }
+    
     public String getName() {
         return name;
     }
@@ -50,33 +70,32 @@ public class RotationDTO implements Serializable {
     }
 
     @Override
-    public boolean equals(Object o) {
-        if (this == o) {
-            return true;
-        }
-        if (o == null || getClass() != o.getClass()) {
-            return false;
-        }
-
-        RotationDTO rotationDTO = (RotationDTO) o;
-        if(rotationDTO.getId() == null || getId() == null) {
-            return false;
-        }
-        return Objects.equals(getId(), rotationDTO.getId());
-    }
-
-    @Override
     public int hashCode() {
         return Objects.hashCode(getId());
     }
 
     @Override
+    public boolean equals(Object o) {
+        if (this == o) return true;
+        if (o == null || getClass() != o.getClass()) return false;
+        RotationDTO that = (RotationDTO) o;
+        return Objects.equals(id, that.id) &&
+                Objects.equals(programmeId, that.programmeId) &&
+                Objects.equals(programmeName, that.programmeName) &&
+                Objects.equals(programmeNumber, that.programmeNumber) &&
+                Objects.equals(name, that.name) &&
+                Objects.equals(status, that.status);
+    }
+    
+    @Override
     public String toString() {
         return "RotationDTO{" +
-            "id=" + getId() +
-            ", programmeId=" + getProgrammeId() +
-            ", name='" + getName() + "'" +
-            ", status='" + getStatus() + "'" +
-            "}";
+                "id=" + id +
+                ", programmeId=" + programmeId +
+                ", programmeName='" + programmeName + '\'' +
+                ", programmeNumber='" + programmeNumber + '\'' +
+                ", name='" + name + '\'' +
+                ", status='" + status + '\'' +
+                '}';
     }
 }
