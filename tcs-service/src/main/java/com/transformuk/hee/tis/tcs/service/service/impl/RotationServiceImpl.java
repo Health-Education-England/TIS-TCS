@@ -15,6 +15,7 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import javax.persistence.EntityNotFoundException;
 import java.util.Collections;
 import java.util.Map;
 import java.util.Set;
@@ -98,7 +99,12 @@ public class RotationServiceImpl implements RotationService {
         RotationDTO dto = rotationMapper.toDto(rotation);
         
         if (dto != null && dto.getProgrammeId() != null) {
-            setProgrammeInfo(dto, programmeRepository.getOne(dto.getProgrammeId()));
+            try {
+                setProgrammeInfo(dto, programmeRepository.getOne(dto.getProgrammeId()));
+            }
+            catch (EntityNotFoundException ene) {
+                log.info("Programme with id {} not found", dto.getProgrammeId());
+            }
         }
         return dto;
     }
