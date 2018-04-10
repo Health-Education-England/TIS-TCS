@@ -393,6 +393,19 @@ public class PostServiceImpl implements PostService {
   }
 
   /**
+   * Get posts by national post numbers
+   *
+   * @return the list of entities
+   */
+  @Override
+  @Transactional(readOnly = true)
+  public List<PostDTO> findAllByNationalPostNumbers(List<String> npns) {
+    log.debug("Request to get all Posts by npn : " + npns);
+
+    return postMapper.postsToPostDTOs(postRepository.findByNationalPostNumberIn(npns));
+  }
+
+  /**
    * Get all the posts.
    *
    * @param pageable the pagination information

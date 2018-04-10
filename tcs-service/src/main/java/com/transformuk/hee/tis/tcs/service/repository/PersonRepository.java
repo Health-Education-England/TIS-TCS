@@ -26,5 +26,5 @@ public interface PersonRepository extends JpaRepository<Person, Long>, JpaSpecif
 
   List<Person> findByPublicHealthNumber(String publicHealthNumber);
 
-  List<Person> findByPublicHealthNumberIn(Set<String> publicHealthNumbers);
+  List<Person> findByPublicHealthNumberIn(List<String> publicHealthNumbers);
 }
