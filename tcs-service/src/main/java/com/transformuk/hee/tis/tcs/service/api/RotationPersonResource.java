@@ -1,6 +1,8 @@
 package com.transformuk.hee.tis.tcs.service.api;
 
 import com.codahale.metrics.annotation.Timed;
+import com.transformuk.hee.tis.tcs.api.dto.validation.Create;
+import com.transformuk.hee.tis.tcs.api.dto.validation.Update;
 import com.transformuk.hee.tis.tcs.service.api.util.HeaderUtil;
 import com.transformuk.hee.tis.tcs.service.service.RotationPersonService;
 import com.transformuk.hee.tis.tcs.api.dto.RotationPersonDTO;
@@ -8,6 +10,7 @@ import io.github.jhipster.web.util.ResponseUtil;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.http.ResponseEntity;
+import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
 
 import java.net.URI;
@@ -42,7 +45,7 @@ public class RotationPersonResource {
      */
     @PostMapping("/rotation-people")
     @Timed
-    public ResponseEntity<RotationPersonDTO> createRotationPerson(@RequestBody RotationPersonDTO rotationPersonDTO) throws URISyntaxException {
+    public ResponseEntity<RotationPersonDTO> createRotationPerson(@RequestBody @Validated(Create.class) RotationPersonDTO rotationPersonDTO) throws URISyntaxException {
         log.debug("REST request to save RotationPerson : {}", rotationPersonDTO);
         RotationPersonDTO result = rotationPersonService.save(rotationPersonDTO);
         return ResponseEntity.created(new URI("/api/rotation-people/" + result.getId()))
@@ -61,7 +64,7 @@ public class RotationPersonResource {
      */
     @PutMapping("/rotation-people")
     @Timed
-    public ResponseEntity<RotationPersonDTO> updateRotationPerson(@RequestBody RotationPersonDTO rotationPersonDTO) throws URISyntaxException {
+    public ResponseEntity<RotationPersonDTO> updateRotationPerson(@RequestBody @Validated(Update.class) RotationPersonDTO rotationPersonDTO) throws URISyntaxException {
         log.debug("REST request to update RotationPerson : {}", rotationPersonDTO);
         if (rotationPersonDTO.getId() == null) {
             return createRotationPerson(rotationPersonDTO);

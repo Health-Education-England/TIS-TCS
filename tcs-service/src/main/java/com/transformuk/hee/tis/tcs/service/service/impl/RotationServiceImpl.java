@@ -80,8 +80,10 @@ public class RotationServiceImpl implements RotationService {
         return page.map(rotationMapper::toDto)
                 .map(rd -> {
                     Programme p = programmeMap.get(rd.getProgrammeId());
-                    rd.setProgrammeName(p.getProgrammeName());
-                    rd.setProgrammeNumber(p.getProgrammeNumber());
+                    if (p != null) {
+                        rd.setProgrammeName(p.getProgrammeName());
+                        rd.setProgrammeNumber(p.getProgrammeNumber());
+                    }
                     return rd;
                 });
     }

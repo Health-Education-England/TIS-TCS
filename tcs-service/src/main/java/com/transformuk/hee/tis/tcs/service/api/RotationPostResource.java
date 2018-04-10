@@ -1,6 +1,8 @@
 package com.transformuk.hee.tis.tcs.service.api;
 
 import com.codahale.metrics.annotation.Timed;
+import com.transformuk.hee.tis.tcs.api.dto.validation.Create;
+import com.transformuk.hee.tis.tcs.api.dto.validation.Update;
 import com.transformuk.hee.tis.tcs.service.api.util.HeaderUtil;
 import com.transformuk.hee.tis.tcs.service.service.RotationPostService;
 import com.transformuk.hee.tis.tcs.api.dto.RotationPostDTO;
@@ -8,6 +10,7 @@ import io.github.jhipster.web.util.ResponseUtil;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.http.ResponseEntity;
+import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
 
 import java.net.URI;
@@ -42,7 +45,7 @@ public class RotationPostResource {
      */
     @PostMapping("/rotation-posts")
     @Timed
-    public ResponseEntity<RotationPostDTO> createRotationPost(@RequestBody RotationPostDTO rotationPostDTO) throws URISyntaxException {
+    public ResponseEntity<RotationPostDTO> createRotationPost(@RequestBody @Validated(Create.class) RotationPostDTO rotationPostDTO) throws URISyntaxException {
         log.debug("REST request to save RotationPost : {}", rotationPostDTO);
         RotationPostDTO result = rotationPostService.save(rotationPostDTO);
         return ResponseEntity.created(new URI("/api/rotation-posts/" + result.getId()))
@@ -61,7 +64,7 @@ public class RotationPostResource {
      */
     @PutMapping("/rotation-posts")
     @Timed
-    public ResponseEntity<RotationPostDTO> updateRotationPost(@RequestBody RotationPostDTO rotationPostDTO) throws URISyntaxException {
+    public ResponseEntity<RotationPostDTO> updateRotationPost(@RequestBody @Validated(Update.class) RotationPostDTO rotationPostDTO) throws URISyntaxException {
         log.debug("REST request to update RotationPost : {}", rotationPostDTO);
         if (rotationPostDTO.getId() == null) {
             return createRotationPost(rotationPostDTO);
