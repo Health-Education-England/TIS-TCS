@@ -79,11 +79,7 @@ public class RotationServiceImpl implements RotationService {
         
         return page.map(rotationMapper::toDto)
                 .map(rd -> {
-                    Programme p = programmeMap.get(rd.getProgrammeId());
-                    if (p != null) {
-                        rd.setProgrammeName(p.getProgrammeName());
-                        rd.setProgrammeNumber(p.getProgrammeNumber());
-                    }
+                    setProgrammeInfo(rd, programmeMap.get(rd.getProgrammeId()));
                     return rd;
                 });
     }
@@ -99,7 +95,12 @@ public class RotationServiceImpl implements RotationService {
     public RotationDTO findOne(Long id) {
         log.debug("Request to get Rotation : {}", id);
         Rotation rotation = rotationRepository.findOne(id);
-        return rotationMapper.toDto(rotation);
+        RotationDTO dto = rotationMapper.toDto(rotation);
+        
+        if (dto != null && dto.getProgrammeId() != null) {
+            setProgrammeInfo(dto, programmeRepository.getOne(dto.getProgrammeId()));
+        }
+        return dto;
     }
     
     /**
@@ -111,5 +112,12 @@ public class RotationServiceImpl implements RotationService {
     public void delete(Long id) {
         log.debug("Request to delete Rotation : {}", id);
         rotationRepository.delete(id);
+    }
+    
+    private void setProgrammeInfo(RotationDTO rd, Programme p) {
+        if (p != null) {
+            rd.setProgrammeName(p.getProgrammeName());
+            rd.setProgrammeNumber(p.getProgrammeNumber());
+        }
     }
 }
