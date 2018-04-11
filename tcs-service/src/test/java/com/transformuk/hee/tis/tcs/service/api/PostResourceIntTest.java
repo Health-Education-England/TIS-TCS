@@ -3,7 +3,6 @@ package com.transformuk.hee.tis.tcs.service.api;
 import com.google.common.collect.Lists;
 import com.google.common.collect.Sets;
 import com.transformuk.hee.tis.tcs.TestUtils;
-import com.transformuk.hee.tis.tcs.api.dto.ColumnFilterDTO;
 import com.transformuk.hee.tis.tcs.api.dto.PlacementDTO;
 import com.transformuk.hee.tis.tcs.api.dto.PostDTO;
 import com.transformuk.hee.tis.tcs.api.dto.PostGradeDTO;
@@ -59,16 +58,13 @@ import org.springframework.test.web.servlet.setup.MockMvcBuilders;
 import org.springframework.transaction.annotation.Transactional;
 
 import javax.persistence.EntityManager;
-import java.util.Collections;
 import java.util.Arrays;
+import java.util.Collections;
 import java.util.List;
 import java.util.Set;
 
-import static com.google.common.collect.Lists.newArrayList;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.hamcrest.Matchers.containsInAnyOrder;
-import static org.hamcrest.Matchers.containsString;
-import static org.hamcrest.Matchers.equalTo;
 import static org.hamcrest.Matchers.hasItem;
 import static org.hamcrest.Matchers.hasSize;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.delete;
@@ -77,7 +73,6 @@ import static org.springframework.test.web.servlet.request.MockMvcRequestBuilder
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.put;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.content;
-import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.header;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
@@ -1219,61 +1214,50 @@ public class PostResourceIntTest {
 
   @Test
   @Transactional
-  public void shouldFilterPostsWithPaginationLinks() throws Exception {
+  public void shouldFilterPostsByDeaneryNumbers() throws Exception {
 
-    List<String> npns = preparePostViewRecords();
+    List<String> npns = preparePostRecords();
 
-    List<ColumnFilterDTO> filters = newArrayList(new ColumnFilterDTO("nationalPostNumber", npns));
-
-    restPostMockMvc.perform(post("/api/posts/filter")
+    restPostMockMvc.perform(post("/api/posts/filter/deanery")
         .contentType(TestUtil.APPLICATION_JSON_UTF8)
         .param("size", "2")
-        .content(TestUtil.convertObjectToJsonBytes(filters)))
+        .content(TestUtil.convertObjectToJsonBytes(npns)))
         .andExpect(status().isOk())
         .andExpect(content().contentType(MediaType.APPLICATION_JSON_UTF8_VALUE))
         .andExpect(jsonPath("$").isArray())
-        .andExpect(jsonPath("$", hasSize(2)))
-        .andExpect(header().string("X-Total-Count", equalTo("3")))
-        .andExpect(header().string("link", containsString("</api/posts/filter?page=1&size=2>;")));
+        .andExpect(jsonPath("$", hasSize(2)));
   }
 
   @Test
   @Transactional
-  public void shouldFilterPostsWithNoMorePaginationLinkValues() throws Exception {
+  public void shouldFilterPostsByDeaneryNumbersAndHonorsPageSize() throws Exception {
 
-    List<String> npns = preparePostViewRecords();
+    List<String> npns = preparePostRecords();
 
-    List<ColumnFilterDTO> filters = newArrayList(new ColumnFilterDTO("nationalPostNumber", npns));
-
-    restPostMockMvc.perform(post("/api/posts/filter")
+    restPostMockMvc.perform(post("/api/posts/filter/deanery")
         .contentType(TestUtil.APPLICATION_JSON_UTF8)
         .param("size", "10")
-        .content(TestUtil.convertObjectToJsonBytes(filters)))
+        .content(TestUtil.convertObjectToJsonBytes(npns)))
         .andExpect(status().isOk())
         .andExpect(content().contentType(MediaType.APPLICATION_JSON_UTF8_VALUE))
         .andExpect(jsonPath("$").isArray())
-        .andExpect(jsonPath("$", hasSize(3)))
-        .andExpect(header().string("X-Total-Count", equalTo("3")))
-        .andExpect(header().string("link", containsString("</api/posts/filter?page=0&size=10>;")));
+        .andExpect(jsonPath("$", hasSize(3)));
   }
 
-  private List<String> preparePostViewRecords() {
+  private List<String> preparePostRecords() {
     List<String> npns = Arrays.asList("npn-01", "npn-02", "npn-03");
 
-    Specialty firstSpeciality = createSpecialty();
-    specialtyRepository.saveAndFlush(firstSpeciality);
-
-    PostView post1 = createPostView(firstSpeciality.getId());
+    Post post1 = createEntity();
     post1.setNationalPostNumber(npns.get(0));
-    postViewRepository.saveAndFlush(post1);
+    postRepository.saveAndFlush(post1);
 
-    PostView post2 = createPostView(firstSpeciality.getId());
+    Post post2 = createEntity();
     post2.setNationalPostNumber(npns.get(1));
-    postViewRepository.saveAndFlush(post2);
+    postRepository.saveAndFlush(post2);
 
-    PostView post3 = createPostView(firstSpeciality.getId());
+    Post post3 = createEntity();
     post3.setNationalPostNumber(npns.get(2));
-    postViewRepository.saveAndFlush(post3);
+    postRepository.saveAndFlush(post3);
     return npns;
   }
 

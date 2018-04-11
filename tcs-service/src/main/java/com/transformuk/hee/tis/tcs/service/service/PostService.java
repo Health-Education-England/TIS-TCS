@@ -1,6 +1,7 @@
 package com.transformuk.hee.tis.tcs.service.service;
 
 import com.transformuk.hee.tis.tcs.api.dto.PostDTO;
+import com.transformuk.hee.tis.tcs.api.dto.PostEsrDTO;
 import com.transformuk.hee.tis.tcs.api.dto.PostViewDTO;
 import com.transformuk.hee.tis.tcs.service.model.ColumnFilter;
 import org.springframework.data.domain.Page;
@@ -116,8 +117,6 @@ public interface PostService {
    */
   Page<PostViewDTO> advancedSearch(String searchString, List<ColumnFilter> columnFilers, Pageable pageable);
 
-  Page<PostViewDTO> advancedSearchBySpecification(String searchString, List<ColumnFilter> columnFilters, Pageable pageable);
-
   /**
    * Get the "id" post.
    *
@@ -138,4 +137,5 @@ public interface PostService {
    */
   CompletableFuture<Void> buildPostView();
 
+  Page<PostEsrDTO> findPostsForEsrByDeaneryNumbers(List<String> deaneryNumbers, Pageable pageable);
 }

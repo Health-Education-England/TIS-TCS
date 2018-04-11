@@ -2,10 +2,10 @@ package com.transformuk.hee.tis.tcs.service.api;
 
 import com.codahale.metrics.annotation.Timed;
 import com.google.common.collect.Lists;
-import com.transformuk.hee.tis.tcs.api.dto.ColumnFilterDTO;
 import com.transformuk.hee.tis.tcs.api.dto.PlacementSummaryDTO;
 import com.transformuk.hee.tis.tcs.api.dto.PlacementViewDTO;
 import com.transformuk.hee.tis.tcs.api.dto.PostDTO;
+import com.transformuk.hee.tis.tcs.api.dto.PostEsrDTO;
 import com.transformuk.hee.tis.tcs.api.dto.PostViewDTO;
 import com.transformuk.hee.tis.tcs.api.dto.validation.Create;
 import com.transformuk.hee.tis.tcs.api.dto.validation.Update;
@@ -179,26 +179,17 @@ public class PostResource {
     return new ResponseEntity<>(page.getContent(), headers, HttpStatus.OK);
   }
 
-  /**
-   * POST  /posts/filter : filter posts.
-   *
-   * @param pageable the pagination information
-   * @return the ResponseEntity with status 200 (OK) and the list of posts in body
-   */
-  @PostMapping("/posts/filter")
+  @PostMapping("/posts/filter/deanery")
   @Timed
   @PreAuthorize("hasAuthority('post:view')")
-  public ResponseEntity<List<PostViewDTO>> filterPosts(
+  public ResponseEntity<List<PostEsrDTO>> filterPostsByDeaneryNumbers(
       @ApiParam Pageable pageable,
-      @ApiParam(value = "json object by column name and value. (Eg: columnFilters={ \"owner\": [\"dean1\", \"dean2\"]," +
-          " \"sites.siteId\":[\"123\"],\"trainingBodyId\":[\"11\"],\"grades.gradeId\":[\"11\"],\"specialties.specialty.name\":[\"Test Specialty\"]}\"")
-      @RequestBody List<ColumnFilterDTO> filters) {
-    log.debug("REST request to filter a page of Posts");
-    Page<PostViewDTO> page = postService.advancedSearchBySpecification(null, filters.stream().map(f ->
-        new ColumnFilter(f.getName(), Lists.newArrayList(f.getValues()))
-    ).collect(Collectors.toList()), pageable);
-    HttpHeaders headers = PaginationUtil.generatePaginationHttpHeaders(page, "/api/posts/filter");
-    return new ResponseEntity<>(page.getContent(), headers, HttpStatus.OK);
+      @RequestBody List<String> deaneryNumbers) {
+    log.debug("REST request to filter a page of Posts by deanery numbers");
+    Page<PostEsrDTO> page = postService.findPostsForEsrByDeaneryNumbers(deaneryNumbers, pageable);
+    List<PostEsrDTO> resultDTOs = page.getContent();
+    log.debug("Found {} matching posts for ESR by given deanery numbers {}", deaneryNumbers.size(), resultDTOs.size());
+    return new ResponseEntity<>(resultDTOs, HttpStatus.OK);
   }
 
   /**

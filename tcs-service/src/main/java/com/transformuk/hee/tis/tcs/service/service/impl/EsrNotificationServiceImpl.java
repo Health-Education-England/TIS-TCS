@@ -324,6 +324,7 @@ public class EsrNotificationServiceImpl implements EsrNotificationService {
       esrNotification.setManagingDeaneryBodyCode(
               postDTO.getNationalPostNumber().substring(0, postDTO.getNationalPostNumber().indexOf('/')));
     }
+    esrNotification.setPostVacantAtNextRotation(true);
     return esrNotification;
   }
 
