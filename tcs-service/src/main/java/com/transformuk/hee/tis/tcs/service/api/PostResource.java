@@ -19,6 +19,7 @@ import com.transformuk.hee.tis.tcs.service.api.decorator.PlacementViewDecorator;
 import com.transformuk.hee.tis.tcs.service.api.util.ColumnFilterUtil;
 import com.transformuk.hee.tis.tcs.service.api.util.HeaderUtil;
 import com.transformuk.hee.tis.tcs.service.api.util.PaginationUtil;
+import com.transformuk.hee.tis.tcs.service.api.util.UrlDecoderUtil;
 import com.transformuk.hee.tis.tcs.service.api.validation.PostValidator;
 import com.transformuk.hee.tis.tcs.service.model.ColumnFilter;
 import com.transformuk.hee.tis.tcs.service.model.PlacementView;
@@ -58,6 +59,7 @@ import javax.validation.Valid;
 import java.io.IOException;
 import java.net.URI;
 import java.net.URISyntaxException;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
 import java.util.stream.Collectors;
@@ -199,6 +201,25 @@ public class PostResource {
     ).collect(Collectors.toList()), pageable);
     HttpHeaders headers = PaginationUtil.generatePaginationHttpHeaders(page, "/api/posts/filter");
     return new ResponseEntity<>(page.getContent(), headers, HttpStatus.OK);
+  }
+
+  /**
+   * GET  /posts/in/:nationalPostNumbers : get the "nationalPostNumbers" post.
+   *
+   * @param nationalPostNumbers the nationalPostNumbers of the postDTO to retrieve
+   * @return the ResponseEntity with status 200 (OK) and with body the postDTO, or with status 404 (Not Found)
+   */
+  @GetMapping("/posts/in/{nationalPostNumbers}")
+  @Timed
+  @PreAuthorize("hasAuthority('post:view')")
+  public ResponseEntity<List<PostDTO>> getPostsIn(@ApiParam(name = "nationalPostNumbers", allowMultiple = true) @PathVariable("nationalPostNumbers") List<String> nationalPostNumbers) {
+    log.debug("REST request to get Posts : {}", nationalPostNumbers);
+    if (!nationalPostNumbers.isEmpty()) {
+      UrlDecoderUtil.decode(nationalPostNumbers);
+      return new ResponseEntity<>(postService.findAllByNationalPostNumbers(nationalPostNumbers), HttpStatus.FOUND);
+    } else {
+      return new ResponseEntity<>(new ArrayList<>(), HttpStatus.OK);
+    }
   }
 
   /**

@@ -6,6 +6,7 @@ import com.transformuk.hee.tis.tcs.api.dto.validation.Create;
 import com.transformuk.hee.tis.tcs.api.dto.validation.Update;
 import com.transformuk.hee.tis.tcs.service.api.util.HeaderUtil;
 import com.transformuk.hee.tis.tcs.service.api.util.PaginationUtil;
+import com.transformuk.hee.tis.tcs.service.api.util.UrlDecoderUtil;
 import com.transformuk.hee.tis.tcs.service.api.validation.GmcDetailsValidator;
 import com.transformuk.hee.tis.tcs.service.service.GmcDetailsService;
 import io.github.jhipster.web.util.ResponseUtil;
@@ -135,6 +136,7 @@ public class GmcDetailsResource {
     log.debug("REST request to find several GmcDetails: {}", gmcIds);
 
     if (!gmcIds.isEmpty()) {
+      UrlDecoderUtil.decode(gmcIds);
       return new ResponseEntity<>(gmcDetailsService.findByIdIn(gmcIds), HttpStatus.FOUND);
     } else {
       return new ResponseEntity<>(new ArrayList<>(), HttpStatus.OK);

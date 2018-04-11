@@ -15,10 +15,13 @@ import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.ProviderManager;
 import org.springframework.security.config.annotation.method.configuration.EnableGlobalMethodSecurity;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
+import org.springframework.security.config.annotation.web.builders.WebSecurity;
 import org.springframework.security.config.annotation.web.configuration.EnableWebSecurity;
 import org.springframework.security.config.annotation.web.configuration.WebSecurityConfigurerAdapter;
 import org.springframework.security.config.http.SessionCreationPolicy;
 import org.springframework.security.web.authentication.UsernamePasswordAuthenticationFilter;
+import org.springframework.security.web.firewall.DefaultHttpFirewall;
+import org.springframework.security.web.firewall.HttpFirewall;
 
 import java.util.Arrays;
 
@@ -61,5 +64,18 @@ public class WebSecurityConfig extends WebSecurityConfigurerAdapter {
     // Custom JWT based security filter
     httpSecurity
         .addFilterBefore(authenticationTokenFilterBean(), UsernamePasswordAuthenticationFilter.class);
+  }
+
+  //npn have slashes, allowing GET requests with slashes through https://stackoverflow.com/a/41593282
+  @Bean
+  public HttpFirewall allowUrlEncodedSlashHttpFirewall() {
+    DefaultHttpFirewall firewall = new DefaultHttpFirewall();
+    firewall.setAllowUrlEncodedSlash(true);
+    return firewall;
+  }
+
+  @Override
+  public void configure(WebSecurity web) throws Exception {
+    web.httpFirewall(allowUrlEncodedSlashHttpFirewall());
   }
 }

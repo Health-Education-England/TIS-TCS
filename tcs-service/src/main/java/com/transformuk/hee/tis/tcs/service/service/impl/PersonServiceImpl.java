@@ -476,7 +476,7 @@ public class PersonServiceImpl implements PersonService {
   }
 
   @Override
-  public List<PersonDTO> findPersonsByPublicHealthNumbersIn(Set<String> publicHealthNumbers) {
+  public List<PersonDTO> findPersonsByPublicHealthNumbersIn(List<String> publicHealthNumbers) {
     return personRepository.findByPublicHealthNumberIn(publicHealthNumbers).stream()
         .map(personMapper::toDto)
         .collect(Collectors.toList());  }

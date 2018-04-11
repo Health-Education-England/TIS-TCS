@@ -29,6 +29,8 @@ public interface PostRepository extends JpaRepository<Post, Long>, JpaSpecificat
 
   List<Post> findByNationalPostNumber(String nationalPostNumber);
 
+  List<Post> findByNationalPostNumberIn(List<String> nationalPostNumbers);
+
   OwnerProjection findPostById(Long id);
 
   Set<Post> findByNationalPostNumberStartingWith(String nationalPostNumberNoCounter);

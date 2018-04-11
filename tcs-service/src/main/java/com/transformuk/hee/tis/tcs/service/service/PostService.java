@@ -98,6 +98,15 @@ public interface PostService {
    */
   Page<PostDTO> findAll(Set<String> dbcs, Pageable pageable);
 
+
+  /**
+   * Get all the post by National Post Numbers
+   *
+   * @param npns
+   * @return
+   */
+  List<PostDTO> findAllByNationalPostNumbers(List<String> npns);
+
   /**
    * Get all the posts.
    *

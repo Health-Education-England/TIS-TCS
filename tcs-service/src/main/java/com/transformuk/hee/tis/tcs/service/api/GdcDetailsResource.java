@@ -6,6 +6,7 @@ import com.transformuk.hee.tis.tcs.api.dto.validation.Create;
 import com.transformuk.hee.tis.tcs.api.dto.validation.Update;
 import com.transformuk.hee.tis.tcs.service.api.util.HeaderUtil;
 import com.transformuk.hee.tis.tcs.service.api.util.PaginationUtil;
+import com.transformuk.hee.tis.tcs.service.api.util.UrlDecoderUtil;
 import com.transformuk.hee.tis.tcs.service.api.validation.GdcDetailsValidator;
 import com.transformuk.hee.tis.tcs.service.service.GdcDetailsService;
 import io.github.jhipster.web.util.ResponseUtil;
@@ -141,6 +142,7 @@ public class GdcDetailsResource {
     log.debug("REST request to find several GdcDetails: {}", gdcIds);
 
     if (!gdcIds.isEmpty()) {
+      UrlDecoderUtil.decode(gdcIds);
       return new ResponseEntity<>(gdcDetailsService.findByIdIn(gdcIds), HttpStatus.FOUND);
     } else {
       return new ResponseEntity<>(new ArrayList<>(), HttpStatus.OK);
