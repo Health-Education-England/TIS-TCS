@@ -6,7 +6,7 @@
 
   <groupId>com.transformuk.hee.tis</groupId>
   <artifactId>tcs-client</artifactId>
-  <version>3.0.39</version>
+  <version>3.0.40</version>
   <packaging>jar</packaging>
 
   <properties>
