@@ -3,12 +3,35 @@ package com.transformuk.hee.tis.tcs.service.service.impl;
 import com.google.common.collect.Lists;
 import com.google.common.collect.Maps;
 import com.google.common.collect.Sets;
-import com.transformuk.hee.tis.tcs.api.dto.*;
+import com.transformuk.hee.tis.tcs.api.dto.PlacementDTO;
+import com.transformuk.hee.tis.tcs.api.dto.PostDTO;
+import com.transformuk.hee.tis.tcs.api.dto.PostEsrDTO;
+import com.transformuk.hee.tis.tcs.api.dto.PostGradeDTO;
+import com.transformuk.hee.tis.tcs.api.dto.PostSiteDTO;
+import com.transformuk.hee.tis.tcs.api.dto.PostSpecialtyDTO;
+import com.transformuk.hee.tis.tcs.api.dto.PostViewDTO;
+import com.transformuk.hee.tis.tcs.api.dto.ProgrammeDTO;
 import com.transformuk.hee.tis.tcs.api.enumeration.FundingType;
 import com.transformuk.hee.tis.tcs.api.enumeration.Status;
 import com.transformuk.hee.tis.tcs.service.api.decorator.PostViewDecorator;
-import com.transformuk.hee.tis.tcs.service.model.*;
-import com.transformuk.hee.tis.tcs.service.repository.*;
+import com.transformuk.hee.tis.tcs.service.model.ColumnFilter;
+import com.transformuk.hee.tis.tcs.service.model.EsrNotification;
+import com.transformuk.hee.tis.tcs.service.model.Placement;
+import com.transformuk.hee.tis.tcs.service.model.Post;
+import com.transformuk.hee.tis.tcs.service.model.PostGrade;
+import com.transformuk.hee.tis.tcs.service.model.PostSite;
+import com.transformuk.hee.tis.tcs.service.model.PostSpecialty;
+import com.transformuk.hee.tis.tcs.service.model.Programme;
+import com.transformuk.hee.tis.tcs.service.model.Specialty;
+import com.transformuk.hee.tis.tcs.service.repository.EsrPostProjection;
+import com.transformuk.hee.tis.tcs.service.repository.PlacementRepository;
+import com.transformuk.hee.tis.tcs.service.repository.PostGradeRepository;
+import com.transformuk.hee.tis.tcs.service.repository.PostRepository;
+import com.transformuk.hee.tis.tcs.service.repository.PostSiteRepository;
+import com.transformuk.hee.tis.tcs.service.repository.PostSpecialtyRepository;
+import com.transformuk.hee.tis.tcs.service.repository.PostViewRepository;
+import com.transformuk.hee.tis.tcs.service.repository.ProgrammeRepository;
+import com.transformuk.hee.tis.tcs.service.repository.SpecialtyRepository;
 import com.transformuk.hee.tis.tcs.service.service.EsrNotificationService;
 import com.transformuk.hee.tis.tcs.service.service.PostService;
 import com.transformuk.hee.tis.tcs.service.service.helper.SqlQuerySupplier;
@@ -23,8 +46,6 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageImpl;
 import org.springframework.data.domain.Pageable;
-import org.springframework.data.jpa.domain.Specification;
-import org.springframework.data.jpa.domain.Specifications;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.jdbc.core.RowMapper;
 import org.springframework.scheduling.annotation.Async;
@@ -34,12 +55,13 @@ import org.springframework.util.StopWatch;
 
 import java.sql.ResultSet;
 import java.sql.SQLException;
-import java.util.*;
+import java.util.Collection;
+import java.util.List;
+import java.util.Map;
+import java.util.Objects;
+import java.util.Set;
 import java.util.concurrent.CompletableFuture;
 import java.util.stream.Collectors;
-
-import static com.transformuk.hee.tis.tcs.service.service.impl.SpecificationFactory.containsLike;
-import static com.transformuk.hee.tis.tcs.service.service.impl.SpecificationFactory.in;
 
 /**
  * Service Implementation for managing Post.
@@ -524,38 +546,12 @@ public class PostServiceImpl implements PostService {
 
   @Override
   @Transactional(readOnly = true)
-  public Page<PostViewDTO> advancedSearchBySpecification(String searchString, List<ColumnFilter> columnFilters, Pageable pageable) {
-
-    List<Specification<PostView>> specs = new ArrayList<>();
-    //add the text search criteria
-    if (StringUtils.isNotEmpty(searchString)) {
-      specs.add(Specifications.where(containsLike("nationalPostNumber", searchString)).
-          or(containsLike("programmeName", searchString)).
-          or(containsLike("currentTraineeGmcNumber", searchString)).
-          or(containsLike("currentTraineeSurname", searchString)).
-          or(containsLike("currentTraineeForenames", searchString)));
-    }
-    //add the column filters criteria
-    if (columnFilters != null && !columnFilters.isEmpty()) {
-      columnFilters.forEach(cf -> specs.add(in(cf.getName(), cf.getValues())));
-    }
-
-    Page<PostView> result;
-    if (!specs.isEmpty()) {
-      Specifications<PostView> fullSpec = Specifications.where(specs.get(0));
-      //add the rest of the specs that made it in
-      for (int i = 1; i < specs.size(); i++) {
-        fullSpec = fullSpec.and(specs.get(i));
-      }
-      result = postViewRepository.findAll(fullSpec, pageable);
-    } else {
-      result = postViewRepository.findAll(pageable);
-    }
-
-    Page<PostViewDTO> dtoPage = result.map(postView -> postViewMapper.postViewToPostViewDTO(postView));
-    postViewDecorator.decorate(dtoPage.getContent());
-    return dtoPage;
+  public Page<PostEsrDTO> findPostsForEsrByDeaneryNumbers(List<String> deaneryNumbers, Pageable pageable) {
+    log.debug("Finding Posts for ESR by deanery numbers : {}", deaneryNumbers.size() );
+    Page<EsrPostProjection> posts = postRepository.findByIdNotNullAndNationalPostNumberIn(deaneryNumbers, pageable);
+    return posts.map(post -> postMapper.esrPostProjectionToPostEsrDTO(post));
   }
+
 
   /**
    * Get one post by id.

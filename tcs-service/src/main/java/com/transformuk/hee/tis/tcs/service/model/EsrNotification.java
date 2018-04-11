@@ -85,7 +85,7 @@ public class EsrNotification implements Serializable {
 
   private Double workingHourIndicator;
 
-  private Boolean postVacantAtNextRotation;
+  private Boolean postVacantAtNextRotation = true; // default to true and to be overwritten wherever there is a next placement.
 
   private String medicalRotationPostDeleteIndicator;
 

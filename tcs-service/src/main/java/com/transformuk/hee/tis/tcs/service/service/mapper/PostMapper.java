@@ -2,8 +2,24 @@ package com.transformuk.hee.tis.tcs.service.service.mapper;
 
 import com.google.common.collect.Lists;
 import com.google.common.collect.Sets;
-import com.transformuk.hee.tis.tcs.api.dto.*;
-import com.transformuk.hee.tis.tcs.service.model.*;
+import com.transformuk.hee.tis.tcs.api.dto.PlacementDTO;
+import com.transformuk.hee.tis.tcs.api.dto.PostDTO;
+import com.transformuk.hee.tis.tcs.api.dto.PostEsrDTO;
+import com.transformuk.hee.tis.tcs.api.dto.PostFundingDTO;
+import com.transformuk.hee.tis.tcs.api.dto.PostGradeDTO;
+import com.transformuk.hee.tis.tcs.api.dto.PostSiteDTO;
+import com.transformuk.hee.tis.tcs.api.dto.PostSpecialtyDTO;
+import com.transformuk.hee.tis.tcs.api.dto.ProgrammeDTO;
+import com.transformuk.hee.tis.tcs.api.dto.SpecialtyDTO;
+import com.transformuk.hee.tis.tcs.service.model.Placement;
+import com.transformuk.hee.tis.tcs.service.model.Post;
+import com.transformuk.hee.tis.tcs.service.model.PostFunding;
+import com.transformuk.hee.tis.tcs.service.model.PostGrade;
+import com.transformuk.hee.tis.tcs.service.model.PostSite;
+import com.transformuk.hee.tis.tcs.service.model.PostSpecialty;
+import com.transformuk.hee.tis.tcs.service.model.Programme;
+import com.transformuk.hee.tis.tcs.service.model.Specialty;
+import com.transformuk.hee.tis.tcs.service.repository.EsrPostProjection;
 import org.apache.commons.collections4.CollectionUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
@@ -60,6 +76,17 @@ public class PostMapper {
       result.add(postToPostDTO(post));
     }
 
+    return result;
+  }
+
+  public PostEsrDTO esrPostProjectionToPostEsrDTO(EsrPostProjection post) {
+    PostEsrDTO result = new PostEsrDTO();
+    if (post != null) {
+      result.setId(post.getId());
+      result.setNationalPostNumber(post.getNationalPostNumber());
+      result.setStatus(post.getStatus());
+      result.setOwner(post.getOwner());
+    }
     return result;
   }
 
