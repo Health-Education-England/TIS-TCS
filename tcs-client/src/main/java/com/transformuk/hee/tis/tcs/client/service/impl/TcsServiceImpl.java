@@ -9,9 +9,11 @@ import com.transformuk.hee.tis.tcs.api.dto.FundingDTO;
 import com.transformuk.hee.tis.tcs.api.dto.GdcDetailsDTO;
 import com.transformuk.hee.tis.tcs.api.dto.GmcDetailsDTO;
 import com.transformuk.hee.tis.tcs.api.dto.JsonPatchDTO;
+import com.transformuk.hee.tis.tcs.api.dto.PersonBasicDetailsDTO;
 import com.transformuk.hee.tis.tcs.api.dto.PersonDTO;
 import com.transformuk.hee.tis.tcs.api.dto.PersonalDetailsDTO;
 import com.transformuk.hee.tis.tcs.api.dto.PlacementDTO;
+import com.transformuk.hee.tis.tcs.api.dto.PlacementDetailsDTO;
 import com.transformuk.hee.tis.tcs.api.dto.PlacementFunderDTO;
 import com.transformuk.hee.tis.tcs.api.dto.PostDTO;
 import com.transformuk.hee.tis.tcs.api.dto.PostFundingDTO;
@@ -24,7 +26,6 @@ import com.transformuk.hee.tis.tcs.api.dto.SpecialtyGroupDTO;
 import com.transformuk.hee.tis.tcs.api.dto.TariffFundingTypeFieldsDTO;
 import com.transformuk.hee.tis.tcs.api.dto.TariffRateDTO;
 import com.transformuk.hee.tis.tcs.api.dto.TrainingNumberDTO;
-import com.transformuk.hee.tis.tcs.api.dto.PersonBasicDetailsDTO;
 import org.apache.commons.codec.EncoderException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -51,12 +52,32 @@ import java.util.stream.Collectors;
 public class TcsServiceImpl extends AbstractClientService {
 	private static final Logger log = LoggerFactory.getLogger(TcsServiceImpl.class);
 
-	private static String curriculumJsonQuerystringURLEncoded, programmeJsonQuerystringURLEncoded;
+	private static final String API_PERSONAL_DETAILS = "/api/personal-details/";
+	private static final String API_QUALIFICATIONS = "/api/qualifications/";
+	private static final String API_PEOPLE = "/api/people/";
+	private static final String API_PLACEMENTS = "/api/placements/";
+	private static final String API_GDC_DETAILS = "/api/gdc-details/";
+	private static final String API_GMC_DETAILS = "/api/gmc-details/";
+	private static final String API_CONTACT_DETAILS = "/api/contact-details/";
+	private static final String API_RIGHT_TO_WORKS = "/api/right-to-works/";
+	private static final String API_PROGRAMME_MEMBERSHIPS = "/api/programme-memberships/";
+	private static final String API_CURRENT_CURRICULA_COLUMN_FILTERS = "/api/current/curricula?columnFilters=";
+	private static final String API_PROGRAMMES_COLUMN_FILTERS = "/api/programmes?columnFilters=";
+	private static final String API_PLACEMENTS_FILTER_COLUMN_FILTERS = "/api/placements/filter?columnFilters=";
+	private static final String API_GDC_DETAILS_IN = "/api/gdc-details/in/";
+	private static final String API_GMC_DETAILS_IN = "/api/gmc-details/in/";
+	private static final String API_POSTS_IN = "/api/posts/in/";
+	private static final String API_PEOPLE_IN = "/api/people/in/";
+	private static final String API_PEOPLE_PHN_IN = "/api/people/phn/in/";
+	private static final String BASIC = "/basic";
+
+	private static String curriculumJsonQuerystringURLEncoded, programmeJsonQuerystringURLEncoded, placementJsonQuerystringURLEncoded;
 
 	static {
 		try {
 			curriculumJsonQuerystringURLEncoded = new org.apache.commons.codec.net.URLCodec().encode("{\"name\":[\"PARAMETER_NAME\"]}");
 			programmeJsonQuerystringURLEncoded  = new org.apache.commons.codec.net.URLCodec().encode("{\"programmeName\":[\"PARAMETER_NAME\"],\"programmeNumber\":[\"PARAMETER_NUMBER\"],\"status\":[\"CURRENT\"]}");
+			placementJsonQuerystringURLEncoded  = new org.apache.commons.codec.net.URLCodec().encode("{\"traineeId\":[\"PARAMETER_TRAINEE_ID\"],\"postId\":[\"PARAMETER_POST_ID\"]}");
 		} catch (EncoderException e) {
 			e.printStackTrace();
 		}
@@ -140,7 +161,7 @@ public class TcsServiceImpl extends AbstractClientService {
 		HttpHeaders headers = new HttpHeaders();
 		HttpEntity<QualificationDTO> httpEntity = new HttpEntity<>(qualificationDTO, headers);
 		return tcsRestTemplate
-				.exchange(serviceUrl + "/api/qualifications/", HttpMethod.POST, httpEntity, new ParameterizedTypeReference<QualificationDTO>() {})
+				.exchange(serviceUrl + API_QUALIFICATIONS, HttpMethod.POST, httpEntity, new ParameterizedTypeReference<QualificationDTO>() {})
 				.getBody();
 	}
 
@@ -148,7 +169,23 @@ public class TcsServiceImpl extends AbstractClientService {
 		HttpHeaders headers = new HttpHeaders();
 		HttpEntity<PersonDTO> httpEntity = new HttpEntity<>(personDTO, headers);
 		return tcsRestTemplate
-				.exchange(serviceUrl + "/api/people/", HttpMethod.POST, httpEntity, new ParameterizedTypeReference<PersonDTO>() {})
+				.exchange(serviceUrl + API_PEOPLE, HttpMethod.POST, httpEntity, new ParameterizedTypeReference<PersonDTO>() {})
+				.getBody();
+	}
+
+	public PlacementDetailsDTO createPlacement(PlacementDetailsDTO placementDetailsDTO) {
+		HttpHeaders headers = new HttpHeaders();
+		HttpEntity<PlacementDetailsDTO> httpEntity = new HttpEntity<>(placementDetailsDTO, headers);
+		return tcsRestTemplate
+				.exchange(serviceUrl + API_PLACEMENTS, HttpMethod.POST, httpEntity, new ParameterizedTypeReference<PlacementDetailsDTO>() {})
+				.getBody();
+	}
+
+	public PlacementDetailsDTO updatePlacement(PlacementDetailsDTO placementDetailsDTO) {
+		HttpHeaders headers = new HttpHeaders();
+		HttpEntity<PlacementDetailsDTO> httpEntity = new HttpEntity<>(placementDetailsDTO, headers);
+		return tcsRestTemplate
+				.exchange(serviceUrl + API_PLACEMENTS, HttpMethod.PUT, httpEntity, new ParameterizedTypeReference<PlacementDetailsDTO>() {})
 				.getBody();
 	}
 
@@ -156,34 +193,34 @@ public class TcsServiceImpl extends AbstractClientService {
 		HttpHeaders headers = new HttpHeaders();
 
 		PersonDTO personDTOUpdated = tcsRestTemplate
-				.exchange(serviceUrl + "/api/people/", HttpMethod.PUT, new HttpEntity<>(personDTO, headers), new ParameterizedTypeReference<PersonDTO>() {})
+				.exchange(serviceUrl + API_PEOPLE, HttpMethod.PUT, new HttpEntity<>(personDTO, headers), new ParameterizedTypeReference<PersonDTO>() {})
 				.getBody();
 
 		personDTOUpdated.setGdcDetails(tcsRestTemplate
-				.exchange(serviceUrl + "/api/gdc-details/", HttpMethod.PUT, new HttpEntity<>(personDTO.getGdcDetails(), headers), new ParameterizedTypeReference<GdcDetailsDTO>() {})
+				.exchange(serviceUrl + API_GDC_DETAILS, HttpMethod.PUT, new HttpEntity<>(personDTO.getGdcDetails(), headers), new ParameterizedTypeReference<GdcDetailsDTO>() {})
 				.getBody());
 
 		personDTOUpdated.setGmcDetails(tcsRestTemplate
-				.exchange(serviceUrl + "/api/gmc-details/", HttpMethod.PUT, new HttpEntity<>(personDTO.getGmcDetails(), headers), new ParameterizedTypeReference<GmcDetailsDTO>() {})
+				.exchange(serviceUrl + API_GMC_DETAILS, HttpMethod.PUT, new HttpEntity<>(personDTO.getGmcDetails(), headers), new ParameterizedTypeReference<GmcDetailsDTO>() {})
 				.getBody());
 
 		personDTOUpdated.setContactDetails(tcsRestTemplate
-				.exchange(serviceUrl + "/api/contact-details/", HttpMethod.PUT, new HttpEntity<>(personDTO.getContactDetails(), headers), new ParameterizedTypeReference<ContactDetailsDTO>() {})
+				.exchange(serviceUrl + API_CONTACT_DETAILS, HttpMethod.PUT, new HttpEntity<>(personDTO.getContactDetails(), headers), new ParameterizedTypeReference<ContactDetailsDTO>() {})
 				.getBody());
 
 		personDTOUpdated.setPersonalDetails(tcsRestTemplate
-				.exchange(serviceUrl + "/api/personal-details/", HttpMethod.PUT, new HttpEntity<>(personDTO.getPersonalDetails(), headers), new ParameterizedTypeReference<PersonalDetailsDTO>() {})
+				.exchange(serviceUrl + API_PERSONAL_DETAILS, HttpMethod.PUT, new HttpEntity<>(personDTO.getPersonalDetails(), headers), new ParameterizedTypeReference<PersonalDetailsDTO>() {})
 				.getBody());
 
 		personDTOUpdated.setRightToWork(tcsRestTemplate
-				.exchange(serviceUrl + "/api/right-to-works/", HttpMethod.PUT, new HttpEntity<>(personDTO.getRightToWork(), headers), new ParameterizedTypeReference<RightToWorkDTO>() {})
+				.exchange(serviceUrl + API_RIGHT_TO_WORKS, HttpMethod.PUT, new HttpEntity<>(personDTO.getRightToWork(), headers), new ParameterizedTypeReference<RightToWorkDTO>() {})
 				.getBody());
 
 		return personDTOUpdated;
 	}
 
 	public PersonDTO getPerson(String id) {
-		return tcsRestTemplate.exchange(serviceUrl + "/api/people/" + id,
+		return tcsRestTemplate.exchange(serviceUrl + API_PEOPLE + id,
 				HttpMethod.GET, null, new ParameterizedTypeReference<PersonDTO>() {}).getBody();
 	}
 
@@ -191,7 +228,7 @@ public class TcsServiceImpl extends AbstractClientService {
 		HttpHeaders headers = new HttpHeaders();
 		HttpEntity<ProgrammeMembershipDTO> httpEntity = new HttpEntity<>(programmeMembershipDTO, headers);
 		return tcsRestTemplate
-				.exchange(serviceUrl + "/api/programme-memberships/", HttpMethod.POST, httpEntity, new ParameterizedTypeReference<ProgrammeMembershipDTO>() {})
+				.exchange(serviceUrl + API_PROGRAMME_MEMBERSHIPS, HttpMethod.POST, httpEntity, new ParameterizedTypeReference<ProgrammeMembershipDTO>() {})
 				.getBody();
 	}
 
@@ -199,7 +236,7 @@ public class TcsServiceImpl extends AbstractClientService {
 	public List<CurriculumDTO> getCurriculaByName(String name) {
 		log.debug("calling getCurriculaByName with {}", name);
 		return tcsRestTemplate
-				.exchange(serviceUrl + "/api/current/curricula?columnFilters=" + curriculumJsonQuerystringURLEncoded.replace("PARAMETER_NAME", name), HttpMethod.GET, null, new ParameterizedTypeReference<List<CurriculumDTO>>() {})
+				.exchange(serviceUrl + API_CURRENT_CURRICULA_COLUMN_FILTERS + curriculumJsonQuerystringURLEncoded.replace("PARAMETER_NAME", name), HttpMethod.GET, null, new ParameterizedTypeReference<List<CurriculumDTO>>() {})
 				.getBody();
 	}
 
@@ -207,7 +244,7 @@ public class TcsServiceImpl extends AbstractClientService {
   public List<ProgrammeDTO> getProgrammeByNameAndNumber(String name, String number) {
 		log.debug("calling getProgrammeByNameAndNumber with {} and number {}", name, number);
 		return tcsRestTemplate
-				.exchange(serviceUrl + "/api/programmes?columnFilters=" +
+				.exchange(serviceUrl + API_PROGRAMMES_COLUMN_FILTERS +
 								programmeJsonQuerystringURLEncoded
 										.replace("PARAMETER_NAME", name)
 										.replace("PARAMETER_NUMBER", number),
@@ -216,17 +253,36 @@ public class TcsServiceImpl extends AbstractClientService {
 				.getBody();
 	}
 
+	public List<PlacementDetailsDTO> getPlacementsByPostIdAndPersonId(Long postId, Long personId) {
+		log.debug("calling getPlacementByPostIdAndPersonId with postId {} and personId {}", postId, personId);
+		return tcsRestTemplate
+				.exchange(serviceUrl + API_PLACEMENTS_FILTER_COLUMN_FILTERS +
+								placementJsonQuerystringURLEncoded
+										.replace("PARAMETER_TRAINEE_ID", String.valueOf(personId))
+										.replace("PARAMETER_POST_ID", String.valueOf(postId)),
+						HttpMethod.GET,
+						null, new ParameterizedTypeReference<List<PlacementDetailsDTO>>() {})
+				.getBody();
+	}
+
 	public List<GdcDetailsDTO> findGdcDetailsIn(List<String> gdcIds) {
-		String url = serviceUrl + "/api/gdc-details/in/" + getIdsAsUrlEncodedCSVs(gdcIds);
+		String url = serviceUrl + API_GDC_DETAILS_IN + getIdsAsUrlEncodedCSVs(gdcIds);
 		ResponseEntity<List<GdcDetailsDTO>> responseEntity = tcsRestTemplate.
 				exchange(url, HttpMethod.GET, null, new ParameterizedTypeReference<List<GdcDetailsDTO>>() {});
 		return responseEntity.getBody();
 	}
 
 	public List<GmcDetailsDTO> findGmcDetailsIn(List<String> gmcIds) {
-		String url = serviceUrl + "/api/gmc-details/in/" + getIdsAsUrlEncodedCSVs(gmcIds);
+		String url = serviceUrl + API_GMC_DETAILS_IN + getIdsAsUrlEncodedCSVs(gmcIds);
 		ResponseEntity<List<GmcDetailsDTO>> responseEntity = tcsRestTemplate.
 				exchange(url, HttpMethod.GET, null, new ParameterizedTypeReference<List<GmcDetailsDTO>>() {});
+		return responseEntity.getBody();
+	}
+
+	public List<PostDTO> findPostsByNationalPostNumbersIn(List<String> npns) {
+		String url = serviceUrl + API_POSTS_IN + getIdsAsUrlEncodedCSVs(npns);
+		ResponseEntity<List<PostDTO>> responseEntity = tcsRestTemplate.
+				exchange(url, HttpMethod.GET, null, new ParameterizedTypeReference<List<PostDTO>>() {});
 		return responseEntity.getBody();
 	}
 
@@ -243,21 +299,21 @@ public class TcsServiceImpl extends AbstractClientService {
 	}
 
 	public List<PersonDTO> findPeopleIn(List<Long> personIds) {
-		String url = serviceUrl + "/api/people/in/" + join(personIds);
+		String url = serviceUrl + API_PEOPLE_IN + join(personIds);
 		ResponseEntity<List<PersonDTO>> responseEntity = tcsRestTemplate.
 				exchange(url, HttpMethod.GET, null, new ParameterizedTypeReference<List<PersonDTO>>() {});
 		return responseEntity.getBody();
 	}
 
 	public List<PersonDTO> findPeopleByPublicHealthNumbersIn(List<String> publicHealthNumbersIds) {
-		String url = serviceUrl + "/api/people/phn/in/" + getIdsAsUrlEncodedCSVs(publicHealthNumbersIds);
+		String url = serviceUrl + API_PEOPLE_PHN_IN + getIdsAsUrlEncodedCSVs(publicHealthNumbersIds);
 		ResponseEntity<List<PersonDTO>> responseEntity = tcsRestTemplate.
 				exchange(url, HttpMethod.GET, null, new ParameterizedTypeReference<List<PersonDTO>>() {});
 		return responseEntity.getBody();
 	}
 
 	public List<PersonBasicDetailsDTO> findPersonBasicDetailsIn(List<Long> personIds) {
-		String url = serviceUrl + "/api/people/in/" + join(personIds) + "/basic";
+		String url = serviceUrl + API_PEOPLE_IN + join(personIds) + BASIC;
 		ResponseEntity<List<PersonBasicDetailsDTO>> responseEntity = tcsRestTemplate.
 				exchange(url, HttpMethod.GET, null, new ParameterizedTypeReference<List<PersonBasicDetailsDTO>>() {});
 		return responseEntity.getBody();

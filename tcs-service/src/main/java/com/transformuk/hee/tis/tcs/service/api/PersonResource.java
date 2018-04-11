@@ -9,10 +9,7 @@ import com.transformuk.hee.tis.tcs.api.enumeration.Status;
 import com.transformuk.hee.tis.tcs.service.api.decorator.PersonViewDecorator;
 import com.transformuk.hee.tis.tcs.service.api.decorator.PlacementSummaryDecorator;
 import com.transformuk.hee.tis.tcs.service.api.decorator.PlacementViewDecorator;
-import com.transformuk.hee.tis.tcs.service.api.util.BasicPage;
-import com.transformuk.hee.tis.tcs.service.api.util.ColumnFilterUtil;
-import com.transformuk.hee.tis.tcs.service.api.util.HeaderUtil;
-import com.transformuk.hee.tis.tcs.service.api.util.PaginationUtil;
+import com.transformuk.hee.tis.tcs.service.api.util.*;
 import com.transformuk.hee.tis.tcs.service.api.validation.PersonValidator;
 import com.transformuk.hee.tis.tcs.service.model.ColumnFilter;
 import com.transformuk.hee.tis.tcs.service.model.PlacementView;
@@ -213,9 +210,10 @@ public class PersonResource {
       @ApiResponse(code = 200, message = "Person list")})
   @Timed
   @PreAuthorize("hasPermission('tis:people::person:', 'View')")
-  public ResponseEntity<List<PersonDTO>> getPersonsWithPublicHealthNumbersIn(@ApiParam(name = "publicHealthNumbers", allowMultiple = true) @PathVariable("publicHealthNumbers") Set<String> publicHealthNumbers) {
+  public ResponseEntity<List<PersonDTO>> getPersonsWithPublicHealthNumbersIn(@ApiParam(name = "publicHealthNumbers", allowMultiple = true) @PathVariable("publicHealthNumbers") List<String> publicHealthNumbers) {
     log.debug("REST request to find several Person: {}", publicHealthNumbers);
     if (!publicHealthNumbers.isEmpty()) {
+      UrlDecoderUtil.decode(publicHealthNumbers);
       return new ResponseEntity<>(personService.findPersonsByPublicHealthNumbersIn(publicHealthNumbers), HttpStatus.FOUND);
     } else {
       return new ResponseEntity<>(new ArrayList<>(), HttpStatus.BAD_REQUEST);

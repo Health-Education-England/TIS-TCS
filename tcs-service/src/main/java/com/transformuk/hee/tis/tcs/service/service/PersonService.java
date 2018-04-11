@@ -110,7 +110,7 @@ public interface PersonService {
    * @param publicHealthNumbers the persons public Health Numbers
    * @return the persons if found
    */
-  List<PersonDTO> findPersonsByPublicHealthNumbersIn(Set<String> publicHealthNumbers);
+  List<PersonDTO> findPersonsByPublicHealthNumbersIn(List<String> publicHealthNumbers);
 
   /**
    * Retrieve the basic details of persons

@@ -58,6 +58,8 @@ import org.springframework.test.web.servlet.setup.MockMvcBuilders;
 import org.springframework.transaction.annotation.Transactional;
 
 import javax.persistence.EntityManager;
+import java.net.URLEncoder;
+import java.util.Collections;
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
@@ -612,6 +614,28 @@ public class PostResourceIntTest {
         .andExpect(jsonPath("$.postFamily").value(DEFAULT_POST_FAMILY))
         .andExpect(jsonPath("$.employingBodyId").value(DEFAULT_EMPLOYING_BODY))
         .andExpect(jsonPath("$.trainingBodyId").value(DEFAULT_TRAINING_BODY_ID));
+  }
+
+  @Test
+  @Transactional
+  public void getPostByNPN() throws Exception {
+    String nationalPostNumberWithSpecialCharacters = TEST_POST_NUMBER + "\\@$&£";
+    post.setNationalPostNumber(nationalPostNumberWithSpecialCharacters);
+    post.setOwner(OWNER);
+    postRepository.saveAndFlush(post);
+
+    // Get the post
+    restPostMockMvc.perform(get("/api/posts/in/{nationalPostNumbers}", URLEncoder.encode(nationalPostNumberWithSpecialCharacters, "UTF-8")))
+        .andExpect(status().isFound())
+        .andExpect(content().contentType(MediaType.APPLICATION_JSON_UTF8_VALUE))
+        .andExpect(jsonPath("$.[0].id").value(post.getId().intValue()))
+        .andExpect(jsonPath("$.[0].nationalPostNumber").value(nationalPostNumberWithSpecialCharacters))
+        .andExpect(jsonPath("$.[0].status").value(DEFAULT_STATUS.toString().toUpperCase()))
+        .andExpect(jsonPath("$.[0].suffix").value(DEFAULT_SUFFIX.toString()))
+        .andExpect(jsonPath("$.[0].owner").value(OWNER))
+        .andExpect(jsonPath("$.[0].postFamily").value(DEFAULT_POST_FAMILY))
+        .andExpect(jsonPath("$.[0].employingBodyId").value(DEFAULT_EMPLOYING_BODY))
+        .andExpect(jsonPath("$.[0].trainingBodyId").value(DEFAULT_TRAINING_BODY_ID));
   }
 
   @Test
