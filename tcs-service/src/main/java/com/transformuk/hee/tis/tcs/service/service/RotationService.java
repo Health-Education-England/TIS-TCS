@@ -1,8 +1,13 @@
 package com.transformuk.hee.tis.tcs.service.service;
 
+import com.transformuk.hee.tis.tcs.api.dto.PostViewDTO;
 import com.transformuk.hee.tis.tcs.api.dto.RotationDTO;
+import com.transformuk.hee.tis.tcs.service.model.ColumnFilter;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
+import org.springframework.transaction.annotation.Transactional;
+
+import java.util.List;
 
 /**
  * Service Interface for managing Rotation.
@@ -32,7 +37,9 @@ public interface RotationService {
      * @return the entity
      */
     RotationDTO findOne(Long id);
-
+    
+    Page<RotationDTO> advancedSearchBySpecification(List<ColumnFilter> columnFilters, Pageable pageable);
+    
     /**
      * Delete the "id" rotation.
      *

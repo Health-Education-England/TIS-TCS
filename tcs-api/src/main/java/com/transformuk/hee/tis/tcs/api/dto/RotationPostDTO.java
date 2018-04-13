@@ -7,6 +7,7 @@ import com.transformuk.hee.tis.tcs.api.dto.validation.Update;
 import javax.validation.constraints.DecimalMin;
 import javax.validation.constraints.NotNull;
 import javax.validation.constraints.Null;
+import java.beans.Transient;
 import java.io.Serializable;
 import java.util.Objects;
 
@@ -26,6 +27,9 @@ public class RotationPostDTO implements Serializable {
     @NotNull(message = "Rotation Id must not be null when updating rotation-post relationships")
     @DecimalMin(value = "0", groups = Update.class, message = "Rotation Id must not be negative")
     private Long rotationId;
+    
+    @Null(groups = Update.class, message = "Programme Id must be null when updating rotation-post relationships")
+    private Long programmeId;
 
     public Long getId() {
         return id;
@@ -50,7 +54,15 @@ public class RotationPostDTO implements Serializable {
     public void setRotationId(Long rotationId) {
         this.rotationId = rotationId;
     }
-
+    
+    public Long getProgrammeId() {
+        return programmeId;
+    }
+    
+    public void setProgrammeId(Long programmeId) {
+        this.programmeId = programmeId;
+    }
+    
     @Override
     public boolean equals(Object o) {
         if (this == o) {
@@ -71,13 +83,14 @@ public class RotationPostDTO implements Serializable {
     public int hashCode() {
         return Objects.hashCode(getId());
     }
-
+    
     @Override
     public String toString() {
         return "RotationPostDTO{" +
-            "id=" + getId() +
-            ", postId=" + getPostId() +
-            ", rotationId=" + getRotationId() +
-            "}";
+                "id=" + id +
+                ", postId=" + postId +
+                ", rotationId=" + rotationId +
+                ", programmeId=" + programmeId +
+                '}';
     }
 }

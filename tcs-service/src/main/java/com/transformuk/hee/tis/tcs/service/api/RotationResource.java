@@ -1,13 +1,21 @@
 package com.transformuk.hee.tis.tcs.service.api;
 
 import com.codahale.metrics.annotation.Timed;
+import com.google.common.collect.Lists;
+import com.transformuk.hee.tis.tcs.api.dto.ColumnFilterDTO;
+import com.transformuk.hee.tis.tcs.api.dto.PostViewDTO;
 import com.transformuk.hee.tis.tcs.api.dto.validation.Create;
 import com.transformuk.hee.tis.tcs.api.dto.validation.Update;
+import com.transformuk.hee.tis.tcs.api.enumeration.*;
+import com.transformuk.hee.tis.tcs.service.api.util.ColumnFilterUtil;
 import com.transformuk.hee.tis.tcs.service.api.util.HeaderUtil;
 import com.transformuk.hee.tis.tcs.service.api.util.PaginationUtil;
+import com.transformuk.hee.tis.tcs.service.model.ColumnFilter;
 import com.transformuk.hee.tis.tcs.service.service.RotationService;
 import com.transformuk.hee.tis.tcs.api.dto.RotationDTO;
 import io.github.jhipster.web.util.ResponseUtil;
+import io.swagger.annotations.ApiParam;
+import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.data.domain.Page;
@@ -15,14 +23,18 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
 
+import java.io.IOException;
 import java.net.URI;
 import java.net.URISyntaxException;
 
+import java.util.Collections;
 import java.util.List;
 import java.util.Optional;
+import java.util.stream.Collectors;
 
 /**
  * REST controller for managing Rotation.
@@ -88,13 +100,24 @@ public class RotationResource {
      */
     @GetMapping("/rotations")
     @Timed
-    public ResponseEntity<List<RotationDTO>> getAllRotations(Pageable pageable) {
+    public ResponseEntity<List<RotationDTO>> getRotations(
+            @ApiParam(value = "json object by column name and value. (Eg: columnFilters={ \"owner\": [\"dean1\", \"dean2\"]," +
+            " \"sites.siteId\":[\"123\"],\"trainingBodyId\":[\"11\"],\"grades.gradeId\":[\"11\"],\"specialties.specialty.name\":[\"Test Specialty\"]}\"")
+            @RequestParam(value = "columnFilters", required = false) String columnFilterJson,
+            Pageable pageable) throws IOException {
         log.debug("REST request to get a page of Rotations");
-        Page<RotationDTO> page = rotationService.findAll(pageable);
+        List<Class> filterEnumList = Collections.singletonList(Status.class);
+        List<ColumnFilter> columnFilters = ColumnFilterUtil.getColumnFilters(columnFilterJson, filterEnumList);
+        Page<RotationDTO> page;
+        if (StringUtils.isEmpty(columnFilterJson)) {
+            page = rotationService.findAll(pageable);
+        } else {
+            page = rotationService.advancedSearchBySpecification(columnFilters, pageable);
+        }
         HttpHeaders headers = PaginationUtil.generatePaginationHttpHeaders(page, "/api/rotations");
         return new ResponseEntity<>(page.getContent(), headers, HttpStatus.OK);
     }
-
+    
     /**
      * GET  /rotations/:id : get the "id" rotation.
      *
