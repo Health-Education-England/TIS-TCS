@@ -131,7 +131,12 @@ public class NationalPostNumberServiceImpl {
   }
 
   private boolean hasSiteCodeChanged(SiteDTO siteCodeContainer, String currentPostLocationCode) {
-    return !siteCodeContainer.getSiteCode().equals(currentPostLocationCode);
+    if(siteCodeContainer != null && StringUtils.isNotEmpty(siteCodeContainer.getSiteCode())) {
+      return !siteCodeContainer.getSiteCode().equals(currentPostLocationCode);
+    }
+    else{
+      return false;
+    }
   }
 
   private boolean hasSpecialtyCodeChanged(String specialtyCode, String currentPostSpecialtyCode) {
@@ -139,7 +144,12 @@ public class NationalPostNumberServiceImpl {
   }
 
   private boolean hasGradeAbbrChanged(GradeDTO gradeAbbrContainer, String currentPostGradeAbbr) {
-    return !gradeAbbrContainer.getAbbreviation().equals(currentPostGradeAbbr);
+    if(gradeAbbrContainer != null && StringUtils.isNotEmpty(gradeAbbrContainer.getAbbreviation())) {
+      return !gradeAbbrContainer.getAbbreviation().equals(currentPostGradeAbbr);
+    }
+    else{
+      return false;
+    }
   }
 
   private boolean hasSuffixChanged(String suffixValue, String currentPostSuffix) {
