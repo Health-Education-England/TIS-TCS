@@ -7,6 +7,7 @@ import org.hibernate.validator.constraints.Email;
 
 import javax.validation.constraints.DecimalMin;
 import javax.validation.constraints.NotNull;
+import javax.validation.constraints.Pattern;
 import java.io.Serializable;
 import java.time.LocalDateTime;
 import java.util.Objects;
@@ -21,25 +22,52 @@ public class ContactDetailsDTO implements Serializable {
   private Long id;
 
   @NotNull(message = "Surname is required", groups = {Update.class, Create.class})
+  @Pattern(regexp = "^$|^[A-Za-z0-9\\-\\\\' ]+",
+          message = "Surname must be alphanumeric",
+          groups = {Update.class, Create.class})
   private String surname;
 
+  @Pattern(regexp = "^$|^[A-Za-z0-9\\-\\\\' ]+",
+          message = "LegalSurname must be alphanumeric",
+          groups = {Update.class, Create.class})
   private String legalSurname;
 
   @NotNull(message = "Forenames is required", groups = {Update.class, Create.class})
+  @Pattern(regexp = "^$|^[A-Za-z0-9\\-\\\\' ]+",
+          message = "Forenames must be alphanumeric",
+          groups = {Update.class, Create.class})
   private String forenames;
 
+  @Pattern(regexp = "^$|^[A-Za-z0-9\\-\\\\' ]+",
+          message = "LegalForenames must be alphanumeric",
+          groups = {Update.class, Create.class})
   private String legalForenames;
 
+  @Pattern(regexp = "^$|^[A-Za-z0-9\\-\\\\' ]+",
+          message = "KnownAs must be alphanumeric",
+          groups = {Update.class, Create.class})
   private String knownAs;
 
+  @Pattern(regexp = "^$|^[A-Za-z0-9\\-\\\\' ]+",
+          message = "MaidenName must be alphanumeric",
+          groups = {Update.class, Create.class})
   private String maidenName;
 
+  @Pattern(regexp = "^$|^[A-Za-z0-9\\-\\\\' ]+",
+          message = "Initials must be alphanumeric",
+          groups = {Update.class, Create.class})
   private String initials;
 
   private String title;
 
+  @Pattern(regexp = "^$|^[0-9 ]+",
+          message = "telephoneNumber must be numeric",
+          groups = {Update.class, Create.class})
   private String telephoneNumber;
 
+  @Pattern(regexp = "^$|^[0-9 ]+",
+          message = "mobileNumber must be numeric",
+          groups = {Update.class, Create.class})
   private String mobileNumber;
 
   @Email(message = "Valid email is required", groups = {Update.class, Create.class})

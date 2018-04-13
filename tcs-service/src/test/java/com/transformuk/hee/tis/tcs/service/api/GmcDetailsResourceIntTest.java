@@ -1,5 +1,7 @@
 package com.transformuk.hee.tis.tcs.service.api;
 
+import com.transformuk.hee.tis.reference.api.dto.GmcStatusDTO;
+import com.transformuk.hee.tis.reference.client.impl.ReferenceServiceImpl;
 import com.transformuk.hee.tis.tcs.api.dto.GmcDetailsDTO;
 import com.transformuk.hee.tis.tcs.service.Application;
 import com.transformuk.hee.tis.tcs.service.api.validation.GmcDetailsValidator;
@@ -11,6 +13,8 @@ import com.transformuk.hee.tis.tcs.service.service.mapper.GmcDetailsMapper;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
+import org.mockito.Mock;
+import org.mockito.Mockito;
 import org.mockito.MockitoAnnotations;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
@@ -80,8 +84,10 @@ public class GmcDetailsResourceIntTest {
   @Autowired
   private ExceptionTranslator exceptionTranslator;
 
-  @Autowired
   private GmcDetailsValidator gmcDetailsValidator;
+
+  @Mock
+  private ReferenceServiceImpl referenceService;
 
   @Autowired
   private EntityManager em;
@@ -93,6 +99,7 @@ public class GmcDetailsResourceIntTest {
   @Before
   public void setup() {
     MockitoAnnotations.initMocks(this);
+    gmcDetailsValidator = new GmcDetailsValidator(gmcDetailsRepository,referenceService);
     GmcDetailsResource gmcDetailsResource = new GmcDetailsResource(gmcDetailsService, gmcDetailsValidator);
     this.restGmcDetailsMockMvc = MockMvcBuilders.standaloneSetup(gmcDetailsResource)
         .setCustomArgumentResolvers(pageableArgumentResolver)
@@ -128,6 +135,9 @@ public class GmcDetailsResourceIntTest {
 
     // Create the GmcDetails
     GmcDetailsDTO gmcDetailsDTO = gmcDetailsMapper.toDto(gmcDetails);
+
+    Mockito.when(referenceService.isValueExists(GmcStatusDTO.class, gmcDetailsDTO.getGmcStatus())).thenReturn(true);
+
     restGmcDetailsMockMvc.perform(post("/api/gmc-details")
         .contentType(TestUtil.APPLICATION_JSON_UTF8)
         .content(TestUtil.convertObjectToJsonBytes(gmcDetailsDTO)))
@@ -203,6 +213,8 @@ public class GmcDetailsResourceIntTest {
     anotherGmcDetailsDTO.setGmcNumber(DEFAULT_GMC_NUMBER);
     anotherGmcDetailsDTO.setGmcStatus(DEFAULT_GMC_STATUS);
 
+    Mockito.when(referenceService.isValueExists(GmcStatusDTO.class, anotherGmcDetailsDTO.getGmcStatus())).thenReturn(true);
+
     // Create the GmcDetails
     restGmcDetailsMockMvc.perform(post("/api/gmc-details")
             .contentType(TestUtil.APPLICATION_JSON_UTF8)
@@ -231,8 +243,10 @@ public class GmcDetailsResourceIntTest {
     //Try to update second gmc details with default gmc number
     anotherGmcDetailsDTO.setGmcNumber(DEFAULT_GMC_NUMBER);
 
+    Mockito.when(referenceService.isValueExists(GmcStatusDTO.class, UPDATED_GMC_STATUS)).thenReturn(true);
+
     // Create the GmcDetails
-    restGmcDetailsMockMvc.perform(post("/api/gmc-details")
+    restGmcDetailsMockMvc.perform(put("/api/gmc-details")
             .contentType(TestUtil.APPLICATION_JSON_UTF8)
             .content(TestUtil.convertObjectToJsonBytes(anotherGmcDetailsDTO)))
             .andExpect(status().isBadRequest())
@@ -268,6 +282,8 @@ public class GmcDetailsResourceIntTest {
     // Create the GmcDetails with an existing ID
     gmcDetails.setId(1L);
     GmcDetailsDTO gmcDetailsDTO = gmcDetailsMapper.toDto(gmcDetails);
+
+    Mockito.when(referenceService.isValueExists(GmcStatusDTO.class, gmcDetailsDTO.getGmcStatus())).thenReturn(true);
 
     // GMC details is part of person so the call must succeed
     restGmcDetailsMockMvc.perform(post("/api/gmc-details")
@@ -338,6 +354,8 @@ public class GmcDetailsResourceIntTest {
     updatedGmcDetailsDTO.setGmcStatus(UPDATED_GMC_STATUS);
     updatedGmcDetailsDTO.setGmcStartDate(UPDATED_GMC_START_DATE);
     updatedGmcDetailsDTO.setGmcEndDate(UPDATED_GMC_END_DATE);
+
+    Mockito.when(referenceService.isValueExists(GmcStatusDTO.class, UPDATED_GMC_STATUS)).thenReturn(true);
 
     restGmcDetailsMockMvc.perform(put("/api/gmc-details")
         .contentType(TestUtil.APPLICATION_JSON_UTF8)

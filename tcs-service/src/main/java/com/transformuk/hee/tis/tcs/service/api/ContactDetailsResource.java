@@ -6,6 +6,7 @@ import com.transformuk.hee.tis.tcs.api.dto.validation.Create;
 import com.transformuk.hee.tis.tcs.api.dto.validation.Update;
 import com.transformuk.hee.tis.tcs.service.api.util.HeaderUtil;
 import com.transformuk.hee.tis.tcs.service.api.util.PaginationUtil;
+import com.transformuk.hee.tis.tcs.service.api.validation.ContactDetailsValidator;
 import com.transformuk.hee.tis.tcs.service.service.ContactDetailsService;
 import io.github.jhipster.web.util.ResponseUtil;
 import io.swagger.annotations.ApiParam;
@@ -19,6 +20,7 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.validation.annotation.Validated;
+import org.springframework.web.bind.MethodArgumentNotValidException;
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PatchMapping;
@@ -48,9 +50,11 @@ public class ContactDetailsResource {
   private static final String ENTITY_NAME = "contactDetails";
 
   private final ContactDetailsService contactDetailsService;
+  private final ContactDetailsValidator contactDetailsValidator;
 
-  public ContactDetailsResource(ContactDetailsService contactDetailsService) {
+  public ContactDetailsResource(ContactDetailsService contactDetailsService, ContactDetailsValidator contactDetailsValidator) {
     this.contactDetailsService = contactDetailsService;
+    this.contactDetailsValidator = contactDetailsValidator;
   }
 
   /**
@@ -63,9 +67,11 @@ public class ContactDetailsResource {
   @PostMapping("/contact-details")
   @Timed
   @PreAuthorize("hasPermission('tis:people::person:', 'Create')")
-  public ResponseEntity<ContactDetailsDTO> createContactDetails(@RequestBody @Validated(Create.class) ContactDetailsDTO contactDetailsDTO) throws URISyntaxException {
+  public ResponseEntity<ContactDetailsDTO> createContactDetails(@RequestBody @Validated(Create.class) ContactDetailsDTO contactDetailsDTO)
+          throws URISyntaxException, MethodArgumentNotValidException {
     log.debug("REST request to save ContactDetails : {}", contactDetailsDTO);
 
+    contactDetailsValidator.validate(contactDetailsDTO);
     ContactDetailsDTO result = contactDetailsService.save(contactDetailsDTO);
     return ResponseEntity.created(new URI("/api/contact-details/" + result.getId()))
         .headers(HeaderUtil.createEntityCreationAlert(ENTITY_NAME, result.getId().toString()))
@@ -84,12 +90,14 @@ public class ContactDetailsResource {
   @PutMapping("/contact-details")
   @Timed
   @PreAuthorize("hasPermission('tis:people::person:', 'Update')")
-  public ResponseEntity<ContactDetailsDTO> updateContactDetails(@RequestBody @Validated(Update.class) ContactDetailsDTO contactDetailsDTO) throws URISyntaxException {
+  public ResponseEntity<ContactDetailsDTO> updateContactDetails(@RequestBody @Validated(Update.class) ContactDetailsDTO contactDetailsDTO)
+          throws URISyntaxException, MethodArgumentNotValidException {
     log.debug("REST request to update ContactDetails : {}", contactDetailsDTO);
     if (contactDetailsDTO.getId() == null) {
       return ResponseEntity.badRequest().headers(HeaderUtil.createFailureAlert(ENTITY_NAME, "must_provide_id",
           "You must provide an ID when updating contact details")).body(null);
     }
+    contactDetailsValidator.validate(contactDetailsDTO);
     ContactDetailsDTO result = contactDetailsService.save(contactDetailsDTO);
     return ResponseEntity.ok()
         .headers(HeaderUtil.createEntityUpdateAlert(ENTITY_NAME, contactDetailsDTO.getId().toString()))

@@ -1,6 +1,8 @@
 package com.transformuk.hee.tis.tcs.service.api.validation;
 
 
+import com.transformuk.hee.tis.reference.api.dto.GmcStatusDTO;
+import com.transformuk.hee.tis.reference.client.impl.ReferenceServiceImpl;
 import com.transformuk.hee.tis.tcs.api.dto.GdcDetailsDTO;
 import com.transformuk.hee.tis.tcs.service.model.GdcDetails;
 import com.transformuk.hee.tis.tcs.service.repository.GdcDetailsRepository;
@@ -26,9 +28,11 @@ public class GdcDetailsValidator {
   private static final String UNKNOWN = "UNKNOWN";
 
   private GdcDetailsRepository gdcDetailsRepository;
+  private ReferenceServiceImpl referenceService;
 
-  public GdcDetailsValidator(GdcDetailsRepository gdcDetailsRepository) {
+  public GdcDetailsValidator(GdcDetailsRepository gdcDetailsRepository,ReferenceServiceImpl referenceService) {
     this.gdcDetailsRepository = gdcDetailsRepository;
+    this.referenceService = referenceService;
   }
 
   /**
@@ -43,6 +47,7 @@ public class GdcDetailsValidator {
     List<FieldError> fieldErrors = new ArrayList<>();
 //    fieldErrors.addAll(checkGdcStatus(gdcDetailsDTO));
     fieldErrors.addAll(checkGdcNumber(gdcDetailsDTO));
+    fieldErrors.addAll(checkGdcStatusExists(gdcDetailsDTO));
     if (!fieldErrors.isEmpty()) {
       BeanPropertyBindingResult bindingResult = new BeanPropertyBindingResult(gdcDetailsDTO, "GdcDetailsDTO");
       fieldErrors.forEach(bindingResult::addError);
@@ -88,6 +93,19 @@ public class GdcDetailsValidator {
                   String.format("gdcNumber %s is not unique, there is currently one person with this number: %s",
                           gdcDetailsDTO.getGdcNumber(), existingGdcDetails.get(0))));
         }
+      }
+    }
+    return fieldErrors;
+  }
+
+  private List<FieldError> checkGdcStatusExists(GdcDetailsDTO gdcDetailsDTO) {
+    List<FieldError> fieldErrors = new ArrayList<>();
+    // then check the gmc status
+    if (StringUtils.isNotEmpty(gdcDetailsDTO.getGdcStatus())) {
+      Boolean isExists = referenceService.isValueExists(GmcStatusDTO.class, gdcDetailsDTO.getGdcStatus());
+      if (!isExists) {
+        fieldErrors.add(new FieldError(GDC_DETAILS_DTO_NAME, "gdcStatus",
+                String.format("gdcStatus %s does not exist", gdcDetailsDTO.getGdcStatus())));
       }
     }
     return fieldErrors;

@@ -2,6 +2,7 @@ package com.transformuk.hee.tis.tcs.service.api;
 
 import com.transformuk.hee.tis.tcs.api.dto.ContactDetailsDTO;
 import com.transformuk.hee.tis.tcs.service.Application;
+import com.transformuk.hee.tis.tcs.service.api.validation.ContactDetailsValidator;
 import com.transformuk.hee.tis.tcs.service.exception.ExceptionTranslator;
 import com.transformuk.hee.tis.tcs.service.model.ContactDetails;
 import com.transformuk.hee.tis.tcs.service.repository.ContactDetailsRepository;
@@ -11,6 +12,7 @@ import org.apache.commons.lang3.StringUtils;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
+import org.mockito.Mock;
 import org.mockito.MockitoAnnotations;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
@@ -72,11 +74,11 @@ public class ContactDetailsResourceIntTest {
   private static final String DEFAULT_TITLE = "AAAAAAAAAA";
   private static final String UPDATED_TITLE = "BBBBBBBBBB";
 
-  private static final String DEFAULT_CONTACT_PHONE_NR_1 = "AAAAAAAAAA";
-  private static final String UPDATED_CONTACT_PHONE_NR_1 = "BBBBBBBBBB";
+  private static final String DEFAULT_CONTACT_PHONE_NR_1 = "080808080";
+  private static final String UPDATED_CONTACT_PHONE_NR_1 = "090909090";
 
-  private static final String DEFAULT_CONTACT_PHONE_NR_2 = "AAAAAAAAAA";
-  private static final String UPDATED_CONTACT_PHONE_NR_2 = "BBBBBBBBBB";
+  private static final String DEFAULT_CONTACT_PHONE_NR_2 = "080808080";
+  private static final String UPDATED_CONTACT_PHONE_NR_2 = "090909090";
 
   private static final String DEFAULT_EMAIL = "AAAAAAAAAA@test.com";
   private static final String UPDATED_EMAIL = "BBBBBBBBBB@test.com";
@@ -110,6 +112,9 @@ public class ContactDetailsResourceIntTest {
   @Autowired
   private ExceptionTranslator exceptionTranslator;
 
+  @Mock
+  private ContactDetailsValidator contactDetailsValidator;
+
   @Autowired
   private EntityManager em;
 
@@ -120,7 +125,7 @@ public class ContactDetailsResourceIntTest {
   @Before
   public void setup() {
     MockitoAnnotations.initMocks(this);
-    ContactDetailsResource contactDetailsResource = new ContactDetailsResource(contactDetailsService);
+    ContactDetailsResource contactDetailsResource = new ContactDetailsResource(contactDetailsService,contactDetailsValidator);
     this.restContactDetailsMockMvc = MockMvcBuilders.standaloneSetup(contactDetailsResource)
         .setCustomArgumentResolvers(pageableArgumentResolver)
         .setControllerAdvice(exceptionTranslator)

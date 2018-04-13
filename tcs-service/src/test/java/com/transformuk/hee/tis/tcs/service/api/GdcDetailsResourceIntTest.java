@@ -11,6 +11,7 @@ import com.transformuk.hee.tis.tcs.service.service.mapper.GdcDetailsMapper;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
+import org.mockito.Mock;
 import org.mockito.MockitoAnnotations;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
@@ -80,7 +81,7 @@ public class GdcDetailsResourceIntTest {
   @Autowired
   private ExceptionTranslator exceptionTranslator;
 
-  @Autowired
+  @Mock
   private GdcDetailsValidator gdcDetailsValidator;
 
   @Autowired

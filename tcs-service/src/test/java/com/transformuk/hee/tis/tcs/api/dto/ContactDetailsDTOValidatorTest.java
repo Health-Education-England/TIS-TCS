@@ -5,6 +5,7 @@ import com.transformuk.hee.tis.tcs.service.api.*;
 import com.transformuk.hee.tis.tcs.service.api.decorator.PersonViewDecorator;
 import com.transformuk.hee.tis.tcs.service.api.decorator.PlacementSummaryDecorator;
 import com.transformuk.hee.tis.tcs.service.api.decorator.PlacementViewDecorator;
+import com.transformuk.hee.tis.tcs.service.api.validation.ContactDetailsValidator;
 import com.transformuk.hee.tis.tcs.service.api.validation.PersonValidator;
 import com.transformuk.hee.tis.tcs.service.exception.ExceptionTranslator;
 import com.transformuk.hee.tis.tcs.service.model.ContactDetails;
@@ -22,6 +23,7 @@ import org.junit.Before;
 import org.junit.Ignore;
 import org.junit.Test;
 import org.junit.runner.RunWith;
+import org.mockito.Mock;
 import org.mockito.MockitoAnnotations;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
@@ -78,6 +80,8 @@ public class ContactDetailsDTOValidatorTest {
 	private PlacementSummaryDecorator placementSummaryDecorator;
 	@Autowired
 	private PersonValidator personValidator;
+	@Mock
+	private ContactDetailsValidator contactDetailsValidator;
 
 	@MockBean
 	private PermissionService permissionServiceMock;
@@ -88,7 +92,7 @@ public class ContactDetailsDTOValidatorTest {
 	@Before
 	public void setup() {
 		MockitoAnnotations.initMocks(this);
-		ContactDetailsResource contactDetailsResource = new ContactDetailsResource(contactDetailsService);
+		ContactDetailsResource contactDetailsResource = new ContactDetailsResource(contactDetailsService,contactDetailsValidator);
 		PersonResource personResource = new PersonResource(personService, placementViewRepository, placementViewMapper,
 				placementViewDecorator, personViewDecorator, placementService, placementSummaryDecorator,personValidator);
 		this.restContactDetailsMockMvc = MockMvcBuilders.standaloneSetup(contactDetailsResource)

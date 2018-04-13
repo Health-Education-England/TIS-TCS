@@ -1,6 +1,8 @@
 package com.transformuk.hee.tis.tcs.service.api.validation;
 
 
+import com.transformuk.hee.tis.reference.api.dto.GmcStatusDTO;
+import com.transformuk.hee.tis.reference.client.impl.ReferenceServiceImpl;
 import com.transformuk.hee.tis.tcs.api.dto.GmcDetailsDTO;
 import com.transformuk.hee.tis.tcs.service.model.GmcDetails;
 import com.transformuk.hee.tis.tcs.service.repository.GmcDetailsRepository;
@@ -24,9 +26,11 @@ public class GmcDetailsValidator {
   private static final String NA = "N/A";
   private static final String UNKNOWN = "UNKNOWN";
   private GmcDetailsRepository gmcDetailsRepository;
+  private ReferenceServiceImpl referenceService;
 
-  public GmcDetailsValidator(GmcDetailsRepository gmcDetailsRepository) {
+  public GmcDetailsValidator(GmcDetailsRepository gmcDetailsRepository,ReferenceServiceImpl referenceService) {
     this.gmcDetailsRepository = gmcDetailsRepository;
+    this.referenceService = referenceService;
   }
 
   /**
@@ -41,6 +45,7 @@ public class GmcDetailsValidator {
     List<FieldError> fieldErrors = new ArrayList<>();
 //    fieldErrors.addAll(checkGmcStatus(gmcDetailsDTO));
     fieldErrors.addAll(checkGmcNumber(gmcDetailsDTO));
+    fieldErrors.addAll(checkGmcStatusExists(gmcDetailsDTO));
     if (!fieldErrors.isEmpty()) {
       BeanPropertyBindingResult bindingResult = new BeanPropertyBindingResult(gmcDetailsDTO, "GmcDetailsDTO");
       fieldErrors.forEach(bindingResult::addError);
@@ -86,6 +91,19 @@ public class GmcDetailsValidator {
                   String.format("gmcNumber %s is not unique, there is currently one person with this number: %s",
                           gmcDetailsDTO.getGmcNumber(), existingGmcDetails.get(0))));
         }
+      }
+    }
+    return fieldErrors;
+  }
+
+  private List<FieldError> checkGmcStatusExists(GmcDetailsDTO gmcDetailsDTO) {
+    List<FieldError> fieldErrors = new ArrayList<>();
+    // then check the gmc status
+    if (StringUtils.isNotEmpty(gmcDetailsDTO.getGmcStatus())) {
+      Boolean isExists = referenceService.isValueExists(GmcStatusDTO.class, gmcDetailsDTO.getGmcStatus());
+      if (!isExists) {
+        fieldErrors.add(new FieldError(GMC_DETAILS_DTO_NAME, "gmcStatus",
+                String.format("gmcStatus %s does not exist", gmcDetailsDTO.getGmcStatus())));
       }
     }
     return fieldErrors;
