@@ -47,7 +47,24 @@ public class EsrNotificationResource {
     List<EsrNotificationDTO> esrNotificationDTOS = esrNotificationService.loadNextTraineeToCurrentTraineeNotification(fromDate);
     return ResponseEntity.ok().body(esrNotificationDTOS);
   }
+
   /**
+   * GET  /notifications/load/future-eligible-trainee : get list of esrNotifications.
+   *
+   * @param fromDate earliest eligible date indicating placement start date for a trainee.
+   * @return the ResponseEntity with status 200 (OK) and with body the EsrNotificationDTO, or with status 404 (Not Found)
+   */
+  @GetMapping("/notifications/load/future-eligible-trainee")
+  @Timed
+  @PreAuthorize("hasAuthority('tcs:view:entities')")
+  public ResponseEntity<List<EsrNotificationDTO>> findEarliestEligiblePlacementWithin3MonthsForEsrNotification(
+      @RequestParam @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate fromDate) {
+    LOG.debug("REST request to load earliest eligible Trainee Notification for effective date : {}", fromDate);
+    List<EsrNotificationDTO> esrNotificationDTOS = esrNotificationService.loadEarliestATraineeIsEligibleAsFuturePlacementNotification(fromDate);
+    return ResponseEntity.ok().body(esrNotificationDTOS);
+  }
+
+    /**
    * GET  /notifications/load/vacant-posts : get list of esrNotifications.
    *
    * @param asOfDate date indicating placement start date.

@@ -162,6 +162,129 @@ public class EsrNotificationResourceIntTest {
         .andExpect(jsonPath("$.[*].nextAppointmentTraineeGmcNumber").value(trainee1GmcDetails.getGmcNumber()));
   }
 
+  @Test
+  @Transactional
+  public void shouldLoadEarliestEligibleTraineePlacementsAndCreateEsrNotificationRecord() throws Exception {
+
+    String localPostNumber = "EOE/RGT00/021/FY1/013";
+    //given
+    Person trainee1 = new Person();
+    Person trainee2 = new Person();
+
+    entityManager.persist(trainee1);
+    entityManager.persist(trainee2);
+
+    Post post = new Post();
+    post.setNationalPostNumber(localPostNumber);
+    entityManager.persist(post);
+
+    ContactDetails trainee1ContactDetails = aContactDetail("trainee01-FN", "trainee01-LN");
+    trainee1ContactDetails.setId(trainee1.getId());
+    trainee1.setContactDetails(trainee1ContactDetails);
+
+    ContactDetails trainee2ContactDetails = aContactDetail("trainee02-FN", "trainee02-LN");
+    trainee2ContactDetails.setId(trainee2.getId());
+    trainee2.setContactDetails(trainee2ContactDetails);
+
+    entityManager.persist(trainee1ContactDetails);
+    entityManager.persist(trainee2ContactDetails);
+
+    GmcDetails trainee1GmcDetails = aGmcDetails("trainee01-gmcNumber");
+    GmcDetails trainee2GmcDetails = aGmcDetails("trainee02-gmcNumber");
+    trainee1GmcDetails.setId(trainee1.getId());
+    trainee2GmcDetails.setId(trainee2.getId());
+    trainee1.setGmcDetails(trainee1GmcDetails);
+    trainee2.setGmcDetails(trainee2GmcDetails);
+
+    entityManager.persist(trainee1GmcDetails);
+    entityManager.persist(trainee2GmcDetails);
+
+    LocalDate from = LocalDate.now();
+    PlacementDetails placement1 = createPlacementEntity(from.plusMonths(3), from.plusMonths(6)); // future placement starting on exact end of 3 months
+    PlacementDetails placement2 = createPlacementEntity(from.minusMonths(1), from.plusMonths(2)); // current placement
+
+    placement1.setTraineeId(trainee1.getId());
+    placement2.setTraineeId(trainee2.getId());
+
+    placement1.setPostId(post.getId());
+    placement2.setPostId(post.getId());
+
+    entityManager.persist(placement1);
+    entityManager.persist(placement2);
+
+    restEsrNotificationMockMvc.perform(get("/api/notifications/load/future-eligible-trainee")
+        .param("fromDate", from.toString()))
+        .andExpect(status().isOk())
+        .andExpect(content().contentType(MediaType.APPLICATION_JSON_UTF8_VALUE))
+        .andExpect(jsonPath("$.*").isArray())
+        .andExpect(jsonPath("$", hasSize(1)))
+        .andExpect(jsonPath("$.[*].notificationTitleCode").value("1"))
+        .andExpect(jsonPath("$.[*].deaneryPostNumber").value(post.getNationalPostNumber()))
+        .andExpect(jsonPath("$.[*].managingDeaneryBodyCode").value("EOE"))
+        .andExpect(jsonPath("$.[*].currentTraineeFirstName").value(trainee2.getContactDetails().getLegalForenames()))
+        .andExpect(jsonPath("$.[*].currentTraineeLastName").value(trainee2.getContactDetails().getLegalSurname()))
+        .andExpect(jsonPath("$.[*].currentTraineeGmcNumber").value(trainee2GmcDetails.getGmcNumber()))
+        .andExpect(jsonPath("$.[*].nextAppointmentTraineeFirstName").value(trainee1.getContactDetails().getLegalForenames()))
+        .andExpect(jsonPath("$.[*].nextAppointmentTraineeLastName").value(trainee1.getContactDetails().getLegalSurname()))
+        .andExpect(jsonPath("$.[*].nextAppointmentTraineeGmcNumber").value(trainee1GmcDetails.getGmcNumber()));
+  }
+
+  @Test
+  @Transactional
+  public void shouldNotFindAnyEarliestEligibleTraineePlacementsAndShouldNotCreateEsrNotificationRecord() throws Exception {
+
+    String localPostNumber = "EOE/RGT00/021/FY1/013";
+    //given
+    Person trainee1 = new Person();
+    Person trainee2 = new Person();
+
+    entityManager.persist(trainee1);
+    entityManager.persist(trainee2);
+
+    Post post = new Post();
+    post.setNationalPostNumber(localPostNumber);
+    entityManager.persist(post);
+
+    ContactDetails trainee1ContactDetails = aContactDetail("trainee01-FN", "trainee01-LN");
+    trainee1ContactDetails.setId(trainee1.getId());
+    trainee1.setContactDetails(trainee1ContactDetails);
+
+    ContactDetails trainee2ContactDetails = aContactDetail("trainee02-FN", "trainee02-LN");
+    trainee2ContactDetails.setId(trainee2.getId());
+    trainee2.setContactDetails(trainee2ContactDetails);
+
+    entityManager.persist(trainee1ContactDetails);
+    entityManager.persist(trainee2ContactDetails);
+
+    GmcDetails trainee1GmcDetails = aGmcDetails("trainee01-gmcNumber");
+    GmcDetails trainee2GmcDetails = aGmcDetails("trainee02-gmcNumber");
+    trainee1GmcDetails.setId(trainee1.getId());
+    trainee2GmcDetails.setId(trainee2.getId());
+    trainee1.setGmcDetails(trainee1GmcDetails);
+    trainee2.setGmcDetails(trainee2GmcDetails);
+
+    entityManager.persist(trainee1GmcDetails);
+    entityManager.persist(trainee2GmcDetails);
+
+    LocalDate from = LocalDate.now();
+    PlacementDetails placement1 = createPlacementEntity(from.plusDays(95), from.plusMonths(6)); // future placement just outside the earliest eligible window.
+    PlacementDetails placement2 = createPlacementEntity(from.minusMonths(1), from.plusMonths(2)); // current placement
+
+    placement1.setTraineeId(trainee1.getId());
+    placement2.setTraineeId(trainee2.getId());
+
+    placement1.setPostId(post.getId());
+    placement2.setPostId(post.getId());
+
+    entityManager.persist(placement1);
+    entityManager.persist(placement2);
+
+    restEsrNotificationMockMvc.perform(get("/api/notifications/load/future-eligible-trainee")
+        .param("fromDate", from.toString()))
+        .andExpect(status().isOk())
+        .andExpect(content().contentType(MediaType.APPLICATION_JSON_UTF8_VALUE))
+        .andExpect(jsonPath("$.*").isEmpty());
+  }
 
   @Test
   @Transactional

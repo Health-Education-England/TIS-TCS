@@ -30,6 +30,20 @@ public interface PlacementRepository extends JpaRepository<Placement, Long> {
       @Param("toDate") LocalDate toDate,
       @Param("placementTypes") List<String> placementTypes);
 
+  @Query(value = "select pl.* from Placement pl where postid in (" +
+      " select pl1.postid from Placement pl1 where pl1.placementType IN (:placementTypes)" +
+      " AND pl1.dateFrom = :earliestEligibleDate" +
+      " )" +
+      "AND (" +
+      "          (dateFrom <= :fromDate AND dateTo >= :fromDate) OR " +
+      "          (dateFrom = :earliestEligibleDate)" +
+      "        )" +
+      "AND pl.placementType IN (:placementTypes)", nativeQuery = true)
+  List<Placement> findEarliestEligiblePlacementWithin3MonthsForEsrNotification(
+      @Param("fromDate") LocalDate fromDate,
+      @Param("earliestEligibleDate") LocalDate earliestEligibleDate,
+      @Param("placementTypes") List<String> placementTypes
+  );
 
   @Query(value =
       "SELECT P1.* FROM Placement AS P1 INNER JOIN" +
