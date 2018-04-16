@@ -1,6 +1,12 @@
 package com.transformuk.hee.tis.tcs.api.dto;
 
 
+import com.transformuk.hee.tis.tcs.api.dto.validation.Create;
+import com.transformuk.hee.tis.tcs.api.dto.validation.Update;
+
+import javax.validation.constraints.DecimalMin;
+import javax.validation.constraints.NotNull;
+import javax.validation.constraints.Null;
 import java.io.Serializable;
 import java.util.Objects;
 
@@ -8,12 +14,21 @@ import java.util.Objects;
  * A DTO for the RotationPerson entity.
  */
 public class RotationPersonDTO implements Serializable {
-
+    
+    @Null(groups = Create.class, message = "Id must be null when creating a new rotation-person relationship")
+    @DecimalMin(value = "0", groups = Update.class, message = "Id must not be negative")
     private Long id;
-
+    
+    @NotNull(message = "Person Id must not be null when updating rotation-person relationships")
+    @DecimalMin(value = "0", groups = Update.class, message = "Id must not be negative")
     private Long personId;
-
+    
+    @NotNull(message = "Rotation Id must not be null when updating rotation-person relationships")
+    @DecimalMin(value = "0", groups = Update.class, message = "Id must not be negative")
     private Long rotationId;
+    
+    @Null(groups = Update.class, message = "Programme Id must be null when updating rotation-post relationships")
+    private Long programmeId;
 
     public Long getId() {
         return id;
@@ -38,7 +53,15 @@ public class RotationPersonDTO implements Serializable {
     public void setRotationId(Long rotationId) {
         this.rotationId = rotationId;
     }
-
+    
+    public void setProgrammeId(Long programmeId) {
+        this.programmeId = programmeId;
+    }
+    
+    public Long getProgrammeId() {
+        return programmeId;
+    }
+    
     @Override
     public boolean equals(Object o) {
         if (this == o) {
@@ -59,13 +82,14 @@ public class RotationPersonDTO implements Serializable {
     public int hashCode() {
         return Objects.hashCode(getId());
     }
-
+    
     @Override
     public String toString() {
         return "RotationPersonDTO{" +
-            "id=" + getId() +
-            ", personId=" + getPersonId() +
-            ", rotationId=" + getRotationId() +
-            "}";
+                "id=" + id +
+                ", personId=" + personId +
+                ", rotationId=" + rotationId +
+                ", programmeId=" + programmeId +
+                '}';
     }
 }

@@ -2,6 +2,7 @@ package com.transformuk.hee.tis.tcs.service.model;
 
 
 import com.transformuk.hee.tis.tcs.api.enumeration.Status;
+import com.transformuk.hee.tis.tcs.service.model.converter.StatusConverter;
 
 import javax.persistence.*;
 
@@ -27,8 +28,8 @@ public class Rotation implements Serializable {
     @Column(name = "name")
     private String name;
     
-    @Enumerated(EnumType.STRING)
     @Column(name = "status")
+    @Convert(converter =  StatusConverter.class)
     private Status status;
 
     // jhipster-needle-entity-add-field - JHipster will add fields here, do not remove

@@ -11,6 +11,6 @@ import org.springframework.data.jpa.repository.*;
  */
 @SuppressWarnings("unused")
 @Repository
-public interface RotationRepository extends JpaRepository<Rotation, Long> {
+public interface RotationRepository extends JpaRepository<Rotation, Long>, JpaSpecificationExecutor<Rotation> {
 
 }

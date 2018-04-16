@@ -16,17 +16,20 @@ import java.util.Objects;
  */
 public class RotationDTO implements Serializable {
     
-    @NotNull(groups = Update.class, message = "Id must not be null when updating a post")
     @DecimalMin(value = "0", groups = Update.class, message = "Id must not be negative")
-    @Null(groups = Create.class, message = "Id must be null when creating a new post")
+    @Null(groups = Create.class, message = "Id must be null when creating a new rotation")
     private Long id;
-
+    
+    @NotNull(groups = Create.class, message = "Programme id must not be null when creating a new rotation")
     private Long programmeId;
     
+    @Null(groups = Create.class, message = "Programme name must be null when creating a new rotation")
     private String programmeName;
     
+    @Null(groups = Create.class, message = "Programme number must be null when creating a new rotation")
     private String programmeNumber;
-
+    
+    @NotNull(groups = Create.class, message = "Rotation name must not be null when creating a new rotation")
     private String name;
     
     @NotNull(message = "Status is required", groups = {Update.class, Create.class})
