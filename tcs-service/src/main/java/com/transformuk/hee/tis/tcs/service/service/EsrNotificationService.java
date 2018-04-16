@@ -40,4 +40,6 @@ public interface EsrNotificationService {
   List<EsrNotification> handleNewPlacementEsrNotification(Placement placement) throws IOException, ClassNotFoundException;
 
   List<EsrNotification> loadPlacementDeleteNotification(Placement placement, List<EsrNotification> allEsrNotifications);
+
+  List<EsrNotificationDTO> loadEarliestATraineeIsEligibleAsFuturePlacementNotification(LocalDate fromDate);
 }

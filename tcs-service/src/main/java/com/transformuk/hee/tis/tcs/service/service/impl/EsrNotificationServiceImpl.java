@@ -87,6 +87,28 @@ public class EsrNotificationServiceImpl implements EsrNotificationService {
     return esrNotificationMapper.esrNotificationsToPlacementDetailDTOs(savedNotifications);
   }
 
+  /**
+   * identify, load and return earliest a trainee is eligible to be future placement records into EsrNotification table.
+   * @param fromDate date from which to identify the above scenario.
+   * @return list of EsrNotificationDTO that are persisted on this load.
+   */
+  @Override
+  public List<EsrNotificationDTO> loadEarliestATraineeIsEligibleAsFuturePlacementNotification(LocalDate fromDate) {
+    if (fromDate == null) {
+      fromDate = LocalDate.now();
+    }
+    LocalDate earliestEligibleDate = fromDate.plusMonths(3);
+
+    List<Placement> placements = placementRepository.findEarliestEligiblePlacementWithin3MonthsForEsrNotification(fromDate, earliestEligibleDate, placementTypes);
+
+    LOG.info("Identified {} earliest eligible future Placements based on current date {} and earliest available date {} ", placements.size(), fromDate, earliestEligibleDate);
+    // Have a separate mapper when time permits
+    List<EsrNotification> esrNotifications = mapNextToCurrentPlacementsToNotification(placements);
+    LOG.info("Saving ESR Notifications for earliest eligible future Placements scenario : {}", esrNotifications.size());
+    List<EsrNotification> savedNotifications = esrNotificationRepository.save(esrNotifications);
+    return esrNotificationMapper.esrNotificationsToPlacementDetailDTOs(savedNotifications);
+  }
+
   @Override
   public List<EsrNotificationDTO> loadVacantPostsForNotification(LocalDate asOfDate) {
 
@@ -328,7 +350,6 @@ public class EsrNotificationServiceImpl implements EsrNotificationService {
     return esrNotification;
   }
 
-
   private List<EsrNotification> mapCurrentAndFuturePlacementsToNotification(List<Placement> currentAndFuturePlacements, LocalDate asOfDate) {
 
     List<String> postNumbers = currentAndFuturePlacements.stream().map(placement -> placement.getPost().getNationalPostNumber()).distinct().collect(toList());
@@ -393,6 +414,7 @@ public class EsrNotificationServiceImpl implements EsrNotificationService {
       Placement nextPlacement = groupedPlacements.get(0);
       Placement currentPlacement = null;
       if (groupedPlacements.size() > 1) {
+        // Check if all current placement needs to be sent
         currentPlacement = groupedPlacements.get(1);
       }
       esrNotifications.add(buildNotification(nextPlacement, currentPlacement));
