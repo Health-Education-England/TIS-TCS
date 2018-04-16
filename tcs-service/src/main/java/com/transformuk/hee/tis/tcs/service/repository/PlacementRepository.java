@@ -37,7 +37,8 @@ public interface PlacementRepository extends JpaRepository<Placement, Long> {
       "AND (" +
       "          (dateFrom <= :fromDate AND dateTo >= :fromDate) OR " +
       "          (dateFrom = :earliestEligibleDate)" +
-      "        )", nativeQuery = true)
+      "        )" +
+      "AND pl.placementType IN (:placementTypes)", nativeQuery = true)
   List<Placement> findEarliestEligiblePlacementWithin3MonthsForEsrNotification(
       @Param("fromDate") LocalDate fromDate,
       @Param("earliestEligibleDate") LocalDate earliestEligibleDate,
