@@ -3,6 +3,7 @@ package com.transformuk.hee.tis.tcs.api.dto;
 import com.transformuk.hee.tis.tcs.api.enumeration.PostSpecialtyType;
 
 import java.io.Serializable;
+import java.util.Objects;
 
 public class PlacementSpecialtyDTO implements Serializable {
 
@@ -38,20 +39,14 @@ public class PlacementSpecialtyDTO implements Serializable {
   public boolean equals(Object o) {
     if (this == o) return true;
     if (o == null || getClass() != o.getClass()) return false;
-
     PlacementSpecialtyDTO that = (PlacementSpecialtyDTO) o;
-
-    if (placementId != null ? !placementId.equals(that.placementId) : that.placementId != null) return false;
-    if (specialtyId != null ? !specialtyId.equals(that.specialtyId) : that.specialtyId != null) return false;
-    return placementSpecialtyType == that.placementSpecialtyType;
+    return Objects.equals(placementId, that.placementId) &&
+        Objects.equals(specialtyId, that.specialtyId);
   }
 
   @Override
   public int hashCode() {
-    int result = placementId != null ? placementId.hashCode() : 0;
-    result = 31 * result + (specialtyId != null ? specialtyId.hashCode() : 0);
-    result = 31 * result + (placementSpecialtyType != null ? placementSpecialtyType.hashCode() : 0);
-    return result;
+    return Objects.hash(placementId, specialtyId);
   }
 
   @Override

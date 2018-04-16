@@ -61,6 +61,7 @@ public class TcsServiceImpl extends AbstractClientService {
 	private static final String API_CONTACT_DETAILS = "/api/contact-details/";
 	private static final String API_RIGHT_TO_WORKS = "/api/right-to-works/";
 	private static final String API_PROGRAMME_MEMBERSHIPS = "/api/programme-memberships/";
+	private static final String API_CURRENT_SPECIALTIES_COLUMN_FILTERS = "/api/specialties?columnFilters=";
 	private static final String API_CURRENT_CURRICULA_COLUMN_FILTERS = "/api/current/curricula?columnFilters=";
 	private static final String API_PROGRAMMES_COLUMN_FILTERS = "/api/programmes?columnFilters=";
 	private static final String API_PLACEMENTS_FILTER_COLUMN_FILTERS = "/api/placements/filter?columnFilters=";
@@ -71,12 +72,13 @@ public class TcsServiceImpl extends AbstractClientService {
 	private static final String API_PEOPLE_PHN_IN = "/api/people/phn/in/";
 	private static final String BASIC = "/basic";
 
-	private static String curriculumJsonQuerystringURLEncoded, programmeJsonQuerystringURLEncoded, placementJsonQuerystringURLEncoded;
+	private static String curriculumJsonQuerystringURLEncoded, programmeJsonQuerystringURLEncoded, specialtyJsonQuerystringURLEncoded, placementJsonQuerystringURLEncoded;
 
 	static {
 		try {
 			curriculumJsonQuerystringURLEncoded = new org.apache.commons.codec.net.URLCodec().encode("{\"name\":[\"PARAMETER_NAME\"]}");
 			programmeJsonQuerystringURLEncoded  = new org.apache.commons.codec.net.URLCodec().encode("{\"programmeName\":[\"PARAMETER_NAME\"],\"programmeNumber\":[\"PARAMETER_NUMBER\"],\"status\":[\"CURRENT\"]}");
+			specialtyJsonQuerystringURLEncoded  = new org.apache.commons.codec.net.URLCodec().encode("{\"name\":[\"PARAMETER_NAME\"],\"status\":[\"CURRENT\"]}");
 			placementJsonQuerystringURLEncoded  = new org.apache.commons.codec.net.URLCodec().encode("{\"traineeId\":[\"PARAMETER_TRAINEE_ID\"],\"postId\":[\"PARAMETER_POST_ID\"]}");
 		} catch (EncoderException e) {
 			e.printStackTrace();
@@ -237,6 +239,14 @@ public class TcsServiceImpl extends AbstractClientService {
 		log.debug("calling getCurriculaByName with {}", name);
 		return tcsRestTemplate
 				.exchange(serviceUrl + API_CURRENT_CURRICULA_COLUMN_FILTERS + curriculumJsonQuerystringURLEncoded.replace("PARAMETER_NAME", name), HttpMethod.GET, null, new ParameterizedTypeReference<List<CurriculumDTO>>() {})
+				.getBody();
+	}
+
+	@Cacheable("specialty")
+	public List<SpecialtyDTO> getSpecialtyByName(String name) {
+		log.debug("calling getSpecialtyByName with {}", name);
+		return tcsRestTemplate
+				.exchange(serviceUrl + API_CURRENT_SPECIALTIES_COLUMN_FILTERS + specialtyJsonQuerystringURLEncoded.replace("PARAMETER_NAME", name), HttpMethod.GET, null, new ParameterizedTypeReference<List<SpecialtyDTO>>() {})
 				.getBody();
 	}
 
