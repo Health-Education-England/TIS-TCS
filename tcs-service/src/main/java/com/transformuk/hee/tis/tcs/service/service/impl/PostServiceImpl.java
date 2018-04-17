@@ -504,7 +504,7 @@ public class PostServiceImpl implements PostService {
         String orderByFirstCriteria = pageable.getSort().iterator().next().toString();
         String orderByClause = orderByFirstCriteria.replaceAll(":", " ");
         if(orderByClause.contains("currentTraineeSurname")){
-          orderByClause = orderByClause.replaceAll("currentTraineeSurname","surnames");
+          orderByClause = orderByClause.replaceAll("currentTraineeSurname","surname");
         }
 
         query = query.replaceAll("ORDERBYCLAUSE", " ORDER BY " + orderByClause);
@@ -631,10 +631,10 @@ public class PostServiceImpl implements PostService {
         columnFilters.forEach(cf -> {
           switch (cf.getName()){
             case "currentTraineeSurname":
-              applyLikeFilter(whereClause, "surnames", cf.getValues());
+              applyInFilter(whereClause, "surname", cf.getValues());
               break;
             case "currentTraineeForenames":
-              applyLikeFilter(whereClause, "forenames", cf.getValues());
+              applyInFilter(whereClause, "forenames", cf.getValues());
               break;
             case "primarySpecialtyId":
               applyInFilter(whereClause, "specialtyId", cf.getValues());
@@ -646,7 +646,7 @@ public class PostServiceImpl implements PostService {
               applyInFilter(whereClause, "name", cf.getValues());
               break;
             case "programmeNames":
-              applyLikeFilter(whereClause, "programmes", cf.getValues());
+              applyInFilter(whereClause, "programmeName", cf.getValues());
               break;
             case "nationalPostNumber":
               applyInFilter(whereClause, "nationalPostNumber", cf.getValues());
@@ -658,10 +658,10 @@ public class PostServiceImpl implements PostService {
               applyInFilter(whereClause, "p.owner", cf.getValues());
               break;
             case "primarySiteId":
-              applyInFilter(whereClause, "siteId", cf.getValues());
+              applyInFilter(whereClause, "pst.siteId", cf.getValues());
               break;
             case "approvedGradeId":
-              applyInFilter(whereClause, "gradeId", cf.getValues());
+              applyInFilter(whereClause, "pg.gradeId", cf.getValues());
               break;
             default:
               throw new IllegalArgumentException("Not accounted for column filter [" + cf.getName() +
@@ -672,8 +672,8 @@ public class PostServiceImpl implements PostService {
 
       if (StringUtils.isNotEmpty(searchString)) {
         whereClause.append(" AND ( nationalPostNumber like ").append("'%" + searchString + "%'");
-        whereClause.append(" OR programmes like ").append("'%" + searchString + "%'");
-        whereClause.append(" OR surnames like ").append("'%" + searchString + "%'");
+        whereClause.append(" OR programmeName like ").append("'%" + searchString + "%'");
+        whereClause.append(" OR surname like ").append("'%" + searchString + "%'");
         whereClause.append(" OR forenames like ").append("'%" + searchString + "%'");
         whereClause.append(" ) ");
       }
