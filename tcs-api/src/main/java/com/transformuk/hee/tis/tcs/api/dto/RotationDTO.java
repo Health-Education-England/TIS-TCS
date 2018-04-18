@@ -22,11 +22,9 @@ public class RotationDTO implements Serializable {
     
     @NotNull(groups = Create.class, message = "Programme id must not be null when creating a new rotation")
     private Long programmeId;
-    
-    @Null(groups = Create.class, message = "Programme name must be null when creating a new rotation")
+
     private String programmeName;
-    
-    @Null(groups = Create.class, message = "Programme number must be null when creating a new rotation")
+
     private String programmeNumber;
     
     @NotNull(groups = Create.class, message = "Rotation name must not be null when creating a new rotation")
