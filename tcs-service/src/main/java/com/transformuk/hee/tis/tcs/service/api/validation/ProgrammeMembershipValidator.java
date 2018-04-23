@@ -3,6 +3,7 @@ package com.transformuk.hee.tis.tcs.service.api.validation;
 
 import com.google.common.collect.Lists;
 import com.transformuk.hee.tis.reference.client.impl.ReferenceServiceImpl;
+import com.transformuk.hee.tis.tcs.service.service.impl.RotationServiceImpl;
 import com.transformuk.hee.tis.tcs.api.dto.ProgrammeMembershipDTO;
 import com.transformuk.hee.tis.tcs.service.model.ProgrammeMembership;
 import com.transformuk.hee.tis.tcs.service.repository.CurriculumRepository;
@@ -33,6 +34,7 @@ public class ProgrammeMembershipValidator {
   private ProgrammeRepository programmeRepository;
   private CurriculumRepository curriculumRepository;
   private ReferenceServiceImpl referenceService;
+  private RotationServiceImpl rotationService;
 
   @Autowired
   public ProgrammeMembershipValidator(PersonRepository personRepository,
@@ -43,6 +45,7 @@ public class ProgrammeMembershipValidator {
     this.programmeRepository = programmeRepository;
     this.curriculumRepository = curriculumRepository;
     this.referenceService = referenceService;
+    this.rotationService = rotationService;
   }
 
   /**
@@ -151,11 +154,10 @@ public class ProgrammeMembershipValidator {
     List<FieldError> fieldErrors = new ArrayList<>();
     // then check the rotation
     if (StringUtils.isNotEmpty(programmeMembershipDTO.getRotation())) {
-      List<String> labels = Lists.newArrayList();
-      labels.add(programmeMembershipDTO.getRotation());
-      if (!CollectionUtils.isEmpty(labels)) {
-        Map<String, Boolean> rotationExistsMap = referenceService.rotationExists(labels);
-        notExistsFieldErrors(fieldErrors, rotationExistsMap, "rotation", "rotation");
+        String label = programmeMembershipDTO.getRotation();
+      if (label != null && false) {
+        Boolean rotationExist = rotationService.rotationExists(label);
+        notExistsFieldErrors(fieldErrors, rotationExist, "rotation", "rotation");
       }
     }
     return fieldErrors;
@@ -172,14 +174,16 @@ public class ProgrammeMembershipValidator {
         String.format("%s is required", field)));
   }
 
-  private void notExistsFieldErrors(List<FieldError> fieldErrors, Map<String, Boolean> rotationExistsMap,
+  private void notExistsFieldErrors(List<FieldError> fieldErrors, Boolean rotationExist,
                                     String field, String entityName) {
-    rotationExistsMap.forEach((k, v) -> {
-      if (!v) {
-        fieldErrors.add(new FieldError(PROGRAMME_MEMBERSHIP_DTO_NAME, field,
-            String.format("%s with label %s does not exist", entityName, k)));
+
+      if ( !fieldErrors.isEmpty()) {
+          fieldErrors.add(new FieldError(PROGRAMME_MEMBERSHIP_DTO_NAME, field,
+                  String.format("%s with name %s does not exist", entityName)));
+
       }
-    });
+
+
   }
 
 }

@@ -393,33 +393,6 @@ public class ProgrammeMembershipResourceIntTest {
             value(String.format("The selected Programme and Curriculum are not linked. They must be linked before a Programme Membership can be made", String.valueOf(notAssociatedCurriculum.getId()))));
   }
 
-  @Test
-  @Transactional
-  public void shouldValidateRotation() throws Exception {
-    //given
-    personRepository.saveAndFlush(person);
-    curriculumRepository.saveAndFlush(curriculum);
-    programme.setCurricula(Sets.newHashSet(Lists.newArrayList(curriculum)));
-    programmeRepository.saveAndFlush(programme);
-    programmeMembership.setPerson(person);
-    programmeMembership.setProgrammeId(programme.getId());
-    programmeMembership.setCurriculumId(programme.getCurricula().iterator().next().getId());
-    ProgrammeMembershipDTO programmeMembershipDTO = programmeMembershipMapper.toDto(programmeMembership);
-    programmeMembershipDTO.setRotation(NOT_EXISTS_ROTATION); // this rotation not exists in reference service
-
-    Map<String, Boolean> exists = Maps.newHashMap(NOT_EXISTS_ROTATION, false);
-    given(referenceService.rotationExists(Lists.newArrayList(NOT_EXISTS_ROTATION))).willReturn(exists);
-
-    //when & then
-    restProgrammeMembershipMockMvc.perform(post("/api/programme-memberships")
-        .contentType(TestUtil.APPLICATION_JSON_UTF8)
-        .content(TestUtil.convertObjectToJsonBytes(programmeMembershipDTO)))
-        .andExpect(status().isBadRequest())
-        .andExpect(jsonPath("$.message").value("error.validation"))
-        .andExpect(jsonPath("$.fieldErrors[0].field").value("rotation"))
-        .andExpect(jsonPath("$.fieldErrors[0].message").
-            value(String.format("rotation with label %s does not exist", NOT_EXISTS_ROTATION)));
-  }
 
   @Test
   @Transactional

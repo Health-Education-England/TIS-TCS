@@ -164,4 +164,13 @@ public class RotationServiceImpl implements RotationService {
             rd.setProgrammeNumber(p.getProgrammeNumber());
         }
     }
+
+    public Boolean rotationExists(String value) {
+        Rotation rotation = rotationRepository.findByNameIn(value);
+        if (rotation != null) {
+            return true;
+        } else {
+            return false;
+        }
+    }
 }
