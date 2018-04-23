@@ -15,6 +15,7 @@ import com.transformuk.hee.tis.tcs.service.repository.PersonRepository;
 import com.transformuk.hee.tis.tcs.service.repository.ProgrammeMembershipRepository;
 import com.transformuk.hee.tis.tcs.service.repository.ProgrammeRepository;
 import com.transformuk.hee.tis.tcs.service.service.ProgrammeMembershipService;
+import com.transformuk.hee.tis.tcs.service.service.RotationService;
 import com.transformuk.hee.tis.tcs.service.service.mapper.PersonMapper;
 import com.transformuk.hee.tis.tcs.service.service.mapper.ProgrammeMembershipMapper;
 import org.assertj.core.util.Lists;
@@ -126,13 +127,16 @@ public class ProgrammeMembershipResourceIntTest {
 
   @Autowired
   private ExceptionTranslator exceptionTranslator;
+  
+  @Autowired
+  private RotationService rotationService;
 
   private ProgrammeMembershipValidator programmeMembershipValidator;
 
   @Autowired
   private EntityManager em;
 
-  @Autowired
+  @Autowired  
   private PersonMapper personMapper;
 
   @Mock
@@ -184,7 +188,7 @@ public class ProgrammeMembershipResourceIntTest {
   @Before
   public void setup() {
     MockitoAnnotations.initMocks(this);
-    programmeMembershipValidator = new ProgrammeMembershipValidator(personRepository, programmeRepository, curriculumRepository, referenceService);
+    programmeMembershipValidator = new ProgrammeMembershipValidator(personRepository, programmeRepository, curriculumRepository, referenceService, rotationService);
     ProgrammeMembershipResource programmeMembershipResource = new ProgrammeMembershipResource(programmeMembershipService,
         programmeMembershipValidator);
     this.restProgrammeMembershipMockMvc = MockMvcBuilders.standaloneSetup(programmeMembershipResource)

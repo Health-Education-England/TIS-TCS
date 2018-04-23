@@ -2,7 +2,9 @@ package com.transformuk.hee.tis.tcs.service.api.validation;
 
 
 import com.google.common.collect.Lists;
+import com.transformuk.hee.tis.reference.client.ReferenceService;
 import com.transformuk.hee.tis.reference.client.impl.ReferenceServiceImpl;
+import com.transformuk.hee.tis.tcs.service.service.RotationService;
 import com.transformuk.hee.tis.tcs.service.service.impl.RotationServiceImpl;
 import com.transformuk.hee.tis.tcs.api.dto.ProgrammeMembershipDTO;
 import com.transformuk.hee.tis.tcs.service.model.ProgrammeMembership;
@@ -33,14 +35,15 @@ public class ProgrammeMembershipValidator {
   private PersonRepository personRepository;
   private ProgrammeRepository programmeRepository;
   private CurriculumRepository curriculumRepository;
-  private ReferenceServiceImpl referenceService;
-  private RotationServiceImpl rotationService;
+  private ReferenceService referenceService;
+  private RotationService rotationService;
 
   @Autowired
   public ProgrammeMembershipValidator(PersonRepository personRepository,
                                       ProgrammeRepository programmeRepository,
                                       CurriculumRepository curriculumRepository,
-                                      ReferenceServiceImpl referenceService) {
+                                      ReferenceService referenceService,
+                                      RotationService rotationService) {
     this.personRepository = personRepository;
     this.programmeRepository = programmeRepository;
     this.curriculumRepository = curriculumRepository;
