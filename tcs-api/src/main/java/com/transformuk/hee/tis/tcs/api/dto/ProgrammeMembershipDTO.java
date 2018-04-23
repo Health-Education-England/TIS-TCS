@@ -199,12 +199,13 @@ public class ProgrammeMembershipDTO implements Serializable {
         Objects.equals(curriculumCompletionDate, that.curriculumCompletionDate) &&
         Objects.equals(programmeEndDate, that.programmeEndDate) &&
         Objects.equals(programmeId, that.programmeId) &&
-        Objects.equals(curriculumId, that.curriculumId);
+        Objects.equals(curriculumId, that.curriculumId) &&
+        Objects.equals(programmeMembershipType, that.programmeMembershipType);
   }
 
   @Override
   public int hashCode() {
-    return Objects.hash(getPersonIdOrNull(), curriculumStartDate, curriculumEndDate, programmeStartDate, curriculumCompletionDate, programmeEndDate, programmeId, curriculumId);
+    return Objects.hash(getPersonIdOrNull(), curriculumStartDate, curriculumEndDate, programmeStartDate, curriculumCompletionDate, programmeEndDate, programmeId, curriculumId, programmeMembershipType);
   }
 
   private Long getPersonIdOrNull() {
