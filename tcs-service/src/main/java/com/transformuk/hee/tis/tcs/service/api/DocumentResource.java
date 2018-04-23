@@ -55,7 +55,7 @@ public class DocumentResource {
             @ApiResponse(code = 500, message = "Error occurred while performing operation", response = String.class)
     })
     @GetMapping(value = PATH_DOCUMENTS, produces = APPLICATION_JSON)
-    public ResponseEntity<Collection<DocumentDTO>> getAllDocumentsForPerson(
+    public ResponseEntity<Collection<DocumentDTO>> getAllDocuments(
             @ApiParam(value = "The Person the document belongs to", required = true)
             @RequestParam("personId") final Long personId,
             @ApiParam(value = "Query to filter documents by")
@@ -81,8 +81,21 @@ public class DocumentResource {
     public ResponseEntity<DocumentDTO> getDocumentById(
             @ApiParam(value = "The document id", required = true)
             @PathVariable(value = "documentId") final Long documentId) {
+        LOG.info("Received 'getDocumentById' request for document id '{}'",
+                documentId);
 
-        return ResponseEntity.ok(documentService.findOne(documentId).get());
+        LOG.debug("Accessing service to load document with id '{}'",
+                documentId);
+
+        final Optional<DocumentDTO> documentOptional = documentService.findOne(documentId);
+
+        if (documentOptional.isPresent()) {
+            return ResponseEntity.ok(documentOptional.get());
+        } else {
+            LOG.warn("Document with id '{}' not found for 'getDocumentById'",
+                    documentId);
+            return new ResponseEntity<>(HttpStatus.NOT_FOUND);
+        }
     }
 
     @ApiOperation(value = "Downloads a specific document", response = String.class, produces = APPLICATION_OCTET_STREAM)
@@ -200,13 +213,15 @@ public class DocumentResource {
             final Optional<DocumentDTO> existingDocumentOptional = documentService.findOne(documentParam.getId());
 
             if (!existingDocumentOptional.isPresent()) {
-                LOG.warn("Document with id '{}' not found");
+                LOG.warn("Document with id '{}' not found",
+                        documentParam.getId());
                 return ResponseEntity.notFound().build();
             }
 
             final DocumentDTO existingDocument = existingDocumentOptional.get();
 
-            LOG.debug("Merging tags changes on Document with id '{}'", documentParam.getId());
+            LOG.debug("Merging tags changes on Document with id '{}'",
+                    documentParam.getId());
 
             // filters deleted tags
             final Set<TagDTO> deletedTags = existingDocument.getTags().stream()
@@ -305,7 +320,7 @@ public class DocumentResource {
             document.setUploadedBy(TisSecurityHelper.getProfileFromContext().getFirstName() + " " + TisSecurityHelper.getProfileFromContext().getLastName());
             document.setPersonId(personId);
             document.setFileName(documentParam.getOriginalFilename());
-            document.setName(Optional.ofNullable(documentParam.getName()).orElse(documentParam.getOriginalFilename()));
+            document.setName(documentParam.getOriginalFilename());
             document.setFileExtension(documentParam.getOriginalFilename().substring(documentParam.getOriginalFilename().lastIndexOf('.') + 1));
             document.setContentType(documentParam.getContentType());
             document.setSize(documentParam.getSize());
