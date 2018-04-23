@@ -5,6 +5,7 @@ import org.springframework.stereotype.Repository;
 
 import org.springframework.data.jpa.repository.*;
 
+import java.util.Optional;
 import java.util.Set;
 import java.util.List;
 
@@ -16,6 +17,6 @@ import java.util.List;
 @Repository
 public interface RotationRepository extends JpaRepository<Rotation, Long>, JpaSpecificationExecutor<Rotation> {
 
-    Rotation findByNameIn(String name);
+    Optional<Rotation> findByName(String name);
 
 }

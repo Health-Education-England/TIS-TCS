@@ -80,23 +80,6 @@ public class RotationServiceImpl implements RotationService {
         return mapRotations(page);
     }
     
-    private Page<RotationDTO> mapRotations(Page<Rotation> page) {
-        Set<Long> programmeIds = page.getContent().stream()
-                .map(Rotation::getProgrammeId)
-                .collect(Collectors.toSet());
-        
-        Map<Long, Programme> programmeMap = !programmeIds.isEmpty() ?
-                programmeRepository.findByIdIn(programmeIds).stream()
-                .collect(Collectors.toMap(Programme::getId, Functions.identity()))
-                : Collections.emptyMap();
-        
-        return page.map(rotationMapper::toDto)
-                .map(rd -> {
-                    setProgrammeInfo(rd, programmeMap.get(rd.getProgrammeId()));
-                    return rd;
-                });
-    }
-    
     /**
      * Get one rotation by id.
      *
@@ -145,6 +128,11 @@ public class RotationServiceImpl implements RotationService {
         return mapRotations(result);
     }
     
+    @Override
+    @Transactional(readOnly = true)
+    public Boolean rotationExists(String value) {
+        return rotationRepository.findByName(value).isPresent();
+    }
     
     /**
      * Delete the rotation by id.
@@ -153,24 +141,31 @@ public class RotationServiceImpl implements RotationService {
      */
     @Override
     public void delete(Long id) {
-
         log.debug("Request to delete Rotation : {}", id);
         rotationRepository.delete(id);
     }
     
+    private Page<RotationDTO> mapRotations(Page<Rotation> page) {
+        Set<Long> programmeIds = page.getContent().stream()
+                .map(Rotation::getProgrammeId)
+                .collect(Collectors.toSet());
+        
+        Map<Long, Programme> programmeMap = !programmeIds.isEmpty() ?
+                programmeRepository.findByIdIn(programmeIds).stream()
+                        .collect(Collectors.toMap(Programme::getId, Functions.identity()))
+                : Collections.emptyMap();
+        
+        return page.map(rotationMapper::toDto)
+                .map(rd -> {
+                    setProgrammeInfo(rd, programmeMap.get(rd.getProgrammeId()));
+                    return rd;
+                });
+    }
+
     private void setProgrammeInfo(RotationDTO rd, Programme p) {
         if (p != null) {
             rd.setProgrammeName(p.getProgrammeName());
             rd.setProgrammeNumber(p.getProgrammeNumber());
-        }
-    }
-
-    public Boolean rotationExists(String value) {
-        Rotation rotation = rotationRepository.findByNameIn(value);
-        if (rotation != null) {
-            return true;
-        } else {
-            return false;
         }
     }
 }

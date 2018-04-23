@@ -40,6 +40,8 @@ public interface RotationService {
     
     Page<RotationDTO> advancedSearchBySpecification(List<ColumnFilter> columnFilters, Pageable pageable);
     
+    Boolean rotationExists(String value);
+    
     /**
      * Delete the "id" rotation.
      *

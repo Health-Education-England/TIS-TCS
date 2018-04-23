@@ -161,7 +161,7 @@ public class RotationPostResourceIntTest {
         rotationPostRepository.saveAndFlush(rotationPost);
 
         // Get the rotationPost
-        restRotationPostMockMvc.perform(get("/api/rotation-posts/{id}", rotationPost.getId()))
+        restRotationPostMockMvc.perform(get("/api/rotation-posts/{id}", rotationPost.getPostId()))
             .andExpect(status().isOk())
             .andExpect(content().contentType(MediaType.APPLICATION_JSON_UTF8_VALUE))
             .andExpect(jsonPath("$.id").value(rotationPost.getId().intValue()))

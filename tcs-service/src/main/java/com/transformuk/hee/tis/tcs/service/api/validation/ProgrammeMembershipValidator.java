@@ -155,10 +155,8 @@ public class ProgrammeMembershipValidator {
     // then check the rotation
     if (StringUtils.isNotEmpty(programmeMembershipDTO.getRotation())) {
         String label = programmeMembershipDTO.getRotation();
-      if (label != null && false) {
         Boolean rotationExist = rotationService.rotationExists(label);
         notExistsFieldErrors(fieldErrors, rotationExist, "rotation", "rotation");
-      }
     }
     return fieldErrors;
   }

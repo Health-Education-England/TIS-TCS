@@ -73,6 +73,21 @@ public class RotationPostServiceImpl implements RotationPostService {
         RotationPost rotationPost = rotationPostRepository.findOne(id);
         return rotationPostMapper.toDto(rotationPost);
     }
+    
+    /**
+     * Get one rotationPost by post id.
+     *
+     * @param id the id of the entity
+     * @return the entity
+     */
+    @Override
+    @Transactional(readOnly = true)
+    public RotationPostDTO findOneByPostId(Long id) {
+        log.debug("Request to get RotationPost : {}", id);
+        return rotationPostRepository.findOneByPostId(id)
+                .map(rotationPostMapper::toDto).orElse(null);
+    }
+    
 
     /**
      * Delete the rotationPost by id.
