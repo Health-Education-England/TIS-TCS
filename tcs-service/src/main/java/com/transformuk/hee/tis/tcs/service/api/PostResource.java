@@ -82,6 +82,7 @@ public class PostResource {
   private final PlacementViewMapper placementViewMapper;
   private final PlacementService placementService;
   private final PlacementSummaryDecorator placementSummaryDecorator;
+
   private static final String REQUEST_BODY_EMPTY = "request.body.empty";
   private static final String REQUEST_BODY_CANNOT_BE_EMPTY = "The request body for this end point cannot be empty";
   private static final String BULK_UPDATE_FAILED_NOID = "bulk.update.failed.noId";
@@ -177,6 +178,28 @@ public class PostResource {
     } else {
       page = postService.advancedSearch(searchQuery, columnFilters, pageable);
     }
+    HttpHeaders headers = PaginationUtil.generatePaginationHttpHeaders(page, "/api/posts");
+    return new ResponseEntity<>(page.getContent(), headers, HttpStatus.OK);
+  }
+
+  /**
+   * Find Posts by searching for parts of a national post number
+   * @param pageable
+   * @param searchQuery
+   * @return
+   * @throws IOException
+   */
+  @GetMapping("/findByNationalPostNumber")
+  @Timed
+  @PreAuthorize("hasAuthority('post:view')")
+  public ResponseEntity<List<PostViewDTO>> findByNationalPostNumber(
+      @ApiParam Pageable pageable,
+      @ApiParam(value = "any wildcard string to be searched")
+      @RequestParam(value = "searchQuery") String searchQuery) throws IOException {
+    log.debug("REST request to get a page of Posts");
+    searchQuery = sanitize(searchQuery);
+    Page<PostViewDTO> page = postService.findByNationalPostNumber(searchQuery, pageable);
+
     HttpHeaders headers = PaginationUtil.generatePaginationHttpHeaders(page, "/api/posts");
     return new ResponseEntity<>(page.getContent(), headers, HttpStatus.OK);
   }
