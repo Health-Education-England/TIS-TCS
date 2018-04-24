@@ -248,9 +248,9 @@ public class ProgrammeMembershipResourceIntTest {
         .content(TestUtil.convertObjectToJsonBytes(programmeMembershipDTO)))
         .andExpect(status().isBadRequest())
         .andExpect(jsonPath("$.message").value("error.validation"))
-        .andExpect(jsonPath("$.fieldErrors[*].field").
-            value(containsInAnyOrder("programmeMembershipType", "curriculumStartDate", "curriculumEndDate",
-                "programmeStartDate", "programmeEndDate", "programmeId", "curriculumId")));
+            .andExpect(jsonPath("$.fieldErrors[*].field").
+                    value(containsInAnyOrder("programmeMembershipType",
+                            "programmeStartDate", "programmeEndDate", "programmeId")));
   }
 
   @Test
@@ -266,8 +266,8 @@ public class ProgrammeMembershipResourceIntTest {
         .andExpect(status().isBadRequest())
         .andExpect(jsonPath("$.message").value("error.validation"))
         .andExpect(jsonPath("$.fieldErrors[*].field").
-            value(containsInAnyOrder("id", "programmeMembershipType", "curriculumStartDate", "curriculumEndDate",
-                "programmeStartDate", "programmeEndDate", "programmeId", "curriculumId")));
+            value(containsInAnyOrder("programmeMembershipType",
+                "programmeStartDate", "programmeEndDate", "programmeId")));
   }
 
   @Test
@@ -428,13 +428,16 @@ public class ProgrammeMembershipResourceIntTest {
     curriculumRepository.saveAndFlush(curriculum);
     programme.setCurricula(Sets.newHashSet(Lists.newArrayList(curriculum)));
     programmeRepository.saveAndFlush(programme);
-    int databaseSizeBeforeCreate = programmeMembershipRepository.findAll().size();
 
     // Create the ProgrammeMembership with an existing ID
     programmeMembership.setId(1L);
     programmeMembership.setPerson(person);
     programmeMembership.setProgrammeId(programme.getId());
     programmeMembership.setCurriculumId(programme.getCurricula().iterator().next().getId());
+    //Save programme membership
+    programmeMembership = programmeMembershipRepository.saveAndFlush(programmeMembership);
+    int databaseSizeBeforeCreate = programmeMembershipRepository.findAll().size();
+
     ProgrammeMembershipDTO programmeMembershipDTO = programmeMembershipMapper.toDto(programmeMembership);
 
     // An entity with an existing ID cannot be created, so this API call must fail
@@ -458,18 +461,17 @@ public class ProgrammeMembershipResourceIntTest {
     restProgrammeMembershipMockMvc.perform(get("/api/programme-memberships?sort=id,desc"))
         .andExpect(status().isOk())
         .andExpect(content().contentType(MediaType.APPLICATION_JSON_UTF8_VALUE))
-        .andExpect(jsonPath("$.[*].id").value(hasItem(programmeMembership.getId().intValue())))
-        .andExpect(jsonPath("$.[*].intrepidId").value(hasItem(DEFAULT_INTREPID_ID.toString())))
+        .andExpect(jsonPath("$.[*].curriculumMemberships[*].intrepidId").value(hasItem(DEFAULT_INTREPID_ID.toString())))
         .andExpect(jsonPath("$.[*].programmeMembershipType").value(hasItem(DEFAULT_PROGRAMME_MEMBERSHIP_TYPE.toString().toUpperCase())))
         .andExpect(jsonPath("$.[*].rotation").value(hasItem(DEFAULT_ROTATION.toString())))
-        .andExpect(jsonPath("$.[*].curriculumStartDate").value(hasItem(DEFAULT_CURRICULUM_START_DATE.toString())))
-        .andExpect(jsonPath("$.[*].curriculumEndDate").value(hasItem(DEFAULT_CURRICULUM_END_DATE.toString())))
-        .andExpect(jsonPath("$.[*].periodOfGrace").value(hasItem(DEFAULT_PERIOD_OF_GRACE)))
+        .andExpect(jsonPath("$.[*].curriculumMemberships[*].curriculumStartDate").value(hasItem(DEFAULT_CURRICULUM_START_DATE.toString())))
+        .andExpect(jsonPath("$.[*].curriculumMemberships[*].curriculumEndDate").value(hasItem(DEFAULT_CURRICULUM_END_DATE.toString())))
+        .andExpect(jsonPath("$.[*].curriculumMemberships[*].periodOfGrace").value(hasItem(DEFAULT_PERIOD_OF_GRACE)))
         .andExpect(jsonPath("$.[*].programmeStartDate").value(hasItem(DEFAULT_PROGRAMME_START_DATE.toString())))
         .andExpect(jsonPath("$.[*].curriculumCompletionDate").value(hasItem(DEFAULT_CURRICULUM_COMPLETION_DATE.toString())))
         .andExpect(jsonPath("$.[*].programmeEndDate").value(hasItem(DEFAULT_PROGRAMME_END_DATE.toString())))
         .andExpect(jsonPath("$.[*].leavingDestination").value(hasItem(DEFAULT_LEAVING_DESTINATION.toString())))
-        .andExpect(jsonPath("$.[*].amendedDate").isNotEmpty());
+        .andExpect(jsonPath("$.[*].curriculumMemberships[*].amendedDate").isNotEmpty());
   }
 
   @Test
@@ -482,18 +484,18 @@ public class ProgrammeMembershipResourceIntTest {
     restProgrammeMembershipMockMvc.perform(get("/api/programme-memberships/{id}", programmeMembership.getId()))
         .andExpect(status().isOk())
         .andExpect(content().contentType(MediaType.APPLICATION_JSON_UTF8_VALUE))
-        .andExpect(jsonPath("$.id").value(programmeMembership.getId().intValue()))
-        .andExpect(jsonPath("$.intrepidId").value(DEFAULT_INTREPID_ID.toString()))
+        .andExpect(jsonPath("$.curriculumMemberships[*].id").value(hasItem(programmeMembership.getId().intValue())))
+        .andExpect(jsonPath("$.curriculumMemberships[*].intrepidId").value(hasItem(DEFAULT_INTREPID_ID.toString())))
         .andExpect(jsonPath("$.programmeMembershipType").value(DEFAULT_PROGRAMME_MEMBERSHIP_TYPE.toString().toUpperCase()))
         .andExpect(jsonPath("$.rotation").value(DEFAULT_ROTATION.toString()))
-        .andExpect(jsonPath("$.curriculumStartDate").value(DEFAULT_CURRICULUM_START_DATE.toString()))
-        .andExpect(jsonPath("$.curriculumEndDate").value(DEFAULT_CURRICULUM_END_DATE.toString()))
-        .andExpect(jsonPath("$.periodOfGrace").value(DEFAULT_PERIOD_OF_GRACE))
+        .andExpect(jsonPath("$.curriculumMemberships[*].curriculumStartDate").value(hasItem(DEFAULT_CURRICULUM_START_DATE.toString())))
+        .andExpect(jsonPath("$.curriculumMemberships[*].curriculumEndDate").value(hasItem(DEFAULT_CURRICULUM_END_DATE.toString())))
+        .andExpect(jsonPath("$.curriculumMemberships[*].periodOfGrace").value(hasItem(DEFAULT_PERIOD_OF_GRACE)))
         .andExpect(jsonPath("$.programmeStartDate").value(DEFAULT_PROGRAMME_START_DATE.toString()))
         .andExpect(jsonPath("$.curriculumCompletionDate").value(DEFAULT_CURRICULUM_COMPLETION_DATE.toString()))
         .andExpect(jsonPath("$.programmeEndDate").value(DEFAULT_PROGRAMME_END_DATE.toString()))
         .andExpect(jsonPath("$.leavingDestination").value(DEFAULT_LEAVING_DESTINATION.toString()))
-        .andExpect(jsonPath("$.amendedDate").isNotEmpty());
+        .andExpect(jsonPath("$.curriculumMemberships[*].amendedDate").isNotEmpty());
   }
 
   @Test

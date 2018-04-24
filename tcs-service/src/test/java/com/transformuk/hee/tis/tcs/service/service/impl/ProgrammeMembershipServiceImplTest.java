@@ -1,6 +1,7 @@
 package com.transformuk.hee.tis.tcs.service.service.impl;
 
 import com.transformuk.hee.tis.tcs.api.dto.CurriculumDTO;
+import com.transformuk.hee.tis.tcs.api.dto.CurriculumMembershipDTO;
 import com.transformuk.hee.tis.tcs.api.dto.ProgrammeMembershipCurriculaDTO;
 import com.transformuk.hee.tis.tcs.api.dto.ProgrammeMembershipDTO;
 import com.transformuk.hee.tis.tcs.service.model.Curriculum;
@@ -112,11 +113,17 @@ public class ProgrammeMembershipServiceImplTest {
 
     programmeMembershipDTO1.setProgrammeId(PROGRAMME_ID);
     programmeMembershipDTO1.setTrainingNumberId(TRAINEE_ID);
-    programmeMembershipDTO1.setCurriculumId(5L);
+    programmeMembershipDTO1.setCurriculumMemberships(Lists.newArrayList());
 
     programmeMembershipDTO2.setProgrammeId(PROGRAMME_ID);
     programmeMembershipDTO2.setTrainingNumberId(TRAINEE_ID);
-    programmeMembershipDTO2.setCurriculumId(6L);
+    programmeMembershipDTO2.setCurriculumMemberships(Lists.newArrayList());
+
+    CurriculumMembershipDTO curriculumMembershipDTO1 = new CurriculumMembershipDTO();
+    curriculumMembershipDTO1.setCurriculumId(5L);
+
+    CurriculumMembershipDTO curriculumMembershipDTO2 = new CurriculumMembershipDTO();
+    curriculumMembershipDTO2.setCurriculumId(6L);
 
     curriculum1.setId(5L);
     curriculum1.setName("XXX");
@@ -127,6 +134,9 @@ public class ProgrammeMembershipServiceImplTest {
     curriculumDTO1.setName("XXX");
     curriculumDTO2.setId(6L);
     curriculumDTO2.setName("YYY");
+
+    programmeMembershipDTO1.getCurriculumMemberships().add(curriculumMembershipDTO1);
+    programmeMembershipDTO2.getCurriculumMemberships().add(curriculumMembershipDTO2);
 
     List<ProgrammeMembership> programmeMemberships = Lists.newArrayList(programmeMembership1, programmeMembership2);
     List<ProgrammeMembershipDTO> programmeMembershipDTOList = Lists.newArrayList(programmeMembershipDTO1, programmeMembershipDTO2);

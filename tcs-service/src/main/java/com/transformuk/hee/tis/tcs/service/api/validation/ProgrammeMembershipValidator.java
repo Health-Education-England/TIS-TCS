@@ -3,6 +3,7 @@ package com.transformuk.hee.tis.tcs.service.api.validation;
 
 import com.google.common.collect.Lists;
 import com.transformuk.hee.tis.reference.client.impl.ReferenceServiceImpl;
+import com.transformuk.hee.tis.tcs.api.dto.CurriculumMembershipDTO;
 import com.transformuk.hee.tis.tcs.api.dto.ProgrammeMembershipDTO;
 import com.transformuk.hee.tis.tcs.service.model.ProgrammeMembership;
 import com.transformuk.hee.tis.tcs.service.repository.CurriculumRepository;
@@ -19,6 +20,8 @@ import org.springframework.web.bind.MethodArgumentNotValidException;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
+import java.util.stream.Collectors;
 
 /**
  * Holds more complex custom validation for a {@link ProgrammeMembership} that
@@ -112,14 +115,17 @@ public class ProgrammeMembershipValidator {
    */
   private List<FieldError> checkCurriculum(ProgrammeMembershipDTO programmeMembershipDTO) {
     List<FieldError> fieldErrors = new ArrayList<>();
-    Long curriculumId = programmeMembershipDTO.getCurriculumId();
-    if (curriculumId != null) {
-      if (!curriculumRepository.exists(curriculumId)) {
-        fieldErrors.add(new FieldError(PROGRAMME_MEMBERSHIP_DTO_NAME, "curriculumId",
-            String.format("Curriculum with id %s does not exist", curriculumId)));
-      } else {
-        checkProgrammeCurriculumAssociation(fieldErrors, programmeMembershipDTO.getProgrammeId(), curriculumId);
-      }
+    Set<Long> curriculumIds = programmeMembershipDTO.getCurriculumMemberships().stream().map(CurriculumMembershipDTO::getCurriculumId).collect(Collectors.toSet());
+    if (!CollectionUtils.isEmpty(curriculumIds)) {
+      curriculumIds.stream().forEach(curriculumId -> {
+        if (!curriculumRepository.exists(curriculumId)) {
+          fieldErrors.add(new FieldError(PROGRAMME_MEMBERSHIP_DTO_NAME, "curriculumId",
+                  String.format("Curriculum with id %s does not exist", curriculumId)));
+        } else{
+          checkProgrammeCurriculumAssociation(fieldErrors, programmeMembershipDTO.getProgrammeId(), curriculumId);
+        }
+      });
+
     }
     return fieldErrors;
   }

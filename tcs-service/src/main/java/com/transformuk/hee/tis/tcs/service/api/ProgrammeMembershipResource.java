@@ -1,6 +1,7 @@
 package com.transformuk.hee.tis.tcs.service.api;
 
 import com.codahale.metrics.annotation.Timed;
+import com.transformuk.hee.tis.tcs.api.dto.CurriculumMembershipDTO;
 import com.transformuk.hee.tis.tcs.api.dto.ProgrammeMembershipCurriculaDTO;
 import com.transformuk.hee.tis.tcs.api.dto.ProgrammeMembershipDTO;
 import com.transformuk.hee.tis.tcs.api.dto.validation.Create;
@@ -35,6 +36,7 @@ import org.springframework.web.bind.annotation.RestController;
 import javax.validation.Valid;
 import java.net.URI;
 import java.net.URISyntaxException;
+import java.util.Collection;
 import java.util.List;
 import java.util.Optional;
 import java.util.stream.Collectors;
@@ -73,14 +75,14 @@ public class ProgrammeMembershipResource {
       throws URISyntaxException, MethodArgumentNotValidException {
     log.debug("REST request to save ProgrammeMembership : {}", programmeMembershipDTO);
     programmeMembershipValidator.validate(programmeMembershipDTO);
-    if (programmeMembershipDTO.getId() != null) {
+    if (programmeMembershipDTO.getCurriculumMemberships().get(0).getId() != null) {
       return ResponseEntity.badRequest().headers(HeaderUtil.
           createFailureAlert(ENTITY_NAME, "idexists",
               "A new programmeMembership cannot already have an ID")).body(null);
     }
     ProgrammeMembershipDTO result = programmeMembershipService.save(programmeMembershipDTO);
-    return ResponseEntity.created(new URI("/api/programme-memberships/" + result.getId()))
-        .headers(HeaderUtil.createEntityCreationAlert(ENTITY_NAME, result.getId().toString()))
+    return ResponseEntity.created(new URI("/api/programme-memberships/" + result.getCurriculumMemberships().get(0).getId()))
+        .headers(HeaderUtil.createEntityCreationAlert(ENTITY_NAME, result.getCurriculumMemberships().get(0).getId().toString()))
         .body(result);
   }
 
@@ -101,12 +103,12 @@ public class ProgrammeMembershipResource {
       throws URISyntaxException, MethodArgumentNotValidException {
     log.debug("REST request to update ProgrammeMembership : {}", programmeMembershipDTO);
     programmeMembershipValidator.validate(programmeMembershipDTO);
-    if (programmeMembershipDTO.getId() == null) {
+    if (programmeMembershipDTO.getCurriculumMemberships().get(0).getId() == null) {
       return createProgrammeMembership(programmeMembershipDTO);
     }
     ProgrammeMembershipDTO result = programmeMembershipService.save(programmeMembershipDTO);
     return ResponseEntity.ok()
-        .headers(HeaderUtil.createEntityUpdateAlert(ENTITY_NAME, programmeMembershipDTO.getId().toString()))
+        .headers(HeaderUtil.createEntityUpdateAlert(ENTITY_NAME, programmeMembershipDTO.getCurriculumMemberships().get(0).toString()))
         .body(result);
   }
 
@@ -171,7 +173,8 @@ public class ProgrammeMembershipResource {
     log.debug("REST request to bulk patch Programme Memberships : {}", programmeMembershipDTOS);
 
     List<ProgrammeMembershipDTO> results = programmeMembershipService.save(programmeMembershipDTOS);
-    List<Long> ids = results.stream().map(ProgrammeMembershipDTO::getId).collect(Collectors.toList());
+    List<Long> ids = results.stream().map(ProgrammeMembershipDTO::getCurriculumMemberships).
+            flatMap(Collection::stream).map(CurriculumMembershipDTO::getId).collect(Collectors.toList());
     return ResponseEntity.ok()
         .headers(HeaderUtil.createEntityUpdateAlert(ENTITY_NAME, StringUtils.join(ids, ",")))
         .body(results);
