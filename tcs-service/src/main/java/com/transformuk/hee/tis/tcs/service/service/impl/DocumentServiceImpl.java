@@ -39,7 +39,7 @@ public class DocumentServiceImpl implements DocumentService {
 
     @Override
     public Optional<DocumentDTO> findOne(final Long id) {
-        LOG.debug("Received request to find one '{}' with ID '{}'", DocumentDTO.class.getSimpleName(), id);
+        LOG.debug("Received request to load '{}' with ID '{}'", DocumentDTO.class.getSimpleName(), id);
 
         final Document document = documentRepository.findOne(id);
 
@@ -94,7 +94,7 @@ public class DocumentServiceImpl implements DocumentService {
     }
 
     private Document create(final Document document) throws IOException {
-        if (document.getBytes() == null && document.getBytes().length == 0) {
+        if (document.getBytes() == null || document.getBytes().length == 0) {
             LOG.warn("File is empty; not creating metadata nor saving file to storage");
             throw new IOException("File is empty");
         }

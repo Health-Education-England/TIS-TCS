@@ -18,6 +18,8 @@ import java.util.Set;
 
 @ApiModel("Document")
 public class DocumentDTO implements Serializable {
+    private static final long serialVersionUID = -204651480188503498L;
+
     @NotNull(groups = Update.class, message = "Id must not be null when updating a document")
     @DecimalMin(value = "0", groups = Update.class, message = "Id must not be negative")
     @Null(groups = Create.class, message = "Id must be null when creating a new document")
