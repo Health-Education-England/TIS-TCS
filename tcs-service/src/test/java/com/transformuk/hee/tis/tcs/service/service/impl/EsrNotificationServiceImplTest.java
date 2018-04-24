@@ -12,6 +12,8 @@ import com.transformuk.hee.tis.tcs.service.repository.PlacementRepository;
 import com.transformuk.hee.tis.tcs.service.service.mapper.EsrNotificationMapper;
 import org.junit.Test;
 import org.junit.runner.RunWith;
+import org.mockito.ArgumentCaptor;
+import org.mockito.Captor;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.runners.MockitoJUnitRunner;
@@ -44,6 +46,9 @@ public class EsrNotificationServiceImplTest {
 
   @Mock
   private PlacementRepository placementRepository;
+
+  @Captor
+  private ArgumentCaptor<List<EsrNotification>> savedEsrNotificationsCaptor;
 
   private static final List<String> placementTypes = Arrays.asList("In post", "In Post - Acting Up", "In post - Extension", "Parental Leave", "Long-term sick", "Suspended", "Phased Return");
 
@@ -137,23 +142,32 @@ public class EsrNotificationServiceImplTest {
     LocalDate asOfDate = LocalDate.now();
     Placement placement = aPlacement(deaneryPostNumber);
     placement.setSiteCode("SITE-01");
+    placement.setPlacementWholeTimeEquivalent(0.5F);
 
     Placement currentPlacement = aPlacement(deaneryPostNumber);
     currentPlacement.setDateFrom(asOfDate.minusMonths(1));
     currentPlacement.setDateTo(asOfDate.plusMonths(2));
     currentPlacement.setSiteCode("SITE-01");
+    currentPlacement.setPlacementWholeTimeEquivalent(1.0F);
 
     when(placementRepository.findCurrentPlacementsForPosts(
         asOfDate, asList(deaneryPostNumber), placementTypes)).thenReturn(singletonList(currentPlacement));
     EsrNotification returnedNotification = anEsrNotification(deaneryPostNumber);
-    when(esrNotificationRepository.save(any(List.class))).thenReturn(asList(returnedNotification));
+    when(esrNotificationRepository.save(savedEsrNotificationsCaptor.capture())).thenReturn(asList(returnedNotification));
 
     List<EsrNotification> mappedNotifications = testService.handleNewPlacementEsrNotification(placement);
 
-    assertThat(mappedNotifications).isNotEmpty();
-    EsrNotification mappedNotification = mappedNotifications.get(0);
-    assertThat(mappedNotification.getId()).isEqualTo(returnedNotification.getId());
+    List<EsrNotification> capturedEsrNotifications = savedEsrNotificationsCaptor.getValue();
+
+    assertThat(capturedEsrNotifications).isNotEmpty();
+
+    EsrNotification mappedNotification = capturedEsrNotifications.get(0);
+
+    assertThat(mappedNotifications.get(0).getId()).isEqualTo(returnedNotification.getId());
     assertThat(mappedNotification.getDeaneryPostNumber()).isEqualTo(returnedNotification.getDeaneryPostNumber());
+
+    assertThat(mappedNotification.getWorkingHourIndicator()).isNotEqualTo(currentPlacement.getPlacementWholeTimeEquivalent());
+    assertThat(mappedNotification.getWorkingHourIndicator()).isEqualTo(placement.getPlacementWholeTimeEquivalent().doubleValue());
 
     verify(placementRepository).findCurrentPlacementsForPosts(asOfDate, asList(deaneryPostNumber), placementTypes);
     verify(esrNotificationRepository).save(any(List.class));

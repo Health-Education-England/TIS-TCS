@@ -147,4 +147,12 @@ public interface PostService {
   CompletableFuture<Void> buildPostView();
 
   Page<PostEsrDTO> findPostsForEsrByDeaneryNumbers(List<String> deaneryNumbers, Pageable pageable);
+
+  /**
+   * Search for a page of Posts by national post number
+   * @param query
+   * @param pageable
+   * @return
+   */
+  Page<PostViewDTO> findByNationalPostNumber(String query, Pageable pageable);
 }

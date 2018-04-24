@@ -477,7 +477,6 @@ public class EsrNotificationServiceImpl implements EsrNotificationService {
     esrNotification.setCurrentTraineeProjectedEndDate(currentPlacement.getDateTo());
     esrNotification.setCurrentTraineeGmcNumber(
         currentPlacement.getTrainee().getGmcDetails() != null ? currentPlacement.getTrainee().getGmcDetails().getGmcNumber() : null);
-    setWorkingHourIndicatorFromPlacement(currentPlacement, esrNotification);
   }
 
   private void mapNextTrainee(Placement nextPlacement, EsrNotification esrNotification) {

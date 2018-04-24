@@ -468,10 +468,9 @@ public class PostServiceImpl implements PostService {
     Page<PostViewDTO> dtoPage;
     if (hasNext) {
       posts = posts.subList(0, pageable.getPageSize()); //ignore any additional
-      dtoPage = new PageImpl<>(posts,pageable,end);
-    }
-    else{
-      dtoPage = new PageImpl<>(posts,pageable,pageable.getPageSize());
+      dtoPage = new PageImpl<>(posts, pageable, end);
+    } else {
+      dtoPage = new PageImpl<>(posts, pageable, pageable.getPageSize());
     }
     postViewDecorator.decorate(dtoPage.getContent());
     return dtoPage;
@@ -533,10 +532,9 @@ public class PostServiceImpl implements PostService {
     Page<PostViewDTO> dtoPage;
     if (hasNext) {
       posts = posts.subList(0, pageable.getPageSize()); //ignore any additional
-      dtoPage = new PageImpl<>(posts,pageable,end);
-    }
-    else{
-      dtoPage = new PageImpl<>(posts,pageable,pageable.getPageSize());
+      dtoPage = new PageImpl<>(posts, pageable, end);
+    } else {
+      dtoPage = new PageImpl<>(posts, pageable, pageable.getPageSize());
     }
     //List<PostViewDTO> postPageList = posts.subList(start,(end > posts.size()) ? posts.size() : end);
     //Page<PostViewDTO> dtoPage = new PageImpl<>(posts,pageable,pageable.getPageSize());
@@ -544,10 +542,54 @@ public class PostServiceImpl implements PostService {
     return dtoPage;
   }
 
+
+  @Override
+  @Transactional(readOnly = true)
+  public Page<PostViewDTO> findByNationalPostNumber(String searchString, Pageable pageable) {
+
+    String whereClause = createWhereClauseForSearch(searchString);
+    int start = pageable.getOffset();
+    int end = start + pageable.getPageSize() + 1;
+
+    String query = sqlQuerySupplier.getQuery(SqlQuerySupplier.SEARCH_POST_VIEW);
+    query = query.replaceAll("WHERECLAUSE", whereClause);
+    if (pageable.getSort() != null) {
+      if (pageable.getSort().iterator().hasNext()) {
+        String orderByFirstCriteria = pageable.getSort().iterator().next().toString();
+        String orderByClause = orderByFirstCriteria.replaceAll(":", " ");
+
+        query = query.replaceAll("ORDERBYCLAUSE", " ORDER BY " + orderByClause);
+      } else {
+        query = query.replaceAll("ORDERBYCLAUSE", "");
+      }
+    } else {
+      query = query.replaceAll("ORDERBYCLAUSE", "");
+    }
+
+    //limit is 0 based
+    query = query.replaceAll("LIMITCLAUSE", "limit " + start + "," + end);
+    List<PostViewDTO> posts = jdbcTemplate.query(query, new PostServiceImpl.PostViewSearchMapper());
+    if (CollectionUtils.isEmpty(posts)) {
+      return new PageImpl<>(posts);
+    }
+
+    boolean hasNext = posts.size() > pageable.getPageSize();
+    Page<PostViewDTO> dtoPage;
+    if (hasNext) {
+      posts = posts.subList(0, pageable.getPageSize()); //ignore any additional
+      dtoPage = new PageImpl<>(posts, pageable, end);
+    } else {
+      dtoPage = new PageImpl<>(posts, pageable, pageable.getPageSize());
+    }
+    postViewDecorator.decorate(dtoPage.getContent());
+    return dtoPage;
+  }
+
+
   @Override
   @Transactional(readOnly = true)
   public Page<PostEsrDTO> findPostsForEsrByDeaneryNumbers(List<String> deaneryNumbers, Pageable pageable) {
-    log.debug("Finding Posts for ESR by deanery numbers : {}", deaneryNumbers.size() );
+    log.debug("Finding Posts for ESR by deanery numbers : {}", deaneryNumbers.size());
     Page<EsrPostProjection> posts = postRepository.findByIdNotNullAndNationalPostNumberIn(deaneryNumbers, pageable);
     return posts.map(post -> postMapper.esrPostProjectionToPostEsrDTO(post));
   }
@@ -590,37 +632,6 @@ public class PostServiceImpl implements PostService {
     log.debug("Request to build Post view");
     postRepository.buildPostView();
     return CompletableFuture.completedFuture(null);
-  }
-
-  private class PostViewRowMapper implements RowMapper<PostViewDTO> {
-
-    @Override
-    public PostViewDTO mapRow(ResultSet rs, int i) throws SQLException {
-      PostViewDTO view = new PostViewDTO();
-      view.setId(rs.getLong("id"));
-
-      view.setApprovedGradeId(rs.getLong("approvedGradeId"));
-      view.setPrimarySpecialtyId(rs.getLong("primarySpecialtyId"));
-      view.setPrimarySpecialtyCode(rs.getString("primarySpecialtyCode"));
-      view.setPrimarySpecialtyName(rs.getString("primarySpecialtyName"));
-      view.setPrimarySiteId(rs.getLong("primarySiteId"));
-      view.setProgrammeNames(rs.getString("programmes"));
-      String fundingType = rs.getString("fundingType");
-      if(StringUtils.isNotEmpty(fundingType)){
-        view.setFundingType(FundingType.valueOf(fundingType));
-      }
-      view.setNationalPostNumber(rs.getString("nationalPostNumber"));
-      String status = rs.getString("status");
-      if (StringUtils.isNotEmpty(status)) {
-        view.setStatus(Status.valueOf(status));
-      }
-
-      view.setOwner(rs.getString("owner"));
-      view.setIntrepidId(rs.getString("intrepidId"));
-      view.setCurrentTraineeSurname(rs.getString("surnames"));
-      view.setCurrentTraineeForenames(rs.getString("forenames"));
-      return view;
-    }
   }
 
   private String createWhereClause(String searchString, List<ColumnFilter> columnFilters) {
@@ -678,31 +689,95 @@ public class PostServiceImpl implements PostService {
         whereClause.append(" ) ");
       }
     return whereClause.toString();
-    }
+  }
 
-    private void applyLikeFilter(StringBuilder whereClause, String columnName, List<Object> values) {
-      whereClause.append(" AND (");
-      values.forEach(value -> whereClause.append(columnName).append(" LIKE '%").append(value).append("%'").append(" OR "));
-      whereClause.delete(whereClause.length() - 4, whereClause.length());
-      whereClause.append(")");
+  private String createWhereClauseForSearch(String searchString) {
+    StringBuilder whereClause = new StringBuilder();
+    whereClause.append(" WHERE 1=1 ");
+    if (StringUtils.isNotEmpty(searchString)) {
+      whereClause.append(" AND ( nationalPostNumber like ").append("'%" + searchString + "%'");
+      whereClause.append(" ) ");
     }
+    return whereClause.toString();
+  }
 
-    private void applyInFilter(StringBuilder whereClause, String columnName, List<Object> values) {
-      whereClause.append(" AND (").append(columnName).append(" IN (");
-      values.forEach(k -> whereClause.append("'").append(k).append("',"));
-      whereClause.deleteCharAt(whereClause.length() - 1);
-      whereClause.append(")");
-      whereClause.append(")");
-    }
+  private void applyLikeFilter(StringBuilder whereClause, String columnName, List<Object> values) {
+    whereClause.append(" AND (");
+    values.forEach(value -> whereClause.append(columnName).append(" LIKE '%").append(value).append("%'").append(" OR "));
+    whereClause.delete(whereClause.length() - 4, whereClause.length());
+    whereClause.append(")");
+  }
+
+  private void applyInFilter(StringBuilder whereClause, String columnName, List<Object> values) {
+    whereClause.append(" AND (").append(columnName).append(" IN (");
+    values.forEach(k -> whereClause.append("'").append(k).append("',"));
+    whereClause.deleteCharAt(whereClause.length() - 1);
+    whereClause.append(")");
+    whereClause.append(")");
+  }
 
   private void handleNewPostEsrNotification(PostDTO postDTO) {
 
     log.info("HANDLE: new post esr notification");
-    if (postDTO.getId() == null ) {
+    if (postDTO.getId() == null) {
 
       EsrNotification esrNotification = esrNotificationService.handleEsrNewPositionNotification(postDTO);
       log.info("SAVED: esr notification with id {} for newly created Post {}", esrNotification.getId(),
           esrNotification.getDeaneryPostNumber());
+    }
+  }
+
+  private class PostViewRowMapper implements RowMapper<PostViewDTO> {
+
+    @Override
+    public PostViewDTO mapRow(ResultSet rs, int i) throws SQLException {
+      PostViewDTO view = new PostViewDTO();
+      view.setId(rs.getLong("id"));
+
+      view.setApprovedGradeId(rs.getLong("approvedGradeId"));
+      view.setPrimarySpecialtyId(rs.getLong("primarySpecialtyId"));
+      view.setPrimarySpecialtyCode(rs.getString("primarySpecialtyCode"));
+      view.setPrimarySpecialtyName(rs.getString("primarySpecialtyName"));
+      view.setPrimarySiteId(rs.getLong("primarySiteId"));
+      view.setProgrammeNames(rs.getString("programmes"));
+      String fundingType = rs.getString("fundingType");
+      if (StringUtils.isNotEmpty(fundingType)) {
+        view.setFundingType(FundingType.valueOf(fundingType));
+      }
+      view.setNationalPostNumber(rs.getString("nationalPostNumber"));
+      String status = rs.getString("status");
+      if (StringUtils.isNotEmpty(status)) {
+        view.setStatus(Status.valueOf(status));
+      }
+
+      view.setOwner(rs.getString("owner"));
+      view.setIntrepidId(rs.getString("intrepidId"));
+      view.setCurrentTraineeSurname(rs.getString("surnames"));
+      view.setCurrentTraineeForenames(rs.getString("forenames"));
+      return view;
+    }
+  }
+
+  private class PostViewSearchMapper implements RowMapper<PostViewDTO> {
+
+    @Override
+    public PostViewDTO mapRow(ResultSet rs, int i) throws SQLException {
+      PostViewDTO view = new PostViewDTO();
+      view.setId(rs.getLong("id"));
+
+      view.setApprovedGradeId(rs.getLong("approvedGradeId"));
+      view.setPrimarySpecialtyId(rs.getLong("primarySpecialtyId"));
+      view.setPrimarySpecialtyCode(rs.getString("primarySpecialtyCode"));
+      view.setPrimarySpecialtyName(rs.getString("primarySpecialtyName"));
+      view.setPrimarySiteId(rs.getLong("primarySiteId"));
+      view.setNationalPostNumber(rs.getString("nationalPostNumber"));
+      String status = rs.getString("status");
+      if (StringUtils.isNotEmpty(status)) {
+        view.setStatus(Status.valueOf(status));
+      }
+
+      view.setOwner(rs.getString("owner"));
+      return view;
     }
   }
 
