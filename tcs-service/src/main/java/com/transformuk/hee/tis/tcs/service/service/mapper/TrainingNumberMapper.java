@@ -56,6 +56,7 @@ public class TrainingNumberMapper {
     result.setSuffix(trainingNumber.getSuffix());
     result.setTrainingNumberType(trainingNumber.getTrainingNumberType());
     result.setTypeOfContract(trainingNumber.getTypeOfContract());
+    result.setTrainingNumber(trainingNumber.getTrainingNumber());
     if(trainingNumber.getProgramme() == null){
       result.setProgramme(null);
     }
@@ -101,6 +102,8 @@ public class TrainingNumberMapper {
     result.setSuffix(trainingNumberDTO.getSuffix());
     result.setTrainingNumberType(trainingNumberDTO.getTrainingNumberType());
     result.setTypeOfContract(trainingNumberDTO.getTypeOfContract());
+    result.setTrainingNumber(trainingNumberDTO.getTrainingNumber());
+
     result.setProgramme(programmeFromId(trainingNumberDTO.getProgramme()));
     return result;
   }
