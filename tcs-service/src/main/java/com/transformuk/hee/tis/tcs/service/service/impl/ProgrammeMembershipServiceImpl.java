@@ -4,6 +4,7 @@ import com.google.common.base.Preconditions;
 import com.google.common.collect.Lists;
 import com.google.common.collect.Maps;
 import com.transformuk.hee.tis.tcs.api.dto.CurriculumDTO;
+import com.transformuk.hee.tis.tcs.api.dto.CurriculumMembershipDTO;
 import com.transformuk.hee.tis.tcs.api.dto.ProgrammeMembershipCurriculaDTO;
 import com.transformuk.hee.tis.tcs.api.dto.ProgrammeMembershipDTO;
 import com.transformuk.hee.tis.tcs.service.model.Curriculum;
@@ -22,6 +23,7 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.util.Collection;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
@@ -61,9 +63,10 @@ public class ProgrammeMembershipServiceImpl implements ProgrammeMembershipServic
   @Override
   public ProgrammeMembershipDTO save(ProgrammeMembershipDTO programmeMembershipDTO) {
     log.debug("Request to save ProgrammeMembership : {}", programmeMembershipDTO);
-    ProgrammeMembership programmeMembership = programmeMembershipMapper.toEntity(programmeMembershipDTO);
-    programmeMembership = programmeMembershipRepository.saveAndFlush(programmeMembership);
-    ProgrammeMembershipDTO result = programmeMembershipMapper.toDto(programmeMembership);
+    List<ProgrammeMembership> programmeMembershipList = programmeMembershipMapper.toEntity(programmeMembershipDTO);
+    programmeMembershipList = programmeMembershipRepository.save(programmeMembershipList);
+    List<ProgrammeMembershipDTO> resultDtos = programmeMembershipMapper.programmeMembershipsToProgrammeMembershipDTOs(programmeMembershipList);
+    ProgrammeMembershipDTO result = CollectionUtils.isNotEmpty(resultDtos) ? resultDtos.get(0) : null;
     return result;
   }
 
@@ -129,13 +132,18 @@ public class ProgrammeMembershipServiceImpl implements ProgrammeMembershipServic
     Preconditions.checkNotNull(programmeId);
 
     List<ProgrammeMembership> foundProgrammeMemberships = programmeMembershipRepository
-        .findByTraineeIdAndProgrammeId(traineeId, programmeId);
+            .findByTraineeIdAndProgrammeId(traineeId, programmeId);
     List<ProgrammeMembershipDTO> programmeMembershipDTOS = programmeMembershipMapper.programmeMembershipsToProgrammeMembershipDTOs(foundProgrammeMemberships);
 
     //get all curriculum ids
-    Set<Long> curriculumIds = programmeMembershipDTOS.stream().map(ProgrammeMembershipDTO::getCurriculumId).collect(Collectors.toSet());
+    Set<Long> curriculumIds = programmeMembershipDTOS.stream().
+            map(ProgrammeMembershipDTO::getCurriculumMemberships).
+            flatMap(Collection::stream).
+            map(CurriculumMembershipDTO::getCurriculumId).
+            collect(Collectors.toSet());
+
     Map<Long, CurriculumDTO> curriculumDTOMap = Maps.newHashMap();
-    if(CollectionUtils.isNotEmpty(curriculumIds)) {
+    if (CollectionUtils.isNotEmpty(curriculumIds)) {
       List<Curriculum> all = curriculumRepository.findAll(curriculumIds);
       curriculumDTOMap = all.stream().collect(Collectors.toMap(Curriculum::getId, curriculumMapper::curriculumToCurriculumDTO));
     }
@@ -145,7 +153,9 @@ public class ProgrammeMembershipServiceImpl implements ProgrammeMembershipServic
     for (ProgrammeMembershipDTO pm : programmeMembershipDTOS) {
       ProgrammeMembershipCurriculaDTO programmeMembershipCurriculaDTO = new ProgrammeMembershipCurriculaDTO();
       BeanUtils.copyProperties(pm, programmeMembershipCurriculaDTO);
-      programmeMembershipCurriculaDTO.setCurriculumDTO(curriculumDTOMap.get(pm.getCurriculumId()));
+      for (CurriculumMembershipDTO cm : pm.getCurriculumMemberships()) {
+        programmeMembershipCurriculaDTO.setCurriculumDTO(curriculumDTOMap.get(cm.getCurriculumId()));
+      }
       result.add(programmeMembershipCurriculaDTO);
     }
 
