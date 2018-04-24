@@ -1,27 +1,22 @@
 package com.transformuk.hee.tis.tcs.service.api.validation;
 
 
-import com.google.common.collect.Lists;
 import com.transformuk.hee.tis.reference.client.ReferenceService;
-import com.transformuk.hee.tis.reference.client.impl.ReferenceServiceImpl;
-import com.transformuk.hee.tis.tcs.service.service.RotationService;
-import com.transformuk.hee.tis.tcs.service.service.impl.RotationServiceImpl;
 import com.transformuk.hee.tis.tcs.api.dto.ProgrammeMembershipDTO;
 import com.transformuk.hee.tis.tcs.service.model.ProgrammeMembership;
 import com.transformuk.hee.tis.tcs.service.repository.CurriculumRepository;
 import com.transformuk.hee.tis.tcs.service.repository.PersonRepository;
 import com.transformuk.hee.tis.tcs.service.repository.ProgrammeRepository;
+import com.transformuk.hee.tis.tcs.service.service.RotationService;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
-import org.springframework.util.CollectionUtils;
 import org.springframework.validation.BeanPropertyBindingResult;
 import org.springframework.validation.FieldError;
 import org.springframework.web.bind.MethodArgumentNotValidException;
 
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Map;
 
 /**
  * Holds more complex custom validation for a {@link ProgrammeMembership} that
@@ -157,9 +152,9 @@ public class ProgrammeMembershipValidator {
     List<FieldError> fieldErrors = new ArrayList<>();
     // then check the rotation
     if (StringUtils.isNotEmpty(programmeMembershipDTO.getRotation())) {
-        String label = programmeMembershipDTO.getRotation();
-        Boolean rotationExist = rotationService.rotationExists(label);
-        notExistsFieldErrors(fieldErrors, rotationExist, "rotation", "rotation");
+        if (!rotationService.rotationExists(programmeMembershipDTO.getRotation())) {
+            fieldErrors.add(new FieldError(PROGRAMME_MEMBERSHIP_DTO_NAME, "rotation", "Rotation with name %s does not exist"));
+        }
     }
     return fieldErrors;
   }
@@ -174,17 +169,4 @@ public class ProgrammeMembershipValidator {
     fieldErrors.add(new FieldError(PROGRAMME_MEMBERSHIP_DTO_NAME, field,
         String.format("%s is required", field)));
   }
-
-  private void notExistsFieldErrors(List<FieldError> fieldErrors, Boolean rotationExist,
-                                    String field, String entityName) {
-
-      if ( !fieldErrors.isEmpty()) {
-          fieldErrors.add(new FieldError(PROGRAMME_MEMBERSHIP_DTO_NAME, field,
-                  String.format("%s with name %s does not exist", entityName)));
-
-      }
-
-
-  }
-
 }
