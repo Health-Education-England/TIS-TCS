@@ -2,6 +2,7 @@ package com.transformuk.hee.tis.tcs.service.service.impl;
 
 import com.google.common.collect.Sets;
 import com.transformuk.hee.tis.reference.api.dto.GradeDTO;
+import com.transformuk.hee.tis.reference.api.dto.LocalOfficeDTO;
 import com.transformuk.hee.tis.reference.api.dto.SiteDTO;
 import com.transformuk.hee.tis.security.model.UserProfile;
 import com.transformuk.hee.tis.tcs.api.dto.PostDTO;
@@ -130,28 +131,6 @@ public class NationalPostNumberServiceImplTest {
   }
 
   @Test
-  public void getLocalOfficeAbbrShouldReturnTheAbbrForTheCurrentUser() {
-    UserProfile userProfile = mock(UserProfile.class);
-    when(userProfile.getDesignatedBodyCodes()).thenReturn(Sets.newHashSet("1-AIIDR8"));
-    doReturn(userProfile).when(testObj).getProfileFromContext();
-
-    String result = testObj.getLocalOfficeAbbr();
-
-    Assert.assertEquals("LDN", result);
-  }
-
-  @Test
-  public void getLocalOfficeAbbrShouldReturnEmptyWhenUsersDbcIsNotMapped() {
-    UserProfile userProfile = mock(UserProfile.class);
-    when(userProfile.getDesignatedBodyCodes()).thenReturn(Sets.newHashSet("RANDOM_DBC_CODE"));
-    doReturn(userProfile).when(testObj).getProfileFromContext();
-
-    String result = testObj.getLocalOfficeAbbr();
-
-    Assert.assertEquals(StringUtils.EMPTY, result);
-  }
-
-  @Test
   public void getPrimarySpecialtyCodeOrEmptyShouldReturnAnEmptyStringWhenThereAreNoSpecialties() {
     when(postDTOMock1.getSpecialties()).thenReturn(null);
     String result = testObj.getPrimarySpecialtyCode(postDTOMock1);
@@ -185,5 +164,4 @@ public class NationalPostNumberServiceImplTest {
     CompletableFuture<Void> result = testObj.getSiteCode(postDTOMock1, siteDTO);
     Assert.assertEquals(expectedCompletedFuture, result);
   }
-
 }
