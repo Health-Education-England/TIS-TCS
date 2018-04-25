@@ -36,6 +36,8 @@ import java.util.List;
 import java.util.Optional;
 import java.util.stream.Collectors;
 
+import static com.transformuk.hee.tis.tcs.service.api.util.StringUtil.sanitize;
+
 /**
  * REST controller for managing Rotation.
  */
@@ -101,18 +103,20 @@ public class RotationResource {
     @GetMapping("/rotations")
     @Timed
     public ResponseEntity<List<RotationDTO>> getRotations(
+            @RequestParam(value = "searchQuery", required = false) String searchQuery,
             @ApiParam(value = "json object by column name and value. (Eg: columnFilters={ \"owner\": [\"dean1\", \"dean2\"]," +
             " \"sites.siteId\":[\"123\"],\"trainingBodyId\":[\"11\"],\"grades.gradeId\":[\"11\"],\"specialties.specialty.name\":[\"Test Specialty\"]}\"")
             @RequestParam(value = "columnFilters", required = false) String columnFilterJson,
             Pageable pageable) throws IOException {
         log.debug("REST request to get a page of Rotations");
+        searchQuery = sanitize(searchQuery);
         List<Class> filterEnumList = Collections.singletonList(Status.class);
         List<ColumnFilter> columnFilters = ColumnFilterUtil.getColumnFilters(columnFilterJson, filterEnumList);
         Page<RotationDTO> page;
-        if (StringUtils.isEmpty(columnFilterJson)) {
+        if (StringUtils.isEmpty(searchQuery) && StringUtils.isEmpty(columnFilterJson)) {
             page = rotationService.findAll(pageable);
         } else {
-            page = rotationService.advancedSearchBySpecification(columnFilters, pageable);
+            page = rotationService.advancedSearchBySpecification(searchQuery, columnFilters, pageable);
         }
         HttpHeaders headers = PaginationUtil.generatePaginationHttpHeaders(page, "/api/rotations");
         return new ResponseEntity<>(page.getContent(), headers, HttpStatus.OK);
