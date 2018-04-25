@@ -21,59 +21,59 @@ public class ContactDetailsDTO implements Serializable {
   @DecimalMin(value = "0", groups = {Update.class, Create.class}, message = "Id must not be negative")
   private Long id;
 
-  @NotNull(message = "Surname is required", groups = {Update.class, Create.class})
+  @NotNull(message = "Surname is required to create or update the record", groups = {Update.class, Create.class})
   @Pattern(regexp = "^$|^[A-Za-z0-9\\-\\\\' ]+",
-          message = "Surname must be alphanumeric",
+          message = "No special characters, with the exception of apostrophes, hyphens and spaces",
           groups = {Update.class, Create.class})
   private String surname;
 
   @Pattern(regexp = "^$|^[A-Za-z0-9\\-\\\\' ]+",
-          message = "LegalSurname must be alphanumeric",
+          message = "No special characters, with the exception of apostrophes, hyphens and spaces",
           groups = {Update.class, Create.class})
   private String legalSurname;
 
-  @NotNull(message = "Forenames is required", groups = {Update.class, Create.class})
+  @NotNull(message = "Forenames is required to create or update the record", groups = {Update.class, Create.class})
   @Pattern(regexp = "^$|^[A-Za-z0-9\\-\\\\' ]+",
-          message = "Forenames must be alphanumeric",
+          message = "No special characters, with the exception of apostrophes, hyphens and spaces",
           groups = {Update.class, Create.class})
   private String forenames;
 
   @Pattern(regexp = "^$|^[A-Za-z0-9\\-\\\\' ]+",
-          message = "LegalForenames must be alphanumeric",
+          message = "No special characters, with the exception of apostrophes, hyphens and spaces",
           groups = {Update.class, Create.class})
   private String legalForenames;
 
   @Pattern(regexp = "^$|^[A-Za-z0-9\\-\\\\' ]+",
-          message = "KnownAs must be alphanumeric",
+          message = "No special characters, with the exception of apostrophes, hyphens and spaces",
           groups = {Update.class, Create.class})
   private String knownAs;
 
   @Pattern(regexp = "^$|^[A-Za-z0-9\\-\\\\' ]+",
-          message = "MaidenName must be alphanumeric",
+          message = "No special characters, with the exception of apostrophes, hyphens and spaces",
           groups = {Update.class, Create.class})
   private String maidenName;
 
   @Pattern(regexp = "^$|^[A-Za-z0-9\\-\\\\' ]+",
-          message = "Initials must be alphanumeric",
+          message = "No special characters, with the exception of apostrophes, hyphens and spaces",
           groups = {Update.class, Create.class})
   private String initials;
 
   private String title;
 
-  @Pattern(regexp = "^$|^[0-9 ]+",
-          message = "telephoneNumber must be numeric",
+  @Pattern(regexp = "^$|^[0-9\\\\+\\- ]+",
+          message = "Only numerical values allowed for TelephoneNumber, no special characters, with the exception of plus, minus and spaces",
           groups = {Update.class, Create.class})
   private String telephoneNumber;
 
-  @Pattern(regexp = "^$|^[0-9 ]+",
-          message = "mobileNumber must be numeric",
+  @Pattern(regexp = "^$|^[0-9\\\\+\\- ]+",
+          message = "Only numerical values allowed for MobileNumber, no special characters, with the exception of plus, minus and spaces",
           groups = {Update.class, Create.class})
   private String mobileNumber;
 
-  @Email(message = "Valid email is required", groups = {Update.class, Create.class})
+  @Email(message = "Valid email format required", groups = {Update.class, Create.class})
   private String email;
 
-  @Email(message = "Valid email is required", groups = {Update.class, Create.class})
+  @Email(message = "Valid email format required", groups = {Update.class, Create.class})
   private String workEmail;
 
   private String address1;
