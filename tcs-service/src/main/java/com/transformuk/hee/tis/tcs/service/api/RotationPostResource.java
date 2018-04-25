@@ -97,7 +97,7 @@ public class RotationPostResource {
     @Timed
     public ResponseEntity<RotationPostDTO> getRotationPost(@PathVariable Long id) {
         log.debug("REST request to get RotationPost : {}", id);
-        RotationPostDTO rotationPostDTO = rotationPostService.findOne(id);
+        RotationPostDTO rotationPostDTO = rotationPostService.findOneByPostId(id);
         return ResponseUtil.wrapOrNotFound(Optional.ofNullable(rotationPostDTO));
     }
 

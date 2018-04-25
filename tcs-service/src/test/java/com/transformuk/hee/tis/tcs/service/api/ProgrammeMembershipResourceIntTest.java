@@ -3,18 +3,14 @@ package com.transformuk.hee.tis.tcs.service.api;
 import com.transformuk.hee.tis.reference.client.impl.ReferenceServiceImpl;
 import com.transformuk.hee.tis.tcs.api.dto.ProgrammeMembershipDTO;
 import com.transformuk.hee.tis.tcs.api.enumeration.ProgrammeMembershipType;
+import com.transformuk.hee.tis.tcs.api.enumeration.Status;
 import com.transformuk.hee.tis.tcs.service.Application;
 import com.transformuk.hee.tis.tcs.service.api.validation.ProgrammeMembershipValidator;
 import com.transformuk.hee.tis.tcs.service.exception.ExceptionTranslator;
-import com.transformuk.hee.tis.tcs.service.model.Curriculum;
-import com.transformuk.hee.tis.tcs.service.model.Person;
-import com.transformuk.hee.tis.tcs.service.model.Programme;
-import com.transformuk.hee.tis.tcs.service.model.ProgrammeMembership;
-import com.transformuk.hee.tis.tcs.service.repository.CurriculumRepository;
-import com.transformuk.hee.tis.tcs.service.repository.PersonRepository;
-import com.transformuk.hee.tis.tcs.service.repository.ProgrammeMembershipRepository;
-import com.transformuk.hee.tis.tcs.service.repository.ProgrammeRepository;
+import com.transformuk.hee.tis.tcs.service.model.*;
+import com.transformuk.hee.tis.tcs.service.repository.*;
 import com.transformuk.hee.tis.tcs.service.service.ProgrammeMembershipService;
+import com.transformuk.hee.tis.tcs.service.service.RotationService;
 import com.transformuk.hee.tis.tcs.service.service.mapper.PersonMapper;
 import com.transformuk.hee.tis.tcs.service.service.mapper.ProgrammeMembershipMapper;
 import org.assertj.core.util.Lists;
@@ -111,6 +107,9 @@ public class ProgrammeMembershipResourceIntTest {
 
   @Autowired
   private CurriculumRepository curriculumRepository;
+  
+  @Autowired
+  private RotationRepository rotationRepository;
 
   @Autowired
   private ProgrammeMembershipMapper programmeMembershipMapper;
@@ -126,13 +125,16 @@ public class ProgrammeMembershipResourceIntTest {
 
   @Autowired
   private ExceptionTranslator exceptionTranslator;
+  
+  @Autowired
+  private RotationService rotationService;
 
   private ProgrammeMembershipValidator programmeMembershipValidator;
 
   @Autowired
   private EntityManager em;
 
-  @Autowired
+  @Autowired  
   private PersonMapper personMapper;
 
   @Mock
@@ -143,6 +145,8 @@ public class ProgrammeMembershipResourceIntTest {
   private Programme programme;
 
   private Curriculum curriculum;
+  
+  private Rotation rotation;
 
   private MockMvc restProgrammeMembershipMockMvc;
 
@@ -184,7 +188,7 @@ public class ProgrammeMembershipResourceIntTest {
   @Before
   public void setup() {
     MockitoAnnotations.initMocks(this);
-    programmeMembershipValidator = new ProgrammeMembershipValidator(personRepository, programmeRepository, curriculumRepository, referenceService);
+    programmeMembershipValidator = new ProgrammeMembershipValidator(personRepository, programmeRepository, curriculumRepository, referenceService, rotationService);
     ProgrammeMembershipResource programmeMembershipResource = new ProgrammeMembershipResource(programmeMembershipService,
         programmeMembershipValidator);
     this.restProgrammeMembershipMockMvc = MockMvcBuilders.standaloneSetup(programmeMembershipResource)
@@ -199,6 +203,7 @@ public class ProgrammeMembershipResourceIntTest {
     programme = ProgrammeResourceIntTest.createEntity();
     curriculum = CurriculumResourceIntTest.createCurriculumEntity();
     programmeMembership = createEntity(em);
+    rotation = new Rotation().name("test").status(Status.CURRENT).programmeId(programme.getId());
   }
 
   @Test
@@ -208,11 +213,13 @@ public class ProgrammeMembershipResourceIntTest {
     curriculumRepository.saveAndFlush(curriculum);
     programme.setCurricula(Sets.newHashSet(Lists.newArrayList(curriculum)));
     programmeRepository.saveAndFlush(programme);
+    rotationRepository.saveAndFlush(rotation);
     int databaseSizeBeforeCreate = programmeMembershipRepository.findAll().size();
 
     programmeMembership.setPerson(person);
     programmeMembership.setProgrammeId(programme.getId());
     programmeMembership.setCurriculumId(programme.getCurricula().iterator().next().getId());
+    programmeMembership.setRotation(rotation.getName());
     // Create the ProgrammeMembership
     ProgrammeMembershipDTO programmeMembershipDTO = programmeMembershipMapper.toDto(programmeMembership);
     restProgrammeMembershipMockMvc.perform(post("/api/programme-memberships")
@@ -226,7 +233,7 @@ public class ProgrammeMembershipResourceIntTest {
     ProgrammeMembership testProgrammeMembership = programmeMembershipList.get(programmeMembershipList.size() - 1);
     assertThat(testProgrammeMembership.getIntrepidId()).isEqualTo(DEFAULT_INTREPID_ID);
     assertThat(testProgrammeMembership.getProgrammeMembershipType()).isEqualTo(DEFAULT_PROGRAMME_MEMBERSHIP_TYPE);
-    assertThat(testProgrammeMembership.getRotation()).isEqualTo(DEFAULT_ROTATION);
+    assertThat(testProgrammeMembership.getRotation()).isEqualTo(rotation.getName());
     assertThat(testProgrammeMembership.getCurriculumStartDate()).isEqualTo(DEFAULT_CURRICULUM_START_DATE);
     assertThat(testProgrammeMembership.getCurriculumEndDate()).isEqualTo(DEFAULT_CURRICULUM_END_DATE);
     assertThat(testProgrammeMembership.getPeriodOfGrace()).isEqualTo(DEFAULT_PERIOD_OF_GRACE);
@@ -393,33 +400,6 @@ public class ProgrammeMembershipResourceIntTest {
             value(String.format("The selected Programme and Curriculum are not linked. They must be linked before a Programme Membership can be made", String.valueOf(notAssociatedCurriculum.getId()))));
   }
 
-  @Test
-  @Transactional
-  public void shouldValidateRotation() throws Exception {
-    //given
-    personRepository.saveAndFlush(person);
-    curriculumRepository.saveAndFlush(curriculum);
-    programme.setCurricula(Sets.newHashSet(Lists.newArrayList(curriculum)));
-    programmeRepository.saveAndFlush(programme);
-    programmeMembership.setPerson(person);
-    programmeMembership.setProgrammeId(programme.getId());
-    programmeMembership.setCurriculumId(programme.getCurricula().iterator().next().getId());
-    ProgrammeMembershipDTO programmeMembershipDTO = programmeMembershipMapper.toDto(programmeMembership);
-    programmeMembershipDTO.setRotation(NOT_EXISTS_ROTATION); // this rotation not exists in reference service
-
-    Map<String, Boolean> exists = Maps.newHashMap(NOT_EXISTS_ROTATION, false);
-    given(referenceService.rotationExists(Lists.newArrayList(NOT_EXISTS_ROTATION))).willReturn(exists);
-
-    //when & then
-    restProgrammeMembershipMockMvc.perform(post("/api/programme-memberships")
-        .contentType(TestUtil.APPLICATION_JSON_UTF8)
-        .content(TestUtil.convertObjectToJsonBytes(programmeMembershipDTO)))
-        .andExpect(status().isBadRequest())
-        .andExpect(jsonPath("$.message").value("error.validation"))
-        .andExpect(jsonPath("$.fieldErrors[0].field").value("rotation"))
-        .andExpect(jsonPath("$.fieldErrors[0].message").
-            value(String.format("rotation with label %s does not exist", NOT_EXISTS_ROTATION)));
-  }
 
   @Test
   @Transactional
@@ -518,6 +498,7 @@ public class ProgrammeMembershipResourceIntTest {
     programmeMembership.setProgrammeId(programme.getId());
     programmeMembership.setCurriculumId(programme.getCurricula().iterator().next().getId());
     programmeMembershipRepository.saveAndFlush(programmeMembership);
+    rotationRepository.saveAndFlush(rotation);
     int databaseSizeBeforeUpdate = programmeMembershipRepository.findAll().size();
 
     // Update the programmeMembership
@@ -525,7 +506,7 @@ public class ProgrammeMembershipResourceIntTest {
     updatedProgrammeMembership
         .intrepidId(UPDATED_INTREPID_ID)
         .programmeMembershipType(UPDATED_PROGRAMME_MEMBERSHIP_TYPE)
-        .rotation(UPDATED_ROTATION)
+        .rotation(rotation.getName())
         .curriculumStartDate(UPDATED_CURRICULUM_START_DATE)
         .curriculumEndDate(UPDATED_CURRICULUM_END_DATE)
         .periodOfGrace(UPDATED_PERIOD_OF_GRACE)
@@ -546,7 +527,7 @@ public class ProgrammeMembershipResourceIntTest {
     ProgrammeMembership testProgrammeMembership = programmeMembershipList.get(programmeMembershipList.size() - 1);
     assertThat(testProgrammeMembership.getIntrepidId()).isEqualTo(UPDATED_INTREPID_ID);
     assertThat(testProgrammeMembership.getProgrammeMembershipType()).isEqualTo(UPDATED_PROGRAMME_MEMBERSHIP_TYPE);
-    assertThat(testProgrammeMembership.getRotation()).isEqualTo(UPDATED_ROTATION);
+    assertThat(testProgrammeMembership.getRotation()).isEqualTo(rotation.getName());
     assertThat(testProgrammeMembership.getCurriculumStartDate()).isEqualTo(UPDATED_CURRICULUM_START_DATE);
     assertThat(testProgrammeMembership.getCurriculumEndDate()).isEqualTo(UPDATED_CURRICULUM_END_DATE);
     assertThat(testProgrammeMembership.getPeriodOfGrace()).isEqualTo(UPDATED_PERIOD_OF_GRACE);

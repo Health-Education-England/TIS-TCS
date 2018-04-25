@@ -1,25 +1,24 @@
 package com.transformuk.hee.tis.tcs.service.api.validation;
 
 
-import com.google.common.collect.Lists;
-import com.transformuk.hee.tis.reference.client.impl.ReferenceServiceImpl;
+import com.transformuk.hee.tis.reference.client.ReferenceService;
 import com.transformuk.hee.tis.tcs.api.dto.CurriculumMembershipDTO;
 import com.transformuk.hee.tis.tcs.api.dto.ProgrammeMembershipDTO;
 import com.transformuk.hee.tis.tcs.service.model.ProgrammeMembership;
 import com.transformuk.hee.tis.tcs.service.repository.CurriculumRepository;
 import com.transformuk.hee.tis.tcs.service.repository.PersonRepository;
 import com.transformuk.hee.tis.tcs.service.repository.ProgrammeRepository;
+import com.transformuk.hee.tis.tcs.service.service.RotationService;
+import org.apache.commons.collections4.CollectionUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
-import org.springframework.util.CollectionUtils;
 import org.springframework.validation.BeanPropertyBindingResult;
 import org.springframework.validation.FieldError;
 import org.springframework.web.bind.MethodArgumentNotValidException;
 
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Map;
 import java.util.Set;
 import java.util.stream.Collectors;
 
@@ -35,17 +34,20 @@ public class ProgrammeMembershipValidator {
   private PersonRepository personRepository;
   private ProgrammeRepository programmeRepository;
   private CurriculumRepository curriculumRepository;
-  private ReferenceServiceImpl referenceService;
+  private ReferenceService referenceService;
+  private RotationService rotationService;
 
   @Autowired
   public ProgrammeMembershipValidator(PersonRepository personRepository,
                                       ProgrammeRepository programmeRepository,
                                       CurriculumRepository curriculumRepository,
-                                      ReferenceServiceImpl referenceService) {
+                                      ReferenceService referenceService,
+                                      RotationService rotationService) {
     this.personRepository = personRepository;
     this.programmeRepository = programmeRepository;
     this.curriculumRepository = curriculumRepository;
     this.referenceService = referenceService;
+    this.rotationService = rotationService;
   }
 
   /**
@@ -157,12 +159,9 @@ public class ProgrammeMembershipValidator {
     List<FieldError> fieldErrors = new ArrayList<>();
     // then check the rotation
     if (StringUtils.isNotEmpty(programmeMembershipDTO.getRotation())) {
-      List<String> labels = Lists.newArrayList();
-      labels.add(programmeMembershipDTO.getRotation());
-      if (!CollectionUtils.isEmpty(labels)) {
-        Map<String, Boolean> rotationExistsMap = referenceService.rotationExists(labels);
-        notExistsFieldErrors(fieldErrors, rotationExistsMap, "rotation", "rotation");
-      }
+        if (!rotationService.rotationExists(programmeMembershipDTO.getRotation())) {
+            fieldErrors.add(new FieldError(PROGRAMME_MEMBERSHIP_DTO_NAME, "rotation", "Rotation with name %s does not exist"));
+        }
     }
     return fieldErrors;
   }
@@ -177,15 +176,4 @@ public class ProgrammeMembershipValidator {
     fieldErrors.add(new FieldError(PROGRAMME_MEMBERSHIP_DTO_NAME, field,
         String.format("%s is required", field)));
   }
-
-  private void notExistsFieldErrors(List<FieldError> fieldErrors, Map<String, Boolean> rotationExistsMap,
-                                    String field, String entityName) {
-    rotationExistsMap.forEach((k, v) -> {
-      if (!v) {
-        fieldErrors.add(new FieldError(PROGRAMME_MEMBERSHIP_DTO_NAME, field,
-            String.format("%s with label %s does not exist", entityName, k)));
-      }
-    });
-  }
-
 }

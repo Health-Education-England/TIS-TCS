@@ -30,6 +30,14 @@ public interface RotationPostService {
      * @return the entity
      */
     RotationPostDTO findOne(Long id);
+    
+    /**
+     * Get the "id" rotationPost.
+     *
+     * @param id the id of the entity
+     * @return the entity
+     */
+    RotationPostDTO findOneByPostId(Long id);
 
     /**
      * Delete the "id" rotationPost.
