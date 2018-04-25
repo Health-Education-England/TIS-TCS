@@ -1,6 +1,5 @@
 package com.transformuk.hee.tis.tcs.service.api;
 
-import com.fasterxml.jackson.databind.ObjectMapper;
 import com.google.gson.Gson;
 import com.google.gson.reflect.TypeToken;
 import com.microsoft.azure.storage.StorageException;
@@ -14,7 +13,6 @@ import com.transformuk.hee.tis.tcs.service.config.AzureProperties;
 import com.transformuk.hee.tis.tcs.service.service.DocumentService;
 import com.transformuk.hee.tis.tcs.service.service.TagService;
 import org.junit.Before;
-import org.junit.Ignore;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.mockito.MockitoAnnotations;
@@ -27,7 +25,6 @@ import org.springframework.mock.web.MockMultipartFile;
 import org.springframework.test.context.junit4.SpringRunner;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.MvcResult;
-import org.springframework.test.web.servlet.ResultActions;
 import org.springframework.test.web.servlet.setup.MockMvcBuilders;
 
 import javax.annotation.Resource;
@@ -65,7 +62,7 @@ public class DocumentResourceIntTest {
     @Resource
     private AzureProperties azureProperties;
 
-    // fixme: replace with API endpoint when implemented
+    // fixme: replace with API endpoint to delete when implemented
     @Resource
     private FileStorageRepository fileStorageRepository;
 
@@ -116,7 +113,7 @@ public class DocumentResourceIntTest {
     }
 
     @Test
-    public void createDocument_shouldReturnHTTP400_WhenPersonIdIsMissing() throws Exception {
+    public void uploadDocument_shouldReturnHTTP400_WhenPersonIsMissing() throws Exception {
         final MockMultipartFile mockFile = new MockMultipartFile(TEST_FILE_FORM_FIELD_NAME, TEST_FILE_NAME, TEST_FILE_CONTENT_TYPE, TEST_FILE_CONTENT);
 
         mockMvc.perform(fileUpload(DocumentResource.PATH_API + DocumentResource.PATH_DOCUMENTS)
@@ -126,7 +123,7 @@ public class DocumentResourceIntTest {
     }
 
     @Test
-    public void createDocument_shouldReturnHTTP400_WhenPersonDocumentIsMissing() throws Exception {
+    public void uploadDocument_shouldReturnHTTP400_WhenPersonDocumentIsMissing() throws Exception {
         mockMvc.perform(fileUpload(DocumentResource.PATH_API + DocumentResource.PATH_DOCUMENTS)
                 .param("personId", String.valueOf(PERSON_BASE_ID))
                 .contentType(MediaType.MULTIPART_FORM_DATA))
@@ -134,7 +131,7 @@ public class DocumentResourceIntTest {
     }
 
     @Test
-    public void createDocument_shouldReturnHTTP201WithId_WhenUploadingValidDocument() throws Exception {
+    public void uploadDocument_shouldReturnHTTP201_WhenUploadingValidDocument() throws Exception {
         final MockMultipartFile mockFile = new MockMultipartFile(TEST_FILE_FORM_FIELD_NAME, TEST_FILE_NAME, TEST_FILE_CONTENT_TYPE, TEST_FILE_CONTENT);
 
         final MvcResult uploadResponse = mockMvc.perform(fileUpload(DocumentResource.PATH_API + DocumentResource.PATH_DOCUMENTS)
@@ -142,32 +139,12 @@ public class DocumentResourceIntTest {
                 .param("personId", String.valueOf(PERSON_BASE_ID))
                 .contentType(MediaType.MULTIPART_FORM_DATA))
                 .andExpect(status().isCreated())
-                .andExpect(content().contentTypeCompatibleWith(MediaType.APPLICATION_JSON))
+                .andExpect(content().contentType(MediaType.APPLICATION_JSON_UTF8))
                 .andExpect(content().string(containsString("{\"id\":"))).andReturn();
 
         final DocumentId documentId = new Gson().fromJson(uploadResponse.getResponse().getContentAsString(), DocumentId.class);
 
         deleteTestFile(documentId.getId());
-    }
-
-    // TODO fix validations
-    @Ignore
-    @Test
-    public void bulkUpdateDocuments_shouldReturnHTTP400_WhenDocumentIsInvalid() throws Exception {
-        final long documentId = DOCUMENT_BASE_ID + 10;
-
-        final Connection connection = jdbcTemplate.getDataSource().getConnection();
-        ScriptUtils.executeSqlScript(connection, new ByteArrayResource(getSql(SQL_INSERT_DOCUMENT, documentId, PERSON_BASE_ID).getBytes()));
-
-        final DocumentDTO document = new DocumentDTO();
-        document.setId(documentId);
-        document.setName("Non-existing document");
-//        document.setPersonId(PERSON_BASE_ID);
-
-        mockMvc.perform(patch(DocumentResource.PATH_API + DocumentResource.PATH_DOCUMENTS)
-                .contentType(MediaType.APPLICATION_JSON)
-                .content(TestUtil.convertObjectToJsonBytes(Collections.singletonList(document))))
-                .andExpect(status().isBadRequest());
     }
 
     @Test
@@ -209,11 +186,15 @@ public class DocumentResourceIntTest {
                 .content(TestUtil.convertObjectToJsonBytes(Collections.singletonList(updatedDocumentWith2Tags))))
                 .andExpect(status().isOk());
 
-        final MvcResult response = this.mockMvc.perform(get(DocumentResource.PATH_API + DocumentResource.PATH_DOCUMENTS + "/" + documentId))
+        final MvcResult response = this.mockMvc.perform(get(DocumentResource.PATH_API +
+                DocumentResource.PATH_DOCUMENTS +
+                "/" +
+                documentId))
+                .andExpect(content().contentType(MediaType.APPLICATION_JSON_UTF8))
                 .andExpect(status().isOk())
                 .andReturn();
 
-        final DocumentDTO updatedDocumentWith3Tags = new ObjectMapper().readValue(response.getResponse().getContentAsString(), DocumentDTO.class);
+        final DocumentDTO updatedDocumentWith3Tags = new Gson().fromJson(response.getResponse().getContentAsString(), DocumentDTO.class);
 
         assertThat(updatedDocumentWith3Tags.getTags()).hasSize(3).containsAll(updatedDocumentWith2Tags.getTags());
     }
@@ -230,25 +211,34 @@ public class DocumentResourceIntTest {
         updatedDocumentWith2Tags.getTags().remove(new TagDTO("Tag 1"));
         updatedDocumentWith2Tags.getTags().add(new TagDTO("Tag 3"));
 
-        mockMvc.perform(patch(DocumentResource.PATH_API + DocumentResource.PATH_DOCUMENTS)
+        mockMvc.perform(patch(DocumentResource.PATH_API +
+                DocumentResource.PATH_DOCUMENTS)
                 .contentType(MediaType.APPLICATION_JSON)
                 .content(TestUtil.convertObjectToJsonBytes(Collections.singletonList(updatedDocumentWith2Tags))))
                 .andExpect(status().isOk());
 
-        final MvcResult response = this.mockMvc.perform(get(DocumentResource.PATH_API + DocumentResource.PATH_DOCUMENTS + "/" + documentId))
+        final MvcResult response = this.mockMvc.perform(get(DocumentResource.PATH_API +
+                DocumentResource.PATH_DOCUMENTS +
+                "/" +
+                documentId))
+                .andExpect(content().contentType(MediaType.APPLICATION_JSON_UTF8))
                 .andExpect(status().isOk())
                 .andReturn();
 
-        final DocumentDTO updatedDocumentWith1Tag = new ObjectMapper().readValue(response.getResponse().getContentAsString(), DocumentDTO.class);
+        final DocumentDTO updatedDocumentWith1Tag = new Gson().fromJson(response.getResponse().getContentAsString(), DocumentDTO.class);
 
         assertThat(updatedDocumentWith1Tag.getTags()).hasSize(2).containsAll(updatedDocumentWith2Tags.getTags());
     }
 
     @Test
-    public void getAllTags_shouldReturnTags_WhenQueryStartsWithOrderAsc() throws Exception {
+    public void getAllTags_shouldReturnHTTP200_WhenQueryStartsWithOrderAsc() throws Exception {
         final String query = "abc";
 
-        final MvcResult response = this.mockMvc.perform(get(DocumentResource.PATH_API + DocumentResource.PATH_DOCUMENTS + DocumentResource.PATH_TAGS + "/?query=" + query))
+        final MvcResult response = this.mockMvc.perform(get(DocumentResource.PATH_API +
+                DocumentResource.PATH_DOCUMENTS +
+                DocumentResource.PATH_TAGS +
+                "/?query=" + query))
+                .andExpect(content().contentType(MediaType.APPLICATION_JSON_UTF8))
                 .andExpect(status().isOk())
                 .andReturn();
 
@@ -262,29 +252,36 @@ public class DocumentResourceIntTest {
     }
 
     @Test
-    public void getAllTags_shouldNotReturnTags_WhenQueryDoesNotStartsWith() throws Exception {
+    public void getAllTags_shouldReturnHTTP404_WhenQueryDoesNotStartsWith() throws Exception {
         final String query = "xyz";
 
-        final MvcResult response = this.mockMvc.perform(get(DocumentResource.PATH_API + DocumentResource.PATH_DOCUMENTS + DocumentResource.PATH_TAGS + "/?query=" + query))
+        final MvcResult response = this.mockMvc.perform(get(DocumentResource.PATH_API +
+                DocumentResource.PATH_DOCUMENTS +
+                DocumentResource.PATH_TAGS +
+                "/?query=" + query))
                 .andExpect(status().isNotFound())
                 .andReturn();
 
+        assertThat(response.getResponse().getContentType()).isNullOrEmpty();
         assertThat(response.getResponse().getContentLength()).isZero();
         assertThat(response.getResponse().getContentAsString()).isEmpty();
     }
 
     @Test
-    public void getAllTags_shouldReturnBadRequest_WhenQueryIsNullOrEmpty() throws Exception {
+    public void getAllTags_shouldReturnHTTP400_WhenQueryIsNullOrEmpty() throws Exception {
         final String query = "";
 
-        this.mockMvc.perform(get(DocumentResource.PATH_API + DocumentResource.PATH_DOCUMENTS + DocumentResource.PATH_TAGS + "/?query=" + query))
+        this.mockMvc.perform(get(DocumentResource.PATH_API +
+                DocumentResource.PATH_DOCUMENTS +
+                DocumentResource.PATH_TAGS +
+                "/?query=" + query))
                 .andExpect(status().isBadRequest())
                 .andExpect(content().string(""))
                 .andReturn();
     }
 
     @Test
-    public void downloadDocumentById_shouldReturn200OKFile_WhenDocumentIdDoesExist() throws Exception {
+    public void downloadDocumentById_shouldReturnHTTP200_WhenDocumentDoesExist() throws Exception {
         final MockMultipartFile mockFile = new MockMultipartFile(TEST_FILE_FORM_FIELD_NAME, TEST_FILE_NAME, TEST_FILE_CONTENT_TYPE, TEST_FILE_CONTENT);
 
         final MvcResult uploadResponse = mockMvc.perform(fileUpload(DocumentResource.PATH_API + DocumentResource.PATH_DOCUMENTS)
@@ -292,42 +289,125 @@ public class DocumentResourceIntTest {
                 .param("personId", String.valueOf(PERSON_BASE_ID))
                 .contentType(MediaType.MULTIPART_FORM_DATA))
                 .andExpect(status().isCreated())
-                .andExpect(content().contentTypeCompatibleWith(MediaType.APPLICATION_JSON))
+                .andExpect(content().contentType(MediaType.APPLICATION_JSON_UTF8))
                 .andExpect(content().string(containsString("{\"id\":"))).andReturn();
 
         final DocumentId documentId = new Gson().fromJson(uploadResponse.getResponse().getContentAsString(), DocumentId.class);
 
-        final ResultActions action = mockMvc.perform(get(DocumentResource.PATH_API + DocumentResource.PATH_DOCUMENTS + DocumentResource.PATH_DOWNLOADS + "/" + documentId.getId()).contentType(MediaType.APPLICATION_OCTET_STREAM));
-        action.andExpect(header().string("Content-Disposition", "attachment;filename=document.txt"));
-        action.andExpect(header().string("Content-Length", String.valueOf(TEST_FILE_CONTENT.length)));
-        action.andExpect(content().contentType(TEST_FILE_CONTENT_TYPE));
-        action.andExpect(content().bytes(TEST_FILE_CONTENT));
-        action.andExpect(status().isOk());
+        mockMvc.perform(get(DocumentResource.PATH_API +
+                DocumentResource.PATH_DOCUMENTS +
+                DocumentResource.PATH_DOWNLOADS +
+                "/" +
+                documentId.getId()))
+                .andExpect(header().string("Content-Disposition", "attachment;filename=document.txt"))
+                .andExpect(header().string("Content-Length", String.valueOf(TEST_FILE_CONTENT.length)))
+                .andExpect(content().contentType(TEST_FILE_CONTENT_TYPE))
+                .andExpect(content().bytes(TEST_FILE_CONTENT))
+                .andExpect(status().isOk());
 
         deleteTestFile(documentId.getId());
     }
 
     @Test
-    public void downloadDocumentById_shouldReturn404OKFile_WhenDocumentIdDoesNotExist() throws Exception {
+    public void downloadDocumentById_shouldReturnHTTP404_WhenDocumentDoesNotExist() throws Exception {
         final long documentId = DOCUMENT_BASE_ID + 999999999;
 
-        final ResultActions action = mockMvc.perform(get(DocumentResource.PATH_API + DocumentResource.PATH_DOCUMENTS + DocumentResource.PATH_DOWNLOADS + "/" + documentId).contentType(MediaType.APPLICATION_OCTET_STREAM));
-        action.andExpect(content().string(""));
-        action.andExpect(status().isNotFound());
+        mockMvc.perform(get(DocumentResource.PATH_API +
+                DocumentResource.PATH_DOCUMENTS +
+                DocumentResource.PATH_DOWNLOADS +
+                "/" +
+                documentId))
+                .andExpect(content().string(""))
+                .andExpect(status().isNotFound());
     }
 
     @Test
-    public void downloadDocumentById_shouldReturn400OKFile_WhenDocumentIdIsEmpty() throws Exception {
-        final ResultActions action = mockMvc.perform(get(DocumentResource.PATH_API + DocumentResource.PATH_DOCUMENTS + DocumentResource.PATH_DOWNLOADS + "/" + "").contentType(MediaType.APPLICATION_OCTET_STREAM));
-        action.andExpect(content().string(""));
-        action.andExpect(status().isBadRequest());
+    public void downloadDocumentById_shouldReturnHTTP400_WhenDocumentIdIsEmpty() throws Exception {
+        mockMvc.perform(get(DocumentResource.PATH_API +
+                DocumentResource.PATH_DOCUMENTS +
+                DocumentResource.PATH_DOWNLOADS +
+                "/" +
+                ""))
+                .andExpect(content().string(""))
+                .andExpect(status().isBadRequest());
     }
 
     @Test
-    public void downloadDocumentById_shouldReturn400OKFile_WhenDocumentIdIsNaN() throws Exception {
-        final ResultActions action = mockMvc.perform(get(DocumentResource.PATH_API + DocumentResource.PATH_DOCUMENTS + DocumentResource.PATH_DOWNLOADS + "/" + "NaN").contentType(MediaType.APPLICATION_OCTET_STREAM));
-        action.andExpect(content().string(""));
-        action.andExpect(status().isBadRequest());
+    public void downloadDocumentById_shouldReturnHTTP400_WhenDocumentIdIsNaN() throws Exception {
+        mockMvc.perform(get(DocumentResource.PATH_API +
+                DocumentResource.PATH_DOCUMENTS +
+                DocumentResource.PATH_DOWNLOADS +
+                "/" +
+                "NaN"))
+                .andExpect(content().string(""))
+                .andExpect(status().isBadRequest());
+    }
+
+    @Test
+    public void getDocumentById_shouldReturnHTTP400_WhenDocumentIdIsEmpty() throws Exception {
+        mockMvc.perform(get(DocumentResource.PATH_API +
+                DocumentResource.PATH_DOCUMENTS +
+                "/" +
+                ""))
+                .andExpect(content().string(""))
+                .andExpect(status().isBadRequest());
+    }
+
+    @Test
+    public void getDocumentById_shouldReturnHTTP400_WhenDocumentIdIsNaN() throws Exception {
+        mockMvc.perform(get(DocumentResource.PATH_API +
+                DocumentResource.PATH_DOCUMENTS +
+                "/" +
+                "NaN"))
+                .andExpect(content().string(""))
+                .andExpect(status().isBadRequest());
+    }
+
+    @Test
+    public void getDocumentById_shouldReturnHTTP404_WhenDocumentDoesNotExist() throws Exception {
+        final long documentId = DOCUMENT_BASE_ID + 999999999;
+
+        mockMvc.perform(get(DocumentResource.PATH_API +
+                DocumentResource.PATH_DOCUMENTS +
+                "/" +
+                documentId))
+                .andExpect(content().string(""))
+                .andExpect(status().isNotFound());
+    }
+
+    @Test
+    public void getDocumentById_shouldReturnHTTP200_WhenDocumentDoesExist() throws Exception {
+        final MockMultipartFile mockFile = new MockMultipartFile(TEST_FILE_FORM_FIELD_NAME, TEST_FILE_NAME, TEST_FILE_CONTENT_TYPE, TEST_FILE_CONTENT);
+
+        final MvcResult uploadResponse = mockMvc.perform(fileUpload(DocumentResource.PATH_API + DocumentResource.PATH_DOCUMENTS)
+                .file(mockFile)
+                .param("personId", String.valueOf(PERSON_BASE_ID))
+                .contentType(MediaType.MULTIPART_FORM_DATA))
+                .andExpect(status().isCreated())
+                .andExpect(content().contentType(MediaType.APPLICATION_JSON_UTF8))
+                .andExpect(content().string(containsString("{\"id\":"))).andReturn();
+
+        final DocumentId documentId = new Gson().fromJson(uploadResponse.getResponse().getContentAsString(), DocumentId.class);
+
+        final MvcResult response = mockMvc.perform(get(DocumentResource.PATH_API +
+                DocumentResource.PATH_DOCUMENTS +
+                "/" +
+                documentId.getId()))
+                .andExpect(content().contentType(MediaType.APPLICATION_JSON_UTF8))
+                .andExpect(status().isOk()).andReturn();
+
+        final DocumentDTO document = new Gson().fromJson(response.getResponse().getContentAsString(), DocumentDTO.class);
+
+        assertThat(document.getId()).isEqualTo(documentId.getId());
+        assertThat(document.getName()).isEqualTo(TEST_FILE_NAME);
+        assertThat(document.getFileName()).isEqualTo(TEST_FILE_NAME);
+        assertThat(document.getFileExtension()).isEqualTo(TEST_FILE_NAME.substring(TEST_FILE_NAME.lastIndexOf(".") + 1));
+        assertThat(document.getContentType()).isEqualTo(TEST_FILE_CONTENT_TYPE);
+        assertThat(document.getSize()).isEqualTo(TEST_FILE_CONTENT.length);
+        assertThat(document.getPersonId()).isEqualTo(PERSON_BASE_ID);
+        assertThat(document.getTags()).isEmpty();
+
+        deleteTestFile(documentId.getId());
     }
 
     private DocumentDTO updateMetadataWith2Tags(final long documentId) throws Exception {
@@ -348,11 +428,15 @@ public class DocumentResourceIntTest {
                 .content(TestUtil.convertObjectToJsonBytes(Collections.singletonList(document))))
                 .andExpect(status().isOk());
 
-        final MvcResult response = this.mockMvc.perform(get(DocumentResource.PATH_API + DocumentResource.PATH_DOCUMENTS + "/" + documentId))
+        final MvcResult response = this.mockMvc.perform(get(DocumentResource.PATH_API +
+                DocumentResource.PATH_DOCUMENTS +
+                "/" +
+                documentId))
+                .andExpect(content().contentType(MediaType.APPLICATION_JSON_UTF8))
                 .andExpect(status().isOk())
                 .andReturn();
 
-        final DocumentDTO updatedDocument = new ObjectMapper().readValue(response.getResponse().getContentAsString(), DocumentDTO.class);
+        final DocumentDTO updatedDocument = new Gson().fromJson(response.getResponse().getContentAsString(), DocumentDTO.class);
 
         assertThat(document.getId()).isEqualTo(updatedDocument.getId());
         assertThat(document.getName()).isEqualTo(updatedDocument.getName());

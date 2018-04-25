@@ -35,6 +35,7 @@ import com.transformuk.hee.tis.tcs.service.service.mapper.PlacementSpecialtyMapp
 import com.transformuk.hee.tis.tcs.service.service.mapper.PlacementViewMapper;
 import com.transformuk.hee.tis.tcs.service.service.mapper.SpecialtyMapper;
 import org.apache.commons.collections4.CollectionUtils;
+import org.apache.commons.lang.StringUtils;
 import org.apache.commons.lang3.time.DateUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -43,6 +44,8 @@ import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.domain.Specification;
 import org.springframework.data.jpa.domain.Specifications;
+import org.springframework.jdbc.core.JdbcTemplate;
+import org.springframework.jdbc.core.RowMapper;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -50,6 +53,8 @@ import javax.persistence.EntityManager;
 import javax.persistence.Query;
 import java.io.IOException;
 import java.math.BigInteger;
+import java.sql.ResultSet;
+import java.sql.SQLException;
 import java.time.LocalDate;
 import java.util.ArrayList;
 import java.util.Calendar;
@@ -99,6 +104,8 @@ public class PlacementServiceImpl implements PlacementService {
   private EntityManager em;
   @Autowired
   private SqlQuerySupplier sqlQuerySupplier;
+  @Autowired
+  private JdbcTemplate jdbcTemplate;
   @Autowired
   private PlacementSpecialtyRepository placementSpecialtyRepository;
   @Autowired
@@ -155,7 +162,7 @@ public class PlacementServiceImpl implements PlacementService {
   private Set<PlacementSpecialty> linkPlacementSpecialties(PlacementDetailsDTO placementDetailsDTO, PlacementDetails placementDetails) {
     Placement placement = placementRepository.findOne(placementDetails.getId());
     Set<PlacementSpecialty> placementSpecialties = Sets.newHashSet();
-    if(CollectionUtils.isNotEmpty(placementDetailsDTO.getSpecialties())) {
+    if (CollectionUtils.isNotEmpty(placementDetailsDTO.getSpecialties())) {
       for (PlacementSpecialtyDTO placementSpecialtyDTO : placementDetailsDTO.getSpecialties()) {
         PlacementSpecialty placementSpecialty = new PlacementSpecialty();
         placementSpecialty.setPlacement(placement);
@@ -218,10 +225,11 @@ public class PlacementServiceImpl implements PlacementService {
     PlacementDetails pd = placementDetailsRepository.findOne(id);
     PlacementDetailsDTO placementDetailsDTO = null;
     if (pd != null) {
-      Set<PlacementSpecialty> placementSpecialties = placementSpecialtyRepository.findByPlacementId(id);
-      Set<PlacementSpecialtyDTO> placementSpecialtyDTOS = placementSpecialtyMapper.toDTOs(placementSpecialties);
+      String query = sqlQuerySupplier.getQuery(SqlQuerySupplier.PLACEMENT_DETAILS);
+      query = query.replace(":id", id.toString());
+      List<PlacementSpecialtyDTO> results = jdbcTemplate.query(query, new PlacementDetailRowMapper());
       placementDetailsDTO = placementDetailsMapper.placementDetailsToPlacementDetailsDTO(pd);
-      placementDetailsDTO.setSpecialties(placementSpecialtyDTOS);
+      placementDetailsDTO.setSpecialties(Sets.newHashSet(results));
     }
     return placementDetailsDTO;
   }
@@ -348,7 +356,6 @@ public class PlacementServiceImpl implements PlacementService {
     return result.map(placementDetailsMapper::placementDetailsToPlacementDetailsDTO);
   }
 
-
   /**
    * Get all placement details by given column filters.
    *
@@ -400,11 +407,10 @@ public class PlacementServiceImpl implements PlacementService {
     return result.map(placementDetailsMapper::placementDetailsToPlacementDetailsDTO);
   }
 
-
   @Override
   public PlacementDTO closePlacement(Long placementId) {
     Placement placement = placementRepository.findOne(placementId);
-    if(placement != null) {
+    if (placement != null) {
       placement.setDateTo(LocalDate.now().minusDays(1));
       placement = placementRepository.saveAndFlush(placement);
     }
@@ -463,7 +469,7 @@ public class PlacementServiceImpl implements PlacementService {
     placementSummaryDTOS.sort(new Comparator<PlacementSummaryDTO>() {
       @Override
       public int compare(PlacementSummaryDTO o1, PlacementSummaryDTO o2) {
-        if(o2.getDateTo() != null && o1.getDateTo() != null) {
+        if (o2.getDateTo() != null && o1.getDateTo() != null) {
           return o2.getDateTo().compareTo(o1.getDateTo());
         }
         return 0;
@@ -479,9 +485,9 @@ public class PlacementServiceImpl implements PlacementService {
     }
 
     // Truncating the hours,minutes,seconds
-    long from = DateUtils.truncate(dateFrom,Calendar.DATE).getTime();
-    long to = DateUtils.truncate(dateTo,Calendar.DATE).getTime();
-    long now = DateUtils.truncate(new Date(),Calendar.DATE).getTime();
+    long from = DateUtils.truncate(dateFrom, Calendar.DATE).getTime();
+    long to = DateUtils.truncate(dateTo, Calendar.DATE).getTime();
+    long now = DateUtils.truncate(new Date(), Calendar.DATE).getTime();
 
     if (now < from) {
       return PlacementStatus.FUTURE.name();
@@ -514,8 +520,8 @@ public class PlacementServiceImpl implements PlacementService {
     return
         ((currentPlacement.getDateFrom() != null && !currentPlacement.getDateFrom().equals(updatedPlacementDetails.getDateFrom())) ||
             (currentPlacement.getDateTo() != null && !currentPlacement.getDateTo().equals(updatedPlacementDetails.getDateTo()))) &&
-        ((currentPlacement.getDateFrom() != null && currentPlacement.getDateFrom().isBefore(LocalDate.now().plusMonths(3))) ||
-            (updatedPlacementDetails.getDateFrom() != null && updatedPlacementDetails.getDateFrom().isBefore(LocalDate.now().plusMonths(3))));
+            ((currentPlacement.getDateFrom() != null && currentPlacement.getDateFrom().isBefore(LocalDate.now().plusMonths(3))) ||
+                (updatedPlacementDetails.getDateFrom() != null && updatedPlacementDetails.getDateFrom().isBefore(LocalDate.now().plusMonths(3))));
   }
 
   private void handleEsrNewPlacementNotification(final PlacementDetailsDTO placementDetailsDTO, PlacementDetails placementDetails) {
@@ -535,6 +541,22 @@ public class PlacementServiceImpl implements PlacementService {
         // Log and continue
         log.error("Error loading New Placement Notification : ", e);
       }
+    }
+  }
+
+  class PlacementDetailRowMapper implements RowMapper<PlacementSpecialtyDTO> {
+    @Override
+    public PlacementSpecialtyDTO mapRow(ResultSet rs, int rowNum) throws SQLException {
+      PlacementSpecialtyDTO result = new PlacementSpecialtyDTO();
+      result.setPlacementId(rs.getLong("placementId"));
+      result.setSpecialtyId(rs.getLong("specialtyId"));
+      String placementSpecialtyType = rs.getString("placementSpecialtyType");
+      PostSpecialtyType postSpecialtyType = null;
+      if (StringUtils.isNotBlank(placementSpecialtyType)) {
+        postSpecialtyType = PostSpecialtyType.valueOf(placementSpecialtyType);
+      }
+      result.setPlacementSpecialtyType(postSpecialtyType);
+      return result;
     }
   }
 }

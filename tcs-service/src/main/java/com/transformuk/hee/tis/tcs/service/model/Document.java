@@ -12,6 +12,8 @@ import java.util.Set;
 @ApiModel("Document")
 @Entity
 public class Document implements Serializable {
+    private static final long serialVersionUID = -5728195363933266747L;
+
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
