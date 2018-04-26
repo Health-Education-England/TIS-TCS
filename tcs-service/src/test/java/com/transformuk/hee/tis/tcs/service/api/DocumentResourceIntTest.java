@@ -18,6 +18,7 @@ import org.junit.runner.RunWith;
 import org.mockito.MockitoAnnotations;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.core.io.ByteArrayResource;
+import org.springframework.data.web.PageableHandlerMethodArgumentResolver;
 import org.springframework.http.MediaType;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.jdbc.datasource.init.ScriptUtils;
@@ -28,6 +29,7 @@ import org.springframework.test.web.servlet.MvcResult;
 import org.springframework.test.web.servlet.setup.MockMvcBuilders;
 
 import javax.annotation.Resource;
+import javax.inject.Inject;
 import java.lang.reflect.Type;
 import java.net.URISyntaxException;
 import java.security.InvalidKeyException;
@@ -61,6 +63,8 @@ public class DocumentResourceIntTest {
     private JdbcTemplate jdbcTemplate;
     @Resource
     private AzureProperties azureProperties;
+    @Inject
+    private PageableHandlerMethodArgumentResolver pageableArgumentResolver;
 
     // fixme: replace with API endpoint to delete when implemented
     @Resource
@@ -87,7 +91,9 @@ public class DocumentResourceIntTest {
     public void setup() throws SQLException {
         MockitoAnnotations.initMocks(this);
         final DocumentResource documentResource = new DocumentResource(documentService, tagService);
-        mockMvc = MockMvcBuilders.standaloneSetup(documentResource).build();
+        mockMvc = MockMvcBuilders.standaloneSetup(documentResource)
+                .setCustomArgumentResolvers(pageableArgumentResolver)
+                .build();
 
         TestUtils.mockUserprofile("jamesh", "1-AIIDR8", "1-AIIDWA");
 
@@ -110,6 +116,8 @@ public class DocumentResourceIntTest {
         ScriptUtils.executeSqlScript(connection, new ByteArrayResource(getSql(SQL_INSERT_TAG, tagId++, "abcxyz").getBytes()));
         ScriptUtils.executeSqlScript(connection, new ByteArrayResource(getSql(SQL_INSERT_TAG, tagId++, "xabcxyz").getBytes()));
         ScriptUtils.executeSqlScript(connection, new ByteArrayResource(getSql(SQL_INSERT_TAG, tagId++, "ghijkl").getBytes()));
+
+        insertBaseDocuments(connection);
     }
 
     @Test
@@ -232,12 +240,12 @@ public class DocumentResourceIntTest {
 
     @Test
     public void getAllTags_shouldReturnHTTP200_WhenQueryStartsWithOrderAsc() throws Exception {
-        final String query = "abc";
+        final String searchQuery = "abc";
 
         final MvcResult response = this.mockMvc.perform(get(DocumentResource.PATH_API +
                 DocumentResource.PATH_DOCUMENTS +
                 DocumentResource.PATH_TAGS +
-                "/?query=" + query))
+                "/?searchQuery=" + searchQuery))
                 .andExpect(content().contentType(MediaType.APPLICATION_JSON_UTF8))
                 .andExpect(status().isOk())
                 .andReturn();
@@ -253,12 +261,12 @@ public class DocumentResourceIntTest {
 
     @Test
     public void getAllTags_shouldReturnHTTP404_WhenQueryDoesNotStartsWith() throws Exception {
-        final String query = "xyz";
+        final String searchQuery = "xyz";
 
         final MvcResult response = this.mockMvc.perform(get(DocumentResource.PATH_API +
                 DocumentResource.PATH_DOCUMENTS +
                 DocumentResource.PATH_TAGS +
-                "/?query=" + query))
+                "/?searchQuery=" + searchQuery))
                 .andExpect(status().isNotFound())
                 .andReturn();
 
@@ -269,12 +277,12 @@ public class DocumentResourceIntTest {
 
     @Test
     public void getAllTags_shouldReturnHTTP400_WhenQueryIsNullOrEmpty() throws Exception {
-        final String query = "";
+        final String searchQuery = "";
 
         this.mockMvc.perform(get(DocumentResource.PATH_API +
                 DocumentResource.PATH_DOCUMENTS +
                 DocumentResource.PATH_TAGS +
-                "/?query=" + query))
+                "/?searchQuery=" + searchQuery))
                 .andExpect(status().isBadRequest())
                 .andExpect(content().string(""))
                 .andReturn();
@@ -347,8 +355,7 @@ public class DocumentResourceIntTest {
     public void getDocumentById_shouldReturnHTTP400_WhenDocumentIdIsEmpty() throws Exception {
         mockMvc.perform(get(DocumentResource.PATH_API +
                 DocumentResource.PATH_DOCUMENTS +
-                "/" +
-                ""))
+                "/"))
                 .andExpect(content().string(""))
                 .andExpect(status().isBadRequest());
     }
@@ -357,8 +364,7 @@ public class DocumentResourceIntTest {
     public void getDocumentById_shouldReturnHTTP400_WhenDocumentIdIsNaN() throws Exception {
         mockMvc.perform(get(DocumentResource.PATH_API +
                 DocumentResource.PATH_DOCUMENTS +
-                "/" +
-                "NaN"))
+                "/NaN"))
                 .andExpect(content().string(""))
                 .andExpect(status().isBadRequest());
     }
@@ -410,6 +416,93 @@ public class DocumentResourceIntTest {
         deleteTestFile(documentId.getId());
     }
 
+    @Test
+    public void getAllDocuments_shouldReturnHTTP501_WhenPersonIdIsEmpty() throws Exception {
+        mockMvc.perform(get(DocumentResource.PATH_API +
+                DocumentResource.PATH_DOCUMENTS +
+                "UnknownEntity/" +
+                "1"
+        ))
+                .andExpect(content().string(""))
+                .andExpect(status().isNotImplemented());
+    }
+
+    @Test
+    public void getAllDocuments_shouldReturnHTTP400_WhenPersonIdIsEmpty() throws Exception {
+        mockMvc.perform(get(DocumentResource.PATH_API +
+                DocumentResource.PATH_DOCUMENTS +
+                "person/   "))
+                .andExpect(content().string(""))
+                .andExpect(status().isBadRequest());
+    }
+
+    @Test
+    public void getAllDocuments_shouldReturnHTTP400_WhenPersonIdIsNaN() throws Exception {
+        final String personId = "NaN";
+
+        mockMvc.perform(get(DocumentResource.PATH_API +
+                DocumentResource.PATH_DOCUMENTS +
+                "person/" +
+                personId
+        ))
+                .andExpect(content().string(""))
+                .andExpect(status().isBadRequest());
+    }
+
+    @Test
+    public void getAllDocuments_shouldReturnHTTP404_WhenPersonDoesNotExist() throws Exception {
+        final Long personId = 999999999L;
+
+        mockMvc.perform(get(DocumentResource.PATH_API +
+                DocumentResource.PATH_DOCUMENTS +
+                "person/" +
+                personId
+        ))
+                .andExpect(content().string(""))
+                .andExpect(status().isNotFound());
+    }
+
+    @Test
+    public void getAllDocuments_shouldReturnHTTP200_WhenDocumentsDoNotExistWithSearchQuery() throws Exception {
+        final Long personId = 1L;
+        final String searchQuery = "NonExistingThing";
+
+        mockMvc.perform(get(DocumentResource.PATH_API +
+                DocumentResource.PATH_DOCUMENTS +
+                "person/" +
+                personId +
+                "?searchQuery=" + searchQuery
+        ))
+                .andExpect(content().string(""))
+                .andExpect(status().isOk());
+    }
+
+    @Test
+    public void getAllDocuments_shouldReturnHTTP200_WhenDocumentsDoNotExistWithFilterStatus() throws Exception {
+
+    }
+
+    @Test
+    public void getAllDocuments_shouldReturnHTTP200_WhenDocumentsDoNotExistWithFilterTags() throws Exception {
+
+    }
+
+
+    @Test
+    public void getAllDocuments_shouldReturnHTTP200_WhenDocumentsExistWithSearchQuery() throws Exception {
+
+    }
+
+    @Test
+    public void getAllDocuments_shouldReturnHTTP200_WhenDocumentsExistWithFilterStatus() throws Exception {
+
+    }
+
+    @Test
+    public void getAllDocuments_shouldReturnHTTP200_WhenDocumentsExistWithFilterTags() throws Exception {
+
+    }
+
     private DocumentDTO updateMetadataWith2Tags(final long documentId) throws Exception {
         final DocumentDTO document = new DocumentDTO();
         document.setId(documentId);
@@ -450,6 +543,17 @@ public class DocumentResourceIntTest {
 
     private void deleteTestFile(final long documentId) throws URISyntaxException, InvalidKeyException, StorageException {
         fileStorageRepository.deleteFile(documentId, azureProperties.getContainerName() + "/" + azureProperties.getPersonFolder(), TEST_FILE_NAME);
+    }
+
+    private void insertBaseDocuments(final Connection connection) {
+        final String query = "INSERT INTO `Document` (`id`, `addedDate`, `amendedDate`, `inactiveDate`, `uploadedBy`, `name`, `fileName`, `fileExtension`, `contentType`, `size`, `personId`, `status`, `version`, `intrepidDocumentUId`, `intrepidParentRecordId`, `intrepidFolderPath`)\n" +
+                "VALUES" +
+                "(" + (DOCUMENT_BASE_ID + 1001) + ", '2018-03-27 14:14:20', '2018-03-27 14:14:20.367', NULL, 'User 1', 'Document AAAAA', 'document1.jpg', 'jpg', 'image/jpeg', 56353, 1, 'CURRENT', NULL, NULL, NULL, NULL)," +
+                "(" + (DOCUMENT_BASE_ID + 1002) + ", '2018-03-27 15:10:59', '2018-03-27 15:14:36.624', NULL, 'User 1', 'Document BBBBB', 'document2.jpg', 'jpg', 'image/jpeg', 12123, 1, 'CURRENT', NULL, NULL, NULL, NULL)," +
+                "(" + (DOCUMENT_BASE_ID + 1003) + ", '2018-03-27 15:10:59', '2018-03-27 15:14:36.624', NULL, 'User 1', 'Document CCCCC', 'document3.jpg', 'jpg', 'image/jpeg', 12982, 1, 'DELETE', NULL, NULL, NULL, NULL)," +
+                "(" + (DOCUMENT_BASE_ID + 1004) + ", '2018-03-27 15:10:59', '2018-03-27 15:14:36.624', NULL, 'User 1', 'Document DDDDD', 'document4.jpg', 'jpg', 'image/jpeg', 12982, 1, 'INACTIVE', NULL, NULL, NULL, NULL);";
+
+        ScriptUtils.executeSqlScript(connection, new ByteArrayResource(query.getBytes()));
     }
 
     private String getSql(final String sql, final Object... args) {

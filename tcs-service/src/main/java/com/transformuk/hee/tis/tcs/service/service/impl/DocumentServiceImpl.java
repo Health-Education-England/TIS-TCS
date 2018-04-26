@@ -5,12 +5,19 @@ import com.microsoft.azure.storage.StorageException;
 import com.transformuk.hee.tis.filestorage.repository.FileStorageRepository;
 import com.transformuk.hee.tis.tcs.api.dto.DocumentDTO;
 import com.transformuk.hee.tis.tcs.service.config.AzureProperties;
+import com.transformuk.hee.tis.tcs.service.model.ColumnFilter;
 import com.transformuk.hee.tis.tcs.service.model.Document;
 import com.transformuk.hee.tis.tcs.service.repository.DocumentRepository;
 import com.transformuk.hee.tis.tcs.service.service.DocumentService;
 import com.transformuk.hee.tis.tcs.service.service.mapper.DocumentMapper;
+import com.transformuk.hee.tis.tcs.service.service.mapper.TagMapper;
+import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
+import org.springframework.data.jpa.domain.Specification;
+import org.springframework.data.jpa.domain.Specifications;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.multipart.MultipartFile;
@@ -18,7 +25,11 @@ import org.springframework.web.multipart.MultipartFile;
 import java.io.*;
 import java.net.URISyntaxException;
 import java.security.InvalidKeyException;
+import java.util.ArrayList;
+import java.util.List;
 import java.util.Optional;
+
+import static com.transformuk.hee.tis.tcs.service.service.impl.SpecificationFactory.in;
 
 @Service
 @Transactional
@@ -28,18 +39,22 @@ public class DocumentServiceImpl implements DocumentService {
     private final DocumentRepository documentRepository;
     private final FileStorageRepository fileStorageRepository;
     private final DocumentMapper documentMapper;
+    private final TagMapper tagMapper;
     private final AzureProperties azureProperties;
 
-    public DocumentServiceImpl(final DocumentRepository documentRepository, final FileStorageRepository fileStorageRepository, final DocumentMapper documentMapper, final AzureProperties azureProperties) {
+    public DocumentServiceImpl(final DocumentRepository documentRepository, final FileStorageRepository fileStorageRepository, final DocumentMapper documentMapper, final TagMapper tagMapper, final AzureProperties azureProperties) {
         this.documentRepository = documentRepository;
         this.fileStorageRepository = fileStorageRepository;
         this.documentMapper = documentMapper;
+        this.tagMapper = tagMapper;
         this.azureProperties = azureProperties;
     }
 
     @Override
     public Optional<DocumentDTO> findOne(final Long id) {
-        LOG.debug("Received request to load '{}' with ID '{}'", DocumentDTO.class.getSimpleName(), id);
+        LOG.debug("Received request to load '{}' with ID '{}'",
+                DocumentDTO.class.getSimpleName(),
+                id);
 
         final Document document = documentRepository.findOne(id);
 
@@ -48,6 +63,62 @@ public class DocumentServiceImpl implements DocumentService {
         }
 
         return Optional.ofNullable(documentMapper.toDto(document));
+    }
+
+    @Override
+    public Page<DocumentDTO> findAll(final Long personId, final String searchQuery, final List<ColumnFilter> columnFilters, final Pageable pageable) {
+        LOG.debug("Received request to load all '{}' with person id '{}', query '{}', status '{}' and tags '{}'",
+                DocumentDTO.class.getSimpleName(),
+                personId);
+
+        final Page<Document> documents;
+        if (StringUtils.isEmpty(searchQuery) && columnFilters.isEmpty()) {
+            documents = documentRepository.findAll(pageable);
+        } else {
+            final List<Specification<Document>> filterSpecs = new ArrayList<>();
+            if (columnFilters != null && !columnFilters.isEmpty()) {
+                columnFilters.forEach(cf -> filterSpecs.add(in(cf.getName(), cf.getValues())));
+            }
+
+            final List<Specification<Document>> querySpecs = new ArrayList<>();
+            if (StringUtils.isNotEmpty(searchQuery)) {
+                querySpecs.add((root, query, sb) -> sb.like(root.get("name"), "%" + searchQuery + "%"));
+                querySpecs.add((root, query, sb) -> sb.like(root.get("fileName"), "%" + searchQuery + "%"));
+                querySpecs.add((root, query, sb) -> sb.like(root.get("fileExtension"), "%" + searchQuery + "%"));
+                querySpecs.add((root, query, sb) -> sb.like(root.get("contentType"), "%" + searchQuery + "%"));
+//                querySpecs.add((root, query, sb) -> sb.like(sb.treat(root.get("size"), String.class), "%" + searchQuery + "%"));
+//                querySpecs.add((root, query, sb) -> sb.like(root.get("status"), Status.fromString(searchQuery));
+                querySpecs.add(SpecificationFactory.containsLike("tags.name", searchQuery));
+            }
+
+            Specifications<Document> fullSpec = null;
+            if (!filterSpecs.isEmpty()) {
+                fullSpec = Specifications.where(filterSpecs.get(0));
+                //add the rest of the querySpecs that made it in
+                for (int i = 1; i < filterSpecs.size(); i++) {
+                    fullSpec = fullSpec.and(filterSpecs.get(i));
+                }
+            }
+
+            if (!querySpecs.isEmpty()) {
+                int i = 0;
+                if (filterSpecs.isEmpty()) {
+                    fullSpec = Specifications.where(querySpecs.get(0));
+                    i++;
+                }
+
+                //add the rest of the querySpecs that made it in
+                for (; i < querySpecs.size(); i++) {
+                    fullSpec = fullSpec.or(querySpecs.get(i));
+                }
+
+                documents = documentRepository.findAll(fullSpec, pageable);
+            } else {
+                documents = documentRepository.findAll(pageable);
+            }
+        }
+
+        return mapDocuments(documents);
     }
 
     @Override
@@ -164,5 +235,9 @@ public class DocumentServiceImpl implements DocumentService {
                 // intentionally left empty
             }
         };
+    }
+
+    private Page<DocumentDTO> mapDocuments(final Page<Document> page) {
+        return page.map(documentMapper::toDto);
     }
 }

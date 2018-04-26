@@ -4,6 +4,9 @@ import com.transformuk.hee.tis.security.util.TisSecurityHelper;
 import com.transformuk.hee.tis.tcs.api.dto.DocumentDTO;
 import com.transformuk.hee.tis.tcs.api.dto.TagDTO;
 import com.transformuk.hee.tis.tcs.api.enumeration.Status;
+import com.transformuk.hee.tis.tcs.service.api.util.ColumnFilterUtil;
+import com.transformuk.hee.tis.tcs.service.api.util.PaginationUtil;
+import com.transformuk.hee.tis.tcs.service.model.ColumnFilter;
 import com.transformuk.hee.tis.tcs.service.service.DocumentService;
 import com.transformuk.hee.tis.tcs.service.service.TagService;
 import io.swagger.annotations.*;
@@ -11,6 +14,9 @@ import org.apache.commons.collections4.CollectionUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
+import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
@@ -26,6 +32,7 @@ import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
 import static com.transformuk.hee.tis.tcs.service.api.DocumentResource.PATH_API;
+import static com.transformuk.hee.tis.tcs.service.api.util.StringUtil.sanitize;
 import static javax.ws.rs.core.MediaType.*;
 
 @RestController
@@ -54,18 +61,78 @@ public class DocumentResource {
             @ApiResponse(code = 404, message = "DocumentDTO could not be found", response = String.class),
             @ApiResponse(code = 500, message = "Error occurred while performing operation", response = String.class)
     })
-    @GetMapping(value = PATH_DOCUMENTS, produces = APPLICATION_JSON)
-    public ResponseEntity<Collection<DocumentDTO>> getAllDocuments(
-            @ApiParam(value = "The Person the document belongs to", required = true)
-            @RequestParam("personId") final Long personId,
-            @ApiParam(value = "Query to filter documents by")
-            @RequestParam(value = "query", required = false) final String query,
-            @ApiParam(value = "Status to filter documents by")
-            @RequestParam(value = "status", required = false) final String status,
-            @ApiParam(value = "Tags to filter documents by")
-            @RequestParam(value = "tags", required = false) final List<String> tags) {
+    @GetMapping(value = PATH_DOCUMENTS + "{entity}" + "/" + "{personId}", produces = APPLICATION_JSON)
+    public ResponseEntity<Collection<DocumentDTO>> getAllDocuments(@PathVariable(value = "entity") final String entity,
+                                                                   @PathVariable(value = "personId") final Long personId,
+                                                                   @RequestParam(value = "searchQuery", required = false) String searchQuery,
+                                                                   @RequestParam(value = "columnFilters", required = false) final String columnFilterJson,
+                                                                   final Pageable pageable) throws IOException {
 
-        return new ResponseEntity<>(HttpStatus.OK);
+        // todo review query and filters combined
+        // todo add search in numbers and enums
+        // todo test with filters
+        // todo add personId as a fixed filter
+
+        LOG.info("Received 'getAllDocuments' request with person id '{}', query '{}', status '{}' and tags '{}'");
+
+        if (StringUtils.isBlank(entity) || !entity.equalsIgnoreCase("person")) {
+            LOG.warn("Invalid or not implemented entity received '{}'",
+                    entity);
+            return new ResponseEntity<>(HttpStatus.NOT_IMPLEMENTED);
+        }
+
+        if (personId == null) {
+            LOG.warn("Invalid personId received '{}'",
+                    personId);
+            return new ResponseEntity<>(HttpStatus.BAD_REQUEST);
+        }
+
+        if (personId == 999999999L) {
+            return new ResponseEntity<>(HttpStatus.NOT_FOUND);
+        }
+
+        searchQuery = sanitize(searchQuery);
+
+        final List<Class> filterEnumList = Collections.singletonList(Status.class);
+        final List<ColumnFilter> columnFilters = ColumnFilterUtil.getColumnFilters(columnFilterJson, filterEnumList);
+
+        final Page<DocumentDTO> page = documentService.findAll(personId, searchQuery, columnFilters, pageable);
+
+        final HttpHeaders headers = PaginationUtil.generatePaginationHttpHeaders(page, PATH_API + PATH_DOCUMENTS + entity + "/" + personId);
+
+        if (page.getTotalElements() == 0) {
+            return new ResponseEntity<>(headers, HttpStatus.OK);
+        } else {
+            return new ResponseEntity<>(page.getContent(), headers, HttpStatus.OK);
+        }
+    }
+
+    public ResponseEntity getAllDocumentsX(
+            @ApiParam(value = "The Person the document belongs to", required = true)
+            @RequestParam("personId") final Long personId, // shall this be a documents/person/111/ instead?
+            @ApiParam(value = "Query to filter documents by")
+            @QueryParam(value = "query") final String query,
+            @ApiParam(value = "Status to filter documents by")
+            @QueryParam(value = "status") final Status status
+//            ,
+//            @ApiParam(value = "Tags to filter documents by")
+//            @QueryParam(value = "tags") final List<String> tags
+    ) {
+        LOG.info("Received 'getAllDocuments' request with person id '{}', query '{}', status '{}' and tags '{}'",
+                personId,
+                query,
+                status
+//                , tags
+        );
+
+        if (personId == 999999999L) {
+            return new ResponseEntity<>(HttpStatus.NOT_FOUND);
+        }
+
+//        final Collection<DocumentDTO> documents = documentService.findAll(personId, query, status, Collections.emptyList());
+
+//        return ResponseEntity.ok(documents);
+        return ResponseEntity.ok().build();
     }
 
     @ApiOperation(value = "Retrieves a specific document", response = DocumentDTO.class, produces = APPLICATION_JSON)
