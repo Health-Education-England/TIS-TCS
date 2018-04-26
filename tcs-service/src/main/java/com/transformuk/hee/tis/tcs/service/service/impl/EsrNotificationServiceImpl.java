@@ -158,6 +158,7 @@ public class EsrNotificationServiceImpl implements EsrNotificationService {
     List<EsrNotification> esrNotifications = mapCurrentAndFuturePlacementsToNotification(currentAndFuturePlacements, asOfDate);
 
     LOG.info("Saving ESR Notifications for full notifications scenario : {}", esrNotifications.size());
+    esrNotifications.stream().forEach(esrNotification -> esrNotification.setManagingDeaneryBodyCode(deaneryBody));
     List<EsrNotification> savedNotifications = esrNotificationRepository.save(esrNotifications);
     return esrNotificationMapper.esrNotificationsToPlacementDetailDTOs(savedNotifications);
   }
@@ -361,17 +362,18 @@ public class EsrNotificationServiceImpl implements EsrNotificationService {
 
       List<Placement> currentPlacements = currentAndFuturePlacements.stream()
           .filter(placement -> placement.getPost().getNationalPostNumber().equals(postNumber) &&
-              (placement.getDateFrom().isBefore(asOfDate) || placement.getDateFrom().equals(asOfDate)))
+              (placement.getDateFrom() != null && (placement.getDateFrom().isBefore(asOfDate) || placement.getDateFrom().equals(asOfDate))))
           .collect(toList());
 
       List<Placement> futurePlacements = currentAndFuturePlacements.stream()
-          .filter(placement -> placement.getPost().getNationalPostNumber().equals(postNumber) && placement.getDateFrom().isAfter(asOfDate))
+          .filter(placement -> placement.getPost().getNationalPostNumber().equals(postNumber)
+              && placement.getDateFrom() != null && placement.getDateFrom().isAfter(asOfDate))
           .collect(toList());
 
       currentPlacements.forEach(currentPlacement -> {
 
         List<Placement> matchedFuturePlacements = futurePlacements.stream()
-            .filter(futurePlacement -> futurePlacement.getSiteCode().equalsIgnoreCase(currentPlacement.getSiteCode()))
+            .filter(futurePlacement -> isNotEmpty(futurePlacement.getSiteCode()) && futurePlacement.getSiteCode().equalsIgnoreCase(currentPlacement.getSiteCode()))
             .collect(toList());
 
         for (Placement futurePlacement : matchedFuturePlacements) {
