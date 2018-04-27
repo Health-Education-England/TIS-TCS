@@ -12,6 +12,7 @@ import com.transformuk.hee.tis.tcs.service.api.validation.ProgrammeMembershipVal
 import com.transformuk.hee.tis.tcs.service.service.ProgrammeMembershipService;
 import io.github.jhipster.web.util.ResponseUtil;
 import io.swagger.annotations.ApiParam;
+import org.apache.commons.collections4.CollectionUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -145,6 +146,28 @@ public class ProgrammeMembershipResource {
   }
 
   /**
+   * DELETE  /programme-memberships/ : delete the programmeMembership.
+   *
+   * @param programmeMembershipDTO the programmeMembershipDTO to update
+   * @return the ResponseEntity with status 200 (OK)
+   */
+  @PostMapping("/programme-memberships/delete/")
+  @Timed
+  @PreAuthorize("hasAuthority('tcs:delete:entities')")
+  public ResponseEntity<Void> deleteProgrammeMembership(@RequestBody ProgrammeMembershipDTO programmeMembershipDTO) {
+    log.debug("REST request to delete ProgrammeMembership : {}", programmeMembershipDTO);
+    StringBuilder idsDeleted = new StringBuilder();
+    if(programmeMembershipDTO != null && CollectionUtils.isNotEmpty(programmeMembershipDTO.getCurriculumMemberships())){
+      programmeMembershipDTO.getCurriculumMemberships().stream().forEach(curriculumMembershipDTO -> {
+        programmeMembershipService.delete(curriculumMembershipDTO.getId());
+        idsDeleted.append(curriculumMembershipDTO.getId());
+      });
+    }
+    return ResponseEntity.ok().headers(HeaderUtil.createEntityDeletionAlert(ENTITY_NAME, idsDeleted.toString())).build();
+  }
+
+
+  /**
    * DELETE  /programme-memberships/:id : delete the "id" programmeMembership.
    *
    * @param id the id of the programmeMembershipDTO to delete
@@ -153,8 +176,8 @@ public class ProgrammeMembershipResource {
   @DeleteMapping("/programme-memberships/{id}")
   @Timed
   @PreAuthorize("hasAuthority('tcs:delete:entities')")
-  public ResponseEntity<Void> deleteProgrammeMembership(@PathVariable Long id) {
-    log.debug("REST request to delete ProgrammeMembership : {}", id);
+  public ResponseEntity<Void> deleteProgrammeMembershipById(@PathVariable Long id) {
+    log.debug("REST request to delete ProgrammeMembership by id : {}", id);
     programmeMembershipService.delete(id);
     return ResponseEntity.ok().headers(HeaderUtil.createEntityDeletionAlert(ENTITY_NAME, id.toString())).build();
   }
