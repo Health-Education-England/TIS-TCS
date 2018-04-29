@@ -1,13 +1,11 @@
 package com.transformuk.hee.tis.tcs.api.dto;
 
 
-import com.transformuk.hee.tis.tcs.api.dto.validation.Create;
 import com.transformuk.hee.tis.tcs.api.dto.validation.Update;
 
 import javax.validation.constraints.DecimalMin;
 import javax.validation.constraints.NotNull;
 import javax.validation.constraints.Null;
-import java.beans.Transient;
 import java.io.Serializable;
 import java.util.Objects;
 
@@ -15,9 +13,6 @@ import java.util.Objects;
  * A DTO for the RotationPost entity.
  */
 public class RotationPostDTO implements Serializable {
-    
-    @DecimalMin(value = "0", groups = Update.class, message = "Id must not be negative")
-    @Null(groups = Create.class, message = "Id must be null when creating a new rotation-post relationship")
     private Long id;
     
     @NotNull(message = "Post Id must not be null when updating rotation-post relationships")
@@ -30,15 +25,15 @@ public class RotationPostDTO implements Serializable {
     
     @Null(groups = Update.class, message = "Programme Id must be null when updating rotation-post relationships")
     private Long programmeId;
-
+    
     public Long getId() {
         return id;
     }
-
+    
     public void setId(Long id) {
         this.id = id;
     }
-
+    
     public Long getPostId() {
         return postId;
     }
@@ -65,30 +60,24 @@ public class RotationPostDTO implements Serializable {
     
     @Override
     public boolean equals(Object o) {
-        if (this == o) {
-            return true;
-        }
-        if (o == null || getClass() != o.getClass()) {
-            return false;
-        }
-
-        RotationPostDTO rotationPostDTO = (RotationPostDTO) o;
-        if(rotationPostDTO.getId() == null || getId() == null) {
-            return false;
-        }
-        return Objects.equals(getId(), rotationPostDTO.getId());
+        if (this == o) return true;
+        if (o == null || getClass() != o.getClass()) return false;
+        RotationPostDTO that = (RotationPostDTO) o;
+        return Objects.equals(postId, that.postId) &&
+                Objects.equals(rotationId, that.rotationId) &&
+                Objects.equals(programmeId, that.programmeId);
     }
-
+    
     @Override
     public int hashCode() {
-        return Objects.hashCode(getId());
+        
+        return Objects.hash(postId, rotationId, programmeId);
     }
     
     @Override
     public String toString() {
         return "RotationPostDTO{" +
-                "id=" + id +
-                ", postId=" + postId +
+                "postId=" + postId +
                 ", rotationId=" + rotationId +
                 ", programmeId=" + programmeId +
                 '}';
