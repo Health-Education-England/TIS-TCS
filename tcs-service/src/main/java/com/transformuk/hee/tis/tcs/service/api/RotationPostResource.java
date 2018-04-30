@@ -39,40 +39,23 @@ public class RotationPostResource {
     /**
      * POST  /rotation-posts : Create a new rotationPost.
      *
-     * @param rotationPostDTO the rotationPostDTO to create
+     * @param rotationPostDTOs the rotationPostDTO to create
      * @return the ResponseEntity with status 201 (Created) and with body the new rotationPostDTO, or with status 400 (Bad Request) if the rotationPost has already an ID
      * @throws URISyntaxException if the Location URI syntax is incorrect
      */
     @PostMapping("/rotation-posts")
     @Timed
-    public ResponseEntity<RotationPostDTO> createRotationPost(@RequestBody @Validated(Create.class) RotationPostDTO rotationPostDTO) throws URISyntaxException {
-        log.debug("REST request to save RotationPost : {}", rotationPostDTO);
-        RotationPostDTO result = rotationPostService.save(rotationPostDTO);
-        return ResponseEntity.created(new URI("/api/rotation-posts/" + result.getId()))
-            .headers(HeaderUtil.createEntityCreationAlert(ENTITY_NAME, result.getId().toString()))
-            .body(result);
-    }
-
-    /**
-     * PUT  /rotation-posts : Updates an existing rotationPost.
-     *
-     * @param rotationPostDTO the rotationPostDTO to update
-     * @return the ResponseEntity with status 200 (OK) and with body the updated rotationPostDTO,
-     * or with status 400 (Bad Request) if the rotationPostDTO is not valid,
-     * or with status 500 (Internal Server Error) if the rotationPostDTO couldn't be updated
-     * @throws URISyntaxException if the Location URI syntax is incorrect
-     */
-    @PutMapping("/rotation-posts")
-    @Timed
-    public ResponseEntity<RotationPostDTO> updateRotationPost(@RequestBody @Validated(Update.class) RotationPostDTO rotationPostDTO) throws URISyntaxException {
-        log.debug("REST request to update RotationPost : {}", rotationPostDTO);
-        if (rotationPostDTO.getId() == null) {
-            return createRotationPost(rotationPostDTO);
+    public ResponseEntity<List<RotationPostDTO>> createRotationPost(@RequestBody @Validated(Create.class) List<RotationPostDTO> rotationPostDTOs) throws URISyntaxException {
+        log.debug("REST request to save RotationPost : {}", rotationPostDTOs);
+        if (rotationPostDTOs.isEmpty()) {
+            return ResponseEntity.badRequest().body(rotationPostDTOs);
+        } else {
+            List<RotationPostDTO> result = rotationPostService.saveAll(rotationPostDTOs);
+            Long postId = result.get(0).getPostId();
+            return ResponseEntity.created(new URI("/api/rotation-posts/" + postId))
+                    .headers(HeaderUtil.createEntityCreationAlert(ENTITY_NAME, postId.toString()))
+                    .body(result);
         }
-        RotationPostDTO result = rotationPostService.save(rotationPostDTO);
-        return ResponseEntity.ok()
-            .headers(HeaderUtil.createEntityUpdateAlert(ENTITY_NAME, rotationPostDTO.getId().toString()))
-            .body(result);
     }
 
     /**
@@ -85,7 +68,7 @@ public class RotationPostResource {
     public List<RotationPostDTO> getAllRotationPosts() {
         log.debug("REST request to get all RotationPosts");
         return rotationPostService.findAll();
-        }
+    }
 
     /**
      * GET  /rotation-posts/:id : get the "id" rotationPost.
@@ -95,23 +78,12 @@ public class RotationPostResource {
      */
     @GetMapping("/rotation-posts/{id}")
     @Timed
-    public ResponseEntity<RotationPostDTO> getRotationPost(@PathVariable Long id) {
+    public ResponseEntity<?> getRotationPosts(@PathVariable Long id) {
         log.debug("REST request to get RotationPost : {}", id);
-        RotationPostDTO rotationPostDTO = rotationPostService.findOneByPostId(id);
-        return ResponseUtil.wrapOrNotFound(Optional.ofNullable(rotationPostDTO));
-    }
-
-    /**
-     * DELETE  /rotation-posts/:id : delete the "id" rotationPost.
-     *
-     * @param id the id of the rotationPostDTO to delete
-     * @return the ResponseEntity with status 200 (OK)
-     */
-    @DeleteMapping("/rotation-posts/{id}")
-    @Timed
-    public ResponseEntity<Void> deleteRotationPost(@PathVariable Long id) {
-        log.debug("REST request to delete RotationPost : {}", id);
-        rotationPostService.delete(id);
-        return ResponseEntity.ok().headers(HeaderUtil.createEntityDeletionAlert(ENTITY_NAME, id.toString())).build();
+        
+        List<RotationPostDTO> rotationPostDTOS = rotationPostService.findByPostId(id);
+        
+        return rotationPostDTOS.isEmpty() ? ResponseEntity.notFound().build()
+                : ResponseEntity.ok().body(rotationPostDTOS);
     }
 }

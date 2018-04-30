@@ -1,10 +1,8 @@
 package com.transformuk.hee.tis.tcs.service.service.impl;
 
 import com.google.common.base.Functions;
-import com.transformuk.hee.tis.tcs.api.dto.PostViewDTO;
 import com.transformuk.hee.tis.tcs.api.dto.RotationDTO;
 import com.transformuk.hee.tis.tcs.service.model.ColumnFilter;
-import com.transformuk.hee.tis.tcs.service.model.PostView;
 import com.transformuk.hee.tis.tcs.service.model.Programme;
 import com.transformuk.hee.tis.tcs.service.model.Rotation;
 import com.transformuk.hee.tis.tcs.service.repository.ProgrammeRepository;
@@ -25,7 +23,6 @@ import javax.persistence.EntityNotFoundException;
 import java.util.*;
 import java.util.stream.Collectors;
 
-import static com.transformuk.hee.tis.tcs.service.service.impl.SpecificationFactory.containsLike;
 import static com.transformuk.hee.tis.tcs.service.service.impl.SpecificationFactory.in;
 
 
@@ -106,13 +103,16 @@ public class RotationServiceImpl implements RotationService {
     
     @Override
     @Transactional(readOnly = true)
-    public Page<RotationDTO> advancedSearchBySpecification(List<ColumnFilter> columnFilters, Pageable pageable) {
-        
+    public Page<RotationDTO> advancedSearchBySpecification(String searchQuery, List<ColumnFilter> columnFilters, Pageable pageable) {
+    
         List<Specification<Rotation>> specs = new ArrayList<>();
         if (columnFilters != null && !columnFilters.isEmpty()) {
             columnFilters.forEach(cf -> specs.add(in(cf.getName(), cf.getValues())));
         }
-        
+        if (StringUtils.isNotEmpty(searchQuery)) {
+            specs.add((root, query, sb) -> sb.like(root.get("name"), "%" + searchQuery + "%"));
+        }
+    
         Page<Rotation> result;
         if (!specs.isEmpty()) {
             Specifications<Rotation> fullSpec = Specifications.where(specs.get(0));
