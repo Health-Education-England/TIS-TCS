@@ -40,6 +40,8 @@ public class PersonalDetailsDTO implements Serializable {
 
   private String disabilityDetails;
 
+  private String nationalInsuranceNumber;
+
   private LocalDateTime amendedDate;
 
   public Long getId() {
@@ -130,6 +132,14 @@ public class PersonalDetailsDTO implements Serializable {
     this.disabilityDetails = disabilityDetails;
   }
 
+  public String getNationalInsuranceNumber() {
+    return nationalInsuranceNumber;
+  }
+
+  public void setNationalInsuranceNumber(String nationalInsuranceNumber) {
+    this.nationalInsuranceNumber = nationalInsuranceNumber;
+  }
+
   public LocalDateTime getAmendedDate() {
     return amendedDate;
   }
@@ -173,6 +183,7 @@ public class PersonalDetailsDTO implements Serializable {
         ", ethnicOrigin='" + getEthnicOrigin() + "'" +
         ", disability='" + getDisability() + "'" +
         ", disabilityDetails='" + getDisabilityDetails() + "'" +
+        ", nationalInsuranceNumber='" + getNationalInsuranceNumber() + "'" +
         ", amendedDate='" + getAmendedDate() + "'" +
         "}";
   }

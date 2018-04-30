@@ -1,8 +1,6 @@
 package com.transformuk.hee.tis.tcs.service.model;
 
 
-import org.springframework.data.annotation.LastModifiedDate;
-
 import javax.persistence.Entity;
 import javax.persistence.Id;
 import javax.persistence.Version;
@@ -41,6 +39,8 @@ public class PersonalDetails implements Serializable {
   private String disability;
 
   private String disabilityDetails;
+
+  private String nationalInsuranceNumber;
 
   @Version
   private LocalDateTime amendedDate;
@@ -188,6 +188,18 @@ public class PersonalDetails implements Serializable {
     this.disabilityDetails = disabilityDetails;
     return this;
   }
+  public String getNationalInsuranceNumber() {
+    return nationalInsuranceNumber;
+  }
+
+  public void setNationalInsuranceNumber(String nationalInsuranceNumber) {
+    this.nationalInsuranceNumber = nationalInsuranceNumber;
+  }
+
+  public PersonalDetails nationalInsuranceNumber(String nationalInsuranceNumber) {
+    this.nationalInsuranceNumber = nationalInsuranceNumber;
+    return this;
+  }
 
   public LocalDateTime getAmendedDate() {
     return amendedDate;
@@ -231,6 +243,7 @@ public class PersonalDetails implements Serializable {
         ", ethnicOrigin='" + getEthnicOrigin() + "'" +
         ", disability='" + getDisability() + "'" +
         ", disabilityDetails='" + getDisabilityDetails() + "'" +
+        ", nationalInsuranceNumber='" + getNationalInsuranceNumber() + "'" +
         ", amendedDate='" + getAmendedDate() + "'" +
         "}";
   }
