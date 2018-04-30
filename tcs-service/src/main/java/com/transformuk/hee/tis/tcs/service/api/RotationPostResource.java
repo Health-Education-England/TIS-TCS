@@ -57,6 +57,17 @@ public class RotationPostResource {
                     .body(result);
         }
     }
+    
+    @DeleteMapping("/rotation-posts/{postId}")
+    @Timed
+    public ResponseEntity<Void> deleteRotationPost(@PathVariable Long postId) throws URISyntaxException {
+        log.debug("REST request to delete RotationPost : {}", postId);
+        rotationPostService.delete(postId);
+        return ResponseEntity
+                .ok()
+                .headers(HeaderUtil.createEntityDeletionAlert(ENTITY_NAME, postId.toString()))
+                .build();
+    }
 
     /**
      * GET  /rotation-posts : get all the rotationPosts.

@@ -87,4 +87,10 @@ public class RotationPostServiceImpl implements RotationPostService {
         return rotationPostRepository.findByPostId(id)
                 .stream().map(rotationPostMapper::toDto).collect(Collectors.toList());
     }
+    
+    @Override
+    public void delete(Long postId) {
+        log.debug("Request to delete RotationPost : {}", postId);
+        rotationPostRepository.deleteByPostId(postId);
+    }
 }
