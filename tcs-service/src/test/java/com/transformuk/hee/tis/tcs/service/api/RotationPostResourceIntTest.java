@@ -145,6 +145,32 @@ public class RotationPostResourceIntTest {
         List<RotationPost> rotationPostList = rotationPostRepository.findAll();
         assertThat(rotationPostList).hasSize(databaseSizeBeforeCreate - 1);
     }
+    
+    @Test
+    @Transactional
+    public void deleteRotationPosts() throws Exception {
+        rotationPostRepository.saveAndFlush(rotationPost);
+    
+        RotationPost rotationPost2 = createEntity(em);
+        rotationPost2.setRotationId(UPDATED_ROTATION_ID);
+        rotationPost2.setPostId(UPDATED_POST_ID);
+        rotationPostRepository.saveAndFlush(rotationPost2);
+    
+        int databaseSizeBeforeCreate = rotationPostRepository.findAll().size();
+        
+        // Create the RotationPost with an existing ID
+        List<RotationPostDTO> rotationPostDTOs = Collections.singletonList(rotationPostMapper.toDto(rotationPost));
+        
+        // An entity with an existing ID cannot be created, so this API call must fail
+        restRotationPostMockMvc.perform(delete("/api/rotation-posts/" + rotationPost.getPostId())
+                .contentType(TestUtil.APPLICATION_JSON_UTF8)
+                .content(TestUtil.convertObjectToJsonBytes(rotationPostDTOs)))
+                .andExpect(status().isOk());
+        
+        // Validate the RotationPost in the database
+        List<RotationPost> rotationPostList = rotationPostRepository.findAll();
+        assertThat(rotationPostList).hasSize(databaseSizeBeforeCreate - 1);
+    }
 
     @Test
     @Transactional

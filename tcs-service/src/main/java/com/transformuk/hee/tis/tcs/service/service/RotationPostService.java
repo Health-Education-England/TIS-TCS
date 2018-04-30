@@ -30,4 +30,6 @@ public interface RotationPostService {
      * @return the entity
      */
     List<RotationPostDTO> findByPostId(Long id);
+    
+    void delete(Long postId);
 }
