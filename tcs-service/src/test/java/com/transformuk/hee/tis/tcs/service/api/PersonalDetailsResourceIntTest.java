@@ -1,7 +1,9 @@
 package com.transformuk.hee.tis.tcs.service.api;
 
+import com.transformuk.hee.tis.reference.client.impl.ReferenceServiceImpl;
 import com.transformuk.hee.tis.tcs.api.dto.PersonalDetailsDTO;
 import com.transformuk.hee.tis.tcs.service.Application;
+import com.transformuk.hee.tis.tcs.service.api.validation.PersonalDetailsValidator;
 import com.transformuk.hee.tis.tcs.service.exception.ExceptionTranslator;
 import com.transformuk.hee.tis.tcs.service.model.PersonalDetails;
 import com.transformuk.hee.tis.tcs.service.repository.PersonalDetailsRepository;
@@ -11,6 +13,7 @@ import com.transformuk.hee.tis.tcs.service.service.mapper.PersonalDetailsMapper;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
+import org.mockito.Mock;
 import org.mockito.MockitoAnnotations;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
@@ -32,6 +35,9 @@ import java.util.List;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.hamcrest.Matchers.containsInAnyOrder;
 import static org.hamcrest.Matchers.hasItem;
+import static org.mockito.Matchers.any;
+import static org.mockito.Matchers.anyString;
+import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.delete;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
@@ -106,6 +112,11 @@ public class PersonalDetailsResourceIntTest {
   @MockBean
   private PermissionService permissionServiceMock;
 
+  private PersonalDetailsValidator personalDetailsValidator;
+
+  @Mock
+  private ReferenceServiceImpl referenceService;
+
   private MockMvc restPersonalDetailsMockMvc;
 
   private PersonalDetails personalDetails;
@@ -113,7 +124,8 @@ public class PersonalDetailsResourceIntTest {
   @Before
   public void setup() {
     MockitoAnnotations.initMocks(this);
-    PersonalDetailsResource personalDetailsResource = new PersonalDetailsResource(personalDetailsService);
+    personalDetailsValidator = new PersonalDetailsValidator(referenceService);
+    PersonalDetailsResource personalDetailsResource = new PersonalDetailsResource(personalDetailsService,personalDetailsValidator);
     this.restPersonalDetailsMockMvc = MockMvcBuilders.standaloneSetup(personalDetailsResource)
         .setCustomArgumentResolvers(pageableArgumentResolver)
         .setControllerAdvice(exceptionTranslator)
@@ -157,6 +169,7 @@ public class PersonalDetailsResourceIntTest {
 
     // Create the PersonalDetails
     PersonalDetailsDTO personalDetailsDTO = personalDetailsMapper.toDto(personalDetails);
+    when(referenceService.isValueExists(any(),anyString())).thenReturn(true);
     restPersonalDetailsMockMvc.perform(post("/api/personal-details")
         .contentType(TestUtil.APPLICATION_JSON_UTF8)
         .content(TestUtil.convertObjectToJsonBytes(personalDetailsDTO)))
@@ -219,7 +232,7 @@ public class PersonalDetailsResourceIntTest {
     // Create the PersonalDetails with an existing ID
     personalDetails.setId(1L);
     PersonalDetailsDTO personalDetailsDTO = personalDetailsMapper.toDto(personalDetails);
-
+    when(referenceService.isValueExists(any(),anyString())).thenReturn(true);
     // Personal details is part of person so the call must succeed
     restPersonalDetailsMockMvc.perform(post("/api/personal-details")
         .contentType(TestUtil.APPLICATION_JSON_UTF8)
@@ -308,7 +321,7 @@ public class PersonalDetailsResourceIntTest {
         .disability(UPDATED_DISABILITY)
         .disabilityDetails(UPDATED_DISABILITY_DETAILS);
     PersonalDetailsDTO personalDetailsDTO = personalDetailsMapper.toDto(updatedPersonalDetails);
-
+    when(referenceService.isValueExists(any(),anyString())).thenReturn(true);
     restPersonalDetailsMockMvc.perform(put("/api/personal-details")
         .contentType(TestUtil.APPLICATION_JSON_UTF8)
         .content(TestUtil.convertObjectToJsonBytes(personalDetailsDTO)))

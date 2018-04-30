@@ -76,7 +76,8 @@ public class AuditingAspect {
    * The intention is to use this JSONPatch to persist user modifications when data gets re imported from intrepid.
    *
    */
-  @Before("execution(* com.transformuk.hee.tis.tcs.service.api.*.update*(..))")
+  @Before("execution(* com.transformuk.hee.tis.tcs.service.api.*.update*(..)) " +
+          "&& !execution(* com.transformuk.hee.tis.tcs.service.api.ProgrammeMembershipResource.update*(..))")
   public void auditUpdateBeforeExecution(JoinPoint joinPoint) throws Throwable {
     // store old value to map, wait until the update process
     UserProfile userPofile = getProfileFromContext();
