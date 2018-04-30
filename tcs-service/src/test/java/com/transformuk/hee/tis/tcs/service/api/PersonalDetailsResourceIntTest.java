@@ -37,7 +37,6 @@ import static org.hamcrest.Matchers.containsInAnyOrder;
 import static org.hamcrest.Matchers.hasItem;
 import static org.mockito.Matchers.any;
 import static org.mockito.Matchers.anyString;
-import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.delete;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
@@ -85,6 +84,9 @@ public class PersonalDetailsResourceIntTest {
 
   private static final String DEFAULT_DISABILITY_DETAILS = "AAAAAAAAAA";
   private static final String UPDATED_DISABILITY_DETAILS = "BBBBBBBBBB";
+
+  private static final String DEFAULT_NI_NUMBER = "DEFAULT_NI";
+  private static final String UPDATED_NI_NUMBER = "UPDATED_NI";
 
   private static final LocalDateTime DEFAULT_AMENDED_DATE = LocalDateTime.now(ZoneId.systemDefault());
 
@@ -153,6 +155,7 @@ public class PersonalDetailsResourceIntTest {
         .religiousBelief(DEFAULT_RELIGIOUS_BELIEF)
         .ethnicOrigin(DEFAULT_ETHNIC_ORIGIN)
         .disability(DEFAULT_DISABILITY)
+        .nationalInsuranceNumber(DEFAULT_NI_NUMBER)
         .disabilityDetails(DEFAULT_DISABILITY_DETAILS);
     return personalDetails;
   }
@@ -189,6 +192,7 @@ public class PersonalDetailsResourceIntTest {
     assertThat(testPersonalDetails.getEthnicOrigin()).isEqualTo(DEFAULT_ETHNIC_ORIGIN);
     assertThat(testPersonalDetails.getDisability()).isEqualTo(DEFAULT_DISABILITY);
     assertThat(testPersonalDetails.getDisabilityDetails()).isEqualTo(DEFAULT_DISABILITY_DETAILS);
+    assertThat(testPersonalDetails.getNationalInsuranceNumber()).isEqualTo(DEFAULT_NI_NUMBER);
     assertThat(testPersonalDetails.getAmendedDate()).isAfter(DEFAULT_AMENDED_DATE);
   }
 
@@ -265,6 +269,7 @@ public class PersonalDetailsResourceIntTest {
         .andExpect(jsonPath("$.[*].ethnicOrigin").value(hasItem(DEFAULT_ETHNIC_ORIGIN.toString())))
         .andExpect(jsonPath("$.[*].disability").value(hasItem(DEFAULT_DISABILITY.toString())))
         .andExpect(jsonPath("$.[*].disabilityDetails").value(hasItem(DEFAULT_DISABILITY_DETAILS.toString())))
+        .andExpect(jsonPath("$.[*].nationalInsuranceNumber").value(hasItem(DEFAULT_NI_NUMBER.toString())))
         .andExpect(jsonPath("$.[*].amendedDate").isNotEmpty());
   }
 
@@ -289,6 +294,7 @@ public class PersonalDetailsResourceIntTest {
         .andExpect(jsonPath("$.ethnicOrigin").value(DEFAULT_ETHNIC_ORIGIN.toString()))
         .andExpect(jsonPath("$.disability").value(DEFAULT_DISABILITY.toString()))
         .andExpect(jsonPath("$.disabilityDetails").value(DEFAULT_DISABILITY_DETAILS.toString()))
+        .andExpect(jsonPath("$.nationalInsuranceNumber").value(DEFAULT_NI_NUMBER.toString()))
         .andExpect(jsonPath("$.amendedDate").isNotEmpty());
   }
 
@@ -319,6 +325,7 @@ public class PersonalDetailsResourceIntTest {
         .religiousBelief(UPDATED_RELIGIOUS_BELIEF)
         .ethnicOrigin(UPDATED_ETHNIC_ORIGIN)
         .disability(UPDATED_DISABILITY)
+        .nationalInsuranceNumber(UPDATED_NI_NUMBER)
         .disabilityDetails(UPDATED_DISABILITY_DETAILS);
     PersonalDetailsDTO personalDetailsDTO = personalDetailsMapper.toDto(updatedPersonalDetails);
     when(referenceService.isValueExists(any(),anyString())).thenReturn(true);
@@ -341,6 +348,7 @@ public class PersonalDetailsResourceIntTest {
     assertThat(testPersonalDetails.getEthnicOrigin()).isEqualTo(UPDATED_ETHNIC_ORIGIN);
     assertThat(testPersonalDetails.getDisability()).isEqualTo(UPDATED_DISABILITY);
     assertThat(testPersonalDetails.getDisabilityDetails()).isEqualTo(UPDATED_DISABILITY_DETAILS);
+    assertThat(testPersonalDetails.getNationalInsuranceNumber()).isEqualTo(UPDATED_NI_NUMBER);
     assertThat(testPersonalDetails.getAmendedDate()).isAfter(DEFAULT_AMENDED_DATE);
   }
 
