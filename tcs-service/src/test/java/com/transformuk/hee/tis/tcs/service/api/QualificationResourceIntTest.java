@@ -42,6 +42,9 @@ import static org.assertj.core.api.Assertions.assertThat;
 import static org.hamcrest.Matchers.containsInAnyOrder;
 import static org.hamcrest.Matchers.hasItem;
 import static org.mockito.BDDMockito.given;
+import static org.mockito.Matchers.any;
+import static org.mockito.Matchers.anyString;
+import static org.mockito.Mockito.when;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.delete;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
@@ -173,6 +176,7 @@ public class QualificationResourceIntTest {
     // Create the Qualification
     qualification.setPerson(person);
     QualificationDTO qualificationDTO = qualificationMapper.toDto(qualification);
+    when(referenceService.isValueExists(any(),anyString())).thenReturn(true);
     restQualificationMockMvc.perform(post("/api/qualifications")
         .contentType(TestUtil.APPLICATION_JSON_UTF8)
         .content(TestUtil.convertObjectToJsonBytes(qualificationDTO)))
@@ -270,7 +274,7 @@ public class QualificationResourceIntTest {
 
     Map<String, Boolean> exists = Maps.newHashMap(NOT_EXISTS_MEDICAL_SCHOOL, false);
     given(referenceService.medicalSchoolsExists(Lists.newArrayList(NOT_EXISTS_MEDICAL_SCHOOL))).willReturn(exists);
-
+    when(referenceService.isValueExists(any(),anyString())).thenReturn(true);
     //when & then
     restQualificationMockMvc.perform(post("/api/qualifications")
         .contentType(TestUtil.APPLICATION_JSON_UTF8)
@@ -293,7 +297,7 @@ public class QualificationResourceIntTest {
 
     Map<String, Boolean> exists = Maps.newHashMap(NOT_EXISTS_COUNTRY, false);
     given(referenceService.countryExists(Lists.newArrayList(NOT_EXISTS_COUNTRY))).willReturn(exists);
-
+    when(referenceService.isValueExists(any(),anyString())).thenReturn(true);
     //when & then
     restQualificationMockMvc.perform(post("/api/qualifications")
         .contentType(TestUtil.APPLICATION_JSON_UTF8)
@@ -333,7 +337,7 @@ public class QualificationResourceIntTest {
     // Create the Qualification with an existing ID
     qualification.setPerson(person);
     QualificationDTO qualificationDTO = qualificationMapper.toDto(qualification);
-
+    when(referenceService.isValueExists(any(),anyString())).thenReturn(true);
     // Qualification is part of person so the call must succeed
     restQualificationMockMvc.perform(post("/api/qualifications")
         .contentType(TestUtil.APPLICATION_JSON_UTF8)
@@ -416,6 +420,8 @@ public class QualificationResourceIntTest {
         .medicalSchool(UPDATED_MEDICAL_SCHOOL)
         .countryOfQualification(UPDATED_COUNTRY_OF_QUALIFICATION);
     QualificationDTO qualificationDTO = qualificationMapper.toDto(updatedQualification);
+
+    when(referenceService.isValueExists(any(),anyString())).thenReturn(true);
 
     restQualificationMockMvc.perform(put("/api/qualifications")
         .contentType(TestUtil.APPLICATION_JSON_UTF8)

@@ -2,6 +2,7 @@ package com.transformuk.hee.tis.tcs.service.api.validation;
 
 
 import com.google.common.collect.Lists;
+import com.transformuk.hee.tis.reference.api.dto.QualificationReferenceDTO;
 import com.transformuk.hee.tis.reference.client.impl.ReferenceServiceImpl;
 import com.transformuk.hee.tis.tcs.api.dto.QualificationDTO;
 import com.transformuk.hee.tis.tcs.service.model.Qualification;
@@ -47,6 +48,7 @@ public class QualificationValidator {
 
     List<FieldError> fieldErrors = new ArrayList<>();
     fieldErrors.addAll(checkPerson(qualificationDTO));
+    fieldErrors.addAll(checkQualification(qualificationDTO));
     fieldErrors.addAll(checkMedicalSchool(qualificationDTO));
     fieldErrors.addAll(checkCountryOfQualification(qualificationDTO));
     if (!fieldErrors.isEmpty()) {
@@ -107,6 +109,19 @@ public class QualificationValidator {
         });
       }
 
+    }
+    return fieldErrors;
+  }
+
+  private List<FieldError> checkQualification(QualificationDTO qualificationDTO) {
+    List<FieldError> fieldErrors = new ArrayList<>();
+    // then check the Gender
+    if (StringUtils.isNotEmpty(qualificationDTO.getQualification())) {
+      Boolean isExists = referenceService.isValueExists(QualificationReferenceDTO.class, qualificationDTO.getQualification());
+      if (!isExists) {
+        fieldErrors.add(new FieldError(QUALIFICATION_DTO_NAME, "qualification",
+                String.format("qualification %s does not exist", qualificationDTO.getQualification())));
+      }
     }
     return fieldErrors;
   }
