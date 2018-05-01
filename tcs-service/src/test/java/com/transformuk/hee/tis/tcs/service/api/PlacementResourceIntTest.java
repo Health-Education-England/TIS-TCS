@@ -653,8 +653,16 @@ public class PlacementResourceIntTest {
     esrNotifications.stream().map(EsrNotification::getNotificationTitleCode).forEachOrdered(r -> asList("1", "4").contains(r));
     esrNotifications.stream().filter(esrNotification -> esrNotification.getNotificationTitleCode().equals("4")).forEach(esrNotification -> {
       assertThat(esrNotification.getChangeOfProjectedHireDate()).isNotNull();
+      assertThat(esrNotification.getNextAppointmentProjectedStartDate()).isEqualTo(UPDATED_DATE_FROM.plusMonths(2));
       assertThat(esrNotification.getChangeOfProjectedHireDate()).isEqualTo(UPDATED_DATE_FROM.plusMonths(1));
       assertThat(esrNotification.getChangeOfProjectedEndDate()).isEqualTo(UPDATED_DATE_TO.plusMonths(6));
+    });
+
+    esrNotifications.stream().filter(esrNotification -> esrNotification.getNotificationTitleCode().equals("1")).forEach(esrNotification -> {
+      assertThat(esrNotification.getChangeOfProjectedHireDate()).isNull();
+      assertThat(esrNotification.getNextAppointmentProjectedStartDate()).isEqualTo(UPDATED_DATE_FROM.plusMonths(1));
+      assertThat(esrNotification.getChangeOfProjectedHireDate()).isNull();
+      assertThat(esrNotification.getChangeOfProjectedEndDate()).isNull();
     });
   }
 
