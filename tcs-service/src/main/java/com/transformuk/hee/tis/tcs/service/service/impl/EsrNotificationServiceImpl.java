@@ -62,8 +62,7 @@ public class EsrNotificationServiceImpl implements EsrNotificationService {
   @Override
   public List<EsrNotification> save(List<EsrNotification> esrNotifications) {
     LOG.debug("Request to save EsrNotifications : {}", esrNotifications);
-    List<EsrNotification> notifications = esrNotificationRepository.save(esrNotifications);
-    return notifications;
+    return esrNotificationRepository.save(esrNotifications);
   }
 
   /**
@@ -189,6 +188,9 @@ public class EsrNotificationServiceImpl implements EsrNotificationService {
       esrNotificationType4.setChangeOfProjectedHireDate(changedPlacement.getDateFrom());
     }
     esrNotificationType4.setChangeOfProjectedEndDate(changedPlacement.getDateTo());
+
+    // Type1 notification should always carry the latest status.
+    type1EsrNotification.setNextAppointmentProjectedStartDate(esrNotificationType4.getChangeOfProjectedHireDate());
 
     LOG.debug("Saving ESR Notifications for changed date scenario : {}");
     List<EsrNotification> savedNotifications = esrNotificationRepository.save(asList(type1EsrNotification, esrNotificationType4));
