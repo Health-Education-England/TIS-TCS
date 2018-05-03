@@ -205,6 +205,6 @@ public class RotationPostResourceIntTest {
     public void getNonExistingRotationPost() throws Exception {
         // Get the rotationPost
         restRotationPostMockMvc.perform(get("/api/rotation-posts/{id}", Long.MAX_VALUE))
-            .andExpect(status().isNotFound());
+            .andExpect(status().isOk());
     }
 }
