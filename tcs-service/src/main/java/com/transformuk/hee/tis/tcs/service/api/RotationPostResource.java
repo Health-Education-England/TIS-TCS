@@ -94,7 +94,7 @@ public class RotationPostResource {
         
         List<RotationPostDTO> rotationPostDTOS = rotationPostService.findByPostId(id);
         
-        return rotationPostDTOS.isEmpty() ? ResponseEntity.notFound().build()
+        return rotationPostDTOS.isEmpty() ? ResponseEntity.ok().build()
                 : ResponseEntity.ok().body(rotationPostDTOS);
     }
 }
