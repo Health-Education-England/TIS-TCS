@@ -1,6 +1,7 @@
 package com.transformuk.hee.tis.tcs.service.api;
 
 import com.codahale.metrics.annotation.Timed;
+import com.google.common.collect.Lists;
 import com.transformuk.hee.tis.tcs.api.dto.validation.Create;
 import com.transformuk.hee.tis.tcs.api.dto.validation.Update;
 import com.transformuk.hee.tis.tcs.service.api.util.HeaderUtil;
@@ -94,7 +95,6 @@ public class RotationPostResource {
         
         List<RotationPostDTO> rotationPostDTOS = rotationPostService.findByPostId(id);
         
-        return rotationPostDTOS.isEmpty() ? ResponseEntity.ok().build()
-                : ResponseEntity.ok().body(rotationPostDTOS);
+        return ResponseEntity.ok().body(rotationPostDTOS);
     }
 }
