@@ -10,6 +10,7 @@ import com.transformuk.hee.tis.tcs.service.repository.EsrNotificationRepository;
 import com.transformuk.hee.tis.tcs.service.repository.PlacementRepository;
 import com.transformuk.hee.tis.tcs.service.service.EsrNotificationService;
 import com.transformuk.hee.tis.tcs.service.service.mapper.EsrNotificationMapper;
+import org.apache.commons.collections4.CollectionUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Service;
@@ -19,6 +20,7 @@ import java.io.IOException;
 import java.text.DecimalFormat;
 import java.time.LocalDate;
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.Comparator;
 import java.util.List;
 
@@ -100,6 +102,10 @@ public class EsrNotificationServiceImpl implements EsrNotificationService {
 
     List<Placement> placements = placementRepository.findEarliestEligiblePlacementWithin3MonthsForEsrNotification(fromDate, earliestEligibleDate, placementTypes);
 
+    if (CollectionUtils.isEmpty(placements)) {
+      LOG.info("ESR: Could not find any earliest trainee eligible for notification from date {}", fromDate );
+      return Collections.emptyList();
+    }
     LOG.info("Identified {} earliest eligible future Placements based on current date {} and earliest available date {} ", placements.size(), fromDate, earliestEligibleDate);
     // Have a separate mapper when time permits
     List<EsrNotification> esrNotifications = mapNextToCurrentPlacementsToNotification(placements);
@@ -410,10 +416,19 @@ public class EsrNotificationServiceImpl implements EsrNotificationService {
     List<EsrNotification> esrNotifications = new ArrayList<>();
 
     for (String postNumber: postNumbers) {
-      List<Placement> groupedPlacements = placements.stream()
-          .filter(placement -> placement.getPost().getNationalPostNumber().equals(postNumber))
-          .sorted(Comparator.comparing(Placement::getDateFrom).reversed())
-          .collect(toList());
+
+      List<Placement> groupedPlacements = new ArrayList<>();
+      for (Placement placement : placements) {
+        if (placement.getPost() != null && placement.getPost().getNationalPostNumber() != null
+            && placement.getPost().getNationalPostNumber().equalsIgnoreCase(postNumber)) {
+          groupedPlacements.add(placement);
+        }
+      }
+
+      if (groupedPlacements.isEmpty()) {
+        continue;
+      }
+      groupedPlacements.sort(Comparator.comparing(Placement::getDateFrom).reversed());
 
       Placement nextPlacement = groupedPlacements.get(0);
       Placement currentPlacement = null;
