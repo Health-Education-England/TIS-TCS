@@ -110,31 +110,31 @@ public class NationalPostNumberServiceImpl {
   }
 
   private boolean hasLocalOfficeAbbrChanged(LocalOfficeDTO localOfficeContainer, String currentPostLocalOfficeAbbr) {
-    return !StringUtils.equals(localOfficeContainer.getPostAbbreviation(), currentPostLocalOfficeAbbr);
+    return !StringUtils.equalsIgnoreCase(localOfficeContainer.getPostAbbreviation(), currentPostLocalOfficeAbbr);
   }
 
   private boolean hasSiteCodeChanged(SiteDTO siteCodeContainer, String currentPostLocationCode) {
     if (siteCodeContainer != null && StringUtils.isNotEmpty(siteCodeContainer.getSiteCode())) {
-      return !siteCodeContainer.getSiteCode().equals(currentPostLocationCode);
+      return !siteCodeContainer.getSiteCode().equalsIgnoreCase(currentPostLocationCode);
     } else {
       return false;
     }
   }
 
   private boolean hasSpecialtyCodeChanged(String specialtyCode, String currentPostSpecialtyCode) {
-    return !specialtyCode.equals(currentPostSpecialtyCode);
+    return !specialtyCode.equalsIgnoreCase(currentPostSpecialtyCode);
   }
 
   private boolean hasGradeAbbrChanged(GradeDTO gradeAbbrContainer, String currentPostGradeAbbr) {
     if (gradeAbbrContainer != null && StringUtils.isNotEmpty(gradeAbbrContainer.getAbbreviation())) {
-      return !gradeAbbrContainer.getAbbreviation().equals(currentPostGradeAbbr);
+      return !gradeAbbrContainer.getAbbreviation().equalsIgnoreCase(currentPostGradeAbbr);
     } else {
       return false;
     }
   }
 
   private boolean hasSuffixChanged(String suffixValue, String currentPostSuffix) {
-    return !suffixValue.equals(currentPostSuffix);
+    return !suffixValue.equalsIgnoreCase(currentPostSuffix);
   }
 
   public void generateAndSetNewNationalPostNumber(PostDTO postDTO) {
