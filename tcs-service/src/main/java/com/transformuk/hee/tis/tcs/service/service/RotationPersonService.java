@@ -1,6 +1,8 @@
 package com.transformuk.hee.tis.tcs.service.service;
 
 import com.transformuk.hee.tis.tcs.api.dto.RotationPersonDTO;
+import org.springframework.transaction.annotation.Transactional;
+
 import java.util.List;
 
 /**
@@ -22,6 +24,13 @@ public interface RotationPersonService {
      * @return the list of entities
      */
     List<RotationPersonDTO> findAll();
+
+    /**
+     * Get all the rotationPeople by person
+     *
+     * @return the list of entities
+     */
+    List<RotationPersonDTO> findByPersonId(Long personId);
 
     /**
      * Get the "id" rotationPerson.
