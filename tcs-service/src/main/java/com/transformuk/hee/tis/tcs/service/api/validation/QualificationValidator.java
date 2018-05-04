@@ -48,7 +48,7 @@ public class QualificationValidator {
 
     List<FieldError> fieldErrors = new ArrayList<>();
     fieldErrors.addAll(checkPerson(qualificationDTO));
-    fieldErrors.addAll(checkQualification(qualificationDTO));
+    //fieldErrors.addAll(checkQualification(qualificationDTO));
     fieldErrors.addAll(checkMedicalSchool(qualificationDTO));
     fieldErrors.addAll(checkCountryOfQualification(qualificationDTO));
     if (!fieldErrors.isEmpty()) {
