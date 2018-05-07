@@ -1,80 +1,45 @@
 package com.transformuk.hee.tis.tcs.service.model;
 
-import javax.persistence.Column;
+import javax.persistence.EmbeddedId;
 import javax.persistence.Entity;
-import javax.persistence.FetchType;
-import javax.persistence.GeneratedValue;
-import javax.persistence.GenerationType;
-import javax.persistence.Id;
-import javax.persistence.JoinColumn;
-import javax.persistence.ManyToOne;
-import javax.persistence.Table;
 import java.io.Serializable;
+import java.util.Objects;
 
-@Entity
-@Table(name = "PlacementSupervisor")
+@Entity(name = "PlacementSupervisor")
 public class PlacementSupervisor implements Serializable {
+    @EmbeddedId
+    private PlacementSupervisorId id;
 
-  @Id
-  @GeneratedValue(strategy = GenerationType.IDENTITY)
-  @Column(name = "id")
-  private Long id;
+    public PlacementSupervisor() {
+    }
 
-  @ManyToOne(targetEntity = Placement.class, fetch = FetchType.EAGER)
-  @JoinColumn(name = "placementId")
-  private Placement placement;
+    public PlacementSupervisor(PlacementSupervisorId id) {
+        this.id = id;
+    }
 
-  @ManyToOne
-  @JoinColumn(name = "clinicalSupervisorId")
-  private Person clinicalSupervisor;
+    public PlacementSupervisor(final Long placementId, final Long personId, final Integer type) {
+        this.id = new PlacementSupervisorId(placementId, personId, type);
+    }
 
-  public Long getId() {
-    return id;
-  }
+    @Override
+    public boolean equals(Object o) {
+        if (this == o) return true;
+        if (o == null || getClass() != o.getClass()) return false;
+        PlacementSupervisor that = (PlacementSupervisor) o;
+        return Objects.equals(id, that.id);
+    }
 
-  public void setId(Long id) {
-    this.id = id;
-  }
+    @Override
+    public int hashCode() {
 
-  public Placement getPlacement() {
-    return placement;
-  }
+        return Objects.hash(id);
+    }
 
-  public void setPlacement(Placement placement) {
-    this.placement = placement;
-  }
+    public PlacementSupervisorId getId() {
+        return id;
+    }
 
-  public Person getClinicalSupervisor() {
-    return clinicalSupervisor;
-  }
-
-  public void setClinicalSupervisor(Person clinicalSupervisor) {
-    this.clinicalSupervisor = clinicalSupervisor;
-  }
-
-  @Override
-  public boolean equals(Object o) {
-    if (this == o) return true;
-    if (o == null || getClass() != o.getClass()) return false;
-
-    PlacementSupervisor that = (PlacementSupervisor) o;
-
-    if (placement != null ? !placement.equals(that.placement) : that.placement != null) return false;
-    return (clinicalSupervisor != null ? !clinicalSupervisor.equals(that.clinicalSupervisor) : that.clinicalSupervisor != null);
-  }
-
-  @Override
-  public int hashCode() {
-    int result = placement != null ? placement.hashCode() : 0;
-    result = 31 * result + (clinicalSupervisor != null ? clinicalSupervisor.hashCode() : 0);
-    return result;
-  }
-
-  @Override
-  public String toString() {
-    return "PlacementSpecialty{" +
-        "id=" + id +
-        ", clinicalSupervisor=" + clinicalSupervisor +
-        '}';
-  }
+    public void setId(PlacementSupervisorId id) {
+        this.id = id;
+    }
 }
