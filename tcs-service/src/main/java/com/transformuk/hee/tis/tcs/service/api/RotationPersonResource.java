@@ -85,7 +85,7 @@ public class RotationPersonResource {
     public List<RotationPersonDTO> getAllRotationPeople() {
         log.debug("REST request to get all RotationPeople");
         return rotationPersonService.findAll();
-        }
+    }
 
     /**
      * GET  /rotation-people/:id : get the "id" rotationPerson.
@@ -99,6 +99,19 @@ public class RotationPersonResource {
         log.debug("REST request to get RotationPerson : {}", id);
         RotationPersonDTO rotationPersonDTO = rotationPersonService.findOne(id);
         return ResponseUtil.wrapOrNotFound(Optional.ofNullable(rotationPersonDTO));
+    }
+
+    /**
+     * GET  /rotation-people/by/person/:id : get the "id" rotationPerson.
+     *
+     * @param id the id of the person to retrieve rotations for
+     * @return the ResponseEntity with status 200 (OK) and with body the rotationPersonDTO, or with status 404 (Not Found)
+     */
+    @GetMapping("/rotation-people/by/person/{id}")
+    @Timed
+    public ResponseEntity<List<RotationPersonDTO>> getRotationForPerson(@PathVariable Long id) {
+        log.debug("REST request to get RotationPerson : {}", id);
+        return ResponseUtil.wrapOrNotFound(Optional.ofNullable(rotationPersonService.findByPersonId(id)));
     }
 
     /**

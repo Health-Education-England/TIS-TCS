@@ -30,6 +30,7 @@ import static org.assertj.core.api.Assertions.assertThat;
 import static org.mockito.Matchers.any;
 import static org.mockito.Mockito.anyListOf;
 import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.verifyNoMoreInteractions;
 import static org.mockito.Mockito.when;
 
 @RunWith(MockitoJUnitRunner.class)
@@ -234,6 +235,76 @@ public class EsrNotificationServiceImplTest {
     verify(esrNotificationRepository).save(any(List.class));
   }
 
+  @Test
+  public void handleLoadEarliestATraineeIsEligibleAsFuturePlacementNotification() {
+
+    String deaneryPostNumber = "EOE/RGT00/021/FY1/010";
+    LocalDate today = LocalDate.now();
+
+    Placement currentPlacement = aPlacement(deaneryPostNumber, today.minusMonths(1), today.plusMonths(2));
+    Placement futurePlacement = aPlacement(deaneryPostNumber, today.plusMonths(1), today.plusMonths(3));
+
+    when(placementRepository.findEarliestEligiblePlacementWithin3MonthsForEsrNotification(
+        any(LocalDate.class), any(LocalDate.class), anyListOf(String.class)))
+        .thenReturn(asList(currentPlacement, futurePlacement));
+    EsrNotification returnedNotification = anEsrNotification(deaneryPostNumber);
+    when(esrNotificationRepository.save(savedEsrNotificationsCaptor.capture())).thenReturn(asList(returnedNotification));
+
+    testService.loadEarliestATraineeIsEligibleAsFuturePlacementNotification(today);
+
+    List<EsrNotification> notifications = savedEsrNotificationsCaptor.getValue();
+    assertThat(notifications).hasSize(1);
+    EsrNotification esrNotification = notifications.get(0);
+    assertThat(esrNotification.getDeaneryPostNumber()).isEqualTo(deaneryPostNumber);
+    assertThat(esrNotification.getNotificationTitleCode()).isEqualTo("1");
+    assertThat(esrNotification.getNextAppointmentProjectedStartDate()).isEqualTo(today.plusMonths(1));
+    assertThat(esrNotification.getCurrentTraineeProjectedEndDate()).isEqualTo(today.plusMonths(2));
+  }
+
+  @Test
+  public void handleLoadEarliestATraineeIsEligibleWhenNoCurrentTrainee() {
+
+    String deaneryPostNumber = "EOE/RGT00/021/FY1/010";
+    LocalDate today = LocalDate.now();
+
+    Placement futurePlacement = aPlacement(deaneryPostNumber, today.plusMonths(1), today.plusMonths(3));
+
+    when(placementRepository.findEarliestEligiblePlacementWithin3MonthsForEsrNotification(
+        any(LocalDate.class), any(LocalDate.class), anyListOf(String.class)))
+        .thenReturn(asList(futurePlacement));
+    EsrNotification returnedNotification = anEsrNotification(deaneryPostNumber);
+    when(esrNotificationRepository.save(savedEsrNotificationsCaptor.capture())).thenReturn(asList(returnedNotification));
+
+    testService.loadEarliestATraineeIsEligibleAsFuturePlacementNotification(today);
+
+    List<EsrNotification> notifications = savedEsrNotificationsCaptor.getValue();
+    assertThat(notifications).hasSize(1);
+    EsrNotification esrNotification = notifications.get(0);
+    assertThat(esrNotification.getDeaneryPostNumber()).isEqualTo(deaneryPostNumber);
+    assertThat(esrNotification.getNotificationTitleCode()).isEqualTo("1");
+    assertThat(esrNotification.getNextAppointmentProjectedStartDate()).isEqualTo(today.plusMonths(1));
+    assertThat(esrNotification.getCurrentTraineeProjectedEndDate()).isNull();
+
+    verify(placementRepository).findEarliestEligiblePlacementWithin3MonthsForEsrNotification(any(LocalDate.class), any(LocalDate.class), anyListOf(String.class));
+    verify(esrNotificationRepository).save(anyListOf(EsrNotification.class));
+  }
+
+  @Test
+  public void handleLoadEarliestATraineeIsEligibleWhenNoRecordsFound() {
+
+    LocalDate today = LocalDate.now();
+
+    when(placementRepository.findEarliestEligiblePlacementWithin3MonthsForEsrNotification(
+        any(LocalDate.class), any(LocalDate.class), anyListOf(String.class)))
+        .thenReturn(emptyList());
+
+    List<EsrNotificationDTO> esrNotificationDTOS = testService.loadEarliestATraineeIsEligibleAsFuturePlacementNotification(today);
+
+    assertThat(esrNotificationDTOS).isEmpty();
+    verify(placementRepository).findEarliestEligiblePlacementWithin3MonthsForEsrNotification(any(LocalDate.class), any(LocalDate.class), anyListOf(String.class));
+    verifyNoMoreInteractions(esrNotificationRepository);
+    verifyNoMoreInteractions(esrNotificationMapper);
+  }
 
   private EsrNotification anEsrNotification(String deaneryPostNumber) {
     EsrNotification esrNotification = new EsrNotification();
