@@ -197,6 +197,14 @@ public class TcsServiceImpl extends AbstractClientService {
 				.getBody();
 	}
 
+	public Void deletePlacement(Long id) {
+		HttpHeaders headers = new HttpHeaders();
+		HttpEntity<Long> httpEntity = new HttpEntity<>(id, headers);
+		return tcsRestTemplate
+				.exchange(serviceUrl + API_PLACEMENTS + id, HttpMethod.DELETE, httpEntity, new ParameterizedTypeReference<Void>() {})
+				.getBody();
+	}
+
 	public PersonDTO updatePersonForBulkWithAssociatedDTOs(PersonDTO personDTO) {
 		HttpHeaders headers = new HttpHeaders();
 
