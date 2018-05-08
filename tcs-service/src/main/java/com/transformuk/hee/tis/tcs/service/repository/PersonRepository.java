@@ -8,20 +8,14 @@ import org.springframework.stereotype.Repository;
 
 import java.util.List;
 
-
-/**
- * Spring Data JPA repository for the Person entity.
- */
-@SuppressWarnings("unused")
 @Repository
-public interface PersonRepository extends JpaRepository<Person, Long>, JpaSpecificationExecutor<Person> {
+public interface PersonRepository extends JpaRepository<Person, Long>, JpaSpecificationExecutor<Person>, CustomPersonRepository {
+    @Procedure(name = "build_person_localoffice")
+    void buildPersonView();
 
-  @Procedure(name = "build_person_localoffice")
-  void buildPersonView();
+    Long findOneIdByGmcDetailsGmcNumber(String gmcNumber);
 
-  Long findOneIdByGmcDetailsGmcNumber(String gmcNumber);
+    List<Person> findByPublicHealthNumber(String publicHealthNumber);
 
-  List<Person> findByPublicHealthNumber(String publicHealthNumber);
-
-  List<Person> findByPublicHealthNumberIn(List<String> publicHealthNumbers);
+    List<Person> findByPublicHealthNumberIn(List<String> publicHealthNumbers);
 }
