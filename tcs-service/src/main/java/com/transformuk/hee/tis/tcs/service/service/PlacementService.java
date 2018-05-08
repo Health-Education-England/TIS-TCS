@@ -87,14 +87,6 @@ public interface PlacementService {
   List<PlacementDTO> patchPlacementSpecialties(List<PlacementDTO> placementDTOList);
 
   /**
-   * Patch a list of Placement clinical supervisors
-   *
-   * @param placementDTOList
-   * @return
-   */
-  List<PlacementDTO> patchPlacementClinicalSupervisors(List<PlacementDTO> placementDTOList);
-
-  /**
    * Get filtered  the placement details.
    *
    * @param pageable the pagination information

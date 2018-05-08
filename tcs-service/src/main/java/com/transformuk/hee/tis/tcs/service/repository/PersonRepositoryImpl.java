@@ -15,7 +15,7 @@ import java.util.*;
 public class PersonRepositoryImpl implements CustomPersonRepository {
     private final Logger log = LoggerFactory.getLogger(PersonRepositoryImpl.class);
 
-    private static final String BASE_QUERY =
+    private static final String BASE_QUERY_PERSON =
             "select distinct p.id, trim(concat(cd.forenames, ' ', cd.surname)) as name, p.publicHealthNumber, gmc.gmcNumber, gdc.gdcNumber \n" +
                     "from Person p \n" +
                     "left join ContactDetails cd \n" +
@@ -23,21 +23,23 @@ public class PersonRepositoryImpl implements CustomPersonRepository {
                     "left join GmcDetails gmc \n" +
                     "  on gmc.id = p.id \n" +
                     "left join GdcDetails gdc \n" +
-                    "  on gdc.id = p.id \n" +
-                    "join (\n" +
-                    "$(join)\n" +
-                    ") r \n" +
-                    "  on p.role like concat('%', r.code, '%') \n" +
-                    "where p.status = 'CURRENT' \n" +
-                    "  and (surname like '%$(query)%'\n" +
-                    "  or forenames like '%$(query)%'\n" +
-                    "  or knownAs like '%$(query)%'\n" +
-                    "  or maidenName like '%$(query)%'\n" +
-                    "  or legalSurname like '%$(query)%'\n" +
-                    "  or legalForenames like '%$(query)%'\n" +
-                    "  or gmcNumber like '%$(query)%'\n" +
-                    "  or gdcNumber like '%$(query)%'\n" +
-                    "  )";
+                    "  on gdc.id = p.id \n";
+
+    private static final String BASE_QUERY_PERSON_ROLES = BASE_QUERY_PERSON +
+            "join (\n" +
+            "$(join)\n" +
+            ") r \n" +
+            "  on p.role like concat('%', r.code, '%') \n" +
+            "where p.status = 'CURRENT' \n" +
+            "  and (surname like '%$(query)%'\n" +
+            "  or forenames like '%$(query)%'\n" +
+            "  or knownAs like '%$(query)%'\n" +
+            "  or maidenName like '%$(query)%'\n" +
+            "  or legalSurname like '%$(query)%'\n" +
+            "  or legalForenames like '%$(query)%'\n" +
+            "  or gmcNumber like '%$(query)%'\n" +
+            "  or gdcNumber like '%$(query)%'\n" +
+            "  )";
 
     @Autowired
     private JdbcTemplate jdbcTemplate;
@@ -64,12 +66,12 @@ public class PersonRepositoryImpl implements CustomPersonRepository {
         values.put("join", join.toString());
         values.put("query", query);
 
-        final String sql = new StrSubstitutor(values, "$(", ")").replace(BASE_QUERY);
+        final String sql = new StrSubstitutor(values, "$(", ")").replace(BASE_QUERY_PERSON_ROLES);
 
         return jdbcTemplate.query(sql, new PersonLiteRowMapper());
     }
 
-    private class PersonLiteRowMapper implements RowMapper<PersonLite> {
+    public static class PersonLiteRowMapper implements RowMapper<PersonLite> {
         @Override
         public PersonLite mapRow(final ResultSet resultSet, final int i) throws SQLException {
             final PersonLite personLite = new PersonLite();
