@@ -136,16 +136,6 @@ public class PlacementServiceImpl implements PlacementService {
         return createDetails(placementDetailsDTO);
     }
 
-    private void saveSupervisors(final Set<PlacementSupervisorDTO> supervisorDTOs, final Long placementId) {
-        placementSupervisorRepository.deleteAllByIdPlacementId(placementId);
-
-        final Set<PlacementSupervisor> supervisors = new HashSet<>();
-
-        supervisorDTOs.forEach(s -> supervisors.add(new PlacementSupervisor(placementId, s.getPerson().getId(), s.getType())));
-
-        placementSupervisorRepository.save(supervisors);
-    }
-
     @Transactional
     private Set<PlacementSpecialty> linkPlacementSpecialties(final PlacementDetailsDTO placementDetailsDTO, final PlacementDetails placementDetails) {
         final Placement placement = placementRepository.findOne(placementDetails.getId());
@@ -241,6 +231,9 @@ public class PlacementServiceImpl implements PlacementService {
         log.debug("Request to delete Placement : {}", id);
         // handle esr notification
         handleEsrNotificationForPlacementDelete(id);
+
+        placementSupervisorRepository.deleteAllByIdPlacementId(id);
+
         placementRepository.delete(id);
     }
 
@@ -504,6 +497,16 @@ public class PlacementServiceImpl implements PlacementService {
                 log.error("Error loading New Placement Notification : ", e);
             }
         }
+    }
+
+    private void saveSupervisors(final Set<PlacementSupervisorDTO> supervisorDTOs, final Long placementId) {
+        placementSupervisorRepository.deleteAllByIdPlacementId(placementId);
+
+        final Set<PlacementSupervisor> supervisors = new HashSet<>();
+
+        supervisorDTOs.forEach(s -> supervisors.add(new PlacementSupervisor(placementId, s.getPerson().getId(), s.getType())));
+
+        placementSupervisorRepository.save(supervisors);
     }
 
     class PlacementDetailSpecialtyRowMapper implements RowMapper<PlacementSpecialtyDTO> {
