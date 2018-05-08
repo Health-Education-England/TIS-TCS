@@ -137,9 +137,11 @@ public class PlacementResourceIntTest {
     @Autowired
     private EsrNotificationService esrNotificationService;
 
-
     @Autowired
     private EntityManager entityManager;
+
+    @Autowired
+    private PlacementSupervisorRepository placementSupervisorRepository;
 
     private PlacementDetailsDecorator placementDetailsDecorator;
 
@@ -249,29 +251,6 @@ public class PlacementResourceIntTest {
                 .andExpect(jsonPath("$.fieldErrors[*].field").
                         value(containsInAnyOrder("dateFrom", "dateTo", "placementType",
                                 "traineeId", "postId", "gradeId", "siteId")));
-    }
-
-    @Autowired
-    private PlacementSupervisorRepository placementSupervisorRepository;
-
-    private void addSupervisorsToPlacement(final PlacementDetailsDTO placementDetailsDTO) {
-        final Set<PlacementSupervisorDTO> supervisors = new HashSet<>();
-
-        PersonLiteDTO personLite = new PersonLiteDTO();
-        personLite.setId(1000L);
-        PlacementSupervisorDTO supervisor = new PlacementSupervisorDTO();
-        supervisor.setType(1);
-        supervisor.setPerson(personLite);
-        supervisors.add(supervisor);
-
-        personLite = new PersonLiteDTO();
-        personLite.setId(2000L);
-        supervisor = new PlacementSupervisorDTO();
-        supervisor.setType(2);
-        supervisor.setPerson(personLite);
-        supervisors.add(supervisor);
-
-        placementDetailsDTO.setSupervisors(supervisors);
     }
 
     @Test
@@ -1058,5 +1037,25 @@ public class PlacementResourceIntTest {
     private String encodeDateRange(final String dateRangeFilter) throws EncoderException {
         final URLCodec codec = new URLCodec();
         return codec.encode(dateRangeFilter);
+    }
+
+    private void addSupervisorsToPlacement(final PlacementDetailsDTO placementDetailsDTO) {
+        final Set<PlacementSupervisorDTO> supervisors = new HashSet<>();
+
+        PersonLiteDTO personLite = new PersonLiteDTO();
+        personLite.setId(1000L);
+        PlacementSupervisorDTO supervisor = new PlacementSupervisorDTO();
+        supervisor.setType(1);
+        supervisor.setPerson(personLite);
+        supervisors.add(supervisor);
+
+        personLite = new PersonLiteDTO();
+        personLite.setId(2000L);
+        supervisor = new PlacementSupervisorDTO();
+        supervisor.setType(2);
+        supervisor.setPerson(personLite);
+        supervisors.add(supervisor);
+
+        placementDetailsDTO.setSupervisors(supervisors);
     }
 }
