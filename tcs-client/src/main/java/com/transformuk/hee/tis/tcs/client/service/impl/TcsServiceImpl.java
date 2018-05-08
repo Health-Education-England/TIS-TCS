@@ -21,6 +21,8 @@ import com.transformuk.hee.tis.tcs.api.dto.ProgrammeDTO;
 import com.transformuk.hee.tis.tcs.api.dto.ProgrammeMembershipDTO;
 import com.transformuk.hee.tis.tcs.api.dto.QualificationDTO;
 import com.transformuk.hee.tis.tcs.api.dto.RightToWorkDTO;
+import com.transformuk.hee.tis.tcs.api.dto.RotationDTO;
+import com.transformuk.hee.tis.tcs.api.dto.RotationPersonDTO;
 import com.transformuk.hee.tis.tcs.api.dto.SpecialtyDTO;
 import com.transformuk.hee.tis.tcs.api.dto.SpecialtyGroupDTO;
 import com.transformuk.hee.tis.tcs.api.dto.TariffFundingTypeFieldsDTO;
@@ -62,6 +64,9 @@ public class TcsServiceImpl extends AbstractClientService {
 	private static final String API_RIGHT_TO_WORKS = "/api/right-to-works/";
 	private static final String API_PROGRAMME_MEMBERSHIPS = "/api/programme-memberships/";
 	private static final String API_CURRENT_SPECIALTIES_COLUMN_FILTERS = "/api/specialties?columnFilters=";
+	private static final String API_ROTATION_COLUMN_FILTERS = "/api/rotations?columnFilters=";
+	private static final String API_ROTATION_PERSON = "/api/rotation-people/";
+	private static final String API_ROTATION_PERSON_BY_PERSON_ID = API_ROTATION_PERSON + "/by/person/";
 	private static final String API_CURRENT_CURRICULA_COLUMN_FILTERS = "/api/current/curricula?columnFilters=";
 	private static final String API_PROGRAMMES_COLUMN_FILTERS = "/api/programmes?columnFilters=";
 	private static final String API_PLACEMENTS_FILTER_COLUMN_FILTERS = "/api/placements/filter?columnFilters=";
@@ -72,7 +77,7 @@ public class TcsServiceImpl extends AbstractClientService {
 	private static final String API_PEOPLE_PHN_IN = "/api/people/phn/in/";
 	private static final String BASIC = "/basic";
 
-	private static String curriculumJsonQuerystringURLEncoded, programmeJsonQuerystringURLEncoded, specialtyJsonQuerystringURLEncoded, placementJsonQuerystringURLEncoded;
+	private static String curriculumJsonQuerystringURLEncoded, programmeJsonQuerystringURLEncoded, specialtyJsonQuerystringURLEncoded, placementJsonQuerystringURLEncoded, rotationJsonQuerystringURLEncoded;
 
 	static {
 		try {
@@ -80,6 +85,7 @@ public class TcsServiceImpl extends AbstractClientService {
 			programmeJsonQuerystringURLEncoded  = new org.apache.commons.codec.net.URLCodec().encode("{\"programmeName\":[\"PARAMETER_NAME\"],\"programmeNumber\":[\"PARAMETER_NUMBER\"],\"status\":[\"CURRENT\"]}");
 			specialtyJsonQuerystringURLEncoded  = new org.apache.commons.codec.net.URLCodec().encode("{\"name\":[\"PARAMETER_NAME\"],\"status\":[\"CURRENT\"]}");
 			placementJsonQuerystringURLEncoded  = new org.apache.commons.codec.net.URLCodec().encode("{\"traineeId\":[\"PARAMETER_TRAINEE_ID\"],\"postId\":[\"PARAMETER_POST_ID\"]}");
+			rotationJsonQuerystringURLEncoded  = new org.apache.commons.codec.net.URLCodec().encode("{\"programmeId\":[\"PARAMETER_PROGRAMME_ID\"],\"status\":[\"CURRENT\"]}");
 		} catch (EncoderException e) {
 			e.printStackTrace();
 		}
@@ -260,6 +266,39 @@ public class TcsServiceImpl extends AbstractClientService {
 										.replace("PARAMETER_NUMBER", number),
 						HttpMethod.GET,
 						null, new ParameterizedTypeReference<List<ProgrammeDTO>>() {})
+				.getBody();
+	}
+
+	@Cacheable("rotationByProgramme")
+	public List<RotationDTO> getRotationByProgrammeId(Long programmeId) {
+		log.debug("calling getRotationByProgrammeId with {}", programmeId);
+		return tcsRestTemplate
+				.exchange(serviceUrl + API_ROTATION_COLUMN_FILTERS + rotationJsonQuerystringURLEncoded.replace("PARAMETER_PROGRAMME_ID", String.valueOf(programmeId)), HttpMethod.GET, null, new ParameterizedTypeReference<List<RotationDTO>>() {})
+				.getBody();
+	}
+
+	public RotationPersonDTO createRotationForPerson(RotationPersonDTO rotationPersonDTO) {
+		log.debug("calling createRotationForPerson with rotation {}", rotationPersonDTO);
+		HttpHeaders headers = new HttpHeaders();
+		HttpEntity<RotationPersonDTO> httpEntity = new HttpEntity<>(rotationPersonDTO, headers);
+		return tcsRestTemplate
+				.exchange(serviceUrl + API_ROTATION_PERSON, HttpMethod.POST, httpEntity, new ParameterizedTypeReference<RotationPersonDTO>() {})
+				.getBody();
+	}
+
+	public RotationPersonDTO updateRotationForPerson(RotationPersonDTO rotationPersonDTO) {
+		log.debug("calling updateRotationForPerson with rotation {}", rotationPersonDTO);
+		HttpHeaders headers = new HttpHeaders();
+		HttpEntity<RotationPersonDTO> httpEntity = new HttpEntity<>(rotationPersonDTO, headers);
+		return tcsRestTemplate
+				.exchange(serviceUrl + API_ROTATION_PERSON, HttpMethod.PUT, httpEntity, new ParameterizedTypeReference<RotationPersonDTO>() {})
+				.getBody();
+	}
+
+	public List<RotationPersonDTO> getRotationsForPerson(Long personId) {
+		log.debug("calling getRotationsForPerson with personId {}", personId);
+		return tcsRestTemplate
+				.exchange(serviceUrl + API_ROTATION_PERSON_BY_PERSON_ID + personId, HttpMethod.GET, null, new ParameterizedTypeReference<List<RotationPersonDTO>>() {})
 				.getBody();
 	}
 
