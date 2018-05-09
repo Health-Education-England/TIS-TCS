@@ -228,19 +228,19 @@ public class PersonResource {
     public ResponseEntity<Collection<PersonLiteDTO>> getPersonsByRoleCategory(
             @ApiParam(name = "categoryId")
             @PathVariable("categoryId") final Long categoryId,
-            @ApiParam(name = "query")
-            @RequestParam(value = "query") final String query) {
-        log.info("Received request to search '{}' with RoleCategory ID '{}' and query '{}'",
-                PersonLiteDTO.class.getSimpleName(), categoryId, query);
+            @ApiParam(name = "searchQuery")
+            @RequestParam(value = "searchQuery") final String searchQuery) {
+        log.info("Received request to search '{}' with RoleCategory ID '{}' and searchQuery '{}'",
+                PersonLiteDTO.class.getSimpleName(), categoryId, searchQuery);
 
-        if (Strings.isNullOrEmpty(query) || query.length() < 3) {
+        if (Strings.isNullOrEmpty(searchQuery) || searchQuery.length() < 3) {
             return new ResponseEntity<>(HttpStatus.BAD_REQUEST);
         }
 
-        log.debug("Accessing '{}' to search '{}' with RoleCategory ID '{}' and query '{}'",
-                personService.getClass().getSimpleName(), PersonLiteDTO.class.getSimpleName(), categoryId, query);
+        log.debug("Accessing '{}' to search '{}' with RoleCategory ID '{}' and searchQuery '{}'",
+                personService.getClass().getSimpleName(), PersonLiteDTO.class.getSimpleName(), categoryId, searchQuery);
 
-        return new ResponseEntity<>(personService.searchByRoleCategory(query, categoryId), HttpStatus.OK);
+        return new ResponseEntity<>(personService.searchByRoleCategory(searchQuery, categoryId), HttpStatus.OK);
     }
 
     /**
