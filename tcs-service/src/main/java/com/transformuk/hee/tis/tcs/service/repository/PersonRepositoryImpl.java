@@ -87,7 +87,7 @@ public class PersonRepositoryImpl implements CustomPersonRepository {
 
         final boolean hasNext = searchResult.size() > pageable.getPageSize();
         if (hasNext) {
-            searchResult = searchResult.subList(pageable.getOffset(), pageable.getPageSize() + pageable.getOffset());
+            searchResult = searchResult.subList(Math.min(searchResult.size(), pageable.getOffset()), Math.min(searchResult.size(), pageable.getPageSize() + pageable.getOffset()));
         }
         stopWatch.stop();
 

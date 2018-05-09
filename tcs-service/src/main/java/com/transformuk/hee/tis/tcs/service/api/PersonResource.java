@@ -231,13 +231,14 @@ public class PersonResource {
             @PathVariable("categoryId") final Long categoryId,
             @ApiParam(value = "any wildcard string to be searched")
             @RequestParam(value = "searchQuery", required = false) final String searchQuery) {
-        log.info("Received request to search '{}' with RoleCategory ID '{}' and searchQuery '{}'",
-                PersonLiteDTO.class.getSimpleName(), categoryId, searchQuery);
+        log.info("Received request to search '{}' with RoleCategory ID '{}', searchQuery '{}' and pageable '{}'",
+                PersonLiteDTO.class.getSimpleName(), categoryId, searchQuery, pageable);
 
         log.debug("Accessing '{}' to search '{}' with RoleCategory ID '{}' and searchQuery '{}'",
                 personService.getClass().getSimpleName(), PersonLiteDTO.class.getSimpleName(), categoryId, searchQuery);
 
-        final Page<PersonLiteDTO> page = personService.searchByRoleCategory(searchQuery, categoryId, pageable);
+        final Page<PersonLiteDTO> page = personService.searchByRoleCategory(
+                Optional.ofNullable(searchQuery).orElse("").replace("\"", ""), categoryId, pageable);
 
         final HttpHeaders headers = PaginationUtil.generatePaginationHttpHeaders(page, "/api/people/roles/categories/" + categoryId);
 
