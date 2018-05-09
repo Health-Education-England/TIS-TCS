@@ -1,12 +1,18 @@
 package com.transformuk.hee.tis.tcs.service.repository;
 
 import com.transformuk.hee.tis.tcs.service.model.PersonLite;
+import org.apache.commons.lang.StringUtils;
 import org.apache.commons.lang.text.StrSubstitutor;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageImpl;
+import org.springframework.data.domain.Pageable;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.jdbc.core.RowMapper;
+import org.springframework.util.CollectionUtils;
+import org.springframework.util.StopWatch;
 
 import java.sql.ResultSet;
 import java.sql.SQLException;
@@ -25,32 +31,35 @@ public class PersonRepositoryImpl implements CustomPersonRepository {
                     "left join GdcDetails gdc \n" +
                     "  on gdc.id = p.id \n";
 
+    private static final String BASE_QUERY_PERSON_SEARCH =
+            "where p.status = 'CURRENT' \n" +
+                    "  and (surname like '%$(query)%'\n" +
+                    "  or forenames like '%$(query)%'\n" +
+                    "  or gmcNumber like '%$(query)%'\n" +
+                    "  or gdcNumber like '%$(query)%'\n" +
+                    "  or publicHealthNumber like '%$(query)%'\n" +
+                    "  )";
+
     private static final String BASE_QUERY_PERSON_ROLES = BASE_QUERY_PERSON +
             "join (\n" +
             "$(join)\n" +
             ") r \n" +
-            "  on p.role like concat('%', r.code, '%') \n" +
-            "where p.status = 'CURRENT' \n" +
-            "  and (surname like '%$(query)%'\n" +
-            "  or forenames like '%$(query)%'\n" +
-            "  or knownAs like '%$(query)%'\n" +
-            "  or maidenName like '%$(query)%'\n" +
-            "  or legalSurname like '%$(query)%'\n" +
-            "  or legalForenames like '%$(query)%'\n" +
-            "  or gmcNumber like '%$(query)%'\n" +
-            "  or gdcNumber like '%$(query)%'\n" +
-            "  )";
+            "  on p.role like concat('%', r.code, '%') \n";
+
 
     @Autowired
     private JdbcTemplate jdbcTemplate;
 
     @Override
-    public Collection<PersonLite> searchByRoleCategory(final String query, final Set<String> roles) {
+    public Page<PersonLite> searchByRoleCategory(final String query, final Set<String> roles, final Pageable pageable) {
         log.debug("Received request to search '{}' with roles '{}' and query '{}'",
                 PersonLite.class.getSimpleName(), roles, query);
 
+        final StopWatch stopWatch = new StopWatch();
+        stopWatch.start();
+
         if (roles.isEmpty()) {
-            return Collections.emptyList();
+            return new PageImpl<>(Collections.emptyList(), pageable, 0);
         }
 
         final Iterator<String> rolesIterator = roles.iterator();
@@ -64,11 +73,32 @@ public class PersonRepositoryImpl implements CustomPersonRepository {
 
         final Map<String, String> values = new HashMap<>();
         values.put("join", join.toString());
-        values.put("query", query);
+        String sql = BASE_QUERY_PERSON_ROLES;
 
-        final String sql = new StrSubstitutor(values, "$(", ")").replace(BASE_QUERY_PERSON_ROLES);
+        if (StringUtils.isNotBlank(query)) {
+            values.put("query", query);
+            sql += BASE_QUERY_PERSON_SEARCH;
+        }
 
-        return jdbcTemplate.query(sql, new PersonLiteRowMapper());
+        sql = new StrSubstitutor(values, "$(", ")").replace(sql);
+
+        List<PersonLite> searchResult = jdbcTemplate.query(sql, new PersonLiteRowMapper());
+        final int originalTotal = searchResult.size();
+
+        final boolean hasNext = searchResult.size() > pageable.getPageSize();
+        if (hasNext) {
+            searchResult = searchResult.subList(pageable.getOffset(), pageable.getPageSize() + pageable.getOffset());
+        }
+        stopWatch.stop();
+
+        log.info("Request to search '{}' with roles '{}' and query '{}' finished; took '{}'ms",
+                PersonLite.class.getSimpleName(), roles, query, stopWatch.getTotalTimeSeconds());
+
+        if (CollectionUtils.isEmpty(searchResult)) {
+            return new PageImpl<>(searchResult, pageable, 0);
+        }
+
+        return new PageImpl<>(searchResult, pageable, originalTotal);
     }
 
     public static class PersonLiteRowMapper implements RowMapper<PersonLite> {

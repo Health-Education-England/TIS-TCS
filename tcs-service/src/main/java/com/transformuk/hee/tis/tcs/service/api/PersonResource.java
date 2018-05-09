@@ -1,7 +1,6 @@
 package com.transformuk.hee.tis.tcs.service.api;
 
 import com.codahale.metrics.annotation.Timed;
-import com.google.common.base.Strings;
 import com.google.common.collect.Lists;
 import com.transformuk.hee.tis.tcs.api.dto.*;
 import com.transformuk.hee.tis.tcs.api.dto.validation.Create;
@@ -26,6 +25,7 @@ import io.swagger.annotations.ApiResponses;
 import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
@@ -64,10 +64,10 @@ public class PersonResource {
     private final PlacementSummaryDecorator placementSummaryDecorator;
     private final PersonValidator personValidator;
 
-    public PersonResource(PersonService personService, PlacementViewRepository placementViewRepository,
-                          PlacementViewMapper placementViewMapper, PlacementViewDecorator placementViewDecorator,
-                          PersonViewDecorator personViewDecorator, PlacementService placementService,
-                          PlacementSummaryDecorator placementSummaryDecorator, PersonValidator personValidator) {
+    public PersonResource(final PersonService personService, final PlacementViewRepository placementViewRepository,
+                          final PlacementViewMapper placementViewMapper, final PlacementViewDecorator placementViewDecorator,
+                          final PersonViewDecorator personViewDecorator, final PlacementService placementService,
+                          final PlacementSummaryDecorator placementSummaryDecorator, final PersonValidator personValidator) {
         this.personService = personService;
         this.placementViewRepository = placementViewRepository;
         this.placementViewMapper = placementViewMapper;
@@ -88,14 +88,14 @@ public class PersonResource {
     @PostMapping("/people")
     @Timed
     @PreAuthorize("hasPermission('tis:people::person:', 'Create')")
-    public ResponseEntity<PersonDTO> createPerson(@RequestBody @Validated(Create.class) PersonDTO personDTO)
+    public ResponseEntity<PersonDTO> createPerson(@RequestBody @Validated(Create.class) final PersonDTO personDTO)
             throws URISyntaxException, MethodArgumentNotValidException {
         log.debug("REST request to save Person : {}", personDTO);
         if (personDTO.getId() != null) {
             return ResponseEntity.badRequest().headers(HeaderUtil.createFailureAlert(ENTITY_NAME, "idexists", "A new person cannot already have an ID")).body(null);
         }
         personValidator.validate(personDTO);
-        PersonDTO result = personService.create(personDTO);
+        final PersonDTO result = personService.create(personDTO);
         return ResponseEntity.created(new URI("/api/people/" + result.getId()))
                 .headers(HeaderUtil.createEntityCreationAlert(ENTITY_NAME, result.getId().toString()))
                 .body(result);
@@ -113,14 +113,14 @@ public class PersonResource {
     @PutMapping("/people")
     @Timed
     @PreAuthorize("hasPermission('tis:people::person:', 'Update')")
-    public ResponseEntity<PersonDTO> updatePerson(@RequestBody @Validated(Update.class) PersonDTO personDTO)
+    public ResponseEntity<PersonDTO> updatePerson(@RequestBody @Validated(Update.class) final PersonDTO personDTO)
             throws URISyntaxException, MethodArgumentNotValidException {
         log.debug("REST request to update Person : {}", personDTO);
         if (personDTO.getId() == null) {
             return createPerson(personDTO);
         }
         personValidator.validate(personDTO);
-        PersonDTO result = personService.save(personDTO);
+        final PersonDTO result = personService.save(personDTO);
         return ResponseEntity.ok()
                 .headers(HeaderUtil.createEntityUpdateAlert(ENTITY_NAME, personDTO.getId().toString()))
                 .body(result);
@@ -140,22 +140,22 @@ public class PersonResource {
     @Timed
     @PreAuthorize("hasPermission('tis:people::person:', 'View')")
     public ResponseEntity<List<PersonViewDTO>> getAllPeople(
-            @ApiParam Pageable pageable,
+            @ApiParam final Pageable pageable,
             @ApiParam(value = "any wildcard string to be searched")
             @RequestParam(value = "searchQuery", required = false) String searchQuery,
             @ApiParam(value = "json object by column name and value. (Eg: columnFilters={ \"status\": [\"CURRENT\"]}\"")
-            @RequestParam(value = "columnFilters", required = false) String columnFilterJson) throws IOException {
+            @RequestParam(value = "columnFilters", required = false) final String columnFilterJson) throws IOException {
         log.info("REST request to get a page of People begin");
         searchQuery = sanitize(searchQuery);
-        List<Class> filterEnumList = Lists.newArrayList(Status.class);
-        List<ColumnFilter> columnFilters = ColumnFilterUtil.getColumnFilters(columnFilterJson, filterEnumList);
-        BasicPage<PersonViewDTO> page;
+        final List<Class> filterEnumList = Lists.newArrayList(Status.class);
+        final List<ColumnFilter> columnFilters = ColumnFilterUtil.getColumnFilters(columnFilterJson, filterEnumList);
+        final BasicPage<PersonViewDTO> page;
         if (StringUtils.isEmpty(searchQuery) && StringUtils.isEmpty(columnFilterJson)) {
             page = personService.findAll(pageable);
         } else {
             page = personService.advancedSearch(searchQuery, columnFilters, pageable);
         }
-        HttpHeaders headers = PaginationUtil.generateBasicPaginationHttpHeaders(page, "/api/people");
+        final HttpHeaders headers = PaginationUtil.generateBasicPaginationHttpHeaders(page, "/api/people");
         log.info("REST request to get a page of People completed successfully");
         return new ResponseEntity<>(personViewDecorator.decorate(page.getContent()), headers, HttpStatus.OK);
     }
@@ -175,15 +175,15 @@ public class PersonResource {
     @Timed
     @PreAuthorize("hasPermission('tis:people::person:', 'View')")
     public ResponseEntity<Integer> getAllPeopleCount(
-            @ApiParam Pageable pageable,
+            @ApiParam final Pageable pageable,
             @ApiParam(value = "any wildcard string to be searched")
             @RequestParam(value = "searchQuery", required = false) String searchQuery,
             @ApiParam(value = "json object by column name and value. (Eg: columnFilters={ \"status\": [\"CURRENT\"]}\"")
-            @RequestParam(value = "columnFilters", required = false) String columnFilterJson) throws IOException {
+            @RequestParam(value = "columnFilters", required = false) final String columnFilterJson) throws IOException {
         log.info("REST request to get a page of People begin");
         searchQuery = sanitize(searchQuery);
-        List<Class> filterEnumList = Lists.newArrayList(Status.class);
-        List<ColumnFilter> columnFilters = ColumnFilterUtil.getColumnFilters(columnFilterJson, filterEnumList);
+        final List<Class> filterEnumList = Lists.newArrayList(Status.class);
+        final List<ColumnFilter> columnFilters = ColumnFilterUtil.getColumnFilters(columnFilterJson, filterEnumList);
         Integer count = 0;
         if (StringUtils.isEmpty(searchQuery) && StringUtils.isEmpty(columnFilterJson)) {
             count = personService.findAllCountQuery();
@@ -208,7 +208,7 @@ public class PersonResource {
             @ApiResponse(code = 200, message = "Person list")})
     @Timed
     @PreAuthorize("hasPermission('tis:people::person:', 'View')")
-    public ResponseEntity<List<PersonDTO>> getPersonsWithPublicHealthNumbersIn(@ApiParam(name = "publicHealthNumbers", allowMultiple = true) @PathVariable("publicHealthNumbers") List<String> publicHealthNumbers) {
+    public ResponseEntity<List<PersonDTO>> getPersonsWithPublicHealthNumbersIn(@ApiParam(name = "publicHealthNumbers", allowMultiple = true) @PathVariable("publicHealthNumbers") final List<String> publicHealthNumbers) {
         log.debug("REST request to find several Person: {}", publicHealthNumbers);
         if (!publicHealthNumbers.isEmpty()) {
             UrlDecoderUtil.decode(publicHealthNumbers);
@@ -226,21 +226,22 @@ public class PersonResource {
     @Timed
     @PreAuthorize("hasPermission('tis:people::person:', 'View')")
     public ResponseEntity<Collection<PersonLiteDTO>> getPersonsByRoleCategory(
+            @ApiParam final Pageable pageable,
             @ApiParam(name = "categoryId")
             @PathVariable("categoryId") final Long categoryId,
-            @ApiParam(name = "searchQuery")
-            @RequestParam(value = "searchQuery") final String searchQuery) {
+            @ApiParam(value = "any wildcard string to be searched")
+            @RequestParam(value = "searchQuery", required = false) final String searchQuery) {
         log.info("Received request to search '{}' with RoleCategory ID '{}' and searchQuery '{}'",
                 PersonLiteDTO.class.getSimpleName(), categoryId, searchQuery);
-
-        if (Strings.isNullOrEmpty(searchQuery) || searchQuery.length() < 3) {
-            return new ResponseEntity<>(HttpStatus.BAD_REQUEST);
-        }
 
         log.debug("Accessing '{}' to search '{}' with RoleCategory ID '{}' and searchQuery '{}'",
                 personService.getClass().getSimpleName(), PersonLiteDTO.class.getSimpleName(), categoryId, searchQuery);
 
-        return new ResponseEntity<>(personService.searchByRoleCategory(searchQuery, categoryId), HttpStatus.OK);
+        final Page<PersonLiteDTO> page = personService.searchByRoleCategory(searchQuery, categoryId, pageable);
+
+        final HttpHeaders headers = PaginationUtil.generatePaginationHttpHeaders(page, "/api/people/roles/categories/" + categoryId);
+
+        return new ResponseEntity<>(page.getContent(), headers, HttpStatus.OK);
     }
 
     /**
@@ -257,7 +258,7 @@ public class PersonResource {
             @ApiResponse(code = 200, message = "Person list")})
     @Timed
     @PreAuthorize("hasPermission('tis:people::person:', 'View')")
-    public ResponseEntity<List<PersonDTO>> getPersonsIn(@ApiParam(name = "ids", allowMultiple = true) @PathVariable("ids") Set<Long> ids) {
+    public ResponseEntity<List<PersonDTO>> getPersonsIn(@ApiParam(name = "ids", allowMultiple = true) @PathVariable("ids") final Set<Long> ids) {
         log.debug("REST request to find several Person: {}", ids);
         if (!ids.isEmpty()) {
             return new ResponseEntity<>(personService.findByIdIn(ids), HttpStatus.FOUND);
@@ -280,7 +281,7 @@ public class PersonResource {
             @ApiResponse(code = 200, message = "Person basic details list")})
     @Timed
     @PreAuthorize("hasPermission('tis:people::person:', 'View')")
-    public ResponseEntity<List<PersonBasicDetailsDTO>> getPersonBasicDetailsIn(@ApiParam(name = "ids", allowMultiple = true) @PathVariable("ids") Set<Long> ids) {
+    public ResponseEntity<List<PersonBasicDetailsDTO>> getPersonBasicDetailsIn(@ApiParam(name = "ids", allowMultiple = true) @PathVariable("ids") final Set<Long> ids) {
         log.debug("REST request to find several Person: {}", ids);
         if (!ids.isEmpty()) {
             return new ResponseEntity<>(personService.findBasicDetailsByIdIn(ids), HttpStatus.FOUND);
@@ -307,7 +308,7 @@ public class PersonResource {
         log.debug("REST request to get a basic details page of People");
         searchQuery = sanitize(searchQuery);
 
-        List<PersonBasicDetailsDTO> result = personService.basicDetailsSearch(searchQuery);
+        final List<PersonBasicDetailsDTO> result = personService.basicDetailsSearch(searchQuery);
         return new ResponseEntity<>(result, null, HttpStatus.OK);
     }
 
@@ -320,9 +321,9 @@ public class PersonResource {
     @GetMapping("/people/{id}")
     @Timed
     @PreAuthorize("hasPermission('tis:people::person:', 'View')")
-    public ResponseEntity<PersonDTO> getPerson(@PathVariable Long id) {
+    public ResponseEntity<PersonDTO> getPerson(@PathVariable final Long id) {
         log.debug("REST request to get Person : {}", id);
-        PersonDTO personDTO = personService.findOne(id);
+        final PersonDTO personDTO = personService.findOne(id);
         return ResponseUtil.wrapOrNotFound(Optional.ofNullable(personDTO));
     }
 
@@ -335,7 +336,7 @@ public class PersonResource {
     @DeleteMapping("/people/{id}")
     @Timed
     @PreAuthorize("hasAuthority('tcs:delete:entities')")
-    public ResponseEntity<Void> deletePerson(@PathVariable Long id) {
+    public ResponseEntity<Void> deletePerson(@PathVariable final Long id) {
         log.debug("REST request to delete Person : {}", id);
         personService.delete(id);
         return ResponseEntity.ok().headers(HeaderUtil.createEntityDeletionAlert(ENTITY_NAME, id.toString())).build();
@@ -350,9 +351,9 @@ public class PersonResource {
     @GetMapping("/people/{id}/basic")
     @Timed
     @PreAuthorize("hasPermission('tis:people::person:', 'View')")
-    public ResponseEntity<PersonBasicDetailsDTO> getBasicDetails(@PathVariable Long id) {
+    public ResponseEntity<PersonBasicDetailsDTO> getBasicDetails(@PathVariable final Long id) {
         log.debug("REST request to get basic details");
-        PersonBasicDetailsDTO basicDetails = personService.getBasicDetails(id);
+        final PersonBasicDetailsDTO basicDetails = personService.getBasicDetails(id);
         return ResponseUtil.wrapOrNotFound(Optional.ofNullable(basicDetails));
     }
 
@@ -365,9 +366,9 @@ public class PersonResource {
     @GetMapping("/people/{id}/placements")
     @Timed
     @PreAuthorize("hasPermission('tis:people::person:', 'View')")
-    public ResponseEntity<List<PlacementViewDTO>> getPlacementsForTrainee(@PathVariable Long id) {
+    public ResponseEntity<List<PlacementViewDTO>> getPlacementsForTrainee(@PathVariable final Long id) {
         log.debug("REST request to get a page of Placements");
-        List<PlacementView> placementViews = placementViewRepository.findAllByTraineeIdOrderByDateToDesc(id);
+        final List<PlacementView> placementViews = placementViewRepository.findAllByTraineeIdOrderByDateToDesc(id);
         return ResponseUtil.wrapOrNotFound(Optional.ofNullable(placementViews != null ?
                 placementViewDecorator.decorate(placementViewMapper.placementViewsToPlacementViewDTOs(placementViews)) :
                 null));
@@ -382,9 +383,9 @@ public class PersonResource {
     @GetMapping("/people/gmc/{gmcId}/placements")
     @Timed
     @PreAuthorize("hasPermission('tis:people::person:', 'View')")
-    public ResponseEntity<List<PlacementViewDTO>> getPlacementsForTraineeByGmcId(@PathVariable String gmcId) {
+    public ResponseEntity<List<PlacementViewDTO>> getPlacementsForTraineeByGmcId(@PathVariable final String gmcId) {
         log.debug("REST request to get a page of Placements");
-        Long personId = personService.findIdByGmcId(gmcId);
+        final Long personId = personService.findIdByGmcId(gmcId);
         return getPlacementsForTrainee(personId);
     }
 
@@ -398,9 +399,9 @@ public class PersonResource {
     @GetMapping("/people/{id}/placements/new")
     @Timed
     @PreAuthorize("hasPermission('tis:people::person:', 'View')")
-    public ResponseEntity<List<PlacementSummaryDTO>> getPersonPlacements(@PathVariable Long id) {
+    public ResponseEntity<List<PlacementSummaryDTO>> getPersonPlacements(@PathVariable final Long id) {
         log.debug("REST request to get a page of Placements");
-        List<PlacementSummaryDTO> placementForTrainee = placementService.getPlacementForTrainee(id);
+        final List<PlacementSummaryDTO> placementForTrainee = placementService.getPlacementForTrainee(id);
         return ResponseUtil.wrapOrNotFound(Optional.ofNullable(placementForTrainee != null ? placementSummaryDecorator.decorate(placementForTrainee) : null));
     }
 
@@ -414,9 +415,9 @@ public class PersonResource {
     @GetMapping("/people/gmc/{gmcId}/placements/new")
     @Timed
     @PreAuthorize("hasPermission('tis:people::person:', 'View')")
-    public ResponseEntity<List<PlacementSummaryDTO>> getPersonPlacementsByGmcId(@PathVariable String gmcId) {
+    public ResponseEntity<List<PlacementSummaryDTO>> getPersonPlacementsByGmcId(@PathVariable final String gmcId) {
         log.debug("REST request to get a page of Placements");
-        Long personId = personService.findIdByGmcId(gmcId);
+        final Long personId = personService.findIdByGmcId(gmcId);
         return getPersonPlacements(personId);
     }
 
@@ -431,10 +432,10 @@ public class PersonResource {
     @PatchMapping("/people")
     @Timed
     @PreAuthorize("hasPermission('tis:people::person:consolidated_etl', 'Update')")
-    public ResponseEntity<List<PersonDTO>> patchPersons(@Valid @RequestBody List<PersonDTO> personDTOs) {
+    public ResponseEntity<List<PersonDTO>> patchPersons(@Valid @RequestBody final List<PersonDTO> personDTOs) {
         log.debug("REST request to patch Persons: {}", personDTOs);
-        List<PersonDTO> result = personService.save(personDTOs);
-        List<Long> ids = result.stream().map(PersonDTO::getId).collect(Collectors.toList());
+        final List<PersonDTO> result = personService.save(personDTOs);
+        final List<Long> ids = result.stream().map(PersonDTO::getId).collect(Collectors.toList());
         return ResponseEntity.ok()
                 .headers(HeaderUtil.createEntityUpdateAlert(ENTITY_NAME, StringUtils.join(ids, ",")))
                 .body(result);

@@ -21,6 +21,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageImpl;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.domain.Specification;
@@ -474,7 +475,7 @@ public class PersonServiceImpl implements PersonService {
     }
 
     @Override
-    public Collection<PersonLiteDTO> searchByRoleCategory(final String query, final Long categoryId) {
+    public Page<PersonLiteDTO> searchByRoleCategory(final String query, final Long categoryId, final Pageable pageable) {
         log.debug("Received request to search '{}' with RoleCategory ID '{}' and query '{}'",
                 PersonLiteDTO.class.getSimpleName(), categoryId, query);
 
@@ -492,7 +493,7 @@ public class PersonServiceImpl implements PersonService {
                 referenceService.getClass().getSimpleName(), rolesByCategory.size(), RoleDTO.class.getSimpleName(), categoryId, stopWatch.getTotalTimeSeconds());
 
         if (rolesByCategory.isEmpty()) {
-            return java.util.Collections.emptyList();
+            return new PageImpl<>(java.util.Collections.emptyList(), pageable, 0);
         }
 
         final Set<String> roles = rolesByCategory.stream()
@@ -502,9 +503,8 @@ public class PersonServiceImpl implements PersonService {
         log.debug("Accessing '{}' to search '{}' with roles for Category ID '{}' and query '{}'",
                 personRepository.getClass().getSimpleName(), PersonLiteDTO.class.getSimpleName(), categoryId, query);
 
-        return personRepository.searchByRoleCategory(query, roles).stream()
-                .map(personLiteMapper::toDto)
-                .collect(Collectors.toList());
+        return personRepository.searchByRoleCategory(query, roles, pageable)
+                .map(personLiteMapper::toDto);
     }
 
     @Override

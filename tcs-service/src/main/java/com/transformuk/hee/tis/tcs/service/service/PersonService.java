@@ -7,9 +7,9 @@ import com.transformuk.hee.tis.tcs.api.dto.PersonViewDTO;
 import com.transformuk.hee.tis.tcs.service.api.util.BasicPage;
 import com.transformuk.hee.tis.tcs.service.model.ColumnFilter;
 import com.transformuk.hee.tis.tcs.service.repository.RightToWorkRepository;
+import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 
-import java.util.Collection;
 import java.util.List;
 import java.util.Set;
 import java.util.concurrent.CompletableFuture;
@@ -113,7 +113,7 @@ public interface PersonService {
      */
     List<PersonDTO> findPersonsByPublicHealthNumbersIn(List<String> publicHealthNumbers);
 
-    Collection<PersonLiteDTO> searchByRoleCategory(String query, Long categoryId);
+    Page<PersonLiteDTO> searchByRoleCategory(String query, Long categoryId, final Pageable pageable);
 
     /**
      * Retrieve the basic details of persons
