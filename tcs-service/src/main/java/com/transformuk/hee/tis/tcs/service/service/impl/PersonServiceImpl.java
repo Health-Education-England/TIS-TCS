@@ -8,12 +8,14 @@ import com.transformuk.hee.tis.tcs.api.dto.PersonalDetailsDTO;
 import com.transformuk.hee.tis.tcs.api.enumeration.PersonOwnerRule;
 import com.transformuk.hee.tis.tcs.api.enumeration.Status;
 import com.transformuk.hee.tis.tcs.service.api.util.BasicPage;
+import com.transformuk.hee.tis.tcs.service.exception.AccessUnauthorisedException;
 import com.transformuk.hee.tis.tcs.service.model.ColumnFilter;
 import com.transformuk.hee.tis.tcs.service.model.ContactDetails;
 import com.transformuk.hee.tis.tcs.service.model.GdcDetails;
 import com.transformuk.hee.tis.tcs.service.model.GmcDetails;
 import com.transformuk.hee.tis.tcs.service.model.Person;
 import com.transformuk.hee.tis.tcs.service.model.PersonBasicDetails;
+import com.transformuk.hee.tis.tcs.service.model.PersonTrust;
 import com.transformuk.hee.tis.tcs.service.model.PersonalDetails;
 import com.transformuk.hee.tis.tcs.service.model.RightToWork;
 import com.transformuk.hee.tis.tcs.service.repository.ContactDetailsRepository;
@@ -29,7 +31,6 @@ import com.transformuk.hee.tis.tcs.service.service.helper.SqlQuerySupplier;
 import com.transformuk.hee.tis.tcs.service.service.mapper.PersonBasicDetailsMapper;
 import com.transformuk.hee.tis.tcs.service.service.mapper.PersonMapper;
 import com.transformuk.hee.tis.tcs.service.service.mapper.PersonViewMapper;
-import io.jsonwebtoken.lang.Collections;
 import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -50,7 +51,9 @@ import org.springframework.util.StopWatch;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
+import java.util.Optional;
 import java.util.Set;
 import java.util.concurrent.CompletableFuture;
 import java.util.stream.Collectors;
@@ -207,8 +210,13 @@ public class PersonServiceImpl implements PersonService {
     int start = pageable.getOffset();
     int end = start + pageable.getPageSize();
 
+    String whereClause = " WHERE 1=1 ";
+    if (permissionService.isUserTrustAdmin()) {
+      whereClause += String.format("AND trustId in (%s) ", getLoggedInUsersAssociatedTrusts());
+    }
+
     String query = sqlQuerySupplier.getQuery(SqlQuerySupplier.PERSON_VIEW);
-    query = query.replaceAll("WHERECLAUSE", " WHERE 1=1 ");
+    query = query.replaceAll("WHERECLAUSE", whereClause);
     if (pageable.getSort() != null) {
       if (pageable.getSort().iterator().hasNext()) {
         String orderByFirstCriteria = pageable.getSort().iterator().next().toString();
@@ -255,7 +263,7 @@ public class PersonServiceImpl implements PersonService {
    * There are two queries that happen in this method, one to retrieve the data based on the search and column filters
    * and the second to get the count so that we can support pagination
    *
-   * @param searchString  the search string to match, can be null
+   * @param searchString the search string to match, can be null
    * @return
    */
   @Override
@@ -270,7 +278,7 @@ public class PersonServiceImpl implements PersonService {
     Pageable pageable = new PageRequest(0, PERSON_BASIC_DETAILS_MAX_RESULTS);
 
     Page<PersonBasicDetails> result;
-    if (Collections.isEmpty(specs)) {
+    if (org.apache.commons.collections4.CollectionUtils.isEmpty(specs)) {
       result = personBasicDetailsRepository.findAll(pageable);
     } else {
       Specifications<PersonBasicDetails> fullSpec = Specifications.where(specs.get(0));
@@ -341,6 +349,10 @@ public class PersonServiceImpl implements PersonService {
   private String createWhereClause(String searchString, List<ColumnFilter> columnFilters) {
     StringBuilder whereClause = new StringBuilder();
     whereClause.append(" WHERE 1=1 ");
+
+    if (permissionService.isUserTrustAdmin()) {
+      whereClause.append(String.format("AND trustId in (%s) ", getLoggedInUsersAssociatedTrusts()));
+    }
 
     //add the column filters criteria
     if (columnFilters != null && !columnFilters.isEmpty()) {
@@ -439,11 +451,11 @@ public class PersonServiceImpl implements PersonService {
   @Override
   @Transactional(readOnly = true)
   public List<PersonBasicDetailsDTO> findBasicDetailsByIdIn(Set<Long> ids) {
-  log.debug("Request to get all person basic details {} ", ids);
+    log.debug("Request to get all person basic details {} ", ids);
 
-  return personBasicDetailsRepository.findAll(ids).stream()
-      .map(personBasicDetailsMapper::toDto)
-      .collect(Collectors.toList());
+    return personBasicDetailsRepository.findAll(ids).stream()
+        .map(personBasicDetailsMapper::toDto)
+        .collect(Collectors.toList());
   }
 
   /**
@@ -479,7 +491,8 @@ public class PersonServiceImpl implements PersonService {
   public List<PersonDTO> findPersonsByPublicHealthNumbersIn(List<String> publicHealthNumbers) {
     return personRepository.findByPublicHealthNumberIn(publicHealthNumbers).stream()
         .map(personMapper::toDto)
-        .collect(Collectors.toList());  }
+        .collect(Collectors.toList());
+  }
 
   @Override
   public PersonBasicDetailsDTO getBasicDetails(Long id) {
@@ -519,6 +532,35 @@ public class PersonServiceImpl implements PersonService {
   @Override
   public void setRightToWorkRepository(RightToWorkRepository rightToWorkRepository) {
     this.rightToWorkRepository = rightToWorkRepository;
+  }
+
+  /**
+   * Method that will throw a not authorized exception if the current logged in user cannot view or modify the person record
+   *
+   * @param personId the db managed id of the person record
+   */
+  public void canLoggedInUserViewOrAmend(Long personId) {
+    if (permissionService.isUserTrustAdmin()) {
+      Set<Long> userTrustIds = permissionService.getUsersTrustIds();
+
+      Optional<Person> optionalPerson = personRepository.findPersonById(personId);
+      if (optionalPerson.isPresent()) {
+        Set<PersonTrust> associatedTrusts = optionalPerson.get().getAssociatedTrusts();
+        if (!CollectionUtils.isEmpty(associatedTrusts)) {
+          Set<Long> personTrustIds = associatedTrusts.stream().map(PersonTrust::getTrustId).collect(Collectors.toSet());
+          boolean noCommonElements = Collections.disjoint(personTrustIds, userTrustIds);
+          if (noCommonElements)
+            throw new AccessUnauthorisedException("You cannot view or modify Person with id: " + personId);
+        }
+      }
+    }
+  }
+
+  private String getLoggedInUsersAssociatedTrusts() {
+    String commaSepTrustIds = permissionService.getUsersTrustIds().stream()
+        .map(Object::toString)
+        .reduce((x, y) -> x + ", " + y).orElse(StringUtils.EMPTY);
+    return commaSepTrustIds;
   }
 
   private class PersonViewRowMapper implements RowMapper<PersonViewDTO> {

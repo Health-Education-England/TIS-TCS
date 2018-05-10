@@ -49,6 +49,9 @@ spring:
         multipart:
           max-file-size: 10MB
           max-request-size: 10MB
+    jdbc:
+        template:
+          query-timeout: 120
 
 flyway:
     baseline-description: #
@@ -89,7 +92,7 @@ server:
         cookie:
             http-only: true
     context-path: /tcs
-
+    connection-timeout: 120
 info:
     project:
         version: #project.version#

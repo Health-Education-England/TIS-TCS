@@ -148,4 +148,11 @@ public interface PersonService {
   CompletableFuture<Void> buildPersonView();
 
   void setRightToWorkRepository(RightToWorkRepository rightToWorkRepository);
+
+  /**
+   * Method that will throw a not authorized exception if the current logged in user cannot view or modify the person record
+   *
+   * @param personId the db managed id of the person record
+   */
+  void canLoggedInUserViewOrAmend(Long personId);
 }

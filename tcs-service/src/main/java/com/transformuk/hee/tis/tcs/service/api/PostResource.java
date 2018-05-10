@@ -145,6 +145,8 @@ public class PostResource {
     if (postDTO.getId() == null) {
       return createPost(postDTO);
     }
+
+    postService.canLoggedInUserViewOrAmend(postDTO.getId());
     PostDTO result = postService.update(postDTO);
     return ResponseEntity.ok()
         .headers(HeaderUtil.createEntityUpdateAlert(ENTITY_NAME, postDTO.getId().toString()))
@@ -247,6 +249,9 @@ public class PostResource {
   @PreAuthorize("hasAuthority('post:view')")
   public ResponseEntity<PostDTO> getPost(@PathVariable Long id) {
     log.debug("REST request to get Post : {}", id);
+
+    postService.canLoggedInUserViewOrAmend(id);
+
     PostDTO postDTO = postService.findOne(id);
     return ResponseUtil.wrapOrNotFound(Optional.ofNullable(postDTO));
   }
@@ -262,6 +267,8 @@ public class PostResource {
   @PreAuthorize("hasAuthority('post:view')")
   public ResponseEntity<List<PlacementViewDTO>> getPostPlacements(@PathVariable Long id) {
     log.debug("REST request to get Post Placements: {}", id);
+    postService.canLoggedInUserViewOrAmend(id);
+
     List<PlacementView> placementViews = placementViewRepository.findAllByPostIdOrderByDateToDesc(id);
     return ResponseUtil.wrapOrNotFound(Optional.ofNullable(placementViews != null ?
         placementViewDecorator.decorate(placementViewMapper.placementViewsToPlacementViewDTOs(placementViews)) :
@@ -279,6 +286,8 @@ public class PostResource {
   @PreAuthorize("hasAuthority('post:view')")
   public ResponseEntity<List<PlacementSummaryDTO>> getPlacementsForPosts(@PathVariable Long postId) {
     log.debug("REST request to get Post Placements: {}", postId);
+    postService.canLoggedInUserViewOrAmend(postId);
+
     List<PlacementSummaryDTO> placementForPost = placementService.getPlacementForPost(postId);
     return ResponseUtil.wrapOrNotFound(Optional.ofNullable(placementForPost != null ?
         placementSummaryDecorator.decorate(placementForPost) : null));
@@ -295,6 +304,8 @@ public class PostResource {
   @PreAuthorize("hasAuthority('tcs:delete:entities')")
   public ResponseEntity<Void> deletePost(@PathVariable Long id) {
     log.debug("REST request to delete Post : {}", id);
+    postService.canLoggedInUserViewOrAmend(id);
+
     postService.delete(id);
     return ResponseEntity.ok().headers(HeaderUtil.createEntityDeletionAlert(ENTITY_NAME, id.toString())).build();
   }

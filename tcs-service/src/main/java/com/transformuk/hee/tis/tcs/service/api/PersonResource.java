@@ -138,6 +138,8 @@ public class PersonResource {
     if (personDTO.getId() == null) {
       return createPerson(personDTO);
     }
+    personService.canLoggedInUserViewOrAmend(personDTO.getId());
+
     personValidator.validate(personDTO);
     PersonDTO result = personService.save(personDTO);
     return ResponseEntity.ok()
@@ -316,6 +318,8 @@ public class PersonResource {
   @PreAuthorize("hasPermission('tis:people::person:', 'View')")
   public ResponseEntity<PersonDTO> getPerson(@PathVariable Long id) {
     log.debug("REST request to get Person : {}", id);
+    personService.canLoggedInUserViewOrAmend(id);
+
     PersonDTO personDTO = personService.findOne(id);
     return ResponseUtil.wrapOrNotFound(Optional.ofNullable(personDTO));
   }
@@ -331,6 +335,8 @@ public class PersonResource {
   @PreAuthorize("hasAuthority('tcs:delete:entities')")
   public ResponseEntity<Void> deletePerson(@PathVariable Long id) {
     log.debug("REST request to delete Person : {}", id);
+    personService.canLoggedInUserViewOrAmend(id);
+
     personService.delete(id);
     return ResponseEntity.ok().headers(HeaderUtil.createEntityDeletionAlert(ENTITY_NAME, id.toString())).build();
   }
@@ -346,6 +352,8 @@ public class PersonResource {
   @PreAuthorize("hasPermission('tis:people::person:', 'View')")
   public ResponseEntity<PersonBasicDetailsDTO> getBasicDetails(@PathVariable Long id) {
     log.debug("REST request to get basic details");
+    personService.canLoggedInUserViewOrAmend(id);
+
     PersonBasicDetailsDTO basicDetails = personService.getBasicDetails(id);
     return ResponseUtil.wrapOrNotFound(Optional.ofNullable(basicDetails));
   }
@@ -361,6 +369,8 @@ public class PersonResource {
   @PreAuthorize("hasPermission('tis:people::person:', 'View')")
   public ResponseEntity<List<PlacementViewDTO>> getPlacementsForTrainee(@PathVariable Long id) {
     log.debug("REST request to get a page of Placements");
+    personService.canLoggedInUserViewOrAmend(id);
+
     List<PlacementView> placementViews = placementViewRepository.findAllByTraineeIdOrderByDateToDesc(id);
     return ResponseUtil.wrapOrNotFound(Optional.ofNullable(placementViews != null ?
         placementViewDecorator.decorate(placementViewMapper.placementViewsToPlacementViewDTOs(placementViews)) :
@@ -378,7 +388,10 @@ public class PersonResource {
   @PreAuthorize("hasPermission('tis:people::person:', 'View')")
   public ResponseEntity<List<PlacementViewDTO>> getPlacementsForTraineeByGmcId(@PathVariable String gmcId) {
     log.debug("REST request to get a page of Placements");
+
     Long personId = personService.findIdByGmcId(gmcId);
+    personService.canLoggedInUserViewOrAmend(personId);
+
     return getPlacementsForTrainee(personId);
   }
 
@@ -395,6 +408,8 @@ public class PersonResource {
   @PreAuthorize("hasPermission('tis:people::person:', 'View')")
   public ResponseEntity<List<PlacementSummaryDTO>> getPersonPlacements(@PathVariable Long id) {
     log.debug("REST request to get a page of Placements");
+    personService.canLoggedInUserViewOrAmend(id);
+
     List<PlacementSummaryDTO> placementForTrainee = placementService.getPlacementForTrainee(id);
     return ResponseUtil.wrapOrNotFound(Optional.ofNullable(placementForTrainee != null ? placementSummaryDecorator.decorate(placementForTrainee) : null));
   }
@@ -412,6 +427,8 @@ public class PersonResource {
   public ResponseEntity<List<PlacementSummaryDTO>> getPersonPlacementsByGmcId(@PathVariable String gmcId) {
     log.debug("REST request to get a page of Placements");
     Long personId = personService.findIdByGmcId(gmcId);
+    personService.canLoggedInUserViewOrAmend(personId);
+
     return getPersonPlacements(personId);
   }
 

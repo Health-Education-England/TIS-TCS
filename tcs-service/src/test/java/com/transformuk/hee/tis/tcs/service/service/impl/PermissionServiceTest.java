@@ -1,5 +1,6 @@
 package com.transformuk.hee.tis.tcs.service.service.impl;
 
+import com.transformuk.hee.tis.security.model.Trust;
 import com.transformuk.hee.tis.tcs.TestUtils;
 import org.assertj.core.util.Sets;
 import org.junit.Assert;
@@ -13,6 +14,7 @@ public class PermissionServiceTest {
 
   private static final String TEST_USER = "test user";
   private static final String OTHER_PERMISSION = "random permission";
+  private static final String TRUST_ID = "random permission";
 
   @InjectMocks
   private PermissionService testObj;
@@ -47,6 +49,32 @@ public class PermissionServiceTest {
     boolean result = testObj.canEditSensitiveData();
 
     Assert.assertFalse(result);
+  }
+
+  @Test
+  public void isUserTrustAdminWillReturnTrueWhenTheyHaveAnAssociatedTrust() {
+    Trust trust = new Trust(1L, "ABC", "ST TRUST");
+    TestUtils.mockUserProfileWithAssociatedTrusts(TEST_USER, Sets.newLinkedHashSet(trust));
+    boolean result = testObj.isUserTrustAdmin();
+
+    Assert.assertTrue(result);
+
+  }
+
+  @Test
+  public void isUserTrustAdminWillReturnFalseWhenTheyHaveNoAssociatedTrust() {
+
+    TestUtils.mockUserProfileWithAssociatedTrusts(TEST_USER, Sets.newLinkedHashSet());
+    boolean result1 = testObj.isUserTrustAdmin();
+
+    Assert.assertFalse(result1);
+
+    TestUtils.mockUserProfileWithAssociatedTrusts(TEST_USER, null);
+    boolean result2 = testObj.isUserTrustAdmin();
+
+    Assert.assertFalse(result2);
+
+
   }
 
 }

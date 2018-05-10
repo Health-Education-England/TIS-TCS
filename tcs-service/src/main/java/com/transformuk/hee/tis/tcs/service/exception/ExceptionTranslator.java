@@ -143,4 +143,11 @@ public class ExceptionTranslator {
     List<FieldError> fieldErrors = result.getFieldErrors();
     return processFieldErrors(fieldErrors);
   }
+
+  @ExceptionHandler(AccessUnauthorisedException.class)
+  @ResponseStatus(HttpStatus.UNAUTHORIZED)
+  @ResponseBody
+  public ErrorVM accessUnauthorisedException(AccessUnauthorisedException ex) {
+    return new ErrorVM(ErrorConstants.ERR_ACCESS_DENIED, ex.getMessage());
+  }
 }
