@@ -11,6 +11,7 @@ import javax.validation.constraints.Null;
 import java.io.Serializable;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Objects;
 
@@ -137,12 +138,18 @@ public class ProgrammeMembershipDTO implements Serializable {
         Objects.equals(curriculumCompletionDate, that.curriculumCompletionDate) &&
         Objects.equals(programmeEndDate, that.programmeEndDate) &&
         Objects.equals(programmeId, that.programmeId) &&
-        Objects.equals(programmeMembershipType, that.programmeMembershipType);
+        Objects.equals(programmeMembershipType, that.programmeMembershipType) &&
+        listEqualsIgnoreOrder(curriculumMemberships, that.curriculumMemberships);
+  }
+
+  //https://stackoverflow.com/a/1075699
+  public static <T> boolean listEqualsIgnoreOrder(List<T> list1, List<T> list2) {
+    return new HashSet<>(list1).equals(new HashSet<>(list2));
   }
 
   @Override
   public int hashCode() {
-    return Objects.hash(getPersonIdOrNull(), programmeStartDate, curriculumCompletionDate, programmeEndDate, programmeId, programmeMembershipType);
+    return Objects.hash(getPersonIdOrNull(), programmeStartDate, curriculumCompletionDate, programmeEndDate, programmeId, programmeMembershipType, curriculumMemberships);
   }
 
   private Long getPersonIdOrNull() {
