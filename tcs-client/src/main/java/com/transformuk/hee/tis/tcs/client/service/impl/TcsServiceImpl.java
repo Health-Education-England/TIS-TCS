@@ -248,6 +248,14 @@ public class TcsServiceImpl extends AbstractClientService {
 				.getBody();
 	}
 
+	public ProgrammeMembershipDTO updateProgrammeMembership(ProgrammeMembershipDTO programmeMembershipDTO) {
+		HttpHeaders headers = new HttpHeaders();
+		HttpEntity<ProgrammeMembershipDTO> httpEntity = new HttpEntity<>(programmeMembershipDTO, headers);
+		return tcsRestTemplate
+				.exchange(serviceUrl + API_PROGRAMME_MEMBERSHIPS, HttpMethod.PUT, httpEntity, new ParameterizedTypeReference<ProgrammeMembershipDTO>() {})
+				.getBody();
+	}
+
 	@Cacheable("curricula")
 	public List<CurriculumDTO> getCurriculaByName(String name) {
 		log.debug("calling getCurriculaByName with {}", name);
