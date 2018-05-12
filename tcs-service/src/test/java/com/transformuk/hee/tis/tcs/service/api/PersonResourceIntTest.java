@@ -155,7 +155,7 @@ public class PersonResourceIntTest {
   public void setup() {
     MockitoAnnotations.initMocks(this);
     PersonResource personResource = new PersonResource(personService, placementViewRepository, placementViewMapper,
-        placementViewDecorator, personViewDecorator, placementService, placementSummaryDecorator,personValidator);
+        placementViewDecorator, personViewDecorator, placementService, placementSummaryDecorator,personValidator, null);
     this.restPersonMockMvc = MockMvcBuilders.standaloneSetup(personResource)
         .setCustomArgumentResolvers(pageableArgumentResolver)
         .setControllerAdvice(exceptionTranslator)

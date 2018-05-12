@@ -18,7 +18,7 @@ public class PersonTrust {
   private Long id;
 
   @ManyToOne(fetch = FetchType.LAZY, optional = false)
-  @JoinColumn(name = "personId", nullable = false)
+  @JoinColumn(name = "personId")
   private Person person;
 
   @Column(name = "trustId", nullable = false)

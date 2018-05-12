@@ -272,7 +272,7 @@ public class PostResourceIntTest {
   public void setup() {
     MockitoAnnotations.initMocks(this);
     PostResource postResource = new PostResource(postService, postValidator, placementViewRepository, placementViewDecorator,
-        placementViewMapper, placementService, placementSummaryDecorator);
+        placementViewMapper, placementService, placementSummaryDecorator, null);
     this.restPostMockMvc = MockMvcBuilders.standaloneSetup(postResource)
         .setCustomArgumentResolvers(pageableArgumentResolver)
         .setControllerAdvice(exceptionTranslator)

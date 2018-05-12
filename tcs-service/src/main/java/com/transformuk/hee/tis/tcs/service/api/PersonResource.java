@@ -24,6 +24,7 @@ import com.transformuk.hee.tis.tcs.service.model.PlacementView;
 import com.transformuk.hee.tis.tcs.service.repository.PlacementViewRepository;
 import com.transformuk.hee.tis.tcs.service.service.PersonService;
 import com.transformuk.hee.tis.tcs.service.service.PlacementService;
+import com.transformuk.hee.tis.tcs.service.service.impl.PersonTrustService;
 import com.transformuk.hee.tis.tcs.service.service.mapper.PlacementViewMapper;
 import io.github.jhipster.web.util.ResponseUtil;
 import io.swagger.annotations.ApiOperation;
@@ -82,11 +83,13 @@ public class PersonResource {
   private final PlacementService placementService;
   private final PlacementSummaryDecorator placementSummaryDecorator;
   private final PersonValidator personValidator;
+  private final PersonTrustService  personTrustService;
 
   public PersonResource(PersonService personService, PlacementViewRepository placementViewRepository,
                         PlacementViewMapper placementViewMapper, PlacementViewDecorator placementViewDecorator,
                         PersonViewDecorator personViewDecorator, PlacementService placementService,
-                        PlacementSummaryDecorator placementSummaryDecorator, PersonValidator personValidator) {
+                        PlacementSummaryDecorator placementSummaryDecorator, PersonValidator personValidator,
+                        PersonTrustService personTrustService) {
     this.personService = personService;
     this.placementViewRepository = placementViewRepository;
     this.placementViewMapper = placementViewMapper;
@@ -95,6 +98,7 @@ public class PersonResource {
     this.placementService = placementService;
     this.placementSummaryDecorator = placementSummaryDecorator;
     this.personValidator = personValidator;
+    this.personTrustService = personTrustService;
   }
 
   /**
@@ -470,4 +474,9 @@ public class PersonResource {
     return ResponseEntity.ok().headers(HeaderUtil.createEntityUpdateAlert(ENTITY_NAME, "procedure is underway")).build();
   }
 
+  @PostMapping("/person/blah")
+  public String blah() {
+    personTrustService.runPersonTrustFullSync();
+    return "blah";
+  }
 }

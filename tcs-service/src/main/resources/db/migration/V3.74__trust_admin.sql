@@ -1,7 +1,7 @@
 -- add support for people and posts to be linked to a trust
 
 CREATE TABLE `PostTrust` (
-  `id` bigint(20) NOT NULL,
+  `id` bigint(20) NOT NULL AUTO_INCREMENT,
   `postId` bigint(20) NOT NULL,
   `trustId` bigint(20) NOT NULL,
   `trustCode` varchar(255) DEFAULT NULL,
@@ -13,7 +13,7 @@ CREATE TABLE `PostTrust` (
 
 
 CREATE TABLE `PersonTrust` (
-  `id` bigint(20) NOT NULL,
+  `id` bigint(20) NOT NULL AUTO_INCREMENT,
   `personId` bigint(20) NOT NULL,
   `trustId` bigint(20) NOT NULL,
   `trustCode` varchar(255) DEFAULT NULL,
