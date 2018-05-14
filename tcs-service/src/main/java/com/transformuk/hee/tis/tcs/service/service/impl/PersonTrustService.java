@@ -68,12 +68,13 @@ public class PersonTrustService {
   public void runPersonTrustFullSync() {
 
     CompletableFuture.runAsync(() -> {
-      mainStopwatch = Stopwatch.createStarted();
 
       if (mainStopwatch != null) {
         LOG.info("Person Trust sync job is already running, exiting this execution");
         return;
       }
+
+      mainStopwatch = Stopwatch.createStarted();
 
       try {
 
@@ -104,7 +105,6 @@ public class PersonTrustService {
 
             lastGreatestPersonId = personDataList.get(personDataList.size() - 1).getPersonId();
             lastGreatestSiteId = personDataList.get(personDataList.size() - 1).getSiteId();
-
             getSiteAndTrustReferenceData(siteIdToSiteDTO, personDataList);
 
             stopwatch.reset().start();
@@ -170,14 +170,12 @@ public class PersonTrustService {
    * @param personData
    */
   private void getSiteAndTrustReferenceData(Map<Long, SiteDTO> siteIdToSiteDTO, List<PersonData> personData) {
-    //get all the site ids from the collection and filter any that we dont yet have
     Set<Long> siteIds = personData.stream()
         .map(PersonData::getSiteId)
         .filter(Objects::nonNull)
         .filter(siteId -> !siteIdToSiteDTO.keySet().contains(siteId))
         .collect(Collectors.toSet());
 
-    //create a map of site ids to trust objs
     if (CollectionUtils.isNotEmpty(siteIds)) {
       LOG.debug("requesting [{}] site records", siteIds.size());
       List<SiteDTO> sitesIdIn = findSitesIdIn(siteIds);
