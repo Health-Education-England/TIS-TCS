@@ -5,23 +5,37 @@ import com.google.common.collect.Maps;
 import com.google.common.collect.Sets;
 import com.transformuk.hee.tis.reference.api.dto.SiteDTO;
 import com.transformuk.hee.tis.reference.client.ReferenceService;
+import com.transformuk.hee.tis.security.client.KeycloakClientRequestFactory;
+import com.transformuk.hee.tis.security.client.KeycloakRestTemplate;
+import com.transformuk.hee.tis.security.config.KeycloakClientConfig;
 import com.transformuk.hee.tis.tcs.service.model.Person;
 import com.transformuk.hee.tis.tcs.service.model.PersonTrust;
 import com.transformuk.hee.tis.tcs.service.repository.PersonRepository;
 import com.transformuk.hee.tis.tcs.service.repository.PersonTrustRepository;
 import org.apache.commons.collections4.CollectionUtils;
+import org.apache.commons.lang3.StringUtils;
+import org.keycloak.admin.client.Keycloak;
+import org.keycloak.admin.client.KeycloakBuilder;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Value;
+import org.springframework.core.ParameterizedTypeReference;
+import org.springframework.http.HttpMethod;
+import org.springframework.http.ResponseEntity;
 import org.springframework.jmx.export.annotation.ManagedOperation;
 import org.springframework.jmx.export.annotation.ManagedResource;
+import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Service;
+import org.springframework.web.client.RestTemplate;
+import org.springframework.web.util.UriComponentsBuilder;
 
 import javax.persistence.EntityManager;
 import javax.persistence.EntityManagerFactory;
 import javax.persistence.EntityTransaction;
 import javax.persistence.Query;
 import java.math.BigInteger;
+import java.util.Collections;
 import java.util.List;
 import java.util.Map;
 import java.util.Objects;
@@ -34,7 +48,7 @@ import java.util.stream.Collectors;
 public class PersonTrustService {
 
   private static final Logger LOG = LoggerFactory.getLogger(PersonTrustService.class);
-  private static final int PAGE_SIZE = 5000;
+  private static final int PAGE_SIZE = 1000;
 
 
   @Autowired
@@ -42,42 +56,90 @@ public class PersonTrustService {
   @Autowired
   private PersonTrustRepository personTrustRepository;
   @Autowired
-  private ReferenceService referenceService;
-  @Autowired
   private EntityManagerFactory entityManagerFactory;
+  @Autowired
+  private RestTemplate trustAdminEnabledRestTemplate;
 
+  @Value("${reference.service.url}")
+  private String serviceUrl;
+
+  //used to keep state if the sync job is currently running
+  private Stopwatch mainStopwatch;
+
+  @Scheduled(cron = "0 0 0 * * *") //run every day at 12am
   @ManagedOperation(description = "Run full sync of the PersonTrust table")
   public void runPersonTrustFullSync() {
-    int totalSoFar = 0;
-    boolean hasMoreResults = true;
+    if (mainStopwatch != null) {
+      LOG.info("Person Trust sync job is already running, exiting this execution");
+      return;
+    }
 
-    LOG.info("deleting all PersonTrust");
-    personTrustRepository.deleteAllInBatch();
-    LOG.info("deleted all PersonTrust");
+    try {
+      int totalSoFar = 0;
+      boolean hasMoreResults = true;
 
-    Set<PersonTrust> personTrustsToSave = Sets.newHashSet();
-    Map<Long, SiteDTO> siteIdToSiteDTO = Maps.newHashMap();
-    Stopwatch mainStopwatch = Stopwatch.createStarted();
-    Stopwatch stopwatch = Stopwatch.createStarted();
-    int skipped = 0;
-    while (hasMoreResults) {
+      LOG.info("deleting all PersonTrust");
+      personTrustRepository.deleteAllInBatch();
+      LOG.info("deleted all PersonTrust");
 
-      EntityManager entityManager = entityManagerFactory.createEntityManager();
-      EntityTransaction transaction = entityManager.getTransaction();
-      transaction.begin();
+      Set<PersonTrust> personTrustsToSave = Sets.newHashSet();
+      Map<Long, SiteDTO> siteIdToSiteDTO = Maps.newHashMap();
+      mainStopwatch = Stopwatch.createStarted();
+      Stopwatch stopwatch = Stopwatch.createStarted();
+      int skipped = 0;
+      while (hasMoreResults) {
 
-      List<PersonData> personDataList = collectData(PAGE_SIZE, totalSoFar, entityManager);
-      LOG.info("Time taken to get all data : [{}]", stopwatch.toString());
+        EntityManager entityManager = entityManagerFactory.createEntityManager();
+        EntityTransaction transaction = entityManager.getTransaction();
+        transaction.begin();
 
-      totalSoFar += personDataList.size();
-      hasMoreResults = personDataList.size() > 0;
-      LOG.info("got [{}] records, offset [{}]", personDataList.size(), totalSoFar);
+        List<PersonData> personDataList = collectData(PAGE_SIZE, totalSoFar, entityManager);
+        LOG.info("Time taken to get all data : [{}]", stopwatch.toString());
 
-      if (CollectionUtils.isNotEmpty(personDataList)) {
-        getSiteAndTrustReferenceData(siteIdToSiteDTO, personDataList);
+        totalSoFar += personDataList.size();
+        hasMoreResults = personDataList.size() > 0;
+        LOG.info("got [{}] records, offset [{}]", personDataList.size(), totalSoFar);
 
+        if (CollectionUtils.isNotEmpty(personDataList)) {
+          getSiteAndTrustReferenceData(siteIdToSiteDTO, personDataList);
+
+          stopwatch.reset().start();
+          skipped = convertData(personTrustsToSave, siteIdToSiteDTO, skipped, entityManager, personDataList);
+          LOG.info("Time taken to transform all data : [{}]", stopwatch.toString());
+        }
         stopwatch.reset().start();
-        for (PersonData pd : personDataList) {
+        personTrustsToSave.forEach(entityManager::persist);
+//        entityManager.flush();
+        personTrustsToSave.clear();
+
+        transaction.commit();
+        entityManager.close();
+        LOG.info("Time taken to save all data : [{}]", stopwatch.toString());
+      }
+      LOG.info("Time taken to repopulate entire table: [{}]", mainStopwatch.toString());
+      LOG.info("Skipped records: [{}]", skipped);
+    } catch (Exception e) {
+      LOG.error("An error occurred while running the Person Trust sync job.", e);
+    }
+
+    //reset the time started so that it can be triggered again
+    this.mainStopwatch = null;
+  }
+
+  @ManagedOperation(description = "Is the Person Trust sync just currently running")
+  public boolean isCurrentlyRunning() {
+    return mainStopwatch != null;
+  }
+
+  @ManagedOperation(description = "The current elapsed time of the current sync job")
+  public String elaspedTime() {
+    return mainStopwatch != null ? mainStopwatch.toString() : "0s";
+  }
+
+  private int convertData(Set<PersonTrust> personTrustsToSave, Map<Long, SiteDTO> siteIdToSiteDTO, int skipped, EntityManager entityManager, List<PersonData> personDataList) {
+    if (CollectionUtils.isNotEmpty(personDataList)) {
+      for (PersonData pd : personDataList) {
+        if (pd != null) {
           SiteDTO siteDTO = siteIdToSiteDTO.get(pd.siteId);
           if (pd.getPersonId() != null && siteDTO.getTrustId() != null) {
             PersonTrust personTrust = new PersonTrust();
@@ -90,17 +152,9 @@ public class PersonTrustService {
             skipped++;
           }
         }
-        LOG.info("Time taken to transform all data : [{}]", stopwatch.toString());
       }
-      stopwatch.reset().start();
-      personTrustsToSave.forEach(entityManager::persist);
-      personTrustsToSave.clear();
-      transaction.commit();
-      entityManager.close();
-      LOG.info("Time taken to save all data : [{}]", stopwatch.toString());
     }
-    LOG.info("Time taken to repopulate entire table: [{}]", mainStopwatch.toString());
-    LOG.info("Skipped records: [{}]", skipped);
+    return skipped;
   }
 
 
@@ -115,9 +169,26 @@ public class PersonTrustService {
     //create a map of site ids to trust objs
     if (CollectionUtils.isNotEmpty(siteIds)) {
       LOG.debug("requesting [{}] site records", siteIds.size());
-      List<SiteDTO> sitesIdIn = referenceService.findSitesIdIn(siteIds);
+      List<SiteDTO> sitesIdIn = findSitesIdIn(siteIds);
       LOG.debug("got all site records");
       sitesIdIn.forEach(s -> siteIdToSiteDTO.put(s.getId(), s));
+    }
+  }
+
+  private List<SiteDTO> findSitesIdIn(Set<Long> ids) {
+    String url = serviceUrl + "/api/sites/ids/in";
+    String joinedIds = StringUtils.join(ids, ",");
+    UriComponentsBuilder uriBuilder = UriComponentsBuilder.fromHttpUrl(url)
+        .queryParam("ids", joinedIds);
+    try {
+      ResponseEntity<List<SiteDTO>> responseEntity = trustAdminEnabledRestTemplate.
+          exchange(uriBuilder.build().encode().toUri(), HttpMethod.GET, null,
+              new ParameterizedTypeReference<List<SiteDTO>>() {});
+      return responseEntity.getBody();
+    } catch(Exception e) {
+      LOG.error("Exception during find sites id in for ids [{}], returning empty list. Here's the error message {}",
+          joinedIds, e.getMessage());
+      return Collections.EMPTY_LIST;
     }
   }
 
@@ -127,6 +198,7 @@ public class PersonTrustService {
         "LEFT JOIN Placement pl " +
         "ON p.id = pl.traineeId " +
         "WHERE pl.siteId IS NOT NULL " +
+        "ORDER BY p.id, pl.siteId " +
         "LIMIT " + pageSize + " OFFSET " + totalSoFar);
     List<Object[]> resultList = query.getResultList();
     List<PersonData> result = resultList.stream().map(objArr -> {
@@ -162,4 +234,5 @@ public class PersonTrustService {
       this.siteId = siteId;
     }
   }
+
 }
