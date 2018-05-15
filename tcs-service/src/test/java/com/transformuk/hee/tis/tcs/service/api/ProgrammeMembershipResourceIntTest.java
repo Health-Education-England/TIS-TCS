@@ -448,7 +448,6 @@ public class ProgrammeMembershipResourceIntTest {
         .andExpect(jsonPath("$.[*].curriculumMemberships[*].curriculumEndDate").value(hasItem(DEFAULT_CURRICULUM_END_DATE.toString())))
         .andExpect(jsonPath("$.[*].curriculumMemberships[*].periodOfGrace").value(hasItem(DEFAULT_PERIOD_OF_GRACE)))
         .andExpect(jsonPath("$.[*].programmeStartDate").value(hasItem(DEFAULT_PROGRAMME_START_DATE.toString())))
-        .andExpect(jsonPath("$.[*].curriculumCompletionDate").value(hasItem(DEFAULT_CURRICULUM_COMPLETION_DATE.toString())))
         .andExpect(jsonPath("$.[*].programmeEndDate").value(hasItem(DEFAULT_PROGRAMME_END_DATE.toString())))
         .andExpect(jsonPath("$.[*].leavingDestination").value(hasItem(DEFAULT_LEAVING_DESTINATION.toString())))
         .andExpect(jsonPath("$.[*].curriculumMemberships[*].amendedDate").isNotEmpty());
@@ -472,7 +471,6 @@ public class ProgrammeMembershipResourceIntTest {
         .andExpect(jsonPath("$.curriculumMemberships[*].curriculumEndDate").value(hasItem(DEFAULT_CURRICULUM_END_DATE.toString())))
         .andExpect(jsonPath("$.curriculumMemberships[*].periodOfGrace").value(hasItem(DEFAULT_PERIOD_OF_GRACE)))
         .andExpect(jsonPath("$.programmeStartDate").value(DEFAULT_PROGRAMME_START_DATE.toString()))
-        .andExpect(jsonPath("$.curriculumCompletionDate").value(DEFAULT_CURRICULUM_COMPLETION_DATE.toString()))
         .andExpect(jsonPath("$.programmeEndDate").value(DEFAULT_PROGRAMME_END_DATE.toString()))
         .andExpect(jsonPath("$.leavingDestination").value(DEFAULT_LEAVING_DESTINATION.toString()))
         .andExpect(jsonPath("$.curriculumMemberships[*].amendedDate").isNotEmpty());
