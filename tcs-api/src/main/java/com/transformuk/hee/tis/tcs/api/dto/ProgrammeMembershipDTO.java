@@ -128,8 +128,7 @@ public class ProgrammeMembershipDTO implements Serializable {
         Objects.equals(programmeStartDate, that.programmeStartDate) &&
         Objects.equals(programmeEndDate, that.programmeEndDate) &&
         Objects.equals(programmeId, that.programmeId) &&
-        Objects.equals(programmeMembershipType, that.programmeMembershipType) &&
-        listEqualsIgnoreOrder(curriculumMemberships, that.curriculumMemberships);
+        Objects.equals(programmeMembershipType, that.programmeMembershipType);
   }
 
   //https://stackoverflow.com/a/1075699
