@@ -31,8 +31,6 @@ public class ProgrammeMembershipDTO implements Serializable {
   @NotNull(message = "ProgrammeStartDate is required", groups = {Update.class, Create.class})
   private LocalDate programmeStartDate;
 
-  private LocalDate curriculumCompletionDate;
-
   @NotNull(message = "ProgrammeEndDate is required", groups = {Update.class, Create.class})
   private LocalDate programmeEndDate;
 
@@ -72,13 +70,6 @@ public class ProgrammeMembershipDTO implements Serializable {
     this.programmeStartDate = programmeStartDate;
   }
 
-  public LocalDate getCurriculumCompletionDate() {
-    return curriculumCompletionDate;
-  }
-
-  public void setCurriculumCompletionDate(LocalDate curriculumCompletionDate) {
-    this.curriculumCompletionDate = curriculumCompletionDate;
-  }
 
   public LocalDate getProgrammeEndDate() {
     return programmeEndDate;
@@ -135,7 +126,6 @@ public class ProgrammeMembershipDTO implements Serializable {
     ProgrammeMembershipDTO that = (ProgrammeMembershipDTO) o;
     return Objects.equals(getPersonIdOrNull(), that.getPersonIdOrNull()) &&
         Objects.equals(programmeStartDate, that.programmeStartDate) &&
-        Objects.equals(curriculumCompletionDate, that.curriculumCompletionDate) &&
         Objects.equals(programmeEndDate, that.programmeEndDate) &&
         Objects.equals(programmeId, that.programmeId) &&
         Objects.equals(programmeMembershipType, that.programmeMembershipType) &&
@@ -149,7 +139,7 @@ public class ProgrammeMembershipDTO implements Serializable {
 
   @Override
   public int hashCode() {
-    return Objects.hash(getPersonIdOrNull(), programmeStartDate, curriculumCompletionDate, programmeEndDate, programmeId, programmeMembershipType, curriculumMemberships);
+    return Objects.hash(getPersonIdOrNull(), programmeStartDate, programmeEndDate, programmeId, programmeMembershipType, curriculumMemberships);
   }
 
   private Long getPersonIdOrNull() {
@@ -162,7 +152,6 @@ public class ProgrammeMembershipDTO implements Serializable {
         ", programmeMembershipType='" + programmeMembershipType + "'" +
         ", rotation='" + rotation + "'" +
         ", programmeStartDate='" + programmeStartDate + "'" +
-        ", curriculumCompletionDate='" + curriculumCompletionDate + "'" +
         ", programmeEndDate='" + programmeEndDate + "'" +
         ", leavingDestination='" + leavingDestination + "'" +
         ", person='" + person + "'" +
