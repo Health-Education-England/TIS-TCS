@@ -474,9 +474,4 @@ public class PersonResource {
     return ResponseEntity.ok().headers(HeaderUtil.createEntityUpdateAlert(ENTITY_NAME, "procedure is underway")).build();
   }
 
-  @PostMapping("/person/blah")
-  public String blah() {
-    personTrustService.runPersonTrustFullSync();
-    return "blah";
-  }
 }

@@ -607,9 +607,4 @@ public class PostResource {
         .body(results);
   }
 
-  @PostMapping("/post/blah")
-  public String blah() {
-    postTrustService.runPostTrustFullSync();
-    return "blah";
-  }
 }
