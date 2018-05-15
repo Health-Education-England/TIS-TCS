@@ -78,7 +78,6 @@ public class ProgrammeMembershipMapper {
     result.setRotation(programmeMembership.getRotation());
     result.setProgrammeStartDate(programmeMembership.getProgrammeStartDate());
     result.setProgrammeEndDate(programmeMembership.getProgrammeEndDate());
-    result.setCurriculumCompletionDate(programmeMembership.getCurriculumCompletionDate());
     result.setLeavingDestination(programmeMembership.getLeavingDestination());
     result.setProgrammeId(programmeMembership.getProgrammeId());
     result.setTrainingNumberId(programmeMembership.getTrainingNumberId());
@@ -125,7 +124,6 @@ public class ProgrammeMembershipMapper {
     result.setRotation(programmeMembershipDTO.getRotation());
     result.setProgrammeStartDate(programmeMembershipDTO.getProgrammeStartDate());
     result.setProgrammeEndDate(programmeMembershipDTO.getProgrammeEndDate());
-    result.setCurriculumCompletionDate(programmeMembershipDTO.getCurriculumCompletionDate());
     result.setLeavingDestination(programmeMembershipDTO.getLeavingDestination());
     result.setProgrammeId(programmeMembershipDTO.getProgrammeId());
     result.setTrainingNumberId(programmeMembershipDTO.getTrainingNumberId());
