@@ -87,15 +87,13 @@ public class PostResource {
   private final PlacementViewMapper placementViewMapper;
   private final PlacementService placementService;
   private final PlacementSummaryDecorator placementSummaryDecorator;
-  private final PostTrustService postTrustService;
 
   public PostResource(PostService postService, PostValidator postValidator,
                       PlacementViewRepository placementViewRepository,
                       PlacementViewDecorator placementViewDecorator,
                       PlacementViewMapper placementViewMapper,
                       PlacementService placementService,
-                      PlacementSummaryDecorator placementSummaryDecorator,
-                      PostTrustService postTrustService) {
+                      PlacementSummaryDecorator placementSummaryDecorator) {
     this.postService = postService;
     this.postValidator = postValidator;
     this.placementViewRepository = placementViewRepository;
@@ -103,7 +101,6 @@ public class PostResource {
     this.placementViewMapper = placementViewMapper;
     this.placementService = placementService;
     this.placementSummaryDecorator = placementSummaryDecorator;
-    this.postTrustService = postTrustService;
   }
 
   /**

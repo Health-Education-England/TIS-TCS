@@ -9,6 +9,10 @@ import javax.persistence.Id;
 import javax.persistence.JoinColumn;
 import javax.persistence.ManyToOne;
 
+/**
+ * Entity that links a Person record to a trust. This is used to filter out what People records Trust admin users
+ * can see
+ */
 @Entity
 public class PersonTrust {
 

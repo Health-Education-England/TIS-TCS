@@ -64,13 +64,11 @@ public class PersonResource {
   private final PlacementService placementService;
   private final PlacementSummaryDecorator placementSummaryDecorator;
   private final PersonValidator personValidator;
-  private final PersonTrustService  personTrustService;
 
   public PersonResource(PersonService personService, PlacementViewRepository placementViewRepository,
                         PlacementViewMapper placementViewMapper, PlacementViewDecorator placementViewDecorator,
                         PersonViewDecorator personViewDecorator, PlacementService placementService,
-                        PlacementSummaryDecorator placementSummaryDecorator, PersonValidator personValidator,
-                        PersonTrustService personTrustService) {
+                        PlacementSummaryDecorator placementSummaryDecorator, PersonValidator personValidator) {
     this.personService = personService;
     this.placementViewRepository = placementViewRepository;
     this.placementViewMapper = placementViewMapper;
@@ -79,7 +77,6 @@ public class PersonResource {
     this.placementService = placementService;
     this.placementSummaryDecorator = placementSummaryDecorator;
     this.personValidator = personValidator;
-    this.personTrustService = personTrustService;
   }
 
     /**

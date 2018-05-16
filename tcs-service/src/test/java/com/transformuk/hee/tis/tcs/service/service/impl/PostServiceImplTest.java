@@ -115,6 +115,8 @@ public class PostServiceImplTest {
 
   @Mock
   private JdbcTemplate jdbcTemplate;
+  @Mock
+  private PermissionService permissionService;
 
   @Test
   public void saveShouldSavePost() {
@@ -189,6 +191,8 @@ public class PostServiceImplTest {
     List<PostView> posts = Lists.newArrayList(postViewMock1);
     List<PostViewDTO> mappedPosts = Lists.newArrayList(postViewDTOMock1);
     Page<PostView> page = new PageImpl<>(posts);
+
+    when(permissionService.isUserTrustAdmin()).thenReturn(false);
     when(sqlQuerySupplier.getQuery(SqlQuerySupplier.POST_VIEW)).thenReturn(query);
     when(jdbcTemplate.query(anyString(),any(RowMapper.class))).thenReturn(mappedPosts);
 

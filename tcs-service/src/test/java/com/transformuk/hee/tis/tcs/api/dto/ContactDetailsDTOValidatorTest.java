@@ -94,7 +94,7 @@ public class ContactDetailsDTOValidatorTest {
 		MockitoAnnotations.initMocks(this);
 		ContactDetailsResource contactDetailsResource = new ContactDetailsResource(contactDetailsService,contactDetailsValidator);
 		PersonResource personResource = new PersonResource(personService, placementViewRepository, placementViewMapper,
-				placementViewDecorator, personViewDecorator, placementService, placementSummaryDecorator,personValidator, null);
+				placementViewDecorator, personViewDecorator, placementService, placementSummaryDecorator,personValidator);
 		this.restContactDetailsMockMvc = MockMvcBuilders.standaloneSetup(contactDetailsResource)
 				.setCustomArgumentResolvers(pageableArgumentResolver)
 				.setControllerAdvice(exceptionTranslator)
