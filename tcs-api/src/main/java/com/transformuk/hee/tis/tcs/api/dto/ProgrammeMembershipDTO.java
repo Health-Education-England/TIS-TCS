@@ -138,7 +138,7 @@ public class ProgrammeMembershipDTO implements Serializable {
 
   @Override
   public int hashCode() {
-    return Objects.hash(getPersonIdOrNull(), programmeStartDate, programmeEndDate, programmeId, programmeMembershipType, curriculumMemberships);
+    return Objects.hash(getPersonIdOrNull(), programmeStartDate, programmeEndDate, programmeId, programmeMembershipType);
   }
 
   private Long getPersonIdOrNull() {
