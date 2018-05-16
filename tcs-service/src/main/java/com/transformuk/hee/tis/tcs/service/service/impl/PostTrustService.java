@@ -5,6 +5,7 @@ import com.transformuk.hee.tis.reference.api.dto.SiteDTO;
 import com.transformuk.hee.tis.tcs.service.model.Post;
 import com.transformuk.hee.tis.tcs.service.model.PostTrust;
 import com.transformuk.hee.tis.tcs.service.repository.PostTrustRepository;
+import net.javacrumbs.shedlock.core.SchedulerLock;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -45,6 +46,7 @@ public class PostTrustService extends TrustAdminSyncJobTemplate<PostTrust> {
   private String serviceUrl;
 
   @Scheduled(cron = "0 30 0 * * *")
+  @SchedulerLock(name = "postTrustScheduledTask")
   @ManagedOperation(description = "Run full sync of the PostTrust table")
   public void runPostTrustFullSync() {
     runSyncJob();

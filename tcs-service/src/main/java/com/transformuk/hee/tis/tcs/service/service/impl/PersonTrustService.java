@@ -4,6 +4,7 @@ import com.transformuk.hee.tis.reference.api.dto.SiteDTO;
 import com.transformuk.hee.tis.tcs.service.model.Person;
 import com.transformuk.hee.tis.tcs.service.model.PersonTrust;
 import com.transformuk.hee.tis.tcs.service.repository.PersonTrustRepository;
+import net.javacrumbs.shedlock.core.SchedulerLock;
 import org.apache.commons.collections4.CollectionUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -47,6 +48,7 @@ public class PersonTrustService extends TrustAdminSyncJobTemplate<PersonTrust> {
    * The scheduled job method that links a person to a trust
    */
   @Scheduled(cron = "0 0 0 * * *") //run every day at 12am
+  @SchedulerLock(name = "personTrustScheduledTask")
   @ManagedOperation(description = "Run full sync of the PersonTrust table")
   public void runPersonTrustFullSync() {
     runSyncJob();
