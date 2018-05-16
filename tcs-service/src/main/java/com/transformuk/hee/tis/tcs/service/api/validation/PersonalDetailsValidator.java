@@ -64,7 +64,7 @@ public class PersonalDetailsValidator {
       Boolean isExists = referenceService.isValueExists(NationalityDTO.class, personalDetailsDTO.getNationality());
       if (!isExists) {
         fieldErrors.add(new FieldError(PERSONAL_DETAILS_DTO_NAME, "nationality",
-                String.format("Nationality %s does not exist", personalDetailsDTO.getGender())));
+                String.format("Nationality %s does not exist", personalDetailsDTO.getNationality())));
       }
     }
     return fieldErrors;
@@ -90,7 +90,7 @@ public class PersonalDetailsValidator {
       Boolean isExists = referenceService.isValueExists(NationalityDTO.class, personalDetailsDTO.getDualNationality());
       if (!isExists) {
         fieldErrors.add(new FieldError(PERSONAL_DETAILS_DTO_NAME, "dualNationality",
-                String.format("DualNationality %s does not exist", personalDetailsDTO.getGender())));
+                String.format("DualNationality %s does not exist", personalDetailsDTO.getDualNationality())));
       }
     }
     return fieldErrors;
@@ -103,7 +103,7 @@ public class PersonalDetailsValidator {
       Boolean isExists = referenceService.isValueExists(EthnicOriginDTO.class, personalDetailsDTO.getEthnicOrigin());
       if (!isExists) {
         fieldErrors.add(new FieldError(PERSONAL_DETAILS_DTO_NAME, "ethnicOrigin",
-                String.format("EthnicOrigin %s does not exist", personalDetailsDTO.getGender())));
+                String.format("EthnicOrigin %s does not exist", personalDetailsDTO.getEthnicOrigin())));
       }
     }
     return fieldErrors;
@@ -116,7 +116,7 @@ public class PersonalDetailsValidator {
       Boolean isExists = referenceService.isValueExists(MaritalStatusDTO.class, personalDetailsDTO.getMaritalStatus());
       if (!isExists) {
         fieldErrors.add(new FieldError(PERSONAL_DETAILS_DTO_NAME, "maritalStatus",
-                String.format("MaritalStatus %s does not exist", personalDetailsDTO.getGender())));
+                String.format("MaritalStatus %s does not exist", personalDetailsDTO.getMaritalStatus())));
       }
     }
     return fieldErrors;
@@ -129,7 +129,7 @@ public class PersonalDetailsValidator {
       Boolean isExists = referenceService.isValueExists(SexualOrientationDTO.class, personalDetailsDTO.getSexualOrientation());
       if (!isExists) {
         fieldErrors.add(new FieldError(PERSONAL_DETAILS_DTO_NAME, "sexualOrientation",
-                String.format("SexualOrientation %s does not exist", personalDetailsDTO.getGender())));
+                String.format("SexualOrientation %s does not exist", personalDetailsDTO.getSexualOrientation())));
       }
     }
     return fieldErrors;
@@ -142,7 +142,7 @@ public class PersonalDetailsValidator {
       Boolean isExists = referenceService.isValueExists(ReligiousBeliefDTO.class, personalDetailsDTO.getReligiousBelief());
       if (!isExists) {
         fieldErrors.add(new FieldError(PERSONAL_DETAILS_DTO_NAME, "religiousBelief",
-                String.format("ReligiousBelief %s does not exist", personalDetailsDTO.getGender())));
+                String.format("ReligiousBelief %s does not exist", personalDetailsDTO.getReligiousBelief())));
       }
     }
     return fieldErrors;
