@@ -131,11 +131,6 @@ public class ProgrammeMembershipDTO implements Serializable {
         Objects.equals(programmeMembershipType, that.programmeMembershipType);
   }
 
-  //https://stackoverflow.com/a/1075699
-  public static <T> boolean listEqualsIgnoreOrder(List<T> list1, List<T> list2) {
-    return new HashSet<>(list1).equals(new HashSet<>(list2));
-  }
-
   @Override
   public int hashCode() {
     return Objects.hash(getPersonIdOrNull(), programmeStartDate, programmeEndDate, programmeId, programmeMembershipType);

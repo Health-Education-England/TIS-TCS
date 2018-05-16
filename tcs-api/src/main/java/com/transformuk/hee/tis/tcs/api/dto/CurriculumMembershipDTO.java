@@ -110,7 +110,6 @@ public class CurriculumMembershipDTO implements Serializable {
     return Objects.equals(curriculumStartDate, that.curriculumStartDate) &&
         Objects.equals(curriculumEndDate, that.curriculumEndDate) &&
         Objects.equals(curriculumCompletionDate, that.curriculumCompletionDate) &&
-        Objects.equals(curriculumId, that.curriculumId) &&
         Objects.equals(curriculumId, that.curriculumId);
   }
 
