@@ -5,9 +5,12 @@ import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.JpaSpecificationExecutor;
+import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.jpa.repository.query.Procedure;
+import org.springframework.data.repository.query.Param;
 
 import java.util.List;
+import java.util.Optional;
 import java.util.Set;
 
 /**
@@ -34,4 +37,10 @@ public interface PostRepository extends JpaRepository<Post, Long>, JpaSpecificat
   Set<Post> findByNationalPostNumberStartingWith(String nationalPostNumberNoCounter);
 
   Page<EsrPostProjection> findByIdNotNullAndNationalPostNumberIn(List<String> nationalPostNumbers, Pageable pageable);
+
+  @Query("SELECT p " +
+      "FROM Post p " +
+      "LEFT JOIN FETCH p.associatedTrusts " +
+      "WHERE p.id = :id")
+  Optional<Post> findPostWithTrustsById(@Param("id") Long id);
 }

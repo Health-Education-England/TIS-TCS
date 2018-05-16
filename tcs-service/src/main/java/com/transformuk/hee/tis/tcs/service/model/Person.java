@@ -76,6 +76,9 @@ public class Person implements Serializable {
   @JoinColumn(unique = true, name = "id")
   private RightToWork rightToWork;
 
+  @OneToMany(mappedBy = "person", fetch = FetchType.LAZY)
+  private Set<PersonTrust> associatedTrusts;
+
   public Long getId() {
     return id;
   }
@@ -305,6 +308,14 @@ public class Person implements Serializable {
 
   public void setRegulator(String regulator) {
     this.regulator = regulator;
+  }
+
+  public Set<PersonTrust> getAssociatedTrusts() {
+    return associatedTrusts;
+  }
+
+  public void setAssociatedTrusts(Set<PersonTrust> associatedTrusts) {
+    this.associatedTrusts = associatedTrusts;
   }
 
   @Override

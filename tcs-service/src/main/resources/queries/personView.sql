@@ -21,7 +21,8 @@ from (
     s.name as specialty,
     p.status,
     lo.owner as currentOwner,
-    lo.rule as currentOwnerRule
+    lo.rule as currentOwnerRule,
+    pt.trustId
   from
     Person p
   join ContactDetails cd on (cd.id = p.id)
@@ -34,6 +35,7 @@ from (
   left join PlacementSpecialty ps on ps.placementId = pl.id and ps.placementSpecialtyType = 'PRIMARY'
   left join Specialty s on s.id = ps.specialtyId
   left join PersonOwner lo on (lo.id = p.id)
+  left join PersonTrust pt on (pt.personId = p.id)
   WHERECLAUSE
   ) as ot
 ORDERBYCLAUSE

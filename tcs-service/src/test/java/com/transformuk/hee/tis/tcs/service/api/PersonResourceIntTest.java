@@ -130,15 +130,15 @@ public class PersonResourceIntTest {
     private MockMvc restPersonMockMvc;
     private Person person;
 
-    @Before
-    public void setup() {
-        MockitoAnnotations.initMocks(this);
-        final PersonResource personResource = new PersonResource(personService, placementViewRepository, placementViewMapper,
-                placementViewDecorator, personViewDecorator, placementService, placementSummaryDecorator, personValidator);
-        this.restPersonMockMvc = MockMvcBuilders.standaloneSetup(personResource)
-                .setCustomArgumentResolvers(pageableArgumentResolver)
-                .setControllerAdvice(exceptionTranslator)
-                .setMessageConverters(jacksonMessageConverter).build();
+  @Before
+  public void setup() {
+    MockitoAnnotations.initMocks(this);
+    PersonResource personResource = new PersonResource(personService, placementViewRepository, placementViewMapper,
+        placementViewDecorator, personViewDecorator, placementService, placementSummaryDecorator,personValidator);
+    this.restPersonMockMvc = MockMvcBuilders.standaloneSetup(personResource)
+        .setCustomArgumentResolvers(pageableArgumentResolver)
+        .setControllerAdvice(exceptionTranslator)
+        .setMessageConverters(jacksonMessageConverter).build();
 
         personRepository.deleteAllInBatch();
 

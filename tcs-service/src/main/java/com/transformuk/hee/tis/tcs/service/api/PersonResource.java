@@ -16,6 +16,7 @@ import com.transformuk.hee.tis.tcs.service.model.PlacementView;
 import com.transformuk.hee.tis.tcs.service.repository.PlacementViewRepository;
 import com.transformuk.hee.tis.tcs.service.service.PersonService;
 import com.transformuk.hee.tis.tcs.service.service.PlacementService;
+import com.transformuk.hee.tis.tcs.service.service.impl.PersonTrustService;
 import com.transformuk.hee.tis.tcs.service.service.mapper.PlacementViewMapper;
 import io.github.jhipster.web.util.ResponseUtil;
 import io.swagger.annotations.ApiOperation;
@@ -55,28 +56,28 @@ public class PersonResource {
 
     private static final String ENTITY_NAME = "person";
 
-    private final PersonService personService;
-    private final PlacementViewRepository placementViewRepository;
-    private final PlacementViewMapper placementViewMapper;
-    private final PlacementViewDecorator placementViewDecorator;
-    private final PersonViewDecorator personViewDecorator;
-    private final PlacementService placementService;
-    private final PlacementSummaryDecorator placementSummaryDecorator;
-    private final PersonValidator personValidator;
+  private final PersonService personService;
+  private final PlacementViewRepository placementViewRepository;
+  private final PlacementViewMapper placementViewMapper;
+  private final PlacementViewDecorator placementViewDecorator;
+  private final PersonViewDecorator personViewDecorator;
+  private final PlacementService placementService;
+  private final PlacementSummaryDecorator placementSummaryDecorator;
+  private final PersonValidator personValidator;
 
-    public PersonResource(final PersonService personService, final PlacementViewRepository placementViewRepository,
-                          final PlacementViewMapper placementViewMapper, final PlacementViewDecorator placementViewDecorator,
-                          final PersonViewDecorator personViewDecorator, final PlacementService placementService,
-                          final PlacementSummaryDecorator placementSummaryDecorator, final PersonValidator personValidator) {
-        this.personService = personService;
-        this.placementViewRepository = placementViewRepository;
-        this.placementViewMapper = placementViewMapper;
-        this.placementViewDecorator = placementViewDecorator;
-        this.personViewDecorator = personViewDecorator;
-        this.placementService = placementService;
-        this.placementSummaryDecorator = placementSummaryDecorator;
-        this.personValidator = personValidator;
-    }
+  public PersonResource(PersonService personService, PlacementViewRepository placementViewRepository,
+                        PlacementViewMapper placementViewMapper, PlacementViewDecorator placementViewDecorator,
+                        PersonViewDecorator personViewDecorator, PlacementService placementService,
+                        PlacementSummaryDecorator placementSummaryDecorator, PersonValidator personValidator) {
+    this.personService = personService;
+    this.placementViewRepository = placementViewRepository;
+    this.placementViewMapper = placementViewMapper;
+    this.placementViewDecorator = placementViewDecorator;
+    this.personViewDecorator = personViewDecorator;
+    this.placementService = placementService;
+    this.placementSummaryDecorator = placementSummaryDecorator;
+    this.personValidator = personValidator;
+  }
 
     /**
      * POST  /people : Create a new person.
@@ -101,30 +102,32 @@ public class PersonResource {
                 .body(result);
     }
 
-    /**
-     * PUT  /people : Updates an existing person.
-     *
-     * @param personDTO the personDTO to update
-     * @return the ResponseEntity with status 200 (OK) and with body the updated personDTO,
-     * or with status 400 (Bad Request) if the personDTO is not valid,
-     * or with status 500 (Internal Server Error) if the personDTO couldn't be updated
-     * @throws URISyntaxException if the Location URI syntax is incorrect
-     */
-    @PutMapping("/people")
-    @Timed
-    @PreAuthorize("hasPermission('tis:people::person:', 'Update')")
-    public ResponseEntity<PersonDTO> updatePerson(@RequestBody @Validated(Update.class) final PersonDTO personDTO)
-            throws URISyntaxException, MethodArgumentNotValidException {
-        log.debug("REST request to update Person : {}", personDTO);
-        if (personDTO.getId() == null) {
-            return createPerson(personDTO);
-        }
-        personValidator.validate(personDTO);
-        final PersonDTO result = personService.save(personDTO);
-        return ResponseEntity.ok()
-                .headers(HeaderUtil.createEntityUpdateAlert(ENTITY_NAME, personDTO.getId().toString()))
-                .body(result);
+  /**
+   * PUT  /people : Updates an existing person.
+   *
+   * @param personDTO the personDTO to update
+   * @return the ResponseEntity with status 200 (OK) and with body the updated personDTO,
+   * or with status 400 (Bad Request) if the personDTO is not valid,
+   * or with status 500 (Internal Server Error) if the personDTO couldn't be updated
+   * @throws URISyntaxException if the Location URI syntax is incorrect
+   */
+  @PutMapping("/people")
+  @Timed
+  @PreAuthorize("hasPermission('tis:people::person:', 'Update')")
+  public ResponseEntity<PersonDTO> updatePerson(@RequestBody @Validated(Update.class) PersonDTO personDTO)
+          throws URISyntaxException, MethodArgumentNotValidException {
+    log.debug("REST request to update Person : {}", personDTO);
+    if (personDTO.getId() == null) {
+      return createPerson(personDTO);
     }
+    personService.canLoggedInUserViewOrAmend(personDTO.getId());
+
+    personValidator.validate(personDTO);
+    PersonDTO result = personService.save(personDTO);
+    return ResponseEntity.ok()
+        .headers(HeaderUtil.createEntityUpdateAlert(ENTITY_NAME, personDTO.getId().toString()))
+        .body(result);
+  }
 
     /**
      * GET  /people : get all the people.
@@ -313,114 +316,130 @@ public class PersonResource {
         return new ResponseEntity<>(result, null, HttpStatus.OK);
     }
 
-    /**
-     * GET  /people/:id : get the "id" person.
-     *
-     * @param id the id of the personDTO to retrieve
-     * @return the ResponseEntity with status 200 (OK) and with body the personDTO, or with status 404 (Not Found)
-     */
-    @GetMapping("/people/{id}")
-    @Timed
-    @PreAuthorize("hasPermission('tis:people::person:', 'View')")
-    public ResponseEntity<PersonDTO> getPerson(@PathVariable final Long id) {
-        log.debug("REST request to get Person : {}", id);
-        final PersonDTO personDTO = personService.findOne(id);
-        return ResponseUtil.wrapOrNotFound(Optional.ofNullable(personDTO));
-    }
+  /**
+   * GET  /people/:id : get the "id" person.
+   *
+   * @param id the id of the personDTO to retrieve
+   * @return the ResponseEntity with status 200 (OK) and with body the personDTO, or with status 404 (Not Found)
+   */
+  @GetMapping("/people/{id}")
+  @Timed
+  @PreAuthorize("hasPermission('tis:people::person:', 'View')")
+  public ResponseEntity<PersonDTO> getPerson(@PathVariable Long id) {
+    log.debug("REST request to get Person : {}", id);
+    personService.canLoggedInUserViewOrAmend(id);
 
-    /**
-     * DELETE  /people/:id : delete the "id" person.
-     *
-     * @param id the id of the personDTO to delete
-     * @return the ResponseEntity with status 200 (OK)
-     */
-    @DeleteMapping("/people/{id}")
-    @Timed
-    @PreAuthorize("hasAuthority('tcs:delete:entities')")
-    public ResponseEntity<Void> deletePerson(@PathVariable final Long id) {
-        log.debug("REST request to delete Person : {}", id);
-        personService.delete(id);
-        return ResponseEntity.ok().headers(HeaderUtil.createEntityDeletionAlert(ENTITY_NAME, id.toString())).build();
-    }
+    PersonDTO personDTO = personService.findOne(id);
+    return ResponseUtil.wrapOrNotFound(Optional.ofNullable(personDTO));
+  }
 
-    /**
-     * GET  /people/{id}/basic : get a person's basic details
-     *
-     * @param id the trainee Id
-     * @return the ResponseEntity with status 200 (OK) and the list of placements in body
-     */
-    @GetMapping("/people/{id}/basic")
-    @Timed
-    @PreAuthorize("hasPermission('tis:people::person:', 'View')")
-    public ResponseEntity<PersonBasicDetailsDTO> getBasicDetails(@PathVariable final Long id) {
-        log.debug("REST request to get basic details");
-        final PersonBasicDetailsDTO basicDetails = personService.getBasicDetails(id);
-        return ResponseUtil.wrapOrNotFound(Optional.ofNullable(basicDetails));
-    }
+  /**
+   * DELETE  /people/:id : delete the "id" person.
+   *
+   * @param id the id of the personDTO to delete
+   * @return the ResponseEntity with status 200 (OK)
+   */
+  @DeleteMapping("/people/{id}")
+  @Timed
+  @PreAuthorize("hasAuthority('tcs:delete:entities')")
+  public ResponseEntity<Void> deletePerson(@PathVariable Long id) {
+    log.debug("REST request to delete Person : {}", id);
+    personService.canLoggedInUserViewOrAmend(id);
 
-    /**
-     * GET  /people/{id}/placements : get all the placements for a trainee.
-     *
-     * @param id the trainee Id
-     * @return the ResponseEntity with status 200 (OK) and the list of placements in body
-     */
-    @GetMapping("/people/{id}/placements")
-    @Timed
-    @PreAuthorize("hasPermission('tis:people::person:', 'View')")
-    public ResponseEntity<List<PlacementViewDTO>> getPlacementsForTrainee(@PathVariable final Long id) {
-        log.debug("REST request to get a page of Placements");
-        final List<PlacementView> placementViews = placementViewRepository.findAllByTraineeIdOrderByDateToDesc(id);
-        return ResponseUtil.wrapOrNotFound(Optional.ofNullable(placementViews != null ?
-                placementViewDecorator.decorate(placementViewMapper.placementViewsToPlacementViewDTOs(placementViews)) :
-                null));
-    }
+    personService.delete(id);
+    return ResponseEntity.ok().headers(HeaderUtil.createEntityDeletionAlert(ENTITY_NAME, id.toString())).build();
+  }
 
-    /**
-     * GET  /people/{id}/placements : get all the placements for a trainee.
-     *
-     * @param gmcId the trainee GMC Id
-     * @return the ResponseEntity with status 200 (OK) and the list of placements in body
-     */
-    @GetMapping("/people/gmc/{gmcId}/placements")
-    @Timed
-    @PreAuthorize("hasPermission('tis:people::person:', 'View')")
-    public ResponseEntity<List<PlacementViewDTO>> getPlacementsForTraineeByGmcId(@PathVariable final String gmcId) {
-        log.debug("REST request to get a page of Placements");
-        final Long personId = personService.findIdByGmcId(gmcId);
-        return getPlacementsForTrainee(personId);
-    }
+  /**
+   * GET  /people/{id}/basic : get a person's basic details
+   *
+   * @param id the trainee Id
+   * @return the ResponseEntity with status 200 (OK) and the list of placements in body
+   */
+  @GetMapping("/people/{id}/basic")
+  @Timed
+  @PreAuthorize("hasPermission('tis:people::person:', 'View')")
+  public ResponseEntity<PersonBasicDetailsDTO> getBasicDetails(@PathVariable Long id) {
+    log.debug("REST request to get basic details");
+    personService.canLoggedInUserViewOrAmend(id);
 
+    PersonBasicDetailsDTO basicDetails = personService.getBasicDetails(id);
+    return ResponseUtil.wrapOrNotFound(Optional.ofNullable(basicDetails));
+  }
 
-    /**
-     * GET  /people/{id}/placements : get all the placements for a trainee.
-     *
-     * @param id the trainee Id
-     * @return the ResponseEntity with status 200 (OK) and the list of placements in body
-     */
-    @GetMapping("/people/{id}/placements/new")
-    @Timed
-    @PreAuthorize("hasPermission('tis:people::person:', 'View')")
-    public ResponseEntity<List<PlacementSummaryDTO>> getPersonPlacements(@PathVariable final Long id) {
-        log.debug("REST request to get a page of Placements");
-        final List<PlacementSummaryDTO> placementForTrainee = placementService.getPlacementForTrainee(id);
-        return ResponseUtil.wrapOrNotFound(Optional.ofNullable(placementForTrainee != null ? placementSummaryDecorator.decorate(placementForTrainee) : null));
-    }
+  /**
+   * GET  /people/{id}/placements : get all the placements for a trainee.
+   *
+   * @param id the trainee Id
+   * @return the ResponseEntity with status 200 (OK) and the list of placements in body
+   */
+  @GetMapping("/people/{id}/placements")
+  @Timed
+  @PreAuthorize("hasPermission('tis:people::person:', 'View')")
+  public ResponseEntity<List<PlacementViewDTO>> getPlacementsForTrainee(@PathVariable Long id) {
+    log.debug("REST request to get a page of Placements");
+    personService.canLoggedInUserViewOrAmend(id);
+
+    List<PlacementView> placementViews = placementViewRepository.findAllByTraineeIdOrderByDateToDesc(id);
+    return ResponseUtil.wrapOrNotFound(Optional.ofNullable(placementViews != null ?
+        placementViewDecorator.decorate(placementViewMapper.placementViewsToPlacementViewDTOs(placementViews)) :
+        null));
+  }
+
+  /**
+   * GET  /people/{id}/placements : get all the placements for a trainee.
+   *
+   * @param gmcId the trainee GMC Id
+   * @return the ResponseEntity with status 200 (OK) and the list of placements in body
+   */
+  @GetMapping("/people/gmc/{gmcId}/placements")
+  @Timed
+  @PreAuthorize("hasPermission('tis:people::person:', 'View')")
+  public ResponseEntity<List<PlacementViewDTO>> getPlacementsForTraineeByGmcId(@PathVariable String gmcId) {
+    log.debug("REST request to get a page of Placements");
+
+    Long personId = personService.findIdByGmcId(gmcId);
+    personService.canLoggedInUserViewOrAmend(personId);
+
+    return getPlacementsForTrainee(personId);
+  }
 
 
-    /**
-     * GET  /people/{id}/placements : get all the placements for a trainee.
-     *
-     * @param gmcId the trainee GMC Id
-     * @return the ResponseEntity with status 200 (OK) and the list of placements in body
-     */
-    @GetMapping("/people/gmc/{gmcId}/placements/new")
-    @Timed
-    @PreAuthorize("hasPermission('tis:people::person:', 'View')")
-    public ResponseEntity<List<PlacementSummaryDTO>> getPersonPlacementsByGmcId(@PathVariable final String gmcId) {
-        log.debug("REST request to get a page of Placements");
-        final Long personId = personService.findIdByGmcId(gmcId);
-        return getPersonPlacements(personId);
-    }
+
+  /**
+   * GET  /people/{id}/placements : get all the placements for a trainee.
+   *
+   * @param id the trainee Id
+   * @return the ResponseEntity with status 200 (OK) and the list of placements in body
+   */
+  @GetMapping("/people/{id}/placements/new")
+  @Timed
+  @PreAuthorize("hasPermission('tis:people::person:', 'View')")
+  public ResponseEntity<List<PlacementSummaryDTO>> getPersonPlacements(@PathVariable Long id) {
+    log.debug("REST request to get a page of Placements");
+    personService.canLoggedInUserViewOrAmend(id);
+
+    List<PlacementSummaryDTO> placementForTrainee = placementService.getPlacementForTrainee(id);
+    return ResponseUtil.wrapOrNotFound(Optional.ofNullable(placementForTrainee != null ? placementSummaryDecorator.decorate(placementForTrainee) : null));
+  }
+
+
+  /**
+   * GET  /people/{id}/placements : get all the placements for a trainee.
+   *
+   * @param gmcId the trainee GMC Id
+   * @return the ResponseEntity with status 200 (OK) and the list of placements in body
+   */
+  @GetMapping("/people/gmc/{gmcId}/placements/new")
+  @Timed
+  @PreAuthorize("hasPermission('tis:people::person:', 'View')")
+  public ResponseEntity<List<PlacementSummaryDTO>> getPersonPlacementsByGmcId(@PathVariable String gmcId) {
+    log.debug("REST request to get a page of Placements");
+    Long personId = personService.findIdByGmcId(gmcId);
+    personService.canLoggedInUserViewOrAmend(personId);
+
+    return getPersonPlacements(personId);
+  }
 
 
     /**

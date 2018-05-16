@@ -69,6 +69,8 @@ public class Post implements Serializable {
     private Set<PostFunding> fundings = new HashSet<>();
     @OneToMany(mappedBy = "post", fetch = FetchType.EAGER)
     private Set<Placement> placementHistory = new HashSet<>();
+    @OneToMany(mappedBy = "post", fetch = FetchType.LAZY)
+    private Set<PostTrust> associatedTrusts;
 
     public Long getId() {
         return id;
@@ -332,6 +334,14 @@ public class Post implements Serializable {
 
     public void setBypassNPNGeneration(final boolean bypassNPNGeneration) {
         this.bypassNPNGeneration = bypassNPNGeneration;
+    }
+
+    public Set<PostTrust> getAssociatedTrusts() {
+        return associatedTrusts;
+    }
+
+    public void setAssociatedTrusts(Set<PostTrust> associatedTrusts) {
+        this.associatedTrusts = associatedTrusts;
     }
 
     @Override

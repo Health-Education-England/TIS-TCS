@@ -49,6 +49,9 @@ spring:
         multipart:
           max-file-size: 10MB
           max-request-size: 10MB
+    jdbc:
+        template:
+          query-timeout: 120
 
 flyway:
     baseline-description: #
@@ -89,7 +92,7 @@ server:
         cookie:
             http-only: true
     context-path: /tcs
-
+    connection-timeout: 120
 info:
     project:
         version: #project.version#
@@ -153,3 +156,13 @@ azure:
     personFolder: person
 
 auto.generate.npn: true
+
+kc:
+  realm: ${KC_REALM:lin}
+  client:
+    id: ${KC_CLIENT_ID:api-tokens}
+  server:
+    url: ${KC_SERVER_URL:https://dev-apps.tis.nhs.uk/auth/}
+  username: ${KC_USERNAME:tcs_trust_admin}
+  password: ${KC_PASSWORD:tcs_trust_admin}
+  timeout: ${KC_TIMEOUT:10000}

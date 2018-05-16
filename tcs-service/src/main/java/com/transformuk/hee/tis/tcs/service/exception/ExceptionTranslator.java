@@ -143,4 +143,18 @@ public class ExceptionTranslator {
     List<FieldError> fieldErrors = result.getFieldErrors();
     return processFieldErrors(fieldErrors);
   }
+
+  /**
+   * Handler for an exception thrown at the service level, that checks if the current user is authorised to do a
+   * certain action
+   *
+   * @param ex
+   * @return
+   */
+  @ExceptionHandler(AccessUnauthorisedException.class)
+  @ResponseStatus(HttpStatus.UNAUTHORIZED)
+  @ResponseBody
+  public ErrorVM accessUnauthorisedException(AccessUnauthorisedException ex) {
+    return new ErrorVM(ErrorConstants.ERR_ACCESS_DENIED, ex.getMessage());
+  }
 }

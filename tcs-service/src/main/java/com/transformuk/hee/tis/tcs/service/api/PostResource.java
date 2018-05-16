@@ -26,6 +26,7 @@ import com.transformuk.hee.tis.tcs.service.model.PlacementView;
 import com.transformuk.hee.tis.tcs.service.repository.PlacementViewRepository;
 import com.transformuk.hee.tis.tcs.service.service.PlacementService;
 import com.transformuk.hee.tis.tcs.service.service.PostService;
+import com.transformuk.hee.tis.tcs.service.service.impl.PostTrustService;
 import com.transformuk.hee.tis.tcs.service.service.mapper.PlacementViewMapper;
 import io.github.jhipster.web.util.ResponseUtil;
 import io.jsonwebtoken.lang.Collections;
@@ -74,6 +75,10 @@ import static com.transformuk.hee.tis.tcs.service.api.util.StringUtil.sanitize;
 public class PostResource {
 
   private static final String ENTITY_NAME = "post";
+  private static final String REQUEST_BODY_EMPTY = "request.body.empty";
+  private static final String REQUEST_BODY_CANNOT_BE_EMPTY = "The request body for this end point cannot be empty";
+  private static final String BULK_UPDATE_FAILED_NOID = "bulk.update.failed.noId";
+  private static final String NOID_ERR_MSG = "Some DTOs you've provided have no Id, cannot update entities that don't exist";
   private final Logger log = LoggerFactory.getLogger(PostResource.class);
   private final PostService postService;
   private final PostValidator postValidator;
@@ -82,11 +87,6 @@ public class PostResource {
   private final PlacementViewMapper placementViewMapper;
   private final PlacementService placementService;
   private final PlacementSummaryDecorator placementSummaryDecorator;
-
-  private static final String REQUEST_BODY_EMPTY = "request.body.empty";
-  private static final String REQUEST_BODY_CANNOT_BE_EMPTY = "The request body for this end point cannot be empty";
-  private static final String BULK_UPDATE_FAILED_NOID = "bulk.update.failed.noId";
-  private static final String NOID_ERR_MSG = "Some DTOs you've provided have no Id, cannot update entities that don't exist";
 
   public PostResource(PostService postService, PostValidator postValidator,
                       PlacementViewRepository placementViewRepository,
@@ -145,6 +145,8 @@ public class PostResource {
     if (postDTO.getId() == null) {
       return createPost(postDTO);
     }
+
+    postService.canLoggedInUserViewOrAmend(postDTO.getId());
     PostDTO result = postService.update(postDTO);
     return ResponseEntity.ok()
         .headers(HeaderUtil.createEntityUpdateAlert(ENTITY_NAME, postDTO.getId().toString()))
@@ -184,6 +186,7 @@ public class PostResource {
 
   /**
    * Find Posts by searching for parts of a national post number
+   *
    * @param pageable
    * @param searchQuery
    * @return
@@ -247,6 +250,9 @@ public class PostResource {
   @PreAuthorize("hasAuthority('post:view')")
   public ResponseEntity<PostDTO> getPost(@PathVariable Long id) {
     log.debug("REST request to get Post : {}", id);
+
+    postService.canLoggedInUserViewOrAmend(id);
+
     PostDTO postDTO = postService.findOne(id);
     return ResponseUtil.wrapOrNotFound(Optional.ofNullable(postDTO));
   }
@@ -262,6 +268,8 @@ public class PostResource {
   @PreAuthorize("hasAuthority('post:view')")
   public ResponseEntity<List<PlacementViewDTO>> getPostPlacements(@PathVariable Long id) {
     log.debug("REST request to get Post Placements: {}", id);
+    postService.canLoggedInUserViewOrAmend(id);
+
     List<PlacementView> placementViews = placementViewRepository.findAllByPostIdOrderByDateToDesc(id);
     return ResponseUtil.wrapOrNotFound(Optional.ofNullable(placementViews != null ?
         placementViewDecorator.decorate(placementViewMapper.placementViewsToPlacementViewDTOs(placementViews)) :
@@ -279,6 +287,9 @@ public class PostResource {
   @PreAuthorize("hasAuthority('post:view')")
   public ResponseEntity<List<PlacementSummaryDTO>> getPlacementsForPosts(@PathVariable Long postId) {
     log.debug("REST request to get Post Placements: {}", postId);
+
+    postService.canLoggedInUserViewOrAmend(postId);
+
     List<PlacementSummaryDTO> placementForPost = placementService.getPlacementForPost(postId);
     return ResponseUtil.wrapOrNotFound(Optional.ofNullable(placementForPost != null ?
         placementSummaryDecorator.decorate(placementForPost) : null));
@@ -295,6 +306,8 @@ public class PostResource {
   @PreAuthorize("hasAuthority('tcs:delete:entities')")
   public ResponseEntity<Void> deletePost(@PathVariable Long id) {
     log.debug("REST request to delete Post : {}", id);
+    postService.canLoggedInUserViewOrAmend(id);
+
     postService.delete(id);
     return ResponseEntity.ok().headers(HeaderUtil.createEntityDeletionAlert(ENTITY_NAME, id.toString())).build();
   }
@@ -591,4 +604,5 @@ public class PostResource {
         .headers(HeaderUtil.createEntityUpdateAlert(ENTITY_NAME, StringUtils.join(ids, ",")))
         .body(results);
   }
+
 }

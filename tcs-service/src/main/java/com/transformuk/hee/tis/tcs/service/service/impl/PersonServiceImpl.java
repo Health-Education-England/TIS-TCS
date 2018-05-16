@@ -7,15 +7,30 @@ import com.transformuk.hee.tis.tcs.api.dto.*;
 import com.transformuk.hee.tis.tcs.api.enumeration.PersonOwnerRule;
 import com.transformuk.hee.tis.tcs.api.enumeration.Status;
 import com.transformuk.hee.tis.tcs.service.api.util.BasicPage;
-import com.transformuk.hee.tis.tcs.service.model.*;
-import com.transformuk.hee.tis.tcs.service.repository.*;
+import com.transformuk.hee.tis.tcs.service.exception.AccessUnauthorisedException;
+import com.transformuk.hee.tis.tcs.service.model.ColumnFilter;
+import com.transformuk.hee.tis.tcs.service.model.ContactDetails;
+import com.transformuk.hee.tis.tcs.service.model.GdcDetails;
+import com.transformuk.hee.tis.tcs.service.model.GmcDetails;
+import com.transformuk.hee.tis.tcs.service.model.Person;
+import com.transformuk.hee.tis.tcs.service.model.PersonBasicDetails;
+import com.transformuk.hee.tis.tcs.service.model.PersonTrust;
+import com.transformuk.hee.tis.tcs.service.model.PersonalDetails;
+import com.transformuk.hee.tis.tcs.service.model.RightToWork;
+import com.transformuk.hee.tis.tcs.service.repository.ContactDetailsRepository;
+import com.transformuk.hee.tis.tcs.service.repository.GdcDetailsRepository;
+import com.transformuk.hee.tis.tcs.service.repository.GmcDetailsRepository;
+import com.transformuk.hee.tis.tcs.service.repository.PersonBasicDetailsRepository;
+import com.transformuk.hee.tis.tcs.service.repository.PersonRepository;
+import com.transformuk.hee.tis.tcs.service.repository.PersonViewRepository;
+import com.transformuk.hee.tis.tcs.service.repository.PersonalDetailsRepository;
+import com.transformuk.hee.tis.tcs.service.repository.RightToWorkRepository;
 import com.transformuk.hee.tis.tcs.service.service.PersonService;
 import com.transformuk.hee.tis.tcs.service.service.helper.SqlQuerySupplier;
 import com.transformuk.hee.tis.tcs.service.service.mapper.PersonBasicDetailsMapper;
 import com.transformuk.hee.tis.tcs.service.service.mapper.PersonLiteMapper;
 import com.transformuk.hee.tis.tcs.service.service.mapper.PersonMapper;
 import com.transformuk.hee.tis.tcs.service.service.mapper.PersonViewMapper;
-import io.jsonwebtoken.lang.Collections;
 import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -38,7 +53,9 @@ import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.Collection;
+import java.util.Collections;
 import java.util.List;
+import java.util.Optional;
 import java.util.Set;
 import java.util.concurrent.CompletableFuture;
 import java.util.stream.Collectors;
@@ -199,19 +216,24 @@ public class PersonServiceImpl implements PersonService {
         final int start = pageable.getOffset();
         final int end = start + pageable.getPageSize();
 
-        String query = sqlQuerySupplier.getQuery(SqlQuerySupplier.PERSON_VIEW);
-        query = query.replaceAll("WHERECLAUSE", " WHERE 1=1 ");
-        if (pageable.getSort() != null) {
-            if (pageable.getSort().iterator().hasNext()) {
-                final String orderByFirstCriteria = pageable.getSort().iterator().next().toString();
-                final String orderByClause = orderByFirstCriteria.replaceAll(":", " ");
-                query = query.replaceAll("ORDERBYCLAUSE", " ORDER BY " + orderByClause);
-            } else {
-                query = query.replaceAll("ORDERBYCLAUSE", "");
-            }
-        } else {
-            query = query.replaceAll("ORDERBYCLAUSE", "");
-        }
+    String whereClause = " WHERE 1=1 ";
+    if (permissionService.isUserTrustAdmin()) {
+      whereClause += String.format("AND trustId in (%s) ", getLoggedInUsersAssociatedTrusts());
+    }
+
+    String query = sqlQuerySupplier.getQuery(SqlQuerySupplier.PERSON_VIEW);
+    query = query.replaceAll("WHERECLAUSE", whereClause);
+    if (pageable.getSort() != null) {
+      if (pageable.getSort().iterator().hasNext()) {
+        String orderByFirstCriteria = pageable.getSort().iterator().next().toString();
+        String orderByClause = orderByFirstCriteria.replaceAll(":", " ");
+        query = query.replaceAll("ORDERBYCLAUSE", " ORDER BY " + orderByClause);
+      } else {
+        query = query.replaceAll("ORDERBYCLAUSE", "");
+      }
+    } else {
+      query = query.replaceAll("ORDERBYCLAUSE", "");
+    }
 
         query = query.replaceAll("LIMITCLAUSE", "limit " + start + "," + end);
 
@@ -241,33 +263,33 @@ public class PersonServiceImpl implements PersonService {
         return personCount;
     }
 
-    /**
-     * Advanced search for person list view.
-     * <p>
-     * There are two queries that happen in this method, one to retrieve the data based on the search and column filters
-     * and the second to get the count so that we can support pagination
-     *
-     * @param searchString the search string to match, can be null
-     * @return
-     */
-    @Override
-    @Transactional(readOnly = true)
-    public List<PersonBasicDetailsDTO> basicDetailsSearch(final String searchString) {
-        final List<Specification<PersonBasicDetails>> specs = new ArrayList<>();
-        if (StringUtils.isNotEmpty(searchString)) {
-            specs.add(Specifications.where(containsLike("firstName", searchString)).
-                    or(containsLike("lastName", searchString)).
-                    or(containsLike("gmcDetails.gmcNumber", searchString)));
-        }
-        final Pageable pageable = new PageRequest(0, PERSON_BASIC_DETAILS_MAX_RESULTS);
+  /**
+   * Advanced search for person list view.
+   * <p>
+   * There are two queries that happen in this method, one to retrieve the data based on the search and column filters
+   * and the second to get the count so that we can support pagination
+   *
+   * @param searchString the search string to match, can be null
+   * @return
+   */
+  @Override
+  @Transactional(readOnly = true)
+  public List<PersonBasicDetailsDTO> basicDetailsSearch(String searchString) {
+    List<Specification<PersonBasicDetails>> specs = new ArrayList<>();
+    if (StringUtils.isNotEmpty(searchString)) {
+      specs.add(Specifications.where(containsLike("firstName", searchString)).
+          or(containsLike("lastName", searchString)).
+          or(containsLike("gmcDetails.gmcNumber", searchString)));
+    }
+    Pageable pageable = new PageRequest(0, PERSON_BASIC_DETAILS_MAX_RESULTS);
 
-        final Page<PersonBasicDetails> result;
-        if (Collections.isEmpty(specs)) {
-            result = personBasicDetailsRepository.findAll(pageable);
-        } else {
-            final Specifications<PersonBasicDetails> fullSpec = Specifications.where(specs.get(0));
-            result = personBasicDetailsRepository.findAll(fullSpec, pageable);
-        }
+    Page<PersonBasicDetails> result;
+    if (org.apache.commons.collections4.CollectionUtils.isEmpty(specs)) {
+      result = personBasicDetailsRepository.findAll(pageable);
+    } else {
+      Specifications<PersonBasicDetails> fullSpec = Specifications.where(specs.get(0));
+      result = personBasicDetailsRepository.findAll(fullSpec, pageable);
+    }
 
         return result.map(person -> personBasicDetailsMapper.toDto(person)).getContent();
     }
@@ -334,9 +356,13 @@ public class PersonServiceImpl implements PersonService {
         final StringBuilder whereClause = new StringBuilder();
         whereClause.append(" WHERE 1=1 ");
 
-        //add the column filters criteria
-        if (columnFilters != null && !columnFilters.isEmpty()) {
-            columnFilters.forEach(cf -> {
+    if (permissionService.isUserTrustAdmin()) {
+      whereClause.append(String.format("AND trustId in (%s) ", getLoggedInUsersAssociatedTrusts()));
+    }
+
+    //add the column filters criteria
+    if (columnFilters != null && !columnFilters.isEmpty()) {
+      columnFilters.forEach(cf -> {
 
                 switch (cf.getName()) {
                     case "programmeName":
@@ -422,21 +448,21 @@ public class PersonServiceImpl implements PersonService {
         personalDetailsDTO.setSexualOrientation(null);
     }
 
-    /**
-     * Get persons by ids.
-     *
-     * @param ids the Ids of the entities
-     * @return the entities
-     */
-    @Override
-    @Transactional(readOnly = true)
-    public List<PersonBasicDetailsDTO> findBasicDetailsByIdIn(final Set<Long> ids) {
-        log.debug("Request to get all person basic details {} ", ids);
+  /**
+   * Get persons by ids.
+   *
+   * @param ids the Ids of the entities
+   * @return the entities
+   */
+  @Override
+  @Transactional(readOnly = true)
+  public List<PersonBasicDetailsDTO> findBasicDetailsByIdIn(Set<Long> ids) {
+    log.debug("Request to get all person basic details {} ", ids);
 
-        return personBasicDetailsRepository.findAll(ids).stream()
-                .map(personBasicDetailsMapper::toDto)
-                .collect(Collectors.toList());
-    }
+    return personBasicDetailsRepository.findAll(ids).stream()
+        .map(personBasicDetailsMapper::toDto)
+        .collect(Collectors.toList());
+  }
 
     /**
      * Get persons by ids.
@@ -467,12 +493,12 @@ public class PersonServiceImpl implements PersonService {
         return gmcDetailsRepository.findByGmcNumber(gmcId).getId();
     }
 
-    @Override
-    public List<PersonDTO> findPersonsByPublicHealthNumbersIn(final List<String> publicHealthNumbers) {
-        return personRepository.findByPublicHealthNumberIn(publicHealthNumbers).stream()
-                .map(personMapper::toDto)
-                .collect(Collectors.toList());
-    }
+  @Override
+  public List<PersonDTO> findPersonsByPublicHealthNumbersIn(List<String> publicHealthNumbers) {
+    return personRepository.findByPublicHealthNumberIn(publicHealthNumbers).stream()
+        .map(personMapper::toDto)
+        .collect(Collectors.toList());
+  }
 
     @Override
     public Page<PersonLiteDTO> searchByRoleCategory(final String query, final Long categoryId, final Pageable pageable) {
@@ -547,7 +573,36 @@ public class PersonServiceImpl implements PersonService {
         this.rightToWorkRepository = rightToWorkRepository;
     }
 
-    private class PersonViewRowMapper implements RowMapper<PersonViewDTO> {
+  /**
+   * Method that will throw a not authorized exception if the current logged in user cannot view or modify the person record
+   *
+   * @param personId the db managed id of the person record
+   */
+  public void canLoggedInUserViewOrAmend(Long personId) {
+    if (permissionService.isUserTrustAdmin()) {
+      Set<Long> userTrustIds = permissionService.getUsersTrustIds();
+
+      Optional<Person> optionalPerson = personRepository.findPersonById(personId);
+      if (optionalPerson.isPresent()) {
+        Set<PersonTrust> associatedTrusts = optionalPerson.get().getAssociatedTrusts();
+        if (!CollectionUtils.isEmpty(associatedTrusts)) {
+          Set<Long> personTrustIds = associatedTrusts.stream().map(PersonTrust::getTrustId).collect(Collectors.toSet());
+          boolean noCommonElements = Collections.disjoint(personTrustIds, userTrustIds);
+          if (noCommonElements)
+            throw new AccessUnauthorisedException("You cannot view or modify Person with id: " + personId);
+        }
+      }
+    }
+  }
+
+  private String getLoggedInUsersAssociatedTrusts() {
+    String commaSepTrustIds = permissionService.getUsersTrustIds().stream()
+        .map(Object::toString)
+        .reduce((x, y) -> x + ", " + y).orElse(StringUtils.EMPTY);
+    return commaSepTrustIds;
+  }
+
+  private class PersonViewRowMapper implements RowMapper<PersonViewDTO> {
 
         @Override
         public PersonViewDTO mapRow(final ResultSet rs, final int id) throws SQLException {
