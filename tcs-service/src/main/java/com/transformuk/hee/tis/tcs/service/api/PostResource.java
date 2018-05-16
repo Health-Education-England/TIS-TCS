@@ -287,6 +287,7 @@ public class PostResource {
   @PreAuthorize("hasAuthority('post:view')")
   public ResponseEntity<List<PlacementSummaryDTO>> getPlacementsForPosts(@PathVariable Long postId) {
     log.debug("REST request to get Post Placements: {}", postId);
+
     postService.canLoggedInUserViewOrAmend(postId);
 
     List<PlacementSummaryDTO> placementForPost = placementService.getPlacementForPost(postId);

@@ -10,6 +10,9 @@ import org.springframework.context.annotation.Configuration;
 import org.springframework.stereotype.Component;
 import org.springframework.web.client.RestTemplate;
 
+/**
+ * Config class to define some KC settings for this service to communicate to other services
+ */
 @Configuration
 @Component
 public class TrustAdminConfig {

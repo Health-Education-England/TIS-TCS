@@ -144,6 +144,13 @@ public class ExceptionTranslator {
     return processFieldErrors(fieldErrors);
   }
 
+  /**
+   * Handler for an exception thrown at the service level, that checks if the current user is authorised to do a
+   * certain action
+   *
+   * @param ex
+   * @return
+   */
   @ExceptionHandler(AccessUnauthorisedException.class)
   @ResponseStatus(HttpStatus.UNAUTHORIZED)
   @ResponseBody

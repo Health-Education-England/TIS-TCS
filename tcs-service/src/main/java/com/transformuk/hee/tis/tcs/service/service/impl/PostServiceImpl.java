@@ -640,18 +640,18 @@ public class PostServiceImpl implements PostService {
   }
 
   @Override
-  public void canLoggedInUserViewOrAmend(Long personId) {
+  public void canLoggedInUserViewOrAmend(Long postId) {
     if (permissionService.isUserTrustAdmin()) {
       Set<Long> userTrustIds = permissionService.getUsersTrustIds();
 
-      Optional<Post> optionalPost = postRepository.findPostWithTrustsById(personId);
+      Optional<Post> optionalPost = postRepository.findPostWithTrustsById(postId);
       if (optionalPost.isPresent()) {
         Set<PostTrust> associatedTrusts = optionalPost.get().getAssociatedTrusts();
         if (!org.springframework.util.CollectionUtils.isEmpty(associatedTrusts)) {
           Set<Long> postTrustIds = associatedTrusts.stream().map(PostTrust::getTrustId).collect(Collectors.toSet());
           boolean noCommonElements = Collections.disjoint(postTrustIds, userTrustIds);
           if (noCommonElements)
-            throw new AccessUnauthorisedException("You cannot view or modify Post with id: " + personId);
+            throw new AccessUnauthorisedException("You cannot view or modify Post with id: " + postId);
         }
       }
     }
