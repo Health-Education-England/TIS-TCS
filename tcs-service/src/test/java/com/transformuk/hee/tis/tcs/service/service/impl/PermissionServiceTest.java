@@ -73,8 +73,6 @@ public class PermissionServiceTest {
     boolean result2 = testObj.isUserTrustAdmin();
 
     Assert.assertFalse(result2);
-
-
   }
 
 }
