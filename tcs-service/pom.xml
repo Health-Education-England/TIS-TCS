@@ -12,7 +12,7 @@
 
   <groupId>com.transformuk.hee.tis</groupId>
   <artifactId>tcs-service</artifactId>
-  <version>3.7.4</version>
+  <version>3.7.5</version>
   <packaging>war</packaging>
   <name>tcs-service</name>
 
@@ -416,6 +416,12 @@
       <groupId>com.transformuk.hee</groupId>
       <artifactId>file-storage</artifactId>
       <version>2.1.5</version>
+      <exclusions>
+        <exclusion>
+          <groupId>com.sun.jersey</groupId>
+          <artifactId>jersey-core</artifactId>
+        </exclusion>
+      </exclusions>
     </dependency>
 
     <dependency>
