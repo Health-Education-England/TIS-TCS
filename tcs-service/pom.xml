@@ -12,7 +12,7 @@
 
   <groupId>com.transformuk.hee.tis</groupId>
   <artifactId>tcs-service</artifactId>
-  <version>3.7.5</version>
+  <version>3.7.6</version>
   <packaging>war</packaging>
   <name>tcs-service</name>
 
@@ -433,6 +433,11 @@
       <groupId>net.javacrumbs.shedlock</groupId>
       <artifactId>shedlock-provider-jdbc-template</artifactId>
       <version>0.18.2</version>
+    </dependency>
+    <dependency>
+      <groupId>org.jboss.resteasy</groupId>
+      <artifactId>resteasy-client</artifactId>
+      <version>3.0.14.Final</version>
     </dependency>
   </dependencies>
   <build>
