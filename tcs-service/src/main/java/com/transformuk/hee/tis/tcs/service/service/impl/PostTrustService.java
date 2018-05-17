@@ -33,6 +33,8 @@ public class PostTrustService extends TrustAdminSyncJobTemplate<PostTrust> {
 
   private static final Logger LOG = LoggerFactory.getLogger(PostTrustService.class);
   private static final int PAGE_SIZE = 5000;
+  private static final int FIFTEEN_MIN = 15 * 60 * 1000;
+
   @Autowired
   private PostTrustRepository postTrustRepository;
   @Autowired
@@ -45,8 +47,8 @@ public class PostTrustService extends TrustAdminSyncJobTemplate<PostTrust> {
   @Value("${reference.service.url}")
   private String serviceUrl;
 
-  @Scheduled(cron = "0 30 0 * * *")
-  @SchedulerLock(name = "postTrustScheduledTask")
+  @Scheduled(cron = "0 0/1 0 * * *")
+  @SchedulerLock(name = "postTrustScheduledTask", lockAtLeastFor = FIFTEEN_MIN, lockAtMostFor = FIFTEEN_MIN)
   @ManagedOperation(description = "Run full sync of the PostTrust table")
   public void runPostTrustFullSync() {
     runSyncJob();

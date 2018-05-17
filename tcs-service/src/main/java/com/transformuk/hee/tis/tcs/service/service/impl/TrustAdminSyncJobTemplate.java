@@ -73,9 +73,8 @@ public abstract class TrustAdminSyncJobTemplate<ENTITY> {
         .collect(Collectors.toSet());
 
     if (CollectionUtils.isNotEmpty(siteIds)) {
-      LOG.debug("requesting [{}] site records", siteIds.size());
+      LOG.info("requesting [{}] site records", siteIds.size());
       List<SiteDTO> sitesIdIn = findSitesIdIn(siteIds);
-      LOG.debug("got all site records");
       sitesIdIn.forEach(s -> siteIdToSiteDTO.put(s.getId(), s));
     }
   }
@@ -107,54 +106,59 @@ public abstract class TrustAdminSyncJobTemplate<ENTITY> {
   }
 
   private void run() {
-    LOG.info("Sync started");
-    mainStopWatch = Stopwatch.createStarted();
-    Stopwatch stopwatch = Stopwatch.createStarted();
+    try {
+      LOG.info("Sync started");
+      mainStopWatch = Stopwatch.createStarted();
+      Stopwatch stopwatch = Stopwatch.createStarted();
 
-    int skipped = 0, totalRecords = 0;
-    long lastEntityId = 0;
-    long lastSiteId = 0;
-    boolean hasMoreResults = true;
+      int skipped = 0, totalRecords = 0;
+      long lastEntityId = 0;
+      long lastSiteId = 0;
+      boolean hasMoreResults = true;
 
-    LOG.debug("deleting all data");
-    deleteData();
-    LOG.debug("deleted all data {}", stopwatch.toString());
-    stopwatch.reset().start();
-
-    Set<ENTITY> dataToSave = Sets.newHashSet();
-    Map<Long, SiteDTO> siteIdToSiteCache = Maps.newHashMap();
-
-    while (hasMoreResults) {
-
-      EntityManager entityManager = getEntityManagerFactory().createEntityManager();
-      EntityTransaction transaction = entityManager.getTransaction();
-      transaction.begin();
-
-      List<EntityData> collectedData = collectData(getPageSize(), lastEntityId, lastSiteId, entityManager);
-      hasMoreResults = collectedData.size() > 0;
-      LOG.debug("Time taken to read chunk : [{}]", stopwatch.toString());
-
-      if (CollectionUtils.isNotEmpty(collectedData)) {
-        lastEntityId = collectedData.get(collectedData.size() - 1).getEntityId();
-        lastSiteId = collectedData.get(collectedData.size() - 1).getSiteId();
-        totalRecords += collectedData.size();
-        getSiteAndTrustReferenceData(siteIdToSiteCache, collectedData);
-        skipped = convertData(skipped, dataToSave, siteIdToSiteCache, collectedData, entityManager);
-      }
-
+      LOG.info("deleting all data");
+      deleteData();
+      LOG.info("deleted all data {}", stopwatch.toString());
       stopwatch.reset().start();
-      dataToSave.forEach(entityManager::persist);
-      entityManager.flush();
-      dataToSave.clear();
 
-      transaction.commit();
-      entityManager.close();
-      LOG.debug("Time taken to save chunk : [{}]", stopwatch.toString());
+      Set<ENTITY> dataToSave = Sets.newHashSet();
+      Map<Long, SiteDTO> siteIdToSiteCache = Maps.newHashMap();
+
+      while (hasMoreResults) {
+
+        EntityManager entityManager = getEntityManagerFactory().createEntityManager();
+        EntityTransaction transaction = entityManager.getTransaction();
+        transaction.begin();
+
+        List<EntityData> collectedData = collectData(getPageSize(), lastEntityId, lastSiteId, entityManager);
+        hasMoreResults = collectedData.size() > 0;
+        LOG.info("Time taken to read chunk : [{}]", stopwatch.toString());
+
+        if (CollectionUtils.isNotEmpty(collectedData)) {
+          lastEntityId = collectedData.get(collectedData.size() - 1).getEntityId();
+          lastSiteId = collectedData.get(collectedData.size() - 1).getSiteId();
+          totalRecords += collectedData.size();
+          getSiteAndTrustReferenceData(siteIdToSiteCache, collectedData);
+          skipped = convertData(skipped, dataToSave, siteIdToSiteCache, collectedData, entityManager);
+        }
+
+        stopwatch.reset().start();
+        dataToSave.forEach(entityManager::persist);
+        entityManager.flush();
+        dataToSave.clear();
+
+        transaction.commit();
+        entityManager.close();
+        LOG.info("Time taken to save chunk : [{}]", stopwatch.toString());
+      }
+      stopwatch.reset().start();
+      LOG.info("Sync job finished. Total time taken {} for processing [{}] records", mainStopWatch.stop().toString(), totalRecords);
+      LOG.info("Skipped records {}", skipped);
+    } catch(Exception e) {
+      LOG.error("An error occurred while running the scheduled job", e);
+    } finally {
+      mainStopWatch = null;
     }
-    stopwatch.reset().start();
-    LOG.info("Sync job finished. Total time taken {} for processing [{}] records", mainStopWatch.stop().toString(), totalRecords);
-    LOG.info("Skipped records {}", skipped);
-    mainStopWatch = null;
   }
 
 

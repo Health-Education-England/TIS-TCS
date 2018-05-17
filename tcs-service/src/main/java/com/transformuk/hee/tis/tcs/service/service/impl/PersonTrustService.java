@@ -33,6 +33,7 @@ public class PersonTrustService extends TrustAdminSyncJobTemplate<PersonTrust> {
 
   private static final Logger LOG = LoggerFactory.getLogger(PersonTrustService.class);
   private static final int PAGE_SIZE = 5000;
+  private static final int FIFTEEN_MIN = 15 * 60 * 1000;
 
   @Autowired
   private PersonTrustRepository personTrustRepository;
@@ -48,7 +49,7 @@ public class PersonTrustService extends TrustAdminSyncJobTemplate<PersonTrust> {
    * The scheduled job method that links a person to a trust
    */
   @Scheduled(cron = "0 0 0 * * *") //run every day at 12am
-  @SchedulerLock(name = "personTrustScheduledTask")
+  @SchedulerLock(name = "personTrustScheduledTask", lockAtLeastFor = FIFTEEN_MIN, lockAtMostFor = FIFTEEN_MIN)
   @ManagedOperation(description = "Run full sync of the PersonTrust table")
   public void runPersonTrustFullSync() {
     runSyncJob();
@@ -113,7 +114,7 @@ public class PersonTrustService extends TrustAdminSyncJobTemplate<PersonTrust> {
    * @return
    */
   protected List<EntityData> collectData(int pageSize, long lastPersonId, long lastSiteId, EntityManager entityManager) {
-    LOG.debug("Querying with lastPersonId: [{}] and lastSiteId: [{}]", lastPersonId, lastSiteId);
+    LOG.info("Querying with lastPersonId: [{}] and lastSiteId: [{}]", lastPersonId, lastSiteId);
     Query query = entityManager.createNativeQuery("SELECT distinct p.id, pl.siteId " +
         "FROM Person p " +
         "LEFT JOIN Placement pl " +
