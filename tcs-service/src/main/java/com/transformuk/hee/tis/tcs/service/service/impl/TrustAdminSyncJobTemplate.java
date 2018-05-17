@@ -4,6 +4,7 @@ import com.google.common.base.Stopwatch;
 import com.google.common.collect.Maps;
 import com.google.common.collect.Sets;
 import com.transformuk.hee.tis.reference.api.dto.SiteDTO;
+import com.transformuk.hee.tis.tcs.service.command.FindSitesInCommand;
 import org.apache.commons.collections4.CollectionUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
@@ -90,21 +91,7 @@ public abstract class TrustAdminSyncJobTemplate<ENTITY> {
    * @return
    */
   private List<SiteDTO> findSitesIdIn(Set<Long> ids) {
-    String url = getServiceUrl();
-    String joinedIds = StringUtils.join(ids, ",");
-    UriComponentsBuilder uriBuilder = UriComponentsBuilder.fromHttpUrl(url)
-        .queryParam("ids", joinedIds);
-    try {
-      ResponseEntity<List<SiteDTO>> responseEntity = getTrustAdminEnabledRestTemplate().
-          exchange(uriBuilder.build().encode().toUri(), HttpMethod.GET, null,
-              new ParameterizedTypeReference<List<SiteDTO>>() {
-              });
-      return responseEntity.getBody();
-    } catch (Exception e) {
-      LOG.error("Exception during find sites id in for ids [{}], returning empty list. Here's the error message {}",
-          joinedIds, e.getMessage());
-      return Collections.EMPTY_LIST;
-    }
+    return new FindSitesInCommand(getTrustAdminEnabledRestTemplate(), getServiceUrl(), ids).execute();
   }
 
   private void run() {
