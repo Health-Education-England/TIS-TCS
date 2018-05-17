@@ -44,11 +44,13 @@ public abstract class TrustAdminSyncJobTemplate<ENTITY> {
 
   protected void runSyncJob() {
     if (mainStopWatch != null) {
-      LOG.info("Sync job already running, exiting this execution");
+      LOG.info("Sync job [{}] already running, exiting this execution", getJobName());
       return;
     }
     CompletableFuture.runAsync(this::run);
   }
+
+  protected abstract String getJobName();
 
   protected abstract int getPageSize();
 
@@ -107,7 +109,7 @@ public abstract class TrustAdminSyncJobTemplate<ENTITY> {
 
   private void run() {
     try {
-      LOG.info("Sync started");
+      LOG.info("Sync [{}] started", getJobName());
       mainStopWatch = Stopwatch.createStarted();
       Stopwatch stopwatch = Stopwatch.createStarted();
 
@@ -152,9 +154,10 @@ public abstract class TrustAdminSyncJobTemplate<ENTITY> {
         LOG.info("Time taken to save chunk : [{}]", stopwatch.toString());
       }
       stopwatch.reset().start();
-      LOG.info("Sync job finished. Total time taken {} for processing [{}] records", mainStopWatch.stop().toString(), totalRecords);
+      LOG.info("Sync job [{}] finished. Total time taken {} for processing [{}] records", getJobName(),
+          mainStopWatch.stop().toString(), totalRecords);
       LOG.info("Skipped records {}", skipped);
-    } catch(Exception e) {
+    } catch (Exception e) {
       LOG.error("An error occurred while running the scheduled job", e);
     } finally {
       mainStopWatch = null;

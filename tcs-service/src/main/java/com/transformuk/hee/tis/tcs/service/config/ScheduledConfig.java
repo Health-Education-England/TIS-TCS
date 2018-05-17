@@ -1,7 +1,7 @@
 package com.transformuk.hee.tis.tcs.service.config;
 
 import net.javacrumbs.shedlock.core.LockProvider;
-import net.javacrumbs.shedlock.provider.jdbc.JdbcLockProvider;
+import net.javacrumbs.shedlock.provider.jdbctemplate.JdbcTemplateLockProvider;
 import net.javacrumbs.shedlock.spring.ScheduledLockConfiguration;
 import net.javacrumbs.shedlock.spring.ScheduledLockConfigurationBuilder;
 import org.springframework.context.annotation.Bean;
@@ -24,6 +24,6 @@ public class ScheduledConfig {
 
   @Bean
   public LockProvider lockProvider(DataSource dataSource) {
-    return new JdbcLockProvider(dataSource);
+    return new JdbcTemplateLockProvider(dataSource);
   }
 }

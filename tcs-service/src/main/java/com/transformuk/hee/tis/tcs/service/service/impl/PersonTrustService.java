@@ -34,6 +34,7 @@ public class PersonTrustService extends TrustAdminSyncJobTemplate<PersonTrust> {
   private static final Logger LOG = LoggerFactory.getLogger(PersonTrustService.class);
   private static final int PAGE_SIZE = 5000;
   private static final int FIFTEEN_MIN = 15 * 60 * 1000;
+  public static final String JOB_NAME = "PersonTrustSync";
 
   @Autowired
   private PersonTrustRepository personTrustRepository;
@@ -58,6 +59,11 @@ public class PersonTrustService extends TrustAdminSyncJobTemplate<PersonTrust> {
   @Override
   protected int getPageSize() {
     return PAGE_SIZE;
+  }
+
+  @Override
+  protected String getJobName() {
+    return JOB_NAME;
   }
 
   @Override
