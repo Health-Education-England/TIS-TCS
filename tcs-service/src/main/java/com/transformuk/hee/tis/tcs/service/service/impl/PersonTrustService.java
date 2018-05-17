@@ -93,7 +93,7 @@ public class PersonTrustService extends TrustAdminSyncJobTemplate<PersonTrust> {
       for (EntityData ed : entityData) {
         if (ed != null) {
           SiteDTO siteDTO = siteIdToSiteDTO.get(ed.getSiteId());
-          if (ed.getEntityId() != null && siteDTO.getTrustId() != null) {
+          if (ed.getEntityId() != null && siteDTO != null && siteDTO.getTrustId() != null) {
             PersonTrust personTrust = new PersonTrust();
             Person person = entityManager.getReference(Person.class, ed.getEntityId());
             personTrust.setPerson(person);

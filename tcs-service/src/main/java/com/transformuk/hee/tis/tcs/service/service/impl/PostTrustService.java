@@ -91,7 +91,7 @@ public class PostTrustService extends TrustAdminSyncJobTemplate<PostTrust> {
                             List<EntityData> entityData, EntityManager entityManager) {
     for (EntityData ed : entityData) {
       SiteDTO siteDTO = siteIdToSiteDTO.get(ed.getSiteId());
-      if (ed.getEntityId() != null && siteDTO.getTrustId() != null) {
+      if (ed.getEntityId() != null && siteDTO != null && siteDTO.getTrustId() != null) {
         PostTrust postTrust = new PostTrust();
         Post post = new Post();
         post.setId(ed.getEntityId());
