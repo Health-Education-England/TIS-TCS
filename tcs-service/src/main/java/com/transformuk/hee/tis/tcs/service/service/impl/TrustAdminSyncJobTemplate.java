@@ -91,7 +91,8 @@ public abstract class TrustAdminSyncJobTemplate<ENTITY> {
    * @return
    */
   private List<SiteDTO> findSitesIdIn(Set<Long> ids) {
-    return new FindSitesInCommand(getTrustAdminEnabledRestTemplate(), getServiceUrl(), ids).execute();
+    String joinedIds = StringUtils.join(ids, ",");
+    return new FindSitesInCommand(getTrustAdminEnabledRestTemplate(), getServiceUrl(), joinedIds).execute();
   }
 
   private void run() {

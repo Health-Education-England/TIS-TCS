@@ -27,9 +27,9 @@ public class FindSitesInCommand extends HystrixCommand<List<SiteDTO>> {
 
   private RestTemplate trustAdminRestTemplate;
   private String urlEndpoint;
-  private Set<Long> siteIds;
+  private String joinedIds;
 
-  public FindSitesInCommand(RestTemplate trustAdminRestTemplate, String urlEndpoint, Set<Long> siteIds) {
+  public FindSitesInCommand(RestTemplate trustAdminRestTemplate, String urlEndpoint, String joinedIds) {
     super(Setter.withGroupKey(HystrixCommandGroupKey.Factory.asKey(GROUP_KEY))
         .andCommandKey(HystrixCommandKey.Factory.asKey(COMMAND_KEY))
         .andCommandPropertiesDefaults(
@@ -38,7 +38,7 @@ public class FindSitesInCommand extends HystrixCommand<List<SiteDTO>> {
     );
     this.trustAdminRestTemplate = trustAdminRestTemplate;
     this.urlEndpoint = urlEndpoint;
-    this.siteIds = siteIds;
+    this.joinedIds = joinedIds;
   }
 
   @Override
@@ -50,10 +50,8 @@ public class FindSitesInCommand extends HystrixCommand<List<SiteDTO>> {
   @Override
   protected List<SiteDTO> run() throws Exception {
     LOG.info("Attempting to call reference service with: [{}]", urlEndpoint);
-    String joinedIds = StringUtils.join(siteIds, ",");
     UriComponentsBuilder uriBuilder = UriComponentsBuilder.fromHttpUrl(urlEndpoint)
         .queryParam("ids", joinedIds);
-
 
     ResponseEntity<List<SiteDTO>> responseEntity = trustAdminRestTemplate.
         exchange(uriBuilder.build().encode().toUri(), HttpMethod.GET, null,
