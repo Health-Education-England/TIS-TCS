@@ -23,8 +23,7 @@ GROUP_CONCAT(surnames SEPARATOR ', ') surnames, GROUP_CONCAT(forenames SEPARATOR
     p.`status`,
     p.`owner`,
     p.`intrepidId`,
-    c.surname surnames, c.forenames forenames,
-    pt.trustId
+    c.surname surnames, c.forenames forenames
     FROM `Post` p
     LEFT JOIN `PostGrade` pg on p.`id` = pg.`postId` AND pg.`postGradeType` = 'APPROVED'
     LEFT JOIN `PostSpecialty` ps on p.`id` = ps.`postId` AND ps.`postSpecialtyType` = 'PRIMARY'
