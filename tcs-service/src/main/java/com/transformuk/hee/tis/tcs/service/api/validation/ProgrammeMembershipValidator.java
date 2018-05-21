@@ -159,8 +159,10 @@ public class ProgrammeMembershipValidator {
     List<FieldError> fieldErrors = new ArrayList<>();
     // then check the rotation
     if (StringUtils.isNotEmpty(programmeMembershipDTO.getRotation())) {
-        if (!rotationService.rotationExists(programmeMembershipDTO.getRotation())) {
-            fieldErrors.add(new FieldError(PROGRAMME_MEMBERSHIP_DTO_NAME, "rotation", "Rotation with name %s does not exist"));
+        if (!rotationService.rotationExists(programmeMembershipDTO.getRotation(), programmeMembershipDTO.getProgrammeId())) {
+            fieldErrors.add(new FieldError(PROGRAMME_MEMBERSHIP_DTO_NAME, "rotation",
+                String.format("Rotation with name (%1$s) does not exist for programmeId (%2$s)",
+                    programmeMembershipDTO.getRotation(), programmeMembershipDTO.getProgrammeId())));
         }
     }
     return fieldErrors;

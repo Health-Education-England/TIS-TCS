@@ -203,7 +203,7 @@ public class ProgrammeMembershipResourceIntTest {
     programme = ProgrammeResourceIntTest.createEntity();
     curriculum = CurriculumResourceIntTest.createCurriculumEntity();
     programmeMembership = createEntity(em);
-    rotation = new Rotation().name("test").status(Status.CURRENT).programmeId(programme.getId());
+    rotation = new Rotation().name("test").status(Status.CURRENT);
   }
 
   @Test
@@ -213,6 +213,7 @@ public class ProgrammeMembershipResourceIntTest {
     curriculumRepository.saveAndFlush(curriculum);
     programme.setCurricula(Sets.newHashSet(Lists.newArrayList(curriculum)));
     programmeRepository.saveAndFlush(programme);
+    rotation.setProgrammeId(programme.getId());
     rotationRepository.saveAndFlush(rotation);
     int databaseSizeBeforeCreate = programmeMembershipRepository.findAll().size();
 
@@ -496,6 +497,7 @@ public class ProgrammeMembershipResourceIntTest {
     programmeMembership.setProgrammeId(programme.getId());
     programmeMembership.setCurriculumId(programme.getCurricula().iterator().next().getId());
     programmeMembershipRepository.saveAndFlush(programmeMembership);
+    rotation.setProgrammeId(programme.getId());
     rotationRepository.saveAndFlush(rotation);
     int databaseSizeBeforeUpdate = programmeMembershipRepository.findAll().size();
 

@@ -130,8 +130,8 @@ public class RotationServiceImpl implements RotationService {
     
     @Override
     @Transactional(readOnly = true)
-    public boolean rotationExists(String value) {
-        return rotationRepository.findByName(value).isPresent();
+    public boolean rotationExists(String rotationName, Long programmeId) {
+        return rotationRepository.findByNameAndProgrammeId(rotationName, programmeId).isPresent();
     }
     
     /**
