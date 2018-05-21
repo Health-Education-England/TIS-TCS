@@ -24,6 +24,7 @@ class ProgrammeMembershipValidatorSpec extends Specification {
 
             PersonDTO person = new PersonDTO(id: 1L)
             def dto = new ProgrammeMembershipDTO(person: person, rotation: "rotation")
+            dto.setCurriculumMemberships(new ArrayList<>())
 
 
         when:
@@ -46,6 +47,7 @@ class ProgrammeMembershipValidatorSpec extends Specification {
 
             PersonDTO person = new PersonDTO(id: 1L)
             def dto = new ProgrammeMembershipDTO(person: person, rotation: "rotation")
+            dto.setCurriculumMemberships(new ArrayList<>())
 
         when:
             pmv.validate(dto)
@@ -66,6 +68,7 @@ class ProgrammeMembershipValidatorSpec extends Specification {
 
             PersonDTO person = new PersonDTO(id: 1L)
             def dto = new ProgrammeMembershipDTO(person: person, rotation: name)
+            dto.setCurriculumMemberships(new ArrayList<>())
 
         when:
             pmv.validate(dto)
