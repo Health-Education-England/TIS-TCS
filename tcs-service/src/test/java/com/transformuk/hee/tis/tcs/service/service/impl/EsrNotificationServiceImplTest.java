@@ -79,7 +79,7 @@ public class EsrNotificationServiceImplTest {
     String deaneryBody = "EOE";
 
     when(placementRepository.findCurrentAndFuturePlacementsForPosts(asOfDate, asOfDate.plusDays(2), asOfDate.plusMonths(3), deaneryNumbers, placementTypes))
-        .thenReturn(asList(aPlacement(deaneryNumber, LocalDate.now(), LocalDate.now().plusMonths(1))));
+        .thenReturn(asList(aPlacement(deaneryNumber, LocalDate.now(), LocalDate.now().plusMonths(1), 1L)));
     List<EsrNotification> esrNotifications = savedNotifications();
     when(esrNotificationRepository.save(anyListOf(EsrNotification.class))).thenReturn(esrNotifications);
     when(esrNotificationMapper.esrNotificationsToPlacementDetailDTOs(esrNotifications)).thenReturn(aNotificationDTO());
@@ -97,6 +97,122 @@ public class EsrNotificationServiceImplTest {
 
 
   @Test
+  public void testLoadFullNotificationMapsMatchingSiteCodeCurrentAndFuturePlacements() {
+
+    LocalDate asOfDate = LocalDate.now();
+    String deaneryNumber = "EOE/RGT00/021/FY1/010";
+    List<String> deaneryNumbers = asList(deaneryNumber, "dn-02");
+    String deaneryBody = "EOE";
+    List<EsrNotification> esrNotifications = savedNotifications();
+
+    when(placementRepository.findCurrentAndFuturePlacementsForPosts(asOfDate, asOfDate.plusDays(2), asOfDate.plusMonths(3), deaneryNumbers, placementTypes))
+        .thenReturn(aListOfSiteCodeMatchingCurrentAndFuturePlacements(deaneryNumber));
+    when(esrNotificationRepository.save(savedEsrNotificationsCaptor.capture())).thenReturn(esrNotifications);
+    when(esrNotificationMapper.esrNotificationsToPlacementDetailDTOs(esrNotifications)).thenReturn(aNotificationDTO());
+
+    List<EsrNotificationDTO> esrNotificationDTOS = testService.loadFullNotification(asOfDate, deaneryNumbers, deaneryBody);
+
+    List<EsrNotification> notifications = savedEsrNotificationsCaptor.getValue();
+    assertThat(notifications).isNotEmpty();
+    assertThat(notifications).hasSize(2);
+    assertThat(notifications.get(0).getDeaneryPostNumber()).isEqualTo(deaneryNumber);
+
+
+    assertThat(esrNotificationDTOS).isNotEmpty();
+    assertThat(esrNotificationDTOS.get(0).getDeaneryPostNumber()).isEqualTo(deaneryNumber);
+
+    verify(placementRepository).findCurrentAndFuturePlacementsForPosts(asOfDate, asOfDate.plusDays(2), asOfDate.plusMonths(3), deaneryNumbers, placementTypes);
+    verify(esrNotificationRepository).save(anyListOf(EsrNotification.class));
+    verify(esrNotificationMapper).esrNotificationsToPlacementDetailDTOs(esrNotifications);
+
+  }
+
+  @Test
+  public void testLoadFullNotificationMapsNonMatchingSiteCodeCurrentAndFuturePlacements() {
+
+    LocalDate asOfDate = LocalDate.now();
+    String deaneryNumber = "EOE/RGT00/021/FY1/010";
+    List<String> deaneryNumbers = asList(deaneryNumber, "dn-02");
+    String deaneryBody = "EOE";
+    List<EsrNotification> esrNotifications = savedNotifications();
+
+    when(placementRepository.findCurrentAndFuturePlacementsForPosts(asOfDate, asOfDate.plusDays(2), asOfDate.plusMonths(3), deaneryNumbers, placementTypes))
+        .thenReturn(aListOfSiteCodeNonMatchingCurrentAndFuturePlacements(deaneryNumber));
+    when(esrNotificationRepository.save(savedEsrNotificationsCaptor.capture())).thenReturn(esrNotifications);
+    when(esrNotificationMapper.esrNotificationsToPlacementDetailDTOs(esrNotifications)).thenReturn(aNotificationDTO());
+
+    List<EsrNotificationDTO> esrNotificationDTOS = testService.loadFullNotification(asOfDate, deaneryNumbers, deaneryBody);
+
+    List<EsrNotification> notifications = savedEsrNotificationsCaptor.getValue();
+    assertThat(notifications).isNotEmpty();
+    assertThat(notifications).hasSize(3);
+    assertThat(notifications.get(0).getDeaneryPostNumber()).isEqualTo(deaneryNumber);
+
+
+    assertThat(esrNotificationDTOS).isNotEmpty();
+    assertThat(esrNotificationDTOS.get(0).getDeaneryPostNumber()).isEqualTo(deaneryNumber);
+
+    verify(placementRepository).findCurrentAndFuturePlacementsForPosts(asOfDate, asOfDate.plusDays(2), asOfDate.plusMonths(3), deaneryNumbers, placementTypes);
+    verify(esrNotificationRepository).save(anyListOf(EsrNotification.class));
+    verify(esrNotificationMapper).esrNotificationsToPlacementDetailDTOs(esrNotifications);
+
+  }
+
+
+  private List<Placement> aListOfSiteCodeMatchingCurrentAndFuturePlacements(String deaneryNumber) {
+
+    String siteCode = "SITECODE-01";
+
+    Person currentTrainee = aTrainee("CT-FN", "CT-SN", "CT@xyz.com");
+    Person futureTrainee01 = aTrainee("FT01-FN", "FT01-SN", "FT01@xyz.com");
+    Person futureTrainee02 = aTrainee("FT02-FN", "FT02-SN", "FT02@xyz.com");
+
+    Placement currentPlacement = aPlacement(deaneryNumber, LocalDate.now().minusMonths(1), LocalDate.now().plusMonths(2), 1L);
+    currentPlacement.setTrainee(currentTrainee);
+    currentPlacement.setSiteCode(siteCode);
+
+    Placement futurePlacement01 = aPlacement(deaneryNumber, LocalDate.now().plusMonths(2), LocalDate.now().plusMonths(5), 2L);
+    futurePlacement01.setTrainee(futureTrainee01);
+    futurePlacement01.setSiteCode(siteCode);
+
+    Placement futurePlacement02 = aPlacement(deaneryNumber, LocalDate.now().plusMonths(1), LocalDate.now().plusMonths(4), 3L);
+    futurePlacement02.setTrainee(futureTrainee02);
+    futurePlacement02.setSiteCode(siteCode);
+
+    return asList(currentPlacement, futurePlacement01, futurePlacement02);
+  }
+
+
+  private List<Placement> aListOfSiteCodeNonMatchingCurrentAndFuturePlacements(String deaneryNumber) {
+
+    String siteCode01 = "SITECODE-01";
+    String siteCode02 = "SITECODE-02";
+
+    Person currentTrainee01 = aTrainee("CT01-FN", "CT01-SN", "CT01@xyz.com");
+    Person currentTrainee02 = aTrainee("CT02-FN", "CT02-SN", "CT02@xyz.com");
+    Person futureTrainee01 = aTrainee("FT01-FN", "FT01-SN", "FT01@xyz.com");
+    Person futureTrainee02 = aTrainee("FT02-FN", "FT02-SN", "FT02@xyz.com");
+
+    Placement currentPlacement01 = aPlacement(deaneryNumber, LocalDate.now().minusMonths(1), LocalDate.now().plusMonths(2), 1L);
+    currentPlacement01.setTrainee(currentTrainee01);
+    currentPlacement01.setSiteCode(siteCode01);
+
+    Placement currentPlacement02 = aPlacement(deaneryNumber, LocalDate.now().minusMonths(1), LocalDate.now().plusMonths(2), 2L);
+    currentPlacement02.setTrainee(currentTrainee02);
+    currentPlacement02.setSiteCode(siteCode01);
+
+    Placement futurePlacement01 = aPlacement(deaneryNumber, LocalDate.now().plusMonths(2), LocalDate.now().plusMonths(5), 3L);
+    futurePlacement01.setTrainee(futureTrainee01);
+    futurePlacement01.setSiteCode(siteCode01);
+
+    Placement futurePlacement02 = aPlacement(deaneryNumber, LocalDate.now().plusMonths(1), LocalDate.now().plusMonths(4), 4L);
+    futurePlacement02.setTrainee(futureTrainee02);
+    futurePlacement02.setSiteCode(siteCode02);
+
+    return asList(currentPlacement01, currentPlacement02, futurePlacement01, futurePlacement02);
+  }
+
+  @Test
   public void loadFullNotificationSetsTheManagingDeaneryCode() {
 
     LocalDate asOfDate = LocalDate.now();
@@ -104,8 +220,8 @@ public class EsrNotificationServiceImplTest {
     List<String> deaneryNumbers = asList(deaneryNumber, "EOE/RGT00/021/FY1/010");
     String deaneryBody = "EOE";
 
-    Placement currentPlacement = aPlacement(deaneryNumber, LocalDate.now(), LocalDate.now().plusMonths(1));
-    Placement futurePlacement = aPlacement(deaneryNumber, LocalDate.now().plusMonths(3), LocalDate.now().plusMonths(6));
+    Placement currentPlacement = aPlacement(deaneryNumber, LocalDate.now(), LocalDate.now().plusMonths(1), 1L);
+    Placement futurePlacement = aPlacement(deaneryNumber, LocalDate.now().plusMonths(3), LocalDate.now().plusMonths(6), 2L);
     when(placementRepository.findCurrentAndFuturePlacementsForPosts(asOfDate, asOfDate.plusDays(2), asOfDate.plusMonths(3), deaneryNumbers, placementTypes))
         .thenReturn(asList(currentPlacement, futurePlacement));
 
@@ -241,8 +357,8 @@ public class EsrNotificationServiceImplTest {
     String deaneryPostNumber = "EOE/RGT00/021/FY1/010";
     LocalDate today = LocalDate.now();
 
-    Placement currentPlacement = aPlacement(deaneryPostNumber, today.minusMonths(1), today.plusMonths(2));
-    Placement futurePlacement = aPlacement(deaneryPostNumber, today.plusMonths(1), today.plusMonths(3));
+    Placement currentPlacement = aPlacement(deaneryPostNumber, today.minusMonths(1), today.plusMonths(2), 1L);
+    Placement futurePlacement = aPlacement(deaneryPostNumber, today.plusMonths(1), today.plusMonths(3), 2L);
 
     when(placementRepository.findEarliestEligiblePlacementWithin3MonthsForEsrNotification(
         any(LocalDate.class), any(LocalDate.class), anyListOf(String.class)))
@@ -267,7 +383,7 @@ public class EsrNotificationServiceImplTest {
     String deaneryPostNumber = "EOE/RGT00/021/FY1/010";
     LocalDate today = LocalDate.now();
 
-    Placement futurePlacement = aPlacement(deaneryPostNumber, today.plusMonths(1), today.plusMonths(3));
+    Placement futurePlacement = aPlacement(deaneryPostNumber, today.plusMonths(1), today.plusMonths(3), 1L);
 
     when(placementRepository.findEarliestEligiblePlacementWithin3MonthsForEsrNotification(
         any(LocalDate.class), any(LocalDate.class), anyListOf(String.class)))
@@ -317,7 +433,7 @@ public class EsrNotificationServiceImplTest {
     Placement placement = new Placement();
     placement.setLocalPostNumber(deaneryPostNumber);
     placement.setPost(aPost(deaneryPostNumber));
-    placement.setTrainee(aTrainee());
+    placement.setTrainee(aTrainee("aTrainee-FN", "aTrainee-SN", "trainee@xyz.com"));
     placement.setPlacementWholeTimeEquivalent(1.0F);
     return placement;
   }
@@ -347,18 +463,18 @@ public class EsrNotificationServiceImplTest {
   }
 
   private List<Placement> aListOfCurrentAndFuturePlacements(String deaneryNumber) {
-    Placement currentPlacement = aPlacement(deaneryNumber, LocalDate.now(), LocalDate.now().plusMonths(1));
+    Placement currentPlacement = aPlacement(deaneryNumber, LocalDate.now(), LocalDate.now().plusMonths(1), 1L);
     return asList(currentPlacement);
   }
 
-  private Placement aPlacement(String deaneryNumber, LocalDate from, LocalDate to) {
+  private Placement aPlacement(String deaneryNumber, LocalDate from, LocalDate to, long id) {
     Placement placement = new Placement();
-    placement.setId(1L);
+    placement.setId(id);
     placement.setDateFrom(from);
     placement.setDateTo(to);
     placement.setPlacementWholeTimeEquivalent(1.0F);
 //    placement.setLocalPostNumber("EOE/RGT00/021/FY1/010");
-    placement.setTrainee(aTrainee());
+    placement.setTrainee(aTrainee("aTrainee-FN", "aTrainee-SN", "trainee@xyz.com"));
     placement.setPost(aPost(deaneryNumber));
     placement.setSiteCode("RGT00");
     return placement;
@@ -371,20 +487,20 @@ public class EsrNotificationServiceImplTest {
     return post;
   }
 
-  private Person aTrainee() {
+  private Person aTrainee(String forename, String surname, String email) {
 
     Person person = new Person();
-    person.setContactDetails(aContactDetails());
+    person.setContactDetails(aContactDetails(forename, surname, email));
     return person;
   }
 
-  private ContactDetails aContactDetails() {
+  private ContactDetails aContactDetails(String forename, String surname, String email) {
 
     ContactDetails contactDetails = new ContactDetails();
     contactDetails.setId(1L);
-    contactDetails.setLegalForenames("aTrainee-FN");
-    contactDetails.setLegalSurname("aTrainee-SN");
-    contactDetails.setEmail("trainee@xyz.com");
+    contactDetails.setLegalForenames(forename);
+    contactDetails.setLegalSurname(surname);
+    contactDetails.setEmail(email);
     return contactDetails;
   }
 

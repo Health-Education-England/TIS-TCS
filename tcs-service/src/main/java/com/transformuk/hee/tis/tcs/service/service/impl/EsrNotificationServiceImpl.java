@@ -302,7 +302,9 @@ public class EsrNotificationServiceImpl implements EsrNotificationService {
       LOG.info("Placement Delete: Identified {} current Placements for post {} as of date {}", currentPlacements.size(), nationalPostNumber, asOfDate);
     }
     if (CollectionUtils.isNotEmpty(futurePlacements)) {
-      Optional<Placement> matchedFuturePlacements = futurePlacements.stream().filter(placement -> placement.getSiteCode() != null && placement.getSiteCode().equalsIgnoreCase(placementToDelete.getSiteCode())).findFirst();
+      Optional<Placement> matchedFuturePlacements = futurePlacements.stream()
+          .filter(placement -> !placement.getId().equals(placementToDelete.getId()))
+          .filter(placement -> placement.getSiteCode() != null && placement.getSiteCode().equalsIgnoreCase(placementToDelete.getSiteCode())).findFirst();
       futurePlacement = matchedFuturePlacements.isPresent()  ? matchedFuturePlacements.get() : futurePlacements.get(0);
       LOG.info("Placement Delete: Identified {} future Placements for post {} as of date {}", futurePlacements.size(), nationalPostNumber, asOfDate);
     }

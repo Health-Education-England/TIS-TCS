@@ -759,6 +759,7 @@ public class PlacementResourceIntTest {
         final LocalDate tomorrow = LocalDate.now().plus(1, DAYS);
         placement.setDateFrom(tomorrow);
         placement.setLocalPostNumber(localPostNumber);
+        placement.setPlacementType("In Post");
         placementDetailsRepository.saveAndFlush(placement);
 
         final Post post = postRepository.findOne(placement.getPostId());
