@@ -43,7 +43,7 @@ public class EsrNotificationResource {
   @PreAuthorize("hasAuthority('tcs:view:entities')")
   public ResponseEntity<List<EsrNotificationDTO>> loadNextTraineeToCurrentTraineeNotification(
       @RequestParam @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate fromDate) {
-    LOG.debug("REST request to load Next to current Trainee Notification for effective date : {}", fromDate);
+    LOG.info("REST request to load Next to current Trainee Notification for effective date : {}", fromDate);
     List<EsrNotificationDTO> esrNotificationDTOS = esrNotificationService.loadNextTraineeToCurrentTraineeNotification(fromDate);
     return ResponseEntity.ok().body(esrNotificationDTOS);
   }
@@ -59,7 +59,7 @@ public class EsrNotificationResource {
   @PreAuthorize("hasAuthority('tcs:view:entities')")
   public ResponseEntity<List<EsrNotificationDTO>> findEarliestEligiblePlacementWithin3MonthsForEsrNotification(
       @RequestParam @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate fromDate) {
-    LOG.debug("REST request to load earliest eligible Trainee Notification for effective date : {}", fromDate);
+    LOG.info("REST request to load earliest eligible Trainee Notification for effective date : {}", fromDate);
     List<EsrNotificationDTO> esrNotificationDTOS = esrNotificationService.loadEarliestATraineeIsEligibleAsFuturePlacementNotification(fromDate);
     return ResponseEntity.ok().body(esrNotificationDTOS);
   }
@@ -75,7 +75,7 @@ public class EsrNotificationResource {
   @PreAuthorize("hasAuthority('tcs:view:entities')")
   public ResponseEntity<List<EsrNotificationDTO>> loadVacantPostsForNotification(
       @RequestParam @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate asOfDate) {
-    LOG.debug("REST request to load Vacant Posts as of date : {}", asOfDate);
+    LOG.info("REST request to load Vacant Posts as of date : {}", asOfDate);
     List<EsrNotificationDTO> esrNotificationDTOS = esrNotificationService.loadVacantPostsForNotification(asOfDate);
     return ResponseEntity.ok().body(esrNotificationDTOS);
   }
@@ -93,7 +93,7 @@ public class EsrNotificationResource {
       @RequestParam(required = false) String deaneryBody,
       @RequestBody List<String> deaneryNumbers,
       @RequestParam @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate asOfDate) {
-    LOG.debug("REST request to load full notification recrods as of date : {}", asOfDate);
+    LOG.info("REST request to load full notification records as of date : {}", asOfDate);
     List<EsrNotificationDTO> esrNotificationDTOS = esrNotificationService.loadFullNotification(asOfDate, deaneryNumbers, deaneryBody);
     return ResponseEntity.ok().body(esrNotificationDTOS);
   }
@@ -112,7 +112,7 @@ public class EsrNotificationResource {
       @RequestParam(required = false) @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate fromDate
       ) {
 
-    LOG.debug("REST request to get notifications for deanery {} from date : {}", deanery, fromDate);
+    LOG.info("REST request to get notifications for deanery {} from date : {}", deanery, fromDate);
     List<EsrNotificationDTO> esrNotificationDTOS;
     if (fromDate == null) {
       esrNotificationDTOS = esrNotificationService.fetchLatestNotifications(deanery);
