@@ -1,11 +1,9 @@
 package com.transformuk.hee.tis.tcs.service.service.impl;
 
-import com.transformuk.hee.tis.tcs.api.dto.CurriculumDTO;
-import com.transformuk.hee.tis.tcs.api.dto.CurriculumMembershipDTO;
-import com.transformuk.hee.tis.tcs.api.dto.ProgrammeMembershipCurriculaDTO;
-import com.transformuk.hee.tis.tcs.api.dto.ProgrammeMembershipDTO;
+import com.transformuk.hee.tis.tcs.api.dto.*;
 import com.transformuk.hee.tis.tcs.service.model.Curriculum;
 import com.transformuk.hee.tis.tcs.service.model.ProgrammeMembership;
+import com.transformuk.hee.tis.tcs.service.model.TrainingNumber;
 import com.transformuk.hee.tis.tcs.service.repository.CurriculumRepository;
 import com.transformuk.hee.tis.tcs.service.repository.ProgrammeMembershipRepository;
 import com.transformuk.hee.tis.tcs.service.service.mapper.CurriculumMapper;
@@ -25,7 +23,6 @@ import java.util.Set;
 import static org.mockito.Matchers.any;
 import static org.mockito.Matchers.anyList;
 import static org.mockito.Matchers.anyLong;
-import static org.mockito.Matchers.anyString;
 import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
@@ -34,6 +31,8 @@ import static org.mockito.Mockito.when;
 public class ProgrammeMembershipServiceImplTest {
 
   private static final long TRAINEE_ID = 1L;
+  private static final String TRAINEE_NUMBER = "XXX/XXX/XXX";
+
   private static final long PROGRAMME_ID = 2L;
   private static final String PROGRAMME_NUMBER = "XXXXX";
 
@@ -53,6 +52,9 @@ public class ProgrammeMembershipServiceImplTest {
   private ProgrammeMembershipDTO programmeMembershipDTO1 = new ProgrammeMembershipDTO(), programmeMembershipDTO2 = new ProgrammeMembershipDTO();
   private Curriculum curriculum1 = new Curriculum(), curriculum2 = new Curriculum();
   private CurriculumDTO curriculumDTO1 = new CurriculumDTO(), curriculumDTO2 = new CurriculumDTO();
+  private TrainingNumber trainingNumber = new TrainingNumber();
+  private TrainingNumberDTO trainingNumberDTO = new TrainingNumberDTO();
+
 
 
   @Test(expected = NullPointerException.class)
@@ -103,20 +105,25 @@ public class ProgrammeMembershipServiceImplTest {
 
   @Test()
   public void findProgrammeMembershipsForTraineeAndProgramme() {
+    trainingNumber.setId(TRAINEE_ID);
+    trainingNumber.setTrainingNumber(TRAINEE_NUMBER);
+
     programmeMembership1.setProgrammeId(PROGRAMME_ID);
-    programmeMembership1.setTrainingNumberId(TRAINEE_ID);
+    programmeMembership1.setTrainingNumber(trainingNumber);
     programmeMembership1.setCurriculumId(5L);
 
     programmeMembership2.setProgrammeId(PROGRAMME_ID);
-    programmeMembership2.setTrainingNumberId(TRAINEE_ID);
+    programmeMembership2.setTrainingNumber(trainingNumber);
     programmeMembership2.setCurriculumId(6L);
 
+    trainingNumberDTO.setId(TRAINEE_ID);
+    trainingNumberDTO.setTrainingNumber(TRAINEE_NUMBER);
     programmeMembershipDTO1.setProgrammeId(PROGRAMME_ID);
-    programmeMembershipDTO1.setTrainingNumberId(TRAINEE_ID);
+    programmeMembershipDTO1.setTrainingNumber(trainingNumberDTO);
     programmeMembershipDTO1.setCurriculumMemberships(Lists.newArrayList());
 
     programmeMembershipDTO2.setProgrammeId(PROGRAMME_ID);
-    programmeMembershipDTO2.setTrainingNumberId(TRAINEE_ID);
+    programmeMembershipDTO2.setTrainingNumber(trainingNumberDTO);
     programmeMembershipDTO2.setCurriculumMemberships(Lists.newArrayList());
 
     CurriculumMembershipDTO curriculumMembershipDTO1 = new CurriculumMembershipDTO();
