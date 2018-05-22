@@ -5,11 +5,13 @@ import com.transformuk.hee.tis.tcs.api.dto.PersonDTO;
 import com.transformuk.hee.tis.tcs.service.model.Person;
 import com.transformuk.hee.tis.tcs.service.repository.PersonRepository;
 import org.apache.commons.lang3.StringUtils;
+import org.springframework.core.MethodParameter;
 import org.springframework.stereotype.Component;
 import org.springframework.validation.BeanPropertyBindingResult;
 import org.springframework.validation.FieldError;
 import org.springframework.web.bind.MethodArgumentNotValidException;
 
+import java.lang.reflect.Method;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -43,7 +45,8 @@ public class PersonValidator {
     if (!fieldErrors.isEmpty()) {
       BeanPropertyBindingResult bindingResult = new BeanPropertyBindingResult(personDTO, PERSON_DTO_NAME);
       fieldErrors.forEach(bindingResult::addError);
-      throw new MethodArgumentNotValidException(null, bindingResult);
+      Method method = this.getClass().getMethods()[0];
+      throw new MethodArgumentNotValidException(new MethodParameter(method, 0), bindingResult);
     }
   }
 
