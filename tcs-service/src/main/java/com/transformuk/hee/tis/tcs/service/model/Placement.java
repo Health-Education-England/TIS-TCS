@@ -67,6 +67,8 @@ public class Placement implements Serializable {
     private String trainingDescription;
     @Column(name = "localPostNumber")
     private String localPostNumber;
+    @OneToMany(mappedBy = "placement", cascade = CascadeType.ALL, fetch = FetchType.EAGER)
+    private Set<Comment> comments = new HashSet<>();
 
     public Long getId() {
         return id;
@@ -187,6 +189,10 @@ public class Placement implements Serializable {
     public void setGradeId(final Long gradeId) {
         this.gradeId = gradeId;
     }
+
+    public Set<Comment> getComments() { return comments; }
+
+    public void setComments(Set<Comment> comments) { this.comments = comments; }
 
     @Override
     public boolean equals(final Object o) {

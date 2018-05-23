@@ -4,10 +4,7 @@ import com.google.common.collect.Sets;
 import com.transformuk.hee.tis.reference.api.dto.GradeDTO;
 import com.transformuk.hee.tis.reference.api.dto.SiteDTO;
 import com.transformuk.hee.tis.reference.client.ReferenceService;
-import com.transformuk.hee.tis.tcs.api.dto.PersonLiteDTO;
-import com.transformuk.hee.tis.tcs.api.dto.PlacementDTO;
-import com.transformuk.hee.tis.tcs.api.dto.PlacementDetailsDTO;
-import com.transformuk.hee.tis.tcs.api.dto.PlacementSupervisorDTO;
+import com.transformuk.hee.tis.tcs.api.dto.*;
 import com.transformuk.hee.tis.tcs.service.Application;
 import com.transformuk.hee.tis.tcs.service.api.decorator.AsyncReferenceService;
 import com.transformuk.hee.tis.tcs.service.api.decorator.PersonBasicDetailsRepositoryAccessor;
@@ -23,15 +20,7 @@ import com.transformuk.hee.tis.tcs.service.model.PlacementSupervisor;
 import com.transformuk.hee.tis.tcs.service.model.PlacementSupervisorId;
 import com.transformuk.hee.tis.tcs.service.model.Post;
 import com.transformuk.hee.tis.tcs.service.model.Specialty;
-import com.transformuk.hee.tis.tcs.service.repository.ContactDetailsRepository;
-import com.transformuk.hee.tis.tcs.service.repository.EsrNotificationRepository;
-import com.transformuk.hee.tis.tcs.service.repository.PersonBasicDetailsRepository;
-import com.transformuk.hee.tis.tcs.service.repository.PersonRepository;
-import com.transformuk.hee.tis.tcs.service.repository.PlacementDetailsRepository;
-import com.transformuk.hee.tis.tcs.service.repository.PlacementRepository;
-import com.transformuk.hee.tis.tcs.service.repository.PlacementSupervisorRepository;
-import com.transformuk.hee.tis.tcs.service.repository.PostRepository;
-import com.transformuk.hee.tis.tcs.service.repository.SpecialtyRepository;
+import com.transformuk.hee.tis.tcs.service.repository.*;
 import com.transformuk.hee.tis.tcs.service.service.EsrNotificationService;
 import com.transformuk.hee.tis.tcs.service.service.PlacementService;
 import com.transformuk.hee.tis.tcs.service.service.mapper.PlacementDetailsMapper;
@@ -119,6 +108,9 @@ public class PlacementResourceIntTest {
     private static final Double DEFAULT_PLACEMENT_WHOLE_TIME_EQUIVALENT = 1D;
     private static final Double UPDATED_PLACEMENT_WHOLE_TIME_EQUIVALENT = 2D;
 
+    private static final String COMMENT = "Hello world!";
+
+
     @Autowired
     private PlacementDetailsRepository placementDetailsRepository;
     @Autowired
@@ -135,6 +127,8 @@ public class PlacementResourceIntTest {
     private PersonRepository personRepository;
     @Autowired
     private PlacementRepository placementRepository;
+    @Autowired
+    private CommentRepository commentRepository;
     @Autowired
     private EsrNotificationRepository esrNotificationRepository;
     @Autowired
@@ -542,6 +536,39 @@ public class PlacementResourceIntTest {
         // validate that no EsrNotification records are created in the database
         final List<EsrNotification> esrNotifications = esrNotificationRepository.findAll();
         assertThat(esrNotifications).hasSize(0);
+    }
+
+    @Test
+    @Transactional
+    public void updatePlacementWithNewComment() throws Exception {
+        // Initialize the database
+        placementDetailsRepository.saveAndFlush(placement);
+
+        final int databaseSizeBeforeUpdate = placementDetailsRepository.findAll().size();
+
+        // Update the placement
+        final PlacementDetails updatedPlacement = placementDetailsRepository.findOne(placement.getId());
+        updatedPlacement.setSiteCode(UPDATED_SITE);
+
+        final PlacementDetailsDTO placementDTO = placementDetailsMapper.placementDetailsToPlacementDetailsDTO(updatedPlacement);
+        final PlacementCommentDTO placementCommentDTO = new PlacementCommentDTO();
+        placementCommentDTO.setBody(COMMENT);
+        Set<PlacementCommentDTO> placementCommentDTOS = new HashSet<>();
+        placementCommentDTOS.add(placementCommentDTO);
+        placementDTO.setComments(placementCommentDTOS);
+
+        restPlacementMockMvc.perform(put("/api/placements")
+            .contentType(TestUtil.APPLICATION_JSON_UTF8)
+            .content(TestUtil.convertObjectToJsonBytes(placementDTO)))
+            .andExpect(status().isOk());
+
+        // Validate the Placement in the database
+        final List<PlacementDetails> placementList = placementDetailsRepository.findAll();
+        assertThat(placementList).hasSize(databaseSizeBeforeUpdate);
+        final PlacementDetails testPlacement = placementList.get(placementList.size() - 1);
+        assertThat(testPlacement.getSiteCode()).isEqualTo(UPDATED_SITE);
+
+        assertThat(commentRepository.findAll()).hasSize(1);
     }
 
     @Test

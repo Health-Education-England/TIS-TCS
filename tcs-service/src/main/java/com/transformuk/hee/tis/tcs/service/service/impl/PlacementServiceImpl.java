@@ -14,12 +14,14 @@ import com.transformuk.hee.tis.tcs.api.enumeration.TCSDateColumns;
 import com.transformuk.hee.tis.tcs.service.api.util.ColumnFilterUtil;
 import com.transformuk.hee.tis.tcs.service.exception.DateRangeColumnFilterException;
 import com.transformuk.hee.tis.tcs.service.model.ColumnFilter;
+import com.transformuk.hee.tis.tcs.service.model.Comment;
 import com.transformuk.hee.tis.tcs.service.model.EsrNotification;
 import com.transformuk.hee.tis.tcs.service.model.Placement;
 import com.transformuk.hee.tis.tcs.service.model.PlacementDetails;
 import com.transformuk.hee.tis.tcs.service.model.PlacementSpecialty;
 import com.transformuk.hee.tis.tcs.service.model.PlacementSupervisor;
 import com.transformuk.hee.tis.tcs.service.model.Specialty;
+import com.transformuk.hee.tis.tcs.service.repository.CommentRepository;
 import com.transformuk.hee.tis.tcs.service.repository.PersonRepository;
 import com.transformuk.hee.tis.tcs.service.repository.PersonRepositoryImpl;
 import com.transformuk.hee.tis.tcs.service.repository.PlacementDetailsRepository;
@@ -47,7 +49,6 @@ import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.domain.Specification;
 import org.springframework.data.jpa.domain.Specifications;
-import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.jdbc.core.RowMapper;
 import org.springframework.jdbc.core.namedparam.MapSqlParameterSource;
 import org.springframework.jdbc.core.namedparam.NamedParameterJdbcTemplate;
@@ -122,6 +123,8 @@ public class PlacementServiceImpl implements PlacementService {
 
     @Autowired
     private NamedParameterJdbcTemplate namedParameterJdbcTemplate;
+    @Autowired
+    private CommentRepository commentRepository;
 
     /**
      * Save a placement.
@@ -147,6 +150,7 @@ public class PlacementServiceImpl implements PlacementService {
     public PlacementDetailsDTO createDetails(final PlacementDetailsDTO placementDetailsDTO) {
         log.debug("Request to create Placement : {}", placementDetailsDTO);
         PlacementDetails placementDetails = placementDetailsMapper.placementDetailsDTOToPlacementDetails(placementDetailsDTO);
+        updateStoredCommentsWithChangesOrAdd(placementDetails);
         placementDetails = placementDetailsRepository.saveAndFlush(placementDetails);
 
         final Set<PlacementSpecialty> placementSpecialties = linkPlacementSpecialties(placementDetailsDTO, placementDetails);
@@ -159,7 +163,23 @@ public class PlacementServiceImpl implements PlacementService {
         return placementDetailsDTO1;
     }
 
-    @Override
+  private void updateStoredCommentsWithChangesOrAdd(PlacementDetails placementDetails) {
+      Set<Comment> commentsToPersist = new HashSet<>();
+      for(Comment comment : placementDetails.getComments()) {
+        if(comment.getId() != null) {
+          Comment commentSaved = commentRepository.findOne(comment.getId());
+          commentSaved.setBody(comment.getBody());
+          commentSaved.setPlacement(placementDetails);
+          commentsToPersist.add(commentSaved);
+        } else {
+          comment.setPlacement(placementDetails);
+          commentsToPersist.add(comment);
+        }
+      }
+      placementDetails.setComments(commentsToPersist);
+  }
+
+  @Override
   public boolean isEligibleForChangedDatesNotification(PlacementDetailsDTO updatedPlacementDetails, Placement existingPlacement) {
 
     if (existingPlacement != null && updatedPlacementDetails != null &&
