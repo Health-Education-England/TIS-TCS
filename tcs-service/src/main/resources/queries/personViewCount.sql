@@ -34,6 +34,7 @@ select count(1) from (
     left join PlacementSpecialty ps on ps.placementId = pl.id and ps.placementSpecialtyType = 'PRIMARY'
     left join Specialty s on s.id = ps.specialtyId
     left join PersonOwner lo on (lo.id = p.id)
+    TRUST_JOIN
     WHERECLAUSE
   ) as ot
 ) as ot2

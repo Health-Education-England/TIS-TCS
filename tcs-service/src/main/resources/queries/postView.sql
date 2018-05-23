@@ -34,7 +34,7 @@ GROUP_CONCAT(surnames SEPARATOR ', ') surnames, GROUP_CONCAT(forenames SEPARATOR
     LEFT JOIN `ContactDetails` c on pl.traineeId = c.id
     LEFT JOIN `ProgrammePost` pp on pp.postId = p.id
     LEFT JOIN `Programme` prg on prg.`id` = pp.`programmeId`
-    LEFT JOIN `PostTrust` pt on pt.`postId` = p.`id`
+ TRUST_JOIN
  WHERECLAUSE
  ORDERBYCLAUSE
 ) as ot

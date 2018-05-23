@@ -458,6 +458,7 @@ public class PostServiceImpl implements PostService {
     String whereClause = " where 1=1 ";
     if (permissionService.isUserTrustAdmin()) {
       whereClause += String.format("AND trustId in (%s) ", getLoggedInUsersAssociatedTrusts());
+      query = query.replaceAll("TRUST_JOIN", "  LEFT JOIN `PostTrust` pt on pt.`postId` = p.`id` ");
     }
     // Where condition
     query = query.replaceAll("WHERECLAUSE", whereClause);
@@ -502,6 +503,9 @@ public class PostServiceImpl implements PostService {
     int end = start + pageable.getPageSize() + 1;
 
     String query = sqlQuerySupplier.getQuery(SqlQuerySupplier.POST_VIEW);
+    if (permissionService.isUserTrustAdmin()) {
+      query = query.replaceAll("TRUST_JOIN", "  LEFT JOIN `PostTrust` pt on pt.`postId` = p.`id` ");
+    }
     query = query.replaceAll("WHERECLAUSE", whereClause);
     if (pageable.getSort() != null) {
       if (pageable.getSort().iterator().hasNext()) {
