@@ -17,8 +17,6 @@ import com.transformuk.hee.tis.tcs.service.api.decorator.PostViewDecorator;
 import com.transformuk.hee.tis.tcs.service.exception.AccessUnauthorisedException;
 import com.transformuk.hee.tis.tcs.service.model.ColumnFilter;
 import com.transformuk.hee.tis.tcs.service.model.EsrNotification;
-import com.transformuk.hee.tis.tcs.service.model.Person;
-import com.transformuk.hee.tis.tcs.service.model.PersonTrust;
 import com.transformuk.hee.tis.tcs.service.model.Placement;
 import com.transformuk.hee.tis.tcs.service.model.Post;
 import com.transformuk.hee.tis.tcs.service.model.PostGrade;
@@ -458,8 +456,8 @@ public class PostServiceImpl implements PostService {
     String whereClause = " where 1=1 ";
     if (permissionService.isUserTrustAdmin()) {
       whereClause += String.format("AND trustId in (%s) ", getLoggedInUsersAssociatedTrusts());
-      query = query.replaceAll("TRUST_JOIN", "  LEFT JOIN `PostTrust` pt on pt.`postId` = p.`id` ");
     }
+    query = query.replaceAll("TRUST_JOIN", permissionService.isUserTrustAdmin() ? "  LEFT JOIN `PostTrust` pt on pt.`postId` = p.`id` " : StringUtils.EMPTY);
     // Where condition
     query = query.replaceAll("WHERECLAUSE", whereClause);
 
@@ -503,9 +501,7 @@ public class PostServiceImpl implements PostService {
     int end = start + pageable.getPageSize() + 1;
 
     String query = sqlQuerySupplier.getQuery(SqlQuerySupplier.POST_VIEW);
-    if (permissionService.isUserTrustAdmin()) {
-      query = query.replaceAll("TRUST_JOIN", "  LEFT JOIN `PostTrust` pt on pt.`postId` = p.`id` ");
-    }
+    query = query.replaceAll("TRUST_JOIN", permissionService.isUserTrustAdmin() ? "  LEFT JOIN `PostTrust` pt on pt.`postId` = p.`id` " : StringUtils.EMPTY);
     query = query.replaceAll("WHERECLAUSE", whereClause);
     if (pageable.getSort() != null) {
       if (pageable.getSort().iterator().hasNext()) {

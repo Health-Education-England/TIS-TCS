@@ -224,8 +224,8 @@ public class PersonServiceImpl implements PersonService {
     String whereClause = " WHERE 1=1 ";
     if (permissionService.isUserTrustAdmin()) {
       whereClause += String.format("AND trustId in (%s) ", getLoggedInUsersAssociatedTrusts());
-      query = query.replaceAll("TRUST_JOIN", " left join PersonTrust pt on (pt.personId = p.id)");
     }
+    query = query.replaceAll("TRUST_JOIN", permissionService.isUserTrustAdmin() ? " left join PersonTrust pt on (pt.personId = p.id)" : StringUtils.EMPTY);
 
     query = query.replaceAll("WHERECLAUSE", whereClause);
     if (pageable.getSort() != null) {
@@ -307,10 +307,7 @@ public class PersonServiceImpl implements PersonService {
     final int end = pageable.getPageSize() + 1;
 
     String query = sqlQuerySupplier.getQuery(SqlQuerySupplier.PERSON_VIEW);
-
-    if (permissionService.isUserTrustAdmin()) {
-      query = query.replaceAll("TRUST_JOIN", " left join PersonTrust pt on (pt.personId = p.id)");
-    }
+    query = query.replaceAll("TRUST_JOIN", permissionService.isUserTrustAdmin() ? " left join PersonTrust pt on (pt.personId = p.id)" : StringUtils.EMPTY);
     query = query.replaceAll("WHERECLAUSE", whereClause);
     if (pageable.getSort() != null) {
       if (pageable.getSort().iterator().hasNext()) {
@@ -355,9 +352,7 @@ public class PersonServiceImpl implements PersonService {
     stopWatch.start();
     String countQuery = sqlQuerySupplier.getQuery(SqlQuerySupplier.PERSON_VIEW_COUNT);
     countQuery = countQuery.replaceAll("WHERECLAUSE", whereClause);
-    if (permissionService.isUserTrustAdmin()) {
-      countQuery = countQuery.replaceAll("TRUST_JOIN", " left join PersonTrust pt on (pt.personId = p.id)");
-    }
+    countQuery = countQuery.replaceAll("TRUST_JOIN", permissionService.isUserTrustAdmin() ? " left join PersonTrust pt on (pt.personId = p.id)" : StringUtils.EMPTY);
     final Integer personCount = jdbcTemplate.queryForObject(countQuery, Integer.class);
     stopWatch.stop();
     log.info("count query finished in: [{}]s", stopWatch.getTotalTimeSeconds());
