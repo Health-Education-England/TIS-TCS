@@ -3,18 +3,40 @@ package com.transformuk.hee.tis.tcs.service.service.impl;
 import com.google.common.collect.Lists;
 import com.google.common.collect.Maps;
 import com.google.common.collect.Sets;
-import com.transformuk.hee.tis.tcs.api.dto.*;
+import com.transformuk.hee.tis.tcs.api.dto.PlacementDTO;
+import com.transformuk.hee.tis.tcs.api.dto.PlacementDetailsDTO;
+import com.transformuk.hee.tis.tcs.api.dto.PlacementSpecialtyDTO;
+import com.transformuk.hee.tis.tcs.api.dto.PlacementSummaryDTO;
+import com.transformuk.hee.tis.tcs.api.dto.PlacementSupervisorDTO;
 import com.transformuk.hee.tis.tcs.api.enumeration.PlacementStatus;
 import com.transformuk.hee.tis.tcs.api.enumeration.PostSpecialtyType;
 import com.transformuk.hee.tis.tcs.api.enumeration.TCSDateColumns;
 import com.transformuk.hee.tis.tcs.service.api.util.ColumnFilterUtil;
 import com.transformuk.hee.tis.tcs.service.exception.DateRangeColumnFilterException;
-import com.transformuk.hee.tis.tcs.service.model.*;
-import com.transformuk.hee.tis.tcs.service.repository.*;
+import com.transformuk.hee.tis.tcs.service.model.ColumnFilter;
+import com.transformuk.hee.tis.tcs.service.model.EsrNotification;
+import com.transformuk.hee.tis.tcs.service.model.Placement;
+import com.transformuk.hee.tis.tcs.service.model.PlacementDetails;
+import com.transformuk.hee.tis.tcs.service.model.PlacementSpecialty;
+import com.transformuk.hee.tis.tcs.service.model.PlacementSupervisor;
+import com.transformuk.hee.tis.tcs.service.model.Specialty;
+import com.transformuk.hee.tis.tcs.service.repository.PersonRepository;
+import com.transformuk.hee.tis.tcs.service.repository.PersonRepositoryImpl;
+import com.transformuk.hee.tis.tcs.service.repository.PlacementDetailsRepository;
+import com.transformuk.hee.tis.tcs.service.repository.PlacementRepository;
+import com.transformuk.hee.tis.tcs.service.repository.PlacementSpecialtyRepository;
+import com.transformuk.hee.tis.tcs.service.repository.PlacementSupervisorRepository;
+import com.transformuk.hee.tis.tcs.service.repository.PlacementViewRepository;
+import com.transformuk.hee.tis.tcs.service.repository.SpecialtyRepository;
 import com.transformuk.hee.tis.tcs.service.service.EsrNotificationService;
 import com.transformuk.hee.tis.tcs.service.service.PlacementService;
 import com.transformuk.hee.tis.tcs.service.service.helper.SqlQuerySupplier;
-import com.transformuk.hee.tis.tcs.service.service.mapper.*;
+import com.transformuk.hee.tis.tcs.service.service.mapper.PersonLiteMapper;
+import com.transformuk.hee.tis.tcs.service.service.mapper.PlacementDetailsMapper;
+import com.transformuk.hee.tis.tcs.service.service.mapper.PlacementMapper;
+import com.transformuk.hee.tis.tcs.service.service.mapper.PlacementSpecialtyMapper;
+import com.transformuk.hee.tis.tcs.service.service.mapper.PlacementViewMapper;
+import com.transformuk.hee.tis.tcs.service.service.mapper.SpecialtyMapper;
 import org.apache.commons.collections4.CollectionUtils;
 import org.apache.commons.lang.StringUtils;
 import org.apache.commons.lang3.time.DateUtils;
@@ -37,7 +59,16 @@ import java.math.BigInteger;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.time.LocalDate;
-import java.util.*;
+import java.util.ArrayList;
+import java.util.Calendar;
+import java.util.Collection;
+import java.util.Collections;
+import java.util.Comparator;
+import java.util.Date;
+import java.util.HashSet;
+import java.util.List;
+import java.util.Map;
+import java.util.Set;
 import java.util.stream.Collectors;
 
 import static com.transformuk.hee.tis.tcs.service.api.util.DateUtil.getLocalDateFromString;
@@ -103,12 +134,17 @@ public class PlacementServiceImpl implements PlacementService {
         return placementMapper.placementToPlacementDTO(placement);
     }
 
+    @Override
+    public Placement findPlacementById(Long placementId) {
+      return placementRepository.findOne(placementId);
+    }
+
     @Transactional
     @Override
     public PlacementDetailsDTO createDetails(final PlacementDetailsDTO placementDetailsDTO) {
         log.debug("Request to create Placement : {}", placementDetailsDTO);
         PlacementDetails placementDetails = placementDetailsMapper.placementDetailsDTOToPlacementDetails(placementDetailsDTO);
-        placementDetails = placementDetailsRepository.save(placementDetails);
+        placementDetails = placementDetailsRepository.saveAndFlush(placementDetails);
 
         final Set<PlacementSpecialty> placementSpecialties = linkPlacementSpecialties(placementDetailsDTO, placementDetails);
         final PlacementDetailsDTO placementDetailsDTO1 = placementDetailsMapper.placementDetailsToPlacementDetailsDTO(placementDetails);
@@ -120,7 +156,34 @@ public class PlacementServiceImpl implements PlacementService {
         return placementDetailsDTO1;
     }
 
-    @Transactional
+    @Override
+  public boolean isEligibleForChangedDatesNotification(PlacementDetailsDTO updatedPlacementDetails, Placement existingPlacement) {
+
+    if (existingPlacement != null && updatedPlacementDetails != null &&
+        isEligibleForNotification(existingPlacement, updatedPlacementDetails)) {
+      log.info("Change in hire or end date. Marking for notification : npn {} ",
+          existingPlacement.getPost() != null ? existingPlacement.getPost().getNationalPostNumber() : null);
+      return true;
+    }
+    return false;
+  }
+
+  @Override
+  public void handleChangeOfPlacementDatesEsrNotification(PlacementDetailsDTO updatedPlacementDetails, Placement placementBeforeUpdate, boolean currentPlacementEdit) {
+
+    if (placementBeforeUpdate != null && updatedPlacementDetails != null ) {
+      // create NOT1 type record. Current and next trainee details for the post number.
+      // Create NOT4 type record
+      log.info("Change in hire or end date. Marking for notification : {} ", placementBeforeUpdate.getPost().getNationalPostNumber());
+      try {
+        esrNotificationService.loadChangeOfPlacementDatesNotification(updatedPlacementDetails, placementBeforeUpdate.getPost().getNationalPostNumber(), currentPlacementEdit);
+      } catch (final Exception e) {
+        log.error("Error loading Change of Placement Dates Notification : ", e);
+      }
+    }
+  }
+
+  @Transactional
     @Override
     public PlacementDetailsDTO saveDetails(final PlacementDetailsDTO placementDetailsDTO) {
 
@@ -128,7 +191,6 @@ public class PlacementServiceImpl implements PlacementService {
 
         //clear any linked specialties before trying to save the placement
         final Placement placement = placementRepository.findOne(placementDetailsDTO.getId());
-        handleChangeOfPlacementDatesEsrNotification(placement, placementDetailsDTO);
         placementSpecialtyRepository.delete(placement.getSpecialties());
         placement.setSpecialties(new HashSet<>());
         placementRepository.saveAndFlush(placement);
@@ -241,7 +303,8 @@ public class PlacementServiceImpl implements PlacementService {
         final List<EsrNotification> allEsrNotifications = new ArrayList<>();
 
         final Placement placementToDelete = placementRepository.findOne(id);
-        if (placementToDelete.getDateFrom() != null && placementToDelete.getDateFrom().isBefore(LocalDate.now().plusMonths(3))) {
+        // Only future placements can be deleted.
+        if (placementToDelete != null && placementToDelete.getDateFrom() != null && placementToDelete.getDateFrom().isBefore(LocalDate.now().plusMonths(3))) {
             final List<EsrNotification> esrNotifications = esrNotificationService.loadPlacementDeleteNotification(placementToDelete, allEsrNotifications);
             log.info("Placement Delete: PERSISTING: {} EsrNotifications for post {} being deleted", esrNotifications.size(), placementToDelete.getLocalPostNumber());
             esrNotificationService.save(esrNotifications);
@@ -451,23 +514,6 @@ public class PlacementServiceImpl implements PlacementService {
         }
         return PlacementStatus.CURRENT.name();
 
-    }
-
-    private void handleChangeOfPlacementDatesEsrNotification(final Placement currentPlacement, final PlacementDetailsDTO updatedPlacementDetails) {
-
-        if (currentPlacement != null && updatedPlacementDetails != null &&
-                isEligibleForNotification(currentPlacement, updatedPlacementDetails)) {
-            // create NOT1 type record. Current and next trainee details for the post number.
-            // Create NOT4 type record
-            log.info("Change in hire or end date. Marking for notification : {} ", currentPlacement.getPost().getNationalPostNumber());
-            try {
-                esrNotificationService.loadChangeOfPlacementDatesNotification(updatedPlacementDetails, currentPlacement.getPost().getNationalPostNumber());
-            } catch (final Exception e) {
-                // Ideally it should fail the entire update. Keeping the impact minimal for go live and revisit after go live.
-                // Log and continue
-                log.error("Error loading Change of Placement Dates Notification : ", e);
-            }
-        }
     }
 
     private boolean isEligibleForNotification(final Placement currentPlacement, final PlacementDetailsDTO updatedPlacementDetails) {
