@@ -38,7 +38,7 @@ public interface RotationService {
     
     Page<RotationDTO> advancedSearchBySpecification(String searchQuery, List<ColumnFilter> columnFilters, Pageable pageable);
     
-    boolean rotationExists(String value);
+    boolean rotationExists(String value, Long programmeId);
     
     /**
      * Delete the "id" rotation.

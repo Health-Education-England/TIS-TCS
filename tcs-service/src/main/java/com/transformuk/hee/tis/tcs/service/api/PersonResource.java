@@ -10,13 +10,16 @@ import com.transformuk.hee.tis.tcs.service.api.decorator.PersonViewDecorator;
 import com.transformuk.hee.tis.tcs.service.api.decorator.PlacementSummaryDecorator;
 import com.transformuk.hee.tis.tcs.service.api.decorator.PlacementViewDecorator;
 import com.transformuk.hee.tis.tcs.service.api.util.*;
+import com.transformuk.hee.tis.tcs.service.api.validation.ContactDetailsValidator;
+import com.transformuk.hee.tis.tcs.service.api.validation.GdcDetailsValidator;
+import com.transformuk.hee.tis.tcs.service.api.validation.GmcDetailsValidator;
 import com.transformuk.hee.tis.tcs.service.api.validation.PersonValidator;
+import com.transformuk.hee.tis.tcs.service.api.validation.PersonalDetailsValidator;
 import com.transformuk.hee.tis.tcs.service.model.ColumnFilter;
 import com.transformuk.hee.tis.tcs.service.model.PlacementView;
 import com.transformuk.hee.tis.tcs.service.repository.PlacementViewRepository;
 import com.transformuk.hee.tis.tcs.service.service.PersonService;
 import com.transformuk.hee.tis.tcs.service.service.PlacementService;
-import com.transformuk.hee.tis.tcs.service.service.impl.PersonTrustService;
 import com.transformuk.hee.tis.tcs.service.service.mapper.PlacementViewMapper;
 import io.github.jhipster.web.util.ResponseUtil;
 import io.swagger.annotations.ApiOperation;
@@ -64,11 +67,18 @@ public class PersonResource {
   private final PlacementService placementService;
   private final PlacementSummaryDecorator placementSummaryDecorator;
   private final PersonValidator personValidator;
+  private final GmcDetailsValidator gmcDetailsValidator;
+  private final GdcDetailsValidator gdcDetailsValidator;
+  private final PersonalDetailsValidator personalDetailsValidator;
+  private final ContactDetailsValidator contactDetailsValidator;
+
 
   public PersonResource(PersonService personService, PlacementViewRepository placementViewRepository,
                         PlacementViewMapper placementViewMapper, PlacementViewDecorator placementViewDecorator,
                         PersonViewDecorator personViewDecorator, PlacementService placementService,
-                        PlacementSummaryDecorator placementSummaryDecorator, PersonValidator personValidator) {
+                        PlacementSummaryDecorator placementSummaryDecorator, PersonValidator personValidator,
+                        GmcDetailsValidator gmcDetailsValidator, GdcDetailsValidator gdcDetailsValidator,
+                        PersonalDetailsValidator personalDetailsValidator, ContactDetailsValidator contactDetailsValidator) {
     this.personService = personService;
     this.placementViewRepository = placementViewRepository;
     this.placementViewMapper = placementViewMapper;
@@ -77,6 +87,10 @@ public class PersonResource {
     this.placementService = placementService;
     this.placementSummaryDecorator = placementSummaryDecorator;
     this.personValidator = personValidator;
+    this.gmcDetailsValidator = gmcDetailsValidator;
+    this.gdcDetailsValidator = gdcDetailsValidator;
+    this.personalDetailsValidator = personalDetailsValidator;
+    this.contactDetailsValidator = contactDetailsValidator;
   }
 
     /**
@@ -96,6 +110,11 @@ public class PersonResource {
             return ResponseEntity.badRequest().headers(HeaderUtil.createFailureAlert(ENTITY_NAME, "idexists", "A new person cannot already have an ID")).body(null);
         }
         personValidator.validate(personDTO);
+        gmcDetailsValidator.validate(personDTO.getGmcDetails());
+        gdcDetailsValidator.validate(personDTO.getGdcDetails());
+        personalDetailsValidator.validate(personDTO.getPersonalDetails());
+        contactDetailsValidator.validate(personDTO.getContactDetails());
+
         final PersonDTO result = personService.create(personDTO);
         return ResponseEntity.created(new URI("/api/people/" + result.getId()))
                 .headers(HeaderUtil.createEntityCreationAlert(ENTITY_NAME, result.getId().toString()))
@@ -123,6 +142,11 @@ public class PersonResource {
     personService.canLoggedInUserViewOrAmend(personDTO.getId());
 
     personValidator.validate(personDTO);
+    gmcDetailsValidator.validate(personDTO.getGmcDetails());
+    gdcDetailsValidator.validate(personDTO.getGdcDetails());
+    personalDetailsValidator.validate(personDTO.getPersonalDetails());
+    contactDetailsValidator.validate(personDTO.getContactDetails());
+
     PersonDTO result = personService.save(personDTO);
     return ResponseEntity.ok()
         .headers(HeaderUtil.createEntityUpdateAlert(ENTITY_NAME, personDTO.getId().toString()))

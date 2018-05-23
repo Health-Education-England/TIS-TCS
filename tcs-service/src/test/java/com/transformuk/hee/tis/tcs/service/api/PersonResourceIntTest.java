@@ -9,7 +9,11 @@ import com.transformuk.hee.tis.tcs.service.Application;
 import com.transformuk.hee.tis.tcs.service.api.decorator.PersonViewDecorator;
 import com.transformuk.hee.tis.tcs.service.api.decorator.PlacementSummaryDecorator;
 import com.transformuk.hee.tis.tcs.service.api.decorator.PlacementViewDecorator;
+import com.transformuk.hee.tis.tcs.service.api.validation.ContactDetailsValidator;
+import com.transformuk.hee.tis.tcs.service.api.validation.GdcDetailsValidator;
+import com.transformuk.hee.tis.tcs.service.api.validation.GmcDetailsValidator;
 import com.transformuk.hee.tis.tcs.service.api.validation.PersonValidator;
+import com.transformuk.hee.tis.tcs.service.api.validation.PersonalDetailsValidator;
 import com.transformuk.hee.tis.tcs.service.exception.ExceptionTranslator;
 import com.transformuk.hee.tis.tcs.service.model.ContactDetails;
 import com.transformuk.hee.tis.tcs.service.model.GdcDetails;
@@ -126,7 +130,14 @@ public class PersonResourceIntTest {
     private PermissionService permissionServiceMock;
     @MockBean
     private ReferenceServiceImpl referenceService;
-
+  @MockBean
+  private GmcDetailsValidator gmcDetailsValidator;
+  @MockBean
+  private GdcDetailsValidator gdcDetailsValidator;
+  @MockBean
+  private PersonalDetailsValidator personalDetailsValidator;
+  @MockBean
+  private ContactDetailsValidator contactDetailsValidator;
     private MockMvc restPersonMockMvc;
     private Person person;
 
@@ -134,7 +145,8 @@ public class PersonResourceIntTest {
   public void setup() {
     MockitoAnnotations.initMocks(this);
     PersonResource personResource = new PersonResource(personService, placementViewRepository, placementViewMapper,
-        placementViewDecorator, personViewDecorator, placementService, placementSummaryDecorator,personValidator);
+        placementViewDecorator, personViewDecorator, placementService, placementSummaryDecorator,personValidator,
+        gmcDetailsValidator, gdcDetailsValidator, personalDetailsValidator, contactDetailsValidator);
     this.restPersonMockMvc = MockMvcBuilders.standaloneSetup(personResource)
         .setCustomArgumentResolvers(pageableArgumentResolver)
         .setControllerAdvice(exceptionTranslator)

@@ -5,8 +5,10 @@ import com.google.common.collect.Maps;
 import com.transformuk.hee.tis.tcs.api.dto.CurriculumMembershipDTO;
 import com.transformuk.hee.tis.tcs.api.dto.PersonDTO;
 import com.transformuk.hee.tis.tcs.api.dto.ProgrammeMembershipDTO;
+import com.transformuk.hee.tis.tcs.api.dto.TrainingNumberDTO;
 import com.transformuk.hee.tis.tcs.service.model.Person;
 import com.transformuk.hee.tis.tcs.service.model.ProgrammeMembership;
+import com.transformuk.hee.tis.tcs.service.model.TrainingNumber;
 import org.springframework.stereotype.Component;
 import org.springframework.util.CollectionUtils;
 
@@ -80,7 +82,7 @@ public class ProgrammeMembershipMapper {
     result.setProgrammeEndDate(programmeMembership.getProgrammeEndDate());
     result.setLeavingDestination(programmeMembership.getLeavingDestination());
     result.setProgrammeId(programmeMembership.getProgrammeId());
-    result.setTrainingNumberId(programmeMembership.getTrainingNumberId());
+    result.setTrainingNumber(trainingNumberToTrainingNumberDTO(programmeMembership.getTrainingNumber()));
 
     if (programmeMembership.getPerson() == null) {
       result.setPerson(null);
@@ -126,7 +128,7 @@ public class ProgrammeMembershipMapper {
     result.setProgrammeEndDate(programmeMembershipDTO.getProgrammeEndDate());
     result.setLeavingDestination(programmeMembershipDTO.getLeavingDestination());
     result.setProgrammeId(programmeMembershipDTO.getProgrammeId());
-    result.setTrainingNumberId(programmeMembershipDTO.getTrainingNumberId());
+    result.setTrainingNumber(trainingNumberDTOToTrainingNumber(programmeMembershipDTO.getTrainingNumber()));
 
     if (programmeMembershipDTO.getPerson() == null) {
       result.setPerson(null);
@@ -171,6 +173,28 @@ public class ProgrammeMembershipMapper {
       result.setPublicHealthNumber(personDTO.getPublicHealthNumber());
       result.setRegulator(personDTO.getRegulator());
 
+    }
+    return result;
+  }
+
+  private TrainingNumberDTO trainingNumberToTrainingNumberDTO(TrainingNumber trainingNumber) {
+    TrainingNumberDTO result = null;
+    if (trainingNumber != null) {
+      result = new TrainingNumberDTO();
+      result.setId(trainingNumber.getId());
+      result.setIntrepidId(trainingNumber.getIntrepidId());
+      result.setTrainingNumber(trainingNumber.getTrainingNumber());
+    }
+    return result;
+  }
+
+  private TrainingNumber trainingNumberDTOToTrainingNumber(TrainingNumberDTO trainingNumberDTO) {
+    TrainingNumber result = null;
+    if (trainingNumberDTO != null) {
+      result = new TrainingNumber();
+      result.setId(trainingNumberDTO.getId());
+      result.setIntrepidId(trainingNumberDTO.getIntrepidId());
+      result.setTrainingNumber(trainingNumberDTO.getTrainingNumber());
     }
     return result;
   }

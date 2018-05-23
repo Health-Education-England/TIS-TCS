@@ -21,8 +21,7 @@ from (
     s.name as specialty,
     p.status,
     lo.owner as currentOwner,
-    lo.rule as currentOwnerRule,
-    pt.trustId
+    lo.rule as currentOwnerRule
   from
     Person p
   join ContactDetails cd on (cd.id = p.id)

@@ -39,7 +39,7 @@ public class ProgrammeMembershipDTO implements Serializable {
   @NotNull(message = "Programme is required", groups = {Update.class, Create.class})
   private Long programmeId;
 
-  private Long trainingNumberId;
+  private TrainingNumberDTO trainingNumber;
 
   @Valid
   private List<CurriculumMembershipDTO> curriculumMemberships;
@@ -95,12 +95,12 @@ public class ProgrammeMembershipDTO implements Serializable {
     this.programmeId = programmeId;
   }
 
-  public Long getTrainingNumberId() {
-    return trainingNumberId;
+  public TrainingNumberDTO getTrainingNumber() {
+    return trainingNumber;
   }
 
-  public void setTrainingNumberId(Long trainingNumberId) {
-    this.trainingNumberId = trainingNumberId;
+  public void setTrainingNumber(TrainingNumberDTO trainingNumber) {
+    this.trainingNumber = trainingNumber;
   }
 
   public PersonDTO getPerson() {
