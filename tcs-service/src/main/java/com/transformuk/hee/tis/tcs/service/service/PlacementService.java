@@ -1,8 +1,9 @@
 package com.transformuk.hee.tis.tcs.service.service;
 
-import com.transformuk.hee.tis.tcs.api.dto.PlacementSummaryDTO;
 import com.transformuk.hee.tis.tcs.api.dto.PlacementDTO;
 import com.transformuk.hee.tis.tcs.api.dto.PlacementDetailsDTO;
+import com.transformuk.hee.tis.tcs.api.dto.PlacementSummaryDTO;
+import com.transformuk.hee.tis.tcs.service.model.Placement;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 
@@ -123,4 +124,10 @@ public interface PlacementService {
    * @return
    */
   List<PlacementSummaryDTO> getPlacementForPost(Long postId);
+
+  Placement findPlacementById(Long placementId);
+
+  boolean isEligibleForChangedDatesNotification(PlacementDetailsDTO updatedPlacementDetails, Placement existingPlacement);
+
+  void handleChangeOfPlacementDatesEsrNotification(PlacementDetailsDTO placementDetailsDTO, Placement placementBeforeUpdate, boolean currentPlacementEdit);
 }

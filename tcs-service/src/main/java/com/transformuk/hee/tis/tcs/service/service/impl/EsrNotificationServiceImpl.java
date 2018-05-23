@@ -173,13 +173,12 @@ public class EsrNotificationServiceImpl implements EsrNotificationService {
   }
 
   @Override
-  public void loadChangeOfPlacementDatesNotification(PlacementDetailsDTO changedPlacement, String nationalPostNumber) throws IOException, ClassNotFoundException {
+  public void loadChangeOfPlacementDatesNotification(PlacementDetailsDTO changedPlacement, String nationalPostNumber, boolean currentPlacementEdit) throws IOException, ClassNotFoundException {
 
     LocalDate asOfDate = LocalDate.now(); // find placements as of today.
     List<EsrNotification> allEsrNotifications = new ArrayList<>();
 
-    // if the changed placement is current then find the future placement for the post to create the notification record.
-    if (changedPlacement.getDateFrom() != null && (changedPlacement.getDateFrom().isBefore(LocalDate.now()) || changedPlacement.getDateFrom().equals(asOfDate))) {
+    if (currentPlacementEdit) {
       handleCurrentPlacementEdit(changedPlacement, nationalPostNumber, asOfDate, allEsrNotifications);
     } else { // if the changed placement is future placement then find the current placement for the post to create the notification record.
       handleFuturePlacementEdit(changedPlacement, nationalPostNumber, asOfDate, allEsrNotifications);
@@ -200,9 +199,6 @@ public class EsrNotificationServiceImpl implements EsrNotificationService {
     esrNotificationType4.setChangeOfProjectedEndDate(changedPlacement.getDateTo());
     esrNotificationType4.setCurrentTraineeProjectedEndDate(null);
 
-    // Type1 notification should always carry the latest status.
-    type1EsrNotification.setNextAppointmentProjectedStartDate(esrNotificationType4.getChangeOfProjectedHireDate());
-
     LOG.info("Saving ESR Notifications for changed date scenario : {}");
     List<EsrNotification> savedNotifications = esrNotificationRepository.save(asList(type1EsrNotification, esrNotificationType4));
     LOG.info("Saved {} ESR notifications for changed date scenario", isNotEmpty(savedNotifications) ? savedNotifications.size() : 0);
@@ -214,9 +210,11 @@ public class EsrNotificationServiceImpl implements EsrNotificationService {
         asOfDate, asList(nationalPostNumber), placementTypes);
     LOG.info("Identified {} current Placements for post {} as of date {}", isNotEmpty(currentPlacements) ? currentPlacements.size() : 0, nationalPostNumber, asOfDate);
 
-    List<Placement> matchedCurrentPlacements = currentPlacements.stream()
-        .filter(placement -> isNotEmpty(placement.getSiteCode()) && placement.getSiteCode().equalsIgnoreCase(changedPlacement.getSiteCode()))
-        .collect(toList());
+    List<Placement> matchedCurrentPlacements = isNotEmpty(currentPlacements) ?
+        currentPlacements.stream().filter(placement ->
+            isNotEmpty(placement.getSiteCode()) && placement.getSiteCode().equalsIgnoreCase(changedPlacement.getSiteCode()))
+            .collect(toList())
+        : Collections.emptyList();
 
     Placement futurePlacement = placementRepository.findOne(changedPlacement.getId());
     if (CollectionUtils.isEmpty(matchedCurrentPlacements)) {

@@ -134,12 +134,17 @@ public class PlacementServiceImpl implements PlacementService {
         return placementMapper.placementToPlacementDTO(placement);
     }
 
+    @Override
+    public Placement findPlacementById(Long placementId) {
+      return placementRepository.findOne(placementId);
+    }
+
     @Transactional
     @Override
     public PlacementDetailsDTO createDetails(final PlacementDetailsDTO placementDetailsDTO) {
         log.debug("Request to create Placement : {}", placementDetailsDTO);
         PlacementDetails placementDetails = placementDetailsMapper.placementDetailsDTOToPlacementDetails(placementDetailsDTO);
-        placementDetails = placementDetailsRepository.save(placementDetails);
+        placementDetails = placementDetailsRepository.saveAndFlush(placementDetails);
 
         final Set<PlacementSpecialty> placementSpecialties = linkPlacementSpecialties(placementDetailsDTO, placementDetails);
         final PlacementDetailsDTO placementDetailsDTO1 = placementDetailsMapper.placementDetailsToPlacementDetailsDTO(placementDetails);
@@ -151,7 +156,34 @@ public class PlacementServiceImpl implements PlacementService {
         return placementDetailsDTO1;
     }
 
-    @Transactional
+    @Override
+  public boolean isEligibleForChangedDatesNotification(PlacementDetailsDTO updatedPlacementDetails, Placement existingPlacement) {
+
+    if (existingPlacement != null && updatedPlacementDetails != null &&
+        isEligibleForNotification(existingPlacement, updatedPlacementDetails)) {
+      log.info("Change in hire or end date. Marking for notification : npn {} ",
+          existingPlacement.getPost() != null ? existingPlacement.getPost().getNationalPostNumber() : null);
+      return true;
+    }
+    return false;
+  }
+
+  @Override
+  public void handleChangeOfPlacementDatesEsrNotification(PlacementDetailsDTO updatedPlacementDetails, Placement placementBeforeUpdate, boolean currentPlacementEdit) {
+
+    if (placementBeforeUpdate != null && updatedPlacementDetails != null ) {
+      // create NOT1 type record. Current and next trainee details for the post number.
+      // Create NOT4 type record
+      log.info("Change in hire or end date. Marking for notification : {} ", placementBeforeUpdate.getPost().getNationalPostNumber());
+      try {
+        esrNotificationService.loadChangeOfPlacementDatesNotification(updatedPlacementDetails, placementBeforeUpdate.getPost().getNationalPostNumber(), currentPlacementEdit);
+      } catch (final Exception e) {
+        log.error("Error loading Change of Placement Dates Notification : ", e);
+      }
+    }
+  }
+
+  @Transactional
     @Override
     public PlacementDetailsDTO saveDetails(final PlacementDetailsDTO placementDetailsDTO) {
 
@@ -159,7 +191,6 @@ public class PlacementServiceImpl implements PlacementService {
 
         //clear any linked specialties before trying to save the placement
         final Placement placement = placementRepository.findOne(placementDetailsDTO.getId());
-        handleChangeOfPlacementDatesEsrNotification(placement, placementDetailsDTO);
         placementSpecialtyRepository.delete(placement.getSpecialties());
         placement.setSpecialties(new HashSet<>());
         placementRepository.saveAndFlush(placement);
@@ -483,23 +514,6 @@ public class PlacementServiceImpl implements PlacementService {
         }
         return PlacementStatus.CURRENT.name();
 
-    }
-
-    private void handleChangeOfPlacementDatesEsrNotification(final Placement currentPlacement, final PlacementDetailsDTO updatedPlacementDetails) {
-
-        if (currentPlacement != null && updatedPlacementDetails != null &&
-                isEligibleForNotification(currentPlacement, updatedPlacementDetails)) {
-            // create NOT1 type record. Current and next trainee details for the post number.
-            // Create NOT4 type record
-            log.info("Change in hire or end date. Marking for notification : {} ", currentPlacement.getPost().getNationalPostNumber());
-            try {
-                esrNotificationService.loadChangeOfPlacementDatesNotification(updatedPlacementDetails, currentPlacement.getPost().getNationalPostNumber());
-            } catch (final Exception e) {
-                // Ideally it should fail the entire update. Keeping the impact minimal for go live and revisit after go live.
-                // Log and continue
-                log.error("Error loading Change of Placement Dates Notification : ", e);
-            }
-        }
     }
 
     private boolean isEligibleForNotification(final Placement currentPlacement, final PlacementDetailsDTO updatedPlacementDetails) {

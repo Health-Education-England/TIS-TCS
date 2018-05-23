@@ -10,6 +10,8 @@ import com.transformuk.hee.tis.tcs.service.api.util.HeaderUtil;
 import com.transformuk.hee.tis.tcs.service.api.util.PaginationUtil;
 import com.transformuk.hee.tis.tcs.service.api.validation.PlacementValidator;
 import com.transformuk.hee.tis.tcs.service.api.validation.ValidationException;
+import com.transformuk.hee.tis.tcs.service.model.Placement;
+import com.transformuk.hee.tis.tcs.service.repository.PlacementRepository;
 import com.transformuk.hee.tis.tcs.service.service.PlacementService;
 import io.github.jhipster.web.util.ResponseUtil;
 import io.swagger.annotations.ApiOperation;
@@ -26,11 +28,21 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.validation.annotation.Validated;
-import org.springframework.web.bind.annotation.*;
+import org.springframework.web.bind.annotation.DeleteMapping;
+import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PatchMapping;
+import org.springframework.web.bind.annotation.PathVariable;
+import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.PutMapping;
+import org.springframework.web.bind.annotation.RequestBody;
+import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestParam;
+import org.springframework.web.bind.annotation.RestController;
 
 import java.io.IOException;
 import java.net.URI;
 import java.net.URISyntaxException;
+import java.time.LocalDate;
 import java.util.List;
 import java.util.Optional;
 import java.util.stream.Collectors;
@@ -51,12 +63,14 @@ public class PlacementResource {
     private final PlacementService placementService;
     private final PlacementValidator placementValidator;
     private final PlacementDetailsDecorator placementDetailsDecorator;
+    private PlacementRepository placementRepository;
 
     public PlacementResource(final PlacementService placementService, final PlacementValidator placementValidator,
-                             final PlacementDetailsDecorator placementDetailsDecorator) {
+                             final PlacementDetailsDecorator placementDetailsDecorator, PlacementRepository placementRepository) {
         this.placementService = placementService;
         this.placementValidator = placementValidator;
         this.placementDetailsDecorator = placementDetailsDecorator;
+      this.placementRepository = placementRepository;
     }
 
     /**
@@ -100,7 +114,16 @@ public class PlacementResource {
         if (placementDetailsDTO.getId() == null) {
             return createPlacement(placementDetailsDTO);
         }
+        Placement placementBeforeUpdate = placementService.findPlacementById(placementDetailsDTO.getId());
+        boolean eligibleForEsrNotification = placementService.isEligibleForChangedDatesNotification(placementDetailsDTO, placementBeforeUpdate);
+        boolean currentPlacementEdit = placementBeforeUpdate.getDateFrom().isBefore(LocalDate.now().plusDays(1)) ? true : false;
+
         final PlacementDetailsDTO result = placementService.saveDetails(placementDetailsDTO);
+
+        if (eligibleForEsrNotification) {
+          log.info("Handling ESR Notification for date changes in placement edit: placement id {}", placementDetailsDTO.getId());
+          placementService.handleChangeOfPlacementDatesEsrNotification(placementDetailsDTO, placementBeforeUpdate, currentPlacementEdit);
+        }
         return ResponseEntity.ok()
                 .headers(HeaderUtil.createEntityUpdateAlert(ENTITY_NAME, result.getId().toString()))
                 .body(result);

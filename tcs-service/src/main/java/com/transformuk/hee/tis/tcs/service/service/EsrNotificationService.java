@@ -33,7 +33,7 @@ public interface EsrNotificationService {
 
   List<EsrNotificationDTO> loadFullNotification(LocalDate asOfDate, List<String> deaneryNumbers, String deaneryBody);
 
-  void loadChangeOfPlacementDatesNotification(PlacementDetailsDTO changedPlacement, String nationalPostNumber) throws IOException, ClassNotFoundException ;
+  void loadChangeOfPlacementDatesNotification(PlacementDetailsDTO changedPlacement, String nationalPostNumber, boolean currentPlacementEdit) throws IOException, ClassNotFoundException ;
 
   EsrNotification handleEsrNewPositionNotification(PostDTO postDTO);
 
