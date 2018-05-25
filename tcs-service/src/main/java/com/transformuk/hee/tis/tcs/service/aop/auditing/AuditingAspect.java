@@ -37,6 +37,7 @@ public class AuditingAspect {
   private final static String DTO_POSTFIX = "DTO";
   private final static String ETL_USERNAME = "consolidated_etl";
   private final static String ID_KEY = "id";
+  private final static String RESOURCE_POSTFIX = "Resource";
   private final AuditEventRepository auditEventRepository;
   @Autowired
   private JsonPatchRepository jsonPatchRepository;
@@ -114,6 +115,29 @@ public class AuditingAspect {
       }
     }
 
+  }
+
+  /**
+   * This is the aspect to audit deleted records by fetching the information by id
+   *
+   */
+  @Before("execution(* com.transformuk.hee.tis.tcs.service.api.*.delete*(..))")
+  public void auditDeleteBeforeExecution(JoinPoint joinPoint) throws Throwable {
+    // Audit log the dto which we want to delete it
+    UserProfile userPofile = getProfileFromContext();
+    if (!userPofile.getUserName().equalsIgnoreCase(ETL_USERNAME)) {
+      final Object deleteId = joinPoint.getArgs()[0];
+      if(deleteId != null){
+        String targetClassName = joinPoint.getTarget().getClass().getSimpleName();
+        String entityName = targetClassName.substring(0,StringUtils.length(targetClassName) - StringUtils.length(RESOURCE_POSTFIX));
+        final Method method = joinPoint.getTarget().getClass().getDeclaredMethod(GET_PREFIX + entityName, new Class[]{Long.class});
+        final Object responseEntity = method.invoke(joinPoint.getTarget(), deleteId);
+        Object dto = ((ResponseEntity) responseEntity).getBody();
+        AuditEvent auditEvent = createEvent(userPofile.getUserName(), TCS_PREFIX, joinPoint.getSignature().getName()
+                , GenericAuditEventType.delete, dto);
+        auditEventRepository.add(auditEvent);
+      }
+    }
   }
 
   /**
