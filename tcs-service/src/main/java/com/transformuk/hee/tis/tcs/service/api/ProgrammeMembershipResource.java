@@ -220,4 +220,19 @@ public class ProgrammeMembershipResource {
 
     return new ResponseEntity<>(programmeMembershipDTOS, HttpStatus.OK);
   }
+
+  /**
+   * GET  /trainee/:traineeId/programme-memberships : get all the programmeMemberships relating to a trainee
+   *
+   * @return the ResponseEntity with status 200 (OK) and the list of programmeMemberships in body
+   */
+  @GetMapping("/trainee/{traineeId}/programme-memberships")
+  @Timed
+  @PreAuthorize("hasPermission('tis:people::person:', 'View')")
+  public ResponseEntity<List<ProgrammeMembershipCurriculaDTO>> getProgrammeMembershipForTrainee(@PathVariable Long traineeId) {
+    log.debug("REST request to get ProgrammeMemberships for trainee {}", traineeId);
+    List<ProgrammeMembershipCurriculaDTO> programmeMembershipDTOS = programmeMembershipService.findProgrammeMembershipsForTrainee(traineeId);
+
+    return new ResponseEntity<>(programmeMembershipDTOS, HttpStatus.OK);
+  }
 }
