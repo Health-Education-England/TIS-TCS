@@ -33,7 +33,7 @@ public class StringUtilTest {
     String res = StringUtil.sanitize(input);
 
     //Then
-    assertThat(res).isEqualTo("alpha numer1c ))(");
+    assertThat(res).isEqualTo("alpha& numer1c ))('");
   }
 
   @Test
