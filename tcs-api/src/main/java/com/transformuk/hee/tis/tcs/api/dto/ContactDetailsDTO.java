@@ -73,7 +73,7 @@ public class ContactDetailsDTO implements Serializable {
   @Email(message = "Valid email format required", groups = {Update.class, Create.class})
   private String email;
 
-  @Email(message = "Valid email format required", groups = {Update.class, Create.class})
+  @Email(message = "Valid workEmail format required", groups = {Update.class, Create.class})
   private String workEmail;
 
   private String address1;
