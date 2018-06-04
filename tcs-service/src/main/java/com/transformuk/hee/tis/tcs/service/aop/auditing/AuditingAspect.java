@@ -127,7 +127,7 @@ public class AuditingAspect {
     UserProfile userPofile = getProfileFromContext();
     if (!userPofile.getUserName().equalsIgnoreCase(ETL_USERNAME)) {
       final Object deleteId = joinPoint.getArgs()[0];
-      if(deleteId != null){
+      if(deleteId != null && deleteId instanceof Long){
         String targetClassName = joinPoint.getTarget().getClass().getSimpleName();
         String entityName = targetClassName.substring(0,StringUtils.length(targetClassName) - StringUtils.length(RESOURCE_POSTFIX));
         final Method method = joinPoint.getTarget().getClass().getDeclaredMethod(GET_PREFIX + entityName, new Class[]{Long.class});

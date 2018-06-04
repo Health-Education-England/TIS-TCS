@@ -154,7 +154,7 @@ public class ProgrammeMembershipResource {
   @PostMapping("/programme-memberships/delete/")
   @Timed
   @PreAuthorize("hasAuthority('tcs:delete:entities')")
-  public ResponseEntity<Void> deleteProgrammeMembership(@RequestBody ProgrammeMembershipDTO programmeMembershipDTO) {
+  public ResponseEntity<Void> removeProgrammeMembershipAndItsCurriculum(@RequestBody ProgrammeMembershipDTO programmeMembershipDTO) {
     log.debug("REST request to delete ProgrammeMembership : {}", programmeMembershipDTO);
     StringBuilder idsDeleted = new StringBuilder();
     if(programmeMembershipDTO != null && CollectionUtils.isNotEmpty(programmeMembershipDTO.getCurriculumMemberships())){
