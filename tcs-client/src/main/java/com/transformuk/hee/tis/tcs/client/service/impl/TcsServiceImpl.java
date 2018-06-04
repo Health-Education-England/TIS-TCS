@@ -260,7 +260,7 @@ public class TcsServiceImpl extends AbstractClientService {
 	public List<CurriculumDTO> getCurriculaByName(String name) {
 		log.debug("calling getCurriculaByName with {}", name);
 		return tcsRestTemplate
-				.exchange(serviceUrl + API_CURRENT_CURRICULA_COLUMN_FILTERS + curriculumJsonQuerystringURLEncoded.replace("PARAMETER_NAME", name), HttpMethod.GET, null, new ParameterizedTypeReference<List<CurriculumDTO>>() {})
+				.exchange(serviceUrl + API_CURRENT_CURRICULA_COLUMN_FILTERS + curriculumJsonQuerystringURLEncoded.replace("PARAMETER_NAME", urlEncode(name)), HttpMethod.GET, null, new ParameterizedTypeReference<List<CurriculumDTO>>() {})
 				.getBody();
 	}
 
@@ -268,7 +268,7 @@ public class TcsServiceImpl extends AbstractClientService {
 	public List<SpecialtyDTO> getSpecialtyByName(String name) {
 		log.debug("calling getSpecialtyByName with {}", name);
 		return tcsRestTemplate
-				.exchange(serviceUrl + API_CURRENT_SPECIALTIES_COLUMN_FILTERS + specialtyJsonQuerystringURLEncoded.replace("PARAMETER_NAME", name), HttpMethod.GET, null, new ParameterizedTypeReference<List<SpecialtyDTO>>() {})
+				.exchange(serviceUrl + API_CURRENT_SPECIALTIES_COLUMN_FILTERS + specialtyJsonQuerystringURLEncoded.replace("PARAMETER_NAME", urlEncode(name)), HttpMethod.GET, null, new ParameterizedTypeReference<List<SpecialtyDTO>>() {})
 				.getBody();
 	}
 
@@ -278,7 +278,7 @@ public class TcsServiceImpl extends AbstractClientService {
 		return tcsRestTemplate
 				.exchange(serviceUrl + API_PROGRAMMES_COLUMN_FILTERS +
 								programmeJsonQuerystringURLEncoded
-										.replace("PARAMETER_NAME", name)
+										.replace("PARAMETER_NAME", urlEncode(name))
 										.replace("PARAMETER_NUMBER", number),
 						HttpMethod.GET,
 						null, new ParameterizedTypeReference<List<ProgrammeDTO>>() {})
@@ -352,15 +352,18 @@ public class TcsServiceImpl extends AbstractClientService {
 	}
 
 	private String getIdsAsUrlEncodedCSVs(List<String> ids) {
-		Set<String> urlEncodedIds = ids.stream().map(s -> {
-			try {
-				return URLEncoder.encode(s, "UTF-8");
-			} catch (UnsupportedEncodingException e) {
-				throw new AssertionError("UTF-8 is unknown");
-			}
-		}).collect(Collectors.toSet());
-
+		Set<String> urlEncodedIds = ids.stream()
+				.map(this::urlEncode)
+				.collect(Collectors.toSet());
 		return String.join(",", urlEncodedIds);
+	}
+
+	private String urlEncode(String s) {
+		try {
+			return URLEncoder.encode(s, "UTF-8");
+		} catch (UnsupportedEncodingException e) {
+			throw new AssertionError("UTF-8 is unknown");
+		}
 	}
 
 	public List<PersonDTO> findPeopleIn(List<Long> personIds) {
