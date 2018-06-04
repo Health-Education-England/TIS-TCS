@@ -91,7 +91,7 @@ public class RotationPostResource {
    */
   @GetMapping("/rotation-posts/{id}")
   @Timed
-  public ResponseEntity<?> getRotationPosts(@PathVariable Long id) {
+  public ResponseEntity<?> getRotationPost(@PathVariable Long id) {
     log.debug("REST request to get RotationPost : {}", id);
 
     List<RotationPostDTO> rotationPostDTOS = rotationPostService.findByPostId(id);
