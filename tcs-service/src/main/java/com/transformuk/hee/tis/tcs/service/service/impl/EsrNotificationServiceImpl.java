@@ -516,9 +516,12 @@ public class EsrNotificationServiceImpl implements EsrNotificationService {
   private void mapCurrentTrainee(Placement currentPlacement, EsrNotification esrNotification) {
 
     setManagingDeaneryBodyCodeFromPlacement(currentPlacement, esrNotification);
-    if (currentPlacement.getTrainee().getContactDetails() != null) {
-      esrNotification.setCurrentTraineeFirstName(currentPlacement.getTrainee().getContactDetails().getLegalForenames());
-      esrNotification.setCurrentTraineeLastName(currentPlacement.getTrainee().getContactDetails().getLegalSurname());
+    if (currentPlacement.getTrainee() != null && currentPlacement.getTrainee().getContactDetails() != null) {
+      ContactDetails contactDetails = currentPlacement.getTrainee().getContactDetails();
+      esrNotification.setCurrentTraineeFirstName(
+          isNotEmpty(contactDetails.getLegalForenames()) ? contactDetails.getLegalForenames() : contactDetails.getForenames());
+      esrNotification.setCurrentTraineeLastName(
+          isNotEmpty(contactDetails.getLegalSurname()) ? contactDetails.getLegalSurname() : contactDetails.getSurname());
     }
     esrNotification.setCurrentTraineeProjectedEndDate(currentPlacement.getDateTo());
     esrNotification.setCurrentTraineeGmcNumber(
@@ -528,12 +531,17 @@ public class EsrNotificationServiceImpl implements EsrNotificationService {
   }
 
   private void mapNextTrainee(Placement nextPlacement, EsrNotification esrNotification) {
+
     setManagingDeaneryBodyCodeFromPlacement(nextPlacement, esrNotification);
     esrNotification.setNextAppointmentProjectedStartDate(nextPlacement.getDateFrom());
-    if (nextPlacement.getTrainee().getContactDetails() != null) {
-      esrNotification.setNextAppointmentTraineeEmailAddress(nextPlacement.getTrainee().getContactDetails().getEmail());
-      esrNotification.setNextAppointmentTraineeFirstName(nextPlacement.getTrainee().getContactDetails().getLegalForenames());
-      esrNotification.setNextAppointmentTraineeLastName(nextPlacement.getTrainee().getContactDetails().getLegalSurname());
+
+    if (nextPlacement.getTrainee() != null && nextPlacement.getTrainee().getContactDetails() != null) {
+      ContactDetails contactDetails = nextPlacement.getTrainee().getContactDetails();
+      esrNotification.setNextAppointmentTraineeEmailAddress(contactDetails.getEmail());
+      esrNotification.setNextAppointmentTraineeFirstName(
+          isNotEmpty(contactDetails.getLegalForenames()) ? contactDetails.getLegalForenames() : contactDetails.getForenames());
+      esrNotification.setNextAppointmentTraineeLastName(
+          isNotEmpty(contactDetails.getLegalSurname()) ? contactDetails.getLegalSurname() : contactDetails.getSurname());
     }
 
     esrNotification.setNextAppointmentTraineeGmcNumber(
