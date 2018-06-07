@@ -116,7 +116,7 @@ public class PlacementResource {
         }
         Placement placementBeforeUpdate = placementService.findPlacementById(placementDetailsDTO.getId());
         boolean eligibleForEsrNotification = placementService.isEligibleForChangedDatesNotification(placementDetailsDTO, placementBeforeUpdate);
-        boolean currentPlacementEdit = placementBeforeUpdate.getDateFrom().isBefore(LocalDate.now().plusDays(1)) ? true : false;
+        boolean currentPlacementEdit = placementBeforeUpdate.getDateFrom().isBefore(LocalDate.now().plusDays(1));
 
         final PlacementDetailsDTO result = placementService.saveDetails(placementDetailsDTO);
 
