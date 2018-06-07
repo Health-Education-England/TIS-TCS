@@ -57,7 +57,7 @@ public class ProgrammeResourceTest {
     controller.getAllProgrammes(p, "#$$)alp%*h(&^)a ..?'';;\\numer1`~c", null);
 
     // then
-    assertThat(searchStringCaptor.getValue()).isEqualTo(")alph()a numer1c");
+    assertThat(searchStringCaptor.getValue()).isEqualTo("alpha numer1c");
   }
 
   @Test
