@@ -183,6 +183,11 @@ public class EsrNotificationResourceIntTest {
     trainee1.setContactDetails(trainee1ContactDetails);
 
     ContactDetails trainee2ContactDetails = aContactDetail("trainee02-FN", "trainee02-LN");
+    // To test that names fallback to non legal names if legal is not provided.
+    trainee2ContactDetails.setLegalSurname(null);
+    trainee2ContactDetails.setLegalForenames(null);
+    trainee2ContactDetails.setForenames("trainee02-FN-NonLegal");
+    trainee2ContactDetails.setSurname("trainee02-SN-NonLegal");
     trainee2ContactDetails.setId(trainee2.getId());
     trainee2.setContactDetails(trainee2ContactDetails);
 
@@ -221,8 +226,8 @@ public class EsrNotificationResourceIntTest {
         .andExpect(jsonPath("$.[*].notificationTitleCode").value("1"))
         .andExpect(jsonPath("$.[*].deaneryPostNumber").value(post.getNationalPostNumber()))
         .andExpect(jsonPath("$.[*].managingDeaneryBodyCode").value("EOE"))
-        .andExpect(jsonPath("$.[*].currentTraineeFirstName").value(trainee2.getContactDetails().getLegalForenames()))
-        .andExpect(jsonPath("$.[*].currentTraineeLastName").value(trainee2.getContactDetails().getLegalSurname()))
+        .andExpect(jsonPath("$.[*].currentTraineeFirstName").value(trainee2.getContactDetails().getForenames()))
+        .andExpect(jsonPath("$.[*].currentTraineeLastName").value(trainee2.getContactDetails().getSurname()))
         .andExpect(jsonPath("$.[*].currentTraineeGmcNumber").value(trainee2GmcDetails.getGmcNumber()))
         .andExpect(jsonPath("$.[*].nextAppointmentTraineeFirstName").value(trainee1.getContactDetails().getLegalForenames()))
         .andExpect(jsonPath("$.[*].nextAppointmentTraineeLastName").value(trainee1.getContactDetails().getLegalSurname()))
