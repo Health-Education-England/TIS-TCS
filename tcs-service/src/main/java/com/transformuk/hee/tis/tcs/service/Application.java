@@ -1,7 +1,6 @@
 package com.transformuk.hee.tis.tcs.service;
 
 import com.transformuk.hee.tis.filestorage.config.TisFileStorageConfig;
-import com.transformuk.hee.tis.tcs.service.api.util.StringUtil;
 import com.transformuk.hee.tis.tcs.service.config.ApplicationProperties;
 import com.transformuk.hee.tis.tcs.service.config.DefaultProfileUtil;
 import io.github.jhipster.config.JHipsterConstants;
@@ -79,7 +78,6 @@ public class Application {
    */
   @PostConstruct
   public void initApplication() {
-    StringUtil.setSanitiserRegex(env.getProperty("SANITISER_REGEX"));
     Collection<String> activeProfiles = Arrays.asList(env.getActiveProfiles());
     if (activeProfiles.contains(JHipsterConstants.SPRING_PROFILE_DEVELOPMENT) && activeProfiles.contains(JHipsterConstants.SPRING_PROFILE_PRODUCTION)) {
       log.error("You have misconfigured your application! It should not run " +
