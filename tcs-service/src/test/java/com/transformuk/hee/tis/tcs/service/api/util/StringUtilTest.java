@@ -27,12 +27,12 @@ public class StringUtilTest {
   @Test
   public void shouldStripNonAlphanumericButLeaveWhitespace() {
     //Given
-    String input = "alpha*%&^% {}{numer1c _))(@!@#<>.?'\\";
+    String input = "alpha*%&^% {}{numer1c _))(@!@#<>.?'+\\";
 
     //When
     String res = StringUtil.sanitize(input);
 
     //Then
-    assertThat(res).isEqualTo("alpha& numer1c ('");
+    assertThat(res).isEqualTo("alpha& numer1c ))('+");
   }
 }
