@@ -18,7 +18,6 @@ import static org.slf4j.LoggerFactory.getLogger;
 @Component
 public class SqlQuerySupplier {
     public static final String PERSON_VIEW = "queries/personView.sql";
-    public static final String PERSON_VIEW_COUNT = "queries/personViewCount.sql";
     public static final String POST_VIEW = "queries/postView.sql";
     public static final String SEARCH_POST_VIEW = "queries/searchPostView.sql";
     public static final String POST_VIEW_COUNT = "queries/postViewCount.sql";

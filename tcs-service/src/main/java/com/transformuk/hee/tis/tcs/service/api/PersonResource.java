@@ -189,39 +189,6 @@ public class PersonResource {
 
 
     /**
-     * GET  /people : get all the people.
-     *
-     * @param pageable the pagination information
-     * @return the ResponseEntity with status 200 (OK) and the list of people in body
-     */
-    @ApiOperation(value = "Lists People data",
-            notes = "Returns a list of people with support for pagination, sorting, smart search and column filters \n")
-    @ApiResponses(value = {
-            @ApiResponse(code = 200, message = "Person list")})
-    @GetMapping("/people/count")
-    @Timed
-    @PreAuthorize("hasPermission('tis:people::person:', 'View')")
-    public ResponseEntity<Integer> getAllPeopleCount(
-            @ApiParam final Pageable pageable,
-            @ApiParam(value = "any wildcard string to be searched")
-            @RequestParam(value = "searchQuery", required = false) String searchQuery,
-            @ApiParam(value = "json object by column name and value. (Eg: columnFilters={ \"status\": [\"CURRENT\"]}\"")
-            @RequestParam(value = "columnFilters", required = false) final String columnFilterJson) throws IOException {
-        log.info("REST request to get a page of People begin");
-        searchQuery = sanitize(searchQuery);
-        final List<Class> filterEnumList = Lists.newArrayList(Status.class);
-        final List<ColumnFilter> columnFilters = ColumnFilterUtil.getColumnFilters(columnFilterJson, filterEnumList);
-        Integer count = 0;
-        if (StringUtils.isEmpty(searchQuery) && StringUtils.isEmpty(columnFilterJson)) {
-            count = personService.findAllCountQuery();
-        } else {
-            count = personService.advancedSearchCountQuery(searchQuery, columnFilters, pageable);
-        }
-        log.info("REST request to get a page of People completed successfully");
-        return new ResponseEntity<>(count, HttpStatus.OK);
-    }
-
-    /**
      * GET  /people/phn/in/{publicHealthNumbers} : get people given their ID's.
      * Ignores malformed or not found people
      *
