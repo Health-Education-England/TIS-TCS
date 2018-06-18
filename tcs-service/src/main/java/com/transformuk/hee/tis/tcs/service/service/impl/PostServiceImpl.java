@@ -11,8 +11,7 @@ import com.transformuk.hee.tis.tcs.api.dto.PostSiteDTO;
 import com.transformuk.hee.tis.tcs.api.dto.PostSpecialtyDTO;
 import com.transformuk.hee.tis.tcs.api.dto.PostViewDTO;
 import com.transformuk.hee.tis.tcs.api.dto.ProgrammeDTO;
-import com.transformuk.hee.tis.tcs.api.enumeration.FundingType;
-import com.transformuk.hee.tis.tcs.api.enumeration.Status;
+import com.transformuk.hee.tis.tcs.api.enumeration.*;
 import com.transformuk.hee.tis.tcs.service.api.decorator.PostViewDecorator;
 import com.transformuk.hee.tis.tcs.service.exception.AccessUnauthorisedException;
 import com.transformuk.hee.tis.tcs.service.model.ColumnFilter;
@@ -48,8 +47,10 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageImpl;
 import org.springframework.data.domain.Pageable;
-import org.springframework.jdbc.core.JdbcTemplate;
+import org.springframework.data.domain.Sort;
 import org.springframework.jdbc.core.RowMapper;
+import org.springframework.jdbc.core.namedparam.MapSqlParameterSource;
+import org.springframework.jdbc.core.namedparam.NamedParameterJdbcTemplate;
 import org.springframework.scheduling.annotation.Async;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -105,7 +106,7 @@ public class PostServiceImpl implements PostService {
   private EsrNotificationService esrNotificationService;
 
   @Autowired
-  private JdbcTemplate jdbcTemplate;
+  private NamedParameterJdbcTemplate namedParameterJdbcTemplate;
 
   @Autowired
   private SqlQuerySupplier sqlQuerySupplier;
@@ -444,37 +445,29 @@ public class PostServiceImpl implements PostService {
   @Transactional(readOnly = true)
   public Page<PostViewDTO> findAll(Pageable pageable) {
     log.debug("Request to get all Posts");
-    /*Integer postCount = jdbcTemplate.queryForObject("select count(p.id) from Post p",
-            Integer.class);
-    int start = pageable.getOffset();
-    int end = ((start + pageable.getPageSize()) > postCount) ? postCount : (start + pageable.getPageSize());*/
     int start = pageable.getOffset();
     int end = start + pageable.getPageSize() + 1;
+    MapSqlParameterSource paramSource = new MapSqlParameterSource();
 
     String query = sqlQuerySupplier.getQuery(SqlQuerySupplier.POST_VIEW);
 
-    String whereClause = " where 1=1 ";
+    String whereClause = " WHERE 1=1 ";
+
     if (permissionService.isUserTrustAdmin()) {
-      whereClause += String.format("AND trustId in (%s) ", getLoggedInUsersAssociatedTrusts());
+      whereClause = whereClause + "AND trustId in (:trustList) ";
+      paramSource.addValue("trustList", permissionService.getUsersTrustIds());
     }
+
     query = query.replaceAll("TRUST_JOIN", permissionService.isUserTrustAdmin() ? "  LEFT JOIN `PostTrust` pt on pt.`postId` = p.`id` " : StringUtils.EMPTY);
     // Where condition
     query = query.replaceAll("WHERECLAUSE", whereClause);
 
-    if (pageable.getSort() != null) {
-      if (pageable.getSort().iterator().hasNext()) {
-        String orderByFirstCriteria = pageable.getSort().iterator().next().toString();
-        String orderByClause = orderByFirstCriteria.replaceAll(":", " ");
-        query = query.replaceAll("ORDERBYCLAUSE", " ORDER BY " + orderByClause);
-      } else {
-        query = query.replaceAll("ORDERBYCLAUSE", "");
-      }
-    } else {
-      query = query.replaceAll("ORDERBYCLAUSE", "");
-    }
+    //For order by clause
+    final String orderByClause = createOrderByClauseWithParams(pageable);
+    query = query.replaceAll("ORDERBYCLAUSE", orderByClause);
 
     query = query.replaceAll("LIMITCLAUSE", "limit " + start + "," + end);
-    List<PostViewDTO> posts = jdbcTemplate.query(query, new PostServiceImpl.PostViewRowMapper());
+    List<PostViewDTO> posts = namedParameterJdbcTemplate.query(query,paramSource, new PostServiceImpl.PostViewRowMapper());
     if (CollectionUtils.isEmpty(posts)) {
       return new PageImpl<>(posts);
     }
@@ -494,6 +487,7 @@ public class PostServiceImpl implements PostService {
   @Transactional(readOnly = true)
   public Page<PostViewDTO> advancedSearch(String searchString, List<ColumnFilter> columnFilters, Pageable pageable) {
 
+    MapSqlParameterSource paramSource = new MapSqlParameterSource();
     String whereClause = createWhereClause(searchString, columnFilters);
     StopWatch stopWatch;
 
@@ -503,29 +497,26 @@ public class PostServiceImpl implements PostService {
     String query = sqlQuerySupplier.getQuery(SqlQuerySupplier.POST_VIEW);
     query = query.replaceAll("TRUST_JOIN", permissionService.isUserTrustAdmin() ? "  LEFT JOIN `PostTrust` pt on pt.`postId` = p.`id` " : StringUtils.EMPTY);
     query = query.replaceAll("WHERECLAUSE", whereClause);
-    if (pageable.getSort() != null) {
-      if (pageable.getSort().iterator().hasNext()) {
-        String orderByFirstCriteria = pageable.getSort().iterator().next().toString();
-        String orderByClause = orderByFirstCriteria.replaceAll(":", " ");
-        if (orderByClause.contains("currentTraineeSurname")) {
-          orderByClause = orderByClause.replaceAll("currentTraineeSurname", "surname");
-        }
-
-        query = query.replaceAll("ORDERBYCLAUSE", " ORDER BY " + orderByClause);
-      } else {
-        query = query.replaceAll("ORDERBYCLAUSE", "");
-      }
-    } else {
-      query = query.replaceAll("ORDERBYCLAUSE", "");
+    if (permissionService.isUserTrustAdmin()) {
+      paramSource.addValue("trustList", permissionService.getUsersTrustIds());
     }
+    //For order by clause
+    final String orderByClause = createOrderByClauseWithParams(pageable);
+    query = query.replaceAll("ORDERBYCLAUSE", orderByClause);
 
     //limit is 0 based
     query = query.replaceAll("LIMITCLAUSE", "limit " + start + "," + end);
 
+    if (StringUtils.isNotEmpty(searchString)) {
+      paramSource.addValue("searchString", "%" + searchString + "%");
+    }
+
+    applyFilterByParams(columnFilters, paramSource);
+
     log.info("running post query");
     stopWatch = new StopWatch();
     stopWatch.start();
-    List<PostViewDTO> posts = jdbcTemplate.query(query, new PostServiceImpl.PostViewRowMapper());
+    List<PostViewDTO> posts = namedParameterJdbcTemplate.query(query, paramSource,new PostServiceImpl.PostViewRowMapper());
     stopWatch.stop();
     log.info("post query finished in: [{}]s", stopWatch.getTotalTimeSeconds());
 
@@ -541,8 +532,7 @@ public class PostServiceImpl implements PostService {
     } else {
       dtoPage = new PageImpl<>(posts, pageable, pageable.getPageSize());
     }
-    //List<PostViewDTO> postPageList = posts.subList(start,(end > posts.size()) ? posts.size() : end);
-    //Page<PostViewDTO> dtoPage = new PageImpl<>(posts,pageable,pageable.getPageSize());
+
     postViewDecorator.decorate(dtoPage.getContent());
     return dtoPage;
   }
@@ -552,28 +542,28 @@ public class PostServiceImpl implements PostService {
   @Transactional(readOnly = true)
   public Page<PostViewDTO> findByNationalPostNumber(String searchString, Pageable pageable) {
 
+    MapSqlParameterSource paramSource = new MapSqlParameterSource();
     String whereClause = createWhereClauseForSearch(searchString);
     int start = pageable.getOffset();
     int end = start + pageable.getPageSize() + 1;
 
     String query = sqlQuerySupplier.getQuery(SqlQuerySupplier.SEARCH_POST_VIEW);
     query = query.replaceAll("WHERECLAUSE", whereClause);
-    if (pageable.getSort() != null) {
-      if (pageable.getSort().iterator().hasNext()) {
-        String orderByFirstCriteria = pageable.getSort().iterator().next().toString();
-        String orderByClause = orderByFirstCriteria.replaceAll(":", " ");
+    //For order by clause
+    final String orderByClause = createOrderByClauseWithParams(pageable);
+    query = query.replaceAll("ORDERBYCLAUSE", orderByClause);
 
-        query = query.replaceAll("ORDERBYCLAUSE", " ORDER BY " + orderByClause);
-      } else {
-        query = query.replaceAll("ORDERBYCLAUSE", "");
-      }
-    } else {
-      query = query.replaceAll("ORDERBYCLAUSE", "");
+    if (permissionService.isUserTrustAdmin()) {
+      paramSource.addValue("trustList",permissionService.getUsersTrustIds());
+    }
+
+    if (StringUtils.isNotEmpty(searchString)) {
+      paramSource.addValue("searchString", "%" + searchString + "%");
     }
 
     //limit is 0 based
     query = query.replaceAll("LIMITCLAUSE", "limit " + start + "," + end);
-    List<PostViewDTO> posts = jdbcTemplate.query(query, new PostServiceImpl.PostViewSearchMapper());
+    List<PostViewDTO> posts = namedParameterJdbcTemplate.query(query,paramSource, new PostServiceImpl.PostViewSearchMapper());
     if (CollectionUtils.isEmpty(posts)) {
       return new PageImpl<>(posts);
     }
@@ -657,66 +647,139 @@ public class PostServiceImpl implements PostService {
     }
   }
 
-  private String createWhereClause(String searchString, List<ColumnFilter> columnFilters) {
-    StringBuilder whereClause = new StringBuilder();
+  private String createWhereClause(final String searchString, final List<ColumnFilter> columnFilters) {
+    final StringBuilder whereClause = new StringBuilder();
     whereClause.append(" WHERE 1=1 ");
-    //add the column filters criteria
 
     if (permissionService.isUserTrustAdmin()) {
-      whereClause.append(String.format("AND trustId in (%s) ", getLoggedInUsersAssociatedTrusts()));
+      whereClause.append("AND trustId in (:trustList) ");
     }
 
+    //add the column filters criteria
     if (columnFilters != null && !columnFilters.isEmpty()) {
       columnFilters.forEach(cf -> {
+
         switch (cf.getName()) {
           case "currentTraineeSurname":
-            applyInFilter(whereClause, "surname", cf.getValues());
+            whereClause.append(" AND surname in (:surnameList)");
             break;
           case "currentTraineeForenames":
-            applyInFilter(whereClause, "forenames", cf.getValues());
+            whereClause.append(" AND forenames in (:forenamesList)");
             break;
           case "primarySpecialtyId":
-            applyInFilter(whereClause, "specialtyId", cf.getValues());
+            whereClause.append(" AND specialtyId in (:specialtyIdList)");
             break;
           case "primarySpecialtyCode":
-            applyInFilter(whereClause, "specialtyCode", cf.getValues());
+            whereClause.append(" AND specialtyCode in (:specialtyCodeList)");
             break;
           case "primarySpecialtyName":
-            applyInFilter(whereClause, "name", cf.getValues());
+            whereClause.append(" AND name in (:nameList)");
             break;
           case "programmeNames":
-            applyInFilter(whereClause, "programmeName", cf.getValues());
+            whereClause.append(" AND programmeName in (:programmeNameList)");
             break;
           case "nationalPostNumber":
-            applyInFilter(whereClause, "nationalPostNumber", cf.getValues());
+            whereClause.append(" AND nationalPostNumber in (:nationalPostNumberList)");
             break;
           case "status":
-            applyInFilter(whereClause, "p.status", cf.getValues());
+            whereClause.append(" AND p.status in (:statusList)");
             break;
           case "owner":
-            applyInFilter(whereClause, "p.owner", cf.getValues());
+            whereClause.append(" AND p.owner in (:ownerList)");
             break;
           case "primarySiteId":
-            applyInFilter(whereClause, "pst.siteId", cf.getValues());
+            whereClause.append(" AND pst.siteId in (:siteIdList)");
             break;
           case "approvedGradeId":
-            applyInFilter(whereClause, "pg.gradeId", cf.getValues());
+            whereClause.append(" AND pg.gradeId in (:gradeIdList)");
             break;
           default:
             throw new IllegalArgumentException("Not accounted for column filter [" + cf.getName() +
-                "] you need to add an additional case statement or remove it from the request");
+                    "] you need to add an additional case statement or remove it from the request");
         }
       });
     }
-
     if (StringUtils.isNotEmpty(searchString)) {
-      whereClause.append(" AND ( nationalPostNumber like ").append("'%" + searchString + "%'");
-      whereClause.append(" OR programmeName like ").append("'%" + searchString + "%'");
-      whereClause.append(" OR surname like ").append("'%" + searchString + "%'");
-      whereClause.append(" OR forenames like ").append("'%" + searchString + "%'");
-      whereClause.append(" ) ");
+      whereClause.append(" AND (nationalPostNumber LIKE :searchString " +
+              "OR programmeName LIKE :searchString " +
+              "OR surname LIKE :searchString " +
+              "OR forenames LIKE :searchString ) ");
     }
     return whereClause.toString();
+  }
+
+  /**
+   * For parameterised query add param based on filter criteria
+   *
+   * @param columnFilters
+   * @param paramSource
+   */
+  private void applyFilterByParams(List<ColumnFilter> columnFilters, MapSqlParameterSource paramSource) {
+    if (columnFilters != null && !columnFilters.isEmpty()) {
+      columnFilters.forEach(cf -> {
+        switch (cf.getName()) {
+          case "programmeName":
+            paramSource.addValue("surnameList", cf.getValues());
+            break;
+          case "currentTraineeSurname":
+            paramSource.addValue("surnameList", cf.getValues());
+            break;
+          case "currentTraineeForenames":
+            paramSource.addValue("forenamesList", cf.getValues());
+            break;
+          case "primarySpecialtyId":
+            paramSource.addValue("specialtyIdList", cf.getValues());
+            break;
+          case "primarySpecialtyCode":
+            paramSource.addValue("specialtyCodeList", cf.getValues());
+            break;
+          case "primarySpecialtyName":
+            paramSource.addValue("nameList", cf.getValues());
+            break;
+          case "programmeNames":
+            paramSource.addValue("programmeNameList", cf.getValues());
+            break;
+          case "nationalPostNumber":
+            paramSource.addValue("nationalPostNumberList", cf.getValues());
+            break;
+          case "status":
+            paramSource.addValue("statusList", cf.getValues().stream().map(o -> ((Status) o).name()).collect(Collectors.toList()));
+            break;
+          case "owner":
+            paramSource.addValue("ownerList", cf.getValues());
+            break;
+          case "primarySiteId":
+            paramSource.addValue("siteIdList", cf.getValues());
+            break;
+          case "approvedGradeId":
+            paramSource.addValue("gradeIdList", cf.getValues());
+            break;
+          default:
+            throw new IllegalArgumentException("Not accounted for column filter [" + cf.getName() +
+                    "] you need to add an additional case statement or remove it from the request");
+        }
+      });
+    }
+  }
+
+  /**
+   * To generate order by clause with parameterised sort
+   * @param pageable
+   * @return
+   */
+  private String createOrderByClauseWithParams(Pageable pageable) {
+    final StringBuilder orderByClause = new StringBuilder();
+    if (pageable.getSort() != null) {
+      if (pageable.getSort().iterator().hasNext()) {
+        Sort.Order order = pageable.getSort().iterator().next();
+        if("currentTraineeSurname".equalsIgnoreCase(order.getProperty())) {
+          orderByClause.append(" ORDER BY ").append("surname ").append(order.getDirection()).append(" ");
+        } else {
+          orderByClause.append(" ORDER BY ").append(order.getProperty()).append(" ").append(order.getDirection()).append(" ");
+        }
+      }
+    }
+    return orderByClause.toString();
   }
 
   private String createWhereClauseForSearch(String searchString) {
@@ -724,30 +787,15 @@ public class PostServiceImpl implements PostService {
     whereClause.append(" WHERE 1=1 ");
 
     if (permissionService.isUserTrustAdmin()) {
-      whereClause.append(String.format("AND trustId in (%s) ", getLoggedInUsersAssociatedTrusts()));
+      whereClause.append("AND trustId in (:trustList) ");
     }
 
     if (StringUtils.isNotEmpty(searchString)) {
-      whereClause.append(" AND ( nationalPostNumber like ").append("'%" + searchString + "%'");
-      whereClause.append(" ) ");
+      whereClause.append(" AND ( nationalPostNumber like :searchString )");
     }
     return whereClause.toString();
   }
 
-  private void applyLikeFilter(StringBuilder whereClause, String columnName, List<Object> values) {
-    whereClause.append(" AND (");
-    values.forEach(value -> whereClause.append(columnName).append(" LIKE '%").append(value).append("%'").append(" OR "));
-    whereClause.delete(whereClause.length() - 4, whereClause.length());
-    whereClause.append(")");
-  }
-
-  private void applyInFilter(StringBuilder whereClause, String columnName, List<Object> values) {
-    whereClause.append(" AND (").append(columnName).append(" IN (");
-    values.forEach(k -> whereClause.append("'").append(k).append("',"));
-    whereClause.deleteCharAt(whereClause.length() - 1);
-    whereClause.append(")");
-    whereClause.append(")");
-  }
 
   private void handleNewPostEsrNotification(PostDTO postDTO) {
 
@@ -758,13 +806,6 @@ public class PostServiceImpl implements PostService {
       log.info("SAVED: esr notification with id {} for newly created Post {}", esrNotification.getId(),
           esrNotification.getDeaneryPostNumber());
     }
-  }
-
-  private String getLoggedInUsersAssociatedTrusts() {
-    String commaSepTrustIds = permissionService.getUsersTrustIds().stream()
-        .map(Object::toString)
-        .reduce((x, y) -> x + ", " + y).orElse(StringUtils.EMPTY);
-    return commaSepTrustIds;
   }
 
   private class PostViewRowMapper implements RowMapper<PostViewDTO> {

@@ -55,13 +55,6 @@ public interface PersonService {
     BasicPage<PersonViewDTO> findAll(Pageable pageable);
 
     /**
-     * Return the amount of records that a search with no query params will return
-     *
-     * @return
-     */
-    Integer findAllCountQuery();
-
-    /**
      * Get all the people using the given smart search string and filters.
      *
      * @param searchString the search string to match, can be null
@@ -71,13 +64,6 @@ public interface PersonService {
      */
     BasicPage<PersonViewDTO> advancedSearch(String searchString, List<ColumnFilter> columnFilers, Pageable pageable);
 
-    /**
-     * @param searchString
-     * @param columnFilters
-     * @param pageable
-     * @return
-     */
-    Integer advancedSearchCountQuery(String searchString, List<ColumnFilter> columnFilters, Pageable pageable);
 
     /**
      * Looks for person basic details with support of only smart search and automatically limited
