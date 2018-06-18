@@ -47,7 +47,7 @@ public class DesignatedBodyMapperTest {
 
     //then
     assertThat(ownerSet).contains("Health Education England Kent, Surrey and Sussex", "London LETBs",
-        "Health Education England North Central and East London",
+        "Health Education England North Central and East London",
         "Health Education England South London",
         "Health Education England East Midlands",
         "Health Education England East of England",
