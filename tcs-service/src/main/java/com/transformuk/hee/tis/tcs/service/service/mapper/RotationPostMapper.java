@@ -18,7 +18,6 @@ public interface RotationPostMapper extends EntityMapper<RotationPostDTO, Rotati
             return null;
         }
         RotationPost rotationPost = new RotationPost();
-        rotationPost.setId(id);
         return rotationPost;
     }
 }

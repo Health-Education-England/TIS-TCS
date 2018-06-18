@@ -1,8 +1,9 @@
 package com.transformuk.hee.tis.tcs.service.service;
 
-import com.transformuk.hee.tis.tcs.api.dto.PlacementSummaryDTO;
 import com.transformuk.hee.tis.tcs.api.dto.PlacementDTO;
 import com.transformuk.hee.tis.tcs.api.dto.PlacementDetailsDTO;
+import com.transformuk.hee.tis.tcs.api.dto.PlacementSummaryDTO;
+import com.transformuk.hee.tis.tcs.service.model.Placement;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 
@@ -87,14 +88,6 @@ public interface PlacementService {
   List<PlacementDTO> patchPlacementSpecialties(List<PlacementDTO> placementDTOList);
 
   /**
-   * Patch a list of Placement clinical supervisors
-   *
-   * @param placementDTOList
-   * @return
-   */
-  List<PlacementDTO> patchPlacementClinicalSupervisors(List<PlacementDTO> placementDTOList);
-
-  /**
    * Get filtered  the placement details.
    *
    * @param pageable the pagination information
@@ -131,4 +124,10 @@ public interface PlacementService {
    * @return
    */
   List<PlacementSummaryDTO> getPlacementForPost(Long postId);
+
+  Placement findPlacementById(Long placementId);
+
+  boolean isEligibleForChangedDatesNotification(PlacementDetailsDTO updatedPlacementDetails, Placement existingPlacement);
+
+  void handleChangeOfPlacementDatesEsrNotification(PlacementDetailsDTO placementDetailsDTO, Placement placementBeforeUpdate, boolean currentPlacementEdit);
 }

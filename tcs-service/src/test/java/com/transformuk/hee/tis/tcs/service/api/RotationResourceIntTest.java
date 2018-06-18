@@ -11,6 +11,7 @@ import com.transformuk.hee.tis.tcs.service.repository.RotationRepository;
 import com.transformuk.hee.tis.tcs.service.service.RotationService;
 import com.transformuk.hee.tis.tcs.service.service.mapper.RotationMapper;
 import org.apache.commons.codec.net.URLCodec;
+import org.hamcrest.Matchers;
 import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
@@ -32,6 +33,7 @@ import java.util.List;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.hamcrest.Matchers.hasItem;
+import static org.hamcrest.Matchers.hasItems;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.*;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.*;
 
@@ -240,6 +242,56 @@ public class RotationResourceIntTest {
                 .andExpect(jsonPath("$.[*].programmeName").value(PROGRAMME_NAME))
                 .andExpect(jsonPath("$.[*].programmeNumber").value(PROGRAMME_NUMBER))
                 .andExpect(jsonPath("$.[*].name").value(hasItem(DEFAULT_NAME.toString())))
+                .andExpect(jsonPath("$.[*].status").value(hasItem(DEFAULT_STATUS.toString().toUpperCase())));
+    }
+    
+    @Test
+    @Transactional
+    public void filterRotationsByMatchingName() throws Exception {
+        // Initialize the database
+        Programme p2 = buildProgramme();
+        programmeRepository.saveAndFlush(p2);
+        long progId = p2.getId();
+        
+        Rotation rotation2 = buildRotation(p2.getId());
+        rotation2.setProgrammeId(progId);
+        rotation2.setName("test");
+        rotationRepository.saveAndFlush(rotation2);
+        
+        // Get all the rotationList
+        restRotationMockMvc.perform(get("/api/rotations?sort=id,desc&searchQuery=" + rotation2.getName()))
+                .andExpect(status().isOk())
+                .andExpect(content().contentType(MediaType.APPLICATION_JSON_UTF8_VALUE))
+                .andExpect(jsonPath("$.[*].id").value(hasItem(rotation2.getId().intValue())))
+                .andExpect(jsonPath("$.[*].programmeId").value(hasItem((int)progId)))
+                .andExpect(jsonPath("$.[*].programmeName").value(PROGRAMME_NAME))
+                .andExpect(jsonPath("$.[*].programmeNumber").value(PROGRAMME_NUMBER))
+                .andExpect(jsonPath("$.[*].name").value(hasItem(rotation2.getName())))
+                .andExpect(jsonPath("$.[*].status").value(hasItem(DEFAULT_STATUS.toString().toUpperCase())));
+    }
+    
+    @Test
+    @Transactional
+    public void filterRotationsBySimilarName() throws Exception {
+        // Initialize the database
+        Programme p2 = buildProgramme();
+        programmeRepository.saveAndFlush(p2);
+        long progId = p2.getId();
+        
+        Rotation rotation2 = buildRotation(p2.getId());
+        rotation2.setProgrammeId(progId);
+        rotation2.setName("testA");
+        rotationRepository.saveAndFlush(rotation2);
+        
+        // Get all the rotationList
+        restRotationMockMvc.perform(get("/api/rotations?sort=id,desc&searchQuery=A"))
+                .andExpect(status().isOk())
+                .andExpect(content().contentType(MediaType.APPLICATION_JSON_UTF8_VALUE))
+                .andExpect(jsonPath("$.[*].id").value(hasItem(rotation2.getId().intValue())))
+                .andExpect(jsonPath("$.[*].programmeId").value(hasItem((int)progId)))
+                .andExpect(jsonPath("$.[*].programmeName").value(hasItem(PROGRAMME_NAME)))
+                .andExpect(jsonPath("$.[*].programmeNumber").value(hasItem(PROGRAMME_NUMBER)))
+                .andExpect(jsonPath("$.[*].name").value(Matchers.hasItems(rotation.getName(), rotation2.getName())))
                 .andExpect(jsonPath("$.[*].status").value(hasItem(DEFAULT_STATUS.toString().toUpperCase())));
     }
 

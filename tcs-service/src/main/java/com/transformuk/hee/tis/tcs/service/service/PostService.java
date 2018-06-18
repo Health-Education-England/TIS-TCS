@@ -155,4 +155,11 @@ public interface PostService {
    * @return
    */
   Page<PostViewDTO> findByNationalPostNumber(String query, Pageable pageable);
+
+  /**
+   * Method that will throw a not authorized exception if the current logged in user cannot view or modify the person record
+   *
+   * @param personId the db managed id of the person record
+   */
+  void canLoggedInUserViewOrAmend(Long personId);
 }

@@ -18,22 +18,21 @@ public class RotationPost implements Serializable {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
-
+    
     @Column(name = "postId")
     private Long postId;
-
+    
     @Column(name = "rotationId")
     private Long rotationId;
-
-    // jhipster-needle-entity-add-field - JHipster will add fields here, do not remove
-    public Long getId() {
-        return id;
-    }
-
+    
     public void setId(Long id) {
         this.id = id;
     }
-
+    
+    public Long getId() {
+        return id;
+    }
+    
     public Long getPostId() {
         return postId;
     }
@@ -60,33 +59,27 @@ public class RotationPost implements Serializable {
         this.rotationId = rotationId;
     }
     // jhipster-needle-entity-add-getters-setters - JHipster will add getters and setters here, do not remove
-
+    
     @Override
     public boolean equals(Object o) {
-        if (this == o) {
-            return true;
-        }
-        if (o == null || getClass() != o.getClass()) {
-            return false;
-        }
-        RotationPost rotationPost = (RotationPost) o;
-        if (rotationPost.getId() == null || getId() == null) {
-            return false;
-        }
-        return Objects.equals(getId(), rotationPost.getId());
+        if (this == o) return true;
+        if (o == null || getClass() != o.getClass()) return false;
+        RotationPost that = (RotationPost) o;
+        return Objects.equals(postId, that.postId) &&
+                Objects.equals(rotationId, that.rotationId);
     }
-
+    
     @Override
     public int hashCode() {
-        return Objects.hashCode(getId());
+        
+        return Objects.hash(postId, rotationId);
     }
-
+    
     @Override
     public String toString() {
         return "RotationPost{" +
-            "id=" + getId() +
-            ", postId=" + getPostId() +
-            ", rotationId=" + getRotationId() +
-            "}";
+                "postId=" + postId +
+                ", rotationId=" + rotationId +
+                '}';
     }
 }

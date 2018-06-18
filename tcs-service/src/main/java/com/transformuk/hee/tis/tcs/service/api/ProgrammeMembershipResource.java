@@ -1,6 +1,7 @@
 package com.transformuk.hee.tis.tcs.service.api;
 
 import com.codahale.metrics.annotation.Timed;
+import com.transformuk.hee.tis.tcs.api.dto.CurriculumMembershipDTO;
 import com.transformuk.hee.tis.tcs.api.dto.ProgrammeMembershipCurriculaDTO;
 import com.transformuk.hee.tis.tcs.api.dto.ProgrammeMembershipDTO;
 import com.transformuk.hee.tis.tcs.api.dto.validation.Create;
@@ -11,6 +12,7 @@ import com.transformuk.hee.tis.tcs.service.api.validation.ProgrammeMembershipVal
 import com.transformuk.hee.tis.tcs.service.service.ProgrammeMembershipService;
 import io.github.jhipster.web.util.ResponseUtil;
 import io.swagger.annotations.ApiParam;
+import org.apache.commons.collections4.CollectionUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -35,6 +37,7 @@ import org.springframework.web.bind.annotation.RestController;
 import javax.validation.Valid;
 import java.net.URI;
 import java.net.URISyntaxException;
+import java.util.Collection;
 import java.util.List;
 import java.util.Optional;
 import java.util.stream.Collectors;
@@ -73,14 +76,14 @@ public class ProgrammeMembershipResource {
       throws URISyntaxException, MethodArgumentNotValidException {
     log.debug("REST request to save ProgrammeMembership : {}", programmeMembershipDTO);
     programmeMembershipValidator.validate(programmeMembershipDTO);
-    if (programmeMembershipDTO.getId() != null) {
+    if (programmeMembershipDTO.getCurriculumMemberships().get(0).getId() != null) {
       return ResponseEntity.badRequest().headers(HeaderUtil.
           createFailureAlert(ENTITY_NAME, "idexists",
               "A new programmeMembership cannot already have an ID")).body(null);
     }
     ProgrammeMembershipDTO result = programmeMembershipService.save(programmeMembershipDTO);
-    return ResponseEntity.created(new URI("/api/programme-memberships/" + result.getId()))
-        .headers(HeaderUtil.createEntityCreationAlert(ENTITY_NAME, result.getId().toString()))
+    return ResponseEntity.created(new URI("/api/programme-memberships/" + result.getCurriculumMemberships().get(0).getId()))
+        .headers(HeaderUtil.createEntityCreationAlert(ENTITY_NAME, result.getCurriculumMemberships().get(0).getId().toString()))
         .body(result);
   }
 
@@ -101,12 +104,12 @@ public class ProgrammeMembershipResource {
       throws URISyntaxException, MethodArgumentNotValidException {
     log.debug("REST request to update ProgrammeMembership : {}", programmeMembershipDTO);
     programmeMembershipValidator.validate(programmeMembershipDTO);
-    if (programmeMembershipDTO.getId() == null) {
+    if (programmeMembershipDTO.getCurriculumMemberships().get(0).getId() == null) {
       return createProgrammeMembership(programmeMembershipDTO);
     }
     ProgrammeMembershipDTO result = programmeMembershipService.save(programmeMembershipDTO);
     return ResponseEntity.ok()
-        .headers(HeaderUtil.createEntityUpdateAlert(ENTITY_NAME, programmeMembershipDTO.getId().toString()))
+        .headers(HeaderUtil.createEntityUpdateAlert(ENTITY_NAME, programmeMembershipDTO.getCurriculumMemberships().get(0).toString()))
         .body(result);
   }
 
@@ -143,6 +146,28 @@ public class ProgrammeMembershipResource {
   }
 
   /**
+   * DELETE  /programme-memberships/ : delete the programmeMembership.
+   *
+   * @param programmeMembershipDTO the programmeMembershipDTO to update
+   * @return the ResponseEntity with status 200 (OK)
+   */
+  @PostMapping("/programme-memberships/delete/")
+  @Timed
+  @PreAuthorize("hasAuthority('tcs:delete:entities')")
+  public ResponseEntity<Void> removeProgrammeMembershipAndItsCurriculum(@RequestBody ProgrammeMembershipDTO programmeMembershipDTO) {
+    log.debug("REST request to delete ProgrammeMembership : {}", programmeMembershipDTO);
+    StringBuilder idsDeleted = new StringBuilder();
+    if(programmeMembershipDTO != null && CollectionUtils.isNotEmpty(programmeMembershipDTO.getCurriculumMemberships())){
+      programmeMembershipDTO.getCurriculumMemberships().stream().forEach(curriculumMembershipDTO -> {
+        programmeMembershipService.delete(curriculumMembershipDTO.getId());
+        idsDeleted.append(curriculumMembershipDTO.getId());
+      });
+    }
+    return ResponseEntity.ok().headers(HeaderUtil.createEntityDeletionAlert(ENTITY_NAME, idsDeleted.toString())).build();
+  }
+
+
+  /**
    * DELETE  /programme-memberships/:id : delete the "id" programmeMembership.
    *
    * @param id the id of the programmeMembershipDTO to delete
@@ -151,8 +176,8 @@ public class ProgrammeMembershipResource {
   @DeleteMapping("/programme-memberships/{id}")
   @Timed
   @PreAuthorize("hasAuthority('tcs:delete:entities')")
-  public ResponseEntity<Void> deleteProgrammeMembership(@PathVariable Long id) {
-    log.debug("REST request to delete ProgrammeMembership : {}", id);
+  public ResponseEntity<Void> deleteProgrammeMembershipById(@PathVariable Long id) {
+    log.debug("REST request to delete ProgrammeMembership by id : {}", id);
     programmeMembershipService.delete(id);
     return ResponseEntity.ok().headers(HeaderUtil.createEntityDeletionAlert(ENTITY_NAME, id.toString())).build();
   }
@@ -171,7 +196,8 @@ public class ProgrammeMembershipResource {
     log.debug("REST request to bulk patch Programme Memberships : {}", programmeMembershipDTOS);
 
     List<ProgrammeMembershipDTO> results = programmeMembershipService.save(programmeMembershipDTOS);
-    List<Long> ids = results.stream().map(ProgrammeMembershipDTO::getId).collect(Collectors.toList());
+    List<Long> ids = results.stream().map(ProgrammeMembershipDTO::getCurriculumMemberships).
+            flatMap(Collection::stream).map(CurriculumMembershipDTO::getId).collect(Collectors.toList());
     return ResponseEntity.ok()
         .headers(HeaderUtil.createEntityUpdateAlert(ENTITY_NAME, StringUtils.join(ids, ",")))
         .body(results);
@@ -191,6 +217,21 @@ public class ProgrammeMembershipResource {
                                                                                                             @PathVariable Long programmeId) {
     log.debug("REST request to get ProgrammeMemberships for trainee {}, programme {}", traineeId, programmeId);
     List<ProgrammeMembershipCurriculaDTO> programmeMembershipDTOS = programmeMembershipService.findProgrammeMembershipsForTraineeAndProgramme(traineeId, programmeId);
+
+    return new ResponseEntity<>(programmeMembershipDTOS, HttpStatus.OK);
+  }
+
+  /**
+   * GET  /trainee/:traineeId/programme-memberships : get all the programmeMemberships relating to a trainee
+   *
+   * @return the ResponseEntity with status 200 (OK) and the list of programmeMemberships in body
+   */
+  @GetMapping("/trainee/{traineeId}/programme-memberships")
+  @Timed
+  @PreAuthorize("hasPermission('tis:people::person:', 'View')")
+  public ResponseEntity<List<ProgrammeMembershipCurriculaDTO>> getProgrammeMembershipForTrainee(@PathVariable Long traineeId) {
+    log.debug("REST request to get ProgrammeMemberships for trainee {}", traineeId);
+    List<ProgrammeMembershipCurriculaDTO> programmeMembershipDTOS = programmeMembershipService.findProgrammeMembershipsForTrainee(traineeId);
 
     return new ResponseEntity<>(programmeMembershipDTOS, HttpStatus.OK);
   }

@@ -7,6 +7,7 @@ import com.transformuk.hee.tis.tcs.service.Application;
 import com.transformuk.hee.tis.tcs.service.api.decorator.PlacementSummaryDecorator;
 import com.transformuk.hee.tis.tcs.service.api.decorator.PlacementViewDecorator;
 import com.transformuk.hee.tis.tcs.service.api.validation.PostValidator;
+import com.transformuk.hee.tis.tcs.service.exception.AccessUnauthorisedException;
 import com.transformuk.hee.tis.tcs.service.exception.ExceptionTranslator;
 import com.transformuk.hee.tis.tcs.service.repository.PlacementViewRepository;
 import com.transformuk.hee.tis.tcs.service.service.PlacementService;
@@ -30,8 +31,14 @@ import org.springframework.test.web.servlet.setup.MockMvcBuilders;
 import org.springframework.validation.BeanPropertyBindingResult;
 import org.springframework.web.bind.MethodArgumentNotValidException;
 
+import static org.mockito.Matchers.any;
+import static org.mockito.Mockito.doNothing;
 import static org.mockito.Mockito.doThrow;
+import static org.mockito.Mockito.never;
+import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.delete;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.put;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.header;
@@ -185,5 +192,76 @@ public class PostResourceTest2 {
         .content(TestUtil.convertObjectToJsonBytes(postDTO)))
         .andExpect(status().isOk())
         .andExpect(jsonPath("$.id").value("1"));
+  }
+
+  @Test
+  public void updatePostShouldReturnUnauth() throws Exception {
+    long postId = 1L;
+    postDTO.setId(postId);
+
+    doNothing().when(postValidator).validate(postDTO);
+    doThrow(new AccessUnauthorisedException("")).when(postService).canLoggedInUserViewOrAmend(postId);
+
+    restPostMockMvc.perform(put("/api/posts")
+        .contentType(TestUtil.APPLICATION_JSON_UTF8)
+        .content(TestUtil.convertObjectToJsonBytes(postDTO)))
+        .andExpect(status().isUnauthorized())
+        .andExpect(jsonPath("$.message").value("error.accessDenied"));
+  }
+
+  @Test
+  public void getPostShouldReturnUnauthWhenUserNotPartOfSameTrust() throws Exception {
+    long postId = 1L;
+
+    doThrow(new AccessUnauthorisedException("")).when(postService).canLoggedInUserViewOrAmend(postId);
+
+    restPostMockMvc.perform(get("/api/posts/{id}", postId)
+        .contentType(TestUtil.APPLICATION_JSON_UTF8))
+        .andExpect(status().isUnauthorized())
+        .andExpect(jsonPath("$.message").value("error.accessDenied"));
+    verify(postService, never()).findOne(any());
+  }
+
+  @Test
+  public void getPostPlacementShouldReturnUnauthWhenUserNotPartOfSameTrust() throws Exception {
+    long personId = 1L;
+
+    doThrow(new AccessUnauthorisedException("")).when(postService).canLoggedInUserViewOrAmend(personId);
+
+    restPostMockMvc.perform(get("/api/posts/{id}/placements", personId)
+        .contentType(TestUtil.APPLICATION_JSON_UTF8))
+        .andExpect(status().isUnauthorized())
+        .andExpect(jsonPath("$.message").value("error.accessDenied"));
+    verify(placementViewRepository, never()).findAllByPostIdOrderByDateToDesc(any());
+    verify(placementViewDecorator, never()).decorate(any());
+    verify(placementViewMapper, never()).placementViewsToPlacementViewDTOs(any());
+  }
+
+  @Test
+  public void getPostPlacementShouldReturnUnauthWhenUserNotPartOfSameTrustNew() throws Exception {
+    long postId = 1L;
+
+    doThrow(new AccessUnauthorisedException("")).when(postService).canLoggedInUserViewOrAmend(postId);
+
+    restPostMockMvc.perform(get("/api/posts/{postId}/placements/new", postId)
+        .contentType(TestUtil.APPLICATION_JSON_UTF8))
+        .andExpect(status().isUnauthorized())
+        .andExpect(jsonPath("$.message").value("error.accessDenied"));
+    verify(placementService, never()).getPlacementForPost(any());
+    verify(placementSummaryDecorator, never()).decorate(any());
+  }
+
+  @Test
+  public void deletePostShouldReturnUnauthWhenUserNotPartOfSameTrust() throws Exception {
+    long personId = 1L;
+    postDTO.setId(personId);
+
+    doThrow(new AccessUnauthorisedException("")).when(postService).canLoggedInUserViewOrAmend(personId);
+
+    restPostMockMvc.perform(delete("/api/posts/{id}", personId)
+        .contentType(TestUtil.APPLICATION_JSON_UTF8))
+        .andExpect(status().isUnauthorized())
+        .andExpect(jsonPath("$.message").value("error.accessDenied"));
+    verify(postService, never()).delete(any());
   }
 }

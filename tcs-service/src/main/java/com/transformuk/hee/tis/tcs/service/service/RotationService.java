@@ -1,11 +1,9 @@
 package com.transformuk.hee.tis.tcs.service.service;
 
-import com.transformuk.hee.tis.tcs.api.dto.PostViewDTO;
 import com.transformuk.hee.tis.tcs.api.dto.RotationDTO;
 import com.transformuk.hee.tis.tcs.service.model.ColumnFilter;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
-import org.springframework.transaction.annotation.Transactional;
 
 import java.util.List;
 
@@ -38,7 +36,9 @@ public interface RotationService {
      */
     RotationDTO findOne(Long id);
     
-    Page<RotationDTO> advancedSearchBySpecification(List<ColumnFilter> columnFilters, Pageable pageable);
+    Page<RotationDTO> advancedSearchBySpecification(String searchQuery, List<ColumnFilter> columnFilters, Pageable pageable);
+    
+    boolean rotationExists(String value, Long programmeId);
     
     /**
      * Delete the "id" rotation.

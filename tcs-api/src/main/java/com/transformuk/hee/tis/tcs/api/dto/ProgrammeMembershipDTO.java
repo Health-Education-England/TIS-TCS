@@ -4,12 +4,15 @@ import com.transformuk.hee.tis.tcs.api.dto.validation.Create;
 import com.transformuk.hee.tis.tcs.api.dto.validation.Update;
 import com.transformuk.hee.tis.tcs.api.enumeration.ProgrammeMembershipType;
 
+import javax.validation.Valid;
 import javax.validation.constraints.DecimalMin;
 import javax.validation.constraints.NotNull;
 import javax.validation.constraints.Null;
 import java.io.Serializable;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
+import java.util.HashSet;
+import java.util.List;
 import java.util.Objects;
 
 /**
@@ -17,12 +20,6 @@ import java.util.Objects;
  */
 public class ProgrammeMembershipDTO implements Serializable {
 
-  @NotNull(groups = Update.class, message = "Id must not be null when updating a ProgrammeMembership")
-  @DecimalMin(value = "0", groups = Update.class, message = "Id must not be negative")
-  @Null(groups = Create.class, message = "Id must be null when creating a new ProgrammeMembership")
-  private Long id;
-
-  private String intrepidId;
 
   @NotNull(message = "ProgrammeMembershipType is required", groups = {Update.class, Create.class})
   private ProgrammeMembershipType programmeMembershipType;
@@ -31,18 +28,8 @@ public class ProgrammeMembershipDTO implements Serializable {
 
   private String rotation;
 
-  @NotNull(message = "CurriculumStartDate is required", groups = {Update.class, Create.class})
-  private LocalDate curriculumStartDate;
-
-  @NotNull(message = "CurriculumEndDate is required", groups = {Update.class, Create.class})
-  private LocalDate curriculumEndDate;
-
-  private Integer periodOfGrace;
-
   @NotNull(message = "ProgrammeStartDate is required", groups = {Update.class, Create.class})
   private LocalDate programmeStartDate;
-
-  private LocalDate curriculumCompletionDate;
 
   @NotNull(message = "ProgrammeEndDate is required", groups = {Update.class, Create.class})
   private LocalDate programmeEndDate;
@@ -52,28 +39,15 @@ public class ProgrammeMembershipDTO implements Serializable {
   @NotNull(message = "Programme is required", groups = {Update.class, Create.class})
   private Long programmeId;
 
-  @NotNull(message = "Curriculum is required", groups = {Update.class, Create.class})
-  private Long curriculumId;
+  private String programmeName;
 
-  private Long trainingNumberId;
+  private String programmeNumber;
 
-  private LocalDateTime amendedDate;
+  private TrainingNumberDTO trainingNumber;
 
-  public Long getId() {
-    return id;
-  }
+  @Valid
+  private List<CurriculumMembershipDTO> curriculumMemberships;
 
-  public void setId(Long id) {
-    this.id = id;
-  }
-
-  public String getIntrepidId() {
-    return intrepidId;
-  }
-
-  public void setIntrepidId(String intrepidId) {
-    this.intrepidId = intrepidId;
-  }
 
   public ProgrammeMembershipType getProgrammeMembershipType() {
     return programmeMembershipType;
@@ -91,29 +65,6 @@ public class ProgrammeMembershipDTO implements Serializable {
     this.rotation = rotation;
   }
 
-  public LocalDate getCurriculumStartDate() {
-    return curriculumStartDate;
-  }
-
-  public void setCurriculumStartDate(LocalDate curriculumStartDate) {
-    this.curriculumStartDate = curriculumStartDate;
-  }
-
-  public LocalDate getCurriculumEndDate() {
-    return curriculumEndDate;
-  }
-
-  public void setCurriculumEndDate(LocalDate curriculumEndDate) {
-    this.curriculumEndDate = curriculumEndDate;
-  }
-
-  public Integer getPeriodOfGrace() {
-    return periodOfGrace;
-  }
-
-  public void setPeriodOfGrace(Integer periodOfGrace) {
-    this.periodOfGrace = periodOfGrace;
-  }
 
   public LocalDate getProgrammeStartDate() {
     return programmeStartDate;
@@ -123,13 +74,6 @@ public class ProgrammeMembershipDTO implements Serializable {
     this.programmeStartDate = programmeStartDate;
   }
 
-  public LocalDate getCurriculumCompletionDate() {
-    return curriculumCompletionDate;
-  }
-
-  public void setCurriculumCompletionDate(LocalDate curriculumCompletionDate) {
-    this.curriculumCompletionDate = curriculumCompletionDate;
-  }
 
   public LocalDate getProgrammeEndDate() {
     return programmeEndDate;
@@ -155,20 +99,28 @@ public class ProgrammeMembershipDTO implements Serializable {
     this.programmeId = programmeId;
   }
 
-  public Long getCurriculumId() {
-    return curriculumId;
+  public String getProgrammeName() {
+    return programmeName;
   }
 
-  public void setCurriculumId(Long curriculumId) {
-    this.curriculumId = curriculumId;
+  public void setProgrammeName(String programmeName) {
+    this.programmeName = programmeName;
   }
 
-  public Long getTrainingNumberId() {
-    return trainingNumberId;
+  public String getProgrammeNumber() {
+    return programmeNumber;
   }
 
-  public void setTrainingNumberId(Long trainingNumberId) {
-    this.trainingNumberId = trainingNumberId;
+  public void setProgrammeNumber(String programmeNumber) {
+    this.programmeNumber = programmeNumber;
+  }
+
+  public TrainingNumberDTO getTrainingNumber() {
+    return trainingNumber;
+  }
+
+  public void setTrainingNumber(TrainingNumberDTO trainingNumber) {
+    this.trainingNumber = trainingNumber;
   }
 
   public PersonDTO getPerson() {
@@ -179,12 +131,12 @@ public class ProgrammeMembershipDTO implements Serializable {
     this.person = person;
   }
 
-  public LocalDateTime getAmendedDate() {
-    return amendedDate;
+  public List<CurriculumMembershipDTO> getCurriculumMemberships() {
+    return curriculumMemberships;
   }
 
-  public void setAmendedDate(LocalDateTime amendedDate) {
-    this.amendedDate = amendedDate;
+  public void setCurriculumMemberships(List<CurriculumMembershipDTO> curriculumMemberships) {
+    this.curriculumMemberships = curriculumMemberships;
   }
 
   @Override
@@ -193,19 +145,15 @@ public class ProgrammeMembershipDTO implements Serializable {
     if (o == null || getClass() != o.getClass()) return false;
     ProgrammeMembershipDTO that = (ProgrammeMembershipDTO) o;
     return Objects.equals(getPersonIdOrNull(), that.getPersonIdOrNull()) &&
-        Objects.equals(curriculumStartDate, that.curriculumStartDate) &&
-        Objects.equals(curriculumEndDate, that.curriculumEndDate) &&
         Objects.equals(programmeStartDate, that.programmeStartDate) &&
-        Objects.equals(curriculumCompletionDate, that.curriculumCompletionDate) &&
         Objects.equals(programmeEndDate, that.programmeEndDate) &&
         Objects.equals(programmeId, that.programmeId) &&
-        Objects.equals(curriculumId, that.curriculumId) &&
         Objects.equals(programmeMembershipType, that.programmeMembershipType);
   }
 
   @Override
   public int hashCode() {
-    return Objects.hash(getPersonIdOrNull(), curriculumStartDate, curriculumEndDate, programmeStartDate, curriculumCompletionDate, programmeEndDate, programmeId, curriculumId, programmeMembershipType);
+    return Objects.hash(getPersonIdOrNull(), programmeStartDate, programmeEndDate, programmeId, programmeMembershipType);
   }
 
   private Long getPersonIdOrNull() {
@@ -215,19 +163,12 @@ public class ProgrammeMembershipDTO implements Serializable {
   @Override
   public String toString() {
     return "ProgrammeMembershipDTO{" +
-        "id=" + id +
-        ", intrepidId='" + intrepidId + "'" +
         ", programmeMembershipType='" + programmeMembershipType + "'" +
         ", rotation='" + rotation + "'" +
-        ", curriculumStartDate='" + curriculumStartDate + "'" +
-        ", curriculumEndDate='" + curriculumEndDate + "'" +
-        ", periodOfGrace='" + periodOfGrace + "'" +
         ", programmeStartDate='" + programmeStartDate + "'" +
-        ", curriculumCompletionDate='" + curriculumCompletionDate + "'" +
         ", programmeEndDate='" + programmeEndDate + "'" +
         ", leavingDestination='" + leavingDestination + "'" +
         ", person='" + person + "'" +
-        ", amendedDate='" + amendedDate + "'" +
         '}';
   }
 }

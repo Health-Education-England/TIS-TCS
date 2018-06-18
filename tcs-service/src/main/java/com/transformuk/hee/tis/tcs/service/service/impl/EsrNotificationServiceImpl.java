@@ -1,15 +1,19 @@
 package com.transformuk.hee.tis.tcs.service.service.impl;
 
+import com.transformuk.hee.tis.reference.api.dto.SiteDTO;
+import com.transformuk.hee.tis.reference.client.ReferenceService;
 import com.transformuk.hee.tis.tcs.api.dto.EsrNotificationDTO;
 import com.transformuk.hee.tis.tcs.api.dto.PlacementDetailsDTO;
 import com.transformuk.hee.tis.tcs.api.dto.PostDTO;
 import com.transformuk.hee.tis.tcs.service.api.util.ObjectCloner;
+import com.transformuk.hee.tis.tcs.service.model.ContactDetails;
 import com.transformuk.hee.tis.tcs.service.model.EsrNotification;
 import com.transformuk.hee.tis.tcs.service.model.Placement;
 import com.transformuk.hee.tis.tcs.service.repository.EsrNotificationRepository;
 import com.transformuk.hee.tis.tcs.service.repository.PlacementRepository;
 import com.transformuk.hee.tis.tcs.service.service.EsrNotificationService;
 import com.transformuk.hee.tis.tcs.service.service.mapper.EsrNotificationMapper;
+import org.apache.commons.collections4.CollectionUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Service;
@@ -19,12 +23,17 @@ import java.io.IOException;
 import java.text.DecimalFormat;
 import java.time.LocalDate;
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.Comparator;
 import java.util.List;
+import java.util.Optional;
 
+import static com.google.common.collect.Sets.newHashSet;
 import static java.lang.Double.parseDouble;
 import static java.util.Arrays.asList;
 import static java.util.stream.Collectors.toList;
+import static org.apache.commons.collections4.CollectionUtils.isNotEmpty;
+import static org.apache.commons.lang3.StringUtils.isEmpty;
 import static org.apache.commons.lang3.StringUtils.isNotEmpty;
 
 /**
@@ -41,16 +50,20 @@ public class EsrNotificationServiceImpl implements EsrNotificationService {
 
   private final PlacementRepository placementRepository;
 
+  private ReferenceService referenceService;
+
   private static final DecimalFormat DECIMAL_FORMAT = new DecimalFormat("#.#");
 
   private static final List<String> placementTypes = asList("In post", "In Post - Acting Up", "In post - Extension", "Parental Leave", "Long-term sick", "Suspended", "Phased Return");
 
   public EsrNotificationServiceImpl(EsrNotificationRepository esrNotificationRepository,
                                     EsrNotificationMapper esrNotificationMapper,
-                                    PlacementRepository placementRepository) {
+                                    PlacementRepository placementRepository,
+                                    ReferenceService referenceService) {
     this.esrNotificationRepository = esrNotificationRepository;
     this.esrNotificationMapper = esrNotificationMapper;
     this.placementRepository = placementRepository;
+    this.referenceService = referenceService;
   }
 
   /**
@@ -61,9 +74,8 @@ public class EsrNotificationServiceImpl implements EsrNotificationService {
    */
   @Override
   public List<EsrNotification> save(List<EsrNotification> esrNotifications) {
-    LOG.debug("Request to save EsrNotifications : {}", esrNotifications);
-    List<EsrNotification> notifications = esrNotificationRepository.save(esrNotifications);
-    return notifications;
+    LOG.info("Request to save EsrNotifications : {}", isNotEmpty(esrNotifications) ? esrNotifications.size() : 0);
+    return esrNotificationRepository.save(esrNotifications);
   }
 
   /**
@@ -79,10 +91,10 @@ public class EsrNotificationServiceImpl implements EsrNotificationService {
     LocalDate toDate = fromDate.minusDays(1);
     List<Placement> placements = placementRepository.findPlacementsWithTraineesStartingOnTheDayAndFinishingOnPreviousDay(fromDate, toDate, placementTypes);
 
-    LOG.debug("Identified {} Placements with next to current trainees from {} to {} ", placements.size(), fromDate, toDate);
+    LOG.info("Identified {} Placements with next to current trainees from {} to {} ", isNotEmpty(placements) ? placements.size() : 0, fromDate, toDate);
     // Have a separate mapper when time permits
     List<EsrNotification> esrNotifications = mapNextToCurrentPlacementsToNotification(placements);
-    LOG.debug("Saving ESR Notifications for next to current trainee scenario : {}", esrNotifications.size());
+    LOG.info("Saving ESR Notifications for next to current trainee scenario : {}", isNotEmpty(esrNotifications) ? esrNotifications.size() : 0);
     List<EsrNotification> savedNotifications = esrNotificationRepository.save(esrNotifications);
     return esrNotificationMapper.esrNotificationsToPlacementDetailDTOs(savedNotifications);
   }
@@ -101,6 +113,10 @@ public class EsrNotificationServiceImpl implements EsrNotificationService {
 
     List<Placement> placements = placementRepository.findEarliestEligiblePlacementWithin3MonthsForEsrNotification(fromDate, earliestEligibleDate, placementTypes);
 
+    if (CollectionUtils.isEmpty(placements)) {
+      LOG.info("ESR: Could not find any earliest trainee eligible for notification from date {}", fromDate );
+      return Collections.emptyList();
+    }
     LOG.info("Identified {} earliest eligible future Placements based on current date {} and earliest available date {} ", placements.size(), fromDate, earliestEligibleDate);
     // Have a separate mapper when time permits
     List<EsrNotification> esrNotifications = mapNextToCurrentPlacementsToNotification(placements);
@@ -131,7 +147,7 @@ public class EsrNotificationServiceImpl implements EsrNotificationService {
 
     List<EsrNotification> latestNotifications = esrNotificationRepository.getLatestNotificationsByDeanery(deanery);
 
-    LOG.debug("Found {} latest notifications for deanery {} ", latestNotifications.size(), deanery);
+    LOG.info("Found {} latest notifications for deanery {} ", isNotEmpty(latestNotifications) ? latestNotifications.size() : 0, deanery);
     return esrNotificationMapper.esrNotificationsToPlacementDetailDTOs(latestNotifications);
   }
 
@@ -139,7 +155,7 @@ public class EsrNotificationServiceImpl implements EsrNotificationService {
   public List<EsrNotificationDTO> fetchNotificationsFrom(String deanery, LocalDate fromDate) {
 
     List<EsrNotification> latestNotifications = esrNotificationRepository.getLatestNotificationsFromDateByDeanery(fromDate, deanery);
-    LOG.debug("Found {} notifications from day {} for deanery {} ", latestNotifications.size(), fromDate, deanery);
+    LOG.info("Found {} notifications from day {} for deanery {} ", isNotEmpty(latestNotifications) ? latestNotifications.size() : 0, fromDate, deanery);
     return esrNotificationMapper.esrNotificationsToPlacementDetailDTOs(latestNotifications);
   }
 
@@ -158,18 +174,18 @@ public class EsrNotificationServiceImpl implements EsrNotificationService {
     List<EsrNotification> esrNotifications = mapCurrentAndFuturePlacementsToNotification(currentAndFuturePlacements, asOfDate);
 
     LOG.info("Saving ESR Notifications for full notifications scenario : {}", esrNotifications.size());
+    esrNotifications.stream().forEach(esrNotification -> esrNotification.setManagingDeaneryBodyCode(deaneryBody));
     List<EsrNotification> savedNotifications = esrNotificationRepository.save(esrNotifications);
     return esrNotificationMapper.esrNotificationsToPlacementDetailDTOs(savedNotifications);
   }
 
   @Override
-  public void loadChangeOfPlacementDatesNotification(PlacementDetailsDTO changedPlacement, String nationalPostNumber) throws IOException, ClassNotFoundException {
+  public void loadChangeOfPlacementDatesNotification(PlacementDetailsDTO changedPlacement, String nationalPostNumber, boolean currentPlacementEdit) throws IOException, ClassNotFoundException {
 
     LocalDate asOfDate = LocalDate.now(); // find placements as of today.
     List<EsrNotification> allEsrNotifications = new ArrayList<>();
 
-    // if the changed placement is current then find the future placement for the post to create the notification record.
-    if (changedPlacement.getDateFrom() != null && (changedPlacement.getDateFrom().isBefore(LocalDate.now()) || changedPlacement.getDateFrom().equals(asOfDate))) {
+    if (currentPlacementEdit) {
       handleCurrentPlacementEdit(changedPlacement, nationalPostNumber, asOfDate, allEsrNotifications);
     } else { // if the changed placement is future placement then find the current placement for the post to create the notification record.
       handleFuturePlacementEdit(changedPlacement, nationalPostNumber, asOfDate, allEsrNotifications);
@@ -188,27 +204,32 @@ public class EsrNotificationServiceImpl implements EsrNotificationService {
       esrNotificationType4.setChangeOfProjectedHireDate(changedPlacement.getDateFrom());
     }
     esrNotificationType4.setChangeOfProjectedEndDate(changedPlacement.getDateTo());
+    esrNotificationType4.setCurrentTraineeProjectedEndDate(null);
 
-    LOG.debug("Saving ESR Notifications for changed date scenario : {}");
+    LOG.info("Saving ESR Notifications for changed date scenario : ");
     List<EsrNotification> savedNotifications = esrNotificationRepository.save(asList(type1EsrNotification, esrNotificationType4));
-    LOG.debug("Saved {} ESR notifications for changed date scenario", savedNotifications.size());
+    LOG.info("Saved {} ESR notifications for changed date scenario", isNotEmpty(savedNotifications) ? savedNotifications.size() : 0);
   }
 
   private void handleFuturePlacementEdit(PlacementDetailsDTO changedPlacement, String nationalPostNumber, LocalDate asOfDate, List<EsrNotification> allEsrNotifications) {
 
     List<Placement> currentPlacements = placementRepository.findCurrentPlacementsForPosts(
         asOfDate, asList(nationalPostNumber), placementTypes);
-    LOG.info("Identified {} current Placements for post {} as of date {}", currentPlacements.size(), nationalPostNumber, asOfDate);
+    LOG.info("Identified {} current Placements for post {} as of date {}", isNotEmpty(currentPlacements) ? currentPlacements.size() : 0, nationalPostNumber, asOfDate);
 
-    List<Placement> matchedCurrentPlacements = currentPlacements.stream()
-        .filter(placement -> isNotEmpty(placement.getSiteCode()) && placement.getSiteCode().equalsIgnoreCase(changedPlacement.getSiteCode()))
-        .collect(toList());
+    List<Placement> matchedCurrentPlacements = isNotEmpty(currentPlacements) ?
+        currentPlacements.stream().filter(placement ->
+            isNotEmpty(placement.getSiteCode()) && placement.getSiteCode().equalsIgnoreCase(changedPlacement.getSiteCode()))
+            .collect(toList())
+        : Collections.emptyList();
 
     Placement futurePlacement = placementRepository.findOne(changedPlacement.getId());
-    if (matchedCurrentPlacements.isEmpty()) {
+    if (CollectionUtils.isEmpty(matchedCurrentPlacements)) {
       allEsrNotifications.add(buildNotification(futurePlacement, null));
     } else {
-      matchedCurrentPlacements.forEach(currentPlacement -> allEsrNotifications.add(buildNotification(futurePlacement, currentPlacement)));
+      // NOTE: Send the first matched current placement associated with the edited placement.
+      // There is an enhancement to send all placements in future.
+      allEsrNotifications.add(buildNotification(futurePlacement, matchedCurrentPlacements.get(0)));
     }
   }
 
@@ -223,10 +244,12 @@ public class EsrNotificationServiceImpl implements EsrNotificationService {
         .collect(toList());
 
     Placement currentPlacement = placementRepository.findOne(changedPlacement.getId());
-    if (matchedFuturePlacements.isEmpty()) {
+    if (CollectionUtils.isEmpty(matchedFuturePlacements)) {
       allEsrNotifications.add(buildNotification(null, currentPlacement));
     } else {
-      matchedFuturePlacements.forEach(futurePlacement -> allEsrNotifications.add(buildNotification(futurePlacement, currentPlacement)));
+      // NOTE: Send the first matched future placement associated with the edited placement.
+      // There is an enhancement to send all placements in future.
+      allEsrNotifications.add(buildNotification(matchedFuturePlacements.get(0), currentPlacement));
     }
   }
 
@@ -263,7 +286,7 @@ public class EsrNotificationServiceImpl implements EsrNotificationService {
       return savedNotifications;
 
     } else {
-      LOG.warn("Could not generate esr notification for newly created placement {}, {}", nationalPostNumber);
+      LOG.warn("Could not generate esr notification for newly created placement {}", nationalPostNumber);
       return allEsrNotifications;
     }
 
@@ -275,34 +298,39 @@ public class EsrNotificationServiceImpl implements EsrNotificationService {
     LocalDate asOfDate = LocalDate.now();
     String nationalPostNumber = placementToDelete.getPost().getNationalPostNumber();
     List<Placement> currentPlacements = placementRepository.findCurrentPlacementsForPosts(asOfDate, asList(nationalPostNumber), placementTypes);
+    List<Placement> futurePlacements = placementRepository.findFuturePlacementsForPosts(asOfDate, asOfDate.plusMonths(3), asList(nationalPostNumber), placementTypes);
 
-    LOG.info("Placement Delete: Identified {} current Placements for post {} as of date {}", currentPlacements.size(), nationalPostNumber, asOfDate);
-
-    if (currentPlacements.isEmpty()) {
-      // build notification without current trainee details.
-      generateWithdrawalNotifications(placementToDelete, allEsrNotifications, null);
-
-    } else {
-      List<Placement> placementsWithSiteCode = currentPlacements.stream().filter(placement -> isNotEmpty(placement.getSiteCode())).collect(toList());
-
-      // if there is a site code match use that as priority and ignore the rest otherwise use available current placements
-      if (!placementsWithSiteCode.isEmpty()) {
-        placementsWithSiteCode.forEach(currentPlacement -> generateWithdrawalNotifications(placementToDelete, allEsrNotifications, currentPlacement));
-      } else {
-        currentPlacements.forEach(currentPlacement -> generateWithdrawalNotifications(placementToDelete, allEsrNotifications, currentPlacement));
-      }
-
+    Placement currentPlacement = null;
+    Placement futurePlacement = null;
+    if (isNotEmpty(currentPlacements)) {
+      Optional<Placement> matchedCurrentPlacements = currentPlacements.stream().filter(placement -> placement.getSiteCode() != null && placement.getSiteCode().equalsIgnoreCase(placementToDelete.getSiteCode())).findFirst();
+      currentPlacement =  matchedCurrentPlacements.isPresent() ? matchedCurrentPlacements.get() : currentPlacements.get(0);
+      LOG.info("Placement Delete: Identified {} current Placements for post {} as of date {}", currentPlacements.size(), nationalPostNumber, asOfDate);
     }
+    if (isNotEmpty(futurePlacements)) {
+      Optional<Placement> matchedFuturePlacements = futurePlacements.stream()
+          .filter(placement -> !placement.getId().equals(placementToDelete.getId()))
+          .filter(placement -> placement.getSiteCode() != null && placement.getSiteCode().equalsIgnoreCase(placementToDelete.getSiteCode())).findFirst();
+      futurePlacement = matchedFuturePlacements.isPresent()  ? matchedFuturePlacements.get() : futurePlacements.get(0);
+      LOG.info("Placement Delete: Identified {} future Placements for post {} as of date {}", futurePlacements.size(), nationalPostNumber, asOfDate);
+    }
+
+    generateWithdrawalNotifications(placementToDelete, allEsrNotifications, currentPlacement, futurePlacement);
+
     return allEsrNotifications;
   }
 
-  private void generateWithdrawalNotifications(Placement placementToDelete, List<EsrNotification> allEsrNotifications, Placement currentPlacement) {
-    EsrNotification esrNotification = buildNotification(placementToDelete, currentPlacement);
+  private void generateWithdrawalNotifications(Placement placementToDelete, List<EsrNotification> allEsrNotifications, Placement currentPlacement, Placement futurePlacement) {
+    EsrNotification esrNotification = buildNotification(futurePlacement, currentPlacement);
     allEsrNotifications.add(esrNotification);
-    allEsrNotifications.add(buildWithdrawnNotification(esrNotification));
+    if (isEmpty(esrNotification.getDeaneryPostNumber())) {
+      esrNotification.setDeaneryPostNumber(placementToDelete.getPost().getNationalPostNumber());
+    }
+    allEsrNotifications.add(buildWithdrawnNotification(esrNotification, placementToDelete));
   }
 
-  private EsrNotification buildWithdrawnNotification(EsrNotification esrNotification) {
+
+  private EsrNotification buildWithdrawnNotification(EsrNotification esrNotification, Placement placementToDelete) {
 
     EsrNotification withdrawnEsrNotification = new EsrNotification();
 
@@ -314,9 +342,17 @@ public class EsrNotificationServiceImpl implements EsrNotificationService {
     withdrawnEsrNotification.setCurrentTraineeGmcNumber(esrNotification.getCurrentTraineeGmcNumber());
     withdrawnEsrNotification.setCurrentTraineeProjectedEndDate(esrNotification.getCurrentTraineeProjectedEndDate());
 
-    withdrawnEsrNotification.setWithdrawnTraineeFirstName(esrNotification.getNextAppointmentTraineeFirstName());
-    withdrawnEsrNotification.setWithdrawnTraineeLastName(esrNotification.getNextAppointmentTraineeLastName());
-    withdrawnEsrNotification.setWithdrawnTraineeGmcNumber(esrNotification.getNextAppointmentTraineeGmcNumber());
+    if (placementToDelete.getTrainee() != null && placementToDelete.getTrainee().getContactDetails() != null ) {
+      ContactDetails withdrawnTraineeDetails = placementToDelete.getTrainee().getContactDetails();
+      withdrawnEsrNotification.setWithdrawnTraineeFirstName(
+          isNotEmpty(withdrawnTraineeDetails.getLegalForenames()) ? withdrawnTraineeDetails.getLegalForenames() : withdrawnTraineeDetails.getForenames());
+      withdrawnEsrNotification.setWithdrawnTraineeLastName(
+          isNotEmpty(withdrawnTraineeDetails.getLegalSurname()) ? withdrawnTraineeDetails.getLegalSurname() : withdrawnTraineeDetails.getSurname());
+    }
+    if (placementToDelete.getTrainee() != null && placementToDelete.getTrainee().getGmcDetails() != null) {
+
+      withdrawnEsrNotification.setWithdrawnTraineeGmcNumber(placementToDelete.getTrainee().getGmcDetails().getGmcNumber());
+    }
     withdrawnEsrNotification.setPostVacantAtNextRotation(esrNotification.getPostVacantAtNextRotation());
     // There is no withdrawal reason in TIS as the withdrawn is handled by deleting future placement. Hence defaulting to other
     withdrawnEsrNotification.setWithdrawalReason(
@@ -361,21 +397,22 @@ public class EsrNotificationServiceImpl implements EsrNotificationService {
 
       List<Placement> currentPlacements = currentAndFuturePlacements.stream()
           .filter(placement -> placement.getPost().getNationalPostNumber().equals(postNumber) &&
-              (placement.getDateFrom().isBefore(asOfDate) || placement.getDateFrom().equals(asOfDate)))
+              (placement.getDateFrom() != null && (placement.getDateFrom().isBefore(asOfDate) || placement.getDateFrom().equals(asOfDate))))
           .collect(toList());
 
       List<Placement> futurePlacements = currentAndFuturePlacements.stream()
-          .filter(placement -> placement.getPost().getNationalPostNumber().equals(postNumber) && placement.getDateFrom().isAfter(asOfDate))
+          .filter(placement -> placement.getPost().getNationalPostNumber().equals(postNumber)
+              && placement.getDateFrom() != null && placement.getDateFrom().isAfter(asOfDate))
           .collect(toList());
 
-      currentPlacements.forEach(currentPlacement -> {
+      for (Placement currentPlacement : currentPlacements) {
 
         List<Placement> matchedFuturePlacements = futurePlacements.stream()
-            .filter(futurePlacement -> futurePlacement.getSiteCode().equalsIgnoreCase(currentPlacement.getSiteCode()))
+            .filter(futurePlacement -> isNotEmpty(futurePlacement.getSiteCode()) && futurePlacement.getSiteCode().equalsIgnoreCase(currentPlacement.getSiteCode()))
             .collect(toList());
 
-        for (Placement futurePlacement : matchedFuturePlacements) {
-
+        if (isNotEmpty(matchedFuturePlacements)) {
+          Placement futurePlacement = matchedFuturePlacements.get(0);
           // map current and future placements to notification record
           esrNotifications.add(buildNotification(futurePlacement, currentPlacement));
           // remove future placement from the list. to handle any posts with no current placements but only future assigned.
@@ -383,7 +420,7 @@ public class EsrNotificationServiceImpl implements EsrNotificationService {
           // remove current placement from the list. to handle any posts with no future placements but only current assigned.
           matchedCurrentPlacementsToRemove.add(currentPlacement);
         }
-      });
+      }
 
       currentPlacements.removeAll(matchedCurrentPlacementsToRemove);
 
@@ -406,10 +443,19 @@ public class EsrNotificationServiceImpl implements EsrNotificationService {
     List<EsrNotification> esrNotifications = new ArrayList<>();
 
     for (String postNumber: postNumbers) {
-      List<Placement> groupedPlacements = placements.stream()
-          .filter(placement -> placement.getPost().getNationalPostNumber().equals(postNumber))
-          .sorted(Comparator.comparing(Placement::getDateFrom).reversed())
-          .collect(toList());
+
+      List<Placement> groupedPlacements = new ArrayList<>();
+      for (Placement placement : placements) {
+        if (placement.getPost() != null && placement.getPost().getNationalPostNumber() != null
+            && placement.getPost().getNationalPostNumber().equalsIgnoreCase(postNumber)) {
+          groupedPlacements.add(placement);
+        }
+      }
+
+      if (groupedPlacements.isEmpty()) {
+        continue;
+      }
+      groupedPlacements.sort(Comparator.comparing(Placement::getDateFrom).reversed());
 
       Placement nextPlacement = groupedPlacements.get(0);
       Placement currentPlacement = null;
@@ -419,7 +465,7 @@ public class EsrNotificationServiceImpl implements EsrNotificationService {
       }
       esrNotifications.add(buildNotification(nextPlacement, currentPlacement));
     }
-    LOG.debug("FINISHED: Mapping placements to ESR Notification records");
+    LOG.info("FINISHED: Mapping placements to ESR Notification records");
     return esrNotifications;
   }
 
@@ -440,7 +486,7 @@ public class EsrNotificationServiceImpl implements EsrNotificationService {
       esrNotifications.add(esrNotification);
     });
 
-    LOG.debug("FINISHED: Mapping vacant posts to ESR Notification records");
+    LOG.info("FINISHED: Mapping vacant posts to ESR Notification records");
     return esrNotifications;
   }
 
@@ -470,29 +516,73 @@ public class EsrNotificationServiceImpl implements EsrNotificationService {
   private void mapCurrentTrainee(Placement currentPlacement, EsrNotification esrNotification) {
 
     setManagingDeaneryBodyCodeFromPlacement(currentPlacement, esrNotification);
-    if (currentPlacement.getTrainee().getContactDetails() != null) {
-      esrNotification.setCurrentTraineeFirstName(currentPlacement.getTrainee().getContactDetails().getLegalForenames());
-      esrNotification.setCurrentTraineeLastName(currentPlacement.getTrainee().getContactDetails().getLegalSurname());
+    if (currentPlacement.getTrainee() != null && currentPlacement.getTrainee().getContactDetails() != null) {
+      ContactDetails contactDetails = currentPlacement.getTrainee().getContactDetails();
+      esrNotification.setCurrentTraineeFirstName(
+          isNotEmpty(contactDetails.getLegalForenames()) ? contactDetails.getLegalForenames() : contactDetails.getForenames());
+      esrNotification.setCurrentTraineeLastName(
+          isNotEmpty(contactDetails.getLegalSurname()) ? contactDetails.getLegalSurname() : contactDetails.getSurname());
     }
     esrNotification.setCurrentTraineeProjectedEndDate(currentPlacement.getDateTo());
     esrNotification.setCurrentTraineeGmcNumber(
         currentPlacement.getTrainee().getGmcDetails() != null ? currentPlacement.getTrainee().getGmcDetails().getGmcNumber() : null);
+
+    esrNotification.setCurrentTraineeVpdForNextPlacement(getNextPlacementForTrainee(currentPlacement.getTrainee().getId()));
   }
 
   private void mapNextTrainee(Placement nextPlacement, EsrNotification esrNotification) {
+
     setManagingDeaneryBodyCodeFromPlacement(nextPlacement, esrNotification);
     esrNotification.setNextAppointmentProjectedStartDate(nextPlacement.getDateFrom());
-    if (nextPlacement.getTrainee().getContactDetails() != null) {
-      esrNotification.setNextAppointmentTraineeEmailAddress(nextPlacement.getTrainee().getContactDetails().getEmail());
-      esrNotification.setNextAppointmentTraineeFirstName(nextPlacement.getTrainee().getContactDetails().getLegalForenames());
-      esrNotification.setNextAppointmentTraineeLastName(nextPlacement.getTrainee().getContactDetails().getLegalSurname());
+
+    if (nextPlacement.getTrainee() != null && nextPlacement.getTrainee().getContactDetails() != null) {
+      ContactDetails contactDetails = nextPlacement.getTrainee().getContactDetails();
+      esrNotification.setNextAppointmentTraineeEmailAddress(contactDetails.getEmail());
+      esrNotification.setNextAppointmentTraineeFirstName(
+          isNotEmpty(contactDetails.getLegalForenames()) ? contactDetails.getLegalForenames() : contactDetails.getForenames());
+      esrNotification.setNextAppointmentTraineeLastName(
+          isNotEmpty(contactDetails.getLegalSurname()) ? contactDetails.getLegalSurname() : contactDetails.getSurname());
     }
 
     esrNotification.setNextAppointmentTraineeGmcNumber(
         nextPlacement.getTrainee().getGmcDetails() != null ?  nextPlacement.getTrainee().getGmcDetails().getGmcNumber() : null);
     esrNotification.setNextAppointmentTraineeGrade(nextPlacement.getGradeAbbreviation());
     setWorkingHourIndicatorFromPlacement(nextPlacement, esrNotification);
+    esrNotification.setNextAppointmentCurrentPlacementVpd(getCurrentPlacementForTrainee(nextPlacement.getTrainee().getId()));
+  }
 
+  private String getNextPlacementForTrainee(Long traineeId) {
+
+    LOG.debug("Fetching NEXT/FUTURE placement for Trainee {} ", traineeId);
+    List<Placement> nextPlacementsForTrainee = placementRepository.findFuturePlacementForTrainee(
+        traineeId, LocalDate.now().plusDays(2), LocalDate.now().plusMonths(3), placementTypes);
+    return getSiteKnownAs(nextPlacementsForTrainee, traineeId);
+
+  }
+
+  private String getCurrentPlacementForTrainee(Long traineeId) {
+
+    LOG.debug("Fetching Current placement for Trainee {} ", traineeId);
+    List<Placement> currentPlacementsForTrainee = placementRepository.findCurrentPlacementForTrainee(traineeId, LocalDate.now(), placementTypes);
+    return getSiteKnownAs(currentPlacementsForTrainee, traineeId);
+  }
+
+  private String getSiteKnownAs(List<Placement> placements, Long traineeId) {
+
+    String siteKnownAs = "NOT KNOWN";
+    if (CollectionUtils.isNotEmpty(placements) && placements.get(0).getSiteId() != null) {
+
+      List<SiteDTO> siteDTOS = referenceService.findSitesIdIn(newHashSet(placements.get(0).getSiteId()));
+      if (CollectionUtils.isEmpty(siteDTOS)) {
+        LOG.debug("Could not find any site details for id {} ", traineeId);
+        return siteKnownAs;
+      }
+      siteKnownAs = siteDTOS.get(0).getSiteKnownAs();
+    } else {
+      LOG.debug("Could not find placement or placement site id for trainee id {}", traineeId);
+    }
+    LOG.debug("Returning siteKnownAs {} for trainee id {} and placement {} ", siteKnownAs, traineeId, placements);
+    return siteKnownAs;
   }
 
   private void setManagingDeaneryBodyCodeFromPlacement(Placement nextPlacement, EsrNotification esrNotification) {

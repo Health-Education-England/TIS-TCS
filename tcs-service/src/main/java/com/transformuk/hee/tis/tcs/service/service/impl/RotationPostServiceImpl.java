@@ -10,6 +10,8 @@ import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.util.ArrayList;
+import java.util.Collections;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.stream.Collectors;
@@ -38,14 +40,26 @@ public class RotationPostServiceImpl implements RotationPostService {
      * @param rotationPostDTO the entity to save
      * @return the persisted entity
      */
-    @Override
     public RotationPostDTO save(RotationPostDTO rotationPostDTO) {
         log.debug("Request to save RotationPost : {}", rotationPostDTO);
         RotationPost rotationPost = rotationPostMapper.toEntity(rotationPostDTO);
         rotationPost = rotationPostRepository.save(rotationPost);
         return rotationPostMapper.toDto(rotationPost);
     }
-
+    
+    @Override
+    @Transactional
+    public List<RotationPostDTO> saveAll(List<RotationPostDTO> rotationPostDTOs) {
+        if (!rotationPostDTOs.isEmpty()) {
+            Long postId = rotationPostDTOs.get(0).getPostId();
+            Long count = rotationPostRepository.deleteByPostId(postId);
+            log.info("Deleted {} rotationPosts", count);
+            return rotationPostDTOs.stream().map(this::save).collect(Collectors.toList());
+        } else {
+            return Collections.emptyList();
+        }
+    }
+    
     /**
      * Get all the rotationPosts.
      *
@@ -61,27 +75,22 @@ public class RotationPostServiceImpl implements RotationPostService {
     }
 
     /**
-     * Get one rotationPost by id.
+     * Get one rotationPost by post id.
      *
      * @param id the id of the entity
      * @return the entity
      */
     @Override
     @Transactional(readOnly = true)
-    public RotationPostDTO findOne(Long id) {
+    public List<RotationPostDTO> findByPostId(Long id) {
         log.debug("Request to get RotationPost : {}", id);
-        RotationPost rotationPost = rotationPostRepository.findOne(id);
-        return rotationPostMapper.toDto(rotationPost);
+        return rotationPostRepository.findByPostId(id)
+                .stream().map(rotationPostMapper::toDto).collect(Collectors.toList());
     }
-
-    /**
-     * Delete the rotationPost by id.
-     *
-     * @param id the id of the entity
-     */
+    
     @Override
-    public void delete(Long id) {
-        log.debug("Request to delete RotationPost : {}", id);
-        rotationPostRepository.delete(id);
+    public void delete(Long postId) {
+        log.debug("Request to delete RotationPost : {}", postId);
+        rotationPostRepository.deleteByPostId(postId);
     }
 }

@@ -14,11 +14,13 @@ import com.transformuk.hee.tis.tcs.api.enumeration.PostGradeType;
 import com.transformuk.hee.tis.tcs.api.enumeration.PostSiteType;
 import com.transformuk.hee.tis.tcs.api.enumeration.PostSpecialtyType;
 import com.transformuk.hee.tis.tcs.service.api.decorator.PostViewDecorator;
+import com.transformuk.hee.tis.tcs.service.exception.AccessUnauthorisedException;
 import com.transformuk.hee.tis.tcs.service.model.Placement;
 import com.transformuk.hee.tis.tcs.service.model.Post;
 import com.transformuk.hee.tis.tcs.service.model.PostGrade;
 import com.transformuk.hee.tis.tcs.service.model.PostSite;
 import com.transformuk.hee.tis.tcs.service.model.PostSpecialty;
+import com.transformuk.hee.tis.tcs.service.model.PostTrust;
 import com.transformuk.hee.tis.tcs.service.model.PostView;
 import com.transformuk.hee.tis.tcs.service.model.Programme;
 import com.transformuk.hee.tis.tcs.service.model.Specialty;
@@ -47,15 +49,19 @@ import org.springframework.data.domain.PageImpl;
 import org.springframework.data.domain.Pageable;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.jdbc.core.RowMapper;
+import org.springframework.jdbc.core.namedparam.MapSqlParameterSource;
+import org.springframework.jdbc.core.namedparam.NamedParameterJdbcTemplate;
 
 import java.util.Collections;
 import java.util.HashSet;
 import java.util.List;
+import java.util.Optional;
 import java.util.Set;
 
 import static org.mockito.Matchers.any;
 import static org.mockito.Matchers.anyList;
 import static org.mockito.Matchers.anyString;
+import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
@@ -114,7 +120,9 @@ public class PostServiceImplTest {
   private NationalPostNumberServiceImpl nationalPostNumberServiceMock;
 
   @Mock
-  private JdbcTemplate jdbcTemplate;
+  private NamedParameterJdbcTemplate namedParameterJdbcTemplate;
+  @Mock
+  private PermissionService permissionService;
 
   @Test
   public void saveShouldSavePost() {
@@ -189,15 +197,17 @@ public class PostServiceImplTest {
     List<PostView> posts = Lists.newArrayList(postViewMock1);
     List<PostViewDTO> mappedPosts = Lists.newArrayList(postViewDTOMock1);
     Page<PostView> page = new PageImpl<>(posts);
+
+    when(permissionService.isUserTrustAdmin()).thenReturn(false);
     when(sqlQuerySupplier.getQuery(SqlQuerySupplier.POST_VIEW)).thenReturn(query);
-    when(jdbcTemplate.query(anyString(),any(RowMapper.class))).thenReturn(mappedPosts);
+    when(namedParameterJdbcTemplate.query(anyString(),any(MapSqlParameterSource.class), any(RowMapper.class))).thenReturn(mappedPosts);
 
     Page<PostViewDTO> result = testObj.findAll(pageableMock);
 
     Assert.assertEquals(1, result.getTotalPages());
 
     verify(sqlQuerySupplier).getQuery(SqlQuerySupplier.POST_VIEW);
-    verify(jdbcTemplate).query(anyString(),any(RowMapper.class));
+    verify(namedParameterJdbcTemplate).query(anyString(),any(MapSqlParameterSource.class),any(RowMapper.class));
   }
 
   @Test
@@ -508,5 +518,77 @@ public class PostServiceImplTest {
     Assert.assertEquals(Sets.newHashSet(placementDTO), result.get(0).getPlacementHistory());
   }
 
+
+  @Test
+  public void canLoggedInUserViewOrAmendShouldDoNothingWhenUserIsNotTrustAdmin(){
+    Long postId = 1L;
+    when(permissionService.isUserTrustAdmin()).thenReturn(false);
+
+    testObj.canLoggedInUserViewOrAmend(postId);
+
+    verify(permissionService, never()).getUsersTrustIds();
+    verify(postRepositoryMock, never()).findPostWithTrustsById(any());
+  }
+
+  @Test
+  public void canLoggedInUserViewOrAmendShouldDoNothingWhenPostCannotBeFound(){
+    Long postId = 1L;
+    when(permissionService.isUserTrustAdmin()).thenReturn(true);
+    when(postRepositoryMock.findPostWithTrustsById(postId)).thenReturn(Optional.empty());
+
+    testObj.canLoggedInUserViewOrAmend(postId);
+
+    verify(permissionService).getUsersTrustIds();
+    verify(postRepositoryMock).findPostWithTrustsById(postId);
+  }
+
+  @Test
+  public void canLoggedInUserViewOrAmendShouldDoNothingWhenPostIsPartOfUsersTrusts(){
+
+    PostTrust associatedTrust1 = new PostTrust();
+    associatedTrust1.setTrustId(1L);
+    PostTrust associatedTrust2 = new PostTrust();
+    associatedTrust2.setTrustId(2L);
+
+    Long postId = 1L;
+    Post foundPost = new Post();
+    foundPost.setId(postId);
+    foundPost.setAssociatedTrusts(Sets.newHashSet(associatedTrust1, associatedTrust2));
+
+    when(permissionService.isUserTrustAdmin()).thenReturn(true);
+    when(permissionService.getUsersTrustIds()).thenReturn(Sets.newHashSet(1L));
+    when(postRepositoryMock.findPostWithTrustsById(postId)).thenReturn(Optional.of(foundPost));
+
+    testObj.canLoggedInUserViewOrAmend(postId);
+
+    verify(permissionService).getUsersTrustIds();
+    verify(postRepositoryMock).findPostWithTrustsById(postId);
+  }
+
+  @Test(expected = AccessUnauthorisedException.class)
+  public void canLoggedInUserViewOrAmendShouldThrowExceptionWhenPostIsNotPartOfUsersTrusts(){
+
+    PostTrust associatedTrust1 = new PostTrust();
+    associatedTrust1.setTrustId(1L);
+    PostTrust associatedTrust2 = new PostTrust();
+    associatedTrust2.setTrustId(2L);
+
+    Long postId = 1L;
+    Post foundPost = new Post();
+    foundPost.setId(postId);
+    foundPost.setAssociatedTrusts(Sets.newHashSet(associatedTrust1, associatedTrust2));
+
+    when(permissionService.isUserTrustAdmin()).thenReturn(true);
+    when(permissionService.getUsersTrustIds()).thenReturn(Sets.newHashSet(99999L));
+    when(postRepositoryMock.findPostWithTrustsById(postId)).thenReturn(Optional.of(foundPost));
+
+    try {
+      testObj.canLoggedInUserViewOrAmend(postId);
+    } catch (Exception e) {
+      verify(permissionService).getUsersTrustIds();
+      verify(postRepositoryMock).findPostWithTrustsById(postId);
+      throw e;
+    }
+  }
 
 }

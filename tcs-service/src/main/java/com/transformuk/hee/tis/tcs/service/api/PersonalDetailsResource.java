@@ -6,6 +6,7 @@ import com.transformuk.hee.tis.tcs.api.dto.validation.Create;
 import com.transformuk.hee.tis.tcs.api.dto.validation.Update;
 import com.transformuk.hee.tis.tcs.service.api.util.HeaderUtil;
 import com.transformuk.hee.tis.tcs.service.api.util.PaginationUtil;
+import com.transformuk.hee.tis.tcs.service.api.validation.PersonalDetailsValidator;
 import com.transformuk.hee.tis.tcs.service.service.PersonalDetailsService;
 import io.github.jhipster.web.util.ResponseUtil;
 import io.swagger.annotations.ApiParam;
@@ -19,15 +20,8 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.validation.annotation.Validated;
-import org.springframework.web.bind.annotation.DeleteMapping;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.PatchMapping;
-import org.springframework.web.bind.annotation.PathVariable;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.PutMapping;
-import org.springframework.web.bind.annotation.RequestBody;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.MethodArgumentNotValidException;
+import org.springframework.web.bind.annotation.*;
 
 import javax.validation.Valid;
 import java.net.URI;
@@ -48,9 +42,11 @@ public class PersonalDetailsResource {
   private static final String ENTITY_NAME = "personalDetails";
 
   private final PersonalDetailsService personalDetailsService;
+  private final PersonalDetailsValidator personalDetailsValidator;
 
-  public PersonalDetailsResource(PersonalDetailsService personalDetailsService) {
+  public PersonalDetailsResource(PersonalDetailsService personalDetailsService, PersonalDetailsValidator personalDetailsValidator) {
     this.personalDetailsService = personalDetailsService;
+    this.personalDetailsValidator = personalDetailsValidator;
   }
 
   /**
@@ -63,13 +59,15 @@ public class PersonalDetailsResource {
   @PostMapping("/personal-details")
   @Timed
   @PreAuthorize("hasPermission('tis:people::person:', 'Create')")
-  public ResponseEntity<PersonalDetailsDTO> createPersonalDetails(@RequestBody @Validated(Create.class) PersonalDetailsDTO personalDetailsDTO) throws URISyntaxException {
+  public ResponseEntity<PersonalDetailsDTO> createPersonalDetails(@RequestBody @Validated(Create.class) PersonalDetailsDTO personalDetailsDTO)
+          throws URISyntaxException, MethodArgumentNotValidException {
     log.debug("REST request to save PersonalDetails : {}", personalDetailsDTO);
 
+    personalDetailsValidator.validate(personalDetailsDTO);
     PersonalDetailsDTO result = personalDetailsService.save(personalDetailsDTO);
     return ResponseEntity.created(new URI("/api/personal-details/" + result.getId()))
-        .headers(HeaderUtil.createEntityCreationAlert(ENTITY_NAME, result.getId().toString()))
-        .body(result);
+            .headers(HeaderUtil.createEntityCreationAlert(ENTITY_NAME, result.getId().toString()))
+            .body(result);
   }
 
   /**
@@ -84,16 +82,18 @@ public class PersonalDetailsResource {
   @PutMapping("/personal-details")
   @Timed
   @PreAuthorize("hasPermission('tis:people::person:', 'Update')")
-  public ResponseEntity<PersonalDetailsDTO> updatePersonalDetails(@RequestBody @Validated(Update.class) PersonalDetailsDTO personalDetailsDTO) throws URISyntaxException {
+  public ResponseEntity<PersonalDetailsDTO> updatePersonalDetails(@RequestBody @Validated(Update.class) PersonalDetailsDTO personalDetailsDTO)
+          throws URISyntaxException, MethodArgumentNotValidException {
     log.debug("REST request to update PersonalDetails : {}", personalDetailsDTO);
     if (personalDetailsDTO.getId() == null) {
       return ResponseEntity.badRequest().headers(HeaderUtil.createFailureAlert(ENTITY_NAME, "must_provide_id",
-          "You must provide an ID when updating Personal details")).body(null);
+              "You must provide an ID when updating Personal details")).body(null);
     }
+    personalDetailsValidator.validate(personalDetailsDTO);
     PersonalDetailsDTO result = personalDetailsService.save(personalDetailsDTO);
     return ResponseEntity.ok()
-        .headers(HeaderUtil.createEntityUpdateAlert(ENTITY_NAME, personalDetailsDTO.getId().toString()))
-        .body(result);
+            .headers(HeaderUtil.createEntityUpdateAlert(ENTITY_NAME, personalDetailsDTO.getId().toString()))
+            .body(result);
   }
 
   /**
@@ -157,7 +157,7 @@ public class PersonalDetailsResource {
     List<PersonalDetailsDTO> result = personalDetailsService.save(personalDetailsDTOs);
     List<Long> ids = result.stream().map(PersonalDetailsDTO::getId).collect(Collectors.toList());
     return ResponseEntity.ok()
-        .headers(HeaderUtil.createEntityUpdateAlert(ENTITY_NAME, StringUtils.join(ids, ",")))
-        .body(result);
+            .headers(HeaderUtil.createEntityUpdateAlert(ENTITY_NAME, StringUtils.join(ids, ",")))
+            .body(result);
   }
 }

@@ -1,10 +1,8 @@
 package com.transformuk.hee.tis.tcs.service.service.impl;
 
 import com.google.common.base.Functions;
-import com.transformuk.hee.tis.tcs.api.dto.PostViewDTO;
 import com.transformuk.hee.tis.tcs.api.dto.RotationDTO;
 import com.transformuk.hee.tis.tcs.service.model.ColumnFilter;
-import com.transformuk.hee.tis.tcs.service.model.PostView;
 import com.transformuk.hee.tis.tcs.service.model.Programme;
 import com.transformuk.hee.tis.tcs.service.model.Rotation;
 import com.transformuk.hee.tis.tcs.service.repository.ProgrammeRepository;
@@ -25,7 +23,6 @@ import javax.persistence.EntityNotFoundException;
 import java.util.*;
 import java.util.stream.Collectors;
 
-import static com.transformuk.hee.tis.tcs.service.service.impl.SpecificationFactory.containsLike;
 import static com.transformuk.hee.tis.tcs.service.service.impl.SpecificationFactory.in;
 
 
@@ -80,23 +77,6 @@ public class RotationServiceImpl implements RotationService {
         return mapRotations(page);
     }
     
-    private Page<RotationDTO> mapRotations(Page<Rotation> page) {
-        Set<Long> programmeIds = page.getContent().stream()
-                .map(Rotation::getProgrammeId)
-                .collect(Collectors.toSet());
-        
-        Map<Long, Programme> programmeMap = !programmeIds.isEmpty() ?
-                programmeRepository.findByIdIn(programmeIds).stream()
-                .collect(Collectors.toMap(Programme::getId, Functions.identity()))
-                : Collections.emptyMap();
-        
-        return page.map(rotationMapper::toDto)
-                .map(rd -> {
-                    setProgrammeInfo(rd, programmeMap.get(rd.getProgrammeId()));
-                    return rd;
-                });
-    }
-    
     /**
      * Get one rotation by id.
      *
@@ -123,13 +103,16 @@ public class RotationServiceImpl implements RotationService {
     
     @Override
     @Transactional(readOnly = true)
-    public Page<RotationDTO> advancedSearchBySpecification(List<ColumnFilter> columnFilters, Pageable pageable) {
-        
+    public Page<RotationDTO> advancedSearchBySpecification(String searchQuery, List<ColumnFilter> columnFilters, Pageable pageable) {
+    
         List<Specification<Rotation>> specs = new ArrayList<>();
         if (columnFilters != null && !columnFilters.isEmpty()) {
             columnFilters.forEach(cf -> specs.add(in(cf.getName(), cf.getValues())));
         }
-        
+        if (StringUtils.isNotEmpty(searchQuery)) {
+            specs.add((root, query, sb) -> sb.like(root.get("name"), "%" + searchQuery + "%"));
+        }
+    
         Page<Rotation> result;
         if (!specs.isEmpty()) {
             Specifications<Rotation> fullSpec = Specifications.where(specs.get(0));
@@ -145,6 +128,11 @@ public class RotationServiceImpl implements RotationService {
         return mapRotations(result);
     }
     
+    @Override
+    @Transactional(readOnly = true)
+    public boolean rotationExists(String rotationName, Long programmeId) {
+        return rotationRepository.findByNameAndProgrammeId(rotationName, programmeId).isPresent();
+    }
     
     /**
      * Delete the rotation by id.
@@ -153,11 +141,27 @@ public class RotationServiceImpl implements RotationService {
      */
     @Override
     public void delete(Long id) {
-
         log.debug("Request to delete Rotation : {}", id);
         rotationRepository.delete(id);
     }
     
+    private Page<RotationDTO> mapRotations(Page<Rotation> page) {
+        Set<Long> programmeIds = page.getContent().stream()
+                .map(Rotation::getProgrammeId)
+                .collect(Collectors.toSet());
+        
+        Map<Long, Programme> programmeMap = !programmeIds.isEmpty() ?
+                programmeRepository.findByIdIn(programmeIds).stream()
+                        .collect(Collectors.toMap(Programme::getId, Functions.identity()))
+                : Collections.emptyMap();
+        
+        return page.map(rotationMapper::toDto)
+                .map(rd -> {
+                    setProgrammeInfo(rd, programmeMap.get(rd.getProgrammeId()));
+                    return rd;
+                });
+    }
+
     private void setProgrammeInfo(RotationDTO rd, Programme p) {
         if (p != null) {
             rd.setProgrammeName(p.getProgrammeName());

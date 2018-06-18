@@ -62,6 +62,20 @@ public class RotationPersonServiceImpl implements RotationPersonService {
     }
 
     /**
+     * Get the rotationPeople for person.
+     *
+     * @return the list of entities
+     */
+    @Override
+    @Transactional(readOnly = true)
+    public List<RotationPersonDTO> findByPersonId(Long personId) {
+        log.debug("Request to get all RotationPeople");
+        return rotationPersonRepository.findByPersonId(personId).stream()
+            .map(rotationPersonMapper::toDto)
+            .collect(Collectors.toCollection(LinkedList::new));
+    }
+
+    /**
      * Get one rotationPerson by id.
      *
      * @param id the id of the entity

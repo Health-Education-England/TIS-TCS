@@ -11,30 +11,25 @@ public interface RotationPostService {
     /**
      * Save a rotationPost.
      *
-     * @param rotationPostDTO the entity to save
+     * @param rotationPostDTOs the entity to save
      * @return the persisted entity
      */
-    RotationPostDTO save(RotationPostDTO rotationPostDTO);
-
+    List<RotationPostDTO> saveAll(List<RotationPostDTO> rotationPostDTOs);
+    
     /**
      * Get all the rotationPosts.
      *
      * @return the list of entities
      */
     List<RotationPostDTO> findAll();
-
+    
     /**
      * Get the "id" rotationPost.
      *
      * @param id the id of the entity
      * @return the entity
      */
-    RotationPostDTO findOne(Long id);
-
-    /**
-     * Delete the "id" rotationPost.
-     *
-     * @param id the id of the entity
-     */
-    void delete(Long id);
+    List<RotationPostDTO> findByPostId(Long id);
+    
+    void delete(Long postId);
 }

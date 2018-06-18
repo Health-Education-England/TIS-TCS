@@ -27,36 +27,12 @@ public class StringUtilTest {
   @Test
   public void shouldStripNonAlphanumericButLeaveWhitespace() {
     //Given
-    String input = "alpha*%&^% {}{numer1c _))(@!@#<>.?'\\";
+    String input = "alpha*%&^% {}{n-umer1c _))(@!@#<>.?'+\\";
 
     //When
     String res = StringUtil.sanitize(input);
 
     //Then
-    assertThat(res).isEqualTo("alpha numer1c ))(");
-  }
-
-  @Test
-  public void shouldAllowAngleBrackets() {
-    //Given
-    String input = "General (Internal) Medicine";
-
-    //When
-    String res = StringUtil.sanitize(input);
-
-    //Then
-    assertThat(res).isEqualTo("General (Internal) Medicine");
-  }
-
-  @Test
-  public void shouldAllowHyphens() {
-    //Given
-    String input = "General (Internal-crap) Medicine";
-
-    //When
-    String res = StringUtil.sanitize(input);
-
-    //Then
-    assertThat(res).isEqualTo("General (Internal-crap) Medicine");
+    assertThat(res).isEqualTo("alpha& n-umer1c ))('+");
   }
 }

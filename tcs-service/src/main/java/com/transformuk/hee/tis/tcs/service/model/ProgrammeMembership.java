@@ -2,15 +2,7 @@ package com.transformuk.hee.tis.tcs.service.model;
 
 import com.transformuk.hee.tis.tcs.api.enumeration.ProgrammeMembershipType;
 
-import javax.persistence.Entity;
-import javax.persistence.EnumType;
-import javax.persistence.Enumerated;
-import javax.persistence.GeneratedValue;
-import javax.persistence.GenerationType;
-import javax.persistence.Id;
-import javax.persistence.JoinColumn;
-import javax.persistence.ManyToOne;
-import javax.persistence.Version;
+import javax.persistence.*;
 import java.io.Serializable;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
@@ -57,7 +49,9 @@ public class ProgrammeMembership implements Serializable {
 
   private Long curriculumId;
 
-  private Long trainingNumberId;
+  @ManyToOne
+  @JoinColumn(name = "trainingNumberId")
+  private TrainingNumber trainingNumber;
 
   @Version
   private LocalDateTime amendedDate;
@@ -217,12 +211,12 @@ public class ProgrammeMembership implements Serializable {
     this.curriculumId = curriculumId;
   }
 
-  public Long getTrainingNumberId() {
-    return trainingNumberId;
+  public TrainingNumber getTrainingNumber() {
+    return trainingNumber;
   }
 
-  public void setTrainingNumberId(Long trainingNumberId) {
-    this.trainingNumberId = trainingNumberId;
+  public void setTrainingNumber(TrainingNumber trainingNumber) {
+    this.trainingNumber = trainingNumber;
   }
 
   public Person getPerson() {

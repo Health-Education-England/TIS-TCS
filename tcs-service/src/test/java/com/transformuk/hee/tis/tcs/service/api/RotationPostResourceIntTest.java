@@ -23,6 +23,7 @@ import org.springframework.test.web.servlet.setup.MockMvcBuilders;
 import org.springframework.transaction.annotation.Transactional;
 
 import javax.persistence.EntityManager;
+import java.util.Collections;
 import java.util.List;
 
 import static org.assertj.core.api.Assertions.assertThat;
@@ -101,11 +102,12 @@ public class RotationPostResourceIntTest {
 
     @Test
     @Transactional
-    public void createRotationPost() throws Exception {
+    public void createRotationPosts() throws Exception {
         int databaseSizeBeforeCreate = rotationPostRepository.findAll().size();
 
         // Create the RotationPost
-        RotationPostDTO rotationPostDTO = rotationPostMapper.toDto(rotationPost);
+        List<RotationPostDTO> rotationPostDTO = Collections.singletonList(rotationPostMapper.toDto(rotationPost));
+    
         restRotationPostMockMvc.perform(post("/api/rotation-posts")
             .contentType(TestUtil.APPLICATION_JSON_UTF8)
             .content(TestUtil.convertObjectToJsonBytes(rotationPostDTO)))
@@ -121,22 +123,53 @@ public class RotationPostResourceIntTest {
 
     @Test
     @Transactional
-    public void createRotationPostWithExistingId() throws Exception {
-        int databaseSizeBeforeCreate = rotationPostRepository.findAll().size();
+    public void overwriteRotationPosts() throws Exception {
+        rotationPostRepository.saveAndFlush(rotationPost);
+    
+        RotationPost rotationPost2 = createEntity(em);
+        rotationPost2.setRotationId(UPDATED_ROTATION_ID);
+        rotationPostRepository.saveAndFlush(rotationPost2);
 
+        int databaseSizeBeforeCreate = rotationPostRepository.findAll().size();
+        
         // Create the RotationPost with an existing ID
-        rotationPost.setId(1L);
-        RotationPostDTO rotationPostDTO = rotationPostMapper.toDto(rotationPost);
+        List<RotationPostDTO> rotationPostDTOs = Collections.singletonList(rotationPostMapper.toDto(rotationPost));
 
         // An entity with an existing ID cannot be created, so this API call must fail
         restRotationPostMockMvc.perform(post("/api/rotation-posts")
             .contentType(TestUtil.APPLICATION_JSON_UTF8)
-            .content(TestUtil.convertObjectToJsonBytes(rotationPostDTO)))
-            .andExpect(status().isBadRequest());
+            .content(TestUtil.convertObjectToJsonBytes(rotationPostDTOs)))
+            .andExpect(status().isCreated());
 
         // Validate the RotationPost in the database
         List<RotationPost> rotationPostList = rotationPostRepository.findAll();
-        assertThat(rotationPostList).hasSize(databaseSizeBeforeCreate);
+        assertThat(rotationPostList).hasSize(databaseSizeBeforeCreate - 1);
+    }
+    
+    @Test
+    @Transactional
+    public void deleteRotationPosts() throws Exception {
+        rotationPostRepository.saveAndFlush(rotationPost);
+    
+        RotationPost rotationPost2 = createEntity(em);
+        rotationPost2.setRotationId(UPDATED_ROTATION_ID);
+        rotationPost2.setPostId(UPDATED_POST_ID);
+        rotationPostRepository.saveAndFlush(rotationPost2);
+    
+        int databaseSizeBeforeCreate = rotationPostRepository.findAll().size();
+        
+        // Create the RotationPost with an existing ID
+        List<RotationPostDTO> rotationPostDTOs = Collections.singletonList(rotationPostMapper.toDto(rotationPost));
+        
+        // An entity with an existing ID cannot be created, so this API call must fail
+        restRotationPostMockMvc.perform(delete("/api/rotation-posts/" + rotationPost.getPostId())
+                .contentType(TestUtil.APPLICATION_JSON_UTF8)
+                .content(TestUtil.convertObjectToJsonBytes(rotationPostDTOs)))
+                .andExpect(status().isOk());
+        
+        // Validate the RotationPost in the database
+        List<RotationPost> rotationPostList = rotationPostRepository.findAll();
+        assertThat(rotationPostList).hasSize(databaseSizeBeforeCreate - 1);
     }
 
     @Test
@@ -149,24 +182,22 @@ public class RotationPostResourceIntTest {
         restRotationPostMockMvc.perform(get("/api/rotation-posts?sort=id,desc"))
             .andExpect(status().isOk())
             .andExpect(content().contentType(MediaType.APPLICATION_JSON_UTF8_VALUE))
-            .andExpect(jsonPath("$.[*].id").value(hasItem(rotationPost.getId().intValue())))
             .andExpect(jsonPath("$.[*].postId").value(hasItem(DEFAULT_POST_ID.intValue())))
             .andExpect(jsonPath("$.[*].rotationId").value(hasItem(DEFAULT_ROTATION_ID.intValue())));
     }
 
     @Test
     @Transactional
-    public void getRotationPost() throws Exception {
+    public void getRotationPostsByPostId() throws Exception {
         // Initialize the database
         rotationPostRepository.saveAndFlush(rotationPost);
 
         // Get the rotationPost
-        restRotationPostMockMvc.perform(get("/api/rotation-posts/{id}", rotationPost.getId()))
+        restRotationPostMockMvc.perform(get("/api/rotation-posts/{id}", rotationPost.getPostId()))
             .andExpect(status().isOk())
             .andExpect(content().contentType(MediaType.APPLICATION_JSON_UTF8_VALUE))
-            .andExpect(jsonPath("$.id").value(rotationPost.getId().intValue()))
-            .andExpect(jsonPath("$.postId").value(DEFAULT_POST_ID.intValue()))
-            .andExpect(jsonPath("$.rotationId").value(DEFAULT_ROTATION_ID.intValue()));
+            .andExpect(jsonPath("$.[*].postId").value(DEFAULT_POST_ID.intValue()))
+            .andExpect(jsonPath("$.[*].rotationId").value(DEFAULT_ROTATION_ID.intValue()));
     }
 
     @Test
@@ -174,109 +205,6 @@ public class RotationPostResourceIntTest {
     public void getNonExistingRotationPost() throws Exception {
         // Get the rotationPost
         restRotationPostMockMvc.perform(get("/api/rotation-posts/{id}", Long.MAX_VALUE))
-            .andExpect(status().isNotFound());
-    }
-
-    @Test
-    @Transactional
-    public void updateRotationPost() throws Exception {
-        // Initialize the database
-        rotationPostRepository.saveAndFlush(rotationPost);
-        int databaseSizeBeforeUpdate = rotationPostRepository.findAll().size();
-
-        // Update the rotationPost
-        RotationPost updatedRotationPost = rotationPostRepository.findOne(rotationPost.getId());
-        // Disconnect from session so that the updates on updatedRotationPost are not directly saved in db
-        em.detach(updatedRotationPost);
-        updatedRotationPost
-            .postId(UPDATED_POST_ID)
-            .rotationId(UPDATED_ROTATION_ID);
-        RotationPostDTO rotationPostDTO = rotationPostMapper.toDto(updatedRotationPost);
-
-        restRotationPostMockMvc.perform(put("/api/rotation-posts")
-            .contentType(TestUtil.APPLICATION_JSON_UTF8)
-            .content(TestUtil.convertObjectToJsonBytes(rotationPostDTO)))
             .andExpect(status().isOk());
-
-        // Validate the RotationPost in the database
-        List<RotationPost> rotationPostList = rotationPostRepository.findAll();
-        assertThat(rotationPostList).hasSize(databaseSizeBeforeUpdate);
-        RotationPost testRotationPost = rotationPostList.get(rotationPostList.size() - 1);
-        assertThat(testRotationPost.getPostId()).isEqualTo(UPDATED_POST_ID);
-        assertThat(testRotationPost.getRotationId()).isEqualTo(UPDATED_ROTATION_ID);
-    }
-
-    @Test
-    @Transactional
-    public void updateNonExistingRotationPost() throws Exception {
-        int databaseSizeBeforeUpdate = rotationPostRepository.findAll().size();
-
-        // Create the RotationPost
-        RotationPostDTO rotationPostDTO = rotationPostMapper.toDto(rotationPost);
-
-        // If the entity doesn't have an ID, it will be created instead of just being updated
-        restRotationPostMockMvc.perform(put("/api/rotation-posts")
-            .contentType(TestUtil.APPLICATION_JSON_UTF8)
-            .content(TestUtil.convertObjectToJsonBytes(rotationPostDTO)))
-            .andExpect(status().isCreated());
-
-        // Validate the RotationPost in the database
-        List<RotationPost> rotationPostList = rotationPostRepository.findAll();
-        assertThat(rotationPostList).hasSize(databaseSizeBeforeUpdate + 1);
-    }
-
-    @Test
-    @Transactional
-    public void deleteRotationPost() throws Exception {
-        // Initialize the database
-        rotationPostRepository.saveAndFlush(rotationPost);
-        int databaseSizeBeforeDelete = rotationPostRepository.findAll().size();
-
-        // Get the rotationPost
-        restRotationPostMockMvc.perform(delete("/api/rotation-posts/{id}", rotationPost.getId())
-            .accept(TestUtil.APPLICATION_JSON_UTF8))
-            .andExpect(status().isOk());
-
-        // Validate the database is empty
-        List<RotationPost> rotationPostList = rotationPostRepository.findAll();
-        assertThat(rotationPostList).hasSize(databaseSizeBeforeDelete - 1);
-    }
-
-    @Test
-    @Transactional
-    public void equalsVerifier() throws Exception {
-        TestUtil.equalsVerifier(RotationPost.class);
-        RotationPost rotationPost1 = new RotationPost();
-        rotationPost1.setId(1L);
-        RotationPost rotationPost2 = new RotationPost();
-        rotationPost2.setId(rotationPost1.getId());
-        assertThat(rotationPost1).isEqualTo(rotationPost2);
-        rotationPost2.setId(2L);
-        assertThat(rotationPost1).isNotEqualTo(rotationPost2);
-        rotationPost1.setId(null);
-        assertThat(rotationPost1).isNotEqualTo(rotationPost2);
-    }
-
-    @Test
-    @Transactional
-    public void dtoEqualsVerifier() throws Exception {
-        TestUtil.equalsVerifier(RotationPostDTO.class);
-        RotationPostDTO rotationPostDTO1 = new RotationPostDTO();
-        rotationPostDTO1.setId(1L);
-        RotationPostDTO rotationPostDTO2 = new RotationPostDTO();
-        assertThat(rotationPostDTO1).isNotEqualTo(rotationPostDTO2);
-        rotationPostDTO2.setId(rotationPostDTO1.getId());
-        assertThat(rotationPostDTO1).isEqualTo(rotationPostDTO2);
-        rotationPostDTO2.setId(2L);
-        assertThat(rotationPostDTO1).isNotEqualTo(rotationPostDTO2);
-        rotationPostDTO1.setId(null);
-        assertThat(rotationPostDTO1).isNotEqualTo(rotationPostDTO2);
-    }
-
-    @Test
-    @Transactional
-    public void testEntityFromId() {
-        assertThat(rotationPostMapper.fromId(42L).getId()).isEqualTo(42);
-        assertThat(rotationPostMapper.fromId(null)).isNull();
     }
 }
