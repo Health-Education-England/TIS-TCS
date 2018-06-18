@@ -22,7 +22,7 @@ public class DesignatedBodyMapper {
       //London LETBs match any of the london DBC's
       .put("1-AIIDR8", Lists.newArrayList("Health Education England Kent, Surrey and Sussex", "London LETBs"))
       .put("1-AIIDWA", Lists.newArrayList("Health Education England North West London", "London LETBs"))
-      .put("1-AIIDVS", Lists.newArrayList("Health Education England North Central and East London", "London LETBs"))
+      .put("1-AIIDVS", Lists.newArrayList("Health Education England North Central and East London", "London LETBs"))
       .put("1-AIIDWI", Lists.newArrayList("Health Education England South London", "London LETBs"))
 
       .put("1-AIIDSA", Lists.newArrayList("Health Education England East Midlands"))
