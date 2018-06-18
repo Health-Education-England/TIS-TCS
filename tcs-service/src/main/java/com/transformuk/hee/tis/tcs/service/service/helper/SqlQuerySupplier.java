@@ -20,7 +20,6 @@ public class SqlQuerySupplier {
     public static final String PERSON_VIEW = "queries/personView.sql";
     public static final String POST_VIEW = "queries/postView.sql";
     public static final String SEARCH_POST_VIEW = "queries/searchPostView.sql";
-    public static final String POST_VIEW_COUNT = "queries/postViewCount.sql";
     public static final String TRAINEE_PLACEMENT_SUMMARY = "queries/placementSummaryForTrainee.sql";
     public static final String PLACEMENT_DETAILS = "queries/placementDetails.sql";
     public static final String PLACEMENT_SUPERVISOR = "queries/placementSupervisor.sql";

@@ -49,6 +49,8 @@ import org.springframework.data.jpa.domain.Specification;
 import org.springframework.data.jpa.domain.Specifications;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.jdbc.core.RowMapper;
+import org.springframework.jdbc.core.namedparam.MapSqlParameterSource;
+import org.springframework.jdbc.core.namedparam.NamedParameterJdbcTemplate;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -108,8 +110,6 @@ public class PlacementServiceImpl implements PlacementService {
     @Autowired
     private SqlQuerySupplier sqlQuerySupplier;
     @Autowired
-    private JdbcTemplate jdbcTemplate;
-    @Autowired
     private PlacementSpecialtyRepository placementSpecialtyRepository;
     @Autowired
     private PlacementSpecialtyMapper placementSpecialtyMapper;
@@ -119,6 +119,9 @@ public class PlacementServiceImpl implements PlacementService {
     private EsrNotificationService esrNotificationService;
     @Autowired
     private PlacementSupervisorRepository placementSupervisorRepository;
+
+    @Autowired
+    private NamedParameterJdbcTemplate namedParameterJdbcTemplate;
 
     /**
      * Save a placement.
@@ -269,13 +272,15 @@ public class PlacementServiceImpl implements PlacementService {
             placementDetailsDTO = placementDetailsMapper.placementDetailsToPlacementDetailsDTO(pd);
 
             String query = sqlQuerySupplier.getQuery(SqlQuerySupplier.PLACEMENT_DETAILS);
-            query = query.replace(":id", id.toString());
-            final List<PlacementSpecialtyDTO> specialties = jdbcTemplate.query(query, new PlacementDetailSpecialtyRowMapper());
+            MapSqlParameterSource specialtiesParamSource = new MapSqlParameterSource();
+            specialtiesParamSource.addValue("id",id);
+            final List<PlacementSpecialtyDTO> specialties = namedParameterJdbcTemplate.query(query,specialtiesParamSource, new PlacementDetailSpecialtyRowMapper());
             placementDetailsDTO.setSpecialties(Sets.newHashSet(specialties));
 
             query = sqlQuerySupplier.getQuery(SqlQuerySupplier.PLACEMENT_SUPERVISOR);
-            query = query.replace(":id", id.toString());
-            final List<PlacementSupervisorDTO> supervisors = jdbcTemplate.query(query, new PlacementDetailSupervisorRowMapper(new PersonRepositoryImpl.PersonLiteRowMapper(), personLiteMapper));
+            MapSqlParameterSource supervisorsParamSource = new MapSqlParameterSource();
+            supervisorsParamSource.addValue("id",id);
+            final List<PlacementSupervisorDTO> supervisors = namedParameterJdbcTemplate.query(query,supervisorsParamSource, new PlacementDetailSupervisorRowMapper(new PersonRepositoryImpl.PersonLiteRowMapper(), personLiteMapper));
             placementDetailsDTO.setSupervisors(Sets.newHashSet(supervisors));
         }
 

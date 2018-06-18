@@ -49,6 +49,8 @@ import org.springframework.data.domain.PageImpl;
 import org.springframework.data.domain.Pageable;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.jdbc.core.RowMapper;
+import org.springframework.jdbc.core.namedparam.MapSqlParameterSource;
+import org.springframework.jdbc.core.namedparam.NamedParameterJdbcTemplate;
 
 import java.util.Collections;
 import java.util.HashSet;
@@ -118,7 +120,7 @@ public class PostServiceImplTest {
   private NationalPostNumberServiceImpl nationalPostNumberServiceMock;
 
   @Mock
-  private JdbcTemplate jdbcTemplate;
+  private NamedParameterJdbcTemplate namedParameterJdbcTemplate;
   @Mock
   private PermissionService permissionService;
 
@@ -198,14 +200,14 @@ public class PostServiceImplTest {
 
     when(permissionService.isUserTrustAdmin()).thenReturn(false);
     when(sqlQuerySupplier.getQuery(SqlQuerySupplier.POST_VIEW)).thenReturn(query);
-    when(jdbcTemplate.query(anyString(),any(RowMapper.class))).thenReturn(mappedPosts);
+    when(namedParameterJdbcTemplate.query(anyString(),any(MapSqlParameterSource.class), any(RowMapper.class))).thenReturn(mappedPosts);
 
     Page<PostViewDTO> result = testObj.findAll(pageableMock);
 
     Assert.assertEquals(1, result.getTotalPages());
 
     verify(sqlQuerySupplier).getQuery(SqlQuerySupplier.POST_VIEW);
-    verify(jdbcTemplate).query(anyString(),any(RowMapper.class));
+    verify(namedParameterJdbcTemplate).query(anyString(),any(MapSqlParameterSource.class),any(RowMapper.class));
   }
 
   @Test
