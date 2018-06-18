@@ -66,64 +66,27 @@ public class DocumentServiceImpl implements DocumentService {
     }
 
     @Override
-    public Page<DocumentDTO> findAll(final Long personId, final String searchQuery, final List<ColumnFilter> columnFilters, final Pageable pageable) {
-        LOG.debug("Received request to load all '{}' with person id '{}', query '{}', status '{}' and tags '{}'",
+    public Page<DocumentDTO> findAll(final Long personId, final String query, final List<ColumnFilter> columnFilters, final Pageable pageable) {
+        LOG.debug("Received request to load all '{}' with person id '{}' and query '{}'",
                 DocumentDTO.class.getSimpleName(),
-                personId);
+                personId,
+                query);
 
-        final Page<Document> documents;
-        if (StringUtils.isEmpty(searchQuery) && columnFilters.isEmpty()) {
-            documents = documentRepository.findAll(pageable);
-        } else {
-            final List<Specification<Document>> filterSpecs = new ArrayList<>();
-            if (columnFilters != null && !columnFilters.isEmpty()) {
-                columnFilters.forEach(cf -> filterSpecs.add(in(cf.getName(), cf.getValues())));
-            }
+        final Specification<Document> personSpec = (root, criteriaQuery, sb) -> sb.equal(root.get("personId"), personId);
+        Specifications<Document> spec = Specifications.where(personSpec);
 
-            final List<Specification<Document>> querySpecs = new ArrayList<>();
-            if (StringUtils.isNotEmpty(searchQuery)) {
-                querySpecs.add((root, query, sb) -> sb.like(root.get("name"), "%" + searchQuery + "%"));
-                querySpecs.add((root, query, sb) -> sb.like(root.get("fileName"), "%" + searchQuery + "%"));
-                querySpecs.add((root, query, sb) -> sb.like(root.get("fileExtension"), "%" + searchQuery + "%"));
-                querySpecs.add((root, query, sb) -> sb.like(root.get("contentType"), "%" + searchQuery + "%"));
-//                querySpecs.add((root, query, sb) -> sb.like(sb.treat(root.get("size"), String.class), "%" + searchQuery + "%"));
-//                querySpecs.add((root, query, sb) -> sb.like(root.get("status"), Status.fromString(searchQuery));
-                querySpecs.add(SpecificationFactory.containsLike("tags.name", searchQuery));
-            }
+        spec = addColumnFiltersToSpec(columnFilters, spec);
 
-            Specifications<Document> fullSpec = null;
-            if (!filterSpecs.isEmpty()) {
-                fullSpec = Specifications.where(filterSpecs.get(0));
-                //add the rest of the querySpecs that made it in
-                for (int i = 1; i < filterSpecs.size(); i++) {
-                    fullSpec = fullSpec.and(filterSpecs.get(i));
-                }
-            }
+        spec = addSearchQueryToSpec(query, spec);
 
-            if (!querySpecs.isEmpty()) {
-                int i = 0;
-                if (filterSpecs.isEmpty()) {
-                    fullSpec = Specifications.where(querySpecs.get(0));
-                    i++;
-                }
-
-                //add the rest of the querySpecs that made it in
-                for (; i < querySpecs.size(); i++) {
-                    fullSpec = fullSpec.or(querySpecs.get(i));
-                }
-
-                documents = documentRepository.findAll(fullSpec, pageable);
-            } else {
-                documents = documentRepository.findAll(pageable);
-            }
-        }
-
-        return mapDocuments(documents);
+        return mapDocuments(documentRepository.findAll(spec, pageable));
     }
 
     @Override
     public void download(final DocumentDTO document, final OutputStream outputStream) throws IOException {
-        LOG.debug("Received request to download '{}' with ID '{}'", DocumentDTO.class.getSimpleName(), document.getId());
+        LOG.debug("Received request to download '{}' with ID '{}'",
+                DocumentDTO.class.getSimpleName(),
+                document.getId());
 
         try {
             fileStorageRepository.download(azureProperties.getContainerName(),
@@ -136,7 +99,9 @@ public class DocumentServiceImpl implements DocumentService {
 
     @Override
     public DocumentDTO save(final DocumentDTO documentDTO) throws IOException {
-        LOG.debug("Received request to save '{}' with name '{}'", documentDTO.getClass().getSimpleName(), documentDTO.getFileName());
+        LOG.debug("Received request to save '{}' with name '{}'",
+                documentDTO.getClass().getSimpleName(),
+                documentDTO.getFileName());
 
         Document document = documentMapper.toEntity(documentDTO);
 
@@ -185,7 +150,8 @@ public class DocumentServiceImpl implements DocumentService {
         return saveMetadata(document);
     }
 
-    private String saveFile(final Document document) throws InvalidKeyException, StorageException, URISyntaxException {
+    private String saveFile(final Document document) throws
+            InvalidKeyException, StorageException, URISyntaxException {
         return fileStorageRepository.store(document.getId(), azureProperties.getContainerName() + "/" + azureProperties.getPersonFolder(), Lists.newArrayList(getFileAsMultipart(document)));
     }
 
@@ -239,5 +205,47 @@ public class DocumentServiceImpl implements DocumentService {
 
     private Page<DocumentDTO> mapDocuments(final Page<Document> page) {
         return page.map(documentMapper::toDto);
+    }
+
+    private Specifications<Document> addColumnFiltersToSpec(final List<ColumnFilter> columnFilters, Specifications<Document> fullSpec) {
+        if (columnFilters == null || columnFilters.isEmpty()) {
+            return fullSpec;
+        }
+
+        final List<Specification<Document>> columnFilterSpecs = new ArrayList<>();
+        columnFilters.forEach(cf -> columnFilterSpecs.add(in(cf.getName(), cf.getValues())));
+
+        fullSpec = Specifications.where(columnFilterSpecs.get(0));
+        for (int i = 1; i < columnFilterSpecs.size(); i++) {
+            fullSpec = fullSpec.and(columnFilterSpecs.get(i));
+        }
+
+        return fullSpec;
+    }
+
+    private Specifications<Document> addSearchQueryToSpec(final String query, Specifications<Document> fullSpec) {
+        final List<Specification<Document>> querySpecs = new ArrayList<>();
+
+        if (StringUtils.isEmpty(query)) {
+            return fullSpec;
+        }
+
+        querySpecs.add((root, criteriaQuery, sb) -> sb.like(root.get("name"), "%" + query + "%"));
+        querySpecs.add((root, criteriaQuery, sb) -> sb.like(root.get("fileName"), "%" + query + "%"));
+        querySpecs.add((root, criteriaQuery, sb) -> sb.like(root.get("fileExtension"), "%" + query + "%"));
+        querySpecs.add((root, criteriaQuery, sb) -> sb.like(root.get("contentType"), "%" + query + "%"));
+
+        int i = 0;
+        Specifications<Document> orSpec = Specifications.where(querySpecs.get(0));
+        i++;
+
+        for (; i < querySpecs.size(); i++) {
+            orSpec = orSpec.or(querySpecs.get(i));
+        }
+
+        fullSpec = fullSpec.and(orSpec);
+
+
+        return fullSpec;
     }
 }

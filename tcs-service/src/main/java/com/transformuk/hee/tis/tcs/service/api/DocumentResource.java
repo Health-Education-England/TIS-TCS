@@ -5,7 +5,6 @@ import com.transformuk.hee.tis.tcs.api.dto.DocumentDTO;
 import com.transformuk.hee.tis.tcs.api.dto.TagDTO;
 import com.transformuk.hee.tis.tcs.api.enumeration.Status;
 import com.transformuk.hee.tis.tcs.service.api.util.ColumnFilterUtil;
-import com.transformuk.hee.tis.tcs.service.api.util.PaginationUtil;
 import com.transformuk.hee.tis.tcs.service.model.ColumnFilter;
 import com.transformuk.hee.tis.tcs.service.service.DocumentService;
 import com.transformuk.hee.tis.tcs.service.service.TagService;
@@ -16,7 +15,6 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
-import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
@@ -32,7 +30,6 @@ import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
 import static com.transformuk.hee.tis.tcs.service.api.DocumentResource.PATH_API;
-import static com.transformuk.hee.tis.tcs.service.api.util.StringUtil.sanitize;
 import static javax.ws.rs.core.MediaType.*;
 
 @RestController
@@ -52,31 +49,28 @@ public class DocumentResource {
         this.tagService = tagService;
     }
 
-    @ApiOperation(value = "Retrieves a list documents", response = DocumentDTO.class, responseContainer = "List", produces = APPLICATION_JSON)
+    @ApiOperation(value = "Retrieves a list documents", response = DocumentDTOPage.class, responseContainer = "DocumentDTOPage", produces = APPLICATION_JSON)
     @ApiResponses(value = {
-            @ApiResponse(code = 200, message = "Operation performed successfully", response = DocumentDTO.class),
+            @ApiResponse(code = 200, message = "Operation performed successfully", response = DocumentDTOPage.class),
             @ApiResponse(code = 400, message = "Invalid parameters", response = String.class),
             @ApiResponse(code = 401, message = "User not authenticated", response = String.class),
             @ApiResponse(code = 403, message = "User not authorised to perform operation", response = String.class),
             @ApiResponse(code = 404, message = "DocumentDTO could not be found", response = String.class),
             @ApiResponse(code = 500, message = "Error occurred while performing operation", response = String.class)
     })
-    @GetMapping(value = PATH_DOCUMENTS + "{entity}" + "/" + "{personId}", produces = APPLICATION_JSON)
-    public ResponseEntity<Collection<DocumentDTO>> getAllDocuments(@PathVariable(value = "entity") final String entity,
-                                                                   @PathVariable(value = "personId") final Long personId,
-                                                                   @RequestParam(value = "searchQuery", required = false) String searchQuery,
-                                                                   @RequestParam(value = "columnFilters", required = false) final String columnFilterJson,
-                                                                   final Pageable pageable) throws IOException {
-
-        // todo review query and filters combined
-        // todo add search in numbers and enums
-        // todo test with filters
-        // todo add personId as a fixed filter
-
-        LOG.info("Received 'getAllDocuments' request with person id '{}', query '{}', status '{}' and tags '{}'");
+    @GetMapping(value = PATH_DOCUMENTS + "/{entity}/{personId}", produces = APPLICATION_JSON)
+    public ResponseEntity<Page<DocumentDTO>> getAllDocuments(@PathVariable(value = "entity") final String entity,
+                                                             @PathVariable(value = "personId") final Long personId,
+                                                             @RequestParam(value = "query", required = false) final String query,
+                                                             @RequestParam(value = "columnFilters", required = false) final String columnFilterJson,
+                                                             final Pageable pageable) throws IOException {
+        LOG.info("Received 'getAllDocuments' request for entity '{}', person id '{}' and query '{}'",
+                entity,
+                personId,
+                query);
 
         if (StringUtils.isBlank(entity) || !entity.equalsIgnoreCase("person")) {
-            LOG.warn("Invalid or not implemented entity received '{}'",
+            LOG.warn("Invalid or not implemented entity received ',as a{}'",
                     entity);
             return new ResponseEntity<>(HttpStatus.NOT_IMPLEMENTED);
         }
@@ -87,52 +81,10 @@ public class DocumentResource {
             return new ResponseEntity<>(HttpStatus.BAD_REQUEST);
         }
 
-        if (personId == 999999999L) {
-            return new ResponseEntity<>(HttpStatus.NOT_FOUND);
-        }
-
-        searchQuery = sanitize(searchQuery);
-
         final List<Class> filterEnumList = Collections.singletonList(Status.class);
         final List<ColumnFilter> columnFilters = ColumnFilterUtil.getColumnFilters(columnFilterJson, filterEnumList);
 
-        final Page<DocumentDTO> page = documentService.findAll(personId, searchQuery, columnFilters, pageable);
-
-        final HttpHeaders headers = PaginationUtil.generatePaginationHttpHeaders(page, PATH_API + PATH_DOCUMENTS + entity + "/" + personId);
-
-        if (page.getTotalElements() == 0) {
-            return new ResponseEntity<>(headers, HttpStatus.OK);
-        } else {
-            return new ResponseEntity<>(page.getContent(), headers, HttpStatus.OK);
-        }
-    }
-
-    public ResponseEntity getAllDocumentsX(
-            @ApiParam(value = "The Person the document belongs to", required = true)
-            @RequestParam("personId") final Long personId, // shall this be a documents/person/111/ instead?
-            @ApiParam(value = "Query to filter documents by")
-            @QueryParam(value = "query") final String query,
-            @ApiParam(value = "Status to filter documents by")
-            @QueryParam(value = "status") final Status status
-//            ,
-//            @ApiParam(value = "Tags to filter documents by")
-//            @QueryParam(value = "tags") final List<String> tags
-    ) {
-        LOG.info("Received 'getAllDocuments' request with person id '{}', query '{}', status '{}' and tags '{}'",
-                personId,
-                query,
-                status
-//                , tags
-        );
-
-        if (personId == 999999999L) {
-            return new ResponseEntity<>(HttpStatus.NOT_FOUND);
-        }
-
-//        final Collection<DocumentDTO> documents = documentService.findAll(personId, query, status, Collections.emptyList());
-
-//        return ResponseEntity.ok(documents);
-        return ResponseEntity.ok().build();
+        return ResponseEntity.ok(documentService.findAll(personId, query, columnFilters, pageable));
     }
 
     @ApiOperation(value = "Retrieves a specific document", response = DocumentDTO.class, produces = APPLICATION_JSON)
@@ -192,30 +144,13 @@ public class DocumentResource {
         final Optional<DocumentDTO> documentOptional = documentService.findOne(documentId);
 
         if (!documentOptional.isPresent()) {
-            LOG.warn("Document with id '{}' not found for 'DownloadDocument'");
+            LOG.warn("Document with id '{}' not found for 'DownloadDocument'",
+                    documentId);
             response.setStatus(HttpStatus.NOT_FOUND.value());
             return;
         }
 
-        final DocumentDTO document = documentOptional.get();
-
-        LOG.trace("Setting response headers to download document with id '{}' ",
-                documentId);
-
-        response.setStatus(HttpStatus.OK.value());
-        response.addHeader("Content-disposition", "attachment;filename=" + document.getFileName());
-        response.setContentType(document.getContentType());
-        response.setContentLengthLong(document.getSize());
-
-        response.flushBuffer();
-
-        LOG.debug("Preparing to stream document with id '{}'",
-                documentId);
-
-        documentService.download(document, response.getOutputStream());
-
-        LOG.debug("Finished streaming document with id '{}'",
-                documentId);
+        streamFile(documentOptional.get(), response);
     }
 
     @ApiOperation(value = "Uploads documents and returns the created document id", response = DocumentId.class, consumes = MULTIPART_FORM_DATA, produces = APPLICATION_JSON)
@@ -237,9 +172,9 @@ public class DocumentResource {
         LOG.info("Received 'UploadDocument' request with person '{}' and document name '{}'",
                 personId, documentParam.getOriginalFilename());
 
-        final Optional<DocumentDTO> document = createDocument(documentParam, personId);
+        final Optional<DocumentDTO> newDocument = createDocument(documentParam, personId);
 
-        if (!document.isPresent()) {
+        if (!newDocument.isPresent()) {
             LOG.warn("Document with person '{}' and document name '{}' failed validation; rejecting request",
                     personId, documentParam.getOriginalFilename());
             return new ResponseEntity<>(HttpStatus.BAD_REQUEST);
@@ -248,12 +183,12 @@ public class DocumentResource {
         LOG.debug("Accessing service to save document with person '{}' and document name '{}'",
                 personId, documentParam.getOriginalFilename());
 
-        final DocumentDTO documentDTO = documentService.save(document.get());
+        final DocumentDTO savedDocument = documentService.save(newDocument.get());
 
         LOG.debug("Document with person '{}' and document name '{}' saved successfully",
                 personId, documentParam.getOriginalFilename());
 
-        return ResponseEntity.status(HttpStatus.CREATED).body(new DocumentId(documentDTO.getId()));
+        return ResponseEntity.status(HttpStatus.CREATED).body(new DocumentId(savedDocument.getId()));
     }
 
     @ApiOperation(value = "Bulk update of documents", response = String.class, consumes = APPLICATION_JSON, produces = APPLICATION_JSON)
@@ -285,34 +220,7 @@ public class DocumentResource {
                 return ResponseEntity.notFound().build();
             }
 
-            final DocumentDTO existingDocument = existingDocumentOptional.get();
-
-            LOG.debug("Merging tags changes on Document with id '{}'",
-                    documentParam.getId());
-
-            // filters deleted tags
-            final Set<TagDTO> deletedTags = existingDocument.getTags().stream()
-                    .filter(tag -> Optional.ofNullable(documentParam.getTags()).orElse(Collections.emptySet()).contains(new TagDTO(tag.getName())))
-                    .collect(Collectors.toSet());
-
-            // combines added tags
-            final Stream<TagDTO> combinedTags = Stream.concat(
-                    Optional.ofNullable(deletedTags).orElse(Collections.emptySet()).stream(),
-                    Optional.ofNullable(documentParam.getTags()).orElse(Collections.emptySet()).stream()
-            );
-
-            existingDocument.setName(documentParam.getName());
-            existingDocument.setStatus(documentParam.getStatus());
-            existingDocument.setVersion(documentParam.getVersion());
-            existingDocument.setTags(combinedTags.collect(Collectors.toSet()));
-
-            LOG.debug("Accessing service to update document metadata on document with id '{}'",
-                    documentParam.getId());
-
-            documentService.save(existingDocument);
-
-            LOG.debug("Document with id '{}' updated successfully",
-                    documentParam.getId());
+            updateDocumentMetadata(existingDocumentOptional.get(), documentParam);
         }
 
         return ResponseEntity.ok().build();
@@ -349,7 +257,6 @@ public class DocumentResource {
     public ResponseEntity<Collection<TagDTO>> getAllTags(
             @ApiParam(value = "Query to filter tags by")
             @QueryParam("query") final String query) {
-
         LOG.info("Received 'SearchTags' request with query '{}'",
                 query);
 
@@ -402,6 +309,55 @@ public class DocumentResource {
         return Optional.of(document);
     }
 
+    private void updateDocumentMetadata(final DocumentDTO existingDocument, final DocumentDTO documentParam) throws IOException {
+        LOG.debug("Merging tags changes on Document with id '{}'",
+                documentParam.getId());
+
+        // filters deleted tags
+        final Set<TagDTO> deletedTags = existingDocument.getTags().stream()
+                .filter(tag -> Optional.ofNullable(documentParam.getTags()).orElse(Collections.emptySet()).contains(new TagDTO(tag.getName())))
+                .collect(Collectors.toSet());
+
+        // combines added tags
+        final Stream<TagDTO> combinedTags = Stream.concat(
+                Optional.ofNullable(deletedTags).orElse(Collections.emptySet()).stream(),
+                Optional.ofNullable(documentParam.getTags()).orElse(Collections.emptySet()).stream()
+        );
+
+        existingDocument.setName(documentParam.getName());
+        existingDocument.setStatus(documentParam.getStatus());
+        existingDocument.setVersion(documentParam.getVersion());
+        existingDocument.setTags(combinedTags.collect(Collectors.toSet()));
+
+        LOG.debug("Accessing service to update document metadata on document with id '{}'",
+                documentParam.getId());
+
+        documentService.save(existingDocument);
+
+        LOG.debug("Document with id '{}' updated successfully",
+                documentParam.getId());
+    }
+
+    private void streamFile(final DocumentDTO document, final HttpServletResponse response) throws IOException {
+        LOG.trace("Setting response headers to download document with id '{}' ",
+                document.getId());
+
+        response.setStatus(HttpStatus.OK.value());
+        response.addHeader("Content-disposition", "attachment;filename=" + document.getFileName());
+        response.setContentType(document.getContentType());
+        response.setContentLengthLong(document.getSize());
+
+        response.flushBuffer();
+
+        LOG.debug("Preparing to stream document with id '{}'",
+                document.getId());
+
+        documentService.download(document, response.getOutputStream());
+
+        LOG.debug("Finished streaming document with id '{}'",
+                document.getId());
+    }
+
     @ApiModel("DocumentId")
     private class DocumentId {
         private final Long id;
@@ -413,5 +369,9 @@ public class DocumentResource {
         public Long getId() {
             return id;
         }
+    }
+
+    public interface DocumentDTOPage extends Page<DocumentDTO> {
+
     }
 }
