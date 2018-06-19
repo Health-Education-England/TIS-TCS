@@ -5,12 +5,19 @@ import com.microsoft.azure.storage.StorageException;
 import com.transformuk.hee.tis.filestorage.repository.FileStorageRepository;
 import com.transformuk.hee.tis.tcs.api.dto.DocumentDTO;
 import com.transformuk.hee.tis.tcs.service.config.AzureProperties;
+import com.transformuk.hee.tis.tcs.service.model.ColumnFilter;
 import com.transformuk.hee.tis.tcs.service.model.Document;
 import com.transformuk.hee.tis.tcs.service.repository.DocumentRepository;
 import com.transformuk.hee.tis.tcs.service.service.DocumentService;
 import com.transformuk.hee.tis.tcs.service.service.mapper.DocumentMapper;
+import com.transformuk.hee.tis.tcs.service.service.mapper.TagMapper;
+import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
+import org.springframework.data.jpa.domain.Specification;
+import org.springframework.data.jpa.domain.Specifications;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.multipart.MultipartFile;
@@ -18,7 +25,11 @@ import org.springframework.web.multipart.MultipartFile;
 import java.io.*;
 import java.net.URISyntaxException;
 import java.security.InvalidKeyException;
+import java.util.ArrayList;
+import java.util.List;
 import java.util.Optional;
+
+import static com.transformuk.hee.tis.tcs.service.service.impl.SpecificationFactory.in;
 
 @Service
 @Transactional
@@ -28,18 +39,22 @@ public class DocumentServiceImpl implements DocumentService {
     private final DocumentRepository documentRepository;
     private final FileStorageRepository fileStorageRepository;
     private final DocumentMapper documentMapper;
+    private final TagMapper tagMapper;
     private final AzureProperties azureProperties;
 
-    public DocumentServiceImpl(final DocumentRepository documentRepository, final FileStorageRepository fileStorageRepository, final DocumentMapper documentMapper, final AzureProperties azureProperties) {
+    public DocumentServiceImpl(final DocumentRepository documentRepository, final FileStorageRepository fileStorageRepository, final DocumentMapper documentMapper, final TagMapper tagMapper, final AzureProperties azureProperties) {
         this.documentRepository = documentRepository;
         this.fileStorageRepository = fileStorageRepository;
         this.documentMapper = documentMapper;
+        this.tagMapper = tagMapper;
         this.azureProperties = azureProperties;
     }
 
     @Override
     public Optional<DocumentDTO> findOne(final Long id) {
-        LOG.debug("Received request to load '{}' with ID '{}'", DocumentDTO.class.getSimpleName(), id);
+        LOG.debug("Received request to load '{}' with ID '{}'",
+                DocumentDTO.class.getSimpleName(),
+                id);
 
         final Document document = documentRepository.findOne(id);
 
@@ -51,8 +66,27 @@ public class DocumentServiceImpl implements DocumentService {
     }
 
     @Override
+    public Page<DocumentDTO> findAll(final Long personId, final String query, final List<ColumnFilter> columnFilters, final Pageable pageable) {
+        LOG.debug("Received request to load all '{}' with person id '{}' and query '{}'",
+                DocumentDTO.class.getSimpleName(),
+                personId,
+                query);
+
+        final Specification<Document> personSpec = (root, criteriaQuery, sb) -> sb.equal(root.get("personId"), personId);
+        Specifications<Document> spec = Specifications.where(personSpec);
+
+        spec = addColumnFiltersToSpec(columnFilters, spec);
+
+        spec = addSearchQueryToSpec(query, spec);
+
+        return mapDocuments(documentRepository.findAll(spec, pageable));
+    }
+
+    @Override
     public void download(final DocumentDTO document, final OutputStream outputStream) throws IOException {
-        LOG.debug("Received request to download '{}' with ID '{}'", DocumentDTO.class.getSimpleName(), document.getId());
+        LOG.debug("Received request to download '{}' with ID '{}'",
+                DocumentDTO.class.getSimpleName(),
+                document.getId());
 
         try {
             fileStorageRepository.download(azureProperties.getContainerName(),
@@ -65,7 +99,9 @@ public class DocumentServiceImpl implements DocumentService {
 
     @Override
     public DocumentDTO save(final DocumentDTO documentDTO) throws IOException {
-        LOG.debug("Received request to save '{}' with name '{}'", documentDTO.getClass().getSimpleName(), documentDTO.getFileName());
+        LOG.debug("Received request to save '{}' with name '{}'",
+                documentDTO.getClass().getSimpleName(),
+                documentDTO.getFileName());
 
         Document document = documentMapper.toEntity(documentDTO);
 
@@ -114,7 +150,8 @@ public class DocumentServiceImpl implements DocumentService {
         return saveMetadata(document);
     }
 
-    private String saveFile(final Document document) throws InvalidKeyException, StorageException, URISyntaxException {
+    private String saveFile(final Document document) throws
+            InvalidKeyException, StorageException, URISyntaxException {
         return fileStorageRepository.store(document.getId(), azureProperties.getContainerName() + "/" + azureProperties.getPersonFolder(), Lists.newArrayList(getFileAsMultipart(document)));
     }
 
@@ -164,5 +201,51 @@ public class DocumentServiceImpl implements DocumentService {
                 // intentionally left empty
             }
         };
+    }
+
+    private Page<DocumentDTO> mapDocuments(final Page<Document> page) {
+        return page.map(documentMapper::toDto);
+    }
+
+    private Specifications<Document> addColumnFiltersToSpec(final List<ColumnFilter> columnFilters, Specifications<Document> fullSpec) {
+        if (columnFilters == null || columnFilters.isEmpty()) {
+            return fullSpec;
+        }
+
+        final List<Specification<Document>> columnFilterSpecs = new ArrayList<>();
+        columnFilters.forEach(cf -> columnFilterSpecs.add(in(cf.getName(), cf.getValues())));
+
+        fullSpec = Specifications.where(columnFilterSpecs.get(0));
+        for (int i = 1; i < columnFilterSpecs.size(); i++) {
+            fullSpec = fullSpec.and(columnFilterSpecs.get(i));
+        }
+
+        return fullSpec;
+    }
+
+    private Specifications<Document> addSearchQueryToSpec(final String query, Specifications<Document> fullSpec) {
+        final List<Specification<Document>> querySpecs = new ArrayList<>();
+
+        if (StringUtils.isEmpty(query)) {
+            return fullSpec;
+        }
+
+        querySpecs.add((root, criteriaQuery, sb) -> sb.like(root.get("name"), "%" + query + "%"));
+        querySpecs.add((root, criteriaQuery, sb) -> sb.like(root.get("fileName"), "%" + query + "%"));
+        querySpecs.add((root, criteriaQuery, sb) -> sb.like(root.get("fileExtension"), "%" + query + "%"));
+        querySpecs.add((root, criteriaQuery, sb) -> sb.like(root.get("contentType"), "%" + query + "%"));
+
+        int i = 0;
+        Specifications<Document> orSpec = Specifications.where(querySpecs.get(0));
+        i++;
+
+        for (; i < querySpecs.size(); i++) {
+            orSpec = orSpec.or(querySpecs.get(i));
+        }
+
+        fullSpec = fullSpec.and(orSpec);
+
+
+        return fullSpec;
     }
 }
