@@ -162,7 +162,6 @@ public class ProgrammeMembershipResourceIntTest {
     ProgrammeMembership programmeMembership = new ProgrammeMembership()
         .intrepidId(DEFAULT_INTREPID_ID)
         .programmeMembershipType(DEFAULT_PROGRAMME_MEMBERSHIP_TYPE)
-        .rotation(DEFAULT_ROTATION)
         .curriculumStartDate(DEFAULT_CURRICULUM_START_DATE)
         .curriculumEndDate(DEFAULT_CURRICULUM_END_DATE)
         .periodOfGrace(DEFAULT_PERIOD_OF_GRACE)
@@ -182,6 +181,16 @@ public class ProgrammeMembershipResourceIntTest {
     Person person = new Person()
         .intrepidId(DEFAULT_INTREPID_ID);
     return person;
+  }
+
+  /**
+   * Create Rotation entity
+   *
+   * @return
+   */
+  public static Rotation createRotationEntity() {
+    Rotation rotation =new Rotation().name(DEFAULT_ROTATION).status(Status.CURRENT);
+    return rotation;
   }
 
 
@@ -220,7 +229,7 @@ public class ProgrammeMembershipResourceIntTest {
     programmeMembership.setPerson(person);
     programmeMembership.setProgrammeId(programme.getId());
     programmeMembership.setCurriculumId(programme.getCurricula().iterator().next().getId());
-    programmeMembership.setRotation(rotation.getName());
+    programmeMembership.setRotation(rotation);
     // Create the ProgrammeMembership
     ProgrammeMembershipDTO programmeMembershipDTO = programmeMembershipMapper.toDto(programmeMembership);
     restProgrammeMembershipMockMvc.perform(post("/api/programme-memberships")
@@ -234,7 +243,7 @@ public class ProgrammeMembershipResourceIntTest {
     ProgrammeMembership testProgrammeMembership = programmeMembershipList.get(programmeMembershipList.size() - 1);
     assertThat(testProgrammeMembership.getIntrepidId()).isEqualTo(DEFAULT_INTREPID_ID);
     assertThat(testProgrammeMembership.getProgrammeMembershipType()).isEqualTo(DEFAULT_PROGRAMME_MEMBERSHIP_TYPE);
-    assertThat(testProgrammeMembership.getRotation()).isEqualTo(rotation.getName());
+    assertThat(testProgrammeMembership.getRotation()).isEqualTo(rotation);
     assertThat(testProgrammeMembership.getCurriculumStartDate()).isEqualTo(DEFAULT_CURRICULUM_START_DATE);
     assertThat(testProgrammeMembership.getCurriculumEndDate()).isEqualTo(DEFAULT_CURRICULUM_END_DATE);
     assertThat(testProgrammeMembership.getPeriodOfGrace()).isEqualTo(DEFAULT_PERIOD_OF_GRACE);
@@ -436,6 +445,8 @@ public class ProgrammeMembershipResourceIntTest {
   @Transactional
   public void getAllProgrammeMemberships() throws Exception {
     // Initialize the database
+    rotationRepository.saveAndFlush(rotation);
+    programmeMembership.setRotation(rotation);
     programmeMembershipRepository.saveAndFlush(programmeMembership);
 
     // Get all the programmeMembershipList
@@ -444,7 +455,7 @@ public class ProgrammeMembershipResourceIntTest {
         .andExpect(content().contentType(MediaType.APPLICATION_JSON_UTF8_VALUE))
         .andExpect(jsonPath("$.[*].curriculumMemberships[*].intrepidId").value(hasItem(DEFAULT_INTREPID_ID.toString())))
         .andExpect(jsonPath("$.[*].programmeMembershipType").value(hasItem(DEFAULT_PROGRAMME_MEMBERSHIP_TYPE.toString().toUpperCase())))
-        .andExpect(jsonPath("$.[*].rotation").value(hasItem(DEFAULT_ROTATION.toString())))
+        .andExpect(jsonPath("$.[*].rotation.name").value(rotation.getName()))
         .andExpect(jsonPath("$.[*].curriculumMemberships[*].curriculumStartDate").value(hasItem(DEFAULT_CURRICULUM_START_DATE.toString())))
         .andExpect(jsonPath("$.[*].curriculumMemberships[*].curriculumEndDate").value(hasItem(DEFAULT_CURRICULUM_END_DATE.toString())))
         .andExpect(jsonPath("$.[*].curriculumMemberships[*].periodOfGrace").value(hasItem(DEFAULT_PERIOD_OF_GRACE)))
@@ -458,6 +469,8 @@ public class ProgrammeMembershipResourceIntTest {
   @Transactional
   public void getProgrammeMembership() throws Exception {
     // Initialize the database
+    rotationRepository.saveAndFlush(rotation);
+    programmeMembership.setRotation(rotation);
     programmeMembershipRepository.saveAndFlush(programmeMembership);
 
     // Get the programmeMembership
@@ -467,7 +480,7 @@ public class ProgrammeMembershipResourceIntTest {
         .andExpect(jsonPath("$.curriculumMemberships[*].id").value(hasItem(programmeMembership.getId().intValue())))
         .andExpect(jsonPath("$.curriculumMemberships[*].intrepidId").value(hasItem(DEFAULT_INTREPID_ID.toString())))
         .andExpect(jsonPath("$.programmeMembershipType").value(DEFAULT_PROGRAMME_MEMBERSHIP_TYPE.toString().toUpperCase()))
-        .andExpect(jsonPath("$.rotation").value(DEFAULT_ROTATION.toString()))
+        .andExpect(jsonPath("$.rotation.name").value(rotation.getName()))
         .andExpect(jsonPath("$.curriculumMemberships[*].curriculumStartDate").value(hasItem(DEFAULT_CURRICULUM_START_DATE.toString())))
         .andExpect(jsonPath("$.curriculumMemberships[*].curriculumEndDate").value(hasItem(DEFAULT_CURRICULUM_END_DATE.toString())))
         .andExpect(jsonPath("$.curriculumMemberships[*].periodOfGrace").value(hasItem(DEFAULT_PERIOD_OF_GRACE)))
@@ -493,12 +506,14 @@ public class ProgrammeMembershipResourceIntTest {
     curriculumRepository.saveAndFlush(curriculum);
     programme.setCurricula(Sets.newHashSet(Lists.newArrayList(curriculum)));
     programmeRepository.saveAndFlush(programme);
+    rotation.setProgrammeId(programme.getId());
+    rotationRepository.saveAndFlush(rotation);
     programmeMembership.setPerson(person);
     programmeMembership.setProgrammeId(programme.getId());
     programmeMembership.setCurriculumId(programme.getCurricula().iterator().next().getId());
     programmeMembershipRepository.saveAndFlush(programmeMembership);
-    rotation.setProgrammeId(programme.getId());
-    rotationRepository.saveAndFlush(rotation);
+
+
     int databaseSizeBeforeUpdate = programmeMembershipRepository.findAll().size();
 
     // Update the programmeMembership
@@ -506,7 +521,7 @@ public class ProgrammeMembershipResourceIntTest {
     updatedProgrammeMembership
         .intrepidId(UPDATED_INTREPID_ID)
         .programmeMembershipType(UPDATED_PROGRAMME_MEMBERSHIP_TYPE)
-        .rotation(rotation.getName())
+        .rotation(rotation)
         .curriculumStartDate(UPDATED_CURRICULUM_START_DATE)
         .curriculumEndDate(UPDATED_CURRICULUM_END_DATE)
         .periodOfGrace(UPDATED_PERIOD_OF_GRACE)
@@ -527,7 +542,7 @@ public class ProgrammeMembershipResourceIntTest {
     ProgrammeMembership testProgrammeMembership = programmeMembershipList.get(programmeMembershipList.size() - 1);
     assertThat(testProgrammeMembership.getIntrepidId()).isEqualTo(UPDATED_INTREPID_ID);
     assertThat(testProgrammeMembership.getProgrammeMembershipType()).isEqualTo(UPDATED_PROGRAMME_MEMBERSHIP_TYPE);
-    assertThat(testProgrammeMembership.getRotation()).isEqualTo(rotation.getName());
+    assertThat(testProgrammeMembership.getRotation()).isEqualTo(rotation);
     assertThat(testProgrammeMembership.getCurriculumStartDate()).isEqualTo(UPDATED_CURRICULUM_START_DATE);
     assertThat(testProgrammeMembership.getCurriculumEndDate()).isEqualTo(UPDATED_CURRICULUM_END_DATE);
     assertThat(testProgrammeMembership.getPeriodOfGrace()).isEqualTo(UPDATED_PERIOD_OF_GRACE);

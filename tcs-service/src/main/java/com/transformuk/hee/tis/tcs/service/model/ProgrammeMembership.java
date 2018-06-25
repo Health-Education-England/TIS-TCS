@@ -29,8 +29,6 @@ public class ProgrammeMembership implements Serializable {
   @Enumerated(EnumType.STRING)
   private ProgrammeMembershipType programmeMembershipType;
 
-  private String rotation;
-
   private LocalDate curriculumStartDate;
 
   private LocalDate curriculumEndDate;
@@ -48,6 +46,10 @@ public class ProgrammeMembership implements Serializable {
   private Long programmeId;
 
   private Long curriculumId;
+
+  @ManyToOne
+  @JoinColumn(name = "rotationId")
+  private Rotation rotation;
 
   @ManyToOne
   @JoinColumn(name = "trainingNumberId")
@@ -91,15 +93,15 @@ public class ProgrammeMembership implements Serializable {
     return this;
   }
 
-  public String getRotation() {
+  public Rotation getRotation() {
     return rotation;
   }
 
-  public void setRotation(String rotation) {
+  public void setRotation(Rotation rotation) {
     this.rotation = rotation;
   }
 
-  public ProgrammeMembership rotation(String rotation) {
+  public ProgrammeMembership rotation(Rotation rotation) {
     this.rotation = rotation;
     return this;
   }

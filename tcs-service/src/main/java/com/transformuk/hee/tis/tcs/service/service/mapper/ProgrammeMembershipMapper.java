@@ -2,12 +2,10 @@ package com.transformuk.hee.tis.tcs.service.service.mapper;
 
 import com.google.common.collect.Lists;
 import com.google.common.collect.Maps;
-import com.transformuk.hee.tis.tcs.api.dto.CurriculumMembershipDTO;
-import com.transformuk.hee.tis.tcs.api.dto.PersonDTO;
-import com.transformuk.hee.tis.tcs.api.dto.ProgrammeMembershipDTO;
-import com.transformuk.hee.tis.tcs.api.dto.TrainingNumberDTO;
+import com.transformuk.hee.tis.tcs.api.dto.*;
 import com.transformuk.hee.tis.tcs.service.model.Person;
 import com.transformuk.hee.tis.tcs.service.model.ProgrammeMembership;
+import com.transformuk.hee.tis.tcs.service.model.Rotation;
 import com.transformuk.hee.tis.tcs.service.model.TrainingNumber;
 import org.springframework.stereotype.Component;
 import org.springframework.util.CollectionUtils;
@@ -77,7 +75,7 @@ public class ProgrammeMembershipMapper {
     ProgrammeMembershipDTO result = new ProgrammeMembershipDTO();
 
     result.setProgrammeMembershipType(programmeMembership.getProgrammeMembershipType());
-    result.setRotation(programmeMembership.getRotation());
+    result.setRotation(rotaionToRotationDTO(programmeMembership.getRotation()));
     result.setProgrammeStartDate(programmeMembership.getProgrammeStartDate());
     result.setProgrammeEndDate(programmeMembership.getProgrammeEndDate());
     result.setLeavingDestination(programmeMembership.getLeavingDestination());
@@ -123,7 +121,7 @@ public class ProgrammeMembershipMapper {
     ProgrammeMembership result = new ProgrammeMembership();
 
     result.setProgrammeMembershipType(programmeMembershipDTO.getProgrammeMembershipType());
-    result.setRotation(programmeMembershipDTO.getRotation());
+    result.setRotation(rotaionDTOToRotation(programmeMembershipDTO.getRotation()));
     result.setProgrammeStartDate(programmeMembershipDTO.getProgrammeStartDate());
     result.setProgrammeEndDate(programmeMembershipDTO.getProgrammeEndDate());
     result.setLeavingDestination(programmeMembershipDTO.getLeavingDestination());
@@ -195,6 +193,30 @@ public class ProgrammeMembershipMapper {
       result.setId(trainingNumberDTO.getId());
       result.setIntrepidId(trainingNumberDTO.getIntrepidId());
       result.setTrainingNumber(trainingNumberDTO.getTrainingNumber());
+    }
+    return result;
+  }
+
+  private RotationDTO rotaionToRotationDTO(Rotation rotation) {
+    RotationDTO result = null;
+    if (rotation != null) {
+      result = new RotationDTO();
+      result.setId(rotation.getId());
+      result.setProgrammeId(rotation.getProgrammeId());
+      result.setName(rotation.getName());
+      result.setStatus(rotation.getStatus());
+    }
+    return result;
+  }
+
+  private Rotation rotaionDTOToRotation(RotationDTO rotationDTO) {
+    Rotation result = null;
+    if (rotationDTO != null) {
+      result = new Rotation();
+      result.setId(rotationDTO.getId());
+      result.setProgrammeId(rotationDTO.getProgrammeId());
+      result.setName(rotationDTO.getName());
+      result.setStatus(rotationDTO.getStatus());
     }
     return result;
   }

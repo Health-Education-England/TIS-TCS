@@ -17,6 +17,6 @@ import java.util.List;
 @Repository
 public interface RotationRepository extends JpaRepository<Rotation, Long>, JpaSpecificationExecutor<Rotation> {
 
-    Optional<Rotation> findByNameAndProgrammeId(String name, Long programmeId);
+    Optional<Rotation> findByIdAndProgrammeId(Long id, Long programmeId);
 
 }
