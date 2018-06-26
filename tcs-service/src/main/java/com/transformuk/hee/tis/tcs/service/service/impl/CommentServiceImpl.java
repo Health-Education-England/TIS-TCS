@@ -28,7 +28,7 @@ public class CommentServiceImpl implements CommentService {
 		Comment comment;
 		if(placementCommentDTO.getId() != null) {
 			comment = commentRepository.findOne(placementCommentDTO.getId());
-			placementCommentMapper.overwriteCommentEntityWithDTOCommentBody(comment, placementCommentDTO);
+			placementCommentMapper.overwriteCommentEntityWithDTOComment(comment, placementCommentDTO);
 		} else {
 			comment = placementCommentMapper.toEntity(placementCommentDTO);
 		}

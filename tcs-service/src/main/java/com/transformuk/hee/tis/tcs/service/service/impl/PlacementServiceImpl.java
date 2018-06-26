@@ -170,6 +170,8 @@ public class PlacementServiceImpl implements PlacementService {
           Comment commentSaved = commentRepository.findOne(comment.getId());
           commentSaved.setBody(comment.getBody());
           commentSaved.setPlacement(placementDetails);
+          commentSaved.setAuthor(comment.getAuthor());
+          commentSaved.setSource(comment.getSource());
           commentsToPersist.add(commentSaved);
         } else {
           comment.setPlacement(placementDetails);
