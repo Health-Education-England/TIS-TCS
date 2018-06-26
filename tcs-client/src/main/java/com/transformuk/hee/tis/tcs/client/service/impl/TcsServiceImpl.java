@@ -12,6 +12,7 @@ import com.transformuk.hee.tis.tcs.api.dto.JsonPatchDTO;
 import com.transformuk.hee.tis.tcs.api.dto.PersonBasicDetailsDTO;
 import com.transformuk.hee.tis.tcs.api.dto.PersonDTO;
 import com.transformuk.hee.tis.tcs.api.dto.PersonalDetailsDTO;
+import com.transformuk.hee.tis.tcs.api.dto.PlacementCommentDTO;
 import com.transformuk.hee.tis.tcs.api.dto.PlacementDTO;
 import com.transformuk.hee.tis.tcs.api.dto.PlacementDetailsDTO;
 import com.transformuk.hee.tis.tcs.api.dto.PlacementFunderDTO;
@@ -57,7 +58,9 @@ public class TcsServiceImpl extends AbstractClientService {
 	private static final String API_PERSONAL_DETAILS = "/api/personal-details/";
 	private static final String API_QUALIFICATIONS = "/api/qualifications/";
 	private static final String API_PEOPLE = "/api/people/";
+	private static final String API_PLACEMENT = "/api/placement/";
 	private static final String API_PLACEMENTS = "/api/placements/";
+	private static final String API_PLACEMENT_COMMENT = "/api/placementComment/";
 	private static final String API_GDC_DETAILS = "/api/gdc-details/";
 	private static final String API_GMC_DETAILS = "/api/gmc-details/";
 	private static final String API_CONTACT_DETAILS = "/api/contact-details/";
@@ -178,6 +181,30 @@ public class TcsServiceImpl extends AbstractClientService {
 		HttpEntity<PersonDTO> httpEntity = new HttpEntity<>(personDTO, headers);
 		return tcsRestTemplate
 				.exchange(serviceUrl + API_PEOPLE, HttpMethod.POST, httpEntity, new ParameterizedTypeReference<PersonDTO>() {})
+				.getBody();
+	}
+
+	public PlacementCommentDTO createPlacementComment(PlacementCommentDTO placementCommentDTO) {
+		HttpHeaders headers = new HttpHeaders();
+		HttpEntity<PlacementCommentDTO> httpEntity = new HttpEntity<>(placementCommentDTO, headers);
+		return tcsRestTemplate
+				.exchange(serviceUrl + API_PLACEMENT_COMMENT, HttpMethod.POST, httpEntity, new ParameterizedTypeReference<PlacementCommentDTO>() {})
+				.getBody();
+	}
+
+	public PlacementCommentDTO updatePlacementComment(PlacementCommentDTO placementCommentDTO) {
+		HttpHeaders headers = new HttpHeaders();
+		HttpEntity<PlacementCommentDTO> httpEntity = new HttpEntity<>(placementCommentDTO, headers);
+		return tcsRestTemplate
+				.exchange(serviceUrl + API_PLACEMENT_COMMENT, HttpMethod.PUT, httpEntity, new ParameterizedTypeReference<PlacementCommentDTO>() {})
+				.getBody();
+	}
+
+	public PlacementCommentDTO findCommentForPlacement(Long placementId) {
+		HttpHeaders headers = new HttpHeaders();
+		HttpEntity<Long> httpEntity = new HttpEntity<>(placementId, headers);
+		return tcsRestTemplate
+				.exchange(serviceUrl + API_PLACEMENT + placementId + "/placementComment", HttpMethod.GET, httpEntity, new ParameterizedTypeReference<PlacementCommentDTO>() {})
 				.getBody();
 	}
 

@@ -2,13 +2,18 @@ package com.transformuk.hee.tis.tcs.service.model;
 
 import com.transformuk.hee.tis.tcs.api.enumeration.PlacementStatus;
 
+import javax.persistence.CascadeType;
 import javax.persistence.Column;
 import javax.persistence.Entity;
+import javax.persistence.FetchType;
 import javax.persistence.GeneratedValue;
 import javax.persistence.GenerationType;
 import javax.persistence.Id;
+import javax.persistence.OneToMany;
 import javax.persistence.Table;
 import java.time.LocalDate;
+import java.util.HashSet;
+import java.util.Set;
 
 /**
  * Holds the data from the placements table necessary to populate the
@@ -49,6 +54,9 @@ public class PlacementDetails {
   private String trainingDescription;
 
   private String localPostNumber;
+
+  @OneToMany(mappedBy = "placement", cascade = CascadeType.ALL, fetch = FetchType.EAGER)
+  private Set<Comment> comments = new HashSet<>();
 
   /**
    * @return the placement status based on dateFrom and dateTo
@@ -178,6 +186,10 @@ public class PlacementDetails {
   public void setGradeId(Long gradeId) {
     this.gradeId = gradeId;
   }
+
+  public Set<Comment> getComments() { return comments; }
+
+  public void setComments(Set<Comment> comments) { this.comments = comments; }
 
   @Override
   public boolean equals(Object o) {

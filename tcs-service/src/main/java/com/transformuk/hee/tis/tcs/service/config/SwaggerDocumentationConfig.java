@@ -22,7 +22,7 @@ public class SwaggerDocumentationConfig {
     ApiInfo apiInfo() {
         return new ApiInfoBuilder()
                 .title("TIS TCS API")
-                .description("Programme Curriculum Specialty Service REST API")
+                .description("TCS Service REST API")
                 .license("")
                 .licenseUrl("")
                 .termsOfServiceUrl("")
@@ -34,7 +34,7 @@ public class SwaggerDocumentationConfig {
     @Bean
     public Docket customImplementation() {
         return new Docket(DocumentationType.SWAGGER_2)
-                .groupName("PCS")
+                .groupName("TCS")
                 .apiInfo(apiInfo())
                 .select()
                 .apis(RequestHandlerSelectors.basePackage("com.transformuk.hee.tis.tcs.service.api"))

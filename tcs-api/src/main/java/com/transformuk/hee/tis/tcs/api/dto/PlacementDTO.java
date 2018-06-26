@@ -46,6 +46,7 @@ public class PlacementDTO implements Serializable {
     private String trainingDescription;
     private String localPostNumber;
     private Set<PlacementSupervisorDTO> supervisors = new HashSet<>();
+    private Set<PlacementCommentDTO> comments = new HashSet<>();
 
     public Long getId() {
         return id;
@@ -181,6 +182,14 @@ public class PlacementDTO implements Serializable {
 
     public void setSupervisors(Set<PlacementSupervisorDTO> supervisors) {
         this.supervisors = supervisors;
+    }
+
+    public Set<PlacementCommentDTO> getComments() {
+        return comments;
+    }
+
+    public void setComments(Set<PlacementCommentDTO> comments) {
+        this.comments = comments;
     }
 
     @Override
