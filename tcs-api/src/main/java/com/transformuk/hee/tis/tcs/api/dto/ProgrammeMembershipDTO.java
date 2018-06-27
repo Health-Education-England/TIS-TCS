@@ -26,7 +26,7 @@ public class ProgrammeMembershipDTO implements Serializable {
 
   private PersonDTO person;
 
-  private String rotation;
+  private RotationDTO rotation;
 
   @NotNull(message = "ProgrammeStartDate is required", groups = {Update.class, Create.class})
   private LocalDate programmeStartDate;
@@ -57,11 +57,11 @@ public class ProgrammeMembershipDTO implements Serializable {
     this.programmeMembershipType = programmeMembershipType;
   }
 
-  public String getRotation() {
+  public RotationDTO getRotation() {
     return rotation;
   }
 
-  public void setRotation(String rotation) {
+  public void setRotation(RotationDTO rotation) {
     this.rotation = rotation;
   }
 
