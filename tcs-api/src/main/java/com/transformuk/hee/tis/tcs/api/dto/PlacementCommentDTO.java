@@ -2,6 +2,7 @@ package com.transformuk.hee.tis.tcs.api.dto;
 
 import com.transformuk.hee.tis.tcs.api.dto.validation.Create;
 import com.transformuk.hee.tis.tcs.api.dto.validation.Update;
+import com.transformuk.hee.tis.tcs.api.enumeration.CommentSource;
 import io.swagger.annotations.ApiModel;
 
 import javax.validation.Valid;
@@ -22,6 +23,11 @@ public class PlacementCommentDTO implements Serializable {
 	@NotNull(message = "body is required", groups = {Update.class, Create.class})
 	protected String body;
 
+	@NotNull(message = "author is required", groups = {Update.class, Create.class})
+	protected String author;
+
+	protected CommentSource source;
+
 	public Long getId() {
 		return id;
 	}
@@ -37,4 +43,12 @@ public class PlacementCommentDTO implements Serializable {
 	public void setBody(String body) {
 		this.body = body;
 	}
+
+	public String getAuthor() { return author; }
+
+	public void setAuthor(String author) { this.author = author; }
+
+	public CommentSource getSource() { return source; }
+
+	public void setSource(CommentSource source) { this.source = source; }
 }

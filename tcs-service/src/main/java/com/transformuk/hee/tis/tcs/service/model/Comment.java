@@ -1,7 +1,11 @@
 package com.transformuk.hee.tis.tcs.service.model;
 
+import com.transformuk.hee.tis.tcs.api.enumeration.CommentSource;
+
 import javax.persistence.Column;
 import javax.persistence.Entity;
+import javax.persistence.EnumType;
+import javax.persistence.Enumerated;
 import javax.persistence.FetchType;
 import javax.persistence.GeneratedValue;
 import javax.persistence.GenerationType;
@@ -35,7 +39,9 @@ public class Comment implements Serializable {
 	@ManyToOne(fetch = FetchType.EAGER)
 	@JoinColumn(name = "placementId")
 	private PlacementDetails placement;
-
+	@Enumerated(value = EnumType.STRING)
+	@Column(name = "source")
+	private CommentSource source;
 	@Override
 	public boolean equals(Object o) {
 		if (this == o) return true;
@@ -120,4 +126,8 @@ public class Comment implements Serializable {
 	public void setPlacement(PlacementDetails placement) {
 		this.placement = placement;
 	}
+
+	public CommentSource getSource() { return source; }
+
+	public void setSource(CommentSource source) { this.source = source; }
 }
