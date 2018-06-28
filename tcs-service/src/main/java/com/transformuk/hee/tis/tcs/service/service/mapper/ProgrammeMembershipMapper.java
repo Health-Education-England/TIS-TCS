@@ -80,7 +80,7 @@ public class ProgrammeMembershipMapper {
       result.setProgrammeId(programme.getId());
       result.setProgrammeName(programme.getProgrammeName());
       result.setProgrammeNumber(programme.getProgrammeNumber());
-      result.setRotation(rotaionToRotationDTO(programmeMembership.getRotation(), programme));
+      result.setRotation(rotationToRotationDTO(programmeMembership.getRotation(), programme));
     }
     result.setTrainingNumber(trainingNumberToTrainingNumberDTO(programmeMembership.getTrainingNumber()));
 
@@ -123,7 +123,7 @@ public class ProgrammeMembershipMapper {
     ProgrammeMembership result = new ProgrammeMembership();
 
     result.setProgrammeMembershipType(programmeMembershipDTO.getProgrammeMembershipType());
-    result.setRotation(rotaionDTOToRotation(programmeMembershipDTO.getRotation()));
+    result.setRotation(rotationDTOToRotation(programmeMembershipDTO.getRotation()));
     result.setProgrammeStartDate(programmeMembershipDTO.getProgrammeStartDate());
     result.setProgrammeEndDate(programmeMembershipDTO.getProgrammeEndDate());
     result.setLeavingDestination(programmeMembershipDTO.getLeavingDestination());
@@ -205,7 +205,7 @@ public class ProgrammeMembershipMapper {
     return result;
   }
 
-  private RotationDTO rotaionToRotationDTO(Rotation rotation, Programme programme) {
+  private RotationDTO rotationToRotationDTO(Rotation rotation, Programme programme) {
     RotationDTO result = null;
     if (rotation != null) {
       result = new RotationDTO();
@@ -219,7 +219,7 @@ public class ProgrammeMembershipMapper {
     return result;
   }
 
-  private Rotation rotaionDTOToRotation(RotationDTO rotationDTO) {
+  private Rotation rotationDTOToRotation(RotationDTO rotationDTO) {
     Rotation result = null;
     if (rotationDTO != null) {
       result = new Rotation();
