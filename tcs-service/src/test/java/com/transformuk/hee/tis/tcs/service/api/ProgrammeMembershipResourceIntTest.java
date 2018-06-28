@@ -227,7 +227,7 @@ public class ProgrammeMembershipResourceIntTest {
     int databaseSizeBeforeCreate = programmeMembershipRepository.findAll().size();
 
     programmeMembership.setPerson(person);
-    programmeMembership.setProgrammeId(programme.getId());
+    programmeMembership.setProgramme(programme);
     programmeMembership.setCurriculumId(programme.getCurricula().iterator().next().getId());
     programmeMembership.setRotation(rotation);
     // Create the ProgrammeMembership
@@ -294,7 +294,7 @@ public class ProgrammeMembershipResourceIntTest {
     curriculumRepository.saveAndFlush(curriculum);
     programme.setCurricula(Sets.newHashSet(Lists.newArrayList(curriculum)));
     programmeRepository.saveAndFlush(programme);
-    programmeMembership.setProgrammeId(programme.getId());
+    programmeMembership.setProgramme(programme);
     programmeMembership.setCurriculumId(programme.getCurricula().iterator().next().getId());
     ProgrammeMembershipDTO programmeMembershipDTO = programmeMembershipMapper.toDto(programmeMembership);
     programmeMembershipDTO.setPerson(null);
@@ -316,7 +316,7 @@ public class ProgrammeMembershipResourceIntTest {
     curriculumRepository.saveAndFlush(curriculum);
     programme.setCurricula(Sets.newHashSet(Lists.newArrayList(curriculum)));
     programmeRepository.saveAndFlush(programme);
-    programmeMembership.setProgrammeId(programme.getId());
+    programmeMembership.setProgramme(programme);
     programmeMembership.setCurriculumId(programme.getCurricula().iterator().next().getId());
     ProgrammeMembershipDTO programmeMembershipDTO = programmeMembershipMapper.toDto(programmeMembership);
     person.setId(1020120L); // set not exists person Id
@@ -337,11 +337,13 @@ public class ProgrammeMembershipResourceIntTest {
   @Transactional
   public void shouldValidateProgramme() throws Exception {
     //given
+    programmeRepository.saveAndFlush(programme);
     curriculumRepository.saveAndFlush(curriculum);
     programme.setCurricula(Sets.newHashSet(Lists.newArrayList(curriculum)));
-    programmeMembership.setProgrammeId(NOT_EXISTS_PROGRAMME_ID); // this programme doesn't exists in DB
+    programmeMembership.setProgramme(programme); // this programme doesn't exists in DB
     programmeMembership.setCurriculumId(programme.getCurricula().iterator().next().getId());
     ProgrammeMembershipDTO programmeMembershipDTO = programmeMembershipMapper.toDto(programmeMembership);
+    programmeMembershipDTO.setProgrammeId(NOT_EXISTS_PROGRAMME_ID);
     personRepository.saveAndFlush(person);
     programmeMembershipDTO.setPerson(personMapper.toDto(person));
 
@@ -364,7 +366,7 @@ public class ProgrammeMembershipResourceIntTest {
     curriculumRepository.saveAndFlush(curriculum);
     programme.setCurricula(Sets.newHashSet(Lists.newArrayList(curriculum)));
     programmeRepository.saveAndFlush(programme);
-    programmeMembership.setProgrammeId(programme.getId());
+    programmeMembership.setProgramme(programme);
     programmeMembership.setCurriculumId(NOT_EXISTS_CURRICULUM_ID);
     ProgrammeMembershipDTO programmeMembershipDTO = programmeMembershipMapper.toDto(programmeMembership);
     personRepository.saveAndFlush(person);
@@ -389,7 +391,7 @@ public class ProgrammeMembershipResourceIntTest {
     curriculumRepository.saveAndFlush(curriculum);
     programme.setCurricula(Sets.newHashSet(Lists.newArrayList(curriculum)));
     programmeRepository.saveAndFlush(programme);
-    programmeMembership.setProgrammeId(programme.getId());
+    programmeMembership.setProgramme(programme);
 
     Curriculum notAssociatedCurriculum = CurriculumResourceIntTest.createCurriculumEntity();
     curriculumRepository.saveAndFlush(notAssociatedCurriculum);
@@ -422,7 +424,7 @@ public class ProgrammeMembershipResourceIntTest {
     // Create the ProgrammeMembership with an existing ID
     programmeMembership.setId(1L);
     programmeMembership.setPerson(person);
-    programmeMembership.setProgrammeId(programme.getId());
+    programmeMembership.setProgramme(programme);
     programmeMembership.setCurriculumId(programme.getCurricula().iterator().next().getId());
     //Save programme membership
     programmeMembership = programmeMembershipRepository.saveAndFlush(programmeMembership);
@@ -446,7 +448,9 @@ public class ProgrammeMembershipResourceIntTest {
   public void getAllProgrammeMemberships() throws Exception {
     // Initialize the database
     rotationRepository.saveAndFlush(rotation);
+    programmeRepository.saveAndFlush(programme);
     programmeMembership.setRotation(rotation);
+    programmeMembership.setProgramme(programme);
     programmeMembershipRepository.saveAndFlush(programmeMembership);
 
     // Get all the programmeMembershipList
@@ -469,7 +473,9 @@ public class ProgrammeMembershipResourceIntTest {
   @Transactional
   public void getProgrammeMembership() throws Exception {
     // Initialize the database
+    programmeRepository.saveAndFlush(programme);
     rotationRepository.saveAndFlush(rotation);
+    programmeMembership.setProgramme(programme);
     programmeMembership.setRotation(rotation);
     programmeMembershipRepository.saveAndFlush(programmeMembership);
 
@@ -509,7 +515,7 @@ public class ProgrammeMembershipResourceIntTest {
     rotation.setProgrammeId(programme.getId());
     rotationRepository.saveAndFlush(rotation);
     programmeMembership.setPerson(person);
-    programmeMembership.setProgrammeId(programme.getId());
+    programmeMembership.setProgramme(programme);
     programmeMembership.setCurriculumId(programme.getCurricula().iterator().next().getId());
     programmeMembershipRepository.saveAndFlush(programmeMembership);
 
@@ -561,7 +567,7 @@ public class ProgrammeMembershipResourceIntTest {
     programme.setCurricula(Sets.newHashSet(Lists.newArrayList(curriculum)));
     programmeRepository.saveAndFlush(programme);
     programmeMembership.setPerson(person);
-    programmeMembership.setProgrammeId(programme.getId());
+    programmeMembership.setProgramme(programme);
     programmeMembership.setCurriculumId(programme.getCurricula().iterator().next().getId());
 
     // Create the ProgrammeMembership

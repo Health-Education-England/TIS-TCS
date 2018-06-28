@@ -3,10 +3,7 @@ package com.transformuk.hee.tis.tcs.service.service.mapper;
 import com.google.common.collect.Lists;
 import com.google.common.collect.Maps;
 import com.transformuk.hee.tis.tcs.api.dto.*;
-import com.transformuk.hee.tis.tcs.service.model.Person;
-import com.transformuk.hee.tis.tcs.service.model.ProgrammeMembership;
-import com.transformuk.hee.tis.tcs.service.model.Rotation;
-import com.transformuk.hee.tis.tcs.service.model.TrainingNumber;
+import com.transformuk.hee.tis.tcs.service.model.*;
 import org.springframework.stereotype.Component;
 import org.springframework.util.CollectionUtils;
 
@@ -75,11 +72,16 @@ public class ProgrammeMembershipMapper {
     ProgrammeMembershipDTO result = new ProgrammeMembershipDTO();
 
     result.setProgrammeMembershipType(programmeMembership.getProgrammeMembershipType());
-    result.setRotation(rotaionToRotationDTO(programmeMembership.getRotation()));
     result.setProgrammeStartDate(programmeMembership.getProgrammeStartDate());
     result.setProgrammeEndDate(programmeMembership.getProgrammeEndDate());
     result.setLeavingDestination(programmeMembership.getLeavingDestination());
-    result.setProgrammeId(programmeMembership.getProgrammeId());
+    Programme programme = programmeMembership.getProgramme();
+    if(programme != null){
+      result.setProgrammeId(programme.getId());
+      result.setProgrammeName(programme.getProgrammeName());
+      result.setProgrammeNumber(programme.getProgrammeNumber());
+      result.setRotation(rotationToRotationDTO(programmeMembership.getRotation(), programme));
+    }
     result.setTrainingNumber(trainingNumberToTrainingNumberDTO(programmeMembership.getTrainingNumber()));
 
     if (programmeMembership.getPerson() == null) {
@@ -121,11 +123,17 @@ public class ProgrammeMembershipMapper {
     ProgrammeMembership result = new ProgrammeMembership();
 
     result.setProgrammeMembershipType(programmeMembershipDTO.getProgrammeMembershipType());
-    result.setRotation(rotaionDTOToRotation(programmeMembershipDTO.getRotation()));
+    result.setRotation(rotationDTOToRotation(programmeMembershipDTO.getRotation()));
     result.setProgrammeStartDate(programmeMembershipDTO.getProgrammeStartDate());
     result.setProgrammeEndDate(programmeMembershipDTO.getProgrammeEndDate());
     result.setLeavingDestination(programmeMembershipDTO.getLeavingDestination());
-    result.setProgrammeId(programmeMembershipDTO.getProgrammeId());
+    if(programmeMembershipDTO.getProgrammeId() != null){
+      Programme programme = new Programme();
+      programme.setId(programmeMembershipDTO.getProgrammeId());
+      programme.setProgrammeName(programmeMembershipDTO.getProgrammeName());
+      programme.setProgrammeNumber(programmeMembershipDTO.getProgrammeNumber());
+      result.setProgramme(programme);
+    }
     result.setTrainingNumber(trainingNumberDTOToTrainingNumber(programmeMembershipDTO.getTrainingNumber()));
 
     if (programmeMembershipDTO.getPerson() == null) {
@@ -197,19 +205,21 @@ public class ProgrammeMembershipMapper {
     return result;
   }
 
-  private RotationDTO rotaionToRotationDTO(Rotation rotation) {
+  private RotationDTO rotationToRotationDTO(Rotation rotation, Programme programme) {
     RotationDTO result = null;
     if (rotation != null) {
       result = new RotationDTO();
       result.setId(rotation.getId());
       result.setProgrammeId(rotation.getProgrammeId());
       result.setName(rotation.getName());
+      result.setProgrammeName(programme.getProgrammeName());
+      result.setProgrammeNumber(programme.getProgrammeNumber());
       result.setStatus(rotation.getStatus());
     }
     return result;
   }
 
-  private Rotation rotaionDTOToRotation(RotationDTO rotationDTO) {
+  private Rotation rotationDTOToRotation(RotationDTO rotationDTO) {
     Rotation result = null;
     if (rotationDTO != null) {
       result = new Rotation();
