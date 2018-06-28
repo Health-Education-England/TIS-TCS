@@ -160,8 +160,8 @@ public class ProgrammeMembershipServiceImpl implements ProgrammeMembershipServic
 
       //get the programme names and numbers
       Set<Long> programmeIds = foundProgrammeMemberships.stream()
-          .filter(pm -> Objects.nonNull(pm.getProgrammeId()))
-          .map(ProgrammeMembership::getProgrammeId)
+          .filter(pm -> Objects.nonNull(pm.getProgramme()))
+          .map(pm -> pm.getProgramme().getId())
           .collect(Collectors.toSet());
 
       List<Programme> programmesById = programmeRepository.findByIdIn(programmeIds);

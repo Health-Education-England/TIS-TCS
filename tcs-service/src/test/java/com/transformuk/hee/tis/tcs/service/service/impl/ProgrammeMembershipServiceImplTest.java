@@ -77,13 +77,17 @@ public class ProgrammeMembershipServiceImplTest {
     trainingNumber.setId(TRAINEE_ID);
     trainingNumber.setTrainingNumber(TRAINEE_NUMBER);
 
+    programme.setId(PROGRAMME_ID);
+    programme.setProgrammeNumber(PROGRAMME_NUMBER1);
+    programme.setProgrammeName(PROGRAMME_NAME);
+
     programmeMembership1.setId(PROGRAMME_MEMBERSHIP_ID_1);
-    programmeMembership1.setProgrammeId(PROGRAMME_ID);
+    programmeMembership1.setProgramme(programme);
     programmeMembership1.setTrainingNumber(trainingNumber);
     programmeMembership1.setCurriculumId(5L);
 
     programmeMembership2.setId(PROGRAMME_MEMBERSHIP_ID_2);
-    programmeMembership2.setProgrammeId(PROGRAMME_ID);
+    programmeMembership2.setProgramme(programme);
     programmeMembership2.setTrainingNumber(trainingNumber);
     programmeMembership2.setCurriculumId(6L);
 
@@ -110,9 +114,6 @@ public class ProgrammeMembershipServiceImplTest {
     curriculumDTO2.setId(6L);
     curriculumDTO2.setName("YYY");
 
-    programme.setId(PROGRAMME_ID);
-    programme.setProgrammeNumber(PROGRAMME_NUMBER1);
-    programme.setProgrammeName(PROGRAMME_NAME);
   }
 
   @Test(expected = NullPointerException.class)

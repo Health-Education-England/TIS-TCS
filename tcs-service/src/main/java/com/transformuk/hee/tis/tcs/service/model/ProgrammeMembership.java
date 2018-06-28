@@ -43,7 +43,9 @@ public class ProgrammeMembership implements Serializable {
 
   private String leavingDestination;
 
-  private Long programmeId;
+  @ManyToOne
+  @JoinColumn(name = "programmeId")
+  private Programme programme;
 
   private Long curriculumId;
 
@@ -197,12 +199,12 @@ public class ProgrammeMembership implements Serializable {
     return this;
   }
 
-  public Long getProgrammeId() {
-    return programmeId;
+  public Programme getProgramme() {
+    return programme;
   }
 
-  public void setProgrammeId(Long programmeId) {
-    this.programmeId = programmeId;
+  public void setProgramme(Programme programme) {
+    this.programme = programme;
   }
 
   public Long getCurriculumId() {
