@@ -36,7 +36,7 @@ public class Comment implements Serializable {
 	@Version
 	private LocalDateTime amendedDate;
 	private LocalDateTime inactiveDate;
-	@ManyToOne(fetch = FetchType.EAGER)
+	@ManyToOne(fetch = FetchType.LAZY)
 	@JoinColumn(name = "placementId")
 	private PlacementDetails placement;
 	@Enumerated(value = EnumType.STRING)

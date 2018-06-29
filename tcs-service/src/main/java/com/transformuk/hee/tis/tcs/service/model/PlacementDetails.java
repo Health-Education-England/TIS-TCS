@@ -55,7 +55,7 @@ public class PlacementDetails {
 
   private String localPostNumber;
 
-  @OneToMany(mappedBy = "placement", cascade = CascadeType.ALL, fetch = FetchType.EAGER)
+  @OneToMany(mappedBy = "placement", cascade = CascadeType.ALL, fetch = FetchType.EAGER, orphanRemoval = true)
   private Set<Comment> comments = new HashSet<>();
 
   /**
