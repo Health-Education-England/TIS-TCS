@@ -82,7 +82,7 @@ public class DocumentResourceIntTest {
     private static final String SQL_INSERT_DOCUMENT =
             "INSERT INTO `Document` (`id`, `addedDate`, `amendedDate`, `inactiveDate`, `uploadedBy`, `name`, `fileName`, `fileExtension`, `contentType`, `size`, `personId`, `status`, `version`, `intrepidDocumentUId`, `intrepidParentRecordId`, `intrepidFolderPath`) " +
                     " VALUES " +
-                    " (%d, '2018-02-16 14:32:06', '2018-02-19 11:07:11.882', NULL, 'James Hudson', 'Test Update', 'LargeTestFile.txt', 'txt', 'text/plain', 512000, %d, 'INACTIVE', 1, NULL, NULL, NULL);";
+                    " (%d, '2018-02-16 14:32:06', '2018-02-19 11:07:11.882', NULL, 'James Hudson', 'Test Update', 'LargeTestFile.txt', 'txt', 'text/plain', 512000, %d, 'CURRENT', 1, NULL, NULL, NULL);";
 
     private static final String SQL_INSERT_TAG =
             "INSERT INTO `Tag` (`id`, `name`) " +
@@ -648,6 +648,123 @@ public class DocumentResourceIntTest {
                 .andReturn();
     }
 
+    @Test
+    public void deleteDocumentById_shouldReturnHTTP501_WhenEntityDoesNotExist() throws Exception {
+        mockMvc.perform(delete(DocumentResource.PATH_API +
+                DocumentResource.PATH_DOCUMENTS +
+                "/UnknownEntity" +
+                "/1" +
+                "/1"
+        ))
+                .andExpect(content().string(""))
+                .andExpect(status().isNotImplemented());
+    }
+
+    @Test
+    public void deleteDocumentById_shouldReturnHTTP400_WhenPersonIdIsEmpty() throws Exception {
+        mockMvc.perform(delete(DocumentResource.PATH_API +
+                DocumentResource.PATH_DOCUMENTS +
+                "/person" +
+                "/ " +
+                "/ 1"
+        ))
+                .andExpect(content().string(""))
+                .andExpect(status().isBadRequest());
+    }
+
+    @Test
+    public void deleteDocumentById_shouldReturnHTTP400_WhenDocumentIdIsEmpty() throws Exception {
+        mockMvc.perform(delete(DocumentResource.PATH_API +
+                DocumentResource.PATH_DOCUMENTS +
+                "/person" +
+                "/1" +
+                "/ "
+        ))
+                .andExpect(content().string(""))
+                .andExpect(status().isBadRequest());
+    }
+
+
+    @Test
+    public void deleteDocumentById_shouldReturnHTTP400_WhenPersonIdIsNaN() throws Exception {
+        final String personId = "NaN";
+
+        mockMvc.perform(delete(DocumentResource.PATH_API +
+                DocumentResource.PATH_DOCUMENTS +
+                "/person" +
+                "/" + personId +
+                "/1"
+        ))
+                .andExpect(content().string(""))
+                .andExpect(status().isBadRequest());
+    }
+
+    @Test
+    public void deleteDocumentById_shouldReturnHTTP404_WhenDocumentDoesNotExist() throws Exception {
+        final long documentId = DOCUMENT_BASE_ID + 999999999;
+
+        mockMvc.perform(delete(DocumentResource.PATH_API +
+                DocumentResource.PATH_DOCUMENTS +
+                "/person" +
+                "/1" +
+                "/" + documentId
+        ))
+                .andExpect(content().string(""))
+                .andExpect(status().isNotFound());
+    }
+
+    @Test
+    public void deleteDocumentById_shouldReturnHTT200_WhenDocumentDoesExist() throws Exception {
+        mockMvc.perform(delete(
+                DocumentResource.PATH_API +
+                        DocumentResource.PATH_DOCUMENTS +
+                        "/person" +
+                        "/" + (PERSON_BASE_ID + 3) +
+                        "/" + (DOCUMENT_BASE_ID + 1011)
+        ))
+                .andExpect(status().isNoContent())
+                .andExpect(content().string(""))
+                .andReturn();
+
+        mockMvc.perform(get(DocumentResource.PATH_API +
+                DocumentResource.PATH_DOCUMENTS +
+                "/" +
+                (DOCUMENT_BASE_ID + 1011)))
+                .andExpect(content().string(""))
+                .andExpect(status().isNotFound());
+
+        final MvcResult response = mockMvc.perform(get(DocumentResource.PATH_API +
+                DocumentResource.PATH_DOCUMENTS +
+                "/person/" +
+                (PERSON_BASE_ID + 3)
+        ))
+                .andExpect(content().contentType(MediaType.APPLICATION_JSON_UTF8))
+                .andExpect(status().isOk()).andReturn();
+
+        final List<DocumentDTO> documents = assertPaginationDocumentsExist(response.getResponse().getContentAsString(), 2);
+
+        assertThat(documents).hasSize(2);
+
+        DocumentDTO document = documents.get(0);
+
+        assertThat(document.getName()).isEqualTo("Document To Delete 2");
+        assertThat(document.getFileName()).isEqualTo("documentToDelete2.jpg");
+        assertThat(document.getFileExtension()).isEqualTo("jpg");
+        assertThat(document.getContentType()).isEqualTo("image/jpeg");
+        assertThat(document.getSize()).isEqualTo(45654);
+        assertThat(document.getPersonId()).isEqualTo((PERSON_BASE_ID + 3));
+
+        document = documents.get(1);
+
+        assertThat(document.getName()).isEqualTo("Document To Delete 3");
+        assertThat(document.getFileName()).isEqualTo("documentToDelete3.jpg");
+        assertThat(document.getFileExtension()).isEqualTo("jpg");
+        assertThat(document.getContentType()).isEqualTo("image/jpeg");
+        assertThat(document.getSize()).isEqualTo(78976);
+        assertThat(document.getPersonId()).isEqualTo((PERSON_BASE_ID + 3));
+
+    }
+
     private DocumentDTO updateMetadataWith2Tags(final long documentId) throws Exception {
         final DocumentDTO document = new DocumentDTO();
         document.setId(documentId);
@@ -715,14 +832,17 @@ public class DocumentResourceIntTest {
                 "VALUES" +
                 "(" + (DOCUMENT_BASE_ID + 1001) + ", '2018-03-27 14:14:20', '2018-03-27 14:14:20.367', NULL, 'User 1', 'Document AAAAA', 'document1.jpg', 'jpg', 'image/jpeg', 56353, " + PERSON_BASE_ID + ", 'CURRENT', NULL, NULL, NULL, NULL)," +
                 "(" + (DOCUMENT_BASE_ID + 1002) + ", '2018-03-27 15:10:59', '2018-03-27 15:14:36.624', NULL, 'User 1', 'Document BBBBB', 'document2.png', 'png', 'image/png', 12123, " + PERSON_BASE_ID + ", 'CURRENT', NULL, NULL, NULL, NULL)," +
-                "(" + (DOCUMENT_BASE_ID + 1003) + ", '2018-03-27 15:10:59', '2018-03-27 15:14:36.624', NULL, 'User 1', 'Document CCCCC', 'document3.jpg', 'jpg', 'image/jpeg', 12982, " + PERSON_BASE_ID + ", 'DELETE', NULL, NULL, NULL, NULL)," +
-                "(" + (DOCUMENT_BASE_ID + 1004) + ", '2018-03-27 15:10:59', '2018-03-27 15:14:36.624', NULL, 'User 2', 'Document DDDDD', 'document4.jpg', 'jpg', 'image/jpeg', 23423, " + (PERSON_BASE_ID + 1) + ", 'INACTIVE', NULL, NULL, NULL, NULL)," +
-                "(" + (DOCUMENT_BASE_ID + 1005) + ", '2018-03-27 15:10:59', '2018-03-27 15:14:36.624', NULL, 'User 3', 'Document XXXXX', 'documentX.jpg', 'jpg', 'image/jpeg', 98123, " + (PERSON_BASE_ID + 2) + ", 'INACTIVE', NULL, NULL, NULL, NULL)," +
-                "(" + (DOCUMENT_BASE_ID + 1006) + ", '2018-03-27 15:10:59', '2018-03-27 15:14:36.624', NULL, 'User 3', 'Document XXXXX', 'documentX.jpg', 'jpg', 'image/jpeg', 98123, " + (PERSON_BASE_ID + 2) + ", 'INACTIVE', NULL, NULL, NULL, NULL)," +
-                "(" + (DOCUMENT_BASE_ID + 1007) + ", '2018-03-27 15:10:59', '2018-03-27 15:14:36.624', NULL, 'User 3', 'Document XXXXX', 'documentX.jpg', 'jpg', 'image/jpeg', 98123, " + (PERSON_BASE_ID + 2) + ", 'INACTIVE', NULL, NULL, NULL, NULL)," +
-                "(" + (DOCUMENT_BASE_ID + 1008) + ", '2018-03-27 15:10:59', '2018-03-27 15:14:36.624', NULL, 'User 3', 'Document XXXXX', 'documentX.jpg', 'jpg', 'image/jpeg', 98123, " + (PERSON_BASE_ID + 2) + ", 'INACTIVE', NULL, NULL, NULL, NULL)," +
-                "(" + (DOCUMENT_BASE_ID + 1009) + ", '2018-03-27 15:10:59', '2018-03-27 15:14:36.624', NULL, 'User 3', 'Document XXXXX', 'documentX.jpg', 'jpg', 'image/jpeg', 98123, " + (PERSON_BASE_ID + 2) + ", 'INACTIVE', NULL, NULL, NULL, NULL)," +
-                "(" + (DOCUMENT_BASE_ID + 1010) + ", '2018-03-27 15:10:59', '2018-03-27 15:14:36.624', NULL, 'User 3', 'Document XXXXX', 'documentX.jpg', 'jpg', 'image/jpeg', 98123, " + (PERSON_BASE_ID + 2) + ", 'INACTIVE', NULL, NULL, NULL, NULL);";
+                "(" + (DOCUMENT_BASE_ID + 1003) + ", '2018-03-27 15:10:59', '2018-03-27 15:14:36.624', NULL, 'User 1', 'Document CCCCC', 'document3.jpg', 'jpg', 'image/jpeg', 12982, " + PERSON_BASE_ID + ", 'CURRENT', NULL, NULL, NULL, NULL)," +
+                "(" + (DOCUMENT_BASE_ID + 1004) + ", '2018-03-27 15:10:59', '2018-03-27 15:14:36.624', NULL, 'User 2', 'Document DDDDD', 'document4.jpg', 'jpg', 'image/jpeg', 23423, " + (PERSON_BASE_ID + 1) + ", 'CURRENT', NULL, NULL, NULL, NULL)," +
+                "(" + (DOCUMENT_BASE_ID + 1005) + ", '2018-03-27 15:10:59', '2018-03-27 15:14:36.624', NULL, 'User 3', 'Document XXXXX', 'documentX.jpg', 'jpg', 'image/jpeg', 98123, " + (PERSON_BASE_ID + 2) + ", 'CURRENT', NULL, NULL, NULL, NULL)," +
+                "(" + (DOCUMENT_BASE_ID + 1006) + ", '2018-03-27 15:10:59', '2018-03-27 15:14:36.624', NULL, 'User 3', 'Document XXXXX', 'documentX.jpg', 'jpg', 'image/jpeg', 98123, " + (PERSON_BASE_ID + 2) + ", 'CURRENT', NULL, NULL, NULL, NULL)," +
+                "(" + (DOCUMENT_BASE_ID + 1007) + ", '2018-03-27 15:10:59', '2018-03-27 15:14:36.624', NULL, 'User 3', 'Document XXXXX', 'documentX.jpg', 'jpg', 'image/jpeg', 98123, " + (PERSON_BASE_ID + 2) + ", 'CURRENT', NULL, NULL, NULL, NULL)," +
+                "(" + (DOCUMENT_BASE_ID + 1008) + ", '2018-03-27 15:10:59', '2018-03-27 15:14:36.624', NULL, 'User 3', 'Document XXXXX', 'documentX.jpg', 'jpg', 'image/jpeg', 98123, " + (PERSON_BASE_ID + 2) + ", 'CURRENT', NULL, NULL, NULL, NULL)," +
+                "(" + (DOCUMENT_BASE_ID + 1009) + ", '2018-03-27 15:10:59', '2018-03-27 15:14:36.624', NULL, 'User 3', 'Document XXXXX', 'documentX.jpg', 'jpg', 'image/jpeg', 98123, " + (PERSON_BASE_ID + 2) + ", 'CURRENT', NULL, NULL, NULL, NULL)," +
+                "(" + (DOCUMENT_BASE_ID + 1010) + ", '2018-03-27 15:10:59', '2018-03-27 15:14:36.624', NULL, 'User 3', 'Document XXXXX', 'documentX.jpg', 'jpg', 'image/jpeg', 98123, " + (PERSON_BASE_ID + 2) + ", 'CURRENT', NULL, NULL, NULL, NULL)," +
+                "(" + (DOCUMENT_BASE_ID + 1011) + ", '2018-03-27 15:10:59', '2018-03-27 15:14:36.624', NULL, 'User 4', 'Document To Delete 1', 'documentToDelete1.jpg', 'jpg', 'image/jpeg', 23423, " + (PERSON_BASE_ID + 3) + ", 'CURRENT', NULL, NULL, NULL, NULL)," +
+                "(" + (DOCUMENT_BASE_ID + 1012) + ", '2018-03-27 15:10:59', '2018-03-27 15:14:36.624', NULL, 'User 4', 'Document To Delete 2', 'documentToDelete2.jpg', 'jpg', 'image/jpeg', 45654, " + (PERSON_BASE_ID + 3) + ", 'CURRENT', NULL, NULL, NULL, NULL)," +
+                "(" + (DOCUMENT_BASE_ID + 1013) + ", '2018-03-27 15:10:59', '2018-03-27 15:14:36.624', NULL, 'User 4', 'Document To Delete 3', 'documentToDelete3.jpg', 'jpg', 'image/jpeg', 78976, " + (PERSON_BASE_ID + 3) + ", 'CURRENT', NULL, NULL, NULL, NULL);";
 
         ScriptUtils.executeSqlScript(connection, new ByteArrayResource(query.getBytes()));
     }

@@ -70,7 +70,7 @@ public class DocumentResource {
                 query);
 
         if (StringUtils.isBlank(entity) || !entity.equalsIgnoreCase("person")) {
-            LOG.warn("Invalid or not implemented entity received ',as a{}'",
+            LOG.warn("Invalid or not implemented entity received '{}'",
                     entity);
             return new ResponseEntity<>(HttpStatus.NOT_IMPLEMENTED);
         }
@@ -228,20 +228,64 @@ public class DocumentResource {
 
     @ApiOperation(value = "Deletes documents", response = String.class)
     @ApiResponses(value = {
-            @ApiResponse(code = 200, message = "Documents deleted successfully", response = String.class),
+            @ApiResponse(code = 204, message = "Documents deleted successfully", response = String.class),
             @ApiResponse(code = 400, message = "Invalid parameters", response = String.class),
             @ApiResponse(code = 401, message = "User not authenticated", response = String.class),
             @ApiResponse(code = 403, message = "User not authorised to perform operation", response = String.class),
             @ApiResponse(code = 404, message = "DocumentDTO could not be found", response = String.class),
             @ApiResponse(code = 500, message = "Error occurred while performing operation", response = String.class)
     })
-    @DeleteMapping(PATH_DOCUMENTS)
+    @DeleteMapping(PATH_DOCUMENTS + "/{entity}/{personId}")
     public ResponseEntity<Void> deleteAllDocuments(
+            @PathVariable(value = "entity") final String entity,
+            @PathVariable(value = "personId") final Long personId,
             @ApiParam(value = "The list of documents to delete", required = true)
             @RequestBody final Collection<DocumentId> documents) {
 
-        //receive in the body the document ids to delete
+        documents.forEach(document -> deleteDocumentById(entity, personId, document.getId()));
+
         return ResponseEntity.noContent().build();
+    }
+
+    @ApiOperation(value = "Deletes a document", response = String.class)
+    @ApiResponses(value = {
+            @ApiResponse(code = 204, message = "Document deleted successfully", response = String.class),
+            @ApiResponse(code = 400, message = "Invalid parameters", response = String.class),
+            @ApiResponse(code = 401, message = "User not authenticated", response = String.class),
+            @ApiResponse(code = 403, message = "User not authorised to perform operation", response = String.class),
+            @ApiResponse(code = 404, message = "DocumentDTO could not be found", response = String.class),
+            @ApiResponse(code = 500, message = "Error occurred while performing operation", response = String.class)
+    })
+    @DeleteMapping(PATH_DOCUMENTS + "/{entity}/{personId}/{documentId}")
+    public ResponseEntity<Void> deleteDocumentById(@PathVariable(value = "entity") final String entity,
+                                                   @PathVariable(value = "personId") final Long personId,
+                                                   @PathVariable(value = "documentId") final Long documentId) {
+
+        if (StringUtils.isBlank(entity) || !entity.equalsIgnoreCase("person")) {
+            LOG.warn("Invalid or not implemented entity received '{}'",
+                    entity);
+            return new ResponseEntity<>(HttpStatus.NOT_IMPLEMENTED);
+        }
+
+        if (personId == null) {
+            LOG.warn("Invalid personId received '{}'",
+                    personId);
+            return new ResponseEntity<>(HttpStatus.BAD_REQUEST);
+        }
+
+        if (documentId == null) {
+            LOG.warn("Invalid documentId received '{}'",
+                    documentId);
+            return new ResponseEntity<>(HttpStatus.BAD_REQUEST);
+        }
+
+        final Optional<DocumentDTO> deletedDocumentOptional = documentService.delete(personId, documentId);
+
+        if (deletedDocumentOptional.isPresent()) {
+            return ResponseEntity.noContent().build();
+        } else {
+            return ResponseEntity.notFound().build();
+        }
     }
 
     @ApiOperation(value = "Retrieves a list tags", response = TagDTO.class, responseContainer = "List", produces = APPLICATION_JSON)
@@ -359,8 +403,12 @@ public class DocumentResource {
     }
 
     @ApiModel("DocumentId")
-    private class DocumentId {
-        private final Long id;
+    private static class DocumentId {
+        private Long id;
+
+        DocumentId() {
+
+        }
 
         DocumentId(final Long id) {
             this.id = id;
@@ -368,6 +416,10 @@ public class DocumentResource {
 
         public Long getId() {
             return id;
+        }
+
+        public void setId(final Long id) {
+            this.id = id;
         }
     }
 

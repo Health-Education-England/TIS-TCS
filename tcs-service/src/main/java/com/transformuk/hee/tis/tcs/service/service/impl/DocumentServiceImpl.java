@@ -4,6 +4,7 @@ import com.google.common.collect.Lists;
 import com.microsoft.azure.storage.StorageException;
 import com.transformuk.hee.tis.filestorage.repository.FileStorageRepository;
 import com.transformuk.hee.tis.tcs.api.dto.DocumentDTO;
+import com.transformuk.hee.tis.tcs.api.enumeration.Status;
 import com.transformuk.hee.tis.tcs.service.config.AzureProperties;
 import com.transformuk.hee.tis.tcs.service.model.ColumnFilter;
 import com.transformuk.hee.tis.tcs.service.model.Document;
@@ -25,6 +26,7 @@ import org.springframework.web.multipart.MultipartFile;
 import java.io.*;
 import java.net.URISyntaxException;
 import java.security.InvalidKeyException;
+import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
@@ -56,13 +58,9 @@ public class DocumentServiceImpl implements DocumentService {
                 DocumentDTO.class.getSimpleName(),
                 id);
 
-        final Document document = documentRepository.findOne(id);
-
-        if (document == null) {
-            return Optional.empty();
-        }
-
-        return Optional.ofNullable(documentMapper.toDto(document));
+        return documentRepository
+                .findOneByIdAndStatus(id, Status.CURRENT)
+                .map(documentMapper::toDto);
     }
 
     @Override
@@ -73,13 +71,15 @@ public class DocumentServiceImpl implements DocumentService {
                 query);
 
         final Specification<Document> personSpec = (root, criteriaQuery, sb) -> sb.equal(root.get("personId"), personId);
-        Specifications<Document> spec = Specifications.where(personSpec);
+        Specifications<Document> fullSpec = Specifications.where(personSpec);
 
-        spec = addColumnFiltersToSpec(columnFilters, spec);
+        fullSpec = addStatusFilterToSpec(fullSpec, Status.CURRENT);
 
-        spec = addSearchQueryToSpec(query, spec);
+        fullSpec = addColumnFiltersToSpec(fullSpec, columnFilters);
 
-        return mapDocuments(documentRepository.findAll(spec, pageable));
+        fullSpec = addSearchQueryToSpec(fullSpec, query);
+
+        return mapDocuments(documentRepository.findAll(fullSpec, pageable));
     }
 
     @Override
@@ -127,6 +127,25 @@ public class DocumentServiceImpl implements DocumentService {
         }
 
         return documentMapper.toDto(document);
+    }
+
+    @Override
+    public Optional<DocumentDTO> delete(final Long personId, final Long documentId) {
+        final Optional<Document> documentOptional = documentRepository.findOneByIdAndStatus(documentId, Status.CURRENT);
+
+        if (!documentOptional.isPresent()) {
+            LOG.warn("Document with id '{}' does not exist", documentId);
+
+            return Optional.empty();
+        }
+
+        final Document document = documentOptional.get();
+        document.setStatus(Status.INACTIVE);
+        document.setInactiveDate(LocalDateTime.now());
+
+        documentRepository.save(document);
+
+        return Optional.of(documentMapper.toDto(document));
     }
 
     private Document create(final Document document) throws IOException {
@@ -207,7 +226,19 @@ public class DocumentServiceImpl implements DocumentService {
         return page.map(documentMapper::toDto);
     }
 
-    private Specifications<Document> addColumnFiltersToSpec(final List<ColumnFilter> columnFilters, Specifications<Document> fullSpec) {
+    private Specifications<Document> addStatusFilterToSpec(Specifications<Document> fullSpec, final Status status) {
+        final Specification<Document> statusFilter = (root, criteriaQuery, sb) -> sb.equal(root.get("status"), status);
+
+        if (fullSpec == null) {
+            fullSpec = Specifications.where(statusFilter);
+        } else {
+            fullSpec = fullSpec.and(statusFilter);
+        }
+
+        return fullSpec;
+    }
+
+    private Specifications<Document> addColumnFiltersToSpec(Specifications<Document> fullSpec, final List<ColumnFilter> columnFilters) {
         if (columnFilters == null || columnFilters.isEmpty()) {
             return fullSpec;
         }
@@ -215,15 +246,20 @@ public class DocumentServiceImpl implements DocumentService {
         final List<Specification<Document>> columnFilterSpecs = new ArrayList<>();
         columnFilters.forEach(cf -> columnFilterSpecs.add(in(cf.getName(), cf.getValues())));
 
-        fullSpec = Specifications.where(columnFilterSpecs.get(0));
-        for (int i = 1; i < columnFilterSpecs.size(); i++) {
+        int i = 0;
+        if (fullSpec == null) {
+            fullSpec = Specifications.where(columnFilterSpecs.get(0));
+            i++;
+        }
+
+        for (; i < columnFilterSpecs.size(); i++) {
             fullSpec = fullSpec.and(columnFilterSpecs.get(i));
         }
 
         return fullSpec;
     }
 
-    private Specifications<Document> addSearchQueryToSpec(final String query, Specifications<Document> fullSpec) {
+    private Specifications<Document> addSearchQueryToSpec(Specifications<Document> fullSpec, final String query) {
         final List<Specification<Document>> querySpecs = new ArrayList<>();
 
         if (StringUtils.isEmpty(query)) {
