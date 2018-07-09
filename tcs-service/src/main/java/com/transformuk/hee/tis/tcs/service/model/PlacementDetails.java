@@ -11,6 +11,7 @@ import javax.persistence.GenerationType;
 import javax.persistence.Id;
 import javax.persistence.OneToMany;
 import javax.persistence.Table;
+import java.math.BigDecimal;
 import java.time.LocalDate;
 import java.util.HashSet;
 import java.util.Set;
@@ -39,7 +40,7 @@ public class PlacementDetails {
   private LocalDate dateTo;
 
   @Column(name = "placementWholeTimeEquivalent")
-  private Double wholeTimeEquivalent;
+  private BigDecimal wholeTimeEquivalent;
 
   private Long siteId;
 
@@ -123,11 +124,11 @@ public class PlacementDetails {
     this.dateTo = dateTo;
   }
 
-  public Double getWholeTimeEquivalent() {
+  public BigDecimal getWholeTimeEquivalent() {
     return wholeTimeEquivalent;
   }
 
-  public void setWholeTimeEquivalent(Double wholeTimeEquivalent) {
+  public void setWholeTimeEquivalent(BigDecimal wholeTimeEquivalent) {
     this.wholeTimeEquivalent = wholeTimeEquivalent;
   }
 

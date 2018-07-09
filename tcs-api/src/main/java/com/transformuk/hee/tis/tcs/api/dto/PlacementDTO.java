@@ -8,6 +8,7 @@ import javax.validation.constraints.DecimalMin;
 import javax.validation.constraints.NotNull;
 import javax.validation.constraints.Null;
 import java.io.Serializable;
+import java.math.BigDecimal;
 import java.time.LocalDate;
 import java.util.HashSet;
 import java.util.Objects;
@@ -42,7 +43,7 @@ public class PlacementDTO implements Serializable {
     private LocalDate dateTo;
     @NotNull(message = "PlacementType is required", groups = {Update.class, Create.class})
     private String placementType;
-    private Float placementWholeTimeEquivalent;
+    private BigDecimal placementWholeTimeEquivalent;
     private String trainingDescription;
     private String localPostNumber;
     private Set<PlacementSupervisorDTO> supervisors = new HashSet<>();
@@ -144,11 +145,11 @@ public class PlacementDTO implements Serializable {
         this.placementType = placementType;
     }
 
-    public Float getPlacementWholeTimeEquivalent() {
+    public BigDecimal getPlacementWholeTimeEquivalent() {
         return placementWholeTimeEquivalent;
     }
 
-    public void setPlacementWholeTimeEquivalent(final Float placementWholeTimeEquivalent) {
+    public void setPlacementWholeTimeEquivalent(final BigDecimal placementWholeTimeEquivalent) {
         this.placementWholeTimeEquivalent = placementWholeTimeEquivalent;
     }
 

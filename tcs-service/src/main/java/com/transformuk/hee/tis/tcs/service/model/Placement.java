@@ -4,6 +4,7 @@ import com.transformuk.hee.tis.tcs.api.dto.PlacementSummaryDTO;
 
 import javax.persistence.*;
 import java.io.Serializable;
+import java.math.BigDecimal;
 import java.time.LocalDate;
 import java.util.HashSet;
 import java.util.Set;
@@ -62,7 +63,7 @@ public class Placement implements Serializable {
     @Column(name = "placementType")
     private String placementType;
     @Column(name = "placementWholeTimeEquivalent")
-    private Float placementWholeTimeEquivalent;
+    private BigDecimal placementWholeTimeEquivalent;
     @Column(name = "trainingDescription")
     private String trainingDescription;
     @Column(name = "localPostNumber")
@@ -166,11 +167,11 @@ public class Placement implements Serializable {
         this.placementType = placementType;
     }
 
-    public Float getPlacementWholeTimeEquivalent() {
+    public BigDecimal getPlacementWholeTimeEquivalent() {
         return placementWholeTimeEquivalent;
     }
 
-    public void setPlacementWholeTimeEquivalent(final Float placementWholeTimeEquivalent) {
+    public void setPlacementWholeTimeEquivalent(final BigDecimal placementWholeTimeEquivalent) {
         this.placementWholeTimeEquivalent = placementWholeTimeEquivalent;
     }
 

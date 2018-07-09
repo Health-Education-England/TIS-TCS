@@ -21,6 +21,7 @@ import org.springframework.test.web.servlet.setup.MockMvcBuilders;
 import org.springframework.transaction.annotation.Transactional;
 
 import javax.persistence.EntityManager;
+import java.math.BigDecimal;
 import java.time.LocalDate;
 
 import static org.hamcrest.Matchers.hasSize;
@@ -50,7 +51,7 @@ public class EsrNotificationResourceIntTest {
 
   private static final String DEFAULT_PLACEMENT_TYPE = "In Post";
 
-  private static final Double DEFAULT_PLACEMENT_WHOLE_TIME_EQUIVALENT = 1D;
+  private static final BigDecimal DEFAULT_PLACEMENT_WHOLE_TIME_EQUIVALENT = new BigDecimal(1);
 
   @Autowired
   private MappingJackson2HttpMessageConverter jacksonMessageConverter;
