@@ -191,7 +191,7 @@ public class PersonServiceImpl implements PersonService {
     log.debug("Request to get all People");
 
     final int start = pageable.getOffset();
-    final int end = start + pageable.getPageSize();
+    final int end = start + pageable.getPageSize() + 1;
     MapSqlParameterSource paramSource = new MapSqlParameterSource();
     String query = sqlQuerySupplier.getQuery(SqlQuerySupplier.PERSON_VIEW);
 
@@ -219,10 +219,12 @@ public class PersonServiceImpl implements PersonService {
     stopWatch.stop();
     log.debug("full person query finished in: [{}]s", stopWatch.getTotalTimeSeconds());
 
+    final boolean hasNext = persons.size() > pageable.getPageSize();
+
     if (CollectionUtils.isEmpty(persons)) {
       return new BasicPage<>(persons, pageable);
     }
-    return new BasicPage<>(persons, pageable);
+    return new BasicPage<>(persons, pageable, hasNext);
   }
 
   /**
