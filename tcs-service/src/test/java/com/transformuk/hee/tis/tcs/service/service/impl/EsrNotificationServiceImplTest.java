@@ -21,6 +21,7 @@ import org.mockito.Mock;
 import org.mockito.runners.MockitoJUnitRunner;
 
 import java.io.IOException;
+import java.math.BigDecimal;
 import java.time.LocalDate;
 import java.util.Arrays;
 import java.util.List;
@@ -351,13 +352,13 @@ public class EsrNotificationServiceImplTest {
     LocalDate asOfDate = LocalDate.now();
     Placement placement = aPlacement(deaneryPostNumber);
     placement.setSiteCode("SITE-01");
-    placement.setPlacementWholeTimeEquivalent(0.5F);
+    placement.setPlacementWholeTimeEquivalent(new BigDecimal(0.5F));
 
     Placement currentPlacement = aPlacement(deaneryPostNumber);
     currentPlacement.setDateFrom(asOfDate.minusMonths(1));
     currentPlacement.setDateTo(asOfDate.plusMonths(2));
     currentPlacement.setSiteCode("SITE-01");
-    currentPlacement.setPlacementWholeTimeEquivalent(1.0F);
+    currentPlacement.setPlacementWholeTimeEquivalent(new BigDecimal(1.0F));
 
     when(placementRepository.findCurrentPlacementsForPosts(
         asOfDate, asList(deaneryPostNumber), placementTypes)).thenReturn(singletonList(currentPlacement));
@@ -495,7 +496,7 @@ public class EsrNotificationServiceImplTest {
     placement.setLocalPostNumber(deaneryPostNumber);
     placement.setPost(aPost(deaneryPostNumber));
     placement.setTrainee(aTrainee("aTrainee-FN", "aTrainee-SN", "trainee@xyz.com"));
-    placement.setPlacementWholeTimeEquivalent(1.0F);
+    placement.setPlacementWholeTimeEquivalent(new BigDecimal(1.0F));
     return placement;
   }
 
@@ -533,7 +534,7 @@ public class EsrNotificationServiceImplTest {
     placement.setId(id);
     placement.setDateFrom(from);
     placement.setDateTo(to);
-    placement.setPlacementWholeTimeEquivalent(1.0F);
+    placement.setPlacementWholeTimeEquivalent(new BigDecimal(1.0F));
 //    placement.setLocalPostNumber("EOE/RGT00/021/FY1/010");
     placement.setTrainee(aTrainee("aTrainee-FN", "aTrainee-SN", "trainee@xyz.com"));
     placement.setPost(aPost(deaneryNumber));

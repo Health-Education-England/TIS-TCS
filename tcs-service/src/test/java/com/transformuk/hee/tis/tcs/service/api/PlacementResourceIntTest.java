@@ -45,6 +45,7 @@ import org.springframework.test.web.servlet.setup.MockMvcBuilders;
 import org.springframework.transaction.annotation.Transactional;
 
 import javax.persistence.EntityManager;
+import java.math.BigDecimal;
 import java.time.LocalDate;
 import java.time.ZoneId;
 import java.util.HashSet;
@@ -105,8 +106,8 @@ public class PlacementResourceIntTest {
     private static final String DEFAULT_PLACEMENT_TYPE = "OOPT";
     private static final String UPDATED_PLACEMENT_TYPE = "PWA";
 
-    private static final Double DEFAULT_PLACEMENT_WHOLE_TIME_EQUIVALENT = 1D;
-    private static final Double UPDATED_PLACEMENT_WHOLE_TIME_EQUIVALENT = 2D;
+    private static final BigDecimal DEFAULT_PLACEMENT_WHOLE_TIME_EQUIVALENT = new BigDecimal(1);
+    private static final BigDecimal UPDATED_PLACEMENT_WHOLE_TIME_EQUIVALENT = new BigDecimal(2);
 
     private static final String COMMENT = "Hello world!";
 
@@ -180,7 +181,7 @@ public class PlacementResourceIntTest {
         placement.setDateFrom(DEFAULT_DATE_FROM);
         placement.setDateTo(DEFAULT_DATE_TO);
         placement.setPlacementType(DEFAULT_PLACEMENT_TYPE);
-        placement.setWholeTimeEquivalent(DEFAULT_PLACEMENT_WHOLE_TIME_EQUIVALENT.doubleValue());
+        placement.setWholeTimeEquivalent(DEFAULT_PLACEMENT_WHOLE_TIME_EQUIVALENT);
         placement.setLocalPostNumber(DEFAULT_LOCAL_POST_NUMBER);
         placement.setTrainingDescription(DEFAULT_TRAINING_DESCRIPTION);
         return placement;
@@ -505,7 +506,7 @@ public class PlacementResourceIntTest {
         updatedPlacement.setLocalPostNumber(UPDATED_LOCAL_POST_NUMBER);
         updatedPlacement.setTrainingDescription(UPDATED_TRAINING_DESCRPTION);
         updatedPlacement.setPlacementType(UPDATED_PLACEMENT_TYPE);
-        updatedPlacement.setWholeTimeEquivalent(UPDATED_PLACEMENT_WHOLE_TIME_EQUIVALENT.doubleValue());
+        updatedPlacement.setWholeTimeEquivalent(UPDATED_PLACEMENT_WHOLE_TIME_EQUIVALENT);
         final PlacementDetailsDTO placementDTO = placementDetailsMapper.placementDetailsToPlacementDetailsDTO(updatedPlacement);
 
         addSupervisorsToPlacement(placementDTO);
@@ -600,7 +601,7 @@ public class PlacementResourceIntTest {
         updatedPlacement.setLocalPostNumber(localPostNumber);
         updatedPlacement.setTrainingDescription(UPDATED_TRAINING_DESCRPTION);
         updatedPlacement.setPlacementType(placementType);
-        updatedPlacement.setWholeTimeEquivalent(UPDATED_PLACEMENT_WHOLE_TIME_EQUIVALENT.doubleValue());
+        updatedPlacement.setWholeTimeEquivalent(UPDATED_PLACEMENT_WHOLE_TIME_EQUIVALENT);
         final PlacementDetailsDTO placementDTO = placementDetailsMapper.placementDetailsToPlacementDetailsDTO(updatedPlacement);
 
         restPlacementMockMvc.perform(put("/api/placements")
@@ -661,7 +662,7 @@ public class PlacementResourceIntTest {
         updatedPlacement.setLocalPostNumber(localPostNumber);
         updatedPlacement.setTrainingDescription(UPDATED_TRAINING_DESCRPTION);
         updatedPlacement.setPlacementType(placementType);
-        updatedPlacement.setWholeTimeEquivalent(UPDATED_PLACEMENT_WHOLE_TIME_EQUIVALENT.doubleValue());
+        updatedPlacement.setWholeTimeEquivalent(UPDATED_PLACEMENT_WHOLE_TIME_EQUIVALENT);
         final PlacementDetailsDTO placementDTO = placementDetailsMapper.placementDetailsToPlacementDetailsDTO(updatedPlacement);
 
         restPlacementMockMvc.perform(put("/api/placements")
@@ -732,7 +733,7 @@ public class PlacementResourceIntTest {
         updatedPlacement.setLocalPostNumber(localPostNumber);
         updatedPlacement.setTrainingDescription(UPDATED_TRAINING_DESCRPTION);
         updatedPlacement.setPlacementType(placementType);
-        updatedPlacement.setWholeTimeEquivalent(UPDATED_PLACEMENT_WHOLE_TIME_EQUIVALENT.doubleValue());
+        updatedPlacement.setWholeTimeEquivalent(UPDATED_PLACEMENT_WHOLE_TIME_EQUIVALENT);
         final PlacementDetailsDTO placementDTO = placementDetailsMapper.placementDetailsToPlacementDetailsDTO(updatedPlacement);
 
         restPlacementMockMvc.perform(put("/api/placements")
@@ -914,7 +915,7 @@ public class PlacementResourceIntTest {
         currentPlacement.setTraineeId(currentTrainee.getId());
         currentPlacement.setPostId(post.getId());
         currentPlacement.setPlacementType("In Post");
-        currentPlacement.setWholeTimeEquivalent(1.0);
+        currentPlacement.setWholeTimeEquivalent(new BigDecimal(1.0));
         placementDetailsRepository.saveAndFlush(currentPlacement);
 
         final ContactDetails currentTraineeContactDetails = createContactDetails(currentPlacement, "currentTraineeFN", "currentTraineeSN");
