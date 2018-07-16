@@ -45,6 +45,7 @@ import org.springframework.test.web.servlet.setup.MockMvcBuilders;
 import org.springframework.transaction.annotation.Transactional;
 
 import javax.persistence.EntityManager;
+import java.math.BigDecimal;
 import java.time.LocalDate;
 import java.time.ZoneId;
 import java.util.HashSet;
@@ -105,8 +106,8 @@ public class PlacementResourceIntTest {
     private static final String DEFAULT_PLACEMENT_TYPE = "OOPT";
     private static final String UPDATED_PLACEMENT_TYPE = "PWA";
 
-    private static final Double DEFAULT_PLACEMENT_WHOLE_TIME_EQUIVALENT = 1D;
-    private static final Double UPDATED_PLACEMENT_WHOLE_TIME_EQUIVALENT = 2D;
+    private static final BigDecimal DEFAULT_PLACEMENT_WHOLE_TIME_EQUIVALENT = new BigDecimal(1);
+    private static final BigDecimal UPDATED_PLACEMENT_WHOLE_TIME_EQUIVALENT = new BigDecimal(2);
 
     private static final String COMMENT = "Hello world!";
 
@@ -180,7 +181,7 @@ public class PlacementResourceIntTest {
         placement.setDateFrom(DEFAULT_DATE_FROM);
         placement.setDateTo(DEFAULT_DATE_TO);
         placement.setPlacementType(DEFAULT_PLACEMENT_TYPE);
-        placement.setWholeTimeEquivalent(DEFAULT_PLACEMENT_WHOLE_TIME_EQUIVALENT.doubleValue());
+        placement.setWholeTimeEquivalent(DEFAULT_PLACEMENT_WHOLE_TIME_EQUIVALENT);
         placement.setLocalPostNumber(DEFAULT_LOCAL_POST_NUMBER);
         placement.setTrainingDescription(DEFAULT_TRAINING_DESCRIPTION);
         return placement;
@@ -309,7 +310,7 @@ public class PlacementResourceIntTest {
         assertThat(testPlacement.getTraineeId()).isEqualTo(placement.getTraineeId());
         assertThat(testPlacement.getTrainingDescription()).isEqualTo(DEFAULT_TRAINING_DESCRIPTION);
         assertThat(testPlacement.getPlacementType()).isEqualTo(placementType);
-        assertThat(testPlacement.getWholeTimeEquivalent()).isEqualTo(DEFAULT_PLACEMENT_WHOLE_TIME_EQUIVALENT.floatValue());
+        assertThat(testPlacement.getWholeTimeEquivalent()).isEqualTo(DEFAULT_PLACEMENT_WHOLE_TIME_EQUIVALENT.setScale(2,BigDecimal.ROUND_HALF_UP));
         assertThat(placementSupervisorRepository.findOne(new PlacementSupervisorId(testPlacement.getId(), 1000L, 1))).isNotNull();
         assertThat(placementSupervisorRepository.findOne(new PlacementSupervisorId(testPlacement.getId(), 2000L, 2))).isNotNull();
 
@@ -382,7 +383,7 @@ public class PlacementResourceIntTest {
         assertThat(testPlacement.getTraineeId()).isEqualTo(placement.getTraineeId());
         assertThat(testPlacement.getTrainingDescription()).isEqualTo(DEFAULT_TRAINING_DESCRIPTION);
         assertThat(testPlacement.getPlacementType()).isEqualTo(placementType);
-        assertThat(testPlacement.getWholeTimeEquivalent()).isEqualTo(DEFAULT_PLACEMENT_WHOLE_TIME_EQUIVALENT.floatValue());
+        assertThat(testPlacement.getWholeTimeEquivalent()).isEqualTo(DEFAULT_PLACEMENT_WHOLE_TIME_EQUIVALENT.setScale(2,BigDecimal.ROUND_HALF_UP));
 
         // Validate that there is no ESR notification record created
         final List<EsrNotification> esrNotifications = esrNotificationRepository.findAll();
@@ -469,7 +470,7 @@ public class PlacementResourceIntTest {
                 .andExpect(jsonPath("$.placementType").value(DEFAULT_PLACEMENT_TYPE))
                 .andExpect(jsonPath("$.localPostNumber").value(DEFAULT_LOCAL_POST_NUMBER))
                 .andExpect(jsonPath("$.trainingDescription").value(DEFAULT_TRAINING_DESCRIPTION))
-                .andExpect(jsonPath("$.wholeTimeEquivalent").value(DEFAULT_PLACEMENT_WHOLE_TIME_EQUIVALENT));
+                .andExpect(jsonPath("$.wholeTimeEquivalent").value(DEFAULT_PLACEMENT_WHOLE_TIME_EQUIVALENT.floatValue()));
     }
 
     @Test
@@ -505,7 +506,7 @@ public class PlacementResourceIntTest {
         updatedPlacement.setLocalPostNumber(UPDATED_LOCAL_POST_NUMBER);
         updatedPlacement.setTrainingDescription(UPDATED_TRAINING_DESCRPTION);
         updatedPlacement.setPlacementType(UPDATED_PLACEMENT_TYPE);
-        updatedPlacement.setWholeTimeEquivalent(UPDATED_PLACEMENT_WHOLE_TIME_EQUIVALENT.doubleValue());
+        updatedPlacement.setWholeTimeEquivalent(UPDATED_PLACEMENT_WHOLE_TIME_EQUIVALENT);
         final PlacementDetailsDTO placementDTO = placementDetailsMapper.placementDetailsToPlacementDetailsDTO(updatedPlacement);
 
         addSupervisorsToPlacement(placementDTO);
@@ -527,7 +528,7 @@ public class PlacementResourceIntTest {
         assertThat(testPlacement.getLocalPostNumber()).isEqualTo(UPDATED_LOCAL_POST_NUMBER);
         assertThat(testPlacement.getTrainingDescription()).isEqualTo(UPDATED_TRAINING_DESCRPTION);
         assertThat(testPlacement.getPlacementType()).isEqualTo(UPDATED_PLACEMENT_TYPE);
-        assertThat(testPlacement.getWholeTimeEquivalent()).isEqualTo(UPDATED_PLACEMENT_WHOLE_TIME_EQUIVALENT.floatValue());
+        assertThat(testPlacement.getWholeTimeEquivalent()).isEqualTo(UPDATED_PLACEMENT_WHOLE_TIME_EQUIVALENT.setScale(2,BigDecimal.ROUND_HALF_UP));
         assertThat(placementSupervisorRepository.findOne(new PlacementSupervisorId(testPlacement.getId(), 1000L, 1))).isNotNull();
         assertThat(placementSupervisorRepository.findOne(new PlacementSupervisorId(testPlacement.getId(), 2000L, 2))).isNotNull();
         assertThat(placementSupervisorRepository.findOne(new PlacementSupervisorId(5000L, 4000L, 2))).isNotNull();
@@ -600,7 +601,7 @@ public class PlacementResourceIntTest {
         updatedPlacement.setLocalPostNumber(localPostNumber);
         updatedPlacement.setTrainingDescription(UPDATED_TRAINING_DESCRPTION);
         updatedPlacement.setPlacementType(placementType);
-        updatedPlacement.setWholeTimeEquivalent(UPDATED_PLACEMENT_WHOLE_TIME_EQUIVALENT.doubleValue());
+        updatedPlacement.setWholeTimeEquivalent(UPDATED_PLACEMENT_WHOLE_TIME_EQUIVALENT);
         final PlacementDetailsDTO placementDTO = placementDetailsMapper.placementDetailsToPlacementDetailsDTO(updatedPlacement);
 
         restPlacementMockMvc.perform(put("/api/placements")
@@ -620,7 +621,7 @@ public class PlacementResourceIntTest {
         assertThat(testPlacement.getLocalPostNumber()).isEqualTo(localPostNumber);
         assertThat(testPlacement.getTrainingDescription()).isEqualTo(UPDATED_TRAINING_DESCRPTION);
         assertThat(testPlacement.getPlacementType()).isEqualTo(placementType);
-        assertThat(testPlacement.getWholeTimeEquivalent()).isEqualTo(UPDATED_PLACEMENT_WHOLE_TIME_EQUIVALENT.floatValue());
+        assertThat(testPlacement.getWholeTimeEquivalent()).isEqualTo(UPDATED_PLACEMENT_WHOLE_TIME_EQUIVALENT.setScale(2,BigDecimal.ROUND_HALF_UP));
 
         // validate the EsrNotification in the database
         final List<EsrNotification> esrNotifications = esrNotificationRepository.findAll();
@@ -661,7 +662,7 @@ public class PlacementResourceIntTest {
         updatedPlacement.setLocalPostNumber(localPostNumber);
         updatedPlacement.setTrainingDescription(UPDATED_TRAINING_DESCRPTION);
         updatedPlacement.setPlacementType(placementType);
-        updatedPlacement.setWholeTimeEquivalent(UPDATED_PLACEMENT_WHOLE_TIME_EQUIVALENT.doubleValue());
+        updatedPlacement.setWholeTimeEquivalent(UPDATED_PLACEMENT_WHOLE_TIME_EQUIVALENT);
         final PlacementDetailsDTO placementDTO = placementDetailsMapper.placementDetailsToPlacementDetailsDTO(updatedPlacement);
 
         restPlacementMockMvc.perform(put("/api/placements")
@@ -681,7 +682,7 @@ public class PlacementResourceIntTest {
         assertThat(testPlacement.getLocalPostNumber()).isEqualTo(localPostNumber);
         assertThat(testPlacement.getTrainingDescription()).isEqualTo(UPDATED_TRAINING_DESCRPTION);
         assertThat(testPlacement.getPlacementType()).isEqualTo(placementType);
-        assertThat(testPlacement.getWholeTimeEquivalent()).isEqualTo(UPDATED_PLACEMENT_WHOLE_TIME_EQUIVALENT.floatValue());
+        assertThat(testPlacement.getWholeTimeEquivalent()).isEqualTo(UPDATED_PLACEMENT_WHOLE_TIME_EQUIVALENT.setScale(2,BigDecimal.ROUND_HALF_UP));
 
         // validate the EsrNotification in the database
         final List<EsrNotification> esrNotifications = esrNotificationRepository.findAll();
@@ -732,7 +733,7 @@ public class PlacementResourceIntTest {
         updatedPlacement.setLocalPostNumber(localPostNumber);
         updatedPlacement.setTrainingDescription(UPDATED_TRAINING_DESCRPTION);
         updatedPlacement.setPlacementType(placementType);
-        updatedPlacement.setWholeTimeEquivalent(UPDATED_PLACEMENT_WHOLE_TIME_EQUIVALENT.doubleValue());
+        updatedPlacement.setWholeTimeEquivalent(UPDATED_PLACEMENT_WHOLE_TIME_EQUIVALENT);
         final PlacementDetailsDTO placementDTO = placementDetailsMapper.placementDetailsToPlacementDetailsDTO(updatedPlacement);
 
         restPlacementMockMvc.perform(put("/api/placements")
@@ -752,7 +753,7 @@ public class PlacementResourceIntTest {
         assertThat(testPlacement.getLocalPostNumber()).isEqualTo(localPostNumber);
         assertThat(testPlacement.getTrainingDescription()).isEqualTo(UPDATED_TRAINING_DESCRPTION);
         assertThat(testPlacement.getPlacementType()).isEqualTo(placementType);
-        assertThat(testPlacement.getWholeTimeEquivalent()).isEqualTo(UPDATED_PLACEMENT_WHOLE_TIME_EQUIVALENT.floatValue());
+        assertThat(testPlacement.getWholeTimeEquivalent()).isEqualTo(UPDATED_PLACEMENT_WHOLE_TIME_EQUIVALENT.setScale(2,BigDecimal.ROUND_HALF_UP));
 
         // validate the EsrNotification in the database
         final List<EsrNotification> esrNotifications = esrNotificationRepository.findAll();
@@ -914,7 +915,7 @@ public class PlacementResourceIntTest {
         currentPlacement.setTraineeId(currentTrainee.getId());
         currentPlacement.setPostId(post.getId());
         currentPlacement.setPlacementType("In Post");
-        currentPlacement.setWholeTimeEquivalent(1.0);
+        currentPlacement.setWholeTimeEquivalent(new BigDecimal(1.0));
         placementDetailsRepository.saveAndFlush(currentPlacement);
 
         final ContactDetails currentTraineeContactDetails = createContactDetails(currentPlacement, "currentTraineeFN", "currentTraineeSN");

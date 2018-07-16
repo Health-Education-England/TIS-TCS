@@ -19,6 +19,7 @@ import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.runners.MockitoJUnitRunner;
 
+import java.math.BigDecimal;
 import java.time.LocalDate;
 
 import static java.time.temporal.ChronoUnit.DAYS;
@@ -43,7 +44,7 @@ public class PlacementValidatorTest {
     private static final LocalDate DEFAULT_DATE_FROM = LocalDate.ofEpochDay(0L);
     private static final LocalDate DEFAULT_DATE_TO = LocalDate.ofEpochDay(0L);
     private static final String DEFAULT_PLACEMENT_TYPE = "OOPT";
-    private static final Float DEFAULT_PLACEMENT_WHOLE_TIME_EQUIVALENT = 1F;
+    private static final BigDecimal DEFAULT_PLACEMENT_WHOLE_TIME_EQUIVALENT = new BigDecimal(1);
     private PlacementDetailsDTO placementDTO;
 
     @Mock
@@ -76,7 +77,7 @@ public class PlacementValidatorTest {
         placementDTO.setDateFrom(DEFAULT_DATE_FROM);
         placementDTO.setDateTo(DEFAULT_DATE_TO);
         placementDTO.setPlacementType(DEFAULT_PLACEMENT_TYPE);
-        placementDTO.setWholeTimeEquivalent(DEFAULT_PLACEMENT_WHOLE_TIME_EQUIVALENT.doubleValue());
+        placementDTO.setWholeTimeEquivalent(DEFAULT_PLACEMENT_WHOLE_TIME_EQUIVALENT);
         placementDTO.setLocalPostNumber(DEFAULT_LOCAL_POST_NUMBER);
         placementDTO.setTrainingDescription(DEFAULT_TRAINING_DESCRIPTION);
         placementDTO.setTraineeId(DEFAULT_TRAINEE);

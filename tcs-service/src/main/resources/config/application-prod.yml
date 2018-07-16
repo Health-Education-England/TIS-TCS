@@ -132,3 +132,6 @@ azure:
 
   storage:
     personFolder: person
+
+endpoints:
+    enabled: false # disable all monitoring endpoints

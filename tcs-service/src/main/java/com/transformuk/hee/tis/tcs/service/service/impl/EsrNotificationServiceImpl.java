@@ -595,8 +595,8 @@ public class EsrNotificationServiceImpl implements EsrNotificationService {
   private void setWorkingHourIndicatorFromPlacement(Placement placement, EsrNotification esrNotification) {
     esrNotification.setWorkingHourIndicator(
         placement.getPlacementWholeTimeEquivalent() != null
-            ? parseDouble(DECIMAL_FORMAT.format(placement.getPlacementWholeTimeEquivalent()))
-            : placement.getPlacementWholeTimeEquivalent()
+            ? parseDouble(DECIMAL_FORMAT.format(placement.getPlacementWholeTimeEquivalent().floatValue()))
+            : placement.getPlacementWholeTimeEquivalent().floatValue()
     );
   }
 }
