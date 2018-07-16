@@ -18,4 +18,6 @@ public interface DocumentService {
     DocumentDTO save(final DocumentDTO documentDTO) throws IOException;
 
     void download(final DocumentDTO document, final OutputStream outputStream) throws IOException;
+
+    Optional<DocumentDTO> delete(final Long personId, final Long documentId);
 }
