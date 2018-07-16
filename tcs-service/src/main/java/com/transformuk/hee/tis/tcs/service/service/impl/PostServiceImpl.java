@@ -123,7 +123,6 @@ public class PostServiceImpl implements PostService {
    * @param postDTO the entity to save
    * @return the persisted entity
    */
-  @Transactional
   @Override
   public PostDTO save(PostDTO postDTO) {
     log.debug("Request to save Post : {}", postDTO);
@@ -149,7 +148,6 @@ public class PostServiceImpl implements PostService {
    * @param postDTOs the list of entities to save
    * @return the list of persisted entities
    */
-  @Transactional
   @Override
   public List<PostDTO> save(List<PostDTO> postDTOs) {
     log.debug("Request to save Post : {}", postDTOs);
@@ -181,7 +179,6 @@ public class PostServiceImpl implements PostService {
    * @param postDTOList the list of entities to save
    * @return the list of persisted entities
    */
-  @Transactional
   @Override
   public List<PostDTO> patchOldNewPosts(List<PostDTO> postDTOList) {
     List<Post> postsToSave = Lists.newArrayList();
@@ -227,7 +224,6 @@ public class PostServiceImpl implements PostService {
     return postMapper.postsToPostDTOs(savedPosts);
   }
 
-  @Transactional
   @Override
   public List<PostDTO> patchPostSites(List<PostDTO> postDTOList) {
     Map<String, Post> intrepidIdToPost = getPostsByIntrepidId(postDTOList);
@@ -255,7 +251,6 @@ public class PostServiceImpl implements PostService {
     return postMapper.postsToPostDTOs(postsModified);
   }
 
-  @Transactional
   @Override
   public List<PostDTO> patchPostGrades(List<PostDTO> postDTOList) {
     List<Post> postsToSave = Lists.newArrayList();
@@ -281,7 +276,6 @@ public class PostServiceImpl implements PostService {
     return postMapper.postsToPostDTOs(savedPosts);
   }
 
-  @Transactional
   @Override
   public List<PostDTO> patchPostProgrammes(List<PostDTO> postDTOList) {
     List<Post> posts = Lists.newArrayList();
@@ -317,7 +311,6 @@ public class PostServiceImpl implements PostService {
     return postMapper.postsToPostDTOs(savedPosts);
   }
 
-  @Transactional
   @Override
   public List<PostDTO> patchPostSpecialties(List<PostDTO> postDTOList) {
     List<Post> posts = Lists.newArrayList();
@@ -358,7 +351,6 @@ public class PostServiceImpl implements PostService {
     return result;
   }
 
-  @Transactional
   @Override
   public List<PostDTO> patchPostPlacements(List<PostDTO> postDTOList) {
     List<Post> posts = Lists.newArrayList();
@@ -392,7 +384,6 @@ public class PostServiceImpl implements PostService {
     return postMapper.postsToPostDTOs(savedPosts);
   }
 
-  @Transactional
   @Override
   public PostDTO update(PostDTO postDTO) {
     Post post = postRepository.findOne(postDTO.getId());
@@ -618,7 +609,6 @@ public class PostServiceImpl implements PostService {
    *
    * @param id the id of the entity
    */
-  @Transactional
   @Override
   public void delete(Long id) {
     log.debug("Request to delete Post : {}", id);
