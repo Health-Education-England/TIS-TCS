@@ -294,7 +294,8 @@ public class Post implements Serializable {
     }
 
     public void setSites(final Set<PostSite> sites) {
-        this.sites = sites;
+        this.sites.clear();
+        this.sites.addAll(sites);
     }
 
     public Post sites(final Set<PostSite> sites) {
@@ -307,7 +308,8 @@ public class Post implements Serializable {
     }
 
     public void setGrades(final Set<PostGrade> grades) {
-        this.grades = grades;
+        this.grades.clear();
+        this.grades.addAll(grades);
     }
 
     public Post grades(final Set<PostGrade> grades) {
@@ -320,7 +322,8 @@ public class Post implements Serializable {
     }
 
     public void setSpecialties(final Set<PostSpecialty> specialties) {
-        this.specialties = specialties;
+        this.specialties.clear();
+        this.specialties.addAll(specialties);
     }
 
     public Post specialties(final Set<PostSpecialty> specialties) {
