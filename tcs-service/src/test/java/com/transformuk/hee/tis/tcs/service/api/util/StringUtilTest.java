@@ -35,4 +35,30 @@ public class StringUtilTest {
     //Then
     assertThat(res).isEqualTo("alpha& n-umer1c ))('+");
   }
+
+  @Test
+  public void shouldDecodeTheEncodedValue(){
+    //Given
+    String input = "OXF%2FRTH02%2F034%2FPSTR3%2B%2F001";
+    //When
+    String res = StringUtil.sanitize(input);
+
+    //Then
+    assertThat(res).isEqualTo("OXF/RTH02/034/PSTR3+/001");
+
+  }
+
+  @Test
+  public void shouldNotDecodeWhenNotEncodedValue(){
+    //Given
+    String input = "OXF/RTH02/034/PSTR3/001";
+
+    //When
+    String res = StringUtil.sanitize(input);
+
+    //Then
+    assertThat(res).isEqualTo("OXF/RTH02/034/PSTR3/001");
+
+  }
+
 }
