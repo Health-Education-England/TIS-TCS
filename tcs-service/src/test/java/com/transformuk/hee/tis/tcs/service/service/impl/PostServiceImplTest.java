@@ -416,6 +416,7 @@ public class PostServiceImplTest {
     SpecialtyDTO newSpecialtyDTO = new SpecialtyDTO();
     newSpecialtyDTO.setId(2L);
     newPostSpecialtyDTO.setSpecialty(newSpecialtyDTO);
+    newPostSpecialtyDTO.setPostId(1L);
 
     PostDTO postDTOToSend = new PostDTO();
     postDTOToSend.id(postIds.get(0)).intrepidId(intrepidIds.get(0)).specialties(Sets.newHashSet(newPostSpecialtyDTO));
@@ -453,10 +454,9 @@ public class PostServiceImplTest {
     verify(postSpecialtyRepositoryMock).save(postSpecialtyArgumentCaptor.capture());
     verify(postMapperMock).postsToPostDTOs(savedPosts);
 
-    Set<PostSpecialty> postSpecialtyValueSet = postSpecialtyArgumentCaptor.getValue();
 
-    PostSpecialty postSpecialtyValue = null;
-    for (PostSpecialty savedLink : postSpecialtyValueSet) {
+    PostSpecialtyDTO postSpecialtyValue = null;
+    for (PostSpecialtyDTO savedLink : result.get(0).getSpecialties()) {
       if (PostSpecialtyType.OTHER.equals(savedLink.getPostSpecialtyType())) {
         postSpecialtyValue = savedLink;
         break;
@@ -464,7 +464,7 @@ public class PostServiceImplTest {
     }
 
     Assert.assertEquals(PostSpecialtyType.OTHER, postSpecialtyValue.getPostSpecialtyType());
-    Assert.assertEquals(postInRepository.getId(), postSpecialtyValue.getPost().getId());
+    Assert.assertEquals(postInRepository.getId(), postSpecialtyValue.getPostId());
     Assert.assertEquals(newPostSpecialtyDTO.getSpecialty().getId(), postSpecialtyValue.getSpecialty().getId());
 
     Assert.assertSame(transformedPosts, result);

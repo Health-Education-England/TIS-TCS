@@ -129,7 +129,8 @@ public class DocumentResource {
     @GetMapping(value = PATH_DOCUMENTS + PATH_DOWNLOADS + "/{documentId}")
     public void downloadDocumentById(final HttpServletResponse response,
                                      @ApiParam(value = "The document id", required = true)
-                                     @PathVariable(value = "documentId") final Long documentId) throws IOException {
+                                     @PathVariable(value = "documentId") final Long documentId,
+                                     @QueryParam("view") final boolean view) throws IOException {
         LOG.info("Received 'DownloadDocument' request for document '{}'", documentId);
 
         if (documentId == null) {
@@ -150,7 +151,7 @@ public class DocumentResource {
             return;
         }
 
-        streamFile(documentOptional.get(), response);
+        streamFile(documentOptional.get(), response, view);
     }
 
     @ApiOperation(value = "Uploads documents and returns the created document id", response = DocumentId.class, consumes = MULTIPART_FORM_DATA, produces = APPLICATION_JSON)
@@ -382,12 +383,12 @@ public class DocumentResource {
                 documentParam.getId());
     }
 
-    private void streamFile(final DocumentDTO document, final HttpServletResponse response) throws IOException {
+    private void streamFile(final DocumentDTO document, final HttpServletResponse response, final boolean view) throws IOException {
         LOG.trace("Setting response headers to download document with id '{}' ",
                 document.getId());
 
         response.setStatus(HttpStatus.OK.value());
-        response.addHeader("Content-disposition", "attachment;filename=" + document.getFileName());
+        response.addHeader("Content-disposition", (view ? "inline" : "attachment") + ";filename=" + document.getFileName());
         response.setContentType(document.getContentType());
         response.setContentLengthLong(document.getSize());
 
