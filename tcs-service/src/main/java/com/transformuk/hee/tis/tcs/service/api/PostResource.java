@@ -60,6 +60,7 @@ import javax.validation.Valid;
 import java.io.IOException;
 import java.net.URI;
 import java.net.URISyntaxException;
+import java.net.URLDecoder;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
@@ -170,6 +171,12 @@ public class PostResource {
           " \"sites.siteId\":[\"123\"],\"trainingBodyId\":[\"11\"],\"grades.gradeId\":[\"11\"],\"specialties.specialty.name\":[\"Test Specialty\"]}\"")
       @RequestParam(value = "columnFilters", required = false) String columnFilterJson) throws IOException {
     log.debug("REST request to get a page of Posts");
+    /**
+      * If FE send the parameter string without encoded string then some characters are escaped
+      * e.g "OXF/RTH02/034/PSTR3+" will be converted into "OXF/RTH02/034/PSTR3 "
+      * Its must be encoded at FE and decoded at BE to allow special charaters
+      */
+    searchQuery = URLDecoder.decode(searchQuery,"UTF-8");
     searchQuery = sanitize(searchQuery);
     List<Class> filterEnumList = Lists.newArrayList(Status.class, FundingType.class, PostSuffix.class,
         PostGradeType.class, PostSpecialtyType.class);
