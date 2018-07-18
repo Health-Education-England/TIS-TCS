@@ -445,8 +445,8 @@ public class PostServiceImpl implements PostService {
   @Transactional(readOnly = true)
   public Page<PostViewDTO> findAll(Pageable pageable) {
     log.debug("Request to get all Posts");
-    int start = pageable.getOffset();
-    int end = start + pageable.getPageSize() + 1;
+    final int size = pageable.getPageSize() + 1;
+    final int offset = pageable.getOffset();
     MapSqlParameterSource paramSource = new MapSqlParameterSource();
 
     String query = sqlQuerySupplier.getQuery(SqlQuerySupplier.POST_VIEW);
@@ -466,7 +466,7 @@ public class PostServiceImpl implements PostService {
     final String orderByClause = createOrderByClauseWithParams(pageable);
     query = query.replaceAll("ORDERBYCLAUSE", orderByClause);
 
-    query = query.replaceAll("LIMITCLAUSE", "limit " + start + "," + end);
+    query = query.replaceAll("LIMITCLAUSE", "limit " + size + " offset " + offset);
     List<PostViewDTO> posts = namedParameterJdbcTemplate.query(query,paramSource, new PostServiceImpl.PostViewRowMapper());
     if (CollectionUtils.isEmpty(posts)) {
       return new PageImpl<>(posts);
@@ -475,7 +475,7 @@ public class PostServiceImpl implements PostService {
     Page<PostViewDTO> dtoPage;
     if (hasNext) {
       posts = posts.subList(0, pageable.getPageSize()); //ignore any additional
-      dtoPage = new PageImpl<>(posts, pageable, end);
+      dtoPage = new PageImpl<>(posts, pageable, pageable.getPageSize());
     } else {
       dtoPage = new PageImpl<>(posts, pageable, pageable.getPageSize());
     }
@@ -491,8 +491,8 @@ public class PostServiceImpl implements PostService {
     String whereClause = createWhereClause(searchString, columnFilters);
     StopWatch stopWatch;
 
-    int start = pageable.getOffset();
-    int end = start + pageable.getPageSize() + 1;
+    final int size = pageable.getPageSize() + 1;
+    final int offset = pageable.getOffset();
 
     String query = sqlQuerySupplier.getQuery(SqlQuerySupplier.POST_VIEW);
     query = query.replaceAll("TRUST_JOIN", permissionService.isUserTrustAdmin() ? "  LEFT JOIN `PostTrust` pt on pt.`postId` = p.`id` " : StringUtils.EMPTY);
@@ -505,7 +505,7 @@ public class PostServiceImpl implements PostService {
     query = query.replaceAll("ORDERBYCLAUSE", orderByClause);
 
     //limit is 0 based
-    query = query.replaceAll("LIMITCLAUSE", "limit " + start + "," + end);
+    query = query.replaceAll("LIMITCLAUSE", "limit " + size + " offset " + offset);
 
     if (StringUtils.isNotEmpty(searchString)) {
       paramSource.addValue("searchString", "%" + searchString + "%");
@@ -528,10 +528,8 @@ public class PostServiceImpl implements PostService {
     Page<PostViewDTO> dtoPage;
     if (hasNext) {
       posts = posts.subList(0, pageable.getPageSize()); //ignore any additional
-      dtoPage = new PageImpl<>(posts, pageable, end);
-    } else {
-      dtoPage = new PageImpl<>(posts, pageable, pageable.getPageSize());
     }
+    dtoPage = new PageImpl<>(posts, pageable, pageable.getPageSize());
 
     postViewDecorator.decorate(dtoPage.getContent());
     return dtoPage;
@@ -544,8 +542,8 @@ public class PostServiceImpl implements PostService {
 
     MapSqlParameterSource paramSource = new MapSqlParameterSource();
     String whereClause = createWhereClauseForSearch(searchString);
-    int start = pageable.getOffset();
-    int end = start + pageable.getPageSize() + 1;
+    final int size = pageable.getPageSize() + 1;
+    final int offset = pageable.getOffset();
 
     String query = sqlQuerySupplier.getQuery(SqlQuerySupplier.SEARCH_POST_VIEW);
     query = query.replaceAll("WHERECLAUSE", whereClause);
@@ -562,7 +560,7 @@ public class PostServiceImpl implements PostService {
     }
 
     //limit is 0 based
-    query = query.replaceAll("LIMITCLAUSE", "limit " + start + "," + end);
+    query = query.replaceAll("LIMITCLAUSE", "limit " + size + " offset " + offset);
     List<PostViewDTO> posts = namedParameterJdbcTemplate.query(query,paramSource, new PostServiceImpl.PostViewSearchMapper());
     if (CollectionUtils.isEmpty(posts)) {
       return new PageImpl<>(posts);
@@ -572,10 +570,8 @@ public class PostServiceImpl implements PostService {
     Page<PostViewDTO> dtoPage;
     if (hasNext) {
       posts = posts.subList(0, pageable.getPageSize()); //ignore any additional
-      dtoPage = new PageImpl<>(posts, pageable, end);
-    } else {
-      dtoPage = new PageImpl<>(posts, pageable, pageable.getPageSize());
     }
+    dtoPage = new PageImpl<>(posts, pageable, pageable.getPageSize());
     postViewDecorator.decorate(dtoPage.getContent());
     return dtoPage;
   }

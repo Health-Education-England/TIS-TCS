@@ -190,8 +190,8 @@ public class PersonServiceImpl implements PersonService {
   public BasicPage<PersonViewDTO> findAll(final Pageable pageable) {
     log.debug("Request to get all People");
 
-    final int start = pageable.getOffset();
-    final int end = start + pageable.getPageSize() + 1;
+    final int size = pageable.getPageSize() + 1;
+    final int offset = pageable.getOffset();
     MapSqlParameterSource paramSource = new MapSqlParameterSource();
     String query = sqlQuerySupplier.getQuery(SqlQuerySupplier.PERSON_VIEW);
 
@@ -210,16 +210,19 @@ public class PersonServiceImpl implements PersonService {
     final String orderByClause = createOrderByClauseWithParams(pageable);
     query = query.replaceAll("ORDERBYCLAUSE", orderByClause);
 
-    query = query.replaceAll("LIMITCLAUSE", "limit " + start + "," + end);
+    query = query.replaceAll("LIMITCLAUSE", "limit " + size + " offset " + offset);
 
     log.debug("running full person query with no filters");
     final StopWatch stopWatch = new StopWatch();
     stopWatch.start();
-    final List<PersonViewDTO> persons = namedParameterJdbcTemplate.query(query, paramSource, new PersonViewRowMapper());
+    List<PersonViewDTO> persons = namedParameterJdbcTemplate.query(query, paramSource, new PersonViewRowMapper());
     stopWatch.stop();
     log.debug("full person query finished in: [{}]s", stopWatch.getTotalTimeSeconds());
 
     final boolean hasNext = persons.size() > pageable.getPageSize();
+    if (hasNext) {
+      persons = persons.subList(0, pageable.getPageSize()); //ignore any additional
+    }
 
     if (CollectionUtils.isEmpty(persons)) {
       return new BasicPage<>(persons, pageable);
@@ -261,8 +264,8 @@ public class PersonServiceImpl implements PersonService {
   @Override
   @Transactional(readOnly = true)
   public BasicPage<PersonViewDTO> advancedSearch(final String searchString, final List<ColumnFilter> columnFilters, final Pageable pageable) {
-    final int start = pageable.getOffset();
-    final int end = pageable.getPageSize() + 1;
+    final int size = pageable.getPageSize() + 1;
+    final int offset = pageable.getOffset();
     MapSqlParameterSource paramSource = new MapSqlParameterSource();
     String query = sqlQuerySupplier.getQuery(SqlQuerySupplier.PERSON_VIEW);
     query = query.replaceAll("TRUST_JOIN", permissionService.isUserTrustAdmin() ? " left join PersonTrust pt on (pt.personId = p.id)" : StringUtils.EMPTY);
@@ -288,7 +291,7 @@ public class PersonServiceImpl implements PersonService {
 
 
     //limit is 0 based
-    query = query.replaceAll("LIMITCLAUSE", "limit " + start + "," + end);
+    query = query.replaceAll("LIMITCLAUSE", "limit " + size + " offset " + offset);
 
     List<PersonViewDTO> persons = namedParameterJdbcTemplate.query(query, paramSource, new PersonViewRowMapper());
 
