@@ -10,7 +10,7 @@ import java.util.Optional;
 
 @Repository
 public interface DocumentRepository extends JpaRepository<Document, Long>, JpaSpecificationExecutor<Document> {
-    Optional<Document> findOneBypersonIdAndIdAndStatus(final Long personId, final Long id, Status status);
+    Optional<Document> findOneByPersonIdAndIdAndStatus(final Long personId, final Long id, Status status);
 
     Optional<Document> findOneByIdAndStatus(final Long id, Status status);
 }

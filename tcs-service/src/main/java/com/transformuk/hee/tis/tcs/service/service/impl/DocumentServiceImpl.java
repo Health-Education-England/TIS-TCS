@@ -11,7 +11,6 @@ import com.transformuk.hee.tis.tcs.service.model.Document;
 import com.transformuk.hee.tis.tcs.service.repository.DocumentRepository;
 import com.transformuk.hee.tis.tcs.service.service.DocumentService;
 import com.transformuk.hee.tis.tcs.service.service.mapper.DocumentMapper;
-import com.transformuk.hee.tis.tcs.service.service.mapper.TagMapper;
 import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -41,14 +40,12 @@ public class DocumentServiceImpl implements DocumentService {
     private final DocumentRepository documentRepository;
     private final FileStorageRepository fileStorageRepository;
     private final DocumentMapper documentMapper;
-    private final TagMapper tagMapper;
     private final AzureProperties azureProperties;
 
-    public DocumentServiceImpl(final DocumentRepository documentRepository, final FileStorageRepository fileStorageRepository, final DocumentMapper documentMapper, final TagMapper tagMapper, final AzureProperties azureProperties) {
+    public DocumentServiceImpl(final DocumentRepository documentRepository, final FileStorageRepository fileStorageRepository, final DocumentMapper documentMapper, final AzureProperties azureProperties) {
         this.documentRepository = documentRepository;
         this.fileStorageRepository = fileStorageRepository;
         this.documentMapper = documentMapper;
-        this.tagMapper = tagMapper;
         this.azureProperties = azureProperties;
     }
 
@@ -131,7 +128,7 @@ public class DocumentServiceImpl implements DocumentService {
 
     @Override
     public Optional<DocumentDTO> delete(final Long personId, final Long documentId) {
-        final Optional<Document> documentOptional = documentRepository.findOneBypersonIdAndIdAndStatus(personId, documentId, Status.CURRENT);
+        final Optional<Document> documentOptional = documentRepository.findOneByPersonIdAndIdAndStatus(personId, documentId, Status.CURRENT);
 
         if (!documentOptional.isPresent()) {
             LOG.warn("Document with id '{}' and person id '{}' does not exist", documentId, personId);
