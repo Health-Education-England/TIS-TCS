@@ -1,12 +1,18 @@
 package com.transformuk.hee.tis.tcs.service.api;
 
-import com.google.gson.Gson;
-import com.google.gson.reflect.TypeToken;
+import com.fasterxml.jackson.core.Version;
+import com.fasterxml.jackson.core.type.TypeReference;
+import com.fasterxml.jackson.databind.JsonDeserializer;
+import com.fasterxml.jackson.databind.JsonSerializer;
+import com.fasterxml.jackson.databind.ObjectMapper;
+import com.fasterxml.jackson.databind.module.SimpleModule;
 import com.microsoft.azure.storage.StorageException;
 import com.transformuk.hee.tis.filestorage.repository.FileStorageRepository;
 import com.transformuk.hee.tis.tcs.TestUtils;
 import com.transformuk.hee.tis.tcs.api.dto.DocumentDTO;
 import com.transformuk.hee.tis.tcs.api.dto.TagDTO;
+import com.transformuk.hee.tis.tcs.api.dto.jackson.LocalDateTimeDeserializer;
+import com.transformuk.hee.tis.tcs.api.dto.jackson.LocalDateTimeSerializer;
 import com.transformuk.hee.tis.tcs.api.enumeration.Status;
 import com.transformuk.hee.tis.tcs.service.Application;
 import com.transformuk.hee.tis.tcs.service.config.AzureProperties;
@@ -34,11 +40,12 @@ import org.springframework.test.web.servlet.setup.MockMvcBuilders;
 
 import javax.annotation.Resource;
 import javax.inject.Inject;
-import java.lang.reflect.Type;
+import java.io.IOException;
 import java.net.URISyntaxException;
 import java.security.InvalidKeyException;
 import java.sql.Connection;
 import java.sql.SQLException;
+import java.time.LocalDateTime;
 import java.util.*;
 
 import static org.assertj.core.api.Assertions.assertThat;
@@ -56,8 +63,18 @@ public class DocumentResourceIntTest {
     private static final String TEST_FILE_NAME = "document.txt";
     private static final String TEST_FILE_CONTENT_TYPE = "text/plain";
     private static final String TEST_FILE_FORM_FIELD_NAME = "document";
-
-    private MockMvc mockMvc;
+    private static final String SQL_INSERT_PERSON =
+            " INSERT INTO `Person` (`id`, `intrepidId`, `addedDate`, `amendedDate`, `role`, `status`, `comments`, `inactiveDate`, `inactiveNotes`, `publicHealthNumber`, `regulator`) " +
+                    " VALUES " +
+                    " (%d, '98798797987', '2012-06-20 00:00:00', '2012-06-20 00:00:00.000', 'AAAAA', 'CURRENT', 'XXXX', NULL, NULL, NULL, 'HEELIVE');";
+    private static final String SQL_INSERT_DOCUMENT =
+            "INSERT INTO `Document` (`id`, `addedDate`, `amendedDate`, `inactiveDate`, `uploadedBy`, `title`, `fileName`, `fileExtension`, `contentType`, `size`, `personId`, `status`, `version`, `intrepidDocumentUId`, `intrepidParentRecordId`, `intrepidFolderPath`) " +
+                    " VALUES " +
+                    " (%d, '2018-02-16 14:32:06', '2018-02-19 11:07:11.882', NULL, 'James Hudson', 'Test Update', 'LargeTestFile.txt', 'txt', 'text/plain', 512000, %d, 'CURRENT', 1, NULL, NULL, NULL);";
+    private static final String SQL_INSERT_TAG =
+            "INSERT INTO `Tag` (`id`, `name`) " +
+                    " VALUES " +
+                    " (%d, '%s');";
 
     @Resource
     private DocumentService documentService;
@@ -69,27 +86,12 @@ public class DocumentResourceIntTest {
     private AzureProperties azureProperties;
     @Inject
     private PageableHandlerMethodArgumentResolver pageableArgumentResolver;
-
-    // fixme: replace with API endpoint to delete when implemented
     @Resource
     private FileStorageRepository fileStorageRepository;
 
-    private static final String SQL_INSERT_PERSON =
-            " INSERT INTO `Person` (`id`, `intrepidId`, `addedDate`, `amendedDate`, `role`, `status`, `comments`, `inactiveDate`, `inactiveNotes`, `publicHealthNumber`, `regulator`) " +
-                    " VALUES " +
-                    " (%d, '98798797987', '2012-06-20 00:00:00', '2012-06-20 00:00:00.000', 'AAAAA', 'CURRENT', 'XXXX', NULL, NULL, NULL, 'HEELIVE');";
-
-    private static final String SQL_INSERT_DOCUMENT =
-            "INSERT INTO `Document` (`id`, `addedDate`, `amendedDate`, `inactiveDate`, `uploadedBy`, `name`, `fileName`, `fileExtension`, `contentType`, `size`, `personId`, `status`, `version`, `intrepidDocumentUId`, `intrepidParentRecordId`, `intrepidFolderPath`) " +
-                    " VALUES " +
-                    " (%d, '2018-02-16 14:32:06', '2018-02-19 11:07:11.882', NULL, 'James Hudson', 'Test Update', 'LargeTestFile.txt', 'txt', 'text/plain', 512000, %d, 'CURRENT', 1, NULL, NULL, NULL);";
-
-    private static final String SQL_INSERT_TAG =
-            "INSERT INTO `Tag` (`id`, `name`) " +
-                    " VALUES " +
-                    " (%d, '%s');";
-
+    private MockMvc mockMvc;
     private static boolean loaded = false;
+    private final ObjectMapper jacksonMapper = createObjectMapper(new LocalDateTimeDeserializer(), new LocalDateTimeSerializer());
 
     @Before
     public void setup() throws SQLException {
@@ -134,7 +136,8 @@ public class DocumentResourceIntTest {
                 .andExpect(content().contentType(MediaType.APPLICATION_JSON_UTF8))
                 .andExpect(content().string(containsString("{\"id\":"))).andReturn();
 
-        final DocumentId documentId = new Gson().fromJson(uploadResponse.getResponse().getContentAsString(), DocumentId.class);
+        final DocumentId documentId = jacksonMapper.readValue(uploadResponse.getResponse().getContentAsString(), DocumentId.class);
+
 
         deleteTestFile(documentId.getId());
     }
@@ -143,7 +146,7 @@ public class DocumentResourceIntTest {
     public void bulkUpdateDocuments_shouldReturnHTTP404_WhenDocumentDoesNotExist() throws Exception {
         final DocumentDTO document = new DocumentDTO();
         document.setId(9999999999L);
-        document.setName("Non-existing document");
+        document.setTitle("Non-existing document");
         document.setPersonId(PERSON_BASE_ID);
 
         mockMvc.perform(patch(DocumentResource.PATH_API + DocumentResource.PATH_DOCUMENTS)
@@ -186,7 +189,7 @@ public class DocumentResourceIntTest {
                 .andExpect(status().isOk())
                 .andReturn();
 
-        final DocumentDTO updatedDocumentWith3Tags = new Gson().fromJson(response.getResponse().getContentAsString(), DocumentDTO.class);
+        final DocumentDTO updatedDocumentWith3Tags = jacksonMapper.readValue(response.getResponse().getContentAsString(), DocumentDTO.class);
 
         assertThat(updatedDocumentWith3Tags.getTags()).hasSize(3).containsAll(updatedDocumentWith2Tags.getTags());
     }
@@ -217,7 +220,7 @@ public class DocumentResourceIntTest {
                 .andExpect(status().isOk())
                 .andReturn();
 
-        final DocumentDTO updatedDocumentWith1Tag = new Gson().fromJson(response.getResponse().getContentAsString(), DocumentDTO.class);
+        final DocumentDTO updatedDocumentWith1Tag = jacksonMapper.readValue(response.getResponse().getContentAsString(), DocumentDTO.class);
 
         assertThat(updatedDocumentWith1Tag.getTags()).hasSize(2).containsAll(updatedDocumentWith2Tags.getTags());
     }
@@ -234,7 +237,7 @@ public class DocumentResourceIntTest {
                 .andExpect(content().contentType(MediaType.APPLICATION_JSON_UTF8))
                 .andExpect(content().string(containsString("{\"id\":"))).andReturn();
 
-        final DocumentId documentId = new Gson().fromJson(uploadResponse.getResponse().getContentAsString(), DocumentId.class);
+        final DocumentId documentId = jacksonMapper.readValue(uploadResponse.getResponse().getContentAsString(), DocumentId.class);
 
         mockMvc.perform(get(DocumentResource.PATH_API +
                 DocumentResource.PATH_DOCUMENTS +
@@ -318,7 +321,7 @@ public class DocumentResourceIntTest {
                 .andExpect(content().contentType(MediaType.APPLICATION_JSON_UTF8))
                 .andExpect(content().string(containsString("{\"id\":"))).andReturn();
 
-        final DocumentId documentId = new Gson().fromJson(uploadResponse.getResponse().getContentAsString(), DocumentId.class);
+        final DocumentId documentId = jacksonMapper.readValue(uploadResponse.getResponse().getContentAsString(), DocumentId.class);
 
         final MvcResult response = mockMvc.perform(get(DocumentResource.PATH_API +
                 DocumentResource.PATH_DOCUMENTS +
@@ -327,10 +330,10 @@ public class DocumentResourceIntTest {
                 .andExpect(content().contentType(MediaType.APPLICATION_JSON_UTF8))
                 .andExpect(status().isOk()).andReturn();
 
-        final DocumentDTO document = new Gson().fromJson(response.getResponse().getContentAsString(), DocumentDTO.class);
+        final DocumentDTO document = jacksonMapper.readValue(response.getResponse().getContentAsString(), DocumentDTO.class);
 
         assertThat(document.getId()).isEqualTo(documentId.getId());
-        assertThat(document.getName()).isEqualTo(TEST_FILE_NAME);
+        assertThat(document.getTitle()).isEqualTo(TEST_FILE_NAME);
         assertThat(document.getFileName()).isEqualTo(TEST_FILE_NAME);
         assertThat(document.getFileExtension()).isEqualTo(TEST_FILE_NAME.substring(TEST_FILE_NAME.lastIndexOf(".") + 1));
         assertThat(document.getContentType()).isEqualTo(TEST_FILE_CONTENT_TYPE);
@@ -425,7 +428,7 @@ public class DocumentResourceIntTest {
 
         final DocumentDTO document = documents.get(0);
 
-        assertThat(document.getName()).isEqualTo("Document AAAAA");
+        assertThat(document.getTitle()).isEqualTo("Document AAAAA");
         assertThat(document.getFileName()).isEqualTo("document1.jpg");
         assertThat(document.getFileExtension()).isEqualTo("jpg");
         assertThat(document.getContentType()).isEqualTo("image/jpeg");
@@ -452,7 +455,7 @@ public class DocumentResourceIntTest {
 
         final DocumentDTO document = documents.get(0);
 
-        assertThat(document.getName()).isEqualTo("Document AAAAA");
+        assertThat(document.getTitle()).isEqualTo("Document AAAAA");
         assertThat(document.getFileName()).isEqualTo("document1.jpg");
         assertThat(document.getFileExtension()).isEqualTo("jpg");
         assertThat(document.getContentType()).isEqualTo("image/jpeg");
@@ -479,7 +482,7 @@ public class DocumentResourceIntTest {
 
         DocumentDTO document = documents.get(0);
 
-        assertThat(document.getName()).isEqualTo("Document AAAAA");
+        assertThat(document.getTitle()).isEqualTo("Document AAAAA");
         assertThat(document.getFileName()).isEqualTo("document1.jpg");
         assertThat(document.getFileExtension()).isEqualTo("jpg");
         assertThat(document.getContentType()).isEqualTo("image/jpeg");
@@ -488,7 +491,7 @@ public class DocumentResourceIntTest {
 
         document = documents.get(1);
 
-        assertThat(document.getName()).isEqualTo("Document CCCCC");
+        assertThat(document.getTitle()).isEqualTo("Document CCCCC");
         assertThat(document.getFileName()).isEqualTo("document3.jpg");
         assertThat(document.getFileExtension()).isEqualTo("jpg");
         assertThat(document.getContentType()).isEqualTo("image/jpeg");
@@ -515,7 +518,7 @@ public class DocumentResourceIntTest {
 
         final DocumentDTO document = documents.get(0);
 
-        assertThat(document.getName()).isEqualTo("Document BBBBB");
+        assertThat(document.getTitle()).isEqualTo("Document BBBBB");
         assertThat(document.getFileName()).isEqualTo("document2.png");
         assertThat(document.getFileExtension()).isEqualTo("png");
         assertThat(document.getContentType()).isEqualTo("image/png");
@@ -534,8 +537,8 @@ public class DocumentResourceIntTest {
                 .andExpect(content().contentType(MediaType.APPLICATION_JSON_UTF8))
                 .andExpect(status().isOk()).andReturn();
 
-        final PageImplTest<DocumentDTO> documents = new Gson().fromJson(response.getResponse().getContentAsString(), new TypeToken<PageImplTest<DocumentDTO>>() {
-        }.getType());
+        final PageImplTest<DocumentDTO> documents = jacksonMapper.readValue(response.getResponse().getContentAsString(), new TypeReference<PageImplTest<DocumentDTO>>() {
+        });
 
         assertThat(documents.hasContent()).isTrue();
         assertThat(documents.isFirst()).isTrue();
@@ -559,8 +562,8 @@ public class DocumentResourceIntTest {
                 .andExpect(content().contentType(MediaType.APPLICATION_JSON_UTF8))
                 .andExpect(status().isOk()).andReturn();
 
-        final PageImplTest<DocumentDTO> documents = new Gson().fromJson(response.getResponse().getContentAsString(), new TypeToken<PageImplTest<DocumentDTO>>() {
-        }.getType());
+        final PageImplTest<DocumentDTO> documents = jacksonMapper.readValue(response.getResponse().getContentAsString(), new TypeReference<PageImplTest<DocumentDTO>>() {
+        });
 
         assertThat(documents.hasContent()).isTrue();
         assertThat(documents.isFirst()).isFalse();
@@ -584,8 +587,8 @@ public class DocumentResourceIntTest {
                 .andExpect(content().contentType(MediaType.APPLICATION_JSON_UTF8))
                 .andExpect(status().isOk()).andReturn();
 
-        final PageImplTest<DocumentDTO> documents = new Gson().fromJson(response.getResponse().getContentAsString(), new TypeToken<PageImplTest<DocumentDTO>>() {
-        }.getType());
+        final PageImplTest<DocumentDTO> documents = jacksonMapper.readValue(response.getResponse().getContentAsString(), new TypeReference<PageImplTest<DocumentDTO>>() {
+        });
 
         assertThat(documents.hasContent()).isTrue();
         assertThat(documents.isFirst()).isFalse();
@@ -610,10 +613,8 @@ public class DocumentResourceIntTest {
                 .andExpect(status().isOk())
                 .andReturn();
 
-        final Type tagDTOListType = new TypeToken<ArrayList<TagDTO>>() {
-        }.getType();
-
-        final List<TagDTO> responseBody = new Gson().fromJson(response.getResponse().getContentAsString(), tagDTOListType);
+        final List<TagDTO> responseBody = jacksonMapper.readValue(response.getResponse().getContentAsString(), new TypeReference<ArrayList<TagDTO>>() {
+        });
 
         assertThat(responseBody).hasSize(2);
         assertThat(responseBody).containsSequence(new TagDTO("abcdef"), new TagDTO("abcxyz"));
@@ -747,7 +748,7 @@ public class DocumentResourceIntTest {
 
         DocumentDTO document = documents.get(0);
 
-        assertThat(document.getName()).isEqualTo("Document To Delete 2");
+        assertThat(document.getTitle()).isEqualTo("Document To Delete 2");
         assertThat(document.getFileName()).isEqualTo("documentToDelete2.jpg");
         assertThat(document.getFileExtension()).isEqualTo("jpg");
         assertThat(document.getContentType()).isEqualTo("image/jpeg");
@@ -756,7 +757,7 @@ public class DocumentResourceIntTest {
 
         document = documents.get(1);
 
-        assertThat(document.getName()).isEqualTo("Document To Delete 3");
+        assertThat(document.getTitle()).isEqualTo("Document To Delete 3");
         assertThat(document.getFileName()).isEqualTo("documentToDelete3.jpg");
         assertThat(document.getFileExtension()).isEqualTo("jpg");
         assertThat(document.getContentType()).isEqualTo("image/jpeg");
@@ -768,7 +769,7 @@ public class DocumentResourceIntTest {
     private DocumentDTO updateMetadataWith2Tags(final long documentId) throws Exception {
         final DocumentDTO document = new DocumentDTO();
         document.setId(documentId);
-        document.setName("Document Name");
+        document.setTitle("Document Title");
         document.setPersonId(PERSON_BASE_ID);
         document.setStatus(Status.CURRENT);
         document.setVersion(1);
@@ -791,10 +792,11 @@ public class DocumentResourceIntTest {
                 .andExpect(status().isOk())
                 .andReturn();
 
-        final DocumentDTO updatedDocument = new Gson().fromJson(response.getResponse().getContentAsString(), DocumentDTO.class);
+
+        final DocumentDTO updatedDocument = jacksonMapper.readValue(response.getResponse().getContentAsString(), DocumentDTO.class);
 
         assertThat(document.getId()).isEqualTo(updatedDocument.getId());
-        assertThat(document.getName()).isEqualTo(updatedDocument.getName());
+        assertThat(document.getTitle()).isEqualTo(updatedDocument.getTitle());
         assertThat(document.getPersonId()).isEqualTo(updatedDocument.getPersonId());
         assertThat(document.getStatus()).isEqualTo(updatedDocument.getStatus());
         assertThat(document.getVersion()).isEqualTo(updatedDocument.getVersion());
@@ -827,8 +829,18 @@ public class DocumentResourceIntTest {
         insertBaseDocuments(connection);
     }
 
+    private ObjectMapper createObjectMapper(final JsonDeserializer deserializer, final JsonSerializer serializer) {
+        final SimpleModule module = new SimpleModule("customerSerializationModule", new Version(1, 0, 0, "static version"));
+        module.addDeserializer(LocalDateTime.class, deserializer);
+        module.addSerializer(LocalDateTime.class, serializer);
+
+        final ObjectMapper objectMapper = new ObjectMapper();
+        objectMapper.registerModule(module);
+        return objectMapper;
+    }
+
     private void insertBaseDocuments(final Connection connection) {
-        final String query = "INSERT INTO `Document` (`id`, `addedDate`, `amendedDate`, `inactiveDate`, `uploadedBy`, `name`, `fileName`, `fileExtension`, `contentType`, `size`, `personId`, `status`, `version`, `intrepidDocumentUId`, `intrepidParentRecordId`, `intrepidFolderPath`)\n" +
+        final String query = "INSERT INTO `Document` (`id`, `addedDate`, `amendedDate`, `inactiveDate`, `uploadedBy`, `title`, `fileName`, `fileExtension`, `contentType`, `size`, `personId`, `status`, `version`, `intrepidDocumentUId`, `intrepidParentRecordId`, `intrepidFolderPath`)\n" +
                 "VALUES" +
                 "(" + (DOCUMENT_BASE_ID + 1001) + ", '2018-03-27 14:14:20', '2018-03-27 14:14:20.367', NULL, 'User 1', 'Document AAAAA', 'document1.jpg', 'jpg', 'image/jpeg', 56353, " + PERSON_BASE_ID + ", 'CURRENT', NULL, NULL, NULL, NULL)," +
                 "(" + (DOCUMENT_BASE_ID + 1002) + ", '2018-03-27 15:10:59', '2018-03-27 15:14:36.624', NULL, 'User 1', 'Document BBBBB', 'document2.png', 'png', 'image/png', 12123, " + PERSON_BASE_ID + ", 'CURRENT', NULL, NULL, NULL, NULL)," +
@@ -851,9 +863,9 @@ public class DocumentResourceIntTest {
         return String.format(sql, args);
     }
 
-    private void assertPaginationDocumentsDoNotExist(final String json) {
-        final PageImplTest<DocumentDTO> documents = new Gson().fromJson(json, new TypeToken<PageImplTest<DocumentDTO>>() {
-        }.getType());
+    private void assertPaginationDocumentsDoNotExist(final String json) throws IOException {
+        final PageImplTest<DocumentDTO> documents = jacksonMapper.readValue(json, new TypeReference<PageImplTest<DocumentDTO>>() {
+        });
 
         assertThat(documents.hasContent()).isFalse();
         assertThat(documents.isFirst()).isTrue();
@@ -865,9 +877,9 @@ public class DocumentResourceIntTest {
         assertThat(documents.getTotalPages()).isZero();
     }
 
-    private List<DocumentDTO> assertPaginationDocumentsExist(final String json, final int expectedElements) {
-        final PageImplTest<DocumentDTO> documents = new Gson().fromJson(json, new TypeToken<PageImplTest<DocumentDTO>>() {
-        }.getType());
+    private List<DocumentDTO> assertPaginationDocumentsExist(final String json, final int expectedElements) throws IOException {
+        final PageImplTest<DocumentDTO> documents = jacksonMapper.readValue(json, new TypeReference<PageImplTest<DocumentDTO>>() {
+        });
 
         assertThat(documents.hasContent()).isTrue();
         assertThat(documents.isFirst()).isTrue();
@@ -881,8 +893,11 @@ public class DocumentResourceIntTest {
         return documents.getContent();
     }
 
-    private class DocumentId {
-        private final Long id;
+    private static class DocumentId {
+        private Long id;
+
+        public DocumentId() {
+        }
 
         public DocumentId(final Long id) {
             this.id = id;
@@ -891,22 +906,29 @@ public class DocumentResourceIntTest {
         public Long getId() {
             return id;
         }
+
+        public void setId(final Long id) {
+            this.id = id;
+        }
     }
 
     /**
      * The intention of this class is to ease the asserts in tests and was created because
-     * {@link Gson} cannot instantiate {@link org.springframework.data.domain.PageImpl}.
+     * Jackson {@link ObjectMapper} cannot instantiate {@link org.springframework.data.domain.PageImpl}.
      */
-    private class PageImplTest<T> implements Page<T> {
-        protected boolean first;
-        protected boolean last;
-        protected Integer number;
-        protected Integer numberOfElements;
-        protected Integer size;
-        protected Sort sort;
-        protected Integer totalElements;
-        protected Integer totalPages;
-        protected List<T> content;
+    private static class PageImplTest<T> implements Page<T> {
+        boolean first;
+        boolean last;
+        Integer number;
+        Integer numberOfElements;
+        Integer size;
+        Sort sort;
+        Integer totalElements;
+        Integer totalPages;
+        List<T> content;
+
+        public PageImplTest() {
+        }
 
         @Override
         public int getTotalPages() {

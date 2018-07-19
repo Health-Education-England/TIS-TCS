@@ -339,7 +339,7 @@ public class DocumentResource {
             document.setUploadedBy(TisSecurityHelper.getProfileFromContext().getFirstName() + " " + TisSecurityHelper.getProfileFromContext().getLastName());
             document.setPersonId(personId);
             document.setFileName(documentParam.getOriginalFilename());
-            document.setName(documentParam.getOriginalFilename());
+            document.setTitle(documentParam.getOriginalFilename());
             document.setFileExtension(documentParam.getOriginalFilename().substring(documentParam.getOriginalFilename().lastIndexOf('.') + 1));
             document.setContentType(documentParam.getContentType());
             document.setSize(documentParam.getSize());
@@ -369,7 +369,7 @@ public class DocumentResource {
                 Optional.ofNullable(documentParam.getTags()).orElse(Collections.emptySet()).stream()
         );
 
-        existingDocument.setName(documentParam.getName());
+        existingDocument.setTitle(documentParam.getTitle());
         existingDocument.setStatus(documentParam.getStatus());
         existingDocument.setVersion(documentParam.getVersion());
         existingDocument.setTags(combinedTags.collect(Collectors.toSet()));
