@@ -23,7 +23,7 @@ public class Document implements Serializable {
     private LocalDateTime amendedDate;
     private LocalDateTime inactiveDate;
     private String uploadedBy;
-    private String name;
+    private String title;
     private String fileName;
     private String fileExtension;
     private String contentType;
@@ -89,7 +89,7 @@ public class Document implements Serializable {
                 ", amendedDate=" + amendedDate +
                 ", inactiveDate=" + inactiveDate +
                 ", uploadedBy='" + uploadedBy + '\'' +
-                ", name='" + name + '\'' +
+                ", name='" + title + '\'' +
                 ", fileName='" + fileName + '\'' +
                 ", fileExtension='" + fileExtension + '\'' +
                 ", contentType='" + contentType + '\'' +
@@ -144,12 +144,12 @@ public class Document implements Serializable {
         this.uploadedBy = uploadedBy;
     }
 
-    public String getName() {
-        return name;
+    public String getTitle() {
+        return title;
     }
 
-    public void setName(final String name) {
-        this.name = name;
+    public void setTitle(final String title) {
+        this.title = title;
     }
 
     public String getFileName() {

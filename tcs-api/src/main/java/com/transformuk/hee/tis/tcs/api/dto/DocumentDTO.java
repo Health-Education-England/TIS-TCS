@@ -2,6 +2,10 @@ package com.transformuk.hee.tis.tcs.api.dto;
 
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
+import com.fasterxml.jackson.databind.annotation.JsonDeserialize;
+import com.fasterxml.jackson.databind.annotation.JsonSerialize;
+import com.transformuk.hee.tis.tcs.api.dto.jackson.LocalDateTimeDeserializer;
+import com.transformuk.hee.tis.tcs.api.dto.jackson.LocalDateTimeSerializer;
 import com.transformuk.hee.tis.tcs.api.dto.validation.Create;
 import com.transformuk.hee.tis.tcs.api.dto.validation.Update;
 import com.transformuk.hee.tis.tcs.api.enumeration.Status;
@@ -24,8 +28,8 @@ public class DocumentDTO implements Serializable {
     @DecimalMin(value = "0", groups = Update.class, message = "Id must not be negative")
     @Null(groups = Create.class, message = "Id must be null when creating a new document")
     private Long id;
-    @ApiModelProperty(hidden = true)
-    @JsonIgnore
+    @JsonSerialize(using = LocalDateTimeSerializer.class)
+    @JsonDeserialize(using = LocalDateTimeDeserializer.class)
     private LocalDateTime addedDate;
     @ApiModelProperty(hidden = true)
     @JsonIgnore
@@ -35,8 +39,8 @@ public class DocumentDTO implements Serializable {
     private LocalDateTime inactiveDate;
     @ApiModelProperty(readOnly = true)
     private String uploadedBy;
-    @NotNull(groups = Update.class, message = "Name must not be null when updating a document")
-    private String name;
+    @NotNull(groups = Update.class, message = "Title must not be null when updating a document")
+    private String title;
     @Null(groups = Update.class, message = "Filename must be null when creating a updating document")
     @ApiModelProperty(readOnly = true)
     private String fileName;
@@ -70,7 +74,6 @@ public class DocumentDTO implements Serializable {
 
     @Override
     public int hashCode() {
-
         return Objects.hash(id);
     }
 
@@ -82,7 +85,7 @@ public class DocumentDTO implements Serializable {
                 ", amendedDate=" + amendedDate +
                 ", inactiveDate=" + inactiveDate +
                 ", uploadedBy='" + uploadedBy + '\'' +
-                ", name='" + name + '\'' +
+                ", title='" + title + '\'' +
                 ", fileName='" + fileName + '\'' +
                 ", fileExtension='" + fileExtension + '\'' +
                 ", contentType='" + contentType + '\'' +
@@ -134,12 +137,12 @@ public class DocumentDTO implements Serializable {
         this.uploadedBy = uploadedBy;
     }
 
-    public String getName() {
-        return name;
+    public String getTitle() {
+        return title;
     }
 
-    public void setName(final String name) {
-        this.name = name;
+    public void setTitle(final String title) {
+        this.title = title;
     }
 
     public String getFileName() {

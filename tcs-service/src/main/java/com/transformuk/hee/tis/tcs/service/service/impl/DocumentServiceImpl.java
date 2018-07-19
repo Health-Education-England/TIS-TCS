@@ -11,7 +11,6 @@ import com.transformuk.hee.tis.tcs.service.model.Document;
 import com.transformuk.hee.tis.tcs.service.repository.DocumentRepository;
 import com.transformuk.hee.tis.tcs.service.service.DocumentService;
 import com.transformuk.hee.tis.tcs.service.service.mapper.DocumentMapper;
-import com.transformuk.hee.tis.tcs.service.service.mapper.TagMapper;
 import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -41,14 +40,12 @@ public class DocumentServiceImpl implements DocumentService {
     private final DocumentRepository documentRepository;
     private final FileStorageRepository fileStorageRepository;
     private final DocumentMapper documentMapper;
-    private final TagMapper tagMapper;
     private final AzureProperties azureProperties;
 
-    public DocumentServiceImpl(final DocumentRepository documentRepository, final FileStorageRepository fileStorageRepository, final DocumentMapper documentMapper, final TagMapper tagMapper, final AzureProperties azureProperties) {
+    public DocumentServiceImpl(final DocumentRepository documentRepository, final FileStorageRepository fileStorageRepository, final DocumentMapper documentMapper, final AzureProperties azureProperties) {
         this.documentRepository = documentRepository;
         this.fileStorageRepository = fileStorageRepository;
         this.documentMapper = documentMapper;
-        this.tagMapper = tagMapper;
         this.azureProperties = azureProperties;
     }
 
@@ -88,9 +85,17 @@ public class DocumentServiceImpl implements DocumentService {
                 DocumentDTO.class.getSimpleName(),
                 document.getId());
 
+        final Optional<Document> documentOptional = documentRepository.findOneByPersonIdAndIdAndStatus(document.getPersonId(), document.getId(), Status.CURRENT);
+
+        if (!documentOptional.isPresent()) {
+            LOG.warn("Document with id '{}' and person id '{}' does not exist", document.getPersonId(), document.getId());
+
+            throw new IOException("Document not found");
+        }
+
         try {
             fileStorageRepository.download(azureProperties.getContainerName(),
-                    azureProperties.getPersonFolder() + "/" + document.getId() + "/" + document.getFileName(),
+                    getAzureFilePath(documentOptional.get()),
                     outputStream);
         } catch (final URISyntaxException | InvalidKeyException | StorageException ex) {
             throw new IOException(ex);
@@ -99,7 +104,7 @@ public class DocumentServiceImpl implements DocumentService {
 
     @Override
     public DocumentDTO save(final DocumentDTO documentDTO) throws IOException {
-        LOG.debug("Received request to save '{}' with name '{}'",
+        LOG.debug("Received request to save '{}' with filename '{}'",
                 documentDTO.getClass().getSimpleName(),
                 documentDTO.getFileName());
 
@@ -113,7 +118,7 @@ public class DocumentServiceImpl implements DocumentService {
             } catch (final IOException ex) {
                 // rollback
                 try {
-                    fileStorageRepository.deleteFile(document.getId(), azureProperties.getContainerName() + "/" + azureProperties.getPersonFolder(), document.getFileName());
+                    fileStorageRepository.deleteFile(azureProperties.getContainerName(), getAzureFilePath(document));
                 } catch (final URISyntaxException | InvalidKeyException | StorageException exx) {
                     LOG.warn("Error while rolling back; could not delete file from remote storage", exx);
                 }
@@ -131,7 +136,7 @@ public class DocumentServiceImpl implements DocumentService {
 
     @Override
     public Optional<DocumentDTO> delete(final Long personId, final Long documentId) {
-        final Optional<Document> documentOptional = documentRepository.findOneBypersonIdAndIdAndStatus(personId, documentId, Status.CURRENT);
+        final Optional<Document> documentOptional = documentRepository.findOneByPersonIdAndIdAndStatus(personId, documentId, Status.CURRENT);
 
         if (!documentOptional.isPresent()) {
             LOG.warn("Document with id '{}' and person id '{}' does not exist", documentId, personId);
@@ -162,7 +167,7 @@ public class DocumentServiceImpl implements DocumentService {
             throw new IOException("Failed to save document to storage", ex);
         }
 
-        return saveMetadata(document);
+        return document;
     }
 
     private Document update(final Document document) {
@@ -171,7 +176,7 @@ public class DocumentServiceImpl implements DocumentService {
 
     private String saveFile(final Document document) throws
             InvalidKeyException, StorageException, URISyntaxException {
-        return fileStorageRepository.store(document.getId(), azureProperties.getContainerName() + "/" + azureProperties.getPersonFolder(), Lists.newArrayList(getFileAsMultipart(document)));
+        return fileStorageRepository.store(null, azureProperties.getContainerName(), Lists.newArrayList(getFileAsMultipart(document)));
     }
 
     private Document saveMetadata(final Document document) {
@@ -182,12 +187,12 @@ public class DocumentServiceImpl implements DocumentService {
         return new MultipartFile() {
             @Override
             public String getName() {
-                return document.getName();
+                return document.getTitle();
             }
 
             @Override
             public String getOriginalFilename() {
-                return document.getFileName();
+                return getAzureFilePath(document);
             }
 
             @Override
@@ -266,7 +271,7 @@ public class DocumentServiceImpl implements DocumentService {
             return fullSpec;
         }
 
-        querySpecs.add((root, criteriaQuery, sb) -> sb.like(root.get("name"), "%" + query + "%"));
+        querySpecs.add((root, criteriaQuery, sb) -> sb.like(root.get("title"), "%" + query + "%"));
         querySpecs.add((root, criteriaQuery, sb) -> sb.like(root.get("fileName"), "%" + query + "%"));
         querySpecs.add((root, criteriaQuery, sb) -> sb.like(root.get("fileExtension"), "%" + query + "%"));
         querySpecs.add((root, criteriaQuery, sb) -> sb.like(root.get("contentType"), "%" + query + "%"));
@@ -283,5 +288,9 @@ public class DocumentServiceImpl implements DocumentService {
 
 
         return fullSpec;
+    }
+
+    private String getAzureFilePath(final Document document) {
+        return document.getId() + "." + document.getFileExtension();
     }
 }
