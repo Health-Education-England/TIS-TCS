@@ -151,10 +151,11 @@ public interface PostService {
   /**
    * Search for a page of Posts by national post number
    * @param query
+   * @param columnFilers the exact key value filters to apply, can be null
    * @param pageable
    * @return
    */
-  Page<PostViewDTO> findByNationalPostNumber(String query, Pageable pageable);
+  Page<PostViewDTO> findByNationalPostNumber(String query, List<ColumnFilter> columnFilers, Pageable pageable);
 
   /**
    * Method that will throw a not authorized exception if the current logged in user cannot view or modify the person record
