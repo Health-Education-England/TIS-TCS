@@ -44,12 +44,13 @@ public class RotationPostServiceImpl implements RotationPostService {
         }
 
         final Long postId = newRotationPostDTOs.get(0).getPostId();
-        final Long totalRotationPostDeleted = rotationPostRepository.deleteByPostId(postId);
-
-        LOG.info("Deleted '{}' RotationPosts with postId '{}'", totalRotationPostDeleted, postId);
 
         final List<RotationPostDTO> existingRotationPostDTOs = findByPostId(postId);
         final List<RotationPostDTO> rotationPostDTOS = new ArrayList<>(combineRotationPost(existingRotationPostDTOs, new HashSet<>(newRotationPostDTOs)));
+
+        final Long totalRotationPostDeleted = rotationPostRepository.deleteByPostId(postId);
+        rotationPostRepository.flush();
+        LOG.info("Deleted '{}' RotationPosts with postId '{}'", totalRotationPostDeleted, postId);
 
         rotationPostRepository.save(rotationPostMapper.toEntity(rotationPostDTOS));
 
