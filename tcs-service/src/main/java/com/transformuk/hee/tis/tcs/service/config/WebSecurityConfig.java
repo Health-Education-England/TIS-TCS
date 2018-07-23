@@ -55,13 +55,18 @@ public class WebSecurityConfig extends WebSecurityConfigurerAdapter {
     protected void configure(HttpSecurity httpSecurity) throws Exception {
         httpSecurity
                 // to allow browser to render contents in frames
+<<<<<<< HEAD
                 .headers().frameOptions().sameOrigin()
+=======
+                .headers().frameOptions().disable()
+>>>>>>> develop
                 .and()
                 // we don't need CSRF because our token is invulnerable
                 .csrf().disable()
                 .exceptionHandling().authenticationEntryPoint(unauthorizedHandler).accessDeniedHandler(accessDeniedHandler)
                 .and()
                 // don't create session
+<<<<<<< HEAD
                 .sessionManagement().sessionCreationPolicy(SessionCreationPolicy.STATELESS)
                 .and()
                 // Custom JWT based security filter
@@ -76,6 +81,23 @@ public class WebSecurityConfig extends WebSecurityConfigurerAdapter {
         return firewall;
     }
 
+=======
+                .sessionManagement().sessionCreationPolicy(SessionCreationPolicy.STATELESS); //.and()
+
+        // Custom JWT based security filter
+        httpSecurity
+                .addFilterBefore(authenticationTokenFilterBean(), UsernamePasswordAuthenticationFilter.class);
+    }
+
+    //npn have slashes, allowing GET requests with slashes through https://stackoverflow.com/a/41593282
+    @Bean
+    public HttpFirewall allowUrlEncodedSlashHttpFirewall() {
+        DefaultHttpFirewall firewall = new DefaultHttpFirewall();
+        firewall.setAllowUrlEncodedSlash(true);
+        return firewall;
+    }
+
+>>>>>>> develop
     @Override
     public void configure(WebSecurity web) throws Exception {
         web.httpFirewall(allowUrlEncodedSlashHttpFirewall());

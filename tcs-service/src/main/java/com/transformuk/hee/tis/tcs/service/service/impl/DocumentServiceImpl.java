@@ -136,7 +136,11 @@ public class DocumentServiceImpl implements DocumentService {
 
     @Override
     public Optional<DocumentDTO> delete(final Long personId, final Long documentId) {
+<<<<<<< HEAD
         final Optional<Document> documentOptional = documentRepository.findOneByPersonIdAndIdAndStatus(personId, documentId, Status.CURRENT);
+=======
+        final Optional<Document> documentOptional = documentRepository.findOneBypersonIdAndIdAndStatus(personId, documentId, Status.CURRENT);
+>>>>>>> develop
 
         if (!documentOptional.isPresent()) {
             LOG.warn("Document with id '{}' and person id '{}' does not exist", documentId, personId);
