@@ -505,6 +505,41 @@ public class PostResourceIntTest {
 
   @Test
   @Transactional
+  public void shouldSearchByNationalPostNumber() throws Exception {
+
+    post.setNationalPostNumber(TEST_POST_NUMBER);
+    postRepository.saveAndFlush(post);
+
+    restPostMockMvc.perform(get("/api/findByNationalPostNumber?searchQuery=TESTPOST"))
+            .andExpect(status().isOk())
+            .andExpect(content().contentType(MediaType.APPLICATION_JSON_UTF8_VALUE))
+            .andExpect(jsonPath("$.[*].id").value(hasItem(post.getId().intValue())))
+            .andExpect(jsonPath("$.[*].nationalPostNumber").value(hasItem(TEST_POST_NUMBER)))
+            .andExpect(jsonPath("$.[*].status").value(hasItem(DEFAULT_STATUS.toString().toUpperCase())));
+
+  }
+
+  @Test
+  @Transactional
+  public void shouldSearchByNationalPostNumberAndStatus() throws Exception {
+
+    post.setNationalPostNumber(TEST_POST_NUMBER);
+    post.setStatus(Status.CURRENT);
+    postRepository.saveAndFlush(post);
+
+    String colFilters = new URLCodec().encode("{\"status\":[\"CURRENT\"]}");
+
+    restPostMockMvc.perform(get("/api/findByNationalPostNumber?searchQuery=TESTPOST&columnFilters=" + colFilters))
+            .andExpect(status().isOk())
+            .andExpect(content().contentType(MediaType.APPLICATION_JSON_UTF8_VALUE))
+            .andExpect(jsonPath("$.[*].id").value(hasItem(post.getId().intValue())))
+            .andExpect(jsonPath("$.[*].nationalPostNumber").value(hasItem(TEST_POST_NUMBER)))
+            .andExpect(jsonPath("$.[*].status").value(hasItem(Status.CURRENT.name())));
+
+  }
+
+  @Test
+  @Transactional
   public void shouldFilterColumns() throws Exception {
     //given
     // Initialize the database

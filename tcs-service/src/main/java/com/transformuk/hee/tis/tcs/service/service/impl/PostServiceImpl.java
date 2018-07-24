@@ -538,10 +538,10 @@ public class PostServiceImpl implements PostService {
 
   @Override
   @Transactional(readOnly = true)
-  public Page<PostViewDTO> findByNationalPostNumber(String searchString, Pageable pageable) {
+  public Page<PostViewDTO> findByNationalPostNumber(String searchString, List<ColumnFilter> columnFilters, Pageable pageable) {
 
     MapSqlParameterSource paramSource = new MapSqlParameterSource();
-    String whereClause = createWhereClauseForSearch(searchString);
+    String whereClause = createWhereClauseByNationalPostNumberAndFilter(searchString,columnFilters);
     final int size = pageable.getPageSize() + 1;
     final int offset = pageable.getOffset();
 
@@ -561,6 +561,9 @@ public class PostServiceImpl implements PostService {
 
     //limit is 0 based
     query = query.replaceAll("LIMITCLAUSE", "limit " + size + " offset " + offset);
+
+    applyFilterByParams(columnFilters, paramSource);
+
     List<PostViewDTO> posts = namedParameterJdbcTemplate.query(query,paramSource, new PostServiceImpl.PostViewSearchMapper());
     if (CollectionUtils.isEmpty(posts)) {
       return new PageImpl<>(posts);
@@ -778,7 +781,7 @@ public class PostServiceImpl implements PostService {
     return orderByClause.toString();
   }
 
-  private String createWhereClauseForSearch(String searchString) {
+  private String createWhereClauseByNationalPostNumberAndFilter(String searchString, final List<ColumnFilter> columnFilters) {
     StringBuilder whereClause = new StringBuilder();
     whereClause.append(" WHERE 1=1 ");
 
@@ -788,6 +791,21 @@ public class PostServiceImpl implements PostService {
 
     if (StringUtils.isNotEmpty(searchString)) {
       whereClause.append(" AND ( nationalPostNumber like :searchString )");
+    }
+
+    //add the column filters criteria
+    if (columnFilters != null && !columnFilters.isEmpty()) {
+      columnFilters.forEach(cf -> {
+
+        switch (cf.getName()) {
+          case "status":
+            whereClause.append(" AND p.status in (:statusList)");
+            break;
+          default:
+            throw new IllegalArgumentException("Not accounted for column filter [" + cf.getName() +
+                    "] you need to add an additional case statement or remove it from the request");
+        }
+      });
     }
     return whereClause.toString();
   }

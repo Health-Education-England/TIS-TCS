@@ -197,10 +197,14 @@ public class PostResource {
   public ResponseEntity<List<PostViewDTO>> findByNationalPostNumber(
       @ApiParam Pageable pageable,
       @ApiParam(value = "any wildcard string to be searched")
-      @RequestParam(value = "searchQuery") String searchQuery) throws IOException {
+      @RequestParam(value = "searchQuery") String searchQuery,
+      @ApiParam(value = "json object by column name and value. (Eg: columnFilters={ \"status\": [\"CURRENT\"] }\"")
+      @RequestParam(value = "columnFilters", required = false) String columnFilterJson) throws IOException {
     log.debug("REST request to get a page of Posts");
     searchQuery = sanitize(searchQuery);
-    Page<PostViewDTO> page = postService.findByNationalPostNumber(searchQuery, pageable);
+    List<Class> filterEnumList = Lists.newArrayList(Status.class);
+    List<ColumnFilter> columnFilters = ColumnFilterUtil.getColumnFilters(columnFilterJson, filterEnumList);
+    Page<PostViewDTO> page = postService.findByNationalPostNumber(searchQuery,columnFilters, pageable);
 
     HttpHeaders headers = PaginationUtil.generatePaginationHttpHeaders(page, "/api/posts");
     return new ResponseEntity<>(page.getContent(), headers, HttpStatus.OK);
