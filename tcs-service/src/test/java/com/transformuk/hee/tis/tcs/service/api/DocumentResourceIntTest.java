@@ -68,9 +68,9 @@ public class DocumentResourceIntTest {
                     " VALUES " +
                     " (%d, '98798797987', '2012-06-20 00:00:00', '2012-06-20 00:00:00.000', 'AAAAA', 'CURRENT', 'XXXX', NULL, NULL, NULL, 'HEELIVE');";
     private static final String SQL_INSERT_DOCUMENT =
-            "INSERT INTO `Document` (`id`, `addedDate`, `amendedDate`, `inactiveDate`, `uploadedBy`, `title`, `fileName`, `fileExtension`, `contentType`, `size`, `personId`, `status`, `version`, `intrepidDocumentUId`, `intrepidParentRecordId`, `intrepidFolderPath`) " +
+            "INSERT INTO `Document` (`id`, `addedDate`, `amendedDate`, `inactiveDate`, `uploadedBy`, `title`, `fileName`, `fileExtension`, `contentType`, `size`, `personId`, `status`, `version`) " +
                     " VALUES " +
-                    " (%d, '2018-02-16 14:32:06', '2018-02-19 11:07:11.882', NULL, 'James Hudson', 'Test Update', 'LargeTestFile.txt', 'txt', 'text/plain', 512000, %d, 'CURRENT', 1, NULL, NULL, NULL);";
+                    " (%d, '2018-02-16 14:32:06', '2018-02-19 11:07:11.882', NULL, 'James Hudson', 'Test Update', 'LargeTestFile.txt', 'txt', 'text/plain', 512000, %d, 'CURRENT', 1);";
     private static final String SQL_INSERT_TAG =
             "INSERT INTO `Tag` (`id`, `name`) " +
                     " VALUES " +
@@ -140,19 +140,6 @@ public class DocumentResourceIntTest {
 
 
         deleteTestFile(documentId.getId());
-    }
-
-    @Test
-    public void bulkUpdateDocuments_shouldReturnHTTP404_WhenDocumentDoesNotExist() throws Exception {
-        final DocumentDTO document = new DocumentDTO();
-        document.setId(9999999999L);
-        document.setTitle("Non-existing document");
-        document.setPersonId(PERSON_BASE_ID);
-
-        mockMvc.perform(patch(DocumentResource.PATH_API + DocumentResource.PATH_DOCUMENTS)
-                .contentType(MediaType.APPLICATION_JSON)
-                .content(TestUtil.convertObjectToJsonBytes(Collections.singletonList(document))))
-                .andExpect(status().isNotFound());
     }
 
     @Test
@@ -527,6 +514,69 @@ public class DocumentResourceIntTest {
     }
 
     @Test
+    public void getAllDocuments_shouldReturnHTTP200_WhenFilteringWithOneTag() throws Exception {
+        final String tags = "tag 1";
+
+        final MvcResult response = mockMvc.perform(get(DocumentResource.PATH_API +
+                DocumentResource.PATH_DOCUMENTS +
+                "/person/" +
+                (PERSON_BASE_ID + 4) +
+                "?tags=" + tags
+        ))
+                .andExpect(content().contentType(MediaType.APPLICATION_JSON_UTF8))
+                .andExpect(status().isOk()).andReturn();
+
+        final List<DocumentDTO> documents = assertPaginationDocumentsExist(response.getResponse().getContentAsString(), 1);
+
+        assertThat(documents).hasSize(1);
+
+        final DocumentDTO document = documents.get(0);
+
+        assertThat(document.getTitle()).isEqualTo("Document With Tags 1");
+        assertThat(document.getFileName()).isEqualTo("DocumentWithTags1.jpg");
+        assertThat(document.getFileExtension()).isEqualTo("jpg");
+        assertThat(document.getContentType()).isEqualTo("image/jpeg");
+        assertThat(document.getSize()).isEqualTo(8768);
+        assertThat(document.getPersonId()).isEqualTo(PERSON_BASE_ID + 4);
+    }
+
+    @Test
+    public void getAllDocuments_shouldReturnHTTP200_WhenFilteringWithTwoTags() throws Exception {
+        final String tags = "tag 1,tag 2";
+
+        final MvcResult response = mockMvc.perform(get(DocumentResource.PATH_API +
+                DocumentResource.PATH_DOCUMENTS +
+                "/person/" +
+                (PERSON_BASE_ID + 4) +
+                "?tags=" + tags
+        ))
+                .andExpect(content().contentType(MediaType.APPLICATION_JSON_UTF8))
+                .andExpect(status().isOk()).andReturn();
+
+        final List<DocumentDTO> documents = assertPaginationDocumentsExist(response.getResponse().getContentAsString(), 2);
+
+        assertThat(documents).hasSize(2);
+
+        DocumentDTO document = documents.get(0);
+
+        assertThat(document.getTitle()).isEqualTo("Document With Tags 1");
+        assertThat(document.getFileName()).isEqualTo("DocumentWithTags1.jpg");
+        assertThat(document.getFileExtension()).isEqualTo("jpg");
+        assertThat(document.getContentType()).isEqualTo("image/jpeg");
+        assertThat(document.getSize()).isEqualTo(8768);
+        assertThat(document.getPersonId()).isEqualTo(PERSON_BASE_ID + 4);
+
+        document = documents.get(1);
+
+        assertThat(document.getTitle()).isEqualTo("Document With Tags 2");
+        assertThat(document.getFileName()).isEqualTo("DocumentWithTags2.jpg");
+        assertThat(document.getFileExtension()).isEqualTo("jpg");
+        assertThat(document.getContentType()).isEqualTo("image/jpeg");
+        assertThat(document.getSize()).isEqualTo(8769);
+        assertThat(document.getPersonId()).isEqualTo(PERSON_BASE_ID + 4);
+    }
+
+    @Test
     public void getAllDocuments_shouldReturnHTTP200_WhenRequestedFistPage() throws Exception {
         final MvcResult response = mockMvc.perform(get(DocumentResource.PATH_API +
                 DocumentResource.PATH_DOCUMENTS +
@@ -826,7 +876,7 @@ public class DocumentResourceIntTest {
         ScriptUtils.executeSqlScript(connection, new ByteArrayResource(getSql(SQL_INSERT_TAG, tagId++, "xabcxyz").getBytes()));
         ScriptUtils.executeSqlScript(connection, new ByteArrayResource(getSql(SQL_INSERT_TAG, tagId++, "ghijkl").getBytes()));
 
-        insertBaseDocuments(connection);
+        insertBaseData(connection);
     }
 
     private ObjectMapper createObjectMapper(final JsonDeserializer deserializer, final JsonSerializer serializer) {
@@ -839,22 +889,41 @@ public class DocumentResourceIntTest {
         return objectMapper;
     }
 
-    private void insertBaseDocuments(final Connection connection) {
-        final String query = "INSERT INTO `Document` (`id`, `addedDate`, `amendedDate`, `inactiveDate`, `uploadedBy`, `title`, `fileName`, `fileExtension`, `contentType`, `size`, `personId`, `status`, `version`, `intrepidDocumentUId`, `intrepidParentRecordId`, `intrepidFolderPath`)\n" +
+    private void insertBaseData(final Connection connection) {
+        String query = "INSERT INTO `Document` (`id`, `addedDate`, `amendedDate`, `inactiveDate`, `uploadedBy`, `title`, `fileName`, `fileExtension`, `contentType`, `size`, `personId`, `status`, `version`)\n" +
                 "VALUES" +
-                "(" + (DOCUMENT_BASE_ID + 1001) + ", '2018-03-27 14:14:20', '2018-03-27 14:14:20.367', NULL, 'User 1', 'Document AAAAA', 'document1.jpg', 'jpg', 'image/jpeg', 56353, " + PERSON_BASE_ID + ", 'CURRENT', NULL, NULL, NULL, NULL)," +
-                "(" + (DOCUMENT_BASE_ID + 1002) + ", '2018-03-27 15:10:59', '2018-03-27 15:14:36.624', NULL, 'User 1', 'Document BBBBB', 'document2.png', 'png', 'image/png', 12123, " + PERSON_BASE_ID + ", 'CURRENT', NULL, NULL, NULL, NULL)," +
-                "(" + (DOCUMENT_BASE_ID + 1003) + ", '2018-03-27 15:10:59', '2018-03-27 15:14:36.624', NULL, 'User 1', 'Document CCCCC', 'document3.jpg', 'jpg', 'image/jpeg', 12982, " + PERSON_BASE_ID + ", 'CURRENT', NULL, NULL, NULL, NULL)," +
-                "(" + (DOCUMENT_BASE_ID + 1004) + ", '2018-03-27 15:10:59', '2018-03-27 15:14:36.624', NULL, 'User 2', 'Document DDDDD', 'document4.jpg', 'jpg', 'image/jpeg', 23423, " + (PERSON_BASE_ID + 1) + ", 'CURRENT', NULL, NULL, NULL, NULL)," +
-                "(" + (DOCUMENT_BASE_ID + 1005) + ", '2018-03-27 15:10:59', '2018-03-27 15:14:36.624', NULL, 'User 3', 'Document XXXXX', 'documentX.jpg', 'jpg', 'image/jpeg', 98123, " + (PERSON_BASE_ID + 2) + ", 'CURRENT', NULL, NULL, NULL, NULL)," +
-                "(" + (DOCUMENT_BASE_ID + 1006) + ", '2018-03-27 15:10:59', '2018-03-27 15:14:36.624', NULL, 'User 3', 'Document XXXXX', 'documentX.jpg', 'jpg', 'image/jpeg', 98123, " + (PERSON_BASE_ID + 2) + ", 'CURRENT', NULL, NULL, NULL, NULL)," +
-                "(" + (DOCUMENT_BASE_ID + 1007) + ", '2018-03-27 15:10:59', '2018-03-27 15:14:36.624', NULL, 'User 3', 'Document XXXXX', 'documentX.jpg', 'jpg', 'image/jpeg', 98123, " + (PERSON_BASE_ID + 2) + ", 'CURRENT', NULL, NULL, NULL, NULL)," +
-                "(" + (DOCUMENT_BASE_ID + 1008) + ", '2018-03-27 15:10:59', '2018-03-27 15:14:36.624', NULL, 'User 3', 'Document XXXXX', 'documentX.jpg', 'jpg', 'image/jpeg', 98123, " + (PERSON_BASE_ID + 2) + ", 'CURRENT', NULL, NULL, NULL, NULL)," +
-                "(" + (DOCUMENT_BASE_ID + 1009) + ", '2018-03-27 15:10:59', '2018-03-27 15:14:36.624', NULL, 'User 3', 'Document XXXXX', 'documentX.jpg', 'jpg', 'image/jpeg', 98123, " + (PERSON_BASE_ID + 2) + ", 'CURRENT', NULL, NULL, NULL, NULL)," +
-                "(" + (DOCUMENT_BASE_ID + 1010) + ", '2018-03-27 15:10:59', '2018-03-27 15:14:36.624', NULL, 'User 3', 'Document XXXXX', 'documentX.jpg', 'jpg', 'image/jpeg', 98123, " + (PERSON_BASE_ID + 2) + ", 'CURRENT', NULL, NULL, NULL, NULL)," +
-                "(" + (DOCUMENT_BASE_ID + 1011) + ", '2018-03-27 15:10:59', '2018-03-27 15:14:36.624', NULL, 'User 4', 'Document To Delete 1', 'documentToDelete1.jpg', 'jpg', 'image/jpeg', 23423, " + (PERSON_BASE_ID + 3) + ", 'CURRENT', NULL, NULL, NULL, NULL)," +
-                "(" + (DOCUMENT_BASE_ID + 1012) + ", '2018-03-27 15:10:59', '2018-03-27 15:14:36.624', NULL, 'User 4', 'Document To Delete 2', 'documentToDelete2.jpg', 'jpg', 'image/jpeg', 45654, " + (PERSON_BASE_ID + 3) + ", 'CURRENT', NULL, NULL, NULL, NULL)," +
-                "(" + (DOCUMENT_BASE_ID + 1013) + ", '2018-03-27 15:10:59', '2018-03-27 15:14:36.624', NULL, 'User 4', 'Document To Delete 3', 'documentToDelete3.jpg', 'jpg', 'image/jpeg', 78976, " + (PERSON_BASE_ID + 3) + ", 'CURRENT', NULL, NULL, NULL, NULL);";
+                "(" + (DOCUMENT_BASE_ID + 1001) + ", '2018-03-27 14:14:20', '2018-03-27 14:14:20.367', NULL, 'User 1', 'Document AAAAA', 'document1.jpg', 'jpg', 'image/jpeg', 56353, " + PERSON_BASE_ID + ", 'CURRENT', NULL)," +
+                "(" + (DOCUMENT_BASE_ID + 1002) + ", '2018-03-27 15:10:59', '2018-03-27 15:14:36.624', NULL, 'User 1', 'Document BBBBB', 'document2.png', 'png', 'image/png', 12123, " + PERSON_BASE_ID + ", 'CURRENT', NULL)," +
+                "(" + (DOCUMENT_BASE_ID + 1003) + ", '2018-03-27 15:10:59', '2018-03-27 15:14:36.624', NULL, 'User 1', 'Document CCCCC', 'document3.jpg', 'jpg', 'image/jpeg', 12982, " + PERSON_BASE_ID + ", 'CURRENT', NULL)," +
+                "(" + (DOCUMENT_BASE_ID + 1004) + ", '2018-03-27 15:10:59', '2018-03-27 15:14:36.624', NULL, 'User 2', 'Document DDDDD', 'document4.jpg', 'jpg', 'image/jpeg', 23423, " + (PERSON_BASE_ID + 1) + ", 'CURRENT', NULL)," +
+                "(" + (DOCUMENT_BASE_ID + 1005) + ", '2018-03-27 15:10:59', '2018-03-27 15:14:36.624', NULL, 'User 3', 'Document XXXXX', 'documentX.jpg', 'jpg', 'image/jpeg', 98123, " + (PERSON_BASE_ID + 2) + ", 'CURRENT', NULL)," +
+                "(" + (DOCUMENT_BASE_ID + 1006) + ", '2018-03-27 15:10:59', '2018-03-27 15:14:36.624', NULL, 'User 3', 'Document XXXXX', 'documentX.jpg', 'jpg', 'image/jpeg', 98123, " + (PERSON_BASE_ID + 2) + ", 'CURRENT', NULL)," +
+                "(" + (DOCUMENT_BASE_ID + 1007) + ", '2018-03-27 15:10:59', '2018-03-27 15:14:36.624', NULL, 'User 3', 'Document XXXXX', 'documentX.jpg', 'jpg', 'image/jpeg', 98123, " + (PERSON_BASE_ID + 2) + ", 'CURRENT', NULL)," +
+                "(" + (DOCUMENT_BASE_ID + 1008) + ", '2018-03-27 15:10:59', '2018-03-27 15:14:36.624', NULL, 'User 3', 'Document XXXXX', 'documentX.jpg', 'jpg', 'image/jpeg', 98123, " + (PERSON_BASE_ID + 2) + ", 'CURRENT', NULL)," +
+                "(" + (DOCUMENT_BASE_ID + 1009) + ", '2018-03-27 15:10:59', '2018-03-27 15:14:36.624', NULL, 'User 3', 'Document XXXXX', 'documentX.jpg', 'jpg', 'image/jpeg', 98123, " + (PERSON_BASE_ID + 2) + ", 'CURRENT', NULL)," +
+                "(" + (DOCUMENT_BASE_ID + 1010) + ", '2018-03-27 15:10:59', '2018-03-27 15:14:36.624', NULL, 'User 3', 'Document XXXXX', 'documentX.jpg', 'jpg', 'image/jpeg', 98123, " + (PERSON_BASE_ID + 2) + ", 'CURRENT', NULL)," +
+                "(" + (DOCUMENT_BASE_ID + 1011) + ", '2018-03-27 15:10:59', '2018-03-27 15:14:36.624', NULL, 'User 4', 'Document To Delete 1', 'documentToDelete1.jpg', 'jpg', 'image/jpeg', 23423, " + (PERSON_BASE_ID + 3) + ", 'CURRENT', NULL)," +
+                "(" + (DOCUMENT_BASE_ID + 1012) + ", '2018-03-27 15:10:59', '2018-03-27 15:14:36.624', NULL, 'User 4', 'Document To Delete 2', 'documentToDelete2.jpg', 'jpg', 'image/jpeg', 45654, " + (PERSON_BASE_ID + 3) + ", 'CURRENT', NULL)," +
+                "(" + (DOCUMENT_BASE_ID + 1013) + ", '2018-03-27 15:10:59', '2018-03-27 15:14:36.624', NULL, 'User 4', 'Document To Delete 3', 'documentToDelete3.jpg', 'jpg', 'image/jpeg', 78976, " + (PERSON_BASE_ID + 3) + ", 'CURRENT', NULL)," +
+                "(" + (DOCUMENT_BASE_ID + 1014) + ", '2018-03-27 15:10:59', '2018-03-27 15:14:36.624', NULL, 'User 5', 'Document With Tags 1', 'DocumentWithTags1.jpg', 'jpg', 'image/jpeg', 8768, " + (PERSON_BASE_ID + 4) + ", 'CURRENT', NULL)," +
+                "(" + (DOCUMENT_BASE_ID + 1015) + ", '2018-03-27 15:10:59', '2018-03-27 15:14:36.624', NULL, 'User 5', 'Document With Tags 2', 'DocumentWithTags2.jpg', 'jpg', 'image/jpeg', 8769, " + (PERSON_BASE_ID + 4) + ", 'CURRENT', NULL)," +
+                "(" + (DOCUMENT_BASE_ID + 1016) + ", '2018-03-27 15:10:59', '2018-03-27 15:14:36.624', NULL, 'User 5', 'Document With Tags 3', 'DocumentWithTags3.jpg', 'jpg', 'image/jpeg', 8760, " + (PERSON_BASE_ID + 4) + ", 'CURRENT', NULL);";
+
+        ScriptUtils.executeSqlScript(connection, new ByteArrayResource(query.getBytes()));
+
+        query = "INSERT INTO `Tag` (`id`, `name`)\n" +
+                "VALUES\n" +
+                "\t(1, 'tag 1'),\n" +
+                "\t(2, 'tag 2'),\n" +
+                "\t(3, 'tag 3');\n";
+
+        ScriptUtils.executeSqlScript(connection, new ByteArrayResource(query.getBytes()));
+
+        query = "INSERT INTO `DocumentTag` (`documentId`, `tagId`)\n" +
+                "VALUES\n" +
+                "\t(" + (DOCUMENT_BASE_ID + 1014) + ", 1),\n" +
+                "\t(" + (DOCUMENT_BASE_ID + 1015) + ", 2),\n" +
+                "\t(" + (DOCUMENT_BASE_ID + 1016) + ", 3);\n";
 
         ScriptUtils.executeSqlScript(connection, new ByteArrayResource(query.getBytes()));
     }
