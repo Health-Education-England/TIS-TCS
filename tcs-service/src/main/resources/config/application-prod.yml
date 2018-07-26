@@ -99,7 +99,7 @@ jhipster:
             prefix: tcs
         prometheus:
             enabled: true
-            endpoint: /prometheusMetrics
+            endpoint: /management/prometheus
         logs: # Reports Dropwizard metrics in the logs
             enabled: false
             reportFrequency: 60 # in seconds
