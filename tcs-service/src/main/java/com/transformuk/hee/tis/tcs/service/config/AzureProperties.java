@@ -11,8 +11,6 @@ public class AzureProperties {
     private String accountKey;
     @Value("${azure.containerName}")
     private String containerName;
-    @Value("${azure.storage.personFolder}")
-    private String personFolder;
 
     public String getAccountName() {
         return accountName;
@@ -24,9 +22,5 @@ public class AzureProperties {
 
     public String getContainerName() {
         return containerName;
-    }
-
-    public String getPersonFolder() {
-        return personFolder;
     }
 }

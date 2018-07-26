@@ -138,8 +138,7 @@ public class DocumentResourceIntTest {
 
         final DocumentId documentId = jacksonMapper.readValue(uploadResponse.getResponse().getContentAsString(), DocumentId.class);
 
-
-        deleteTestFile(documentId.getId());
+        deleteTestFile(documentId.getId() + TEST_FILE_NAME.substring(TEST_FILE_NAME.indexOf(".")));
     }
 
     @Test
@@ -237,7 +236,7 @@ public class DocumentResourceIntTest {
                 .andExpect(content().bytes(TEST_FILE_CONTENT))
                 .andExpect(status().isOk());
 
-        deleteTestFile(documentId.getId());
+        deleteTestFile(documentId.getId() + TEST_FILE_NAME.substring(TEST_FILE_NAME.indexOf(".")));
     }
 
     @Test
@@ -328,7 +327,7 @@ public class DocumentResourceIntTest {
         assertThat(document.getPersonId()).isEqualTo(PERSON_BASE_ID);
         assertThat(document.getTags()).isEmpty();
 
-        deleteTestFile(documentId.getId());
+        deleteTestFile(documentId.getId() + TEST_FILE_NAME.substring(TEST_FILE_NAME.indexOf(".")));
     }
 
     @Test
@@ -855,8 +854,8 @@ public class DocumentResourceIntTest {
         return updatedDocument;
     }
 
-    private void deleteTestFile(final long documentId) throws URISyntaxException, InvalidKeyException, StorageException {
-        fileStorageRepository.deleteFile(documentId, azureProperties.getContainerName() + "/" + azureProperties.getPersonFolder(), TEST_FILE_NAME);
+    private void deleteTestFile(final String fileName) throws URISyntaxException, InvalidKeyException, StorageException {
+        fileStorageRepository.deleteFile(azureProperties.getContainerName(), fileName);
     }
 
     private void initDB() throws SQLException {
