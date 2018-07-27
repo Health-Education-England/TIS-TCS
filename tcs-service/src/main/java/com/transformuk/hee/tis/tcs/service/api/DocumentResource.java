@@ -25,9 +25,10 @@ import org.springframework.web.multipart.MultipartFile;
 import javax.servlet.http.HttpServletResponse;
 import javax.ws.rs.QueryParam;
 import java.io.IOException;
-import java.util.*;
-import java.util.stream.Collectors;
-import java.util.stream.Stream;
+import java.util.Collection;
+import java.util.Collections;
+import java.util.List;
+import java.util.Optional;
 
 import static com.transformuk.hee.tis.tcs.service.api.DocumentResource.PATH_API;
 import static javax.ws.rs.core.MediaType.*;
@@ -63,6 +64,7 @@ public class DocumentResource {
                                                              @PathVariable(value = "personId") final Long personId,
                                                              @RequestParam(value = "query", required = false) final String query,
                                                              @RequestParam(value = "columnFilters", required = false) final String columnFilterJson,
+                                                             @RequestParam(value = "tags", required = false) final List<String> tagNames,
                                                              final Pageable pageable) throws IOException {
         LOG.info("Received 'getAllDocuments' request for entity '{}', person id '{}' and query '{}'",
                 entity,
@@ -84,7 +86,7 @@ public class DocumentResource {
         final List<Class> filterEnumList = Collections.singletonList(Status.class);
         final List<ColumnFilter> columnFilters = ColumnFilterUtil.getColumnFilters(columnFilterJson, filterEnumList);
 
-        return ResponseEntity.ok(documentService.findAll(personId, query, columnFilters, pageable));
+        return ResponseEntity.ok(documentService.findAll(personId, query, columnFilters, tagNames, pageable));
     }
 
     @ApiOperation(value = "Retrieves a specific document", response = DocumentDTO.class, produces = APPLICATION_JSON)
@@ -151,7 +153,14 @@ public class DocumentResource {
             return;
         }
 
-        streamFile(documentOptional.get(), response, view);
+        try {
+            streamFile(documentOptional.get(), response, view);
+        } catch (final IOException ex) {
+            LOG.error("Failed to stream file with name '{}' on document with id '{}'",
+                    documentOptional.get().getFileName(),
+                    documentOptional.get().getId());
+            response.setStatus(HttpStatus.NOT_FOUND.value());
+        }
     }
 
     @ApiOperation(value = "Uploads documents and returns the created document id", response = DocumentId.class, consumes = MULTIPART_FORM_DATA, produces = APPLICATION_JSON)
@@ -209,20 +218,10 @@ public class DocumentResource {
         LOG.info("Received 'BulkUpdateDocuments' request with '{}' documents",
                 documents.size());
 
-        for (final DocumentDTO documentParam : documents) {
-            LOG.debug("Accessing service to load document with id '{}'",
-                    documentParam.getId());
+        LOG.debug("Accessing service to load '{}' documents",
+                documents.size());
 
-            final Optional<DocumentDTO> existingDocumentOptional = documentService.findOne(documentParam.getId());
-
-            if (!existingDocumentOptional.isPresent()) {
-                LOG.warn("Document with id '{}' not found",
-                        documentParam.getId());
-                return ResponseEntity.notFound().build();
-            }
-
-            updateDocumentMetadata(existingDocumentOptional.get(), documentParam);
-        }
+        documentService.save(documents);
 
         return ResponseEntity.ok().build();
     }
@@ -352,35 +351,6 @@ public class DocumentResource {
         }
 
         return Optional.of(document);
-    }
-
-    private void updateDocumentMetadata(final DocumentDTO existingDocument, final DocumentDTO documentParam) throws IOException {
-        LOG.debug("Merging tags changes on Document with id '{}'",
-                documentParam.getId());
-
-        // filters deleted tags
-        final Set<TagDTO> deletedTags = existingDocument.getTags().stream()
-                .filter(tag -> Optional.ofNullable(documentParam.getTags()).orElse(Collections.emptySet()).contains(new TagDTO(tag.getName())))
-                .collect(Collectors.toSet());
-
-        // combines added tags
-        final Stream<TagDTO> combinedTags = Stream.concat(
-                Optional.ofNullable(deletedTags).orElse(Collections.emptySet()).stream(),
-                Optional.ofNullable(documentParam.getTags()).orElse(Collections.emptySet()).stream()
-        );
-
-        existingDocument.setTitle(documentParam.getTitle());
-        existingDocument.setStatus(documentParam.getStatus());
-        existingDocument.setVersion(documentParam.getVersion());
-        existingDocument.setTags(combinedTags.collect(Collectors.toSet()));
-
-        LOG.debug("Accessing service to update document metadata on document with id '{}'",
-                documentParam.getId());
-
-        documentService.save(existingDocument);
-
-        LOG.debug("Document with id '{}' updated successfully",
-                documentParam.getId());
     }
 
     private void streamFile(final DocumentDTO document, final HttpServletResponse response, final boolean view) throws IOException {

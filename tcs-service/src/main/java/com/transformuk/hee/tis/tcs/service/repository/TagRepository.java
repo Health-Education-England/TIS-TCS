@@ -9,4 +9,6 @@ import java.util.Collection;
 @Repository
 public interface TagRepository extends JpaRepository<Tag, Long> {
     Collection<Tag> findByNameStartingWithOrderByName(final String query);
+
+    Tag findByName(final String name);
 }
