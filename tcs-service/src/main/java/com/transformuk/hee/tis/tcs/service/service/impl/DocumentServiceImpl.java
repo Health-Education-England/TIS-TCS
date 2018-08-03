@@ -170,7 +170,9 @@ public class DocumentServiceImpl implements DocumentService {
 
         final Document documentParam = documentMapper.toEntity(documentParamDTO);
 
-        final Set<Tag> databaseTags = documentParam.getTags().stream().map(tag -> Optional.ofNullable(tagRepository.findByName(tag.getName())).orElse(tag)).collect(Collectors.toSet());
+        final Set<Tag> databaseTags = Optional.ofNullable(documentParam.getTags())
+                .orElse(Collections.emptySet())
+                .stream().map(tag -> Optional.ofNullable(tagRepository.findByName(tag.getName())).orElse(tag)).collect(Collectors.toSet());
         documentParam.setTags(databaseTags);
 
         // filters deleted tags
