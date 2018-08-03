@@ -1,6 +1,8 @@
 package com.transformuk.hee.tis.tcs.service.api;
 
+import com.google.common.collect.Lists;
 import com.transformuk.hee.tis.tcs.api.dto.PostFundingDTO;
+import com.transformuk.hee.tis.tcs.api.enumeration.FundingType;
 import com.transformuk.hee.tis.tcs.service.Application;
 import com.transformuk.hee.tis.tcs.service.exception.ExceptionTranslator;
 import com.transformuk.hee.tis.tcs.service.model.PostFunding;
@@ -16,6 +18,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.data.web.PageableHandlerMethodArgumentResolver;
 import org.springframework.http.MediaType;
+import org.springframework.http.ResponseEntity;
 import org.springframework.http.converter.json.MappingJackson2HttpMessageConverter;
 import org.springframework.test.context.junit4.SpringRunner;
 import org.springframework.test.web.servlet.MockMvc;
@@ -23,6 +26,7 @@ import org.springframework.test.web.servlet.setup.MockMvcBuilders;
 import org.springframework.transaction.annotation.Transactional;
 
 import javax.persistence.EntityManager;
+import java.time.LocalDate;
 import java.util.List;
 
 import static org.assertj.core.api.Assertions.assertThat;
@@ -40,7 +44,7 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
  *
  * @see PostFundingResource
  */
-//TODO most tests are ignored here, to be addressed in future task
+
 @RunWith(SpringRunner.class)
 @SpringBootTest(classes = Application.class)
 public class PostFundingResourceIntTest {
@@ -69,6 +73,10 @@ public class PostFundingResourceIntTest {
   private MockMvc restPostFundingMockMvc;
 
   private PostFunding postFunding;
+  private PostFunding anotherPostFunding;
+
+  private static final FundingType FUNDING_TYPE = FundingType.TRUST;
+  private static final LocalDate END_DATE = LocalDate.of(2033,07,06);
 
   /**
    * Create an entity for this test.
@@ -79,6 +87,17 @@ public class PostFundingResourceIntTest {
   public static PostFunding createEntity(EntityManager em) {
     PostFunding postFunding = new PostFunding();
     return postFunding;
+  }
+
+  /**
+   * Create another entity for this test.
+   * <p>
+   * This is a static method, as tests for other entities might also need it,
+   * if they test an entity which requires another entity - e.g. for testing in bulk.
+   */
+  public static PostFunding createAnotherEntity(EntityManager em) {
+    PostFunding anotherPostFunding = new PostFunding();
+    return anotherPostFunding;
   }
 
   @Before
@@ -94,9 +113,9 @@ public class PostFundingResourceIntTest {
   @Before
   public void initTest() {
     postFunding = createEntity(em);
+    anotherPostFunding = createAnotherEntity(em);
   }
 
-  @Ignore
   @Test
   @Transactional
   public void createPostFunding() throws Exception {
@@ -113,6 +132,63 @@ public class PostFundingResourceIntTest {
     List<PostFunding> postFundingList = postFundingRepository.findAll();
     assertThat(postFundingList).hasSize(databaseSizeBeforeCreate + 1);
     PostFunding testPostFunding = postFundingList.get(postFundingList.size() - 1);
+  }
+
+  @Test
+  @Transactional
+  public void shouldCreateBulkPostFundings() throws Exception {
+    int databaseSizeBeforeCreate = postFundingRepository.findAll().size();
+
+    // Create two post funding DTOs and add to a list
+    PostFundingDTO postFundingDTO = postFundingMapper.postFundingToPostFundingDTO(postFunding);
+    PostFundingDTO anotherPostFundingDTO = postFundingMapper.postFundingToPostFundingDTO(anotherPostFunding);
+    List<PostFundingDTO> postFundingDTOS = Lists.newArrayList(postFundingDTO,anotherPostFundingDTO);
+    restPostFundingMockMvc.perform(post("/api/bulk-post-fundings")
+        .contentType(TestUtil.APPLICATION_JSON_UTF8)
+        .content(TestUtil.convertObjectToJsonBytes(postFundingDTOS)))
+        .andExpect(status().isOk());
+
+    // Validate the PostFundings are in the database
+    List<PostFunding> postFundings = postFundingRepository.findAll();
+    assertThat(postFundings).hasSize(databaseSizeBeforeCreate + 2);
+    PostFunding anotherPostFunding = postFundings.get(postFundings.size() - 1);
+  }
+
+  @Test
+  @Transactional
+  public void shouldUpdateBulkPostFundings() throws Exception {
+    // Add some post fundings
+    postFundingRepository.saveAndFlush(postFunding);
+    postFundingRepository.saveAndFlush(anotherPostFunding);
+    int databaseSizeBeforeCreate = postFundingRepository.findAll().size();
+
+    // Create two post funding DTOs and add to a list
+
+    // Update the postFunding
+    PostFunding updatedPostFunding = postFundingRepository.findOne(postFunding.getId());
+    PostFunding anotherUpdatedPostFunding = postFundingRepository.findOne(anotherPostFunding.getId());
+
+    updatedPostFunding.setEndDate(END_DATE);
+    anotherUpdatedPostFunding.setFundingType(FUNDING_TYPE.toString());
+
+    PostFundingDTO postFundingDTO = postFundingMapper.postFundingToPostFundingDTO(updatedPostFunding);
+    PostFundingDTO anotherPostFundingDTO = postFundingMapper.postFundingToPostFundingDTO(anotherUpdatedPostFunding);
+
+
+    List<PostFundingDTO> postFundingDTOS = Lists.newArrayList(postFundingDTO,anotherPostFundingDTO);
+    restPostFundingMockMvc.perform(put("/api/bulk-post-fundings")
+        .contentType(TestUtil.APPLICATION_JSON_UTF8)
+        .content(TestUtil.convertObjectToJsonBytes(postFundingDTOS)))
+        .andExpect(status().isOk());
+
+    // Validate the PostFundings have been updated
+    List<PostFunding> postFundings = postFundingRepository.findAll();
+    assertThat(postFundings).hasSize(databaseSizeBeforeCreate);
+
+    PostFunding postFunding = postFundingRepository.findOne(updatedPostFunding.getId());
+    PostFunding anotherPostFunding = postFundingRepository.findOne(anotherUpdatedPostFunding.getId());
+    assertThat(postFunding.getEndDate()).isEqualTo(END_DATE);
+    assertThat(anotherPostFunding.getFundingType()).isEqualTo(FUNDING_TYPE.toString());
   }
 
   @Test
@@ -135,7 +211,6 @@ public class PostFundingResourceIntTest {
     assertThat(postFundingList).hasSize(databaseSizeBeforeCreate);
   }
 
-  @Ignore
   @Test
   @Transactional
   public void getAllPostFundings() throws Exception {
@@ -149,7 +224,6 @@ public class PostFundingResourceIntTest {
         .andExpect(jsonPath("$.[*].id").value(hasItem(postFunding.getId().intValue())));
   }
 
-  @Ignore
   @Test
   @Transactional
   public void getPostFunding() throws Exception {
@@ -171,7 +245,6 @@ public class PostFundingResourceIntTest {
         .andExpect(status().isNotFound());
   }
 
-  @Ignore
   @Test
   @Transactional
   public void updatePostFunding() throws Exception {
@@ -194,7 +267,6 @@ public class PostFundingResourceIntTest {
     PostFunding testPostFunding = postFundingList.get(postFundingList.size() - 1);
   }
 
-  @Ignore
   @Test
   @Transactional
   public void updateNonExistingPostFunding() throws Exception {
@@ -214,7 +286,6 @@ public class PostFundingResourceIntTest {
     assertThat(postFundingList).hasSize(databaseSizeBeforeUpdate + 1);
   }
 
-  @Ignore
   @Test
   @Transactional
   public void deletePostFunding() throws Exception {

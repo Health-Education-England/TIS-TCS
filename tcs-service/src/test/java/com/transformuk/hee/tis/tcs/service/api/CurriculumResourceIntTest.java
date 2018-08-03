@@ -18,9 +18,11 @@ import com.transformuk.hee.tis.tcs.service.service.CurriculumService;
 import com.transformuk.hee.tis.tcs.service.service.mapper.CurriculumMapper;
 import com.transformuk.hee.tis.tcs.service.service.mapper.SpecialtyMapper;
 import org.apache.commons.codec.net.URLCodec;
+import org.apache.commons.collections4.Get;
 import org.assertj.core.util.Lists;
 import org.junit.Before;
 import org.junit.Test;
+import org.hamcrest.core.StringContains;
 import org.junit.runner.RunWith;
 import org.mockito.MockitoAnnotations;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -36,7 +38,10 @@ import org.springframework.transaction.annotation.Transactional;
 import java.util.List;
 
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.hamcrest.Matchers.contains;
+import static org.hamcrest.Matchers.containsInAnyOrder;
 import static org.hamcrest.Matchers.hasItem;
+import static org.hamcrest.Matchers.not;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.delete;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
@@ -56,7 +61,10 @@ public class CurriculumResourceIntTest {
 
   private static final String DEFAULT_NAME = "AAAAAAAAAA";
   private static final String DEFAULT_NAME_2 = "Another Curriculum Name";
+  private static final String INACTIVE_NAME = "Inactive Curriculum";
   private static final String UPDATED_NAME = "BBBBBBBBBB";
+  private static final Status CURRENT_STATUS = Status.CURRENT;
+  private static final Status INACTIVE_STATUS = Status.INACTIVE;
 
   private static final String DEFAULT_INTREPID_ID = "1234";
   private static final String DEFAULT_INTREPID_ID_2 = "1111";
@@ -836,4 +844,36 @@ public class CurriculumResourceIntTest {
     curriculumDTO.setSpecialty(specialtyDTO);
     return curriculumDTO;
   }
+
+  @Test
+  @Transactional
+  public void shouldGetAllCurrentCurricula() throws Exception {
+    // Given
+    Curriculum curriculum_current = new Curriculum()
+        .name(DEFAULT_NAME)
+        .length(DEFAULT_LENGTH)
+        .intrepidId(DEFAULT_INTREPID_ID)
+        .curriculumSubType(DEFAULT_CURRICULUM_SUB_TYPE)
+        .assessmentType(DEFAULT_ASSESSMENT_TYPE)
+        .doesThisCurriculumLeadToCct(DEFAULT_DOES_THIS_CURRICULUM_LEAD_TO_CCT)
+        .periodOfGrace(DEFAULT_PERIOD_OF_GRACE)
+        .status(CURRENT_STATUS);
+    Curriculum savedCurriculumCurrent = curriculumRepository.saveAndFlush(curriculum_current);
+    Curriculum curriculum_inactive = new Curriculum()
+        .name(INACTIVE_NAME)
+        .length(DEFAULT_LENGTH)
+        .intrepidId(DEFAULT_INTREPID_ID)
+        .curriculumSubType(DEFAULT_CURRICULUM_SUB_TYPE)
+        .assessmentType(DEFAULT_ASSESSMENT_TYPE)
+        .doesThisCurriculumLeadToCct(DEFAULT_DOES_THIS_CURRICULUM_LEAD_TO_CCT)
+        .periodOfGrace(DEFAULT_PERIOD_OF_GRACE)
+        .status(INACTIVE_STATUS);
+    Curriculum savedCurriculumInactive = curriculumRepository.saveAndFlush(curriculum_inactive);
+    // When
+    restCurriculumMockMvc.perform(get("/api/current/curricula"))
+        .andExpect(status().isOk())
+        .andExpect(jsonPath("$.[*].name").value(containsInAnyOrder(DEFAULT_NAME)))
+        .andExpect(jsonPath("$.[*].name").value(not(contains(INACTIVE_NAME))));
+  }
 }
+
