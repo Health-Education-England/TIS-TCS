@@ -10,7 +10,6 @@ import com.transformuk.hee.tis.tcs.service.repository.PostFundingRepository;
 import com.transformuk.hee.tis.tcs.service.service.PostFundingService;
 import com.transformuk.hee.tis.tcs.service.service.mapper.PostFundingMapper;
 import org.junit.Before;
-import org.junit.Ignore;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.mockito.MockitoAnnotations;
@@ -18,7 +17,6 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.data.web.PageableHandlerMethodArgumentResolver;
 import org.springframework.http.MediaType;
-import org.springframework.http.ResponseEntity;
 import org.springframework.http.converter.json.MappingJackson2HttpMessageConverter;
 import org.springframework.test.context.junit4.SpringRunner;
 import org.springframework.test.web.servlet.MockMvc;
@@ -140,6 +138,10 @@ public class PostFundingResourceIntTest {
     int databaseSizeBeforeCreate = postFundingRepository.findAll().size();
 
     // Create two post funding DTOs and add to a list
+    postFunding.setFundingType(FUNDING_TYPE.toString());
+    anotherPostFunding.setFundingType(FUNDING_TYPE.toString());
+    postFunding.setEndDate(END_DATE);
+    anotherPostFunding.setEndDate(END_DATE);
     PostFundingDTO postFundingDTO = postFundingMapper.postFundingToPostFundingDTO(postFunding);
     PostFundingDTO anotherPostFundingDTO = postFundingMapper.postFundingToPostFundingDTO(anotherPostFunding);
     List<PostFundingDTO> postFundingDTOS = Lists.newArrayList(postFundingDTO,anotherPostFundingDTO);
@@ -152,6 +154,8 @@ public class PostFundingResourceIntTest {
     List<PostFunding> postFundings = postFundingRepository.findAll();
     assertThat(postFundings).hasSize(databaseSizeBeforeCreate + 2);
     PostFunding anotherPostFunding = postFundings.get(postFundings.size() - 1);
+    assertThat(anotherPostFunding.getFundingType()).isEqualTo(FUNDING_TYPE.toString());
+    assertThat(anotherPostFunding.getEndDate()).isEqualTo(END_DATE);
   }
 
   @Test
