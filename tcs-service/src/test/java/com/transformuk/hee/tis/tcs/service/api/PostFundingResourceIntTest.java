@@ -162,15 +162,11 @@ public class PostFundingResourceIntTest {
   @Transactional
   public void shouldUpdateBulkPostFundings() throws Exception {
     // Add some post fundings
-    postFundingRepository.saveAndFlush(postFunding);
-    postFundingRepository.saveAndFlush(anotherPostFunding);
+    PostFunding updatedPostFunding = postFundingRepository.saveAndFlush(postFunding);
+    PostFunding anotherUpdatedPostFunding = postFundingRepository.saveAndFlush(anotherPostFunding);
     int databaseSizeBeforeCreate = postFundingRepository.findAll().size();
 
-    // Create two post funding DTOs and add to a list
-
-    // Update the postFunding
-    PostFunding updatedPostFunding = postFundingRepository.findOne(postFunding.getId());
-    PostFunding anotherUpdatedPostFunding = postFundingRepository.findOne(anotherPostFunding.getId());
+    // Update the post funding details
 
     updatedPostFunding.setEndDate(END_DATE);
     anotherUpdatedPostFunding.setFundingType(FUNDING_TYPE.toString());
