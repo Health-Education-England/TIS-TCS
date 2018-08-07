@@ -71,6 +71,7 @@ public class ProgrammeMembershipMapper {
   private ProgrammeMembershipDTO programmeMembershipToProgrammeMembershipDTO(ProgrammeMembership programmeMembership) {
     ProgrammeMembershipDTO result = new ProgrammeMembershipDTO();
 
+    result.setId(programmeMembership.getId());
     result.setProgrammeMembershipType(programmeMembership.getProgrammeMembershipType());
     result.setProgrammeStartDate(programmeMembership.getProgrammeStartDate());
     result.setProgrammeEndDate(programmeMembership.getProgrammeEndDate());
@@ -122,6 +123,7 @@ public class ProgrammeMembershipMapper {
   private ProgrammeMembership programmeMembershipDTOToProgrammeMembership(ProgrammeMembershipDTO programmeMembershipDTO) {
     ProgrammeMembership result = new ProgrammeMembership();
 
+    result.setId(programmeMembershipDTO.getId());
     result.setProgrammeMembershipType(programmeMembershipDTO.getProgrammeMembershipType());
     result.setRotation(rotationDTOToRotation(programmeMembershipDTO.getRotation()));
     result.setProgrammeStartDate(programmeMembershipDTO.getProgrammeStartDate());

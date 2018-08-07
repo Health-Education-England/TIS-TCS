@@ -26,8 +26,10 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 @SpringBootTest(webEnvironment = SpringBootTest.WebEnvironment.RANDOM_PORT, classes = Application.class)
 public class ProgrammeMembershipResourceTest {
 
-  public static final String PROGRAMME_NAME = "Programme name";
-  public static final String PROGRAMME_NUMBER = "999";
+  private static final String PROGRAMME_NAME = "Programme name";
+  private static final String PROGRAMME_NUMBER = "999";
+  private static final Long PROGRAMME_MEMBERSHIP_ID = 999L;
+
   @MockBean
   private ProgrammeMembershipService programmeMembershipServiceMock;
   @MockBean
@@ -49,19 +51,17 @@ public class ProgrammeMembershipResourceTest {
     programmeMembershipCurriculaDTO.setProgrammeNumber(PROGRAMME_NUMBER);
     programmeMembershipCurriculaDTO.setProgrammeName(PROGRAMME_NAME);
     programmeMembershipCurriculaDTO.setProgrammeId(1L);
+    programmeMembershipCurriculaDTO.setId(PROGRAMME_MEMBERSHIP_ID);
 
     when(programmeMembershipServiceMock.findProgrammeMembershipsForTrainee(1L)).thenReturn(Lists.newArrayList(programmeMembershipCurriculaDTO));
 
-    try {
-      mockMvc.perform(get("/api/trainee/{traineeId}/programme-memberships", "1")
-          .contentType(MediaType.APPLICATION_JSON))
-          .andExpect(jsonPath("$.*.programmeId").value(hasItem(1)))
-          .andExpect(jsonPath("$.*.programmeName").value(hasItem(PROGRAMME_NAME)))
-          .andExpect(jsonPath("$.*.programmeNumber").value(hasItem(PROGRAMME_NUMBER)))
-          .andExpect(status().isOk());
-    } catch (Exception e) {
-      verify(programmeMembershipServiceMock).findProgrammeMembershipsForTrainee(1L);
-      throw e;
-    }
+    mockMvc.perform(get("/api/trainee/{traineeId}/programme-memberships", "1")
+        .contentType(MediaType.APPLICATION_JSON))
+        .andExpect(jsonPath("$.*.programmeId").value(hasItem(1)))
+        .andExpect(jsonPath("$.*.programmeName").value(hasItem(PROGRAMME_NAME)))
+        .andExpect(jsonPath("$.*.programmeNumber").value(hasItem(PROGRAMME_NUMBER)))
+        .andExpect(jsonPath("$.*.id").value(hasItem(PROGRAMME_MEMBERSHIP_ID.intValue())))
+        .andExpect(status().isOk());
+    verify(programmeMembershipServiceMock).findProgrammeMembershipsForTrainee(1L);
   }
 }
