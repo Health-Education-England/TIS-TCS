@@ -41,22 +41,6 @@ public class Document implements Serializable {
     )
     private Set<Tag> tags;
 
-    /**
-     * @deprecated TODO: To be removed after importing documents from Hicom
-     */
-    @Deprecated
-    private String intrepidDocumentUId;
-    /**
-     * @deprecated TODO: To be removed after importing documents from Hicom
-     */
-    @Deprecated
-    private String intrepidParentRecordId;
-    /**
-     * @deprecated TODO: To be removed after importing documents from Hicom
-     */
-    @Deprecated
-    private String intrepidFolderPath;
-
     public void addTag(final Tag tag) {
         tags.add(tag);
         tag.getDocuments().add(this);
@@ -77,7 +61,6 @@ public class Document implements Serializable {
 
     @Override
     public int hashCode() {
-
         return Objects.hash(id);
     }
 
@@ -98,9 +81,6 @@ public class Document implements Serializable {
                 ", status=" + status +
                 ", version=" + version +
                 ", tags=" + tags +
-                ", intrepidDocumentUId='" + intrepidDocumentUId + '\'' +
-                ", intrepidParentRecordId='" + intrepidParentRecordId + '\'' +
-                ", intrepidFolderPath='" + intrepidFolderPath + '\'' +
                 '}';
     }
 
@@ -222,29 +202,5 @@ public class Document implements Serializable {
 
     public void setTags(final Set<Tag> tags) {
         this.tags = tags;
-    }
-
-    public String getIntrepidDocumentUId() {
-        return intrepidDocumentUId;
-    }
-
-    public void setIntrepidDocumentUId(final String intrepidDocumentUId) {
-        this.intrepidDocumentUId = intrepidDocumentUId;
-    }
-
-    public String getIntrepidParentRecordId() {
-        return intrepidParentRecordId;
-    }
-
-    public void setIntrepidParentRecordId(final String intrepidParentRecordId) {
-        this.intrepidParentRecordId = intrepidParentRecordId;
-    }
-
-    public String getIntrepidFolderPath() {
-        return intrepidFolderPath;
-    }
-
-    public void setIntrepidFolderPath(final String intrepidFolderPath) {
-        this.intrepidFolderPath = intrepidFolderPath;
     }
 }

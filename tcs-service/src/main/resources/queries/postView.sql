@@ -36,8 +36,8 @@ GROUP_CONCAT(surnames SEPARATOR ', ') surnames, GROUP_CONCAT(forenames SEPARATOR
     LEFT JOIN `Programme` prg on prg.`id` = pp.`programmeId`
  TRUST_JOIN
  WHERECLAUSE
- ORDERBYCLAUSE
 ) as ot
 group by id,approvedGradeId,primarySpecialtyId,primarySpecialtyCode,primarySpecialtyName,primarySiteId,fundingType,nationalPostNumber,status,owner,intrepidId
+ ORDERBYCLAUSE
  LIMITCLAUSE
 ;

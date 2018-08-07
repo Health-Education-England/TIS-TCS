@@ -8,9 +8,13 @@ import com.transformuk.hee.tis.tcs.api.enumeration.Status;
 import com.transformuk.hee.tis.tcs.service.config.AzureProperties;
 import com.transformuk.hee.tis.tcs.service.model.ColumnFilter;
 import com.transformuk.hee.tis.tcs.service.model.Document;
+import com.transformuk.hee.tis.tcs.service.model.Tag;
 import com.transformuk.hee.tis.tcs.service.repository.DocumentRepository;
+import com.transformuk.hee.tis.tcs.service.repository.TagRepository;
 import com.transformuk.hee.tis.tcs.service.service.DocumentService;
 import com.transformuk.hee.tis.tcs.service.service.mapper.DocumentMapper;
+import com.transformuk.hee.tis.tcs.service.service.mapper.TagMapper;
+import org.apache.commons.collections4.ListUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -26,11 +30,12 @@ import java.io.*;
 import java.net.URISyntaxException;
 import java.security.InvalidKeyException;
 import java.time.LocalDateTime;
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Optional;
+import java.util.*;
+import java.util.stream.Collectors;
+import java.util.stream.Stream;
 
 import static com.transformuk.hee.tis.tcs.service.service.impl.SpecificationFactory.in;
+import static com.transformuk.hee.tis.tcs.service.service.impl.SpecificationFactory.isEqual;
 
 @Service
 @Transactional
@@ -38,14 +43,18 @@ public class DocumentServiceImpl implements DocumentService {
     private static final Logger LOG = LoggerFactory.getLogger(DocumentServiceImpl.class);
 
     private final DocumentRepository documentRepository;
+    private final TagRepository tagRepository;
     private final FileStorageRepository fileStorageRepository;
     private final DocumentMapper documentMapper;
+    private final TagMapper tagMapper;
     private final AzureProperties azureProperties;
 
-    public DocumentServiceImpl(final DocumentRepository documentRepository, final FileStorageRepository fileStorageRepository, final DocumentMapper documentMapper, final AzureProperties azureProperties) {
+    public DocumentServiceImpl(final DocumentRepository documentRepository, final TagRepository tagRepository, final FileStorageRepository fileStorageRepository, final DocumentMapper documentMapper, final TagMapper tagMapper, final AzureProperties azureProperties) {
         this.documentRepository = documentRepository;
+        this.tagRepository = tagRepository;
         this.fileStorageRepository = fileStorageRepository;
         this.documentMapper = documentMapper;
+        this.tagMapper = tagMapper;
         this.azureProperties = azureProperties;
     }
 
@@ -61,7 +70,7 @@ public class DocumentServiceImpl implements DocumentService {
     }
 
     @Override
-    public Page<DocumentDTO> findAll(final Long personId, final String query, final List<ColumnFilter> columnFilters, final Pageable pageable) {
+    public Page<DocumentDTO> findAll(final Long personId, final String query, final List<ColumnFilter> columnFilters, final List<String> tagNames, final Pageable pageable) {
         LOG.debug("Received request to load all '{}' with person id '{}' and query '{}'",
                 DocumentDTO.class.getSimpleName(),
                 personId,
@@ -71,6 +80,8 @@ public class DocumentServiceImpl implements DocumentService {
         Specifications<Document> fullSpec = Specifications.where(personSpec);
 
         fullSpec = addStatusFilterToSpec(fullSpec, Status.CURRENT);
+
+        fullSpec = addTagFilterToSpec(fullSpec, tagNames);
 
         fullSpec = addColumnFiltersToSpec(fullSpec, columnFilters);
 
@@ -114,7 +125,7 @@ public class DocumentServiceImpl implements DocumentService {
             LOG.debug("Document is new; creating");
 
             try {
-                document = create(document);
+                create(document);
             } catch (final IOException ex) {
                 // rollback
                 try {
@@ -132,6 +143,63 @@ public class DocumentServiceImpl implements DocumentService {
         }
 
         return documentMapper.toDto(document);
+    }
+
+    @Override
+    public void save(final Collection<DocumentDTO> documentDTOs) throws IOException {
+
+        for (final DocumentDTO documentParam : documentDTOs) {
+            LOG.debug("Accessing service to load document with id '{}'",
+                    documentParam.getId());
+
+            final Optional<Document> existingDocumentOptional = Optional.ofNullable(documentRepository.findOne(documentParam.getId()));
+
+            if (!existingDocumentOptional.isPresent()) {
+                LOG.warn("Document with id '{}' not found",
+                        documentParam.getId());
+                continue;
+            }
+
+            updateDocumentMetadata(existingDocumentOptional.get(), documentParam);
+        }
+    }
+
+    private void updateDocumentMetadata(final Document existingDocument, final DocumentDTO documentParamDTO) {
+        LOG.debug("Merging tags changes on Document with id '{}'",
+                documentParamDTO.getId());
+
+        final Document documentParam = documentMapper.toEntity(documentParamDTO);
+
+        final Set<Tag> databaseTags = Optional.ofNullable(documentParam.getTags())
+                .orElse(Collections.emptySet())
+                .stream().map(tag -> Optional.ofNullable(tagRepository.findByName(tag.getName())).orElse(tag)).collect(Collectors.toSet());
+        documentParam.setTags(databaseTags);
+
+        // filters deleted tags
+        final Set<Tag> deletedTags = existingDocument.getTags().stream()
+                .filter(tag -> Optional.ofNullable(documentParam.getTags())
+                        .orElse(Collections.emptySet()).contains(new Tag(tag.getName())))
+                .collect(Collectors.toSet());
+
+        // combines added tags
+        final Stream<Tag> combinedTags = Stream.concat(
+                deletedTags.stream(),
+                documentParam.getTags().stream()
+        );
+
+        existingDocument.setTitle(documentParam.getTitle());
+        existingDocument.setStatus(documentParam.getStatus());
+        existingDocument.setVersion(documentParam.getVersion());
+        existingDocument.setTags(combinedTags.collect(Collectors.toSet()));
+
+        LOG.debug("Accessing service to update document metadata on document with id '{}'",
+                documentParam.getId());
+
+        documentRepository.save(existingDocument);
+        documentRepository.flush();
+
+        LOG.debug("Document with id '{}' updated successfully",
+                documentParam.getId());
     }
 
     @Override
@@ -243,6 +311,28 @@ public class DocumentServiceImpl implements DocumentService {
         return fullSpec;
     }
 
+    private Specifications<Document> addTagFilterToSpec(Specifications<Document> fullSpec, final List<String> tagNames) {
+        final List<Specification<Document>> tagNameSpecs = new ArrayList<>();
+
+        if (ListUtils.emptyIfNull(tagNames).isEmpty()) {
+            return fullSpec;
+        }
+
+        tagNames.forEach(tagName -> tagNameSpecs.add(isEqual("tags.name", tagName)));
+
+        int i = 0;
+        Specifications<Document> orSpec = Specifications.where(tagNameSpecs.get(0));
+        i++;
+
+        for (; i < tagNameSpecs.size(); i++) {
+            orSpec = orSpec.or(tagNameSpecs.get(i));
+        }
+
+        fullSpec = fullSpec.and(orSpec);
+
+        return fullSpec;
+    }
+
     private Specifications<Document> addColumnFiltersToSpec(Specifications<Document> fullSpec, final List<ColumnFilter> columnFilters) {
         if (columnFilters == null || columnFilters.isEmpty()) {
             return fullSpec;
@@ -285,7 +375,6 @@ public class DocumentServiceImpl implements DocumentService {
         }
 
         fullSpec = fullSpec.and(orSpec);
-
 
         return fullSpec;
     }

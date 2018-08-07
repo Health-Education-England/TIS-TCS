@@ -19,7 +19,15 @@ public class Tag implements Serializable {
     private LocalDateTime amendedDate;
     @ManyToMany(mappedBy = "tags")
     private Set<Document> documents;
+    @Column(unique = true)
     private String name;
+
+    public Tag() {
+    }
+
+    public Tag(final String name) {
+        this.name = name;
+    }
 
     @PreUpdate
     @PrePersist
