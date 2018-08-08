@@ -40,6 +40,7 @@ import com.transformuk.hee.tis.tcs.service.service.mapper.PlacementSpecialtyMapp
 import com.transformuk.hee.tis.tcs.service.service.mapper.PlacementViewMapper;
 import com.transformuk.hee.tis.tcs.service.service.mapper.SpecialtyMapper;
 import org.apache.commons.collections4.CollectionUtils;
+import org.apache.commons.lang.ObjectUtils;
 import org.apache.commons.lang.StringUtils;
 import org.apache.commons.lang3.time.DateUtils;
 import org.slf4j.Logger;
@@ -514,10 +515,7 @@ public class PlacementServiceImpl implements PlacementService {
         placementSummaryDTOS.sort(new Comparator<PlacementSummaryDTO>() {
             @Override
             public int compare(final PlacementSummaryDTO o1, final PlacementSummaryDTO o2) {
-                if (o2.getDateTo() != null && o1.getDateTo() != null) {
-                    return o2.getDateTo().compareTo(o1.getDateTo());
-                }
-                return 0;
+              return ObjectUtils.compare(o2.getDateTo(), o1.getDateTo());
             }
         });
         return placementSummaryDTOS;
