@@ -169,7 +169,7 @@ public class PersonResourceIntTest {
                 .intrepidId(DEFAULT_INTREPID_ID)
                 .addedDate(DEFAULT_ADDED_DATE)
                 .role(DEFAULT_ROLE)
-                .status(DEFAULT_STATUS)
+                //.status(DEFAULT_STATUS)
                 .comments(DEFAULT_COMMENTS)
                 .inactiveDate(DEFAULT_INACTIVE_DATE)
                 .inactiveNotes(DEFAULT_INACTIVE_NOTES)
@@ -489,7 +489,6 @@ public class PersonResourceIntTest {
     public void getPerson() throws Exception {
         // Initialize the database
         personRepository.saveAndFlush(person);
-
         // Get the person
         restPersonMockMvc.perform(get("/api/people/{id}", person.getId()))
                 .andExpect(status().isOk())
@@ -506,6 +505,30 @@ public class PersonResourceIntTest {
                 .andExpect(jsonPath("$.publicHealthNumber").value(DEFAULT_PUBLIC_HEALTH_NUMBER))
                 .andExpect(jsonPath("$.regulator").value(DEFAULT_REGULATOR));
     }
+
+  @Test
+  @Transactional
+  public void shouldGetAllThePlacementsForATrainee() throws Exception {
+    // Initialize the database
+    personRepository.saveAndFlush(person);
+    https://apps.tis.nhs.uk/admin/people/person/44842/edit-placements
+    // Get the person
+    restPersonMockMvc.perform(get("/api/people/{id}/placements/new", person.getId()))
+        //.andExpect(status().isNotFound());
+        .andExpect(status().isOk())
+        .andExpect(content().contentType(MediaType.APPLICATION_JSON_UTF8_VALUE));
+        /*.andExpect(jsonPath("$.id").value(person.getId().intValue()))
+        .andExpect(jsonPath("$.intrepidId").value(DEFAULT_INTREPID_ID))
+        .andExpect(jsonPath("$.addedDate").value(DEFAULT_ADDED_DATE.toString()))
+        .andExpect(jsonPath("$.amendedDate").isNotEmpty())
+        .andExpect(jsonPath("$.role").value(DEFAULT_ROLE))
+        .andExpect(jsonPath("$.status").value(DEFAULT_STATUS.toString().toUpperCase()))
+        .andExpect(jsonPath("$.comments").value(DEFAULT_COMMENTS))
+        .andExpect(jsonPath("$.inactiveDate").value(DEFAULT_INACTIVE_DATE.toString()))
+        .andExpect(jsonPath("$.inactiveNotes").value(DEFAULT_INACTIVE_NOTES))
+        .andExpect(jsonPath("$.publicHealthNumber").value(DEFAULT_PUBLIC_HEALTH_NUMBER))
+        .andExpect(jsonPath("$.regulator").value(DEFAULT_REGULATOR));*/
+  }
 
     @Test
     @Transactional
