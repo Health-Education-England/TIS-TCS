@@ -5,7 +5,7 @@ primarySpecialtyCode,
 primarySpecialtyName,
 primarySiteId,
 GROUP_CONCAT(programmeName SEPARATOR ', ') programmes,
-fundingType,
+GROUP_CONCAT(fundingType SEPARATOR ', ') fundingType,
 nationalPostNumber,
 status,
 owner,
@@ -29,7 +29,7 @@ GROUP_CONCAT(surnames SEPARATOR ', ') surnames, GROUP_CONCAT(forenames SEPARATOR
     LEFT JOIN `PostSpecialty` ps on p.`id` = ps.`postId` AND ps.`postSpecialtyType` = 'PRIMARY'
     LEFT JOIN `Specialty` sp on sp.`id` = ps.`specialtyId`
     LEFT JOIN `PostSite` pst on p.`id` = pst.`postId` AND pst.`postSiteType` = 'PRIMARY'
-    LEFT JOIN `PostFunding` pf on p.`id` = pf.`postId`
+    LEFT JOIN `PostFunding` pf on p.`id` = pf.`postId` and (curdate() BETWEEN pf.startDate AND pf.endDate or pf.endDate is NULL)
     LEFT JOIN `Placement` pl on pl.postId = p.id and curdate() BETWEEN pl.dateFrom AND pl.dateTo
     LEFT JOIN `ContactDetails` c on pl.traineeId = c.id
     LEFT JOIN `ProgrammePost` pp on pp.postId = p.id
@@ -37,7 +37,7 @@ GROUP_CONCAT(surnames SEPARATOR ', ') surnames, GROUP_CONCAT(forenames SEPARATOR
  TRUST_JOIN
  WHERECLAUSE
 ) as ot
-group by id,approvedGradeId,primarySpecialtyId,primarySpecialtyCode,primarySpecialtyName,primarySiteId,fundingType,nationalPostNumber,status,owner,intrepidId
+group by id,approvedGradeId,primarySpecialtyId,primarySpecialtyCode,primarySpecialtyName,primarySiteId,nationalPostNumber,status,owner,intrepidId
  ORDERBYCLAUSE
  LIMITCLAUSE
 ;

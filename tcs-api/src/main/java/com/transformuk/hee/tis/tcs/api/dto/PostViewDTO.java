@@ -48,7 +48,7 @@ public class PostViewDTO implements Serializable {
 
   private Status status;
 
-  private FundingType fundingType;
+  private String fundingType;
 
   private String owner;
 
@@ -178,11 +178,11 @@ public class PostViewDTO implements Serializable {
     this.status = status;
   }
 
-  public FundingType getFundingType() {
+  public String getFundingType() {
     return fundingType;
   }
 
-  public void setFundingType(FundingType fundingType) {
+  public void setFundingType(String fundingType) {
     this.fundingType = fundingType;
   }
 
