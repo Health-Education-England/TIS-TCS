@@ -320,7 +320,7 @@ public class PersonResource {
     log.debug("REST request to get Person : {}", id);
     personService.canLoggedInUserViewOrAmend(id);
 
-    PersonDTO personDTO = personService.findOne(id);
+    PersonDTO personDTO = personService.findPersonWithProgrammeMembershipsSorted(id);
     return ResponseUtil.wrapOrNotFound(Optional.ofNullable(personDTO));
   }
 

@@ -772,7 +772,7 @@ public class PostServiceImpl implements PostService {
       if (pageable.getSort().iterator().hasNext()) {
         Sort.Order order = pageable.getSort().iterator().next();
         if("currentTraineeSurname".equalsIgnoreCase(order.getProperty())) {
-          orderByClause.append(" ORDER BY ").append("surname ").append(order.getDirection()).append(" ");
+          orderByClause.append(" ORDER BY ").append("surnames ").append(order.getDirection()).append(" ");
         } else {
           orderByClause.append(" ORDER BY ").append(order.getProperty()).append(" ").append(order.getDirection()).append(" ");
         }

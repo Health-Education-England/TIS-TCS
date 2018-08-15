@@ -2,6 +2,7 @@ package com.transformuk.hee.tis.tcs.api.dto;
 
 import java.math.BigInteger;
 import java.util.Date;
+import java.util.Objects;
 
 /**
  * DTO to display placement details for a post or person
@@ -23,6 +24,9 @@ public class PlacementSummaryDTO {
   private BigInteger placementId;
   private String placementStatus;
   private String placementSpecialtyType;
+
+  public PlacementSummaryDTO() {
+  }
 
   public PlacementSummaryDTO(Date dateFrom, Date dateTo, BigInteger siteId, String primarySpecialtyName,
                              BigInteger gradeId, String placementType, String status, String forenames, String surname,
@@ -159,5 +163,33 @@ public class PlacementSummaryDTO {
 
   public void setPlacementSpecialtyType(String placementSpecialtyType) {
     this.placementSpecialtyType = placementSpecialtyType;
+  }
+
+  @Override
+  public boolean equals(Object o) {
+    if (this == o) return true;
+    if (o == null || getClass() != o.getClass()) return false;
+    PlacementSummaryDTO that = (PlacementSummaryDTO) o;
+    return Objects.equals(dateFrom, that.dateFrom) &&
+        Objects.equals(dateTo, that.dateTo) &&
+        Objects.equals(siteId, that.siteId) &&
+        Objects.equals(siteName, that.siteName) &&
+        Objects.equals(primarySpecialtyName, that.primarySpecialtyName) &&
+        Objects.equals(gradeId, that.gradeId) &&
+        Objects.equals(gradeName, that.gradeName) &&
+        Objects.equals(placementType, that.placementType) &&
+        Objects.equals(status, that.status) &&
+        Objects.equals(forenames, that.forenames) &&
+        Objects.equals(surname, that.surname) &&
+        Objects.equals(traineeId, that.traineeId) &&
+        Objects.equals(placementId, that.placementId) &&
+        Objects.equals(placementStatus, that.placementStatus) &&
+        Objects.equals(placementSpecialtyType, that.placementSpecialtyType);
+  }
+
+  @Override
+  public int hashCode() {
+
+    return Objects.hash(dateFrom, dateTo, siteId, siteName, primarySpecialtyName, gradeId, gradeName, placementType, status, forenames, surname, traineeId, placementId, placementStatus, placementSpecialtyType);
   }
 }

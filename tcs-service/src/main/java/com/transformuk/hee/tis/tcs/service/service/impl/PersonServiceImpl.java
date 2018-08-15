@@ -15,6 +15,7 @@ import com.transformuk.hee.tis.tcs.service.service.mapper.PersonBasicDetailsMapp
 import com.transformuk.hee.tis.tcs.service.service.mapper.PersonLiteMapper;
 import com.transformuk.hee.tis.tcs.service.service.mapper.PersonMapper;
 import com.transformuk.hee.tis.tcs.service.service.mapper.PersonViewMapper;
+import org.apache.commons.lang3.ObjectUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -444,6 +445,27 @@ public class PersonServiceImpl implements PersonService {
       clearSensitiveData(personalDetails);
     }
     return personMapper.toDto(person);
+  }
+
+  /**
+   * Find a person record and ensure that the
+   * @param id
+   * @return
+   */
+  @Override
+  @Transactional(readOnly = true)
+  public PersonDTO findPersonWithProgrammeMembershipsSorted(final Long id) {
+    PersonDTO personDTO = findOne(id);
+    if(personDTO != null) {
+      Set<ProgrammeMembershipDTO> programmeMemberships = personDTO.getProgrammeMemberships();
+      if(org.apache.commons.collections4.CollectionUtils.isNotEmpty(programmeMemberships)) {
+        SortedSet<ProgrammeMembershipDTO> orderedProgrammeMemberships = new TreeSet<>((o1, o2) -> ObjectUtils.compare(o2.getProgrammeStartDate(), o1.getProgrammeStartDate()));
+        orderedProgrammeMemberships.addAll(programmeMemberships);
+        personDTO.setProgrammeMemberships(orderedProgrammeMemberships);
+      }
+    }
+
+    return personDTO;
   }
 
   private void clearSensitiveData(final PersonalDetails personalDetails) {
