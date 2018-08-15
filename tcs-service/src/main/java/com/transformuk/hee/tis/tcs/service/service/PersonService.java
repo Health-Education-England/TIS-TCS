@@ -83,6 +83,8 @@ public interface PersonService {
     PersonDTO findOne(Long id);
 
 
+    PersonDTO findPersonWithProgrammeMembershipsSorted(Long id);
+
     /**
      * Get a person's ID by Gmc Id
      *
