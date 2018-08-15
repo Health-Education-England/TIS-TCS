@@ -489,6 +489,7 @@ public class PersonResourceIntTest {
     public void getPerson() throws Exception {
         // Initialize the database
         personRepository.saveAndFlush(person);
+
         // Get the person
         restPersonMockMvc.perform(get("/api/people/{id}", person.getId()))
                 .andExpect(status().isOk())
@@ -506,8 +507,8 @@ public class PersonResourceIntTest {
                 .andExpect(jsonPath("$.regulator").value(DEFAULT_REGULATOR));
     }
 
-  @Test
-  @Transactional
+    @Test
+    @Transactional
     public void getNonExistingPerson() throws Exception {
         // Get the person
         restPersonMockMvc.perform(get("/api/people/{id}", Long.MAX_VALUE))
