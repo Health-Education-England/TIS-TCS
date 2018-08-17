@@ -2,32 +2,7 @@ package com.transformuk.hee.tis.tcs.client.service.impl;
 
 import com.google.common.collect.Maps;
 import com.transformuk.hee.tis.client.impl.AbstractClientService;
-import com.transformuk.hee.tis.tcs.api.dto.ContactDetailsDTO;
-import com.transformuk.hee.tis.tcs.api.dto.CurriculumDTO;
-import com.transformuk.hee.tis.tcs.api.dto.FundingComponentsDTO;
-import com.transformuk.hee.tis.tcs.api.dto.FundingDTO;
-import com.transformuk.hee.tis.tcs.api.dto.GdcDetailsDTO;
-import com.transformuk.hee.tis.tcs.api.dto.GmcDetailsDTO;
-import com.transformuk.hee.tis.tcs.api.dto.JsonPatchDTO;
-import com.transformuk.hee.tis.tcs.api.dto.PersonBasicDetailsDTO;
-import com.transformuk.hee.tis.tcs.api.dto.PersonDTO;
-import com.transformuk.hee.tis.tcs.api.dto.PersonalDetailsDTO;
-import com.transformuk.hee.tis.tcs.api.dto.PlacementCommentDTO;
-import com.transformuk.hee.tis.tcs.api.dto.PlacementDTO;
-import com.transformuk.hee.tis.tcs.api.dto.PlacementDetailsDTO;
-import com.transformuk.hee.tis.tcs.api.dto.PlacementFunderDTO;
-import com.transformuk.hee.tis.tcs.api.dto.PostDTO;
-import com.transformuk.hee.tis.tcs.api.dto.PostFundingDTO;
-import com.transformuk.hee.tis.tcs.api.dto.ProgrammeDTO;
-import com.transformuk.hee.tis.tcs.api.dto.ProgrammeMembershipDTO;
-import com.transformuk.hee.tis.tcs.api.dto.QualificationDTO;
-import com.transformuk.hee.tis.tcs.api.dto.RightToWorkDTO;
-import com.transformuk.hee.tis.tcs.api.dto.RotationDTO;
-import com.transformuk.hee.tis.tcs.api.dto.SpecialtyDTO;
-import com.transformuk.hee.tis.tcs.api.dto.SpecialtyGroupDTO;
-import com.transformuk.hee.tis.tcs.api.dto.TariffFundingTypeFieldsDTO;
-import com.transformuk.hee.tis.tcs.api.dto.TariffRateDTO;
-import com.transformuk.hee.tis.tcs.api.dto.TrainingNumberDTO;
+import com.transformuk.hee.tis.tcs.api.dto.*;
 import org.apache.commons.codec.EncoderException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -75,6 +50,7 @@ public class TcsServiceImpl extends AbstractClientService {
 	private static final String API_POSTS_IN = "/api/posts/in/";
 	private static final String API_PEOPLE_IN = "/api/people/in/";
 	private static final String API_PEOPLE_PHN_IN = "/api/people/phn/in/";
+	private static final String API_TRAINEE_PROGRAMME_MEMBERSHIPS = "/api/trainee/"; // {traineeId}/programme-memberships;
 	private static final String BASIC = "/basic";
 
 	private static String curriculumJsonQuerystringURLEncoded, programmeJsonQuerystringURLEncoded, specialtyJsonQuerystringURLEncoded, placementJsonQuerystringURLEncoded, rotationJsonQuerystringURLEncoded;
@@ -263,6 +239,11 @@ public class TcsServiceImpl extends AbstractClientService {
 		return tcsRestTemplate.exchange(serviceUrl + API_PEOPLE + id,
 				HttpMethod.GET, null, new ParameterizedTypeReference<PersonDTO>() {}).getBody();
 	}
+
+  public List<ProgrammeMembershipCurriculaDTO> getProgrammeMembershipForTrainee(Long traineeId) {
+    return tcsRestTemplate.exchange(serviceUrl + API_TRAINEE_PROGRAMME_MEMBERSHIPS + traineeId + "/programme-memberships",
+            HttpMethod.GET, null, new ParameterizedTypeReference<List<ProgrammeMembershipCurriculaDTO>>() {}).getBody();
+  }
 
 	public ProgrammeMembershipDTO createProgrammeMembership(ProgrammeMembershipDTO programmeMembershipDTO) {
 		HttpHeaders headers = new HttpHeaders();
