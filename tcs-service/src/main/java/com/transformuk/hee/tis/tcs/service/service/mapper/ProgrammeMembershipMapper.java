@@ -7,6 +7,7 @@ import com.transformuk.hee.tis.tcs.service.model.*;
 import org.springframework.stereotype.Component;
 import org.springframework.util.CollectionUtils;
 
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 import java.util.stream.Collectors;
@@ -30,21 +31,18 @@ public class ProgrammeMembershipMapper {
   }
 
   public List<ProgrammeMembershipDTO> programmeMembershipsToProgrammeMembershipDTOs(List<ProgrammeMembership> programmeMemberships) {
-    Map<ProgrammeMembershipDTO, ProgrammeMembershipDTO> listMap = Maps.newHashMap();
+    List<ProgrammeMembershipDTO> result = Lists.newArrayList();
 
     for (ProgrammeMembership programmeMembership : programmeMemberships) {
       ProgrammeMembershipDTO programmeMembershipDTO = programmeMembershipToProgrammeMembershipDTO(programmeMembership);
-      if (listMap.containsKey(programmeMembershipDTO)) {
-        programmeMembershipDTO = listMap.get(programmeMembershipDTO);
-      }
       if (CollectionUtils.isEmpty(programmeMembershipDTO.getCurriculumMemberships())) {
         programmeMembershipDTO.setCurriculumMemberships(Lists.newArrayList());
       }
       programmeMembershipDTO.getCurriculumMemberships().add(curriculumMembershipToCurriculumMembershipDTO(programmeMembership));
-      listMap.put(programmeMembershipDTO, programmeMembershipDTO);
+      result.add(programmeMembershipDTO);
     }
 
-    return listMap.keySet().stream().collect(Collectors.toList());
+    return result;
   }
 
   public List<ProgrammeMembership> toEntity(ProgrammeMembershipDTO programmeMembershipDTO) {
