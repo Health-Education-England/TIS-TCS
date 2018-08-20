@@ -30,7 +30,7 @@ public class ProgrammeMembershipMapper {
     return result;
   }
 
-  public List<ProgrammeMembershipDTO> programmeMembershipsToProgrammeMembershipDTOs(List<ProgrammeMembership> programmeMemberships) {
+  public List<ProgrammeMembershipDTO> allEntityToDto(List<ProgrammeMembership> programmeMemberships) {
     List<ProgrammeMembershipDTO> result = Lists.newArrayList();
 
     for (ProgrammeMembership programmeMembership : programmeMemberships) {
@@ -43,6 +43,24 @@ public class ProgrammeMembershipMapper {
     }
 
     return result;
+  }
+
+  public List<ProgrammeMembershipDTO> programmeMembershipsToProgrammeMembershipDTOs(List<ProgrammeMembership> programmeMemberships) {
+    Map<ProgrammeMembershipDTO, ProgrammeMembershipDTO> listMap = Maps.newHashMap();
+
+    for (ProgrammeMembership programmeMembership : programmeMemberships) {
+      ProgrammeMembershipDTO programmeMembershipDTO = programmeMembershipToProgrammeMembershipDTO(programmeMembership);
+      if (listMap.containsKey(programmeMembershipDTO)) {
+        programmeMembershipDTO = listMap.get(programmeMembershipDTO);
+      }
+      if (CollectionUtils.isEmpty(programmeMembershipDTO.getCurriculumMemberships())) {
+        programmeMembershipDTO.setCurriculumMemberships(Lists.newArrayList());
+      }
+      programmeMembershipDTO.getCurriculumMemberships().add(curriculumMembershipToCurriculumMembershipDTO(programmeMembership));
+      listMap.put(programmeMembershipDTO, programmeMembershipDTO);
+    }
+
+    return listMap.keySet().stream().collect(Collectors.toList());
   }
 
   public List<ProgrammeMembership> toEntity(ProgrammeMembershipDTO programmeMembershipDTO) {

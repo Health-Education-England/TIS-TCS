@@ -51,7 +51,7 @@ public class ProgrammeMembershipMapperTest {
     pm2.setPerson(person1);
     pm3.setPerson(person1);
 
-    List<ProgrammeMembershipDTO> result = testObj.programmeMembershipsToProgrammeMembershipDTOs(Lists.newArrayList(pm1, pm2, pm3));
+    List<ProgrammeMembershipDTO> result = testObj.allEntityToDto(Lists.newArrayList(pm1, pm2, pm3));
 
     Assert.assertEquals(3, result.size());
   }
