@@ -154,7 +154,7 @@ public class ProgrammeMembershipServiceImpl implements ProgrammeMembershipServic
         .findByTraineeId(traineeId);
 
     if(CollectionUtils.isNotEmpty(foundProgrammeMemberships)) {
-      List<ProgrammeMembershipDTO> programmeMembershipDTOS = programmeMembershipMapper.programmeMembershipsToProgrammeMembershipDTOs(foundProgrammeMemberships);
+      List<ProgrammeMembershipDTO> programmeMembershipDTOS = programmeMembershipMapper.allEntityToDto(foundProgrammeMemberships);
       List<ProgrammeMembershipCurriculaDTO> result = attachCurricula(programmeMembershipDTOS);
 
 
