@@ -5,13 +5,9 @@ import com.transformuk.hee.tis.tcs.api.dto.validation.Update;
 import com.transformuk.hee.tis.tcs.api.enumeration.ProgrammeMembershipType;
 
 import javax.validation.Valid;
-import javax.validation.constraints.DecimalMin;
 import javax.validation.constraints.NotNull;
-import javax.validation.constraints.Null;
 import java.io.Serializable;
 import java.time.LocalDate;
-import java.time.LocalDateTime;
-import java.util.HashSet;
 import java.util.List;
 import java.util.Objects;
 
@@ -20,6 +16,7 @@ import java.util.Objects;
  */
 public class ProgrammeMembershipDTO implements Serializable {
 
+  private Long id;
 
   @NotNull(message = "ProgrammeMembershipType is required", groups = {Update.class, Create.class})
   private ProgrammeMembershipType programmeMembershipType;
@@ -48,6 +45,13 @@ public class ProgrammeMembershipDTO implements Serializable {
   @Valid
   private List<CurriculumMembershipDTO> curriculumMemberships;
 
+  public Long getId() {
+    return id;
+  }
+
+  public void setId(Long id) {
+    this.id = id;
+  }
 
   public ProgrammeMembershipType getProgrammeMembershipType() {
     return programmeMembershipType;
@@ -163,6 +167,7 @@ public class ProgrammeMembershipDTO implements Serializable {
   @Override
   public String toString() {
     return "ProgrammeMembershipDTO{" +
+        ", id='" + id + "'" +
         ", programmeMembershipType='" + programmeMembershipType + "'" +
         ", rotation='" + rotation + "'" +
         ", programmeStartDate='" + programmeStartDate + "'" +
