@@ -327,7 +327,7 @@ public class PostResourceIntTest {
 
   @Test
   @Transactional
-  public void test() throws Exception {
+  public void shouldReturnMultipleCurrentFundingTypesSeparatedByCommas() throws Exception {
     post.setNationalPostNumber(TEST_POST_NUMBER);
     post.setStatus(Status.CURRENT);
     postRepository.saveAndFlush(post);
