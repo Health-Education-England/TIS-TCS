@@ -835,10 +835,7 @@ public class PostServiceImpl implements PostService {
       view.setPrimarySpecialtyName(rs.getString("primarySpecialtyName"));
       view.setPrimarySiteId(rs.getLong("primarySiteId"));
       view.setProgrammeNames(rs.getString("programmes"));
-      String fundingType = rs.getString("fundingType");
-      if (StringUtils.isNotEmpty(fundingType)) {
-        view.setFundingType(FundingType.valueOf(fundingType));
-      }
+      view.setFundingType(rs.getString("fundingType"));
       view.setNationalPostNumber(rs.getString("nationalPostNumber"));
       String status = rs.getString("status");
       if (StringUtils.isNotEmpty(status)) {

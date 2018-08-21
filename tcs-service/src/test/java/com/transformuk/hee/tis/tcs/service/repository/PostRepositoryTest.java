@@ -2,8 +2,6 @@ package com.transformuk.hee.tis.tcs.service.repository;
 
 import com.google.common.collect.Sets;
 import com.transformuk.hee.tis.tcs.service.Application;
-import com.transformuk.hee.tis.tcs.service.model.Person;
-import com.transformuk.hee.tis.tcs.service.model.PostTrust;
 import com.transformuk.hee.tis.tcs.service.model.Post;
 import com.transformuk.hee.tis.tcs.service.model.PostTrust;
 import org.junit.After;

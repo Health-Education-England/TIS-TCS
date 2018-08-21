@@ -23,6 +23,7 @@ import com.transformuk.hee.tis.tcs.service.api.validation.PostValidator;
 import com.transformuk.hee.tis.tcs.service.exception.ExceptionTranslator;
 import com.transformuk.hee.tis.tcs.service.model.Placement;
 import com.transformuk.hee.tis.tcs.service.model.Post;
+import com.transformuk.hee.tis.tcs.service.model.PostFunding;
 import com.transformuk.hee.tis.tcs.service.model.PostGrade;
 import com.transformuk.hee.tis.tcs.service.model.PostSite;
 import com.transformuk.hee.tis.tcs.service.model.PostSpecialty;
@@ -59,12 +60,14 @@ import org.springframework.transaction.annotation.Transactional;
 
 import javax.persistence.EntityManager;
 import java.net.URLEncoder;
+import java.time.LocalDate;
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
 import java.util.Set;
 
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.hamcrest.Matchers.contains;
 import static org.hamcrest.Matchers.containsInAnyOrder;
 import static org.hamcrest.Matchers.hasItem;
 import static org.hamcrest.Matchers.hasSize;
@@ -122,6 +125,8 @@ public class PostResourceIntTest {
   private static final String OWNER = "Health Education England Kent, Surrey and Sussex";
   private static final String OWNER_NORTH_EAST = "Health Education England North East";
   private static final String CURRENT_TRAINEE_SURNAME = "Smith";
+  private static final String FUNDING_TYPE_TRUST = "TRUST";
+  private static final String FUNDING_TYPE_TARIFF = "TARIFF";
 
   private static final String UPDATED_OWNER = "Health Education England North West London";
 
@@ -281,7 +286,7 @@ public class PostResourceIntTest {
   }
 
   @Before
-  public void initTest() {
+  public void initTest() throws Exception {
     post = createEntity();
     post.setOwner(OWNER);
     em.persist(post);
@@ -298,9 +303,41 @@ public class PostResourceIntTest {
     programme = createProgramme();
     em.persist(programme);
 
-    //postView = createPostView(specialty.getId());
-    //em.persist(postView);
+    PostFunding postFundingTrust = new PostFunding();
+    postFundingTrust.setFundingType(FUNDING_TYPE_TRUST);
+    PostFunding postFundingTarrif = new PostFunding();
+    postFundingTarrif.setFundingType(FUNDING_TYPE_TARIFF);
+
+    LocalDate futureDate = LocalDate.of(2099, 12, 12);
+    LocalDate oldDate = LocalDate.of(1999, 12, 12);
+
+    postFundingTrust.setEndDate(futureDate);
+    postFundingTrust.setStartDate(oldDate);
+
+    postFundingTarrif.setEndDate(futureDate);
+    postFundingTarrif.setStartDate(oldDate);
+
+    postFundingTarrif.setPost(post);
+    postFundingTrust.setPost(post);
+    em.persist(postFundingTarrif);
+    em.persist(postFundingTrust);
+    Set<PostFunding> postFundings = Sets.newHashSet(postFundingTarrif, postFundingTrust);
+    post.setFundings(postFundings);
   }
+
+  @Test
+  @Transactional
+  public void shouldReturnMultipleCurrentFundingTypesSeparatedByCommas() throws Exception {
+    post.setNationalPostNumber(TEST_POST_NUMBER);
+    post.setStatus(Status.CURRENT);
+    postRepository.saveAndFlush(post);
+    String colFilters = new URLCodec().encode("{\"status\":[\"CURRENT\"]}");
+    restPostMockMvc.perform(get("/api/posts?page=0&size=100&sort=nationalPostNumber,asc&sort=id&columnFilters=" + colFilters)
+        .contentType(TestUtil.APPLICATION_JSON_UTF8))
+        .andExpect(jsonPath("$.[*].nationalPostNumber").value(TEST_POST_NUMBER))
+        .andExpect(jsonPath("$.[*].fundingType").value(contains("TARIFF, TRUST")));
+  }
+
 
   @Test
   @Transactional
@@ -511,11 +548,11 @@ public class PostResourceIntTest {
     postRepository.saveAndFlush(post);
 
     restPostMockMvc.perform(get("/api/findByNationalPostNumber?searchQuery=TESTPOST"))
-            .andExpect(status().isOk())
-            .andExpect(content().contentType(MediaType.APPLICATION_JSON_UTF8_VALUE))
-            .andExpect(jsonPath("$.[*].id").value(hasItem(post.getId().intValue())))
-            .andExpect(jsonPath("$.[*].nationalPostNumber").value(hasItem(TEST_POST_NUMBER)))
-            .andExpect(jsonPath("$.[*].status").value(hasItem(DEFAULT_STATUS.toString().toUpperCase())));
+        .andExpect(status().isOk())
+        .andExpect(content().contentType(MediaType.APPLICATION_JSON_UTF8_VALUE))
+        .andExpect(jsonPath("$.[*].id").value(hasItem(post.getId().intValue())))
+        .andExpect(jsonPath("$.[*].nationalPostNumber").value(hasItem(TEST_POST_NUMBER)))
+        .andExpect(jsonPath("$.[*].status").value(hasItem(DEFAULT_STATUS.toString().toUpperCase())));
 
   }
 
@@ -530,11 +567,11 @@ public class PostResourceIntTest {
     String colFilters = new URLCodec().encode("{\"status\":[\"CURRENT\"]}");
 
     restPostMockMvc.perform(get("/api/findByNationalPostNumber?searchQuery=TESTPOST&columnFilters=" + colFilters))
-            .andExpect(status().isOk())
-            .andExpect(content().contentType(MediaType.APPLICATION_JSON_UTF8_VALUE))
-            .andExpect(jsonPath("$.[*].id").value(hasItem(post.getId().intValue())))
-            .andExpect(jsonPath("$.[*].nationalPostNumber").value(hasItem(TEST_POST_NUMBER)))
-            .andExpect(jsonPath("$.[*].status").value(hasItem(Status.CURRENT.name())));
+        .andExpect(status().isOk())
+        .andExpect(content().contentType(MediaType.APPLICATION_JSON_UTF8_VALUE))
+        .andExpect(jsonPath("$.[*].id").value(hasItem(post.getId().intValue())))
+        .andExpect(jsonPath("$.[*].nationalPostNumber").value(hasItem(TEST_POST_NUMBER)))
+        .andExpect(jsonPath("$.[*].status").value(hasItem(Status.CURRENT.name())));
 
   }
 
