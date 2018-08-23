@@ -10,6 +10,7 @@ import com.transformuk.hee.tis.tcs.service.api.decorator.PlacementDetailsDecorat
 import com.transformuk.hee.tis.tcs.service.api.validation.PlacementValidator;
 import com.transformuk.hee.tis.tcs.service.exception.ExceptionTranslator;
 import com.transformuk.hee.tis.tcs.service.model.Comment;
+import com.transformuk.hee.tis.tcs.service.model.Placement;
 import com.transformuk.hee.tis.tcs.service.model.PlacementDetails;
 import com.transformuk.hee.tis.tcs.service.repository.CommentRepository;
 import com.transformuk.hee.tis.tcs.service.repository.ContactDetailsRepository;
@@ -24,7 +25,10 @@ import com.transformuk.hee.tis.tcs.service.repository.SpecialtyRepository;
 import com.transformuk.hee.tis.tcs.service.service.CommentService;
 import com.transformuk.hee.tis.tcs.service.service.EsrNotificationService;
 import com.transformuk.hee.tis.tcs.service.service.PlacementService;
+import com.transformuk.hee.tis.tcs.service.service.mapper.PlacementCommentMapper;
 import com.transformuk.hee.tis.tcs.service.service.mapper.PlacementDetailsMapper;
+import com.transformuk.hee.tis.tcs.service.service.mapper.PlacementMapper;
+import org.hibernate.engine.spi.EntityUniqueKey;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -98,6 +102,9 @@ public class PlacementCommentResourceIntTest {
   private ExceptionTranslator exceptionTranslator;
   @Autowired
   private CommentService commentService;
+  @Autowired
+  private PlacementCommentMapper placementCommentMapper;
+
 
   private AsyncReferenceService asyncReferenceService;
 
@@ -121,6 +128,8 @@ public class PlacementCommentResourceIntTest {
 
   private PlacementCommentDTO placementCommentDTO;
 
+  private Placement placement;
+
   private static final String AUTHOR = "TEST_AUTHOR";
   private static final String BODY = "THIS_IS_A_TEST_BODY";
 
@@ -137,6 +146,12 @@ public class PlacementCommentResourceIntTest {
     placementCommentDTO.setBody(BODY);
     placementCommentDTO.setSource(CommentSource.INTREPID);
     return placementCommentDTO;
+  }
+
+  public static Placement createPlacement(EntityManager em) {
+    Placement placement = new Placement();
+    placement.setComments(fdsasfdsaf);
+    return placement;
   }
 
 
@@ -165,7 +180,39 @@ public class PlacementCommentResourceIntTest {
         .andExpect(status().isCreated());
     List<Comment> placementComments = commentRepository.findAll();
     assertThat(placementComments).hasSize(databaseSizeBeforeCreate+1);
-
-        
+    Comment comment = placementComments.get(placementComments.size()-1);
+    assertThat(comment.getAuthor()).isEqualTo(AUTHOR);
+    assertThat(comment.getBody()).isEqualTo(BODY);
+    assertThat(comment.getId()).isNotZero();
+    assertThat(comment.getId()).isNotNull();
     }
+
+  @Test
+  @Transactional
+  public void shouldGetPlacementCommentById() throws Exception {
+    commentRepository.saveAndFlush(placementCommentMapper.toEntity(placementCommentDTO));
+    List<Comment> placementComments = commentRepository.findAll();
+    Comment comment = placementComments.get(placementComments.size()-1);
+    restPlacementCommentMock.perform(get("/api/placementComment/{id}", comment.getId())
+        .contentType(TestUtil.APPLICATION_JSON_UTF8))
+        .andExpect(status().isOk())
+        .andExpect(jsonPath("$.id").value(comment.getId().intValue()))
+        .andExpect(jsonPath("$.author").value(AUTHOR))
+        .andExpect(jsonPath("$.body").value(BODY));
+  }
+
+  @Test
+  @Transactional
+  public void shouldGetACommentForAPlacementId() throws Exception {
+    commentRepository.saveAndFlush(placementCommentMapper.toEntity(placementCommentDTO));
+    List<Comment> placementComments = commentRepository.findAll();
+    Comment comment = placementComments.get(placementComments.size()-1);
+    Long id = comment.getPlacement().getId();
+    restPlacementCommentMock.perform(get("/api/placement/{placementId}/placementComment", comment.getPlacement().getId())
+        .contentType(TestUtil.APPLICATION_JSON_UTF8))
+        .andExpect(status().isOk())
+        .andExpect(jsonPath("$.id").value(comment.getId().intValue()))
+        .andExpect(jsonPath("$.author").value(AUTHOR))
+        .andExpect(jsonPath("$.body").value(BODY));
+  }
 }
