@@ -335,7 +335,7 @@ public class PostResourceIntTest {
     restPostMockMvc.perform(get("/api/posts?page=0&size=100&sort=nationalPostNumber,asc&sort=id&columnFilters=" + colFilters)
         .contentType(TestUtil.APPLICATION_JSON_UTF8))
         .andExpect(jsonPath("$.[*].nationalPostNumber").value(TEST_POST_NUMBER))
-        .andExpect(jsonPath("$.[*].fundingType").value(contains("TARIFF, TRUST")));
+        .andExpect(jsonPath("$.[*].fundingType").value(contains("TRUST, TARIFF")));
   }
 
 
