@@ -4,8 +4,13 @@ primarySpecialtyId,
 primarySpecialtyCode,
 primarySpecialtyName,
 primarySiteId,
+<<<<<<< HEAD
 GROUP_CONCAT(distinct programmeName SEPARATOR ', ') programmes,
 GROUP_CONCAT(distinct fundingType SEPARATOR ', ') fundingType,
+=======
+GROUP_CONCAT(programmeName SEPARATOR ', ') programmes,
+GROUP_CONCAT(fundingType SEPARATOR ', ') fundingType,
+>>>>>>> master
 nationalPostNumber,
 status,
 owner,
