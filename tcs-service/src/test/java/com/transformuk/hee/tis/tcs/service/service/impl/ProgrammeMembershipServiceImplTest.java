@@ -237,7 +237,7 @@ public class ProgrammeMembershipServiceImplTest {
     Set<Long> curriculumIds = Sets.newLinkedHashSet(new Long(5L), new Long(6L));
 
     when(programmeMembershipRepositoryMock.findByTraineeId(TRAINEE_ID)).thenReturn(programmeMemberships);
-    when(programmeMembershipMapperMock.programmeMembershipsToProgrammeMembershipDTOs(programmeMemberships)).thenReturn(programmeMembershipDTOList);
+    when(programmeMembershipMapperMock.allEntityToDto(programmeMemberships)).thenReturn(programmeMembershipDTOList);
     when(curriculumRepositoryMock.findAll(curriculumIds)).thenReturn(foundCurricula);
     when(curriculumMapperMock.curriculumToCurriculumDTO(curriculum1)).thenReturn(curriculumDTO1);
     when(curriculumMapperMock.curriculumToCurriculumDTO(curriculum2)).thenReturn(curriculumDTO2);
@@ -252,7 +252,7 @@ public class ProgrammeMembershipServiceImplTest {
     Assert.assertEquals(PROGRAMME_NUMBER1, programmeMembershipCurriculaDTO.getProgrammeNumber());
 
     verify(programmeMembershipRepositoryMock).findByTraineeId(TRAINEE_ID);
-    verify(programmeMembershipMapperMock).programmeMembershipsToProgrammeMembershipDTOs(programmeMemberships);
+    verify(programmeMembershipMapperMock).allEntityToDto(programmeMemberships);
     verify(curriculumRepositoryMock).findAll(curriculumIds);
     verify(curriculumMapperMock).curriculumToCurriculumDTO(curriculum1);
     verify(curriculumMapperMock).curriculumToCurriculumDTO(curriculum2);
