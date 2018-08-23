@@ -21,6 +21,7 @@ import com.transformuk.hee.tis.tcs.service.repository.PlacementRepository;
 import com.transformuk.hee.tis.tcs.service.repository.PlacementSupervisorRepository;
 import com.transformuk.hee.tis.tcs.service.repository.PostRepository;
 import com.transformuk.hee.tis.tcs.service.repository.SpecialtyRepository;
+import com.transformuk.hee.tis.tcs.service.service.CommentService;
 import com.transformuk.hee.tis.tcs.service.service.EsrNotificationService;
 import com.transformuk.hee.tis.tcs.service.service.PlacementService;
 import com.transformuk.hee.tis.tcs.service.service.mapper.PlacementDetailsMapper;
@@ -28,6 +29,7 @@ import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.mockito.Mock;
+import org.mockito.MockitoAnnotations;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.data.web.PageableHandlerMethodArgumentResolver;
@@ -35,6 +37,7 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.http.converter.json.MappingJackson2HttpMessageConverter;
 import org.springframework.test.context.junit4.SpringRunner;
 import org.springframework.test.web.servlet.MockMvc;
+import org.springframework.test.web.servlet.setup.MockMvcBuilders;
 import org.springframework.transaction.annotation.Transactional;
 
 import javax.persistence.EntityManager;
@@ -93,6 +96,8 @@ public class PlacementCommentResourceIntTest {
   private PageableHandlerMethodArgumentResolver pageableArgumentResolver;
   @Autowired
   private ExceptionTranslator exceptionTranslator;
+  @Autowired
+  private CommentService commentService;
 
   private AsyncReferenceService asyncReferenceService;
 
@@ -117,7 +122,7 @@ public class PlacementCommentResourceIntTest {
   private PlacementCommentDTO placementCommentDTO;
 
   private static final String AUTHOR = "TEST_AUTHOR";
-  private static final String BODY = "TEST_BODY";
+  private static final String BODY = "THIS_IS_A_TEST_BODY";
 
 
   /**
@@ -137,6 +142,12 @@ public class PlacementCommentResourceIntTest {
 
   @Before
   public void setup() {
+    MockitoAnnotations.initMocks(this);
+    PlacementCommentResource placementCommentResource = new PlacementCommentResource(commentService);
+    this.restPlacementCommentMock = MockMvcBuilders.standaloneSetup(placementCommentResource)
+        .setCustomArgumentResolvers(pageableArgumentResolver)
+        .setControllerAdvice(exceptionTranslator)
+        .setMessageConverters(jacksonMessageConverter).build();
   }
 
   @Before
@@ -148,13 +159,12 @@ public class PlacementCommentResourceIntTest {
   @Transactional
   public void shouldCreatePlacementComment() throws Exception {
     int databaseSizeBeforeCreate = commentRepository.findAll().size();
-    //ResponseEntity<PlacementCommentDTO> result =
     restPlacementCommentMock.perform(post("/api/placementComment")
         .contentType(TestUtil.APPLICATION_JSON_UTF8)
         .content(TestUtil.convertObjectToJsonBytes(placementCommentDTO)))
         .andExpect(status().isCreated());
-    int databaseSizeAfterCreate = commentRepository.findAll().size();
     List<Comment> placementComments = commentRepository.findAll();
+    assertThat(placementComments).hasSize(databaseSizeBeforeCreate+1);
 
         
     }
