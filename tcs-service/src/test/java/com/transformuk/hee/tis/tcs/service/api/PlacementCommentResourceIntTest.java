@@ -1,43 +1,24 @@
 package com.transformuk.hee.tis.tcs.service.api;
 
-import com.transformuk.hee.tis.reference.client.ReferenceService;
 import com.transformuk.hee.tis.tcs.api.dto.PlacementCommentDTO;
 import com.transformuk.hee.tis.tcs.api.enumeration.CommentSource;
 import com.transformuk.hee.tis.tcs.service.Application;
-import com.transformuk.hee.tis.tcs.service.api.decorator.AsyncReferenceService;
-import com.transformuk.hee.tis.tcs.service.api.decorator.PersonBasicDetailsRepositoryAccessor;
-import com.transformuk.hee.tis.tcs.service.api.decorator.PlacementDetailsDecorator;
-import com.transformuk.hee.tis.tcs.service.api.validation.PlacementValidator;
 import com.transformuk.hee.tis.tcs.service.exception.ExceptionTranslator;
 import com.transformuk.hee.tis.tcs.service.model.Comment;
 import com.transformuk.hee.tis.tcs.service.model.Placement;
 import com.transformuk.hee.tis.tcs.service.model.PlacementDetails;
 import com.transformuk.hee.tis.tcs.service.repository.CommentRepository;
-import com.transformuk.hee.tis.tcs.service.repository.ContactDetailsRepository;
-import com.transformuk.hee.tis.tcs.service.repository.EsrNotificationRepository;
-import com.transformuk.hee.tis.tcs.service.repository.PersonBasicDetailsRepository;
-import com.transformuk.hee.tis.tcs.service.repository.PersonRepository;
 import com.transformuk.hee.tis.tcs.service.repository.PlacementDetailsRepository;
-import com.transformuk.hee.tis.tcs.service.repository.PlacementRepository;
-import com.transformuk.hee.tis.tcs.service.repository.PlacementSupervisorRepository;
-import com.transformuk.hee.tis.tcs.service.repository.PostRepository;
-import com.transformuk.hee.tis.tcs.service.repository.SpecialtyRepository;
 import com.transformuk.hee.tis.tcs.service.service.CommentService;
-import com.transformuk.hee.tis.tcs.service.service.EsrNotificationService;
-import com.transformuk.hee.tis.tcs.service.service.PlacementService;
 import com.transformuk.hee.tis.tcs.service.service.mapper.PlacementCommentMapper;
-import com.transformuk.hee.tis.tcs.service.service.mapper.PlacementDetailsMapper;
-import com.transformuk.hee.tis.tcs.service.service.mapper.PlacementMapper;
-import org.hibernate.engine.spi.EntityUniqueKey;
+import org.assertj.core.util.Sets;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
-import org.mockito.Mock;
 import org.mockito.MockitoAnnotations;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.data.web.PageableHandlerMethodArgumentResolver;
-import org.springframework.http.ResponseEntity;
 import org.springframework.http.converter.json.MappingJackson2HttpMessageConverter;
 import org.springframework.test.context.junit4.SpringRunner;
 import org.springframework.test.web.servlet.MockMvc;
@@ -45,13 +26,10 @@ import org.springframework.test.web.servlet.setup.MockMvcBuilders;
 import org.springframework.transaction.annotation.Transactional;
 
 import javax.persistence.EntityManager;
-
 import java.util.List;
+import java.util.Set;
 
 import static org.assertj.core.api.Assertions.assertThat;
-import static org.hamcrest.Matchers.containsInAnyOrder;
-import static org.hamcrest.Matchers.hasItem;
-import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.delete;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.put;
@@ -71,29 +49,7 @@ public class PlacementCommentResourceIntTest {
   @Autowired
   private PlacementDetailsRepository placementDetailsRepository;
   @Autowired
-  private SpecialtyRepository specialtyRepository;
-  @Autowired
-  private PersonBasicDetailsRepository personBasicDetailsRepository;
-  @Autowired
-  private PersonBasicDetailsRepositoryAccessor asyncPersonBasicDetailsRepository;
-  @Autowired
-  private ContactDetailsRepository contactDetailsRepository;
-  @Autowired
-  private PostRepository postRepository;
-  @Autowired
-  private PersonRepository personRepository;
-  @Autowired
-  private PlacementRepository placementRepository;
-  @Autowired
   private CommentRepository commentRepository;
-  @Autowired
-  private EsrNotificationRepository esrNotificationRepository;
-  @Autowired
-  private PlacementDetailsMapper placementDetailsMapper;
-  @Autowired
-  private PlacementService placementService;
-  @Autowired
-  private PlacementValidator placementValidator;
   @Autowired
   private MappingJackson2HttpMessageConverter jacksonMessageConverter;
   @Autowired
@@ -104,34 +60,17 @@ public class PlacementCommentResourceIntTest {
   private CommentService commentService;
   @Autowired
   private PlacementCommentMapper placementCommentMapper;
-
-
-  private AsyncReferenceService asyncReferenceService;
-
-  @Mock
-  private ReferenceService referenceService;
-
-  @Autowired
-  private EsrNotificationService esrNotificationService;
-
   @Autowired
   private EntityManager entityManager;
 
-  @Autowired
-  private PlacementSupervisorRepository placementSupervisorRepository;
-
-  private PlacementDetailsDecorator placementDetailsDecorator;
-
   private MockMvc restPlacementCommentMock;
-
-  private PlacementDetails placement;
-
   private PlacementCommentDTO placementCommentDTO;
-
-  private Placement placement;
 
   private static final String AUTHOR = "TEST_AUTHOR";
   private static final String BODY = "THIS_IS_A_TEST_BODY";
+
+  private static final String UPDATED_AUTHOR = "UPDATED_AUTHOR";
+  private static final String UPDATED_BODY = "UPDATED_BODY";
 
 
   /**
@@ -150,7 +89,6 @@ public class PlacementCommentResourceIntTest {
 
   public static Placement createPlacement(EntityManager em) {
     Placement placement = new Placement();
-    placement.setComments(fdsasfdsaf);
     return placement;
   }
 
@@ -179,20 +117,34 @@ public class PlacementCommentResourceIntTest {
         .content(TestUtil.convertObjectToJsonBytes(placementCommentDTO)))
         .andExpect(status().isCreated());
     List<Comment> placementComments = commentRepository.findAll();
-    assertThat(placementComments).hasSize(databaseSizeBeforeCreate+1);
-    Comment comment = placementComments.get(placementComments.size()-1);
+    assertThat(placementComments).hasSize(databaseSizeBeforeCreate + 1);
+    Comment comment = placementComments.get(placementComments.size() - 1);
     assertThat(comment.getAuthor()).isEqualTo(AUTHOR);
     assertThat(comment.getBody()).isEqualTo(BODY);
     assertThat(comment.getId()).isNotZero();
     assertThat(comment.getId()).isNotNull();
-    }
+  }
+
+  @Test
+  @Transactional
+  public void shouldNotAllowCreatePlacementIfIdisNotNull() throws Exception {
+    int databaseSizeBeforeCreate = commentRepository.findAll().size();
+    placementCommentDTO.setId(1L);
+    restPlacementCommentMock.perform(post("/api/placementComment")
+        .contentType(TestUtil.APPLICATION_JSON_UTF8)
+        .content(TestUtil.convertObjectToJsonBytes(placementCommentDTO)))
+        .andExpect(status().isBadRequest());
+    List<Comment> placementComments = commentRepository.findAll();
+    assertThat(placementComments).hasSize(databaseSizeBeforeCreate);
+  }
+
 
   @Test
   @Transactional
   public void shouldGetPlacementCommentById() throws Exception {
     commentRepository.saveAndFlush(placementCommentMapper.toEntity(placementCommentDTO));
     List<Comment> placementComments = commentRepository.findAll();
-    Comment comment = placementComments.get(placementComments.size()-1);
+    Comment comment = placementComments.get(placementComments.size() - 1);
     restPlacementCommentMock.perform(get("/api/placementComment/{id}", comment.getId())
         .contentType(TestUtil.APPLICATION_JSON_UTF8))
         .andExpect(status().isOk())
@@ -204,15 +156,47 @@ public class PlacementCommentResourceIntTest {
   @Test
   @Transactional
   public void shouldGetACommentForAPlacementId() throws Exception {
+    // Set up placement comments in the repository
     commentRepository.saveAndFlush(placementCommentMapper.toEntity(placementCommentDTO));
     List<Comment> placementComments = commentRepository.findAll();
-    Comment comment = placementComments.get(placementComments.size()-1);
-    Long id = comment.getPlacement().getId();
+    Comment comment = placementComments.get(placementComments.size() - 1);
+    Set<Comment> comments = Sets.newHashSet();
+    comments.add(comment);
+
+    // Set up a placement and attach the comments
+    PlacementDetails placementDetails = new PlacementDetails();
+    placementDetails.setComments(comments);
+    placementDetailsRepository.saveAndFlush(placementDetails);
+
+    // Add the placement to the comment
+    comment.setPlacement(placementDetails);
+    commentRepository.saveAndFlush(comment);
+
     restPlacementCommentMock.perform(get("/api/placement/{placementId}/placementComment", comment.getPlacement().getId())
         .contentType(TestUtil.APPLICATION_JSON_UTF8))
         .andExpect(status().isOk())
         .andExpect(jsonPath("$.id").value(comment.getId().intValue()))
         .andExpect(jsonPath("$.author").value(AUTHOR))
         .andExpect(jsonPath("$.body").value(BODY));
+  }
+
+  @Test
+  @Transactional
+  public void shouldUpdatePlacementComment() throws Exception {
+    // Set up placement comment in repository
+    commentRepository.saveAndFlush(placementCommentMapper.toEntity(placementCommentDTO));
+    List<Comment> comments = commentRepository.findAll();
+    Comment comment = comments.get(comments.size() - 1);
+    comment.setBody(UPDATED_BODY);
+    comment.setAuthor(UPDATED_AUTHOR);
+    Long commentId = comment.getId();
+    PlacementCommentDTO placementCommentDTO = placementCommentMapper.toDto(comment);
+    restPlacementCommentMock.perform(put("/api/placementComment")
+        .contentType(TestUtil.APPLICATION_JSON_UTF8)
+        .content(TestUtil.convertObjectToJsonBytes(placementCommentDTO)))
+        .andExpect(status().isOk());
+    Comment result = commentRepository.findOne(commentId);
+    assertThat(result.getBody().equals(UPDATED_BODY));
+    assertThat(result.getAuthor().equals(UPDATED_AUTHOR));
   }
 }
