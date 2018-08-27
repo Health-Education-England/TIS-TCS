@@ -2,6 +2,7 @@ package com.transformuk.hee.tis.tcs.service.service.impl;
 
 import com.google.common.collect.Sets;
 import com.transformuk.hee.tis.tcs.api.dto.PersonDTO;
+import com.transformuk.hee.tis.tcs.api.dto.PersonV2DTO;
 import com.transformuk.hee.tis.tcs.api.dto.ProgrammeMembershipDTO;
 import com.transformuk.hee.tis.tcs.service.exception.AccessUnauthorisedException;
 import com.transformuk.hee.tis.tcs.service.model.Person;
@@ -12,10 +13,14 @@ import com.transformuk.hee.tis.tcs.service.model.ProgrammeMembership;
 import com.transformuk.hee.tis.tcs.service.repository.PersonRepository;
 import com.transformuk.hee.tis.tcs.service.service.mapper.PersonMapper;
 import org.junit.Assert;
+import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
+import org.mockito.ArgumentCaptor;
+import org.mockito.Captor;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
+import org.mockito.Spy;
 import org.mockito.runners.MockitoJUnitRunner;
 
 import java.time.LocalDate;
@@ -26,6 +31,8 @@ import java.util.Optional;
 import java.util.Set;
 
 import static org.mockito.Matchers.any;
+import static org.mockito.Mockito.doNothing;
+import static org.mockito.Mockito.doReturn;
 import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
@@ -34,6 +41,8 @@ import static org.mockito.Mockito.when;
 public class PersonServiceImplTest {
 
   public static final long PERSON_ID = 1L;
+
+  @Spy
   @InjectMocks
   private PersonServiceImpl testObj;
 
@@ -43,6 +52,47 @@ public class PersonServiceImplTest {
   private PersonRepository personRepositoryMock;
   @Mock
   private PersonMapper personMapperMock;
+  @Captor
+  private ArgumentCaptor<PersonDTO> personDTOArgumentCaptor;
+  @Captor
+  private ArgumentCaptor<PersonV2DTO> personV2DTOArgumentCaptor;
+
+  private Person person;
+  private ProgrammeMembership pm1, pm2, pm3, pm4;
+  private PersonDTO personDTO;
+  private ProgrammeMembershipDTO pmDTO1, pmDTO2, pmDTO3, pmDTO4;
+
+  @Before
+  public void setup() {
+    person = new Person();
+    person.setPersonalDetails(new PersonalDetails());
+    person.setId(PERSON_ID);
+
+    LocalDate pm1Date = LocalDate.of(2018, 1, 2);
+    LocalDate pm2Date = LocalDate.of(2018, 1, 1);
+    LocalDate pm3Date = null;
+    LocalDate pm4Date = LocalDate.of(2000, 1, 1);
+
+    pm1 = new ProgrammeMembership().programmeStartDate(pm1Date);
+    pm2 = new ProgrammeMembership().programmeStartDate(pm2Date);
+    pm3 = new ProgrammeMembership().programmeStartDate(pm3Date);
+    pm4 = new ProgrammeMembership().programmeStartDate(pm4Date);
+
+    person.setProgrammeMemberships(Sets.newHashSet(pm1, pm2, pm3, pm4));
+
+    personDTO = new PersonDTO();
+    pmDTO1 = new ProgrammeMembershipDTO();
+    pmDTO2 = new ProgrammeMembershipDTO();
+    pmDTO3 = new ProgrammeMembershipDTO();
+    pmDTO4 = new ProgrammeMembershipDTO();
+    pmDTO1.setProgrammeStartDate(pm1Date);
+    pmDTO2.setProgrammeStartDate(pm2Date);
+    pmDTO3.setProgrammeStartDate(pm3Date);
+    pmDTO4.setProgrammeStartDate(pm4Date);
+
+    personDTO.setProgrammeMemberships(Sets.newHashSet(pmDTO1, pmDTO2, pmDTO3, pmDTO4));
+
+  }
 
   @Test
   public void canLoggedInUserViewOrAmendShouldDoNothingWhenUserIsNotTrustAdmin() {
@@ -116,32 +166,7 @@ public class PersonServiceImplTest {
   }
 
   @Test
-  public void findPersonPMSortedShouldReturnDTOWithProgrammeMembershipsInDescendingOrder(){
-    Person person = new Person();
-    person.setPersonalDetails(new PersonalDetails());
-    person.setId(PERSON_ID);
-
-    LocalDate pm1Date = LocalDate.of(2018, 1, 2);
-    LocalDate pm2Date = LocalDate.of(2018, 1, 1);
-    LocalDate pm3Date = null;
-    LocalDate pm4Date = LocalDate.of(2000, 1, 1);
-
-    ProgrammeMembership pm1 = new ProgrammeMembership(), pm2 = new ProgrammeMembership(), pm3 = new ProgrammeMembership(), pm4 = new ProgrammeMembership();;
-    pm1.setProgrammeStartDate(pm1Date);
-    pm2.setProgrammeStartDate(pm2Date);
-    pm3.setProgrammeStartDate(pm3Date);
-    pm4.setProgrammeStartDate(pm4Date);
-    person.setProgrammeMemberships(Sets.newHashSet(pm1, pm2, pm3, pm4));
-
-    PersonDTO personDTO = new PersonDTO();
-    ProgrammeMembershipDTO pmDTO1 = new ProgrammeMembershipDTO(), pmDTO2 = new ProgrammeMembershipDTO(), pmDTO3 = new ProgrammeMembershipDTO(), pmDTO4 = new ProgrammeMembershipDTO();
-    pmDTO1.setProgrammeStartDate(pm1Date);
-    pmDTO2.setProgrammeStartDate(pm2Date);
-    pmDTO3.setProgrammeStartDate(pm3Date);
-    pmDTO4.setProgrammeStartDate(pm4Date);
-
-    personDTO.setProgrammeMemberships(Sets.newHashSet(pmDTO1, pmDTO2, pmDTO3, pmDTO4));
-
+  public void findPersonPMSortedShouldReturnDTOWithProgrammeMembershipsInDescendingOrder() {
     when(personRepositoryMock.findOne(PERSON_ID)).thenReturn(person);
     when(personMapperMock.toDto(person)).thenReturn(personDTO);
 
@@ -153,5 +178,19 @@ public class PersonServiceImplTest {
     Assert.assertTrue(pmList.get(0).getProgrammeStartDate().isAfter(pmList.get(1).getProgrammeStartDate()));
     Assert.assertTrue(pmList.get(1).getProgrammeStartDate().isAfter(pmList.get(2).getProgrammeStartDate()));
     Assert.assertNull(pmList.get(3).getProgrammeStartDate());
+  }
+
+  @Test
+  public void findPersonV2WithProgrammeMembershipsSortedShouldReturnPersonV2WithoutQualifactions() {
+    doReturn(personDTO).when(testObj).findPersonWithProgrammeMembershipsSorted(PERSON_ID);
+    doNothing().when(testObj).copyProperties(personDTOArgumentCaptor.capture(), personV2DTOArgumentCaptor.capture());
+
+    PersonV2DTO result = testObj.findPersonV2WithProgrammeMembershipsSorted(PERSON_ID);
+
+    PersonDTO capturedPersonDTO = personDTOArgumentCaptor.getValue();
+    Assert.assertEquals(capturedPersonDTO, personDTO);
+
+    PersonV2DTO capturedPersonV2DTO = personV2DTOArgumentCaptor.getValue();
+    Assert.assertEquals(capturedPersonV2DTO, result);
   }
 }

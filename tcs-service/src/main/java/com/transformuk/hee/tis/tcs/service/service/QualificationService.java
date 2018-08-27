@@ -49,4 +49,12 @@ public interface QualificationService {
    * @param id the id of the entity
    */
   void delete(Long id);
+
+  /**
+   * find all qualifications related to the person
+   *
+   * @param personId id unique id for the person
+   * @return a list of qualifications linked to the person
+   */
+  List<QualificationDTO> findPersonQualifications(Long personId);
 }
