@@ -325,6 +325,26 @@ public class PersonResource {
   }
 
   /**
+   * GET  /people/v2/:id : get the "id" person.
+   *
+   * This endpoint was created because we want to send back a person obj with no qualification as trust users shouldn't
+   * be able to access it.
+   *
+   * @param id the id of the personDTO to retrieve
+   * @return the ResponseEntity with status 200 (OK) and with body the personDTO, or with status 404 (Not Found)
+   */
+  @GetMapping("/people/v2/{id}")
+  @Timed
+  @PreAuthorize("hasPermission('tis:people::person:', 'View')")
+  public ResponseEntity<PersonV2DTO> getPersonV2(@PathVariable Long id) {
+    log.debug("REST request to get Person : {}", id);
+    personService.canLoggedInUserViewOrAmend(id);
+
+    PersonV2DTO personDTO = personService.findPersonV2WithProgrammeMembershipsSorted(id);
+    return ResponseUtil.wrapOrNotFound(Optional.ofNullable(personDTO));
+  }
+
+  /**
    * DELETE  /people/:id : delete the "id" person.
    *
    * @param id the id of the personDTO to delete
