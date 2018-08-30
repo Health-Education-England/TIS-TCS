@@ -224,6 +224,13 @@ public class ProgrammeMembershipResource {
   /**
    * GET  /trainee/:traineeId/programme-memberships : get all the programmeMemberships relating to a trainee
    *
+   * This was originally created as we thought that the users on the assessment event page needed a list of all programme
+   * memberships but what they really want is a unique list of programmes that the trainee has been enrolled on.
+   *
+   * This is all very poorly designed and named
+   *
+   * If you want a list of all the programme that a trainee is enrolled on, look at the {@link ProgrammeResource#getTraineeProgrammes(Long)}
+   *
    * @return the ResponseEntity with status 200 (OK) and the list of programmeMemberships in body
    */
   @GetMapping("/trainee/{traineeId}/programme-memberships")
