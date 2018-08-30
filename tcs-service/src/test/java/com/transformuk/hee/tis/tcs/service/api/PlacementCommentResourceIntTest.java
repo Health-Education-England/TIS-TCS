@@ -4,7 +4,6 @@ import com.transformuk.hee.tis.tcs.api.dto.PlacementCommentDTO;
 import com.transformuk.hee.tis.tcs.api.enumeration.CommentSource;
 import com.transformuk.hee.tis.tcs.service.Application;
 import com.transformuk.hee.tis.tcs.service.exception.ExceptionTranslator;
-import com.transformuk.hee.tis.tcs.service.model.Placement;
 import com.transformuk.hee.tis.tcs.service.service.CommentService;
 import org.junit.Assert;
 import org.junit.Before;
@@ -23,8 +22,6 @@ import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.setup.MockMvcBuilders;
 import org.springframework.transaction.annotation.Transactional;
 
-import javax.persistence.EntityManager;
-
 import static org.mockito.Mockito.when;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
@@ -42,7 +39,6 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 @SpringBootTest(classes = Application.class)
 public class PlacementCommentResourceIntTest {
 
-
   private static final Long NEW_COMMENT_ID = 1L;
   private static final Long ID_LONG = 1L;
   private static final Long ID_PLACEMENT = 2L;
@@ -53,8 +49,6 @@ public class PlacementCommentResourceIntTest {
   private PageableHandlerMethodArgumentResolver pageableArgumentResolver;
   @Autowired
   private ExceptionTranslator exceptionTranslator;
-  @Autowired
-  private EntityManager entityManager;
   @MockBean
   private CommentService commentService;
   @Captor
@@ -67,24 +61,18 @@ public class PlacementCommentResourceIntTest {
   private static final String BODY = "THIS_IS_A_TEST_BODY";
   private static final String SPECIAL_CHARACTERS = "#%$^&**(";
 
-
   /**
    * Create an entity for this test.
    * <p>
    * This is a static method, as tests for other entities might also need it,
    * if they test an entity which requires the current entity.
    */
-  public static PlacementCommentDTO createEntity(EntityManager em) {
+  public static PlacementCommentDTO createPlacementCommentDTO() {
     PlacementCommentDTO placementCommentDTO = new PlacementCommentDTO();
     placementCommentDTO.setAuthor(AUTHOR);
     placementCommentDTO.setBody(BODY);
     placementCommentDTO.setSource(CommentSource.INTREPID);
     return placementCommentDTO;
-  }
-
-  public static Placement createPlacement(EntityManager em) {
-    Placement placement = new Placement();
-    return placement;
   }
 
   @Before
@@ -96,7 +84,7 @@ public class PlacementCommentResourceIntTest {
         .setControllerAdvice(exceptionTranslator)
         .setMessageConverters(jacksonMessageConverter).build();
 
-    placementCommentDTO = createEntity(entityManager);
+    placementCommentDTO = createPlacementCommentDTO();
 
   }
 
