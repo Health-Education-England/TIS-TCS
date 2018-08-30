@@ -8,7 +8,6 @@ import com.transformuk.hee.tis.tcs.api.dto.PostDTO;
 import com.transformuk.hee.tis.tcs.api.dto.PostGradeDTO;
 import com.transformuk.hee.tis.tcs.api.dto.PostSiteDTO;
 import com.transformuk.hee.tis.tcs.api.dto.PostSpecialtyDTO;
-import com.transformuk.hee.tis.tcs.api.dto.PostViewDTO;
 import com.transformuk.hee.tis.tcs.api.dto.ProgrammeDTO;
 import com.transformuk.hee.tis.tcs.api.dto.SpecialtyDTO;
 import com.transformuk.hee.tis.tcs.api.enumeration.PostGradeType;
@@ -222,20 +221,6 @@ public class PostResourceIntTest {
 
     return post;
   }
-
-  /*public static PostView createPostView(Long specialtyId) {
-    PostView postView = new PostView();
-    postView.setNationalPostNumber(DEFAULT_NATIONAL_POST_NUMBER);
-    postView.setStatus(DEFAULT_STATUS);
-    postView.setOwner(OWNER);
-    postView.setApprovedGradeId(GRADE_ID);
-    postView.setApprovedGradeCode(GRADE_CODE);
-    postView.setPrimarySiteId(SITE_ID);
-    postView.setPrimarySiteCode(SITE_CODE);
-    postView.setPrimarySpecialtyId(specialtyId);
-    postView.setCurrentTraineeSurname("AAAAAA");
-    return postView;
-  }*/
   public static PostView createPostView() {
     PostView postView = new PostView();
     postView.setNationalPostNumber(DEFAULT_NATIONAL_POST_NUMBER);
@@ -245,7 +230,6 @@ public class PostResourceIntTest {
     postView.setApprovedGradeCode(GRADE_CODE);
     postView.setPrimarySiteId(SITE_ID);
     postView.setPrimarySiteCode(SITE_CODE);
-    //postView.setPrimarySpecialtyId(specialtyId);
     postView.setCurrentTraineeSurname("AAAAAA");
     return postView;
   }
