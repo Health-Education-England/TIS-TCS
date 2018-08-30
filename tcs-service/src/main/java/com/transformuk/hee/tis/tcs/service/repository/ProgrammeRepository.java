@@ -29,7 +29,7 @@ public interface ProgrammeRepository extends JpaRepository<Programme, Long>, Jpa
                                                @Param("curriculumId") Long curriculumId);
 
   @Query(value =
-      "SELECT pm.programme " +
+      "SELECT distinct pm.programme " +
       "FROM ProgrammeMembership pm " +
       "WHERE pm.person.id = :personId")
   List<Programme> findByProgrammeMembershipPersonId(@Param("personId") Long personId);
