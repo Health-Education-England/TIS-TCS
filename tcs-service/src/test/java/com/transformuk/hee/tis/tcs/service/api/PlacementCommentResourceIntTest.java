@@ -4,20 +4,18 @@ import com.transformuk.hee.tis.tcs.api.dto.PlacementCommentDTO;
 import com.transformuk.hee.tis.tcs.api.enumeration.CommentSource;
 import com.transformuk.hee.tis.tcs.service.Application;
 import com.transformuk.hee.tis.tcs.service.exception.ExceptionTranslator;
-import com.transformuk.hee.tis.tcs.service.model.Comment;
 import com.transformuk.hee.tis.tcs.service.model.Placement;
-import com.transformuk.hee.tis.tcs.service.model.PlacementDetails;
-import com.transformuk.hee.tis.tcs.service.repository.CommentRepository;
-import com.transformuk.hee.tis.tcs.service.repository.PlacementDetailsRepository;
 import com.transformuk.hee.tis.tcs.service.service.CommentService;
-import com.transformuk.hee.tis.tcs.service.service.mapper.PlacementCommentMapper;
-import org.assertj.core.util.Sets;
+import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
+import org.mockito.ArgumentCaptor;
+import org.mockito.Captor;
 import org.mockito.MockitoAnnotations;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
+import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.data.web.PageableHandlerMethodArgumentResolver;
 import org.springframework.http.converter.json.MappingJackson2HttpMessageConverter;
 import org.springframework.test.context.junit4.SpringRunner;
@@ -26,13 +24,12 @@ import org.springframework.test.web.servlet.setup.MockMvcBuilders;
 import org.springframework.transaction.annotation.Transactional;
 
 import javax.persistence.EntityManager;
-import java.util.List;
-import java.util.Set;
 
-import static org.assertj.core.api.Assertions.assertThat;
+import static org.mockito.Mockito.when;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.put;
+import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.header;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
@@ -46,10 +43,10 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 public class PlacementCommentResourceIntTest {
 
 
-  @Autowired
-  private PlacementDetailsRepository placementDetailsRepository;
-  @Autowired
-  private CommentRepository commentRepository;
+  private static final Long NEW_COMMENT_ID = 1L;
+  private static final Long ID_LONG = 1L;
+  private static final Long ID_PLACEMENT = 2L;
+
   @Autowired
   private MappingJackson2HttpMessageConverter jacksonMessageConverter;
   @Autowired
@@ -57,20 +54,18 @@ public class PlacementCommentResourceIntTest {
   @Autowired
   private ExceptionTranslator exceptionTranslator;
   @Autowired
-  private CommentService commentService;
-  @Autowired
-  private PlacementCommentMapper placementCommentMapper;
-  @Autowired
   private EntityManager entityManager;
+  @MockBean
+  private CommentService commentService;
+  @Captor
+  private ArgumentCaptor<PlacementCommentDTO> placementCommentDTOArgumentCaptor;
 
   private MockMvc restPlacementCommentMock;
   private PlacementCommentDTO placementCommentDTO;
 
   private static final String AUTHOR = "TEST_AUTHOR";
   private static final String BODY = "THIS_IS_A_TEST_BODY";
-
-  private static final String UPDATED_AUTHOR = "UPDATED_AUTHOR";
-  private static final String UPDATED_BODY = "UPDATED_BODY";
+  private static final String SPECIAL_CHARACTERS = "#%$^&**(";
 
 
   /**
@@ -92,7 +87,6 @@ public class PlacementCommentResourceIntTest {
     return placement;
   }
 
-
   @Before
   public void setup() {
     MockitoAnnotations.initMocks(this);
@@ -101,102 +95,107 @@ public class PlacementCommentResourceIntTest {
         .setCustomArgumentResolvers(pageableArgumentResolver)
         .setControllerAdvice(exceptionTranslator)
         .setMessageConverters(jacksonMessageConverter).build();
-  }
 
-  @Before
-  public void initTest() {
     placementCommentDTO = createEntity(entityManager);
+
   }
 
   @Test
   @Transactional
   public void shouldCreatePlacementComment() throws Exception {
-    int databaseSizeBeforeCreate = commentRepository.findAll().size();
+    PlacementCommentDTO placementCommentDTOsaved = new PlacementCommentDTO();
+    placementCommentDTOsaved.setId(NEW_COMMENT_ID);
+    when(commentService.save(placementCommentDTOArgumentCaptor.capture())).thenReturn(placementCommentDTOsaved);
+
     restPlacementCommentMock.perform(post("/api/placementComment")
         .contentType(TestUtil.APPLICATION_JSON_UTF8)
         .content(TestUtil.convertObjectToJsonBytes(placementCommentDTO)))
-        .andExpect(status().isCreated());
-    List<Comment> placementComments = commentRepository.findAll();
-    assertThat(placementComments).hasSize(databaseSizeBeforeCreate + 1);
-    Comment comment = placementComments.get(placementComments.size() - 1);
-    assertThat(comment.getAuthor()).isEqualTo(AUTHOR);
-    assertThat(comment.getBody()).isEqualTo(BODY);
-    assertThat(comment.getId()).isNotZero();
-    assertThat(comment.getId()).isNotNull();
+        .andExpect(status().isCreated())
+        .andExpect(jsonPath("$.id").value(NEW_COMMENT_ID))
+        .andExpect(header().string("location", "/api/placementComment/" + NEW_COMMENT_ID.toString()));
+
+    PlacementCommentDTO placementCommentDTOArgumentCaptorValue = placementCommentDTOArgumentCaptor.getValue();
+    Assert.assertEquals(placementCommentDTO, placementCommentDTOArgumentCaptorValue);
   }
 
   @Test
   @Transactional
   public void shouldNotAllowCreatePlacementIfIdisNotNull() throws Exception {
-    int databaseSizeBeforeCreate = commentRepository.findAll().size();
-    placementCommentDTO.setId(1L);
+    placementCommentDTO.setId(ID_LONG);
     restPlacementCommentMock.perform(post("/api/placementComment")
         .contentType(TestUtil.APPLICATION_JSON_UTF8)
         .content(TestUtil.convertObjectToJsonBytes(placementCommentDTO)))
         .andExpect(status().isBadRequest());
-    List<Comment> placementComments = commentRepository.findAll();
-    assertThat(placementComments).hasSize(databaseSizeBeforeCreate);
   }
 
+  @Test
+  @Transactional
+  public void createPlacementShouldReturnOkWhenCommentContainsSpecialCharacters() throws Exception {
+    placementCommentDTO.setBody(SPECIAL_CHARACTERS);
+    PlacementCommentDTO placementCommentDTOsaved = new PlacementCommentDTO();
+    placementCommentDTOsaved.setId(ID_LONG);
+    placementCommentDTOsaved.setBody(SPECIAL_CHARACTERS);
+    when(commentService.save(placementCommentDTOArgumentCaptor.capture())).thenReturn(placementCommentDTOsaved);
+
+    restPlacementCommentMock.perform(post("/api/placementComment")
+        .contentType(TestUtil.APPLICATION_JSON_UTF8)
+        .content(TestUtil.convertObjectToJsonBytes(placementCommentDTO)))
+        .andExpect(status().isCreated())
+        .andExpect(header().string("location", "/api/placementComment/" + NEW_COMMENT_ID.toString()))
+        .andExpect(jsonPath("$.id").value(NEW_COMMENT_ID));
+
+    PlacementCommentDTO placementCommentDTOcaptured = placementCommentDTOArgumentCaptor.getValue();
+    Assert.assertEquals(placementCommentDTO, placementCommentDTOcaptured);
+    Assert.assertEquals(SPECIAL_CHARACTERS, placementCommentDTOcaptured.getBody());
+  }
 
   @Test
   @Transactional
   public void shouldGetPlacementCommentById() throws Exception {
-    commentRepository.saveAndFlush(placementCommentMapper.toEntity(placementCommentDTO));
-    List<Comment> placementComments = commentRepository.findAll();
-    Comment comment = placementComments.get(placementComments.size() - 1);
-    restPlacementCommentMock.perform(get("/api/placementComment/{id}", comment.getId())
+    PlacementCommentDTO placementCommentDTOreturned = new PlacementCommentDTO();
+    placementCommentDTOreturned.setId(ID_LONG);
+    when(commentService.findById(ID_LONG)).thenReturn(placementCommentDTOreturned);
+
+    restPlacementCommentMock.perform(get("/api/placementComment/{id}", ID_LONG)
         .contentType(TestUtil.APPLICATION_JSON_UTF8))
         .andExpect(status().isOk())
-        .andExpect(jsonPath("$.id").value(comment.getId().intValue()))
-        .andExpect(jsonPath("$.author").value(AUTHOR))
-        .andExpect(jsonPath("$.body").value(BODY));
+        .andExpect(jsonPath("$.id").value(ID_LONG));
   }
 
   @Test
   @Transactional
   public void shouldGetACommentForAPlacementId() throws Exception {
-    // Set up placement comments in the repository
-    commentRepository.saveAndFlush(placementCommentMapper.toEntity(placementCommentDTO));
-    List<Comment> placementComments = commentRepository.findAll();
-    Comment comment = placementComments.get(placementComments.size() - 1);
-    Set<Comment> comments = Sets.newHashSet();
-    comments.add(comment);
+    PlacementCommentDTO placementCommentDTOreturned = new PlacementCommentDTO();
+    placementCommentDTOreturned.setId(ID_LONG);
+    when(commentService.findByPlacementId(ID_PLACEMENT)).thenReturn(placementCommentDTOreturned);
 
-    // Set up a placement and attach the comments
-    PlacementDetails placementDetails = new PlacementDetails();
-    placementDetails.setComments(comments);
-    placementDetailsRepository.saveAndFlush(placementDetails);
-
-    // Add the placement to the comment
-    comment.setPlacement(placementDetails);
-    commentRepository.saveAndFlush(comment);
-
-    restPlacementCommentMock.perform(get("/api/placement/{placementId}/placementComment", comment.getPlacement().getId())
+    restPlacementCommentMock.perform(get("/api/placement/{placementId}/placementComment", ID_PLACEMENT)
         .contentType(TestUtil.APPLICATION_JSON_UTF8))
         .andExpect(status().isOk())
-        .andExpect(jsonPath("$.id").value(comment.getId().intValue()))
-        .andExpect(jsonPath("$.author").value(AUTHOR))
-        .andExpect(jsonPath("$.body").value(BODY));
+        .andExpect(jsonPath("$.id").value(ID_LONG));
   }
 
   @Test
   @Transactional
   public void shouldUpdatePlacementComment() throws Exception {
-    // Set up placement comment in repository
-    commentRepository.saveAndFlush(placementCommentMapper.toEntity(placementCommentDTO));
-    List<Comment> comments = commentRepository.findAll();
-    Comment comment = comments.get(comments.size() - 1);
-    comment.setBody(UPDATED_BODY);
-    comment.setAuthor(UPDATED_AUTHOR);
-    Long commentId = comment.getId();
-    PlacementCommentDTO placementCommentDTO = placementCommentMapper.toDto(comment);
+    placementCommentDTO.setId(ID_LONG);
+    PlacementCommentDTO placementCommentDTOupdated = new PlacementCommentDTO();
+    placementCommentDTOupdated.setId(ID_LONG);
+
+    when(commentService.save(placementCommentDTO)).thenReturn(placementCommentDTOupdated);
+
     restPlacementCommentMock.perform(put("/api/placementComment")
         .contentType(TestUtil.APPLICATION_JSON_UTF8)
         .content(TestUtil.convertObjectToJsonBytes(placementCommentDTO)))
-        .andExpect(status().isOk());
-    Comment result = commentRepository.findOne(commentId);
-    assertThat(result.getBody().equals(UPDATED_BODY));
-    assertThat(result.getAuthor().equals(UPDATED_AUTHOR));
+        .andExpect(status().isOk())
+        .andExpect(jsonPath("$.id").value(ID_LONG));
+  }
+
+  @Test
+  public void updateShouldReturnBadRequestIfIdIsNull() throws Exception {
+    restPlacementCommentMock.perform(put("/api/placementComment")
+        .contentType(TestUtil.APPLICATION_JSON_UTF8)
+        .content(TestUtil.convertObjectToJsonBytes(placementCommentDTO)))
+        .andExpect(status().isBadRequest());
   }
 }
