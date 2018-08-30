@@ -8,6 +8,7 @@ import com.transformuk.hee.tis.tcs.api.dto.PostDTO;
 import com.transformuk.hee.tis.tcs.api.dto.PostGradeDTO;
 import com.transformuk.hee.tis.tcs.api.dto.PostSiteDTO;
 import com.transformuk.hee.tis.tcs.api.dto.PostSpecialtyDTO;
+import com.transformuk.hee.tis.tcs.api.dto.PostViewDTO;
 import com.transformuk.hee.tis.tcs.api.dto.ProgrammeDTO;
 import com.transformuk.hee.tis.tcs.api.dto.SpecialtyDTO;
 import com.transformuk.hee.tis.tcs.api.enumeration.PostGradeType;
@@ -40,6 +41,7 @@ import com.transformuk.hee.tis.tcs.service.service.PlacementService;
 import com.transformuk.hee.tis.tcs.service.service.PostService;
 import com.transformuk.hee.tis.tcs.service.service.mapper.PlacementViewMapper;
 import com.transformuk.hee.tis.tcs.service.service.mapper.PostMapper;
+import com.transformuk.hee.tis.tcs.service.service.mapper.PostViewMapper;
 import org.apache.commons.codec.net.URLCodec;
 import org.hamcrest.core.StringContains;
 import org.junit.Before;
@@ -152,6 +154,9 @@ public class PostResourceIntTest {
   private PostMapper postMapper;
 
   @Autowired
+  private PostViewMapper postViewMapper;
+
+  @Autowired
   private PostService postService;
 
   @Autowired
@@ -218,7 +223,7 @@ public class PostResourceIntTest {
     return post;
   }
 
-  public static PostView createPostView(Long specialtyId) {
+  /*public static PostView createPostView(Long specialtyId) {
     PostView postView = new PostView();
     postView.setNationalPostNumber(DEFAULT_NATIONAL_POST_NUMBER);
     postView.setStatus(DEFAULT_STATUS);
@@ -228,10 +233,22 @@ public class PostResourceIntTest {
     postView.setPrimarySiteId(SITE_ID);
     postView.setPrimarySiteCode(SITE_CODE);
     postView.setPrimarySpecialtyId(specialtyId);
-
+    postView.setCurrentTraineeSurname("AAAAAA");
+    return postView;
+  }*/
+  public static PostView createPostView() {
+    PostView postView = new PostView();
+    postView.setNationalPostNumber(DEFAULT_NATIONAL_POST_NUMBER);
+    postView.setStatus(DEFAULT_STATUS);
+    postView.setOwner(OWNER);
+    postView.setApprovedGradeId(GRADE_ID);
+    postView.setApprovedGradeCode(GRADE_CODE);
+    postView.setPrimarySiteId(SITE_ID);
+    postView.setPrimarySiteCode(SITE_CODE);
+    //postView.setPrimarySpecialtyId(specialtyId);
+    postView.setCurrentTraineeSurname("AAAAAA");
     return postView;
   }
-
   public static Specialty createSpecialty() {
     Specialty specialty = new Specialty();
     specialty.setCollege(SPECIALTY_COLLEGE);
@@ -287,6 +304,7 @@ public class PostResourceIntTest {
 
   @Before
   public void initTest() throws Exception {
+    postView = createPostView();
     post = createEntity();
     post.setOwner(OWNER);
     em.persist(post);
@@ -573,6 +591,49 @@ public class PostResourceIntTest {
         .andExpect(jsonPath("$.[*].nationalPostNumber").value(hasItem(TEST_POST_NUMBER)))
         .andExpect(jsonPath("$.[*].status").value(hasItem(Status.CURRENT.name())));
 
+  }
+  @Test
+  @Transactional
+  public void shouldOrderPostsByNationalPostNumberDescending() throws Exception {
+
+    List<String> npns = Arrays.asList("npn-01", "npn-02", "npn-03");
+    Post post1 = createEntity();
+    post1.setNationalPostNumber(npns.get(0));
+    postRepository.saveAndFlush(post1);
+    Post post2 = createEntity();
+    post2.setNationalPostNumber(npns.get(1));
+    postRepository.saveAndFlush(post2);
+    Post post3 = createEntity();
+    post3.setNationalPostNumber(npns.get(2));
+    postRepository.saveAndFlush(post3);
+    restPostMockMvc.perform(get("/api/posts?page=0&size=100&sort=nationalPostNumber,desc")
+        .contentType(TestUtil.APPLICATION_JSON_UTF8))
+        .andExpect(jsonPath("$[0].nationalPostNumber").value("npn-03"))
+        .andExpect(jsonPath("$[1].nationalPostNumber").value("npn-02"))
+        .andExpect(jsonPath("$[2].nationalPostNumber").value("npn-01"))
+        .andExpect(jsonPath("$[3].nationalPostNumber").value("AAAAAAAAAA"));
+  }
+
+  @Test
+  @Transactional
+  public void shouldOrderPostsByNationalPostNumberAscending() throws Exception {
+    List<String> npns1 = Arrays.asList("npn-01", "npn-02", "npn-03");
+    Post post11 = createEntity();
+    post11.setNationalPostNumber(npns1.get(0));
+    postRepository.saveAndFlush(post11);
+    Post post22 = createEntity();
+    post22.setNationalPostNumber(npns1.get(1));
+    postRepository.saveAndFlush(post22);
+    Post post33 = createEntity();
+    post33.setNationalPostNumber(npns1.get(2));
+    postRepository.saveAndFlush(post33);
+    List<Post> posts = postRepository.findAll();
+    restPostMockMvc.perform(get("/api/posts?page=0&size=100&sort=nationalPostNumber,asc")
+        .contentType(TestUtil.APPLICATION_JSON_UTF8))
+        .andExpect(jsonPath("$[0].nationalPostNumber").value("AAAAAAAAAA"))
+        .andExpect(jsonPath("$[1].nationalPostNumber").value("npn-01"))
+        .andExpect(jsonPath("$[2].nationalPostNumber").value("npn-02"))
+        .andExpect(jsonPath("$[3].nationalPostNumber").value("npn-03"));
   }
 
   @Test

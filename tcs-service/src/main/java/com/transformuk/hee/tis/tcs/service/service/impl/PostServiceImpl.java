@@ -516,7 +516,7 @@ public class PostServiceImpl implements PostService {
     log.info("running post query");
     stopWatch = new StopWatch();
     stopWatch.start();
-    List<PostViewDTO> posts = namedParameterJdbcTemplate.query(query, paramSource,new PostServiceImpl.PostViewRowMapper());
+    List<PostViewDTO> posts = namedParameterJdbcTemplate.query(query, paramSource, new PostServiceImpl.PostViewRowMapper());
     stopWatch.stop();
     log.info("post query finished in: [{}]s", stopWatch.getTotalTimeSeconds());
 
@@ -646,7 +646,7 @@ public class PostServiceImpl implements PostService {
     }
   }
 
-  private String createWhereClause(final String searchString, final List<ColumnFilter> columnFilters) {
+  protected String createWhereClause(final String searchString, final List<ColumnFilter> columnFilters) {
     final StringBuilder whereClause = new StringBuilder();
     whereClause.append(" WHERE 1=1 ");
 
@@ -766,7 +766,7 @@ public class PostServiceImpl implements PostService {
    * @param pageable
    * @return
    */
-  private String createOrderByClauseWithParams(Pageable pageable) {
+  protected String createOrderByClauseWithParams(Pageable pageable) {
     final StringBuilder orderByClause = new StringBuilder();
     if (pageable.getSort() != null) {
       if (pageable.getSort().iterator().hasNext()) {
@@ -822,7 +822,7 @@ public class PostServiceImpl implements PostService {
     }
   }
 
-  private class PostViewRowMapper implements RowMapper<PostViewDTO> {
+  protected class PostViewRowMapper implements RowMapper<PostViewDTO> {
 
     @Override
     public PostViewDTO mapRow(ResultSet rs, int i) throws SQLException {
