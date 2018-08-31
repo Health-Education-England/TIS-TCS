@@ -19,6 +19,7 @@ import org.apache.commons.lang3.ObjectUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.beans.BeanUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.*;
 import org.springframework.data.jpa.domain.Specification;
@@ -466,6 +467,19 @@ public class PersonServiceImpl implements PersonService {
     }
 
     return personDTO;
+  }
+
+  @Override
+  @Transactional(readOnly = true)
+  public PersonV2DTO findPersonV2WithProgrammeMembershipsSorted(final Long id) {
+    PersonDTO temp = findPersonWithProgrammeMembershipsSorted(id);
+    PersonV2DTO personV2DTO = new PersonV2DTO();
+    copyProperties(temp, personV2DTO);
+    return personV2DTO;
+  }
+
+  protected void copyProperties(PersonDTO temp, PersonV2DTO personV2DTO) {
+    BeanUtils.copyProperties(temp, personV2DTO);
   }
 
   private void clearSensitiveData(final PersonalDetails personalDetails) {
