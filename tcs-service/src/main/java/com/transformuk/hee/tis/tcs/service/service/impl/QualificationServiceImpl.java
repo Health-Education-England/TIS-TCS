@@ -1,12 +1,15 @@
 package com.transformuk.hee.tis.tcs.service.service.impl;
 
+import com.google.common.base.Preconditions;
 import com.transformuk.hee.tis.tcs.api.dto.QualificationDTO;
+import com.transformuk.hee.tis.tcs.service.model.Person;
 import com.transformuk.hee.tis.tcs.service.model.Qualification;
 import com.transformuk.hee.tis.tcs.service.repository.QualificationRepository;
 import com.transformuk.hee.tis.tcs.service.service.QualificationService;
 import com.transformuk.hee.tis.tcs.service.service.mapper.QualificationMapper;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.data.domain.Example;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
@@ -98,5 +101,20 @@ public class QualificationServiceImpl implements QualificationService {
   public void delete(Long id) {
     log.debug("Request to delete Qualification : {}", id);
     qualificationRepository.delete(id);
+  }
+
+  @Transactional(readOnly = true)
+  @Override
+  public List<QualificationDTO> findPersonQualifications(Long personId) {
+    Preconditions.checkNotNull(personId);
+
+    Person person = new Person();
+    person.setId(personId);
+    Qualification qualificationExample = new Qualification();
+    qualificationExample.setPerson(person);
+    Example<Qualification> example = Example.of(qualificationExample);
+    List<Qualification> personQualifications = qualificationRepository.findAll(example);
+
+    return qualificationMapper.toDTOs(personQualifications);
   }
 }

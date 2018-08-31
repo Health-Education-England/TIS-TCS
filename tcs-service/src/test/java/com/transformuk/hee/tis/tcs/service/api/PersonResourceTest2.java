@@ -2,6 +2,7 @@ package com.transformuk.hee.tis.tcs.service.api;
 
 import com.transformuk.hee.tis.tcs.TestUtils;
 import com.transformuk.hee.tis.tcs.api.dto.PersonDTO;
+import com.transformuk.hee.tis.tcs.api.dto.PersonV2DTO;
 import com.transformuk.hee.tis.tcs.api.enumeration.Status;
 import com.transformuk.hee.tis.tcs.service.Application;
 import com.transformuk.hee.tis.tcs.service.api.decorator.PersonViewDecorator;
@@ -37,6 +38,7 @@ import static org.mockito.Mockito.doThrow;
 import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
@@ -125,7 +127,7 @@ public class PersonResourceTest2 {
     doThrow(new AccessUnauthorisedException("")).when(personServiceMock).canLoggedInUserViewOrAmend(1L);
 
     mockMvc.perform(
-        MockMvcRequestBuilders.get("/api/people/{id}", 1L)
+        get("/api/people/{id}", 1L)
             .contentType(TestUtil.APPLICATION_JSON_UTF8))
         .andExpect(status().isUnauthorized())
         .andExpect(jsonPath("$.message").value("error.accessDenied"));
@@ -153,7 +155,7 @@ public class PersonResourceTest2 {
     doThrow(new AccessUnauthorisedException("")).when(personServiceMock).canLoggedInUserViewOrAmend(1L);
 
     mockMvc.perform(
-        MockMvcRequestBuilders.get("/api/people/{id}/basic", 1L)
+        get("/api/people/{id}/basic", 1L)
             .contentType(TestUtil.APPLICATION_JSON_UTF8))
         .andExpect(status().isUnauthorized())
         .andExpect(jsonPath("$.message").value("error.accessDenied"));
@@ -167,7 +169,7 @@ public class PersonResourceTest2 {
     doThrow(new AccessUnauthorisedException("")).when(personServiceMock).canLoggedInUserViewOrAmend(1L);
 
     mockMvc.perform(
-        MockMvcRequestBuilders.get("/api/people/{id}/placements", 1L)
+        get("/api/people/{id}/placements", 1L)
             .contentType(TestUtil.APPLICATION_JSON_UTF8))
         .andExpect(status().isUnauthorized())
         .andExpect(jsonPath("$.message").value("error.accessDenied"));
@@ -186,7 +188,7 @@ public class PersonResourceTest2 {
     doThrow(new AccessUnauthorisedException("")).when(personServiceMock).canLoggedInUserViewOrAmend(personId);
 
     mockMvc.perform(
-        MockMvcRequestBuilders.get("/api/people/gmc/{gmcId}/placements", gmcId)
+        get("/api/people/gmc/{gmcId}/placements", gmcId)
             .contentType(TestUtil.APPLICATION_JSON_UTF8))
         .andExpect(status().isUnauthorized())
         .andExpect(jsonPath("$.message").value("error.accessDenied"));
@@ -201,7 +203,7 @@ public class PersonResourceTest2 {
     doThrow(new AccessUnauthorisedException("")).when(personServiceMock).canLoggedInUserViewOrAmend(personId);
 
     mockMvc.perform(
-        MockMvcRequestBuilders.get("/api/people/gmc/{gmcId}/placements/new", gmcId)
+        get("/api/people/gmc/{gmcId}/placements/new", gmcId)
             .contentType(TestUtil.APPLICATION_JSON_UTF8))
         .andExpect(status().isUnauthorized())
         .andExpect(jsonPath("$.message").value("error.accessDenied"));
@@ -214,10 +216,25 @@ public class PersonResourceTest2 {
     doThrow(new AccessUnauthorisedException("")).when(personServiceMock).canLoggedInUserViewOrAmend(personId);
 
     mockMvc.perform(
-        MockMvcRequestBuilders.get("/api/people/{id}/placements/new", personId)
+        get("/api/people/{id}/placements/new", personId)
             .contentType(TestUtil.APPLICATION_JSON_UTF8))
         .andExpect(status().isUnauthorized())
         .andExpect(jsonPath("$.message").value("error.accessDenied"));
     verify(placementServiceMock, never()).getPlacementForTrainee(personId);
+  }
+
+  @Test
+  public void getPersonV2ShouldReturnPersonWithNoQualificationData() throws Exception {
+    long personId = 1L;
+    PersonV2DTO foundPerson = new PersonV2DTO();
+
+    when(personServiceMock.findPersonV2WithProgrammeMembershipsSorted(personId)).thenReturn(foundPerson);
+
+    mockMvc.perform(get("/api/people/v2/{id}", personId)
+        .contentType(TestUtil.APPLICATION_JSON_UTF8))
+        .andExpect(status().isOk())
+        .andExpect(jsonPath("$.qualifications").doesNotExist());
+
+    verify(personServiceMock).findPersonV2WithProgrammeMembershipsSorted(personId);
   }
 }

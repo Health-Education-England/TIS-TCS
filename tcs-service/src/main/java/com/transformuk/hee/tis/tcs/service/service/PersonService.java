@@ -3,6 +3,7 @@ package com.transformuk.hee.tis.tcs.service.service;
 import com.transformuk.hee.tis.tcs.api.dto.PersonBasicDetailsDTO;
 import com.transformuk.hee.tis.tcs.api.dto.PersonDTO;
 import com.transformuk.hee.tis.tcs.api.dto.PersonLiteDTO;
+import com.transformuk.hee.tis.tcs.api.dto.PersonV2DTO;
 import com.transformuk.hee.tis.tcs.api.dto.PersonViewDTO;
 import com.transformuk.hee.tis.tcs.service.api.util.BasicPage;
 import com.transformuk.hee.tis.tcs.service.model.ColumnFilter;
@@ -84,6 +85,15 @@ public interface PersonService {
 
 
     PersonDTO findPersonWithProgrammeMembershipsSorted(Long id);
+
+  /**
+   * Alternate version of the find person method that returns the same person but with no qualification data.
+   * Implemented for the Trust Access work
+   *
+   * @param id the ID of the trainee
+   * @return
+   */
+    PersonV2DTO findPersonV2WithProgrammeMembershipsSorted(Long id);
 
     /**
      * Get a person's ID by Gmc Id

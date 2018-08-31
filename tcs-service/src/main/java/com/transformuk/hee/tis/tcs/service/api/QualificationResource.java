@@ -67,7 +67,7 @@ public class QualificationResource {
    */
   @PostMapping("/qualifications")
   @Timed
-  @PreAuthorize("hasPermission('tis:people::person:', 'Create')")
+  @PreAuthorize("hasPermission('tis:tcs::qualification:', 'Create')")
   public ResponseEntity<QualificationDTO> createQualification(@RequestBody @Validated(Create.class) QualificationDTO qualificationDTO)
       throws URISyntaxException, MethodArgumentNotValidException {
     log.debug("REST request to save Qualification : {}", qualificationDTO);
@@ -89,7 +89,7 @@ public class QualificationResource {
    */
   @PutMapping("/qualifications")
   @Timed
-  @PreAuthorize("hasPermission('tis:people::person:', 'Update')")
+  @PreAuthorize("hasPermission('tis:tcs::qualification:', 'Update')")
   public ResponseEntity<QualificationDTO> updateQualification(@RequestBody @Validated(Update.class) QualificationDTO qualificationDTO)
       throws URISyntaxException, MethodArgumentNotValidException {
     log.debug("REST request to update Qualification : {}", qualificationDTO);
@@ -112,7 +112,7 @@ public class QualificationResource {
    */
   @GetMapping("/qualifications")
   @Timed
-  @PreAuthorize("hasPermission('tis:people::person:', 'View')")
+  @PreAuthorize("hasPermission('tis:tcs::qualification:', 'View')")
   public ResponseEntity<List<QualificationDTO>> getAllQualifications(@ApiParam Pageable pageable) {
     log.debug("REST request to get a page of Qualifications");
     Page<QualificationDTO> page = qualificationService.findAll(pageable);
@@ -128,11 +128,26 @@ public class QualificationResource {
    */
   @GetMapping("/qualifications/{id}")
   @Timed
-  @PreAuthorize("hasPermission('tis:people::person:', 'View')")
+  @PreAuthorize("hasPermission('tis:tcs::qualification:', 'View')")
   public ResponseEntity<QualificationDTO> getQualification(@PathVariable Long id) {
     log.debug("REST request to get Qualification : {}", id);
     QualificationDTO qualificationDTO = qualificationService.findOne(id);
     return ResponseUtil.wrapOrNotFound(Optional.ofNullable(qualificationDTO));
+  }
+
+  /**
+   * GET  /qualifications/:id : get the "id" qualification.
+   *
+   * @param personId the id of the qualificationDTO to retrieve
+   * @return the ResponseEntity with status 200 (OK) and with body the qualificationDTO, or with status 404 (Not Found)
+   */
+  @GetMapping("/people/{personId}/qualifications")
+  @Timed
+  @PreAuthorize("hasPermission('tis:tcs::qualification:', 'View')")
+  public ResponseEntity<List<QualificationDTO>> getPersonQualifications(@PathVariable Long personId) {
+    log.debug("REST request to get Qualification : {}", personId);
+    List<QualificationDTO> personQualifications = qualificationService.findPersonQualifications(personId);
+    return ResponseUtil.wrapOrNotFound(Optional.ofNullable(personQualifications));
   }
 
   /**
@@ -159,7 +174,7 @@ public class QualificationResource {
    */
   @PatchMapping("/qualifications")
   @Timed
-  @PreAuthorize("hasPermission('tis:people::person:', 'Update')")
+  @PreAuthorize("hasPermission('tis:tcs::qualification:', 'Update')")
   public ResponseEntity<List<QualificationDTO>> patchQualifications(@Valid @RequestBody List<QualificationDTO> qualificationDTOs) throws URISyntaxException {
     log.debug("REST request to patch qualifications: {}", qualificationDTOs);
     List<QualificationDTO> result = qualificationService.save(qualificationDTOs);
