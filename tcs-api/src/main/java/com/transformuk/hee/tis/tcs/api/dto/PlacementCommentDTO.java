@@ -10,6 +10,7 @@ import javax.validation.constraints.DecimalMin;
 import javax.validation.constraints.NotNull;
 import javax.validation.constraints.Null;
 import java.io.Serializable;
+import java.util.Objects;
 
 @ApiModel("PlacementComment")
 public class PlacementCommentDTO implements Serializable {
@@ -51,4 +52,21 @@ public class PlacementCommentDTO implements Serializable {
 	public CommentSource getSource() { return source; }
 
 	public void setSource(CommentSource source) { this.source = source; }
+
+  @Override
+  public boolean equals(Object o) {
+    if (this == o) return true;
+    if (o == null || getClass() != o.getClass()) return false;
+    PlacementCommentDTO that = (PlacementCommentDTO) o;
+    return Objects.equals(id, that.id) &&
+        Objects.equals(body, that.body) &&
+        Objects.equals(author, that.author) &&
+        source == that.source;
+  }
+
+  @Override
+  public int hashCode() {
+
+    return Objects.hash(id, body, author, source);
+  }
 }

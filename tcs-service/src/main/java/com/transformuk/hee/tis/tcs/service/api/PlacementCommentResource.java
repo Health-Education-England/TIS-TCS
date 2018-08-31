@@ -137,13 +137,13 @@ public class PlacementCommentResource {
 	/**
 	 * PUT  /placementComment : Update a placement comment.
 	 *
-	 * @param placementCommentDTO the placementCommentDTO to create
-	 * @return the ResponseEntity with status 201 (Created) and with body the new placementCommentDTO, or with status 400 (Bad Request) if the placementCommentDTO has already an ID
+	 * @param placementCommentDTO the placementCommentDTO to update
+	 * @return the ResponseEntity with status 200 (OK), or with status 400 (Bad Request)
 	 * @throws URISyntaxException if the Location URI syntax is incorrect
 	 */
 	@ApiOperation(value = "Updates an existing placement comment", response = PlacementCommentDTO.class, consumes = APPLICATION_JSON, produces = APPLICATION_JSON)
 	@ApiResponses(value = {
-			@ApiResponse(code = 201, message = "Placement comment uploaded successfully", response = PlacementCommentDTO.class),
+			@ApiResponse(code = 200, message = "Placement comment updated successfully", response = PlacementCommentDTO.class),
 			@ApiResponse(code = 400, message = "Invalid parameters", response = String.class),
 			@ApiResponse(code = 401, message = "User not authenticated", response = String.class),
 			@ApiResponse(code = 403, message = "User not authorised to perform operation", response = String.class),
@@ -156,8 +156,7 @@ public class PlacementCommentResource {
 		log.debug("REST request to update a Placement comment : {}", placementCommentDTO);
 
 		final PlacementCommentDTO result = commentService.save(placementCommentDTO);
-		return ResponseEntity.created(new URI("/api/placementComment/" + result.getId()))
-				.headers(HeaderUtil.createEntityCreationAlert(ENTITY_NAME, result.getId().toString()))
+		return ResponseEntity.ok()
 				.body(result);
 	}
 }
