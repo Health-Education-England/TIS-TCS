@@ -12,7 +12,7 @@
 
   <groupId>com.transformuk.hee.tis</groupId>
   <artifactId>tcs-service</artifactId>
-  <version>3.9.4</version>
+  <version>3.9.5</version>
   <packaging>war</packaging>
   <name>tcs-service</name>
 
@@ -21,7 +21,7 @@
   </prerequisites>
 
   <properties>
-    <argLine>-Djava.security.egd=file:/dev/./urandom -Xmx256m</argLine>
+    <argLine>-Djava.security.egd=file:/dev/./urandom -Xmx1g</argLine>
     <assertj.version>3.6.2</assertj.version>
     <awaitility.version>2.0.0</awaitility.version>
     <commons-io.version>2.5</commons-io.version>
@@ -192,7 +192,7 @@
     <dependency>
       <groupId>com.transformuk.hee.tis</groupId>
       <artifactId>tcs-api</artifactId>
-      <version>3.3.2</version>
+      <version>4.0.0</version>
     </dependency>
     <dependency>
       <groupId>com.zaxxer</groupId>
@@ -486,6 +486,8 @@
               <version>${mapstruct.version}</version>
             </path>
           </annotationProcessorPaths>
+          <meminitial>1024m</meminitial>
+          <maxmem>2048m</maxmem>
         </configuration>
       </plugin>
       <plugin>

@@ -30,7 +30,9 @@ import java.util.Collections;
 import java.util.List;
 import java.util.Map;
 import java.util.Objects;
+import java.util.Optional;
 import java.util.Set;
+import java.util.function.Predicate;
 import java.util.stream.Collectors;
 
 /**
@@ -145,6 +147,67 @@ public class ProgrammeMembershipServiceImpl implements ProgrammeMembershipServic
     return attachCurricula(programmeMembershipDTOS);
   }
 
+  /**
+   * Method just like the find programme memberships for trainee but rolls up the programme (group by) and also
+   * attaches all the curricula on those rolled up programmes into a single programme
+   * <p>
+   * The initial thoughts around the attachment of curricula was that we use a Set collection as this would then
+   * remove all duplicates. This was found to be an issue as the CurriculaDTO equals/hashcode methods are scenario specific
+   * code. So we're just using a list now
+   *
+   * @param traineeId
+   * @return
+   */
+  @Transactional(readOnly = true)
+  @Override
+  public List<ProgrammeMembershipCurriculaDTO> findProgrammeMembershipsForTraineeRolledUp(Long traineeId) {
+    Preconditions.checkNotNull(traineeId);
+
+    List<ProgrammeMembershipCurriculaDTO> programmeMembershipsForTrainee = findProgrammeMembershipsForTrainee(traineeId);
+
+    List<ProgrammeMembershipCurriculaDTO> result = Lists.newArrayList();
+    if (CollectionUtils.isNotEmpty(programmeMembershipsForTrainee)) {
+      for (ProgrammeMembershipCurriculaDTO programmeMembershipCurriculaDTO : programmeMembershipsForTrainee) {
+        Optional<ProgrammeMembershipCurriculaDTO> foundPMCOptional = getSameProgrammeMembershipForDates(result, programmeMembershipCurriculaDTO);
+        if (foundPMCOptional.isPresent()) {
+          ProgrammeMembershipCurriculaDTO foundPMC = foundPMCOptional.get();
+
+          List<CurriculumMembershipDTO> curriculumMemberships = Lists.newArrayList();
+          if (foundPMC.getCurriculumMemberships() != null) {
+            curriculumMemberships.addAll(foundPMC.getCurriculumMemberships());
+          }
+          //merge the existing curricula memberships with the new ones
+          if (programmeMembershipCurriculaDTO.getCurriculumMemberships() != null) {
+            curriculumMemberships.addAll(programmeMembershipCurriculaDTO.getCurriculumMemberships());
+          }
+
+          foundPMC.setCurriculumMemberships(curriculumMemberships);
+        } else {
+          result.add(programmeMembershipCurriculaDTO);
+        }
+      }
+    }
+    return result;
+  }
+
+  //Loop through a collection of PMC DTO and if theres one already that matches the programme id, dates and type then return that one
+  private Optional<ProgrammeMembershipCurriculaDTO> getSameProgrammeMembershipForDates(List<ProgrammeMembershipCurriculaDTO> result, ProgrammeMembershipCurriculaDTO programmeMembershipCurriculaDTO) {
+    if (CollectionUtils.isNotEmpty(result)) {
+      return result.stream()
+          .filter(isProgrammeMembershipEffectivelyTheSame(programmeMembershipCurriculaDTO))
+          .findAny();
+    }
+    return Optional.empty();
+  }
+
+  private Predicate<ProgrammeMembershipCurriculaDTO> isProgrammeMembershipEffectivelyTheSame(ProgrammeMembershipCurriculaDTO programmeMembershipCurriculaDTO) {
+    return pmc -> Objects.equals(pmc.getProgrammeId(), programmeMembershipCurriculaDTO.getProgrammeId()) &&
+        Objects.equals(pmc.getProgrammeMembershipType(), programmeMembershipCurriculaDTO.getProgrammeMembershipType()) &&
+        Objects.equals(pmc.getProgrammeStartDate(), programmeMembershipCurriculaDTO.getProgrammeStartDate()) &&
+        Objects.equals(pmc.getProgrammeEndDate(), programmeMembershipCurriculaDTO.getProgrammeEndDate());
+  }
+
+
   @Transactional(readOnly = true)
   @Override
   public List<ProgrammeMembershipCurriculaDTO> findProgrammeMembershipsForTrainee(Long traineeId) {
@@ -153,10 +216,9 @@ public class ProgrammeMembershipServiceImpl implements ProgrammeMembershipServic
     List<ProgrammeMembership> foundProgrammeMemberships = programmeMembershipRepository
         .findByTraineeId(traineeId);
 
-    if(CollectionUtils.isNotEmpty(foundProgrammeMemberships)) {
+    if (CollectionUtils.isNotEmpty(foundProgrammeMemberships)) {
       List<ProgrammeMembershipDTO> programmeMembershipDTOS = programmeMembershipMapper.allEntityToDto(foundProgrammeMemberships);
       List<ProgrammeMembershipCurriculaDTO> result = attachCurricula(programmeMembershipDTOS);
-
 
       //get the programme names and numbers
       Set<Long> programmeIds = foundProgrammeMemberships.stream()
