@@ -646,7 +646,7 @@ public class PostServiceImpl implements PostService {
     }
   }
 
-  private String createWhereClause(final String searchString, final List<ColumnFilter> columnFilters) {
+  protected String createWhereClause(final String searchString, final List<ColumnFilter> columnFilters) {
     final StringBuilder whereClause = new StringBuilder();
     whereClause.append(" WHERE 1=1 ");
 
@@ -822,7 +822,7 @@ public class PostServiceImpl implements PostService {
     }
   }
 
-  private class PostViewRowMapper implements RowMapper<PostViewDTO> {
+  protected class PostViewRowMapper implements RowMapper<PostViewDTO> {
 
     @Override
     public PostViewDTO mapRow(ResultSet rs, int i) throws SQLException {
