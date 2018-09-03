@@ -73,9 +73,6 @@ public class ContactDetailsDTO implements Serializable {
   @Email(message = "Valid email format required", groups = {Update.class, Create.class})
   private String email;
 
-  @Email(message = "Valid workEmail format required", groups = {Update.class, Create.class})
-  private String workEmail;
-
   private String address1;
 
   private String address2;
@@ -166,14 +163,6 @@ public class ContactDetailsDTO implements Serializable {
 
   public void setEmail(String email) {
     this.email = email;
-  }
-
-  public String getWorkEmail() {
-    return workEmail;
-  }
-
-  public void setWorkEmail(String workEmail) {
-    this.workEmail = workEmail;
   }
 
   public String getAddress1() {
@@ -276,7 +265,6 @@ public class ContactDetailsDTO implements Serializable {
         ", telephoneNumber='" + telephoneNumber + '\'' +
         ", mobileNumber='" + mobileNumber + '\'' +
         ", email='" + email + '\'' +
-        ", workEmail='" + workEmail + '\'' +
         ", address1='" + address1 + '\'' +
         ", address2='" + address2 + '\'' +
         ", address3='" + address3 + '\'' +

@@ -41,8 +41,6 @@ public class ContactDetails implements Serializable {
 
   private String email;
 
-  private String workEmail;
-
   private String address1;
 
   private String address2;
@@ -187,19 +185,6 @@ public class ContactDetails implements Serializable {
     return this;
   }
 
-  public String getWorkEmail() {
-    return workEmail;
-  }
-
-  public void setWorkEmail(String workEmail) {
-    this.workEmail = workEmail;
-  }
-
-  public ContactDetails workEmail(String workEmail) {
-    this.workEmail = workEmail;
-    return this;
-  }
-
   public String getAddress1() {
     return address1;
   }
@@ -319,7 +304,6 @@ public class ContactDetails implements Serializable {
         ", telephoneNumber='" + telephoneNumber + '\'' +
         ", mobileNumber='" + mobileNumber + '\'' +
         ", email='" + email + '\'' +
-        ", workEmail='" + workEmail + '\'' +
         ", address1='" + address1 + '\'' +
         ", address2='" + address2 + '\'' +
         ", address3='" + address3 + '\'' +
