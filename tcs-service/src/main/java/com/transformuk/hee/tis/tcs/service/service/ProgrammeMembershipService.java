@@ -66,4 +66,6 @@ public interface ProgrammeMembershipService {
    */
   List<ProgrammeMembershipCurriculaDTO> findProgrammeMembershipsForTrainee(Long traineeId);
 
+  List<ProgrammeMembershipCurriculaDTO> findProgrammeMembershipsForTraineeRolledUp(Long traineeId);
+
 }

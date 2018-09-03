@@ -242,4 +242,23 @@ public class ProgrammeMembershipResource {
 
     return new ResponseEntity<>(programmeMembershipDTOS, HttpStatus.OK);
   }
+
+  /**
+   * GET  /trainee/:traineeId/programme-memberships/rolled-up
+   *
+   * This endpoint is very much like getProgrammeMembershipForTrainee method but it rolls up (group by and dedupes) the programme memberships
+   * that have the same programme and dates (imagine doing an sql distinct on the programme id, start, end dates and membership type)
+   * then attach the curricula to them
+   *
+   * @return the ResponseEntity with status 200 (OK) and the list of programmeMemberships in body
+   */
+  @GetMapping("/trainee/{traineeId}/programme-memberships/rolled-up")
+  @Timed
+  @PreAuthorize("hasPermission('tis:people::person:', 'View')")
+  public ResponseEntity<List<ProgrammeMembershipCurriculaDTO>> getRolledUpProgrammeMembershipForTrainee(@PathVariable Long traineeId) {
+    log.debug("REST request to get ProgrammeMemberships for trainee {}", traineeId);
+    List<ProgrammeMembershipCurriculaDTO> programmeMembershipDTOS = programmeMembershipService.findProgrammeMembershipsForTraineeRolledUp(traineeId);
+
+    return new ResponseEntity<>(programmeMembershipDTOS, HttpStatus.OK);
+  }
 }

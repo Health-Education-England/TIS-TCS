@@ -57,8 +57,6 @@ public class PersonV2DTO implements Serializable {
 
   private GdcDetailsDTO gdcDetails;
 
-  private Set<ProgrammeMembershipDTO> programmeMemberships = new HashSet<>();
-
   private RightToWorkDTO rightToWork;
 
   public Long getId() {
@@ -189,14 +187,6 @@ public class PersonV2DTO implements Serializable {
     this.regulator = regulator;
   }
 
-  public Set<ProgrammeMembershipDTO> getProgrammeMemberships() {
-    return programmeMemberships;
-  }
-
-  public void setProgrammeMemberships(Set<ProgrammeMembershipDTO> programmeMemberships) {
-    this.programmeMemberships = programmeMemberships;
-  }
-
   @Override
   public boolean equals(Object o) {
     if (this == o) return true;
@@ -225,8 +215,6 @@ public class PersonV2DTO implements Serializable {
       return false;
     if (gmcDetails != null ? !gmcDetails.equals(personDTO.gmcDetails) : personDTO.gmcDetails != null) return false;
     if (gdcDetails != null ? !gdcDetails.equals(personDTO.gdcDetails) : personDTO.gdcDetails != null) return false;
-    if (programmeMemberships != null ? !programmeMemberships.equals(personDTO.programmeMemberships) : personDTO.programmeMemberships != null)
-      return false;
     return rightToWork != null ? rightToWork.equals(personDTO.rightToWork) : personDTO.rightToWork == null;
   }
 
@@ -247,7 +235,6 @@ public class PersonV2DTO implements Serializable {
     result = 31 * result + (personalDetails != null ? personalDetails.hashCode() : 0);
     result = 31 * result + (gmcDetails != null ? gmcDetails.hashCode() : 0);
     result = 31 * result + (gdcDetails != null ? gdcDetails.hashCode() : 0);
-    result = 31 * result + (programmeMemberships != null ? programmeMemberships.hashCode() : 0);
     result = 31 * result + (rightToWork != null ? rightToWork.hashCode() : 0);
     return result;
   }
@@ -270,7 +257,6 @@ public class PersonV2DTO implements Serializable {
         ", personalDetails=" + personalDetails +
         ", gmcDetails=" + gmcDetails +
         ", gdcDetails=" + gdcDetails +
-        ", programmeMemberships=" + programmeMemberships +
         ", rightToWork=" + rightToWork +
         '}';
   }

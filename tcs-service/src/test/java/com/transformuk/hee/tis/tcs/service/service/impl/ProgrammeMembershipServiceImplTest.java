@@ -5,6 +5,7 @@ import com.transformuk.hee.tis.tcs.api.dto.CurriculumMembershipDTO;
 import com.transformuk.hee.tis.tcs.api.dto.ProgrammeMembershipCurriculaDTO;
 import com.transformuk.hee.tis.tcs.api.dto.ProgrammeMembershipDTO;
 import com.transformuk.hee.tis.tcs.api.dto.TrainingNumberDTO;
+import com.transformuk.hee.tis.tcs.api.enumeration.ProgrammeMembershipType;
 import com.transformuk.hee.tis.tcs.service.model.Curriculum;
 import com.transformuk.hee.tis.tcs.service.model.Programme;
 import com.transformuk.hee.tis.tcs.service.model.ProgrammeMembership;
@@ -22,15 +23,20 @@ import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
+import org.mockito.Spy;
 import org.mockito.runners.MockitoJUnitRunner;
+import org.springframework.cglib.core.Local;
 
+import java.time.LocalDate;
 import java.util.List;
+import java.util.Optional;
 import java.util.Set;
 
 import static org.mockito.Matchers.any;
 import static org.mockito.Matchers.anyList;
 import static org.mockito.Matchers.anyLong;
 import static org.mockito.Matchers.anySet;
+import static org.mockito.Mockito.doReturn;
 import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
@@ -48,6 +54,7 @@ public class ProgrammeMembershipServiceImplTest {
   private static final String PROGRAMME_NUMBER1 = "Programme number";
   private static final String PROGRAMME_NAME = "Programme Name";
 
+  @Spy
   @InjectMocks
   private ProgrammeMembershipServiceImpl testObj;
 
@@ -257,5 +264,86 @@ public class ProgrammeMembershipServiceImplTest {
     verify(curriculumMapperMock).curriculumToCurriculumDTO(curriculum1);
     verify(curriculumMapperMock).curriculumToCurriculumDTO(curriculum2);
     verify(programmeRepositoryMock).findByIdIn(Sets.newLinkedHashSet(PROGRAMME_ID));
+  }
+
+
+  @Test
+  public void findProgrammeMembershipsForTraineeRolledUpShouldThrowExceptionWithWhenTraineeIdIsNull(){
+    try{
+      testObj.findProgrammeMembershipsForTraineeRolledUp(TRAINEE_ID);
+    } catch (Exception e) {
+      verify(testObj, never()).findProgrammeMembershipsForTrainee(anyLong());
+      throw e;
+    }
+  }
+
+  @Test
+  public void findProgrammeMembershipsForTraineeRolledUpShouldRollUpPMs(){
+    LocalDate dateFrom = LocalDate.of(1999,12, 31);
+    LocalDate dateTo = LocalDate.of(2000,12, 31);
+    LocalDate anotherDateFrom = LocalDate.of(2011,12, 31);
+    LocalDate anotherDateTo = LocalDate.of(2015,12, 31);
+    ProgrammeMembershipCurriculaDTO pmc1 = new ProgrammeMembershipCurriculaDTO(), pmc2 = new ProgrammeMembershipCurriculaDTO(),
+        pmc3 = new ProgrammeMembershipCurriculaDTO(), pmc4 = new ProgrammeMembershipCurriculaDTO();
+    CurriculumMembershipDTO cm1 = new CurriculumMembershipDTO(), cm2 = new CurriculumMembershipDTO(), cm3 = new CurriculumMembershipDTO();
+
+    cm1.setId(1L);
+    cm1.setCurriculumStartDate(dateFrom);
+    cm1.setCurriculumEndDate(dateTo);
+
+    cm2.setId(2L);
+    cm2.setCurriculumStartDate(anotherDateFrom);
+    cm2.setCurriculumEndDate(anotherDateTo);
+
+    cm3.setId(3L);
+    cm3.setCurriculumStartDate(anotherDateFrom);
+    cm3.setCurriculumEndDate(anotherDateTo);
+
+
+    //pmc1 and pmc 2 effectively the same but they have different ids
+    pmc1.setId(1L);
+    pmc1.setProgrammeStartDate(dateFrom);
+    pmc1.setProgrammeEndDate(dateTo);
+    pmc1.setProgrammeMembershipType(ProgrammeMembershipType.FTSTA);
+    pmc1.setProgrammeId(PROGRAMME_ID);
+    pmc1.setCurriculumMemberships(Lists.newArrayList(cm1));
+
+    pmc2.setId(2L);
+    pmc2.setProgrammeStartDate(dateFrom);
+    pmc2.setProgrammeEndDate(dateTo);
+    pmc2.setProgrammeMembershipType(ProgrammeMembershipType.FTSTA);
+    pmc2.setProgrammeId(PROGRAMME_ID);
+    pmc2.setCurriculumMemberships(Lists.newArrayList(cm2));
+
+    pmc3.setId(3L);
+    pmc3.setProgrammeStartDate(anotherDateFrom);
+    pmc3.setProgrammeEndDate(anotherDateTo);
+    pmc3.setProgrammeMembershipType(ProgrammeMembershipType.ACADEMIC);
+    pmc3.setProgrammeId(PROGRAMME_ID);
+    pmc3.setCurriculumMemberships(Lists.newArrayList(cm3));
+
+
+    pmc4.setId(4L);
+    pmc4.setProgrammeStartDate(dateFrom);
+    pmc4.setProgrammeEndDate(dateTo);
+    pmc4.setProgrammeMembershipType(ProgrammeMembershipType.FTSTA);
+    pmc4.setProgrammeId(PROGRAMME_ID);
+    pmc4.setCurriculumMemberships(null);
+
+    List<Object> programmeMemberships = Lists.newArrayList(pmc1, pmc2, pmc3);
+    doReturn(programmeMemberships).when(testObj).findProgrammeMembershipsForTrainee(TRAINEE_ID);
+
+    List<ProgrammeMembershipCurriculaDTO> result = testObj.findProgrammeMembershipsForTraineeRolledUp(TRAINEE_ID);
+
+    Assert.assertEquals(2, result.size());
+    long dateFromCount = result.stream().filter(pmc -> pmc.getProgrammeStartDate().equals(dateFrom)).count();
+    Assert.assertEquals(1L, dateFromCount);
+    long anotherDateFromCount = result.stream().filter(pmc -> pmc.getProgrammeStartDate().equals(anotherDateFrom)).count();
+    Assert.assertEquals(1L, anotherDateFromCount);
+
+    Optional<ProgrammeMembershipCurriculaDTO> any = result.stream().filter(pmc -> pmc.getProgrammeStartDate().equals(dateFrom)).findAny();
+    Assert.assertTrue(any.isPresent());
+    ProgrammeMembershipCurriculaDTO programmeMembershipCurriculaDTO = any.get();
+    Assert.assertEquals(2, programmeMembershipCurriculaDTO.getCurriculumMemberships().size());
   }
 }
