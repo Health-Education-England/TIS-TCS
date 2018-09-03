@@ -150,10 +150,11 @@ public class ProgrammeMembershipServiceImpl implements ProgrammeMembershipServic
   /**
    * Method just like the find programme memberships for trainee but rolls up the programme (group by) and also
    * attaches all the curricula on those rolled up programmes into a single programme
-   *
+   * <p>
    * The initial thoughts around the attachment of curricula was that we use a Set collection as this would then
    * remove all duplicates. This was found to be an issue as the CurriculaDTO equals/hashcode methods are scenario specific
    * code. So we're just using a list now
+   *
    * @param traineeId
    * @return
    */
@@ -165,18 +166,18 @@ public class ProgrammeMembershipServiceImpl implements ProgrammeMembershipServic
     List<ProgrammeMembershipCurriculaDTO> programmeMembershipsForTrainee = findProgrammeMembershipsForTrainee(traineeId);
 
     List<ProgrammeMembershipCurriculaDTO> result = Lists.newArrayList();
-    if(CollectionUtils.isNotEmpty(programmeMembershipsForTrainee)) {
+    if (CollectionUtils.isNotEmpty(programmeMembershipsForTrainee)) {
       for (ProgrammeMembershipCurriculaDTO programmeMembershipCurriculaDTO : programmeMembershipsForTrainee) {
         Optional<ProgrammeMembershipCurriculaDTO> foundPMCOptional = getSameProgrammeMembershipForDates(result, programmeMembershipCurriculaDTO);
         if (foundPMCOptional.isPresent()) {
           ProgrammeMembershipCurriculaDTO foundPMC = foundPMCOptional.get();
 
           List<CurriculumMembershipDTO> curriculumMemberships = Lists.newArrayList();
-          if(foundPMC.getCurriculumMemberships() != null) {
+          if (foundPMC.getCurriculumMemberships() != null) {
             curriculumMemberships.addAll(foundPMC.getCurriculumMemberships());
           }
           //merge the existing curricula memberships with the new ones
-          if(programmeMembershipCurriculaDTO.getCurriculumMemberships() != null) {
+          if (programmeMembershipCurriculaDTO.getCurriculumMemberships() != null) {
             curriculumMemberships.addAll(programmeMembershipCurriculaDTO.getCurriculumMemberships());
           }
 

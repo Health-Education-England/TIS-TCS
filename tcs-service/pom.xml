@@ -21,7 +21,7 @@
   </prerequisites>
 
   <properties>
-    <argLine>-Djava.security.egd=file:/dev/./urandom -Xmx256m</argLine>
+    <argLine>-Djava.security.egd=file:/dev/./urandom -Xmx1g</argLine>
     <assertj.version>3.6.2</assertj.version>
     <awaitility.version>2.0.0</awaitility.version>
     <commons-io.version>2.5</commons-io.version>
@@ -486,6 +486,8 @@
               <version>${mapstruct.version}</version>
             </path>
           </annotationProcessorPaths>
+          <meminitial>1024m</meminitial>
+          <maxmem>2048m</maxmem>
         </configuration>
       </plugin>
       <plugin>

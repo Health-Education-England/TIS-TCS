@@ -97,7 +97,7 @@ public class ProgrammeMembershipResourceTest {
     .contentType(MediaType.APPLICATION_JSON))
         .andExpect(jsonPath("$.*.programmeId").value(hasItem(1)))
         .andExpect(jsonPath("$.*.id").value(hasItem(999)))
-        .andExpect(jsonPath("$.*.id").value(hasItem(976)))
+        .andExpect(jsonPath("$.*.id").value(hasItem(976 )))
         .andExpect(status().isOk());
 
     verify(programmeMembershipServiceMock).findProgrammeMembershipsForTraineeRolledUp(TRAINEE_ID_LONG);
