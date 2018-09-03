@@ -150,7 +150,6 @@ public class ContactDetailsResourceIntTest {
         .telephoneNumber(DEFAULT_CONTACT_PHONE_NR_1)
         .mobileNumber(DEFAULT_CONTACT_PHONE_NR_2)
         .email(DEFAULT_EMAIL)
-        .workEmail(DEFAULT_WORK_EMAIL)
         .address1(DEFAULT_ADDRESS)
         .postCode(DEFAULT_POST_CODE)
         .legalSurname(DEFAULT_LEGAL_SURNAME)
@@ -170,7 +169,6 @@ public class ContactDetailsResourceIntTest {
     List<Object[]> authors = nativeQuery.getResultList();
 
     for (Object[] a : authors) {
-//      System.out.println(a);
       System.out.println(StringUtils.join(a, ", "));
     }
 
@@ -197,7 +195,6 @@ public class ContactDetailsResourceIntTest {
     assertThat(testContactDetails.getTelephoneNumber()).isEqualTo(DEFAULT_CONTACT_PHONE_NR_1);
     assertThat(testContactDetails.getMobileNumber()).isEqualTo(DEFAULT_CONTACT_PHONE_NR_2);
     assertThat(testContactDetails.getEmail()).isEqualTo(DEFAULT_EMAIL);
-    assertThat(testContactDetails.getWorkEmail()).isEqualTo(DEFAULT_WORK_EMAIL);
     assertThat(testContactDetails.getAddress1()).isEqualTo(DEFAULT_ADDRESS);
     assertThat(testContactDetails.getPostCode()).isEqualTo(DEFAULT_POST_CODE);
     assertThat(testContactDetails.getLegalSurname()).isEqualTo(DEFAULT_LEGAL_SURNAME);
@@ -294,7 +291,6 @@ public class ContactDetailsResourceIntTest {
         .andExpect(jsonPath("$.[*].telephoneNumber").value(hasItem(DEFAULT_CONTACT_PHONE_NR_1.toString())))
         .andExpect(jsonPath("$.[*].mobileNumber").value(hasItem(DEFAULT_CONTACT_PHONE_NR_2.toString())))
         .andExpect(jsonPath("$.[*].email").value(hasItem(DEFAULT_EMAIL.toString())))
-        .andExpect(jsonPath("$.[*].workEmail").value(hasItem(DEFAULT_WORK_EMAIL.toString())))
         .andExpect(jsonPath("$.[*].address1").value(hasItem(DEFAULT_ADDRESS.toString())))
         .andExpect(jsonPath("$.[*].postCode").value(hasItem(DEFAULT_POST_CODE.toString())))
         .andExpect(jsonPath("$.[*].legalSurname").value(hasItem(DEFAULT_LEGAL_SURNAME.toString())))
@@ -322,7 +318,6 @@ public class ContactDetailsResourceIntTest {
         .andExpect(jsonPath("$.telephoneNumber").value(DEFAULT_CONTACT_PHONE_NR_1.toString()))
         .andExpect(jsonPath("$.mobileNumber").value(DEFAULT_CONTACT_PHONE_NR_2.toString()))
         .andExpect(jsonPath("$.email").value(DEFAULT_EMAIL.toString()))
-        .andExpect(jsonPath("$.workEmail").value(DEFAULT_WORK_EMAIL.toString()))
         .andExpect(jsonPath("$.address1").value(DEFAULT_ADDRESS.toString()))
         .andExpect(jsonPath("$.postCode").value(DEFAULT_POST_CODE.toString()))
         .andExpect(jsonPath("$.legalSurname").value(DEFAULT_LEGAL_SURNAME.toString()))
@@ -358,7 +353,6 @@ public class ContactDetailsResourceIntTest {
         .telephoneNumber(UPDATED_CONTACT_PHONE_NR_1)
         .mobileNumber(UPDATED_CONTACT_PHONE_NR_2)
         .email(UPDATED_EMAIL)
-        .workEmail(UPDATED_WORK_EMAIL)
         .address1(UPDATED_ADDRESS)
         .postCode(UPDATED_POST_CODE)
         .legalSurname(UPDATED_LEGAL_SURNAME)
@@ -383,7 +377,6 @@ public class ContactDetailsResourceIntTest {
     assertThat(testContactDetails.getTelephoneNumber()).isEqualTo(UPDATED_CONTACT_PHONE_NR_1);
     assertThat(testContactDetails.getMobileNumber()).isEqualTo(UPDATED_CONTACT_PHONE_NR_2);
     assertThat(testContactDetails.getEmail()).isEqualTo(UPDATED_EMAIL);
-    assertThat(testContactDetails.getWorkEmail()).isEqualTo(UPDATED_WORK_EMAIL);
     assertThat(testContactDetails.getAddress1()).isEqualTo(UPDATED_ADDRESS);
     assertThat(testContactDetails.getPostCode()).isEqualTo(UPDATED_POST_CODE);
     assertThat(testContactDetails.getLegalSurname()).isEqualTo(UPDATED_LEGAL_SURNAME);
