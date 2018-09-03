@@ -181,6 +181,7 @@ public class ContactDetailsResourceIntTest {
         .contentType(TestUtil.APPLICATION_JSON_UTF8)
         .content(TestUtil.convertObjectToJsonBytes(contactDetailsDTO)))
         .andExpect(status().isCreated());
+    
 // Validate the ContactDetails in the database
     List<ContactDetails> contactDetailsList = contactDetailsRepository.findAll();
     assertThat(contactDetailsList).hasSize(databaseSizeBeforeCreate + 1);
