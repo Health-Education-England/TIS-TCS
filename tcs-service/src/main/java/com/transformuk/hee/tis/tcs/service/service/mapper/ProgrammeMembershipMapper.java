@@ -112,6 +112,7 @@ public class ProgrammeMembershipMapper {
   private CurriculumMembershipDTO curriculumMembershipToCurriculumMembershipDTO(ProgrammeMembership programmeMembership) {
     CurriculumMembershipDTO result = new CurriculumMembershipDTO();
 
+    //Note: this is done as the ProgrammeMembershipDTO didn't have an id but it was needed so that the FE can send delete by id requests
     result.setId(programmeMembership.getId());
     result.setIntrepidId(programmeMembership.getIntrepidId());
     result.setCurriculumStartDate(programmeMembership.getCurriculumStartDate());
