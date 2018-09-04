@@ -556,7 +556,6 @@ public class PostServiceImplTest {
     when(namedParameterJdbcTemplateMock.query(queryCaptor.capture(), any(MapSqlParameterSource.class), any(PostServiceImpl.PostViewRowMapper.class)))
         .thenReturn(resultsFromQuery);
     Page<PostViewDTO> result = testObj.advancedSearch(SEARCH_STRING, COLUMN_FILTERS, pageable);
-    //testObj.findAll(pageable);
     String capturedQueryString = queryCaptor.getValue();
     int indexOfGroupBy = capturedQueryString.indexOf("group by");
     Assert.assertTrue(indexOfGroupBy >= 0);
