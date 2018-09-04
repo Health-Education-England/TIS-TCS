@@ -37,6 +37,7 @@ import org.springframework.web.bind.annotation.RestController;
 import javax.validation.Valid;
 import java.net.URI;
 import java.net.URISyntaxException;
+import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
 import java.util.Optional;
@@ -146,7 +147,7 @@ public class ProgrammeMembershipResource {
   }
 
   /**
-   * DELETE  /programme-memberships/ : delete the programmeMembership.
+   * POST  /programme-memberships/ : delete the programmeMembership using the pm id stored on the cm id.
    *
    * @param programmeMembershipDTO the programmeMembershipDTO to update
    * @return the ResponseEntity with status 200 (OK)
@@ -156,14 +157,15 @@ public class ProgrammeMembershipResource {
   @PreAuthorize("hasAuthority('tcs:delete:entities')")
   public ResponseEntity<Void> removeProgrammeMembershipAndItsCurriculum(@RequestBody ProgrammeMembershipDTO programmeMembershipDTO) {
     log.debug("REST request to delete ProgrammeMembership : {}", programmeMembershipDTO);
-    StringBuilder idsDeleted = new StringBuilder();
+    List<String> idsDeleted = new ArrayList<>();
     if(programmeMembershipDTO != null && CollectionUtils.isNotEmpty(programmeMembershipDTO.getCurriculumMemberships())){
       programmeMembershipDTO.getCurriculumMemberships().stream().forEach(curriculumMembershipDTO -> {
+        // Note: The curriculum membership id is set in the mapper with the contents of the programme membership id
         programmeMembershipService.delete(curriculumMembershipDTO.getId());
-        idsDeleted.append(curriculumMembershipDTO.getId());
+        idsDeleted.add(curriculumMembershipDTO.getId().toString());
       });
     }
-    return ResponseEntity.ok().headers(HeaderUtil.createEntityDeletionAlert(ENTITY_NAME, idsDeleted.toString())).build();
+    return ResponseEntity.ok().headers(HeaderUtil.createEntityDeletionAlert(ENTITY_NAME, StringUtils.join(idsDeleted, ","))).build();
   }
 
 
