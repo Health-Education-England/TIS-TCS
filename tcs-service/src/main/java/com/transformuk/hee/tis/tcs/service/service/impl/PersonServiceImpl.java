@@ -136,9 +136,9 @@ public class PersonServiceImpl implements PersonService {
     Person person = personMapper.toEntity(personDTO);
     person = personRepository.save(person);
 
-    final GdcDetails gdcDetails = person.getGdcDetails() != null ? person.getGdcDetails() : new GdcDetails();
+    GdcDetails gdcDetails = person.getGdcDetails() != null ? person.getGdcDetails() : new GdcDetails();
     gdcDetails.setId(person.getId());
-    gdcDetailsRepository.save(gdcDetails);
+    gdcDetails = gdcDetailsRepository.save(gdcDetails);
     person.setGdcDetails(gdcDetails);
 
     GmcDetails gmcDetails = person.getGmcDetails() != null ? person.getGmcDetails() : new GmcDetails();

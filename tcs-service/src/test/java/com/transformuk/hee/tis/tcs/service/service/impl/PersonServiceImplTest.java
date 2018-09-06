@@ -3,14 +3,24 @@ package com.transformuk.hee.tis.tcs.service.service.impl;
 import com.google.common.collect.Sets;
 import com.transformuk.hee.tis.tcs.api.dto.PersonDTO;
 import com.transformuk.hee.tis.tcs.api.dto.PersonV2DTO;
+import com.transformuk.hee.tis.tcs.api.dto.PersonalDetailsDTO;
 import com.transformuk.hee.tis.tcs.api.dto.ProgrammeMembershipDTO;
 import com.transformuk.hee.tis.tcs.service.exception.AccessUnauthorisedException;
+import com.transformuk.hee.tis.tcs.service.model.ContactDetails;
+import com.transformuk.hee.tis.tcs.service.model.GdcDetails;
+import com.transformuk.hee.tis.tcs.service.model.GmcDetails;
 import com.transformuk.hee.tis.tcs.service.model.Person;
 import com.transformuk.hee.tis.tcs.service.model.PersonTrust;
 import com.transformuk.hee.tis.tcs.service.model.PersonalDetails;
 import com.transformuk.hee.tis.tcs.service.model.PostTrust;
 import com.transformuk.hee.tis.tcs.service.model.ProgrammeMembership;
+import com.transformuk.hee.tis.tcs.service.model.RightToWork;
+import com.transformuk.hee.tis.tcs.service.repository.ContactDetailsRepository;
+import com.transformuk.hee.tis.tcs.service.repository.GdcDetailsRepository;
+import com.transformuk.hee.tis.tcs.service.repository.GmcDetailsRepository;
 import com.transformuk.hee.tis.tcs.service.repository.PersonRepository;
+import com.transformuk.hee.tis.tcs.service.repository.PersonalDetailsRepository;
+import com.transformuk.hee.tis.tcs.service.repository.RightToWorkRepository;
 import com.transformuk.hee.tis.tcs.service.service.mapper.PersonMapper;
 import org.junit.Assert;
 import org.junit.Before;
@@ -25,14 +35,15 @@ import org.mockito.runners.MockitoJUnitRunner;
 
 import java.time.LocalDate;
 import java.util.ArrayList;
-import java.util.Date;
 import java.util.List;
 import java.util.Optional;
 import java.util.Set;
 
 import static org.mockito.Matchers.any;
+import static org.mockito.Matchers.anyLong;
 import static org.mockito.Mockito.doNothing;
 import static org.mockito.Mockito.doReturn;
+import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
@@ -40,7 +51,12 @@ import static org.mockito.Mockito.when;
 @RunWith(MockitoJUnitRunner.class)
 public class PersonServiceImplTest {
 
-  public static final long PERSON_ID = 1L;
+  private static final Long PERSON_ID = 1L;
+  private static final Long SAVED_PERSON_ID = 1L;
+  private static final String DISABILITY_VALUE = "DISABILITY";
+  private static final String DISABILITY_DETAILS_VALUE = "DISABILITY DETAILS";
+  private static final String RELIGIOUS_BELIEF_VALUE = "RELIGIOUS BELIEF";
+  private static final String SEXUAL_ORIENTATION_VALUE = "SEXUAL ORIENTATION";
 
   @Spy
   @InjectMocks
@@ -61,6 +77,32 @@ public class PersonServiceImplTest {
   private ProgrammeMembership pm1, pm2, pm3, pm4;
   private PersonDTO personDTO;
   private ProgrammeMembershipDTO pmDTO1, pmDTO2, pmDTO3, pmDTO4;
+  private PersonDTO unsavedPersonDTOMock = mock(PersonDTO.class), savedPersonDTOMock = mock(PersonDTO.class);
+  private PersonalDetailsDTO unsavedPersonDetailsDTOMock = mock(PersonalDetailsDTO.class), savedPersonDetailsDTOMock = mock(PersonalDetailsDTO.class);
+  private Person unsavedPersonMock = mock(Person.class), savedPersonMock = mock(Person.class);
+
+  @Mock
+  private GdcDetailsRepository gdcDetailsRepositoryMock;
+  @Mock
+  private GmcDetailsRepository gmcDetailsRepositoryMock;
+  @Mock
+  private ContactDetailsRepository contactDetailsRepositoryMock;
+  @Mock
+  private PersonalDetailsRepository personalDetailsRepositoryMock;
+  @Mock
+  private RightToWorkRepository rightToWorkRepositoryMock;
+
+  @Captor
+  private ArgumentCaptor<GdcDetails> gdcDetailsArgumentCaptor;
+  @Captor
+  private ArgumentCaptor<GmcDetails> gmcDetailsArgumentCaptor;
+  @Captor
+  private ArgumentCaptor<ContactDetails> contactDetailsArgumentCaptor;
+  @Captor
+  private ArgumentCaptor<PersonalDetails> personalDetailsArgumentCaptor;
+  @Captor
+  private ArgumentCaptor<RightToWork> rightToWorkArgumentCaptor;
+
 
   @Before
   public void setup() {
@@ -192,5 +234,108 @@ public class PersonServiceImplTest {
 
     PersonV2DTO capturedPersonV2DTO = personV2DTOArgumentCaptor.getValue();
     Assert.assertEquals(capturedPersonV2DTO, result);
+  }
+
+  @Test
+  public void saveShouldSaveAndFlushPersonForAUserThatCanEditSensitiveData() {
+    Person unsavedPerson = new Person(), savedPerson = new Person();
+    savedPerson.setId(SAVED_PERSON_ID);
+
+    when(personMapperMock.toEntity(unsavedPersonDTOMock)).thenReturn(unsavedPerson);
+    when(permissionServiceMock.canEditSensitiveData()).thenReturn(true);
+    when(personRepositoryMock.saveAndFlush(unsavedPerson)).thenReturn(savedPerson);
+    when(personMapperMock.toDto(savedPerson)).thenReturn(savedPersonDTOMock);
+
+    PersonDTO result = testObj.save(unsavedPersonDTOMock);
+
+    Assert.assertEquals(savedPersonDTOMock, result);
+
+    verify(personRepositoryMock, never()).findOne(anyLong());
+    verify(unsavedPersonDTOMock, never()).getPersonalDetails();
+    verify(savedPersonDTOMock, never()).getPersonalDetails();
+  }
+
+  @Test
+  public void saveShouldSaveAndFlushPersonForAUserThatCannotEditSensitiveDataAndPersonIsNotNew() {
+    when(unsavedPersonDTOMock.getId()).thenReturn(PERSON_ID);
+    when(unsavedPersonDTOMock.getPersonalDetails()).thenReturn(unsavedPersonDetailsDTOMock);
+    when(savedPersonDTOMock.getPersonalDetails()).thenReturn(savedPersonDetailsDTOMock);
+
+    Person unsavedPerson = new Person(), savedPerson = new Person(), originalPersonMock = mock(Person.class);
+
+    PersonalDetails originalPersonalDetailsMock = mock(PersonalDetails.class);
+    when(originalPersonalDetailsMock.getDisability()).thenReturn(DISABILITY_VALUE);
+    when(originalPersonalDetailsMock.getDisabilityDetails()).thenReturn(DISABILITY_DETAILS_VALUE);
+    when(originalPersonalDetailsMock.getReligiousBelief()).thenReturn(RELIGIOUS_BELIEF_VALUE);
+    when(originalPersonalDetailsMock.getSexualOrientation()).thenReturn(SEXUAL_ORIENTATION_VALUE);
+
+    when(personMapperMock.toEntity(unsavedPersonDTOMock)).thenReturn(unsavedPerson);
+    when(permissionServiceMock.canEditSensitiveData()).thenReturn(false);
+    when(personRepositoryMock.findOne(PERSON_ID)).thenReturn(originalPersonMock);
+    when(originalPersonMock.getPersonalDetails()).thenReturn(originalPersonalDetailsMock);
+
+    when(personRepositoryMock.saveAndFlush(unsavedPerson)).thenReturn(savedPerson);
+    when(personMapperMock.toDto(savedPerson)).thenReturn(savedPersonDTOMock);
+
+    PersonDTO result = testObj.save(unsavedPersonDTOMock);
+
+    Assert.assertEquals(savedPersonDTOMock, result);
+
+    verify(personRepositoryMock).findOne(PERSON_ID);
+    verify(unsavedPersonDTOMock).getPersonalDetails();
+    verify(savedPersonDTOMock).getPersonalDetails();
+    verify(unsavedPersonDetailsDTOMock).setDisability(DISABILITY_VALUE);
+    verify(unsavedPersonDetailsDTOMock).setDisabilityDetails(DISABILITY_DETAILS_VALUE);
+    verify(unsavedPersonDetailsDTOMock).setReligiousBelief(RELIGIOUS_BELIEF_VALUE);
+    verify(unsavedPersonDetailsDTOMock).setSexualOrientation(SEXUAL_ORIENTATION_VALUE);
+    verify(savedPersonDetailsDTOMock).setDisability(null);
+    verify(savedPersonDetailsDTOMock).setDisabilityDetails(null);
+    verify(savedPersonDetailsDTOMock).setReligiousBelief(null);
+    verify(savedPersonDetailsDTOMock).setSexualOrientation(null);
+  }
+
+  @Test
+  public void createShouldCreateNewPersonAndReturnDTO() {
+    GdcDetails gdcDetailsMock = mock(GdcDetails.class);
+    GmcDetails gmcDetailsMock = mock(GmcDetails.class);
+    ContactDetails contactDetailsMock = mock(ContactDetails.class);
+    PersonalDetails personalDetailsMock = mock(PersonalDetails.class);
+    RightToWork rightToWorkMock = mock(RightToWork.class);
+
+    when(savedPersonMock.getId()).thenReturn(PERSON_ID);
+    when(personMapperMock.toEntity(unsavedPersonDTOMock)).thenReturn(unsavedPersonMock);
+    when(personRepositoryMock.save(unsavedPersonMock)).thenReturn(savedPersonMock);
+
+    when(gdcDetailsRepositoryMock.save(gdcDetailsArgumentCaptor.capture())).thenReturn(gdcDetailsMock);
+    when(gmcDetailsRepositoryMock.save(gmcDetailsArgumentCaptor.capture())).thenReturn(gmcDetailsMock);
+    when(contactDetailsRepositoryMock.save(contactDetailsArgumentCaptor.capture())).thenReturn(contactDetailsMock);
+    when(personalDetailsRepositoryMock.save(personalDetailsArgumentCaptor.capture())).thenReturn(personalDetailsMock);
+    when(rightToWorkRepositoryMock.save(rightToWorkArgumentCaptor.capture())).thenReturn(rightToWorkMock);
+    when(personMapperMock.toDto(savedPersonMock)).thenReturn(savedPersonDTOMock);
+
+    PersonDTO result = testObj.create(unsavedPersonDTOMock);
+
+    Assert.assertSame(savedPersonDTOMock, result);
+
+    GdcDetails gdcDetailsValue = gdcDetailsArgumentCaptor.getValue();
+    Assert.assertEquals(PERSON_ID, gdcDetailsValue.getId());
+
+    GmcDetails gmcDetailsValue = gmcDetailsArgumentCaptor.getValue();
+    Assert.assertEquals(PERSON_ID, gmcDetailsValue.getId());
+
+    ContactDetails contactDetailsValue = contactDetailsArgumentCaptor.getValue();
+    Assert.assertEquals(PERSON_ID, contactDetailsValue.getId());
+
+    PersonalDetails personalDetailsValue = personalDetailsArgumentCaptor.getValue();
+    Assert.assertEquals(PERSON_ID, personalDetailsValue.getId());
+
+    RightToWork rightToWorkValue = rightToWorkArgumentCaptor.getValue();
+    Assert.assertEquals(PERSON_ID, rightToWorkValue.getId());
+
+    verify(savedPersonMock).setGdcDetails(gdcDetailsMock);
+    verify(savedPersonMock).setGmcDetails(gmcDetailsMock);
+    verify(savedPersonMock).setContactDetails(contactDetailsMock);
+    verify(savedPersonMock).setPersonalDetails(personalDetailsMock);
+    verify(savedPersonMock).setRightToWork(rightToWorkMock);
   }
 }
