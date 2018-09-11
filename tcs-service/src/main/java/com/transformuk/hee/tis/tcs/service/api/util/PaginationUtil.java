@@ -44,7 +44,7 @@ public final class PaginationUtil {
     HttpHeaders headers = new HttpHeaders();
     String link = "";
     if (page.isHasNext()) {
-      link = "<" + generateUri(baseUrl, page.getNumber() + 1, page.getSize()) + ">; rel=\"next\",";
+      link = "<" + generateUri(baseUrl, page.getNumber() + 1, page.getSize()) + ">; rel=\"next\"";
     }
     headers.add(HttpHeaders.LINK, link);
     return headers;
