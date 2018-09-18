@@ -205,6 +205,11 @@ public class TcsServiceImpl extends AbstractClientService {
 				.getBody();
 	}
 
+	public PlacementDetailsDTO getPlacementById(Long id) {
+		return tcsRestTemplate.exchange(serviceUrl + API_PLACEMENTS + id,
+						HttpMethod.GET, null, new ParameterizedTypeReference<PlacementDetailsDTO>() {}).getBody();
+	}
+
 	public PersonDTO updatePersonForBulkWithAssociatedDTOs(PersonDTO personDTO) {
 		HttpHeaders headers = new HttpHeaders();
 
