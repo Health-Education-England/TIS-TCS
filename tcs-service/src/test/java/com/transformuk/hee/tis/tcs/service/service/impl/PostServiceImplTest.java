@@ -1,4 +1,5 @@
 package com.transformuk.hee.tis.tcs.service.service.impl;
+
 import com.google.common.collect.Lists;
 import com.google.common.collect.Sets;
 import com.transformuk.hee.tis.tcs.api.dto.PlacementDTO;
@@ -13,7 +14,7 @@ import com.transformuk.hee.tis.tcs.api.enumeration.PostGradeType;
 import com.transformuk.hee.tis.tcs.api.enumeration.PostSiteType;
 import com.transformuk.hee.tis.tcs.api.enumeration.PostSpecialtyType;
 import com.transformuk.hee.tis.tcs.service.api.decorator.PostViewDecorator;
-import com.transformuk.hee.tis.tcs.service.api.util.StringUtil;
+import com.transformuk.hee.tis.tcs.service.api.util.BasicPage;
 import com.transformuk.hee.tis.tcs.service.exception.AccessUnauthorisedException;
 import com.transformuk.hee.tis.tcs.service.model.ColumnFilter;
 import com.transformuk.hee.tis.tcs.service.model.Placement;
@@ -37,7 +38,6 @@ import com.transformuk.hee.tis.tcs.service.service.helper.SqlQuerySupplier;
 import com.transformuk.hee.tis.tcs.service.service.mapper.PostMapper;
 import com.transformuk.hee.tis.tcs.service.service.mapper.PostViewMapper;
 import org.apache.commons.lang.StringUtils;
-import org.hamcrest.CoreMatchers;
 import org.junit.Assert;
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -55,68 +55,66 @@ import org.springframework.data.domain.Sort;
 import org.springframework.jdbc.core.RowMapper;
 import org.springframework.jdbc.core.namedparam.MapSqlParameterSource;
 import org.springframework.jdbc.core.namedparam.NamedParameterJdbcTemplate;
+
 import java.util.ArrayList;
 import java.util.Collections;
-import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
-import java.util.Map;
 import java.util.Optional;
 import java.util.Set;
-import java.util.regex.Matcher;
-import java.util.regex.Pattern;
+
 import static org.mockito.Matchers.any;
 import static org.mockito.Matchers.anyList;
-import static org.mockito.Matchers.anyMap;
 import static org.mockito.Matchers.anyString;
 import static org.mockito.Mockito.doReturn;
 import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
+
 @RunWith(MockitoJUnitRunner.class)
 public class PostServiceImplTest {
-  String query = "select distinct id,\n"+
-      "approvedGradeId,\n"+
-      "primarySpecialtyId,\n"+
-      "primarySpecialtyCode,\n"+
-      "primarySpecialtyName,\n"+
-      "primarySiteId,\n"+
-      "GROUP_CONCAT(distinct programmeName SEPARATOR ', ') programmes,\n"+
-      "GROUP_CONCAT(distinct fundingType SEPARATOR ', ') fundingType,\n"+
-      "nationalPostNumber,\n"+
-      "status,\n"+
-      "owner,\n"+
-      "intrepidId,\n"+
-      "GROUP_CONCAT(surnames SEPARATOR ', ') surnames, GROUP_CONCAT(forenames SEPARATOR ', ') forenames\n"+
-      " from (SELECT p.`id`,\n"+
-      "    pg.`gradeId` as `approvedGradeId`,\n"+
-      "    ps.`specialtyId` as `primarySpecialtyId`,\n"+
-      "    sp.`specialtyCode` as `primarySpecialtyCode`,\n"+
-      "    sp.`name` as `primarySpecialtyName`,\n"+
-      "    pst.`siteId` as `primarySiteId`,\n"+
-      "    prg.`programmeName`,\n"+
-      "    pf.`fundingType`,\n"+
-      "    p.`nationalPostNumber`,\n"+
-      "    p.`status`,\n"+
-      "    p.`owner`,\n"+
-      "    p.`intrepidId`,\n"+
-      "    c.surname surnames, c.forenames forenames\n"+
-      "    FROM `Post` p\n"+
-      "    LEFT JOIN `PostGrade` pg on p.`id` = pg.`postId` AND pg.`postGradeType` = 'APPROVED'\n"+
-      "    LEFT JOIN `PostSpecialty` ps on p.`id` = ps.`postId` AND ps.`postSpecialtyType` = 'PRIMARY'\n"+
-      "    LEFT JOIN `Specialty` sp on sp.`id` = ps.`specialtyId`\n"+
-      "    LEFT JOIN `PostSite` pst on p.`id` = pst.`postId` AND pst.`postSiteType` = 'PRIMARY'\n"+
-      "    LEFT JOIN `PostFunding` pf on p.`id` = pf.`postId` and (curdate() BETWEEN pf.startDate AND pf.endDate or pf.endDate is NULL)\n"+
-      "    LEFT JOIN `Placement` pl on pl.postId = p.id and curdate() BETWEEN pl.dateFrom AND pl.dateTo\n"+
-      "    LEFT JOIN `ContactDetails` c on pl.traineeId = c.id\n"+
-      "    LEFT JOIN `ProgrammePost` pp on pp.postId = p.id\n"+
-      "    LEFT JOIN `Programme` prg on prg.`id` = pp.`programmeId`\n"+
-      " TRUST_JOIN\n"+
-      " WHERECLAUSE\n"+
-      ") as ot\n"+
-      "group by id,approvedGradeId,primarySpecialtyId,primarySpecialtyCode,primarySpecialtyName,primarySiteId,nationalPostNumber,status,owner,intrepidId\n"+
-      " ORDERBYCLAUSE\n"+
-      " LIMITCLAUSE\n"+
+  String query = "select distinct id,\n" +
+      "approvedGradeId,\n" +
+      "primarySpecialtyId,\n" +
+      "primarySpecialtyCode,\n" +
+      "primarySpecialtyName,\n" +
+      "primarySiteId,\n" +
+      "GROUP_CONCAT(distinct programmeName SEPARATOR ', ') programmes,\n" +
+      "GROUP_CONCAT(distinct fundingType SEPARATOR ', ') fundingType,\n" +
+      "nationalPostNumber,\n" +
+      "status,\n" +
+      "owner,\n" +
+      "intrepidId,\n" +
+      "GROUP_CONCAT(surnames SEPARATOR ', ') surnames, GROUP_CONCAT(forenames SEPARATOR ', ') forenames\n" +
+      " from (SELECT p.`id`,\n" +
+      "    pg.`gradeId` as `approvedGradeId`,\n" +
+      "    ps.`specialtyId` as `primarySpecialtyId`,\n" +
+      "    sp.`specialtyCode` as `primarySpecialtyCode`,\n" +
+      "    sp.`name` as `primarySpecialtyName`,\n" +
+      "    pst.`siteId` as `primarySiteId`,\n" +
+      "    prg.`programmeName`,\n" +
+      "    pf.`fundingType`,\n" +
+      "    p.`nationalPostNumber`,\n" +
+      "    p.`status`,\n" +
+      "    p.`owner`,\n" +
+      "    p.`intrepidId`,\n" +
+      "    c.surname surnames, c.forenames forenames\n" +
+      "    FROM `Post` p\n" +
+      "    LEFT JOIN `PostGrade` pg on p.`id` = pg.`postId` AND pg.`postGradeType` = 'APPROVED'\n" +
+      "    LEFT JOIN `PostSpecialty` ps on p.`id` = ps.`postId` AND ps.`postSpecialtyType` = 'PRIMARY'\n" +
+      "    LEFT JOIN `Specialty` sp on sp.`id` = ps.`specialtyId`\n" +
+      "    LEFT JOIN `PostSite` pst on p.`id` = pst.`postId` AND pst.`postSiteType` = 'PRIMARY'\n" +
+      "    LEFT JOIN `PostFunding` pf on p.`id` = pf.`postId` and (curdate() BETWEEN pf.startDate AND pf.endDate or pf.endDate is NULL)\n" +
+      "    LEFT JOIN `Placement` pl on pl.postId = p.id and curdate() BETWEEN pl.dateFrom AND pl.dateTo\n" +
+      "    LEFT JOIN `ContactDetails` c on pl.traineeId = c.id\n" +
+      "    LEFT JOIN `ProgrammePost` pp on pp.postId = p.id\n" +
+      "    LEFT JOIN `Programme` prg on prg.`id` = pp.`programmeId`\n" +
+      " TRUST_JOIN\n" +
+      " WHERECLAUSE\n" +
+      ") as ot\n" +
+      "group by id,approvedGradeId,primarySpecialtyId,primarySpecialtyCode,primarySpecialtyName,primarySiteId,nationalPostNumber,status,owner,intrepidId\n" +
+      " ORDERBYCLAUSE\n" +
+      " LIMITCLAUSE\n" +
       ";";
   private static final Long SITE_ID = 12345L;
   @Spy
@@ -166,6 +164,7 @@ public class PostServiceImplTest {
   private PermissionService permissionServiceMock;
   @Captor
   private ArgumentCaptor<String> queryCaptor;
+
   @Test
   public void saveShouldSavePost() {
     when(postMapperMock.postDTOToPost(postDTOMock1)).thenReturn(postMock1);
@@ -177,6 +176,7 @@ public class PostServiceImplTest {
     verify(postRepositoryMock).save(postMock1);
     verify(postMapperMock).postToPostDTO(postSaveMock1);
   }
+
   @Test
   public void saveShouldSaveListOfPosts() {
     List<PostDTO> postDTOsList = Lists.newArrayList(postDTOMock1, postDTOMock2);
@@ -192,6 +192,7 @@ public class PostServiceImplTest {
     verify(postRepositoryMock).save(postList);
     verify(postMapperMock).postsToPostDTOs(savedPosts);
   }
+
   @Test
   public void updateShouldSavePostAndRefreshLinkedEntities() {
     Set<PostGrade> grades = Sets.newHashSet();
@@ -215,6 +216,7 @@ public class PostServiceImplTest {
     verify(postSiteRepositoryMock).delete(sites);
     verify(postSpecialtyRepositoryMock).delete(specialties);
   }
+
   @Test
   public void findAllShouldRetrieveAllInstances() {
     String query = "PostQuery";
@@ -223,12 +225,16 @@ public class PostServiceImplTest {
     Page<PostView> page = new PageImpl<>(posts);
     when(permissionServiceMock.isUserTrustAdmin()).thenReturn(false);
     when(sqlQuerySupplierMock.getQuery(SqlQuerySupplier.POST_VIEW)).thenReturn(query);
-    when(namedParameterJdbcTemplateMock.query(anyString(),any(MapSqlParameterSource.class), any(RowMapper.class))).thenReturn(mappedPosts);
-    Page<PostViewDTO> result = testObj.findAll(pageableMock);
-    Assert.assertEquals(1, result.getTotalPages());
+    when(namedParameterJdbcTemplateMock.query(anyString(), any(MapSqlParameterSource.class), any(RowMapper.class))).thenReturn(mappedPosts);
+    when(pageableMock.getPageSize()).thenReturn(20);
+
+    BasicPage<PostViewDTO> result = testObj.findAll(pageableMock);
+
+    Assert.assertEquals(1, result.getContent().size());
     verify(sqlQuerySupplierMock).getQuery(SqlQuerySupplier.POST_VIEW);
-    verify(namedParameterJdbcTemplateMock).query(anyString(),any(MapSqlParameterSource.class),any(RowMapper.class));
+    verify(namedParameterJdbcTemplateMock).query(anyString(), any(MapSqlParameterSource.class), any(RowMapper.class));
   }
+
   @Test
   public void findOneShouldRetrieveOneInstanceById() {
     when(postRepositoryMock.findOne(1L)).thenReturn(postMock1);
@@ -238,11 +244,13 @@ public class PostServiceImplTest {
     verify(postRepositoryMock).findOne(1L);
     verify(postMapperMock).postToPostDTO(postMock1);
   }
+
   @Test
   public void deleteShouldDeleteOneInstanceById() {
     testObj.delete(1L);
     verify(postRepositoryMock).delete(1L);
   }
+
   @Test
   public void patchOldNewPostsShouldApplyProvidedPosts() {
     List<Long> postIds = Lists.newArrayList(1L, 2L, 3L);
@@ -281,6 +289,7 @@ public class PostServiceImplTest {
     Assert.assertEquals(oldPostDTO, result.get(0).getOldPost());
     Assert.assertEquals(newPostDTO, result.get(0).getNewPost());
   }
+
   @Test
   public void patchPostSites() {
     List<Long> postIds = Lists.newArrayList(1L);
@@ -310,6 +319,7 @@ public class PostServiceImplTest {
     Assert.assertEquals(expectedDTO, result.get(0));
     Assert.assertEquals(expectedSites, result.get(0).getSites());
   }
+
   @Test
   public void pathPostGrades() {
     List<Long> postIds = Lists.newArrayList(1L);
@@ -339,6 +349,7 @@ public class PostServiceImplTest {
     Assert.assertEquals(expectedDTO, result.get(0));
     Assert.assertEquals(expectedGrades, result.get(0).getGrades());
   }
+
   @Test
   public void pathPostProgrammes() {
     List<Long> postIds = Lists.newArrayList(1L);
@@ -373,6 +384,7 @@ public class PostServiceImplTest {
     Assert.assertEquals(expectedDTO, result.get(0));
     Assert.assertEquals(programmeDTO, result.get(0).getProgrammes().iterator().next());
   }
+
   @Test
   public void patchPostSpecialties() {
     List<Long> postIds = Lists.newArrayList(1L);
@@ -423,6 +435,7 @@ public class PostServiceImplTest {
     Assert.assertEquals(expectedDTO, result.get(0));
     Assert.assertEquals(expectedSpecialties, result.get(0).getSpecialties());
   }
+
   @Test
   public void patchPostPlacements() {
     List<Long> postIds = Lists.newArrayList(1L);
@@ -457,16 +470,18 @@ public class PostServiceImplTest {
     Assert.assertEquals(expectedDTO, result.get(0));
     Assert.assertEquals(Sets.newHashSet(placementDTO), result.get(0).getPlacementHistory());
   }
+
   @Test
-  public void canLoggedInUserViewOrAmendShouldDoNothingWhenUserIsNotTrustAdmin(){
+  public void canLoggedInUserViewOrAmendShouldDoNothingWhenUserIsNotTrustAdmin() {
     Long postId = 1L;
     when(permissionServiceMock.isUserTrustAdmin()).thenReturn(false);
     testObj.canLoggedInUserViewOrAmend(postId);
     verify(permissionServiceMock, never()).getUsersTrustIds();
     verify(postRepositoryMock, never()).findPostWithTrustsById(any());
   }
+
   @Test
-  public void canLoggedInUserViewOrAmendShouldDoNothingWhenPostCannotBeFound(){
+  public void canLoggedInUserViewOrAmendShouldDoNothingWhenPostCannotBeFound() {
     Long postId = 1L;
     when(permissionServiceMock.isUserTrustAdmin()).thenReturn(true);
     when(postRepositoryMock.findPostWithTrustsById(postId)).thenReturn(Optional.empty());
@@ -474,8 +489,9 @@ public class PostServiceImplTest {
     verify(permissionServiceMock).getUsersTrustIds();
     verify(postRepositoryMock).findPostWithTrustsById(postId);
   }
+
   @Test
-  public void canLoggedInUserViewOrAmendShouldDoNothingWhenPostIsPartOfUsersTrusts(){
+  public void canLoggedInUserViewOrAmendShouldDoNothingWhenPostIsPartOfUsersTrusts() {
     PostTrust associatedTrust1 = new PostTrust();
     associatedTrust1.setTrustId(1L);
     PostTrust associatedTrust2 = new PostTrust();
@@ -491,8 +507,9 @@ public class PostServiceImplTest {
     verify(permissionServiceMock).getUsersTrustIds();
     verify(postRepositoryMock).findPostWithTrustsById(postId);
   }
+
   @Test(expected = AccessUnauthorisedException.class)
-  public void canLoggedInUserViewOrAmendShouldThrowExceptionWhenPostIsNotPartOfUsersTrusts(){
+  public void canLoggedInUserViewOrAmendShouldThrowExceptionWhenPostIsNotPartOfUsersTrusts() {
     PostTrust associatedTrust1 = new PostTrust();
     associatedTrust1.setTrustId(1L);
     PostTrust associatedTrust2 = new PostTrust();
@@ -512,6 +529,7 @@ public class PostServiceImplTest {
       throw e;
     }
   }
+
   @Test
   public void advancedSearchShouldSearchWithDescOrderByCurrentTraineeSurname() {
     final int PAGE = 1;
@@ -528,7 +546,7 @@ public class PostServiceImplTest {
     when(permissionServiceMock.isUserTrustAdmin()).thenReturn(false);
     when(namedParameterJdbcTemplateMock.query(queryCaptor.capture(), any(MapSqlParameterSource.class), any(PostServiceImpl.PostViewRowMapper.class)))
         .thenReturn(resultsFromQuery);
-    Page<PostViewDTO> result = testObj.advancedSearch(SEARCH_STRING, COLUMN_FILTERS, pageable);
+    BasicPage<PostViewDTO> result = testObj.advancedSearch(SEARCH_STRING, COLUMN_FILTERS, pageable);
     String capturedQueryString = queryCaptor.getValue();
     int indexOfGroupBy = capturedQueryString.indexOf("group by");
     Assert.assertTrue(indexOfGroupBy >= 0);
@@ -539,6 +557,7 @@ public class PostServiceImplTest {
     //multiples
     Assert.assertFalse(capturedQueryString.substring(indexOfGroupBy + "group by".length()).contains("group by"));
   }
+
   @Test
   public void advancedSearchShouldSearchWithAscendingOrderByCurrentTraineeSurname() {
     final int PAGE = 1;
@@ -555,7 +574,7 @@ public class PostServiceImplTest {
     when(permissionServiceMock.isUserTrustAdmin()).thenReturn(false);
     when(namedParameterJdbcTemplateMock.query(queryCaptor.capture(), any(MapSqlParameterSource.class), any(PostServiceImpl.PostViewRowMapper.class)))
         .thenReturn(resultsFromQuery);
-    Page<PostViewDTO> result = testObj.advancedSearch(SEARCH_STRING, COLUMN_FILTERS, pageable);
+    BasicPage<PostViewDTO> result = testObj.advancedSearch(SEARCH_STRING, COLUMN_FILTERS, pageable);
     String capturedQueryString = queryCaptor.getValue();
     int indexOfGroupBy = capturedQueryString.indexOf("group by");
     Assert.assertTrue(indexOfGroupBy >= 0);
