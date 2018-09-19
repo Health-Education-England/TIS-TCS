@@ -3,6 +3,7 @@ package com.transformuk.hee.tis.tcs.service.service;
 import com.transformuk.hee.tis.tcs.api.dto.PostDTO;
 import com.transformuk.hee.tis.tcs.api.dto.PostEsrDTO;
 import com.transformuk.hee.tis.tcs.api.dto.PostViewDTO;
+import com.transformuk.hee.tis.tcs.service.api.util.BasicPage;
 import com.transformuk.hee.tis.tcs.service.model.ColumnFilter;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
@@ -114,7 +115,7 @@ public interface PostService {
    * @param pageable the pagination information
    * @return the list of entities
    */
-  Page<PostViewDTO> findAll(Pageable pageable);
+  BasicPage<PostViewDTO> findAll(Pageable pageable);
 
   /**
    * Get all the posts using the given smart search string and filters.
@@ -124,7 +125,7 @@ public interface PostService {
    * @param pageable     the pagination information
    * @return the list of entities
    */
-  Page<PostViewDTO> advancedSearch(String searchString, List<ColumnFilter> columnFilers, Pageable pageable);
+  BasicPage<PostViewDTO> advancedSearch(String searchString, List<ColumnFilter> columnFilers, Pageable pageable);
 
   /**
    * Get the "id" post.

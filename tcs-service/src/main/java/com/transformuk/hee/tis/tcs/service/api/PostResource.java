@@ -16,6 +16,7 @@ import com.transformuk.hee.tis.tcs.api.enumeration.PostSuffix;
 import com.transformuk.hee.tis.tcs.api.enumeration.Status;
 import com.transformuk.hee.tis.tcs.service.api.decorator.PlacementSummaryDecorator;
 import com.transformuk.hee.tis.tcs.service.api.decorator.PlacementViewDecorator;
+import com.transformuk.hee.tis.tcs.service.api.util.BasicPage;
 import com.transformuk.hee.tis.tcs.service.api.util.ColumnFilterUtil;
 import com.transformuk.hee.tis.tcs.service.api.util.HeaderUtil;
 import com.transformuk.hee.tis.tcs.service.api.util.PaginationUtil;
@@ -173,13 +174,13 @@ public class PostResource {
     List<Class> filterEnumList = Lists.newArrayList(Status.class, FundingType.class, PostSuffix.class,
         PostGradeType.class, PostSpecialtyType.class);
     List<ColumnFilter> columnFilters = ColumnFilterUtil.getColumnFilters(columnFilterJson, filterEnumList);
-    Page<PostViewDTO> page;
+    BasicPage<PostViewDTO> page;
     if (StringUtils.isEmpty(searchQuery) && StringUtils.isEmpty(columnFilterJson)) {
       page = postService.findAll(pageable);
     } else {
       page = postService.advancedSearch(searchQuery, columnFilters, pageable);
     }
-    HttpHeaders headers = PaginationUtil.generatePaginationHttpHeaders(page, "/api/posts");
+    HttpHeaders headers = PaginationUtil.generateBasicPaginationHttpHeaders(page, "/api/posts");
     return new ResponseEntity<>(page.getContent(), headers, HttpStatus.OK);
   }
 
