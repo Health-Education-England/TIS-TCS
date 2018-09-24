@@ -9,13 +9,13 @@ import org.mockito.runners.MockitoJUnitRunner;
 import javax.persistence.EntityManager;
 import javax.persistence.EntityManagerFactory;
 import javax.persistence.EntityTransaction;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
 
+import static org.mockito.Matchers.any;
 import static org.mockito.Matchers.anyList;
-import static org.mockito.Mockito.never;
-import static org.mockito.Mockito.verify;
-import static org.mockito.Mockito.when;
+import static org.mockito.Mockito.*;
 
 @RunWith(MockitoJUnitRunner.class)
 public class TrustAdminSyncJobTemplateTest {
@@ -58,7 +58,7 @@ public class TrustAdminSyncJobTemplateTest {
 
     testObj.run();
 
-    verify(entityManagerMock).persist(anyList());
+    verify(entityManagerMock, times(100)).persist(any());
     verify(entityManagerMock).flush();
     verify(entityTransactionMock).commit();
   }
@@ -105,6 +105,9 @@ public class TrustAdminSyncJobTemplateTest {
 
     @Override
     protected int convertData(int skipped, Set<Object> entitiesToSave, List<EntityData> entityData, EntityManager entityManager) {
+      for (Object o : entityData) {
+        entitiesToSave.add(new Object());
+      }
       return 0;
     }
   }
