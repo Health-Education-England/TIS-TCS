@@ -36,7 +36,7 @@ public abstract class TrustAdminSyncJobTemplate<ENTITY> {
   }
 
   @ManagedOperation(description = "The current elapsed time of the current sync job")
-  public String elaspedTime() {
+  public String elapsedTime() {
     return mainStopWatch != null ? mainStopWatch.toString() : "0s";
   }
 
@@ -60,7 +60,7 @@ public abstract class TrustAdminSyncJobTemplate<ENTITY> {
 
   protected abstract int convertData(int skipped, Set<ENTITY> entitiesToSave, List<EntityData> entityData, EntityManager entityManager);
 
-  private void run() {
+  protected void run() {
     try {
       LOG.info("Sync [{}] started", getJobName());
       mainStopWatch = Stopwatch.createStarted();
@@ -93,15 +93,16 @@ public abstract class TrustAdminSyncJobTemplate<ENTITY> {
           lastSiteId = collectedData.get(collectedData.size() - 1).getOtherId();
           totalRecords += collectedData.size();
           skipped = convertData(skipped, dataToSave, collectedData, entityManager);
+
+          stopwatch.reset().start();
+          entityManager.persist(dataToSave);
+          entityManager.flush();
+          dataToSave.clear();
+
+          transaction.commit();
+          entityManager.close();
         }
 
-        stopwatch.reset().start();
-        dataToSave.forEach(entityManager::persist);
-        entityManager.flush();
-        dataToSave.clear();
-
-        transaction.commit();
-        entityManager.close();
         LOG.info("Time taken to save chunk : [{}]", stopwatch.toString());
       }
       stopwatch.reset().start();
@@ -115,27 +116,4 @@ public abstract class TrustAdminSyncJobTemplate<ENTITY> {
     }
   }
 
-
-  class EntityData {
-    private Long entityId;
-    private Long otherId;
-
-    public Long getEntityId() {
-      return entityId;
-    }
-
-    public EntityData entityId(Long entityId) {
-      this.entityId = entityId;
-      return this;
-    }
-
-    public Long getOtherId() {
-      return otherId;
-    }
-
-    public EntityData otherId(Long otherId) {
-      this.otherId = otherId;
-      return this;
-    }
-  }
 }
