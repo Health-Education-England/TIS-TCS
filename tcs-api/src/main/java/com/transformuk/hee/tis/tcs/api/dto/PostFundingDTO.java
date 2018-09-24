@@ -16,6 +16,8 @@ public class PostFundingDTO implements Serializable {
 
   private String fundingType;
 
+  private Long fundingTypeId;
+
   private String info;
 
   private LocalDate startDate;
@@ -46,6 +48,14 @@ public class PostFundingDTO implements Serializable {
 
   public void setFundingType(String fundingType) {
     this.fundingType = fundingType;
+  }
+
+  public Long getFundingTypeId() {
+    return fundingTypeId;
+  }
+
+  public void setFundingTypeId(Long fundingTypeId) {
+    this.fundingTypeId = fundingTypeId;
   }
 
   public String getInfo() {
