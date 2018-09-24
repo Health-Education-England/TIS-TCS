@@ -29,7 +29,7 @@ import java.util.stream.Collectors;
 
 @Component
 @ManagedResource(objectName = "tcs.mbean:name=PersonPlacementEmployingBodyJob",
-        description = "Service that clears the PersonTrust table and links Person with Placement Trusts")
+        description = "Service that clears the PersonTrust table and links Person with Placement EmployingBody(Trust)")
 public class PersonPlacementEmployingBodyTrustJob extends TrustAdminSyncJobTemplate<PersonTrust> {
 
     private static final Logger LOG = LoggerFactory.getLogger(PostEmployingBodyTrustJob.class);
@@ -45,7 +45,7 @@ public class PersonPlacementEmployingBodyTrustJob extends TrustAdminSyncJobTempl
     //@Scheduled(cron = "0 30 0 * * *")
     @SchedulerLock(name = "personTrustScheduledTask", lockAtLeastFor = FIFTEEN_MIN, lockAtMostFor = FIFTEEN_MIN)
     @ManagedOperation(description = "Run sync of the PersonTrust table with Person to Placement EmployingBody")
-    public void PersonPlacementTrustFullSync() {
+    public void PersonPlacementEmployingBodyFullSync() {
         runSyncJob();
     }
 
@@ -64,16 +64,6 @@ public class PersonPlacementEmployingBodyTrustJob extends TrustAdminSyncJobTempl
         return this.entityManagerFactory;
     }
 
-    @Override
-    protected String getServiceUrl() {
-        return StringUtils.EMPTY;
-    }
-
-    @Override
-    protected RestTemplate getTrustAdminEnabledRestTemplate() {
-        //do nothing as we already have the trust id stored
-        return null;
-    }
 
     @Override
     protected void deleteData() {

@@ -95,7 +95,7 @@ public abstract class TrustAdminSyncJobTemplate<ENTITY> {
           skipped = convertData(skipped, dataToSave, collectedData, entityManager);
 
           stopwatch.reset().start();
-          entityManager.persist(dataToSave);
+          dataToSave.forEach(entityManager::persist);
           entityManager.flush();
           dataToSave.clear();
 
