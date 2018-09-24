@@ -28,6 +28,8 @@ public abstract class TrustAdminSyncJobTemplate<ENTITY> {
 
   private Stopwatch mainStopWatch;
 
+  protected static final int DEFAULT_PAGE_SIZE = 5000;
+
   @ManagedOperation(description = "Is the Post Trust sync just currently running")
   public boolean isCurrentlyRunning() {
     return mainStopWatch != null;
@@ -52,28 +54,11 @@ public abstract class TrustAdminSyncJobTemplate<ENTITY> {
 
   protected abstract EntityManagerFactory getEntityManagerFactory();
 
-  protected abstract String getServiceUrl();
-
-  protected abstract RestTemplate getTrustAdminEnabledRestTemplate();
-
   protected abstract void deleteData();
 
   protected abstract List<EntityData> collectData(int pageSize, long lastId, long lastSiteId, EntityManager entityManager);
 
   protected abstract int convertData(int skipped, Set<ENTITY> entitiesToSave, List<EntityData> entityData, EntityManager entityManager);
-
-  /**
-   * Copied from the Reference client as we want to communicate to the Reference service using the TCS credentials.
-   * <p>
-   * We don't have a user context if we run this as a scheduled job so we need to talk to KC to log in and get a OIDC key
-   *
-   * @param ids
-   * @return
-   */
-  private List<SiteDTO> findSitesIdIn(Set<Long> ids) {
-    String joinedIds = StringUtils.join(ids, ",");
-    return new FindSitesInCommand(getTrustAdminEnabledRestTemplate(), getServiceUrl(), joinedIds).execute();
-  }
 
   private void run() {
     try {
