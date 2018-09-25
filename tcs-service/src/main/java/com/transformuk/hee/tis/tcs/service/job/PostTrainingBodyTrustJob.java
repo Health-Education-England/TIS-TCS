@@ -2,6 +2,7 @@ package com.transformuk.hee.tis.tcs.service.job;
 
 import com.transformuk.hee.tis.tcs.service.model.Post;
 import com.transformuk.hee.tis.tcs.service.model.PostTrust;
+import com.transformuk.hee.tis.tcs.service.service.helper.SqlQuerySupplier;
 import net.javacrumbs.shedlock.core.SchedulerLock;
 import org.apache.commons.collections4.CollectionUtils;
 import org.slf4j.Logger;
@@ -36,6 +37,8 @@ public class PostTrainingBodyTrustJob extends TrustAdminSyncJobTemplate<PostTrus
 
   @Autowired
   private EntityManagerFactory entityManagerFactory;
+  @Autowired
+  private SqlQuerySupplier sqlQuerySupplier;
 
 
   @Scheduled(cron = "0 20 1 * * *")
@@ -67,14 +70,12 @@ public class PostTrainingBodyTrustJob extends TrustAdminSyncJobTemplate<PostTrus
 
   @Override
   protected List<EntityData> collectData(int pageSize, long lastId, long lastTrainingBodyId, EntityManager entityManager) {
-    LOG.info("Querying with lastPersonId: [{}] and lastSiteId: [{}]", lastId, lastTrainingBodyId);
-    Query query = entityManager.createNativeQuery(
-        "SELECT distinct p.id, p.trainingBodyId " +
-            "FROM Post p " +
-            "WHERE (p.id, p.trainingBodyId) > (" + lastId + "," + lastTrainingBodyId + ") " +
-            "AND p.trainingBodyId IS NOT NULL " +
-            "ORDER BY p.id ASC, p.trainingBodyId ASC " +
-            "LIMIT " + pageSize);
+    LOG.info("Querying with lastPostId: [{}] and lastTrainingBodyId: [{}]", lastId, lastTrainingBodyId);
+    String postTrainingBodyQuery = sqlQuerySupplier.getQuery(SqlQuerySupplier.POST_TRAININGBODY);
+
+    Query query = entityManager.createNativeQuery(postTrainingBodyQuery).setParameter("lastId", lastId )
+                                                                        .setParameter("lastTrainingBodyId", lastTrainingBodyId)
+                                                                        .setParameter("pageSize", pageSize);
 
     List<Object[]> resultList = query.getResultList();
     List<EntityData> result = resultList.stream().filter(Objects::nonNull).map(objArr -> {

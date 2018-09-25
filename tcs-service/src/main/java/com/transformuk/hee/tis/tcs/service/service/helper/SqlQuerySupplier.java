@@ -24,6 +24,10 @@ public class SqlQuerySupplier {
     public static final String PLACEMENT_DETAILS = "queries/placementDetails.sql";
     public static final String PLACEMENT_SUPERVISOR = "queries/placementSupervisor.sql";
     public static final String POST_PLACEMENT_SUMMARY = "queries/placementSummaryForPost.sql";
+    public static final String PERSON_PLACEMENT_EMPLOYINGBODY = "queries/personPlacementEmployingBody.sql";
+    public static final String PERSON_PLACEMENT_TRAININGBODY = "queries/personPlacementTrainingBody.sql";
+    public static final String POST_EMPLOYINGBODY = "queries/postEmployingBody.sql";
+    public static final String POST_TRAININGBODY = "queries/postTrainingBody.sql";
     private static final Logger LOG = getLogger(SqlQuerySupplier.class);
     private Map<String, String> files;
 

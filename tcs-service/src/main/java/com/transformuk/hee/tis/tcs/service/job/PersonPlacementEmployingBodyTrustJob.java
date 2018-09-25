@@ -2,14 +2,11 @@ package com.transformuk.hee.tis.tcs.service.job;
 
 import com.transformuk.hee.tis.tcs.service.model.Person;
 import com.transformuk.hee.tis.tcs.service.model.PersonTrust;
-import com.transformuk.hee.tis.tcs.service.model.Post;
-import com.transformuk.hee.tis.tcs.service.model.PostTrust;
 import com.transformuk.hee.tis.tcs.service.repository.PersonRepository;
 import com.transformuk.hee.tis.tcs.service.repository.PersonTrustRepository;
-import com.transformuk.hee.tis.tcs.service.repository.PostTrustRepository;
+import com.transformuk.hee.tis.tcs.service.service.helper.SqlQuerySupplier;
 import net.javacrumbs.shedlock.core.SchedulerLock;
 import org.apache.commons.collections4.CollectionUtils;
-import org.apache.commons.lang.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -18,12 +15,10 @@ import org.springframework.jmx.export.annotation.ManagedResource;
 import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Component;
 import org.springframework.transaction.annotation.Transactional;
-import org.springframework.web.client.RestTemplate;
 
 import javax.persistence.EntityManager;
 import javax.persistence.EntityManagerFactory;
 import javax.persistence.Query;
-import javax.persistence.Transient;
 import java.math.BigInteger;
 import java.util.*;
 import java.util.stream.Collectors;
@@ -42,6 +37,8 @@ public class PersonPlacementEmployingBodyTrustJob extends TrustAdminSyncJobTempl
     private EntityManagerFactory entityManagerFactory;
     @Autowired
     private PersonRepository personRepository;
+    @Autowired
+    private SqlQuerySupplier sqlQuerySupplier;
 
     @Scheduled(cron = "0 10 0 * * *")
     @SchedulerLock(name = "personTrustScheduledTask", lockAtLeastFor = FIFTEEN_MIN, lockAtMostFor = FIFTEEN_MIN)
@@ -74,18 +71,12 @@ public class PersonPlacementEmployingBodyTrustJob extends TrustAdminSyncJobTempl
 
     @Override
     protected List<EntityData> collectData(int pageSize, long lastId, long lastEmployingBodyId, EntityManager entityManager) {
-        LOG.info("Querying with lastPersonId: [{}] and lastPlacementId: [{}]", lastId, lastEmployingBodyId);
-        Query query = entityManager.createNativeQuery("SELECT distinct p.id, po.employingBodyId " +
-                "FROM Person p " +
-                "LEFT JOIN Placement pl " +
-                "ON p.id = pl.traineeId " +
-                "LEFT JOIN Post po " +
-                "ON po.id = pl.postId " +
-                "WHERE (p.id, po.employingBodyId) > (" + lastId + "," + lastEmployingBodyId + ") " +
-                "AND po.employingBodyId IS NOT NULL " +
-                "ORDER BY p.id ASC, po.employingBodyId ASC " +
-                "LIMIT " + pageSize);
+        LOG.info("Querying with lastPersonId: [{}] and lastEmployingBodyId: [{}]", lastId, lastEmployingBodyId);
+        String personPlacementQuery = sqlQuerySupplier.getQuery(SqlQuerySupplier.PERSON_PLACEMENT_EMPLOYINGBODY);
 
+        Query query = entityManager.createNativeQuery(personPlacementQuery).setParameter("lastId", lastId )
+                                                                     .setParameter("lastEmployingBodyId", lastEmployingBodyId)
+                                                                     .setParameter("pageSize", pageSize);
         List<Object[]> resultList = query.getResultList();
         List<EntityData> result = resultList.stream().filter(Objects::nonNull).map(objArr -> {
             EntityData entityData = new EntityData()

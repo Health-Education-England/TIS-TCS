@@ -7,6 +7,7 @@ import com.transformuk.hee.tis.tcs.service.model.PostTrust;
 import com.transformuk.hee.tis.tcs.service.repository.PersonRepository;
 import com.transformuk.hee.tis.tcs.service.repository.PersonTrustRepository;
 import com.transformuk.hee.tis.tcs.service.repository.PostTrustRepository;
+import com.transformuk.hee.tis.tcs.service.service.helper.SqlQuerySupplier;
 import net.javacrumbs.shedlock.core.SchedulerLock;
 import org.apache.commons.collections4.CollectionUtils;
 import org.apache.commons.lang.StringUtils;
@@ -42,6 +43,8 @@ public class PersonPlacementTrainingBodyTrustJob extends TrustAdminSyncJobTempla
     private EntityManagerFactory entityManagerFactory;
     @Autowired
     private PersonRepository personRepository;
+    @Autowired
+    private SqlQuerySupplier sqlQuerySupplier;
 
     @Scheduled(cron = "0 30 0 * * *")
     @SchedulerLock(name = "personTrustScheduledTask", lockAtLeastFor = FIFTEEN_MIN, lockAtMostFor = FIFTEEN_MIN)
@@ -74,17 +77,12 @@ public class PersonPlacementTrainingBodyTrustJob extends TrustAdminSyncJobTempla
 
     @Override
     protected List<EntityData> collectData(int pageSize, long lastId, long lastTrainingBodyId, EntityManager entityManager) {
-        LOG.info("Querying with lastPersonId: [{}] and lastPlacementId: [{}]", lastId, lastTrainingBodyId);
-        Query query = entityManager.createNativeQuery("SELECT distinct p.id, po.trainingBodyId " +
-                "FROM Person p " +
-                "LEFT JOIN Placement pl " +
-                "ON p.id = pl.traineeId " +
-                "LEFT JOIN Post po " +
-                "ON po.id = pl.postId " +
-                "WHERE (p.id, po.trainingBodyId) > (" + lastId + "," + lastTrainingBodyId + ") " +
-                "AND po.trainingBodyId IS NOT NULL " +
-                "ORDER BY p.id ASC, po.trainingBodyId ASC " +
-                "LIMIT " + pageSize);
+        LOG.info("Querying with lastPersonId: [{}] and lastTrainingBodyId: [{}]", lastId, lastTrainingBodyId);
+        String personPlacementQuery = sqlQuerySupplier.getQuery(SqlQuerySupplier.PERSON_PLACEMENT_TRAININGBODY);
+
+        Query query = entityManager.createNativeQuery(personPlacementQuery).setParameter("lastId", lastId )
+                                                                           .setParameter("lastTrainingBodyId", lastTrainingBodyId)
+                                                                           .setParameter("pageSize", pageSize);
 
         List<Object[]> resultList = query.getResultList();
         List<EntityData> result = resultList.stream().filter(Objects::nonNull).map(objArr -> {

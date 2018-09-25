@@ -3,6 +3,7 @@ package com.transformuk.hee.tis.tcs.service.job;
 import com.transformuk.hee.tis.tcs.service.model.Post;
 import com.transformuk.hee.tis.tcs.service.model.PostTrust;
 import com.transformuk.hee.tis.tcs.service.repository.PostTrustRepository;
+import com.transformuk.hee.tis.tcs.service.service.helper.SqlQuerySupplier;
 import net.javacrumbs.shedlock.core.SchedulerLock;
 import org.apache.commons.collections4.CollectionUtils;
 import org.slf4j.Logger;
@@ -39,6 +40,9 @@ public class PostEmployingBodyTrustJob extends TrustAdminSyncJobTemplate<PostTru
   private PostTrustRepository postTrustRepository;
   @Autowired
   private EntityManagerFactory entityManagerFactory;
+  @Autowired
+  private SqlQuerySupplier sqlQuerySupplier;
+
 
   @Scheduled(cron = "0 10 1 * * *")
   @SchedulerLock(name = "postTrustScheduledTask", lockAtLeastFor = FIFTEEN_MIN, lockAtMostFor = FIFTEEN_MIN)
@@ -70,13 +74,12 @@ public class PostEmployingBodyTrustJob extends TrustAdminSyncJobTemplate<PostTru
 
   @Override
   protected List<EntityData> collectData(int pageSize, long lastId, long lastEmployingBodyId, EntityManager entityManager) {
-    LOG.info("Querying with lastPersonId: [{}] and lastSiteId: [{}]", lastId, lastEmployingBodyId);
-    Query query = entityManager.createNativeQuery("SELECT distinct p.id, p.employingBodyId " +
-        "FROM Post p " +
-        "WHERE (p.id, p.employingBodyId) > (" + lastId + "," + lastEmployingBodyId + ") " +
-        "AND p.employingBodyId IS NOT NULL " +
-        "ORDER BY p.id ASC, p.employingBodyId ASC " +
-        "LIMIT " + pageSize);
+    LOG.info("Querying with lastPostId: [{}] and lastEmployingBodyId: [{}]", lastId, lastEmployingBodyId);
+    String postEmployingBodyQuery = sqlQuerySupplier.getQuery(SqlQuerySupplier.POST_EMPLOYINGBODY);
+
+    Query query = entityManager.createNativeQuery(postEmployingBodyQuery).setParameter("lastId", lastId )
+                                                                         .setParameter("lastEmployingBodyId", lastEmployingBodyId)
+                                                                         .setParameter("pageSize", pageSize);
 
     List<Object[]> resultList = query.getResultList();
     List<EntityData> result = resultList.stream().filter(Objects::nonNull).map(objArr -> {
