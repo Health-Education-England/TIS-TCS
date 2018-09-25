@@ -1,4 +1,4 @@
-package com.transformuk.hee.tis.tcs.service.service.impl;
+package com.transformuk.hee.tis.tcs.service.job;
 
 import com.google.common.base.Stopwatch;
 import com.google.common.collect.Maps;
@@ -9,17 +9,12 @@ import org.apache.commons.collections4.CollectionUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.springframework.core.ParameterizedTypeReference;
-import org.springframework.http.HttpMethod;
-import org.springframework.http.ResponseEntity;
 import org.springframework.jmx.export.annotation.ManagedOperation;
 import org.springframework.web.client.RestTemplate;
-import org.springframework.web.util.UriComponentsBuilder;
 
 import javax.persistence.EntityManager;
 import javax.persistence.EntityManagerFactory;
 import javax.persistence.EntityTransaction;
-import java.util.Collections;
 import java.util.List;
 import java.util.Map;
 import java.util.Objects;
@@ -33,13 +28,15 @@ public abstract class TrustAdminSyncJobTemplate<ENTITY> {
 
   private Stopwatch mainStopWatch;
 
+  protected static final int DEFAULT_PAGE_SIZE = 5000;
+
   @ManagedOperation(description = "Is the Post Trust sync just currently running")
   public boolean isCurrentlyRunning() {
     return mainStopWatch != null;
   }
 
   @ManagedOperation(description = "The current elapsed time of the current sync job")
-  public String elaspedTime() {
+  public String elapsedTime() {
     return mainStopWatch != null ? mainStopWatch.toString() : "0s";
   }
 
@@ -57,45 +54,13 @@ public abstract class TrustAdminSyncJobTemplate<ENTITY> {
 
   protected abstract EntityManagerFactory getEntityManagerFactory();
 
-  protected abstract String getServiceUrl();
-
-  protected abstract RestTemplate getTrustAdminEnabledRestTemplate();
-
   protected abstract void deleteData();
 
   protected abstract List<EntityData> collectData(int pageSize, long lastId, long lastSiteId, EntityManager entityManager);
 
-  protected abstract int convertData(int skipped, Set<ENTITY> entitiesToSave, Map<Long, SiteDTO> siteIdToSiteDTO, List<EntityData> entityData, EntityManager entityManager);
+  protected abstract int convertData(int skipped, Set<ENTITY> entitiesToSave, List<EntityData> entityData, EntityManager entityManager);
 
-
-  private void getSiteAndTrustReferenceData(Map<Long, SiteDTO> siteIdToSiteDTO, List<EntityData> entityData) {
-    Set<Long> siteIds = entityData.stream()
-        .map(EntityData::getSiteId)
-        .filter(Objects::nonNull)
-        .filter(siteId -> !siteIdToSiteDTO.keySet().contains(siteId))
-        .collect(Collectors.toSet());
-
-    if (CollectionUtils.isNotEmpty(siteIds)) {
-      LOG.info("requesting [{}] site records", siteIds.size());
-      List<SiteDTO> sitesIdIn = findSitesIdIn(siteIds);
-      sitesIdIn.forEach(s -> siteIdToSiteDTO.put(s.getId(), s));
-    }
-  }
-
-  /**
-   * Copied from the Reference client as we want to communicate to the Reference service using the TCS credentials.
-   * <p>
-   * We don't have a user context if we run this as a scheduled job so we need to talk to KC to log in and get a OIDC key
-   *
-   * @param ids
-   * @return
-   */
-  private List<SiteDTO> findSitesIdIn(Set<Long> ids) {
-    String joinedIds = StringUtils.join(ids, ",");
-    return new FindSitesInCommand(getTrustAdminEnabledRestTemplate(), getServiceUrl(), joinedIds).execute();
-  }
-
-  private void run() {
+  protected void run() {
     try {
       LOG.info("Sync [{}] started", getJobName());
       mainStopWatch = Stopwatch.createStarted();
@@ -112,7 +77,6 @@ public abstract class TrustAdminSyncJobTemplate<ENTITY> {
       stopwatch.reset().start();
 
       Set<ENTITY> dataToSave = Sets.newHashSet();
-      Map<Long, SiteDTO> siteIdToSiteCache = Maps.newHashMap();
 
       while (hasMoreResults) {
 
@@ -126,19 +90,19 @@ public abstract class TrustAdminSyncJobTemplate<ENTITY> {
 
         if (CollectionUtils.isNotEmpty(collectedData)) {
           lastEntityId = collectedData.get(collectedData.size() - 1).getEntityId();
-          lastSiteId = collectedData.get(collectedData.size() - 1).getSiteId();
+          lastSiteId = collectedData.get(collectedData.size() - 1).getOtherId();
           totalRecords += collectedData.size();
-          getSiteAndTrustReferenceData(siteIdToSiteCache, collectedData);
-          skipped = convertData(skipped, dataToSave, siteIdToSiteCache, collectedData, entityManager);
+          skipped = convertData(skipped, dataToSave, collectedData, entityManager);
+
+          stopwatch.reset().start();
+          dataToSave.forEach(entityManager::persist);
+          entityManager.flush();
+          dataToSave.clear();
+
+          transaction.commit();
+          entityManager.close();
         }
 
-        stopwatch.reset().start();
-        dataToSave.forEach(entityManager::persist);
-        entityManager.flush();
-        dataToSave.clear();
-
-        transaction.commit();
-        entityManager.close();
         LOG.info("Time taken to save chunk : [{}]", stopwatch.toString());
       }
       stopwatch.reset().start();
@@ -152,27 +116,4 @@ public abstract class TrustAdminSyncJobTemplate<ENTITY> {
     }
   }
 
-
-  class EntityData {
-    private Long entityId;
-    private Long siteId;
-
-    public Long getEntityId() {
-      return entityId;
-    }
-
-    public EntityData entityId(Long entityId) {
-      this.entityId = entityId;
-      return this;
-    }
-
-    public Long getSiteId() {
-      return siteId;
-    }
-
-    public EntityData siteId(Long siteId) {
-      this.siteId = siteId;
-      return this;
-    }
-  }
 }
