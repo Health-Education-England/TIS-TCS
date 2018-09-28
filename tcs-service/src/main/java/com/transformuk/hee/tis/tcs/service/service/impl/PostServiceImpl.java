@@ -1,5 +1,4 @@
 package com.transformuk.hee.tis.tcs.service.service.impl;
-
 import com.google.common.collect.Lists;
 import com.google.common.collect.Maps;
 import com.google.common.collect.Sets;
@@ -11,6 +10,7 @@ import com.transformuk.hee.tis.tcs.api.dto.PostSiteDTO;
 import com.transformuk.hee.tis.tcs.api.dto.PostSpecialtyDTO;
 import com.transformuk.hee.tis.tcs.api.dto.PostViewDTO;
 import com.transformuk.hee.tis.tcs.api.dto.ProgrammeDTO;
+import com.transformuk.hee.tis.tcs.api.enumeration.FundingType;
 import com.transformuk.hee.tis.tcs.api.enumeration.Status;
 import com.transformuk.hee.tis.tcs.service.api.decorator.PostViewDecorator;
 import com.transformuk.hee.tis.tcs.service.api.util.BasicPage;
@@ -56,7 +56,6 @@ import org.springframework.scheduling.annotation.Async;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.util.StopWatch;
-
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.util.Collection;
@@ -68,17 +67,13 @@ import java.util.Optional;
 import java.util.Set;
 import java.util.concurrent.CompletableFuture;
 import java.util.stream.Collectors;
-
 /**
  * Service Implementation for managing Post.
  */
 @Service
 @Transactional
 public class PostServiceImpl implements PostService {
-
-
   private static final Logger log = LoggerFactory.getLogger(PostServiceImpl.class);
-
   @Autowired
   private PostRepository postRepository;
   @Autowired
@@ -105,16 +100,12 @@ public class PostServiceImpl implements PostService {
   private NationalPostNumberServiceImpl nationalPostNumberService;
   @Autowired
   private EsrNotificationService esrNotificationService;
-
   @Autowired
   private NamedParameterJdbcTemplate namedParameterJdbcTemplate;
-
   @Autowired
   private SqlQuerySupplier sqlQuerySupplier;
-
   @Autowired
   private PermissionService permissionService;
-
   /**
    * Save a post.
    * <p>
@@ -137,7 +128,6 @@ public class PostServiceImpl implements PostService {
     handleNewPostEsrNotification(postDTO);
     return postMapper.postToPostDTO(post);
   }
-
   /**
    * Save a list of post.
    * <p>
@@ -153,22 +143,17 @@ public class PostServiceImpl implements PostService {
   public List<PostDTO> save(List<PostDTO> postDTOs) {
     log.debug("Request to save Post : {}", postDTOs);
     List<Post> posts = postMapper.postDTOsToPosts(postDTOs);
-
     Set<String> postIntrepidIds = posts.stream().map(Post::getIntrepidId).collect(Collectors.toSet());
     Set<Post> postByIntrepidIds = postRepository.findPostByIntrepidIdIn(postIntrepidIds);
     Set<PostGrade> allPostGrades = postByIntrepidIds.stream().flatMap(post -> post.getGrades().stream()).collect(Collectors.toSet());
     Set<PostSite> allPostSites = postByIntrepidIds.stream().flatMap(post -> post.getSites().stream()).collect(Collectors.toSet());
     Set<PostSpecialty> allPostSpecialties = postByIntrepidIds.stream().flatMap(post -> post.getSpecialties().stream()).collect(Collectors.toSet());
-
     postGradeRepository.delete(allPostGrades);
     postSiteRepository.delete(allPostSites);
     postSpecialtyRepository.delete(allPostSpecialties);
-
     posts = postRepository.save(posts);
     return postMapper.postsToPostDTOs(posts);
   }
-
-
   /**
    * Update a list of post so that the links to old/new posts are saved. its important to note that if a related post
    * cannot be found, the existing post is cleared but if related post id  is null then it isnt cleared, this is to ensure
@@ -183,52 +168,42 @@ public class PostServiceImpl implements PostService {
   @Override
   public List<PostDTO> patchOldNewPosts(List<PostDTO> postDTOList) {
     List<Post> postsToSave = Lists.newArrayList();
-
     Set<String> postIntrepidIds = postDTOList.stream().map(PostDTO::getIntrepidId).collect(Collectors.toSet());
     Set<String> oldPostIntrepidIds = postDTOList.stream()
         .map(PostDTO::getOldPost)
         .filter(Objects::nonNull)
         .map(PostDTO::getIntrepidId)
         .collect(Collectors.toSet());
-
     Set<String> newPostIntrepidIds = postDTOList.stream()
         .map(PostDTO::getNewPost)
         .filter(Objects::nonNull)
         .map(PostDTO::getIntrepidId)
         .collect(Collectors.toSet());
-
     Set<String> postIntredpidIds = Sets.newHashSet(postIntrepidIds);
     postIntredpidIds.addAll(oldPostIntrepidIds);
     postIntredpidIds.addAll(newPostIntrepidIds);
-
     Map<String, Post> intrepidIdToPost = postRepository.findPostByIntrepidIdIn(postIntredpidIds)
         .stream().collect(Collectors.toMap(Post::getIntrepidId, p -> p));
-
     for (PostDTO dto : postDTOList) {
-
       Post post = intrepidIdToPost.get(dto.getIntrepidId());
       if (post != null) {
         if (dto.getOldPost() != null && dto.getOldPost().getIntrepidId() != null) {
           Post oldPost = intrepidIdToPost.get(dto.getOldPost().getIntrepidId());
           post.setOldPost(oldPost);
         }
-
         if (dto.getNewPost() != null && dto.getNewPost().getIntrepidId() != null) {
           Post newPost = intrepidIdToPost.get(dto.getNewPost().getIntrepidId());
           post.setNewPost(newPost);
         }
-
         postsToSave.add(post);
       }
     }
     List<Post> savedPosts = postRepository.save(postsToSave);
     return postMapper.postsToPostDTOs(savedPosts);
   }
-
   @Override
   public List<PostDTO> patchPostSites(List<PostDTO> postDTOList) {
     Map<String, Post> intrepidIdToPost = getPostsByIntrepidId(postDTOList);
-
     List<Post> postsModified = Lists.newArrayList();
     for (PostDTO dto : postDTOList) {
       Set<PostSite> sitesToSave;
@@ -246,17 +221,13 @@ public class PostServiceImpl implements PostService {
         post.setSites(Sets.newHashSet(savedPostSite));
         postsModified.add(post);
       }
-
     }
-
     return postMapper.postsToPostDTOs(postsModified);
   }
-
   @Override
   public List<PostDTO> patchPostGrades(List<PostDTO> postDTOList) {
     List<Post> postsToSave = Lists.newArrayList();
     Map<String, Post> intrepidIdToPost = getPostsByIntrepidId(postDTOList);
-
     for (PostDTO dto : postDTOList) {
       Post post = intrepidIdToPost.get(dto.getIntrepidId());
       Set<PostGrade> postGrades = post.getGrades();
@@ -276,14 +247,11 @@ public class PostServiceImpl implements PostService {
     List<Post> savedPosts = postRepository.save(postsToSave);
     return postMapper.postsToPostDTOs(savedPosts);
   }
-
   @Override
   public List<PostDTO> patchPostProgrammes(List<PostDTO> postDTOList) {
     List<Post> posts = Lists.newArrayList();
-
     // fixme why we using intrepidIDs and not TISIDs?
     Map<String, Post> intrepidIdToPost = getPostsByIntrepidId(postDTOList);
-
     // fixme review this code with a developer that understands the business requirement for this method
     Set<Long> programmeIds = postDTOList
         .stream()
@@ -291,41 +259,32 @@ public class PostServiceImpl implements PostService {
         .flatMap(Collection::stream)
         .map(ProgrammeDTO::getId)
         .collect(Collectors.toSet());
-
     Map<Long, Programme> idToProgramme = programmeRepository.findAll(programmeIds)
         .stream().collect(Collectors.toMap(Programme::getId, p -> p));
-
     for (final PostDTO dto : postDTOList) {
       final Post post = intrepidIdToPost.get(dto.getIntrepidId());
-
       for (final ProgrammeDTO programmeDTO : dto.getProgrammes()) {
         final Programme programme = idToProgramme.get(programmeDTO.getId());
-
         if (post != null && programme != null) {
           post.addProgramme(programme);
           posts.add(post);
         }
       }
     }
-
     List<Post> savedPosts = postRepository.save(posts);
     return postMapper.postsToPostDTOs(savedPosts);
   }
-
   @Override
   public List<PostDTO> patchPostSpecialties(List<PostDTO> postDTOList) {
     List<Post> posts = Lists.newArrayList();
     Map<String, Post> intrepidIdToPost = getPostsByIntrepidId(postDTOList);
-
     for (PostDTO dto : postDTOList) {
       Post post = intrepidIdToPost.get(dto.getIntrepidId());
       if (post != null) {
         Set<PostSpecialty> attachedSpecialties = post.getSpecialties();
         for (PostSpecialtyDTO postSpecialtyDTO : dto.getSpecialties()) {
-
           Specialty specialty = new Specialty();
           specialty.setId(postSpecialtyDTO.getSpecialty().getId());
-
           PostSpecialty postSpecialty = new PostSpecialty();
           postSpecialty.setPostSpecialtyType(postSpecialtyDTO.getPostSpecialtyType());
           postSpecialty.setPost(post);
@@ -339,7 +298,6 @@ public class PostServiceImpl implements PostService {
     }
     return postMapper.postsToPostDTOs(posts);
   }
-
   private Map<String, Post> getPostsByIntrepidId(List<PostDTO> postDtoList) {
     Set<String> postIntrepidIds = postDtoList.stream().map(PostDTO::getIntrepidId).collect(Collectors.toSet());
     Set<Post> postsFound = postRepository.findPostByIntrepidIdIn(postIntrepidIds);
@@ -351,22 +309,18 @@ public class PostServiceImpl implements PostService {
     }
     return result;
   }
-
   @Override
   public List<PostDTO> patchPostPlacements(List<PostDTO> postDTOList) {
     List<Post> posts = Lists.newArrayList();
     Map<String, Post> intrepidIdToPost = getPostsByIntrepidId(postDTOList);
-
     Set<String> postPlamementIntrepidIds = postDTOList
         .stream()
         .map(PostDTO::getPlacementHistory)
         .flatMap(Collection::stream)
         .map(PlacementDTO::getIntrepidId)
         .collect(Collectors.toSet());
-
     Map<String, Placement> placementIntrepidIdToPlacements = placementRepository.findByIntrepidIdIn(postPlamementIntrepidIds)
         .stream().collect(Collectors.toMap(Placement::getIntrepidId, p -> p));
-
     for (PostDTO dto : postDTOList) {
       Post post = intrepidIdToPost.get(dto.getIntrepidId());
       if (post != null) {
@@ -384,16 +338,13 @@ public class PostServiceImpl implements PostService {
     List<Post> savedPosts = postRepository.save(posts);
     return postMapper.postsToPostDTOs(savedPosts);
   }
-
   @Override
   public PostDTO update(PostDTO postDTO) {
     Post post = postRepository.findOne(postDTO.getId());
-
     //clear all the relations
     postGradeRepository.delete(post.getGrades());
     postSiteRepository.delete(post.getSites());
     postSpecialtyRepository.delete(post.getSpecialties());
-
     if (postDTO.isBypassNPNGeneration()) {
       //if we bypass do no do any of the generation logic
     } else if (nationalPostNumberService.requireNewNationalPostNumber(postDTO)) {
@@ -406,7 +357,6 @@ public class PostServiceImpl implements PostService {
     post = postRepository.save(post);
     return postMapper.postToPostDTO(post);
   }
-
   /**
    * Get all the posts.
    *
@@ -417,12 +367,10 @@ public class PostServiceImpl implements PostService {
   @Transactional(readOnly = true)
   public Page<PostDTO> findAll(Set<String> dbcs, Pageable pageable) {
     log.debug("Request to get all Posts");
-
     Set<String> deaneries = DesignatedBodyMapper.map(dbcs);
     Page<Post> result = postRepository.findByOwnerIn(deaneries, pageable);
     return result.map(post -> postMapper.postToPostDTO(post));
   }
-
   /**
    * Get posts by national post numbers
    *
@@ -432,10 +380,8 @@ public class PostServiceImpl implements PostService {
   @Transactional(readOnly = true)
   public List<PostDTO> findAllByNationalPostNumbers(List<String> npns) {
     log.debug("Request to get all Posts by npn : " + npns);
-
     return postMapper.postsToPostDTOs(postRepository.findByNationalPostNumberIn(npns));
   }
-
   /**
    * Get all the posts.
    *
@@ -449,49 +395,37 @@ public class PostServiceImpl implements PostService {
     final int size = pageable.getPageSize() + 1;
     final int offset = pageable.getOffset();
     MapSqlParameterSource paramSource = new MapSqlParameterSource();
-
     String query = sqlQuerySupplier.getQuery(SqlQuerySupplier.POST_VIEW);
-
     String whereClause = " WHERE 1=1 ";
-
     if (permissionService.isUserTrustAdmin()) {
       whereClause = whereClause + "AND trustId in (:trustList) ";
       paramSource.addValue("trustList", permissionService.getUsersTrustIds());
     }
-
     query = query.replaceAll("TRUST_JOIN", permissionService.isUserTrustAdmin() ? "  LEFT JOIN `PostTrust` pt on pt.`postId` = p.`id` " : StringUtils.EMPTY);
     // Where condition
     query = query.replaceAll("WHERECLAUSE", whereClause);
-
     //For order by clause
     final String orderByClause = createOrderByClauseWithParams(pageable);
     query = query.replaceAll("ORDERBYCLAUSE", orderByClause);
-
     query = query.replaceAll("LIMITCLAUSE", "limit " + size + " offset " + offset);
     List<PostViewDTO> posts = namedParameterJdbcTemplate.query(query,paramSource, new PostServiceImpl.PostViewRowMapper());
-
     final boolean hasNext = posts.size() > pageable.getPageSize();
     if (hasNext) {
       posts = posts.subList(0, pageable.getPageSize()); //ignore any additional
     }
-
     if (org.springframework.util.CollectionUtils.isEmpty(posts)) {
       return new BasicPage<>(posts, pageable);
     }
     return new BasicPage<>(posts, pageable, hasNext);
   }
-
   @Override
   @Transactional(readOnly = true)
   public BasicPage<PostViewDTO> advancedSearch(String searchString, List<ColumnFilter> columnFilters, Pageable pageable) {
-
     MapSqlParameterSource paramSource = new MapSqlParameterSource();
     String whereClause = createWhereClause(searchString, columnFilters);
     StopWatch stopWatch;
-
     final int size = pageable.getPageSize() + 1;
     final int offset = pageable.getOffset();
-
     String query = sqlQuerySupplier.getQuery(SqlQuerySupplier.POST_VIEW);
     query = query.replaceAll("TRUST_JOIN", permissionService.isUserTrustAdmin() ? "  LEFT JOIN `PostTrust` pt on pt.`postId` = p.`id` " : StringUtils.EMPTY);
     query = query.replaceAll("WHERECLAUSE", whereClause);
@@ -501,72 +435,55 @@ public class PostServiceImpl implements PostService {
     //For order by clause
     final String orderByClause = createOrderByClauseWithParams(pageable);
     query = query.replaceAll("ORDERBYCLAUSE", orderByClause);
-
     //limit is 0 based
     query = query.replaceAll("LIMITCLAUSE", "limit " + size + " offset " + offset);
-
     if (StringUtils.isNotEmpty(searchString)) {
       paramSource.addValue("searchString", "%" + searchString + "%");
     }
-
     applyFilterByParams(columnFilters, paramSource);
-
     log.info("running post query");
     stopWatch = new StopWatch();
     stopWatch.start();
     List<PostViewDTO> posts = namedParameterJdbcTemplate.query(query, paramSource,new PostServiceImpl.PostViewRowMapper());
     stopWatch.stop();
     log.info("post query finished in: [{}]s", stopWatch.getTotalTimeSeconds());
-
     if (CollectionUtils.isEmpty(posts)) {
       return new BasicPage<>(posts, pageable);
     }
-
     boolean hasNext = posts.size() > pageable.getPageSize();
     BasicPage<PostViewDTO> dtoPage;
     if (hasNext) {
       posts = posts.subList(0, pageable.getPageSize()); //ignore any additional
     }
     dtoPage = new BasicPage<>(posts, pageable, hasNext);
-
     postViewDecorator.decorate(dtoPage.getContent());
     return dtoPage;
   }
-
-
   @Override
   @Transactional(readOnly = true)
   public Page<PostViewDTO> findByNationalPostNumber(String searchString, List<ColumnFilter> columnFilters, Pageable pageable) {
-
     MapSqlParameterSource paramSource = new MapSqlParameterSource();
     String whereClause = createWhereClauseByNationalPostNumberAndFilter(searchString,columnFilters);
     final int size = pageable.getPageSize() + 1;
     final int offset = pageable.getOffset();
-
     String query = sqlQuerySupplier.getQuery(SqlQuerySupplier.SEARCH_POST_VIEW);
     query = query.replaceAll("WHERECLAUSE", whereClause);
     //For order by clause
     final String orderByClause = createOrderByClauseWithParams(pageable);
     query = query.replaceAll("ORDERBYCLAUSE", orderByClause);
-
     if (permissionService.isUserTrustAdmin()) {
       paramSource.addValue("trustList",permissionService.getUsersTrustIds());
     }
-
     if (StringUtils.isNotEmpty(searchString)) {
       paramSource.addValue("searchString", "%" + searchString + "%");
     }
-
     //limit is 0 based
     query = query.replaceAll("LIMITCLAUSE", "limit " + size + " offset " + offset);
-
     applyFilterByParams(columnFilters, paramSource);
-
     List<PostViewDTO> posts = namedParameterJdbcTemplate.query(query,paramSource, new PostServiceImpl.PostViewSearchMapper());
     if (CollectionUtils.isEmpty(posts)) {
       return new PageImpl<>(posts);
     }
-
     boolean hasNext = posts.size() > pageable.getPageSize();
     Page<PostViewDTO> dtoPage;
     if (hasNext) {
@@ -576,8 +493,6 @@ public class PostServiceImpl implements PostService {
     postViewDecorator.decorate(dtoPage.getContent());
     return dtoPage;
   }
-
-
   @Override
   @Transactional(readOnly = true)
   public Page<PostEsrDTO> findPostsForEsrByDeaneryNumbers(List<String> deaneryNumbers, Pageable pageable) {
@@ -585,8 +500,6 @@ public class PostServiceImpl implements PostService {
     Page<EsrPostProjection> posts = postRepository.findByIdNotNullAndNationalPostNumberIn(deaneryNumbers, pageable);
     return posts.map(post -> postMapper.esrPostProjectionToPostEsrDTO(post));
   }
-
-
   /**
    * Get one post by id.
    *
@@ -600,7 +513,6 @@ public class PostServiceImpl implements PostService {
     Post post = postRepository.findOne(id);
     return postMapper.postToPostDTO(post);
   }
-
   /**
    * Delete the  post by id.
    *
@@ -611,7 +523,6 @@ public class PostServiceImpl implements PostService {
     log.debug("Request to delete Post : {}", id);
     postRepository.delete(id);
   }
-
   /**
    * Call Stored proc to build the post view
    *
@@ -625,12 +536,10 @@ public class PostServiceImpl implements PostService {
     postRepository.buildPostView();
     return CompletableFuture.completedFuture(null);
   }
-
   @Override
   public void canLoggedInUserViewOrAmend(Long postId) {
     if (permissionService.isUserTrustAdmin()) {
       Set<Long> userTrustIds = permissionService.getUsersTrustIds();
-
       Optional<Post> optionalPost = postRepository.findPostWithTrustsById(postId);
       if (optionalPost.isPresent()) {
         Set<PostTrust> associatedTrusts = optionalPost.get().getAssociatedTrusts();
@@ -643,19 +552,15 @@ public class PostServiceImpl implements PostService {
       }
     }
   }
-
   protected String createWhereClause(final String searchString, final List<ColumnFilter> columnFilters) {
     final StringBuilder whereClause = new StringBuilder();
     whereClause.append(" WHERE 1=1 ");
-
     if (permissionService.isUserTrustAdmin()) {
       whereClause.append("AND trustId in (:trustList) ");
     }
-
     //add the column filters criteria
     if (columnFilters != null && !columnFilters.isEmpty()) {
       columnFilters.forEach(cf -> {
-
         switch (cf.getName()) {
           case "currentTraineeSurname":
             whereClause.append(" AND surname in (:surnameList)");
@@ -690,21 +595,23 @@ public class PostServiceImpl implements PostService {
           case "approvedGradeId":
             whereClause.append(" AND pg.gradeId in (:gradeIdList)");
             break;
+          case "fundingType":
+            whereClause.append(" AND pf.fundingType in (:fundingTypeList)");
+            break;
           default:
             throw new IllegalArgumentException("Not accounted for column filter [" + cf.getName() +
-                    "] you need to add an additional case statement or remove it from the request");
+                "] you need to add an additional case statement or remove it from the request");
         }
       });
     }
     if (StringUtils.isNotEmpty(searchString)) {
       whereClause.append(" AND (nationalPostNumber LIKE :searchString " +
-              "OR programmeName LIKE :searchString " +
-              "OR surname LIKE :searchString " +
-              "OR forenames LIKE :searchString ) ");
+          "OR programmeName LIKE :searchString " +
+          "OR surname LIKE :searchString " +
+          "OR forenames LIKE :searchString ) ");
     }
     return whereClause.toString();
   }
-
   /**
    * For parameterised query add param based on filter criteria
    *
@@ -751,14 +658,16 @@ public class PostServiceImpl implements PostService {
           case "approvedGradeId":
             paramSource.addValue("gradeIdList", cf.getValues());
             break;
+          case "fundingType":
+            paramSource.addValue("fundingTypeList", cf.getValues().stream().map(ft -> ((FundingType) ft).name()).collect(Collectors.toList()));
+            break;
           default:
             throw new IllegalArgumentException("Not accounted for column filter [" + cf.getName() +
-                    "] you need to add an additional case statement or remove it from the request");
+                "] you need to add an additional case statement or remove it from the request");
         }
       });
     }
   }
-
   /**
    * To generate order by clause with parameterised sort
    * @param pageable
@@ -778,55 +687,43 @@ public class PostServiceImpl implements PostService {
     }
     return orderByClause.toString();
   }
-
   private String createWhereClauseByNationalPostNumberAndFilter(String searchString, final List<ColumnFilter> columnFilters) {
     StringBuilder whereClause = new StringBuilder();
     whereClause.append(" WHERE 1=1 ");
-
     if (permissionService.isUserTrustAdmin()) {
       whereClause.append("AND trustId in (:trustList) ");
     }
-
     if (StringUtils.isNotEmpty(searchString)) {
       whereClause.append(" AND ( nationalPostNumber like :searchString )");
     }
-
     //add the column filters criteria
     if (columnFilters != null && !columnFilters.isEmpty()) {
       columnFilters.forEach(cf -> {
-
         switch (cf.getName()) {
           case "status":
             whereClause.append(" AND p.status in (:statusList)");
             break;
           default:
             throw new IllegalArgumentException("Not accounted for column filter [" + cf.getName() +
-                    "] you need to add an additional case statement or remove it from the request");
+                "] you need to add an additional case statement or remove it from the request");
         }
       });
     }
     return whereClause.toString();
   }
-
-
   private void handleNewPostEsrNotification(PostDTO postDTO) {
-
     log.info("HANDLE: new post esr notification");
     if (postDTO.getId() == null) {
-
       EsrNotification esrNotification = esrNotificationService.handleEsrNewPositionNotification(postDTO);
       log.info("SAVED: esr notification with id {} for newly created Post {}", esrNotification.getId(),
           esrNotification.getDeaneryPostNumber());
     }
   }
-
   protected class PostViewRowMapper implements RowMapper<PostViewDTO> {
-
     @Override
     public PostViewDTO mapRow(ResultSet rs, int i) throws SQLException {
       PostViewDTO view = new PostViewDTO();
       view.setId(rs.getLong("id"));
-
       view.setApprovedGradeId(rs.getLong("approvedGradeId"));
       view.setPrimarySpecialtyId(rs.getLong("primarySpecialtyId"));
       view.setPrimarySpecialtyCode(rs.getString("primarySpecialtyCode"));
@@ -839,7 +736,6 @@ public class PostServiceImpl implements PostService {
       if (StringUtils.isNotEmpty(status)) {
         view.setStatus(Status.valueOf(status));
       }
-
       view.setOwner(rs.getString("owner"));
       view.setIntrepidId(rs.getString("intrepidId"));
       view.setCurrentTraineeSurname(rs.getString("surnames"));
@@ -847,14 +743,11 @@ public class PostServiceImpl implements PostService {
       return view;
     }
   }
-
   private class PostViewSearchMapper implements RowMapper<PostViewDTO> {
-
     @Override
     public PostViewDTO mapRow(ResultSet rs, int i) throws SQLException {
       PostViewDTO view = new PostViewDTO();
       view.setId(rs.getLong("id"));
-
       view.setApprovedGradeId(rs.getLong("approvedGradeId"));
       view.setPrimarySpecialtyId(rs.getLong("primarySpecialtyId"));
       view.setPrimarySpecialtyCode(rs.getString("primarySpecialtyCode"));
@@ -865,10 +758,8 @@ public class PostServiceImpl implements PostService {
       if (StringUtils.isNotEmpty(status)) {
         view.setStatus(Status.valueOf(status));
       }
-
       view.setOwner(rs.getString("owner"));
       return view;
     }
   }
-
 }
