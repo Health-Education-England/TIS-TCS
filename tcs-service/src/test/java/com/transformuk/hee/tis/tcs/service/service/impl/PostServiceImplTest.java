@@ -10,6 +10,7 @@ import com.transformuk.hee.tis.tcs.api.dto.PostSpecialtyDTO;
 import com.transformuk.hee.tis.tcs.api.dto.PostViewDTO;
 import com.transformuk.hee.tis.tcs.api.dto.ProgrammeDTO;
 import com.transformuk.hee.tis.tcs.api.dto.SpecialtyDTO;
+import com.transformuk.hee.tis.tcs.api.enumeration.FundingType;
 import com.transformuk.hee.tis.tcs.api.enumeration.PostGradeType;
 import com.transformuk.hee.tis.tcs.api.enumeration.PostSiteType;
 import com.transformuk.hee.tis.tcs.api.enumeration.PostSpecialtyType;
@@ -528,6 +529,27 @@ public class PostServiceImplTest {
       verify(postRepositoryMock).findPostWithTrustsById(postId);
       throw e;
     }
+  }
+
+  @Test
+  public void fundingTypeShouldExistInWhereClauseWhenFilteredByIt(){
+    final int PAGE = 1;
+    final int SIZE = 100;
+    final Sort nationalPostNumberSortOrder = new Sort(Sort.Direction.DESC, "nationalPostNumber");
+    final String SEARCH_STRING = StringUtils.EMPTY;
+    final List<ColumnFilter> COLUMN_FILTERS = new ArrayList<>();
+    List<Object> columnFilterValues = new ArrayList<>();
+    columnFilterValues.add(FundingType.TARIFF);
+    columnFilterValues.add(FundingType.MADEL);
+    columnFilterValues.add(FundingType.TRUST);
+    columnFilterValues.add(FundingType.OTHER);
+    COLUMN_FILTERS.add(new ColumnFilter("fundingType", columnFilterValues));
+    final String WHERE_CLAUSE = new String("TARIFF, MADEL, TRUST, OTHER");
+    List<PostViewDTO> resultsFromQuery = new ArrayList<>();
+    resultsFromQuery.add(new PostViewDTO());
+    PageRequest pageable = new PageRequest(PAGE, SIZE, nationalPostNumberSortOrder);
+    String whereClause = testObj.createWhereClause(SEARCH_STRING, COLUMN_FILTERS);
+    Assert.assertTrue(whereClause.contains("fundingTypeList"));
   }
 
   @Test
