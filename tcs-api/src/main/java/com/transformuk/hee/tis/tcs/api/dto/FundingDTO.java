@@ -1,7 +1,5 @@
 package com.transformuk.hee.tis.tcs.api.dto;
 
-import com.transformuk.hee.tis.tcs.api.enumeration.FundingType;
-
 import java.io.Serializable;
 import java.time.LocalDate;
 import java.util.Objects;
@@ -19,7 +17,7 @@ public class FundingDTO implements Serializable {
 
   private LocalDate endDate;
 
-  private FundingType fundingType;
+  private String fundingType;
 
   private String fundingIssue;
 
@@ -55,11 +53,11 @@ public class FundingDTO implements Serializable {
     this.endDate = endDate;
   }
 
-  public FundingType getFundingType() {
+  public String getFundingType() {
     return fundingType;
   }
 
-  public void setFundingType(FundingType fundingType) {
+  public void setFundingType(String fundingType) {
     this.fundingType = fundingType;
   }
 
