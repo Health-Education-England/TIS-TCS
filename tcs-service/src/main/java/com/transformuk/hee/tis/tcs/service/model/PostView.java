@@ -69,7 +69,6 @@ public class PostView implements Serializable {
   @Column(name = "status")
   private Status status;
 
-  //@Enumerated(EnumType.STRING)
   @Column(name = "fundingType")
   private String fundingType;
 
