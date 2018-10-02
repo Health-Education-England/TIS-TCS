@@ -10,7 +10,6 @@ import com.transformuk.hee.tis.tcs.api.dto.PostSiteDTO;
 import com.transformuk.hee.tis.tcs.api.dto.PostSpecialtyDTO;
 import com.transformuk.hee.tis.tcs.api.dto.PostViewDTO;
 import com.transformuk.hee.tis.tcs.api.dto.ProgrammeDTO;
-import com.transformuk.hee.tis.tcs.api.enumeration.FundingType;
 import com.transformuk.hee.tis.tcs.api.enumeration.Status;
 import com.transformuk.hee.tis.tcs.service.api.decorator.PostViewDecorator;
 import com.transformuk.hee.tis.tcs.service.api.util.BasicPage;
@@ -659,7 +658,7 @@ public class PostServiceImpl implements PostService {
             paramSource.addValue("gradeIdList", cf.getValues());
             break;
           case "fundingType":
-            paramSource.addValue("fundingTypeList", cf.getValues().stream().map(ft -> ((FundingType) ft).name()).collect(Collectors.toList()));
+            paramSource.addValue("fundingTypeList", cf.getValues());
             break;
           default:
             throw new IllegalArgumentException("Not accounted for column filter [" + cf.getName() +

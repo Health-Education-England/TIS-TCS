@@ -1,7 +1,6 @@
 package com.transformuk.hee.tis.tcs.service.api;
 
 import com.transformuk.hee.tis.tcs.api.dto.FundingDTO;
-import com.transformuk.hee.tis.tcs.api.enumeration.FundingType;
 import com.transformuk.hee.tis.tcs.service.Application;
 import com.transformuk.hee.tis.tcs.service.exception.ExceptionTranslator;
 import com.transformuk.hee.tis.tcs.service.model.Funding;
@@ -55,8 +54,8 @@ public class FundingResourceIntTest {
   private static final LocalDate DEFAULT_END_DATE = LocalDate.ofEpochDay(0L);
   private static final LocalDate UPDATED_END_DATE = LocalDate.now(ZoneId.systemDefault());
 
-  private static final FundingType DEFAULT_FUNDING_TYPE = FundingType.TARIFF;
-  private static final FundingType UPDATED_FUNDING_TYPE = FundingType.MADEL;
+  private static final String DEFAULT_FUNDING_TYPE = "HEE Funded - Tariff";
+  private static final String UPDATED_FUNDING_TYPE = "HEE Funded - Non-Tariff";
 
   private static final String DEFAULT_FUNDING_ISSUE = "AAAAAAAAAA";
   private static final String UPDATED_FUNDING_ISSUE = "BBBBBBBBBB";

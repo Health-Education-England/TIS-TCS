@@ -1,11 +1,8 @@
 package com.transformuk.hee.tis.tcs.service.model;
 
-import com.transformuk.hee.tis.tcs.api.enumeration.FundingType;
 
 import javax.persistence.Column;
 import javax.persistence.Entity;
-import javax.persistence.EnumType;
-import javax.persistence.Enumerated;
 import javax.persistence.GeneratedValue;
 import javax.persistence.GenerationType;
 import javax.persistence.Id;
@@ -34,9 +31,8 @@ public class Funding implements Serializable {
   @Column(name = "endDate")
   private LocalDate endDate;
 
-  @Enumerated(EnumType.STRING)
   @Column(name = "fundingType")
-  private FundingType fundingType;
+  private String fundingType;
 
   @Column(name = "fundingIssue")
   private String fundingIssue;
@@ -88,15 +84,15 @@ public class Funding implements Serializable {
     return this;
   }
 
-  public FundingType getFundingType() {
+  public String getFundingType() {
     return fundingType;
   }
 
-  public void setFundingType(FundingType fundingType) {
+  public void setFundingType(String fundingType) {
     this.fundingType = fundingType;
   }
 
-  public Funding fundingType(FundingType fundingType) {
+  public Funding fundingType(String fundingType) {
     this.fundingType = fundingType;
     return this;
   }

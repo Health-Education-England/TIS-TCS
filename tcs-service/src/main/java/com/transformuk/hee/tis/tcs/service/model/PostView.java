@@ -1,6 +1,5 @@
 package com.transformuk.hee.tis.tcs.service.model;
 
-import com.transformuk.hee.tis.tcs.api.enumeration.FundingType;
 import com.transformuk.hee.tis.tcs.api.enumeration.Status;
 
 import javax.persistence.Column;
@@ -70,9 +69,8 @@ public class PostView implements Serializable {
   @Column(name = "status")
   private Status status;
 
-  @Enumerated(EnumType.STRING)
   @Column(name = "fundingType")
-  private FundingType fundingType;
+  private String fundingType;
 
   @Column(name = "owner")
   private String owner;
@@ -188,11 +186,11 @@ public class PostView implements Serializable {
     this.status = status;
   }
 
-  public FundingType getFundingType() {
+  public String getFundingType() {
     return fundingType;
   }
 
-  public void setFundingType(FundingType fundingType) {
+  public void setFundingType(String fundingType) {
     this.fundingType = fundingType;
   }
 

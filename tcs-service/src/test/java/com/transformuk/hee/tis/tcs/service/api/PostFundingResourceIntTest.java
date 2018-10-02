@@ -2,7 +2,6 @@ package com.transformuk.hee.tis.tcs.service.api;
 
 import com.google.common.collect.Lists;
 import com.transformuk.hee.tis.tcs.api.dto.PostFundingDTO;
-import com.transformuk.hee.tis.tcs.api.enumeration.FundingType;
 import com.transformuk.hee.tis.tcs.service.Application;
 import com.transformuk.hee.tis.tcs.service.exception.ExceptionTranslator;
 import com.transformuk.hee.tis.tcs.service.model.PostFunding;
@@ -73,7 +72,7 @@ public class PostFundingResourceIntTest {
   private PostFunding postFunding;
   private PostFunding anotherPostFunding;
 
-  private static final FundingType FUNDING_TYPE = FundingType.TRUST;
+  private static final String FUNDING_TYPE = "Trust Funded";
   private static final LocalDate END_DATE = LocalDate.of(2033,07,06);
 
   /**
