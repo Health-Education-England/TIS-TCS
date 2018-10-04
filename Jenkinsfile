@@ -34,6 +34,13 @@ node {
 
     try {
 
+        if (env.CHANGE_ID) {
+            pullRequest.createStatus(status: 'PENDING',
+                         context: 'continuous-integration/jenkins/pr-merge',
+                         description: 'Currently building..',
+                         targetUrl: "${env.JOB_URL}")
+        }
+
         milestone 1
 
 
@@ -71,7 +78,7 @@ node {
 
     } catch (err) {
         if (env.CHANGE_ID) {
-            pullRequest.comment('The pull request failed to build successfully')
+            pullRequest.comment('The pull request failed to build')
             pullRequest.createStatus(status: 'FAILURE',
                          context: 'continuous-integration/jenkins/pr-merge',
                          description: 'Build or testing failed',
@@ -82,10 +89,13 @@ node {
 
     } finally {
 
-        pullRequest.createStatus(status: 'success',
+        if (env.CHANGE_ID) {
+
+            pullRequest.createStatus(status: 'success',
                              context: 'continuous-integration/jenkins/pr-merge/tests',
                              description: 'All tests are passing',
                              targetUrl: "${env.JOB_URL}/testResults")
+	}
 
         if (env.BRANCH_NAME == "master") {
 
