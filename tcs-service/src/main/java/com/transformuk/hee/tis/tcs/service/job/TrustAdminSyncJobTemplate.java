@@ -1,26 +1,18 @@
 package com.transformuk.hee.tis.tcs.service.job;
 
 import com.google.common.base.Stopwatch;
-import com.google.common.collect.Maps;
 import com.google.common.collect.Sets;
-import com.transformuk.hee.tis.reference.api.dto.SiteDTO;
-import com.transformuk.hee.tis.tcs.service.command.FindSitesInCommand;
 import org.apache.commons.collections4.CollectionUtils;
-import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.jmx.export.annotation.ManagedOperation;
-import org.springframework.web.client.RestTemplate;
 
 import javax.persistence.EntityManager;
 import javax.persistence.EntityManagerFactory;
 import javax.persistence.EntityTransaction;
 import java.util.List;
-import java.util.Map;
-import java.util.Objects;
 import java.util.Set;
 import java.util.concurrent.CompletableFuture;
-import java.util.stream.Collectors;
 
 public abstract class TrustAdminSyncJobTemplate<ENTITY> {
 
@@ -61,6 +53,9 @@ public abstract class TrustAdminSyncJobTemplate<ENTITY> {
   protected abstract int convertData(int skipped, Set<ENTITY> entitiesToSave, List<EntityData> entityData, EntityManager entityManager);
 
   protected void run() {
+    EntityManager entityManager = getEntityManagerFactory().createEntityManager();
+    EntityTransaction transaction = entityManager.getTransaction();
+
     try {
       LOG.info("Sync [{}] started", getJobName());
       mainStopWatch = Stopwatch.createStarted();
@@ -80,8 +75,6 @@ public abstract class TrustAdminSyncJobTemplate<ENTITY> {
 
       while (hasMoreResults) {
 
-        EntityManager entityManager = getEntityManagerFactory().createEntityManager();
-        EntityTransaction transaction = entityManager.getTransaction();
         transaction.begin();
 
         List<EntityData> collectedData = collectData(getPageSize(), lastEntityId, lastSiteId, entityManager);
@@ -93,15 +86,14 @@ public abstract class TrustAdminSyncJobTemplate<ENTITY> {
           lastSiteId = collectedData.get(collectedData.size() - 1).getOtherId();
           totalRecords += collectedData.size();
           skipped = convertData(skipped, dataToSave, collectedData, entityManager);
-
-          stopwatch.reset().start();
-          dataToSave.forEach(entityManager::persist);
-          entityManager.flush();
-          dataToSave.clear();
-
-          transaction.commit();
-          entityManager.close();
         }
+        stopwatch.reset().start();
+        dataToSave.forEach(entityManager::persist);
+        entityManager.flush();
+        dataToSave.clear();
+
+        transaction.commit();
+        entityManager.close();
 
         LOG.info("Time taken to save chunk : [{}]", stopwatch.toString());
       }
@@ -111,8 +103,12 @@ public abstract class TrustAdminSyncJobTemplate<ENTITY> {
       LOG.info("Skipped records {}", skipped);
     } catch (Exception e) {
       LOG.error("An error occurred while running the scheduled job", e);
+      throw e;
     } finally {
       mainStopWatch = null;
+      if(entityManager != null && entityManager.isOpen()){
+        entityManager.close();
+      }
     }
   }
 
