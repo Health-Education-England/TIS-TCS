@@ -27,9 +27,16 @@ spring:
         hikari:
             data-source-properties:
                 cachePrepStmts: true
+                cacheResultSetMetadata: true
+                cacheServerConfiguration: true
+                elideSetAutoCommits: true
+                maintainTimeStats: false
                 prepStmtCacheSize: 250
                 prepStmtCacheSqlLimit: 2048
+                rewriteBatchedStatements: true
+                useLocalSessionState: true
                 useServerPrepStmts: true
+
     jpa:
         database-platform: org.hibernate.dialect.MySQL5InnoDBDialect
         database: MYSQL
