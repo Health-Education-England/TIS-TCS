@@ -32,75 +32,101 @@ node {
         isService = true
     }
 
-    milestone 1
+    try {
+
+        milestone 1
 
 
-    stage('Build') {
-      sh "'${mvn}' clean install -DskipTests"
-    }
+        stage('Build') {
+          sh "'${mvn}' clean install -DskipTests"
+        }
 
-    stage('Unit Tests') {
-      try {
-        sh "'${mvn}' clean test"
-      } finally {
-        junit '**/target/surefire-reports/TEST-*.xml'
-      }
-    }
+        stage('Unit Tests') {
+          try {
+            sh "'${mvn}' clean test"
+          } finally {
+            junit '**/target/surefire-reports/TEST-*.xml'
+          }
+        }
 
-    milestone 2
+        milestone 2
 
-    stage('Dockerise') {
-      env.VERSION = utils.getMvnToPom(workspace, 'version')
-      env.GROUP_ID = utils.getMvnToPom(workspace, 'groupId')
-      env.ARTIFACT_ID = utils.getMvnToPom(workspace, 'artifactId')
-      env.PACKAGING = utils.getMvnToPom(workspace, 'packaging')
-      imageName = env.ARTIFACT_ID
-      imageVersionTag = env.GIT_COMMIT
+        stage('Dockerise') {
+          env.VERSION = utils.getMvnToPom(workspace, 'version')
+          env.GROUP_ID = utils.getMvnToPom(workspace, 'groupId')
+          env.ARTIFACT_ID = utils.getMvnToPom(workspace, 'artifactId')
+          env.PACKAGING = utils.getMvnToPom(workspace, 'packaging')
+          imageName = env.ARTIFACT_ID
+          imageVersionTag = env.GIT_COMMIT
 
-      if (isService) {
-          imageName = service
-          env.IMAGE_NAME = imageName
-      }
+          if (isService) {
+              imageName = service
+              env.IMAGE_NAME = imageName
+          }
 
-      sh "ansible-playbook -i $env.DEVOPS_BASE/ansible/inventory/dev $env.DEVOPS_BASE/ansible/tasks/spring-boot-build.yml"
+          sh "ansible-playbook -i $env.DEVOPS_BASE/ansible/inventory/dev $env.DEVOPS_BASE/ansible/tasks/spring-boot-build.yml"
 
-      println "[Jenkinsfile INFO] Stage Dockerize completed..."
-    }
+          println "[Jenkinsfile INFO] Stage Dockerize completed..."
+        }
 
-    milestone 3
+    } catch {
+        if (env.CHANGE_ID) {
+            pullRequest.comment('The pull request failed to build successfully')
+            pullRequest.createStatus(status: 'FAILURE',
+                         context: 'continuous-integration/jenkins/pr-merge',
+                         description: 'Build or testing failed',
+                         targetUrl: "${env.JOB_URL}")
+        }
 
-    stage('Development') {
-      node {
-        println "[Jenkinsfile INFO] Development Deploy starting..."
+        throw err
 
-        sh "ansible-playbook -i $env.DEVOPS_BASE/ansible/inventory/dev $env.DEVOPS_BASE/ansible/${service}.yml --extra-vars=\"{\'versions\': {\'${service}\': \'${env.GIT_COMMIT}\'}}\""
+    } finally {
 
-      }
-    }
+        pullRequest.createStatus(status: 'success',
+                             context: 'continuous-integration/jenkins/pr-merge/tests',
+                             description: 'All tests are passing',
+                             targetUrl: "${env.JOB_URL}/testResults")
 
-    milestone 4
+        if (env.BRANCH_NAME == "master") {
 
-    stage('Staging') {
-      node {
-        println "[Jenkinsfile INFO] Stage Deploy starting..."
+            milestone 3
 
-        sh "ansible-playbook -i $env.DEVOPS_BASE/ansible/inventory/stage $env.DEVOPS_BASE/ansible/${service}.yml --extra-vars=\"{\'versions\': {\'${service}\': \'${env.GIT_COMMIT}\'}}\""
-      }
-    }
+            stage('Development') {
+              node {
+                println "[Jenkinsfile INFO] Development Deploy starting..."
 
-    milestone 5
+                sh "ansible-playbook -i $env.DEVOPS_BASE/ansible/inventory/dev $env.DEVOPS_BASE/ansible/${service}.yml --extra-vars=\"{\'versions\': {\'${service}\': \'${env.GIT_COMMIT}\'}}\""
 
-    stage('Approval') {
-      timeout(time:5, unit:'HOURS') {
-        input message: 'Deploy to production?', ok: 'Deploy!'
-      }
-    }
+              }
+            }
 
-    milestone 6
+            milestone 4
 
-    stage('Production') {
-      node {
-        sh "ansible-playbook -i $env.DEVOPS_BASE/ansible/inventory/stage $env.DEVOPS_BASE/ansible/${service}.yml --extra-vars=\"{\'versions\': {\'${service}\': \'${env.GIT_COMMIT}\'}}\""
-	}
+            stage('Staging') {
+              node {
+                println "[Jenkinsfile INFO] Stage Deploy starting..."
+
+                sh "ansible-playbook -i $env.DEVOPS_BASE/ansible/inventory/stage $env.DEVOPS_BASE/ansible/${service}.yml --extra-vars=\"{\'versions\': {\'${service}\': \'${env.GIT_COMMIT}\'}}\""
+              }
+            }
+
+            milestone 5
+
+            stage('Approval') {
+              timeout(time:5, unit:'HOURS') {
+                input message: 'Deploy to production?', ok: 'Deploy!'
+              }
+            }
+
+            milestone 6
+
+            stage('Production') {
+              node {
+                sh "ansible-playbook -i $env.DEVOPS_BASE/ansible/inventory/stage $env.DEVOPS_BASE/ansible/${service}.yml --extra-vars=\"{\'versions\': {\'${service}\': \'${env.GIT_COMMIT}\'}}\""
+              }
+            }
+
+        }
+
     }
 }
