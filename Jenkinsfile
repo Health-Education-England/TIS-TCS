@@ -69,7 +69,7 @@ node {
           println "[Jenkinsfile INFO] Stage Dockerize completed..."
         }
 
-    } catch {
+    } catch (err) {
         if (env.CHANGE_ID) {
             pullRequest.comment('The pull request failed to build successfully')
             pullRequest.createStatus(status: 'FAILURE',
