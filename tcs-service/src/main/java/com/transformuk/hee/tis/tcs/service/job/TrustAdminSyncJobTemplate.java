@@ -1,26 +1,18 @@
 package com.transformuk.hee.tis.tcs.service.job;
 
 import com.google.common.base.Stopwatch;
-import com.google.common.collect.Maps;
 import com.google.common.collect.Sets;
-import com.transformuk.hee.tis.reference.api.dto.SiteDTO;
-import com.transformuk.hee.tis.tcs.service.command.FindSitesInCommand;
 import org.apache.commons.collections4.CollectionUtils;
-import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.jmx.export.annotation.ManagedOperation;
-import org.springframework.web.client.RestTemplate;
 
 import javax.persistence.EntityManager;
 import javax.persistence.EntityManagerFactory;
 import javax.persistence.EntityTransaction;
 import java.util.List;
-import java.util.Map;
-import java.util.Objects;
 import java.util.Set;
 import java.util.concurrent.CompletableFuture;
-import java.util.stream.Collectors;
 
 public abstract class TrustAdminSyncJobTemplate<ENTITY> {
 
@@ -61,26 +53,27 @@ public abstract class TrustAdminSyncJobTemplate<ENTITY> {
   protected abstract int convertData(int skipped, Set<ENTITY> entitiesToSave, List<EntityData> entityData, EntityManager entityManager);
 
   protected void run() {
-    try {
-      LOG.info("Sync [{}] started", getJobName());
-      mainStopWatch = Stopwatch.createStarted();
-      Stopwatch stopwatch = Stopwatch.createStarted();
 
-      int skipped = 0, totalRecords = 0;
-      long lastEntityId = 0;
-      long lastSiteId = 0;
-      boolean hasMoreResults = true;
 
-      LOG.info("deleting all data");
-      deleteData();
-      LOG.info("deleted all data {}", stopwatch.toString());
-      stopwatch.reset().start();
+    LOG.info("Sync [{}] started", getJobName());
+    mainStopWatch = Stopwatch.createStarted();
+    Stopwatch stopwatch = Stopwatch.createStarted();
 
-      Set<ENTITY> dataToSave = Sets.newHashSet();
+    int skipped = 0, totalRecords = 0;
+    long lastEntityId = 0;
+    long lastSiteId = 0;
+    boolean hasMoreResults = true;
 
-      while (hasMoreResults) {
+    LOG.info("deleting all data");
+    deleteData();
+    LOG.info("deleted all data took {}", stopwatch.toString());
+    stopwatch.reset().start();
 
-        EntityManager entityManager = getEntityManagerFactory().createEntityManager();
+    Set<ENTITY> dataToSave = Sets.newHashSet();
+
+    while (hasMoreResults) {
+      EntityManager entityManager = getEntityManagerFactory().createEntityManager();
+      try {
         EntityTransaction transaction = entityManager.getTransaction();
         transaction.begin();
 
@@ -93,27 +86,28 @@ public abstract class TrustAdminSyncJobTemplate<ENTITY> {
           lastSiteId = collectedData.get(collectedData.size() - 1).getOtherId();
           totalRecords += collectedData.size();
           skipped = convertData(skipped, dataToSave, collectedData, entityManager);
+        }
+        stopwatch.reset().start();
+        dataToSave.forEach(entityManager::persist);
+        entityManager.flush();
+        dataToSave.clear();
 
-          stopwatch.reset().start();
-          dataToSave.forEach(entityManager::persist);
-          entityManager.flush();
-          dataToSave.clear();
-
-          transaction.commit();
+        transaction.commit();
+        entityManager.close();
+      } catch (Exception e) {
+        LOG.error("An error occurred while running the scheduled job", e);
+        throw e;
+      } finally {
+        if (entityManager != null && entityManager.isOpen()) {
           entityManager.close();
         }
-
-        LOG.info("Time taken to save chunk : [{}]", stopwatch.toString());
       }
-      stopwatch.reset().start();
-      LOG.info("Sync job [{}] finished. Total time taken {} for processing [{}] records", getJobName(),
-          mainStopWatch.stop().toString(), totalRecords);
-      LOG.info("Skipped records {}", skipped);
-    } catch (Exception e) {
-      LOG.error("An error occurred while running the scheduled job", e);
-    } finally {
-      mainStopWatch = null;
+      LOG.info("Time taken to save chunk : [{}]", stopwatch.toString());
     }
+    stopwatch.reset().start();
+    LOG.info("Sync job [{}] finished. Total time taken {} for processing [{}] records", getJobName(),
+        mainStopWatch.stop().toString(), totalRecords);
+    LOG.info("Skipped records {}", skipped);
   }
 
 }
