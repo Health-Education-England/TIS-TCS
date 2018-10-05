@@ -53,28 +53,28 @@ public abstract class TrustAdminSyncJobTemplate<ENTITY> {
   protected abstract int convertData(int skipped, Set<ENTITY> entitiesToSave, List<EntityData> entityData, EntityManager entityManager);
 
   protected void run() {
-    EntityManager entityManager = getEntityManagerFactory().createEntityManager();
-    EntityTransaction transaction = entityManager.getTransaction();
 
-    try {
-      LOG.info("Sync [{}] started", getJobName());
-      mainStopWatch = Stopwatch.createStarted();
-      Stopwatch stopwatch = Stopwatch.createStarted();
 
-      int skipped = 0, totalRecords = 0;
-      long lastEntityId = 0;
-      long lastSiteId = 0;
-      boolean hasMoreResults = true;
+    LOG.info("Sync [{}] started", getJobName());
+    mainStopWatch = Stopwatch.createStarted();
+    Stopwatch stopwatch = Stopwatch.createStarted();
 
-      LOG.info("deleting all data");
-      deleteData();
-      LOG.info("deleted all data {}", stopwatch.toString());
-      stopwatch.reset().start();
+    int skipped = 0, totalRecords = 0;
+    long lastEntityId = 0;
+    long lastSiteId = 0;
+    boolean hasMoreResults = true;
 
-      Set<ENTITY> dataToSave = Sets.newHashSet();
+    LOG.info("deleting all data");
+    deleteData();
+    LOG.info("deleted all data took {}", stopwatch.toString());
+    stopwatch.reset().start();
 
-      while (hasMoreResults) {
+    Set<ENTITY> dataToSave = Sets.newHashSet();
 
+    while (hasMoreResults) {
+      EntityManager entityManager = getEntityManagerFactory().createEntityManager();
+      try {
+        EntityTransaction transaction = entityManager.getTransaction();
         transaction.begin();
 
         List<EntityData> collectedData = collectData(getPageSize(), lastEntityId, lastSiteId, entityManager);
@@ -94,22 +94,20 @@ public abstract class TrustAdminSyncJobTemplate<ENTITY> {
 
         transaction.commit();
         entityManager.close();
-
-        LOG.info("Time taken to save chunk : [{}]", stopwatch.toString());
+      } catch (Exception e) {
+        LOG.error("An error occurred while running the scheduled job", e);
+        throw e;
+      } finally {
+        if (entityManager != null && entityManager.isOpen()) {
+          entityManager.close();
+        }
       }
-      stopwatch.reset().start();
-      LOG.info("Sync job [{}] finished. Total time taken {} for processing [{}] records", getJobName(),
-          mainStopWatch.stop().toString(), totalRecords);
-      LOG.info("Skipped records {}", skipped);
-    } catch (Exception e) {
-      LOG.error("An error occurred while running the scheduled job", e);
-      throw e;
-    } finally {
-      mainStopWatch = null;
-      if(entityManager != null && entityManager.isOpen()){
-        entityManager.close();
-      }
+      LOG.info("Time taken to save chunk : [{}]", stopwatch.toString());
     }
+    stopwatch.reset().start();
+    LOG.info("Sync job [{}] finished. Total time taken {} for processing [{}] records", getJobName(),
+        mainStopWatch.stop().toString(), totalRecords);
+    LOG.info("Skipped records {}", skipped);
   }
 
 }

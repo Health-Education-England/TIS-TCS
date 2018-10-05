@@ -14,6 +14,12 @@ public class PersonPlacementTrainingBodyTrustJobTest {
   @Autowired
   private PersonPlacementTrainingBodyTrustJob testObj;
 
+  /**
+   * This test was introduced to prove that the job was opening up entity manager
+   * connections can not closing them properly.
+   *
+   * This test should just run through if everything is fine, an exception otherwise
+   */
   @Test
   public void runShouldNotHaveConnectionPoolIssuesAfterRunningMultipleTimes() {
     for (int i = 0; i < 30; i++) {
