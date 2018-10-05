@@ -29,21 +29,6 @@ public class TrustAdminSyncJobTemplateTest {
   @Mock
   private EntityTransaction entityTransactionMock;
 
-
-  @Test
-  public void runShouldNotPersistIfNoDataReturned() {
-    testObj = new TrustAdminSyncJobTemplateStub(entityManagerFactoryMock, Lists.emptyList());
-
-    when(entityManagerFactoryMock.createEntityManager()).thenReturn(entityManagerMock);
-    when(entityManagerMock.getTransaction()).thenReturn(entityTransactionMock);
-
-    testObj.run();
-
-    verify(entityManagerMock, never()).persist(anyList());
-    verify(entityManagerMock, never()).flush();
-    verify(entityTransactionMock, never()).commit();
-  }
-
   @Test
   public void runShouldPersistWhenDataReturnedFromQuery() {
     List<EntityData> data = Lists.newArrayList();
@@ -59,8 +44,8 @@ public class TrustAdminSyncJobTemplateTest {
     testObj.run();
 
     verify(entityManagerMock, times(100)).persist(any());
-    verify(entityManagerMock).flush();
-    verify(entityTransactionMock).commit();
+    verify(entityManagerMock, times(2)).flush();
+    verify(entityTransactionMock, times(2)).commit();
   }
 
   class TrustAdminSyncJobTemplateStub extends TrustAdminSyncJobTemplate<Object> {
