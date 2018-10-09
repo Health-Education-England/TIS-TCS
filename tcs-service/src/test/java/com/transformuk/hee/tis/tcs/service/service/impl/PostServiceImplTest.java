@@ -17,24 +17,8 @@ import com.transformuk.hee.tis.tcs.api.enumeration.PostSpecialtyType;
 import com.transformuk.hee.tis.tcs.service.api.decorator.PostViewDecorator;
 import com.transformuk.hee.tis.tcs.service.api.util.BasicPage;
 import com.transformuk.hee.tis.tcs.service.exception.AccessUnauthorisedException;
-import com.transformuk.hee.tis.tcs.service.model.ColumnFilter;
-import com.transformuk.hee.tis.tcs.service.model.Placement;
-import com.transformuk.hee.tis.tcs.service.model.Post;
-import com.transformuk.hee.tis.tcs.service.model.PostGrade;
-import com.transformuk.hee.tis.tcs.service.model.PostSite;
-import com.transformuk.hee.tis.tcs.service.model.PostSpecialty;
-import com.transformuk.hee.tis.tcs.service.model.PostTrust;
-import com.transformuk.hee.tis.tcs.service.model.PostView;
-import com.transformuk.hee.tis.tcs.service.model.Programme;
-import com.transformuk.hee.tis.tcs.service.model.Specialty;
-import com.transformuk.hee.tis.tcs.service.repository.PlacementRepository;
-import com.transformuk.hee.tis.tcs.service.repository.PostGradeRepository;
-import com.transformuk.hee.tis.tcs.service.repository.PostRepository;
-import com.transformuk.hee.tis.tcs.service.repository.PostSiteRepository;
-import com.transformuk.hee.tis.tcs.service.repository.PostSpecialtyRepository;
-import com.transformuk.hee.tis.tcs.service.repository.PostViewRepository;
-import com.transformuk.hee.tis.tcs.service.repository.ProgrammeRepository;
-import com.transformuk.hee.tis.tcs.service.repository.SpecialtyRepository;
+import com.transformuk.hee.tis.tcs.service.model.*;
+import com.transformuk.hee.tis.tcs.service.repository.*;
 import com.transformuk.hee.tis.tcs.service.service.helper.SqlQuerySupplier;
 import com.transformuk.hee.tis.tcs.service.service.mapper.PostMapper;
 import com.transformuk.hee.tis.tcs.service.service.mapper.PostViewMapper;
@@ -67,10 +51,7 @@ import java.util.Set;
 import static org.mockito.Matchers.any;
 import static org.mockito.Matchers.anyList;
 import static org.mockito.Matchers.anyString;
-import static org.mockito.Mockito.doReturn;
-import static org.mockito.Mockito.never;
-import static org.mockito.Mockito.verify;
-import static org.mockito.Mockito.when;
+import static org.mockito.Mockito.*;
 
 @RunWith(MockitoJUnitRunner.class)
 public class PostServiceImplTest {
@@ -165,6 +146,10 @@ public class PostServiceImplTest {
   private PermissionService permissionServiceMock;
   @Captor
   private ArgumentCaptor<String> queryCaptor;
+  @Mock
+  private PostFundingRepository postFundingRepositoryMock;
+  @Captor
+  private ArgumentCaptor<Set<PostFunding>> postFundingCaptor;
 
   @Test
   public void saveShouldSavePost() {
@@ -196,18 +181,33 @@ public class PostServiceImplTest {
 
   @Test
   public void updateShouldSavePostAndRefreshLinkedEntities() {
+    Post postInDBMock = mock(Post.class);
     Set<PostGrade> grades = Sets.newHashSet();
     Set<PostSite> sites = Sets.newHashSet();
     Set<PostSpecialty> specialties = Sets.newHashSet();
+    PostFunding postFunding1 = new PostFunding();
+    postFunding1.setId(1L);
+    PostFunding postFunding2 = new PostFunding();
+    postFunding2.setId(2L);
+    PostFunding postFunding3 = new PostFunding();
+    postFunding3.setId(3L);
+    Set<PostFunding> fundingsOnPayload = Sets.newHashSet(postFunding1, postFunding2);
+    Set<PostFunding> fundingsInDatabase = Sets.newHashSet(postFunding1, postFunding2, postFunding3);
+
     when(postDTOMock1.getId()).thenReturn(1L);
     when(postMock1.getGrades()).thenReturn(grades);
     when(postMock1.getSites()).thenReturn(sites);
     when(postMock1.getSpecialties()).thenReturn(specialties);
-    when(postRepositoryMock.findOne(1L)).thenReturn(postMock1);
+    when(postMock1.getFundings()).thenReturn(fundingsOnPayload);
+    when(postRepositoryMock.findOne(1L)).thenReturn(postInDBMock);
+    when(postInDBMock.getFundings()).thenReturn(fundingsInDatabase);
     when(postMapperMock.postDTOToPost(postDTOMock1)).thenReturn(postMock1);
     when(postRepositoryMock.save(postMock1)).thenReturn(postSaveMock1);
     when(postMapperMock.postToPostDTO(postSaveMock1)).thenReturn(postMappedDTOMock1);
+    doNothing().when(postFundingRepositoryMock).delete(postFundingCaptor.capture());
+
     PostDTO result = testObj.update(postDTOMock1);
+
     Assert.assertEquals(postMappedDTOMock1, result);
     verify(postRepositoryMock).findOne(1L);
     verify(postMapperMock).postDTOToPost(postDTOMock1);
@@ -216,6 +216,18 @@ public class PostServiceImplTest {
     verify(postGradeRepositoryMock).delete(grades);
     verify(postSiteRepositoryMock).delete(sites);
     verify(postSpecialtyRepositoryMock).delete(specialties);
+
+    Set<PostFunding> capturedPostFundings = postFundingCaptor.getValue();
+    Assert.assertTrue(capturedPostFundings.size() < fundingsInDatabase.size());
+
+  }
+
+  private PostFunding createPostFunding(Long id) {
+    PostFunding postFunding = new PostFunding();
+
+    postFunding.setId(id);
+
+    return postFunding;
   }
 
   @Test
