@@ -40,13 +40,7 @@ import org.springframework.transaction.annotation.Transactional;
 import org.springframework.util.StopWatch;
 import java.sql.ResultSet;
 import java.sql.SQLException;
-import java.util.Collection;
-import java.util.Collections;
-import java.util.List;
-import java.util.Map;
-import java.util.Objects;
-import java.util.Optional;
-import java.util.Set;
+import java.util.*;
 import java.util.concurrent.CompletableFuture;
 import java.util.stream.Collectors;
 /**
@@ -324,29 +318,30 @@ public class PostServiceImpl implements PostService {
   }
   @Override
   public PostDTO update(PostDTO postDTO) {
-    Post post = postRepository.findOne(postDTO.getId());
+    Post currentInDbPost = postRepository.findOne(postDTO.getId());
     //clear all the relations
-    postGradeRepository.delete(post.getGrades());
-    postSiteRepository.delete(post.getSites());
-    postSpecialtyRepository.delete(post.getSpecialties());
+    postGradeRepository.delete(currentInDbPost.getGrades());
+    postSiteRepository.delete(currentInDbPost.getSites());
+    postSpecialtyRepository.delete(currentInDbPost.getSpecialties());
     if (postDTO.isBypassNPNGeneration()) {
       //if we bypass do no do any of the generation logic
     } else if (nationalPostNumberService.requireNewNationalPostNumber(postDTO)) {
       nationalPostNumberService.generateAndSetNewNationalPostNumber(postDTO);
-    } else if (!StringUtils.equals(post.getNationalPostNumber(), postDTO.getNationalPostNumber())) {
+    } else if (!StringUtils.equals(currentInDbPost.getNationalPostNumber(), postDTO.getNationalPostNumber())) {
       //if the user tries to manually change the npn without override, set it back
-      postDTO.setNationalPostNumber(post.getNationalPostNumber());
+      postDTO.setNationalPostNumber(currentInDbPost.getNationalPostNumber());
     }
-    post = postMapper.postDTOToPost(postDTO);
-    Set<PostFunding> newPostFundings = post.getFundings();
+    Post payloadPost = postMapper.postDTOToPost(postDTO);
+    Set<PostFunding> newPostFundings = payloadPost.getFundings();
 
-    Set<PostFunding> currentPostFundings = post.getFundings();
+    Set<PostFunding> currentPostFundings = currentInDbPost.getFundings();
 
-    currentPostFundings.removeAll(newPostFundings);
+    Set<PostFunding> postFundingsToRemove = new HashSet<>(currentPostFundings);
+    postFundingsToRemove.removeAll(newPostFundings);
 
-    postFundingRepository.delete(currentPostFundings);
-    post = postRepository.save(post);
-    return postMapper.postToPostDTO(post);
+    postFundingRepository.delete(postFundingsToRemove);
+    currentInDbPost = postRepository.save(payloadPost);
+    return postMapper.postToPostDTO(currentInDbPost);
   }
   /**
    * Get all the posts.

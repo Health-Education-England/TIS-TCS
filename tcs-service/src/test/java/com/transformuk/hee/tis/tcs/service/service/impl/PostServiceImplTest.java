@@ -182,6 +182,7 @@ public class PostServiceImplTest {
   @Test
   public void updateShouldSavePostAndRefreshLinkedEntities() {
     Post postInDBMock = mock(Post.class);
+    Post payloadPostMock = mock(Post.class);
     Set<PostGrade> grades = Sets.newHashSet();
     Set<PostSite> sites = Sets.newHashSet();
     Set<PostSpecialty> specialties = Sets.newHashSet();
@@ -194,24 +195,29 @@ public class PostServiceImplTest {
     Set<PostFunding> fundingsOnPayload = Sets.newHashSet(postFunding1, postFunding2);
     Set<PostFunding> fundingsInDatabase = Sets.newHashSet(postFunding1, postFunding2, postFunding3);
 
-    when(postDTOMock1.getId()).thenReturn(1L);
-    when(postMock1.getGrades()).thenReturn(grades);
-    when(postMock1.getSites()).thenReturn(sites);
-    when(postMock1.getSpecialties()).thenReturn(specialties);
-    when(postMock1.getFundings()).thenReturn(fundingsOnPayload);
     when(postRepositoryMock.findOne(1L)).thenReturn(postInDBMock);
+
+    when(postDTOMock1.getId()).thenReturn(1L);
+    when(postInDBMock.getGrades()).thenReturn(grades);
+    when(postInDBMock.getSites()).thenReturn(sites);
+    when(postInDBMock.getSpecialties()).thenReturn(specialties);
+
+    when(postMapperMock.postDTOToPost(postDTOMock1)).thenReturn(payloadPostMock);
+
+    when(payloadPostMock.getFundings()).thenReturn(fundingsOnPayload);
+
     when(postInDBMock.getFundings()).thenReturn(fundingsInDatabase);
-    when(postMapperMock.postDTOToPost(postDTOMock1)).thenReturn(postMock1);
-    when(postRepositoryMock.save(postMock1)).thenReturn(postSaveMock1);
-    when(postMapperMock.postToPostDTO(postSaveMock1)).thenReturn(postMappedDTOMock1);
     doNothing().when(postFundingRepositoryMock).delete(postFundingCaptor.capture());
+
+    when(postRepositoryMock.save(payloadPostMock)).thenReturn(postSaveMock1);
+    when(postMapperMock.postToPostDTO(postSaveMock1)).thenReturn(postMappedDTOMock1);
 
     PostDTO result = testObj.update(postDTOMock1);
 
     Assert.assertEquals(postMappedDTOMock1, result);
     verify(postRepositoryMock).findOne(1L);
     verify(postMapperMock).postDTOToPost(postDTOMock1);
-    verify(postRepositoryMock).save(postMock1);
+    verify(postRepositoryMock).save(payloadPostMock);
     verify(postMapperMock).postToPostDTO(postSaveMock1);
     verify(postGradeRepositoryMock).delete(grades);
     verify(postSiteRepositoryMock).delete(sites);
