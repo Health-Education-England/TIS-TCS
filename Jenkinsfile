@@ -115,7 +115,7 @@ node {
         }
     } catch (hudson.AbortException ae) {
       // We do nothing for Aborts.
-    } catch (err)
+    } catch (err) {
       throw err
     }
 }
