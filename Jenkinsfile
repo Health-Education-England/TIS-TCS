@@ -69,52 +69,53 @@ node {
           println "[Jenkinsfile INFO] Stage Dockerize completed..."
         }
 
-    } catch (err) {
-
-        throw err
-
-    } finally {
-
         if (env.BRANCH_NAME == "master") {
 
-            milestone 3
+          milestone 3
 
-            stage('Development') {
-              node {
-                println "[Jenkinsfile INFO] Development Deploy starting..."
+          stage('Development') {
+            node {
+              println "[Jenkinsfile INFO] Development Deploy starting..."
 
-                sh "ansible-playbook -i $env.DEVOPS_BASE/ansible/inventory/dev $env.DEVOPS_BASE/ansible/${service}.yml --extra-vars=\"{\'versions\': {\'${service}\': \'${env.GIT_COMMIT}\'}}\""
+              sh "ansible-playbook -i $env.DEVOPS_BASE/ansible/inventory/dev $env.DEVOPS_BASE/ansible/${service}.yml --extra-vars=\"{\'versions\': {\'${service}\': \'${env.GIT_COMMIT}\'}}\""
 
-              }
             }
+          }
 
-            milestone 4
+          milestone 4
 
-            stage('Staging') {
-              node {
-                println "[Jenkinsfile INFO] Stage Deploy starting..."
+          stage('Staging') {
+            node {
+              println "[Jenkinsfile INFO] Stage Deploy starting..."
 
-                sh "ansible-playbook -i $env.DEVOPS_BASE/ansible/inventory/stage $env.DEVOPS_BASE/ansible/${service}.yml --extra-vars=\"{\'versions\': {\'${service}\': \'${env.GIT_COMMIT}\'}}\""
-              }
+              sh "ansible-playbook -i $env.DEVOPS_BASE/ansible/inventory/stage $env.DEVOPS_BASE/ansible/${service}.yml --extra-vars=\"{\'versions\': {\'${service}\': \'${env.GIT_COMMIT}\'}}\""
             }
+          }
 
-            milestone 5
+          stage('End-to-end Tests') {
+            build job: 'e2e-tests'
+          }
 
-            stage('Approval') {
-              timeout(time:5, unit:'HOURS') {
-                input message: 'Deploy to production?', ok: 'Deploy!'
-              }
+          milestone 5
+
+          stage('Approval') {
+            timeout(time:5, unit:'HOURS') {
+              input message: 'Deploy to production?', ok: 'Deploy!'
             }
+          }
 
-            milestone 6
+          milestone 6
 
-            stage('Production') {
-              node {
-                sh "ansible-playbook -i $env.DEVOPS_BASE/ansible/inventory/prod $env.DEVOPS_BASE/ansible/${service}.yml --extra-vars=\"{\'versions\': {\'${service}\': \'${env.GIT_COMMIT}\'}}\""
-              }
+          stage('Production') {
+            node {
+              sh "ansible-playbook -i $env.DEVOPS_BASE/ansible/inventory/prod $env.DEVOPS_BASE/ansible/${service}.yml --extra-vars=\"{\'versions\': {\'${service}\': \'${env.GIT_COMMIT}\'}}\""
             }
+          }
 
         }
-
+    } catch (hudson.AbortException ae) {
+      // We do nothing for Aborts.
+    } catch (err)
+      throw err
     }
 }
