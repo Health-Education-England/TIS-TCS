@@ -14,25 +14,8 @@ import com.transformuk.hee.tis.tcs.api.enumeration.Status;
 import com.transformuk.hee.tis.tcs.service.api.decorator.PostViewDecorator;
 import com.transformuk.hee.tis.tcs.service.api.util.BasicPage;
 import com.transformuk.hee.tis.tcs.service.exception.AccessUnauthorisedException;
-import com.transformuk.hee.tis.tcs.service.model.ColumnFilter;
-import com.transformuk.hee.tis.tcs.service.model.EsrNotification;
-import com.transformuk.hee.tis.tcs.service.model.Placement;
-import com.transformuk.hee.tis.tcs.service.model.Post;
-import com.transformuk.hee.tis.tcs.service.model.PostGrade;
-import com.transformuk.hee.tis.tcs.service.model.PostSite;
-import com.transformuk.hee.tis.tcs.service.model.PostSpecialty;
-import com.transformuk.hee.tis.tcs.service.model.PostTrust;
-import com.transformuk.hee.tis.tcs.service.model.Programme;
-import com.transformuk.hee.tis.tcs.service.model.Specialty;
-import com.transformuk.hee.tis.tcs.service.repository.EsrPostProjection;
-import com.transformuk.hee.tis.tcs.service.repository.PlacementRepository;
-import com.transformuk.hee.tis.tcs.service.repository.PostGradeRepository;
-import com.transformuk.hee.tis.tcs.service.repository.PostRepository;
-import com.transformuk.hee.tis.tcs.service.repository.PostSiteRepository;
-import com.transformuk.hee.tis.tcs.service.repository.PostSpecialtyRepository;
-import com.transformuk.hee.tis.tcs.service.repository.PostViewRepository;
-import com.transformuk.hee.tis.tcs.service.repository.ProgrammeRepository;
-import com.transformuk.hee.tis.tcs.service.repository.SpecialtyRepository;
+import com.transformuk.hee.tis.tcs.service.model.*;
+import com.transformuk.hee.tis.tcs.service.repository.*;
 import com.transformuk.hee.tis.tcs.service.service.EsrNotificationService;
 import com.transformuk.hee.tis.tcs.service.service.PostService;
 import com.transformuk.hee.tis.tcs.service.service.helper.SqlQuerySupplier;
@@ -57,13 +40,7 @@ import org.springframework.transaction.annotation.Transactional;
 import org.springframework.util.StopWatch;
 import java.sql.ResultSet;
 import java.sql.SQLException;
-import java.util.Collection;
-import java.util.Collections;
-import java.util.List;
-import java.util.Map;
-import java.util.Objects;
-import java.util.Optional;
-import java.util.Set;
+import java.util.*;
 import java.util.concurrent.CompletableFuture;
 import java.util.stream.Collectors;
 /**
@@ -105,6 +82,8 @@ public class PostServiceImpl implements PostService {
   private SqlQuerySupplier sqlQuerySupplier;
   @Autowired
   private PermissionService permissionService;
+  @Autowired
+  private PostFundingRepository postFundingRepository;
   /**
    * Save a post.
    * <p>
@@ -339,22 +318,30 @@ public class PostServiceImpl implements PostService {
   }
   @Override
   public PostDTO update(PostDTO postDTO) {
-    Post post = postRepository.findOne(postDTO.getId());
+    Post currentInDbPost = postRepository.findOne(postDTO.getId());
     //clear all the relations
-    postGradeRepository.delete(post.getGrades());
-    postSiteRepository.delete(post.getSites());
-    postSpecialtyRepository.delete(post.getSpecialties());
+    postGradeRepository.delete(currentInDbPost.getGrades());
+    postSiteRepository.delete(currentInDbPost.getSites());
+    postSpecialtyRepository.delete(currentInDbPost.getSpecialties());
     if (postDTO.isBypassNPNGeneration()) {
       //if we bypass do no do any of the generation logic
     } else if (nationalPostNumberService.requireNewNationalPostNumber(postDTO)) {
       nationalPostNumberService.generateAndSetNewNationalPostNumber(postDTO);
-    } else if (!StringUtils.equals(post.getNationalPostNumber(), postDTO.getNationalPostNumber())) {
+    } else if (!StringUtils.equals(currentInDbPost.getNationalPostNumber(), postDTO.getNationalPostNumber())) {
       //if the user tries to manually change the npn without override, set it back
-      postDTO.setNationalPostNumber(post.getNationalPostNumber());
+      postDTO.setNationalPostNumber(currentInDbPost.getNationalPostNumber());
     }
-    post = postMapper.postDTOToPost(postDTO);
-    post = postRepository.save(post);
-    return postMapper.postToPostDTO(post);
+    Post payloadPost = postMapper.postDTOToPost(postDTO);
+    Set<PostFunding> newPostFundings = payloadPost.getFundings();
+
+    Set<PostFunding> currentPostFundings = currentInDbPost.getFundings();
+
+    Set<PostFunding> postFundingsToRemove = new HashSet<>(currentPostFundings);
+    postFundingsToRemove.removeAll(newPostFundings);
+
+    postFundingRepository.delete(postFundingsToRemove);
+    currentInDbPost = postRepository.save(payloadPost);
+    return postMapper.postToPostDTO(currentInDbPost);
   }
   /**
    * Get all the posts.
