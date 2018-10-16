@@ -467,15 +467,20 @@ public class PlacementServiceImpl implements PlacementService {
     @Override
     public List<PlacementSummaryDTO> getPlacementForTrainee(final Long traineeId) {
         final String query = sqlQuerySupplier.getQuery(SqlQuerySupplier.TRAINEE_PLACEMENT_SUMMARY);
+        List<PlacementSummaryDTO> resultList;
 
-        final Query traineePlacementsQuery = em.createNativeQuery(query, PLACEMENTS_SUMMARY_MAPPER)
-                .setParameter("traineeId", traineeId);
-        // TODO: uncomment this when changes to the FE adds a specialty on creation
+        try {
+          final Query traineePlacementsQuery = em.createNativeQuery(query, PLACEMENTS_SUMMARY_MAPPER)
+              .setParameter("traineeId", traineeId);
+          // TODO: uncomment this when changes to the FE adds a specialty on creation
 //        .setParameter("specialtyType", PostSpecialtyType.PRIMARY.name());
-        List<PlacementSummaryDTO> resultList = traineePlacementsQuery.getResultList();
-        resultList.forEach(p -> p.setPlacementStatus(getPlacementStatus(p.getDateFrom(), p.getDateTo())));
+          resultList = traineePlacementsQuery.getResultList();
+          resultList.forEach(p -> p.setPlacementStatus(getPlacementStatus(p.getDateFrom(), p.getDateTo())));
 
-        resultList = filterPlacements(resultList);
+          resultList = filterPlacements(resultList);
+        } finally {
+          em.close();
+        }
         return resultList;
     }
 
@@ -483,13 +488,20 @@ public class PlacementServiceImpl implements PlacementService {
     @Override
     public List<PlacementSummaryDTO> getPlacementForPost(final Long postId) {
         final String query = sqlQuerySupplier.getQuery(SqlQuerySupplier.POST_PLACEMENT_SUMMARY);
-        final Query postPlacementsQuery = em.createNativeQuery(query, PLACEMENTS_SUMMARY_MAPPER)
-                .setParameter("postId", postId);
-        // TODO: uncomment this when changes to the FE adds a specialty on creation
+        List<PlacementSummaryDTO> resultList ;
+        try {
+
+
+          final Query postPlacementsQuery = em.createNativeQuery(query, PLACEMENTS_SUMMARY_MAPPER)
+              .setParameter("postId", postId);
+          // TODO: uncomment this when changes to the FE adds a specialty on creation
 //        .setParameter("specialtyType", PostSpecialtyType.PRIMARY.name());
-        List<PlacementSummaryDTO> resultList = postPlacementsQuery.getResultList();
-        resultList.forEach(p -> p.setPlacementStatus(getPlacementStatus(p.getDateFrom(), p.getDateTo())));
-        resultList = filterPlacements(resultList);
+          resultList = postPlacementsQuery.getResultList();
+          resultList.forEach(p -> p.setPlacementStatus(getPlacementStatus(p.getDateFrom(), p.getDateTo())));
+          resultList = filterPlacements(resultList);
+        } finally {
+          em.close();
+        }
         return resultList;
     }
 

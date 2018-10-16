@@ -73,8 +73,9 @@ public abstract class TrustAdminSyncJobTemplate<ENTITY> {
 
     while (hasMoreResults) {
       EntityManager entityManager = getEntityManagerFactory().createEntityManager();
+      EntityTransaction transaction = null;
       try {
-        EntityTransaction transaction = entityManager.getTransaction();
+        transaction = entityManager.getTransaction();
         transaction.begin();
 
         List<EntityData> collectedData = collectData(getPageSize(), lastEntityId, lastSiteId, entityManager);
@@ -96,6 +97,10 @@ public abstract class TrustAdminSyncJobTemplate<ENTITY> {
         entityManager.close();
       } catch (Exception e) {
         LOG.error("An error occurred while running the scheduled job", e);
+        mainStopWatch = null;
+        if (transaction != null && transaction.isActive()) {
+          transaction.rollback();
+        }
         throw e;
       } finally {
         if (entityManager != null && entityManager.isOpen()) {
@@ -108,6 +113,7 @@ public abstract class TrustAdminSyncJobTemplate<ENTITY> {
     LOG.info("Sync job [{}] finished. Total time taken {} for processing [{}] records", getJobName(),
         mainStopWatch.stop().toString(), totalRecords);
     LOG.info("Skipped records {}", skipped);
+    mainStopWatch = null;
   }
 
 }
