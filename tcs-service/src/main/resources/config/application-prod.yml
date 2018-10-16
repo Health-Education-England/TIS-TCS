@@ -36,6 +36,7 @@ spring:
                 rewriteBatchedStatements: true
                 useLocalSessionState: true
                 useServerPrepStmts: true
+            maximumPoolSize: 20
 
     jpa:
         database-platform: org.hibernate.dialect.MySQL5InnoDBDialect
