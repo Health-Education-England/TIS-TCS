@@ -40,6 +40,7 @@ public class TcsServiceImpl extends AbstractClientService {
 	private static final String API_CONTACT_DETAILS = "/api/contact-details/";
 	private static final String API_RIGHT_TO_WORKS = "/api/right-to-works/";
 	private static final String API_PROGRAMME_MEMBERSHIPS = "/api/programme-memberships/";
+	private static final String API_TRAINEE_PLACEMENTS = "/api/people/%d/placements/new";
 	private static final String API_CURRENT_SPECIALTIES_COLUMN_FILTERS = "/api/specialties?columnFilters=";
 	private static final String API_ROTATION_COLUMN_FILTERS = "/api/rotations?columnFilters=";
 	private static final String API_CURRENT_CURRICULA_COLUMN_FILTERS = "/api/current/curricula?columnFilters=";
@@ -195,6 +196,12 @@ public class TcsServiceImpl extends AbstractClientService {
 		return tcsRestTemplate
 				.exchange(serviceUrl + API_PLACEMENTS, HttpMethod.PUT, httpEntity, new ParameterizedTypeReference<PlacementDetailsDTO>() {})
 				.getBody();
+	}
+
+	public List<PlacementDetailsDTO> getPlacementForTrainee(Long traineeId) {
+		String uri = String.format(API_TRAINEE_PLACEMENTS, traineeId);
+		return tcsRestTemplate.exchange(serviceUrl + uri,
+				HttpMethod.GET, null, new ParameterizedTypeReference<List<PlacementDetailsDTO>>() {}).getBody();
 	}
 
 	public Void deletePlacement(Long id) {
