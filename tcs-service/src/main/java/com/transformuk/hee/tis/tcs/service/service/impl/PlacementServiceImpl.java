@@ -187,7 +187,7 @@ public class PlacementServiceImpl implements PlacementService {
 
     if (existingPlacement != null && updatedPlacementDetails != null &&
         isEligibleForNotification(existingPlacement, updatedPlacementDetails)) {
-      log.info("Change in hire or end date. Marking for notification : npn {} ",
+      log.debug("Change in hire or end date. Marking for notification : npn {} ",
           existingPlacement.getPost() != null ? existingPlacement.getPost().getNationalPostNumber() : null);
       return true;
     }
@@ -200,7 +200,7 @@ public class PlacementServiceImpl implements PlacementService {
     if (placementBeforeUpdate != null && updatedPlacementDetails != null ) {
       // create NOT1 type record. Current and next trainee details for the post number.
       // Create NOT4 type record
-      log.info("Change in hire or end date. Marking for notification : {} ", placementBeforeUpdate.getPost().getNationalPostNumber());
+      log.debug("Change in hire or end date. Marking for notification : {} ", placementBeforeUpdate.getPost().getNationalPostNumber());
       try {
         esrNotificationService.loadChangeOfPlacementDatesNotification(updatedPlacementDetails, placementBeforeUpdate.getPost().getNationalPostNumber(), currentPlacementEdit);
       } catch (final Exception e) {
@@ -334,9 +334,9 @@ public class PlacementServiceImpl implements PlacementService {
         // Only future placements can be deleted.
         if (placementToDelete != null && placementToDelete.getDateFrom() != null && placementToDelete.getDateFrom().isBefore(LocalDate.now().plusMonths(3))) {
             final List<EsrNotification> esrNotifications = esrNotificationService.loadPlacementDeleteNotification(placementToDelete, allEsrNotifications);
-            log.info("Placement Delete: PERSISTING: {} EsrNotifications for post {} being deleted", esrNotifications.size(), placementToDelete.getLocalPostNumber());
+            log.debug("Placement Delete: PERSISTING: {} EsrNotifications for post {} being deleted", esrNotifications.size(), placementToDelete.getLocalPostNumber());
             esrNotificationService.save(esrNotifications);
-            log.info("Placement Delete: PERSISTED: {} EsrNotifications for post {} being deleted", esrNotifications.size(), placementToDelete.getLocalPostNumber());
+            log.debug("Placement Delete: PERSISTED: {} EsrNotifications for post {} being deleted", esrNotifications.size(), placementToDelete.getLocalPostNumber());
         }
     }
 
@@ -564,14 +564,14 @@ public class PlacementServiceImpl implements PlacementService {
 
     private void handleEsrNewPlacementNotification(final PlacementDetailsDTO placementDetailsDTO, final PlacementDetails placementDetails) {
 
-        log.info("Handling ESR notifications for new placement creation for deanery number {}", placementDetailsDTO.getLocalPostNumber());
+        log.debug("Handling ESR notifications for new placement creation for deanery number {}", placementDetailsDTO.getLocalPostNumber());
         if (placementDetailsDTO.getId() == null) {
             try {
                 final Placement savedPlacement = placementRepository.findOne(placementDetails.getId());
                 if (savedPlacement.getDateFrom() != null && savedPlacement.getDateFrom().isBefore(LocalDate.now().plusMonths(3))) {
-                    log.info("Creating ESR notification for new placement creation for deanery number {}", savedPlacement.getPost().getNationalPostNumber());
+                    log.debug("Creating ESR notification for new placement creation for deanery number {}", savedPlacement.getPost().getNationalPostNumber());
                     final List<EsrNotification> esrNotifications = esrNotificationService.handleNewPlacementEsrNotification(savedPlacement);
-                    log.info("CREATED: ESR {} notifications for new placement creation for deanery number {}",
+                    log.debug("CREATED: ESR {} notifications for new placement creation for deanery number {}",
                             esrNotifications.size(), savedPlacement.getPost().getNationalPostNumber());
                 }
             } catch (final Exception e) {

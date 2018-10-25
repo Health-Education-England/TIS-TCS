@@ -30,6 +30,9 @@ node_modules
 */bdd/node_modules/
 */bdd/phantomjsdriver.log
 */bower_components/
+.project
+*/.project
+*/**/.project
 
 
 # IDEA files #

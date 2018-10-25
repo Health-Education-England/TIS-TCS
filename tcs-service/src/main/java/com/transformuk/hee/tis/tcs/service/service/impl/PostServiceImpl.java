@@ -427,12 +427,12 @@ public class PostServiceImpl implements PostService {
       paramSource.addValue("searchString", "%" + searchString + "%");
     }
     applyFilterByParams(columnFilters, paramSource);
-    log.info("running post query");
+    log.debug("REST request to get for the Post query");
     stopWatch = new StopWatch();
     stopWatch.start();
     List<PostViewDTO> posts = namedParameterJdbcTemplate.query(query, paramSource,new PostServiceImpl.PostViewRowMapper());
     stopWatch.stop();
-    log.info("post query finished in: [{}]s", stopWatch.getTotalTimeSeconds());
+    log.debug("REST request for the Post query finished in: [{}]s", stopWatch.getTotalTimeSeconds());
     if (CollectionUtils.isEmpty(posts)) {
       return new BasicPage<>(posts, pageable);
     }
@@ -698,10 +698,10 @@ public class PostServiceImpl implements PostService {
     return whereClause.toString();
   }
   private void handleNewPostEsrNotification(PostDTO postDTO) {
-    log.info("HANDLE: new post esr notification");
+    log.debug("HANDLE: new post esr notification");
     if (postDTO.getId() == null) {
       EsrNotification esrNotification = esrNotificationService.handleEsrNewPositionNotification(postDTO);
-      log.info("SAVED: esr notification with id {} for newly created Post {}", esrNotification.getId(),
+      log.debug("SAVED: esr notification with id {} for newly created Post {}", esrNotification.getId(),
           esrNotification.getDeaneryPostNumber());
     }
   }
