@@ -172,7 +172,7 @@ public class PersonResource {
             @RequestParam(value = "searchQuery", required = false) String searchQuery,
             @ApiParam(value = "json object by column name and value. (Eg: columnFilters={ \"status\": [\"CURRENT\"]}\"")
             @RequestParam(value = "columnFilters", required = false) final String columnFilterJson) throws IOException {
-        log.info("REST request to get a page of People begin");
+        log.debug("REST request to get a page of People begin");
         searchQuery = sanitize(searchQuery);
         final List<Class> filterEnumList = Lists.newArrayList(Status.class);
         final List<ColumnFilter> columnFilters = ColumnFilterUtil.getColumnFilters(columnFilterJson, filterEnumList);
@@ -183,7 +183,7 @@ public class PersonResource {
             page = personService.advancedSearch(searchQuery, columnFilters, pageable);
         }
         final HttpHeaders headers = PaginationUtil.generateBasicPaginationHttpHeaders(page, "/api/people");
-        log.info("REST request to get a page of People completed successfully");
+        log.debug("REST request to get a page of People completed successfully");
         return new ResponseEntity<>(personViewDecorator.decorate(page.getContent()), headers, HttpStatus.OK);
     }
 
