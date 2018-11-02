@@ -26,6 +26,7 @@ import com.transformuk.hee.tis.tcs.service.service.EsrNotificationService;
 import com.transformuk.hee.tis.tcs.service.service.PlacementService;
 import com.transformuk.hee.tis.tcs.service.service.mapper.PlacementDetailsMapper;
 import com.transformuk.hee.tis.tcs.service.service.mapper.PlacementMapper;
+import net.sf.cglib.core.Local;
 import org.apache.commons.codec.EncoderException;
 import org.apache.commons.codec.net.URLCodec;
 import org.assertj.core.util.Lists;
@@ -103,10 +104,10 @@ public class PlacementResourceIntTest {
     private static final String UPDATED_TRAINING_DESCRPTION = "NEW_TRAINING";
 
     private static final LocalDate DEFAULT_DATE_FROM = LocalDate.ofEpochDay(0L);
-    private static final LocalDate UPDATED_DATE_FROM = now(ZoneId.systemDefault());
+    private static final LocalDate UPDATED_DATE_FROM = LocalDate.now(ZoneId.systemDefault());
 
     private static final LocalDate DEFAULT_DATE_TO = LocalDate.ofEpochDay(0L);
-    private static final LocalDate UPDATED_DATE_TO = now(ZoneId.systemDefault());
+    private static final LocalDate UPDATED_DATE_TO = LocalDate.now(ZoneId.systemDefault());
 
     private static final String DEFAULT_PLACEMENT_TYPE = "OOPT";
     private static final String UPDATED_PLACEMENT_TYPE = "PWA";
@@ -299,7 +300,6 @@ public class PlacementResourceIntTest {
 
         placementDetails.setDateFrom(UPDATED_DATE_FROM.plusMonths(1));
         placementDetails.setDateTo(UPDATED_DATE_TO.plusMonths(3));
-//    placementDetails.setLocalPostNumber(postNumber);
         placementDetails.setPlacementType(placementType);
 
         final Post post = postRepository.findOne(placementDetails.getPostId());
@@ -321,8 +321,6 @@ public class PlacementResourceIntTest {
         final PlacementDetails testPlacement = placementList.get(placementList.size() - 1);
         assertThat(testPlacement.getSiteCode()).isEqualTo(DEFAULT_SITE);
         assertThat(testPlacement.getGradeAbbreviation()).isEqualTo(DEFAULT_GRADE);
-        //assertThat(testPlacement.getSpecialties().iterator().next().getPlacementSpecialtyType()).isEqualTo(placementDetails.getSpecialties().iterator().next().getPlacementSpecialtyType());
-        //assertThat(testPlacement.getSpecialties().iterator().next().getSpecialty()).isEqualTo(placementDetails.getSpecialties().iterator().next().getSpecialty());
         assertThat(testPlacement.getDateFrom()).isEqualTo(UPDATED_DATE_FROM.plusMonths(1));
         assertThat(testPlacement.getDateTo()).isEqualTo(UPDATED_DATE_TO.plusMonths(3));
         assertThat(testPlacement.getPostId()).isEqualTo(placementDetails.getPostId());
@@ -425,7 +423,6 @@ public class PlacementResourceIntTest {
                 .andExpect(jsonPath("$.[*].postId").value(placementDetails.getPostId().intValue()))
                 .andExpect(jsonPath("$.[*].siteCode").value(DEFAULT_SITE))
                 .andExpect(jsonPath("$.[*].gradeAbbreviation").value(DEFAULT_GRADE))
-                //.andExpect(jsonPath("$.[*].specialties[0].specialtyId").value(placementDetails.getSpecialties().iterator().next().getSpecialty().getId().intValue()))
                 .andExpect(jsonPath("$.[*].dateFrom").value(DEFAULT_DATE_FROM.toString()))
                 .andExpect(jsonPath("$.[*].dateTo").value(DEFAULT_DATE_TO.toString()))
                 .andExpect(jsonPath("$.[*].placementType").value(DEFAULT_PLACEMENT_TYPE))
@@ -519,7 +516,6 @@ public class PlacementResourceIntTest {
         final PlacementDetails updatedPlacement = placementDetailsRepository.findOne(placementDetails.getId());
         updatedPlacement.setSiteCode(UPDATED_SITE);
         updatedPlacement.setGradeAbbreviation(UPDATED_GRADE);
-        //updatedPlacement.setSpecialties(Sets.newHashSet());
         updatedPlacement.setDateFrom(DEFAULT_DATE_FROM);
         updatedPlacement.setDateTo(DEFAULT_DATE_TO);
         updatedPlacement.setLocalPostNumber(UPDATED_LOCAL_POST_NUMBER);
@@ -541,7 +537,6 @@ public class PlacementResourceIntTest {
         final PlacementDetails testPlacement = placementList.get(placementList.size() - 1);
         assertThat(testPlacement.getSiteCode()).isEqualTo(UPDATED_SITE);
         assertThat(testPlacement.getGradeAbbreviation()).isEqualTo(UPDATED_GRADE);
-        //assertThat(testPlacement.getSpecialties()).isEqualTo(placementDetails.getSpecialties());
         assertThat(testPlacement.getDateFrom()).isEqualTo(DEFAULT_DATE_FROM);
         assertThat(testPlacement.getDateTo()).isEqualTo(DEFAULT_DATE_TO);
         assertThat(testPlacement.getLocalPostNumber()).isEqualTo(UPDATED_LOCAL_POST_NUMBER);
@@ -600,7 +595,6 @@ public class PlacementResourceIntTest {
 
         placementDetails.setDateFrom(UPDATED_DATE_FROM.minusMonths(2));
         placementDetails.setDateTo(UPDATED_DATE_TO.plusMonths(2));
-//    placementDetails.setLocalPostNumber(localPostNumber);
         placementDetails.setPlacementType(placementType);
         placementDetailsRepository.saveAndFlush(placementDetails);
 
@@ -614,8 +608,6 @@ public class PlacementResourceIntTest {
         final PlacementDetails updatedPlacement = placementDetailsRepository.findOne(placementDetails.getId());
         updatedPlacement.setSiteCode(UPDATED_SITE);
         updatedPlacement.setGradeAbbreviation(UPDATED_GRADE);
-        //updatedPlacement.setSpecialties(Sets.newHashSet());
-//    updatedPlacement.setDateFrom(UPDATED_DATE_FROM);
         updatedPlacement.setDateTo(UPDATED_DATE_TO);
         updatedPlacement.setLocalPostNumber(localPostNumber);
         updatedPlacement.setTrainingDescription(UPDATED_TRAINING_DESCRPTION);
@@ -634,7 +626,6 @@ public class PlacementResourceIntTest {
         final PlacementDetails testPlacement = placementList.get(placementList.size() - 1);
         assertThat(testPlacement.getSiteCode()).isEqualTo(UPDATED_SITE);
         assertThat(testPlacement.getGradeAbbreviation()).isEqualTo(UPDATED_GRADE);
-        //assertThat(testPlacement.getSpecialties()).isEqualTo(placementDetails.getSpecialties());
         assertThat(testPlacement.getDateFrom()).isEqualTo(UPDATED_DATE_FROM.minusMonths(2));
         assertThat(testPlacement.getDateTo()).isEqualTo(UPDATED_DATE_TO);
         assertThat(testPlacement.getLocalPostNumber()).isEqualTo(localPostNumber);
@@ -661,7 +652,6 @@ public class PlacementResourceIntTest {
 
         placementDetails.setDateFrom(UPDATED_DATE_FROM.plusMonths(1));
         placementDetails.setDateTo(UPDATED_DATE_TO.plusMonths(2));
-//    placementDetails.setLocalPostNumber(localPostNumber);
         placementDetails.setPlacementType(placementType);
         placementDetailsRepository.saveAndFlush(placementDetails);
 
@@ -675,7 +665,6 @@ public class PlacementResourceIntTest {
         final PlacementDetails updatedPlacement = placementDetailsRepository.findOne(placementDetails.getId());
         updatedPlacement.setSiteCode(UPDATED_SITE);
         updatedPlacement.setGradeAbbreviation(UPDATED_GRADE);
-        //updatedPlacement.setSpecialties(Sets.newHashSet());
         updatedPlacement.setDateFrom(UPDATED_DATE_FROM.plusMonths(3));
         updatedPlacement.setDateTo(UPDATED_DATE_TO.plusMonths(4));
         updatedPlacement.setLocalPostNumber(localPostNumber);
@@ -695,7 +684,6 @@ public class PlacementResourceIntTest {
         final PlacementDetails testPlacement = placementList.get(placementList.size() - 1);
         assertThat(testPlacement.getSiteCode()).isEqualTo(UPDATED_SITE);
         assertThat(testPlacement.getGradeAbbreviation()).isEqualTo(UPDATED_GRADE);
-        //assertThat(testPlacement.getSpecialties()).isEqualTo(placementDetails.getSpecialties());
         assertThat(testPlacement.getDateFrom()).isEqualTo(UPDATED_DATE_FROM.plusMonths(3));
         assertThat(testPlacement.getDateTo()).isEqualTo(UPDATED_DATE_TO.plusMonths(4));
         assertThat(testPlacement.getLocalPostNumber()).isEqualTo(localPostNumber);
@@ -709,15 +697,12 @@ public class PlacementResourceIntTest {
         esrNotifications.stream().map(EsrNotification::getNotificationTitleCode).forEachOrdered(r -> asList("1", "4").contains(r));
         esrNotifications.stream().filter(esrNotification -> esrNotification.getNotificationTitleCode().equals("4")).forEach(esrNotification -> {
             assertThat(esrNotification.getChangeOfProjectedHireDate()).isNotNull();
-            // For some reason the spring test does not seems to see the latest db updates.
-//            assertThat(esrNotification.getNextAppointmentProjectedStartDate()).isEqualTo(UPDATED_DATE_FROM.plusMonths(3));
             assertThat(esrNotification.getChangeOfProjectedHireDate()).isEqualTo(UPDATED_DATE_FROM.plusMonths(3));
             assertThat(esrNotification.getChangeOfProjectedEndDate()).isEqualTo(UPDATED_DATE_TO.plusMonths(4));
         });
 
         esrNotifications.stream().filter(esrNotification -> esrNotification.getNotificationTitleCode().equals("1")).forEach(esrNotification -> {
             assertThat(esrNotification.getChangeOfProjectedHireDate()).isNull();
-//            assertThat(esrNotification.getNextAppointmentProjectedStartDate()).isEqualTo(UPDATED_DATE_FROM.plusMonths(3));
             assertThat(esrNotification.getChangeOfProjectedHireDate()).isNull();
             assertThat(esrNotification.getChangeOfProjectedEndDate()).isNull();
         });
@@ -746,7 +731,6 @@ public class PlacementResourceIntTest {
         final PlacementDetails updatedPlacement = placementDetailsRepository.findOne(placementDetails.getId());
         updatedPlacement.setSiteCode(UPDATED_SITE);
         updatedPlacement.setGradeAbbreviation(UPDATED_GRADE);
-        //updatedPlacement.setSpecialties(Sets.newHashSet());
         updatedPlacement.setDateFrom(UPDATED_DATE_FROM.plusMonths(5));
         updatedPlacement.setDateTo(UPDATED_DATE_TO.plusMonths(7));
         updatedPlacement.setLocalPostNumber(localPostNumber);
@@ -766,7 +750,6 @@ public class PlacementResourceIntTest {
         final PlacementDetails testPlacement = placementList.get(placementList.size() - 1);
         assertThat(testPlacement.getSiteCode()).isEqualTo(UPDATED_SITE);
         assertThat(testPlacement.getGradeAbbreviation()).isEqualTo(UPDATED_GRADE);
-        //assertThat(testPlacement.getSpecialties()).isEqualTo(placementDetails.getSpecialties());
         assertThat(testPlacement.getDateFrom()).isEqualTo(UPDATED_DATE_FROM.plusMonths(5));
         assertThat(testPlacement.getDateTo()).isEqualTo(UPDATED_DATE_TO.plusMonths(7));
         assertThat(testPlacement.getLocalPostNumber()).isEqualTo(localPostNumber);
