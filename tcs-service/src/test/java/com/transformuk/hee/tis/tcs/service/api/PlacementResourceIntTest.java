@@ -187,7 +187,6 @@ public class PlacementResourceIntTest {
         placement.setSiteId(DEFAULT_SITE_ID);
         placement.setGradeId(DEFAULT_GRADE_ID);
         placement.setGradeAbbreviation(DEFAULT_GRADE);
-        //placementDetails.setSpecialties(Sets.newHashSet());
         placement.setDateFrom(DEFAULT_DATE_FROM);
         placement.setDateTo(DEFAULT_DATE_TO);
         placement.setPlacementType(DEFAULT_PLACEMENT_TYPE);
