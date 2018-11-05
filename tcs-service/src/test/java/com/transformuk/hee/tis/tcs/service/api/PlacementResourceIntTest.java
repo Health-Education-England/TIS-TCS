@@ -15,6 +15,7 @@ import com.transformuk.hee.tis.tcs.service.model.ContactDetails;
 import com.transformuk.hee.tis.tcs.service.model.EsrNotification;
 import com.transformuk.hee.tis.tcs.service.model.GmcDetails;
 import com.transformuk.hee.tis.tcs.service.model.Person;
+import com.transformuk.hee.tis.tcs.service.model.Placement;
 import com.transformuk.hee.tis.tcs.service.model.PlacementDetails;
 import com.transformuk.hee.tis.tcs.service.model.PlacementSupervisor;
 import com.transformuk.hee.tis.tcs.service.model.PlacementSupervisorId;
@@ -24,6 +25,8 @@ import com.transformuk.hee.tis.tcs.service.repository.*;
 import com.transformuk.hee.tis.tcs.service.service.EsrNotificationService;
 import com.transformuk.hee.tis.tcs.service.service.PlacementService;
 import com.transformuk.hee.tis.tcs.service.service.mapper.PlacementDetailsMapper;
+import com.transformuk.hee.tis.tcs.service.service.mapper.PlacementMapper;
+import net.sf.cglib.core.Local;
 import org.apache.commons.codec.EncoderException;
 import org.apache.commons.codec.net.URLCodec;
 import org.assertj.core.util.Lists;
@@ -53,15 +56,18 @@ import java.util.List;
 import java.util.Set;
 
 import static com.transformuk.hee.tis.tcs.service.api.util.DateUtil.getLocalDateFromString;
+import static java.time.LocalDate.now;
 import static java.time.temporal.ChronoUnit.DAYS;
 import static java.util.Arrays.asList;
 import static java.util.stream.Collectors.toList;
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.contentOf;
 import static org.hamcrest.Matchers.containsInAnyOrder;
 import static org.hamcrest.Matchers.hasItem;
 import static org.mockito.BDDMockito.given;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.delete;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.patch;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.put;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.content;
@@ -135,6 +141,8 @@ public class PlacementResourceIntTest {
     @Autowired
     private PlacementDetailsMapper placementDetailsMapper;
     @Autowired
+    private PlacementMapper placementMapper;
+    @Autowired
     private PlacementService placementService;
     @Autowired
     private PlacementValidator placementValidator;
@@ -163,7 +171,9 @@ public class PlacementResourceIntTest {
 
     private MockMvc restPlacementMockMvc;
 
-    private PlacementDetails placement;
+    private PlacementDetails placementDetails;
+
+    private Placement placement;
 
     /**
      * Create an entity for this test.
@@ -177,7 +187,6 @@ public class PlacementResourceIntTest {
         placement.setSiteId(DEFAULT_SITE_ID);
         placement.setGradeId(DEFAULT_GRADE_ID);
         placement.setGradeAbbreviation(DEFAULT_GRADE);
-        //placement.setSpecialties(Sets.newHashSet());
         placement.setDateFrom(DEFAULT_DATE_FROM);
         placement.setDateTo(DEFAULT_DATE_TO);
         placement.setPlacementType(DEFAULT_PLACEMENT_TYPE);
@@ -188,16 +197,21 @@ public class PlacementResourceIntTest {
     }
 
     public static PlacementDetails createPlacementDetails() {
-        final PlacementDetails placement = new PlacementDetails();
-        placement.setSiteCode(DEFAULT_SITE);
-        placement.setGradeAbbreviation(DEFAULT_GRADE);
-        placement.setDateFrom(DEFAULT_DATE_FROM);
-        placement.setDateTo(DEFAULT_DATE_TO);
-        placement.setPlacementType(DEFAULT_PLACEMENT_TYPE);
-        placement.setWholeTimeEquivalent(DEFAULT_PLACEMENT_WHOLE_TIME_EQUIVALENT);
-        placement.setLocalPostNumber(DEFAULT_LOCAL_POST_NUMBER);
-        placement.setTrainingDescription(DEFAULT_TRAINING_DESCRIPTION);
-        return placement;
+        final PlacementDetails placementDetails = new PlacementDetails();
+        placementDetails.setSiteCode(DEFAULT_SITE);
+        placementDetails.setGradeAbbreviation(DEFAULT_GRADE);
+        placementDetails.setDateFrom(DEFAULT_DATE_FROM);
+        placementDetails.setDateTo(DEFAULT_DATE_TO);
+        placementDetails.setPlacementType(DEFAULT_PLACEMENT_TYPE);
+        placementDetails.setWholeTimeEquivalent(DEFAULT_PLACEMENT_WHOLE_TIME_EQUIVALENT);
+        placementDetails.setLocalPostNumber(DEFAULT_LOCAL_POST_NUMBER);
+        placementDetails.setTrainingDescription(DEFAULT_TRAINING_DESCRIPTION);
+        return placementDetails;
+    }
+
+    public static Placement createPlacementEntity() {
+      final Placement placement = new Placement();
+      return placement;
     }
 
     @Before
@@ -228,10 +242,15 @@ public class PlacementResourceIntTest {
         final Specialty specialty = new Specialty();
         entityManager.persist(specialty);
 
-        placement = createEntity();
+        placementDetails = createEntity();
 
-        placement.setPostId(post.getId());
-        placement.setTraineeId(trainee.getId());
+        placementDetails.setPostId(post.getId());
+        placementDetails.setTraineeId(trainee.getId());
+
+        placement = createPlacementEntity();
+        placement.setPost(post);
+        placement.setTrainee(trainee);
+
     }
 
     @Test
@@ -278,16 +297,15 @@ public class PlacementResourceIntTest {
         final String postNumber = "EOE/RGT00/021/FY1/010";
         final String placementType = "In Post";
 
-        placement.setDateFrom(UPDATED_DATE_FROM.plusMonths(1));
-        placement.setDateTo(UPDATED_DATE_TO.plusMonths(3));
-//    placement.setLocalPostNumber(postNumber);
-        placement.setPlacementType(placementType);
+        placementDetails.setDateFrom(UPDATED_DATE_FROM.plusMonths(1));
+        placementDetails.setDateTo(UPDATED_DATE_TO.plusMonths(3));
+        placementDetails.setPlacementType(placementType);
 
-        final Post post = postRepository.findOne(placement.getPostId());
+        final Post post = postRepository.findOne(placementDetails.getPostId());
         post.setNationalPostNumber(postNumber);
         postRepository.saveAndFlush(post);
 
-        final PlacementDetailsDTO placementDetailsDTO = placementDetailsMapper.placementDetailsToPlacementDetailsDTO(placement);
+        final PlacementDetailsDTO placementDetailsDTO = placementDetailsMapper.placementDetailsToPlacementDetailsDTO(placementDetails);
 
         addSupervisorsToPlacement(placementDetailsDTO);
 
@@ -302,12 +320,10 @@ public class PlacementResourceIntTest {
         final PlacementDetails testPlacement = placementList.get(placementList.size() - 1);
         assertThat(testPlacement.getSiteCode()).isEqualTo(DEFAULT_SITE);
         assertThat(testPlacement.getGradeAbbreviation()).isEqualTo(DEFAULT_GRADE);
-        //assertThat(testPlacement.getSpecialties().iterator().next().getPlacementSpecialtyType()).isEqualTo(placement.getSpecialties().iterator().next().getPlacementSpecialtyType());
-        //assertThat(testPlacement.getSpecialties().iterator().next().getSpecialty()).isEqualTo(placement.getSpecialties().iterator().next().getSpecialty());
         assertThat(testPlacement.getDateFrom()).isEqualTo(UPDATED_DATE_FROM.plusMonths(1));
         assertThat(testPlacement.getDateTo()).isEqualTo(UPDATED_DATE_TO.plusMonths(3));
-        assertThat(testPlacement.getPostId()).isEqualTo(placement.getPostId());
-        assertThat(testPlacement.getTraineeId()).isEqualTo(placement.getTraineeId());
+        assertThat(testPlacement.getPostId()).isEqualTo(placementDetails.getPostId());
+        assertThat(testPlacement.getTraineeId()).isEqualTo(placementDetails.getTraineeId());
         assertThat(testPlacement.getTrainingDescription()).isEqualTo(DEFAULT_TRAINING_DESCRIPTION);
         assertThat(testPlacement.getPlacementType()).isEqualTo(placementType);
         assertThat(testPlacement.getWholeTimeEquivalent()).isEqualTo(DEFAULT_PLACEMENT_WHOLE_TIME_EQUIVALENT.setScale(2,BigDecimal.ROUND_HALF_UP));
@@ -329,8 +345,8 @@ public class PlacementResourceIntTest {
         final int databaseSizeBeforeCreate = placementDetailsRepository.findAll().size();
 
         // Create the Placement with an existing ID
-        placement.setId(1L);
-        final PlacementDetailsDTO placementDTO = placementDetailsMapper.placementDetailsToPlacementDetailsDTO(placement);
+        placementDetails.setId(1L);
+        final PlacementDetailsDTO placementDTO = placementDetailsMapper.placementDetailsToPlacementDetailsDTO(placementDetails);
 
         // An entity with an existing ID cannot be created, so this API call must fail
         restPlacementMockMvc.perform(post("/api/placements")
@@ -357,15 +373,15 @@ public class PlacementResourceIntTest {
         final String postNumber = "EOE/RGT00/021/FY1/010";
         final String placementType = "In Post";
 
-        placement.setDateFrom(UPDATED_DATE_FROM.plusMonths(5));
-        placement.setDateTo(UPDATED_DATE_TO.plusMonths(8));
-        placement.setPlacementType(placementType);
+        placementDetails.setDateFrom(UPDATED_DATE_FROM.plusMonths(5));
+        placementDetails.setDateTo(UPDATED_DATE_TO.plusMonths(8));
+        placementDetails.setPlacementType(placementType);
 
-        final Post post = postRepository.findOne(placement.getPostId());
+        final Post post = postRepository.findOne(placementDetails.getPostId());
         post.setNationalPostNumber(postNumber);
         postRepository.saveAndFlush(post);
 
-        final PlacementDetailsDTO placementDetailsDTO = placementDetailsMapper.placementDetailsToPlacementDetailsDTO(placement);
+        final PlacementDetailsDTO placementDetailsDTO = placementDetailsMapper.placementDetailsToPlacementDetailsDTO(placementDetails);
         restPlacementMockMvc.perform(post("/api/placements")
                 .contentType(TestUtil.APPLICATION_JSON_UTF8)
                 .content(TestUtil.convertObjectToJsonBytes(placementDetailsDTO)))
@@ -379,8 +395,8 @@ public class PlacementResourceIntTest {
         assertThat(testPlacement.getGradeAbbreviation()).isEqualTo(DEFAULT_GRADE);
         assertThat(testPlacement.getDateFrom()).isEqualTo(UPDATED_DATE_FROM.plusMonths(5));
         assertThat(testPlacement.getDateTo()).isEqualTo(UPDATED_DATE_TO.plusMonths(8));
-        assertThat(testPlacement.getPostId()).isEqualTo(placement.getPostId());
-        assertThat(testPlacement.getTraineeId()).isEqualTo(placement.getTraineeId());
+        assertThat(testPlacement.getPostId()).isEqualTo(placementDetails.getPostId());
+        assertThat(testPlacement.getTraineeId()).isEqualTo(placementDetails.getTraineeId());
         assertThat(testPlacement.getTrainingDescription()).isEqualTo(DEFAULT_TRAINING_DESCRIPTION);
         assertThat(testPlacement.getPlacementType()).isEqualTo(placementType);
         assertThat(testPlacement.getWholeTimeEquivalent()).isEqualTo(DEFAULT_PLACEMENT_WHOLE_TIME_EQUIVALENT.setScale(2,BigDecimal.ROUND_HALF_UP));
@@ -395,18 +411,17 @@ public class PlacementResourceIntTest {
     @Transactional
     public void getAllPlacements() throws Exception {
         // Initialize the database
-        placementDetailsRepository.saveAndFlush(placement);
+        placementDetailsRepository.saveAndFlush(placementDetails);
 
         // Get all the placementList
         restPlacementMockMvc.perform(get("/api/placements?sort=id,desc"))
                 .andExpect(status().isOk())
                 .andExpect(content().contentType(MediaType.APPLICATION_JSON_UTF8_VALUE))
-                .andExpect(jsonPath("$.[*].id").value(hasItem(placement.getId().intValue())))
-                .andExpect(jsonPath("$.[*].traineeId").value(placement.getTraineeId().intValue()))
-                .andExpect(jsonPath("$.[*].postId").value(placement.getPostId().intValue()))
+                .andExpect(jsonPath("$.[*].id").value(hasItem(placementDetails.getId().intValue())))
+                .andExpect(jsonPath("$.[*].traineeId").value(placementDetails.getTraineeId().intValue()))
+                .andExpect(jsonPath("$.[*].postId").value(placementDetails.getPostId().intValue()))
                 .andExpect(jsonPath("$.[*].siteCode").value(DEFAULT_SITE))
                 .andExpect(jsonPath("$.[*].gradeAbbreviation").value(DEFAULT_GRADE))
-                //.andExpect(jsonPath("$.[*].specialties[0].specialtyId").value(placement.getSpecialties().iterator().next().getSpecialty().getId().intValue()))
                 .andExpect(jsonPath("$.[*].dateFrom").value(DEFAULT_DATE_FROM.toString()))
                 .andExpect(jsonPath("$.[*].dateTo").value(DEFAULT_DATE_TO.toString()))
                 .andExpect(jsonPath("$.[*].placementType").value(DEFAULT_PLACEMENT_TYPE))
@@ -447,17 +462,17 @@ public class PlacementResourceIntTest {
         person.setContactDetails(cd);
         personRepository.saveAndFlush(person);
 
-        placement.setTraineeId(person.getId());
-        placement.setPostId(post.getId());
-        placementDetailsRepository.saveAndFlush(placement);
+        placementDetails.setTraineeId(person.getId());
+        placementDetails.setPostId(post.getId());
+        placementDetailsRepository.saveAndFlush(placementDetails);
 
-        // Get the placement
-        restPlacementMockMvc.perform(get("/api/placements/{id}", placement.getId()))
+        // Get the placementDetails
+        restPlacementMockMvc.perform(get("/api/placements/{id}", placementDetails.getId()))
                 .andExpect(status().isOk())
                 .andExpect(content().contentType(MediaType.APPLICATION_JSON_UTF8_VALUE))
-                .andExpect(jsonPath("$.id").value(placement.getId().intValue()))
-                .andExpect(jsonPath("$.traineeId").value(placement.getTraineeId().intValue()))
-                .andExpect(jsonPath("$.postId").value(placement.getPostId().intValue()))
+                .andExpect(jsonPath("$.id").value(placementDetails.getId().intValue()))
+                .andExpect(jsonPath("$.traineeId").value(placementDetails.getTraineeId().intValue()))
+                .andExpect(jsonPath("$.postId").value(placementDetails.getPostId().intValue()))
                 .andExpect(jsonPath("$.siteCode").value(DEFAULT_SITE))
                 .andExpect(jsonPath("$.gradeAbbreviation").value(DEFAULT_GRADE))
                 .andExpect(jsonPath("$.dateFrom").value(DEFAULT_DATE_FROM.toString()))
@@ -476,7 +491,7 @@ public class PlacementResourceIntTest {
     @Test
     @Transactional
     public void getNonExistingPlacement() throws Exception {
-        // Get the placement
+        // Get the placementDetails
         restPlacementMockMvc.perform(get("/api/placements/{id}", Long.MAX_VALUE))
                 .andExpect(status().isNotFound());
     }
@@ -485,22 +500,21 @@ public class PlacementResourceIntTest {
     @Transactional
     public void updatePlacement() throws Exception {
         // Initialize the database
-        placementDetailsRepository.saveAndFlush(placement);
+        placementDetailsRepository.saveAndFlush(placementDetails);
 
         final Set<PlacementSupervisor> supervisors = new HashSet<>();
-        supervisors.add(new PlacementSupervisor(placement.getId(), 3000L, 1));
-        supervisors.add(new PlacementSupervisor(placement.getId(), 4000L, 2));
+        supervisors.add(new PlacementSupervisor(placementDetails.getId(), 3000L, 1));
+        supervisors.add(new PlacementSupervisor(placementDetails.getId(), 4000L, 2));
         supervisors.add(new PlacementSupervisor(5000L, 4000L, 2));
 
         placementSupervisorRepository.save(supervisors);
 
         final int databaseSizeBeforeUpdate = placementDetailsRepository.findAll().size();
 
-        // Update the placement
-        final PlacementDetails updatedPlacement = placementDetailsRepository.findOne(placement.getId());
+        // Update the placementDetails
+        final PlacementDetails updatedPlacement = placementDetailsRepository.findOne(placementDetails.getId());
         updatedPlacement.setSiteCode(UPDATED_SITE);
         updatedPlacement.setGradeAbbreviation(UPDATED_GRADE);
-        //updatedPlacement.setSpecialties(Sets.newHashSet());
         updatedPlacement.setDateFrom(DEFAULT_DATE_FROM);
         updatedPlacement.setDateTo(DEFAULT_DATE_TO);
         updatedPlacement.setLocalPostNumber(UPDATED_LOCAL_POST_NUMBER);
@@ -522,7 +536,6 @@ public class PlacementResourceIntTest {
         final PlacementDetails testPlacement = placementList.get(placementList.size() - 1);
         assertThat(testPlacement.getSiteCode()).isEqualTo(UPDATED_SITE);
         assertThat(testPlacement.getGradeAbbreviation()).isEqualTo(UPDATED_GRADE);
-        //assertThat(testPlacement.getSpecialties()).isEqualTo(placement.getSpecialties());
         assertThat(testPlacement.getDateFrom()).isEqualTo(DEFAULT_DATE_FROM);
         assertThat(testPlacement.getDateTo()).isEqualTo(DEFAULT_DATE_TO);
         assertThat(testPlacement.getLocalPostNumber()).isEqualTo(UPDATED_LOCAL_POST_NUMBER);
@@ -543,12 +556,12 @@ public class PlacementResourceIntTest {
     @Transactional
     public void updatePlacementWithNewComment() throws Exception {
         // Initialize the database
-        placementDetailsRepository.saveAndFlush(placement);
+        placementDetailsRepository.saveAndFlush(placementDetails);
 
         final int databaseSizeBeforeUpdate = placementDetailsRepository.findAll().size();
 
-        // Update the placement
-        final PlacementDetails updatedPlacement = placementDetailsRepository.findOne(placement.getId());
+        // Update the placementDetails
+        final PlacementDetails updatedPlacement = placementDetailsRepository.findOne(placementDetails.getId());
         updatedPlacement.setSiteCode(UPDATED_SITE);
 
         final PlacementDetailsDTO placementDTO = placementDetailsMapper.placementDetailsToPlacementDetailsDTO(updatedPlacement);
@@ -579,24 +592,21 @@ public class PlacementResourceIntTest {
         final String localPostNumber = "EOE/RGT00/004/STR/704";
         final String placementType = "In Post";
 
-        placement.setDateFrom(UPDATED_DATE_FROM.minusMonths(2));
-        placement.setDateTo(UPDATED_DATE_TO.plusMonths(2));
-//    placement.setLocalPostNumber(localPostNumber);
-        placement.setPlacementType(placementType);
-        placementDetailsRepository.saveAndFlush(placement);
+        placementDetails.setDateFrom(UPDATED_DATE_FROM.minusMonths(2));
+        placementDetails.setDateTo(UPDATED_DATE_TO.plusMonths(2));
+        placementDetails.setPlacementType(placementType);
+        placementDetailsRepository.saveAndFlush(placementDetails);
 
-        final Post post = postRepository.findOne(placement.getPostId());
+        final Post post = postRepository.findOne(placementDetails.getPostId());
         post.setNationalPostNumber(localPostNumber);
         postRepository.saveAndFlush(post);
 
         final int databaseSizeBeforeUpdate = placementDetailsRepository.findAll().size();
 
-        // Update the placement
-        final PlacementDetails updatedPlacement = placementDetailsRepository.findOne(placement.getId());
+        // Update the placementDetails
+        final PlacementDetails updatedPlacement = placementDetailsRepository.findOne(placementDetails.getId());
         updatedPlacement.setSiteCode(UPDATED_SITE);
         updatedPlacement.setGradeAbbreviation(UPDATED_GRADE);
-        //updatedPlacement.setSpecialties(Sets.newHashSet());
-//    updatedPlacement.setDateFrom(UPDATED_DATE_FROM);
         updatedPlacement.setDateTo(UPDATED_DATE_TO);
         updatedPlacement.setLocalPostNumber(localPostNumber);
         updatedPlacement.setTrainingDescription(UPDATED_TRAINING_DESCRPTION);
@@ -615,7 +625,6 @@ public class PlacementResourceIntTest {
         final PlacementDetails testPlacement = placementList.get(placementList.size() - 1);
         assertThat(testPlacement.getSiteCode()).isEqualTo(UPDATED_SITE);
         assertThat(testPlacement.getGradeAbbreviation()).isEqualTo(UPDATED_GRADE);
-        //assertThat(testPlacement.getSpecialties()).isEqualTo(placement.getSpecialties());
         assertThat(testPlacement.getDateFrom()).isEqualTo(UPDATED_DATE_FROM.minusMonths(2));
         assertThat(testPlacement.getDateTo()).isEqualTo(UPDATED_DATE_TO);
         assertThat(testPlacement.getLocalPostNumber()).isEqualTo(localPostNumber);
@@ -640,23 +649,21 @@ public class PlacementResourceIntTest {
         final String localPostNumber = "EOE/RGT00/004/STR/704";
         final String placementType = "In Post";
 
-        placement.setDateFrom(UPDATED_DATE_FROM.plusMonths(1));
-        placement.setDateTo(UPDATED_DATE_TO.plusMonths(2));
-//    placement.setLocalPostNumber(localPostNumber);
-        placement.setPlacementType(placementType);
-        placementDetailsRepository.saveAndFlush(placement);
+        placementDetails.setDateFrom(UPDATED_DATE_FROM.plusMonths(1));
+        placementDetails.setDateTo(UPDATED_DATE_TO.plusMonths(2));
+        placementDetails.setPlacementType(placementType);
+        placementDetailsRepository.saveAndFlush(placementDetails);
 
-        final Post post = postRepository.findOne(placement.getPostId());
+        final Post post = postRepository.findOne(placementDetails.getPostId());
         post.setNationalPostNumber(localPostNumber);
         postRepository.saveAndFlush(post);
 
         final int databaseSizeBeforeUpdate = placementDetailsRepository.findAll().size();
 
-        // Update the placement
-        final PlacementDetails updatedPlacement = placementDetailsRepository.findOne(placement.getId());
+        // Update the placementDetails
+        final PlacementDetails updatedPlacement = placementDetailsRepository.findOne(placementDetails.getId());
         updatedPlacement.setSiteCode(UPDATED_SITE);
         updatedPlacement.setGradeAbbreviation(UPDATED_GRADE);
-        //updatedPlacement.setSpecialties(Sets.newHashSet());
         updatedPlacement.setDateFrom(UPDATED_DATE_FROM.plusMonths(3));
         updatedPlacement.setDateTo(UPDATED_DATE_TO.plusMonths(4));
         updatedPlacement.setLocalPostNumber(localPostNumber);
@@ -676,7 +683,6 @@ public class PlacementResourceIntTest {
         final PlacementDetails testPlacement = placementList.get(placementList.size() - 1);
         assertThat(testPlacement.getSiteCode()).isEqualTo(UPDATED_SITE);
         assertThat(testPlacement.getGradeAbbreviation()).isEqualTo(UPDATED_GRADE);
-        //assertThat(testPlacement.getSpecialties()).isEqualTo(placement.getSpecialties());
         assertThat(testPlacement.getDateFrom()).isEqualTo(UPDATED_DATE_FROM.plusMonths(3));
         assertThat(testPlacement.getDateTo()).isEqualTo(UPDATED_DATE_TO.plusMonths(4));
         assertThat(testPlacement.getLocalPostNumber()).isEqualTo(localPostNumber);
@@ -690,15 +696,12 @@ public class PlacementResourceIntTest {
         esrNotifications.stream().map(EsrNotification::getNotificationTitleCode).forEachOrdered(r -> asList("1", "4").contains(r));
         esrNotifications.stream().filter(esrNotification -> esrNotification.getNotificationTitleCode().equals("4")).forEach(esrNotification -> {
             assertThat(esrNotification.getChangeOfProjectedHireDate()).isNotNull();
-            // For some reason the spring test does not seems to see the latest db updates.
-//            assertThat(esrNotification.getNextAppointmentProjectedStartDate()).isEqualTo(UPDATED_DATE_FROM.plusMonths(3));
             assertThat(esrNotification.getChangeOfProjectedHireDate()).isEqualTo(UPDATED_DATE_FROM.plusMonths(3));
             assertThat(esrNotification.getChangeOfProjectedEndDate()).isEqualTo(UPDATED_DATE_TO.plusMonths(4));
         });
 
         esrNotifications.stream().filter(esrNotification -> esrNotification.getNotificationTitleCode().equals("1")).forEach(esrNotification -> {
             assertThat(esrNotification.getChangeOfProjectedHireDate()).isNull();
-//            assertThat(esrNotification.getNextAppointmentProjectedStartDate()).isEqualTo(UPDATED_DATE_FROM.plusMonths(3));
             assertThat(esrNotification.getChangeOfProjectedHireDate()).isNull();
             assertThat(esrNotification.getChangeOfProjectedEndDate()).isNull();
         });
@@ -712,22 +715,21 @@ public class PlacementResourceIntTest {
         final String placementType = "In Post";
 
         // prepare Placement to be starting after 3 months.
-        placement.setDateFrom(UPDATED_DATE_FROM.plusMonths(4));
-        placement.setDateTo(UPDATED_DATE_TO.plusMonths(6));
-        placement.setPlacementType(placementType);
-        placementDetailsRepository.saveAndFlush(placement);
+        placementDetails.setDateFrom(UPDATED_DATE_FROM.plusMonths(4));
+        placementDetails.setDateTo(UPDATED_DATE_TO.plusMonths(6));
+        placementDetails.setPlacementType(placementType);
+        placementDetailsRepository.saveAndFlush(placementDetails);
 
-        final Post post = postRepository.findOne(placement.getPostId());
+        final Post post = postRepository.findOne(placementDetails.getPostId());
         post.setNationalPostNumber(localPostNumber);
         postRepository.saveAndFlush(post);
 
         final int databaseSizeBeforeUpdate = placementDetailsRepository.findAll().size();
 
-        // Update the placement but still falls beyond the three months
-        final PlacementDetails updatedPlacement = placementDetailsRepository.findOne(placement.getId());
+        // Update the placementDetails but still falls beyond the three months
+        final PlacementDetails updatedPlacement = placementDetailsRepository.findOne(placementDetails.getId());
         updatedPlacement.setSiteCode(UPDATED_SITE);
         updatedPlacement.setGradeAbbreviation(UPDATED_GRADE);
-        //updatedPlacement.setSpecialties(Sets.newHashSet());
         updatedPlacement.setDateFrom(UPDATED_DATE_FROM.plusMonths(5));
         updatedPlacement.setDateTo(UPDATED_DATE_TO.plusMonths(7));
         updatedPlacement.setLocalPostNumber(localPostNumber);
@@ -747,7 +749,6 @@ public class PlacementResourceIntTest {
         final PlacementDetails testPlacement = placementList.get(placementList.size() - 1);
         assertThat(testPlacement.getSiteCode()).isEqualTo(UPDATED_SITE);
         assertThat(testPlacement.getGradeAbbreviation()).isEqualTo(UPDATED_GRADE);
-        //assertThat(testPlacement.getSpecialties()).isEqualTo(placement.getSpecialties());
         assertThat(testPlacement.getDateFrom()).isEqualTo(UPDATED_DATE_FROM.plusMonths(5));
         assertThat(testPlacement.getDateTo()).isEqualTo(UPDATED_DATE_TO.plusMonths(7));
         assertThat(testPlacement.getLocalPostNumber()).isEqualTo(localPostNumber);
@@ -764,13 +765,13 @@ public class PlacementResourceIntTest {
     @Transactional
     public void deletePlacement() throws Exception {
         // Initialize the database
-        final LocalDate tomorrow = LocalDate.now().plus(1, DAYS);
-        placement.setDateFrom(tomorrow);
-        placementDetailsRepository.saveAndFlush(placement);
+        final LocalDate tomorrow = now().plus(1, DAYS);
+        placementDetails.setDateFrom(tomorrow);
+        placementDetailsRepository.saveAndFlush(placementDetails);
         final int databaseSizeBeforeDelete = placementDetailsRepository.findAll().size();
 
-        // Get the placement
-        restPlacementMockMvc.perform(delete("/api/placements/{id}", placement.getId())
+        // Get the placementDetails
+        restPlacementMockMvc.perform(delete("/api/placements/{id}", placementDetails.getId())
                 .accept(TestUtil.APPLICATION_JSON_UTF8))
                 .andExpect(status().isOk());
 
@@ -785,19 +786,19 @@ public class PlacementResourceIntTest {
         final String localPostNumber = "EOE/RGT00/004/STR/704";
 
         // Initialize the database
-        final LocalDate tomorrow = LocalDate.now().plus(1, DAYS);
-        placement.setDateFrom(tomorrow);
-        placement.setLocalPostNumber(localPostNumber);
-        placement.setPlacementType("In Post");
-        placementDetailsRepository.saveAndFlush(placement);
+        final LocalDate tomorrow = now().plus(1, DAYS);
+        placementDetails.setDateFrom(tomorrow);
+        placementDetails.setLocalPostNumber(localPostNumber);
+        placementDetails.setPlacementType("In Post");
+        placementDetailsRepository.saveAndFlush(placementDetails);
 
-        final Post post = postRepository.findOne(placement.getPostId());
+        final Post post = postRepository.findOne(placementDetails.getPostId());
         post.setNationalPostNumber(localPostNumber);
         postRepository.saveAndFlush(post);
 
-        final ContactDetails cd = createContactDetails(placement, "TraineeFN", "TraineeSN");
-        final GmcDetails gmcDetails = getGmcDetails(placement, "deleteTraineeGmcNumber");
-        enhancePlacement(placement, cd, gmcDetails);
+        final ContactDetails cd = createContactDetails(placementDetails, "TraineeFN", "TraineeSN");
+        final GmcDetails gmcDetails = getGmcDetails(placementDetails, "deleteTraineeGmcNumber");
+        enhancePlacement(placementDetails, cd, gmcDetails);
 
         Person nextTrainee = new Person();
         personRepository.saveAndFlush(nextTrainee);
@@ -816,8 +817,8 @@ public class PlacementResourceIntTest {
 
         final int databaseSizeBeforeDelete = placementDetailsRepository.findAll().size();
 
-        // Get the placement
-        restPlacementMockMvc.perform(delete("/api/placements/{id}", placement.getId())
+        // Get the placementDetails
+        restPlacementMockMvc.perform(delete("/api/placements/{id}", placementDetails.getId())
                 .accept(TestUtil.APPLICATION_JSON_UTF8))
                 .andExpect(status().isOk());
 
@@ -849,24 +850,24 @@ public class PlacementResourceIntTest {
         final String localPostNumber = "EOE/RGT00/004/STR/704";
 
         // Initialize the database
-        final LocalDate startDate = LocalDate.now().plusMonths(5);
-        placement.setDateFrom(startDate);
-        placement.setDateTo(startDate.plusMonths(3));
-        placement.setLocalPostNumber(localPostNumber);
-        placementDetailsRepository.saveAndFlush(placement);
+        final LocalDate startDate = now().plusMonths(5);
+        placementDetails.setDateFrom(startDate);
+        placementDetails.setDateTo(startDate.plusMonths(3));
+        placementDetails.setLocalPostNumber(localPostNumber);
+        placementDetailsRepository.saveAndFlush(placementDetails);
 
-        final Post post = postRepository.findOne(placement.getPostId());
+        final Post post = postRepository.findOne(placementDetails.getPostId());
         post.setNationalPostNumber(localPostNumber);
         postRepository.saveAndFlush(post);
 
-        final ContactDetails cd = createContactDetails(placement, "TraineeFN", "TraineeSN");
-        final GmcDetails gmcDetails = getGmcDetails(placement, "nextTraineeGmcNumber");
-        enhancePlacement(placement, cd, gmcDetails);
+        final ContactDetails cd = createContactDetails(placementDetails, "TraineeFN", "TraineeSN");
+        final GmcDetails gmcDetails = getGmcDetails(placementDetails, "nextTraineeGmcNumber");
+        enhancePlacement(placementDetails, cd, gmcDetails);
 
         final int databaseSizeBeforeDelete = placementDetailsRepository.findAll().size();
 
-        // Get the placement
-        restPlacementMockMvc.perform(delete("/api/placements/{id}", placement.getId())
+        // Get the placementDetails
+        restPlacementMockMvc.perform(delete("/api/placements/{id}", placementDetails.getId())
                 .accept(TestUtil.APPLICATION_JSON_UTF8))
                 .andExpect(status().isOk());
 
@@ -885,10 +886,10 @@ public class PlacementResourceIntTest {
         final String localPostNumber = "EOE/RGT00/004/STR/704";
 
         // Initialize the database
-        // Create a future placement to delete
-        final LocalDate tomorrow = LocalDate.now().plus(10, DAYS);
+        // Create a future placementDetails to delete
+        final LocalDate tomorrow = now().plus(10, DAYS);
 
-        final PlacementDetails futurePlacementToDelete = placement;
+        final PlacementDetails futurePlacementToDelete = placementDetails;
 
         futurePlacementToDelete.setDateFrom(tomorrow);
         futurePlacementToDelete.setLocalPostNumber(localPostNumber);
@@ -908,7 +909,7 @@ public class PlacementResourceIntTest {
 
         final PlacementDetails currentPlacement = new PlacementDetails();
 
-        final LocalDate currentPlacementStart = LocalDate.now().minus(10, DAYS);
+        final LocalDate currentPlacementStart = now().minus(10, DAYS);
         currentPlacement.setDateFrom(currentPlacementStart);
         currentPlacement.setDateTo(currentPlacementStart.plusMonths(3));
         currentPlacement.setLocalPostNumber(localPostNumber);
@@ -924,7 +925,7 @@ public class PlacementResourceIntTest {
 
         final int databaseSizeBeforeDelete = placementDetailsRepository.findAll().size();
 
-        // Get the placement
+        // Get the placementDetails
         restPlacementMockMvc.perform(delete("/api/placements/{id}", futurePlacementToDelete.getId())
                 .accept(TestUtil.APPLICATION_JSON_UTF8))
                 .andExpect(status().isOk());
@@ -988,15 +989,15 @@ public class PlacementResourceIntTest {
     public void shouldReturnAllPlacementsWhenNoFilter() throws Exception {
 
         // Initialize the database
-        placementDetailsRepository.saveAndFlush(placement);
+        placementDetailsRepository.saveAndFlush(placementDetails);
 
         // Get all the placementList
         restPlacementMockMvc.perform(get("/api/placements/filter"))
                 .andExpect(status().isOk())
                 .andExpect(content().contentType(MediaType.APPLICATION_JSON_UTF8_VALUE))
-                .andExpect(jsonPath("$.[*].id").value(hasItem(placement.getId().intValue())))
-                .andExpect(jsonPath("$.[*].traineeId").value(placement.getTraineeId().intValue()))
-                .andExpect(jsonPath("$.[*].postId").value(placement.getPostId().intValue()))
+                .andExpect(jsonPath("$.[*].id").value(hasItem(placementDetails.getId().intValue())))
+                .andExpect(jsonPath("$.[*].traineeId").value(placementDetails.getTraineeId().intValue()))
+                .andExpect(jsonPath("$.[*].postId").value(placementDetails.getPostId().intValue()))
                 .andExpect(jsonPath("$.[*].siteCode").value(DEFAULT_SITE))
                 .andExpect(jsonPath("$.[*].gradeAbbreviation").value(DEFAULT_GRADE))
                 .andExpect(jsonPath("$.[*].dateFrom").value(DEFAULT_DATE_FROM.toString()))
@@ -1010,7 +1011,7 @@ public class PlacementResourceIntTest {
     public void shouldReturnNoPlacementsWhenDateFromIsInPastAndDateRangeDoesNotMatch() throws Exception {
 
         // Initialize the database
-        placementDetailsRepository.saveAndFlush(placement);
+        placementDetailsRepository.saveAndFlush(placementDetails);
 
         final String dateRangeFilter = "{\"dateFrom\":[\"2017-10-01\", \"2017-12-01\"]}";
         // Get filtered placements
@@ -1025,9 +1026,9 @@ public class PlacementResourceIntTest {
         // Initialize the database
         final LocalDate dateFrom = getLocalDateFromString("2018-03-01");
         final LocalDate dateTo = getLocalDateFromString("2018-05-01");
-        placement.setDateFrom(dateFrom);
-        placement.setDateTo(dateTo);
-        placementDetailsRepository.saveAndFlush(placement);
+        placementDetails.setDateFrom(dateFrom);
+        placementDetails.setDateTo(dateTo);
+        placementDetailsRepository.saveAndFlush(placementDetails);
 
         final String dateRangeFilter = "{\"dateFrom\":[\"2018-02-01\", \"2018-05-01\"]}";
 
@@ -1036,9 +1037,9 @@ public class PlacementResourceIntTest {
                 .andExpect(status().isOk());
         resultActions.andExpect(status().isOk())
                 .andExpect(content().contentType(MediaType.APPLICATION_JSON_UTF8_VALUE))
-                .andExpect(jsonPath("$.[*].id").value(hasItem(placement.getId().intValue())))
-                .andExpect(jsonPath("$.[*].traineeId").value(placement.getTraineeId().intValue()))
-                .andExpect(jsonPath("$.[*].postId").value(placement.getPostId().intValue()))
+                .andExpect(jsonPath("$.[*].id").value(hasItem(placementDetails.getId().intValue())))
+                .andExpect(jsonPath("$.[*].traineeId").value(placementDetails.getTraineeId().intValue()))
+                .andExpect(jsonPath("$.[*].postId").value(placementDetails.getPostId().intValue()))
                 .andExpect(jsonPath("$.[*].siteCode").value(DEFAULT_SITE))
                 .andExpect(jsonPath("$.[*].gradeAbbreviation").value(DEFAULT_GRADE))
                 .andExpect(jsonPath("$.[*].dateFrom").value(dateFrom.toString()))
@@ -1056,9 +1057,9 @@ public class PlacementResourceIntTest {
         // Initialize the database
         final LocalDate dateFrom = getLocalDateFromString("2018-06-01");
         final LocalDate dateTo = getLocalDateFromString("2018-09-01");
-        placement.setDateFrom(dateFrom);
-        placement.setDateTo(dateTo);
-        placementDetailsRepository.saveAndFlush(placement);
+        placementDetails.setDateFrom(dateFrom);
+        placementDetails.setDateTo(dateTo);
+        placementDetailsRepository.saveAndFlush(placementDetails);
 
         final String dateRangeFilter = "{\"dateFrom\":[\"2018-02-01\", \"2018-05-01\"]}";
         // Get filtered placements
@@ -1074,9 +1075,9 @@ public class PlacementResourceIntTest {
         // Initialize the database
         final LocalDate dateFrom = getLocalDateFromString("2018-06-01");
         final LocalDate dateTo = getLocalDateFromString("2018-09-01");
-        placement.setDateFrom(dateFrom);
-        placement.setDateTo(dateTo);
-        placementDetailsRepository.saveAndFlush(placement);
+        placementDetails.setDateFrom(dateFrom);
+        placementDetails.setDateTo(dateTo);
+        placementDetailsRepository.saveAndFlush(placementDetails);
 
         final String dateRangeFilter = "{\"dateFrom\":[\"201802-01\", \"2018-0501\"]}";
         // Get filtered placements
@@ -1090,14 +1091,44 @@ public class PlacementResourceIntTest {
         // Initialize the database
         final LocalDate dateFrom = getLocalDateFromString("2018-06-01");
         final LocalDate dateTo = getLocalDateFromString("2018-09-01");
-        placement.setDateFrom(dateFrom);
-        placement.setDateTo(dateTo);
-        placementDetailsRepository.saveAndFlush(placement);
+        placementDetails.setDateFrom(dateFrom);
+        placementDetails.setDateTo(dateTo);
+        placementDetailsRepository.saveAndFlush(placementDetails);
 
         final String dateRangeFilter = "{\"dateFrom\":[\"2018-02-01\", \"2018-05-01\", \"2018-05-01\"]}";
         // Get filtered placements
         restPlacementMockMvc.perform(get("/api/placements/filter?page=0&size=30&columnFilters=" + encodeDateRange(dateRangeFilter)))
                 .andExpect(status().is5xxServerError());
+    }
+
+    @Test
+    @Transactional
+    public void shouldClosePlacement() throws Exception {
+      Placement placement = new Placement();
+      LocalDate dateFrom = now().minusMonths(1L);
+      LocalDate dateTo = now().plusMonths(1L);
+      placement.setDateFrom(dateFrom);
+      placement.setDateTo(dateTo);
+      Placement savedPlacement = placementRepository.saveAndFlush(placement);
+      restPlacementMockMvc.perform(put("/api/placements/{id}/close",savedPlacement.getId()))
+          .andExpect(status().isOk())
+          .andExpect(jsonPath("$.dateTo").value(LocalDate.now().minusDays(1).toString()));
+    }
+
+    @Test
+    @Transactional
+    public void shouldPatchPlacements() throws Exception {
+      placement.setPlacementType(DEFAULT_PLACEMENT_TYPE);
+      placement.setGradeId(DEFAULT_GRADE_ID);
+      Placement savedPlacement = placementRepository.saveAndFlush(placement);
+      savedPlacement.setPlacementType(UPDATED_PLACEMENT_TYPE);
+      List<PlacementDTO> placementDTOS = Lists.newArrayList(placementMapper.placementToPlacementDTO(savedPlacement));
+      restPlacementMockMvc.perform(patch("/api/placements")
+          .contentType(TestUtil.APPLICATION_JSON_UTF8)
+          .content(TestUtil.convertObjectToJsonBytes(placementDTOS)))
+          .andExpect(status().isOk())
+          .andExpect(jsonPath("$.[*].placementType").value(UPDATED_PLACEMENT_TYPE))
+          .andExpect(jsonPath("$.[*].gradeId").value(DEFAULT_GRADE_ID.intValue()));
     }
 
     private String encodeDateRange(final String dateRangeFilter) throws EncoderException {
