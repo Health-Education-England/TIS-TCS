@@ -6,7 +6,7 @@ import org.springframework.context.annotation.Profile;
 import org.springframework.web.client.RestTemplate;
 
 @Configuration
-@Profile("prod")
+@Profile({"dev", "stage", "prod", "uidev"})
 public class ReferenceClientProdConfig extends com.transformuk.hee.tis.reference.client.config.ReferenceClientConfig {
 
   @Bean
