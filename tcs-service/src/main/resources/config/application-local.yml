@@ -1,0 +1,30 @@
+spring:
+    devtools:
+        restart:
+            enabled: false
+    datasource:
+        url: jdbc:mysql://${DBHOST:localhost}:${DBPORT:3306}/${DBNAME:tcs}?useUnicode=true&characterEncoding=utf8&useSSL=${USE_SSL:false}
+        username: ${DBUSER:root}
+        password: ${DBPASSWORD:}
+
+flyway:
+    password: ${DBPASSWORD:}
+    schemas: ${DBNAME:tcs}
+
+logging:
+    file: ${LOG_DIR:${HOME}}/tcs.log
+
+azure:
+    accountName: ${CLOUD_BLOB_ACCOUNT_NAME:tisdevstor}
+    accountKey: ${CLOUD_BLOB_ACCOUNT_KEY:C+3kNX/Ttim1chPZUFcjyakUNY7Nx86YNZP5ftZIWzy17+zNlkAj9+uX3TdpJrE49To12DvD/VKx97JWeKPZnA==}
+    containerName: ${CLOUD_BLOB_CONTAINER_NAME:document-manager}
+
+kc:
+    realm: ${KC_REALM:lin}
+    client:
+        id: ${KC_CLIENT_ID:api-tokens}
+    server:
+        url: ${KC_SERVER_URL:https://dev-apps.tis.nhs.uk/auth/}
+    username: ${KC_USERNAME:tcs_trust_admin}
+    password: ${KC_PASSWORD:tcs_trust_admin}
+    timeout: ${KC_TIMEOUT:10000}
