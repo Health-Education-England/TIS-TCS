@@ -411,7 +411,6 @@ public class PostServiceImpl implements PostService {
   @Override
   @Transactional(readOnly = true)
   public BasicPage<PostViewDTO> advancedSearch(String searchString, List<ColumnFilter> columnFilters, Pageable pageable) {
-    System.out.println("===============================================  TEST ==================================");
     MapSqlParameterSource paramSource = new MapSqlParameterSource();
     String whereClause = createWhereClause(searchString, columnFilters);
     StopWatch stopWatch;

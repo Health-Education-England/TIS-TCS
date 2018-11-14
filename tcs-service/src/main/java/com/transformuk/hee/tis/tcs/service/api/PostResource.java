@@ -36,7 +36,6 @@ import io.swagger.annotations.ApiResponses;
 import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.springframework.cache.annotation.Cacheable;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.http.HttpHeaders;
@@ -205,7 +204,7 @@ public class PostResource {
     searchQuery = sanitize(searchQuery);
     List<Class> filterEnumList = Lists.newArrayList(Status.class);
     List<ColumnFilter> columnFilters = ColumnFilterUtil.getColumnFilters(columnFilterJson, filterEnumList);
-    Page<PostViewDTO> page = postService.findByNationalPostNumber(searchQuery,columnFilters, pageable);
+    Page<PostViewDTO> page = postService.findByNationalPostNumber(searchQuery, columnFilters, pageable);
 
     HttpHeaders headers = PaginationUtil.generatePaginationHttpHeaders(page, "/api/posts");
     return new ResponseEntity<>(page.getContent(), headers, HttpStatus.OK);

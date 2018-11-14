@@ -221,8 +221,8 @@ application:
 logging:
     file: ${LOG_DIR:${HOME}}/tcs.log
 
-# ===================================================================
-# Azure block blob storage properties
-# ===================================================================
 
 auto.generate.npn: true
+cache:
+  maxSize: 100
+  timeToLiveInMinutes: 1

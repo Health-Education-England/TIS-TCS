@@ -1,6 +1,7 @@
 package com.transformuk.hee.tis.tcs.service.config;
 
 import com.google.common.cache.CacheBuilder;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.cache.CacheManager;
 import org.springframework.cache.annotation.CachingConfigurerSupport;
 import org.springframework.cache.annotation.EnableCaching;
@@ -14,13 +15,19 @@ import java.util.concurrent.TimeUnit;
 @EnableCaching(proxyTargetClass = true)
 public class CacheConfig extends CachingConfigurerSupport {
 
+  @Value("${cache.maxSize}")
+  private int cacheMaxSize;
+
+  @Value("${cache.timeToLiveInMinutes}")
+  private int cacheTimeToLiveInMinutes;
+
   @Override
   @Bean
   public CacheManager cacheManager() {
     GuavaCacheManager cacheManager = new GuavaCacheManager();
     CacheBuilder<Object, Object> cacheBuilder = CacheBuilder.newBuilder()
-        .maximumSize(100)
-        .expireAfterWrite(5, TimeUnit.MINUTES);
+        .maximumSize(cacheMaxSize)
+        .expireAfterWrite(cacheTimeToLiveInMinutes, TimeUnit.MINUTES);
     cacheManager.setCacheBuilder(cacheBuilder);
     return cacheManager;
   }
