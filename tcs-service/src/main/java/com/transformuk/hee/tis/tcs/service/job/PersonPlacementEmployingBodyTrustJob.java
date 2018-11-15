@@ -65,7 +65,7 @@ public class PersonPlacementEmployingBodyTrustJob extends TrustAdminSyncJobTempl
 
     @Override
     protected void deleteData() {
-        personTrustRepository.deleteAll();
+        personTrustRepository.deleteAllInBatch();
     }
 
 
