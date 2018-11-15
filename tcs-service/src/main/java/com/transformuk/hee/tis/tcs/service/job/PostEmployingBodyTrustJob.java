@@ -69,7 +69,7 @@ public class PostEmployingBodyTrustJob extends TrustAdminSyncJobTemplate<PostTru
 
   @Override
   protected void deleteData() {
-    postTrustRepository.deleteAll();
+    postTrustRepository.deleteAllInBatch();
   }
 
   @Override
