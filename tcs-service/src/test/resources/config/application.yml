@@ -135,3 +135,7 @@ kc:
   username: ${KC_USERNAME:tcs_trust_admin}
   password: ${KC_PASSWORD:tcs_trust_admin}
   timeout: ${KC_TIMEOUT:10000}
+
+cache:
+  maxSize: 100
+  timeToLiveInMinutes: 1

@@ -27,6 +27,7 @@ import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.cache.annotation.Cacheable;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageImpl;
 import org.springframework.data.domain.Pageable;
@@ -374,6 +375,7 @@ public class PostServiceImpl implements PostService {
    * @param pageable the pagination information
    * @return the list of entities
    */
+  @Cacheable(value = "postFindAll", sync = true)
   @Override
   @Transactional(readOnly = true)
   public BasicPage<PostViewDTO> findAll(Pageable pageable) {
@@ -404,6 +406,8 @@ public class PostServiceImpl implements PostService {
     }
     return new BasicPage<>(posts, pageable, hasNext);
   }
+
+  @Cacheable(value = "postAdvSearch", sync = true)
   @Override
   @Transactional(readOnly = true)
   public BasicPage<PostViewDTO> advancedSearch(String searchString, List<ColumnFilter> columnFilters, Pageable pageable) {
