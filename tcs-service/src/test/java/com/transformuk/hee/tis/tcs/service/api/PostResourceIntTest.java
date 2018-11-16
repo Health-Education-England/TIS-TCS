@@ -440,7 +440,7 @@ public class PostResourceIntTest {
     postRepository.saveAndFlush(anotherPost);
     int databaseSize = postRepository.findAll().size();
     // Get all the postList
-    restPostMockMvc.perform(get("/api/posts?sort=id,desc"))
+    restPostMockMvc.perform(get("/api/posts?sort=id,asc"))
         .andExpect(status().isOk())
         .andExpect(jsonPath("$", hasSize(databaseSize))) // checking the size of the post
         .andExpect(content().contentType(MediaType.APPLICATION_JSON_UTF8_VALUE))

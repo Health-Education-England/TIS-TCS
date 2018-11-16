@@ -70,3 +70,7 @@ kc:
   username: ${KC_USERNAME}
   password: ${KC_PASSWORD}
   timeout: ${KC_TIMEOUT}
+
+cache:
+  maxSize: 50
+  timeToLiveInMinutes: 5

@@ -21,6 +21,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.BeanUtils;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.cache.annotation.Cacheable;
 import org.springframework.data.domain.*;
 import org.springframework.data.jpa.domain.Specification;
 import org.springframework.data.jpa.domain.Specifications;
@@ -187,6 +188,7 @@ public class PersonServiceImpl implements PersonService {
    * @param pageable the pagination information
    * @return the list of entities
    */
+  @Cacheable(value = "personFindAll", sync = true)
   @Override
   @Transactional(readOnly = true)
   public BasicPage<PersonViewDTO> findAll(final Pageable pageable) {
@@ -263,6 +265,7 @@ public class PersonServiceImpl implements PersonService {
     return result.map(person -> personBasicDetailsMapper.toDto(person)).getContent();
   }
 
+  @Cacheable(value = "personAdvSearch", sync = true)
   @Override
   @Transactional(readOnly = true)
   public BasicPage<PersonViewDTO> advancedSearch(final String searchString, final List<ColumnFilter> columnFilters, final Pageable pageable) {
