@@ -204,12 +204,12 @@ public class PersonServiceImpl implements PersonService {
     String whereClause = " WHERE 1=1 ";
 
     if (permissionService.isUserTrustAdmin()) {
-      whereClause = whereClause + "AND trustId in (:trustList) ";
+      whereClause = whereClause + "AND trustId IN (:trustList) ";
       paramSource.addValue("trustList", permissionService.getUsersTrustIds());
     }
 
     if (permissionService.isProgrammeObserver()) {
-      whereClause = whereClause + "AND pm.programmeId in (:programmesList) ";
+      whereClause = whereClause + "AND pm.programmeId IN (:programmesList) ";
       paramSource.addValue("programmesList", permissionService.getUsersProgrammeIds());
     }
 

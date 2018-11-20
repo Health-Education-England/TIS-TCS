@@ -11,15 +11,11 @@ import org.springframework.util.CollectionUtils;
 import java.util.Collections;
 import java.util.Set;
 import java.util.stream.Collectors;
-
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 /**
  * Class that contains utility methods that work on the Principle of the logged in user
  */
 @Service
 public class PermissionService {
-  private final Logger log = LoggerFactory.getLogger(PersonServiceImpl.class);
   protected static final String VIEW_SENSITIVE_DATA_ROLE = "personsensitive:view:entities";
   protected static final String EDIT_SENSITIVE_DATA_ROLE = "personsensitive:add:modify:entities";
 
