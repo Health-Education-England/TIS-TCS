@@ -39,3 +39,13 @@ node_modules
 ######################
 .idea/
 **/*.iml
+
+######################
+# Visual Studio Code
+######################
+.vscode/
+.settings/
+tcs-api/.classpath
+tcs-api/.settings/
+tcs-client/.classpath
+tcs-client/.settings/
