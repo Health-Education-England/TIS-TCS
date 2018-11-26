@@ -34,13 +34,8 @@ import java.util.List;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.hamcrest.Matchers.containsInAnyOrder;
 import static org.hamcrest.Matchers.hasItem;
-import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.delete;
-import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
-import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
-import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.put;
-import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.content;
-import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
-import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.*;
+import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.*;
 
 /**
  * Test class for the RightToWorkResource REST controller.
@@ -231,7 +226,7 @@ public class RightToWorkResourceIntTest {
 
   private void getOrCreateParent() {
     //check that Person with ID 1 exists otherwise create it
-    Person person = personRepository.findOne(1L);
+    Person person = personRepository.findById(1L).orElse(null);
     if (person == null) {
       person = PersonResourceIntTest.createEntity();
       person.setId(1L);
@@ -250,12 +245,12 @@ public class RightToWorkResourceIntTest {
         .andExpect(status().isOk())
         .andExpect(content().contentType(MediaType.APPLICATION_JSON_UTF8_VALUE))
         .andExpect(jsonPath("$.[*].id").value(hasItem(rightToWork.getId().intValue())))
-        .andExpect(jsonPath("$.[*].eeaResident").value(hasItem(DEFAULT_EEA_RESIDENT.toString())))
+      .andExpect(jsonPath("$.[*].eeaResident").value(hasItem(DEFAULT_EEA_RESIDENT)))
         .andExpect(jsonPath("$.[*].permitToWork").value(hasItem(DEFAULT_PERMIT_TO_WORK.name())))
-        .andExpect(jsonPath("$.[*].settled").value(hasItem(DEFAULT_SETTLED.toString())))
+      .andExpect(jsonPath("$.[*].settled").value(hasItem(DEFAULT_SETTLED)))
         .andExpect(jsonPath("$.[*].visaIssued").value(hasItem(DEFAULT_VISA_ISSUED.toString())))
         .andExpect(jsonPath("$.[*].visaValidTo").value(hasItem(DEFAULT_VISA_VALID_TO.toString())))
-        .andExpect(jsonPath("$.[*].visaDetails").value(hasItem(DEFAULT_VISA_DETAILS.toString())))
+      .andExpect(jsonPath("$.[*].visaDetails").value(hasItem(DEFAULT_VISA_DETAILS)))
         .andExpect(jsonPath("$.[*].amendedDate").isNotEmpty());
   }
 
@@ -270,12 +265,12 @@ public class RightToWorkResourceIntTest {
         .andExpect(status().isOk())
         .andExpect(content().contentType(MediaType.APPLICATION_JSON_UTF8_VALUE))
         .andExpect(jsonPath("$.id").value(rightToWork.getId().intValue()))
-        .andExpect(jsonPath("$.eeaResident").value(DEFAULT_EEA_RESIDENT.toString()))
+      .andExpect(jsonPath("$.eeaResident").value(DEFAULT_EEA_RESIDENT))
         .andExpect(jsonPath("$.permitToWork").value(DEFAULT_PERMIT_TO_WORK.name()))
-        .andExpect(jsonPath("$.settled").value(DEFAULT_SETTLED.toString()))
+      .andExpect(jsonPath("$.settled").value(DEFAULT_SETTLED))
         .andExpect(jsonPath("$.visaIssued").value(DEFAULT_VISA_ISSUED.toString()))
         .andExpect(jsonPath("$.visaValidTo").value(DEFAULT_VISA_VALID_TO.toString()))
-        .andExpect(jsonPath("$.visaDetails").value(DEFAULT_VISA_DETAILS.toString()))
+      .andExpect(jsonPath("$.visaDetails").value(DEFAULT_VISA_DETAILS))
         .andExpect(jsonPath("$.amendedDate").isNotEmpty());
   }
 
@@ -295,7 +290,7 @@ public class RightToWorkResourceIntTest {
     int databaseSizeBeforeUpdate = rightToWorkRepository.findAll().size();
 
     // Update the rightToWork
-    RightToWork updatedRightToWork = rightToWorkRepository.findOne(rightToWork.getId());
+    RightToWork updatedRightToWork = rightToWorkRepository.findById(rightToWork.getId()).orElse(null);
     updatedRightToWork
         .eeaResident(UPDATED_EEA_RESIDENT)
         .permitToWork(UPDATED_PERMIT_TO_WORK)

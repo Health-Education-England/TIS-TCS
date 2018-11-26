@@ -1,6 +1,5 @@
 package com.transformuk.hee.tis.tcs.service.api;
 
-import com.codahale.metrics.annotation.Timed;
 import com.transformuk.hee.tis.tcs.api.dto.RotationPostDTO;
 import com.transformuk.hee.tis.tcs.api.dto.validation.Create;
 import com.transformuk.hee.tis.tcs.service.api.util.HeaderUtil;
@@ -9,13 +8,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.http.ResponseEntity;
 import org.springframework.validation.annotation.Validated;
-import org.springframework.web.bind.annotation.DeleteMapping;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.PathVariable;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RequestBody;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
 
 import java.net.URI;
 import java.net.URISyntaxException;
@@ -46,7 +39,6 @@ public class RotationPostResource {
    * @throws URISyntaxException if the Location URI syntax is incorrect
    */
   @PostMapping("/rotation-posts")
-  @Timed
   public ResponseEntity<List<RotationPostDTO>> createRotationPost(@RequestBody @Validated(Create.class) List<RotationPostDTO> rotationPostDTOs) throws URISyntaxException {
     log.debug("REST request to save RotationPost : {}", rotationPostDTOs);
     if (rotationPostDTOs.isEmpty()) {
@@ -61,7 +53,6 @@ public class RotationPostResource {
   }
 
   @DeleteMapping("/rotation-posts/{postId}")
-  @Timed
   public ResponseEntity<Void> deleteRotationPost(@PathVariable Long postId) throws URISyntaxException {
     log.debug("REST request to delete RotationPost : {}", postId);
     rotationPostService.delete(postId);
@@ -77,7 +68,6 @@ public class RotationPostResource {
    * @return the ResponseEntity with status 200 (OK) and the list of rotationPosts in body
    */
   @GetMapping("/rotation-posts")
-  @Timed
   public List<RotationPostDTO> getAllRotationPosts() {
     log.debug("REST request to get all RotationPosts");
     return rotationPostService.findAll();
@@ -90,7 +80,6 @@ public class RotationPostResource {
    * @return the ResponseEntity with status 200 (OK) and with body the rotationPostDTO, or with status 404 (Not Found)
    */
   @GetMapping("/rotation-posts/{id}")
-  @Timed
   public ResponseEntity<?> getRotationPost(@PathVariable Long id) {
     log.debug("REST request to get RotationPost : {}", id);
 

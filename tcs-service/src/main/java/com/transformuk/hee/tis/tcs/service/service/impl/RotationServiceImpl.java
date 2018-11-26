@@ -87,12 +87,12 @@ public class RotationServiceImpl implements RotationService {
     @Transactional(readOnly = true)
     public RotationDTO findOne(Long id) {
         log.debug("Request to get Rotation : {}", id);
-        Rotation rotation = rotationRepository.findOne(id);
+      Rotation rotation = rotationRepository.findById(id).orElse(null);
         RotationDTO dto = rotationMapper.toDto(rotation);
         
         if (dto != null && dto.getProgrammeId() != null) {
             try {
-                setProgrammeInfo(dto, programmeRepository.getOne(dto.getProgrammeId()));
+              setProgrammeInfo(dto, programmeRepository.findById(dto.getProgrammeId()).orElse(null));
             }
             catch (EntityNotFoundException ene) {
                 log.info("Programme with id {} not found", dto.getProgrammeId());
@@ -142,7 +142,7 @@ public class RotationServiceImpl implements RotationService {
     @Override
     public void delete(Long id) {
         log.debug("Request to delete Rotation : {}", id);
-        rotationRepository.delete(id);
+      rotationRepository.deleteById(id);
     }
     
     private Page<RotationDTO> mapRotations(Page<Rotation> page) {

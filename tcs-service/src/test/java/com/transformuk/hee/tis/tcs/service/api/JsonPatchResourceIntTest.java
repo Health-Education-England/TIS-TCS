@@ -26,12 +26,8 @@ import java.util.List;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.hamcrest.Matchers.hasItem;
-import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
-import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
-import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.put;
-import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.content;
-import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
-import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.*;
+import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.*;
 
 /**
  * Test class for the JsonPatchResource REST controller.
@@ -214,7 +210,7 @@ public class JsonPatchResourceIntTest {
     int databaseSizeBeforeUpdate = jsonPatchRepository.findAll().size();
 
     // Update the jsonPatch
-    JsonPatch updateJsonPatch = jsonPatchRepository.findOne(jsonPatch.getId());
+    JsonPatch updateJsonPatch = jsonPatchRepository.findById(jsonPatch.getId()).orElse(null);
     updateJsonPatch
         .patchId(UPDATED_DEFAULT_PATCH_ID)
         .patch(UPDATED_DEFAULT_PATCH);

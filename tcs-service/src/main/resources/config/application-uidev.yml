@@ -14,17 +14,4 @@ flyway:
 logging:
     file: ${LOG_DIR:${HOME}}/tcs.log
 
-azure:
-    accountName: ${CLOUD_BLOB_ACCOUNT_NAME}
-    accountKey: ${CLOUD_BLOB_ACCOUNT_KEY}
-    containerName: ${CLOUD_BLOB_CONTAINER_NAME}
-
-kc:
-    realm: ${KC_REALM}
-    client:
-        id: ${KC_CLIENT_ID}
-    server:
-        url: ${KC_SERVER_URL}
-    username: ${KC_USERNAME}
-    password: ${KC_PASSWORD}
-    timeout: ${KC_TIMEOUT}
+application:

@@ -1,7 +1,5 @@
 package com.transformuk.hee.tis.tcs.service.api.validation;
 
-
-import com.transformuk.hee.tis.reference.client.ReferenceService;
 import com.transformuk.hee.tis.tcs.api.dto.CurriculumMembershipDTO;
 import com.transformuk.hee.tis.tcs.api.dto.ProgrammeMembershipDTO;
 import com.transformuk.hee.tis.tcs.service.model.ProgrammeMembership;
@@ -10,7 +8,6 @@ import com.transformuk.hee.tis.tcs.service.repository.PersonRepository;
 import com.transformuk.hee.tis.tcs.service.repository.ProgrammeRepository;
 import com.transformuk.hee.tis.tcs.service.service.RotationService;
 import org.apache.commons.collections4.CollectionUtils;
-import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 import org.springframework.validation.BeanPropertyBindingResult;
@@ -34,19 +31,16 @@ public class ProgrammeMembershipValidator {
   private PersonRepository personRepository;
   private ProgrammeRepository programmeRepository;
   private CurriculumRepository curriculumRepository;
-  private ReferenceService referenceService;
   private RotationService rotationService;
 
   @Autowired
   public ProgrammeMembershipValidator(PersonRepository personRepository,
                                       ProgrammeRepository programmeRepository,
                                       CurriculumRepository curriculumRepository,
-                                      ReferenceService referenceService,
                                       RotationService rotationService) {
     this.personRepository = personRepository;
     this.programmeRepository = programmeRepository;
     this.curriculumRepository = curriculumRepository;
-    this.referenceService = referenceService;
     this.rotationService = rotationService;
   }
 
@@ -83,7 +77,7 @@ public class ProgrammeMembershipValidator {
     if (programmeMembershipDTO.getPerson() == null || programmeMembershipDTO.getPerson().getId() == null) {
       requireFieldErrors(fieldErrors, "person");
     } else if (programmeMembershipDTO.getPerson() != null && programmeMembershipDTO.getPerson().getId() != null) {
-      if (!personRepository.exists(programmeMembershipDTO.getPerson().getId())) {
+      if (!personRepository.existsById(programmeMembershipDTO.getPerson().getId())) {
         fieldErrors.add(new FieldError(PROGRAMME_MEMBERSHIP_DTO_NAME, "person",
             String.format("Person with id %d does not exist", programmeMembershipDTO.getPerson().getId())));
       }
@@ -101,7 +95,7 @@ public class ProgrammeMembershipValidator {
     List<FieldError> fieldErrors = new ArrayList<>();
     Long programmeId = programmeMembershipDTO.getProgrammeId();
     if (programmeId != null) {
-      if (!programmeRepository.exists(programmeId)) {
+      if (!programmeRepository.existsById(programmeId)) {
         fieldErrors.add(new FieldError(PROGRAMME_MEMBERSHIP_DTO_NAME, "programmeId",
             String.format("Programme with id %s does not exist", programmeId)));
       }
@@ -120,7 +114,7 @@ public class ProgrammeMembershipValidator {
     Set<Long> curriculumIds = programmeMembershipDTO.getCurriculumMemberships().stream().map(CurriculumMembershipDTO::getCurriculumId).collect(Collectors.toSet());
     if (!CollectionUtils.isEmpty(curriculumIds)) {
       curriculumIds.stream().forEach(curriculumId -> {
-        if (!curriculumRepository.exists(curriculumId)) {
+        if (!curriculumRepository.existsById(curriculumId)) {
           fieldErrors.add(new FieldError(PROGRAMME_MEMBERSHIP_DTO_NAME, "curriculumId",
                   String.format("Curriculum with id %s does not exist", curriculumId)));
         } else{

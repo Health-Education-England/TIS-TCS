@@ -21,9 +21,7 @@ import org.springframework.transaction.annotation.Transactional;
 import java.util.ArrayList;
 import java.util.List;
 
-import static com.transformuk.hee.tis.tcs.service.service.impl.SpecificationFactory.containsLike;
-import static com.transformuk.hee.tis.tcs.service.service.impl.SpecificationFactory.in;
-import static com.transformuk.hee.tis.tcs.service.service.impl.SpecificationFactory.isEqual;
+import static com.transformuk.hee.tis.tcs.service.service.impl.SpecificationFactory.*;
 
 /**
  * Service Implementation for managing Curriculum.
@@ -62,7 +60,7 @@ public class CurriculumServiceImpl implements CurriculumService {
   public List<CurriculumDTO> save(List<CurriculumDTO> curriculumDTOs) {
     log.debug("Request to save Curriculum : {}", curriculumDTOs);
     List<Curriculum> curriculums = curriculumMapper.curriculumDTOsToCurricula(curriculumDTOs);
-    curriculums = curriculumRepository.save(curriculums);
+    curriculums = curriculumRepository.saveAll(curriculums);
     List<CurriculumDTO> result = curriculumMapper.curriculaToCurriculumDTOs(curriculums);
     return result;
   }
@@ -134,7 +132,7 @@ public class CurriculumServiceImpl implements CurriculumService {
   @Transactional(readOnly = true)
   public CurriculumDTO findOne(Long id) {
     log.debug("Request to get Curriculum : {}", id);
-    Curriculum curriculum = curriculumRepository.findOne(id);
+    Curriculum curriculum = curriculumRepository.findById(id).orElse(null);
     CurriculumDTO curriculumDTO = curriculumMapper.curriculumToCurriculumDTO(curriculum);
     return curriculumDTO;
   }
@@ -147,6 +145,6 @@ public class CurriculumServiceImpl implements CurriculumService {
   @Override
   public void delete(Long id) {
     log.debug("Request to delete Curriculum : {}", id);
-    curriculumRepository.delete(id);
+    curriculumRepository.deleteById(id);
   }
 }

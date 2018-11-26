@@ -1,6 +1,5 @@
 package com.transformuk.hee.tis.tcs.service.api;
 
-import com.transformuk.hee.tis.reference.client.impl.ReferenceServiceImpl;
 import com.transformuk.hee.tis.tcs.api.dto.ProgrammeMembershipDTO;
 import com.transformuk.hee.tis.tcs.api.enumeration.ProgrammeMembershipType;
 import com.transformuk.hee.tis.tcs.api.enumeration.Status;
@@ -14,12 +13,10 @@ import com.transformuk.hee.tis.tcs.service.service.RotationService;
 import com.transformuk.hee.tis.tcs.service.service.mapper.PersonMapper;
 import com.transformuk.hee.tis.tcs.service.service.mapper.ProgrammeMembershipMapper;
 import org.assertj.core.util.Lists;
-import org.assertj.core.util.Maps;
 import org.assertj.core.util.Sets;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
-import org.mockito.Mock;
 import org.mockito.MockitoAnnotations;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
@@ -36,19 +33,12 @@ import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.time.ZoneId;
 import java.util.List;
-import java.util.Map;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.hamcrest.Matchers.containsInAnyOrder;
 import static org.hamcrest.Matchers.hasItem;
-import static org.mockito.BDDMockito.given;
-import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.delete;
-import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
-import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
-import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.put;
-import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.content;
-import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
-import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.*;
+import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.*;
 
 /**
  * Test class for the ProgrammeMembershipResource REST controller.
@@ -91,8 +81,6 @@ public class ProgrammeMembershipResourceIntTest {
 
   private static final Long NOT_EXISTS_PROGRAMME_ID = 10101010l;
   private static final Long NOT_EXISTS_CURRICULUM_ID = 20202020l;
-
-  private static final String NOT_EXISTS_ROTATION = "XYZ";
 
   private static final LocalDateTime DEFAULT_AMENDED_DATE = LocalDateTime.now(ZoneId.systemDefault());
 
@@ -137,9 +125,6 @@ public class ProgrammeMembershipResourceIntTest {
   @Autowired  
   private PersonMapper personMapper;
 
-  @Mock
-  private ReferenceServiceImpl referenceService;
-
   private Person person;
 
   private Programme programme;
@@ -174,30 +159,24 @@ public class ProgrammeMembershipResourceIntTest {
 
   /**
    * Create Person entity
-   *
-   * @return
    */
   public static Person createPersonEntity() {
-    Person person = new Person()
+    return new Person()
         .intrepidId(DEFAULT_INTREPID_ID);
-    return person;
   }
 
   /**
    * Create Rotation entity
-   *
-   * @return
    */
   public static Rotation createRotationEntity() {
-    Rotation rotation =new Rotation().name(DEFAULT_ROTATION).status(Status.CURRENT);
-    return rotation;
+    return new Rotation().name(DEFAULT_ROTATION).status(Status.CURRENT);
   }
 
 
   @Before
   public void setup() {
     MockitoAnnotations.initMocks(this);
-    programmeMembershipValidator = new ProgrammeMembershipValidator(personRepository, programmeRepository, curriculumRepository, referenceService, rotationService);
+    programmeMembershipValidator = new ProgrammeMembershipValidator(personRepository, programmeRepository, curriculumRepository, rotationService);
     ProgrammeMembershipResource programmeMembershipResource = new ProgrammeMembershipResource(programmeMembershipService,
         programmeMembershipValidator);
     this.restProgrammeMembershipMockMvc = MockMvcBuilders.standaloneSetup(programmeMembershipResource)
@@ -484,7 +463,7 @@ public class ProgrammeMembershipResourceIntTest {
         .andExpect(status().isOk())
         .andExpect(content().contentType(MediaType.APPLICATION_JSON_UTF8_VALUE))
         .andExpect(jsonPath("$.curriculumMemberships[*].id").value(hasItem(programmeMembership.getId().intValue())))
-        .andExpect(jsonPath("$.curriculumMemberships[*].intrepidId").value(hasItem(DEFAULT_INTREPID_ID.toString())))
+      .andExpect(jsonPath("$.curriculumMemberships[*].intrepidId").value(hasItem(DEFAULT_INTREPID_ID)))
         .andExpect(jsonPath("$.programmeMembershipType").value(DEFAULT_PROGRAMME_MEMBERSHIP_TYPE.toString().toUpperCase()))
         .andExpect(jsonPath("$.rotation.name").value(rotation.getName()))
         .andExpect(jsonPath("$.curriculumMemberships[*].curriculumStartDate").value(hasItem(DEFAULT_CURRICULUM_START_DATE.toString())))
@@ -492,7 +471,7 @@ public class ProgrammeMembershipResourceIntTest {
         .andExpect(jsonPath("$.curriculumMemberships[*].periodOfGrace").value(hasItem(DEFAULT_PERIOD_OF_GRACE)))
         .andExpect(jsonPath("$.programmeStartDate").value(DEFAULT_PROGRAMME_START_DATE.toString()))
         .andExpect(jsonPath("$.programmeEndDate").value(DEFAULT_PROGRAMME_END_DATE.toString()))
-        .andExpect(jsonPath("$.leavingDestination").value(DEFAULT_LEAVING_DESTINATION.toString()))
+      .andExpect(jsonPath("$.leavingDestination").value(DEFAULT_LEAVING_DESTINATION))
         .andExpect(jsonPath("$.curriculumMemberships[*].amendedDate").isNotEmpty());
   }
 
@@ -523,7 +502,7 @@ public class ProgrammeMembershipResourceIntTest {
     int databaseSizeBeforeUpdate = programmeMembershipRepository.findAll().size();
 
     // Update the programmeMembership
-    ProgrammeMembership updatedProgrammeMembership = programmeMembershipRepository.findOne(programmeMembership.getId());
+    ProgrammeMembership updatedProgrammeMembership = programmeMembershipRepository.findById(programmeMembership.getId()).orElse(null);
     updatedProgrammeMembership
         .intrepidId(UPDATED_INTREPID_ID)
         .programmeMembershipType(UPDATED_PROGRAMME_MEMBERSHIP_TYPE)

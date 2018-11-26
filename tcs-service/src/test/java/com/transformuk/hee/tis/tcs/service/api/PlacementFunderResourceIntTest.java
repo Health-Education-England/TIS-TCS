@@ -26,13 +26,8 @@ import java.util.List;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.hamcrest.Matchers.hasItem;
-import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.delete;
-import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
-import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
-import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.put;
-import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.content;
-import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
-import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.*;
+import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.*;
 
 /**
  * Test class for the PlacementFunderResource REST controller.
@@ -153,8 +148,8 @@ public class PlacementFunderResourceIntTest {
         .andExpect(status().isOk())
         .andExpect(content().contentType(MediaType.APPLICATION_JSON_UTF8_VALUE))
         .andExpect(jsonPath("$.[*].id").value(hasItem(placementFunder.getId().intValue())))
-        .andExpect(jsonPath("$.[*].localOffice").value(hasItem(DEFAULT_LOCAL_OFFICE.toString())))
-        .andExpect(jsonPath("$.[*].trust").value(hasItem(DEFAULT_TRUST.toString())));
+      .andExpect(jsonPath("$.[*].localOffice").value(hasItem(DEFAULT_LOCAL_OFFICE)))
+      .andExpect(jsonPath("$.[*].trust").value(hasItem(DEFAULT_TRUST)));
   }
 
   @Test
@@ -168,8 +163,8 @@ public class PlacementFunderResourceIntTest {
         .andExpect(status().isOk())
         .andExpect(content().contentType(MediaType.APPLICATION_JSON_UTF8_VALUE))
         .andExpect(jsonPath("$.id").value(placementFunder.getId().intValue()))
-        .andExpect(jsonPath("$.localOffice").value(DEFAULT_LOCAL_OFFICE.toString()))
-        .andExpect(jsonPath("$.trust").value(DEFAULT_TRUST.toString()));
+      .andExpect(jsonPath("$.localOffice").value(DEFAULT_LOCAL_OFFICE))
+      .andExpect(jsonPath("$.trust").value(DEFAULT_TRUST));
   }
 
   @Test
@@ -188,7 +183,7 @@ public class PlacementFunderResourceIntTest {
     int databaseSizeBeforeUpdate = placementFunderRepository.findAll().size();
 
     // Update the placementFunder
-    PlacementFunder updatedPlacementFunder = placementFunderRepository.findOne(placementFunder.getId());
+    PlacementFunder updatedPlacementFunder = placementFunderRepository.findById(placementFunder.getId()).orElse(null);
     updatedPlacementFunder
         .localOffice(UPDATED_LOCAL_OFFICE)
         .trust(UPDATED_TRUST);

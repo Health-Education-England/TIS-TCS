@@ -60,7 +60,7 @@ public class QualificationServiceImpl implements QualificationService {
   public List<QualificationDTO> save(List<QualificationDTO> qualificationDTOs) {
     log.debug("Request to save Qualifications : {}", qualificationDTOs);
     List<Qualification> qualifications = qualificationMapper.toEntities(qualificationDTOs);
-    qualifications = qualificationRepository.save(qualifications);
+    qualifications = qualificationRepository.saveAll(qualifications);
     return qualificationMapper.toDTOs(qualifications);
   }
 
@@ -88,7 +88,7 @@ public class QualificationServiceImpl implements QualificationService {
   @Transactional(readOnly = true)
   public QualificationDTO findOne(Long id) {
     log.debug("Request to get Qualification : {}", id);
-    Qualification qualification = qualificationRepository.findOne(id);
+    Qualification qualification = qualificationRepository.findById(id).orElse(null);
     return qualificationMapper.toDto(qualification);
   }
 
@@ -100,7 +100,7 @@ public class QualificationServiceImpl implements QualificationService {
   @Override
   public void delete(Long id) {
     log.debug("Request to delete Qualification : {}", id);
-    qualificationRepository.delete(id);
+    qualificationRepository.deleteById(id);
   }
 
   @Transactional(readOnly = true)

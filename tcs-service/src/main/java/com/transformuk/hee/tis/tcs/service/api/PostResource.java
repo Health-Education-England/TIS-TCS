@@ -1,12 +1,7 @@
 package com.transformuk.hee.tis.tcs.service.api;
 
-import com.codahale.metrics.annotation.Timed;
 import com.google.common.collect.Lists;
-import com.transformuk.hee.tis.tcs.api.dto.PlacementSummaryDTO;
-import com.transformuk.hee.tis.tcs.api.dto.PlacementViewDTO;
-import com.transformuk.hee.tis.tcs.api.dto.PostDTO;
-import com.transformuk.hee.tis.tcs.api.dto.PostEsrDTO;
-import com.transformuk.hee.tis.tcs.api.dto.PostViewDTO;
+import com.transformuk.hee.tis.tcs.api.dto.*;
 import com.transformuk.hee.tis.tcs.api.dto.validation.Create;
 import com.transformuk.hee.tis.tcs.api.dto.validation.Update;
 import com.transformuk.hee.tis.tcs.api.enumeration.PostGradeType;
@@ -15,11 +10,7 @@ import com.transformuk.hee.tis.tcs.api.enumeration.PostSuffix;
 import com.transformuk.hee.tis.tcs.api.enumeration.Status;
 import com.transformuk.hee.tis.tcs.service.api.decorator.PlacementSummaryDecorator;
 import com.transformuk.hee.tis.tcs.service.api.decorator.PlacementViewDecorator;
-import com.transformuk.hee.tis.tcs.service.api.util.BasicPage;
-import com.transformuk.hee.tis.tcs.service.api.util.ColumnFilterUtil;
-import com.transformuk.hee.tis.tcs.service.api.util.HeaderUtil;
-import com.transformuk.hee.tis.tcs.service.api.util.PaginationUtil;
-import com.transformuk.hee.tis.tcs.service.api.util.UrlDecoderUtil;
+import com.transformuk.hee.tis.tcs.service.api.util.*;
 import com.transformuk.hee.tis.tcs.service.api.validation.PostValidator;
 import com.transformuk.hee.tis.tcs.service.model.ColumnFilter;
 import com.transformuk.hee.tis.tcs.service.model.PlacementView;
@@ -29,10 +20,6 @@ import com.transformuk.hee.tis.tcs.service.service.PostService;
 import com.transformuk.hee.tis.tcs.service.service.mapper.PlacementViewMapper;
 import io.github.jhipster.web.util.ResponseUtil;
 import io.jsonwebtoken.lang.Collections;
-import io.swagger.annotations.ApiOperation;
-import io.swagger.annotations.ApiParam;
-import io.swagger.annotations.ApiResponse;
-import io.swagger.annotations.ApiResponses;
 import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -44,16 +31,7 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.MethodArgumentNotValidException;
-import org.springframework.web.bind.annotation.DeleteMapping;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.PatchMapping;
-import org.springframework.web.bind.annotation.PathVariable;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.PutMapping;
-import org.springframework.web.bind.annotation.RequestBody;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RequestParam;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
 
 import javax.validation.Valid;
 import java.io.IOException;
@@ -110,7 +88,6 @@ public class PostResource {
    * @throws URISyntaxException if the Location URI syntax is incorrect
    */
   @PostMapping("/posts")
-  @Timed
   @PreAuthorize("hasAuthority('post:add:modify')")
   public ResponseEntity<PostDTO> createPost(@RequestBody @Validated(Create.class) PostDTO postDTO) throws URISyntaxException,
       MethodArgumentNotValidException {
@@ -135,7 +112,6 @@ public class PostResource {
    * @throws URISyntaxException if the Location URI syntax is incorrect
    */
   @PutMapping("/posts")
-  @Timed
   @PreAuthorize("hasAuthority('post:add:modify')")
   public ResponseEntity<PostDTO> updatePost(@RequestBody @Validated(Update.class) PostDTO postDTO) throws URISyntaxException,
       MethodArgumentNotValidException {
@@ -159,15 +135,11 @@ public class PostResource {
    * @return the ResponseEntity with status 200 (OK) and the list of posts in body
    */
   @GetMapping("/posts")
-  @Timed
   @PreAuthorize("hasAuthority('post:view')")
   public ResponseEntity<List<PostViewDTO>> getAllPosts(
-      @ApiParam Pageable pageable,
-      @ApiParam(value = "any wildcard string to be searched")
-      @RequestParam(value = "searchQuery", required = false) String searchQuery,
-      @ApiParam(value = "json object by column name and value. (Eg: columnFilters={ \"owner\": [\"dean1\", \"dean2\"]," +
-          " \"sites.siteId\":[\"123\"],\"trainingBodyId\":[\"11\"],\"grades.gradeId\":[\"11\"],\"specialties.specialty.name\":[\"Test Specialty\"]}\"")
-      @RequestParam(value = "columnFilters", required = false) String columnFilterJson) throws IOException {
+    Pageable pageable,
+    @RequestParam(value = "searchQuery", required = false) String searchQuery,
+    @RequestParam(value = "columnFilters", required = false) String columnFilterJson) throws IOException {
     log.debug("REST request to get a page of Posts");
     searchQuery = sanitize(searchQuery);
     List<Class> filterEnumList = Lists.newArrayList(Status.class, PostSuffix.class,
@@ -192,14 +164,11 @@ public class PostResource {
    * @throws IOException
    */
   @GetMapping("/findByNationalPostNumber")
-  @Timed
   @PreAuthorize("hasAuthority('post:view')")
   public ResponseEntity<List<PostViewDTO>> findByNationalPostNumber(
-      @ApiParam Pageable pageable,
-      @ApiParam(value = "any wildcard string to be searched")
-      @RequestParam(value = "searchQuery") String searchQuery,
-      @ApiParam(value = "json object by column name and value. (Eg: columnFilters={ \"status\": [\"CURRENT\"] }\"")
-      @RequestParam(value = "columnFilters", required = false) String columnFilterJson) throws IOException {
+    Pageable pageable,
+    @RequestParam(value = "searchQuery") String searchQuery,
+    @RequestParam(value = "columnFilters", required = false) String columnFilterJson) throws IOException {
     log.debug("REST request to get a page of Posts");
     searchQuery = sanitize(searchQuery);
     List<Class> filterEnumList = Lists.newArrayList(Status.class);
@@ -211,11 +180,10 @@ public class PostResource {
   }
 
   @PostMapping("/posts/filter/deanery")
-  @Timed
   @PreAuthorize("hasAuthority('post:view')")
   public ResponseEntity<List<PostEsrDTO>> filterPostsByDeaneryNumbers(
-      @ApiParam Pageable pageable,
-      @RequestBody List<String> deaneryNumbers) {
+    Pageable pageable,
+    @RequestBody List<String> deaneryNumbers) {
     log.debug("REST request to filter a page of Posts by deanery numbers");
     Page<PostEsrDTO> page = postService.findPostsForEsrByDeaneryNumbers(deaneryNumbers, pageable);
     List<PostEsrDTO> resultDTOs = page.getContent();
@@ -230,9 +198,8 @@ public class PostResource {
    * @return the ResponseEntity with status 200 (OK) and with body the postDTO, or with status 404 (Not Found)
    */
   @GetMapping("/posts/in/{nationalPostNumbers}")
-  @Timed
   @PreAuthorize("hasAuthority('post:view')")
-  public ResponseEntity<List<PostDTO>> getPostsIn(@ApiParam(name = "nationalPostNumbers", allowMultiple = true) @PathVariable("nationalPostNumbers") List<String> nationalPostNumbers) {
+  public ResponseEntity<List<PostDTO>> getPostsIn(@PathVariable("nationalPostNumbers") List<String> nationalPostNumbers) {
     log.debug("REST request to get Posts : {}", nationalPostNumbers);
     if (!nationalPostNumbers.isEmpty()) {
       UrlDecoderUtil.decode(nationalPostNumbers);
@@ -249,7 +216,6 @@ public class PostResource {
    * @return the ResponseEntity with status 200 (OK) and with body the postDTO, or with status 404 (Not Found)
    */
   @GetMapping("/posts/{id}")
-  @Timed
   @PreAuthorize("hasAuthority('post:view')")
   public ResponseEntity<PostDTO> getPost(@PathVariable Long id) {
     log.debug("REST request to get Post : {}", id);
@@ -267,7 +233,6 @@ public class PostResource {
    * @return the ResponseEntity with status 200 (OK) and with body the postDTO, or with status 404 (Not Found)
    */
   @GetMapping("/posts/{id}/placements")
-  @Timed
   @PreAuthorize("hasAuthority('post:view')")
   public ResponseEntity<List<PlacementViewDTO>> getPostPlacements(@PathVariable Long id) {
     log.debug("REST request to get Post Placements: {}", id);
@@ -286,7 +251,6 @@ public class PostResource {
    * @return the ResponseEntity with status 200 (OK) and with body the postDTO, or with status 404 (Not Found)
    */
   @GetMapping("/posts/{postId}/placements/new")
-  @Timed
   @PreAuthorize("hasAuthority('post:view')")
   public ResponseEntity<List<PlacementSummaryDTO>> getPlacementsForPosts(@PathVariable Long postId) {
     log.debug("REST request to get Post Placements: {}", postId);
@@ -305,7 +269,6 @@ public class PostResource {
    * @return the ResponseEntity with status 200 (OK)
    */
   @DeleteMapping("/posts/{id}")
-  @Timed
   @PreAuthorize("hasAuthority('tcs:delete:entities')")
   public ResponseEntity<Void> deletePost(@PathVariable Long id) {
     log.debug("REST request to delete Post : {}", id);
@@ -324,7 +287,6 @@ public class PostResource {
    * @throws URISyntaxException if the Location URI syntax is incorrect
    */
   @PostMapping("/bulk-posts")
-  @Timed
   @PreAuthorize("hasAuthority('post:bulk:add:modify')")
   public ResponseEntity<List<PostDTO>> bulkCreatePosts(@Valid @RequestBody List<PostDTO> postDTOS) {
     log.debug("REST request to bulk save Post : {}", postDTOS);
@@ -354,7 +316,6 @@ public class PostResource {
    * @throws URISyntaxException if the Location URI syntax is incorrect
    */
   @PutMapping("/bulk-posts")
-  @Timed
   @PreAuthorize("hasAuthority('post:bulk:add:modify')")
   public ResponseEntity<List<PostDTO>> bulkUpdatePosts(@Valid @RequestBody List<PostDTO> postDTOS) {
     log.debug("REST request to bulk update Posts : {}", postDTOS);
@@ -382,12 +343,7 @@ public class PostResource {
    * @return the ResponseEntity with status 200 (OK)
    * @throws URISyntaxException if the Location URI syntax is incorrect
    */
-  @ApiOperation(value = "Run the stored procedure to build the post view",
-      response = ResponseEntity.class, responseContainer = "void")
-  @ApiResponses(value = {
-      @ApiResponse(code = 200, message = "Person list", response = ResponseEntity.class)})
   @PostMapping("/posts/build-post-view")
-  @Timed
   @PreAuthorize("hasAuthority('post:bulk:add:modify')")
   public ResponseEntity<Void> buildPersonsOwnership() {
     postService.buildPostView();
@@ -404,7 +360,6 @@ public class PostResource {
    * @throws URISyntaxException if the Location URI syntax is incorrect
    */
   @PatchMapping("/bulk-patch-new-old-posts")
-  @Timed
   @PreAuthorize("hasAuthority('tcs:add:modify:entities')")
   public ResponseEntity<List<PostDTO>> bulkPatchNewOldPosts(@Valid @RequestBody List<PostDTO> postDTOS) {
     log.debug("REST request to bulk link old/new Posts : {}", postDTOS);
@@ -443,7 +398,6 @@ public class PostResource {
    * @throws URISyntaxException if the Location URI syntax is incorrect
    */
   @PatchMapping("/bulk-patch-post-sites")
-  @Timed
   @PreAuthorize("hasAuthority('tcs:add:modify:entities')")
   public ResponseEntity<List<PostDTO>> bulkPatchPostSites(@Valid @RequestBody List<PostDTO> postDTOS) {
     log.debug("REST request to bulk link old/new Posts : {}", postDTOS);
@@ -482,7 +436,6 @@ public class PostResource {
    * @throws URISyntaxException if the Location URI syntax is incorrect
    */
   @PatchMapping("/bulk-patch-post-grades")
-  @Timed
   @PreAuthorize("hasAuthority('tcs:add:modify:entities')")
   public ResponseEntity<List<PostDTO>> bulkPatchPostGrades(@Valid @RequestBody List<PostDTO> postRelationshipsDto) {
     log.debug("REST request to bulk link grades to Posts : {}", postRelationshipsDto);
@@ -516,7 +469,6 @@ public class PostResource {
    * @throws URISyntaxException if the Location URI syntax is incorrect
    */
   @PatchMapping("/bulk-patch-post-programmes")
-  @Timed
   @PreAuthorize("hasAuthority('tcs:add:modify:entities')")
   public ResponseEntity<List<PostDTO>> bulkPatchPostProgrammes(@Valid @RequestBody List<PostDTO> postRelationshipsDto) {
     log.debug("REST request to bulk link programmes to Posts : {}", postRelationshipsDto);
@@ -550,7 +502,6 @@ public class PostResource {
    * @throws URISyntaxException if the Location URI syntax is incorrect
    */
   @PatchMapping("/bulk-patch-post-specialties")
-  @Timed
   @PreAuthorize("hasAuthority('tcs:add:modify:entities')")
   public ResponseEntity<List<PostDTO>> bulkPatchPostSpecialties(@Valid @RequestBody List<PostDTO> postRelationshipsDto) {
     log.debug("REST request to bulk link specialties to Posts : {}", postRelationshipsDto);
@@ -584,7 +535,6 @@ public class PostResource {
    * @throws URISyntaxException if the Location URI syntax is incorrect
    */
   @PatchMapping("/bulk-patch-post-placements")
-  @Timed
   @PreAuthorize("hasAuthority('tcs:add:modify:entities')")
   public ResponseEntity<List<PostDTO>> bulkPatchPostPlacements(@Valid @RequestBody List<PostDTO> postRelationshipsDto) {
     log.debug("REST request to bulk link placements to Posts : {}", postRelationshipsDto);

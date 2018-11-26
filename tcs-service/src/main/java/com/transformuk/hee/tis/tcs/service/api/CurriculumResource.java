@@ -1,6 +1,5 @@
 package com.transformuk.hee.tis.tcs.service.api;
 
-import com.codahale.metrics.annotation.Timed;
 import com.google.common.collect.Lists;
 import com.transformuk.hee.tis.tcs.api.dto.CurriculumDTO;
 import com.transformuk.hee.tis.tcs.api.dto.validation.Create;
@@ -16,10 +15,6 @@ import com.transformuk.hee.tis.tcs.service.model.ColumnFilter;
 import com.transformuk.hee.tis.tcs.service.service.CurriculumService;
 import io.github.jhipster.web.util.ResponseUtil;
 import io.jsonwebtoken.lang.Collections;
-import io.swagger.annotations.ApiOperation;
-import io.swagger.annotations.ApiParam;
-import io.swagger.annotations.ApiResponse;
-import io.swagger.annotations.ApiResponses;
 import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -32,15 +27,7 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.MethodArgumentNotValidException;
-import org.springframework.web.bind.annotation.DeleteMapping;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.PathVariable;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.PutMapping;
-import org.springframework.web.bind.annotation.RequestBody;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RequestParam;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
 
 import javax.validation.Valid;
 import java.io.IOException;
@@ -78,7 +65,6 @@ public class CurriculumResource {
    * @throws URISyntaxException if the Location URI syntax is incorrect
    */
   @PostMapping("/curricula")
-  @Timed
   @PreAuthorize("hasAuthority('curriculum:add:modify')")
   public ResponseEntity<CurriculumDTO> createCurriculum(@RequestBody @Validated(Create.class) CurriculumDTO curriculumDTO) throws URISyntaxException, MethodArgumentNotValidException {
     log.debug("REST request to save Curriculum : {}", curriculumDTO);
@@ -101,12 +87,10 @@ public class CurriculumResource {
    * @return the ResponseEntity with status 200 (OK) and with body the updated curriculumDTO,
    * or with status 400 (Bad Request) if the curriculumDTO is not valid,
    * or with status 500 (Internal Server Error) if the curriculumDTO couldnt be updated
-   * @throws URISyntaxException if the Location URI syntax is incorrect
    */
   @PutMapping("/curricula")
-  @Timed
   @PreAuthorize("hasAuthority('curriculum:add:modify')")
-  public ResponseEntity<CurriculumDTO> updateCurriculum(@RequestBody @Validated(Update.class) CurriculumDTO curriculumDTO) throws URISyntaxException, MethodArgumentNotValidException {
+  public ResponseEntity<CurriculumDTO> updateCurriculum(@RequestBody @Validated(Update.class) CurriculumDTO curriculumDTO) throws MethodArgumentNotValidException {
     log.debug("REST request to update Curriculum : {}", curriculumDTO);
     curriculumValidator.validate(curriculumDTO);
     try {
@@ -120,36 +104,18 @@ public class CurriculumResource {
     }
   }
 
-  @ApiOperation(value = "Lists Curriculum data",
-      notes = "Returns a list of Curriculum with support for pagination, sorting, smart search and column filters")
   /**
    * GET  /curricula : get all the curricula.
    *
    * @param pageable the pagination information
    * @return the ResponseEntity with status 200 (OK) and the list of curricula in body
-   * @throws URISyntaxException if there is an error to generate the pagination HTTP headers
    */
   @GetMapping("/curricula")
-  @Timed
   @PreAuthorize("hasAuthority('curriculum:view')")
   public ResponseEntity<List<CurriculumDTO>> getAllCurricula(
-      @ApiParam Pageable pageable,
-      @ApiParam(value = "any wildcard string to be searched")
-      @RequestParam(value = "searchQuery", required = false) String searchQuery,
-      @ApiParam(value = "columns by which to filter by in a string representation of the json. \n\n" +
-          "Eg: \n\n" +
-          "```" +
-          "columnFilters={" +
-          "\"name\": [\"Orthodontics\", \"Core Medical Training\"]," +
-          "\"curriculumSubType\":[\"ACL\"] }\"" +
-          "```\n\n" +
-          "The following fields are currently supported: \n" +
-          "+ id (Number) \n" +
-          "+ name (String) \n" +
-          "+ curriculumSubType Please see endpoint: /api/curriculum-sub-types \n\n" +
-          "+ assessmentType (ARCP|RITA|ACADEMIC) \n" +
-          "+ doesThisCurriculumLeadToCct (Boolean) \n")
-      @RequestParam(value = "columnFilters", required = false) String columnFilterJson) throws IOException {
+    Pageable pageable,
+    @RequestParam(value = "searchQuery", required = false) String searchQuery,
+    @RequestParam(value = "columnFilters", required = false) String columnFilterJson) throws IOException {
 
     log.debug("REST request to get a page of Curricula");
 
@@ -167,36 +133,18 @@ public class CurriculumResource {
   }
 
 
-  @ApiOperation(value = "Lists Current Curriculum data",
-      notes = "Returns a list of Curriculum in the CURRENT STATUS with support for pagination, sorting, smart search and column filters")
   /**
    * GET  /current/curricula : get all the current curricula.
    *
    * @param pageable the pagination information
    * @return the ResponseEntity with status 200 (OK) and the list of curricula in body
-   * @throws URISyntaxException if there is an error to generate the pagination HTTP headers
    */
   @GetMapping("/current/curricula")
-  @Timed
   @PreAuthorize("hasAuthority('curriculum:view')")
   public ResponseEntity<List<CurriculumDTO>> getAllCurrentCurricula(
-      @ApiParam Pageable pageable,
-      @ApiParam(value = "any wildcard string to be searched")
-      @RequestParam(value = "searchQuery", required = false) String searchQuery,
-      @ApiParam(value = "columns by which to filter by in a string representation of the json. \n\n" +
-          "Eg: \n\n" +
-          "```" +
-          "columnFilters={" +
-          "\"name\": [\"Orthodontics\", \"Core Medical Training\"]," +
-          "\"curriculumSubType\":[\"ACL\"] }\"" +
-          "```\n\n" +
-          "The following fields are currently supported: \n" +
-          "+ id (Number) \n" +
-          "+ name (String) \n" +
-          "+ curriculumSubType Please see endpoint: /api/curriculum-sub-types \n\n" +
-          "+ assessmentType (ARCP|RITA|ACADEMIC) \n" +
-          "+ doesThisCurriculumLeadToCct (Boolean) \n")
-      @RequestParam(value = "columnFilters", required = false) String columnFilterJson) throws IOException {
+    Pageable pageable,
+    @RequestParam(value = "searchQuery", required = false) String searchQuery,
+    @RequestParam(value = "columnFilters", required = false) String columnFilterJson) throws IOException {
 
     log.debug("REST request to get a page of current Curricula");
 
@@ -221,7 +169,6 @@ public class CurriculumResource {
    * @return the ResponseEntity with status 200 (OK) and with body the curriculumDTO, or with status 404 (Not Found)
    */
   @GetMapping("/curricula/{id}")
-  @Timed
   @PreAuthorize("hasAuthority('curriculum:view')")
   public ResponseEntity<CurriculumDTO> getCurriculum(@PathVariable Long id) {
     log.debug("REST request to get Curriculum : {}", id);
@@ -236,7 +183,6 @@ public class CurriculumResource {
    * @return the ResponseEntity with status 200 (OK)
    */
   @DeleteMapping("/curricula/{id}")
-  @Timed
   @PreAuthorize("hasAuthority('tcs:delete:entities')")
   public ResponseEntity<Void> deleteCurriculum(@PathVariable Long id) {
     log.debug("REST request to delete Curriculum : {}", id);
@@ -250,24 +196,22 @@ public class CurriculumResource {
    *
    * @param curriculumDTOS List of the curriculumDTOS to create
    * @return the ResponseEntity with status 200 (Created) and with body the new curriculumDTOS, or with status 400 (Bad Request) if the EqualityAndDiversity has already an ID
-   * @throws URISyntaxException if the Location URI syntax is incorrect
    */
   @PostMapping("/bulk-curricula")
-  @Timed
   @PreAuthorize("hasAuthority('curriculum:bulk:add:modify')")
-  public ResponseEntity<List<CurriculumDTO>> bulkCreateCurricula(@Valid @RequestBody List<CurriculumDTO> curriculumDTOS) throws URISyntaxException {
+  public ResponseEntity<List<CurriculumDTO>> bulkCreateCurricula(@Valid @RequestBody List<CurriculumDTO> curriculumDTOS) {
     log.debug("REST request to bulk save Curricula : {}", curriculumDTOS);
     if (!Collections.isEmpty(curriculumDTOS)) {
       List<Long> entityIds = curriculumDTOS.stream()
           .filter(c -> c.getId() != null)
-          .map(c -> c.getId())
+        .map(CurriculumDTO::getId)
           .collect(Collectors.toList());
       if (!Collections.isEmpty(entityIds)) {
         return ResponseEntity.badRequest().headers(HeaderUtil.createFailureAlert(StringUtils.join(entityIds, ","), "ids.exist", "A new Curricula cannot already have an ID")).body(null);
       }
     }
     List<CurriculumDTO> result = curriculumService.save(curriculumDTOS);
-    List<Long> ids = result.stream().map(c -> c.getId()).collect(Collectors.toList());
+    List<Long> ids = result.stream().map(CurriculumDTO::getId).collect(Collectors.toList());
     return ResponseEntity.ok()
         .headers(HeaderUtil.createEntityCreationAlert(ENTITY_NAME, StringUtils.join(ids, ",")))
         .body(result);
@@ -280,12 +224,10 @@ public class CurriculumResource {
    * @return the ResponseEntity with status 200 (OK) and with body the updated curriculumDTOS,
    * or with status 400 (Bad Request) if the curriculumDTOS is not valid,
    * or with status 500 (Internal Server Error) if the curriculumDTOS couldn't be updated
-   * @throws URISyntaxException if the Location URI syntax is incorrect
    */
   @PutMapping("/bulk-curricula")
-  @Timed
   @PreAuthorize("hasAuthority('curriculum:add:modify')")
-  public ResponseEntity<List<CurriculumDTO>> bulkUpdateCurricula(@Valid @RequestBody List<CurriculumDTO> curriculumDTOS) throws URISyntaxException {
+  public ResponseEntity<List<CurriculumDTO>> bulkUpdateCurricula(@Valid @RequestBody List<CurriculumDTO> curriculumDTOS) {
     log.debug("REST request to bulk update Curricula : {}", curriculumDTOS);
     if (Collections.isEmpty(curriculumDTOS)) {
       return ResponseEntity.badRequest().headers(HeaderUtil.createFailureAlert(ENTITY_NAME, "request.body.empty",
@@ -299,7 +241,7 @@ public class CurriculumResource {
     }
 
     List<CurriculumDTO> results = curriculumService.save(curriculumDTOS);
-    List<Long> ids = results.stream().map(r -> r.getId()).collect(Collectors.toList());
+    List<Long> ids = results.stream().map(CurriculumDTO::getId).collect(Collectors.toList());
     return ResponseEntity.ok()
         .headers(HeaderUtil.createEntityUpdateAlert(ENTITY_NAME, StringUtils.join(ids, ",")))
         .body(results);

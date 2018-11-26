@@ -28,12 +28,10 @@ import org.springframework.test.web.servlet.setup.MockMvcBuilders;
 import org.springframework.transaction.annotation.Transactional;
 
 import javax.persistence.EntityManager;
-import javax.sound.midi.SysexMessage;
 import java.util.List;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.hamcrest.Matchers.hasItem;
-import static org.hamcrest.Matchers.hasItems;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.*;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.*;
 
@@ -190,7 +188,7 @@ public class RotationResourceIntTest {
                 .andExpect(jsonPath("$.[*].programmeId").value(hasItem(programme.getId().intValue())))
                 .andExpect(jsonPath("$.[*].programmeName").value(PROGRAMME_NAME))
                 .andExpect(jsonPath("$.[*].programmeNumber").value(PROGRAMME_NUMBER))
-                .andExpect(jsonPath("$.[*].name").value(hasItem(DEFAULT_NAME.toString())))
+          .andExpect(jsonPath("$.[*].name").value(hasItem(DEFAULT_NAME)))
                 .andExpect(jsonPath("$.[*].status").value(hasItem(DEFAULT_STATUS.toString().toUpperCase())));
     }
     
@@ -213,7 +211,7 @@ public class RotationResourceIntTest {
                 .andExpect(jsonPath("$.[*].programmeId").value(hasItem(programme.getId().intValue())))
                 .andExpect(jsonPath("$.[*].programmeName").value(PROGRAMME_NAME))
                 .andExpect(jsonPath("$.[*].programmeNumber").value(PROGRAMME_NUMBER))
-                .andExpect(jsonPath("$.[*].name").value(hasItem(DEFAULT_NAME.toString())))
+          .andExpect(jsonPath("$.[*].name").value(hasItem(DEFAULT_NAME)))
                 .andExpect(jsonPath("$.[*].status").value(hasItem(expectedStatus.toString().toUpperCase())));
     }
     
@@ -241,7 +239,7 @@ public class RotationResourceIntTest {
                 .andExpect(jsonPath("$.[*].programmeId").value(hasItem((int)progId)))
                 .andExpect(jsonPath("$.[*].programmeName").value(PROGRAMME_NAME))
                 .andExpect(jsonPath("$.[*].programmeNumber").value(PROGRAMME_NUMBER))
-                .andExpect(jsonPath("$.[*].name").value(hasItem(DEFAULT_NAME.toString())))
+          .andExpect(jsonPath("$.[*].name").value(hasItem(DEFAULT_NAME)))
                 .andExpect(jsonPath("$.[*].status").value(hasItem(DEFAULT_STATUS.toString().toUpperCase())));
     }
     
@@ -306,7 +304,7 @@ public class RotationResourceIntTest {
                 .andExpect(jsonPath("$.programmeId").value(programme.getId().intValue()))
                 .andExpect(jsonPath("$.programmeName").value(PROGRAMME_NAME))
                 .andExpect(jsonPath("$.programmeNumber").value(PROGRAMME_NUMBER))
-                .andExpect(jsonPath("$.name").value(DEFAULT_NAME.toString()))
+          .andExpect(jsonPath("$.name").value(DEFAULT_NAME))
                 .andExpect(jsonPath("$.status").value(DEFAULT_STATUS.name()));
     }
     
@@ -325,7 +323,7 @@ public class RotationResourceIntTest {
         int databaseSizeBeforeUpdate = rotationRepository.findAll().size();
         
         // Update the rotation
-        Rotation updatedRotation = rotationRepository.findOne(rotation.getId());
+      Rotation updatedRotation = rotationRepository.findById(rotation.getId()).orElse(null);
         // Disconnect from session so that the updates on updatedRotation are not directly saved in db
         em.detach(updatedRotation);
         updatedRotation
@@ -401,7 +399,7 @@ public class RotationResourceIntTest {
     
     @Test
     @Transactional
-    public void dtoEqualsVerifier() throws Exception {
+    public void dtoEqualsVerifier() {
         RotationDTO rotationDTO1 = new RotationDTO();
         rotationDTO1.setId(1L);
         RotationDTO rotationDTO2 = new RotationDTO();

@@ -3,7 +3,6 @@ package com.transformuk.hee.tis.tcs.api.dto;
 import com.transformuk.hee.tis.tcs.api.dto.validation.Create;
 import com.transformuk.hee.tis.tcs.api.dto.validation.Update;
 import com.transformuk.hee.tis.tcs.api.enumeration.PlacementStatus;
-import io.swagger.annotations.ApiModelProperty;
 
 import javax.validation.constraints.DecimalMin;
 import javax.validation.constraints.NotNull;
@@ -41,19 +40,15 @@ public class PlacementDetailsDTO implements Serializable {
 
   private BigDecimal wholeTimeEquivalent;
 
-  @ApiModelProperty("The site code")
   private String siteCode;
 
-  @ApiModelProperty("The id of the site from the reference service")
   @NotNull(message = "SiteId is required", groups = {Update.class, Create.class})
   private Long siteId;
 
   private String siteName;
 
-  @ApiModelProperty("The Grade Abbr")
   private String gradeAbbreviation;
 
-  @ApiModelProperty("The Grade id from Reference service")
   @NotNull(message = "GradeId is required", groups = {Update.class, Create.class})
   private Long gradeId;
 

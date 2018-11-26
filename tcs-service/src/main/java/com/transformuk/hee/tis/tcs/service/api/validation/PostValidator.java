@@ -2,12 +2,7 @@ package com.transformuk.hee.tis.tcs.service.api.validation;
 
 import com.google.common.collect.Lists;
 import com.transformuk.hee.tis.reference.client.impl.ReferenceServiceImpl;
-import com.transformuk.hee.tis.tcs.api.dto.PlacementDTO;
-import com.transformuk.hee.tis.tcs.api.dto.PostDTO;
-import com.transformuk.hee.tis.tcs.api.dto.PostGradeDTO;
-import com.transformuk.hee.tis.tcs.api.dto.PostSiteDTO;
-import com.transformuk.hee.tis.tcs.api.dto.PostSpecialtyDTO;
-import com.transformuk.hee.tis.tcs.api.dto.ProgrammeDTO;
+import com.transformuk.hee.tis.tcs.api.dto.*;
 import com.transformuk.hee.tis.tcs.api.enumeration.PostSpecialtyType;
 import com.transformuk.hee.tis.tcs.service.model.Post;
 import com.transformuk.hee.tis.tcs.service.repository.PlacementRepository;
@@ -106,7 +101,7 @@ public class PostValidator {
         fieldErrors.add(new FieldError(POST_DTO_NAME, "programmes",
                 "Programme ID cannot be null or negative"));
       } else {
-        if (!programmeRepository.exists(programmeDTO.getId())) {
+        if (!programmeRepository.existsById(programmeDTO.getId())) {
           fieldErrors.add(new FieldError(POST_DTO_NAME, "programmes",
                   String.format("Programme with id %d does not exist", programmeDTO.getId())));
         }
@@ -179,7 +174,7 @@ public class PostValidator {
           fieldErrors.add(new FieldError(POST_DTO_NAME, SPECIALTIES,
               "Specialty ID cannot be null or negative"));
         } else {
-          if (!specialtyRepository.exists(ps.getSpecialty().getId())) {
+          if (!specialtyRepository.existsById(ps.getSpecialty().getId())) {
             fieldErrors.add(new FieldError(POST_DTO_NAME, SPECIALTIES,
                 String.format("Specialty with id %d does not exist", ps.getSpecialty().getId())));
           } else if (PostSpecialtyType.PRIMARY.equals(ps.getPostSpecialtyType())) {
@@ -208,7 +203,7 @@ public class PostValidator {
           fieldErrors.add(new FieldError(POST_DTO_NAME, "placementHistory",
               "Placement ID cannot be null or negative"));
         } else {
-          if (!placementRepository.exists(ps.getId())) {
+          if (!placementRepository.existsById(ps.getId())) {
             fieldErrors.add(new FieldError(POST_DTO_NAME, "placementHistory",
                 String.format("Placement with id %d does not exist", ps.getId())));
           }
@@ -263,7 +258,7 @@ public class PostValidator {
   private List<FieldError> checkLegacy(Long postId) {
     List<FieldError> fieldErrors = new ArrayList<>();
     if (postId != null) {
-      Post post = postRepository.findOne(postId);
+      Post post = postRepository.findById(postId).orElse(null);
       if (post != null && post.isLegacy()) {
         fieldErrors.add(new FieldError("postDTO", "legacy",
             "You cannot update a post that has been migrated from intrepid and marked as legacy"));

@@ -67,7 +67,7 @@ public class NationalPostNumberServiceImpl {
    */
   @Transactional(readOnly = true)
   boolean requireNewNationalPostNumber(PostDTO postDTO) {
-    Post currentPost = postRepository.findOne(postDTO.getId());
+    Post currentPost = postRepository.findById(postDTO.getId()).orElse(null);
     if (currentPost == null) {
       return true;
     } else {
@@ -233,7 +233,7 @@ public class NationalPostNumberServiceImpl {
             throw new NationalPostNumberRuntimeException("No Primary Specialty ID found for PostSpecialty relation - cannot generate full NPN");
           });
 
-      Specialty primarySpecialty = specialtyRepository.findOne(specialtyId);
+      Specialty primarySpecialty = specialtyRepository.findById(specialtyId).orElse(null);
       return primarySpecialty != null ? primarySpecialty.getSpecialtyCode() : StringUtils.EMPTY;
 
     }

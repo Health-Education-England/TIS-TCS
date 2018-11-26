@@ -27,7 +27,7 @@ public class CommentServiceImpl implements CommentService {
 
 		Comment comment;
 		if(placementCommentDTO.getId() != null) {
-			comment = commentRepository.findOne(placementCommentDTO.getId());
+      comment = commentRepository.findById(placementCommentDTO.getId()).orElse(null);
 			placementCommentMapper.overwriteCommentEntityWithDTOComment(comment, placementCommentDTO);
 		} else {
 			comment = placementCommentMapper.toEntity(placementCommentDTO);
@@ -49,7 +49,7 @@ public class CommentServiceImpl implements CommentService {
 	public PlacementCommentDTO findById(Long id) {
 		log.debug("Request to retrieve Placement by Id : {}", id);
 
-		Comment comment = commentRepository.findOne(id);
+    Comment comment = commentRepository.findById(id).orElse(null);
 		return placementCommentMapper.toDto(comment);
 	}
 }

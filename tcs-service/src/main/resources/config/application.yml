@@ -15,132 +15,122 @@
 # ===================================================================
 
 management:
-    context-path: /management
-    security:
-        enabled: false
-    health:
-        mail:
-            enabled: false # When using the MailService, configure an SMTP server and set this to true
+  endpoints:
+    enabled-by-default: false
+  health:
+    mail:
+      enabled: false # When using the MailService, configure an SMTP server and set this to true
+  server:
     add-application-context-header: false
+    servlet.context-path: /management
 
 spring:
-    application:
-        name: tcs
-    profiles:
-        active: local
-        include:
-        - swagger
-        - prometheus
-    devtools:
-        restart:
-            enabled: true
-        livereload:
-            enabled: false # we use gulp + BrowserSync for livereload
-    datasource:
-        type: com.zaxxer.hikari.HikariDataSource
-        url: jdbc:mysql://${DBHOST:localhost}:${DBPORT:3306}/${DBNAME:tcs}?useUnicode=true&characterEncoding=utf8&useSSL=${USE_SSL:false}
-        username: ${DBUSER:root}
-        password: ${DBPASSWORD:}
-        hikari:
-            data-source-properties:
-                cachePrepStmts: true
-                prepStmtCacheSize: 250
-                prepStmtCacheSqlLimit: 2048
-                useServerPrepStmts: true
-                cacheResultSetMetadata: true
-                cacheServerConfiguration: true
-                elideSetAutoCommits: true
-                maintainTimeStats: false
-                rewriteBatchedStatements: true
-                useLocalSessionState: true
-            maximumPoolSize: 20
-    jackson:
-        serialization.write_dates_as_timestamps: false
-        serialization.indent_output: true
-    jpa:
-        open-in-view: false
-        hibernate:
-            ddl-auto: none
-            naming:
-                physical-strategy: org.hibernate.boot.model.naming.PhysicalNamingStrategyStandardImpl
-                implicit-strategy: org.hibernate.boot.model.naming.ImplicitNamingStrategyLegacyJpaImpl
-        database-platform: org.hibernate.dialect.MySQL5InnoDBDialect
-        database: MYSQL
-        show-sql: true
-        properties:
-            hibernate.id.new_generator_mappings: true
-            hibernate.cache.use_second_level_cache: false
-            hibernate.cache.use_query_cache: false
-            hibernate.generate_statistics: true
-    messages:
-        basename: i18n/messages
-        cache-seconds: 1
-    mvc:
-        favicon:
-            enabled: false
-    http:
-        multipart:
-            max-file-size: 10MB
-            max-request-size: 10MB
-    jdbc:
-        template:
-            query-timeout: 120
-    mail:
-        host: ${DBHOST:localhost}
-        port: 25
-        username:
-        password:
-
-
-flyway:
-    baseline-description: #
+  main.allow-bean-definition-overriding: true
+  application:
+    name: tcs
+  profiles:
+    # The commented value for `active` can be replaced with valid Spring profiles to load.
+    # Otherwise, it will be filled in by maven when building the WAR file
+    # Either way, it can be overridden by `--spring.profiles.active` value passed in the commandline or `-Dspring.profiles.active` set in `JAVA_OPTS`
+    active: local
+  devtools:
+    restart:
+      enabled: true
+    livereload:
+      enabled: false # we use gulp + BrowserSync for livereload
+  datasource:
+    type: com.zaxxer.hikari.HikariDataSource
+    url: jdbc:mysql://${DBHOST:localhost}:${DBPORT:3306}/${DBNAME:tcs}?useUnicode=true&characterEncoding=utf8&useSSL=${USE_SSL:false}
+    username: ${DBUSER:root}
+    password: ${DBPASSWORD:}
+    hikari:
+      data-source-properties:
+        cachePrepStmts: true
+        prepStmtCacheSize: 250
+        prepStmtCacheSqlLimit: 2048
+        useServerPrepStmts: true
+        cacheResultSetMetadata: true
+        cacheServerConfiguration: true
+        elideSetAutoCommits: true
+        maintainTimeStats: false
+        rewriteBatchedStatements: true
+        useLocalSessionState: true
+      maximumPoolSize: 20
+  jackson:
+    serialization.write_dates_as_timestamps: false
+    serialization.indent_output: true
+  jpa:
+    open-in-view: false
+    hibernate:
+      ddl-auto: none
+      naming:
+        physical-strategy: org.hibernate.boot.model.naming.PhysicalNamingStrategyStandardImpl
+        implicit-strategy: org.hibernate.boot.model.naming.ImplicitNamingStrategyLegacyJpaImpl
+    database-platform: org.hibernate.dialect.MySQL5InnoDBDialect
+    database: MYSQL
+    show-sql: true
+    properties:
+      hibernate.id.new_generator_mappings: true
+      hibernate.cache.use_second_level_cache: false
+      hibernate.cache.use_query_cache: false
+      hibernate.generate_statistics: true
+  flyway:
     baseline-version: 1 # version to start migration
     baseline-on-migrate: true
     check-location: false # Check that migration scripts location exists.
     clean-on-validation-error: false
-    flyway.enabled: true # Enable flyway.
-    encoding: #
-    ignore-failed-future-migration: #
+    ignore-future-migrations: true
     init-sqls: # SQL statements to execute to initialize a connection immediately after obtaining it.
     locations: classpath:db/migration
     out-of-order: true
     password: ${DBPASSWORD:}
-    placeholder-prefix:
-    placeholder-replacement:
-    placeholder-suffix:
-    placeholders.*:
     schemas: ${DBNAME:tcs}
     sql-migration-prefix: V
-    sql-migration-separator:
-    sql-migration-suffix: .sql
-    table:  #
     url: ${spring.datasource.url}
     user: ${spring.datasource.username}
-    validate-on-migrate:  #
-    initOnMigrate: true
-
-security:
+    enabled: true
+  messages:
+    basename: i18n/messages
+    cache-duration: 1s
+  mvc:
+    favicon:
+      enabled: false
+  jdbc:
+    template:
+      query-timeout: 120s
+  mail:
+    host: ${DBHOST:localhost}
+    port: 25
+    username:
+    password:
+  security:
     basic:
-        enabled: false
+      enabled: false
     user:
-        name: admin
-        password: admin
+      name: admin
+      password: admin
+  servlet:
+    multipart:
+      max-file-size: 10MB
+      max-request-size: 10MB
+  cache:
+    caffeine.spec: maximumSize=100,expireAfterAccess=1m
 
 server:
-    port: 8093
+  port: 8093
+  connection-timeout: 120s
+  compression:
+    enabled: true
+    mime-types: text/html,text/xml,text/plain,text/css, application/javascript, application/json
+    min-response-size: 1024
+  servlet:
     session:
-        cookie:
-            http-only: true
+      cookie:
+        http-only: true
     context-path: /tcs
-    connection-timeout: 120
-    compression:
-        enabled: true
-        mime-types: text/html,text/xml,text/plain,text/css, application/javascript, application/json
-        min-response-size: 1024
-
 info:
-    project:
-        version: #project.version#
+  project:
+    version: #project.version#
 
 # ===================================================================
 # JHipster specific properties
@@ -149,62 +139,38 @@ info:
 # ===================================================================
 
 jhipster:
-    async:
-        core-pool-size: 2
-        max-pool-size: 50
-        queue-capacity: 10000
-        # By default CORS is disabled. Uncomment to enable.
-        #cors:
-        #allowed-origins: "*"
-        #allowed-methods: GET, PUT, POST, DELETE, OPTIONS
-        #allowed-headers: "*"
-        #exposed-headers:
-        #allow-credentials: true
-        #max-age: 1800
-    swagger:
-        default-include-pattern: /api/.*
-        title: tcs API
-        description: tcs API documentation
-        version: 0.0.1
-        terms-of-service-url:
-        contact-name:
-        contact-url:
-        contact-email:
-        license:
-        license-url:
-    ribbon:
-        display-on-active-profiles: dev
-    http:
-        version: V_1_1 # To use HTTP/2 you will need SSL support (see above the "server.ssl" configuration)
-    security:
-        authentication:
-            jwt:
-                secret: my-secret-token-to-change-in-production
-                # Token is valid 24 hours
-                token-validity-in-seconds: 86400
-                token-validity-in-seconds-for-remember-me: 2592000
-    mail: # specific JHipster mail property, for standard properties see MailProperties
-        from: tcs@localhost
-        base-url: http://127.0.0.1:8093
-    metrics: # DropWizard Metrics configuration, used by MetricsConfiguration
-        jmx.enabled: true
-        graphite: # Use the "graphite" Maven profile to have the Graphite dependencies
-            enabled: false
-            host: localhost
-            port: 2003
-            prefix: tcs
-        prometheus: # Use the "prometheus" Maven profile to have the Prometheus dependencies
-            enabled: true
-            endpoint: http://127.0.0.1:8093/prometheusMetrics
-        logs: # Reports Dropwizard metrics in the logs
-            enabled: false
-            reportFrequency: 60 # in seconds
-    logging:
-        logstash: # Forward logs to logstash over a socket, used by LoggingConfiguration
-            enabled: false
-            host: localhost
-            port: 5000
-            queue-size: 512
+  async:
+    core-pool-size: 2
+    max-pool-size: 50
+    queue-capacity: 10000
+    # By default CORS is disabled. Uncomment to enable.
+    #cors:
+    #allowed-origins: "*"
+    #allowed-methods: GET, PUT, POST, DELETE, OPTIONS
+    #allowed-headers: "*"
+    #exposed-headers:
+    #allow-credentials: true
+    #max-age: 1800
+  ribbon:
+    display-on-active-profiles: dev
+  http:
+    version: V_1_1 # To use HTTP/2 you will need SSL support (see above the "server.ssl" configuration)
+  security:
+    authentication:
+      jwt:
+        secret: my-secret-token-to-change-in-production
+        # Token is valid 24 hours
+        token-validity-in-seconds: 86400
+        token-validity-in-seconds-for-remember-me: 2592000
+  mail: # specific JHipster mail property, for standard properties see MailProperties
+    from: tcs@localhost
+    base-url: http://127.0.0.1:8093
+  logging:
+    logstash: # Forward logs to logstash over a socket, used by LoggingConfiguration
+      enabled: false
+      host: localhost
+      port: 5000
+      queue-size: 512
 
 
 # ===================================================================
@@ -218,11 +184,25 @@ jhipster:
 
 application:
 
+azure:
+  accountName: ${CLOUD_BLOB_ACCOUNT_NAME:}
+  accountKey: ${CLOUD_BLOB_ACCOUNT_KEY:}
+  containerName: ${CLOUD_BLOB_CONTAINER_NAME:}
+kc:
+  realm: ${KC_REALM:}
+  client:
+    id: ${KC_CLIENT_ID:}
+  server:
+    url: ${KC_SERVER_URL:}
+  username: ${KC_USERNAME:}
+  password: ${KC_PASSWORD:}
+  timeout: ${KC_TIMEOUT:}
+
+debug: true
 logging:
-    file: ${LOG_DIR:${HOME}}/tcs.log
+  file: ${LOG_DIR:${HOME}}/tcs.log
+    # level:
+  # com.transformuk.hee.tis.tcs: DEBUG
 
 
 auto.generate.npn: true
-cache:
-  maxSize: 100
-  timeToLiveInMinutes: 1

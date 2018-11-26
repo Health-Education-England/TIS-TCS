@@ -45,13 +45,8 @@ import static org.mockito.BDDMockito.given;
 import static org.mockito.Matchers.any;
 import static org.mockito.Matchers.anyString;
 import static org.mockito.Mockito.when;
-import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.delete;
-import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
-import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
-import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.put;
-import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.content;
-import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
-import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.*;
+import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.*;
 
 /**
  * Test class for the QualificationResource REST controller.
@@ -411,7 +406,7 @@ public class QualificationResourceIntTest {
     int databaseSizeBeforeUpdate = qualificationRepository.findAll().size();
 
     // Update the qualification
-    Qualification updatedQualification = qualificationRepository.findOne(qualification.getId());
+    Qualification updatedQualification = qualificationRepository.findById(qualification.getId()).orElse(null);
     updatedQualification
         .intrepidId(UPDATED_INTREPID_ID)
         .qualification(UPDATED_QUALIFICATION)
@@ -495,7 +490,7 @@ public class QualificationResourceIntTest {
 
   @Test
   @Transactional
-  public void dtoEqualsVerifier() throws Exception {
+  public void dtoEqualsVerifier() {
     QualificationDTO qualificationDTO1 = new QualificationDTO();
     qualificationDTO1.setCountryOfQualification("UK");
     PersonDTO personDTO = new PersonDTO();

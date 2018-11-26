@@ -15,7 +15,6 @@ import com.transformuk.hee.tis.tcs.service.repository.ProgrammeRepository;
 import com.transformuk.hee.tis.tcs.service.service.ProgrammeService;
 import com.transformuk.hee.tis.tcs.service.service.mapper.ProgrammeMapper;
 import org.apache.commons.codec.net.URLCodec;
-import org.hamcrest.core.StringContains;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -36,13 +35,8 @@ import java.util.stream.Collectors;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.hamcrest.Matchers.containsInAnyOrder;
 import static org.hamcrest.Matchers.hasItem;
-import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.delete;
-import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
-import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
-import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.put;
-import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.content;
-import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
-import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.*;
+import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.*;
 
 /**
  * Test class for the ProgrammeResource REST controller.
@@ -102,13 +96,12 @@ public class ProgrammeResourceIntTest {
    * if they test an entity which requires the current entity.
    */
   public static Programme createEntity() {
-    Programme programme = new Programme()
+    return new Programme()
         .status(DEFAULT_STATUS)
         .intrepidId(DEFAULT_INTREPID_ID)
         .owner(DEFAULT_OWNER)
         .programmeName(DEFAULT_PROGRAMME_NAME)
         .programmeNumber(DEFAULT_PROGRAMME_NUMBER);
-    return programme;
   }
 
   @Before
@@ -239,7 +232,7 @@ public class ProgrammeResourceIntTest {
     assertThat(testProgramme.getProgrammeName()).isEqualTo(DEFAULT_PROGRAMME_NAME);
     assertThat(testProgramme.getProgrammeNumber()).isEqualTo(DEFAULT_PROGRAMME_NUMBER);
     assertThat(testProgramme.getCurricula().size()).isEqualTo(2);
-    assertThat(testProgramme.getCurricula().stream().map(c -> c.getId()).collect(Collectors.toSet())).
+    assertThat(testProgramme.getCurricula().stream().map(Curriculum::getId).collect(Collectors.toSet())).
         containsAll(Sets.newHashSet(curriculum1.getId(), curriculum2.getId()));
   }
 
@@ -290,7 +283,7 @@ public class ProgrammeResourceIntTest {
     assertThat(testProgramme1.getProgrammeName()).isEqualTo(DEFAULT_PROGRAMME_NAME);
     assertThat(testProgramme1.getProgrammeNumber()).isEqualTo(DEFAULT_PROGRAMME_NUMBER);
     assertThat(testProgramme1.getCurricula().size()).isEqualTo(2);
-    assertThat(testProgramme1.getCurricula().stream().map(c -> c.getId()).collect(Collectors.toSet())).
+    assertThat(testProgramme1.getCurricula().stream().map(Curriculum::getId).collect(Collectors.toSet())).
         containsAll(Sets.newHashSet(curriculum1.getId(), curriculum2.getId()));
 
     assertThat(testProgramme2.getStatus()).isEqualTo(DEFAULT_STATUS);
@@ -299,7 +292,7 @@ public class ProgrammeResourceIntTest {
     assertThat(testProgramme2.getProgrammeName()).isEqualTo(DEFAULT_PROGRAMME_NAME);
     assertThat(testProgramme2.getProgrammeNumber()).isEqualTo(DEFAULT_PROGRAMME_NUMBER);
     assertThat(testProgramme2.getCurricula().size()).isEqualTo(2);
-    assertThat(testProgramme2.getCurricula().stream().map(c -> c.getId()).collect(Collectors.toSet())).
+    assertThat(testProgramme2.getCurricula().stream().map(Curriculum::getId).collect(Collectors.toSet())).
         containsAll(Sets.newHashSet(curriculum1.getId(), curriculum2.getId()));
   }
 
@@ -334,11 +327,11 @@ public class ProgrammeResourceIntTest {
         .andExpect(status().isOk())
         .andExpect(content().contentType(MediaType.APPLICATION_JSON_UTF8_VALUE))
         .andExpect(jsonPath("$.[*].id").value(hasItem(programme.getId().intValue())))
-        .andExpect(jsonPath("$.[*].intrepidId").value(hasItem(DEFAULT_INTREPID_ID.toString())))
+      .andExpect(jsonPath("$.[*].intrepidId").value(hasItem(DEFAULT_INTREPID_ID)))
         .andExpect(jsonPath("$.[*].status").value(hasItem(DEFAULT_STATUS.toString().toUpperCase())))
-        .andExpect(jsonPath("$.[*].owner").value(hasItem(DEFAULT_OWNER.toString())))
-        .andExpect(jsonPath("$.[*].programmeName").value(hasItem(DEFAULT_PROGRAMME_NAME.toString())))
-        .andExpect(jsonPath("$.[*].programmeNumber").value(hasItem(DEFAULT_PROGRAMME_NUMBER.toString())));
+      .andExpect(jsonPath("$.[*].owner").value(hasItem(DEFAULT_OWNER)))
+      .andExpect(jsonPath("$.[*].programmeName").value(hasItem(DEFAULT_PROGRAMME_NAME)))
+      .andExpect(jsonPath("$.[*].programmeNumber").value(hasItem(DEFAULT_PROGRAMME_NUMBER)));
   }
 
   @Test
@@ -352,11 +345,11 @@ public class ProgrammeResourceIntTest {
         .andExpect(status().isOk())
         .andExpect(content().contentType(MediaType.APPLICATION_JSON_UTF8_VALUE))
         .andExpect(jsonPath("$.[*].id").value(hasItem(programme.getId().intValue())))
-        .andExpect(jsonPath("$.[*].intrepidId").value(hasItem(DEFAULT_INTREPID_ID.toString())))
+      .andExpect(jsonPath("$.[*].intrepidId").value(hasItem(DEFAULT_INTREPID_ID)))
         .andExpect(jsonPath("$.[*].status").value(hasItem(DEFAULT_STATUS.toString().toUpperCase())))
-        .andExpect(jsonPath("$.[*].owner").value(hasItem(DEFAULT_OWNER.toString())))
-        .andExpect(jsonPath("$.[*].programmeName").value(hasItem(DEFAULT_PROGRAMME_NAME.toString())))
-        .andExpect(jsonPath("$.[*].programmeNumber").value(hasItem(DEFAULT_PROGRAMME_NUMBER.toString())));
+      .andExpect(jsonPath("$.[*].owner").value(hasItem(DEFAULT_OWNER)))
+      .andExpect(jsonPath("$.[*].programmeName").value(hasItem(DEFAULT_PROGRAMME_NAME)))
+      .andExpect(jsonPath("$.[*].programmeNumber").value(hasItem(DEFAULT_PROGRAMME_NUMBER)));
   }
 
   @Test
@@ -370,11 +363,11 @@ public class ProgrammeResourceIntTest {
         .andExpect(status().isOk())
         .andExpect(content().contentType(MediaType.APPLICATION_JSON_UTF8_VALUE))
         .andExpect(jsonPath("$.id").value(programme.getId().intValue()))
-        .andExpect(jsonPath("$.intrepidId").value(DEFAULT_INTREPID_ID.toString()))
+      .andExpect(jsonPath("$.intrepidId").value(DEFAULT_INTREPID_ID))
         .andExpect(jsonPath("$.status").value(DEFAULT_STATUS.toString().toUpperCase()))
-        .andExpect(jsonPath("$.owner").value(DEFAULT_OWNER.toString()))
-        .andExpect(jsonPath("$.programmeName").value(DEFAULT_PROGRAMME_NAME.toString()))
-        .andExpect(jsonPath("$.programmeNumber").value(DEFAULT_PROGRAMME_NUMBER.toString()));
+      .andExpect(jsonPath("$.owner").value(DEFAULT_OWNER))
+      .andExpect(jsonPath("$.programmeName").value(DEFAULT_PROGRAMME_NAME))
+      .andExpect(jsonPath("$.programmeNumber").value(DEFAULT_PROGRAMME_NUMBER));
   }
 
   @Test
@@ -393,7 +386,7 @@ public class ProgrammeResourceIntTest {
     int databaseSizeBeforeUpdate = programmeRepository.findAll().size();
 
     // Update the programme
-    Programme updatedProgramme = programmeRepository.findOne(programme.getId());
+    Programme updatedProgramme = programmeRepository.findById(programme.getId()).orElse(null);
     updatedProgramme
         .status(UPDATED_STATUS)
         .intrepidId(UPDATED_INTREPID_ID)
@@ -433,7 +426,7 @@ public class ProgrammeResourceIntTest {
     int databaseSizeBeforeUpdate = programmeRepository.findAll().size();
 
     // Update the programme
-    Programme updatedProgramme = programmeRepository.findOne(programme.getId());
+    Programme updatedProgramme = programmeRepository.findById(programme.getId()).orElse(null);
     updatedProgramme
         .status(UPDATED_STATUS)
         .intrepidId(UPDATED_INTREPID_ID)
@@ -458,7 +451,7 @@ public class ProgrammeResourceIntTest {
     assertThat(testProgramme.getProgrammeName()).isEqualTo(UPDATED_PROGRAMME_NAME);
     assertThat(testProgramme.getProgrammeNumber()).isEqualTo(UPDATED_PROGRAMME_NUMBER);
     assertThat(testProgramme.getCurricula().size()).isEqualTo(2);
-    assertThat(testProgramme.getCurricula().stream().map(c -> c.getId()).collect(Collectors.toSet())).
+    assertThat(testProgramme.getCurricula().stream().map(Curriculum::getId).collect(Collectors.toSet())).
         containsAll(Sets.newHashSet(curriculum2.getId(), curriculum3.getId()));
   }
 
@@ -477,7 +470,7 @@ public class ProgrammeResourceIntTest {
     programmeRepository.saveAndFlush(programme2);
 
     // Update the programme
-    Programme updatedProgramme1 = programmeRepository.findOne(programme1.getId());
+    Programme updatedProgramme1 = programmeRepository.findById(programme1.getId()).orElse(null);
     updatedProgramme1
         .status(UPDATED_STATUS)
         .intrepidId(UPDATED_INTREPID_ID)
@@ -486,7 +479,7 @@ public class ProgrammeResourceIntTest {
         .programmeNumber(UPDATED_PROGRAMME_NUMBER)
         .curricula(Sets.newHashSet(curriculum2));
     ProgrammeDTO programmeDTO1 = programmeMapper.programmeToProgrammeDTO(updatedProgramme1);
-    Programme updatedProgramme2 = programmeRepository.findOne(programme2.getId());
+    Programme updatedProgramme2 = programmeRepository.findById(programme2.getId()).orElse(null);
     updatedProgramme2
         .status(UPDATED_STATUS)
         .intrepidId(UPDATED_INTREPID_ID)
@@ -513,7 +506,7 @@ public class ProgrammeResourceIntTest {
     assertThat(testProgramme1.getProgrammeName()).isEqualTo(UPDATED_PROGRAMME_NAME);
     assertThat(testProgramme1.getProgrammeNumber()).isEqualTo(UPDATED_PROGRAMME_NUMBER);
     assertThat(testProgramme1.getCurricula().size()).isEqualTo(1);
-    assertThat(testProgramme1.getCurricula().stream().map(c -> c.getId()).collect(Collectors.toSet())).
+    assertThat(testProgramme1.getCurricula().stream().map(Curriculum::getId).collect(Collectors.toSet())).
         containsAll(Sets.newHashSet(curriculum2.getId()));
 
     assertThat(testProgramme2.getStatus()).isEqualTo(UPDATED_STATUS);
@@ -522,7 +515,7 @@ public class ProgrammeResourceIntTest {
     assertThat(testProgramme2.getProgrammeName()).isEqualTo(UPDATED_PROGRAMME_NAME);
     assertThat(testProgramme2.getProgrammeNumber()).isEqualTo(UPDATED_PROGRAMME_NUMBER);
     assertThat(testProgramme2.getCurricula().size()).isEqualTo(1);
-    assertThat(testProgramme2.getCurricula().stream().map(c -> c.getId()).collect(Collectors.toSet())).
+    assertThat(testProgramme2.getCurricula().stream().map(Curriculum::getId).collect(Collectors.toSet())).
         containsAll(Sets.newHashSet(curriculum3.getId()));
   }
 
@@ -559,10 +552,10 @@ public class ProgrammeResourceIntTest {
         .andExpect(content().contentType(MediaType.APPLICATION_JSON_UTF8_VALUE))
         .andExpect(jsonPath("$.[*].id").value(hasItem(otherDeaneryProgramme.getId().intValue())))
         .andExpect(jsonPath("$.[*].status").value(hasItem(DEFAULT_STATUS.toString().toUpperCase())))
-        .andExpect(jsonPath("$.[*].intrepidId").value(hasItem(DEFAULT_INTREPID_ID.toString())))
+      .andExpect(jsonPath("$.[*].intrepidId").value(hasItem(DEFAULT_INTREPID_ID)))
         .andExpect(jsonPath("$.[*].owner").value(hasItem("Health Education England West Midlands")))
-        .andExpect(jsonPath("$.[*].programmeName").value(hasItem(DEFAULT_PROGRAMME_NAME.toString())))
-        .andExpect(jsonPath("$.[*].programmeNumber").value(hasItem(DEFAULT_PROGRAMME_NUMBER.toString())));
+      .andExpect(jsonPath("$.[*].programmeName").value(hasItem(DEFAULT_PROGRAMME_NAME)))
+      .andExpect(jsonPath("$.[*].programmeNumber").value(hasItem(DEFAULT_PROGRAMME_NUMBER)));
   }
 
   @Test

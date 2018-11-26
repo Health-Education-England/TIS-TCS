@@ -1,6 +1,5 @@
 package com.transformuk.hee.tis.tcs.service.api;
 
-import com.codahale.metrics.annotation.Timed;
 import com.transformuk.hee.tis.tcs.api.dto.ContactDetailsDTO;
 import com.transformuk.hee.tis.tcs.api.dto.validation.Create;
 import com.transformuk.hee.tis.tcs.api.dto.validation.Update;
@@ -9,7 +8,6 @@ import com.transformuk.hee.tis.tcs.service.api.util.PaginationUtil;
 import com.transformuk.hee.tis.tcs.service.api.validation.ContactDetailsValidator;
 import com.transformuk.hee.tis.tcs.service.service.ContactDetailsService;
 import io.github.jhipster.web.util.ResponseUtil;
-import io.swagger.annotations.ApiParam;
 import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -21,15 +19,7 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.MethodArgumentNotValidException;
-import org.springframework.web.bind.annotation.DeleteMapping;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.PatchMapping;
-import org.springframework.web.bind.annotation.PathVariable;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.PutMapping;
-import org.springframework.web.bind.annotation.RequestBody;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
 
 import javax.validation.Valid;
 import java.net.URI;
@@ -65,7 +55,6 @@ public class ContactDetailsResource {
    * @throws URISyntaxException if the Location URI syntax is incorrect
    */
   @PostMapping("/contact-details")
-  @Timed
   @PreAuthorize("hasPermission('tis:people::person:', 'Create')")
   public ResponseEntity<ContactDetailsDTO> createContactDetails(@RequestBody @Validated(Create.class) ContactDetailsDTO contactDetailsDTO)
           throws URISyntaxException, MethodArgumentNotValidException {
@@ -85,13 +74,11 @@ public class ContactDetailsResource {
    * @return the ResponseEntity with status 200 (OK) and with body the updated contactDetailsDTO,
    * or with status 400 (Bad Request) if the contactDetailsDTO is not valid,
    * or with status 500 (Internal Server Error) if the contactDetailsDTO couldn't be updated
-   * @throws URISyntaxException if the Location URI syntax is incorrect
    */
   @PutMapping("/contact-details")
-  @Timed
   @PreAuthorize("hasPermission('tis:people::person:', 'Update')")
   public ResponseEntity<ContactDetailsDTO> updateContactDetails(@RequestBody @Validated(Update.class) ContactDetailsDTO contactDetailsDTO)
-          throws URISyntaxException, MethodArgumentNotValidException {
+    throws MethodArgumentNotValidException {
     log.debug("REST request to update ContactDetails : {}", contactDetailsDTO);
     if (contactDetailsDTO.getId() == null) {
       return ResponseEntity.badRequest().headers(HeaderUtil.createFailureAlert(ENTITY_NAME, "must_provide_id",
@@ -111,9 +98,8 @@ public class ContactDetailsResource {
    * @return the ResponseEntity with status 200 (OK) and the list of contactDetails in body
    */
   @GetMapping("/contact-details")
-  @Timed
   @PreAuthorize("hasPermission('tis:people::person:', 'View')")
-  public ResponseEntity<List<ContactDetailsDTO>> getAllContactDetails(@ApiParam Pageable pageable) {
+  public ResponseEntity<List<ContactDetailsDTO>> getAllContactDetails(Pageable pageable) {
     log.debug("REST request to get a page of ContactDetails");
     Page<ContactDetailsDTO> page = contactDetailsService.findAll(pageable);
     HttpHeaders headers = PaginationUtil.generatePaginationHttpHeaders(page, "/api/contact-details");
@@ -127,7 +113,6 @@ public class ContactDetailsResource {
    * @return the ResponseEntity with status 200 (OK) and with body the contactDetailsDTO, or with status 404 (Not Found)
    */
   @GetMapping("/contact-details/{id}")
-  @Timed
   @PreAuthorize("hasPermission('tis:people::person:', 'View')")
   public ResponseEntity<ContactDetailsDTO> getContactDetails(@PathVariable Long id) {
     log.debug("REST request to get ContactDetails : {}", id);
@@ -142,7 +127,6 @@ public class ContactDetailsResource {
    * @return the ResponseEntity with status 200 (OK)
    */
   @DeleteMapping("/contact-details/{id}")
-  @Timed
   @PreAuthorize("hasAuthority('tcs:delete:entities')")
   public ResponseEntity<Void> deleteContactDetails(@PathVariable Long id) {
     log.debug("REST request to delete ContactDetails : {}", id);
@@ -155,12 +139,10 @@ public class ContactDetailsResource {
    *
    * @param contactDetailsDTOs the contactDetailsDTOs to create/update
    * @return the ResponseEntity with status 200 and with body the new contactDetailsDTOs
-   * @throws URISyntaxException if the Location URI syntax is incorrect
    */
   @PatchMapping("/contact-details")
-  @Timed
   @PreAuthorize("hasPermission('tis:people::person:', 'Update')")
-  public ResponseEntity<List<ContactDetailsDTO>> patchContactDetails(@Valid @RequestBody List<ContactDetailsDTO> contactDetailsDTOs) throws URISyntaxException {
+  public ResponseEntity<List<ContactDetailsDTO>> patchContactDetails(@Valid @RequestBody List<ContactDetailsDTO> contactDetailsDTOs) {
     log.debug("REST request to patch contactDetails: {}", contactDetailsDTOs);
     List<ContactDetailsDTO> result = contactDetailsService.save(contactDetailsDTOs);
     List<Long> ids = result.stream().map(ContactDetailsDTO::getId).collect(Collectors.toList());

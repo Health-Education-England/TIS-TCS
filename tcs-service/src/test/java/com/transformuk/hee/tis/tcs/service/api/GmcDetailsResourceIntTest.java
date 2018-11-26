@@ -35,13 +35,8 @@ import java.util.List;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.hamcrest.Matchers.containsInAnyOrder;
 import static org.hamcrest.Matchers.hasItem;
-import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.delete;
-import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
-import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
-import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.put;
-import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.content;
-import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
-import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.*;
+import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.*;
 
 /**
  * Test class for the GmcDetailsResource REST controller.
@@ -348,7 +343,7 @@ public class GmcDetailsResourceIntTest {
     int databaseSizeBeforeUpdate = gmcDetailsRepository.findAll().size();
 
     // Update the gmcDetails
-    GmcDetails updatedGmcDetails = gmcDetailsRepository.findOne(gmcDetails.getId());
+    GmcDetails updatedGmcDetails = gmcDetailsRepository.findById(gmcDetails.getId()).orElse(null);
     GmcDetailsDTO updatedGmcDetailsDTO = gmcDetailsMapper.toDto(updatedGmcDetails);
     updatedGmcDetailsDTO.setGmcNumber(UPDATED_GMC_NUMBER);
     updatedGmcDetailsDTO.setGmcStatus(UPDATED_GMC_STATUS);

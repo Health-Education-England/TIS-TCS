@@ -23,7 +23,7 @@ public class PersonBasicDetailsRepositoryAccessor {
 
     public void doWithPersonBasicDetails(Long personId, Consumer<PersonBasicDetails> consumer) {
         if (personId != null && personId != 0) {
-            PersonBasicDetails bdt = personBasicDetailsRepository.findOne(personId);
+          PersonBasicDetails bdt = personBasicDetailsRepository.findById(personId).orElse(null);
             if (bdt != null) {
                 consumer.accept(bdt);
             }
@@ -32,7 +32,7 @@ public class PersonBasicDetailsRepositoryAccessor {
 
     public void doWithPersonBasicDetailsSet(Set<Long> personIds, Consumer<Map<Long, PersonBasicDetails>> consumer) {
         if (CollectionUtils.isNotEmpty(personIds)) {
-            List<PersonBasicDetails> details = personBasicDetailsRepository.findAll(personIds);
+          List<PersonBasicDetails> details = personBasicDetailsRepository.findAllById(personIds);
             if (CollectionUtils.isNotEmpty(details)) {
                 Map<Long, PersonBasicDetails> detailsMap = details.stream().collect(Collectors.toMap(PersonBasicDetails::getId, d -> d));
                 consumer.accept(detailsMap);

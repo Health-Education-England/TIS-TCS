@@ -30,13 +30,8 @@ import java.util.List;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.hamcrest.Matchers.containsInAnyOrder;
 import static org.hamcrest.Matchers.hasItem;
-import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.delete;
-import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
-import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
-import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.put;
-import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.content;
-import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
-import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.*;
+import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.*;
 
 /**
  * Test class for the TrainingNumberResource REST controller.
@@ -290,7 +285,7 @@ public class TrainingNumberResourceIntTest {
     int databaseSizeBeforeUpdate = trainingNumberRepository.findAll().size();
 
     // Update the trainingNumber
-    TrainingNumber updatedTrainingNumber = trainingNumberRepository.findOne(trainingNumber.getId());
+    TrainingNumber updatedTrainingNumber = trainingNumberRepository.findById(trainingNumber.getId()).orElse(null);
     updatedTrainingNumber
         .trainingNumberType(UPDATED_TRAINING_NUMBER_TYPE)
         .number(UPDATED_NUMBER)

@@ -11,22 +11,11 @@ import com.transformuk.hee.tis.tcs.service.api.decorator.PersonBasicDetailsRepos
 import com.transformuk.hee.tis.tcs.service.api.decorator.PlacementDetailsDecorator;
 import com.transformuk.hee.tis.tcs.service.api.validation.PlacementValidator;
 import com.transformuk.hee.tis.tcs.service.exception.ExceptionTranslator;
-import com.transformuk.hee.tis.tcs.service.model.ContactDetails;
-import com.transformuk.hee.tis.tcs.service.model.EsrNotification;
-import com.transformuk.hee.tis.tcs.service.model.GmcDetails;
-import com.transformuk.hee.tis.tcs.service.model.Person;
-import com.transformuk.hee.tis.tcs.service.model.Placement;
-import com.transformuk.hee.tis.tcs.service.model.PlacementDetails;
-import com.transformuk.hee.tis.tcs.service.model.PlacementSupervisor;
-import com.transformuk.hee.tis.tcs.service.model.PlacementSupervisorId;
-import com.transformuk.hee.tis.tcs.service.model.Post;
-import com.transformuk.hee.tis.tcs.service.model.Specialty;
+import com.transformuk.hee.tis.tcs.service.model.*;
 import com.transformuk.hee.tis.tcs.service.repository.*;
-import com.transformuk.hee.tis.tcs.service.service.EsrNotificationService;
 import com.transformuk.hee.tis.tcs.service.service.PlacementService;
 import com.transformuk.hee.tis.tcs.service.service.mapper.PlacementDetailsMapper;
 import com.transformuk.hee.tis.tcs.service.service.mapper.PlacementMapper;
-import net.sf.cglib.core.Local;
 import org.apache.commons.codec.EncoderException;
 import org.apache.commons.codec.net.URLCodec;
 import org.assertj.core.util.Lists;
@@ -61,18 +50,11 @@ import static java.time.temporal.ChronoUnit.DAYS;
 import static java.util.Arrays.asList;
 import static java.util.stream.Collectors.toList;
 import static org.assertj.core.api.Assertions.assertThat;
-import static org.assertj.core.api.Assertions.contentOf;
 import static org.hamcrest.Matchers.containsInAnyOrder;
 import static org.hamcrest.Matchers.hasItem;
 import static org.mockito.BDDMockito.given;
-import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.delete;
-import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
-import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.patch;
-import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
-import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.put;
-import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.content;
-import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
-import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.*;
+import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.*;
 
 /**
  * Test class for the PlacementResource REST controller.
@@ -159,9 +141,6 @@ public class PlacementResourceIntTest {
     private ReferenceService referenceService;
 
     @Autowired
-    private EsrNotificationService esrNotificationService;
-
-    @Autowired
     private EntityManager entityManager;
 
     @Autowired
@@ -218,7 +197,7 @@ public class PlacementResourceIntTest {
     public void setup() {
         MockitoAnnotations.initMocks(this);
         asyncReferenceService = new AsyncReferenceService(referenceService);
-        placementValidator = new PlacementValidator(specialtyRepository, referenceService, postRepository, personRepository, placementRepository);
+      placementValidator = new PlacementValidator(referenceService, postRepository, personRepository, placementRepository);
         placementDetailsDecorator = new PlacementDetailsDecorator(asyncReferenceService, asyncPersonBasicDetailsRepository, postRepository);
         final PlacementResource placementResource = new PlacementResource(placementService, placementValidator, placementDetailsDecorator, placementRepository);
         this.restPlacementMockMvc = MockMvcBuilders.standaloneSetup(placementResource)
@@ -301,7 +280,7 @@ public class PlacementResourceIntTest {
         placementDetails.setDateTo(UPDATED_DATE_TO.plusMonths(3));
         placementDetails.setPlacementType(placementType);
 
-        final Post post = postRepository.findOne(placementDetails.getPostId());
+      final Post post = postRepository.findById(placementDetails.getPostId()).orElse(null);
         post.setNationalPostNumber(postNumber);
         postRepository.saveAndFlush(post);
 
@@ -327,8 +306,8 @@ public class PlacementResourceIntTest {
         assertThat(testPlacement.getTrainingDescription()).isEqualTo(DEFAULT_TRAINING_DESCRIPTION);
         assertThat(testPlacement.getPlacementType()).isEqualTo(placementType);
         assertThat(testPlacement.getWholeTimeEquivalent()).isEqualTo(DEFAULT_PLACEMENT_WHOLE_TIME_EQUIVALENT.setScale(2,BigDecimal.ROUND_HALF_UP));
-        assertThat(placementSupervisorRepository.findOne(new PlacementSupervisorId(testPlacement.getId(), 1000L, 1))).isNotNull();
-        assertThat(placementSupervisorRepository.findOne(new PlacementSupervisorId(testPlacement.getId(), 2000L, 2))).isNotNull();
+      assertThat(placementSupervisorRepository.findById(new PlacementSupervisorId(testPlacement.getId(), 1000L, 1))).isNotNull();
+      assertThat(placementSupervisorRepository.findById(new PlacementSupervisorId(testPlacement.getId(), 2000L, 2))).isNotNull();
 
         // Validate that there is no ESR notification record created
         final List<EsrNotification> esrNotifications = esrNotificationRepository.findAll();
@@ -377,7 +356,7 @@ public class PlacementResourceIntTest {
         placementDetails.setDateTo(UPDATED_DATE_TO.plusMonths(8));
         placementDetails.setPlacementType(placementType);
 
-        final Post post = postRepository.findOne(placementDetails.getPostId());
+      final Post post = postRepository.findById(placementDetails.getPostId()).orElse(null);
         post.setNationalPostNumber(postNumber);
         postRepository.saveAndFlush(post);
 
@@ -507,12 +486,12 @@ public class PlacementResourceIntTest {
         supervisors.add(new PlacementSupervisor(placementDetails.getId(), 4000L, 2));
         supervisors.add(new PlacementSupervisor(5000L, 4000L, 2));
 
-        placementSupervisorRepository.save(supervisors);
+      placementSupervisorRepository.saveAll(supervisors);
 
         final int databaseSizeBeforeUpdate = placementDetailsRepository.findAll().size();
 
-        // Update the placementDetails
-        final PlacementDetails updatedPlacement = placementDetailsRepository.findOne(placementDetails.getId());
+      // Update the placement details
+      final PlacementDetails updatedPlacement = placementDetailsRepository.findById(placementDetails.getId()).orElse(null);
         updatedPlacement.setSiteCode(UPDATED_SITE);
         updatedPlacement.setGradeAbbreviation(UPDATED_GRADE);
         updatedPlacement.setDateFrom(DEFAULT_DATE_FROM);
@@ -542,9 +521,9 @@ public class PlacementResourceIntTest {
         assertThat(testPlacement.getTrainingDescription()).isEqualTo(UPDATED_TRAINING_DESCRPTION);
         assertThat(testPlacement.getPlacementType()).isEqualTo(UPDATED_PLACEMENT_TYPE);
         assertThat(testPlacement.getWholeTimeEquivalent()).isEqualTo(UPDATED_PLACEMENT_WHOLE_TIME_EQUIVALENT.setScale(2,BigDecimal.ROUND_HALF_UP));
-        assertThat(placementSupervisorRepository.findOne(new PlacementSupervisorId(testPlacement.getId(), 1000L, 1))).isNotNull();
-        assertThat(placementSupervisorRepository.findOne(new PlacementSupervisorId(testPlacement.getId(), 2000L, 2))).isNotNull();
-        assertThat(placementSupervisorRepository.findOne(new PlacementSupervisorId(5000L, 4000L, 2))).isNotNull();
+      assertThat(placementSupervisorRepository.findById(new PlacementSupervisorId(testPlacement.getId(), 1000L, 1))).isNotNull();
+      assertThat(placementSupervisorRepository.findById(new PlacementSupervisorId(testPlacement.getId(), 2000L, 2))).isNotNull();
+      assertThat(placementSupervisorRepository.findById(new PlacementSupervisorId(5000L, 4000L, 2))).isNotNull();
         assertThat(placementSupervisorRepository.findAll()).hasSize(3);
 
         // validate that no EsrNotification records are created in the database
@@ -560,8 +539,8 @@ public class PlacementResourceIntTest {
 
         final int databaseSizeBeforeUpdate = placementDetailsRepository.findAll().size();
 
-        // Update the placementDetails
-        final PlacementDetails updatedPlacement = placementDetailsRepository.findOne(placementDetails.getId());
+      // Update the placement details
+      final PlacementDetails updatedPlacement = placementDetailsRepository.findById(placementDetails.getId()).orElse(null);
         updatedPlacement.setSiteCode(UPDATED_SITE);
 
         final PlacementDetailsDTO placementDTO = placementDetailsMapper.placementDetailsToPlacementDetailsDTO(updatedPlacement);
@@ -597,14 +576,14 @@ public class PlacementResourceIntTest {
         placementDetails.setPlacementType(placementType);
         placementDetailsRepository.saveAndFlush(placementDetails);
 
-        final Post post = postRepository.findOne(placementDetails.getPostId());
+      final Post post = postRepository.findById(placementDetails.getPostId()).orElse(null);
         post.setNationalPostNumber(localPostNumber);
         postRepository.saveAndFlush(post);
 
         final int databaseSizeBeforeUpdate = placementDetailsRepository.findAll().size();
 
-        // Update the placementDetails
-        final PlacementDetails updatedPlacement = placementDetailsRepository.findOne(placementDetails.getId());
+      // Update the placement details
+      final PlacementDetails updatedPlacement = placementDetailsRepository.findById(placementDetails.getId()).orElse(null);
         updatedPlacement.setSiteCode(UPDATED_SITE);
         updatedPlacement.setGradeAbbreviation(UPDATED_GRADE);
         updatedPlacement.setDateTo(UPDATED_DATE_TO);
@@ -654,14 +633,14 @@ public class PlacementResourceIntTest {
         placementDetails.setPlacementType(placementType);
         placementDetailsRepository.saveAndFlush(placementDetails);
 
-        final Post post = postRepository.findOne(placementDetails.getPostId());
+      final Post post = postRepository.findById(placementDetails.getPostId()).orElse(null);
         post.setNationalPostNumber(localPostNumber);
         postRepository.saveAndFlush(post);
 
         final int databaseSizeBeforeUpdate = placementDetailsRepository.findAll().size();
 
-        // Update the placementDetails
-        final PlacementDetails updatedPlacement = placementDetailsRepository.findOne(placementDetails.getId());
+      // Update the placement details
+      final PlacementDetails updatedPlacement = placementDetailsRepository.findById(placementDetails.getId()).orElse(null);
         updatedPlacement.setSiteCode(UPDATED_SITE);
         updatedPlacement.setGradeAbbreviation(UPDATED_GRADE);
         updatedPlacement.setDateFrom(UPDATED_DATE_FROM.plusMonths(3));
@@ -720,14 +699,14 @@ public class PlacementResourceIntTest {
         placementDetails.setPlacementType(placementType);
         placementDetailsRepository.saveAndFlush(placementDetails);
 
-        final Post post = postRepository.findOne(placementDetails.getPostId());
+      final Post post = postRepository.findById(placementDetails.getPostId()).orElse(null);
         post.setNationalPostNumber(localPostNumber);
         postRepository.saveAndFlush(post);
 
         final int databaseSizeBeforeUpdate = placementDetailsRepository.findAll().size();
 
-        // Update the placementDetails but still falls beyond the three months
-        final PlacementDetails updatedPlacement = placementDetailsRepository.findOne(placementDetails.getId());
+      // Update the placement details but still falls beyond the three months
+      final PlacementDetails updatedPlacement = placementDetailsRepository.findById(placementDetails.getId()).orElse(null);
         updatedPlacement.setSiteCode(UPDATED_SITE);
         updatedPlacement.setGradeAbbreviation(UPDATED_GRADE);
         updatedPlacement.setDateFrom(UPDATED_DATE_FROM.plusMonths(5));
@@ -792,7 +771,7 @@ public class PlacementResourceIntTest {
         placementDetails.setPlacementType("In Post");
         placementDetailsRepository.saveAndFlush(placementDetails);
 
-        final Post post = postRepository.findOne(placementDetails.getPostId());
+      final Post post = postRepository.findById(placementDetails.getPostId()).orElse(null);
         post.setNationalPostNumber(localPostNumber);
         postRepository.saveAndFlush(post);
 
@@ -856,7 +835,7 @@ public class PlacementResourceIntTest {
         placementDetails.setLocalPostNumber(localPostNumber);
         placementDetailsRepository.saveAndFlush(placementDetails);
 
-        final Post post = postRepository.findOne(placementDetails.getPostId());
+      final Post post = postRepository.findById(placementDetails.getPostId()).orElse(null);
         post.setNationalPostNumber(localPostNumber);
         postRepository.saveAndFlush(post);
 
@@ -895,7 +874,7 @@ public class PlacementResourceIntTest {
         futurePlacementToDelete.setLocalPostNumber(localPostNumber);
         placementDetailsRepository.saveAndFlush(futurePlacementToDelete);
 
-        final Post post = postRepository.findOne(futurePlacementToDelete.getPostId());
+      final Post post = postRepository.findById(futurePlacementToDelete.getPostId()).orElse(null);
         post.setNationalPostNumber(localPostNumber);
         postRepository.saveAndFlush(post);
 
@@ -960,7 +939,7 @@ public class PlacementResourceIntTest {
     }
 
     private void enhancePlacement(final PlacementDetails placement, final ContactDetails contactDetails, final GmcDetails gmcDetails) {
-        final Person person = personRepository.findOne(placement.getTraineeId());
+      final Person person = personRepository.findById(placement.getTraineeId()).orElse(null);
         person.setGmcDetails(gmcDetails);
         person.setContactDetails(contactDetails);
         personRepository.saveAndFlush(person);

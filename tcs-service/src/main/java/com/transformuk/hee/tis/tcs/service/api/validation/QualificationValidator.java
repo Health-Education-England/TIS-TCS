@@ -64,7 +64,7 @@ public class QualificationValidator {
     if (qualificationDTO.getPerson() == null || qualificationDTO.getPerson().getId() == null) {
       requireFieldErrors(fieldErrors, "person");
     } else if (qualificationDTO.getPerson() != null && qualificationDTO.getPerson().getId() != null) {
-      if (!personRepository.exists(qualificationDTO.getPerson().getId())) {
+      if (!personRepository.existsById(qualificationDTO.getPerson().getId())) {
         fieldErrors.add(new FieldError(QUALIFICATION_DTO_NAME, "person",
             String.format("Person with id %d does not exist", qualificationDTO.getPerson().getId())));
       }

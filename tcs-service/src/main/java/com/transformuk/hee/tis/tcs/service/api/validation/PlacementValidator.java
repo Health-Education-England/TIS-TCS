@@ -8,7 +8,6 @@ import com.transformuk.hee.tis.tcs.service.model.Placement;
 import com.transformuk.hee.tis.tcs.service.repository.PersonRepository;
 import com.transformuk.hee.tis.tcs.service.repository.PlacementRepository;
 import com.transformuk.hee.tis.tcs.service.repository.PostRepository;
-import com.transformuk.hee.tis.tcs.service.repository.SpecialtyRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 import org.springframework.validation.BeanPropertyBindingResult;
@@ -28,19 +27,16 @@ import static com.google.common.collect.Lists.newArrayList;
 @Component
 public class PlacementValidator {
     private static final String PLACEMENT_DTO_NAME = "PlacementDTO";
-    private final SpecialtyRepository specialtyRepository;
     private final ReferenceService referenceService;
     private final PostRepository postRepository;
     private final PersonRepository personRepository;
     private final PlacementRepository placementRepository;
 
     @Autowired
-    public PlacementValidator(final SpecialtyRepository specialtyRepository,
-                              final ReferenceService referenceService,
+    public PlacementValidator(final ReferenceService referenceService,
                               final PostRepository postRepository,
                               final PersonRepository personRepository,
                               final PlacementRepository placementRepository) {
-        this.specialtyRepository = specialtyRepository;
         this.referenceService = referenceService;
         this.personRepository = personRepository;
         this.postRepository = postRepository;
@@ -66,8 +62,7 @@ public class PlacementValidator {
     }
 
     public void validatePlacementForClose(final Long id) throws IllegalArgumentException {
-
-        final Placement placement = placementRepository.findOne(id);
+      final Placement placement = placementRepository.findById(id).orElse(null);
         final LocalDate now = LocalDate.now();
         if (placement != null && placement.getDateFrom() != null && placement.getDateTo() != null) {
             if (!(now.isAfter(placement.getDateFrom()) && (now.isBefore(placement.getDateTo()) || now.isEqual(placement.getDateTo())))) {
@@ -80,8 +75,7 @@ public class PlacementValidator {
     }
 
     public void validatePlacementForDelete(final Long id) throws IllegalArgumentException {
-        final Placement placement = placementRepository.findOne(id);
-        final LocalDate now = LocalDate.now();
+      final Placement placement = placementRepository.findById(id).orElse(null);
         if (placement == null) {
             throw new IllegalArgumentException(String.format("No Placement found for id: [%s]", id));
         }
@@ -89,10 +83,10 @@ public class PlacementValidator {
 
     private List<FieldError> checkPost(final PlacementDetailsDTO placementDetailsDTO) {
         final List<FieldError> fieldErrors = new ArrayList<>();
-        if (placementDetailsDTO.getPostId() == null || Long.valueOf(placementDetailsDTO.getPostId()) < 0) {
+      if (placementDetailsDTO.getPostId() == null || placementDetailsDTO.getPostId() < 0) {
             fieldErrors.add(new FieldError(PLACEMENT_DTO_NAME, "postId",
                     "Post ID cannot be null or negative"));
-        } else if (!postRepository.exists(placementDetailsDTO.getPostId())) {
+      } else if (!postRepository.existsById(placementDetailsDTO.getPostId())) {
             fieldErrors.add(new FieldError(PLACEMENT_DTO_NAME, "postId",
                     String.format("Post with id %d does not exist", placementDetailsDTO.getPostId())));
         }
@@ -104,7 +98,7 @@ public class PlacementValidator {
         if (placementDetailsDTO.getTraineeId() == null || placementDetailsDTO.getTraineeId() < 0) {
             fieldErrors.add(new FieldError(PLACEMENT_DTO_NAME, "traineeId",
                     "Trainee ID cannot be null or negative"));
-        } else if (!personRepository.exists(placementDetailsDTO.getTraineeId())) {
+        } else if (!personRepository.existsById(placementDetailsDTO.getTraineeId())) {
             fieldErrors.add(new FieldError(PLACEMENT_DTO_NAME, "traineeId",
                     String.format("Trainee with id %d does not exist", placementDetailsDTO.getTraineeId())));
         }

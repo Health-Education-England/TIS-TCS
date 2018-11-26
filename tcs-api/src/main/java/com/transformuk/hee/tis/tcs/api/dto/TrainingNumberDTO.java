@@ -3,7 +3,6 @@ package com.transformuk.hee.tis.tcs.api.dto;
 import com.transformuk.hee.tis.tcs.api.dto.validation.Create;
 import com.transformuk.hee.tis.tcs.api.dto.validation.Update;
 import com.transformuk.hee.tis.tcs.api.enumeration.TrainingNumberType;
-import org.springframework.validation.annotation.Validated;
 
 import javax.validation.constraints.DecimalMin;
 import javax.validation.constraints.NotNull;

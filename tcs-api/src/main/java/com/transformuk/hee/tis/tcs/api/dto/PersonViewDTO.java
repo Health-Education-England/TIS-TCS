@@ -271,7 +271,7 @@ public class PersonViewDTO implements Serializable {
     if (siteName != null ? !siteName.equals(that.siteName) : that.siteName != null) return false;
     if (placementType != null ? !placementType.equals(that.placementType) : that.placementType != null) return false;
     if (specialty != null ? !specialty.equals(that.specialty) : that.specialty != null) return false;
-    if (role != that.role) return false;
+    if (!role.equals(that.role)) return false;
     if (status != that.status) return false;
     if (currentOwner != null ? !currentOwner.equals(that.currentOwner) : that.currentOwner != null)
       return false;

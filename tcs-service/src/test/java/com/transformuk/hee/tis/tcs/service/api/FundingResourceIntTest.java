@@ -28,13 +28,8 @@ import java.util.List;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.hamcrest.Matchers.hasItem;
-import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.delete;
-import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
-import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
-import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.put;
-import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.content;
-import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
-import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.*;
+import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.*;
 
 /**
  * Test class for the FundingResource REST controller.
@@ -211,7 +206,7 @@ public class FundingResourceIntTest {
     int databaseSizeBeforeUpdate = fundingRepository.findAll().size();
 
     // Update the funding
-    Funding updatedFunding = fundingRepository.findOne(funding.getId());
+    Funding updatedFunding = fundingRepository.findById(funding.getId()).orElse(null);
     updatedFunding
         .status(UPDATED_STATUS)
         .startDate(UPDATED_START_DATE)

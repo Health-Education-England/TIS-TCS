@@ -29,19 +29,13 @@ import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.setup.MockMvcBuilders;
 import org.springframework.transaction.annotation.Transactional;
 
-import javax.persistence.EntityManager;
 import java.util.List;
 
 import static com.google.common.collect.Sets.newHashSet;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.hamcrest.Matchers.hasItem;
-import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.delete;
-import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
-import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
-import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.put;
-import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.content;
-import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
-import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.*;
+import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.*;
 
 /**
  * Test class for the SpecialtyResource REST controller.
@@ -90,9 +84,6 @@ public class SpecialtyResourceIntTest {
   @Autowired
   private ExceptionTranslator exceptionTranslator;
 
-  @Autowired
-  private EntityManager em;
-
   private MockMvc restSpecialtyMockMvc;
 
   private Specialty specialty;
@@ -104,21 +95,18 @@ public class SpecialtyResourceIntTest {
    * if they test an entity which requires the current entity.
    */
   public static Specialty createEntity() {
-    Specialty specialty = new Specialty()
+    return new Specialty()
         .status(DEFAULT_STATUS)
         .college(DEFAULT_COLLEGE)
         .specialtyCode(DEFAULT_NHS_SPECIALTY_CODE)
         .specialtyTypes(newHashSet(DEFAULT_SPECIALTY_TYPE))
         .intrepidId(DEFAULT_INTREPID_ID)
         .name(DEFAULT_NAME);
-    return specialty;
   }
 
   public static SpecialtyGroup createSpecialtyGroupEntity() {
-    SpecialtyGroup specialtyGroup = new SpecialtyGroup()
+    return new SpecialtyGroup()
         .intrepidId("123333");
-
-    return specialtyGroup;
   }
 
   @Before
@@ -283,8 +271,8 @@ public class SpecialtyResourceIntTest {
         .andExpect(content().contentType(MediaType.APPLICATION_JSON_UTF8_VALUE))
         .andExpect(jsonPath("$.[*].id").value(hasItem(specialty.getId().intValue())))
         .andExpect(jsonPath("$.[*].status").value(hasItem(DEFAULT_STATUS.toString().toUpperCase())))
-        .andExpect(jsonPath("$.[*].college").value(hasItem(DEFAULT_COLLEGE.toString())))
-        .andExpect(jsonPath("$.[*].specialtyCode").value(hasItem(DEFAULT_NHS_SPECIALTY_CODE.toString())))
+      .andExpect(jsonPath("$.[*].college").value(hasItem(DEFAULT_COLLEGE)))
+      .andExpect(jsonPath("$.[*].specialtyCode").value(hasItem(DEFAULT_NHS_SPECIALTY_CODE)))
         .andExpect(jsonPath("$.[*].specialtyTypes[0]").value(DEFAULT_SPECIALTY_TYPE.toString()));
   }
 
@@ -300,7 +288,7 @@ public class SpecialtyResourceIntTest {
         .andExpect(content().contentType(MediaType.APPLICATION_JSON_UTF8_VALUE))
         .andExpect(jsonPath("$.[*].id").value(hasItem(specialty.getId().intValue())))
         .andExpect(jsonPath("$.[*].status").value(hasItem(DEFAULT_STATUS.toString().toUpperCase())))
-        .andExpect(jsonPath("$.[*].college").value(hasItem(DEFAULT_COLLEGE.toString())));
+      .andExpect(jsonPath("$.[*].college").value(hasItem(DEFAULT_COLLEGE)));
   }
 
   @Test
@@ -334,8 +322,8 @@ public class SpecialtyResourceIntTest {
         .andExpect(content().contentType(MediaType.APPLICATION_JSON_UTF8_VALUE))
         .andExpect(jsonPath("$.id").value(specialty.getId().intValue()))
         .andExpect(jsonPath("$.status").value(DEFAULT_STATUS.toString().toUpperCase()))
-        .andExpect(jsonPath("$.college").value(DEFAULT_COLLEGE.toString()))
-        .andExpect(jsonPath("$.specialtyCode").value(DEFAULT_NHS_SPECIALTY_CODE.toString()))
+      .andExpect(jsonPath("$.college").value(DEFAULT_COLLEGE))
+      .andExpect(jsonPath("$.specialtyCode").value(DEFAULT_NHS_SPECIALTY_CODE))
         .andExpect(jsonPath("$.specialtyTypes[0]").value(DEFAULT_SPECIALTY_TYPE.toString()))
         .andExpect(jsonPath("$.specialtyGroup.id").value(specialtyGroup.getId().intValue()));
   }
@@ -455,7 +443,7 @@ public class SpecialtyResourceIntTest {
     int databaseSizeBeforeUpdate = specialtyRepository.findAll().size();
 
     // Update the specialty
-    Specialty updatedSpecialty = specialtyRepository.findOne(specialty.getId());
+    Specialty updatedSpecialty = specialtyRepository.findById(specialty.getId()).orElse(null);
     updatedSpecialty
         .status(UPDATED_STATUS)
         .college(UPDATED_COLLEGE)
@@ -733,7 +721,7 @@ public class SpecialtyResourceIntTest {
 
     //ensure curricula is in the database before an update
     Specialty savedSpecialty = specialtyRepository.saveAndFlush(specialty);
-    Specialty anotherSavedSpecialty = specialtyRepository.saveAndFlush(anotherSpecialty);
+    specialtyRepository.saveAndFlush(anotherSpecialty);
 
     //set the ids for the Dtos
     specialtyDTO.setId(savedSpecialty.getId());
