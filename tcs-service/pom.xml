@@ -499,6 +499,7 @@
         <version>2.1.1</version>
         <configuration>
           <attachClasses>true</attachClasses>
+          <failOnMissingWebXml>false</failOnMissingWebXml>
         </configuration>
       </plugin>
       <plugin>
