@@ -204,8 +204,13 @@ public class PersonServiceImpl implements PersonService {
     String whereClause = " WHERE 1=1 ";
 
     if (permissionService.isUserTrustAdmin()) {
-      whereClause = whereClause + "AND trustId in (:trustList) ";
+      whereClause = whereClause + "AND trustId IN (:trustList) ";
       paramSource.addValue("trustList", permissionService.getUsersTrustIds());
+    }
+
+    if (permissionService.isProgrammeObserver()) {
+      whereClause = whereClause + "AND pm.programmeId IN (:programmesList) ";
+      paramSource.addValue("programmesList", permissionService.getUsersProgrammeIds());
     }
 
     query = query.replaceAll("WHERECLAUSE", whereClause);
@@ -275,12 +280,18 @@ public class PersonServiceImpl implements PersonService {
     String query = sqlQuerySupplier.getQuery(SqlQuerySupplier.PERSON_VIEW);
     query = query.replaceAll("TRUST_JOIN", permissionService.isUserTrustAdmin() ? " left join PersonTrust pt on (pt.personId = p.id)" : StringUtils.EMPTY);
 
-    final String whereClause = createWhereClause(searchString, columnFilters);
-    query = query.replaceAll("WHERECLAUSE", whereClause);
+    String whereClause = createWhereClause(searchString, columnFilters);
 
     if (permissionService.isUserTrustAdmin()) {
       paramSource.addValue("trustList", permissionService.getUsersTrustIds());
     }
+
+    if (permissionService.isProgrammeObserver()) {
+      whereClause = whereClause + "AND pm.programmeId in (:programmesList) ";
+      paramSource.addValue("programmesList", permissionService.getUsersProgrammeIds());
+    }
+
+    query = query.replaceAll("WHERECLAUSE", whereClause);
 
     //add the text search criteria
     if (StringUtils.isNotEmpty(searchString)) {

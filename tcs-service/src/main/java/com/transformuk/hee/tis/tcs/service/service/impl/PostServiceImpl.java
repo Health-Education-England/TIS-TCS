@@ -390,6 +390,12 @@ public class PostServiceImpl implements PostService {
       paramSource.addValue("trustList", permissionService.getUsersTrustIds());
     }
     query = query.replaceAll("TRUST_JOIN", permissionService.isUserTrustAdmin() ? "  LEFT JOIN `PostTrust` pt on pt.`postId` = p.`id` " : StringUtils.EMPTY);
+
+    if (permissionService.isProgrammeObserver()) {
+      whereClause = whereClause + "AND pp.programmeId in (:programmesList) ";
+      paramSource.addValue("programmesList", permissionService.getUsersProgrammeIds());
+    }
+
     // Where condition
     query = query.replaceAll("WHERECLAUSE", whereClause);
     //For order by clause
@@ -418,10 +424,18 @@ public class PostServiceImpl implements PostService {
     final int offset = pageable.getOffset();
     String query = sqlQuerySupplier.getQuery(SqlQuerySupplier.POST_VIEW);
     query = query.replaceAll("TRUST_JOIN", permissionService.isUserTrustAdmin() ? "  LEFT JOIN `PostTrust` pt on pt.`postId` = p.`id` " : StringUtils.EMPTY);
+
+    if (permissionService.isProgrammeObserver()) {
+      whereClause = whereClause + "AND pp.programmeId in (:programmesList) ";
+      paramSource.addValue("programmesList", permissionService.getUsersProgrammeIds());
+    }
+
     query = query.replaceAll("WHERECLAUSE", whereClause);
+
     if (permissionService.isUserTrustAdmin()) {
       paramSource.addValue("trustList", permissionService.getUsersTrustIds());
     }
+
     //For order by clause
     final String orderByClause = createOrderByClauseWithParams(pageable);
     query = query.replaceAll("ORDERBYCLAUSE", orderByClause);
