@@ -34,7 +34,7 @@
     <jacoco-maven-plugin.version>0.7.9</jacoco-maven-plugin.version>
     <java.version>1.8</java.version>
     <javassist.version>3.21.0-GA</javassist.version>
-    <javax.servlet.version>4.0.0-b03</javax.servlet.version>
+    <javax.servlet.version>4.0.1</javax.servlet.version>
     <jhipster.server.version>1.2.0</jhipster.server.version>
     <jjwt.version>0.7.0</jjwt.version>
     <logstash-logback-encoder.version>4.8</logstash-logback-encoder.version>
