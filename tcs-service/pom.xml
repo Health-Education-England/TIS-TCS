@@ -31,7 +31,6 @@
     <groovy.version>2.4.13</groovy.version>
     <hibernate.version>5.3.7.Final</hibernate.version>
     <hikaricp.version>3.2.0</hikaricp.version>
-    <jacoco-maven-plugin.version>0.7.9</jacoco-maven-plugin.version>
     <java.version>1.8</java.version>
     <javassist.version>3.21.0-GA</javassist.version>
     <javax.servlet.version>4.0.1</javax.servlet.version>
@@ -75,11 +74,6 @@
     </sonar.issue.ignore.multicriteria.UndocumentedApi.resourceKey>
     <sonar.issue.ignore.multicriteria.UndocumentedApi.ruleKey>squid:UndocumentedApi
     </sonar.issue.ignore.multicriteria.UndocumentedApi.ruleKey>
-
-    <sonar.jacoco.itReportPath>${project.testresult.directory}/coverage/jacoco/jacoco-it.exec
-    </sonar.jacoco.itReportPath>
-    <sonar.jacoco.reportPath>${project.testresult.directory}/coverage/jacoco/jacoco.exec</sonar.jacoco.reportPath>
-    <sonar.java.codeCoveragePlugin>jacoco</sonar.java.codeCoveragePlugin>
 
     <sonar.javascript.jstestdriver.reportsPath>${project.testresult.directory}/karma
     </sonar.javascript.jstestdriver.reportsPath>
@@ -501,35 +495,6 @@
           <attachClasses>true</attachClasses>
           <failOnMissingWebXml>false</failOnMissingWebXml>
         </configuration>
-      </plugin>
-      <plugin>
-        <groupId>org.jacoco</groupId>
-        <artifactId>jacoco-maven-plugin</artifactId>
-        <version>${jacoco-maven-plugin.version}</version>
-        <executions>
-          <execution>
-            <id>pre-unit-tests</id>
-            <goals>
-              <goal>prepare-agent</goal>
-            </goals>
-            <configuration>
-              <!-- Sets the path to the file which contains the execution data. -->
-              <destFile>${project.testresult.directory}/coverage/jacoco/jacoco.exec</destFile>
-            </configuration>
-          </execution>
-          <!-- Ensures that the code coverage report for unit tests is created after unit tests have been run -->
-          <execution>
-            <id>postId-unit-test</id>
-            <phase>test</phase>
-            <goals>
-              <goal>report</goal>
-            </goals>
-            <configuration>
-              <dataFile>${project.testresult.directory}/coverage/jacoco/jacoco.exec</dataFile>
-              <outputDirectory>${project.testresult.directory}/coverage/jacoco</outputDirectory>
-            </configuration>
-          </execution>
-        </executions>
       </plugin>
       <plugin>
         <groupId>org.sonarsource.scanner.maven</groupId>
