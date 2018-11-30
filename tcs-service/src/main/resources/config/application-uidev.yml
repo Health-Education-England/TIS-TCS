@@ -1,17 +1,16 @@
 spring:
-    devtools:
-        restart:
-            enabled: false
-    datasource:
-        url: jdbc:mysql://${DBHOST}:${DBPORT}/${DBNAME}?useUnicode=true&characterEncoding=utf8&useSSL=${USE_SSL}
-        username: ${DBUSER}
-        password: ${DBPASSWORD}
-
-flyway:
+  devtools:
+    restart:
+      enabled: false
+  datasource:
+    url: jdbc:mysql://${DBHOST}:${DBPORT}/${DBNAME}?useUnicode=true&characterEncoding=utf8&useSSL=${USE_SSL}
+    username: ${DBUSER}
+    password: ${DBPASSWORD}
+  flyway:
     password: ${DBPASSWORD}
     schemas: ${DBNAME}
 
 logging:
-    file: ${LOG_DIR:${HOME}}/tcs.log
+  file: ${LOG_DIR:${HOME}}/tcs.log
 
 application:
