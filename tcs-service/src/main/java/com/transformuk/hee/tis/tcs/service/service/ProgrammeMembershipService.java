@@ -64,7 +64,7 @@ public interface ProgrammeMembershipService {
    * @param traineeId the tis id of the trainee
    * @return a list of programme curricula memberships for the trainee
    */
-  List findProgrammeMembershipsForTrainee(Long traineeId);
+  List<ProgrammeMembershipCurriculaDTO> findProgrammeMembershipsForTrainee(Long traineeId);
 
   List<ProgrammeMembershipCurriculaDTO> findProgrammeMembershipsForTraineeRolledUp(Long traineeId);
 
