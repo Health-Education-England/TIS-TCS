@@ -12,7 +12,7 @@
 
   <groupId>com.transformuk.hee.tis</groupId>
   <artifactId>tcs-service</artifactId>
-  <version>3.10.0</version>
+  <version>4.0.0</version>
   <packaging>war</packaging>
   <name>tcs-service</name>
 
@@ -126,12 +126,12 @@
     <dependency>
       <groupId>com.transformuk.hee</groupId>
       <artifactId>audit</artifactId>
-      <version>2.1.0</version>
+      <version>3.0.0</version>
     </dependency>
     <dependency>
       <groupId>com.transformuk.hee</groupId>
       <artifactId>tis-parent-client</artifactId>
-      <version>4.1.2</version>
+      <version>5.0.0</version>
     </dependency>
     <dependency>
       <groupId>com.transformuk.hee</groupId>
@@ -146,7 +146,7 @@
     <dependency>
       <groupId>com.transformuk.hee.tis</groupId>
       <artifactId>tcs-api</artifactId>
-      <version>4.0.3</version>
+      <version>5.0.0</version>
     </dependency>
     <dependency>
       <groupId>com.zaxxer</groupId>
@@ -297,6 +297,12 @@
       <groupId>org.springframework.boot</groupId>
       <artifactId>spring-boot-starter-test</artifactId>
       <scope>test</scope>
+      <exclusions>
+        <exclusion>
+          <groupId>com.vaadin.external.google</groupId>
+          <artifactId>android-json</artifactId>
+        </exclusion>
+      </exclusions>
     </dependency>
     <dependency>
       <groupId>org.springframework.boot</groupId>

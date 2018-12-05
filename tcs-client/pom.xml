@@ -6,7 +6,7 @@
 
   <groupId>com.transformuk.hee.tis</groupId>
   <artifactId>tcs-client</artifactId>
-  <version>3.0.76</version>
+  <version>4.0.0</version>
   <packaging>jar</packaging>
 
   <properties>
@@ -22,7 +22,7 @@
     <dependency>
       <groupId>com.transformuk.hee</groupId>
       <artifactId>tis-parent-client</artifactId>
-      <version>4.1.2</version>
+      <version>5.0.0</version>
       <exclusions>
         <exclusion>
           <groupId>org.springframework</groupId>
@@ -42,17 +42,17 @@
     <dependency>
       <groupId>com.transformuk.hee</groupId>
       <artifactId>tis-security-jwt</artifactId>
-      <version>4.2.0</version>
+      <version>5.0.0</version>
     </dependency>
     <dependency>
       <groupId>com.transformuk.hee.tis</groupId>
       <artifactId>tcs-api</artifactId>
-      <version>4.0.3</version>
+      <version>5.0.0</version>
     </dependency>
     <dependency>
       <groupId>com.transformuk.hee</groupId>
       <artifactId>keycloak-client</artifactId>
-      <version>2.2.0</version>
+      <version>3.0.0</version>
     </dependency>
   </dependencies>
 
