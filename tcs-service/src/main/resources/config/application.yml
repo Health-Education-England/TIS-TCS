@@ -20,6 +20,9 @@ management:
     web:
       exposure:
         include: ["health"]
+    jmx:
+      exposure:
+        include: []
   health:
     mail:
       enabled: false # When using the MailService, configure an SMTP server and set this to true
@@ -201,7 +204,6 @@ kc:
   password: ${KC_PASSWORD}
   timeout: ${KC_TIMEOUT}
 
-debug: true
 logging:
   file: ${LOG_DIR:${HOME}}/tcs.log
     # level:
