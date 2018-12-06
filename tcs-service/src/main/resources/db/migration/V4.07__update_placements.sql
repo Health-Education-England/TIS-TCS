@@ -1,3 +1,4 @@
+SET FOREIGN_KEY_CHECKS = 0;
 UPDATE Placement SET traineeid=80166 where id=7644;
 UPDATE Placement SET traineeid=5877 where id=8317;
 UPDATE Placement SET traineeid=104180 where id=8835;
@@ -5258,3 +5259,4 @@ UPDATE Placement SET traineeid=253219 where id=1603716;
 UPDATE Placement SET traineeid=198268 where id=1607156;
 UPDATE Placement SET traineeid=247494 where id=1609297;
 UPDATE Placement SET traineeid=253343 where id=1611597;
+SET FOREIGN_KEY_CHECKS = 1;

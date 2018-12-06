@@ -1,3 +1,4 @@
+SET FOREIGN_KEY_CHECKS = 0;
 UPDATE ProgrammeMembership SET personid=5877 where id=63;
 UPDATE ProgrammeMembership SET personid=31959 where id=2518;
 UPDATE ProgrammeMembership SET personid=40403 where id=2646;
@@ -1045,3 +1046,4 @@ UPDATE ProgrammeMembership SET personid=165855 where id=282333;
 UPDATE ProgrammeMembership SET personid=248578 where id=282339;
 UPDATE ProgrammeMembership SET personid=207918 where id=282655;
 UPDATE ProgrammeMembership SET personid=253219 where id=282972;
+SET FOREIGN_KEY_CHECKS = 1;

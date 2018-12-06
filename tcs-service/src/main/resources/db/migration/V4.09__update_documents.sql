@@ -1,3 +1,4 @@
+SET FOREIGN_KEY_CHECKS = 0;
 UPDATE Document SET personId=688 where personId=145934;
 UPDATE Document SET personId=688 where personId=145934;
 UPDATE Document SET personId=1279 where personId=198325;
@@ -10291,3 +10292,4 @@ UPDATE Document SET personId=254966 where personId=73510;
 UPDATE Document SET personId=254966 where personId=73510;
 UPDATE Document SET personId=254966 where personId=73510;
 UPDATE Document SET personId=254966 where personId=73510;
+SET FOREIGN_KEY_CHECKS = 1;

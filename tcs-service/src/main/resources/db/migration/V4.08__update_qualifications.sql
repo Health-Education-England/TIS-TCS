@@ -1,3 +1,4 @@
+SET FOREIGN_KEY_CHECKS = 0;
 UPDATE Qualification SET personid=80166 where id=1772;
 UPDATE Qualification SET personid=25568 where id=10494;
 UPDATE Qualification SET personid=31713 where id=12083;
@@ -1424,3 +1425,4 @@ UPDATE Qualification SET personid=5877 where id=245780;
 UPDATE Qualification SET personid=46444 where id=245789;
 UPDATE Qualification SET personid=250495 where id=245796;
 UPDATE Qualification SET personid=253400 where id=245870;
+SET FOREIGN_KEY_CHECKS = 1;
