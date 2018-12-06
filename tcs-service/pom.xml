@@ -6,13 +6,13 @@
   <parent>
     <artifactId>tis-parent</artifactId>
     <groupId>com.transformuk.hee</groupId>
-    <version>2.2.3</version>
+    <version>3.0.0</version>
     <relativePath/>
   </parent>
 
   <groupId>com.transformuk.hee.tis</groupId>
   <artifactId>tcs-service</artifactId>
-  <version>3.10.3</version>
+  <version>4.0.0</version>
   <packaging>war</packaging>
   <name>tcs-service</name>
 
@@ -29,12 +29,11 @@
     <docker-maven-plugin.version>0.4.13</docker-maven-plugin.version>
     <frontend.maven.plugin.version>1.3</frontend.maven.plugin.version>
     <groovy.version>2.4.13</groovy.version>
-    <hibernate.version>5.2.8.Final</hibernate.version>
-    <hikaricp.version>2.6.0</hikaricp.version>
-    <jacoco-maven-plugin.version>0.7.9</jacoco-maven-plugin.version>
+    <hibernate.version>5.3.7.Final</hibernate.version>
+    <hikaricp.version>3.2.0</hikaricp.version>
     <java.version>1.8</java.version>
     <javassist.version>3.21.0-GA</javassist.version>
-    <javax.servlet.version>4.0.0-b03</javax.servlet.version>
+    <javax.servlet.version>4.0.1</javax.servlet.version>
     <jhipster.server.version>1.2.0</jhipster.server.version>
     <jjwt.version>0.7.0</jjwt.version>
     <logstash-logback-encoder.version>4.8</logstash-logback-encoder.version>
@@ -47,11 +46,8 @@
     <maven.compiler.source>${java.version}</maven.compiler.source>
     <maven.compiler.target>${java.version}</maven.compiler.target>
     <maven.version>3.0.0</maven.version>
-    <metrics-spring.version>3.1.3</metrics-spring.version>
-    <node.version>v6.10.0</node.version>
     <!-- Sonar properties -->
     <project.testresult.directory>${project.build.directory}/test-results</project.testresult.directory>
-    <prometheus-simpleclient.version>0.0.20</prometheus-simpleclient.version>
     <run.addResources>false</run.addResources>
     <scala-maven-plugin.version>3.2.2</scala-maven-plugin.version>
     <scala.version>2.12.1</scala.version>
@@ -79,11 +75,6 @@
     <sonar.issue.ignore.multicriteria.UndocumentedApi.ruleKey>squid:UndocumentedApi
     </sonar.issue.ignore.multicriteria.UndocumentedApi.ruleKey>
 
-    <sonar.jacoco.itReportPath>${project.testresult.directory}/coverage/jacoco/jacoco-it.exec
-    </sonar.jacoco.itReportPath>
-    <sonar.jacoco.reportPath>${project.testresult.directory}/coverage/jacoco/jacoco.exec</sonar.jacoco.reportPath>
-    <sonar.java.codeCoveragePlugin>jacoco</sonar.java.codeCoveragePlugin>
-
     <sonar.javascript.jstestdriver.reportsPath>${project.testresult.directory}/karma
     </sonar.javascript.jstestdriver.reportsPath>
     <!-- For Sonar < 6.2 -->
@@ -99,30 +90,12 @@
 
     <spock.version>1.1-groovy-2.4</spock.version>
     <!-- Spring properties -->
-    <springfox.version>2.8.0</springfox.version>
-    <swagger.version>1.5.18</swagger.version>
     <tis.shared.modules.version>2.3.0</tis.shared.modules.version>
-    <undertow.version>1.4.10.Final</undertow.version>
+    <undertow.version>2.0.15.Final</undertow.version>
     <validation-api.version>1.1.0.Final</validation-api.version>
-    <yarn.version>v0.21.3</yarn.version>
   </properties>
 
   <dependencies>
-    <dependency>
-      <groupId>io.prometheus</groupId>
-      <artifactId>simpleclient</artifactId>
-      <version>${prometheus-simpleclient.version}</version>
-    </dependency>
-    <dependency>
-      <groupId>io.prometheus</groupId>
-      <artifactId>simpleclient_dropwizard</artifactId>
-      <version>${prometheus-simpleclient.version}</version>
-    </dependency>
-    <dependency>
-      <groupId>io.prometheus</groupId>
-      <artifactId>simpleclient_servlet</artifactId>
-      <version>${prometheus-simpleclient.version}</version>
-    </dependency>
     <dependency>
       <groupId>com.fasterxml.jackson.datatype</groupId>
       <artifactId>jackson-datatype-hibernate5</artifactId>
@@ -145,44 +118,20 @@
       <version>0.3.1</version>
     </dependency>
     <dependency>
-      <groupId>com.h2database</groupId>
-      <artifactId>h2</artifactId>
-      <scope>test</scope>
-    </dependency>
-    <dependency>
       <groupId>com.jayway.jsonpath</groupId>
       <artifactId>json-path</artifactId>
       <scope>test</scope>
       <!-- parent POM declares this dependency in default (compile) scope -->
     </dependency>
     <dependency>
-      <groupId>com.ryantenney.metrics</groupId>
-      <artifactId>metrics-spring</artifactId>
-      <version>${metrics-spring.version}</version>
-      <exclusions>
-        <exclusion>
-          <artifactId>metrics-annotation</artifactId>
-          <groupId>com.codahale.metrics</groupId>
-        </exclusion>
-        <exclusion>
-          <artifactId>metrics-core</artifactId>
-          <groupId>com.codahale.metrics</groupId>
-        </exclusion>
-        <exclusion>
-          <artifactId>metrics-healthchecks</artifactId>
-          <groupId>com.codahale.metrics</groupId>
-        </exclusion>
-      </exclusions>
-    </dependency>
-    <dependency>
       <groupId>com.transformuk.hee</groupId>
       <artifactId>audit</artifactId>
-      <version>2.1.0</version>
+      <version>3.0.0</version>
     </dependency>
     <dependency>
       <groupId>com.transformuk.hee</groupId>
       <artifactId>tis-parent-client</artifactId>
-      <version>4.1.2</version>
+      <version>5.0.0</version>
     </dependency>
     <dependency>
       <groupId>com.transformuk.hee</groupId>
@@ -197,7 +146,7 @@
     <dependency>
       <groupId>com.transformuk.hee.tis</groupId>
       <artifactId>tcs-api</artifactId>
-      <version>4.0.3</version>
+      <version>5.0.0</version>
     </dependency>
     <dependency>
       <groupId>com.zaxxer</groupId>
@@ -215,34 +164,6 @@
       <version>${commons-io.version}</version>
     </dependency>
     <dependency>
-      <groupId>io.dropwizard.metrics</groupId>
-      <artifactId>metrics-annotation</artifactId>
-      <version>${dropwizard-metrics.version}</version>
-    </dependency>
-    <dependency>
-      <groupId>io.dropwizard.metrics</groupId>
-      <artifactId>metrics-core</artifactId>
-    </dependency>
-    <dependency>
-      <groupId>io.dropwizard.metrics</groupId>
-      <artifactId>metrics-json</artifactId>
-      <version>${dropwizard-metrics.version}</version>
-    </dependency>
-    <dependency>
-      <groupId>io.dropwizard.metrics</groupId>
-      <artifactId>metrics-jvm</artifactId>
-      <version>${dropwizard-metrics.version}</version>
-    </dependency>
-    <dependency>
-      <groupId>io.dropwizard.metrics</groupId>
-      <artifactId>metrics-servlet</artifactId>
-      <version>${dropwizard-metrics.version}</version>
-    </dependency>
-    <dependency>
-      <groupId>io.dropwizard.metrics</groupId>
-      <artifactId>metrics-servlets</artifactId>
-    </dependency>
-    <dependency>
       <groupId>io.github.jhipster</groupId>
       <artifactId>jhipster</artifactId>
       <version>${jhipster.server.version}</version>
@@ -252,36 +173,13 @@
       <artifactId>jjwt</artifactId>
       <version>${jjwt.version}</version>
     </dependency>
-    <dependency>
-      <groupId>io.springfox</groupId>
-      <artifactId>springfox-bean-validators</artifactId>
-      <version>${springfox.version}</version>
-    </dependency>
-    <dependency>
-      <groupId>io.springfox</groupId>
-      <artifactId>springfox-swagger-ui</artifactId>
-      <version>${springfox.version}</version>
-    </dependency>
-    <dependency>
-      <groupId>io.springfox</groupId>
-      <artifactId>springfox-core</artifactId>
-      <version>${springfox.version}</version>
-    </dependency>
-    <dependency>
-      <groupId>io.swagger</groupId>
-      <artifactId>swagger-models</artifactId>
-      <version>${swagger.version}</version>
-    </dependency>
-    <dependency>
-      <groupId>io.swagger</groupId>
-      <artifactId>swagger-annotations</artifactId>
-      <version>${swagger.version}</version>
-    </dependency>
+
     <dependency>
       <groupId>javax.servlet</groupId>
       <artifactId>javax.servlet-api</artifactId>
       <version>${javax.servlet.version}</version>
     </dependency>
+
     <dependency>
       <groupId>mysql</groupId>
       <artifactId>mysql-connector-java</artifactId>
@@ -331,10 +229,6 @@
       <artifactId>hibernate-envers</artifactId>
     </dependency>
     <dependency>
-      <groupId>org.hibernate</groupId>
-      <artifactId>hibernate-validator</artifactId>
-    </dependency>
-    <dependency>
       <groupId>org.mapstruct</groupId>
       <artifactId>mapstruct-jdk8</artifactId>
       <version>${mapstruct.version}</version>
@@ -345,7 +239,16 @@
     </dependency>
     <dependency>
       <groupId>org.springframework.boot</groupId>
-      <artifactId>spring-boot-actuator</artifactId>
+      <artifactId>spring-boot-starter-actuator</artifactId>
+    </dependency>
+    <dependency>
+      <groupId>org.springframework.boot</groupId>
+      <artifactId>spring-boot-starter-cache</artifactId>
+    </dependency>
+    <dependency>
+      <groupId>com.github.ben-manes.caffeine</groupId>
+      <artifactId>caffeine</artifactId>
+      <version>2.6.2</version>
     </dependency>
     <dependency>
       <groupId>org.springframework.boot</groupId>
@@ -377,6 +280,12 @@
       <artifactId>spring-boot-starter-logging</artifactId>
     </dependency>
     <dependency>
+      <groupId>com.h2database</groupId>
+      <artifactId>h2</artifactId>
+      <version>1.4.192</version>
+      <scope>test</scope>
+    </dependency>
+    <dependency>
       <groupId>org.springframework.boot</groupId>
       <artifactId>spring-boot-starter-mail</artifactId>
     </dependency>
@@ -388,6 +297,12 @@
       <groupId>org.springframework.boot</groupId>
       <artifactId>spring-boot-starter-test</artifactId>
       <scope>test</scope>
+      <exclusions>
+        <exclusion>
+          <groupId>com.vaadin.external.google</groupId>
+          <artifactId>android-json</artifactId>
+        </exclusion>
+      </exclusions>
     </dependency>
     <dependency>
       <groupId>org.springframework.boot</groupId>
@@ -580,36 +495,8 @@
         <version>2.1.1</version>
         <configuration>
           <attachClasses>true</attachClasses>
+          <failOnMissingWebXml>false</failOnMissingWebXml>
         </configuration>
-      </plugin>
-      <plugin>
-        <groupId>org.jacoco</groupId>
-        <artifactId>jacoco-maven-plugin</artifactId>
-        <version>${jacoco-maven-plugin.version}</version>
-        <executions>
-          <execution>
-            <id>pre-unit-tests</id>
-            <goals>
-              <goal>prepare-agent</goal>
-            </goals>
-            <configuration>
-              <!-- Sets the path to the file which contains the execution data. -->
-              <destFile>${project.testresult.directory}/coverage/jacoco/jacoco.exec</destFile>
-            </configuration>
-          </execution>
-          <!-- Ensures that the code coverage report for unit tests is created after unit tests have been run -->
-          <execution>
-            <id>postId-unit-test</id>
-            <phase>test</phase>
-            <goals>
-              <goal>report</goal>
-            </goals>
-            <configuration>
-              <dataFile>${project.testresult.directory}/coverage/jacoco/jacoco.exec</dataFile>
-              <outputDirectory>${project.testresult.directory}/coverage/jacoco</outputDirectory>
-            </configuration>
-          </execution>
-        </executions>
       </plugin>
       <plugin>
         <groupId>org.sonarsource.scanner.maven</groupId>
@@ -629,6 +516,11 @@
         </configuration>
       </plugin>
       <!-- jhipster-needle-maven-add-plugin -->
+      <plugin>
+        <groupId>org.codehaus.mojo</groupId>
+        <artifactId>versions-maven-plugin</artifactId>
+        <version>2.5</version>
+      </plugin>
     </plugins>
   </build>
   <profiles>
@@ -641,7 +533,7 @@
         <!-- log configuration -->
         <logback.loglevel>DEBUG</logback.loglevel>
         <!-- default Spring profiles -->
-        <spring.profiles.active>dev,prometheus</spring.profiles.active>
+        <spring.profiles.active>dev</spring.profiles.active>
       </properties>
       <dependencies>
         <dependency>
@@ -675,43 +567,8 @@
         <!-- log configuration -->
         <logback.loglevel>INFO</logback.loglevel>
         <!-- default Spring profiles -->
-        <spring.profiles.active>prod,prometheus</spring.profiles.active>
+        <spring.profiles.active>prod</spring.profiles.active>
       </properties>
-    </profile>
-    <profile>
-      <!--
-        Profile for monitoring the application with Graphite.
-      -->
-      <id>graphite</id>
-      <dependencies>
-        <dependency>
-          <groupId>io.dropwizard.metrics</groupId>
-          <artifactId>metrics-graphite</artifactId>
-        </dependency>
-      </dependencies>
-    </profile>
-    <profile>
-      <!--
-        Profile for monitoring the application with Prometheus.
-      -->
-      <id>prometheus</id>
-      <dependencies>
-        <dependency>
-          <groupId>io.prometheus</groupId>
-          <artifactId>simpleclient</artifactId>
-          <version>${prometheus-simpleclient.version}</version>
-        </dependency>
-        <dependency>
-          <groupId>io.prometheus</groupId>
-          <artifactId>simpleclient_dropwizard</artifactId>
-          <version>${prometheus-simpleclient.version}</version>
-        </dependency>
-        <dependency>
-          <groupId>io.prometheus</groupId>
-          <artifactId>simpleclient_servlet</artifactId>
-          <version>${prometheus-simpleclient.version}</version>
-        </dependency>
-      </dependencies>
     </profile>
     <profile>
       <!--

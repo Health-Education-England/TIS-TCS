@@ -27,13 +27,8 @@ import java.util.List;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.hamcrest.Matchers.hasItem;
-import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.delete;
-import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
-import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
-import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.put;
-import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.content;
-import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
-import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.*;
+import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.*;
 
 /**
  * Test class for the FundingComponentsResource REST controller.
@@ -189,7 +184,7 @@ public class FundingComponentsResourceIntTest {
     int databaseSizeBeforeUpdate = fundingComponentsRepository.findAll().size();
 
     // Update the fundingComponents
-    FundingComponents updatedFundingComponents = fundingComponentsRepository.findOne(fundingComponents.getId());
+    FundingComponents updatedFundingComponents = fundingComponentsRepository.findById(fundingComponents.getId()).orElse(null);
     updatedFundingComponents
         .percentage(UPDATED_PERCENTAGE)
         .amount(UPDATED_AMOUNT);

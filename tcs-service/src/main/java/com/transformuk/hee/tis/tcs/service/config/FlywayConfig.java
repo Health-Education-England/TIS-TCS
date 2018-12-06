@@ -11,30 +11,31 @@ import org.springframework.context.annotation.Configuration;
 @Configuration
 public class FlywayConfig {
 
-  @Value("${flyway.url}")
+  @Value("${spring.flyway.url}")
   private String url;
 
-  @Value("${flyway.password}")
+  @Value("${spring.flyway.password}")
   private String password;
 
-  @Value("${flyway.user}")
+  @Value("${spring.flyway.user}")
   private String user;
 
-  @Value("${flyway.locations}")
+  @Value("${spring.flyway.locations}")
   private String migrationFilesLocations;
 
-  @Value("${flyway.schemas}")
+  @Value("${spring.flyway.schemas}")
   private String schemas;
 
-  @Value("${flyway.baseline-on-migrate}")
+  @Value("${spring.flyway.baseline-on-migrate}")
   private boolean baseLineOnMigrate;
 
-  @Value("${flyway.clean-on-validation-error}")
+  @Value("${spring.flyway.clean-on-validation-error}")
   private boolean cleanOnValidationError;
 
-  @Value("${flyway.out-of-order}")
+  @Value("${spring.flyway.out-of-order}")
   private boolean outOfOrder;
 
+  // Since Spring Boot 2 brings
   @Bean(initMethod = "migrate")
   Flyway flyway() {
     Flyway flyway = new Flyway();

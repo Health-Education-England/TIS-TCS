@@ -52,7 +52,7 @@ public class RotationPostServiceImpl implements RotationPostService {
         rotationPostRepository.flush();
         LOG.info("Deleted '{}' RotationPosts with postId '{}'", totalRotationPostDeleted, postId);
 
-        rotationPostRepository.save(rotationPostMapper.toEntity(rotationPostDTOS));
+      rotationPostRepository.saveAll(rotationPostMapper.toEntity(rotationPostDTOS));
 
         return rotationPostDTOS;
     }

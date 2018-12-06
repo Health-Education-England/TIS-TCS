@@ -1,6 +1,5 @@
 package com.transformuk.hee.tis.tcs.service.api;
 
-import com.codahale.metrics.annotation.Timed;
 import com.transformuk.hee.tis.tcs.api.dto.GdcDetailsDTO;
 import com.transformuk.hee.tis.tcs.api.dto.validation.Create;
 import com.transformuk.hee.tis.tcs.api.dto.validation.Update;
@@ -10,7 +9,6 @@ import com.transformuk.hee.tis.tcs.service.api.util.UrlDecoderUtil;
 import com.transformuk.hee.tis.tcs.service.api.validation.GdcDetailsValidator;
 import com.transformuk.hee.tis.tcs.service.service.GdcDetailsService;
 import io.github.jhipster.web.util.ResponseUtil;
-import io.swagger.annotations.ApiParam;
 import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -22,15 +20,7 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.MethodArgumentNotValidException;
-import org.springframework.web.bind.annotation.DeleteMapping;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.PatchMapping;
-import org.springframework.web.bind.annotation.PathVariable;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.PutMapping;
-import org.springframework.web.bind.annotation.RequestBody;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
 
 import javax.validation.Valid;
 import java.net.URI;
@@ -67,7 +57,6 @@ public class GdcDetailsResource {
    * @throws URISyntaxException if the Location URI syntax is incorrect
    */
   @PostMapping("/gdc-details")
-  @Timed
   @PreAuthorize("hasPermission('tis:people::person:', 'Create')")
   public ResponseEntity<GdcDetailsDTO> createGdcDetails(@RequestBody @Validated(Create.class) GdcDetailsDTO gdcDetailsDTO)
       throws URISyntaxException, MethodArgumentNotValidException {
@@ -89,7 +78,6 @@ public class GdcDetailsResource {
    * @throws URISyntaxException if the Location URI syntax is incorrect
    */
   @PutMapping("/gdc-details")
-  @Timed
   @PreAuthorize("hasPermission('tis:people::person:', 'Update')")
   public ResponseEntity<GdcDetailsDTO> updateGdcDetails(@RequestBody @Validated(Update.class) GdcDetailsDTO gdcDetailsDTO)
       throws URISyntaxException, MethodArgumentNotValidException {
@@ -112,9 +100,8 @@ public class GdcDetailsResource {
    * @return the ResponseEntity with status 200 (OK) and the list of gdcDetails in body
    */
   @GetMapping("/gdc-details")
-  @Timed
   @PreAuthorize("hasPermission('tis:people::person:', 'View')")
-  public ResponseEntity<List<GdcDetailsDTO>> getAllGdcDetails(@ApiParam Pageable pageable) {
+  public ResponseEntity<List<GdcDetailsDTO>> getAllGdcDetails(Pageable pageable) {
     log.debug("REST request to get a page of GdcDetails");
     Page<GdcDetailsDTO> page = gdcDetailsService.findAll(pageable);
     HttpHeaders headers = PaginationUtil.generatePaginationHttpHeaders(page, "/api/gdc-details");
@@ -128,7 +115,6 @@ public class GdcDetailsResource {
    * @return the ResponseEntity with status 200 (OK) and with body the gdcDetailsDTO, or with status 404 (Not Found)
    */
   @GetMapping("/gdc-details/{id}")
-  @Timed
   @PreAuthorize("hasPermission('tis:people::person:', 'View')")
   public ResponseEntity<GdcDetailsDTO> getGdcDetails(@PathVariable Long id) {
     log.debug("REST request to get GdcDetails : {}", id);
@@ -144,9 +130,8 @@ public class GdcDetailsResource {
    * @return the ResponseEntity with status 200 (OK)  and the list of gdcDetails in body, or empty list
    */
   @GetMapping("/gdc-details/in/{gdcIds}")
-  @Timed
   @PreAuthorize("hasPermission('tis:people::person:', 'View')")
-  public ResponseEntity<List<GdcDetailsDTO>> getGdcDetailsIn(@ApiParam(name = "gdcIds", allowMultiple = true) @PathVariable("gdcIds") List<String> gdcIds) {
+  public ResponseEntity<List<GdcDetailsDTO>> getGdcDetailsIn(@PathVariable("gdcIds") List<String> gdcIds) {
     log.debug("REST request to find several GdcDetails: {}", gdcIds);
 
     if (!gdcIds.isEmpty()) {
@@ -164,7 +149,6 @@ public class GdcDetailsResource {
    * @return the ResponseEntity with status 200 (OK)
    */
   @DeleteMapping("/gdc-details/{id}")
-  @Timed
   @PreAuthorize("hasAuthority('tcs:delete:entities')")
   public ResponseEntity<Void> deleteGdcDetails(@PathVariable Long id) {
     log.debug("REST request to delete GdcDetails : {}", id);
@@ -177,12 +161,10 @@ public class GdcDetailsResource {
    *
    * @param gdcDetailsDTOs the gdcDetailsDTOs to create/update
    * @return the ResponseEntity with status 200 and with body the new gdcDetails
-   * @throws URISyntaxException if the Location URI syntax is incorrect
    */
   @PatchMapping("/gdc-details")
-  @Timed
   @PreAuthorize("hasPermission('tis:people::person:', 'Update')")
-  public ResponseEntity<List<GdcDetailsDTO>> patchGdcDetails(@Valid @RequestBody List<GdcDetailsDTO> gdcDetailsDTOs) throws URISyntaxException {
+  public ResponseEntity<List<GdcDetailsDTO>> patchGdcDetails(@Valid @RequestBody List<GdcDetailsDTO> gdcDetailsDTOs) {
     log.debug("REST request to patch gdcDetails: {}", gdcDetailsDTOs);
     List<GdcDetailsDTO> result = gdcDetailsService.save(gdcDetailsDTOs);
     List<Long> ids = result.stream().map(GdcDetailsDTO::getId).collect(Collectors.toList());

@@ -20,7 +20,10 @@ import javax.persistence.EntityManager;
 import javax.persistence.EntityManagerFactory;
 import javax.persistence.Query;
 import java.math.BigInteger;
-import java.util.*;
+import java.util.List;
+import java.util.Map;
+import java.util.Objects;
+import java.util.Set;
 import java.util.stream.Collectors;
 
 @Component
@@ -78,14 +81,10 @@ public class PersonPlacementEmployingBodyTrustJob extends TrustAdminSyncJobTempl
                                                                      .setParameter("lastEmployingBodyId", lastEmployingBodyId)
                                                                      .setParameter("pageSize", pageSize);
         List<Object[]> resultList = query.getResultList();
-        List<EntityData> result = resultList.stream().filter(Objects::nonNull).map(objArr -> {
-            EntityData entityData = new EntityData()
-                    .entityId(((BigInteger) objArr[0]).longValue())
-                    .otherId(((BigInteger) objArr[1]).longValue());
-            return entityData;
-        }).collect(Collectors.toList());
 
-        return result;
+      return resultList.stream().filter(Objects::nonNull).map(objArr -> new EntityData()
+        .entityId(((BigInteger) objArr[0]).longValue())
+        .otherId(((BigInteger) objArr[1]).longValue())).collect(Collectors.toList());
     }
 
     @Transactional(readOnly = true)
@@ -96,7 +95,7 @@ public class PersonPlacementEmployingBodyTrustJob extends TrustAdminSyncJobTempl
         if (CollectionUtils.isNotEmpty(entityData)) {
 
             Set<Long> personIds = entityData.stream().map(EntityData::getEntityId).collect(Collectors.toSet());
-            List<Person> allPersons = personRepository.findAll(personIds);
+          List<Person> allPersons = personRepository.findAllById(personIds);
             Map<Long, Person> personIdToPerson = allPersons.stream().collect(Collectors.toMap(Person::getId, person -> person));
 
             for (EntityData ed : entityData) {

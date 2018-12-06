@@ -2,14 +2,7 @@ package com.transformuk.hee.tis.tcs.service.service.impl;
 
 import com.google.common.collect.Lists;
 import com.google.common.collect.Sets;
-import com.transformuk.hee.tis.tcs.api.dto.PlacementDTO;
-import com.transformuk.hee.tis.tcs.api.dto.PostDTO;
-import com.transformuk.hee.tis.tcs.api.dto.PostGradeDTO;
-import com.transformuk.hee.tis.tcs.api.dto.PostSiteDTO;
-import com.transformuk.hee.tis.tcs.api.dto.PostSpecialtyDTO;
-import com.transformuk.hee.tis.tcs.api.dto.PostViewDTO;
-import com.transformuk.hee.tis.tcs.api.dto.ProgrammeDTO;
-import com.transformuk.hee.tis.tcs.api.dto.SpecialtyDTO;
+import com.transformuk.hee.tis.tcs.api.dto.*;
 import com.transformuk.hee.tis.tcs.api.enumeration.FundingType;
 import com.transformuk.hee.tis.tcs.api.enumeration.PostGradeType;
 import com.transformuk.hee.tis.tcs.api.enumeration.PostSiteType;
@@ -26,14 +19,8 @@ import org.apache.commons.lang.StringUtils;
 import org.junit.Assert;
 import org.junit.Test;
 import org.junit.runner.RunWith;
-import org.mockito.ArgumentCaptor;
-import org.mockito.Captor;
-import org.mockito.InjectMocks;
-import org.mockito.Mock;
-import org.mockito.Spy;
+import org.mockito.*;
 import org.mockito.runners.MockitoJUnitRunner;
-import org.springframework.data.domain.Page;
-import org.springframework.data.domain.PageImpl;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Sort;
@@ -41,15 +28,9 @@ import org.springframework.jdbc.core.RowMapper;
 import org.springframework.jdbc.core.namedparam.MapSqlParameterSource;
 import org.springframework.jdbc.core.namedparam.NamedParameterJdbcTemplate;
 
-import java.util.ArrayList;
-import java.util.Collections;
-import java.util.HashSet;
-import java.util.List;
-import java.util.Optional;
-import java.util.Set;
+import java.util.*;
 
 import static org.mockito.Matchers.any;
-import static org.mockito.Matchers.anyList;
 import static org.mockito.Matchers.anyString;
 import static org.mockito.Mockito.*;
 
@@ -170,12 +151,12 @@ public class PostServiceImplTest {
     List<Post> savedPosts = Lists.newArrayList(postSaveMock1, postSaveMock2);
     List<PostDTO> savedPostDTOs = Lists.newArrayList(postMappedDTOMock1, postMappedDTOMock2);
     when(postMapperMock.postDTOsToPosts(postDTOsList)).thenReturn(postList);
-    when(postRepositoryMock.save(postList)).thenReturn(savedPosts);
+    when(postRepositoryMock.saveAll(postList)).thenReturn(savedPosts);
     when(postMapperMock.postsToPostDTOs(savedPosts)).thenReturn(savedPostDTOs);
     List<PostDTO> results = testObj.save(postDTOsList);
     Assert.assertSame(savedPostDTOs, results);
     verify(postMapperMock).postDTOsToPosts(postDTOsList);
-    verify(postRepositoryMock).save(postList);
+    verify(postRepositoryMock).saveAll(postList);
     verify(postMapperMock).postsToPostDTOs(savedPosts);
   }
 
@@ -195,7 +176,7 @@ public class PostServiceImplTest {
     Set<PostFunding> fundingsOnPayload = Sets.newHashSet(postFunding1, postFunding2);
     Set<PostFunding> fundingsInDatabase = Sets.newHashSet(postFunding1, postFunding2, postFunding3);
 
-    when(postRepositoryMock.findOne(1L)).thenReturn(postInDBMock);
+    when(postRepositoryMock.findById(1L)).thenReturn(Optional.of(postInDBMock));
 
     when(postDTOMock1.getId()).thenReturn(1L);
     when(postInDBMock.getGrades()).thenReturn(grades);
@@ -207,7 +188,7 @@ public class PostServiceImplTest {
     when(payloadPostMock.getFundings()).thenReturn(fundingsOnPayload);
 
     when(postInDBMock.getFundings()).thenReturn(fundingsInDatabase);
-    doNothing().when(postFundingRepositoryMock).delete(postFundingCaptor.capture());
+    doNothing().when(postFundingRepositoryMock).deleteAll(postFundingCaptor.capture());
 
     when(postRepositoryMock.save(payloadPostMock)).thenReturn(postSaveMock1);
     when(postMapperMock.postToPostDTO(postSaveMock1)).thenReturn(postMappedDTOMock1);
@@ -215,13 +196,13 @@ public class PostServiceImplTest {
     PostDTO result = testObj.update(postDTOMock1);
 
     Assert.assertEquals(postMappedDTOMock1, result);
-    verify(postRepositoryMock).findOne(1L);
+    verify(postRepositoryMock).findById(1L);
     verify(postMapperMock).postDTOToPost(postDTOMock1);
     verify(postRepositoryMock).save(payloadPostMock);
     verify(postMapperMock).postToPostDTO(postSaveMock1);
-    verify(postGradeRepositoryMock).delete(grades);
-    verify(postSiteRepositoryMock).delete(sites);
-    verify(postSpecialtyRepositoryMock).delete(specialties);
+    verify(postGradeRepositoryMock).deleteAll(grades);
+    verify(postSiteRepositoryMock).deleteAll(sites);
+    verify(postSpecialtyRepositoryMock).deleteAll(specialties);
 
     Set<PostFunding> capturedPostFundings = postFundingCaptor.getValue();
     Assert.assertTrue(capturedPostFundings.size() < fundingsInDatabase.size());
@@ -241,7 +222,6 @@ public class PostServiceImplTest {
     String query = "PostQuery";
     List<PostView> posts = Lists.newArrayList(postViewMock1);
     List<PostViewDTO> mappedPosts = Lists.newArrayList(postViewDTOMock1);
-    Page<PostView> page = new PageImpl<>(posts);
     when(permissionServiceMock.isUserTrustAdmin()).thenReturn(false);
     when(sqlQuerySupplierMock.getQuery(SqlQuerySupplier.POST_VIEW)).thenReturn(query);
     when(namedParameterJdbcTemplateMock.query(anyString(), any(MapSqlParameterSource.class), any(RowMapper.class))).thenReturn(mappedPosts);
@@ -256,18 +236,18 @@ public class PostServiceImplTest {
 
   @Test
   public void findOneShouldRetrieveOneInstanceById() {
-    when(postRepositoryMock.findOne(1L)).thenReturn(postMock1);
+    when(postRepositoryMock.findById(1L)).thenReturn(Optional.of(postMock1));
     when(postMapperMock.postToPostDTO(postMock1)).thenReturn(postDTOMock1);
     PostDTO result = testObj.findOne(1L);
     Assert.assertEquals(postDTOMock1, result);
-    verify(postRepositoryMock).findOne(1L);
+    verify(postRepositoryMock).findById(1L);
     verify(postMapperMock).postToPostDTO(postMock1);
   }
 
   @Test
   public void deleteShouldDeleteOneInstanceById() {
     testObj.delete(1L);
-    verify(postRepositoryMock).delete(1L);
+    verify(postRepositoryMock).deleteById(1L);
   }
 
   @Test
@@ -297,11 +277,11 @@ public class PostServiceImplTest {
     expectedDTO.id(currentPostDTO.getId()).intrepidId(currentPost.getIntrepidId()).oldPost(oldPostDTO).newPost(newPostDTO);
     List<PostDTO> transformedPosts = Lists.newArrayList(expectedDTO);
     when(postRepositoryMock.findPostByIntrepidIdIn(Sets.newHashSet(intrepidIds))).thenReturn(postsFromRepository);
-    when(postRepositoryMock.save(Lists.newArrayList(currentPost))).thenReturn(savedPosts);
+    when(postRepositoryMock.saveAll(Lists.newArrayList(currentPost))).thenReturn(savedPosts);
     when(postMapperMock.postsToPostDTOs(savedPosts)).thenReturn(transformedPosts);
     List<PostDTO> result = testObj.patchOldNewPosts(postDtos);
     verify(postRepositoryMock).findPostByIntrepidIdIn(Sets.newHashSet(intrepidIds));
-    verify(postRepositoryMock).save(Lists.newArrayList(currentPost));
+    verify(postRepositoryMock).saveAll(Lists.newArrayList(currentPost));
     verify(postMapperMock).postsToPostDTOs(savedPosts);
     Assert.assertSame(transformedPosts, result);
     Assert.assertEquals(expectedDTO, result.get(0));
@@ -328,11 +308,10 @@ public class PostServiceImplTest {
     expectedDTO.id(sendPostData.getId()).intrepidId(currentPost.getIntrepidId()).sites(expectedSites);
     List<PostDTO> transformedPosts = Lists.newArrayList(expectedDTO);
     when(postRepositoryMock.findPostByIntrepidIdIn(Sets.newHashSet(intrepidIds))).thenReturn(postsFromRepository);
-    when(postRepositoryMock.save(Lists.newArrayList(currentPost))).thenReturn(savedPosts);
     when(postMapperMock.postsToPostDTOs(savedPosts)).thenReturn(transformedPosts);
     List<PostDTO> result = testObj.patchPostSites(Lists.newArrayList(sendPostData));
     verify(postRepositoryMock).findPostByIntrepidIdIn(Sets.newHashSet(intrepidIds));
-    verify(postSiteRepositoryMock).save(anyList());
+    verify(postSiteRepositoryMock).saveAll(any());
     verify(postMapperMock).postsToPostDTOs(savedPosts);
     Assert.assertSame(transformedPosts, result);
     Assert.assertEquals(expectedDTO, result.get(0));
@@ -358,11 +337,11 @@ public class PostServiceImplTest {
     expectedDTO.id(sendPostData.getId()).intrepidId(currentPost.getIntrepidId()).grades(expectedGrades);
     List<PostDTO> transformedPosts = Lists.newArrayList(expectedDTO);
     when(postRepositoryMock.findPostByIntrepidIdIn(Sets.newHashSet(intrepidIds))).thenReturn(postsFromRepository);
-    when(postRepositoryMock.save(Lists.newArrayList(currentPost))).thenReturn(savedPosts);
+    when(postRepositoryMock.saveAll(Lists.newArrayList(currentPost))).thenReturn(savedPosts);
     when(postMapperMock.postsToPostDTOs(savedPosts)).thenReturn(transformedPosts);
     List<PostDTO> result = testObj.patchPostGrades(Lists.newArrayList(sendPostData));
     verify(postRepositoryMock).findPostByIntrepidIdIn(Sets.newHashSet(intrepidIds));
-    verify(postRepositoryMock).save(Lists.newArrayList(currentPost));
+    verify(postRepositoryMock).saveAll(Lists.newArrayList(currentPost));
     verify(postMapperMock).postsToPostDTOs(savedPosts);
     Assert.assertSame(transformedPosts, result);
     Assert.assertEquals(expectedDTO, result.get(0));
@@ -391,13 +370,13 @@ public class PostServiceImplTest {
     List<PostDTO> transformedPosts = Lists.newArrayList(expectedDTO);
     Set<Long> programmeIds = Sets.newHashSet(1L);
     when(postRepositoryMock.findPostByIntrepidIdIn(Sets.newHashSet(intrepidIds))).thenReturn(postsFromRepository);
-    when(programmeRepositoryMock.findAll(programmeIds)).thenReturn(Lists.newArrayList(programme));
-    when(postRepositoryMock.save(Lists.newArrayList(currentPost))).thenReturn(savedPosts);
+    when(programmeRepositoryMock.findAllById(programmeIds)).thenReturn(Lists.newArrayList(programme));
+    when(postRepositoryMock.saveAll(Lists.newArrayList(currentPost))).thenReturn(savedPosts);
     when(postMapperMock.postsToPostDTOs(savedPosts)).thenReturn(transformedPosts);
     List<PostDTO> result = testObj.patchPostProgrammes(Lists.newArrayList(sendPostData));
     verify(postRepositoryMock).findPostByIntrepidIdIn(Sets.newHashSet(intrepidIds));
-    verify(programmeRepositoryMock).findAll(programmeIds);
-    verify(postRepositoryMock).save(Lists.newArrayList(currentPost));
+    verify(programmeRepositoryMock).findAllById(programmeIds);
+    verify(postRepositoryMock).saveAll(Lists.newArrayList(currentPost));
     verify(postMapperMock).postsToPostDTOs(savedPosts);
     Assert.assertSame(transformedPosts, result);
     Assert.assertEquals(expectedDTO, result.get(0));
@@ -433,12 +412,10 @@ public class PostServiceImplTest {
     List<PostDTO> transformedPosts = Lists.newArrayList(expectedDTO);
     Set<Long> specialtyIds = Sets.newHashSet(2L);
     when(postRepositoryMock.findPostByIntrepidIdIn(Sets.newHashSet(intrepidIds))).thenReturn(postsFromRepository);
-    when(specialtyRepositoryMock.findAll(specialtyIds)).thenReturn(Lists.newArrayList(primarySpecialty));
-    when(postRepositoryMock.save(Lists.newArrayList(postInRepository))).thenReturn(savedPosts);
     when(postMapperMock.postsToPostDTOs(savedPosts)).thenReturn(transformedPosts);
     List<PostDTO> result = testObj.patchPostSpecialties(Lists.newArrayList(postDTOToSend));
     verify(postRepositoryMock).findPostByIntrepidIdIn(Sets.newHashSet(intrepidIds));
-    verify(postSpecialtyRepositoryMock).save(postSpecialtyArgumentCaptor.capture());
+    verify(postSpecialtyRepositoryMock).saveAll(postSpecialtyArgumentCaptor.capture());
     verify(postMapperMock).postsToPostDTOs(savedPosts);
     PostSpecialtyDTO postSpecialtyValue = null;
     for (PostSpecialtyDTO savedLink : result.get(0).getSpecialties()) {
@@ -478,12 +455,12 @@ public class PostServiceImplTest {
     Set<String> placementIds = Sets.newHashSet("placement intrepid id");
     when(postRepositoryMock.findPostByIntrepidIdIn(Sets.newHashSet(intrepidIds))).thenReturn(postsFromRepository);
     when(placementRepositoryMock.findByIntrepidIdIn(placementIds)).thenReturn(Sets.newHashSet(placement));
-    when(postRepositoryMock.save(Lists.newArrayList(currentPost))).thenReturn(savedPosts);
+    when(postRepositoryMock.saveAll(Lists.newArrayList(currentPost))).thenReturn(savedPosts);
     when(postMapperMock.postsToPostDTOs(savedPosts)).thenReturn(transformedPosts);
     List<PostDTO> result = testObj.patchPostPlacements(Lists.newArrayList(sendPostData));
     verify(postRepositoryMock).findPostByIntrepidIdIn(Sets.newHashSet(intrepidIds));
     verify(placementRepositoryMock).findByIntrepidIdIn(placementIds);
-    verify(postRepositoryMock).save(Lists.newArrayList(currentPost));
+    verify(postRepositoryMock).saveAll(Lists.newArrayList(currentPost));
     verify(postMapperMock).postsToPostDTOs(savedPosts);
     Assert.assertSame(transformedPosts, result);
     Assert.assertEquals(expectedDTO, result.get(0));
@@ -551,9 +528,6 @@ public class PostServiceImplTest {
 
   @Test
   public void fundingTypeShouldExistInWhereClauseWhenFilteredByIt(){
-    final int PAGE = 1;
-    final int SIZE = 100;
-    final Sort nationalPostNumberSortOrder = new Sort(Sort.Direction.DESC, "nationalPostNumber");
     final String SEARCH_STRING = StringUtils.EMPTY;
     final List<ColumnFilter> COLUMN_FILTERS = new ArrayList<>();
     List<Object> columnFilterValues = new ArrayList<>();
@@ -562,10 +536,8 @@ public class PostServiceImplTest {
     columnFilterValues.add(FundingType.TRUST);
     columnFilterValues.add(FundingType.OTHER);
     COLUMN_FILTERS.add(new ColumnFilter("fundingType", columnFilterValues));
-    final String WHERE_CLAUSE = new String("TARIFF, MADEL, TRUST, OTHER");
     List<PostViewDTO> resultsFromQuery = new ArrayList<>();
     resultsFromQuery.add(new PostViewDTO());
-    PageRequest pageable = new PageRequest(PAGE, SIZE, nationalPostNumberSortOrder);
     String whereClause = testObj.createWhereClause(SEARCH_STRING, COLUMN_FILTERS);
     Assert.assertTrue(whereClause.contains("fundingTypeList"));
   }
@@ -586,7 +558,7 @@ public class PostServiceImplTest {
     when(permissionServiceMock.isUserTrustAdmin()).thenReturn(false);
     when(namedParameterJdbcTemplateMock.query(queryCaptor.capture(), any(MapSqlParameterSource.class), any(PostServiceImpl.PostViewRowMapper.class)))
         .thenReturn(resultsFromQuery);
-    BasicPage<PostViewDTO> result = testObj.advancedSearch(SEARCH_STRING, COLUMN_FILTERS, pageable);
+    testObj.advancedSearch(SEARCH_STRING, COLUMN_FILTERS, pageable);
     String capturedQueryString = queryCaptor.getValue();
     int indexOfGroupBy = capturedQueryString.indexOf("group by");
     Assert.assertTrue(indexOfGroupBy >= 0);
@@ -614,7 +586,7 @@ public class PostServiceImplTest {
     when(permissionServiceMock.isUserTrustAdmin()).thenReturn(false);
     when(namedParameterJdbcTemplateMock.query(queryCaptor.capture(), any(MapSqlParameterSource.class), any(PostServiceImpl.PostViewRowMapper.class)))
         .thenReturn(resultsFromQuery);
-    BasicPage<PostViewDTO> result = testObj.advancedSearch(SEARCH_STRING, COLUMN_FILTERS, pageable);
+    testObj.advancedSearch(SEARCH_STRING, COLUMN_FILTERS, pageable);
     String capturedQueryString = queryCaptor.getValue();
     int indexOfGroupBy = capturedQueryString.indexOf("group by");
     Assert.assertTrue(indexOfGroupBy >= 0);

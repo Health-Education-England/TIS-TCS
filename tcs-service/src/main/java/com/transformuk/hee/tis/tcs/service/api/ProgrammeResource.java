@@ -1,8 +1,6 @@
 package com.transformuk.hee.tis.tcs.service.api;
 
-import com.codahale.metrics.annotation.Timed;
 import com.google.common.collect.Lists;
-import com.transformuk.hee.tis.security.model.UserProfile;
 import com.transformuk.hee.tis.tcs.api.dto.ProgrammeDTO;
 import com.transformuk.hee.tis.tcs.api.dto.validation.Create;
 import com.transformuk.hee.tis.tcs.api.dto.validation.Update;
@@ -15,10 +13,6 @@ import com.transformuk.hee.tis.tcs.service.model.ColumnFilter;
 import com.transformuk.hee.tis.tcs.service.service.ProgrammeService;
 import io.github.jhipster.web.util.ResponseUtil;
 import io.jsonwebtoken.lang.Collections;
-import io.swagger.annotations.ApiOperation;
-import io.swagger.annotations.ApiParam;
-import io.swagger.annotations.ApiResponse;
-import io.swagger.annotations.ApiResponses;
 import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -31,15 +25,7 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.MethodArgumentNotValidException;
-import org.springframework.web.bind.annotation.DeleteMapping;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.PathVariable;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.PutMapping;
-import org.springframework.web.bind.annotation.RequestBody;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RequestParam;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
 
 import javax.validation.Valid;
 import java.io.IOException;
@@ -78,7 +64,6 @@ public class ProgrammeResource {
    * @throws URISyntaxException if the Location URI syntax is incorrect
    */
   @PostMapping("/programmes")
-  @Timed
   @PreAuthorize("hasAuthority('programme:add:modify')")
   public ResponseEntity<ProgrammeDTO> createProgramme(@RequestBody @Validated(Create.class) ProgrammeDTO programmeDTO)
       throws URISyntaxException, MethodArgumentNotValidException {
@@ -108,7 +93,6 @@ public class ProgrammeResource {
    * @throws URISyntaxException if the Location URI syntax is incorrect
    */
   @PutMapping("/programmes")
-  @Timed
   @PreAuthorize("hasAuthority('programme:add:modify')")
   public ResponseEntity<ProgrammeDTO> updateProgramme(@RequestBody @Validated(Update.class) ProgrammeDTO programmeDTO)
       throws URISyntaxException, MethodArgumentNotValidException {
@@ -136,17 +120,12 @@ public class ProgrammeResource {
    * @return the ResponseEntity with status 200 (OK) and the list of programmes in body
    * @throws URISyntaxException if there is an error to generate the pagination HTTP headers
    */
-  @ApiOperation(value = "Lists Programmes data",
-      notes = "Returns a list of Programmes with support for pagination, sorting, smart search and column filters")
   @GetMapping("/programmes")
-  @Timed
   @PreAuthorize("hasAuthority('programme:view')")
   public ResponseEntity<List<ProgrammeDTO>> getAllProgrammes(
-      @ApiParam Pageable pageable,
-      @ApiParam(value = "any wildcard string to be searched")
-      @RequestParam(value = "searchQuery", required = false) String searchQuery,
-      @ApiParam(value = "json object by column name and value. (Eg: columnFilters={ \"owner\": [\"dean1\", \"dean2\"], \"dbc\":[\"dbc1\"] }\"")
-      @RequestParam(value = "columnFilters", required = false) String columnFilterJson) throws IOException {
+    Pageable pageable,
+    @RequestParam(value = "searchQuery", required = false) String searchQuery,
+    @RequestParam(value = "columnFilters", required = false) String columnFilterJson) throws IOException {
     log.debug("REST request to get a page of Programmes");
 
     searchQuery = sanitize(searchQuery);
@@ -170,9 +149,8 @@ public class ProgrammeResource {
    * @throws URISyntaxException if there is an error to generate the pagination HTTP headers
    */
   @GetMapping("/bulk-programmes")
-  @Timed
   @PreAuthorize("hasAuthority('programme:bulk:add:modify')")
-  public ResponseEntity<List<ProgrammeDTO>> getAllProgrammesForETL(@ApiParam Pageable pageable) {
+  public ResponseEntity<List<ProgrammeDTO>> getAllProgrammesForETL(Pageable pageable) {
     log.debug("REST request to get a page of Programmes");
     Page<ProgrammeDTO> page = programmeService.findAll(pageable);
     HttpHeaders headers = PaginationUtil.generatePaginationHttpHeaders(page, "/api/bulk-programmes");
@@ -186,7 +164,6 @@ public class ProgrammeResource {
    * @return the ResponseEntity with status 200 (OK) and with body the programmeDTO, or with status 404 (Not Found)
    */
   @GetMapping("/programmes/{id}")
-  @Timed
   @PreAuthorize("hasAuthority('programme:view')")
   public ResponseEntity<ProgrammeDTO> getProgramme(@PathVariable Long id) {
     log.debug("REST request to get Programme : {}", id);
@@ -201,7 +178,6 @@ public class ProgrammeResource {
    * @return the ResponseEntity with status 200 (OK)
    */
   @DeleteMapping("/programmes/{id}")
-  @Timed
   @PreAuthorize("hasAuthority('tcs:delete:entities')")
   public ResponseEntity<Void> deleteProgramme(@PathVariable Long id) {
     log.debug("REST request to delete Programme : {}", id);
@@ -216,7 +192,6 @@ public class ProgrammeResource {
    * @return the ResponseEntity with status 200 (OK) and with body the programmeDTO, or with status 404 (Not Found)
    */
   @GetMapping("/trainee/{traineeId}/programmes")
-  @Timed
   @PreAuthorize("hasAuthority('programme:view')")
   public ResponseEntity<List<ProgrammeDTO>> getTraineeProgrammes(@PathVariable Long traineeId) {
     log.debug("REST request to get Programmes for trainee: [{}]", traineeId);
@@ -232,7 +207,6 @@ public class ProgrammeResource {
    * @throws URISyntaxException if the Location URI syntax is incorrect
    */
   @PostMapping("/bulk-programmes")
-  @Timed
   @PreAuthorize("hasAuthority('programme:bulk:add:modify')")
   public ResponseEntity<List<ProgrammeDTO>> bulkCreateProgrammes(@RequestBody List<ProgrammeDTO> programmeDTOS)
       throws URISyntaxException, MethodArgumentNotValidException {
@@ -266,7 +240,6 @@ public class ProgrammeResource {
    * @throws URISyntaxException if the Location URI syntax is incorrect
    */
   @PutMapping("/bulk-programmes")
-  @Timed
   @PreAuthorize("hasAuthority('programme:bulk:add:modify')")
   public ResponseEntity<List<ProgrammeDTO>> bulkUpdateProgrammes(@Valid @RequestBody List<ProgrammeDTO> programmeDTOS) throws URISyntaxException {
     log.debug("REST request to bulk update Programme : {}", programmeDTOS);

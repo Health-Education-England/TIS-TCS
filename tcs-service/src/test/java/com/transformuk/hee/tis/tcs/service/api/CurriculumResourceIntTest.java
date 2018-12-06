@@ -16,7 +16,6 @@ import com.transformuk.hee.tis.tcs.service.repository.CurriculumRepository;
 import com.transformuk.hee.tis.tcs.service.repository.SpecialtyRepository;
 import com.transformuk.hee.tis.tcs.service.service.CurriculumService;
 import com.transformuk.hee.tis.tcs.service.service.mapper.CurriculumMapper;
-import com.transformuk.hee.tis.tcs.service.service.mapper.SpecialtyMapper;
 import org.apache.commons.codec.net.URLCodec;
 import org.assertj.core.util.Lists;
 import org.junit.Before;
@@ -36,17 +35,9 @@ import org.springframework.transaction.annotation.Transactional;
 import java.util.List;
 
 import static org.assertj.core.api.Assertions.assertThat;
-import static org.hamcrest.Matchers.contains;
-import static org.hamcrest.Matchers.containsInAnyOrder;
-import static org.hamcrest.Matchers.hasItem;
-import static org.hamcrest.Matchers.not;
-import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.delete;
-import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
-import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
-import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.put;
-import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.content;
-import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
-import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
+import static org.hamcrest.Matchers.*;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.*;
+import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.*;
 
 /**
  * Test class for the CurriculumResource REST controller.
@@ -95,9 +86,6 @@ public class CurriculumResourceIntTest {
 
   @Autowired
   private CurriculumMapper curriculumMapper;
-
-  @Autowired
-  private SpecialtyMapper specialtyMapper;
 
   @Autowired
   private CurriculumService curriculumService;
@@ -446,8 +434,8 @@ public class CurriculumResourceIntTest {
         .andExpect(status().isOk())
         .andExpect(content().contentType(MediaType.APPLICATION_JSON_UTF8_VALUE))
         .andExpect(jsonPath("$.[*].id").value(hasItem(curriculum.getId().intValue())))
-        .andExpect(jsonPath("$.[*].intrepidId").value(hasItem(DEFAULT_INTREPID_ID.toString())))
-        .andExpect(jsonPath("$.[*].name").value(hasItem(DEFAULT_NAME.toString())))
+      .andExpect(jsonPath("$.[*].intrepidId").value(hasItem(DEFAULT_INTREPID_ID)))
+      .andExpect(jsonPath("$.[*].name").value(hasItem(DEFAULT_NAME)))
         .andExpect(jsonPath("$.[*].curriculumSubType").value(hasItem(DEFAULT_CURRICULUM_SUB_TYPE.toString())))
         .andExpect(jsonPath("$.[*].length").value(hasItem(DEFAULT_LENGTH)))
         .andExpect(jsonPath("$.[*].assessmentType").value(hasItem(DEFAULT_ASSESSMENT_TYPE.toString())))
@@ -466,8 +454,8 @@ public class CurriculumResourceIntTest {
         .andExpect(status().isOk())
         .andExpect(content().contentType(MediaType.APPLICATION_JSON_UTF8_VALUE))
         .andExpect(jsonPath("$.id").value(curriculum.getId().intValue()))
-        .andExpect(jsonPath("$.intrepidId").value(DEFAULT_INTREPID_ID.toString()))
-        .andExpect(jsonPath("$.name").value(DEFAULT_NAME.toString()))
+      .andExpect(jsonPath("$.intrepidId").value(DEFAULT_INTREPID_ID))
+      .andExpect(jsonPath("$.name").value(DEFAULT_NAME))
         .andExpect(jsonPath("$.curriculumSubType").value(DEFAULT_CURRICULUM_SUB_TYPE.toString()))
         .andExpect(jsonPath("$.length").value(DEFAULT_LENGTH))
         .andExpect(jsonPath("$.assessmentType").value(DEFAULT_ASSESSMENT_TYPE.toString()))
@@ -562,7 +550,7 @@ public class CurriculumResourceIntTest {
     int databaseSizeBeforeUpdate = curriculumRepository.findAll().size();
 
     // Update the curriculum
-    Curriculum updatedCurriculum = curriculumRepository.findOne(curriculum.getId());
+    Curriculum updatedCurriculum = curriculumRepository.findById(curriculum.getId()).orElse(null);
     updatedCurriculum
         .name(UPDATED_NAME)
         .curriculumSubType(UPDATED_CURRICULUM_SUB_TYPE)
@@ -813,7 +801,7 @@ public class CurriculumResourceIntTest {
 
     //ensure curricula is in the database before an update
     Curriculum savedCurriculum = curriculumRepository.saveAndFlush(this.curriculum);
-    Curriculum anotherSavedCurriculum = curriculumRepository.saveAndFlush(anotherCurriculum);
+    curriculumRepository.saveAndFlush(anotherCurriculum);
 
     //set the ids for the Dtos
     curriculumDTO.setId(savedCurriculum.getId());
@@ -856,7 +844,7 @@ public class CurriculumResourceIntTest {
         .doesThisCurriculumLeadToCct(DEFAULT_DOES_THIS_CURRICULUM_LEAD_TO_CCT)
         .periodOfGrace(DEFAULT_PERIOD_OF_GRACE)
         .status(CURRENT_STATUS);
-    Curriculum savedCurriculumCurrent = curriculumRepository.saveAndFlush(curriculum_current);
+    curriculumRepository.saveAndFlush(curriculum_current);
     Curriculum curriculum_inactive = new Curriculum()
         .name(INACTIVE_NAME)
         .length(DEFAULT_LENGTH)
@@ -866,7 +854,7 @@ public class CurriculumResourceIntTest {
         .doesThisCurriculumLeadToCct(DEFAULT_DOES_THIS_CURRICULUM_LEAD_TO_CCT)
         .periodOfGrace(DEFAULT_PERIOD_OF_GRACE)
         .status(INACTIVE_STATUS);
-    Curriculum savedCurriculumInactive = curriculumRepository.saveAndFlush(curriculum_inactive);
+    curriculumRepository.saveAndFlush(curriculum_inactive);
     // When
     restCurriculumMockMvc.perform(get("/api/current/curricula"))
         .andExpect(status().isOk())

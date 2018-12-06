@@ -20,14 +20,11 @@ import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 
 import java.util.List;
+import java.util.Optional;
 
 import static org.mockito.Matchers.any;
 import static org.mockito.Matchers.anyList;
-import static org.mockito.Mockito.mock;
-import static org.mockito.Mockito.never;
-import static org.mockito.Mockito.times;
-import static org.mockito.Mockito.verify;
-import static org.mockito.Mockito.when;
+import static org.mockito.Mockito.*;
 
 @RunWith(MockitoJUnitRunner.class)
 public class QualificationServiceImplTest {
@@ -90,7 +87,7 @@ public class QualificationServiceImplTest {
   public void deleteShouldCallDeleteOnRepository() {
     testObj.delete(QUALIFICATION_ID);
 
-    verify(qualificationRepository, times(1)).delete(QUALIFICATION_ID);
+    verify(qualificationRepository, times(1)).deleteById(QUALIFICATION_ID);
   }
 
   @Test
@@ -98,7 +95,7 @@ public class QualificationServiceImplTest {
     Qualification foundEntity = new Qualification();
     QualificationDTO dtoOfEntity = new QualificationDTO();
 
-    when(qualificationRepository.findOne(QUALIFICATION_ID)).thenReturn(foundEntity);
+    when(qualificationRepository.findById(QUALIFICATION_ID)).thenReturn(Optional.of(foundEntity));
     when(qualificationMapper.toDto(foundEntity)).thenReturn(dtoOfEntity);
 
     QualificationDTO result = testObj.findOne(QUALIFICATION_ID);
@@ -108,7 +105,7 @@ public class QualificationServiceImplTest {
 
   @Test
   public void foundOneShouldReturnNullIfNoEntityFoundWithId() {
-    when(qualificationRepository.findOne(QUALIFICATION_ID)).thenReturn(null);
+    when(qualificationRepository.findById(QUALIFICATION_ID)).thenReturn(Optional.empty());
     when(qualificationMapper.toDto(null)).thenReturn(null);
 
     QualificationDTO result = testObj.findOne(QUALIFICATION_ID);
@@ -124,7 +121,7 @@ public class QualificationServiceImplTest {
 
 
     when(qualificationRepository.findAll(pageableMock)).thenReturn(pageMock);
-    when(pageMock.map(converterArgumentCaptor.capture())).thenReturn(dtoPageMock);
+    when(pageMock.map(any())).thenReturn((Page) dtoPageMock);
 
     Page<QualificationDTO> result = testObj.findAll(pageableMock);
 
@@ -139,14 +136,12 @@ public class QualificationServiceImplTest {
     Qualification q1 = new Qualification(), q2 = new Qualification();
     List<Qualification> convertedDtos = Lists.newArrayList(q1, q2);
 
-    Qualification q3 = new Qualification(), q4 = new Qualification();
     List<Qualification> savedEntities = Lists.newArrayList(q1, q2);
 
-    QualificationDTO dto3 = new QualificationDTO(), dto4 = new QualificationDTO();
     List<QualificationDTO> savedAndConvertedDtos = Lists.newArrayList(dto1, dto2);
 
     when(qualificationMapper.toEntities(toSave)).thenReturn(convertedDtos);
-    when(qualificationRepository.save(convertedDtos)).thenReturn(savedEntities);
+    when(qualificationRepository.saveAll(convertedDtos)).thenReturn(savedEntities);
     when(qualificationMapper.toDTOs(savedEntities)).thenReturn(savedAndConvertedDtos);
 
     List<QualificationDTO> result = testObj.save(toSave);
@@ -157,7 +152,6 @@ public class QualificationServiceImplTest {
   @Test
   public void saveShouldConvertSingleDtoAndSaveEntity() {
     QualificationDTO unsavedDto = new QualificationDTO(), savedDto = new QualificationDTO();
-    ;
     Qualification unsavedEntity1 = new Qualification(), savedEntity2 = new Qualification();
 
     when(qualificationMapper.toEntity(unsavedDto)).thenReturn(unsavedEntity1);

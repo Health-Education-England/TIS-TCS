@@ -14,7 +14,6 @@ import com.transformuk.hee.tis.tcs.service.service.helper.SqlQuerySupplier;
 import com.transformuk.hee.tis.tcs.service.service.mapper.PersonBasicDetailsMapper;
 import com.transformuk.hee.tis.tcs.service.service.mapper.PersonLiteMapper;
 import com.transformuk.hee.tis.tcs.service.service.mapper.PersonMapper;
-import com.transformuk.hee.tis.tcs.service.service.mapper.PersonViewMapper;
 import org.apache.commons.lang3.ObjectUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
@@ -73,10 +72,6 @@ public class PersonServiceImpl implements PersonService {
   @Autowired
   private PersonBasicDetailsMapper personBasicDetailsMapper;
   @Autowired
-  private PersonViewRepository personViewRepository;
-  @Autowired
-  private PersonViewMapper personViewMapper;
-  @Autowired
   private PermissionService permissionService;
   @Autowired
   private ReferenceService referenceService;
@@ -100,7 +95,7 @@ public class PersonServiceImpl implements PersonService {
 
     final Long personDtoId = personDTO.getId();
     if (!permissionService.canEditSensitiveData() && personDtoId != null) {
-      final Person originalPerson = personRepository.findOne(personDtoId);
+      final Person originalPerson = personRepository.findById(personDtoId).orElse(null);
       if (originalPerson == null) { //this shouldn't happen
         throw new IllegalArgumentException("The person record for id " + personDtoId + " could not be found");
       }
@@ -178,7 +173,7 @@ public class PersonServiceImpl implements PersonService {
   public List<PersonDTO> save(final List<PersonDTO> personDTOs) {
     log.debug("Request to save Persons : {}", personDTOs);
     List<Person> personList = personMapper.toEntity(personDTOs);
-    personList = personRepository.save(personList);
+    personList = personRepository.saveAll(personList);
     return personMapper.toDto(personList);
   }
 
@@ -195,7 +190,7 @@ public class PersonServiceImpl implements PersonService {
     log.debug("Request to get all People");
 
     final int size = pageable.getPageSize() + 1;
-    final int offset = pageable.getOffset();
+    final long offset = pageable.getOffset();
     MapSqlParameterSource paramSource = new MapSqlParameterSource();
     String query = sqlQuerySupplier.getQuery(SqlQuerySupplier.PERSON_VIEW);
 
@@ -275,7 +270,7 @@ public class PersonServiceImpl implements PersonService {
   @Transactional(readOnly = true)
   public BasicPage<PersonViewDTO> advancedSearch(final String searchString, final List<ColumnFilter> columnFilters, final Pageable pageable) {
     final int size = pageable.getPageSize() + 1;
-    final int offset = pageable.getOffset();
+    final long offset = pageable.getOffset();
     MapSqlParameterSource paramSource = new MapSqlParameterSource();
     String query = sqlQuerySupplier.getQuery(SqlQuerySupplier.PERSON_VIEW);
     query = query.replaceAll("TRUST_JOIN", permissionService.isUserTrustAdmin() ? " left join PersonTrust pt on (pt.personId = p.id)" : StringUtils.EMPTY);
@@ -453,7 +448,7 @@ public class PersonServiceImpl implements PersonService {
   @Transactional(readOnly = true)
   public PersonDTO findOne(final Long id) {
     log.debug("Request to get Person : {}", id);
-    final Person person = personRepository.findOne(id);
+    final Person person = personRepository.findById(id).orElse(null);
     final boolean canViewSensitiveData = permissionService.canViewSensitiveData();
     if (!canViewSensitiveData) {
       final PersonalDetails personalDetails = person.getPersonalDetails();
@@ -521,7 +516,7 @@ public class PersonServiceImpl implements PersonService {
   public List<PersonBasicDetailsDTO> findBasicDetailsByIdIn(Set<Long> ids) {
     log.debug("Request to get all person basic details {} ", ids);
 
-    return personBasicDetailsRepository.findAll(ids).stream()
+    return personBasicDetailsRepository.findAllById(ids).stream()
             .map(personBasicDetailsMapper::toDto)
             .collect(Collectors.toList());
   }
@@ -537,7 +532,7 @@ public class PersonServiceImpl implements PersonService {
   public List<PersonDTO> findByIdIn(final Set<Long> ids) {
     log.debug("Request to get all persons {} ", ids);
 
-    return personRepository.findAll(ids).stream()
+    return personRepository.findAllById(ids).stream()
             .map(personMapper::toDto)
             .collect(Collectors.toList());
   }
@@ -597,7 +592,7 @@ public class PersonServiceImpl implements PersonService {
 
   @Override
   public PersonBasicDetailsDTO getBasicDetails(final Long id) {
-    final PersonBasicDetails details = personBasicDetailsRepository.findOne(id);
+    final PersonBasicDetails details = personBasicDetailsRepository.findById(id).orElse(null);
     if (details != null) {
       return personBasicDetailsMapper.toDto(details);
     } else {
@@ -613,7 +608,7 @@ public class PersonServiceImpl implements PersonService {
   @Override
   public void delete(final Long id) {
     log.debug("Request to delete Person : {}", id);
-    personRepository.delete(id);
+    personRepository.deleteById(id);
   }
 
   /**

@@ -60,7 +60,7 @@ public class SpecialtyValidator {
       if (specialtyGroup.getId() == null || specialtyGroup.getId() < 0) {
         fieldErrors.add(new FieldError("SpecialtyDTO", "specialtyGroup",
             String.format("SpecialtyGroup with id %d cannot be null or negative", specialtyGroup.getId())));
-      } else if (!specialtyGroupRepository.exists(specialtyGroup.getId())) {
+      } else if (!specialtyGroupRepository.existsById(specialtyGroup.getId())) {
         fieldErrors.add(new FieldError("SpecialtyDTO", "specialtyGroup",
             String.format("SpecialtyGroup with id %d does not exist", specialtyGroup.getId())));
       }

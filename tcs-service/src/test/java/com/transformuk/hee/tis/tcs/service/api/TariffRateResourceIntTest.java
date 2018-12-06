@@ -26,13 +26,8 @@ import java.util.List;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.hamcrest.Matchers.hasItem;
-import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.delete;
-import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
-import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
-import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.put;
-import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.content;
-import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
-import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.*;
+import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.*;
 
 /**
  * Test class for the TariffRateResource REST controller.
@@ -163,10 +158,10 @@ public class TariffRateResourceIntTest {
         .andExpect(status().isOk())
         .andExpect(content().contentType(MediaType.APPLICATION_JSON_UTF8_VALUE))
         .andExpect(jsonPath("$.[*].id").value(hasItem(tariffRate.getId().intValue())))
-        .andExpect(jsonPath("$.[*].gradeAbbreviation").value(hasItem(DEFAULT_GRADE_ABBREVIATION.toString())))
-        .andExpect(jsonPath("$.[*].tariffRate").value(hasItem(DEFAULT_TARIFF_RATE.toString())))
-        .andExpect(jsonPath("$.[*].tariffRateFringe").value(hasItem(DEFAULT_TARIFF_RATE_FRINGE.toString())))
-        .andExpect(jsonPath("$.[*].tariffRateLondon").value(hasItem(DEFAULT_TARIFF_RATE_LONDON.toString())));
+      .andExpect(jsonPath("$.[*].gradeAbbreviation").value(hasItem(DEFAULT_GRADE_ABBREVIATION)))
+      .andExpect(jsonPath("$.[*].tariffRate").value(hasItem(DEFAULT_TARIFF_RATE)))
+      .andExpect(jsonPath("$.[*].tariffRateFringe").value(hasItem(DEFAULT_TARIFF_RATE_FRINGE)))
+      .andExpect(jsonPath("$.[*].tariffRateLondon").value(hasItem(DEFAULT_TARIFF_RATE_LONDON)));
   }
 
   @Test
@@ -180,10 +175,10 @@ public class TariffRateResourceIntTest {
         .andExpect(status().isOk())
         .andExpect(content().contentType(MediaType.APPLICATION_JSON_UTF8_VALUE))
         .andExpect(jsonPath("$.id").value(tariffRate.getId().intValue()))
-        .andExpect(jsonPath("$.gradeAbbreviation").value(DEFAULT_GRADE_ABBREVIATION.toString()))
-        .andExpect(jsonPath("$.tariffRate").value(DEFAULT_TARIFF_RATE.toString()))
-        .andExpect(jsonPath("$.tariffRateFringe").value(DEFAULT_TARIFF_RATE_FRINGE.toString()))
-        .andExpect(jsonPath("$.tariffRateLondon").value(DEFAULT_TARIFF_RATE_LONDON.toString()));
+      .andExpect(jsonPath("$.gradeAbbreviation").value(DEFAULT_GRADE_ABBREVIATION))
+      .andExpect(jsonPath("$.tariffRate").value(DEFAULT_TARIFF_RATE))
+      .andExpect(jsonPath("$.tariffRateFringe").value(DEFAULT_TARIFF_RATE_FRINGE))
+      .andExpect(jsonPath("$.tariffRateLondon").value(DEFAULT_TARIFF_RATE_LONDON));
   }
 
   @Test
@@ -202,7 +197,7 @@ public class TariffRateResourceIntTest {
     int databaseSizeBeforeUpdate = tariffRateRepository.findAll().size();
 
     // Update the tariffRate
-    TariffRate updatedTariffRate = tariffRateRepository.findOne(tariffRate.getId());
+    TariffRate updatedTariffRate = tariffRateRepository.findById(tariffRate.getId()).orElse(null);
     updatedTariffRate
         .gradeAbbreviation(UPDATED_GRADE_ABBREVIATION)
         .tariffRate(UPDATED_TARIFF_RATE)

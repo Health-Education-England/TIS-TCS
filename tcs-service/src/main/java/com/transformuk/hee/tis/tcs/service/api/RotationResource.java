@@ -1,20 +1,15 @@
 package com.transformuk.hee.tis.tcs.service.api;
 
-import com.codahale.metrics.annotation.Timed;
-import com.google.common.collect.Lists;
-import com.transformuk.hee.tis.tcs.api.dto.ColumnFilterDTO;
-import com.transformuk.hee.tis.tcs.api.dto.PostViewDTO;
+import com.transformuk.hee.tis.tcs.api.dto.RotationDTO;
 import com.transformuk.hee.tis.tcs.api.dto.validation.Create;
 import com.transformuk.hee.tis.tcs.api.dto.validation.Update;
-import com.transformuk.hee.tis.tcs.api.enumeration.*;
+import com.transformuk.hee.tis.tcs.api.enumeration.Status;
 import com.transformuk.hee.tis.tcs.service.api.util.ColumnFilterUtil;
 import com.transformuk.hee.tis.tcs.service.api.util.HeaderUtil;
 import com.transformuk.hee.tis.tcs.service.api.util.PaginationUtil;
 import com.transformuk.hee.tis.tcs.service.model.ColumnFilter;
 import com.transformuk.hee.tis.tcs.service.service.RotationService;
-import com.transformuk.hee.tis.tcs.api.dto.RotationDTO;
 import io.github.jhipster.web.util.ResponseUtil;
-import io.swagger.annotations.ApiParam;
 import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -23,18 +18,15 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
-import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
 
 import java.io.IOException;
 import java.net.URI;
 import java.net.URISyntaxException;
-
 import java.util.Collections;
 import java.util.List;
 import java.util.Optional;
-import java.util.stream.Collectors;
 
 import static com.transformuk.hee.tis.tcs.service.api.util.StringUtil.sanitize;
 
@@ -63,7 +55,6 @@ public class RotationResource {
      * @throws URISyntaxException if the Location URI syntax is incorrect
      */
     @PostMapping("/rotations")
-    @Timed
     public ResponseEntity<RotationDTO> createRotation(@RequestBody @Validated(Create.class) RotationDTO rotationDTO) throws URISyntaxException {
         log.debug("REST request to save Rotation : {}", rotationDTO);
         RotationDTO result = rotationService.save(rotationDTO);
@@ -82,7 +73,6 @@ public class RotationResource {
      * @throws URISyntaxException if the Location URI syntax is incorrect
      */
     @PutMapping("/rotations")
-    @Timed
     public ResponseEntity<RotationDTO> updateRotation(@RequestBody @Validated(Update.class) RotationDTO rotationDTO) throws URISyntaxException {
         log.debug("REST request to update Rotation : {}", rotationDTO);
         if (rotationDTO.getId() == null) {
@@ -101,11 +91,8 @@ public class RotationResource {
      * @return the ResponseEntity with status 200 (OK) and the list of rotations in body
      */
     @GetMapping("/rotations")
-    @Timed
     public ResponseEntity<List<RotationDTO>> getRotations(
             @RequestParam(value = "searchQuery", required = false) String searchQuery,
-            @ApiParam(value = "json object by column name and value. (Eg: columnFilters={ \"owner\": [\"dean1\", \"dean2\"]," +
-            " \"sites.siteId\":[\"123\"],\"trainingBodyId\":[\"11\"],\"grades.gradeId\":[\"11\"],\"specialties.specialty.name\":[\"Test Specialty\"]}\"")
             @RequestParam(value = "columnFilters", required = false) String columnFilterJson,
             Pageable pageable) throws IOException {
         log.debug("REST request to get a page of Rotations");
@@ -129,7 +116,6 @@ public class RotationResource {
      * @return the ResponseEntity with status 200 (OK) and with body the rotationDTO, or with status 404 (Not Found)
      */
     @GetMapping("/rotations/{id}")
-    @Timed
     public ResponseEntity<RotationDTO> getRotation(@PathVariable Long id) {
         log.debug("REST request to get Rotation : {}", id);
         RotationDTO rotationDTO = rotationService.findOne(id);
@@ -143,7 +129,6 @@ public class RotationResource {
      * @return the ResponseEntity with status 200 (OK)
      */
     @DeleteMapping("/rotations/{id}")
-    @Timed
     public ResponseEntity<Void> deleteRotation(@PathVariable Long id) {
         log.debug("REST request to delete Rotation : {}", id);
         rotationService.delete(id);

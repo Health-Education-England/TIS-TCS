@@ -13,8 +13,6 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.util.List;
-import java.util.Set;
-
 
 /**
  * Service Implementation for managing GmcDetails.
@@ -58,7 +56,7 @@ public class GmcDetailsServiceImpl implements GmcDetailsService {
   public List<GmcDetailsDTO> save(List<GmcDetailsDTO> gmcDetailsDTOs) {
     log.debug("Request to save GmcDetails : {}", gmcDetailsDTOs);
     List<GmcDetails> gmcDetailsList = gmcDetailsMapper.toEntity(gmcDetailsDTOs);
-    gmcDetailsList = gmcDetailsRepository.save(gmcDetailsList);
+    gmcDetailsList = gmcDetailsRepository.saveAll(gmcDetailsList);
     return gmcDetailsMapper.toDto(gmcDetailsList);
   }
 
@@ -95,7 +93,7 @@ public class GmcDetailsServiceImpl implements GmcDetailsService {
   @Transactional(readOnly = true)
   public GmcDetailsDTO findOne(Long id) {
     log.debug("Request to get GmcDetails : {}", id);
-    GmcDetails gmcDetails = gmcDetailsRepository.findOne(id);
+    GmcDetails gmcDetails = gmcDetailsRepository.findById(id).orElse(null);
     return gmcDetailsMapper.toDto(gmcDetails);
   }
 
@@ -107,6 +105,6 @@ public class GmcDetailsServiceImpl implements GmcDetailsService {
   @Override
   public void delete(Long id) {
     log.debug("Request to delete GmcDetails : {}", id);
-    gmcDetailsRepository.delete(id);
+    gmcDetailsRepository.deleteById(id);
   }
 }

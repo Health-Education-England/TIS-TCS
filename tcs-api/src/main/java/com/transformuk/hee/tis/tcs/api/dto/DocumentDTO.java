@@ -9,8 +9,6 @@ import com.transformuk.hee.tis.tcs.api.dto.jackson.LocalDateTimeSerializer;
 import com.transformuk.hee.tis.tcs.api.dto.validation.Create;
 import com.transformuk.hee.tis.tcs.api.dto.validation.Update;
 import com.transformuk.hee.tis.tcs.api.enumeration.Status;
-import io.swagger.annotations.ApiModel;
-import io.swagger.annotations.ApiModelProperty;
 
 import javax.validation.constraints.DecimalMin;
 import javax.validation.constraints.NotNull;
@@ -20,7 +18,6 @@ import java.time.LocalDateTime;
 import java.util.Objects;
 import java.util.Set;
 
-@ApiModel("Document")
 public class DocumentDTO implements Serializable {
     private static final long serialVersionUID = -204651480188503498L;
 
@@ -31,26 +28,19 @@ public class DocumentDTO implements Serializable {
     @JsonSerialize(using = LocalDateTimeSerializer.class)
     @JsonDeserialize(using = LocalDateTimeDeserializer.class)
     private LocalDateTime addedDate;
-    @ApiModelProperty(hidden = true)
     @JsonIgnore
     private LocalDateTime amendedDate;
-    @ApiModelProperty(hidden = true)
     @JsonIgnore
     private LocalDateTime inactiveDate;
-    @ApiModelProperty(readOnly = true)
     private String uploadedBy;
     @NotNull(groups = Update.class, message = "Title must not be null when updating a document")
     private String title;
     @Null(groups = Update.class, message = "Filename must be null when creating a updating document")
-    @ApiModelProperty(readOnly = true)
     private String fileName;
     @Null(groups = Update.class, message = "File Extension must be null when creating a updating document")
-    @ApiModelProperty(readOnly = true)
     private String fileExtension;
-    @ApiModelProperty(readOnly = true)
     @Null(groups = Update.class, message = "Content Type must be null when creating a updating document")
     private String contentType;
-    @ApiModelProperty(readOnly = true)
     @Null(groups = Update.class, message = "Size must be null when creating a updating document")
     private Long size;
     @NotNull(groups = Update.class, message = "Person ID must not be null when updating a document")
@@ -59,7 +49,6 @@ public class DocumentDTO implements Serializable {
     private Status status;
     @NotNull(groups = Update.class, message = "Version must not be null when updating a document")
     private Integer version;
-    @ApiModelProperty(hidden = true)
     @JsonIgnore
     private byte[] bytes;
     private Set<TagDTO> tags;

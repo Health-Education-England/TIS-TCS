@@ -1,11 +1,12 @@
 package com.transformuk.hee.tis.tcs.service.service.helper;
 
 import com.google.common.base.Preconditions;
-import org.flywaydb.core.internal.util.scanner.classpath.ClassPathResource;
+import org.flywaydb.core.internal.resource.classpath.ClassPathResource;
 import org.slf4j.Logger;
 import org.springframework.stereotype.Component;
 
 import java.io.IOException;
+import java.nio.charset.StandardCharsets;
 import java.util.HashMap;
 import java.util.Map;
 
@@ -49,11 +50,11 @@ public class SqlQuerySupplier {
         if (files.containsKey(fileName)) {
             content = files.get(fileName);
         } else {
-            content = new ClassPathResource(fileName, Thread.currentThread().getContextClassLoader()).loadAsString("UTF-8");
+          content = new String(new ClassPathResource(null, fileName, Thread.currentThread().getContextClassLoader(), StandardCharsets.UTF_8)
+            .loadAsBytes(), StandardCharsets.UTF_8);
             files.put(fileName, content);
         }
-        final String query = content;
-        LOG.debug("Running query:\n {}", query);
-        return query;
+      LOG.debug("Running query:\n {}", content);
+      return content;
     }
 }

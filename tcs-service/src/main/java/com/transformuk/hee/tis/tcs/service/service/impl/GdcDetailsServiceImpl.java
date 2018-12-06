@@ -1,9 +1,7 @@
 package com.transformuk.hee.tis.tcs.service.service.impl;
 
 import com.transformuk.hee.tis.tcs.api.dto.GdcDetailsDTO;
-import com.transformuk.hee.tis.tcs.api.dto.GmcDetailsDTO;
 import com.transformuk.hee.tis.tcs.service.model.GdcDetails;
-import com.transformuk.hee.tis.tcs.service.model.GmcDetails;
 import com.transformuk.hee.tis.tcs.service.repository.GdcDetailsRepository;
 import com.transformuk.hee.tis.tcs.service.service.GdcDetailsService;
 import com.transformuk.hee.tis.tcs.service.service.mapper.GdcDetailsMapper;
@@ -59,7 +57,7 @@ public class GdcDetailsServiceImpl implements GdcDetailsService {
   public List<GdcDetailsDTO> save(List<GdcDetailsDTO> gdcDetailsDTOs) {
     log.debug("Request to save GdcDetails : {}", gdcDetailsDTOs);
     List<GdcDetails> gdcDetailsList = gdcDetailsMapper.toEntity(gdcDetailsDTOs);
-    gdcDetailsList = gdcDetailsRepository.save(gdcDetailsList);
+    gdcDetailsList = gdcDetailsRepository.saveAll(gdcDetailsList);
     return gdcDetailsMapper.toDto(gdcDetailsList);
   }
 
@@ -96,7 +94,7 @@ public class GdcDetailsServiceImpl implements GdcDetailsService {
   @Transactional(readOnly = true)
   public GdcDetailsDTO findOne(Long id) {
     log.debug("Request to get GdcDetails : {}", id);
-    GdcDetails gdcDetails = gdcDetailsRepository.findOne(id);
+    GdcDetails gdcDetails = gdcDetailsRepository.findById(id).orElse(null);
     return gdcDetailsMapper.toDto(gdcDetails);
   }
 
@@ -108,6 +106,6 @@ public class GdcDetailsServiceImpl implements GdcDetailsService {
   @Override
   public void delete(Long id) {
     log.debug("Request to delete GdcDetails : {}", id);
-    gdcDetailsRepository.delete(id);
+    gdcDetailsRepository.deleteById(id);
   }
 }

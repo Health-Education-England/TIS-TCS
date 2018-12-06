@@ -2,15 +2,10 @@ package com.transformuk.hee.tis.tcs.service.job;
 
 import com.transformuk.hee.tis.tcs.service.model.Person;
 import com.transformuk.hee.tis.tcs.service.model.PersonTrust;
-import com.transformuk.hee.tis.tcs.service.model.Post;
-import com.transformuk.hee.tis.tcs.service.model.PostTrust;
 import com.transformuk.hee.tis.tcs.service.repository.PersonRepository;
-import com.transformuk.hee.tis.tcs.service.repository.PersonTrustRepository;
-import com.transformuk.hee.tis.tcs.service.repository.PostTrustRepository;
 import com.transformuk.hee.tis.tcs.service.service.helper.SqlQuerySupplier;
 import net.javacrumbs.shedlock.core.SchedulerLock;
 import org.apache.commons.collections4.CollectionUtils;
-import org.apache.commons.lang.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -19,14 +14,15 @@ import org.springframework.jmx.export.annotation.ManagedResource;
 import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Component;
 import org.springframework.transaction.annotation.Transactional;
-import org.springframework.web.client.RestTemplate;
 
 import javax.persistence.EntityManager;
 import javax.persistence.EntityManagerFactory;
 import javax.persistence.Query;
-import javax.persistence.Transient;
 import java.math.BigInteger;
-import java.util.*;
+import java.util.List;
+import java.util.Map;
+import java.util.Objects;
+import java.util.Set;
 import java.util.stream.Collectors;
 
 @Component
@@ -37,8 +33,6 @@ public class PersonPlacementTrainingBodyTrustJob extends TrustAdminSyncJobTempla
     private static final Logger LOG = LoggerFactory.getLogger(PostEmployingBodyTrustJob.class);
     private static final int FIFTEEN_MIN = 15 * 60 * 1000;
 
-    @Autowired
-    private PersonTrustRepository personTrustRepository;
     @Autowired
     private EntityManagerFactory entityManagerFactory;
     @Autowired
@@ -85,12 +79,9 @@ public class PersonPlacementTrainingBodyTrustJob extends TrustAdminSyncJobTempla
                                                                            .setParameter("pageSize", pageSize);
 
         List<Object[]> resultList = query.getResultList();
-        List<EntityData> result = resultList.stream().filter(Objects::nonNull).map(objArr -> {
-            EntityData entityData = new EntityData()
-                    .entityId(((BigInteger) objArr[0]).longValue())
-                    .otherId(((BigInteger) objArr[1]).longValue());
-            return entityData;
-        }).collect(Collectors.toList());
+      List<EntityData> result = resultList.stream().filter(Objects::nonNull).map(objArr -> new EntityData()
+        .entityId(((BigInteger) objArr[0]).longValue())
+        .otherId(((BigInteger) objArr[1]).longValue())).collect(Collectors.toList());
 
         return result;
     }
@@ -103,7 +94,7 @@ public class PersonPlacementTrainingBodyTrustJob extends TrustAdminSyncJobTempla
         if (CollectionUtils.isNotEmpty(entityData)) {
 
             Set<Long> personIds = entityData.stream().map(EntityData::getEntityId).collect(Collectors.toSet());
-            List<Person> allPersons = personRepository.findAll(personIds);
+          List<Person> allPersons = personRepository.findAllById(personIds);
             Map<Long, Person> personIdToPerson = allPersons.stream().collect(Collectors.toMap(Person::getId, person -> person));
 
             for (EntityData ed : entityData) {

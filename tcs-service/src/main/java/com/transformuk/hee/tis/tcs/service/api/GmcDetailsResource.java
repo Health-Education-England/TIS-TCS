@@ -1,6 +1,5 @@
 package com.transformuk.hee.tis.tcs.service.api;
 
-import com.codahale.metrics.annotation.Timed;
 import com.transformuk.hee.tis.tcs.api.dto.GmcDetailsDTO;
 import com.transformuk.hee.tis.tcs.api.dto.validation.Create;
 import com.transformuk.hee.tis.tcs.api.dto.validation.Update;
@@ -10,7 +9,6 @@ import com.transformuk.hee.tis.tcs.service.api.util.UrlDecoderUtil;
 import com.transformuk.hee.tis.tcs.service.api.validation.GmcDetailsValidator;
 import com.transformuk.hee.tis.tcs.service.service.GmcDetailsService;
 import io.github.jhipster.web.util.ResponseUtil;
-import io.swagger.annotations.ApiParam;
 import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -22,15 +20,7 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.MethodArgumentNotValidException;
-import org.springframework.web.bind.annotation.DeleteMapping;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.PatchMapping;
-import org.springframework.web.bind.annotation.PathVariable;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.PutMapping;
-import org.springframework.web.bind.annotation.RequestBody;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
 
 import javax.validation.Valid;
 import java.net.URI;
@@ -67,7 +57,6 @@ public class GmcDetailsResource {
    * @throws URISyntaxException if the Location URI syntax is incorrect
    */
   @PostMapping("/gmc-details")
-  @Timed
   @PreAuthorize("hasPermission('tis:people::person:', 'Create')")
   public ResponseEntity<GmcDetailsDTO> createGmcDetails(@RequestBody @Validated(Create.class) GmcDetailsDTO gmcDetailsDTO)
       throws URISyntaxException, MethodArgumentNotValidException {
@@ -89,7 +78,6 @@ public class GmcDetailsResource {
    * @throws URISyntaxException if the Location URI syntax is incorrect
    */
   @PutMapping("/gmc-details")
-  @Timed
   @PreAuthorize("hasPermission('tis:people::person:', 'Update')")
   public ResponseEntity<GmcDetailsDTO> updateGmcDetails(@RequestBody @Validated(Update.class) GmcDetailsDTO gmcDetailsDTO)
       throws URISyntaxException, MethodArgumentNotValidException {
@@ -112,9 +100,8 @@ public class GmcDetailsResource {
    * @return the ResponseEntity with status 200 (OK) and the list of gmcDetails in body
    */
   @GetMapping("/gmc-details")
-  @Timed
   @PreAuthorize("hasPermission('tis:people::person:', 'View')")
-  public ResponseEntity<List<GmcDetailsDTO>> getAllGmcDetails(@ApiParam Pageable pageable) {
+  public ResponseEntity<List<GmcDetailsDTO>> getAllGmcDetails(Pageable pageable) {
     log.debug("REST request to get a page of GmcDetails");
     Page<GmcDetailsDTO> page = gmcDetailsService.findAll(pageable);
     HttpHeaders headers = PaginationUtil.generatePaginationHttpHeaders(page, "/api/gmc-details");
@@ -129,9 +116,8 @@ public class GmcDetailsResource {
    * @return the ResponseEntity with status 200 (OK)  and the list of gmcDetails in body, or empty list
    */
   @GetMapping("/gmc-details/in/{gmcIds}")
-  @Timed
   @PreAuthorize("hasPermission('tis:people::person:', 'View')")
-  public ResponseEntity<List<GmcDetailsDTO>> getGmcDetailsIn(@ApiParam(name = "gmcIds", allowMultiple = true) @PathVariable("gmcIds") List<String> gmcIds) {
+  public ResponseEntity<List<GmcDetailsDTO>> getGmcDetailsIn(@PathVariable("gmcIds") List<String> gmcIds) {
     log.debug("REST request to find several GmcDetails: {}", gmcIds);
 
     if (!gmcIds.isEmpty()) {
@@ -149,7 +135,6 @@ public class GmcDetailsResource {
    * @return the ResponseEntity with status 200 (OK) and with body the gmcDetailsDTO, or with status 404 (Not Found)
    */
   @GetMapping("/gmc-details/{id}")
-  @Timed
   @PreAuthorize("hasPermission('tis:people::person:', 'View')")
   public ResponseEntity<GmcDetailsDTO> getGmcDetails(@PathVariable Long id) {
     log.debug("REST request to get GmcDetails : {}", id);
@@ -164,7 +149,6 @@ public class GmcDetailsResource {
    * @return the ResponseEntity with status 200 (OK)
    */
   @DeleteMapping("/gmc-details/{id}")
-  @Timed
   @PreAuthorize("hasAuthority('tcs:delete:entities')")
   public ResponseEntity<Void> deleteGmcDetails(@PathVariable Long id) {
     log.debug("REST request to delete GmcDetails : {}", id);
@@ -180,7 +164,6 @@ public class GmcDetailsResource {
    * @throws URISyntaxException if the Location URI syntax is incorrect
    */
   @PatchMapping("/gmc-details")
-  @Timed
   @PreAuthorize("hasPermission('tis:people::person:', 'Update')")
   public ResponseEntity<List<GmcDetailsDTO>> patchGmcDetails(@Valid @RequestBody List<GmcDetailsDTO> gmcDetailsDTOs) throws URISyntaxException {
     log.debug("REST request to patch gmcDetails: {}", gmcDetailsDTOs);

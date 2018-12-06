@@ -6,31 +6,14 @@ import com.transformuk.hee.tis.tcs.api.dto.PersonV2DTO;
 import com.transformuk.hee.tis.tcs.api.dto.PersonalDetailsDTO;
 import com.transformuk.hee.tis.tcs.api.dto.ProgrammeMembershipDTO;
 import com.transformuk.hee.tis.tcs.service.exception.AccessUnauthorisedException;
-import com.transformuk.hee.tis.tcs.service.model.ContactDetails;
-import com.transformuk.hee.tis.tcs.service.model.GdcDetails;
-import com.transformuk.hee.tis.tcs.service.model.GmcDetails;
-import com.transformuk.hee.tis.tcs.service.model.Person;
-import com.transformuk.hee.tis.tcs.service.model.PersonTrust;
-import com.transformuk.hee.tis.tcs.service.model.PersonalDetails;
-import com.transformuk.hee.tis.tcs.service.model.PostTrust;
-import com.transformuk.hee.tis.tcs.service.model.ProgrammeMembership;
-import com.transformuk.hee.tis.tcs.service.model.RightToWork;
-import com.transformuk.hee.tis.tcs.service.repository.ContactDetailsRepository;
-import com.transformuk.hee.tis.tcs.service.repository.GdcDetailsRepository;
-import com.transformuk.hee.tis.tcs.service.repository.GmcDetailsRepository;
-import com.transformuk.hee.tis.tcs.service.repository.PersonRepository;
-import com.transformuk.hee.tis.tcs.service.repository.PersonalDetailsRepository;
-import com.transformuk.hee.tis.tcs.service.repository.RightToWorkRepository;
+import com.transformuk.hee.tis.tcs.service.model.*;
+import com.transformuk.hee.tis.tcs.service.repository.*;
 import com.transformuk.hee.tis.tcs.service.service.mapper.PersonMapper;
 import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
-import org.mockito.ArgumentCaptor;
-import org.mockito.Captor;
-import org.mockito.InjectMocks;
-import org.mockito.Mock;
-import org.mockito.Spy;
+import org.mockito.*;
 import org.mockito.runners.MockitoJUnitRunner;
 
 import java.time.LocalDate;
@@ -41,12 +24,7 @@ import java.util.Set;
 
 import static org.mockito.Matchers.any;
 import static org.mockito.Matchers.anyLong;
-import static org.mockito.Mockito.doNothing;
-import static org.mockito.Mockito.doReturn;
-import static org.mockito.Mockito.mock;
-import static org.mockito.Mockito.never;
-import static org.mockito.Mockito.verify;
-import static org.mockito.Mockito.when;
+import static org.mockito.Mockito.*;
 
 @RunWith(MockitoJUnitRunner.class)
 public class PersonServiceImplTest {
@@ -209,7 +187,7 @@ public class PersonServiceImplTest {
 
   @Test
   public void findPersonPMSortedShouldReturnDTOWithProgrammeMembershipsInDescendingOrder() {
-    when(personRepositoryMock.findOne(PERSON_ID)).thenReturn(person);
+    when(personRepositoryMock.findById(PERSON_ID)).thenReturn(Optional.of(person));
     when(personMapperMock.toDto(person)).thenReturn(personDTO);
 
     PersonDTO result = testObj.findPersonWithProgrammeMembershipsSorted(PERSON_ID);
@@ -250,7 +228,7 @@ public class PersonServiceImplTest {
 
     Assert.assertEquals(savedPersonDTOMock, result);
 
-    verify(personRepositoryMock, never()).findOne(anyLong());
+    verify(personRepositoryMock, never()).findById(anyLong());
     verify(unsavedPersonDTOMock, never()).getPersonalDetails();
     verify(savedPersonDTOMock, never()).getPersonalDetails();
   }
@@ -271,7 +249,7 @@ public class PersonServiceImplTest {
 
     when(personMapperMock.toEntity(unsavedPersonDTOMock)).thenReturn(unsavedPerson);
     when(permissionServiceMock.canEditSensitiveData()).thenReturn(false);
-    when(personRepositoryMock.findOne(PERSON_ID)).thenReturn(originalPersonMock);
+    when(personRepositoryMock.findById(PERSON_ID)).thenReturn(Optional.of(originalPersonMock));
     when(originalPersonMock.getPersonalDetails()).thenReturn(originalPersonalDetailsMock);
 
     when(personRepositoryMock.saveAndFlush(unsavedPerson)).thenReturn(savedPerson);
@@ -281,7 +259,7 @@ public class PersonServiceImplTest {
 
     Assert.assertEquals(savedPersonDTOMock, result);
 
-    verify(personRepositoryMock).findOne(PERSON_ID);
+    verify(personRepositoryMock).findById(PERSON_ID);
     verify(unsavedPersonDTOMock).getPersonalDetails();
     verify(savedPersonDTOMock).getPersonalDetails();
     verify(unsavedPersonDetailsDTOMock).setDisability(DISABILITY_VALUE);

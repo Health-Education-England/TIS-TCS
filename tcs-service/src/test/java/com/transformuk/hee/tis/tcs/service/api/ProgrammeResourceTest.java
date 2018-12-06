@@ -20,10 +20,9 @@ import org.springframework.data.domain.Pageable;
 import java.util.List;
 
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.BDDMockito.given;
 import static org.mockito.Matchers.anyList;
-import static org.mockito.Matchers.anySet;
-import static org.mockito.Matchers.anyString;
 import static org.mockito.Matchers.eq;
 
 @RunWith(MockitoJUnitRunner.class)
@@ -37,7 +36,6 @@ public class ProgrammeResourceTest {
 
   @InjectMocks
   private ProgrammeResource controller;
-
 
   @Before
   public void setup() {
@@ -68,7 +66,7 @@ public class ProgrammeResourceTest {
     String colFilter = "{\"owner\":[\"Health Ed:uc#%ation §±England@$% West Mid^la*nds\"]}";
 
     ArgumentCaptor<List> searchStringCaptor = ArgumentCaptor.forClass(List.class);
-    given(programmeService.advancedSearch(anyString(), searchStringCaptor.capture(), eq(p))).willReturn(page);
+    given(programmeService.advancedSearch(any(), searchStringCaptor.capture(), eq(p))).willReturn(page);
 
     // when
     controller.getAllProgrammes(p, null, colFilter);
@@ -88,7 +86,7 @@ public class ProgrammeResourceTest {
     String colFilter = "{\"status\":[\"badstatus\",\"CURRENT\"]}";
 
     ArgumentCaptor<List> searchStringCaptor = ArgumentCaptor.forClass(List.class);
-    given(programmeService.advancedSearch(anyString(), searchStringCaptor.capture(), eq(p))).willReturn(page);
+    given(programmeService.advancedSearch(any(), searchStringCaptor.capture(), eq(p))).willReturn(page);
 
     // when
     controller.getAllProgrammes(p, null, colFilter);
@@ -108,7 +106,7 @@ public class ProgrammeResourceTest {
     String colFilter = "{\"status\":[\"badstatus\"]}";
 
     ArgumentCaptor<List> searchStringCaptor = ArgumentCaptor.forClass(List.class);
-    given(programmeService.advancedSearch(anyString(), searchStringCaptor.capture(), eq(p))).willReturn(page);
+    given(programmeService.advancedSearch(any(), searchStringCaptor.capture(), eq(p))).willReturn(page);
 
     // when
     controller.getAllProgrammes(p, null, colFilter);

@@ -57,7 +57,7 @@ public class RightToWorkServiceImpl implements RightToWorkService {
   public List<RightToWorkDTO> save(List<RightToWorkDTO> rightToWorkDTOs) {
     log.debug("Request to save RightToWork : {}", rightToWorkDTOs);
     List<RightToWork> rightToWorks = rightToWorkMapper.toEntity(rightToWorkDTOs);
-    rightToWorks = rightToWorkRepository.save(rightToWorks);
+    rightToWorks = rightToWorkRepository.saveAll(rightToWorks);
     return rightToWorkMapper.toDto(rightToWorks);
   }
 
@@ -85,7 +85,7 @@ public class RightToWorkServiceImpl implements RightToWorkService {
   @Transactional(readOnly = true)
   public RightToWorkDTO findOne(Long id) {
     log.debug("Request to get RightToWork : {}", id);
-    RightToWork rightToWork = rightToWorkRepository.findOne(id);
+    RightToWork rightToWork = rightToWorkRepository.findById(id).orElse(null);
     return rightToWorkMapper.toDto(rightToWork);
   }
 
@@ -97,6 +97,6 @@ public class RightToWorkServiceImpl implements RightToWorkService {
   @Override
   public void delete(Long id) {
     log.debug("Request to delete RightToWork : {}", id);
-    rightToWorkRepository.delete(id);
+    rightToWorkRepository.deleteById(id);
   }
 }

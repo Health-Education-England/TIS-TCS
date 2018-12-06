@@ -29,13 +29,8 @@ import java.util.List;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.hamcrest.Matchers.hasItem;
-import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.delete;
-import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
-import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
-import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.put;
-import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.content;
-import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
-import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.*;
+import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.*;
 
 /**
  * Test class for the TariffFundingTypeFieldsResource REST controller.
@@ -205,7 +200,7 @@ public class TariffFundingTypeFieldsResourceIntTest {
     int databaseSizeBeforeUpdate = tariffFundingTypeFieldsRepository.findAll().size();
 
     // Update the tariffFundingTypeFields
-    TariffFundingTypeFields updatedTariffFundingTypeFields = tariffFundingTypeFieldsRepository.findOne(tariffFundingTypeFields.getId());
+    TariffFundingTypeFields updatedTariffFundingTypeFields = tariffFundingTypeFieldsRepository.findById(tariffFundingTypeFields.getId()).orElse(null);
     updatedTariffFundingTypeFields
         .effectiveDateFrom(UPDATED_EFFECTIVE_DATE_FROM)
         .effectiveDateTo(UPDATED_EFFECTIVE_DATE_TO)

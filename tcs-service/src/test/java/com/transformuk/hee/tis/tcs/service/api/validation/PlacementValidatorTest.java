@@ -21,6 +21,7 @@ import org.mockito.runners.MockitoJUnitRunner;
 
 import java.math.BigDecimal;
 import java.time.LocalDate;
+import java.util.Optional;
 
 import static java.time.temporal.ChronoUnit.DAYS;
 import static java.time.temporal.ChronoUnit.YEARS;
@@ -84,9 +85,8 @@ public class PlacementValidatorTest {
         //placementDTO.setClinicalSupervisorIds(Sets.newHashSet(DEFAULT_CLINICAL_SUPERVISOR));
         placementDTO.setPostId(DEFAULT_POST);
 
-        given(personRepository.exists(DEFAULT_TRAINEE)).willReturn(true);
-        given(personRepository.exists(DEFAULT_CLINICAL_SUPERVISOR)).willReturn(true);
-        given(postRepository.exists(DEFAULT_POST)).willReturn(true);
+      given(personRepository.existsById(DEFAULT_TRAINEE)).willReturn(true);
+      given(postRepository.existsById(DEFAULT_POST)).willReturn(true);
         given(referenceService.siteIdExists(Lists.newArrayList(DEFAULT_SITE))).willReturn(Maps.newHashMap(DEFAULT_SITE, true));
         given(referenceService.gradeIdsExists(Lists.newArrayList(DEFAULT_GRADE))).willReturn(Maps.newHashMap(DEFAULT_GRADE, true));
         given(referenceService.placementTypeExists(Lists.newArrayList(DEFAULT_PLACEMENT_TYPE))).willReturn(Maps.newHashMap(DEFAULT_PLACEMENT_TYPE, true));
@@ -134,7 +134,7 @@ public class PlacementValidatorTest {
     @Test
     public void testValidateFailsIfPostIsInvalid() {
         try {
-            given(postRepository.exists(321L)).willReturn(false);
+          given(postRepository.existsById(321L)).willReturn(false);
             placementDTO.setPostId(321L);
             placementValidator.validate(placementDTO);
             fail("ValidationException expected.");
@@ -147,7 +147,7 @@ public class PlacementValidatorTest {
     @Test
     public void testValidateFailsIfTraineeIsInvalid() {
         try {
-            given(personRepository.exists(321L)).willReturn(false);
+          given(personRepository.existsById(321L)).willReturn(false);
             placementDTO.setTraineeId(321L);
             placementValidator.validate(placementDTO);
             fail("ValidationException expected.");
@@ -162,7 +162,7 @@ public class PlacementValidatorTest {
     @Test
     public void testValidateFailsIfSpecialtyIsInvalid() {
         try {
-            given(specialtyRepository.exists(321L)).willReturn(false);
+          given(specialtyRepository.existsById(321L)).willReturn(false);
             final PlacementSpecialtyDTO placementSpecialtyDTO = new PlacementSpecialtyDTO();
             placementSpecialtyDTO.setSpecialtyId(321L);
             placementSpecialtyDTO.setPlacementSpecialtyType(PostSpecialtyType.PRIMARY);
@@ -180,8 +180,8 @@ public class PlacementValidatorTest {
     @Test
     public void testValidateFailsIfMoreThanOnePrimarySpecialtyDefined() {
         try {
-            given(specialtyRepository.exists(321L)).willReturn(true);
-            given(specialtyRepository.exists(4321L)).willReturn(true);
+          given(specialtyRepository.existsById(321L)).willReturn(true);
+          given(specialtyRepository.existsById(4321L)).willReturn(true);
             final PlacementSpecialtyDTO placementSpecialtyDTO = new PlacementSpecialtyDTO();
             placementSpecialtyDTO.setSpecialtyId(321L);
             placementSpecialtyDTO.setPlacementSpecialtyType(PostSpecialtyType.PRIMARY);
@@ -202,8 +202,8 @@ public class PlacementValidatorTest {
     @Test
     public void testValidateFailsIfMoreThanOneSubSpecialtySpecialtyDefined() {
         try {
-            given(specialtyRepository.exists(321L)).willReturn(true);
-            given(specialtyRepository.exists(4321L)).willReturn(true);
+          given(specialtyRepository.existsById(321L)).willReturn(true);
+          given(specialtyRepository.existsById(4321L)).willReturn(true);
             final PlacementSpecialtyDTO placementSpecialtyDTO = new PlacementSpecialtyDTO();
             placementSpecialtyDTO.setSpecialtyId(321L);
             placementSpecialtyDTO.setPlacementSpecialtyType(PostSpecialtyType.SUB_SPECIALTY);
@@ -223,8 +223,8 @@ public class PlacementValidatorTest {
     @Ignore
     @Test
     public void testValidateSucceedsIfMoreThanOneOtherSpecialtyDefined() throws Exception {
-        given(specialtyRepository.exists(321L)).willReturn(true);
-        given(specialtyRepository.exists(4321L)).willReturn(true);
+      given(specialtyRepository.existsById(321L)).willReturn(true);
+      given(specialtyRepository.existsById(4321L)).willReturn(true);
         final PlacementSpecialtyDTO placementSpecialtyDTO = new PlacementSpecialtyDTO();
         placementSpecialtyDTO.setSpecialtyId(321L);
         placementSpecialtyDTO.setPlacementSpecialtyType(PostSpecialtyType.OTHER);
@@ -237,7 +237,7 @@ public class PlacementValidatorTest {
 
     @Test(expected = IllegalArgumentException.class)
     public void validatePlacementForCloseShouldThrowExceptionWhenNotCurrentPlacement() {
-        when(placementRepository.findOne(PLACEMENT_ID)).thenReturn(placementMock);
+      when(placementRepository.findById(PLACEMENT_ID)).thenReturn(Optional.of(placementMock));
         final LocalDate tomorrow = LocalDate.now().plus(1, DAYS);
         final LocalDate nextYear = LocalDate.now().plus(1, YEARS);
 
@@ -249,14 +249,13 @@ public class PlacementValidatorTest {
 
     @Test(expected = IllegalArgumentException.class)
     public void validatePlacementForCloseShouldThrowExceptionWhenCannotFindPlacement() {
-        when(placementRepository.findOne(PLACEMENT_ID)).thenReturn(null);
-
+      when(placementRepository.findById(PLACEMENT_ID)).thenReturn(Optional.empty());
         placementValidator.validatePlacementForClose(PLACEMENT_ID);
     }
 
     @Test
     public void validatePlacementForCloseShouldValidateWithNoExceptions() {
-        when(placementRepository.findOne(PLACEMENT_ID)).thenReturn(placementMock);
+      when(placementRepository.findById(PLACEMENT_ID)).thenReturn(Optional.of(placementMock));
         final LocalDate yesterday = LocalDate.now().minus(1, DAYS);
         final LocalDate nextYear = LocalDate.now().plus(1, YEARS);
 
@@ -268,19 +267,14 @@ public class PlacementValidatorTest {
 
     @Test(expected = IllegalArgumentException.class)
     public void validatePlacementForDeleteShouldThrowExceptionWhenCannotFindPlacement() {
-        when(placementRepository.findOne(PLACEMENT_ID)).thenReturn(null);
-
+      when(placementRepository.findById(PLACEMENT_ID)).thenReturn(Optional.empty());
         placementValidator.validatePlacementForDelete(PLACEMENT_ID);
     }
 
 
     @Test
     public void validatePlacementForDeleteShouldValidate() {
-        when(placementRepository.findOne(PLACEMENT_ID)).thenReturn(placementMock);
-        final LocalDate tomorrow = LocalDate.now().plus(1, DAYS);
-
-        when(placementMock.getDateFrom()).thenReturn(tomorrow);
-
+      when(placementRepository.findById(PLACEMENT_ID)).thenReturn(Optional.of(placementMock));
         placementValidator.validatePlacementForDelete(PLACEMENT_ID);
     }
 

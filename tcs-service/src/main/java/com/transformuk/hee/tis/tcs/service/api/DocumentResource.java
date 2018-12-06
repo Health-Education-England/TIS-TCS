@@ -8,7 +8,6 @@ import com.transformuk.hee.tis.tcs.service.api.util.ColumnFilterUtil;
 import com.transformuk.hee.tis.tcs.service.model.ColumnFilter;
 import com.transformuk.hee.tis.tcs.service.service.DocumentService;
 import com.transformuk.hee.tis.tcs.service.service.TagService;
-import io.swagger.annotations.*;
 import org.apache.commons.collections4.CollectionUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
@@ -31,7 +30,8 @@ import java.util.List;
 import java.util.Optional;
 
 import static com.transformuk.hee.tis.tcs.service.api.DocumentResource.PATH_API;
-import static javax.ws.rs.core.MediaType.*;
+import static javax.ws.rs.core.MediaType.APPLICATION_JSON;
+import static javax.ws.rs.core.MediaType.MULTIPART_FORM_DATA;
 
 @RestController
 @RequestMapping(PATH_API)
@@ -50,15 +50,6 @@ public class DocumentResource {
         this.tagService = tagService;
     }
 
-    @ApiOperation(value = "Retrieves a list documents", response = DocumentDTOPage.class, responseContainer = "DocumentDTOPage", produces = APPLICATION_JSON)
-    @ApiResponses(value = {
-            @ApiResponse(code = 200, message = "Operation performed successfully", response = DocumentDTOPage.class),
-            @ApiResponse(code = 400, message = "Invalid parameters", response = String.class),
-            @ApiResponse(code = 401, message = "User not authenticated", response = String.class),
-            @ApiResponse(code = 403, message = "User not authorised to perform operation", response = String.class),
-            @ApiResponse(code = 404, message = "DocumentDTO could not be found", response = String.class),
-            @ApiResponse(code = 500, message = "Error occurred while performing operation", response = String.class)
-    })
     @GetMapping(value = PATH_DOCUMENTS + "/{entity}/{personId}", produces = APPLICATION_JSON)
     public ResponseEntity<Page<DocumentDTO>> getAllDocuments(@PathVariable(value = "entity") final String entity,
                                                              @PathVariable(value = "personId") final Long personId,
@@ -89,18 +80,8 @@ public class DocumentResource {
         return ResponseEntity.ok(documentService.findAll(personId, query, columnFilters, tagNames, pageable));
     }
 
-    @ApiOperation(value = "Retrieves a specific document", response = DocumentDTO.class, produces = APPLICATION_JSON)
-    @ApiResponses(value = {
-            @ApiResponse(code = 200, message = "Operation performed successfully", response = DocumentDTO.class),
-            @ApiResponse(code = 400, message = "Invalid parameters", response = String.class),
-            @ApiResponse(code = 401, message = "User not authenticated", response = String.class),
-            @ApiResponse(code = 403, message = "User not authorised to perform operation", response = String.class),
-            @ApiResponse(code = 404, message = "DocumentDTO could not be found", response = String.class),
-            @ApiResponse(code = 500, message = "Error occurred while performing operation", response = String.class)
-    })
     @GetMapping(value = PATH_DOCUMENTS + "/{documentId}", produces = APPLICATION_JSON)
     public ResponseEntity<DocumentDTO> getDocumentById(
-            @ApiParam(value = "The document id", required = true)
             @PathVariable(value = "documentId") final Long documentId) {
         LOG.info("Received 'getDocumentById' request for document id '{}'",
                 documentId);
@@ -119,18 +100,8 @@ public class DocumentResource {
         }
     }
 
-    @ApiOperation(value = "Downloads a specific document", response = String.class, produces = APPLICATION_OCTET_STREAM)
-    @ApiResponses(value = {
-            @ApiResponse(code = 200, message = "Operation performed successfully", response = String.class),
-            @ApiResponse(code = 400, message = "Invalid parameters", response = String.class),
-            @ApiResponse(code = 401, message = "User not authenticated", response = String.class),
-            @ApiResponse(code = 403, message = "User not authorised to perform operation", response = String.class),
-            @ApiResponse(code = 404, message = "DocumentDTO could not be found", response = String.class),
-            @ApiResponse(code = 500, message = "Error occurred while performing operation", response = String.class)
-    })
     @GetMapping(value = PATH_DOCUMENTS + PATH_DOWNLOADS + "/{documentId}")
     public void downloadDocumentById(final HttpServletResponse response,
-                                     @ApiParam(value = "The document id", required = true)
                                      @PathVariable(value = "documentId") final Long documentId,
                                      @QueryParam("view") final boolean view) throws IOException {
         LOG.info("Received 'DownloadDocument' request for document '{}'", documentId);
@@ -163,20 +134,10 @@ public class DocumentResource {
         }
     }
 
-    @ApiOperation(value = "Uploads documents and returns the created document id", response = DocumentId.class, consumes = MULTIPART_FORM_DATA, produces = APPLICATION_JSON)
-    @ApiResponses(value = {
-            @ApiResponse(code = 201, message = "Documents uploaded successfully", response = DocumentId.class),
-            @ApiResponse(code = 400, message = "Invalid parameters", response = String.class),
-            @ApiResponse(code = 401, message = "User not authenticated", response = String.class),
-            @ApiResponse(code = 403, message = "User not authorised to perform operation", response = String.class),
-            @ApiResponse(code = 500, message = "Error occurred while performing operation", response = String.class)
-    })
     @PreAuthorize("hasPermission('tis:people::person:', 'Create')")
     @PostMapping(value = PATH_DOCUMENTS, consumes = MULTIPART_FORM_DATA, produces = APPLICATION_JSON)
     public ResponseEntity<DocumentId> uploadDocument(
-            @ApiParam(value = "The Person the document belongs to", required = true)
             @RequestParam("personId") final Long personId,
-            @ApiParam(value = "The document to upload", required = true)
             @RequestParam("document") final MultipartFile documentParam
     ) throws IOException {
         LOG.info("Received 'UploadDocument' request with person '{}' and document name '{}'",
@@ -201,19 +162,9 @@ public class DocumentResource {
         return ResponseEntity.status(HttpStatus.CREATED).body(new DocumentId(savedDocument.getId()));
     }
 
-    @ApiOperation(value = "Bulk update of documents", response = String.class, consumes = APPLICATION_JSON, produces = APPLICATION_JSON)
-    @ApiResponses(value = {
-            @ApiResponse(code = 200, message = "Operation performed successfully", response = String.class),
-            @ApiResponse(code = 400, message = "Invalid parameters or metadata", response = String.class),
-            @ApiResponse(code = 401, message = "User not authenticated", response = String.class),
-            @ApiResponse(code = 403, message = "User not authorised to perform operation", response = String.class),
-            @ApiResponse(code = 404, message = "Document could not be found", response = String.class),
-            @ApiResponse(code = 500, message = "Error occurred while performing operation", response = String.class)
-    })
     @PreAuthorize("hasPermission('tis:people::person:', 'Update')")
     @PatchMapping(value = PATH_DOCUMENTS, consumes = APPLICATION_JSON, produces = APPLICATION_JSON)
     public ResponseEntity<Void> bulkUpdateDocuments(
-            @ApiParam(value = "The list of documents to update", required = true)
             @RequestBody @Validated final Collection<DocumentDTO> documents) throws IOException {
         LOG.info("Received 'BulkUpdateDocuments' request with '{}' documents",
                 documents.size());
@@ -226,20 +177,10 @@ public class DocumentResource {
         return ResponseEntity.ok().build();
     }
 
-    @ApiOperation(value = "Deletes documents", response = String.class)
-    @ApiResponses(value = {
-            @ApiResponse(code = 204, message = "Documents deleted successfully", response = String.class),
-            @ApiResponse(code = 400, message = "Invalid parameters", response = String.class),
-            @ApiResponse(code = 401, message = "User not authenticated", response = String.class),
-            @ApiResponse(code = 403, message = "User not authorised to perform operation", response = String.class),
-            @ApiResponse(code = 404, message = "DocumentDTO could not be found", response = String.class),
-            @ApiResponse(code = 500, message = "Error occurred while performing operation", response = String.class)
-    })
     @DeleteMapping(PATH_DOCUMENTS + "/{entity}/{personId}")
     public ResponseEntity<Void> deleteAllDocuments(
             @PathVariable(value = "entity") final String entity,
             @PathVariable(value = "personId") final Long personId,
-            @ApiParam(value = "The list of documents to delete", required = true)
             @RequestBody final Collection<DocumentId> documents) {
 
         documents.forEach(document -> deleteDocumentById(entity, personId, document.getId()));
@@ -247,15 +188,6 @@ public class DocumentResource {
         return ResponseEntity.noContent().build();
     }
 
-    @ApiOperation(value = "Deletes a document", response = String.class)
-    @ApiResponses(value = {
-            @ApiResponse(code = 204, message = "Document deleted successfully", response = String.class),
-            @ApiResponse(code = 400, message = "Invalid parameters", response = String.class),
-            @ApiResponse(code = 401, message = "User not authenticated", response = String.class),
-            @ApiResponse(code = 403, message = "User not authorised to perform operation", response = String.class),
-            @ApiResponse(code = 404, message = "DocumentDTO could not be found", response = String.class),
-            @ApiResponse(code = 500, message = "Error occurred while performing operation", response = String.class)
-    })
     @DeleteMapping(PATH_DOCUMENTS + "/{entity}/{personId}/{documentId}")
     public ResponseEntity<Void> deleteDocumentById(@PathVariable(value = "entity") final String entity,
                                                    @PathVariable(value = "personId") final Long personId,
@@ -288,18 +220,8 @@ public class DocumentResource {
         }
     }
 
-    @ApiOperation(value = "Retrieves a list tags", response = TagDTO.class, responseContainer = "List", produces = APPLICATION_JSON)
-    @ApiResponses(value = {
-            @ApiResponse(code = 200, message = "Operation performed successfully", response = TagDTO.class),
-            @ApiResponse(code = 400, message = "Invalid parameters", response = String.class),
-            @ApiResponse(code = 401, message = "User not authenticated", response = String.class),
-            @ApiResponse(code = 403, message = "User not authorised to perform operation", response = String.class),
-            @ApiResponse(code = 404, message = "DocumentDTO could not be found", response = String.class),
-            @ApiResponse(code = 500, message = "Error occurred while performing operation", response = String.class)
-    })
     @GetMapping(value = PATH_DOCUMENTS + PATH_TAGS, produces = APPLICATION_JSON)
     public ResponseEntity<Collection<TagDTO>> getAllTags(
-            @ApiParam(value = "Query to filter tags by")
             @QueryParam("query") final String query) {
         LOG.info("Received 'SearchTags' request with query '{}'",
                 query);
@@ -373,7 +295,6 @@ public class DocumentResource {
                 document.getId());
     }
 
-    @ApiModel("DocumentId")
     private static class DocumentId {
         private Long id;
 

@@ -84,9 +84,9 @@ public class PlacementMapper {
 
         final Placement placement = new Placement();
         placement.setId(placementDTO.getId());
-        placement.setTrainee(personRepository.findOne(placementDTO.getTraineeId()));
+      placement.setTrainee(personRepository.findById(placementDTO.getTraineeId()).orElse(null));
         if (placementDTO.getPostId() != null) {
-            placement.setPost(postRepository.findOne(placementDTO.getPostId()));
+          placement.setPost(postRepository.findById(placementDTO.getPostId()).orElse(null));
         }
         placement.setGradeId(placementDTO.getGradeId());
         placement.setGradeAbbreviation(placementDTO.getGradeAbbreviation());
@@ -106,7 +106,7 @@ public class PlacementMapper {
                 final PlacementSpecialty placementSpecialty = new PlacementSpecialty();
                 placementSpecialty.setPlacementSpecialtyType(placementSpecialtyDTO.getPlacementSpecialtyType());
                 placementSpecialty.setPlacement(placement);
-                placementSpecialty.setSpecialty(specialtyRepository.findOne(placementSpecialtyDTO.getSpecialtyId()));
+              placementSpecialty.setSpecialty(specialtyRepository.findById(placementSpecialtyDTO.getSpecialtyId()).orElse(null));
                 specialties.add(placementSpecialty);
             }
             placement.setSpecialties(specialties);

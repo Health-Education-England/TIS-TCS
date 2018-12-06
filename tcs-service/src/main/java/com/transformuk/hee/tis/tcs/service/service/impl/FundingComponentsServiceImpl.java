@@ -43,8 +43,7 @@ public class FundingComponentsServiceImpl implements FundingComponentsService {
     log.debug("Request to save FundingComponents : {}", fundingComponentsDTO);
     FundingComponents fundingComponents = fundingComponentsMapper.fundingComponentsDTOToFundingComponents(fundingComponentsDTO);
     fundingComponents = fundingComponentsRepository.save(fundingComponents);
-    FundingComponentsDTO result = fundingComponentsMapper.fundingComponentsToFundingComponentsDTO(fundingComponents);
-    return result;
+    return fundingComponentsMapper.fundingComponentsToFundingComponentsDTO(fundingComponents);
   }
 
   /**
@@ -57,9 +56,8 @@ public class FundingComponentsServiceImpl implements FundingComponentsService {
   public List<FundingComponentsDTO> save(List<FundingComponentsDTO> fundingComponentsDTO) {
     log.debug("Request to save FundingComponents : {}", fundingComponentsDTO);
     List<FundingComponents> fundingComponents = fundingComponentsMapper.fundingComponentsDTOsToFundingComponents(fundingComponentsDTO);
-    fundingComponents = fundingComponentsRepository.save(fundingComponents);
-    List<FundingComponentsDTO> result = fundingComponentsMapper.fundingComponentsToFundingComponentsDTOs(fundingComponents);
-    return result;
+    fundingComponents = fundingComponentsRepository.saveAll(fundingComponents);
+    return fundingComponentsMapper.fundingComponentsToFundingComponentsDTOs(fundingComponents);
   }
 
   /**
@@ -73,7 +71,7 @@ public class FundingComponentsServiceImpl implements FundingComponentsService {
   public Page<FundingComponentsDTO> findAll(Pageable pageable) {
     log.debug("Request to get all FundingComponents");
     Page<FundingComponents> result = fundingComponentsRepository.findAll(pageable);
-    return result.map(fundingComponents -> fundingComponentsMapper.fundingComponentsToFundingComponentsDTO(fundingComponents));
+    return result.map(fundingComponentsMapper::fundingComponentsToFundingComponentsDTO);
   }
 
   /**
@@ -86,9 +84,8 @@ public class FundingComponentsServiceImpl implements FundingComponentsService {
   @Transactional(readOnly = true)
   public FundingComponentsDTO findOne(Long id) {
     log.debug("Request to get FundingComponents : {}", id);
-    FundingComponents fundingComponents = fundingComponentsRepository.findOne(id);
-    FundingComponentsDTO fundingComponentsDTO = fundingComponentsMapper.fundingComponentsToFundingComponentsDTO(fundingComponents);
-    return fundingComponentsDTO;
+    FundingComponents fundingComponents = fundingComponentsRepository.findById(id).orElse(null);
+    return fundingComponentsMapper.fundingComponentsToFundingComponentsDTO(fundingComponents);
   }
 
   /**
@@ -99,6 +96,6 @@ public class FundingComponentsServiceImpl implements FundingComponentsService {
   @Override
   public void delete(Long id) {
     log.debug("Request to delete FundingComponents : {}", id);
-    fundingComponentsRepository.delete(id);
+    fundingComponentsRepository.deleteById(id);
   }
 }

@@ -30,17 +30,9 @@ import java.util.List;
 import java.util.Set;
 
 import static org.assertj.core.api.Assertions.assertThat;
-import static org.hamcrest.Matchers.contains;
-import static org.hamcrest.Matchers.equalTo;
-import static org.hamcrest.Matchers.hasItem;
-import static org.hamcrest.Matchers.not;
-import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.delete;
-import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
-import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
-import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.put;
-import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.content;
-import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
-import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
+import static org.hamcrest.Matchers.*;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.*;
+import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.*;
 
 /**
  * Test class for the SpecialtyGroupResource REST controller.
@@ -184,7 +176,7 @@ public class SpecialtyGroupResourceIntTest {
         .andExpect(status().isOk())
         .andExpect(content().contentType(MediaType.APPLICATION_JSON_UTF8_VALUE))
         .andExpect(jsonPath("$.[*].id").value(hasItem(specialtyGroup.getId().intValue())))
-        .andExpect(jsonPath("$.[*].name").value(hasItem(DEFAULT_NAME.toString())));
+      .andExpect(jsonPath("$.[*].name").value(hasItem(DEFAULT_NAME)));
   }
 
 
@@ -267,7 +259,7 @@ public class SpecialtyGroupResourceIntTest {
         .andExpect(status().isOk());
 
     // verify that the DB has the updated Specialty Group
-    SpecialtyGroup testGroup = specialtyGroupRepository.findOne(specialtyGroupId);
+    SpecialtyGroup testGroup = specialtyGroupRepository.findById(specialtyGroupId).orElse(null);
     assertThat(testGroup.getSpecialties().contains(addedSpecialty));
     assertThat(testGroup.getSpecialties().contains(addSpecialty1));
     assertThat(testGroup.getSpecialties().contains(addSpecialty2));
@@ -318,7 +310,7 @@ public class SpecialtyGroupResourceIntTest {
         .andExpect(status().isOk());
 
     // verify it has been removed in the database
-    SpecialtyGroup testGroup = specialtyGroupRepository.findOne(specialtyGroupId);
+    SpecialtyGroup testGroup = specialtyGroupRepository.findById(specialtyGroupId).orElse(null);
     assertThat(testGroup.getSpecialties().contains(addSpecialty1));
     assertThat(testGroup.getSpecialties().contains(not(addSpecialty2)));
 
@@ -388,7 +380,7 @@ public class SpecialtyGroupResourceIntTest {
         .andExpect(status().isOk())
         .andExpect(content().contentType(MediaType.APPLICATION_JSON_UTF8_VALUE))
         .andExpect(jsonPath("$.id").value(specialtyGroup.getId().intValue()))
-        .andExpect(jsonPath("$.name").value(DEFAULT_NAME.toString()));
+      .andExpect(jsonPath("$.name").value(DEFAULT_NAME));
   }
 
   @Test
@@ -407,7 +399,7 @@ public class SpecialtyGroupResourceIntTest {
     int databaseSizeBeforeUpdate = specialtyGroupRepository.findAll().size();
 
     // Update the specialtyGroup
-    SpecialtyGroup updatedSpecialtyGroup = specialtyGroupRepository.findOne(specialtyGroup.getId());
+    SpecialtyGroup updatedSpecialtyGroup = specialtyGroupRepository.findById(specialtyGroup.getId()).orElse(null);
     updatedSpecialtyGroup
         .name(UPDATED_NAME);
     SpecialtyGroupDTO specialtyGroupDTO = specialtyGroupMapper.specialtyGroupToSpecialtyGroupDTO(updatedSpecialtyGroup);

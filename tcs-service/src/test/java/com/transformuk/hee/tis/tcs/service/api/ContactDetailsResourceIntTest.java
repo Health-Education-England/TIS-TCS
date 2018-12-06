@@ -33,13 +33,8 @@ import java.util.List;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.hamcrest.Matchers.containsInAnyOrder;
 import static org.hamcrest.Matchers.hasItem;
-import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.delete;
-import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
-import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
-import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.put;
-import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.content;
-import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
-import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.*;
+import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.*;
 
 /**
  * Test class for the ContactDetailsResource REST controller.
@@ -342,7 +337,7 @@ public class ContactDetailsResourceIntTest {
     int databaseSizeBeforeUpdate = contactDetailsRepository.findAll().size();
 
     // Update the contactDetails
-    ContactDetails updatedContactDetails = contactDetailsRepository.findOne(contactDetails.getId());
+    ContactDetails updatedContactDetails = contactDetailsRepository.findById(contactDetails.getId()).orElse(null);
     updatedContactDetails
         .surname(UPDATED_SURNAME)
         .forenames(UPDATED_FORENAMES)

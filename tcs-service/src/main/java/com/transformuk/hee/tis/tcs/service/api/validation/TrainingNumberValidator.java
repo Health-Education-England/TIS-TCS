@@ -33,9 +33,7 @@ public class TrainingNumberValidator {
      * @throws MethodArgumentNotValidException if there are validation errors
      */
     public void validate(TrainingNumberDTO trainingNumberDTO) throws MethodArgumentNotValidException {
-
-        List<FieldError> fieldErrors = new ArrayList<>();;
-        fieldErrors.addAll(checkNumber(trainingNumberDTO));
+      List<FieldError> fieldErrors = new ArrayList<>(checkNumber(trainingNumberDTO));
 
         if (!fieldErrors.isEmpty()) {
             BeanPropertyBindingResult bindingResult = new BeanPropertyBindingResult(trainingNumberDTO, "TrainingNumberDTO");

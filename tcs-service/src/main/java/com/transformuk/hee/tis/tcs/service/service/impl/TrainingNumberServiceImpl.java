@@ -2,13 +2,11 @@ package com.transformuk.hee.tis.tcs.service.service.impl;
 
 import com.transformuk.hee.tis.tcs.api.dto.TrainingNumberDTO;
 import com.transformuk.hee.tis.tcs.service.model.TrainingNumber;
-import com.transformuk.hee.tis.tcs.service.repository.ProgrammeRepository;
 import com.transformuk.hee.tis.tcs.service.repository.TrainingNumberRepository;
 import com.transformuk.hee.tis.tcs.service.service.TrainingNumberService;
 import com.transformuk.hee.tis.tcs.service.service.mapper.TrainingNumberMapper;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
@@ -45,8 +43,7 @@ public class TrainingNumberServiceImpl implements TrainingNumberService {
     log.debug("Request to save TrainingNumber : {}", trainingNumberDTO);
     TrainingNumber trainingNumber = trainingNumberMapper.trainingNumberDTOToTrainingNumber(trainingNumberDTO);
     trainingNumber = trainingNumberRepository.save(trainingNumber);
-    TrainingNumberDTO result = trainingNumberMapper.trainingNumberToTrainingNumberDTO(trainingNumber);
-    return result;
+    return trainingNumberMapper.trainingNumberToTrainingNumberDTO(trainingNumber);
   }
 
   /**
@@ -58,10 +55,9 @@ public class TrainingNumberServiceImpl implements TrainingNumberService {
   @Override
   public List<TrainingNumberDTO> save(List<TrainingNumberDTO> trainingNumberDTO) {
     log.debug("Request to save TrainingNumber : {}", trainingNumberDTO);
-    List<TrainingNumber> trainingNumber = trainingNumberMapper.trainingNumberDTOsToTrainingNumbers(trainingNumberDTO);
-    trainingNumber = trainingNumberRepository.save(trainingNumber);
-    List<TrainingNumberDTO> result = trainingNumberMapper.trainingNumbersToTrainingNumberDTOs(trainingNumber);
-    return result;
+    List<TrainingNumber> trainingNumbers = trainingNumberMapper.trainingNumberDTOsToTrainingNumbers(trainingNumberDTO);
+    trainingNumbers = trainingNumberRepository.saveAll(trainingNumbers);
+    return trainingNumberMapper.trainingNumbersToTrainingNumberDTOs(trainingNumbers);
   }
 
   /**
@@ -74,7 +70,7 @@ public class TrainingNumberServiceImpl implements TrainingNumberService {
   public Page<TrainingNumberDTO> findAll(Pageable pageable) {
     log.debug("Request to get all TrainingNumbers");
     Page<TrainingNumber> trainingNumberPage = trainingNumberRepository.findAll(pageable);
-    return trainingNumberPage.map(trainingNumber -> trainingNumberMapper.trainingNumberToTrainingNumberDTO(trainingNumber));
+    return trainingNumberPage.map(trainingNumberMapper::trainingNumberToTrainingNumberDTO);
   }
 
   /**
@@ -87,9 +83,8 @@ public class TrainingNumberServiceImpl implements TrainingNumberService {
   @Transactional(readOnly = true)
   public TrainingNumberDTO findOne(Long id) {
     log.debug("Request to get TrainingNumber : {}", id);
-    TrainingNumber trainingNumber = trainingNumberRepository.findOne(id);
-    TrainingNumberDTO trainingNumberDTO = trainingNumberMapper.trainingNumberToTrainingNumberDTO(trainingNumber);
-    return trainingNumberDTO;
+    TrainingNumber trainingNumber = trainingNumberRepository.findById(id).orElse(null);
+    return trainingNumberMapper.trainingNumberToTrainingNumberDTO(trainingNumber);
   }
 
   /**
@@ -100,6 +95,6 @@ public class TrainingNumberServiceImpl implements TrainingNumberService {
   @Override
   public void delete(Long id) {
     log.debug("Request to delete TrainingNumber : {}", id);
-    trainingNumberRepository.delete(id);
+    trainingNumberRepository.deleteById(id);
   }
 }

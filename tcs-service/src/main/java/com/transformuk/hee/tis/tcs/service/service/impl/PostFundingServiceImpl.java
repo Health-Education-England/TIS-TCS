@@ -43,8 +43,7 @@ public class PostFundingServiceImpl implements PostFundingService {
     log.debug("Request to save PostFunding : {}", postFundingDTO);
     PostFunding postFunding = postFundingMapper.postFundingDTOToPostFunding(postFundingDTO);
     postFunding = postFundingRepository.save(postFunding);
-    PostFundingDTO result = postFundingMapper.postFundingToPostFundingDTO(postFunding);
-    return result;
+    return postFundingMapper.postFundingToPostFundingDTO(postFunding);
   }
 
   /**
@@ -56,10 +55,9 @@ public class PostFundingServiceImpl implements PostFundingService {
   @Override
   public List<PostFundingDTO> save(List<PostFundingDTO> postFundingDTO) {
     log.debug("Request to save PostFunding : {}", postFundingDTO);
-    List<PostFunding> postFunding = postFundingMapper.postFundingDTOsToPostFundings(postFundingDTO);
-    postFunding = postFundingRepository.save(postFunding);
-    List<PostFundingDTO> result = postFundingMapper.postFundingsToPostFundingDTOs(postFunding);
-    return result;
+    List<PostFunding> postFundings = postFundingMapper.postFundingDTOsToPostFundings(postFundingDTO);
+    postFundings = postFundingRepository.saveAll(postFundings);
+    return postFundingMapper.postFundingsToPostFundingDTOs(postFundings);
   }
 
   /**
@@ -73,7 +71,7 @@ public class PostFundingServiceImpl implements PostFundingService {
   public Page<PostFundingDTO> findAll(Pageable pageable) {
     log.debug("Request to get all PostFundings");
     Page<PostFunding> result = postFundingRepository.findAll(pageable);
-    return result.map(postFunding -> postFundingMapper.postFundingToPostFundingDTO(postFunding));
+    return result.map(postFundingMapper::postFundingToPostFundingDTO);
   }
 
   /**
@@ -86,9 +84,8 @@ public class PostFundingServiceImpl implements PostFundingService {
   @Transactional(readOnly = true)
   public PostFundingDTO findOne(Long id) {
     log.debug("Request to get PostFunding : {}", id);
-    PostFunding postFunding = postFundingRepository.findOne(id);
-    PostFundingDTO postFundingDTO = postFundingMapper.postFundingToPostFundingDTO(postFunding);
-    return postFundingDTO;
+    PostFunding postFunding = postFundingRepository.findById(id).orElse(null);
+    return postFundingMapper.postFundingToPostFundingDTO(postFunding);
   }
 
   /**
@@ -99,6 +96,6 @@ public class PostFundingServiceImpl implements PostFundingService {
   @Override
   public void delete(Long id) {
     log.debug("Request to delete PostFunding : {}", id);
-    postFundingRepository.delete(id);
+    postFundingRepository.deleteById(id);
   }
 }

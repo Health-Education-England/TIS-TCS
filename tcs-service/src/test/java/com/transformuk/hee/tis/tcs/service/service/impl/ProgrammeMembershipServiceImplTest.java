@@ -1,10 +1,6 @@
 package com.transformuk.hee.tis.tcs.service.service.impl;
 
-import com.transformuk.hee.tis.tcs.api.dto.CurriculumDTO;
-import com.transformuk.hee.tis.tcs.api.dto.CurriculumMembershipDTO;
-import com.transformuk.hee.tis.tcs.api.dto.ProgrammeMembershipCurriculaDTO;
-import com.transformuk.hee.tis.tcs.api.dto.ProgrammeMembershipDTO;
-import com.transformuk.hee.tis.tcs.api.dto.TrainingNumberDTO;
+import com.transformuk.hee.tis.tcs.api.dto.*;
 import com.transformuk.hee.tis.tcs.api.enumeration.ProgrammeMembershipType;
 import com.transformuk.hee.tis.tcs.service.model.Curriculum;
 import com.transformuk.hee.tis.tcs.service.model.Programme;
@@ -25,7 +21,6 @@ import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.Spy;
 import org.mockito.runners.MockitoJUnitRunner;
-import org.springframework.cglib.core.Local;
 
 import java.time.LocalDate;
 import java.util.List;
@@ -36,10 +31,7 @@ import static org.mockito.Matchers.any;
 import static org.mockito.Matchers.anyList;
 import static org.mockito.Matchers.anyLong;
 import static org.mockito.Matchers.anySet;
-import static org.mockito.Mockito.doReturn;
-import static org.mockito.Mockito.never;
-import static org.mockito.Mockito.verify;
-import static org.mockito.Mockito.when;
+import static org.mockito.Mockito.*;
 
 @RunWith(MockitoJUnitRunner.class)
 public class ProgrammeMembershipServiceImplTest {
@@ -48,7 +40,6 @@ public class ProgrammeMembershipServiceImplTest {
   private static final String TRAINEE_NUMBER = "XXX/XXX/XXX";
 
   private static final long PROGRAMME_ID = 2L;
-  private static final String PROGRAMME_NUMBER = "XXXXX";
   private static final Long PROGRAMME_MEMBERSHIP_ID_1 = 7777L;
   private static final Long PROGRAMME_MEMBERSHIP_ID_2 = 8888L;
   private static final String PROGRAMME_NUMBER1 = "Programme number";
@@ -130,7 +121,7 @@ public class ProgrammeMembershipServiceImplTest {
     } catch (Exception e) {
       verify(programmeMembershipRepositoryMock, never()).findByTraineeIdAndProgrammeId(anyLong(), anyLong());
       verify(programmeMembershipMapperMock, never()).programmeMembershipsToProgrammeMembershipDTOs(anyList());
-      verify(curriculumRepositoryMock, never()).findAll(anyList());
+      verify(curriculumRepositoryMock, never()).findAllById(anyList());
       verify(curriculumMapperMock, never()).curriculumToCurriculumDTO(any(Curriculum.class));
       throw e;
     }
@@ -143,7 +134,7 @@ public class ProgrammeMembershipServiceImplTest {
     } catch (Exception e) {
       verify(programmeMembershipRepositoryMock, never()).findByTraineeIdAndProgrammeId(anyLong(), anyLong());
       verify(programmeMembershipMapperMock, never()).programmeMembershipsToProgrammeMembershipDTOs(anyList());
-      verify(curriculumRepositoryMock, never()).findAll(anyList());
+      verify(curriculumRepositoryMock, never()).findAllById(anyList());
       verify(curriculumMapperMock, never()).curriculumToCurriculumDTO(any(Curriculum.class));
       throw e;
     }
@@ -161,7 +152,7 @@ public class ProgrammeMembershipServiceImplTest {
     Assert.assertNotNull(result);
     Assert.assertEquals(0L, result.size());
 
-    verify(curriculumRepositoryMock, never()).findAll(anyList());
+    verify(curriculumRepositoryMock, never()).findAllById(anyList());
     verify(curriculumMapperMock, never()).curriculumToCurriculumDTO(any(Curriculum.class));
 
     verify(programmeMembershipRepositoryMock).findByTraineeIdAndProgrammeId(TRAINEE_ID, PROGRAMME_ID);
@@ -178,11 +169,11 @@ public class ProgrammeMembershipServiceImplTest {
     List<ProgrammeMembership> programmeMemberships = Lists.newArrayList(programmeMembership1, programmeMembership2);
     List<ProgrammeMembershipDTO> programmeMembershipDTOList = Lists.newArrayList(programmeMembershipDTO1, programmeMembershipDTO2);
     List<Curriculum> foundCurricula = Lists.newArrayList(curriculum1, curriculum2);
-    Set<Long> curriculumIds = Sets.newLinkedHashSet(new Long(5L), new Long(6L));
+    Set<Long> curriculumIds = Sets.newLinkedHashSet(5L, 6L);
 
     when(programmeMembershipRepositoryMock.findByTraineeIdAndProgrammeId(TRAINEE_ID, PROGRAMME_ID)).thenReturn(programmeMemberships);
     when(programmeMembershipMapperMock.programmeMembershipsToProgrammeMembershipDTOs(programmeMemberships)).thenReturn(programmeMembershipDTOList);
-    when(curriculumRepositoryMock.findAll(curriculumIds)).thenReturn(foundCurricula);
+    when(curriculumRepositoryMock.findAllById(curriculumIds)).thenReturn(foundCurricula);
     when(curriculumMapperMock.curriculumToCurriculumDTO(curriculum1)).thenReturn(curriculumDTO1);
     when(curriculumMapperMock.curriculumToCurriculumDTO(curriculum2)).thenReturn(curriculumDTO2);
 
@@ -193,7 +184,7 @@ public class ProgrammeMembershipServiceImplTest {
 
     verify(programmeMembershipRepositoryMock).findByTraineeIdAndProgrammeId(TRAINEE_ID, PROGRAMME_ID);
     verify(programmeMembershipMapperMock).programmeMembershipsToProgrammeMembershipDTOs(programmeMemberships);
-    verify(curriculumRepositoryMock).findAll(curriculumIds);
+    verify(curriculumRepositoryMock).findAllById(curriculumIds);
     verify(curriculumMapperMock).curriculumToCurriculumDTO(curriculum1);
     verify(curriculumMapperMock).curriculumToCurriculumDTO(curriculum2);
   }
@@ -206,7 +197,7 @@ public class ProgrammeMembershipServiceImplTest {
     } catch (Exception e) {
       verify(programmeMembershipRepositoryMock, never()).findByTraineeIdAndProgrammeId(anyLong(), anyLong());
       verify(programmeMembershipMapperMock, never()).programmeMembershipsToProgrammeMembershipDTOs(anyList());
-      verify(curriculumRepositoryMock, never()).findAll(anyList());
+      verify(curriculumRepositoryMock, never()).findAllById(anyList());
       verify(curriculumMapperMock, never()).curriculumToCurriculumDTO(any(Curriculum.class));
       verify(programmeRepositoryMock, never()).findByIdIn(anySet());
       throw e;
@@ -218,7 +209,6 @@ public class ProgrammeMembershipServiceImplTest {
     List<ProgrammeMembership> emptyProgrammeMembershipList = Lists.emptyList();
     List<ProgrammeMembershipDTO> emptyProgrammeMembershipDTOList = Lists.emptyList();
     when(programmeMembershipRepositoryMock.findByTraineeId(TRAINEE_ID)).thenReturn(emptyProgrammeMembershipList);
-    when(programmeMembershipMapperMock.programmeMembershipsToProgrammeMembershipDTOs(emptyProgrammeMembershipList)).thenReturn(emptyProgrammeMembershipDTOList);
 
     List<ProgrammeMembershipCurriculaDTO> result = testObj.findProgrammeMembershipsForTrainee(TRAINEE_ID);
 
@@ -226,7 +216,7 @@ public class ProgrammeMembershipServiceImplTest {
     Assert.assertEquals(0L, result.size());
 
     verify(programmeMembershipMapperMock, never()).programmeMembershipsToProgrammeMembershipDTOs(anyList());
-    verify(curriculumRepositoryMock, never()).findAll(anyList());
+    verify(curriculumRepositoryMock, never()).findAllById(anyList());
     verify(curriculumMapperMock, never()).curriculumToCurriculumDTO(any(Curriculum.class));
     verify(programmeRepositoryMock, never()).findByIdIn(anySet());
     verify(programmeMembershipRepositoryMock).findByTraineeId(TRAINEE_ID);
@@ -245,7 +235,7 @@ public class ProgrammeMembershipServiceImplTest {
 
     when(programmeMembershipRepositoryMock.findByTraineeId(TRAINEE_ID)).thenReturn(programmeMemberships);
     when(programmeMembershipMapperMock.allEntityToDto(programmeMemberships)).thenReturn(programmeMembershipDTOList);
-    when(curriculumRepositoryMock.findAll(curriculumIds)).thenReturn(foundCurricula);
+    when(curriculumRepositoryMock.findAllById(curriculumIds)).thenReturn(foundCurricula);
     when(curriculumMapperMock.curriculumToCurriculumDTO(curriculum1)).thenReturn(curriculumDTO1);
     when(curriculumMapperMock.curriculumToCurriculumDTO(curriculum2)).thenReturn(curriculumDTO2);
     when(programmeRepositoryMock.findByIdIn(Sets.newLinkedHashSet(PROGRAMME_ID))).thenReturn(Lists.newArrayList(programme));
@@ -260,7 +250,7 @@ public class ProgrammeMembershipServiceImplTest {
 
     verify(programmeMembershipRepositoryMock).findByTraineeId(TRAINEE_ID);
     verify(programmeMembershipMapperMock).allEntityToDto(programmeMemberships);
-    verify(curriculumRepositoryMock).findAll(curriculumIds);
+    verify(curriculumRepositoryMock).findAllById(curriculumIds);
     verify(curriculumMapperMock).curriculumToCurriculumDTO(curriculum1);
     verify(curriculumMapperMock).curriculumToCurriculumDTO(curriculum2);
     verify(programmeRepositoryMock).findByIdIn(Sets.newLinkedHashSet(PROGRAMME_ID));

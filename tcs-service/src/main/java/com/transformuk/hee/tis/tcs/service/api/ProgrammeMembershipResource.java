@@ -1,6 +1,5 @@
 package com.transformuk.hee.tis.tcs.service.api;
 
-import com.codahale.metrics.annotation.Timed;
 import com.transformuk.hee.tis.tcs.api.dto.CurriculumMembershipDTO;
 import com.transformuk.hee.tis.tcs.api.dto.ProgrammeMembershipCurriculaDTO;
 import com.transformuk.hee.tis.tcs.api.dto.ProgrammeMembershipDTO;
@@ -11,7 +10,6 @@ import com.transformuk.hee.tis.tcs.service.api.util.PaginationUtil;
 import com.transformuk.hee.tis.tcs.service.api.validation.ProgrammeMembershipValidator;
 import com.transformuk.hee.tis.tcs.service.service.ProgrammeMembershipService;
 import io.github.jhipster.web.util.ResponseUtil;
-import io.swagger.annotations.ApiParam;
 import org.apache.commons.collections4.CollectionUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
@@ -24,15 +22,7 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.MethodArgumentNotValidException;
-import org.springframework.web.bind.annotation.DeleteMapping;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.PatchMapping;
-import org.springframework.web.bind.annotation.PathVariable;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.PutMapping;
-import org.springframework.web.bind.annotation.RequestBody;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
 
 import javax.validation.Valid;
 import java.net.URI;
@@ -70,7 +60,6 @@ public class ProgrammeMembershipResource {
    * @throws URISyntaxException if the Location URI syntax is incorrect
    */
   @PostMapping("/programme-memberships")
-  @Timed
   @PreAuthorize("hasPermission('tis:people::person:', 'Create')")
   public ResponseEntity<ProgrammeMembershipDTO> createProgrammeMembership(
       @RequestBody @Validated(Create.class) ProgrammeMembershipDTO programmeMembershipDTO)
@@ -98,7 +87,6 @@ public class ProgrammeMembershipResource {
    * @throws URISyntaxException if the Location URI syntax is incorrect
    */
   @PutMapping("/programme-memberships")
-  @Timed
   @PreAuthorize("hasPermission('tis:people::person:', 'Update')")
   public ResponseEntity<ProgrammeMembershipDTO> updateProgrammeMembership(
       @RequestBody @Validated(Update.class) ProgrammeMembershipDTO programmeMembershipDTO)
@@ -122,9 +110,8 @@ public class ProgrammeMembershipResource {
    * @throws URISyntaxException if there is an error to generate the pagination HTTP headers
    */
   @GetMapping("/programme-memberships")
-  @Timed
   @PreAuthorize("hasPermission('tis:people::person:', 'View')")
-  public ResponseEntity<List<ProgrammeMembershipDTO>> getAllProgrammeMemberships(@ApiParam Pageable pageable) {
+  public ResponseEntity<List<ProgrammeMembershipDTO>> getAllProgrammeMemberships(Pageable pageable) {
     log.debug("REST request to get a page of ProgrammeMemberships");
     Page<ProgrammeMembershipDTO> page = programmeMembershipService.findAll(pageable);
     HttpHeaders headers = PaginationUtil.generatePaginationHttpHeaders(page, "/api/programme-memberships");
@@ -138,7 +125,6 @@ public class ProgrammeMembershipResource {
    * @return the ResponseEntity with status 200 (OK) and with body the programmeMembershipDTO, or with status 404 (Not Found)
    */
   @GetMapping("/programme-memberships/{id}")
-  @Timed
   @PreAuthorize("hasPermission('tis:people::person:', 'View')")
   public ResponseEntity<ProgrammeMembershipDTO> getProgrammeMembership(@PathVariable Long id) {
     log.debug("REST request to get ProgrammeMembership : {}", id);
@@ -153,7 +139,6 @@ public class ProgrammeMembershipResource {
    * @return the ResponseEntity with status 200 (OK)
    */
   @PostMapping("/programme-memberships/delete/")
-  @Timed
   @PreAuthorize("hasAuthority('tcs:delete:entities')")
   public ResponseEntity<Void> removeProgrammeMembershipAndItsCurriculum(@RequestBody ProgrammeMembershipDTO programmeMembershipDTO) {
     log.debug("REST request to delete ProgrammeMembership : {}", programmeMembershipDTO);
@@ -176,7 +161,6 @@ public class ProgrammeMembershipResource {
    * @return the ResponseEntity with status 200 (OK)
    */
   @DeleteMapping("/programme-memberships/{id}")
-  @Timed
   @PreAuthorize("hasAuthority('tcs:delete:entities')")
   public ResponseEntity<Void> deleteProgrammeMembershipById(@PathVariable Long id) {
     log.debug("REST request to delete ProgrammeMembership by id : {}", id);
@@ -191,7 +175,6 @@ public class ProgrammeMembershipResource {
    * @return the ResponseEntity with status 200 (OK) and with body the updated programmeMembershipDTOS
    */
   @PatchMapping("/programme-memberships")
-  @Timed
   @PreAuthorize("hasPermission('tis:people::person:', 'Update')")
   public ResponseEntity<List<ProgrammeMembershipDTO>> patchProgrammeMemberships(
       @Valid @RequestBody List<ProgrammeMembershipDTO> programmeMembershipDTOS) {
@@ -213,7 +196,6 @@ public class ProgrammeMembershipResource {
    * @return the ResponseEntity with status 200 (OK) and the list of programmeMemberships in body
    */
   @GetMapping("/trainee/{traineeId}/programme/{programmeId}/programme-memberships")
-  @Timed
   @PreAuthorize("hasPermission('tis:people::person:', 'View')")
   public ResponseEntity<List<ProgrammeMembershipCurriculaDTO>> getProgrammeMembershipForTraineeAndProgramme(@PathVariable Long traineeId,
                                                                                                             @PathVariable Long programmeId) {
@@ -236,7 +218,6 @@ public class ProgrammeMembershipResource {
    * @return the ResponseEntity with status 200 (OK) and the list of programmeMemberships in body
    */
   @GetMapping("/trainee/{traineeId}/programme-memberships")
-  @Timed
   @PreAuthorize("hasPermission('tis:people::person:', 'View')")
   public ResponseEntity<List<ProgrammeMembershipCurriculaDTO>> getProgrammeMembershipForTrainee(@PathVariable Long traineeId) {
     log.debug("REST request to get ProgrammeMemberships for trainee {}", traineeId);
@@ -255,7 +236,6 @@ public class ProgrammeMembershipResource {
    * @return the ResponseEntity with status 200 (OK) and the list of programmeMemberships in body
    */
   @GetMapping("/trainee/{traineeId}/programme-memberships/rolled-up")
-  @Timed
   @PreAuthorize("hasPermission('tis:people::person:', 'View')")
   public ResponseEntity<List<ProgrammeMembershipCurriculaDTO>> getRolledUpProgrammeMembershipForTrainee(@PathVariable Long traineeId) {
     log.debug("REST request to get ProgrammeMemberships for trainee {}", traineeId);

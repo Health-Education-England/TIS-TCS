@@ -3,8 +3,6 @@ package com.transformuk.hee.tis.tcs.api.dto;
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.google.common.base.Strings;
 import com.transformuk.hee.tis.tcs.api.dto.validation.Update;
-import io.swagger.annotations.ApiModel;
-import io.swagger.annotations.ApiModelProperty;
 
 import javax.validation.constraints.DecimalMin;
 import javax.validation.constraints.NotNull;
@@ -12,16 +10,13 @@ import javax.validation.constraints.Null;
 import java.time.LocalDateTime;
 import java.util.Objects;
 
-@ApiModel("Tag")
 public class TagDTO {
     @NotNull(groups = Update.class, message = "Id must not be null when updating a tag")
     @DecimalMin(value = "0", groups = Update.class, message = "Id must not be negative")
     @Null(groups = Update.class, message = "Id must be null when creating a new tag")
     private Long id;
-    @ApiModelProperty(hidden = true)
     @JsonIgnore
     private LocalDateTime addedDate;
-    @ApiModelProperty(hidden = true)
     @JsonIgnore
     private LocalDateTime amendedDate;
     private String name;

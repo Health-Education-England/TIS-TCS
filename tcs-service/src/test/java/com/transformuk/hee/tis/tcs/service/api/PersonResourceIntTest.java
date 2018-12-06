@@ -9,21 +9,13 @@ import com.transformuk.hee.tis.tcs.service.Application;
 import com.transformuk.hee.tis.tcs.service.api.decorator.PersonViewDecorator;
 import com.transformuk.hee.tis.tcs.service.api.decorator.PlacementSummaryDecorator;
 import com.transformuk.hee.tis.tcs.service.api.decorator.PlacementViewDecorator;
-import com.transformuk.hee.tis.tcs.service.api.validation.ContactDetailsValidator;
-import com.transformuk.hee.tis.tcs.service.api.validation.GdcDetailsValidator;
-import com.transformuk.hee.tis.tcs.service.api.validation.GmcDetailsValidator;
-import com.transformuk.hee.tis.tcs.service.api.validation.PersonValidator;
-import com.transformuk.hee.tis.tcs.service.api.validation.PersonalDetailsValidator;
+import com.transformuk.hee.tis.tcs.service.api.validation.*;
 import com.transformuk.hee.tis.tcs.service.exception.ExceptionTranslator;
 import com.transformuk.hee.tis.tcs.service.model.ContactDetails;
 import com.transformuk.hee.tis.tcs.service.model.GdcDetails;
 import com.transformuk.hee.tis.tcs.service.model.GmcDetails;
 import com.transformuk.hee.tis.tcs.service.model.Person;
-import com.transformuk.hee.tis.tcs.service.repository.ContactDetailsRepository;
-import com.transformuk.hee.tis.tcs.service.repository.GdcDetailsRepository;
-import com.transformuk.hee.tis.tcs.service.repository.GmcDetailsRepository;
-import com.transformuk.hee.tis.tcs.service.repository.PersonRepository;
-import com.transformuk.hee.tis.tcs.service.repository.PlacementViewRepository;
+import com.transformuk.hee.tis.tcs.service.repository.*;
 import com.transformuk.hee.tis.tcs.service.service.PersonService;
 import com.transformuk.hee.tis.tcs.service.service.PlacementService;
 import com.transformuk.hee.tis.tcs.service.service.impl.PermissionService;
@@ -53,18 +45,10 @@ import java.util.Collection;
 import java.util.List;
 
 import static org.assertj.core.api.Assertions.assertThat;
-import static org.hamcrest.Matchers.containsInAnyOrder;
-import static org.hamcrest.Matchers.hasItem;
-import static org.hamcrest.Matchers.hasSize;
+import static org.hamcrest.Matchers.*;
 import static org.mockito.Mockito.when;
-import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.delete;
-import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
-import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.patch;
-import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
-import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.put;
-import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.content;
-import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
-import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.*;
+import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.*;
 
 @RunWith(SpringRunner.class)
 @SpringBootTest(classes = Application.class, webEnvironment = SpringBootTest.WebEnvironment.RANDOM_PORT)
@@ -534,7 +518,7 @@ public class PersonResourceIntTest {
     personRepository.saveAndFlush(person);
 
     // Update the person
-    final Person updatedPerson = personRepository.findOne(person.getId());
+    final Person updatedPerson = personRepository.findById(person.getId()).orElse(null);
     final PersonDTO updatedPersonDTO = personMapper.toDto(updatedPerson);
     updatedPersonDTO.setIntrepidId(UPDATED_INTREPID_ID);
     updatedPersonDTO.setAddedDate(UPDATED_ADDED_DATE);
@@ -748,7 +732,7 @@ public class PersonResourceIntTest {
     personRepository.saveAndFlush(person);
 
     // Update the person
-    final Person updatedPerson = personRepository.findOne(person.getId());
+    final Person updatedPerson = personRepository.findById(person.getId()).orElse(null);
     updatedPerson
         .intrepidId(UPDATED_INTREPID_ID)
         .addedDate(UPDATED_ADDED_DATE)

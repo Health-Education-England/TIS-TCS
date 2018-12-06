@@ -3,16 +3,13 @@ package com.transformuk.hee.tis.tcs.api.dto;
 import com.transformuk.hee.tis.tcs.api.dto.validation.Create;
 import com.transformuk.hee.tis.tcs.api.dto.validation.Update;
 import com.transformuk.hee.tis.tcs.api.enumeration.CommentSource;
-import io.swagger.annotations.ApiModel;
 
-import javax.validation.Valid;
 import javax.validation.constraints.DecimalMin;
 import javax.validation.constraints.NotNull;
 import javax.validation.constraints.Null;
 import java.io.Serializable;
 import java.util.Objects;
 
-@ApiModel("PlacementComment")
 public class PlacementCommentDTO implements Serializable {
 	private static final long serialVersionUID = -1543336084132879227L;
 

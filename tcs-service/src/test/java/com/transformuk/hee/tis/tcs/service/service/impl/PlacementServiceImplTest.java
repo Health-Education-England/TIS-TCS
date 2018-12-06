@@ -9,7 +9,6 @@ import com.transformuk.hee.tis.tcs.service.service.helper.SqlQuerySupplier;
 import com.transformuk.hee.tis.tcs.service.service.mapper.PlacementMapper;
 import org.junit.Assert;
 import org.junit.Before;
-import org.junit.Ignore;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.mockito.ArgumentCaptor;
@@ -22,9 +21,9 @@ import javax.persistence.EntityManager;
 import java.math.BigInteger;
 import java.text.SimpleDateFormat;
 import java.time.LocalDate;
-import java.util.Arrays;
 import java.util.Date;
 import java.util.List;
+import java.util.Optional;
 
 import static org.mockito.Mockito.doNothing;
 import static org.mockito.Mockito.when;
@@ -68,7 +67,7 @@ public class PlacementServiceImplTest {
 
   @Test
   public void closePlacementShouldClosePlacementBySettingToDate() {
-    when(placementRepositoryMock.findOne(PLACEMENT_ID)).thenReturn(placementMock);
+    when(placementRepositoryMock.findById(PLACEMENT_ID)).thenReturn(Optional.of(placementMock));
     doNothing().when(placementMock).setDateTo(toDateCaptor.capture());
     when(placementRepositoryMock.saveAndFlush(placementMock)).thenReturn(placementMock);
     when(placementMapperMock.placementToPlacementDTO(placementMock)).thenReturn(placementDTOMock);

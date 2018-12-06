@@ -25,13 +25,7 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
-import java.util.Collection;
-import java.util.Collections;
-import java.util.List;
-import java.util.Map;
-import java.util.Objects;
-import java.util.Optional;
-import java.util.Set;
+import java.util.*;
 import java.util.function.Predicate;
 import java.util.stream.Collectors;
 
@@ -72,10 +66,9 @@ public class ProgrammeMembershipServiceImpl implements ProgrammeMembershipServic
   public ProgrammeMembershipDTO save(ProgrammeMembershipDTO programmeMembershipDTO) {
     log.debug("Request to save ProgrammeMembership : {}", programmeMembershipDTO);
     List<ProgrammeMembership> programmeMembershipList = programmeMembershipMapper.toEntity(programmeMembershipDTO);
-    programmeMembershipList = programmeMembershipRepository.save(programmeMembershipList);
+    programmeMembershipList = programmeMembershipRepository.saveAll(programmeMembershipList);
     List<ProgrammeMembershipDTO> resultDtos = programmeMembershipMapper.programmeMembershipsToProgrammeMembershipDTOs(programmeMembershipList);
-    ProgrammeMembershipDTO result = CollectionUtils.isNotEmpty(resultDtos) ? resultDtos.get(0) : null;
-    return result;
+    return CollectionUtils.isNotEmpty(resultDtos) ? resultDtos.get(0) : null;
   }
 
   /**
@@ -87,10 +80,9 @@ public class ProgrammeMembershipServiceImpl implements ProgrammeMembershipServic
   @Override
   public List<ProgrammeMembershipDTO> save(List<ProgrammeMembershipDTO> programmeMembershipDTO) {
     log.debug("Request to save ProgrammeMembership : {}", programmeMembershipDTO);
-    List<ProgrammeMembership> programmeMembership = programmeMembershipMapper.programmeMembershipDTOsToProgrammeMemberships(programmeMembershipDTO);
-    programmeMembership = programmeMembershipRepository.save(programmeMembership);
-    List<ProgrammeMembershipDTO> result = programmeMembershipMapper.programmeMembershipsToProgrammeMembershipDTOs(programmeMembership);
-    return result;
+    List<ProgrammeMembership> programmeMemberships = programmeMembershipMapper.programmeMembershipDTOsToProgrammeMemberships(programmeMembershipDTO);
+    programmeMemberships = programmeMembershipRepository.saveAll(programmeMemberships);
+    return programmeMembershipMapper.programmeMembershipsToProgrammeMembershipDTOs(programmeMemberships);
   }
 
   /**
@@ -104,7 +96,7 @@ public class ProgrammeMembershipServiceImpl implements ProgrammeMembershipServic
   public Page<ProgrammeMembershipDTO> findAll(Pageable pageable) {
     log.debug("Request to get all ProgrammeMemberships");
     Page<ProgrammeMembership> result = programmeMembershipRepository.findAll(pageable);
-    return result.map(programmeMembership -> programmeMembershipMapper.toDto(programmeMembership));
+    return result.map(programmeMembershipMapper::toDto);
   }
 
   /**
@@ -117,9 +109,8 @@ public class ProgrammeMembershipServiceImpl implements ProgrammeMembershipServic
   @Transactional(readOnly = true)
   public ProgrammeMembershipDTO findOne(Long id) {
     log.debug("Request to get ProgrammeMembership : {}", id);
-    ProgrammeMembership programmeMembership = programmeMembershipRepository.findOne(id);
-    ProgrammeMembershipDTO programmeMembershipDTO = programmeMembershipMapper.toDto(programmeMembership);
-    return programmeMembershipDTO;
+    ProgrammeMembership programmeMembership = programmeMembershipRepository.findById(id).orElse(null);
+    return programmeMembershipMapper.toDto(programmeMembership);
   }
 
   /**
@@ -130,7 +121,7 @@ public class ProgrammeMembershipServiceImpl implements ProgrammeMembershipServic
   @Override
   public void delete(Long id) {
     log.debug("Request to delete ProgrammeMembership : {}", id);
-    programmeMembershipRepository.delete(id);
+    programmeMembershipRepository.deleteById(id);
   }
 
   @Transactional(readOnly = true)
@@ -155,8 +146,7 @@ public class ProgrammeMembershipServiceImpl implements ProgrammeMembershipServic
    * remove all duplicates. This was found to be an issue as the CurriculaDTO equals/hashcode methods are scenario specific
    * code. So we're just using a list now
    *
-   * @param traineeId
-   * @return
+   * @param traineeId Trainee id
    */
   @Transactional(readOnly = true)
   @Override
@@ -256,7 +246,7 @@ public class ProgrammeMembershipServiceImpl implements ProgrammeMembershipServic
 
     Map<Long, CurriculumDTO> curriculumDTOMap = Maps.newHashMap();
     if (CollectionUtils.isNotEmpty(curriculumIds)) {
-      List<Curriculum> all = curriculumRepository.findAll(curriculumIds);
+      List<Curriculum> all = curriculumRepository.findAllById(curriculumIds);
       curriculumDTOMap = all.stream().collect(Collectors.toMap(Curriculum::getId, curriculumMapper::curriculumToCurriculumDTO));
     }
 

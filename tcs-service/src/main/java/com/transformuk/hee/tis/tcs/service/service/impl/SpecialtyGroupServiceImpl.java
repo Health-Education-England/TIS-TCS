@@ -92,10 +92,9 @@ public class SpecialtyGroupServiceImpl implements SpecialtyGroupService {
   @Override
   public List<SpecialtyGroupDTO> save(List<SpecialtyGroupDTO> specialtyGroupDTO) {
     log.debug("Request to save SpecialtyGroup : {}", specialtyGroupDTO);
-    List<SpecialtyGroup> specialtyGroup = specialtyGroupMapper.specialtyGroupDTOsToSpecialtyGroups(specialtyGroupDTO);
-    specialtyGroup = specialtyGroupRepository.save(specialtyGroup);
-    List<SpecialtyGroupDTO> result = specialtyGroupMapper.specialtyGroupsToSpecialtyGroupDTOs(specialtyGroup);
-    return result;
+    List<SpecialtyGroup> specialtyGroups = specialtyGroupMapper.specialtyGroupDTOsToSpecialtyGroups(specialtyGroupDTO);
+    specialtyGroups = specialtyGroupRepository.saveAll(specialtyGroups);
+    return specialtyGroupMapper.specialtyGroupsToSpecialtyGroupDTOs(specialtyGroups);
   }
 
   @Override
@@ -141,9 +140,8 @@ public class SpecialtyGroupServiceImpl implements SpecialtyGroupService {
   @Transactional(readOnly = true)
   public SpecialtyGroupDTO findOne(Long id) {
     log.debug("Request to get SpecialtyGroup : {}", id);
-    SpecialtyGroup specialtyGroup = specialtyGroupRepository.findOne(id);
-    SpecialtyGroupDTO specialtyGroupDTO = specialtyGroupMapper.specialtyGroupToSpecialtyGroupDTO(specialtyGroup);
-    return specialtyGroupDTO;
+    SpecialtyGroup specialtyGroup = specialtyGroupRepository.findById(id).orElse(null);
+    return specialtyGroupMapper.specialtyGroupToSpecialtyGroupDTO(specialtyGroup);
   }
 
   /**
@@ -154,6 +152,6 @@ public class SpecialtyGroupServiceImpl implements SpecialtyGroupService {
   @Override
   public void delete(Long id) {
     log.debug("Request to delete SpecialtyGroup : {}", id);
-    specialtyGroupRepository.delete(id);
+    specialtyGroupRepository.deleteById(id);
   }
 }

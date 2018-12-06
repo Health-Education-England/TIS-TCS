@@ -48,12 +48,12 @@ public class ProgrammeRepositoryIntTest {
     programme2.setProgrammeName("Programme 2");
     programme3.setProgrammeName("Programme 3");
 
-    testObj.save(Lists.newArrayList(programme1, programme2, programme3));
+    testObj.saveAll(Lists.newArrayList(programme1, programme2, programme3));
     testObj.flush();
 
     Person person1 = new Person(), person2 = new Person();
 
-    personRepository.save(Lists.newArrayList(person1, person2));
+    personRepository.saveAll(Lists.newArrayList(person1, person2));
     personRepository.flush();
 
     ProgrammeMembership pm1 = new ProgrammeMembership(), pm2 = new ProgrammeMembership(), pm3 = new ProgrammeMembership(),
@@ -69,7 +69,7 @@ public class ProgrammeRepositoryIntTest {
     pm3.setProgramme(programme3);
     pm3.setPerson(person2);
 
-    programmeMembershipRepository.save(Lists.newArrayList(pm1, pm2, pm3, pmWithSameProgramme));
+    programmeMembershipRepository.saveAll(Lists.newArrayList(pm1, pm2, pm3, pmWithSameProgramme));
     programmeMembershipRepository.flush();
 
     List<Programme> result = testObj.findByProgrammeMembershipPersonId(person1.getId());

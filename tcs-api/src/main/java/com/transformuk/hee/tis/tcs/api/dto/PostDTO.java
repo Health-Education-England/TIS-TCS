@@ -5,7 +5,6 @@ import com.transformuk.hee.tis.tcs.api.dto.validation.Create;
 import com.transformuk.hee.tis.tcs.api.dto.validation.Update;
 import com.transformuk.hee.tis.tcs.api.enumeration.PostSuffix;
 import com.transformuk.hee.tis.tcs.api.enumeration.Status;
-import io.swagger.annotations.ApiModelProperty;
 
 import javax.validation.constraints.DecimalMin;
 import javax.validation.constraints.NotNull;
@@ -43,7 +42,6 @@ public class PostDTO implements Serializable {
     private Set<PlacementDTO> placementHistory;
     private Set<ProgrammeDTO> programmes;
     private Set<PostFundingDTO> fundings;
-    @ApiModelProperty("Set this flag to true if you want to override the generated national post number and set your own")
     private boolean bypassNPNGeneration;
 
     public Long getId() {
