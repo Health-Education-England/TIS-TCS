@@ -16,7 +16,10 @@
 
 management:
   endpoints:
-    enabled-by-default: false
+    enabled-by-default: true
+    web:
+      exposure:
+        include: ["health"]
   health:
     mail:
       enabled: false # When using the MailService, configure an SMTP server and set this to true

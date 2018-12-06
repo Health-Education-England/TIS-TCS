@@ -37,7 +37,3 @@ jhipster:
 
 application:
 
-management:
-  endpoints:
-    enabled-by-default: false
-
