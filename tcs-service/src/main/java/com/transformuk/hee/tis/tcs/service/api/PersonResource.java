@@ -1,7 +1,13 @@
 package com.transformuk.hee.tis.tcs.service.api;
 
 import com.google.common.collect.Lists;
-import com.transformuk.hee.tis.tcs.api.dto.*;
+import com.transformuk.hee.tis.tcs.api.dto.PersonBasicDetailsDTO;
+import com.transformuk.hee.tis.tcs.api.dto.PersonDTO;
+import com.transformuk.hee.tis.tcs.api.dto.PersonLiteDTO;
+import com.transformuk.hee.tis.tcs.api.dto.PersonV2DTO;
+import com.transformuk.hee.tis.tcs.api.dto.PersonViewDTO;
+import com.transformuk.hee.tis.tcs.api.dto.PlacementSummaryDTO;
+import com.transformuk.hee.tis.tcs.api.dto.PlacementViewDTO;
 import com.transformuk.hee.tis.tcs.api.dto.validation.Create;
 import com.transformuk.hee.tis.tcs.api.dto.validation.Update;
 import com.transformuk.hee.tis.tcs.api.enumeration.Status;
@@ -10,9 +16,20 @@ import com.transformuk.hee.tis.tcs.service.api.decorator.PlacementSummaryDecorat
 import com.transformuk.hee.tis.tcs.service.api.decorator.PlacementViewDecorator;
 import com.transformuk.hee.tis.tcs.service.api.util.*;
 import com.transformuk.hee.tis.tcs.service.api.validation.*;
+import com.transformuk.hee.tis.tcs.service.api.util.BasicPage;
+import com.transformuk.hee.tis.tcs.service.api.util.ColumnFilterUtil;
+import com.transformuk.hee.tis.tcs.service.api.util.HeaderUtil;
+import com.transformuk.hee.tis.tcs.service.api.util.PaginationUtil;
+import com.transformuk.hee.tis.tcs.service.api.util.UrlDecoderUtil;
+import com.transformuk.hee.tis.tcs.service.api.validation.ContactDetailsValidator;
+import com.transformuk.hee.tis.tcs.service.api.validation.GdcDetailsValidator;
+import com.transformuk.hee.tis.tcs.service.api.validation.GmcDetailsValidator;
+import com.transformuk.hee.tis.tcs.service.api.validation.PersonValidator;
+import com.transformuk.hee.tis.tcs.service.api.validation.PersonalDetailsValidator;
 import com.transformuk.hee.tis.tcs.service.model.ColumnFilter;
 import com.transformuk.hee.tis.tcs.service.model.PlacementView;
 import com.transformuk.hee.tis.tcs.service.repository.PlacementViewRepository;
+import com.transformuk.hee.tis.tcs.service.service.PersonElasticSearchService;
 import com.transformuk.hee.tis.tcs.service.service.PersonService;
 import com.transformuk.hee.tis.tcs.service.service.PlacementService;
 import com.transformuk.hee.tis.tcs.service.service.mapper.PlacementViewMapper;
@@ -20,6 +37,7 @@ import io.github.jhipster.web.util.ResponseUtil;
 import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.http.HttpHeaders;
@@ -28,13 +46,26 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.MethodArgumentNotValidException;
-import org.springframework.web.bind.annotation.*;
+import org.springframework.web.bind.annotation.DeleteMapping;
+import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PatchMapping;
+import org.springframework.web.bind.annotation.PathVariable;
+import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.PutMapping;
+import org.springframework.web.bind.annotation.RequestBody;
+import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestParam;
+import org.springframework.web.bind.annotation.RestController;
 
 import javax.validation.Valid;
 import java.io.IOException;
 import java.net.URI;
 import java.net.URISyntaxException;
-import java.util.*;
+import java.util.ArrayList;
+import java.util.Collection;
+import java.util.List;
+import java.util.Optional;
+import java.util.Set;
 import java.util.stream.Collectors;
 
 import static com.transformuk.hee.tis.tcs.service.api.util.StringUtil.sanitize;
@@ -49,6 +80,9 @@ public class PersonResource {
   private static final String ENTITY_NAME = "person";
   private final Logger log = LoggerFactory.getLogger(PersonResource.class);
 
+  @Value("${enable.es.search}")
+  private boolean enableEsSearch;
+
   private final PersonService personService;
   private final PlacementViewRepository placementViewRepository;
   private final PlacementViewMapper placementViewMapper;
@@ -61,14 +95,15 @@ public class PersonResource {
   private final GdcDetailsValidator gdcDetailsValidator;
   private final PersonalDetailsValidator personalDetailsValidator;
   private final ContactDetailsValidator contactDetailsValidator;
-
+  private final PersonElasticSearchService personElasticSearchService;
 
   public PersonResource(PersonService personService, PlacementViewRepository placementViewRepository,
                         PlacementViewMapper placementViewMapper, PlacementViewDecorator placementViewDecorator,
                         PersonViewDecorator personViewDecorator, PlacementService placementService,
                         PlacementSummaryDecorator placementSummaryDecorator, PersonValidator personValidator,
                         GmcDetailsValidator gmcDetailsValidator, GdcDetailsValidator gdcDetailsValidator,
-                        PersonalDetailsValidator personalDetailsValidator, ContactDetailsValidator contactDetailsValidator) {
+                        PersonalDetailsValidator personalDetailsValidator, ContactDetailsValidator contactDetailsValidator,
+                        PersonElasticSearchService personElasticSearchService) {
     this.personService = personService;
     this.placementViewRepository = placementViewRepository;
     this.placementViewMapper = placementViewMapper;
@@ -81,6 +116,7 @@ public class PersonResource {
     this.gdcDetailsValidator = gdcDetailsValidator;
     this.personalDetailsValidator = personalDetailsValidator;
     this.contactDetailsValidator = contactDetailsValidator;
+    this.personElasticSearchService = personElasticSearchService;
   }
 
   /**
@@ -152,20 +188,32 @@ public class PersonResource {
   public ResponseEntity<List<PersonViewDTO>> getAllPeople(
     final Pageable pageable,
     @RequestParam(value = "searchQuery", required = false) String searchQuery,
-    @RequestParam(value = "columnFilters", required = false) final String columnFilterJson) throws IOException {
+    @RequestParam(value = "columnFilters", required = false) final String columnFilterJson,
+    @RequestParam(required = false, defaultValue = "false") boolean special) throws IOException {
+
     log.debug("REST request to get a page of People begin");
     searchQuery = sanitize(searchQuery);
     final List<Class> filterEnumList = Lists.newArrayList(Status.class);
     final List<ColumnFilter> columnFilters = ColumnFilterUtil.getColumnFilters(columnFilterJson, filterEnumList);
     final BasicPage<PersonViewDTO> page;
-    if (StringUtils.isEmpty(searchQuery) && StringUtils.isEmpty(columnFilterJson)) {
-      page = personService.findAll(pageable);
+
+    if (enableEsSearch || special) {
+      if (StringUtils.isEmpty(searchQuery) && StringUtils.isEmpty(columnFilterJson)) {
+        return new ResponseEntity<>(personElasticSearchService.searchForPage(pageable), HttpStatus.OK);
+      } else {
+        return new ResponseEntity<>(personElasticSearchService.searchForPage(searchQuery, columnFilters, pageable), HttpStatus.OK);
+      }
+
     } else {
-      page = personService.advancedSearch(searchQuery, columnFilters, pageable);
+      if (StringUtils.isEmpty(searchQuery) && StringUtils.isEmpty(columnFilterJson)) {
+        page = personService.findAll(pageable);
+      } else {
+        page = personService.advancedSearch(searchQuery, columnFilters, pageable);
+      }
+      final HttpHeaders headers = PaginationUtil.generateBasicPaginationHttpHeaders(page, "/api/people");
+      log.debug("REST request to get a page of People completed successfully");
+      return new ResponseEntity<>(personViewDecorator.decorate(page.getContent()), headers, HttpStatus.OK);
     }
-    final HttpHeaders headers = PaginationUtil.generateBasicPaginationHttpHeaders(page, "/api/people");
-    log.debug("REST request to get a page of People completed successfully");
-    return new ResponseEntity<>(personViewDecorator.decorate(page.getContent()), headers, HttpStatus.OK);
   }
 
 

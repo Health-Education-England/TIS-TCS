@@ -659,7 +659,7 @@ public class PersonServiceImpl implements PersonService {
     return commaSepTrustIds;
   }
 
-  private class PersonViewRowMapper implements RowMapper<PersonViewDTO> {
+  public class PersonViewRowMapper implements RowMapper<PersonViewDTO> {
 
     @Override
     public PersonViewDTO mapRow(final ResultSet rs, final int id) throws SQLException {
