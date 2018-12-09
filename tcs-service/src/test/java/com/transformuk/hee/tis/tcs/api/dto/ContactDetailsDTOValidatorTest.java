@@ -11,6 +11,7 @@ import com.transformuk.hee.tis.tcs.service.model.ContactDetails;
 import com.transformuk.hee.tis.tcs.service.model.Person;
 import com.transformuk.hee.tis.tcs.service.repository.PlacementViewRepository;
 import com.transformuk.hee.tis.tcs.service.service.ContactDetailsService;
+import com.transformuk.hee.tis.tcs.service.service.PersonElasticSearchService;
 import com.transformuk.hee.tis.tcs.service.service.PersonService;
 import com.transformuk.hee.tis.tcs.service.service.PlacementService;
 import com.transformuk.hee.tis.tcs.service.service.impl.PermissionService;
@@ -89,6 +90,8 @@ public class ContactDetailsDTOValidatorTest {
 
 	@MockBean
 	private PermissionService permissionServiceMock;
+	@MockBean
+  private PersonElasticSearchService personElasticSearchServiceMock;
 
 	private MockMvc restContactDetailsMockMvc;
 	private MockMvc restPersonMockMvc;
@@ -99,7 +102,7 @@ public class ContactDetailsDTOValidatorTest {
 		ContactDetailsResource contactDetailsResource = new ContactDetailsResource(contactDetailsService,contactDetailsValidator);
 		PersonResource personResource = new PersonResource(personService, placementViewRepository, placementViewMapper,
 				placementViewDecorator, personViewDecorator, placementService, placementSummaryDecorator,personValidator,
-				gmcDetailsValidator, gdcDetailsValidator, personalDetailsValidator, contactDetailsValidator);
+				gmcDetailsValidator, gdcDetailsValidator, personalDetailsValidator, contactDetailsValidator,personElasticSearchServiceMock);
 		this.restContactDetailsMockMvc = MockMvcBuilders.standaloneSetup(contactDetailsResource)
 				.setCustomArgumentResolvers(pageableArgumentResolver)
 				.setControllerAdvice(exceptionTranslator)

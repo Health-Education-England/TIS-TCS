@@ -14,9 +14,6 @@ import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
-import org.springframework.data.elasticsearch.core.ElasticsearchOperations;
-import org.springframework.data.elasticsearch.core.query.NativeSearchQuery;
-import org.springframework.data.elasticsearch.core.query.NativeSearchQueryBuilder;
 import org.springframework.stereotype.Component;
 
 import java.util.List;
@@ -26,9 +23,6 @@ import java.util.stream.Collectors;
 public class PersonElasticSearchService {
 
   private static final Logger LOG = LoggerFactory.getLogger(PersonElasticSearchService.class);
-
-  @Autowired
-  private ElasticsearchOperations elasticsearchOperations;
 
   @Autowired
   private PersonEsRepository personEsRepository;
@@ -71,15 +65,25 @@ public class PersonElasticSearchService {
 
   public List<PersonViewDTO> searchForPage(String searchQuery, List<ColumnFilter> columnFilters, Pageable pageable) {
 
-    BoolQueryBuilder filterQuery = new BoolQueryBuilder();
-
+    // iterate over the column filters, if they have multiple values per filter, place a should between then
+    // for each column filter set, place a must between them
+    BoolQueryBuilder mustBetweenDifferentColumnFilters = new BoolQueryBuilder();
     for (ColumnFilter columnFilter : columnFilters) {
-      List<Object> values = columnFilter.getValues();
-      for (Object value : values) {
-        filterQuery = filterQuery.filter(new MatchQueryBuilder(columnFilter.getName(), value.toString()));
+
+      BoolQueryBuilder shouldBetweenSameColumnFilter = new BoolQueryBuilder();
+      for (Object value : columnFilter.getValues()) {
+
+        if (StringUtils.equals(columnFilter.getName(), "status")) {
+          value = value.toString().toUpperCase();
+        }
+
+        shouldBetweenSameColumnFilter.should(new MatchQueryBuilder(columnFilter.getName(), value));
       }
+
+      mustBetweenDifferentColumnFilters.must(shouldBetweenSameColumnFilter);
     }
 
+    // this part is the free text part of the query, place a should between all of the searchable fields
     BoolQueryBuilder shouldQuery = new BoolQueryBuilder();
     if (StringUtils.isNotEmpty(searchQuery)) {
       shouldQuery
@@ -95,22 +99,11 @@ public class PersonElasticSearchService {
       }
     }
 
-//    QueryBuilder filterQuery = new BoolQueryBuilder().filter(new TermQueryBuilder("status", "CURRENT"));
-//    shouldQuery = shouldQuery.filter(new MatchQueryBuilder("status", "CURRENT"));
+    // add the free text query with a must to the column filters query
+    BoolQueryBuilder fullQuery = mustBetweenDifferentColumnFilters.must(shouldQuery);
 
-
-
-//    Page<PersonView> search = personEsRepository.search(shouldQuery, pageable);
-
-
-    NativeSearchQuery nativeSearchQuery = new NativeSearchQueryBuilder()
-        .withQuery(shouldQuery)
-        .withFilter(filterQuery)
-        .withPageable(pageable)
-        .build();
-
-    LOG.info("Query {}", nativeSearchQuery.getQuery().toString());
-    List<PersonView> response = elasticsearchOperations.queryForList(nativeSearchQuery, PersonView.class);
-    return convertPersonViewToDTO(response);
+    LOG.info("Query {}", mustBetweenDifferentColumnFilters.toString());
+    Page<PersonView> result = personEsRepository.search(mustBetweenDifferentColumnFilters, pageable);
+    return convertPersonViewToDTO(result.getContent());
   }
 }

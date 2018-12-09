@@ -2,6 +2,7 @@ package com.transformuk.hee.tis.tcs.service.job.person;
 
 import com.google.common.base.Stopwatch;
 import com.google.common.collect.Lists;
+import com.transformuk.hee.tis.tcs.service.repository.PersonEsRepository;
 import com.transformuk.hee.tis.tcs.service.service.helper.SqlQuerySupplier;
 import com.transformuk.hee.tis.tcs.service.service.impl.PersonViewRowMapper;
 import org.apache.commons.collections4.CollectionUtils;
@@ -38,6 +39,9 @@ public class PersonElasticsearchSyncJob {
   @Autowired
   private ElasticsearchOperations elasticSearchOperations;
 
+  @Autowired
+  private PersonEsRepository personEsRepository;
+
 
   @ManagedOperation(description = "Is the Person es sync just currently running")
   public boolean isCurrentlyRunning() {
@@ -70,7 +74,7 @@ public class PersonElasticsearchSyncJob {
     return DEFAULT_PAGE_SIZE;
   }
 
-  private void deleteData() {
+  private void deleteIndex() {
     elasticSearchOperations.deleteIndex("tcs-person");
   }
 
@@ -89,18 +93,7 @@ public class PersonElasticsearchSyncJob {
 
   private void sendToEs(List<PersonView> dataToSave) {
     if (CollectionUtils.isNotEmpty(dataToSave)) {
-      LOG.info("sending data");
-      List<IndexQuery> documentsToIndex = Lists.newArrayList();
-      for (PersonView personView : dataToSave) {
-        IndexQuery indexQuery = new IndexQuery();
-        indexQuery.setIndexName("tcs-person");
-        indexQuery.setObject(personView);
-        indexQuery.setType("person");
-        documentsToIndex.add(indexQuery);
-      }
-
-      LOG.info("doing bulk");
-      elasticSearchOperations.bulkIndex(documentsToIndex);
+      personEsRepository.saveAll(dataToSave);
     }
   }
 
@@ -116,8 +109,8 @@ public class PersonElasticsearchSyncJob {
       boolean hasMoreResults = true;
 
       LOG.info("deleting all data");
-      deleteData();
-      LOG.info("deleted all data took {}", stopwatch.toString());
+      deleteIndex();
+      createIndex();
       stopwatch.reset().start();
 
       while (hasMoreResults) {
@@ -144,6 +137,12 @@ public class PersonElasticsearchSyncJob {
       e.printStackTrace();
       mainStopWatch = null;
     }
+  }
+
+  private void createIndex() {
+    LOG.info("creating and updating mappings");
+    elasticSearchOperations.createIndex("tcs-person");
+    elasticSearchOperations.putMapping(PersonView.class);
   }
 
 }

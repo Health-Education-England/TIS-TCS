@@ -3,6 +3,8 @@ package com.transformuk.hee.tis.tcs.service.job.person;
 import com.transformuk.hee.tis.tcs.api.enumeration.PersonOwnerRule;
 import com.transformuk.hee.tis.tcs.api.enumeration.Status;
 import org.springframework.data.elasticsearch.annotations.Document;
+import org.springframework.data.elasticsearch.annotations.Field;
+import org.springframework.data.elasticsearch.annotations.FieldType;
 
 import java.io.Serializable;
 
@@ -15,8 +17,10 @@ public class PersonView implements Serializable {
 
   private String intrepidId;
 
+  @Field(type = FieldType.Text)
   private String surname;
 
+  @Field(type = FieldType.Text)
   private String forenames;
 
   private String gmcNumber;
@@ -51,8 +55,10 @@ public class PersonView implements Serializable {
 
   private String role;
 
+  @Field(type=FieldType.Keyword)
   private Status status;
 
+  @Field(type= FieldType.Keyword)
   private String currentOwner;
 
   private PersonOwnerRule currentOwnerRule;
