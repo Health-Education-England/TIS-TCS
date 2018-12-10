@@ -21,6 +21,13 @@ spring:
       enabled: false
   jpa:
     show-sql: false
+  datasource:
+    url: jdbc:mysql://${DBHOST}:${DBPORT}/${DBNAME}?useUnicode=true&characterEncoding=utf8&useSSL=${USE_SSL}
+    username: ${DBUSER}
+    password: ${DBPASSWORD}
+    flyway:
+      password: ${DBPASSWORD}
+      schemas: ${DBNAME}
   cache:
     caffeine.spec: maximumSize=50,expireAfterAccess=5m
 
