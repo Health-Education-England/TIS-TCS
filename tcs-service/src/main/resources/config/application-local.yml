@@ -1,7 +1,7 @@
 spring:
   devtools:
     restart:
-      enabled: false
+      enabled: true
   datasource:
     url: jdbc:mysql://${DBHOST:localhost}:${DBPORT:3306}/${DBNAME:tcs}?useUnicode=true&characterEncoding=utf8&useSSL=${USE_SSL:false}
     username: ${DBUSER:root}
