@@ -1,0 +1,73 @@
+{
+    "provider": {
+        "name": "TCSProvider"
+    },
+    "consumer": {
+        "name": "TCSConsumer"
+    },
+    "interactions": [
+        {
+            "description": "A request to get notification data",
+            "request": {
+                "method": "GET",
+                "path": "/tcs/api/notifications?deanery=YHD"
+            },
+            "response": {
+                "status": 200,
+                "headers": {
+                    "Content-Type": "application/json"
+                },
+                "body": {
+                    "id": "6785",
+                    "notificationTitleCode": "5",
+                    "deaneryBody": null,
+                    "deaneryPostNumber": "YHD/RCF22/007/SD/001",
+                    "managingDeaneryBodyCode": "YHD",
+                    "occupationCode": null,
+                    "hostLeadEmployerStatus": null,
+                    "newTrainingPositionLocation": null,
+                    "currentTraineeLastName": null,
+                    "currentTraineeFirstName": null,
+                    "currentTraineeGmcNumber": null,
+                    "currentTraineeProjectedEndDate": null,
+                    "currentTraineeVpdForNextPlacement": null,
+                    "nextAppointmentTraineeLastName": null,
+                    "nextAppointmentTraineeFirstName": null,
+                    "nextAppointmentTraineeGmcNumber": null,
+                    "nextAppointmentCurrentPlacementVpd": null,
+                    "nextAppointmentProjectedStartDate": null,
+                    "nextAppointmentTraineeEmailAddress": null,
+                    "nextAppointmentTraineeGrade": null,
+                    "withdrawnTraineeLastName": null,
+                    "withdrawnTraineeFirstName": null,
+                    "withdrawnTraineeGmcNumber": null,
+                    "withdrawalReason": null,
+                    "replacementTraineeLastName": null,
+                    "replacementTraineeFirstName": null,
+                    "replacementTraineeGmcNumber": null,
+                    "replacementTraineeCurrentPlacementVpd": null,
+                    "replacementTraineeProjectedHireDate": null,
+                    "changeOfProjectedHireDate": null,
+                    "changeOfProjectedEndDate": null,
+                    "postSpeciality": null,
+                    "workingHourIndicator": null,
+                    "postVacantAtNextRotation": true,
+                    "medicalRotationPostDeleteIndicator": null
+                }
+            },
+            "providerStates": [
+                {
+                    "name": ""
+                }
+            ]
+        }
+    ],
+    "metadata": {
+        "pactSpecification": {
+            "version": "3.0.0"
+        },
+        "pact-jvm": {
+            "version": "3.5.23"
+        }
+    }
+}
