@@ -28,13 +28,8 @@ import java.util.List;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.hamcrest.Matchers.hasItem;
-import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.delete;
-import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
-import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
-import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.put;
-import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.content;
-import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
-import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.*;
+import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.*;
 
 /**
  * Test class for the PostFundingResource REST controller.
@@ -73,7 +68,7 @@ public class PostFundingResourceIntTest {
   private PostFunding anotherPostFunding;
 
   private static final String FUNDING_TYPE = "Trust Funded";
-  private static final LocalDate END_DATE = LocalDate.of(2033,07,06);
+  private static final LocalDate END_DATE = LocalDate.of(2033, 7, 6);
 
   /**
    * Create an entity for this test.
@@ -128,7 +123,6 @@ public class PostFundingResourceIntTest {
     // Validate the PostFunding in the database
     List<PostFunding> postFundingList = postFundingRepository.findAll();
     assertThat(postFundingList).hasSize(databaseSizeBeforeCreate + 1);
-    PostFunding testPostFunding = postFundingList.get(postFundingList.size() - 1);
   }
 
   @Test
@@ -137,8 +131,8 @@ public class PostFundingResourceIntTest {
     int databaseSizeBeforeCreate = postFundingRepository.findAll().size();
 
     // Create two post funding DTOs and add to a list
-    postFunding.setFundingType(FUNDING_TYPE.toString());
-    anotherPostFunding.setFundingType(FUNDING_TYPE.toString());
+    postFunding.setFundingType(FUNDING_TYPE);
+    anotherPostFunding.setFundingType(FUNDING_TYPE);
     postFunding.setEndDate(END_DATE);
     anotherPostFunding.setEndDate(END_DATE);
     PostFundingDTO postFundingDTO = postFundingMapper.postFundingToPostFundingDTO(postFunding);
@@ -153,7 +147,7 @@ public class PostFundingResourceIntTest {
     List<PostFunding> postFundings = postFundingRepository.findAll();
     assertThat(postFundings).hasSize(databaseSizeBeforeCreate + 2);
     PostFunding anotherPostFunding = postFundings.get(postFundings.size() - 1);
-    assertThat(anotherPostFunding.getFundingType()).isEqualTo(FUNDING_TYPE.toString());
+    assertThat(anotherPostFunding.getFundingType()).isEqualTo(FUNDING_TYPE);
     assertThat(anotherPostFunding.getEndDate()).isEqualTo(END_DATE);
   }
 
@@ -168,7 +162,7 @@ public class PostFundingResourceIntTest {
     // Update the post funding details
 
     updatedPostFunding.setEndDate(END_DATE);
-    anotherUpdatedPostFunding.setFundingType(FUNDING_TYPE.toString());
+    anotherUpdatedPostFunding.setFundingType(FUNDING_TYPE);
 
     PostFundingDTO postFundingDTO = postFundingMapper.postFundingToPostFundingDTO(updatedPostFunding);
     PostFundingDTO anotherPostFundingDTO = postFundingMapper.postFundingToPostFundingDTO(anotherUpdatedPostFunding);
@@ -184,10 +178,10 @@ public class PostFundingResourceIntTest {
     List<PostFunding> postFundings = postFundingRepository.findAll();
     assertThat(postFundings).hasSize(databaseSizeBeforeCreate);
 
-    PostFunding postFunding = postFundingRepository.findOne(updatedPostFunding.getId());
-    PostFunding anotherPostFunding = postFundingRepository.findOne(anotherUpdatedPostFunding.getId());
+    PostFunding postFunding = postFundingRepository.findById(updatedPostFunding.getId()).orElse(null);
+    PostFunding anotherPostFunding = postFundingRepository.findById(anotherUpdatedPostFunding.getId()).orElse(null);
     assertThat(postFunding.getEndDate()).isEqualTo(END_DATE);
-    assertThat(anotherPostFunding.getFundingType()).isEqualTo(FUNDING_TYPE.toString());
+    assertThat(anotherPostFunding.getFundingType()).isEqualTo(FUNDING_TYPE);
   }
 
   @Test
@@ -252,7 +246,7 @@ public class PostFundingResourceIntTest {
     int databaseSizeBeforeUpdate = postFundingRepository.findAll().size();
 
     // Update the postFunding
-    PostFunding updatedPostFunding = postFundingRepository.findOne(postFunding.getId());
+    PostFunding updatedPostFunding = postFundingRepository.findById(postFunding.getId()).orElse(null);
     PostFundingDTO postFundingDTO = postFundingMapper.postFundingToPostFundingDTO(updatedPostFunding);
 
     restPostFundingMockMvc.perform(put("/api/post-fundings")
@@ -263,7 +257,6 @@ public class PostFundingResourceIntTest {
     // Validate the PostFunding in the database
     List<PostFunding> postFundingList = postFundingRepository.findAll();
     assertThat(postFundingList).hasSize(databaseSizeBeforeUpdate);
-    PostFunding testPostFunding = postFundingList.get(postFundingList.size() - 1);
   }
 
   @Test

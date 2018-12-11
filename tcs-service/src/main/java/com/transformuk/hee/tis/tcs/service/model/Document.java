@@ -1,7 +1,6 @@
 package com.transformuk.hee.tis.tcs.service.model;
 
 import com.transformuk.hee.tis.tcs.api.enumeration.Status;
-import io.swagger.annotations.ApiModel;
 
 import javax.persistence.*;
 import java.io.Serializable;
@@ -9,7 +8,6 @@ import java.time.LocalDateTime;
 import java.util.Objects;
 import java.util.Set;
 
-@ApiModel("Document")
 @Entity
 public class Document implements Serializable {
     private static final long serialVersionUID = -5728195363933266747L;

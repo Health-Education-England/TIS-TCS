@@ -1,6 +1,5 @@
 package com.transformuk.hee.tis.tcs.service.api;
 
-import com.codahale.metrics.annotation.Timed;
 import com.google.common.collect.Lists;
 import com.transformuk.hee.tis.tcs.api.dto.SpecialtyDTO;
 import com.transformuk.hee.tis.tcs.api.dto.SpecialtySimpleDTO;
@@ -14,11 +13,9 @@ import com.transformuk.hee.tis.tcs.service.api.util.PaginationUtil;
 import com.transformuk.hee.tis.tcs.service.api.validation.SpecialtyValidator;
 import com.transformuk.hee.tis.tcs.service.api.validation.ValidationException;
 import com.transformuk.hee.tis.tcs.service.model.ColumnFilter;
-import com.transformuk.hee.tis.tcs.service.model.SpecialtySimple;
 import com.transformuk.hee.tis.tcs.service.service.SpecialtyService;
 import io.github.jhipster.web.util.ResponseUtil;
 import io.jsonwebtoken.lang.Collections;
-import io.swagger.annotations.ApiParam;
 import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -30,15 +27,7 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.validation.annotation.Validated;
-import org.springframework.web.bind.annotation.DeleteMapping;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.PathVariable;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.PutMapping;
-import org.springframework.web.bind.annotation.RequestBody;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RequestParam;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
 
 import javax.validation.Valid;
 import java.io.IOException;
@@ -77,7 +66,6 @@ public class SpecialtyResource {
    * @throws URISyntaxException if the Location URI syntax is incorrect
    */
   @PostMapping("/specialties")
-  @Timed
   @PreAuthorize("hasAuthority('specialty:add:modify')")
   public ResponseEntity<SpecialtyDTO> createSpecialty(@RequestBody @Validated(Create.class) SpecialtyDTO specialtyDTO) throws URISyntaxException, ValidationException {
     log.debug("REST request to save Specialty : {}", specialtyDTO);
@@ -100,12 +88,10 @@ public class SpecialtyResource {
    * @return the ResponseEntity with status 200 (OK) and with body the updated specialtyDTO,
    * or with status 400 (Bad Request) if the specialtyDTO is not valid,
    * or with status 500 (Internal Server Error) if the specialtyDTO couldnt be updated
-   * @throws URISyntaxException if the Location URI syntax is incorrect
    */
   @PutMapping("/specialties")
-  @Timed
   @PreAuthorize("hasAuthority('specialty:add:modify')")
-  public ResponseEntity<SpecialtyDTO> updateSpecialty(@RequestBody @Validated(Update.class) SpecialtyDTO specialtyDTO) throws URISyntaxException, ValidationException {
+  public ResponseEntity<SpecialtyDTO> updateSpecialty(@RequestBody @Validated(Update.class) SpecialtyDTO specialtyDTO) throws ValidationException {
     log.debug("REST request to update Specialty : {}", specialtyDTO);
     specialtyValidator.validate(specialtyDTO);
     try {
@@ -124,17 +110,13 @@ public class SpecialtyResource {
    *
    * @param pageable the pagination information
    * @return the ResponseEntity with status 200 (OK) and the list of specialty in body
-   * @throws URISyntaxException if there is an error to generate the pagination HTTP headers
    */
   @GetMapping("/specialties")
-  @Timed
   @PreAuthorize("hasAuthority('specialty:view')")
   public ResponseEntity<List<SpecialtyDTO>> getAllSpecialties(
-      @ApiParam Pageable pageable,
-      @ApiParam(value = "any wildcard string to be searched")
-      @RequestParam(value = "searchQuery", required = false) String searchQuery,
-      @ApiParam(value = "json object by column name and value. (Eg: columnFilters={ \"college\": [\"Core Medical Training\"], \"status\":[\"CURRENT\"] }\"")
-      @RequestParam(value = "columnFilters", required = false) String columnFilterJson) throws IOException {
+    Pageable pageable,
+    @RequestParam(value = "searchQuery", required = false) String searchQuery,
+    @RequestParam(value = "columnFilters", required = false) String columnFilterJson) throws IOException {
 
     log.debug("REST request to get a page of Specialties");
 
@@ -158,14 +140,11 @@ public class SpecialtyResource {
    *
    * @param ids the ids to use to find specialties
    * @return the ResponseEntity with status 200 (OK) and the list of specialty in body
-   * @throws URISyntaxException if there is an error to generate the pagination HTTP headers
    */
   @GetMapping("/specialties/in/{ids}")
-  @Timed
   @PreAuthorize("hasAuthority('specialty:view')")
   public ResponseEntity<List<SpecialtySimpleDTO>> findByIds(
-      @ApiParam(value = "the ids to use to find specialties")
-      @PathVariable String ids) throws IOException {
+    @PathVariable String ids) {
 
     log.debug("REST request to find several Specialties");
     List<SpecialtySimpleDTO> resp = new ArrayList<>();
@@ -195,7 +174,6 @@ public class SpecialtyResource {
    * @return the ResponseEntity with status 200 (OK) and with body the specialtyDTO, or with status 404 (Not Found)
    */
   @GetMapping("/specialties/{id}")
-  @Timed
   @PreAuthorize("hasAuthority('specialty:view')")
   public ResponseEntity<SpecialtyDTO> getSpecialty(@PathVariable Long id) {
     log.debug("REST request to get Specialty : {}", id);
@@ -210,7 +188,6 @@ public class SpecialtyResource {
    * @return the ResponseEntity with status 200 (OK)
    */
   @DeleteMapping("/specialties/{id}")
-  @Timed
   @PreAuthorize("hasAuthority('tcs:delete:entities')")
   public ResponseEntity<Void> deleteSpecialty(@PathVariable Long id) {
     log.debug("REST request to delete Specialty : {}", id);
@@ -224,17 +201,15 @@ public class SpecialtyResource {
    *
    * @param specialtyDTOS List of the specialtyDTOS to create
    * @return the ResponseEntity with status 200 (Created) and with body the new specialtyDTOS, or with status 400 (Bad Request) if the Specialty has already an ID
-   * @throws URISyntaxException if the Location URI syntax is incorrect
    */
   @PostMapping("/bulk-specialties")
-  @Timed
   @PreAuthorize("hasAuthority('specialty:bulk:add:modify')")
-  public ResponseEntity<List<SpecialtyDTO>> bulkCreateSpecialties(@Valid @RequestBody List<SpecialtyDTO> specialtyDTOS) throws URISyntaxException, ValidationException {
+  public ResponseEntity<List<SpecialtyDTO>> bulkCreateSpecialties(@Valid @RequestBody List<SpecialtyDTO> specialtyDTOS) throws ValidationException {
     log.debug("REST request to bulk save Specialties : {}", specialtyDTOS);
     if (!Collections.isEmpty(specialtyDTOS)) {
       List<Long> entityIds = specialtyDTOS.stream()
           .filter(s -> s.getId() != null)
-          .map(s -> s.getId())
+        .map(SpecialtyDTO::getId)
           .collect(Collectors.toList());
       if (!Collections.isEmpty(entityIds)) {
         return ResponseEntity.badRequest().headers(HeaderUtil.createFailureAlert(StringUtils.join(entityIds, ","), "ids.exist", "A new Specialty cannot already have an ID")).body(null);
@@ -258,12 +233,10 @@ public class SpecialtyResource {
    * @return the ResponseEntity with status 200 (OK) and with body the updated specialtyDTOS,
    * or with status 400 (Bad Request) if the specialtyDTOS is not valid,
    * or with status 500 (Internal Server Error) if the specialtyDTOS couldnt be updated
-   * @throws URISyntaxException if the Location URI syntax is incorrect
    */
   @PutMapping("/bulk-specialties")
-  @Timed
   @PreAuthorize("hasAuthority('specialty:bulk:add:modify')")
-  public ResponseEntity<List<SpecialtyDTO>> bulkUpdateSpecialties(@Valid @RequestBody List<SpecialtyDTO> specialtyDTOS) throws URISyntaxException, ValidationException {
+  public ResponseEntity<List<SpecialtyDTO>> bulkUpdateSpecialties(@Valid @RequestBody List<SpecialtyDTO> specialtyDTOS) throws ValidationException {
     log.debug("REST request to bulk update Specialties : {}", specialtyDTOS);
     if (Collections.isEmpty(specialtyDTOS)) {
       return ResponseEntity.badRequest().headers(HeaderUtil.createFailureAlert(ENTITY_NAME, "request.body.empty",
@@ -280,7 +253,7 @@ public class SpecialtyResource {
       specialtyValidator.validate(specialtyDTO);
     }
     List<SpecialtyDTO> results = specialtyService.save(specialtyDTOS);
-    List<Long> ids = results.stream().map(r -> r.getId()).collect(Collectors.toList());
+    List<Long> ids = results.stream().map(SpecialtyDTO::getId).collect(Collectors.toList());
     return ResponseEntity.ok()
         .headers(HeaderUtil.createEntityUpdateAlert(ENTITY_NAME, StringUtils.join(ids, ",")))
         .body(results);

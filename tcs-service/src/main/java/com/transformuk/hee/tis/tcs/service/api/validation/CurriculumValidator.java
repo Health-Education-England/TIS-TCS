@@ -47,7 +47,7 @@ public class CurriculumValidator {
       if (specialty.getId() == null || specialty.getId() < 0) {
         fieldErrors.add(new FieldError("CurriculumDTO", "specialty",
             String.format("Specialty with id %d cannot be null or negative", specialty.getId())));
-      } else if (!specialtyRepository.exists(specialty.getId())) {
+      } else if (!specialtyRepository.existsById(specialty.getId())) {
         fieldErrors.add(new FieldError("CurriculumDTO", "specialty",
             String.format("Specialty with id %d does not exist", specialty.getId())));
       }

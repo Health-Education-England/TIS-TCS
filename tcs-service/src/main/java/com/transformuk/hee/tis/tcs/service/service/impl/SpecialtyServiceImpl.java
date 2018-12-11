@@ -82,7 +82,7 @@ public class SpecialtyServiceImpl implements SpecialtyService {
   public List<SpecialtyDTO> save(List<SpecialtyDTO> specialtyDTO) {
     log.debug("Request to save Specialties : {}", specialtyDTO);
     List<Specialty> specialty = specialtyMapper.specialtyDTOsToSpecialties(specialtyDTO);
-    specialty = specialtyRepository.save(specialty);
+    specialty = specialtyRepository.saveAll(specialty);
     return specialtyMapper.specialtiesToSpecialtyDTOs(specialty);
   }
 
@@ -150,7 +150,7 @@ public class SpecialtyServiceImpl implements SpecialtyService {
   @Transactional(readOnly = true)
   public SpecialtyDTO findOne(Long id) {
     log.debug("Request to get Specialty : {}", id);
-    Specialty specialty = specialtyRepository.findOne(id);
+    Specialty specialty = specialtyRepository.findById(id).orElse(null);
     return specialtyMapper.specialtyToSpecialtyDTO(specialty);
   }
 
@@ -162,6 +162,6 @@ public class SpecialtyServiceImpl implements SpecialtyService {
   @Override
   public void delete(Long id) {
     log.debug("Request to delete Specialty : {}", id);
-    specialtyRepository.delete(id);
+    specialtyRepository.deleteById(id);
   }
 }

@@ -38,13 +38,8 @@ import static org.hamcrest.Matchers.hasItem;
 import static org.mockito.Matchers.any;
 import static org.mockito.Matchers.anyString;
 import static org.mockito.Mockito.when;
-import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.delete;
-import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
-import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
-import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.put;
-import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.content;
-import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
-import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.*;
+import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.*;
 
 /**
  * Test class for the PersonalDetailsResource REST controller.
@@ -314,7 +309,7 @@ public class PersonalDetailsResourceIntTest {
     int databaseSizeBeforeUpdate = personalDetailsRepository.findAll().size();
 
     // Update the personalDetails
-    PersonalDetails updatedPersonalDetails = personalDetailsRepository.findOne(personalDetails.getId());
+    PersonalDetails updatedPersonalDetails = personalDetailsRepository.findById(personalDetails.getId()).orElse(null);
     updatedPersonalDetails
         .maritalStatus(UPDATED_MARITAL_STATUS)
         .dateOfBirth(UPDATED_DATE_OF_BIRTH)

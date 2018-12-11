@@ -1,13 +1,11 @@
 package com.transformuk.hee.tis.tcs.service.api;
 
-import com.codahale.metrics.annotation.Timed;
 import com.transformuk.hee.tis.tcs.api.dto.PlacementFunderDTO;
 import com.transformuk.hee.tis.tcs.service.api.util.HeaderUtil;
 import com.transformuk.hee.tis.tcs.service.api.util.PaginationUtil;
 import com.transformuk.hee.tis.tcs.service.service.PlacementFunderService;
 import io.github.jhipster.web.util.ResponseUtil;
 import io.jsonwebtoken.lang.Collections;
-import io.swagger.annotations.ApiParam;
 import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -17,14 +15,7 @@ import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
-import org.springframework.web.bind.annotation.DeleteMapping;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.PathVariable;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.PutMapping;
-import org.springframework.web.bind.annotation.RequestBody;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
 
 import javax.validation.Valid;
 import java.net.URI;
@@ -56,7 +47,6 @@ public class PlacementFunderResource {
    * @throws URISyntaxException if the Location URI syntax is incorrect
    */
   @PostMapping("/placement-funders")
-  @Timed
   @PreAuthorize("hasAuthority('tcs:add:modify:entities')")
   public ResponseEntity<PlacementFunderDTO> createPlacementFunder(@RequestBody PlacementFunderDTO placementFunderDTO) throws URISyntaxException {
     log.debug("REST request to save PlacementFunder : {}", placementFunderDTO);
@@ -79,7 +69,6 @@ public class PlacementFunderResource {
    * @throws URISyntaxException if the Location URI syntax is incorrect
    */
   @PutMapping("/placement-funders")
-  @Timed
   @PreAuthorize("hasAuthority('tcs:add:modify:entities')")
   public ResponseEntity<PlacementFunderDTO> updatePlacementFunder(@RequestBody PlacementFunderDTO placementFunderDTO) throws URISyntaxException {
     log.debug("REST request to update PlacementFunder : {}", placementFunderDTO);
@@ -99,9 +88,8 @@ public class PlacementFunderResource {
    * @return the ResponseEntity with status 200 (OK) and the list of placementFunders in body
    */
   @GetMapping("/placement-funders")
-  @Timed
   @PreAuthorize("hasAuthority('tcs:view:entities')")
-  public ResponseEntity<List<PlacementFunderDTO>> getAllPlacementFunders(@ApiParam Pageable pageable) {
+  public ResponseEntity<List<PlacementFunderDTO>> getAllPlacementFunders(Pageable pageable) {
     log.debug("REST request to get a page of PlacementFunders");
     Page<PlacementFunderDTO> page = placementFunderService.findAll(pageable);
     HttpHeaders headers = PaginationUtil.generatePaginationHttpHeaders(page, "/api/placement-funders");
@@ -115,7 +103,6 @@ public class PlacementFunderResource {
    * @return the ResponseEntity with status 200 (OK) and with body the placementFunderDTO, or with status 404 (Not Found)
    */
   @GetMapping("/placement-funders/{id}")
-  @Timed
   @PreAuthorize("hasAuthority('tcs:view:entities')")
   public ResponseEntity<PlacementFunderDTO> getPlacementFunder(@PathVariable Long id) {
     log.debug("REST request to get PlacementFunder : {}", id);
@@ -130,7 +117,6 @@ public class PlacementFunderResource {
    * @return the ResponseEntity with status 200 (OK)
    */
   @DeleteMapping("/placement-funders/{id}")
-  @Timed
   @PreAuthorize("hasAuthority('tcs:delete:entities')")
   public ResponseEntity<Void> deletePlacementFunder(@PathVariable Long id) {
     log.debug("REST request to delete PlacementFunder : {}", id);
@@ -146,7 +132,6 @@ public class PlacementFunderResource {
    * @throws URISyntaxException if the Location URI syntax is incorrect
    */
   @PostMapping("/bulk-placement-funders")
-  @Timed
   @PreAuthorize("hasAuthority('tcs:add:modify:entities')")
   public ResponseEntity<List<PlacementFunderDTO>> bulkCreatePlacementFunders(@Valid @RequestBody List<PlacementFunderDTO> placementFunderDTOS) throws URISyntaxException {
     log.debug("REST request to bulk save Placement Funders : {}", placementFunderDTOS);
@@ -176,7 +161,6 @@ public class PlacementFunderResource {
    * @throws URISyntaxException if the Location URI syntax is incorrect
    */
   @PutMapping("/bulk-placement-funders")
-  @Timed
   @PreAuthorize("hasAuthority('tcs:add:modify:entities')")
   public ResponseEntity<List<PlacementFunderDTO>> bulkUpdatePlacementFunders(@Valid @RequestBody List<PlacementFunderDTO> placementFunderDTOS) throws URISyntaxException {
     log.debug("REST request to bulk update Placement Funders : {}", placementFunderDTOS);

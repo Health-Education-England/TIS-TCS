@@ -1,15 +1,9 @@
 package com.transformuk.hee.tis.tcs.service.service.impl;
+
 import com.google.common.collect.Lists;
 import com.google.common.collect.Maps;
 import com.google.common.collect.Sets;
-import com.transformuk.hee.tis.tcs.api.dto.PlacementDTO;
-import com.transformuk.hee.tis.tcs.api.dto.PostDTO;
-import com.transformuk.hee.tis.tcs.api.dto.PostEsrDTO;
-import com.transformuk.hee.tis.tcs.api.dto.PostGradeDTO;
-import com.transformuk.hee.tis.tcs.api.dto.PostSiteDTO;
-import com.transformuk.hee.tis.tcs.api.dto.PostSpecialtyDTO;
-import com.transformuk.hee.tis.tcs.api.dto.PostViewDTO;
-import com.transformuk.hee.tis.tcs.api.dto.ProgrammeDTO;
+import com.transformuk.hee.tis.tcs.api.dto.*;
 import com.transformuk.hee.tis.tcs.api.enumeration.Status;
 import com.transformuk.hee.tis.tcs.service.api.decorator.PostViewDecorator;
 import com.transformuk.hee.tis.tcs.service.api.util.BasicPage;
@@ -39,6 +33,7 @@ import org.springframework.scheduling.annotation.Async;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.util.StopWatch;
+
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.util.*;
@@ -127,10 +122,10 @@ public class PostServiceImpl implements PostService {
     Set<PostGrade> allPostGrades = postByIntrepidIds.stream().flatMap(post -> post.getGrades().stream()).collect(Collectors.toSet());
     Set<PostSite> allPostSites = postByIntrepidIds.stream().flatMap(post -> post.getSites().stream()).collect(Collectors.toSet());
     Set<PostSpecialty> allPostSpecialties = postByIntrepidIds.stream().flatMap(post -> post.getSpecialties().stream()).collect(Collectors.toSet());
-    postGradeRepository.delete(allPostGrades);
-    postSiteRepository.delete(allPostSites);
-    postSpecialtyRepository.delete(allPostSpecialties);
-    posts = postRepository.save(posts);
+    postGradeRepository.deleteAll(allPostGrades);
+    postSiteRepository.deleteAll(allPostSites);
+    postSpecialtyRepository.deleteAll(allPostSpecialties);
+    posts = postRepository.saveAll(posts);
     return postMapper.postsToPostDTOs(posts);
   }
   /**
@@ -177,7 +172,7 @@ public class PostServiceImpl implements PostService {
         postsToSave.add(post);
       }
     }
-    List<Post> savedPosts = postRepository.save(postsToSave);
+    List<Post> savedPosts = postRepository.saveAll(postsToSave);
     return postMapper.postsToPostDTOs(savedPosts);
   }
   @Override
@@ -196,7 +191,7 @@ public class PostServiceImpl implements PostService {
           postSite.setSiteId(siteDTO.getSiteId());
           sitesToSave.add(postSite);
         }
-        List<PostSite> savedPostSite = postSiteRepository.save(sitesToSave);
+        List<PostSite> savedPostSite = postSiteRepository.saveAll(sitesToSave);
         post.setSites(Sets.newHashSet(savedPostSite));
         postsModified.add(post);
       }
@@ -218,12 +213,12 @@ public class PostServiceImpl implements PostService {
           postGrade.setGradeId(postGradeDTO.getGradeId());
           postGrades.add(postGrade);
         }
-        List<PostGrade> savedGrades = postGradeRepository.save(postGrades);
+        List<PostGrade> savedGrades = postGradeRepository.saveAll(postGrades);
         post.setGrades(Sets.newHashSet(savedGrades));
         postsToSave.add(post);
       }
     }
-    List<Post> savedPosts = postRepository.save(postsToSave);
+    List<Post> savedPosts = postRepository.saveAll(postsToSave);
     return postMapper.postsToPostDTOs(savedPosts);
   }
   @Override
@@ -238,7 +233,7 @@ public class PostServiceImpl implements PostService {
         .flatMap(Collection::stream)
         .map(ProgrammeDTO::getId)
         .collect(Collectors.toSet());
-    Map<Long, Programme> idToProgramme = programmeRepository.findAll(programmeIds)
+    Map<Long, Programme> idToProgramme = programmeRepository.findAllById(programmeIds)
         .stream().collect(Collectors.toMap(Programme::getId, p -> p));
     for (final PostDTO dto : postDTOList) {
       final Post post = intrepidIdToPost.get(dto.getIntrepidId());
@@ -250,7 +245,7 @@ public class PostServiceImpl implements PostService {
         }
       }
     }
-    List<Post> savedPosts = postRepository.save(posts);
+    List<Post> savedPosts = postRepository.saveAll(posts);
     return postMapper.postsToPostDTOs(savedPosts);
   }
   @Override
@@ -270,7 +265,7 @@ public class PostServiceImpl implements PostService {
           postSpecialty.setSpecialty(specialty);
           attachedSpecialties.add(postSpecialty);
         }
-        List<PostSpecialty> savedSpecialties = postSpecialtyRepository.save(attachedSpecialties);
+        List<PostSpecialty> savedSpecialties = postSpecialtyRepository.saveAll(attachedSpecialties);
         post.setSpecialties(Sets.newHashSet(savedSpecialties));
         posts.add(post);
       }
@@ -314,16 +309,16 @@ public class PostServiceImpl implements PostService {
         posts.add(post);
       }
     }
-    List<Post> savedPosts = postRepository.save(posts);
+    List<Post> savedPosts = postRepository.saveAll(posts);
     return postMapper.postsToPostDTOs(savedPosts);
   }
   @Override
   public PostDTO update(PostDTO postDTO) {
-    Post currentInDbPost = postRepository.findOne(postDTO.getId());
+    Post currentInDbPost = postRepository.findById(postDTO.getId()).orElse(null);
     //clear all the relations
-    postGradeRepository.delete(currentInDbPost.getGrades());
-    postSiteRepository.delete(currentInDbPost.getSites());
-    postSpecialtyRepository.delete(currentInDbPost.getSpecialties());
+    postGradeRepository.deleteAll(currentInDbPost.getGrades());
+    postSiteRepository.deleteAll(currentInDbPost.getSites());
+    postSpecialtyRepository.deleteAll(currentInDbPost.getSpecialties());
     if (postDTO.isBypassNPNGeneration()) {
       //if we bypass do no do any of the generation logic
     } else if (nationalPostNumberService.requireNewNationalPostNumber(postDTO)) {
@@ -340,7 +335,7 @@ public class PostServiceImpl implements PostService {
     Set<PostFunding> postFundingsToRemove = new HashSet<>(currentPostFundings);
     postFundingsToRemove.removeAll(newPostFundings);
 
-    postFundingRepository.delete(postFundingsToRemove);
+    postFundingRepository.deleteAll(postFundingsToRemove);
     currentInDbPost = postRepository.save(payloadPost);
     return postMapper.postToPostDTO(currentInDbPost);
   }
@@ -381,7 +376,7 @@ public class PostServiceImpl implements PostService {
   public BasicPage<PostViewDTO> findAll(Pageable pageable) {
     log.debug("Request to get all Posts");
     final int size = pageable.getPageSize() + 1;
-    final int offset = pageable.getOffset();
+    final long offset = pageable.getOffset();
     MapSqlParameterSource paramSource = new MapSqlParameterSource();
     String query = sqlQuerySupplier.getQuery(SqlQuerySupplier.POST_VIEW);
     String whereClause = " WHERE 1=1 ";
@@ -421,7 +416,7 @@ public class PostServiceImpl implements PostService {
     String whereClause = createWhereClause(searchString, columnFilters);
     StopWatch stopWatch;
     final int size = pageable.getPageSize() + 1;
-    final int offset = pageable.getOffset();
+    final long offset = pageable.getOffset();
     String query = sqlQuerySupplier.getQuery(SqlQuerySupplier.POST_VIEW);
     query = query.replaceAll("TRUST_JOIN", permissionService.isUserTrustAdmin() ? "  LEFT JOIN `PostTrust` pt on pt.`postId` = p.`id` " : StringUtils.EMPTY);
 
@@ -469,7 +464,7 @@ public class PostServiceImpl implements PostService {
     MapSqlParameterSource paramSource = new MapSqlParameterSource();
     String whereClause = createWhereClauseByNationalPostNumberAndFilter(searchString,columnFilters);
     final int size = pageable.getPageSize() + 1;
-    final int offset = pageable.getOffset();
+    final long offset = pageable.getOffset();
     String query = sqlQuerySupplier.getQuery(SqlQuerySupplier.SEARCH_POST_VIEW);
     query = query.replaceAll("WHERECLAUSE", whereClause);
     //For order by clause
@@ -514,7 +509,7 @@ public class PostServiceImpl implements PostService {
   @Transactional(readOnly = true)
   public PostDTO findOne(Long id) {
     log.debug("Request to get Post : {}", id);
-    Post post = postRepository.findOne(id);
+    Post post = postRepository.findById(id).orElse(null);
     return postMapper.postToPostDTO(post);
   }
   /**
@@ -525,12 +520,10 @@ public class PostServiceImpl implements PostService {
   @Override
   public void delete(Long id) {
     log.debug("Request to delete Post : {}", id);
-    postRepository.delete(id);
+    postRepository.deleteById(id);
   }
   /**
    * Call Stored proc to build the post view
-   *
-   * @return
    */
   @Override
   @Transactional

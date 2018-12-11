@@ -43,8 +43,7 @@ public class FundingServiceImpl implements FundingService {
     log.debug("Request to save Funding : {}", fundingDTO);
     Funding funding = fundingMapper.fundingDTOToFunding(fundingDTO);
     funding = fundingRepository.save(funding);
-    FundingDTO result = fundingMapper.fundingToFundingDTO(funding);
-    return result;
+    return fundingMapper.fundingToFundingDTO(funding);
   }
 
   /**
@@ -56,10 +55,9 @@ public class FundingServiceImpl implements FundingService {
   @Override
   public List<FundingDTO> save(List<FundingDTO> fundingDTO) {
     log.debug("Request to save Fundings : {}", fundingDTO);
-    List<Funding> funding = fundingMapper.fundingDTOsToFundings(fundingDTO);
-    funding = fundingRepository.save(funding);
-    List<FundingDTO> result = fundingMapper.fundingsToFundingDTOs(funding);
-    return result;
+    List<Funding> fundings = fundingMapper.fundingDTOsToFundings(fundingDTO);
+    fundings = fundingRepository.saveAll(fundings);
+    return fundingMapper.fundingsToFundingDTOs(fundings);
   }
 
   /**
@@ -73,7 +71,7 @@ public class FundingServiceImpl implements FundingService {
   public Page<FundingDTO> findAll(Pageable pageable) {
     log.debug("Request to get all Fundings");
     Page<Funding> result = fundingRepository.findAll(pageable);
-    return result.map(funding -> fundingMapper.fundingToFundingDTO(funding));
+    return result.map(fundingMapper::fundingToFundingDTO);
   }
 
   /**
@@ -86,9 +84,8 @@ public class FundingServiceImpl implements FundingService {
   @Transactional(readOnly = true)
   public FundingDTO findOne(Long id) {
     log.debug("Request to get Funding : {}", id);
-    Funding funding = fundingRepository.findOne(id);
-    FundingDTO fundingDTO = fundingMapper.fundingToFundingDTO(funding);
-    return fundingDTO;
+    Funding funding = fundingRepository.findById(id).orElse(null);
+    return fundingMapper.fundingToFundingDTO(funding);
   }
 
   /**
@@ -99,6 +96,6 @@ public class FundingServiceImpl implements FundingService {
   @Override
   public void delete(Long id) {
     log.debug("Request to delete Funding : {}", id);
-    fundingRepository.delete(id);
+    fundingRepository.deleteById(id);
   }
 }

@@ -7,8 +7,6 @@ import io.github.jhipster.config.JHipsterConstants;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.boot.SpringApplication;
-import org.springframework.boot.actuate.autoconfigure.MetricFilterAutoConfiguration;
-import org.springframework.boot.actuate.autoconfigure.MetricRepositoryAutoConfiguration;
 import org.springframework.boot.autoconfigure.EnableAutoConfiguration;
 import org.springframework.boot.context.properties.EnableConfigurationProperties;
 import org.springframework.context.annotation.ComponentScan;
@@ -23,7 +21,7 @@ import java.util.Arrays;
 import java.util.Collection;
 
 @ComponentScan(basePackages = {"com.transformuk.hee.tis.tcs.service","com.transformuk.hee.tis.reference"})
-@EnableAutoConfiguration(exclude = {MetricFilterAutoConfiguration.class, MetricRepositoryAutoConfiguration.class})
+@EnableAutoConfiguration()
 @EnableConfigurationProperties({ApplicationProperties.class})
 @PropertySource({
     "classpath:/config/application.properties",

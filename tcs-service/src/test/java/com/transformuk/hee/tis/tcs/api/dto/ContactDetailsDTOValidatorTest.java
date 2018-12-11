@@ -5,15 +5,10 @@ import com.transformuk.hee.tis.tcs.service.api.*;
 import com.transformuk.hee.tis.tcs.service.api.decorator.PersonViewDecorator;
 import com.transformuk.hee.tis.tcs.service.api.decorator.PlacementSummaryDecorator;
 import com.transformuk.hee.tis.tcs.service.api.decorator.PlacementViewDecorator;
-import com.transformuk.hee.tis.tcs.service.api.validation.ContactDetailsValidator;
-import com.transformuk.hee.tis.tcs.service.api.validation.GdcDetailsValidator;
-import com.transformuk.hee.tis.tcs.service.api.validation.GmcDetailsValidator;
-import com.transformuk.hee.tis.tcs.service.api.validation.PersonValidator;
-import com.transformuk.hee.tis.tcs.service.api.validation.PersonalDetailsValidator;
+import com.transformuk.hee.tis.tcs.service.api.validation.*;
 import com.transformuk.hee.tis.tcs.service.exception.ExceptionTranslator;
 import com.transformuk.hee.tis.tcs.service.model.ContactDetails;
 import com.transformuk.hee.tis.tcs.service.model.Person;
-import com.transformuk.hee.tis.tcs.service.repository.PersonViewRepository;
 import com.transformuk.hee.tis.tcs.service.repository.PlacementViewRepository;
 import com.transformuk.hee.tis.tcs.service.service.ContactDetailsService;
 import com.transformuk.hee.tis.tcs.service.service.PersonService;
@@ -29,6 +24,7 @@ import org.junit.runner.RunWith;
 import org.mockito.Mock;
 import org.mockito.MockitoAnnotations;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.boot.test.autoconfigure.jdbc.AutoConfigureTestDatabase;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.data.web.PageableHandlerMethodArgumentResolver;
@@ -47,6 +43,7 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
 @RunWith(SpringRunner.class)
+@AutoConfigureTestDatabase(replace = AutoConfigureTestDatabase.Replace.NONE)
 @SpringBootTest(classes = Application.class)
 public class ContactDetailsDTOValidatorTest {
 	@Autowired
@@ -75,8 +72,6 @@ public class ContactDetailsDTOValidatorTest {
 	private PlacementViewDecorator placementViewDecorator;
 	@Autowired
 	private PersonViewDecorator personViewDecorator;
-	@Autowired
-	private PersonViewRepository personViewRepository;
 	@Autowired
 	private PlacementService placementService;
 	@Autowired

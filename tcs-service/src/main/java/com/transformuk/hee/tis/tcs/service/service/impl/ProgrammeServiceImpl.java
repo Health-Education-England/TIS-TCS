@@ -24,7 +24,6 @@ import java.util.List;
 
 import static com.transformuk.hee.tis.tcs.service.service.impl.SpecificationFactory.containsLike;
 import static com.transformuk.hee.tis.tcs.service.service.impl.SpecificationFactory.in;
-import static com.transformuk.hee.tis.tcs.service.service.impl.SpecificationFactory.isEqual;
 
 /**
  * Service Implementation for managing Programme.
@@ -82,9 +81,9 @@ public class ProgrammeServiceImpl implements ProgrammeService {
   @Override
   public List<ProgrammeDTO> save(List<ProgrammeDTO> programmeDTO) {
     log.debug("Request to save Programme : {}", programmeDTO);
-    List<Programme> programme = programmeMapper.programmeDTOsToProgrammes(programmeDTO);
-    programme = programmeRepository.save(programme);
-    return programmeMapper.programmesToProgrammeDTOs(programme);
+    List<Programme> programmes = programmeMapper.programmeDTOsToProgrammes(programmeDTO);
+    programmes = programmeRepository.saveAll(programmes);
+    return programmeMapper.programmesToProgrammeDTOs(programmes);
   }
 
   /**
@@ -151,7 +150,7 @@ public class ProgrammeServiceImpl implements ProgrammeService {
   @Transactional(readOnly = true)
   public ProgrammeDTO findOne(Long id) {
     log.debug("Request to get Programme : {}", id);
-    Programme programme = programmeRepository.findOne(id);
+    Programme programme = programmeRepository.findById(id).orElse(null);
     return programmeMapper.programmeToProgrammeDTO(programme);
   }
 
@@ -171,6 +170,6 @@ public class ProgrammeServiceImpl implements ProgrammeService {
   @Override
   public void delete(Long id) {
     log.debug("Request to delete Programme : {}", id);
-    programmeRepository.delete(id);
+    programmeRepository.deleteById(id);
   }
 }

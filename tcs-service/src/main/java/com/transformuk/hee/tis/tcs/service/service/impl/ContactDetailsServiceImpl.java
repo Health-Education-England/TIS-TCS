@@ -57,7 +57,7 @@ public class ContactDetailsServiceImpl implements ContactDetailsService {
   public List<ContactDetailsDTO> save(List<ContactDetailsDTO> contactDetailsDTOs) {
     log.debug("Request to save ContactDetails : {}", contactDetailsDTOs);
     List<ContactDetails> contactDetails = contactDetailsMapper.toEntity(contactDetailsDTOs);
-    contactDetails = contactDetailsRepository.save(contactDetails);
+    contactDetails = contactDetailsRepository.saveAll(contactDetails);
     return contactDetailsMapper.toDto(contactDetails);
   }
 
@@ -85,7 +85,7 @@ public class ContactDetailsServiceImpl implements ContactDetailsService {
   @Transactional(readOnly = true)
   public ContactDetailsDTO findOne(Long id) {
     log.debug("Request to get ContactDetails : {}", id);
-    ContactDetails contactDetails = contactDetailsRepository.findOne(id);
+    ContactDetails contactDetails = contactDetailsRepository.findById(id).orElse(null);
     return contactDetailsMapper.toDto(contactDetails);
   }
 
@@ -97,6 +97,6 @@ public class ContactDetailsServiceImpl implements ContactDetailsService {
   @Override
   public void delete(Long id) {
     log.debug("Request to delete ContactDetails : {}", id);
-    contactDetailsRepository.delete(id);
+    contactDetailsRepository.deleteById(id);
   }
 }

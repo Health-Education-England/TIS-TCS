@@ -22,11 +22,7 @@ import org.springframework.transaction.annotation.Transactional;
 import java.io.IOException;
 import java.text.DecimalFormat;
 import java.time.LocalDate;
-import java.util.ArrayList;
-import java.util.Collections;
-import java.util.Comparator;
-import java.util.List;
-import java.util.Optional;
+import java.util.*;
 
 import static com.google.common.collect.Sets.newHashSet;
 import static java.lang.Double.parseDouble;
@@ -75,7 +71,7 @@ public class EsrNotificationServiceImpl implements EsrNotificationService {
   @Override
   public List<EsrNotification> save(List<EsrNotification> esrNotifications) {
     LOG.info("Request to save EsrNotifications : {}", isNotEmpty(esrNotifications) ? esrNotifications.size() : 0);
-    return esrNotificationRepository.save(esrNotifications);
+    return esrNotificationRepository.saveAll(esrNotifications);
   }
 
   /**
@@ -95,7 +91,7 @@ public class EsrNotificationServiceImpl implements EsrNotificationService {
     // Have a separate mapper when time permits
     List<EsrNotification> esrNotifications = mapNextToCurrentPlacementsToNotification(placements);
     LOG.info("Saving ESR Notifications for next to current trainee scenario : {}", isNotEmpty(esrNotifications) ? esrNotifications.size() : 0);
-    List<EsrNotification> savedNotifications = esrNotificationRepository.save(esrNotifications);
+    List<EsrNotification> savedNotifications = esrNotificationRepository.saveAll(esrNotifications);
     return esrNotificationMapper.esrNotificationsToPlacementDetailDTOs(savedNotifications);
   }
 
@@ -121,7 +117,7 @@ public class EsrNotificationServiceImpl implements EsrNotificationService {
     // Have a separate mapper when time permits
     List<EsrNotification> esrNotifications = mapNextToCurrentPlacementsToNotification(placements);
     LOG.info("Saving ESR Notifications for earliest eligible future Placements scenario : {}", esrNotifications.size());
-    List<EsrNotification> savedNotifications = esrNotificationRepository.save(esrNotifications);
+    List<EsrNotification> savedNotifications = esrNotificationRepository.saveAll(esrNotifications);
     return esrNotificationMapper.esrNotificationsToPlacementDetailDTOs(savedNotifications);
   }
 
@@ -138,7 +134,7 @@ public class EsrNotificationServiceImpl implements EsrNotificationService {
     List<EsrNotification> esrNotifications = mapVacantPostsToNotification(vacantPostPlacements);
 
     LOG.info("Saving ESR Notifications for Vacant Posts scenario : {}", esrNotifications.size());
-    List<EsrNotification> savedNotifications = esrNotificationRepository.save(esrNotifications);
+    List<EsrNotification> savedNotifications = esrNotificationRepository.saveAll(esrNotifications);
     return esrNotificationMapper.esrNotificationsToPlacementDetailDTOs(savedNotifications);
   }
 
@@ -175,7 +171,7 @@ public class EsrNotificationServiceImpl implements EsrNotificationService {
 
     LOG.info("Saving ESR Notifications for full notifications scenario : {}", esrNotifications.size());
     esrNotifications.stream().forEach(esrNotification -> esrNotification.setManagingDeaneryBodyCode(deaneryBody));
-    List<EsrNotification> savedNotifications = esrNotificationRepository.save(esrNotifications);
+    List<EsrNotification> savedNotifications = esrNotificationRepository.saveAll(esrNotifications);
     return esrNotificationMapper.esrNotificationsToPlacementDetailDTOs(savedNotifications);
   }
 
@@ -207,7 +203,7 @@ public class EsrNotificationServiceImpl implements EsrNotificationService {
     esrNotificationType4.setCurrentTraineeProjectedEndDate(null);
 
     LOG.info("Saving ESR Notifications for changed date scenario : ");
-    List<EsrNotification> savedNotifications = esrNotificationRepository.save(asList(type1EsrNotification, esrNotificationType4));
+    List<EsrNotification> savedNotifications = esrNotificationRepository.saveAll(asList(type1EsrNotification, esrNotificationType4));
     LOG.info("Saved {} ESR notifications for changed date scenario", isNotEmpty(savedNotifications) ? savedNotifications.size() : 0);
   }
 
@@ -223,7 +219,7 @@ public class EsrNotificationServiceImpl implements EsrNotificationService {
             .collect(toList())
         : Collections.emptyList();
 
-    Placement futurePlacement = placementRepository.findOne(changedPlacement.getId());
+    Placement futurePlacement = placementRepository.findById(changedPlacement.getId()).orElse(null);
     if (CollectionUtils.isEmpty(matchedCurrentPlacements)) {
       allEsrNotifications.add(buildNotification(futurePlacement, null));
     } else {
@@ -243,7 +239,7 @@ public class EsrNotificationServiceImpl implements EsrNotificationService {
         .filter(placement -> isNotEmpty(placement.getSiteCode()) && placement.getSiteCode().equalsIgnoreCase(changedPlacement.getSiteCode()))
         .collect(toList());
 
-    Placement currentPlacement = placementRepository.findOne(changedPlacement.getId());
+    Placement currentPlacement = placementRepository.findById(changedPlacement.getId()).orElse(null);
     if (CollectionUtils.isEmpty(matchedFuturePlacements)) {
       allEsrNotifications.add(buildNotification(null, currentPlacement));
     } else {
@@ -254,7 +250,7 @@ public class EsrNotificationServiceImpl implements EsrNotificationService {
   }
 
   @Override
-  public List<EsrNotification> handleNewPlacementEsrNotification(Placement newFuturePlacement) throws IOException, ClassNotFoundException {
+  public List<EsrNotification> handleNewPlacementEsrNotification(Placement newFuturePlacement) {
 
     LocalDate asOfDate = LocalDate.now(); // find placements as of today.
     List<EsrNotification> allEsrNotifications = new ArrayList<>();
@@ -281,7 +277,7 @@ public class EsrNotificationServiceImpl implements EsrNotificationService {
     if (!allEsrNotifications.isEmpty() ) {
 
       LOG.info("Saving ESR notification for newly created Placement : {}", nationalPostNumber);
-      List<EsrNotification> savedNotifications = esrNotificationRepository.save(allEsrNotifications);
+      List<EsrNotification> savedNotifications = esrNotificationRepository.saveAll(allEsrNotifications);
       LOG.info("Saved ESR notifications {} for newly created Placement : {} ", savedNotifications.size(), nationalPostNumber);
       return savedNotifications;
 

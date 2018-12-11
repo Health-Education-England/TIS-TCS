@@ -56,10 +56,9 @@ public class TariffRateServiceImpl implements TariffRateService {
   @Override
   public List<TariffRateDTO> save(List<TariffRateDTO> tariffRateDTO) {
     log.debug("Request to save TariffRate : {}", tariffRateDTO);
-    List<TariffRate> tariffRate = tariffRateMapper.tariffRateDTOsToTariffRates(tariffRateDTO);
-    tariffRate = tariffRateRepository.save(tariffRate);
-    List<TariffRateDTO> result = tariffRateMapper.tariffRatesToTariffRateDTOs(tariffRate);
-    return result;
+    List<TariffRate> tariffRates = tariffRateMapper.tariffRateDTOsToTariffRates(tariffRateDTO);
+    tariffRates = tariffRateRepository.saveAll(tariffRates);
+    return tariffRateMapper.tariffRatesToTariffRateDTOs(tariffRates);
   }
 
   /**
@@ -86,7 +85,7 @@ public class TariffRateServiceImpl implements TariffRateService {
   @Transactional(readOnly = true)
   public TariffRateDTO findOne(Long id) {
     log.debug("Request to get TariffRate : {}", id);
-    TariffRate tariffRate = tariffRateRepository.findOne(id);
+    TariffRate tariffRate = tariffRateRepository.findById(id).orElse(null);
     TariffRateDTO tariffRateDTO = tariffRateMapper.tariffRateToTariffRateDTO(tariffRate);
     return tariffRateDTO;
   }
@@ -99,6 +98,6 @@ public class TariffRateServiceImpl implements TariffRateService {
   @Override
   public void delete(Long id) {
     log.debug("Request to delete TariffRate : {}", id);
-    tariffRateRepository.delete(id);
+    tariffRateRepository.deleteById(id);
   }
 }

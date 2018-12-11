@@ -45,7 +45,7 @@ public class PersonalDetailsServiceImpl implements PersonalDetailsService {
     PersonalDetails personalDetails = personalDetailsMapper.toEntity(personalDetailsDTO);
     Long personDetailId = personalDetailsDTO.getId();
     if (!permissionService.canEditSensitiveData()) {
-      PersonalDetails originalPersonDetail = personalDetailsRepository.findOne(personDetailId);
+      PersonalDetails originalPersonDetail = personalDetailsRepository.findById(personDetailId).orElse(null);
       if (originalPersonDetail == null) { //during create
         clearSensitiveData(personalDetails);
       } else {
@@ -74,7 +74,7 @@ public class PersonalDetailsServiceImpl implements PersonalDetailsService {
   public List<PersonalDetailsDTO> save(List<PersonalDetailsDTO> personalDetailsDTOs) {
     log.debug("Request to save personalDetails : {}", personalDetailsDTOs);
     List<PersonalDetails> personalDetailsList = personalDetailsMapper.toEntity(personalDetailsDTOs);
-    personalDetailsList = personalDetailsRepository.save(personalDetailsList);
+    personalDetailsList = personalDetailsRepository.saveAll(personalDetailsList);
     return personalDetailsMapper.toDto(personalDetailsList);
   }
 
@@ -110,7 +110,7 @@ public class PersonalDetailsServiceImpl implements PersonalDetailsService {
   @Transactional(readOnly = true)
   public PersonalDetailsDTO findOne(Long id) {
     log.debug("Request to get PersonalDetails : {}", id);
-    PersonalDetails personalDetails = personalDetailsRepository.findOne(id);
+    PersonalDetails personalDetails = personalDetailsRepository.findById(id).orElse(null);
     PersonalDetailsDTO personalDetailsDTO = personalDetailsMapper.toDto(personalDetails);
 
     if (!permissionService.canViewSensitiveData()) {
@@ -142,6 +142,6 @@ public class PersonalDetailsServiceImpl implements PersonalDetailsService {
   @Override
   public void delete(Long id) {
     log.debug("Request to delete PersonalDetails : {}", id);
-    personalDetailsRepository.delete(id);
+    personalDetailsRepository.deleteById(id);
   }
 }

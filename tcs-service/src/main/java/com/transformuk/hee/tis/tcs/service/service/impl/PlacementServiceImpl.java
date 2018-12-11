@@ -3,33 +3,14 @@ package com.transformuk.hee.tis.tcs.service.service.impl;
 import com.google.common.collect.Lists;
 import com.google.common.collect.Maps;
 import com.google.common.collect.Sets;
-import com.transformuk.hee.tis.tcs.api.dto.PlacementDTO;
-import com.transformuk.hee.tis.tcs.api.dto.PlacementDetailsDTO;
-import com.transformuk.hee.tis.tcs.api.dto.PlacementSpecialtyDTO;
-import com.transformuk.hee.tis.tcs.api.dto.PlacementSummaryDTO;
-import com.transformuk.hee.tis.tcs.api.dto.PlacementSupervisorDTO;
+import com.transformuk.hee.tis.tcs.api.dto.*;
 import com.transformuk.hee.tis.tcs.api.enumeration.PlacementStatus;
 import com.transformuk.hee.tis.tcs.api.enumeration.PostSpecialtyType;
 import com.transformuk.hee.tis.tcs.api.enumeration.TCSDateColumns;
 import com.transformuk.hee.tis.tcs.service.api.util.ColumnFilterUtil;
 import com.transformuk.hee.tis.tcs.service.exception.DateRangeColumnFilterException;
-import com.transformuk.hee.tis.tcs.service.model.ColumnFilter;
-import com.transformuk.hee.tis.tcs.service.model.Comment;
-import com.transformuk.hee.tis.tcs.service.model.EsrNotification;
-import com.transformuk.hee.tis.tcs.service.model.Placement;
-import com.transformuk.hee.tis.tcs.service.model.PlacementDetails;
-import com.transformuk.hee.tis.tcs.service.model.PlacementSpecialty;
-import com.transformuk.hee.tis.tcs.service.model.PlacementSupervisor;
-import com.transformuk.hee.tis.tcs.service.model.Specialty;
-import com.transformuk.hee.tis.tcs.service.repository.CommentRepository;
-import com.transformuk.hee.tis.tcs.service.repository.PersonRepository;
-import com.transformuk.hee.tis.tcs.service.repository.PersonRepositoryImpl;
-import com.transformuk.hee.tis.tcs.service.repository.PlacementDetailsRepository;
-import com.transformuk.hee.tis.tcs.service.repository.PlacementRepository;
-import com.transformuk.hee.tis.tcs.service.repository.PlacementSpecialtyRepository;
-import com.transformuk.hee.tis.tcs.service.repository.PlacementSupervisorRepository;
-import com.transformuk.hee.tis.tcs.service.repository.PlacementViewRepository;
-import com.transformuk.hee.tis.tcs.service.repository.SpecialtyRepository;
+import com.transformuk.hee.tis.tcs.service.model.*;
+import com.transformuk.hee.tis.tcs.service.repository.*;
 import com.transformuk.hee.tis.tcs.service.service.EsrNotificationService;
 import com.transformuk.hee.tis.tcs.service.service.PlacementService;
 import com.transformuk.hee.tis.tcs.service.service.helper.SqlQuerySupplier;
@@ -37,8 +18,6 @@ import com.transformuk.hee.tis.tcs.service.service.mapper.PersonLiteMapper;
 import com.transformuk.hee.tis.tcs.service.service.mapper.PlacementDetailsMapper;
 import com.transformuk.hee.tis.tcs.service.service.mapper.PlacementMapper;
 import com.transformuk.hee.tis.tcs.service.service.mapper.PlacementSpecialtyMapper;
-import com.transformuk.hee.tis.tcs.service.service.mapper.PlacementViewMapper;
-import com.transformuk.hee.tis.tcs.service.service.mapper.SpecialtyMapper;
 import org.apache.commons.collections4.CollectionUtils;
 import org.apache.commons.lang.StringUtils;
 import org.apache.commons.lang3.ObjectUtils;
@@ -63,16 +42,7 @@ import java.math.BigInteger;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.time.LocalDate;
-import java.util.ArrayList;
-import java.util.Calendar;
-import java.util.Collection;
-import java.util.Collections;
-import java.util.Comparator;
-import java.util.Date;
-import java.util.HashSet;
-import java.util.List;
-import java.util.Map;
-import java.util.Set;
+import java.util.*;
 import java.util.stream.Collectors;
 
 import static com.transformuk.hee.tis.tcs.service.api.util.DateUtil.getLocalDateFromString;
@@ -86,7 +56,7 @@ import static com.transformuk.hee.tis.tcs.service.service.impl.SpecificationFact
 @Transactional
 public class PlacementServiceImpl implements PlacementService {
 
-    public static final String PLACEMENTS_SUMMARY_MAPPER = "PlacementsSummary";
+  static final String PLACEMENTS_SUMMARY_MAPPER = "PlacementsSummary";
     private final Logger log = LoggerFactory.getLogger(PlacementServiceImpl.class);
 
     @Autowired
@@ -99,14 +69,6 @@ public class PlacementServiceImpl implements PlacementService {
     private PlacementDetailsMapper placementDetailsMapper;
     @Autowired
     private SpecialtyRepository specialtyRepository;
-    @Autowired
-    private SpecialtyMapper specialtyMapper;
-    @Autowired
-    private PersonRepository personRepository;
-    @Autowired
-    private PlacementViewRepository placementViewRepository;
-    @Autowired
-    private PlacementViewMapper placementViewMapper;
     @Autowired
     private EntityManager em;
     @Autowired
@@ -143,7 +105,7 @@ public class PlacementServiceImpl implements PlacementService {
 
     @Override
     public Placement findPlacementById(Long placementId) {
-      return placementRepository.findOne(placementId);
+      return placementRepository.findById(placementId).orElse(null);
     }
 
     @Transactional
@@ -168,7 +130,7 @@ public class PlacementServiceImpl implements PlacementService {
       Set<Comment> commentsToPersist = new HashSet<>();
       for(Comment comment : placementDetails.getComments()) {
         if(comment.getId() != null) {
-          Comment commentSaved = commentRepository.findOne(comment.getId());
+          Comment commentSaved = commentRepository.findById(comment.getId()).orElse(null);
           commentSaved.setBody(comment.getBody());
           commentSaved.setPlacement(placementDetails);
           commentSaved.setAuthor(comment.getAuthor());
@@ -216,8 +178,8 @@ public class PlacementServiceImpl implements PlacementService {
         log.debug("Request to save Placement : {}", placementDetailsDTO);
 
         //clear any linked specialties before trying to save the placement
-        final Placement placement = placementRepository.findOne(placementDetailsDTO.getId());
-        placementSpecialtyRepository.delete(placement.getSpecialties());
+    final Placement placement = placementRepository.findById(placementDetailsDTO.getId()).orElse(null);
+    placementSpecialtyRepository.deleteInBatch(placement.getSpecialties());
         placement.setSpecialties(new HashSet<>());
         placementRepository.saveAndFlush(placement);
 
@@ -225,14 +187,14 @@ public class PlacementServiceImpl implements PlacementService {
     }
 
     @Transactional
-    private Set<PlacementSpecialty> linkPlacementSpecialties(final PlacementDetailsDTO placementDetailsDTO, final PlacementDetails placementDetails) {
-        final Placement placement = placementRepository.findOne(placementDetails.getId());
+    protected Set<PlacementSpecialty> linkPlacementSpecialties(final PlacementDetailsDTO placementDetailsDTO, final PlacementDetails placementDetails) {
+      final Placement placement = placementRepository.findById(placementDetails.getId()).orElse(null);
         final Set<PlacementSpecialty> placementSpecialties = Sets.newHashSet();
         if (CollectionUtils.isNotEmpty(placementDetailsDTO.getSpecialties())) {
             for (final PlacementSpecialtyDTO placementSpecialtyDTO : placementDetailsDTO.getSpecialties()) {
                 final PlacementSpecialty placementSpecialty = new PlacementSpecialty();
                 placementSpecialty.setPlacement(placement);
-                placementSpecialty.setSpecialty(specialtyRepository.findOne(placementSpecialtyDTO.getSpecialtyId()));
+              placementSpecialty.setSpecialty(specialtyRepository.findById(placementSpecialtyDTO.getSpecialtyId()).orElse(null));
                 placementSpecialty.setPlacementSpecialtyType(placementSpecialtyDTO.getPlacementSpecialtyType());
                 placementSpecialties.add(placementSpecialty);
             }
@@ -253,7 +215,7 @@ public class PlacementServiceImpl implements PlacementService {
     public List<PlacementDTO> save(final List<PlacementDTO> placementDTO) {
         log.debug("Request to save Placements : {}", placementDTO);
         List<Placement> placements = placementMapper.placementDTOsToPlacements(placementDTO);
-        placements = placementRepository.save(placements);
+      placements = placementRepository.saveAll(placements);
         return placementMapper.placementsToPlacementDTOs(placements);
     }
 
@@ -281,14 +243,14 @@ public class PlacementServiceImpl implements PlacementService {
     @Transactional(readOnly = true)
     public PlacementDTO findOne(final Long id) {
         log.debug("Request to get Placement : {}", id);
-        final Placement placement = placementRepository.findOne(id);
+      final Placement placement = placementRepository.findById(id).orElse(null);
         return placementMapper.placementToPlacementDTO(placement);
     }
 
     @Override
     @Transactional(readOnly = true)
     public PlacementDetailsDTO getDetails(final Long id) {
-        final PlacementDetails pd = placementDetailsRepository.findOne(id);
+      final PlacementDetails pd = placementDetailsRepository.findById(id).orElse(null);
         PlacementDetailsDTO placementDetailsDTO = null;
 
         if (pd != null) {
@@ -324,13 +286,13 @@ public class PlacementServiceImpl implements PlacementService {
 
         placementSupervisorRepository.deleteAllByIdPlacementId(id);
 
-        placementRepository.delete(id);
+      placementRepository.deleteById(id);
     }
 
     private void handleEsrNotificationForPlacementDelete(final Long id) {
         final List<EsrNotification> allEsrNotifications = new ArrayList<>();
 
-        final Placement placementToDelete = placementRepository.findOne(id);
+      final Placement placementToDelete = placementRepository.findById(id).orElse(null);
         // Only future placements can be deleted.
         if (placementToDelete != null && placementToDelete.getDateFrom() != null && placementToDelete.getDateFrom().isBefore(LocalDate.now().plusMonths(3))) {
             final List<EsrNotification> esrNotifications = esrNotificationService.loadPlacementDeleteNotification(placementToDelete, allEsrNotifications);
@@ -364,7 +326,7 @@ public class PlacementServiceImpl implements PlacementService {
                 .map(PlacementSpecialtyDTO::getSpecialtyId)
                 .collect(Collectors.toSet());
 
-        final Map<Long, Specialty> idToSpecialty = specialtyRepository.findAll(specialtyIds).stream().collect(Collectors.toMap(Specialty::getId, sp -> sp));
+      final Map<Long, Specialty> idToSpecialty = specialtyRepository.findAllById(specialtyIds).stream().collect(Collectors.toMap(Specialty::getId, sp -> sp));
         for (final PlacementDTO dto : placementDTOList) {
             final Placement placement = intrepidIdToPlacement.get(dto.getIntrepidId());
             if (placement != null) {
@@ -384,7 +346,7 @@ public class PlacementServiceImpl implements PlacementService {
                 placements.add(placement);
             }
         }
-        final List<Placement> savedPlacements = placementRepository.save(placements);
+      final List<Placement> savedPlacements = placementRepository.saveAll(placements);
         return placementMapper.placementsToPlacementDTOs(savedPlacements);
     }
 
@@ -455,7 +417,7 @@ public class PlacementServiceImpl implements PlacementService {
 
     @Override
     public PlacementDTO closePlacement(final Long placementId) {
-        Placement placement = placementRepository.findOne(placementId);
+      Placement placement = placementRepository.findById(placementId).orElse(null);
         if (placement != null) {
             placement.setDateTo(LocalDate.now().minusDays(1));
             placement = placementRepository.saveAndFlush(placement);
@@ -567,7 +529,7 @@ public class PlacementServiceImpl implements PlacementService {
         log.debug("Handling ESR notifications for new placement creation for deanery number {}", placementDetailsDTO.getLocalPostNumber());
         if (placementDetailsDTO.getId() == null) {
             try {
-                final Placement savedPlacement = placementRepository.findOne(placementDetails.getId());
+              final Placement savedPlacement = placementRepository.findById(placementDetails.getId()).orElse(null);
                 if (savedPlacement.getDateFrom() != null && savedPlacement.getDateFrom().isBefore(LocalDate.now().plusMonths(3))) {
                     log.debug("Creating ESR notification for new placement creation for deanery number {}", savedPlacement.getPost().getNationalPostNumber());
                     final List<EsrNotification> esrNotifications = esrNotificationService.handleNewPlacementEsrNotification(savedPlacement);
@@ -589,7 +551,7 @@ public class PlacementServiceImpl implements PlacementService {
 
         supervisorDTOs.forEach(s -> supervisors.add(new PlacementSupervisor(placementId, s.getPerson().getId(), s.getType())));
 
-        placementSupervisorRepository.save(supervisors);
+      placementSupervisorRepository.saveAll(supervisors);
     }
 
     class PlacementDetailSpecialtyRowMapper implements RowMapper<PlacementSpecialtyDTO> {

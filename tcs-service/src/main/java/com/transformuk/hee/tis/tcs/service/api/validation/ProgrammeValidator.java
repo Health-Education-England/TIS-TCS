@@ -3,10 +3,7 @@ package com.transformuk.hee.tis.tcs.service.api.validation;
 import com.transformuk.hee.tis.security.model.UserProfile;
 import com.transformuk.hee.tis.tcs.api.dto.CurriculumDTO;
 import com.transformuk.hee.tis.tcs.api.dto.ProgrammeDTO;
-import com.transformuk.hee.tis.tcs.service.model.Programme;
 import com.transformuk.hee.tis.tcs.service.repository.CurriculumRepository;
-import com.transformuk.hee.tis.tcs.service.repository.ProgrammeRepository;
-import com.transformuk.hee.tis.tcs.service.repository.TrainingNumberRepository;
 import com.transformuk.hee.tis.tcs.service.service.mapper.DesignatedBodyMapper;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
@@ -25,14 +22,10 @@ import java.util.List;
 public class ProgrammeValidator {
 
   private CurriculumRepository curriculumRepository;
-  private ProgrammeRepository programmeRepository;
-  private TrainingNumberRepository trainingNumberRepository;
 
   @Autowired
-  public ProgrammeValidator(CurriculumRepository curriculumRepository, ProgrammeRepository programmeRepository, TrainingNumberRepository trainingNumberRepository) {
+  public ProgrammeValidator(CurriculumRepository curriculumRepository) {
     this.curriculumRepository = curriculumRepository;
-    this.programmeRepository = programmeRepository;
-    this.trainingNumberRepository = trainingNumberRepository;
   }
 
   /**
@@ -69,7 +62,7 @@ public class ProgrammeValidator {
           fieldErrors.add(new FieldError("ProgrammeDTO", "curricula",
               "Curriculum ID cannot be null or negative"));
         } else {
-          if (!curriculumRepository.exists(c.getId())) {
+          if (!curriculumRepository.existsById(c.getId())) {
             fieldErrors.add(new FieldError("ProgrammeDTO", "curricula",
                 String.format("Curricula with id %d does not exist", c.getId())));
           }

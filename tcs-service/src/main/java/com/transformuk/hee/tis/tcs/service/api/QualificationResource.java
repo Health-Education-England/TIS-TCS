@@ -1,6 +1,5 @@
 package com.transformuk.hee.tis.tcs.service.api;
 
-import com.codahale.metrics.annotation.Timed;
 import com.transformuk.hee.tis.tcs.api.dto.QualificationDTO;
 import com.transformuk.hee.tis.tcs.api.dto.validation.Create;
 import com.transformuk.hee.tis.tcs.api.dto.validation.Update;
@@ -9,7 +8,6 @@ import com.transformuk.hee.tis.tcs.service.api.util.PaginationUtil;
 import com.transformuk.hee.tis.tcs.service.api.validation.QualificationValidator;
 import com.transformuk.hee.tis.tcs.service.service.QualificationService;
 import io.github.jhipster.web.util.ResponseUtil;
-import io.swagger.annotations.ApiParam;
 import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -21,15 +19,7 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.MethodArgumentNotValidException;
-import org.springframework.web.bind.annotation.DeleteMapping;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.PatchMapping;
-import org.springframework.web.bind.annotation.PathVariable;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.PutMapping;
-import org.springframework.web.bind.annotation.RequestBody;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
 
 import javax.validation.Valid;
 import java.net.URI;
@@ -66,7 +56,6 @@ public class QualificationResource {
    * @throws URISyntaxException if the Location URI syntax is incorrect
    */
   @PostMapping("/qualifications")
-  @Timed
   @PreAuthorize("hasPermission('tis:tcs::qualification:', 'Create')")
   public ResponseEntity<QualificationDTO> createQualification(@RequestBody @Validated(Create.class) QualificationDTO qualificationDTO)
       throws URISyntaxException, MethodArgumentNotValidException {
@@ -85,13 +74,11 @@ public class QualificationResource {
    * @return the ResponseEntity with status 200 (OK) and with body the updated qualificationDTO,
    * or with status 400 (Bad Request) if the qualificationDTO is not valid,
    * or with status 500 (Internal Server Error) if the qualificationDTO couldn't be updated
-   * @throws URISyntaxException if the Location URI syntax is incorrect
    */
   @PutMapping("/qualifications")
-  @Timed
   @PreAuthorize("hasPermission('tis:tcs::qualification:', 'Update')")
   public ResponseEntity<QualificationDTO> updateQualification(@RequestBody @Validated(Update.class) QualificationDTO qualificationDTO)
-      throws URISyntaxException, MethodArgumentNotValidException {
+    throws MethodArgumentNotValidException {
     log.debug("REST request to update Qualification : {}", qualificationDTO);
     qualificationValidator.validate(qualificationDTO);
     if (qualificationDTO.getId() == null) {
@@ -111,9 +98,8 @@ public class QualificationResource {
    * @return the ResponseEntity with status 200 (OK) and the list of qualifications in body
    */
   @GetMapping("/qualifications")
-  @Timed
   @PreAuthorize("hasPermission('tis:tcs::qualification:', 'View')")
-  public ResponseEntity<List<QualificationDTO>> getAllQualifications(@ApiParam Pageable pageable) {
+  public ResponseEntity<List<QualificationDTO>> getAllQualifications(Pageable pageable) {
     log.debug("REST request to get a page of Qualifications");
     Page<QualificationDTO> page = qualificationService.findAll(pageable);
     HttpHeaders headers = PaginationUtil.generatePaginationHttpHeaders(page, "/api/qualifications");
@@ -127,7 +113,6 @@ public class QualificationResource {
    * @return the ResponseEntity with status 200 (OK) and with body the qualificationDTO, or with status 404 (Not Found)
    */
   @GetMapping("/qualifications/{id}")
-  @Timed
   @PreAuthorize("hasPermission('tis:tcs::qualification:', 'View')")
   public ResponseEntity<QualificationDTO> getQualification(@PathVariable Long id) {
     log.debug("REST request to get Qualification : {}", id);
@@ -142,7 +127,6 @@ public class QualificationResource {
    * @return the ResponseEntity with status 200 (OK) and with body the qualificationDTO, or with status 404 (Not Found)
    */
   @GetMapping("/people/{personId}/qualifications")
-  @Timed
   @PreAuthorize("hasPermission('tis:tcs::qualification:', 'View')")
   public ResponseEntity<List<QualificationDTO>> getPersonQualifications(@PathVariable Long personId) {
     log.debug("REST request to get Qualification : {}", personId);
@@ -157,7 +141,6 @@ public class QualificationResource {
    * @return the ResponseEntity with status 200 (OK)
    */
   @DeleteMapping("/qualifications/{id}")
-  @Timed
   @PreAuthorize("hasAuthority('tcs:delete:entities')")
   public ResponseEntity<Void> deleteQualification(@PathVariable Long id) {
     log.debug("REST request to delete Qualification : {}", id);
@@ -170,12 +153,10 @@ public class QualificationResource {
    *
    * @param qualificationDTOs the qualificationDTOs to create/update
    * @return the ResponseEntity with status 200 and with body the new qualification
-   * @throws URISyntaxException if the Location URI syntax is incorrect
    */
   @PatchMapping("/qualifications")
-  @Timed
   @PreAuthorize("hasPermission('tis:tcs::qualification:', 'Update')")
-  public ResponseEntity<List<QualificationDTO>> patchQualifications(@Valid @RequestBody List<QualificationDTO> qualificationDTOs) throws URISyntaxException {
+  public ResponseEntity<List<QualificationDTO>> patchQualifications(@Valid @RequestBody List<QualificationDTO> qualificationDTOs) {
     log.debug("REST request to patch qualifications: {}", qualificationDTOs);
     List<QualificationDTO> result = qualificationService.save(qualificationDTOs);
     List<Long> ids = result.stream().map(QualificationDTO::getId).collect(Collectors.toList());

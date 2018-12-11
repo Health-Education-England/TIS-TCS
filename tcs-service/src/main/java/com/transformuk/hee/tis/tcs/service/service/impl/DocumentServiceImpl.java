@@ -152,7 +152,7 @@ public class DocumentServiceImpl implements DocumentService {
             LOG.debug("Accessing service to load document with id '{}'",
                     documentParam.getId());
 
-            final Optional<Document> existingDocumentOptional = Optional.ofNullable(documentRepository.findOne(documentParam.getId()));
+          final Optional<Document> existingDocumentOptional = documentRepository.findById(documentParam.getId());
 
             if (!existingDocumentOptional.isPresent()) {
                 LOG.warn("Document with id '{}' not found",

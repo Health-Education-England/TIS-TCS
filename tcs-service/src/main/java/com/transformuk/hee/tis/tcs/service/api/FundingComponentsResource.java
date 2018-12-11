@@ -1,13 +1,11 @@
 package com.transformuk.hee.tis.tcs.service.api;
 
-import com.codahale.metrics.annotation.Timed;
 import com.transformuk.hee.tis.tcs.api.dto.FundingComponentsDTO;
 import com.transformuk.hee.tis.tcs.service.api.util.HeaderUtil;
 import com.transformuk.hee.tis.tcs.service.api.util.PaginationUtil;
 import com.transformuk.hee.tis.tcs.service.service.FundingComponentsService;
 import io.github.jhipster.web.util.ResponseUtil;
 import io.jsonwebtoken.lang.Collections;
-import io.swagger.annotations.ApiParam;
 import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -17,14 +15,7 @@ import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
-import org.springframework.web.bind.annotation.DeleteMapping;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.PathVariable;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.PutMapping;
-import org.springframework.web.bind.annotation.RequestBody;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
 
 import javax.validation.Valid;
 import java.net.URI;
@@ -56,7 +47,6 @@ public class FundingComponentsResource {
    * @throws URISyntaxException if the Location URI syntax is incorrect
    */
   @PostMapping("/funding-components")
-  @Timed
   @PreAuthorize("hasAuthority('tcs:add:modify:entities')")
   public ResponseEntity<FundingComponentsDTO> createFundingComponents(@RequestBody FundingComponentsDTO fundingComponentsDTO) throws URISyntaxException {
     log.debug("REST request to save FundingComponents : {}", fundingComponentsDTO);
@@ -79,7 +69,6 @@ public class FundingComponentsResource {
    * @throws URISyntaxException if the Location URI syntax is incorrect
    */
   @PutMapping("/funding-components")
-  @Timed
   @PreAuthorize("hasAuthority('tcs:add:modify:entities')")
   public ResponseEntity<FundingComponentsDTO> updateFundingComponents(@RequestBody FundingComponentsDTO fundingComponentsDTO) throws URISyntaxException {
     log.debug("REST request to update FundingComponents : {}", fundingComponentsDTO);
@@ -99,9 +88,8 @@ public class FundingComponentsResource {
    * @return the ResponseEntity with status 200 (OK) and the list of fundingComponents in body
    */
   @GetMapping("/funding-components")
-  @Timed
   @PreAuthorize("hasAuthority('tcs:view:entities')")
-  public ResponseEntity<List<FundingComponentsDTO>> getAllFundingComponents(@ApiParam Pageable pageable) {
+  public ResponseEntity<List<FundingComponentsDTO>> getAllFundingComponents(Pageable pageable) {
     log.debug("REST request to get a page of FundingComponents");
     Page<FundingComponentsDTO> page = fundingComponentsService.findAll(pageable);
     HttpHeaders headers = PaginationUtil.generatePaginationHttpHeaders(page, "/api/funding-components");
@@ -115,7 +103,6 @@ public class FundingComponentsResource {
    * @return the ResponseEntity with status 200 (OK) and with body the fundingComponentsDTO, or with status 404 (Not Found)
    */
   @GetMapping("/funding-components/{id}")
-  @Timed
   @PreAuthorize("hasAuthority('tcs:view:entities')")
   public ResponseEntity<FundingComponentsDTO> getFundingComponents(@PathVariable Long id) {
     log.debug("REST request to get FundingComponents : {}", id);
@@ -130,7 +117,6 @@ public class FundingComponentsResource {
    * @return the ResponseEntity with status 200 (OK)
    */
   @DeleteMapping("/funding-components/{id}")
-  @Timed
   @PreAuthorize("hasAuthority('tcs:delete:entities')")
   public ResponseEntity<Void> deleteFundingComponents(@PathVariable Long id) {
     log.debug("REST request to delete FundingComponents : {}", id);
@@ -143,24 +129,22 @@ public class FundingComponentsResource {
    *
    * @param fundingComponentsDTOS List of the fundingComponentsDTOS to create
    * @return the ResponseEntity with status 200 (Created) and with body the new fundingComponentsDTOS, or with status 400 (Bad Request) if the FundingComponents has already an ID
-   * @throws URISyntaxException if the Location URI syntax is incorrect
    */
   @PostMapping("/bulk-funding-components")
-  @Timed
   @PreAuthorize("hasAuthority('tcs:add:modify:entities')")
-  public ResponseEntity<List<FundingComponentsDTO>> bulkCreateFundingComponents(@Valid @RequestBody List<FundingComponentsDTO> fundingComponentsDTOS) throws URISyntaxException {
+  public ResponseEntity<List<FundingComponentsDTO>> bulkCreateFundingComponents(@Valid @RequestBody List<FundingComponentsDTO> fundingComponentsDTOS) {
     log.debug("REST request to bulk save FundingComponents : {}", fundingComponentsDTOS);
     if (!Collections.isEmpty(fundingComponentsDTOS)) {
       List<Long> entityIds = fundingComponentsDTOS.stream()
           .filter(f -> f.getId() != null)
-          .map(f -> f.getId())
+        .map(FundingComponentsDTO::getId)
           .collect(Collectors.toList());
       if (!Collections.isEmpty(entityIds)) {
         return ResponseEntity.badRequest().headers(HeaderUtil.createFailureAlert(StringUtils.join(entityIds, ","), "ids.exist", "A new FundingComponents cannot already have an ID")).body(null);
       }
     }
     List<FundingComponentsDTO> result = fundingComponentsService.save(fundingComponentsDTOS);
-    List<Long> ids = result.stream().map(r -> r.getId()).collect(Collectors.toList());
+    List<Long> ids = result.stream().map(FundingComponentsDTO::getId).collect(Collectors.toList());
     return ResponseEntity.ok()
         .headers(HeaderUtil.createEntityCreationAlert(ENTITY_NAME, StringUtils.join(ids, ",")))
         .body(result);
@@ -173,12 +157,10 @@ public class FundingComponentsResource {
    * @return the ResponseEntity with status 200 (OK) and with body the updated fundingComponentsDTOS,
    * or with status 400 (Bad Request) if the fundingComponentsDTOS is not valid,
    * or with status 500 (Internal Server Error) if the fundingComponentsDTOS couldnt be updated
-   * @throws URISyntaxException if the Location URI syntax is incorrect
    */
   @PutMapping("/bulk-funding-components")
-  @Timed
   @PreAuthorize("hasAuthority('tcs:add:modify:entities')")
-  public ResponseEntity<List<FundingComponentsDTO>> bulkUpdateFundingComponents(@Valid @RequestBody List<FundingComponentsDTO> fundingComponentsDTOS) throws URISyntaxException {
+  public ResponseEntity<List<FundingComponentsDTO>> bulkUpdateFundingComponents(@Valid @RequestBody List<FundingComponentsDTO> fundingComponentsDTOS) {
     log.debug("REST request to bulk update Funding Components : {}", fundingComponentsDTOS);
     if (Collections.isEmpty(fundingComponentsDTOS)) {
       return ResponseEntity.badRequest().headers(HeaderUtil.createFailureAlert(ENTITY_NAME, "request.body.empty",
@@ -192,7 +174,7 @@ public class FundingComponentsResource {
     }
 
     List<FundingComponentsDTO> results = fundingComponentsService.save(fundingComponentsDTOS);
-    List<Long> ids = results.stream().map(r -> r.getId()).collect(Collectors.toList());
+    List<Long> ids = results.stream().map(FundingComponentsDTO::getId).collect(Collectors.toList());
     return ResponseEntity.ok()
         .headers(HeaderUtil.createEntityUpdateAlert(ENTITY_NAME, StringUtils.join(ids, ",")))
         .body(results);

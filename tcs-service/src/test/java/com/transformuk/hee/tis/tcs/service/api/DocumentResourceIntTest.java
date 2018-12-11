@@ -1,7 +1,9 @@
 package com.transformuk.hee.tis.tcs.service.api;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.core.Version;
 import com.fasterxml.jackson.core.type.TypeReference;
+import com.fasterxml.jackson.databind.DeserializationFeature;
 import com.fasterxml.jackson.databind.JsonDeserializer;
 import com.fasterxml.jackson.databind.JsonSerializer;
 import com.fasterxml.jackson.databind.ObjectMapper;
@@ -23,7 +25,6 @@ import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.mockito.MockitoAnnotations;
 import org.springframework.boot.test.context.SpringBootTest;
-import org.springframework.core.convert.converter.Converter;
 import org.springframework.core.io.ByteArrayResource;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
@@ -47,6 +48,7 @@ import java.sql.Connection;
 import java.sql.SQLException;
 import java.time.LocalDateTime;
 import java.util.*;
+import java.util.function.Function;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.hamcrest.CoreMatchers.containsString;
@@ -764,7 +766,7 @@ public class DocumentResourceIntTest {
     }
 
     @Test
-    public void deleteDocumentById_shouldReturnHTT200_WhenDocumentDoesExist() throws Exception {
+    public void deleteDocumentById_shouldReturnHTTP200_WhenDocumentDoesExist() throws Exception {
         mockMvc.perform(delete(
                 DocumentResource.PATH_API +
                         DocumentResource.PATH_DOCUMENTS +
@@ -884,6 +886,7 @@ public class DocumentResourceIntTest {
         module.addSerializer(LocalDateTime.class, serializer);
 
         final ObjectMapper objectMapper = new ObjectMapper();
+      objectMapper.disable(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES);
         objectMapper.registerModule(module);
         return objectMapper;
     }
@@ -990,7 +993,8 @@ public class DocumentResourceIntTest {
         Integer number;
         Integer numberOfElements;
         Integer size;
-        Sort sort;
+      @JsonIgnore
+      Sort sort;
         Integer totalElements;
         Integer totalPages;
         List<T> content;
@@ -1069,7 +1073,7 @@ public class DocumentResourceIntTest {
         }
 
         @Override
-        public <S> Page<S> map(final Converter<? super T, ? extends S> converter) {
+        public <U> Page<U> map(Function<? super T, ? extends U> function) {
             return null;
         }
 

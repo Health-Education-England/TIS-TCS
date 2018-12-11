@@ -43,8 +43,7 @@ public class PlacementFunderServiceImpl implements PlacementFunderService {
     log.debug("Request to save PlacementFunder : {}", placementFunderDTO);
     PlacementFunder placementFunder = placementFunderMapper.placementFunderDTOToPlacementFunder(placementFunderDTO);
     placementFunder = placementFunderRepository.save(placementFunder);
-    PlacementFunderDTO result = placementFunderMapper.placementFunderToPlacementFunderDTO(placementFunder);
-    return result;
+    return placementFunderMapper.placementFunderToPlacementFunderDTO(placementFunder);
   }
 
   /**
@@ -56,10 +55,9 @@ public class PlacementFunderServiceImpl implements PlacementFunderService {
   @Override
   public List<PlacementFunderDTO> save(List<PlacementFunderDTO> placementFunderDTO) {
     log.debug("Request to save PlacementFunder : {}", placementFunderDTO);
-    List<PlacementFunder> placementFunder = placementFunderMapper.placementFunderDTOsToPlacementFunders(placementFunderDTO);
-    placementFunder = placementFunderRepository.save(placementFunder);
-    List<PlacementFunderDTO> result = placementFunderMapper.placementFundersToPlacementFunderDTOs(placementFunder);
-    return result;
+    List<PlacementFunder> placementFunders = placementFunderMapper.placementFunderDTOsToPlacementFunders(placementFunderDTO);
+    placementFunders = placementFunderRepository.saveAll(placementFunders);
+    return placementFunderMapper.placementFundersToPlacementFunderDTOs(placementFunders);
   }
 
   /**
@@ -73,7 +71,7 @@ public class PlacementFunderServiceImpl implements PlacementFunderService {
   public Page<PlacementFunderDTO> findAll(Pageable pageable) {
     log.debug("Request to get all PlacementFunders");
     Page<PlacementFunder> result = placementFunderRepository.findAll(pageable);
-    return result.map(placementFunder -> placementFunderMapper.placementFunderToPlacementFunderDTO(placementFunder));
+    return result.map(placementFunderMapper::placementFunderToPlacementFunderDTO);
   }
 
   /**
@@ -86,9 +84,8 @@ public class PlacementFunderServiceImpl implements PlacementFunderService {
   @Transactional(readOnly = true)
   public PlacementFunderDTO findOne(Long id) {
     log.debug("Request to get PlacementFunder : {}", id);
-    PlacementFunder placementFunder = placementFunderRepository.findOne(id);
-    PlacementFunderDTO placementFunderDTO = placementFunderMapper.placementFunderToPlacementFunderDTO(placementFunder);
-    return placementFunderDTO;
+    PlacementFunder placementFunder = placementFunderRepository.findById(id).orElse(null);
+    return placementFunderMapper.placementFunderToPlacementFunderDTO(placementFunder);
   }
 
   /**
@@ -99,6 +96,6 @@ public class PlacementFunderServiceImpl implements PlacementFunderService {
   @Override
   public void delete(Long id) {
     log.debug("Request to delete PlacementFunder : {}", id);
-    placementFunderRepository.delete(id);
+    placementFunderRepository.deleteById(id);
   }
 }

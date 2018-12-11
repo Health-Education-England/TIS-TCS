@@ -57,7 +57,7 @@ public class TariffFundingTypeFieldsServiceImpl implements TariffFundingTypeFiel
   public List<TariffFundingTypeFieldsDTO> save(List<TariffFundingTypeFieldsDTO> tariffFundingTypeFieldsDTO) {
     log.debug("Request to save TariffFundingTypeFields : {}", tariffFundingTypeFieldsDTO);
     List<TariffFundingTypeFields> tariffFundingTypeFields = tariffFundingTypeFieldsMapper.tariffFundingTypeFieldsDTOsToTariffFundingTypeFields(tariffFundingTypeFieldsDTO);
-    tariffFundingTypeFields = tariffFundingTypeFieldsRepository.save(tariffFundingTypeFields);
+    tariffFundingTypeFields = tariffFundingTypeFieldsRepository.saveAll(tariffFundingTypeFields);
     List<TariffFundingTypeFieldsDTO> result = tariffFundingTypeFieldsMapper.tariffFundingTypeFieldsToTariffFundingTypeFieldsDTOs(tariffFundingTypeFields);
     return result;
   }
@@ -86,7 +86,7 @@ public class TariffFundingTypeFieldsServiceImpl implements TariffFundingTypeFiel
   @Transactional(readOnly = true)
   public TariffFundingTypeFieldsDTO findOne(Long id) {
     log.debug("Request to get TariffFundingTypeFields : {}", id);
-    TariffFundingTypeFields tariffFundingTypeFields = tariffFundingTypeFieldsRepository.findOne(id);
+    TariffFundingTypeFields tariffFundingTypeFields = tariffFundingTypeFieldsRepository.findById(id).orElse(null);
     TariffFundingTypeFieldsDTO tariffFundingTypeFieldsDTO = tariffFundingTypeFieldsMapper.tariffFundingTypeFieldsToTariffFundingTypeFieldsDTO(tariffFundingTypeFields);
     return tariffFundingTypeFieldsDTO;
   }
@@ -99,6 +99,6 @@ public class TariffFundingTypeFieldsServiceImpl implements TariffFundingTypeFiel
   @Override
   public void delete(Long id) {
     log.debug("Request to delete TariffFundingTypeFields : {}", id);
-    tariffFundingTypeFieldsRepository.delete(id);
+    tariffFundingTypeFieldsRepository.deleteById(id);
   }
 }

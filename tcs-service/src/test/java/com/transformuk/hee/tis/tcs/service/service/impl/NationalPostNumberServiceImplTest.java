@@ -2,14 +2,8 @@ package com.transformuk.hee.tis.tcs.service.service.impl;
 
 import com.google.common.collect.Sets;
 import com.transformuk.hee.tis.reference.api.dto.GradeDTO;
-import com.transformuk.hee.tis.reference.api.dto.LocalOfficeDTO;
 import com.transformuk.hee.tis.reference.api.dto.SiteDTO;
-import com.transformuk.hee.tis.security.model.UserProfile;
-import com.transformuk.hee.tis.tcs.api.dto.PostDTO;
-import com.transformuk.hee.tis.tcs.api.dto.PostGradeDTO;
-import com.transformuk.hee.tis.tcs.api.dto.PostSiteDTO;
-import com.transformuk.hee.tis.tcs.api.dto.PostSpecialtyDTO;
-import com.transformuk.hee.tis.tcs.api.dto.SpecialtyDTO;
+import com.transformuk.hee.tis.tcs.api.dto.*;
 import com.transformuk.hee.tis.tcs.api.enumeration.PostGradeType;
 import com.transformuk.hee.tis.tcs.api.enumeration.PostSiteType;
 import com.transformuk.hee.tis.tcs.api.enumeration.PostSpecialtyType;
@@ -31,12 +25,11 @@ import org.mockito.Mock;
 import org.mockito.Spy;
 import org.mockito.runners.MockitoJUnitRunner;
 
+import java.util.Optional;
 import java.util.concurrent.CompletableFuture;
 
 import static org.mockito.Matchers.any;
 import static org.mockito.Matchers.anySet;
-import static org.mockito.Mockito.doReturn;
-import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
 
 @RunWith(MockitoJUnitRunner.class)
@@ -95,30 +88,20 @@ public class NationalPostNumberServiceImplTest {
     when(postSiteDTOMock.getPostSiteType()).thenReturn(PostSiteType.PRIMARY);
     when(postSpecialtyDTOMock.getSpecialty()).thenReturn(specialtyDTOMock);
     when(postSpecialtyDTOMock.getPostSpecialtyType()).thenReturn(PostSpecialtyType.PRIMARY);
-    when(specialtyDTOMock.getSpecialtyCode()).thenReturn(SPECIALTY_CODE);
     when(specialtyDTOMock.getId()).thenReturn(SPECIALTY_ID);
 
-    when(postDTOMock1.getId()).thenReturn(POST_ID);
     when(postDTOMock1.getGrades()).thenReturn(Sets.newHashSet(postGradeDTOMock));
     when(postDTOMock1.getSpecialties()).thenReturn(Sets.newHashSet(postSpecialtyDTOMock));
     when(postDTOMock1.getSites()).thenReturn(Sets.newHashSet(postSiteDTOMock));
 
-    when(postRepositoryMock.findOne(POST_ID)).thenReturn(postMock1);
     when(postMock1.getNationalPostNumber()).thenReturn(CURRENT_NATIONAL_POST_NUMBER);
-    when(postSpecialtyMock.getPostSpecialtyType()).thenReturn(PostSpecialtyType.PRIMARY);
-    when(postSpecialtyMock.getSpecialty()).thenReturn(specialtyMock);
     when(specialtyMock.getSpecialtyCode()).thenReturn(SPECIALTY_CODE);
-    when(postMock1.getSpecialties()).thenReturn(Sets.newHashSet(postSpecialtyMock));
-    when(postGradeMock.getPostGradeType()).thenReturn(PostGradeType.APPROVED);
-    when(postGradeMock.getGradeId()).thenReturn(GRADE_ID);
-    when(postMock1.getGrades()).thenReturn(Sets.newHashSet(postGradeMock));
   }
 
   @Test
   public void generateNationalPostNumberShouldReturnNewUniquePostNumberWithCounterOneHigherThanCurrentHighest() {
     when(postMock1.getNationalPostNumber()).thenReturn(LOCAL_OFFICE_ABBR + SLASH + SITE_CODE + SLASH +
         SPECIALTY_CODE + SLASH + GRADE_ABBR + SLASH + UNIQUE_NUMBER + SLASH + MILITARY_SUFFIX);
-    when(postMock1.getSuffix()).thenReturn(PostSuffix.MILITARY);
     when(postRepositoryMock.findByNationalPostNumberStartingWith(LOCAL_OFFICE_ABBR + SLASH + SITE_CODE + SLASH +
         SPECIALTY_CODE + SLASH + GRADE_ABBR)).thenReturn(Sets.newHashSet(postMock1));
 
@@ -139,7 +122,7 @@ public class NationalPostNumberServiceImplTest {
 
   @Test
   public void getPrimarySpecialtyCodeOrEmptyShouldReturnCode() {
-    when(specialtyRepositoryMock.findOne(SPECIALTY_ID)).thenReturn(specialtyMock);
+    when(specialtyRepositoryMock.findById(SPECIALTY_ID)).thenReturn(Optional.of(specialtyMock));
     when(specialtyMock.getSpecialtyCode()).thenReturn(SPECIALTY_CODE);
     String result = testObj.getPrimarySpecialtyCode(postDTOMock1);
     Assert.assertEquals(SPECIALTY_CODE, result);
