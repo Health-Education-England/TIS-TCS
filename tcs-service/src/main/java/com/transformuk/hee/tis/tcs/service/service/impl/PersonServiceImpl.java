@@ -6,6 +6,8 @@ import com.transformuk.hee.tis.tcs.api.dto.*;
 import com.transformuk.hee.tis.tcs.api.enumeration.PersonOwnerRule;
 import com.transformuk.hee.tis.tcs.api.enumeration.Status;
 import com.transformuk.hee.tis.tcs.service.api.util.BasicPage;
+import com.transformuk.hee.tis.tcs.service.event.PersonCreatedEvent;
+import com.transformuk.hee.tis.tcs.service.event.PersonSavedEvent;
 import com.transformuk.hee.tis.tcs.service.exception.AccessUnauthorisedException;
 import com.transformuk.hee.tis.tcs.service.model.*;
 import com.transformuk.hee.tis.tcs.service.repository.*;
@@ -21,6 +23,7 @@ import org.slf4j.LoggerFactory;
 import org.springframework.beans.BeanUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.cache.annotation.Cacheable;
+import org.springframework.context.ApplicationEventPublisher;
 import org.springframework.data.domain.*;
 import org.springframework.data.jpa.domain.Specification;
 import org.springframework.data.jpa.domain.Specifications;
@@ -82,6 +85,9 @@ public class PersonServiceImpl implements PersonService {
   @Autowired
   private NamedParameterJdbcTemplate namedParameterJdbcTemplate;
 
+  @Autowired
+  private ApplicationEventPublisher applicationEventPublisher;
+
   /**
    * Save a person.
    *
@@ -112,6 +118,9 @@ public class PersonServiceImpl implements PersonService {
     if (!permissionService.canEditSensitiveData() && personDtoId != null) {
       clearSensitiveData(personDTO1.getPersonalDetails());
     }
+
+    applicationEventPublisher.publishEvent(new PersonSavedEvent(personDTO, person.getId()));
+
     return personDTO1;
   }
 
@@ -159,6 +168,8 @@ public class PersonServiceImpl implements PersonService {
     rightToWork.setId(person.getId());
     rightToWork = rightToWorkRepository.save(rightToWork);
     person.setRightToWork(rightToWork);
+
+    applicationEventPublisher.publishEvent(new PersonCreatedEvent(personDTO.getId()));
 
     return personMapper.toDto(person);
   }

@@ -88,7 +88,9 @@ public class PersonElasticsearchSyncJob {
 
     MapSqlParameterSource paramSource = new MapSqlParameterSource();
 
-    return namedParameterJdbcTemplate.query(query, paramSource, new PersonViewRowMapper());
+    List<PersonView> queryResult = namedParameterJdbcTemplate.query(query, paramSource, new PersonViewRowMapper());
+    queryResult.stream().forEach(pv -> pv.setFullName(pv.getForenames() + " " + pv.getSurname()));
+    return queryResult;
   }
 
   private void sendToEs(List<PersonView> dataToSave) {
@@ -131,7 +133,7 @@ public class PersonElasticsearchSyncJob {
         LOG.info("Time taken to save chunk : [{}]", stopwatch.toString());
       }
       stopwatch.reset().start();
-      LOG.info("Sync job [{}] finished. Total time taken {} for processing [{}] records", getJobName(), mainStopWatch.stop().toString(), totalRecords);
+      LOG.info("Sync job [{}] finished. Total time taken {} for   processing [{}] records", getJobName(), mainStopWatch.stop().toString(), totalRecords);
       mainStopWatch = null;
     } catch (Exception e) {
       e.printStackTrace();

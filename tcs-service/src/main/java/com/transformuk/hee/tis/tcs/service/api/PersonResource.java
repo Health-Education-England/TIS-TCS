@@ -192,6 +192,7 @@ public class PersonResource {
     @RequestParam(required = false, defaultValue = "false") boolean special) throws IOException {
 
     log.debug("REST request to get a page of People begin");
+    searchQuery = sanitize(searchQuery);
     final List<Class> filterEnumList = Lists.newArrayList(Status.class);
     final List<ColumnFilter> columnFilters = ColumnFilterUtil.getColumnFilters(columnFilterJson, filterEnumList);
     final BasicPage<PersonViewDTO> page;
@@ -204,7 +205,6 @@ public class PersonResource {
       }
 
     } else {
-      searchQuery = sanitize(searchQuery);
 
       if (StringUtils.isEmpty(searchQuery) && StringUtils.isEmpty(columnFilterJson)) {
         page = personService.findAll(pageable);

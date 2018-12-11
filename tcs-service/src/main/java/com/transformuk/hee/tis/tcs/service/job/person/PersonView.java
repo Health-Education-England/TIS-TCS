@@ -17,16 +17,20 @@ public class PersonView implements Serializable {
 
   private String intrepidId;
 
-  @Field(type = FieldType.Text)
+//  @Field(type = FieldType.Text)
   private String surname;
 
-  @Field(type = FieldType.Text)
+//  @Field(type = FieldType.Text)
   private String forenames;
+
+  @Field(type = FieldType.Text)
+  private String fullName;
 
   private String gmcNumber;
 
   private String gdcNumber;
 
+  @Field(type=FieldType.Keyword)
   private String publicHealthNumber;
 
   private Long programmeId;
@@ -53,6 +57,7 @@ public class PersonView implements Serializable {
 
   private String specialty;
 
+  @Field(type=FieldType.Keyword)
   private String role;
 
   @Field(type=FieldType.Keyword)
@@ -93,6 +98,14 @@ public class PersonView implements Serializable {
 
   public void setForenames(String forenames) {
     this.forenames = forenames;
+  }
+
+  public String getFullName() {
+    return fullName;
+  }
+
+  public void setFullName(String fullName) {
+    this.fullName = fullName;
   }
 
   public String getGmcNumber() {
