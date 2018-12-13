@@ -179,8 +179,7 @@ public class PlacementServiceImpl implements PlacementService {
 
         //clear any linked specialties before trying to save the placement
         final Placement placement = placementRepository.findById(placementDetailsDTO.getId()).orElse(null);
-        //placementSpecialtyRepository.deleteInBatch(placement.getSpecialties());
-        //Instead of batch delete we need unlink specialties from placement one by one
+        //Instead of batch delete we need to unlink specialties from placement one by one
         Set<PlacementSpecialty> specialties = placement.getSpecialties();
         for(PlacementSpecialty specialty: specialties){
           placementSpecialtyRepository.delete(specialty);
