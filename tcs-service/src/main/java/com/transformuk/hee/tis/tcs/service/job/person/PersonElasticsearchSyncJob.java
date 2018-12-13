@@ -1,8 +1,7 @@
 package com.transformuk.hee.tis.tcs.service.job.person;
 
 import com.google.common.base.Stopwatch;
-import com.google.common.collect.Lists;
-import com.transformuk.hee.tis.tcs.service.repository.PersonEsRepository;
+import com.transformuk.hee.tis.tcs.service.repository.PersonElasticSearchRepository;
 import com.transformuk.hee.tis.tcs.service.service.helper.SqlQuerySupplier;
 import com.transformuk.hee.tis.tcs.service.service.impl.PersonViewRowMapper;
 import org.apache.commons.collections4.CollectionUtils;
@@ -10,7 +9,6 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.elasticsearch.core.ElasticsearchOperations;
-import org.springframework.data.elasticsearch.core.query.IndexQuery;
 import org.springframework.jdbc.core.namedparam.MapSqlParameterSource;
 import org.springframework.jdbc.core.namedparam.NamedParameterJdbcTemplate;
 import org.springframework.jmx.export.annotation.ManagedOperation;
@@ -40,7 +38,7 @@ public class PersonElasticsearchSyncJob {
   private ElasticsearchOperations elasticSearchOperations;
 
   @Autowired
-  private PersonEsRepository personEsRepository;
+  private PersonElasticSearchRepository personElasticSearchRepository;
 
 
   @ManagedOperation(description = "Is the Person es sync just currently running")
@@ -95,7 +93,7 @@ public class PersonElasticsearchSyncJob {
 
   private void sendToEs(List<PersonView> dataToSave) {
     if (CollectionUtils.isNotEmpty(dataToSave)) {
-      personEsRepository.saveAll(dataToSave);
+      personElasticSearchRepository.saveAll(dataToSave);
     }
   }
 

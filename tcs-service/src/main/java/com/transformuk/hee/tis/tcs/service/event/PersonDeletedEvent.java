@@ -6,29 +6,29 @@ import org.springframework.lang.NonNull;
 
 import java.util.Objects;
 
-public class PersonSavedEvent extends ApplicationEvent {
+public class PersonDeletedEvent extends ApplicationEvent {
 
-  private PersonDTO personDTO;
+  private Long personId;
 
-  public PersonSavedEvent(@NonNull PersonDTO source) {
+  public PersonDeletedEvent(@NonNull Long source) {
     super(source);
-    this.personDTO = source;
+    this.personId = source;
   }
 
-  public PersonDTO getPersonDTO() {
-    return personDTO;
+  public Long getPersonId() {
+    return personId;
   }
 
   @Override
   public boolean equals(Object o) {
     if (this == o) return true;
     if (o == null || getClass() != o.getClass()) return false;
-    PersonSavedEvent that = (PersonSavedEvent) o;
-    return Objects.equals(personDTO, that.personDTO);
+    PersonDeletedEvent that = (PersonDeletedEvent) o;
+    return Objects.equals(personId, that.personId);
   }
 
   @Override
   public int hashCode() {
-    return Objects.hash(personDTO);
+    return Objects.hash(personId);
   }
 }

@@ -7,6 +7,7 @@ import com.transformuk.hee.tis.tcs.api.enumeration.PersonOwnerRule;
 import com.transformuk.hee.tis.tcs.api.enumeration.Status;
 import com.transformuk.hee.tis.tcs.service.api.util.BasicPage;
 import com.transformuk.hee.tis.tcs.service.event.PersonCreatedEvent;
+import com.transformuk.hee.tis.tcs.service.event.PersonDeletedEvent;
 import com.transformuk.hee.tis.tcs.service.event.PersonSavedEvent;
 import com.transformuk.hee.tis.tcs.service.exception.AccessUnauthorisedException;
 import com.transformuk.hee.tis.tcs.service.model.*;
@@ -119,7 +120,7 @@ public class PersonServiceImpl implements PersonService {
       clearSensitiveData(personDTO1.getPersonalDetails());
     }
 
-    applicationEventPublisher.publishEvent(new PersonSavedEvent(personDTO, person.getId()));
+    applicationEventPublisher.publishEvent(new PersonSavedEvent(personDTO));
 
     return personDTO1;
   }
@@ -169,7 +170,7 @@ public class PersonServiceImpl implements PersonService {
     rightToWork = rightToWorkRepository.save(rightToWork);
     person.setRightToWork(rightToWork);
 
-    applicationEventPublisher.publishEvent(new PersonCreatedEvent(personDTO.getId()));
+    applicationEventPublisher.publishEvent(new PersonCreatedEvent(personDTO));
 
     return personMapper.toDto(person);
   }
@@ -185,7 +186,13 @@ public class PersonServiceImpl implements PersonService {
     log.debug("Request to save Persons : {}", personDTOs);
     List<Person> personList = personMapper.toEntity(personDTOs);
     personList = personRepository.saveAll(personList);
-    return personMapper.toDto(personList);
+    List<PersonDTO> personDTOS = personMapper.toDto(personList);
+
+    personDTOS.stream()
+        .map(PersonSavedEvent::new)
+        .forEach(applicationEventPublisher::publishEvent);
+
+    return personDTOS;
   }
 
   /**
@@ -620,6 +627,7 @@ public class PersonServiceImpl implements PersonService {
   public void delete(final Long id) {
     log.debug("Request to delete Person : {}", id);
     personRepository.deleteById(id);
+    applicationEventPublisher.publishEvent(new PersonDeletedEvent(id));
   }
 
   /**

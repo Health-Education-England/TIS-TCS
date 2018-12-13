@@ -3,9 +3,10 @@ package com.transformuk.hee.tis.tcs.service.service;
 import com.transformuk.hee.tis.tcs.api.dto.PersonViewDTO;
 import com.transformuk.hee.tis.tcs.service.job.person.PersonView;
 import com.transformuk.hee.tis.tcs.service.model.ColumnFilter;
-import com.transformuk.hee.tis.tcs.service.repository.PersonEsRepository;
+import com.transformuk.hee.tis.tcs.service.repository.PersonElasticSearchRepository;
 import com.transformuk.hee.tis.tcs.service.service.helper.SqlQuerySupplier;
 import com.transformuk.hee.tis.tcs.service.service.impl.PersonViewRowMapper;
+import org.apache.commons.collections4.CollectionUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.elasticsearch.index.query.BoolQueryBuilder;
 import org.elasticsearch.index.query.FuzzyQueryBuilder;
@@ -29,14 +30,14 @@ public class PersonElasticSearchService {
   private static final Logger LOG = LoggerFactory.getLogger(PersonElasticSearchService.class);
 
   @Autowired
-  private PersonEsRepository personEsRepository;
+  private PersonElasticSearchRepository personElasticSearchRepository;
   @Autowired
   private SqlQuerySupplier sqlQuerySupplier;
   @Autowired
   private NamedParameterJdbcTemplate namedParameterJdbcTemplate;
 
   public List<PersonViewDTO> searchForPage(Pageable pageable) {
-    List<PersonView> content = personEsRepository.findAll(pageable).getContent();
+    List<PersonView> content = personElasticSearchRepository.findAll(pageable).getContent();
     return convertPersonViewToDTO(content);
   }
 
@@ -69,6 +70,10 @@ public class PersonElasticSearchService {
           .should(new FuzzyQueryBuilder("fullName", searchQuery))
           .should(new FuzzyQueryBuilder("surname", searchQuery))
           .should(new FuzzyQueryBuilder("forenames", searchQuery))
+
+//          .should(new MatchQueryBuilder("surname", searchQuery))
+//          .should(new MatchQueryBuilder("forenames", searchQuery))
+
           .should(new MatchQueryBuilder("gmcNumber", searchQuery))
           .should(new MatchQueryBuilder("gdcNumber", searchQuery))
           .should(new MatchQueryBuilder("role", searchQuery));
@@ -82,25 +87,75 @@ public class PersonElasticSearchService {
     BoolQueryBuilder fullQuery = mustBetweenDifferentColumnFilters.must(shouldQuery);
 
     LOG.info("Query {}", fullQuery.toString());
-    Page<PersonView> result = personEsRepository.search(fullQuery, pageable);
+    Page<PersonView> result = personElasticSearchRepository.search(fullQuery, pageable);
     return convertPersonViewToDTO(result.getContent());
   }
 
+  /**
+   * Update the ES document for the particular person with id. If no Person is found, delete the document from ES
+   *
+   * @param personId
+   */
   public void updatePersonDocument(Long personId) {
-    String query = sqlQuerySupplier.getQuery(SqlQuerySupplier.PERSON_VIEW);
-    query = query.replace("TRUST_JOIN", "")
-        .replace("WHERECLAUSE", "WHERE p.id=:id")
-        .replace("ORDERBYCLAUSE", "ORDER BY id DESC")
-        .replace("LIMITCLAUSE", "");
+    String query = getQuery()
+        .replace("WHERECLAUSE", "WHERE p.id=:id");
 
     MapSqlParameterSource paramSource = new MapSqlParameterSource();
     paramSource.addValue("id", personId);
 
     List<PersonView> queryResult = namedParameterJdbcTemplate.query(query, paramSource, new PersonViewRowMapper());
-    queryResult.stream().forEach(pv -> pv.setFullName(pv.getForenames() + " " + pv.getSurname()));
+    if (CollectionUtils.isNotEmpty(queryResult)) {
+      queryResult.stream().forEach(pv -> pv.setFullName(pv.getForenames() + " " + pv.getSurname()));
+      personElasticSearchRepository.saveAll(queryResult);
+    } else {
+      deletePersonDocument(personId);
+    }
+  }
 
-    personEsRepository.saveAll(queryResult);
+  public void deletePersonDocument(Long personId) {
+    personElasticSearchRepository.deleteById(personId);
+  }
 
+  public void updatePersonDocumentForProgramme(Long programmeId) {
+    String query = getQuery()
+        .replace("WHERECLAUSE", "WHERE prg.id=:id");
+
+    List<PersonView> personViews = runQuery(query, programmeId);
+    saveDocuments(personViews);
+  }
+
+  public void updatePersonDocumentForTrainingNumber(Long trainingNumberId) {
+    String query = getQuery()
+        .replace("WHERECLAUSE", "WHERE tn.id=:id");
+
+    List<PersonView> personViews = runQuery(query, trainingNumberId);
+    saveDocuments(personViews);
+  }
+
+  /**
+   * Get the query with most of the template areas removed, leaving the where clause to be filled by the calling method
+   *
+   * @return
+   */
+  private String getQuery() {
+    String query = sqlQuerySupplier.getQuery(SqlQuerySupplier.PERSON_VIEW);
+    return query.replace("TRUST_JOIN", "")
+        .replace("ORDERBYCLAUSE", "ORDER BY id DESC")
+        .replace("LIMITCLAUSE", "");
+  }
+
+  private List<PersonView> runQuery(String query, Long id) {
+    MapSqlParameterSource paramSource = new MapSqlParameterSource();
+    paramSource.addValue("id", id);
+
+    return namedParameterJdbcTemplate.query(query, paramSource, new PersonViewRowMapper());
+  }
+
+  private void saveDocuments(List<PersonView> queryResult) {
+    if (CollectionUtils.isNotEmpty(queryResult)) {
+      queryResult.stream().forEach(pv -> pv.setFullName(pv.getForenames() + " " + pv.getSurname()));
+      personElasticSearchRepository.saveAll(queryResult);
+    }
   }
 
   private List<PersonViewDTO> convertPersonViewToDTO(List<PersonView> content) {
@@ -132,4 +187,6 @@ public class PersonElasticSearchService {
       return personViewDTO;
     }).collect(Collectors.toList());
   }
+
+
 }

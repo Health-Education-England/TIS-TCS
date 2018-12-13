@@ -7,6 +7,7 @@ import com.transformuk.hee.tis.tcs.api.dto.CurriculumDTO;
 import com.transformuk.hee.tis.tcs.api.dto.CurriculumMembershipDTO;
 import com.transformuk.hee.tis.tcs.api.dto.ProgrammeMembershipCurriculaDTO;
 import com.transformuk.hee.tis.tcs.api.dto.ProgrammeMembershipDTO;
+import com.transformuk.hee.tis.tcs.service.event.ProgrammeMembershipSavedEvent;
 import com.transformuk.hee.tis.tcs.service.model.Curriculum;
 import com.transformuk.hee.tis.tcs.service.model.Programme;
 import com.transformuk.hee.tis.tcs.service.model.ProgrammeMembership;
@@ -20,6 +21,7 @@ import org.apache.commons.collections4.CollectionUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.BeanUtils;
+import org.springframework.context.ApplicationEventPublisher;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
@@ -43,17 +45,19 @@ public class ProgrammeMembershipServiceImpl implements ProgrammeMembershipServic
   private final CurriculumRepository curriculumRepository;
   private final CurriculumMapper curriculumMapper;
   private final ProgrammeRepository programmeRepository;
-
+  private final ApplicationEventPublisher applicationEventPublisher;
 
   public ProgrammeMembershipServiceImpl(ProgrammeMembershipRepository programmeMembershipRepository,
                                         ProgrammeMembershipMapper programmeMembershipMapper,
                                         CurriculumRepository curriculumRepository,
-                                        CurriculumMapper curriculumMapper, ProgrammeRepository programmeRepository) {
+                                        CurriculumMapper curriculumMapper, ProgrammeRepository programmeRepository,
+                                        ApplicationEventPublisher applicationEventPublisher) {
     this.programmeMembershipRepository = programmeMembershipRepository;
     this.programmeMembershipMapper = programmeMembershipMapper;
     this.curriculumRepository = curriculumRepository;
     this.curriculumMapper = curriculumMapper;
     this.programmeRepository = programmeRepository;
+    this.applicationEventPublisher = applicationEventPublisher;
   }
 
   /**
@@ -68,6 +72,8 @@ public class ProgrammeMembershipServiceImpl implements ProgrammeMembershipServic
     List<ProgrammeMembership> programmeMembershipList = programmeMembershipMapper.toEntity(programmeMembershipDTO);
     programmeMembershipList = programmeMembershipRepository.saveAll(programmeMembershipList);
     List<ProgrammeMembershipDTO> resultDtos = programmeMembershipMapper.programmeMembershipsToProgrammeMembershipDTOs(programmeMembershipList);
+
+    emitProgrammeMembershipSavedEvents(resultDtos);
     return CollectionUtils.isNotEmpty(resultDtos) ? resultDtos.get(0) : null;
   }
 
@@ -82,7 +88,18 @@ public class ProgrammeMembershipServiceImpl implements ProgrammeMembershipServic
     log.debug("Request to save ProgrammeMembership : {}", programmeMembershipDTO);
     List<ProgrammeMembership> programmeMemberships = programmeMembershipMapper.programmeMembershipDTOsToProgrammeMemberships(programmeMembershipDTO);
     programmeMemberships = programmeMembershipRepository.saveAll(programmeMemberships);
-    return programmeMembershipMapper.programmeMembershipsToProgrammeMembershipDTOs(programmeMemberships);
+    List<ProgrammeMembershipDTO> programmeMembershipDTOS = programmeMembershipMapper.programmeMembershipsToProgrammeMembershipDTOs(programmeMemberships);
+    emitProgrammeMembershipSavedEvents(programmeMembershipDTOS);
+    return programmeMembershipDTOS;
+  }
+
+  private void emitProgrammeMembershipSavedEvents(List<ProgrammeMembershipDTO> programmeMembershipDTOS) {
+    if(CollectionUtils.isNotEmpty(programmeMembershipDTOS)) {
+      programmeMembershipDTOS.stream()
+          .distinct()
+          .map(ProgrammeMembershipSavedEvent::new)
+          .forEach(applicationEventPublisher::publishEvent);
+    }
   }
 
   /**
