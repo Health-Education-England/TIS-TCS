@@ -48,6 +48,7 @@ import java.util.stream.Collectors;
 import static com.transformuk.hee.tis.tcs.service.api.util.DateUtil.getLocalDateFromString;
 import static com.transformuk.hee.tis.tcs.service.service.impl.SpecificationFactory.in;
 import static com.transformuk.hee.tis.tcs.service.service.impl.SpecificationFactory.isBetween;
+import static com.transformuk.hee.tis.security.util.TisSecurityHelper.getProfileFromContext;
 
 /**
  * Service Implementation for managing Placement.
@@ -133,8 +134,9 @@ public class PlacementServiceImpl implements PlacementService {
           Comment commentSaved = commentRepository.findById(comment.getId()).orElse(null);
           commentSaved.setBody(comment.getBody());
           commentSaved.setPlacement(placementDetails);
-          commentSaved.setAuthor(comment.getAuthor());
+          commentSaved.setAuthor(getProfileFromContext().getFullName());
           commentSaved.setSource(comment.getSource());
+          commentSaved.setAmendedDate(comment.getAmendedDate());
           commentsToPersist.add(commentSaved);
         } else {
           comment.setPlacement(placementDetails);
@@ -174,12 +176,21 @@ public class PlacementServiceImpl implements PlacementService {
   @Transactional
     @Override
     public PlacementDetailsDTO saveDetails(final PlacementDetailsDTO placementDetailsDTO) {
-
+    PlacementDetails placementDetails = placementDetailsMapper.placementDetailsDTOToPlacementDetails(placementDetailsDTO);
         log.debug("Request to save Placement : {}", placementDetailsDTO);
 
-        //clear any linked specialties before trying to save the placement
+    //clear any linked specialties before trying to save the placement
     final Placement placement = placementRepository.findById(placementDetailsDTO.getId()).orElse(null);
-    placementSpecialtyRepository.deleteInBatch(placement.getSpecialties());
+    //placementSpecialtyRepository.deleteInBatch(placement.getSpecialties());
+    Set<PlacementSpecialty> specialties = placement.getSpecialties();
+    for(PlacementSpecialty specialty: specialties){
+      //placementSpecialtyRepository.delete(specialty.getPlacement().getId());
+      placementSpecialtyRepository.delete(specialty);
+    }
+
+    //placementSpecialtyRepository.delete(placement.getSpecialties());
+    updateStoredCommentsWithChangesOrAdd(placementDetails);
+
         placement.setSpecialties(new HashSet<>());
         placementRepository.saveAndFlush(placement);
 

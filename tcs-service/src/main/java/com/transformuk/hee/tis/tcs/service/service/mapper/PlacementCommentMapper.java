@@ -14,6 +14,7 @@ public class PlacementCommentMapper {
 		comment.setBody(dto.getBody());
 		comment.setAuthor(dto.getAuthor());
 		comment.setSource(dto.getSource());
+		comment.setAmendedDate(dto.getAmendedDate());
 		return comment;
 	}
 
@@ -23,6 +24,7 @@ public class PlacementCommentMapper {
 		placementCommentDTO.setBody(comment.getBody());
 		placementCommentDTO.setAuthor(comment.getAuthor());
 		placementCommentDTO.setSource(comment.getSource());
+		placementCommentDTO.setAmendedDate(comment.getAmendedDate());
 		return placementCommentDTO;
 	}
 
@@ -30,6 +32,7 @@ public class PlacementCommentMapper {
 		comment.setBody(commentDTO.getBody());
 		comment.setAuthor(commentDTO.getAuthor());
 		comment.setSource(commentDTO.getSource());
+		comment.setAmendedDate(commentDTO.getAmendedDate());
 		return comment;
 	}
 }

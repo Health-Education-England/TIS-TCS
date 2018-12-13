@@ -5,6 +5,7 @@ import com.transformuk.hee.tis.reference.api.dto.GradeDTO;
 import com.transformuk.hee.tis.reference.api.dto.SiteDTO;
 import com.transformuk.hee.tis.reference.client.ReferenceService;
 import com.transformuk.hee.tis.tcs.api.dto.*;
+import com.transformuk.hee.tis.tcs.api.enumeration.CommentSource;
 import com.transformuk.hee.tis.tcs.service.Application;
 import com.transformuk.hee.tis.tcs.service.api.decorator.AsyncReferenceService;
 import com.transformuk.hee.tis.tcs.service.api.decorator.PersonBasicDetailsRepositoryAccessor;
@@ -503,6 +504,8 @@ public class PlacementResourceIntTest {
         final PlacementDetailsDTO placementDTO = placementDetailsMapper.placementDetailsToPlacementDetailsDTO(updatedPlacement);
 
         addSupervisorsToPlacement(placementDTO);
+        // This method is invoked from here to add comments to the PlacementDTO
+        addCommentsToPlacementDetailsDTO(placementDTO);
 
         restPlacementMockMvc.perform(put("/api/placements")
                 .contentType(TestUtil.APPLICATION_JSON_UTF8)
@@ -544,12 +547,7 @@ public class PlacementResourceIntTest {
         updatedPlacement.setSiteCode(UPDATED_SITE);
 
         final PlacementDetailsDTO placementDTO = placementDetailsMapper.placementDetailsToPlacementDetailsDTO(updatedPlacement);
-        final PlacementCommentDTO placementCommentDTO = new PlacementCommentDTO();
-        placementCommentDTO.setBody(COMMENT);
-        Set<PlacementCommentDTO> placementCommentDTOS = new HashSet<>();
-        placementCommentDTOS.add(placementCommentDTO);
-        placementDTO.setComments(placementCommentDTOS);
-
+        addCommentsToPlacementDetailsDTO(placementDTO);
         restPlacementMockMvc.perform(put("/api/placements")
             .contentType(TestUtil.APPLICATION_JSON_UTF8)
             .content(TestUtil.convertObjectToJsonBytes(placementDTO)))
@@ -1113,6 +1111,22 @@ public class PlacementResourceIntTest {
     private String encodeDateRange(final String dateRangeFilter) throws EncoderException {
         final URLCodec codec = new URLCodec();
         return codec.encode(dateRangeFilter);
+    }
+
+    /**
+     * Create PlacementCommentDTO for PlacementDetailsDTO.
+     * <p>
+     * This method is called from the test updatePlacement() and updatePlacementWithNewComment()
+     * method.
+     */
+    private void addCommentsToPlacementDetailsDTO(final PlacementDetailsDTO placementDetailsDTO){
+        final Set<PlacementCommentDTO> comments = new HashSet<>();
+        PlacementCommentDTO comment1 = new PlacementCommentDTO();
+        comment1.setAuthor("Comment Author");
+        comment1.setBody("Comment Body");
+        comment1.setSource(CommentSource.TIS);
+        comments.add(comment1);
+        placementDetailsDTO.setComments(comments);
     }
 
     private void addSupervisorsToPlacement(final PlacementDetailsDTO placementDetailsDTO) {
