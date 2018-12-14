@@ -14,27 +14,27 @@ import org.springframework.stereotype.Component;
  * Events listener for all Person events
  */
 @Component
-public class PersonElasticSearchEventsListener {
+public class PersonElasticSearchEventListener {
 
-  private static final Logger LOG = LoggerFactory.getLogger(PersonElasticSearchEventsListener.class);
+  private static final Logger LOG = LoggerFactory.getLogger(PersonElasticSearchEventListener.class);
 
   @Autowired
   private PersonElasticSearchService personElasticSearchService;
 
   @EventListener
-  public void personSavedEventListener(PersonSavedEvent personSavedEvent) {
+  public void handlePersonSavedEvent(PersonSavedEvent personSavedEvent) {
     LOG.info("Received person saved event for personId [{}]" + personSavedEvent.getPersonDTO().getId());
     personElasticSearchService.updatePersonDocument(personSavedEvent.getPersonDTO().getId());
   }
 
   @EventListener
-  public void personCreatedEventListener(PersonCreatedEvent event) {
+  public void handlePersonCreatedEvent(PersonCreatedEvent event) {
     LOG.info("Received Person created event for personId [{}]", event.getPersonDTO().getId());
     personElasticSearchService.updatePersonDocument(event.getPersonDTO().getId());
   }
 
   @EventListener
-  public void personDeletedEventListener(PersonDeletedEvent event) {
+  public void handlePersonDeletedEvent(PersonDeletedEvent event) {
     LOG.info("Received Person deleted event for personId [{}]", event.getPersonId());
     personElasticSearchService.deletePersonDocument(event.getPersonId());
   }

@@ -7,15 +7,15 @@ import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.event.EventListener;
 
-public class ProgrammeEventListener {
+public class ProgrammeElasticSearchEventListener {
 
-  private static final Logger LOG = LoggerFactory.getLogger(ProgrammeEventListener.class);
+  private static final Logger LOG = LoggerFactory.getLogger(ProgrammeElasticSearchEventListener.class);
 
   @Autowired
   private PersonElasticSearchService personElasticSearchService;
 
   @EventListener
-  public void programmeSavedEventListener(ProgrammeSavedEvent event) {
+  public void handleProgrammeSavedEvent(ProgrammeSavedEvent event) {
     LOG.info("Received ProgrammeSavedEvent for Programme id [{}]", event.getProgrammeDTO().getId());
     personElasticSearchService.updatePersonDocumentForProgramme(event.getProgrammeDTO().getId());
   }

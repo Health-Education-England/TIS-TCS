@@ -1,5 +1,6 @@
 package com.transformuk.hee.tis.tcs.service.service;
 
+import com.google.common.base.Preconditions;
 import com.transformuk.hee.tis.tcs.api.dto.PersonViewDTO;
 import com.transformuk.hee.tis.tcs.service.job.person.PersonView;
 import com.transformuk.hee.tis.tcs.service.model.ColumnFilter;
@@ -67,9 +68,9 @@ public class PersonElasticSearchService {
       searchQuery = StringUtils.remove(searchQuery, '"');
       shouldQuery
           .should(new MatchQueryBuilder("publicHealthNumber", searchQuery))
-          .should(new FuzzyQueryBuilder("fullName", searchQuery))
-          .should(new FuzzyQueryBuilder("surname", searchQuery))
-          .should(new FuzzyQueryBuilder("forenames", searchQuery))
+          .should(new MatchQueryBuilder("fullName", searchQuery).analyzer("standard"))
+//          .should(new FuzzyQueryBuilder("surname", searchQuery))
+//          .should(new FuzzyQueryBuilder("forenames", searchQuery))
 
 //          .should(new MatchQueryBuilder("surname", searchQuery))
 //          .should(new MatchQueryBuilder("forenames", searchQuery))
@@ -97,6 +98,8 @@ public class PersonElasticSearchService {
    * @param personId
    */
   public void updatePersonDocument(Long personId) {
+    Preconditions.checkNotNull(personId, "Person Id cannot be null");
+
     String query = getQuery()
         .replace("WHERECLAUSE", "WHERE p.id=:id");
 
@@ -113,6 +116,7 @@ public class PersonElasticSearchService {
   }
 
   public void deletePersonDocument(Long personId) {
+    Preconditions.checkNotNull(personId, "Person id cannot be null");
     personElasticSearchRepository.deleteById(personId);
   }
 
@@ -129,6 +133,23 @@ public class PersonElasticSearchService {
         .replace("WHERECLAUSE", "WHERE tn.id=:id");
 
     List<PersonView> personViews = runQuery(query, trainingNumberId);
+    saveDocuments(personViews);
+  }
+
+//  public void updatePersonDocumentForPlacement(Long placementId) {
+//    String query = getQuery()
+//        .replace("WHERECLAUSE", "WHERE pl.id=:id");
+//
+//    List<PersonView> personViews = runQuery(query, placementId);
+//    saveDocuments(personViews);
+//  }
+
+
+  public void updatePersonDocumentForSpecialty(Long specialtyId) {
+    String query = getQuery()
+        .replace("WHERECLAUSE", "WHERE s.id=:id");
+
+    List<PersonView> personViews = runQuery(query, specialtyId);
     saveDocuments(personViews);
   }
 
@@ -187,6 +208,4 @@ public class PersonElasticSearchService {
       return personViewDTO;
     }).collect(Collectors.toList());
   }
-
-
 }

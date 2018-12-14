@@ -23,7 +23,7 @@ public class PersonView implements Serializable {
 //  @Field(type = FieldType.Text)
   private String forenames;
 
-  @Field(type = FieldType.Text)
+  @Field(type = FieldType.Text, analyzer = "standard")
   private String fullName;
 
   private String gmcNumber;
