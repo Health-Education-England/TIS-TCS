@@ -35,6 +35,7 @@ public class PersonView implements Serializable {
 
   private Long programmeId;
 
+  @Field(type=FieldType.Keyword)
   private String programmeName;
 
   private String programmeNumber;
@@ -53,14 +54,16 @@ public class PersonView implements Serializable {
 
   private String siteName;
 
+  @Field(type=FieldType.Keyword)
   private String placementType;
 
+  @Field(type=FieldType.Keyword)
   private String specialty;
 
   @Field(type=FieldType.Keyword)
   private String role;
 
-  @Field(type=FieldType.Keyword)
+  @Field(type=FieldType.Text, analyzer = "standard")
   private Status status;
 
   @Field(type= FieldType.Keyword)

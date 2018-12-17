@@ -1,0 +1,31 @@
+package com.transformuk.hee.tis.tcs.service.strategy;
+
+import com.transformuk.hee.tis.security.model.Programme;
+import com.transformuk.hee.tis.security.model.UserProfile;
+import com.transformuk.hee.tis.security.util.TisSecurityHelper;
+import org.apache.commons.collections4.CollectionUtils;
+import org.elasticsearch.common.collect.Tuple;
+import org.elasticsearch.index.query.BoolQueryBuilder;
+import org.elasticsearch.index.query.FuzzyQueryBuilder;
+import org.springframework.stereotype.Component;
+
+import java.util.Optional;
+import java.util.Set;
+
+@Component
+public class ProgrammeBasedFilterStrategy implements RoleBasedFilterStrategy {
+
+  private static final String COLUMN_FILTER = "programmeId";
+
+  @Override
+  public Optional<Tuple<String, BoolQueryBuilder>> getFilter() {
+    UserProfile currentUserProfile = TisSecurityHelper.getProfileFromContext();
+    Set<Programme> assignedProgrammes = currentUserProfile.getAssignedProgrammes();
+    if (CollectionUtils.isNotEmpty(assignedProgrammes)) {
+      BoolQueryBuilder programmeRoleFilter = new BoolQueryBuilder();
+      assignedProgrammes.forEach(programme -> programmeRoleFilter.should(new FuzzyQueryBuilder(COLUMN_FILTER, programme.getId())));
+      return Optional.of(new Tuple<>(COLUMN_FILTER, programmeRoleFilter));
+    }
+    return Optional.empty();
+  }
+}

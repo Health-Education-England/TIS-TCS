@@ -73,6 +73,7 @@ public class PersonElasticsearchSyncJob {
   }
 
   private void deleteIndex() {
+    LOG.info("deleting person es index");
     elasticSearchOperations.deleteIndex("tcs-person");
   }
 
@@ -108,7 +109,6 @@ public class PersonElasticsearchSyncJob {
       int page = 0;
       boolean hasMoreResults = true;
 
-      LOG.info("deleting all data");
       deleteIndex();
       createIndex();
       stopwatch.reset().start();

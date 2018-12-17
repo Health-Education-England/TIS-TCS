@@ -14,8 +14,6 @@ import com.transformuk.hee.tis.tcs.api.enumeration.Status;
 import com.transformuk.hee.tis.tcs.service.api.decorator.PersonViewDecorator;
 import com.transformuk.hee.tis.tcs.service.api.decorator.PlacementSummaryDecorator;
 import com.transformuk.hee.tis.tcs.service.api.decorator.PlacementViewDecorator;
-import com.transformuk.hee.tis.tcs.service.api.util.*;
-import com.transformuk.hee.tis.tcs.service.api.validation.*;
 import com.transformuk.hee.tis.tcs.service.api.util.BasicPage;
 import com.transformuk.hee.tis.tcs.service.api.util.ColumnFilterUtil;
 import com.transformuk.hee.tis.tcs.service.api.util.HeaderUtil;
@@ -129,7 +127,7 @@ public class PersonResource {
   @PostMapping("/people")
   @PreAuthorize("hasPermission('tis:people::person:', 'Create')")
   public ResponseEntity<PersonDTO> createPerson(@RequestBody @Validated(Create.class) final PersonDTO personDTO)
-    throws URISyntaxException, MethodArgumentNotValidException {
+      throws URISyntaxException, MethodArgumentNotValidException {
     log.debug("REST request to save Person : {}", personDTO);
     if (personDTO.getId() != null) {
       return ResponseEntity.badRequest().headers(HeaderUtil.createFailureAlert(ENTITY_NAME, "idexists", "A new person cannot already have an ID")).body(null);
@@ -142,8 +140,8 @@ public class PersonResource {
 
     final PersonDTO result = personService.create(personDTO);
     return ResponseEntity.created(new URI("/api/people/" + result.getId()))
-      .headers(HeaderUtil.createEntityCreationAlert(ENTITY_NAME, result.getId().toString()))
-      .body(result);
+        .headers(HeaderUtil.createEntityCreationAlert(ENTITY_NAME, result.getId().toString()))
+        .body(result);
   }
 
   /**
@@ -158,7 +156,7 @@ public class PersonResource {
   @PutMapping("/people")
   @PreAuthorize("hasPermission('tis:people::person:', 'Update')")
   public ResponseEntity<PersonDTO> updatePerson(@RequestBody @Validated(Update.class) PersonDTO personDTO)
-    throws URISyntaxException, MethodArgumentNotValidException {
+      throws URISyntaxException, MethodArgumentNotValidException {
     log.debug("REST request to update Person : {}", personDTO);
     if (personDTO.getId() == null) {
       return createPerson(personDTO);
@@ -173,8 +171,8 @@ public class PersonResource {
 
     PersonDTO result = personService.save(personDTO);
     return ResponseEntity.ok()
-      .headers(HeaderUtil.createEntityUpdateAlert(ENTITY_NAME, personDTO.getId().toString()))
-      .body(result);
+        .headers(HeaderUtil.createEntityUpdateAlert(ENTITY_NAME, personDTO.getId().toString()))
+        .body(result);
   }
 
   /**
@@ -186,10 +184,10 @@ public class PersonResource {
   @GetMapping("/people")
   @PreAuthorize("hasPermission('tis:people::person:', 'View')")
   public ResponseEntity<List<PersonViewDTO>> getAllPeople(
-    final Pageable pageable,
-    @RequestParam(value = "searchQuery", required = false) String searchQuery,
-    @RequestParam(value = "columnFilters", required = false) final String columnFilterJson,
-    @RequestParam(required = false, defaultValue = "false") boolean special) throws IOException {
+      final Pageable pageable,
+      @RequestParam(value = "searchQuery", required = false) String searchQuery,
+      @RequestParam(value = "columnFilters", required = false) final String columnFilterJson,
+      @RequestParam(required = false, defaultValue = "false") boolean special) throws IOException {
 
     log.debug("REST request to get a page of People begin");
     searchQuery = sanitize(searchQuery);
@@ -199,22 +197,20 @@ public class PersonResource {
 
     if (enableEsSearch || special) {
       if (StringUtils.isEmpty(searchQuery) && StringUtils.isEmpty(columnFilterJson)) {
-        return new ResponseEntity<>(personElasticSearchService.searchForPage(pageable), HttpStatus.OK);
+        page = personElasticSearchService.searchForPage(pageable);
       } else {
-        return new ResponseEntity<>(personElasticSearchService.searchForPage(searchQuery, columnFilters, pageable), HttpStatus.OK);
+        page = personElasticSearchService.searchForPage(searchQuery, columnFilters, pageable);
       }
-
     } else {
-
       if (StringUtils.isEmpty(searchQuery) && StringUtils.isEmpty(columnFilterJson)) {
         page = personService.findAll(pageable);
       } else {
         page = personService.advancedSearch(searchQuery, columnFilters, pageable);
       }
-      final HttpHeaders headers = PaginationUtil.generateBasicPaginationHttpHeaders(page, "/api/people");
       log.debug("REST request to get a page of People completed successfully");
-      return new ResponseEntity<>(personViewDecorator.decorate(page.getContent()), headers, HttpStatus.OK);
     }
+    final HttpHeaders headers = PaginationUtil.generateBasicPaginationHttpHeaders(page, "/api/people");
+    return new ResponseEntity<>(personViewDecorator.decorate(page.getContent()), headers, HttpStatus.OK);
   }
 
 
@@ -240,17 +236,17 @@ public class PersonResource {
   @GetMapping("/people/roles/categories/{categoryId}")
   @PreAuthorize("hasPermission('tis:people::person:', 'View')")
   public ResponseEntity<Collection<PersonLiteDTO>> getPersonsByRoleCategory(
-    final Pageable pageable,
-    @PathVariable("categoryId") final Long categoryId,
-    @RequestParam(value = "searchQuery", required = false) final String searchQuery) {
+      final Pageable pageable,
+      @PathVariable("categoryId") final Long categoryId,
+      @RequestParam(value = "searchQuery", required = false) final String searchQuery) {
     log.info("Received request to search '{}' with RoleCategory ID '{}', searchQuery '{}' and pageable '{}'",
-      PersonLiteDTO.class.getSimpleName(), categoryId, searchQuery, pageable);
+        PersonLiteDTO.class.getSimpleName(), categoryId, searchQuery, pageable);
 
     log.debug("Accessing '{}' to search '{}' with RoleCategory ID '{}' and searchQuery '{}'",
-      personService.getClass().getSimpleName(), PersonLiteDTO.class.getSimpleName(), categoryId, searchQuery);
+        personService.getClass().getSimpleName(), PersonLiteDTO.class.getSimpleName(), categoryId, searchQuery);
 
     final Page<PersonLiteDTO> page = personService.searchByRoleCategory(
-      Optional.ofNullable(searchQuery).orElse("").replace("\"", ""), categoryId, pageable);
+        Optional.ofNullable(searchQuery).orElse("").replace("\"", ""), categoryId, pageable);
 
     final HttpHeaders headers = PaginationUtil.generatePaginationHttpHeaders(page, "/api/people/roles/categories/" + categoryId);
 
@@ -301,7 +297,7 @@ public class PersonResource {
   @GetMapping("/people/basic")
   @PreAuthorize("hasPermission('tis:people::person:', 'View')")
   public ResponseEntity<List<PersonBasicDetailsDTO>> searchBasicDetails(
-    @RequestParam(value = "searchQuery", required = false) String searchQuery) {
+      @RequestParam(value = "searchQuery", required = false) String searchQuery) {
     log.debug("REST request to get a basic details page of People");
     searchQuery = sanitize(searchQuery);
 
@@ -390,8 +386,8 @@ public class PersonResource {
 
     List<PlacementView> placementViews = placementViewRepository.findAllByTraineeIdOrderByDateToDesc(id);
     return ResponseUtil.wrapOrNotFound(Optional.ofNullable(placementViews != null ?
-      placementViewDecorator.decorate(placementViewMapper.placementViewsToPlacementViewDTOs(placementViews)) :
-      null));
+        placementViewDecorator.decorate(placementViewMapper.placementViewsToPlacementViewDTOs(placementViews)) :
+        null));
   }
 
   /**
@@ -460,8 +456,8 @@ public class PersonResource {
     final List<PersonDTO> result = personService.save(personDTOs);
     final List<Long> ids = result.stream().map(PersonDTO::getId).collect(Collectors.toList());
     return ResponseEntity.ok()
-      .headers(HeaderUtil.createEntityUpdateAlert(ENTITY_NAME, StringUtils.join(ids, ",")))
-      .body(result);
+        .headers(HeaderUtil.createEntityUpdateAlert(ENTITY_NAME, StringUtils.join(ids, ",")))
+        .body(result);
   }
 
   /**

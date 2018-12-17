@@ -1,18 +1,22 @@
 package com.transformuk.hee.tis.tcs.service.service;
 
 import com.google.common.base.Preconditions;
+import com.google.common.collect.Sets;
 import com.transformuk.hee.tis.tcs.api.dto.PersonViewDTO;
+import com.transformuk.hee.tis.tcs.service.api.util.BasicPage;
 import com.transformuk.hee.tis.tcs.service.job.person.PersonView;
 import com.transformuk.hee.tis.tcs.service.model.ColumnFilter;
 import com.transformuk.hee.tis.tcs.service.repository.PersonElasticSearchRepository;
 import com.transformuk.hee.tis.tcs.service.service.helper.SqlQuerySupplier;
 import com.transformuk.hee.tis.tcs.service.service.impl.PersonViewRowMapper;
+import com.transformuk.hee.tis.tcs.service.strategy.RoleBasedFilterStrategy;
 import org.apache.commons.collections4.CollectionUtils;
 import org.apache.commons.lang3.StringUtils;
+import org.elasticsearch.common.collect.Tuple;
 import org.elasticsearch.index.query.BoolQueryBuilder;
-import org.elasticsearch.index.query.FuzzyQueryBuilder;
 import org.elasticsearch.index.query.MatchQueryBuilder;
 import org.elasticsearch.index.query.TermQueryBuilder;
+import org.elasticsearch.index.query.WildcardQueryBuilder;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -23,6 +27,8 @@ import org.springframework.jdbc.core.namedparam.NamedParameterJdbcTemplate;
 import org.springframework.stereotype.Component;
 
 import java.util.List;
+import java.util.Optional;
+import java.util.Set;
 import java.util.stream.Collectors;
 
 @Component
@@ -36,32 +42,54 @@ public class PersonElasticSearchService {
   private SqlQuerySupplier sqlQuerySupplier;
   @Autowired
   private NamedParameterJdbcTemplate namedParameterJdbcTemplate;
+  @Autowired
+  private Set<RoleBasedFilterStrategy> roleBasedFilterStrategies;
 
-  public List<PersonViewDTO> searchForPage(Pageable pageable) {
-    List<PersonView> content = personElasticSearchRepository.findAll(pageable).getContent();
-    return convertPersonViewToDTO(content);
+  public BasicPage<PersonViewDTO> searchForPage(Pageable pageable) {
+    Page<PersonView> pagedResults = personElasticSearchRepository.findAll(pageable);
+    return new BasicPage(convertPersonViewToDTO(pagedResults.getContent()), pageable, pagedResults.hasNext());
   }
 
-  public List<PersonViewDTO> searchForPage(String searchQuery, List<ColumnFilter> columnFilters, Pageable pageable) {
+  public BasicPage<PersonViewDTO> searchForPage(String searchQuery, List<ColumnFilter> columnFilters, Pageable pageable) {
 
     // iterate over the column filters, if they have multiple values per filter, place a should between then
     // for each column filter set, place a must between them
     BoolQueryBuilder mustBetweenDifferentColumnFilters = new BoolQueryBuilder();
+
+    Set<String> appliedFilters = applyRoleBasedFilters(mustBetweenDifferentColumnFilters);
+
     for (ColumnFilter columnFilter : columnFilters) {
 
       BoolQueryBuilder shouldBetweenSameColumnFilter = new BoolQueryBuilder();
       for (Object value : columnFilter.getValues()) {
 
-        if (StringUtils.equals(columnFilter.getName(), "status")) {
-          value = value.toString().toUpperCase();
+        if (appliedFilters.contains(columnFilter.getName())) { // skip if we've already applied this type of filter via role based filters
+          continue;
         }
 
-        shouldBetweenSameColumnFilter.should(new MatchQueryBuilder(columnFilter.getName(), value));
+        //because the role column is a comma separated list of roles, we need to do a wildcard 'like' search
+        if (StringUtils.equals(columnFilter.getName(), "role")) {
+          shouldBetweenSameColumnFilter.should(new WildcardQueryBuilder(columnFilter.getName(), "*" + value.toString() + "*"));
+        } else {
+          shouldBetweenSameColumnFilter.should(new MatchQueryBuilder(columnFilter.getName(), value.toString()));
+        }
       }
 
       mustBetweenDifferentColumnFilters.must(shouldBetweenSameColumnFilter);
     }
 
+    //apply free text search on the searchable columns
+    BoolQueryBuilder shouldQuery = applyTextBasedSearchQuery(searchQuery);
+
+    // add the free text query with a must to the column filters query
+    BoolQueryBuilder fullQuery = mustBetweenDifferentColumnFilters.must(shouldQuery);
+
+    LOG.info("Query {}", fullQuery.toString());
+    Page<PersonView> result = personElasticSearchRepository.search(fullQuery, pageable);
+    return new BasicPage(convertPersonViewToDTO(result.getContent()), pageable, result.hasNext());
+  }
+
+  private BoolQueryBuilder applyTextBasedSearchQuery(String searchQuery) {
     // this part is the free text part of the query, place a should between all of the searchable fields
     BoolQueryBuilder shouldQuery = new BoolQueryBuilder();
     if (StringUtils.isNotEmpty(searchQuery)) {
@@ -83,13 +111,28 @@ public class PersonElasticSearchService {
         shouldQuery = shouldQuery.should(new TermQueryBuilder("id", searchQuery));
       }
     }
+    return shouldQuery;
+  }
 
-    // add the free text query with a must to the column filters query
-    BoolQueryBuilder fullQuery = mustBetweenDifferentColumnFilters.must(shouldQuery);
-
-    LOG.info("Query {}", fullQuery.toString());
-    Page<PersonView> result = personElasticSearchRepository.search(fullQuery, pageable);
-    return convertPersonViewToDTO(result.getContent());
+  /**
+   * If the current user is a programme user of a trust user, apply the filters and return a list of filters applied
+   * so that any other selected programme or trust(owner) filters aren't applied too
+   *
+   * @param mustBetweenDifferentColumnFilters
+   * @return
+   */
+  private Set<String> applyRoleBasedFilters(BoolQueryBuilder mustBetweenDifferentColumnFilters) {
+    //find if there are any strategies based off roles need executing
+    Set<String> appliedFilters = Sets.newHashSet();
+    for (RoleBasedFilterStrategy roleBasedFilterStrategy : roleBasedFilterStrategies) {
+      Optional<Tuple<String, BoolQueryBuilder>> nameToFilterOptionalTuple = roleBasedFilterStrategy.getFilter();
+      if (nameToFilterOptionalTuple.isPresent()) {
+        Tuple<String, BoolQueryBuilder> nameToFilterTuple = nameToFilterOptionalTuple.get();
+        appliedFilters.add(nameToFilterTuple.v1());
+        mustBetweenDifferentColumnFilters.must(nameToFilterTuple.v2());
+      }
+    }
+    return appliedFilters;
   }
 
   /**
@@ -127,22 +170,6 @@ public class PersonElasticSearchService {
     List<PersonView> personViews = runQuery(query, programmeId);
     saveDocuments(personViews);
   }
-
-  public void updatePersonDocumentForTrainingNumber(Long trainingNumberId) {
-    String query = getQuery()
-        .replace("WHERECLAUSE", "WHERE tn.id=:id");
-
-    List<PersonView> personViews = runQuery(query, trainingNumberId);
-    saveDocuments(personViews);
-  }
-
-//  public void updatePersonDocumentForPlacement(Long placementId) {
-//    String query = getQuery()
-//        .replace("WHERECLAUSE", "WHERE pl.id=:id");
-//
-//    List<PersonView> personViews = runQuery(query, placementId);
-//    saveDocuments(personViews);
-//  }
 
 
   public void updatePersonDocumentForSpecialty(Long specialtyId) {
