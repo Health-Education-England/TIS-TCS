@@ -1,9 +1,12 @@
 package com.transformuk.hee.tis.tcs.service.job.person;
 
 import com.google.common.base.Stopwatch;
+import com.google.common.collect.Lists;
 import com.transformuk.hee.tis.tcs.service.repository.PersonElasticSearchRepository;
 import com.transformuk.hee.tis.tcs.service.service.helper.SqlQuerySupplier;
+import com.transformuk.hee.tis.tcs.service.service.impl.PersonTrustRowMapper;
 import com.transformuk.hee.tis.tcs.service.service.impl.PersonViewRowMapper;
+import net.javacrumbs.shedlock.core.SchedulerLock;
 import org.apache.commons.collections4.CollectionUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -13,17 +16,24 @@ import org.springframework.jdbc.core.namedparam.MapSqlParameterSource;
 import org.springframework.jdbc.core.namedparam.NamedParameterJdbcTemplate;
 import org.springframework.jmx.export.annotation.ManagedOperation;
 import org.springframework.jmx.export.annotation.ManagedResource;
+import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Component;
 
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
+import java.util.Set;
 import java.util.concurrent.CompletableFuture;
+import java.util.stream.Collectors;
 
 @Component
 @ManagedResource(objectName = "tcs.mbean:name=PersonElasticSearchJob",
-    description = "Service that clears the tcs-person index in ES and repopulates the data")
+    description = "Service that clears the persons index in ES and repopulates the data")
 public class PersonElasticsearchSyncJob {
 
   private static final Logger LOG = LoggerFactory.getLogger(PersonElasticsearchSyncJob.class);
+  private static final String ES_INDEX = "persons";
+  private static final int FIFTEEN_MIN = 15 * 60 * 1000;
 
   private Stopwatch mainStopWatch;
 
@@ -39,7 +49,6 @@ public class PersonElasticsearchSyncJob {
 
   @Autowired
   private PersonElasticSearchRepository personElasticSearchRepository;
-
 
   @ManagedOperation(description = "Is the Person es sync just currently running")
   public boolean isCurrentlyRunning() {
@@ -59,8 +68,10 @@ public class PersonElasticsearchSyncJob {
     CompletableFuture.runAsync(this::run);
   }
 
-  @ManagedOperation(description = "Run sync of the tcs-person index")
-  public void PersonElasticSearchSync() {
+  @Scheduled(cron = "0 1 * * * *")
+  @SchedulerLock(name = "personsElasticSearchScheduledTask", lockAtLeastFor = FIFTEEN_MIN, lockAtMostFor = FIFTEEN_MIN)
+  @ManagedOperation(description = "Run sync of the persons index")
+  public void personElasticSearchSync() {
     runSyncJob();
   }
 
@@ -74,7 +85,7 @@ public class PersonElasticsearchSyncJob {
 
   private void deleteIndex() {
     LOG.info("deleting person es index");
-    elasticSearchOperations.deleteIndex("tcs-person");
+    elasticSearchOperations.deleteIndex(ES_INDEX);
   }
 
   private List<PersonView> collectData(int page, int pageSize) {
@@ -88,6 +99,32 @@ public class PersonElasticsearchSyncJob {
     MapSqlParameterSource paramSource = new MapSqlParameterSource();
 
     List<PersonView> queryResult = namedParameterJdbcTemplate.query(query, paramSource, new PersonViewRowMapper());
+
+    if (CollectionUtils.isNotEmpty(queryResult)) {
+      Set<Long> personIds = queryResult.stream().map(PersonView::getId).collect(Collectors.toSet());
+      List<PersonTrustDto> personTrustDtos = namedParameterJdbcTemplate
+          .query("SELECT personId, trustId FROM PersonTrust WHERE personId IN (:personIds)",
+              new MapSqlParameterSource("personIds", personIds), new PersonTrustRowMapper());
+
+      Map<Long, List<PersonTrustDto>> personIdToTrustIds = new HashMap<>();
+
+      for (PersonTrustDto personTrustDto : personTrustDtos) {
+        Long personId = personTrustDto.getPersonId();
+        if (!personIdToTrustIds.containsKey(personId)) {
+          personIdToTrustIds.put(personId, Lists.newArrayList());
+        }
+
+        personIdToTrustIds.get(personId).add(personTrustDto);
+      }
+
+      queryResult.stream().forEach(pv -> {
+        if (personIdToTrustIds.containsKey(pv.getId())) {
+          pv.setTrusts(personIdToTrustIds.get(pv.getId()));
+        } else {
+          pv.setTrusts(Lists.newArrayList());
+        }
+      });
+    }
     queryResult.stream().forEach(pv -> pv.setFullName(pv.getForenames() + " " + pv.getSurname()));
     return queryResult;
   }
@@ -141,7 +178,7 @@ public class PersonElasticsearchSyncJob {
 
   private void createIndex() {
     LOG.info("creating and updating mappings");
-    elasticSearchOperations.createIndex("tcs-person");
+    elasticSearchOperations.createIndex(ES_INDEX);
     elasticSearchOperations.putMapping(PersonView.class);
   }
 

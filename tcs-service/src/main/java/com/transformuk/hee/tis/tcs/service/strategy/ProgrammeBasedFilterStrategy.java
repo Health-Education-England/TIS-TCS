@@ -6,7 +6,7 @@ import com.transformuk.hee.tis.security.util.TisSecurityHelper;
 import org.apache.commons.collections4.CollectionUtils;
 import org.elasticsearch.common.collect.Tuple;
 import org.elasticsearch.index.query.BoolQueryBuilder;
-import org.elasticsearch.index.query.FuzzyQueryBuilder;
+import org.elasticsearch.index.query.MatchQueryBuilder;
 import org.springframework.stereotype.Component;
 
 import java.util.Optional;
@@ -15,7 +15,7 @@ import java.util.Set;
 @Component
 public class ProgrammeBasedFilterStrategy implements RoleBasedFilterStrategy {
 
-  private static final String COLUMN_FILTER = "programmeId";
+  private static final String COLUMN_FILTER = "programmeName";
 
   @Override
   public Optional<Tuple<String, BoolQueryBuilder>> getFilter() {
@@ -23,7 +23,7 @@ public class ProgrammeBasedFilterStrategy implements RoleBasedFilterStrategy {
     Set<Programme> assignedProgrammes = currentUserProfile.getAssignedProgrammes();
     if (CollectionUtils.isNotEmpty(assignedProgrammes)) {
       BoolQueryBuilder programmeRoleFilter = new BoolQueryBuilder();
-      assignedProgrammes.forEach(programme -> programmeRoleFilter.should(new FuzzyQueryBuilder(COLUMN_FILTER, programme.getId())));
+      assignedProgrammes.forEach(programme -> programmeRoleFilter.should(new MatchQueryBuilder("programmeId", programme.getId())));
       return Optional.of(new Tuple<>(COLUMN_FILTER, programmeRoleFilter));
     }
     return Optional.empty();

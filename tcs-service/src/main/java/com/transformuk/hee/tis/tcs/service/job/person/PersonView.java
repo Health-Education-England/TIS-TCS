@@ -7,8 +7,9 @@ import org.springframework.data.elasticsearch.annotations.Field;
 import org.springframework.data.elasticsearch.annotations.FieldType;
 
 import java.io.Serializable;
+import java.util.List;
 
-@Document(indexName = "tcs-person", type = "person")
+@Document(indexName = "persons", type = "person")
 public class PersonView implements Serializable {
 
   private static final long serialVersionUID = 1L;
@@ -17,10 +18,10 @@ public class PersonView implements Serializable {
 
   private String intrepidId;
 
-//  @Field(type = FieldType.Text)
+  //  @Field(type = FieldType.Text)
   private String surname;
 
-//  @Field(type = FieldType.Text)
+  //  @Field(type = FieldType.Text)
   private String forenames;
 
   @Field(type = FieldType.Text, analyzer = "standard")
@@ -30,12 +31,12 @@ public class PersonView implements Serializable {
 
   private String gdcNumber;
 
-  @Field(type=FieldType.Keyword)
+  @Field(type = FieldType.Keyword)
   private String publicHealthNumber;
 
   private Long programmeId;
 
-  @Field(type=FieldType.Keyword)
+  @Field(type = FieldType.Keyword)
   private String programmeName;
 
   private String programmeNumber;
@@ -54,22 +55,25 @@ public class PersonView implements Serializable {
 
   private String siteName;
 
-  @Field(type=FieldType.Keyword)
+  @Field(type = FieldType.Keyword)
   private String placementType;
 
-  @Field(type=FieldType.Keyword)
+  @Field(type = FieldType.Keyword)
   private String specialty;
 
-  @Field(type=FieldType.Keyword)
+  @Field(type = FieldType.Keyword)
   private String role;
 
-  @Field(type=FieldType.Text, analyzer = "standard")
+  @Field(type = FieldType.Text, analyzer = "standard")
   private Status status;
 
-  @Field(type= FieldType.Keyword)
+  @Field(type = FieldType.Keyword)
   private String currentOwner;
 
   private PersonOwnerRule currentOwnerRule;
+
+  @Field(type = FieldType.Nested)
+  private List<PersonTrustDto> trusts;
 
   public Long getId() {
     return id;
@@ -263,6 +267,12 @@ public class PersonView implements Serializable {
     this.siteId = siteId;
   }
 
+  public List<PersonTrustDto> getTrusts() {
+    return trusts;
+  }
 
+  public void setTrusts(List<PersonTrustDto> trusts) {
+    this.trusts = trusts;
+  }
 }
 

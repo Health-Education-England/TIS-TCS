@@ -196,11 +196,7 @@ public class PersonResource {
     final BasicPage<PersonViewDTO> page;
 
     if (enableEsSearch || special) {
-      if (StringUtils.isEmpty(searchQuery) && StringUtils.isEmpty(columnFilterJson)) {
-        page = personElasticSearchService.searchForPage(pageable);
-      } else {
-        page = personElasticSearchService.searchForPage(searchQuery, columnFilters, pageable);
-      }
+      page = personElasticSearchService.searchForPage(searchQuery, columnFilters, pageable);
     } else {
       if (StringUtils.isEmpty(searchQuery) && StringUtils.isEmpty(columnFilterJson)) {
         page = personService.findAll(pageable);

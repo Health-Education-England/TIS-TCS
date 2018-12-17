@@ -4,9 +4,11 @@ import com.transformuk.hee.tis.security.model.Trust;
 import com.transformuk.hee.tis.security.model.UserProfile;
 import com.transformuk.hee.tis.security.util.TisSecurityHelper;
 import org.apache.commons.collections4.CollectionUtils;
+import org.apache.lucene.search.join.ScoreMode;
 import org.elasticsearch.common.collect.Tuple;
 import org.elasticsearch.index.query.BoolQueryBuilder;
-import org.elasticsearch.index.query.FuzzyQueryBuilder;
+import org.elasticsearch.index.query.MatchQueryBuilder;
+import org.elasticsearch.index.query.NestedQueryBuilder;
 import org.springframework.stereotype.Component;
 
 import java.util.Optional;
@@ -20,7 +22,7 @@ import java.util.Set;
 @Component
 public class TrustRoleBasedFilterStrategy implements RoleBasedFilterStrategy {
 
-  private static final String COLUMN_FILTER = "currentOwner";
+  private static final String COLUMN_FILTER = "trusts.trustId";
 
   @Override
   public Optional<Tuple<String, BoolQueryBuilder>> getFilter() {
@@ -28,7 +30,7 @@ public class TrustRoleBasedFilterStrategy implements RoleBasedFilterStrategy {
     Set<Trust> assignedTrusts = currentUserProfile.getAssignedTrusts();
     if (CollectionUtils.isNotEmpty(assignedTrusts)) {
       BoolQueryBuilder trustRoleFilter = new BoolQueryBuilder();
-      assignedTrusts.forEach(t -> trustRoleFilter.should(new FuzzyQueryBuilder(COLUMN_FILTER, t.getTrustName())));
+      assignedTrusts.forEach(t -> trustRoleFilter.should(new NestedQueryBuilder("trusts", new MatchQueryBuilder(COLUMN_FILTER, t.getId()), ScoreMode.None)));
       return Optional.of(new Tuple<>(COLUMN_FILTER, trustRoleFilter));
     }
     return Optional.empty();

@@ -45,37 +45,29 @@ public class PersonElasticSearchService {
   @Autowired
   private Set<RoleBasedFilterStrategy> roleBasedFilterStrategies;
 
-  public BasicPage<PersonViewDTO> searchForPage(Pageable pageable) {
-    Page<PersonView> pagedResults = personElasticSearchRepository.findAll(pageable);
-    return new BasicPage(convertPersonViewToDTO(pagedResults.getContent()), pageable, pagedResults.hasNext());
-  }
-
   public BasicPage<PersonViewDTO> searchForPage(String searchQuery, List<ColumnFilter> columnFilters, Pageable pageable) {
-
     // iterate over the column filters, if they have multiple values per filter, place a should between then
     // for each column filter set, place a must between them
     BoolQueryBuilder mustBetweenDifferentColumnFilters = new BoolQueryBuilder();
 
     Set<String> appliedFilters = applyRoleBasedFilters(mustBetweenDifferentColumnFilters);
+    if(CollectionUtils.isNotEmpty(columnFilters)) {
+      for (ColumnFilter columnFilter : columnFilters) {
+        BoolQueryBuilder shouldBetweenSameColumnFilter = new BoolQueryBuilder();
+        for (Object value : columnFilter.getValues()) {
+          if (appliedFilters.contains(columnFilter.getName())) { // skip if we've already applied this type of filter via role based filters
+            continue;
+          }
 
-    for (ColumnFilter columnFilter : columnFilters) {
-
-      BoolQueryBuilder shouldBetweenSameColumnFilter = new BoolQueryBuilder();
-      for (Object value : columnFilter.getValues()) {
-
-        if (appliedFilters.contains(columnFilter.getName())) { // skip if we've already applied this type of filter via role based filters
-          continue;
+          //because the role column is a comma separated list of roles, we need to do a wildcard 'like' search
+          if (StringUtils.equals(columnFilter.getName(), "role")) {
+            shouldBetweenSameColumnFilter.should(new WildcardQueryBuilder(columnFilter.getName(), "*" + value.toString() + "*"));
+          } else {
+            shouldBetweenSameColumnFilter.should(new MatchQueryBuilder(columnFilter.getName(), value.toString()));
+          }
         }
-
-        //because the role column is a comma separated list of roles, we need to do a wildcard 'like' search
-        if (StringUtils.equals(columnFilter.getName(), "role")) {
-          shouldBetweenSameColumnFilter.should(new WildcardQueryBuilder(columnFilter.getName(), "*" + value.toString() + "*"));
-        } else {
-          shouldBetweenSameColumnFilter.should(new MatchQueryBuilder(columnFilter.getName(), value.toString()));
-        }
+        mustBetweenDifferentColumnFilters.must(shouldBetweenSameColumnFilter);
       }
-
-      mustBetweenDifferentColumnFilters.must(shouldBetweenSameColumnFilter);
     }
 
     //apply free text search on the searchable columns
@@ -84,7 +76,7 @@ public class PersonElasticSearchService {
     // add the free text query with a must to the column filters query
     BoolQueryBuilder fullQuery = mustBetweenDifferentColumnFilters.must(shouldQuery);
 
-    LOG.info("Query {}", fullQuery.toString());
+//    LOG.info("Query {}", fullQuery.toString());
     Page<PersonView> result = personElasticSearchRepository.search(fullQuery, pageable);
     return new BasicPage(convertPersonViewToDTO(result.getContent()), pageable, result.hasNext());
   }
@@ -96,13 +88,8 @@ public class PersonElasticSearchService {
       searchQuery = StringUtils.remove(searchQuery, '"');
       shouldQuery
           .should(new MatchQueryBuilder("publicHealthNumber", searchQuery))
-          .should(new MatchQueryBuilder("fullName", searchQuery).analyzer("standard"))
-//          .should(new FuzzyQueryBuilder("surname", searchQuery))
-//          .should(new FuzzyQueryBuilder("forenames", searchQuery))
-
-//          .should(new MatchQueryBuilder("surname", searchQuery))
-//          .should(new MatchQueryBuilder("forenames", searchQuery))
-
+          .should(new WildcardQueryBuilder("surname", "*" + searchQuery + "*"))
+          .should(new WildcardQueryBuilder("forenames", "*" + searchQuery + "*"))
           .should(new MatchQueryBuilder("gmcNumber", searchQuery))
           .should(new MatchQueryBuilder("gdcNumber", searchQuery))
           .should(new MatchQueryBuilder("role", searchQuery));
