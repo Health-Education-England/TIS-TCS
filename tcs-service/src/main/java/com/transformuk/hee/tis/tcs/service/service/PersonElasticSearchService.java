@@ -3,6 +3,7 @@ package com.transformuk.hee.tis.tcs.service.service;
 import com.google.common.base.Preconditions;
 import com.google.common.collect.Sets;
 import com.transformuk.hee.tis.tcs.api.dto.PersonViewDTO;
+import com.transformuk.hee.tis.tcs.api.enumeration.PersonOwnerRule;
 import com.transformuk.hee.tis.tcs.service.api.util.BasicPage;
 import com.transformuk.hee.tis.tcs.service.job.person.PersonView;
 import com.transformuk.hee.tis.tcs.service.model.ColumnFilter;
@@ -58,7 +59,6 @@ public class PersonElasticSearchService {
           if (appliedFilters.contains(columnFilter.getName())) { // skip if we've already applied this type of filter via role based filters
             continue;
           }
-
           //because the role column is a comma separated list of roles, we need to do a wildcard 'like' search
           if (StringUtils.equals(columnFilter.getName(), "role")) {
             shouldBetweenSameColumnFilter.should(new WildcardQueryBuilder(columnFilter.getName(), "*" + value.toString() + "*"));
@@ -78,18 +78,20 @@ public class PersonElasticSearchService {
 
 //    LOG.info("Query {}", fullQuery.toString());
     Page<PersonView> result = personElasticSearchRepository.search(fullQuery, pageable);
-    return new BasicPage(convertPersonViewToDTO(result.getContent()), pageable, result.hasNext());
+    return new BasicPage<>(convertPersonViewToDTO(result.getContent()), pageable, result.hasNext());
   }
 
   private BoolQueryBuilder applyTextBasedSearchQuery(String searchQuery) {
     // this part is the free text part of the query, place a should between all of the searchable fields
     BoolQueryBuilder shouldQuery = new BoolQueryBuilder();
     if (StringUtils.isNotEmpty(searchQuery)) {
-      searchQuery = StringUtils.remove(searchQuery, '"');
+      searchQuery = StringUtils.remove(searchQuery, '"'); //remove any quotations that were added from the FE
       shouldQuery
           .should(new MatchQueryBuilder("publicHealthNumber", searchQuery))
-          .should(new WildcardQueryBuilder("surname", "*" + searchQuery + "*"))
-          .should(new WildcardQueryBuilder("forenames", "*" + searchQuery + "*"))
+          //lower case the search query as the index uses the standard analyzer for name type fields (remove this if
+          //we want to stop emulating the current search solution)
+          .should(new WildcardQueryBuilder("surname", "*" + searchQuery.toLowerCase() + "*"))
+          .should(new WildcardQueryBuilder("forenames", "*" + searchQuery.toLowerCase() + "*"))
           .should(new MatchQueryBuilder("gmcNumber", searchQuery))
           .should(new MatchQueryBuilder("gdcNumber", searchQuery))
           .should(new MatchQueryBuilder("role", searchQuery));
@@ -218,6 +220,9 @@ public class PersonElasticSearchService {
       personViewDTO.setRole(pv.getRole());
       personViewDTO.setStatus(pv.getStatus());
       personViewDTO.setCurrentOwner(pv.getCurrentOwner());
+      if(StringUtils.isNotEmpty(pv.getCurrentOwnerRule())){
+        personViewDTO.setCurrentOwnerRule(PersonOwnerRule.valueOf(pv.getCurrentOwnerRule()));
+      }
 
       return personViewDTO;
     }).collect(Collectors.toList());

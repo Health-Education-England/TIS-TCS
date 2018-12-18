@@ -30,6 +30,13 @@ spring:
       schemas: ${DBNAME}
   cache:
     caffeine.spec: maximumSize=50,expireAfterAccess=5m
+  elasticsearch:
+    rest:
+      uris: http://${ES_URL}:${ES_URL_PORT}
+  data:
+    elasticsearch:
+      cluster-nodes: ${ES_CLUSTER_NODE_URL}:${ES_CLUSTER_NODE_PORT}
+      cluster-name: ${ES_CLUSTER_NAME}
 
 jhipster:
   http:
@@ -44,3 +51,4 @@ jhipster:
 
 application:
 
+enable.es.search: ${ENABLE_ES_SEARCH}

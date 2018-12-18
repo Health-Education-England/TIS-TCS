@@ -187,7 +187,7 @@ public class PersonResource {
       final Pageable pageable,
       @RequestParam(value = "searchQuery", required = false) String searchQuery,
       @RequestParam(value = "columnFilters", required = false) final String columnFilterJson,
-      @RequestParam(required = false, defaultValue = "false") boolean special) throws IOException {
+      @RequestParam(required = false, defaultValue = "false") boolean enableES) throws IOException {
 
     log.debug("REST request to get a page of People begin");
     searchQuery = sanitize(searchQuery);
@@ -195,7 +195,8 @@ public class PersonResource {
     final List<ColumnFilter> columnFilters = ColumnFilterUtil.getColumnFilters(columnFilterJson, filterEnumList);
     final BasicPage<PersonViewDTO> page;
 
-    if (enableEsSearch || special) {
+    //feature flag to enable es, allow the enabling from the FE
+    if (enableEsSearch || enableES) {
       page = personElasticSearchService.searchForPage(searchQuery, columnFilters, pageable);
     } else {
       if (StringUtils.isEmpty(searchQuery) && StringUtils.isEmpty(columnFilterJson)) {

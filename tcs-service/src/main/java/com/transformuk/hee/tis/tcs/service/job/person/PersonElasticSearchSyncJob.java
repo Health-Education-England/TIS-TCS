@@ -29,10 +29,11 @@ import java.util.stream.Collectors;
 @Component
 @ManagedResource(objectName = "tcs.mbean:name=PersonElasticSearchJob",
     description = "Service that clears the persons index in ES and repopulates the data")
-public class PersonElasticsearchSyncJob {
+public class PersonElasticSearchSyncJob {
 
-  private static final Logger LOG = LoggerFactory.getLogger(PersonElasticsearchSyncJob.class);
+  private static final Logger LOG = LoggerFactory.getLogger(PersonElasticSearchSyncJob.class);
   private static final String ES_INDEX = "persons";
+  private static final String PERSON_TRUST_QUERY = "SELECT personId, trustId FROM PersonTrust WHERE personId IN (:personIds)";
   private static final int FIFTEEN_MIN = 15 * 60 * 1000;
 
   private Stopwatch mainStopWatch;
@@ -103,8 +104,7 @@ public class PersonElasticsearchSyncJob {
     if (CollectionUtils.isNotEmpty(queryResult)) {
       Set<Long> personIds = queryResult.stream().map(PersonView::getId).collect(Collectors.toSet());
       List<PersonTrustDto> personTrustDtos = namedParameterJdbcTemplate
-          .query("SELECT personId, trustId FROM PersonTrust WHERE personId IN (:personIds)",
-              new MapSqlParameterSource("personIds", personIds), new PersonTrustRowMapper());
+          .query(PERSON_TRUST_QUERY, new MapSqlParameterSource("personIds", personIds), new PersonTrustRowMapper());
 
       Map<Long, List<PersonTrustDto>> personIdToTrustIds = new HashMap<>();
 
@@ -168,7 +168,7 @@ public class PersonElasticsearchSyncJob {
         LOG.info("Time taken to save chunk : [{}]", stopwatch.toString());
       }
       stopwatch.reset().start();
-      LOG.info("Sync job [{}] finished. Total time taken {} for   processing [{}] records", getJobName(), mainStopWatch.stop().toString(), totalRecords);
+      LOG.info("Sync job [{}] finished. Total time taken {} for processing [{}] records", getJobName(), mainStopWatch.stop().toString(), totalRecords);
       mainStopWatch = null;
     } catch (Exception e) {
       e.printStackTrace();

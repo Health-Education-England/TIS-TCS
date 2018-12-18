@@ -211,5 +211,3 @@ logging:
 
 
 auto.generate.npn: true
-
-enable.es.search: true

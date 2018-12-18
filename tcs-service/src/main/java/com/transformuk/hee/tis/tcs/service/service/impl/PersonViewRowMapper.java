@@ -1,6 +1,5 @@
 package com.transformuk.hee.tis.tcs.service.service.impl;
 
-import com.transformuk.hee.tis.tcs.api.enumeration.PersonOwnerRule;
 import com.transformuk.hee.tis.tcs.api.enumeration.Status;
 import com.transformuk.hee.tis.tcs.service.job.person.PersonView;
 import org.apache.commons.lang3.StringUtils;
@@ -38,10 +37,7 @@ public class PersonViewRowMapper implements RowMapper<PersonView> {
       view.setStatus(Status.valueOf(status));
     }
     view.setCurrentOwner(rs.getString("currentOwner"));
-    final String ownerRule = rs.getString("currentOwnerRule");
-    if (StringUtils.isNotEmpty(ownerRule)) {
-      view.setCurrentOwnerRule(PersonOwnerRule.valueOf(ownerRule));
-    }
+    view.setCurrentOwnerRule(rs.getString("currentOwnerRule"));
     return view;
   }
 }

@@ -1,6 +1,5 @@
 package com.transformuk.hee.tis.tcs.service.job.person;
 
-import com.transformuk.hee.tis.tcs.api.enumeration.PersonOwnerRule;
 import com.transformuk.hee.tis.tcs.api.enumeration.Status;
 import org.springframework.data.elasticsearch.annotations.Document;
 import org.springframework.data.elasticsearch.annotations.Field;
@@ -18,10 +17,10 @@ public class PersonView implements Serializable {
 
   private String intrepidId;
 
-  //  @Field(type = FieldType.Text)
+  @Field(type = FieldType.Text, analyzer = "standard")
   private String surname;
 
-  //  @Field(type = FieldType.Text)
+  @Field(type = FieldType.Text, analyzer = "standard")
   private String forenames;
 
   @Field(type = FieldType.Text, analyzer = "standard")
@@ -70,7 +69,7 @@ public class PersonView implements Serializable {
   @Field(type = FieldType.Keyword)
   private String currentOwner;
 
-  private PersonOwnerRule currentOwnerRule;
+  private String currentOwnerRule;
 
   @Field(type = FieldType.Nested)
   private List<PersonTrustDto> trusts;
@@ -243,11 +242,11 @@ public class PersonView implements Serializable {
     this.currentOwner = currentOwner;
   }
 
-  public PersonOwnerRule getCurrentOwnerRule() {
+  public String getCurrentOwnerRule() {
     return currentOwnerRule;
   }
 
-  public void setCurrentOwnerRule(PersonOwnerRule currentOwnerRule) {
+  public void setCurrentOwnerRule(String currentOwnerRule) {
     this.currentOwnerRule = currentOwnerRule;
   }
 
