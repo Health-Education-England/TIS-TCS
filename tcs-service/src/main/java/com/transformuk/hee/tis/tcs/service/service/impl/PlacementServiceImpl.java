@@ -130,16 +130,20 @@ public class PlacementServiceImpl implements PlacementService {
   private void updateStoredCommentsWithChangesOrAdd(PlacementDetails placementDetails) {
       Set<Comment> commentsToPersist = new HashSet<>();
       for(Comment comment : placementDetails.getComments()) {
+        //If the placement comment already exists, it has an id
         if(comment.getId() != null) {
           Comment commentSaved = commentRepository.findById(comment.getId()).orElse(null);
           commentSaved.setBody(comment.getBody());
           commentSaved.setPlacement(placementDetails);
           commentSaved.setAuthor(getProfileFromContext().getFullName());
           commentSaved.setSource(comment.getSource());
-          commentSaved.setAmendedDate(comment.getAmendedDate());
+          //commentSaved.setAmendedDate(comment.getAmendedDate());
+          commentSaved.setAmendedDate(LocalDate.now());
           commentsToPersist.add(commentSaved);
-        } else {
+        } else {// else this is a new comment
           comment.setPlacement(placementDetails);
+          comment.setAmendedDate(LocalDate.now());
+          //comment.setAuthor(getProfileFromContext().getFullName());
           commentsToPersist.add(comment);
         }
       }

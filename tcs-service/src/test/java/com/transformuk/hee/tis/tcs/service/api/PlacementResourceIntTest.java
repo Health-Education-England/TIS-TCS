@@ -45,6 +45,7 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
 
+import static com.transformuk.hee.tis.security.util.TisSecurityHelper.getProfileFromContext;
 import static com.transformuk.hee.tis.tcs.service.api.util.DateUtil.getLocalDateFromString;
 import static java.time.LocalDate.now;
 import static java.time.temporal.ChronoUnit.DAYS;
@@ -1122,9 +1123,16 @@ public class PlacementResourceIntTest {
     private void addCommentsToPlacementDetailsDTO(final PlacementDetailsDTO placementDetailsDTO){
         final Set<PlacementCommentDTO> comments = new HashSet<>();
         PlacementCommentDTO comment1 = new PlacementCommentDTO();
-        comment1.setAuthor("Comment Author");
+
+
+
+
+
+        //comment1.setAuthor("Comment Author");
+        //comment1.setAuthor(getProfileFromContext().getFullName());
         comment1.setBody("Comment Body");
         comment1.setSource(CommentSource.TIS);
+        comment1.setAmendedDate(LocalDate.now());
         comments.add(comment1);
         placementDetailsDTO.setComments(comments);
     }

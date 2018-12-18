@@ -8,6 +8,7 @@ import javax.validation.constraints.DecimalMin;
 import javax.validation.constraints.NotNull;
 import javax.validation.constraints.Null;
 import java.io.Serializable;
+import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.util.Objects;
 
@@ -25,7 +26,7 @@ public class PlacementCommentDTO implements Serializable {
 	@NotNull(message = "author is required", groups = {Update.class, Create.class})
 	protected String author;
 
-	protected LocalDateTime amendedDate;
+	protected LocalDate amendedDate;
 
 	protected CommentSource source;
 
@@ -53,11 +54,11 @@ public class PlacementCommentDTO implements Serializable {
 
 	public void setSource(CommentSource source) { this.source = source; }
 
-  public LocalDateTime getAmendedDate() {
+  public LocalDate getAmendedDate() {
     return amendedDate;
   }
 
-  public void setAmendedDate(LocalDateTime amendedDate) {
+  public void setAmendedDate(LocalDate amendedDate) {
     this.amendedDate = amendedDate;
   }
 
@@ -78,21 +79,4 @@ public class PlacementCommentDTO implements Serializable {
 
     return Objects.hash(getId(), getBody(), getAuthor(), getAmendedDate(), getSource());
   }
-
-  /*@Override
-  public boolean equals(Object o) {
-    if (this == o) return true;
-    if (o == null || getClass() != o.getClass()) return false;
-    PlacementCommentDTO that = (PlacementCommentDTO) o;
-    return Objects.equals(id, that.id) &&
-        Objects.equals(body, that.body) &&
-        Objects.equals(author, that.author) &&
-        source == that.source;
-  }
-
-  @Override
-  public int hashCode() {
-
-    return Objects.hash(id, body, author, source);
-  }*/
 }
