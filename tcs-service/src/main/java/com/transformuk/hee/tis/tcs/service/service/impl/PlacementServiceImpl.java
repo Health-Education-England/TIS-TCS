@@ -137,13 +137,11 @@ public class PlacementServiceImpl implements PlacementService {
           commentSaved.setPlacement(placementDetails);
           commentSaved.setAuthor(getProfileFromContext().getFullName());
           commentSaved.setSource(comment.getSource());
-          //commentSaved.setAmendedDate(comment.getAmendedDate());
           commentSaved.setAmendedDate(LocalDate.now());
           commentsToPersist.add(commentSaved);
         } else {// else this is a new comment
           comment.setPlacement(placementDetails);
           comment.setAmendedDate(LocalDate.now());
-          //comment.setAuthor(getProfileFromContext().getFullName());
           commentsToPersist.add(comment);
         }
       }
@@ -185,14 +183,10 @@ public class PlacementServiceImpl implements PlacementService {
 
     //clear any linked specialties before trying to save the placement
     final Placement placement = placementRepository.findById(placementDetailsDTO.getId()).orElse(null);
-    //placementSpecialtyRepository.deleteInBatch(placement.getSpecialties());
     Set<PlacementSpecialty> specialties = placement.getSpecialties();
     for(PlacementSpecialty specialty: specialties){
-      //placementSpecialtyRepository.delete(specialty.getPlacement().getId());
       placementSpecialtyRepository.delete(specialty);
     }
-
-    //placementSpecialtyRepository.delete(placement.getSpecialties());
     updateStoredCommentsWithChangesOrAdd(placementDetails);
 
         placement.setSpecialties(new HashSet<>());

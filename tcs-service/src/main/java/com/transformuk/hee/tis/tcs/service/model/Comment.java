@@ -34,7 +34,6 @@ public class Comment implements Serializable {
 
 	@Column(name = "addedDate", updatable = false, insertable = false)
 	private LocalDate addedDate;
-	//@Version
 	private LocalDate amendedDate;
 	private LocalDate inactiveDate;
 	@ManyToOne(fetch = FetchType.LAZY)

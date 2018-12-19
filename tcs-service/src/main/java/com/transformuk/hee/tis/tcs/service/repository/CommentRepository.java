@@ -4,7 +4,6 @@ import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
 public interface CommentRepository extends JpaRepository<Comment, Long> {
-  //Comment findByPlacementId(Long placementId);// This is not deleted, in case we need it in the future
   @Query(value = "SELECT * FROM tcs.Comment where placementId=:placementId order by addedDate desc limit 1", nativeQuery = true)
   Comment findByPlacementId(@Param("placementId") Long placementId);
 }
