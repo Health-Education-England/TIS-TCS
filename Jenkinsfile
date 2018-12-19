@@ -92,10 +92,6 @@ node {
             }
           }
 
-          stage('End-to-end Tests') {
-            build job: 'e2e-tests'
-          }
-
           milestone 5
 
           stage('Approval') {

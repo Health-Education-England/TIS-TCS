@@ -178,16 +178,17 @@ public class PlacementServiceImpl implements PlacementService {
   @Transactional
     @Override
     public PlacementDetailsDTO saveDetails(final PlacementDetailsDTO placementDetailsDTO) {
-    PlacementDetails placementDetails = placementDetailsMapper.placementDetailsDTOToPlacementDetails(placementDetailsDTO);
+        PlacementDetails placementDetails = placementDetailsMapper.placementDetailsDTOToPlacementDetails(placementDetailsDTO);
         log.debug("Request to save Placement : {}", placementDetailsDTO);
 
-    //clear any linked specialties before trying to save the placement
-    final Placement placement = placementRepository.findById(placementDetailsDTO.getId()).orElse(null);
-    Set<PlacementSpecialty> specialties = placement.getSpecialties();
-    for(PlacementSpecialty specialty: specialties){
-      placementSpecialtyRepository.delete(specialty);
-    }
-    updateStoredCommentsWithChangesOrAdd(placementDetails);
+        //clear any linked specialties before trying to save the placement
+        final Placement placement = placementRepository.findById(placementDetailsDTO.getId()).orElse(null);
+        //Instead of batch delete we need to unlink specialties from placement one by one
+        Set<PlacementSpecialty> specialties = placement.getSpecialties();
+        for(PlacementSpecialty specialty: specialties){
+          placementSpecialtyRepository.delete(specialty);
+        }
+        updateStoredCommentsWithChangesOrAdd(placementDetails);
 
         placement.setSpecialties(new HashSet<>());
         placementRepository.saveAndFlush(placement);
