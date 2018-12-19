@@ -8,6 +8,7 @@ import com.transformuk.hee.tis.tcs.service.service.impl.PersonTrustRowMapper;
 import com.transformuk.hee.tis.tcs.service.service.impl.PersonViewRowMapper;
 import net.javacrumbs.shedlock.core.SchedulerLock;
 import org.apache.commons.collections4.CollectionUtils;
+import org.elasticsearch.index.IndexNotFoundException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -86,7 +87,11 @@ public class PersonElasticSearchSyncJob {
 
   private void deleteIndex() {
     LOG.info("deleting person es index");
-    elasticSearchOperations.deleteIndex(ES_INDEX);
+    try {
+      elasticSearchOperations.deleteIndex(ES_INDEX);
+    } catch (IndexNotFoundException e) {
+      LOG.info("Could not delete an index that does not exist, continuing");
+    }
   }
 
   private List<PersonView> collectData(int page, int pageSize) {
