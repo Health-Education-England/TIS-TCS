@@ -141,7 +141,8 @@ public class PlacementServiceImpl implements PlacementService {
           commentsToPersist.add(commentSaved);
         } else {// else this is a new comment
           comment.setPlacement(placementDetails);
-          comment.setAmendedDate(LocalDate.now());
+          if(placementDetails.getComments() != null && comment.getBody() != null)
+            comment.setAmendedDate(LocalDate.now());
           commentsToPersist.add(comment);
         }
       }
