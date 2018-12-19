@@ -70,8 +70,13 @@ spring:
     user:
       name: admin
       password: admin
-
-
+  elasticsearch:
+    rest:
+      uris: http://localhost:9200
+  data:
+    elasticsearch:
+      cluster-nodes: localhost:9300
+      cluster-name: docker-cluster
 server:
   port: 10344
   address: localhost
@@ -120,4 +125,4 @@ kc:
   password: ${KC_PASSWORD:tcs_trust_admin}
   timeout: ${KC_TIMEOUT:10000}
 
-enable.es.search: true
+enable.es.search: false
