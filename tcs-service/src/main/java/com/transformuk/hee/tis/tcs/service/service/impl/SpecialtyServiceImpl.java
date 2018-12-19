@@ -3,6 +3,8 @@ package com.transformuk.hee.tis.tcs.service.service.impl;
 import com.transformuk.hee.tis.tcs.api.dto.SpecialtyDTO;
 import com.transformuk.hee.tis.tcs.api.dto.SpecialtySimpleDTO;
 import com.transformuk.hee.tis.tcs.api.enumeration.Status;
+import com.transformuk.hee.tis.tcs.service.event.SpecialtyDeletedEvent;
+import com.transformuk.hee.tis.tcs.service.event.SpecialtySavedEvent;
 import com.transformuk.hee.tis.tcs.service.model.ColumnFilter;
 import com.transformuk.hee.tis.tcs.service.model.Specialty;
 import com.transformuk.hee.tis.tcs.service.model.SpecialtySimple;
@@ -14,6 +16,7 @@ import com.transformuk.hee.tis.tcs.service.service.mapper.SpecialtySimpleMapper;
 import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.context.ApplicationEventPublisher;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.domain.Specification;
@@ -37,20 +40,19 @@ public class SpecialtyServiceImpl implements SpecialtyService {
   private final Logger log = LoggerFactory.getLogger(SpecialtyServiceImpl.class);
 
   private final SpecialtyRepository specialtyRepository;
-
   private final SpecialtySimpleRepository specialtySimpleRepository;
-
   private final SpecialtyMapper specialtyMapper;
-
   private final SpecialtySimpleMapper specialtySimpleMapper;
+  private final ApplicationEventPublisher applicationEventPublisher;
 
   public SpecialtyServiceImpl(SpecialtyRepository specialtyRepository, SpecialtyMapper specialtyMapper,
                               SpecialtySimpleRepository specialtySimpleRepository,
-                              SpecialtySimpleMapper specialtySimpleMapper) {
+                              SpecialtySimpleMapper specialtySimpleMapper, ApplicationEventPublisher applicationEventPublisher) {
     this.specialtyRepository = specialtyRepository;
     this.specialtyMapper = specialtyMapper;
     this.specialtySimpleRepository = specialtySimpleRepository;
     this.specialtySimpleMapper = specialtySimpleMapper;
+    this.applicationEventPublisher = applicationEventPublisher;
   }
 
   /**
@@ -69,7 +71,11 @@ public class SpecialtyServiceImpl implements SpecialtyService {
       specialty.setStatus(Status.CURRENT);
     }
     specialty = specialtyRepository.save(specialty);
-    return specialtyMapper.specialtyToSpecialtyDTO(specialty);
+    SpecialtyDTO specialtyDTO1 = specialtyMapper.specialtyToSpecialtyDTO(specialty);
+
+    applicationEventPublisher.publishEvent(new SpecialtySavedEvent(specialtyDTO1));
+
+    return specialtyDTO1;
   }
 
   /**
@@ -83,7 +89,13 @@ public class SpecialtyServiceImpl implements SpecialtyService {
     log.debug("Request to save Specialties : {}", specialtyDTO);
     List<Specialty> specialty = specialtyMapper.specialtyDTOsToSpecialties(specialtyDTO);
     specialty = specialtyRepository.saveAll(specialty);
-    return specialtyMapper.specialtiesToSpecialtyDTOs(specialty);
+    List<SpecialtyDTO> specialtyDTOS = specialtyMapper.specialtiesToSpecialtyDTOs(specialty);
+
+    specialtyDTO.stream()
+        .map(SpecialtySavedEvent::new)
+        .forEach(applicationEventPublisher::publishEvent);
+
+    return specialtyDTOS;
   }
 
   @Override
@@ -163,5 +175,6 @@ public class SpecialtyServiceImpl implements SpecialtyService {
   public void delete(Long id) {
     log.debug("Request to delete Specialty : {}", id);
     specialtyRepository.deleteById(id);
+    applicationEventPublisher.publishEvent(new SpecialtyDeletedEvent(id));
   }
 }

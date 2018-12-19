@@ -16,6 +16,7 @@ import com.transformuk.hee.tis.tcs.service.model.GdcDetails;
 import com.transformuk.hee.tis.tcs.service.model.GmcDetails;
 import com.transformuk.hee.tis.tcs.service.model.Person;
 import com.transformuk.hee.tis.tcs.service.repository.*;
+import com.transformuk.hee.tis.tcs.service.service.PersonElasticSearchService;
 import com.transformuk.hee.tis.tcs.service.service.PersonService;
 import com.transformuk.hee.tis.tcs.service.service.PlacementService;
 import com.transformuk.hee.tis.tcs.service.service.impl.PermissionService;
@@ -134,6 +135,9 @@ public class PersonResourceIntTest {
   private PersonalDetailsValidator personalDetailsValidator;
   @MockBean
   private ContactDetailsValidator contactDetailsValidator;
+  @MockBean
+  private PersonElasticSearchService personElasticSearchServiceMock;
+
   private MockMvc restPersonMockMvc;
   private Person person;
 
@@ -142,7 +146,7 @@ public class PersonResourceIntTest {
     MockitoAnnotations.initMocks(this);
     PersonResource personResource = new PersonResource(personService, placementViewRepository, placementViewMapper,
         placementViewDecorator, personViewDecorator, placementService, placementSummaryDecorator, personValidator,
-        gmcDetailsValidator, gdcDetailsValidator, personalDetailsValidator, contactDetailsValidator);
+        gmcDetailsValidator, gdcDetailsValidator, personalDetailsValidator, contactDetailsValidator, personElasticSearchServiceMock);
     this.restPersonMockMvc = MockMvcBuilders.standaloneSetup(personResource)
         .setCustomArgumentResolvers(pageableArgumentResolver)
         .setControllerAdvice(exceptionTranslator)

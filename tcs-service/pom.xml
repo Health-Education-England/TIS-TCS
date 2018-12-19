@@ -12,7 +12,7 @@
 
   <groupId>com.transformuk.hee.tis</groupId>
   <artifactId>tcs-service</artifactId>
-  <version>4.0.3</version>
+  <version>4.0.4</version>
   <packaging>war</packaging>
   <name>tcs-service</name>
 
@@ -374,6 +374,18 @@
       <artifactId>resteasy-client</artifactId>
       <version>3.0.14.Final</version>
     </dependency>
+    <dependency>
+      <groupId>org.springframework.boot</groupId>
+      <artifactId>spring-boot-devtools</artifactId>
+      <optional>true</optional>
+    </dependency>
+
+
+    <dependency>
+      <groupId>org.springframework.boot</groupId>
+      <artifactId>spring-boot-starter-data-elasticsearch</artifactId>
+    </dependency>
+
   </dependencies>
   <build>
     <defaultGoal>spring-boot:run</defaultGoal>

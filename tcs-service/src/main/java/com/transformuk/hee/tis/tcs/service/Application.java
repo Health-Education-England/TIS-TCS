@@ -13,6 +13,7 @@ import org.springframework.context.annotation.ComponentScan;
 import org.springframework.context.annotation.Import;
 import org.springframework.context.annotation.PropertySource;
 import org.springframework.core.env.Environment;
+import org.springframework.data.elasticsearch.repository.config.EnableElasticsearchRepositories;
 
 import javax.annotation.PostConstruct;
 import java.net.InetAddress;
@@ -21,6 +22,7 @@ import java.util.Arrays;
 import java.util.Collection;
 
 @ComponentScan(basePackages = {"com.transformuk.hee.tis.tcs.service","com.transformuk.hee.tis.reference"})
+@EnableElasticsearchRepositories
 @EnableAutoConfiguration()
 @EnableConfigurationProperties({ApplicationProperties.class})
 @PropertySource({

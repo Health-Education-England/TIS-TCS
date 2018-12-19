@@ -3,6 +3,9 @@ package com.transformuk.hee.tis.tcs.service.service.impl;
 import com.google.common.base.Preconditions;
 import com.transformuk.hee.tis.tcs.api.dto.ProgrammeDTO;
 import com.transformuk.hee.tis.tcs.api.enumeration.Status;
+import com.transformuk.hee.tis.tcs.service.event.ProgrammeCreatedEvent;
+import com.transformuk.hee.tis.tcs.service.event.ProgrammeDeletedEvent;
+import com.transformuk.hee.tis.tcs.service.event.ProgrammeSavedEvent;
 import com.transformuk.hee.tis.tcs.service.model.ColumnFilter;
 import com.transformuk.hee.tis.tcs.service.model.Programme;
 import com.transformuk.hee.tis.tcs.service.repository.ProgrammeRepository;
@@ -11,6 +14,7 @@ import com.transformuk.hee.tis.tcs.service.service.mapper.ProgrammeMapper;
 import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.context.ApplicationEventPublisher;
 import org.springframework.data.domain.Example;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
@@ -35,12 +39,14 @@ public class ProgrammeServiceImpl implements ProgrammeService {
   private final Logger log = LoggerFactory.getLogger(ProgrammeServiceImpl.class);
 
   private final ProgrammeRepository programmeRepository;
-
   private final ProgrammeMapper programmeMapper;
+  private final ApplicationEventPublisher applicationEventPublisher;
 
-  public ProgrammeServiceImpl(ProgrammeRepository programmeRepository, ProgrammeMapper programmeMapper) {
+  public ProgrammeServiceImpl(ProgrammeRepository programmeRepository, ProgrammeMapper programmeMapper,
+                              ApplicationEventPublisher applicationEventPublisher) {
     this.programmeRepository = programmeRepository;
     this.programmeMapper = programmeMapper;
+    this.applicationEventPublisher = applicationEventPublisher;
   }
 
   /**
@@ -54,7 +60,9 @@ public class ProgrammeServiceImpl implements ProgrammeService {
     log.debug("Request to save Programme : {}", programmeDTO);
     Programme programme = programmeMapper.programmeDTOToProgramme(programmeDTO);
     programme = programmeRepository.save(programme);
-    return programmeMapper.programmeToProgrammeDTO(programme);
+    ProgrammeDTO programmeDTO1 = programmeMapper.programmeToProgrammeDTO(programme);
+    applicationEventPublisher.publishEvent(new ProgrammeCreatedEvent(programmeDTO1));
+    return programmeDTO1;
   }
 
   /**
@@ -69,7 +77,9 @@ public class ProgrammeServiceImpl implements ProgrammeService {
 
     Programme programme = programmeMapper.programmeDTOToProgramme(programmeDTO);
     programme = programmeRepository.save(programme);
-    return programmeMapper.programmeToProgrammeDTO(programme);
+    ProgrammeDTO programmeDTO1 = programmeMapper.programmeToProgrammeDTO(programme);
+    applicationEventPublisher.publishEvent(new ProgrammeSavedEvent(programmeDTO1));
+    return programmeDTO1;
   }
 
   /**
@@ -83,7 +93,9 @@ public class ProgrammeServiceImpl implements ProgrammeService {
     log.debug("Request to save Programme : {}", programmeDTO);
     List<Programme> programmes = programmeMapper.programmeDTOsToProgrammes(programmeDTO);
     programmes = programmeRepository.saveAll(programmes);
-    return programmeMapper.programmesToProgrammeDTOs(programmes);
+    List<ProgrammeDTO> programmeDTOS = programmeMapper.programmesToProgrammeDTOs(programmes);
+    programmeDTOS.stream().distinct().map(ProgrammeSavedEvent::new).forEach(applicationEventPublisher::publishEvent);
+    return programmeDTOS;
   }
 
   /**
@@ -171,5 +183,6 @@ public class ProgrammeServiceImpl implements ProgrammeService {
   public void delete(Long id) {
     log.debug("Request to delete Programme : {}", id);
     programmeRepository.deleteById(id);
+    applicationEventPublisher.publishEvent(new ProgrammeDeletedEvent(id));
   }
 }

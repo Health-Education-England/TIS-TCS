@@ -6,6 +6,9 @@ import com.transformuk.hee.tis.tcs.api.dto.*;
 import com.transformuk.hee.tis.tcs.api.enumeration.PersonOwnerRule;
 import com.transformuk.hee.tis.tcs.api.enumeration.Status;
 import com.transformuk.hee.tis.tcs.service.api.util.BasicPage;
+import com.transformuk.hee.tis.tcs.service.event.PersonCreatedEvent;
+import com.transformuk.hee.tis.tcs.service.event.PersonDeletedEvent;
+import com.transformuk.hee.tis.tcs.service.event.PersonSavedEvent;
 import com.transformuk.hee.tis.tcs.service.exception.AccessUnauthorisedException;
 import com.transformuk.hee.tis.tcs.service.model.*;
 import com.transformuk.hee.tis.tcs.service.repository.*;
@@ -21,6 +24,7 @@ import org.slf4j.LoggerFactory;
 import org.springframework.beans.BeanUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.cache.annotation.Cacheable;
+import org.springframework.context.ApplicationEventPublisher;
 import org.springframework.data.domain.*;
 import org.springframework.data.jpa.domain.Specification;
 import org.springframework.data.jpa.domain.Specifications;
@@ -82,6 +86,9 @@ public class PersonServiceImpl implements PersonService {
   @Autowired
   private NamedParameterJdbcTemplate namedParameterJdbcTemplate;
 
+  @Autowired
+  private ApplicationEventPublisher applicationEventPublisher;
+
   /**
    * Save a person.
    *
@@ -112,6 +119,9 @@ public class PersonServiceImpl implements PersonService {
     if (!permissionService.canEditSensitiveData() && personDtoId != null) {
       clearSensitiveData(personDTO1.getPersonalDetails());
     }
+
+    applicationEventPublisher.publishEvent(new PersonSavedEvent(personDTO));
+
     return personDTO1;
   }
 
@@ -160,6 +170,8 @@ public class PersonServiceImpl implements PersonService {
     rightToWork = rightToWorkRepository.save(rightToWork);
     person.setRightToWork(rightToWork);
 
+    applicationEventPublisher.publishEvent(new PersonCreatedEvent(personDTO));
+
     return personMapper.toDto(person);
   }
 
@@ -174,7 +186,13 @@ public class PersonServiceImpl implements PersonService {
     log.debug("Request to save Persons : {}", personDTOs);
     List<Person> personList = personMapper.toEntity(personDTOs);
     personList = personRepository.saveAll(personList);
-    return personMapper.toDto(personList);
+    List<PersonDTO> personDTOS = personMapper.toDto(personList);
+
+    personDTOS.stream()
+        .map(PersonSavedEvent::new)
+        .forEach(applicationEventPublisher::publishEvent);
+
+    return personDTOS;
   }
 
   /**
@@ -609,6 +627,7 @@ public class PersonServiceImpl implements PersonService {
   public void delete(final Long id) {
     log.debug("Request to delete Person : {}", id);
     personRepository.deleteById(id);
+    applicationEventPublisher.publishEvent(new PersonDeletedEvent(id));
   }
 
   /**
@@ -659,7 +678,7 @@ public class PersonServiceImpl implements PersonService {
     return commaSepTrustIds;
   }
 
-  private class PersonViewRowMapper implements RowMapper<PersonViewDTO> {
+  public class PersonViewRowMapper implements RowMapper<PersonViewDTO> {
 
     @Override
     public PersonViewDTO mapRow(final ResultSet rs, final int id) throws SQLException {

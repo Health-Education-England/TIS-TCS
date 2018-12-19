@@ -1,12 +1,15 @@
 package com.transformuk.hee.tis.tcs.service.service.impl;
 
 import com.transformuk.hee.tis.tcs.api.dto.GmcDetailsDTO;
+import com.transformuk.hee.tis.tcs.service.event.GmcDetailsDeletedEvent;
+import com.transformuk.hee.tis.tcs.service.event.GmcDetailsSavedEvent;
 import com.transformuk.hee.tis.tcs.service.model.GmcDetails;
 import com.transformuk.hee.tis.tcs.service.repository.GmcDetailsRepository;
 import com.transformuk.hee.tis.tcs.service.service.GmcDetailsService;
 import com.transformuk.hee.tis.tcs.service.service.mapper.GmcDetailsMapper;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.context.ApplicationEventPublisher;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
@@ -24,12 +27,14 @@ public class GmcDetailsServiceImpl implements GmcDetailsService {
   private final Logger log = LoggerFactory.getLogger(GmcDetailsServiceImpl.class);
 
   private final GmcDetailsRepository gmcDetailsRepository;
-
   private final GmcDetailsMapper gmcDetailsMapper;
+  private final ApplicationEventPublisher applicationEventPublisher;
 
-  public GmcDetailsServiceImpl(GmcDetailsRepository gmcDetailsRepository, GmcDetailsMapper gmcDetailsMapper) {
+  public GmcDetailsServiceImpl(GmcDetailsRepository gmcDetailsRepository, GmcDetailsMapper gmcDetailsMapper,
+                               ApplicationEventPublisher applicationEventPublisher) {
     this.gmcDetailsRepository = gmcDetailsRepository;
     this.gmcDetailsMapper = gmcDetailsMapper;
+    this.applicationEventPublisher = applicationEventPublisher;
   }
 
   /**
@@ -43,7 +48,10 @@ public class GmcDetailsServiceImpl implements GmcDetailsService {
     log.debug("Request to save GmcDetails : {}", gmcDetailsDTO);
     GmcDetails gmcDetails = gmcDetailsMapper.toEntity(gmcDetailsDTO);
     gmcDetails = gmcDetailsRepository.saveAndFlush(gmcDetails);
-    return gmcDetailsMapper.toDto(gmcDetails);
+
+    gmcDetailsDTO = gmcDetailsMapper.toDto(gmcDetails);
+    applicationEventPublisher.publishEvent(new GmcDetailsSavedEvent(gmcDetailsDTO));
+    return gmcDetailsDTO;
   }
 
   /**
@@ -57,7 +65,13 @@ public class GmcDetailsServiceImpl implements GmcDetailsService {
     log.debug("Request to save GmcDetails : {}", gmcDetailsDTOs);
     List<GmcDetails> gmcDetailsList = gmcDetailsMapper.toEntity(gmcDetailsDTOs);
     gmcDetailsList = gmcDetailsRepository.saveAll(gmcDetailsList);
-    return gmcDetailsMapper.toDto(gmcDetailsList);
+    List<GmcDetailsDTO> gmcDetailsDTOS = gmcDetailsMapper.toDto(gmcDetailsList);
+
+    gmcDetailsDTOS.stream()
+        .map(GmcDetailsSavedEvent::new)
+        .forEach(applicationEventPublisher::publishEvent);
+
+    return gmcDetailsDTOS;
   }
 
   /**
@@ -106,5 +120,6 @@ public class GmcDetailsServiceImpl implements GmcDetailsService {
   public void delete(Long id) {
     log.debug("Request to delete GmcDetails : {}", id);
     gmcDetailsRepository.deleteById(id);
+    applicationEventPublisher.publishEvent(new GmcDetailsDeletedEvent(id));
   }
 }
