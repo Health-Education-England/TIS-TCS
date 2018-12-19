@@ -1123,13 +1123,6 @@ public class PlacementResourceIntTest {
     private void addCommentsToPlacementDetailsDTO(final PlacementDetailsDTO placementDetailsDTO){
         final Set<PlacementCommentDTO> comments = new HashSet<>();
         PlacementCommentDTO comment1 = new PlacementCommentDTO();
-
-
-
-
-
-        //comment1.setAuthor("Comment Author");
-        //comment1.setAuthor(getProfileFromContext().getFullName());
         comment1.setBody("Comment Body");
         comment1.setSource(CommentSource.TIS);
         comment1.setAmendedDate(LocalDate.now());
