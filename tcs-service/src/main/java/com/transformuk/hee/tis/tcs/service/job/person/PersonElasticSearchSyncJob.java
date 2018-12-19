@@ -102,7 +102,7 @@ public class PersonElasticSearchSyncJob {
     List<PersonView> queryResult = namedParameterJdbcTemplate.query(query, paramSource, new PersonViewRowMapper());
 
     if (CollectionUtils.isNotEmpty(queryResult)) {
-      Set<Long> personIds = queryResult.stream().map(PersonView::getId).collect(Collectors.toSet());
+      Set<Long> personIds = queryResult.stream().map(PersonView::getPersonId).collect(Collectors.toSet());
       List<PersonTrustDto> personTrustDtos = namedParameterJdbcTemplate
           .query(PERSON_TRUST_QUERY, new MapSqlParameterSource("personIds", personIds), new PersonTrustRowMapper());
 
@@ -118,14 +118,16 @@ public class PersonElasticSearchSyncJob {
       }
 
       queryResult.stream().forEach(pv -> {
-        if (personIdToTrustIds.containsKey(pv.getId())) {
-          pv.setTrusts(personIdToTrustIds.get(pv.getId()));
+        if (personIdToTrustIds.containsKey(pv.getPersonId())) {
+          pv.setTrusts(personIdToTrustIds.get(pv.getPersonId()));
         } else {
           pv.setTrusts(Lists.newArrayList());
         }
       });
     }
-    queryResult.stream().forEach(pv -> pv.setFullName(pv.getForenames() + " " + pv.getSurname()));
+    queryResult.stream().forEach(pv -> {
+      pv.setFullName(pv.getForenames() + " " + pv.getSurname());
+    });
     return queryResult;
   }
 

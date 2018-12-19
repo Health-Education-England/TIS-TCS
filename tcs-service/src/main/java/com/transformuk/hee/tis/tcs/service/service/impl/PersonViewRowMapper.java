@@ -13,7 +13,7 @@ public class PersonViewRowMapper implements RowMapper<PersonView> {
   @Override
   public PersonView mapRow(final ResultSet rs, final int id) throws SQLException {
     final PersonView view = new PersonView();
-    view.setId(rs.getLong("id"));
+    view.setPersonId(rs.getLong("id"));
     view.setIntrepidId(rs.getString("intrepidId"));
     view.setSurname(rs.getString("surname"));
     view.setForenames(rs.getString("forenames"));

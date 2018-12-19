@@ -1,6 +1,7 @@
 package com.transformuk.hee.tis.tcs.service.job.person;
 
 import com.transformuk.hee.tis.tcs.api.enumeration.Status;
+import org.springframework.data.annotation.Id;
 import org.springframework.data.elasticsearch.annotations.Document;
 import org.springframework.data.elasticsearch.annotations.Field;
 import org.springframework.data.elasticsearch.annotations.FieldType;
@@ -13,14 +14,17 @@ public class PersonView implements Serializable {
 
   private static final long serialVersionUID = 1L;
 
-  private Long id;
+  @Id
+  private String id;
+
+  private Long personId;
 
   private String intrepidId;
 
-  @Field(type = FieldType.Text, analyzer = "standard")
+  @Field(type = FieldType.Text, analyzer = "standard", fielddata = true)
   private String surname;
 
-  @Field(type = FieldType.Text, analyzer = "standard")
+  @Field(type = FieldType.Text, analyzer = "standard", fielddata = true)
   private String forenames;
 
   @Field(type = FieldType.Text, analyzer = "standard")
@@ -74,12 +78,20 @@ public class PersonView implements Serializable {
   @Field(type = FieldType.Nested)
   private List<PersonTrustDto> trusts;
 
-  public Long getId() {
+  public String getId() {
     return id;
   }
 
-  public void setId(Long id) {
+  public void setId(String id) {
     this.id = id;
+  }
+
+  public Long getPersonId() {
+    return personId;
+  }
+
+  public void setPersonId(Long personId) {
+    this.personId = personId;
   }
 
   public String getIntrepidId() {
