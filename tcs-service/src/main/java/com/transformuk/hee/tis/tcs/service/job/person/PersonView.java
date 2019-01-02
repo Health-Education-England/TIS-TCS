@@ -7,7 +7,7 @@ import org.springframework.data.elasticsearch.annotations.Field;
 import org.springframework.data.elasticsearch.annotations.FieldType;
 
 import java.io.Serializable;
-import java.util.List;
+import java.util.Set;
 
 @Document(indexName = "persons", type = "person")
 public class PersonView implements Serializable {
@@ -76,7 +76,7 @@ public class PersonView implements Serializable {
   private String currentOwnerRule;
 
   @Field(type = FieldType.Nested)
-  private List<PersonTrustDto> trusts;
+  private Set<PersonTrustDto> trusts;
 
   public String getId() {
     return id;
@@ -278,11 +278,11 @@ public class PersonView implements Serializable {
     this.siteId = siteId;
   }
 
-  public List<PersonTrustDto> getTrusts() {
+  public Set<PersonTrustDto> getTrusts() {
     return trusts;
   }
 
-  public void setTrusts(List<PersonTrustDto> trusts) {
+  public void setTrusts(Set<PersonTrustDto> trusts) {
     this.trusts = trusts;
   }
 }

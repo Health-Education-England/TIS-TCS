@@ -1,6 +1,7 @@
 package com.transformuk.hee.tis.tcs.service.job.person;
 
 import java.io.Serializable;
+import java.util.Objects;
 
 public class PersonTrustDto implements Serializable {
   private Long personId;
@@ -28,5 +29,19 @@ public class PersonTrustDto implements Serializable {
 
   public void setTrustId(Long trustId) {
     this.trustId = trustId;
+  }
+
+  @Override
+  public boolean equals(Object o) {
+    if (this == o) return true;
+    if (o == null || getClass() != o.getClass()) return false;
+    PersonTrustDto that = (PersonTrustDto) o;
+    return Objects.equals(personId, that.personId) &&
+        Objects.equals(trustId, that.trustId);
+  }
+
+  @Override
+  public int hashCode() {
+    return Objects.hash(personId, trustId);
   }
 }
