@@ -4,10 +4,10 @@ spring:
       enabled: true
   datasource:
     url: jdbc:mysql://${DBHOST:localhost}:${DBPORT:3306}/${DBNAME:tcs}?useUnicode=true&characterEncoding=utf8&useSSL=${USE_SSL:false}
-    username: ${DBUSER:}
-    password: ${DBPASSWORD:}
+    username: ${DBUSER:admin}
+    password: ${DBPASSWORD:admin}
   flyway:
-    password: ${DBPASSWORD:}
+    password: ${DBPASSWORD:admin}
     schemas: ${DBNAME:tcs}
 
 logging:
