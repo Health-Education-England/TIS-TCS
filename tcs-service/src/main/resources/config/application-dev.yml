@@ -9,8 +9,17 @@ spring:
   flyway:
     password: ${DBPASSWORD}
     schemas: ${DBNAME}
+  elasticsearch:
+    rest:
+      uris: http://${ES_URL}:${ES_URL_PORT}
+  data:
+    elasticsearch:
+      cluster-nodes: ${ES_CLUSTER_NODE_URL}:${ES_CLUSTER_NODE_PORT}
+      cluster-name: ${ES_CLUSTER_NAME}
 
 logging:
   file: ${LOG_DIR:${HOME}}/tcs.log
 
 application:
+
+enable.es.search: ${ENABLE_ES_SEARCH}

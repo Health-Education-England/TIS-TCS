@@ -4,6 +4,7 @@ import com.transformuk.hee.tis.filestorage.config.TisFileStorageConfig;
 import com.transformuk.hee.tis.tcs.service.config.ApplicationProperties;
 import com.transformuk.hee.tis.tcs.service.config.DefaultProfileUtil;
 import io.github.jhipster.config.JHipsterConstants;
+import net.javacrumbs.shedlock.spring.annotation.EnableSchedulerLock;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.boot.SpringApplication;
@@ -13,6 +14,7 @@ import org.springframework.context.annotation.ComponentScan;
 import org.springframework.context.annotation.Import;
 import org.springframework.context.annotation.PropertySource;
 import org.springframework.core.env.Environment;
+import org.springframework.data.elasticsearch.repository.config.EnableElasticsearchRepositories;
 
 import javax.annotation.PostConstruct;
 import java.net.InetAddress;
@@ -21,6 +23,7 @@ import java.util.Arrays;
 import java.util.Collection;
 
 @ComponentScan(basePackages = {"com.transformuk.hee.tis.tcs.service","com.transformuk.hee.tis.reference"})
+@EnableElasticsearchRepositories
 @EnableAutoConfiguration()
 @EnableConfigurationProperties({ApplicationProperties.class})
 @PropertySource({
@@ -29,6 +32,7 @@ import java.util.Collection;
     "classpath:/config/referenceclientapplication.properties"
 })
 @Import(TisFileStorageConfig.class)
+@EnableSchedulerLock(defaultLockAtLeastFor = "PT1M", defaultLockAtMostFor = "PT1M")
 public class Application {
 
   private static final Logger log = LoggerFactory.getLogger(Application.class);

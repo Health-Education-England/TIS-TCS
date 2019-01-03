@@ -9,6 +9,13 @@ spring:
   flyway:
     password: ${DBPASSWORD:admin}
     schemas: ${DBNAME:tcs}
+  elasticsearch:
+    rest:
+      uris: http://localhost:9200
+  data:
+    elasticsearch:
+      cluster-nodes: localhost:9300
+      cluster-name: docker-cluster
 
 logging:
     file: ${LOG_DIR:${HOME}}/tcs.log
@@ -29,3 +36,6 @@ kc:
   username: ${KC_USERNAME:tcs_trust_admin}
   password: ${KC_PASSWORD:tcs_trust_admin}
   timeout: ${KC_TIMEOUT:10000}
+
+# enable.es.search: true
+enable.es.search: false

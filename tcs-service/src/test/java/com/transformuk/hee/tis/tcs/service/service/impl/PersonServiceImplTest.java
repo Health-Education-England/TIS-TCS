@@ -15,6 +15,7 @@ import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.mockito.*;
 import org.mockito.runners.MockitoJUnitRunner;
+import org.springframework.context.ApplicationEventPublisher;
 
 import java.time.LocalDate;
 import java.util.ArrayList;
@@ -81,6 +82,8 @@ public class PersonServiceImplTest {
   @Captor
   private ArgumentCaptor<RightToWork> rightToWorkArgumentCaptor;
 
+  @Mock
+  private ApplicationEventPublisher applicationEventPublisherMock;
 
   @Before
   public void setup() {

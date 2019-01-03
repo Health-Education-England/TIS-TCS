@@ -15,6 +15,8 @@
 
 
 spring:
+  h2.console.enabled: true
+  h2.console.path: /h2-console
   main.allow-bean-definition-overriding: true
   application:
     name: tcs
@@ -70,8 +72,13 @@ spring:
     user:
       name: admin
       password: admin
-
-
+  elasticsearch:
+    rest:
+      uris: http://localhost:9200
+  data:
+    elasticsearch:
+      cluster-nodes: localhost:9300
+      cluster-name: docker-cluster
 server:
   port: 10344
   address: localhost
@@ -102,6 +109,11 @@ jhipster:
 # More documentation is available at:
 # https://jhipster.github.io/common-application-properties/
 # ===================================================================
+logging:
+  # file: ${LOG_DIR:${HOME}}/tcs.log
+  level:
+       # org.springframework.web: WARN
+       org.flywaydb.core: ERROR
 
 application:
 
@@ -119,3 +131,5 @@ kc:
   username: ${KC_USERNAME:tcs_trust_admin}
   password: ${KC_PASSWORD:tcs_trust_admin}
   timeout: ${KC_TIMEOUT:10000}
+
+enable.es.search: false

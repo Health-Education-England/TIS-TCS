@@ -17,6 +17,7 @@ import org.mockito.Captor;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.runners.MockitoJUnitRunner;
+import org.springframework.context.ApplicationEventPublisher;
 
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
@@ -45,6 +46,9 @@ public class SpecialtyServiceImplTest {
   private ArgumentCaptor<Status> statusCaptor;
 
   private SpecialtyDTO specialtyDTO;
+
+  @Mock
+  private ApplicationEventPublisher applicationEventPublisherMock;
 
   @Before
   public void setup() {

@@ -8,6 +8,8 @@ import com.transformuk.hee.tis.tcs.api.enumeration.PlacementStatus;
 import com.transformuk.hee.tis.tcs.api.enumeration.PostSpecialtyType;
 import com.transformuk.hee.tis.tcs.api.enumeration.TCSDateColumns;
 import com.transformuk.hee.tis.tcs.service.api.util.ColumnFilterUtil;
+import com.transformuk.hee.tis.tcs.service.event.PlacementDeletedEvent;
+import com.transformuk.hee.tis.tcs.service.event.PlacementSavedEvent;
 import com.transformuk.hee.tis.tcs.service.exception.DateRangeColumnFilterException;
 import com.transformuk.hee.tis.tcs.service.model.*;
 import com.transformuk.hee.tis.tcs.service.repository.*;
@@ -25,6 +27,7 @@ import org.apache.commons.lang3.time.DateUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.context.ApplicationEventPublisher;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.domain.Specification;
@@ -89,6 +92,8 @@ public class PlacementServiceImpl implements PlacementService {
     private NamedParameterJdbcTemplate namedParameterJdbcTemplate;
     @Autowired
     private CommentRepository commentRepository;
+    @Autowired
+    private ApplicationEventPublisher applicationEventPublisher;
 
     /**
      * Save a placement.
@@ -192,8 +197,8 @@ public class PlacementServiceImpl implements PlacementService {
         updateStoredCommentsWithChangesOrAdd(placementDetails);
 
         placement.setSpecialties(new HashSet<>());
-        placementRepository.saveAndFlush(placement);
-
+        PlacementDTO placementDTO = placementMapper.placementToPlacementDTO(placementRepository.saveAndFlush(placement));
+        applicationEventPublisher.publishEvent(new PlacementSavedEvent(placementDTO));
         return createDetails(placementDetailsDTO);
     }
 
@@ -212,7 +217,9 @@ public class PlacementServiceImpl implements PlacementService {
         }
 
         placement.setSpecialties(Sets.newHashSet(placementSpecialties));
-        placementRepository.save(placement);
+        Placement savedPlacement = placementRepository.save(placement);
+        PlacementDTO placementDTO = placementMapper.placementToPlacementDTO(savedPlacement);
+        applicationEventPublisher.publishEvent(new PlacementSavedEvent(placementDTO));
         return placementSpecialties;
     }
 
@@ -226,8 +233,14 @@ public class PlacementServiceImpl implements PlacementService {
     public List<PlacementDTO> save(final List<PlacementDTO> placementDTO) {
         log.debug("Request to save Placements : {}", placementDTO);
         List<Placement> placements = placementMapper.placementDTOsToPlacements(placementDTO);
-      placements = placementRepository.saveAll(placements);
-        return placementMapper.placementsToPlacementDTOs(placements);
+        placements = placementRepository.saveAll(placements);
+        List<PlacementDTO> placementDTOS = placementMapper.placementsToPlacementDTOs(placements);
+
+        placementDTO.stream()
+            .map(PlacementSavedEvent::new)
+            .forEach(applicationEventPublisher::publishEvent);
+
+        return placementDTOS;
     }
 
     /**
@@ -296,8 +309,12 @@ public class PlacementServiceImpl implements PlacementService {
         handleEsrNotificationForPlacementDelete(id);
 
         placementSupervisorRepository.deleteAllByIdPlacementId(id);
+        Placement placement = placementRepository.getOne(id);
+        PlacementDeletedEvent event = new PlacementDeletedEvent(id, placement.getTrainee().getId());
 
-      placementRepository.deleteById(id);
+        placementRepository.delete(placement);
+
+        applicationEventPublisher.publishEvent(event);
     }
 
     private void handleEsrNotificationForPlacementDelete(final Long id) {
