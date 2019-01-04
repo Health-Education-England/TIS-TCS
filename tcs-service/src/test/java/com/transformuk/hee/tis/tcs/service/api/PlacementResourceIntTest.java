@@ -4,7 +4,11 @@ import com.google.common.collect.Sets;
 import com.transformuk.hee.tis.reference.api.dto.GradeDTO;
 import com.transformuk.hee.tis.reference.api.dto.SiteDTO;
 import com.transformuk.hee.tis.reference.client.ReferenceService;
-import com.transformuk.hee.tis.tcs.api.dto.*;
+import com.transformuk.hee.tis.tcs.api.dto.PersonLiteDTO;
+import com.transformuk.hee.tis.tcs.api.dto.PlacementCommentDTO;
+import com.transformuk.hee.tis.tcs.api.dto.PlacementDTO;
+import com.transformuk.hee.tis.tcs.api.dto.PlacementDetailsDTO;
+import com.transformuk.hee.tis.tcs.api.dto.PlacementSupervisorDTO;
 import com.transformuk.hee.tis.tcs.api.enumeration.CommentSource;
 import com.transformuk.hee.tis.tcs.service.Application;
 import com.transformuk.hee.tis.tcs.service.api.decorator.AsyncReferenceService;
@@ -12,8 +16,26 @@ import com.transformuk.hee.tis.tcs.service.api.decorator.PersonBasicDetailsRepos
 import com.transformuk.hee.tis.tcs.service.api.decorator.PlacementDetailsDecorator;
 import com.transformuk.hee.tis.tcs.service.api.validation.PlacementValidator;
 import com.transformuk.hee.tis.tcs.service.exception.ExceptionTranslator;
-import com.transformuk.hee.tis.tcs.service.model.*;
-import com.transformuk.hee.tis.tcs.service.repository.*;
+import com.transformuk.hee.tis.tcs.service.model.ContactDetails;
+import com.transformuk.hee.tis.tcs.service.model.EsrNotification;
+import com.transformuk.hee.tis.tcs.service.model.GmcDetails;
+import com.transformuk.hee.tis.tcs.service.model.Person;
+import com.transformuk.hee.tis.tcs.service.model.Placement;
+import com.transformuk.hee.tis.tcs.service.model.PlacementDetails;
+import com.transformuk.hee.tis.tcs.service.model.PlacementSupervisor;
+import com.transformuk.hee.tis.tcs.service.model.PlacementSupervisorId;
+import com.transformuk.hee.tis.tcs.service.model.Post;
+import com.transformuk.hee.tis.tcs.service.model.Specialty;
+import com.transformuk.hee.tis.tcs.service.repository.CommentRepository;
+import com.transformuk.hee.tis.tcs.service.repository.ContactDetailsRepository;
+import com.transformuk.hee.tis.tcs.service.repository.EsrNotificationRepository;
+import com.transformuk.hee.tis.tcs.service.repository.PersonBasicDetailsRepository;
+import com.transformuk.hee.tis.tcs.service.repository.PersonRepository;
+import com.transformuk.hee.tis.tcs.service.repository.PlacementDetailsRepository;
+import com.transformuk.hee.tis.tcs.service.repository.PlacementRepository;
+import com.transformuk.hee.tis.tcs.service.repository.PlacementSupervisorRepository;
+import com.transformuk.hee.tis.tcs.service.repository.PostRepository;
+import com.transformuk.hee.tis.tcs.service.repository.SpecialtyRepository;
 import com.transformuk.hee.tis.tcs.service.service.PlacementService;
 import com.transformuk.hee.tis.tcs.service.service.mapper.PlacementDetailsMapper;
 import com.transformuk.hee.tis.tcs.service.service.mapper.PlacementMapper;
@@ -39,13 +61,14 @@ import org.springframework.transaction.annotation.Transactional;
 
 import javax.persistence.EntityManager;
 import java.math.BigDecimal;
+import java.text.SimpleDateFormat;
 import java.time.LocalDate;
 import java.time.ZoneId;
+import java.util.Date;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
 
-import static com.transformuk.hee.tis.security.util.TisSecurityHelper.getProfileFromContext;
 import static com.transformuk.hee.tis.tcs.service.api.util.DateUtil.getLocalDateFromString;
 import static java.time.LocalDate.now;
 import static java.time.temporal.ChronoUnit.DAYS;
@@ -55,8 +78,14 @@ import static org.assertj.core.api.Assertions.assertThat;
 import static org.hamcrest.Matchers.containsInAnyOrder;
 import static org.hamcrest.Matchers.hasItem;
 import static org.mockito.BDDMockito.given;
-import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.*;
-import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.*;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.delete;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.patch;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.put;
+import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.content;
+import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
+import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
 /**
  * Test class for the PlacementResource REST controller.
@@ -508,10 +537,17 @@ public class PlacementResourceIntTest {
         // This method is invoked from here to add comments to the PlacementDTO
         addCommentsToPlacementDetailsDTO(placementDTO);
 
-        restPlacementMockMvc.perform(put("/api/placements")
+
+      SimpleDateFormat simpleDateFormat = new SimpleDateFormat("yyyy-MM-dd");
+      String expectedAmendedDate = simpleDateFormat.format(new Date());
+      restPlacementMockMvc.perform(put("/api/placements")
                 .contentType(TestUtil.APPLICATION_JSON_UTF8)
                 .content(TestUtil.convertObjectToJsonBytes(placementDTO)))
-                .andExpect(status().isOk());
+                .andExpect(status().isOk())
+                .andExpect(content().contentType(MediaType.APPLICATION_JSON_UTF8))
+                .andExpect(jsonPath("$.comments[0].body").value("Comment Body"))
+                .andExpect(jsonPath("$.comments[0].source").value("TIS"))
+                .andExpect(jsonPath("$.comments[0].amendedDate").value(expectedAmendedDate));
 
         // Validate the Placement in the database
         final List<PlacementDetails> placementList = placementDetailsRepository.findAll();
@@ -549,12 +585,21 @@ public class PlacementResourceIntTest {
 
         final PlacementDetailsDTO placementDTO = placementDetailsMapper.placementDetailsToPlacementDetailsDTO(updatedPlacement);
         addCommentsToPlacementDetailsDTO(placementDTO);
+
+        SimpleDateFormat simpleDateFormat = new SimpleDateFormat("yyyy-MM-dd");
+        String expectedAmendedDate = simpleDateFormat.format(new Date());
+
         restPlacementMockMvc.perform(put("/api/placements")
             .contentType(TestUtil.APPLICATION_JSON_UTF8)
             .content(TestUtil.convertObjectToJsonBytes(placementDTO)))
-            .andExpect(status().isOk());
+            .andExpect(status().isOk())
+            .andExpect(content().contentType(MediaType.APPLICATION_JSON_UTF8))
+            .andExpect(jsonPath("$.comments[0].body").value("Comment Body"))
+            .andExpect(jsonPath("$.comments[0].source").value("TIS"))
+            .andExpect(jsonPath("$.comments[0].amendedDate").value(expectedAmendedDate));
 
-        // Validate the Placement in the database
+
+      // Validate the Placement in the database
         final List<PlacementDetails> placementList = placementDetailsRepository.findAll();
         assertThat(placementList).hasSize(databaseSizeBeforeUpdate);
         final PlacementDetails testPlacement = placementList.get(placementList.size() - 1);
@@ -1125,7 +1170,6 @@ public class PlacementResourceIntTest {
         PlacementCommentDTO comment1 = new PlacementCommentDTO();
         comment1.setBody("Comment Body");
         comment1.setSource(CommentSource.TIS);
-        comment1.setAmendedDate(LocalDate.now());
         comments.add(comment1);
         placementDetailsDTO.setComments(comments);
     }
