@@ -1,10 +1,8 @@
 package com.transformuk.hee.tis.tcs.service.job.person;
 
 import com.google.common.base.Stopwatch;
-import com.google.common.collect.Lists;
-import com.transformuk.hee.tis.tcs.service.repository.PersonElasticSearchRepository;
+import com.transformuk.hee.tis.tcs.service.service.PersonElasticSearchService;
 import com.transformuk.hee.tis.tcs.service.service.helper.SqlQuerySupplier;
-import com.transformuk.hee.tis.tcs.service.service.impl.PersonTrustRowMapper;
 import com.transformuk.hee.tis.tcs.service.service.impl.PersonViewRowMapper;
 import net.javacrumbs.shedlock.core.SchedulerLock;
 import org.apache.commons.collections4.CollectionUtils;
@@ -20,12 +18,8 @@ import org.springframework.jmx.export.annotation.ManagedResource;
 import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Component;
 
-import java.util.HashMap;
 import java.util.List;
-import java.util.Map;
-import java.util.Set;
 import java.util.concurrent.CompletableFuture;
-import java.util.stream.Collectors;
 
 @Component
 @ManagedResource(objectName = "tcs.mbean:name=PersonElasticSearchJob",
@@ -34,7 +28,6 @@ public class PersonElasticSearchSyncJob {
 
   private static final Logger LOG = LoggerFactory.getLogger(PersonElasticSearchSyncJob.class);
   private static final String ES_INDEX = "persons";
-  private static final String PERSON_TRUST_QUERY = "SELECT personId, trustId FROM PersonTrust WHERE personId IN (:personIds)";
   private static final int FIFTEEN_MIN = 15 * 60 * 1000;
 
   private Stopwatch mainStopWatch;
@@ -50,7 +43,7 @@ public class PersonElasticSearchSyncJob {
   private ElasticsearchOperations elasticSearchOperations;
 
   @Autowired
-  private PersonElasticSearchRepository personElasticSearchRepository;
+  private PersonElasticSearchService personElasticSearchService;
 
   @ManagedOperation(description = "Is the Person es sync just currently running")
   public boolean isCurrentlyRunning() {
@@ -103,43 +96,9 @@ public class PersonElasticSearchSyncJob {
         .replace("LIMITCLAUSE", limitClause);
 
     MapSqlParameterSource paramSource = new MapSqlParameterSource();
-
     List<PersonView> queryResult = namedParameterJdbcTemplate.query(query, paramSource, new PersonViewRowMapper());
-
-    if (CollectionUtils.isNotEmpty(queryResult)) {
-      Set<Long> personIds = queryResult.stream().map(PersonView::getPersonId).collect(Collectors.toSet());
-      List<PersonTrustDto> personTrustDtos = namedParameterJdbcTemplate
-          .query(PERSON_TRUST_QUERY, new MapSqlParameterSource("personIds", personIds), new PersonTrustRowMapper());
-
-      Map<Long, List<PersonTrustDto>> personIdToTrustIds = new HashMap<>();
-
-      for (PersonTrustDto personTrustDto : personTrustDtos) {
-        Long personId = personTrustDto.getPersonId();
-        if (!personIdToTrustIds.containsKey(personId)) {
-          personIdToTrustIds.put(personId, Lists.newArrayList());
-        }
-
-        personIdToTrustIds.get(personId).add(personTrustDto);
-      }
-
-      queryResult.stream().forEach(pv -> {
-        if (personIdToTrustIds.containsKey(pv.getPersonId())) {
-          pv.setTrusts(personIdToTrustIds.get(pv.getPersonId()));
-        } else {
-          pv.setTrusts(Lists.newArrayList());
-        }
-      });
-    }
-    queryResult.stream().forEach(pv -> {
-      pv.setFullName(pv.getForenames() + " " + pv.getSurname());
-    });
+    personElasticSearchService.updateDocumentWithTrustData(queryResult);
     return queryResult;
-  }
-
-  private void sendToEs(List<PersonView> dataToSave) {
-    if (CollectionUtils.isNotEmpty(dataToSave)) {
-      personElasticSearchRepository.saveAll(dataToSave);
-    }
   }
 
   protected void run() {
@@ -170,10 +129,11 @@ public class PersonElasticSearchSyncJob {
         }
         stopwatch.reset().start();
 
-        sendToEs(collectedData);
+        personElasticSearchService.saveDocuments(collectedData);
 
         LOG.info("Time taken to save chunk : [{}]", stopwatch.toString());
       }
+      elasticSearchOperations.refresh(PersonView.class);
       stopwatch.reset().start();
       LOG.info("Sync job [{}] finished. Total time taken {} for processing [{}] records", getJobName(), mainStopWatch.stop().toString(), totalRecords);
       mainStopWatch = null;
