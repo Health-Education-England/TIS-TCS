@@ -133,6 +133,7 @@ public class PersonElasticSearchSyncJob {
 
         LOG.info("Time taken to save chunk : [{}]", stopwatch.toString());
       }
+      elasticSearchOperations.refresh(PersonView.class);
       stopwatch.reset().start();
       LOG.info("Sync job [{}] finished. Total time taken {} for processing [{}] records", getJobName(), mainStopWatch.stop().toString(), totalRecords);
       mainStopWatch = null;

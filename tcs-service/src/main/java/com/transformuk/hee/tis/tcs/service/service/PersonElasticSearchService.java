@@ -201,6 +201,7 @@ public class PersonElasticSearchService {
     } else {
       deletePersonDocument(personId);
     }
+    personElasticSearchRepository.refresh();
   }
 
   public void deletePersonDocument(Long personId) {

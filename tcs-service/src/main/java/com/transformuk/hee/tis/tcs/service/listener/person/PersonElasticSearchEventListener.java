@@ -23,7 +23,7 @@ public class PersonElasticSearchEventListener {
 
   @EventListener
   public void handlePersonSavedEvent(PersonSavedEvent personSavedEvent) {
-    LOG.info("Received person saved event for personId [{}]" + personSavedEvent.getPersonDTO().getId());
+    LOG.info("Received person saved event for personId [{}]", personSavedEvent.getPersonDTO().getId());
     personElasticSearchService.updatePersonDocument(personSavedEvent.getPersonDTO().getId());
   }
 
