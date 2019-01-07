@@ -193,21 +193,23 @@ public class PersonResource {
     searchQuery = sanitize(searchQuery);
     final List<Class> filterEnumList = Lists.newArrayList(Status.class);
     final List<ColumnFilter> columnFilters = ColumnFilterUtil.getColumnFilters(columnFilterJson, filterEnumList);
-    final BasicPage<PersonViewDTO> page;
 
     //feature flag to enable es, allow the enabling from the FE
     if (enableEsSearch || enableES) {
-      page = personElasticSearchService.searchForPage(searchQuery, columnFilters, pageable);
+      final Page<PersonViewDTO> page = personElasticSearchService.searchForPage(searchQuery, columnFilters, pageable);
+      final HttpHeaders headers = PaginationUtil.generatePaginationHttpHeaders(page, "/api/people");
+      return new ResponseEntity<>(personViewDecorator.decorate(page.getContent()), headers, HttpStatus.OK);
     } else {
+      final BasicPage<PersonViewDTO> page;
       if (StringUtils.isEmpty(searchQuery) && StringUtils.isEmpty(columnFilterJson)) {
         page = personService.findAll(pageable);
       } else {
         page = personService.advancedSearch(searchQuery, columnFilters, pageable);
       }
       log.debug("REST request to get a page of People completed successfully");
+      final HttpHeaders headers = PaginationUtil.generateBasicPaginationHttpHeaders(page, "/api/people");
+      return new ResponseEntity<>(personViewDecorator.decorate(page.getContent()), headers, HttpStatus.OK);
     }
-    final HttpHeaders headers = PaginationUtil.generateBasicPaginationHttpHeaders(page, "/api/people");
-    return new ResponseEntity<>(personViewDecorator.decorate(page.getContent()), headers, HttpStatus.OK);
   }
 
 

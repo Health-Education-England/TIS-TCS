@@ -25,6 +25,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageImpl;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Sort;
@@ -55,7 +56,7 @@ public class PersonElasticSearchService {
   @Autowired
   private Set<RoleBasedFilterStrategy> roleBasedFilterStrategies;
 
-  public BasicPage<PersonViewDTO> searchForPage(String searchQuery, List<ColumnFilter> columnFilters, Pageable pageable) {
+  public Page<PersonViewDTO> searchForPage(String searchQuery, List<ColumnFilter> columnFilters, Pageable pageable) {
     // iterate over the column filters, if they have multiple values per filter, place a should between then
     // for each column filter set, place a must between them
     BoolQueryBuilder mustBetweenDifferentColumnFilters = new BoolQueryBuilder();
@@ -89,7 +90,7 @@ public class PersonElasticSearchService {
     pageable = replaceSortByIdHack(pageable);
 
     Page<PersonView> result = personElasticSearchRepository.search(fullQuery, pageable);
-    return new BasicPage<>(convertPersonViewToDTO(result.getContent()), pageable, result.hasNext());
+    return new PageImpl<>(convertPersonViewToDTO(result.getContent()), pageable, result.getTotalElements());
   }
 
   private Pageable replaceSortByIdHack(Pageable pageable) {
