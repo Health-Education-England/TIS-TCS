@@ -71,6 +71,7 @@ import java.util.Date;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
+import java.util.Optional;
 import java.util.Set;
 import java.util.stream.Collectors;
 
@@ -160,22 +161,18 @@ public class PlacementServiceImpl implements PlacementService {
 
   private void updateStoredCommentsWithChangesOrAdd(PlacementDetails placementDetails) {
     Set<Comment> commentsToPersist = new HashSet<>();
-    for (Comment comment : placementDetails.getComments()) {
-      //If the placement comment already exists, it has an id
-      if (comment.getId() != null) {
-        Comment commentSaved = commentRepository.findById(comment.getId()).orElse(null);
-        commentSaved.setBody(comment.getBody());
-        commentSaved.setPlacement(placementDetails);
-        commentSaved.setAuthor(getProfileFromContext().getFullName());
-        commentSaved.setSource(comment.getSource());
-        commentSaved.setAmendedDate(LocalDate.now());
-        commentsToPersist.add(commentSaved);
-      } else {// else this is a new comment
-        comment.setPlacement(placementDetails);
-        if (comment.getBody() != null)
-          comment.setAmendedDate(LocalDate.now());
-        commentsToPersist.add(comment);
-      }
+
+    Optional<Comment> optionalLatestComment = commentRepository.findFirstByPlacementIdOrderByAmendedDateDesc(placementDetails.getId());
+    Comment latestComment = optionalLatestComment.orElse(new Comment());
+
+    if (CollectionUtils.isNotEmpty(placementDetails.getComments())) {
+      Comment comment = placementDetails.getComments().iterator().next();
+      latestComment.setBody(comment.getBody());
+      latestComment.setPlacement(placementDetails);
+      latestComment.setAuthor(getProfileFromContext().getFullName());
+      latestComment.setSource(comment.getSource());
+      latestComment.setAmendedDate(LocalDate.now());
+      commentsToPersist.add(latestComment);
     }
     placementDetails.setComments(commentsToPersist);
   }

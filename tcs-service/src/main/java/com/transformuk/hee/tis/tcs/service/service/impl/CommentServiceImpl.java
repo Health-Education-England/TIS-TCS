@@ -11,6 +11,8 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.util.Optional;
+
 @Service
 @Transactional
 public class CommentServiceImpl implements CommentService {
@@ -41,8 +43,8 @@ public class CommentServiceImpl implements CommentService {
 	public PlacementCommentDTO findByPlacementId(Long placementId) {
 		log.debug("Request to retrieve Placement by placementId : {}", placementId);
 
-		Comment comment = commentRepository.findByPlacementId(placementId);
-		return placementCommentMapper.toDto(comment);
+		Optional<Comment> optionalComment = commentRepository.findFirstByPlacementIdOrderByAmendedDateDesc(placementId);
+		return placementCommentMapper.toDto(optionalComment.orElse(new Comment()));
 	}
 
 	@Override
