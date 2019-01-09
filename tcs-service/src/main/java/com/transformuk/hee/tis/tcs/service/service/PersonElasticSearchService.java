@@ -56,40 +56,46 @@ public class PersonElasticSearchService {
   private Set<RoleBasedFilterStrategy> roleBasedFilterStrategies;
 
   public BasicPage<PersonViewDTO> searchForPage(String searchQuery, List<ColumnFilter> columnFilters, Pageable pageable) {
-    // iterate over the column filters, if they have multiple values per filter, place a should between then
-    // for each column filter set, place a must between them
-    BoolQueryBuilder mustBetweenDifferentColumnFilters = new BoolQueryBuilder();
 
-    Set<String> appliedFilters = applyRoleBasedFilters(mustBetweenDifferentColumnFilters);
-    if (CollectionUtils.isNotEmpty(columnFilters)) {
-      for (ColumnFilter columnFilter : columnFilters) {
-        BoolQueryBuilder shouldBetweenSameColumnFilter = new BoolQueryBuilder();
-        for (Object value : columnFilter.getValues()) {
-          if (appliedFilters.contains(columnFilter.getName())) { // skip if we've already applied this type of filter via role based filters
-            continue;
+    try {
+      // iterate over the column filters, if they have multiple values per filter, place a should between then
+      // for each column filter set, place a must between them
+      BoolQueryBuilder mustBetweenDifferentColumnFilters = new BoolQueryBuilder();
+
+      Set<String> appliedFilters = applyRoleBasedFilters(mustBetweenDifferentColumnFilters);
+      if (CollectionUtils.isNotEmpty(columnFilters)) {
+        for (ColumnFilter columnFilter : columnFilters) {
+          BoolQueryBuilder shouldBetweenSameColumnFilter = new BoolQueryBuilder();
+          for (Object value : columnFilter.getValues()) {
+            if (appliedFilters.contains(columnFilter.getName())) { // skip if we've already applied this type of filter via role based filters
+              continue;
+            }
+            //because the role column is a comma separated list of roles, we need to do a wildcard 'like' search
+            if (StringUtils.equals(columnFilter.getName(), "role")) {
+              shouldBetweenSameColumnFilter.should(new WildcardQueryBuilder(columnFilter.getName(), "*" + value.toString() + "*"));
+            } else {
+              shouldBetweenSameColumnFilter.should(new MatchQueryBuilder(columnFilter.getName(), value.toString()));
+            }
           }
-          //because the role column is a comma separated list of roles, we need to do a wildcard 'like' search
-          if (StringUtils.equals(columnFilter.getName(), "role")) {
-            shouldBetweenSameColumnFilter.should(new WildcardQueryBuilder(columnFilter.getName(), "*" + value.toString() + "*"));
-          } else {
-            shouldBetweenSameColumnFilter.should(new MatchQueryBuilder(columnFilter.getName(), value.toString()));
-          }
+          mustBetweenDifferentColumnFilters.must(shouldBetweenSameColumnFilter);
         }
-        mustBetweenDifferentColumnFilters.must(shouldBetweenSameColumnFilter);
       }
-    }
 
-    //apply free text search on the searchable columns
-    BoolQueryBuilder shouldQuery = applyTextBasedSearchQuery(searchQuery);
+      //apply free text search on the searchable columns
+      BoolQueryBuilder shouldQuery = applyTextBasedSearchQuery(searchQuery);
 
-    // add the free text query with a must to the column filters query
-    BoolQueryBuilder fullQuery = mustBetweenDifferentColumnFilters.must(shouldQuery);
+      // add the free text query with a must to the column filters query
+      BoolQueryBuilder fullQuery = mustBetweenDifferentColumnFilters.must(shouldQuery);
 
 //    LOG.info("Query {}", fullQuery.toString());
-    pageable = replaceSortByIdHack(pageable);
+      pageable = replaceSortByIdHack(pageable);
 
-    Page<PersonView> result = personElasticSearchRepository.search(fullQuery, pageable);
-    return new BasicPage<>(convertPersonViewToDTO(result.getContent()), pageable, result.hasNext());
+      Page<PersonView> result = personElasticSearchRepository.search(fullQuery, pageable);
+      return new BasicPage<>(convertPersonViewToDTO(result.getContent()), pageable, result.hasNext());
+    } catch (RuntimeException re) {
+      LOG.error("An exception occurred while attempting to do an ES search", re);
+      throw re;
+    }
   }
 
   private Pageable replaceSortByIdHack(Pageable pageable) {
