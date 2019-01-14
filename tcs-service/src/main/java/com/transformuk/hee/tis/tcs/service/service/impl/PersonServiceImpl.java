@@ -137,7 +137,7 @@ public class PersonServiceImpl implements PersonService {
    */
   @Override
   @Transactional()
-  public PersonDTO create(final PersonDTO personDTO) {
+  public PersonDTO create(PersonDTO personDTO) {
     log.debug("Request to save Person : {}", personDTO);
     Person person = personMapper.toEntity(personDTO);
     person = personRepository.save(person);
@@ -170,9 +170,9 @@ public class PersonServiceImpl implements PersonService {
     rightToWork = rightToWorkRepository.save(rightToWork);
     person.setRightToWork(rightToWork);
 
+    personDTO = personMapper.toDto(person);
     applicationEventPublisher.publishEvent(new PersonCreatedEvent(personDTO));
-
-    return personMapper.toDto(person);
+    return personDTO;
   }
 
   /**

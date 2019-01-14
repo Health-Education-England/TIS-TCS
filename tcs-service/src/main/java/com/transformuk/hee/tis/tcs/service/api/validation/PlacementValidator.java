@@ -1,6 +1,7 @@
 package com.transformuk.hee.tis.tcs.service.api.validation;
 
 import com.transformuk.hee.tis.reference.client.ReferenceService;
+import com.transformuk.hee.tis.tcs.api.dto.PlacementCommentDTO;
 import com.transformuk.hee.tis.tcs.api.dto.PlacementDTO;
 import com.transformuk.hee.tis.tcs.api.dto.PlacementDetailsDTO;
 import com.transformuk.hee.tis.tcs.api.enumeration.PostSpecialtyType;
@@ -8,6 +9,7 @@ import com.transformuk.hee.tis.tcs.service.model.Placement;
 import com.transformuk.hee.tis.tcs.service.repository.PersonRepository;
 import com.transformuk.hee.tis.tcs.service.repository.PlacementRepository;
 import com.transformuk.hee.tis.tcs.service.repository.PostRepository;
+import org.apache.commons.collections4.CollectionUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 import org.springframework.validation.BeanPropertyBindingResult;
@@ -17,6 +19,7 @@ import java.time.LocalDate;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 
 import static com.google.common.collect.Lists.newArrayList;
 
@@ -50,6 +53,7 @@ public class PlacementValidator {
         fieldErrors.addAll(checkSite(placementDetailsDTO));
         fieldErrors.addAll(checkGrade(placementDetailsDTO));
         fieldErrors.addAll(checkPlacementType(placementDetailsDTO));
+        fieldErrors.addAll(checkPlacementComments(placementDetailsDTO.getComments()));
         // TODO add specialties and clinical supervisors
         //fieldErrors.addAll(checkSpecialties(placementDetailsDTO));
         fieldErrors.addAll(checkPersons(placementDetailsDTO));
@@ -61,7 +65,7 @@ public class PlacementValidator {
         }
     }
 
-    public void validatePlacementForClose(final Long id) throws IllegalArgumentException {
+  public void validatePlacementForClose(final Long id) throws IllegalArgumentException {
       final Placement placement = placementRepository.findById(id).orElse(null);
         final LocalDate now = LocalDate.now();
         if (placement != null && placement.getDateFrom() != null && placement.getDateTo() != null) {
@@ -139,6 +143,14 @@ public class PlacementValidator {
 
         return fieldErrors;
     }
+
+  private List<FieldError> checkPlacementComments(Set<PlacementCommentDTO> comments) {
+    final List<FieldError> fieldErrors = new ArrayList<>();
+    if(CollectionUtils.isNotEmpty(comments) && comments.size() > 1) {
+      fieldErrors.add(new FieldError(PLACEMENT_DTO_NAME, "comments", "cannot have more than 1 placement comment"));
+    }
+    return fieldErrors;
+  }
 
     private void notExistsFieldErrors(final List<FieldError> fieldErrors, final Map<Long, Boolean> gradeIdsExistsMap,
                                       final String field, final String entityName) {

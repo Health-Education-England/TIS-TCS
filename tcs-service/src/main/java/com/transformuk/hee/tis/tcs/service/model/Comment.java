@@ -15,6 +15,7 @@ import javax.persistence.ManyToOne;
 import javax.persistence.Version;
 
 import java.io.Serializable;
+import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.util.Objects;
 
@@ -32,10 +33,9 @@ public class Comment implements Serializable {
 	private String body;
 
 	@Column(name = "addedDate", updatable = false, insertable = false)
-	private LocalDateTime addedDate;
-	@Version
-	private LocalDateTime amendedDate;
-	private LocalDateTime inactiveDate;
+	private LocalDate addedDate;
+	private LocalDate amendedDate;
+	private LocalDate inactiveDate;
 	@ManyToOne(fetch = FetchType.LAZY)
 	@JoinColumn(name = "placementId")
 	private PlacementDetails placement;
@@ -95,27 +95,27 @@ public class Comment implements Serializable {
 		this.body = body;
 	}
 
-	public LocalDateTime getAddedDate() {
+	public LocalDate getAddedDate() {
 		return addedDate;
 	}
 
-	public void setAddedDate(LocalDateTime addedDate) {
+	public void setAddedDate(LocalDate addedDate) {
 		this.addedDate = addedDate;
 	}
 
-	public LocalDateTime getAmendedDate() {
+	public LocalDate getAmendedDate() {
 		return amendedDate;
 	}
 
-	public void setAmendedDate(LocalDateTime amendedDate) {
+	public void setAmendedDate(LocalDate amendedDate) {
 		this.amendedDate = amendedDate;
 	}
 
-	public LocalDateTime getInactiveDate() {
+	public LocalDate getInactiveDate() {
 		return inactiveDate;
 	}
 
-	public void setInactiveDate(LocalDateTime inactiveDate) {
+	public void setInactiveDate(LocalDate inactiveDate) {
 		this.inactiveDate = inactiveDate;
 	}
 

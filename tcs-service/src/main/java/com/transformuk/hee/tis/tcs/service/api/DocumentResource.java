@@ -280,7 +280,7 @@ public class DocumentResource {
                 document.getId());
 
         response.setStatus(HttpStatus.OK.value());
-        response.addHeader("Content-disposition", (view ? "inline" : "attachment") + ";filename=" + document.getFileName());
+        response.addHeader("Content-disposition", (view ? "inline" : "attachment") + ";filename=\"" + document.getFileName() + "\"");
         response.setContentType(document.getContentType());
         response.setContentLengthLong(document.getSize());
 

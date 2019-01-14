@@ -6,10 +6,12 @@ import com.google.common.collect.Sets;
 import com.transformuk.hee.tis.tcs.api.dto.PersonViewDTO;
 import com.transformuk.hee.tis.tcs.api.enumeration.PersonOwnerRule;
 import com.transformuk.hee.tis.tcs.service.api.util.BasicPage;
+import com.transformuk.hee.tis.tcs.service.job.person.PersonTrustDto;
 import com.transformuk.hee.tis.tcs.service.job.person.PersonView;
 import com.transformuk.hee.tis.tcs.service.model.ColumnFilter;
 import com.transformuk.hee.tis.tcs.service.repository.PersonElasticSearchRepository;
 import com.transformuk.hee.tis.tcs.service.service.helper.SqlQuerySupplier;
+import com.transformuk.hee.tis.tcs.service.service.impl.PersonTrustRowMapper;
 import com.transformuk.hee.tis.tcs.service.service.impl.PersonViewRowMapper;
 import com.transformuk.hee.tis.tcs.service.strategy.RoleBasedFilterStrategy;
 import org.apache.commons.collections4.CollectionUtils;
@@ -30,8 +32,10 @@ import org.springframework.jdbc.core.namedparam.MapSqlParameterSource;
 import org.springframework.jdbc.core.namedparam.NamedParameterJdbcTemplate;
 import org.springframework.stereotype.Component;
 
+import java.util.HashMap;
 import java.util.Iterator;
 import java.util.List;
+import java.util.Map;
 import java.util.Optional;
 import java.util.Set;
 import java.util.stream.Collectors;
@@ -40,6 +44,7 @@ import java.util.stream.Collectors;
 public class PersonElasticSearchService {
 
   private static final Logger LOG = LoggerFactory.getLogger(PersonElasticSearchService.class);
+  private static final String PERSON_TRUST_QUERY = "SELECT personId, trustId FROM PersonTrust WHERE personId IN (:personIds)";
 
   @Autowired
   private PersonElasticSearchRepository personElasticSearchRepository;
@@ -51,40 +56,46 @@ public class PersonElasticSearchService {
   private Set<RoleBasedFilterStrategy> roleBasedFilterStrategies;
 
   public BasicPage<PersonViewDTO> searchForPage(String searchQuery, List<ColumnFilter> columnFilters, Pageable pageable) {
-    // iterate over the column filters, if they have multiple values per filter, place a should between then
-    // for each column filter set, place a must between them
-    BoolQueryBuilder mustBetweenDifferentColumnFilters = new BoolQueryBuilder();
 
-    Set<String> appliedFilters = applyRoleBasedFilters(mustBetweenDifferentColumnFilters);
-    if(CollectionUtils.isNotEmpty(columnFilters)) {
-      for (ColumnFilter columnFilter : columnFilters) {
-        BoolQueryBuilder shouldBetweenSameColumnFilter = new BoolQueryBuilder();
-        for (Object value : columnFilter.getValues()) {
-          if (appliedFilters.contains(columnFilter.getName())) { // skip if we've already applied this type of filter via role based filters
-            continue;
+    try {
+      // iterate over the column filters, if they have multiple values per filter, place a should between then
+      // for each column filter set, place a must between them
+      BoolQueryBuilder mustBetweenDifferentColumnFilters = new BoolQueryBuilder();
+
+      Set<String> appliedFilters = applyRoleBasedFilters(mustBetweenDifferentColumnFilters);
+      if (CollectionUtils.isNotEmpty(columnFilters)) {
+        for (ColumnFilter columnFilter : columnFilters) {
+          BoolQueryBuilder shouldBetweenSameColumnFilter = new BoolQueryBuilder();
+          for (Object value : columnFilter.getValues()) {
+            if (appliedFilters.contains(columnFilter.getName())) { // skip if we've already applied this type of filter via role based filters
+              continue;
+            }
+            //because the role column is a comma separated list of roles, we need to do a wildcard 'like' search
+            if (StringUtils.equals(columnFilter.getName(), "role")) {
+              shouldBetweenSameColumnFilter.should(new WildcardQueryBuilder(columnFilter.getName(), "*" + value.toString() + "*"));
+            } else {
+              shouldBetweenSameColumnFilter.should(new MatchQueryBuilder(columnFilter.getName(), value.toString()));
+            }
           }
-          //because the role column is a comma separated list of roles, we need to do a wildcard 'like' search
-          if (StringUtils.equals(columnFilter.getName(), "role")) {
-            shouldBetweenSameColumnFilter.should(new WildcardQueryBuilder(columnFilter.getName(), "*" + value.toString() + "*"));
-          } else {
-            shouldBetweenSameColumnFilter.should(new MatchQueryBuilder(columnFilter.getName(), value.toString()));
-          }
+          mustBetweenDifferentColumnFilters.must(shouldBetweenSameColumnFilter);
         }
-        mustBetweenDifferentColumnFilters.must(shouldBetweenSameColumnFilter);
       }
-    }
 
-    //apply free text search on the searchable columns
-    BoolQueryBuilder shouldQuery = applyTextBasedSearchQuery(searchQuery);
+      //apply free text search on the searchable columns
+      BoolQueryBuilder shouldQuery = applyTextBasedSearchQuery(searchQuery);
 
-    // add the free text query with a must to the column filters query
-    BoolQueryBuilder fullQuery = mustBetweenDifferentColumnFilters.must(shouldQuery);
+      // add the free text query with a must to the column filters query
+      BoolQueryBuilder fullQuery = mustBetweenDifferentColumnFilters.must(shouldQuery);
 
 //    LOG.info("Query {}", fullQuery.toString());
-    pageable = replaceSortByIdHack(pageable);
+      pageable = replaceSortByIdHack(pageable);
 
-    Page<PersonView> result = personElasticSearchRepository.search(fullQuery, pageable);
-    return new BasicPage<>(convertPersonViewToDTO(result.getContent()), pageable, result.hasNext());
+      Page<PersonView> result = personElasticSearchRepository.search(fullQuery, pageable);
+      return new BasicPage<>(convertPersonViewToDTO(result.getContent()), pageable, result.hasNext());
+    } catch (RuntimeException re) {
+      LOG.error("An exception occurred while attempting to do an ES search", re);
+      throw re;
+    }
   }
 
   private Pageable replaceSortByIdHack(Pageable pageable) {
@@ -94,12 +105,12 @@ public class PersonElasticSearchService {
 
     Iterator<Sort.Order> sortIterator = sort.iterator();
     List<Sort.Order> sortOrders = Lists.newArrayList();
-    while(sortIterator.hasNext()){
+    while (sortIterator.hasNext()) {
       Sort.Order order = sortIterator.next();
-      if(!order.getProperty().equals("id")) {
+      if (!order.getProperty().equals("id")) {
         sortOrders.add(order);
       } else {
-        if(order.isAscending()) {
+        if (order.isAscending()) {
           sortOrders.add(Sort.Order.asc("personId"));
         } else if (order.isDescending()) {
           sortOrders.add(Sort.Order.desc("personId"));
@@ -158,16 +169,30 @@ public class PersonElasticSearchService {
   /**
    * Update the ES document for the particular person with id. If no Person is found, delete the document from ES as
    * the change may have removed the trainee from the list
-   *
+   * <p>
    * Before an update can happen, we first find the existing trainees from ES and remove them, then do a new save.
    * This is because the ES ids are autogenerated, and we dont store any of the Ids in the DB so we can match the records
    * so its far easier to delete the records and reimport
    *
+   * This method has now been marked as synchronized as we are getting race conditions when throwing multiple events for
+   * the same person record. Without this, two or more threads could be running this method at the same time, both of them
+   * will delete the record, then both will run the create method, leading to multiple records in ES
+   *
+   * A sleep has also be introduced as for some reason, the read and ES update was happening before the commit to the DB occured
+   * this meant that the data retrieved from the DB to be pushed to ES was the non updated data.
+   *
+   * This should eventually be removed when we move the a proper queue system with delays built in as a feature
    * @param personId
    */
-  public void updatePersonDocument(Long personId) {
+  public synchronized void updatePersonDocument(Long personId) {
     Preconditions.checkNotNull(personId, "Person Id cannot be null");
 
+    //horrible hack! we seem to have a race condition
+    try {
+      Thread.sleep(500L);
+    } catch (InterruptedException e) {
+
+    }
     String query = getQuery()
         .replace("WHERECLAUSE", "WHERE p.id=:id");
 
@@ -176,12 +201,13 @@ public class PersonElasticSearchService {
 
     List<PersonView> queryResult = namedParameterJdbcTemplate.query(query, paramSource, new PersonViewRowMapper());
     if (CollectionUtils.isNotEmpty(queryResult)) {
-      queryResult.stream().forEach(pv -> pv.setFullName(pv.getForenames() + " " + pv.getSurname()));
+      updateDocumentWithTrustData(queryResult);
       deletePersonDocument(personId);
-      personElasticSearchRepository.saveAll(queryResult);
+      saveDocuments(queryResult);
     } else {
       deletePersonDocument(personId);
     }
+    personElasticSearchRepository.refresh();
   }
 
   public void deletePersonDocument(Long personId) {
@@ -195,6 +221,7 @@ public class PersonElasticSearchService {
         .replace("WHERECLAUSE", "WHERE prg.id=:id");
 
     List<PersonView> personViews = runQuery(query, programmeId);
+    updateDocumentWithTrustData(personViews);
     saveDocuments(personViews);
   }
 
@@ -204,6 +231,7 @@ public class PersonElasticSearchService {
         .replace("WHERECLAUSE", "WHERE s.id=:id");
 
     List<PersonView> personViews = runQuery(query, specialtyId);
+    updateDocumentWithTrustData(personViews);
     saveDocuments(personViews);
   }
 
@@ -222,14 +250,41 @@ public class PersonElasticSearchService {
   private List<PersonView> runQuery(String query, Long id) {
     MapSqlParameterSource paramSource = new MapSqlParameterSource();
     paramSource.addValue("id", id);
-
     return namedParameterJdbcTemplate.query(query, paramSource, new PersonViewRowMapper());
   }
 
-  private void saveDocuments(List<PersonView> queryResult) {
+  public void saveDocuments(List<PersonView> queryResult) {
     if (CollectionUtils.isNotEmpty(queryResult)) {
       queryResult.stream().forEach(pv -> pv.setFullName(pv.getForenames() + " " + pv.getSurname()));
       personElasticSearchRepository.saveAll(queryResult);
+    }
+  }
+
+  public void updateDocumentWithTrustData(List<PersonView> queryResult) {
+    if (CollectionUtils.isNotEmpty(queryResult)) {
+
+      Set<Long> personIds = queryResult.stream().map(PersonView::getPersonId).collect(Collectors.toSet());
+      List<PersonTrustDto> personTrustDtos = namedParameterJdbcTemplate
+          .query(PERSON_TRUST_QUERY, new MapSqlParameterSource("personIds", personIds), new PersonTrustRowMapper());
+
+      Map<Long, Set<PersonTrustDto>> personIdToTrustIds = new HashMap<>();
+
+      for (PersonTrustDto personTrustDto : personTrustDtos) {
+        Long personId = personTrustDto.getPersonId();
+        if (!personIdToTrustIds.containsKey(personId)) {
+          personIdToTrustIds.put(personId, Sets.newHashSet());
+        }
+
+        personIdToTrustIds.get(personId).add(personTrustDto);
+      }
+
+      queryResult.stream().forEach(pv -> {
+        if (personIdToTrustIds.containsKey(pv.getPersonId())) {
+          pv.setTrusts(personIdToTrustIds.get(pv.getPersonId()));
+        } else {
+          pv.setTrusts(Sets.newHashSet());
+        }
+      });
     }
   }
 
@@ -258,7 +313,7 @@ public class PersonElasticSearchService {
       personViewDTO.setRole(pv.getRole());
       personViewDTO.setStatus(pv.getStatus());
       personViewDTO.setCurrentOwner(pv.getCurrentOwner());
-      if(StringUtils.isNotEmpty(pv.getCurrentOwnerRule())){
+      if (StringUtils.isNotEmpty(pv.getCurrentOwnerRule())) {
         personViewDTO.setCurrentOwnerRule(PersonOwnerRule.valueOf(pv.getCurrentOwnerRule()));
       }
 

@@ -24,7 +24,7 @@ public class PlacementElasticSearchEventListener {
   }
 
   @EventListener
-  public void handlePlacementSavedEvent(PlacementDeletedEvent event) {
+  public void handlePlacementDeletedEvent(PlacementDeletedEvent event) {
     LOG.info("Received PlacementDeleteEvent for placement id [{}]", event.getPlacementId());
     personElasticSearchService.updatePersonDocument(event.getPersonId());
   }

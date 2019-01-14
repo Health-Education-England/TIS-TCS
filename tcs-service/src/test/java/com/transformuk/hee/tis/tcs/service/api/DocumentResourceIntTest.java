@@ -232,7 +232,7 @@ public class DocumentResourceIntTest {
                 DocumentResource.PATH_DOWNLOADS +
                 "/" +
                 documentId.getId()))
-                .andExpect(header().string("Content-Disposition", "attachment;filename=document.txt"))
+                .andExpect(header().string("Content-Disposition", "attachment;filename=\"document.txt\""))
                 .andExpect(header().string("Content-Length", String.valueOf(TEST_FILE_CONTENT.length)))
                 .andExpect(content().contentType(TEST_FILE_CONTENT_TYPE))
                 .andExpect(content().bytes(TEST_FILE_CONTENT))

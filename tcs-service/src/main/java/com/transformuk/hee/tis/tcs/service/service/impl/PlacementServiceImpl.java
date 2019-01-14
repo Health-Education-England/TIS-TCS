@@ -3,7 +3,11 @@ package com.transformuk.hee.tis.tcs.service.service.impl;
 import com.google.common.collect.Lists;
 import com.google.common.collect.Maps;
 import com.google.common.collect.Sets;
-import com.transformuk.hee.tis.tcs.api.dto.*;
+import com.transformuk.hee.tis.tcs.api.dto.PlacementDTO;
+import com.transformuk.hee.tis.tcs.api.dto.PlacementDetailsDTO;
+import com.transformuk.hee.tis.tcs.api.dto.PlacementSpecialtyDTO;
+import com.transformuk.hee.tis.tcs.api.dto.PlacementSummaryDTO;
+import com.transformuk.hee.tis.tcs.api.dto.PlacementSupervisorDTO;
 import com.transformuk.hee.tis.tcs.api.enumeration.PlacementStatus;
 import com.transformuk.hee.tis.tcs.api.enumeration.PostSpecialtyType;
 import com.transformuk.hee.tis.tcs.api.enumeration.TCSDateColumns;
@@ -11,8 +15,21 @@ import com.transformuk.hee.tis.tcs.service.api.util.ColumnFilterUtil;
 import com.transformuk.hee.tis.tcs.service.event.PlacementDeletedEvent;
 import com.transformuk.hee.tis.tcs.service.event.PlacementSavedEvent;
 import com.transformuk.hee.tis.tcs.service.exception.DateRangeColumnFilterException;
-import com.transformuk.hee.tis.tcs.service.model.*;
-import com.transformuk.hee.tis.tcs.service.repository.*;
+import com.transformuk.hee.tis.tcs.service.model.ColumnFilter;
+import com.transformuk.hee.tis.tcs.service.model.Comment;
+import com.transformuk.hee.tis.tcs.service.model.EsrNotification;
+import com.transformuk.hee.tis.tcs.service.model.Placement;
+import com.transformuk.hee.tis.tcs.service.model.PlacementDetails;
+import com.transformuk.hee.tis.tcs.service.model.PlacementSpecialty;
+import com.transformuk.hee.tis.tcs.service.model.PlacementSupervisor;
+import com.transformuk.hee.tis.tcs.service.model.Specialty;
+import com.transformuk.hee.tis.tcs.service.repository.CommentRepository;
+import com.transformuk.hee.tis.tcs.service.repository.PersonRepositoryImpl;
+import com.transformuk.hee.tis.tcs.service.repository.PlacementDetailsRepository;
+import com.transformuk.hee.tis.tcs.service.repository.PlacementRepository;
+import com.transformuk.hee.tis.tcs.service.repository.PlacementSpecialtyRepository;
+import com.transformuk.hee.tis.tcs.service.repository.PlacementSupervisorRepository;
+import com.transformuk.hee.tis.tcs.service.repository.SpecialtyRepository;
 import com.transformuk.hee.tis.tcs.service.service.EsrNotificationService;
 import com.transformuk.hee.tis.tcs.service.service.PlacementService;
 import com.transformuk.hee.tis.tcs.service.service.helper.SqlQuerySupplier;
@@ -45,9 +62,20 @@ import java.math.BigInteger;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.time.LocalDate;
-import java.util.*;
+import java.util.ArrayList;
+import java.util.Calendar;
+import java.util.Collection;
+import java.util.Collections;
+import java.util.Comparator;
+import java.util.Date;
+import java.util.HashSet;
+import java.util.List;
+import java.util.Map;
+import java.util.Optional;
+import java.util.Set;
 import java.util.stream.Collectors;
 
+import static com.transformuk.hee.tis.security.util.TisSecurityHelper.getProfileFromContext;
 import static com.transformuk.hee.tis.tcs.service.api.util.DateUtil.getLocalDateFromString;
 import static com.transformuk.hee.tis.tcs.service.service.impl.SpecificationFactory.in;
 import static com.transformuk.hee.tis.tcs.service.service.impl.SpecificationFactory.isBetween;
@@ -60,93 +88,93 @@ import static com.transformuk.hee.tis.tcs.service.service.impl.SpecificationFact
 public class PlacementServiceImpl implements PlacementService {
 
   static final String PLACEMENTS_SUMMARY_MAPPER = "PlacementsSummary";
-    private final Logger log = LoggerFactory.getLogger(PlacementServiceImpl.class);
+  private final Logger log = LoggerFactory.getLogger(PlacementServiceImpl.class);
 
-    @Autowired
-    private PlacementRepository placementRepository;
-    @Autowired
-    private PlacementDetailsRepository placementDetailsRepository;
-    @Autowired
-    private PlacementMapper placementMapper;
-    @Autowired
-    private PlacementDetailsMapper placementDetailsMapper;
-    @Autowired
-    private SpecialtyRepository specialtyRepository;
-    @Autowired
-    private EntityManager em;
-    @Autowired
-    private SqlQuerySupplier sqlQuerySupplier;
-    @Autowired
-    private PlacementSpecialtyRepository placementSpecialtyRepository;
-    @Autowired
-    private PlacementSpecialtyMapper placementSpecialtyMapper;
-    @Autowired
-    private PersonLiteMapper personLiteMapper;
-    @Autowired
-    private EsrNotificationService esrNotificationService;
-    @Autowired
-    private PlacementSupervisorRepository placementSupervisorRepository;
+  @Autowired
+  private PlacementRepository placementRepository;
+  @Autowired
+  private PlacementDetailsRepository placementDetailsRepository;
+  @Autowired
+  private PlacementMapper placementMapper;
+  @Autowired
+  private PlacementDetailsMapper placementDetailsMapper;
+  @Autowired
+  private SpecialtyRepository specialtyRepository;
+  @Autowired
+  private EntityManager em;
+  @Autowired
+  private SqlQuerySupplier sqlQuerySupplier;
+  @Autowired
+  private PlacementSpecialtyRepository placementSpecialtyRepository;
+  @Autowired
+  private PlacementSpecialtyMapper placementSpecialtyMapper;
+  @Autowired
+  private PersonLiteMapper personLiteMapper;
+  @Autowired
+  private EsrNotificationService esrNotificationService;
+  @Autowired
+  private PlacementSupervisorRepository placementSupervisorRepository;
 
-    @Autowired
-    private NamedParameterJdbcTemplate namedParameterJdbcTemplate;
-    @Autowired
-    private CommentRepository commentRepository;
-    @Autowired
-    private ApplicationEventPublisher applicationEventPublisher;
+  @Autowired
+  private NamedParameterJdbcTemplate namedParameterJdbcTemplate;
+  @Autowired
+  private CommentRepository commentRepository;
+  @Autowired
+  private ApplicationEventPublisher applicationEventPublisher;
 
-    /**
-     * Save a placement.
-     *
-     * @param placementDTO the entity to save
-     * @return the persisted entity
-     */
-    @Override
-    public PlacementDTO save(final PlacementDTO placementDTO) {
-        log.debug("Request to save Placement : {}", placementDTO);
-        Placement placement = placementMapper.placementDTOToPlacement(placementDTO);
-        placement = placementRepository.save(placement);
-        return placementMapper.placementToPlacementDTO(placement);
-    }
+  /**
+   * Save a placement.
+   *
+   * @param placementDTO the entity to save
+   * @return the persisted entity
+   */
+  @Override
+  public PlacementDTO save(final PlacementDTO placementDTO) {
+    log.debug("Request to save Placement : {}", placementDTO);
+    Placement placement = placementMapper.placementDTOToPlacement(placementDTO);
+    placement = placementRepository.save(placement);
+    return placementMapper.placementToPlacementDTO(placement);
+  }
 
-    @Override
-    public Placement findPlacementById(Long placementId) {
-      return placementRepository.findById(placementId).orElse(null);
-    }
+  @Override
+  public Placement findPlacementById(Long placementId) {
+    return placementRepository.findById(placementId).orElse(null);
+  }
 
-    @Transactional
-    @Override
-    public PlacementDetailsDTO createDetails(final PlacementDetailsDTO placementDetailsDTO) {
-        log.debug("Request to create Placement : {}", placementDetailsDTO);
-        PlacementDetails placementDetails = placementDetailsMapper.placementDetailsDTOToPlacementDetails(placementDetailsDTO);
-        updateStoredCommentsWithChangesOrAdd(placementDetails);
-        placementDetails = placementDetailsRepository.saveAndFlush(placementDetails);
+  @Transactional
+  @Override
+  public PlacementDetailsDTO createDetails(final PlacementDetailsDTO placementDetailsDTO) {
+    log.debug("Request to create Placement : {}", placementDetailsDTO);
+    PlacementDetails placementDetails = placementDetailsMapper.placementDetailsDTOToPlacementDetails(placementDetailsDTO);
+    updateStoredCommentsWithChangesOrAdd(placementDetails);
+    placementDetails = placementDetailsRepository.saveAndFlush(placementDetails);
 
-        final Set<PlacementSpecialty> placementSpecialties = linkPlacementSpecialties(placementDetailsDTO, placementDetails);
-        final PlacementDetailsDTO placementDetailsDTO1 = placementDetailsMapper.placementDetailsToPlacementDetailsDTO(placementDetails);
-        placementDetailsDTO1.setSpecialties(placementSpecialtyMapper.toDTOs(placementSpecialties));
-        handleEsrNewPlacementNotification(placementDetailsDTO, placementDetails);
+    final Set<PlacementSpecialty> placementSpecialties = linkPlacementSpecialties(placementDetailsDTO, placementDetails);
+    final PlacementDetailsDTO placementDetailsDTO1 = placementDetailsMapper.placementDetailsToPlacementDetailsDTO(placementDetails);
+    placementDetailsDTO1.setSpecialties(placementSpecialtyMapper.toDTOs(placementSpecialties));
+    handleEsrNewPlacementNotification(placementDetailsDTO, placementDetails);
 
-        saveSupervisors(placementDetailsDTO.getSupervisors(), placementDetails.getId());
+    saveSupervisors(placementDetailsDTO.getSupervisors(), placementDetails.getId());
 
-        return placementDetailsDTO1;
-    }
+    return placementDetailsDTO1;
+  }
 
   private void updateStoredCommentsWithChangesOrAdd(PlacementDetails placementDetails) {
-      Set<Comment> commentsToPersist = new HashSet<>();
-      for(Comment comment : placementDetails.getComments()) {
-        if(comment.getId() != null) {
-          Comment commentSaved = commentRepository.findById(comment.getId()).orElse(null);
-          commentSaved.setBody(comment.getBody());
-          commentSaved.setPlacement(placementDetails);
-          commentSaved.setAuthor(comment.getAuthor());
-          commentSaved.setSource(comment.getSource());
-          commentsToPersist.add(commentSaved);
-        } else {
-          comment.setPlacement(placementDetails);
-          commentsToPersist.add(comment);
-        }
-      }
-      placementDetails.setComments(commentsToPersist);
+    Set<Comment> commentsToPersist = new HashSet<>();
+
+    Optional<Comment> optionalLatestComment = commentRepository.findFirstByPlacementIdOrderByAmendedDateDesc(placementDetails.getId());
+    Comment latestComment = optionalLatestComment.orElse(new Comment());
+
+    if (CollectionUtils.isNotEmpty(placementDetails.getComments())) {
+      Comment comment = placementDetails.getComments().iterator().next();
+      latestComment.setBody(comment.getBody());
+      latestComment.setPlacement(placementDetails);
+      latestComment.setAuthor(getProfileFromContext().getFullName());
+      latestComment.setSource(comment.getSource());
+      latestComment.setAmendedDate(LocalDate.now());
+      commentsToPersist.add(latestComment);
+    }
+    placementDetails.setComments(commentsToPersist);
   }
 
   @Override
@@ -164,7 +192,7 @@ public class PlacementServiceImpl implements PlacementService {
   @Override
   public void handleChangeOfPlacementDatesEsrNotification(PlacementDetailsDTO updatedPlacementDetails, Placement placementBeforeUpdate, boolean currentPlacementEdit) {
 
-    if (placementBeforeUpdate != null && updatedPlacementDetails != null ) {
+    if (placementBeforeUpdate != null && updatedPlacementDetails != null) {
       // create NOT1 type record. Current and next trainee details for the post number.
       // Create NOT4 type record
       log.debug("Change in hire or end date. Marking for notification : {} ", placementBeforeUpdate.getPost().getNationalPostNumber());
@@ -177,417 +205,419 @@ public class PlacementServiceImpl implements PlacementService {
   }
 
   @Transactional
-    @Override
-    public PlacementDetailsDTO saveDetails(final PlacementDetailsDTO placementDetailsDTO) {
+  @Override
+  public PlacementDetailsDTO saveDetails(final PlacementDetailsDTO placementDetailsDTO) {
+    log.debug("Request to save Placement : {}", placementDetailsDTO);
 
-        log.debug("Request to save Placement : {}", placementDetailsDTO);
+    //clear any linked specialties before trying to save the placement
+    final Placement placement = placementRepository.findById(placementDetailsDTO.getId()).orElse(null);
+    //Instead of batch delete we need to unlink specialties from placement one by one
+    Set<PlacementSpecialty> specialties = placement.getSpecialties();
+    for (PlacementSpecialty specialty : specialties) {
+      placementSpecialtyRepository.delete(specialty);
+    }
+    PlacementDetails placementDetails = placementDetailsMapper.placementDetailsDTOToPlacementDetails(placementDetailsDTO);
+    updateStoredCommentsWithChangesOrAdd(placementDetails);
 
-        //clear any linked specialties before trying to save the placement
-        final Placement placement = placementRepository.findById(placementDetailsDTO.getId()).orElse(null);
-        //Instead of batch delete we need to unlink specialties from placement one by one
-        Set<PlacementSpecialty> specialties = placement.getSpecialties();
-        for(PlacementSpecialty specialty: specialties){
-          placementSpecialtyRepository.delete(specialty);
+    placement.setSpecialties(new HashSet<>());
+    PlacementDTO placementDTO = placementMapper.placementToPlacementDTO(placementRepository.saveAndFlush(placement));
+    applicationEventPublisher.publishEvent(new PlacementSavedEvent(placementDTO));
+    return createDetails(placementDetailsDTO);
+  }
+
+  @Transactional
+  protected Set<PlacementSpecialty> linkPlacementSpecialties(final PlacementDetailsDTO placementDetailsDTO, final PlacementDetails placementDetails) {
+    final Placement placement = placementRepository.findById(placementDetails.getId()).orElse(null);
+    final Set<PlacementSpecialty> placementSpecialties = Sets.newHashSet();
+    if (CollectionUtils.isNotEmpty(placementDetailsDTO.getSpecialties())) {
+      for (final PlacementSpecialtyDTO placementSpecialtyDTO : placementDetailsDTO.getSpecialties()) {
+        final PlacementSpecialty placementSpecialty = new PlacementSpecialty();
+        placementSpecialty.setPlacement(placement);
+        placementSpecialty.setSpecialty(specialtyRepository.findById(placementSpecialtyDTO.getSpecialtyId()).orElse(null));
+        placementSpecialty.setPlacementSpecialtyType(placementSpecialtyDTO.getPlacementSpecialtyType());
+        placementSpecialties.add(placementSpecialty);
+      }
+    }
+
+    placement.setSpecialties(Sets.newHashSet(placementSpecialties));
+    Placement savedPlacement = placementRepository.save(placement);
+    PlacementDTO placementDTO = placementMapper.placementToPlacementDTO(savedPlacement);
+    applicationEventPublisher.publishEvent(new PlacementSavedEvent(placementDTO));
+    return placementSpecialties;
+  }
+
+  /**
+   * Save a list of placements.
+   *
+   * @param placementDTO the list of entities to save
+   * @return the list of persisted entities
+   */
+  @Override
+  public List<PlacementDTO> save(final List<PlacementDTO> placementDTO) {
+    log.debug("Request to save Placements : {}", placementDTO);
+    List<Placement> placements = placementMapper.placementDTOsToPlacements(placementDTO);
+    placements = placementRepository.saveAll(placements);
+    List<PlacementDTO> placementDTOS = placementMapper.placementsToPlacementDTOs(placements);
+
+    placementDTO.stream()
+        .map(PlacementSavedEvent::new)
+        .forEach(applicationEventPublisher::publishEvent);
+
+    return placementDTOS;
+  }
+
+  /**
+   * Get all the placements.
+   *
+   * @param pageable the pagination information
+   * @return the list of entities
+   */
+  @Override
+  @Transactional(readOnly = true)
+  public Page<PlacementDTO> findAll(final Pageable pageable) {
+    log.debug("Request to get all Placements");
+    final Page<Placement> result = placementRepository.findAll(pageable);
+    return result.map(placementMapper::placementToPlacementDTO);
+  }
+
+  /**
+   * Get one placement by id.
+   *
+   * @param id the id of the entity
+   * @return the entity
+   */
+  @Override
+  @Transactional(readOnly = true)
+  public PlacementDTO findOne(final Long id) {
+    log.debug("Request to get Placement : {}", id);
+    final Placement placement = placementRepository.findById(id).orElse(null);
+    return placementMapper.placementToPlacementDTO(placement);
+  }
+
+  @Override
+  @Transactional(readOnly = true)
+  public PlacementDetailsDTO getDetails(final Long id) {
+    final PlacementDetails pd = placementDetailsRepository.findById(id).orElse(null);
+    PlacementDetailsDTO placementDetailsDTO = null;
+
+    if (pd != null) {
+      placementDetailsDTO = placementDetailsMapper.placementDetailsToPlacementDetailsDTO(pd);
+
+      String query = sqlQuerySupplier.getQuery(SqlQuerySupplier.PLACEMENT_DETAILS);
+      MapSqlParameterSource specialtiesParamSource = new MapSqlParameterSource();
+      specialtiesParamSource.addValue("id", id);
+      final List<PlacementSpecialtyDTO> specialties = namedParameterJdbcTemplate.query(query, specialtiesParamSource, new PlacementDetailSpecialtyRowMapper());
+      placementDetailsDTO.setSpecialties(Sets.newHashSet(specialties));
+
+      query = sqlQuerySupplier.getQuery(SqlQuerySupplier.PLACEMENT_SUPERVISOR);
+      MapSqlParameterSource supervisorsParamSource = new MapSqlParameterSource();
+      supervisorsParamSource.addValue("id", id);
+      final List<PlacementSupervisorDTO> supervisors = namedParameterJdbcTemplate.query(query, supervisorsParamSource, new PlacementDetailSupervisorRowMapper(new PersonRepositoryImpl.PersonLiteRowMapper(), personLiteMapper));
+      placementDetailsDTO.setSupervisors(Sets.newHashSet(supervisors));
+    }
+
+    return placementDetailsDTO;
+  }
+
+  /**
+   * Delete the  placement by id.
+   *
+   * @param id the id of the entity
+   */
+  @Override
+  @Transactional
+  public void delete(final Long id) {
+    log.debug("Request to delete Placement : {}", id);
+    // handle esr notification
+    handleEsrNotificationForPlacementDelete(id);
+
+    placementSupervisorRepository.deleteAllByIdPlacementId(id);
+    Placement placement = placementRepository.getOne(id);
+    PlacementDeletedEvent event = new PlacementDeletedEvent(id, placement.getTrainee().getId());
+
+    placementRepository.delete(placement);
+
+    applicationEventPublisher.publishEvent(event);
+  }
+
+  private void handleEsrNotificationForPlacementDelete(final Long id) {
+    final List<EsrNotification> allEsrNotifications = new ArrayList<>();
+
+    final Placement placementToDelete = placementRepository.findById(id).orElse(null);
+    // Only future placements can be deleted.
+    if (placementToDelete != null && placementToDelete.getDateFrom() != null && placementToDelete.getDateFrom().isBefore(LocalDate.now().plusMonths(3))) {
+      final List<EsrNotification> esrNotifications = esrNotificationService.loadPlacementDeleteNotification(placementToDelete, allEsrNotifications);
+      log.debug("Placement Delete: PERSISTING: {} EsrNotifications for post {} being deleted", esrNotifications.size(), placementToDelete.getLocalPostNumber());
+      esrNotificationService.save(esrNotifications);
+      log.debug("Placement Delete: PERSISTED: {} EsrNotifications for post {} being deleted", esrNotifications.size(), placementToDelete.getLocalPostNumber());
+    }
+  }
+
+  private Map<String, Placement> getPlacementsByIntrepidId(final List<PlacementDTO> placementDtoList) {
+    final Set<String> placementIntrepidIds = placementDtoList.stream().map(PlacementDTO::getIntrepidId).collect(Collectors.toSet());
+    final Set<Placement> placementsFound = placementRepository.findByIntrepidIdIn(placementIntrepidIds);
+    Map<String, Placement> result = Maps.newHashMap();
+    if (CollectionUtils.isNotEmpty(placementsFound)) {
+      result = placementsFound.stream().collect(
+          Collectors.toMap(Placement::getIntrepidId, post -> post)
+      );
+    }
+    return result;
+  }
+
+  @Override
+  public List<PlacementDTO> patchPlacementSpecialties(final List<PlacementDTO> placementDTOList) {
+    final List<Placement> placements = Lists.newArrayList();
+    final Map<String, Placement> intrepidIdToPlacement = getPlacementsByIntrepidId(placementDTOList);
+
+    final Set<Long> specialtyIds = placementDTOList
+        .stream()
+        .map(PlacementDTO::getSpecialties)
+        .flatMap(Collection::stream)
+        .map(PlacementSpecialtyDTO::getSpecialtyId)
+        .collect(Collectors.toSet());
+
+    final Map<Long, Specialty> idToSpecialty = specialtyRepository.findAllById(specialtyIds).stream().collect(Collectors.toMap(Specialty::getId, sp -> sp));
+    for (final PlacementDTO dto : placementDTOList) {
+      final Placement placement = intrepidIdToPlacement.get(dto.getIntrepidId());
+      if (placement != null) {
+        final Set<PlacementSpecialty> attachedSpecialties = placement.getSpecialties();
+        final Set<Long> attachedSpecialtyIds = attachedSpecialties.stream().map(ps -> ps.getSpecialty().getId()).collect(Collectors.toSet());
+        for (final PlacementSpecialtyDTO placementSpecialtyDTO : dto.getSpecialties()) {
+          final Specialty specialty = idToSpecialty.get(placementSpecialtyDTO.getSpecialtyId());
+          if (specialty != null && !attachedSpecialtyIds.contains(specialty.getId())) {
+            final PlacementSpecialty placementSpecialty = new PlacementSpecialty();
+            placementSpecialty.setPlacementSpecialtyType(placementSpecialtyDTO.getPlacementSpecialtyType());
+            placementSpecialty.setPlacement(placement);
+            placementSpecialty.setSpecialty(specialty);
+            attachedSpecialties.add(placementSpecialty);
+          }
         }
-        placement.setSpecialties(new HashSet<>());
-        PlacementDTO placementDTO = placementMapper.placementToPlacementDTO(placementRepository.saveAndFlush(placement));
-        applicationEventPublisher.publishEvent(new PlacementSavedEvent(placementDTO));
-        return createDetails(placementDetailsDTO);
+        placement.setSpecialties(attachedSpecialties);
+        placements.add(placement);
+      }
     }
+    final List<Placement> savedPlacements = placementRepository.saveAll(placements);
+    return placementMapper.placementsToPlacementDTOs(savedPlacements);
+  }
 
-    @Transactional
-    protected Set<PlacementSpecialty> linkPlacementSpecialties(final PlacementDetailsDTO placementDetailsDTO, final PlacementDetails placementDetails) {
-      final Placement placement = placementRepository.findById(placementDetails.getId()).orElse(null);
-        final Set<PlacementSpecialty> placementSpecialties = Sets.newHashSet();
-        if (CollectionUtils.isNotEmpty(placementDetailsDTO.getSpecialties())) {
-            for (final PlacementSpecialtyDTO placementSpecialtyDTO : placementDetailsDTO.getSpecialties()) {
-                final PlacementSpecialty placementSpecialty = new PlacementSpecialty();
-                placementSpecialty.setPlacement(placement);
-              placementSpecialty.setSpecialty(specialtyRepository.findById(placementSpecialtyDTO.getSpecialtyId()).orElse(null));
-                placementSpecialty.setPlacementSpecialtyType(placementSpecialtyDTO.getPlacementSpecialtyType());
-                placementSpecialties.add(placementSpecialty);
-            }
-        }
+  /**
+   * Get all placement details by given column filters.
+   *
+   * @param pageable the pagination information
+   * @return the list of entities
+   */
+  @Override
+  @Transactional(readOnly = true)
+  public Page<PlacementDetailsDTO> findAllPlacementDetails(final Pageable pageable) {
+    log.debug("Request to get all Placements details");
+    final Page<PlacementDetails> result = placementDetailsRepository.findAll(pageable);
+    return result.map(placementDetailsMapper::placementDetailsToPlacementDetailsDTO);
+  }
 
-        placement.setSpecialties(Sets.newHashSet(placementSpecialties));
-        Placement savedPlacement = placementRepository.save(placement);
-        PlacementDTO placementDTO = placementMapper.placementToPlacementDTO(savedPlacement);
-        applicationEventPublisher.publishEvent(new PlacementSavedEvent(placementDTO));
-        return placementSpecialties;
-    }
+  /**
+   * Get all placement details by given column filters.
+   *
+   * @param columnFilterJson column filters represented in json object
+   * @param pageable         the pagination information
+   * @return the list of entities
+   * @throws IOException
+   */
+  @Override
+  @Transactional(readOnly = true)
+  public Page<PlacementDetailsDTO> findFilteredPlacements(final String columnFilterJson, final Pageable pageable) throws IOException {
 
-    /**
-     * Save a list of placements.
-     *
-     * @param placementDTO the list of entities to save
-     * @return the list of persisted entities
-     */
-    @Override
-    public List<PlacementDTO> save(final List<PlacementDTO> placementDTO) {
-        log.debug("Request to save Placements : {}", placementDTO);
-        List<Placement> placements = placementMapper.placementDTOsToPlacements(placementDTO);
-        placements = placementRepository.saveAll(placements);
-        List<PlacementDTO> placementDTOS = placementMapper.placementsToPlacementDTOs(placements);
+    log.debug("Request to get all Revalidations filtered by columns {}", columnFilterJson);
+    final List<Class> filterEnumList = Collections.emptyList();
+    final List<ColumnFilter> columnFilters = ColumnFilterUtil.getColumnFilters(columnFilterJson, filterEnumList);
 
-        placementDTO.stream()
-            .map(PlacementSavedEvent::new)
-            .forEach(applicationEventPublisher::publishEvent);
+    final List<Specification<PlacementDetails>> specs = new ArrayList<>();
 
-        return placementDTOS;
-    }
-
-    /**
-     * Get all the placements.
-     *
-     * @param pageable the pagination information
-     * @return the list of entities
-     */
-    @Override
-    @Transactional(readOnly = true)
-    public Page<PlacementDTO> findAll(final Pageable pageable) {
-        log.debug("Request to get all Placements");
-        final Page<Placement> result = placementRepository.findAll(pageable);
-        return result.map(placementMapper::placementToPlacementDTO);
-    }
-
-    /**
-     * Get one placement by id.
-     *
-     * @param id the id of the entity
-     * @return the entity
-     */
-    @Override
-    @Transactional(readOnly = true)
-    public PlacementDTO findOne(final Long id) {
-        log.debug("Request to get Placement : {}", id);
-      final Placement placement = placementRepository.findById(id).orElse(null);
-        return placementMapper.placementToPlacementDTO(placement);
-    }
-
-    @Override
-    @Transactional(readOnly = true)
-    public PlacementDetailsDTO getDetails(final Long id) {
-      final PlacementDetails pd = placementDetailsRepository.findById(id).orElse(null);
-        PlacementDetailsDTO placementDetailsDTO = null;
-
-        if (pd != null) {
-            placementDetailsDTO = placementDetailsMapper.placementDetailsToPlacementDetailsDTO(pd);
-
-            String query = sqlQuerySupplier.getQuery(SqlQuerySupplier.PLACEMENT_DETAILS);
-            MapSqlParameterSource specialtiesParamSource = new MapSqlParameterSource();
-            specialtiesParamSource.addValue("id",id);
-            final List<PlacementSpecialtyDTO> specialties = namedParameterJdbcTemplate.query(query,specialtiesParamSource, new PlacementDetailSpecialtyRowMapper());
-            placementDetailsDTO.setSpecialties(Sets.newHashSet(specialties));
-
-            query = sqlQuerySupplier.getQuery(SqlQuerySupplier.PLACEMENT_SUPERVISOR);
-            MapSqlParameterSource supervisorsParamSource = new MapSqlParameterSource();
-            supervisorsParamSource.addValue("id",id);
-            final List<PlacementSupervisorDTO> supervisors = namedParameterJdbcTemplate.query(query,supervisorsParamSource, new PlacementDetailSupervisorRowMapper(new PersonRepositoryImpl.PersonLiteRowMapper(), personLiteMapper));
-            placementDetailsDTO.setSupervisors(Sets.newHashSet(supervisors));
-        }
-
-        return placementDetailsDTO;
-    }
-
-    /**
-     * Delete the  placement by id.
-     *
-     * @param id the id of the entity
-     */
-    @Override
-    @Transactional
-    public void delete(final Long id) {
-        log.debug("Request to delete Placement : {}", id);
-        // handle esr notification
-        handleEsrNotificationForPlacementDelete(id);
-
-        placementSupervisorRepository.deleteAllByIdPlacementId(id);
-        Placement placement = placementRepository.getOne(id);
-        PlacementDeletedEvent event = new PlacementDeletedEvent(id, placement.getTrainee().getId());
-
-        placementRepository.delete(placement);
-
-        applicationEventPublisher.publishEvent(event);
-    }
-
-    private void handleEsrNotificationForPlacementDelete(final Long id) {
-        final List<EsrNotification> allEsrNotifications = new ArrayList<>();
-
-      final Placement placementToDelete = placementRepository.findById(id).orElse(null);
-        // Only future placements can be deleted.
-        if (placementToDelete != null && placementToDelete.getDateFrom() != null && placementToDelete.getDateFrom().isBefore(LocalDate.now().plusMonths(3))) {
-            final List<EsrNotification> esrNotifications = esrNotificationService.loadPlacementDeleteNotification(placementToDelete, allEsrNotifications);
-            log.debug("Placement Delete: PERSISTING: {} EsrNotifications for post {} being deleted", esrNotifications.size(), placementToDelete.getLocalPostNumber());
-            esrNotificationService.save(esrNotifications);
-            log.debug("Placement Delete: PERSISTED: {} EsrNotifications for post {} being deleted", esrNotifications.size(), placementToDelete.getLocalPostNumber());
-        }
-    }
-
-    private Map<String, Placement> getPlacementsByIntrepidId(final List<PlacementDTO> placementDtoList) {
-        final Set<String> placementIntrepidIds = placementDtoList.stream().map(PlacementDTO::getIntrepidId).collect(Collectors.toSet());
-        final Set<Placement> placementsFound = placementRepository.findByIntrepidIdIn(placementIntrepidIds);
-        Map<String, Placement> result = Maps.newHashMap();
-        if (CollectionUtils.isNotEmpty(placementsFound)) {
-            result = placementsFound.stream().collect(
-                    Collectors.toMap(Placement::getIntrepidId, post -> post)
-            );
-        }
-        return result;
-    }
-
-    @Override
-    public List<PlacementDTO> patchPlacementSpecialties(final List<PlacementDTO> placementDTOList) {
-        final List<Placement> placements = Lists.newArrayList();
-        final Map<String, Placement> intrepidIdToPlacement = getPlacementsByIntrepidId(placementDTOList);
-
-        final Set<Long> specialtyIds = placementDTOList
-                .stream()
-                .map(PlacementDTO::getSpecialties)
-                .flatMap(Collection::stream)
-                .map(PlacementSpecialtyDTO::getSpecialtyId)
-                .collect(Collectors.toSet());
-
-      final Map<Long, Specialty> idToSpecialty = specialtyRepository.findAllById(specialtyIds).stream().collect(Collectors.toMap(Specialty::getId, sp -> sp));
-        for (final PlacementDTO dto : placementDTOList) {
-            final Placement placement = intrepidIdToPlacement.get(dto.getIntrepidId());
-            if (placement != null) {
-                final Set<PlacementSpecialty> attachedSpecialties = placement.getSpecialties();
-                final Set<Long> attachedSpecialtyIds = attachedSpecialties.stream().map(ps -> ps.getSpecialty().getId()).collect(Collectors.toSet());
-                for (final PlacementSpecialtyDTO placementSpecialtyDTO : dto.getSpecialties()) {
-                    final Specialty specialty = idToSpecialty.get(placementSpecialtyDTO.getSpecialtyId());
-                    if (specialty != null && !attachedSpecialtyIds.contains(specialty.getId())) {
-                        final PlacementSpecialty placementSpecialty = new PlacementSpecialty();
-                        placementSpecialty.setPlacementSpecialtyType(placementSpecialtyDTO.getPlacementSpecialtyType());
-                        placementSpecialty.setPlacement(placement);
-                        placementSpecialty.setSpecialty(specialty);
-                        attachedSpecialties.add(placementSpecialty);
-                    }
-                }
-                placement.setSpecialties(attachedSpecialties);
-                placements.add(placement);
-            }
-        }
-      final List<Placement> savedPlacements = placementRepository.saveAll(placements);
-        return placementMapper.placementsToPlacementDTOs(savedPlacements);
-    }
-
-    /**
-     * Get all placement details by given column filters.
-     *
-     * @param pageable the pagination information
-     * @return the list of entities
-     */
-    @Override
-    @Transactional(readOnly = true)
-    public Page<PlacementDetailsDTO> findAllPlacementDetails(final Pageable pageable) {
-        log.debug("Request to get all Placements details");
-        final Page<PlacementDetails> result = placementDetailsRepository.findAll(pageable);
-        return result.map(placementDetailsMapper::placementDetailsToPlacementDetailsDTO);
-    }
-
-    /**
-     * Get all placement details by given column filters.
-     *
-     * @param columnFilterJson column filters represented in json object
-     * @param pageable         the pagination information
-     * @return the list of entities
-     * @throws IOException
-     */
-    @Override
-    @Transactional(readOnly = true)
-    public Page<PlacementDetailsDTO> findFilteredPlacements(final String columnFilterJson, final Pageable pageable) throws IOException {
-
-        log.debug("Request to get all Revalidations filtered by columns {}", columnFilterJson);
-        final List<Class> filterEnumList = Collections.emptyList();
-        final List<ColumnFilter> columnFilters = ColumnFilterUtil.getColumnFilters(columnFilterJson, filterEnumList);
-
-        final List<Specification<PlacementDetails>> specs = new ArrayList<>();
-
-        //add the column filters criteria
-        if (CollectionUtils.isNotEmpty(columnFilters)) {
-            columnFilters.forEach(cf -> {
-                if (TCSDateColumns.contains(cf.getName())) {
-                    if (cf.getValues().isEmpty() || cf.getValues().size() != 2) {
-                        throw new DateRangeColumnFilterException("Invalid values or no values supplied for date range column filter");
-                    }
-                    specs.add(isBetween(
-                            cf.getName(),
-                            getLocalDateFromString(cf.getValues().get(0).toString()),
-                            getLocalDateFromString(cf.getValues().get(1).toString())
-                            )
-                    );
-                } else {
-                    specs.add(in(cf.getName(), Collections.unmodifiableCollection(cf.getValues())));
-                }
-            });
-        }
-        final Page<PlacementDetails> result;
-        if (!specs.isEmpty()) {
-            Specifications<PlacementDetails> fullSpec = Specifications.where(specs.get(0));
-            //add the rest of the specs that made it in
-            for (int i = 1; i < specs.size(); i++) {
-                fullSpec = fullSpec.and(specs.get(i));
-            }
-            result = placementDetailsRepository.findAll(fullSpec, pageable);
+    //add the column filters criteria
+    if (CollectionUtils.isNotEmpty(columnFilters)) {
+      columnFilters.forEach(cf -> {
+        if (TCSDateColumns.contains(cf.getName())) {
+          if (cf.getValues().isEmpty() || cf.getValues().size() != 2) {
+            throw new DateRangeColumnFilterException("Invalid values or no values supplied for date range column filter");
+          }
+          specs.add(isBetween(
+              cf.getName(),
+              getLocalDateFromString(cf.getValues().get(0).toString()),
+              getLocalDateFromString(cf.getValues().get(1).toString())
+              )
+          );
         } else {
-            result = placementDetailsRepository.findAll(pageable);
+          specs.add(in(cf.getName(), Collections.unmodifiableCollection(cf.getValues())));
         }
-
-        return result.map(placementDetailsMapper::placementDetailsToPlacementDetailsDTO);
+      });
+    }
+    final Page<PlacementDetails> result;
+    if (!specs.isEmpty()) {
+      Specifications<PlacementDetails> fullSpec = Specifications.where(specs.get(0));
+      //add the rest of the specs that made it in
+      for (int i = 1; i < specs.size(); i++) {
+        fullSpec = fullSpec.and(specs.get(i));
+      }
+      result = placementDetailsRepository.findAll(fullSpec, pageable);
+    } else {
+      result = placementDetailsRepository.findAll(pageable);
     }
 
-    @Override
-    public PlacementDTO closePlacement(final Long placementId) {
-      Placement placement = placementRepository.findById(placementId).orElse(null);
-        if (placement != null) {
-            placement.setDateTo(LocalDate.now().minusDays(1));
-            placement = placementRepository.saveAndFlush(placement);
-        }
-        return placementMapper.placementToPlacementDTO(placement);
+    return result.map(placementDetailsMapper::placementDetailsToPlacementDetailsDTO);
+  }
+
+  @Override
+  public PlacementDTO closePlacement(final Long placementId) {
+    Placement placement = placementRepository.findById(placementId).orElse(null);
+    if (placement != null) {
+      placement.setDateTo(LocalDate.now().minusDays(1));
+      placement = placementRepository.saveAndFlush(placement);
     }
+    return placementMapper.placementToPlacementDTO(placement);
+  }
 
-    @Transactional(readOnly = true)
-    @Override
-    public List<PlacementSummaryDTO> getPlacementForTrainee(final Long traineeId) {
-        final String query = sqlQuerySupplier.getQuery(SqlQuerySupplier.TRAINEE_PLACEMENT_SUMMARY);
-        List<PlacementSummaryDTO> resultList;
+  @Transactional(readOnly = true)
+  @Override
+  public List<PlacementSummaryDTO> getPlacementForTrainee(final Long traineeId) {
+    final String query = sqlQuerySupplier.getQuery(SqlQuerySupplier.TRAINEE_PLACEMENT_SUMMARY);
+    List<PlacementSummaryDTO> resultList;
 
-        try {
-          final Query traineePlacementsQuery = em.createNativeQuery(query, PLACEMENTS_SUMMARY_MAPPER)
-              .setParameter("traineeId", traineeId);
-          // TODO: uncomment this when changes to the FE adds a specialty on creation
+    try {
+      final Query traineePlacementsQuery = em.createNativeQuery(query, PLACEMENTS_SUMMARY_MAPPER)
+          .setParameter("traineeId", traineeId);
+      // TODO: uncomment this when changes to the FE adds a specialty on creation
 //        .setParameter("specialtyType", PostSpecialtyType.PRIMARY.name());
-          resultList = traineePlacementsQuery.getResultList();
-          resultList.forEach(p -> p.setPlacementStatus(getPlacementStatus(p.getDateFrom(), p.getDateTo())));
+      resultList = traineePlacementsQuery.getResultList();
+      resultList.forEach(p -> p.setPlacementStatus(getPlacementStatus(p.getDateFrom(), p.getDateTo())));
 
-          resultList = filterPlacements(resultList);
-        } finally {
-          em.close();
-        }
-        return resultList;
+      resultList = filterPlacements(resultList);
+    } finally {
+      em.close();
     }
+    return resultList;
+  }
 
-    @Transactional(readOnly = true)
-    @Override
-    public List<PlacementSummaryDTO> getPlacementForPost(final Long postId) {
-        final String query = sqlQuerySupplier.getQuery(SqlQuerySupplier.POST_PLACEMENT_SUMMARY);
-        List<PlacementSummaryDTO> resultList ;
-        try {
+  @Transactional(readOnly = true)
+  @Override
+  public List<PlacementSummaryDTO> getPlacementForPost(final Long postId) {
+    final String query = sqlQuerySupplier.getQuery(SqlQuerySupplier.POST_PLACEMENT_SUMMARY);
+    List<PlacementSummaryDTO> resultList;
+    try {
 
 
-          final Query postPlacementsQuery = em.createNativeQuery(query, PLACEMENTS_SUMMARY_MAPPER)
-              .setParameter("postId", postId);
-          // TODO: uncomment this when changes to the FE adds a specialty on creation
+      final Query postPlacementsQuery = em.createNativeQuery(query, PLACEMENTS_SUMMARY_MAPPER)
+          .setParameter("postId", postId);
+      // TODO: uncomment this when changes to the FE adds a specialty on creation
 //        .setParameter("specialtyType", PostSpecialtyType.PRIMARY.name());
-          resultList = postPlacementsQuery.getResultList();
-          resultList.forEach(p -> p.setPlacementStatus(getPlacementStatus(p.getDateFrom(), p.getDateTo())));
-          resultList = filterPlacements(resultList);
-        } finally {
-          em.close();
+      resultList = postPlacementsQuery.getResultList();
+      resultList.forEach(p -> p.setPlacementStatus(getPlacementStatus(p.getDateFrom(), p.getDateTo())));
+      resultList = filterPlacements(resultList);
+    } finally {
+      em.close();
+    }
+    return resultList;
+  }
+
+  /**
+   * this is a temporary method that filters out duplicates and preferring placements with specialties of type primary
+   * this and its usage should be removed after the PUT/POST endpoints to placements is updated with specialties
+   *
+   * @param resultList
+   * @return
+   */
+  private List<PlacementSummaryDTO> filterPlacements(final List<PlacementSummaryDTO> resultList) {
+    final Map<BigInteger, PlacementSummaryDTO> idsToPlacementSummary = Maps.newHashMap();
+    for (final PlacementSummaryDTO placementSummaryDTO : resultList) {
+
+      final BigInteger placementId = placementSummaryDTO.getPlacementId();
+      if (!idsToPlacementSummary.containsKey(placementId) ||
+          PostSpecialtyType.PRIMARY.name().equals(placementSummaryDTO.getPlacementSpecialtyType())) {
+        idsToPlacementSummary.put(placementId, placementSummaryDTO);
+      }
+    }
+
+    final List<PlacementSummaryDTO> placementSummaryDTOS = Lists.newArrayList(idsToPlacementSummary.values());
+    placementSummaryDTOS.sort(new Comparator<PlacementSummaryDTO>() {
+      @Override
+      public int compare(final PlacementSummaryDTO o1, final PlacementSummaryDTO o2) {
+        return ObjectUtils.compare(o2.getDateTo(), o1.getDateTo());
+      }
+    });
+    return placementSummaryDTOS;
+  }
+
+  private String getPlacementStatus(final Date dateFrom, final Date dateTo) {
+
+    if (dateFrom == null || dateTo == null) {
+      return PlacementStatus.PAST.name();
+    }
+
+    // Truncating the hours,minutes,seconds
+    final long from = DateUtils.truncate(dateFrom, Calendar.DATE).getTime();
+    final long to = DateUtils.truncate(dateTo, Calendar.DATE).getTime();
+    final long now = DateUtils.truncate(new Date(), Calendar.DATE).getTime();
+
+    if (now < from) {
+      return PlacementStatus.FUTURE.name();
+    } else if (now > to) {
+      return PlacementStatus.PAST.name();
+    }
+    return PlacementStatus.CURRENT.name();
+
+  }
+
+  private boolean isEligibleForNotification(final Placement currentPlacement, final PlacementDetailsDTO updatedPlacementDetails) {
+    // I really do not like this null checks :-( but keeping it to work around the data from intrepid
+    return
+        ((currentPlacement.getDateFrom() != null && !currentPlacement.getDateFrom().equals(updatedPlacementDetails.getDateFrom())) ||
+            (currentPlacement.getDateTo() != null && !currentPlacement.getDateTo().equals(updatedPlacementDetails.getDateTo()))) &&
+            ((currentPlacement.getDateFrom() != null && currentPlacement.getDateFrom().isBefore(LocalDate.now().plusMonths(3))) ||
+                (updatedPlacementDetails.getDateFrom() != null && updatedPlacementDetails.getDateFrom().isBefore(LocalDate.now().plusMonths(3))));
+  }
+
+  private void handleEsrNewPlacementNotification(final PlacementDetailsDTO placementDetailsDTO, final PlacementDetails placementDetails) {
+
+    log.debug("Handling ESR notifications for new placement creation for deanery number {}", placementDetailsDTO.getLocalPostNumber());
+    if (placementDetailsDTO.getId() == null) {
+      try {
+        final Placement savedPlacement = placementRepository.findById(placementDetails.getId()).orElse(null);
+        if (savedPlacement.getDateFrom() != null && savedPlacement.getDateFrom().isBefore(LocalDate.now().plusMonths(3))) {
+          log.debug("Creating ESR notification for new placement creation for deanery number {}", savedPlacement.getPost().getNationalPostNumber());
+          final List<EsrNotification> esrNotifications = esrNotificationService.handleNewPlacementEsrNotification(savedPlacement);
+          log.debug("CREATED: ESR {} notifications for new placement creation for deanery number {}",
+              esrNotifications.size(), savedPlacement.getPost().getNationalPostNumber());
         }
-        return resultList;
+      } catch (final Exception e) {
+        // Ideally it should fail the entire update. Keeping the impact minimal for TCS and go live and revisit after go live.
+        // Log and continue
+        log.error("Error loading New Placement Notification : ", e);
+      }
     }
+  }
 
-    /**
-     * this is a temporary method that filters out duplicates and preferring placements with specialties of type primary
-     * this and its usage should be removed after the PUT/POST endpoints to placements is updated with specialties
-     *
-     * @param resultList
-     * @return
-     */
-    private List<PlacementSummaryDTO> filterPlacements(final List<PlacementSummaryDTO> resultList) {
-        final Map<BigInteger, PlacementSummaryDTO> idsToPlacementSummary = Maps.newHashMap();
-        for (final PlacementSummaryDTO placementSummaryDTO : resultList) {
+  private void saveSupervisors(final Set<PlacementSupervisorDTO> supervisorDTOs, final Long placementId) {
+    placementSupervisorRepository.deleteAllByIdPlacementId(placementId);
 
-            final BigInteger placementId = placementSummaryDTO.getPlacementId();
-            if (!idsToPlacementSummary.containsKey(placementId) ||
-                    PostSpecialtyType.PRIMARY.name().equals(placementSummaryDTO.getPlacementSpecialtyType())) {
-                idsToPlacementSummary.put(placementId, placementSummaryDTO);
-            }
-        }
+    final Set<PlacementSupervisor> supervisors = new HashSet<>();
 
-        final List<PlacementSummaryDTO> placementSummaryDTOS = Lists.newArrayList(idsToPlacementSummary.values());
-        placementSummaryDTOS.sort(new Comparator<PlacementSummaryDTO>() {
-            @Override
-            public int compare(final PlacementSummaryDTO o1, final PlacementSummaryDTO o2) {
-              return ObjectUtils.compare(o2.getDateTo(), o1.getDateTo());
-            }
-        });
-        return placementSummaryDTOS;
+    supervisorDTOs.forEach(s -> supervisors.add(new PlacementSupervisor(placementId, s.getPerson().getId(), s.getType())));
+
+    placementSupervisorRepository.saveAll(supervisors);
+  }
+
+  class PlacementDetailSpecialtyRowMapper implements RowMapper<PlacementSpecialtyDTO> {
+    @Override
+    public PlacementSpecialtyDTO mapRow(final ResultSet rs, final int rowNum) throws SQLException {
+      final PlacementSpecialtyDTO result = new PlacementSpecialtyDTO();
+      result.setPlacementId(rs.getLong("placementId"));
+      result.setSpecialtyId(rs.getLong("specialtyId"));
+      final String placementSpecialtyType = rs.getString("placementSpecialtyType");
+      PostSpecialtyType postSpecialtyType = null;
+      if (StringUtils.isNotBlank(placementSpecialtyType)) {
+        postSpecialtyType = PostSpecialtyType.valueOf(placementSpecialtyType);
+      }
+      result.setPlacementSpecialtyType(postSpecialtyType);
+      return result;
     }
-
-    private String getPlacementStatus(final Date dateFrom, final Date dateTo) {
-
-        if (dateFrom == null || dateTo == null) {
-            return PlacementStatus.PAST.name();
-        }
-
-        // Truncating the hours,minutes,seconds
-        final long from = DateUtils.truncate(dateFrom, Calendar.DATE).getTime();
-        final long to = DateUtils.truncate(dateTo, Calendar.DATE).getTime();
-        final long now = DateUtils.truncate(new Date(), Calendar.DATE).getTime();
-
-        if (now < from) {
-            return PlacementStatus.FUTURE.name();
-        } else if (now > to) {
-            return PlacementStatus.PAST.name();
-        }
-        return PlacementStatus.CURRENT.name();
-
-    }
-
-    private boolean isEligibleForNotification(final Placement currentPlacement, final PlacementDetailsDTO updatedPlacementDetails) {
-        // I really do not like this null checks :-( but keeping it to work around the data from intrepid
-        return
-                ((currentPlacement.getDateFrom() != null && !currentPlacement.getDateFrom().equals(updatedPlacementDetails.getDateFrom())) ||
-                        (currentPlacement.getDateTo() != null && !currentPlacement.getDateTo().equals(updatedPlacementDetails.getDateTo()))) &&
-                        ((currentPlacement.getDateFrom() != null && currentPlacement.getDateFrom().isBefore(LocalDate.now().plusMonths(3))) ||
-                                (updatedPlacementDetails.getDateFrom() != null && updatedPlacementDetails.getDateFrom().isBefore(LocalDate.now().plusMonths(3))));
-    }
-
-    private void handleEsrNewPlacementNotification(final PlacementDetailsDTO placementDetailsDTO, final PlacementDetails placementDetails) {
-
-        log.debug("Handling ESR notifications for new placement creation for deanery number {}", placementDetailsDTO.getLocalPostNumber());
-        if (placementDetailsDTO.getId() == null) {
-            try {
-              final Placement savedPlacement = placementRepository.findById(placementDetails.getId()).orElse(null);
-                if (savedPlacement.getDateFrom() != null && savedPlacement.getDateFrom().isBefore(LocalDate.now().plusMonths(3))) {
-                    log.debug("Creating ESR notification for new placement creation for deanery number {}", savedPlacement.getPost().getNationalPostNumber());
-                    final List<EsrNotification> esrNotifications = esrNotificationService.handleNewPlacementEsrNotification(savedPlacement);
-                    log.debug("CREATED: ESR {} notifications for new placement creation for deanery number {}",
-                            esrNotifications.size(), savedPlacement.getPost().getNationalPostNumber());
-                }
-            } catch (final Exception e) {
-                // Ideally it should fail the entire update. Keeping the impact minimal for TCS and go live and revisit after go live.
-                // Log and continue
-                log.error("Error loading New Placement Notification : ", e);
-            }
-        }
-    }
-
-    private void saveSupervisors(final Set<PlacementSupervisorDTO> supervisorDTOs, final Long placementId) {
-        placementSupervisorRepository.deleteAllByIdPlacementId(placementId);
-
-        final Set<PlacementSupervisor> supervisors = new HashSet<>();
-
-        supervisorDTOs.forEach(s -> supervisors.add(new PlacementSupervisor(placementId, s.getPerson().getId(), s.getType())));
-
-      placementSupervisorRepository.saveAll(supervisors);
-    }
-
-    class PlacementDetailSpecialtyRowMapper implements RowMapper<PlacementSpecialtyDTO> {
-        @Override
-        public PlacementSpecialtyDTO mapRow(final ResultSet rs, final int rowNum) throws SQLException {
-            final PlacementSpecialtyDTO result = new PlacementSpecialtyDTO();
-            result.setPlacementId(rs.getLong("placementId"));
-            result.setSpecialtyId(rs.getLong("specialtyId"));
-            final String placementSpecialtyType = rs.getString("placementSpecialtyType");
-            PostSpecialtyType postSpecialtyType = null;
-            if (StringUtils.isNotBlank(placementSpecialtyType)) {
-                postSpecialtyType = PostSpecialtyType.valueOf(placementSpecialtyType);
-            }
-            result.setPlacementSpecialtyType(postSpecialtyType);
-            return result;
-        }
-    }
+  }
 }
