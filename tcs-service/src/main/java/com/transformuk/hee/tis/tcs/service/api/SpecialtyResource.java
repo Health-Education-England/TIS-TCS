@@ -27,7 +27,15 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.validation.annotation.Validated;
-import org.springframework.web.bind.annotation.*;
+import org.springframework.web.bind.annotation.DeleteMapping;
+import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PathVariable;
+import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.PutMapping;
+import org.springframework.web.bind.annotation.RequestBody;
+import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestParam;
+import org.springframework.web.bind.annotation.RestController;
 
 import javax.validation.Valid;
 import java.io.IOException;
@@ -114,9 +122,9 @@ public class SpecialtyResource {
   @GetMapping("/specialties")
   @PreAuthorize("hasAuthority('specialty:view')")
   public ResponseEntity<List<SpecialtyDTO>> getAllSpecialties(
-    Pageable pageable,
-    @RequestParam(value = "searchQuery", required = false) String searchQuery,
-    @RequestParam(value = "columnFilters", required = false) String columnFilterJson) throws IOException {
+      Pageable pageable,
+      @RequestParam(value = "searchQuery", required = false) String searchQuery,
+      @RequestParam(value = "columnFilters", required = false) String columnFilterJson) throws IOException {
 
     log.debug("REST request to get a page of Specialties");
 
@@ -144,7 +152,7 @@ public class SpecialtyResource {
   @GetMapping("/specialties/in/{ids}")
   @PreAuthorize("hasAuthority('specialty:view')")
   public ResponseEntity<List<SpecialtySimpleDTO>> findByIds(
-    @PathVariable String ids) {
+      @PathVariable String ids) {
 
     log.debug("REST request to find several Specialties");
     List<SpecialtySimpleDTO> resp = new ArrayList<>();
@@ -209,7 +217,7 @@ public class SpecialtyResource {
     if (!Collections.isEmpty(specialtyDTOS)) {
       List<Long> entityIds = specialtyDTOS.stream()
           .filter(s -> s.getId() != null)
-        .map(SpecialtyDTO::getId)
+          .map(SpecialtyDTO::getId)
           .collect(Collectors.toList());
       if (!Collections.isEmpty(entityIds)) {
         return ResponseEntity.badRequest().headers(HeaderUtil.createFailureAlert(StringUtils.join(entityIds, ","), "ids.exist", "A new Specialty cannot already have an ID")).body(null);
@@ -257,5 +265,11 @@ public class SpecialtyResource {
     return ResponseEntity.ok()
         .headers(HeaderUtil.createEntityUpdateAlert(ENTITY_NAME, StringUtils.join(ids, ",")))
         .body(results);
+  }
+
+  @GetMapping("/programme/{id}/specialties")
+  public Page<SpecialtyDTO> getAllSpecialtiesForProgrammeId(@PathVariable Long id, @RequestParam(required = false) String searchQuery,
+                                                      Pageable pageable) {
+    return specialtyService.getPagedSpecialtiesForProgrammeId(id, searchQuery, pageable);
   }
 }
