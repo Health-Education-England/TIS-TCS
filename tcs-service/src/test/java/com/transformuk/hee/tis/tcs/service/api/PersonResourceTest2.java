@@ -1,8 +1,10 @@
 package com.transformuk.hee.tis.tcs.service.api;
 
+import com.google.common.collect.Lists;
 import com.transformuk.hee.tis.tcs.TestUtils;
 import com.transformuk.hee.tis.tcs.api.dto.PersonDTO;
 import com.transformuk.hee.tis.tcs.api.dto.PersonV2DTO;
+import com.transformuk.hee.tis.tcs.api.dto.PersonViewDTO;
 import com.transformuk.hee.tis.tcs.api.enumeration.Status;
 import com.transformuk.hee.tis.tcs.service.Application;
 import com.transformuk.hee.tis.tcs.service.api.decorator.PersonViewDecorator;
@@ -27,19 +29,28 @@ import org.mockito.MockitoAnnotations;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.boot.test.mock.mockito.MockBean;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageImpl;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
 import org.springframework.data.web.PageableHandlerMethodArgumentResolver;
+import org.springframework.http.MediaType;
 import org.springframework.http.converter.json.MappingJackson2HttpMessageConverter;
 import org.springframework.test.context.junit4.SpringRunner;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.request.MockMvcRequestBuilders;
 import org.springframework.test.web.servlet.setup.MockMvcBuilders;
 
+import java.util.ArrayList;
+
+import static org.hamcrest.Matchers.containsInAnyOrder;
 import static org.mockito.Matchers.any;
 import static org.mockito.Mockito.doThrow;
 import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
+import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.content;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
@@ -196,7 +207,7 @@ public class PersonResourceTest2 {
             .contentType(TestUtil.APPLICATION_JSON_UTF8))
         .andExpect(status().isUnauthorized())
         .andExpect(jsonPath("$.message").value("error.accessDenied"));
-    }
+  }
 
   @Test
   public void unauthorisedExceptionThrownWhenUserCannotViewPlacementsUsingGmcIdNew() throws Exception {
@@ -241,4 +252,36 @@ public class PersonResourceTest2 {
 
     verify(personServiceMock).findPersonV2WithProgrammeMembershipsSorted(personId);
   }
+
+  @Test
+  public void findPeopleOnProgrammeShouldReturnPagedResultsOfFound() throws Exception {
+    Long programmeId = 1L;
+    String searchQuery = "john";
+    int page = 0;
+    int size = 100;
+    Pageable pageable = PageRequest.of(page, size);
+    PersonViewDTO foundPerson1 = new PersonViewDTO(), foundPerson2 = new PersonViewDTO();
+    foundPerson1.setProgrammeId(programmeId);
+    foundPerson2.setProgrammeId(programmeId);
+    foundPerson1.setId(1L);
+    foundPerson2.setId(2L);
+
+    ArrayList<PersonViewDTO> content = Lists.newArrayList(foundPerson1, foundPerson2);
+    Page<PersonViewDTO> searchResults = new PageImpl<>(content, pageable, 2);
+
+    when(personElasticSearchServiceMock.findPeopleOnProgramme(programmeId, searchQuery, pageable)).thenReturn(searchResults);
+
+    mockMvc.perform(get("/api/programme/{id}/people?page=0&size=100&searchQuery=john", programmeId)
+        .contentType(MediaType.APPLICATION_JSON_UTF8))
+        .andExpect(content().contentType(MediaType.APPLICATION_JSON_UTF8))
+        .andExpect(status().isOk())
+        .andExpect(jsonPath("$.size").value(size))
+        .andExpect(jsonPath("$.number").value(page))
+        .andExpect(jsonPath("$.numberOfElements").value(content.size()))
+        .andExpect(jsonPath("$.content.[*].id").value(containsInAnyOrder(1, 2)))
+        .andExpect(jsonPath("$.content.[0].programmeId").value(1))
+    ;
+
+  }
+
 }
