@@ -38,6 +38,7 @@ import com.transformuk.hee.tis.tcs.service.repository.PlacementSupervisorReposit
 import com.transformuk.hee.tis.tcs.service.repository.PostRepository;
 import com.transformuk.hee.tis.tcs.service.repository.SpecialtyRepository;
 import com.transformuk.hee.tis.tcs.service.service.PlacementService;
+import com.transformuk.hee.tis.tcs.service.service.impl.PlacementPlannerServiceImp;
 import com.transformuk.hee.tis.tcs.service.service.mapper.PlacementDetailsMapper;
 import com.transformuk.hee.tis.tcs.service.service.mapper.PlacementMapper;
 import org.apache.commons.codec.EncoderException;
@@ -166,6 +167,8 @@ public class PlacementResourceIntTest {
   private PageableHandlerMethodArgumentResolver pageableArgumentResolver;
   @Autowired
   private ExceptionTranslator exceptionTranslator;
+  @Autowired
+  private PlacementPlannerServiceImp placementPlannerServiceImp;
 
   private AsyncReferenceService asyncReferenceService;
 
@@ -231,7 +234,7 @@ public class PlacementResourceIntTest {
     asyncReferenceService = new AsyncReferenceService(referenceService);
     placementValidator = new PlacementValidator(referenceService, postRepository, personRepository, placementRepository);
     placementDetailsDecorator = new PlacementDetailsDecorator(asyncReferenceService, asyncPersonBasicDetailsRepository, postRepository);
-    final PlacementResource placementResource = new PlacementResource(placementService, placementValidator, placementDetailsDecorator, placementRepository);
+    final PlacementResource placementResource = new PlacementResource(placementService, placementValidator, placementDetailsDecorator, placementPlannerServiceImp);
     this.restPlacementMockMvc = MockMvcBuilders.standaloneSetup(placementResource)
         .setCustomArgumentResolvers(pageableArgumentResolver)
         .setControllerAdvice(exceptionTranslator)
