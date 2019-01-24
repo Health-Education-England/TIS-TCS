@@ -216,6 +216,7 @@ public class PlacementServiceImpl implements PlacementService {
     for (PlacementSpecialty specialty : specialties) {
       placementSpecialtyRepository.delete(specialty);
     }
+    specialties.removeAll(specialties);
     PlacementDetails placementDetails = placementDetailsMapper.placementDetailsDTOToPlacementDetails(placementDetailsDTO);
     updateStoredCommentsWithChangesOrAdd(placementDetails);
 
