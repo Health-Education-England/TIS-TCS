@@ -81,4 +81,13 @@ public interface SpecialtyService {
    * @return Paginated list of found specialties
    */
   Page<SpecialtyDTO> getPagedSpecialtiesForProgrammeId(Long programmeId, String searchQuery, Pageable pageable);
+
+  /**
+   * Find specialties for a Programme that a Person is a member of
+   *
+   * @param programmeId The Programme id
+   * @param personId    The id of the Person
+   * @return List of all the specialties linked to the person and programme
+   */
+  List<SpecialtyDTO> getSpecialtiesForProgrammeAndPerson(Long programmeId, Long personId);
 }

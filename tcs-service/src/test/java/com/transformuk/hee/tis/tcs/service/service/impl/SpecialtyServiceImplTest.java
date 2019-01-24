@@ -24,12 +24,14 @@ import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageImpl;
 import org.springframework.data.domain.PageRequest;
 
+import java.util.Collections;
 import java.util.List;
 
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.verifyNoMoreInteractions;
+import static org.mockito.Mockito.verifyZeroInteractions;
 import static org.mockito.Mockito.when;
 
 @RunWith(MockitoJUnitRunner.class)
@@ -205,5 +207,59 @@ public class SpecialtyServiceImplTest {
     Assert.assertEquals(specialtyDTO, result.getContent().get(0));
 
     verify(specialtyRepositoryMock, never()).findSpecialtyDistinctByCurriculaProgrammesIdAndStatusIs(any(), any(), any());
+  }
+
+  @Test(expected = NullPointerException.class)
+  public void getSpecialtiesForProgrammeAndPersonShouldThrowExceptionWhenProgrammeIdIsNull() {
+    try {
+      testObj.getSpecialtiesForProgrammeAndPerson(null, 1L);
+    } catch (Exception e) {
+      verifyZeroInteractions(specialtyRepositoryMock);
+      verifyZeroInteractions(specialtyMapperMock);
+      throw e;
+    }
+  }
+
+  @Test(expected = NullPointerException.class)
+  public void getSpecialtiesForProgrammeAndPersonShouldThrowExceptionWhenPersonIdIsNull() {
+    try {
+      testObj.getSpecialtiesForProgrammeAndPerson(1L, null);
+    } catch (Exception e) {
+      verifyZeroInteractions(specialtyRepositoryMock);
+      verifyZeroInteractions(specialtyMapperMock);
+      throw e;
+    }
+  }
+
+  @Test
+  public void getSpecialtiesForProgrammeAndPersonShouldReturnEmptyListWhenNoSpecialtiesFound() {
+    long programmeId = 1L;
+    long personId = 2L;
+    when(specialtyRepositoryMock.findDistinctByProgrammeIdAndPersonId(programmeId, personId)).thenReturn(Collections.EMPTY_LIST);
+    List<SpecialtyDTO> result = testObj.getSpecialtiesForProgrammeAndPerson(programmeId, personId);
+
+    Assert.assertEquals(0, result.size());
+
+    verify(specialtyRepositoryMock).findDistinctByProgrammeIdAndPersonId(programmeId, personId);
+    verify(specialtyMapperMock).specialtiesToSpecialtyDTOs(Collections.EMPTY_LIST);
+  }
+
+  @Test
+  public void getSpecialtiesForProgrammeAndPersonShouldReturnSpecialtiesDTOFound() {
+    long programmeId = 1L;
+    long personId = 2L;
+    List<Specialty> foundSpecialties = Lists.newArrayList(specialtyMock);
+    List<SpecialtyDTO> convertedSpecialties = Lists.newArrayList(specialtyDTO);
+
+    when(specialtyRepositoryMock.findDistinctByProgrammeIdAndPersonId(programmeId, personId)).thenReturn(foundSpecialties);
+    when(specialtyMapperMock.specialtiesToSpecialtyDTOs(foundSpecialties)).thenReturn(convertedSpecialties);
+
+    List<SpecialtyDTO> result = testObj.getSpecialtiesForProgrammeAndPerson(programmeId, personId);
+
+    Assert.assertEquals(1, result.size());
+    Assert.assertEquals(convertedSpecialties, result);
+
+    verify(specialtyRepositoryMock).findDistinctByProgrammeIdAndPersonId(programmeId, personId);
+    verify(specialtyMapperMock).specialtiesToSpecialtyDTOs(foundSpecialties);
   }
 }

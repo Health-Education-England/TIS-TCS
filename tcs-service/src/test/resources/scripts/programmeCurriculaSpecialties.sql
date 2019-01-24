@@ -1,4 +1,5 @@
 -- SQL to insert programmes with curricula and specialties
+SET FOREIGN_KEY_CHECKS = 0;
 
 INSERT INTO `Programme` (`id`, `status`, `owner`, `programmeName`, `programmeNumber`)
 VALUES
@@ -25,29 +26,59 @@ VALUES
 
 INSERT INTO `Curriculum` (`id`, `name`, `curriculumSubType`, `assessmentType`, `doesThisCurriculumLeadToCct`, `periodOfGrace`, `specialtyId`, `status`, `length`)
 VALUES
-	(1, 'NE - Vacant Dr-Dummy', NULL, 'ACADEMIC', 0, NULL, '1', 'CURRENT', 12),
-	(2, 'Clinical Teaching Fellow (Scotland)', NULL, 'ACADEMIC', 0, 0, '2', 'CURRENT', 12),
-	(3, 'Clinical Research Fellow (Scotland)', NULL, 'ACADEMIC', 0, 0, '3', 'CURRENT', 12),
-	(4, 'Clinical Lecturer (Scotland)', NULL, 'ACADEMIC', 0, 0,  '4', 'CURRENT', 12),
-	(5, 'Other fellowship', NULL, 'ACADEMIC', 0, 0, '5', 'CURRENT', 12),
-	(6, 'ACL (N Ireland)', NULL, 'ACADEMIC', 0, 0,  '6', 'CURRENT', 12),
-	(7, 'University of Cambridge ? ACF (Local)', 'ACF_OTHER_FUNDING', 'ACADEMIC', 0, NULL, '7', 'CURRENT', 0),
-	(17, 'University of Cambridge ? ACF (Local) - NEW', 'ACF_OTHER_FUNDING', 'ACADEMIC', 0, NULL, '7', 'CURRENT', 0),
-	(27, 'University of Cambridge ? ACF (Local) - NEWER DUPE', 'ACF_OTHER_FUNDING', 'ACADEMIC', 0, NULL, '7', 'CURRENT', 0),
-	(8, 'EOE - ACL (matched substantive)', 'ACL_OTHER_FUNDING', 'ACADEMIC', 0, NULL, '8', 'CURRENT', 0),
-	(9, 'AAA', 'ACL_OTHER_FUNDING', 'ACADEMIC', 0, NULL, '9', 'CURRENT', 0),
-	(19, 'BBB', 'ACL_OTHER_FUNDING', 'ACADEMIC', 0, NULL, '19', 'CURRENT', 0);
+	(100, 'NE - Vacant Dr-Dummy', NULL, 'ACADEMIC', 0, NULL, '1', 'CURRENT', 12),
+	(200, 'Clinical Teaching Fellow (Scotland)', NULL, 'ACADEMIC', 0, 0, '2', 'CURRENT', 12),
+	(300, 'Clinical Research Fellow', NULL, 'ACADEMIC', 0, 0, '3', 'CURRENT', 12),
+	(400, 'Clinical Lecturer (Scotland)', NULL, 'ACADEMIC', 0, 0,  '4', 'CURRENT', 12),
+	(500, 'Other fellowship', NULL, 'ACADEMIC', 0, 0, '5', 'CURRENT', 12),
+	(600, 'ACL (N Ireland)', NULL, 'ACADEMIC', 0, 0,  '6', 'CURRENT', 12),
+	(700, 'University of Cambridge ? ACF (Local)', 'ACF_OTHER_FUNDING', 'ACADEMIC', 0, NULL, '7', 'CURRENT', 0),
+	(1700, 'University of Cambridge ? ACF (Local) - NEW', 'ACF_OTHER_FUNDING', 'ACADEMIC', 0, NULL, '7', 'CURRENT', 0),
+	(2700, 'University of Cambridge ? ACF (Local) - NEWER DUPE', 'ACF_OTHER_FUNDING', 'ACADEMIC', 0, NULL, '7', 'CURRENT', 0),
+	(800, 'EOE - ACL (matched substantive)', 'ACL_OTHER_FUNDING', 'ACADEMIC', 0, NULL, '8', 'CURRENT', 0),
+	(900, 'AAA', 'ACL_OTHER_FUNDING', 'ACADEMIC', 0, NULL, '9', 'CURRENT', 0),
+	(1900, 'BBB', 'ACL_OTHER_FUNDING', 'ACADEMIC', 0, NULL, '19', 'CURRENT', 0);
 
-INSERT INTO `ProgrammeCurriculum` (`programmeId`, `curriculumId`) VALUES
-	(1, 1),
-	(1, 2),
-	(2, 3),
-	(2, 4),
-	(3, 5),
-	(3, 6),
-	(4, 7),
-	(4, 17),
-	(4, 27),
-	(5, 8),
-	(6, 9),
-	(6, 19);
+INSERT INTO `ProgrammeCurriculum` (`programmeId`, `curriculumId`) VALUES (1, 100);
+INSERT INTO `ProgrammeCurriculum` (`programmeId`, `curriculumId`) VALUES (1, 200);
+INSERT INTO `ProgrammeCurriculum` (`programmeId`, `curriculumId`) VALUES (2, 300);
+INSERT INTO `ProgrammeCurriculum` (`programmeId`, `curriculumId`) VALUES (2, 400);
+INSERT INTO `ProgrammeCurriculum` (`programmeId`, `curriculumId`) VALUES (3, 500);
+INSERT INTO `ProgrammeCurriculum` (`programmeId`, `curriculumId`) VALUES (3, 600);
+INSERT INTO `ProgrammeCurriculum` (`programmeId`, `curriculumId`) VALUES (4, 700);
+INSERT INTO `ProgrammeCurriculum` (`programmeId`, `curriculumId`) VALUES (4, 1700);
+INSERT INTO `ProgrammeCurriculum` (`programmeId`, `curriculumId`) VALUES (4, 2700);
+INSERT INTO `ProgrammeCurriculum` (`programmeId`, `curriculumId`) VALUES (5, 800);
+INSERT INTO `ProgrammeCurriculum` (`programmeId`, `curriculumId`) VALUES (6, 900);
+INSERT INTO `ProgrammeCurriculum` (`programmeId`, `curriculumId`) VALUES (6, 1900);
+
+INSERT INTO `Post` (`id`, `nationalPostNumber`, `status`, `owner`, `legacy`, `bypassNPNGeneration`)
+VALUES
+	(11, 'XXX', 'CURRENT', 'Health Education England Wessex', 0, 1),
+  (12, 'YYY', 'CURRENT', 'Health Education England Wessex', 0, 1),
+  (13, 'ZZZ', 'CURRENT', 'Health Education England Wessex', 0, 1);
+
+INSERT INTO `PostSpecialty` (`id`, `postId`, `specialtyId`, `postSpecialtyType`)
+VALUES
+	(1, 11, 3, 'PRIMARY'),
+	(2, 12, 4, 'PRIMARY'),
+	(3, 13, 5, 'PRIMARY');
+
+INSERT INTO `ProgrammePost` (`programmeId`, `postId`)
+VALUES
+	(1, 11),
+	(1, 12);
+
+INSERT INTO `Placement` (`id`, `dateFrom`, `dateTo`, `placementWholeTimeEquivalent`, `traineeId`, `postId`)
+VALUES
+	(33, '2015-03-06', '2019-06-06', 0.6, 1, 11),
+	(34, '2016-03-06', '2019-06-06', 0.3, 1, 12),
+	(35, '2017-03-06', '2019-06-06', 1, 2, 11);
+
+INSERT INTO `Person` (`id`, `role`, `status`, `comments`, `inactiveDate`, `inactiveNotes`, `publicHealthNumber`, `regulator`)
+VALUES
+	(1, 'DR in Training', 'CURRENT', NULL, NULL, NULL, NULL, NULL),
+	(2, 'DR in Training', 'CURRENT', NULL, NULL, NULL, NULL, NULL);
+
+
+SET FOREIGN_KEY_CHECKS = 1;

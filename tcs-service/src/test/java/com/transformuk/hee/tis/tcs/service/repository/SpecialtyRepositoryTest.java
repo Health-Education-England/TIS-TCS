@@ -14,6 +14,8 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.test.context.jdbc.Sql;
 import org.springframework.test.context.junit4.SpringRunner;
 
+import java.util.List;
+
 @RunWith(SpringRunner.class)
 @SpringBootTest(classes = Application.class, webEnvironment = SpringBootTest.WebEnvironment.RANDOM_PORT)
 public class SpecialtyRepositoryTest {
@@ -83,6 +85,24 @@ public class SpecialtyRepositoryTest {
     Assert.assertFalse(result.hasNext());
     for (Specialty specialty : result.getContent()) {
       Assert.assertEquals(Status.INACTIVE, specialty.getStatus());
+    }
+  }
+
+
+  @Test
+  @Sql("/scripts/programmeCurriculaSpecialties.sql")
+  @Sql(executionPhase = Sql.ExecutionPhase.AFTER_TEST_METHOD, scripts = "/scripts/deleteProgrammeCurriculaSpecialties.sql")
+  public void findDistinctByProgrammeIdAndPersonId() {
+    Long programmeId = 1L;
+    Long personId = 1L;
+    Long expectedSpecialtyId1 = 4L, expectedSpecialtyId2 = 3L;
+    String specialtyName1 = "Urogynaecology", specialtyName2 = "Oral and maxillofacial pathology";
+    List<Specialty> results = specialtyRepository.findDistinctByProgrammeIdAndPersonId(programmeId, personId);
+
+    Assert.assertEquals(2, results.size());
+    for (Specialty result : results) {
+      Assert.assertTrue(expectedSpecialtyId1.equals(result.getId()) || expectedSpecialtyId2.equals(result.getId()));
+      Assert.assertTrue(specialtyName1.equals(result.getName()) || specialtyName2.equals(result.getName()));
     }
   }
 }

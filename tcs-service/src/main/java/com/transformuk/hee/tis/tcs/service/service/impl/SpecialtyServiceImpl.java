@@ -195,4 +195,12 @@ public class SpecialtyServiceImpl implements SpecialtyService {
     return new PageImpl<>(specialtyDTOS, pageable, foundSpecialties.getTotalElements());
   }
 
+  @Override
+  public List<SpecialtyDTO> getSpecialtiesForProgrammeAndPerson(Long programmeId, Long personId) {
+    Preconditions.checkNotNull(programmeId, "Programme id cannot be null");
+    Preconditions.checkNotNull(personId, "Person id cannot be null");
+
+    List<Specialty> specialties = specialtyRepository.findDistinctByProgrammeIdAndPersonId(programmeId, personId);
+    return specialtyMapper.specialtiesToSpecialtyDTOs(specialties);
+  }
 }

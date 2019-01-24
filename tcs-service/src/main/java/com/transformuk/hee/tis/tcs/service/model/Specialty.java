@@ -3,6 +3,7 @@ package com.transformuk.hee.tis.tcs.service.model;
 import com.transformuk.hee.tis.tcs.api.enumeration.SpecialtyType;
 import com.transformuk.hee.tis.tcs.api.enumeration.Status;
 
+import javax.persistence.CascadeType;
 import javax.persistence.CollectionTable;
 import javax.persistence.Column;
 import javax.persistence.ElementCollection;
@@ -60,6 +61,9 @@ public class Specialty implements Serializable {
 
   @OneToMany(mappedBy = "specialty", fetch = FetchType.LAZY)
   private List<Curriculum> curricula;
+
+  @OneToMany(mappedBy = "specialty", cascade = CascadeType.ALL, orphanRemoval=true)
+  private Set<PostSpecialty> posts = new HashSet<>();
 
   public Long getId() {
     return id;
@@ -166,6 +170,14 @@ public class Specialty implements Serializable {
 
   public void setCurricula(List<Curriculum> curricula) {
     this.curricula = curricula;
+  }
+
+  public Set<PostSpecialty> getPosts() {
+    return posts;
+  }
+
+  public void setPosts(Set<PostSpecialty> posts) {
+    this.posts = posts;
   }
 
   @Override

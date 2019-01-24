@@ -272,4 +272,10 @@ public class SpecialtyResource {
                                                       Pageable pageable) {
     return specialtyService.getPagedSpecialtiesForProgrammeId(id, searchQuery, pageable);
   }
+
+  @GetMapping("/programme/{programmeId}/person/{personId}/specialties")
+  public ResponseEntity<List<SpecialtyDTO>> getSpecialtiesForProgrammeAndTrainee(@PathVariable Long programmeId, @PathVariable Long personId) {
+    List<SpecialtyDTO> specialties = specialtyService.getSpecialtiesForProgrammeAndPerson(programmeId, personId);
+    return ResponseEntity.ok(specialties);
+  }
 }
