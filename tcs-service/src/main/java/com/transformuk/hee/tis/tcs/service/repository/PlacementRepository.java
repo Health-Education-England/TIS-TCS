@@ -102,4 +102,31 @@ public interface PlacementRepository extends JpaRepository<Placement, Long> {
       @Param("startDateTo") LocalDate startDateTo,
       @Param("placementTypes") List<String> placementTypes);
 
+  /**
+   * Find a unique collection of Placements that have links to a specific specialty and programme
+   *
+   * @param programmeId the Programme id
+   * @param specialtyId the Specialty id
+   * @return collection of Placements
+   */
+  @Query("SELECT DISTINCT pl " +
+      "FROM Placement pl " +
+      "JOIN FETCH pl.post p " +
+      "JOIN FETCH p.programmes pr " +
+      "JOIN FETCH p.specialties ps " +
+      "JOIN FETCH ps.specialty sp " +
+      "LEFT JOIN FETCH pl.trainee t " +
+      "LEFT JOIN FETCH t.contactDetails c " +
+      "LEFT JOIN FETCH t.gmcDetails gmc " +
+      "LEFT JOIN FETCH t.gdcDetails gdc " +
+      "LEFT JOIN FETCH t.personalDetails pd " +
+      "LEFT JOIN FETCH t.rightToWork rtw " +
+      "WHERE pr.id = :programmeId " +
+      "AND sp.id = :specialtyId " +
+      "AND pl.dateFrom >= :dateFrom " +
+      "AND pl.dateTo <= :dateTo ")
+  List<Placement> findPlacementsByProgrammeIdAndSpecialtyId(@Param("programmeId") Long programmeId,
+                                                            @Param("specialtyId")Long specialtyId,
+                                                            @Param("dateFrom") LocalDate dateFrom,
+                                                            @Param("dateTo") LocalDate dateTo);
 }

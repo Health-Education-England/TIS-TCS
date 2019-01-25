@@ -3,7 +3,6 @@ package com.transformuk.hee.tis.tcs.service.service;
 import com.transformuk.hee.tis.tcs.api.dto.SpecialtyDTO;
 import com.transformuk.hee.tis.tcs.api.dto.SpecialtySimpleDTO;
 import com.transformuk.hee.tis.tcs.service.model.ColumnFilter;
-import com.transformuk.hee.tis.tcs.service.model.SpecialtySimple;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 
@@ -51,6 +50,7 @@ public interface SpecialtyService {
 
   /**
    * Looks for specialties given their ID's
+   *
    * @param ids the id's to look for
    * @return the list of specialties found
    */
@@ -70,4 +70,24 @@ public interface SpecialtyService {
    * @param id the id of the entity
    */
   void delete(Long id);
+
+  /**
+   * Find Specialties that are linked to a Programe via the attached Curricula, find by Specialty name if a search criteria
+   * is provided
+   *
+   * @param programmeId The programme id to search for
+   * @param searchQuery the possible name of the Specialty
+   * @param pageable    The page in which we want
+   * @return Paginated list of found specialties
+   */
+  Page<SpecialtyDTO> getPagedSpecialtiesForProgrammeId(Long programmeId, String searchQuery, Pageable pageable);
+
+  /**
+   * Find specialties for a Programme that a Person is a member of
+   *
+   * @param programmeId The Programme id
+   * @param personId    The id of the Person
+   * @return List of all the specialties linked to the person and programme
+   */
+  List<SpecialtyDTO> getSpecialtiesForProgrammeAndPerson(Long programmeId, Long personId);
 }

@@ -1,5 +1,7 @@
 package com.transformuk.hee.tis.tcs.service.service.impl;
 
+import com.google.common.base.Preconditions;
+import com.google.common.collect.Lists;
 import com.transformuk.hee.tis.tcs.api.dto.SpecialtyDTO;
 import com.transformuk.hee.tis.tcs.api.dto.SpecialtySimpleDTO;
 import com.transformuk.hee.tis.tcs.api.enumeration.Status;
@@ -18,6 +20,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.context.ApplicationEventPublisher;
 import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageImpl;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.domain.Specification;
 import org.springframework.data.jpa.domain.Specifications;
@@ -176,5 +179,28 @@ public class SpecialtyServiceImpl implements SpecialtyService {
     log.debug("Request to delete Specialty : {}", id);
     specialtyRepository.deleteById(id);
     applicationEventPublisher.publishEvent(new SpecialtyDeletedEvent(id));
+  }
+
+  public Page<SpecialtyDTO> getPagedSpecialtiesForProgrammeId(Long programmeId, String searchQuery, Pageable pageable) {
+    Preconditions.checkNotNull(programmeId, "programmeId cannot be null");
+    Preconditions.checkNotNull(pageable, "pageable cannot be null");
+
+    Page<Specialty> foundSpecialties;
+    if(StringUtils.isEmpty(searchQuery)) {
+      foundSpecialties = specialtyRepository.findSpecialtyDistinctByCurriculaProgrammesIdAndStatusIs(programmeId, Status.CURRENT, pageable);
+    } else {
+      foundSpecialties = specialtyRepository.findSpecialtyDistinctByCurriculaProgrammesIdAndNameContainingIgnoreCaseAndStatusIs(programmeId, searchQuery, Status.CURRENT, pageable);
+    }
+    List<SpecialtyDTO> specialtyDTOS = specialtyMapper.specialtiesToSpecialtyDTOs(Lists.newArrayList(foundSpecialties));
+    return new PageImpl<>(specialtyDTOS, pageable, foundSpecialties.getTotalElements());
+  }
+
+  @Override
+  public List<SpecialtyDTO> getSpecialtiesForProgrammeAndPerson(Long programmeId, Long personId) {
+    Preconditions.checkNotNull(programmeId, "Programme id cannot be null");
+    Preconditions.checkNotNull(personId, "Person id cannot be null");
+
+    List<Specialty> specialties = specialtyRepository.findDistinctByProgrammeIdAndPersonId(programmeId, personId);
+    return specialtyMapper.specialtiesToSpecialtyDTOs(specialties);
   }
 }

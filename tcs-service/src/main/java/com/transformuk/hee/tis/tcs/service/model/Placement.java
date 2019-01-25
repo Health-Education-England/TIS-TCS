@@ -68,7 +68,7 @@ public class Placement implements Serializable {
     private String trainingDescription;
     @Column(name = "localPostNumber")
     private String localPostNumber;
-    @OneToMany(mappedBy = "placement", cascade = CascadeType.ALL, fetch = FetchType.EAGER, orphanRemoval = true)
+    @OneToMany(mappedBy = "placement", cascade = CascadeType.ALL, orphanRemoval = true)
     private Set<Comment> comments = new HashSet<>();
 
     public Long getId() {

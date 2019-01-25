@@ -484,6 +484,7 @@ public class PersonResourceIntTest {
         .andExpect(jsonPath("$.[*].lastName").value(PERSON_SURNAME));
   }
 
+  @Ignore
   @Test
   @Transactional
   public void getPerson() throws Exception {

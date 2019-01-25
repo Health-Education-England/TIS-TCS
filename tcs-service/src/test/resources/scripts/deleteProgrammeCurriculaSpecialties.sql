@@ -1,0 +1,24 @@
+-- SQL to clean up the insert of programmes with curricula and specialties
+SET FOREIGN_KEY_CHECKS = 0;
+DELETE `Programme` WHERE `id` IN (1, 2, 3, 4, 5, 6);
+DELETE `Specialty` WHERE `id` IN (1, 2, 3, 4, 5, 6, 7, 8, 9, 19);
+DELETE `Curriculum` WHERE `id` IN (100, 200, 300, 400, 500, 600, 700, 1700, 2700, 800, 900, 1900);
+DELETE `ProgrammeCurriculum` WHERE `programmeId` = 1 AND `curriculumId` = 100;
+DELETE `ProgrammeCurriculum` WHERE `programmeId` = 1 AND `curriculumId` = 200;
+DELETE `ProgrammeCurriculum` WHERE `programmeId` = 2 AND `curriculumId` = 300;
+DELETE `ProgrammeCurriculum` WHERE `programmeId` = 2 AND `curriculumId` = 400;
+DELETE `ProgrammeCurriculum` WHERE `programmeId` = 3 AND `curriculumId` = 500;
+DELETE `ProgrammeCurriculum` WHERE `programmeId` = 3 AND `curriculumId` = 600;
+DELETE `ProgrammeCurriculum` WHERE `programmeId` = 4 AND `curriculumId` = 700;
+DELETE `ProgrammeCurriculum` WHERE `programmeId` = 4 AND `curriculumId` = 1700;
+DELETE `ProgrammeCurriculum` WHERE `programmeId` = 4 AND `curriculumId` = 2700;
+DELETE `ProgrammeCurriculum` WHERE `programmeId` = 5 AND `curriculumId` = 800;
+DELETE `ProgrammeCurriculum` WHERE `programmeId` = 6 AND `curriculumId` = 900;
+DELETE `ProgrammeCurriculum` WHERE `programmeId` = 6 AND `curriculumId` = 1900;
+DELETE `Post` WHERE `id` IN (11, 12, 13);
+DELETE `PostSpecialty` WHERE `id` IN (1, 2, 3);
+DELETE `ProgrammePost` WHERE `programmeId` = 1 AND `postId` = 11;
+DELETE `ProgrammePost` WHERE `programmeId` = 1 AND `postId` = 12;
+DELETE `Placement` WHERE `id` IN (33, 34, 35);
+DELETE `Person` WHERE `id` IN  (1, 2);
+SET FOREIGN_KEY_CHECKS = 1;

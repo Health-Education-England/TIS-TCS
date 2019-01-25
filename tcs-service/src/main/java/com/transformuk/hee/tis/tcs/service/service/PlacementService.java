@@ -113,6 +113,7 @@ public interface PlacementService {
 
   /**
    * Get all placements by trainee id
+   *
    * @param traineeId the id of the trainee
    * @return
    */
@@ -120,6 +121,7 @@ public interface PlacementService {
 
   /**
    * Get all placements by post id
+   *
    * @param postId the id of the Post
    * @return
    */

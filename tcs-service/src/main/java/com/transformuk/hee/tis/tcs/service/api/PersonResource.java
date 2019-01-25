@@ -470,4 +470,21 @@ public class PersonResource {
     return ResponseEntity.ok().headers(HeaderUtil.createEntityUpdateAlert(ENTITY_NAME, "procedure is underway")).build();
   }
 
+  /**
+   * Advance search endpoint that support fuzzy search.
+   * <p>
+   * Find people that are enrolled to certain programme by id
+   *
+   * @param id          the id of the programme
+   * @param searchQuery fuzzy search param
+   * @param pageable    the page in which we need
+   * @return
+   */
+  @GetMapping("/programme/{id}/people")
+  @PreAuthorize("hasPermission('tis:people::person:', 'View')")
+  public ResponseEntity<Page<PersonViewDTO>> findPeopleOnProgramme(@PathVariable Long id, @RequestParam(required = false) String searchQuery, Pageable pageable) {
+    Page<PersonViewDTO> results = personElasticSearchService.findPeopleOnProgramme(id, searchQuery, pageable);
+    final HttpHeaders headers = PaginationUtil.generatePaginationHttpHeaders(results, "/api/people");
+    return new ResponseEntity<>(results, headers, HttpStatus.OK);
+  }
 }

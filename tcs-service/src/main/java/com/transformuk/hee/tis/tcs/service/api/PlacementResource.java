@@ -9,21 +9,32 @@ import com.transformuk.hee.tis.tcs.service.api.util.HeaderUtil;
 import com.transformuk.hee.tis.tcs.service.api.util.PaginationUtil;
 import com.transformuk.hee.tis.tcs.service.api.validation.PlacementValidator;
 import com.transformuk.hee.tis.tcs.service.api.validation.ValidationException;
+import com.transformuk.hee.tis.tcs.service.dto.placementmanager.PlacementsResultDTO;
 import com.transformuk.hee.tis.tcs.service.model.Placement;
-import com.transformuk.hee.tis.tcs.service.repository.PlacementRepository;
 import com.transformuk.hee.tis.tcs.service.service.PlacementService;
+import com.transformuk.hee.tis.tcs.service.service.impl.PlacementPlannerServiceImp;
 import io.github.jhipster.web.util.ResponseUtil;
 import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
+import org.springframework.format.annotation.DateTimeFormat;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.validation.annotation.Validated;
-import org.springframework.web.bind.annotation.*;
+import org.springframework.web.bind.annotation.DeleteMapping;
+import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PatchMapping;
+import org.springframework.web.bind.annotation.PathVariable;
+import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.PutMapping;
+import org.springframework.web.bind.annotation.RequestBody;
+import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestParam;
+import org.springframework.web.bind.annotation.RestController;
 
 import java.io.IOException;
 import java.net.URI;
@@ -49,14 +60,14 @@ public class PlacementResource {
   private final PlacementService placementService;
   private final PlacementValidator placementValidator;
   private final PlacementDetailsDecorator placementDetailsDecorator;
-  private PlacementRepository placementRepository;
+  private final PlacementPlannerServiceImp placementPlannerService;
 
   public PlacementResource(final PlacementService placementService, final PlacementValidator placementValidator,
-                           final PlacementDetailsDecorator placementDetailsDecorator, PlacementRepository placementRepository) {
+                           final PlacementDetailsDecorator placementDetailsDecorator, PlacementPlannerServiceImp placementPlannerService) {
     this.placementService = placementService;
     this.placementValidator = placementValidator;
     this.placementDetailsDecorator = placementDetailsDecorator;
-    this.placementRepository = placementRepository;
+    this.placementPlannerService = placementPlannerService;
   }
 
   /**
@@ -77,8 +88,8 @@ public class PlacementResource {
 
     final PlacementDetailsDTO result = placementService.createDetails(placementDetailsDTO);
     return ResponseEntity.created(new URI("/api/placements/" + result.getId()))
-      .headers(HeaderUtil.createEntityCreationAlert(ENTITY_NAME, result.getId().toString()))
-      .body(result);
+        .headers(HeaderUtil.createEntityCreationAlert(ENTITY_NAME, result.getId().toString()))
+        .body(result);
   }
 
   /**
@@ -109,8 +120,8 @@ public class PlacementResource {
       placementService.handleChangeOfPlacementDatesEsrNotification(placementDetailsDTO, placementBeforeUpdate, currentPlacementEdit);
     }
     return ResponseEntity.ok()
-      .headers(HeaderUtil.createEntityUpdateAlert(ENTITY_NAME, result.getId().toString()))
-      .body(result);
+        .headers(HeaderUtil.createEntityUpdateAlert(ENTITY_NAME, result.getId().toString()))
+        .body(result);
   }
 
   /**
@@ -172,8 +183,8 @@ public class PlacementResource {
     final List<PlacementDTO> result = placementService.save(placementDTOS);
     final List<Long> ids = result.stream().map(PlacementDTO::getId).collect(Collectors.toList());
     return ResponseEntity.ok()
-      .headers(HeaderUtil.createEntityUpdateAlert(ENTITY_NAME, StringUtils.join(ids, ",")))
-      .body(result);
+        .headers(HeaderUtil.createEntityUpdateAlert(ENTITY_NAME, StringUtils.join(ids, ",")))
+        .body(result);
   }
 
 
@@ -188,8 +199,8 @@ public class PlacementResource {
   @GetMapping("/placements/filter")
   @PreAuthorize("hasAuthority('tcs:view:entities')")
   public ResponseEntity<List<PlacementDetailsDTO>> getFilteredPlacementDetails(
-    Pageable pageable,
-    @RequestParam(value = "columnFilters", required = false) final String columnFilterJson) throws IOException {
+      Pageable pageable,
+      @RequestParam(value = "columnFilters", required = false) final String columnFilterJson) throws IOException {
     log.debug("REST request to get Placements by filter : {}", columnFilterJson);
     final Page<PlacementDetailsDTO> page;
     if (org.apache.commons.lang.StringUtils.isEmpty(columnFilterJson)) {
@@ -208,6 +219,24 @@ public class PlacementResource {
     final PlacementDTO refreshedPlacement = placementService.closePlacement(id);
     return ResponseEntity.ok(refreshedPlacement);
   }
+
+  /**
+   * Get a list of placements for a programme and specialty id
+   *
+   * @param programmeId the programme id
+   * @param specialtyId the specialty id
+   * @return A list of placements
+   */
+  @GetMapping("/programme/{programmeId}/specialty/{specialtyId}/placements")
+  @PreAuthorize("hasAuthority('tcs:view:entities')")
+  public ResponseEntity<PlacementsResultDTO> findPlacementsByProgrammeAndSpecialty(@PathVariable Long programmeId,
+                                                                                   @PathVariable Long specialtyId,
+                                                                                   @RequestParam(required = false) @DateTimeFormat(pattern = "yyyy/MM/dd") LocalDate fromDate,
+                                                                                   @RequestParam(required = false) @DateTimeFormat(pattern = "yyyy/MM/dd") LocalDate toDate) {
+    PlacementsResultDTO result = placementPlannerService.findPlacementsForProgrammeAndSpecialty(programmeId, specialtyId, fromDate, toDate);
+    return ResponseEntity.ok(result);
+  }
+
 
   //Required for the auditing aspect
   public ResponseEntity<PlacementDetailsDTO> getPlacementDetails(@PathVariable final Long id) {

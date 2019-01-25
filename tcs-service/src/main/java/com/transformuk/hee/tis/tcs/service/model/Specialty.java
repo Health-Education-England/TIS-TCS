@@ -3,6 +3,7 @@ package com.transformuk.hee.tis.tcs.service.model;
 import com.transformuk.hee.tis.tcs.api.enumeration.SpecialtyType;
 import com.transformuk.hee.tis.tcs.api.enumeration.Status;
 
+import javax.persistence.CascadeType;
 import javax.persistence.CollectionTable;
 import javax.persistence.Column;
 import javax.persistence.ElementCollection;
@@ -15,8 +16,11 @@ import javax.persistence.GenerationType;
 import javax.persistence.Id;
 import javax.persistence.JoinColumn;
 import javax.persistence.ManyToOne;
+import javax.persistence.OneToMany;
 import java.io.Serializable;
 import java.util.HashSet;
+import java.util.List;
+import java.util.Objects;
 import java.util.Set;
 
 /**
@@ -54,6 +58,12 @@ public class Specialty implements Serializable {
 
   @Column(name = "name")
   private String name;
+
+  @OneToMany(mappedBy = "specialty", fetch = FetchType.LAZY)
+  private List<Curriculum> curricula;
+
+  @OneToMany(mappedBy = "specialty", cascade = CascadeType.ALL, orphanRemoval=true)
+  private Set<PostSpecialty> posts = new HashSet<>();
 
   public Long getId() {
     return id;
@@ -154,32 +164,40 @@ public class Specialty implements Serializable {
     return this;
   }
 
+  public List<Curriculum> getCurricula() {
+    return curricula;
+  }
+
+  public void setCurricula(List<Curriculum> curricula) {
+    this.curricula = curricula;
+  }
+
+  public Set<PostSpecialty> getPosts() {
+    return posts;
+  }
+
+  public void setPosts(Set<PostSpecialty> posts) {
+    this.posts = posts;
+  }
+
   @Override
   public boolean equals(Object o) {
     if (this == o) return true;
     if (o == null || getClass() != o.getClass()) return false;
-
     Specialty specialty = (Specialty) o;
-
-    return id != null ? id.equals(specialty.id) : specialty.id == null;
+    return Objects.equals(id, specialty.id) &&
+        Objects.equals(intrepidId, specialty.intrepidId) &&
+        status == specialty.status &&
+        Objects.equals(college, specialty.college) &&
+        Objects.equals(specialtyCode, specialty.specialtyCode) &&
+        Objects.equals(specialtyTypes, specialty.specialtyTypes) &&
+        Objects.equals(specialtyGroup, specialty.specialtyGroup) &&
+        Objects.equals(name, specialty.name) &&
+        Objects.equals(curricula, specialty.curricula);
   }
 
   @Override
   public int hashCode() {
-    return id != null ? id.hashCode() : 0;
-  }
-
-  @Override
-  public String toString() {
-    return "Specialty{" +
-        "id=" + id +
-        ", intrepidId='" + intrepidId + '\'' +
-        ", status=" + status +
-        ", college='" + college + '\'' +
-        ", specialtyCode='" + specialtyCode + '\'' +
-        ", specialtyTypes=" + specialtyTypes +
-        ", specialtyGroup=" + specialtyGroup +
-        ", name=" + name +
-        '}';
+    return Objects.hash(id, intrepidId, status, college, specialtyCode, specialtyTypes, specialtyGroup, name, curricula);
   }
 }
