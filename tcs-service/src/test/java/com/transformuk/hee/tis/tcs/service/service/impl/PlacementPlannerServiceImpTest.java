@@ -84,13 +84,15 @@ public class PlacementPlannerServiceImpTest {
     siteToPosts.put(siteDTOMock, Sets.newHashSet(postMock));
     Map<Post, Set<Placement>> postToPlacements = Maps.newHashMap();
     postToPlacements.put(postMock, Sets.newHashSet(placementMock1, placementMock2));
+    LocalDate fromDate = LocalDate.now().minusYears(1);
+    LocalDate toDate = LocalDate.now().plusYears(1);
 
     when(specialtyRepositoryMock.findById(SPECIALTY_ID)).thenReturn(Optional.of(specialtyMock));
-    when(placementRepositoryMock.findPlacementsByProgrammeIdAndSpecialtyId(PROGRAMME_ID, SPECIALTY_ID, null, null)).thenReturn(foundPlacements);
+    when(placementRepositoryMock.findPlacementsByProgrammeIdAndSpecialtyId(PROGRAMME_ID, SPECIALTY_ID, fromDate, toDate)).thenReturn(foundPlacements);
     when(referenceServiceMock.findSitesIdIn(siteIds)).thenReturn(foundSites);
     when(placementPlannerMapperMock.convertSpecialty(eq(specialtyMock), eq(foundSites), eq(siteToPosts), eq(postToPlacements))).thenReturn(specialtyDTOMock);
 
-    PlacementsResultDTO result = testObj.findPlacementsForProgrammeAndSpecialty(PROGRAMME_ID, SPECIALTY_ID, null, null);
+    PlacementsResultDTO result = testObj.findPlacementsForProgrammeAndSpecialty(PROGRAMME_ID, SPECIALTY_ID, fromDate, toDate);
 
     Assert.assertNotNull(result);
     Assert.assertNotNull(result.getSpecialties());
@@ -98,7 +100,7 @@ public class PlacementPlannerServiceImpTest {
     Assert.assertEquals(specialtyDTOMock, result.getSpecialties().get(0));
 
     verify(specialtyRepositoryMock).findById(SPECIALTY_ID);
-    verify(placementRepositoryMock).findPlacementsByProgrammeIdAndSpecialtyId(PROGRAMME_ID, SPECIALTY_ID, null, null);
+    verify(placementRepositoryMock).findPlacementsByProgrammeIdAndSpecialtyId(PROGRAMME_ID, SPECIALTY_ID, fromDate, toDate);
     verify(referenceServiceMock).findSitesIdIn(siteIds);
     verify(placementPlannerMapperMock).convertSpecialty(eq(specialtyMock), eq(foundSites), eq(siteToPosts), eq(postToPlacements));
   }

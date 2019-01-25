@@ -10,6 +10,7 @@ import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.test.context.jdbc.Sql;
 import org.springframework.test.context.junit4.SpringRunner;
 
+import java.time.LocalDate;
 import java.util.List;
 
 @RunWith(SpringRunner.class)
@@ -29,7 +30,10 @@ public class PlacementRepositoryTest {
     Long traineeId1 = 4L, traineeId2 = 40L;
     String traineeForename1 = "John", traineeForename2 = "Joanne";
 
-    List<Placement> results = testObj.findPlacementsByProgrammeIdAndSpecialtyId(programmeId, specialtyId, null, null);
+    LocalDate dateFrom = LocalDate.of(2000, 1, 1);
+    LocalDate dateTo = LocalDate.of(2100, 1, 1);
+
+    List<Placement> results = testObj.findPlacementsByProgrammeIdAndSpecialtyId(programmeId, specialtyId, dateFrom, dateTo);
 
     Assert.assertNotNull(results);
     Assert.assertEquals(2, results.size());
