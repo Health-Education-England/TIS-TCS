@@ -97,7 +97,7 @@ public class SpecialtyRepositoryTest {
     Long personId = 1L;
     Long expectedSpecialtyId1 = 4L, expectedSpecialtyId2 = 3L;
     String specialtyName1 = "Urogynaecology", specialtyName2 = "Oral and maxillofacial pathology";
-    List<Specialty> results = specialtyRepository.findDistinctByProgrammeIdAndPersonId(programmeId, personId);
+    List<Specialty> results = specialtyRepository.findDistinctByProgrammeIdAndPersonIdAndStatus(programmeId, personId, Status.CURRENT);
 
     Assert.assertEquals(2, results.size());
     for (Specialty result : results) {

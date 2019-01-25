@@ -200,7 +200,7 @@ public class SpecialtyServiceImpl implements SpecialtyService {
     Preconditions.checkNotNull(programmeId, "Programme id cannot be null");
     Preconditions.checkNotNull(personId, "Person id cannot be null");
 
-    List<Specialty> specialties = specialtyRepository.findDistinctByProgrammeIdAndPersonId(programmeId, personId);
+    List<Specialty> specialties = specialtyRepository.findDistinctByProgrammeIdAndPersonIdAndStatus(programmeId, personId, Status.CURRENT);
     return specialtyMapper.specialtiesToSpecialtyDTOs(specialties);
   }
 }

@@ -51,6 +51,8 @@ public interface SpecialtyRepository extends JpaRepository<Specialty, Long>, Jpa
       "JOIN p.placementHistory pl " +
       "JOIN pl.trainee t " +
       "WHERE pr.id = :programmeId " +
-      "AND t.id = :personId")
-  List<Specialty> findDistinctByProgrammeIdAndPersonId(@Param("programmeId") Long programmeId, @Param("personId") Long personId);
+      "AND t.id = :personId " +
+      "AND sp.status = :status")
+  List<Specialty> findDistinctByProgrammeIdAndPersonIdAndStatus(@Param("programmeId") Long programmeId, @Param("personId") Long personId,
+                                                                @Param("status") Status status);
 }

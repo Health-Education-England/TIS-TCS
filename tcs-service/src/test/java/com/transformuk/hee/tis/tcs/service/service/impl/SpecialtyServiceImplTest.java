@@ -235,12 +235,12 @@ public class SpecialtyServiceImplTest {
   public void getSpecialtiesForProgrammeAndPersonShouldReturnEmptyListWhenNoSpecialtiesFound() {
     long programmeId = 1L;
     long personId = 2L;
-    when(specialtyRepositoryMock.findDistinctByProgrammeIdAndPersonId(programmeId, personId)).thenReturn(Collections.EMPTY_LIST);
+    when(specialtyRepositoryMock.findDistinctByProgrammeIdAndPersonIdAndStatus(programmeId, personId, Status.CURRENT)).thenReturn(Collections.EMPTY_LIST);
     List<SpecialtyDTO> result = testObj.getSpecialtiesForProgrammeAndPerson(programmeId, personId);
 
     Assert.assertEquals(0, result.size());
 
-    verify(specialtyRepositoryMock).findDistinctByProgrammeIdAndPersonId(programmeId, personId);
+    verify(specialtyRepositoryMock).findDistinctByProgrammeIdAndPersonIdAndStatus(programmeId, personId, Status.CURRENT);
     verify(specialtyMapperMock).specialtiesToSpecialtyDTOs(Collections.EMPTY_LIST);
   }
 
@@ -251,7 +251,7 @@ public class SpecialtyServiceImplTest {
     List<Specialty> foundSpecialties = Lists.newArrayList(specialtyMock);
     List<SpecialtyDTO> convertedSpecialties = Lists.newArrayList(specialtyDTO);
 
-    when(specialtyRepositoryMock.findDistinctByProgrammeIdAndPersonId(programmeId, personId)).thenReturn(foundSpecialties);
+    when(specialtyRepositoryMock.findDistinctByProgrammeIdAndPersonIdAndStatus(programmeId, personId, Status.CURRENT)).thenReturn(foundSpecialties);
     when(specialtyMapperMock.specialtiesToSpecialtyDTOs(foundSpecialties)).thenReturn(convertedSpecialties);
 
     List<SpecialtyDTO> result = testObj.getSpecialtiesForProgrammeAndPerson(programmeId, personId);
@@ -259,7 +259,7 @@ public class SpecialtyServiceImplTest {
     Assert.assertEquals(1, result.size());
     Assert.assertEquals(convertedSpecialties, result);
 
-    verify(specialtyRepositoryMock).findDistinctByProgrammeIdAndPersonId(programmeId, personId);
+    verify(specialtyRepositoryMock).findDistinctByProgrammeIdAndPersonIdAndStatus(programmeId, personId, Status.CURRENT);
     verify(specialtyMapperMock).specialtiesToSpecialtyDTOs(foundSpecialties);
   }
 }

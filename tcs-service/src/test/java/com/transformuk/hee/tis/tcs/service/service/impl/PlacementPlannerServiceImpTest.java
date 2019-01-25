@@ -28,6 +28,7 @@ import java.util.Map;
 import java.util.Optional;
 import java.util.Set;
 
+import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.verifyZeroInteractions;
@@ -36,11 +37,10 @@ import static org.mockito.Mockito.when;
 @RunWith(MockitoJUnitRunner.class)
 public class PlacementPlannerServiceImpTest {
 
-  public static final long SITE_ID = 1L;
-  public static final long SPECIALTY_ID = 1L;
-  public static final long PROGRAMME_ID = 1L;
-  public static final long PLACEMENT_ID1 = 4L;
-  public static final long PLACEMENT_ID2 = 6L;
+  private static final long SITE_ID = 1L;
+  private static final long SPECIALTY_ID = 1L;
+  private static final long PROGRAMME_ID = 1L;
+
   @Mock
   private PlacementRepository placementRepositoryMock;
   @Mock
@@ -78,7 +78,7 @@ public class PlacementPlannerServiceImpTest {
   public void findPlacementsForProgrammeAndSpecialtyShouldRetrievePlacementsAndTheRestOfTheRequiredData() {
 
     HashSet<Long> siteIds = Sets.newHashSet(SITE_ID);
-    List<Placement> foundPlacements = Lists.newArrayList(placementMock1, placementMock2);
+    Set<Placement> foundPlacements = Sets.newHashSet(placementMock1, placementMock2);
     List<SiteDTO> foundSites = Lists.newArrayList(siteDTOMock);
     Map<SiteDTO, Set<Post>> siteToPosts = Maps.newHashMap();
     siteToPosts.put(siteDTOMock, Sets.newHashSet(postMock));
@@ -90,7 +90,7 @@ public class PlacementPlannerServiceImpTest {
     when(specialtyRepositoryMock.findById(SPECIALTY_ID)).thenReturn(Optional.of(specialtyMock));
     when(placementRepositoryMock.findPlacementsByProgrammeIdAndSpecialtyId(PROGRAMME_ID, SPECIALTY_ID, fromDate, toDate)).thenReturn(foundPlacements);
     when(referenceServiceMock.findSitesIdIn(siteIds)).thenReturn(foundSites);
-    when(placementPlannerMapperMock.convertSpecialty(eq(specialtyMock), eq(foundSites), eq(siteToPosts), eq(postToPlacements))).thenReturn(specialtyDTOMock);
+    when(placementPlannerMapperMock.convertSpecialty(eq(specialtyMock), any())).thenReturn(specialtyDTOMock);
 
     PlacementsResultDTO result = testObj.findPlacementsForProgrammeAndSpecialty(PROGRAMME_ID, SPECIALTY_ID, fromDate, toDate);
 
@@ -102,7 +102,7 @@ public class PlacementPlannerServiceImpTest {
     verify(specialtyRepositoryMock).findById(SPECIALTY_ID);
     verify(placementRepositoryMock).findPlacementsByProgrammeIdAndSpecialtyId(PROGRAMME_ID, SPECIALTY_ID, fromDate, toDate);
     verify(referenceServiceMock).findSitesIdIn(siteIds);
-    verify(placementPlannerMapperMock).convertSpecialty(eq(specialtyMock), eq(foundSites), eq(siteToPosts), eq(postToPlacements));
+    verify(placementPlannerMapperMock).convertSpecialty(eq(specialtyMock), any());
   }
 
   @Test
