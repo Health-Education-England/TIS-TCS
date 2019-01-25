@@ -38,3 +38,4 @@ kc:
   timeout: ${KC_TIMEOUT:10000}
 
 enable.es.search: true
+# enable.es.search: false
