@@ -268,12 +268,14 @@ public class SpecialtyResource {
   }
 
   @GetMapping("/programme/{id}/specialties")
+  @PreAuthorize("hasAuthority('specialty:view')")
   public Page<SpecialtyDTO> getAllSpecialtiesForProgrammeId(@PathVariable Long id, @RequestParam(required = false) String searchQuery,
                                                       Pageable pageable) {
     return specialtyService.getPagedSpecialtiesForProgrammeId(id, searchQuery, pageable);
   }
 
   @GetMapping("/programme/{programmeId}/person/{personId}/specialties")
+  @PreAuthorize("hasAuthority('specialty:view')")
   public ResponseEntity<List<SpecialtyDTO>> getSpecialtiesForProgrammeAndTrainee(@PathVariable Long programmeId, @PathVariable Long personId) {
     List<SpecialtyDTO> specialties = specialtyService.getSpecialtiesForProgrammeAndPerson(programmeId, personId);
     return ResponseEntity.ok(specialties);

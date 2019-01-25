@@ -481,6 +481,7 @@ public class PersonResource {
    * @return
    */
   @GetMapping("/programme/{id}/people")
+  @PreAuthorize("hasPermission('tis:people::person:', 'View')")
   public ResponseEntity<Page<PersonViewDTO>> findPeopleOnProgramme(@PathVariable Long id, @RequestParam(required = false) String searchQuery, Pageable pageable) {
     Page<PersonViewDTO> results = personElasticSearchService.findPeopleOnProgramme(id, searchQuery, pageable);
     final HttpHeaders headers = PaginationUtil.generatePaginationHttpHeaders(results, "/api/people");

@@ -227,6 +227,7 @@ public class PlacementResource {
    * @return A list of placements
    */
   @GetMapping("/programme/{programmeId}/specialty/{specialtyId}/placements")
+  @PreAuthorize("hasAuthority('tcs:view:entities')")
   public ResponseEntity<PlacementsResultDTO> findPlacementsByProgrammeAndSpecialty(@PathVariable Long programmeId,
                                                                                    @PathVariable Long specialtyId) {
     PlacementsResultDTO result = placementPlannerService.findPlacementsForProgrammeAndSpecialty(programmeId, specialtyId);

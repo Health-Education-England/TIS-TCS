@@ -57,7 +57,9 @@ public class PlacementPlannerServiceImp {
     Map<Post, Set<Placement>> postsToPlacements = getPostToPlacements(foundPlacements);
 
     result.setSpecialties(Lists.newArrayList(placementPlannerMapper.convertSpecialty(specialty, foundSites, siteToPosts, postsToPlacements)));
-
+    result.setTotalSpecialties(1);
+    result.setTotalSites(siteIds.size());
+    result.setTotalPlacements(foundPlacements.size());
     return result;
   }
 
