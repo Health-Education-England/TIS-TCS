@@ -1,5 +1,6 @@
 package com.transformuk.hee.tis.tcs.service.service.impl;
 
+import com.google.common.base.Preconditions;
 import com.google.common.collect.Lists;
 import com.google.common.collect.Maps;
 import com.google.common.collect.Sets;
@@ -17,6 +18,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.time.LocalDate;
 import java.util.List;
 import java.util.Map;
 import java.util.Objects;
@@ -28,6 +30,9 @@ import java.util.stream.Collectors;
 @Service
 public class PlacementPlannerServiceImp {
 
+  private static final int PLACEMENTS_YEARS_IN_THE_PAST = 5;
+  private static final int PLACEMENTS_YEARS_IN_THE_FUTURE = 5;
+
   @Autowired
   private PlacementRepository placementRepository;
   @Autowired
@@ -38,7 +43,11 @@ public class PlacementPlannerServiceImp {
   private PlacementPlannerMapper placementPlannerMapper;
 
   @Transactional(readOnly = true)
-  public PlacementsResultDTO findPlacementsForProgrammeAndSpecialty(Long programmeId, Long specialtyId) {
+  public PlacementsResultDTO findPlacementsForProgrammeAndSpecialty(Long programmeId, Long specialtyId,
+                                                                    LocalDate fromDate, LocalDate toDate) {
+    Preconditions.checkNotNull(programmeId, "Programme Id cannot be null");
+    Preconditions.checkNotNull(specialtyId, "Specialty Id cannot be null");
+
     PlacementsResultDTO result = new PlacementsResultDTO();
     Optional<Specialty> optionalSpecialty = specialtyRepository.findById(specialtyId);
 
@@ -47,7 +56,15 @@ public class PlacementPlannerServiceImp {
     }
 
     Specialty specialty = optionalSpecialty.get();
-    List<Placement> foundPlacements = placementRepository.findPlacementsByProgrammeIdAndSpecialtyId(programmeId, specialtyId);
+
+    if (fromDate == null) {
+      fromDate = LocalDate.now().minusYears(PLACEMENTS_YEARS_IN_THE_PAST);
+    }
+    if (toDate == null) {
+      toDate = LocalDate.now().plusYears(PLACEMENTS_YEARS_IN_THE_FUTURE);
+    }
+
+    List<Placement> foundPlacements = placementRepository.findPlacementsByProgrammeIdAndSpecialtyId(programmeId, specialtyId, fromDate, toDate);
 
     Set<Long> siteIds = getSiteIdsForPlacements(foundPlacements);
     List<com.transformuk.hee.tis.reference.api.dto.SiteDTO> foundSites = referenceService.findSitesIdIn(siteIds);

@@ -29,7 +29,7 @@ public class PlacementRepositoryTest {
     Long traineeId1 = 4L, traineeId2 = 40L;
     String traineeForename1 = "John", traineeForename2 = "Joanne";
 
-    List<Placement> results = testObj.findPlacementsByProgrammeIdAndSpecialtyId(programmeId, specialtyId);
+    List<Placement> results = testObj.findPlacementsByProgrammeIdAndSpecialtyId(programmeId, specialtyId, null, null);
 
     Assert.assertNotNull(results);
     Assert.assertEquals(2, results.size());

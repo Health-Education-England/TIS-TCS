@@ -19,6 +19,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
+import org.springframework.format.annotation.DateTimeFormat;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -229,8 +230,10 @@ public class PlacementResource {
   @GetMapping("/programme/{programmeId}/specialty/{specialtyId}/placements")
   @PreAuthorize("hasAuthority('tcs:view:entities')")
   public ResponseEntity<PlacementsResultDTO> findPlacementsByProgrammeAndSpecialty(@PathVariable Long programmeId,
-                                                                                   @PathVariable Long specialtyId) {
-    PlacementsResultDTO result = placementPlannerService.findPlacementsForProgrammeAndSpecialty(programmeId, specialtyId);
+                                                                                   @PathVariable Long specialtyId,
+                                                                                   @RequestParam(required = false) @DateTimeFormat(pattern = "yyyy/MM/dd") LocalDate fromDate,
+                                                                                   @RequestParam(required = false) @DateTimeFormat(pattern = "yyyy/MM/dd") LocalDate toDate) {
+    PlacementsResultDTO result = placementPlannerService.findPlacementsForProgrammeAndSpecialty(programmeId, specialtyId, fromDate, toDate);
     return ResponseEntity.ok(result);
   }
 

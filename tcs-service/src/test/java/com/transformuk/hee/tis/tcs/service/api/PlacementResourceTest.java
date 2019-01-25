@@ -183,7 +183,7 @@ public class PlacementResourceTest {
     Long programmeId = 1L;
     Long specialtyId = 2L;
 
-    when(placementPlannerServiceMock.findPlacementsForProgrammeAndSpecialty(programmeId, specialtyId)).thenReturn(placements);
+    when(placementPlannerServiceMock.findPlacementsForProgrammeAndSpecialty(programmeId, specialtyId, null, null)).thenReturn(placements);
 
     mockMvc.perform(
         get("/api/programme/{programmeId}/specialty/{specialtyId}/placements", programmeId, specialtyId)

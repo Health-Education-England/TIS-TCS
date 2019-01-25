@@ -86,11 +86,11 @@ public class PlacementPlannerServiceImpTest {
     postToPlacements.put(postMock, Sets.newHashSet(placementMock1, placementMock2));
 
     when(specialtyRepositoryMock.findById(SPECIALTY_ID)).thenReturn(Optional.of(specialtyMock));
-    when(placementRepositoryMock.findPlacementsByProgrammeIdAndSpecialtyId(PROGRAMME_ID, SPECIALTY_ID)).thenReturn(foundPlacements);
+    when(placementRepositoryMock.findPlacementsByProgrammeIdAndSpecialtyId(PROGRAMME_ID, SPECIALTY_ID, null, null)).thenReturn(foundPlacements);
     when(referenceServiceMock.findSitesIdIn(siteIds)).thenReturn(foundSites);
     when(placementPlannerMapperMock.convertSpecialty(eq(specialtyMock), eq(foundSites), eq(siteToPosts), eq(postToPlacements))).thenReturn(specialtyDTOMock);
 
-    PlacementsResultDTO result = testObj.findPlacementsForProgrammeAndSpecialty(PROGRAMME_ID, SPECIALTY_ID);
+    PlacementsResultDTO result = testObj.findPlacementsForProgrammeAndSpecialty(PROGRAMME_ID, SPECIALTY_ID, null, null);
 
     Assert.assertNotNull(result);
     Assert.assertNotNull(result.getSpecialties());
@@ -98,7 +98,7 @@ public class PlacementPlannerServiceImpTest {
     Assert.assertEquals(specialtyDTOMock, result.getSpecialties().get(0));
 
     verify(specialtyRepositoryMock).findById(SPECIALTY_ID);
-    verify(placementRepositoryMock).findPlacementsByProgrammeIdAndSpecialtyId(PROGRAMME_ID, SPECIALTY_ID);
+    verify(placementRepositoryMock).findPlacementsByProgrammeIdAndSpecialtyId(PROGRAMME_ID, SPECIALTY_ID, null, null);
     verify(referenceServiceMock).findSitesIdIn(siteIds);
     verify(placementPlannerMapperMock).convertSpecialty(eq(specialtyMock), eq(foundSites), eq(siteToPosts), eq(postToPlacements));
   }
@@ -107,7 +107,7 @@ public class PlacementPlannerServiceImpTest {
   public void findPlacementForProgrammeAndSpecialtyShouldReturnResultWithEmptyList() {
     when(specialtyRepositoryMock.findById(SPECIALTY_ID)).thenReturn(Optional.empty());
 
-    PlacementsResultDTO result = testObj.findPlacementsForProgrammeAndSpecialty(PROGRAMME_ID, SPECIALTY_ID);
+    PlacementsResultDTO result = testObj.findPlacementsForProgrammeAndSpecialty(PROGRAMME_ID, SPECIALTY_ID, null, null);
 
     Assert.assertNull(result.getSpecialties());
 

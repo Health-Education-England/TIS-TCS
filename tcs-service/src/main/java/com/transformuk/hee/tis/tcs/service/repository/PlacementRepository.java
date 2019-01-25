@@ -122,6 +122,11 @@ public interface PlacementRepository extends JpaRepository<Placement, Long> {
       "LEFT JOIN FETCH t.personalDetails pd " +
       "LEFT JOIN FETCH t.rightToWork rtw " +
       "WHERE pr.id = :programmeId " +
-      "AND sp.id = :specialtyId")
-  List<Placement> findPlacementsByProgrammeIdAndSpecialtyId(@Param("programmeId") Long programmeId, @Param("specialtyId")Long specialtyId);
+      "AND sp.id = :specialtyId " +
+      "AND pl.dateFrom >= :dateFrom " +
+      "AND pl.dateTo <= :dateTo ")
+  List<Placement> findPlacementsByProgrammeIdAndSpecialtyId(@Param("programmeId") Long programmeId,
+                                                            @Param("specialtyId")Long specialtyId,
+                                                            @Param("dateFrom") LocalDate dateFrom,
+                                                            @Param("dateTo") LocalDate dateTo);
 }
