@@ -29,6 +29,7 @@ import org.springframework.transaction.annotation.Transactional;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Set;
 
 import static com.transformuk.hee.tis.tcs.service.service.impl.SpecificationFactory.containsLike;
 import static com.transformuk.hee.tis.tcs.service.service.impl.SpecificationFactory.in;
@@ -200,7 +201,7 @@ public class SpecialtyServiceImpl implements SpecialtyService {
     Preconditions.checkNotNull(programmeId, "Programme id cannot be null");
     Preconditions.checkNotNull(personId, "Person id cannot be null");
 
-    List<Specialty> specialties = specialtyRepository.findDistinctByProgrammeIdAndPersonId(programmeId, personId);
-    return specialtyMapper.specialtiesToSpecialtyDTOs(specialties);
+    Set<Specialty> specialties = specialtyRepository.findDistinctByProgrammeIdAndPersonIdAndStatus(programmeId, personId, Status.CURRENT);
+    return specialtyMapper.specialtiesToSpecialtyDTOs(Lists.newArrayList(specialties));
   }
 }

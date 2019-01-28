@@ -11,7 +11,7 @@ import org.springframework.test.context.jdbc.Sql;
 import org.springframework.test.context.junit4.SpringRunner;
 
 import java.time.LocalDate;
-import java.util.List;
+import java.util.Set;
 
 @RunWith(SpringRunner.class)
 @SpringBootTest(classes = Application.class, webEnvironment = SpringBootTest.WebEnvironment.RANDOM_PORT)
@@ -23,7 +23,7 @@ public class PlacementRepositoryTest {
   @Test
   @Sql(scripts = "/scripts/placementProgrammeSpecialty.sql")
   @Sql(scripts = "/scripts/deletePlacementProgrammeSpecialty.sql", executionPhase = Sql.ExecutionPhase.AFTER_TEST_METHOD)
-  public void findPlacementsByProgrammeIdAndSpecialtyIdShouldFindPlacementsLinkedToSpecialtyAndProgramme(){
+  public void findPlacementsByProgrammeIdAndSpecialtyIdShouldFindPlacementsLinkedToSpecialtyAndProgramme() {
     Long placementId1 = 3L, placementId2 = 30L;
     Long programmeId = 5L;
     Long specialtyId = 1L;
@@ -33,7 +33,7 @@ public class PlacementRepositoryTest {
     LocalDate dateFrom = LocalDate.of(2000, 1, 1);
     LocalDate dateTo = LocalDate.of(2100, 1, 1);
 
-    List<Placement> results = testObj.findPlacementsByProgrammeIdAndSpecialtyId(programmeId, specialtyId, dateFrom, dateTo);
+    Set<Placement> results = testObj.findPlacementsByProgrammeIdAndSpecialtyId(programmeId, specialtyId, dateFrom, dateTo);
 
     Assert.assertNotNull(results);
     Assert.assertEquals(2, results.size());

@@ -3,10 +3,10 @@ package com.transformuk.hee.tis.tcs.service.service.impl;
 import com.google.common.base.Preconditions;
 import com.google.common.collect.Lists;
 import com.google.common.collect.Maps;
-import com.google.common.collect.Sets;
 import com.transformuk.hee.tis.reference.api.dto.SiteDTO;
 import com.transformuk.hee.tis.reference.client.ReferenceService;
 import com.transformuk.hee.tis.tcs.service.dto.placementmanager.PlacementsResultDTO;
+import com.transformuk.hee.tis.tcs.service.dto.placementmanager.SpecialtyDTO;
 import com.transformuk.hee.tis.tcs.service.model.Placement;
 import com.transformuk.hee.tis.tcs.service.model.Post;
 import com.transformuk.hee.tis.tcs.service.model.Specialty;
@@ -14,6 +14,8 @@ import com.transformuk.hee.tis.tcs.service.repository.PlacementRepository;
 import com.transformuk.hee.tis.tcs.service.repository.SpecialtyRepository;
 import com.transformuk.hee.tis.tcs.service.service.mapper.PlacementPlannerMapper;
 import org.apache.commons.lang3.ObjectUtils;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -30,8 +32,9 @@ import java.util.stream.Collectors;
 @Service
 public class PlacementPlannerServiceImp {
 
-  private static final int PLACEMENTS_YEARS_IN_THE_PAST = 5;
-  private static final int PLACEMENTS_YEARS_IN_THE_FUTURE = 5;
+  private static final int PLACEMENTS_YEARS_IN_THE_PAST = 1;
+  private static final int PLACEMENTS_YEARS_IN_THE_FUTURE = 1;
+  private static final Logger LOG = LoggerFactory.getLogger(PlacementPlannerServiceImp.class);
 
   @Autowired
   private PlacementRepository placementRepository;
@@ -64,20 +67,53 @@ public class PlacementPlannerServiceImp {
       toDate = LocalDate.now().plusYears(PLACEMENTS_YEARS_IN_THE_FUTURE);
     }
 
-    List<Placement> foundPlacements = placementRepository.findPlacementsByProgrammeIdAndSpecialtyId(programmeId, specialtyId, fromDate, toDate);
+    Set<Placement> foundPlacements = placementRepository.findPlacementsByProgrammeIdAndSpecialtyId(programmeId, specialtyId, fromDate, toDate);
 
     Set<Long> siteIds = getSiteIdsForPlacements(foundPlacements);
     List<com.transformuk.hee.tis.reference.api.dto.SiteDTO> foundSites = referenceService.findSitesIdIn(siteIds);
     Map<Long, com.transformuk.hee.tis.reference.api.dto.SiteDTO> siteIdToSite = getSiteIdsToSites(foundSites);
+    Map<SiteDTO, Map<Post, Set<Placement>>> formattedData = orderPlacementsIntoFormat(foundPlacements, siteIdToSite);
 
-    Map<com.transformuk.hee.tis.reference.api.dto.SiteDTO, Set<Post>> siteToPosts = getSiteToPosts(siteIdToSite, foundPlacements);
-    Map<Post, Set<Placement>> postsToPlacements = getPostToPlacements(foundPlacements);
+    SpecialtyDTO specialtyDTO = placementPlannerMapper.convertSpecialty(specialty, formattedData);
+    Long count = specialtyDTO.getSites().stream().flatMap(s -> s.getPosts().stream()).flatMap(p -> p.getPlacements().stream()).count();
 
-    result.setSpecialties(Lists.newArrayList(placementPlannerMapper.convertSpecialty(specialty, foundSites, siteToPosts, postsToPlacements)));
+    result.setSpecialties(Lists.newArrayList(specialtyDTO));
     result.setTotalSpecialties(1);
     result.setTotalSites(siteIds.size());
-    result.setTotalPlacements(foundPlacements.size());
+    result.setTotalPlacements(count.intValue());
+
     return result;
+  }
+
+  private Map<SiteDTO, Map<Post, Set<Placement>>> orderPlacementsIntoFormat(Set<Placement> foundPlacements, Map<Long, SiteDTO> siteIdToSiteDTO) {
+    Map<SiteDTO, Map<Post, Set<Placement>>> sitesToPosts = Maps.newHashMap();
+
+    for (Placement foundPlacement : foundPlacements) {
+      Long placementSiteId = foundPlacement.getSiteId();
+      if (siteIdToSiteDTO.containsKey(placementSiteId)) {
+        SiteDTO siteDTO = siteIdToSiteDTO.get(placementSiteId);
+
+        Map<Post, Set<Placement>> postsToPlacements = Maps.newHashMap();
+        if (sitesToPosts.containsKey(siteDTO)) {
+          postsToPlacements = sitesToPosts.get(siteDTO);
+        }
+        sitesToPosts.put(siteDTO, postsToPlacements);
+
+        Post placementPost = foundPlacement.getPost();
+
+        Set<Placement> postPlacements = new TreeSet<>((o1, o2) -> ObjectUtils.compare(o1.getDateFrom(), o2.getDateFrom()));
+        if (postsToPlacements.containsKey(placementPost)) {
+          postPlacements = postsToPlacements.get(placementPost);
+        }
+
+        postsToPlacements.put(placementPost, postPlacements);
+        postPlacements.add(foundPlacement);
+
+      } else {
+        LOG.warn("Placement with id [{}] has siteId [{}] that is not in map", foundPlacement.getId(), placementSiteId);
+      }
+    }
+    return sitesToPosts;
   }
 
   private Map<Long, SiteDTO> getSiteIdsToSites(List<SiteDTO> foundSites) {
@@ -87,44 +123,12 @@ public class PlacementPlannerServiceImp {
         .collect(Collectors.toMap((s -> s.getId()), (s -> s)));
   }
 
-  private Set<Long> getSiteIdsForPlacements(List<Placement> foundPlacements) {
+  private Set<Long> getSiteIdsForPlacements(Set<Placement> foundPlacements) {
     return foundPlacements.stream()
         .filter(Objects::nonNull)
         .filter(p -> Objects.nonNull(p.getSiteId()))
         .map(Placement::getSiteId)
         .collect(Collectors.toSet());
-  }
-
-  private Map<com.transformuk.hee.tis.reference.api.dto.SiteDTO, Set<Post>> getSiteToPosts(Map<Long,
-      com.transformuk.hee.tis.reference.api.dto.SiteDTO> siteIdToSite, List<Placement> placements) {
-
-    Map<com.transformuk.hee.tis.reference.api.dto.SiteDTO, Set<Post>> result = Maps.newHashMap();
-
-    for (Placement placement : placements) {
-      Set<Post> posts = Sets.newHashSet();
-      Post placementPost = placement.getPost();
-      com.transformuk.hee.tis.reference.api.dto.SiteDTO siteDTO = siteIdToSite.get(placement.getSiteId());
-      if (result.containsKey(siteDTO)) {
-        posts = result.get(siteDTO);
-      }
-      posts.add(placementPost);
-      result.put(siteDTO, posts);
-    }
-    return result;
-  }
-
-  private Map<Post, Set<Placement>> getPostToPlacements(List<Placement> placements) {
-    Map<Post, Set<Placement>> result = Maps.newHashMap();
-    for (Placement placement : placements) {
-      Post post = placement.getPost();
-      Set<Placement> placementsForPost = new TreeSet<>((o1, o2) -> ObjectUtils.compare(o1.getDateFrom(), o2.getDateFrom()));
-      if (result.containsKey(post)) {
-        placementsForPost = result.get(post);
-      }
-      placementsForPost.add(placement);
-      result.put(post, placementsForPost);
-    }
-    return result;
   }
 
 }

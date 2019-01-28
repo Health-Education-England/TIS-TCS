@@ -23,59 +23,55 @@ import java.util.Set;
 @Component
 public class PlacementPlannerMapper {
 
-  public SpecialtyDTO convertSpecialty(Specialty specialty, List<SiteDTO> sites,
-                                        Map<SiteDTO, Set<Post>> siteToPosts,
-                                        Map<Post, Set<Placement>> postsToPlacements) {
+  public SpecialtyDTO convertSpecialty(Specialty specialty, Map<SiteDTO, Map<Post, Set<Placement>>> data) {
     SpecialtyDTO result = new SpecialtyDTO();
 
     result.setId(specialty.getId());
     result.setName(specialty.getName());
     result.setCollege(specialty.getCollege());
-    result.setSites(convertSites(sites, siteToPosts, postsToPlacements));
+    List<com.transformuk.hee.tis.tcs.service.dto.placementmanager.SiteDTO> sites = Lists.newArrayList();
+    result.setSites(sites);
+
+    for (Map.Entry<SiteDTO, Map<Post, Set<Placement>>> siteDTOMapEntry : data.entrySet()) {
+      SiteDTO siteDTO = siteDTOMapEntry.getKey();
+      com.transformuk.hee.tis.tcs.service.dto.placementmanager.SiteDTO convertedSite = convertSite(siteDTO);
+      sites.add(convertedSite);
+
+      Map<Post, Set<Placement>> postToPlacements = siteDTOMapEntry.getValue();
+      List<PostDTO> posts = Lists.newArrayList();
+      convertedSite.setPosts(posts);
+      for (Map.Entry<Post, Set<Placement>> postSetEntry : postToPlacements.entrySet()) {
+        Post post = postSetEntry.getKey();
+        PostDTO postDTO = convertPost(post);
+        posts.add(postDTO);
+
+        Set<Placement> placements = postSetEntry.getValue();
+        List<PlacementDTO> placementDTOS = convertPlacements(placements);
+        postDTO.setPlacements(placementDTOS);
+      }
+
+    }
     return result;
   }
 
-  private List<com.transformuk.hee.tis.tcs.service.dto.placementmanager.SiteDTO> convertSites(List<com.transformuk.hee.tis.reference.api.dto.SiteDTO> sites,
-                                                                                              Map<com.transformuk.hee.tis.reference.api.dto.SiteDTO, Set<Post>> siteToPosts,
-                                                                                              Map<Post, Set<Placement>> postsToPlacements) {
-    List<com.transformuk.hee.tis.tcs.service.dto.placementmanager.SiteDTO> results = Lists.newArrayList();
-
-    if (CollectionUtils.isNotEmpty(sites)) {
-      for (com.transformuk.hee.tis.reference.api.dto.SiteDTO site : sites) {
-        com.transformuk.hee.tis.tcs.service.dto.placementmanager.SiteDTO result = new com.transformuk.hee.tis.tcs.service.dto.placementmanager.SiteDTO();
-        result.setId(site.getId());
-        result.setName(site.getSiteName());
-        result.setSiteKnownAs(site.getSiteKnownAs());
-        result.setSiteNumber(site.getSiteNumber());
-        result.setPosts(convertPosts(siteToPosts.get(site), postsToPlacements));
-
-        results.add(result);
-      }
-    }
-
-    return results;
+  private com.transformuk.hee.tis.tcs.service.dto.placementmanager.SiteDTO convertSite(SiteDTO site) {
+    com.transformuk.hee.tis.tcs.service.dto.placementmanager.SiteDTO result = new com.transformuk.hee.tis.tcs.service.dto.placementmanager.SiteDTO();
+    result.setId(site.getId());
+    result.setName(site.getSiteName());
+    result.setSiteKnownAs(site.getSiteKnownAs());
+    result.setSiteNumber(site.getSiteNumber());
+    return result;
   }
 
-  private List<PostDTO> convertPosts(Set<Post> posts, Map<Post, Set<Placement>> postsToPlacements) {
-    List<PostDTO> results = Lists.newArrayList();
-
-    if (CollectionUtils.isNotEmpty(posts)) {
-      for (Post post : posts) {
-        PostDTO result = new PostDTO();
-        result.setId(post.getId());
-        result.setNationalPostNumber(post.getNationalPostNumber());
-        result.setPlacements(convertPlacements(postsToPlacements.get(post)));
-
-        results.add(result);
-      }
-    }
-
-    return results;
+  private PostDTO convertPost(Post post) {
+    PostDTO result = new PostDTO();
+    result.setId(post.getId());
+    result.setNationalPostNumber(post.getNationalPostNumber());
+    return result;
   }
 
   private List<PlacementDTO> convertPlacements(Set<Placement> placements) {
     List<PlacementDTO> results = Lists.newArrayList();
-
     if (CollectionUtils.isNotEmpty(placements)) {
       for (Placement placement : placements) {
         PlacementDTO result = new PlacementDTO();
@@ -89,7 +85,6 @@ public class PlacementPlannerMapper {
         results.add(result);
       }
     }
-
     return results;
   }
 

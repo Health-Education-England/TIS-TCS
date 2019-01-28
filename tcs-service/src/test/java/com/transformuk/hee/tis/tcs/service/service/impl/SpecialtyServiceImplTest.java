@@ -26,6 +26,7 @@ import org.springframework.data.domain.PageRequest;
 
 import java.util.Collections;
 import java.util.List;
+import java.util.Set;
 
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.never;
@@ -235,12 +236,12 @@ public class SpecialtyServiceImplTest {
   public void getSpecialtiesForProgrammeAndPersonShouldReturnEmptyListWhenNoSpecialtiesFound() {
     long programmeId = 1L;
     long personId = 2L;
-    when(specialtyRepositoryMock.findDistinctByProgrammeIdAndPersonId(programmeId, personId)).thenReturn(Collections.EMPTY_LIST);
+    when(specialtyRepositoryMock.findDistinctByProgrammeIdAndPersonIdAndStatus(programmeId, personId, Status.CURRENT)).thenReturn(Collections.EMPTY_SET);
     List<SpecialtyDTO> result = testObj.getSpecialtiesForProgrammeAndPerson(programmeId, personId);
 
     Assert.assertEquals(0, result.size());
 
-    verify(specialtyRepositoryMock).findDistinctByProgrammeIdAndPersonId(programmeId, personId);
+    verify(specialtyRepositoryMock).findDistinctByProgrammeIdAndPersonIdAndStatus(programmeId, personId, Status.CURRENT);
     verify(specialtyMapperMock).specialtiesToSpecialtyDTOs(Collections.EMPTY_LIST);
   }
 
@@ -248,18 +249,19 @@ public class SpecialtyServiceImplTest {
   public void getSpecialtiesForProgrammeAndPersonShouldReturnSpecialtiesDTOFound() {
     long programmeId = 1L;
     long personId = 2L;
-    List<Specialty> foundSpecialties = Lists.newArrayList(specialtyMock);
+    Set<Specialty> foundSpecialties = Sets.newHashSet(specialtyMock);
     List<SpecialtyDTO> convertedSpecialties = Lists.newArrayList(specialtyDTO);
 
-    when(specialtyRepositoryMock.findDistinctByProgrammeIdAndPersonId(programmeId, personId)).thenReturn(foundSpecialties);
-    when(specialtyMapperMock.specialtiesToSpecialtyDTOs(foundSpecialties)).thenReturn(convertedSpecialties);
+    when(specialtyRepositoryMock.findDistinctByProgrammeIdAndPersonIdAndStatus(programmeId, personId, Status.CURRENT)).thenReturn(foundSpecialties);
+    List<Specialty> specialtiesList = Lists.newArrayList(foundSpecialties);
+    when(specialtyMapperMock.specialtiesToSpecialtyDTOs(specialtiesList)).thenReturn(convertedSpecialties);
 
     List<SpecialtyDTO> result = testObj.getSpecialtiesForProgrammeAndPerson(programmeId, personId);
 
     Assert.assertEquals(1, result.size());
     Assert.assertEquals(convertedSpecialties, result);
 
-    verify(specialtyRepositoryMock).findDistinctByProgrammeIdAndPersonId(programmeId, personId);
-    verify(specialtyMapperMock).specialtiesToSpecialtyDTOs(foundSpecialties);
+    verify(specialtyRepositoryMock).findDistinctByProgrammeIdAndPersonIdAndStatus(programmeId, personId, Status.CURRENT);
+    verify(specialtyMapperMock).specialtiesToSpecialtyDTOs(specialtiesList);
   }
 }

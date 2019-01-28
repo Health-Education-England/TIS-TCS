@@ -47,6 +47,7 @@ public class PersonElasticSearchService {
 
   private static final Logger LOG = LoggerFactory.getLogger(PersonElasticSearchService.class);
   private static final String PERSON_TRUST_QUERY = "SELECT personId, trustId FROM PersonTrust WHERE personId IN (:personIds)";
+  public static final String CURRENT_STATUS = "CURRENT";
 
   @Autowired
   private PersonElasticSearchRepository personElasticSearchRepository;
@@ -72,6 +73,7 @@ public class PersonElasticSearchService {
     BoolQueryBuilder query = new BoolQueryBuilder();
 
     query = query.must(new MatchQueryBuilder("programmeId", programmeId));
+    query = query.must(new MatchQueryBuilder("status", CURRENT_STATUS));
 
     if (StringUtils.isNotEmpty(searchQuery)) {
       BoolQueryBuilder boolSearchQuery = new BoolQueryBuilder();
