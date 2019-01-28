@@ -10,7 +10,6 @@ import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
 import org.springframework.stereotype.Repository;
 
-import java.util.List;
 import java.util.Set;
 
 /**
@@ -45,6 +44,23 @@ public interface SpecialtyRepository extends JpaRepository<Specialty, Long>, Jpa
 
   @Query("SELECT DISTINCT sp " +
       "FROM Specialty sp " +
+      "JOIN sp.posts psp " +
+      "JOIN psp.post p " +
+      "JOIN p.programmes pr " +
+      "WHERE pr.id = :programmeId " +
+      "AND sp.status = :status ")
+  Page<Specialty> findSpecialtiesByProgrammeId(@Param("programmeId") Long programmeId, @Param("status") Status stats, Pageable pageable);
+
+  /**
+   * Get a Set of Specialties that a trainee is on
+   *
+   * @param programmeId
+   * @param personId
+   * @param status
+   * @return
+   */
+  @Query("SELECT DISTINCT sp " +
+      "FROM Specialty sp " +
       "JOIN sp.posts spp " +
       "JOIN spp.post p " +
       "JOIN p.programmes pr " +
@@ -53,6 +69,6 @@ public interface SpecialtyRepository extends JpaRepository<Specialty, Long>, Jpa
       "WHERE pr.id = :programmeId " +
       "AND t.id = :personId " +
       "AND sp.status = :status")
-  List<Specialty> findDistinctByProgrammeIdAndPersonIdAndStatus(@Param("programmeId") Long programmeId, @Param("personId") Long personId,
-                                                                @Param("status") Status status);
+  Set<Specialty> findDistinctByProgrammeIdAndPersonIdAndStatus(@Param("programmeId") Long programmeId, @Param("personId") Long personId,
+                                                               @Param("status") Status status);
 }

@@ -231,8 +231,8 @@ public class PlacementResource {
   @PreAuthorize("hasAuthority('tcs:view:entities')")
   public ResponseEntity<PlacementsResultDTO> findPlacementsByProgrammeAndSpecialty(@PathVariable Long programmeId,
                                                                                    @PathVariable Long specialtyId,
-                                                                                   @RequestParam(required = false) @DateTimeFormat(pattern = "yyyy/MM/dd") LocalDate fromDate,
-                                                                                   @RequestParam(required = false) @DateTimeFormat(pattern = "yyyy/MM/dd") LocalDate toDate) {
+                                                                                   @RequestParam(required = false) @DateTimeFormat(pattern = "dd/MM/yyyy") LocalDate fromDate,
+                                                                                   @RequestParam(required = false) @DateTimeFormat(pattern = "dd/MM/yyyy") LocalDate toDate) {
     PlacementsResultDTO result = placementPlannerService.findPlacementsForProgrammeAndSpecialty(programmeId, specialtyId, fromDate, toDate);
     return ResponseEntity.ok(result);
   }

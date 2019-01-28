@@ -15,6 +15,7 @@ import org.springframework.test.context.jdbc.Sql;
 import org.springframework.test.context.junit4.SpringRunner;
 
 import java.util.List;
+import java.util.Set;
 
 @RunWith(SpringRunner.class)
 @SpringBootTest(classes = Application.class, webEnvironment = SpringBootTest.WebEnvironment.RANDOM_PORT)
@@ -97,7 +98,7 @@ public class SpecialtyRepositoryTest {
     Long personId = 1L;
     Long expectedSpecialtyId1 = 4L, expectedSpecialtyId2 = 3L;
     String specialtyName1 = "Urogynaecology", specialtyName2 = "Oral and maxillofacial pathology";
-    List<Specialty> results = specialtyRepository.findDistinctByProgrammeIdAndPersonIdAndStatus(programmeId, personId, Status.CURRENT);
+    Set<Specialty> results = specialtyRepository.findDistinctByProgrammeIdAndPersonIdAndStatus(programmeId, personId, Status.CURRENT);
 
     Assert.assertEquals(2, results.size());
     for (Specialty result : results) {
