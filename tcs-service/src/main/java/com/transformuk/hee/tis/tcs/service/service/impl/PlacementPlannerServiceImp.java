@@ -32,8 +32,8 @@ import java.util.stream.Collectors;
 @Service
 public class PlacementPlannerServiceImp {
 
-  private static final int PLACEMENTS_YEARS_IN_THE_PAST = 5;
-  private static final int PLACEMENTS_YEARS_IN_THE_FUTURE = 5;
+  private static final int PLACEMENTS_YEARS_IN_THE_PAST = 1;
+  private static final int PLACEMENTS_YEARS_IN_THE_FUTURE = 1;
   private static final Logger LOG = LoggerFactory.getLogger(PlacementPlannerServiceImp.class);
 
   @Autowired
