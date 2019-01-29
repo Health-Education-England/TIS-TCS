@@ -123,7 +123,7 @@ public class SpecialtyServiceImplTest {
     PageImpl<Specialty> pagedSpecialties = new PageImpl<>(foundSpecialties, pageRequest, 1L);
     List<SpecialtyDTO> convertedSpecialties = Lists.newArrayList(specialtyDTO);
 
-    when(specialtyRepositoryMock.findSpecialtyDistinctByCurriculaProgrammesIdAndStatusIs(programmeId, Status.CURRENT, pageRequest)).thenReturn(pagedSpecialties);
+    when(specialtyRepositoryMock.findSpecialtiesByProgrammeId(programmeId, Status.CURRENT, pageRequest)).thenReturn(pagedSpecialties);
     when(specialtyMapperMock.specialtiesToSpecialtyDTOs(foundSpecialties)).thenReturn(convertedSpecialties);
 
     Page<SpecialtyDTO> result = testObj.getPagedSpecialtiesForProgrammeId(programmeId, StringUtils.EMPTY, pageRequest);
@@ -143,7 +143,7 @@ public class SpecialtyServiceImplTest {
     PageImpl<Specialty> pagedSpecialties = new PageImpl<>(noFoundSpecialties, pageRequest, 1L);
     List<SpecialtyDTO> convertedSpecialties = Lists.newArrayList();
 
-    when(specialtyRepositoryMock.findSpecialtyDistinctByCurriculaProgrammesIdAndStatusIs(programmeId, Status.CURRENT, pageRequest)).thenReturn(pagedSpecialties);
+    when(specialtyRepositoryMock.findSpecialtiesByProgrammeId(programmeId, Status.CURRENT, pageRequest)).thenReturn(pagedSpecialties);
     when(specialtyMapperMock.specialtiesToSpecialtyDTOs(noFoundSpecialties)).thenReturn(convertedSpecialties);
 
     Page<SpecialtyDTO> result = testObj.getPagedSpecialtiesForProgrammeId(programmeId, StringUtils.EMPTY, pageRequest);
@@ -197,7 +197,7 @@ public class SpecialtyServiceImplTest {
     List<SpecialtyDTO> convertedSpecialties = Lists.newArrayList(specialtyDTO);
     String searchCriteria = "SEARCH TEXT";
 
-    when(specialtyRepositoryMock.findSpecialtyDistinctByCurriculaProgrammesIdAndNameContainingIgnoreCaseAndStatusIs(programmeId, searchCriteria, Status.CURRENT, pageRequest)).thenReturn(pagedSpecialties);
+    when(specialtyRepositoryMock.findSpecialtiesByProgrammeIdAndName(programmeId, searchCriteria, Status.CURRENT, pageRequest)).thenReturn(pagedSpecialties);
     when(specialtyMapperMock.specialtiesToSpecialtyDTOs(foundSpecialties)).thenReturn(convertedSpecialties);
 
     Page<SpecialtyDTO> result = testObj.getPagedSpecialtiesForProgrammeId(programmeId, searchCriteria, pageRequest);

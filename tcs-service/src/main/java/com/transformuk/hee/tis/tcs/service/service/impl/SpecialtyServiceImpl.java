@@ -187,11 +187,12 @@ public class SpecialtyServiceImpl implements SpecialtyService {
     Preconditions.checkNotNull(pageable, "pageable cannot be null");
 
     Page<Specialty> foundSpecialties;
-    if(StringUtils.isEmpty(searchQuery)) {
-      foundSpecialties = specialtyRepository.findSpecialtyDistinctByCurriculaProgrammesIdAndStatusIs(programmeId, Status.CURRENT, pageable);
+    if (StringUtils.isEmpty(searchQuery)) {
+      foundSpecialties = specialtyRepository.findSpecialtiesByProgrammeId(programmeId, Status.CURRENT, pageable);
     } else {
-      foundSpecialties = specialtyRepository.findSpecialtyDistinctByCurriculaProgrammesIdAndNameContainingIgnoreCaseAndStatusIs(programmeId, searchQuery, Status.CURRENT, pageable);
+      foundSpecialties = specialtyRepository.findSpecialtiesByProgrammeIdAndName(programmeId, searchQuery, Status.CURRENT, pageable);
     }
+
     List<SpecialtyDTO> specialtyDTOS = specialtyMapper.specialtiesToSpecialtyDTOs(Lists.newArrayList(foundSpecialties));
     return new PageImpl<>(specialtyDTOS, pageable, foundSpecialties.getTotalElements());
   }

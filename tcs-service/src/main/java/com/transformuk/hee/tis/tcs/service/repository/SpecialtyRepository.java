@@ -51,6 +51,17 @@ public interface SpecialtyRepository extends JpaRepository<Specialty, Long>, Jpa
       "AND sp.status = :status ")
   Page<Specialty> findSpecialtiesByProgrammeId(@Param("programmeId") Long programmeId, @Param("status") Status stats, Pageable pageable);
 
+  @Query("SELECT DISTINCT sp " +
+      "FROM Specialty sp " +
+      "JOIN sp.posts psp " +
+      "JOIN psp.post p " +
+      "JOIN p.programmes pr " +
+      "WHERE pr.id = :programmeId " +
+      "AND sp.status = :status " +
+      "AND sp.name LIKE %:query%")
+  Page<Specialty> findSpecialtiesByProgrammeIdAndName(@Param("programmeId") Long programmeId, @Param("query") String query,
+                                                      @Param("status") Status stats, Pageable pageable);
+
   /**
    * Get a Set of Specialties that a trainee is on
    *
