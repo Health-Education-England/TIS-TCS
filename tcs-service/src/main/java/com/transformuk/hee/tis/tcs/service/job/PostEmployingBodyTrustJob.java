@@ -45,7 +45,7 @@ public class PostEmployingBodyTrustJob extends TrustAdminSyncJobTemplate<PostTru
 
 
   @Scheduled(cron = "0 10 1 * * *")
-  @SchedulerLock(name = "postTrustScheduledTask", lockAtLeastFor = FIFTEEN_MIN, lockAtMostFor = FIFTEEN_MIN)
+  @SchedulerLock(name = "postTrustEmployingBodyScheduledTask", lockAtLeastFor = FIFTEEN_MIN, lockAtMostFor = FIFTEEN_MIN)
   @ManagedOperation(description = "Run sync of the PostTrust table with Post to Employing Body Trust")
   public void PostEmployingBodyTrustFullSync() {
     runSyncJob();
