@@ -44,7 +44,7 @@ public class PersonPlacementEmployingBodyTrustJob extends TrustAdminSyncJobTempl
     private SqlQuerySupplier sqlQuerySupplier;
 
     @Scheduled(cron = "0 10 0 * * *")
-    @SchedulerLock(name = "personTrustScheduledTask", lockAtLeastFor = FIFTEEN_MIN, lockAtMostFor = FIFTEEN_MIN)
+    @SchedulerLock(name = "personTrustEmployingBodyScheduledTask", lockAtLeastFor = FIFTEEN_MIN, lockAtMostFor = FIFTEEN_MIN)
     @ManagedOperation(description = "Run sync of the PersonTrust table with Person to Placement EmployingBody")
     public void PersonPlacementEmployingBodyFullSync() {
         runSyncJob();
