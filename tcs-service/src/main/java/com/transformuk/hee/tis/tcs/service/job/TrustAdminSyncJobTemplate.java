@@ -64,9 +64,7 @@ public abstract class TrustAdminSyncJobTemplate<ENTITY> {
     long lastSiteId = 0;
     boolean hasMoreResults = true;
 
-    LOG.info("deleting all data");
     deleteData();
-    LOG.info("deleted all data took {}", stopwatch.toString());
     stopwatch.reset().start();
 
     Set<ENTITY> dataToSave = Sets.newHashSet();

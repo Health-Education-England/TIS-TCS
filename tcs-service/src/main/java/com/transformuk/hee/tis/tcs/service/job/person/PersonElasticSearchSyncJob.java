@@ -63,7 +63,7 @@ public class PersonElasticSearchSyncJob {
     CompletableFuture.runAsync(this::run);
   }
 
-  @Scheduled(cron = "0 0 1 * * *")
+  @Scheduled(cron = "0 30 1 * * *")
   @SchedulerLock(name = "personsElasticSearchScheduledTask", lockAtLeastFor = FIFTEEN_MIN, lockAtMostFor = FIFTEEN_MIN)
   @ManagedOperation(description = "Run sync of the persons es index")
   public void personElasticSearchSync() {

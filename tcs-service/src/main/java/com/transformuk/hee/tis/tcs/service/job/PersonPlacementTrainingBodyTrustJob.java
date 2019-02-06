@@ -30,7 +30,7 @@ import java.util.stream.Collectors;
         description = "Service that clears the PersonTrust table and links Person with Placement TrainingBody (Trusts)")
 public class PersonPlacementTrainingBodyTrustJob extends TrustAdminSyncJobTemplate<PersonTrust> {
 
-    private static final Logger LOG = LoggerFactory.getLogger(PostEmployingBodyTrustJob.class);
+    private static final Logger LOG = LoggerFactory.getLogger(PersonPlacementTrainingBodyTrustJob.class);
     private static final int FIFTEEN_MIN = 15 * 60 * 1000;
 
     @Autowired
@@ -49,7 +49,7 @@ public class PersonPlacementTrainingBodyTrustJob extends TrustAdminSyncJobTempla
 
     @Override
     protected String getJobName() {
-        return "Person associated with Placements and Post";
+        return "PersonPlacementTrainingBodyTrustJob";
     }
 
     @Override

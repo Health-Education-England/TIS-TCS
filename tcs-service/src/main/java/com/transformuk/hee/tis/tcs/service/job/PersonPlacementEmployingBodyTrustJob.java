@@ -31,7 +31,7 @@ import java.util.stream.Collectors;
         description = "Service that clears the PersonTrust table and links Person with Placement EmployingBody(Trust)")
 public class PersonPlacementEmployingBodyTrustJob extends TrustAdminSyncJobTemplate<PersonTrust> {
 
-    private static final Logger LOG = LoggerFactory.getLogger(PostEmployingBodyTrustJob.class);
+    private static final Logger LOG = LoggerFactory.getLogger(PersonPlacementEmployingBodyTrustJob.class);
     private static final int FIFTEEN_MIN = 15 * 60 * 1000;
 
     @Autowired
@@ -52,7 +52,7 @@ public class PersonPlacementEmployingBodyTrustJob extends TrustAdminSyncJobTempl
 
     @Override
     protected String getJobName() {
-        return "Person associated with Placements and Post";
+        return "PersonPlacementEmployingBodyTrustJob";
     }
 
     @Override
@@ -68,7 +68,9 @@ public class PersonPlacementEmployingBodyTrustJob extends TrustAdminSyncJobTempl
 
     @Override
     protected void deleteData() {
-        personTrustRepository.deleteAllInBatch();
+      LOG.info("deleting all data");
+      personTrustRepository.deleteAllInBatch();
+      LOG.info("deleted all PersonTrust data");
     }
 
 
