@@ -16,14 +16,15 @@ import com.transformuk.hee.tis.tcs.service.model.Specialty;
 import org.apache.commons.collections4.CollectionUtils;
 import org.springframework.stereotype.Component;
 
+import java.util.Collections;
+import java.util.Comparator;
 import java.util.List;
 import java.util.Map;
-import java.util.Set;
 
 @Component
 public class PlacementPlannerMapper {
 
-  public SpecialtyDTO convertSpecialty(Specialty specialty, Map<SiteDTO, Map<Post, Set<Placement>>> data) {
+  public SpecialtyDTO convertSpecialty(Specialty specialty, Map<SiteDTO, Map<Post, List<Placement>>> data) {
     SpecialtyDTO result = new SpecialtyDTO();
 
     result.setId(specialty.getId());
@@ -32,20 +33,20 @@ public class PlacementPlannerMapper {
     List<com.transformuk.hee.tis.tcs.service.dto.placementmanager.SiteDTO> sites = Lists.newArrayList();
     result.setSites(sites);
 
-    for (Map.Entry<SiteDTO, Map<Post, Set<Placement>>> siteDTOMapEntry : data.entrySet()) {
+    for (Map.Entry<SiteDTO, Map<Post, List<Placement>>> siteDTOMapEntry : data.entrySet()) {
       SiteDTO siteDTO = siteDTOMapEntry.getKey();
       com.transformuk.hee.tis.tcs.service.dto.placementmanager.SiteDTO convertedSite = convertSite(siteDTO);
       sites.add(convertedSite);
 
-      Map<Post, Set<Placement>> postToPlacements = siteDTOMapEntry.getValue();
+      Map<Post, List<Placement>> postToPlacements = siteDTOMapEntry.getValue();
       List<PostDTO> posts = Lists.newArrayList();
       convertedSite.setPosts(posts);
-      for (Map.Entry<Post, Set<Placement>> postSetEntry : postToPlacements.entrySet()) {
+      for (Map.Entry<Post, List<Placement>> postSetEntry : postToPlacements.entrySet()) {
         Post post = postSetEntry.getKey();
         PostDTO postDTO = convertPost(post);
         posts.add(postDTO);
 
-        Set<Placement> placements = postSetEntry.getValue();
+        List<Placement> placements = postSetEntry.getValue();
         List<PlacementDTO> placementDTOS = convertPlacements(placements);
         postDTO.setPlacements(placementDTOS);
       }
@@ -70,7 +71,7 @@ public class PlacementPlannerMapper {
     return result;
   }
 
-  private List<PlacementDTO> convertPlacements(Set<Placement> placements) {
+  private List<PlacementDTO> convertPlacements(List<Placement> placements) {
     List<PlacementDTO> results = Lists.newArrayList();
     if (CollectionUtils.isNotEmpty(placements)) {
       for (Placement placement : placements) {
@@ -84,6 +85,7 @@ public class PlacementPlannerMapper {
 
         results.add(result);
       }
+      Collections.sort(results, Comparator.comparing(PlacementDTO::getDateFrom));
     }
     return results;
   }

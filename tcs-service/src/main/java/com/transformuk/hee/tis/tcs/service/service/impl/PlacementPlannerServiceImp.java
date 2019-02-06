@@ -13,7 +13,6 @@ import com.transformuk.hee.tis.tcs.service.model.Specialty;
 import com.transformuk.hee.tis.tcs.service.repository.PlacementRepository;
 import com.transformuk.hee.tis.tcs.service.repository.SpecialtyRepository;
 import com.transformuk.hee.tis.tcs.service.service.mapper.PlacementPlannerMapper;
-import org.apache.commons.lang3.ObjectUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -21,12 +20,12 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.time.LocalDate;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 import java.util.Objects;
 import java.util.Optional;
 import java.util.Set;
-import java.util.TreeSet;
 import java.util.stream.Collectors;
 
 @Service
@@ -68,11 +67,10 @@ public class PlacementPlannerServiceImp {
     }
 
     Set<Placement> foundPlacements = placementRepository.findPlacementsByProgrammeIdAndSpecialtyId(programmeId, specialtyId, fromDate, toDate);
-
     Set<Long> siteIds = getSiteIdsForPlacements(foundPlacements);
     List<com.transformuk.hee.tis.reference.api.dto.SiteDTO> foundSites = referenceService.findSitesIdIn(siteIds);
     Map<Long, com.transformuk.hee.tis.reference.api.dto.SiteDTO> siteIdToSite = getSiteIdsToSites(foundSites);
-    Map<SiteDTO, Map<Post, Set<Placement>>> formattedData = orderPlacementsIntoFormat(foundPlacements, siteIdToSite);
+    Map<SiteDTO, Map<Post, List<Placement>>> formattedData = orderPlacementsIntoFormat(foundPlacements, siteIdToSite);
 
     SpecialtyDTO specialtyDTO = placementPlannerMapper.convertSpecialty(specialty, formattedData);
     Long count = specialtyDTO.getSites().stream().flatMap(s -> s.getPosts().stream()).flatMap(p -> p.getPlacements().stream()).count();
@@ -85,15 +83,15 @@ public class PlacementPlannerServiceImp {
     return result;
   }
 
-  private Map<SiteDTO, Map<Post, Set<Placement>>> orderPlacementsIntoFormat(Set<Placement> foundPlacements, Map<Long, SiteDTO> siteIdToSiteDTO) {
-    Map<SiteDTO, Map<Post, Set<Placement>>> sitesToPosts = Maps.newHashMap();
+  private Map<SiteDTO, Map<Post, List<Placement>>> orderPlacementsIntoFormat(Set<Placement> foundPlacements, Map<Long, SiteDTO> siteIdToSiteDTO) {
+    Map<SiteDTO, Map<Post, List<Placement>>> sitesToPosts = Maps.newHashMap();
 
     for (Placement foundPlacement : foundPlacements) {
       Long placementSiteId = foundPlacement.getSiteId();
       if (siteIdToSiteDTO.containsKey(placementSiteId)) {
         SiteDTO siteDTO = siteIdToSiteDTO.get(placementSiteId);
 
-        Map<Post, Set<Placement>> postsToPlacements = Maps.newHashMap();
+        Map<Post, List<Placement>> postsToPlacements = Maps.newHashMap();
         if (sitesToPosts.containsKey(siteDTO)) {
           postsToPlacements = sitesToPosts.get(siteDTO);
         }
@@ -101,7 +99,7 @@ public class PlacementPlannerServiceImp {
 
         Post placementPost = foundPlacement.getPost();
 
-        Set<Placement> postPlacements = new TreeSet<>((o1, o2) -> ObjectUtils.compare(o1.getDateFrom(), o2.getDateFrom()));
+        List<Placement> postPlacements = new ArrayList<>();
         if (postsToPlacements.containsKey(placementPost)) {
           postPlacements = postsToPlacements.get(placementPost);
         }
