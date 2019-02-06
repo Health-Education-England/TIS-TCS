@@ -54,7 +54,7 @@ public class PostEmployingBodyTrustJob extends TrustAdminSyncJobTemplate<PostTru
 
   @Override
   protected String getJobName() {
-    return "Post associated with Employing Body";
+    return "PostEmployingBodyTrustJob";
   }
 
   @Override
@@ -69,7 +69,9 @@ public class PostEmployingBodyTrustJob extends TrustAdminSyncJobTemplate<PostTru
 
   @Override
   protected void deleteData() {
+    LOG.info("deleting all data");
     postTrustRepository.deleteAllInBatch();
+    LOG.info("deleted all PostTrust data");
   }
 
   @Override

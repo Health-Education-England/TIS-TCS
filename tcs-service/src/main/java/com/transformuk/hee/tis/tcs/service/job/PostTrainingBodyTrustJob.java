@@ -32,7 +32,7 @@ import java.util.stream.Collectors;
     description = "Service that links Post with Training Body Trusts")
 public class PostTrainingBodyTrustJob extends TrustAdminSyncJobTemplate<PostTrust> {
 
-  private static final Logger LOG = LoggerFactory.getLogger(PostEmployingBodyTrustJob.class);
+  private static final Logger LOG = LoggerFactory.getLogger(PostTrainingBodyTrustJob.class);
   private static final int FIFTEEN_MIN = 15 * 60 * 1000;
 
   @Autowired
@@ -50,7 +50,7 @@ public class PostTrainingBodyTrustJob extends TrustAdminSyncJobTemplate<PostTrus
 
   @Override
   protected String getJobName() {
-    return "Post associated with Training Body";
+    return "PostTrainingBodyTrustJob";
   }
 
   @Override
