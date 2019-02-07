@@ -21,13 +21,13 @@ public class PersonView implements Serializable {
 
   private String intrepidId;
 
-  @Field(type = FieldType.Text, analyzer = "standard", fielddata = true)
+  @Field(type = FieldType.Keyword)
   private String surname;
 
-  @Field(type = FieldType.Text, analyzer = "standard", fielddata = true)
+  @Field(type = FieldType.Keyword)
   private String forenames;
 
-  @Field(type = FieldType.Text, analyzer = "standard")
+  @Field(type = FieldType.Text, analyzer = "standard", searchAnalyzer = "standard")
   private String fullName;
 
   private String gmcNumber;
