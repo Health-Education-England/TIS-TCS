@@ -67,10 +67,8 @@ public class PlacementPlannerServiceImpTest {
   public void setup() {
     when(siteDTOMock.getId()).thenReturn(SITE_ID);
     when(placementMock1.getSiteId()).thenReturn(SITE_ID);
-    when(placementMock1.getDateFrom()).thenReturn(LocalDate.now());
     when(placementMock1.getPost()).thenReturn(postMock);
     when(placementMock2.getSiteId()).thenReturn(SITE_ID);
-    when(placementMock2.getDateFrom()).thenReturn(LocalDate.now().plusMonths(1));
     when(placementMock2.getPost()).thenReturn(postMock);
   }
 
