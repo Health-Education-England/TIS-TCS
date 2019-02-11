@@ -100,7 +100,6 @@ public class DocumentServiceImpl implements DocumentService {
 
         if (!documentOptional.isPresent()) {
             LOG.warn("Document with id '{}' and person id '{}' does not exist", document.getPersonId(), document.getId());
-
             throw new IOException("Document not found");
         }
 
@@ -108,6 +107,27 @@ public class DocumentServiceImpl implements DocumentService {
             fileStorageRepository.download(azureProperties.getContainerName(),
                     getAzureFilePath(documentOptional.get()),
                     outputStream);
+        } catch (final URISyntaxException | InvalidKeyException | StorageException ex) {
+            throw new IOException(ex);
+        }
+    }
+
+    @Override
+    public String getDownloadUrl(final DocumentDTO document) throws IOException {
+        LOG.debug("Received request to download '{}' with ID '{}'",
+            DocumentDTO.class.getSimpleName(),
+            document.getId());
+
+        final Optional<Document> documentOptional = documentRepository.findOneByPersonIdAndIdAndStatus(document.getPersonId(), document.getId(), Status.CURRENT);
+
+        if (!documentOptional.isPresent()) {
+            LOG.warn("Document with id '{}' and person id '{}' does not exist", document.getPersonId(), document.getId());
+            throw new IOException("Document not found");
+        }
+
+        try {
+            return fileStorageRepository.getDirectDownloadUrl(azureProperties.getContainerName(),
+                getAzureFilePath(documentOptional.get()));
         } catch (final URISyntaxException | InvalidKeyException | StorageException ex) {
             throw new IOException(ex);
         }

@@ -135,11 +135,20 @@ public class DocumentResource {
         try {
             streamFile(documentOptional.get(), response, view);
         } catch (final IOException ex) {
-            LOG.error("Failed to stream file with name '{}' on document with id '{}'",
+            LOG.error("Failed to stream file with name '{}' on document with id '{}', the full stack trace follows",
                     documentOptional.get().getFileName(),
                     documentOptional.get().getId());
             response.setStatus(HttpStatus.NOT_FOUND.value());
+            ex.printStackTrace();
         }
+    }
+
+    @GetMapping(value = PATH_DOCUMENTS + PATH_DOWNLOADS + "/v2/{documentId}")
+    public String downloadDocumentByIdV2(@PathVariable(value = "documentId") final Long documentId,
+                                   @QueryParam("view") final boolean view) throws IOException {
+        final Optional<DocumentDTO> documentOptional = documentService.findOne(documentId);
+        String downloadUrl = documentService.getDownloadUrl(documentOptional.get());
+        return "redirect:" + downloadUrl;
     }
 
     @PreAuthorize("hasPermission('tis:people::person:', 'Create')")

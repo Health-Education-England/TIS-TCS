@@ -22,5 +22,7 @@ public interface DocumentService {
 
     void download(final DocumentDTO document, final OutputStream outputStream) throws IOException;
 
+    String getDownloadUrl(final DocumentDTO document) throws IOException;
+
     Optional<DocumentDTO> delete(final Long personId, final Long documentId);
 }
