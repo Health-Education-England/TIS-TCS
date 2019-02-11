@@ -143,12 +143,58 @@ public class DocumentResource {
         }
     }
 
+  /**
+   * quick hack to fix all the prod issues
+   *
+   * @param response
+   * @param documentId
+   * @param view
+   * @throws IOException
+   */
     @GetMapping(value = PATH_DOCUMENTS + PATH_DOWNLOADS + "/v2/{documentId}")
-    public String downloadDocumentByIdV2(@PathVariable(value = "documentId") final Long documentId,
+    public void downloadDocumentByIdV2(final HttpServletResponse response,
+        @PathVariable(value = "documentId") final Long documentId,
                                    @QueryParam("view") final boolean view) throws IOException {
+        UserProfile profileFromContext = null;
+        try {
+            profileFromContext = TisSecurityHelper.getProfileFromContext();
+        } catch (RuntimeException e) {
+            //oh wells - we tried
+        }
+        String username = profileFromContext != null ? profileFromContext.getUserName() : "No profile info available";
+        LOG.info("Received 'DownloadDocument' request for document [{}], for user [{}]", documentId, username);
+
+        if (documentId == null) {
+            LOG.warn("Received null documentId for 'DownloadDocument'; rejecting request");
+            response.setStatus(HttpStatus.BAD_REQUEST.value());
+            return;
+        }
+
+        LOG.debug("Accessing service to load document with id '{}'",
+            documentId);
+
         final Optional<DocumentDTO> documentOptional = documentService.findOne(documentId);
-        String downloadUrl = documentService.getDownloadUrl(documentOptional.get());
-        return "redirect:" + downloadUrl;
+
+        if (!documentOptional.isPresent()) {
+            LOG.warn("Document with id '{}' not found for 'DownloadDocument'",
+                documentId);
+            response.setStatus(HttpStatus.NOT_FOUND.value());
+            return;
+        }
+
+        try {
+            String downloadUrl = documentService.getDownloadUrl(documentOptional.get());
+            response.setStatus(HttpServletResponse.SC_MOVED_TEMPORARILY);
+            response.setHeader("Location", downloadUrl);
+        } catch (final IOException ex) {
+            LOG.error("Failed to stream file with name '{}' on document with id '{}', the full stack trace follows",
+                documentOptional.get().getFileName(),
+                documentOptional.get().getId());
+            response.setStatus(HttpStatus.NOT_FOUND.value());
+            ex.printStackTrace();
+        }
+
+
     }
 
     @PreAuthorize("hasPermission('tis:people::person:', 'Create')")
