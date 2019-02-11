@@ -1,5 +1,6 @@
 package com.transformuk.hee.tis.tcs.service.api;
 
+import com.transformuk.hee.tis.security.model.UserProfile;
 import com.transformuk.hee.tis.security.util.TisSecurityHelper;
 import com.transformuk.hee.tis.tcs.api.dto.DocumentDTO;
 import com.transformuk.hee.tis.tcs.api.dto.TagDTO;
@@ -104,7 +105,14 @@ public class DocumentResource {
     public void downloadDocumentById(final HttpServletResponse response,
                                      @PathVariable(value = "documentId") final Long documentId,
                                      @QueryParam("view") final boolean view) throws IOException {
-        LOG.info("Received 'DownloadDocument' request for document '{}'", documentId);
+      UserProfile profileFromContext = null;
+      try {
+        TisSecurityHelper.getProfileFromContext();
+      } catch (RuntimeException e) {
+        //oh wells - we tried
+      }
+      String username = profileFromContext != null ? profileFromContext.getUserName() : "No profile info available";
+      LOG.info("Received 'DownloadDocument' request for document [{}], for user [{}]", documentId, username);
 
         if (documentId == null) {
             LOG.warn("Received null documentId for 'DownloadDocument'; rejecting request");
