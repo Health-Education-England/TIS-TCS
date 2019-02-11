@@ -107,7 +107,7 @@ public class DocumentResource {
                                      @QueryParam("view") final boolean view) throws IOException {
       UserProfile profileFromContext = null;
       try {
-        TisSecurityHelper.getProfileFromContext();
+        profileFromContext = TisSecurityHelper.getProfileFromContext();
       } catch (RuntimeException e) {
         //oh wells - we tried
       }
