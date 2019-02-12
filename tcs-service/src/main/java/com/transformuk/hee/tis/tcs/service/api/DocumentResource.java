@@ -101,7 +101,17 @@ public class DocumentResource {
         }
     }
 
-    @GetMapping(value = PATH_DOCUMENTS + PATH_DOWNLOADS + "/{documentId}")
+  /**
+   * Marking this endpoint as deprecated and changing the url to be /old
+   * please see {@link #downloadDocumentByIdV2} for its replacement
+   *
+   * @param response
+   * @param documentId
+   * @param view
+   * @throws IOException
+   */
+    @Deprecated
+    @GetMapping(value = PATH_DOCUMENTS + PATH_DOWNLOADS + "/old/{documentId}")
     public void downloadDocumentById(final HttpServletResponse response,
                                      @PathVariable(value = "documentId") final Long documentId,
                                      @QueryParam("view") final boolean view) throws IOException {
@@ -144,17 +154,16 @@ public class DocumentResource {
     }
 
   /**
-   * quick hack to fix all the prod issues
+   * quick hack to fix all the prod issues. changed this endpoint to be the main one and the broken one to be '/old/'
    *
    * @param response
    * @param documentId
    * @param view
    * @throws IOException
    */
-    @GetMapping(value = PATH_DOCUMENTS + PATH_DOWNLOADS + "/v2/{documentId}")
+    @GetMapping(value = PATH_DOCUMENTS + PATH_DOWNLOADS + "/{documentId}")
     public void downloadDocumentByIdV2(final HttpServletResponse response,
-        @PathVariable(value = "documentId") final Long documentId,
-                                   @QueryParam("view") final boolean view) throws IOException {
+        @PathVariable(value = "documentId") final Long documentId, @QueryParam("view") final boolean view) throws IOException {
         UserProfile profileFromContext = null;
         try {
             profileFromContext = TisSecurityHelper.getProfileFromContext();

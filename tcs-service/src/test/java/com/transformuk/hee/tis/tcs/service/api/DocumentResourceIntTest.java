@@ -214,34 +214,6 @@ public class DocumentResourceIntTest {
     }
 
     @Test
-    public void downloadDocumentById_shouldReturnHTTP200_WhenDocumentDoesExist() throws Exception {
-        final MockMultipartFile mockFile = new MockMultipartFile(TEST_FILE_FORM_FIELD_NAME, TEST_FILE_NAME, TEST_FILE_CONTENT_TYPE, TEST_FILE_CONTENT);
-
-        final MvcResult uploadResponse = mockMvc.perform(fileUpload(DocumentResource.PATH_API + DocumentResource.PATH_DOCUMENTS)
-                .file(mockFile)
-                .param("personId", String.valueOf(PERSON_BASE_ID))
-                .contentType(MediaType.MULTIPART_FORM_DATA))
-                .andExpect(status().isCreated())
-                .andExpect(content().contentType(MediaType.APPLICATION_JSON_UTF8))
-                .andExpect(content().string(containsString("{\"id\":"))).andReturn();
-
-        final DocumentId documentId = jacksonMapper.readValue(uploadResponse.getResponse().getContentAsString(), DocumentId.class);
-
-        mockMvc.perform(get(DocumentResource.PATH_API +
-                DocumentResource.PATH_DOCUMENTS +
-                DocumentResource.PATH_DOWNLOADS +
-                "/" +
-                documentId.getId()))
-                .andExpect(header().string("Content-Disposition", "attachment;filename=\"document.txt\""))
-                .andExpect(header().string("Content-Length", String.valueOf(TEST_FILE_CONTENT.length)))
-                .andExpect(content().contentType(TEST_FILE_CONTENT_TYPE))
-                .andExpect(content().bytes(TEST_FILE_CONTENT))
-                .andExpect(status().isOk());
-
-        deleteTestFile(documentId.getId() + TEST_FILE_NAME.substring(TEST_FILE_NAME.indexOf(".")));
-    }
-
-    @Test
     public void downloadDocumentById_shouldReturnHTTP404_WhenDocumentDoesNotExist() throws Exception {
         final long documentId = DOCUMENT_BASE_ID + 999999999;
 
