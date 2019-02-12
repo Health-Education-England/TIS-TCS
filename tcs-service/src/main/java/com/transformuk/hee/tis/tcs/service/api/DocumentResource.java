@@ -163,8 +163,7 @@ public class DocumentResource {
    */
     @GetMapping(value = PATH_DOCUMENTS + PATH_DOWNLOADS + "/{documentId}")
     public void downloadDocumentByIdV2(final HttpServletResponse response,
-        @PathVariable(value = "documentId") final Long documentId,
-                                   @QueryParam("view") final boolean view) throws IOException {
+        @PathVariable(value = "documentId") final Long documentId, @QueryParam("view") final boolean view) throws IOException {
         UserProfile profileFromContext = null;
         try {
             profileFromContext = TisSecurityHelper.getProfileFromContext();
