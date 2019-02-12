@@ -16,6 +16,7 @@ import com.transformuk.hee.tis.tcs.service.exception.ExceptionTranslator;
 import com.transformuk.hee.tis.tcs.service.repository.PlacementViewRepository;
 import com.transformuk.hee.tis.tcs.service.service.PlacementService;
 import com.transformuk.hee.tis.tcs.service.service.PostService;
+import com.transformuk.hee.tis.tcs.service.service.impl.PostElasticSearchService;
 import com.transformuk.hee.tis.tcs.service.service.mapper.PlacementViewMapper;
 import org.apache.commons.lang3.StringUtils;
 import org.hamcrest.core.StringContains;
@@ -81,7 +82,8 @@ public class PostResourceTest2 {
   private PlacementService placementService;
   @MockBean
   private PlacementSummaryDecorator placementSummaryDecorator;
-
+  @MockBean
+  private PostElasticSearchService postElasticSearchService;
   private MockMvc restPostMockMvc;
   @Autowired
   private MappingJackson2HttpMessageConverter jacksonMessageConverter;
@@ -97,7 +99,7 @@ public class PostResourceTest2 {
   @Before
   public void setup() {
     PostResource postResource = new PostResource(postService, postValidator, placementViewRepository, placementViewDecorator,
-        placementViewMapper, placementService, placementSummaryDecorator);
+        placementViewMapper, placementService, placementSummaryDecorator, postElasticSearchService);
     this.restPostMockMvc = MockMvcBuilders.standaloneSetup(postResource)
         .setCustomArgumentResolvers(pageableArgumentResolver)
         .setControllerAdvice(exceptionTranslator)

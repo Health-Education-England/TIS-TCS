@@ -33,6 +33,7 @@ import com.transformuk.hee.tis.tcs.service.repository.PostRepository;
 import com.transformuk.hee.tis.tcs.service.repository.SpecialtyRepository;
 import com.transformuk.hee.tis.tcs.service.service.PlacementService;
 import com.transformuk.hee.tis.tcs.service.service.PostService;
+import com.transformuk.hee.tis.tcs.service.service.impl.PostElasticSearchService;
 import com.transformuk.hee.tis.tcs.service.service.mapper.PlacementViewMapper;
 import com.transformuk.hee.tis.tcs.service.service.mapper.PostMapper;
 import org.apache.commons.codec.net.URLCodec;
@@ -139,6 +140,8 @@ public class PostResourceIntTest {
   @Autowired
   private PlacementSummaryDecorator placementSummaryDecorator;
   @Autowired
+  private PostElasticSearchService postElasticSearchService;
+  @Autowired
   private MappingJackson2HttpMessageConverter jacksonMessageConverter;
   @Autowired
   private PageableHandlerMethodArgumentResolver pageableArgumentResolver;
@@ -227,7 +230,7 @@ public class PostResourceIntTest {
   public void setup() {
     MockitoAnnotations.initMocks(this);
     PostResource postResource = new PostResource(postService, postValidator, placementViewRepository, placementViewDecorator,
-        placementViewMapper, placementService, placementSummaryDecorator);
+        placementViewMapper, placementService, placementSummaryDecorator, postElasticSearchService);
     this.restPostMockMvc = MockMvcBuilders.standaloneSetup(postResource)
         .setCustomArgumentResolvers(pageableArgumentResolver)
         .setControllerAdvice(exceptionTranslator)

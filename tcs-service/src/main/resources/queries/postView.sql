@@ -10,7 +10,10 @@ nationalPostNumber,
 status,
 owner,
 intrepidId,
-GROUP_CONCAT(surnames SEPARATOR ', ') surnames, GROUP_CONCAT(forenames SEPARATOR ', ') forenames
+GROUP_CONCAT(surnames SEPARATOR ', ') surnames,
+GROUP_CONCAT(forenames SEPARATOR ', ') forenames,
+employingBodyId,
+trainingBodyId
  from (SELECT p.`id`,
     pg.`gradeId` as `approvedGradeId`,
     ps.`specialtyId` as `primarySpecialtyId`,
@@ -23,7 +26,10 @@ GROUP_CONCAT(surnames SEPARATOR ', ') surnames, GROUP_CONCAT(forenames SEPARATOR
     p.`status`,
     p.`owner`,
     p.`intrepidId`,
-    c.surname surnames, c.forenames forenames
+    c.surname surnames,
+    c.forenames forenames,
+    p.employingBodyId employingBodyId,
+    p.trainingBodyId trainingBodyId
     FROM `Post` p
     LEFT JOIN `PostGrade` pg on p.`id` = pg.`postId` AND pg.`postGradeType` = 'APPROVED'
     LEFT JOIN `PostSpecialty` ps on p.`id` = ps.`postId` AND ps.`postSpecialtyType` = 'PRIMARY'
