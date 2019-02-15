@@ -61,6 +61,7 @@ import java.io.IOException;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.time.LocalDate;
+import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.Calendar;
 import java.util.Collection;
@@ -149,6 +150,8 @@ public class PlacementServiceImpl implements PlacementService {
     log.debug("Request to create Placement : {}", placementDetailsDTO);
     PlacementDetails placementDetails = placementDetailsMapper.placementDetailsDTOToPlacementDetails(placementDetailsDTO);
     updateStoredCommentsWithChangesOrAdd(placementDetails);
+    if(placementDetails.getId() == null)
+      placementDetails.setAddedDate(LocalDateTime.now());
     placementDetails = placementDetailsRepository.saveAndFlush(placementDetails);
 
     final Set<PlacementSpecialty> placementSpecialties = linkPlacementSpecialties(placementDetailsDTO, placementDetails);
@@ -228,6 +231,7 @@ public class PlacementServiceImpl implements PlacementService {
     Placement savedPlacement = placementRepository.saveAndFlush(placement);
     PlacementDTO placementDTO = convertPlacementWithSupervisors(savedPlacement);
     applicationEventPublisher.publishEvent(new PlacementSavedEvent(placementDTO));
+    placementDetailsDTO.setAmendedDate(LocalDateTime.now());
     return createDetails(placementDetailsDTO);
   }
 
