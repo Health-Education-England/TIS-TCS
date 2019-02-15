@@ -1,0 +1,9 @@
+ALTER TABLE `Placement`
+	ADD COLUMN `addedDate` DATETIME  NULL DEFAULT NULL;
+ALTER TABLE `Placement`
+    ADD COLUMN `amendedDate` DATETIME  NULL DEFAULT NULL;
+
+
+
+
+
