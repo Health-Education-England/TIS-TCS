@@ -43,4 +43,26 @@ public interface PostRepository extends JpaRepository<Post, Long>, JpaSpecificat
       "LEFT JOIN FETCH p.associatedTrusts " +
       "WHERE p.id = :id")
   Optional<Post> findPostWithTrustsById(@Param("id") Long id);
+
+  /**
+   * This is the main method to get Posts by ID, It does most of the joins for data retrieved on the post details page
+   * The main thing missing from this query is the placements, thats skipped right now as bucket posts can have up to 64k
+   * placements.
+   * <p>
+   * If you want Placements for a post, there is the {@link com.transformuk.hee.tis.tcs.service.api.PostResource#getPlacementsForPosts}
+   * endpoint
+   *
+   * @param postId the id of the post
+   * @return
+   */
+  @Query("SELECT p " +
+      "FROM Post p " +
+      "LEFT JOIN FETCH p.grades " +
+      "LEFT JOIN FETCH p.sites " +
+      "LEFT JOIN FETCH p.specialties psp " +
+      "LEFT JOIN FETCH psp.specialty " +
+      "LEFT JOIN FETCH p.fundings " +
+      "LEFT JOIN FETCH p.programmes " +
+      "WHERE p.id = :id")
+  Optional<Post> findPostByIdWithJoinFetch(@Param("id") Long postId);
 }

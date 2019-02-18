@@ -525,37 +525,5 @@ public class PostResource {
         .body(results);
   }
 
-  /**
-   * PATCH  /bulk-patch-post-placements : Patches a Post to link it to placements
-   *
-   * @param postRelationshipsDto List of the PostRelationshipsDTO to update their old and new Posts
-   * @return the ResponseEntity with status 200 (OK) and with body the updated postDTOS,
-   * or with status 400 (Bad Request) if the postDTOS is not valid,
-   * or with status 500 (Internal Server Error) if the postDTOS couldnt be updated
-   * @throws URISyntaxException if the Location URI syntax is incorrect
-   */
-  @PatchMapping("/bulk-patch-post-placements")
-  @PreAuthorize("hasAuthority('tcs:add:modify:entities')")
-  public ResponseEntity<List<PostDTO>> bulkPatchPostPlacements(@Valid @RequestBody List<PostDTO> postRelationshipsDto) {
-    log.debug("REST request to bulk link placements to Posts : {}", postRelationshipsDto);
-    if (Collections.isEmpty(postRelationshipsDto)) {
-      return ResponseEntity.badRequest().headers(HeaderUtil.createFailureAlert(ENTITY_NAME, REQUEST_BODY_EMPTY,
-          REQUEST_BODY_CANNOT_BE_EMPTY)).body(null);
-    } else if (!Collections.isEmpty(postRelationshipsDto)) {
-      List<PostDTO> entitiesWithNoId = postRelationshipsDto.stream()
-          .filter(p -> p.getIntrepidId() == null)
-          .collect(Collectors.toList());
-      if (!Collections.isEmpty(entitiesWithNoId)) {
-        return ResponseEntity.badRequest().headers(HeaderUtil.createFailureAlert(StringUtils.join(entitiesWithNoId, ","),
-            BULK_UPDATE_FAILED_NOID, NOID_ERR_MSG)).body(entitiesWithNoId);
-      }
-    }
-
-    List<PostDTO> results = postService.patchPostPlacements(postRelationshipsDto);
-    List<Long> ids = results.stream().map(PostDTO::getId).collect(Collectors.toList());
-    return ResponseEntity.ok()
-        .headers(HeaderUtil.createEntityUpdateAlert(ENTITY_NAME, StringUtils.join(ids, ",")))
-        .body(results);
-  }
 
 }

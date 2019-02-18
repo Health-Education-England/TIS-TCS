@@ -3,28 +3,44 @@ package com.transformuk.hee.tis.tcs.service.api;
 import com.google.common.collect.Lists;
 import com.google.common.collect.Sets;
 import com.transformuk.hee.tis.tcs.TestUtils;
-import com.transformuk.hee.tis.tcs.api.dto.*;
-import com.transformuk.hee.tis.tcs.api.enumeration.*;
+import com.transformuk.hee.tis.tcs.api.dto.PlacementDTO;
+import com.transformuk.hee.tis.tcs.api.dto.PostDTO;
+import com.transformuk.hee.tis.tcs.api.dto.PostGradeDTO;
+import com.transformuk.hee.tis.tcs.api.dto.PostSiteDTO;
+import com.transformuk.hee.tis.tcs.api.dto.PostSpecialtyDTO;
+import com.transformuk.hee.tis.tcs.api.dto.ProgrammeDTO;
+import com.transformuk.hee.tis.tcs.api.dto.SpecialtyDTO;
+import com.transformuk.hee.tis.tcs.api.enumeration.PostGradeType;
+import com.transformuk.hee.tis.tcs.api.enumeration.PostSiteType;
+import com.transformuk.hee.tis.tcs.api.enumeration.PostSpecialtyType;
+import com.transformuk.hee.tis.tcs.api.enumeration.PostSuffix;
+import com.transformuk.hee.tis.tcs.api.enumeration.Status;
 import com.transformuk.hee.tis.tcs.service.Application;
 import com.transformuk.hee.tis.tcs.service.api.decorator.PlacementSummaryDecorator;
 import com.transformuk.hee.tis.tcs.service.api.decorator.PlacementViewDecorator;
-import com.transformuk.hee.tis.tcs.service.api.decorator.PostViewDecorator;
 import com.transformuk.hee.tis.tcs.service.api.validation.PostValidator;
 import com.transformuk.hee.tis.tcs.service.exception.ExceptionTranslator;
-import com.transformuk.hee.tis.tcs.service.model.*;
-import com.transformuk.hee.tis.tcs.service.repository.*;
+import com.transformuk.hee.tis.tcs.service.model.Placement;
+import com.transformuk.hee.tis.tcs.service.model.Post;
+import com.transformuk.hee.tis.tcs.service.model.PostFunding;
+import com.transformuk.hee.tis.tcs.service.model.PostGrade;
+import com.transformuk.hee.tis.tcs.service.model.PostSite;
+import com.transformuk.hee.tis.tcs.service.model.PostSpecialty;
+import com.transformuk.hee.tis.tcs.service.model.Programme;
+import com.transformuk.hee.tis.tcs.service.model.Specialty;
+import com.transformuk.hee.tis.tcs.service.repository.PlacementViewRepository;
+import com.transformuk.hee.tis.tcs.service.repository.PostRepository;
+import com.transformuk.hee.tis.tcs.service.repository.SpecialtyRepository;
 import com.transformuk.hee.tis.tcs.service.service.PlacementService;
 import com.transformuk.hee.tis.tcs.service.service.PostService;
 import com.transformuk.hee.tis.tcs.service.service.mapper.PlacementViewMapper;
 import com.transformuk.hee.tis.tcs.service.service.mapper.PostMapper;
-import com.transformuk.hee.tis.tcs.service.service.mapper.PostViewMapper;
 import org.apache.commons.codec.net.URLCodec;
 import org.hamcrest.core.StringContains;
 import org.junit.Before;
 import org.junit.Ignore;
 import org.junit.Test;
 import org.junit.runner.RunWith;
-import org.mockito.Mock;
 import org.mockito.MockitoAnnotations;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
@@ -45,9 +61,19 @@ import java.util.List;
 import java.util.Set;
 
 import static org.assertj.core.api.Assertions.assertThat;
-import static org.hamcrest.Matchers.*;
-import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.*;
-import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.*;
+import static org.hamcrest.Matchers.contains;
+import static org.hamcrest.Matchers.containsInAnyOrder;
+import static org.hamcrest.Matchers.hasItem;
+import static org.hamcrest.Matchers.hasSize;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.delete;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.patch;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.put;
+import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.content;
+import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
+import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
+
 /**
  * Test class for the PostResource REST controller.
  *
@@ -81,36 +107,23 @@ public class PostResourceIntTest {
   private static final String UPDATED_LOCAL_POST_NUMBER = "Updated local post number";
   private static final String DEFAULT_INTREPID_ID = "intrepidNumber";
   private static final String UPDATED_INTREPID_ID = "updated intrepidNumber";
-  private static final String GRADE_CODE = "GRADE CODE";
   private static final Long GRADE_ID = 11111L;
   private static final Long NEW_GRADE_ID = 11112L;
-  private static final String SITE_CODE = "SITE CODE";
   private static final Long SITE_ID = 22222L;
   private static final Long NEW_SITE_ID = 22223L;
   private static final String TEST_POST_NUMBER = "TESTPOST";
   private static final String DEFAULT_POST_NUMBER = "DEFAULTPOST";
   private static final String OWNER = "Health Education England Kent, Surrey and Sussex";
   private static final String OWNER_NORTH_EAST = "Health Education England North East";
-  private static final String CURRENT_TRAINEE_SURNAME = "Smith";
   private static final String FUNDING_TYPE_TRUST = "TRUST";
   private static final String FUNDING_TYPE_TARIFF = "TARIFF";
   private static final String UPDATED_OWNER = "Health Education England North West London";
   @Autowired
   private PostRepository postRepository;
   @Autowired
-  private PostViewRepository postViewRepository;
-  @Mock
-  private PostViewDecorator postViewDecorator;
-  @Autowired
   private SpecialtyRepository specialtyRepository;
   @Autowired
-  private PlacementRepository placementRepository;
-  @Autowired
-  private ProgrammeRepository programmeRepository;
-  @Autowired
   private PostMapper postMapper;
-  @Autowired
-  private PostViewMapper postViewMapper;
   @Autowired
   private PostService postService;
   @Autowired
@@ -135,12 +148,12 @@ public class PostResourceIntTest {
   private EntityManager em;
   private MockMvc restPostMockMvc;
   private Post post;
-  private PostView postView;
   private Specialty specialty;
   private PostGrade postGrade;
   private PostSite postSite;
   private PostSpecialty postSpecialty;
   private Programme programme;
+
   /**
    * Create an entity for this test.
    * <p>
@@ -153,6 +166,7 @@ public class PostResourceIntTest {
         .specialties(specialties);
     return post;
   }
+
   public static Post createEntity() {
     Post post = new Post()
         .nationalPostNumber(DEFAULT_NATIONAL_POST_NUMBER)
@@ -167,18 +181,7 @@ public class PostResourceIntTest {
         .intrepidId(DEFAULT_INTREPID_ID);
     return post;
   }
-  public static PostView createPostView() {
-    PostView postView = new PostView();
-    postView.setNationalPostNumber(DEFAULT_NATIONAL_POST_NUMBER);
-    postView.setStatus(DEFAULT_STATUS);
-    postView.setOwner(OWNER);
-    postView.setApprovedGradeId(GRADE_ID);
-    postView.setApprovedGradeCode(GRADE_CODE);
-    postView.setPrimarySiteId(SITE_ID);
-    postView.setPrimarySiteCode(SITE_CODE);
-    postView.setCurrentTraineeSurname("AAAAAA");
-    return postView;
-  }
+
   public static Specialty createSpecialty() {
     Specialty specialty = new Specialty();
     specialty.setCollege(SPECIALTY_COLLEGE);
@@ -186,6 +189,7 @@ public class PostResourceIntTest {
     specialty.setIntrepidId(SPECIALTY_INTREPID_ID);
     return specialty;
   }
+
   public static PostSpecialty createPostSpecialty(Specialty specialty, PostSpecialtyType postSpecialtyType, Post post) {
     PostSpecialty postSpecialty = new PostSpecialty();
     postSpecialty.setPostSpecialtyType(postSpecialtyType);
@@ -193,6 +197,7 @@ public class PostResourceIntTest {
     postSpecialty.setPost(post);
     return postSpecialty;
   }
+
   public static PostGrade createPostGrade(Long gradeId, PostGradeType postGradeType, Post post) {
     PostGrade postGrade = new PostGrade();
     postGrade.setPostGradeType(postGradeType);
@@ -200,6 +205,7 @@ public class PostResourceIntTest {
     postGrade.setPost(post);
     return postGrade;
   }
+
   public static PostSite createPostSite(Long siteId, PostSiteType postSiteType, Post post) {
     PostSite postSite = new PostSite();
     postSite.setPostSiteType(postSiteType);
@@ -207,6 +213,7 @@ public class PostResourceIntTest {
     postSite.setPost(post);
     return postSite;
   }
+
   public static Programme createProgramme() {
     Programme programme = new Programme();
     programme.setIntrepidId(PROGRAMME_INTREPID_ID);
@@ -215,6 +222,7 @@ public class PostResourceIntTest {
     programme.setStatus(Status.CURRENT);
     return programme;
   }
+
   @Before
   public void setup() {
     MockitoAnnotations.initMocks(this);
@@ -226,9 +234,9 @@ public class PostResourceIntTest {
         .setMessageConverters(jacksonMessageConverter).build();
     TestUtils.mockUserprofile("jamesh", "1-AIIDR8", "1-AIIDWA");
   }
+
   @Before
   public void initTest() throws Exception {
-    postView = createPostView();
     post = createEntity();
     post.setOwner(OWNER);
     em.persist(post);
@@ -258,6 +266,7 @@ public class PostResourceIntTest {
     Set<PostFunding> postFundings = Sets.newHashSet(postFundingTarrif, postFundingTrust);
     post.setFundings(postFundings);
   }
+
   @Test
   @Transactional
   public void shouldReturnMultipleCurrentFundingTypesSeparatedByCommas() throws Exception {
@@ -270,6 +279,7 @@ public class PostResourceIntTest {
         .andExpect(jsonPath("$.[*].nationalPostNumber").value(TEST_POST_NUMBER))
         .andExpect(jsonPath("$.[*].fundingType").value(contains("TRUST, TARIFF")));
   }
+
   @Test
   @Transactional
   public void shouldValidateMandatoryFieldsWhenCreating() throws Exception {
@@ -284,6 +294,7 @@ public class PostResourceIntTest {
         .andExpect(jsonPath("$.fieldErrors[*].field").
             value(containsInAnyOrder("owner", "status")));
   }
+
   @Test
   @Transactional
   public void shouldValidateMandatoryFieldsWhenUpdating() throws Exception {
@@ -299,6 +310,7 @@ public class PostResourceIntTest {
         .andExpect(jsonPath("$.fieldErrors[*].field").
             value(containsInAnyOrder("owner", "status")));
   }
+
   @Test
   @Transactional
   public void shouldValidateIdWhenCreating() throws Exception {
@@ -313,6 +325,7 @@ public class PostResourceIntTest {
         .andExpect(jsonPath("$.message").value("error.validation"))
         .andExpect(jsonPath("$.fieldErrors[0].field").value("id"));
   }
+
   @Test
   @Transactional
   public void shouldNotAllowTwoPrimarySpecialties() throws Exception {
@@ -339,6 +352,7 @@ public class PostResourceIntTest {
         .andExpect(jsonPath("$.fieldErrors[0].message").value(StringContains.
             containsString("Only one Specialty of type PRIMARY allowed")));
   }
+
   @Ignore
   @Test
   @Transactional
@@ -365,6 +379,7 @@ public class PostResourceIntTest {
     Post dbUpdatedPost = postRepository.findById(post.getId()).orElse(null);
     assertThat(dbUpdatedPost.getSpecialties().iterator().next().getPostSpecialtyType()).isEqualTo(PostSpecialtyType.OTHER);
   }
+
   @Test
   @Transactional
   public void createPostWithExistingId() throws Exception {
@@ -382,6 +397,7 @@ public class PostResourceIntTest {
     List<Post> postList = postRepository.findAll();
     assertThat(postList).hasSize(databaseSizeBeforeCreate);
   }
+
   @Test
   @Transactional
   public void getAllPosts() throws Exception {
@@ -394,6 +410,7 @@ public class PostResourceIntTest {
         .andExpect(jsonPath("$.[*].status").value(hasItem(DEFAULT_STATUS.toString().toUpperCase())))
         .andExpect(jsonPath("$.[*].owner").value(hasItem(OWNER)));
   }
+
   @Test
   @Transactional
   public void shouldReturnAllPostsWithoutOwnerFilter() throws Exception {
@@ -414,6 +431,7 @@ public class PostResourceIntTest {
         .andExpect(jsonPath("$.[*].owner").value(hasItem(OWNER)))
         .andExpect(jsonPath("$.[*].owner").value(hasItem(OWNER_NORTH_EAST)));
   }
+
   @Test
   @Transactional
   public void shouldTextSearch() throws Exception {
@@ -428,6 +446,7 @@ public class PostResourceIntTest {
         .andExpect(jsonPath("$.[*].status").value(hasItem(DEFAULT_STATUS.toString().toUpperCase())))
         .andExpect(jsonPath("$.[*].owner").value(hasItem(OWNER)));
   }
+
   @Test
   @Transactional
   public void shouldTextSearchOnCurrentTrainee() throws Exception {
@@ -440,6 +459,7 @@ public class PostResourceIntTest {
         .andExpect(jsonPath("$.[*].nationalPostNumber").value(hasItem(TEST_POST_NUMBER)))
         .andExpect(jsonPath("$.[*].status").value(hasItem(DEFAULT_STATUS.toString().toUpperCase())));
   }
+
   @Test
   @Transactional
   public void shouldSearchByNationalPostNumber() throws Exception {
@@ -452,6 +472,7 @@ public class PostResourceIntTest {
         .andExpect(jsonPath("$.[*].nationalPostNumber").value(hasItem(TEST_POST_NUMBER)))
         .andExpect(jsonPath("$.[*].status").value(hasItem(DEFAULT_STATUS.toString().toUpperCase())));
   }
+
   @Test
   @Transactional
   public void shouldSearchByNationalPostNumberAndStatus() throws Exception {
@@ -466,6 +487,7 @@ public class PostResourceIntTest {
         .andExpect(jsonPath("$.[*].nationalPostNumber").value(hasItem(TEST_POST_NUMBER)))
         .andExpect(jsonPath("$.[*].status").value(hasItem(Status.CURRENT.name())));
   }
+
   @Test
   @Transactional
   public void shouldOrderPostsByNationalPostNumberDescending() throws Exception {
@@ -486,6 +508,7 @@ public class PostResourceIntTest {
         .andExpect(jsonPath("$[2].nationalPostNumber").value("npn-01"))
         .andExpect(jsonPath("$[3].nationalPostNumber").value("AAAAAAAAAA"));
   }
+
   @Test
   @Transactional
   public void shouldOrderPostsByNationalPostNumberAscending() throws Exception {
@@ -507,6 +530,7 @@ public class PostResourceIntTest {
         .andExpect(jsonPath("$[2].nationalPostNumber").value("npn-02"))
         .andExpect(jsonPath("$[3].nationalPostNumber").value("npn-03"));
   }
+
   @Test
   @Transactional
   public void shouldFilterColumns() throws Exception {
@@ -525,6 +549,7 @@ public class PostResourceIntTest {
         .andExpect(jsonPath("$.[*].status").value("INACTIVE"))
         .andExpect(jsonPath("$.[*].owner").value(hasItem(OWNER)));
   }
+
   @Test
   @Transactional
   public void shouldFilterColumnsBySiteId() throws Exception {
@@ -539,6 +564,7 @@ public class PostResourceIntTest {
         .andExpect(jsonPath("$.[*].primarySiteId").value(hasItem(siteId.intValue())))
         .andExpect(jsonPath("$.[*].owner").value(hasItem(OWNER)));
   }
+
   @Test
   @Transactional
   public void shouldFilterColumnsByGradeId() throws Exception {
@@ -553,6 +579,7 @@ public class PostResourceIntTest {
         .andExpect(jsonPath("$.[*].approvedGradeId").value(hasItem(gradeId.intValue())))
         .andExpect(jsonPath("$.[*].owner").value(hasItem(OWNER)));
   }
+
   @Test
   @Transactional
   public void shouldFilterColumnsBySpecialtyId() throws Exception {
@@ -566,6 +593,7 @@ public class PostResourceIntTest {
         .andExpect(jsonPath("$.[*].primarySpecialtyId").value(hasItem(specialtyId.intValue())))
         .andExpect(jsonPath("$.[*].owner").value(hasItem(OWNER)));
   }
+
   @Test
   @Transactional
   public void shouldTextSearchAndFilterColumns() throws Exception {
@@ -591,6 +619,7 @@ public class PostResourceIntTest {
         .andExpect(status().isOk())
         .andExpect(jsonPath("$.[*].status").value("INACTIVE"));
   }
+
   @Test
   @Transactional
   public void getPostId() throws Exception {
@@ -607,6 +636,7 @@ public class PostResourceIntTest {
         .andExpect(jsonPath("$.employingBodyId").value(DEFAULT_EMPLOYING_BODY))
         .andExpect(jsonPath("$.trainingBodyId").value(DEFAULT_TRAINING_BODY_ID));
   }
+
   @Test
   @Transactional
   public void getPostByNPN() throws Exception {
@@ -627,6 +657,7 @@ public class PostResourceIntTest {
         .andExpect(jsonPath("$.[0].employingBodyId").value(DEFAULT_EMPLOYING_BODY))
         .andExpect(jsonPath("$.[0].trainingBodyId").value(DEFAULT_TRAINING_BODY_ID));
   }
+
   @Test
   @Transactional
   public void getNonExistingPost() throws Exception {
@@ -634,6 +665,7 @@ public class PostResourceIntTest {
     restPostMockMvc.perform(get("/api/posts/{id}", Long.MAX_VALUE))
         .andExpect(status().isNotFound());
   }
+
   @Test
   @Transactional
   public void updatePost() throws Exception {
@@ -673,6 +705,7 @@ public class PostResourceIntTest {
     assertThat(testPost.getTrainingDescription()).isEqualTo(UPDATED_TRAINING_DESCRIPTION);
     assertThat(testPost.getLocalPostNumber()).isEqualTo(UPDATED_LOCAL_POST_NUMBER);
   }
+
   @Test
   @Transactional
   public void updateNonExistingPost() throws Exception {
@@ -691,6 +724,7 @@ public class PostResourceIntTest {
     List<Post> postList = postRepository.findAll();
     assertThat(postList).hasSize(databaseSizeBeforeUpdate);
   }
+
   @Test
   @Transactional
   public void deletePost() throws Exception {
@@ -704,11 +738,13 @@ public class PostResourceIntTest {
     List<Post> postList = postRepository.findAll();
     assertThat(postList).hasSize(databaseSizeBeforeDelete - 1);
   }
+
   @Test
   @Transactional
   public void equalsVerifier() throws Exception {
     TestUtil.equalsVerifier(Post.class);
   }
+
   @Test
   @Transactional
   public void bulkCreateShouldSucceedWhenDataIsValid() throws Exception {
@@ -743,6 +779,7 @@ public class PostResourceIntTest {
     List<Post> postList = postRepository.findAll();
     assertThat(postList).hasSize(expectedDatabaseSizeAfterBulkCreate);
   }
+
   @Test
   @Transactional
   public void bulkUpdateShouldSucceedWhenDataIsValid() throws Exception {
@@ -781,6 +818,7 @@ public class PostResourceIntTest {
     List<Post> postList = postRepository.findAll();
     assertThat(postList).hasSize(expectedDatabaseSizeAfterBulkUpdate);
   }
+
   @Test
   @Transactional
   public void bulkPatchNewOldPostShouldSucceedWhenDataIsValid() throws Exception {
@@ -821,6 +859,7 @@ public class PostResourceIntTest {
     List<Post> postList = postRepository.findAll();
     assertThat(postList).hasSize(expectedDatabaseSizeAfterBulkUpdate);
   }
+
   @Test
   @Transactional
   public void bulkPatchNewOldPostShouldFailWhenNoDataIsSent() throws Exception {
@@ -834,6 +873,7 @@ public class PostResourceIntTest {
     List<Post> postList = postRepository.findAll();
     assertThat(postList).hasSize(expectedDatabaseSizeAfterBulkUpdate);
   }
+
   @Test
   @Transactional
   public void bulkPatchNewOldPostShouldFailWhenDataIsSentWithNoId() throws Exception {
@@ -849,6 +889,7 @@ public class PostResourceIntTest {
     List<Post> postList = postRepository.findAll();
     assertThat(postList).hasSize(expectedDatabaseSizeAfterBulkUpdate);
   }
+
   @Test
   @Transactional
   public void bulkPatchPostSitesShouldSucceedWhenDataIsValid() throws Exception {
@@ -871,6 +912,7 @@ public class PostResourceIntTest {
     List<Post> postList = postRepository.findAll();
     assertThat(postList).hasSize(expectedDatabaseSizeAfterBulkUpdate);
   }
+
   @Test
   @Transactional
   public void bulkPatchPostSiteshouldFailWhenNoDataIsSent() throws Exception {
@@ -884,6 +926,7 @@ public class PostResourceIntTest {
     List<Post> postList = postRepository.findAll();
     assertThat(postList).hasSize(expectedDatabaseSizeAfterBulkUpdate);
   }
+
   @Test
   @Transactional
   public void bulkPatchPostSiteShouldFailWhenDataIsSentWithNoId() throws Exception {
@@ -899,6 +942,7 @@ public class PostResourceIntTest {
     List<Post> postList = postRepository.findAll();
     assertThat(postList).hasSize(expectedDatabaseSizeAfterBulkUpdate);
   }
+
   @Test
   @Transactional
   public void bulkPatchPostGradesShouldSucceedWhenDataIsValid() throws Exception {
@@ -918,6 +962,7 @@ public class PostResourceIntTest {
     List<Post> postList = postRepository.findAll();
     assertThat(postList).hasSize(expectedDatabaseSizeAfterBulkUpdate);
   }
+
   @Test
   @Transactional
   public void bulkPatchPostGradesShouldFailWhenNoDataIsSent() throws Exception {
@@ -931,6 +976,7 @@ public class PostResourceIntTest {
     List<Post> postList = postRepository.findAll();
     assertThat(postList).hasSize(expectedDatabaseSizeAfterBulkUpdate);
   }
+
   @Test
   @Transactional
   public void bulkPatchPostGradesShouldFailWhenDataIsSentWithNoId() throws Exception {
@@ -946,6 +992,7 @@ public class PostResourceIntTest {
     List<Post> postList = postRepository.findAll();
     assertThat(postList).hasSize(expectedDatabaseSizeAfterBulkUpdate);
   }
+
   @Test
   @Transactional
   public void bulkPatchPostProgrammesShouldSucceedWhenDataIsValid() throws Exception {
@@ -972,6 +1019,7 @@ public class PostResourceIntTest {
     List<Post> postList = postRepository.findAll();
     assertThat(postList).hasSize(expectedDatabaseSizeAfterBulkUpdate);
   }
+
   @Test
   @Transactional
   public void bulkPatchPostProgrammesShouldFailWhenNoDataIsSent() throws Exception {
@@ -985,6 +1033,7 @@ public class PostResourceIntTest {
     List<Post> postList = postRepository.findAll();
     assertThat(postList).hasSize(expectedDatabaseSizeAfterBulkUpdate);
   }
+
   @Test
   @Transactional
   public void bulkPatchPostProgrammesShouldFailWhenDataIsSentWithNoId() throws Exception {
@@ -1000,6 +1049,7 @@ public class PostResourceIntTest {
     List<Post> postList = postRepository.findAll();
     assertThat(postList).hasSize(expectedDatabaseSizeAfterBulkUpdate);
   }
+
   @Test
   @Transactional
   public void bulkPatchPostSpecialtiesShouldSucceedWhenDataIsValid() throws Exception {
@@ -1026,6 +1076,7 @@ public class PostResourceIntTest {
     List<Post> postList = postRepository.findAll();
     assertThat(postList).hasSize(expectedDatabaseSizeAfterBulkUpdate);
   }
+
   @Test
   @Transactional
   public void bulkPatchPostSpecialtiesShouldFailWhenNoDataIsSent() throws Exception {
@@ -1039,6 +1090,7 @@ public class PostResourceIntTest {
     List<Post> postList = postRepository.findAll();
     assertThat(postList).hasSize(expectedDatabaseSizeAfterBulkUpdate);
   }
+
   @Test
   @Transactional
   public void bulkPatchPostSpecialtiesShouldFailWhenDataIsSentWithNoId() throws Exception {
@@ -1054,6 +1106,7 @@ public class PostResourceIntTest {
     List<Post> postList = postRepository.findAll();
     assertThat(postList).hasSize(expectedDatabaseSizeAfterBulkUpdate);
   }
+
   @Test
   @Transactional
   public void bulkPatchPostPlacementsShouldSucceedWhenDataIsValid() throws Exception {
@@ -1083,6 +1136,7 @@ public class PostResourceIntTest {
     List<Post> postList = postRepository.findAll();
     assertThat(postList).hasSize(expectedDatabaseSizeAfterBulkUpdate);
   }
+
   @Test
   @Transactional
   public void bulkPatchPostPlacementsShouldFailWhenNoDataIsSent() throws Exception {
@@ -1096,6 +1150,7 @@ public class PostResourceIntTest {
     List<Post> postList = postRepository.findAll();
     assertThat(postList).hasSize(expectedDatabaseSizeAfterBulkUpdate);
   }
+
   @Test
   @Transactional
   public void bulkPatchPostPlacementsShouldFailWhenDataIsSentWithNoId() throws Exception {
@@ -1111,6 +1166,7 @@ public class PostResourceIntTest {
     List<Post> postList = postRepository.findAll();
     assertThat(postList).hasSize(expectedDatabaseSizeAfterBulkUpdate);
   }
+
   @Test
   @Transactional
   public void shouldFilterPostsByDeaneryNumbers() throws Exception {
@@ -1124,6 +1180,7 @@ public class PostResourceIntTest {
         .andExpect(jsonPath("$").isArray())
         .andExpect(jsonPath("$", hasSize(2)));
   }
+
   @Test
   @Transactional
   public void shouldFilterPostsByDeaneryNumbersAndHonorsPageSize() throws Exception {
@@ -1137,6 +1194,7 @@ public class PostResourceIntTest {
         .andExpect(jsonPath("$").isArray())
         .andExpect(jsonPath("$", hasSize(3)));
   }
+
   private List<String> preparePostRecords() {
     List<String> npns = Arrays.asList("npn-01", "npn-02", "npn-03");
     Post post1 = createEntity();

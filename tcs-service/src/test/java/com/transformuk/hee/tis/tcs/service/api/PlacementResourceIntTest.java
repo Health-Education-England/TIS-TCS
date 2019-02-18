@@ -1145,21 +1145,21 @@ public class PlacementResourceIntTest {
         .andExpect(jsonPath("$.dateTo").value(LocalDate.now().minusDays(1).toString()));
   }
 
-  @Test
-  @Transactional
-  public void shouldPatchPlacements() throws Exception {
-    placement.setPlacementType(DEFAULT_PLACEMENT_TYPE);
-    placement.setGradeId(DEFAULT_GRADE_ID);
-    Placement savedPlacement = placementRepository.saveAndFlush(placement);
-    savedPlacement.setPlacementType(UPDATED_PLACEMENT_TYPE);
-    List<PlacementDTO> placementDTOS = Lists.newArrayList(placementMapper.placementToPlacementDTO(savedPlacement));
-    restPlacementMockMvc.perform(patch("/api/placements")
-        .contentType(TestUtil.APPLICATION_JSON_UTF8)
-        .content(TestUtil.convertObjectToJsonBytes(placementDTOS)))
-        .andExpect(status().isOk())
-        .andExpect(jsonPath("$.[*].placementType").value(UPDATED_PLACEMENT_TYPE))
-        .andExpect(jsonPath("$.[*].gradeId").value(DEFAULT_GRADE_ID.intValue()));
-  }
+//  @Test
+//  @Transactional
+//  public void shouldPatchPlacements() throws Exception {
+//    placement.setPlacementType(DEFAULT_PLACEMENT_TYPE);
+//    placement.setGradeId(DEFAULT_GRADE_ID);
+//    Placement savedPlacement = placementRepository.saveAndFlush(placement);
+//    savedPlacement.setPlacementType(UPDATED_PLACEMENT_TYPE);
+//    List<PlacementDTO> placementDTOS = Lists.newArrayList(placementMapper.placementToPlacementDTO(savedPlacement));
+//    restPlacementMockMvc.perform(patch("/api/placements")
+//        .contentType(TestUtil.APPLICATION_JSON_UTF8)
+//        .content(TestUtil.convertObjectToJsonBytes(placementDTOS)))
+//        .andExpect(status().isOk())
+//        .andExpect(jsonPath("$.[*].placementType").value(UPDATED_PLACEMENT_TYPE))
+//        .andExpect(jsonPath("$.[*].gradeId").value(DEFAULT_GRADE_ID.intValue()));
+//  }
 
   private String encodeDateRange(final String dateRangeFilter) throws EncoderException {
     final URLCodec codec = new URLCodec();

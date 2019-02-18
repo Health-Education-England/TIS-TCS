@@ -40,13 +40,10 @@ import java.util.stream.Collectors;
 @Component
 public class PostMapper {
 
-  @Autowired
-  private PlacementMapper placementMapper;
-
   public PostDTO postToPostDTO(Post post) {
     PostDTO result = null;
     if (post != null) {
-      result = postToPostDTO(post, true, true);
+      result = postToPostDTO(post, true);
     }
     return result;
   }
@@ -54,7 +51,7 @@ public class PostMapper {
   public PostDTO postToPostDTO(Post post, Boolean includePlacements) {
     PostDTO result = null;
     if (post != null) {
-      result = postToPostDTO(post, true, includePlacements);
+      result = postToPostDTO(post, true);
     }
     return result;
   }
@@ -90,7 +87,7 @@ public class PostMapper {
     return result;
   }
 
-  private PostDTO postToPostDTO(Post post, boolean traverseRelatedPosts, boolean includePlacements) {
+  private PostDTO postToPostDTO(Post post, boolean traverseRelatedPosts) {
     PostDTO result = new PostDTO();
 
     result.setId(post.getId());
@@ -108,10 +105,10 @@ public class PostMapper {
 
     if (traverseRelatedPosts) {
       if (post.getOldPost() != null) {
-        result.setOldPost(postToPostDTO(post.getOldPost(), false, includePlacements));
+        result.setOldPost(postToPostDTO(post.getOldPost(), false));
       }
       if (post.getNewPost() != null) {
-        result.setNewPost(postToPostDTO(post.getNewPost(), false, includePlacements));
+        result.setNewPost(postToPostDTO(post.getNewPost(), false));
       }
     }
 
@@ -152,16 +149,6 @@ public class PostMapper {
         specialties.add(postSpecialtyDTO);
       }
       result.setSpecialties(specialties);
-    }
-
-    if (includePlacements) {
-      if (CollectionUtils.isNotEmpty(post.getPlacementHistory())) {
-        Set<PlacementDTO> placements = Sets.newHashSet();
-        for (Placement placement : post.getPlacementHistory()) {
-          placements.add(placementMapper.placementToPlacementDTO(placement));
-        }
-        result.setPlacementHistory(placements);
-      }
     }
 
     if (CollectionUtils.isNotEmpty(post.getFundings())) {

@@ -1,6 +1,5 @@
 package com.transformuk.hee.tis.tcs.api.dto;
 
-import java.math.BigInteger;
 import java.util.Date;
 import java.util.Objects;
 
@@ -11,26 +10,26 @@ public class PlacementSummaryDTO {
 
   private Date dateFrom;
   private Date dateTo;
-  private BigInteger siteId;
+  private Long siteId;
   private String siteName;
   private String primarySpecialtyName;
-  private BigInteger gradeId;
+  private Long gradeId;
   private String gradeName;
   private String placementType;
   private String status;
   private String forenames;
   private String surname;
-  private BigInteger traineeId;
-  private BigInteger placementId;
+  private Long traineeId;
+  private Long placementId;
   private String placementStatus;
   private String placementSpecialtyType;
 
   public PlacementSummaryDTO() {
   }
 
-  public PlacementSummaryDTO(Date dateFrom, Date dateTo, BigInteger siteId, String primarySpecialtyName,
-                             BigInteger gradeId, String placementType, String status, String forenames, String surname,
-                             BigInteger traineeId, BigInteger placementId, String placementSpecialtyType) {
+  public PlacementSummaryDTO(Date dateFrom, Date dateTo, Long siteId, String primarySpecialtyName,
+                             Long gradeId, String placementType, String status, String forenames, String surname,
+                             Long traineeId, Long placementId, String placementSpecialtyType) {
     this.dateFrom = dateFrom;
     this.dateTo = dateTo;
     this.siteId = siteId;
@@ -61,11 +60,11 @@ public class PlacementSummaryDTO {
     this.dateTo = dateTo;
   }
 
-  public BigInteger getSiteId() {
+  public Long getSiteId() {
     return siteId;
   }
 
-  public void setSiteId(BigInteger siteId) {
+  public void setSiteId(Long siteId) {
     this.siteId = siteId;
   }
 
@@ -85,11 +84,11 @@ public class PlacementSummaryDTO {
     this.primarySpecialtyName = primarySpecialtyName;
   }
 
-  public BigInteger getGradeId() {
+  public Long getGradeId() {
     return gradeId;
   }
 
-  public void setGradeId(BigInteger gradeId) {
+  public void setGradeId(Long gradeId) {
     this.gradeId = gradeId;
   }
 
@@ -133,19 +132,19 @@ public class PlacementSummaryDTO {
     this.surname = surname;
   }
 
-  public BigInteger getTraineeId() {
+  public Long getTraineeId() {
     return traineeId;
   }
 
-  public void setTraineeId(BigInteger traineeId) {
+  public void setTraineeId(Long traineeId) {
     this.traineeId = traineeId;
   }
 
-  public BigInteger getPlacementId() {
+  public Long getPlacementId() {
     return placementId;
   }
 
-  public void setPlacementId(BigInteger placementId) {
+  public void setPlacementId(Long placementId) {
     this.placementId = placementId;
   }
 

@@ -15,16 +15,16 @@ import org.mockito.ArgumentCaptor;
 import org.mockito.Captor;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
-import org.mockito.runners.MockitoJUnitRunner;
+import org.mockito.junit.MockitoJUnitRunner;
 
 import javax.persistence.EntityManager;
-import java.math.BigInteger;
 import java.text.SimpleDateFormat;
 import java.time.LocalDate;
 import java.util.Date;
 import java.util.List;
 import java.util.Optional;
 
+import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.doNothing;
 import static org.mockito.Mockito.when;
 
@@ -52,12 +52,12 @@ public class PlacementServiceImplTest {
   @Captor
   private ArgumentCaptor<LocalDate> toDateCaptor;
 
-  private static final BigInteger bigInteger = BigInteger.ONE;
+  private static final Long number = new Long(1);
 
   public static PlacementSummaryDTO createPlacementSummaryDTO() {
-    return new PlacementSummaryDTO(null,null,bigInteger,
-        "Elbows",bigInteger,"In Post","CURRENT","Joe", "Bloggs",
-        bigInteger,bigInteger,null);
+    return new PlacementSummaryDTO(null,null,number,
+        "Elbows",number,"In Post","CURRENT","Joe", "Bloggs",
+        number,number,null);
   }
 
   @Before
@@ -70,7 +70,7 @@ public class PlacementServiceImplTest {
     when(placementRepositoryMock.findById(PLACEMENT_ID)).thenReturn(Optional.of(placementMock));
     doNothing().when(placementMock).setDateTo(toDateCaptor.capture());
     when(placementRepositoryMock.saveAndFlush(placementMock)).thenReturn(placementMock);
-    when(placementMapperMock.placementToPlacementDTO(placementMock)).thenReturn(placementDTOMock);
+    when(placementMapperMock.placementToPlacementDTO(placementMock, any())).thenReturn(placementDTOMock);
 
     PlacementDTO result = testObj.closePlacement(PLACEMENT_ID);
 
@@ -90,11 +90,11 @@ public class PlacementServiceImplTest {
     Date bulk_date = simpleDateFormat.parse("2018/12/01");
     Date null_date = null;
     Long traineeId = 1L;
-    BigInteger id1 = BigInteger.valueOf(1);
-    BigInteger id2 = BigInteger.valueOf(2);
-    BigInteger id3 = BigInteger.valueOf(3);
-    BigInteger id4 = BigInteger.valueOf(4);
-    BigInteger id5 = BigInteger.valueOf(5);
+    Long id1 = new Long(1);
+    Long id2 = new Long(2);
+    Long id3 = new Long(3);
+    Long id4 = new Long(4);
+    Long id5 = new Long(5);
 
     PlacementSummaryDTO placement_latest = createPlacementSummaryDTO(), placement_second_latest = createPlacementSummaryDTO(),
         placement_earliest = createPlacementSummaryDTO(), placement_null = createPlacementSummaryDTO(),
@@ -117,7 +117,7 @@ public class PlacementServiceImplTest {
     for(int i = 6; i < 2000; i++){
       PlacementSummaryDTO placement = new PlacementSummaryDTO();
       placement.setDateTo(bulk_date);
-      placement.setPlacementId(BigInteger.valueOf(i));
+      placement.setPlacementId(Long.valueOf(i));
 
       placements.add(placement);
     }
@@ -148,11 +148,11 @@ public class PlacementServiceImplTest {
     Date bulk_date = simpleDateFormat.parse("2018/12/01");
     Date null_date = null;
     Long postId = 1L;
-    BigInteger id1 = BigInteger.valueOf(1);
-    BigInteger id2 = BigInteger.valueOf(2);
-    BigInteger id3 = BigInteger.valueOf(3);
-    BigInteger id4 = BigInteger.valueOf(4);
-    BigInteger id5 = BigInteger.valueOf(5);
+    Long id1 = new Long(1);
+    Long id2 = new Long(2);
+    Long id3 = new Long(3);
+    Long id4 = new Long(4);
+    Long id5 = new Long(5);
 
     PlacementSummaryDTO placement_latest = createPlacementSummaryDTO(), placement_second_latest = createPlacementSummaryDTO(),
         placement_earliest = createPlacementSummaryDTO(), placement_null = createPlacementSummaryDTO(),
@@ -175,7 +175,7 @@ public class PlacementServiceImplTest {
     for(int i = 6; i < 2000; i++){
       PlacementSummaryDTO placement = new PlacementSummaryDTO();
       placement.setDateTo(bulk_date);
-      placement.setPlacementId(BigInteger.valueOf(i));
+      placement.setPlacementId(Long.valueOf(i));
 
       placements.add(placement);
     }

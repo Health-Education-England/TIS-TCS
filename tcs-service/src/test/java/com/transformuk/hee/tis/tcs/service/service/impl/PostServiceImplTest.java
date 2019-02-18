@@ -2,24 +2,45 @@ package com.transformuk.hee.tis.tcs.service.service.impl;
 
 import com.google.common.collect.Lists;
 import com.google.common.collect.Sets;
-import com.transformuk.hee.tis.tcs.api.dto.*;
+import com.transformuk.hee.tis.tcs.api.dto.PostDTO;
+import com.transformuk.hee.tis.tcs.api.dto.PostGradeDTO;
+import com.transformuk.hee.tis.tcs.api.dto.PostSiteDTO;
+import com.transformuk.hee.tis.tcs.api.dto.PostSpecialtyDTO;
+import com.transformuk.hee.tis.tcs.api.dto.PostViewDTO;
+import com.transformuk.hee.tis.tcs.api.dto.ProgrammeDTO;
+import com.transformuk.hee.tis.tcs.api.dto.SpecialtyDTO;
 import com.transformuk.hee.tis.tcs.api.enumeration.FundingType;
 import com.transformuk.hee.tis.tcs.api.enumeration.PostGradeType;
 import com.transformuk.hee.tis.tcs.api.enumeration.PostSiteType;
 import com.transformuk.hee.tis.tcs.api.enumeration.PostSpecialtyType;
-import com.transformuk.hee.tis.tcs.service.api.decorator.PostViewDecorator;
 import com.transformuk.hee.tis.tcs.service.api.util.BasicPage;
 import com.transformuk.hee.tis.tcs.service.exception.AccessUnauthorisedException;
-import com.transformuk.hee.tis.tcs.service.model.*;
-import com.transformuk.hee.tis.tcs.service.repository.*;
+import com.transformuk.hee.tis.tcs.service.model.ColumnFilter;
+import com.transformuk.hee.tis.tcs.service.model.Post;
+import com.transformuk.hee.tis.tcs.service.model.PostFunding;
+import com.transformuk.hee.tis.tcs.service.model.PostGrade;
+import com.transformuk.hee.tis.tcs.service.model.PostSite;
+import com.transformuk.hee.tis.tcs.service.model.PostSpecialty;
+import com.transformuk.hee.tis.tcs.service.model.PostTrust;
+import com.transformuk.hee.tis.tcs.service.model.Programme;
+import com.transformuk.hee.tis.tcs.service.model.Specialty;
+import com.transformuk.hee.tis.tcs.service.repository.PostFundingRepository;
+import com.transformuk.hee.tis.tcs.service.repository.PostGradeRepository;
+import com.transformuk.hee.tis.tcs.service.repository.PostRepository;
+import com.transformuk.hee.tis.tcs.service.repository.PostSiteRepository;
+import com.transformuk.hee.tis.tcs.service.repository.PostSpecialtyRepository;
+import com.transformuk.hee.tis.tcs.service.repository.ProgrammeRepository;
 import com.transformuk.hee.tis.tcs.service.service.helper.SqlQuerySupplier;
 import com.transformuk.hee.tis.tcs.service.service.mapper.PostMapper;
-import com.transformuk.hee.tis.tcs.service.service.mapper.PostViewMapper;
 import org.apache.commons.lang.StringUtils;
 import org.junit.Assert;
 import org.junit.Test;
 import org.junit.runner.RunWith;
-import org.mockito.*;
+import org.mockito.ArgumentCaptor;
+import org.mockito.Captor;
+import org.mockito.InjectMocks;
+import org.mockito.Mock;
+import org.mockito.Spy;
 import org.mockito.junit.MockitoJUnitRunner;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
@@ -28,9 +49,21 @@ import org.springframework.jdbc.core.RowMapper;
 import org.springframework.jdbc.core.namedparam.MapSqlParameterSource;
 import org.springframework.jdbc.core.namedparam.NamedParameterJdbcTemplate;
 
-import java.util.*;
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.HashSet;
+import java.util.List;
+import java.util.Optional;
+import java.util.Set;
 
-import static org.mockito.Mockito.*;
+import static org.mockito.Mockito.any;
+import static org.mockito.Mockito.anyString;
+import static org.mockito.Mockito.doNothing;
+import static org.mockito.Mockito.doReturn;
+import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.never;
+import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.when;
 
 @RunWith(MockitoJUnitRunner.class)
 public class PostServiceImplTest {
@@ -84,8 +117,6 @@ public class PostServiceImplTest {
   @Mock
   private PostRepository postRepositoryMock;
   @Mock
-  private PostViewRepository postViewRepositoryMock;
-  @Mock
   private PostGradeRepository postGradeRepositoryMock;
   @Mock
   private PostSiteRepository postSiteRepositoryMock;
@@ -94,13 +125,7 @@ public class PostServiceImplTest {
   @Mock
   private ProgrammeRepository programmeRepositoryMock;
   @Mock
-  private SpecialtyRepository specialtyRepositoryMock;
-  @Mock
-  private PlacementRepository placementRepositoryMock;
-  @Mock
   private PostMapper postMapperMock;
-  @Mock
-  private PostViewMapper postViewMapperMock;
   @Mock
   private SqlQuerySupplier sqlQuerySupplierMock;
   @Mock
@@ -110,15 +135,9 @@ public class PostServiceImplTest {
   @Mock
   private Post postMock1, postMock2, postSaveMock1, postSaveMock2;
   @Mock
-  private PostView postViewMock1;
-  @Mock
   private Pageable pageableMock;
   @Captor
   private ArgumentCaptor<Set<PostSpecialty>> postSpecialtyArgumentCaptor;
-  @Mock
-  private PostViewDecorator postViewDecorator;
-  @Mock
-  private NationalPostNumberServiceImpl nationalPostNumberServiceMock;
   @Mock
   private NamedParameterJdbcTemplate namedParameterJdbcTemplateMock;
   @Mock
@@ -207,18 +226,9 @@ public class PostServiceImplTest {
 
   }
 
-  private PostFunding createPostFunding(Long id) {
-    PostFunding postFunding = new PostFunding();
-
-    postFunding.setId(id);
-
-    return postFunding;
-  }
-
   @Test
   public void findAllShouldRetrieveAllInstances() {
     String query = "PostQuery";
-    List<PostView> posts = Lists.newArrayList(postViewMock1);
     List<PostViewDTO> mappedPosts = Lists.newArrayList(postViewDTOMock1);
     when(permissionServiceMock.isUserTrustAdmin()).thenReturn(false);
     when(sqlQuerySupplierMock.getQuery(SqlQuerySupplier.POST_VIEW)).thenReturn(query);
@@ -408,7 +418,6 @@ public class PostServiceImplTest {
     Set<PostSpecialtyDTO> expectedSpecialties = Sets.newHashSet(newPostSpecialtyDTO);
     expectedDTO.id(postDTOToSend.getId()).intrepidId(postInRepository.getIntrepidId()).specialties(expectedSpecialties);
     List<PostDTO> transformedPosts = Lists.newArrayList(expectedDTO);
-    Set<Long> specialtyIds = Sets.newHashSet(2L);
     when(postRepositoryMock.findPostByIntrepidIdIn(Sets.newHashSet(intrepidIds))).thenReturn(postsFromRepository);
     when(postMapperMock.postsToPostDTOs(savedPosts)).thenReturn(transformedPosts);
     List<PostDTO> result = testObj.patchPostSpecialties(Lists.newArrayList(postDTOToSend));
@@ -428,41 +437,6 @@ public class PostServiceImplTest {
     Assert.assertSame(transformedPosts, result);
     Assert.assertEquals(expectedDTO, result.get(0));
     Assert.assertEquals(expectedSpecialties, result.get(0).getSpecialties());
-  }
-
-  @Test
-  public void patchPostPlacements() {
-    List<Long> postIds = Lists.newArrayList(1L);
-    List<String> intrepidIds = Lists.newArrayList("intrepid1");
-    PlacementDTO placementDTO = new PlacementDTO();
-    placementDTO.setId(1L);
-    placementDTO.setIntrepidId("placement intrepid id");
-    Placement placement = new Placement();
-    placement.setId(1L);
-    placement.setIntrepidId("placement intrepid id");
-    PostDTO sendPostData = new PostDTO();
-    sendPostData.id(postIds.get(0)).intrepidId(intrepidIds.get(0)).placementHistory(Sets.newHashSet(placementDTO));
-    Post currentPost = new Post();
-    currentPost.setId(postIds.get(0));
-    currentPost.setIntrepidId(intrepidIds.get(0));
-    HashSet<Post> postsFromRepository = Sets.newHashSet(currentPost);
-    List<Post> savedPosts = Lists.newArrayList(currentPost);
-    PostDTO expectedDTO = new PostDTO();
-    expectedDTO.id(sendPostData.getId()).intrepidId(currentPost.getIntrepidId()).placementHistory(Sets.newHashSet(placementDTO));
-    List<PostDTO> transformedPosts = Lists.newArrayList(expectedDTO);
-    Set<String> placementIds = Sets.newHashSet("placement intrepid id");
-    when(postRepositoryMock.findPostByIntrepidIdIn(Sets.newHashSet(intrepidIds))).thenReturn(postsFromRepository);
-    when(placementRepositoryMock.findByIntrepidIdIn(placementIds)).thenReturn(Sets.newHashSet(placement));
-    when(postRepositoryMock.saveAll(Lists.newArrayList(currentPost))).thenReturn(savedPosts);
-    when(postMapperMock.postsToPostDTOs(savedPosts)).thenReturn(transformedPosts);
-    List<PostDTO> result = testObj.patchPostPlacements(Lists.newArrayList(sendPostData));
-    verify(postRepositoryMock).findPostByIntrepidIdIn(Sets.newHashSet(intrepidIds));
-    verify(placementRepositoryMock).findByIntrepidIdIn(placementIds);
-    verify(postRepositoryMock).saveAll(Lists.newArrayList(currentPost));
-    verify(postMapperMock).postsToPostDTOs(savedPosts);
-    Assert.assertSame(transformedPosts, result);
-    Assert.assertEquals(expectedDTO, result.get(0));
-    Assert.assertEquals(Sets.newHashSet(placementDTO), result.get(0).getPlacementHistory());
   }
 
   @Test
@@ -525,7 +499,7 @@ public class PostServiceImplTest {
   }
 
   @Test
-  public void fundingTypeShouldExistInWhereClauseWhenFilteredByIt(){
+  public void fundingTypeShouldExistInWhereClauseWhenFilteredByIt() {
     final String SEARCH_STRING = StringUtils.EMPTY;
     final List<ColumnFilter> COLUMN_FILTERS = new ArrayList<>();
     List<Object> columnFilterValues = new ArrayList<>();
