@@ -46,7 +46,7 @@ public class Specialty implements Serializable {
   @Column(name = "specialtyCode")
   private String specialtyCode;
 
-  @ElementCollection(targetClass = SpecialtyType.class, fetch = FetchType.EAGER)
+  @ElementCollection(targetClass = SpecialtyType.class, fetch = FetchType.LAZY)
   @CollectionTable(name = "SpecialtyTypes", joinColumns = {@JoinColumn(name = "specialtyId")})
   @Column(name = "specialtyType")
   @Enumerated(EnumType.STRING)
@@ -64,6 +64,9 @@ public class Specialty implements Serializable {
 
   @OneToMany(mappedBy = "specialty", cascade = CascadeType.ALL, orphanRemoval=true)
   private Set<PostSpecialty> posts = new HashSet<>();
+
+  @OneToMany(mappedBy = "specialty", fetch = FetchType.LAZY)
+  private Set<PlacementSpecialty> placementSpecialty;
 
   public Long getId() {
     return id;
@@ -180,24 +183,31 @@ public class Specialty implements Serializable {
     this.posts = posts;
   }
 
+  public Set<PlacementSpecialty> getPlacementSpecialty() {
+    return placementSpecialty;
+  }
+
+  public void setPlacementSpecialty(Set<PlacementSpecialty> placementSpecialty) {
+    this.placementSpecialty = placementSpecialty;
+  }
+
   @Override
   public boolean equals(Object o) {
     if (this == o) return true;
     if (o == null || getClass() != o.getClass()) return false;
     Specialty specialty = (Specialty) o;
-    return Objects.equals(id, specialty.id) &&
-        Objects.equals(intrepidId, specialty.intrepidId) &&
-        status == specialty.status &&
-        Objects.equals(college, specialty.college) &&
-        Objects.equals(specialtyCode, specialty.specialtyCode) &&
-        Objects.equals(specialtyTypes, specialty.specialtyTypes) &&
-        Objects.equals(specialtyGroup, specialty.specialtyGroup) &&
-        Objects.equals(name, specialty.name) &&
-        Objects.equals(curricula, specialty.curricula);
+    return Objects.equals(id, specialty.id);
   }
 
   @Override
   public int hashCode() {
-    return Objects.hash(id, intrepidId, status, college, specialtyCode, specialtyTypes, specialtyGroup, name, curricula);
+    return Objects.hash(id);
+  }
+
+  @Override
+  public String toString() {
+    return "Specialty{" +
+        "id=" + id +
+        '}';
   }
 }

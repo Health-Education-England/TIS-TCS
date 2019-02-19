@@ -13,6 +13,7 @@ import com.transformuk.hee.tis.tcs.api.enumeration.FundingType;
 import com.transformuk.hee.tis.tcs.api.enumeration.PostGradeType;
 import com.transformuk.hee.tis.tcs.api.enumeration.PostSiteType;
 import com.transformuk.hee.tis.tcs.api.enumeration.PostSpecialtyType;
+import com.transformuk.hee.tis.tcs.service.api.decorator.PostViewDecorator;
 import com.transformuk.hee.tis.tcs.service.api.util.BasicPage;
 import com.transformuk.hee.tis.tcs.service.exception.AccessUnauthorisedException;
 import com.transformuk.hee.tis.tcs.service.model.ColumnFilter;
@@ -148,6 +149,10 @@ public class PostServiceImplTest {
   private PostFundingRepository postFundingRepositoryMock;
   @Captor
   private ArgumentCaptor<Set<PostFunding>> postFundingCaptor;
+  @Mock
+  private NationalPostNumberServiceImpl nationalPostNumberServiceMock;
+  @Mock
+  private PostViewDecorator postViewDecoratorMock;
 
   @Test
   public void saveShouldSavePost() {
@@ -244,11 +249,13 @@ public class PostServiceImplTest {
 
   @Test
   public void findOneShouldRetrieveOneInstanceById() {
-    when(postRepositoryMock.findById(1L)).thenReturn(Optional.of(postMock1));
+    when(postRepositoryMock.findPostByIdWithJoinFetch(1L)).thenReturn(Optional.of(postMock1));
     when(postMapperMock.postToPostDTO(postMock1)).thenReturn(postDTOMock1);
+
     PostDTO result = testObj.findOne(1L);
     Assert.assertEquals(postDTOMock1, result);
-    verify(postRepositoryMock).findById(1L);
+
+    verify(postRepositoryMock).findPostByIdWithJoinFetch(1L);
     verify(postMapperMock).postToPostDTO(postMock1);
   }
 

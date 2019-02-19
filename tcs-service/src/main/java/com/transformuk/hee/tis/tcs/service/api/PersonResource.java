@@ -76,6 +76,7 @@ import static com.transformuk.hee.tis.tcs.service.api.util.StringUtil.sanitize;
 public class PersonResource {
 
   private static final String ENTITY_NAME = "person";
+  private static final String PLACEHOLDER_ROLE_NAME = "Placeholder";
   private final Logger log = LoggerFactory.getLogger(PersonResource.class);
 
   @Value("${enable.es.search}")
@@ -417,8 +418,13 @@ public class PersonResource {
     log.debug("REST request to get a page of Placements");
     personService.canLoggedInUserViewOrAmend(id);
 
-    List<PlacementSummaryDTO> placementForTrainee = placementService.getPlacementForTrainee(id);
-    return ResponseUtil.wrapOrNotFound(Optional.ofNullable(placementForTrainee != null ? placementSummaryDecorator.decorate(placementForTrainee) : null));
+    PersonDTO trainee = personService.findOne(id);
+    if(trainee != null) {
+      boolean limitResults = StringUtils.containsIgnoreCase(trainee.getRole(), PLACEHOLDER_ROLE_NAME);
+      List<PlacementSummaryDTO> placementForTrainee = placementService.getPlacementForTrainee(id, limitResults);
+      return ResponseUtil.wrapOrNotFound(Optional.ofNullable(placementForTrainee != null ? placementSummaryDecorator.decorate(placementForTrainee) : null));
+    }
+    return ResponseUtil.wrapOrNotFound(Optional.empty());
   }
 
 

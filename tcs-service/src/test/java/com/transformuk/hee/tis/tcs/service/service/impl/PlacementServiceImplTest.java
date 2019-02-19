@@ -16,15 +16,20 @@ import org.mockito.Captor;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.MockitoJUnitRunner;
+import org.springframework.jdbc.core.namedparam.NamedParameterJdbcTemplate;
 
-import javax.persistence.EntityManager;
 import java.text.SimpleDateFormat;
 import java.time.LocalDate;
 import java.util.Date;
 import java.util.List;
+import java.util.Map;
 import java.util.Optional;
+import java.util.stream.IntStream;
+import java.util.stream.LongStream;
+import java.util.stream.StreamSupport;
 
-import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.anyMap;
+import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.doNothing;
 import static org.mockito.Mockito.when;
 
@@ -44,13 +49,15 @@ public class PlacementServiceImplTest {
   @Mock
   private PlacementDTO placementDTOMock;
   @Mock
-  private javax.persistence.Query queryMock;
-  @Mock
   private SqlQuerySupplier sqlQuerySupplierMock;
   @Mock
-  private EntityManager entityManagerMock;
+  private NamedParameterJdbcTemplate namedParameterJdbcTemplateMock;
   @Captor
   private ArgumentCaptor<LocalDate> toDateCaptor;
+  @Captor
+  private ArgumentCaptor<Map<String, Object>> mapArgumentCaptor;
+  @Captor
+  private ArgumentCaptor<PlacementRowMapper> placementRowMapperArgumentCaptor;
 
   private static final Long number = new Long(1);
 
@@ -70,7 +77,7 @@ public class PlacementServiceImplTest {
     when(placementRepositoryMock.findById(PLACEMENT_ID)).thenReturn(Optional.of(placementMock));
     doNothing().when(placementMock).setDateTo(toDateCaptor.capture());
     when(placementRepositoryMock.saveAndFlush(placementMock)).thenReturn(placementMock);
-    when(placementMapperMock.placementToPlacementDTO(placementMock, any())).thenReturn(placementDTOMock);
+    when(placementMapperMock.placementToPlacementDTO(eq(placementMock), anyMap())).thenReturn(placementDTOMock);
 
     PlacementDTO result = testObj.closePlacement(PLACEMENT_ID);
 
@@ -78,7 +85,6 @@ public class PlacementServiceImplTest {
 
     LocalDate toDateCapture = toDateCaptor.getValue();
     Assert.assertEquals(LocalDate.now().minusDays(1), toDateCapture);
-
   }
   @Test
   public void shouldReturnPlacementsForATraineeInOrder () throws Exception {
@@ -125,17 +131,22 @@ public class PlacementServiceImplTest {
     String sqlQueryMock = "SELECT * FROM PLACEMENT WHERE traineeId = :traineeId";
 
     when(sqlQuerySupplierMock.getQuery(SqlQuerySupplier.TRAINEE_PLACEMENT_SUMMARY)).thenReturn(sqlQueryMock);
-    when(entityManagerMock.createNativeQuery(sqlQueryMock,PlacementServiceImpl.PLACEMENTS_SUMMARY_MAPPER)).thenReturn(queryMock);
-    when(queryMock.setParameter("traineeId",traineeId)).thenReturn(queryMock);
-    when(queryMock.getResultList()).thenReturn(placements);
+    when(namedParameterJdbcTemplateMock.query(eq(sqlQueryMock), mapArgumentCaptor.capture(),
+        placementRowMapperArgumentCaptor.capture())).thenReturn(placements);
 
-    List<PlacementSummaryDTO> result = testObj.getPlacementForTrainee(traineeId);
+    List<PlacementSummaryDTO> result = testObj.getPlacementForTrainee(traineeId, false);
 
     int sizeOfResult = result.size();
-    Assert.assertEquals(true, result.get(0).getDateTo().after(result.get(1).getDateTo()));
-    Assert.assertEquals(true, result.get(1).getDateTo().after(result.get(2).getDateTo()));
+    Assert.assertTrue(result.get(0).getDateTo().after(result.get(1).getDateTo()));
+    Assert.assertTrue(result.get(1).getDateTo().after(result.get(2).getDateTo()));
     Assert.assertNull(result.get(sizeOfResult-2).getDateTo());
     Assert.assertNull(result.get(sizeOfResult-1).getDateTo());
+
+    Map<String, Object> capturedParams = mapArgumentCaptor.getValue();
+    Assert.assertTrue(capturedParams.containsKey("traineeId"));
+
+    PlacementRowMapper capturedRowMapper = placementRowMapperArgumentCaptor.getValue();
+    Assert.assertNotNull(capturedRowMapper);
   }
 
   @Test
@@ -172,7 +183,7 @@ public class PlacementServiceImplTest {
     List<PlacementSummaryDTO> placements = Lists.newArrayList(placement_second_latest,placement_earliest,placement_null,
         placement_latest,placement_null_2);
 
-    for(int i = 6; i < 2000; i++){
+    for(int i = 6; i < 1000; i++){
       PlacementSummaryDTO placement = new PlacementSummaryDTO();
       placement.setDateTo(bulk_date);
       placement.setPlacementId(Long.valueOf(i));
@@ -183,17 +194,41 @@ public class PlacementServiceImplTest {
     String sqlQueryMock = "SELECT * FROM PLACEMENT WHERE p.postId = :postId";
 
     when(sqlQuerySupplierMock.getQuery(SqlQuerySupplier.POST_PLACEMENT_SUMMARY)).thenReturn(sqlQueryMock);
-    when(entityManagerMock.createNativeQuery(sqlQueryMock,PlacementServiceImpl.PLACEMENTS_SUMMARY_MAPPER)).thenReturn(queryMock);
-    when(queryMock.setParameter("postId",postId)).thenReturn(queryMock);
-    when(queryMock.getResultList()).thenReturn(placements);
+    when(namedParameterJdbcTemplateMock.query(eq(sqlQueryMock), mapArgumentCaptor.capture(),
+        placementRowMapperArgumentCaptor.capture())).thenReturn(placements);
 
     List<PlacementSummaryDTO> result = testObj.getPlacementForPost(postId);
 
     int sizeOfResult = result.size();
-    Assert.assertEquals(true, result.get(0).getDateTo().after(result.get(1).getDateTo()));
-    Assert.assertEquals(true, result.get(1).getDateTo().after(result.get(2).getDateTo()));
+    Assert.assertTrue(result.get(0).getDateTo().after(result.get(1).getDateTo()));
+    Assert.assertTrue(result.get(1).getDateTo().after(result.get(2).getDateTo()));
     Assert.assertNull(result.get(sizeOfResult-2).getDateTo());
     Assert.assertNull(result.get(sizeOfResult-1).getDateTo());
+
+    Map<String, Object> capturedParams = mapArgumentCaptor.getValue();
+    Assert.assertTrue(capturedParams.containsKey("postId"));
+
+    PlacementRowMapper capturedRowMapper = placementRowMapperArgumentCaptor.getValue();
+    Assert.assertNotNull(capturedRowMapper);
+  }
+
+  @Test
+  public void placementForPostShouldLimitPostsIfMoreThan1k() {
+    long postId = 1L;
+    String sqlQueryMock = "SELECT * FROM PLACEMENT WHERE p.postId = :postId";
+    List<PlacementSummaryDTO> queryResult = Lists.newArrayList();
+    for(int i = 0; i < 5000; i++) {
+      PlacementSummaryDTO placementSummaryDTO = new PlacementSummaryDTO();
+      queryResult.add(placementSummaryDTO);
+    }
+
+    when(sqlQuerySupplierMock.getQuery(SqlQuerySupplier.POST_PLACEMENT_SUMMARY)).thenReturn(sqlQueryMock);
+    when(namedParameterJdbcTemplateMock.query(eq(sqlQueryMock), mapArgumentCaptor.capture(),
+        placementRowMapperArgumentCaptor.capture())).thenReturn(queryResult);
+
+    List<PlacementSummaryDTO> result = testObj.getPlacementForPost(postId);
+
+    Assert.assertTrue(result.size() <= 1000);
   }
 
 }

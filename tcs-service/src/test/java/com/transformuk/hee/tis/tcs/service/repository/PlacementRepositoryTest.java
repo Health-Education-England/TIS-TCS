@@ -9,6 +9,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.test.context.jdbc.Sql;
 import org.springframework.test.context.junit4.SpringRunner;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.time.LocalDate;
 import java.util.Set;
@@ -20,6 +21,7 @@ public class PlacementRepositoryTest {
   @Autowired
   private PlacementRepository testObj;
 
+  @Transactional
   @Test
   @Sql(scripts = "/scripts/placementProgrammeSpecialty.sql")
   @Sql(scripts = "/scripts/deletePlacementProgrammeSpecialty.sql", executionPhase = Sql.ExecutionPhase.AFTER_TEST_METHOD)

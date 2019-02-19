@@ -326,33 +326,6 @@ public class PostResourceIntTest {
         .andExpect(jsonPath("$.fieldErrors[0].field").value("id"));
   }
 
-  @Test
-  @Transactional
-  public void shouldNotAllowTwoPrimarySpecialties() throws Exception {
-    post = createEntity();
-    post.setIntrepidId(POST_INTREPID_ID);
-    postRepository.saveAndFlush(post);
-    // Update the post
-    Post updatedPost = postRepository.findById(post.getId()).orElse(null);
-    Specialty firstSpeciality = createSpecialty();
-    specialtyRepository.saveAndFlush(firstSpeciality);
-    Specialty secondSpeciality = createSpecialty();
-    specialtyRepository.saveAndFlush(secondSpeciality);
-    PostSpecialty firstPostSpecialty = createPostSpecialty(firstSpeciality, PostSpecialtyType.PRIMARY, updatedPost);
-    PostSpecialty secondPostSpecialty = createPostSpecialty(secondSpeciality, PostSpecialtyType.PRIMARY, updatedPost);
-    updatedPost.setSpecialties(Sets.newHashSet(firstPostSpecialty, secondPostSpecialty));
-    PostDTO postDTO = postMapper.postToPostDTO(updatedPost);
-    //when & then
-    restPostMockMvc.perform(put("/api/posts")
-        .contentType(TestUtil.APPLICATION_JSON_UTF8)
-        .content(TestUtil.convertObjectToJsonBytes(postDTO)))
-        .andExpect(status().isBadRequest())
-        .andExpect(jsonPath("$.message").value("error.validation"))
-        .andExpect(jsonPath("$.fieldErrors[0].field").value("specialties"))
-        .andExpect(jsonPath("$.fieldErrors[0].message").value(StringContains.
-            containsString("Only one Specialty of type PRIMARY allowed")));
-  }
-
   @Ignore
   @Test
   @Transactional
@@ -741,12 +714,6 @@ public class PostResourceIntTest {
 
   @Test
   @Transactional
-  public void equalsVerifier() throws Exception {
-    TestUtil.equalsVerifier(Post.class);
-  }
-
-  @Test
-  @Transactional
   public void bulkCreateShouldSucceedWhenDataIsValid() throws Exception {
     PostDTO postDTO = new PostDTO()
         .nationalPostNumber(UPDATED_NATIONAL_POST_NUMBER)
@@ -1107,65 +1074,6 @@ public class PostResourceIntTest {
     assertThat(postList).hasSize(expectedDatabaseSizeAfterBulkUpdate);
   }
 
-  @Test
-  @Transactional
-  public void bulkPatchPostPlacementsShouldSucceedWhenDataIsValid() throws Exception {
-    PostDTO postDTO = new PostDTO()
-        .intrepidId(DEFAULT_INTREPID_ID);
-    Placement newPlacement = new Placement();
-    newPlacement.setGradeAbbreviation("12L");
-    newPlacement.setSiteCode("1L");
-    newPlacement.setPlacementType("OOPT");
-    newPlacement.setIntrepidId("12345");
-    em.persist(newPlacement);
-    PlacementDTO placementDTO = new PlacementDTO();
-    placementDTO.setId(newPlacement.getId());
-    placementDTO.setIntrepidId("12345");
-    postDTO.setPlacementHistory(Sets.newHashSet(placementDTO));
-    int expectedDatabaseSizeAfterBulkUpdate = postRepository.findAll().size();
-    List<PostDTO> payload = Lists.newArrayList(postDTO);
-    restPostMockMvc.perform(patch("/api/bulk-patch-post-placements")
-        .contentType(TestUtil.APPLICATION_JSON_UTF8)
-        .content(TestUtil.convertObjectToJsonBytes(payload)))
-        .andExpect(status().isOk())
-        .andExpect(jsonPath("$").isArray())
-        .andExpect(jsonPath("$.[*].placementHistory.[*].id").isArray())
-        .andExpect(jsonPath("$.[*].placementHistory.[*].id").isNotEmpty())
-        .andExpect(jsonPath("$.[*].placementHistory.[*].id").value(hasItem(newPlacement.getId().intValue())));
-    // Validate that both Post are still in the database
-    List<Post> postList = postRepository.findAll();
-    assertThat(postList).hasSize(expectedDatabaseSizeAfterBulkUpdate);
-  }
-
-  @Test
-  @Transactional
-  public void bulkPatchPostPlacementsShouldFailWhenNoDataIsSent() throws Exception {
-    int expectedDatabaseSizeAfterBulkUpdate = postRepository.findAll().size();
-    List<PostDTO> payload = Lists.newArrayList();
-    restPostMockMvc.perform(patch("/api/bulk-patch-post-placements")
-        .contentType(TestUtil.APPLICATION_JSON_UTF8)
-        .content(TestUtil.convertObjectToJsonBytes(payload)))
-        .andExpect(status().isBadRequest());
-    // Validate that both Post are still in the database
-    List<Post> postList = postRepository.findAll();
-    assertThat(postList).hasSize(expectedDatabaseSizeAfterBulkUpdate);
-  }
-
-  @Test
-  @Transactional
-  public void bulkPatchPostPlacementsShouldFailWhenDataIsSentWithNoId() throws Exception {
-    int expectedDatabaseSizeAfterBulkUpdate = postRepository.findAll().size();
-    PostDTO postDTO = new PostDTO();
-    postDTO.setTrainingDescription("RANDOM DATA");
-    List<PostDTO> payload = Lists.newArrayList(postDTO);
-    restPostMockMvc.perform(patch("/api/bulk-patch-post-placements")
-        .contentType(TestUtil.APPLICATION_JSON_UTF8)
-        .content(TestUtil.convertObjectToJsonBytes(payload)))
-        .andExpect(status().isBadRequest());
-    // Validate that both Post are still in the database
-    List<Post> postList = postRepository.findAll();
-    assertThat(postList).hasSize(expectedDatabaseSizeAfterBulkUpdate);
-  }
 
   @Test
   @Transactional

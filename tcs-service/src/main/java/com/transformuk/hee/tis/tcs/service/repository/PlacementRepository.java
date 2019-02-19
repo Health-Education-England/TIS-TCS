@@ -128,7 +128,7 @@ public interface PlacementRepository extends JpaRepository<Placement, Long> {
       "AND pl.dateTo IS NOT NULL " +
       "AND pl.dateTo <= :dateTo ")
   Set<Placement> findPlacementsByProgrammeIdAndSpecialtyId(@Param("programmeId") Long programmeId,
-                                                            @Param("specialtyId")Long specialtyId,
-                                                            @Param("dateFrom") LocalDate dateFrom,
-                                                            @Param("dateTo") LocalDate dateTo);
+                                                           @Param("specialtyId") Long specialtyId,
+                                                           @Param("dateFrom") LocalDate dateFrom,
+                                                           @Param("dateTo") LocalDate dateTo);
 }

@@ -55,8 +55,6 @@ import org.springframework.jdbc.core.namedparam.NamedParameterJdbcTemplate;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
-import javax.persistence.EntityManager;
-import javax.persistence.Query;
 import java.io.IOException;
 import java.sql.ResultSet;
 import java.sql.SQLException;
@@ -71,6 +69,7 @@ import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
+import java.util.Objects;
 import java.util.Optional;
 import java.util.Set;
 import java.util.stream.Collectors;
@@ -100,8 +99,6 @@ public class PlacementServiceImpl implements PlacementService {
   private PlacementDetailsMapper placementDetailsMapper;
   @Autowired
   private SpecialtyRepository specialtyRepository;
-  @Autowired
-  private EntityManager em;
   @Autowired
   private SqlQuerySupplier sqlQuerySupplier;
   @Autowired
@@ -480,22 +477,25 @@ public class PlacementServiceImpl implements PlacementService {
 
   @Transactional(readOnly = true)
   @Override
-  public List<PlacementSummaryDTO> getPlacementForTrainee(final Long traineeId) {
+  public List<PlacementSummaryDTO> getPlacementForTrainee(final Long traineeId, boolean limitResults) {
     final String query = sqlQuerySupplier.getQuery(SqlQuerySupplier.TRAINEE_PLACEMENT_SUMMARY);
     List<PlacementSummaryDTO> resultList;
 
-    try {
-      final Query traineePlacementsQuery = em.createNativeQuery(query, PLACEMENTS_SUMMARY_MAPPER)
-          .setParameter("traineeId", traineeId);
-      // TODO: uncomment this when changes to the FE adds a specialty on creation
-//        .setParameter("specialtyType", PostSpecialtyType.PRIMARY.name());
-      resultList = traineePlacementsQuery.getResultList();
-      resultList.forEach(p -> p.setPlacementStatus(getPlacementStatus(p.getDateFrom(), p.getDateTo())));
+    Map<String, Object> params = Maps.newHashMap();
+    params.put("traineeId", traineeId);
+    resultList = namedParameterJdbcTemplate.query(query, params, new PlacementRowMapper());
+    resultList.forEach(p -> p.setPlacementStatus(getPlacementStatus(p.getDateFrom(), p.getDateTo())));
+    resultList = filterPlacements(resultList);
 
-      resultList = filterPlacements(resultList);
-    } finally {
-      em.close();
+    if (limitResults && CollectionUtils.isNotEmpty(resultList)) {
+      long now = new Date().getTime();
+      resultList = resultList.stream()
+          .filter(Objects::nonNull)
+          .filter(p -> p.getDateTo() != null)
+          .filter(p -> now < p.getDateTo().getTime())
+          .collect(Collectors.toList());
     }
+
     return resultList;
   }
 
@@ -504,16 +504,18 @@ public class PlacementServiceImpl implements PlacementService {
   public List<PlacementSummaryDTO> getPlacementForPost(final Long postId) {
     final String query = sqlQuerySupplier.getQuery(SqlQuerySupplier.POST_PLACEMENT_SUMMARY);
     List<PlacementSummaryDTO> resultList;
-    try {
-      Map<String, Object> params = Maps.newHashMap();
-      params.put("postId", postId);
-      PlacementRowMapper placementRowMapper = new PlacementRowMapper();
-      resultList = namedParameterJdbcTemplate.query(query, params, placementRowMapper);
-      resultList.forEach(p -> p.setPlacementStatus(getPlacementStatus(p.getDateFrom(), p.getDateTo())));
-      resultList = filterPlacements(resultList);
-    } finally {
-      em.close();
+
+    Map<String, Object> params = Maps.newHashMap();
+    params.put("postId", postId);
+    PlacementRowMapper placementRowMapper = new PlacementRowMapper();
+    resultList = namedParameterJdbcTemplate.query(query, params, placementRowMapper);
+    resultList.forEach(p -> p.setPlacementStatus(getPlacementStatus(p.getDateFrom(), p.getDateTo())));
+    resultList = filterPlacements(resultList);
+
+    if (CollectionUtils.isNotEmpty(resultList) && resultList.size() > 1000) {
+      resultList = resultList.subList(0, 1000);
     }
+
     return resultList;
   }
 
@@ -549,7 +551,7 @@ public class PlacementServiceImpl implements PlacementService {
    * @return List of converted PlacementDTOs
    */
   private List<PlacementDTO> convertPlacements(List<Placement> placements) {
-    if(CollectionUtils.isNotEmpty(placements)) {
+    if (CollectionUtils.isNotEmpty(placements)) {
       Set<Long> placementIds = placements.stream().map(Placement::getId).collect(Collectors.toSet());
       String query = sqlQuerySupplier.getQuery(SqlQuerySupplier.PLACEMENT_SUPERVISOR);
       HashMap<String, Object> params = Maps.newHashMap();
@@ -588,13 +590,15 @@ public class PlacementServiceImpl implements PlacementService {
       }
     }
 
-    final List<PlacementSummaryDTO> placementSummaryDTOS = Lists.newArrayList(idsToPlacementSummary.values());
+    List<PlacementSummaryDTO> placementSummaryDTOS = Lists.newArrayList(idsToPlacementSummary.values());
+
     placementSummaryDTOS.sort(new Comparator<PlacementSummaryDTO>() {
       @Override
       public int compare(final PlacementSummaryDTO o1, final PlacementSummaryDTO o2) {
         return ObjectUtils.compare(o2.getDateTo(), o1.getDateTo());
       }
     });
+
     return placementSummaryDTOS;
   }
 
