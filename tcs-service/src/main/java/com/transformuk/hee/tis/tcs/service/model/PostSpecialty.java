@@ -4,6 +4,7 @@ import com.transformuk.hee.tis.tcs.api.enumeration.PostSpecialtyType;
 
 import javax.persistence.*;
 import java.io.Serializable;
+import java.util.Objects;
 
 @Entity
 @Table(name = "PostSpecialty")
@@ -14,7 +15,7 @@ public class PostSpecialty implements Serializable {
   @Column(name = "id")
   private Long id;
 
-  @ManyToOne(targetEntity = Post.class, fetch = FetchType.EAGER)
+  @ManyToOne(targetEntity = Post.class, fetch = FetchType.LAZY)
   @JoinColumn(name = "postId")
   private Post post;
 
@@ -62,29 +63,19 @@ public class PostSpecialty implements Serializable {
   public boolean equals(Object o) {
     if (this == o) return true;
     if (o == null || getClass() != o.getClass()) return false;
-
     PostSpecialty that = (PostSpecialty) o;
-
-    if (post != null ? !post.equals(that.post) : that.post != null) return false;
-    if (specialty != null ? !specialty.equals(that.specialty) : that.specialty != null) return false;
-    return postSpecialtyType == that.postSpecialtyType;
+    return Objects.equals(id, that.id);
   }
 
   @Override
   public int hashCode() {
-    int result = post != null ? post.hashCode() : 0;
-    result = 31 * result + (specialty != null ? specialty.hashCode() : 0);
-    result = 31 * result + (postSpecialtyType != null ? postSpecialtyType.hashCode() : 0);
-    return result;
+    return Objects.hash(id);
   }
 
   @Override
   public String toString() {
     return "PostSpecialty{" +
         "id=" + id +
-        ", post=" + post +
-        ", specialty=" + specialty +
-        ", postSpecialtyType=" + postSpecialtyType +
         '}';
   }
 }

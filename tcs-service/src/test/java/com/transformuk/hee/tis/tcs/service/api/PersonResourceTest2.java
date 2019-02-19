@@ -235,7 +235,7 @@ public class PersonResourceTest2 {
             .contentType(TestUtil.APPLICATION_JSON_UTF8))
         .andExpect(status().isUnauthorized())
         .andExpect(jsonPath("$.message").value("error.accessDenied"));
-    verify(placementServiceMock, never()).getPlacementForTrainee(personId);
+    verify(placementServiceMock, never()).getPlacementForTrainee(any(), any());
   }
 
   @Test

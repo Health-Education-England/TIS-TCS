@@ -55,10 +55,7 @@ import org.springframework.jdbc.core.namedparam.NamedParameterJdbcTemplate;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
-import javax.persistence.EntityManager;
-import javax.persistence.Query;
 import java.io.IOException;
-import java.math.BigInteger;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.time.LocalDate;
@@ -68,9 +65,11 @@ import java.util.Collection;
 import java.util.Collections;
 import java.util.Comparator;
 import java.util.Date;
+import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
+import java.util.Objects;
 import java.util.Optional;
 import java.util.Set;
 import java.util.stream.Collectors;
@@ -88,6 +87,7 @@ import static com.transformuk.hee.tis.tcs.service.service.impl.SpecificationFact
 public class PlacementServiceImpl implements PlacementService {
 
   static final String PLACEMENTS_SUMMARY_MAPPER = "PlacementsSummary";
+  private static final String PLACEHOLDER_ROLE_NAME = "Placeholder";
   private final Logger log = LoggerFactory.getLogger(PlacementServiceImpl.class);
 
   @Autowired
@@ -100,8 +100,6 @@ public class PlacementServiceImpl implements PlacementService {
   private PlacementDetailsMapper placementDetailsMapper;
   @Autowired
   private SpecialtyRepository specialtyRepository;
-  @Autowired
-  private EntityManager em;
   @Autowired
   private SqlQuerySupplier sqlQuerySupplier;
   @Autowired
@@ -133,7 +131,7 @@ public class PlacementServiceImpl implements PlacementService {
     log.debug("Request to save Placement : {}", placementDTO);
     Placement placement = placementMapper.placementDTOToPlacement(placementDTO);
     placement = placementRepository.save(placement);
-    return placementMapper.placementToPlacementDTO(placement);
+    return convertPlacementWithSupervisors(placement);
   }
 
   @Override
@@ -221,7 +219,8 @@ public class PlacementServiceImpl implements PlacementService {
     updateStoredCommentsWithChangesOrAdd(placementDetails);
 
     placement.setSpecialties(new HashSet<>());
-    PlacementDTO placementDTO = placementMapper.placementToPlacementDTO(placementRepository.saveAndFlush(placement));
+    Placement savedPlacement = placementRepository.saveAndFlush(placement);
+    PlacementDTO placementDTO = convertPlacementWithSupervisors(savedPlacement);
     applicationEventPublisher.publishEvent(new PlacementSavedEvent(placementDTO));
     return createDetails(placementDetailsDTO);
   }
@@ -242,7 +241,7 @@ public class PlacementServiceImpl implements PlacementService {
 
     placement.setSpecialties(Sets.newHashSet(placementSpecialties));
     Placement savedPlacement = placementRepository.save(placement);
-    PlacementDTO placementDTO = placementMapper.placementToPlacementDTO(savedPlacement);
+    PlacementDTO placementDTO = convertPlacementWithSupervisors(savedPlacement);
     applicationEventPublisher.publishEvent(new PlacementSavedEvent(placementDTO));
     return placementSpecialties;
   }
@@ -258,7 +257,7 @@ public class PlacementServiceImpl implements PlacementService {
     log.debug("Request to save Placements : {}", placementDTO);
     List<Placement> placements = placementMapper.placementDTOsToPlacements(placementDTO);
     placements = placementRepository.saveAll(placements);
-    List<PlacementDTO> placementDTOS = placementMapper.placementsToPlacementDTOs(placements);
+    List<PlacementDTO> placementDTOS = convertPlacements(placements);
 
     placementDTO.stream()
         .map(PlacementSavedEvent::new)
@@ -278,7 +277,7 @@ public class PlacementServiceImpl implements PlacementService {
   public Page<PlacementDTO> findAll(final Pageable pageable) {
     log.debug("Request to get all Placements");
     final Page<Placement> result = placementRepository.findAll(pageable);
-    return result.map(placementMapper::placementToPlacementDTO);
+    return result.map(this::convertPlacementWithSupervisors);
   }
 
   /**
@@ -292,7 +291,7 @@ public class PlacementServiceImpl implements PlacementService {
   public PlacementDTO findOne(final Long id) {
     log.debug("Request to get Placement : {}", id);
     final Placement placement = placementRepository.findById(id).orElse(null);
-    return placementMapper.placementToPlacementDTO(placement);
+    return this.convertPlacementWithSupervisors(placement);
   }
 
   @Override
@@ -312,7 +311,7 @@ public class PlacementServiceImpl implements PlacementService {
 
       query = sqlQuerySupplier.getQuery(SqlQuerySupplier.PLACEMENT_SUPERVISOR);
       MapSqlParameterSource supervisorsParamSource = new MapSqlParameterSource();
-      supervisorsParamSource.addValue("id", id);
+      supervisorsParamSource.addValue("ids", id);
       final List<PlacementSupervisorDTO> supervisors = namedParameterJdbcTemplate.query(query, supervisorsParamSource, new PlacementDetailSupervisorRowMapper(new PersonRepositoryImpl.PersonLiteRowMapper(), personLiteMapper));
       placementDetailsDTO.setSupervisors(Sets.newHashSet(supervisors));
     }
@@ -399,7 +398,7 @@ public class PlacementServiceImpl implements PlacementService {
       }
     }
     final List<Placement> savedPlacements = placementRepository.saveAll(placements);
-    return placementMapper.placementsToPlacementDTOs(savedPlacements);
+    return convertPlacements(savedPlacements);
   }
 
   /**
@@ -474,27 +473,31 @@ public class PlacementServiceImpl implements PlacementService {
       placement.setDateTo(LocalDate.now().minusDays(1));
       placement = placementRepository.saveAndFlush(placement);
     }
-    return placementMapper.placementToPlacementDTO(placement);
+    return convertPlacementWithSupervisors(placement);
   }
 
   @Transactional(readOnly = true)
   @Override
-  public List<PlacementSummaryDTO> getPlacementForTrainee(final Long traineeId) {
+  public List<PlacementSummaryDTO> getPlacementForTrainee(final Long traineeId, String traineeRole) {
     final String query = sqlQuerySupplier.getQuery(SqlQuerySupplier.TRAINEE_PLACEMENT_SUMMARY);
     List<PlacementSummaryDTO> resultList;
 
-    try {
-      final Query traineePlacementsQuery = em.createNativeQuery(query, PLACEMENTS_SUMMARY_MAPPER)
-          .setParameter("traineeId", traineeId);
-      // TODO: uncomment this when changes to the FE adds a specialty on creation
-//        .setParameter("specialtyType", PostSpecialtyType.PRIMARY.name());
-      resultList = traineePlacementsQuery.getResultList();
-      resultList.forEach(p -> p.setPlacementStatus(getPlacementStatus(p.getDateFrom(), p.getDateTo())));
+    Map<String, Object> params = Maps.newHashMap();
+    params.put("traineeId", traineeId);
+    resultList = namedParameterJdbcTemplate.query(query, params, new PlacementRowMapper());
+    resultList.forEach(p -> p.setPlacementStatus(getPlacementStatus(p.getDateFrom(), p.getDateTo())));
+    resultList = filterPlacements(resultList);
 
-      resultList = filterPlacements(resultList);
-    } finally {
-      em.close();
+    if (org.apache.commons.lang3.StringUtils.containsIgnoreCase(traineeRole, PLACEHOLDER_ROLE_NAME)
+        && CollectionUtils.isNotEmpty(resultList)) {
+      long now = new Date().getTime();
+      resultList = resultList.stream()
+          .filter(Objects::nonNull)
+          .filter(p -> p.getDateTo() != null)
+          .filter(p -> now < p.getDateTo().getTime())
+          .collect(Collectors.toList());
     }
+
     return resultList;
   }
 
@@ -503,20 +506,72 @@ public class PlacementServiceImpl implements PlacementService {
   public List<PlacementSummaryDTO> getPlacementForPost(final Long postId) {
     final String query = sqlQuerySupplier.getQuery(SqlQuerySupplier.POST_PLACEMENT_SUMMARY);
     List<PlacementSummaryDTO> resultList;
-    try {
 
+    Map<String, Object> params = Maps.newHashMap();
+    params.put("postId", postId);
+    PlacementRowMapper placementRowMapper = new PlacementRowMapper();
+    resultList = namedParameterJdbcTemplate.query(query, params, placementRowMapper);
+    resultList.forEach(p -> p.setPlacementStatus(getPlacementStatus(p.getDateFrom(), p.getDateTo())));
+    resultList = filterPlacements(resultList);
 
-      final Query postPlacementsQuery = em.createNativeQuery(query, PLACEMENTS_SUMMARY_MAPPER)
-          .setParameter("postId", postId);
-      // TODO: uncomment this when changes to the FE adds a specialty on creation
-//        .setParameter("specialtyType", PostSpecialtyType.PRIMARY.name());
-      resultList = postPlacementsQuery.getResultList();
-      resultList.forEach(p -> p.setPlacementStatus(getPlacementStatus(p.getDateFrom(), p.getDateTo())));
-      resultList = filterPlacements(resultList);
-    } finally {
-      em.close();
+    if (CollectionUtils.isNotEmpty(resultList) && resultList.size() > 1000) {
+      resultList = resultList.subList(0, 1000);
     }
+
     return resultList;
+  }
+
+  /**
+   * Convert a single Placement entity into a PlacementDTO
+   *
+   * @param placement The placement entity to convert
+   * @return the converted PlacementDTO
+   */
+  private PlacementDTO convertPlacementWithSupervisors(Placement placement) {
+    if (placement != null) {
+      String query = sqlQuerySupplier.getQuery(SqlQuerySupplier.PLACEMENT_SUPERVISOR);
+      HashMap<String, Object> params = Maps.newHashMap();
+      params.put("ids", placement.getId());
+      List<PlacementSupervisorDTO> supervisors = namedParameterJdbcTemplate.query(query, params, new PlacementDetailSupervisorRowMapper(new PersonRepositoryImpl.PersonLiteRowMapper(), personLiteMapper));
+      HashMap<Long, List<PlacementSupervisorDTO>> placementToSupervisor = Maps.newHashMap();
+      placementToSupervisor.put(placement.getId(), supervisors);
+      return placementMapper.placementToPlacementDTO(placement, placementToSupervisor);
+    }
+    return null;
+  }
+
+  /**
+   * Convert Placements to DTOs
+   * <p>
+   * This also grabs all the placement supervisors for each placement by doing a single query and converts that data too
+   * <p>
+   * The previous implementation would convert the placements and then do a db call for the supervisor for that placement instance
+   * this caused memory issues as it was creating many temporary objects and calling the database thousands of times for
+   * bucket posts
+   *
+   * @param placements The placements entities we wish to convert
+   * @return List of converted PlacementDTOs
+   */
+  private List<PlacementDTO> convertPlacements(List<Placement> placements) {
+    if (CollectionUtils.isNotEmpty(placements)) {
+      Set<Long> placementIds = placements.stream().map(Placement::getId).collect(Collectors.toSet());
+      String query = sqlQuerySupplier.getQuery(SqlQuerySupplier.PLACEMENT_SUPERVISOR);
+      HashMap<String, Object> params = Maps.newHashMap();
+      params.put("ids", placementIds);
+      List<PlacementSupervisorDTO> supervisors = namedParameterJdbcTemplate.query(query, params, new PlacementDetailSupervisorRowMapper(new PersonRepositoryImpl.PersonLiteRowMapper(), personLiteMapper));
+      Map<Long, List<PlacementSupervisorDTO>> placementToSupervisors = new HashMap<>();
+      for (PlacementSupervisorDTO supervisor : supervisors) {
+        if (!placementToSupervisors.containsKey(supervisor.getPlacementId())) {
+          placementToSupervisors.put(supervisor.getPlacementId(), new ArrayList<>());
+        }
+
+        List<PlacementSupervisorDTO> placementSupervisorDTOS = placementToSupervisors.get(supervisor.getPlacementId());
+        placementSupervisorDTOS.add(supervisor);
+      }
+
+      return placementMapper.placementsToPlacementDTOs(placements, placementToSupervisors);
+    }
+    return Collections.EMPTY_LIST;
   }
 
   /**
@@ -527,23 +582,25 @@ public class PlacementServiceImpl implements PlacementService {
    * @return
    */
   private List<PlacementSummaryDTO> filterPlacements(final List<PlacementSummaryDTO> resultList) {
-    final Map<BigInteger, PlacementSummaryDTO> idsToPlacementSummary = Maps.newHashMap();
+    final Map<Long, PlacementSummaryDTO> idsToPlacementSummary = Maps.newHashMap();
     for (final PlacementSummaryDTO placementSummaryDTO : resultList) {
 
-      final BigInteger placementId = placementSummaryDTO.getPlacementId();
+      final Long placementId = placementSummaryDTO.getPlacementId();
       if (!idsToPlacementSummary.containsKey(placementId) ||
           PostSpecialtyType.PRIMARY.name().equals(placementSummaryDTO.getPlacementSpecialtyType())) {
         idsToPlacementSummary.put(placementId, placementSummaryDTO);
       }
     }
 
-    final List<PlacementSummaryDTO> placementSummaryDTOS = Lists.newArrayList(idsToPlacementSummary.values());
+    List<PlacementSummaryDTO> placementSummaryDTOS = Lists.newArrayList(idsToPlacementSummary.values());
+
     placementSummaryDTOS.sort(new Comparator<PlacementSummaryDTO>() {
       @Override
       public int compare(final PlacementSummaryDTO o1, final PlacementSummaryDTO o2) {
         return ObjectUtils.compare(o2.getDateTo(), o1.getDateTo());
       }
     });
+
     return placementSummaryDTOS;
   }
 

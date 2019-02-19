@@ -8,4 +8,4 @@ left join GdcDetails gdc
   on gdc.id = p.id
 inner join PlacementSupervisor ps
   on ps.personId = p.id
-where ps.placementId = :id
+where ps.placementId in (:ids)

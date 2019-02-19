@@ -114,10 +114,11 @@ public interface PlacementService {
   /**
    * Get all placements by trainee id
    *
-   * @param traineeId the id of the trainee
+   * @param traineeId   the id of the trainee
+   * @param traineeRole the role of the trainee
    * @return
    */
-  List<PlacementSummaryDTO> getPlacementForTrainee(Long traineeId);
+  List<PlacementSummaryDTO> getPlacementForTrainee(Long traineeId, String traineeRole);
 
   /**
    * Get all placements by post id

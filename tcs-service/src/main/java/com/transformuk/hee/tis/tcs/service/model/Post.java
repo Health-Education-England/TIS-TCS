@@ -46,28 +46,28 @@ public class Post implements Serializable {
     private boolean legacy;
     @Column(name = "bypassNPNGeneration")
     private boolean bypassNPNGeneration;
-    @OneToOne(fetch = FetchType.EAGER)
+    @OneToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "oldPostId")
     private Post oldPost;
-    @OneToOne(fetch = FetchType.EAGER)
+    @OneToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "newPostId")
     private Post newPost;
-    @ManyToMany(fetch = FetchType.EAGER)
+    @ManyToMany(fetch = FetchType.LAZY)
     @JoinTable(name = "ProgrammePost",
             joinColumns = @JoinColumn(name = "postId"),
     inverseJoinColumns = @JoinColumn(name = "programmeId")
     )
     private Set<Programme> programmes = new HashSet<>();
     // Entity Site defined in the Reference service
-    @OneToMany(mappedBy = "post", cascade = CascadeType.ALL, fetch = FetchType.EAGER, orphanRemoval=true)
+    @OneToMany(mappedBy = "post", cascade = CascadeType.ALL, fetch = FetchType.LAZY, orphanRemoval=true)
     private Set<PostSite> sites = new HashSet<>();
-    @OneToMany(mappedBy = "post", cascade = CascadeType.ALL, fetch = FetchType.EAGER, orphanRemoval=true)
+    @OneToMany(mappedBy = "post", cascade = CascadeType.ALL, fetch = FetchType.LAZY, orphanRemoval=true)
     private Set<PostGrade> grades = new HashSet<>();
-    @OneToMany(mappedBy = "post", cascade = CascadeType.ALL, fetch = FetchType.EAGER, orphanRemoval=true)
+    @OneToMany(mappedBy = "post", cascade = CascadeType.ALL, fetch = FetchType.LAZY, orphanRemoval=true)
     private Set<PostSpecialty> specialties = new HashSet<>();
-    @OneToMany(mappedBy = "post", cascade = CascadeType.ALL, fetch = FetchType.EAGER)
+    @OneToMany(mappedBy = "post", cascade = CascadeType.ALL, fetch = FetchType.LAZY)
     private Set<PostFunding> fundings = new HashSet<>();
-    @OneToMany(mappedBy = "post", fetch = FetchType.EAGER)
+    @OneToMany(mappedBy = "post", fetch = FetchType.LAZY)
     private Set<Placement> placementHistory = new HashSet<>();
     @OneToMany(mappedBy = "post", fetch = FetchType.LAZY)
     private Set<PostTrust> associatedTrusts;
@@ -347,46 +347,23 @@ public class Post implements Serializable {
         this.associatedTrusts = associatedTrusts;
     }
 
-    @Override
-    public boolean equals(final Object o) {
-        if (this == o) {
-            return true;
-        }
-        if (o == null || getClass() != o.getClass()) {
-            return false;
-        }
-        final Post post = (Post) o;
-        if (post.id == null || id == null) {
-            return false;
-        }
-        return Objects.equals(id, post.id);
-    }
+  @Override
+  public boolean equals(Object o) {
+    if (this == o) return true;
+    if (o == null || getClass() != o.getClass()) return false;
+    Post post = (Post) o;
+    return Objects.equals(id, post.id);
+  }
 
-    @Override
-    public int hashCode() {
-        return Objects.hashCode(id);
-    }
+  @Override
+  public int hashCode() {
+    return Objects.hash(id);
+  }
 
-    @Override
-    public String toString() {
-        return "Post{" +
-                "id=" + id +
-                ", intrepidId='" + intrepidId + '\'' +
-                ", nationalPostNumber='" + nationalPostNumber + '\'' +
-                ", status=" + status +
-                ", suffix=" + suffix +
-                ", owner='" + owner + '\'' +
-                ", postFamily='" + postFamily + '\'' +
-                ", oldPost=" + oldPost +
-                ", newPost=" + newPost +
-                ", employingBodyId='" + employingBodyId + '\'' +
-                ", trainingBodyId='" + trainingBodyId + '\'' +
-                ", trainingDescription='" + trainingDescription + '\'' +
-                ", localPostNumber='" + localPostNumber + '\'' +
-                ", placementHistory=" + placementHistory +
-                ", programmes=" + programmes +
-                ", fundings=" + fundings +
-                ", legacy=" + legacy +
-                '}';
-    }
+  @Override
+  public String toString() {
+    return "Post{" +
+        "id=" + id +
+        '}';
+  }
 }

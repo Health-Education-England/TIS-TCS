@@ -417,8 +417,12 @@ public class PersonResource {
     log.debug("REST request to get a page of Placements");
     personService.canLoggedInUserViewOrAmend(id);
 
-    List<PlacementSummaryDTO> placementForTrainee = placementService.getPlacementForTrainee(id);
-    return ResponseUtil.wrapOrNotFound(Optional.ofNullable(placementForTrainee != null ? placementSummaryDecorator.decorate(placementForTrainee) : null));
+    PersonDTO trainee = personService.findOne(id);
+    if(trainee != null) {
+      List<PlacementSummaryDTO> placementForTrainee = placementService.getPlacementForTrainee(id, trainee.getRole());
+      return ResponseUtil.wrapOrNotFound(Optional.ofNullable(placementForTrainee != null ? placementSummaryDecorator.decorate(placementForTrainee) : null));
+    }
+    return ResponseUtil.wrapOrNotFound(Optional.empty());
   }
 
 

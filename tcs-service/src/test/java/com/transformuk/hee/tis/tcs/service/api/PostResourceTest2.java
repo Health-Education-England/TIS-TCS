@@ -2,6 +2,7 @@ package com.transformuk.hee.tis.tcs.service.api;
 
 import com.transformuk.hee.tis.tcs.TestUtils;
 import com.transformuk.hee.tis.tcs.api.dto.PostDTO;
+import com.transformuk.hee.tis.tcs.api.enumeration.PostSpecialtyType;
 import com.transformuk.hee.tis.tcs.api.enumeration.Status;
 import com.transformuk.hee.tis.tcs.service.Application;
 import com.transformuk.hee.tis.tcs.service.api.decorator.PlacementSummaryDecorator;
@@ -13,23 +14,29 @@ import com.transformuk.hee.tis.tcs.service.repository.PlacementViewRepository;
 import com.transformuk.hee.tis.tcs.service.service.PlacementService;
 import com.transformuk.hee.tis.tcs.service.service.PostService;
 import com.transformuk.hee.tis.tcs.service.service.mapper.PlacementViewMapper;
+import org.hamcrest.core.StringContains;
 import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.mockito.ArgumentCaptor;
 import org.mockito.Captor;
-import org.mockito.MockitoAnnotations;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.boot.test.mock.mockito.MockBean;
+import org.springframework.core.MethodParameter;
 import org.springframework.data.web.PageableHandlerMethodArgumentResolver;
 import org.springframework.http.converter.json.MappingJackson2HttpMessageConverter;
 import org.springframework.test.context.junit4.SpringRunner;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.setup.MockMvcBuilders;
 import org.springframework.validation.BeanPropertyBindingResult;
+import org.springframework.validation.FieldError;
 import org.springframework.web.bind.MethodArgumentNotValidException;
+
+import java.lang.reflect.Method;
+import java.util.ArrayList;
+import java.util.List;
 
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.doNothing;
@@ -71,7 +78,6 @@ public class PostResourceTest2 {
   private PlacementSummaryDecorator placementSummaryDecorator;
 
   private MockMvc restPostMockMvc;
-
   @Autowired
   private MappingJackson2HttpMessageConverter jacksonMessageConverter;
   @Autowired
@@ -85,7 +91,6 @@ public class PostResourceTest2 {
 
   @Before
   public void setup() {
-    MockitoAnnotations.initMocks(this);
     PostResource postResource = new PostResource(postService, postValidator, placementViewRepository, placementViewDecorator,
         placementViewMapper, placementService, placementSummaryDecorator);
     this.restPostMockMvc = MockMvcBuilders.standaloneSetup(postResource)
@@ -263,5 +268,30 @@ public class PostResourceTest2 {
         .andExpect(status().isUnauthorized())
         .andExpect(jsonPath("$.message").value("error.accessDenied"));
     verify(postService, never()).delete(any());
+  }
+
+  @Test
+  public void updatePostShouldFailWhenThereAreMultiplePrimarySpecialtiesAttached() throws Exception {
+
+    postDTO.setId(1L);
+
+    List<FieldError> fieldErrors = new ArrayList<>();
+    fieldErrors.add(new FieldError(POST_DTO_NAME, "specialties",
+        String.format("Only one Specialty of type %s allowed", PostSpecialtyType.PRIMARY)));
+    BeanPropertyBindingResult bindingResult = new BeanPropertyBindingResult(postDTO, POST_DTO_NAME);
+    fieldErrors.forEach(bindingResult::addError);
+    Method method = PostValidator.class.getMethods()[0];
+
+    doThrow(new MethodArgumentNotValidException(new MethodParameter(method, 0), bindingResult)).when(
+        postValidator).validate(any(PostDTO.class));
+
+    restPostMockMvc.perform(put("/api/posts")
+        .contentType(TestUtil.APPLICATION_JSON_UTF8)
+        .content(TestUtil.convertObjectToJsonBytes(postDTO)))
+        .andExpect(status().isBadRequest())
+        .andExpect(jsonPath("$.message").value("error.validation"))
+        .andExpect(jsonPath("$.fieldErrors[0].field").value("specialties"))
+        .andExpect(jsonPath("$.fieldErrors[0].message").value(StringContains.
+            containsString("Only one Specialty of type PRIMARY allowed")));
   }
 }

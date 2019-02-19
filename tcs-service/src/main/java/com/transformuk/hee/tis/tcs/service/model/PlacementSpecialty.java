@@ -57,21 +57,4 @@ public class PlacementSpecialty implements Serializable {
     this.placementSpecialtyType = placementSpecialtyType;
   }
 
-  @Override
-  public boolean equals(Object o) {
-    if (this == o) return true;
-    if (o == null || getClass() != o.getClass()) return false;
-
-    PlacementSpecialty that = (PlacementSpecialty) o;
-
-    if (placement != null ? !placement.equals(that.placement) : that.placement != null) return false;
-    return specialty != null ? specialty.equals(that.specialty) : that.specialty == null;
-  }
-
-  @Override
-  public int hashCode() {
-    int result = placement != null ? placement.hashCode() : 0;
-    result = 31 * result + (specialty != null ? specialty.hashCode() : 0);
-    return result;
-  }
 }
