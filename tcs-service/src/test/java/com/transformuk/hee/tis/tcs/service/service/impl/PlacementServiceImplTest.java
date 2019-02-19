@@ -134,7 +134,7 @@ public class PlacementServiceImplTest {
     when(namedParameterJdbcTemplateMock.query(eq(sqlQueryMock), mapArgumentCaptor.capture(),
         placementRowMapperArgumentCaptor.capture())).thenReturn(placements);
 
-    List<PlacementSummaryDTO> result = testObj.getPlacementForTrainee(traineeId, false);
+    List<PlacementSummaryDTO> result = testObj.getPlacementForTrainee(traineeId, "Dr in Training");
 
     int sizeOfResult = result.size();
     Assert.assertTrue(result.get(0).getDateTo().after(result.get(1).getDateTo()));

@@ -87,6 +87,7 @@ import static com.transformuk.hee.tis.tcs.service.service.impl.SpecificationFact
 public class PlacementServiceImpl implements PlacementService {
 
   static final String PLACEMENTS_SUMMARY_MAPPER = "PlacementsSummary";
+  private static final String PLACEHOLDER_ROLE_NAME = "Placeholder";
   private final Logger log = LoggerFactory.getLogger(PlacementServiceImpl.class);
 
   @Autowired
@@ -477,7 +478,7 @@ public class PlacementServiceImpl implements PlacementService {
 
   @Transactional(readOnly = true)
   @Override
-  public List<PlacementSummaryDTO> getPlacementForTrainee(final Long traineeId, boolean limitResults) {
+  public List<PlacementSummaryDTO> getPlacementForTrainee(final Long traineeId, String traineeRole) {
     final String query = sqlQuerySupplier.getQuery(SqlQuerySupplier.TRAINEE_PLACEMENT_SUMMARY);
     List<PlacementSummaryDTO> resultList;
 
@@ -487,7 +488,8 @@ public class PlacementServiceImpl implements PlacementService {
     resultList.forEach(p -> p.setPlacementStatus(getPlacementStatus(p.getDateFrom(), p.getDateTo())));
     resultList = filterPlacements(resultList);
 
-    if (limitResults && CollectionUtils.isNotEmpty(resultList)) {
+    if (org.apache.commons.lang3.StringUtils.containsIgnoreCase(traineeRole, PLACEHOLDER_ROLE_NAME)
+        && CollectionUtils.isNotEmpty(resultList)) {
       long now = new Date().getTime();
       resultList = resultList.stream()
           .filter(Objects::nonNull)
