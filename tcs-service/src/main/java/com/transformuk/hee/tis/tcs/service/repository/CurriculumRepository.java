@@ -16,8 +16,8 @@ public interface CurriculumRepository extends JpaRepository<Curriculum, Long>, J
 
   @Query("SELECT c " +
       "FROM Curriculum c " +
-      "JOIN FETCH c.specialty s " +
-      "JOIN FETCH s.specialtyTypes st " +
+      "LEFT JOIN FETCH c.specialty s " +
+      "LEFT JOIN FETCH s.specialtyTypes st " +
       "WHERE c.id = :id ")
   Optional<Curriculum> findCurriculaByIdEagerFetch(@Param("id") Long id);
 }

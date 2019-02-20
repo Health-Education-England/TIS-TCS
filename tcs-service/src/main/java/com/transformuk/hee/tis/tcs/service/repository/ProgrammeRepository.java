@@ -37,9 +37,9 @@ public interface ProgrammeRepository extends JpaRepository<Programme, Long>, Jpa
 
   @Query("SELECT p " +
       "FROM Programme p " +
-      "JOIN FETCH p.curricula c " +
-      "JOIN FETCH c.specialty s " +
-      "JOIN FETCH s.specialtyTypes st " +
+      "LEFT JOIN FETCH p.curricula c " +
+      "LEFT JOIN FETCH c.specialty s " +
+      "LEFT JOIN FETCH s.specialtyTypes st " +
       "WHERE p.id = :id ")
   Optional<Programme> findProgrammeByIdEagerFetch(@Param("id") Long id);
 }

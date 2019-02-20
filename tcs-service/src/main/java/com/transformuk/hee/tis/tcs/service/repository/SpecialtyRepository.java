@@ -103,7 +103,7 @@ public interface SpecialtyRepository extends JpaRepository<Specialty, Long>, Jpa
 
   @Query("SELECT s " +
       "FROM Specialty s " +
-      "JOIN FETCH s.specialtyTypes st " +
+      "LEFT JOIN FETCH s.specialtyTypes st " +
       "WHERE s.id = :id ")
   Optional<Specialty> findSpecialtyByIdEagerFetch(@Param("id") Long id);
 }
