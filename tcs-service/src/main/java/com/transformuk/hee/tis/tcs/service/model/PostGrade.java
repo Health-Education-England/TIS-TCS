@@ -4,6 +4,7 @@ import com.transformuk.hee.tis.tcs.api.enumeration.PostGradeType;
 
 import javax.persistence.*;
 import java.io.Serializable;
+import java.util.Objects;
 
 
 @Entity
@@ -15,7 +16,7 @@ public class PostGrade implements Serializable {
   @Column(name = "id")
   private Long id;
 
-  @ManyToOne(targetEntity = Post.class, fetch = FetchType.EAGER)
+  @ManyToOne(targetEntity = Post.class, fetch = FetchType.LAZY)
   @JoinColumn(name = "postId")
   private Post post;
 
@@ -58,24 +59,23 @@ public class PostGrade implements Serializable {
     this.postGradeType = postGradeType;
   }
 
-
   @Override
   public boolean equals(Object o) {
     if (this == o) return true;
     if (o == null || getClass() != o.getClass()) return false;
-
     PostGrade postGrade = (PostGrade) o;
-
-    if (post != null ? !post.equals(postGrade.post) : postGrade.post != null) return false;
-    if (gradeId != null ? !gradeId.equals(postGrade.gradeId) : postGrade.gradeId != null) return false;
-    return postGradeType == postGrade.postGradeType;
+    return Objects.equals(id, postGrade.id);
   }
 
   @Override
   public int hashCode() {
-    int result = post != null ? post.hashCode() : 0;
-    result = 31 * result + (gradeId != null ? gradeId.hashCode() : 0);
-    result = 31 * result + (postGradeType != null ? postGradeType.hashCode() : 0);
-    return result;
+    return Objects.hash(id);
+  }
+
+  @Override
+  public String toString() {
+    return "PostGrade{" +
+        "id=" + id +
+        '}';
   }
 }

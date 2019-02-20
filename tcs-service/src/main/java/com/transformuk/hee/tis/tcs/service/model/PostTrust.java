@@ -8,6 +8,7 @@ import javax.persistence.GenerationType;
 import javax.persistence.Id;
 import javax.persistence.JoinColumn;
 import javax.persistence.ManyToOne;
+import java.util.Objects;
 
 /**
  * Entity that links a Post record to a trust. This is used to filter out what Post records Trust admin users
@@ -72,5 +73,25 @@ public class PostTrust {
 
   public void setTrustName(String trustName) {
     this.trustName = trustName;
+  }
+
+  @Override
+  public boolean equals(Object o) {
+    if (this == o) return true;
+    if (o == null || getClass() != o.getClass()) return false;
+    PostTrust postTrust = (PostTrust) o;
+    return Objects.equals(id, postTrust.id);
+  }
+
+  @Override
+  public int hashCode() {
+    return Objects.hash(id);
+  }
+
+  @Override
+  public String toString() {
+    return "PostTrust{" +
+        "id=" + id +
+        '}';
   }
 }

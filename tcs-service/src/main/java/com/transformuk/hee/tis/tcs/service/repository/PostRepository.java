@@ -66,4 +66,17 @@ public interface PostRepository extends JpaRepository<Post, Long>, JpaSpecificat
       "LEFT JOIN FETCH p.programmes " +
       "WHERE p.id = :id")
   Optional<Post> findPostByIdWithJoinFetch(@Param("id") Long postId);
+
+  @Query("SELECT DISTINCT p " +
+      "FROM Post p " +
+      "JOIN FETCH p.programmes pr " +
+      "LEFT JOIN FETCH p.grades " +
+      "LEFT JOIN FETCH p.sites " +
+      "LEFT JOIN FETCH p.fundings " +
+      "LEFT JOIN FETCH p.specialties psp " +
+      "LEFT JOIN FETCH psp.specialty sp " +
+      "LEFT JOIN FETCH sp.specialtyTypes st " +
+      "WHERE pr.id = :id " +
+      "AND p.nationalPostNumber LIKE %:npn% ")
+  List<Post> findPostsForProgrammeIdAndNpnLike(@Param("id") Long id, @Param("npn") String npn);
 }

@@ -43,7 +43,7 @@ public class Placement implements Serializable {
   private Person trainee;
   @Column(name = "intrepidId")
   private String intrepidId;
-  @ManyToOne
+  @ManyToOne(fetch = FetchType.LAZY)
   @JoinColumn(name = "postId")
   private Post post;
   //Please use site id, site codes from intrepid are NOT unique

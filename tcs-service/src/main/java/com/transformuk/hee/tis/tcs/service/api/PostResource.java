@@ -526,4 +526,14 @@ public class PostResource {
   }
 
 
+
+  @GetMapping("/programme/{id}/posts")
+  public ResponseEntity<List<PostDTO>> getAllPostsForProgramme(@PathVariable Long id,
+                                                               @RequestParam(required = false, defaultValue = StringUtils.EMPTY) String npn) {
+
+    List<PostDTO> foundPosts = postService.findPostsForProgrammeIdAndNpn(id, npn);
+    return new ResponseEntity<>(foundPosts, HttpStatus.OK);
+
+  }
+
 }
