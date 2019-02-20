@@ -166,7 +166,7 @@ public class SpecialtyServiceImpl implements SpecialtyService {
   @Transactional(readOnly = true)
   public SpecialtyDTO findOne(Long id) {
     log.debug("Request to get Specialty : {}", id);
-    Specialty specialty = specialtyRepository.findById(id).orElse(null);
+    Specialty specialty = specialtyRepository.findSpecialtyByIdEagerFetch(id).orElse(null);
     return specialtyMapper.specialtyToSpecialtyDTO(specialty);
   }
 

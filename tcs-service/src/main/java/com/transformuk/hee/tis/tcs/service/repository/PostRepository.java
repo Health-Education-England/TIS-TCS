@@ -60,7 +60,8 @@ public interface PostRepository extends JpaRepository<Post, Long>, JpaSpecificat
       "LEFT JOIN FETCH p.grades " +
       "LEFT JOIN FETCH p.sites " +
       "LEFT JOIN FETCH p.specialties psp " +
-      "LEFT JOIN FETCH psp.specialty " +
+      "LEFT JOIN FETCH psp.specialty sp " +
+      "LEFT JOIN FETCH sp.specialtyTypes st " +
       "LEFT JOIN FETCH p.fundings " +
       "LEFT JOIN FETCH p.programmes " +
       "WHERE p.id = :id")

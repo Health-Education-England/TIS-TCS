@@ -10,6 +10,7 @@ import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
 import org.springframework.stereotype.Repository;
 
+import java.util.Optional;
 import java.util.Set;
 
 /**
@@ -99,4 +100,10 @@ public interface SpecialtyRepository extends JpaRepository<Specialty, Long>, Jpa
       "AND sp.status = :status")
   Set<Specialty> findDistinctByProgrammeIdAndPersonIdAndStatus(@Param("programmeId") Long programmeId, @Param("personId") Long personId,
                                                                @Param("status") Status status);
+
+  @Query("SELECT s " +
+      "FROM Specialty s " +
+      "LEFT JOIN FETCH s.specialtyTypes st " +
+      "WHERE s.id = :id ")
+  Optional<Specialty> findSpecialtyByIdEagerFetch(@Param("id") Long id);
 }
