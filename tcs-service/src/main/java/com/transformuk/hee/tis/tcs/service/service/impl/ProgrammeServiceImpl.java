@@ -162,7 +162,7 @@ public class ProgrammeServiceImpl implements ProgrammeService {
   @Transactional(readOnly = true)
   public ProgrammeDTO findOne(Long id) {
     log.debug("Request to get Programme : {}", id);
-    Programme programme = programmeRepository.findById(id).orElse(null);
+    Programme programme = programmeRepository.findProgrammeByIdEagerFetch(id).orElse(null);
     return programmeMapper.programmeToProgrammeDTO(programme);
   }
 

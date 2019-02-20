@@ -9,6 +9,7 @@ import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
 
 import java.util.List;
+import java.util.Optional;
 import java.util.Set;
 
 /**
@@ -33,4 +34,12 @@ public interface ProgrammeRepository extends JpaRepository<Programme, Long>, Jpa
       "FROM ProgrammeMembership pm " +
       "WHERE pm.person.id = :personId")
   List<Programme> findByProgrammeMembershipPersonId(@Param("personId") Long personId);
+
+  @Query("SELECT p " +
+      "FROM Programme p " +
+      "JOIN FETCH p.curricula c " +
+      "JOIN FETCH c.specialty s " +
+      "JOIN FETCH s.specialtyTypes st " +
+      "WHERE p.id = :id ")
+  Optional<Programme> findProgrammeByIdEagerFetch(@Param("id") Long id);
 }
