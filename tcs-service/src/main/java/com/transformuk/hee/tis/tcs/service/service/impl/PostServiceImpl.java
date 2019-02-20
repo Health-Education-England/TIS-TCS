@@ -564,7 +564,7 @@ public class PostServiceImpl implements PostService {
   public List<PostDTO> findPostsForProgrammeIdAndNpn(Long programmeId, String npn) {
     Preconditions.checkNotNull(programmeId, "Programme programmeId cannot be null");
 
-    List<Post> result = postRepository.findPostsForProgrammeIdAndNpnLike(programmeId, npn);
+    List<Post> result = postRepository.findPostsForProgrammeIdAndNpnLike(programmeId, npn, Status.CURRENT);
     return postMapper.postsToPostDTOs(result);
   }
 
