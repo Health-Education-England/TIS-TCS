@@ -1,27 +1,18 @@
 package com.transformuk.hee.tis.tcs.service.aop.auditing;
 
-import com.fasterxml.jackson.databind.JsonNode;
-import com.fasterxml.jackson.databind.ObjectMapper;
-import com.fasterxml.jackson.databind.node.NullNode;
-import com.flipkart.zjsonpatch.JsonDiff;
 import com.transformuk.hee.tis.audit.enumeration.GenericAuditEventType;
 import com.transformuk.hee.tis.security.model.UserProfile;
-import com.transformuk.hee.tis.tcs.service.model.JsonPatch;
-import com.transformuk.hee.tis.tcs.service.repository.JsonPatchRepository;
 import org.apache.commons.lang3.StringUtils;
 import org.aspectj.lang.JoinPoint;
 import org.aspectj.lang.annotation.AfterReturning;
 import org.aspectj.lang.annotation.Aspect;
 import org.aspectj.lang.annotation.Before;
 import org.aspectj.lang.annotation.Pointcut;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.actuate.audit.AuditEvent;
 import org.springframework.boot.actuate.audit.AuditEventRepository;
 import org.springframework.http.ResponseEntity;
 
-import java.lang.reflect.Field;
 import java.lang.reflect.Method;
-import java.util.concurrent.ConcurrentHashMap;
 
 import static com.transformuk.hee.tis.audit.enumeration.GenericAuditEventType.createEvent;
 import static com.transformuk.hee.tis.security.util.TisSecurityHelper.getProfileFromContext;
