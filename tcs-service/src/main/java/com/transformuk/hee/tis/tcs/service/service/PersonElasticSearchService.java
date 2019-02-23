@@ -165,10 +165,6 @@ public class PersonElasticSearchService {
       searchQuery = StringUtils.remove(searchQuery, '"'); //remove any quotations that were added from the FE
       shouldQuery
           .should(new MatchQueryBuilder("publicHealthNumber", searchQuery))
-          //lower case the search query as the index uses the standard analyzer for name type fields (remove this if
-          //we want to stop emulating the current search solution)
-//          .should(new WildcardQueryBuilder("surname", "*" + searchQuery.toLowerCase() + "*"))
-//          .should(new WildcardQueryBuilder("forenames", "*" + searchQuery.toLowerCase() + "*"))
           .should(new MatchQueryBuilder("fullName", searchQuery))
           .should(new MatchQueryBuilder("gmcNumber", searchQuery))
           .should(new MatchQueryBuilder("gdcNumber", searchQuery))
@@ -180,7 +176,7 @@ public class PersonElasticSearchService {
       }
     }
 
-    LOG.info("Query is : {}", shouldQuery);
+    LOG.debug("Query is : {}", shouldQuery);
     return shouldQuery;
   }
 
