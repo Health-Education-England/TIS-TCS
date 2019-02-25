@@ -81,4 +81,6 @@ public interface PostRepository extends JpaRepository<Post, Long>, JpaSpecificat
       "AND p.nationalPostNumber LIKE %:npn% " +
       "AND p.status = :status ")
   List<Post> findPostsForProgrammeIdAndNpnLike(@Param("id") Long id, @Param("npn") String npn, @Param("status") Status status);
+
+  Optional<Post> findPostByPlacementHistoryId(Long id);
 }

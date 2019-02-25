@@ -101,4 +101,29 @@ public class PostRepositoryTest {
     Assert.assertEquals(Status.CURRENT, result.get(0).getStatus());
 
   }
+
+  @Test
+  @Sql(scripts = {"/scripts/posts.sql", "/scripts/placements.sql"})
+  @Sql(scripts = {"/scripts/deletePlacements.sql", "/scripts/deletePosts.sql"}, executionPhase = Sql.ExecutionPhase.AFTER_TEST_METHOD)
+
+  public void findPostByPlacementHistoryIdShouldReturnPostLinkedToPlacement(){
+    long placementId = 1L;
+    Long expectedPostId = 1L;
+
+    Optional<Post> result = postRepository.findPostByPlacementHistoryId(placementId);
+
+    Assert.assertTrue(result.isPresent());
+    Assert.assertEquals(expectedPostId, result.get().getId());
+  }
+
+  @Test
+  @Sql(scripts = {"/scripts/posts.sql", "/scripts/placements.sql"})
+  @Sql(scripts = {"/scripts/deletePlacements.sql", "/scripts/deletePosts.sql"}, executionPhase = Sql.ExecutionPhase.AFTER_TEST_METHOD)
+  public void findPostByPlacementHistoryIdShouldReturnEmptyOptionalIfNotPostExistsForPlacement(){
+    long placementId = 9999L;
+
+    Optional<Post> result = postRepository.findPostByPlacementHistoryId(placementId);
+
+    Assert.assertFalse(result.isPresent());
+  }
 }
