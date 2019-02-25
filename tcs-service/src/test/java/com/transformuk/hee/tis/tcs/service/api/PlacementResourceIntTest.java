@@ -635,6 +635,7 @@ public class PlacementResourceIntTest {
 
     // Update the placement details
     final PlacementDetails updatedPlacement = placementDetailsRepository.findById(placementDetails.getId()).orElse(null);
+    entityManager.detach(updatedPlacement);
     updatedPlacement.setSiteCode(UPDATED_SITE);
     updatedPlacement.setGradeAbbreviation(UPDATED_GRADE);
     updatedPlacement.setDateTo(UPDATED_DATE_TO);
@@ -692,6 +693,7 @@ public class PlacementResourceIntTest {
 
     // Update the placement details
     final PlacementDetails updatedPlacement = placementDetailsRepository.findById(placementDetails.getId()).orElse(null);
+    entityManager.detach(updatedPlacement);
     updatedPlacement.setSiteCode(UPDATED_SITE);
     updatedPlacement.setGradeAbbreviation(UPDATED_GRADE);
     updatedPlacement.setDateFrom(UPDATED_DATE_FROM.plusMonths(3));
