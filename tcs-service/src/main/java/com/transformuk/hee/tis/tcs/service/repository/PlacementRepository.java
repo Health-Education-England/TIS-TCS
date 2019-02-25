@@ -7,6 +7,7 @@ import org.springframework.data.repository.query.Param;
 
 import java.time.LocalDate;
 import java.util.List;
+import java.util.Optional;
 import java.util.Set;
 
 /**
@@ -131,4 +132,17 @@ public interface PlacementRepository extends JpaRepository<Placement, Long> {
                                                            @Param("specialtyId") Long specialtyId,
                                                            @Param("dateFrom") LocalDate dateFrom,
                                                            @Param("dateTo") LocalDate dateTo);
+
+  /**
+   * Use this method to get the placement by id as most of the time when getting a placement we also want to get the
+   * post
+   *
+   * @param id the id of the placement
+   * @return optional of the placement
+   */
+  @Query("SELECT pl " +
+      "FROM Placement pl " +
+      "LEFT JOIN FETCH pl.post " +
+      "WHERE pl.id = :id")
+  Optional<Placement> findPlacementById(@Param("id") Long id);
 }
