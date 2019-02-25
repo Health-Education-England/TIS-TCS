@@ -22,6 +22,7 @@ import com.transformuk.hee.tis.tcs.service.model.Placement;
 import com.transformuk.hee.tis.tcs.service.model.PlacementDetails;
 import com.transformuk.hee.tis.tcs.service.model.PlacementSpecialty;
 import com.transformuk.hee.tis.tcs.service.model.PlacementSupervisor;
+import com.transformuk.hee.tis.tcs.service.model.Post;
 import com.transformuk.hee.tis.tcs.service.model.Specialty;
 import com.transformuk.hee.tis.tcs.service.repository.CommentRepository;
 import com.transformuk.hee.tis.tcs.service.repository.PersonRepositoryImpl;
@@ -29,6 +30,7 @@ import com.transformuk.hee.tis.tcs.service.repository.PlacementDetailsRepository
 import com.transformuk.hee.tis.tcs.service.repository.PlacementRepository;
 import com.transformuk.hee.tis.tcs.service.repository.PlacementSpecialtyRepository;
 import com.transformuk.hee.tis.tcs.service.repository.PlacementSupervisorRepository;
+import com.transformuk.hee.tis.tcs.service.repository.PostRepository;
 import com.transformuk.hee.tis.tcs.service.repository.SpecialtyRepository;
 import com.transformuk.hee.tis.tcs.service.service.EsrNotificationService;
 import com.transformuk.hee.tis.tcs.service.service.PlacementService;
@@ -119,6 +121,8 @@ public class PlacementServiceImpl implements PlacementService {
   private CommentRepository commentRepository;
   @Autowired
   private ApplicationEventPublisher applicationEventPublisher;
+  @Autowired
+  private PostRepository postRepository;
 
   /**
    * Save a placement.
@@ -180,8 +184,10 @@ public class PlacementServiceImpl implements PlacementService {
 
     if (existingPlacement != null && updatedPlacementDetails != null &&
         isEligibleForNotification(existingPlacement, updatedPlacementDetails)) {
+      Optional<Post> optionalExistingPlacementPost = postRepository.findPostByPlacementHistoryId(existingPlacement.getId());
+
       log.debug("Change in hire or end date. Marking for notification : npn {} ",
-          existingPlacement.getPost() != null ? existingPlacement.getPost().getNationalPostNumber() : null);
+          optionalExistingPlacementPost.isPresent() ? optionalExistingPlacementPost.get().getNationalPostNumber() : null);
       return true;
     }
     return false;

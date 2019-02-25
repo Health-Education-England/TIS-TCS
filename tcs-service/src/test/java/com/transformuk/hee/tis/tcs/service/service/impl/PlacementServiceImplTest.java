@@ -2,9 +2,12 @@ package com.transformuk.hee.tis.tcs.service.service.impl;
 
 import com.google.common.collect.Lists;
 import com.transformuk.hee.tis.tcs.api.dto.PlacementDTO;
+import com.transformuk.hee.tis.tcs.api.dto.PlacementDetailsDTO;
 import com.transformuk.hee.tis.tcs.api.dto.PlacementSummaryDTO;
 import com.transformuk.hee.tis.tcs.service.model.Placement;
+import com.transformuk.hee.tis.tcs.service.model.Post;
 import com.transformuk.hee.tis.tcs.service.repository.PlacementRepository;
+import com.transformuk.hee.tis.tcs.service.repository.PostRepository;
 import com.transformuk.hee.tis.tcs.service.service.helper.SqlQuerySupplier;
 import com.transformuk.hee.tis.tcs.service.service.mapper.PlacementMapper;
 import org.junit.Assert;
@@ -31,6 +34,8 @@ import java.util.stream.StreamSupport;
 import static org.mockito.ArgumentMatchers.anyMap;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.doNothing;
+import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.verifyZeroInteractions;
 import static org.mockito.Mockito.when;
 
 @RunWith(MockitoJUnitRunner.class)
@@ -52,12 +57,16 @@ public class PlacementServiceImplTest {
   private SqlQuerySupplier sqlQuerySupplierMock;
   @Mock
   private NamedParameterJdbcTemplate namedParameterJdbcTemplateMock;
+  @Mock
+  private PostRepository postRepositoryMock;
   @Captor
   private ArgumentCaptor<LocalDate> toDateCaptor;
   @Captor
   private ArgumentCaptor<Map<String, Object>> mapArgumentCaptor;
   @Captor
   private ArgumentCaptor<PlacementRowMapper> placementRowMapperArgumentCaptor;
+  @Captor
+  private ArgumentCaptor<Long> longArgumentCaptor;
 
   private static final Long number = new Long(1);
 
@@ -229,6 +238,50 @@ public class PlacementServiceImplTest {
     List<PlacementSummaryDTO> result = testObj.getPlacementForPost(postId);
 
     Assert.assertTrue(result.size() <= 1000);
+  }
+
+  @Test
+  public void isEligibleForChangedDatesNotificationShouldReturnTrueWhenUpdatedPlacementIsEligibleForNotification() {
+    LocalDate dateFiveMonthsAgo = LocalDate.now().minusMonths(5);
+    LocalDate dateOneMonthsAgo = LocalDate.now().minusMonths(1);
+    Long existingPlacementId = 1L;
+
+    Placement currentPlacement = new Placement();
+    currentPlacement.setId(existingPlacementId);
+    currentPlacement.setDateFrom(dateFiveMonthsAgo);
+
+    PlacementDetailsDTO updatedPlacementDetails = new PlacementDetailsDTO();
+    updatedPlacementDetails.setDateFrom(dateOneMonthsAgo);
+
+    Post foundPostMock = mock(Post.class);
+
+    when(postRepositoryMock.findPostByPlacementHistoryId(longArgumentCaptor.capture())).thenReturn(Optional.of(foundPostMock));
+
+    boolean result = testObj.isEligibleForChangedDatesNotification(updatedPlacementDetails, currentPlacement);
+
+    Assert.assertTrue(result);
+
+    Long capturedPlacementId = longArgumentCaptor.getValue();
+    Assert.assertEquals(existingPlacementId, capturedPlacementId);
+  }
+
+  @Test
+  public void isEligibleForChangedDatesNotificationShouldReturnFalseWhenCurrentAndUpdatedPlacementFromDatesAreTheSame() {
+    LocalDate dateFiveMonthsAgo = LocalDate.now().minusMonths(5);
+    Long existingPlacementId = 1L;
+
+    Placement currentPlacement = new Placement();
+    currentPlacement.setId(existingPlacementId);
+    currentPlacement.setDateFrom(dateFiveMonthsAgo);
+
+    PlacementDetailsDTO updatedPlacementDetails = new PlacementDetailsDTO();
+    updatedPlacementDetails.setDateFrom(dateFiveMonthsAgo);
+
+    boolean result = testObj.isEligibleForChangedDatesNotification(updatedPlacementDetails, currentPlacement);
+
+    Assert.assertFalse(result);
+
+    verifyZeroInteractions(postRepositoryMock);
   }
 
 }
