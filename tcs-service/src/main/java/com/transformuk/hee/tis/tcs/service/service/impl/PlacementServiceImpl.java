@@ -1,5 +1,10 @@
 package com.transformuk.hee.tis.tcs.service.service.impl;
 
+import static com.transformuk.hee.tis.security.util.TisSecurityHelper.getProfileFromContext;
+import static com.transformuk.hee.tis.tcs.service.api.util.DateUtil.getLocalDateFromString;
+import static com.transformuk.hee.tis.tcs.service.service.impl.SpecificationFactory.in;
+import static com.transformuk.hee.tis.tcs.service.service.impl.SpecificationFactory.isBetween;
+
 import com.google.common.collect.Lists;
 import com.google.common.collect.Maps;
 import com.google.common.collect.Sets;
@@ -37,6 +42,27 @@ import com.transformuk.hee.tis.tcs.service.service.mapper.PersonLiteMapper;
 import com.transformuk.hee.tis.tcs.service.service.mapper.PlacementDetailsMapper;
 import com.transformuk.hee.tis.tcs.service.service.mapper.PlacementMapper;
 import com.transformuk.hee.tis.tcs.service.service.mapper.PlacementSpecialtyMapper;
+import java.io.IOException;
+import java.math.BigInteger;
+import java.sql.ResultSet;
+import java.sql.SQLException;
+import java.time.Clock;
+import java.time.LocalDate;
+import java.time.LocalDateTime;
+import java.util.ArrayList;
+import java.util.Calendar;
+import java.util.Collection;
+import java.util.Collections;
+import java.util.Comparator;
+import java.util.Date;
+import java.util.HashSet;
+import java.util.List;
+import java.util.Map;
+import java.util.Optional;
+import java.util.Set;
+import java.util.stream.Collectors;
+import javax.persistence.EntityManager;
+import javax.persistence.Query;
 import org.apache.commons.collections4.CollectionUtils;
 import org.apache.commons.lang.StringUtils;
 import org.apache.commons.lang3.ObjectUtils;
@@ -54,32 +80,6 @@ import org.springframework.jdbc.core.namedparam.MapSqlParameterSource;
 import org.springframework.jdbc.core.namedparam.NamedParameterJdbcTemplate;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
-
-import javax.persistence.EntityManager;
-import javax.persistence.Query;
-import java.io.IOException;
-import java.math.BigInteger;
-import java.sql.ResultSet;
-import java.sql.SQLException;
-import java.time.LocalDate;
-import java.time.LocalDateTime;
-import java.util.ArrayList;
-import java.util.Calendar;
-import java.util.Collection;
-import java.util.Collections;
-import java.util.Comparator;
-import java.util.Date;
-import java.util.HashSet;
-import java.util.List;
-import java.util.Map;
-import java.util.Optional;
-import java.util.Set;
-import java.util.stream.Collectors;
-
-import static com.transformuk.hee.tis.security.util.TisSecurityHelper.getProfileFromContext;
-import static com.transformuk.hee.tis.tcs.service.api.util.DateUtil.getLocalDateFromString;
-import static com.transformuk.hee.tis.tcs.service.service.impl.SpecificationFactory.in;
-import static com.transformuk.hee.tis.tcs.service.service.impl.SpecificationFactory.isBetween;
 
 /**
  * Service Implementation for managing Placement.
@@ -122,6 +122,8 @@ public class PlacementServiceImpl implements PlacementService {
   private CommentRepository commentRepository;
   @Autowired
   private ApplicationEventPublisher applicationEventPublisher;
+  @Autowired
+  private Clock clock;
 
   /**
    * Save a placement.
@@ -148,8 +150,11 @@ public class PlacementServiceImpl implements PlacementService {
     log.debug("Request to create Placement : {}", placementDetailsDTO);
     PlacementDetails placementDetails = placementDetailsMapper.placementDetailsDTOToPlacementDetails(placementDetailsDTO);
     updateStoredCommentsWithChangesOrAdd(placementDetails);
-    if(placementDetails.getId() == null)
-      placementDetails.setAddedDate(LocalDateTime.now());
+    if(placementDetails.getId() == null) {
+      placementDetails.setAddedDate(LocalDateTime.now(clock));
+    } else {
+      placementDetails.setAmendedDate(LocalDateTime.now(clock));
+    }
     placementDetails = placementDetailsRepository.saveAndFlush(placementDetails);
 
     final Set<PlacementSpecialty> placementSpecialties = linkPlacementSpecialties(placementDetailsDTO, placementDetails);
@@ -174,7 +179,7 @@ public class PlacementServiceImpl implements PlacementService {
       latestComment.setPlacement(placementDetails);
       latestComment.setAuthor(getProfileFromContext().getFullName());
       latestComment.setSource(comment.getSource());
-      latestComment.setAmendedDate(LocalDate.now());
+      latestComment.setAmendedDate(LocalDate.now(clock));
       commentsToPersist.add(latestComment);
     }
     placementDetails.setComments(commentsToPersist);
@@ -226,7 +231,6 @@ public class PlacementServiceImpl implements PlacementService {
     placement.setSpecialties(new HashSet<>());
     PlacementDTO placementDTO = placementMapper.placementToPlacementDTO(placementRepository.saveAndFlush(placement));
     applicationEventPublisher.publishEvent(new PlacementSavedEvent(placementDTO));
-    placementDetailsDTO.setAmendedDate(LocalDateTime.now());
     return createDetails(placementDetailsDTO);
   }
 
@@ -244,10 +248,12 @@ public class PlacementServiceImpl implements PlacementService {
       }
     }
 
-    placement.setSpecialties(Sets.newHashSet(placementSpecialties));
-    Placement savedPlacement = placementRepository.save(placement);
-    PlacementDTO placementDTO = placementMapper.placementToPlacementDTO(savedPlacement);
-    applicationEventPublisher.publishEvent(new PlacementSavedEvent(placementDTO));
+    if (placement != null) {
+      placement.setSpecialties(Sets.newHashSet(placementSpecialties));
+      Placement savedPlacement = placementRepository.save(placement);
+      PlacementDTO placementDTO = placementMapper.placementToPlacementDTO(savedPlacement);
+      applicationEventPublisher.publishEvent(new PlacementSavedEvent(placementDTO));
+    }
     return placementSpecialties;
   }
 
@@ -350,7 +356,7 @@ public class PlacementServiceImpl implements PlacementService {
 
     final Placement placementToDelete = placementRepository.findById(id).orElse(null);
     // Only future placements can be deleted.
-    if (placementToDelete != null && placementToDelete.getDateFrom() != null && placementToDelete.getDateFrom().isBefore(LocalDate.now().plusMonths(3))) {
+    if (placementToDelete != null && placementToDelete.getDateFrom() != null && placementToDelete.getDateFrom().isBefore(LocalDate.now(clock).plusMonths(3))) {
       final List<EsrNotification> esrNotifications = esrNotificationService.loadPlacementDeleteNotification(placementToDelete, allEsrNotifications);
       log.debug("Placement Delete: PERSISTING: {} EsrNotifications for post {} being deleted", esrNotifications.size(), placementToDelete.getLocalPostNumber());
       esrNotificationService.save(esrNotifications);
@@ -475,7 +481,7 @@ public class PlacementServiceImpl implements PlacementService {
   public PlacementDTO closePlacement(final Long placementId) {
     Placement placement = placementRepository.findById(placementId).orElse(null);
     if (placement != null) {
-      placement.setDateTo(LocalDate.now().minusDays(1));
+      placement.setDateTo(LocalDate.now(clock).minusDays(1));
       placement = placementRepository.saveAndFlush(placement);
     }
     return placementMapper.placementToPlacementDTO(placement);
@@ -576,8 +582,8 @@ public class PlacementServiceImpl implements PlacementService {
     return
         ((currentPlacement.getDateFrom() != null && !currentPlacement.getDateFrom().equals(updatedPlacementDetails.getDateFrom())) ||
             (currentPlacement.getDateTo() != null && !currentPlacement.getDateTo().equals(updatedPlacementDetails.getDateTo()))) &&
-            ((currentPlacement.getDateFrom() != null && currentPlacement.getDateFrom().isBefore(LocalDate.now().plusMonths(3))) ||
-                (updatedPlacementDetails.getDateFrom() != null && updatedPlacementDetails.getDateFrom().isBefore(LocalDate.now().plusMonths(3))));
+            ((currentPlacement.getDateFrom() != null && currentPlacement.getDateFrom().isBefore(LocalDate.now(clock).plusMonths(3))) ||
+                (updatedPlacementDetails.getDateFrom() != null && updatedPlacementDetails.getDateFrom().isBefore(LocalDate.now(clock).plusMonths(3))));
   }
 
   private void handleEsrNewPlacementNotification(final PlacementDetailsDTO placementDetailsDTO, final PlacementDetails placementDetails) {
@@ -586,7 +592,7 @@ public class PlacementServiceImpl implements PlacementService {
     if (placementDetailsDTO.getId() == null) {
       try {
         final Placement savedPlacement = placementRepository.findById(placementDetails.getId()).orElse(null);
-        if (savedPlacement.getDateFrom() != null && savedPlacement.getDateFrom().isBefore(LocalDate.now().plusMonths(3))) {
+        if (savedPlacement.getDateFrom() != null && savedPlacement.getDateFrom().isBefore(LocalDate.now(clock).plusMonths(3))) {
           log.debug("Creating ESR notification for new placement creation for deanery number {}", savedPlacement.getPost().getNationalPostNumber());
           final List<EsrNotification> esrNotifications = esrNotificationService.handleNewPlacementEsrNotification(savedPlacement);
           log.debug("CREATED: ESR {} notifications for new placement creation for deanery number {}",
