@@ -63,18 +63,22 @@ public class PostSite implements Serializable {
     if (this == o) return true;
     if (o == null || getClass() != o.getClass()) return false;
     PostSite postSite = (PostSite) o;
-    return Objects.equals(id, postSite.id);
+    return Objects.equals(id, postSite.id) &&
+        Objects.equals(siteId, postSite.siteId) &&
+        postSiteType == postSite.postSiteType;
   }
 
   @Override
   public int hashCode() {
-    return Objects.hash(id);
+    return Objects.hash(id, siteId, postSiteType);
   }
 
   @Override
   public String toString() {
     return "PostSite{" +
         "id=" + id +
+        ", siteId=" + siteId +
+        ", postSiteType=" + postSiteType +
         '}';
   }
 }

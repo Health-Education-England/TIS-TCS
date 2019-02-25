@@ -294,10 +294,4 @@ public class PostFundingResourceIntTest {
     List<PostFunding> postFundingList = postFundingRepository.findAll();
     assertThat(postFundingList).hasSize(databaseSizeBeforeDelete - 1);
   }
-
-  @Test
-  @Transactional
-  public void equalsVerifier() throws Exception {
-    TestUtil.equalsVerifier(PostFunding.class);
-  }
 }

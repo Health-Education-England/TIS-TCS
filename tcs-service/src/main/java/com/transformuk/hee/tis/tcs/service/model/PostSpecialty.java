@@ -64,18 +64,21 @@ public class PostSpecialty implements Serializable {
     if (this == o) return true;
     if (o == null || getClass() != o.getClass()) return false;
     PostSpecialty that = (PostSpecialty) o;
-    return Objects.equals(id, that.id);
+    return Objects.equals(id, that.id) &&
+        Objects.equals(specialty, that.specialty) &&
+        postSpecialtyType == that.postSpecialtyType;
   }
 
   @Override
   public int hashCode() {
-    return Objects.hash(id);
+    return Objects.hash(id, specialty, postSpecialtyType);
   }
 
   @Override
   public String toString() {
     return "PostSpecialty{" +
         "id=" + id +
+        ", postSpecialtyType=" + postSpecialtyType +
         '}';
   }
 }

@@ -211,24 +211,47 @@ public class Placement implements Serializable {
     this.status = status;
   }
 
-
   @Override
   public boolean equals(Object o) {
     if (this == o) return true;
     if (o == null || getClass() != o.getClass()) return false;
     Placement placement = (Placement) o;
-    return Objects.equals(id, placement.id);
+    return Objects.equals(id, placement.id) &&
+        Objects.equals(intrepidId, placement.intrepidId) &&
+        Objects.equals(siteCode, placement.siteCode) &&
+        Objects.equals(gradeAbbreviation, placement.gradeAbbreviation) &&
+        Objects.equals(siteId, placement.siteId) &&
+        Objects.equals(gradeId, placement.gradeId) &&
+        Objects.equals(dateFrom, placement.dateFrom) &&
+        Objects.equals(dateTo, placement.dateTo) &&
+        Objects.equals(placementType, placement.placementType) &&
+        Objects.equals(placementWholeTimeEquivalent, placement.placementWholeTimeEquivalent) &&
+        Objects.equals(trainingDescription, placement.trainingDescription) &&
+        Objects.equals(localPostNumber, placement.localPostNumber) &&
+        status == placement.status;
   }
 
   @Override
   public int hashCode() {
-    return Objects.hash(id);
+    return Objects.hash(id, intrepidId, siteCode, gradeAbbreviation, siteId, gradeId, dateFrom, dateTo, placementType, placementWholeTimeEquivalent, trainingDescription, localPostNumber, status);
   }
 
   @Override
   public String toString() {
     return "Placement{" +
         "id=" + id +
+        ", intrepidId='" + intrepidId + '\'' +
+        ", siteCode='" + siteCode + '\'' +
+        ", gradeAbbreviation='" + gradeAbbreviation + '\'' +
+        ", siteId=" + siteId +
+        ", gradeId=" + gradeId +
+        ", dateFrom=" + dateFrom +
+        ", dateTo=" + dateTo +
+        ", placementType='" + placementType + '\'' +
+        ", placementWholeTimeEquivalent=" + placementWholeTimeEquivalent +
+        ", trainingDescription='" + trainingDescription + '\'' +
+        ", localPostNumber='" + localPostNumber + '\'' +
+        ", status=" + status +
         '}';
   }
 }

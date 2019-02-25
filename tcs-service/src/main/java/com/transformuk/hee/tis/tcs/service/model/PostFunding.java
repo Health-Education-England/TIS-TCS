@@ -109,28 +109,33 @@ public class PostFunding implements Serializable {
 
   @Override
   public boolean equals(Object o) {
-    if (this == o) {
-      return true;
-    }
-    if (o == null || getClass() != o.getClass()) {
-      return false;
-    }
-    PostFunding postFunding = (PostFunding) o;
-    if (postFunding.id == null || id == null) {
-      return false;
-    }
-    return Objects.equals(id, postFunding.id);
+    if (this == o) return true;
+    if (o == null || getClass() != o.getClass()) return false;
+    PostFunding that = (PostFunding) o;
+    return Objects.equals(id, that.id) &&
+        Objects.equals(intrepidId, that.intrepidId) &&
+        Objects.equals(fundingType, that.fundingType) &&
+        Objects.equals(info, that.info) &&
+        Objects.equals(startDate, that.startDate) &&
+        Objects.equals(endDate, that.endDate) &&
+        Objects.equals(fundingBodyId, that.fundingBodyId);
   }
 
   @Override
   public int hashCode() {
-    return Objects.hashCode(id);
+    return Objects.hash(id, intrepidId, fundingType, info, startDate, endDate, fundingBodyId);
   }
 
   @Override
   public String toString() {
     return "PostFunding{" +
         "id=" + id +
+        ", intrepidId='" + intrepidId + '\'' +
+        ", fundingType='" + fundingType + '\'' +
+        ", info='" + info + '\'' +
+        ", startDate=" + startDate +
+        ", endDate=" + endDate +
+        ", fundingBodyId='" + fundingBodyId + '\'' +
         '}';
   }
 }

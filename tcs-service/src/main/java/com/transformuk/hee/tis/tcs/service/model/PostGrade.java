@@ -64,18 +64,22 @@ public class PostGrade implements Serializable {
     if (this == o) return true;
     if (o == null || getClass() != o.getClass()) return false;
     PostGrade postGrade = (PostGrade) o;
-    return Objects.equals(id, postGrade.id);
+    return Objects.equals(id, postGrade.id) &&
+        Objects.equals(gradeId, postGrade.gradeId) &&
+        postGradeType == postGrade.postGradeType;
   }
 
   @Override
   public int hashCode() {
-    return Objects.hash(id);
+    return Objects.hash(id, gradeId, postGradeType);
   }
 
   @Override
   public String toString() {
     return "PostGrade{" +
         "id=" + id +
+        ", gradeId=" + gradeId +
+        ", postGradeType=" + postGradeType +
         '}';
   }
 }
