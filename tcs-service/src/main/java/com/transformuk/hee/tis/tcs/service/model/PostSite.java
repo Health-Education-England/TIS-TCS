@@ -4,6 +4,7 @@ import com.transformuk.hee.tis.tcs.api.enumeration.PostSiteType;
 
 import javax.persistence.*;
 import java.io.Serializable;
+import java.util.Objects;
 
 @Entity
 @Table(name = "PostSite")
@@ -14,7 +15,7 @@ public class PostSite implements Serializable {
   @Column(name = "id")
   private Long id;
 
-  @ManyToOne(targetEntity = Post.class, fetch = FetchType.EAGER)
+  @ManyToOne(targetEntity = Post.class, fetch = FetchType.LAZY)
   @JoinColumn(name = "postId")
   private Post post;
 
@@ -61,29 +62,19 @@ public class PostSite implements Serializable {
   public boolean equals(Object o) {
     if (this == o) return true;
     if (o == null || getClass() != o.getClass()) return false;
-
     PostSite postSite = (PostSite) o;
-
-    if (post != null ? !post.equals(postSite.post) : postSite.post != null) return false;
-    if (siteId != null ? !siteId.equals(postSite.siteId) : postSite.siteId != null) return false;
-    return postSiteType == postSite.postSiteType;
+    return Objects.equals(id, postSite.id);
   }
 
   @Override
   public int hashCode() {
-    int result = post != null ? post.hashCode() : 0;
-    result = 31 * result + (siteId != null ? siteId.hashCode() : 0);
-    result = 31 * result + (postSiteType != null ? postSiteType.hashCode() : 0);
-    return result;
+    return Objects.hash(id);
   }
 
   @Override
   public String toString() {
     return "PostSite{" +
         "id=" + id +
-        ", post=" + post +
-        ", siteId='" + siteId + '\'' +
-        ", postSiteType=" + postSiteType +
         '}';
   }
 }

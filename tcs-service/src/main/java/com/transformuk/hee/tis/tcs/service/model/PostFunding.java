@@ -28,7 +28,7 @@ public class PostFunding implements Serializable {
   @Column(name = "intrepidId")
   private String intrepidId;
 
-  @ManyToOne(targetEntity = Post.class, fetch = FetchType.EAGER)
+  @ManyToOne(targetEntity = Post.class, fetch = FetchType.LAZY)
   @JoinColumn(name = "postId")
   private Post post;
 

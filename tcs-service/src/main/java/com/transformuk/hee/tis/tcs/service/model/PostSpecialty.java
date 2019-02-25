@@ -19,7 +19,7 @@ public class PostSpecialty implements Serializable {
   @JoinColumn(name = "postId")
   private Post post;
 
-  @ManyToOne
+  @ManyToOne(fetch = FetchType.LAZY)
   @JoinColumn(name = "specialtyId")
   private Specialty specialty;
 

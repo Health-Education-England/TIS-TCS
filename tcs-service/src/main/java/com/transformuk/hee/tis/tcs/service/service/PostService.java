@@ -142,6 +142,7 @@ public interface PostService {
 
   /**
    * Search for a page of Posts by national post number
+   *
    * @param query
    * @param columnFilers the exact key value filters to apply, can be null
    * @param pageable
@@ -155,4 +156,13 @@ public interface PostService {
    * @param personId the db managed id of the person record
    */
   void canLoggedInUserViewOrAmend(Long personId);
+
+  /**
+   * Find all Posts that are linked to a certain Programme and NPN
+   *
+   * @param programmeId  The id of the Programme
+   * @param npn the npn of the post
+   * @return List of PostDTO of the found Posts
+   */
+  List<PostDTO> findPostsForProgrammeIdAndNpn(Long programmeId, String npn);
 }

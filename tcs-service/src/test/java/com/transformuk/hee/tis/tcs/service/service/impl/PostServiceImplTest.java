@@ -13,6 +13,7 @@ import com.transformuk.hee.tis.tcs.api.enumeration.FundingType;
 import com.transformuk.hee.tis.tcs.api.enumeration.PostGradeType;
 import com.transformuk.hee.tis.tcs.api.enumeration.PostSiteType;
 import com.transformuk.hee.tis.tcs.api.enumeration.PostSpecialtyType;
+import com.transformuk.hee.tis.tcs.api.enumeration.Status;
 import com.transformuk.hee.tis.tcs.service.api.decorator.PostViewDecorator;
 import com.transformuk.hee.tis.tcs.service.api.util.BasicPage;
 import com.transformuk.hee.tis.tcs.service.exception.AccessUnauthorisedException;
@@ -64,6 +65,7 @@ import static org.mockito.Mockito.doReturn;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.verifyZeroInteractions;
 import static org.mockito.Mockito.when;
 
 @RunWith(MockitoJUnitRunner.class)
@@ -575,5 +577,34 @@ public class PostServiceImplTest {
     Assert.assertTrue(indexOfGroupBy < indexOfOrderBy);
     //multiples
     Assert.assertFalse(capturedQueryString.substring(indexOfGroupBy + "group by".length()).contains("group by"));
+  }
+
+  @Test(expected = NullPointerException.class)
+  public void findPostsForProgrammeIdAndNpnShouldThrowExceptionWhenProgrammeIdIsNull() {
+    try {
+      testObj.findPostsForProgrammeIdAndNpn(null, "DUMMY TEXT");
+    } catch (Exception e) {
+      verifyZeroInteractions(postRepositoryMock);
+      verifyZeroInteractions(postMapperMock);
+      throw e;
+    }
+  }
+
+  @Test
+  public void findPostsForProgrammeIdAndNpnShouldDoSearchAndConvertResultToDto() {
+    long programmeId = 1L;
+    String npn = "DUMMY TEXT";
+
+    List<Post> postsFromDb = Lists.newArrayList(new Post());
+    List<PostDTO> convertedPosts = Lists.newArrayList(new PostDTO());
+
+    when(postRepositoryMock.findPostsForProgrammeIdAndNpnLike(programmeId, npn, Status.CURRENT)).thenReturn(postsFromDb);
+    when(postMapperMock.postsToPostDTOs(postsFromDb)).thenReturn(convertedPosts);
+
+    List<PostDTO> result = testObj.findPostsForProgrammeIdAndNpn(programmeId, npn);
+
+    verify(postRepositoryMock).findPostsForProgrammeIdAndNpnLike(programmeId, npn, Status.CURRENT);
+    verify(postMapperMock).postsToPostDTOs(postsFromDb);
+    Assert.assertSame(convertedPosts, result);
   }
 }

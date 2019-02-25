@@ -1,7 +1,10 @@
 package com.transformuk.hee.tis.tcs.service.api;
 
+import com.google.common.collect.Lists;
+import com.google.common.collect.Sets;
 import com.transformuk.hee.tis.tcs.TestUtils;
 import com.transformuk.hee.tis.tcs.api.dto.PostDTO;
+import com.transformuk.hee.tis.tcs.api.dto.ProgrammeDTO;
 import com.transformuk.hee.tis.tcs.api.enumeration.PostSpecialtyType;
 import com.transformuk.hee.tis.tcs.api.enumeration.Status;
 import com.transformuk.hee.tis.tcs.service.Application;
@@ -14,6 +17,7 @@ import com.transformuk.hee.tis.tcs.service.repository.PlacementViewRepository;
 import com.transformuk.hee.tis.tcs.service.service.PlacementService;
 import com.transformuk.hee.tis.tcs.service.service.PostService;
 import com.transformuk.hee.tis.tcs.service.service.mapper.PlacementViewMapper;
+import org.apache.commons.lang3.StringUtils;
 import org.hamcrest.core.StringContains;
 import org.junit.Assert;
 import org.junit.Before;
@@ -48,6 +52,7 @@ import static org.springframework.test.web.servlet.request.MockMvcRequestBuilder
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.put;
+import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.content;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.header;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
@@ -293,5 +298,69 @@ public class PostResourceTest2 {
         .andExpect(jsonPath("$.fieldErrors[0].field").value("specialties"))
         .andExpect(jsonPath("$.fieldErrors[0].message").value(StringContains.
             containsString("Only one Specialty of type PRIMARY allowed")));
+  }
+
+  @Test
+  public void getAllPostsForProgrammeShouldReturnFoundDtos() throws Exception {
+    long programmeId = 1L;
+    String programmeName = "PROGRAMME NAME";
+    long postId = 2L;
+    String postNpn = "NPN";
+
+    ProgrammeDTO programmeDTO = new ProgrammeDTO();
+    programmeDTO.setId(programmeId);
+    programmeDTO.setProgrammeName(programmeName);
+
+    PostDTO postDTO = new PostDTO();
+    postDTO.setId(postId);
+    postDTO.setNationalPostNumber(postNpn);
+    postDTO.setProgrammes(Sets.newHashSet(programmeDTO));
+
+    List<PostDTO> expectedList = Lists.newArrayList(postDTO);
+
+    when(postService.findPostsForProgrammeIdAndNpn(programmeId, StringUtils.EMPTY)).thenReturn(expectedList);
+
+    restPostMockMvc.perform(get("/api/programme/{id}/posts", programmeId)
+        .contentType(TestUtil.APPLICATION_JSON_UTF8))
+        .andExpect(status().isOk())
+        .andExpect(header().string("Content-Type", TestUtil.APPLICATION_JSON_UTF8.toString()))
+        .andExpect(jsonPath("$[0].id").value(postId))
+        .andExpect(jsonPath("$[0].nationalPostNumber").value(postNpn))
+        .andExpect(jsonPath("$[0].programmes[0].id").value(programmeId))
+        .andExpect(jsonPath("$[0].programmes[0].programmeName").value(programmeName));
+
+    verify(postService).findPostsForProgrammeIdAndNpn(programmeId, StringUtils.EMPTY);
+  }
+
+  @Test
+  public void getAllPostsForProgrammeShouldReturnFoundDtosWithNpnSearch() throws Exception {
+    long programmeId = 1L;
+    String programmeName = "PROGRAMME NAME";
+    long postId = 2L;
+    String postNpn = "NPN";
+
+    ProgrammeDTO programmeDTO = new ProgrammeDTO();
+    programmeDTO.setId(programmeId);
+    programmeDTO.setProgrammeName(programmeName);
+
+    PostDTO postDTO = new PostDTO();
+    postDTO.setId(postId);
+    postDTO.setNationalPostNumber(postNpn);
+    postDTO.setProgrammes(Sets.newHashSet(programmeDTO));
+
+    List<PostDTO> expectedList = Lists.newArrayList(postDTO);
+
+    when(postService.findPostsForProgrammeIdAndNpn(programmeId, postNpn)).thenReturn(expectedList);
+
+    restPostMockMvc.perform(get("/api/programme/{id}/posts?npn=NPN", programmeId)
+        .contentType(TestUtil.APPLICATION_JSON_UTF8))
+        .andExpect(status().isOk())
+        .andExpect(header().string("Content-Type", TestUtil.APPLICATION_JSON_UTF8.toString()))
+        .andExpect(jsonPath("$[0].id").value(postId))
+        .andExpect(jsonPath("$[0].nationalPostNumber").value(postNpn))
+        .andExpect(jsonPath("$[0].programmes[0].id").value(programmeId))
+        .andExpect(jsonPath("$[0].programmes[0].programmeName").value(programmeName));
+
+    verify(postService).findPostsForProgrammeIdAndNpn(programmeId, postNpn);
   }
 }

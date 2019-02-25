@@ -52,7 +52,7 @@ public class Specialty implements Serializable {
   @Enumerated(EnumType.STRING)
   private Set<SpecialtyType> specialtyTypes = new HashSet<>();
 
-  @ManyToOne(fetch = FetchType.EAGER)
+  @ManyToOne(fetch = FetchType.LAZY)
   @JoinColumn(name = "specialtyGroupId", referencedColumnName = "id")
   private SpecialtyGroup specialtyGroup;
 

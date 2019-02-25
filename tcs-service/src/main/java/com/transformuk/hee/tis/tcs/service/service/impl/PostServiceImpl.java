@@ -1,5 +1,6 @@
 package com.transformuk.hee.tis.tcs.service.service.impl;
 
+import com.google.common.base.Preconditions;
 import com.google.common.collect.Lists;
 import com.google.common.collect.Maps;
 import com.google.common.collect.Sets;
@@ -557,6 +558,14 @@ public class PostServiceImpl implements PostService {
         }
       }
     }
+  }
+
+  @Override
+  public List<PostDTO> findPostsForProgrammeIdAndNpn(Long programmeId, String npn) {
+    Preconditions.checkNotNull(programmeId, "Programme programmeId cannot be null");
+
+    List<Post> result = postRepository.findPostsForProgrammeIdAndNpnLike(programmeId, npn, Status.CURRENT);
+    return postMapper.postsToPostDTOs(result);
   }
 
   protected String createWhereClause(final String searchString, final List<ColumnFilter> columnFilters) {
