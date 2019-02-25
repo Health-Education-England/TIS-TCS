@@ -11,7 +11,7 @@ import com.transformuk.hee.tis.tcs.service.model.ContactDetails;
 import com.transformuk.hee.tis.tcs.service.model.Person;
 import com.transformuk.hee.tis.tcs.service.repository.PlacementViewRepository;
 import com.transformuk.hee.tis.tcs.service.service.ContactDetailsService;
-import com.transformuk.hee.tis.tcs.service.service.PersonElasticSearchService;
+import com.transformuk.hee.tis.tcs.service.service.impl.PersonElasticSearchService;
 import com.transformuk.hee.tis.tcs.service.service.PersonService;
 import com.transformuk.hee.tis.tcs.service.service.PlacementService;
 import com.transformuk.hee.tis.tcs.service.service.impl.PermissionService;

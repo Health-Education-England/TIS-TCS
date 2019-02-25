@@ -1,7 +1,7 @@
 package com.transformuk.hee.tis.tcs.service.job.person;
 
 import com.google.common.base.Stopwatch;
-import com.transformuk.hee.tis.tcs.service.service.PersonElasticSearchService;
+import com.transformuk.hee.tis.tcs.service.service.impl.PersonElasticSearchService;
 import com.transformuk.hee.tis.tcs.service.service.helper.SqlQuerySupplier;
 import com.transformuk.hee.tis.tcs.service.service.impl.PersonViewRowMapper;
 import net.javacrumbs.shedlock.core.SchedulerLock;

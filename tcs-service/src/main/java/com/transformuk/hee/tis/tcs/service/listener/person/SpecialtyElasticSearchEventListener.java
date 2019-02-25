@@ -1,7 +1,7 @@
 package com.transformuk.hee.tis.tcs.service.listener.person;
 
 import com.transformuk.hee.tis.tcs.service.event.SpecialtySavedEvent;
-import com.transformuk.hee.tis.tcs.service.service.PersonElasticSearchService;
+import com.transformuk.hee.tis.tcs.service.service.impl.PersonElasticSearchService;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;

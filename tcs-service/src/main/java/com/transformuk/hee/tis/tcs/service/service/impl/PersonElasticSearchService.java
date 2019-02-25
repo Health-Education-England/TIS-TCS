@@ -1,4 +1,4 @@
-package com.transformuk.hee.tis.tcs.service.service;
+package com.transformuk.hee.tis.tcs.service.service.impl;
 
 import com.google.common.base.Preconditions;
 import com.google.common.collect.Lists;
@@ -12,8 +12,6 @@ import com.transformuk.hee.tis.tcs.service.job.person.PersonView;
 import com.transformuk.hee.tis.tcs.service.model.ColumnFilter;
 import com.transformuk.hee.tis.tcs.service.repository.PersonElasticSearchRepository;
 import com.transformuk.hee.tis.tcs.service.service.helper.SqlQuerySupplier;
-import com.transformuk.hee.tis.tcs.service.service.impl.PersonTrustRowMapper;
-import com.transformuk.hee.tis.tcs.service.service.impl.PersonViewRowMapper;
 import com.transformuk.hee.tis.tcs.service.strategy.RoleBasedFilterStrategy;
 import org.apache.commons.collections4.CollectionUtils;
 import org.apache.commons.lang3.StringUtils;

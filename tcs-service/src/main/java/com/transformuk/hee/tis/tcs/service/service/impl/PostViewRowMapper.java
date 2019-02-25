@@ -31,7 +31,7 @@ public class PostViewRowMapper implements RowMapper<PostView> {
 
     Set<String> foundProgrammes = splitStringToSet(rs.getString("programmes"));
     Set<ProgrammeName> programmeNames = foundProgrammes.stream().map(ProgrammeName::new).collect(Collectors.toSet());
-    view.setProgrammeName(programmeNames);
+    view.setProgrammeNames(programmeNames);
 
     Set<String> foundFundingType = splitStringToSet(rs.getString("fundingType"));
     Set<FundingType> fundingTypes = foundFundingType.stream().map(FundingType::new).collect(Collectors.toSet());

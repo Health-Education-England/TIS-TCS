@@ -18,7 +18,7 @@ import com.transformuk.hee.tis.tcs.service.api.validation.PersonalDetailsValidat
 import com.transformuk.hee.tis.tcs.service.exception.AccessUnauthorisedException;
 import com.transformuk.hee.tis.tcs.service.exception.ExceptionTranslator;
 import com.transformuk.hee.tis.tcs.service.repository.PlacementViewRepository;
-import com.transformuk.hee.tis.tcs.service.service.PersonElasticSearchService;
+import com.transformuk.hee.tis.tcs.service.service.impl.PersonElasticSearchService;
 import com.transformuk.hee.tis.tcs.service.service.PersonService;
 import com.transformuk.hee.tis.tcs.service.service.PlacementService;
 import com.transformuk.hee.tis.tcs.service.service.mapper.PlacementViewMapper;

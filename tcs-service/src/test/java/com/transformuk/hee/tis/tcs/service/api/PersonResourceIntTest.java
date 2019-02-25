@@ -16,7 +16,7 @@ import com.transformuk.hee.tis.tcs.service.model.GdcDetails;
 import com.transformuk.hee.tis.tcs.service.model.GmcDetails;
 import com.transformuk.hee.tis.tcs.service.model.Person;
 import com.transformuk.hee.tis.tcs.service.repository.*;
-import com.transformuk.hee.tis.tcs.service.service.PersonElasticSearchService;
+import com.transformuk.hee.tis.tcs.service.service.impl.PersonElasticSearchService;
 import com.transformuk.hee.tis.tcs.service.service.PersonService;
 import com.transformuk.hee.tis.tcs.service.service.PlacementService;
 import com.transformuk.hee.tis.tcs.service.service.impl.PermissionService;

@@ -31,7 +31,7 @@ public class PostView implements Serializable {
   private Long primarySpecialty;
 
   @Field(type = FieldType.Nested)
-  private Set<ProgrammeName> programmeName;
+  private Set<ProgrammeName> programmeNames;
 
   @Field(type = FieldType.Nested)
   private Set<CurrentTrainee> currentTrainee;
@@ -39,7 +39,7 @@ public class PostView implements Serializable {
   @Field(type = FieldType.Nested)
   private Set<FundingType> fundingType;
 
-  @Field(type = FieldType.Keyword)
+  @Field(type = FieldType.Text, analyzer = "standard")
   private Status status;
 
   @Field(type = FieldType.Keyword)
@@ -88,12 +88,12 @@ public class PostView implements Serializable {
     this.primarySpecialty = primarySpecialty;
   }
 
-  public Set<ProgrammeName> getProgrammeName() {
-    return programmeName;
+  public Set<ProgrammeName> getProgrammeNames() {
+    return programmeNames;
   }
 
-  public void setProgrammeName(Set<ProgrammeName> programmeName) {
-    this.programmeName = programmeName;
+  public void setProgrammeNames(Set<ProgrammeName> programmeNames) {
+    this.programmeNames = programmeNames;
   }
 
   public Set<CurrentTrainee> getCurrentTrainee() {
@@ -146,7 +146,7 @@ public class PostView implements Serializable {
         Objects.equals(primarySiteId, postView.primarySiteId) &&
         Objects.equals(approvedGradeId, postView.approvedGradeId) &&
         Objects.equals(primarySpecialty, postView.primarySpecialty) &&
-        Objects.equals(programmeName, postView.programmeName) &&
+        Objects.equals(programmeNames, postView.programmeNames) &&
         Objects.equals(currentTrainee, postView.currentTrainee) &&
         Objects.equals(fundingType, postView.fundingType) &&
         status == postView.status &&
@@ -156,6 +156,6 @@ public class PostView implements Serializable {
 
   @Override
   public int hashCode() {
-    return Objects.hash(id, nationalPostNumber, primarySiteId, approvedGradeId, primarySpecialty, programmeName, currentTrainee, fundingType, status, owner, trusts);
+    return Objects.hash(id, nationalPostNumber, primarySiteId, approvedGradeId, primarySpecialty, programmeNames, currentTrainee, fundingType, status, owner, trusts);
   }
 }

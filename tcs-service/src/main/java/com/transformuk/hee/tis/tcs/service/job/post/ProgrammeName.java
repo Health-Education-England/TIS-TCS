@@ -1,8 +1,9 @@
 package com.transformuk.hee.tis.tcs.service.job.post;
 
+import java.io.Serializable;
 import java.util.Objects;
 
-public class ProgrammeName {
+public class ProgrammeName implements Serializable {
   private String programmeName;
 
   public ProgrammeName() {
