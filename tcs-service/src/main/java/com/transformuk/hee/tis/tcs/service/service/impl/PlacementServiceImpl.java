@@ -140,7 +140,7 @@ public class PlacementServiceImpl implements PlacementService {
 
   @Override
   public Placement findPlacementById(Long placementId) {
-    return placementRepository.findById(placementId).orElse(null);
+    return placementRepository.findPlacementById(placementId).orElse(null);
   }
 
   @Transactional
