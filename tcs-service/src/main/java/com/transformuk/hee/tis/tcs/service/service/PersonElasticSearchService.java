@@ -166,6 +166,8 @@ public class PersonElasticSearchService {
       shouldQuery
           .should(new MatchQueryBuilder("publicHealthNumber", searchQuery))
           .should(new MatchQueryBuilder("fullName", searchQuery))
+          .should(new WildcardQueryBuilder("surname", "*" + searchQuery + "*"))
+          .should(new WildcardQueryBuilder("forename", "*" + searchQuery + "*"))
           .should(new MatchQueryBuilder("gmcNumber", searchQuery))
           .should(new MatchQueryBuilder("gdcNumber", searchQuery))
           .should(new MatchQueryBuilder("role", searchQuery));
