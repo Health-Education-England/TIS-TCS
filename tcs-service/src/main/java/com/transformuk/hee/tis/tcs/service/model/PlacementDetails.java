@@ -57,8 +57,10 @@ public class PlacementDetails {
 
   private String localPostNumber;
 
+  @Column(name="placementAddedDate")
   private LocalDateTime addedDate;
 
+  @Column(name="placementAmendedDate")
   private LocalDateTime amendedDate;
 
   @OneToMany(mappedBy = "placement", cascade = CascadeType.ALL, fetch = FetchType.EAGER, orphanRemoval = true)
