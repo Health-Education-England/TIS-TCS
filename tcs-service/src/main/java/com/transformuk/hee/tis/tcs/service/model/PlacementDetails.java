@@ -13,6 +13,7 @@ import javax.persistence.OneToMany;
 import javax.persistence.Table;
 import java.math.BigDecimal;
 import java.time.LocalDate;
+import java.time.LocalDateTime;
 import java.util.HashSet;
 import java.util.Set;
 
@@ -55,6 +56,12 @@ public class PlacementDetails {
   private String trainingDescription;
 
   private String localPostNumber;
+
+  @Column(name="placementAddedDate")
+  private LocalDateTime addedDate;
+
+  @Column(name="placementAmendedDate")
+  private LocalDateTime amendedDate;
 
   @OneToMany(mappedBy = "placement", cascade = CascadeType.ALL, fetch = FetchType.EAGER, orphanRemoval = true)
   private Set<Comment> comments = new HashSet<>();
@@ -188,6 +195,22 @@ public class PlacementDetails {
     this.gradeId = gradeId;
   }
 
+  public LocalDateTime getAddedDate() {
+    return addedDate;
+  }
+
+  public void setAddedDate(LocalDateTime addedDate) {
+    this.addedDate = addedDate;
+  }
+
+  public LocalDateTime getAmendedDate() {
+    return amendedDate;
+  }
+
+  public void setAmendedDate(LocalDateTime amendedDate) {
+    this.amendedDate = amendedDate;
+  }
+
   public Set<Comment> getComments() { return comments; }
 
   public void setComments(Set<Comment> comments) { this.comments = comments; }
@@ -215,6 +238,8 @@ public class PlacementDetails {
     if (placementType != null ? !placementType.equals(that.placementType) : that.placementType != null) return false;
     if (trainingDescription != null ? !trainingDescription.equals(that.trainingDescription) : that.trainingDescription != null)
       return false;
+    if (addedDate != null ? !addedDate.equals(that.addedDate) : that.addedDate != null) return false;
+    if (amendedDate != null ? !amendedDate.equals(that.amendedDate) : that.amendedDate != null) return false;
     return localPostNumber != null ? localPostNumber.equals(that.localPostNumber) : that.localPostNumber == null;
   }
 
@@ -234,6 +259,8 @@ public class PlacementDetails {
     result = 31 * result + (placementType != null ? placementType.hashCode() : 0);
     result = 31 * result + (trainingDescription != null ? trainingDescription.hashCode() : 0);
     result = 31 * result + (localPostNumber != null ? localPostNumber.hashCode() : 0);
+    result = 31 * result + (addedDate != null ? addedDate.hashCode() : 0);
+    result = 31 * result + (amendedDate != null ? amendedDate.hashCode() : 0);
     return result;
   }
 
@@ -254,6 +281,8 @@ public class PlacementDetails {
         ", placementType='" + placementType + '\'' +
         ", trainingDescription='" + trainingDescription + '\'' +
         ", localPostNumber='" + localPostNumber + '\'' +
+        ", addedDate='" + addedDate + '\'' +
+        ", amendedDate='" + amendedDate + '\'' +
         '}';
   }
 }

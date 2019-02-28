@@ -10,6 +10,7 @@ import javax.validation.constraints.Null;
 import java.io.Serializable;
 import java.math.BigDecimal;
 import java.time.LocalDate;
+import java.time.LocalDateTime;
 import java.util.HashSet;
 import java.util.Set;
 
@@ -71,6 +72,10 @@ public class PlacementDetailsDTO implements Serializable {
   private String localPostNumber;
 
   private Set<PlacementSpecialtyDTO> specialties;
+
+  private LocalDateTime addedDate;
+
+  private LocalDateTime amendedDate;
 
   private Set<PlacementSupervisorDTO> supervisors = new HashSet<>();
 
@@ -256,6 +261,22 @@ public class PlacementDetailsDTO implements Serializable {
     this.gradeId = gradeId;
   }
 
+  public LocalDateTime getAmendedDate() {
+    return amendedDate;
+  }
+
+  public void setAmendedDate(LocalDateTime amendedDate) {
+    this.amendedDate = amendedDate;
+  }
+
+  public LocalDateTime getAddedDate() {
+    return addedDate;
+  }
+
+  public void setAddedDate(LocalDateTime addedDate) {
+    this.addedDate = addedDate;
+  }
+
   public Set<PlacementSpecialtyDTO> getSpecialties() {
     return specialties;
   }
@@ -314,6 +335,8 @@ public class PlacementDetailsDTO implements Serializable {
       return false;
     if (status != that.status) return false;
     if (postId != null ? !postId.equals(that.postId) : that.postId != null) return false;
+    if (addedDate != null ? !addedDate.equals(that.addedDate) : that.addedDate != null) return false;
+    if (amendedDate != null ? !amendedDate.equals(that.amendedDate) : that.amendedDate != null) return false;
     return localPostNumber != null ? localPostNumber.equals(that.localPostNumber) : that.localPostNumber == null;
   }
 
@@ -338,6 +361,8 @@ public class PlacementDetailsDTO implements Serializable {
     result = 31 * result + (trainingDescription != null ? trainingDescription.hashCode() : 0);
     result = 31 * result + (status != null ? status.hashCode() : 0);
     result = 31 * result + (postId != null ? postId.hashCode() : 0);
+    result = 31 * result + (addedDate != null ? addedDate.hashCode() : 0);
+    result = 31 * result + (amendedDate != null ? amendedDate.hashCode() : 0);
     result = 31 * result + (localPostNumber != null ? localPostNumber.hashCode() : 0);
     return result;
   }
@@ -364,6 +389,8 @@ public class PlacementDetailsDTO implements Serializable {
             ", trainingDescription='" + trainingDescription + '\'' +
             ", status=" + status +
             ", postId=" + postId +
+            ", addedDate=" + addedDate +
+            ", amendedDate=" + amendedDate +
             ", localPostNumber='" + localPostNumber + '\'' +
             '}';
   }
