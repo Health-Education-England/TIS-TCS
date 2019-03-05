@@ -5,6 +5,8 @@ import org.springframework.data.annotation.Id;
 import org.springframework.data.elasticsearch.annotations.Document;
 import org.springframework.data.elasticsearch.annotations.Field;
 import org.springframework.data.elasticsearch.annotations.FieldType;
+import org.springframework.data.elasticsearch.annotations.InnerField;
+import org.springframework.data.elasticsearch.annotations.MultiField;
 
 import java.io.Serializable;
 import java.util.Set;
@@ -21,10 +23,14 @@ public class PersonView implements Serializable {
 
   private String intrepidId;
 
-  @Field(type = FieldType.Keyword)
+  @MultiField(
+      mainField = @Field(type = FieldType.Keyword),
+      otherFields = { @InnerField(suffix = "text", type = FieldType.Text, analyzer = "standard", searchAnalyzer = "standard")})
   private String surname;
 
-  @Field(type = FieldType.Keyword)
+  @MultiField(
+      mainField = @Field(type = FieldType.Keyword),
+      otherFields = { @InnerField(suffix = "text", type = FieldType.Text, analyzer = "standard", searchAnalyzer = "standard")})
   private String forenames;
 
   @Field(type = FieldType.Text, analyzer = "standard", searchAnalyzer = "standard")
