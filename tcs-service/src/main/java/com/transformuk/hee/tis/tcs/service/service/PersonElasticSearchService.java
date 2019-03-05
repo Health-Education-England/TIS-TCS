@@ -77,6 +77,7 @@ public class PersonElasticSearchService {
 
     if (StringUtils.isNotEmpty(searchQuery)) {
       BoolQueryBuilder boolSearchQuery = new BoolQueryBuilder();
+      boolSearchQuery.should(new MatchQueryBuilder("fullName", searchQuery));
       boolSearchQuery.should(new WildcardQueryBuilder("surname", "*" + searchQuery + "*"));
       boolSearchQuery.should(new WildcardQueryBuilder("forenames", "*" + searchQuery + "*"));
       boolSearchQuery.should(new MatchQueryBuilder("gmcNumber", searchQuery));
@@ -167,7 +168,7 @@ public class PersonElasticSearchService {
           .should(new MatchQueryBuilder("publicHealthNumber", searchQuery))
           .should(new MatchQueryBuilder("fullName", searchQuery))
           .should(new WildcardQueryBuilder("surname", "*" + searchQuery + "*"))
-          .should(new WildcardQueryBuilder("forename", "*" + searchQuery + "*"))
+          .should(new WildcardQueryBuilder("forenames", "*" + searchQuery + "*"))
           .should(new MatchQueryBuilder("gmcNumber", searchQuery))
           .should(new MatchQueryBuilder("gdcNumber", searchQuery))
           .should(new MatchQueryBuilder("role", searchQuery));
