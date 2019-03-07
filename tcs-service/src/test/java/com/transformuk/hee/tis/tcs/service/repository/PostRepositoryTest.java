@@ -3,6 +3,7 @@ package com.transformuk.hee.tis.tcs.service.repository;
 import com.google.common.collect.Sets;
 import com.transformuk.hee.tis.tcs.api.enumeration.Status;
 import com.transformuk.hee.tis.tcs.service.Application;
+import com.transformuk.hee.tis.tcs.service.model.Placement;
 import com.transformuk.hee.tis.tcs.service.model.Post;
 import com.transformuk.hee.tis.tcs.service.model.PostTrust;
 import org.apache.commons.lang3.StringUtils;
@@ -18,6 +19,7 @@ import org.springframework.test.context.junit4.SpringRunner;
 import org.springframework.transaction.annotation.Transactional;
 
 import javax.persistence.EntityManager;
+import java.time.LocalDate;
 import java.util.List;
 import java.util.Optional;
 import java.util.Set;
@@ -125,5 +127,39 @@ public class PostRepositoryTest {
     Optional<Post> result = postRepository.findPostByPlacementHistoryId(placementId);
 
     Assert.assertFalse(result.isPresent());
+  }
+
+  @Transactional
+  @Test
+  @Sql(scripts = "/scripts/placementProgrammeSpecialty.sql")
+  @Sql(scripts = "/scripts/deletePlacementProgrammeSpecialty.sql", executionPhase = Sql.ExecutionPhase.AFTER_TEST_METHOD)
+  public void findPostsAndPlacementsByProgrammeIdAndSpecialtyIdShouldFindPostsLinkedToSpecialtyAndProgramme() {
+    Long placementId1 = 3L, placementId2 = 30L;
+    Long postId1 = 2L, postId2 = 20L;
+    Long programmeId = 5L;
+    Long specialtyId = 1L;
+    Long traineeId1 = 4L, traineeId2 = 40L;
+    String traineeForename1 = "John", traineeForename2 = "Joanne";
+
+    LocalDate dateFrom = LocalDate.of(2000, 1, 1);
+    LocalDate dateTo = LocalDate.of(2100, 1, 1);
+
+    Set<Post> results = postRepository.findPostsAndPlacementsByProgrammeIdAndSpecialtyId(programmeId, specialtyId);
+
+    Assert.assertNotNull(results);
+    Assert.assertEquals(1, results.size());
+
+    for (Post post : results) {
+        Assert.assertTrue(postId1.equals(post.getId()));
+        Assert.assertEquals(specialtyId, post.getSpecialties().iterator().next().getSpecialty().getId());
+        Assert.assertEquals(programmeId, post.getProgrammes().iterator().next().getId());
+        Assert.assertTrue(placementId1.equals(post.getPlacementHistory().iterator().next().getId()) || placementId2.equals(post.getPlacementHistory().iterator().next().getId()));
+        System.out.println(post.getPlacementHistory().iterator().next().getTrainee().getId());
+        Assert.assertTrue(traineeId1.equals(post.getPlacementHistory().iterator().next().getTrainee().getId()) || traineeId2.equals(post.getPlacementHistory().iterator().next().getTrainee().getId()));
+        Assert.assertTrue(traineeForename1.equals(post.getPlacementHistory().iterator().next().getTrainee().getContactDetails().getForenames())
+          || traineeForename2.equals(post.getPlacementHistory().iterator().next().getTrainee().getContactDetails().getForenames()));
+
+    }
+
   }
 }

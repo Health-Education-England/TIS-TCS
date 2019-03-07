@@ -3,14 +3,17 @@ package com.transformuk.hee.tis.tcs.service.service.impl;
 import com.google.common.base.Preconditions;
 import com.google.common.collect.Lists;
 import com.google.common.collect.Maps;
+import com.google.common.collect.Sets;
 import com.transformuk.hee.tis.reference.api.dto.SiteDTO;
 import com.transformuk.hee.tis.reference.client.ReferenceService;
 import com.transformuk.hee.tis.tcs.service.dto.placementmanager.PlacementsResultDTO;
 import com.transformuk.hee.tis.tcs.service.dto.placementmanager.SpecialtyDTO;
 import com.transformuk.hee.tis.tcs.service.model.Placement;
 import com.transformuk.hee.tis.tcs.service.model.Post;
+import com.transformuk.hee.tis.tcs.service.model.PostSite;
 import com.transformuk.hee.tis.tcs.service.model.Specialty;
 import com.transformuk.hee.tis.tcs.service.repository.PlacementRepository;
+import com.transformuk.hee.tis.tcs.service.repository.PostRepository;
 import com.transformuk.hee.tis.tcs.service.repository.SpecialtyRepository;
 import com.transformuk.hee.tis.tcs.service.service.mapper.PlacementPlannerMapper;
 import org.slf4j.Logger;
@@ -37,6 +40,8 @@ public class PlacementPlannerServiceImp {
 
   @Autowired
   private PlacementRepository placementRepository;
+  @Autowired
+  private PostRepository postRepository;
   @Autowired
   private SpecialtyRepository specialtyRepository;
   @Autowired
@@ -67,12 +72,27 @@ public class PlacementPlannerServiceImp {
     }
 
     Set<Placement> foundPlacements = placementRepository.findPlacementsByProgrammeIdAndSpecialtyId(programmeId, specialtyId, fromDate, toDate);
+
+    System.out.println(foundPlacements);
+
     Set<Long> siteIds = getSiteIdsForPlacements(foundPlacements);
     List<com.transformuk.hee.tis.reference.api.dto.SiteDTO> foundSites = referenceService.findSitesIdIn(siteIds);
     Map<Long, com.transformuk.hee.tis.reference.api.dto.SiteDTO> siteIdToSite = getSiteIdsToSites(foundSites);
     Map<SiteDTO, Map<Post, List<Placement>>> formattedData = orderPlacementsIntoFormat(foundPlacements, siteIdToSite);
+    System.out.println(formattedData);
 
-    SpecialtyDTO specialtyDTO = placementPlannerMapper.convertSpecialty(specialty, formattedData);
+    Set<Post> foundPosts = postRepository.findPostsAndPlacementsByProgrammeIdAndSpecialtyId(programmeId, specialtyId);
+    System.out.println(foundPosts);
+
+    Set<Long> postIds = getSiteIdsForPosts(foundPosts);
+    System.out.println(postIds);
+
+    Map<Long, com.transformuk.hee.tis.reference.api.dto.SiteDTO> siteIdToSite2 = getSiteIdsToSites(foundSites);
+
+    Map<SiteDTO, Map<Post, List<Placement>>> formattedData2 = orderPostsIntoFormat(foundPosts, siteIdToSite2);
+    System.out.println((formattedData2));
+
+    SpecialtyDTO specialtyDTO = placementPlannerMapper.convertSpecialty(specialty, formattedData2);
     Long count = specialtyDTO.getSites().stream().flatMap(s -> s.getPosts().stream()).flatMap(p -> p.getPlacements().stream()).count();
 
     result.setSpecialties(Lists.newArrayList(specialtyDTO));
@@ -81,6 +101,46 @@ public class PlacementPlannerServiceImp {
     result.setTotalPlacements(count.intValue());
 
     return result;
+  }
+
+  private Map<SiteDTO, Map<Post, List<Placement>>> orderPostsIntoFormat(Set<Post> foundPosts, Map<Long, SiteDTO> siteIdToSiteDTO) {
+    Map<SiteDTO, Map<Post, List<Placement>>> sitesToPosts = Maps.newHashMap();
+
+    for (Post foundPost: foundPosts) {
+
+      Map<Post, List<Placement>> postsToPlacements = Maps.newHashMap();
+      List<Placement> postPlacements = new ArrayList<>();
+
+      // if the post does not have placements, add post with empty placements
+      if (foundPost.getPlacementHistory().isEmpty()) {
+        for (PostSite site: foundPost.getSites()) {
+          Long siteId = site.getSiteId();
+          if (siteIdToSiteDTO.containsKey(siteId)) {
+              SiteDTO siteDTO = siteIdToSiteDTO.get(siteId);
+              if (sitesToPosts.containsKey(siteDTO)) {
+                postsToPlacements = sitesToPosts.get(siteDTO);
+              }
+              sitesToPosts.put(siteDTO, postsToPlacements);
+              postsToPlacements.put(foundPost, postPlacements);
+          }
+        }
+        // if the post has placements, add post with placements
+      } else {
+        for (Placement placement : foundPost.getPlacementHistory()) {
+          Long siteId = placement.getSiteId();
+          if (siteIdToSiteDTO.containsKey(siteId)) {
+            SiteDTO siteDTO = siteIdToSiteDTO.get(siteId);
+            if (sitesToPosts.containsKey(siteDTO)) {
+              postsToPlacements = sitesToPosts.get(siteDTO);
+            }
+            sitesToPosts.put(siteDTO, postsToPlacements);
+            postPlacements.add(placement);
+            postsToPlacements.put(foundPost, postPlacements);
+          }
+        }
+      }
+    }
+    return sitesToPosts;
   }
 
   private Map<SiteDTO, Map<Post, List<Placement>>> orderPlacementsIntoFormat(Set<Placement> foundPlacements, Map<Long, SiteDTO> siteIdToSiteDTO) {
@@ -119,6 +179,27 @@ public class PlacementPlannerServiceImp {
         .stream()
         .filter(Objects::nonNull)
         .collect(Collectors.toMap((s -> s.getId()), (s -> s)));
+  }
+
+  private Set<Long> getSiteIdsForPosts(Set<Post> foundPosts) {
+    Set<Long> foundIds = Sets.newHashSet();
+
+    for (Post post: foundPosts) {
+      // if the post does not have placements, add the primary site id of the post
+      if (post.getPlacementHistory().isEmpty()) {
+        for (PostSite site: post.getSites()) {
+          if (site.getPostSiteType().equals("PRIMARY")) {
+            foundIds.add(site.getSiteId());
+          }
+        }
+      // if the post has placements, add the site id of the placement
+      } else {
+        for (Placement placement : post.getPlacementHistory()) {
+          foundIds.add(placement.getSiteId());
+        }
+      }
+    }
+    return foundIds;
   }
 
   private Set<Long> getSiteIdsForPlacements(Set<Placement> foundPlacements) {

@@ -11,6 +11,7 @@ import com.transformuk.hee.tis.tcs.service.model.Placement;
 import com.transformuk.hee.tis.tcs.service.model.Post;
 import com.transformuk.hee.tis.tcs.service.model.Specialty;
 import com.transformuk.hee.tis.tcs.service.repository.PlacementRepository;
+import com.transformuk.hee.tis.tcs.service.repository.PostRepository;
 import com.transformuk.hee.tis.tcs.service.repository.SpecialtyRepository;
 import com.transformuk.hee.tis.tcs.service.service.mapper.PlacementPlannerMapper;
 import org.junit.Assert;
@@ -43,6 +44,8 @@ public class PlacementPlannerServiceImpTest {
 
   @Mock
   private PlacementRepository placementRepositoryMock;
+  @Mock
+  private PostRepository postRepositoryMock;
   @Mock
   private SpecialtyRepository specialtyRepositoryMock;
   @Mock
@@ -77,6 +80,7 @@ public class PlacementPlannerServiceImpTest {
 
     HashSet<Long> siteIds = Sets.newHashSet(SITE_ID);
     Set<Placement> foundPlacements = Sets.newHashSet(placementMock1, placementMock2);
+    Set<Post> foundPosts = Sets.newHashSet(postMock);
     List<SiteDTO> foundSites = Lists.newArrayList(siteDTOMock);
     Map<SiteDTO, Set<Post>> siteToPosts = Maps.newHashMap();
     siteToPosts.put(siteDTOMock, Sets.newHashSet(postMock));
@@ -87,6 +91,7 @@ public class PlacementPlannerServiceImpTest {
 
     when(specialtyRepositoryMock.findById(SPECIALTY_ID)).thenReturn(Optional.of(specialtyMock));
     when(placementRepositoryMock.findPlacementsByProgrammeIdAndSpecialtyId(PROGRAMME_ID, SPECIALTY_ID, fromDate, toDate)).thenReturn(foundPlacements);
+    when(postRepositoryMock.findPostsAndPlacementsByProgrammeIdAndSpecialtyId(PROGRAMME_ID, SPECIALTY_ID)).thenReturn(foundPosts);
     when(referenceServiceMock.findSitesIdIn(siteIds)).thenReturn(foundSites);
     when(placementPlannerMapperMock.convertSpecialty(eq(specialtyMock), any())).thenReturn(specialtyDTOMock);
 

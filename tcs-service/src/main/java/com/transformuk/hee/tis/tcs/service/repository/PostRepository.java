@@ -10,6 +10,7 @@ import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.jpa.repository.query.Procedure;
 import org.springframework.data.repository.query.Param;
 
+import java.time.LocalDate;
 import java.util.List;
 import java.util.Optional;
 import java.util.Set;
@@ -83,4 +84,23 @@ public interface PostRepository extends JpaRepository<Post, Long>, JpaSpecificat
   List<Post> findPostsForProgrammeIdAndNpnLike(@Param("id") Long id, @Param("npn") String npn, @Param("status") Status status);
 
   Optional<Post> findPostByPlacementHistoryId(Long id);
+
+  @Query("SELECT p " +
+    "FROM Post p " +
+    "JOIN FETCH p.programmes pr " +
+    "JOIN FETCH p.specialties ps " +
+    "JOIN FETCH ps.specialty sp " +
+    "LEFT JOIN FETCH p.placementHistory pl " +
+    "LEFT JOIN FETCH p.sites " +
+    "LEFT JOIN FETCH pl.trainee t " +
+    "LEFT JOIN FETCH t.contactDetails c " +
+    "LEFT JOIN FETCH t.gmcDetails gmc " +
+    "LEFT JOIN FETCH t.gdcDetails gdc " +
+    "LEFT JOIN FETCH t.personalDetails pd " +
+    "LEFT JOIN FETCH t.rightToWork rtw " +
+    "WHERE pr.id = :programmeId " +
+    "AND sp.id = :specialtyId " +
+    "AND p.status = 'CURRENT'")
+  Set<Post> findPostsAndPlacementsByProgrammeIdAndSpecialtyId(@Param("programmeId") Long programmeId,
+                                                               @Param("specialtyId") Long specialtyId);
 }
