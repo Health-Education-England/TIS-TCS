@@ -89,7 +89,7 @@ public class PlacementPlannerServiceImp {
 
     Map<Long, com.transformuk.hee.tis.reference.api.dto.SiteDTO> siteIdToSite2 = getSiteIdsToSites(foundSites);
 
-    Map<SiteDTO, Map<Post, List<Placement>>> formattedData2 = orderPostsIntoFormat(foundPosts, siteIdToSite2);
+    Map<SiteDTO, Map<Post, List<Placement>>> formattedData2 = orderPostsIntoFormat(foundPosts, siteIdToSite2, fromDate, toDate);
     System.out.println((formattedData2));
 
     SpecialtyDTO specialtyDTO = placementPlannerMapper.convertSpecialty(specialty, formattedData2);
@@ -103,7 +103,7 @@ public class PlacementPlannerServiceImp {
     return result;
   }
 
-  private Map<SiteDTO, Map<Post, List<Placement>>> orderPostsIntoFormat(Set<Post> foundPosts, Map<Long, SiteDTO> siteIdToSiteDTO) {
+  private Map<SiteDTO, Map<Post, List<Placement>>> orderPostsIntoFormat(Set<Post> foundPosts, Map<Long, SiteDTO> siteIdToSiteDTO, LocalDate fromDate, LocalDate toDate) {
     Map<SiteDTO, Map<Post, List<Placement>>> sitesToPosts = Maps.newHashMap();
 
     for (Post foundPost: foundPosts) {
@@ -127,18 +127,25 @@ public class PlacementPlannerServiceImp {
         // if the post has placements, add post with placements
       } else {
         for (Placement placement : foundPost.getPlacementHistory()) {
-          Long siteId = placement.getSiteId();
-          if (siteIdToSiteDTO.containsKey(siteId)) {
-            SiteDTO siteDTO = siteIdToSiteDTO.get(siteId);
-            if (sitesToPosts.containsKey(siteDTO)) {
-              postsToPlacements = sitesToPosts.get(siteDTO);
+            Long siteId = placement.getSiteId();
+            if (siteIdToSiteDTO.containsKey(siteId)) {
+              SiteDTO siteDTO = siteIdToSiteDTO.get(siteId);
+              if (sitesToPosts.containsKey(siteDTO)) {
+                postsToPlacements = sitesToPosts.get(siteDTO);
+              }
+              sitesToPosts.put(siteDTO, postsToPlacements);
+
+              if ((placement.getDateFrom().isBefore(toDate) && placement.getDateTo().isAfter(fromDate)) ||
+                placement.getDateFrom().isEqual(fromDate) || placement.getDateTo().isEqual(toDate)
+              ) {
+                System.out.println(placement.getDateTo() + " is before " + toDate);
+                System.out.println(placement.getDateTo() + " is after " + fromDate);
+                postPlacements.add(placement);
+              }
+              postsToPlacements.put(foundPost, postPlacements);
             }
-            sitesToPosts.put(siteDTO, postsToPlacements);
-            postPlacements.add(placement);
-            postsToPlacements.put(foundPost, postPlacements);
           }
         }
-      }
     }
     return sitesToPosts;
   }
