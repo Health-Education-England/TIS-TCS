@@ -138,8 +138,6 @@ public class PlacementPlannerServiceImp {
               if ((placement.getDateFrom().isBefore(toDate) && placement.getDateTo().isAfter(fromDate)) ||
                 placement.getDateFrom().isEqual(fromDate) || placement.getDateTo().isEqual(toDate)
               ) {
-                System.out.println(placement.getDateTo() + " is before " + toDate);
-                System.out.println(placement.getDateTo() + " is after " + fromDate);
                 postPlacements.add(placement);
               }
               postsToPlacements.put(foundPost, postPlacements);
