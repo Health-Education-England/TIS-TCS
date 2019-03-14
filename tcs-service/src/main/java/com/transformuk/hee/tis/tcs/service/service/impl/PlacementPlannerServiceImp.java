@@ -22,6 +22,7 @@ import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+import org.springframework.util.StopWatch;
 
 import java.time.LocalDate;
 import java.util.ArrayList;
@@ -72,26 +73,35 @@ public class PlacementPlannerServiceImp {
       toDate = LocalDate.now().plusYears(PLACEMENTS_YEARS_IN_THE_FUTURE);
     }
 
-    Set<Placement> foundPlacements = placementRepository.findPlacementsByProgrammeIdAndSpecialtyId(programmeId, specialtyId, fromDate, toDate);
+    // Set<Placement> foundPlacements = placementRepository.findPlacementsByProgrammeIdAndSpecialtyId(programmeId, specialtyId, fromDate, toDate);
 
-    System.out.println(foundPlacements);
+    // System.out.println(foundPlacements);
 
-    Set<Long> siteIds = getSiteIdsForPlacements(foundPlacements);
-    List<com.transformuk.hee.tis.reference.api.dto.SiteDTO> foundSites = referenceService.findSitesIdIn(siteIds);
-    Map<Long, com.transformuk.hee.tis.reference.api.dto.SiteDTO> siteIdToSite = getSiteIdsToSites(foundSites);
-    Map<SiteDTO, Map<Post, List<Placement>>> formattedData = orderPlacementsIntoFormat(foundPlacements, siteIdToSite);
-    System.out.println(formattedData);
+    // Set<Long> siteIds = getSiteIdsForPlacements(foundPlacements);
+    // List<com.transformuk.hee.tis.reference.api.dto.SiteDTO> foundSites = referenceService.findSitesIdIn(siteIds);
+    // Map<Long, com.transformuk.hee.tis.reference.api.dto.SiteDTO> siteIdToSite = getSiteIdsToSites(foundSites);
+    // Map<SiteDTO, Map<Post, List<Placement>>> formattedData = orderPlacementsIntoFormat(foundPlacements, siteIdToSite);
+    // System.out.println(formattedData);
 
+    StopWatch stopWatch = new StopWatch();
+    stopWatch.start();
     Set<Post> foundPosts = postRepository.findPostsAndPlacementsByProgrammeIdAndSpecialtyId(programmeId, specialtyId);
-    System.out.println(foundPosts);
+    stopWatch.stop();
+    LOG.info("Time it took to run query: {}", stopWatch.toString());
 
-    Set<Long> postIds = getSiteIdsForPosts(foundPosts);
-    System.out.println(postIds);
+
+
+    stopWatch = new StopWatch();
+    stopWatch.start();
+    LOG.info("We have {} posts", foundPosts.size());
+    Set<Long> siteIds = getSiteIdsForPosts(foundPosts, fromDate, toDate);
+    LOG.info("We have {} sites", siteIds.size());
+
+    List<com.transformuk.hee.tis.reference.api.dto.SiteDTO> foundSites = referenceService.findSitesIdIn(siteIds);
 
     Map<Long, com.transformuk.hee.tis.reference.api.dto.SiteDTO> siteIdToSite2 = getSiteIdsToSites(foundSites);
 
     Map<SiteDTO, Map<Post, List<Placement>>> formattedData2 = orderPostsIntoFormat(foundPosts, siteIdToSite2, fromDate, toDate);
-    System.out.println((formattedData2));
 
     SpecialtyDTO specialtyDTO = placementPlannerMapper.convertSpecialty(specialty, formattedData2);
     Long count = specialtyDTO.getSites().stream().flatMap(s -> s.getPosts().stream()).flatMap(p -> p.getPlacements().stream()).count();
@@ -101,52 +111,55 @@ public class PlacementPlannerServiceImp {
     result.setTotalSites(siteIds.size());
     result.setTotalPlacements(count.intValue());
 
+    stopWatch.stop();
+    LOG.info("Time it took to process data: {}", stopWatch.toString());
     return result;
   }
 
   private Map<SiteDTO, Map<Post, List<Placement>>> orderPostsIntoFormat(Set<Post> foundPosts, Map<Long, SiteDTO> siteIdToSiteDTO, LocalDate fromDate, LocalDate toDate) {
     Map<SiteDTO, Map<Post, List<Placement>>> sitesToPosts = Maps.newHashMap();
 
-    for (Post foundPost: foundPosts) {
+    List<Placement> allPlacements = foundPosts.stream().flatMap(p -> p.getPlacementHistory().stream()).collect(Collectors.toList());
 
-      Map<Post, List<Placement>> postsToPlacements = Maps.newHashMap();
-      List<Placement> postPlacements = new ArrayList<>();
+    for (Placement placement : allPlacements) {
+      //get thew site
+      SiteDTO siteDTO = siteIdToSiteDTO.get(placement.getSiteId());
 
-      // if the post does not have placements, add post with empty placements
-      if (foundPost.getPlacementHistory().isEmpty()) {
-        for (PostSite site: foundPost.getSites()) {
-          Long siteId = site.getSiteId();
-          if (siteIdToSiteDTO.containsKey(siteId)) {
-              SiteDTO siteDTO = siteIdToSiteDTO.get(siteId);
-              if (sitesToPosts.containsKey(siteDTO)) {
-                postsToPlacements = sitesToPosts.get(siteDTO);
-              }
-              sitesToPosts.put(siteDTO, postsToPlacements);
-              postsToPlacements.put(foundPost, postPlacements);
-          }
-        }
-        // if the post has placements, add post with placements
+      //get the list of posts to site
+      Map<Post, List<Placement>> postsToPlacement = Maps.newHashMap();
+      if(sitesToPosts.containsKey(siteDTO)){
+        postsToPlacement = sitesToPosts.get(siteDTO);
       } else {
-        for (Placement placement : foundPost.getPlacementHistory()) {
-            Long siteId = placement.getSiteId();
-            if (siteIdToSiteDTO.containsKey(siteId)) {
-              SiteDTO siteDTO = siteIdToSiteDTO.get(siteId);
-              if (sitesToPosts.containsKey(siteDTO)) {
-                postsToPlacements = sitesToPosts.get(siteDTO);
-              }
-              sitesToPosts.put(siteDTO, postsToPlacements);
+        sitesToPosts.put(siteDTO, postsToPlacement);
+      }
 
-              if ((placement.getDateFrom().isBefore(toDate) && placement.getDateTo().isAfter(fromDate)) ||
-                placement.getDateFrom().isEqual(fromDate) || placement.getDateTo().isEqual(toDate)
-              ) {
-                postPlacements.add(placement);
-              }
-              postsToPlacements.put(foundPost, postPlacements);
-            }
-          }
-        }
+      Post post = placement.getPost();
+      List<Placement> placements = Lists.newArrayList();
+      if(postsToPlacement.containsKey(post)) {
+        placements = postsToPlacement.get(post);
+      } else {
+        postsToPlacement.put(post, placements);
+      }
+
+      if ((placement.getDateFrom().isBefore(toDate) && placement.getDateTo().isAfter(fromDate))) {
+        placements.add(placement);
+      }
     }
     return sitesToPosts;
+  }
+
+  private Optional<SiteDTO> getPrimarySite(Post post, Map<Long, SiteDTO> siteIdToSiteDTO){
+    Optional<PostSite> optionalFirstSite = post.getSites()
+      .stream()
+      .filter(ps -> PostSiteType.PRIMARY.equals(ps.getPostSiteType()))
+      .findFirst();
+
+    if(optionalFirstSite.isPresent()){
+      PostSite postSite = optionalFirstSite.get();
+      return Optional.ofNullable(siteIdToSiteDTO.get(postSite.getSiteId()));
+    } else {
+      return Optional.empty();
+    }
   }
 
   private Map<SiteDTO, Map<Post, List<Placement>>> orderPlacementsIntoFormat(Set<Placement> foundPlacements, Map<Long, SiteDTO> siteIdToSiteDTO) {
@@ -187,7 +200,7 @@ public class PlacementPlannerServiceImp {
         .collect(Collectors.toMap((s -> s.getId()), (s -> s)));
   }
 
-  private Set<Long> getSiteIdsForPosts(Set<Post> foundPosts) {
+  private Set<Long> getSiteIdsForPosts(Set<Post> foundPosts, LocalDate fromDate, LocalDate toDate) {
     Set<Long> foundIds = Sets.newHashSet();
 
     for (Post post: foundPosts) {
