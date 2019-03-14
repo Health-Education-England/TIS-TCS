@@ -6,6 +6,7 @@ import com.google.common.collect.Maps;
 import com.google.common.collect.Sets;
 import com.transformuk.hee.tis.reference.api.dto.SiteDTO;
 import com.transformuk.hee.tis.reference.client.ReferenceService;
+import com.transformuk.hee.tis.tcs.api.enumeration.PostSiteType;
 import com.transformuk.hee.tis.tcs.service.dto.placementmanager.PlacementsResultDTO;
 import com.transformuk.hee.tis.tcs.service.dto.placementmanager.SpecialtyDTO;
 import com.transformuk.hee.tis.tcs.service.model.Placement;
@@ -193,7 +194,7 @@ public class PlacementPlannerServiceImp {
       // if the post does not have placements, add the primary site id of the post
       if (post.getPlacementHistory().isEmpty()) {
         for (PostSite site: post.getSites()) {
-          if (site.getPostSiteType().equals("PRIMARY")) {
+          if (site.getPostSiteType().equals(PostSiteType.PRIMARY)) {
             foundIds.add(site.getSiteId());
           }
         }
