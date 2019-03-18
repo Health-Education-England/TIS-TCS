@@ -34,6 +34,7 @@ public class TcsServiceImpl extends AbstractClientService {
   private static final String API_PEOPLE = "/api/people/";
   private static final String API_PLACEMENT = "/api/placement/";
   private static final String API_PLACEMENTS = "/api/placements/";
+  private static final String API_POSTS = "/api/posts/";
   private static final String API_PLACEMENT_COMMENT = "/api/placementComment/";
   private static final String API_GDC_DETAILS = "/api/gdc-details/";
   private static final String API_GMC_DETAILS = "/api/gmc-details/";
@@ -208,6 +209,15 @@ public class TcsServiceImpl extends AbstractClientService {
       .getBody();
   }
 
+  public PostDTO updatePost(PostDTO postDTO) {
+    HttpHeaders headers = new HttpHeaders();
+    HttpEntity<PostDTO> httpEntity = new HttpEntity<>(postDTO, headers);
+    return tcsRestTemplate
+        .exchange(serviceUrl + API_POSTS, HttpMethod.PUT, httpEntity, new ParameterizedTypeReference<PostDTO>() {
+        })
+        .getBody();
+  }
+
   public List<PlacementDetailsDTO> getPlacementForTrainee(Long traineeId) {
     String uri = String.format(API_TRAINEE_PLACEMENTS, traineeId);
     return tcsRestTemplate.exchange(serviceUrl + uri,
@@ -228,6 +238,12 @@ public class TcsServiceImpl extends AbstractClientService {
     return tcsRestTemplate.exchange(serviceUrl + API_PLACEMENTS + id,
       HttpMethod.GET, null, new ParameterizedTypeReference<PlacementDetailsDTO>() {
       }).getBody();
+  }
+
+  public PostDTO getPostById(Long id){
+    return tcsRestTemplate.exchange(serviceUrl + API_POSTS + id,
+        HttpMethod.GET, null, new ParameterizedTypeReference<PostDTO>() {
+        }).getBody();
   }
 
   public PersonDTO updatePersonForBulkWithAssociatedDTOs(PersonDTO personDTO) {
