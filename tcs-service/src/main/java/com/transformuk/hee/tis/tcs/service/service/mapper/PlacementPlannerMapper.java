@@ -83,9 +83,6 @@ public class PlacementPlannerMapper {
         LocalDate fromDate = LocalDate.of(2017, 3, 12);
         LocalDate toDate = LocalDate.of(2021, 3, 12);
 
-        if(!(placement.getDateFrom().isBefore(toDate) && placement.getDateTo().isAfter(fromDate))) {
-          System.out.printf("FFFFFFFUUUUUUUUUCCCCCCCKCKKKKKKKKKKKKKK##########!!!!!!!!");
-        }
         result.setWte(placement.getPlacementWholeTimeEquivalent());
         result.setType(placement.getPlacementType());
         result.setTrainee(convertPerson(placement.getTrainee()));

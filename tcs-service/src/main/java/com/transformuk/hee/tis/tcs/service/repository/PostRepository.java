@@ -90,14 +90,6 @@ public interface PostRepository extends JpaRepository<Post, Long>, JpaSpecificat
     "JOIN FETCH p.programmes pr " +
     "JOIN FETCH p.specialties ps " +
     "JOIN FETCH ps.specialty sp " +
-    "LEFT JOIN FETCH p.placementHistory pl " +
-    "LEFT JOIN FETCH p.sites " +
-    "LEFT JOIN FETCH pl.trainee t " +
-    "LEFT JOIN FETCH t.contactDetails c " +
-    "LEFT JOIN FETCH t.gmcDetails gmc " +
-    "LEFT JOIN FETCH t.gdcDetails gdc " +
-    "LEFT JOIN FETCH t.personalDetails pd " +
-    "LEFT JOIN FETCH t.rightToWork rtw " +
     "WHERE pr.id = :programmeId " +
     "AND sp.id = :specialtyId " +
     "AND p.status = 'CURRENT'")

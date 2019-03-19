@@ -141,9 +141,6 @@ public class PostRepositoryTest {
     Long traineeId1 = 4L, traineeId2 = 40L;
     String traineeForename1 = "John", traineeForename2 = "Joanne";
 
-    LocalDate dateFrom = LocalDate.of(2000, 1, 1);
-    LocalDate dateTo = LocalDate.of(2100, 1, 1);
-
     Set<Post> results = postRepository.findPostsAndPlacementsByProgrammeIdAndSpecialtyId(programmeId, specialtyId);
 
     Assert.assertNotNull(results);
