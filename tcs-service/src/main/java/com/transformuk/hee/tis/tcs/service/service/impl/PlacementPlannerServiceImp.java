@@ -132,8 +132,8 @@ public class PlacementPlannerServiceImp {
         postsToPlacement.put(post, placements);
       }
 
-      if (placement.getDateFrom().isBefore(toDate) &&
-          placement.getDateTo().isAfter(fromDate)) {
+      if ((placement.getDateFrom().isBefore(toDate) || placement.getDateFrom().isEqual(toDate)) &&
+        (placement.getDateTo().isAfter(fromDate)) || placement.getDateTo().isEqual(fromDate)) {
         placements.add(placement);
       }
 
