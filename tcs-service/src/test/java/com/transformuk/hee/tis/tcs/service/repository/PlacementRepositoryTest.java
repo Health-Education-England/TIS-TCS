@@ -37,7 +37,6 @@ public class PlacementRepositoryTest {
     postIds.add(postId1);
 
     Set<Placement> results = testObj.findPlacementsByPostIds(postIds);
-    System.out.println(results);
 
     Assert.assertNotNull(results);
     Assert.assertEquals(2, results.size());

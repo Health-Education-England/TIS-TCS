@@ -151,7 +151,6 @@ public class PostRepositoryTest {
         Assert.assertEquals(specialtyId, post.getSpecialties().iterator().next().getSpecialty().getId());
         Assert.assertEquals(programmeId, post.getProgrammes().iterator().next().getId());
         Assert.assertTrue(placementId1.equals(post.getPlacementHistory().iterator().next().getId()) || placementId2.equals(post.getPlacementHistory().iterator().next().getId()));
-        System.out.println(post.getPlacementHistory().iterator().next().getTrainee().getId());
         Assert.assertTrue(traineeId1.equals(post.getPlacementHistory().iterator().next().getTrainee().getId()) || traineeId2.equals(post.getPlacementHistory().iterator().next().getTrainee().getId()));
         Assert.assertTrue(traineeForename1.equals(post.getPlacementHistory().iterator().next().getTrainee().getContactDetails().getForenames())
           || traineeForename2.equals(post.getPlacementHistory().iterator().next().getTrainee().getContactDetails().getForenames()));
