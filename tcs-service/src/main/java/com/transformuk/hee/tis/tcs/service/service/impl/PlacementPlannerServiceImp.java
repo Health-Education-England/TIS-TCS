@@ -72,17 +72,9 @@ public class PlacementPlannerServiceImp {
       toDate = LocalDate.now().plusYears(PLACEMENTS_YEARS_IN_THE_FUTURE);
     }
 
-    StopWatch stopWatch = new StopWatch();
-    stopWatch.start();
     Set<Post> foundPosts = postRepository.findPostsAndPlacementsByProgrammeIdAndSpecialtyId(programmeId, specialtyId);
-    stopWatch.stop();
-    LOG.info("Time it took to run query: {}", stopWatch.toString());
 
-    stopWatch = new StopWatch();
-    stopWatch.start();
-    LOG.info("We have {} posts", foundPosts.size());
     Set<Long> siteIds = getSiteIdsForPosts(foundPosts);
-    LOG.info("We have {} sites", siteIds.size());
 
     List<com.transformuk.hee.tis.reference.api.dto.SiteDTO> foundSites = referenceService.findSitesIdIn(siteIds);
 
@@ -98,15 +90,11 @@ public class PlacementPlannerServiceImp {
     result.setTotalSites(siteIds.size());
     result.setTotalPlacements(count.intValue());
 
-    stopWatch.stop();
-    LOG.info("Time it took to process data: {}", stopWatch.toString());
     return result;
   }
 
   private Map<SiteDTO, Map<Post, List<Placement>>> orderPostsIntoFormat(Set<Post> foundPosts ,Map<Long, SiteDTO> siteIdToSiteDTO, LocalDate fromDate, LocalDate toDate) {
     Map<SiteDTO, Map<Post, List<Placement>>> sitesToPosts = Maps.newHashMap();
-
-    LOG.info("We have {} posts that do have placements", foundPosts.size());
 
     Set<Long> postIds = foundPosts.stream().map(Post::getId).collect(Collectors.toSet());
 
@@ -139,10 +127,8 @@ public class PlacementPlannerServiceImp {
 
     }
 
-    LOG.info("We have {} posts that do not have placements", foundPosts.size());
     //add posts that have missing
     for (Post foundPost : foundPosts) {
-      LOG.info("post with id: {}", foundPost.getId());
       Optional<SiteDTO> optionalPrimarySite = getPrimarySite(foundPost, siteIdToSiteDTO);
       if(optionalPrimarySite.isPresent()) {
         SiteDTO siteDTO = optionalPrimarySite.get();
