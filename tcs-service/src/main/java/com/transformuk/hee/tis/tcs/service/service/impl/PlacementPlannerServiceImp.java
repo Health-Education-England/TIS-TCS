@@ -72,7 +72,7 @@ public class PlacementPlannerServiceImp {
       toDate = LocalDate.now().plusYears(PLACEMENTS_YEARS_IN_THE_FUTURE);
     }
 
-    Set<Post> foundPosts = postRepository.findPostsAndPlacementsByProgrammeIdAndSpecialtyId(programmeId, specialtyId);
+    Set<Post> foundPosts = postRepository.findPostsByProgrammeIdAndSpecialtyId(programmeId, specialtyId);
 
     Set<Long> siteIds = getSiteIdsForPosts(foundPosts);
 
@@ -104,7 +104,7 @@ public class PlacementPlannerServiceImp {
       //get the site
       SiteDTO siteDTO = siteIdToSiteDTO.get(placement.getSiteId());
 
-      //get the list of posts to site
+      // get the list of posts to site
       Map<Post, List<Placement>> postsToPlacement = Maps.newHashMap();
       if(sitesToPosts.containsKey(siteDTO)){
         postsToPlacement = sitesToPosts.get(siteDTO);
@@ -120,6 +120,7 @@ public class PlacementPlannerServiceImp {
         postsToPlacement.put(post, placements);
       }
 
+      // if placements are within the given timeline, include them in the post
       if ((placement.getDateFrom().isBefore(toDate) || placement.getDateFrom().isEqual(toDate)) &&
         (placement.getDateTo().isAfter(fromDate)) || placement.getDateTo().isEqual(fromDate)) {
         placements.add(placement);
@@ -127,7 +128,7 @@ public class PlacementPlannerServiceImp {
 
     }
 
-    //add posts that have missing
+    // if there are no placements present, add post with empty placements
     for (Post foundPost : foundPosts) {
       Optional<SiteDTO> optionalPrimarySite = getPrimarySite(foundPost, siteIdToSiteDTO);
       if(optionalPrimarySite.isPresent()) {

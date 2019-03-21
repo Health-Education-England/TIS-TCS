@@ -111,7 +111,7 @@ public class PlacementPlannerServiceImpTest {
     postIds.add(postMock.getId());
 
     when(specialtyRepositoryMock.findById(SPECIALTY_ID)).thenReturn(Optional.of(specialtyMock));
-    when(postRepositoryMock.findPostsAndPlacementsByProgrammeIdAndSpecialtyId(PROGRAMME_ID, SPECIALTY_ID)).thenReturn(foundPosts);
+    when(postRepositoryMock.findPostsByProgrammeIdAndSpecialtyId(PROGRAMME_ID, SPECIALTY_ID)).thenReturn(foundPosts);
     when(placementRepositoryMock.findPlacementsByPostIds(postIds)).thenReturn(foundPlacements);
     when(referenceServiceMock.findSitesIdIn(siteIds)).thenReturn(foundSites);
     when(placementPlannerMapperMock.convertSpecialty(eq(specialtyMock), any())).thenReturn(specialtyDTOMock);

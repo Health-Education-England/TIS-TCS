@@ -93,6 +93,6 @@ public interface PostRepository extends JpaRepository<Post, Long>, JpaSpecificat
     "WHERE pr.id = :programmeId " +
     "AND sp.id = :specialtyId " +
     "AND p.status = 'CURRENT'")
-  Set<Post> findPostsAndPlacementsByProgrammeIdAndSpecialtyId(@Param("programmeId") Long programmeId,
+  Set<Post> findPostsByProgrammeIdAndSpecialtyId(@Param("programmeId") Long programmeId,
                                                                @Param("specialtyId") Long specialtyId);
 }

@@ -141,7 +141,7 @@ public class PostRepositoryTest {
     Long traineeId1 = 4L, traineeId2 = 40L;
     String traineeForename1 = "John", traineeForename2 = "Joanne";
 
-    Set<Post> results = postRepository.findPostsAndPlacementsByProgrammeIdAndSpecialtyId(programmeId, specialtyId);
+    Set<Post> results = postRepository.findPostsByProgrammeIdAndSpecialtyId(programmeId, specialtyId);
 
     Assert.assertNotNull(results);
     Assert.assertEquals(1, results.size());
