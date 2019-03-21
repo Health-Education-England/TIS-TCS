@@ -12,6 +12,7 @@ import org.springframework.test.context.junit4.SpringRunner;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.time.LocalDate;
+import java.util.HashSet;
 import java.util.Set;
 
 @RunWith(SpringRunner.class)
@@ -25,17 +26,17 @@ public class PlacementRepositoryTest {
   @Test
   @Sql(scripts = "/scripts/placementProgrammeSpecialty.sql")
   @Sql(scripts = "/scripts/deletePlacementProgrammeSpecialty.sql", executionPhase = Sql.ExecutionPhase.AFTER_TEST_METHOD)
-  public void findPlacementsByProgrammeIdAndSpecialtyIdShouldFindPlacementsLinkedToSpecialtyAndProgramme() {
+  public void findPlacementsByPostIdsShouldFindPlacementsLinkedToSpecialtyAndProgramme() {
     Long placementId1 = 3L, placementId2 = 30L;
     Long programmeId = 5L;
     Long specialtyId = 1L;
     Long traineeId1 = 4L, traineeId2 = 40L;
+    Long postId1 = 2L;
     String traineeForename1 = "John", traineeForename2 = "Joanne";
+    Set<Long> postIds = new HashSet<>();
+    postIds.add(postId1);
 
-    LocalDate dateFrom = LocalDate.of(2000, 1, 1);
-    LocalDate dateTo = LocalDate.of(2100, 1, 1);
-
-    Set<Placement> results = testObj.findPlacementsByProgrammeIdAndSpecialtyId(programmeId, specialtyId, dateFrom, dateTo);
+    Set<Placement> results = testObj.findPlacementsByPostIds(postIds);
 
     Assert.assertNotNull(results);
     Assert.assertEquals(2, results.size());

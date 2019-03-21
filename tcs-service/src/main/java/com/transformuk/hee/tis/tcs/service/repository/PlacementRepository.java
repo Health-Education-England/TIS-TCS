@@ -106,8 +106,7 @@ public interface PlacementRepository extends JpaRepository<Placement, Long> {
   /**
    * Find a unique collection of Placements that have links to a specific specialty and programme
    *
-   * @param programmeId the Programme id
-   * @param specialtyId the Specialty id
+   * @param postIds postIds to search for placements
    * @return collection of Placements
    */
   @Query("SELECT DISTINCT pl " +
@@ -122,16 +121,8 @@ public interface PlacementRepository extends JpaRepository<Placement, Long> {
       "LEFT JOIN FETCH t.gdcDetails gdc " +
       "LEFT JOIN FETCH t.personalDetails pd " +
       "LEFT JOIN FETCH t.rightToWork rtw " +
-      "WHERE pr.id = :programmeId " +
-      "AND sp.id = :specialtyId " +
-      "AND pl.dateFrom IS NOT NULL " +
-      "AND pl.dateFrom >= :dateFrom " +
-      "AND pl.dateTo IS NOT NULL " +
-      "AND pl.dateTo <= :dateTo ")
-  Set<Placement> findPlacementsByProgrammeIdAndSpecialtyId(@Param("programmeId") Long programmeId,
-                                                           @Param("specialtyId") Long specialtyId,
-                                                           @Param("dateFrom") LocalDate dateFrom,
-                                                           @Param("dateTo") LocalDate dateTo);
+      "WHERE p.id in (:postIds) ")
+  Set<Placement> findPlacementsByPostIds(@Param("postIds") Set<Long> postIds);
 
   /**
    * Use this method to get the placement by id as most of the time when getting a placement we also want to get the

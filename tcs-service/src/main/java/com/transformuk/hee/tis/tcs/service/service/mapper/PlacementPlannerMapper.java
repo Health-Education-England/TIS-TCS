@@ -16,6 +16,7 @@ import com.transformuk.hee.tis.tcs.service.model.Specialty;
 import org.apache.commons.collections4.CollectionUtils;
 import org.springframework.stereotype.Component;
 
+import java.time.LocalDate;
 import java.util.Collections;
 import java.util.Comparator;
 import java.util.List;
@@ -79,6 +80,9 @@ public class PlacementPlannerMapper {
         result.setId(placement.getId());
         result.setDateFrom(placement.getDateFrom());
         result.setDateTo(placement.getDateTo());
+        LocalDate fromDate = LocalDate.of(2017, 3, 12);
+        LocalDate toDate = LocalDate.of(2021, 3, 12);
+
         result.setWte(placement.getPlacementWholeTimeEquivalent());
         result.setType(placement.getPlacementType());
         result.setTrainee(convertPerson(placement.getTrainee()));
