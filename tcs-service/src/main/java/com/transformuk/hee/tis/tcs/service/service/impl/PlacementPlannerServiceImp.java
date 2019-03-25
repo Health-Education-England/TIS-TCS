@@ -96,50 +96,53 @@ public class PlacementPlannerServiceImp {
   private Map<SiteDTO, Map<Post, List<Placement>>> orderPostsIntoFormat(Set<Post> foundPosts ,Map<Long, SiteDTO> siteIdToSiteDTO, LocalDate fromDate, LocalDate toDate) {
     Map<SiteDTO, Map<Post, List<Placement>>> sitesToPosts = Maps.newHashMap();
 
-    Set<Long> postIds = foundPosts.stream().map(Post::getId).collect(Collectors.toSet());
+    if (!foundPosts.isEmpty()) {
 
-    Set<Placement> allPlacements = placementRepository.findPlacementsByPostIds(postIds);
+      Set<Long> postIds = foundPosts.stream().map(Post::getId).collect(Collectors.toSet());
 
-    for (Placement placement : allPlacements) {
-      //get the site
-      SiteDTO siteDTO = siteIdToSiteDTO.get(placement.getSiteId());
+      Set<Placement> allPlacements = placementRepository.findPlacementsByPostIds(postIds);
 
-      // get the list of posts to site
-      Map<Post, List<Placement>> postsToPlacement = Maps.newHashMap();
-      if(sitesToPosts.containsKey(siteDTO)){
-        postsToPlacement = sitesToPosts.get(siteDTO);
-      } else {
-        sitesToPosts.put(siteDTO, postsToPlacement);
+      for (Placement placement : allPlacements) {
+        //get the site
+        SiteDTO siteDTO = siteIdToSiteDTO.get(placement.getSiteId());
+
+        // get the list of posts to site
+        Map<Post, List<Placement>> postsToPlacement = Maps.newHashMap();
+        if(sitesToPosts.containsKey(siteDTO)){
+          postsToPlacement = sitesToPosts.get(siteDTO);
+        } else {
+          sitesToPosts.put(siteDTO, postsToPlacement);
+        }
+
+        Post post = placement.getPost();
+        List<Placement> placements = Lists.newArrayList();
+        if(postsToPlacement.containsKey(post)) {
+          placements = postsToPlacement.get(post);
+        } else {
+          postsToPlacement.put(post, placements);
+        }
+
+        // if placements are within the given timeline, include them in the post
+        if ((placement.getDateFrom().isBefore(toDate) || placement.getDateFrom().isEqual(toDate)) &&
+          (placement.getDateTo().isAfter(fromDate)) || placement.getDateTo().isEqual(fromDate)) {
+          placements.add(placement);
+        }
+
       }
 
-      Post post = placement.getPost();
-      List<Placement> placements = Lists.newArrayList();
-      if(postsToPlacement.containsKey(post)) {
-        placements = postsToPlacement.get(post);
-      } else {
-        postsToPlacement.put(post, placements);
-      }
+      // if there are no placements present, add post with empty placements
+      for (Post foundPost : foundPosts) {
+        Optional<SiteDTO> optionalPrimarySite = getPrimarySite(foundPost, siteIdToSiteDTO);
+        if(optionalPrimarySite.isPresent()) {
+          SiteDTO siteDTO = optionalPrimarySite.get();
 
-      // if placements are within the given timeline, include them in the post
-      if ((placement.getDateFrom().isBefore(toDate) || placement.getDateFrom().isEqual(toDate)) &&
-        (placement.getDateTo().isAfter(fromDate)) || placement.getDateTo().isEqual(fromDate)) {
-        placements.add(placement);
-      }
-
-    }
-
-    // if there are no placements present, add post with empty placements
-    for (Post foundPost : foundPosts) {
-      Optional<SiteDTO> optionalPrimarySite = getPrimarySite(foundPost, siteIdToSiteDTO);
-      if(optionalPrimarySite.isPresent()) {
-        SiteDTO siteDTO = optionalPrimarySite.get();
-
-        if(sitesToPosts.containsKey(siteDTO)) {
-          Map<Post, List<Placement>> postListMap = sitesToPosts.get(siteDTO);
-          if(!postListMap.containsKey(foundPost)) {
-            Map<Post, List<Placement>> emptyPlacementPosts = Maps.newHashMap();
-            emptyPlacementPosts.put(foundPost, Lists.newArrayList());
-            sitesToPosts.put(siteDTO, emptyPlacementPosts);
+          if(sitesToPosts.containsKey(siteDTO)) {
+            Map<Post, List<Placement>> postListMap = sitesToPosts.get(siteDTO);
+            if(!postListMap.containsKey(foundPost)) {
+              Map<Post, List<Placement>> emptyPlacementPosts = Maps.newHashMap();
+              emptyPlacementPosts.put(foundPost, Lists.newArrayList());
+              sitesToPosts.put(siteDTO, emptyPlacementPosts);
+            }
           }
         }
       }
