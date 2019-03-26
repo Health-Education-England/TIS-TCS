@@ -2,7 +2,40 @@ package com.transformuk.hee.tis.tcs.client.service.impl;
 
 import com.google.common.collect.Maps;
 import com.transformuk.hee.tis.client.impl.AbstractClientService;
-import com.transformuk.hee.tis.tcs.api.dto.*;
+import com.transformuk.hee.tis.tcs.api.dto.ContactDetailsDTO;
+import com.transformuk.hee.tis.tcs.api.dto.CurriculumDTO;
+import com.transformuk.hee.tis.tcs.api.dto.FundingComponentsDTO;
+import com.transformuk.hee.tis.tcs.api.dto.FundingDTO;
+import com.transformuk.hee.tis.tcs.api.dto.GdcDetailsDTO;
+import com.transformuk.hee.tis.tcs.api.dto.GmcDetailsDTO;
+import com.transformuk.hee.tis.tcs.api.dto.JsonPatchDTO;
+import com.transformuk.hee.tis.tcs.api.dto.PersonBasicDetailsDTO;
+import com.transformuk.hee.tis.tcs.api.dto.PersonDTO;
+import com.transformuk.hee.tis.tcs.api.dto.PersonalDetailsDTO;
+import com.transformuk.hee.tis.tcs.api.dto.PlacementCommentDTO;
+import com.transformuk.hee.tis.tcs.api.dto.PlacementDTO;
+import com.transformuk.hee.tis.tcs.api.dto.PlacementDetailsDTO;
+import com.transformuk.hee.tis.tcs.api.dto.PlacementFunderDTO;
+import com.transformuk.hee.tis.tcs.api.dto.PostDTO;
+import com.transformuk.hee.tis.tcs.api.dto.PostFundingDTO;
+import com.transformuk.hee.tis.tcs.api.dto.ProgrammeDTO;
+import com.transformuk.hee.tis.tcs.api.dto.ProgrammeMembershipCurriculaDTO;
+import com.transformuk.hee.tis.tcs.api.dto.ProgrammeMembershipDTO;
+import com.transformuk.hee.tis.tcs.api.dto.QualificationDTO;
+import com.transformuk.hee.tis.tcs.api.dto.RightToWorkDTO;
+import com.transformuk.hee.tis.tcs.api.dto.RotationDTO;
+import com.transformuk.hee.tis.tcs.api.dto.SpecialtyDTO;
+import com.transformuk.hee.tis.tcs.api.dto.SpecialtyGroupDTO;
+import com.transformuk.hee.tis.tcs.api.dto.TariffFundingTypeFieldsDTO;
+import com.transformuk.hee.tis.tcs.api.dto.TariffRateDTO;
+import com.transformuk.hee.tis.tcs.api.dto.TrainingNumberDTO;
+import java.io.UnsupportedEncodingException;
+import java.net.URLEncoder;
+import java.util.List;
+import java.util.Map;
+import java.util.Set;
+import java.util.stream.Collectors;
+import javax.annotation.PostConstruct;
 import org.apache.commons.codec.EncoderException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -17,14 +50,6 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
 import org.springframework.web.client.RestTemplate;
 
-import javax.annotation.PostConstruct;
-import java.io.UnsupportedEncodingException;
-import java.net.URLEncoder;
-import java.util.List;
-import java.util.Map;
-import java.util.Set;
-import java.util.stream.Collectors;
-
 @Service
 public class TcsServiceImpl extends AbstractClientService {
   private static final Logger log = LoggerFactory.getLogger(TcsServiceImpl.class);
@@ -34,6 +59,7 @@ public class TcsServiceImpl extends AbstractClientService {
   private static final String API_PEOPLE = "/api/people/";
   private static final String API_PLACEMENT = "/api/placement/";
   private static final String API_PLACEMENTS = "/api/placements/";
+  private static final String API_POSTS = "/api/posts/";
   private static final String API_PLACEMENT_COMMENT = "/api/placementComment/";
   private static final String API_GDC_DETAILS = "/api/gdc-details/";
   private static final String API_GMC_DETAILS = "/api/gmc-details/";
@@ -45,6 +71,7 @@ public class TcsServiceImpl extends AbstractClientService {
   private static final String API_ROTATION_COLUMN_FILTERS = "/api/rotations?columnFilters=";
   private static final String API_CURRENT_CURRICULA_COLUMN_FILTERS = "/api/current/curricula?columnFilters=";
   private static final String API_PROGRAMMES_COLUMN_FILTERS = "/api/programmes?columnFilters=";
+  private static final String API_PROGRAMMES_IN = "/api/programmes/in/";
   private static final String API_PLACEMENTS_FILTER_COLUMN_FILTERS = "/api/placements/filter?columnFilters=";
   private static final String API_GDC_DETAILS_IN = "/api/gdc-details/in/";
   private static final String API_GMC_DETAILS_IN = "/api/gmc-details/in/";
@@ -208,6 +235,15 @@ public class TcsServiceImpl extends AbstractClientService {
       .getBody();
   }
 
+  public PostDTO updatePost(PostDTO postDTO) {
+    HttpHeaders headers = new HttpHeaders();
+    HttpEntity<PostDTO> httpEntity = new HttpEntity<>(postDTO, headers);
+    return tcsRestTemplate
+        .exchange(serviceUrl + API_POSTS, HttpMethod.PUT, httpEntity, new ParameterizedTypeReference<PostDTO>() {
+        })
+        .getBody();
+  }
+
   public List<PlacementDetailsDTO> getPlacementForTrainee(Long traineeId) {
     String uri = String.format(API_TRAINEE_PLACEMENTS, traineeId);
     return tcsRestTemplate.exchange(serviceUrl + uri,
@@ -228,6 +264,12 @@ public class TcsServiceImpl extends AbstractClientService {
     return tcsRestTemplate.exchange(serviceUrl + API_PLACEMENTS + id,
       HttpMethod.GET, null, new ParameterizedTypeReference<PlacementDetailsDTO>() {
       }).getBody();
+  }
+
+  public PostDTO getPostById(Long id){
+    return tcsRestTemplate.exchange(serviceUrl + API_POSTS + id,
+        HttpMethod.GET, null, new ParameterizedTypeReference<PostDTO>() {
+        }).getBody();
   }
 
   public PersonDTO updatePersonForBulkWithAssociatedDTOs(PersonDTO personDTO) {
@@ -348,6 +390,14 @@ public class TcsServiceImpl extends AbstractClientService {
         null, new ParameterizedTypeReference<List<PlacementDetailsDTO>>() {
         })
       .getBody();
+  }
+
+  public List<ProgrammeDTO> findProgrammesIn(List<String> programmeIds) {
+    String url = serviceUrl + API_PROGRAMMES_IN + getIdsAsUrlEncodedCSVs(programmeIds);
+    ResponseEntity<List<ProgrammeDTO>> responseEntity = tcsRestTemplate.
+      exchange(url, HttpMethod.GET, null, new ParameterizedTypeReference<List<ProgrammeDTO>>() {
+      });
+    return responseEntity.getBody();
   }
 
   public List<GdcDetailsDTO> findGdcDetailsIn(List<String> gdcIds) {
