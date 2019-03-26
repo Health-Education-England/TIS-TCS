@@ -1,5 +1,8 @@
 package com.transformuk.hee.tis.tcs.service.api;
 
+import static com.transformuk.hee.tis.security.util.TisSecurityHelper.getProfileFromContext;
+import static com.transformuk.hee.tis.tcs.service.api.util.StringUtil.sanitize;
+
 import com.google.common.collect.Lists;
 import com.transformuk.hee.tis.tcs.api.dto.ProgrammeDTO;
 import com.transformuk.hee.tis.tcs.api.dto.validation.Create;
@@ -13,6 +16,15 @@ import com.transformuk.hee.tis.tcs.service.model.ColumnFilter;
 import com.transformuk.hee.tis.tcs.service.service.ProgrammeService;
 import io.github.jhipster.web.util.ResponseUtil;
 import io.jsonwebtoken.lang.Collections;
+import java.io.IOException;
+import java.net.URI;
+import java.net.URISyntaxException;
+import java.util.ArrayList;
+import java.util.List;
+import java.util.Optional;
+import java.util.Set;
+import java.util.stream.Collectors;
+import javax.validation.Valid;
 import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -25,18 +37,15 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.MethodArgumentNotValidException;
-import org.springframework.web.bind.annotation.*;
-
-import javax.validation.Valid;
-import java.io.IOException;
-import java.net.URI;
-import java.net.URISyntaxException;
-import java.util.List;
-import java.util.Optional;
-import java.util.stream.Collectors;
-
-import static com.transformuk.hee.tis.security.util.TisSecurityHelper.getProfileFromContext;
-import static com.transformuk.hee.tis.tcs.service.api.util.StringUtil.sanitize;
+import org.springframework.web.bind.annotation.DeleteMapping;
+import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PathVariable;
+import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.PutMapping;
+import org.springframework.web.bind.annotation.RequestBody;
+import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestParam;
+import org.springframework.web.bind.annotation.RestController;
 
 /**
  * REST controller for managing Programme.
@@ -139,6 +148,25 @@ public class ProgrammeResource {
     }
     HttpHeaders headers = PaginationUtil.generatePaginationHttpHeaders(page, "/api/programmes");
     return new ResponseEntity<>(page.getContent(), headers, HttpStatus.OK);
+  }
+
+  /**
+   * GET  /programme/in/{ids} : get programmes given their ID's.
+   * Ignores malformed or not found programmes
+   *
+   * @param ids the ids to search by
+   * @return the ResponseEntity with status 200 (OK)  and the list of programmes in body, or empty list
+   */
+  @GetMapping("/programmes/in/{ids}")
+  @PreAuthorize("hasAuthority('programme:view')")
+  public ResponseEntity<List<ProgrammeDTO>> getProgrammesIn(@PathVariable("ids") final Set<Long> ids) {
+    log.debug("REST request to find several Programmes by Ids: {}", ids);
+    if (!ids.isEmpty()) {
+      List<ProgrammeDTO> programmesDtos = programmeService.findByIdIn(ids);
+      return new ResponseEntity<>(programmesDtos, HttpStatus.FOUND);
+    } else {
+      return new ResponseEntity<>(new ArrayList<>(), HttpStatus.OK);
+    }
   }
 
   /**

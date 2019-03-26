@@ -46,6 +46,14 @@ public interface ProgrammeService {
   Page<ProgrammeDTO> findAll(Pageable pageable);
 
   /**
+   * Get the programmes with the given IDs.
+   *
+   * @param ids The programme IDs
+   * @return the list of entities
+   */
+  List<ProgrammeDTO> findByIdIn(Set<Long> ids);
+
+  /**
    * Get all the programmes.
    *
    * @param pageable the pagination information
