@@ -14,8 +14,6 @@ import com.transformuk.hee.tis.tcs.service.model.Placement;
 import com.transformuk.hee.tis.tcs.service.model.Post;
 import com.transformuk.hee.tis.tcs.service.model.Specialty;
 import org.apache.commons.collections4.CollectionUtils;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Component;
 
 import java.time.LocalDate;
@@ -26,8 +24,6 @@ import java.util.Map;
 
 @Component
 public class PlacementPlannerMapper {
-  private static final Logger LOGGER = LoggerFactory.getLogger(PlacementPlannerMapper.class);
-
   public SpecialtyDTO convertSpecialty(Specialty specialty, Map<SiteDTO, Map<Post, List<Placement>>> data) {
     SpecialtyDTO result = new SpecialtyDTO();
 
@@ -39,8 +35,6 @@ public class PlacementPlannerMapper {
 
     for (Map.Entry<SiteDTO, Map<Post, List<Placement>>> siteDTOMapEntry : data.entrySet()) {
       SiteDTO siteDTO = siteDTOMapEntry.getKey();
-
-      if(siteDTO != null) {
         com.transformuk.hee.tis.tcs.service.dto.placementmanager.SiteDTO convertedSite = convertSite(siteDTO);
         sites.add(convertedSite);
 
@@ -56,10 +50,6 @@ public class PlacementPlannerMapper {
           List<PlacementDTO> placementDTOS = convertPlacements(placements);
           postDTO.setPlacements(placementDTOS);
         }
-      }
-      else {
-        LOGGER.info("Site missing");
-      }
     }
     return result;
   }

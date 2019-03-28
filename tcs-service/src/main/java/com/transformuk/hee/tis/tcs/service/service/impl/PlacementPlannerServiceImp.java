@@ -34,7 +34,7 @@ import java.util.stream.Collectors;
 
 @Service
 public class PlacementPlannerServiceImp {
-
+  private static final Logger LOGGER = LoggerFactory.getLogger(PlacementPlannerServiceImp.class);
   private static final int PLACEMENTS_YEARS_IN_THE_PAST = 1;
   private static final int PLACEMENTS_YEARS_IN_THE_FUTURE = 1;
   private static final Logger LOG = LoggerFactory.getLogger(PlacementPlannerServiceImp.class);
@@ -106,28 +106,31 @@ public class PlacementPlannerServiceImp {
         //get the site
         SiteDTO siteDTO = siteIdToSiteDTO.get(placement.getSiteId());
 
-        // get the list of posts to site
-        Map<Post, List<Placement>> postsToPlacement = Maps.newHashMap();
-        if(sitesToPosts.containsKey(siteDTO)){
-          postsToPlacement = sitesToPosts.get(siteDTO);
+        if(siteDTO != null) {
+          // get the list of posts to site
+          Map<Post, List<Placement>> postsToPlacement = Maps.newHashMap();
+          if (sitesToPosts.containsKey(siteDTO)) {
+            postsToPlacement = sitesToPosts.get(siteDTO);
+          } else {
+            sitesToPosts.put(siteDTO, postsToPlacement);
+          }
+
+          Post post = placement.getPost();
+          List<Placement> placements = Lists.newArrayList();
+          if (postsToPlacement.containsKey(post)) {
+            placements = postsToPlacement.get(post);
+          } else {
+            postsToPlacement.put(post, placements);
+          }
+
+          // if placements are within the given timeline, include them in the post
+          if ((placement.getDateFrom().isBefore(toDate) || placement.getDateFrom().isEqual(toDate)) &&
+              (placement.getDateTo().isAfter(fromDate)) || placement.getDateTo().isEqual(fromDate)) {
+            placements.add(placement);
+          }
         } else {
-          sitesToPosts.put(siteDTO, postsToPlacement);
+          LOGGER.info("Site missing");
         }
-
-        Post post = placement.getPost();
-        List<Placement> placements = Lists.newArrayList();
-        if(postsToPlacement.containsKey(post)) {
-          placements = postsToPlacement.get(post);
-        } else {
-          postsToPlacement.put(post, placements);
-        }
-
-        // if placements are within the given timeline, include them in the post
-        if ((placement.getDateFrom().isBefore(toDate) || placement.getDateFrom().isEqual(toDate)) &&
-          (placement.getDateTo().isAfter(fromDate)) || placement.getDateTo().isEqual(fromDate)) {
-          placements.add(placement);
-        }
-
       }
 
       // if there are no placements present, add post with empty placements
