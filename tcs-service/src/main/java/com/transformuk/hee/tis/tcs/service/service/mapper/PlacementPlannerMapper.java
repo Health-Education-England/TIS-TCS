@@ -24,7 +24,6 @@ import java.util.Map;
 
 @Component
 public class PlacementPlannerMapper {
-
   public SpecialtyDTO convertSpecialty(Specialty specialty, Map<SiteDTO, Map<Post, List<Placement>>> data) {
     SpecialtyDTO result = new SpecialtyDTO();
 
@@ -36,22 +35,21 @@ public class PlacementPlannerMapper {
 
     for (Map.Entry<SiteDTO, Map<Post, List<Placement>>> siteDTOMapEntry : data.entrySet()) {
       SiteDTO siteDTO = siteDTOMapEntry.getKey();
-      com.transformuk.hee.tis.tcs.service.dto.placementmanager.SiteDTO convertedSite = convertSite(siteDTO);
-      sites.add(convertedSite);
+        com.transformuk.hee.tis.tcs.service.dto.placementmanager.SiteDTO convertedSite = convertSite(siteDTO);
+        sites.add(convertedSite);
 
-      Map<Post, List<Placement>> postToPlacements = siteDTOMapEntry.getValue();
-      List<PostDTO> posts = Lists.newArrayList();
-      convertedSite.setPosts(posts);
-      for (Map.Entry<Post, List<Placement>> postSetEntry : postToPlacements.entrySet()) {
-        Post post = postSetEntry.getKey();
-        PostDTO postDTO = convertPost(post);
-        posts.add(postDTO);
+        Map<Post, List<Placement>> postToPlacements = siteDTOMapEntry.getValue();
+        List<PostDTO> posts = Lists.newArrayList();
+        convertedSite.setPosts(posts);
+        for (Map.Entry<Post, List<Placement>> postSetEntry : postToPlacements.entrySet()) {
+          Post post = postSetEntry.getKey();
+          PostDTO postDTO = convertPost(post);
+          posts.add(postDTO);
 
-        List<Placement> placements = postSetEntry.getValue();
-        List<PlacementDTO> placementDTOS = convertPlacements(placements);
-        postDTO.setPlacements(placementDTOS);
-      }
-
+          List<Placement> placements = postSetEntry.getValue();
+          List<PlacementDTO> placementDTOS = convertPlacements(placements);
+          postDTO.setPlacements(placementDTOS);
+        }
     }
     return result;
   }
