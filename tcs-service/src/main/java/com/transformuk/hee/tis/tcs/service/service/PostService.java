@@ -75,6 +75,14 @@ public interface PostService {
   List<PostDTO> patchPostSpecialties(List<PostDTO> postDTOList);
 
   /**
+   * Patch a list of post so that the links to fundings are saved.
+   *
+   * @param postDTO the entity to patch
+   * @return the list of persisted entities
+   */
+  PostDTO patchPostFundings(PostDTO postDTO);
+
+  /**
    * Update a single post
    *
    * @param postDTO the entity to update

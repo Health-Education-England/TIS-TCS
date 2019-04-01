@@ -54,6 +54,7 @@ import org.springframework.scheduling.annotation.Async;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.util.StopWatch;
+import org.springframework.web.client.ResourceAccessException;
 
 import java.sql.ResultSet;
 import java.sql.SQLException;
@@ -299,6 +300,26 @@ public class PostServiceImpl implements PostService {
       }
     }
     return postMapper.postsToPostDTOs(posts);
+  }
+
+  // yafang
+  @Override
+  public PostDTO patchPostFundings(PostDTO postDTO) {
+    if (postDTO != null) {
+      Long postId = postDTO.getId();
+      try {
+        PostDTO queryPostDTO = findOne(postId);
+        if (queryPostDTO != null) {
+          Set<PostFundingDTO> postFundingDTOS = postDTO.getFundings();
+          queryPostDTO.setFundings(postFundingDTOS);
+          PostDTO retPostDto = update(queryPostDTO);
+          return retPostDto;
+        }
+      } catch (ResourceAccessException e) {
+        return null;
+      }
+    }
+    return null;
   }
 
   private Map<String, Post> getPostsByIntrepidId(List<PostDTO> postDtoList) {

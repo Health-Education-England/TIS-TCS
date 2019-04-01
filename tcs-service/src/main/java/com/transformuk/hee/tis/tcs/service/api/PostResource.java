@@ -525,6 +525,29 @@ public class PostResource {
         .body(results);
   }
 
+  /**
+   * PATCH  /patch/fundings : Patches a Post to link it to fundings
+   *
+   * @param postRelationshipsDto List of the PostRelationshipsDTO to update their old and new Posts
+   * @return the ResponseEntity with status 200 (OK) and with body the updated postDTOS,
+   * or with status 400 (Bad Request) if the postDTOS is not valid,
+   * or with status 500 (Internal Server Error) if the postDTOS couldnt be updated
+   * @throws URISyntaxException if the Location URI syntax is incorrect
+   */
+  @PatchMapping("/post/fundings")
+  @PreAuthorize("hasAuthority('tcs:add:modify:entities')")
+  public ResponseEntity<PostDTO> bulkPatchPostFundings(@Valid @RequestBody PostDTO postRelationshipsDto) {
+    log.debug("REST request to bulk link fundings to Posts : {}", postRelationshipsDto);
+    if (postRelationshipsDto == null) {
+      return ResponseEntity.badRequest().headers(HeaderUtil.createFailureAlert(ENTITY_NAME, REQUEST_BODY_EMPTY,
+        REQUEST_BODY_CANNOT_BE_EMPTY)).body(null);
+    }
+    PostDTO result = postService.patchPostFundings(postRelationshipsDto);
+    result.getId();
+    return ResponseEntity.ok()
+      .headers(HeaderUtil.createEntityUpdateAlert(ENTITY_NAME, result.getId().toString()))
+      .body(result);
+  }
 
 
   @GetMapping("/programme/{id}/posts")
