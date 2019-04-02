@@ -12,7 +12,7 @@
 
   <groupId>com.transformuk.hee.tis</groupId>
   <artifactId>tcs-service</artifactId>
-  <version>4.2.0</version>
+  <version>4.3.0</version>
   <packaging>war</packaging>
   <name>tcs-service</name>
 
@@ -523,9 +523,9 @@
           <executable>true</executable>
           <fork>true</fork>
           <!--
-          Enable the line below to have remote debugging of your application on port 5005
-          <jvmArguments>-agentlib:jdwp=transport=dt_socket,server=y,suspend=n,address=5005</jvmArguments>
-          -->
+          Enable the line below to have remote debugging of your application on port 5005-->
+          <jvmArguments>-agentlib:jdwp=transport=dt_socket,server=y,suspend=n,address=5007</jvmArguments>
+
         </configuration>
       </plugin>
       <!-- jhipster-needle-maven-add-plugin -->
