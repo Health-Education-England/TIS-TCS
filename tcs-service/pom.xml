@@ -141,7 +141,7 @@
     <dependency>
       <groupId>com.transformuk.hee</groupId>
       <artifactId>reference-client</artifactId>
-      <version>4.1.5</version>
+      <version>4.3.0</version>
     </dependency>
     <dependency>
       <groupId>com.transformuk.hee.tis</groupId>
