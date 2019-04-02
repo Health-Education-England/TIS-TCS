@@ -303,7 +303,6 @@ public class PostServiceImpl implements PostService {
     return postMapper.postsToPostDTOs(posts);
   }
 
-  // yafang
   @Override
   public PostDTO patchPostFundings(PostDTO postDTO) {
     if (postDTO != null) {
