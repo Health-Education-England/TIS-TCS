@@ -529,11 +529,11 @@ public class PostResource {
   /**
    * PATCH  /patch/fundings : Patches a Post to link it to fundings
    *
-   * @param postDto The PostDTO to update the funding for.
-   * @return the ResponseEntity with status 200 (OK) and with body the updated PostDTO,
-   * or with status 400 (Bad Request) if the PostDTO is not valid,
-   * or with status 500 (Internal Server Error) if the PostDTO could not be updated.
-   * @throws URISyntaxException if the Location URI syntax is incorrect.
+   * @param postDto List of the PostRelationshipsDTO to update their old and new Posts
+   * @return the ResponseEntity with status 200 (OK) and with body the updated postDTOS,
+   * or with status 400 (Bad Request) if the postDTOS is not valid,
+   * or with status 500 (Internal Server Error) if the postDTOS couldnt be updated
+   * @throws URISyntaxException if the Location URI syntax is incorrect
    */
   @PatchMapping("/post/fundings")
   @PreAuthorize("hasAuthority('tcs:add:modify:entities')")
