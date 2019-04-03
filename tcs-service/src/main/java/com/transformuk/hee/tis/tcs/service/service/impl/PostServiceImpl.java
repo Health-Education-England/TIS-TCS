@@ -8,7 +8,7 @@ import com.transformuk.hee.tis.tcs.api.dto.*;
 import com.transformuk.hee.tis.tcs.api.enumeration.Status;
 import com.transformuk.hee.tis.tcs.service.api.decorator.PostViewDecorator;
 import com.transformuk.hee.tis.tcs.service.api.util.BasicPage;
-import com.transformuk.hee.tis.tcs.service.api.validation.FundingValidator;
+import com.transformuk.hee.tis.tcs.service.api.validation.PostFundingValidator;
 import com.transformuk.hee.tis.tcs.service.exception.AccessUnauthorisedException;
 import com.transformuk.hee.tis.tcs.service.model.*;
 import com.transformuk.hee.tis.tcs.service.repository.*;
@@ -77,7 +77,7 @@ public class PostServiceImpl implements PostService {
   @Autowired
   private PostFundingRepository postFundingRepository;
   @Autowired
-  private FundingValidator fundingValidator;
+  private PostFundingValidator postFundingValidator;
 
   /**
    * Save a post.
@@ -279,20 +279,22 @@ public class PostServiceImpl implements PostService {
   }
 
   @Override
-  public PostDTO patchPostFundings(PostDTO postDTO) {
+  public Map<PostFundingDTO, List<String>> patchPostFundings(PostDTO postDTO) {
     if (postDTO != null) {
       Long postId = postDTO.getId();
       try {
         PostDTO queryPostDTO = findOne(postId);
         if (queryPostDTO != null) {
           Set<PostFundingDTO> postFundingDTOS = postDTO.getFundings();
-          for (PostFundingDTO pf: postFundingDTOS) {
-            List<FieldError> fieldErrors = fundingValidator.validateFundingType(pf);
-
+          Map<PostFundingDTO, List<String>> checkFailedMap = postFundingValidator.validateFundingType(postFundingDTOS);
+          // patch update
+          for (PostFundingDTO postFundingDTO: postFundingDTOS) {
+            if (!checkFailedMap.keySet().contains(postFundingDTO)) {
+              queryPostDTO.getFundings().add(postFundingDTO);
+            }
           }
-          queryPostDTO.setFundings(postFundingDTOS);
-          PostDTO retPostDto = update(queryPostDTO);
-          return retPostDto;
+          update(queryPostDTO);
+          return checkFailedMap;
         }
       } catch (ResourceAccessException e) {
         return null;

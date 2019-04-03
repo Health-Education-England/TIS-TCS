@@ -39,6 +39,7 @@ import java.net.URI;
 import java.net.URISyntaxException;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Map;
 import java.util.Optional;
 import java.util.stream.Collectors;
 
@@ -536,17 +537,16 @@ public class PostResource {
    */
   @PatchMapping("/post/fundings")
   @PreAuthorize("hasAuthority('tcs:add:modify:entities')")
-  public ResponseEntity<PostDTO> patchPostFundings(@Valid @RequestBody PostDTO postDto) {
-    log.debug("REST request to link fundings to Posts : {}", postDto);
+  public ResponseEntity<Map<PostFundingDTO, List<String>>> patchPostFundings(@Valid @RequestBody PostDTO postDto) {
+    log.debug("REST request to bulk link fundings to Posts : {}", postDto);
     if (postDto == null) {
       return ResponseEntity.badRequest().headers(HeaderUtil.createFailureAlert(ENTITY_NAME, REQUEST_BODY_EMPTY,
         REQUEST_BODY_CANNOT_BE_EMPTY)).body(null);
     }
-    PostDTO result = postService.patchPostFundings(postDto);
-    result.getId();
+    Map<PostFundingDTO, List<String>> checkFailedMap = postService.patchPostFundings(postDto);
     return ResponseEntity.ok()
-      .headers(HeaderUtil.createEntityUpdateAlert(ENTITY_NAME, result.getId().toString()))
-      .body(result);
+      .headers(HeaderUtil.createEntityUpdateAlert(ENTITY_NAME, postDto.getId().toString()))
+      .body(checkFailedMap);
   }
 
 
