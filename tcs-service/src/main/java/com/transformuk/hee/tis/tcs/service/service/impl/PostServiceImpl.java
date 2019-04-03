@@ -313,15 +313,15 @@ public class PostServiceImpl implements PostService {
         PostDTO queryPostDTO = findOne(postId);
         if (queryPostDTO != null) {
           Set<PostFundingDTO> postFundingDTOS = postDTO.getFundings();
-          Map<PostFundingDTO, List<String>> checkFailedMap = postFundingValidator.validateFundingType(postFundingDTOS);
+          Map<PostFundingDTO, List<String>> checkedMap = postFundingValidator.validateFundingType(postFundingDTOS);
           // patch update
-          for (PostFundingDTO postFundingDTO: postFundingDTOS) {
-            if (!checkFailedMap.keySet().contains(postFundingDTO)) {
-              queryPostDTO.getFundings().add(postFundingDTO);
+          for (Map.Entry<PostFundingDTO, List<String>> entry: checkedMap.entrySet()) {
+            if (entry.getValue().size() == 0) {
+              queryPostDTO.getFundings().add(entry.getKey());
             }
           }
           update(queryPostDTO);
-          return checkFailedMap;
+          return checkedMap;
         }
       } catch (ResourceAccessException e) {
         return null;

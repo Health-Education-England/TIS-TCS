@@ -23,7 +23,7 @@ public class PostFundingValidator {
     if (pfDTOs.isEmpty()) {
       return null;
     }
-    Map<PostFundingDTO, List<String>> checkFailedMap = new HashMap<>();
+    Map<PostFundingDTO, List<String>> checkedMap = new HashMap<>();
     String NOT_FOUND_ERROR = "funding type does not exist.";
     String MULTIPLE_FOUND_ERROR = "found multiple funding type.";
     Set<String> labels= new HashSet<>();
@@ -45,10 +45,8 @@ public class PostFundingValidator {
       } else if (count > 1) {
         errorList.add(MULTIPLE_FOUND_ERROR);
       }
-      if (errorList.size() != 0) {
-        checkFailedMap.put(pfDTO, errorList);
-      }
+      checkedMap.put(pfDTO, errorList);
     }
-    return checkFailedMap;
+    return checkedMap;
   }
 }

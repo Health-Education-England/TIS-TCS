@@ -544,7 +544,7 @@ public class PostResource {
   }
 
   /**
-   * PATCH  /patch/fundings : Patches a Post to link it to fundings
+   * PATCH  /post/fundings : Patches a Post to link it to fundings
    *
    * @param postDto The PostDTO to update the fundings for.
    * @return the ResponseEntity with status 200 (OK) and with body of a map of
