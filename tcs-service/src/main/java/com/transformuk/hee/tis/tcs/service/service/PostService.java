@@ -2,6 +2,7 @@ package com.transformuk.hee.tis.tcs.service.service;
 
 import com.transformuk.hee.tis.tcs.api.dto.PostDTO;
 import com.transformuk.hee.tis.tcs.api.dto.PostEsrDTO;
+import com.transformuk.hee.tis.tcs.api.dto.PostFundingDTO;
 import com.transformuk.hee.tis.tcs.api.dto.PostViewDTO;
 import com.transformuk.hee.tis.tcs.service.api.util.BasicPage;
 import com.transformuk.hee.tis.tcs.service.model.ColumnFilter;
@@ -9,6 +10,7 @@ import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 
 import java.util.List;
+import java.util.Map;
 import java.util.Set;
 import java.util.concurrent.CompletableFuture;
 
@@ -80,7 +82,7 @@ public interface PostService {
    * @param postDTO the entity to patch
    * @return the list of persisted entities
    */
-  PostDTO patchPostFundings(PostDTO postDTO);
+  Map<PostFundingDTO, List<String>> patchPostFundings(PostDTO postDTO);
 
   /**
    * Update a single post
