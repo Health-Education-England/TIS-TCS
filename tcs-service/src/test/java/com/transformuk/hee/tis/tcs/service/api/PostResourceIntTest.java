@@ -10,6 +10,7 @@ import com.transformuk.hee.tis.tcs.api.dto.PostSiteDTO;
 import com.transformuk.hee.tis.tcs.api.dto.PostSpecialtyDTO;
 import com.transformuk.hee.tis.tcs.api.dto.ProgrammeDTO;
 import com.transformuk.hee.tis.tcs.api.dto.SpecialtyDTO;
+import com.transformuk.hee.tis.tcs.api.dto.PostFundingDTO;
 import com.transformuk.hee.tis.tcs.api.enumeration.PostGradeType;
 import com.transformuk.hee.tis.tcs.api.enumeration.PostSiteType;
 import com.transformuk.hee.tis.tcs.api.enumeration.PostSpecialtyType;
@@ -59,6 +60,7 @@ import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
 import java.util.Set;
+import java.util.HashSet;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.hamcrest.Matchers.contains;
@@ -162,8 +164,8 @@ public class PostResourceIntTest {
    */
   public static Post linkEntities(Post post, Set<PostSite> sites, Set<PostGrade> grades, Set<PostSpecialty> specialties) {
     post.sites(sites)
-        .grades(grades)
-        .specialties(specialties);
+      .grades(grades)
+      .specialties(specialties);
     return post;
   }
 
@@ -319,10 +321,10 @@ public class PostResourceIntTest {
     postDTO.setId(-1L);
     //when & then
     restPostMockMvc.perform(post("/api/posts")
-        .contentType(TestUtil.APPLICATION_JSON_UTF8)
-        .content(TestUtil.convertObjectToJsonBytes(postDTO)))
-        .andExpect(status().isBadRequest())
-        .andExpect(jsonPath("$.message").value("error.validation"))
+          .contentType(TestUtil.APPLICATION_JSON_UTF8)
+          .content(TestUtil.convertObjectToJsonBytes(postDTO)))
+          .andExpect(status().isBadRequest())
+          .andExpect(jsonPath("$.message").value("error.validation"))
         .andExpect(jsonPath("$.fieldErrors[0].field").value("id"));
   }
 
@@ -1072,6 +1074,44 @@ public class PostResourceIntTest {
     // Validate that both Post are still in the database
     List<Post> postList = postRepository.findAll();
     assertThat(postList).hasSize(expectedDatabaseSizeAfterBulkUpdate);
+  }
+
+  @Test
+  @Transactional
+  public void pathPostFundingsShouldSucceedWhenDataIsValid() throws Exception {
+    // Initialize the database
+    post.setStatus(Status.CURRENT);
+    postRepository.saveAndFlush(post);
+
+    // Initialize the payload
+    PostDTO postDTO = new PostDTO();
+    postDTO.setId(1L);
+
+    Set<PostFundingDTO> postFundingDTOs = new HashSet<>();
+    PostFundingDTO pfDTO_1 = new PostFundingDTO();
+    pfDTO_1.setFundingType("Academic - Trust");
+    pfDTO_1.setFundingBodyId("864");
+    pfDTO_1.setStartDate(LocalDate.of(2019, 4, 4));
+    pfDTO_1.setEndDate(LocalDate.of(2019, 5, 4));
+    postFundingDTOs.add(pfDTO_1);
+
+    PostFundingDTO pfDTO_2 = new PostFundingDTO();
+    pfDTO_2.setFundingType("lalala");
+    pfDTO_2.setFundingBodyId("864");
+    pfDTO_2.setStartDate(LocalDate.of(2019, 4, 4));
+    pfDTO_2.setEndDate(LocalDate.of(2019, 5, 4));
+    postFundingDTOs.add(pfDTO_2);
+
+    postDTO.setFundings(postFundingDTOs);
+
+    restPostMockMvc.perform(patch("/api/post/fundings")
+        .contentType(TestUtil.APPLICATION_JSON_UTF8)
+        .content(TestUtil.convertObjectToJsonBytes(postDTO)))
+        .andExpect(status().isOk())
+        .andExpect(jsonPath("$").isMap())
+        .andExpect(jsonPath("$.[*]").isArray())
+        .andExpect(jsonPath("$.*[0]", hasSize(1)))
+        .andExpect(jsonPath("$.*[1]", hasSize(0)));
   }
 
 
