@@ -1109,7 +1109,7 @@ public class PostResourceIntTest {
         .content(TestUtil.convertObjectToJsonBytes(postDTO)))
         .andExpect(status().isOk())
         .andExpect(jsonPath("$").isMap())
-        .andExpect(jsonPath("$.[*]").isArray())
+        .andExpect(jsonPath("$.*").isArray())
         .andExpect(jsonPath("$.*[0]", hasSize(1)))
         .andExpect(jsonPath("$.*[1]", hasSize(0)));
   }

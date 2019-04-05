@@ -41,14 +41,7 @@ import com.transformuk.hee.tis.tcs.service.service.mapper.DesignatedBodyMapper;
 import com.transformuk.hee.tis.tcs.service.service.mapper.PostMapper;
 import java.sql.ResultSet;
 import java.sql.SQLException;
-import java.util.Collection;
-import java.util.Collections;
-import java.util.HashSet;
-import java.util.List;
-import java.util.Map;
-import java.util.Objects;
-import java.util.Optional;
-import java.util.Set;
+import java.util.*;
 import java.util.concurrent.CompletableFuture;
 import java.util.stream.Collectors;
 import org.apache.commons.collections4.CollectionUtils;
@@ -313,7 +306,15 @@ public class PostServiceImpl implements PostService {
         PostDTO queryPostDTO = findOne(postId);
         if (queryPostDTO != null) {
           Set<PostFundingDTO> postFundingDTOS = postDTO.getFundings();
-          Map<PostFundingDTO, List<String>> checkedMap = postFundingValidator.validateFundingType(postFundingDTOS);
+
+          // prepare a map
+          Iterator iter = postFundingDTOS.iterator();
+          Map<PostFundingDTO, List<String>> checkedMap = new HashMap<>();
+          while (iter.hasNext()) {
+            checkedMap.put((PostFundingDTO)iter.next(), new ArrayList<>());
+          }
+
+          checkedMap = postFundingValidator.validateFundingType(checkedMap);
           // patch update
           for (Map.Entry<PostFundingDTO, List<String>> entry: checkedMap.entrySet()) {
             if (entry.getValue().size() == 0) {

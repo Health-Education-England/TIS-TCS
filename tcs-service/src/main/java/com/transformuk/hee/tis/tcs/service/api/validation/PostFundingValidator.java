@@ -19,33 +19,33 @@ public class PostFundingValidator {
   @Autowired
   private ReferenceServiceImpl referenceService;
 
-  public Map<PostFundingDTO, List<String>> validateFundingType(Set<PostFundingDTO> pfDTOs) {
-    if (pfDTOs.isEmpty()) {
-      return null;
+  public Map<PostFundingDTO, List<String>> validateFundingType(Map<PostFundingDTO, List<String>> checkedMap) {
+    if (checkedMap.size() == 0) {
+      return checkedMap;
     }
-    Map<PostFundingDTO, List<String>> checkedMap = new HashMap<>();
     String NOT_FOUND_ERROR = "funding type does not exist.";
     String MULTIPLE_FOUND_ERROR = "found multiple funding type.";
     Set<String> labels= new HashSet<>();
-    for (PostFundingDTO pfDTO: pfDTOs) {
+    for (Map.Entry<PostFundingDTO, List<String>> entry: checkedMap.entrySet()) {
+      PostFundingDTO pfDTO = entry.getKey();
       labels.add(pfDTO.getFundingType());
     }
     List<FundingTypeDTO> fundingTypeDTOs = referenceService.findCurrentFundingTypesByLabelIn(labels);
     // check if the funding type is unique in the fundingType table in reference
-    for (PostFundingDTO pfDTO: pfDTOs) {
-      List<String> errorList = new ArrayList<>();
+    for (Map.Entry<PostFundingDTO, List<String>> entry: checkedMap.entrySet()) {
+      PostFundingDTO pfDTO = entry.getKey();
       int count = 0;
       for (FundingTypeDTO fundingTypeDTO: fundingTypeDTOs) {
         if (StringUtils.equals(fundingTypeDTO.getLabel(), pfDTO.getFundingType())) {
           count++;
         }
+        List<String> errorList = entry.getValue();
+        if (count == 0) {
+          errorList.add(NOT_FOUND_ERROR);
+        } else if (count > 1) {
+          errorList.add(MULTIPLE_FOUND_ERROR);
+        }
       }
-      if (count == 0) {
-        errorList.add(NOT_FOUND_ERROR);
-      } else if (count > 1) {
-        errorList.add(MULTIPLE_FOUND_ERROR);
-      }
-      checkedMap.put(pfDTO, errorList);
     }
     return checkedMap;
   }
