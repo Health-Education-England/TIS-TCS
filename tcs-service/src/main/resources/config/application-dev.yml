@@ -23,9 +23,3 @@ logging:
 application:
 
 enable.es.search: ${ENABLE_ES_SEARCH}
-
-opentracing:
-  jaeger:
-    udp-sender:
-      host: ${JAEGER_HOST}
-      port: ${JAEGER_PORT}
