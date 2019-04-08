@@ -299,7 +299,7 @@ public class PostServiceImpl implements PostService {
   }
 
   @Override
-  public Map<PostFundingDTO, List<String>> patchPostFundings(PostDTO postDTO) {
+  public List<PostFundingDTO> patchPostFundings(PostDTO postDTO) {
     if (postDTO != null) {
       Long postId = postDTO.getId();
       try {
@@ -307,22 +307,17 @@ public class PostServiceImpl implements PostService {
         if (queryPostDTO != null) {
           Set<PostFundingDTO> postFundingDTOS = postDTO.getFundings();
 
-          // prepare a map
-          Iterator iter = postFundingDTOS.iterator();
-          Map<PostFundingDTO, List<String>> checkedMap = new HashMap<>();
-          while (iter.hasNext()) {
-            checkedMap.put((PostFundingDTO)iter.next(), new ArrayList<>());
-          }
-
-          checkedMap = postFundingValidator.validateFundingType(checkedMap);
+          // prepare a list
+          List<PostFundingDTO> checkList = postFundingDTOS.stream().collect(Collectors.toList());
+          checkList = postFundingValidator.validateFundingType(checkList);
           // patch update
-          for (Map.Entry<PostFundingDTO, List<String>> entry: checkedMap.entrySet()) {
-            if (entry.getValue().size() == 0) {
-              queryPostDTO.getFundings().add(entry.getKey());
+          for (PostFundingDTO pfDTO: checkList) {
+            if (pfDTO.getMessageList().size() == 0) {
+              queryPostDTO.getFundings().add(pfDTO);
             }
           }
           update(queryPostDTO);
-          return checkedMap;
+          return checkList;
         }
       } catch (ResourceAccessException e) {
         return null;
