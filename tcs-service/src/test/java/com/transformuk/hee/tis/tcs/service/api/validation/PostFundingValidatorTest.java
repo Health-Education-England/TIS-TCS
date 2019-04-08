@@ -30,8 +30,7 @@ public class PostFundingValidatorTest {
   String FUNDING_TYPE_LABEL = "1234funding";
   String FUNDING_TYPE_LABEL2 = "5678funding";
   FundingTypeDTO fundingTypeDTO;
-  private Set<PostFundingDTO> pfDTOs;
-  private Map<PostFundingDTO, List<String>> checkedMap;
+  private List<PostFundingDTO> pfDTOs;
   private PostFundingDTO fundingTypeMissingDTO;
   private PostFundingDTO notOtherDTO;
   private PostFundingDTO validDTO;
@@ -54,17 +53,10 @@ public class PostFundingValidatorTest {
     return result;
   }
 
-  private Map<PostFundingDTO, List<String>> buildCheckedMap(PostFundingDTO pfDTO) {
-    pfDTOs = new HashSet<>();
+  private List<PostFundingDTO> buildCheckedMap(PostFundingDTO pfDTO) {
+    pfDTOs = new ArrayList<>();
     pfDTOs.add(pfDTO);
-
-    // prepare a map
-    Iterator iter = pfDTOs.iterator();
-    checkedMap = new HashMap<>();
-    while (iter.hasNext()) {
-      checkedMap.put((PostFundingDTO)iter.next(), new ArrayList<>());
-    }
-    return checkedMap;
+    return pfDTOs;
   }
 
   @Before
@@ -90,25 +82,25 @@ public class PostFundingValidatorTest {
 
   @Test
   public void testValidateFailsIfIdIsEmpty() {
-    checkedMap = buildCheckedMap(fundingTypeMissingDTO);
+    pfDTOs = buildCheckedMap(fundingTypeMissingDTO);
 
-    Map<PostFundingDTO, List<String>> result = postFundingValidator.validateFundingType(checkedMap);
-    assertThat(result.get(fundingTypeMissingDTO).contains(FUNDING_TYPE_EMPTY), is(true));
+    List<PostFundingDTO> result = postFundingValidator.validateFundingType(pfDTOs);
+    assertThat(result.get(0).getMessageList().contains(FUNDING_TYPE_EMPTY), is(true));
   }
 
   @Test
   public void testValidateFailsInfoGivenForFundingTypeNoOther() {
-    checkedMap = buildCheckedMap(notOtherDTO);
-    Map<PostFundingDTO, List<String>> result = postFundingValidator.validateFundingType(checkedMap);
-    assertThat(result.get(notOtherDTO).contains(FUNDING_TYPE_NOT_OTHER_ERROR), is(true));
+    pfDTOs = buildCheckedMap(notOtherDTO);
+    List<PostFundingDTO> result = postFundingValidator.validateFundingType(pfDTOs);
+    assertThat(result.get(0).getMessageList().contains(FUNDING_TYPE_NOT_OTHER_ERROR), is(true));
 
   }
 
   @Test
   public void testValidateFailsIfFundingTypeNotFound() {
-    checkedMap = buildCheckedMap(fundingTypeFilledDTO);
-    Map<PostFundingDTO, List<String>> result = postFundingValidator.validateFundingType(checkedMap);
-    assertThat(result.get(fundingTypeFilledDTO).contains(NOT_FOUND_ERROR), is(true));
+    pfDTOs = buildCheckedMap(fundingTypeFilledDTO);
+    List<PostFundingDTO> result = postFundingValidator.validateFundingType(pfDTOs);
+    assertThat(result.get(0).getMessageList().contains(NOT_FOUND_ERROR), is(true));
   }
 
   @Test
@@ -118,9 +110,9 @@ public class PostFundingValidatorTest {
 
   @Test
   public void testValidateSuccessfully() {
-    checkedMap = buildCheckedMap(validDTO);
-    Map<PostFundingDTO, List<String>> result = postFundingValidator.validateFundingType(checkedMap);
-    assertThat(result.get(validDTO).isEmpty(), is(true));
+    pfDTOs = buildCheckedMap(validDTO);
+    List<PostFundingDTO> result = postFundingValidator.validateFundingType(pfDTOs);
+    assertThat(result.get(0).getMessageList().isEmpty(), is(true));
   }
 
 }

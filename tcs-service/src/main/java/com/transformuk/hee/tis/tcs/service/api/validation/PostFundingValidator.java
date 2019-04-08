@@ -20,6 +20,8 @@ public class PostFundingValidator {
     if (checkList.size() == 0) {
       return checkList;
     }
+    String FUNDING_TYPE_EMPTY = "funding type is empty";
+    String FUNDING_TYPE_NOT_OTHER_ERROR = "funding type specified filled although type is not Other.";
     String FUNDING_TYPE_NOT_FOUND_ERROR = "funding type does not exist.";
     String FUNDING_TYPE_MULTIPLE_FOUND_ERROR = "found multiple funding type.";
     Set<String> labels= new HashSet<>();
@@ -29,6 +31,20 @@ public class PostFundingValidator {
     List<FundingTypeDTO> fundingTypeDTOs = referenceService.findCurrentFundingTypesByLabelIn(labels);
     // check if the funding type is unique in the fundingType table in reference
     for (PostFundingDTO pfDTO: checkList) {
+
+      // check if funding type is not Other but an other value has been entered for for the row.
+      if (pfDTO.getFundingType() != "Other" && pfDTO.getInfo() != null) {
+        if (!pfDTO.getInfo().isEmpty()) {
+          pfDTO.getMessageList().add(FUNDING_TYPE_NOT_OTHER_ERROR);
+        }
+      }
+
+      // check if funding type is empty
+      if (pfDTO.getFundingType() == null || pfDTO.getFundingType().isEmpty()) {
+        pfDTO.getMessageList().add(FUNDING_TYPE_EMPTY);
+        break;
+      }
+
       int count = 0;
       for (FundingTypeDTO fundingTypeDTO: fundingTypeDTOs) {
         if (StringUtils.equals(fundingTypeDTO.getLabel(), pfDTO.getFundingType())) {
