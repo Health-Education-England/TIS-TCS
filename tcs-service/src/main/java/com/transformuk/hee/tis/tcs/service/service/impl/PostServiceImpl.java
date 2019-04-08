@@ -308,12 +308,12 @@ public class PostServiceImpl implements PostService {
           Set<PostFundingDTO> postFundingDTOS = postDTO.getFundings();
 
           // prepare a list
-          List<PostFundingDTO> checkList = postFundingDTOS.stream().collect(Collectors.toList());
+          List<PostFundingDTO> checkList = new ArrayList<>(postFundingDTOS);
           checkList = postFundingValidator.validateFundingType(checkList);
           // patch update
           for (PostFundingDTO pfDTO: checkList) {
             if (pfDTO.getMessageList().size() == 0) {
-              queryPostDTO.getFundings().add(pfDTO);
+              queryPostDTO.addFunding(pfDTO);
             }
           }
           update(queryPostDTO);
