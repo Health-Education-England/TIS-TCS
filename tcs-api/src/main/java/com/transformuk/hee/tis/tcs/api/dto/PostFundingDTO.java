@@ -2,7 +2,9 @@ package com.transformuk.hee.tis.tcs.api.dto;
 
 import java.io.Serializable;
 import java.time.LocalDate;
+import java.util.ArrayList;
 import java.util.Objects;
+import java.util.List;
 
 /**
  * A DTO for the PostFunding entity.
@@ -22,6 +24,12 @@ public class PostFundingDTO implements Serializable {
   private LocalDate endDate;
 
   private String fundingBodyId;
+
+  private List<String> messageList;
+
+  public PostFundingDTO() {
+    this.messageList = new ArrayList<>();
+  }
 
   public Long getId() {
     return id;
@@ -79,6 +87,14 @@ public class PostFundingDTO implements Serializable {
     this.fundingBodyId = fundingBodyId;
   }
 
+  public List<String> getMessageList() {
+    return this.messageList;
+  }
+
+  public void setMessageList(List<String> messageList) {
+    this.messageList = messageList;
+  }
+
   @Override
   public boolean equals(Object o) {
     if (this == o) {
@@ -94,12 +110,13 @@ public class PostFundingDTO implements Serializable {
       Objects.equals(info, that.info) &&
       Objects.equals(startDate, that.startDate) &&
       Objects.equals(endDate, that.endDate) &&
-      Objects.equals(fundingBodyId, that.fundingBodyId);
+      Objects.equals(fundingBodyId, that.fundingBodyId) &&
+      Objects.equals(messageList, that.messageList);
   }
 
   @Override
   public int hashCode() {
-    return Objects.hash(id, intrepidId, fundingType, info, startDate, endDate, fundingBodyId);
+    return Objects.hash(id, intrepidId, fundingType, info, startDate, endDate, fundingBodyId, messageList);
   }
 
   @Override
@@ -112,6 +129,7 @@ public class PostFundingDTO implements Serializable {
       ", startDate=" + startDate +
       ", endDate=" + endDate +
       ", fundingBodyId='" + fundingBodyId + '\'' +
+      ", messageList='" + messageList + '\'' +
       '}';
   }
 }

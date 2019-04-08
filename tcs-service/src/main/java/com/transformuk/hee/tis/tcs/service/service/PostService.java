@@ -10,7 +10,6 @@ import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 
 import java.util.List;
-import java.util.Map;
 import java.util.Set;
 import java.util.concurrent.CompletableFuture;
 
@@ -82,7 +81,7 @@ public interface PostService {
    * @param postDTO the entity to patch
    * @return the list of persisted entities
    */
-  Map<PostFundingDTO, List<String>> patchPostFundings(PostDTO postDTO);
+  List<PostFundingDTO> patchPostFundings(PostDTO postDTO);
 
   /**
    * Update a single post

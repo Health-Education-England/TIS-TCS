@@ -3,12 +3,9 @@ package com.transformuk.hee.tis.tcs.service.api.validation;
 import com.transformuk.hee.tis.reference.api.dto.FundingTypeDTO;
 import com.transformuk.hee.tis.reference.client.impl.ReferenceServiceImpl;
 import com.transformuk.hee.tis.tcs.api.dto.PostFundingDTO;
-import com.transformuk.hee.tis.tcs.service.model.Funding;
-import com.transformuk.hee.tis.tcs.service.model.PostFunding;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
-import org.springframework.validation.FieldError;
 
 import java.util.*;
 
@@ -19,34 +16,31 @@ public class PostFundingValidator {
   @Autowired
   private ReferenceServiceImpl referenceService;
 
-  public Map<PostFundingDTO, List<String>> validateFundingType(Map<PostFundingDTO, List<String>> checkedMap) {
-    if (checkedMap.size() == 0) {
-      return checkedMap;
+  public List<PostFundingDTO> validateFundingType(List<PostFundingDTO> checkList) {
+    if (checkList.size() == 0) {
+      return checkList;
     }
-    String NOT_FOUND_ERROR = "funding type does not exist.";
-    String MULTIPLE_FOUND_ERROR = "found multiple funding type.";
+    String FUNDING_TYPE_NOT_FOUND_ERROR = "funding type does not exist.";
+    String FUNDING_TYPE_MULTIPLE_FOUND_ERROR = "found multiple funding type.";
     Set<String> labels= new HashSet<>();
-    for (Map.Entry<PostFundingDTO, List<String>> entry: checkedMap.entrySet()) {
-      PostFundingDTO pfDTO = entry.getKey();
+    for (PostFundingDTO pfDTO: checkList) {
       labels.add(pfDTO.getFundingType());
     }
     List<FundingTypeDTO> fundingTypeDTOs = referenceService.findCurrentFundingTypesByLabelIn(labels);
     // check if the funding type is unique in the fundingType table in reference
-    for (Map.Entry<PostFundingDTO, List<String>> entry: checkedMap.entrySet()) {
-      PostFundingDTO pfDTO = entry.getKey();
+    for (PostFundingDTO pfDTO: checkList) {
       int count = 0;
       for (FundingTypeDTO fundingTypeDTO: fundingTypeDTOs) {
         if (StringUtils.equals(fundingTypeDTO.getLabel(), pfDTO.getFundingType())) {
           count++;
         }
-        List<String> errorList = entry.getValue();
-        if (count == 0) {
-          errorList.add(NOT_FOUND_ERROR);
-        } else if (count > 1) {
-          errorList.add(MULTIPLE_FOUND_ERROR);
-        }
+      }
+      if (count == 0) {
+        pfDTO.getMessageList().add(FUNDING_TYPE_NOT_FOUND_ERROR);
+      } else if (count > 1) {
+        pfDTO.getMessageList().add(FUNDING_TYPE_MULTIPLE_FOUND_ERROR);
       }
     }
-    return checkedMap;
+    return checkList;
   }
 }
