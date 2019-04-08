@@ -4,7 +4,6 @@ import com.google.common.collect.Lists;
 import com.transformuk.hee.tis.reference.api.dto.FundingTypeDTO;
 import com.transformuk.hee.tis.reference.client.impl.ReferenceServiceImpl;
 import com.transformuk.hee.tis.tcs.api.dto.PostFundingDTO;
-import org.assertj.core.util.Maps;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -17,7 +16,7 @@ import java.util.*;
 
 import static org.hamcrest.CoreMatchers.is;
 import static org.junit.Assert.assertThat;
-import static org.mockito.BDDMockito.given;
+import static org.mockito.Mockito.when;
 
 @RunWith(MockitoJUnitRunner.class)
 public class PostFundingValidatorTest {
@@ -29,12 +28,15 @@ public class PostFundingValidatorTest {
   Long FUNDING_TYPE_ID = 2L;
   String FUNDING_TYPE_LABEL = "1234funding";
   String FUNDING_TYPE_LABEL2 = "5678funding";
+  String FUNDING_TYPE_LABEL3 = "8910funding";
   FundingTypeDTO fundingTypeDTO;
+  FundingTypeDTO multipleFundingTypeDTO;
   private List<PostFundingDTO> pfDTOs;
   private PostFundingDTO fundingTypeMissingDTO;
   private PostFundingDTO notOtherDTO;
   private PostFundingDTO validDTO;
   private PostFundingDTO fundingTypeFilledDTO;
+  private PostFundingDTO multipleFundingTypesDTO;
 
   @Mock
   private ReferenceServiceImpl referenceService;
@@ -53,7 +55,7 @@ public class PostFundingValidatorTest {
     return result;
   }
 
-  private List<PostFundingDTO> buildCheckedMap(PostFundingDTO pfDTO) {
+  private List<PostFundingDTO> buildCheckedList(PostFundingDTO pfDTO) {
     pfDTOs = new ArrayList<>();
     pfDTOs.add(pfDTO);
     return pfDTOs;
@@ -65,24 +67,33 @@ public class PostFundingValidatorTest {
     fundingTypeDTO.setId(FUNDING_TYPE_ID);
     fundingTypeDTO.setLabel(FUNDING_TYPE_LABEL);
 
+    multipleFundingTypeDTO = new FundingTypeDTO();
+    multipleFundingTypeDTO.setId(FUNDING_TYPE_ID);
+    multipleFundingTypeDTO.setLabel(FUNDING_TYPE_LABEL3);
+
     Set<String> labels = new HashSet<>();
     labels.add(FUNDING_TYPE_LABEL);
 
     Set<String> labels2 = new HashSet<>();
-    labels.add(FUNDING_TYPE_LABEL2);
+    labels2.add(FUNDING_TYPE_LABEL2);
 
-    given(referenceService.findCurrentFundingTypesByLabelIn(labels)).willReturn(Lists.newArrayList(fundingTypeDTO));
-    given(referenceService.findCurrentFundingTypesByLabelIn(labels2)).willReturn(Lists.newArrayList(fundingTypeDTO));
+    Set<String> labels3 = new HashSet<>();
+    labels3.add(FUNDING_TYPE_LABEL3);
 
-    validDTO = buildMockFundingTypeDTO(1L, "Other", "info", "foo");
+    when(referenceService.findCurrentFundingTypesByLabelIn(labels)).thenReturn(Lists.newArrayList(fundingTypeDTO));
+    when(referenceService.findCurrentFundingTypesByLabelIn(labels2)).thenReturn(Lists.newArrayList(fundingTypeDTO));
+    when(referenceService.findCurrentFundingTypesByLabelIn(labels3)).thenReturn(Lists.newArrayList(multipleFundingTypeDTO, multipleFundingTypeDTO));
+
+    validDTO = buildMockFundingTypeDTO(1L, FUNDING_TYPE_LABEL, null, "foo");
     fundingTypeMissingDTO = buildMockFundingTypeDTO(1L, null, "info", "foo");
     notOtherDTO = buildMockFundingTypeDTO(1L, FUNDING_TYPE_LABEL, "info", "foo");
     fundingTypeFilledDTO = buildMockFundingTypeDTO(1L, FUNDING_TYPE_LABEL2, null, "foo");
+    multipleFundingTypesDTO = buildMockFundingTypeDTO(1L, FUNDING_TYPE_LABEL3, null, "foo");
   }
 
   @Test
   public void testValidateFailsIfIdIsEmpty() {
-    pfDTOs = buildCheckedMap(fundingTypeMissingDTO);
+    pfDTOs = buildCheckedList(fundingTypeMissingDTO);
 
     List<PostFundingDTO> result = postFundingValidator.validateFundingType(pfDTOs);
     assertThat(result.get(0).getMessageList().contains(FUNDING_TYPE_EMPTY), is(true));
@@ -90,7 +101,7 @@ public class PostFundingValidatorTest {
 
   @Test
   public void testValidateFailsInfoGivenForFundingTypeNoOther() {
-    pfDTOs = buildCheckedMap(notOtherDTO);
+    pfDTOs = buildCheckedList(notOtherDTO);
     List<PostFundingDTO> result = postFundingValidator.validateFundingType(pfDTOs);
     assertThat(result.get(0).getMessageList().contains(FUNDING_TYPE_NOT_OTHER_ERROR), is(true));
 
@@ -98,19 +109,21 @@ public class PostFundingValidatorTest {
 
   @Test
   public void testValidateFailsIfFundingTypeNotFound() {
-    pfDTOs = buildCheckedMap(fundingTypeFilledDTO);
+    pfDTOs = buildCheckedList(fundingTypeFilledDTO);
     List<PostFundingDTO> result = postFundingValidator.validateFundingType(pfDTOs);
     assertThat(result.get(0).getMessageList().contains(NOT_FOUND_ERROR), is(true));
   }
 
   @Test
   public void testValidateFailsIfFundingTypeIsNotUnique() {
-    // Map<PostFundingDTO, List<String>> result = postFundingValidator.validateFundingType(checkedMap);
+    pfDTOs = buildCheckedList(multipleFundingTypesDTO);
+    List<PostFundingDTO> result = postFundingValidator.validateFundingType(pfDTOs);
+    assertThat(result.get(0).getMessageList().contains(MULTIPLE_FOUND_ERROR), is(true));
   }
 
   @Test
   public void testValidateSuccessfully() {
-    pfDTOs = buildCheckedMap(validDTO);
+    pfDTOs = buildCheckedList(validDTO);
     List<PostFundingDTO> result = postFundingValidator.validateFundingType(pfDTOs);
     assertThat(result.get(0).getMessageList().isEmpty(), is(true));
   }
