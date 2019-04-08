@@ -245,11 +245,11 @@ public class TcsServiceImpl extends AbstractClientService {
         .getBody();
   }
 
-  public PostDTO updatePostFundings(PostDTO postDTO) {
+  public List<PostFundingDTO> updatePostFundings(PostDTO postDTO) {
     HttpHeaders headers = new HttpHeaders();
     HttpEntity<PostDTO> httpEntity = new HttpEntity<>(postDTO, headers);
     return tcsRestTemplate
-      .exchange(serviceUrl + API_POST_FUNDINGS, HttpMethod.PATCH, httpEntity, new ParameterizedTypeReference<PostDTO>() {
+      .exchange(serviceUrl + API_POST_FUNDINGS, HttpMethod.PATCH, httpEntity, new ParameterizedTypeReference<List<PostFundingDTO>>() {
       })
       .getBody();
   }
