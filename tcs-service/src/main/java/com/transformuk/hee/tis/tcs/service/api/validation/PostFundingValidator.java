@@ -32,17 +32,17 @@ public class PostFundingValidator {
     // check if the funding type is unique in the fundingType table in reference
     for (PostFundingDTO pfDTO: checkList) {
 
-      // check if funding type is not Other but an other value has been entered for for the row.
-      if (pfDTO.getFundingType() != "Other" && pfDTO.getInfo() != null) {
-        if (!pfDTO.getInfo().isEmpty()) {
-          pfDTO.getMessageList().add(FUNDING_TYPE_NOT_OTHER_ERROR);
-        }
-      }
-
       // check if funding type is empty
       if (pfDTO.getFundingType() == null || pfDTO.getFundingType().isEmpty()) {
         pfDTO.getMessageList().add(FUNDING_TYPE_EMPTY);
         break;
+      }
+
+      // check if funding type is not Other but an other value has been entered for for the row.
+      if (!pfDTO.getFundingType().equals("Other") && pfDTO.getInfo() != null) {
+        if (!pfDTO.getInfo().isEmpty()) {
+          pfDTO.getMessageList().add(FUNDING_TYPE_NOT_OTHER_ERROR);
+        }
       }
 
       int count = 0;
