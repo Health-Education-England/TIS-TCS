@@ -1078,14 +1078,14 @@ public class PostResourceIntTest {
 
   @Test
   @Transactional
-  public void pathPostFundingsShouldSucceedWhenDataIsValid() throws Exception {
+  public void patchPostFundingsShouldSucceedWhenDataIsValid() throws Exception {
     // Initialize the database
     post.setStatus(Status.CURRENT);
     postRepository.saveAndFlush(post);
 
     // Initialize the payload
     PostDTO postDTO = new PostDTO();
-    postDTO.setId(1L);
+    postDTO.setId(post.getId());
 
     Set<PostFundingDTO> postFundingDTOs = new HashSet<>();
     PostFundingDTO pfDTO_1 = new PostFundingDTO();
