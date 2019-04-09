@@ -2,13 +2,7 @@ package com.transformuk.hee.tis.tcs.service.service.impl;
 
 import com.google.common.collect.Lists;
 import com.google.common.collect.Sets;
-import com.transformuk.hee.tis.tcs.api.dto.PostDTO;
-import com.transformuk.hee.tis.tcs.api.dto.PostGradeDTO;
-import com.transformuk.hee.tis.tcs.api.dto.PostSiteDTO;
-import com.transformuk.hee.tis.tcs.api.dto.PostSpecialtyDTO;
-import com.transformuk.hee.tis.tcs.api.dto.PostViewDTO;
-import com.transformuk.hee.tis.tcs.api.dto.ProgrammeDTO;
-import com.transformuk.hee.tis.tcs.api.dto.SpecialtyDTO;
+import com.transformuk.hee.tis.tcs.api.dto.*;
 import com.transformuk.hee.tis.tcs.api.enumeration.FundingType;
 import com.transformuk.hee.tis.tcs.api.enumeration.PostGradeType;
 import com.transformuk.hee.tis.tcs.api.enumeration.PostSiteType;
@@ -16,6 +10,7 @@ import com.transformuk.hee.tis.tcs.api.enumeration.PostSpecialtyType;
 import com.transformuk.hee.tis.tcs.api.enumeration.Status;
 import com.transformuk.hee.tis.tcs.service.api.decorator.PostViewDecorator;
 import com.transformuk.hee.tis.tcs.service.api.util.BasicPage;
+import com.transformuk.hee.tis.tcs.service.api.validation.PostFundingValidator;
 import com.transformuk.hee.tis.tcs.service.exception.AccessUnauthorisedException;
 import com.transformuk.hee.tis.tcs.service.model.ColumnFilter;
 import com.transformuk.hee.tis.tcs.service.model.Post;
@@ -155,6 +150,8 @@ public class PostServiceImplTest {
   private NationalPostNumberServiceImpl nationalPostNumberServiceMock;
   @Mock
   private PostViewDecorator postViewDecoratorMock;
+  @Mock
+  private PostFundingValidator postFundingValidatorMock;
 
   @Test
   public void saveShouldSavePost() {
@@ -446,6 +443,37 @@ public class PostServiceImplTest {
     Assert.assertSame(transformedPosts, result);
     Assert.assertEquals(expectedDTO, result.get(0));
     Assert.assertEquals(expectedSpecialties, result.get(0).getSpecialties());
+  }
+
+  @Test
+  public void patchPostFundingsShouldReturnNullWhenPostDTOIsNull() {
+    PostDTO postDTO = null;
+    List<PostFundingDTO> retList = testObj.patchPostFundings(postDTO);
+    Assert.assertNull(retList);
+  }
+
+  @Test
+  public void patchPostFundingsShouldReturnNullWhenPostIsNotFound() {
+    PostDTO postDTO = new PostDTO();
+    Set<PostFundingDTO> postFundingDTOs = new HashSet<>();
+    postDTO.id(1L).setFundings(postFundingDTOs);
+    doReturn(null).when(testObj).findOne(any());
+    List<PostFundingDTO> retList = testObj.patchPostFundings(postDTO);
+    Assert.assertNull(retList);
+  }
+
+  @Test
+  public void patchPostFundingShouldSucceed() {
+    PostDTO postDTO = new PostDTO();
+    Set<PostFundingDTO> postFundingDTOs = new HashSet<>();
+    postDTO.id(1L).setFundings(postFundingDTOs);
+    PostDTO postDTOInDBMock = mock(PostDTO.class);
+    List<PostFundingDTO> checkList = new ArrayList<>(postFundingDTOs);
+    doReturn(postDTOInDBMock).when(testObj).findOne(any());
+    when(postFundingValidatorMock.validateFundingType(checkList)).thenReturn(checkList);
+    doReturn(postDTOInDBMock).when(testObj).update(any());
+    List<PostFundingDTO> retList = testObj.patchPostFundings(postDTO);
+    Assert.assertEquals(checkList, retList);
   }
 
   @Test

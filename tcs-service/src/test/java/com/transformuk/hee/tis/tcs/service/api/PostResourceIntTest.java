@@ -1105,13 +1105,12 @@ public class PostResourceIntTest {
     postDTO.setFundings(postFundingDTOs);
 
     restPostMockMvc.perform(patch("/api/post/fundings")
-        .contentType(TestUtil.APPLICATION_JSON_UTF8)
-        .content(TestUtil.convertObjectToJsonBytes(postDTO)))
-        .andExpect(status().isOk());
-//        .andExpect(jsonPath("$").isMap())
-//        .andExpect(jsonPath("$.*").isArray())
-//        .andExpect(jsonPath("$.*[0]", hasSize(1)))
-//        .andExpect(jsonPath("$.*[1]", hasSize(0)));
+      .contentType(TestUtil.APPLICATION_JSON_UTF8)
+      .content(TestUtil.convertObjectToJsonBytes(postDTO)))
+      .andExpect(status().isOk())
+      .andExpect(jsonPath("$").isArray())
+      .andExpect(jsonPath("$.[0].messageList", hasSize(0)))
+      .andExpect(jsonPath("$.[1].messageList", hasSize(1)));
   }
 
 
