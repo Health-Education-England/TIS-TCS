@@ -2,33 +2,17 @@ package com.transformuk.hee.tis.tcs.service.api;
 
 import com.google.common.collect.Lists;
 import com.google.common.collect.Sets;
+import com.transformuk.hee.tis.reference.api.dto.FundingTypeDTO;
+import com.transformuk.hee.tis.reference.client.ReferenceService;
 import com.transformuk.hee.tis.tcs.TestUtils;
-import com.transformuk.hee.tis.tcs.api.dto.PlacementDTO;
-import com.transformuk.hee.tis.tcs.api.dto.PostDTO;
-import com.transformuk.hee.tis.tcs.api.dto.PostGradeDTO;
-import com.transformuk.hee.tis.tcs.api.dto.PostSiteDTO;
-import com.transformuk.hee.tis.tcs.api.dto.PostSpecialtyDTO;
-import com.transformuk.hee.tis.tcs.api.dto.ProgrammeDTO;
-import com.transformuk.hee.tis.tcs.api.dto.SpecialtyDTO;
-import com.transformuk.hee.tis.tcs.api.dto.PostFundingDTO;
-import com.transformuk.hee.tis.tcs.api.enumeration.PostGradeType;
-import com.transformuk.hee.tis.tcs.api.enumeration.PostSiteType;
-import com.transformuk.hee.tis.tcs.api.enumeration.PostSpecialtyType;
-import com.transformuk.hee.tis.tcs.api.enumeration.PostSuffix;
-import com.transformuk.hee.tis.tcs.api.enumeration.Status;
+import com.transformuk.hee.tis.tcs.api.dto.*;
+import com.transformuk.hee.tis.tcs.api.enumeration.*;
 import com.transformuk.hee.tis.tcs.service.Application;
 import com.transformuk.hee.tis.tcs.service.api.decorator.PlacementSummaryDecorator;
 import com.transformuk.hee.tis.tcs.service.api.decorator.PlacementViewDecorator;
 import com.transformuk.hee.tis.tcs.service.api.validation.PostValidator;
 import com.transformuk.hee.tis.tcs.service.exception.ExceptionTranslator;
-import com.transformuk.hee.tis.tcs.service.model.Placement;
-import com.transformuk.hee.tis.tcs.service.model.Post;
-import com.transformuk.hee.tis.tcs.service.model.PostFunding;
-import com.transformuk.hee.tis.tcs.service.model.PostGrade;
-import com.transformuk.hee.tis.tcs.service.model.PostSite;
-import com.transformuk.hee.tis.tcs.service.model.PostSpecialty;
-import com.transformuk.hee.tis.tcs.service.model.Programme;
-import com.transformuk.hee.tis.tcs.service.model.Specialty;
+import com.transformuk.hee.tis.tcs.service.model.*;
 import com.transformuk.hee.tis.tcs.service.repository.PlacementViewRepository;
 import com.transformuk.hee.tis.tcs.service.repository.PostRepository;
 import com.transformuk.hee.tis.tcs.service.repository.SpecialtyRepository;
@@ -37,11 +21,11 @@ import com.transformuk.hee.tis.tcs.service.service.PostService;
 import com.transformuk.hee.tis.tcs.service.service.mapper.PlacementViewMapper;
 import com.transformuk.hee.tis.tcs.service.service.mapper.PostMapper;
 import org.apache.commons.codec.net.URLCodec;
-import org.hamcrest.core.StringContains;
 import org.junit.Before;
 import org.junit.Ignore;
 import org.junit.Test;
 import org.junit.runner.RunWith;
+import org.mockito.Mock;
 import org.mockito.MockitoAnnotations;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
@@ -56,26 +40,13 @@ import org.springframework.transaction.annotation.Transactional;
 import javax.persistence.EntityManager;
 import java.net.URLEncoder;
 import java.time.LocalDate;
-import java.util.Arrays;
-import java.util.Collections;
-import java.util.List;
-import java.util.Set;
-import java.util.HashSet;
+import java.util.*;
 
 import static org.assertj.core.api.Assertions.assertThat;
-import static org.hamcrest.Matchers.contains;
-import static org.hamcrest.Matchers.containsInAnyOrder;
-import static org.hamcrest.Matchers.hasItem;
-import static org.hamcrest.Matchers.hasSize;
-import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.delete;
-import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
-import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.patch;
-import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
-import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.put;
-import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.content;
-import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
-import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
-
+import static org.hamcrest.Matchers.*;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.*;
+import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.*;
+import static org.mockito.Mockito.when;
 /**
  * Test class for the PostResource REST controller.
  *
@@ -155,6 +126,9 @@ public class PostResourceIntTest {
   private PostSite postSite;
   private PostSpecialty postSpecialty;
   private Programme programme;
+
+  @Mock
+  private ReferenceService referenceServiceMock;
 
   /**
    * Create an entity for this test.
@@ -1103,6 +1077,21 @@ public class PostResourceIntTest {
     postFundingDTOs.add(pfDTO_2);
 
     postDTO.setFundings(postFundingDTOs);
+
+    Set<String> labels = new HashSet<>();
+    labels.add("Academic - Trust");
+    labels.add("lalala");
+
+    List<FundingTypeDTO> fundingTypeDTOS = new ArrayList<>();
+    FundingTypeDTO fundingTypeDTO = new FundingTypeDTO();
+    fundingTypeDTO.setId(10L);
+    fundingTypeDTO.setCode("ACADEMIC_TRUST");
+    fundingTypeDTO.setLabel("Academic - Trust");
+    fundingTypeDTO.setLabel("CURRENT");
+
+    fundingTypeDTOS.add(fundingTypeDTO);
+
+    when(referenceServiceMock.findCurrentFundingTypesByLabelIn(labels)).thenReturn(fundingTypeDTOS);
 
     restPostMockMvc.perform(patch("/api/post/fundings")
       .contentType(TestUtil.APPLICATION_JSON_UTF8)
