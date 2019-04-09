@@ -2,6 +2,7 @@ package com.transformuk.hee.tis.tcs.service.service;
 
 import com.transformuk.hee.tis.tcs.api.dto.PostDTO;
 import com.transformuk.hee.tis.tcs.api.dto.PostEsrDTO;
+import com.transformuk.hee.tis.tcs.api.dto.PostFundingDTO;
 import com.transformuk.hee.tis.tcs.api.dto.PostViewDTO;
 import com.transformuk.hee.tis.tcs.service.api.util.BasicPage;
 import com.transformuk.hee.tis.tcs.service.model.ColumnFilter;
@@ -73,6 +74,14 @@ public interface PostService {
    * @return the list of persisted entities
    */
   List<PostDTO> patchPostSpecialties(List<PostDTO> postDTOList);
+
+  /**
+   * Patch a list of post so that the links to fundings are saved.
+   *
+   * @param postDTO the entity to patch
+   * @return the list of persisted entities
+   */
+  List<PostFundingDTO> patchPostFundings(PostDTO postDTO);
 
   /**
    * Update a single post

@@ -1,7 +1,14 @@
 package com.transformuk.hee.tis.tcs.service.api;
 
+import static com.transformuk.hee.tis.tcs.service.api.util.StringUtil.sanitize;
+
 import com.google.common.collect.Lists;
-import com.transformuk.hee.tis.tcs.api.dto.*;
+import com.transformuk.hee.tis.tcs.api.dto.PlacementSummaryDTO;
+import com.transformuk.hee.tis.tcs.api.dto.PlacementViewDTO;
+import com.transformuk.hee.tis.tcs.api.dto.PostDTO;
+import com.transformuk.hee.tis.tcs.api.dto.PostEsrDTO;
+import com.transformuk.hee.tis.tcs.api.dto.PostFundingDTO;
+import com.transformuk.hee.tis.tcs.api.dto.PostViewDTO;
 import com.transformuk.hee.tis.tcs.api.dto.validation.Create;
 import com.transformuk.hee.tis.tcs.api.dto.validation.Update;
 import com.transformuk.hee.tis.tcs.api.enumeration.PostGradeType;
@@ -10,7 +17,11 @@ import com.transformuk.hee.tis.tcs.api.enumeration.PostSuffix;
 import com.transformuk.hee.tis.tcs.api.enumeration.Status;
 import com.transformuk.hee.tis.tcs.service.api.decorator.PlacementSummaryDecorator;
 import com.transformuk.hee.tis.tcs.service.api.decorator.PlacementViewDecorator;
-import com.transformuk.hee.tis.tcs.service.api.util.*;
+import com.transformuk.hee.tis.tcs.service.api.util.BasicPage;
+import com.transformuk.hee.tis.tcs.service.api.util.ColumnFilterUtil;
+import com.transformuk.hee.tis.tcs.service.api.util.HeaderUtil;
+import com.transformuk.hee.tis.tcs.service.api.util.PaginationUtil;
+import com.transformuk.hee.tis.tcs.service.api.util.UrlDecoderUtil;
 import com.transformuk.hee.tis.tcs.service.api.validation.PostValidator;
 import com.transformuk.hee.tis.tcs.service.model.ColumnFilter;
 import com.transformuk.hee.tis.tcs.service.model.PlacementView;
@@ -20,6 +31,14 @@ import com.transformuk.hee.tis.tcs.service.service.PostService;
 import com.transformuk.hee.tis.tcs.service.service.mapper.PlacementViewMapper;
 import io.github.jhipster.web.util.ResponseUtil;
 import io.jsonwebtoken.lang.Collections;
+import java.io.IOException;
+import java.net.URI;
+import java.net.URISyntaxException;
+import java.util.ArrayList;
+import java.util.List;
+import java.util.Optional;
+import java.util.stream.Collectors;
+import javax.validation.Valid;
 import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -31,18 +50,16 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.MethodArgumentNotValidException;
-import org.springframework.web.bind.annotation.*;
-
-import javax.validation.Valid;
-import java.io.IOException;
-import java.net.URI;
-import java.net.URISyntaxException;
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Optional;
-import java.util.stream.Collectors;
-
-import static com.transformuk.hee.tis.tcs.service.api.util.StringUtil.sanitize;
+import org.springframework.web.bind.annotation.DeleteMapping;
+import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PatchMapping;
+import org.springframework.web.bind.annotation.PathVariable;
+import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.PutMapping;
+import org.springframework.web.bind.annotation.RequestBody;
+import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestParam;
+import org.springframework.web.bind.annotation.RestController;
 
 /**
  * REST controller for managing Post.
@@ -525,7 +542,29 @@ public class PostResource {
         .body(results);
   }
 
-
+  /**
+   * PATCH  /post/fundings : Patches a Post to link it to fundings
+   *
+   * @param postDto The PostDTO to update the fundings for.
+   * @return the ResponseEntity with status 200 (OK) and with body of a map of
+   * the updated postDTOS and associated error messages,
+   * or with status 400 (Bad Request) if the postDTOS is not valid,
+   * or with status 500 (Internal Server Error) if the postDTOS couldnt be updated
+   * @throws URISyntaxException if the Location URI syntax is incorrect
+   */
+  @PatchMapping("/post/fundings")
+  @PreAuthorize("hasAuthority('tcs:add:modify:entities')")
+  public ResponseEntity<List<PostFundingDTO>> patchPostFundings(@Valid @RequestBody PostDTO postDto) {
+    log.debug("REST request to bulk link fundings to Posts : {}", postDto);
+    if (postDto == null) {
+      return ResponseEntity.badRequest().headers(HeaderUtil.createFailureAlert(ENTITY_NAME, REQUEST_BODY_EMPTY,
+        REQUEST_BODY_CANNOT_BE_EMPTY)).body(null);
+    }
+    List<PostFundingDTO> checkList = postService.patchPostFundings(postDto);
+    return ResponseEntity.ok()
+      .headers(HeaderUtil.createEntityUpdateAlert(ENTITY_NAME, postDto.getId().toString()))
+      .body(checkList);
+  }
 
   @GetMapping("/programme/{id}/posts")
   public ResponseEntity<List<PostDTO>> getAllPostsForProgramme(@PathVariable Long id,

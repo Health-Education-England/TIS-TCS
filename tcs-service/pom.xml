@@ -12,7 +12,7 @@
 
   <groupId>com.transformuk.hee.tis</groupId>
   <artifactId>tcs-service</artifactId>
-  <version>4.2.0</version>
+  <version>4.3.0</version>
   <packaging>war</packaging>
   <name>tcs-service</name>
 
@@ -141,12 +141,12 @@
     <dependency>
       <groupId>com.transformuk.hee</groupId>
       <artifactId>reference-client</artifactId>
-      <version>4.1.5</version>
+      <version>4.3.0</version>
     </dependency>
     <dependency>
       <groupId>com.transformuk.hee.tis</groupId>
       <artifactId>tcs-api</artifactId>
-      <version>5.0.2</version>
+      <version>5.1.1</version>
     </dependency>
     <dependency>
       <groupId>com.zaxxer</groupId>

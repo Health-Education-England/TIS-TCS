@@ -1,9 +1,10 @@
 package com.transformuk.hee.tis.tcs.api.dto;
 
-
 import java.io.Serializable;
 import java.time.LocalDate;
+import java.util.ArrayList;
 import java.util.Objects;
+import java.util.List;
 
 /**
  * A DTO for the PostFunding entity.
@@ -23,6 +24,12 @@ public class PostFundingDTO implements Serializable {
   private LocalDate endDate;
 
   private String fundingBodyId;
+
+  private List<String> messageList;
+
+  public PostFundingDTO() {
+    this.messageList = new ArrayList<>();
+  }
 
   public Long getId() {
     return id;
@@ -72,9 +79,21 @@ public class PostFundingDTO implements Serializable {
     this.startDate = startDate;
   }
 
-  public String getFundingBodyId() {return fundingBodyId; }
+  public String getFundingBodyId() {
+    return fundingBodyId;
+  }
 
-  public void setFundingBodyId(String fundingBodyId) {this.fundingBodyId = fundingBodyId; }
+  public void setFundingBodyId(String fundingBodyId) {
+    this.fundingBodyId = fundingBodyId;
+  }
+
+  public List<String> getMessageList() {
+    return this.messageList;
+  }
+
+  public void setMessageList(List<String> messageList) {
+    this.messageList = messageList;
+  }
 
   @Override
   public boolean equals(Object o) {
@@ -84,25 +103,33 @@ public class PostFundingDTO implements Serializable {
     if (o == null || getClass() != o.getClass()) {
       return false;
     }
-
-    PostFundingDTO postFundingDTO = (PostFundingDTO) o;
-
-    if (!Objects.equals(id, postFundingDTO.id)) {
-      return false;
-    }
-
-    return true;
+    PostFundingDTO that = (PostFundingDTO) o;
+    return Objects.equals(id, that.id) &&
+      Objects.equals(intrepidId, that.intrepidId) &&
+      Objects.equals(fundingType, that.fundingType) &&
+      Objects.equals(info, that.info) &&
+      Objects.equals(startDate, that.startDate) &&
+      Objects.equals(endDate, that.endDate) &&
+      Objects.equals(fundingBodyId, that.fundingBodyId) &&
+      Objects.equals(messageList, that.messageList);
   }
 
   @Override
   public int hashCode() {
-    return Objects.hashCode(id);
+    return Objects.hash(id, intrepidId, fundingType, info, startDate, endDate, fundingBodyId, messageList);
   }
 
   @Override
   public String toString() {
     return "PostFundingDTO{" +
-        "id=" + id +
-        '}';
+      "id=" + id +
+      ", intrepidId='" + intrepidId + '\'' +
+      ", fundingType='" + fundingType + '\'' +
+      ", info='" + info + '\'' +
+      ", startDate=" + startDate +
+      ", endDate=" + endDate +
+      ", fundingBodyId='" + fundingBodyId + '\'' +
+      ", messageList='" + messageList + '\'' +
+      '}';
   }
 }

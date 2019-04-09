@@ -1,10 +1,29 @@
 package com.transformuk.hee.tis.tcs.service.api;
 
+import static org.assertj.core.api.Assertions.assertThat;
+import static org.hamcrest.Matchers.contains;
+import static org.hamcrest.Matchers.containsInAnyOrder;
+import static org.hamcrest.Matchers.hasItem;
+import static org.hamcrest.Matchers.hasSize;
+import static org.hamcrest.Matchers.is;
+import static org.mockito.Mockito.when;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.delete;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.patch;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.put;
+import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.content;
+import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
+import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
+
 import com.google.common.collect.Lists;
 import com.google.common.collect.Sets;
+import com.transformuk.hee.tis.reference.api.dto.FundingTypeDTO;
+import com.transformuk.hee.tis.reference.client.ReferenceService;
+import com.transformuk.hee.tis.reference.client.impl.ReferenceServiceImpl;
 import com.transformuk.hee.tis.tcs.TestUtils;
-import com.transformuk.hee.tis.tcs.api.dto.PlacementDTO;
 import com.transformuk.hee.tis.tcs.api.dto.PostDTO;
+import com.transformuk.hee.tis.tcs.api.dto.PostFundingDTO;
 import com.transformuk.hee.tis.tcs.api.dto.PostGradeDTO;
 import com.transformuk.hee.tis.tcs.api.dto.PostSiteDTO;
 import com.transformuk.hee.tis.tcs.api.dto.PostSpecialtyDTO;
@@ -18,9 +37,9 @@ import com.transformuk.hee.tis.tcs.api.enumeration.Status;
 import com.transformuk.hee.tis.tcs.service.Application;
 import com.transformuk.hee.tis.tcs.service.api.decorator.PlacementSummaryDecorator;
 import com.transformuk.hee.tis.tcs.service.api.decorator.PlacementViewDecorator;
+import com.transformuk.hee.tis.tcs.service.api.validation.PostFundingValidator;
 import com.transformuk.hee.tis.tcs.service.api.validation.PostValidator;
 import com.transformuk.hee.tis.tcs.service.exception.ExceptionTranslator;
-import com.transformuk.hee.tis.tcs.service.model.Placement;
 import com.transformuk.hee.tis.tcs.service.model.Post;
 import com.transformuk.hee.tis.tcs.service.model.PostFunding;
 import com.transformuk.hee.tis.tcs.service.model.PostGrade;
@@ -32,15 +51,24 @@ import com.transformuk.hee.tis.tcs.service.repository.PlacementViewRepository;
 import com.transformuk.hee.tis.tcs.service.repository.PostRepository;
 import com.transformuk.hee.tis.tcs.service.repository.SpecialtyRepository;
 import com.transformuk.hee.tis.tcs.service.service.PlacementService;
-import com.transformuk.hee.tis.tcs.service.service.PostService;
+import com.transformuk.hee.tis.tcs.service.service.impl.PostServiceImpl;
 import com.transformuk.hee.tis.tcs.service.service.mapper.PlacementViewMapper;
 import com.transformuk.hee.tis.tcs.service.service.mapper.PostMapper;
+import java.net.URLEncoder;
+import java.time.LocalDate;
+import java.util.Arrays;
+import java.util.Collections;
+import java.util.HashSet;
+import java.util.List;
+import java.util.Set;
+import javax.persistence.EntityManager;
 import org.apache.commons.codec.net.URLCodec;
-import org.hamcrest.core.StringContains;
 import org.junit.Before;
 import org.junit.Ignore;
 import org.junit.Test;
 import org.junit.runner.RunWith;
+import org.mockito.InjectMocks;
+import org.mockito.Mock;
 import org.mockito.MockitoAnnotations;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
@@ -51,28 +79,6 @@ import org.springframework.test.context.junit4.SpringRunner;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.setup.MockMvcBuilders;
 import org.springframework.transaction.annotation.Transactional;
-
-import javax.persistence.EntityManager;
-import java.net.URLEncoder;
-import java.time.LocalDate;
-import java.util.Arrays;
-import java.util.Collections;
-import java.util.List;
-import java.util.Set;
-
-import static org.assertj.core.api.Assertions.assertThat;
-import static org.hamcrest.Matchers.contains;
-import static org.hamcrest.Matchers.containsInAnyOrder;
-import static org.hamcrest.Matchers.hasItem;
-import static org.hamcrest.Matchers.hasSize;
-import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.delete;
-import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
-import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.patch;
-import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
-import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.put;
-import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.content;
-import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
-import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
 /**
  * Test class for the PostResource REST controller.
@@ -124,8 +130,14 @@ public class PostResourceIntTest {
   private SpecialtyRepository specialtyRepository;
   @Autowired
   private PostMapper postMapper;
+  @Mock
+  private ReferenceServiceImpl referenceService;
   @Autowired
-  private PostService postService;
+  @InjectMocks
+  private PostFundingValidator postFundingValidator;
+  @Autowired
+  @InjectMocks
+  private PostServiceImpl postService;
   @Autowired
   private PostValidator postValidator;
   @Autowired
@@ -154,6 +166,9 @@ public class PostResourceIntTest {
   private PostSpecialty postSpecialty;
   private Programme programme;
 
+  @Mock
+  private ReferenceService referenceServiceMock;
+
   /**
    * Create an entity for this test.
    * <p>
@@ -162,8 +177,8 @@ public class PostResourceIntTest {
    */
   public static Post linkEntities(Post post, Set<PostSite> sites, Set<PostGrade> grades, Set<PostSpecialty> specialties) {
     post.sites(sites)
-        .grades(grades)
-        .specialties(specialties);
+      .grades(grades)
+      .specialties(specialties);
     return post;
   }
 
@@ -319,10 +334,10 @@ public class PostResourceIntTest {
     postDTO.setId(-1L);
     //when & then
     restPostMockMvc.perform(post("/api/posts")
-        .contentType(TestUtil.APPLICATION_JSON_UTF8)
-        .content(TestUtil.convertObjectToJsonBytes(postDTO)))
-        .andExpect(status().isBadRequest())
-        .andExpect(jsonPath("$.message").value("error.validation"))
+          .contentType(TestUtil.APPLICATION_JSON_UTF8)
+          .content(TestUtil.convertObjectToJsonBytes(postDTO)))
+          .andExpect(status().isBadRequest())
+          .andExpect(jsonPath("$.message").value("error.validation"))
         .andExpect(jsonPath("$.fieldErrors[0].field").value("id"));
   }
 
@@ -1074,6 +1089,48 @@ public class PostResourceIntTest {
     assertThat(postList).hasSize(expectedDatabaseSizeAfterBulkUpdate);
   }
 
+  @Test
+  @Transactional
+  public void patchPostFundingsShouldSucceedWhenDataIsValid() throws Exception {
+    // Initialize the database
+    post.setStatus(Status.CURRENT);
+    postRepository.saveAndFlush(post);
+
+    // Initialize the payload
+    PostDTO postDTO = new PostDTO();
+    postDTO.setId(post.getId());
+
+    Set<PostFundingDTO> postFundingDTOs = new HashSet<>();
+    PostFundingDTO pfDTO_1 = new PostFundingDTO();
+    pfDTO_1.setFundingType("Academic - Trust");
+    pfDTO_1.setFundingBodyId("864");
+    pfDTO_1.setStartDate(LocalDate.of(2019, 4, 4));
+    pfDTO_1.setEndDate(LocalDate.of(2019, 5, 4));
+    postFundingDTOs.add(pfDTO_1);
+
+    PostFundingDTO pfDTO_2 = new PostFundingDTO();
+    pfDTO_2.setFundingType("lalala");
+    pfDTO_2.setFundingBodyId("864");
+    pfDTO_2.setStartDate(LocalDate.of(2019, 4, 4));
+    pfDTO_2.setEndDate(LocalDate.of(2019, 5, 4));
+    postFundingDTOs.add(pfDTO_2);
+
+    postDTO.setFundings(postFundingDTOs);
+
+    FundingTypeDTO fundingTypeDto = new FundingTypeDTO();
+    fundingTypeDto.setLabel("Academic - Trust");
+    when(referenceService.findCurrentFundingTypesByLabelIn(Sets.newHashSet("Academic - Trust", "lalala")))
+      .thenReturn(Collections.singletonList(fundingTypeDto));
+
+    restPostMockMvc.perform(patch("/api/post/fundings")
+      .contentType(TestUtil.APPLICATION_JSON_UTF8)
+      .content(TestUtil.convertObjectToJsonBytes(postDTO)))
+      .andExpect(status().isOk())
+      .andExpect(jsonPath("$").isArray())
+      .andExpect(jsonPath("$.[0].messageList", hasSize(0)))
+      .andExpect(jsonPath("$.[1].messageList", hasSize(1)))
+      .andExpect(jsonPath("$.[1].messageList.[0]", is("funding type does not exist.")));
+  }
 
   @Test
   @Transactional

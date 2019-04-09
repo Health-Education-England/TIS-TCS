@@ -6,6 +6,7 @@ import com.google.common.collect.Maps;
 import com.google.common.collect.Sets;
 import com.transformuk.hee.tis.tcs.api.dto.PostDTO;
 import com.transformuk.hee.tis.tcs.api.dto.PostEsrDTO;
+import com.transformuk.hee.tis.tcs.api.dto.PostFundingDTO;
 import com.transformuk.hee.tis.tcs.api.dto.PostGradeDTO;
 import com.transformuk.hee.tis.tcs.api.dto.PostSiteDTO;
 import com.transformuk.hee.tis.tcs.api.dto.PostSpecialtyDTO;
@@ -14,6 +15,7 @@ import com.transformuk.hee.tis.tcs.api.dto.ProgrammeDTO;
 import com.transformuk.hee.tis.tcs.api.enumeration.Status;
 import com.transformuk.hee.tis.tcs.service.api.decorator.PostViewDecorator;
 import com.transformuk.hee.tis.tcs.service.api.util.BasicPage;
+import com.transformuk.hee.tis.tcs.service.api.validation.PostFundingValidator;
 import com.transformuk.hee.tis.tcs.service.exception.AccessUnauthorisedException;
 import com.transformuk.hee.tis.tcs.service.model.ColumnFilter;
 import com.transformuk.hee.tis.tcs.service.model.EsrNotification;
@@ -37,6 +39,11 @@ import com.transformuk.hee.tis.tcs.service.service.PostService;
 import com.transformuk.hee.tis.tcs.service.service.helper.SqlQuerySupplier;
 import com.transformuk.hee.tis.tcs.service.service.mapper.DesignatedBodyMapper;
 import com.transformuk.hee.tis.tcs.service.service.mapper.PostMapper;
+import java.sql.ResultSet;
+import java.sql.SQLException;
+import java.util.*;
+import java.util.concurrent.CompletableFuture;
+import java.util.stream.Collectors;
 import org.apache.commons.collections4.CollectionUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
@@ -54,19 +61,7 @@ import org.springframework.scheduling.annotation.Async;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.util.StopWatch;
-
-import java.sql.ResultSet;
-import java.sql.SQLException;
-import java.util.Collection;
-import java.util.Collections;
-import java.util.HashSet;
-import java.util.List;
-import java.util.Map;
-import java.util.Objects;
-import java.util.Optional;
-import java.util.Set;
-import java.util.concurrent.CompletableFuture;
-import java.util.stream.Collectors;
+import org.springframework.web.client.ResourceAccessException;
 
 /**
  * Service Implementation for managing Post.
@@ -101,6 +96,8 @@ public class PostServiceImpl implements PostService {
   private PermissionService permissionService;
   @Autowired
   private PostFundingRepository postFundingRepository;
+  @Autowired
+  private PostFundingValidator postFundingValidator;
 
   /**
    * Save a post.
@@ -299,6 +296,34 @@ public class PostServiceImpl implements PostService {
       }
     }
     return postMapper.postsToPostDTOs(posts);
+  }
+
+  @Override
+  public List<PostFundingDTO> patchPostFundings(PostDTO postDTO) {
+    if (postDTO != null) {
+      Long postId = postDTO.getId();
+      try {
+        PostDTO queryPostDTO = findOne(postId);
+        if (queryPostDTO != null) {
+          Set<PostFundingDTO> postFundingDTOS = postDTO.getFundings();
+
+          // prepare a list
+          List<PostFundingDTO> checkList = new ArrayList<>(postFundingDTOS);
+          checkList = postFundingValidator.validateFundingType(checkList);
+          // patch update
+          for (PostFundingDTO pfDTO: checkList) {
+            if (pfDTO.getMessageList().size() == 0) {
+              queryPostDTO.addFunding(pfDTO);
+            }
+          }
+          update(queryPostDTO);
+          return checkList;
+        }
+      } catch (ResourceAccessException e) {
+        return null;
+      }
+    }
+    return null;
   }
 
   private Map<String, Post> getPostsByIntrepidId(List<PostDTO> postDtoList) {

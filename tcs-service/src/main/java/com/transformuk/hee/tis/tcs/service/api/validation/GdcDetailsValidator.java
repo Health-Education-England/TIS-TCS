@@ -125,7 +125,7 @@ public class GdcDetailsValidator {
 
   private void requireFieldErrors(List<FieldError> fieldErrors, String field) {
     fieldErrors.add(new FieldError(GDC_DETAILS_DTO_NAME, field,
-        String.format("%s is required", field)));
+      String.format("%s is required", field)));
   }
 
 }

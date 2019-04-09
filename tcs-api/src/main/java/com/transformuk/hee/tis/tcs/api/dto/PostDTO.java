@@ -6,6 +6,7 @@ import com.transformuk.hee.tis.tcs.api.dto.validation.Update;
 import com.transformuk.hee.tis.tcs.api.enumeration.PostSuffix;
 import com.transformuk.hee.tis.tcs.api.enumeration.Status;
 
+import java.util.HashSet;
 import javax.validation.constraints.DecimalMin;
 import javax.validation.constraints.NotNull;
 import javax.validation.constraints.Null;
@@ -280,6 +281,14 @@ public class PostDTO implements Serializable {
 
     public Set<PostFundingDTO> getFundings() {
         return fundings;
+    }
+
+    public void addFunding(final PostFundingDTO funding) {
+      if (fundings == null) {
+        fundings = new HashSet<>();
+      }
+
+      fundings.add(funding);
     }
 
     public void setFundings(final Set<PostFundingDTO> fundings) {
