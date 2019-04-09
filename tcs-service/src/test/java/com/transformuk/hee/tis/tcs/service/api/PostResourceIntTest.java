@@ -19,12 +19,7 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 import com.google.common.collect.Lists;
 import com.google.common.collect.Sets;
 import com.transformuk.hee.tis.reference.api.dto.FundingTypeDTO;
-<<<<<<< Updated upstream
 import com.transformuk.hee.tis.reference.client.ReferenceService;
-import com.transformuk.hee.tis.tcs.TestUtils;
-import com.transformuk.hee.tis.tcs.api.dto.*;
-import com.transformuk.hee.tis.tcs.api.enumeration.*;
-=======
 import com.transformuk.hee.tis.reference.client.impl.ReferenceServiceImpl;
 import com.transformuk.hee.tis.tcs.TestUtils;
 import com.transformuk.hee.tis.tcs.api.dto.PostDTO;
@@ -39,16 +34,12 @@ import com.transformuk.hee.tis.tcs.api.enumeration.PostSiteType;
 import com.transformuk.hee.tis.tcs.api.enumeration.PostSpecialtyType;
 import com.transformuk.hee.tis.tcs.api.enumeration.PostSuffix;
 import com.transformuk.hee.tis.tcs.api.enumeration.Status;
->>>>>>> Stashed changes
 import com.transformuk.hee.tis.tcs.service.Application;
 import com.transformuk.hee.tis.tcs.service.api.decorator.PlacementSummaryDecorator;
 import com.transformuk.hee.tis.tcs.service.api.decorator.PlacementViewDecorator;
 import com.transformuk.hee.tis.tcs.service.api.validation.PostFundingValidator;
 import com.transformuk.hee.tis.tcs.service.api.validation.PostValidator;
 import com.transformuk.hee.tis.tcs.service.exception.ExceptionTranslator;
-<<<<<<< Updated upstream
-import com.transformuk.hee.tis.tcs.service.model.*;
-=======
 import com.transformuk.hee.tis.tcs.service.model.Post;
 import com.transformuk.hee.tis.tcs.service.model.PostFunding;
 import com.transformuk.hee.tis.tcs.service.model.PostGrade;
@@ -56,7 +47,6 @@ import com.transformuk.hee.tis.tcs.service.model.PostSite;
 import com.transformuk.hee.tis.tcs.service.model.PostSpecialty;
 import com.transformuk.hee.tis.tcs.service.model.Programme;
 import com.transformuk.hee.tis.tcs.service.model.Specialty;
->>>>>>> Stashed changes
 import com.transformuk.hee.tis.tcs.service.repository.PlacementViewRepository;
 import com.transformuk.hee.tis.tcs.service.repository.PostRepository;
 import com.transformuk.hee.tis.tcs.service.repository.SpecialtyRepository;
@@ -77,10 +67,7 @@ import org.junit.Before;
 import org.junit.Ignore;
 import org.junit.Test;
 import org.junit.runner.RunWith;
-<<<<<<< Updated upstream
-=======
 import org.mockito.InjectMocks;
->>>>>>> Stashed changes
 import org.mockito.Mock;
 import org.mockito.MockitoAnnotations;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -93,19 +80,6 @@ import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.setup.MockMvcBuilders;
 import org.springframework.transaction.annotation.Transactional;
 
-<<<<<<< Updated upstream
-import javax.persistence.EntityManager;
-import java.net.URLEncoder;
-import java.time.LocalDate;
-import java.util.*;
-
-import static org.assertj.core.api.Assertions.assertThat;
-import static org.hamcrest.Matchers.*;
-import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.*;
-import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.*;
-import static org.mockito.Mockito.when;
-=======
->>>>>>> Stashed changes
 /**
  * Test class for the PostResource REST controller.
  *
@@ -1143,27 +1117,10 @@ public class PostResourceIntTest {
 
     postDTO.setFundings(postFundingDTOs);
 
-<<<<<<< Updated upstream
-    Set<String> labels = new HashSet<>();
-    labels.add("Academic - Trust");
-    labels.add("lalala");
-
-    List<FundingTypeDTO> fundingTypeDTOS = new ArrayList<>();
-    FundingTypeDTO fundingTypeDTO = new FundingTypeDTO();
-    fundingTypeDTO.setId(10L);
-    fundingTypeDTO.setCode("ACADEMIC_TRUST");
-    fundingTypeDTO.setLabel("Academic - Trust");
-    fundingTypeDTO.setLabel("CURRENT");
-
-    fundingTypeDTOS.add(fundingTypeDTO);
-
-    when(referenceServiceMock.findCurrentFundingTypesByLabelIn(labels)).thenReturn(fundingTypeDTOS);
-=======
     FundingTypeDTO fundingTypeDto = new FundingTypeDTO();
     fundingTypeDto.setLabel("Academic - Trust");
     when(referenceService.findCurrentFundingTypesByLabelIn(Sets.newHashSet("Academic - Trust", "lalala")))
       .thenReturn(Collections.singletonList(fundingTypeDto));
->>>>>>> Stashed changes
 
     restPostMockMvc.perform(patch("/api/post/fundings")
       .contentType(TestUtil.APPLICATION_JSON_UTF8)
