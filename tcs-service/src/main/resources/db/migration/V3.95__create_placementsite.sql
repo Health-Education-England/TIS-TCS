@@ -1,6 +1,6 @@
 CREATE TABLE PlacementSite (
    id bigint(20) NOT NULL AUTO_INCREMENT,
-   placementId bigint(20) NOT NULL,
+   placementId bigint(20) NULL,
    siteId bigint(20) NULL DEFAULT NULL,
    placementSiteType varchar(255) NULL DEFAULT NULL,
    UNIQUE KEY placement_site_pk (id),

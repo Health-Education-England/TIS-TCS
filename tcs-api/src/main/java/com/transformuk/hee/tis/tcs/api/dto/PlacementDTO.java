@@ -32,6 +32,7 @@ public class PlacementDTO implements Serializable {
     private Long postId;
     @NotNull(message = "SiteId is required", groups = {Update.class, Create.class})
     private Long siteId;
+    private Set<PlacementSiteDTO> sites = new HashSet<>();
     private String siteCode;
     @NotNull(message = "GradeId is required", groups = {Update.class, Create.class})
     private Long gradeId;
@@ -167,6 +168,14 @@ public class PlacementDTO implements Serializable {
 
     public void setSiteId(final Long siteId) {
         this.siteId = siteId;
+    }
+
+    public Set<PlacementSiteDTO> getSites() {
+      return sites;
+    }
+
+    public void setSites(Set<PlacementSiteDTO> sites) {
+      this.sites = sites;
     }
 
     public Long getGradeId() {
