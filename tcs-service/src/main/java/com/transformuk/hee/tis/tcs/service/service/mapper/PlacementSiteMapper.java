@@ -11,7 +11,7 @@ public class PlacementSiteMapper {
     PlacementSite placementSite = new PlacementSite();
     placementSite.setId(dto.getId());
     placementSite.setSiteId(dto.getSiteId());
-    placementSite.setPostSiteType(dto.getPlacementSiteType());
+    placementSite.setPlacementSiteType(dto.getPlacementSiteType());
     placementSite.setPlacement(placementSite.getPlacement());
     return placementSite;
   }
@@ -21,7 +21,7 @@ public class PlacementSiteMapper {
     placementSiteDTO.setId(placementSite.getId());
     //placementSiteDTO.setPlacementId(placementSite.getPlacement().getId());
     placementSiteDTO.setSiteId(placementSite.getSiteId());
-    placementSiteDTO.setPlacementSiteType(placementSite.getPostSiteType());
+    placementSiteDTO.setPlacementSiteType(placementSite.getPlacementSiteType());
     return placementSiteDTO;
   }
 }
