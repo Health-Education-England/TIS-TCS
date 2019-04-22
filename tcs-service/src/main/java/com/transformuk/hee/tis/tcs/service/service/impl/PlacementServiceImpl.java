@@ -167,6 +167,7 @@ public class PlacementServiceImpl implements PlacementService {
     Set<PlacementSite> siteModels = new HashSet<>();
     for(PlacementSiteDTO placementSiteDTO : siteDTOsInPlacementDTO){
       PlacementSite placementSite = placementSiteMapper.toEntity(placementSiteDTO);
+      placementSite.setPlacement(placementDetails);
       siteModels.add(placementSite);
     }
     placementDetails.setSites(siteModels);
@@ -180,6 +181,14 @@ public class PlacementServiceImpl implements PlacementService {
     handleEsrNewPlacementNotification(placementDetailsDTO, placementDetails);
 
     saveSupervisors(placementDetailsDTO.getSupervisors(), placementDetails.getId());
+
+    Set<PlacementSiteDTO> sitesToReturnToFE = new HashSet<>();
+    for(PlacementSite placementSite : siteModels){
+      PlacementSiteDTO placementSiteDTO = placementSiteMapper.toDto(placementSite);
+      placementSiteDTO.setPlacementId(placementSite.getPlacement().getId());
+      sitesToReturnToFE.add(placementSiteDTO);
+    }
+    placementDetailsDTO1.setSites(sitesToReturnToFE);
 
     return placementDetailsDTO1;
   }

@@ -2,6 +2,7 @@ package com.transformuk.hee.tis.tcs.service.model;
 
 import com.transformuk.hee.tis.tcs.api.enumeration.PostSiteType;
 
+import javax.persistence.CascadeType;
 import javax.persistence.Column;
 import javax.persistence.Entity;
 import javax.persistence.EnumType;
@@ -25,9 +26,9 @@ public class PlacementSite implements Serializable {
   @Column(name = "id")
   private Long id;
 
-  @ManyToOne(targetEntity = Placement.class, fetch = FetchType.LAZY)
+  @ManyToOne(targetEntity = PlacementDetails.class, fetch = FetchType.LAZY)
   @JoinColumn(name = "placementId")
-  private Placement placement;
+  private PlacementDetails placement;// eta hobe PlacementDetails
 
   @JoinColumn(name = "siteId")
   private Long siteId;
@@ -44,11 +45,11 @@ public class PlacementSite implements Serializable {
     this.id = id;
   }
 
-  public Placement getPlacement() {
+  public PlacementDetails getPlacement() {
     return placement;
   }
 
-  public void setPlacement(Placement placement) {
+  public void setPlacement(PlacementDetails placement) {
     this.placement = placement;
   }
 

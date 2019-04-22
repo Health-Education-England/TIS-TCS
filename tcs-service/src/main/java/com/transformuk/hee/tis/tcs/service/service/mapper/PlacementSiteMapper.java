@@ -12,6 +12,7 @@ public class PlacementSiteMapper {
     placementSite.setId(dto.getId());
     placementSite.setSiteId(dto.getSiteId());
     placementSite.setPostSiteType(dto.getPlacementSiteType());
+    placementSite.setPlacement(placementSite.getPlacement());
     return placementSite;
   }
 
