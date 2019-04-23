@@ -1,6 +1,6 @@
 package com.transformuk.hee.tis.tcs.service.model;
 
-import com.transformuk.hee.tis.tcs.api.enumeration.PostSiteType;
+import com.transformuk.hee.tis.tcs.api.enumeration.PlacementSiteType;
 
 import javax.persistence.CascadeType;
 import javax.persistence.Column;
@@ -35,7 +35,7 @@ public class PlacementSite implements Serializable {
 
   @Enumerated(EnumType.STRING)
   @Column(name = "placementSiteType")
-  private PostSiteType postSiteType;
+  private PlacementSiteType placementSiteType;
 
   public Long getId() {
     return id;
@@ -61,12 +61,12 @@ public class PlacementSite implements Serializable {
     this.siteId = siteId;
   }
 
-  public PostSiteType getPostSiteType() {
-    return postSiteType;
+  public PlacementSiteType getPlacementSiteType() {
+    return placementSiteType;
   }
 
-  public void setPostSiteType(PostSiteType postSiteType) {
-    this.postSiteType = postSiteType;
+  public void setPlacementSiteType(PlacementSiteType placementSiteType) {
+    this.placementSiteType = placementSiteType;
   }
 
   @Override
@@ -77,12 +77,12 @@ public class PlacementSite implements Serializable {
     return Objects.equals(getId(), that.getId()) &&
         Objects.equals(getPlacement(), that.getPlacement()) &&
         Objects.equals(getSiteId(), that.getSiteId()) &&
-        getPostSiteType() == that.getPostSiteType();
+      getPlacementSiteType() == that.getPlacementSiteType();
   }
 
   @Override
   public int hashCode() {
 
-    return Objects.hash(getId(), getPlacement(), getSiteId(), getPostSiteType());
+    return Objects.hash(getId(), getPlacement(), getSiteId(), getPlacementSiteType());
   }
 }

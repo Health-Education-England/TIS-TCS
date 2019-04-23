@@ -1,6 +1,6 @@
 package com.transformuk.hee.tis.tcs.api.dto;
 
-import com.transformuk.hee.tis.tcs.api.enumeration.PostSiteType;
+import com.transformuk.hee.tis.tcs.api.enumeration.PlacementSiteType;
 
 import java.io.Serializable;
 import java.util.Objects;
@@ -10,7 +10,15 @@ public class PlacementSiteDTO implements Serializable {
   private Long id;
   private Long placementId;
   private Long siteId;
-  private PostSiteType placementSiteType;
+  private PlacementSiteType placementSiteType;
+
+  public PlacementSiteDTO() {}
+
+  public PlacementSiteDTO(Long placementId, Long siteId, PlacementSiteType placementSiteType) {
+    this.placementId = placementId;
+    this.siteId = siteId;
+    this.placementSiteType = placementSiteType;
+  }
 
   public Long getId() {
     return id;
@@ -36,11 +44,11 @@ public class PlacementSiteDTO implements Serializable {
     this.siteId = siteId;
   }
 
-  public PostSiteType getPlacementSiteType() {
+  public PlacementSiteType getPlacementSiteType() {
     return placementSiteType;
   }
 
-  public void setPlacementSiteType(PostSiteType placementSiteType) {
+  public void setPlacementSiteType(PlacementSiteType placementSiteType) {
     this.placementSiteType = placementSiteType;
   }
 
