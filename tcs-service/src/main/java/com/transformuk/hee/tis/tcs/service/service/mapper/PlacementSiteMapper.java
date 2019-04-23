@@ -19,7 +19,9 @@ public class PlacementSiteMapper {
   public PlacementSiteDTO toDto(PlacementSite placementSite) {
     PlacementSiteDTO placementSiteDTO = new PlacementSiteDTO();
     placementSiteDTO.setId(placementSite.getId());
-    //placementSiteDTO.setPlacementId(placementSite.getPlacement().getId());
+    if (placementSite.getPlacement() != null) {
+      placementSiteDTO.setPlacementId(placementSite.getPlacement().getId());
+    }
     placementSiteDTO.setSiteId(placementSite.getSiteId());
     placementSiteDTO.setPlacementSiteType(placementSite.getPlacementSiteType());
     return placementSiteDTO;
