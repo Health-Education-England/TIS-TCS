@@ -4,7 +4,7 @@ CREATE TABLE PlacementSite (
    siteId bigint(20) NULL DEFAULT NULL,
    placementSiteType varchar(255) NULL DEFAULT NULL,
    PRIMARY KEY (`id`),
-   CONSTRAINT fk_placement_site_id FOREIGN KEY (placementId) REFERENCES Placement (id)
+   CONSTRAINT fk_placement_site_id FOREIGN KEY (placementId) REFERENCES Placement (id) ON DELETE CASCADE
 )ENGINE=InnoDB DEFAULT CHARSET=utf8;
 
 
