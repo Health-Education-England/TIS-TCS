@@ -47,6 +47,9 @@ public class PlacementDetails {
 
   private String siteCode;
 
+  @OneToMany(mappedBy = "placement", cascade = CascadeType.ALL, fetch = FetchType.EAGER, orphanRemoval = true)
+  private Set<PlacementSite> sites = new HashSet<>();
+
   private Long gradeId;
 
   private String gradeAbbreviation;
@@ -145,6 +148,14 @@ public class PlacementDetails {
 
   public void setSiteCode(String siteCode) {
     this.siteCode = siteCode;
+  }
+
+  public Set<PlacementSite> getSites() {
+    return sites;
+  }
+
+  public void setSites(Set<PlacementSite> sites) {
+    this.sites = sites;
   }
 
   public String getGradeAbbreviation() {

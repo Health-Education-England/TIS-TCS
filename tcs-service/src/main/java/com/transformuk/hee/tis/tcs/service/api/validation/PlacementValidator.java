@@ -182,7 +182,8 @@ public class PlacementValidator {
         });
     }
 
-    private void checkSpecialtyType(final List<FieldError> fieldErrors, final int noOfPrimarySpecialtyCount, final int noOfSubSpecialtyCount) {
+    private void checkSpecialtyType(final List<FieldError> fieldErrors, final int noOfPrimarySpecialtyCount,
+                                    final int noOfSubSpecialtyCount) {
         if (noOfPrimarySpecialtyCount > 1) {
             fieldErrors.add(new FieldError(PLACEMENT_DTO_NAME, "specialties",
                     String.format("Only one Specialty of type %s allowed", PostSpecialtyType.PRIMARY)));

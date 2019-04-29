@@ -10,6 +10,7 @@ import com.google.common.collect.Maps;
 import com.google.common.collect.Sets;
 import com.transformuk.hee.tis.tcs.api.dto.PlacementDTO;
 import com.transformuk.hee.tis.tcs.api.dto.PlacementDetailsDTO;
+import com.transformuk.hee.tis.tcs.api.dto.PlacementSiteDTO;
 import com.transformuk.hee.tis.tcs.api.dto.PlacementSpecialtyDTO;
 import com.transformuk.hee.tis.tcs.api.dto.PlacementSummaryDTO;
 import com.transformuk.hee.tis.tcs.api.dto.PlacementSupervisorDTO;
@@ -25,6 +26,7 @@ import com.transformuk.hee.tis.tcs.service.model.Comment;
 import com.transformuk.hee.tis.tcs.service.model.EsrNotification;
 import com.transformuk.hee.tis.tcs.service.model.Placement;
 import com.transformuk.hee.tis.tcs.service.model.PlacementDetails;
+import com.transformuk.hee.tis.tcs.service.model.PlacementSite;
 import com.transformuk.hee.tis.tcs.service.model.PlacementSpecialty;
 import com.transformuk.hee.tis.tcs.service.model.PlacementSupervisor;
 import com.transformuk.hee.tis.tcs.service.model.Post;
@@ -43,6 +45,7 @@ import com.transformuk.hee.tis.tcs.service.service.helper.SqlQuerySupplier;
 import com.transformuk.hee.tis.tcs.service.service.mapper.PersonLiteMapper;
 import com.transformuk.hee.tis.tcs.service.service.mapper.PlacementDetailsMapper;
 import com.transformuk.hee.tis.tcs.service.service.mapper.PlacementMapper;
+import com.transformuk.hee.tis.tcs.service.service.mapper.PlacementSiteMapper;
 import com.transformuk.hee.tis.tcs.service.service.mapper.PlacementSpecialtyMapper;
 import java.io.IOException;
 import java.sql.ResultSet;
@@ -110,6 +113,8 @@ public class PlacementServiceImpl implements PlacementService {
   @Autowired
   private PlacementSpecialtyMapper placementSpecialtyMapper;
   @Autowired
+  private PlacementSiteMapper placementSiteMapper;
+  @Autowired
   private PersonLiteMapper personLiteMapper;
   @Autowired
   private EsrNotificationService esrNotificationService;
@@ -158,6 +163,14 @@ public class PlacementServiceImpl implements PlacementService {
     } else {
       placementDetails.setAmendedDate(LocalDateTime.now(clock));
     }
+    Set<PlacementSiteDTO> siteDTOsInPlacementDTO = placementDetailsDTO.getSites();
+    Set<PlacementSite> siteModels = new HashSet<>();
+    for(PlacementSiteDTO placementSiteDTO : siteDTOsInPlacementDTO){
+      PlacementSite placementSite = placementSiteMapper.toEntity(placementSiteDTO);
+      placementSite.setPlacement(placementDetails);
+      siteModels.add(placementSite);
+    }
+    placementDetails.setSites(siteModels);
     placementDetails = placementDetailsRepository.saveAndFlush(placementDetails);
 
     final Set<PlacementSpecialty> placementSpecialties = linkPlacementSpecialties(
@@ -168,6 +181,14 @@ public class PlacementServiceImpl implements PlacementService {
     handleEsrNewPlacementNotification(placementDetailsDTO, placementDetails);
 
     saveSupervisors(placementDetailsDTO.getSupervisors(), placementDetails.getId());
+
+    Set<PlacementSiteDTO> sitesToReturnToFE = new HashSet<>();
+    for(PlacementSite placementSite : siteModels){
+      PlacementSiteDTO placementSiteDTO = placementSiteMapper.toDto(placementSite);
+      placementSiteDTO.setPlacementId(placementSite.getPlacement().getId());
+      sitesToReturnToFE.add(placementSiteDTO);
+    }
+    placementDetailsDTO1.setSites(sitesToReturnToFE);
 
     return placementDetailsDTO1;
   }

@@ -13,7 +13,7 @@ import java.util.Set;
  * Mapper for the entity PlacementDetails and its DTO PlacementDetailsDTO.
  *
  */
-@Mapper(componentModel = "spring", uses = {PlacementCommentMapper.class})
+@Mapper(componentModel = "spring", uses = {PlacementCommentMapper.class, PlacementSiteMapper.class})
 public interface PlacementDetailsMapper {
 
   PlacementDetailsDTO placementDetailsToPlacementDetailsDTO(PlacementDetails placementDetails);

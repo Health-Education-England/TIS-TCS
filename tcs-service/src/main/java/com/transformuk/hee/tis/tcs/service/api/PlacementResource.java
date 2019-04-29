@@ -79,11 +79,14 @@ public class PlacementResource {
    */
   @PostMapping("/placements")
   @PreAuthorize("hasAuthority('tcs:add:modify:entities')")
-  public ResponseEntity<PlacementDetailsDTO> createPlacement(@RequestBody @Validated(Create.class) final PlacementDetailsDTO placementDetailsDTO) throws URISyntaxException, ValidationException {
+  public ResponseEntity<PlacementDetailsDTO> createPlacement(@RequestBody @Validated(Create.class)
+                                                               final PlacementDetailsDTO placementDetailsDTO)
+      throws URISyntaxException, ValidationException {
     log.debug("REST request to save Placement : {}", placementDetailsDTO);
     placementValidator.validate(placementDetailsDTO);
     if (placementDetailsDTO.getId() != null) {
-      return ResponseEntity.badRequest().headers(HeaderUtil.createFailureAlert(ENTITY_NAME, "idexists", "A new placement cannot already have an ID")).body(null);
+      return ResponseEntity.badRequest().headers(HeaderUtil.createFailureAlert(ENTITY_NAME,
+          "idexists", "A new placement cannot already have an ID")).body(null);
     }
 
     final PlacementDetailsDTO result = placementService.createDetails(placementDetailsDTO);

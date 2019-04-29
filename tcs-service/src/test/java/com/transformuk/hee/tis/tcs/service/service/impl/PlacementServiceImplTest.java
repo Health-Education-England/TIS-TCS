@@ -9,11 +9,15 @@ import static org.mockito.Mockito.verifyZeroInteractions;
 import static org.mockito.Mockito.when;
 
 import com.google.common.collect.Lists;
+import com.google.common.collect.Sets;
 import com.transformuk.hee.tis.tcs.api.dto.PlacementDTO;
 import com.transformuk.hee.tis.tcs.api.dto.PlacementDetailsDTO;
+import com.transformuk.hee.tis.tcs.api.dto.PlacementSiteDTO;
 import com.transformuk.hee.tis.tcs.api.dto.PlacementSummaryDTO;
+import com.transformuk.hee.tis.tcs.api.enumeration.PlacementSiteType;
 import com.transformuk.hee.tis.tcs.service.model.Placement;
 import com.transformuk.hee.tis.tcs.service.model.PlacementDetails;
+import com.transformuk.hee.tis.tcs.service.model.PlacementSite;
 import com.transformuk.hee.tis.tcs.service.model.Post;
 import com.transformuk.hee.tis.tcs.service.repository.CommentRepository;
 import com.transformuk.hee.tis.tcs.service.repository.PlacementDetailsRepository;
@@ -23,6 +27,7 @@ import com.transformuk.hee.tis.tcs.service.repository.PostRepository;
 import com.transformuk.hee.tis.tcs.service.service.helper.SqlQuerySupplier;
 import com.transformuk.hee.tis.tcs.service.service.mapper.PlacementDetailsMapper;
 import com.transformuk.hee.tis.tcs.service.service.mapper.PlacementMapper;
+import com.transformuk.hee.tis.tcs.service.service.mapper.PlacementSiteMapper;
 import com.transformuk.hee.tis.tcs.service.service.mapper.PlacementSpecialtyMapper;
 import java.text.SimpleDateFormat;
 import java.time.Clock;
@@ -35,6 +40,7 @@ import java.util.Date;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
+import java.util.Set;
 import org.hamcrest.CoreMatchers;
 import org.junit.Assert;
 import org.junit.Before;
@@ -66,6 +72,8 @@ public class PlacementServiceImplTest {
   private PlacementMapper placementMapperMock;
   @Mock
   private PlacementDetailsMapper placementDetailsMapperMock;
+  @Mock
+  private PlacementSiteMapper placementSiteMapper;
   @Mock
   private PlacementSpecialtyMapper placementSpecialtyMapperMock;
   @Mock
@@ -376,5 +384,103 @@ public class PlacementServiceImplTest {
       placementDetails.getAddedDate(), CoreMatchers.nullValue());
     Assert.assertThat("The placement's amended date did not match the expected value.",
       placementDetails.getAmendedDate(), CoreMatchers.is(LocalDateTime.now(clock)));
+  }
+
+  /**
+   * Test that no sites are contained in the DTO when no sites are given.
+   */
+  @Test
+  public void testCreateDetails_noSites_noSites() {
+    // Set up test data.
+    PlacementDetailsDTO placementDetailsDto = new PlacementDetailsDTO();
+    PlacementDetails placementDetails = new PlacementDetails();
+    placementDetails.setId(1L);
+
+    // Record expectations.
+    when(placementDetailsMapperMock.placementDetailsDTOToPlacementDetails(placementDetailsDto))
+      .thenReturn(placementDetails);
+    when(placementDetailsRepositoryMock.saveAndFlush(placementDetails))
+      .thenReturn(placementDetails);
+    when(placementDetailsMapperMock.placementDetailsToPlacementDetailsDTO(placementDetails))
+      .thenReturn(new PlacementDetailsDTO());
+    when(placementSpecialtyMapperMock.toDTOs(any())).thenReturn(Collections.emptySet());
+    doNothing().when(placementSupervisorRepositoryMock).deleteAllByIdPlacementId(1L);
+    when(placementSupervisorRepositoryMock.saveAll(any())).thenReturn(null);
+
+    // Call the method under test.
+    PlacementDetailsDTO updatedPlacementDetailsDto = testObj.createDetails(placementDetailsDto);
+
+    // Perform assertions.
+    Set<PlacementSiteDTO> sites = updatedPlacementDetailsDto.getSites();
+    Assert
+      .assertThat("The placement's number of sites did not match the expected value.", sites.size(),
+        CoreMatchers.is(0));
+  }
+
+  /**
+   * Test that sites are contained in the DTO when sites are given.
+   */
+  @Test
+  public void testCreateDetails_hasSites_hasSites() {
+    // Set up test data.
+    PlacementDetailsDTO placementDetailsDto = new PlacementDetailsDTO();
+
+    PlacementSiteDTO placementSiteDto1 = new PlacementSiteDTO();
+    placementSiteDto1.setSiteId(1L);
+    placementSiteDto1.setPlacementSiteType(PlacementSiteType.OTHER);
+    PlacementSiteDTO placementSiteDto2 = new PlacementSiteDTO();
+    placementSiteDto2.setSiteId(2L);
+    placementSiteDto2.setPlacementSiteType(PlacementSiteType.OTHER);
+    Set<PlacementSiteDTO> siteDtos = Sets.newHashSet(placementSiteDto1, placementSiteDto2);
+    placementDetailsDto.setSites(siteDtos);
+
+    PlacementDetails placementDetails = new PlacementDetails();
+    placementDetails.setId(1L);
+
+    PlacementSite placementSite1 = new PlacementSite();
+    placementSite1.setId(1L);
+    placementSite1.setPlacementSiteType(PlacementSiteType.OTHER);
+    placementSite1.setPlacement(placementDetails);
+    PlacementSite placementSite2 = new PlacementSite();
+    placementSite2.setId(2L);
+    placementSite2.setPlacementSiteType(PlacementSiteType.OTHER);
+    placementSite2.setPlacement(placementDetails);
+    Set<PlacementSite> placementSites = Sets.newHashSet(placementSite1, placementSite2);
+
+    PlacementDetails updatedPlacementDetails = new PlacementDetails();
+    updatedPlacementDetails.setId(1L);
+    updatedPlacementDetails.setSites(placementSites);
+    updatedPlacementDetails.setAmendedDate(LocalDateTime.now(clock));
+
+    // Record expectations.
+    when(placementDetailsMapperMock.placementDetailsDTOToPlacementDetails(placementDetailsDto))
+      .thenReturn(placementDetails);
+    when(placementSiteMapper.toEntity(placementSiteDto1)).thenReturn(placementSite1);
+    when(placementSiteMapper.toEntity(placementSiteDto2)).thenReturn(placementSite2);
+    when(placementDetailsRepositoryMock.saveAndFlush(eq(updatedPlacementDetails)))
+      .thenReturn(updatedPlacementDetails);
+    when(placementDetailsMapperMock.placementDetailsToPlacementDetailsDTO(placementDetails))
+      .thenReturn(new PlacementDetailsDTO());
+    when(placementSpecialtyMapperMock.toDTOs(any())).thenReturn(Collections.emptySet());
+    doNothing().when(placementSupervisorRepositoryMock).deleteAllByIdPlacementId(1L);
+    when(placementSupervisorRepositoryMock.saveAll(any())).thenReturn(null);
+    when(placementSiteMapper.toDto(placementSite1)).thenReturn(placementSiteDto1);
+    when(placementSiteMapper.toDto(placementSite2)).thenReturn(placementSiteDto2);
+
+    // Call the method under test.
+    PlacementDetailsDTO updatedPlacementDetailsDto = testObj.createDetails(placementDetailsDto);
+
+    // Perform assertions.
+    Set<PlacementSiteDTO> sites = updatedPlacementDetailsDto.getSites();
+    Assert
+      .assertThat("The number of placement sites did not match the expected value.", sites.size(),
+        CoreMatchers.is(2));
+
+    for (PlacementSiteDTO site : sites) {
+      Assert.assertThat("The placement site's type did not match the expected value.",
+        site.getPlacementSiteType(), CoreMatchers.is(PlacementSiteType.OTHER));
+      Assert.assertThat("The placement site's placement ID did not match the expected value.",
+        site.getPlacementId(), CoreMatchers.is(1L));
+    }
   }
 }
