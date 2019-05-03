@@ -1,6 +1,6 @@
 package com.transformuk.hee.tis.tcs.service.repository;
 
-import com.transformuk.hee.tis.tcs.service.Application;
+import com.transformuk.hee.tis.tcs.service.TestConfig;
 import com.transformuk.hee.tis.tcs.service.model.Post;
 import org.junit.Assert;
 import org.junit.Before;
@@ -15,7 +15,7 @@ import javax.persistence.EntityManager;
 import java.util.Set;
 
 @RunWith(SpringRunner.class)
-@SpringBootTest(classes = Application.class)
+@SpringBootTest(classes = TestConfig.class)
 public class PostRepositoryIntTest {
 
   @Autowired

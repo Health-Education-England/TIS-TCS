@@ -2,8 +2,7 @@ package com.transformuk.hee.tis.tcs.service.repository;
 
 import com.google.common.collect.Sets;
 import com.transformuk.hee.tis.tcs.api.enumeration.Status;
-import com.transformuk.hee.tis.tcs.service.Application;
-import com.transformuk.hee.tis.tcs.service.model.Placement;
+import com.transformuk.hee.tis.tcs.service.TestConfig;
 import com.transformuk.hee.tis.tcs.service.model.Post;
 import com.transformuk.hee.tis.tcs.service.model.PostTrust;
 import org.apache.commons.lang3.StringUtils;
@@ -19,13 +18,12 @@ import org.springframework.test.context.junit4.SpringRunner;
 import org.springframework.transaction.annotation.Transactional;
 
 import javax.persistence.EntityManager;
-import java.time.LocalDate;
 import java.util.List;
 import java.util.Optional;
 import java.util.Set;
 
 @RunWith(SpringRunner.class)
-@SpringBootTest(classes = Application.class)
+@SpringBootTest(classes = TestConfig.class)
 @Transactional
 public class PostRepositoryTest {
 

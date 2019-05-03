@@ -41,11 +41,9 @@ node_modules
 **/*.iml
 
 ######################
-# Visual Studio Code
+# Visual Studio Code & STS/Eclipse
 ######################
 .vscode/
 .settings/
-tcs-api/.classpath
-tcs-api/.settings/
-tcs-client/.classpath
-tcs-client/.settings/
+*/.classpath
+*/.settings/
