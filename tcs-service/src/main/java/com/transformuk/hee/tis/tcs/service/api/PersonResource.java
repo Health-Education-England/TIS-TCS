@@ -468,7 +468,7 @@ public class PersonResource {
    * @throws URISyntaxException if the Location URI syntax is incorrect
    */
   @PostMapping("/people/ownership")
-//  @PreAuthorize("hasPermission('tis:people::person:', 'Update')")
+  @PreAuthorize("hasPermission('tis:people::person:', 'Update')")
   public ResponseEntity<Void> buildPersonsOwnership() {
     personService.buildPersonView();
     return ResponseEntity.ok().headers(HeaderUtil.createEntityUpdateAlert(ENTITY_NAME, "procedure is underway")).build();
