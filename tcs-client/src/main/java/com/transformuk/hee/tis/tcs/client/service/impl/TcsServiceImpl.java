@@ -24,6 +24,7 @@ import com.transformuk.hee.tis.tcs.api.dto.ProgrammeMembershipDTO;
 import com.transformuk.hee.tis.tcs.api.dto.QualificationDTO;
 import com.transformuk.hee.tis.tcs.api.dto.RightToWorkDTO;
 import com.transformuk.hee.tis.tcs.api.dto.RotationDTO;
+import com.transformuk.hee.tis.tcs.api.dto.RotationPostDTO;
 import com.transformuk.hee.tis.tcs.api.dto.SpecialtyDTO;
 import com.transformuk.hee.tis.tcs.api.dto.SpecialtyGroupDTO;
 import com.transformuk.hee.tis.tcs.api.dto.TariffFundingTypeFieldsDTO;
@@ -37,6 +38,7 @@ import java.util.Set;
 import java.util.stream.Collectors;
 import javax.annotation.PostConstruct;
 import org.apache.commons.codec.EncoderException;
+import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -69,6 +71,7 @@ public class TcsServiceImpl extends AbstractClientService {
   private static final String API_TRAINEE_PLACEMENTS = "/api/people/%d/placements/new";
   private static final String API_CURRENT_SPECIALTIES_COLUMN_FILTERS = "/api/specialties?columnFilters=";
   private static final String API_ROTATION_COLUMN_FILTERS = "/api/rotations?columnFilters=";
+  private static final String API_ROTATION_POST = "/api/rotation-posts/";
   private static final String API_CURRENT_CURRICULA_COLUMN_FILTERS = "/api/current/curricula?columnFilters=";
   private static final String API_PROGRAMMES_COLUMN_FILTERS = "/api/programmes?columnFilters=";
   private static final String API_PROGRAMMES_IN = "/api/programmes/in/";
@@ -380,11 +383,44 @@ public class TcsServiceImpl extends AbstractClientService {
       .getBody();
   }
 
+  public List<RotationPostDTO> createRotationsForPost(List<RotationPostDTO> rotationPostDtos) {
+    HttpHeaders headers = new HttpHeaders();
+    HttpEntity<List<RotationPostDTO>> httpEntity = new HttpEntity<>(rotationPostDtos, headers);
+    return tcsRestTemplate
+      .exchange(serviceUrl + API_ROTATION_POST, HttpMethod.POST, httpEntity, new ParameterizedTypeReference<List<RotationPostDTO>>() {
+      })
+      .getBody();
+  }
+
   @Cacheable("rotationByProgramme")
   public List<RotationDTO> getRotationByProgrammeId(Long programmeId) {
     log.debug("calling getRotationByProgrammeId with {}", programmeId);
     return tcsRestTemplate
       .exchange(serviceUrl + API_ROTATION_COLUMN_FILTERS + rotationJsonQuerystringURLEncoded.replace("PARAMETER_PROGRAMME_ID", String.valueOf(programmeId)), HttpMethod.GET, null, new ParameterizedTypeReference<List<RotationDTO>>() {
+      })
+      .getBody();
+  }
+
+  public List<RotationDTO> getRotationByProgrammeIdsIn(List<Long> programmeIds) {
+    log.debug("calling getRotationByProgrammeIdsIn with {}", programmeIds);
+    String joinedProgrammeIds = StringUtils.join(programmeIds, "\",\"");
+    String url = serviceUrl + API_ROTATION_COLUMN_FILTERS +
+        rotationJsonQuerystringURLEncoded.replace("PARAMETER_PROGRAMME_ID", joinedProgrammeIds);
+    return tcsRestTemplate
+      .exchange(url, HttpMethod.GET, null, new ParameterizedTypeReference<List<RotationDTO>>() {
+      })
+      .getBody();
+  }
+
+  public Void deleteRotationsForPostId(Long postId) {
+    log.debug("calling deleteRotationsForPostId with {}", postId);
+
+    String url = serviceUrl + API_ROTATION_POST + postId;
+    HttpHeaders headers = new HttpHeaders();
+    HttpEntity<Long> httpEntity = new HttpEntity<>(postId, headers);
+
+    return tcsRestTemplate
+      .exchange(url, HttpMethod.DELETE, httpEntity, new ParameterizedTypeReference<Void>() {
       })
       .getBody();
   }
