@@ -206,7 +206,7 @@ public class EsrNotificationResourceIntTest {
     entityManager.persist(trainee2GmcDetails);
 
     LocalDate from = LocalDate.now();
-    PlacementDetails placement1 = createPlacementEntity(from.plusMonths(3), from.plusMonths(6)); // future placement starting on exact end of 3 months
+    PlacementDetails placement1 = createPlacementEntity(from.plusWeeks(13), from.plusMonths(6)); // future placement starting in 13 weeks
     PlacementDetails placement2 = createPlacementEntity(from.minusMonths(1), from.plusMonths(2)); // current placement
 
     placement1.setTraineeId(trainee1.getId());
