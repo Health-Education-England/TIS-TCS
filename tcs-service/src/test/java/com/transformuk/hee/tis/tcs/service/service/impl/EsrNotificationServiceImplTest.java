@@ -8,6 +8,7 @@ import com.transformuk.hee.tis.tcs.service.model.*;
 import com.transformuk.hee.tis.tcs.service.repository.EsrNotificationRepository;
 import com.transformuk.hee.tis.tcs.service.repository.PlacementRepository;
 import com.transformuk.hee.tis.tcs.service.service.mapper.EsrNotificationMapper;
+import org.hamcrest.CoreMatchers;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.mockito.ArgumentCaptor;
@@ -15,6 +16,7 @@ import org.mockito.Captor;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.runners.MockitoJUnitRunner;
+import org.junit.Assert;
 
 import java.io.IOException;
 import java.math.BigDecimal;
@@ -33,7 +35,7 @@ import static org.mockito.Mockito.*;
 
 @RunWith(MockitoJUnitRunner.class)
 public class EsrNotificationServiceImplTest {
-  private static final LocalDate CURRENT_DATE = LocalDate.of(2019,1,1);
+  private static final LocalDate CURRENT_DATE = LocalDate.of(2019,2,28);
 
   @InjectMocks
   private EsrNotificationServiceImpl testService;
@@ -57,11 +59,19 @@ public class EsrNotificationServiceImplTest {
 
 
   @Test
+  public void testgetNotificationPeriodEndDate() {
+    LocalDate date = LocalDate.of(2019,2,28);
+    LocalDate expectedDate = LocalDate.of(2019,5,30);
+    LocalDate returnDate = testService.getNotificationPeriodEndDate(date);
+    Assert.assertThat("Should return a date 13 weeks from the start date", returnDate, CoreMatchers.equalTo(expectedDate));
+  }
+
+  @Test
   public void testLoadFullNotificationDoesNotFindAnyRecords() {
 
     LocalDate asOfDate = CURRENT_DATE;
-    LocalDate expectedStartDate = LocalDate.of(2019,1,3);
-    LocalDate expectedEndDate = LocalDate.of(2019,4,2);
+    LocalDate expectedStartDate = CURRENT_DATE.plusDays(2);
+    LocalDate expectedEndDate = CURRENT_DATE.plusWeeks(13);
 
     List<String> deaneryNumbers = asList("dn-01", "dn-02");
     String deaneryBody = "EOE";
@@ -79,8 +89,8 @@ public class EsrNotificationServiceImplTest {
   public void testLoadFullNotificationReturnsFoundRecords() {
 
     LocalDate asOfDate = CURRENT_DATE;
-    LocalDate expectedStartDate = LocalDate.of(2019,1,3);
-    LocalDate expectedEndDate = LocalDate.of(2019,4,2);
+    LocalDate expectedStartDate = CURRENT_DATE.plusDays(2);
+    LocalDate expectedEndDate = CURRENT_DATE.plusWeeks(13);
     String deaneryNumber = "EOE/RGT00/021/FY1/010";
     List<String> deaneryNumbers = asList(deaneryNumber, "dn-02");
     String deaneryBody = "EOE";
@@ -107,8 +117,8 @@ public class EsrNotificationServiceImplTest {
   public void testLoadFullNotificationMapsMatchingSiteCodeCurrentAndFuturePlacements() {
 
     LocalDate asOfDate = CURRENT_DATE;
-    LocalDate expectedStartDate = LocalDate.of(2019,1,3);
-    LocalDate expectedEndDate = LocalDate.of(2019,4,2);
+    LocalDate expectedStartDate = CURRENT_DATE.plusDays(2);
+    LocalDate expectedEndDate = CURRENT_DATE.plusWeeks(13);
     String deaneryNumber = "EOE/RGT00/021/FY1/010";
     List<String> deaneryNumbers = asList(deaneryNumber, "dn-02");
     String deaneryBody = "EOE";
@@ -140,8 +150,8 @@ public class EsrNotificationServiceImplTest {
   public void testLoadNotificationMapsCurrentAndNextVPDs() {
 
     LocalDate asOfDate = CURRENT_DATE;
-    LocalDate expectedStartDate = LocalDate.of(2019,1,3);
-    LocalDate expectedEndDate = LocalDate.of(2019,4,2);
+    LocalDate expectedStartDate = CURRENT_DATE.plusDays(2);
+    LocalDate expectedEndDate = CURRENT_DATE.plusWeeks(13);
     String deaneryNumber = "EOE/RGT00/021/FY1/010";
     String futureDeaneryNumber = "EOE/RGT00/021/FY1/999";
     List<String> deaneryNumbers = asList(deaneryNumber, "dn-02");
@@ -195,8 +205,8 @@ public class EsrNotificationServiceImplTest {
   public void testLoadFullNotificationMapsNonMatchingSiteCodeCurrentAndFuturePlacements() {
 
     LocalDate asOfDate = CURRENT_DATE;
-    LocalDate expectedStartDate = LocalDate.of(2019,1,3);
-    LocalDate expectedEndDate = LocalDate.of(2019,4,2);
+    LocalDate expectedStartDate = CURRENT_DATE.plusDays(2);
+    LocalDate expectedEndDate = CURRENT_DATE.plusWeeks(13);
     String deaneryNumber = "EOE/RGT00/021/FY1/010";
     List<String> deaneryNumbers = asList(deaneryNumber, "dn-02");
     String deaneryBody = "EOE";
@@ -281,9 +291,9 @@ public class EsrNotificationServiceImplTest {
   @Test
   public void loadFullNotificationSetsTheManagingDeaneryCode() {
 
-    LocalDate asOfDate = LocalDate.of(2019,1,1);
-    LocalDate expectedStartDate = LocalDate.of(2019,1,3);
-    LocalDate expectedEndDate = LocalDate.of(2019,4,2);
+    LocalDate asOfDate = CURRENT_DATE;
+    LocalDate expectedStartDate = CURRENT_DATE.plusDays(2);
+    LocalDate expectedEndDate = CURRENT_DATE.plusWeeks(13);
     String deaneryNumber = "LDN/RV308/CPT/CTP/001";
     List<String> deaneryNumbers = asList(deaneryNumber, "EOE/RGT00/021/FY1/010");
     String deaneryBody = "EOE";
