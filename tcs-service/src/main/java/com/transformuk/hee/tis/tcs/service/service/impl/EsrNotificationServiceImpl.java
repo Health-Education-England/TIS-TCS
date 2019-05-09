@@ -168,9 +168,6 @@ public class EsrNotificationServiceImpl implements EsrNotificationService {
 
     // This is a silly way to work around for some of the tests using H2 DB for integration tests. You can't use
     // database functions which H2 is unaware of. One of the many pains.
-//    List<Placement> currentAndFuturePlacements = placementRepository.findCurrentAndFuturePlacementsForPosts(
-//      asOfDate, asOfDate.plusDays(2), asOfDate.plusMonths(3), deaneryNumbers, placementTypes);
-//    LOG.info("Identified {} Posts with current or future placements as of date {}", currentAndFuturePlacements.size(), asOfDate);
 
     List<Placement> currentAndFuturePlacements = placementRepository.findCurrentAndFuturePlacementsForPosts(
       asOfDate, asOfDate.plusDays(2), getNotificationPeriodEndDate(asOfDate), deaneryNumbers, placementTypes);

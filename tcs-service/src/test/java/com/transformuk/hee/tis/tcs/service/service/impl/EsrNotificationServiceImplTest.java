@@ -30,6 +30,7 @@ import static org.mockito.Matchers.any;
 import static org.mockito.Matchers.anySet;
 import static org.mockito.Mockito.*;
 
+
 @RunWith(MockitoJUnitRunner.class)
 public class EsrNotificationServiceImplTest {
   private static final LocalDate CURRENT_DATE = LocalDate.of(2019,1,1);
@@ -425,7 +426,7 @@ public class EsrNotificationServiceImplTest {
     LocalDate today = CURRENT_DATE;
 
     Placement currentPlacement = aPlacement(deaneryPostNumber, today.minusMonths(1), today.plusMonths(2), 1L);
-    Placement futurePlacement = aPlacement(deaneryPostNumber, today.plusMonths(1), today.plusMonths(3), 2L);
+    Placement futurePlacement = aPlacement(deaneryPostNumber, today.plusMonths(1), today.plusWeeks(13), 2L);
 
     when(placementRepository.findEarliestEligiblePlacementWithin3MonthsForEsrNotification(
       any(LocalDate.class), any(LocalDate.class), anyListOf(String.class)))
@@ -450,7 +451,7 @@ public class EsrNotificationServiceImplTest {
     String deaneryPostNumber = "EOE/RGT00/021/FY1/010";
     LocalDate today = CURRENT_DATE;
 
-    Placement futurePlacement = aPlacement(deaneryPostNumber, today.plusMonths(1), today.plusMonths(3), 1L);
+    Placement futurePlacement = aPlacement(deaneryPostNumber, today.plusMonths(1), today.plusWeeks(13), 1L);
 
     when(placementRepository.findEarliestEligiblePlacementWithin3MonthsForEsrNotification(
       any(LocalDate.class), any(LocalDate.class), anyListOf(String.class)))
