@@ -74,7 +74,7 @@ public class EsrNotificationServiceImpl implements EsrNotificationService {
     return esrNotificationRepository.saveAll(esrNotifications);
   }
 
-  // ------------New function using 13 week time period instead of 3  months to address notification date coverage errors -----------
+  // ------------New function using 13 week time period instead of 3 months to address notification date coverage errors -----------
   public LocalDate getNotificationPeriodEndDate (LocalDate startDate) {
     return startDate.plusWeeks(13);
   }

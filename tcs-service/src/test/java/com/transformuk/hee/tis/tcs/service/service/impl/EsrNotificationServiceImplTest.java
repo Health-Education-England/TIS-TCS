@@ -59,9 +59,9 @@ public class EsrNotificationServiceImplTest {
 
 
   @Test
-  public void testgetNotificationPeriodEndDate() {
-    LocalDate date = LocalDate.of(2019,2,28);
-    LocalDate expectedDate = LocalDate.of(2019,5,30);
+  public void testGetNotificationPeriodEndDate_20200228_20200529() {
+    LocalDate date = LocalDate.of(2020,2,28);
+    LocalDate expectedDate = LocalDate.of(2020,5,29);
     LocalDate returnDate = testService.getNotificationPeriodEndDate(date);
     Assert.assertThat("Should return a date 13 weeks from the start date", returnDate, CoreMatchers.equalTo(expectedDate));
   }
