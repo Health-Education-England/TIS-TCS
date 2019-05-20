@@ -33,17 +33,3 @@ node_modules
 .project
 */.project
 */**/.project
-
-
-# IDEA files #
-######################
-.idea/
-**/*.iml
-
-######################
-# Visual Studio Code & STS/Eclipse
-######################
-.vscode/
-.settings/
-*/.classpath
-*/.settings/
