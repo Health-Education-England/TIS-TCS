@@ -4,7 +4,7 @@ VALUES
 
 INSERT INTO `Post` (`id`, `nationalPostNumber`, `status`, `employingBodyId`, `trainingBodyId`, `oldPostId`, `newPostId`, `suffix`, `owner`, `postFamily`, `localPostNumber`, `trainingDescription`, `intrepidId`, `legacy`, `bypassNPNGeneration`)
 VALUES
-	(2, 'xxx/xxx03/080/xxx/015', 'CURRENT', 1411, 1411, NULL, NULL, NULL, 'Health Education England North West London', NULL, NULL, '', '128357847', 0, 1);
+	(2, 'xxx/xxx03/080/xxx/015', 'CURRENT', 1411, 1411, NULL, NULL, 'A', 'Health Education England North West London', NULL, NULL, '', '128357847', 0, 1);
 
 
 INSERT INTO `Placement` (`id`, `dateFrom`, `dateTo`, `placementWholeTimeEquivalent`, `intrepidId`, `traineeId`, `postId`, `localPostNumber`, `siteCode`, `gradeAbbreviation`, `placementType`, `trainingDescription`, `siteId`, `gradeId`)

@@ -1,6 +1,6 @@
 INSERT INTO `Post` (`id`, `nationalPostNumber`, `status`, `employingBodyId`, `trainingBodyId`, `oldPostId`, `newPostId`, `suffix`, `owner`, `postFamily`, `localPostNumber`, `trainingDescription`, `legacy`, `bypassNPNGeneration`)
 VALUES
-	(1, 'XXX/XXX03/080/XXX/015', 'INACTIVE', 1411, 1411, NULL, NULL, NULL, 'Health Education England North West London', NULL, NULL, '', 0, 1),
+	(1, 'XXX/XXX03/080/XXX/015', 'INACTIVE', 1411, 1411, NULL, NULL, 'A', 'Health Education England North West London', NULL, NULL, '', 0, 1),
 	(2, 'XXX/XXX01/080/XXX/001', 'CURRENT', 1239, NULL, NULL, NULL, NULL, 'Health Education England North West London', NULL, NULL, NULL,  0, 1),
 	(3, 'XXX/XXX01/020/XXX/004', 'CURRENT', 1389, NULL, NULL, NULL, NULL, 'Health Education England South London', NULL, NULL, NULL,  0, 1),
 	(4, 'YYY/YYY30/024/YYY/001', 'CURRENT', 1901, 1901, NULL, NULL, NULL, 'Health Education England Yorkshire and the Humber', NULL, NULL, 'FP1', 0, 1),
