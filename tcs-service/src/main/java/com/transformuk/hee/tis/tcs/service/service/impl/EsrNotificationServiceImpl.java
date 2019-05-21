@@ -383,9 +383,11 @@ public class EsrNotificationServiceImpl implements EsrNotificationService {
   }
 
   private List<EsrNotification> mapCurrentAndFuturePlacementsToNotification(List<Placement> currentAndFuturePlacements, LocalDate asOfDate) {
-
     List<String> postNumbers = currentAndFuturePlacements.stream().map(placement -> placement.getPost().getNationalPostNumber()).distinct().collect(toList());
     List<EsrNotification> esrNotifications = new ArrayList<>();
+
+    int totalPosts = postNumbers.size();
+    int processedPosts = 0;
 
     for (String postNumber : postNumbers) {
 
@@ -429,14 +431,19 @@ public class EsrNotificationServiceImpl implements EsrNotificationService {
         LOG.debug("No Current trainee and creating future Placement only record for DPN {}", futurePlacement.getPost().getNationalPostNumber());
         esrNotifications.add(buildNotification(futurePlacement, null));
       });
+
+      LOG.info("FINISHED: Mapping placements to ESR Notification record for post {} ({} of {})",
+        postNumber, ++processedPosts, totalPosts);
     }
     return esrNotifications;
   }
 
   private List<EsrNotification> mapNextToCurrentPlacementsToNotification(List<Placement> placements) {
-
     List<String> postNumbers = placements.stream().map(placement -> placement.getPost().getNationalPostNumber()).distinct().collect(toList());
     List<EsrNotification> esrNotifications = new ArrayList<>();
+
+    int totalPosts = postNumbers.size();
+    int processedPosts = 0;
 
     for (String postNumber: postNumbers) {
 
@@ -460,6 +467,8 @@ public class EsrNotificationServiceImpl implements EsrNotificationService {
         currentPlacement = groupedPlacements.get(1);
       }
       esrNotifications.add(buildNotification(nextPlacement, currentPlacement));
+      LOG.info("FINISHED: Mapping placements to ESR Notification record for post {} ({} of {})",
+        postNumber, ++processedPosts, totalPosts);
     }
     LOG.info("FINISHED: Mapping placements to ESR Notification records");
     return esrNotifications;
