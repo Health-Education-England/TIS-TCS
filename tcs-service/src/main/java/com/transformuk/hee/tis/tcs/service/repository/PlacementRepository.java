@@ -48,7 +48,7 @@ public interface PlacementRepository extends JpaRepository<Placement, Long> {
 
   @Query(value =
       "SELECT * FROM Placement AS p WHERE p.postId NOT IN(" +
-          "SELECT p1.postId FROM Placement p1 WHERE p1.dateTo > :asOfDate)" +
+          "SELECT p1.postId FROM Placement p1 WHERE p1.dateTo > :asOfDate) " +
           "AND p.dateTo = :asOfDate", nativeQuery = true)
   List<Placement> findPlacementsForPostsWithoutAnyCurrentOrFuturePlacements(@Param("asOfDate") LocalDate asOfDate);
 
