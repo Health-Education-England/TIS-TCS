@@ -566,7 +566,7 @@ public class EsrNotificationServiceImpl implements EsrNotificationService {
 
     LOG.debug("Fetching NEXT/FUTURE placement for Trainee {} ", traineeId);
     List<Placement> nextPlacementsForTrainee = placementRepository.findFuturePlacementForTrainee(
-      traineeId, LocalDate.now().plusDays(2), LocalDate.now().plusMonths(3), placementTypes);
+      traineeId, LocalDate.now().plusDays(2), LocalDate.now().plusWeeks(13), placementTypes);
     return getSiteKnownAs(nextPlacementsForTrainee, traineeId);
 
   }
