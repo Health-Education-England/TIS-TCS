@@ -81,6 +81,10 @@ public class EsrNotificationServiceImpl implements EsrNotificationService {
     return esrNotificationRepository.saveAll(esrNotifications);
   }
 
+  protected LocalDate getNotificationPeriodEndDate (LocalDate startDate) {
+    return startDate.plusWeeks(13);
+  }
+
   /**
    * identify, load and return next trainee to current trainee records into EsrNotification table.
    * @param fromDate date from which to identify the above scenario.
@@ -112,7 +116,7 @@ public class EsrNotificationServiceImpl implements EsrNotificationService {
     if (fromDate == null) {
       fromDate = LocalDate.now();
     }
-    LocalDate earliestEligibleDate = fromDate.plusMonths(3);
+    LocalDate earliestEligibleDate = getNotificationPeriodEndDate(fromDate);
 
     List<Placement> placements = placementRepository.findEarliestEligiblePlacementWithin3MonthsForEsrNotification(fromDate, earliestEligibleDate, placementTypes);
 
@@ -170,8 +174,9 @@ public class EsrNotificationServiceImpl implements EsrNotificationService {
 
     // This is a silly way to work around for some of the tests using H2 DB for integration tests. You can't use
     // database functions which H2 is unaware of. One of the many pains.
+
     List<Placement> currentAndFuturePlacements = placementRepository.findCurrentAndFuturePlacementsForPosts(
-      asOfDate, asOfDate.plusDays(2), asOfDate.plusMonths(3), deaneryNumbers, placementTypes);
+      asOfDate, asOfDate.plusDays(2), getNotificationPeriodEndDate(asOfDate), deaneryNumbers, placementTypes);
     LOG.info("Identified {} Posts with current or future placements as of date {}", currentAndFuturePlacements.size(), asOfDate);
 
     List<EsrNotification> esrNotifications = mapCurrentAndFuturePlacementsToNotification(currentAndFuturePlacements, asOfDate, getSiteIdsToKnownAs(currentAndFuturePlacements));
@@ -239,7 +244,7 @@ public class EsrNotificationServiceImpl implements EsrNotificationService {
   private void handleCurrentPlacementEdit(PlacementDetailsDTO changedPlacement, String nationalPostNumber, LocalDate asOfDate, List<EsrNotification> allEsrNotifications, Map<Long, String> siteIdsToKnownAs) {
 
     List<Placement> futurePlacements = placementRepository.findFuturePlacementsForPosts(
-      asOfDate.plusDays(2), asOfDate.plusMonths(3), Collections.singletonList(nationalPostNumber), placementTypes);
+      asOfDate.plusDays(2), getNotificationPeriodEndDate(asOfDate), Collections.singletonList(nationalPostNumber), placementTypes);
     LOG.info("Identified {} future Placements for post {} as of date {}", futurePlacements.size(), nationalPostNumber, asOfDate);
 
     List<Placement> matchedFuturePlacements = futurePlacements.stream()
@@ -561,7 +566,7 @@ public class EsrNotificationServiceImpl implements EsrNotificationService {
 
     LOG.debug("Fetching NEXT/FUTURE placement for Trainee {} ", traineeId);
     List<Placement> nextPlacementsForTrainee = placementRepository.findFuturePlacementForTrainee(
-      traineeId, LocalDate.now().plusDays(2), LocalDate.now().plusMonths(3), placementTypes);
+      traineeId, LocalDate.now().plusDays(2), LocalDate.now().plusWeeks(13), placementTypes);
     return getSiteKnownAs(nextPlacementsForTrainee, traineeId, siteIdsToKnownAs);
 
   }
