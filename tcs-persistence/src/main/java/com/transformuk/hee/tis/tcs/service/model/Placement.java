@@ -38,7 +38,7 @@ public class Placement implements Serializable {
   @Id
   @GeneratedValue(strategy = GenerationType.IDENTITY)
   private Long id;
-  @ManyToOne
+  @ManyToOne(fetch = FetchType.LAZY)
   @JoinColumn(name = "traineeId")
   private Person trainee;
   @Column(name = "intrepidId")

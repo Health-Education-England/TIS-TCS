@@ -404,7 +404,7 @@ public class PlacementServiceImpl implements PlacementService {
     final Placement placementToDelete = placementRepository.findById(id).orElse(null);
     // Only future placements can be deleted.
     if (placementToDelete != null && placementToDelete.getDateFrom() != null && placementToDelete
-      .getDateFrom().isBefore(LocalDate.now(clock).plusMonths(3))) {
+      .getDateFrom().isBefore(LocalDate.now(clock).plusWeeks(13))) {
       final List<EsrNotification> esrNotifications = esrNotificationService
         .loadPlacementDeleteNotification(placementToDelete, allEsrNotifications);
       log.debug("Placement Delete: PERSISTING: {} EsrNotifications for post {} being deleted",
@@ -713,9 +713,9 @@ public class PlacementServiceImpl implements PlacementService {
         (currentPlacement.getDateTo() != null && !currentPlacement.getDateTo()
           .equals(updatedPlacementDetails.getDateTo()))) &&
         ((currentPlacement.getDateFrom() != null && currentPlacement.getDateFrom()
-          .isBefore(LocalDate.now(clock).plusMonths(3))) ||
+          .isBefore(LocalDate.now(clock).plusWeeks(13))) ||
           (updatedPlacementDetails.getDateFrom() != null && updatedPlacementDetails.getDateFrom()
-            .isBefore(LocalDate.now(clock).plusMonths(3))));
+            .isBefore(LocalDate.now(clock).plusWeeks(13))));
   }
 
   private void handleEsrNewPlacementNotification(final PlacementDetailsDTO placementDetailsDTO,
@@ -728,7 +728,7 @@ public class PlacementServiceImpl implements PlacementService {
         final Placement savedPlacement = placementRepository.findById(placementDetails.getId())
           .orElse(null);
         if (savedPlacement.getDateFrom() != null && savedPlacement.getDateFrom()
-          .isBefore(LocalDate.now(clock).plusMonths(3))) {
+          .isBefore(LocalDate.now(clock).plusWeeks(13))) {
           log.debug("Creating ESR notification for new placement creation for deanery number {}",
             savedPlacement.getPost().getNationalPostNumber());
           final List<EsrNotification> esrNotifications = esrNotificationService
