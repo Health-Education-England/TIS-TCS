@@ -1,5 +1,7 @@
 package com.transformuk.hee.tis.tcs.service.api.util;
 
+import org.apache.lucene.queryparser.classic.QueryParserBase;
+
 import java.io.UnsupportedEncodingException;
 import java.net.URLDecoder;
 
@@ -30,6 +32,15 @@ public final class StringUtil {
     catch (UnsupportedEncodingException | IllegalArgumentException e){
       // if exception then do nothing
     }
-    return str.replaceAll("[^a-zA-Z0-9\\s\\,\\&\\'\\-\\+\\/\\)\\(]", "").trim();
+    return str.replaceAll("^\\\"|\\\"$", "").trim();
+  }
+
+  public static String escapeElasticSearch(String esStr) {
+    if (esStr == null) {
+      return null;
+    }
+    // escape for es
+    esStr = QueryParserBase.escape(esStr);
+    return esStr;
   }
 }

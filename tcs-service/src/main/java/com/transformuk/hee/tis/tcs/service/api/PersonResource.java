@@ -14,11 +14,7 @@ import com.transformuk.hee.tis.tcs.api.enumeration.Status;
 import com.transformuk.hee.tis.tcs.service.api.decorator.PersonViewDecorator;
 import com.transformuk.hee.tis.tcs.service.api.decorator.PlacementSummaryDecorator;
 import com.transformuk.hee.tis.tcs.service.api.decorator.PlacementViewDecorator;
-import com.transformuk.hee.tis.tcs.service.api.util.BasicPage;
-import com.transformuk.hee.tis.tcs.service.api.util.ColumnFilterUtil;
-import com.transformuk.hee.tis.tcs.service.api.util.HeaderUtil;
-import com.transformuk.hee.tis.tcs.service.api.util.PaginationUtil;
-import com.transformuk.hee.tis.tcs.service.api.util.UrlDecoderUtil;
+import com.transformuk.hee.tis.tcs.service.api.util.*;
 import com.transformuk.hee.tis.tcs.service.api.validation.ContactDetailsValidator;
 import com.transformuk.hee.tis.tcs.service.api.validation.GdcDetailsValidator;
 import com.transformuk.hee.tis.tcs.service.api.validation.GmcDetailsValidator;
@@ -66,7 +62,7 @@ import java.util.Optional;
 import java.util.Set;
 import java.util.stream.Collectors;
 
-import static com.transformuk.hee.tis.tcs.service.api.util.StringUtil.sanitize;
+import static com.transformuk.hee.tis.tcs.service.api.util.StringUtil.*;
 
 /**
  * REST controller for managing Person.
@@ -197,6 +193,7 @@ public class PersonResource {
 
     //feature flag to enable es, allow the enabling from the FE
     if (enableEsSearch || enableES) {
+      searchQuery = escapeElasticSearch(searchQuery);
       page = personElasticSearchService.searchForPage(searchQuery, columnFilters, pageable);
     } else {
       if (StringUtils.isEmpty(searchQuery) && StringUtils.isEmpty(columnFilterJson)) {
