@@ -1,6 +1,6 @@
 package com.transformuk.hee.tis.tcs.service.repository;
 
-import com.transformuk.hee.tis.tcs.service.Application;
+import com.transformuk.hee.tis.tcs.service.TestConfig;
 import com.transformuk.hee.tis.tcs.service.model.Comment;
 import org.junit.Assert;
 import org.junit.Test;
@@ -15,7 +15,7 @@ import java.util.Optional;
 
 @RunWith(SpringRunner.class)
 @Transactional
-@SpringBootTest(classes = {Application.class})
+@SpringBootTest(classes = {TestConfig.class})
 public class CommentRepositoryTest {
 
   private static final Long PLACEMENT_ID_WITH_COMMENT = 3L;

@@ -1,16 +1,17 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <project xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns="http://maven.apache.org/POM/4.0.0"
-		 xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/maven-v4_0_0.xsd">
-	<modelVersion>4.0.0</modelVersion>
+  xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/maven-v4_0_0.xsd">
+  <modelVersion>4.0.0</modelVersion>
 
-	<groupId>com.transformuk.hee.tis</groupId>
-	<artifactId>tcs</artifactId>
-	<version>1.2.5</version>
-	<packaging>pom</packaging>
+  <groupId>com.transformuk.hee.tis</groupId>
+  <artifactId>tcs</artifactId>
+  <version>1.2.5</version>
+  <packaging>pom</packaging>
 
-	<modules>
-		<module>tcs-api</module>
-		<module>tcs-client</module>
-		<module>tcs-service</module>
-	</modules>
+  <modules>
+    <module>tcs-api</module>
+    <module>tcs-client</module>
+    <module>tcs-persistence</module>
+    <module>tcs-service</module>
+  </modules>
 </project>
