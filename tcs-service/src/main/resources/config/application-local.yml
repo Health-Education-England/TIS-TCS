@@ -37,5 +37,5 @@ kc:
   password: ${KC_PASSWORD:tcs_trust_admin}
   timeout: ${KC_TIMEOUT:10000}
 
-# enable.es.search: true
-enable.es.search: false
+enable.es.search: true
+#enable.es.search: false

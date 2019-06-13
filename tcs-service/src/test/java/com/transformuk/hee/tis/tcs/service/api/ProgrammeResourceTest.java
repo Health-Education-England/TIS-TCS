@@ -52,10 +52,10 @@ public class ProgrammeResourceTest {
     given(programmeService.advancedSearch(searchStringCaptor.capture(), anyList(), eq(p))).willReturn(page);
 
     // when
-    controller.getAllProgrammes(p, "#$$)alp%*h(&^)a ..?'';;\\numer1`~c", null);
+    controller.getAllProgrammes(p, "[)alph(&)a ''numer1]c", null);
 
     // then
-    assertThat(searchStringCaptor.getValue()).isEqualTo(")alph(&)a ''numer1c");
+    assertThat(searchStringCaptor.getValue()).isEqualTo("[)alph(&)a \\'\\'numer1]c");
   }
 
   @Test
@@ -69,13 +69,13 @@ public class ProgrammeResourceTest {
     given(programmeService.advancedSearch(any(), searchStringCaptor.capture(), eq(p))).willReturn(page);
 
     // when
-    controller.getAllProgrammes(p, null, colFilter);
+    controller.getAllProgrammes(p, "[)alph(&)a [\\'\\]'numer1]c", colFilter);
 
     // then
     ColumnFilter f = ((ColumnFilter) searchStringCaptor.getValue().get(0));
     assertThat(f.getName()).isEqualTo("owner");
     assertThat(f.getValues().size()).isEqualTo(1);
-    assertThat(f.getValues().get(0)).isEqualTo("Health Education England West Midlands");
+    assertThat(f.getValues().get(0)).isEqualTo("Health Ed:uc#%ation §±England@$% West Mid^la*nds");
   }
 
   @Test
@@ -89,7 +89,7 @@ public class ProgrammeResourceTest {
     given(programmeService.advancedSearch(any(), searchStringCaptor.capture(), eq(p))).willReturn(page);
 
     // when
-    controller.getAllProgrammes(p, null, colFilter);
+    controller.getAllProgrammes(p, "[)alph(&)a ''numer1]c", colFilter);
 
     // then
     ColumnFilter f = ((ColumnFilter) searchStringCaptor.getValue().get(0));
@@ -109,7 +109,7 @@ public class ProgrammeResourceTest {
     given(programmeService.advancedSearch(any(), searchStringCaptor.capture(), eq(p))).willReturn(page);
 
     // when
-    controller.getAllProgrammes(p, null, colFilter);
+    controller.getAllProgrammes(p, "[)alph(&)a ''numer1]c", colFilter);
 
     // then
     assertThat(searchStringCaptor.getValue()).isEmpty();

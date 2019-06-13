@@ -1,7 +1,5 @@
 package com.transformuk.hee.tis.tcs.service.api;
 
-import static com.transformuk.hee.tis.tcs.service.api.util.StringUtil.sanitize;
-
 import com.google.common.collect.Lists;
 import com.transformuk.hee.tis.tcs.api.dto.PlacementSummaryDTO;
 import com.transformuk.hee.tis.tcs.api.dto.PlacementViewDTO;
@@ -61,6 +59,7 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
+import static uk.nhs.tis.StringConverter.getConverter;
 /**
  * REST controller for managing Post.
  */
@@ -158,7 +157,7 @@ public class PostResource {
     @RequestParam(value = "searchQuery", required = false) String searchQuery,
     @RequestParam(value = "columnFilters", required = false) String columnFilterJson) throws IOException {
     log.debug("REST request to get a page of Posts");
-    searchQuery = sanitize(searchQuery);
+    searchQuery = getConverter(searchQuery).fromJson().decodeUrl().escapeForSql().toString();
     List<Class> filterEnumList = Lists.newArrayList(Status.class, PostSuffix.class,
         PostGradeType.class, PostSpecialtyType.class);
     List<ColumnFilter> columnFilters = ColumnFilterUtil.getColumnFilters(columnFilterJson, filterEnumList);
@@ -187,7 +186,7 @@ public class PostResource {
     @RequestParam(value = "searchQuery") String searchQuery,
     @RequestParam(value = "columnFilters", required = false) String columnFilterJson) throws IOException {
     log.debug("REST request to get a page of Posts");
-    searchQuery = sanitize(searchQuery);
+    searchQuery = getConverter(searchQuery).fromJson().decodeUrl().escapeForSql().toString();
     List<Class> filterEnumList = Lists.newArrayList(Status.class);
     List<ColumnFilter> columnFilters = ColumnFilterUtil.getColumnFilters(columnFilterJson, filterEnumList);
     Page<PostViewDTO> page = postService.findByNationalPostNumber(searchQuery, columnFilters, pageable);

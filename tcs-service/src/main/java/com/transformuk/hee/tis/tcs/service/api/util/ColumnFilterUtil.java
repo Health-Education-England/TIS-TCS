@@ -9,6 +9,7 @@ import org.apache.commons.codec.net.URLCodec;
 import org.apache.commons.lang3.EnumUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import static uk.nhs.tis.StringConverter.getConverter;
 
 import java.io.IOException;
 import java.util.ArrayList;
@@ -17,7 +18,6 @@ import java.util.List;
 import java.util.Map;
 import java.util.Optional;
 
-import static com.transformuk.hee.tis.tcs.service.api.util.StringUtil.sanitize;
 import static java.util.Collections.EMPTY_LIST;
 import static java.util.stream.Collectors.toList;
 
@@ -72,7 +72,7 @@ public final class ColumnFilterUtil {
           } else {
             List<Object> values = e.getValue().stream().map(v -> {
               if (!TCSDateColumns.contains(e.getKey())) {
-                return sanitize(v);
+                return getConverter(v).toString();
               }
               return v;
             }).collect(toList());

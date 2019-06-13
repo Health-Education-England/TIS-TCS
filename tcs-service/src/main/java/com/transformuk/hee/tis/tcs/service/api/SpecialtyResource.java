@@ -46,7 +46,7 @@ import java.util.List;
 import java.util.Optional;
 import java.util.stream.Collectors;
 
-import static com.transformuk.hee.tis.tcs.service.api.util.StringUtil.sanitize;
+import static uk.nhs.tis.StringConverter.getConverter;
 
 /**
  * REST controller for managing Specialty.
@@ -127,8 +127,7 @@ public class SpecialtyResource {
       @RequestParam(value = "columnFilters", required = false) String columnFilterJson) throws IOException {
 
     log.debug("REST request to get a page of Specialties");
-
-    searchQuery = sanitize(searchQuery);
+    searchQuery = getConverter(searchQuery).fromJson().decodeUrl().escapeForSql().toString();
     List<Class> filterEnumList = Lists.newArrayList(Status.class, SpecialtyType.class);
     List<ColumnFilter> columnFilters = ColumnFilterUtil.getColumnFilters(columnFilterJson, filterEnumList);
     Page<SpecialtyDTO> page;

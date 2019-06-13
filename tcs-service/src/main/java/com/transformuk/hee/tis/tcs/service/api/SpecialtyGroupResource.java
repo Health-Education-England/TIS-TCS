@@ -32,7 +32,7 @@ import java.util.List;
 import java.util.Optional;
 import java.util.stream.Collectors;
 
-import static com.transformuk.hee.tis.tcs.service.api.util.StringUtil.sanitize;
+import static uk.nhs.tis.StringConverter.getConverter;
 
 /**
  * REST controller for managing SpecialtyGroup.
@@ -113,7 +113,7 @@ public class SpecialtyGroupResource {
     @RequestParam(value = "searchQuery", required = false) String searchQuery) {
 
     log.debug("REST request to get all SpecialtyGroups");
-    String sanitizedSearchQuery = sanitize(searchQuery);
+    String sanitizedSearchQuery = getConverter(searchQuery).fromJson().decodeUrl().escapeForSql().toString();
     Page<SpecialtyGroupDTO> page;
     if (StringUtils.isEmpty(sanitizedSearchQuery)) {
       page = specialtyGroupService.findAll(pageable);

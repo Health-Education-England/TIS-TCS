@@ -28,7 +28,7 @@ import java.util.Collections;
 import java.util.List;
 import java.util.Optional;
 
-import static com.transformuk.hee.tis.tcs.service.api.util.StringUtil.sanitize;
+import static uk.nhs.tis.StringConverter.getConverter;
 
 /**
  * REST controller for managing Rotation.
@@ -96,7 +96,7 @@ public class RotationResource {
             @RequestParam(value = "columnFilters", required = false) String columnFilterJson,
             Pageable pageable) throws IOException {
         log.debug("REST request to get a page of Rotations");
-        searchQuery = sanitize(searchQuery);
+        searchQuery = getConverter(searchQuery).fromJson().decodeUrl().escapeForSql().toString();
         List<Class> filterEnumList = Collections.singletonList(Status.class);
         List<ColumnFilter> columnFilters = ColumnFilterUtil.getColumnFilters(columnFilterJson, filterEnumList);
         Page<RotationDTO> page;
