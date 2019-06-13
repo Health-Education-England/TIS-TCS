@@ -66,7 +66,7 @@ import java.util.Optional;
 import java.util.Set;
 import java.util.stream.Collectors;
 
-import static com.transformuk.hee.tis.tcs.service.api.util.StringUtil.sanitize;
+import static uk.nhs.tis.StringConverter.getConverter;
 
 /**
  * REST controller for managing Person.
@@ -190,14 +190,15 @@ public class PersonResource {
       @RequestParam(required = false, defaultValue = "false") boolean enableES) throws IOException {
 
     log.debug("REST request to get a page of People begin");
-    searchQuery = sanitize(searchQuery);
+    searchQuery = getConverter(searchQuery).fromJson().decodeUrl().escapeForSql().toString();
+    String searchQueryES = getConverter(searchQuery).fromJson().decodeUrl().escapeForElasticSearch().toString();
     final List<Class> filterEnumList = Lists.newArrayList(Status.class);
     final List<ColumnFilter> columnFilters = ColumnFilterUtil.getColumnFilters(columnFilterJson, filterEnumList);
     final BasicPage<PersonViewDTO> page;
 
     //feature flag to enable es, allow the enabling from the FE
     if (enableEsSearch || enableES) {
-      page = personElasticSearchService.searchForPage(searchQuery, columnFilters, pageable);
+      page = personElasticSearchService.searchForPage(searchQueryES, columnFilters, pageable);
     } else {
       if (StringUtils.isEmpty(searchQuery) && StringUtils.isEmpty(columnFilterJson)) {
         page = personService.findAll(pageable);
@@ -296,7 +297,7 @@ public class PersonResource {
   public ResponseEntity<List<PersonBasicDetailsDTO>> searchBasicDetails(
       @RequestParam(value = "searchQuery", required = false) String searchQuery) {
     log.debug("REST request to get a basic details page of People");
-    searchQuery = sanitize(searchQuery);
+    searchQuery = getConverter(searchQuery).fromJson().decodeUrl().escapeForSql().toString();
 
     final List<PersonBasicDetailsDTO> result = personService.basicDetailsSearch(searchQuery);
     return new ResponseEntity<>(result, null, HttpStatus.OK);

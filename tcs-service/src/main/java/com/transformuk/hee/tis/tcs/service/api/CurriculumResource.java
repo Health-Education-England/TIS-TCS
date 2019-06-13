@@ -37,7 +37,7 @@ import java.util.List;
 import java.util.Optional;
 import java.util.stream.Collectors;
 
-import static com.transformuk.hee.tis.tcs.service.api.util.StringUtil.sanitize;
+import static uk.nhs.tis.StringConverter.getConverter;
 
 /**
  * REST controller for managing Curriculum.
@@ -118,8 +118,7 @@ public class CurriculumResource {
     @RequestParam(value = "columnFilters", required = false) String columnFilterJson) throws IOException {
 
     log.debug("REST request to get a page of Curricula");
-
-    searchQuery = sanitize(searchQuery);
+    searchQuery = getConverter(searchQuery).fromJson().decodeUrl().escapeForSql().toString();
     List<Class> filterEnumList = Lists.newArrayList(CurriculumSubType.class, AssessmentType.class, Status.class);
     List<ColumnFilter> columnFilters = ColumnFilterUtil.getColumnFilters(columnFilterJson, filterEnumList);
     Page<CurriculumDTO> page;
@@ -147,8 +146,7 @@ public class CurriculumResource {
     @RequestParam(value = "columnFilters", required = false) String columnFilterJson) throws IOException {
 
     log.debug("REST request to get a page of current Curricula");
-
-    searchQuery = sanitize(searchQuery);
+    searchQuery = getConverter(searchQuery).fromJson().decodeUrl().escapeForSql().toString();
     List<Class> filterEnumList = Lists.newArrayList(CurriculumSubType.class, AssessmentType.class, Status.class);
     List<ColumnFilter> columnFilters = ColumnFilterUtil.getColumnFilters(columnFilterJson, filterEnumList);
     Page<CurriculumDTO> page;
