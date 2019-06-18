@@ -5,6 +5,7 @@ import com.google.common.collect.Lists;
 import com.google.common.collect.Sets;
 import com.transformuk.hee.tis.tcs.api.dto.PersonViewDTO;
 import com.transformuk.hee.tis.tcs.api.enumeration.PersonOwnerRule;
+import com.transformuk.hee.tis.tcs.api.enumeration.ProgrammeMembershipStatus;
 import com.transformuk.hee.tis.tcs.service.api.decorator.PersonViewDecorator;
 import com.transformuk.hee.tis.tcs.service.api.util.BasicPage;
 import com.transformuk.hee.tis.tcs.service.job.person.PersonTrustDto;
@@ -17,11 +18,9 @@ import com.transformuk.hee.tis.tcs.service.service.impl.PersonViewRowMapper;
 import com.transformuk.hee.tis.tcs.service.strategy.RoleBasedFilterStrategy;
 import org.apache.commons.collections4.CollectionUtils;
 import org.apache.commons.lang3.StringUtils;
+import org.apache.commons.lang3.time.DateUtils;
 import org.elasticsearch.common.collect.Tuple;
-import org.elasticsearch.index.query.BoolQueryBuilder;
-import org.elasticsearch.index.query.MatchQueryBuilder;
-import org.elasticsearch.index.query.TermQueryBuilder;
-import org.elasticsearch.index.query.WildcardQueryBuilder;
+import org.elasticsearch.index.query.*;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -34,12 +33,7 @@ import org.springframework.jdbc.core.namedparam.MapSqlParameterSource;
 import org.springframework.jdbc.core.namedparam.NamedParameterJdbcTemplate;
 import org.springframework.stereotype.Component;
 
-import java.util.HashMap;
-import java.util.Iterator;
-import java.util.List;
-import java.util.Map;
-import java.util.Optional;
-import java.util.Set;
+import java.util.*;
 import java.util.stream.Collectors;
 
 @Component
@@ -356,7 +350,27 @@ public class PersonElasticSearchService {
         personViewDTO.setCurrentOwnerRule(PersonOwnerRule.valueOf(pv.getCurrentOwnerRule()));
       }
 
+      ProgrammeMembershipStatus pms = getProgrammeMembershipStatus(pv.getProgrammeStartDate(), pv.getProgrammeEndDate());
+      personViewDTO.setProgrammeMembershipStatus(pms);
+
       return personViewDTO;
     }).collect(Collectors.toList());
+  }
+
+  private ProgrammeMembershipStatus getProgrammeMembershipStatus(final Date dateFrom, final Date dateTo) {
+    if (dateFrom == null || dateTo == null) {
+      return ProgrammeMembershipStatus.PAST;
+    }
+    // Truncating the hours,minutes,seconds
+    final long from = DateUtils.truncate(dateFrom, Calendar.DATE).getTime();
+    final long to = DateUtils.truncate(dateTo, Calendar.DATE).getTime();
+    final long now = DateUtils.truncate(new Date(), Calendar.DATE).getTime();
+
+    if (now < from) {
+      return ProgrammeMembershipStatus.FUTURE;
+    } else if (now > to) {
+      return ProgrammeMembershipStatus.PAST;
+    }
+    return ProgrammeMembershipStatus.CURRENT;
   }
 }
