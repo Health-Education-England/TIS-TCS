@@ -1,6 +1,7 @@
 package com.transformuk.hee.tis.tcs.api.dto;
 
 import com.transformuk.hee.tis.tcs.api.enumeration.PersonOwnerRule;
+import com.transformuk.hee.tis.tcs.api.enumeration.ProgrammeMembershipStatus;
 import com.transformuk.hee.tis.tcs.api.enumeration.Status;
 
 import java.io.Serializable;
@@ -28,6 +29,8 @@ public class PersonViewDTO implements Serializable {
   private String publicHealthNumber;
 
   private Long programmeId;
+
+  private ProgrammeMembershipStatus programmeMembershipStatus;
 
   private String programmeName;
 
@@ -121,6 +124,14 @@ public class PersonViewDTO implements Serializable {
 
   public void setProgrammeId(Long programmeId) {
     this.programmeId = programmeId;
+  }
+
+  public ProgrammeMembershipStatus getProgrammeMembershipStatus() {
+    return programmeMembershipStatus;
+  }
+
+  public void setProgrammeMembershipStatus(ProgrammeMembershipStatus programmeMembershipStatus) {
+    this.programmeMembershipStatus = programmeMembershipStatus;
   }
 
   public String getProgrammeName() {

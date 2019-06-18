@@ -21,6 +21,8 @@ public class PersonViewRowMapper implements RowMapper<PersonView> {
     view.setGdcNumber(rs.getString("gdcNumber"));
     view.setPublicHealthNumber(rs.getString("publicHealthNumber"));
     view.setProgrammeId(rs.getLong("programmeId"));
+    view.setProgrammeStartDate(rs.getDate("programmeStartDate"));
+    view.setProgrammeEndDate(rs.getDate("programmeEndDate"));
     view.setProgrammeName(rs.getString("programmeName"));
     view.setProgrammeNumber(rs.getString("programmeNumber"));
     view.setTrainingNumber(rs.getString("trainingNumber"));

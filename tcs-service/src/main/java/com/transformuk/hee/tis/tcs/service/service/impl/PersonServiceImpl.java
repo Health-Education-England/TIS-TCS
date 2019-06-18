@@ -4,6 +4,7 @@ import com.transformuk.hee.tis.reference.api.dto.RoleDTO;
 import com.transformuk.hee.tis.reference.client.ReferenceService;
 import com.transformuk.hee.tis.tcs.api.dto.*;
 import com.transformuk.hee.tis.tcs.api.enumeration.PersonOwnerRule;
+import com.transformuk.hee.tis.tcs.api.enumeration.ProgrammeMembershipStatus;
 import com.transformuk.hee.tis.tcs.api.enumeration.Status;
 import com.transformuk.hee.tis.tcs.service.api.util.BasicPage;
 import com.transformuk.hee.tis.tcs.service.event.PersonCreatedEvent;
@@ -17,6 +18,7 @@ import com.transformuk.hee.tis.tcs.service.service.helper.SqlQuerySupplier;
 import com.transformuk.hee.tis.tcs.service.service.mapper.PersonBasicDetailsMapper;
 import com.transformuk.hee.tis.tcs.service.service.mapper.PersonLiteMapper;
 import com.transformuk.hee.tis.tcs.service.service.mapper.PersonMapper;
+import org.apache.commons.lang3.time.DateUtils;
 import org.apache.commons.lang3.ObjectUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
@@ -711,8 +713,27 @@ public class PersonServiceImpl implements PersonService {
       if (StringUtils.isNotEmpty(ownerRule)) {
         view.setCurrentOwnerRule(PersonOwnerRule.valueOf(ownerRule));
       }
+      final Date programmeStartDate = rs.getDate("programmeStartDate");
+      final Date programmeEndDate = rs.getDate("programmeEndDate");
+      view.setProgrammeMembershipStatus(getProgrammeMembershipStatus(programmeStartDate, programmeEndDate));
       return view;
     }
-  }
 
+    private ProgrammeMembershipStatus getProgrammeMembershipStatus(final Date dateFrom, final Date dateTo) {
+      if (dateFrom == null || dateTo == null) {
+        return ProgrammeMembershipStatus.PAST;
+      }
+      // Truncating the hours,minutes,seconds
+      final long from = DateUtils.truncate(dateFrom, Calendar.DATE).getTime();
+      final long to = DateUtils.truncate(dateTo, Calendar.DATE).getTime();
+      final long now = DateUtils.truncate(new Date(), Calendar.DATE).getTime();
+
+      if (now < from) {
+        return ProgrammeMembershipStatus.FUTURE;
+      } else if (now > to) {
+        return ProgrammeMembershipStatus.PAST;
+      }
+      return ProgrammeMembershipStatus.CURRENT;
+    }
+  }
 }
