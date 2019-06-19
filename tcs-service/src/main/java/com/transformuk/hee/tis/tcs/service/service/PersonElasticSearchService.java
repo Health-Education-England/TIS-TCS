@@ -87,6 +87,21 @@ public class PersonElasticSearchService {
 
   public BasicPage<PersonViewDTO> searchForPage(String searchQuery, List<ColumnFilter> columnFilters, Pageable pageable) {
 
+    final long now = DateUtils.truncate(new Date(), Calendar.DATE).getTime();
+    // past programmeMembership
+    BoolQueryBuilder startDateNotExists = new BoolQueryBuilder().mustNot(QueryBuilders.existsQuery("programmeStartDate"));
+    BoolQueryBuilder endDateNotExists = new BoolQueryBuilder().mustNot(QueryBuilders.existsQuery("programmeEndDate"));
+    BoolQueryBuilder programmeMembershipPastFilter = new BoolQueryBuilder()
+      .should(QueryBuilders.rangeQuery("programmeEndDate").lt(now))
+      .should(startDateNotExists)
+      .should(endDateNotExists)
+      .minimumShouldMatch(1);
+    // future programmeMembership
+    BoolQueryBuilder programmeMembershipfutureFilter = new BoolQueryBuilder().must(QueryBuilders.rangeQuery("programmeStartDate").gt(now));
+    // current programmeMembership
+    BoolQueryBuilder programmeMembershipCurrentFilter = new BoolQueryBuilder().must(QueryBuilders.rangeQuery("programmeStartDate").lte(now))
+      .must(QueryBuilders.rangeQuery("programmeEndDate").gt(now));
+
     try {
       // iterate over the column filters, if they have multiple values per filter, place a should between then
       // for each column filter set, place a must between them
@@ -100,10 +115,26 @@ public class PersonElasticSearchService {
             if (appliedFilters.contains(columnFilter.getName())) { // skip if we've already applied this type of filter via role based filters
               continue;
             }
+            if (StringUtils.equals(columnFilter.getName(), "programmeMembershipStatus")) {
+              HashSet<ProgrammeMembershipStatus> statuses = new HashSet<>(); // set this HashSet to count how many statuses there are to match
+              if (StringUtils.equals(value.toString(), ProgrammeMembershipStatus.CURRENT.name())) {
+                statuses.add(ProgrammeMembershipStatus.CURRENT);
+                shouldBetweenSameColumnFilter.should(programmeMembershipCurrentFilter);
+              } else if (StringUtils.equals(value.toString(), ProgrammeMembershipStatus.PAST.name())) {
+                statuses.add(ProgrammeMembershipStatus.PAST);
+                shouldBetweenSameColumnFilter.should(programmeMembershipPastFilter);
+              } else if (StringUtils.equals(value.toString(), ProgrammeMembershipStatus.FUTURE.name())) {
+                statuses.add(ProgrammeMembershipStatus.FUTURE);
+                shouldBetweenSameColumnFilter.should(programmeMembershipfutureFilter);
+              }
+              shouldBetweenSameColumnFilter.minimumShouldMatch(statuses.size());
+              continue;
+            }
             //because the role column is a comma separated list of roles, we need to do a wildcard 'like' search
             if (StringUtils.equals(columnFilter.getName(), "role")) {
               shouldBetweenSameColumnFilter.should(new WildcardQueryBuilder(columnFilter.getName(), "*" + value.toString() + "*"));
-            } else {
+            }
+            else {
               shouldBetweenSameColumnFilter.should(new MatchQueryBuilder(columnFilter.getName(), value.toString()));
             }
           }
