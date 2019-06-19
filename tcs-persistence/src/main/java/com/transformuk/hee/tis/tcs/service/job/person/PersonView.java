@@ -40,9 +40,7 @@ public class PersonView implements Serializable {
 
   private Long programmeId;
 
-  private Date programmeStartDate;
-
-  private Date programmeEndDate;
+  private String programmeMembershipStatus;
 
   @Field(type = FieldType.Keyword)
   private String programmeName;
@@ -291,20 +289,13 @@ public class PersonView implements Serializable {
     this.trusts = trusts;
   }
 
-  public Date getProgrammeStartDate() {
-    return programmeStartDate;
+  public String getProgrammeMembershipStatus() {
+    return programmeMembershipStatus;
   }
 
-  public void setProgrammeStartDate(Date programmeStartDate) {
-    this.programmeStartDate = programmeStartDate;
+  public void setProgrammeMembershipStatus(String programmeMembershipStatus) {
+    this.programmeMembershipStatus = programmeMembershipStatus;
   }
 
-  public Date getProgrammeEndDate() {
-    return programmeEndDate;
-  }
-
-  public void setProgrammeEndDate(Date programmeEndDate) {
-    this.programmeEndDate = programmeEndDate;
-  }
 }
 

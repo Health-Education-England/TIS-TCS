@@ -713,27 +713,8 @@ public class PersonServiceImpl implements PersonService {
       if (StringUtils.isNotEmpty(ownerRule)) {
         view.setCurrentOwnerRule(PersonOwnerRule.valueOf(ownerRule));
       }
-      final Date programmeStartDate = rs.getDate("programmeStartDate");
-      final Date programmeEndDate = rs.getDate("programmeEndDate");
-      view.setProgrammeMembershipStatus(getProgrammeMembershipStatus(programmeStartDate, programmeEndDate));
+      view.setProgrammeMembershipStatus(ProgrammeMembershipStatus.valueOf(rs.getString("programmeMembershipStatus")));
       return view;
-    }
-
-    private ProgrammeMembershipStatus getProgrammeMembershipStatus(final Date dateFrom, final Date dateTo) {
-      if (dateFrom == null || dateTo == null) {
-        return ProgrammeMembershipStatus.PAST;
-      }
-      // Truncating the hours,minutes,seconds
-      final long from = DateUtils.truncate(dateFrom, Calendar.DATE).getTime();
-      final long to = DateUtils.truncate(dateTo, Calendar.DATE).getTime();
-      final long now = DateUtils.truncate(new Date(), Calendar.DATE).getTime();
-
-      if (now < from) {
-        return ProgrammeMembershipStatus.FUTURE;
-      } else if (now > to) {
-        return ProgrammeMembershipStatus.PAST;
-      }
-      return ProgrammeMembershipStatus.CURRENT;
     }
   }
 }

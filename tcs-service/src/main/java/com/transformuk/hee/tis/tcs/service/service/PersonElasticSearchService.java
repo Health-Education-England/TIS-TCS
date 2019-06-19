@@ -349,10 +349,7 @@ public class PersonElasticSearchService {
       if (StringUtils.isNotEmpty(pv.getCurrentOwnerRule())) {
         personViewDTO.setCurrentOwnerRule(PersonOwnerRule.valueOf(pv.getCurrentOwnerRule()));
       }
-
-      ProgrammeMembershipStatus pms = getProgrammeMembershipStatus(pv.getProgrammeStartDate(), pv.getProgrammeEndDate());
-      personViewDTO.setProgrammeMembershipStatus(pms);
-
+      personViewDTO.setProgrammeMembershipStatus(ProgrammeMembershipStatus.valueOf(pv.getProgrammeMembershipStatus()));
       return personViewDTO;
     }).collect(Collectors.toList());
   }
