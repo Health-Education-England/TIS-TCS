@@ -117,15 +117,20 @@ public class PersonElasticSearchService {
             }
             if (StringUtils.equals(columnFilter.getName(), "programmeMembershipStatus")) {
               HashSet<ProgrammeMembershipStatus> statuses = new HashSet<>(); // set this HashSet to count how many statuses there are to match
-              if (StringUtils.equals(value.toString(), ProgrammeMembershipStatus.CURRENT.name())) {
-                statuses.add(ProgrammeMembershipStatus.CURRENT);
-                shouldBetweenSameColumnFilter.should(programmeMembershipCurrentFilter);
-              } else if (StringUtils.equals(value.toString(), ProgrammeMembershipStatus.PAST.name())) {
-                statuses.add(ProgrammeMembershipStatus.PAST);
-                shouldBetweenSameColumnFilter.should(programmeMembershipPastFilter);
-              } else if (StringUtils.equals(value.toString(), ProgrammeMembershipStatus.FUTURE.name())) {
-                statuses.add(ProgrammeMembershipStatus.FUTURE);
-                shouldBetweenSameColumnFilter.should(programmeMembershipfutureFilter);
+
+              try {
+                ProgrammeMembershipStatus status = ProgrammeMembershipStatus.valueOf(value.toString());
+                statuses.add(status);
+
+                if (status.equals(ProgrammeMembershipStatus.CURRENT)) {
+                  shouldBetweenSameColumnFilter.should(programmeMembershipCurrentFilter);
+                } else if (status.equals(ProgrammeMembershipStatus.PAST)) {
+                  shouldBetweenSameColumnFilter.should(programmeMembershipPastFilter);
+                } else if (status.equals(ProgrammeMembershipStatus.FUTURE)) {
+                  shouldBetweenSameColumnFilter.should(programmeMembershipfutureFilter);
+                }
+              } catch (IllegalArgumentException e) {
+                LOG.error("Illegal argument: {} for programmeMembershipStatus column filter", value.toString());
               }
               shouldBetweenSameColumnFilter.minimumShouldMatch(statuses.size());
               continue;
