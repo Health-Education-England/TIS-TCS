@@ -1,0 +1,14 @@
+<component name="ArtifactManager">
+  <artifact type="war" name="tcs-service:war">
+    <output-path>$PROJECT_DIR$/tcs-service/target</output-path>
+    <properties id="maven-jee-properties">
+      <options>
+        <module>tcs-service</module>
+        <packaging>war</packaging>
+      </options>
+    </properties>
+    <root id="archive" name="tcs-service-4.4.8.war">
+      <element id="artifact" artifact-name="tcs-service:war exploded" />
+    </root>
+  </artifact>
+</component>

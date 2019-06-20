@@ -253,6 +253,8 @@ public class PersonResourceTest2 {
     verify(personServiceMock).findPersonV2WithProgrammeMembershipsSorted(personId);
   }
 
+  int test = 1;
+
   @Test
   public void findPeopleOnProgrammeShouldReturnPagedResultsOfFound() throws Exception {
     Long programmeId = 1L;
