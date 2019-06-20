@@ -1,6 +1,11 @@
 select distinct ot.*
 from (
   select
+  	CASE
+		WHEN pm.programmeStartDate > curdate() THEN "FUTURE"
+		WHEN curdate() between pm.programmeStartDate and pm.programmeEndDate THEN "CURRENT"
+		WHEN pm.programmeEndDate < curdate() OR pm.programmeStartDate is NULL OR pm.programmeEndDate is NULL THEN "PAST"
+  	END AS programmeMembershipStatus,
     p.id,
     p.intrepidId,
     cd.surname,
