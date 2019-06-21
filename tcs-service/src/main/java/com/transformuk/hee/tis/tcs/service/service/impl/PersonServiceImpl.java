@@ -389,6 +389,8 @@ public class PersonServiceImpl implements PersonService {
           case "status":
             paramSource.addValue("statusList", cf.getValues().stream().map(o -> ((Status) o).name()).collect(Collectors.toList()));
             break;
+          case "programmeMembershipStatus":
+            break;
           default:
             throw new IllegalArgumentException("Not accounted for column filter [" + cf.getName() +
                     "] you need to add an additional case statement or remove it from the request");
