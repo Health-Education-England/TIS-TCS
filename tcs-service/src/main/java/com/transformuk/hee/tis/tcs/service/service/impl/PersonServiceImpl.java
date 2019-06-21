@@ -389,6 +389,8 @@ public class PersonServiceImpl implements PersonService {
           case "status":
             paramSource.addValue("statusList", cf.getValues().stream().map(o -> ((Status) o).name()).collect(Collectors.toList()));
             break;
+          case "programmeMembershipStatus":
+            break;
           default:
             throw new IllegalArgumentException("Not accounted for column filter [" + cf.getName() +
                     "] you need to add an additional case statement or remove it from the request");
@@ -434,6 +436,31 @@ public class PersonServiceImpl implements PersonService {
             break;
           case "status":
             whereClause.append(" AND p.status in (:statusList)");
+            break;
+          case "programmeMembershipStatus":
+            final StringBuilder programmeMembershipStatusWhereClause = new StringBuilder();
+            programmeMembershipStatusWhereClause.append(" AND (");
+            List<Object> valueList = cf.getValues();
+            HashSet<ProgrammeMembershipStatus> statuses = new HashSet<>();
+            for (int i = 0; i < valueList.size(); i++) {
+              ProgrammeMembershipStatus status = ProgrammeMembershipStatus.valueOf((valueList.get(i)).toString());
+              if (statuses.contains(status)) {
+                continue; // to skip the same value
+              }
+              if (i != 0) {
+                programmeMembershipStatusWhereClause.append(" OR");
+              }
+              statuses.add(status);
+              if (status.equals(ProgrammeMembershipStatus.CURRENT)) {
+                programmeMembershipStatusWhereClause.append(" (curdate() between pm.programmeStartDate and pm.programmeEndDate)");
+              } else if (status.equals(ProgrammeMembershipStatus.FUTURE)) {
+                programmeMembershipStatusWhereClause.append(" (pm.programmeStartDate > curdate())");
+              } else if (status.equals(ProgrammeMembershipStatus.PAST)) {
+                programmeMembershipStatusWhereClause.append(" (pm.programmeEndDate < curdate() OR pm.programmeStartDate is NULL OR pm.programmeEndDate is NULL)");
+              }
+            }
+            programmeMembershipStatusWhereClause.append(")");
+            whereClause.append(programmeMembershipStatusWhereClause);
             break;
           default:
             throw new IllegalArgumentException("Not accounted for column filter [" + cf.getName() +
