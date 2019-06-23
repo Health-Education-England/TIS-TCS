@@ -224,13 +224,17 @@ public class PersonElasticSearchService {
   private Set<String> applyRoleBasedFilters(BoolQueryBuilder mustBetweenDifferentColumnFilters) {
     //find if there are any strategies based off roles need executing
     Set<String> appliedFilters = Sets.newHashSet();
-    for (RoleBasedFilterStrategy roleBasedFilterStrategy : roleBasedFilterStrategies) {
-      Optional<Tuple<String, BoolQueryBuilder>> nameToFilterOptionalTuple = roleBasedFilterStrategy.getFilter();
-      if (nameToFilterOptionalTuple.isPresent()) {
-        Tuple<String, BoolQueryBuilder> nameToFilterTuple = nameToFilterOptionalTuple.get();
-        appliedFilters.add(nameToFilterTuple.v1());
-        mustBetweenDifferentColumnFilters.must(nameToFilterTuple.v2());
+    try {
+      for (RoleBasedFilterStrategy roleBasedFilterStrategy : roleBasedFilterStrategies) {
+        Optional<Tuple<String, BoolQueryBuilder>> nameToFilterOptionalTuple = roleBasedFilterStrategy.getFilter();
+        if (nameToFilterOptionalTuple.isPresent()) {
+          Tuple<String, BoolQueryBuilder> nameToFilterTuple = nameToFilterOptionalTuple.get();
+          appliedFilters.add(nameToFilterTuple.v1());
+          mustBetweenDifferentColumnFilters.must(nameToFilterTuple.v2());
+        }
       }
+    } catch (NullPointerException e) {
+      LOG.error("Null pointer exception for roleBasedFilterStrategies", e);
     }
     return appliedFilters;
   }
