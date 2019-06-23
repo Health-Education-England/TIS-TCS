@@ -110,12 +110,6 @@ public class PersonElasticSearchService {
       // for each column filter set, place a must between them
       BoolQueryBuilder mustBetweenDifferentColumnFilters = new BoolQueryBuilder();
 
-      // if programmeMembershipStatus columnfilter doesn't exist, set this as CURRENT
-      long programmeMemberstipStatusCount = columnFilters.stream().filter(v -> StringUtils.equals(v.getName(), "programmeMembershipStatus")).count();
-      if (programmeMemberstipStatusCount <= 0) {
-        mustBetweenDifferentColumnFilters.must(programmeMembershipCurrentFilter);
-      }
-
       Set<String> appliedFilters = applyRoleBasedFilters(mustBetweenDifferentColumnFilters);
       if (CollectionUtils.isNotEmpty(columnFilters)) {
         for (ColumnFilter columnFilter : columnFilters) {
@@ -125,29 +119,18 @@ public class PersonElasticSearchService {
               continue;
             }
             if (StringUtils.equals(columnFilter.getName(), "programmeMembershipStatus")) {
-              HashSet<ProgrammeMembershipStatus> statuses = new HashSet<>(); // used for filtering the same values
-
               try {
                   ProgrammeMembershipStatus status = ProgrammeMembershipStatus.valueOf(value.toString());
-                  if (statuses.contains(status)) {
-                    continue; // to skip the same value
-                  }
+
                 if (status.equals(ProgrammeMembershipStatus.CURRENT)) {
                   shouldBetweenSameColumnFilter.should(programmeMembershipCurrentFilter);
 
                 } else if (status.equals(ProgrammeMembershipStatus.PAST)) {
-                  if (!permissionService.isProgrammeObserver()) { // break when the user isn't programmeObserver
-                    break;
-                  }
                   shouldBetweenSameColumnFilter.should(programmeMembershipPastFilter);
 
                 } else if (status.equals(ProgrammeMembershipStatus.FUTURE)) {
-                  if (!permissionService.isProgrammeObserver()) { // break when the user isn't programmeObserver
-                    break;
-                  }
                   shouldBetweenSameColumnFilter.should(programmeMembershipfutureFilter);
                 }
-                statuses.add(status);
               } catch (IllegalArgumentException e) {
                 LOG.error("Illegal argument: {} for programmeMembershipStatus column filter", value.toString());
               }
