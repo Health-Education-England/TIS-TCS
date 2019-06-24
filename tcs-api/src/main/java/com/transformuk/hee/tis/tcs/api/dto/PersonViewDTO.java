@@ -1,9 +1,11 @@
 package com.transformuk.hee.tis.tcs.api.dto;
 
 import com.transformuk.hee.tis.tcs.api.enumeration.PersonOwnerRule;
+import com.transformuk.hee.tis.tcs.api.enumeration.ProgrammeMembershipStatus;
 import com.transformuk.hee.tis.tcs.api.enumeration.Status;
 
 import java.io.Serializable;
+import java.util.Objects;
 
 /**
  * This DTO is used in the person list, it's meant as a read only entity aggregating what the user needs to see
@@ -28,6 +30,8 @@ public class PersonViewDTO implements Serializable {
   private String publicHealthNumber;
 
   private Long programmeId;
+
+  private ProgrammeMembershipStatus programmeMembershipStatus;
 
   private String programmeName;
 
@@ -121,6 +125,14 @@ public class PersonViewDTO implements Serializable {
 
   public void setProgrammeId(Long programmeId) {
     this.programmeId = programmeId;
+  }
+
+  public ProgrammeMembershipStatus getProgrammeMembershipStatus() {
+    return programmeMembershipStatus;
+  }
+
+  public void setProgrammeMembershipStatus(ProgrammeMembershipStatus programmeMembershipStatus) {
+    this.programmeMembershipStatus = programmeMembershipStatus;
   }
 
   public String getProgrammeName() {
@@ -250,58 +262,36 @@ public class PersonViewDTO implements Serializable {
 
     PersonViewDTO that = (PersonViewDTO) o;
 
-    if (!id.equals(that.id)) return false;
-    if (!intrepidId.equals(that.intrepidId)) return false;
-    if (surname != null ? !surname.equals(that.surname) : that.surname != null) return false;
-    if (forenames != null ? !forenames.equals(that.forenames) : that.forenames != null) return false;
-    if (gmcNumber != null ? !gmcNumber.equals(that.gmcNumber) : that.gmcNumber != null) return false;
-    if (gdcNumber != null ? !gdcNumber.equals(that.gdcNumber) : that.gdcNumber != null) return false;
-    if (publicHealthNumber != null ? !publicHealthNumber.equals(that.publicHealthNumber) : that.publicHealthNumber != null)
-      return false;
-    if (programmeId != null ? !programmeId.equals(that.programmeId) : that.programmeId != null) return false;
-    if (programmeName != null ? !programmeName.equals(that.programmeName) : that.programmeName != null) return false;
-    if (programmeNumber != null ? !programmeNumber.equals(that.programmeNumber) : that.programmeNumber != null)
-      return false;
-    if (trainingNumber != null ? !trainingNumber.equals(that.trainingNumber) : that.trainingNumber != null)
-      return false;
-    if (gradeAbbreviation != null ? !gradeAbbreviation.equals(that.gradeAbbreviation) : that.gradeAbbreviation != null)
-      return false;
-    if (gradeName != null ? !gradeName.equals(that.gradeName) : that.gradeName != null) return false;
-    if (siteCode != null ? !siteCode.equals(that.siteCode) : that.siteCode != null) return false;
-    if (siteName != null ? !siteName.equals(that.siteName) : that.siteName != null) return false;
-    if (placementType != null ? !placementType.equals(that.placementType) : that.placementType != null) return false;
-    if (specialty != null ? !specialty.equals(that.specialty) : that.specialty != null) return false;
-    if (role != null ? !role.equals(that.role) : that.role != null) return false;
-    if (status != that.status) return false;
-    if (currentOwner != null ? !currentOwner.equals(that.currentOwner) : that.currentOwner != null)
-      return false;
-    return currentOwnerRule != null ? currentOwnerRule.equals(that.currentOwnerRule) : that.currentOwnerRule == null;
+    return Objects.equals(id, that.id) &&
+      Objects.equals(intrepidId, that.intrepidId) &&
+      Objects.equals(surname, that.surname) &&
+      Objects.equals(forenames, that.forenames) &&
+      Objects.equals(gmcNumber, that.gmcNumber) &&
+      Objects.equals(gdcNumber, that.gdcNumber) &&
+      Objects.equals(publicHealthNumber, that.publicHealthNumber) &&
+      Objects.equals(programmeId, that.programmeId) &&
+      Objects.equals(programmeMembershipStatus, that.programmeMembershipStatus) &&
+      Objects.equals(programmeName, that.programmeName) &&
+      Objects.equals(programmeNumber, that.programmeNumber) &&
+      Objects.equals(trainingNumber, that.trainingNumber) &&
+      Objects.equals(gradeAbbreviation, that.gradeAbbreviation) &&
+      Objects.equals(gradeName, that.gradeName) &&
+      Objects.equals(siteCode, that.siteCode) &&
+      Objects.equals(siteName, that.siteName) &&
+      Objects.equals(placementType, that.placementType) &&
+      Objects.equals(specialty, that.specialty) &&
+      Objects.equals(role, that.role) &&
+      Objects.equals(status, that.status) &&
+      Objects.equals(currentOwner, that.currentOwner) &&
+      Objects.equals(currentOwnerRule, that.currentOwnerRule);
   }
 
   @Override
   public int hashCode() {
-    int result = id.hashCode();
-    result = 31 * result + intrepidId.hashCode();
-    result = 31 * result + (surname != null ? surname.hashCode() : 0);
-    result = 31 * result + (forenames != null ? forenames.hashCode() : 0);
-    result = 31 * result + (gmcNumber != null ? gmcNumber.hashCode() : 0);
-    result = 31 * result + (gdcNumber != null ? gdcNumber.hashCode() : 0);
-    result = 31 * result + (publicHealthNumber != null ? publicHealthNumber.hashCode() : 0);
-    result = 31 * result + (programmeId != null ? programmeId.hashCode() : 0);
-    result = 31 * result + (programmeName != null ? programmeName.hashCode() : 0);
-    result = 31 * result + (programmeNumber != null ? programmeNumber.hashCode() : 0);
-    result = 31 * result + (trainingNumber != null ? trainingNumber.hashCode() : 0);
-    result = 31 * result + (gradeAbbreviation != null ? gradeAbbreviation.hashCode() : 0);
-    result = 31 * result + (gradeName != null ? gradeName.hashCode() : 0);
-    result = 31 * result + (siteCode != null ? siteCode.hashCode() : 0);
-    result = 31 * result + (siteName != null ? siteName.hashCode() : 0);
-    result = 31 * result + (placementType != null ? placementType.hashCode() : 0);
-    result = 31 * result + (specialty != null ? specialty.hashCode() : 0);
-    result = 31 * result + (role != null ? role.hashCode() : 0);
-    result = 31 * result + (status != null ? status.hashCode() : 0);
-    result = 31 * result + (currentOwner != null ? currentOwner.hashCode() : 0);
-    result = 31 * result + (currentOwnerRule != null ? currentOwnerRule.hashCode() : 0);
-    return result;
+    return Objects.hash(id, intrepidId, surname, forenames, gmcNumber, gdcNumber, publicHealthNumber,
+      programmeId, programmeMembershipStatus, programmeName, programmeNumber, trainingNumber,
+      gradeAbbreviation, gradeName, siteCode, siteName, placementType, specialty, role, status,
+      currentOwner, currentOwnerRule);
   }
 
   @Override
@@ -315,6 +305,7 @@ public class PersonViewDTO implements Serializable {
         ", gdcNumber='" + gdcNumber + '\'' +
         ", publicHealthNumber='" + publicHealthNumber + '\'' +
         ", programmeId=" + programmeId +
+        ", programmeMembershipStatus='" + programmeMembershipStatus + '\'' +
         ", programmeName='" + programmeName + '\'' +
         ", programmeNumber='" + programmeNumber + '\'' +
         ", trainingNumber='" + trainingNumber + '\'' +
