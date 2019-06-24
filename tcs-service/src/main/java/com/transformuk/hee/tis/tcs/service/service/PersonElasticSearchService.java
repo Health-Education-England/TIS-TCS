@@ -54,8 +54,6 @@ public class PersonElasticSearchService {
   private Set<RoleBasedFilterStrategy> roleBasedFilterStrategies;
   @Autowired
   private PersonViewDecorator personViewDecorator;
-  @Autowired
-  private PermissionService permissionService;
 
   /**
    * Find a paginated set of people on a specified programme, if a search query is provided, do fuzzy search
