@@ -221,6 +221,23 @@ public class PersonResourceIntTest {
     return programmeMembership;
   }
 
+  private void initializeForProgrammeMembershipTests(Programme programme) {
+    Person personCurrent = createEntity();
+    personCurrent = personRepository.saveAndFlush(personCurrent);
+    createPersonBlankSubSections(personCurrent);
+    setCurrentProgrammeMembership(personCurrent, ProgrammeMembershipStatus.CURRENT, programme);
+
+    Person personFuture = createEntity();
+    personFuture = personRepository.saveAndFlush(personFuture);
+    createPersonBlankSubSections(personFuture);
+    setCurrentProgrammeMembership(personFuture, ProgrammeMembershipStatus.FUTURE, programme);
+
+    Person personPast = createEntity();
+    personPast = personRepository.saveAndFlush(personPast);
+    createPersonBlankSubSections(personPast);
+    setCurrentProgrammeMembership(personPast, ProgrammeMembershipStatus.PAST, programme);
+  }
+
   @Before
   public void initTest() {
     person = createEntity();
@@ -713,23 +730,6 @@ public class PersonResourceIntTest {
         colFilters))
         .andExpect(status().isOk())
         .andExpect(jsonPath("$.[*].status").value("INACTIVE"));
-  }
-
-  private void initializeForProgrammeMembershipTests(Programme programme) {
-    Person personCurrent = createEntity();
-    personCurrent = personRepository.saveAndFlush(personCurrent);
-    createPersonBlankSubSections(personCurrent);
-    setCurrentProgrammeMembership(personCurrent, ProgrammeMembershipStatus.CURRENT, programme);
-
-    Person personFuture = createEntity();
-    personFuture = personRepository.saveAndFlush(personFuture);
-    createPersonBlankSubSections(personFuture);
-    setCurrentProgrammeMembership(personFuture, ProgrammeMembershipStatus.FUTURE, programme);
-
-    Person personPast = createEntity();
-    personPast = personRepository.saveAndFlush(personPast);
-    createPersonBlankSubSections(personPast);
-    setCurrentProgrammeMembership(personPast, ProgrammeMembershipStatus.PAST, programme);
   }
 
   @Test
