@@ -13,6 +13,7 @@ import com.transformuk.hee.tis.tcs.service.job.person.PersonView;
 import com.transformuk.hee.tis.tcs.service.model.ColumnFilter;
 import com.transformuk.hee.tis.tcs.service.repository.PersonElasticSearchRepository;
 import com.transformuk.hee.tis.tcs.service.service.helper.SqlQuerySupplier;
+import com.transformuk.hee.tis.tcs.service.service.impl.PermissionService;
 import com.transformuk.hee.tis.tcs.service.service.impl.PersonTrustRowMapper;
 import com.transformuk.hee.tis.tcs.service.service.impl.PersonViewRowMapper;
 import com.transformuk.hee.tis.tcs.service.strategy.RoleBasedFilterStrategy;
@@ -53,6 +54,8 @@ public class PersonElasticSearchService {
   private Set<RoleBasedFilterStrategy> roleBasedFilterStrategies;
   @Autowired
   private PersonViewDecorator personViewDecorator;
+  @Autowired
+  private PermissionService permissionService;
 
   /**
    * Find a paginated set of people on a specified programme, if a search query is provided, do fuzzy search
@@ -87,6 +90,21 @@ public class PersonElasticSearchService {
 
   public BasicPage<PersonViewDTO> searchForPage(String searchQuery, List<ColumnFilter> columnFilters, Pageable pageable) {
 
+    final long now = DateUtils.truncate(new Date(), Calendar.DATE).getTime();
+    // past programmeMembership
+    BoolQueryBuilder startDateNotExists = new BoolQueryBuilder().mustNot(QueryBuilders.existsQuery("programmeStartDate"));
+    BoolQueryBuilder endDateNotExists = new BoolQueryBuilder().mustNot(QueryBuilders.existsQuery("programmeEndDate"));
+    BoolQueryBuilder programmeMembershipPastFilter = new BoolQueryBuilder()
+      .should(QueryBuilders.rangeQuery("programmeEndDate").lt(now))
+      .should(startDateNotExists)
+      .should(endDateNotExists)
+      .minimumShouldMatch(1);
+    // future programmeMembership
+    BoolQueryBuilder programmeMembershipfutureFilter = new BoolQueryBuilder().must(QueryBuilders.rangeQuery("programmeStartDate").gt(now));
+    // current programmeMembership
+    BoolQueryBuilder programmeMembershipCurrentFilter = new BoolQueryBuilder().must(QueryBuilders.rangeQuery("programmeStartDate").lte(now))
+      .must(QueryBuilders.rangeQuery("programmeEndDate").gt(now));
+
     try {
       // iterate over the column filters, if they have multiple values per filter, place a should between then
       // for each column filter set, place a must between them
@@ -100,10 +118,30 @@ public class PersonElasticSearchService {
             if (appliedFilters.contains(columnFilter.getName())) { // skip if we've already applied this type of filter via role based filters
               continue;
             }
+            if (StringUtils.equals(columnFilter.getName(), "programmeMembershipStatus")) {
+              try {
+                  ProgrammeMembershipStatus status = ProgrammeMembershipStatus.valueOf(value.toString());
+
+                if (status.equals(ProgrammeMembershipStatus.CURRENT)) {
+                  shouldBetweenSameColumnFilter.should(programmeMembershipCurrentFilter);
+
+                } else if (status.equals(ProgrammeMembershipStatus.PAST)) {
+                  shouldBetweenSameColumnFilter.should(programmeMembershipPastFilter);
+
+                } else if (status.equals(ProgrammeMembershipStatus.FUTURE)) {
+                  shouldBetweenSameColumnFilter.should(programmeMembershipfutureFilter);
+                }
+              } catch (IllegalArgumentException e) {
+                LOG.error("Illegal argument: {} for programmeMembershipStatus column filter", value.toString());
+              }
+              shouldBetweenSameColumnFilter.minimumShouldMatch(1);
+              continue;
+            }
             //because the role column is a comma separated list of roles, we need to do a wildcard 'like' search
             if (StringUtils.equals(columnFilter.getName(), "role")) {
               shouldBetweenSameColumnFilter.should(new WildcardQueryBuilder(columnFilter.getName(), "*" + value.toString() + "*"));
-            } else {
+            }
+            else {
               shouldBetweenSameColumnFilter.should(new MatchQueryBuilder(columnFilter.getName(), value.toString()));
             }
           }
@@ -117,7 +155,6 @@ public class PersonElasticSearchService {
       // add the free text query with a must to the column filters query
       BoolQueryBuilder fullQuery = mustBetweenDifferentColumnFilters.must(shouldQuery);
 
-//    LOG.info("Query {}", fullQuery.toString());
       pageable = replaceSortByIdHack(pageable);
 
       Page<PersonView> result = personElasticSearchRepository.search(fullQuery, pageable);
@@ -187,13 +224,17 @@ public class PersonElasticSearchService {
   private Set<String> applyRoleBasedFilters(BoolQueryBuilder mustBetweenDifferentColumnFilters) {
     //find if there are any strategies based off roles need executing
     Set<String> appliedFilters = Sets.newHashSet();
-    for (RoleBasedFilterStrategy roleBasedFilterStrategy : roleBasedFilterStrategies) {
-      Optional<Tuple<String, BoolQueryBuilder>> nameToFilterOptionalTuple = roleBasedFilterStrategy.getFilter();
-      if (nameToFilterOptionalTuple.isPresent()) {
-        Tuple<String, BoolQueryBuilder> nameToFilterTuple = nameToFilterOptionalTuple.get();
-        appliedFilters.add(nameToFilterTuple.v1());
-        mustBetweenDifferentColumnFilters.must(nameToFilterTuple.v2());
+    try {
+      for (RoleBasedFilterStrategy roleBasedFilterStrategy : roleBasedFilterStrategies) {
+        Optional<Tuple<String, BoolQueryBuilder>> nameToFilterOptionalTuple = roleBasedFilterStrategy.getFilter();
+        if (nameToFilterOptionalTuple.isPresent()) {
+          Tuple<String, BoolQueryBuilder> nameToFilterTuple = nameToFilterOptionalTuple.get();
+          appliedFilters.add(nameToFilterTuple.v1());
+          mustBetweenDifferentColumnFilters.must(nameToFilterTuple.v2());
+        }
       }
+    } catch (NullPointerException e) {
+      LOG.error("Null pointer exception for roleBasedFilterStrategies", e);
     }
     return appliedFilters;
   }

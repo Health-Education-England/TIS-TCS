@@ -55,6 +55,14 @@ public interface PersonService {
      */
     BasicPage<PersonViewDTO> findAll(Pageable pageable);
 
+
+  /**
+   * filter the column filter for programme membership status, can be extended for other column filters
+   * @param columnFilters unFilteredColumnFilters which may contain illegal values
+   * @return new generated safe column filters
+   */
+    List<ColumnFilter> getSafeColumnFilters(final List<ColumnFilter> columnFilters);
+
     /**
      * Get all the people using the given smart search string and filters.
      *
