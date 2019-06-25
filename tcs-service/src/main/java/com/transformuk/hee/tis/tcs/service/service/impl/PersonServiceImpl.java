@@ -414,7 +414,6 @@ public class PersonServiceImpl implements PersonService {
   public List<ColumnFilter> getSafeColumnFilters(final List<ColumnFilter> columnFilters) {
 
     final List<ColumnFilter> safeColumnFilters = new ArrayList<>();
-    boolean foundProgrammeMembershipStatus = false;
     for (ColumnFilter cf : columnFilters) {
       switch (cf.getName()) {
         case "programmeMembershipStatus":
@@ -779,9 +778,11 @@ public class PersonServiceImpl implements PersonService {
       if (StringUtils.isNotEmpty(ownerRule)) {
         view.setCurrentOwnerRule(PersonOwnerRule.valueOf(ownerRule));
       }
-      final Date programmeStartDate = rs.getDate("programmeStartDate");
-      final Date programmeEndDate = rs.getDate("programmeEndDate");
-      view.setProgrammeMembershipStatus(getProgrammeMembershipStatus(programmeStartDate, programmeEndDate));
+      if (permissionService.isProgrammeObserver()) {
+        final Date programmeStartDate = rs.getDate("programmeStartDate");
+        final Date programmeEndDate = rs.getDate("programmeEndDate");
+        view.setProgrammeMembershipStatus(getProgrammeMembershipStatus(programmeStartDate, programmeEndDate));
+      }
       return view;
     }
 

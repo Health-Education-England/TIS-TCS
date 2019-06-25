@@ -91,9 +91,7 @@ public class ContactDetailsDTOValidatorTest {
 	@MockBean
 	private PermissionService permissionServiceMock;
 	@MockBean
-  private PersonElasticSearchService personElasticSearchServiceMock;
-	@MockBean
-  private PermissionService permissionService;
+    private PersonElasticSearchService personElasticSearchServiceMock;
 
 	private MockMvc restContactDetailsMockMvc;
 	private MockMvc restPersonMockMvc;
@@ -104,7 +102,7 @@ public class ContactDetailsDTOValidatorTest {
 		ContactDetailsResource contactDetailsResource = new ContactDetailsResource(contactDetailsService,contactDetailsValidator);
 		PersonResource personResource = new PersonResource(personService, placementViewRepository, placementViewMapper,
 				placementViewDecorator, personViewDecorator, placementService, placementSummaryDecorator,personValidator,
-				gmcDetailsValidator, gdcDetailsValidator, personalDetailsValidator, contactDetailsValidator,personElasticSearchServiceMock, permissionService);
+				gmcDetailsValidator, gdcDetailsValidator, personalDetailsValidator, contactDetailsValidator,personElasticSearchServiceMock, permissionServiceMock);
 		this.restContactDetailsMockMvc = MockMvcBuilders.standaloneSetup(contactDetailsResource)
 				.setCustomArgumentResolvers(pageableArgumentResolver)
 				.setControllerAdvice(exceptionTranslator)

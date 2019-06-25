@@ -21,8 +21,6 @@ import com.transformuk.hee.tis.tcs.service.service.impl.PermissionService;
 import com.transformuk.hee.tis.tcs.service.service.mapper.PersonMapper;
 import com.transformuk.hee.tis.tcs.service.service.mapper.PlacementViewMapper;
 import org.apache.commons.codec.net.URLCodec;
-import org.apache.commons.lang3.StringUtils;
-import org.hamcrest.CoreMatchers;
 import org.junit.Before;
 import org.junit.Ignore;
 import org.junit.Test;
@@ -140,22 +138,59 @@ public class PersonResourceIntTest {
   private ContactDetailsValidator contactDetailsValidator;
   @MockBean
   private PersonElasticSearchService personElasticSearchServiceMock;
-  @MockBean
-  private PermissionService permissionService;
 
   private MockMvc restPersonMockMvc;
   private Person person;
+
+  private ProgrammeMembership setCurrentProgrammeMembership(Person person, ProgrammeMembershipStatus programmeMembershipStatus, Programme programme) {
+    ProgrammeMembership programmeMembership = new ProgrammeMembership();
+    programmeMembership.setPerson(person);
+    if (programme != null) {
+      programmeMembership.setProgramme(programme);
+    }
+    if (programmeMembershipStatus == ProgrammeMembershipStatus.CURRENT) {
+      programmeMembership.setProgrammeStartDate(LocalDate.now().minusDays(3));
+      programmeMembership.setProgrammeEndDate(LocalDate.now().plusDays(3));
+    } else if (programmeMembershipStatus == ProgrammeMembershipStatus.FUTURE) {
+      programmeMembership.setProgrammeStartDate(LocalDate.now().plusDays(1));
+      programmeMembership.setProgrammeEndDate(LocalDate.now().plusDays(10));
+    } else if (programmeMembershipStatus == ProgrammeMembershipStatus.PAST) {
+      programmeMembership.setProgrammeStartDate(LocalDate.now().minusDays(10));
+      programmeMembership.setProgrammeEndDate(LocalDate.now().minusDays(3));
+    }
+    programmeMembership = programmeMembershipRepository.saveAndFlush(programmeMembership);
+
+    return programmeMembership;
+  }
+
+  private void initializeForProgrammeMembershipTests(Programme programme) {
+    Person personCurrent = createEntity();
+    personCurrent = personRepository.saveAndFlush(personCurrent);
+    createPersonBlankSubSections(personCurrent);
+    setCurrentProgrammeMembership(personCurrent, ProgrammeMembershipStatus.CURRENT, programme);
+
+    Person personFuture = createEntity();
+    personFuture = personRepository.saveAndFlush(personFuture);
+    createPersonBlankSubSections(personFuture);
+    setCurrentProgrammeMembership(personFuture, ProgrammeMembershipStatus.FUTURE, programme);
+
+    Person personPast = createEntity();
+    personPast = personRepository.saveAndFlush(personPast);
+    createPersonBlankSubSections(personPast);
+    setCurrentProgrammeMembership(personPast, ProgrammeMembershipStatus.PAST, programme);
+  }
 
   @Before
   public void setup() {
     MockitoAnnotations.initMocks(this);
     PersonResource personResource = new PersonResource(personService, placementViewRepository, placementViewMapper,
-      placementViewDecorator, personViewDecorator, placementService, placementSummaryDecorator, personValidator,
-      gmcDetailsValidator, gdcDetailsValidator, personalDetailsValidator, contactDetailsValidator, personElasticSearchServiceMock, permissionService);
+        placementViewDecorator, personViewDecorator, placementService, placementSummaryDecorator, personValidator,
+        gmcDetailsValidator, gdcDetailsValidator, personalDetailsValidator, contactDetailsValidator, personElasticSearchServiceMock,
+        permissionServiceMock);
     this.restPersonMockMvc = MockMvcBuilders.standaloneSetup(personResource)
-      .setCustomArgumentResolvers(pageableArgumentResolver)
-      .setControllerAdvice(exceptionTranslator)
-      .setMessageConverters(jacksonMessageConverter).build();
+        .setCustomArgumentResolvers(pageableArgumentResolver)
+        .setControllerAdvice(exceptionTranslator)
+        .setMessageConverters(jacksonMessageConverter).build();
 
     personRepository.deleteAllInBatch();
 
@@ -200,44 +235,6 @@ public class PersonResourceIntTest {
     person.setGdcDetails(gdcDetails);
 
     return person;
-  }
-
-  private ProgrammeMembership setCurrentProgrammeMembership(Person person, ProgrammeMembershipStatus programmeMembershipStatus, Programme programme) {
-    ProgrammeMembership programmeMembership = new ProgrammeMembership();
-    programmeMembership.setPerson(person);
-    if (programme != null) {
-      programmeMembership.setProgramme(programme);
-    }
-    if (programmeMembershipStatus == ProgrammeMembershipStatus.CURRENT) {
-      programmeMembership.setProgrammeStartDate(LocalDate.now().minusDays(3));
-      programmeMembership.setProgrammeEndDate(LocalDate.now().plusDays(3));
-    } else if (programmeMembershipStatus == ProgrammeMembershipStatus.FUTURE) {
-      programmeMembership.setProgrammeStartDate(LocalDate.now().plusDays(1));
-      programmeMembership.setProgrammeEndDate(LocalDate.now().plusDays(10));
-    } else if (programmeMembershipStatus == ProgrammeMembershipStatus.PAST) {
-      programmeMembership.setProgrammeStartDate(LocalDate.now().minusDays(10));
-      programmeMembership.setProgrammeEndDate(LocalDate.now().minusDays(3));
-    }
-    programmeMembership = programmeMembershipRepository.saveAndFlush(programmeMembership);
-
-    return programmeMembership;
-  }
-
-  private void initializeForProgrammeMembershipTests(Programme programme) {
-    Person personCurrent = createEntity();
-    personCurrent = personRepository.saveAndFlush(personCurrent);
-    createPersonBlankSubSections(personCurrent);
-    setCurrentProgrammeMembership(personCurrent, ProgrammeMembershipStatus.CURRENT, programme);
-
-    Person personFuture = createEntity();
-    personFuture = personRepository.saveAndFlush(personFuture);
-    createPersonBlankSubSections(personFuture);
-    setCurrentProgrammeMembership(personFuture, ProgrammeMembershipStatus.FUTURE, programme);
-
-    Person personPast = createEntity();
-    personPast = personRepository.saveAndFlush(personPast);
-    createPersonBlankSubSections(personPast);
-    setCurrentProgrammeMembership(personPast, ProgrammeMembershipStatus.PAST, programme);
   }
 
   @Before
@@ -468,7 +465,6 @@ public class PersonResourceIntTest {
         .andExpect(jsonPath("$[1].id").value(person2.getId().intValue()));
   }
 
-
   @Test
   @Transactional
   public void getAllPeople() throws Exception {
@@ -487,8 +483,6 @@ public class PersonResourceIntTest {
     contactDetails.setSurname(PERSON_SURNAME);
     contactDetails.setForenames(PERSON_FORENAMES);
     contactDetailsRepository.saveAndFlush(contactDetails);
-
-    setCurrentProgrammeMembership(person, ProgrammeMembershipStatus.CURRENT, null);
 
     // Get all the personList
     restPersonMockMvc.perform(get("/api/people?sort=id,desc"))
@@ -631,7 +625,6 @@ public class PersonResourceIntTest {
     contactDetails.setSurname(PERSON_SURNAME);
     contactDetails.setForenames(PERSON_FORENAMES);
     contactDetailsRepository.saveAndFlush(contactDetails);
-    setCurrentProgrammeMembership(anotherPerson, ProgrammeMembershipStatus.CURRENT, null);
 
     restPersonMockMvc.perform(get("/api/people?searchQuery=" + PERSON_SURNAME))
         .andExpect(status().isOk())
@@ -653,7 +646,6 @@ public class PersonResourceIntTest {
     final GmcDetails gmcDetails = anotherPerson.getGmcDetails();
     gmcDetails.setGmcNumber(GMC_NUMBER);
     gmcDetailsRepository.saveAndFlush(gmcDetails);
-    setCurrentProgrammeMembership(anotherPerson, ProgrammeMembershipStatus.CURRENT, null);
 
     restPersonMockMvc.perform(get("/api/people?searchQuery=" + GMC_NUMBER))
         .andExpect(status().isOk())
@@ -674,7 +666,6 @@ public class PersonResourceIntTest {
     final GdcDetails gdcDetails = anotherPerson.getGdcDetails();
     gdcDetails.setGdcNumber(GDC_NUMBER);
     gdcDetailsRepository.saveAndFlush(gdcDetails);
-    setCurrentProgrammeMembership(anotherPerson, ProgrammeMembershipStatus.CURRENT, null);
 
     final ContactDetails contactDetails = anotherPerson.getContactDetails();
     contactDetails.setForenames(PERSON_FORENAMES);
@@ -699,7 +690,6 @@ public class PersonResourceIntTest {
     final Person anotherPerson = createEntity();
     personRepository.saveAndFlush(anotherPerson);
     createPersonBlankSubSections(anotherPerson);
-    setCurrentProgrammeMembership(anotherPerson, ProgrammeMembershipStatus.CURRENT, null);
 
     restPersonMockMvc.perform(get("/api/people?searchQuery=" + DEFAULT_PUBLIC_HEALTH_NUMBER))
         .andExpect(status().isOk())
@@ -722,11 +712,9 @@ public class PersonResourceIntTest {
     otherStatusPerson.setStatus(Status.INACTIVE);
     personRepository.saveAndFlush(otherStatusPerson);
     createPersonBlankSubSections(otherStatusPerson);
-    setCurrentProgrammeMembership(person, ProgrammeMembershipStatus.CURRENT, null);
-    setCurrentProgrammeMembership(otherStatusPerson, ProgrammeMembershipStatus.CURRENT, null);
 
     //when & then
-    final String colFilters = new URLCodec().encode("{\"status\":[\"INACTIVE\"],\"programmeMembershipStatus\":[\"CURRENT\"]}");
+    final String colFilters = new URLCodec().encode("{\"status\":[\"INACTIVE\"]}");
     // Get all the programmeList
     restPersonMockMvc.perform(get("/api/people?sort=id,desc&columnFilters=" +
         colFilters))
@@ -736,31 +724,7 @@ public class PersonResourceIntTest {
 
   @Test
   @Transactional
-  public void shouldGetCurrentWhenProgrammeMembershipStatusColumnFilterDoesNotExists() throws Exception{
-    initializeForProgrammeMembershipTests(null);
-
-    // Get all the programmeList
-    restPersonMockMvc.perform(get("/api/people?sort=id,desc"))
-      .andExpect(status().isOk())
-      .andExpect(jsonPath("$.[*].programmeMembershipStatus").value("CURRENT"));
-  }
-
-  @Test
-  @Transactional
-  public void shouldGetCurrentWhenProgrammeMembershipStatusColumnFilterIsCurrent() throws Exception{
-    initializeForProgrammeMembershipTests(null);
-
-    final String colFilters = new URLCodec().encode("{\"programmeMembershipStatus\":[\"CURRENT\"]}");
-    // Get all the programmeList
-    restPersonMockMvc.perform(get("/api/people?sort=id,desc&columnFilters=" +
-      colFilters))
-      .andExpect(status().isOk())
-      .andExpect(jsonPath("$.[*].programmeMembershipStatus").value("CURRENT"));
-  }
-
-  @Test
-  @Transactional
-  public void shouldGetCurrentProgrammeMembershipStatusWhenUserIsNotProgrammeObserver() throws Exception{
+  public void shouldReturnErrorWhenUserIsNotProgrammeObserverSendProgrammeMembershipStatus() throws Exception{
     initializeForProgrammeMembershipTests(null);
     when(permissionServiceMock.isProgrammeObserver()).thenReturn(false);
 
@@ -768,8 +732,7 @@ public class PersonResourceIntTest {
     // Get all the programmeList
     restPersonMockMvc.perform(get("/api/people?sort=id,desc&columnFilters=" +
       colFilters))
-      .andExpect(status().isOk())
-      .andExpect(jsonPath("$.[*].programmeMembershipStatus").value("CURRENT"));
+      .andExpect(status().is4xxClientError());
   }
 
   @Test
@@ -806,18 +769,15 @@ public class PersonResourceIntTest {
     otherStatusPerson.setStatus(Status.INACTIVE);
     personRepository.saveAndFlush(otherStatusPerson);
     createPersonBlankSubSections(otherStatusPerson);
-    setCurrentProgrammeMembership(otherStatusPerson, ProgrammeMembershipStatus.CURRENT, null);
 
     Person otherNamePerson = createEntity();
     otherNamePerson.setStatus(Status.INACTIVE);
     personRepository.saveAndFlush(otherNamePerson);
     otherNamePerson = createPersonBlankSubSections(otherNamePerson);
-    setCurrentProgrammeMembership(otherNamePerson, ProgrammeMembershipStatus.CURRENT, null);
 
     final ContactDetails contactDetails = otherNamePerson.getContactDetails();
     contactDetails.setSurname(PERSON_OHTER_SURNANME);
     contactDetailsRepository.saveAndFlush(contactDetails);
-
 
     //when & then
     final String colFilters = new URLCodec().encode("{\"status\":[\"INACTIVE\"]}");
