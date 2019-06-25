@@ -1,6 +1,5 @@
 package com.transformuk.hee.tis.tcs.service.service.impl;
 
-import com.google.common.collect.Lists;
 import com.transformuk.hee.tis.reference.api.dto.RoleDTO;
 import com.transformuk.hee.tis.reference.client.ReferenceService;
 import com.transformuk.hee.tis.tcs.api.dto.*;
@@ -40,7 +39,6 @@ import org.springframework.transaction.annotation.Transactional;
 import org.springframework.util.CollectionUtils;
 import org.springframework.util.StopWatch;
 
-import javax.ws.rs.NotFoundException;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.util.*;
@@ -214,7 +212,12 @@ public class PersonServiceImpl implements PersonService {
     final int size = pageable.getPageSize() + 1;
     final long offset = pageable.getOffset();
     MapSqlParameterSource paramSource = new MapSqlParameterSource();
-    String query = sqlQuerySupplier.getQuery(SqlQuerySupplier.PERSON_VIEW);
+    String query = "";
+    if (permissionService.isProgrammeObserver()) {
+      query = sqlQuerySupplier.getQuery(SqlQuerySupplier.PERSON_VIEW_FOR_PROGRAMME_ROLE);
+    } else {
+      query = sqlQuerySupplier.getQuery(SqlQuerySupplier.PERSON_VIEW);
+    }
 
     query = query.replaceAll("TRUST_JOIN", permissionService.isUserTrustAdmin() ? " left join PersonTrust pt on (pt.personId = p.id)" : StringUtils.EMPTY);
 
@@ -294,10 +297,17 @@ public class PersonServiceImpl implements PersonService {
     final int size = pageable.getPageSize() + 1;
     final long offset = pageable.getOffset();
     MapSqlParameterSource paramSource = new MapSqlParameterSource();
-    String query = sqlQuerySupplier.getQuery(SqlQuerySupplier.PERSON_VIEW);
+    String query;
+    if (permissionService.isProgrammeObserver()) {
+      query = sqlQuerySupplier.getQuery(SqlQuerySupplier.PERSON_VIEW_FOR_PROGRAMME_ROLE);
+    } else {
+      query = sqlQuerySupplier.getQuery(SqlQuerySupplier.PERSON_VIEW);
+    }
+
+    List<ColumnFilter> safeColumnFilters = getSafeColumnFilters(columnFilters);
     query = query.replaceAll("TRUST_JOIN", permissionService.isUserTrustAdmin() ? " left join PersonTrust pt on (pt.personId = p.id)" : StringUtils.EMPTY);
 
-    String whereClause = createWhereClause(searchString, columnFilters);
+    String whereClause = createWhereClause(searchString, safeColumnFilters);
 
     if (permissionService.isUserTrustAdmin()) {
       paramSource.addValue("trustList", permissionService.getUsersTrustIds());
@@ -316,7 +326,7 @@ public class PersonServiceImpl implements PersonService {
       paramSource.addValue("searchStringArray", Arrays.asList(searchString.split(",")));
     }
 
-    applyFilterByParams(columnFilters, paramSource);
+    applyFilterByParams(safeColumnFilters, paramSource);
 
     //For order by clause
     final String orderByClause = createOrderByClauseWithParams(pageable);
@@ -402,19 +412,19 @@ public class PersonServiceImpl implements PersonService {
   }
 
   public List<ColumnFilter> getSafeColumnFilters(final List<ColumnFilter> columnFilters) {
-    HashSet<String> valuesSet = new HashSet<>();
-    valuesSet.add("CURRENT");
-    valuesSet.add("FUTURE");
-    valuesSet.add("PAST");
+
     final List<ColumnFilter> safeColumnFilters = new ArrayList<>();
     boolean foundProgrammeMembershipStatus = false;
     for (ColumnFilter cf : columnFilters) {
       switch (cf.getName()) {
         case "programmeMembershipStatus":
-          foundProgrammeMembershipStatus = true;
-          if (!permissionService.isProgrammeObserver()) { // if the user isn't assigned a programme, set its programmMembershipStatus to CURRENT
-            ColumnFilter safeColumnFilter = new ColumnFilter("programmeMembershipStatus", Lists.newArrayList("CURRENT"));
-            safeColumnFilters.add(safeColumnFilter);
+          HashSet<String> valuesSet = new HashSet<>();
+          valuesSet.add("CURRENT");
+          valuesSet.add("FUTURE");
+          valuesSet.add("PAST");
+          if (!permissionService.isProgrammeObserver()) { // if the user doesn't have programme role, throw an exception
+            throw new IllegalArgumentException("Not accounted for column filter [" + cf.getName() +
+              "] you need to add an additional case statement or remove it from the request");
           } else { // remove illegal and duplicated value
             List filteredValues = cf.getValues().stream().filter(v -> valuesSet.contains(v)).distinct().collect(Collectors.toList());
             if (filteredValues.size() == 0) {
@@ -427,10 +437,6 @@ public class PersonServiceImpl implements PersonService {
         default:
           safeColumnFilters.add(cf);
       }
-    }
-    if (foundProgrammeMembershipStatus == false) {
-      ColumnFilter safeColumnFilter = new ColumnFilter("programmeMembershipStatus", Lists.newArrayList("CURRENT"));
-      safeColumnFilters.add(safeColumnFilter);
     }
     return safeColumnFilters;
   }

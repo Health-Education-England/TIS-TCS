@@ -7,7 +7,6 @@ import org.springframework.data.elasticsearch.annotations.Field;
 import org.springframework.data.elasticsearch.annotations.FieldType;
 
 import java.io.Serializable;
-import java.util.Date;
 import java.util.Set;
 
 @Document(indexName = "persons", type = "person")
@@ -39,10 +38,6 @@ public class PersonView implements Serializable {
   private String publicHealthNumber;
 
   private Long programmeId;
-
-  private Date programmeStartDate;
-
-  private Date programmeEndDate;
 
   @Field(type = FieldType.Keyword)
   private String programmeName;
@@ -289,22 +284,6 @@ public class PersonView implements Serializable {
 
   public void setTrusts(Set<PersonTrustDto> trusts) {
     this.trusts = trusts;
-  }
-
-  public Date getProgrammeStartDate() {
-    return programmeStartDate;
-  }
-
-  public void setProgrammeStartDate(Date programmeStartDate) {
-    this.programmeStartDate = programmeStartDate;
-  }
-
-  public Date getProgrammeEndDate() {
-    return programmeEndDate;
-  }
-
-  public void setProgrammeEndDate(Date programmeEndDate) {
-    this.programmeEndDate = programmeEndDate;
   }
 }
 

@@ -30,6 +30,7 @@ import com.transformuk.hee.tis.tcs.service.repository.PlacementViewRepository;
 import com.transformuk.hee.tis.tcs.service.service.PersonElasticSearchService;
 import com.transformuk.hee.tis.tcs.service.service.PersonService;
 import com.transformuk.hee.tis.tcs.service.service.PlacementService;
+import com.transformuk.hee.tis.tcs.service.service.impl.PermissionService;
 import com.transformuk.hee.tis.tcs.service.service.mapper.PlacementViewMapper;
 import io.github.jhipster.web.util.ResponseUtil;
 import org.apache.commons.lang3.StringUtils;
@@ -94,6 +95,7 @@ public class PersonResource {
   private final PersonalDetailsValidator personalDetailsValidator;
   private final ContactDetailsValidator contactDetailsValidator;
   private final PersonElasticSearchService personElasticSearchService;
+  private final PermissionService permissionService;
 
   public PersonResource(PersonService personService, PlacementViewRepository placementViewRepository,
                         PlacementViewMapper placementViewMapper, PlacementViewDecorator placementViewDecorator,
@@ -101,7 +103,7 @@ public class PersonResource {
                         PlacementSummaryDecorator placementSummaryDecorator, PersonValidator personValidator,
                         GmcDetailsValidator gmcDetailsValidator, GdcDetailsValidator gdcDetailsValidator,
                         PersonalDetailsValidator personalDetailsValidator, ContactDetailsValidator contactDetailsValidator,
-                        PersonElasticSearchService personElasticSearchService) {
+                        PersonElasticSearchService personElasticSearchService, PermissionService permissionService) {
     this.personService = personService;
     this.placementViewRepository = placementViewRepository;
     this.placementViewMapper = placementViewMapper;
@@ -115,6 +117,7 @@ public class PersonResource {
     this.personalDetailsValidator = personalDetailsValidator;
     this.contactDetailsValidator = contactDetailsValidator;
     this.personElasticSearchService = personElasticSearchService;
+    this.permissionService = permissionService;
   }
 
   /**
@@ -193,12 +196,12 @@ public class PersonResource {
     searchQuery = getConverter(searchQuery).fromJson().decodeUrl().escapeForSql().toString();
     String searchQueryES = getConverter(searchQuery).fromJson().decodeUrl().escapeForElasticSearch().toString();
     final List<Class> filterEnumList = Lists.newArrayList(Status.class);
-    List<ColumnFilter> columnFilters = ColumnFilterUtil.getColumnFilters(columnFilterJson, filterEnumList);
-    columnFilters = personService.getSafeColumnFilters(columnFilters);
+    final List<ColumnFilter> columnFilters = ColumnFilterUtil.getColumnFilters(columnFilterJson, filterEnumList);
     final BasicPage<PersonViewDTO> page;
 
     //feature flag to enable es, allow the enabling from the FE
-    if (enableEsSearch || enableES) {
+    // if the user has programme role, ES won't be allowed.
+    if ((enableEsSearch || enableES) && !permissionService.isProgrammeObserver()) {
       page = personElasticSearchService.searchForPage(searchQueryES, columnFilters, pageable);
     } else {
       if (StringUtils.isEmpty(searchQuery) && columnFilters.size() == 0) {

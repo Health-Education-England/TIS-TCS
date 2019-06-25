@@ -21,6 +21,7 @@ import com.transformuk.hee.tis.tcs.service.repository.PlacementViewRepository;
 import com.transformuk.hee.tis.tcs.service.service.PersonElasticSearchService;
 import com.transformuk.hee.tis.tcs.service.service.PersonService;
 import com.transformuk.hee.tis.tcs.service.service.PlacementService;
+import com.transformuk.hee.tis.tcs.service.service.impl.PermissionService;
 import com.transformuk.hee.tis.tcs.service.service.mapper.PlacementViewMapper;
 import org.junit.Before;
 import org.junit.Test;
@@ -93,6 +94,8 @@ public class PersonResourceTest2 {
   private ContactDetailsValidator contactDetailsValidator;
   @MockBean
   private PersonElasticSearchService personElasticSearchServiceMock;
+  @MockBean
+  private PermissionService permissionService;
 
   private PersonDTO personDTOStub;
 
@@ -103,7 +106,7 @@ public class PersonResourceTest2 {
     PersonResource personResource = new PersonResource(personServiceMock, placementViewRepositoryMock,
         placementViewMapperMock, placementViewDecoratorMock, personViewDecoratorMock, placementServiceMock,
         placementSummaryDecoratorMock, personValidatorMock, gmcDetailsValidator, gdcDetailsValidator,
-        personalDetailsValidator, contactDetailsValidator, personElasticSearchServiceMock);
+        personalDetailsValidator, contactDetailsValidator, personElasticSearchServiceMock, permissionService);
 
     this.mockMvc = MockMvcBuilders.standaloneSetup(personResource)
         .setCustomArgumentResolvers(pageableArgumentResolver)

@@ -140,6 +140,8 @@ public class PersonResourceIntTest {
   private ContactDetailsValidator contactDetailsValidator;
   @MockBean
   private PersonElasticSearchService personElasticSearchServiceMock;
+  @MockBean
+  private PermissionService permissionService;
 
   private MockMvc restPersonMockMvc;
   private Person person;
@@ -149,7 +151,7 @@ public class PersonResourceIntTest {
     MockitoAnnotations.initMocks(this);
     PersonResource personResource = new PersonResource(personService, placementViewRepository, placementViewMapper,
       placementViewDecorator, personViewDecorator, placementService, placementSummaryDecorator, personValidator,
-      gmcDetailsValidator, gdcDetailsValidator, personalDetailsValidator, contactDetailsValidator, personElasticSearchServiceMock);
+      gmcDetailsValidator, gdcDetailsValidator, personalDetailsValidator, contactDetailsValidator, personElasticSearchServiceMock, permissionService);
     this.restPersonMockMvc = MockMvcBuilders.standaloneSetup(personResource)
       .setCustomArgumentResolvers(pageableArgumentResolver)
       .setControllerAdvice(exceptionTranslator)
