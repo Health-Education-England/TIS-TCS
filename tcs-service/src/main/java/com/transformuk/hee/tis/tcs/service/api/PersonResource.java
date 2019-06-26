@@ -193,15 +193,14 @@ public class PersonResource {
     searchQuery = getConverter(searchQuery).fromJson().decodeUrl().escapeForSql().toString();
     String searchQueryES = getConverter(searchQuery).fromJson().decodeUrl().escapeForElasticSearch().toString();
     final List<Class> filterEnumList = Lists.newArrayList(Status.class);
-    List<ColumnFilter> columnFilters = ColumnFilterUtil.getColumnFilters(columnFilterJson, filterEnumList);
-    columnFilters = personService.getSafeColumnFilters(columnFilters);
+    final List<ColumnFilter> columnFilters = ColumnFilterUtil.getColumnFilters(columnFilterJson, filterEnumList);
     final BasicPage<PersonViewDTO> page;
 
     //feature flag to enable es, allow the enabling from the FE
     if (enableEsSearch || enableES) {
       page = personElasticSearchService.searchForPage(searchQueryES, columnFilters, pageable);
     } else {
-      if (StringUtils.isEmpty(searchQuery) && columnFilters.size() == 0) {
+      if (StringUtils.isEmpty(searchQuery) && StringUtils.isEmpty(columnFilterJson)) {
         page = personService.findAll(pageable);
       } else {
         page = personService.advancedSearch(searchQuery, columnFilters, pageable);

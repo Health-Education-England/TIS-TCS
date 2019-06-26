@@ -1,11 +1,9 @@
 package com.transformuk.hee.tis.tcs.service.service.impl;
 
-import com.google.common.collect.Lists;
 import com.transformuk.hee.tis.reference.api.dto.RoleDTO;
 import com.transformuk.hee.tis.reference.client.ReferenceService;
 import com.transformuk.hee.tis.tcs.api.dto.*;
 import com.transformuk.hee.tis.tcs.api.enumeration.PersonOwnerRule;
-import com.transformuk.hee.tis.tcs.api.enumeration.ProgrammeMembershipStatus;
 import com.transformuk.hee.tis.tcs.api.enumeration.Status;
 import com.transformuk.hee.tis.tcs.service.api.util.BasicPage;
 import com.transformuk.hee.tis.tcs.service.event.PersonCreatedEvent;
@@ -19,7 +17,6 @@ import com.transformuk.hee.tis.tcs.service.service.helper.SqlQuerySupplier;
 import com.transformuk.hee.tis.tcs.service.service.mapper.PersonBasicDetailsMapper;
 import com.transformuk.hee.tis.tcs.service.service.mapper.PersonLiteMapper;
 import com.transformuk.hee.tis.tcs.service.service.mapper.PersonMapper;
-import org.apache.commons.lang3.time.DateUtils;
 import org.apache.commons.lang3.ObjectUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
@@ -40,7 +37,6 @@ import org.springframework.transaction.annotation.Transactional;
 import org.springframework.util.CollectionUtils;
 import org.springframework.util.StopWatch;
 
-import javax.ws.rs.NotFoundException;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.util.*;
@@ -391,48 +387,12 @@ public class PersonServiceImpl implements PersonService {
           case "status":
             paramSource.addValue("statusList", cf.getValues().stream().map(o -> ((Status) o).name()).collect(Collectors.toList()));
             break;
-          case "programmeMembershipStatus":
-            break;
           default:
             throw new IllegalArgumentException("Not accounted for column filter [" + cf.getName() +
                     "] you need to add an additional case statement or remove it from the request");
         }
       });
     }
-  }
-
-  public List<ColumnFilter> getSafeColumnFilters(final List<ColumnFilter> columnFilters) {
-    HashSet<String> valuesSet = new HashSet<>();
-    valuesSet.add("CURRENT");
-    valuesSet.add("FUTURE");
-    valuesSet.add("PAST");
-    final List<ColumnFilter> safeColumnFilters = new ArrayList<>();
-    boolean foundProgrammeMembershipStatus = false;
-    for (ColumnFilter cf : columnFilters) {
-      switch (cf.getName()) {
-        case "programmeMembershipStatus":
-          foundProgrammeMembershipStatus = true;
-          if (!permissionService.isProgrammeObserver()) { // if the user isn't assigned a programme, set its programmMembershipStatus to CURRENT
-            ColumnFilter safeColumnFilter = new ColumnFilter("programmeMembershipStatus", Lists.newArrayList("CURRENT"));
-            safeColumnFilters.add(safeColumnFilter);
-          } else { // remove illegal and duplicated value
-            List filteredValues = cf.getValues().stream().filter(v -> valuesSet.contains(v)).distinct().collect(Collectors.toList());
-            if (filteredValues.size() == 0) {
-              filteredValues.add("CURRENT");
-            }
-            ColumnFilter safeColumnFilter = new ColumnFilter("programmeMembershipStatus", filteredValues);
-            safeColumnFilters.add(safeColumnFilter);
-          }
-          break;
-        default:
-          safeColumnFilters.add(cf);
-      }
-    }
-    if (foundProgrammeMembershipStatus == false) {
-      ColumnFilter safeColumnFilter = new ColumnFilter("programmeMembershipStatus", Lists.newArrayList("CURRENT"));
-      safeColumnFilters.add(safeColumnFilter);
-    }
-    return safeColumnFilters;
   }
 
 
@@ -472,28 +432,6 @@ public class PersonServiceImpl implements PersonService {
             break;
           case "status":
             whereClause.append(" AND p.status in (:statusList)");
-            break;
-          case "programmeMembershipStatus":
-            List<Object> valueList = cf.getValues();
-            final StringBuilder programmeMembershipStatusWhereClause = new StringBuilder();
-            programmeMembershipStatusWhereClause.append(" AND (");
-
-            HashSet<ProgrammeMembershipStatus> statuses = new HashSet<>();
-            for (int i = 0; i < valueList.size(); i++) {
-              ProgrammeMembershipStatus status = ProgrammeMembershipStatus.valueOf((valueList.get(i)).toString());
-              if (i != 0) {
-                programmeMembershipStatusWhereClause.append(" OR");
-              }
-              if (status.equals(ProgrammeMembershipStatus.CURRENT)) {
-                programmeMembershipStatusWhereClause.append(" (curdate() between pm.programmeStartDate and pm.programmeEndDate)");
-              } else if (status.equals(ProgrammeMembershipStatus.FUTURE)) {
-                programmeMembershipStatusWhereClause.append(" (pm.programmeStartDate > curdate())");
-              } else if (status.equals(ProgrammeMembershipStatus.PAST)) {
-                programmeMembershipStatusWhereClause.append(" (pm.programmeEndDate < curdate() OR pm.programmeStartDate is NULL OR pm.programmeEndDate is NULL)");
-              }
-            }
-            programmeMembershipStatusWhereClause.append(")");
-            whereClause.append(programmeMembershipStatusWhereClause);
             break;
           default:
             throw new IllegalArgumentException("Not accounted for column filter [" + cf.getName() +
@@ -773,27 +711,8 @@ public class PersonServiceImpl implements PersonService {
       if (StringUtils.isNotEmpty(ownerRule)) {
         view.setCurrentOwnerRule(PersonOwnerRule.valueOf(ownerRule));
       }
-      final Date programmeStartDate = rs.getDate("programmeStartDate");
-      final Date programmeEndDate = rs.getDate("programmeEndDate");
-      view.setProgrammeMembershipStatus(getProgrammeMembershipStatus(programmeStartDate, programmeEndDate));
       return view;
     }
-
-    private ProgrammeMembershipStatus getProgrammeMembershipStatus(final Date dateFrom, final Date dateTo) {
-      if (dateFrom == null || dateTo == null) {
-        return ProgrammeMembershipStatus.PAST;
-      }
-      // Truncating the hours,minutes,seconds
-      final long from = DateUtils.truncate(dateFrom, Calendar.DATE).getTime();
-      final long to = DateUtils.truncate(dateTo, Calendar.DATE).getTime();
-      final long now = DateUtils.truncate(new Date(), Calendar.DATE).getTime();
-
-      if (now < from) {
-        return ProgrammeMembershipStatus.FUTURE;
-      } else if (now > to) {
-        return ProgrammeMembershipStatus.PAST;
-      }
-      return ProgrammeMembershipStatus.CURRENT;
-    }
   }
+
 }
