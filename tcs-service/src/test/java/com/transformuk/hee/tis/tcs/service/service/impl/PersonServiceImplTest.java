@@ -1,6 +1,5 @@
 package com.transformuk.hee.tis.tcs.service.service.impl;
 
-import com.google.common.collect.Lists;
 import com.google.common.collect.Sets;
 import com.transformuk.hee.tis.tcs.api.dto.PersonDTO;
 import com.transformuk.hee.tis.tcs.api.dto.PersonV2DTO;
@@ -10,7 +9,6 @@ import com.transformuk.hee.tis.tcs.service.exception.AccessUnauthorisedException
 import com.transformuk.hee.tis.tcs.service.model.*;
 import com.transformuk.hee.tis.tcs.service.repository.*;
 import com.transformuk.hee.tis.tcs.service.service.mapper.PersonMapper;
-import org.hamcrest.CoreMatchers;
 import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Test;
@@ -319,129 +317,4 @@ public class PersonServiceImplTest {
     verify(savedPersonMock).setPersonalDetails(personalDetailsMock);
     verify(savedPersonMock).setRightToWork(rightToWorkMock);
   }
-
-  @Test
-  public void ShouldFilterUnsafeValuesForProgrammeMembrshipStatusColumnFilter() {
-    when(permissionServiceMock.isProgrammeObserver()).thenReturn(true);
-    ColumnFilter columnFilter =
-      new ColumnFilter("programmeMembershipStatus",
-        Lists.newArrayList("CURRENT","UNVALID","CURRENT"));
-
-    List<ColumnFilter> unSafeColumnFilters = new ArrayList<>();
-    unSafeColumnFilters.add(columnFilter);
-
-    List<ColumnFilter> safeColumnFilters = testObj.getSafeColumnFilters(unSafeColumnFilters);
-
-    Assert.assertThat("should return column filter with size 1",
-      safeColumnFilters.size(),
-      CoreMatchers.equalTo(1));
-    Assert.assertThat("should contain column filter of programmeMembershipStatus",
-      safeColumnFilters.get(0).getName(),
-      CoreMatchers.equalTo("programmeMembershipStatus"));
-    Assert.assertThat("should only contain CURRENT in programmeMembershipStatus column filter",
-      safeColumnFilters.get(0).getValues().get(0),
-      CoreMatchers.equalTo("CURRENT"));
-  }
-
-  @Test
-  public void shouldSetDefaultValueWhenProgrammeMembershipStatusColumnFilterIsMissing() {
-    List<ColumnFilter> unSafeColumnFilters = new ArrayList<>();
-    List<ColumnFilter> safeColumnFilters = testObj.getSafeColumnFilters(unSafeColumnFilters);
-
-    Assert.assertThat("should return column filter with size 1",
-      safeColumnFilters.size(),
-      CoreMatchers.equalTo(1));
-    Assert.assertThat("should contain column filter of programmeMembershipStatus",
-      safeColumnFilters.get(0).getName(),
-      CoreMatchers.equalTo("programmeMembershipStatus"));
-    Assert.assertThat("should only contain CURRENT in programmeMembershipStatus column filter",
-      safeColumnFilters.get(0).getValues().get(0),
-      CoreMatchers.equalTo("CURRENT"));
-  }
-
-  @Test
-  public void shouldSetDefaultValueWhenProgrammeMembershipStatusColumnFilterDoesNotContainValidValues() {
-    when(permissionServiceMock.isProgrammeObserver()).thenReturn(true);
-    ColumnFilter columnFilter =
-      new ColumnFilter("programmeMembershipStatus",
-        Lists.newArrayList("UNVALID","UNVALID1"));
-
-    List<ColumnFilter> unSafeColumnFilters = new ArrayList<>();
-    unSafeColumnFilters.add(columnFilter);
-
-    List<ColumnFilter> safeColumnFilters = testObj.getSafeColumnFilters(unSafeColumnFilters);
-
-    Assert.assertThat("should return column filter with size 1",
-      safeColumnFilters.size(),
-      CoreMatchers.equalTo(1));
-    Assert.assertThat("should contain column filter of programmeMembershipStatus",
-      safeColumnFilters.get(0).getName(),
-      CoreMatchers.equalTo("programmeMembershipStatus"));
-    Assert.assertThat("should only contain CURRENT in programmeMembershipStatus column filter",
-      safeColumnFilters.get(0).getValues().get(0),
-      CoreMatchers.equalTo("CURRENT"));
-  }
-
-  @Test
-  public void shouldGetColumnFiltersWhenValid() {
-    when(permissionServiceMock.isProgrammeObserver()).thenReturn(true);
-    ColumnFilter columnFilter =
-      new ColumnFilter("programmeMembershipStatus",
-        Lists.newArrayList("CURRENT","FUTURE","PAST"));
-    ColumnFilter columnFilter1 =
-      new ColumnFilter("status",
-        Lists.newArrayList("CURRENT"));
-
-    List<ColumnFilter> columnFilters = new ArrayList<>();
-    columnFilters.add(columnFilter);
-    columnFilters.add(columnFilter1);
-
-    columnFilters = testObj.getSafeColumnFilters(columnFilters);
-
-    Assert.assertThat("should return column filter with size 2",
-      columnFilters.size(),
-      CoreMatchers.is(2));
-    Assert.assertThat("should contain column filter of programmeMembershipStatus",
-      columnFilters.get(0).getName(),
-      CoreMatchers.is("programmeMembershipStatus"));
-    Assert.assertThat("programmeMembershipStatus column filter should contain 3 values",
-      columnFilters.get(0).getValues().size(),
-      CoreMatchers.is(3));
-    Assert.assertThat("should only contain CURRENT in programmeMembershipStatus column filter",
-      columnFilters.get(0).getValues().get(0),
-      CoreMatchers.is("CURRENT"));
-    Assert.assertThat("should only contain FUTURE in programmeMembershipStatus column filter",
-      columnFilters.get(0).getValues().get(1),
-      CoreMatchers.is("FUTURE"));
-    Assert.assertThat("should only contain PAST in programmeMembershipStatus column filter",
-      columnFilters.get(0).getValues().get(2),
-      CoreMatchers.is("PAST"));
-  }
-
-  @Test
-  public void shouldSetProgrammemMembershipStatusToCurrentWhenUserIsNotProgrammeObserver() {
-    when(permissionServiceMock.isProgrammeObserver()).thenReturn(false);
-    ColumnFilter unsafeColumnFilter =
-      new ColumnFilter("programmeMembershipStatus",
-        Lists.newArrayList("CURRENT","FUTURE","PAST"));
-
-    List<ColumnFilter> columnFilters = new ArrayList<>();
-    columnFilters.add(unsafeColumnFilter);
-
-    columnFilters = testObj.getSafeColumnFilters(columnFilters);
-
-    Assert.assertThat("should return column filter with size 1",
-      columnFilters.size(),
-      CoreMatchers.is(1));
-    Assert.assertThat("should contain column filter of programmeMembershipStatus",
-      columnFilters.get(0).getName(),
-      CoreMatchers.is("programmeMembershipStatus"));
-    Assert.assertThat("should contain only 1 value in programmeMembershipStatus column filter",
-      columnFilters.get(0).getValues().size(),
-      CoreMatchers.is(1));
-    Assert.assertThat("should only contain CURRENT in programmeMembershipStatus column filter",
-      columnFilters.get(0).getValues().get(0),
-      CoreMatchers.is("CURRENT"));
-  }
-
 }
