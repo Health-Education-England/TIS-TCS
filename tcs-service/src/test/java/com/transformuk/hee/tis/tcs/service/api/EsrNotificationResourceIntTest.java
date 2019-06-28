@@ -23,7 +23,8 @@ import org.springframework.transaction.annotation.Transactional;
 import javax.persistence.EntityManager;
 import java.math.BigDecimal;
 import java.time.LocalDate;
-
+import static org.hamcrest.CoreMatchers.everyItem;
+import static org.hamcrest.CoreMatchers.is;
 import static org.hamcrest.Matchers.hasSize;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.content;
@@ -311,6 +312,9 @@ public class EsrNotificationResourceIntTest {
 
     placement1.setPostId(post.getId());
     placement2.setPostId(post.getId());
+    placement3.setPostId(post.getId());
+    placement4.setPostId(post.getId());
+    placement5.setPostId(post.getId());
 
     entityManager.persist(placement1);
     entityManager.persist(placement2);
@@ -324,28 +328,21 @@ public class EsrNotificationResourceIntTest {
         .andExpect(status().isOk())
         .andExpect(content().contentType(MediaType.APPLICATION_JSON_UTF8_VALUE))
         .andExpect(jsonPath("$.*").isArray())
-        .andExpect(jsonPath("$", hasSize(3)))
-        .andExpect(jsonPath("$.[*].notificationTitleCode").value("1"))
-        .andExpect(jsonPath("$.[*].deaneryPostNumber").value(post.getNationalPostNumber()))
-        .andExpect(jsonPath("$.[*].managingDeaneryBodyCode").value("EOE"))
-        .andExpect(jsonPath("$.[0].currentTraineeFirstName").value(trainee2.getContactDetails().getForenames()))
-        .andExpect(jsonPath("$.[0].currentTraineeLastName").value(trainee2.getContactDetails().getSurname()))
-        .andExpect(jsonPath("$.[0].currentTraineeGmcNumber").value(trainee2GmcDetails.getGmcNumber()))
+        .andExpect(jsonPath("$", hasSize(2)))
+        // For given data, these should be the same across notifications
+        .andExpect(jsonPath("$.[*].notificationTitleCode").value(everyItem(is("1"))))
+        .andExpect(jsonPath("$.[*].deaneryPostNumber").value(everyItem(is(post.getNationalPostNumber()))))
+        .andExpect(jsonPath("$.[*].managingDeaneryBodyCode").value(everyItem(is("EOE"))))
+        .andExpect(jsonPath("$.[*].currentTraineeFirstName").value(everyItem(is(trainee2.getContactDetails().getLegalForenames()))))
+        .andExpect(jsonPath("$.[*].currentTraineeLastName").value(everyItem(is(trainee2.getContactDetails().getLegalSurname()))))
+        .andExpect(jsonPath("$.[*].currentTraineeGmcNumber").value(everyItem(is(trainee2GmcDetails.getGmcNumber()))))
+        // The 2 placements starting on the same day
         .andExpect(jsonPath("$.[0].nextAppointmentTraineeFirstName").value(trainee1.getContactDetails().getLegalForenames()))
         .andExpect(jsonPath("$.[0].nextAppointmentTraineeLastName").value(trainee1.getContactDetails().getLegalSurname()))
         .andExpect(jsonPath("$.[0].nextAppointmentTraineeGmcNumber").value(trainee1GmcDetails.getGmcNumber()))
-        .andExpect(jsonPath("$.[1].currentTraineeFirstName").value(trainee2.getContactDetails().getForenames()))
-        .andExpect(jsonPath("$.[1].currentTraineeLastName").value(trainee2.getContactDetails().getSurname()))
-        .andExpect(jsonPath("$.[1].currentTraineeGmcNumber").value(trainee2GmcDetails.getGmcNumber()))
         .andExpect(jsonPath("$.[1].nextAppointmentTraineeFirstName").value(trainee3.getContactDetails().getLegalForenames()))
         .andExpect(jsonPath("$.[1].nextAppointmentTraineeLastName").value(trainee3.getContactDetails().getLegalSurname()))
-        .andExpect(jsonPath("$.[1].nextAppointmentTraineeGmcNumber").value(trainee3GmcDetails.getGmcNumber()))
-/*        .andExpect(jsonPath("$.[2].currentTraineeFirstName").value(trainee?.getContactDetails().getForenames()))
-        .andExpect(jsonPath("$.[2].currentTraineeLastName").value(trainee?.getContactDetails().getSurname()))
-        .andExpect(jsonPath("$.[2].currentTraineeGmcNumber").value(trainee?GmcDetails.getGmcNumber()))
-        .andExpect(jsonPath("$.[2].nextAppointmentTraineeFirstName").value(trainee3.getContactDetails().getLegalForenames()))
-        .andExpect(jsonPath("$.[2].nextAppointmentTraineeLastName").value(trainee3.getContactDetails().getLegalSurname()))
-        .andExpect(jsonPath("$.[2].nextAppointmentTraineeGmcNumber").value(trainee3GmcDetails.getGmcNumber()))*/;
+        .andExpect(jsonPath("$.[1].nextAppointmentTraineeGmcNumber").value(trainee3GmcDetails.getGmcNumber()));
   }
 
   @Test

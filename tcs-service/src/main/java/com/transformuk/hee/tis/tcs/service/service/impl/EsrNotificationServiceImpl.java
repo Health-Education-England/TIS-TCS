@@ -466,15 +466,19 @@ public class EsrNotificationServiceImpl implements EsrNotificationService {
       List<Placement> groupedPlacements = entry.getValue();
       groupedPlacements.sort(Comparator.comparing(Placement::getDateFrom).reversed());
 
-      Placement nextPlacement = groupedPlacements.get(0);
-      Placement currentPlacement = null;
-      if (groupedPlacements.size() > 1) {
-        // Check if all current placement needs to be sent
-        currentPlacement = groupedPlacements.get(1);
-      }
-      esrNotifications.add(buildNotification(nextPlacement, currentPlacement, siteIdsToKnownAs));
+      LocalDate dateOfNextPlacements = groupedPlacements.get(0).getDateFrom();
+
+      //TODO Confirm and change filter to compare currentPlacement "To" date with nextPlacement "From" date
+      Optional<Placement> optionalPlacement = groupedPlacements.stream().filter(p -> dateOfNextPlacements.isAfter(p.getDateFrom())).findFirst();
+      Placement currentPlacement = optionalPlacement.isPresent() ? optionalPlacement.get() : null;
+
+      // Create and add Notifications for placements starting on dateOfNextPlacements
+      groupedPlacements.stream()
+        .filter(p -> dateOfNextPlacements.isEqual(p.getDateFrom()))
+        .forEach(p -> esrNotifications.add(buildNotification(p, currentPlacement, siteIdsToKnownAs)));
       LOG.info("FINISHED: Mapping placements to ESR Notification record for post {} ({} of {})",
-        entry.getKey(), ++processedPosts, totalPosts);
+          entry.getKey(), ++processedPosts, totalPosts);
+
     }
     LOG.info("FINISHED: Mapping placements to ESR Notification records");
     return esrNotifications;
