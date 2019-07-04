@@ -106,7 +106,7 @@ public class ProgrammeResource {
   public ResponseEntity<ProgrammeDTO> updateProgramme(@RequestBody @Validated(Update.class) ProgrammeDTO programmeDTO)
       throws URISyntaxException, MethodArgumentNotValidException {
     log.debug("REST request to update Programme : {}", programmeDTO);
-    programmeValidator.validate(programmeDTO, getProfileFromContext());
+    //programmeValidator.validate(programmeDTO, getProfileFromContext());
     try {
       if (programmeDTO.getId() == null) {
         return createProgramme(programmeDTO);
