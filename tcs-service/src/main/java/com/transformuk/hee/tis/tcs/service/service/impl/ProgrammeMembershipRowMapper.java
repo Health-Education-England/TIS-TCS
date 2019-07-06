@@ -14,6 +14,7 @@ public class ProgrammeMembershipRowMapper implements RowMapper<ProgrammeMembersh
     final ProgrammeMembershipDto dto = new ProgrammeMembershipDto();
     dto.setId(rs.getLong("id"));
     dto.setPersonId(rs.getLong("personId"));
+    dto.setProgrammeId(rs.getLong("programmeId"));
     dto.setProgrammeName(rs.getString("programmeName"));
     dto.setProgrammeNumber(rs.getString("programmeNumber"));
     dto.setTrainingNumber(rs.getString("trainingNumber"));

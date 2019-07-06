@@ -14,6 +14,7 @@ import com.transformuk.hee.tis.tcs.service.job.person.ProgrammeMembershipDto;
 import com.transformuk.hee.tis.tcs.service.model.ColumnFilter;
 import com.transformuk.hee.tis.tcs.service.repository.PersonElasticSearchRepository;
 import com.transformuk.hee.tis.tcs.service.service.helper.SqlQuerySupplier;
+import com.transformuk.hee.tis.tcs.service.service.impl.PermissionService;
 import com.transformuk.hee.tis.tcs.service.service.impl.PersonTrustRowMapper;
 import com.transformuk.hee.tis.tcs.service.service.impl.PersonViewRowMapper;
 import com.transformuk.hee.tis.tcs.service.service.impl.ProgrammeMembershipRowMapper;
@@ -57,6 +58,8 @@ public class PersonElasticSearchService {
   private Set<RoleBasedFilterStrategy> roleBasedFilterStrategies;
   @Autowired
   private PersonViewDecorator personViewDecorator;
+  @Autowired
+  private PermissionService permissionService;
 
   /**
    * Find a paginated set of people on a specified programme, if a search query is provided, do fuzzy search
@@ -102,22 +105,40 @@ public class PersonElasticSearchService {
           BoolQueryBuilder shouldBetweenSameColumnFilter = new BoolQueryBuilder();
 
           if (StringUtils.equals(columnFilter.getName(), "programmeMembershipStatus")) {
-            ProgrammeMembershipStatus status = ProgrammeMembershipStatus.valueOf(columnFilter.getValues().get(0).toString());
-            programmeMembershipStatusFilter = status;
-            if (status.equals(ProgrammeMembershipStatus.CURRENT)) {
-              shouldBetweenSameColumnFilter.should(nestedQuery("programmeMemberships", QueryBuilders.matchQuery("programmeMemberships.programmeMembershipStatus", "CURRENT"), ScoreMode.None));
+            if (permissionService.isProgrammeObserver()) {
+              Set<Long> programmeIds = permissionService.getUsersProgrammeIds();
+              for (Long programmeId : programmeIds) {
+                BoolQueryBuilder shouldQuery = new BoolQueryBuilder();
+                MatchQueryBuilder statusQueryBuilder = null;
 
-            } else if (status.equals(ProgrammeMembershipStatus.PAST)) {
-              shouldBetweenSameColumnFilter.should(nestedQuery("programmeMemberships", QueryBuilders.matchQuery("programmeMemberships.programmeMembershipStatus", "PAST"), ScoreMode.None));
+                ProgrammeMembershipStatus status = ProgrammeMembershipStatus.valueOf(columnFilter.getValues().get(0).toString());
+                programmeMembershipStatusFilter = status;
+                if (status.equals(ProgrammeMembershipStatus.CURRENT)) {
+                  statusQueryBuilder = QueryBuilders.matchQuery("programmeMemberships.programmeMembershipStatus", "CURRENT");
+                } else if (status.equals(ProgrammeMembershipStatus.PAST)) {
+                  statusQueryBuilder = QueryBuilders.matchQuery("programmeMemberships.programmeMembershipStatus", "PAST");
+                } else if (status.equals(ProgrammeMembershipStatus.FUTURE)) {
+                  statusQueryBuilder = QueryBuilders.matchQuery("programmeMemberships.programmeMembershipStatus", "FUTURE");
+                }
 
-            } else if (status.equals(ProgrammeMembershipStatus.FUTURE)) {
-              shouldBetweenSameColumnFilter.should(nestedQuery("programmeMemberships", QueryBuilders.matchQuery("programmeMemberships.programmeMembershipStatus", "FUTURE"), ScoreMode.None));
+                shouldQuery.should(new MatchQueryBuilder("programmeMemberships.programmeId", programmeId))
+                  .should(statusQueryBuilder).minimumShouldMatch(2);
+                mustBetweenDifferentColumnFilters.must(nestedQuery("programmeMemberships", shouldQuery, ScoreMode.None));
+              }
             }
-            mustBetweenDifferentColumnFilters.must(shouldBetweenSameColumnFilter);
-
           } else {
+
             for (Object value : columnFilter.getValues()) {
               if (appliedFilters.contains(columnFilter.getName())) { // skip if we've already applied this type of filter via role based filters
+                continue;
+              }
+              if (StringUtils.equals(columnFilter.getName(), "programmeName")) {
+                BoolQueryBuilder shouldQuery = new BoolQueryBuilder();
+                shouldQuery.should(new MatchQueryBuilder("programmeMemberships.programmeName", value.toString()).operator(Operator.AND))
+                  .should(new MatchQueryBuilder("programmeMemberships.programmeMembershipStatus", "CURRENT")).minimumShouldMatch(2);
+                NestedQueryBuilder nested = nestedQuery("programmeMemberships", shouldQuery, ScoreMode.None);
+                shouldBetweenSameColumnFilter.should(nested);
+                shouldBetweenSameColumnFilter.minimumShouldMatch(1);
                 continue;
               }
               //because the role column is a comma separated list of roles, we need to do a wildcard 'like' search
