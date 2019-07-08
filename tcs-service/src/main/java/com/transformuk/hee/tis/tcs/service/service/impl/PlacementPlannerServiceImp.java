@@ -123,10 +123,12 @@ public class PlacementPlannerServiceImp {
             postsToPlacement.put(post, placements);
           }
 
-          // if placements are within the given timeline, include them in the post
-          if ((placement.getDateFrom().isBefore(toDate) || placement.getDateFrom().isEqual(toDate)) &&
-              (placement.getDateTo().isAfter(fromDate)) || placement.getDateTo().isEqual(fromDate)) {
-            placements.add(placement);
+          // if placements are within the given timeline and have placement start and end dates, include them in the post
+          if (placement.getDateFrom() != null || placement.getDateTo() != null) {
+            if ((placement.getDateFrom().isBefore(toDate) || placement.getDateFrom().isEqual(toDate)) &&
+                (placement.getDateTo().isAfter(fromDate)) || placement.getDateTo().isEqual(fromDate)) {
+              placements.add(placement);
+            }
           }
         } else {
           LOGGER.info("Site missing");
