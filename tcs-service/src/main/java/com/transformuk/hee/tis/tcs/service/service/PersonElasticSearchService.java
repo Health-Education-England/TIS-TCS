@@ -97,8 +97,9 @@ public class PersonElasticSearchService {
     try {
       // iterate over the column filters, if they have multiple values per filter, place a should between then
       // for each column filter set, place a must between them
-      ProgrammeMembershipStatus programmeMembershipStatusFilter = ProgrammeMembershipStatus.CURRENT;
       BoolQueryBuilder mustBetweenDifferentColumnFilters = new BoolQueryBuilder();
+
+      ProgrammeMembershipStatus programmeMembershipStatusFilter = ProgrammeMembershipStatus.CURRENT;
       Set<String> appliedFilters = applyRoleBasedFilters(mustBetweenDifferentColumnFilters);
       if (CollectionUtils.isNotEmpty(columnFilters)) {
         for (ColumnFilter columnFilter : columnFilters) {

@@ -5,7 +5,7 @@ BEGIN
   DECLARE currentDate DATE;
 
   IF (programmeStartDate IS NULL OR programmeEndDate IS NULL) THEN
-    RETURN "UNASSIGNED";
+    RETURN "PAST";
   END IF;
 
   SET currentDate = CURDATE();
