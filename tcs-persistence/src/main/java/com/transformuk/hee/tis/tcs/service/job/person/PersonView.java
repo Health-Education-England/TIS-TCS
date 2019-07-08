@@ -1,5 +1,6 @@
 package com.transformuk.hee.tis.tcs.service.job.person;
 
+import com.transformuk.hee.tis.tcs.api.dto.ProgrammeMembershipDTO;
 import com.transformuk.hee.tis.tcs.api.enumeration.Status;
 import org.springframework.data.annotation.Id;
 import org.springframework.data.elasticsearch.annotations.Document;
@@ -37,15 +38,6 @@ public class PersonView implements Serializable {
   @Field(type = FieldType.Keyword)
   private String publicHealthNumber;
 
-  private Long programmeId;
-
-  @Field(type = FieldType.Keyword)
-  private String programmeName;
-
-  private String programmeNumber;
-
-  private String trainingNumber;
-
   private Long gradeId;
 
   private String gradeAbbreviation;
@@ -77,6 +69,17 @@ public class PersonView implements Serializable {
 
   @Field(type = FieldType.Nested)
   private Set<PersonTrustDto> trusts;
+
+  @Field(type = FieldType.Nested)
+  private Set<ProgrammeMembershipDto> programmeMemberships;
+
+  public Set<ProgrammeMembershipDto> getProgrammeMemberships() {
+    return programmeMemberships;
+  }
+
+  public void setProgrammeMemberships(Set<ProgrammeMembershipDto> programmeMemberships) {
+    this.programmeMemberships = programmeMemberships;
+  }
 
   public String getId() {
     return id;
@@ -148,38 +151,6 @@ public class PersonView implements Serializable {
 
   public void setPublicHealthNumber(String publicHealthNumber) {
     this.publicHealthNumber = publicHealthNumber;
-  }
-
-  public Long getProgrammeId() {
-    return programmeId;
-  }
-
-  public void setProgrammeId(Long programmeId) {
-    this.programmeId = programmeId;
-  }
-
-  public String getProgrammeName() {
-    return programmeName;
-  }
-
-  public void setProgrammeName(String programmeName) {
-    this.programmeName = programmeName;
-  }
-
-  public String getProgrammeNumber() {
-    return programmeNumber;
-  }
-
-  public void setProgrammeNumber(String programmeNumber) {
-    this.programmeNumber = programmeNumber;
-  }
-
-  public String getTrainingNumber() {
-    return trainingNumber;
-  }
-
-  public void setTrainingNumber(String trainingNumber) {
-    this.trainingNumber = trainingNumber;
   }
 
   public String getGradeAbbreviation() {

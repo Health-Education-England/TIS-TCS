@@ -88,9 +88,10 @@ public class PersonElasticSearchSyncJob {
   }
 
   private List<PersonView> collectData(int page, int pageSize) {
-    String query = sqlQuerySupplier.getQuery(SqlQuerySupplier.PERSON_VIEW);
+    String query = sqlQuerySupplier.getQuery(SqlQuerySupplier.PERSON_ES_VIEW);
     String limitClause = "limit " + pageSize + " offset " + page * pageSize;
     query = query.replace("TRUST_JOIN", "")
+        .replace("PROGRAMME_MEMBERSHIP_JOIN", "")
         .replace("WHERECLAUSE", "")
         .replace("ORDERBYCLAUSE", "ORDER BY id DESC")
         .replace("LIMITCLAUSE", limitClause);
@@ -98,6 +99,8 @@ public class PersonElasticSearchSyncJob {
     MapSqlParameterSource paramSource = new MapSqlParameterSource();
     List<PersonView> queryResult = namedParameterJdbcTemplate.query(query, paramSource, new PersonViewRowMapper());
     personElasticSearchService.updateDocumentWithTrustData(queryResult);
+    // this is to query from programmeMembership, Programme and TrainingNumber
+    personElasticSearchService.updateDocumentWithProgrammeMembershipData(queryResult);
     return queryResult;
   }
 
