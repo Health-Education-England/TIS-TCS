@@ -124,8 +124,9 @@ public class PersonElasticSearchService {
 
                 shouldQuery.should(new MatchQueryBuilder("programmeMemberships.programmeId", programmeId))
                   .should(statusQueryBuilder).minimumShouldMatch(2);
-                mustBetweenDifferentColumnFilters.must(nestedQuery("programmeMemberships", shouldQuery, ScoreMode.None));
+                shouldBetweenSameColumnFilter.should(nestedQuery("programmeMemberships", shouldQuery, ScoreMode.None)).minimumShouldMatch(1);
               }
+              mustBetweenDifferentColumnFilters.must(shouldBetweenSameColumnFilter);
             }
           } else {
 
