@@ -73,7 +73,7 @@ public class PersonElasticSearchService {
   public Page<PersonViewDTO> findPeopleOnProgramme(Long programmeId, String searchQuery, Pageable pageable) {
     BoolQueryBuilder query = new BoolQueryBuilder();
 
-    query = query.must(new MatchQueryBuilder("programmeId", programmeId));
+    query = query.must(new NestedQueryBuilder("programmeMemberships", new MatchQueryBuilder("programmeMemberships.programmeId", programmeId), ScoreMode.None));
     query = query.must(new MatchQueryBuilder("status", CURRENT_STATUS));
 
     if (StringUtils.isNotEmpty(searchQuery)) {
