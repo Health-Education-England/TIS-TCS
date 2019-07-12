@@ -472,9 +472,11 @@ public class EsrNotificationServiceImpl implements EsrNotificationService {
       Placement earlierPlacement = null;
       while (earlierPlacement == null && !groupedPlacements.isEmpty()) {
         Placement p = groupedPlacements.remove(0);
-        //TODO Confirm and change filter to compare currentPlacement "To" date with nextPlacement "From" date
-        if (dateOfNextPlacements.isEqual(p.getDateFrom())) newPlacements.add(p);
-        else earlierPlacement = p;
+        if (dateOfNextPlacements.isEqual(p.getDateFrom())) {
+          newPlacements.add(p);
+        } else {
+          earlierPlacement = p;
+        }
       }
 
       // Create and add Notifications for placements starting on dateOfNextPlacements
