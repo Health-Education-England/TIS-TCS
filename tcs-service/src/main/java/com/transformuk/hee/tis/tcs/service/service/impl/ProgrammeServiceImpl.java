@@ -41,12 +41,14 @@ public class ProgrammeServiceImpl implements ProgrammeService {
   private final ProgrammeRepository programmeRepository;
   private final ProgrammeMapper programmeMapper;
   private final ApplicationEventPublisher applicationEventPublisher;
+  private final PermissionService permissionService;
 
   public ProgrammeServiceImpl(ProgrammeRepository programmeRepository, ProgrammeMapper programmeMapper,
-                              ApplicationEventPublisher applicationEventPublisher) {
+                              ApplicationEventPublisher applicationEventPublisher, PermissionService permissionService) {
     this.programmeRepository = programmeRepository;
     this.programmeMapper = programmeMapper;
     this.applicationEventPublisher = applicationEventPublisher;
+    this.permissionService = permissionService;
   }
 
   /**
@@ -108,8 +110,13 @@ public class ProgrammeServiceImpl implements ProgrammeService {
   @Transactional(readOnly = true)
   public Page<ProgrammeDTO> findAll(Pageable pageable) {
     log.debug("Request to get all Programmes");
-
-    Page<Programme> result = programmeRepository.findAll(pageable);
+    Page<Programme> result = null;
+    if (permissionService.isProgrammeObserver()) {
+      Specification spec = in("id", new ArrayList<>(permissionService.getUsersProgrammeIds()));
+      result = programmeRepository.findAll(Specification.where(spec), pageable);
+    } else {
+      result = programmeRepository.findAll(pageable);
+    }
     return result.map(programmeMapper::programmeToProgrammeDTO);
   }
 
@@ -139,6 +146,9 @@ public class ProgrammeServiceImpl implements ProgrammeService {
           or(containsLike("programmeNumber", searchString)));
     }
 
+    if (permissionService.isProgrammeObserver()) {
+      specs.add(in("id", new ArrayList<>(permissionService.getUsersProgrammeIds())));
+    }
 
     //add the column filters criteria
     if (columnFilters != null && !columnFilters.isEmpty()) {
