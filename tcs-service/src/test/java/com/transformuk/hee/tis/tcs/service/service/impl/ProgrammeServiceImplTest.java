@@ -5,14 +5,23 @@ import com.transformuk.hee.tis.tcs.service.model.Programme;
 import com.transformuk.hee.tis.tcs.service.repository.ProgrammeRepository;
 import com.transformuk.hee.tis.tcs.service.service.mapper.ProgrammeMapper;
 import org.assertj.core.util.Lists;
+import org.hamcrest.CoreMatchers;
 import org.junit.Assert;
 import org.junit.Test;
 import org.junit.runner.RunWith;
+import org.mockito.ArgumentCaptor;
+import org.mockito.Captor;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.runners.MockitoJUnitRunner;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageImpl;
+import org.springframework.data.domain.Pageable;
+import org.springframework.data.jpa.domain.Specification;
 
+import java.util.HashSet;
 import java.util.List;
+import java.util.Set;
 
 import static org.mockito.Matchers.any;
 import static org.mockito.Matchers.anyList;
@@ -32,6 +41,15 @@ public class ProgrammeServiceImplTest {
 
   @Mock
   private ProgrammeMapper programmeMapperMock;
+
+  @Mock
+  private PermissionService permissionServiceMock;
+
+  @Captor
+  private ArgumentCaptor<Specification> specificationCaptor;
+
+  @Captor
+  private ArgumentCaptor<Pageable> pageableArgumentCaptor;
 
 
   @Test(expected = NullPointerException.class)
@@ -95,4 +113,48 @@ public class ProgrammeServiceImplTest {
     Assert.assertEquals(convertedProgrammes, result);
   }
 
+  @Test()
+  public void findAllShouldDealWithProgrammeObserverRole() {
+    Programme programme = new Programme();
+    programme.setId(425L);
+    programme.setProgrammeName("BBBBB");
+
+    Page<Programme> foundPage = new PageImpl<>(Lists.newArrayList(programme));
+
+    ProgrammeDTO programmeDTO = new ProgrammeDTO();
+    programmeDTO.setId(425L);
+    programmeDTO.setProgrammeName("BBBBB");
+
+    when(permissionServiceMock.isProgrammeObserver()).thenReturn(true);
+    Set<Long> programmeIdSet = new HashSet<>();
+    programmeIdSet.add(425L);
+    when(permissionServiceMock.getUsersProgrammeIds()).thenReturn(programmeIdSet);
+    when(programmeRepositoryMock.findAll(specificationCaptor.capture(), pageableArgumentCaptor.capture())).thenReturn(foundPage);
+    when(programmeMapperMock.programmeToProgrammeDTO(any())).thenReturn(programmeDTO);
+    Page<ProgrammeDTO> result = testObj.findAll(null);
+
+    Assert.assertThat("should return programme dto", result.getContent().get(0), CoreMatchers.is(programmeDTO));
+  }
+
+  @Test()
+  public void advancedSearchShouldDealWithProgrammeObserverRole() {
+    Programme programme = new Programme();
+    programme.setId(425L);
+    programme.setProgrammeName("BBBBB");
+
+    Page<Programme> foundPage = new PageImpl<>(Lists.newArrayList(programme));
+
+    ProgrammeDTO programmeDTO = new ProgrammeDTO();
+    programmeDTO.setId(425L);
+    programmeDTO.setProgrammeName("BBBBB");
+
+    when(permissionServiceMock.isProgrammeObserver()).thenReturn(true);
+    Set<Long> programmeIdSet = new HashSet<>();
+    programmeIdSet.add(425L);
+    when(permissionServiceMock.getUsersProgrammeIds()).thenReturn(programmeIdSet);
+    when(programmeRepositoryMock.findAll(specificationCaptor.capture(), pageableArgumentCaptor.capture())).thenReturn(foundPage);
+    when(programmeMapperMock.programmeToProgrammeDTO(any())).thenReturn(programmeDTO);
+    Page<ProgrammeDTO> result = testObj.advancedSearch("", null,null);
+    Assert.assertThat("should return programme dto", result.getContent().get(0), CoreMatchers.is(programmeDTO));
+  }
 }
