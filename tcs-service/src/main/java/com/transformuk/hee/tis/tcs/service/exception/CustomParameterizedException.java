@@ -1,8 +1,7 @@
 package com.transformuk.hee.tis.tcs.service.exception;
 
 /**
- * Custom, parameterized exception, which can be translated on the client side.
- * For example:
+ * Custom, parameterized exception, which can be translated on the client side. For example:
  * <p>
  * <pre>
  * throw new CustomParameterizedException(&quot;myCustomError&quot;, &quot;hello&quot;, &quot;world&quot;);

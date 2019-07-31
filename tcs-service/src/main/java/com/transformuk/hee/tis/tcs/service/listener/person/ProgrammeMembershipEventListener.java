@@ -20,20 +20,26 @@ public class ProgrammeMembershipEventListener {
 
   @EventListener
   public void handleProgrammeMembershipSavedEvent(ProgrammeMembershipSavedEvent event) {
-    LOG.info("Received ProgrammeMembership saved event for ProgrammeMembership id: [{}]", event.getProgrammeMembershipDTO().getId());
-    personElasticSearchService.updatePersonDocument(event.getProgrammeMembershipDTO().getPerson().getId());
+    LOG.info("Received ProgrammeMembership saved event for ProgrammeMembership id: [{}]",
+        event.getProgrammeMembershipDTO().getId());
+    personElasticSearchService
+        .updatePersonDocument(event.getProgrammeMembershipDTO().getPerson().getId());
   }
 
   @EventListener
   public void handleProgrammeMembershipCreatedEvent(ProgrammeMembershipCreatedEvent event) {
-    LOG.info("Received ProgrammeMembership created event for ProgrammeMembership id: [{}]", event.getProgrammeMembershipDTO().getId());
-    personElasticSearchService.updatePersonDocument(event.getProgrammeMembershipDTO().getPerson().getId());
+    LOG.info("Received ProgrammeMembership created event for ProgrammeMembership id: [{}]",
+        event.getProgrammeMembershipDTO().getId());
+    personElasticSearchService
+        .updatePersonDocument(event.getProgrammeMembershipDTO().getPerson().getId());
 
   }
 
   @EventListener
   public void handleProgrammeMembershipDeletedEvent(ProgrammeMembershipDeletedEvent event) {
-    LOG.info("Received ProgrammeMembership deleted event for ProgrammeMembership id: [{}]", event.getProgrammeMembershipDTO().getId());
-    personElasticSearchService.deletePersonDocument(event.getProgrammeMembershipDTO().getPerson().getId());
+    LOG.info("Received ProgrammeMembership deleted event for ProgrammeMembership id: [{}]",
+        event.getProgrammeMembershipDTO().getId());
+    personElasticSearchService
+        .deletePersonDocument(event.getProgrammeMembershipDTO().getPerson().getId());
   }
 }

@@ -15,9 +15,9 @@ public class PersonPlacementTrainingBodyTrustJobTest {
   private PersonPlacementTrainingBodyTrustJob testObj;
 
   /**
-   * This test was introduced to prove that the job was opening up entity manager
-   * connections can not closing them properly.
-   *
+   * This test was introduced to prove that the job was opening up entity manager connections can
+   * not closing them properly.
+   * <p>
    * This test should just run through if everything is fine, an exception otherwise
    */
   @Test

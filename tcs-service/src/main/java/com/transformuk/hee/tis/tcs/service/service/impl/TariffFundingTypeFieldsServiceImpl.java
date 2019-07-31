@@ -5,14 +5,13 @@ import com.transformuk.hee.tis.tcs.service.model.TariffFundingTypeFields;
 import com.transformuk.hee.tis.tcs.service.repository.TariffFundingTypeFieldsRepository;
 import com.transformuk.hee.tis.tcs.service.service.TariffFundingTypeFieldsService;
 import com.transformuk.hee.tis.tcs.service.service.mapper.TariffFundingTypeFieldsMapper;
+import java.util.List;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
-
-import java.util.List;
 
 /**
  * Service Implementation for managing TariffFundingTypeFields.
@@ -27,7 +26,9 @@ public class TariffFundingTypeFieldsServiceImpl implements TariffFundingTypeFiel
 
   private final TariffFundingTypeFieldsMapper tariffFundingTypeFieldsMapper;
 
-  public TariffFundingTypeFieldsServiceImpl(TariffFundingTypeFieldsRepository tariffFundingTypeFieldsRepository, TariffFundingTypeFieldsMapper tariffFundingTypeFieldsMapper) {
+  public TariffFundingTypeFieldsServiceImpl(
+      TariffFundingTypeFieldsRepository tariffFundingTypeFieldsRepository,
+      TariffFundingTypeFieldsMapper tariffFundingTypeFieldsMapper) {
     this.tariffFundingTypeFieldsRepository = tariffFundingTypeFieldsRepository;
     this.tariffFundingTypeFieldsMapper = tariffFundingTypeFieldsMapper;
   }
@@ -41,9 +42,11 @@ public class TariffFundingTypeFieldsServiceImpl implements TariffFundingTypeFiel
   @Override
   public TariffFundingTypeFieldsDTO save(TariffFundingTypeFieldsDTO tariffFundingTypeFieldsDTO) {
     log.debug("Request to save TariffFundingTypeFields : {}", tariffFundingTypeFieldsDTO);
-    TariffFundingTypeFields tariffFundingTypeFields = tariffFundingTypeFieldsMapper.tariffFundingTypeFieldsDTOToTariffFundingTypeFields(tariffFundingTypeFieldsDTO);
+    TariffFundingTypeFields tariffFundingTypeFields = tariffFundingTypeFieldsMapper
+        .tariffFundingTypeFieldsDTOToTariffFundingTypeFields(tariffFundingTypeFieldsDTO);
     tariffFundingTypeFields = tariffFundingTypeFieldsRepository.save(tariffFundingTypeFields);
-    TariffFundingTypeFieldsDTO result = tariffFundingTypeFieldsMapper.tariffFundingTypeFieldsToTariffFundingTypeFieldsDTO(tariffFundingTypeFields);
+    TariffFundingTypeFieldsDTO result = tariffFundingTypeFieldsMapper
+        .tariffFundingTypeFieldsToTariffFundingTypeFieldsDTO(tariffFundingTypeFields);
     return result;
   }
 
@@ -54,11 +57,14 @@ public class TariffFundingTypeFieldsServiceImpl implements TariffFundingTypeFiel
    * @return the list of persisted entities
    */
   @Override
-  public List<TariffFundingTypeFieldsDTO> save(List<TariffFundingTypeFieldsDTO> tariffFundingTypeFieldsDTO) {
+  public List<TariffFundingTypeFieldsDTO> save(
+      List<TariffFundingTypeFieldsDTO> tariffFundingTypeFieldsDTO) {
     log.debug("Request to save TariffFundingTypeFields : {}", tariffFundingTypeFieldsDTO);
-    List<TariffFundingTypeFields> tariffFundingTypeFields = tariffFundingTypeFieldsMapper.tariffFundingTypeFieldsDTOsToTariffFundingTypeFields(tariffFundingTypeFieldsDTO);
+    List<TariffFundingTypeFields> tariffFundingTypeFields = tariffFundingTypeFieldsMapper
+        .tariffFundingTypeFieldsDTOsToTariffFundingTypeFields(tariffFundingTypeFieldsDTO);
     tariffFundingTypeFields = tariffFundingTypeFieldsRepository.saveAll(tariffFundingTypeFields);
-    List<TariffFundingTypeFieldsDTO> result = tariffFundingTypeFieldsMapper.tariffFundingTypeFieldsToTariffFundingTypeFieldsDTOs(tariffFundingTypeFields);
+    List<TariffFundingTypeFieldsDTO> result = tariffFundingTypeFieldsMapper
+        .tariffFundingTypeFieldsToTariffFundingTypeFieldsDTOs(tariffFundingTypeFields);
     return result;
   }
 
@@ -73,7 +79,8 @@ public class TariffFundingTypeFieldsServiceImpl implements TariffFundingTypeFiel
   public Page<TariffFundingTypeFieldsDTO> findAll(Pageable pageable) {
     log.debug("Request to get all TariffFundingTypeFields");
     Page<TariffFundingTypeFields> page = tariffFundingTypeFieldsRepository.findAll(pageable);
-    return page.map(tftf -> tariffFundingTypeFieldsMapper.tariffFundingTypeFieldsToTariffFundingTypeFieldsDTO(tftf));
+    return page.map(tftf -> tariffFundingTypeFieldsMapper
+        .tariffFundingTypeFieldsToTariffFundingTypeFieldsDTO(tftf));
   }
 
   /**
@@ -86,8 +93,10 @@ public class TariffFundingTypeFieldsServiceImpl implements TariffFundingTypeFiel
   @Transactional(readOnly = true)
   public TariffFundingTypeFieldsDTO findOne(Long id) {
     log.debug("Request to get TariffFundingTypeFields : {}", id);
-    TariffFundingTypeFields tariffFundingTypeFields = tariffFundingTypeFieldsRepository.findById(id).orElse(null);
-    TariffFundingTypeFieldsDTO tariffFundingTypeFieldsDTO = tariffFundingTypeFieldsMapper.tariffFundingTypeFieldsToTariffFundingTypeFieldsDTO(tariffFundingTypeFields);
+    TariffFundingTypeFields tariffFundingTypeFields = tariffFundingTypeFieldsRepository.findById(id)
+        .orElse(null);
+    TariffFundingTypeFieldsDTO tariffFundingTypeFieldsDTO = tariffFundingTypeFieldsMapper
+        .tariffFundingTypeFieldsToTariffFundingTypeFieldsDTO(tariffFundingTypeFields);
     return tariffFundingTypeFieldsDTO;
   }
 

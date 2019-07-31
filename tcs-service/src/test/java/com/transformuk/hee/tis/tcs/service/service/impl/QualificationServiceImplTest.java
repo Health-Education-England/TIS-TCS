@@ -1,9 +1,19 @@
 package com.transformuk.hee.tis.tcs.service.service.impl;
 
+import static org.mockito.Matchers.any;
+import static org.mockito.Matchers.anyList;
+import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.never;
+import static org.mockito.Mockito.times;
+import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.when;
+
 import com.transformuk.hee.tis.tcs.api.dto.QualificationDTO;
 import com.transformuk.hee.tis.tcs.service.model.Qualification;
 import com.transformuk.hee.tis.tcs.service.repository.QualificationRepository;
 import com.transformuk.hee.tis.tcs.service.service.mapper.QualificationMapper;
+import java.util.List;
+import java.util.Optional;
 import org.assertj.core.util.Lists;
 import org.junit.Assert;
 import org.junit.Before;
@@ -19,18 +29,11 @@ import org.springframework.data.domain.Example;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 
-import java.util.List;
-import java.util.Optional;
-
-import static org.mockito.Matchers.any;
-import static org.mockito.Matchers.anyList;
-import static org.mockito.Mockito.*;
-
 @RunWith(MockitoJUnitRunner.class)
 public class QualificationServiceImplTest {
 
-  private static final Long PERSON_ID = 12345L;
   public static final long QUALIFICATION_ID = 1L;
+  private static final Long PERSON_ID = 12345L;
   @InjectMocks
   private QualificationServiceImpl testObj;
 
@@ -57,7 +60,8 @@ public class QualificationServiceImplTest {
     QualificationDTO dto1 = new QualificationDTO(), dto2 = new QualificationDTO();
     List<QualificationDTO> foundQualificationDTOs = Lists.newArrayList(dto1, dto2);
 
-    when(qualificationRepository.findAll(exampleArgumentCaptor.capture())).thenReturn(foundQualifications);
+    when(qualificationRepository.findAll(exampleArgumentCaptor.capture()))
+        .thenReturn(foundQualifications);
     when(qualificationMapper.toDTOs(foundQualifications)).thenReturn(foundQualificationDTOs);
 
     List<QualificationDTO> result = testObj.findPersonQualifications(PERSON_ID);
@@ -118,7 +122,6 @@ public class QualificationServiceImplTest {
     Pageable pageableMock = mock(Pageable.class);
     Page<Qualification> pageMock = mock(Page.class);
     Page<QualificationDTO> dtoPageMock = mock(Page.class);
-
 
     when(qualificationRepository.findAll(pageableMock)).thenReturn(pageMock);
     when(pageMock.map(any())).thenReturn((Page) dtoPageMock);

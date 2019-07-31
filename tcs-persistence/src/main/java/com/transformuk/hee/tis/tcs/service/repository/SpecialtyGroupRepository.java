@@ -8,6 +8,7 @@ import org.springframework.data.jpa.repository.JpaSpecificationExecutor;
  * Spring Data JPA repository for the SpecialtyGroup entity.
  */
 @SuppressWarnings("unused")
-public interface SpecialtyGroupRepository extends JpaRepository<SpecialtyGroup, Long>, JpaSpecificationExecutor<SpecialtyGroup> {
+public interface SpecialtyGroupRepository extends JpaRepository<SpecialtyGroup, Long>,
+    JpaSpecificationExecutor<SpecialtyGroup> {
 
 }

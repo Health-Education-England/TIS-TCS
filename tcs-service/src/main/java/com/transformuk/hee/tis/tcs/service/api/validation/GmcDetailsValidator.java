@@ -6,18 +6,17 @@ import com.transformuk.hee.tis.reference.client.impl.ReferenceServiceImpl;
 import com.transformuk.hee.tis.tcs.api.dto.GmcDetailsDTO;
 import com.transformuk.hee.tis.tcs.service.model.GmcDetails;
 import com.transformuk.hee.tis.tcs.service.repository.GmcDetailsRepository;
+import java.util.ArrayList;
+import java.util.List;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.stereotype.Component;
 import org.springframework.validation.BeanPropertyBindingResult;
 import org.springframework.validation.FieldError;
 import org.springframework.web.bind.MethodArgumentNotValidException;
 
-import java.util.ArrayList;
-import java.util.List;
-
 /**
- * Holds more complex custom validation for a {@link GmcDetails} that
- * cannot be easily done via annotations
+ * Holds more complex custom validation for a {@link GmcDetails} that cannot be easily done via
+ * annotations
  */
 @Component
 public class GmcDetailsValidator {
@@ -28,14 +27,15 @@ public class GmcDetailsValidator {
   private GmcDetailsRepository gmcDetailsRepository;
   private ReferenceServiceImpl referenceService;
 
-  public GmcDetailsValidator(GmcDetailsRepository gmcDetailsRepository,ReferenceServiceImpl referenceService) {
+  public GmcDetailsValidator(GmcDetailsRepository gmcDetailsRepository,
+      ReferenceServiceImpl referenceService) {
     this.gmcDetailsRepository = gmcDetailsRepository;
     this.referenceService = referenceService;
   }
 
   /**
-   * Custom validation on the gmcDetailsDTO DTO, this is meant to supplement the annotation based validation
-   * already in place. It checks that the gmc status if gmc number is entered.
+   * Custom validation on the gmcDetailsDTO DTO, this is meant to supplement the annotation based
+   * validation already in place. It checks that the gmc status if gmc number is entered.
    *
    * @param gmcDetailsDTO the gmcDetails to check
    * @throws MethodArgumentNotValidException if there are validation errors
@@ -47,7 +47,8 @@ public class GmcDetailsValidator {
     fieldErrors.addAll(checkGmcNumber(gmcDetailsDTO));
     fieldErrors.addAll(checkGmcStatusExists(gmcDetailsDTO));
     if (!fieldErrors.isEmpty()) {
-      BeanPropertyBindingResult bindingResult = new BeanPropertyBindingResult(gmcDetailsDTO, "GmcDetailsDTO");
+      BeanPropertyBindingResult bindingResult = new BeanPropertyBindingResult(gmcDetailsDTO,
+          "GmcDetailsDTO");
       fieldErrors.forEach(bindingResult::addError);
       throw new MethodArgumentNotValidException(null, bindingResult);
     }
@@ -63,33 +64,38 @@ public class GmcDetailsValidator {
     List<FieldError> fieldErrors = new ArrayList<>();
     String gmcNumber = gmcDetailsDTO.getGmcNumber();
     // Ignore if gmcNumber is N/A or UNKNOWN
-    if(NA.equalsIgnoreCase(gmcNumber) || UNKNOWN.equalsIgnoreCase(gmcNumber)){
+    if (NA.equalsIgnoreCase(gmcNumber) || UNKNOWN.equalsIgnoreCase(gmcNumber)) {
       return fieldErrors;
     }
     if (gmcDetailsDTO.getId() != null) {
       if (StringUtils.isNotEmpty(gmcNumber)) {
-        List<GmcDetails> existingGmcDetails = gmcDetailsRepository.findByGmcNumberOrderById(gmcNumber);
+        List<GmcDetails> existingGmcDetails = gmcDetailsRepository
+            .findByGmcNumberOrderById(gmcNumber);
         if (existingGmcDetails.size() > 1) {
           fieldErrors.add(new FieldError(GMC_DETAILS_DTO_NAME, "gmcNumber",
-                  String.format("gmcNumber %s is not unique, there are currently %d persons with this number: %s",
-                          gmcDetailsDTO.getGmcNumber(), existingGmcDetails.size(),
-                          existingGmcDetails)));
+              String.format(
+                  "gmcNumber %s is not unique, there are currently %d persons with this number: %s",
+                  gmcDetailsDTO.getGmcNumber(), existingGmcDetails.size(),
+                  existingGmcDetails)));
         } else if (existingGmcDetails.size() == 1) {
           if (!gmcDetailsDTO.getId().equals(existingGmcDetails.get(0).getId())) {
             fieldErrors.add(new FieldError(GMC_DETAILS_DTO_NAME, "gmcNumber",
-                    String.format("gmcNumber %s is not unique, there is currently one person with this number: %s",
-                            gmcDetailsDTO.getGmcNumber(), existingGmcDetails.get(0))));
+                String.format(
+                    "gmcNumber %s is not unique, there is currently one person with this number: %s",
+                    gmcDetailsDTO.getGmcNumber(), existingGmcDetails.get(0))));
           }
         }
       }
     } else {
       //if we create a gmc details
       if (StringUtils.isNotEmpty(gmcNumber)) {
-        List<GmcDetails> existingGmcDetails = gmcDetailsRepository.findByGmcNumberOrderById(gmcNumber);
+        List<GmcDetails> existingGmcDetails = gmcDetailsRepository
+            .findByGmcNumberOrderById(gmcNumber);
         if (!existingGmcDetails.isEmpty()) {
           fieldErrors.add(new FieldError(GMC_DETAILS_DTO_NAME, "gmcNumber",
-                  String.format("gmcNumber %s is not unique, there is currently one person with this number: %s",
-                          gmcDetailsDTO.getGmcNumber(), existingGmcDetails.get(0))));
+              String.format(
+                  "gmcNumber %s is not unique, there is currently one person with this number: %s",
+                  gmcDetailsDTO.getGmcNumber(), existingGmcDetails.get(0))));
         }
       }
     }
@@ -100,10 +106,11 @@ public class GmcDetailsValidator {
     List<FieldError> fieldErrors = new ArrayList<>();
     // then check the gmc status
     if (StringUtils.isNotEmpty(gmcDetailsDTO.getGmcStatus())) {
-      Boolean isExists = referenceService.isValueExists(GmcStatusDTO.class, gmcDetailsDTO.getGmcStatus());
+      Boolean isExists = referenceService
+          .isValueExists(GmcStatusDTO.class, gmcDetailsDTO.getGmcStatus());
       if (!isExists) {
         fieldErrors.add(new FieldError(GMC_DETAILS_DTO_NAME, "gmcStatus",
-                String.format("gmcStatus %s does not exist", gmcDetailsDTO.getGmcStatus())));
+            String.format("gmcStatus %s does not exist", gmcDetailsDTO.getGmcStatus())));
       }
     }
     return fieldErrors;

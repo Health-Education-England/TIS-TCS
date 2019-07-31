@@ -4,16 +4,13 @@ package com.transformuk.hee.tis.tcs.api.dto;
 import com.transformuk.hee.tis.tcs.api.dto.validation.Create;
 import com.transformuk.hee.tis.tcs.api.dto.validation.Update;
 import com.transformuk.hee.tis.tcs.api.enumeration.Status;
-
-import javax.validation.Valid;
-import javax.validation.constraints.DecimalMin;
-import javax.validation.constraints.NotNull;
-import javax.validation.constraints.Null;
 import java.io.Serializable;
-import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.util.HashSet;
 import java.util.Set;
+import javax.validation.constraints.DecimalMin;
+import javax.validation.constraints.NotNull;
+import javax.validation.constraints.Null;
 
 /**
  * A DTO for the Person entity.
@@ -206,37 +203,79 @@ public class PersonDTO implements Serializable {
 
   @Override
   public boolean equals(Object o) {
-    if (this == o) return true;
-    if (o == null || getClass() != o.getClass()) return false;
+    if (this == o) {
+      return true;
+    }
+    if (o == null || getClass() != o.getClass()) {
+      return false;
+    }
 
     PersonDTO personDTO = (PersonDTO) o;
 
-    if (id != null ? !id.equals(personDTO.id) : personDTO.id != null) return false;
-    if (intrepidId != null ? !intrepidId.equals(personDTO.intrepidId) : personDTO.intrepidId != null) return false;
-    if (addedDate != null ? !addedDate.equals(personDTO.addedDate) : personDTO.addedDate != null) return false;
-    if (amendedDate != null ? !amendedDate.equals(personDTO.amendedDate) : personDTO.amendedDate != null) return false;
-    if (role != null ? !role.equals(personDTO.role) : personDTO.role != null) return false;
-    if (status != null ? !status.equals(personDTO.status) : personDTO.status != null) return false;
-    if (comments != null ? !comments.equals(personDTO.comments) : personDTO.comments != null) return false;
-    if (inactiveDate != null ? !inactiveDate.equals(personDTO.inactiveDate) : personDTO.inactiveDate != null)
+    if (id != null ? !id.equals(personDTO.id) : personDTO.id != null) {
       return false;
-    if (inactiveNotes != null ? !inactiveNotes.equals(personDTO.inactiveNotes) : personDTO.inactiveNotes != null)
+    }
+    if (intrepidId != null ? !intrepidId.equals(personDTO.intrepidId)
+        : personDTO.intrepidId != null) {
       return false;
-    if (publicHealthNumber != null ? !publicHealthNumber.equals(personDTO.publicHealthNumber) : personDTO.publicHealthNumber != null)
+    }
+    if (addedDate != null ? !addedDate.equals(personDTO.addedDate) : personDTO.addedDate != null) {
       return false;
-    if (regulator != null ? !regulator.equals(personDTO.regulator) : personDTO.regulator != null)
+    }
+    if (amendedDate != null ? !amendedDate.equals(personDTO.amendedDate)
+        : personDTO.amendedDate != null) {
       return false;
-    if (contactDetails != null ? !contactDetails.equals(personDTO.contactDetails) : personDTO.contactDetails != null)
+    }
+    if (role != null ? !role.equals(personDTO.role) : personDTO.role != null) {
       return false;
-    if (personalDetails != null ? !personalDetails.equals(personDTO.personalDetails) : personDTO.personalDetails != null)
+    }
+    if (status != null ? !status.equals(personDTO.status) : personDTO.status != null) {
       return false;
-    if (gmcDetails != null ? !gmcDetails.equals(personDTO.gmcDetails) : personDTO.gmcDetails != null) return false;
-    if (gdcDetails != null ? !gdcDetails.equals(personDTO.gdcDetails) : personDTO.gdcDetails != null) return false;
-    if (qualifications != null ? !qualifications.equals(personDTO.qualifications) : personDTO.qualifications != null)
+    }
+    if (comments != null ? !comments.equals(personDTO.comments) : personDTO.comments != null) {
       return false;
-    if (programmeMemberships != null ? !programmeMemberships.equals(personDTO.programmeMemberships) : personDTO.programmeMemberships != null)
+    }
+    if (inactiveDate != null ? !inactiveDate.equals(personDTO.inactiveDate)
+        : personDTO.inactiveDate != null) {
       return false;
-    return rightToWork != null ? rightToWork.equals(personDTO.rightToWork) : personDTO.rightToWork == null;
+    }
+    if (inactiveNotes != null ? !inactiveNotes.equals(personDTO.inactiveNotes)
+        : personDTO.inactiveNotes != null) {
+      return false;
+    }
+    if (publicHealthNumber != null ? !publicHealthNumber.equals(personDTO.publicHealthNumber)
+        : personDTO.publicHealthNumber != null) {
+      return false;
+    }
+    if (regulator != null ? !regulator.equals(personDTO.regulator) : personDTO.regulator != null) {
+      return false;
+    }
+    if (contactDetails != null ? !contactDetails.equals(personDTO.contactDetails)
+        : personDTO.contactDetails != null) {
+      return false;
+    }
+    if (personalDetails != null ? !personalDetails.equals(personDTO.personalDetails)
+        : personDTO.personalDetails != null) {
+      return false;
+    }
+    if (gmcDetails != null ? !gmcDetails.equals(personDTO.gmcDetails)
+        : personDTO.gmcDetails != null) {
+      return false;
+    }
+    if (gdcDetails != null ? !gdcDetails.equals(personDTO.gdcDetails)
+        : personDTO.gdcDetails != null) {
+      return false;
+    }
+    if (qualifications != null ? !qualifications.equals(personDTO.qualifications)
+        : personDTO.qualifications != null) {
+      return false;
+    }
+    if (programmeMemberships != null ? !programmeMemberships.equals(personDTO.programmeMemberships)
+        : personDTO.programmeMemberships != null) {
+      return false;
+    }
+    return rightToWork != null ? rightToWork.equals(personDTO.rightToWork)
+        : personDTO.rightToWork == null;
   }
 
   @Override

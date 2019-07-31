@@ -1,11 +1,23 @@
 package com.transformuk.hee.tis.tcs.service.api;
 
+import static org.assertj.core.api.Assertions.assertThat;
+import static org.hamcrest.Matchers.hasItem;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.put;
+import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.content;
+import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
+import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
+
 import com.transformuk.hee.tis.tcs.api.dto.JsonPatchDTO;
 import com.transformuk.hee.tis.tcs.service.Application;
 import com.transformuk.hee.tis.tcs.service.exception.ExceptionTranslator;
 import com.transformuk.hee.tis.tcs.service.model.JsonPatch;
 import com.transformuk.hee.tis.tcs.service.repository.JsonPatchRepository;
 import com.transformuk.hee.tis.tcs.service.service.mapper.JsonPatchMapper;
+import java.util.Date;
+import java.util.List;
+import javax.persistence.EntityManager;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -19,15 +31,6 @@ import org.springframework.test.context.junit4.SpringRunner;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.setup.MockMvcBuilders;
 import org.springframework.transaction.annotation.Transactional;
-
-import javax.persistence.EntityManager;
-import java.util.Date;
-import java.util.List;
-
-import static org.assertj.core.api.Assertions.assertThat;
-import static org.hamcrest.Matchers.hasItem;
-import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.*;
-import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.*;
 
 /**
  * Test class for the JsonPatchResource REST controller.
@@ -70,8 +73,8 @@ public class JsonPatchResourceIntTest {
   /**
    * Create an entity for this test.
    * <p>
-   * This is a static method, as tests for other entities might also need it,
-   * if they test an entity which requires the current entity.
+   * This is a static method, as tests for other entities might also need it, if they test an entity
+   * which requires the current entity.
    */
   public static JsonPatch createEntity(EntityManager em) {
     JsonPatch jsonPatch = new JsonPatch()
@@ -86,7 +89,8 @@ public class JsonPatchResourceIntTest {
   @Before
   public void setup() {
     MockitoAnnotations.initMocks(this);
-    JsonPatchResource jsonPatchResource = new JsonPatchResource(jsonPatchRepository, jsonPatchMapper);
+    JsonPatchResource jsonPatchResource = new JsonPatchResource(jsonPatchRepository,
+        jsonPatchMapper);
     this.restCountryMockMvc = MockMvcBuilders.standaloneSetup(jsonPatchResource)
         .setCustomArgumentResolvers(pageableArgumentResolver)
         .setControllerAdvice(exceptionTranslator)

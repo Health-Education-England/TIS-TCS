@@ -14,6 +14,13 @@ import com.transformuk.hee.tis.tcs.service.model.Placement;
 import com.transformuk.hee.tis.tcs.service.service.PlacementService;
 import com.transformuk.hee.tis.tcs.service.service.impl.PlacementPlannerServiceImp;
 import io.github.jhipster.web.util.ResponseUtil;
+import java.io.IOException;
+import java.net.URI;
+import java.net.URISyntaxException;
+import java.time.LocalDate;
+import java.util.List;
+import java.util.Optional;
+import java.util.stream.Collectors;
 import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -36,14 +43,6 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
-import java.io.IOException;
-import java.net.URI;
-import java.net.URISyntaxException;
-import java.time.LocalDate;
-import java.util.List;
-import java.util.Optional;
-import java.util.stream.Collectors;
-
 /**
  * REST controller for managing Placement.
  */
@@ -62,8 +61,10 @@ public class PlacementResource {
   private final PlacementDetailsDecorator placementDetailsDecorator;
   private final PlacementPlannerServiceImp placementPlannerService;
 
-  public PlacementResource(final PlacementService placementService, final PlacementValidator placementValidator,
-                           final PlacementDetailsDecorator placementDetailsDecorator, PlacementPlannerServiceImp placementPlannerService) {
+  public PlacementResource(final PlacementService placementService,
+      final PlacementValidator placementValidator,
+      final PlacementDetailsDecorator placementDetailsDecorator,
+      PlacementPlannerServiceImp placementPlannerService) {
     this.placementService = placementService;
     this.placementValidator = placementValidator;
     this.placementDetailsDecorator = placementDetailsDecorator;
@@ -74,13 +75,14 @@ public class PlacementResource {
    * POST  /placements : Create a new placement.
    *
    * @param placementDetailsDTO the placementDTO to create
-   * @return the ResponseEntity with status 201 (Created) and with body the new placementDTO, or with status 400 (Bad Request) if the placement has already an ID
+   * @return the ResponseEntity with status 201 (Created) and with body the new placementDTO, or
+   * with status 400 (Bad Request) if the placement has already an ID
    * @throws URISyntaxException if the Location URI syntax is incorrect
    */
   @PostMapping("/placements")
   @PreAuthorize("hasAuthority('tcs:add:modify:entities')")
-  public ResponseEntity<PlacementDetailsDTO> createPlacement(@RequestBody @Validated(Create.class)
-                                                               final PlacementDetailsDTO placementDetailsDTO)
+  public ResponseEntity<PlacementDetailsDTO> createPlacement(
+      @RequestBody @Validated(Create.class) final PlacementDetailsDTO placementDetailsDTO)
       throws URISyntaxException, ValidationException {
     log.debug("REST request to save Placement : {}", placementDetailsDTO);
     placementValidator.validate(placementDetailsDTO);
@@ -99,28 +101,36 @@ public class PlacementResource {
    * PUT  /placements : Updates an existing placement.
    *
    * @param placementDetailsDTO the placementDTO to update
-   * @return the ResponseEntity with status 200 (OK) and with body the updated placementDTO,
-   * or with status 400 (Bad Request) if the placementDTO is not valid,
-   * or with status 500 (Internal Server Error) if the placementDTO couldnt be updated
+   * @return the ResponseEntity with status 200 (OK) and with body the updated placementDTO, or with
+   * status 400 (Bad Request) if the placementDTO is not valid, or with status 500 (Internal Server
+   * Error) if the placementDTO couldnt be updated
    * @throws URISyntaxException if the Location URI syntax is incorrect
    */
   @PutMapping("/placements")
   @PreAuthorize("hasAuthority('tcs:add:modify:entities')")
-  public ResponseEntity<PlacementDetailsDTO> updatePlacement(@RequestBody @Validated(Update.class) final PlacementDetailsDTO placementDetailsDTO) throws ValidationException, URISyntaxException {
+  public ResponseEntity<PlacementDetailsDTO> updatePlacement(
+      @RequestBody @Validated(Update.class) final PlacementDetailsDTO placementDetailsDTO)
+      throws ValidationException, URISyntaxException {
     log.debug("REST request to update Placement : {}", placementDetailsDTO);
     placementValidator.validate(placementDetailsDTO);
     if (placementDetailsDTO.getId() == null) {
       return createPlacement(placementDetailsDTO);
     }
-    Placement placementBeforeUpdate = placementService.findPlacementById(placementDetailsDTO.getId());
-    boolean eligibleForEsrNotification = placementService.isEligibleForChangedDatesNotification(placementDetailsDTO, placementBeforeUpdate);
-    boolean currentPlacementEdit = placementBeforeUpdate.getDateFrom().isBefore(LocalDate.now().plusDays(1));
+    Placement placementBeforeUpdate = placementService
+        .findPlacementById(placementDetailsDTO.getId());
+    boolean eligibleForEsrNotification = placementService
+        .isEligibleForChangedDatesNotification(placementDetailsDTO, placementBeforeUpdate);
+    boolean currentPlacementEdit = placementBeforeUpdate.getDateFrom()
+        .isBefore(LocalDate.now().plusDays(1));
 
     final PlacementDetailsDTO result = placementService.saveDetails(placementDetailsDTO);
 
     if (eligibleForEsrNotification) {
-      log.info("Handling ESR Notification for date changes in placement edit: placement id {}", placementDetailsDTO.getId());
-      placementService.handleChangeOfPlacementDatesEsrNotification(placementDetailsDTO, placementBeforeUpdate, currentPlacementEdit);
+      log.info("Handling ESR Notification for date changes in placement edit: placement id {}",
+          placementDetailsDTO.getId());
+      placementService
+          .handleChangeOfPlacementDatesEsrNotification(placementDetailsDTO, placementBeforeUpdate,
+              currentPlacementEdit);
     }
     return ResponseEntity.ok()
         .headers(HeaderUtil.createEntityUpdateAlert(ENTITY_NAME, result.getId().toString()))
@@ -138,7 +148,8 @@ public class PlacementResource {
   public ResponseEntity<List<PlacementDTO>> getAllPlacements(final Pageable pageable) {
     log.debug("REST request to get a page of Placements");
     final Page<PlacementDTO> page = placementService.findAll(pageable);
-    final HttpHeaders headers = PaginationUtil.generatePaginationHttpHeaders(page, "/api/placements");
+    final HttpHeaders headers = PaginationUtil
+        .generatePaginationHttpHeaders(page, "/api/placements");
     return new ResponseEntity<>(page.getContent(), headers, HttpStatus.OK);
   }
 
@@ -146,14 +157,16 @@ public class PlacementResource {
    * GET  /placements/:id : get the "id" placement.
    *
    * @param id the id of the placementDTO to retrieve
-   * @return the ResponseEntity with status 200 (OK) and with body the placementDTO, or with status 404 (Not Found)
+   * @return the ResponseEntity with status 200 (OK) and with body the placementDTO, or with status
+   * 404 (Not Found)
    */
   @GetMapping("/placements/{id}")
   @PreAuthorize("hasAuthority('tcs:view:entities')")
   public ResponseEntity<PlacementDetailsDTO> getPlacement(@PathVariable final Long id) {
     log.debug("REST request to get Placement : {}", id);
     final PlacementDetailsDTO placementDetailsDTO = placementService.getDetails(id);
-    return ResponseUtil.wrapOrNotFound(Optional.ofNullable(placementDetailsDecorator.decorate(placementDetailsDTO)));
+    return ResponseUtil.wrapOrNotFound(
+        Optional.ofNullable(placementDetailsDecorator.decorate(placementDetailsDTO)));
   }
 
   /**
@@ -168,7 +181,8 @@ public class PlacementResource {
     log.debug("REST request to delete Placement : {}", id);
     placementValidator.validatePlacementForDelete(id);
     placementService.delete(id);
-    return ResponseEntity.ok().headers(HeaderUtil.createEntityDeletionAlert(ENTITY_NAME, id.toString())).build();
+    return ResponseEntity.ok()
+        .headers(HeaderUtil.createEntityDeletionAlert(ENTITY_NAME, id.toString())).build();
   }
 
 
@@ -181,7 +195,8 @@ public class PlacementResource {
    */
   @PatchMapping("/placements")
   @PreAuthorize("hasAuthority('tcs:add:modify:entities')")
-  public ResponseEntity<List<PlacementDTO>> patchPlacements(@RequestBody final List<PlacementDTO> placementDTOS) {
+  public ResponseEntity<List<PlacementDTO>> patchPlacements(
+      @RequestBody final List<PlacementDTO> placementDTOS) {
     log.debug("REST request to bulk save Placement : {}", placementDTOS);
     final List<PlacementDTO> result = placementService.save(placementDTOS);
     final List<Long> ids = result.stream().map(PlacementDTO::getId).collect(Collectors.toList());
@@ -196,14 +211,16 @@ public class PlacementResource {
    *
    * @param pageable
    * @param columnFilterJson
-   * @return the ResponseEntity with status 200 (OK) and with body the placementDTO, or with status 404 (Not Found)
+   * @return the ResponseEntity with status 200 (OK) and with body the placementDTO, or with status
+   * 404 (Not Found)
    * @throws IOException
    */
   @GetMapping("/placements/filter")
   @PreAuthorize("hasAuthority('tcs:view:entities')")
   public ResponseEntity<List<PlacementDetailsDTO>> getFilteredPlacementDetails(
       Pageable pageable,
-      @RequestParam(value = "columnFilters", required = false) final String columnFilterJson) throws IOException {
+      @RequestParam(value = "columnFilters", required = false) final String columnFilterJson)
+      throws IOException {
     log.debug("REST request to get Placements by filter : {}", columnFilterJson);
     final Page<PlacementDetailsDTO> page;
     if (org.apache.commons.lang.StringUtils.isEmpty(columnFilterJson)) {
@@ -211,7 +228,8 @@ public class PlacementResource {
     } else {
       page = placementService.findFilteredPlacements(columnFilterJson, pageable);
     }
-    final HttpHeaders headers = PaginationUtil.generatePaginationHttpHeaders(page, "/api/placements/filter");
+    final HttpHeaders headers = PaginationUtil
+        .generatePaginationHttpHeaders(page, "/api/placements/filter");
     return new ResponseEntity<>(page.getContent(), headers, HttpStatus.OK);
   }
 
@@ -232,11 +250,13 @@ public class PlacementResource {
    */
   @GetMapping("/programme/{programmeId}/specialty/{specialtyId}/placements")
   @PreAuthorize("hasAuthority('tcs:view:entities')")
-  public ResponseEntity<PlacementsResultDTO> findPlacementsByProgrammeAndSpecialty(@PathVariable Long programmeId,
-                                                                                   @PathVariable Long specialtyId,
-                                                                                   @RequestParam(required = false) @DateTimeFormat(pattern = "dd/MM/yyyy") LocalDate fromDate,
-                                                                                   @RequestParam(required = false) @DateTimeFormat(pattern = "dd/MM/yyyy") LocalDate toDate) {
-    PlacementsResultDTO result = placementPlannerService.findPlacementsForProgrammeAndSpecialty(programmeId, specialtyId, fromDate, toDate);
+  public ResponseEntity<PlacementsResultDTO> findPlacementsByProgrammeAndSpecialty(
+      @PathVariable Long programmeId,
+      @PathVariable Long specialtyId,
+      @RequestParam(required = false) @DateTimeFormat(pattern = "dd/MM/yyyy") LocalDate fromDate,
+      @RequestParam(required = false) @DateTimeFormat(pattern = "dd/MM/yyyy") LocalDate toDate) {
+    PlacementsResultDTO result = placementPlannerService
+        .findPlacementsForProgrammeAndSpecialty(programmeId, specialtyId, fromDate, toDate);
     return ResponseEntity.ok(result);
   }
 

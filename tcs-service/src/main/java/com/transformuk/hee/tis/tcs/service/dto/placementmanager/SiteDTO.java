@@ -5,6 +5,7 @@ import java.util.List;
 import java.util.Objects;
 
 public class SiteDTO implements Serializable {
+
   private Long id;
   private String name;
   private String siteKnownAs;
@@ -53,8 +54,12 @@ public class SiteDTO implements Serializable {
 
   @Override
   public boolean equals(Object o) {
-    if (this == o) return true;
-    if (o == null || getClass() != o.getClass()) return false;
+    if (this == o) {
+      return true;
+    }
+    if (o == null || getClass() != o.getClass()) {
+      return false;
+    }
     SiteDTO siteDTO = (SiteDTO) o;
     return Objects.equals(id, siteDTO.id) &&
         Objects.equals(name, siteDTO.name) &&

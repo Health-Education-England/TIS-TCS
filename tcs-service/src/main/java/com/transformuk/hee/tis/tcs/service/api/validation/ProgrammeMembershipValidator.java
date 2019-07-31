@@ -7,6 +7,10 @@ import com.transformuk.hee.tis.tcs.service.repository.CurriculumRepository;
 import com.transformuk.hee.tis.tcs.service.repository.PersonRepository;
 import com.transformuk.hee.tis.tcs.service.repository.ProgrammeRepository;
 import com.transformuk.hee.tis.tcs.service.service.RotationService;
+import java.util.ArrayList;
+import java.util.List;
+import java.util.Set;
+import java.util.stream.Collectors;
 import org.apache.commons.collections4.CollectionUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
@@ -14,14 +18,9 @@ import org.springframework.validation.BeanPropertyBindingResult;
 import org.springframework.validation.FieldError;
 import org.springframework.web.bind.MethodArgumentNotValidException;
 
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Set;
-import java.util.stream.Collectors;
-
 /**
- * Holds more complex custom validation for a {@link ProgrammeMembership} that
- * cannot be easily done via annotations
+ * Holds more complex custom validation for a {@link ProgrammeMembership} that cannot be easily done
+ * via annotations
  */
 @Component
 public class ProgrammeMembershipValidator {
@@ -35,9 +34,9 @@ public class ProgrammeMembershipValidator {
 
   @Autowired
   public ProgrammeMembershipValidator(PersonRepository personRepository,
-                                      ProgrammeRepository programmeRepository,
-                                      CurriculumRepository curriculumRepository,
-                                      RotationService rotationService) {
+      ProgrammeRepository programmeRepository,
+      CurriculumRepository curriculumRepository,
+      RotationService rotationService) {
     this.personRepository = personRepository;
     this.programmeRepository = programmeRepository;
     this.curriculumRepository = curriculumRepository;
@@ -45,13 +44,15 @@ public class ProgrammeMembershipValidator {
   }
 
   /**
-   * Custom validation on the programmeMembershipDTO DTO, this is meant to supplement the annotation based validation
-   * already in place. It checks that the person, programme and curriculum entered.
+   * Custom validation on the programmeMembershipDTO DTO, this is meant to supplement the annotation
+   * based validation already in place. It checks that the person, programme and curriculum
+   * entered.
    *
    * @param programmeMembershipDTO the programmeMembership to check
    * @throws MethodArgumentNotValidException if there are validation errors
    */
-  public void validate(ProgrammeMembershipDTO programmeMembershipDTO) throws MethodArgumentNotValidException {
+  public void validate(ProgrammeMembershipDTO programmeMembershipDTO)
+      throws MethodArgumentNotValidException {
 
     List<FieldError> fieldErrors = new ArrayList<>();
     fieldErrors.addAll(checkPerson(programmeMembershipDTO));
@@ -59,7 +60,8 @@ public class ProgrammeMembershipValidator {
     fieldErrors.addAll(checkCurriculum(programmeMembershipDTO));
     fieldErrors.addAll(checkRotation(programmeMembershipDTO));
     if (!fieldErrors.isEmpty()) {
-      BeanPropertyBindingResult bindingResult = new BeanPropertyBindingResult(programmeMembershipDTO, PROGRAMME_MEMBERSHIP_DTO_NAME);
+      BeanPropertyBindingResult bindingResult = new BeanPropertyBindingResult(
+          programmeMembershipDTO, PROGRAMME_MEMBERSHIP_DTO_NAME);
       fieldErrors.forEach(bindingResult::addError);
       throw new MethodArgumentNotValidException(null, bindingResult);
     }
@@ -74,12 +76,15 @@ public class ProgrammeMembershipValidator {
   private List<FieldError> checkPerson(ProgrammeMembershipDTO programmeMembershipDTO) {
     List<FieldError> fieldErrors = new ArrayList<>();
     // check the Person
-    if (programmeMembershipDTO.getPerson() == null || programmeMembershipDTO.getPerson().getId() == null) {
+    if (programmeMembershipDTO.getPerson() == null
+        || programmeMembershipDTO.getPerson().getId() == null) {
       requireFieldErrors(fieldErrors, "person");
-    } else if (programmeMembershipDTO.getPerson() != null && programmeMembershipDTO.getPerson().getId() != null) {
+    } else if (programmeMembershipDTO.getPerson() != null
+        && programmeMembershipDTO.getPerson().getId() != null) {
       if (!personRepository.existsById(programmeMembershipDTO.getPerson().getId())) {
         fieldErrors.add(new FieldError(PROGRAMME_MEMBERSHIP_DTO_NAME, "person",
-            String.format("Person with id %d does not exist", programmeMembershipDTO.getPerson().getId())));
+            String.format("Person with id %d does not exist",
+                programmeMembershipDTO.getPerson().getId())));
       }
     }
     return fieldErrors;
@@ -111,14 +116,16 @@ public class ProgrammeMembershipValidator {
    */
   private List<FieldError> checkCurriculum(ProgrammeMembershipDTO programmeMembershipDTO) {
     List<FieldError> fieldErrors = new ArrayList<>();
-    Set<Long> curriculumIds = programmeMembershipDTO.getCurriculumMemberships().stream().map(CurriculumMembershipDTO::getCurriculumId).collect(Collectors.toSet());
+    Set<Long> curriculumIds = programmeMembershipDTO.getCurriculumMemberships().stream()
+        .map(CurriculumMembershipDTO::getCurriculumId).collect(Collectors.toSet());
     if (!CollectionUtils.isEmpty(curriculumIds)) {
       curriculumIds.stream().forEach(curriculumId -> {
         if (!curriculumRepository.existsById(curriculumId)) {
           fieldErrors.add(new FieldError(PROGRAMME_MEMBERSHIP_DTO_NAME, "curriculumId",
-                  String.format("Curriculum with id %s does not exist", curriculumId)));
-        } else{
-          checkProgrammeCurriculumAssociation(fieldErrors, programmeMembershipDTO.getProgrammeId(), curriculumId);
+              String.format("Curriculum with id %s does not exist", curriculumId)));
+        } else {
+          checkProgrammeCurriculumAssociation(fieldErrors, programmeMembershipDTO.getProgrammeId(),
+              curriculumId);
         }
       });
 
@@ -133,9 +140,11 @@ public class ProgrammeMembershipValidator {
    * @param programmeId
    * @param curriculumId
    */
-  private void checkProgrammeCurriculumAssociation(List<FieldError> fieldErrors, Long programmeId, Long curriculumId) {
+  private void checkProgrammeCurriculumAssociation(List<FieldError> fieldErrors, Long programmeId,
+      Long curriculumId) {
 
-    boolean isExists = programmeRepository.programmeCurriculumAssociationExists(programmeId, curriculumId);
+    boolean isExists = programmeRepository
+        .programmeCurriculumAssociationExists(programmeId, curriculumId);
     if (!isExists) {
       fieldErrors.add(new FieldError(PROGRAMME_MEMBERSHIP_DTO_NAME, "curriculumId",
           String.format("The selected Programme and Curriculum are not linked. " +
@@ -152,12 +161,14 @@ public class ProgrammeMembershipValidator {
   private List<FieldError> checkRotation(ProgrammeMembershipDTO programmeMembershipDTO) {
     List<FieldError> fieldErrors = new ArrayList<>();
     // then check the rotation
-    if (programmeMembershipDTO.getRotation() != null && programmeMembershipDTO.getRotation().getId() != null) {
-        if (!rotationService.rotationExists(programmeMembershipDTO.getRotation().getId(), programmeMembershipDTO.getProgrammeId())) {
-            fieldErrors.add(new FieldError(PROGRAMME_MEMBERSHIP_DTO_NAME, "rotation",
-                String.format("Rotation with name (%1$s) does not exist for programmeId (%2$s)",
-                    programmeMembershipDTO.getRotation(), programmeMembershipDTO.getProgrammeId())));
-        }
+    if (programmeMembershipDTO.getRotation() != null
+        && programmeMembershipDTO.getRotation().getId() != null) {
+      if (!rotationService.rotationExists(programmeMembershipDTO.getRotation().getId(),
+          programmeMembershipDTO.getProgrammeId())) {
+        fieldErrors.add(new FieldError(PROGRAMME_MEMBERSHIP_DTO_NAME, "rotation",
+            String.format("Rotation with name (%1$s) does not exist for programmeId (%2$s)",
+                programmeMembershipDTO.getRotation(), programmeMembershipDTO.getProgrammeId())));
+      }
     }
     return fieldErrors;
   }

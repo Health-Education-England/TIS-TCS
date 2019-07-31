@@ -5,6 +5,7 @@ import java.util.List;
 import java.util.Objects;
 
 public class PostDTO implements Serializable {
+
   private Long id;
   private String nationalPostNumber;
   private List<PlacementDTO> placements;
@@ -35,8 +36,12 @@ public class PostDTO implements Serializable {
 
   @Override
   public boolean equals(Object o) {
-    if (this == o) return true;
-    if (o == null || getClass() != o.getClass()) return false;
+    if (this == o) {
+      return true;
+    }
+    if (o == null || getClass() != o.getClass()) {
+      return false;
+    }
     PostDTO postDTO = (PostDTO) o;
     return Objects.equals(id, postDTO.id) &&
         Objects.equals(nationalPostNumber, postDTO.nationalPostNumber) &&

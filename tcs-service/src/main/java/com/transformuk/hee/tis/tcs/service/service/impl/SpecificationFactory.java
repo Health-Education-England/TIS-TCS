@@ -1,17 +1,16 @@
 package com.transformuk.hee.tis.tcs.service.service.impl;
 
-import org.apache.commons.lang3.StringUtils;
-import org.springframework.data.jpa.domain.Specification;
-
+import java.time.LocalDate;
+import java.util.Collection;
 import javax.persistence.criteria.CriteriaBuilder;
 import javax.persistence.criteria.Join;
 import javax.persistence.criteria.JoinType;
-import java.time.LocalDate;
-import java.util.Collection;
+import org.apache.commons.lang3.StringUtils;
+import org.springframework.data.jpa.domain.Specification;
 
 /**
- * Contains convenience pieces used to build specifications as query building blocks.
- * For more info please {@see https://jverhoelen.github.io/spring-data-queries-jpa-criteria-api/}
+ * Contains convenience pieces used to build specifications as query building blocks. For more info
+ * please {@see https://jverhoelen.github.io/spring-data-queries-jpa-criteria-api/}
  */
 public final class SpecificationFactory {
 
@@ -24,15 +23,14 @@ public final class SpecificationFactory {
 
   public static Specification containsLike(String attribute, String value) {
     return (root, query, cb) -> {
-      if(StringUtils.isNotEmpty(attribute) && attribute.contains(DOT)){
+      if (StringUtils.isNotEmpty(attribute) && attribute.contains(DOT)) {
         String[] joinTable = StringUtils.split(attribute, DOT);
-        Join tableJoin = root.join(joinTable[0],JoinType.LEFT);
+        Join tableJoin = root.join(joinTable[0], JoinType.LEFT);
         for (int i = 1; i < joinTable.length - 1; i++) {
-          tableJoin = tableJoin.join(joinTable[i],JoinType.LEFT);
+          tableJoin = tableJoin.join(joinTable[i], JoinType.LEFT);
         }
-        return cb.like(tableJoin.get(joinTable[joinTable.length - 1]),"%" + value + "%");
-      }
-      else {
+        return cb.like(tableJoin.get(joinTable[joinTable.length - 1]), "%" + value + "%");
+      } else {
         return cb.like(root.get(attribute), "%" + value + "%");
       }
     };
@@ -40,15 +38,14 @@ public final class SpecificationFactory {
 
   public static Specification isEqual(String attribute, Object value) {
     return (root, query, cb) -> {
-      if(StringUtils.isNotEmpty(attribute) && attribute.contains(DOT)){
+      if (StringUtils.isNotEmpty(attribute) && attribute.contains(DOT)) {
         String[] joinTable = StringUtils.split(attribute, DOT);
-        Join tableJoin = root.join(joinTable[0],JoinType.LEFT);
+        Join tableJoin = root.join(joinTable[0], JoinType.LEFT);
         for (int i = 1; i < joinTable.length - 1; i++) {
-          tableJoin = tableJoin.join(joinTable[i],JoinType.LEFT);
+          tableJoin = tableJoin.join(joinTable[i], JoinType.LEFT);
         }
         return cb.equal(tableJoin.get(joinTable[joinTable.length - 1]), value);
-      }
-      else {
+      } else {
         return cb.equal(root.get(attribute), value);
       }
     };
@@ -56,7 +53,8 @@ public final class SpecificationFactory {
 
 
   /**
-   * In condition for entity property, if property is from sub entity then it should contain '.' e.g sites.siteId
+   * In condition for entity property, if property is from sub entity then it should contain '.' e.g
+   * sites.siteId
    *
    * @param attribute
    * @param values
@@ -103,8 +101,8 @@ public final class SpecificationFactory {
    * InBetween condition for an entity property used for filtering based on a date range.
    *
    * @param attribute
-   * @param from date
-   * @param to date
+   * @param from      date
+   * @param to        date
    * @return
    */
   public static Specification isBetween(String attribute, LocalDate from, LocalDate to) {

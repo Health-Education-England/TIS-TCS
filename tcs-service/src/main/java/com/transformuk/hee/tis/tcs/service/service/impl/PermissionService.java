@@ -4,18 +4,18 @@ import com.transformuk.hee.tis.security.model.Programme;
 import com.transformuk.hee.tis.security.model.Trust;
 import com.transformuk.hee.tis.security.model.UserProfile;
 import com.transformuk.hee.tis.security.util.TisSecurityHelper;
-
-import org.springframework.stereotype.Service;
-import org.springframework.util.CollectionUtils;
-
 import java.util.Collections;
 import java.util.Set;
 import java.util.stream.Collectors;
+import org.springframework.stereotype.Service;
+import org.springframework.util.CollectionUtils;
+
 /**
  * Class that contains utility methods that work on the Principle of the logged in user
  */
 @Service
 public class PermissionService {
+
   protected static final String VIEW_SENSITIVE_DATA_ROLE = "personsensitive:view:entities";
   protected static final String EDIT_SENSITIVE_DATA_ROLE = "personsensitive:add:modify:entities";
 
@@ -46,7 +46,8 @@ public class PermissionService {
   public Set<Long> getUsersTrustIds() {
     UserProfile loggedInUserProfile = TisSecurityHelper.getProfileFromContext();
     if (!CollectionUtils.isEmpty(loggedInUserProfile.getAssignedTrusts())) {
-      return loggedInUserProfile.getAssignedTrusts().stream().map(Trust::getId).collect(Collectors.toSet());
+      return loggedInUserProfile.getAssignedTrusts().stream().map(Trust::getId)
+          .collect(Collectors.toSet());
     }
     return Collections.EMPTY_SET;
   }
@@ -54,7 +55,8 @@ public class PermissionService {
   public Set<Long> getUsersProgrammeIds() {
     UserProfile loggedInUserProfile = TisSecurityHelper.getProfileFromContext();
     if (!CollectionUtils.isEmpty(loggedInUserProfile.getAssignedProgrammes())) {
-      return loggedInUserProfile.getAssignedProgrammes().stream().map(Programme::getId).collect(Collectors.toSet());
+      return loggedInUserProfile.getAssignedProgrammes().stream().map(Programme::getId)
+          .collect(Collectors.toSet());
     }
 
     return Collections.EMPTY_SET;

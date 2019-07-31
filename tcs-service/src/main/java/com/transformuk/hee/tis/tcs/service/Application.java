@@ -4,6 +4,11 @@ import com.transformuk.hee.tis.filestorage.config.TisFileStorageConfig;
 import com.transformuk.hee.tis.tcs.service.config.ApplicationProperties;
 import com.transformuk.hee.tis.tcs.service.config.DefaultProfileUtil;
 import io.github.jhipster.config.JHipsterConstants;
+import java.net.InetAddress;
+import java.net.UnknownHostException;
+import java.util.Arrays;
+import java.util.Collection;
+import javax.annotation.PostConstruct;
 import net.javacrumbs.shedlock.spring.annotation.EnableSchedulerLock;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -16,13 +21,8 @@ import org.springframework.context.annotation.PropertySource;
 import org.springframework.core.env.Environment;
 import org.springframework.data.elasticsearch.repository.config.EnableElasticsearchRepositories;
 
-import javax.annotation.PostConstruct;
-import java.net.InetAddress;
-import java.net.UnknownHostException;
-import java.util.Arrays;
-import java.util.Collection;
-
-@ComponentScan(basePackages = {"com.transformuk.hee.tis.tcs.service","com.transformuk.hee.tis.reference"})
+@ComponentScan(basePackages = {"com.transformuk.hee.tis.tcs.service",
+    "com.transformuk.hee.tis.reference"})
 @EnableElasticsearchRepositories
 @EnableAutoConfiguration()
 @EnableConfigurationProperties({ApplicationProperties.class})
@@ -76,16 +76,19 @@ public class Application {
    * <p>
    * Spring profiles can be configured with a program arguments --spring.profiles.active=your-active-profile
    * <p>
-   * You can find more information on how profiles work with JHipster on <a href="http://jhipster.github.io/profiles/">http://jhipster.github.io/profiles/</a>.
+   * You can find more information on how profiles work with JHipster on <a
+   * href="http://jhipster.github.io/profiles/">http://jhipster.github.io/profiles/</a>.
    */
   @PostConstruct
   public void initApplication() {
     Collection<String> activeProfiles = Arrays.asList(env.getActiveProfiles());
-    if (activeProfiles.contains(JHipsterConstants.SPRING_PROFILE_DEVELOPMENT) && activeProfiles.contains(JHipsterConstants.SPRING_PROFILE_PRODUCTION)) {
+    if (activeProfiles.contains(JHipsterConstants.SPRING_PROFILE_DEVELOPMENT) && activeProfiles
+        .contains(JHipsterConstants.SPRING_PROFILE_PRODUCTION)) {
       log.error("You have misconfigured your application! It should not run " +
           "with both the 'dev' and 'prod' profiles at the same time.");
     }
-    if (activeProfiles.contains(JHipsterConstants.SPRING_PROFILE_DEVELOPMENT) && activeProfiles.contains(JHipsterConstants.SPRING_PROFILE_CLOUD)) {
+    if (activeProfiles.contains(JHipsterConstants.SPRING_PROFILE_DEVELOPMENT) && activeProfiles
+        .contains(JHipsterConstants.SPRING_PROFILE_CLOUD)) {
       log.error("You have misconfigured your application! It should not" +
           "run with both the 'dev' and 'cloud' profiles at the same time.");
     }

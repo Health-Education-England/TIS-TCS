@@ -1,9 +1,17 @@
 package com.transformuk.hee.tis.tcs.service.service.impl;
 
+import static org.mockito.Matchers.any;
+import static org.mockito.Matchers.anySet;
+import static org.mockito.Mockito.when;
+
 import com.google.common.collect.Sets;
 import com.transformuk.hee.tis.reference.api.dto.GradeDTO;
 import com.transformuk.hee.tis.reference.api.dto.SiteDTO;
-import com.transformuk.hee.tis.tcs.api.dto.*;
+import com.transformuk.hee.tis.tcs.api.dto.PostDTO;
+import com.transformuk.hee.tis.tcs.api.dto.PostGradeDTO;
+import com.transformuk.hee.tis.tcs.api.dto.PostSiteDTO;
+import com.transformuk.hee.tis.tcs.api.dto.PostSpecialtyDTO;
+import com.transformuk.hee.tis.tcs.api.dto.SpecialtyDTO;
 import com.transformuk.hee.tis.tcs.api.enumeration.PostGradeType;
 import com.transformuk.hee.tis.tcs.api.enumeration.PostSiteType;
 import com.transformuk.hee.tis.tcs.api.enumeration.PostSpecialtyType;
@@ -15,6 +23,8 @@ import com.transformuk.hee.tis.tcs.service.model.PostSpecialty;
 import com.transformuk.hee.tis.tcs.service.model.Specialty;
 import com.transformuk.hee.tis.tcs.service.repository.PostRepository;
 import com.transformuk.hee.tis.tcs.service.repository.SpecialtyRepository;
+import java.util.Optional;
+import java.util.concurrent.CompletableFuture;
 import org.apache.commons.lang.StringUtils;
 import org.junit.Assert;
 import org.junit.Before;
@@ -24,13 +34,6 @@ import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.Spy;
 import org.mockito.runners.MockitoJUnitRunner;
-
-import java.util.Optional;
-import java.util.concurrent.CompletableFuture;
-
-import static org.mockito.Matchers.any;
-import static org.mockito.Matchers.anySet;
-import static org.mockito.Mockito.when;
 
 @RunWith(MockitoJUnitRunner.class)
 public class NationalPostNumberServiceImplTest {
@@ -48,8 +51,9 @@ public class NationalPostNumberServiceImplTest {
   private static final String UNIQUE_NUMBER = "006";
   private static final String UNIQUE_NUMBER_PLUS_1 = "007";
 
-  private static final String CURRENT_NATIONAL_POST_NUMBER = LOCAL_OFFICE_ABBR + SLASH + SITE_CODE + SLASH +
-      SPECIALTY_CODE + SLASH + GRADE_ABBR + SLASH + UNIQUE_NUMBER;
+  private static final String CURRENT_NATIONAL_POST_NUMBER =
+      LOCAL_OFFICE_ABBR + SLASH + SITE_CODE + SLASH +
+          SPECIALTY_CODE + SLASH + GRADE_ABBR + SLASH + UNIQUE_NUMBER;
 
   @Spy
   @InjectMocks
@@ -100,15 +104,20 @@ public class NationalPostNumberServiceImplTest {
 
   @Test
   public void generateNationalPostNumberShouldReturnNewUniquePostNumberWithCounterOneHigherThanCurrentHighest() {
-    when(postMock1.getNationalPostNumber()).thenReturn(LOCAL_OFFICE_ABBR + SLASH + SITE_CODE + SLASH +
-        SPECIALTY_CODE + SLASH + GRADE_ABBR + SLASH + UNIQUE_NUMBER + SLASH + MILITARY_SUFFIX);
-    when(postRepositoryMock.findByNationalPostNumberStartingWith(LOCAL_OFFICE_ABBR + SLASH + SITE_CODE + SLASH +
-        SPECIALTY_CODE + SLASH + GRADE_ABBR)).thenReturn(Sets.newHashSet(postMock1));
+    when(postMock1.getNationalPostNumber())
+        .thenReturn(LOCAL_OFFICE_ABBR + SLASH + SITE_CODE + SLASH +
+            SPECIALTY_CODE + SLASH + GRADE_ABBR + SLASH + UNIQUE_NUMBER + SLASH + MILITARY_SUFFIX);
+    when(postRepositoryMock
+        .findByNationalPostNumberStartingWith(LOCAL_OFFICE_ABBR + SLASH + SITE_CODE + SLASH +
+            SPECIALTY_CODE + SLASH + GRADE_ABBR)).thenReturn(Sets.newHashSet(postMock1));
 
-    String result = testObj.generateNationalPostNumber(LOCAL_OFFICE_ABBR, SITE_CODE, SPECIALTY_CODE, GRADE_ABBR, PostSuffix.MILITARY);
+    String result = testObj
+        .generateNationalPostNumber(LOCAL_OFFICE_ABBR, SITE_CODE, SPECIALTY_CODE, GRADE_ABBR,
+            PostSuffix.MILITARY);
 
     String expectedNationalPostNumber = LOCAL_OFFICE_ABBR + SLASH + SITE_CODE + SLASH +
-        SPECIALTY_CODE + SLASH + GRADE_ABBR + SLASH + UNIQUE_NUMBER_PLUS_1 + SLASH + MILITARY_SUFFIX;
+        SPECIALTY_CODE + SLASH + GRADE_ABBR + SLASH + UNIQUE_NUMBER_PLUS_1 + SLASH
+        + MILITARY_SUFFIX;
 
     Assert.assertEquals(expectedNationalPostNumber, result);
   }
@@ -132,7 +141,8 @@ public class NationalPostNumberServiceImplTest {
   public void getApprovedOrEmptyShouldPopulateGradeWithAbbr() {
     GradeDTO gradeDTO = new GradeDTO();
     CompletableFuture<Void> expectedCompletedFuture = CompletableFuture.completedFuture(null);
-    when(asyncReferenceServiceMock.doWithGradesAsync(any(), any())).thenReturn(expectedCompletedFuture);
+    when(asyncReferenceServiceMock.doWithGradesAsync(any(), any()))
+        .thenReturn(expectedCompletedFuture);
 
     CompletableFuture<Void> result = testObj.getApprovedGrade(postDTOMock1, gradeDTO);
     Assert.assertEquals(expectedCompletedFuture, result);
@@ -142,7 +152,8 @@ public class NationalPostNumberServiceImplTest {
   public void getSiteCodeOrEmptyShouldPopulateSiteWithCode() {
     SiteDTO siteDTO = new SiteDTO();
     CompletableFuture<Void> expectedCompletedFuture = CompletableFuture.completedFuture(null);
-    when(asyncReferenceServiceMock.doWithSitesAsync(anySet(), any())).thenReturn(expectedCompletedFuture);
+    when(asyncReferenceServiceMock.doWithSitesAsync(anySet(), any()))
+        .thenReturn(expectedCompletedFuture);
 
     CompletableFuture<Void> result = testObj.getSiteCode(postDTOMock1, siteDTO);
     Assert.assertEquals(expectedCompletedFuture, result);

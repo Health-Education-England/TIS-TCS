@@ -1,13 +1,12 @@
 package com.transformuk.hee.tis.tcs.api.dto;
 
 import com.transformuk.hee.tis.tcs.api.enumeration.Status;
-
 import java.io.Serializable;
 import java.util.Objects;
 
 /**
- * A DTO for the Specialty entity. It does not contain it's relationships to types and groups.
- * Use this when you want a faster response that does not hit any other data table except Specialties.
+ * A DTO for the Specialty entity. It does not contain it's relationships to types and groups. Use
+ * this when you want a faster response that does not hit any other data table except Specialties.
  */
 public class SpecialtySimpleDTO implements Serializable {
 

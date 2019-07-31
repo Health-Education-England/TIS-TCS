@@ -3,18 +3,18 @@ package com.transformuk.hee.tis.tcs.api.dto;
 import com.transformuk.hee.tis.tcs.api.dto.validation.Create;
 import com.transformuk.hee.tis.tcs.api.dto.validation.Update;
 import com.transformuk.hee.tis.tcs.api.enumeration.PlacementStatus;
-
-import javax.validation.constraints.DecimalMin;
-import javax.validation.constraints.NotNull;
-import javax.validation.constraints.Null;
 import java.io.Serializable;
 import java.math.BigDecimal;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.util.HashSet;
 import java.util.Set;
+import javax.validation.constraints.DecimalMin;
+import javax.validation.constraints.NotNull;
+import javax.validation.constraints.Null;
 
 public class PlacementDetailsDTO implements Serializable {
+
   @NotNull(groups = Update.class, message = "Id must not be null when updating a placement")
   @DecimalMin(value = "0", groups = Update.class, message = "Id must not be negative")
   @Null(groups = Create.class, message = "Id must be null when creating a new placement")
@@ -313,41 +313,88 @@ public class PlacementDetailsDTO implements Serializable {
 
   @Override
   public boolean equals(final Object o) {
-    if (this == o) return true;
-    if (o == null || getClass() != o.getClass()) return false;
+    if (this == o) {
+      return true;
+    }
+    if (o == null || getClass() != o.getClass()) {
+      return false;
+    }
 
     final PlacementDetailsDTO that = (PlacementDetailsDTO) o;
 
-    if (id != null ? !id.equals(that.id) : that.id != null) return false;
-    if (intrepidId != null ? !intrepidId.equals(that.intrepidId) : that.intrepidId != null) return false;
-    if (traineeId != null ? !traineeId.equals(that.traineeId) : that.traineeId != null) return false;
-    if (traineeFirstName != null ? !traineeFirstName.equals(that.traineeFirstName) : that.traineeFirstName != null)
+    if (id != null ? !id.equals(that.id) : that.id != null) {
       return false;
-    if (traineeLastName != null ? !traineeLastName.equals(that.traineeLastName) : that.traineeLastName != null)
+    }
+    if (intrepidId != null ? !intrepidId.equals(that.intrepidId) : that.intrepidId != null) {
       return false;
-    if (traineeGmcNumber != null ? !traineeGmcNumber.equals(that.traineeGmcNumber) : that.traineeGmcNumber != null)
+    }
+    if (traineeId != null ? !traineeId.equals(that.traineeId) : that.traineeId != null) {
       return false;
-    if (nationalPostNumber != null ? !nationalPostNumber.equals(that.nationalPostNumber) : that.nationalPostNumber != null)
+    }
+    if (traineeFirstName != null ? !traineeFirstName.equals(that.traineeFirstName)
+        : that.traineeFirstName != null) {
       return false;
-    if (dateFrom != null ? !dateFrom.equals(that.dateFrom) : that.dateFrom != null) return false;
-    if (dateTo != null ? !dateTo.equals(that.dateTo) : that.dateTo != null) return false;
-    if (wholeTimeEquivalent != null ? !wholeTimeEquivalent.equals(that.wholeTimeEquivalent) : that.wholeTimeEquivalent != null)
+    }
+    if (traineeLastName != null ? !traineeLastName.equals(that.traineeLastName)
+        : that.traineeLastName != null) {
       return false;
-    if (siteCode != null ? !siteCode.equals(that.siteCode) : that.siteCode != null) return false;
-    if (siteName != null ? !siteName.equals(that.siteName) : that.siteName != null) return false;
-    if (gradeAbbreviation != null ? !gradeAbbreviation.equals(that.gradeAbbreviation) : that.gradeAbbreviation != null)
+    }
+    if (traineeGmcNumber != null ? !traineeGmcNumber.equals(that.traineeGmcNumber)
+        : that.traineeGmcNumber != null) {
       return false;
-    if (gradeName != null ? !gradeName.equals(that.gradeName) : that.gradeName != null) return false;
-    if (placementType != null ? !placementType.equals(that.placementType) : that.placementType != null)
+    }
+    if (nationalPostNumber != null ? !nationalPostNumber.equals(that.nationalPostNumber)
+        : that.nationalPostNumber != null) {
       return false;
-    if (owner != null ? !owner.equals(that.owner) : that.owner != null) return false;
-    if (trainingDescription != null ? !trainingDescription.equals(that.trainingDescription) : that.trainingDescription != null)
+    }
+    if (dateFrom != null ? !dateFrom.equals(that.dateFrom) : that.dateFrom != null) {
       return false;
-    if (status != that.status) return false;
-    if (postId != null ? !postId.equals(that.postId) : that.postId != null) return false;
-    if (addedDate != null ? !addedDate.equals(that.addedDate) : that.addedDate != null) return false;
-    if (amendedDate != null ? !amendedDate.equals(that.amendedDate) : that.amendedDate != null) return false;
-    return localPostNumber != null ? localPostNumber.equals(that.localPostNumber) : that.localPostNumber == null;
+    }
+    if (dateTo != null ? !dateTo.equals(that.dateTo) : that.dateTo != null) {
+      return false;
+    }
+    if (wholeTimeEquivalent != null ? !wholeTimeEquivalent.equals(that.wholeTimeEquivalent)
+        : that.wholeTimeEquivalent != null) {
+      return false;
+    }
+    if (siteCode != null ? !siteCode.equals(that.siteCode) : that.siteCode != null) {
+      return false;
+    }
+    if (siteName != null ? !siteName.equals(that.siteName) : that.siteName != null) {
+      return false;
+    }
+    if (gradeAbbreviation != null ? !gradeAbbreviation.equals(that.gradeAbbreviation)
+        : that.gradeAbbreviation != null) {
+      return false;
+    }
+    if (gradeName != null ? !gradeName.equals(that.gradeName) : that.gradeName != null) {
+      return false;
+    }
+    if (placementType != null ? !placementType.equals(that.placementType)
+        : that.placementType != null) {
+      return false;
+    }
+    if (owner != null ? !owner.equals(that.owner) : that.owner != null) {
+      return false;
+    }
+    if (trainingDescription != null ? !trainingDescription.equals(that.trainingDescription)
+        : that.trainingDescription != null) {
+      return false;
+    }
+    if (status != that.status) {
+      return false;
+    }
+    if (postId != null ? !postId.equals(that.postId) : that.postId != null) {
+      return false;
+    }
+    if (addedDate != null ? !addedDate.equals(that.addedDate) : that.addedDate != null) {
+      return false;
+    }
+    if (amendedDate != null ? !amendedDate.equals(that.amendedDate) : that.amendedDate != null) {
+      return false;
+    }
+    return localPostNumber != null ? localPostNumber.equals(that.localPostNumber)
+        : that.localPostNumber == null;
   }
 
   @Override
@@ -380,28 +427,28 @@ public class PlacementDetailsDTO implements Serializable {
   @Override
   public String toString() {
     return "PlacementDetailsDTO{" +
-            "id=" + id +
-            ", intrepidId='" + intrepidId + '\'' +
-            ", traineeId=" + traineeId +
-            ", traineeFirstName='" + traineeFirstName + '\'' +
-            ", traineeLastName='" + traineeLastName + '\'' +
-            ", traineeGmcNumber='" + traineeGmcNumber + '\'' +
-            ", nationalPostNumber='" + nationalPostNumber + '\'' +
-            ", dateFrom=" + dateFrom +
-            ", dateTo=" + dateTo +
-            ", wholeTimeEquivalent=" + wholeTimeEquivalent +
-            ", siteCode='" + siteCode + '\'' +
-            ", siteName='" + siteName + '\'' +
-            ", gradeAbbreviation='" + gradeAbbreviation + '\'' +
-            ", gradeName='" + gradeName + '\'' +
-            ", placementType='" + placementType + '\'' +
-            ", owner='" + owner + '\'' +
-            ", trainingDescription='" + trainingDescription + '\'' +
-            ", status=" + status +
-            ", postId=" + postId +
-            ", addedDate=" + addedDate +
-            ", amendedDate=" + amendedDate +
-            ", localPostNumber='" + localPostNumber + '\'' +
-            '}';
+        "id=" + id +
+        ", intrepidId='" + intrepidId + '\'' +
+        ", traineeId=" + traineeId +
+        ", traineeFirstName='" + traineeFirstName + '\'' +
+        ", traineeLastName='" + traineeLastName + '\'' +
+        ", traineeGmcNumber='" + traineeGmcNumber + '\'' +
+        ", nationalPostNumber='" + nationalPostNumber + '\'' +
+        ", dateFrom=" + dateFrom +
+        ", dateTo=" + dateTo +
+        ", wholeTimeEquivalent=" + wholeTimeEquivalent +
+        ", siteCode='" + siteCode + '\'' +
+        ", siteName='" + siteName + '\'' +
+        ", gradeAbbreviation='" + gradeAbbreviation + '\'' +
+        ", gradeName='" + gradeName + '\'' +
+        ", placementType='" + placementType + '\'' +
+        ", owner='" + owner + '\'' +
+        ", trainingDescription='" + trainingDescription + '\'' +
+        ", status=" + status +
+        ", postId=" + postId +
+        ", addedDate=" + addedDate +
+        ", amendedDate=" + amendedDate +
+        ", localPostNumber='" + localPostNumber + '\'' +
+        '}';
   }
 }

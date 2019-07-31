@@ -12,7 +12,8 @@ import org.springframework.stereotype.Component;
 @Component
 public class GmcDetailsElasticSearchEventListener {
 
-  private static final Logger LOG = LoggerFactory.getLogger(GmcDetailsElasticSearchEventListener.class);
+  private static final Logger LOG = LoggerFactory
+      .getLogger(GmcDetailsElasticSearchEventListener.class);
 
   @Autowired
   private PersonElasticSearchService personElasticSearchService;

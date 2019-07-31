@@ -7,7 +7,8 @@ import org.springframework.web.client.RestTemplate;
 
 @Configuration
 @Profile({"dev", "stage", "prod", "uidev"})
-public class ReferenceClientProdConfig extends com.transformuk.hee.tis.reference.client.config.ReferenceClientConfig {
+public class ReferenceClientProdConfig extends
+    com.transformuk.hee.tis.reference.client.config.ReferenceClientConfig {
 
   @Bean
   public RestTemplate referenceRestTemplate() {

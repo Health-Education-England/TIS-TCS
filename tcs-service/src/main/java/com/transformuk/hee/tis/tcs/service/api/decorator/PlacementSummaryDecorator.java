@@ -1,14 +1,13 @@
 package com.transformuk.hee.tis.tcs.service.api.decorator;
 
 import com.transformuk.hee.tis.tcs.api.dto.PlacementSummaryDTO;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.stereotype.Component;
-
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
 import java.util.concurrent.CompletableFuture;
 import java.util.stream.Collectors;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Component;
 
 @Component
 public class PlacementSummaryDecorator {
@@ -39,15 +38,16 @@ public class PlacementSummaryDecorator {
     });
 
     CompletableFuture<Void> futures = CompletableFuture.allOf(
-            decorateGradesOnPlacement(gradeIds, placementSummaryDTOS),
-            decorateSitesOnPlacement(siteIds, placementSummaryDTOS));
+        decorateGradesOnPlacement(gradeIds, placementSummaryDTOS),
+        decorateSitesOnPlacement(siteIds, placementSummaryDTOS));
 
     futures.join();
 
     return placementSummaryDTOS;
   }
 
-  protected CompletableFuture<Void> decorateGradesOnPlacement(Set<Long> ids, List<PlacementSummaryDTO> placementSummaryDTOS) {
+  protected CompletableFuture<Void> decorateGradesOnPlacement(Set<Long> ids,
+      List<PlacementSummaryDTO> placementSummaryDTOS) {
     Set<Long> idsSet = ids.stream().map(id -> id.longValue()).collect(Collectors.toSet());
     return referenceService.doWithGradesAsync(idsSet, gradeMap -> {
       for (PlacementSummaryDTO pp : placementSummaryDTOS) {
@@ -58,7 +58,8 @@ public class PlacementSummaryDecorator {
     });
   }
 
-  protected CompletableFuture<Void> decorateSitesOnPlacement(Set<Long> ids, List<PlacementSummaryDTO> placementSummaryDTOS) {
+  protected CompletableFuture<Void> decorateSitesOnPlacement(Set<Long> ids,
+      List<PlacementSummaryDTO> placementSummaryDTOS) {
     Set<Long> idsSet = ids.stream().map(id -> id.longValue()).collect(Collectors.toSet());
     return referenceService.doWithSitesAsync(idsSet, siteMap -> {
       for (PlacementSummaryDTO pp : placementSummaryDTOS) {

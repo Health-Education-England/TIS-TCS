@@ -18,6 +18,14 @@ import com.transformuk.hee.tis.tcs.service.model.Post;
 import com.transformuk.hee.tis.tcs.service.model.Specialty;
 import com.transformuk.hee.tis.tcs.service.repository.PostRepository;
 import com.transformuk.hee.tis.tcs.service.repository.SpecialtyRepository;
+import java.util.Comparator;
+import java.util.List;
+import java.util.Optional;
+import java.util.Set;
+import java.util.concurrent.CompletableFuture;
+import java.util.function.Function;
+import java.util.function.Predicate;
+import java.util.stream.Collectors;
 import org.apache.commons.collections4.CollectionUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.lang3.math.NumberUtils;
@@ -27,15 +35,6 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
-
-import java.util.Comparator;
-import java.util.List;
-import java.util.Optional;
-import java.util.Set;
-import java.util.concurrent.CompletableFuture;
-import java.util.function.Function;
-import java.util.function.Predicate;
-import java.util.stream.Collectors;
 
 @Service
 public class NationalPostNumberServiceImpl {
@@ -59,8 +58,8 @@ public class NationalPostNumberServiceImpl {
   private SpecialtyRepository specialtyRepository;
 
   /**
-   * Check the new post against the current post in the system. If there are changes in some of the values,
-   * a new national post number will need to be generated
+   * Check the new post against the current post in the system. If there are changes in some of the
+   * values, a new national post number will need to be generated
    *
    * @param postDTO
    * @return
@@ -83,11 +82,13 @@ public class NationalPostNumberServiceImpl {
           .join();
 
       String specialtyCode = getPrimarySpecialtyCode(postDTO);
-      String suffixValue = postDTO.getSuffix() != null ? postDTO.getSuffix().getSuffixValue() : StringUtils.EMPTY;
+      String suffixValue =
+          postDTO.getSuffix() != null ? postDTO.getSuffix().getSuffixValue() : StringUtils.EMPTY;
 
       String currentNationalPostNumber = currentPost.getNationalPostNumber();
       String[] currentNationalPostNumberParts = currentNationalPostNumber.split(SLASH);
-      if (currentNationalPostNumberParts.length == 5 || currentNationalPostNumberParts.length == 6) { // does the national post number have the correct number of parts?
+      if (currentNationalPostNumberParts.length == 5 || currentNationalPostNumberParts.length
+          == 6) { // does the national post number have the correct number of parts?
         String currentPostLocalOfficeAbbr = currentNationalPostNumberParts[LOCAL_OFFICE_ABBR_INDEX];
         String currentPostSiteCode = currentNationalPostNumberParts[SITE_CODE_INDEX];
         String currentPostSpecialtyCode = currentNationalPostNumberParts[SPECIALTY_CODE_INDEX];
@@ -109,8 +110,10 @@ public class NationalPostNumberServiceImpl {
     }
   }
 
-  private boolean hasLocalOfficeAbbrChanged(LocalOfficeDTO localOfficeContainer, String currentPostLocalOfficeAbbr) {
-    return !StringUtils.equalsIgnoreCase(localOfficeContainer.getPostAbbreviation(), currentPostLocalOfficeAbbr);
+  private boolean hasLocalOfficeAbbrChanged(LocalOfficeDTO localOfficeContainer,
+      String currentPostLocalOfficeAbbr) {
+    return !StringUtils
+        .equalsIgnoreCase(localOfficeContainer.getPostAbbreviation(), currentPostLocalOfficeAbbr);
   }
 
   private boolean hasSiteCodeChanged(SiteDTO siteCodeContainer, String currentPostLocationCode) {
@@ -126,7 +129,8 @@ public class NationalPostNumberServiceImpl {
   }
 
   private boolean hasGradeAbbrChanged(GradeDTO gradeAbbrContainer, String currentPostGradeAbbr) {
-    if (gradeAbbrContainer != null && StringUtils.isNotEmpty(gradeAbbrContainer.getAbbreviation())) {
+    if (gradeAbbrContainer != null && StringUtils
+        .isNotEmpty(gradeAbbrContainer.getAbbreviation())) {
       return !gradeAbbrContainer.getAbbreviation().equalsIgnoreCase(currentPostGradeAbbr);
     } else {
       return false;
@@ -152,23 +156,28 @@ public class NationalPostNumberServiceImpl {
 
       String newSpecialtyCode = getPrimarySpecialtyCode(postDTO);
 
-      String nationalPostNumber = generateNationalPostNumber(localOfficeContainer.getPostAbbreviation(),
-          siteCodeContainer.getSiteCode(), newSpecialtyCode, gradeAbbrContainer.getAbbreviation(), postDTO.getSuffix());
+      String nationalPostNumber = generateNationalPostNumber(
+          localOfficeContainer.getPostAbbreviation(),
+          siteCodeContainer.getSiteCode(), newSpecialtyCode, gradeAbbrContainer.getAbbreviation(),
+          postDTO.getSuffix());
 
       postDTO.setNationalPostNumber(nationalPostNumber);
     }
   }
 
-  public String generateNationalPostNumber(String localOfficeAbbr, String siteCode, String specialtyCode,
-                                           String gradeAbbr, PostSuffix suffix) {
+  public String generateNationalPostNumber(String localOfficeAbbr, String siteCode,
+      String specialtyCode,
+      String gradeAbbr, PostSuffix suffix) {
     Preconditions.checkNotNull(localOfficeAbbr);
     Preconditions.checkNotNull(siteCode);
     Preconditions.checkNotNull(specialtyCode);
     Preconditions.checkNotNull(gradeAbbr);
 
-    String nationalPostNumberNoCounter = localOfficeAbbr + SLASH + siteCode + SLASH + specialtyCode + SLASH + gradeAbbr;
+    String nationalPostNumberNoCounter =
+        localOfficeAbbr + SLASH + siteCode + SLASH + specialtyCode + SLASH + gradeAbbr;
 
-    Set<Post> postsWithSamePostNumber = postRepository.findByNationalPostNumberStartingWith(nationalPostNumberNoCounter);
+    Set<Post> postsWithSamePostNumber = postRepository
+        .findByNationalPostNumberStartingWith(nationalPostNumberNoCounter);
 
     List<Integer> postNumberCounter = postsWithSamePostNumber.stream()
         .map(Post::getNationalPostNumber)
@@ -205,7 +214,8 @@ public class NationalPostNumberServiceImpl {
   private Function<String[], String> mapToUniqueCounter(PostSuffix suffix) {
     return npn -> {
       if (suffix != null) {
-        return npn[npn.length - 2]; //if we have a suffix, then the number component is second to last
+        return npn[npn.length
+            - 2]; //if we have a suffix, then the number component is second to last
       } else {
         return npn[npn.length - 1];
       }
@@ -215,11 +225,13 @@ public class NationalPostNumberServiceImpl {
   private Predicate<String> isPostNpnRightFormat(PostSuffix suffix) {
     return npn -> {
       if (suffix != null) {
-        return npn.endsWith(suffix.getSuffixValue()); //filter out any npn's that dont match the suffix we're trying to generate
+        return npn.endsWith(suffix
+            .getSuffixValue()); //filter out any npn's that dont match the suffix we're trying to generate
       } else {
         String[] npnParts = npn.split("/");
         String lastNpnPart = npnParts[npnParts.length - 1];
-        return NumberUtils.isDigits(lastNpnPart); //if no suffix is supplied, filter out any that end with non digit
+        return NumberUtils.isDigits(
+            lastNpnPart); //if no suffix is supplied, filter out any that end with non digit
       }
     };
   }
@@ -230,7 +242,8 @@ public class NationalPostNumberServiceImpl {
           .filter(sp -> PostSpecialtyType.PRIMARY.equals(sp.getPostSpecialtyType()))
           .map(ps -> ps.getSpecialty().getId())
           .findAny().orElseGet(() -> {
-            throw new NationalPostNumberRuntimeException("No Primary Specialty ID found for PostSpecialty relation - cannot generate full NPN");
+            throw new NationalPostNumberRuntimeException(
+                "No Primary Specialty ID found for PostSpecialty relation - cannot generate full NPN");
           });
 
       Specialty primarySpecialty = specialtyRepository.findById(specialtyId).orElse(null);
@@ -246,7 +259,8 @@ public class NationalPostNumberServiceImpl {
           .filter(g -> PostGradeType.APPROVED.equals(g.getPostGradeType()))
           .map(PostGradeDTO::getGradeId)
           .findAny().orElseGet(() -> {
-            throw new NationalPostNumberRuntimeException("No Approved Grade ID found for PostGrade relation - cannot generate full NPN");
+            throw new NationalPostNumberRuntimeException(
+                "No Approved Grade ID found for PostGrade relation - cannot generate full NPN");
           });
 
       return asyncReferenceService.doWithGradesAsync(Sets.newHashSet(gradeId), gradeIdsToGrades -> {
@@ -260,10 +274,12 @@ public class NationalPostNumberServiceImpl {
 
   CompletableFuture<Void> getSiteCode(PostDTO postDTO, SiteDTO siteDTO) {
     if (CollectionUtils.isNotEmpty(postDTO.getSites())) {
-      Long siteId = postDTO.getSites().stream().filter(s -> PostSiteType.PRIMARY.equals(s.getPostSiteType()))
+      Long siteId = postDTO.getSites().stream()
+          .filter(s -> PostSiteType.PRIMARY.equals(s.getPostSiteType()))
           .map(PostSiteDTO::getSiteId)
           .findAny().orElseGet(() -> {
-            throw new NationalPostNumberRuntimeException("No Primary Site ID found for PostSite relation - cannot generate full NPN");
+            throw new NationalPostNumberRuntimeException(
+                "No Primary Site ID found for PostSite relation - cannot generate full NPN");
           });
 
       return asyncReferenceService.doWithSitesAsync(Sets.newHashSet(siteId), siteIdsToSites -> {

@@ -32,12 +32,18 @@ public class PlacementSpecialtyPK implements Serializable {
 
   @Override
   public boolean equals(Object o) {
-    if (this == o) return true;
-    if (o == null || getClass() != o.getClass()) return false;
+    if (this == o) {
+      return true;
+    }
+    if (o == null || getClass() != o.getClass()) {
+      return false;
+    }
 
     PlacementSpecialtyPK that = (PlacementSpecialtyPK) o;
 
-    if (placement != null ? !placement.equals(that.placement) : that.placement != null) return false;
+    if (placement != null ? !placement.equals(that.placement) : that.placement != null) {
+      return false;
+    }
     return specialty != null ? specialty.equals(that.specialty) : that.specialty == null;
   }
 

@@ -7,6 +7,7 @@ import com.transformuk.hee.tis.tcs.service.model.Qualification;
 import com.transformuk.hee.tis.tcs.service.repository.QualificationRepository;
 import com.transformuk.hee.tis.tcs.service.service.QualificationService;
 import com.transformuk.hee.tis.tcs.service.service.mapper.QualificationMapper;
+import java.util.List;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.data.domain.Example;
@@ -14,8 +15,6 @@ import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
-
-import java.util.List;
 
 
 /**
@@ -31,7 +30,8 @@ public class QualificationServiceImpl implements QualificationService {
 
   private final QualificationMapper qualificationMapper;
 
-  public QualificationServiceImpl(QualificationRepository qualificationRepository, QualificationMapper qualificationMapper) {
+  public QualificationServiceImpl(QualificationRepository qualificationRepository,
+      QualificationMapper qualificationMapper) {
     this.qualificationRepository = qualificationRepository;
     this.qualificationMapper = qualificationMapper;
   }

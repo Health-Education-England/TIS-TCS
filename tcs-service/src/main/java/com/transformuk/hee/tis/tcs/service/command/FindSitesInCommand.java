@@ -5,7 +5,8 @@ import com.netflix.hystrix.HystrixCommandGroupKey;
 import com.netflix.hystrix.HystrixCommandKey;
 import com.netflix.hystrix.HystrixCommandProperties;
 import com.transformuk.hee.tis.reference.api.dto.SiteDTO;
-import org.apache.commons.lang3.StringUtils;
+import java.util.Collections;
+import java.util.List;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.core.ParameterizedTypeReference;
@@ -13,10 +14,6 @@ import org.springframework.http.HttpMethod;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.client.RestTemplate;
 import org.springframework.web.util.UriComponentsBuilder;
-
-import java.util.Collections;
-import java.util.List;
-import java.util.Set;
 
 public class FindSitesInCommand extends HystrixCommand<List<SiteDTO>> {
 
@@ -29,11 +26,13 @@ public class FindSitesInCommand extends HystrixCommand<List<SiteDTO>> {
   private String urlEndpoint;
   private String joinedIds;
 
-  public FindSitesInCommand(RestTemplate trustAdminRestTemplate, String urlEndpoint, String joinedIds) {
+  public FindSitesInCommand(RestTemplate trustAdminRestTemplate, String urlEndpoint,
+      String joinedIds) {
     super(Setter.withGroupKey(HystrixCommandGroupKey.Factory.asKey(GROUP_KEY))
         .andCommandKey(HystrixCommandKey.Factory.asKey(COMMAND_KEY))
         .andCommandPropertiesDefaults(
-            HystrixCommandProperties.defaultSetter().withExecutionTimeoutInMilliseconds(FIVE_SECONDS)
+            HystrixCommandProperties.defaultSetter()
+                .withExecutionTimeoutInMilliseconds(FIVE_SECONDS)
         )
     );
     this.trustAdminRestTemplate = trustAdminRestTemplate;
@@ -43,7 +42,8 @@ public class FindSitesInCommand extends HystrixCommand<List<SiteDTO>> {
 
   @Override
   protected List<SiteDTO> getFallback() {
-    LOG.error("Something went wrong while attempting to retrieve sites for ids, returning empty list");
+    LOG.error(
+        "Something went wrong while attempting to retrieve sites for ids, returning empty list");
     return Collections.EMPTY_LIST;
   }
 

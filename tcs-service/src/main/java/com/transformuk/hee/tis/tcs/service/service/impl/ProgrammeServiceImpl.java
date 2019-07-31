@@ -43,8 +43,9 @@ public class ProgrammeServiceImpl implements ProgrammeService {
   private final ApplicationEventPublisher applicationEventPublisher;
   private final PermissionService permissionService;
 
-  public ProgrammeServiceImpl(ProgrammeRepository programmeRepository, ProgrammeMapper programmeMapper,
-                              ApplicationEventPublisher applicationEventPublisher, PermissionService permissionService) {
+  public ProgrammeServiceImpl(ProgrammeRepository programmeRepository,
+      ProgrammeMapper programmeMapper,
+      ApplicationEventPublisher applicationEventPublisher, PermissionService permissionService) {
     this.programmeRepository = programmeRepository;
     this.programmeMapper = programmeMapper;
     this.applicationEventPublisher = applicationEventPublisher;
@@ -96,7 +97,8 @@ public class ProgrammeServiceImpl implements ProgrammeService {
     List<Programme> programmes = programmeMapper.programmeDTOsToProgrammes(programmeDTO);
     programmes = programmeRepository.saveAll(programmes);
     List<ProgrammeDTO> programmeDTOS = programmeMapper.programmesToProgrammeDTOs(programmes);
-    programmeDTOS.stream().distinct().map(ProgrammeSavedEvent::new).forEach(applicationEventPublisher::publishEvent);
+    programmeDTOS.stream().distinct().map(ProgrammeSavedEvent::new)
+        .forEach(applicationEventPublisher::publishEvent);
     return programmeDTOS;
   }
 
@@ -137,7 +139,8 @@ public class ProgrammeServiceImpl implements ProgrammeService {
 
   @Override
   @Transactional(readOnly = true)
-  public Page<ProgrammeDTO> advancedSearch(String searchString, List<ColumnFilter> columnFilters, Pageable pageable) {
+  public Page<ProgrammeDTO> advancedSearch(String searchString, List<ColumnFilter> columnFilters,
+      Pageable pageable) {
 
     List<Specification<Programme>> specs = new ArrayList<>();
     //add the text search criteria
@@ -187,7 +190,8 @@ public class ProgrammeServiceImpl implements ProgrammeService {
   @Override
   public List<ProgrammeDTO> findTraineeProgrammes(Long traineeId) {
     Preconditions.checkNotNull(traineeId);
-    List<Programme> traineeProgrammes = programmeRepository.findByProgrammeMembershipPersonId(traineeId);
+    List<Programme> traineeProgrammes = programmeRepository
+        .findByProgrammeMembershipPersonId(traineeId);
     return programmeMapper.programmesToProgrammeDTOs(traineeProgrammes);
   }
 

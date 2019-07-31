@@ -1,5 +1,14 @@
 package com.transformuk.hee.tis.tcs.service.api.validation;
 
+import static java.time.temporal.ChronoUnit.DAYS;
+import static java.time.temporal.ChronoUnit.YEARS;
+import static org.hamcrest.CoreMatchers.is;
+import static org.hamcrest.CoreMatchers.notNullValue;
+import static org.junit.Assert.assertThat;
+import static org.junit.Assert.fail;
+import static org.mockito.BDDMockito.given;
+import static org.mockito.Mockito.when;
+
 import com.google.common.collect.Lists;
 import com.google.common.collect.Sets;
 import com.transformuk.hee.tis.reference.client.impl.ReferenceServiceImpl;
@@ -12,6 +21,9 @@ import com.transformuk.hee.tis.tcs.service.repository.PersonRepository;
 import com.transformuk.hee.tis.tcs.service.repository.PlacementRepository;
 import com.transformuk.hee.tis.tcs.service.repository.PostRepository;
 import com.transformuk.hee.tis.tcs.service.repository.SpecialtyRepository;
+import java.math.BigDecimal;
+import java.time.LocalDate;
+import java.util.Optional;
 import org.assertj.core.util.Maps;
 import org.junit.Before;
 import org.junit.Ignore;
@@ -21,21 +33,9 @@ import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.runners.MockitoJUnitRunner;
 
-import java.math.BigDecimal;
-import java.time.LocalDate;
-import java.util.Optional;
-
-import static java.time.temporal.ChronoUnit.DAYS;
-import static java.time.temporal.ChronoUnit.YEARS;
-import static org.hamcrest.CoreMatchers.is;
-import static org.hamcrest.CoreMatchers.notNullValue;
-import static org.junit.Assert.assertThat;
-import static org.junit.Assert.fail;
-import static org.mockito.BDDMockito.given;
-import static org.mockito.Mockito.when;
-
 @RunWith(MockitoJUnitRunner.class)
 public class PlacementValidatorTest {
+
   public static final long PLACEMENT_ID = 1L;
   private static final Long DEFAULT_TRAINEE = 1L;
   private static final Long DEFAULT_CLINICAL_SUPERVISOR = 12L;
@@ -89,15 +89,19 @@ public class PlacementValidatorTest {
 
     given(personRepository.existsById(DEFAULT_TRAINEE)).willReturn(true);
     given(postRepository.existsById(DEFAULT_POST)).willReturn(true);
-    given(referenceService.siteIdExists(Lists.newArrayList(DEFAULT_SITE))).willReturn(Maps.newHashMap(DEFAULT_SITE, true));
-    given(referenceService.gradeIdsExists(Lists.newArrayList(DEFAULT_GRADE))).willReturn(Maps.newHashMap(DEFAULT_GRADE, true));
-    given(referenceService.placementTypeExists(Lists.newArrayList(DEFAULT_PLACEMENT_TYPE))).willReturn(Maps.newHashMap(DEFAULT_PLACEMENT_TYPE, true));
+    given(referenceService.siteIdExists(Lists.newArrayList(DEFAULT_SITE)))
+        .willReturn(Maps.newHashMap(DEFAULT_SITE, true));
+    given(referenceService.gradeIdsExists(Lists.newArrayList(DEFAULT_GRADE)))
+        .willReturn(Maps.newHashMap(DEFAULT_GRADE, true));
+    given(referenceService.placementTypeExists(Lists.newArrayList(DEFAULT_PLACEMENT_TYPE)))
+        .willReturn(Maps.newHashMap(DEFAULT_PLACEMENT_TYPE, true));
   }
 
   @Test
   public void testValidateFailsIfSiteIsInvalid() {
     try {
-      given(referenceService.siteIdExists(Lists.newArrayList(321L))).willReturn(Maps.newHashMap(321L, false));
+      given(referenceService.siteIdExists(Lists.newArrayList(321L)))
+          .willReturn(Maps.newHashMap(321L, false));
       placementDTO.setSiteId(321L);
       placementValidator.validate(placementDTO);
       fail("ValidationException expected.");
@@ -110,7 +114,8 @@ public class PlacementValidatorTest {
   @Test
   public void testValidateFailsIfGradeIsInvalid() {
     try {
-      given(referenceService.gradeIdsExists(Lists.newArrayList(321L))).willReturn(Maps.newHashMap(321L, false));
+      given(referenceService.gradeIdsExists(Lists.newArrayList(321L)))
+          .willReturn(Maps.newHashMap(321L, false));
       placementDTO.setGradeId(321L);
       placementValidator.validate(placementDTO);
       fail("ValidationException expected.");
@@ -123,7 +128,8 @@ public class PlacementValidatorTest {
   @Test
   public void testValidateFailsIfPlacementTypeIsInvalid() {
     try {
-      given(referenceService.placementTypeExists(Lists.newArrayList("OOPC"))).willReturn(Maps.newHashMap("OOPC", false));
+      given(referenceService.placementTypeExists(Lists.newArrayList("OOPC")))
+          .willReturn(Maps.newHashMap("OOPC", false));
       placementDTO.setPlacementType("OOPC");
       placementValidator.validate(placementDTO);
       fail("ValidationException expected.");

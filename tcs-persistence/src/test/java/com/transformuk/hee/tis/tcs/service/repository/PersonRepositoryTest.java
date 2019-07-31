@@ -4,6 +4,8 @@ import com.google.common.collect.Sets;
 import com.transformuk.hee.tis.tcs.service.TestConfig;
 import com.transformuk.hee.tis.tcs.service.model.Person;
 import com.transformuk.hee.tis.tcs.service.model.PersonTrust;
+import java.util.Optional;
+import javax.persistence.EntityManager;
 import org.junit.After;
 import org.junit.Assert;
 import org.junit.Before;
@@ -13,10 +15,6 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.test.context.junit4.SpringRunner;
 import org.springframework.transaction.annotation.Transactional;
-
-import javax.persistence.EntityManager;
-
-import java.util.Optional;
 
 @RunWith(SpringRunner.class)
 @SpringBootTest(classes = TestConfig.class)
@@ -33,7 +31,7 @@ public class PersonRepositoryTest {
 
   @Before
   @Transactional
-  public void setup(){
+  public void setup() {
     associatedTrust1 = new PersonTrust();
     associatedTrust1.setTrustId(1111L);
     associatedTrust2 = new PersonTrust();
@@ -50,7 +48,7 @@ public class PersonRepositoryTest {
 
   @After
   @Transactional
-  public void tearDown(){
+  public void tearDown() {
     entityManager.remove(personWithTrusts);
     entityManager.remove(associatedTrust1);
     entityManager.remove(associatedTrust2);
@@ -59,7 +57,7 @@ public class PersonRepositoryTest {
 
   @Test
   @Transactional
-  public void findPersonByIdShouldAlsoRetrieveAssociatedTrusts(){
+  public void findPersonByIdShouldAlsoRetrieveAssociatedTrusts() {
     Optional<Person> result = personRepository.findPersonById(personWithTrusts.getId());
 
     Assert.assertTrue(result.isPresent());

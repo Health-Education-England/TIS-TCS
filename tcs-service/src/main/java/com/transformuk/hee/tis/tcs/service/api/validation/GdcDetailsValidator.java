@@ -7,18 +7,17 @@ import com.transformuk.hee.tis.tcs.api.dto.GdcDetailsDTO;
 import com.transformuk.hee.tis.tcs.service.model.GdcDetails;
 import com.transformuk.hee.tis.tcs.service.repository.GdcDetailsRepository;
 import com.transformuk.hee.tis.tcs.service.repository.IdProjection;
+import java.util.ArrayList;
+import java.util.List;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.stereotype.Component;
 import org.springframework.validation.BeanPropertyBindingResult;
 import org.springframework.validation.FieldError;
 import org.springframework.web.bind.MethodArgumentNotValidException;
 
-import java.util.ArrayList;
-import java.util.List;
-
 /**
- * Holds more complex custom validation for a {@link GdcDetails} that
- * cannot be easily done via annotations
+ * Holds more complex custom validation for a {@link GdcDetails} that cannot be easily done via
+ * annotations
  */
 @Component
 public class GdcDetailsValidator {
@@ -30,14 +29,15 @@ public class GdcDetailsValidator {
   private GdcDetailsRepository gdcDetailsRepository;
   private ReferenceServiceImpl referenceService;
 
-  public GdcDetailsValidator(GdcDetailsRepository gdcDetailsRepository,ReferenceServiceImpl referenceService) {
+  public GdcDetailsValidator(GdcDetailsRepository gdcDetailsRepository,
+      ReferenceServiceImpl referenceService) {
     this.gdcDetailsRepository = gdcDetailsRepository;
     this.referenceService = referenceService;
   }
 
   /**
-   * Custom validation on the gdcDetailsDTO DTO, this is meant to supplement the annotation based validation
-   * already in place. It checks that the gmc status if gdc number is entered.
+   * Custom validation on the gdcDetailsDTO DTO, this is meant to supplement the annotation based
+   * validation already in place. It checks that the gmc status if gdc number is entered.
    *
    * @param gdcDetailsDTO the gdcDetails to check
    * @throws MethodArgumentNotValidException if there are validation errors
@@ -49,7 +49,8 @@ public class GdcDetailsValidator {
     fieldErrors.addAll(checkGdcNumber(gdcDetailsDTO));
     fieldErrors.addAll(checkGdcStatusExists(gdcDetailsDTO));
     if (!fieldErrors.isEmpty()) {
-      BeanPropertyBindingResult bindingResult = new BeanPropertyBindingResult(gdcDetailsDTO, "GdcDetailsDTO");
+      BeanPropertyBindingResult bindingResult = new BeanPropertyBindingResult(gdcDetailsDTO,
+          "GdcDetailsDTO");
       fieldErrors.forEach(bindingResult::addError);
       throw new MethodArgumentNotValidException(null, bindingResult);
     }
@@ -65,7 +66,7 @@ public class GdcDetailsValidator {
     List<FieldError> fieldErrors = new ArrayList<>();
     String gdcNumber = gdcDetailsDTO.getGdcNumber();
     // Ignore if gdcNumber is N/A or UNKNOWN
-    if(NA.equalsIgnoreCase(gdcNumber) || UNKNOWN.equalsIgnoreCase(gdcNumber)){
+    if (NA.equalsIgnoreCase(gdcNumber) || UNKNOWN.equalsIgnoreCase(gdcNumber)) {
       return fieldErrors;
     }
     if (gdcDetailsDTO.getId() != null) {
@@ -73,14 +74,16 @@ public class GdcDetailsValidator {
         List<IdProjection> existingGdcDetails = gdcDetailsRepository.findByGdcNumber(gdcNumber);
         if (existingGdcDetails.size() > 1) {
           fieldErrors.add(new FieldError(GDC_DETAILS_DTO_NAME, "gdcNumber",
-                  String.format("gdcNumber %s is not unique, there are currently %d persons with this number: %s",
-                          gdcDetailsDTO.getGdcNumber(), existingGdcDetails.size(),
-                          existingGdcDetails)));
+              String.format(
+                  "gdcNumber %s is not unique, there are currently %d persons with this number: %s",
+                  gdcDetailsDTO.getGdcNumber(), existingGdcDetails.size(),
+                  existingGdcDetails)));
         } else if (existingGdcDetails.size() == 1) {
           if (!gdcDetailsDTO.getId().equals(existingGdcDetails.get(0).getId())) {
             fieldErrors.add(new FieldError(GDC_DETAILS_DTO_NAME, "gdcNumber",
-                    String.format("gdcNumber %s is not unique, there is currently one person with this number: %s",
-                            gdcDetailsDTO.getGdcNumber(), existingGdcDetails.get(0))));
+                String.format(
+                    "gdcNumber %s is not unique, there is currently one person with this number: %s",
+                    gdcDetailsDTO.getGdcNumber(), existingGdcDetails.get(0))));
           }
         }
       }
@@ -90,8 +93,9 @@ public class GdcDetailsValidator {
         List<IdProjection> existingGdcDetails = gdcDetailsRepository.findByGdcNumber(gdcNumber);
         if (!existingGdcDetails.isEmpty()) {
           fieldErrors.add(new FieldError(GDC_DETAILS_DTO_NAME, "gdcNumber",
-                  String.format("gdcNumber %s is not unique, there is currently one person with this number: %s",
-                          gdcDetailsDTO.getGdcNumber(), existingGdcDetails.get(0))));
+              String.format(
+                  "gdcNumber %s is not unique, there is currently one person with this number: %s",
+                  gdcDetailsDTO.getGdcNumber(), existingGdcDetails.get(0))));
         }
       }
     }
@@ -102,10 +106,11 @@ public class GdcDetailsValidator {
     List<FieldError> fieldErrors = new ArrayList<>();
     // then check the gmc status
     if (StringUtils.isNotEmpty(gdcDetailsDTO.getGdcStatus())) {
-      Boolean isExists = referenceService.isValueExists(GmcStatusDTO.class, gdcDetailsDTO.getGdcStatus());
+      Boolean isExists = referenceService
+          .isValueExists(GmcStatusDTO.class, gdcDetailsDTO.getGdcStatus());
       if (!isExists) {
         fieldErrors.add(new FieldError(GDC_DETAILS_DTO_NAME, "gdcStatus",
-                String.format("gdcStatus %s does not exist", gdcDetailsDTO.getGdcStatus())));
+            String.format("gdcStatus %s does not exist", gdcDetailsDTO.getGdcStatus())));
       }
     }
     return fieldErrors;
@@ -125,7 +130,7 @@ public class GdcDetailsValidator {
 
   private void requireFieldErrors(List<FieldError> fieldErrors, String field) {
     fieldErrors.add(new FieldError(GDC_DETAILS_DTO_NAME, field,
-      String.format("%s is required", field)));
+        String.format("%s is required", field)));
   }
 
 }

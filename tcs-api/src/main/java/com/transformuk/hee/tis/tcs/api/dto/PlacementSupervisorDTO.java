@@ -4,6 +4,7 @@ import java.io.Serializable;
 import java.util.Objects;
 
 public class PlacementSupervisorDTO implements Serializable {
+
   private static final long serialVersionUID = -1604065532486158813L;
 
   private PersonLiteDTO person;
@@ -12,8 +13,12 @@ public class PlacementSupervisorDTO implements Serializable {
 
   @Override
   public boolean equals(Object o) {
-    if (this == o) return true;
-    if (o == null || getClass() != o.getClass()) return false;
+    if (this == o) {
+      return true;
+    }
+    if (o == null || getClass() != o.getClass()) {
+      return false;
+    }
     PlacementSupervisorDTO that = (PlacementSupervisorDTO) o;
     return Objects.equals(person, that.person) &&
         Objects.equals(type, that.type) &&

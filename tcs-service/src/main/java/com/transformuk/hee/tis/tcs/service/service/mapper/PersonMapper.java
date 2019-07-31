@@ -2,11 +2,10 @@ package com.transformuk.hee.tis.tcs.service.service.mapper;
 
 import com.transformuk.hee.tis.tcs.api.dto.PersonDTO;
 import com.transformuk.hee.tis.tcs.service.model.Person;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.stereotype.Component;
-
 import java.util.List;
 import java.util.stream.Collectors;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Component;
 
 /**
  * Mapper for the entity Person and its DTO PersonDTO.
@@ -56,12 +55,15 @@ public class PersonMapper {
     person.setGdcDetails(gdcDetailsMapper.toEntity(dto.getGdcDetails()));
     if (dto.getQualifications() != null) {
       person.setQualifications(qualificationMapper.toEntities(
-          dto.getQualifications().stream().collect(Collectors.toList())).stream().collect(Collectors.toSet())
+          dto.getQualifications().stream().collect(Collectors.toList())).stream()
+          .collect(Collectors.toSet())
       );
     }
     if (dto.getProgrammeMemberships() != null) {
-      person.setProgrammeMemberships(programmeMembershipMapper.programmeMembershipDTOsToProgrammeMemberships(
-          dto.getProgrammeMemberships().stream().collect(Collectors.toList())).stream().collect(Collectors.toSet())
+      person.setProgrammeMemberships(
+          programmeMembershipMapper.programmeMembershipDTOsToProgrammeMemberships(
+              dto.getProgrammeMemberships().stream().collect(Collectors.toList())).stream()
+              .collect(Collectors.toSet())
       );
     }
     person.setRightToWork(rightToWorkMapper.toEntity(dto.getRightToWork()));
@@ -95,14 +97,17 @@ public class PersonMapper {
     personDTO.setGdcDetails(gdcDetailsMapper.toDto(entity.getGdcDetails()));
     if (entity.getQualifications() != null) {
       personDTO.setQualifications(qualificationMapper.toDTOs(
-          entity.getQualifications().stream().collect(Collectors.toList())).stream().collect(Collectors.toSet())
+          entity.getQualifications().stream().collect(Collectors.toList())).stream()
+          .collect(Collectors.toSet())
       );
     }
     personDTO.setRightToWork(rightToWorkMapper.toDto(entity.getRightToWork()));
     personDTO.setRegulator(entity.getRegulator());
     if (entity.getProgrammeMemberships() != null) {
-      personDTO.setProgrammeMemberships(programmeMembershipMapper.programmeMembershipsToProgrammeMembershipDTOs(
-          entity.getProgrammeMemberships().stream().collect(Collectors.toList())).stream().collect(Collectors.toSet())
+      personDTO.setProgrammeMemberships(
+          programmeMembershipMapper.programmeMembershipsToProgrammeMembershipDTOs(
+              entity.getProgrammeMemberships().stream().collect(Collectors.toList())).stream()
+              .collect(Collectors.toSet())
       );
     }
 

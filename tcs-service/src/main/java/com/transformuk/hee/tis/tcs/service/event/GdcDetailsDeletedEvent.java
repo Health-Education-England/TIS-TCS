@@ -1,9 +1,8 @@
 package com.transformuk.hee.tis.tcs.service.event;
 
+import java.util.Objects;
 import org.springframework.context.ApplicationEvent;
 import org.springframework.lang.NonNull;
-
-import java.util.Objects;
 
 public class GdcDetailsDeletedEvent extends ApplicationEvent {
 
@@ -20,8 +19,12 @@ public class GdcDetailsDeletedEvent extends ApplicationEvent {
 
   @Override
   public boolean equals(Object o) {
-    if (this == o) return true;
-    if (o == null || getClass() != o.getClass()) return false;
+    if (this == o) {
+      return true;
+    }
+    if (o == null || getClass() != o.getClass()) {
+      return false;
+    }
     GdcDetailsDeletedEvent that = (GdcDetailsDeletedEvent) o;
     return Objects.equals(gdcDetailsId, that.gdcDetailsId);
   }

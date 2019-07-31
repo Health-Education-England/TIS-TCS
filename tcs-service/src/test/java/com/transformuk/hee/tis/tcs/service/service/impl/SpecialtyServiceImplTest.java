@@ -1,5 +1,12 @@
 package com.transformuk.hee.tis.tcs.service.service.impl;
 
+import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.Mockito.never;
+import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.verifyNoMoreInteractions;
+import static org.mockito.Mockito.verifyZeroInteractions;
+import static org.mockito.Mockito.when;
+
 import com.google.common.collect.Lists;
 import com.google.common.collect.Sets;
 import com.transformuk.hee.tis.tcs.api.dto.SpecialtyDTO;
@@ -9,6 +16,9 @@ import com.transformuk.hee.tis.tcs.api.enumeration.Status;
 import com.transformuk.hee.tis.tcs.service.model.Specialty;
 import com.transformuk.hee.tis.tcs.service.repository.SpecialtyRepository;
 import com.transformuk.hee.tis.tcs.service.service.mapper.SpecialtyMapper;
+import java.util.Collections;
+import java.util.List;
+import java.util.Set;
 import org.apache.commons.lang3.StringUtils;
 import org.junit.Assert;
 import org.junit.Before;
@@ -23,17 +33,6 @@ import org.springframework.context.ApplicationEventPublisher;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageImpl;
 import org.springframework.data.domain.PageRequest;
-
-import java.util.Collections;
-import java.util.List;
-import java.util.Set;
-
-import static org.mockito.ArgumentMatchers.any;
-import static org.mockito.Mockito.never;
-import static org.mockito.Mockito.verify;
-import static org.mockito.Mockito.verifyNoMoreInteractions;
-import static org.mockito.Mockito.verifyZeroInteractions;
-import static org.mockito.Mockito.when;
 
 @RunWith(MockitoJUnitRunner.class)
 public class SpecialtyServiceImplTest {
@@ -80,7 +79,8 @@ public class SpecialtyServiceImplTest {
     expectedSpecialtyDTO.setId(12345L);
     when(specialtyMapperMock.specialtyDTOToSpecialty(specialtyDTO)).thenReturn(specialtyMock);
     when(specialtyRepositoryMock.save(specialtyMock)).thenReturn(specialtyMock);
-    when(specialtyMapperMock.specialtyToSpecialtyDTO(specialtyMock)).thenReturn(expectedSpecialtyDTO);
+    when(specialtyMapperMock.specialtyToSpecialtyDTO(specialtyMock))
+        .thenReturn(expectedSpecialtyDTO);
 
     SpecialtyDTO result = testObj.save(specialtyDTO);
 
@@ -99,7 +99,8 @@ public class SpecialtyServiceImplTest {
 
     when(specialtyMapperMock.specialtyDTOToSpecialty(specialtyDTO)).thenReturn(specialtyMock);
     when(specialtyRepositoryMock.save(specialtyMock)).thenReturn(specialtyMock);
-    when(specialtyMapperMock.specialtyToSpecialtyDTO(specialtyMock)).thenReturn(expectedSpecialtyDTO);
+    when(specialtyMapperMock.specialtyToSpecialtyDTO(specialtyMock))
+        .thenReturn(expectedSpecialtyDTO);
 
     SpecialtyDTO result = testObj.save(specialtyDTO);
 
@@ -123,10 +124,14 @@ public class SpecialtyServiceImplTest {
     PageImpl<Specialty> pagedSpecialties = new PageImpl<>(foundSpecialties, pageRequest, 1L);
     List<SpecialtyDTO> convertedSpecialties = Lists.newArrayList(specialtyDTO);
 
-    when(specialtyRepositoryMock.findSpecialtiesByProgrammeId(programmeId, Status.CURRENT, pageRequest)).thenReturn(pagedSpecialties);
-    when(specialtyMapperMock.specialtiesToSpecialtyDTOs(foundSpecialties)).thenReturn(convertedSpecialties);
+    when(specialtyRepositoryMock
+        .findSpecialtiesByProgrammeId(programmeId, Status.CURRENT, pageRequest))
+        .thenReturn(pagedSpecialties);
+    when(specialtyMapperMock.specialtiesToSpecialtyDTOs(foundSpecialties))
+        .thenReturn(convertedSpecialties);
 
-    Page<SpecialtyDTO> result = testObj.getPagedSpecialtiesForProgrammeId(programmeId, StringUtils.EMPTY, pageRequest);
+    Page<SpecialtyDTO> result = testObj
+        .getPagedSpecialtiesForProgrammeId(programmeId, StringUtils.EMPTY, pageRequest);
 
     Assert.assertEquals(1L, result.getNumberOfElements());
     Assert.assertEquals(page, result.getNumber());
@@ -143,10 +148,14 @@ public class SpecialtyServiceImplTest {
     PageImpl<Specialty> pagedSpecialties = new PageImpl<>(noFoundSpecialties, pageRequest, 1L);
     List<SpecialtyDTO> convertedSpecialties = Lists.newArrayList();
 
-    when(specialtyRepositoryMock.findSpecialtiesByProgrammeId(programmeId, Status.CURRENT, pageRequest)).thenReturn(pagedSpecialties);
-    when(specialtyMapperMock.specialtiesToSpecialtyDTOs(noFoundSpecialties)).thenReturn(convertedSpecialties);
+    when(specialtyRepositoryMock
+        .findSpecialtiesByProgrammeId(programmeId, Status.CURRENT, pageRequest))
+        .thenReturn(pagedSpecialties);
+    when(specialtyMapperMock.specialtiesToSpecialtyDTOs(noFoundSpecialties))
+        .thenReturn(convertedSpecialties);
 
-    Page<SpecialtyDTO> result = testObj.getPagedSpecialtiesForProgrammeId(programmeId, StringUtils.EMPTY, pageRequest);
+    Page<SpecialtyDTO> result = testObj
+        .getPagedSpecialtiesForProgrammeId(programmeId, StringUtils.EMPTY, pageRequest);
 
     Assert.assertEquals(0L, result.getNumberOfElements());
     Assert.assertEquals(page, result.getNumber());
@@ -197,17 +206,22 @@ public class SpecialtyServiceImplTest {
     List<SpecialtyDTO> convertedSpecialties = Lists.newArrayList(specialtyDTO);
     String searchCriteria = "SEARCH TEXT";
 
-    when(specialtyRepositoryMock.findSpecialtiesByProgrammeIdAndName(programmeId, searchCriteria, Status.CURRENT, pageRequest)).thenReturn(pagedSpecialties);
-    when(specialtyMapperMock.specialtiesToSpecialtyDTOs(foundSpecialties)).thenReturn(convertedSpecialties);
+    when(specialtyRepositoryMock
+        .findSpecialtiesByProgrammeIdAndName(programmeId, searchCriteria, Status.CURRENT,
+            pageRequest)).thenReturn(pagedSpecialties);
+    when(specialtyMapperMock.specialtiesToSpecialtyDTOs(foundSpecialties))
+        .thenReturn(convertedSpecialties);
 
-    Page<SpecialtyDTO> result = testObj.getPagedSpecialtiesForProgrammeId(programmeId, searchCriteria, pageRequest);
+    Page<SpecialtyDTO> result = testObj
+        .getPagedSpecialtiesForProgrammeId(programmeId, searchCriteria, pageRequest);
 
     Assert.assertEquals(1L, result.getNumberOfElements());
     Assert.assertEquals(page, result.getNumber());
     Assert.assertEquals(1L, result.getContent().size());
     Assert.assertEquals(specialtyDTO, result.getContent().get(0));
 
-    verify(specialtyRepositoryMock, never()).findSpecialtyDistinctByCurriculaProgrammesIdAndStatusIs(any(), any(), any());
+    verify(specialtyRepositoryMock, never())
+        .findSpecialtyDistinctByCurriculaProgrammesIdAndStatusIs(any(), any(), any());
   }
 
   @Test(expected = NullPointerException.class)
@@ -236,12 +250,15 @@ public class SpecialtyServiceImplTest {
   public void getSpecialtiesForProgrammeAndPersonShouldReturnEmptyListWhenNoSpecialtiesFound() {
     long programmeId = 1L;
     long personId = 2L;
-    when(specialtyRepositoryMock.findDistinctByProgrammeIdAndPersonIdAndStatus(programmeId, personId, Status.CURRENT)).thenReturn(Collections.EMPTY_SET);
+    when(specialtyRepositoryMock
+        .findDistinctByProgrammeIdAndPersonIdAndStatus(programmeId, personId, Status.CURRENT))
+        .thenReturn(Collections.EMPTY_SET);
     List<SpecialtyDTO> result = testObj.getSpecialtiesForProgrammeAndPerson(programmeId, personId);
 
     Assert.assertEquals(0, result.size());
 
-    verify(specialtyRepositoryMock).findDistinctByProgrammeIdAndPersonIdAndStatus(programmeId, personId, Status.CURRENT);
+    verify(specialtyRepositoryMock)
+        .findDistinctByProgrammeIdAndPersonIdAndStatus(programmeId, personId, Status.CURRENT);
     verify(specialtyMapperMock).specialtiesToSpecialtyDTOs(Collections.EMPTY_LIST);
   }
 
@@ -252,16 +269,20 @@ public class SpecialtyServiceImplTest {
     Set<Specialty> foundSpecialties = Sets.newHashSet(specialtyMock);
     List<SpecialtyDTO> convertedSpecialties = Lists.newArrayList(specialtyDTO);
 
-    when(specialtyRepositoryMock.findDistinctByProgrammeIdAndPersonIdAndStatus(programmeId, personId, Status.CURRENT)).thenReturn(foundSpecialties);
+    when(specialtyRepositoryMock
+        .findDistinctByProgrammeIdAndPersonIdAndStatus(programmeId, personId, Status.CURRENT))
+        .thenReturn(foundSpecialties);
     List<Specialty> specialtiesList = Lists.newArrayList(foundSpecialties);
-    when(specialtyMapperMock.specialtiesToSpecialtyDTOs(specialtiesList)).thenReturn(convertedSpecialties);
+    when(specialtyMapperMock.specialtiesToSpecialtyDTOs(specialtiesList))
+        .thenReturn(convertedSpecialties);
 
     List<SpecialtyDTO> result = testObj.getSpecialtiesForProgrammeAndPerson(programmeId, personId);
 
     Assert.assertEquals(1, result.size());
     Assert.assertEquals(convertedSpecialties, result);
 
-    verify(specialtyRepositoryMock).findDistinctByProgrammeIdAndPersonIdAndStatus(programmeId, personId, Status.CURRENT);
+    verify(specialtyRepositoryMock)
+        .findDistinctByProgrammeIdAndPersonIdAndStatus(programmeId, personId, Status.CURRENT);
     verify(specialtyMapperMock).specialtiesToSpecialtyDTOs(specialtiesList);
   }
 }

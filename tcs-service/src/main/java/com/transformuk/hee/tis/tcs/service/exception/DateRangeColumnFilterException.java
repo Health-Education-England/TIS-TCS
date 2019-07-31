@@ -5,7 +5,7 @@ package com.transformuk.hee.tis.tcs.service.exception;
  */
 public class DateRangeColumnFilterException extends RuntimeException {
 
-	public DateRangeColumnFilterException(String message) {
-		super(message);
-	}
+  public DateRangeColumnFilterException(String message) {
+    super(message);
+  }
 }

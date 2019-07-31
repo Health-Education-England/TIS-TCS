@@ -1,5 +1,8 @@
 package com.transformuk.hee.tis.tcs.service.service.impl;
 
+import static org.mockito.Matchers.any;
+import static org.mockito.Mockito.when;
+
 import com.transformuk.hee.tis.tcs.api.dto.ContactDetailsDTO;
 import com.transformuk.hee.tis.tcs.api.dto.GdcDetailsDTO;
 import com.transformuk.hee.tis.tcs.api.dto.GmcDetailsDTO;
@@ -27,9 +30,6 @@ import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.test.context.junit4.SpringRunner;
 import org.springframework.transaction.annotation.Transactional;
-
-import static org.mockito.Matchers.any;
-import static org.mockito.Mockito.when;
 
 @RunWith(SpringRunner.class)
 @SpringBootTest(classes = Application.class)
@@ -142,7 +142,8 @@ public class PersonServiceIntTest {
     RightToWorkRepository rightToWorkRepositoryMock = Mockito.mock(RightToWorkRepository.class);
     personService.setRightToWorkRepository(rightToWorkRepositoryMock);
 
-    when(rightToWorkRepository.save(any(RightToWork.class))).thenThrow(new RuntimeException("Random exception because of id"));
+    when(rightToWorkRepository.save(any(RightToWork.class)))
+        .thenThrow(new RuntimeException("Random exception because of id"));
 
     int beforeGdcSize = gdcDetailsRepository.findAll().size();
     int beforeGmcSize = gmcDetailsRepository.findAll().size();

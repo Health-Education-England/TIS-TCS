@@ -5,14 +5,13 @@ import com.transformuk.hee.tis.tcs.service.model.ContactDetails;
 import com.transformuk.hee.tis.tcs.service.repository.ContactDetailsRepository;
 import com.transformuk.hee.tis.tcs.service.service.ContactDetailsService;
 import com.transformuk.hee.tis.tcs.service.service.mapper.ContactDetailsMapper;
+import java.util.List;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
-
-import java.util.List;
 
 
 /**
@@ -28,7 +27,8 @@ public class ContactDetailsServiceImpl implements ContactDetailsService {
 
   private final ContactDetailsMapper contactDetailsMapper;
 
-  public ContactDetailsServiceImpl(ContactDetailsRepository contactDetailsRepository, ContactDetailsMapper contactDetailsMapper) {
+  public ContactDetailsServiceImpl(ContactDetailsRepository contactDetailsRepository,
+      ContactDetailsMapper contactDetailsMapper) {
     this.contactDetailsRepository = contactDetailsRepository;
     this.contactDetailsMapper = contactDetailsMapper;
   }

@@ -4,6 +4,8 @@ import com.google.common.base.Stopwatch;
 import com.transformuk.hee.tis.tcs.service.service.PersonElasticSearchService;
 import com.transformuk.hee.tis.tcs.service.service.helper.SqlQuerySupplier;
 import com.transformuk.hee.tis.tcs.service.service.impl.PersonViewRowMapper;
+import java.util.List;
+import java.util.concurrent.CompletableFuture;
 import net.javacrumbs.shedlock.core.SchedulerLock;
 import org.apache.commons.collections4.CollectionUtils;
 import org.elasticsearch.index.IndexNotFoundException;
@@ -18,22 +20,16 @@ import org.springframework.jmx.export.annotation.ManagedResource;
 import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Component;
 
-import java.util.List;
-import java.util.concurrent.CompletableFuture;
-
 @Component
 @ManagedResource(objectName = "tcs.mbean:name=PersonElasticSearchJob",
     description = "Service that clears the persons index in ES and repopulates the data")
 public class PersonElasticSearchSyncJob {
 
+  protected static final int DEFAULT_PAGE_SIZE = 10_000;
   private static final Logger LOG = LoggerFactory.getLogger(PersonElasticSearchSyncJob.class);
   private static final String ES_INDEX = "persons";
   private static final int FIFTEEN_MIN = 15 * 60 * 1000;
-
   private Stopwatch mainStopWatch;
-
-  protected static final int DEFAULT_PAGE_SIZE = 10_000;
-
   @Autowired
   private SqlQuerySupplier sqlQuerySupplier;
   @Autowired
@@ -97,7 +93,8 @@ public class PersonElasticSearchSyncJob {
         .replace("LIMITCLAUSE", limitClause);
 
     MapSqlParameterSource paramSource = new MapSqlParameterSource();
-    List<PersonView> queryResult = namedParameterJdbcTemplate.query(query, paramSource, new PersonViewRowMapper());
+    List<PersonView> queryResult = namedParameterJdbcTemplate
+        .query(query, paramSource, new PersonViewRowMapper());
     personElasticSearchService.updateDocumentWithTrustData(queryResult);
     // this is to query from programmeMembership, Programme and TrainingNumber
     personElasticSearchService.updateDocumentWithProgrammeMembershipData(queryResult);
@@ -138,7 +135,8 @@ public class PersonElasticSearchSyncJob {
       }
       elasticSearchOperations.refresh(PersonView.class);
       stopwatch.reset().start();
-      LOG.info("Sync job [{}] finished. Total time taken {} for processing [{}] records", getJobName(), mainStopWatch.stop().toString(), totalRecords);
+      LOG.info("Sync job [{}] finished. Total time taken {} for processing [{}] records",
+          getJobName(), mainStopWatch.stop().toString(), totalRecords);
       mainStopWatch = null;
     } catch (Exception e) {
       e.printStackTrace();

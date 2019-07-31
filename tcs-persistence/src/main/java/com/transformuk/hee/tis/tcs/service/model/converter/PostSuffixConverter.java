@@ -1,7 +1,6 @@
 package com.transformuk.hee.tis.tcs.service.model.converter;
 
 import com.transformuk.hee.tis.tcs.api.enumeration.PostSuffix;
-
 import javax.persistence.AttributeConverter;
 import javax.persistence.Converter;
 
@@ -10,7 +9,7 @@ public class PostSuffixConverter implements AttributeConverter<PostSuffix, Strin
 
   @Override
   public String convertToDatabaseColumn(PostSuffix attribute) {
-    if(attribute != null){
+    if (attribute != null) {
       return attribute.getSuffixValue();
     }
     return null;

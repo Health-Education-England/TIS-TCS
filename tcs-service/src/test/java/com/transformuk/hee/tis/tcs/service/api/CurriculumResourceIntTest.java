@@ -1,5 +1,18 @@
 package com.transformuk.hee.tis.tcs.service.api;
 
+import static org.assertj.core.api.Assertions.assertThat;
+import static org.hamcrest.Matchers.contains;
+import static org.hamcrest.Matchers.containsInAnyOrder;
+import static org.hamcrest.Matchers.hasItem;
+import static org.hamcrest.Matchers.not;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.delete;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.put;
+import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.content;
+import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
+import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
+
 import com.google.common.collect.Sets;
 import com.transformuk.hee.tis.tcs.api.dto.CurriculumDTO;
 import com.transformuk.hee.tis.tcs.api.dto.SpecialtyDTO;
@@ -16,6 +29,7 @@ import com.transformuk.hee.tis.tcs.service.repository.CurriculumRepository;
 import com.transformuk.hee.tis.tcs.service.repository.SpecialtyRepository;
 import com.transformuk.hee.tis.tcs.service.service.CurriculumService;
 import com.transformuk.hee.tis.tcs.service.service.mapper.CurriculumMapper;
+import java.util.List;
 import org.apache.commons.codec.net.URLCodec;
 import org.assertj.core.util.Lists;
 import org.junit.Before;
@@ -31,13 +45,6 @@ import org.springframework.test.context.junit4.SpringRunner;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.setup.MockMvcBuilders;
 import org.springframework.transaction.annotation.Transactional;
-
-import java.util.List;
-
-import static org.assertj.core.api.Assertions.assertThat;
-import static org.hamcrest.Matchers.*;
-import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.*;
-import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.*;
 
 /**
  * Test class for the CurriculumResource REST controller.
@@ -111,8 +118,8 @@ public class CurriculumResourceIntTest {
   /**
    * Create an entity for this test.
    * <p>
-   * This is a static method, as tests for other entities might also need it,
-   * if they test an entity which requires the current entity.
+   * This is a static method, as tests for other entities might also need it, if they test an entity
+   * which requires the current entity.
    */
   public static Curriculum createCurriculumEntity() {
     Curriculum curriculum = new Curriculum()
@@ -127,9 +134,10 @@ public class CurriculumResourceIntTest {
     return curriculum;
   }
 
-  public static Curriculum createCurriculumEntity(String name, String intrepidId, CurriculumSubType curriculumSubType,
-                                                  Integer length, AssessmentType assessmentType, Boolean doesThisCurrLeadToCct,
-                                                  Integer periodOfGrace) {
+  public static Curriculum createCurriculumEntity(String name, String intrepidId,
+      CurriculumSubType curriculumSubType,
+      Integer length, AssessmentType assessmentType, Boolean doesThisCurrLeadToCct,
+      Integer periodOfGrace) {
     Curriculum curriculum = new Curriculum()
         .name(name)
         .intrepidId(intrepidId)
@@ -157,7 +165,8 @@ public class CurriculumResourceIntTest {
   @Before
   public void setup() {
     MockitoAnnotations.initMocks(this);
-    CurriculumResource curriculumResource = new CurriculumResource(curriculumService, curriculumValidator);
+    CurriculumResource curriculumResource = new CurriculumResource(curriculumService,
+        curriculumValidator);
     this.restCurriculumMockMvc = MockMvcBuilders.standaloneSetup(curriculumResource)
         .setCustomArgumentResolvers(pageableArgumentResolver)
         .setControllerAdvice(exceptionTranslator)
@@ -167,7 +176,8 @@ public class CurriculumResourceIntTest {
   @Before
   public void initTest() {
     curriculum = createCurriculumEntity(DEFAULT_NAME, DEFAULT_INTREPID_ID,
-        DEFAULT_CURRICULUM_SUB_TYPE,DEFAULT_LENGTH, DEFAULT_ASSESSMENT_TYPE, DEFAULT_DOES_THIS_CURRICULUM_LEAD_TO_CCT,
+        DEFAULT_CURRICULUM_SUB_TYPE, DEFAULT_LENGTH, DEFAULT_ASSESSMENT_TYPE,
+        DEFAULT_DOES_THIS_CURRICULUM_LEAD_TO_CCT,
         DEFAULT_PERIOD_OF_GRACE);
     specialty = createSpecialtyEntity();
   }
@@ -194,7 +204,8 @@ public class CurriculumResourceIntTest {
     assertThat(testCurriculum.getCurriculumSubType()).isEqualTo(DEFAULT_CURRICULUM_SUB_TYPE);
     assertThat(testCurriculum.getLength()).isEqualTo(DEFAULT_LENGTH);
     assertThat(testCurriculum.getAssessmentType()).isEqualTo(DEFAULT_ASSESSMENT_TYPE);
-    assertThat(testCurriculum.isDoesThisCurriculumLeadToCct()).isEqualTo(DEFAULT_DOES_THIS_CURRICULUM_LEAD_TO_CCT);
+    assertThat(testCurriculum.isDoesThisCurriculumLeadToCct())
+        .isEqualTo(DEFAULT_DOES_THIS_CURRICULUM_LEAD_TO_CCT);
     assertThat(testCurriculum.getPeriodOfGrace()).isEqualTo(DEFAULT_PERIOD_OF_GRACE);
   }
 
@@ -242,7 +253,6 @@ public class CurriculumResourceIntTest {
         .content(TestUtil.convertObjectToJsonBytes(curriculumDTO)))
         .andExpect(status().isBadRequest());
 
-
     // Validate the Curriculum not in the database
     curriculumList = curriculumRepository.findAll();
     assertThat(curriculumList).hasSize(databaseSizeBeforeCreate);
@@ -272,7 +282,6 @@ public class CurriculumResourceIntTest {
         .contentType(TestUtil.APPLICATION_JSON_UTF8)
         .content(TestUtil.convertObjectToJsonBytes(curriculumDTO)))
         .andExpect(status().isBadRequest());
-
 
     // Validate the Curriculum not in the database
     curriculumList = curriculumRepository.findAll();
@@ -304,7 +313,6 @@ public class CurriculumResourceIntTest {
         .content(TestUtil.convertObjectToJsonBytes(curriculumDTO)))
         .andExpect(status().isBadRequest());
 
-
     // Validate the Curriculum not in the database
     curriculumList = curriculumRepository.findAll();
     assertThat(curriculumList).hasSize(databaseSizeBeforeCreate);
@@ -312,7 +320,8 @@ public class CurriculumResourceIntTest {
 
   @Test
   @Transactional
-  public void createOrUpdateCurriculumShouldFailWhenIncorrectPeriodOfGraceProvided() throws Exception {
+  public void createOrUpdateCurriculumShouldFailWhenIncorrectPeriodOfGraceProvided()
+      throws Exception {
     int databaseSizeBeforeCreate = curriculumRepository.findAll().size();
 
     //create
@@ -335,11 +344,9 @@ public class CurriculumResourceIntTest {
         .content(TestUtil.convertObjectToJsonBytes(curriculumDTO)))
         .andExpect(status().isBadRequest());
 
-
     // Validate the Curriculum not in the database
     curriculumList = curriculumRepository.findAll();
     assertThat(curriculumList).hasSize(databaseSizeBeforeCreate);
-
 
     //create with negative value
     curriculum.setPeriodOfGrace(-1);
@@ -359,7 +366,6 @@ public class CurriculumResourceIntTest {
         .contentType(TestUtil.APPLICATION_JSON_UTF8)
         .content(TestUtil.convertObjectToJsonBytes(curriculumDTO)))
         .andExpect(status().isBadRequest());
-
 
     // Validate the Curriculum not in the database
     curriculumList = curriculumRepository.findAll();
@@ -434,12 +440,15 @@ public class CurriculumResourceIntTest {
         .andExpect(status().isOk())
         .andExpect(content().contentType(MediaType.APPLICATION_JSON_UTF8_VALUE))
         .andExpect(jsonPath("$.[*].id").value(hasItem(curriculum.getId().intValue())))
-      .andExpect(jsonPath("$.[*].intrepidId").value(hasItem(DEFAULT_INTREPID_ID)))
-      .andExpect(jsonPath("$.[*].name").value(hasItem(DEFAULT_NAME)))
-        .andExpect(jsonPath("$.[*].curriculumSubType").value(hasItem(DEFAULT_CURRICULUM_SUB_TYPE.toString())))
+        .andExpect(jsonPath("$.[*].intrepidId").value(hasItem(DEFAULT_INTREPID_ID)))
+        .andExpect(jsonPath("$.[*].name").value(hasItem(DEFAULT_NAME)))
+        .andExpect(jsonPath("$.[*].curriculumSubType")
+            .value(hasItem(DEFAULT_CURRICULUM_SUB_TYPE.toString())))
         .andExpect(jsonPath("$.[*].length").value(hasItem(DEFAULT_LENGTH)))
-        .andExpect(jsonPath("$.[*].assessmentType").value(hasItem(DEFAULT_ASSESSMENT_TYPE.toString())))
-        .andExpect(jsonPath("$.[*].doesThisCurriculumLeadToCct").value(hasItem(DEFAULT_DOES_THIS_CURRICULUM_LEAD_TO_CCT.booleanValue())))
+        .andExpect(
+            jsonPath("$.[*].assessmentType").value(hasItem(DEFAULT_ASSESSMENT_TYPE.toString())))
+        .andExpect(jsonPath("$.[*].doesThisCurriculumLeadToCct")
+            .value(hasItem(DEFAULT_DOES_THIS_CURRICULUM_LEAD_TO_CCT.booleanValue())))
         .andExpect(jsonPath("$.[*].periodOfGrace").value(hasItem(DEFAULT_PERIOD_OF_GRACE)));
   }
 
@@ -454,12 +463,13 @@ public class CurriculumResourceIntTest {
         .andExpect(status().isOk())
         .andExpect(content().contentType(MediaType.APPLICATION_JSON_UTF8_VALUE))
         .andExpect(jsonPath("$.id").value(curriculum.getId().intValue()))
-      .andExpect(jsonPath("$.intrepidId").value(DEFAULT_INTREPID_ID))
-      .andExpect(jsonPath("$.name").value(DEFAULT_NAME))
+        .andExpect(jsonPath("$.intrepidId").value(DEFAULT_INTREPID_ID))
+        .andExpect(jsonPath("$.name").value(DEFAULT_NAME))
         .andExpect(jsonPath("$.curriculumSubType").value(DEFAULT_CURRICULUM_SUB_TYPE.toString()))
         .andExpect(jsonPath("$.length").value(DEFAULT_LENGTH))
         .andExpect(jsonPath("$.assessmentType").value(DEFAULT_ASSESSMENT_TYPE.toString()))
-        .andExpect(jsonPath("$.doesThisCurriculumLeadToCct").value(DEFAULT_DOES_THIS_CURRICULUM_LEAD_TO_CCT.booleanValue()))
+        .andExpect(jsonPath("$.doesThisCurriculumLeadToCct")
+            .value(DEFAULT_DOES_THIS_CURRICULUM_LEAD_TO_CCT.booleanValue()))
         .andExpect(jsonPath("$.periodOfGrace").value(DEFAULT_PERIOD_OF_GRACE));
   }
 
@@ -516,8 +526,9 @@ public class CurriculumResourceIntTest {
     //when & then
     String colFilters = new URLCodec().encode("{\"curriculumSubType\":[\"DENTAL_CURRICULUM\"]}");
     // Get all the curriculumList
-    restCurriculumMockMvc.perform(get("/api/curricula?sort=id,desc&searchQuery=other&columnFilters=" +
-        colFilters))
+    restCurriculumMockMvc
+        .perform(get("/api/curricula?sort=id,desc&searchQuery=other&columnFilters=" +
+            colFilters))
         .andExpect(status().isOk())
         .andExpect(jsonPath("$.[*].curriculumSubType").value("DENTAL_CURRICULUM"));
   }
@@ -560,7 +571,8 @@ public class CurriculumResourceIntTest {
         .periodOfGrace(UPDATED_PERIOD_OF_GRACE);
 
     Specialty savedSpecialty = specialtyRepository.save(specialty);
-    CurriculumDTO curriculumDTO = linkCurriculumToSpecialty(updatedCurriculum, savedSpecialty.getId());
+    CurriculumDTO curriculumDTO = linkCurriculumToSpecialty(updatedCurriculum,
+        savedSpecialty.getId());
 
     restCurriculumMockMvc.perform(put("/api/curricula")
         .contentType(TestUtil.APPLICATION_JSON_UTF8)
@@ -575,7 +587,8 @@ public class CurriculumResourceIntTest {
     assertThat(testCurriculum.getCurriculumSubType()).isEqualTo(UPDATED_CURRICULUM_SUB_TYPE);
     assertThat(testCurriculum.getLength()).isEqualTo(UPDATED_LENGTH);
     assertThat(testCurriculum.getAssessmentType()).isEqualTo(UPDATED_ASSESSMENT_TYPE);
-    assertThat(testCurriculum.isDoesThisCurriculumLeadToCct()).isEqualTo(UPDATED_DOES_THIS_CURRICULUM_LEAD_TO_CCT);
+    assertThat(testCurriculum.isDoesThisCurriculumLeadToCct())
+        .isEqualTo(UPDATED_DOES_THIS_CURRICULUM_LEAD_TO_CCT);
     assertThat(testCurriculum.getPeriodOfGrace()).isEqualTo(UPDATED_PERIOD_OF_GRACE);
   }
 
@@ -667,7 +680,8 @@ public class CurriculumResourceIntTest {
 
     Specialty savedSpecialty = specialtyRepository.save(specialty);
     CurriculumDTO curriculumDTO = linkCurriculumToSpecialty(curriculum, savedSpecialty.getId());
-    CurriculumDTO curriculum2DTO = linkCurriculumToSpecialty(anotherCurriculum, savedSpecialty.getId());
+    CurriculumDTO curriculum2DTO = linkCurriculumToSpecialty(anotherCurriculum,
+        savedSpecialty.getId());
 
     List<CurriculumDTO> payload = Lists.newArrayList(curriculumDTO, curriculum2DTO);
     restCurriculumMockMvc.perform(post("/api/bulk-curricula")
@@ -699,7 +713,8 @@ public class CurriculumResourceIntTest {
 
     Specialty savedSpecialty = specialtyRepository.save(specialty);
     CurriculumDTO curriculumDTO = linkCurriculumToSpecialty(curriculum, savedSpecialty.getId());
-    CurriculumDTO curriculum2DTO = linkCurriculumToSpecialty(anotherCurriculum, savedSpecialty.getId());
+    CurriculumDTO curriculum2DTO = linkCurriculumToSpecialty(anotherCurriculum,
+        savedSpecialty.getId());
 
     List<CurriculumDTO> payload = Lists.newArrayList(curriculumDTO, curriculum2DTO);
     restCurriculumMockMvc.perform(post("/api/bulk-curricula")
@@ -726,7 +741,8 @@ public class CurriculumResourceIntTest {
 
     Specialty savedSpecialty = specialtyRepository.save(specialty);
     CurriculumDTO curriculumDTO = linkCurriculumToSpecialty(curriculum, savedSpecialty.getId());
-    CurriculumDTO curriculum2DTO = linkCurriculumToSpecialty(anotherCurriculum, savedSpecialty.getId());
+    CurriculumDTO curriculum2DTO = linkCurriculumToSpecialty(anotherCurriculum,
+        savedSpecialty.getId());
 
     //ensure curricula is in the database before an update
     Curriculum savedCurriculum = curriculumRepository.saveAndFlush(this.curriculum);
@@ -754,18 +770,19 @@ public class CurriculumResourceIntTest {
   @Transactional
   public void shouldFindCurriculumByName() throws Exception {
     Curriculum anotherCurriculum = new Curriculum()
-            .name(DEFAULT_NAME_2)
-            .status(Status.CURRENT)
-            .length(DEFAULT_LENGTH)
-            .intrepidId(DEFAULT_INTREPID_ID_2)
-            .curriculumSubType(DEFAULT_CURRICULUM_SUB_TYPE)
-            .assessmentType(DEFAULT_ASSESSMENT_TYPE)
-            .doesThisCurriculumLeadToCct(DEFAULT_DOES_THIS_CURRICULUM_LEAD_TO_CCT)
-            .periodOfGrace(DEFAULT_PERIOD_OF_GRACE);
+        .name(DEFAULT_NAME_2)
+        .status(Status.CURRENT)
+        .length(DEFAULT_LENGTH)
+        .intrepidId(DEFAULT_INTREPID_ID_2)
+        .curriculumSubType(DEFAULT_CURRICULUM_SUB_TYPE)
+        .assessmentType(DEFAULT_ASSESSMENT_TYPE)
+        .doesThisCurriculumLeadToCct(DEFAULT_DOES_THIS_CURRICULUM_LEAD_TO_CCT)
+        .periodOfGrace(DEFAULT_PERIOD_OF_GRACE);
 
     Specialty savedSpecialty = specialtyRepository.save(specialty);
     CurriculumDTO curriculumDTO = linkCurriculumToSpecialty(curriculum, savedSpecialty.getId());
-    CurriculumDTO curriculum2DTO = linkCurriculumToSpecialty(anotherCurriculum, savedSpecialty.getId());
+    CurriculumDTO curriculum2DTO = linkCurriculumToSpecialty(anotherCurriculum,
+        savedSpecialty.getId());
 
     //ensure curricula is in the database before an update
     Curriculum savedCurriculum = curriculumRepository.saveAndFlush(this.curriculum);
@@ -776,11 +793,12 @@ public class CurriculumResourceIntTest {
     curriculum2DTO.setId(anotherSavedCurriculum.getId());
 
     String jsonQueryString = "{\"name\":[\"" + DEFAULT_NAME_2 + "\"]}";
-    String jsonQuerystringURLEncoded = new org.apache.commons.codec.net.URLCodec().encode(jsonQueryString);
+    String jsonQuerystringURLEncoded = new org.apache.commons.codec.net.URLCodec()
+        .encode(jsonQueryString);
     restCurriculumMockMvc.perform(get("/api/curricula?columnFilters=" + jsonQuerystringURLEncoded))
-            .andExpect(status().isOk())
-            .andExpect(jsonPath("$.[*].name").isArray())
-            .andExpect(jsonPath("$.[0].name").value(DEFAULT_NAME_2));
+        .andExpect(status().isOk())
+        .andExpect(jsonPath("$.[*].name").isArray())
+        .andExpect(jsonPath("$.[0].name").value(DEFAULT_NAME_2));
   }
 
   @Test
@@ -797,7 +815,8 @@ public class CurriculumResourceIntTest {
 
     Specialty savedSpecialty = specialtyRepository.save(specialty);
     CurriculumDTO curriculumDTO = linkCurriculumToSpecialty(curriculum, savedSpecialty.getId());
-    CurriculumDTO curriculum2DTO = linkCurriculumToSpecialty(anotherCurriculum, savedSpecialty.getId());
+    CurriculumDTO curriculum2DTO = linkCurriculumToSpecialty(anotherCurriculum,
+        savedSpecialty.getId());
 
     //ensure curricula is in the database before an update
     Curriculum savedCurriculum = curriculumRepository.saveAndFlush(this.curriculum);

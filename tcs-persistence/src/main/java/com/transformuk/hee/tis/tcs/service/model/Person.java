@@ -2,22 +2,34 @@ package com.transformuk.hee.tis.tcs.service.model;
 
 
 import com.transformuk.hee.tis.tcs.api.enumeration.Status;
-import org.springframework.data.annotation.CreatedDate;
-
-import javax.persistence.*;
 import java.io.Serializable;
 import java.time.LocalDateTime;
 import java.util.HashSet;
 import java.util.Objects;
 import java.util.Set;
+import javax.persistence.CascadeType;
+import javax.persistence.Column;
+import javax.persistence.Entity;
+import javax.persistence.EnumType;
+import javax.persistence.Enumerated;
+import javax.persistence.FetchType;
+import javax.persistence.GeneratedValue;
+import javax.persistence.GenerationType;
+import javax.persistence.Id;
+import javax.persistence.JoinColumn;
+import javax.persistence.NamedStoredProcedureQueries;
+import javax.persistence.NamedStoredProcedureQuery;
+import javax.persistence.OneToMany;
+import javax.persistence.OneToOne;
+import javax.persistence.Version;
 
 /**
  * A Person.
  */
 @Entity
 @NamedStoredProcedureQueries({
-        @NamedStoredProcedureQuery(name = "build_person_localoffice",
-                procedureName = "build_person_localoffice")
+    @NamedStoredProcedureQuery(name = "build_person_localoffice",
+        procedureName = "build_person_localoffice")
 })
 public class Person implements Serializable {
 
@@ -66,10 +78,12 @@ public class Person implements Serializable {
   @JoinColumn(unique = true, name = "id")
   private GdcDetails gdcDetails;
 
-  @OneToMany(mappedBy = "person", cascade = {CascadeType.REMOVE,CascadeType.REFRESH}, orphanRemoval = true)
+  @OneToMany(mappedBy = "person", cascade = {CascadeType.REMOVE,
+      CascadeType.REFRESH}, orphanRemoval = true)
   private Set<Qualification> qualifications = new HashSet<>();
 
-  @OneToMany(mappedBy = "person", cascade = {CascadeType.REMOVE,CascadeType.REFRESH}, orphanRemoval = true)
+  @OneToMany(mappedBy = "person", cascade = {CascadeType.REMOVE,
+      CascadeType.REFRESH}, orphanRemoval = true)
   private Set<ProgrammeMembership> programmeMemberships = new HashSet<>();
 
   @OneToOne

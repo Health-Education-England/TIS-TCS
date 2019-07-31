@@ -1,5 +1,9 @@
 package com.transformuk.hee.tis.tcs.service.service.impl;
 
+import static com.transformuk.hee.tis.tcs.service.service.impl.SpecificationFactory.containsLike;
+import static com.transformuk.hee.tis.tcs.service.service.impl.SpecificationFactory.in;
+import static com.transformuk.hee.tis.tcs.service.service.impl.SpecificationFactory.isEqual;
+
 import com.transformuk.hee.tis.tcs.api.dto.CurriculumDTO;
 import com.transformuk.hee.tis.tcs.api.enumeration.Status;
 import com.transformuk.hee.tis.tcs.service.model.ColumnFilter;
@@ -7,6 +11,8 @@ import com.transformuk.hee.tis.tcs.service.model.Curriculum;
 import com.transformuk.hee.tis.tcs.service.repository.CurriculumRepository;
 import com.transformuk.hee.tis.tcs.service.service.CurriculumService;
 import com.transformuk.hee.tis.tcs.service.service.mapper.CurriculumMapper;
+import java.util.ArrayList;
+import java.util.List;
 import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -17,11 +23,6 @@ import org.springframework.data.jpa.domain.Specification;
 import org.springframework.data.jpa.domain.Specifications;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
-
-import java.util.ArrayList;
-import java.util.List;
-
-import static com.transformuk.hee.tis.tcs.service.service.impl.SpecificationFactory.*;
 
 /**
  * Service Implementation for managing Curriculum.
@@ -36,7 +37,8 @@ public class CurriculumServiceImpl implements CurriculumService {
 
   private final CurriculumMapper curriculumMapper;
 
-  public CurriculumServiceImpl(CurriculumRepository curriculumRepository, CurriculumMapper curriculumMapper) {
+  public CurriculumServiceImpl(CurriculumRepository curriculumRepository,
+      CurriculumMapper curriculumMapper) {
     this.curriculumRepository = curriculumRepository;
     this.curriculumMapper = curriculumMapper;
   }
@@ -77,8 +79,8 @@ public class CurriculumServiceImpl implements CurriculumService {
     }
 
     //add status
-    if(current) {
-        specs.add(Specifications.where(isEqual("status", Status.CURRENT)));
+    if (current) {
+      specs.add(Specifications.where(isEqual("status", Status.CURRENT)));
     }
 
     //add the column filters criteria
@@ -115,7 +117,7 @@ public class CurriculumServiceImpl implements CurriculumService {
   }
 
   @Override
-    public Page<CurriculumDTO> findAllCurrent(Pageable pageable) {
+  public Page<CurriculumDTO> findAllCurrent(Pageable pageable) {
     log.debug("Request to get all Curricula");
     Curriculum example = new Curriculum().status(Status.CURRENT);
     Page<Curriculum> result = curriculumRepository.findAll(Example.of(example), pageable);

@@ -34,13 +34,15 @@ public class TrustAdminConfig {
 
 
   /**
-   * Rest template used to communicate with other services. Talks to keycloak to get a OIDC token before making
-   * the request. Logs into KC using the TCS user credentials
+   * Rest template used to communicate with other services. Talks to keycloak to get a OIDC token
+   * before making the request. Logs into KC using the TCS user credentials
+   *
    * @return
    */
   @Bean
-  public RestTemplate trustAdminEnabledRestTemplate(){
-    final KeycloakClientRequestFactory keycloakClientRequestFactory = new KeycloakClientRequestFactory(getKc());
+  public RestTemplate trustAdminEnabledRestTemplate() {
+    final KeycloakClientRequestFactory keycloakClientRequestFactory = new KeycloakClientRequestFactory(
+        getKc());
     return new KeycloakRestTemplate(keycloakClientRequestFactory);
 
   }

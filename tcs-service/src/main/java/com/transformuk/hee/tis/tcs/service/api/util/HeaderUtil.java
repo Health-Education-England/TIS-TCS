@@ -35,7 +35,8 @@ public final class HeaderUtil {
     return createAlert(APPLICATION_NAME + "." + entityName + ".deleted", param);
   }
 
-  public static HttpHeaders createFailureAlert(String entityName, String errorKey, String defaultMessage) {
+  public static HttpHeaders createFailureAlert(String entityName, String errorKey,
+      String defaultMessage) {
     log.error("Entity creation failed, {}", defaultMessage);
     HttpHeaders headers = new HttpHeaders();
     headers.add("X-tcsApp-error", "error." + errorKey);

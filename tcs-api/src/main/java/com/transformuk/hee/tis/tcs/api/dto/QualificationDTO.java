@@ -4,14 +4,13 @@ package com.transformuk.hee.tis.tcs.api.dto;
 import com.transformuk.hee.tis.tcs.api.dto.validation.Create;
 import com.transformuk.hee.tis.tcs.api.dto.validation.Update;
 import com.transformuk.hee.tis.tcs.api.enumeration.QualificationType;
-
-import javax.validation.constraints.DecimalMin;
-import javax.validation.constraints.NotNull;
-import javax.validation.constraints.Null;
 import java.io.Serializable;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.util.Objects;
+import javax.validation.constraints.DecimalMin;
+import javax.validation.constraints.NotNull;
+import javax.validation.constraints.Null;
 
 /**
  * A DTO for the Qualification entity.
@@ -116,8 +115,12 @@ public class QualificationDTO implements Serializable {
 
   @Override
   public boolean equals(Object o) {
-    if (this == o) return true;
-    if (o == null || getClass() != o.getClass()) return false;
+    if (this == o) {
+      return true;
+    }
+    if (o == null || getClass() != o.getClass()) {
+      return false;
+    }
     QualificationDTO that = (QualificationDTO) o;
     return Objects.equals(qualification, that.qualification) &&
         Objects.equals(getPersonIdOrNull(), that.getPersonIdOrNull()) &&
@@ -129,7 +132,9 @@ public class QualificationDTO implements Serializable {
 
   @Override
   public int hashCode() {
-    return Objects.hash(qualification, getPersonIdOrNull(), qualificationType, qualificationAttainedDate, medicalSchool, countryOfQualification);
+    return Objects
+        .hash(qualification, getPersonIdOrNull(), qualificationType, qualificationAttainedDate,
+            medicalSchool, countryOfQualification);
   }
 
   private Long getPersonIdOrNull() {
@@ -140,7 +145,7 @@ public class QualificationDTO implements Serializable {
   public String toString() {
     return "QualificationDTO{" +
         "id=" + getId() +
-        ", intrepidId='" + getIntrepidId() +  "'" +
+        ", intrepidId='" + getIntrepidId() + "'" +
         ", qualification='" + getQualification() + "'" +
         ", qualificationType='" + getQualificationType() + "'" +
         ", qualifiactionAttainedDate='" + getQualificationAttainedDate() + "'" +

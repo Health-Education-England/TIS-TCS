@@ -1,19 +1,25 @@
 package com.transformuk.hee.tis.tcs.service.job.person;
 
 import com.transformuk.hee.tis.tcs.api.enumeration.ProgrammeMembershipStatus;
-import com.transformuk.hee.tis.tcs.service.model.Programme;
-
 import java.io.Serializable;
 import java.util.Objects;
 
 public class ProgrammeMembershipDto implements Serializable {
 
+  private Long id;
+  private Long personId;
+  private Long programmeId;
+  private String programmeName;
+  private String programmeNumber;
+  private ProgrammeMembershipStatus programmeMembershipStatus;
+  private String trainingNumber;
+
   public ProgrammeMembershipDto() {
   }
 
   public ProgrammeMembershipDto(Long id, Long personId, Long programmeId, String programmeName,
-                                String programmeNumber, String trainingNumber,
-                                ProgrammeMembershipStatus programmeMembershipStatus) {
+      String programmeNumber, String trainingNumber,
+      ProgrammeMembershipStatus programmeMembershipStatus) {
     this.id = id;
     this.personId = personId;
     this.programmeId = programmeId;
@@ -22,18 +28,6 @@ public class ProgrammeMembershipDto implements Serializable {
     this.trainingNumber = trainingNumber;
     this.programmeMembershipStatus = programmeMembershipStatus;
   }
-
-  private Long id;
-
-  private Long personId;
-
-  private Long programmeId;
-
-  private String programmeName;
-
-  private String programmeNumber;
-
-  private ProgrammeMembershipStatus programmeMembershipStatus;
 
   public Long getProgrammeId() {
     return programmeId;
@@ -67,8 +61,6 @@ public class ProgrammeMembershipDto implements Serializable {
     this.trainingNumber = trainingNumber;
   }
 
-  private String trainingNumber;
-
   public String getProgrammeName() {
     return programmeName;
   }
@@ -95,8 +87,12 @@ public class ProgrammeMembershipDto implements Serializable {
 
   @Override
   public boolean equals(Object o) {
-    if (this == o) return true;
-    if (o == null || getClass() != o.getClass()) return false;
+    if (this == o) {
+      return true;
+    }
+    if (o == null || getClass() != o.getClass()) {
+      return false;
+    }
     ProgrammeMembershipDto that = (ProgrammeMembershipDto) o;
     return Objects.equals(id, that.id) &&
         Objects.equals(personId, that.personId) &&
@@ -109,6 +105,7 @@ public class ProgrammeMembershipDto implements Serializable {
 
   @Override
   public int hashCode() {
-    return Objects.hash(id, personId, programmeId, programmeName, programmeNumber, trainingNumber, programmeMembershipStatus);
+    return Objects.hash(id, personId, programmeId, programmeName, programmeNumber, trainingNumber,
+        programmeMembershipStatus);
   }
 }

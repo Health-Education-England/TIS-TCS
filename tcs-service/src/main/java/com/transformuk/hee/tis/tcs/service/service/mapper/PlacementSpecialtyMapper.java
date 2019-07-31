@@ -5,10 +5,9 @@ import com.transformuk.hee.tis.tcs.api.dto.PlacementSpecialtyDTO;
 import com.transformuk.hee.tis.tcs.service.model.Placement;
 import com.transformuk.hee.tis.tcs.service.model.PlacementSpecialty;
 import com.transformuk.hee.tis.tcs.service.model.Specialty;
+import java.util.Set;
 import org.apache.commons.collections4.CollectionUtils;
 import org.springframework.stereotype.Component;
-
-import java.util.Set;
 
 @Component
 public class PlacementSpecialtyMapper {
@@ -20,7 +19,8 @@ public class PlacementSpecialtyMapper {
       for (PlacementSpecialty placementSpecialty : placementSpecialties) {
         PlacementSpecialtyDTO placementSpecialtyDTO = new PlacementSpecialtyDTO();
         placementSpecialtyDTO.setPlacementId(placementSpecialty.getPlacement().getId());
-        placementSpecialtyDTO.setPlacementSpecialtyType(placementSpecialty.getPlacementSpecialtyType());
+        placementSpecialtyDTO
+            .setPlacementSpecialtyType(placementSpecialty.getPlacementSpecialtyType());
         placementSpecialtyDTO.setSpecialtyId(placementSpecialty.getSpecialty().getId());
         specialties.add(placementSpecialtyDTO);
       }
@@ -43,7 +43,8 @@ public class PlacementSpecialtyMapper {
         specialty.setId(placementSpecialtyDTO.getSpecialtyId());
         placementSpecialty.setSpecialty(specialty);
 
-        placementSpecialty.setPlacementSpecialtyType(placementSpecialtyDTO.getPlacementSpecialtyType());
+        placementSpecialty
+            .setPlacementSpecialtyType(placementSpecialtyDTO.getPlacementSpecialtyType());
 
         placementSpecialties.add(placementSpecialty);
       }

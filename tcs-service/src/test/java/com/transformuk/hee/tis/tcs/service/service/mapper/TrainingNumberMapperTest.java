@@ -1,13 +1,13 @@
 package com.transformuk.hee.tis.tcs.service.service.mapper;
 
 
+import static org.assertj.core.api.Assertions.assertThat;
+
 import com.transformuk.hee.tis.tcs.api.dto.TrainingNumberDTO;
 import com.transformuk.hee.tis.tcs.api.enumeration.TrainingNumberType;
 import com.transformuk.hee.tis.tcs.service.model.Programme;
 import com.transformuk.hee.tis.tcs.service.model.TrainingNumber;
 import org.junit.Test;
-
-import static org.assertj.core.api.Assertions.assertThat;
 
 public class TrainingNumberMapperTest {
 
@@ -17,11 +17,13 @@ public class TrainingNumberMapperTest {
     TrainingNumberMapper trainingNumberMapper = new TrainingNumberMapper();
     TrainingNumber trainingNumber = aValidTrainingNumber();
 
-    TrainingNumberDTO trainingNumberDTO = trainingNumberMapper.trainingNumberToTrainingNumberDTO(trainingNumber);
+    TrainingNumberDTO trainingNumberDTO = trainingNumberMapper
+        .trainingNumberToTrainingNumberDTO(trainingNumber);
 
     assertThat(trainingNumberDTO.getId()).isEqualTo(trainingNumber.getId());
     assertThat(trainingNumberDTO.getNumber()).isEqualTo(10);
-    assertThat(trainingNumberDTO.getTrainingNumberType().toString()).isEqualTo(trainingNumber.getTrainingNumberType().toString());
+    assertThat(trainingNumberDTO.getTrainingNumberType().toString())
+        .isEqualTo(trainingNumber.getTrainingNumberType().toString());
     assertThat(trainingNumberDTO.getTrainingNumber()).isEqualTo(trainingNumber.getTrainingNumber());
     assertThat(trainingNumberDTO.getProgramme()).isEqualTo(100);
 
@@ -32,10 +34,12 @@ public class TrainingNumberMapperTest {
     TrainingNumberMapper trainingNumberMapper = new TrainingNumberMapper();
     TrainingNumberDTO trainingNumberDTO = aValidTrainingNumberDTO();
 
-    TrainingNumber trainingNumber = trainingNumberMapper.trainingNumberDTOToTrainingNumber(trainingNumberDTO);
+    TrainingNumber trainingNumber = trainingNumberMapper
+        .trainingNumberDTOToTrainingNumber(trainingNumberDTO);
 
     assertThat(trainingNumber.getId()).isEqualTo(trainingNumberDTO.getId());
-    assertThat(trainingNumber.getTrainingNumberType()).isEqualTo(trainingNumberDTO.getTrainingNumberType());
+    assertThat(trainingNumber.getTrainingNumberType())
+        .isEqualTo(trainingNumberDTO.getTrainingNumberType());
     assertThat(trainingNumber.getTrainingNumber()).isEqualTo(trainingNumberDTO.getTrainingNumber());
     assertThat(trainingNumber.getProgramme().getId()).isEqualTo(trainingNumberDTO.getProgramme());
     assertThat(trainingNumber.getNumber()).isEqualTo(trainingNumberDTO.getNumber());

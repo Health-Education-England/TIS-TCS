@@ -1,5 +1,7 @@
 package com.transformuk.hee.tis.tcs.service.api;
 
+import static uk.nhs.tis.StringConverter.getConverter;
+
 import com.google.common.collect.Lists;
 import com.transformuk.hee.tis.tcs.api.dto.PlacementSummaryDTO;
 import com.transformuk.hee.tis.tcs.api.dto.PlacementViewDTO;
@@ -59,7 +61,6 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
-import static uk.nhs.tis.StringConverter.getConverter;
 /**
  * REST controller for managing Post.
  */
@@ -82,11 +83,11 @@ public class PostResource {
   private final PlacementSummaryDecorator placementSummaryDecorator;
 
   public PostResource(PostService postService, PostValidator postValidator,
-                      PlacementViewRepository placementViewRepository,
-                      PlacementViewDecorator placementViewDecorator,
-                      PlacementViewMapper placementViewMapper,
-                      PlacementService placementService,
-                      PlacementSummaryDecorator placementSummaryDecorator) {
+      PlacementViewRepository placementViewRepository,
+      PlacementViewDecorator placementViewDecorator,
+      PlacementViewMapper placementViewMapper,
+      PlacementService placementService,
+      PlacementSummaryDecorator placementSummaryDecorator) {
     this.postService = postService;
     this.postValidator = postValidator;
     this.placementViewRepository = placementViewRepository;
@@ -100,17 +101,21 @@ public class PostResource {
    * POST  /posts : Create a new post.
    *
    * @param postDTO the postDTO to create
-   * @return the ResponseEntity with status 201 (Created) and with body the new postDTO, or with status 400 (Bad Request) if the post has already an ID
+   * @return the ResponseEntity with status 201 (Created) and with body the new postDTO, or with
+   * status 400 (Bad Request) if the post has already an ID
    * @throws URISyntaxException if the Location URI syntax is incorrect
    */
   @PostMapping("/posts")
   @PreAuthorize("hasAuthority('post:add:modify')")
-  public ResponseEntity<PostDTO> createPost(@RequestBody @Validated(Create.class) PostDTO postDTO) throws URISyntaxException,
+  public ResponseEntity<PostDTO> createPost(@RequestBody @Validated(Create.class) PostDTO postDTO)
+      throws URISyntaxException,
       MethodArgumentNotValidException {
     log.debug("REST request to save Post : {}", postDTO);
     postValidator.validate(postDTO);
     if (postDTO.getId() != null) {
-      return ResponseEntity.badRequest().headers(HeaderUtil.createFailureAlert(ENTITY_NAME, "idexists", "A new post cannot already have an ID")).body(null);
+      return ResponseEntity.badRequest().headers(HeaderUtil
+          .createFailureAlert(ENTITY_NAME, "idexists", "A new post cannot already have an ID"))
+          .body(null);
     }
     PostDTO result = postService.save(postDTO);
     return ResponseEntity.created(new URI("/api/posts/" + result.getId()))
@@ -122,14 +127,15 @@ public class PostResource {
    * PUT  /posts : Updates an existing post.
    *
    * @param postDTO the postDTO to update
-   * @return the ResponseEntity with status 200 (OK) and with body the updated postDTO,
-   * or with status 400 (Bad Request) if the postDTO is not valid,
-   * or with status 500 (Internal Server Error) if the postDTO couldnt be updated
+   * @return the ResponseEntity with status 200 (OK) and with body the updated postDTO, or with
+   * status 400 (Bad Request) if the postDTO is not valid, or with status 500 (Internal Server
+   * Error) if the postDTO couldnt be updated
    * @throws URISyntaxException if the Location URI syntax is incorrect
    */
   @PutMapping("/posts")
   @PreAuthorize("hasAuthority('post:add:modify')")
-  public ResponseEntity<PostDTO> updatePost(@RequestBody @Validated(Update.class) PostDTO postDTO) throws URISyntaxException,
+  public ResponseEntity<PostDTO> updatePost(@RequestBody @Validated(Update.class) PostDTO postDTO)
+      throws URISyntaxException,
       MethodArgumentNotValidException {
     log.debug("REST request to update Post : {}", postDTO);
     postValidator.validate(postDTO);
@@ -153,14 +159,16 @@ public class PostResource {
   @GetMapping("/posts")
   @PreAuthorize("hasAuthority('post:view')")
   public ResponseEntity<List<PostViewDTO>> getAllPosts(
-    Pageable pageable,
-    @RequestParam(value = "searchQuery", required = false) String searchQuery,
-    @RequestParam(value = "columnFilters", required = false) String columnFilterJson) throws IOException {
+      Pageable pageable,
+      @RequestParam(value = "searchQuery", required = false) String searchQuery,
+      @RequestParam(value = "columnFilters", required = false) String columnFilterJson)
+      throws IOException {
     log.debug("REST request to get a page of Posts");
     searchQuery = getConverter(searchQuery).fromJson().decodeUrl().escapeForSql().toString();
     List<Class> filterEnumList = Lists.newArrayList(Status.class, PostSuffix.class,
         PostGradeType.class, PostSpecialtyType.class);
-    List<ColumnFilter> columnFilters = ColumnFilterUtil.getColumnFilters(columnFilterJson, filterEnumList);
+    List<ColumnFilter> columnFilters = ColumnFilterUtil
+        .getColumnFilters(columnFilterJson, filterEnumList);
     BasicPage<PostViewDTO> page;
     if (StringUtils.isEmpty(searchQuery) && StringUtils.isEmpty(columnFilterJson)) {
       page = postService.findAll(pageable);
@@ -182,14 +190,17 @@ public class PostResource {
   @GetMapping("/findByNationalPostNumber")
   @PreAuthorize("hasAuthority('post:view')")
   public ResponseEntity<List<PostViewDTO>> findByNationalPostNumber(
-    Pageable pageable,
-    @RequestParam(value = "searchQuery") String searchQuery,
-    @RequestParam(value = "columnFilters", required = false) String columnFilterJson) throws IOException {
+      Pageable pageable,
+      @RequestParam(value = "searchQuery") String searchQuery,
+      @RequestParam(value = "columnFilters", required = false) String columnFilterJson)
+      throws IOException {
     log.debug("REST request to get a page of Posts");
     searchQuery = getConverter(searchQuery).fromJson().decodeUrl().escapeForSql().toString();
     List<Class> filterEnumList = Lists.newArrayList(Status.class);
-    List<ColumnFilter> columnFilters = ColumnFilterUtil.getColumnFilters(columnFilterJson, filterEnumList);
-    Page<PostViewDTO> page = postService.findByNationalPostNumber(searchQuery, columnFilters, pageable);
+    List<ColumnFilter> columnFilters = ColumnFilterUtil
+        .getColumnFilters(columnFilterJson, filterEnumList);
+    Page<PostViewDTO> page = postService
+        .findByNationalPostNumber(searchQuery, columnFilters, pageable);
 
     HttpHeaders headers = PaginationUtil.generatePaginationHttpHeaders(page, "/api/posts");
     return new ResponseEntity<>(page.getContent(), headers, HttpStatus.OK);
@@ -198,12 +209,13 @@ public class PostResource {
   @PostMapping("/posts/filter/deanery")
   @PreAuthorize("hasAuthority('post:view')")
   public ResponseEntity<List<PostEsrDTO>> filterPostsByDeaneryNumbers(
-    Pageable pageable,
-    @RequestBody List<String> deaneryNumbers) {
+      Pageable pageable,
+      @RequestBody List<String> deaneryNumbers) {
     log.debug("REST request to filter a page of Posts by deanery numbers");
     Page<PostEsrDTO> page = postService.findPostsForEsrByDeaneryNumbers(deaneryNumbers, pageable);
     List<PostEsrDTO> resultDTOs = page.getContent();
-    log.debug("Found {} matching posts for ESR by given deanery numbers {}", deaneryNumbers.size(), resultDTOs.size());
+    log.debug("Found {} matching posts for ESR by given deanery numbers {}", deaneryNumbers.size(),
+        resultDTOs.size());
     return new ResponseEntity<>(resultDTOs, HttpStatus.OK);
   }
 
@@ -211,15 +223,18 @@ public class PostResource {
    * GET  /posts/in/:nationalPostNumbers : get the "nationalPostNumbers" post.
    *
    * @param nationalPostNumbers the nationalPostNumbers of the postDTO to retrieve
-   * @return the ResponseEntity with status 200 (OK) and with body the postDTO, or with status 404 (Not Found)
+   * @return the ResponseEntity with status 200 (OK) and with body the postDTO, or with status 404
+   * (Not Found)
    */
   @GetMapping("/posts/in/{nationalPostNumbers}")
   @PreAuthorize("hasAuthority('post:view')")
-  public ResponseEntity<List<PostDTO>> getPostsIn(@PathVariable("nationalPostNumbers") List<String> nationalPostNumbers) {
+  public ResponseEntity<List<PostDTO>> getPostsIn(
+      @PathVariable("nationalPostNumbers") List<String> nationalPostNumbers) {
     log.debug("REST request to get Posts : {}", nationalPostNumbers);
     if (!nationalPostNumbers.isEmpty()) {
       UrlDecoderUtil.decode(nationalPostNumbers);
-      return new ResponseEntity<>(postService.findAllByNationalPostNumbers(nationalPostNumbers), HttpStatus.FOUND);
+      return new ResponseEntity<>(postService.findAllByNationalPostNumbers(nationalPostNumbers),
+          HttpStatus.FOUND);
     } else {
       return new ResponseEntity<>(new ArrayList<>(), HttpStatus.OK);
     }
@@ -229,7 +244,8 @@ public class PostResource {
    * GET  /posts/:id : get the "id" post.
    *
    * @param id the id of the postDTO to retrieve
-   * @return the ResponseEntity with status 200 (OK) and with body the postDTO, or with status 404 (Not Found)
+   * @return the ResponseEntity with status 200 (OK) and with body the postDTO, or with status 404
+   * (Not Found)
    */
   @GetMapping("/posts/{id}")
   @PreAuthorize("hasAuthority('post:view')")
@@ -246,7 +262,8 @@ public class PostResource {
    * GET  /posts/:id/placements : get the placements for a post.
    *
    * @param id the id of the postDTO to retrieve placements
-   * @return the ResponseEntity with status 200 (OK) and with body the postDTO, or with status 404 (Not Found)
+   * @return the ResponseEntity with status 200 (OK) and with body the postDTO, or with status 404
+   * (Not Found)
    */
   @GetMapping("/posts/{id}/placements")
   @PreAuthorize("hasAuthority('post:view')")
@@ -254,9 +271,11 @@ public class PostResource {
     log.debug("REST request to get Post Placements: {}", id);
     postService.canLoggedInUserViewOrAmend(id);
 
-    List<PlacementView> placementViews = placementViewRepository.findAllByPostIdOrderByDateToDesc(id);
+    List<PlacementView> placementViews = placementViewRepository
+        .findAllByPostIdOrderByDateToDesc(id);
     return ResponseUtil.wrapOrNotFound(Optional.ofNullable(placementViews != null ?
-        placementViewDecorator.decorate(placementViewMapper.placementViewsToPlacementViewDTOs(placementViews)) :
+        placementViewDecorator
+            .decorate(placementViewMapper.placementViewsToPlacementViewDTOs(placementViews)) :
         null));
   }
 
@@ -264,11 +283,13 @@ public class PostResource {
    * GET  /posts/:postId/placements/new : get the placements for a post.
    *
    * @param postId the postId of the postDTO to retrieve placements
-   * @return the ResponseEntity with status 200 (OK) and with body the postDTO, or with status 404 (Not Found)
+   * @return the ResponseEntity with status 200 (OK) and with body the postDTO, or with status 404
+   * (Not Found)
    */
   @GetMapping("/posts/{postId}/placements/new")
   @PreAuthorize("hasAuthority('post:view')")
-  public ResponseEntity<List<PlacementSummaryDTO>> getPlacementsForPosts(@PathVariable Long postId) {
+  public ResponseEntity<List<PlacementSummaryDTO>> getPlacementsForPosts(
+      @PathVariable Long postId) {
     log.debug("REST request to get Post Placements: {}", postId);
 
     postService.canLoggedInUserViewOrAmend(postId);
@@ -291,7 +312,8 @@ public class PostResource {
     postService.canLoggedInUserViewOrAmend(id);
 
     postService.delete(id);
-    return ResponseEntity.ok().headers(HeaderUtil.createEntityDeletionAlert(ENTITY_NAME, id.toString())).build();
+    return ResponseEntity.ok()
+        .headers(HeaderUtil.createEntityDeletionAlert(ENTITY_NAME, id.toString())).build();
   }
 
 
@@ -299,7 +321,8 @@ public class PostResource {
    * POST  /bulk-posts : Bulk create a new Posts.
    *
    * @param postDTOS List of the postDTOS to create
-   * @return the ResponseEntity with status 200 (Created) and with body the new postDTOS, or with status 400 (Bad Request) if the Post has already an ID
+   * @return the ResponseEntity with status 200 (Created) and with body the new postDTOS, or with
+   * status 400 (Bad Request) if the Post has already an ID
    * @throws URISyntaxException if the Location URI syntax is incorrect
    */
   @PostMapping("/bulk-posts")
@@ -312,7 +335,9 @@ public class PostResource {
           .map(PostDTO::getId)
           .collect(Collectors.toList());
       if (!Collections.isEmpty(entityIds)) {
-        return ResponseEntity.badRequest().headers(HeaderUtil.createFailureAlert(StringUtils.join(entityIds, ","), "ids.exist", "A new Post cannot already have an ID")).body(null);
+        return ResponseEntity.badRequest().headers(HeaderUtil
+            .createFailureAlert(StringUtils.join(entityIds, ","), "ids.exist",
+                "A new Post cannot already have an ID")).body(null);
       }
     }
     List<PostDTO> result = postService.save(postDTOS);
@@ -326,9 +351,9 @@ public class PostResource {
    * PUT  /bulk-posts : Updates an existing Posts.
    *
    * @param postDTOS List of the postDTOS to update
-   * @return the ResponseEntity with status 200 (OK) and with body the updated postDTOS,
-   * or with status 400 (Bad Request) if the postDTOS is not valid,
-   * or with status 500 (Internal Server Error) if the postDTOS couldnt be updated
+   * @return the ResponseEntity with status 200 (OK) and with body the updated postDTOS, or with
+   * status 400 (Bad Request) if the postDTOS is not valid, or with status 500 (Internal Server
+   * Error) if the postDTOS couldnt be updated
    * @throws URISyntaxException if the Location URI syntax is incorrect
    */
   @PutMapping("/bulk-posts")
@@ -336,13 +361,16 @@ public class PostResource {
   public ResponseEntity<List<PostDTO>> bulkUpdatePosts(@Valid @RequestBody List<PostDTO> postDTOS) {
     log.debug("REST request to bulk update Posts : {}", postDTOS);
     if (Collections.isEmpty(postDTOS)) {
-      return ResponseEntity.badRequest().headers(HeaderUtil.createFailureAlert(ENTITY_NAME, REQUEST_BODY_EMPTY,
-          REQUEST_BODY_CANNOT_BE_EMPTY)).body(null);
+      return ResponseEntity.badRequest()
+          .headers(HeaderUtil.createFailureAlert(ENTITY_NAME, REQUEST_BODY_EMPTY,
+              REQUEST_BODY_CANNOT_BE_EMPTY)).body(null);
     } else if (!Collections.isEmpty(postDTOS)) {
-      List<PostDTO> entitiesWithNoId = postDTOS.stream().filter(p -> p.getId() == null).collect(Collectors.toList());
+      List<PostDTO> entitiesWithNoId = postDTOS.stream().filter(p -> p.getId() == null)
+          .collect(Collectors.toList());
       if (!Collections.isEmpty(entitiesWithNoId)) {
-        return ResponseEntity.badRequest().headers(HeaderUtil.createFailureAlert(StringUtils.join(entitiesWithNoId, ","),
-            BULK_UPDATE_FAILED_NOID, NOID_ERR_MSG)).body(entitiesWithNoId);
+        return ResponseEntity.badRequest()
+            .headers(HeaderUtil.createFailureAlert(StringUtils.join(entitiesWithNoId, ","),
+                BULK_UPDATE_FAILED_NOID, NOID_ERR_MSG)).body(entitiesWithNoId);
       }
     }
 
@@ -363,25 +391,29 @@ public class PostResource {
   @PreAuthorize("hasAuthority('post:bulk:add:modify')")
   public ResponseEntity<Void> buildPersonsOwnership() {
     postService.buildPostView();
-    return ResponseEntity.ok().headers(HeaderUtil.createEntityUpdateAlert(ENTITY_NAME, "procedure is underway")).build();
+    return ResponseEntity.ok()
+        .headers(HeaderUtil.createEntityUpdateAlert(ENTITY_NAME, "procedure is underway")).build();
   }
 
   /**
-   * PATCH  /bulk-patch-new-old-posts : Patches the Old post and New post relationship on an existing Posts.
+   * PATCH  /bulk-patch-new-old-posts : Patches the Old post and New post relationship on an
+   * existing Posts.
    *
    * @param postDTOS List of the PostRelationshipsDTO to update their old and new Posts
-   * @return the ResponseEntity with status 200 (OK) and with body the updated postDTOS,
-   * or with status 400 (Bad Request) if the postDTOS is not valid,
-   * or with status 500 (Internal Server Error) if the postDTOS couldnt be updated
+   * @return the ResponseEntity with status 200 (OK) and with body the updated postDTOS, or with
+   * status 400 (Bad Request) if the postDTOS is not valid, or with status 500 (Internal Server
+   * Error) if the postDTOS couldnt be updated
    * @throws URISyntaxException if the Location URI syntax is incorrect
    */
   @PatchMapping("/bulk-patch-new-old-posts")
   @PreAuthorize("hasAuthority('tcs:add:modify:entities')")
-  public ResponseEntity<List<PostDTO>> bulkPatchNewOldPosts(@Valid @RequestBody List<PostDTO> postDTOS) {
+  public ResponseEntity<List<PostDTO>> bulkPatchNewOldPosts(
+      @Valid @RequestBody List<PostDTO> postDTOS) {
     log.debug("REST request to bulk link old/new Posts : {}", postDTOS);
     if (Collections.isEmpty(postDTOS)) {
-      return ResponseEntity.badRequest().headers(HeaderUtil.createFailureAlert(ENTITY_NAME, REQUEST_BODY_EMPTY,
-          REQUEST_BODY_CANNOT_BE_EMPTY)).body(null);
+      return ResponseEntity.badRequest()
+          .headers(HeaderUtil.createFailureAlert(ENTITY_NAME, REQUEST_BODY_EMPTY,
+              REQUEST_BODY_CANNOT_BE_EMPTY)).body(null);
     } else if (!Collections.isEmpty(postDTOS)) {
       List<PostDTO> entitiesWithNoId = postDTOS.stream()
           .filter(p -> p.getIntrepidId() == null)
@@ -392,8 +424,9 @@ public class PostResource {
           })
           .collect(Collectors.toList());
       if (!Collections.isEmpty(entitiesWithNoId)) {
-        return ResponseEntity.badRequest().headers(HeaderUtil.createFailureAlert(StringUtils.join(entitiesWithNoId, ","),
-            BULK_UPDATE_FAILED_NOID, NOID_ERR_MSG)).body(entitiesWithNoId);
+        return ResponseEntity.badRequest()
+            .headers(HeaderUtil.createFailureAlert(StringUtils.join(entitiesWithNoId, ","),
+                BULK_UPDATE_FAILED_NOID, NOID_ERR_MSG)).body(entitiesWithNoId);
       }
     }
 
@@ -408,18 +441,20 @@ public class PostResource {
    * PATCH  /bulk-patch-post-sites : Patches a Post to link it to a site
    *
    * @param postDTOS List of the PostRelationshipsDTO to update their old and new Posts
-   * @return the ResponseEntity with status 200 (OK) and with body the updated postDTOS,
-   * or with status 400 (Bad Request) if the postDTOS is not valid,
-   * or with status 500 (Internal Server Error) if the postDTOS couldnt be updated
+   * @return the ResponseEntity with status 200 (OK) and with body the updated postDTOS, or with
+   * status 400 (Bad Request) if the postDTOS is not valid, or with status 500 (Internal Server
+   * Error) if the postDTOS couldnt be updated
    * @throws URISyntaxException if the Location URI syntax is incorrect
    */
   @PatchMapping("/bulk-patch-post-sites")
   @PreAuthorize("hasAuthority('tcs:add:modify:entities')")
-  public ResponseEntity<List<PostDTO>> bulkPatchPostSites(@Valid @RequestBody List<PostDTO> postDTOS) {
+  public ResponseEntity<List<PostDTO>> bulkPatchPostSites(
+      @Valid @RequestBody List<PostDTO> postDTOS) {
     log.debug("REST request to bulk link old/new Posts : {}", postDTOS);
     if (Collections.isEmpty(postDTOS)) {
-      return ResponseEntity.badRequest().headers(HeaderUtil.createFailureAlert(ENTITY_NAME, REQUEST_BODY_EMPTY,
-          REQUEST_BODY_CANNOT_BE_EMPTY)).body(null);
+      return ResponseEntity.badRequest()
+          .headers(HeaderUtil.createFailureAlert(ENTITY_NAME, REQUEST_BODY_EMPTY,
+              REQUEST_BODY_CANNOT_BE_EMPTY)).body(null);
     } else if (!Collections.isEmpty(postDTOS)) {
       List<PostDTO> entitiesWithNoId = postDTOS.stream()
           .filter(p -> p.getIntrepidId() == null)
@@ -430,8 +465,9 @@ public class PostResource {
           })
           .collect(Collectors.toList());
       if (!Collections.isEmpty(entitiesWithNoId)) {
-        return ResponseEntity.badRequest().headers(HeaderUtil.createFailureAlert(StringUtils.join(entitiesWithNoId, ","),
-            BULK_UPDATE_FAILED_NOID, NOID_ERR_MSG)).body(entitiesWithNoId);
+        return ResponseEntity.badRequest()
+            .headers(HeaderUtil.createFailureAlert(StringUtils.join(entitiesWithNoId, ","),
+                BULK_UPDATE_FAILED_NOID, NOID_ERR_MSG)).body(entitiesWithNoId);
       }
     }
 
@@ -446,25 +482,28 @@ public class PostResource {
    * PATCH  /bulk-patch-post-grades : Patches a Post to link it to a grade
    *
    * @param postRelationshipsDto List of the PostRelationshipsDTO to update their old and new Posts
-   * @return the ResponseEntity with status 200 (OK) and with body the updated postDTOS,
-   * or with status 400 (Bad Request) if the postDTOS is not valid,
-   * or with status 500 (Internal Server Error) if the postDTOS couldnt be updated
+   * @return the ResponseEntity with status 200 (OK) and with body the updated postDTOS, or with
+   * status 400 (Bad Request) if the postDTOS is not valid, or with status 500 (Internal Server
+   * Error) if the postDTOS couldnt be updated
    * @throws URISyntaxException if the Location URI syntax is incorrect
    */
   @PatchMapping("/bulk-patch-post-grades")
   @PreAuthorize("hasAuthority('tcs:add:modify:entities')")
-  public ResponseEntity<List<PostDTO>> bulkPatchPostGrades(@Valid @RequestBody List<PostDTO> postRelationshipsDto) {
+  public ResponseEntity<List<PostDTO>> bulkPatchPostGrades(
+      @Valid @RequestBody List<PostDTO> postRelationshipsDto) {
     log.debug("REST request to bulk link grades to Posts : {}", postRelationshipsDto);
     if (Collections.isEmpty(postRelationshipsDto)) {
-      return ResponseEntity.badRequest().headers(HeaderUtil.createFailureAlert(ENTITY_NAME, REQUEST_BODY_EMPTY,
-          REQUEST_BODY_CANNOT_BE_EMPTY)).body(null);
+      return ResponseEntity.badRequest()
+          .headers(HeaderUtil.createFailureAlert(ENTITY_NAME, REQUEST_BODY_EMPTY,
+              REQUEST_BODY_CANNOT_BE_EMPTY)).body(null);
     } else if (!Collections.isEmpty(postRelationshipsDto)) {
       List<PostDTO> entitiesWithNoId = postRelationshipsDto.stream()
           .filter(p -> p.getIntrepidId() == null)
           .collect(Collectors.toList());
       if (!Collections.isEmpty(entitiesWithNoId)) {
-        return ResponseEntity.badRequest().headers(HeaderUtil.createFailureAlert(StringUtils.join(entitiesWithNoId, ","),
-            BULK_UPDATE_FAILED_NOID, NOID_ERR_MSG)).body(entitiesWithNoId);
+        return ResponseEntity.badRequest()
+            .headers(HeaderUtil.createFailureAlert(StringUtils.join(entitiesWithNoId, ","),
+                BULK_UPDATE_FAILED_NOID, NOID_ERR_MSG)).body(entitiesWithNoId);
       }
     }
 
@@ -479,25 +518,28 @@ public class PostResource {
    * PATCH  /bulk-patch-post-programmes : Patches a Post to link it to a programme
    *
    * @param postRelationshipsDto List of the PostRelationshipsDTO to update their old and new Posts
-   * @return the ResponseEntity with status 200 (OK) and with body the updated postDTOS,
-   * or with status 400 (Bad Request) if the postDTOS is not valid,
-   * or with status 500 (Internal Server Error) if the postDTOS couldnt be updated
+   * @return the ResponseEntity with status 200 (OK) and with body the updated postDTOS, or with
+   * status 400 (Bad Request) if the postDTOS is not valid, or with status 500 (Internal Server
+   * Error) if the postDTOS couldnt be updated
    * @throws URISyntaxException if the Location URI syntax is incorrect
    */
   @PatchMapping("/bulk-patch-post-programmes")
   @PreAuthorize("hasAuthority('tcs:add:modify:entities')")
-  public ResponseEntity<List<PostDTO>> bulkPatchPostProgrammes(@Valid @RequestBody List<PostDTO> postRelationshipsDto) {
+  public ResponseEntity<List<PostDTO>> bulkPatchPostProgrammes(
+      @Valid @RequestBody List<PostDTO> postRelationshipsDto) {
     log.debug("REST request to bulk link programmes to Posts : {}", postRelationshipsDto);
     if (Collections.isEmpty(postRelationshipsDto)) {
-      return ResponseEntity.badRequest().headers(HeaderUtil.createFailureAlert(ENTITY_NAME, REQUEST_BODY_EMPTY,
-          REQUEST_BODY_CANNOT_BE_EMPTY)).body(null);
+      return ResponseEntity.badRequest()
+          .headers(HeaderUtil.createFailureAlert(ENTITY_NAME, REQUEST_BODY_EMPTY,
+              REQUEST_BODY_CANNOT_BE_EMPTY)).body(null);
     } else if (!Collections.isEmpty(postRelationshipsDto)) {
       List<PostDTO> entitiesWithNoId = postRelationshipsDto.stream()
           .filter(p -> p.getIntrepidId() == null)
           .collect(Collectors.toList());
       if (!Collections.isEmpty(entitiesWithNoId)) {
-        return ResponseEntity.badRequest().headers(HeaderUtil.createFailureAlert(StringUtils.join(entitiesWithNoId, ","),
-            BULK_UPDATE_FAILED_NOID, NOID_ERR_MSG)).body(entitiesWithNoId);
+        return ResponseEntity.badRequest()
+            .headers(HeaderUtil.createFailureAlert(StringUtils.join(entitiesWithNoId, ","),
+                BULK_UPDATE_FAILED_NOID, NOID_ERR_MSG)).body(entitiesWithNoId);
       }
     }
 
@@ -512,25 +554,28 @@ public class PostResource {
    * PATCH  /bulk-patch-post-programmes : Patches a Post to link it to specialties
    *
    * @param postRelationshipsDto List of the PostRelationshipsDTO to update their old and new Posts
-   * @return the ResponseEntity with status 200 (OK) and with body the updated postDTOS,
-   * or with status 400 (Bad Request) if the postDTOS is not valid,
-   * or with status 500 (Internal Server Error) if the postDTOS couldnt be updated
+   * @return the ResponseEntity with status 200 (OK) and with body the updated postDTOS, or with
+   * status 400 (Bad Request) if the postDTOS is not valid, or with status 500 (Internal Server
+   * Error) if the postDTOS couldnt be updated
    * @throws URISyntaxException if the Location URI syntax is incorrect
    */
   @PatchMapping("/bulk-patch-post-specialties")
   @PreAuthorize("hasAuthority('tcs:add:modify:entities')")
-  public ResponseEntity<List<PostDTO>> bulkPatchPostSpecialties(@Valid @RequestBody List<PostDTO> postRelationshipsDto) {
+  public ResponseEntity<List<PostDTO>> bulkPatchPostSpecialties(
+      @Valid @RequestBody List<PostDTO> postRelationshipsDto) {
     log.debug("REST request to bulk link specialties to Posts : {}", postRelationshipsDto);
     if (Collections.isEmpty(postRelationshipsDto)) {
-      return ResponseEntity.badRequest().headers(HeaderUtil.createFailureAlert(ENTITY_NAME, REQUEST_BODY_EMPTY,
-          REQUEST_BODY_CANNOT_BE_EMPTY)).body(null);
+      return ResponseEntity.badRequest()
+          .headers(HeaderUtil.createFailureAlert(ENTITY_NAME, REQUEST_BODY_EMPTY,
+              REQUEST_BODY_CANNOT_BE_EMPTY)).body(null);
     } else if (!Collections.isEmpty(postRelationshipsDto)) {
       List<PostDTO> entitiesWithNoId = postRelationshipsDto.stream()
           .filter(p -> p.getIntrepidId() == null)
           .collect(Collectors.toList());
       if (!Collections.isEmpty(entitiesWithNoId)) {
-        return ResponseEntity.badRequest().headers(HeaderUtil.createFailureAlert(StringUtils.join(entitiesWithNoId, ","),
-            BULK_UPDATE_FAILED_NOID, NOID_ERR_MSG)).body(entitiesWithNoId);
+        return ResponseEntity.badRequest()
+            .headers(HeaderUtil.createFailureAlert(StringUtils.join(entitiesWithNoId, ","),
+                BULK_UPDATE_FAILED_NOID, NOID_ERR_MSG)).body(entitiesWithNoId);
       }
     }
 
@@ -545,29 +590,30 @@ public class PostResource {
    * PATCH  /post/fundings : Patches a Post to link it to fundings
    *
    * @param postDto The PostDTO to update the fundings for.
-   * @return the ResponseEntity with status 200 (OK) and with body of a map of
-   * the updated postDTOS and associated error messages,
-   * or with status 400 (Bad Request) if the postDTOS is not valid,
+   * @return the ResponseEntity with status 200 (OK) and with body of a map of the updated postDTOS
+   * and associated error messages, or with status 400 (Bad Request) if the postDTOS is not valid,
    * or with status 500 (Internal Server Error) if the postDTOS couldnt be updated
    * @throws URISyntaxException if the Location URI syntax is incorrect
    */
   @PatchMapping("/post/fundings")
   @PreAuthorize("hasAuthority('tcs:add:modify:entities')")
-  public ResponseEntity<List<PostFundingDTO>> patchPostFundings(@Valid @RequestBody PostDTO postDto) {
+  public ResponseEntity<List<PostFundingDTO>> patchPostFundings(
+      @Valid @RequestBody PostDTO postDto) {
     log.debug("REST request to bulk link fundings to Posts : {}", postDto);
     if (postDto == null) {
-      return ResponseEntity.badRequest().headers(HeaderUtil.createFailureAlert(ENTITY_NAME, REQUEST_BODY_EMPTY,
-        REQUEST_BODY_CANNOT_BE_EMPTY)).body(null);
+      return ResponseEntity.badRequest()
+          .headers(HeaderUtil.createFailureAlert(ENTITY_NAME, REQUEST_BODY_EMPTY,
+              REQUEST_BODY_CANNOT_BE_EMPTY)).body(null);
     }
     List<PostFundingDTO> checkList = postService.patchPostFundings(postDto);
     return ResponseEntity.ok()
-      .headers(HeaderUtil.createEntityUpdateAlert(ENTITY_NAME, postDto.getId().toString()))
-      .body(checkList);
+        .headers(HeaderUtil.createEntityUpdateAlert(ENTITY_NAME, postDto.getId().toString()))
+        .body(checkList);
   }
 
   @GetMapping("/programme/{id}/posts")
   public ResponseEntity<List<PostDTO>> getAllPostsForProgramme(@PathVariable Long id,
-                                                               @RequestParam(required = false, defaultValue = StringUtils.EMPTY) String npn) {
+      @RequestParam(required = false, defaultValue = StringUtils.EMPTY) String npn) {
 
     List<PostDTO> foundPosts = postService.findPostsForProgrammeIdAndNpn(id, npn);
     return new ResponseEntity<>(foundPosts, HttpStatus.OK);

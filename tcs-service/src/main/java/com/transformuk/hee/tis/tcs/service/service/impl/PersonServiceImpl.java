@@ -1,8 +1,16 @@
 package com.transformuk.hee.tis.tcs.service.service.impl;
 
+import static com.transformuk.hee.tis.tcs.service.service.impl.SpecificationFactory.containsLike;
+
 import com.transformuk.hee.tis.reference.api.dto.RoleDTO;
 import com.transformuk.hee.tis.reference.client.ReferenceService;
-import com.transformuk.hee.tis.tcs.api.dto.*;
+import com.transformuk.hee.tis.tcs.api.dto.PersonBasicDetailsDTO;
+import com.transformuk.hee.tis.tcs.api.dto.PersonDTO;
+import com.transformuk.hee.tis.tcs.api.dto.PersonLiteDTO;
+import com.transformuk.hee.tis.tcs.api.dto.PersonV2DTO;
+import com.transformuk.hee.tis.tcs.api.dto.PersonViewDTO;
+import com.transformuk.hee.tis.tcs.api.dto.PersonalDetailsDTO;
+import com.transformuk.hee.tis.tcs.api.dto.ProgrammeMembershipDTO;
 import com.transformuk.hee.tis.tcs.api.enumeration.PersonOwnerRule;
 import com.transformuk.hee.tis.tcs.api.enumeration.Status;
 import com.transformuk.hee.tis.tcs.service.api.util.BasicPage;
@@ -10,13 +18,40 @@ import com.transformuk.hee.tis.tcs.service.event.PersonCreatedEvent;
 import com.transformuk.hee.tis.tcs.service.event.PersonDeletedEvent;
 import com.transformuk.hee.tis.tcs.service.event.PersonSavedEvent;
 import com.transformuk.hee.tis.tcs.service.exception.AccessUnauthorisedException;
-import com.transformuk.hee.tis.tcs.service.model.*;
-import com.transformuk.hee.tis.tcs.service.repository.*;
+import com.transformuk.hee.tis.tcs.service.model.ColumnFilter;
+import com.transformuk.hee.tis.tcs.service.model.ContactDetails;
+import com.transformuk.hee.tis.tcs.service.model.GdcDetails;
+import com.transformuk.hee.tis.tcs.service.model.GmcDetails;
+import com.transformuk.hee.tis.tcs.service.model.Person;
+import com.transformuk.hee.tis.tcs.service.model.PersonBasicDetails;
+import com.transformuk.hee.tis.tcs.service.model.PersonTrust;
+import com.transformuk.hee.tis.tcs.service.model.PersonalDetails;
+import com.transformuk.hee.tis.tcs.service.model.RightToWork;
+import com.transformuk.hee.tis.tcs.service.repository.ContactDetailsRepository;
+import com.transformuk.hee.tis.tcs.service.repository.GdcDetailsRepository;
+import com.transformuk.hee.tis.tcs.service.repository.GmcDetailsRepository;
+import com.transformuk.hee.tis.tcs.service.repository.PersonBasicDetailsRepository;
+import com.transformuk.hee.tis.tcs.service.repository.PersonRepository;
+import com.transformuk.hee.tis.tcs.service.repository.PersonalDetailsRepository;
+import com.transformuk.hee.tis.tcs.service.repository.RightToWorkRepository;
 import com.transformuk.hee.tis.tcs.service.service.PersonService;
 import com.transformuk.hee.tis.tcs.service.service.helper.SqlQuerySupplier;
 import com.transformuk.hee.tis.tcs.service.service.mapper.PersonBasicDetailsMapper;
 import com.transformuk.hee.tis.tcs.service.service.mapper.PersonLiteMapper;
 import com.transformuk.hee.tis.tcs.service.service.mapper.PersonMapper;
+import java.sql.ResultSet;
+import java.sql.SQLException;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.Collection;
+import java.util.Collections;
+import java.util.List;
+import java.util.Optional;
+import java.util.Set;
+import java.util.SortedSet;
+import java.util.TreeSet;
+import java.util.concurrent.CompletableFuture;
+import java.util.stream.Collectors;
 import org.apache.commons.lang3.ObjectUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
@@ -25,7 +60,11 @@ import org.springframework.beans.BeanUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.cache.annotation.Cacheable;
 import org.springframework.context.ApplicationEventPublisher;
-import org.springframework.data.domain.*;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageImpl;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
+import org.springframework.data.domain.Sort;
 import org.springframework.data.jpa.domain.Specification;
 import org.springframework.data.jpa.domain.Specifications;
 import org.springframework.jdbc.core.RowMapper;
@@ -37,14 +76,6 @@ import org.springframework.transaction.annotation.Transactional;
 import org.springframework.util.CollectionUtils;
 import org.springframework.util.StopWatch;
 
-import java.sql.ResultSet;
-import java.sql.SQLException;
-import java.util.*;
-import java.util.concurrent.CompletableFuture;
-import java.util.stream.Collectors;
-
-import static com.transformuk.hee.tis.tcs.service.service.impl.SpecificationFactory.containsLike;
-
 
 /**
  * Service Implementation for managing Person.
@@ -52,6 +83,7 @@ import static com.transformuk.hee.tis.tcs.service.service.impl.SpecificationFact
 @Service
 @Transactional
 public class PersonServiceImpl implements PersonService {
+
   private static final int PERSON_BASIC_DETAILS_MAX_RESULTS = 100;
   private final Logger log = LoggerFactory.getLogger(PersonServiceImpl.class);
 
@@ -104,7 +136,8 @@ public class PersonServiceImpl implements PersonService {
     if (!permissionService.canEditSensitiveData() && personDtoId != null) {
       final Person originalPerson = personRepository.findById(personDtoId).orElse(null);
       if (originalPerson == null) { //this shouldn't happen
-        throw new IllegalArgumentException("The person record for id " + personDtoId + " could not be found");
+        throw new IllegalArgumentException(
+            "The person record for id " + personDtoId + " could not be found");
       }
 
       final PersonalDetails originalPersonalDetails = originalPerson.getPersonalDetails();
@@ -129,8 +162,8 @@ public class PersonServiceImpl implements PersonService {
   /**
    * Create a person.
    * <p>
-   * Person is one of those entities that share the ID with the joining tables
-   * Save the person object and ensure we copy the generated id to the linked entities
+   * Person is one of those entities that share the ID with the joining tables Save the person
+   * object and ensure we copy the generated id to the linked entities
    *
    * @param personDTO the entity to save
    * @return the persisted entity
@@ -142,22 +175,26 @@ public class PersonServiceImpl implements PersonService {
     Person person = personMapper.toEntity(personDTO);
     person = personRepository.save(person);
 
-    GdcDetails gdcDetails = person.getGdcDetails() != null ? person.getGdcDetails() : new GdcDetails();
+    GdcDetails gdcDetails =
+        person.getGdcDetails() != null ? person.getGdcDetails() : new GdcDetails();
     gdcDetails.setId(person.getId());
     gdcDetails = gdcDetailsRepository.save(gdcDetails);
     person.setGdcDetails(gdcDetails);
 
-    GmcDetails gmcDetails = person.getGmcDetails() != null ? person.getGmcDetails() : new GmcDetails();
+    GmcDetails gmcDetails =
+        person.getGmcDetails() != null ? person.getGmcDetails() : new GmcDetails();
     gmcDetails.setId(person.getId());
     gmcDetails = gmcDetailsRepository.save(gmcDetails);
     person.setGmcDetails(gmcDetails);
 
-    ContactDetails contactDetails = person.getContactDetails() != null ? person.getContactDetails() : new ContactDetails();
+    ContactDetails contactDetails =
+        person.getContactDetails() != null ? person.getContactDetails() : new ContactDetails();
     contactDetails.setId(person.getId());
     contactDetails = contactDetailsRepository.save(contactDetails);
     person.setContactDetails(contactDetails);
 
-    PersonalDetails personalDetails = person.getPersonalDetails() != null ? person.getPersonalDetails() : new PersonalDetails();
+    PersonalDetails personalDetails =
+        person.getPersonalDetails() != null ? person.getPersonalDetails() : new PersonalDetails();
     personalDetails.setId(person.getId());
     if (!permissionService.canEditSensitiveData()) {
       clearSensitiveData(personalDetails);
@@ -165,7 +202,8 @@ public class PersonServiceImpl implements PersonService {
     personalDetails = personalDetailsRepository.save(personalDetails);
     person.setPersonalDetails(personalDetails);
 
-    RightToWork rightToWork = person.getRightToWork() != null ? person.getRightToWork() : new RightToWork();
+    RightToWork rightToWork =
+        person.getRightToWork() != null ? person.getRightToWork() : new RightToWork();
     rightToWork.setId(person.getId());
     rightToWork = rightToWorkRepository.save(rightToWork);
     person.setRightToWork(rightToWork);
@@ -212,7 +250,9 @@ public class PersonServiceImpl implements PersonService {
     MapSqlParameterSource paramSource = new MapSqlParameterSource();
     String query = sqlQuerySupplier.getQuery(SqlQuerySupplier.PERSON_VIEW);
 
-    query = query.replaceAll("TRUST_JOIN", permissionService.isUserTrustAdmin() ? " left join PersonTrust pt on (pt.personId = p.id)" : StringUtils.EMPTY);
+    query = query.replaceAll("TRUST_JOIN",
+        permissionService.isUserTrustAdmin() ? " left join PersonTrust pt on (pt.personId = p.id)"
+            : StringUtils.EMPTY);
 
     String whereClause = " WHERE 1=1 ";
 
@@ -237,7 +277,8 @@ public class PersonServiceImpl implements PersonService {
     log.debug("running full person query with no filters");
     final StopWatch stopWatch = new StopWatch();
     stopWatch.start();
-    List<PersonViewDTO> persons = namedParameterJdbcTemplate.query(query, paramSource, new PersonViewRowMapper());
+    List<PersonViewDTO> persons = namedParameterJdbcTemplate
+        .query(query, paramSource, new PersonViewRowMapper());
     stopWatch.stop();
     log.debug("full person query finished in: [{}]s", stopWatch.getTotalTimeSeconds());
 
@@ -255,8 +296,8 @@ public class PersonServiceImpl implements PersonService {
   /**
    * Advanced search for person list view.
    * <p>
-   * There are two queries that happen in this method, one to retrieve the data based on the search and column filters
-   * and the second to get the count so that we can support pagination
+   * There are two queries that happen in this method, one to retrieve the data based on the search
+   * and column filters and the second to get the count so that we can support pagination
    *
    * @param searchString the search string to match, can be null
    * @return
@@ -267,8 +308,8 @@ public class PersonServiceImpl implements PersonService {
     List<Specification<PersonBasicDetails>> specs = new ArrayList<>();
     if (StringUtils.isNotEmpty(searchString)) {
       specs.add(Specifications.where(containsLike("firstName", searchString)).
-              or(containsLike("lastName", searchString)).
-              or(containsLike("gmcDetails.gmcNumber", searchString)));
+          or(containsLike("lastName", searchString)).
+          or(containsLike("gmcDetails.gmcNumber", searchString)));
     }
     Pageable pageable = new PageRequest(0, PERSON_BASIC_DETAILS_MAX_RESULTS);
 
@@ -286,12 +327,15 @@ public class PersonServiceImpl implements PersonService {
   @Cacheable(value = "personAdvSearch", sync = true)
   @Override
   @Transactional(readOnly = true)
-  public BasicPage<PersonViewDTO> advancedSearch(final String searchString, final List<ColumnFilter> columnFilters, final Pageable pageable) {
+  public BasicPage<PersonViewDTO> advancedSearch(final String searchString,
+      final List<ColumnFilter> columnFilters, final Pageable pageable) {
     final int size = pageable.getPageSize() + 1;
     final long offset = pageable.getOffset();
     MapSqlParameterSource paramSource = new MapSqlParameterSource();
     String query = sqlQuerySupplier.getQuery(SqlQuerySupplier.PERSON_VIEW);
-    query = query.replaceAll("TRUST_JOIN", permissionService.isUserTrustAdmin() ? " left join PersonTrust pt on (pt.personId = p.id)" : StringUtils.EMPTY);
+    query = query.replaceAll("TRUST_JOIN",
+        permissionService.isUserTrustAdmin() ? " left join PersonTrust pt on (pt.personId = p.id)"
+            : StringUtils.EMPTY);
 
     String whereClause = createWhereClause(searchString, columnFilters);
 
@@ -318,11 +362,11 @@ public class PersonServiceImpl implements PersonService {
     final String orderByClause = createOrderByClauseWithParams(pageable);
     query = query.replaceAll("ORDERBYCLAUSE", orderByClause);
 
-
     //limit is 0 based
     query = query.replaceAll("LIMITCLAUSE", "limit " + size + " offset " + offset);
 
-    List<PersonViewDTO> persons = namedParameterJdbcTemplate.query(query, paramSource, new PersonViewRowMapper());
+    List<PersonViewDTO> persons = namedParameterJdbcTemplate
+        .query(query, paramSource, new PersonViewRowMapper());
 
     final boolean hasNext = persons.size() > pageable.getPageSize();
     if (hasNext) {
@@ -338,6 +382,7 @@ public class PersonServiceImpl implements PersonService {
 
   /**
    * To generate order by clause with parameterised sort
+   *
    * @param pageable
    * @return
    */
@@ -346,7 +391,8 @@ public class PersonServiceImpl implements PersonService {
     if (pageable.getSort() != null) {
       if (pageable.getSort().iterator().hasNext()) {
         Sort.Order order = pageable.getSort().iterator().next();
-        orderByClause.append(" ORDER BY ").append(order.getProperty()).append(" ").append(order.getDirection()).append(" ");
+        orderByClause.append(" ORDER BY ").append(order.getProperty()).append(" ")
+            .append(order.getDirection()).append(" ");
       }
     }
     return orderByClause.toString();
@@ -358,7 +404,8 @@ public class PersonServiceImpl implements PersonService {
    * @param columnFilters
    * @param paramSource
    */
-  private void applyFilterByParams(List<ColumnFilter> columnFilters, MapSqlParameterSource paramSource) {
+  private void applyFilterByParams(List<ColumnFilter> columnFilters,
+      MapSqlParameterSource paramSource) {
     if (columnFilters != null && !columnFilters.isEmpty()) {
       columnFilters.forEach(cf -> {
 
@@ -385,18 +432,20 @@ public class PersonServiceImpl implements PersonService {
             paramSource.addValue("currentOwnerList", cf.getValues());
             break;
           case "status":
-            paramSource.addValue("statusList", cf.getValues().stream().map(o -> ((Status) o).name()).collect(Collectors.toList()));
+            paramSource.addValue("statusList",
+                cf.getValues().stream().map(o -> ((Status) o).name()).collect(Collectors.toList()));
             break;
           default:
             throw new IllegalArgumentException("Not accounted for column filter [" + cf.getName() +
-                    "] you need to add an additional case statement or remove it from the request");
+                "] you need to add an additional case statement or remove it from the request");
         }
       });
     }
   }
 
 
-  private String createWhereClause(final String searchString, final List<ColumnFilter> columnFilters) {
+  private String createWhereClause(final String searchString,
+      final List<ColumnFilter> columnFilters) {
     final StringBuilder whereClause = new StringBuilder();
     whereClause.append(" WHERE 1=1 ");
 
@@ -435,18 +484,18 @@ public class PersonServiceImpl implements PersonService {
             break;
           default:
             throw new IllegalArgumentException("Not accounted for column filter [" + cf.getName() +
-                    "] you need to add an additional case statement or remove it from the request");
+                "] you need to add an additional case statement or remove it from the request");
         }
       });
     }
 
     if (StringUtils.isNotEmpty(searchString)) {
       whereClause.append(" AND (p.publicHealthNumber LIKE :searchString " +
-              "OR cd.surname LIKE :searchString " +
-              "OR cd.forenames LIKE :searchString " +
-              "OR gmc.gmcNumber LIKE :searchString " +
-              "OR gdc.gdcNumber LIKE :searchString " +
-              "OR p.role LIKE :searchString ");
+          "OR cd.surname LIKE :searchString " +
+          "OR cd.forenames LIKE :searchString " +
+          "OR gmc.gmcNumber LIKE :searchString " +
+          "OR gdc.gdcNumber LIKE :searchString " +
+          "OR p.role LIKE :searchString ");
       if (StringUtils.isNumeric(searchString)) {
         whereClause.append(" OR p.id in (:searchStringArray)");
       }
@@ -477,6 +526,7 @@ public class PersonServiceImpl implements PersonService {
 
   /**
    * Find a person record and ensure that the
+   *
    * @param id
    * @return
    */
@@ -484,10 +534,12 @@ public class PersonServiceImpl implements PersonService {
   @Transactional(readOnly = true)
   public PersonDTO findPersonWithProgrammeMembershipsSorted(final Long id) {
     PersonDTO personDTO = findOne(id);
-    if(personDTO != null) {
+    if (personDTO != null) {
       Set<ProgrammeMembershipDTO> programmeMemberships = personDTO.getProgrammeMemberships();
-      if(org.apache.commons.collections4.CollectionUtils.isNotEmpty(programmeMemberships)) {
-        SortedSet<ProgrammeMembershipDTO> orderedProgrammeMemberships = new TreeSet<>((o1, o2) -> ObjectUtils.compare(o2.getProgrammeStartDate(), o1.getProgrammeStartDate()));
+      if (org.apache.commons.collections4.CollectionUtils.isNotEmpty(programmeMemberships)) {
+        SortedSet<ProgrammeMembershipDTO> orderedProgrammeMemberships = new TreeSet<>(
+            (o1, o2) -> ObjectUtils
+                .compare(o2.getProgrammeStartDate(), o1.getProgrammeStartDate()));
         orderedProgrammeMemberships.addAll(programmeMemberships);
         personDTO.setProgrammeMemberships(orderedProgrammeMemberships);
       }
@@ -535,8 +587,8 @@ public class PersonServiceImpl implements PersonService {
     log.debug("Request to get all person basic details {} ", ids);
 
     return personBasicDetailsRepository.findAllById(ids).stream()
-            .map(personBasicDetailsMapper::toDto)
-            .collect(Collectors.toList());
+        .map(personBasicDetailsMapper::toDto)
+        .collect(Collectors.toList());
   }
 
   /**
@@ -551,8 +603,8 @@ public class PersonServiceImpl implements PersonService {
     log.debug("Request to get all persons {} ", ids);
 
     return personRepository.findAllById(ids).stream()
-            .map(personMapper::toDto)
-            .collect(Collectors.toList());
+        .map(personMapper::toDto)
+        .collect(Collectors.toList());
   }
 
   /**
@@ -571,17 +623,18 @@ public class PersonServiceImpl implements PersonService {
   @Override
   public List<PersonDTO> findPersonsByPublicHealthNumbersIn(List<String> publicHealthNumbers) {
     return personRepository.findByPublicHealthNumberIn(publicHealthNumbers).stream()
-            .map(personMapper::toDto)
-            .collect(Collectors.toList());
+        .map(personMapper::toDto)
+        .collect(Collectors.toList());
   }
 
   @Override
-  public Page<PersonLiteDTO> searchByRoleCategory(final String query, final Long categoryId, final Pageable pageable) {
+  public Page<PersonLiteDTO> searchByRoleCategory(final String query, final Long categoryId,
+      final Pageable pageable) {
     log.debug("Received request to search '{}' with RoleCategory ID '{}' and query '{}'",
-            PersonLiteDTO.class.getSimpleName(), categoryId, query);
+        PersonLiteDTO.class.getSimpleName(), categoryId, query);
 
     log.debug("Accessing '{}' to load '{}' for Category ID '{}'",
-            referenceService.getClass().getSimpleName(), RoleDTO.class.getSimpleName(), categoryId);
+        referenceService.getClass().getSimpleName(), RoleDTO.class.getSimpleName(), categoryId);
 
     final StopWatch stopWatch = new StopWatch();
     stopWatch.start();
@@ -591,21 +644,23 @@ public class PersonServiceImpl implements PersonService {
     stopWatch.stop();
 
     log.info("'{}' returned '{}' '{}' for Category ID '{}'; took '{}'ms",
-            referenceService.getClass().getSimpleName(), rolesByCategory.size(), RoleDTO.class.getSimpleName(), categoryId, stopWatch.getTotalTimeSeconds());
+        referenceService.getClass().getSimpleName(), rolesByCategory.size(),
+        RoleDTO.class.getSimpleName(), categoryId, stopWatch.getTotalTimeSeconds());
 
     if (rolesByCategory.isEmpty()) {
       return new PageImpl<>(java.util.Collections.emptyList(), pageable, 0);
     }
 
     final Set<String> roles = rolesByCategory.stream()
-            .map(RoleDTO::getCode)
-            .collect(Collectors.toSet());
+        .map(RoleDTO::getCode)
+        .collect(Collectors.toSet());
 
     log.debug("Accessing '{}' to search '{}' with roles for Category ID '{}' and query '{}'",
-            personRepository.getClass().getSimpleName(), PersonLiteDTO.class.getSimpleName(), categoryId, query);
+        personRepository.getClass().getSimpleName(), PersonLiteDTO.class.getSimpleName(),
+        categoryId, query);
 
     return personRepository.searchByRoleCategory(query, roles, pageable)
-            .map(personLiteMapper::toDto);
+        .map(personLiteMapper::toDto);
   }
 
   @Override
@@ -650,7 +705,8 @@ public class PersonServiceImpl implements PersonService {
   }
 
   /**
-   * Method that will throw a not authorized exception if the current logged in user cannot view or modify the person record
+   * Method that will throw a not authorized exception if the current logged in user cannot view or
+   * modify the person record
    *
    * @param personId the db managed id of the person record
    */
@@ -662,10 +718,13 @@ public class PersonServiceImpl implements PersonService {
       if (optionalPerson.isPresent()) {
         Set<PersonTrust> associatedTrusts = optionalPerson.get().getAssociatedTrusts();
         if (!CollectionUtils.isEmpty(associatedTrusts)) {
-          Set<Long> personTrustIds = associatedTrusts.stream().map(PersonTrust::getTrustId).collect(Collectors.toSet());
+          Set<Long> personTrustIds = associatedTrusts.stream().map(PersonTrust::getTrustId)
+              .collect(Collectors.toSet());
           boolean noCommonElements = Collections.disjoint(personTrustIds, userTrustIds);
-          if (noCommonElements)
-            throw new AccessUnauthorisedException("You cannot view or modify Person with id: " + personId);
+          if (noCommonElements) {
+            throw new AccessUnauthorisedException(
+                "You cannot view or modify Person with id: " + personId);
+          }
         }
       }
     }
@@ -673,8 +732,8 @@ public class PersonServiceImpl implements PersonService {
 
   private String getLoggedInUsersAssociatedTrusts() {
     String commaSepTrustIds = permissionService.getUsersTrustIds().stream()
-            .map(Object::toString)
-            .reduce((x, y) -> x + ", " + y).orElse(StringUtils.EMPTY);
+        .map(Object::toString)
+        .reduce((x, y) -> x + ", " + y).orElse(StringUtils.EMPTY);
     return commaSepTrustIds;
   }
 

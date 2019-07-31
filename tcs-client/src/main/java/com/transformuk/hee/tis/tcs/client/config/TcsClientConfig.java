@@ -10,10 +10,12 @@ import org.springframework.http.client.HttpComponentsClientHttpRequestFactory;
 import org.springframework.web.client.RestTemplate;
 
 public class TcsClientConfig {
+
   /**
    * This rest template makes requests to other services for back end services such as ETLs
    * <p>
-   * It adds auth headers to the request before sending it. This one is used for all environments but production
+   * It adds auth headers to the request before sending it. This one is used for all environments
+   * but production
    *
    * @return
    */
@@ -28,13 +30,14 @@ public class TcsClientConfig {
    * @return
    */
   public RestTemplate prodTcsRestTemplate(Keycloak keycloak) {
-    final KeycloakClientRequestFactory keycloakClientRequestFactory = new KeycloakClientRequestFactory(keycloak);
+    final KeycloakClientRequestFactory keycloakClientRequestFactory = new KeycloakClientRequestFactory(
+        keycloak);
     return new KeycloakRestTemplate(keycloakClientRequestFactory);
   }
 
   /**
-   * This rest template adds auth headers retrieved from the Spring security context. its for use in prod when making
-   * rest calls that were initiated by a browser
+   * This rest template adds auth headers retrieved from the Spring security context. its for use in
+   * prod when making rest calls that were initiated by a browser
    *
    * @return
    */
@@ -43,7 +46,8 @@ public class TcsClientConfig {
     return new RestTemplate(internalClientRequestFactory);
   }
 
-  private static class LocalClientRequestFactory extends HttpComponentsClientHttpRequestFactory implements ClientHttpRequestFactory {
+  private static class LocalClientRequestFactory extends
+      HttpComponentsClientHttpRequestFactory implements ClientHttpRequestFactory {
 
     private static final String TOKEN_HEADER = "OIDC_access_token";
     private static final String AUTH_TOKEN_HEADER = "Authorization";

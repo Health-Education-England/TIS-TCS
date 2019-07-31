@@ -6,6 +6,12 @@ import com.transformuk.hee.tis.tcs.service.api.util.PaginationUtil;
 import com.transformuk.hee.tis.tcs.service.service.TariffRateService;
 import io.github.jhipster.web.util.ResponseUtil;
 import io.jsonwebtoken.lang.Collections;
+import java.net.URI;
+import java.net.URISyntaxException;
+import java.util.List;
+import java.util.Optional;
+import java.util.stream.Collectors;
+import javax.validation.Valid;
 import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -15,14 +21,14 @@ import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
-import org.springframework.web.bind.annotation.*;
-
-import javax.validation.Valid;
-import java.net.URI;
-import java.net.URISyntaxException;
-import java.util.List;
-import java.util.Optional;
-import java.util.stream.Collectors;
+import org.springframework.web.bind.annotation.DeleteMapping;
+import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PathVariable;
+import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.PutMapping;
+import org.springframework.web.bind.annotation.RequestBody;
+import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RestController;
 
 /**
  * REST controller for managing TariffRate.
@@ -43,15 +49,19 @@ public class TariffRateResource {
    * POST  /tariff-rates : Create a new tariffRate.
    *
    * @param tariffRateDTO the tariffRateDTO to create
-   * @return the ResponseEntity with status 201 (Created) and with body the new tariffRateDTO, or with status 400 (Bad Request) if the tariffRate has already an ID
+   * @return the ResponseEntity with status 201 (Created) and with body the new tariffRateDTO, or
+   * with status 400 (Bad Request) if the tariffRate has already an ID
    * @throws URISyntaxException if the Location URI syntax is incorrect
    */
   @PostMapping("/tariff-rates")
   @PreAuthorize("hasAuthority('tcs:add:modify:entities')")
-  public ResponseEntity<TariffRateDTO> createTariffRate(@RequestBody TariffRateDTO tariffRateDTO) throws URISyntaxException {
+  public ResponseEntity<TariffRateDTO> createTariffRate(@RequestBody TariffRateDTO tariffRateDTO)
+      throws URISyntaxException {
     log.debug("REST request to save TariffRate : {}", tariffRateDTO);
     if (tariffRateDTO.getId() != null) {
-      return ResponseEntity.badRequest().headers(HeaderUtil.createFailureAlert(ENTITY_NAME, "idexists", "A new tariffRate cannot already have an ID")).body(null);
+      return ResponseEntity.badRequest().headers(HeaderUtil
+          .createFailureAlert(ENTITY_NAME, "idexists",
+              "A new tariffRate cannot already have an ID")).body(null);
     }
     TariffRateDTO result = tariffRateService.save(tariffRateDTO);
     return ResponseEntity.created(new URI("/api/tariff-rates/" + result.getId()))
@@ -63,14 +73,15 @@ public class TariffRateResource {
    * PUT  /tariff-rates : Updates an existing tariffRate.
    *
    * @param tariffRateDTO the tariffRateDTO to update
-   * @return the ResponseEntity with status 200 (OK) and with body the updated tariffRateDTO,
-   * or with status 400 (Bad Request) if the tariffRateDTO is not valid,
-   * or with status 500 (Internal Server Error) if the tariffRateDTO couldnt be updated
+   * @return the ResponseEntity with status 200 (OK) and with body the updated tariffRateDTO, or
+   * with status 400 (Bad Request) if the tariffRateDTO is not valid, or with status 500 (Internal
+   * Server Error) if the tariffRateDTO couldnt be updated
    * @throws URISyntaxException if the Location URI syntax is incorrect
    */
   @PutMapping("/tariff-rates")
   @PreAuthorize("hasAuthority('tcs:add:modify:entities')")
-  public ResponseEntity<TariffRateDTO> updateTariffRate(@RequestBody TariffRateDTO tariffRateDTO) throws URISyntaxException {
+  public ResponseEntity<TariffRateDTO> updateTariffRate(@RequestBody TariffRateDTO tariffRateDTO)
+      throws URISyntaxException {
     log.debug("REST request to update TariffRate : {}", tariffRateDTO);
     if (tariffRateDTO.getId() == null) {
       return createTariffRate(tariffRateDTO);
@@ -92,7 +103,8 @@ public class TariffRateResource {
   public ResponseEntity<List<TariffRateDTO>> getAllTariffRates(Pageable pageable) {
     log.debug("REST request to get all TariffRates");
     Page<TariffRateDTO> tariffRateDTOPage = tariffRateService.findAll(pageable);
-    HttpHeaders headers = PaginationUtil.generatePaginationHttpHeaders(tariffRateDTOPage, "/api/tariff-rates");
+    HttpHeaders headers = PaginationUtil
+        .generatePaginationHttpHeaders(tariffRateDTOPage, "/api/tariff-rates");
     return new ResponseEntity<>(tariffRateDTOPage.getContent(), headers, HttpStatus.OK);
   }
 
@@ -100,7 +112,8 @@ public class TariffRateResource {
    * GET  /tariff-rates/:id : get the "id" tariffRate.
    *
    * @param id the id of the tariffRateDTO to retrieve
-   * @return the ResponseEntity with status 200 (OK) and with body the tariffRateDTO, or with status 404 (Not Found)
+   * @return the ResponseEntity with status 200 (OK) and with body the tariffRateDTO, or with status
+   * 404 (Not Found)
    */
   @GetMapping("/tariff-rates/{id}")
   @PreAuthorize("hasAuthority('tcs:view:entities')")
@@ -121,7 +134,8 @@ public class TariffRateResource {
   public ResponseEntity<Void> deleteTariffRate(@PathVariable Long id) {
     log.debug("REST request to delete TariffRate : {}", id);
     tariffRateService.delete(id);
-    return ResponseEntity.ok().headers(HeaderUtil.createEntityDeletionAlert(ENTITY_NAME, id.toString())).build();
+    return ResponseEntity.ok()
+        .headers(HeaderUtil.createEntityDeletionAlert(ENTITY_NAME, id.toString())).build();
   }
 
 
@@ -129,19 +143,23 @@ public class TariffRateResource {
    * POST  /bulk-tariff-rates : Bulk create Tariff Rates.
    *
    * @param tariffRateDTOS List of the tariffRateDTOS to create
-   * @return the ResponseEntity with status 200 (Created) and with body the new tariffRateDTOS, or with status 400 (Bad Request) if the Tariff Rates has already an ID
+   * @return the ResponseEntity with status 200 (Created) and with body the new tariffRateDTOS, or
+   * with status 400 (Bad Request) if the Tariff Rates has already an ID
    */
   @PostMapping("/bulk-tariff-rates")
   @PreAuthorize("hasAuthority('tcs:add:modify:entities')")
-  public ResponseEntity<List<TariffRateDTO>> bulkCreateTariffRates(@Valid @RequestBody List<TariffRateDTO> tariffRateDTOS) {
+  public ResponseEntity<List<TariffRateDTO>> bulkCreateTariffRates(
+      @Valid @RequestBody List<TariffRateDTO> tariffRateDTOS) {
     log.debug("REST request to bulk save Tariff Rates : {}", tariffRateDTOS);
     if (!Collections.isEmpty(tariffRateDTOS)) {
       List<Long> entityIds = tariffRateDTOS.stream()
           .filter(tr -> tr.getId() != null)
-        .map(TariffRateDTO::getId)
+          .map(TariffRateDTO::getId)
           .collect(Collectors.toList());
       if (!Collections.isEmpty(entityIds)) {
-        return ResponseEntity.badRequest().headers(HeaderUtil.createFailureAlert(StringUtils.join(entityIds, ","), "ids.exist", "A new Tariff Rates cannot already have an ID")).body(null);
+        return ResponseEntity.badRequest().headers(HeaderUtil
+            .createFailureAlert(StringUtils.join(entityIds, ","), "ids.exist",
+                "A new Tariff Rates cannot already have an ID")).body(null);
       }
     }
     List<TariffRateDTO> result = tariffRateService.save(tariffRateDTOS);
@@ -155,22 +173,28 @@ public class TariffRateResource {
    * PUT  /bulk-tariff-rates : Updates an existing Tariff Rates.
    *
    * @param tariffRateDTOS List of the tariffRateDTOS to update
-   * @return the ResponseEntity with status 200 (OK) and with body the updated tariffRateDTOS,
-   * or with status 400 (Bad Request) if the tariffRateDTOS is not valid,
-   * or with status 500 (Internal Server Error) if the tariffRateDTOS couldnt be updated
+   * @return the ResponseEntity with status 200 (OK) and with body the updated tariffRateDTOS, or
+   * with status 400 (Bad Request) if the tariffRateDTOS is not valid, or with status 500 (Internal
+   * Server Error) if the tariffRateDTOS couldnt be updated
    */
   @PutMapping("/bulk-tariff-rates")
   @PreAuthorize("hasAuthority('tcs:add:modify:entities')")
-  public ResponseEntity<List<TariffRateDTO>> bulkUpdateTariffRates(@Valid @RequestBody List<TariffRateDTO> tariffRateDTOS) {
+  public ResponseEntity<List<TariffRateDTO>> bulkUpdateTariffRates(
+      @Valid @RequestBody List<TariffRateDTO> tariffRateDTOS) {
     log.debug("REST request to bulk update Tariff Rates : {}", tariffRateDTOS);
     if (Collections.isEmpty(tariffRateDTOS)) {
-      return ResponseEntity.badRequest().headers(HeaderUtil.createFailureAlert(ENTITY_NAME, "request.body.empty",
-          "The request body for this end point cannot be empty")).body(null);
+      return ResponseEntity.badRequest()
+          .headers(HeaderUtil.createFailureAlert(ENTITY_NAME, "request.body.empty",
+              "The request body for this end point cannot be empty")).body(null);
     } else if (!Collections.isEmpty(tariffRateDTOS)) {
-      List<TariffRateDTO> entitiesWithNoId = tariffRateDTOS.stream().filter(t -> t.getId() == null).collect(Collectors.toList());
+      List<TariffRateDTO> entitiesWithNoId = tariffRateDTOS.stream().filter(t -> t.getId() == null)
+          .collect(Collectors.toList());
       if (!Collections.isEmpty(entitiesWithNoId)) {
-        return ResponseEntity.badRequest().headers(HeaderUtil.createFailureAlert(StringUtils.join(entitiesWithNoId, ","),
-            "bulk.update.failed.noId", "Some DTOs you've provided have no Id, cannot update entities that dont exist")).body(entitiesWithNoId);
+        return ResponseEntity.badRequest()
+            .headers(HeaderUtil.createFailureAlert(StringUtils.join(entitiesWithNoId, ","),
+                "bulk.update.failed.noId",
+                "Some DTOs you've provided have no Id, cannot update entities that dont exist"))
+            .body(entitiesWithNoId);
       }
     }
 

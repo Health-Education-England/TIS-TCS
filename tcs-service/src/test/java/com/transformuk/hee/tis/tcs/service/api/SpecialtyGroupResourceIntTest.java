@@ -1,5 +1,18 @@
 package com.transformuk.hee.tis.tcs.service.api;
 
+import static org.assertj.core.api.Assertions.assertThat;
+import static org.hamcrest.Matchers.contains;
+import static org.hamcrest.Matchers.equalTo;
+import static org.hamcrest.Matchers.hasItem;
+import static org.hamcrest.Matchers.not;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.delete;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.put;
+import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.content;
+import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
+import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
+
 import com.transformuk.hee.tis.tcs.api.dto.SpecialtyGroupDTO;
 import com.transformuk.hee.tis.tcs.service.Application;
 import com.transformuk.hee.tis.tcs.service.exception.ExceptionTranslator;
@@ -10,6 +23,9 @@ import com.transformuk.hee.tis.tcs.service.repository.SpecialtyRepository;
 import com.transformuk.hee.tis.tcs.service.service.SpecialtyGroupService;
 import com.transformuk.hee.tis.tcs.service.service.mapper.SpecialtyGroupMapper;
 import com.transformuk.hee.tis.tcs.service.service.mapper.SpecialtyMapper;
+import java.util.List;
+import java.util.Set;
+import javax.persistence.EntityManager;
 import org.assertj.core.util.Sets;
 import org.junit.Before;
 import org.junit.Test;
@@ -24,15 +40,6 @@ import org.springframework.test.context.junit4.SpringRunner;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.setup.MockMvcBuilders;
 import org.springframework.transaction.annotation.Transactional;
-
-import javax.persistence.EntityManager;
-import java.util.List;
-import java.util.Set;
-
-import static org.assertj.core.api.Assertions.assertThat;
-import static org.hamcrest.Matchers.*;
-import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.*;
-import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.*;
 
 /**
  * Test class for the SpecialtyGroupResource REST controller.
@@ -85,8 +92,8 @@ public class SpecialtyGroupResourceIntTest {
   /**
    * Create an entity for this test.
    * <p>
-   * This is a static method, as tests for other entities might also need it,
-   * if they test an entity which requires the current entity.
+   * This is a static method, as tests for other entities might also need it, if they test an entity
+   * which requires the current entity.
    */
   public static SpecialtyGroup createEntity() {
     SpecialtyGroup specialtyGroup = new SpecialtyGroup()
@@ -105,13 +112,14 @@ public class SpecialtyGroupResourceIntTest {
   public Specialty createOrphanSpecialty() {
     Specialty specialty = new Specialty()
         .name(DEFAULT_NAME);
-          return specialty;
+    return specialty;
   }
 
   @Before
   public void setup() {
     MockitoAnnotations.initMocks(this);
-    SpecialtyGroupResource specialtyGroupResource = new SpecialtyGroupResource(specialtyGroupService, specialtyRepository, specialtyMapper);
+    SpecialtyGroupResource specialtyGroupResource = new SpecialtyGroupResource(
+        specialtyGroupService, specialtyRepository, specialtyMapper);
     this.restSpecialtyGroupMockMvc = MockMvcBuilders.standaloneSetup(specialtyGroupResource)
         .setCustomArgumentResolvers(pageableArgumentResolver)
         .setControllerAdvice(exceptionTranslator)
@@ -132,7 +140,8 @@ public class SpecialtyGroupResourceIntTest {
     // Create the SpecialtyGroup
     Set<Specialty> specialties = Sets.newLinkedHashSet(specialty);
     specialtyGroup.setSpecialties(specialties);
-    SpecialtyGroupDTO specialtyGroupDTO = specialtyGroupMapper.specialtyGroupToSpecialtyGroupDTO(specialtyGroup);
+    SpecialtyGroupDTO specialtyGroupDTO = specialtyGroupMapper
+        .specialtyGroupToSpecialtyGroupDTO(specialtyGroup);
     restSpecialtyGroupMockMvc.perform(post("/api/specialty-groups")
         .contentType(TestUtil.APPLICATION_JSON_UTF8)
         .content(TestUtil.convertObjectToJsonBytes(specialtyGroupDTO)))
@@ -152,7 +161,8 @@ public class SpecialtyGroupResourceIntTest {
 
     // Create the SpecialtyGroup with an existing ID
     specialtyGroup.setId(1L);
-    SpecialtyGroupDTO specialtyGroupDTO = specialtyGroupMapper.specialtyGroupToSpecialtyGroupDTO(specialtyGroup);
+    SpecialtyGroupDTO specialtyGroupDTO = specialtyGroupMapper
+        .specialtyGroupToSpecialtyGroupDTO(specialtyGroup);
 
     // An entity with an existing ID cannot be created, so this API call must fail
     restSpecialtyGroupMockMvc.perform(post("/api/specialty-groups")
@@ -176,7 +186,7 @@ public class SpecialtyGroupResourceIntTest {
         .andExpect(status().isOk())
         .andExpect(content().contentType(MediaType.APPLICATION_JSON_UTF8_VALUE))
         .andExpect(jsonPath("$.[*].id").value(hasItem(specialtyGroup.getId().intValue())))
-      .andExpect(jsonPath("$.[*].name").value(hasItem(DEFAULT_NAME)));
+        .andExpect(jsonPath("$.[*].name").value(hasItem(DEFAULT_NAME)));
   }
 
 
@@ -251,7 +261,8 @@ public class SpecialtyGroupResourceIntTest {
     // now add specialty to the specialty group and save the specialty group
 
     addSpecialtySpecialtyGroup.addSpecialty(addedSpecialty);
-    SpecialtyGroupDTO addSpecialtySpecialtyGroupDTO = specialtyGroupMapper.specialtyGroupToSpecialtyGroupDTO(addSpecialtySpecialtyGroup);
+    SpecialtyGroupDTO addSpecialtySpecialtyGroupDTO = specialtyGroupMapper
+        .specialtyGroupToSpecialtyGroupDTO(addSpecialtySpecialtyGroup);
     //specialtyGroupRepository.saveAndFlush(addSpecialtySpecialtyGroup);
     restSpecialtyGroupMockMvc.perform(put("/api/specialty-groups/")
         .contentType(TestUtil.APPLICATION_JSON_UTF8)
@@ -303,7 +314,8 @@ public class SpecialtyGroupResourceIntTest {
 
     // remove a specialty from specialty group
     removeSpecialtySpecialtyGroup.removeSpecialty(addSpecialty2);
-    SpecialtyGroupDTO removeSpecialtyGroupDTO = specialtyGroupMapper.specialtyGroupToSpecialtyGroupDTO(removeSpecialtySpecialtyGroup);
+    SpecialtyGroupDTO removeSpecialtyGroupDTO = specialtyGroupMapper
+        .specialtyGroupToSpecialtyGroupDTO(removeSpecialtySpecialtyGroup);
     restSpecialtyGroupMockMvc.perform(put("/api/specialty-groups/")
         .contentType(TestUtil.APPLICATION_JSON_UTF8)
         .content(TestUtil.convertObjectToJsonBytes(removeSpecialtyGroupDTO)))
@@ -380,7 +392,7 @@ public class SpecialtyGroupResourceIntTest {
         .andExpect(status().isOk())
         .andExpect(content().contentType(MediaType.APPLICATION_JSON_UTF8_VALUE))
         .andExpect(jsonPath("$.id").value(specialtyGroup.getId().intValue()))
-      .andExpect(jsonPath("$.name").value(DEFAULT_NAME));
+        .andExpect(jsonPath("$.name").value(DEFAULT_NAME));
   }
 
   @Test
@@ -399,10 +411,12 @@ public class SpecialtyGroupResourceIntTest {
     int databaseSizeBeforeUpdate = specialtyGroupRepository.findAll().size();
 
     // Update the specialtyGroup
-    SpecialtyGroup updatedSpecialtyGroup = specialtyGroupRepository.findById(specialtyGroup.getId()).orElse(null);
+    SpecialtyGroup updatedSpecialtyGroup = specialtyGroupRepository.findById(specialtyGroup.getId())
+        .orElse(null);
     updatedSpecialtyGroup
         .name(UPDATED_NAME);
-    SpecialtyGroupDTO specialtyGroupDTO = specialtyGroupMapper.specialtyGroupToSpecialtyGroupDTO(updatedSpecialtyGroup);
+    SpecialtyGroupDTO specialtyGroupDTO = specialtyGroupMapper
+        .specialtyGroupToSpecialtyGroupDTO(updatedSpecialtyGroup);
 
     restSpecialtyGroupMockMvc.perform(put("/api/specialty-groups")
         .contentType(TestUtil.APPLICATION_JSON_UTF8)
@@ -421,7 +435,8 @@ public class SpecialtyGroupResourceIntTest {
   public void updateNonExistingSpecialtyGroup() throws Exception {
     //given
     int databaseSizeBeforeUpdate = specialtyGroupRepository.findAll().size();
-    SpecialtyGroupDTO specialtyGroupDTO = specialtyGroupMapper.specialtyGroupToSpecialtyGroupDTO(specialtyGroup);
+    SpecialtyGroupDTO specialtyGroupDTO = specialtyGroupMapper
+        .specialtyGroupToSpecialtyGroupDTO(specialtyGroup);
 
     //when and then
     restSpecialtyGroupMockMvc.perform(put("/api/specialty-groups")
@@ -455,7 +470,8 @@ public class SpecialtyGroupResourceIntTest {
   @Transactional
   public void shouldValidateNameExistsWhenCreating() throws Exception {
     //given
-    SpecialtyGroupDTO specialtyGroupDTO = specialtyGroupMapper.specialtyGroupToSpecialtyGroupDTO(createEntity());
+    SpecialtyGroupDTO specialtyGroupDTO = specialtyGroupMapper
+        .specialtyGroupToSpecialtyGroupDTO(createEntity());
     specialtyGroupDTO.setName("");
     //when & then
     restSpecialtyGroupMockMvc.perform(post("/api/specialty-groups")
@@ -470,7 +486,8 @@ public class SpecialtyGroupResourceIntTest {
   @Transactional
   public void shouldValidateNameLengthWhenCreating() throws Exception {
     //given
-    SpecialtyGroupDTO specialtyGroupDTO = specialtyGroupMapper.specialtyGroupToSpecialtyGroupDTO(createEntity());
+    SpecialtyGroupDTO specialtyGroupDTO = specialtyGroupMapper
+        .specialtyGroupToSpecialtyGroupDTO(createEntity());
     specialtyGroupDTO.setName(
         "more_than_100_chars_more_than_100_chars_more_than_100_chars_more_than_100_chars_more_than_100_chars_1");
     //when & then
@@ -486,7 +503,8 @@ public class SpecialtyGroupResourceIntTest {
   @Transactional
   public void shouldValidateNameContentsWhenCreating() throws Exception {
     //given
-    SpecialtyGroupDTO specialtyGroupDTO = specialtyGroupMapper.specialtyGroupToSpecialtyGroupDTO(createEntity());
+    SpecialtyGroupDTO specialtyGroupDTO = specialtyGroupMapper
+        .specialtyGroupToSpecialtyGroupDTO(createEntity());
     specialtyGroupDTO.setName("$^%&*()_");
     //when & then
     restSpecialtyGroupMockMvc.perform(post("/api/specialty-groups")
@@ -501,7 +519,8 @@ public class SpecialtyGroupResourceIntTest {
   @Transactional
   public void shouldValidateNameExistsWhenUpdating() throws Exception {
     //given
-    SpecialtyGroupDTO specialtyGroupDTO = specialtyGroupMapper.specialtyGroupToSpecialtyGroupDTO(createEntity());
+    SpecialtyGroupDTO specialtyGroupDTO = specialtyGroupMapper
+        .specialtyGroupToSpecialtyGroupDTO(createEntity());
     specialtyGroupDTO.setName("");
     specialtyGroupDTO.setId(1L);
     //when & then
@@ -517,7 +536,8 @@ public class SpecialtyGroupResourceIntTest {
   @Transactional
   public void shouldValidateNameLengthWhenUpdating() throws Exception {
     //given
-    SpecialtyGroupDTO specialtyGroupDTO = specialtyGroupMapper.specialtyGroupToSpecialtyGroupDTO(createEntity());
+    SpecialtyGroupDTO specialtyGroupDTO = specialtyGroupMapper
+        .specialtyGroupToSpecialtyGroupDTO(createEntity());
     specialtyGroupDTO.setName(
         "more_than_100_chars_more_than_100_chars_more_than_100_chars_more_than_100_chars_more_than_100_chars_1");
     specialtyGroupDTO.setId(1L);
@@ -534,7 +554,8 @@ public class SpecialtyGroupResourceIntTest {
   @Transactional
   public void shouldValidateNameContentsWhenUpdating() throws Exception {
     //given
-    SpecialtyGroupDTO specialtyGroupDTO = specialtyGroupMapper.specialtyGroupToSpecialtyGroupDTO(createEntity());
+    SpecialtyGroupDTO specialtyGroupDTO = specialtyGroupMapper
+        .specialtyGroupToSpecialtyGroupDTO(createEntity());
     specialtyGroupDTO.setName("$^%&*()_");
     specialtyGroupDTO.setId(1L);
     //when & then

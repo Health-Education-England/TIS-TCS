@@ -17,13 +17,20 @@ public class ProgrammeMembershipCurriculaDTO extends ProgrammeMembershipDTO {
 
   @Override
   public boolean equals(Object o) {
-    if (this == o) return true;
-    if (o == null || getClass() != o.getClass()) return false;
-    if (!super.equals(o)) return false;
+    if (this == o) {
+      return true;
+    }
+    if (o == null || getClass() != o.getClass()) {
+      return false;
+    }
+    if (!super.equals(o)) {
+      return false;
+    }
 
     ProgrammeMembershipCurriculaDTO that = (ProgrammeMembershipCurriculaDTO) o;
 
-    return curriculumDTO != null ? curriculumDTO.equals(that.curriculumDTO) : that.curriculumDTO == null;
+    return curriculumDTO != null ? curriculumDTO.equals(that.curriculumDTO)
+        : that.curriculumDTO == null;
   }
 
   @Override

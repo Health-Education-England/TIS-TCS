@@ -4,10 +4,9 @@ import com.transformuk.hee.tis.tcs.api.dto.SpecialtyDTO;
 import com.transformuk.hee.tis.tcs.api.dto.SpecialtyGroupDTO;
 import com.transformuk.hee.tis.tcs.service.model.Specialty;
 import com.transformuk.hee.tis.tcs.service.model.SpecialtyGroup;
-import org.mapstruct.Mapper;
-
 import java.util.ArrayList;
 import java.util.List;
+import org.mapstruct.Mapper;
 
 /**
  * Mapper for the entity Specialty and its DTO SpecialtyDTO.
@@ -60,7 +59,7 @@ public class SpecialtyMapper {
 
   public List<Specialty> specialtyDTOsToSpecialties(List<SpecialtyDTO> specialtyDTOs) {
     List<Specialty> result = new ArrayList<>();
-    for (SpecialtyDTO specialtyDTO: specialtyDTOs) {
+    for (SpecialtyDTO specialtyDTO : specialtyDTOs) {
       result.add(specialtyDTOToSpecialty(specialtyDTO));
     }
 

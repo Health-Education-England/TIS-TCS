@@ -2,37 +2,51 @@ package com.transformuk.hee.tis.tcs.service.model;
 
 import com.transformuk.hee.tis.tcs.api.dto.PlacementSummaryDTO;
 import com.transformuk.hee.tis.tcs.api.enumeration.Status;
-
-import javax.persistence.*;
 import java.io.Serializable;
 import java.math.BigDecimal;
 import java.time.LocalDate;
 import java.util.HashSet;
 import java.util.Objects;
 import java.util.Set;
+import javax.persistence.CascadeType;
+import javax.persistence.Column;
+import javax.persistence.ColumnResult;
+import javax.persistence.ConstructorResult;
+import javax.persistence.Entity;
+import javax.persistence.EnumType;
+import javax.persistence.Enumerated;
+import javax.persistence.FetchType;
+import javax.persistence.GeneratedValue;
+import javax.persistence.GenerationType;
+import javax.persistence.Id;
+import javax.persistence.JoinColumn;
+import javax.persistence.ManyToOne;
+import javax.persistence.OneToMany;
+import javax.persistence.SqlResultSetMapping;
 
 /**
  * A Placement.
  */
 @SqlResultSetMapping(name = "PlacementsSummary", classes = {
-        @ConstructorResult(targetClass = PlacementSummaryDTO.class,
-                columns = {
-                        @ColumnResult(name = "dateFrom"),
-                        @ColumnResult(name = "dateTo"),
-                        @ColumnResult(name = "siteId"),
-                        @ColumnResult(name = "primarySpecialtyName"),
-                        @ColumnResult(name = "gradeId"),
-                        @ColumnResult(name = "placementType"),
-                        @ColumnResult(name = "status"),
-                        @ColumnResult(name = "forenames"),
-                        @ColumnResult(name = "surname"),
-                        @ColumnResult(name = "traineeId"),
-                        @ColumnResult(name = "placementId"),
-                        @ColumnResult(name = "placementSpecialtyType")
-                })
+    @ConstructorResult(targetClass = PlacementSummaryDTO.class,
+        columns = {
+            @ColumnResult(name = "dateFrom"),
+            @ColumnResult(name = "dateTo"),
+            @ColumnResult(name = "siteId"),
+            @ColumnResult(name = "primarySpecialtyName"),
+            @ColumnResult(name = "gradeId"),
+            @ColumnResult(name = "placementType"),
+            @ColumnResult(name = "status"),
+            @ColumnResult(name = "forenames"),
+            @ColumnResult(name = "surname"),
+            @ColumnResult(name = "traineeId"),
+            @ColumnResult(name = "placementId"),
+            @ColumnResult(name = "placementSpecialtyType")
+        })
 })
 @Entity
 public class Placement implements Serializable {
+
   private static final long serialVersionUID = 42021597714335688L;
 
   @Id
@@ -213,8 +227,12 @@ public class Placement implements Serializable {
 
   @Override
   public boolean equals(Object o) {
-    if (this == o) return true;
-    if (o == null || getClass() != o.getClass()) return false;
+    if (this == o) {
+      return true;
+    }
+    if (o == null || getClass() != o.getClass()) {
+      return false;
+    }
     Placement placement = (Placement) o;
     return Objects.equals(id, placement.id) &&
         Objects.equals(intrepidId, placement.intrepidId) &&
@@ -233,7 +251,10 @@ public class Placement implements Serializable {
 
   @Override
   public int hashCode() {
-    return Objects.hash(id, intrepidId, siteCode, gradeAbbreviation, siteId, gradeId, dateFrom, dateTo, placementType, placementWholeTimeEquivalent, trainingDescription, localPostNumber, status);
+    return Objects
+        .hash(id, intrepidId, siteCode, gradeAbbreviation, siteId, gradeId, dateFrom, dateTo,
+            placementType, placementWholeTimeEquivalent, trainingDescription, localPostNumber,
+            status);
   }
 
   @Override

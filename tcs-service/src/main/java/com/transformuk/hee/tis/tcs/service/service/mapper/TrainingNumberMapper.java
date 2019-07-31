@@ -5,9 +5,8 @@ import com.transformuk.hee.tis.tcs.api.dto.ProgrammeDTO;
 import com.transformuk.hee.tis.tcs.api.dto.TrainingNumberDTO;
 import com.transformuk.hee.tis.tcs.service.model.Programme;
 import com.transformuk.hee.tis.tcs.service.model.TrainingNumber;
-import org.springframework.stereotype.Component;
-
 import java.util.List;
+import org.springframework.stereotype.Component;
 
 /**
  * Mapper for the entity TrainingNumber and its DTO TrainingNumberDTO.
@@ -15,9 +14,9 @@ import java.util.List;
 @Component
 public class TrainingNumberMapper {
 
-  public TrainingNumberDTO trainingNumberToTrainingNumberDTO(TrainingNumber trainingNumber){
+  public TrainingNumberDTO trainingNumberToTrainingNumberDTO(TrainingNumber trainingNumber) {
     TrainingNumberDTO result = null;
-    if(trainingNumber != null){
+    if (trainingNumber != null) {
       result = toDTO(trainingNumber);
     }
     return result;
@@ -27,8 +26,9 @@ public class TrainingNumberMapper {
     return toEntity(trainingNumberDTO);
   }
 
-  public List<TrainingNumber> trainingNumberDTOsToTrainingNumbers(List<TrainingNumberDTO> trainingNumberDTOs) {
-    List<TrainingNumber> result =  Lists.newArrayList();
+  public List<TrainingNumber> trainingNumberDTOsToTrainingNumbers(
+      List<TrainingNumberDTO> trainingNumberDTOs) {
+    List<TrainingNumber> result = Lists.newArrayList();
 
     for (TrainingNumberDTO trainingNumberDTO : trainingNumberDTOs) {
       result.add(toEntity(trainingNumberDTO));
@@ -37,8 +37,9 @@ public class TrainingNumberMapper {
     return result;
   }
 
-  public List<TrainingNumberDTO> trainingNumbersToTrainingNumberDTOs(List<TrainingNumber> trainingNumbers) {
-    List<TrainingNumberDTO> result =  Lists.newArrayList();
+  public List<TrainingNumberDTO> trainingNumbersToTrainingNumberDTOs(
+      List<TrainingNumber> trainingNumbers) {
+    List<TrainingNumberDTO> result = Lists.newArrayList();
 
     for (TrainingNumber trainingNumber : trainingNumbers) {
       result.add(toDTO(trainingNumber));
@@ -57,10 +58,9 @@ public class TrainingNumberMapper {
     result.setTrainingNumberType(trainingNumber.getTrainingNumberType());
     result.setTypeOfContract(trainingNumber.getTypeOfContract());
     result.setTrainingNumber(trainingNumber.getTrainingNumber());
-    if(trainingNumber.getProgramme() == null){
+    if (trainingNumber.getProgramme() == null) {
       result.setProgramme(null);
-    }
-    else {
+    } else {
       result.setProgramme(trainingNumber.getProgramme().getId());
     }
     return result;
@@ -79,6 +79,7 @@ public class TrainingNumberMapper {
     }
     return result;
   }
+
   private Programme programmeDTOToProgramme(ProgrammeDTO programmeDTO) {
     Programme result = null;
     if (programmeDTO != null) {

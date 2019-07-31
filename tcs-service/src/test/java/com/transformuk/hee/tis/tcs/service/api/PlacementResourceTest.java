@@ -1,5 +1,11 @@
 package com.transformuk.hee.tis.tcs.service.api;
 
+import static org.mockito.Mockito.when;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
+import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.content;
+import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
+import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
+
 import com.google.common.collect.Lists;
 import com.transformuk.hee.tis.tcs.service.api.decorator.PlacementDetailsDecorator;
 import com.transformuk.hee.tis.tcs.service.api.validation.PlacementValidator;
@@ -11,6 +17,8 @@ import com.transformuk.hee.tis.tcs.service.dto.placementmanager.SiteDTO;
 import com.transformuk.hee.tis.tcs.service.dto.placementmanager.SpecialtyDTO;
 import com.transformuk.hee.tis.tcs.service.service.PlacementService;
 import com.transformuk.hee.tis.tcs.service.service.impl.PlacementPlannerServiceImp;
+import java.math.BigDecimal;
+import java.time.LocalDate;
 import org.hamcrest.Matchers;
 import org.junit.Before;
 import org.junit.Test;
@@ -20,15 +28,6 @@ import org.springframework.http.MediaType;
 import org.springframework.test.context.junit4.SpringRunner;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.setup.MockMvcBuilders;
-
-import java.math.BigDecimal;
-import java.time.LocalDate;
-
-import static org.mockito.Mockito.when;
-import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
-import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.content;
-import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
-import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
 @RunWith(SpringRunner.class)
 public class PlacementResourceTest {
@@ -84,7 +83,8 @@ public class PlacementResourceTest {
 
   @Before
   public void setup() {
-    placementResource = new PlacementResource(placementServiceMock, placementValidatorMock, placementDetailsDecoratorMock, placementPlannerServiceMock);
+    placementResource = new PlacementResource(placementServiceMock, placementValidatorMock,
+        placementDetailsDecoratorMock, placementPlannerServiceMock);
     mockMvc = MockMvcBuilders.standaloneSetup(placementResource).build();
 
     setupData();
@@ -179,30 +179,46 @@ public class PlacementResourceTest {
   }
 
   @Test
-  public void findPlacementsByProgrammeAndSpecialtyShouldReturnAllPlacementsInASpecifiedFormat() throws Exception {
+  public void findPlacementsByProgrammeAndSpecialtyShouldReturnAllPlacementsInASpecifiedFormat()
+      throws Exception {
     Long programmeId = 1L;
     Long specialtyId = 2L;
 
-    when(placementPlannerServiceMock.findPlacementsForProgrammeAndSpecialty(programmeId, specialtyId, null, null)).thenReturn(placements);
+    when(placementPlannerServiceMock
+        .findPlacementsForProgrammeAndSpecialty(programmeId, specialtyId, null, null))
+        .thenReturn(placements);
 
     mockMvc.perform(
-        get("/api/programme/{programmeId}/specialty/{specialtyId}/placements", programmeId, specialtyId)
+        get("/api/programme/{programmeId}/specialty/{specialtyId}/placements", programmeId,
+            specialtyId)
             .contentType(MediaType.APPLICATION_JSON_UTF8))
         .andExpect(status().isOk())
         .andExpect(content().contentType(MediaType.APPLICATION_JSON_UTF8))
         .andExpect(jsonPath("$.specialties[*].id").value(SPECIALTY_ID.intValue()))
         .andExpect(jsonPath("$.specialties[*].name").value(SPECIALTY_NAME))
         .andExpect(jsonPath("$.specialties[*].college").value(SPECIALTY_COLLEGE))
-        .andExpect(jsonPath("$.specialties[*].sites[*].id").value(Matchers.containsInAnyOrder(SITE1_ID.intValue(), SITE2_ID.intValue())))
-        .andExpect(jsonPath("$.specialties[*].sites[*].name").value(Matchers.containsInAnyOrder(SITE1_NAME, SITE2_NAME)))
-        .andExpect(jsonPath("$.specialties[*].sites[*].siteNumber").value(Matchers.containsInAnyOrder(SITE1_NUMBER, SITE2_NUMBER)))
-        .andExpect(jsonPath("$.specialties[*].sites[*].posts[*].id").value(Matchers.containsInAnyOrder(POST1_ID.intValue(), POST2_ID.intValue())))
-        .andExpect(jsonPath("$.specialties[*].sites[*].posts[*].nationalPostNumber").value(Matchers.containsInAnyOrder(POST1_NATIONAL_POST_NUMBER, POST2_NATIONAL_POST_NUMBER)))
-        .andExpect(jsonPath("$.specialties[*].sites[*].posts[*].placements[*].id").value(Matchers.containsInAnyOrder(PLACEMENT1_ID.intValue(), PLACEMENT2_ID.intValue(), PLACEMENT3_ID.intValue(), PLACEMENT4_ID.intValue())))
-        .andExpect(jsonPath("$.specialties[*].sites[*].posts[*].placements[*].type").value(Matchers.containsInAnyOrder(PLACEMENT_1_TYPE, PLACEMENT_2_TYPE, PLACEMENT_3_TYPE, PLACEMENT_4_TYPE)))
-        .andExpect(jsonPath("$.specialties[*].sites[*].posts[*].placements[*].trainee.id").value(Matchers.hasItems(TRAINEE1_ID.intValue(), TRAINEE2_ID.intValue())))
-        .andExpect(jsonPath("$.specialties[*].sites[*].posts[*].placements[*].trainee.surname").value(Matchers.hasItems(TRAINEE_SURNAME_1, TRAINEE_SURNAME_2)))
-        .andExpect(jsonPath("$.specialties[*].sites[*].posts[*].placements[*].trainee.forename").value(Matchers.hasItems(TRAINEE_FORENAME_1, TRAINEE_FORENAME_2)))
+        .andExpect(jsonPath("$.specialties[*].sites[*].id")
+            .value(Matchers.containsInAnyOrder(SITE1_ID.intValue(), SITE2_ID.intValue())))
+        .andExpect(jsonPath("$.specialties[*].sites[*].name")
+            .value(Matchers.containsInAnyOrder(SITE1_NAME, SITE2_NAME)))
+        .andExpect(jsonPath("$.specialties[*].sites[*].siteNumber")
+            .value(Matchers.containsInAnyOrder(SITE1_NUMBER, SITE2_NUMBER)))
+        .andExpect(jsonPath("$.specialties[*].sites[*].posts[*].id")
+            .value(Matchers.containsInAnyOrder(POST1_ID.intValue(), POST2_ID.intValue())))
+        .andExpect(jsonPath("$.specialties[*].sites[*].posts[*].nationalPostNumber").value(
+            Matchers.containsInAnyOrder(POST1_NATIONAL_POST_NUMBER, POST2_NATIONAL_POST_NUMBER)))
+        .andExpect(jsonPath("$.specialties[*].sites[*].posts[*].placements[*].id").value(Matchers
+            .containsInAnyOrder(PLACEMENT1_ID.intValue(), PLACEMENT2_ID.intValue(),
+                PLACEMENT3_ID.intValue(), PLACEMENT4_ID.intValue())))
+        .andExpect(jsonPath("$.specialties[*].sites[*].posts[*].placements[*].type").value(Matchers
+            .containsInAnyOrder(PLACEMENT_1_TYPE, PLACEMENT_2_TYPE, PLACEMENT_3_TYPE,
+                PLACEMENT_4_TYPE)))
+        .andExpect(jsonPath("$.specialties[*].sites[*].posts[*].placements[*].trainee.id")
+            .value(Matchers.hasItems(TRAINEE1_ID.intValue(), TRAINEE2_ID.intValue())))
+        .andExpect(jsonPath("$.specialties[*].sites[*].posts[*].placements[*].trainee.surname")
+            .value(Matchers.hasItems(TRAINEE_SURNAME_1, TRAINEE_SURNAME_2)))
+        .andExpect(jsonPath("$.specialties[*].sites[*].posts[*].placements[*].trainee.forename")
+            .value(Matchers.hasItems(TRAINEE_FORENAME_1, TRAINEE_FORENAME_2)))
     ;
   }
 

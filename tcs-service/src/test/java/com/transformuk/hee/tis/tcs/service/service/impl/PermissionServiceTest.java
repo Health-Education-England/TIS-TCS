@@ -21,7 +21,8 @@ public class PermissionServiceTest {
 
   @Test
   public void canViewSensitiveDataShouldReturnTrueWhenUserHasCorrectPermission() {
-    TestUtils.mockUserProfileWithPermissions(TEST_USER, Sets.newLinkedHashSet(PermissionService.VIEW_SENSITIVE_DATA_ROLE));
+    TestUtils.mockUserProfileWithPermissions(TEST_USER,
+        Sets.newLinkedHashSet(PermissionService.VIEW_SENSITIVE_DATA_ROLE));
     boolean result = testObj.canViewSensitiveData();
 
     Assert.assertTrue(result);
@@ -37,7 +38,8 @@ public class PermissionServiceTest {
 
   @Test
   public void canEditSensitiveDataShouldReturnTrueWhenUserHasCorrectPermission() {
-    TestUtils.mockUserProfileWithPermissions(TEST_USER, Sets.newLinkedHashSet(PermissionService.EDIT_SENSITIVE_DATA_ROLE));
+    TestUtils.mockUserProfileWithPermissions(TEST_USER,
+        Sets.newLinkedHashSet(PermissionService.EDIT_SENSITIVE_DATA_ROLE));
     boolean result = testObj.canEditSensitiveData();
 
     Assert.assertTrue(result);

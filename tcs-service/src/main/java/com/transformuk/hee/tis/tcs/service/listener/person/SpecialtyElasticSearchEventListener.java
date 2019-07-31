@@ -11,7 +11,8 @@ import org.springframework.stereotype.Component;
 @Component
 public class SpecialtyElasticSearchEventListener {
 
-  private static final Logger LOG = LoggerFactory.getLogger(SpecialtyElasticSearchEventListener.class);
+  private static final Logger LOG = LoggerFactory
+      .getLogger(SpecialtyElasticSearchEventListener.class);
 
   @Autowired
   private PersonElasticSearchService personElasticSearchService;

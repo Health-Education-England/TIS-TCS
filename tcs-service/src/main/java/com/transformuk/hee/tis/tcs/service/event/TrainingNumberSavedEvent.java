@@ -1,9 +1,8 @@
 package com.transformuk.hee.tis.tcs.service.event;
 
 import com.transformuk.hee.tis.tcs.api.dto.TrainingNumberDTO;
-import org.springframework.context.ApplicationEvent;
-
 import java.util.Objects;
+import org.springframework.context.ApplicationEvent;
 
 public class TrainingNumberSavedEvent extends ApplicationEvent {
 
@@ -20,8 +19,12 @@ public class TrainingNumberSavedEvent extends ApplicationEvent {
 
   @Override
   public boolean equals(Object o) {
-    if (this == o) return true;
-    if (o == null || getClass() != o.getClass()) return false;
+    if (this == o) {
+      return true;
+    }
+    if (o == null || getClass() != o.getClass()) {
+      return false;
+    }
     TrainingNumberSavedEvent that = (TrainingNumberSavedEvent) o;
     return Objects.equals(trainingNumberDTO, that.trainingNumberDTO);
   }

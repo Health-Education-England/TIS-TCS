@@ -5,14 +5,13 @@ import com.transformuk.hee.tis.tcs.service.model.PostFunding;
 import com.transformuk.hee.tis.tcs.service.repository.PostFundingRepository;
 import com.transformuk.hee.tis.tcs.service.service.PostFundingService;
 import com.transformuk.hee.tis.tcs.service.service.mapper.PostFundingMapper;
+import java.util.List;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
-
-import java.util.List;
 
 /**
  * Service Implementation for managing PostFunding.
@@ -27,7 +26,8 @@ public class PostFundingServiceImpl implements PostFundingService {
 
   private final PostFundingMapper postFundingMapper;
 
-  public PostFundingServiceImpl(PostFundingRepository postFundingRepository, PostFundingMapper postFundingMapper) {
+  public PostFundingServiceImpl(PostFundingRepository postFundingRepository,
+      PostFundingMapper postFundingMapper) {
     this.postFundingRepository = postFundingRepository;
     this.postFundingMapper = postFundingMapper;
   }
@@ -55,7 +55,8 @@ public class PostFundingServiceImpl implements PostFundingService {
   @Override
   public List<PostFundingDTO> save(List<PostFundingDTO> postFundingDTO) {
     log.debug("Request to save PostFunding : {}", postFundingDTO);
-    List<PostFunding> postFundings = postFundingMapper.postFundingDTOsToPostFundings(postFundingDTO);
+    List<PostFunding> postFundings = postFundingMapper
+        .postFundingDTOsToPostFundings(postFundingDTO);
     postFundings = postFundingRepository.saveAll(postFundings);
     return postFundingMapper.postFundingsToPostFundingDTOs(postFundings);
   }

@@ -1,12 +1,11 @@
 package com.transformuk.hee.tis.tcs.api.dto;
 
 import com.transformuk.hee.tis.tcs.api.dto.validation.Update;
-
-import javax.validation.constraints.DecimalMin;
-import javax.validation.constraints.NotNull;
 import java.io.Serializable;
 import java.time.LocalDate;
 import java.util.Objects;
+import javax.validation.constraints.DecimalMin;
+import javax.validation.constraints.NotNull;
 
 /**
  * A DTO for the EsrNotification entity.
@@ -305,7 +304,8 @@ public class EsrNotificationDTO implements Serializable {
     return replacementTraineeCurrentPlacementVpd;
   }
 
-  public void setReplacementTraineeCurrentPlacementVpd(String replacementTraineeCurrentPlacementVpd) {
+  public void setReplacementTraineeCurrentPlacementVpd(
+      String replacementTraineeCurrentPlacementVpd) {
     this.replacementTraineeCurrentPlacementVpd = replacementTraineeCurrentPlacementVpd;
   }
 
@@ -313,7 +313,8 @@ public class EsrNotificationDTO implements Serializable {
     return replacementTraineeProjectedHireDate;
   }
 
-  public void setReplacementTraineeProjectedHireDate(LocalDate replacementTraineeProjectedHireDate) {
+  public void setReplacementTraineeProjectedHireDate(
+      LocalDate replacementTraineeProjectedHireDate) {
     this.replacementTraineeProjectedHireDate = replacementTraineeProjectedHireDate;
   }
 

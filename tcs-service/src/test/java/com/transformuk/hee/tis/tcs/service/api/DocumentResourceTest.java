@@ -1,8 +1,18 @@
 package com.transformuk.hee.tis.tcs.service.api;
 
+import static com.transformuk.hee.tis.tcs.service.api.DocumentResource.PATH_API;
+import static com.transformuk.hee.tis.tcs.service.api.DocumentResource.PATH_DOCUMENTS;
+import static com.transformuk.hee.tis.tcs.service.api.DocumentResource.PATH_DOWNLOADS;
+import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.when;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
+import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.header;
+import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
+
 import com.transformuk.hee.tis.tcs.api.dto.DocumentDTO;
 import com.transformuk.hee.tis.tcs.service.service.DocumentService;
 import com.transformuk.hee.tis.tcs.service.service.TagService;
+import java.util.Optional;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -10,18 +20,6 @@ import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.test.context.junit4.SpringRunner;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.setup.MockMvcBuilders;
-
-import java.util.Optional;
-
-import static com.transformuk.hee.tis.tcs.service.api.DocumentResource.PATH_API;
-import static com.transformuk.hee.tis.tcs.service.api.DocumentResource.PATH_DOCUMENTS;
-import static com.transformuk.hee.tis.tcs.service.api.DocumentResource.PATH_DOWNLOADS;
-import static org.mockito.Mockito.verify;
-import static org.mockito.Mockito.when;
-import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
-import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.content;
-import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.header;
-import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
 @RunWith(SpringRunner.class)
 public class DocumentResourceTest {
@@ -43,7 +41,8 @@ public class DocumentResourceTest {
   }
 
   @Test
-  public void downloadDocumentByIdV2ShouldRedirectWithLocationWhenDocumentExists() throws Exception {
+  public void downloadDocumentByIdV2ShouldRedirectWithLocationWhenDocumentExists()
+      throws Exception {
     Long documentId = 1L;
     String expectDownloadUrl = "blah";
 

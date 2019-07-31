@@ -1,17 +1,41 @@
 package com.transformuk.hee.tis.tcs.service.api;
 
+import static org.assertj.core.api.Assertions.assertThat;
+import static org.hamcrest.Matchers.containsInAnyOrder;
+import static org.hamcrest.Matchers.hasItem;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.delete;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.put;
+import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.content;
+import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
+import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
+
 import com.transformuk.hee.tis.tcs.api.dto.ProgrammeMembershipDTO;
 import com.transformuk.hee.tis.tcs.api.enumeration.ProgrammeMembershipType;
 import com.transformuk.hee.tis.tcs.api.enumeration.Status;
 import com.transformuk.hee.tis.tcs.service.Application;
 import com.transformuk.hee.tis.tcs.service.api.validation.ProgrammeMembershipValidator;
 import com.transformuk.hee.tis.tcs.service.exception.ExceptionTranslator;
-import com.transformuk.hee.tis.tcs.service.model.*;
-import com.transformuk.hee.tis.tcs.service.repository.*;
+import com.transformuk.hee.tis.tcs.service.model.Curriculum;
+import com.transformuk.hee.tis.tcs.service.model.Person;
+import com.transformuk.hee.tis.tcs.service.model.Programme;
+import com.transformuk.hee.tis.tcs.service.model.ProgrammeMembership;
+import com.transformuk.hee.tis.tcs.service.model.Rotation;
+import com.transformuk.hee.tis.tcs.service.repository.CurriculumRepository;
+import com.transformuk.hee.tis.tcs.service.repository.PersonRepository;
+import com.transformuk.hee.tis.tcs.service.repository.ProgrammeMembershipRepository;
+import com.transformuk.hee.tis.tcs.service.repository.ProgrammeRepository;
+import com.transformuk.hee.tis.tcs.service.repository.RotationRepository;
 import com.transformuk.hee.tis.tcs.service.service.ProgrammeMembershipService;
 import com.transformuk.hee.tis.tcs.service.service.RotationService;
 import com.transformuk.hee.tis.tcs.service.service.mapper.PersonMapper;
 import com.transformuk.hee.tis.tcs.service.service.mapper.ProgrammeMembershipMapper;
+import java.time.LocalDate;
+import java.time.LocalDateTime;
+import java.time.ZoneId;
+import java.util.List;
+import javax.persistence.EntityManager;
 import org.assertj.core.util.Lists;
 import org.assertj.core.util.Sets;
 import org.junit.Before;
@@ -27,18 +51,6 @@ import org.springframework.test.context.junit4.SpringRunner;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.setup.MockMvcBuilders;
 import org.springframework.transaction.annotation.Transactional;
-
-import javax.persistence.EntityManager;
-import java.time.LocalDate;
-import java.time.LocalDateTime;
-import java.time.ZoneId;
-import java.util.List;
-
-import static org.assertj.core.api.Assertions.assertThat;
-import static org.hamcrest.Matchers.containsInAnyOrder;
-import static org.hamcrest.Matchers.hasItem;
-import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.*;
-import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.*;
 
 /**
  * Test class for the ProgrammeMembershipResource REST controller.
@@ -59,19 +71,23 @@ public class ProgrammeMembershipResourceIntTest {
   private static final String UPDATED_ROTATION = "BBBBBBBBBB";
 
   private static final LocalDate DEFAULT_CURRICULUM_START_DATE = LocalDate.ofEpochDay(0L);
-  private static final LocalDate UPDATED_CURRICULUM_START_DATE = LocalDate.now(ZoneId.systemDefault());
+  private static final LocalDate UPDATED_CURRICULUM_START_DATE = LocalDate
+      .now(ZoneId.systemDefault());
 
   private static final LocalDate DEFAULT_CURRICULUM_END_DATE = LocalDate.ofEpochDay(0L);
-  private static final LocalDate UPDATED_CURRICULUM_END_DATE = LocalDate.now(ZoneId.systemDefault());
+  private static final LocalDate UPDATED_CURRICULUM_END_DATE = LocalDate
+      .now(ZoneId.systemDefault());
 
   private static final Integer DEFAULT_PERIOD_OF_GRACE = 1;
   private static final Integer UPDATED_PERIOD_OF_GRACE = 2;
 
   private static final LocalDate DEFAULT_PROGRAMME_START_DATE = LocalDate.ofEpochDay(0L);
-  private static final LocalDate UPDATED_PROGRAMME_START_DATE = LocalDate.now(ZoneId.systemDefault());
+  private static final LocalDate UPDATED_PROGRAMME_START_DATE = LocalDate
+      .now(ZoneId.systemDefault());
 
   private static final LocalDate DEFAULT_CURRICULUM_COMPLETION_DATE = LocalDate.ofEpochDay(0L);
-  private static final LocalDate UPDATED_CURRICULUM_COMPLETION_DATE = LocalDate.now(ZoneId.systemDefault());
+  private static final LocalDate UPDATED_CURRICULUM_COMPLETION_DATE = LocalDate
+      .now(ZoneId.systemDefault());
 
   private static final LocalDate DEFAULT_PROGRAMME_END_DATE = LocalDate.ofEpochDay(0L);
   private static final LocalDate UPDATED_PROGRAMME_END_DATE = LocalDate.now(ZoneId.systemDefault());
@@ -82,7 +98,8 @@ public class ProgrammeMembershipResourceIntTest {
   private static final Long NOT_EXISTS_PROGRAMME_ID = 10101010l;
   private static final Long NOT_EXISTS_CURRICULUM_ID = 20202020l;
 
-  private static final LocalDateTime DEFAULT_AMENDED_DATE = LocalDateTime.now(ZoneId.systemDefault());
+  private static final LocalDateTime DEFAULT_AMENDED_DATE = LocalDateTime
+      .now(ZoneId.systemDefault());
 
   @Autowired
   private ProgrammeMembershipRepository programmeMembershipRepository;
@@ -95,7 +112,7 @@ public class ProgrammeMembershipResourceIntTest {
 
   @Autowired
   private CurriculumRepository curriculumRepository;
-  
+
   @Autowired
   private RotationRepository rotationRepository;
 
@@ -113,7 +130,7 @@ public class ProgrammeMembershipResourceIntTest {
 
   @Autowired
   private ExceptionTranslator exceptionTranslator;
-  
+
   @Autowired
   private RotationService rotationService;
 
@@ -122,7 +139,7 @@ public class ProgrammeMembershipResourceIntTest {
   @Autowired
   private EntityManager em;
 
-  @Autowired  
+  @Autowired
   private PersonMapper personMapper;
 
   private Person person;
@@ -130,7 +147,7 @@ public class ProgrammeMembershipResourceIntTest {
   private Programme programme;
 
   private Curriculum curriculum;
-  
+
   private Rotation rotation;
 
   private MockMvc restProgrammeMembershipMockMvc;
@@ -140,8 +157,8 @@ public class ProgrammeMembershipResourceIntTest {
   /**
    * Create an entity for this test.
    * <p>
-   * This is a static method, as tests for other entities might also need it,
-   * if they test an entity which requires the current entity.
+   * This is a static method, as tests for other entities might also need it, if they test an entity
+   * which requires the current entity.
    */
   public static ProgrammeMembership createEntity(EntityManager em) {
     ProgrammeMembership programmeMembership = new ProgrammeMembership()
@@ -176,10 +193,13 @@ public class ProgrammeMembershipResourceIntTest {
   @Before
   public void setup() {
     MockitoAnnotations.initMocks(this);
-    programmeMembershipValidator = new ProgrammeMembershipValidator(personRepository, programmeRepository, curriculumRepository, rotationService);
-    ProgrammeMembershipResource programmeMembershipResource = new ProgrammeMembershipResource(programmeMembershipService,
+    programmeMembershipValidator = new ProgrammeMembershipValidator(personRepository,
+        programmeRepository, curriculumRepository, rotationService);
+    ProgrammeMembershipResource programmeMembershipResource = new ProgrammeMembershipResource(
+        programmeMembershipService,
         programmeMembershipValidator);
-    this.restProgrammeMembershipMockMvc = MockMvcBuilders.standaloneSetup(programmeMembershipResource)
+    this.restProgrammeMembershipMockMvc = MockMvcBuilders
+        .standaloneSetup(programmeMembershipResource)
         .setCustomArgumentResolvers(pageableArgumentResolver)
         .setControllerAdvice(exceptionTranslator)
         .setMessageConverters(jacksonMessageConverter).build();
@@ -210,7 +230,8 @@ public class ProgrammeMembershipResourceIntTest {
     programmeMembership.setCurriculumId(programme.getCurricula().iterator().next().getId());
     programmeMembership.setRotation(rotation);
     // Create the ProgrammeMembership
-    ProgrammeMembershipDTO programmeMembershipDTO = programmeMembershipMapper.toDto(programmeMembership);
+    ProgrammeMembershipDTO programmeMembershipDTO = programmeMembershipMapper
+        .toDto(programmeMembership);
     restProgrammeMembershipMockMvc.perform(post("/api/programme-memberships")
         .contentType(TestUtil.APPLICATION_JSON_UTF8)
         .content(TestUtil.convertObjectToJsonBytes(programmeMembershipDTO)))
@@ -219,17 +240,24 @@ public class ProgrammeMembershipResourceIntTest {
     // Validate the ProgrammeMembership in the database
     List<ProgrammeMembership> programmeMembershipList = programmeMembershipRepository.findAll();
     assertThat(programmeMembershipList).hasSize(databaseSizeBeforeCreate + 1);
-    ProgrammeMembership testProgrammeMembership = programmeMembershipList.get(programmeMembershipList.size() - 1);
+    ProgrammeMembership testProgrammeMembership = programmeMembershipList
+        .get(programmeMembershipList.size() - 1);
     assertThat(testProgrammeMembership.getIntrepidId()).isEqualTo(DEFAULT_INTREPID_ID);
-    assertThat(testProgrammeMembership.getProgrammeMembershipType()).isEqualTo(DEFAULT_PROGRAMME_MEMBERSHIP_TYPE);
+    assertThat(testProgrammeMembership.getProgrammeMembershipType())
+        .isEqualTo(DEFAULT_PROGRAMME_MEMBERSHIP_TYPE);
     assertThat(testProgrammeMembership.getRotation()).isEqualTo(rotation);
-    assertThat(testProgrammeMembership.getCurriculumStartDate()).isEqualTo(DEFAULT_CURRICULUM_START_DATE);
-    assertThat(testProgrammeMembership.getCurriculumEndDate()).isEqualTo(DEFAULT_CURRICULUM_END_DATE);
+    assertThat(testProgrammeMembership.getCurriculumStartDate())
+        .isEqualTo(DEFAULT_CURRICULUM_START_DATE);
+    assertThat(testProgrammeMembership.getCurriculumEndDate())
+        .isEqualTo(DEFAULT_CURRICULUM_END_DATE);
     assertThat(testProgrammeMembership.getPeriodOfGrace()).isEqualTo(DEFAULT_PERIOD_OF_GRACE);
-    assertThat(testProgrammeMembership.getProgrammeStartDate()).isEqualTo(DEFAULT_PROGRAMME_START_DATE);
-    assertThat(testProgrammeMembership.getCurriculumCompletionDate()).isEqualTo(DEFAULT_CURRICULUM_COMPLETION_DATE);
+    assertThat(testProgrammeMembership.getProgrammeStartDate())
+        .isEqualTo(DEFAULT_PROGRAMME_START_DATE);
+    assertThat(testProgrammeMembership.getCurriculumCompletionDate())
+        .isEqualTo(DEFAULT_CURRICULUM_COMPLETION_DATE);
     assertThat(testProgrammeMembership.getProgrammeEndDate()).isEqualTo(DEFAULT_PROGRAMME_END_DATE);
-    assertThat(testProgrammeMembership.getLeavingDestination()).isEqualTo(DEFAULT_LEAVING_DESTINATION);
+    assertThat(testProgrammeMembership.getLeavingDestination())
+        .isEqualTo(DEFAULT_LEAVING_DESTINATION);
   }
 
   @Test
@@ -244,9 +272,9 @@ public class ProgrammeMembershipResourceIntTest {
         .content(TestUtil.convertObjectToJsonBytes(programmeMembershipDTO)))
         .andExpect(status().isBadRequest())
         .andExpect(jsonPath("$.message").value("error.validation"))
-            .andExpect(jsonPath("$.fieldErrors[*].field").
-                    value(containsInAnyOrder("programmeMembershipType",
-                            "programmeStartDate", "programmeEndDate", "programmeId")));
+        .andExpect(jsonPath("$.fieldErrors[*].field").
+            value(containsInAnyOrder("programmeMembershipType",
+                "programmeStartDate", "programmeEndDate", "programmeId")));
   }
 
   @Test
@@ -275,7 +303,8 @@ public class ProgrammeMembershipResourceIntTest {
     programmeRepository.saveAndFlush(programme);
     programmeMembership.setProgramme(programme);
     programmeMembership.setCurriculumId(programme.getCurricula().iterator().next().getId());
-    ProgrammeMembershipDTO programmeMembershipDTO = programmeMembershipMapper.toDto(programmeMembership);
+    ProgrammeMembershipDTO programmeMembershipDTO = programmeMembershipMapper
+        .toDto(programmeMembership);
     programmeMembershipDTO.setPerson(null);
 
     //when & then
@@ -297,7 +326,8 @@ public class ProgrammeMembershipResourceIntTest {
     programmeRepository.saveAndFlush(programme);
     programmeMembership.setProgramme(programme);
     programmeMembership.setCurriculumId(programme.getCurricula().iterator().next().getId());
-    ProgrammeMembershipDTO programmeMembershipDTO = programmeMembershipMapper.toDto(programmeMembership);
+    ProgrammeMembershipDTO programmeMembershipDTO = programmeMembershipMapper
+        .toDto(programmeMembership);
     person.setId(1020120L); // set not exists person Id
     programmeMembershipDTO.setPerson(personMapper.toDto(person));
 
@@ -321,11 +351,11 @@ public class ProgrammeMembershipResourceIntTest {
     programme.setCurricula(Sets.newHashSet(Lists.newArrayList(curriculum)));
     programmeMembership.setProgramme(programme); // this programme doesn't exists in DB
     programmeMembership.setCurriculumId(programme.getCurricula().iterator().next().getId());
-    ProgrammeMembershipDTO programmeMembershipDTO = programmeMembershipMapper.toDto(programmeMembership);
+    ProgrammeMembershipDTO programmeMembershipDTO = programmeMembershipMapper
+        .toDto(programmeMembership);
     programmeMembershipDTO.setProgrammeId(NOT_EXISTS_PROGRAMME_ID);
     personRepository.saveAndFlush(person);
     programmeMembershipDTO.setPerson(personMapper.toDto(person));
-
 
     //when & then
     restProgrammeMembershipMockMvc.perform(post("/api/programme-memberships")
@@ -347,10 +377,10 @@ public class ProgrammeMembershipResourceIntTest {
     programmeRepository.saveAndFlush(programme);
     programmeMembership.setProgramme(programme);
     programmeMembership.setCurriculumId(NOT_EXISTS_CURRICULUM_ID);
-    ProgrammeMembershipDTO programmeMembershipDTO = programmeMembershipMapper.toDto(programmeMembership);
+    ProgrammeMembershipDTO programmeMembershipDTO = programmeMembershipMapper
+        .toDto(programmeMembership);
     personRepository.saveAndFlush(person);
     programmeMembershipDTO.setPerson(personMapper.toDto(person));
-
 
     //when & then
     restProgrammeMembershipMockMvc.perform(post("/api/programme-memberships")
@@ -375,10 +405,10 @@ public class ProgrammeMembershipResourceIntTest {
     Curriculum notAssociatedCurriculum = CurriculumResourceIntTest.createCurriculumEntity();
     curriculumRepository.saveAndFlush(notAssociatedCurriculum);
     programmeMembership.setCurriculumId(notAssociatedCurriculum.getId());
-    ProgrammeMembershipDTO programmeMembershipDTO = programmeMembershipMapper.toDto(programmeMembership);
+    ProgrammeMembershipDTO programmeMembershipDTO = programmeMembershipMapper
+        .toDto(programmeMembership);
     personRepository.saveAndFlush(person);
     programmeMembershipDTO.setPerson(personMapper.toDto(person));
-
 
     //when & then
     restProgrammeMembershipMockMvc.perform(post("/api/programme-memberships")
@@ -388,7 +418,9 @@ public class ProgrammeMembershipResourceIntTest {
         .andExpect(jsonPath("$.message").value("error.validation"))
         .andExpect(jsonPath("$.fieldErrors[0].field").value("curriculumId"))
         .andExpect(jsonPath("$.fieldErrors[0].message").
-            value(String.format("The selected Programme and Curriculum are not linked. They must be linked before a Programme Membership can be made", String.valueOf(notAssociatedCurriculum.getId()))));
+            value(String.format(
+                "The selected Programme and Curriculum are not linked. They must be linked before a Programme Membership can be made",
+                String.valueOf(notAssociatedCurriculum.getId()))));
   }
 
 
@@ -409,7 +441,8 @@ public class ProgrammeMembershipResourceIntTest {
     programmeMembership = programmeMembershipRepository.saveAndFlush(programmeMembership);
     int databaseSizeBeforeCreate = programmeMembershipRepository.findAll().size();
 
-    ProgrammeMembershipDTO programmeMembershipDTO = programmeMembershipMapper.toDto(programmeMembership);
+    ProgrammeMembershipDTO programmeMembershipDTO = programmeMembershipMapper
+        .toDto(programmeMembership);
 
     // An entity with an existing ID cannot be created, so this API call must fail
     restProgrammeMembershipMockMvc.perform(post("/api/programme-memberships")
@@ -436,15 +469,23 @@ public class ProgrammeMembershipResourceIntTest {
     restProgrammeMembershipMockMvc.perform(get("/api/programme-memberships?sort=id,desc"))
         .andExpect(status().isOk())
         .andExpect(content().contentType(MediaType.APPLICATION_JSON_UTF8_VALUE))
-        .andExpect(jsonPath("$.[*].curriculumMemberships[*].intrepidId").value(hasItem(DEFAULT_INTREPID_ID.toString())))
-        .andExpect(jsonPath("$.[*].programmeMembershipType").value(hasItem(DEFAULT_PROGRAMME_MEMBERSHIP_TYPE.toString().toUpperCase())))
+        .andExpect(jsonPath("$.[*].curriculumMemberships[*].intrepidId")
+            .value(hasItem(DEFAULT_INTREPID_ID.toString())))
+        .andExpect(jsonPath("$.[*].programmeMembershipType")
+            .value(hasItem(DEFAULT_PROGRAMME_MEMBERSHIP_TYPE.toString().toUpperCase())))
         .andExpect(jsonPath("$.[*].rotation.name").value(rotation.getName()))
-        .andExpect(jsonPath("$.[*].curriculumMemberships[*].curriculumStartDate").value(hasItem(DEFAULT_CURRICULUM_START_DATE.toString())))
-        .andExpect(jsonPath("$.[*].curriculumMemberships[*].curriculumEndDate").value(hasItem(DEFAULT_CURRICULUM_END_DATE.toString())))
-        .andExpect(jsonPath("$.[*].curriculumMemberships[*].periodOfGrace").value(hasItem(DEFAULT_PERIOD_OF_GRACE)))
-        .andExpect(jsonPath("$.[*].programmeStartDate").value(hasItem(DEFAULT_PROGRAMME_START_DATE.toString())))
-        .andExpect(jsonPath("$.[*].programmeEndDate").value(hasItem(DEFAULT_PROGRAMME_END_DATE.toString())))
-        .andExpect(jsonPath("$.[*].leavingDestination").value(hasItem(DEFAULT_LEAVING_DESTINATION.toString())))
+        .andExpect(jsonPath("$.[*].curriculumMemberships[*].curriculumStartDate")
+            .value(hasItem(DEFAULT_CURRICULUM_START_DATE.toString())))
+        .andExpect(jsonPath("$.[*].curriculumMemberships[*].curriculumEndDate")
+            .value(hasItem(DEFAULT_CURRICULUM_END_DATE.toString())))
+        .andExpect(jsonPath("$.[*].curriculumMemberships[*].periodOfGrace")
+            .value(hasItem(DEFAULT_PERIOD_OF_GRACE)))
+        .andExpect(jsonPath("$.[*].programmeStartDate")
+            .value(hasItem(DEFAULT_PROGRAMME_START_DATE.toString())))
+        .andExpect(jsonPath("$.[*].programmeEndDate")
+            .value(hasItem(DEFAULT_PROGRAMME_END_DATE.toString())))
+        .andExpect(jsonPath("$.[*].leavingDestination")
+            .value(hasItem(DEFAULT_LEAVING_DESTINATION.toString())))
         .andExpect(jsonPath("$.[*].curriculumMemberships[*].amendedDate").isNotEmpty());
   }
 
@@ -459,19 +500,26 @@ public class ProgrammeMembershipResourceIntTest {
     programmeMembershipRepository.saveAndFlush(programmeMembership);
 
     // Get the programmeMembership
-    restProgrammeMembershipMockMvc.perform(get("/api/programme-memberships/{id}", programmeMembership.getId()))
+    restProgrammeMembershipMockMvc
+        .perform(get("/api/programme-memberships/{id}", programmeMembership.getId()))
         .andExpect(status().isOk())
         .andExpect(content().contentType(MediaType.APPLICATION_JSON_UTF8_VALUE))
-        .andExpect(jsonPath("$.curriculumMemberships[*].id").value(hasItem(programmeMembership.getId().intValue())))
-      .andExpect(jsonPath("$.curriculumMemberships[*].intrepidId").value(hasItem(DEFAULT_INTREPID_ID)))
-        .andExpect(jsonPath("$.programmeMembershipType").value(DEFAULT_PROGRAMME_MEMBERSHIP_TYPE.toString().toUpperCase()))
+        .andExpect(jsonPath("$.curriculumMemberships[*].id")
+            .value(hasItem(programmeMembership.getId().intValue())))
+        .andExpect(
+            jsonPath("$.curriculumMemberships[*].intrepidId").value(hasItem(DEFAULT_INTREPID_ID)))
+        .andExpect(jsonPath("$.programmeMembershipType")
+            .value(DEFAULT_PROGRAMME_MEMBERSHIP_TYPE.toString().toUpperCase()))
         .andExpect(jsonPath("$.rotation.name").value(rotation.getName()))
-        .andExpect(jsonPath("$.curriculumMemberships[*].curriculumStartDate").value(hasItem(DEFAULT_CURRICULUM_START_DATE.toString())))
-        .andExpect(jsonPath("$.curriculumMemberships[*].curriculumEndDate").value(hasItem(DEFAULT_CURRICULUM_END_DATE.toString())))
-        .andExpect(jsonPath("$.curriculumMemberships[*].periodOfGrace").value(hasItem(DEFAULT_PERIOD_OF_GRACE)))
+        .andExpect(jsonPath("$.curriculumMemberships[*].curriculumStartDate")
+            .value(hasItem(DEFAULT_CURRICULUM_START_DATE.toString())))
+        .andExpect(jsonPath("$.curriculumMemberships[*].curriculumEndDate")
+            .value(hasItem(DEFAULT_CURRICULUM_END_DATE.toString())))
+        .andExpect(jsonPath("$.curriculumMemberships[*].periodOfGrace")
+            .value(hasItem(DEFAULT_PERIOD_OF_GRACE)))
         .andExpect(jsonPath("$.programmeStartDate").value(DEFAULT_PROGRAMME_START_DATE.toString()))
         .andExpect(jsonPath("$.programmeEndDate").value(DEFAULT_PROGRAMME_END_DATE.toString()))
-      .andExpect(jsonPath("$.leavingDestination").value(DEFAULT_LEAVING_DESTINATION))
+        .andExpect(jsonPath("$.leavingDestination").value(DEFAULT_LEAVING_DESTINATION))
         .andExpect(jsonPath("$.curriculumMemberships[*].amendedDate").isNotEmpty());
   }
 
@@ -498,11 +546,11 @@ public class ProgrammeMembershipResourceIntTest {
     programmeMembership.setCurriculumId(programme.getCurricula().iterator().next().getId());
     programmeMembershipRepository.saveAndFlush(programmeMembership);
 
-
     int databaseSizeBeforeUpdate = programmeMembershipRepository.findAll().size();
 
     // Update the programmeMembership
-    ProgrammeMembership updatedProgrammeMembership = programmeMembershipRepository.findById(programmeMembership.getId()).orElse(null);
+    ProgrammeMembership updatedProgrammeMembership = programmeMembershipRepository
+        .findById(programmeMembership.getId()).orElse(null);
     updatedProgrammeMembership
         .intrepidId(UPDATED_INTREPID_ID)
         .programmeMembershipType(UPDATED_PROGRAMME_MEMBERSHIP_TYPE)
@@ -514,7 +562,8 @@ public class ProgrammeMembershipResourceIntTest {
         .curriculumCompletionDate(UPDATED_CURRICULUM_COMPLETION_DATE)
         .programmeEndDate(UPDATED_PROGRAMME_END_DATE)
         .leavingDestination(UPDATED_LEAVING_DESTINATION);
-    ProgrammeMembershipDTO programmeMembershipDTO = programmeMembershipMapper.toDto(updatedProgrammeMembership);
+    ProgrammeMembershipDTO programmeMembershipDTO = programmeMembershipMapper
+        .toDto(updatedProgrammeMembership);
 
     restProgrammeMembershipMockMvc.perform(put("/api/programme-memberships")
         .contentType(TestUtil.APPLICATION_JSON_UTF8)
@@ -524,17 +573,24 @@ public class ProgrammeMembershipResourceIntTest {
     // Validate the ProgrammeMembership in the database
     List<ProgrammeMembership> programmeMembershipList = programmeMembershipRepository.findAll();
     assertThat(programmeMembershipList).hasSize(databaseSizeBeforeUpdate);
-    ProgrammeMembership testProgrammeMembership = programmeMembershipList.get(programmeMembershipList.size() - 1);
+    ProgrammeMembership testProgrammeMembership = programmeMembershipList
+        .get(programmeMembershipList.size() - 1);
     assertThat(testProgrammeMembership.getIntrepidId()).isEqualTo(UPDATED_INTREPID_ID);
-    assertThat(testProgrammeMembership.getProgrammeMembershipType()).isEqualTo(UPDATED_PROGRAMME_MEMBERSHIP_TYPE);
+    assertThat(testProgrammeMembership.getProgrammeMembershipType())
+        .isEqualTo(UPDATED_PROGRAMME_MEMBERSHIP_TYPE);
     assertThat(testProgrammeMembership.getRotation()).isEqualTo(rotation);
-    assertThat(testProgrammeMembership.getCurriculumStartDate()).isEqualTo(UPDATED_CURRICULUM_START_DATE);
-    assertThat(testProgrammeMembership.getCurriculumEndDate()).isEqualTo(UPDATED_CURRICULUM_END_DATE);
+    assertThat(testProgrammeMembership.getCurriculumStartDate())
+        .isEqualTo(UPDATED_CURRICULUM_START_DATE);
+    assertThat(testProgrammeMembership.getCurriculumEndDate())
+        .isEqualTo(UPDATED_CURRICULUM_END_DATE);
     assertThat(testProgrammeMembership.getPeriodOfGrace()).isEqualTo(UPDATED_PERIOD_OF_GRACE);
-    assertThat(testProgrammeMembership.getProgrammeStartDate()).isEqualTo(UPDATED_PROGRAMME_START_DATE);
-    assertThat(testProgrammeMembership.getCurriculumCompletionDate()).isEqualTo(UPDATED_CURRICULUM_COMPLETION_DATE);
+    assertThat(testProgrammeMembership.getProgrammeStartDate())
+        .isEqualTo(UPDATED_PROGRAMME_START_DATE);
+    assertThat(testProgrammeMembership.getCurriculumCompletionDate())
+        .isEqualTo(UPDATED_CURRICULUM_COMPLETION_DATE);
     assertThat(testProgrammeMembership.getProgrammeEndDate()).isEqualTo(UPDATED_PROGRAMME_END_DATE);
-    assertThat(testProgrammeMembership.getLeavingDestination()).isEqualTo(UPDATED_LEAVING_DESTINATION);
+    assertThat(testProgrammeMembership.getLeavingDestination())
+        .isEqualTo(UPDATED_LEAVING_DESTINATION);
     assertThat(testProgrammeMembership.getAmendedDate()).isAfter(DEFAULT_AMENDED_DATE);
   }
 
@@ -550,7 +606,8 @@ public class ProgrammeMembershipResourceIntTest {
     programmeMembership.setCurriculumId(programme.getCurricula().iterator().next().getId());
 
     // Create the ProgrammeMembership
-    ProgrammeMembershipDTO programmeMembershipDTO = programmeMembershipMapper.toDto(programmeMembership);
+    ProgrammeMembershipDTO programmeMembershipDTO = programmeMembershipMapper
+        .toDto(programmeMembership);
 
     // If the entity doesn't have an ID, it will give error instead of creating due to validation
     restProgrammeMembershipMockMvc.perform(put("/api/programme-memberships")
@@ -571,8 +628,9 @@ public class ProgrammeMembershipResourceIntTest {
     int databaseSizeBeforeDelete = programmeMembershipRepository.findAll().size();
 
     // Get the programmeMembership
-    restProgrammeMembershipMockMvc.perform(delete("/api/programme-memberships/{id}", programmeMembership.getId())
-        .accept(TestUtil.APPLICATION_JSON_UTF8))
+    restProgrammeMembershipMockMvc
+        .perform(delete("/api/programme-memberships/{id}", programmeMembership.getId())
+            .accept(TestUtil.APPLICATION_JSON_UTF8))
         .andExpect(status().isOk());
 
     // Validate the database is empty

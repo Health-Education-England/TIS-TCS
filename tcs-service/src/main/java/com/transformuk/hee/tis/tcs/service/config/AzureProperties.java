@@ -5,22 +5,23 @@ import org.springframework.context.annotation.Configuration;
 
 @Configuration
 public class AzureProperties {
-    @Value("${azure.accountName}")
-    private String accountName;
-    @Value("${azure.accountKey}")
-    private String accountKey;
-    @Value("${azure.containerName}")
-    private String containerName;
 
-    public String getAccountName() {
-        return accountName;
-    }
+  @Value("${azure.accountName}")
+  private String accountName;
+  @Value("${azure.accountKey}")
+  private String accountKey;
+  @Value("${azure.containerName}")
+  private String containerName;
 
-    public String getAccountKey() {
-        return accountKey;
-    }
+  public String getAccountName() {
+    return accountName;
+  }
 
-    public String getContainerName() {
-        return containerName;
-    }
+  public String getAccountKey() {
+    return accountKey;
+  }
+
+  public String getContainerName() {
+    return containerName;
+  }
 }

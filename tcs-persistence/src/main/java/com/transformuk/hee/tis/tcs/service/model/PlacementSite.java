@@ -1,8 +1,8 @@
 package com.transformuk.hee.tis.tcs.service.model;
 
 import com.transformuk.hee.tis.tcs.api.enumeration.PlacementSiteType;
-
-import javax.persistence.CascadeType;
+import java.io.Serializable;
+import java.util.Objects;
 import javax.persistence.Column;
 import javax.persistence.Entity;
 import javax.persistence.EnumType;
@@ -14,8 +14,6 @@ import javax.persistence.Id;
 import javax.persistence.JoinColumn;
 import javax.persistence.ManyToOne;
 import javax.persistence.Table;
-import java.io.Serializable;
-import java.util.Objects;
 
 @Entity
 @Table(name = "PlacementSite")
@@ -71,13 +69,17 @@ public class PlacementSite implements Serializable {
 
   @Override
   public boolean equals(Object o) {
-    if (this == o) return true;
-    if (!(o instanceof PlacementSite)) return false;
+    if (this == o) {
+      return true;
+    }
+    if (!(o instanceof PlacementSite)) {
+      return false;
+    }
     PlacementSite that = (PlacementSite) o;
     return Objects.equals(getId(), that.getId()) &&
         Objects.equals(getPlacement(), that.getPlacement()) &&
         Objects.equals(getSiteId(), that.getSiteId()) &&
-      getPlacementSiteType() == that.getPlacementSiteType();
+        getPlacementSiteType() == that.getPlacementSiteType();
   }
 
   @Override

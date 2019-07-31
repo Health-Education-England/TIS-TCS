@@ -1,5 +1,16 @@
 package com.transformuk.hee.tis.tcs.service.api;
 
+import static org.assertj.core.api.Assertions.assertThat;
+import static org.hamcrest.Matchers.containsInAnyOrder;
+import static org.hamcrest.Matchers.hasItem;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.delete;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.put;
+import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.content;
+import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
+import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
+
 import com.transformuk.hee.tis.tcs.api.dto.RightToWorkDTO;
 import com.transformuk.hee.tis.tcs.api.enumeration.PermitToWorkType;
 import com.transformuk.hee.tis.tcs.service.Application;
@@ -11,6 +22,11 @@ import com.transformuk.hee.tis.tcs.service.repository.PersonRepository;
 import com.transformuk.hee.tis.tcs.service.repository.RightToWorkRepository;
 import com.transformuk.hee.tis.tcs.service.service.RightToWorkService;
 import com.transformuk.hee.tis.tcs.service.service.mapper.RightToWorkMapper;
+import java.time.LocalDate;
+import java.time.LocalDateTime;
+import java.time.ZoneId;
+import java.util.List;
+import javax.persistence.EntityManager;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -24,18 +40,6 @@ import org.springframework.test.context.junit4.SpringRunner;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.setup.MockMvcBuilders;
 import org.springframework.transaction.annotation.Transactional;
-
-import javax.persistence.EntityManager;
-import java.time.LocalDate;
-import java.time.LocalDateTime;
-import java.time.ZoneId;
-import java.util.List;
-
-import static org.assertj.core.api.Assertions.assertThat;
-import static org.hamcrest.Matchers.containsInAnyOrder;
-import static org.hamcrest.Matchers.hasItem;
-import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.*;
-import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.*;
 
 /**
  * Test class for the RightToWorkResource REST controller.
@@ -64,7 +68,8 @@ public class RightToWorkResourceIntTest {
   private static final String DEFAULT_VISA_DETAILS = "AAAAAAAAAA";
   private static final String UPDATED_VISA_DETAILS = "BBBBBBBBBB";
 
-  private static final LocalDateTime DEFAULT_AMENDED_DATE = LocalDateTime.now(ZoneId.systemDefault());
+  private static final LocalDateTime DEFAULT_AMENDED_DATE = LocalDateTime
+      .now(ZoneId.systemDefault());
 
   @Autowired
   private RightToWorkRepository rightToWorkRepository;
@@ -96,21 +101,11 @@ public class RightToWorkResourceIntTest {
 
   private RightToWork rightToWork;
 
-  @Before
-  public void setup() {
-    MockitoAnnotations.initMocks(this);
-    RightToWorkResource rightToWorkResource = new RightToWorkResource(rightToWorkService, rightToWorkValidator);
-    this.restRightToWorkMockMvc = MockMvcBuilders.standaloneSetup(rightToWorkResource)
-        .setCustomArgumentResolvers(pageableArgumentResolver)
-        .setControllerAdvice(exceptionTranslator)
-        .setMessageConverters(jacksonMessageConverter).build();
-  }
-
   /**
    * Create an entity for this test.
    * <p>
-   * This is a static method, as tests for other entities might also need it,
-   * if they test an entity which requires the current entity.
+   * This is a static method, as tests for other entities might also need it, if they test an entity
+   * which requires the current entity.
    */
   public static RightToWork createEntity(EntityManager em) {
     RightToWork rightToWork = new RightToWork()
@@ -122,6 +117,17 @@ public class RightToWorkResourceIntTest {
         .visaValidTo(DEFAULT_VISA_VALID_TO)
         .visaDetails(DEFAULT_VISA_DETAILS);
     return rightToWork;
+  }
+
+  @Before
+  public void setup() {
+    MockitoAnnotations.initMocks(this);
+    RightToWorkResource rightToWorkResource = new RightToWorkResource(rightToWorkService,
+        rightToWorkValidator);
+    this.restRightToWorkMockMvc = MockMvcBuilders.standaloneSetup(rightToWorkResource)
+        .setCustomArgumentResolvers(pageableArgumentResolver)
+        .setControllerAdvice(exceptionTranslator)
+        .setMessageConverters(jacksonMessageConverter).build();
   }
 
   @Before
@@ -200,7 +206,7 @@ public class RightToWorkResourceIntTest {
         .andExpect(status().isCreated());
 
   }
-  
+
 
   @Test
   @Transactional
@@ -245,12 +251,12 @@ public class RightToWorkResourceIntTest {
         .andExpect(status().isOk())
         .andExpect(content().contentType(MediaType.APPLICATION_JSON_UTF8_VALUE))
         .andExpect(jsonPath("$.[*].id").value(hasItem(rightToWork.getId().intValue())))
-      .andExpect(jsonPath("$.[*].eeaResident").value(hasItem(DEFAULT_EEA_RESIDENT)))
+        .andExpect(jsonPath("$.[*].eeaResident").value(hasItem(DEFAULT_EEA_RESIDENT)))
         .andExpect(jsonPath("$.[*].permitToWork").value(hasItem(DEFAULT_PERMIT_TO_WORK.name())))
-      .andExpect(jsonPath("$.[*].settled").value(hasItem(DEFAULT_SETTLED)))
+        .andExpect(jsonPath("$.[*].settled").value(hasItem(DEFAULT_SETTLED)))
         .andExpect(jsonPath("$.[*].visaIssued").value(hasItem(DEFAULT_VISA_ISSUED.toString())))
         .andExpect(jsonPath("$.[*].visaValidTo").value(hasItem(DEFAULT_VISA_VALID_TO.toString())))
-      .andExpect(jsonPath("$.[*].visaDetails").value(hasItem(DEFAULT_VISA_DETAILS)))
+        .andExpect(jsonPath("$.[*].visaDetails").value(hasItem(DEFAULT_VISA_DETAILS)))
         .andExpect(jsonPath("$.[*].amendedDate").isNotEmpty());
   }
 
@@ -265,12 +271,12 @@ public class RightToWorkResourceIntTest {
         .andExpect(status().isOk())
         .andExpect(content().contentType(MediaType.APPLICATION_JSON_UTF8_VALUE))
         .andExpect(jsonPath("$.id").value(rightToWork.getId().intValue()))
-      .andExpect(jsonPath("$.eeaResident").value(DEFAULT_EEA_RESIDENT))
+        .andExpect(jsonPath("$.eeaResident").value(DEFAULT_EEA_RESIDENT))
         .andExpect(jsonPath("$.permitToWork").value(DEFAULT_PERMIT_TO_WORK.name()))
-      .andExpect(jsonPath("$.settled").value(DEFAULT_SETTLED))
+        .andExpect(jsonPath("$.settled").value(DEFAULT_SETTLED))
         .andExpect(jsonPath("$.visaIssued").value(DEFAULT_VISA_ISSUED.toString()))
         .andExpect(jsonPath("$.visaValidTo").value(DEFAULT_VISA_VALID_TO.toString()))
-      .andExpect(jsonPath("$.visaDetails").value(DEFAULT_VISA_DETAILS))
+        .andExpect(jsonPath("$.visaDetails").value(DEFAULT_VISA_DETAILS))
         .andExpect(jsonPath("$.amendedDate").isNotEmpty());
   }
 
@@ -290,7 +296,8 @@ public class RightToWorkResourceIntTest {
     int databaseSizeBeforeUpdate = rightToWorkRepository.findAll().size();
 
     // Update the rightToWork
-    RightToWork updatedRightToWork = rightToWorkRepository.findById(rightToWork.getId()).orElse(null);
+    RightToWork updatedRightToWork = rightToWorkRepository.findById(rightToWork.getId())
+        .orElse(null);
     updatedRightToWork
         .eeaResident(UPDATED_EEA_RESIDENT)
         .permitToWork(UPDATED_PERMIT_TO_WORK)

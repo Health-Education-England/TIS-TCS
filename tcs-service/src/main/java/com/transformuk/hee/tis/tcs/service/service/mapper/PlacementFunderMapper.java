@@ -2,9 +2,8 @@ package com.transformuk.hee.tis.tcs.service.service.mapper;
 
 import com.transformuk.hee.tis.tcs.api.dto.PlacementFunderDTO;
 import com.transformuk.hee.tis.tcs.service.model.PlacementFunder;
-import org.mapstruct.Mapper;
-
 import java.util.List;
+import org.mapstruct.Mapper;
 
 /**
  * Mapper for the entity PlacementFunder and its DTO PlacementFunderDTO.
@@ -14,15 +13,18 @@ public interface PlacementFunderMapper {
 
   PlacementFunderDTO placementFunderToPlacementFunderDTO(PlacementFunder placementFunder);
 
-  List<PlacementFunderDTO> placementFundersToPlacementFunderDTOs(List<PlacementFunder> placementFunders);
+  List<PlacementFunderDTO> placementFundersToPlacementFunderDTOs(
+      List<PlacementFunder> placementFunders);
 
   PlacementFunder placementFunderDTOToPlacementFunder(PlacementFunderDTO placementFunderDTO);
 
-  List<PlacementFunder> placementFunderDTOsToPlacementFunders(List<PlacementFunderDTO> placementFunderDTOs);
+  List<PlacementFunder> placementFunderDTOsToPlacementFunders(
+      List<PlacementFunderDTO> placementFunderDTOs);
 
   /**
-   * generating the fromId for all mappers if the databaseType is sql, as the class has relationship to it might need it, instead of
-   * creating a new attribute to know if the entity has any relationship from some other entity
+   * generating the fromId for all mappers if the databaseType is sql, as the class has relationship
+   * to it might need it, instead of creating a new attribute to know if the entity has any
+   * relationship from some other entity
    *
    * @param id id of the entity
    * @return the entity instance

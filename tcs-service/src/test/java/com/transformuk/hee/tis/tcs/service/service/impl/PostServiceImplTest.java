@@ -1,8 +1,25 @@
 package com.transformuk.hee.tis.tcs.service.service.impl;
 
+import static org.mockito.Mockito.any;
+import static org.mockito.Mockito.anyString;
+import static org.mockito.Mockito.doNothing;
+import static org.mockito.Mockito.doReturn;
+import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.never;
+import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.verifyZeroInteractions;
+import static org.mockito.Mockito.when;
+
 import com.google.common.collect.Lists;
 import com.google.common.collect.Sets;
-import com.transformuk.hee.tis.tcs.api.dto.*;
+import com.transformuk.hee.tis.tcs.api.dto.PostDTO;
+import com.transformuk.hee.tis.tcs.api.dto.PostFundingDTO;
+import com.transformuk.hee.tis.tcs.api.dto.PostGradeDTO;
+import com.transformuk.hee.tis.tcs.api.dto.PostSiteDTO;
+import com.transformuk.hee.tis.tcs.api.dto.PostSpecialtyDTO;
+import com.transformuk.hee.tis.tcs.api.dto.PostViewDTO;
+import com.transformuk.hee.tis.tcs.api.dto.ProgrammeDTO;
+import com.transformuk.hee.tis.tcs.api.dto.SpecialtyDTO;
 import com.transformuk.hee.tis.tcs.api.enumeration.FundingType;
 import com.transformuk.hee.tis.tcs.api.enumeration.PostGradeType;
 import com.transformuk.hee.tis.tcs.api.enumeration.PostSiteType;
@@ -29,6 +46,12 @@ import com.transformuk.hee.tis.tcs.service.repository.PostSpecialtyRepository;
 import com.transformuk.hee.tis.tcs.service.repository.ProgrammeRepository;
 import com.transformuk.hee.tis.tcs.service.service.helper.SqlQuerySupplier;
 import com.transformuk.hee.tis.tcs.service.service.mapper.PostMapper;
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.HashSet;
+import java.util.List;
+import java.util.Optional;
+import java.util.Set;
 import org.apache.commons.lang.StringUtils;
 import org.junit.Assert;
 import org.junit.Test;
@@ -46,25 +69,10 @@ import org.springframework.jdbc.core.RowMapper;
 import org.springframework.jdbc.core.namedparam.MapSqlParameterSource;
 import org.springframework.jdbc.core.namedparam.NamedParameterJdbcTemplate;
 
-import java.util.ArrayList;
-import java.util.Collections;
-import java.util.HashSet;
-import java.util.List;
-import java.util.Optional;
-import java.util.Set;
-
-import static org.mockito.Mockito.any;
-import static org.mockito.Mockito.anyString;
-import static org.mockito.Mockito.doNothing;
-import static org.mockito.Mockito.doReturn;
-import static org.mockito.Mockito.mock;
-import static org.mockito.Mockito.never;
-import static org.mockito.Mockito.verify;
-import static org.mockito.Mockito.verifyZeroInteractions;
-import static org.mockito.Mockito.when;
-
 @RunWith(MockitoJUnitRunner.class)
 public class PostServiceImplTest {
+
+  private static final Long SITE_ID = 12345L;
   String query = "select distinct id,\n" +
       "approvedGradeId,\n" +
       "primarySpecialtyId,\n" +
@@ -77,7 +85,8 @@ public class PostServiceImplTest {
       "status,\n" +
       "owner,\n" +
       "intrepidId,\n" +
-      "GROUP_CONCAT(surnames SEPARATOR ', ') surnames, GROUP_CONCAT(forenames SEPARATOR ', ') forenames\n" +
+      "GROUP_CONCAT(surnames SEPARATOR ', ') surnames, GROUP_CONCAT(forenames SEPARATOR ', ') forenames\n"
+      +
       " from (SELECT p.`id`,\n" +
       "    pg.`gradeId` as `approvedGradeId`,\n" +
       "    ps.`specialtyId` as `primarySpecialtyId`,\n" +
@@ -93,22 +102,25 @@ public class PostServiceImplTest {
       "    c.surname surnames, c.forenames forenames\n" +
       "    FROM `Post` p\n" +
       "    LEFT JOIN `PostGrade` pg on p.`id` = pg.`postId` AND pg.`postGradeType` = 'APPROVED'\n" +
-      "    LEFT JOIN `PostSpecialty` ps on p.`id` = ps.`postId` AND ps.`postSpecialtyType` = 'PRIMARY'\n" +
+      "    LEFT JOIN `PostSpecialty` ps on p.`id` = ps.`postId` AND ps.`postSpecialtyType` = 'PRIMARY'\n"
+      +
       "    LEFT JOIN `Specialty` sp on sp.`id` = ps.`specialtyId`\n" +
       "    LEFT JOIN `PostSite` pst on p.`id` = pst.`postId` AND pst.`postSiteType` = 'PRIMARY'\n" +
-      "    LEFT JOIN `PostFunding` pf on p.`id` = pf.`postId` and (curdate() BETWEEN pf.startDate AND pf.endDate or pf.endDate is NULL)\n" +
-      "    LEFT JOIN `Placement` pl on pl.postId = p.id and curdate() BETWEEN pl.dateFrom AND pl.dateTo\n" +
+      "    LEFT JOIN `PostFunding` pf on p.`id` = pf.`postId` and (curdate() BETWEEN pf.startDate AND pf.endDate or pf.endDate is NULL)\n"
+      +
+      "    LEFT JOIN `Placement` pl on pl.postId = p.id and curdate() BETWEEN pl.dateFrom AND pl.dateTo\n"
+      +
       "    LEFT JOIN `ContactDetails` c on pl.traineeId = c.id\n" +
       "    LEFT JOIN `ProgrammePost` pp on pp.postId = p.id\n" +
       "    LEFT JOIN `Programme` prg on prg.`id` = pp.`programmeId`\n" +
       " TRUST_JOIN\n" +
       " WHERECLAUSE\n" +
       ") as ot\n" +
-      "group by id,approvedGradeId,primarySpecialtyId,primarySpecialtyCode,primarySpecialtyName,primarySiteId,nationalPostNumber,status,owner,intrepidId\n" +
+      "group by id,approvedGradeId,primarySpecialtyId,primarySpecialtyCode,primarySpecialtyName,primarySiteId,nationalPostNumber,status,owner,intrepidId\n"
+      +
       " ORDERBYCLAUSE\n" +
       " LIMITCLAUSE\n" +
       ";";
-  private static final Long SITE_ID = 12345L;
   @Spy
   @InjectMocks
   private PostServiceImpl testObj;
@@ -236,14 +248,17 @@ public class PostServiceImplTest {
     List<PostViewDTO> mappedPosts = Lists.newArrayList(postViewDTOMock1);
     when(permissionServiceMock.isUserTrustAdmin()).thenReturn(false);
     when(sqlQuerySupplierMock.getQuery(SqlQuerySupplier.POST_VIEW)).thenReturn(query);
-    when(namedParameterJdbcTemplateMock.query(anyString(), any(MapSqlParameterSource.class), any(RowMapper.class))).thenReturn(mappedPosts);
+    when(namedParameterJdbcTemplateMock
+        .query(anyString(), any(MapSqlParameterSource.class), any(RowMapper.class)))
+        .thenReturn(mappedPosts);
     when(pageableMock.getPageSize()).thenReturn(20);
 
     BasicPage<PostViewDTO> result = testObj.findAll(pageableMock);
 
     Assert.assertEquals(1, result.getContent().size());
     verify(sqlQuerySupplierMock).getQuery(SqlQuerySupplier.POST_VIEW);
-    verify(namedParameterJdbcTemplateMock).query(anyString(), any(MapSqlParameterSource.class), any(RowMapper.class));
+    verify(namedParameterJdbcTemplateMock)
+        .query(anyString(), any(MapSqlParameterSource.class), any(RowMapper.class));
   }
 
   @Test
@@ -288,9 +303,11 @@ public class PostServiceImplTest {
     HashSet<Post> postsFromRepository = Sets.newHashSet(currentPost, oldPost, newPost);
     List<Post> savedPosts = Lists.newArrayList(currentPost);
     PostDTO expectedDTO = new PostDTO();
-    expectedDTO.id(currentPostDTO.getId()).intrepidId(currentPost.getIntrepidId()).oldPost(oldPostDTO).newPost(newPostDTO);
+    expectedDTO.id(currentPostDTO.getId()).intrepidId(currentPost.getIntrepidId())
+        .oldPost(oldPostDTO).newPost(newPostDTO);
     List<PostDTO> transformedPosts = Lists.newArrayList(expectedDTO);
-    when(postRepositoryMock.findPostByIntrepidIdIn(Sets.newHashSet(intrepidIds))).thenReturn(postsFromRepository);
+    when(postRepositoryMock.findPostByIntrepidIdIn(Sets.newHashSet(intrepidIds)))
+        .thenReturn(postsFromRepository);
     when(postRepositoryMock.saveAll(Lists.newArrayList(currentPost))).thenReturn(savedPosts);
     when(postMapperMock.postsToPostDTOs(savedPosts)).thenReturn(transformedPosts);
     List<PostDTO> result = testObj.patchOldNewPosts(postDtos);
@@ -311,7 +328,8 @@ public class PostServiceImplTest {
     postSiteDTO.setPostSiteType(PostSiteType.PRIMARY);
     postSiteDTO.setSiteId(SITE_ID);
     PostDTO sendPostData = new PostDTO();
-    sendPostData.id(postIds.get(0)).intrepidId(intrepidIds.get(0)).setSites(Sets.newHashSet(postSiteDTO));
+    sendPostData.id(postIds.get(0)).intrepidId(intrepidIds.get(0))
+        .setSites(Sets.newHashSet(postSiteDTO));
     Post currentPost = new Post();
     currentPost.setId(postIds.get(0));
     currentPost.setIntrepidId(intrepidIds.get(0));
@@ -319,9 +337,11 @@ public class PostServiceImplTest {
     List<Post> savedPosts = Lists.newArrayList(currentPost);
     PostDTO expectedDTO = new PostDTO();
     HashSet<PostSiteDTO> expectedSites = Sets.newHashSet(postSiteDTO);
-    expectedDTO.id(sendPostData.getId()).intrepidId(currentPost.getIntrepidId()).sites(expectedSites);
+    expectedDTO.id(sendPostData.getId()).intrepidId(currentPost.getIntrepidId())
+        .sites(expectedSites);
     List<PostDTO> transformedPosts = Lists.newArrayList(expectedDTO);
-    when(postRepositoryMock.findPostByIntrepidIdIn(Sets.newHashSet(intrepidIds))).thenReturn(postsFromRepository);
+    when(postRepositoryMock.findPostByIntrepidIdIn(Sets.newHashSet(intrepidIds)))
+        .thenReturn(postsFromRepository);
     when(postMapperMock.postsToPostDTOs(savedPosts)).thenReturn(transformedPosts);
     List<PostDTO> result = testObj.patchPostSites(Lists.newArrayList(sendPostData));
     verify(postRepositoryMock).findPostByIntrepidIdIn(Sets.newHashSet(intrepidIds));
@@ -340,7 +360,8 @@ public class PostServiceImplTest {
     postGradeDTO.setPostGradeType(PostGradeType.APPROVED);
     postGradeDTO.setGradeId(SITE_ID);
     PostDTO sendPostData = new PostDTO();
-    sendPostData.id(postIds.get(0)).intrepidId(intrepidIds.get(0)).grades(Sets.newHashSet(postGradeDTO));
+    sendPostData.id(postIds.get(0)).intrepidId(intrepidIds.get(0))
+        .grades(Sets.newHashSet(postGradeDTO));
     Post currentPost = new Post();
     currentPost.setId(postIds.get(0));
     currentPost.setIntrepidId(intrepidIds.get(0));
@@ -348,9 +369,11 @@ public class PostServiceImplTest {
     List<Post> savedPosts = Lists.newArrayList(currentPost);
     PostDTO expectedDTO = new PostDTO();
     HashSet<PostGradeDTO> expectedGrades = Sets.newHashSet(postGradeDTO);
-    expectedDTO.id(sendPostData.getId()).intrepidId(currentPost.getIntrepidId()).grades(expectedGrades);
+    expectedDTO.id(sendPostData.getId()).intrepidId(currentPost.getIntrepidId())
+        .grades(expectedGrades);
     List<PostDTO> transformedPosts = Lists.newArrayList(expectedDTO);
-    when(postRepositoryMock.findPostByIntrepidIdIn(Sets.newHashSet(intrepidIds))).thenReturn(postsFromRepository);
+    when(postRepositoryMock.findPostByIntrepidIdIn(Sets.newHashSet(intrepidIds)))
+        .thenReturn(postsFromRepository);
     when(postRepositoryMock.saveAll(Lists.newArrayList(currentPost))).thenReturn(savedPosts);
     when(postMapperMock.postsToPostDTOs(savedPosts)).thenReturn(transformedPosts);
     List<PostDTO> result = testObj.patchPostGrades(Lists.newArrayList(sendPostData));
@@ -373,18 +396,22 @@ public class PostServiceImplTest {
     programme.setId(1L);
     programme.setIntrepidId("programme intrepid id");
     PostDTO sendPostData = new PostDTO();
-    sendPostData.id(postIds.get(0)).intrepidId(intrepidIds.get(0)).programmes(Collections.singleton(programmeDTO));
+    sendPostData.id(postIds.get(0)).intrepidId(intrepidIds.get(0))
+        .programmes(Collections.singleton(programmeDTO));
     Post currentPost = new Post();
     currentPost.setId(postIds.get(0));
     currentPost.setIntrepidId(intrepidIds.get(0));
     HashSet<Post> postsFromRepository = Sets.newHashSet(currentPost);
     List<Post> savedPosts = Lists.newArrayList(currentPost);
     PostDTO expectedDTO = new PostDTO();
-    expectedDTO.id(sendPostData.getId()).intrepidId(currentPost.getIntrepidId()).programmes(Collections.singleton(programmeDTO));
+    expectedDTO.id(sendPostData.getId()).intrepidId(currentPost.getIntrepidId())
+        .programmes(Collections.singleton(programmeDTO));
     List<PostDTO> transformedPosts = Lists.newArrayList(expectedDTO);
     Set<Long> programmeIds = Sets.newHashSet(1L);
-    when(postRepositoryMock.findPostByIntrepidIdIn(Sets.newHashSet(intrepidIds))).thenReturn(postsFromRepository);
-    when(programmeRepositoryMock.findAllById(programmeIds)).thenReturn(Lists.newArrayList(programme));
+    when(postRepositoryMock.findPostByIntrepidIdIn(Sets.newHashSet(intrepidIds)))
+        .thenReturn(postsFromRepository);
+    when(programmeRepositoryMock.findAllById(programmeIds))
+        .thenReturn(Lists.newArrayList(programme));
     when(postRepositoryMock.saveAll(Lists.newArrayList(currentPost))).thenReturn(savedPosts);
     when(postMapperMock.postsToPostDTOs(savedPosts)).thenReturn(transformedPosts);
     List<PostDTO> result = testObj.patchPostProgrammes(Lists.newArrayList(sendPostData));
@@ -408,7 +435,8 @@ public class PostServiceImplTest {
     newPostSpecialtyDTO.setSpecialty(newSpecialtyDTO);
     newPostSpecialtyDTO.setPostId(1L);
     PostDTO postDTOToSend = new PostDTO();
-    postDTOToSend.id(postIds.get(0)).intrepidId(intrepidIds.get(0)).specialties(Sets.newHashSet(newPostSpecialtyDTO));
+    postDTOToSend.id(postIds.get(0)).intrepidId(intrepidIds.get(0))
+        .specialties(Sets.newHashSet(newPostSpecialtyDTO));
     Specialty primarySpecialty = new Specialty();
     primarySpecialty.setId(2L);
     PostSpecialty primaryPostSpecialty = new PostSpecialty();
@@ -422,9 +450,11 @@ public class PostServiceImplTest {
     List<Post> savedPosts = Lists.newArrayList(postInRepository);
     PostDTO expectedDTO = new PostDTO();
     Set<PostSpecialtyDTO> expectedSpecialties = Sets.newHashSet(newPostSpecialtyDTO);
-    expectedDTO.id(postDTOToSend.getId()).intrepidId(postInRepository.getIntrepidId()).specialties(expectedSpecialties);
+    expectedDTO.id(postDTOToSend.getId()).intrepidId(postInRepository.getIntrepidId())
+        .specialties(expectedSpecialties);
     List<PostDTO> transformedPosts = Lists.newArrayList(expectedDTO);
-    when(postRepositoryMock.findPostByIntrepidIdIn(Sets.newHashSet(intrepidIds))).thenReturn(postsFromRepository);
+    when(postRepositoryMock.findPostByIntrepidIdIn(Sets.newHashSet(intrepidIds)))
+        .thenReturn(postsFromRepository);
     when(postMapperMock.postsToPostDTOs(savedPosts)).thenReturn(transformedPosts);
     List<PostDTO> result = testObj.patchPostSpecialties(Lists.newArrayList(postDTOToSend));
     verify(postRepositoryMock).findPostByIntrepidIdIn(Sets.newHashSet(intrepidIds));
@@ -439,7 +469,8 @@ public class PostServiceImplTest {
     }
     Assert.assertEquals(PostSpecialtyType.OTHER, postSpecialtyValue.getPostSpecialtyType());
     Assert.assertEquals(postInRepository.getId(), postSpecialtyValue.getPostId());
-    Assert.assertEquals(newPostSpecialtyDTO.getSpecialty().getId(), postSpecialtyValue.getSpecialty().getId());
+    Assert.assertEquals(newPostSpecialtyDTO.getSpecialty().getId(),
+        postSpecialtyValue.getSpecialty().getId());
     Assert.assertSame(transformedPosts, result);
     Assert.assertEquals(expectedDTO, result.get(0));
     Assert.assertEquals(expectedSpecialties, result.get(0).getSpecialties());
@@ -565,7 +596,9 @@ public class PostServiceImplTest {
     doReturn(WHERE_CLAUSE).when(testObj).createWhereClause(SEARCH_STRING, COLUMN_FILTERS);
     when(sqlQuerySupplierMock.getQuery(SqlQuerySupplier.POST_VIEW)).thenReturn(query);
     when(permissionServiceMock.isUserTrustAdmin()).thenReturn(false);
-    when(namedParameterJdbcTemplateMock.query(queryCaptor.capture(), any(MapSqlParameterSource.class), any(PostServiceImpl.PostViewRowMapper.class)))
+    when(namedParameterJdbcTemplateMock
+        .query(queryCaptor.capture(), any(MapSqlParameterSource.class),
+            any(PostServiceImpl.PostViewRowMapper.class)))
         .thenReturn(resultsFromQuery);
     testObj.advancedSearch(SEARCH_STRING, COLUMN_FILTERS, pageable);
     String capturedQueryString = queryCaptor.getValue();
@@ -576,7 +609,8 @@ public class PostServiceImplTest {
     //ordering
     Assert.assertTrue(indexOfGroupBy < indexOfOrderBy);
     //multiples
-    Assert.assertFalse(capturedQueryString.substring(indexOfGroupBy + "group by".length()).contains("group by"));
+    Assert.assertFalse(
+        capturedQueryString.substring(indexOfGroupBy + "group by".length()).contains("group by"));
   }
 
   @Test
@@ -593,7 +627,9 @@ public class PostServiceImplTest {
     doReturn(WHERE_CLAUSE).when(testObj).createWhereClause(SEARCH_STRING, COLUMN_FILTERS);
     when(sqlQuerySupplierMock.getQuery(SqlQuerySupplier.POST_VIEW)).thenReturn(query);
     when(permissionServiceMock.isUserTrustAdmin()).thenReturn(false);
-    when(namedParameterJdbcTemplateMock.query(queryCaptor.capture(), any(MapSqlParameterSource.class), any(PostServiceImpl.PostViewRowMapper.class)))
+    when(namedParameterJdbcTemplateMock
+        .query(queryCaptor.capture(), any(MapSqlParameterSource.class),
+            any(PostServiceImpl.PostViewRowMapper.class)))
         .thenReturn(resultsFromQuery);
     testObj.advancedSearch(SEARCH_STRING, COLUMN_FILTERS, pageable);
     String capturedQueryString = queryCaptor.getValue();
@@ -604,7 +640,8 @@ public class PostServiceImplTest {
     //ordering
     Assert.assertTrue(indexOfGroupBy < indexOfOrderBy);
     //multiples
-    Assert.assertFalse(capturedQueryString.substring(indexOfGroupBy + "group by".length()).contains("group by"));
+    Assert.assertFalse(
+        capturedQueryString.substring(indexOfGroupBy + "group by".length()).contains("group by"));
   }
 
   @Test(expected = NullPointerException.class)
@@ -626,7 +663,8 @@ public class PostServiceImplTest {
     List<Post> postsFromDb = Lists.newArrayList(new Post());
     List<PostDTO> convertedPosts = Lists.newArrayList(new PostDTO());
 
-    when(postRepositoryMock.findPostsForProgrammeIdAndNpnLike(programmeId, npn, Status.CURRENT)).thenReturn(postsFromDb);
+    when(postRepositoryMock.findPostsForProgrammeIdAndNpnLike(programmeId, npn, Status.CURRENT))
+        .thenReturn(postsFromDb);
     when(postMapperMock.postsToPostDTOs(postsFromDb)).thenReturn(convertedPosts);
 
     List<PostDTO> result = testObj.findPostsForProgrammeIdAndNpn(programmeId, npn);

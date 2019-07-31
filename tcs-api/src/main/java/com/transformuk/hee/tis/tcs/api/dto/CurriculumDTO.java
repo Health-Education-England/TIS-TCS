@@ -5,12 +5,11 @@ import com.transformuk.hee.tis.tcs.api.dto.validation.Update;
 import com.transformuk.hee.tis.tcs.api.enumeration.AssessmentType;
 import com.transformuk.hee.tis.tcs.api.enumeration.CurriculumSubType;
 import com.transformuk.hee.tis.tcs.api.enumeration.Status;
-
+import java.io.Serializable;
+import java.util.Objects;
 import javax.validation.constraints.DecimalMin;
 import javax.validation.constraints.NotNull;
 import javax.validation.constraints.Null;
-import java.io.Serializable;
-import java.util.Objects;
 
 /**
  * A DTO for the Curriculum entity.
@@ -33,17 +32,20 @@ public class CurriculumDTO implements Serializable {
 
   private CurriculumSubType curriculumSubType;
 
-  @DecimalMin(value = "0", groups = {Create.class, Update.class}, message = "length must not be negative")
+  @DecimalMin(value = "0", groups = {Create.class,
+      Update.class}, message = "length must not be negative")
   @NotNull(groups = {Create.class, Update.class}, message = "length must not be null")
   private Integer length;
 
   @NotNull(groups = {Create.class, Update.class}, message = "assessmentType must not be null")
   private AssessmentType assessmentType;
 
-  @NotNull(groups = {Create.class, Update.class}, message = "doesThisCurriculumLeadToCct must not be null")
+  @NotNull(groups = {Create.class,
+      Update.class}, message = "doesThisCurriculumLeadToCct must not be null")
   private Boolean doesThisCurriculumLeadToCct;
 
-  @DecimalMin(value = "0", groups = {Create.class, Update.class}, message = "periodOfGrace must not be negative")
+  @DecimalMin(value = "0", groups = {Create.class,
+      Update.class}, message = "periodOfGrace must not be negative")
   @NotNull(groups = {Create.class, Update.class}, message = "periodOfGrace must not be null")
   private Integer periodOfGrace;
 

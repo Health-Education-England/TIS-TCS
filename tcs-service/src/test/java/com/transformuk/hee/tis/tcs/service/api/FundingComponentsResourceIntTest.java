@@ -1,5 +1,15 @@
 package com.transformuk.hee.tis.tcs.service.api;
 
+import static org.assertj.core.api.Assertions.assertThat;
+import static org.hamcrest.Matchers.hasItem;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.delete;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.put;
+import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.content;
+import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
+import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
+
 import com.transformuk.hee.tis.tcs.api.dto.FundingComponentsDTO;
 import com.transformuk.hee.tis.tcs.service.Application;
 import com.transformuk.hee.tis.tcs.service.exception.ExceptionTranslator;
@@ -7,6 +17,9 @@ import com.transformuk.hee.tis.tcs.service.model.FundingComponents;
 import com.transformuk.hee.tis.tcs.service.repository.FundingComponentsRepository;
 import com.transformuk.hee.tis.tcs.service.service.FundingComponentsService;
 import com.transformuk.hee.tis.tcs.service.service.mapper.FundingComponentsMapper;
+import java.math.BigDecimal;
+import java.util.List;
+import javax.persistence.EntityManager;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -20,15 +33,6 @@ import org.springframework.test.context.junit4.SpringRunner;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.setup.MockMvcBuilders;
 import org.springframework.transaction.annotation.Transactional;
-
-import javax.persistence.EntityManager;
-import java.math.BigDecimal;
-import java.util.List;
-
-import static org.assertj.core.api.Assertions.assertThat;
-import static org.hamcrest.Matchers.hasItem;
-import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.*;
-import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.*;
 
 /**
  * Test class for the FundingComponentsResource REST controller.
@@ -73,8 +77,8 @@ public class FundingComponentsResourceIntTest {
   /**
    * Create an entity for this test.
    * <p>
-   * This is a static method, as tests for other entities might also need it,
-   * if they test an entity which requires the current entity.
+   * This is a static method, as tests for other entities might also need it, if they test an entity
+   * which requires the current entity.
    */
   public static FundingComponents createEntity(EntityManager em) {
     FundingComponents fundingComponents = new FundingComponents()
@@ -86,7 +90,8 @@ public class FundingComponentsResourceIntTest {
   @Before
   public void setup() {
     MockitoAnnotations.initMocks(this);
-    FundingComponentsResource fundingComponentsResource = new FundingComponentsResource(fundingComponentsService);
+    FundingComponentsResource fundingComponentsResource = new FundingComponentsResource(
+        fundingComponentsService);
     this.restFundingComponentsMockMvc = MockMvcBuilders.standaloneSetup(fundingComponentsResource)
         .setCustomArgumentResolvers(pageableArgumentResolver)
         .setControllerAdvice(exceptionTranslator)
@@ -104,7 +109,8 @@ public class FundingComponentsResourceIntTest {
     int databaseSizeBeforeCreate = fundingComponentsRepository.findAll().size();
 
     // Create the FundingComponents
-    FundingComponentsDTO fundingComponentsDTO = fundingComponentsMapper.fundingComponentsToFundingComponentsDTO(fundingComponents);
+    FundingComponentsDTO fundingComponentsDTO = fundingComponentsMapper
+        .fundingComponentsToFundingComponentsDTO(fundingComponents);
     restFundingComponentsMockMvc.perform(post("/api/funding-components")
         .contentType(TestUtil.APPLICATION_JSON_UTF8)
         .content(TestUtil.convertObjectToJsonBytes(fundingComponentsDTO)))
@@ -113,7 +119,8 @@ public class FundingComponentsResourceIntTest {
     // Validate the FundingComponents in the database
     List<FundingComponents> fundingComponentsList = fundingComponentsRepository.findAll();
     assertThat(fundingComponentsList).hasSize(databaseSizeBeforeCreate + 1);
-    FundingComponents testFundingComponents = fundingComponentsList.get(fundingComponentsList.size() - 1);
+    FundingComponents testFundingComponents = fundingComponentsList
+        .get(fundingComponentsList.size() - 1);
     assertThat(testFundingComponents.getPercentage()).isEqualTo(DEFAULT_PERCENTAGE);
     assertThat(testFundingComponents.getAmount()).isEqualTo(DEFAULT_AMOUNT);
   }
@@ -125,7 +132,8 @@ public class FundingComponentsResourceIntTest {
 
     // Create the FundingComponents with an existing ID
     fundingComponents.setId(1L);
-    FundingComponentsDTO fundingComponentsDTO = fundingComponentsMapper.fundingComponentsToFundingComponentsDTO(fundingComponents);
+    FundingComponentsDTO fundingComponentsDTO = fundingComponentsMapper
+        .fundingComponentsToFundingComponentsDTO(fundingComponents);
 
     // An entity with an existing ID cannot be created, so this API call must fail
     restFundingComponentsMockMvc.perform(post("/api/funding-components")
@@ -160,7 +168,8 @@ public class FundingComponentsResourceIntTest {
     fundingComponentsRepository.saveAndFlush(fundingComponents);
 
     // Get the fundingComponents
-    restFundingComponentsMockMvc.perform(get("/api/funding-components/{id}", fundingComponents.getId()))
+    restFundingComponentsMockMvc
+        .perform(get("/api/funding-components/{id}", fundingComponents.getId()))
         .andExpect(status().isOk())
         .andExpect(content().contentType(MediaType.APPLICATION_JSON_UTF8_VALUE))
         .andExpect(jsonPath("$.id").value(fundingComponents.getId().intValue()))
@@ -184,11 +193,13 @@ public class FundingComponentsResourceIntTest {
     int databaseSizeBeforeUpdate = fundingComponentsRepository.findAll().size();
 
     // Update the fundingComponents
-    FundingComponents updatedFundingComponents = fundingComponentsRepository.findById(fundingComponents.getId()).orElse(null);
+    FundingComponents updatedFundingComponents = fundingComponentsRepository
+        .findById(fundingComponents.getId()).orElse(null);
     updatedFundingComponents
         .percentage(UPDATED_PERCENTAGE)
         .amount(UPDATED_AMOUNT);
-    FundingComponentsDTO fundingComponentsDTO = fundingComponentsMapper.fundingComponentsToFundingComponentsDTO(updatedFundingComponents);
+    FundingComponentsDTO fundingComponentsDTO = fundingComponentsMapper
+        .fundingComponentsToFundingComponentsDTO(updatedFundingComponents);
 
     restFundingComponentsMockMvc.perform(put("/api/funding-components")
         .contentType(TestUtil.APPLICATION_JSON_UTF8)
@@ -198,7 +209,8 @@ public class FundingComponentsResourceIntTest {
     // Validate the FundingComponents in the database
     List<FundingComponents> fundingComponentsList = fundingComponentsRepository.findAll();
     assertThat(fundingComponentsList).hasSize(databaseSizeBeforeUpdate);
-    FundingComponents testFundingComponents = fundingComponentsList.get(fundingComponentsList.size() - 1);
+    FundingComponents testFundingComponents = fundingComponentsList
+        .get(fundingComponentsList.size() - 1);
     assertThat(testFundingComponents.getPercentage()).isEqualTo(UPDATED_PERCENTAGE);
     assertThat(testFundingComponents.getAmount()).isEqualTo(UPDATED_AMOUNT);
   }
@@ -209,7 +221,8 @@ public class FundingComponentsResourceIntTest {
     int databaseSizeBeforeUpdate = fundingComponentsRepository.findAll().size();
 
     // Create the FundingComponents
-    FundingComponentsDTO fundingComponentsDTO = fundingComponentsMapper.fundingComponentsToFundingComponentsDTO(fundingComponents);
+    FundingComponentsDTO fundingComponentsDTO = fundingComponentsMapper
+        .fundingComponentsToFundingComponentsDTO(fundingComponents);
 
     // If the entity doesn't have an ID, it will be created instead of just being updated
     restFundingComponentsMockMvc.perform(put("/api/funding-components")
@@ -230,8 +243,9 @@ public class FundingComponentsResourceIntTest {
     int databaseSizeBeforeDelete = fundingComponentsRepository.findAll().size();
 
     // Get the fundingComponents
-    restFundingComponentsMockMvc.perform(delete("/api/funding-components/{id}", fundingComponents.getId())
-        .accept(TestUtil.APPLICATION_JSON_UTF8))
+    restFundingComponentsMockMvc
+        .perform(delete("/api/funding-components/{id}", fundingComponents.getId())
+            .accept(TestUtil.APPLICATION_JSON_UTF8))
         .andExpect(status().isOk());
 
     // Validate the database is empty

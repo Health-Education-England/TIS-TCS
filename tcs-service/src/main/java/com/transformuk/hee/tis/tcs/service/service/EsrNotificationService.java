@@ -5,7 +5,6 @@ import com.transformuk.hee.tis.tcs.api.dto.PlacementDetailsDTO;
 import com.transformuk.hee.tis.tcs.api.dto.PostDTO;
 import com.transformuk.hee.tis.tcs.service.model.EsrNotification;
 import com.transformuk.hee.tis.tcs.service.model.Placement;
-
 import java.io.IOException;
 import java.time.LocalDate;
 import java.util.List;
@@ -31,15 +30,21 @@ public interface EsrNotificationService {
 
   List<EsrNotificationDTO> fetchNotificationsFrom(String deanery, LocalDate fromDate);
 
-  List<EsrNotificationDTO> loadFullNotification(LocalDate asOfDate, List<String> deaneryNumbers, String deaneryBody);
+  List<EsrNotificationDTO> loadFullNotification(LocalDate asOfDate, List<String> deaneryNumbers,
+      String deaneryBody);
 
-  void loadChangeOfPlacementDatesNotification(PlacementDetailsDTO changedPlacement, String nationalPostNumber, boolean currentPlacementEdit) throws IOException, ClassNotFoundException ;
+  void loadChangeOfPlacementDatesNotification(PlacementDetailsDTO changedPlacement,
+      String nationalPostNumber, boolean currentPlacementEdit)
+      throws IOException, ClassNotFoundException;
 
   EsrNotification handleEsrNewPositionNotification(PostDTO postDTO);
 
-  List<EsrNotification> handleNewPlacementEsrNotification(Placement placement) throws IOException, ClassNotFoundException;
+  List<EsrNotification> handleNewPlacementEsrNotification(Placement placement)
+      throws IOException, ClassNotFoundException;
 
-  List<EsrNotification> loadPlacementDeleteNotification(Placement placement, List<EsrNotification> allEsrNotifications);
+  List<EsrNotification> loadPlacementDeleteNotification(Placement placement,
+      List<EsrNotification> allEsrNotifications);
 
-  List<EsrNotificationDTO> loadEarliestATraineeIsEligibleAsFuturePlacementNotification(LocalDate fromDate);
+  List<EsrNotificationDTO> loadEarliestATraineeIsEligibleAsFuturePlacementNotification(
+      LocalDate fromDate);
 }

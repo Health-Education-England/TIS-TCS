@@ -1,11 +1,18 @@
 package com.transformuk.hee.tis.tcs.service.api;
 
+import static org.assertj.core.api.Assertions.assertThat;
+import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.BDDMockito.given;
+import static org.mockito.Matchers.anyList;
+import static org.mockito.Matchers.eq;
+
 import com.google.common.collect.Lists;
 import com.transformuk.hee.tis.tcs.TestUtils;
 import com.transformuk.hee.tis.tcs.api.dto.ProgrammeDTO;
 import com.transformuk.hee.tis.tcs.api.enumeration.Status;
 import com.transformuk.hee.tis.tcs.service.model.ColumnFilter;
 import com.transformuk.hee.tis.tcs.service.service.ProgrammeService;
+import java.util.List;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -16,14 +23,6 @@ import org.mockito.runners.MockitoJUnitRunner;
 import org.springframework.data.domain.PageImpl;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
-
-import java.util.List;
-
-import static org.assertj.core.api.Assertions.assertThat;
-import static org.mockito.ArgumentMatchers.any;
-import static org.mockito.BDDMockito.given;
-import static org.mockito.Matchers.anyList;
-import static org.mockito.Matchers.eq;
 
 @RunWith(MockitoJUnitRunner.class)
 public class ProgrammeResourceTest {
@@ -49,7 +48,8 @@ public class ProgrammeResourceTest {
     PageImpl<ProgrammeDTO> page = new PageImpl<>(Lists.newArrayList(new ProgrammeDTO()));
 
     ArgumentCaptor<String> searchStringCaptor = ArgumentCaptor.forClass(String.class);
-    given(programmeService.advancedSearch(searchStringCaptor.capture(), anyList(), eq(p))).willReturn(page);
+    given(programmeService.advancedSearch(searchStringCaptor.capture(), anyList(), eq(p)))
+        .willReturn(page);
 
     // when
     controller.getAllProgrammes(p, "[)alph(&)a ''numer1]c", null);
@@ -66,7 +66,8 @@ public class ProgrammeResourceTest {
     String colFilter = "{\"owner\":[\"Health Ed:uc#%ation §±England@$% West Mid^la*nds\"]}";
 
     ArgumentCaptor<List> searchStringCaptor = ArgumentCaptor.forClass(List.class);
-    given(programmeService.advancedSearch(any(), searchStringCaptor.capture(), eq(p))).willReturn(page);
+    given(programmeService.advancedSearch(any(), searchStringCaptor.capture(), eq(p)))
+        .willReturn(page);
 
     // when
     controller.getAllProgrammes(p, "[)alph(&)a [\\'\\]'numer1]c", colFilter);
@@ -86,7 +87,8 @@ public class ProgrammeResourceTest {
     String colFilter = "{\"status\":[\"badstatus\",\"CURRENT\"]}";
 
     ArgumentCaptor<List> searchStringCaptor = ArgumentCaptor.forClass(List.class);
-    given(programmeService.advancedSearch(any(), searchStringCaptor.capture(), eq(p))).willReturn(page);
+    given(programmeService.advancedSearch(any(), searchStringCaptor.capture(), eq(p)))
+        .willReturn(page);
 
     // when
     controller.getAllProgrammes(p, "[)alph(&)a ''numer1]c", colFilter);
@@ -106,7 +108,8 @@ public class ProgrammeResourceTest {
     String colFilter = "{\"status\":[\"badstatus\"]}";
 
     ArgumentCaptor<List> searchStringCaptor = ArgumentCaptor.forClass(List.class);
-    given(programmeService.advancedSearch(any(), searchStringCaptor.capture(), eq(p))).willReturn(page);
+    given(programmeService.advancedSearch(any(), searchStringCaptor.capture(), eq(p)))
+        .willReturn(page);
 
     // when
     controller.getAllProgrammes(p, "[)alph(&)a ''numer1]c", colFilter);

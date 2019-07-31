@@ -1,5 +1,16 @@
 package com.transformuk.hee.tis.tcs.service.api;
 
+import static org.hamcrest.Matchers.containsInAnyOrder;
+import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.Mockito.doThrow;
+import static org.mockito.Mockito.never;
+import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.when;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
+import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.content;
+import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
+import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
+
 import com.google.common.collect.Lists;
 import com.transformuk.hee.tis.tcs.TestUtils;
 import com.transformuk.hee.tis.tcs.api.dto.PersonDTO;
@@ -22,6 +33,7 @@ import com.transformuk.hee.tis.tcs.service.service.PersonElasticSearchService;
 import com.transformuk.hee.tis.tcs.service.service.PersonService;
 import com.transformuk.hee.tis.tcs.service.service.PlacementService;
 import com.transformuk.hee.tis.tcs.service.service.mapper.PlacementViewMapper;
+import java.util.ArrayList;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -40,19 +52,6 @@ import org.springframework.test.context.junit4.SpringRunner;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.request.MockMvcRequestBuilders;
 import org.springframework.test.web.servlet.setup.MockMvcBuilders;
-
-import java.util.ArrayList;
-
-import static org.hamcrest.Matchers.containsInAnyOrder;
-import static org.mockito.ArgumentMatchers.any;
-import static org.mockito.Mockito.doThrow;
-import static org.mockito.Mockito.never;
-import static org.mockito.Mockito.verify;
-import static org.mockito.Mockito.when;
-import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
-import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.content;
-import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
-import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
 @RunWith(SpringRunner.class)
 @SpringBootTest(classes = Application.class)
@@ -100,9 +99,12 @@ public class PersonResourceTest2 {
   public void setup() {
     MockitoAnnotations.initMocks(this);
 
-    PersonResource personResource = new PersonResource(personServiceMock, placementViewRepositoryMock,
-        placementViewMapperMock, placementViewDecoratorMock, personViewDecoratorMock, placementServiceMock,
-        placementSummaryDecoratorMock, personValidatorMock, gmcDetailsValidator, gdcDetailsValidator,
+    PersonResource personResource = new PersonResource(personServiceMock,
+        placementViewRepositoryMock,
+        placementViewMapperMock, placementViewDecoratorMock, personViewDecoratorMock,
+        placementServiceMock,
+        placementSummaryDecoratorMock, personValidatorMock, gmcDetailsValidator,
+        gdcDetailsValidator,
         personalDetailsValidator, contactDetailsValidator, personElasticSearchServiceMock);
 
     this.mockMvc = MockMvcBuilders.standaloneSetup(personResource)
@@ -122,7 +124,8 @@ public class PersonResourceTest2 {
   @Test
   public void unauthorisedExceptionThrownWhenUserCannotUpdatePerson() throws Exception {
 
-    doThrow(new AccessUnauthorisedException("")).when(personServiceMock).canLoggedInUserViewOrAmend(1L);
+    doThrow(new AccessUnauthorisedException("")).when(personServiceMock)
+        .canLoggedInUserViewOrAmend(1L);
 
     mockMvc.perform(
         MockMvcRequestBuilders.put("/api/people")
@@ -139,7 +142,8 @@ public class PersonResourceTest2 {
   @Test
   public void unauthorisedExceptionThrownWhenUserCannotViewSpecificPerson() throws Exception {
 
-    doThrow(new AccessUnauthorisedException("")).when(personServiceMock).canLoggedInUserViewOrAmend(1L);
+    doThrow(new AccessUnauthorisedException("")).when(personServiceMock)
+        .canLoggedInUserViewOrAmend(1L);
 
     mockMvc.perform(
         get("/api/people/{id}", 1L)
@@ -153,7 +157,8 @@ public class PersonResourceTest2 {
   @Test
   public void unauthorisedExceptionThrownWhenUserCannotDeleteSpecificPerson() throws Exception {
 
-    doThrow(new AccessUnauthorisedException("")).when(personServiceMock).canLoggedInUserViewOrAmend(1L);
+    doThrow(new AccessUnauthorisedException("")).when(personServiceMock)
+        .canLoggedInUserViewOrAmend(1L);
 
     mockMvc.perform(
         MockMvcRequestBuilders.delete("/api/people/{id}", 1L)
@@ -165,9 +170,11 @@ public class PersonResourceTest2 {
   }
 
   @Test
-  public void unauthorisedExceptionThrownWhenUserCannotViewSpecificBasicPersonData() throws Exception {
+  public void unauthorisedExceptionThrownWhenUserCannotViewSpecificBasicPersonData()
+      throws Exception {
 
-    doThrow(new AccessUnauthorisedException("")).when(personServiceMock).canLoggedInUserViewOrAmend(1L);
+    doThrow(new AccessUnauthorisedException("")).when(personServiceMock)
+        .canLoggedInUserViewOrAmend(1L);
 
     mockMvc.perform(
         get("/api/people/{id}/basic", 1L)
@@ -181,7 +188,8 @@ public class PersonResourceTest2 {
   @Test
   public void unauthorisedExceptionThrownWhenUserCannotViewPersonPlacements() throws Exception {
 
-    doThrow(new AccessUnauthorisedException("")).when(personServiceMock).canLoggedInUserViewOrAmend(1L);
+    doThrow(new AccessUnauthorisedException("")).when(personServiceMock)
+        .canLoggedInUserViewOrAmend(1L);
 
     mockMvc.perform(
         get("/api/people/{id}/placements", 1L)
@@ -200,7 +208,8 @@ public class PersonResourceTest2 {
     String gmcId = "12345";
     long personId = 1L;
     when(personServiceMock.findIdByGmcId(gmcId)).thenReturn(personId);
-    doThrow(new AccessUnauthorisedException("")).when(personServiceMock).canLoggedInUserViewOrAmend(personId);
+    doThrow(new AccessUnauthorisedException("")).when(personServiceMock)
+        .canLoggedInUserViewOrAmend(personId);
 
     mockMvc.perform(
         get("/api/people/gmc/{gmcId}/placements", gmcId)
@@ -210,12 +219,14 @@ public class PersonResourceTest2 {
   }
 
   @Test
-  public void unauthorisedExceptionThrownWhenUserCannotViewPlacementsUsingGmcIdNew() throws Exception {
+  public void unauthorisedExceptionThrownWhenUserCannotViewPlacementsUsingGmcIdNew()
+      throws Exception {
 
     String gmcId = "12345";
     long personId = 1L;
     when(personServiceMock.findIdByGmcId(gmcId)).thenReturn(personId);
-    doThrow(new AccessUnauthorisedException("")).when(personServiceMock).canLoggedInUserViewOrAmend(personId);
+    doThrow(new AccessUnauthorisedException("")).when(personServiceMock)
+        .canLoggedInUserViewOrAmend(personId);
 
     mockMvc.perform(
         get("/api/people/gmc/{gmcId}/placements/new", gmcId)
@@ -225,10 +236,12 @@ public class PersonResourceTest2 {
   }
 
   @Test
-  public void unauthorisedExceptionThrownWhenUserCannotViewPlacementsUsingPersonIdNew() throws Exception {
+  public void unauthorisedExceptionThrownWhenUserCannotViewPlacementsUsingPersonIdNew()
+      throws Exception {
 
     long personId = 1L;
-    doThrow(new AccessUnauthorisedException("")).when(personServiceMock).canLoggedInUserViewOrAmend(personId);
+    doThrow(new AccessUnauthorisedException("")).when(personServiceMock)
+        .canLoggedInUserViewOrAmend(personId);
 
     mockMvc.perform(
         get("/api/people/{id}/placements/new", personId)
@@ -243,7 +256,8 @@ public class PersonResourceTest2 {
     long personId = 1L;
     PersonV2DTO foundPerson = new PersonV2DTO();
 
-    when(personServiceMock.findPersonV2WithProgrammeMembershipsSorted(personId)).thenReturn(foundPerson);
+    when(personServiceMock.findPersonV2WithProgrammeMembershipsSorted(personId))
+        .thenReturn(foundPerson);
 
     mockMvc.perform(get("/api/people/v2/{id}", personId)
         .contentType(TestUtil.APPLICATION_JSON_UTF8))
@@ -269,7 +283,8 @@ public class PersonResourceTest2 {
     ArrayList<PersonViewDTO> content = Lists.newArrayList(foundPerson1, foundPerson2);
     Page<PersonViewDTO> searchResults = new PageImpl<>(content, pageable, 2);
 
-    when(personElasticSearchServiceMock.findPeopleOnProgramme(programmeId, searchQuery, pageable)).thenReturn(searchResults);
+    when(personElasticSearchServiceMock.findPeopleOnProgramme(programmeId, searchQuery, pageable))
+        .thenReturn(searchResults);
 
     mockMvc.perform(get("/api/programme/{id}/people?page=0&size=100&searchQuery=john", programmeId)
         .contentType(MediaType.APPLICATION_JSON_UTF8))

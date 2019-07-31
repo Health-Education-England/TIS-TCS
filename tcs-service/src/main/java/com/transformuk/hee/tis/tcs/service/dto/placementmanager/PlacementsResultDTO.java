@@ -5,6 +5,7 @@ import java.util.List;
 import java.util.Objects;
 
 public class PlacementsResultDTO implements Serializable {
+
   private List<SpecialtyDTO> specialties;
   private Integer totalSpecialties;
   private Integer totalSites;
@@ -44,8 +45,12 @@ public class PlacementsResultDTO implements Serializable {
 
   @Override
   public boolean equals(Object o) {
-    if (this == o) return true;
-    if (o == null || getClass() != o.getClass()) return false;
+    if (this == o) {
+      return true;
+    }
+    if (o == null || getClass() != o.getClass()) {
+      return false;
+    }
     PlacementsResultDTO that = (PlacementsResultDTO) o;
     return Objects.equals(specialties, that.specialties) &&
         Objects.equals(totalSpecialties, that.totalSpecialties) &&

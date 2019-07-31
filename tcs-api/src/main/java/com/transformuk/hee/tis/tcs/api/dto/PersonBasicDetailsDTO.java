@@ -2,7 +2,8 @@ package com.transformuk.hee.tis.tcs.api.dto;
 
 
 /**
- * Holds basic details for a person. This is useful when needing to display name and gmc number in the UI
+ * Holds basic details for a person. This is useful when needing to display name and gmc number in
+ * the UI
  */
 public class PersonBasicDetailsDTO {
 

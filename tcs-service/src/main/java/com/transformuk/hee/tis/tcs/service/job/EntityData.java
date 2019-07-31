@@ -1,6 +1,7 @@
 package com.transformuk.hee.tis.tcs.service.job;
 
 public class EntityData {
+
   private Long entityId;
   private Long otherId;
 

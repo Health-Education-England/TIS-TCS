@@ -2,16 +2,14 @@ package com.transformuk.hee.tis.tcs.service.api.decorator;
 
 import com.transformuk.hee.tis.tcs.api.dto.PlacementViewDTO;
 import com.transformuk.hee.tis.tcs.service.model.PersonBasicDetails;
-import org.apache.commons.lang.StringUtils;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.stereotype.Component;
-
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
 import java.util.concurrent.CompletableFuture;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Component;
 
 /**
  * Used to decorate the Placement View list with labels such as grade and site labels
@@ -25,7 +23,7 @@ public class PlacementViewDecorator {
 
   @Autowired
   public PlacementViewDecorator(AsyncReferenceService referenceService,
-                                PersonBasicDetailsRepositoryAccessor personBasicDetailsRepository) {
+      PersonBasicDetailsRepositoryAccessor personBasicDetailsRepository) {
     this.referenceService = referenceService;
     this.personBasicDetailsRepository = personBasicDetailsRepository;
   }
@@ -53,8 +51,8 @@ public class PlacementViewDecorator {
     });
 
     CompletableFuture<Void> futures = CompletableFuture.allOf(
-            decorateGradesOnPlacement(gradeIds, placementViews),
-            decorateSitesOnPlacement(siteIds, placementViews));
+        decorateGradesOnPlacement(gradeIds, placementViews),
+        decorateSitesOnPlacement(siteIds, placementViews));
 
     decorateTraineeName(traineeIds, placementViews);
 
@@ -63,7 +61,8 @@ public class PlacementViewDecorator {
     return placementViews;
   }
 
-  protected CompletableFuture<Void> decorateGradesOnPlacement(Set<Long> ids, List<PlacementViewDTO> placementViewDTOS) {
+  protected CompletableFuture<Void> decorateGradesOnPlacement(Set<Long> ids,
+      List<PlacementViewDTO> placementViewDTOS) {
     return referenceService.doWithGradesAsync(ids, gradeMap -> {
       for (PlacementViewDTO pv : placementViewDTOS) {
         if (pv.getGradeId() != null && gradeMap.containsKey(pv.getGradeId())) {
@@ -74,7 +73,8 @@ public class PlacementViewDecorator {
     });
   }
 
-  protected CompletableFuture<Void> decorateSitesOnPlacement(Set<Long> ids, List<PlacementViewDTO> placementViewDTOS) {
+  protected CompletableFuture<Void> decorateSitesOnPlacement(Set<Long> ids,
+      List<PlacementViewDTO> placementViewDTOS) {
     return referenceService.doWithSitesAsync(ids, siteMap -> {
       for (PlacementViewDTO pv : placementViewDTOS) {
         if (pv.getSiteId() != null && siteMap.containsKey(pv.getSiteId())) {
@@ -85,7 +85,8 @@ public class PlacementViewDecorator {
     });
   }
 
-  protected void decorateTraineeName(Set<Long> traineeIds, List<PlacementViewDTO> placementViewDTOS) {
+  protected void decorateTraineeName(Set<Long> traineeIds,
+      List<PlacementViewDTO> placementViewDTOS) {
     personBasicDetailsRepository.doWithPersonBasicDetailsSet(traineeIds, detailsMap -> {
       for (PlacementViewDTO pv : placementViewDTOS) {
         Long traineeId = pv.getTraineeId();
@@ -93,7 +94,8 @@ public class PlacementViewDecorator {
           PersonBasicDetails bd = detailsMap.get(pv.getTraineeId());
           pv.setTraineeFirstName(bd.getFirstName());
           pv.setTraineeLastName(bd.getLastName());
-          pv.setTraineeGmcNumber(bd.getGmcDetails() != null ? bd.getGmcDetails().getGmcNumber() : null);
+          pv.setTraineeGmcNumber(
+              bd.getGmcDetails() != null ? bd.getGmcDetails().getGmcNumber() : null);
         }
       }
     });

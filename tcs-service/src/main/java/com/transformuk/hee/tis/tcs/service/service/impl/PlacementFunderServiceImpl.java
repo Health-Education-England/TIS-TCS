@@ -5,14 +5,13 @@ import com.transformuk.hee.tis.tcs.service.model.PlacementFunder;
 import com.transformuk.hee.tis.tcs.service.repository.PlacementFunderRepository;
 import com.transformuk.hee.tis.tcs.service.service.PlacementFunderService;
 import com.transformuk.hee.tis.tcs.service.service.mapper.PlacementFunderMapper;
+import java.util.List;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
-
-import java.util.List;
 
 /**
  * Service Implementation for managing PlacementFunder.
@@ -27,7 +26,8 @@ public class PlacementFunderServiceImpl implements PlacementFunderService {
 
   private final PlacementFunderMapper placementFunderMapper;
 
-  public PlacementFunderServiceImpl(PlacementFunderRepository placementFunderRepository, PlacementFunderMapper placementFunderMapper) {
+  public PlacementFunderServiceImpl(PlacementFunderRepository placementFunderRepository,
+      PlacementFunderMapper placementFunderMapper) {
     this.placementFunderRepository = placementFunderRepository;
     this.placementFunderMapper = placementFunderMapper;
   }
@@ -41,7 +41,8 @@ public class PlacementFunderServiceImpl implements PlacementFunderService {
   @Override
   public PlacementFunderDTO save(PlacementFunderDTO placementFunderDTO) {
     log.debug("Request to save PlacementFunder : {}", placementFunderDTO);
-    PlacementFunder placementFunder = placementFunderMapper.placementFunderDTOToPlacementFunder(placementFunderDTO);
+    PlacementFunder placementFunder = placementFunderMapper
+        .placementFunderDTOToPlacementFunder(placementFunderDTO);
     placementFunder = placementFunderRepository.save(placementFunder);
     return placementFunderMapper.placementFunderToPlacementFunderDTO(placementFunder);
   }
@@ -55,7 +56,8 @@ public class PlacementFunderServiceImpl implements PlacementFunderService {
   @Override
   public List<PlacementFunderDTO> save(List<PlacementFunderDTO> placementFunderDTO) {
     log.debug("Request to save PlacementFunder : {}", placementFunderDTO);
-    List<PlacementFunder> placementFunders = placementFunderMapper.placementFunderDTOsToPlacementFunders(placementFunderDTO);
+    List<PlacementFunder> placementFunders = placementFunderMapper
+        .placementFunderDTOsToPlacementFunders(placementFunderDTO);
     placementFunders = placementFunderRepository.saveAll(placementFunders);
     return placementFunderMapper.placementFundersToPlacementFunderDTOs(placementFunders);
   }

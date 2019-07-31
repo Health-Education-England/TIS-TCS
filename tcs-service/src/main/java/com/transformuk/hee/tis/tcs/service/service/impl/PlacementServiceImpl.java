@@ -156,7 +156,7 @@ public class PlacementServiceImpl implements PlacementService {
   public PlacementDetailsDTO createDetails(final PlacementDetailsDTO placementDetailsDTO) {
     log.debug("Request to create Placement : {}", placementDetailsDTO);
     PlacementDetails placementDetails = placementDetailsMapper
-      .placementDetailsDTOToPlacementDetails(placementDetailsDTO);
+        .placementDetailsDTOToPlacementDetails(placementDetailsDTO);
     updateStoredCommentsWithChangesOrAdd(placementDetails);
     if (placementDetails.getId() == null) {
       placementDetails.setAddedDate(LocalDateTime.now(clock));
@@ -165,7 +165,7 @@ public class PlacementServiceImpl implements PlacementService {
     }
     Set<PlacementSiteDTO> siteDTOsInPlacementDTO = placementDetailsDTO.getSites();
     Set<PlacementSite> siteModels = new HashSet<>();
-    for(PlacementSiteDTO placementSiteDTO : siteDTOsInPlacementDTO){
+    for (PlacementSiteDTO placementSiteDTO : siteDTOsInPlacementDTO) {
       PlacementSite placementSite = placementSiteMapper.toEntity(placementSiteDTO);
       placementSite.setPlacement(placementDetails);
       siteModels.add(placementSite);
@@ -174,16 +174,16 @@ public class PlacementServiceImpl implements PlacementService {
     placementDetails = placementDetailsRepository.saveAndFlush(placementDetails);
 
     final Set<PlacementSpecialty> placementSpecialties = linkPlacementSpecialties(
-      placementDetailsDTO, placementDetails);
+        placementDetailsDTO, placementDetails);
     final PlacementDetailsDTO placementDetailsDTO1 = placementDetailsMapper
-      .placementDetailsToPlacementDetailsDTO(placementDetails);
+        .placementDetailsToPlacementDetailsDTO(placementDetails);
     placementDetailsDTO1.setSpecialties(placementSpecialtyMapper.toDTOs(placementSpecialties));
     handleEsrNewPlacementNotification(placementDetailsDTO, placementDetails);
 
     saveSupervisors(placementDetailsDTO.getSupervisors(), placementDetails.getId());
 
     Set<PlacementSiteDTO> sitesToReturnToFE = new HashSet<>();
-    for(PlacementSite placementSite : siteModels){
+    for (PlacementSite placementSite : siteModels) {
       PlacementSiteDTO placementSiteDTO = placementSiteMapper.toDto(placementSite);
       placementSiteDTO.setPlacementId(placementSite.getPlacement().getId());
       sitesToReturnToFE.add(placementSiteDTO);
@@ -197,7 +197,7 @@ public class PlacementServiceImpl implements PlacementService {
     Set<Comment> commentsToPersist = new HashSet<>();
 
     Optional<Comment> optionalLatestComment = commentRepository
-      .findFirstByPlacementIdOrderByAmendedDateDesc(placementDetails.getId());
+        .findFirstByPlacementIdOrderByAmendedDateDesc(placementDetails.getId());
     Comment latestComment = optionalLatestComment.orElse(new Comment());
 
     if (CollectionUtils.isNotEmpty(placementDetails.getComments())) {
@@ -214,16 +214,16 @@ public class PlacementServiceImpl implements PlacementService {
 
   @Override
   public boolean isEligibleForChangedDatesNotification(PlacementDetailsDTO updatedPlacementDetails,
-    Placement existingPlacement) {
+      Placement existingPlacement) {
 
     if (existingPlacement != null && updatedPlacementDetails != null &&
-      isEligibleForNotification(existingPlacement, updatedPlacementDetails)) {
+        isEligibleForNotification(existingPlacement, updatedPlacementDetails)) {
       Optional<Post> optionalExistingPlacementPost = postRepository
-        .findPostByPlacementHistoryId(existingPlacement.getId());
+          .findPostByPlacementHistoryId(existingPlacement.getId());
 
       log.debug("Change in hire or end date. Marking for notification : npn {} ",
-        optionalExistingPlacementPost.isPresent() ? optionalExistingPlacementPost.get()
-          .getNationalPostNumber() : null);
+          optionalExistingPlacementPost.isPresent() ? optionalExistingPlacementPost.get()
+              .getNationalPostNumber() : null);
       return true;
     }
     return false;
@@ -231,17 +231,17 @@ public class PlacementServiceImpl implements PlacementService {
 
   @Override
   public void handleChangeOfPlacementDatesEsrNotification(
-    PlacementDetailsDTO updatedPlacementDetails, Placement placementBeforeUpdate,
-    boolean currentPlacementEdit) {
+      PlacementDetailsDTO updatedPlacementDetails, Placement placementBeforeUpdate,
+      boolean currentPlacementEdit) {
 
     if (placementBeforeUpdate != null && updatedPlacementDetails != null) {
       // create NOT1 type record. Current and next trainee details for the post number.
       // Create NOT4 type record
       log.debug("Change in hire or end date. Marking for notification : {} ",
-        placementBeforeUpdate.getPost().getNationalPostNumber());
+          placementBeforeUpdate.getPost().getNationalPostNumber());
       try {
         esrNotificationService.loadChangeOfPlacementDatesNotification(updatedPlacementDetails,
-          placementBeforeUpdate.getPost().getNationalPostNumber(), currentPlacementEdit);
+            placementBeforeUpdate.getPost().getNationalPostNumber(), currentPlacementEdit);
       } catch (final Exception e) {
         log.error("Error loading Change of Placement Dates Notification : ", e);
       }
@@ -255,7 +255,7 @@ public class PlacementServiceImpl implements PlacementService {
 
     //clear any linked specialties before trying to save the placement
     final Placement placement = placementRepository.findById(placementDetailsDTO.getId())
-      .orElse(null);
+        .orElse(null);
     //Instead of batch delete we need to unlink specialties from placement one by one
     Set<PlacementSpecialty> specialties = placement.getSpecialties();
     for (PlacementSpecialty specialty : specialties) {
@@ -263,7 +263,7 @@ public class PlacementServiceImpl implements PlacementService {
     }
     specialties.removeAll(specialties);
     PlacementDetails placementDetails = placementDetailsMapper
-      .placementDetailsDTOToPlacementDetails(placementDetailsDTO);
+        .placementDetailsDTOToPlacementDetails(placementDetailsDTO);
     updateStoredCommentsWithChangesOrAdd(placementDetails);
 
     placement.setSpecialties(new HashSet<>());
@@ -275,18 +275,18 @@ public class PlacementServiceImpl implements PlacementService {
 
   @Transactional
   protected Set<PlacementSpecialty> linkPlacementSpecialties(
-    final PlacementDetailsDTO placementDetailsDTO, final PlacementDetails placementDetails) {
+      final PlacementDetailsDTO placementDetailsDTO, final PlacementDetails placementDetails) {
     final Placement placement = placementRepository.findById(placementDetails.getId()).orElse(null);
     final Set<PlacementSpecialty> placementSpecialties = Sets.newHashSet();
     if (CollectionUtils.isNotEmpty(placementDetailsDTO.getSpecialties())) {
       for (final PlacementSpecialtyDTO placementSpecialtyDTO : placementDetailsDTO
-        .getSpecialties()) {
+          .getSpecialties()) {
         final PlacementSpecialty placementSpecialty = new PlacementSpecialty();
         placementSpecialty.setPlacement(placement);
         placementSpecialty.setSpecialty(
-          specialtyRepository.findById(placementSpecialtyDTO.getSpecialtyId()).orElse(null));
+            specialtyRepository.findById(placementSpecialtyDTO.getSpecialtyId()).orElse(null));
         placementSpecialty
-          .setPlacementSpecialtyType(placementSpecialtyDTO.getPlacementSpecialtyType());
+            .setPlacementSpecialtyType(placementSpecialtyDTO.getPlacementSpecialtyType());
         placementSpecialties.add(placementSpecialty);
       }
     }
@@ -314,8 +314,8 @@ public class PlacementServiceImpl implements PlacementService {
     List<PlacementDTO> placementDTOS = convertPlacements(placements);
 
     placementDTO.stream()
-      .map(PlacementSavedEvent::new)
-      .forEach(applicationEventPublisher::publishEvent);
+        .map(PlacementSavedEvent::new)
+        .forEach(applicationEventPublisher::publishEvent);
 
     return placementDTOS;
   }
@@ -361,16 +361,16 @@ public class PlacementServiceImpl implements PlacementService {
       MapSqlParameterSource specialtiesParamSource = new MapSqlParameterSource();
       specialtiesParamSource.addValue("id", id);
       final List<PlacementSpecialtyDTO> specialties = namedParameterJdbcTemplate
-        .query(query, specialtiesParamSource, new PlacementDetailSpecialtyRowMapper());
+          .query(query, specialtiesParamSource, new PlacementDetailSpecialtyRowMapper());
       placementDetailsDTO.setSpecialties(Sets.newHashSet(specialties));
 
       query = sqlQuerySupplier.getQuery(SqlQuerySupplier.PLACEMENT_SUPERVISOR);
       MapSqlParameterSource supervisorsParamSource = new MapSqlParameterSource();
       supervisorsParamSource.addValue("ids", id);
       final List<PlacementSupervisorDTO> supervisors = namedParameterJdbcTemplate
-        .query(query, supervisorsParamSource,
-          new PlacementDetailSupervisorRowMapper(new PersonRepositoryImpl.PersonLiteRowMapper(),
-            personLiteMapper));
+          .query(query, supervisorsParamSource,
+              new PlacementDetailSupervisorRowMapper(new PersonRepositoryImpl.PersonLiteRowMapper(),
+                  personLiteMapper));
       placementDetailsDTO.setSupervisors(Sets.newHashSet(supervisors));
     }
 
@@ -404,27 +404,27 @@ public class PlacementServiceImpl implements PlacementService {
     final Placement placementToDelete = placementRepository.findById(id).orElse(null);
     // Only future placements can be deleted.
     if (placementToDelete != null && placementToDelete.getDateFrom() != null && placementToDelete
-      .getDateFrom().isBefore(LocalDate.now(clock).plusWeeks(13))) {
+        .getDateFrom().isBefore(LocalDate.now(clock).plusWeeks(13))) {
       final List<EsrNotification> esrNotifications = esrNotificationService
-        .loadPlacementDeleteNotification(placementToDelete, allEsrNotifications);
+          .loadPlacementDeleteNotification(placementToDelete, allEsrNotifications);
       log.debug("Placement Delete: PERSISTING: {} EsrNotifications for post {} being deleted",
-        esrNotifications.size(), placementToDelete.getLocalPostNumber());
+          esrNotifications.size(), placementToDelete.getLocalPostNumber());
       esrNotificationService.save(esrNotifications);
       log.debug("Placement Delete: PERSISTED: {} EsrNotifications for post {} being deleted",
-        esrNotifications.size(), placementToDelete.getLocalPostNumber());
+          esrNotifications.size(), placementToDelete.getLocalPostNumber());
     }
   }
 
   private Map<String, Placement> getPlacementsByIntrepidId(
-    final List<PlacementDTO> placementDtoList) {
+      final List<PlacementDTO> placementDtoList) {
     final Set<String> placementIntrepidIds = placementDtoList.stream()
-      .map(PlacementDTO::getIntrepidId).collect(Collectors.toSet());
+        .map(PlacementDTO::getIntrepidId).collect(Collectors.toSet());
     final Set<Placement> placementsFound = placementRepository
-      .findByIntrepidIdIn(placementIntrepidIds);
+        .findByIntrepidIdIn(placementIntrepidIds);
     Map<String, Placement> result = Maps.newHashMap();
     if (CollectionUtils.isNotEmpty(placementsFound)) {
       result = placementsFound.stream().collect(
-        Collectors.toMap(Placement::getIntrepidId, post -> post)
+          Collectors.toMap(Placement::getIntrepidId, post -> post)
       );
     }
     return result;
@@ -434,29 +434,29 @@ public class PlacementServiceImpl implements PlacementService {
   public List<PlacementDTO> patchPlacementSpecialties(final List<PlacementDTO> placementDTOList) {
     final List<Placement> placements = Lists.newArrayList();
     final Map<String, Placement> intrepidIdToPlacement = getPlacementsByIntrepidId(
-      placementDTOList);
+        placementDTOList);
 
     final Set<Long> specialtyIds = placementDTOList
-      .stream()
-      .map(PlacementDTO::getSpecialties)
-      .flatMap(Collection::stream)
-      .map(PlacementSpecialtyDTO::getSpecialtyId)
-      .collect(Collectors.toSet());
+        .stream()
+        .map(PlacementDTO::getSpecialties)
+        .flatMap(Collection::stream)
+        .map(PlacementSpecialtyDTO::getSpecialtyId)
+        .collect(Collectors.toSet());
 
     final Map<Long, Specialty> idToSpecialty = specialtyRepository.findAllById(specialtyIds)
-      .stream().collect(Collectors.toMap(Specialty::getId, sp -> sp));
+        .stream().collect(Collectors.toMap(Specialty::getId, sp -> sp));
     for (final PlacementDTO dto : placementDTOList) {
       final Placement placement = intrepidIdToPlacement.get(dto.getIntrepidId());
       if (placement != null) {
         final Set<PlacementSpecialty> attachedSpecialties = placement.getSpecialties();
         final Set<Long> attachedSpecialtyIds = attachedSpecialties.stream()
-          .map(ps -> ps.getSpecialty().getId()).collect(Collectors.toSet());
+            .map(ps -> ps.getSpecialty().getId()).collect(Collectors.toSet());
         for (final PlacementSpecialtyDTO placementSpecialtyDTO : dto.getSpecialties()) {
           final Specialty specialty = idToSpecialty.get(placementSpecialtyDTO.getSpecialtyId());
           if (specialty != null && !attachedSpecialtyIds.contains(specialty.getId())) {
             final PlacementSpecialty placementSpecialty = new PlacementSpecialty();
             placementSpecialty
-              .setPlacementSpecialtyType(placementSpecialtyDTO.getPlacementSpecialtyType());
+                .setPlacementSpecialtyType(placementSpecialtyDTO.getPlacementSpecialtyType());
             placementSpecialty.setPlacement(placement);
             placementSpecialty.setSpecialty(specialty);
             attachedSpecialties.add(placementSpecialty);
@@ -488,18 +488,18 @@ public class PlacementServiceImpl implements PlacementService {
    * Get all placement details by given column filters.
    *
    * @param columnFilterJson column filters represented in json object
-   * @param pageable the pagination information
+   * @param pageable         the pagination information
    * @return the list of entities
    */
   @Override
   @Transactional(readOnly = true)
   public Page<PlacementDetailsDTO> findFilteredPlacements(final String columnFilterJson,
-    final Pageable pageable) throws IOException {
+      final Pageable pageable) throws IOException {
 
     log.debug("Request to get all Revalidations filtered by columns {}", columnFilterJson);
     final List<Class> filterEnumList = Collections.emptyList();
     final List<ColumnFilter> columnFilters = ColumnFilterUtil
-      .getColumnFilters(columnFilterJson, filterEnumList);
+        .getColumnFilters(columnFilterJson, filterEnumList);
 
     final List<Specification<PlacementDetails>> specs = new ArrayList<>();
 
@@ -509,13 +509,13 @@ public class PlacementServiceImpl implements PlacementService {
         if (TCSDateColumns.contains(cf.getName())) {
           if (cf.getValues().isEmpty() || cf.getValues().size() != 2) {
             throw new DateRangeColumnFilterException(
-              "Invalid values or no values supplied for date range column filter");
+                "Invalid values or no values supplied for date range column filter");
           }
           specs.add(isBetween(
-            cf.getName(),
-            getLocalDateFromString(cf.getValues().get(0).toString()),
-            getLocalDateFromString(cf.getValues().get(1).toString())
-            )
+              cf.getName(),
+              getLocalDateFromString(cf.getValues().get(0).toString()),
+              getLocalDateFromString(cf.getValues().get(1).toString())
+              )
           );
         } else {
           specs.add(in(cf.getName(), Collections.unmodifiableCollection(cf.getValues())));
@@ -550,7 +550,7 @@ public class PlacementServiceImpl implements PlacementService {
   @Transactional(readOnly = true)
   @Override
   public List<PlacementSummaryDTO> getPlacementForTrainee(final Long traineeId,
-    String traineeRole) {
+      String traineeRole) {
     final String query = sqlQuerySupplier.getQuery(SqlQuerySupplier.TRAINEE_PLACEMENT_SUMMARY);
     List<PlacementSummaryDTO> resultList;
 
@@ -558,17 +558,17 @@ public class PlacementServiceImpl implements PlacementService {
     params.put("traineeId", traineeId);
     resultList = namedParameterJdbcTemplate.query(query, params, new PlacementRowMapper());
     resultList
-      .forEach(p -> p.setPlacementStatus(getPlacementStatus(p.getDateFrom(), p.getDateTo())));
+        .forEach(p -> p.setPlacementStatus(getPlacementStatus(p.getDateFrom(), p.getDateTo())));
     resultList = filterPlacements(resultList);
 
     if (org.apache.commons.lang3.StringUtils.containsIgnoreCase(traineeRole, PLACEHOLDER_ROLE_NAME)
-      && CollectionUtils.isNotEmpty(resultList)) {
+        && CollectionUtils.isNotEmpty(resultList)) {
       long now = new Date().getTime();
       resultList = resultList.stream()
-        .filter(Objects::nonNull)
-        .filter(p -> p.getDateTo() != null)
-        .filter(p -> now < p.getDateTo().getTime())
-        .collect(Collectors.toList());
+          .filter(Objects::nonNull)
+          .filter(p -> p.getDateTo() != null)
+          .filter(p -> now < p.getDateTo().getTime())
+          .collect(Collectors.toList());
     }
 
     return resultList;
@@ -585,7 +585,7 @@ public class PlacementServiceImpl implements PlacementService {
     PlacementRowMapper placementRowMapper = new PlacementRowMapper();
     resultList = namedParameterJdbcTemplate.query(query, params, placementRowMapper);
     resultList
-      .forEach(p -> p.setPlacementStatus(getPlacementStatus(p.getDateFrom(), p.getDateTo())));
+        .forEach(p -> p.setPlacementStatus(getPlacementStatus(p.getDateFrom(), p.getDateTo())));
     resultList = filterPlacements(resultList);
 
     if (CollectionUtils.isNotEmpty(resultList) && resultList.size() > 1000) {
@@ -607,8 +607,8 @@ public class PlacementServiceImpl implements PlacementService {
       HashMap<String, Object> params = Maps.newHashMap();
       params.put("ids", placement.getId());
       List<PlacementSupervisorDTO> supervisors = namedParameterJdbcTemplate.query(query, params,
-        new PlacementDetailSupervisorRowMapper(new PersonRepositoryImpl.PersonLiteRowMapper(),
-          personLiteMapper));
+          new PlacementDetailSupervisorRowMapper(new PersonRepositoryImpl.PersonLiteRowMapper(),
+              personLiteMapper));
       HashMap<Long, List<PlacementSupervisorDTO>> placementToSupervisor = Maps.newHashMap();
       placementToSupervisor.put(placement.getId(), supervisors);
       return placementMapper.placementToPlacementDTO(placement, placementToSupervisor);
@@ -632,13 +632,13 @@ public class PlacementServiceImpl implements PlacementService {
   private List<PlacementDTO> convertPlacements(List<Placement> placements) {
     if (CollectionUtils.isNotEmpty(placements)) {
       Set<Long> placementIds = placements.stream().map(Placement::getId)
-        .collect(Collectors.toSet());
+          .collect(Collectors.toSet());
       String query = sqlQuerySupplier.getQuery(SqlQuerySupplier.PLACEMENT_SUPERVISOR);
       HashMap<String, Object> params = Maps.newHashMap();
       params.put("ids", placementIds);
       List<PlacementSupervisorDTO> supervisors = namedParameterJdbcTemplate.query(query, params,
-        new PlacementDetailSupervisorRowMapper(new PersonRepositoryImpl.PersonLiteRowMapper(),
-          personLiteMapper));
+          new PlacementDetailSupervisorRowMapper(new PersonRepositoryImpl.PersonLiteRowMapper(),
+              personLiteMapper));
       Map<Long, List<PlacementSupervisorDTO>> placementToSupervisors = new HashMap<>();
       for (PlacementSupervisorDTO supervisor : supervisors) {
         if (!placementToSupervisors.containsKey(supervisor.getPlacementId())) {
@@ -646,7 +646,7 @@ public class PlacementServiceImpl implements PlacementService {
         }
 
         List<PlacementSupervisorDTO> placementSupervisorDTOS = placementToSupervisors
-          .get(supervisor.getPlacementId());
+            .get(supervisor.getPlacementId());
         placementSupervisorDTOS.add(supervisor);
       }
 
@@ -666,13 +666,14 @@ public class PlacementServiceImpl implements PlacementService {
 
       final Long placementId = placementSummaryDTO.getPlacementId();
       if (!idsToPlacementSummary.containsKey(placementId) ||
-        PostSpecialtyType.PRIMARY.name().equals(placementSummaryDTO.getPlacementSpecialtyType())) {
+          PostSpecialtyType.PRIMARY.name()
+              .equals(placementSummaryDTO.getPlacementSpecialtyType())) {
         idsToPlacementSummary.put(placementId, placementSummaryDTO);
       }
     }
 
     List<PlacementSummaryDTO> placementSummaryDTOS = Lists
-      .newArrayList(idsToPlacementSummary.values());
+        .newArrayList(idsToPlacementSummary.values());
 
     placementSummaryDTOS.sort(new Comparator<PlacementSummaryDTO>() {
       @Override
@@ -705,37 +706,39 @@ public class PlacementServiceImpl implements PlacementService {
   }
 
   private boolean isEligibleForNotification(final Placement currentPlacement,
-    final PlacementDetailsDTO updatedPlacementDetails) {
+      final PlacementDetailsDTO updatedPlacementDetails) {
     // I really do not like this null checks :-( but keeping it to work around the data from intrepid
     return
-      ((currentPlacement.getDateFrom() != null && !currentPlacement.getDateFrom()
-        .equals(updatedPlacementDetails.getDateFrom())) ||
-        (currentPlacement.getDateTo() != null && !currentPlacement.getDateTo()
-          .equals(updatedPlacementDetails.getDateTo()))) &&
-        ((currentPlacement.getDateFrom() != null && currentPlacement.getDateFrom()
-          .isBefore(LocalDate.now(clock).plusWeeks(13))) ||
-          (updatedPlacementDetails.getDateFrom() != null && updatedPlacementDetails.getDateFrom()
-            .isBefore(LocalDate.now(clock).plusWeeks(13))));
+        ((currentPlacement.getDateFrom() != null && !currentPlacement.getDateFrom()
+            .equals(updatedPlacementDetails.getDateFrom())) ||
+            (currentPlacement.getDateTo() != null && !currentPlacement.getDateTo()
+                .equals(updatedPlacementDetails.getDateTo()))) &&
+            ((currentPlacement.getDateFrom() != null && currentPlacement.getDateFrom()
+                .isBefore(LocalDate.now(clock).plusWeeks(13))) ||
+                (updatedPlacementDetails.getDateFrom() != null && updatedPlacementDetails
+                    .getDateFrom()
+                    .isBefore(LocalDate.now(clock).plusWeeks(13))));
   }
 
   private void handleEsrNewPlacementNotification(final PlacementDetailsDTO placementDetailsDTO,
-    final PlacementDetails placementDetails) {
+      final PlacementDetails placementDetails) {
 
     log.debug("Handling ESR notifications for new placement creation for deanery number {}",
-      placementDetailsDTO.getLocalPostNumber());
+        placementDetailsDTO.getLocalPostNumber());
     if (placementDetailsDTO.getId() == null) {
       try {
         final Placement savedPlacement = placementRepository.findById(placementDetails.getId())
-          .orElse(null);
+            .orElse(null);
         if (savedPlacement.getDateFrom() != null && savedPlacement.getDateFrom()
-          .isBefore(LocalDate.now(clock).plusWeeks(13))) {
+            .isBefore(LocalDate.now(clock).plusWeeks(13))) {
           log.debug("Creating ESR notification for new placement creation for deanery number {}",
-            savedPlacement.getPost().getNationalPostNumber());
+              savedPlacement.getPost().getNationalPostNumber());
           final List<EsrNotification> esrNotifications = esrNotificationService
-            .handleNewPlacementEsrNotification(savedPlacement);
+              .handleNewPlacementEsrNotification(savedPlacement);
           log
-            .debug("CREATED: ESR {} notifications for new placement creation for deanery number {}",
-              esrNotifications.size(), savedPlacement.getPost().getNationalPostNumber());
+              .debug(
+                  "CREATED: ESR {} notifications for new placement creation for deanery number {}",
+                  esrNotifications.size(), savedPlacement.getPost().getNationalPostNumber());
         }
       } catch (final Exception e) {
         // Ideally it should fail the entire update. Keeping the impact minimal for TCS and go live and revisit after go live.
@@ -746,13 +749,13 @@ public class PlacementServiceImpl implements PlacementService {
   }
 
   private void saveSupervisors(final Set<PlacementSupervisorDTO> supervisorDTOs,
-    final Long placementId) {
+      final Long placementId) {
     placementSupervisorRepository.deleteAllByIdPlacementId(placementId);
 
     final Set<PlacementSupervisor> supervisors = new HashSet<>();
 
     supervisorDTOs.forEach(s -> supervisors
-      .add(new PlacementSupervisor(placementId, s.getPerson().getId(), s.getType())));
+        .add(new PlacementSupervisor(placementId, s.getPerson().getId(), s.getType())));
 
     placementSupervisorRepository.saveAll(supervisors);
   }

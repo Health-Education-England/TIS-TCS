@@ -1,16 +1,16 @@
 package com.transformuk.hee.tis.tcs.service.model;
 
+import java.io.Serializable;
+import java.time.LocalDate;
 import javax.persistence.Entity;
 import javax.persistence.GeneratedValue;
 import javax.persistence.GenerationType;
 import javax.persistence.Id;
 import javax.persistence.Table;
-import java.io.Serializable;
-import java.time.LocalDate;
 
 /**
- * Holds the data from the EsrNotification table necessary to populate the
- * {@link com.transformuk.hee.tis.tcs.api.dto.EsrNotificationDTO}
+ * Holds the data from the EsrNotification table necessary to populate the {@link
+ * com.transformuk.hee.tis.tcs.api.dto.EsrNotificationDTO}
  */
 
 @Entity
@@ -309,7 +309,8 @@ public class EsrNotification implements Serializable {
     return replacementTraineeCurrentPlacementVpd;
   }
 
-  public void setReplacementTraineeCurrentPlacementVpd(String replacementTraineeCurrentPlacementVpd) {
+  public void setReplacementTraineeCurrentPlacementVpd(
+      String replacementTraineeCurrentPlacementVpd) {
     this.replacementTraineeCurrentPlacementVpd = replacementTraineeCurrentPlacementVpd;
   }
 
@@ -317,7 +318,8 @@ public class EsrNotification implements Serializable {
     return replacementTraineeProjectedHireDate;
   }
 
-  public void setReplacementTraineeProjectedHireDate(LocalDate replacementTraineeProjectedHireDate) {
+  public void setReplacementTraineeProjectedHireDate(
+      LocalDate replacementTraineeProjectedHireDate) {
     this.replacementTraineeProjectedHireDate = replacementTraineeProjectedHireDate;
   }
 

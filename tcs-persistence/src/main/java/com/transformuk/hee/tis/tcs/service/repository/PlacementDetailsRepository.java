@@ -7,6 +7,7 @@ import org.springframework.data.jpa.repository.JpaSpecificationExecutor;
 /**
  * Spring Data JPA repository for the Placement entity.
  */
-public interface PlacementDetailsRepository extends JpaRepository<PlacementDetails, Long>, JpaSpecificationExecutor<PlacementDetails> {
+public interface PlacementDetailsRepository extends JpaRepository<PlacementDetails, Long>,
+    JpaSpecificationExecutor<PlacementDetails> {
 
 }

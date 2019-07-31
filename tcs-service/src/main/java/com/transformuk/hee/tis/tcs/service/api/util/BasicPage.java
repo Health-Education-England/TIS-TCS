@@ -1,8 +1,7 @@
 package com.transformuk.hee.tis.tcs.service.api.util;
 
-import org.springframework.data.domain.Pageable;
-
 import java.util.List;
+import org.springframework.data.domain.Pageable;
 
 public class BasicPage<T> {
 

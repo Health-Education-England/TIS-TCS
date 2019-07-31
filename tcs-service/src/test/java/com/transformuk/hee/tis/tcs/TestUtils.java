@@ -1,15 +1,14 @@
 package com.transformuk.hee.tis.tcs;
 
 
+import static org.mockito.internal.util.collections.Sets.newSet;
+
 import com.transformuk.hee.tis.security.model.AuthenticatedUser;
 import com.transformuk.hee.tis.security.model.Trust;
 import com.transformuk.hee.tis.security.model.UserProfile;
+import java.util.Set;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.context.SecurityContextHolder;
-
-import java.util.Set;
-
-import static org.mockito.internal.util.collections.Sets.newSet;
 
 public class TestUtils {
 
@@ -17,7 +16,8 @@ public class TestUtils {
     UserProfile userProfile = new UserProfile();
     userProfile.setUserName(userName);
     userProfile.setDesignatedBodyCodes(newSet(designatedBodyCodes));
-    AuthenticatedUser authenticatedUser = new AuthenticatedUser(userName, "dummyToekn", userProfile, null);
+    AuthenticatedUser authenticatedUser = new AuthenticatedUser(userName, "dummyToekn", userProfile,
+        null);
     UsernamePasswordAuthenticationToken authenticationToken = new
         UsernamePasswordAuthenticationToken(authenticatedUser, null);
 
@@ -28,7 +28,8 @@ public class TestUtils {
     UserProfile userProfile = new UserProfile();
     userProfile.setUserName(userName);
     userProfile.setPermissions(permissions);
-    AuthenticatedUser authenticatedUser = new AuthenticatedUser(userName, "dummyToken", userProfile, null);
+    AuthenticatedUser authenticatedUser = new AuthenticatedUser(userName, "dummyToken", userProfile,
+        null);
     UsernamePasswordAuthenticationToken authenticationToken = new
         UsernamePasswordAuthenticationToken(authenticatedUser, null);
 
@@ -39,7 +40,8 @@ public class TestUtils {
     UserProfile userProfile = new UserProfile();
     userProfile.setUserName(userName);
     userProfile.setAssignedTrusts(trusts);
-    AuthenticatedUser authenticatedUser = new AuthenticatedUser(userName, "dummyToken", userProfile, null);
+    AuthenticatedUser authenticatedUser = new AuthenticatedUser(userName, "dummyToken", userProfile,
+        null);
     UsernamePasswordAuthenticationToken authenticationToken = new
         UsernamePasswordAuthenticationToken(authenticatedUser, null);
 

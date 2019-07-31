@@ -1,8 +1,7 @@
 package com.transformuk.hee.tis.tcs.service.event;
 
-import org.springframework.context.ApplicationEvent;
-
 import java.util.Objects;
+import org.springframework.context.ApplicationEvent;
 
 public class PlacementDeletedEvent extends ApplicationEvent {
 
@@ -25,8 +24,12 @@ public class PlacementDeletedEvent extends ApplicationEvent {
 
   @Override
   public boolean equals(Object o) {
-    if (this == o) return true;
-    if (o == null || getClass() != o.getClass()) return false;
+    if (this == o) {
+      return true;
+    }
+    if (o == null || getClass() != o.getClass()) {
+      return false;
+    }
     PlacementDeletedEvent that = (PlacementDeletedEvent) o;
     return Objects.equals(placementId, that.placementId) &&
         Objects.equals(personId, that.personId);

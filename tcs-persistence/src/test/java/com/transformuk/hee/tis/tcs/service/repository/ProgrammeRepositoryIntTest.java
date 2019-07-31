@@ -6,6 +6,7 @@ import com.transformuk.hee.tis.tcs.service.model.Curriculum;
 import com.transformuk.hee.tis.tcs.service.model.Person;
 import com.transformuk.hee.tis.tcs.service.model.Programme;
 import com.transformuk.hee.tis.tcs.service.model.ProgrammeMembership;
+import java.util.List;
 import org.assertj.core.util.Lists;
 import org.junit.Assert;
 import org.junit.Before;
@@ -15,8 +16,6 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.test.context.junit4.SpringRunner;
 import org.springframework.transaction.annotation.Transactional;
-
-import java.util.List;
 
 @RunWith(SpringRunner.class)
 @SpringBootTest(classes = TestConfig.class)
@@ -77,8 +76,10 @@ public class ProgrammeRepositoryIntTest {
     //no duplicate programmes - this would have 3 if we didn't have the distinct
     Assert.assertEquals(2, result.size());
 
-    Assert.assertEquals(1, result.stream().filter(p -> p.getId().equals(programme1.getId())).count());
-    Assert.assertEquals(1, result.stream().filter(p -> p.getId().equals(programme2.getId())).count());
+    Assert
+        .assertEquals(1, result.stream().filter(p -> p.getId().equals(programme1.getId())).count());
+    Assert
+        .assertEquals(1, result.stream().filter(p -> p.getId().equals(programme2.getId())).count());
   }
 
 
@@ -94,7 +95,8 @@ public class ProgrammeRepositoryIntTest {
     programme.setCurricula(Sets.newHashSet(curriculum));
     programme = testObj.saveAndFlush(programme);
 
-    boolean result = testObj.programmeCurriculumAssociationExists(programme.getId(), curriculum.getId());
+    boolean result = testObj
+        .programmeCurriculumAssociationExists(programme.getId(), curriculum.getId());
 
     Assert.assertTrue(result);
   }

@@ -4,15 +4,14 @@ import com.transformuk.hee.tis.tcs.api.dto.validation.Create;
 import com.transformuk.hee.tis.tcs.api.dto.validation.Update;
 import com.transformuk.hee.tis.tcs.api.enumeration.SpecialtyType;
 import com.transformuk.hee.tis.tcs.api.enumeration.Status;
-import org.hibernate.validator.constraints.NotBlank;
-
+import java.io.Serializable;
+import java.util.Objects;
+import java.util.Set;
 import javax.validation.constraints.DecimalMin;
 import javax.validation.constraints.NotNull;
 import javax.validation.constraints.Null;
 import javax.validation.constraints.Size;
-import java.io.Serializable;
-import java.util.Objects;
-import java.util.Set;
+import org.hibernate.validator.constraints.NotBlank;
 
 /**
  * A DTO for the Specialty entity.
@@ -39,7 +38,8 @@ public class SpecialtyDTO implements Serializable {
   private SpecialtyGroupDTO specialtyGroup;
 
   @NotBlank(groups = {Create.class, Update.class}, message = "Name cannot be blank")
-  @Size(groups = {Create.class, Update.class}, min = 1, max = 100, message = "Name cannot be less than 1 and more than 100 characters")
+  @Size(groups = {Create.class,
+      Update.class}, min = 1, max = 100, message = "Name cannot be less than 1 and more than 100 characters")
   private String name;
 
   public Long getId() {

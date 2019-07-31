@@ -1,14 +1,13 @@
 package com.transformuk.hee.tis.tcs.service.repository;
 
 import com.transformuk.hee.tis.tcs.service.model.Placement;
-import org.springframework.data.jpa.repository.JpaRepository;
-import org.springframework.data.jpa.repository.Query;
-import org.springframework.data.repository.query.Param;
-
 import java.time.LocalDate;
 import java.util.List;
 import java.util.Optional;
 import java.util.Set;
+import org.springframework.data.jpa.repository.JpaRepository;
+import org.springframework.data.jpa.repository.Query;
+import org.springframework.data.repository.query.Param;
 
 /**
  * Spring Data JPA repository for the Placement entity.
@@ -23,7 +22,8 @@ public interface PlacementRepository extends JpaRepository<Placement, Long> {
   @Query(value =
       "SELECT pl.* FROM Placement pl WHERE postId IN " +
           "(" +
-          "SELECT DISTINCT postId FROM Placement pl2 WHERE pl2.dateFrom = :fromDate AND pl2.placementType IN " +
+          "SELECT DISTINCT postId FROM Placement pl2 WHERE pl2.dateFrom = :fromDate AND pl2.placementType IN "
+          +
           "(:placementTypes)" +
           ") AND (pl.dateFrom = :fromDate OR pl.dateTo = :toDate)", nativeQuery = true)
   List<Placement> findPlacementsWithTraineesStartingOnTheDayAndFinishingOnPreviousDay(
@@ -50,7 +50,8 @@ public interface PlacementRepository extends JpaRepository<Placement, Long> {
       "SELECT * FROM Placement AS p WHERE p.postId NOT IN(" +
           "SELECT p1.postId FROM Placement p1 WHERE p1.dateTo > :asOfDate) " +
           "AND p.dateTo = :asOfDate", nativeQuery = true)
-  List<Placement> findPlacementsForPostsWithoutAnyCurrentOrFuturePlacements(@Param("asOfDate") LocalDate asOfDate);
+  List<Placement> findPlacementsForPostsWithoutAnyCurrentOrFuturePlacements(
+      @Param("asOfDate") LocalDate asOfDate);
 
   @Query(value = "SELECT pl.* FROM Placement AS pl WHERE " +
       "pl.placementType IN (:placementTypes)" +
@@ -68,33 +69,39 @@ public interface PlacementRepository extends JpaRepository<Placement, Long> {
       @Param("deaneryNumbers") List<String> deaneryNumbers,
       @Param("placementTypes") List<String> placementTypes);
 
-  @Query(value = "SELECT pl.* FROM Placement pl WHERE pl.placementType IN (:placementTypes) AND postId IN " +
-      "(SELECT id FROM Post WHERE nationalPostNumber IN (:deaneryNumbers))" +
-      "AND (dateFrom >= :futureStartDate AND dateFrom < :futureEndDate)", nativeQuery = true)
+  @Query(value =
+      "SELECT pl.* FROM Placement pl WHERE pl.placementType IN (:placementTypes) AND postId IN " +
+          "(SELECT id FROM Post WHERE nationalPostNumber IN (:deaneryNumbers))" +
+          "AND (dateFrom >= :futureStartDate AND dateFrom < :futureEndDate)", nativeQuery = true)
   List<Placement> findFuturePlacementsForPosts(
       @Param("futureStartDate") LocalDate futureStartDate,
       @Param("futureEndDate") LocalDate futureEndDate,
       @Param("deaneryNumbers") List<String> deaneryNumbers,
       @Param("placementTypes") List<String> placementTypes);
 
-  @Query(value = "SELECT pl.* FROM Placement pl WHERE pl.placementType IN (:placementTypes) AND postId IN " +
-      "(SELECT id FROM Post WHERE nationalPostNumber IN (:deaneryNumbers))" +
-      "AND (dateFrom <= :asOfDate AND dateTo >= :asOfDate)", nativeQuery = true)
+  @Query(value =
+      "SELECT pl.* FROM Placement pl WHERE pl.placementType IN (:placementTypes) AND postId IN " +
+          "(SELECT id FROM Post WHERE nationalPostNumber IN (:deaneryNumbers))" +
+          "AND (dateFrom <= :asOfDate AND dateTo >= :asOfDate)", nativeQuery = true)
   List<Placement> findCurrentPlacementsForPosts(
       @Param("asOfDate") LocalDate asOfDate,
       @Param("deaneryNumbers") List<String> deaneryNumbers,
       @Param("placementTypes") List<String> placementTypes);
 
 
-  @Query(value = "select pl.* from Placement pl where traineeId = :traineeId and pl.placementType IN (:placementTypes) " +
-      "and dateFrom <= :currentDate and dateTo > :currentDate", nativeQuery = true)
+  @Query(value =
+      "select pl.* from Placement pl where traineeId = :traineeId and pl.placementType IN (:placementTypes) "
+          +
+          "and dateFrom <= :currentDate and dateTo > :currentDate", nativeQuery = true)
   List<Placement> findCurrentPlacementForTrainee(
       @Param("traineeId") Long traineeId,
       @Param("currentDate") LocalDate currentDate,
       @Param("placementTypes") List<String> placementTypes);
 
-  @Query(value = "select pl.* from Placement pl where traineeId = :traineeId and pl.placementType IN (:placementTypes) " +
-      "and dateFrom >= :startDateFrom and dateFrom <= :startDateTo", nativeQuery = true)
+  @Query(value =
+      "select pl.* from Placement pl where traineeId = :traineeId and pl.placementType IN (:placementTypes) "
+          +
+          "and dateFrom >= :startDateFrom and dateFrom <= :startDateTo", nativeQuery = true)
   List<Placement> findFuturePlacementForTrainee(
       @Param("traineeId") Long traineeId,
       @Param("startDateFrom") LocalDate startDateFrom,
@@ -123,8 +130,8 @@ public interface PlacementRepository extends JpaRepository<Placement, Long> {
   Set<Placement> findPlacementsByPostIds(@Param("postIds") Set<Long> postIds);
 
   /**
-   * Use this method to get the placement by id as most of the time when getting a placement we also want to get the
-   * post
+   * Use this method to get the placement by id as most of the time when getting a placement we also
+   * want to get the post
    *
    * @param id the id of the placement
    * @return optional of the placement

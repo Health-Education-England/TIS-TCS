@@ -88,6 +88,7 @@ import org.springframework.transaction.annotation.Transactional;
 @RunWith(SpringRunner.class)
 @SpringBootTest(classes = Application.class)
 public class PostResourceIntTest {
+
   private static final String SPECIALTY_INTREPID_ID = "SPECIALTY INTREPID ID";
   private static final String PROGRAMME_INTREPID_ID = "programme intrepid id";
   private static final String POST_INTREPID_ID = "post intrepid id";
@@ -172,13 +173,14 @@ public class PostResourceIntTest {
   /**
    * Create an entity for this test.
    * <p>
-   * This is a static method, as tests for other entities might also need it,
-   * if they test an entity which requires the current entity.
+   * This is a static method, as tests for other entities might also need it, if they test an entity
+   * which requires the current entity.
    */
-  public static Post linkEntities(Post post, Set<PostSite> sites, Set<PostGrade> grades, Set<PostSpecialty> specialties) {
+  public static Post linkEntities(Post post, Set<PostSite> sites, Set<PostGrade> grades,
+      Set<PostSpecialty> specialties) {
     post.sites(sites)
-      .grades(grades)
-      .specialties(specialties);
+        .grades(grades)
+        .specialties(specialties);
     return post;
   }
 
@@ -205,7 +207,8 @@ public class PostResourceIntTest {
     return specialty;
   }
 
-  public static PostSpecialty createPostSpecialty(Specialty specialty, PostSpecialtyType postSpecialtyType, Post post) {
+  public static PostSpecialty createPostSpecialty(Specialty specialty,
+      PostSpecialtyType postSpecialtyType, Post post) {
     PostSpecialty postSpecialty = new PostSpecialty();
     postSpecialty.setPostSpecialtyType(postSpecialtyType);
     postSpecialty.setSpecialty(specialty);
@@ -241,7 +244,8 @@ public class PostResourceIntTest {
   @Before
   public void setup() {
     MockitoAnnotations.initMocks(this);
-    PostResource postResource = new PostResource(postService, postValidator, placementViewRepository, placementViewDecorator,
+    PostResource postResource = new PostResource(postService, postValidator,
+        placementViewRepository, placementViewDecorator,
         placementViewMapper, placementService, placementSummaryDecorator);
     this.restPostMockMvc = MockMvcBuilders.standaloneSetup(postResource)
         .setCustomArgumentResolvers(pageableArgumentResolver)
@@ -260,7 +264,8 @@ public class PostResourceIntTest {
     postGrade = createPostGrade(GRADE_ID, PostGradeType.APPROVED, post);
     postSite = createPostSite(SITE_ID, PostSiteType.PRIMARY, post);
     postSpecialty = createPostSpecialty(specialty, PostSpecialtyType.PRIMARY, post);
-    post = linkEntities(post, Sets.newHashSet(postSite), Sets.newHashSet(postGrade), Sets.newHashSet(postSpecialty));
+    post = linkEntities(post, Sets.newHashSet(postSite), Sets.newHashSet(postGrade),
+        Sets.newHashSet(postSpecialty));
     em.persist(post);
     programme = createProgramme();
     em.persist(programme);
@@ -289,8 +294,10 @@ public class PostResourceIntTest {
     post.setStatus(Status.CURRENT);
     postRepository.saveAndFlush(post);
     String colFilters = new URLCodec().encode("{\"status\":[\"CURRENT\"]}");
-    restPostMockMvc.perform(get("/api/posts?page=0&size=100&sort=nationalPostNumber,asc&sort=id&columnFilters=" + colFilters)
-        .contentType(TestUtil.APPLICATION_JSON_UTF8))
+    restPostMockMvc.perform(
+        get("/api/posts?page=0&size=100&sort=nationalPostNumber,asc&sort=id&columnFilters="
+            + colFilters)
+            .contentType(TestUtil.APPLICATION_JSON_UTF8))
         .andExpect(jsonPath("$.[*].nationalPostNumber").value(TEST_POST_NUMBER))
         .andExpect(jsonPath("$.[*].fundingType").value(contains("TRUST, TARIFF")));
   }
@@ -334,10 +341,10 @@ public class PostResourceIntTest {
     postDTO.setId(-1L);
     //when & then
     restPostMockMvc.perform(post("/api/posts")
-          .contentType(TestUtil.APPLICATION_JSON_UTF8)
-          .content(TestUtil.convertObjectToJsonBytes(postDTO)))
-          .andExpect(status().isBadRequest())
-          .andExpect(jsonPath("$.message").value("error.validation"))
+        .contentType(TestUtil.APPLICATION_JSON_UTF8)
+        .content(TestUtil.convertObjectToJsonBytes(postDTO)))
+        .andExpect(status().isBadRequest())
+        .andExpect(jsonPath("$.message").value("error.validation"))
         .andExpect(jsonPath("$.fieldErrors[0].field").value("id"));
   }
 
@@ -355,8 +362,10 @@ public class PostResourceIntTest {
     specialtyRepository.saveAndFlush(firstSpeciality);
     Specialty secondSpeciality = createSpecialty();
     specialtyRepository.saveAndFlush(secondSpeciality);
-    PostSpecialty firstPostSpecialty = createPostSpecialty(firstSpeciality, PostSpecialtyType.OTHER, updatedPost);
-    PostSpecialty secondPostSpecialty = createPostSpecialty(secondSpeciality, PostSpecialtyType.OTHER, updatedPost);
+    PostSpecialty firstPostSpecialty = createPostSpecialty(firstSpeciality, PostSpecialtyType.OTHER,
+        updatedPost);
+    PostSpecialty secondPostSpecialty = createPostSpecialty(secondSpeciality,
+        PostSpecialtyType.OTHER, updatedPost);
     updatedPost.setSpecialties(Sets.newHashSet(firstPostSpecialty, secondPostSpecialty));
     PostDTO postDTO = postMapper.postToPostDTO(updatedPost);
     //when & then
@@ -365,7 +374,8 @@ public class PostResourceIntTest {
         .content(TestUtil.convertObjectToJsonBytes(postDTO)))
         .andExpect(status().isOk());
     Post dbUpdatedPost = postRepository.findById(post.getId()).orElse(null);
-    assertThat(dbUpdatedPost.getSpecialties().iterator().next().getPostSpecialtyType()).isEqualTo(PostSpecialtyType.OTHER);
+    assertThat(dbUpdatedPost.getSpecialties().iterator().next().getPostSpecialtyType())
+        .isEqualTo(PostSpecialtyType.OTHER);
   }
 
   @Test
@@ -394,7 +404,8 @@ public class PostResourceIntTest {
         .andExpect(status().isOk())
         .andExpect(content().contentType(MediaType.APPLICATION_JSON_UTF8_VALUE))
         .andExpect(jsonPath("$.[*].id").value(hasItem(post.getId().intValue())))
-        .andExpect(jsonPath("$.[*].nationalPostNumber").value(hasItem(DEFAULT_NATIONAL_POST_NUMBER)))
+        .andExpect(
+            jsonPath("$.[*].nationalPostNumber").value(hasItem(DEFAULT_NATIONAL_POST_NUMBER)))
         .andExpect(jsonPath("$.[*].status").value(hasItem(DEFAULT_STATUS.toString().toUpperCase())))
         .andExpect(jsonPath("$.[*].owner").value(hasItem(OWNER)));
   }
@@ -414,7 +425,8 @@ public class PostResourceIntTest {
         .andExpect(jsonPath("$", hasSize(databaseSize))) // checking the size of the post
         .andExpect(content().contentType(MediaType.APPLICATION_JSON_UTF8_VALUE))
         .andExpect(jsonPath("$.[*].id").value(hasItem(post.getId().intValue())))
-        .andExpect(jsonPath("$.[*].nationalPostNumber").value(hasItem(DEFAULT_NATIONAL_POST_NUMBER)))
+        .andExpect(
+            jsonPath("$.[*].nationalPostNumber").value(hasItem(DEFAULT_NATIONAL_POST_NUMBER)))
         .andExpect(jsonPath("$.[*].status").value(hasItem(DEFAULT_STATUS.toString().toUpperCase())))
         .andExpect(jsonPath("$.[*].owner").value(hasItem(OWNER)))
         .andExpect(jsonPath("$.[*].owner").value(hasItem(OWNER_NORTH_EAST)));
@@ -445,7 +457,8 @@ public class PostResourceIntTest {
         .andExpect(content().contentType(MediaType.APPLICATION_JSON_UTF8_VALUE))
         .andExpect(jsonPath("$.[*].id").value(hasItem(post.getId().intValue())))
         .andExpect(jsonPath("$.[*].nationalPostNumber").value(hasItem(TEST_POST_NUMBER)))
-        .andExpect(jsonPath("$.[*].status").value(hasItem(DEFAULT_STATUS.toString().toUpperCase())));
+        .andExpect(
+            jsonPath("$.[*].status").value(hasItem(DEFAULT_STATUS.toString().toUpperCase())));
   }
 
   @Test
@@ -458,7 +471,8 @@ public class PostResourceIntTest {
         .andExpect(content().contentType(MediaType.APPLICATION_JSON_UTF8_VALUE))
         .andExpect(jsonPath("$.[*].id").value(hasItem(post.getId().intValue())))
         .andExpect(jsonPath("$.[*].nationalPostNumber").value(hasItem(TEST_POST_NUMBER)))
-        .andExpect(jsonPath("$.[*].status").value(hasItem(DEFAULT_STATUS.toString().toUpperCase())));
+        .andExpect(
+            jsonPath("$.[*].status").value(hasItem(DEFAULT_STATUS.toString().toUpperCase())));
   }
 
   @Test
@@ -468,7 +482,8 @@ public class PostResourceIntTest {
     post.setStatus(Status.CURRENT);
     postRepository.saveAndFlush(post);
     String colFilters = new URLCodec().encode("{\"status\":[\"CURRENT\"]}");
-    restPostMockMvc.perform(get("/api/findByNationalPostNumber?searchQuery=TESTPOST&columnFilters=" + colFilters))
+    restPostMockMvc.perform(
+        get("/api/findByNationalPostNumber?searchQuery=TESTPOST&columnFilters=" + colFilters))
         .andExpect(status().isOk())
         .andExpect(content().contentType(MediaType.APPLICATION_JSON_UTF8_VALUE))
         .andExpect(jsonPath("$.[*].id").value(hasItem(post.getId().intValue())))
@@ -543,8 +558,9 @@ public class PostResourceIntTest {
   public void shouldFilterColumnsBySiteId() throws Exception {
     Long siteId = post.getSites().iterator().next().getSiteId();
     //when & then
-    String colFilters = new URLCodec().encode("{\"primarySiteId\":[\"" + siteId + "\"],\"owner\":[\"" +
-        OWNER + "\"]}");
+    String colFilters = new URLCodec()
+        .encode("{\"primarySiteId\":[\"" + siteId + "\"],\"owner\":[\"" +
+            OWNER + "\"]}");
     // Get all the programmeList
     restPostMockMvc.perform(get("/api/posts?sort=id,desc&columnFilters=" +
         colFilters))
@@ -558,8 +574,9 @@ public class PostResourceIntTest {
   public void shouldFilterColumnsByGradeId() throws Exception {
     Long gradeId = post.getGrades().iterator().next().getGradeId();
     //when & then
-    String colFilters = new URLCodec().encode("{\"approvedGradeId\":[\"" + gradeId + "\"],\"owner\":[\"" +
-        OWNER + "\"]}");
+    String colFilters = new URLCodec()
+        .encode("{\"approvedGradeId\":[\"" + gradeId + "\"],\"owner\":[\"" +
+            OWNER + "\"]}");
     // Get all the programmeList
     restPostMockMvc.perform(get("/api/posts?sort=id,desc&columnFilters=" +
         colFilters))
@@ -633,11 +650,13 @@ public class PostResourceIntTest {
     post.setOwner(OWNER);
     postRepository.saveAndFlush(post);
     // Get the post
-    restPostMockMvc.perform(get("/api/posts/in/{nationalPostNumbers}", URLEncoder.encode(nationalPostNumberWithSpecialCharacters, "UTF-8")))
+    restPostMockMvc.perform(get("/api/posts/in/{nationalPostNumbers}",
+        URLEncoder.encode(nationalPostNumberWithSpecialCharacters, "UTF-8")))
         .andExpect(status().isFound())
         .andExpect(content().contentType(MediaType.APPLICATION_JSON_UTF8_VALUE))
         .andExpect(jsonPath("$.[0].id").value(post.getId().intValue()))
-        .andExpect(jsonPath("$.[0].nationalPostNumber").value(nationalPostNumberWithSpecialCharacters))
+        .andExpect(
+            jsonPath("$.[0].nationalPostNumber").value(nationalPostNumberWithSpecialCharacters))
         .andExpect(jsonPath("$.[0].status").value(DEFAULT_STATUS.toString().toUpperCase()))
         .andExpect(jsonPath("$.[0].suffix").value(DEFAULT_SUFFIX.toString()))
         .andExpect(jsonPath("$.[0].owner").value(OWNER))
@@ -1052,8 +1071,10 @@ public class PostResourceIntTest {
         .andExpect(jsonPath("$").isArray())
         .andExpect(jsonPath("$.[*].specialties.[*].id").isArray())
         .andExpect(jsonPath("$.[*].specialties.[*].id").isNotEmpty())
-        .andExpect(jsonPath("$.[*].specialties.[*].specialty.id").value(hasItem(specialty.getId().intValue())))
-        .andExpect(jsonPath("$.[*].specialties.[*].postSpecialtyType").value(postSpecialtyDTO.getPostSpecialtyType().toString()));
+        .andExpect(jsonPath("$.[*].specialties.[*].specialty.id")
+            .value(hasItem(specialty.getId().intValue())))
+        .andExpect(jsonPath("$.[*].specialties.[*].postSpecialtyType")
+            .value(postSpecialtyDTO.getPostSpecialtyType().toString()));
     // Validate that both Post are still in the database
     List<Post> postList = postRepository.findAll();
     assertThat(postList).hasSize(expectedDatabaseSizeAfterBulkUpdate);
@@ -1119,17 +1140,18 @@ public class PostResourceIntTest {
 
     FundingTypeDTO fundingTypeDto = new FundingTypeDTO();
     fundingTypeDto.setLabel("Academic - Trust");
-    when(referenceService.findCurrentFundingTypesByLabelIn(Sets.newHashSet("Academic - Trust", "lalala")))
-      .thenReturn(Collections.singletonList(fundingTypeDto));
+    when(referenceService
+        .findCurrentFundingTypesByLabelIn(Sets.newHashSet("Academic - Trust", "lalala")))
+        .thenReturn(Collections.singletonList(fundingTypeDto));
 
     restPostMockMvc.perform(patch("/api/post/fundings")
-      .contentType(TestUtil.APPLICATION_JSON_UTF8)
-      .content(TestUtil.convertObjectToJsonBytes(postDTO)))
-      .andExpect(status().isOk())
-      .andExpect(jsonPath("$").isArray())
-      .andExpect(jsonPath("$.[0].messageList", hasSize(0)))
-      .andExpect(jsonPath("$.[1].messageList", hasSize(1)))
-      .andExpect(jsonPath("$.[1].messageList.[0]", is("funding type does not exist.")));
+        .contentType(TestUtil.APPLICATION_JSON_UTF8)
+        .content(TestUtil.convertObjectToJsonBytes(postDTO)))
+        .andExpect(status().isOk())
+        .andExpect(jsonPath("$").isArray())
+        .andExpect(jsonPath("$.[0].messageList", hasSize(0)))
+        .andExpect(jsonPath("$.[1].messageList", hasSize(1)))
+        .andExpect(jsonPath("$.[1].messageList.[0]", is("funding type does not exist.")));
   }
 
   @Test

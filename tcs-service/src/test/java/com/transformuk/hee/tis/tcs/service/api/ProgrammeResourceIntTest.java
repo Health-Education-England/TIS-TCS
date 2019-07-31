@@ -1,5 +1,16 @@
 package com.transformuk.hee.tis.tcs.service.api;
 
+import static org.assertj.core.api.Assertions.assertThat;
+import static org.hamcrest.Matchers.containsInAnyOrder;
+import static org.hamcrest.Matchers.hasItem;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.delete;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.put;
+import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.content;
+import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
+import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
+
 import com.google.common.collect.Lists;
 import com.google.common.collect.Sets;
 import com.transformuk.hee.tis.tcs.TestUtils;
@@ -14,6 +25,8 @@ import com.transformuk.hee.tis.tcs.service.repository.CurriculumRepository;
 import com.transformuk.hee.tis.tcs.service.repository.ProgrammeRepository;
 import com.transformuk.hee.tis.tcs.service.service.ProgrammeService;
 import com.transformuk.hee.tis.tcs.service.service.mapper.ProgrammeMapper;
+import java.util.List;
+import java.util.stream.Collectors;
 import org.apache.commons.codec.net.URLCodec;
 import org.junit.Before;
 import org.junit.Test;
@@ -28,15 +41,6 @@ import org.springframework.test.context.junit4.SpringRunner;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.setup.MockMvcBuilders;
 import org.springframework.transaction.annotation.Transactional;
-
-import java.util.List;
-import java.util.stream.Collectors;
-
-import static org.assertj.core.api.Assertions.assertThat;
-import static org.hamcrest.Matchers.containsInAnyOrder;
-import static org.hamcrest.Matchers.hasItem;
-import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.*;
-import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.*;
 
 /**
  * Test class for the ProgrammeResource REST controller.
@@ -92,8 +96,8 @@ public class ProgrammeResourceIntTest {
   /**
    * Create an entity for this test.
    * <p>
-   * This is a static method, as tests for other entities might also need it,
-   * if they test an entity which requires the current entity.
+   * This is a static method, as tests for other entities might also need it, if they test an entity
+   * which requires the current entity.
    */
   public static Programme createEntity() {
     return new Programme()
@@ -107,7 +111,8 @@ public class ProgrammeResourceIntTest {
   @Before
   public void setup() {
     MockitoAnnotations.initMocks(this);
-    ProgrammeResource programmeResource = new ProgrammeResource(programmeService, programmeValidator);
+    ProgrammeResource programmeResource = new ProgrammeResource(programmeService,
+        programmeValidator);
     this.restProgrammeMockMvc = MockMvcBuilders.standaloneSetup(programmeResource)
         .setCustomArgumentResolvers(pageableArgumentResolver)
         .setControllerAdvice(exceptionTranslator)
@@ -194,7 +199,8 @@ public class ProgrammeResourceIntTest {
 
   @Test
   @Transactional
-  public void shouldAllowProgrammeNumberContentsWhenCreatingNowAllCharactersAreAllowed() throws Exception {
+  public void shouldAllowProgrammeNumberContentsWhenCreatingNowAllCharactersAreAllowed()
+      throws Exception {
     //given
     ProgrammeDTO programmeDTO = programmeMapper.programmeToProgrammeDTO(createEntity());
     programmeDTO.setProgrammeNumber("#%$^&**(");
@@ -211,8 +217,10 @@ public class ProgrammeResourceIntTest {
   public void createProgrammeWithCurricula() throws Exception {
     int databaseSizeBeforeCreate = programmeRepository.findAll().size();
     Programme programme = createEntity();
-    Curriculum curriculum1 = curriculumRepository.saveAndFlush(CurriculumResourceIntTest.createCurriculumEntity());
-    Curriculum curriculum2 = curriculumRepository.saveAndFlush(CurriculumResourceIntTest.createCurriculumEntity());
+    Curriculum curriculum1 = curriculumRepository
+        .saveAndFlush(CurriculumResourceIntTest.createCurriculumEntity());
+    Curriculum curriculum2 = curriculumRepository
+        .saveAndFlush(CurriculumResourceIntTest.createCurriculumEntity());
     programme.setCurricula(Sets.newHashSet(curriculum1, curriculum2));
 
     // Create the Programme
@@ -232,7 +240,8 @@ public class ProgrammeResourceIntTest {
     assertThat(testProgramme.getProgrammeName()).isEqualTo(DEFAULT_PROGRAMME_NAME);
     assertThat(testProgramme.getProgrammeNumber()).isEqualTo(DEFAULT_PROGRAMME_NUMBER);
     assertThat(testProgramme.getCurricula().size()).isEqualTo(2);
-    assertThat(testProgramme.getCurricula().stream().map(Curriculum::getId).collect(Collectors.toSet())).
+    assertThat(
+        testProgramme.getCurricula().stream().map(Curriculum::getId).collect(Collectors.toSet())).
         containsAll(Sets.newHashSet(curriculum1.getId(), curriculum2.getId()));
   }
 
@@ -240,8 +249,10 @@ public class ProgrammeResourceIntTest {
   public void shouldComplainIfBadProgrammeWithCurriculaRequest() throws Exception {
     //given
     Programme programme = createEntity();
-    Curriculum curriculum1 = curriculumRepository.saveAndFlush(CurriculumResourceIntTest.createCurriculumEntity());
-    Curriculum curriculum2 = curriculumRepository.saveAndFlush(CurriculumResourceIntTest.createCurriculumEntity());
+    Curriculum curriculum1 = curriculumRepository
+        .saveAndFlush(CurriculumResourceIntTest.createCurriculumEntity());
+    Curriculum curriculum2 = curriculumRepository
+        .saveAndFlush(CurriculumResourceIntTest.createCurriculumEntity());
     curriculum1.setId(-1L);
     curriculum2.setId(-2L);
     programme.setCurricula(Sets.newHashSet(curriculum1, curriculum2));
@@ -260,8 +271,10 @@ public class ProgrammeResourceIntTest {
   public void bulkCreateProgrammeWithCurricula() throws Exception {
     int databaseSizeBeforeCreate = programmeRepository.findAll().size();
     Programme programme = createEntity();
-    Curriculum curriculum1 = curriculumRepository.saveAndFlush(CurriculumResourceIntTest.createCurriculumEntity());
-    Curriculum curriculum2 = curriculumRepository.saveAndFlush(CurriculumResourceIntTest.createCurriculumEntity());
+    Curriculum curriculum1 = curriculumRepository
+        .saveAndFlush(CurriculumResourceIntTest.createCurriculumEntity());
+    Curriculum curriculum2 = curriculumRepository
+        .saveAndFlush(CurriculumResourceIntTest.createCurriculumEntity());
     programme.setCurricula(Sets.newHashSet(curriculum1, curriculum2));
 
     // Create the Programme
@@ -269,7 +282,8 @@ public class ProgrammeResourceIntTest {
     ProgrammeDTO programmeDTO2 = programmeMapper.programmeToProgrammeDTO(programme);
     restProgrammeMockMvc.perform(post("/api/bulk-programmes")
         .contentType(TestUtil.APPLICATION_JSON_UTF8)
-        .content(TestUtil.convertObjectToJsonBytes(Lists.newArrayList(programmeDTO1, programmeDTO2))))
+        .content(
+            TestUtil.convertObjectToJsonBytes(Lists.newArrayList(programmeDTO1, programmeDTO2))))
         .andExpect(status().isOk());
 
     // Validate the Programme in the database
@@ -283,7 +297,8 @@ public class ProgrammeResourceIntTest {
     assertThat(testProgramme1.getProgrammeName()).isEqualTo(DEFAULT_PROGRAMME_NAME);
     assertThat(testProgramme1.getProgrammeNumber()).isEqualTo(DEFAULT_PROGRAMME_NUMBER);
     assertThat(testProgramme1.getCurricula().size()).isEqualTo(2);
-    assertThat(testProgramme1.getCurricula().stream().map(Curriculum::getId).collect(Collectors.toSet())).
+    assertThat(
+        testProgramme1.getCurricula().stream().map(Curriculum::getId).collect(Collectors.toSet())).
         containsAll(Sets.newHashSet(curriculum1.getId(), curriculum2.getId()));
 
     assertThat(testProgramme2.getStatus()).isEqualTo(DEFAULT_STATUS);
@@ -292,7 +307,8 @@ public class ProgrammeResourceIntTest {
     assertThat(testProgramme2.getProgrammeName()).isEqualTo(DEFAULT_PROGRAMME_NAME);
     assertThat(testProgramme2.getProgrammeNumber()).isEqualTo(DEFAULT_PROGRAMME_NUMBER);
     assertThat(testProgramme2.getCurricula().size()).isEqualTo(2);
-    assertThat(testProgramme2.getCurricula().stream().map(Curriculum::getId).collect(Collectors.toSet())).
+    assertThat(
+        testProgramme2.getCurricula().stream().map(Curriculum::getId).collect(Collectors.toSet())).
         containsAll(Sets.newHashSet(curriculum1.getId(), curriculum2.getId()));
   }
 
@@ -327,11 +343,11 @@ public class ProgrammeResourceIntTest {
         .andExpect(status().isOk())
         .andExpect(content().contentType(MediaType.APPLICATION_JSON_UTF8_VALUE))
         .andExpect(jsonPath("$.[*].id").value(hasItem(programme.getId().intValue())))
-      .andExpect(jsonPath("$.[*].intrepidId").value(hasItem(DEFAULT_INTREPID_ID)))
+        .andExpect(jsonPath("$.[*].intrepidId").value(hasItem(DEFAULT_INTREPID_ID)))
         .andExpect(jsonPath("$.[*].status").value(hasItem(DEFAULT_STATUS.toString().toUpperCase())))
-      .andExpect(jsonPath("$.[*].owner").value(hasItem(DEFAULT_OWNER)))
-      .andExpect(jsonPath("$.[*].programmeName").value(hasItem(DEFAULT_PROGRAMME_NAME)))
-      .andExpect(jsonPath("$.[*].programmeNumber").value(hasItem(DEFAULT_PROGRAMME_NUMBER)));
+        .andExpect(jsonPath("$.[*].owner").value(hasItem(DEFAULT_OWNER)))
+        .andExpect(jsonPath("$.[*].programmeName").value(hasItem(DEFAULT_PROGRAMME_NAME)))
+        .andExpect(jsonPath("$.[*].programmeNumber").value(hasItem(DEFAULT_PROGRAMME_NUMBER)));
   }
 
   @Test
@@ -345,11 +361,11 @@ public class ProgrammeResourceIntTest {
         .andExpect(status().isOk())
         .andExpect(content().contentType(MediaType.APPLICATION_JSON_UTF8_VALUE))
         .andExpect(jsonPath("$.[*].id").value(hasItem(programme.getId().intValue())))
-      .andExpect(jsonPath("$.[*].intrepidId").value(hasItem(DEFAULT_INTREPID_ID)))
+        .andExpect(jsonPath("$.[*].intrepidId").value(hasItem(DEFAULT_INTREPID_ID)))
         .andExpect(jsonPath("$.[*].status").value(hasItem(DEFAULT_STATUS.toString().toUpperCase())))
-      .andExpect(jsonPath("$.[*].owner").value(hasItem(DEFAULT_OWNER)))
-      .andExpect(jsonPath("$.[*].programmeName").value(hasItem(DEFAULT_PROGRAMME_NAME)))
-      .andExpect(jsonPath("$.[*].programmeNumber").value(hasItem(DEFAULT_PROGRAMME_NUMBER)));
+        .andExpect(jsonPath("$.[*].owner").value(hasItem(DEFAULT_OWNER)))
+        .andExpect(jsonPath("$.[*].programmeName").value(hasItem(DEFAULT_PROGRAMME_NAME)))
+        .andExpect(jsonPath("$.[*].programmeNumber").value(hasItem(DEFAULT_PROGRAMME_NUMBER)));
   }
 
   @Test
@@ -363,11 +379,11 @@ public class ProgrammeResourceIntTest {
         .andExpect(status().isOk())
         .andExpect(content().contentType(MediaType.APPLICATION_JSON_UTF8_VALUE))
         .andExpect(jsonPath("$.id").value(programme.getId().intValue()))
-      .andExpect(jsonPath("$.intrepidId").value(DEFAULT_INTREPID_ID))
+        .andExpect(jsonPath("$.intrepidId").value(DEFAULT_INTREPID_ID))
         .andExpect(jsonPath("$.status").value(DEFAULT_STATUS.toString().toUpperCase()))
-      .andExpect(jsonPath("$.owner").value(DEFAULT_OWNER))
-      .andExpect(jsonPath("$.programmeName").value(DEFAULT_PROGRAMME_NAME))
-      .andExpect(jsonPath("$.programmeNumber").value(DEFAULT_PROGRAMME_NUMBER));
+        .andExpect(jsonPath("$.owner").value(DEFAULT_OWNER))
+        .andExpect(jsonPath("$.programmeName").value(DEFAULT_PROGRAMME_NAME))
+        .andExpect(jsonPath("$.programmeNumber").value(DEFAULT_PROGRAMME_NUMBER));
   }
 
   @Test
@@ -417,9 +433,12 @@ public class ProgrammeResourceIntTest {
   public void updateProgrammeWithCurricula() throws Exception {
     // Initialize the database
     Programme programme = createEntity();
-    Curriculum curriculum1 = curriculumRepository.saveAndFlush(CurriculumResourceIntTest.createCurriculumEntity());
-    Curriculum curriculum2 = curriculumRepository.saveAndFlush(CurriculumResourceIntTest.createCurriculumEntity());
-    Curriculum curriculum3 = curriculumRepository.saveAndFlush(CurriculumResourceIntTest.createCurriculumEntity());
+    Curriculum curriculum1 = curriculumRepository
+        .saveAndFlush(CurriculumResourceIntTest.createCurriculumEntity());
+    Curriculum curriculum2 = curriculumRepository
+        .saveAndFlush(CurriculumResourceIntTest.createCurriculumEntity());
+    Curriculum curriculum3 = curriculumRepository
+        .saveAndFlush(CurriculumResourceIntTest.createCurriculumEntity());
     programme.setCurricula(Sets.newHashSet(curriculum1, curriculum2));
 
     programmeRepository.saveAndFlush(programme);
@@ -451,7 +470,8 @@ public class ProgrammeResourceIntTest {
     assertThat(testProgramme.getProgrammeName()).isEqualTo(UPDATED_PROGRAMME_NAME);
     assertThat(testProgramme.getProgrammeNumber()).isEqualTo(UPDATED_PROGRAMME_NUMBER);
     assertThat(testProgramme.getCurricula().size()).isEqualTo(2);
-    assertThat(testProgramme.getCurricula().stream().map(Curriculum::getId).collect(Collectors.toSet())).
+    assertThat(
+        testProgramme.getCurricula().stream().map(Curriculum::getId).collect(Collectors.toSet())).
         containsAll(Sets.newHashSet(curriculum2.getId(), curriculum3.getId()));
   }
 
@@ -460,9 +480,12 @@ public class ProgrammeResourceIntTest {
   public void bulkUpdateProgrammeWithCurricula() throws Exception {
     int databaseSizeBeforeCreate = programmeRepository.findAll().size();
     Programme programme1 = createEntity();
-    Curriculum curriculum1 = curriculumRepository.saveAndFlush(CurriculumResourceIntTest.createCurriculumEntity());
-    Curriculum curriculum2 = curriculumRepository.saveAndFlush(CurriculumResourceIntTest.createCurriculumEntity());
-    Curriculum curriculum3 = curriculumRepository.saveAndFlush(CurriculumResourceIntTest.createCurriculumEntity());
+    Curriculum curriculum1 = curriculumRepository
+        .saveAndFlush(CurriculumResourceIntTest.createCurriculumEntity());
+    Curriculum curriculum2 = curriculumRepository
+        .saveAndFlush(CurriculumResourceIntTest.createCurriculumEntity());
+    Curriculum curriculum3 = curriculumRepository
+        .saveAndFlush(CurriculumResourceIntTest.createCurriculumEntity());
     programme1.setCurricula(Sets.newHashSet(curriculum1, curriculum2));
     Programme programme2 = createEntity();
     programme1.setCurricula(Sets.newHashSet(curriculum2, curriculum3));
@@ -492,7 +515,8 @@ public class ProgrammeResourceIntTest {
     // Bulk update the Programmes
     restProgrammeMockMvc.perform(put("/api/bulk-programmes")
         .contentType(TestUtil.APPLICATION_JSON_UTF8)
-        .content(TestUtil.convertObjectToJsonBytes(Lists.newArrayList(programmeDTO1, programmeDTO2))))
+        .content(
+            TestUtil.convertObjectToJsonBytes(Lists.newArrayList(programmeDTO1, programmeDTO2))))
         .andExpect(status().isOk());
 
     // Validate the Programme in the database
@@ -506,7 +530,8 @@ public class ProgrammeResourceIntTest {
     assertThat(testProgramme1.getProgrammeName()).isEqualTo(UPDATED_PROGRAMME_NAME);
     assertThat(testProgramme1.getProgrammeNumber()).isEqualTo(UPDATED_PROGRAMME_NUMBER);
     assertThat(testProgramme1.getCurricula().size()).isEqualTo(1);
-    assertThat(testProgramme1.getCurricula().stream().map(Curriculum::getId).collect(Collectors.toSet())).
+    assertThat(
+        testProgramme1.getCurricula().stream().map(Curriculum::getId).collect(Collectors.toSet())).
         containsAll(Sets.newHashSet(curriculum2.getId()));
 
     assertThat(testProgramme2.getStatus()).isEqualTo(UPDATED_STATUS);
@@ -515,7 +540,8 @@ public class ProgrammeResourceIntTest {
     assertThat(testProgramme2.getProgrammeName()).isEqualTo(UPDATED_PROGRAMME_NAME);
     assertThat(testProgramme2.getProgrammeNumber()).isEqualTo(UPDATED_PROGRAMME_NUMBER);
     assertThat(testProgramme2.getCurricula().size()).isEqualTo(1);
-    assertThat(testProgramme2.getCurricula().stream().map(Curriculum::getId).collect(Collectors.toSet())).
+    assertThat(
+        testProgramme2.getCurricula().stream().map(Curriculum::getId).collect(Collectors.toSet())).
         containsAll(Sets.newHashSet(curriculum3.getId()));
   }
 
@@ -552,10 +578,10 @@ public class ProgrammeResourceIntTest {
         .andExpect(content().contentType(MediaType.APPLICATION_JSON_UTF8_VALUE))
         .andExpect(jsonPath("$.[*].id").value(hasItem(otherDeaneryProgramme.getId().intValue())))
         .andExpect(jsonPath("$.[*].status").value(hasItem(DEFAULT_STATUS.toString().toUpperCase())))
-      .andExpect(jsonPath("$.[*].intrepidId").value(hasItem(DEFAULT_INTREPID_ID)))
+        .andExpect(jsonPath("$.[*].intrepidId").value(hasItem(DEFAULT_INTREPID_ID)))
         .andExpect(jsonPath("$.[*].owner").value(hasItem("Health Education England West Midlands")))
-      .andExpect(jsonPath("$.[*].programmeName").value(hasItem(DEFAULT_PROGRAMME_NAME)))
-      .andExpect(jsonPath("$.[*].programmeNumber").value(hasItem(DEFAULT_PROGRAMME_NUMBER)));
+        .andExpect(jsonPath("$.[*].programmeName").value(hasItem(DEFAULT_PROGRAMME_NAME)))
+        .andExpect(jsonPath("$.[*].programmeNumber").value(hasItem(DEFAULT_PROGRAMME_NUMBER)));
   }
 
   @Test
@@ -617,8 +643,9 @@ public class ProgrammeResourceIntTest {
     String colFilters = new URLCodec().encode("{\"status\":[\"INACTIVE\"],\"owner\":[\"" +
         DEFAULT_OWNER + "\"]}");
     // Get all the programmeList
-    restProgrammeMockMvc.perform(get("/api/programmes?sort=id,desc&searchQuery=other&columnFilters=" +
-        colFilters))
+    restProgrammeMockMvc
+        .perform(get("/api/programmes?sort=id,desc&searchQuery=other&columnFilters=" +
+            colFilters))
         .andExpect(status().isOk())
         .andExpect(jsonPath("$.[*].status").value("INACTIVE"));
   }

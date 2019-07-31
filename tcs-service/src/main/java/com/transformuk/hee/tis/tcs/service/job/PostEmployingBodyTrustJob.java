@@ -4,6 +4,14 @@ import com.transformuk.hee.tis.tcs.service.model.Post;
 import com.transformuk.hee.tis.tcs.service.model.PostTrust;
 import com.transformuk.hee.tis.tcs.service.repository.PostTrustRepository;
 import com.transformuk.hee.tis.tcs.service.service.helper.SqlQuerySupplier;
+import java.math.BigInteger;
+import java.util.List;
+import java.util.Objects;
+import java.util.Set;
+import java.util.stream.Collectors;
+import javax.persistence.EntityManager;
+import javax.persistence.EntityManagerFactory;
+import javax.persistence.Query;
 import net.javacrumbs.shedlock.core.SchedulerLock;
 import org.apache.commons.collections4.CollectionUtils;
 import org.slf4j.Logger;
@@ -14,19 +22,12 @@ import org.springframework.jmx.export.annotation.ManagedResource;
 import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Component;
 
-import javax.persistence.EntityManager;
-import javax.persistence.EntityManagerFactory;
-import javax.persistence.Query;
-import java.math.BigInteger;
-import java.util.List;
-import java.util.Objects;
-import java.util.Set;
-import java.util.stream.Collectors;
-
 /**
- * This job runs on a daily basis and must be the first job that works on the PostTrust table as it truncates it at the beginning.
+ * This job runs on a daily basis and must be the first job that works on the PostTrust table as it
+ * truncates it at the beginning.
  * <p>
- * Its purpose is to clear down the PostTrust table then populate it with post ids and the linked employing body trust id
+ * Its purpose is to clear down the PostTrust table then populate it with post ids and the linked
+ * employing body trust id
  */
 @Component
 @ManagedResource(objectName = "tcs.mbean:name=PostEmployingBodyTrustJob",
@@ -75,13 +76,16 @@ public class PostEmployingBodyTrustJob extends TrustAdminSyncJobTemplate<PostTru
   }
 
   @Override
-  protected List<EntityData> collectData(int pageSize, long lastId, long lastEmployingBodyId, EntityManager entityManager) {
-    LOG.info("Querying with lastPostId: [{}] and lastEmployingBodyId: [{}]", lastId, lastEmployingBodyId);
+  protected List<EntityData> collectData(int pageSize, long lastId, long lastEmployingBodyId,
+      EntityManager entityManager) {
+    LOG.info("Querying with lastPostId: [{}] and lastEmployingBodyId: [{}]", lastId,
+        lastEmployingBodyId);
     String postEmployingBodyQuery = sqlQuerySupplier.getQuery(SqlQuerySupplier.POST_EMPLOYINGBODY);
 
-    Query query = entityManager.createNativeQuery(postEmployingBodyQuery).setParameter("lastId", lastId )
-                                                                         .setParameter("lastEmployingBodyId", lastEmployingBodyId)
-                                                                         .setParameter("pageSize", pageSize);
+    Query query = entityManager.createNativeQuery(postEmployingBodyQuery)
+        .setParameter("lastId", lastId)
+        .setParameter("lastEmployingBodyId", lastEmployingBodyId)
+        .setParameter("pageSize", pageSize);
 
     List<Object[]> resultList = query.getResultList();
     List<EntityData> result = resultList.stream().filter(Objects::nonNull).map(objArr -> {
@@ -96,7 +100,7 @@ public class PostEmployingBodyTrustJob extends TrustAdminSyncJobTemplate<PostTru
 
   @Override
   protected int convertData(int skipped, Set<PostTrust> entitiesToSave, List<EntityData> entityData,
-                            EntityManager entityManager) {
+      EntityManager entityManager) {
 
     if (CollectionUtils.isNotEmpty(entityData)) {
       for (EntityData ed : entityData) {

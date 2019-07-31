@@ -1,21 +1,20 @@
 package com.transformuk.hee.tis.tcs.service.model;
 
 import com.transformuk.hee.tis.tcs.api.enumeration.PlacementStatus;
-
+import java.io.Serializable;
+import java.time.LocalDate;
 import javax.persistence.Column;
 import javax.persistence.Entity;
 import javax.persistence.GeneratedValue;
 import javax.persistence.GenerationType;
 import javax.persistence.Id;
 import javax.persistence.Table;
-import java.io.Serializable;
-import java.time.LocalDate;
 
 /**
  * A Placement. Contains the fields necessary for presenting an item in a placement list.
  */
 @Entity
-@Table (name = "Placement")
+@Table(name = "Placement")
 public class PlacementView implements Serializable {
 
   private static final long serialVersionUID = 1L;
@@ -55,7 +54,6 @@ public class PlacementView implements Serializable {
   private String placementType;
 
   /**
-   *
    * @return the placement status based on dateFrom and dateTo
    */
   public PlacementStatus getStatus() {
@@ -162,23 +160,48 @@ public class PlacementView implements Serializable {
 
   @Override
   public boolean equals(Object o) {
-    if (this == o) return true;
-    if (o == null || getClass() != o.getClass()) return false;
+    if (this == o) {
+      return true;
+    }
+    if (o == null || getClass() != o.getClass()) {
+      return false;
+    }
 
     PlacementView that = (PlacementView) o;
 
-    if (id != null ? !id.equals(that.id) : that.id != null) return false;
-    if (traineeId != null ? !traineeId.equals(that.traineeId) : that.traineeId != null) return false;
-    if (intrepidId != null ? !intrepidId.equals(that.intrepidId) : that.intrepidId != null) return false;
-    if (postId != null ? !postId.equals(that.postId) : that.postId != null) return false;
-    if (siteId != null ? !siteId.equals(that.siteId) : that.siteId != null) return false;
-    if (siteCode != null ? !siteCode.equals(that.siteCode) : that.siteCode != null) return false;
-    if (gradeId != null ? !gradeId.equals(that.gradeId) : that.gradeId != null) return false;
-    if (gradeAbbreviation != null ? !gradeAbbreviation.equals(that.gradeAbbreviation) : that.gradeAbbreviation != null)
+    if (id != null ? !id.equals(that.id) : that.id != null) {
       return false;
-    if (dateFrom != null ? !dateFrom.equals(that.dateFrom) : that.dateFrom != null) return false;
-    if (dateTo != null ? !dateTo.equals(that.dateTo) : that.dateTo != null) return false;
-    return placementType != null ? placementType.equals(that.placementType) : that.placementType == null;
+    }
+    if (traineeId != null ? !traineeId.equals(that.traineeId) : that.traineeId != null) {
+      return false;
+    }
+    if (intrepidId != null ? !intrepidId.equals(that.intrepidId) : that.intrepidId != null) {
+      return false;
+    }
+    if (postId != null ? !postId.equals(that.postId) : that.postId != null) {
+      return false;
+    }
+    if (siteId != null ? !siteId.equals(that.siteId) : that.siteId != null) {
+      return false;
+    }
+    if (siteCode != null ? !siteCode.equals(that.siteCode) : that.siteCode != null) {
+      return false;
+    }
+    if (gradeId != null ? !gradeId.equals(that.gradeId) : that.gradeId != null) {
+      return false;
+    }
+    if (gradeAbbreviation != null ? !gradeAbbreviation.equals(that.gradeAbbreviation)
+        : that.gradeAbbreviation != null) {
+      return false;
+    }
+    if (dateFrom != null ? !dateFrom.equals(that.dateFrom) : that.dateFrom != null) {
+      return false;
+    }
+    if (dateTo != null ? !dateTo.equals(that.dateTo) : that.dateTo != null) {
+      return false;
+    }
+    return placementType != null ? placementType.equals(that.placementType)
+        : that.placementType == null;
   }
 
   @Override

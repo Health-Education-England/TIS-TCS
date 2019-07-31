@@ -7,6 +7,9 @@ import com.transformuk.hee.tis.reference.client.impl.ReferenceServiceImpl;
 import com.transformuk.hee.tis.tcs.api.dto.QualificationDTO;
 import com.transformuk.hee.tis.tcs.service.model.Qualification;
 import com.transformuk.hee.tis.tcs.service.repository.PersonRepository;
+import java.util.ArrayList;
+import java.util.List;
+import java.util.Map;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
@@ -15,13 +18,9 @@ import org.springframework.validation.BeanPropertyBindingResult;
 import org.springframework.validation.FieldError;
 import org.springframework.web.bind.MethodArgumentNotValidException;
 
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Map;
-
 /**
- * Holds more complex custom validation for a {@link Qualification} that
- * cannot be easily done via annotations
+ * Holds more complex custom validation for a {@link Qualification} that cannot be easily done via
+ * annotations
  */
 @Component
 public class QualificationValidator {
@@ -32,14 +31,16 @@ public class QualificationValidator {
   private ReferenceServiceImpl referenceService;
 
   @Autowired
-  public QualificationValidator(PersonRepository personRepository, ReferenceServiceImpl referenceService) {
+  public QualificationValidator(PersonRepository personRepository,
+      ReferenceServiceImpl referenceService) {
     this.personRepository = personRepository;
     this.referenceService = referenceService;
   }
 
   /**
-   * Custom validation on the qualificationDTO DTO, this is meant to supplement the annotation based validation
-   * already in place. It checks that the person, medical school and country of qualification.
+   * Custom validation on the qualificationDTO DTO, this is meant to supplement the annotation based
+   * validation already in place. It checks that the person, medical school and country of
+   * qualification.
    *
    * @param qualificationDTO the qualification to check
    * @throws MethodArgumentNotValidException if there are validation errors
@@ -52,7 +53,8 @@ public class QualificationValidator {
     fieldErrors.addAll(checkMedicalSchool(qualificationDTO));
     fieldErrors.addAll(checkCountryOfQualification(qualificationDTO));
     if (!fieldErrors.isEmpty()) {
-      BeanPropertyBindingResult bindingResult = new BeanPropertyBindingResult(qualificationDTO, QUALIFICATION_DTO_NAME);
+      BeanPropertyBindingResult bindingResult = new BeanPropertyBindingResult(qualificationDTO,
+          QUALIFICATION_DTO_NAME);
       fieldErrors.forEach(bindingResult::addError);
       throw new MethodArgumentNotValidException(null, bindingResult);
     }
@@ -63,10 +65,12 @@ public class QualificationValidator {
     // check the Person
     if (qualificationDTO.getPerson() == null || qualificationDTO.getPerson().getId() == null) {
       requireFieldErrors(fieldErrors, "person");
-    } else if (qualificationDTO.getPerson() != null && qualificationDTO.getPerson().getId() != null) {
+    } else if (qualificationDTO.getPerson() != null
+        && qualificationDTO.getPerson().getId() != null) {
       if (!personRepository.existsById(qualificationDTO.getPerson().getId())) {
         fieldErrors.add(new FieldError(QUALIFICATION_DTO_NAME, "person",
-            String.format("Person with id %d does not exist", qualificationDTO.getPerson().getId())));
+            String
+                .format("Person with id %d does not exist", qualificationDTO.getPerson().getId())));
       }
     }
     return fieldErrors;
@@ -79,7 +83,8 @@ public class QualificationValidator {
       List<String> medicalSchools = Lists.newArrayList(qualificationDTO.getMedicalSchool());
 
       if (!CollectionUtils.isEmpty(medicalSchools)) {
-        Map<String, Boolean> medicalSchoolExistsMap = referenceService.medicalSchoolsExists(medicalSchools);
+        Map<String, Boolean> medicalSchoolExistsMap = referenceService
+            .medicalSchoolsExists(medicalSchools);
         medicalSchoolExistsMap.forEach((k, v) -> {
           if (!v) {
             fieldErrors.add(new FieldError(QUALIFICATION_DTO_NAME, "medicalSchool",
@@ -97,10 +102,12 @@ public class QualificationValidator {
     List<FieldError> fieldErrors = new ArrayList<>();
     // check the CountryOfQualification
     if (StringUtils.isNotEmpty(qualificationDTO.getCountryOfQualification())) {
-      List<String> countryOfQualifications = Lists.newArrayList(qualificationDTO.getCountryOfQualification());
+      List<String> countryOfQualifications = Lists
+          .newArrayList(qualificationDTO.getCountryOfQualification());
 
       if (!CollectionUtils.isEmpty(countryOfQualifications)) {
-        Map<String, Boolean> countryOfQualificationsExistsMap = referenceService.countryExists(countryOfQualifications);
+        Map<String, Boolean> countryOfQualificationsExistsMap = referenceService
+            .countryExists(countryOfQualifications);
         countryOfQualificationsExistsMap.forEach((k, v) -> {
           if (!v) {
             fieldErrors.add(new FieldError(QUALIFICATION_DTO_NAME, "countryOfQualification",
@@ -117,10 +124,11 @@ public class QualificationValidator {
     List<FieldError> fieldErrors = new ArrayList<>();
     // then check the Gender
     if (StringUtils.isNotEmpty(qualificationDTO.getQualification())) {
-      Boolean isExists = referenceService.isValueExists(QualificationReferenceDTO.class, qualificationDTO.getQualification());
+      Boolean isExists = referenceService
+          .isValueExists(QualificationReferenceDTO.class, qualificationDTO.getQualification());
       if (!isExists) {
         fieldErrors.add(new FieldError(QUALIFICATION_DTO_NAME, "qualification",
-                String.format("qualification %s does not exist", qualificationDTO.getQualification())));
+            String.format("qualification %s does not exist", qualificationDTO.getQualification())));
       }
     }
     return fieldErrors;

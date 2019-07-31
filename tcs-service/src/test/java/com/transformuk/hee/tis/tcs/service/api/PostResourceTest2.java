@@ -1,5 +1,19 @@
 package com.transformuk.hee.tis.tcs.service.api;
 
+import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.Mockito.doNothing;
+import static org.mockito.Mockito.doThrow;
+import static org.mockito.Mockito.never;
+import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.when;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.delete;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.put;
+import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.header;
+import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
+import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
+
 import com.google.common.collect.Lists;
 import com.google.common.collect.Sets;
 import com.transformuk.hee.tis.tcs.TestUtils;
@@ -17,6 +31,9 @@ import com.transformuk.hee.tis.tcs.service.repository.PlacementViewRepository;
 import com.transformuk.hee.tis.tcs.service.service.PlacementService;
 import com.transformuk.hee.tis.tcs.service.service.PostService;
 import com.transformuk.hee.tis.tcs.service.service.mapper.PlacementViewMapper;
+import java.lang.reflect.Method;
+import java.util.ArrayList;
+import java.util.List;
 import org.apache.commons.lang3.StringUtils;
 import org.hamcrest.core.StringContains;
 import org.junit.Assert;
@@ -38,32 +55,14 @@ import org.springframework.validation.BeanPropertyBindingResult;
 import org.springframework.validation.FieldError;
 import org.springframework.web.bind.MethodArgumentNotValidException;
 
-import java.lang.reflect.Method;
-import java.util.ArrayList;
-import java.util.List;
-
-import static org.mockito.ArgumentMatchers.any;
-import static org.mockito.Mockito.doNothing;
-import static org.mockito.Mockito.doThrow;
-import static org.mockito.Mockito.never;
-import static org.mockito.Mockito.verify;
-import static org.mockito.Mockito.when;
-import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.delete;
-import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
-import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
-import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.put;
-import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.content;
-import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.header;
-import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
-import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
-
 /**
- * Test class created to do integration tests on the controller layer only
- * while mocking everything else
+ * Test class created to do integration tests on the controller layer only while mocking everything
+ * else
  */
 @RunWith(SpringRunner.class)
 @SpringBootTest(classes = Application.class)
 public class PostResourceTest2 {
+
   public static final String POST_DTO_NAME = "PostDTO";
   public static final String SPECIAL_CHARACTERS = "#%$^&**(";
 
@@ -96,7 +95,8 @@ public class PostResourceTest2 {
 
   @Before
   public void setup() {
-    PostResource postResource = new PostResource(postService, postValidator, placementViewRepository, placementViewDecorator,
+    PostResource postResource = new PostResource(postService, postValidator,
+        placementViewRepository, placementViewDecorator,
         placementViewMapper, placementService, placementSummaryDecorator);
     this.restPostMockMvc = MockMvcBuilders.standaloneSetup(postResource)
         .setCustomArgumentResolvers(pageableArgumentResolver)
@@ -112,7 +112,8 @@ public class PostResourceTest2 {
   @Test
   public void createPostShouldReturnBadRequestWhenPostIsNotValid() throws Exception {
     BeanPropertyBindingResult bindingResult = new BeanPropertyBindingResult(postDTO, POST_DTO_NAME);
-    doThrow(new MethodArgumentNotValidException(null, bindingResult)).when(postValidator).validate(postDTO);
+    doThrow(new MethodArgumentNotValidException(null, bindingResult)).when(postValidator)
+        .validate(postDTO);
 
     // Create the Post
     restPostMockMvc.perform(post("/api/posts")
@@ -150,7 +151,8 @@ public class PostResourceTest2 {
   }
 
   @Test
-  public void createPostShouldReturnOkWhenPostsNationalPostNumberContainsSpecialChars() throws Exception {
+  public void createPostShouldReturnOkWhenPostsNationalPostNumberContainsSpecialChars()
+      throws Exception {
     postDTO.setNationalPostNumber(SPECIAL_CHARACTERS);
 
     PostDTO savedPostDTO = new PostDTO();
@@ -182,7 +184,8 @@ public class PostResourceTest2 {
   @Test
   public void updatePostShouldReturnBaRequestWhenFailingValidation() throws Exception {
     BeanPropertyBindingResult bindingResult = new BeanPropertyBindingResult(postDTO, POST_DTO_NAME);
-    doThrow(new MethodArgumentNotValidException(null, bindingResult)).when(postValidator).validate(postDTO);
+    doThrow(new MethodArgumentNotValidException(null, bindingResult)).when(postValidator)
+        .validate(postDTO);
 
     restPostMockMvc.perform(put("/api/posts")
         .contentType(TestUtil.APPLICATION_JSON_UTF8)
@@ -210,7 +213,8 @@ public class PostResourceTest2 {
     postDTO.setId(postId);
 
     doNothing().when(postValidator).validate(postDTO);
-    doThrow(new AccessUnauthorisedException("")).when(postService).canLoggedInUserViewOrAmend(postId);
+    doThrow(new AccessUnauthorisedException("")).when(postService)
+        .canLoggedInUserViewOrAmend(postId);
 
     restPostMockMvc.perform(put("/api/posts")
         .contentType(TestUtil.APPLICATION_JSON_UTF8)
@@ -223,7 +227,8 @@ public class PostResourceTest2 {
   public void getPostShouldReturnUnauthWhenUserNotPartOfSameTrust() throws Exception {
     long postId = 1L;
 
-    doThrow(new AccessUnauthorisedException("")).when(postService).canLoggedInUserViewOrAmend(postId);
+    doThrow(new AccessUnauthorisedException("")).when(postService)
+        .canLoggedInUserViewOrAmend(postId);
 
     restPostMockMvc.perform(get("/api/posts/{id}", postId)
         .contentType(TestUtil.APPLICATION_JSON_UTF8))
@@ -236,7 +241,8 @@ public class PostResourceTest2 {
   public void getPostPlacementShouldReturnUnauthWhenUserNotPartOfSameTrust() throws Exception {
     long personId = 1L;
 
-    doThrow(new AccessUnauthorisedException("")).when(postService).canLoggedInUserViewOrAmend(personId);
+    doThrow(new AccessUnauthorisedException("")).when(postService)
+        .canLoggedInUserViewOrAmend(personId);
 
     restPostMockMvc.perform(get("/api/posts/{id}/placements", personId)
         .contentType(TestUtil.APPLICATION_JSON_UTF8))
@@ -251,7 +257,8 @@ public class PostResourceTest2 {
   public void getPostPlacementShouldReturnUnauthWhenUserNotPartOfSameTrustNew() throws Exception {
     long postId = 1L;
 
-    doThrow(new AccessUnauthorisedException("")).when(postService).canLoggedInUserViewOrAmend(postId);
+    doThrow(new AccessUnauthorisedException("")).when(postService)
+        .canLoggedInUserViewOrAmend(postId);
 
     restPostMockMvc.perform(get("/api/posts/{postId}/placements/new", postId)
         .contentType(TestUtil.APPLICATION_JSON_UTF8))
@@ -266,7 +273,8 @@ public class PostResourceTest2 {
     long personId = 1L;
     postDTO.setId(personId);
 
-    doThrow(new AccessUnauthorisedException("")).when(postService).canLoggedInUserViewOrAmend(personId);
+    doThrow(new AccessUnauthorisedException("")).when(postService)
+        .canLoggedInUserViewOrAmend(personId);
 
     restPostMockMvc.perform(delete("/api/posts/{id}", personId)
         .contentType(TestUtil.APPLICATION_JSON_UTF8))
@@ -276,7 +284,8 @@ public class PostResourceTest2 {
   }
 
   @Test
-  public void updatePostShouldFailWhenThereAreMultiplePrimarySpecialtiesAttached() throws Exception {
+  public void updatePostShouldFailWhenThereAreMultiplePrimarySpecialtiesAttached()
+      throws Exception {
 
     postDTO.setId(1L);
 
@@ -287,8 +296,9 @@ public class PostResourceTest2 {
     fieldErrors.forEach(bindingResult::addError);
     Method method = PostValidator.class.getMethods()[0];
 
-    doThrow(new MethodArgumentNotValidException(new MethodParameter(method, 0), bindingResult)).when(
-        postValidator).validate(any(PostDTO.class));
+    doThrow(new MethodArgumentNotValidException(new MethodParameter(method, 0), bindingResult))
+        .when(
+            postValidator).validate(any(PostDTO.class));
 
     restPostMockMvc.perform(put("/api/posts")
         .contentType(TestUtil.APPLICATION_JSON_UTF8)
@@ -318,7 +328,8 @@ public class PostResourceTest2 {
 
     List<PostDTO> expectedList = Lists.newArrayList(postDTO);
 
-    when(postService.findPostsForProgrammeIdAndNpn(programmeId, StringUtils.EMPTY)).thenReturn(expectedList);
+    when(postService.findPostsForProgrammeIdAndNpn(programmeId, StringUtils.EMPTY))
+        .thenReturn(expectedList);
 
     restPostMockMvc.perform(get("/api/programme/{id}/posts", programmeId)
         .contentType(TestUtil.APPLICATION_JSON_UTF8))

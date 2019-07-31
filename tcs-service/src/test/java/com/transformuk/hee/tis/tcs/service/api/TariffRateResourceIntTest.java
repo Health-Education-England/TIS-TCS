@@ -1,5 +1,15 @@
 package com.transformuk.hee.tis.tcs.service.api;
 
+import static org.assertj.core.api.Assertions.assertThat;
+import static org.hamcrest.Matchers.hasItem;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.delete;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.put;
+import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.content;
+import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
+import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
+
 import com.transformuk.hee.tis.tcs.api.dto.TariffRateDTO;
 import com.transformuk.hee.tis.tcs.service.Application;
 import com.transformuk.hee.tis.tcs.service.exception.ExceptionTranslator;
@@ -7,6 +17,8 @@ import com.transformuk.hee.tis.tcs.service.model.TariffRate;
 import com.transformuk.hee.tis.tcs.service.repository.TariffRateRepository;
 import com.transformuk.hee.tis.tcs.service.service.TariffRateService;
 import com.transformuk.hee.tis.tcs.service.service.mapper.TariffRateMapper;
+import java.util.List;
+import javax.persistence.EntityManager;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -20,14 +32,6 @@ import org.springframework.test.context.junit4.SpringRunner;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.setup.MockMvcBuilders;
 import org.springframework.transaction.annotation.Transactional;
-
-import javax.persistence.EntityManager;
-import java.util.List;
-
-import static org.assertj.core.api.Assertions.assertThat;
-import static org.hamcrest.Matchers.hasItem;
-import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.*;
-import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.*;
 
 /**
  * Test class for the TariffRateResource REST controller.
@@ -78,8 +82,8 @@ public class TariffRateResourceIntTest {
   /**
    * Create an entity for this test.
    * <p>
-   * This is a static method, as tests for other entities might also need it,
-   * if they test an entity which requires the current entity.
+   * This is a static method, as tests for other entities might also need it, if they test an entity
+   * which requires the current entity.
    */
   public static TariffRate createEntity(EntityManager em) {
     TariffRate tariffRate = new TariffRate()
@@ -158,10 +162,10 @@ public class TariffRateResourceIntTest {
         .andExpect(status().isOk())
         .andExpect(content().contentType(MediaType.APPLICATION_JSON_UTF8_VALUE))
         .andExpect(jsonPath("$.[*].id").value(hasItem(tariffRate.getId().intValue())))
-      .andExpect(jsonPath("$.[*].gradeAbbreviation").value(hasItem(DEFAULT_GRADE_ABBREVIATION)))
-      .andExpect(jsonPath("$.[*].tariffRate").value(hasItem(DEFAULT_TARIFF_RATE)))
-      .andExpect(jsonPath("$.[*].tariffRateFringe").value(hasItem(DEFAULT_TARIFF_RATE_FRINGE)))
-      .andExpect(jsonPath("$.[*].tariffRateLondon").value(hasItem(DEFAULT_TARIFF_RATE_LONDON)));
+        .andExpect(jsonPath("$.[*].gradeAbbreviation").value(hasItem(DEFAULT_GRADE_ABBREVIATION)))
+        .andExpect(jsonPath("$.[*].tariffRate").value(hasItem(DEFAULT_TARIFF_RATE)))
+        .andExpect(jsonPath("$.[*].tariffRateFringe").value(hasItem(DEFAULT_TARIFF_RATE_FRINGE)))
+        .andExpect(jsonPath("$.[*].tariffRateLondon").value(hasItem(DEFAULT_TARIFF_RATE_LONDON)));
   }
 
   @Test
@@ -175,10 +179,10 @@ public class TariffRateResourceIntTest {
         .andExpect(status().isOk())
         .andExpect(content().contentType(MediaType.APPLICATION_JSON_UTF8_VALUE))
         .andExpect(jsonPath("$.id").value(tariffRate.getId().intValue()))
-      .andExpect(jsonPath("$.gradeAbbreviation").value(DEFAULT_GRADE_ABBREVIATION))
-      .andExpect(jsonPath("$.tariffRate").value(DEFAULT_TARIFF_RATE))
-      .andExpect(jsonPath("$.tariffRateFringe").value(DEFAULT_TARIFF_RATE_FRINGE))
-      .andExpect(jsonPath("$.tariffRateLondon").value(DEFAULT_TARIFF_RATE_LONDON));
+        .andExpect(jsonPath("$.gradeAbbreviation").value(DEFAULT_GRADE_ABBREVIATION))
+        .andExpect(jsonPath("$.tariffRate").value(DEFAULT_TARIFF_RATE))
+        .andExpect(jsonPath("$.tariffRateFringe").value(DEFAULT_TARIFF_RATE_FRINGE))
+        .andExpect(jsonPath("$.tariffRateLondon").value(DEFAULT_TARIFF_RATE_LONDON));
   }
 
   @Test

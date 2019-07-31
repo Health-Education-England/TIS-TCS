@@ -4,11 +4,10 @@ import com.transformuk.hee.tis.tcs.api.dto.PlacementDTO;
 import com.transformuk.hee.tis.tcs.api.dto.PlacementDetailsDTO;
 import com.transformuk.hee.tis.tcs.api.dto.PlacementSummaryDTO;
 import com.transformuk.hee.tis.tcs.service.model.Placement;
-import org.springframework.data.domain.Page;
-import org.springframework.data.domain.Pageable;
-
 import java.io.IOException;
 import java.util.List;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 
 /**
  * Service Interface for managing Placement.
@@ -93,7 +92,8 @@ public interface PlacementService {
    * @param pageable the pagination information
    * @return the list of entities
    */
-  Page<PlacementDetailsDTO> findFilteredPlacements(String columnFilterJson, Pageable pageable) throws IOException;
+  Page<PlacementDetailsDTO> findFilteredPlacements(String columnFilterJson, Pageable pageable)
+      throws IOException;
 
   /**
    * Get all the placement details.
@@ -130,7 +130,9 @@ public interface PlacementService {
 
   Placement findPlacementById(Long placementId);
 
-  boolean isEligibleForChangedDatesNotification(PlacementDetailsDTO updatedPlacementDetails, Placement existingPlacement);
+  boolean isEligibleForChangedDatesNotification(PlacementDetailsDTO updatedPlacementDetails,
+      Placement existingPlacement);
 
-  void handleChangeOfPlacementDatesEsrNotification(PlacementDetailsDTO placementDetailsDTO, Placement placementBeforeUpdate, boolean currentPlacementEdit);
+  void handleChangeOfPlacementDatesEsrNotification(PlacementDetailsDTO placementDetailsDTO,
+      Placement placementBeforeUpdate, boolean currentPlacementEdit);
 }

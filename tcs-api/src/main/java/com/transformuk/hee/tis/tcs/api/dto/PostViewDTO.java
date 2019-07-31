@@ -1,12 +1,11 @@
 package com.transformuk.hee.tis.tcs.api.dto;
 
 import com.transformuk.hee.tis.tcs.api.enumeration.Status;
-
 import java.io.Serializable;
 
 /**
- * This DTO is used in the post list, it's meant as a read only entity aggregating what the user needs to see
- * in a post list.
+ * This DTO is used in the post list, it's meant as a read only entity aggregating what the user
+ * needs to see in a post list.
  */
 public class PostViewDTO implements Serializable {
 
@@ -219,40 +218,79 @@ public class PostViewDTO implements Serializable {
 
   @Override
   public boolean equals(Object o) {
-    if (this == o) return true;
-    if (o == null || getClass() != o.getClass()) return false;
+    if (this == o) {
+      return true;
+    }
+    if (o == null || getClass() != o.getClass()) {
+      return false;
+    }
 
     PostViewDTO that = (PostViewDTO) o;
 
-    if (!id.equals(that.id)) return false;
-    if (currentTraineeId != null ? !currentTraineeId.equals(that.currentTraineeId) : that.currentTraineeId != null)
+    if (!id.equals(that.id)) {
       return false;
-    if (currentTraineeGmcNumber != null ? !currentTraineeGmcNumber.equals(that.currentTraineeGmcNumber) : that.currentTraineeGmcNumber != null)
+    }
+    if (currentTraineeId != null ? !currentTraineeId.equals(that.currentTraineeId)
+        : that.currentTraineeId != null) {
       return false;
-    if (currentTraineeSurname != null ? !currentTraineeSurname.equals(that.currentTraineeSurname) : that.currentTraineeSurname != null)
+    }
+    if (currentTraineeGmcNumber != null ? !currentTraineeGmcNumber
+        .equals(that.currentTraineeGmcNumber) : that.currentTraineeGmcNumber != null) {
       return false;
-    if (currentTraineeForenames != null ? !currentTraineeForenames.equals(that.currentTraineeForenames) : that.currentTraineeForenames != null)
+    }
+    if (currentTraineeSurname != null ? !currentTraineeSurname.equals(that.currentTraineeSurname)
+        : that.currentTraineeSurname != null) {
       return false;
-    if (nationalPostNumber != null ? !nationalPostNumber.equals(that.nationalPostNumber) : that.nationalPostNumber != null)
+    }
+    if (currentTraineeForenames != null ? !currentTraineeForenames
+        .equals(that.currentTraineeForenames) : that.currentTraineeForenames != null) {
       return false;
-    if (primarySiteCode != null ? !primarySiteCode.equals(that.primarySiteCode) : that.primarySiteCode != null) return false;
-    if (primarySiteName != null ? !primarySiteName.equals(that.primarySiteName) : that.primarySiteName != null)
+    }
+    if (nationalPostNumber != null ? !nationalPostNumber.equals(that.nationalPostNumber)
+        : that.nationalPostNumber != null) {
       return false;
-    if (approvedGradeCode != null ? !approvedGradeCode.equals(that.approvedGradeCode) : that.approvedGradeCode != null)
+    }
+    if (primarySiteCode != null ? !primarySiteCode.equals(that.primarySiteCode)
+        : that.primarySiteCode != null) {
       return false;
-    if (approvedGradeName != null ? !approvedGradeName.equals(that.approvedGradeName) : that.approvedGradeName != null)
+    }
+    if (primarySiteName != null ? !primarySiteName.equals(that.primarySiteName)
+        : that.primarySiteName != null) {
       return false;
-    if (primarySpecialtyId != null ? !primarySpecialtyId.equals(that.primarySpecialtyId) : that.primarySpecialtyId != null)
+    }
+    if (approvedGradeCode != null ? !approvedGradeCode.equals(that.approvedGradeCode)
+        : that.approvedGradeCode != null) {
       return false;
-    if (primarySpecialtyCode != null ? !primarySpecialtyCode.equals(that.primarySpecialtyCode) : that.primarySpecialtyCode != null)
+    }
+    if (approvedGradeName != null ? !approvedGradeName.equals(that.approvedGradeName)
+        : that.approvedGradeName != null) {
       return false;
-    if (primarySpecialtyName != null ? !primarySpecialtyName.equals(that.primarySpecialtyName) : that.primarySpecialtyName != null)
+    }
+    if (primarySpecialtyId != null ? !primarySpecialtyId.equals(that.primarySpecialtyId)
+        : that.primarySpecialtyId != null) {
       return false;
-    if (programmeNames != null ? !programmeNames.equals(that.programmeNames) : that.programmeNames != null) return false;
-    if (status != that.status) return false;
-    if (fundingType != that.fundingType) return false;
-    if (owner != null ? !owner.equals(that.owner) : that.owner != null)
+    }
+    if (primarySpecialtyCode != null ? !primarySpecialtyCode.equals(that.primarySpecialtyCode)
+        : that.primarySpecialtyCode != null) {
       return false;
+    }
+    if (primarySpecialtyName != null ? !primarySpecialtyName.equals(that.primarySpecialtyName)
+        : that.primarySpecialtyName != null) {
+      return false;
+    }
+    if (programmeNames != null ? !programmeNames.equals(that.programmeNames)
+        : that.programmeNames != null) {
+      return false;
+    }
+    if (status != that.status) {
+      return false;
+    }
+    if (fundingType != that.fundingType) {
+      return false;
+    }
+    if (owner != null ? !owner.equals(that.owner) : that.owner != null) {
+      return false;
+    }
     return intrepidId != null ? intrepidId.equals(that.intrepidId) : that.intrepidId == null;
   }
 
@@ -260,9 +298,11 @@ public class PostViewDTO implements Serializable {
   public int hashCode() {
     int result = id.hashCode();
     result = 31 * result + (currentTraineeId != null ? currentTraineeId.hashCode() : 0);
-    result = 31 * result + (currentTraineeGmcNumber != null ? currentTraineeGmcNumber.hashCode() : 0);
+    result =
+        31 * result + (currentTraineeGmcNumber != null ? currentTraineeGmcNumber.hashCode() : 0);
     result = 31 * result + (currentTraineeSurname != null ? currentTraineeSurname.hashCode() : 0);
-    result = 31 * result + (currentTraineeForenames != null ? currentTraineeForenames.hashCode() : 0);
+    result =
+        31 * result + (currentTraineeForenames != null ? currentTraineeForenames.hashCode() : 0);
     result = 31 * result + (nationalPostNumber != null ? nationalPostNumber.hashCode() : 0);
     result = 31 * result + (primarySiteCode != null ? primarySiteCode.hashCode() : 0);
     result = 31 * result + (primarySiteName != null ? primarySiteName.hashCode() : 0);

@@ -1,7 +1,6 @@
 package com.transformuk.hee.tis.tcs.api.dto;
 
 import com.transformuk.hee.tis.tcs.api.enumeration.PostSpecialtyType;
-
 import java.io.Serializable;
 import java.util.Objects;
 
@@ -37,8 +36,12 @@ public class PlacementSpecialtyDTO implements Serializable {
 
   @Override
   public boolean equals(Object o) {
-    if (this == o) return true;
-    if (o == null || getClass() != o.getClass()) return false;
+    if (this == o) {
+      return true;
+    }
+    if (o == null || getClass() != o.getClass()) {
+      return false;
+    }
     PlacementSpecialtyDTO that = (PlacementSpecialtyDTO) o;
     return Objects.equals(placementId, that.placementId) &&
         Objects.equals(specialtyId, that.specialtyId);

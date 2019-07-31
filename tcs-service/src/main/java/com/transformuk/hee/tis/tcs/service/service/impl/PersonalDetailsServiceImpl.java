@@ -5,6 +5,7 @@ import com.transformuk.hee.tis.tcs.service.model.PersonalDetails;
 import com.transformuk.hee.tis.tcs.service.repository.PersonalDetailsRepository;
 import com.transformuk.hee.tis.tcs.service.service.PersonalDetailsService;
 import com.transformuk.hee.tis.tcs.service.service.mapper.PersonalDetailsMapper;
+import java.util.List;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -12,8 +13,6 @@ import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
-
-import java.util.List;
 
 
 /**
@@ -45,7 +44,8 @@ public class PersonalDetailsServiceImpl implements PersonalDetailsService {
     PersonalDetails personalDetails = personalDetailsMapper.toEntity(personalDetailsDTO);
     Long personDetailId = personalDetailsDTO.getId();
     if (!permissionService.canEditSensitiveData()) {
-      PersonalDetails originalPersonDetail = personalDetailsRepository.findById(personDetailId).orElse(null);
+      PersonalDetails originalPersonDetail = personalDetailsRepository.findById(personDetailId)
+          .orElse(null);
       if (originalPersonDetail == null) { //during create
         clearSensitiveData(personalDetails);
       } else {

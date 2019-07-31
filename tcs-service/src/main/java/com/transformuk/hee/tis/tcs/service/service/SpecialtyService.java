@@ -3,10 +3,9 @@ package com.transformuk.hee.tis.tcs.service.service;
 import com.transformuk.hee.tis.tcs.api.dto.SpecialtyDTO;
 import com.transformuk.hee.tis.tcs.api.dto.SpecialtySimpleDTO;
 import com.transformuk.hee.tis.tcs.service.model.ColumnFilter;
+import java.util.List;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
-
-import java.util.List;
 
 /**
  * Service Interface for managing Specialty.
@@ -37,7 +36,8 @@ public interface SpecialtyService {
    * @param pageable     the pagination information
    * @return the list of entities
    */
-  Page<SpecialtyDTO> advancedSearch(String searchString, List<ColumnFilter> columnFilers, Pageable pageable);
+  Page<SpecialtyDTO> advancedSearch(String searchString, List<ColumnFilter> columnFilers,
+      Pageable pageable);
 
   /**
    * Get all the specialties.
@@ -72,15 +72,16 @@ public interface SpecialtyService {
   void delete(Long id);
 
   /**
-   * Find Specialties that are linked to a Programe via the attached Curricula, find by Specialty name if a search criteria
-   * is provided
+   * Find Specialties that are linked to a Programe via the attached Curricula, find by Specialty
+   * name if a search criteria is provided
    *
    * @param programmeId The programme id to search for
    * @param searchQuery the possible name of the Specialty
    * @param pageable    The page in which we want
    * @return Paginated list of found specialties
    */
-  Page<SpecialtyDTO> getPagedSpecialtiesForProgrammeId(Long programmeId, String searchQuery, Pageable pageable);
+  Page<SpecialtyDTO> getPagedSpecialtiesForProgrammeId(Long programmeId, String searchQuery,
+      Pageable pageable);
 
   /**
    * Find specialties for a Programme that a Person is a member of

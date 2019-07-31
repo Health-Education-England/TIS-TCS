@@ -1,6 +1,7 @@
 package com.transformuk.hee.tis.tcs.service.api;
 
 import static com.transformuk.hee.tis.security.util.TisSecurityHelper.getProfileFromContext;
+import static uk.nhs.tis.StringConverter.getConverter;
 
 import com.google.common.collect.Lists;
 import com.transformuk.hee.tis.tcs.api.dto.ProgrammeDTO;
@@ -45,7 +46,6 @@ import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
-import static uk.nhs.tis.StringConverter.getConverter;
 
 /**
  * REST controller for managing Programme.
@@ -60,7 +60,8 @@ public class ProgrammeResource {
   private final ProgrammeService programmeService;
   private final ProgrammeValidator programmeValidator;
 
-  public ProgrammeResource(ProgrammeService programmeService, ProgrammeValidator programmeValidator) {
+  public ProgrammeResource(ProgrammeService programmeService,
+      ProgrammeValidator programmeValidator) {
     this.programmeService = programmeService;
     this.programmeValidator = programmeValidator;
   }
@@ -69,18 +70,22 @@ public class ProgrammeResource {
    * POST  /programmes : Create a new programme.
    *
    * @param programmeDTO the programmeDTO to create
-   * @return the ResponseEntity with status 201 (Created) and with body the new programmeDTO, or with status 400 (Bad Request) if the programme has already an ID
+   * @return the ResponseEntity with status 201 (Created) and with body the new programmeDTO, or
+   * with status 400 (Bad Request) if the programme has already an ID
    * @throws URISyntaxException if the Location URI syntax is incorrect
    */
   @PostMapping("/programmes")
   @PreAuthorize("hasAuthority('programme:add:modify')")
-  public ResponseEntity<ProgrammeDTO> createProgramme(@RequestBody @Validated(Create.class) ProgrammeDTO programmeDTO)
+  public ResponseEntity<ProgrammeDTO> createProgramme(
+      @RequestBody @Validated(Create.class) ProgrammeDTO programmeDTO)
       throws URISyntaxException, MethodArgumentNotValidException {
     log.debug("REST request to save Programme : {}", programmeDTO);
     programmeValidator.validate(programmeDTO, getProfileFromContext());
     try {
       if (programmeDTO.getId() != null) {
-        return ResponseEntity.badRequest().headers(HeaderUtil.createFailureAlert(ENTITY_NAME, "idexists", "A new programme cannot already have an ID")).body(null);
+        return ResponseEntity.badRequest().headers(HeaderUtil
+            .createFailureAlert(ENTITY_NAME, "idexists",
+                "A new programme cannot already have an ID")).body(null);
       }
       ProgrammeDTO result = programmeService.save(programmeDTO);
       return ResponseEntity.created(new URI("/api/programmes/" + result.getId()))
@@ -96,14 +101,15 @@ public class ProgrammeResource {
    * PUT  /programmes : Updates an existing programme.
    *
    * @param programmeDTO the programmeDTO to update
-   * @return the ResponseEntity with status 200 (OK) and with body the updated programmeDTO,
-   * or with status 400 (Bad Request) if the programmeDTO is not valid,
-   * or with status 500 (Internal Server Error) if the programmeDTO couldnt be updated
+   * @return the ResponseEntity with status 200 (OK) and with body the updated programmeDTO, or with
+   * status 400 (Bad Request) if the programmeDTO is not valid, or with status 500 (Internal Server
+   * Error) if the programmeDTO couldnt be updated
    * @throws URISyntaxException if the Location URI syntax is incorrect
    */
   @PutMapping("/programmes")
   @PreAuthorize("hasAuthority('programme:add:modify')")
-  public ResponseEntity<ProgrammeDTO> updateProgramme(@RequestBody @Validated(Update.class) ProgrammeDTO programmeDTO)
+  public ResponseEntity<ProgrammeDTO> updateProgramme(
+      @RequestBody @Validated(Update.class) ProgrammeDTO programmeDTO)
       throws URISyntaxException, MethodArgumentNotValidException {
     log.debug("REST request to update Programme : {}", programmeDTO);
     programmeValidator.validate(programmeDTO, getProfileFromContext());
@@ -132,13 +138,15 @@ public class ProgrammeResource {
   @GetMapping("/programmes")
   @PreAuthorize("hasAuthority('programme:view')")
   public ResponseEntity<List<ProgrammeDTO>> getAllProgrammes(
-    Pageable pageable,
-    @RequestParam(value = "searchQuery", required = false) String searchQuery,
-    @RequestParam(value = "columnFilters", required = false) String columnFilterJson) throws IOException {
+      Pageable pageable,
+      @RequestParam(value = "searchQuery", required = false) String searchQuery,
+      @RequestParam(value = "columnFilters", required = false) String columnFilterJson)
+      throws IOException {
     log.debug("REST request to get a page of Programmes");
     searchQuery = getConverter(searchQuery).fromJson().decodeUrl().escapeForSql().toString();
     List<Class> filterEnumList = Lists.newArrayList(Status.class);
-    List<ColumnFilter> columnFilters = ColumnFilterUtil.getColumnFilters(columnFilterJson, filterEnumList);
+    List<ColumnFilter> columnFilters = ColumnFilterUtil
+        .getColumnFilters(columnFilterJson, filterEnumList);
     Page<ProgrammeDTO> page;
     if (StringUtils.isEmpty(searchQuery) && StringUtils.isEmpty(columnFilterJson)) {
       page = programmeService.findAll(pageable);
@@ -150,15 +158,17 @@ public class ProgrammeResource {
   }
 
   /**
-   * GET  /programme/in/{ids} : get programmes given their ID's.
-   * Ignores malformed or not found programmes
+   * GET  /programme/in/{ids} : get programmes given their ID's. Ignores malformed or not found
+   * programmes
    *
    * @param ids the ids to search by
-   * @return the ResponseEntity with status 200 (OK)  and the list of programmes in body, or empty list
+   * @return the ResponseEntity with status 200 (OK)  and the list of programmes in body, or empty
+   * list
    */
   @GetMapping("/programmes/in/{ids}")
   @PreAuthorize("hasAuthority('programme:view')")
-  public ResponseEntity<List<ProgrammeDTO>> getProgrammesIn(@PathVariable("ids") final Set<Long> ids) {
+  public ResponseEntity<List<ProgrammeDTO>> getProgrammesIn(
+      @PathVariable("ids") final Set<Long> ids) {
     log.debug("REST request to find several Programmes by Ids: {}", ids);
     if (!ids.isEmpty()) {
       List<ProgrammeDTO> programmesDtos = programmeService.findByIdIn(ids);
@@ -180,7 +190,8 @@ public class ProgrammeResource {
   public ResponseEntity<List<ProgrammeDTO>> getAllProgrammesForETL(Pageable pageable) {
     log.debug("REST request to get a page of Programmes");
     Page<ProgrammeDTO> page = programmeService.findAll(pageable);
-    HttpHeaders headers = PaginationUtil.generatePaginationHttpHeaders(page, "/api/bulk-programmes");
+    HttpHeaders headers = PaginationUtil
+        .generatePaginationHttpHeaders(page, "/api/bulk-programmes");
     return new ResponseEntity<>(page.getContent(), headers, HttpStatus.OK);
   }
 
@@ -188,7 +199,8 @@ public class ProgrammeResource {
    * GET  /programmes/:id : get the "id" programme.
    *
    * @param id the id of the programmeDTO to retrieve
-   * @return the ResponseEntity with status 200 (OK) and with body the programmeDTO, or with status 404 (Not Found)
+   * @return the ResponseEntity with status 200 (OK) and with body the programmeDTO, or with status
+   * 404 (Not Found)
    */
   @GetMapping("/programmes/{id}")
   @PreAuthorize("hasAuthority('programme:view')")
@@ -209,14 +221,16 @@ public class ProgrammeResource {
   public ResponseEntity<Void> deleteProgramme(@PathVariable Long id) {
     log.debug("REST request to delete Programme : {}", id);
     programmeService.delete(id);
-    return ResponseEntity.ok().headers(HeaderUtil.createEntityDeletionAlert(ENTITY_NAME, id.toString())).build();
+    return ResponseEntity.ok()
+        .headers(HeaderUtil.createEntityDeletionAlert(ENTITY_NAME, id.toString())).build();
   }
 
 
   /**
    * GET  /trainee/programmes : get a list of trainee programmes that they have been enrolled to.
    *
-   * @return the ResponseEntity with status 200 (OK) and with body the programmeDTO, or with status 404 (Not Found)
+   * @return the ResponseEntity with status 200 (OK) and with body the programmeDTO, or with status
+   * 404 (Not Found)
    */
   @GetMapping("/trainee/{traineeId}/programmes")
   @PreAuthorize("hasAuthority('programme:view')")
@@ -230,12 +244,14 @@ public class ProgrammeResource {
    * POST  /bulk-programmes : Bulk create a Programme.
    *
    * @param programmeDTOS List of the programmeDTOS to create
-   * @return the ResponseEntity with status 200 (Created) and with body the new programmeDTOS, or with status 400 (Bad Request) if the Programme has already an ID
+   * @return the ResponseEntity with status 200 (Created) and with body the new programmeDTOS, or
+   * with status 400 (Bad Request) if the Programme has already an ID
    * @throws URISyntaxException if the Location URI syntax is incorrect
    */
   @PostMapping("/bulk-programmes")
   @PreAuthorize("hasAuthority('programme:bulk:add:modify')")
-  public ResponseEntity<List<ProgrammeDTO>> bulkCreateProgrammes(@RequestBody List<ProgrammeDTO> programmeDTOS)
+  public ResponseEntity<List<ProgrammeDTO>> bulkCreateProgrammes(
+      @RequestBody List<ProgrammeDTO> programmeDTOS)
       throws URISyntaxException, MethodArgumentNotValidException {
     log.debug("REST request to bulk save Programmes : {}", programmeDTOS);
     try {
@@ -245,7 +261,9 @@ public class ProgrammeResource {
             .map(p -> p.getId())
             .collect(Collectors.toList());
         if (!Collections.isEmpty(entityIds)) {
-          return ResponseEntity.badRequest().headers(HeaderUtil.createFailureAlert(StringUtils.join(entityIds, ","), "ids.exist", "A new Programme cannot already have an ID")).body(null);
+          return ResponseEntity.badRequest().headers(HeaderUtil
+              .createFailureAlert(StringUtils.join(entityIds, ","), "ids.exist",
+                  "A new Programme cannot already have an ID")).body(null);
         }
       }
       List<ProgrammeDTO> result = programmeService.save(programmeDTOS);
@@ -261,24 +279,30 @@ public class ProgrammeResource {
    * PUT  /bulk-programmes : Updates an existing Programme.
    *
    * @param programmeDTOS List of the programmeDTOS to update
-   * @return the ResponseEntity with status 200 (OK) and with body the updated programmeDTOS,
-   * or with status 400 (Bad Request) if the programmeDTOS is not valid,
-   * or with status 500 (Internal Server Error) if the programmeDTOS couldnt be updated
+   * @return the ResponseEntity with status 200 (OK) and with body the updated programmeDTOS, or
+   * with status 400 (Bad Request) if the programmeDTOS is not valid, or with status 500 (Internal
+   * Server Error) if the programmeDTOS couldnt be updated
    * @throws URISyntaxException if the Location URI syntax is incorrect
    */
   @PutMapping("/bulk-programmes")
   @PreAuthorize("hasAuthority('programme:bulk:add:modify')")
-  public ResponseEntity<List<ProgrammeDTO>> bulkUpdateProgrammes(@Valid @RequestBody List<ProgrammeDTO> programmeDTOS) throws URISyntaxException {
+  public ResponseEntity<List<ProgrammeDTO>> bulkUpdateProgrammes(
+      @Valid @RequestBody List<ProgrammeDTO> programmeDTOS) throws URISyntaxException {
     log.debug("REST request to bulk update Programme : {}", programmeDTOS);
     try {
       if (Collections.isEmpty(programmeDTOS)) {
-        return ResponseEntity.badRequest().headers(HeaderUtil.createFailureAlert(ENTITY_NAME, "request.body.empty",
-            "The request body for this end point cannot be empty")).body(null);
+        return ResponseEntity.badRequest()
+            .headers(HeaderUtil.createFailureAlert(ENTITY_NAME, "request.body.empty",
+                "The request body for this end point cannot be empty")).body(null);
       } else if (!Collections.isEmpty(programmeDTOS)) {
-        List<ProgrammeDTO> entitiesWithNoId = programmeDTOS.stream().filter(p -> p.getId() == null).collect(Collectors.toList());
+        List<ProgrammeDTO> entitiesWithNoId = programmeDTOS.stream().filter(p -> p.getId() == null)
+            .collect(Collectors.toList());
         if (!Collections.isEmpty(entitiesWithNoId)) {
-          return ResponseEntity.badRequest().headers(HeaderUtil.createFailureAlert(StringUtils.join(entitiesWithNoId, ","),
-              "bulk.update.failed.noId", "Some DTOs you've provided have no Id, cannot update entities that dont exist")).body(entitiesWithNoId);
+          return ResponseEntity.badRequest()
+              .headers(HeaderUtil.createFailureAlert(StringUtils.join(entitiesWithNoId, ","),
+                  "bulk.update.failed.noId",
+                  "Some DTOs you've provided have no Id, cannot update entities that dont exist"))
+              .body(entitiesWithNoId);
         }
       }
 

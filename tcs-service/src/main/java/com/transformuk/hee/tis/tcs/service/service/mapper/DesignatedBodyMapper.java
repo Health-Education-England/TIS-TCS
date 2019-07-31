@@ -3,7 +3,6 @@ package com.transformuk.hee.tis.tcs.service.service.mapper;
 import com.google.common.base.Preconditions;
 import com.google.common.collect.ImmutableMap;
 import com.google.common.collect.Lists;
-
 import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
@@ -20,9 +19,12 @@ public class DesignatedBodyMapper {
    */
   private static final Map<String, List<String>> dbToOwnerMap = ImmutableMap.<String, List<String>>builder()
       //London LETBs match any of the london DBC's
-      .put("1-AIIDR8", Lists.newArrayList("Health Education England Kent, Surrey and Sussex", "London LETBs"))
-      .put("1-AIIDWA", Lists.newArrayList("Health Education England North West London", "London LETBs"))
-      .put("1-AIIDVS", Lists.newArrayList("Health Education England North Central and East London", "London LETBs"))
+      .put("1-AIIDR8",
+          Lists.newArrayList("Health Education England Kent, Surrey and Sussex", "London LETBs"))
+      .put("1-AIIDWA",
+          Lists.newArrayList("Health Education England North West London", "London LETBs"))
+      .put("1-AIIDVS", Lists
+          .newArrayList("Health Education England North Central and East London", "London LETBs"))
       .put("1-AIIDWI", Lists.newArrayList("Health Education England South London", "London LETBs"))
 
       .put("1-AIIDSA", Lists.newArrayList("Health Education England East Midlands"))

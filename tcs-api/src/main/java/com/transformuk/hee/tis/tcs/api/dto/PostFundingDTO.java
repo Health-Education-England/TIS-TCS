@@ -3,8 +3,8 @@ package com.transformuk.hee.tis.tcs.api.dto;
 import java.io.Serializable;
 import java.time.LocalDate;
 import java.util.ArrayList;
-import java.util.Objects;
 import java.util.List;
+import java.util.Objects;
 
 /**
  * A DTO for the PostFunding entity.
@@ -105,31 +105,32 @@ public class PostFundingDTO implements Serializable {
     }
     PostFundingDTO that = (PostFundingDTO) o;
     return Objects.equals(id, that.id) &&
-      Objects.equals(intrepidId, that.intrepidId) &&
-      Objects.equals(fundingType, that.fundingType) &&
-      Objects.equals(info, that.info) &&
-      Objects.equals(startDate, that.startDate) &&
-      Objects.equals(endDate, that.endDate) &&
-      Objects.equals(fundingBodyId, that.fundingBodyId) &&
-      Objects.equals(messageList, that.messageList);
+        Objects.equals(intrepidId, that.intrepidId) &&
+        Objects.equals(fundingType, that.fundingType) &&
+        Objects.equals(info, that.info) &&
+        Objects.equals(startDate, that.startDate) &&
+        Objects.equals(endDate, that.endDate) &&
+        Objects.equals(fundingBodyId, that.fundingBodyId) &&
+        Objects.equals(messageList, that.messageList);
   }
 
   @Override
   public int hashCode() {
-    return Objects.hash(id, intrepidId, fundingType, info, startDate, endDate, fundingBodyId, messageList);
+    return Objects
+        .hash(id, intrepidId, fundingType, info, startDate, endDate, fundingBodyId, messageList);
   }
 
   @Override
   public String toString() {
     return "PostFundingDTO{" +
-      "id=" + id +
-      ", intrepidId='" + intrepidId + '\'' +
-      ", fundingType='" + fundingType + '\'' +
-      ", info='" + info + '\'' +
-      ", startDate=" + startDate +
-      ", endDate=" + endDate +
-      ", fundingBodyId='" + fundingBodyId + '\'' +
-      ", messageList='" + messageList + '\'' +
-      '}';
+        "id=" + id +
+        ", intrepidId='" + intrepidId + '\'' +
+        ", fundingType='" + fundingType + '\'' +
+        ", info='" + info + '\'' +
+        ", startDate=" + startDate +
+        ", endDate=" + endDate +
+        ", fundingBodyId='" + fundingBodyId + '\'' +
+        ", messageList='" + messageList + '\'' +
+        '}';
   }
 }

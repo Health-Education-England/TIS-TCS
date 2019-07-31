@@ -3,13 +3,12 @@ package com.transformuk.hee.tis.tcs.api.dto;
 
 import com.transformuk.hee.tis.tcs.api.dto.validation.Create;
 import com.transformuk.hee.tis.tcs.api.dto.validation.Update;
-
-import javax.validation.constraints.DecimalMin;
-import javax.validation.constraints.NotNull;
 import java.io.Serializable;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.util.Objects;
+import javax.validation.constraints.DecimalMin;
+import javax.validation.constraints.NotNull;
 
 /**
  * A DTO for the GdcDetails entity.
@@ -17,7 +16,8 @@ import java.util.Objects;
 public class GdcDetailsDTO implements Serializable {
 
   @NotNull(message = "Id is required", groups = {Update.class, Create.class})
-  @DecimalMin(value = "0", groups = {Update.class, Create.class}, message = "Id must not be negative")
+  @DecimalMin(value = "0", groups = {Update.class,
+      Create.class}, message = "Id must not be negative")
   private Long id;
 
   private String gdcNumber;

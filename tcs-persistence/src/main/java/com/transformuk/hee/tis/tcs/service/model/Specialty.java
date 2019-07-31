@@ -2,7 +2,11 @@ package com.transformuk.hee.tis.tcs.service.model;
 
 import com.transformuk.hee.tis.tcs.api.enumeration.SpecialtyType;
 import com.transformuk.hee.tis.tcs.api.enumeration.Status;
-
+import java.io.Serializable;
+import java.util.HashSet;
+import java.util.List;
+import java.util.Objects;
+import java.util.Set;
 import javax.persistence.CascadeType;
 import javax.persistence.CollectionTable;
 import javax.persistence.Column;
@@ -17,11 +21,6 @@ import javax.persistence.Id;
 import javax.persistence.JoinColumn;
 import javax.persistence.ManyToOne;
 import javax.persistence.OneToMany;
-import java.io.Serializable;
-import java.util.HashSet;
-import java.util.List;
-import java.util.Objects;
-import java.util.Set;
 
 /**
  * A Specialty.
@@ -62,7 +61,7 @@ public class Specialty implements Serializable {
   @OneToMany(mappedBy = "specialty", fetch = FetchType.LAZY)
   private List<Curriculum> curricula;
 
-  @OneToMany(mappedBy = "specialty", cascade = CascadeType.ALL, orphanRemoval=true)
+  @OneToMany(mappedBy = "specialty", cascade = CascadeType.ALL, orphanRemoval = true)
   private Set<PostSpecialty> posts = new HashSet<>();
 
   @OneToMany(mappedBy = "specialty", fetch = FetchType.LAZY)
@@ -193,8 +192,12 @@ public class Specialty implements Serializable {
 
   @Override
   public boolean equals(Object o) {
-    if (this == o) return true;
-    if (o == null || getClass() != o.getClass()) return false;
+    if (this == o) {
+      return true;
+    }
+    if (o == null || getClass() != o.getClass()) {
+      return false;
+    }
     Specialty specialty = (Specialty) o;
     return Objects.equals(id, specialty.id);
   }

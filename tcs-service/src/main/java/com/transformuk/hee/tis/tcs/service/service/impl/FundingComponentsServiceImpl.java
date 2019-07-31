@@ -5,14 +5,13 @@ import com.transformuk.hee.tis.tcs.service.model.FundingComponents;
 import com.transformuk.hee.tis.tcs.service.repository.FundingComponentsRepository;
 import com.transformuk.hee.tis.tcs.service.service.FundingComponentsService;
 import com.transformuk.hee.tis.tcs.service.service.mapper.FundingComponentsMapper;
+import java.util.List;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
-
-import java.util.List;
 
 /**
  * Service Implementation for managing FundingComponents.
@@ -27,7 +26,8 @@ public class FundingComponentsServiceImpl implements FundingComponentsService {
 
   private final FundingComponentsMapper fundingComponentsMapper;
 
-  public FundingComponentsServiceImpl(FundingComponentsRepository fundingComponentsRepository, FundingComponentsMapper fundingComponentsMapper) {
+  public FundingComponentsServiceImpl(FundingComponentsRepository fundingComponentsRepository,
+      FundingComponentsMapper fundingComponentsMapper) {
     this.fundingComponentsRepository = fundingComponentsRepository;
     this.fundingComponentsMapper = fundingComponentsMapper;
   }
@@ -41,7 +41,8 @@ public class FundingComponentsServiceImpl implements FundingComponentsService {
   @Override
   public FundingComponentsDTO save(FundingComponentsDTO fundingComponentsDTO) {
     log.debug("Request to save FundingComponents : {}", fundingComponentsDTO);
-    FundingComponents fundingComponents = fundingComponentsMapper.fundingComponentsDTOToFundingComponents(fundingComponentsDTO);
+    FundingComponents fundingComponents = fundingComponentsMapper
+        .fundingComponentsDTOToFundingComponents(fundingComponentsDTO);
     fundingComponents = fundingComponentsRepository.save(fundingComponents);
     return fundingComponentsMapper.fundingComponentsToFundingComponentsDTO(fundingComponents);
   }
@@ -55,7 +56,8 @@ public class FundingComponentsServiceImpl implements FundingComponentsService {
   @Override
   public List<FundingComponentsDTO> save(List<FundingComponentsDTO> fundingComponentsDTO) {
     log.debug("Request to save FundingComponents : {}", fundingComponentsDTO);
-    List<FundingComponents> fundingComponents = fundingComponentsMapper.fundingComponentsDTOsToFundingComponents(fundingComponentsDTO);
+    List<FundingComponents> fundingComponents = fundingComponentsMapper
+        .fundingComponentsDTOsToFundingComponents(fundingComponentsDTO);
     fundingComponents = fundingComponentsRepository.saveAll(fundingComponents);
     return fundingComponentsMapper.fundingComponentsToFundingComponentsDTOs(fundingComponents);
   }

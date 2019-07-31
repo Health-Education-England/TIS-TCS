@@ -1,22 +1,24 @@
 package com.transformuk.hee.tis.tcs.service.api.validation;
 
+import static org.hamcrest.CoreMatchers.is;
+import static org.junit.Assert.assertThat;
+import static org.mockito.Mockito.when;
+
 import com.google.common.collect.Lists;
 import com.transformuk.hee.tis.reference.api.dto.FundingTypeDTO;
 import com.transformuk.hee.tis.reference.client.impl.ReferenceServiceImpl;
 import com.transformuk.hee.tis.tcs.api.dto.PostFundingDTO;
+import java.time.LocalDate;
+import java.util.ArrayList;
+import java.util.HashSet;
+import java.util.List;
+import java.util.Set;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.runners.MockitoJUnitRunner;
-
-import java.time.LocalDate;
-import java.util.*;
-
-import static org.hamcrest.CoreMatchers.is;
-import static org.junit.Assert.assertThat;
-import static org.mockito.Mockito.when;
 
 @RunWith(MockitoJUnitRunner.class)
 public class PostFundingValidatorTest {
@@ -44,7 +46,8 @@ public class PostFundingValidatorTest {
   @InjectMocks
   private PostFundingValidator postFundingValidator;
 
-  private PostFundingDTO buildMockFundingTypeDTO(Long id, String fundingType, String info, String fundingBodyId) {
+  private PostFundingDTO buildMockFundingTypeDTO(Long id, String fundingType, String info,
+      String fundingBodyId) {
     PostFundingDTO result = new PostFundingDTO();
     result.setId(id);
     result.setFundingType(fundingType);
@@ -80,9 +83,12 @@ public class PostFundingValidatorTest {
     Set<String> labels3 = new HashSet<>();
     labels3.add(FUNDING_TYPE_LABEL3);
 
-    when(referenceService.findCurrentFundingTypesByLabelIn(labels)).thenReturn(Lists.newArrayList(fundingTypeDTO));
-    when(referenceService.findCurrentFundingTypesByLabelIn(labels2)).thenReturn(Lists.newArrayList(fundingTypeDTO));
-    when(referenceService.findCurrentFundingTypesByLabelIn(labels3)).thenReturn(Lists.newArrayList(multipleFundingTypeDTO, multipleFundingTypeDTO));
+    when(referenceService.findCurrentFundingTypesByLabelIn(labels))
+        .thenReturn(Lists.newArrayList(fundingTypeDTO));
+    when(referenceService.findCurrentFundingTypesByLabelIn(labels2))
+        .thenReturn(Lists.newArrayList(fundingTypeDTO));
+    when(referenceService.findCurrentFundingTypesByLabelIn(labels3))
+        .thenReturn(Lists.newArrayList(multipleFundingTypeDTO, multipleFundingTypeDTO));
 
     validDTO = buildMockFundingTypeDTO(1L, FUNDING_TYPE_LABEL, null, "foo");
     fundingTypeMissingDTO = buildMockFundingTypeDTO(1L, null, "info", "foo");

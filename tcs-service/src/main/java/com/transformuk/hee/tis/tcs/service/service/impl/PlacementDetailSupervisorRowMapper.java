@@ -4,16 +4,18 @@ import com.transformuk.hee.tis.tcs.api.dto.PersonLiteDTO;
 import com.transformuk.hee.tis.tcs.api.dto.PlacementSupervisorDTO;
 import com.transformuk.hee.tis.tcs.service.repository.PersonRepositoryImpl;
 import com.transformuk.hee.tis.tcs.service.service.mapper.PersonLiteMapper;
-import org.springframework.jdbc.core.RowMapper;
-
 import java.sql.ResultSet;
 import java.sql.SQLException;
+import org.springframework.jdbc.core.RowMapper;
 
 public class PlacementDetailSupervisorRowMapper implements RowMapper<PlacementSupervisorDTO> {
+
   private final PersonRepositoryImpl.PersonLiteRowMapper personLiteRowMapper;
   private final PersonLiteMapper personLiteMapper;
 
-  public PlacementDetailSupervisorRowMapper(final PersonRepositoryImpl.PersonLiteRowMapper personLiteRowMapper, final PersonLiteMapper personLiteMapper) {
+  public PlacementDetailSupervisorRowMapper(
+      final PersonRepositoryImpl.PersonLiteRowMapper personLiteRowMapper,
+      final PersonLiteMapper personLiteMapper) {
     this.personLiteRowMapper = personLiteRowMapper;
     this.personLiteMapper = personLiteMapper;
   }

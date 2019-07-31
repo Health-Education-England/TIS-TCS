@@ -7,6 +7,9 @@ import org.springframework.data.jpa.repository.JpaSpecificationExecutor;
 import org.springframework.stereotype.Repository;
 
 @Repository
-public interface PlacementSupervisorRepository extends JpaRepository<PlacementSupervisor, PlacementSupervisorId>, JpaSpecificationExecutor<PlacementSupervisor> {
-    void deleteAllByIdPlacementId(long placementId);
+public interface PlacementSupervisorRepository extends
+    JpaRepository<PlacementSupervisor, PlacementSupervisorId>,
+    JpaSpecificationExecutor<PlacementSupervisor> {
+
+  void deleteAllByIdPlacementId(long placementId);
 }

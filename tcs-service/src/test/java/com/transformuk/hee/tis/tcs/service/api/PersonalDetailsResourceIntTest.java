@@ -1,5 +1,19 @@
 package com.transformuk.hee.tis.tcs.service.api;
 
+import static org.assertj.core.api.Assertions.assertThat;
+import static org.hamcrest.Matchers.containsInAnyOrder;
+import static org.hamcrest.Matchers.hasItem;
+import static org.mockito.Matchers.any;
+import static org.mockito.Matchers.anyString;
+import static org.mockito.Mockito.when;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.delete;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.put;
+import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.content;
+import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
+import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
+
 import com.transformuk.hee.tis.reference.client.impl.ReferenceServiceImpl;
 import com.transformuk.hee.tis.tcs.api.dto.PersonalDetailsDTO;
 import com.transformuk.hee.tis.tcs.service.Application;
@@ -10,6 +24,11 @@ import com.transformuk.hee.tis.tcs.service.repository.PersonalDetailsRepository;
 import com.transformuk.hee.tis.tcs.service.service.PersonalDetailsService;
 import com.transformuk.hee.tis.tcs.service.service.impl.PermissionService;
 import com.transformuk.hee.tis.tcs.service.service.mapper.PersonalDetailsMapper;
+import java.time.LocalDate;
+import java.time.LocalDateTime;
+import java.time.ZoneId;
+import java.util.List;
+import javax.persistence.EntityManager;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -25,21 +44,6 @@ import org.springframework.test.context.junit4.SpringRunner;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.setup.MockMvcBuilders;
 import org.springframework.transaction.annotation.Transactional;
-
-import javax.persistence.EntityManager;
-import java.time.LocalDate;
-import java.time.LocalDateTime;
-import java.time.ZoneId;
-import java.util.List;
-
-import static org.assertj.core.api.Assertions.assertThat;
-import static org.hamcrest.Matchers.containsInAnyOrder;
-import static org.hamcrest.Matchers.hasItem;
-import static org.mockito.Matchers.any;
-import static org.mockito.Matchers.anyString;
-import static org.mockito.Mockito.when;
-import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.*;
-import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.*;
 
 /**
  * Test class for the PersonalDetailsResource REST controller.
@@ -83,7 +87,8 @@ public class PersonalDetailsResourceIntTest {
   private static final String DEFAULT_NI_NUMBER = "DEFAULT_NI";
   private static final String UPDATED_NI_NUMBER = "UPDATED_NI";
 
-  private static final LocalDateTime DEFAULT_AMENDED_DATE = LocalDateTime.now(ZoneId.systemDefault());
+  private static final LocalDateTime DEFAULT_AMENDED_DATE = LocalDateTime
+      .now(ZoneId.systemDefault());
 
   @Autowired
   private PersonalDetailsRepository personalDetailsRepository;
@@ -118,25 +123,11 @@ public class PersonalDetailsResourceIntTest {
 
   private PersonalDetails personalDetails;
 
-  @Before
-  public void setup() {
-    MockitoAnnotations.initMocks(this);
-    personalDetailsValidator = new PersonalDetailsValidator(referenceService);
-    PersonalDetailsResource personalDetailsResource = new PersonalDetailsResource(personalDetailsService,personalDetailsValidator);
-    this.restPersonalDetailsMockMvc = MockMvcBuilders.standaloneSetup(personalDetailsResource)
-        .setCustomArgumentResolvers(pageableArgumentResolver)
-        .setControllerAdvice(exceptionTranslator)
-        .setMessageConverters(jacksonMessageConverter).build();
-
-    when(permissionServiceMock.canViewSensitiveData()).thenReturn(true);
-    when(permissionServiceMock.canEditSensitiveData()).thenReturn(true);
-  }
-
   /**
    * Create an entity for this test.
    * <p>
-   * This is a static method, as tests for other entities might also need it,
-   * if they test an entity which requires the current entity.
+   * This is a static method, as tests for other entities might also need it, if they test an entity
+   * which requires the current entity.
    */
   public static PersonalDetails createEntity(EntityManager em) {
     PersonalDetails personalDetails = new PersonalDetails()
@@ -156,6 +147,21 @@ public class PersonalDetailsResourceIntTest {
   }
 
   @Before
+  public void setup() {
+    MockitoAnnotations.initMocks(this);
+    personalDetailsValidator = new PersonalDetailsValidator(referenceService);
+    PersonalDetailsResource personalDetailsResource = new PersonalDetailsResource(
+        personalDetailsService, personalDetailsValidator);
+    this.restPersonalDetailsMockMvc = MockMvcBuilders.standaloneSetup(personalDetailsResource)
+        .setCustomArgumentResolvers(pageableArgumentResolver)
+        .setControllerAdvice(exceptionTranslator)
+        .setMessageConverters(jacksonMessageConverter).build();
+
+    when(permissionServiceMock.canViewSensitiveData()).thenReturn(true);
+    when(permissionServiceMock.canEditSensitiveData()).thenReturn(true);
+  }
+
+  @Before
   public void initTest() {
     personalDetails = createEntity(em);
   }
@@ -167,7 +173,7 @@ public class PersonalDetailsResourceIntTest {
 
     // Create the PersonalDetails
     PersonalDetailsDTO personalDetailsDTO = personalDetailsMapper.toDto(personalDetails);
-    when(referenceService.isValueExists(any(),anyString())).thenReturn(true);
+    when(referenceService.isValueExists(any(), anyString())).thenReturn(true);
     restPersonalDetailsMockMvc.perform(post("/api/personal-details")
         .contentType(TestUtil.APPLICATION_JSON_UTF8)
         .content(TestUtil.convertObjectToJsonBytes(personalDetailsDTO)))
@@ -231,7 +237,7 @@ public class PersonalDetailsResourceIntTest {
     // Create the PersonalDetails with an existing ID
     personalDetails.setId(1L);
     PersonalDetailsDTO personalDetailsDTO = personalDetailsMapper.toDto(personalDetails);
-    when(referenceService.isValueExists(any(),anyString())).thenReturn(true);
+    when(referenceService.isValueExists(any(), anyString())).thenReturn(true);
     // Personal details is part of person so the call must succeed
     restPersonalDetailsMockMvc.perform(post("/api/personal-details")
         .contentType(TestUtil.APPLICATION_JSON_UTF8)
@@ -254,17 +260,23 @@ public class PersonalDetailsResourceIntTest {
         .andExpect(status().isOk())
         .andExpect(content().contentType(MediaType.APPLICATION_JSON_UTF8_VALUE))
         .andExpect(jsonPath("$.[*].id").value(hasItem(personalDetails.getId().intValue())))
-        .andExpect(jsonPath("$.[*].maritalStatus").value(hasItem(DEFAULT_MARITAL_STATUS.toString())))
+        .andExpect(
+            jsonPath("$.[*].maritalStatus").value(hasItem(DEFAULT_MARITAL_STATUS.toString())))
         .andExpect(jsonPath("$.[*].dateOfBirth").value(hasItem(DEFAULT_DATE_OF_BIRTH.toString())))
         .andExpect(jsonPath("$.[*].gender").value(hasItem(DEFAULT_GENDER.toString())))
         .andExpect(jsonPath("$.[*].nationality").value(hasItem(DEFAULT_NATIONALITY.toString())))
-        .andExpect(jsonPath("$.[*].dualNationality").value(hasItem(DEFAULT_DUAL_NATIONALITY.toString())))
-        .andExpect(jsonPath("$.[*].sexualOrientation").value(hasItem(DEFAULT_SEXUAL_ORIENTATION.toString())))
-        .andExpect(jsonPath("$.[*].religiousBelief").value(hasItem(DEFAULT_RELIGIOUS_BELIEF.toString())))
+        .andExpect(
+            jsonPath("$.[*].dualNationality").value(hasItem(DEFAULT_DUAL_NATIONALITY.toString())))
+        .andExpect(jsonPath("$.[*].sexualOrientation")
+            .value(hasItem(DEFAULT_SEXUAL_ORIENTATION.toString())))
+        .andExpect(
+            jsonPath("$.[*].religiousBelief").value(hasItem(DEFAULT_RELIGIOUS_BELIEF.toString())))
         .andExpect(jsonPath("$.[*].ethnicOrigin").value(hasItem(DEFAULT_ETHNIC_ORIGIN.toString())))
         .andExpect(jsonPath("$.[*].disability").value(hasItem(DEFAULT_DISABILITY.toString())))
-        .andExpect(jsonPath("$.[*].disabilityDetails").value(hasItem(DEFAULT_DISABILITY_DETAILS.toString())))
-        .andExpect(jsonPath("$.[*].nationalInsuranceNumber").value(hasItem(DEFAULT_NI_NUMBER.toString())))
+        .andExpect(jsonPath("$.[*].disabilityDetails")
+            .value(hasItem(DEFAULT_DISABILITY_DETAILS.toString())))
+        .andExpect(
+            jsonPath("$.[*].nationalInsuranceNumber").value(hasItem(DEFAULT_NI_NUMBER.toString())))
         .andExpect(jsonPath("$.[*].amendedDate").isNotEmpty());
   }
 
@@ -309,7 +321,8 @@ public class PersonalDetailsResourceIntTest {
     int databaseSizeBeforeUpdate = personalDetailsRepository.findAll().size();
 
     // Update the personalDetails
-    PersonalDetails updatedPersonalDetails = personalDetailsRepository.findById(personalDetails.getId()).orElse(null);
+    PersonalDetails updatedPersonalDetails = personalDetailsRepository
+        .findById(personalDetails.getId()).orElse(null);
     updatedPersonalDetails
         .maritalStatus(UPDATED_MARITAL_STATUS)
         .dateOfBirth(UPDATED_DATE_OF_BIRTH)
@@ -323,7 +336,7 @@ public class PersonalDetailsResourceIntTest {
         .nationalInsuranceNumber(UPDATED_NI_NUMBER)
         .disabilityDetails(UPDATED_DISABILITY_DETAILS);
     PersonalDetailsDTO personalDetailsDTO = personalDetailsMapper.toDto(updatedPersonalDetails);
-    when(referenceService.isValueExists(any(),anyString())).thenReturn(true);
+    when(referenceService.isValueExists(any(), anyString())).thenReturn(true);
     restPersonalDetailsMockMvc.perform(put("/api/personal-details")
         .contentType(TestUtil.APPLICATION_JSON_UTF8)
         .content(TestUtil.convertObjectToJsonBytes(personalDetailsDTO)))

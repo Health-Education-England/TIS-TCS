@@ -6,6 +6,8 @@ package com.transformuk.hee.tis.tcs.service.repository;
 public interface OwnerProjection {
 
   Long getId();
+
   String getOwner();
+
   String getNationalPostNumber();
 }

@@ -1,12 +1,19 @@
 package com.transformuk.hee.tis.tcs.service.model;
 
 import com.transformuk.hee.tis.tcs.api.enumeration.ProgrammeMembershipType;
-
-import javax.persistence.*;
 import java.io.Serializable;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.util.Objects;
+import javax.persistence.Entity;
+import javax.persistence.EnumType;
+import javax.persistence.Enumerated;
+import javax.persistence.GeneratedValue;
+import javax.persistence.GenerationType;
+import javax.persistence.Id;
+import javax.persistence.JoinColumn;
+import javax.persistence.ManyToOne;
+import javax.persistence.Version;
 
 /**
  * A ProgrammeMembership.
@@ -90,7 +97,8 @@ public class ProgrammeMembership implements Serializable {
     this.programmeMembershipType = programmeMembershipType;
   }
 
-  public ProgrammeMembership programmeMembershipType(ProgrammeMembershipType programmeMembershipType) {
+  public ProgrammeMembership programmeMembershipType(
+      ProgrammeMembershipType programmeMembershipType) {
     this.programmeMembershipType = programmeMembershipType;
     return this;
   }
