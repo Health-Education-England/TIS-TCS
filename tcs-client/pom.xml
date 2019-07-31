@@ -22,7 +22,7 @@
     <dependency>
       <groupId>com.transformuk.hee</groupId>
       <artifactId>tis-parent-client</artifactId>
-      <version>5.0.0</version>
+      <version>5.0.1</version>
       <exclusions>
         <exclusion>
           <groupId>org.springframework</groupId>

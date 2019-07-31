@@ -10,3 +10,8 @@ end_of_line = lf
 insert_final_newline = true
 trim_trailing_whitespace = true
 draw_white_space = true
+
+[*.java]
+# IntelliJ specific config should not be here, but is required to allow correct
+# application of styling rules. Otherwise continued lines use standard indent.
+ij_continuation_indent_size = 4
