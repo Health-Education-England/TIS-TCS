@@ -1,7 +1,9 @@
 package com.transformuk.hee.tis.tcs.service.model;
 
 import com.transformuk.hee.tis.tcs.api.enumeration.CommentSource;
-
+import java.io.Serializable;
+import java.time.LocalDate;
+import java.util.Objects;
 import javax.persistence.Column;
 import javax.persistence.Entity;
 import javax.persistence.EnumType;
@@ -12,122 +14,126 @@ import javax.persistence.GenerationType;
 import javax.persistence.Id;
 import javax.persistence.JoinColumn;
 import javax.persistence.ManyToOne;
-import javax.persistence.Version;
-
-import java.io.Serializable;
-import java.time.LocalDate;
-import java.time.LocalDateTime;
-import java.util.Objects;
 
 @Entity
 public class Comment implements Serializable {
-	private static final long serialVersionUID = 4670393251358554050L;
 
-	@Id
-	@GeneratedValue(strategy = GenerationType.IDENTITY)
-	private Long id;
+  private static final long serialVersionUID = 4670393251358554050L;
 
-	private Long threadId;
-	private Long parentId;
-	private String author;
-	private String body;
+  @Id
+  @GeneratedValue(strategy = GenerationType.IDENTITY)
+  private Long id;
 
-	@Column(name = "addedDate", updatable = false, insertable = false)
-	private LocalDate addedDate;
-	private LocalDate amendedDate;
-	private LocalDate inactiveDate;
-	@ManyToOne(fetch = FetchType.LAZY)
-	@JoinColumn(name = "placementId")
-	private PlacementDetails placement;
-	@Enumerated(value = EnumType.STRING)
-	@Column(name = "source")
-	private CommentSource source;
-	@Override
-	public boolean equals(Object o) {
-		if (this == o) return true;
-		if (o == null || getClass() != o.getClass()) return false;
-		Comment comment = (Comment) o;
-		return Objects.equals(id, comment.id);
-	}
+  private Long threadId;
+  private Long parentId;
+  private String author;
+  private String body;
 
-	@Override
-	public int hashCode() {
-		return Objects.hash(id);
-	}
+  @Column(name = "addedDate", updatable = false, insertable = false)
+  private LocalDate addedDate;
+  private LocalDate amendedDate;
+  private LocalDate inactiveDate;
+  @ManyToOne(fetch = FetchType.LAZY)
+  @JoinColumn(name = "placementId")
+  private PlacementDetails placement;
+  @Enumerated(value = EnumType.STRING)
+  @Column(name = "source")
+  private CommentSource source;
 
-	public Long getId() {
-		return id;
-	}
+  @Override
+  public boolean equals(Object o) {
+    if (this == o) {
+      return true;
+    }
+    if (o == null || getClass() != o.getClass()) {
+      return false;
+    }
+    Comment comment = (Comment) o;
+    return Objects.equals(id, comment.id);
+  }
 
-	public void setId(Long id) {
-		this.id = id;
-	}
+  @Override
+  public int hashCode() {
+    return Objects.hash(id);
+  }
 
-	public Long getThreadId() {
-		return threadId;
-	}
+  public Long getId() {
+    return id;
+  }
 
-	public void setThreadId(Long threadId) {
-		this.threadId = threadId;
-	}
+  public void setId(Long id) {
+    this.id = id;
+  }
 
-	public Long getParentId() {
-		return parentId;
-	}
+  public Long getThreadId() {
+    return threadId;
+  }
 
-	public void setParentId(Long parentId) {
-		this.parentId = parentId;
-	}
+  public void setThreadId(Long threadId) {
+    this.threadId = threadId;
+  }
 
-	public String getAuthor() {
-		return author;
-	}
+  public Long getParentId() {
+    return parentId;
+  }
 
-	public void setAuthor(String author) {
-		this.author = author;
-	}
+  public void setParentId(Long parentId) {
+    this.parentId = parentId;
+  }
 
-	public String getBody() {
-		return body;
-	}
+  public String getAuthor() {
+    return author;
+  }
 
-	public void setBody(String body) {
-		this.body = body;
-	}
+  public void setAuthor(String author) {
+    this.author = author;
+  }
 
-	public LocalDate getAddedDate() {
-		return addedDate;
-	}
+  public String getBody() {
+    return body;
+  }
 
-	public void setAddedDate(LocalDate addedDate) {
-		this.addedDate = addedDate;
-	}
+  public void setBody(String body) {
+    this.body = body;
+  }
 
-	public LocalDate getAmendedDate() {
-		return amendedDate;
-	}
+  public LocalDate getAddedDate() {
+    return addedDate;
+  }
 
-	public void setAmendedDate(LocalDate amendedDate) {
-		this.amendedDate = amendedDate;
-	}
+  public void setAddedDate(LocalDate addedDate) {
+    this.addedDate = addedDate;
+  }
 
-	public LocalDate getInactiveDate() {
-		return inactiveDate;
-	}
+  public LocalDate getAmendedDate() {
+    return amendedDate;
+  }
 
-	public void setInactiveDate(LocalDate inactiveDate) {
-		this.inactiveDate = inactiveDate;
-	}
+  public void setAmendedDate(LocalDate amendedDate) {
+    this.amendedDate = amendedDate;
+  }
 
-	public PlacementDetails getPlacement() {
-		return placement;
-	}
+  public LocalDate getInactiveDate() {
+    return inactiveDate;
+  }
 
-	public void setPlacement(PlacementDetails placement) {
-		this.placement = placement;
-	}
+  public void setInactiveDate(LocalDate inactiveDate) {
+    this.inactiveDate = inactiveDate;
+  }
 
-	public CommentSource getSource() { return source; }
+  public PlacementDetails getPlacement() {
+    return placement;
+  }
 
-	public void setSource(CommentSource source) { this.source = source; }
+  public void setPlacement(PlacementDetails placement) {
+    this.placement = placement;
+  }
+
+  public CommentSource getSource() {
+    return source;
+  }
+
+  public void setSource(CommentSource source) {
+    this.source = source;
+  }
 }

@@ -1,14 +1,12 @@
 package com.transformuk.hee.tis.tcs.service.job.person;
 
-import com.transformuk.hee.tis.tcs.api.dto.ProgrammeMembershipDTO;
 import com.transformuk.hee.tis.tcs.api.enumeration.Status;
+import java.io.Serializable;
+import java.util.Set;
 import org.springframework.data.annotation.Id;
 import org.springframework.data.elasticsearch.annotations.Document;
 import org.springframework.data.elasticsearch.annotations.Field;
 import org.springframework.data.elasticsearch.annotations.FieldType;
-
-import java.io.Serializable;
-import java.util.Set;
 
 @Document(indexName = "persons", type = "person")
 public class PersonView implements Serializable {

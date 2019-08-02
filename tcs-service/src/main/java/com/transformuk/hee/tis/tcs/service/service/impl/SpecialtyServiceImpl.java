@@ -1,5 +1,8 @@
 package com.transformuk.hee.tis.tcs.service.service.impl;
 
+import static com.transformuk.hee.tis.tcs.service.service.impl.SpecificationFactory.containsLike;
+import static com.transformuk.hee.tis.tcs.service.service.impl.SpecificationFactory.in;
+
 import com.google.common.base.Preconditions;
 import com.google.common.collect.Lists;
 import com.transformuk.hee.tis.tcs.api.dto.SpecialtyDTO;
@@ -15,6 +18,9 @@ import com.transformuk.hee.tis.tcs.service.repository.SpecialtySimpleRepository;
 import com.transformuk.hee.tis.tcs.service.service.SpecialtyService;
 import com.transformuk.hee.tis.tcs.service.service.mapper.SpecialtyMapper;
 import com.transformuk.hee.tis.tcs.service.service.mapper.SpecialtySimpleMapper;
+import java.util.ArrayList;
+import java.util.List;
+import java.util.Set;
 import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -26,13 +32,6 @@ import org.springframework.data.jpa.domain.Specification;
 import org.springframework.data.jpa.domain.Specifications;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
-
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Set;
-
-import static com.transformuk.hee.tis.tcs.service.service.impl.SpecificationFactory.containsLike;
-import static com.transformuk.hee.tis.tcs.service.service.impl.SpecificationFactory.in;
 
 /**
  * Service Implementation for managing Specialty.
@@ -49,9 +48,11 @@ public class SpecialtyServiceImpl implements SpecialtyService {
   private final SpecialtySimpleMapper specialtySimpleMapper;
   private final ApplicationEventPublisher applicationEventPublisher;
 
-  public SpecialtyServiceImpl(SpecialtyRepository specialtyRepository, SpecialtyMapper specialtyMapper,
-                              SpecialtySimpleRepository specialtySimpleRepository,
-                              SpecialtySimpleMapper specialtySimpleMapper, ApplicationEventPublisher applicationEventPublisher) {
+  public SpecialtyServiceImpl(SpecialtyRepository specialtyRepository,
+      SpecialtyMapper specialtyMapper,
+      SpecialtySimpleRepository specialtySimpleRepository,
+      SpecialtySimpleMapper specialtySimpleMapper,
+      ApplicationEventPublisher applicationEventPublisher) {
     this.specialtyRepository = specialtyRepository;
     this.specialtyMapper = specialtyMapper;
     this.specialtySimpleRepository = specialtySimpleRepository;
@@ -182,18 +183,22 @@ public class SpecialtyServiceImpl implements SpecialtyService {
     applicationEventPublisher.publishEvent(new SpecialtyDeletedEvent(id));
   }
 
-  public Page<SpecialtyDTO> getPagedSpecialtiesForProgrammeId(Long programmeId, String searchQuery, Pageable pageable) {
+  public Page<SpecialtyDTO> getPagedSpecialtiesForProgrammeId(Long programmeId, String searchQuery,
+      Pageable pageable) {
     Preconditions.checkNotNull(programmeId, "programmeId cannot be null");
     Preconditions.checkNotNull(pageable, "pageable cannot be null");
 
     Page<Specialty> foundSpecialties;
     if (StringUtils.isEmpty(searchQuery)) {
-      foundSpecialties = specialtyRepository.findSpecialtiesByProgrammeId(programmeId, Status.CURRENT, pageable);
+      foundSpecialties = specialtyRepository
+          .findSpecialtiesByProgrammeId(programmeId, Status.CURRENT, pageable);
     } else {
-      foundSpecialties = specialtyRepository.findSpecialtiesByProgrammeIdAndName(programmeId, searchQuery, Status.CURRENT, pageable);
+      foundSpecialties = specialtyRepository
+          .findSpecialtiesByProgrammeIdAndName(programmeId, searchQuery, Status.CURRENT, pageable);
     }
 
-    List<SpecialtyDTO> specialtyDTOS = specialtyMapper.specialtiesToSpecialtyDTOs(Lists.newArrayList(foundSpecialties));
+    List<SpecialtyDTO> specialtyDTOS = specialtyMapper
+        .specialtiesToSpecialtyDTOs(Lists.newArrayList(foundSpecialties));
     return new PageImpl<>(specialtyDTOS, pageable, foundSpecialties.getTotalElements());
   }
 
@@ -202,7 +207,8 @@ public class SpecialtyServiceImpl implements SpecialtyService {
     Preconditions.checkNotNull(programmeId, "Programme id cannot be null");
     Preconditions.checkNotNull(personId, "Person id cannot be null");
 
-    Set<Specialty> specialties = specialtyRepository.findDistinctByProgrammeIdAndPersonIdAndStatus(programmeId, personId, Status.CURRENT);
+    Set<Specialty> specialties = specialtyRepository
+        .findDistinctByProgrammeIdAndPersonIdAndStatus(programmeId, personId, Status.CURRENT);
     return specialtyMapper.specialtiesToSpecialtyDTOs(Lists.newArrayList(specialties));
   }
 }

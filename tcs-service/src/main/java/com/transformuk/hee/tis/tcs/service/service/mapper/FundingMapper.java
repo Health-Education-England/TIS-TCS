@@ -2,9 +2,8 @@ package com.transformuk.hee.tis.tcs.service.service.mapper;
 
 import com.transformuk.hee.tis.tcs.api.dto.FundingDTO;
 import com.transformuk.hee.tis.tcs.service.model.Funding;
-import org.mapstruct.Mapper;
-
 import java.util.List;
+import org.mapstruct.Mapper;
 
 /**
  * Mapper for the entity Funding and its DTO FundingDTO.
@@ -21,8 +20,9 @@ public interface FundingMapper {
   List<Funding> fundingDTOsToFundings(List<FundingDTO> fundingDTOs);
 
   /**
-   * generating the fromId for all mappers if the databaseType is sql, as the class has relationship to it might need it, instead of
-   * creating a new attribute to know if the entity has any relationship from some other entity
+   * generating the fromId for all mappers if the databaseType is sql, as the class has relationship
+   * to it might need it, instead of creating a new attribute to know if the entity has any
+   * relationship from some other entity
    *
    * @param id id of the entity
    * @return the entity instance

@@ -1,29 +1,52 @@
 package com.transformuk.hee.tis.tcs.service.service.impl;
 
+import static org.mockito.Mockito.any;
+import static org.mockito.Mockito.anyLong;
+import static org.mockito.Mockito.doNothing;
+import static org.mockito.Mockito.doReturn;
+import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.never;
+import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.when;
+
 import com.google.common.collect.Sets;
 import com.transformuk.hee.tis.tcs.api.dto.PersonDTO;
 import com.transformuk.hee.tis.tcs.api.dto.PersonV2DTO;
 import com.transformuk.hee.tis.tcs.api.dto.PersonalDetailsDTO;
 import com.transformuk.hee.tis.tcs.api.dto.ProgrammeMembershipDTO;
 import com.transformuk.hee.tis.tcs.service.exception.AccessUnauthorisedException;
-import com.transformuk.hee.tis.tcs.service.model.*;
-import com.transformuk.hee.tis.tcs.service.repository.*;
+import com.transformuk.hee.tis.tcs.service.model.ContactDetails;
+import com.transformuk.hee.tis.tcs.service.model.GdcDetails;
+import com.transformuk.hee.tis.tcs.service.model.GmcDetails;
+import com.transformuk.hee.tis.tcs.service.model.Person;
+import com.transformuk.hee.tis.tcs.service.model.PersonTrust;
+import com.transformuk.hee.tis.tcs.service.model.PersonalDetails;
+import com.transformuk.hee.tis.tcs.service.model.PostTrust;
+import com.transformuk.hee.tis.tcs.service.model.ProgrammeMembership;
+import com.transformuk.hee.tis.tcs.service.model.RightToWork;
+import com.transformuk.hee.tis.tcs.service.repository.ContactDetailsRepository;
+import com.transformuk.hee.tis.tcs.service.repository.GdcDetailsRepository;
+import com.transformuk.hee.tis.tcs.service.repository.GmcDetailsRepository;
+import com.transformuk.hee.tis.tcs.service.repository.PersonRepository;
+import com.transformuk.hee.tis.tcs.service.repository.PersonalDetailsRepository;
+import com.transformuk.hee.tis.tcs.service.repository.RightToWorkRepository;
 import com.transformuk.hee.tis.tcs.service.service.mapper.PersonMapper;
-import org.junit.Assert;
-import org.junit.Before;
-import org.junit.Test;
-import org.junit.runner.RunWith;
-import org.mockito.*;
-import org.mockito.junit.MockitoJUnitRunner;
-import org.springframework.context.ApplicationEventPublisher;
-
 import java.time.LocalDate;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
 import java.util.Set;
-
-import static org.mockito.Mockito.*;
+import org.junit.Assert;
+import org.junit.Before;
+import org.junit.Test;
+import org.junit.runner.RunWith;
+import org.mockito.ArgumentCaptor;
+import org.mockito.Captor;
+import org.mockito.InjectMocks;
+import org.mockito.Mock;
+import org.mockito.Spy;
+import org.mockito.junit.MockitoJUnitRunner;
+import org.springframework.context.ApplicationEventPublisher;
 
 @RunWith(MockitoJUnitRunner.class)
 public class PersonServiceImplTest {
@@ -54,8 +77,10 @@ public class PersonServiceImplTest {
   private ProgrammeMembership pm1, pm2, pm3, pm4;
   private PersonDTO personDTO;
   private ProgrammeMembershipDTO pmDTO1, pmDTO2, pmDTO3, pmDTO4;
-  private PersonDTO unsavedPersonDTOMock = mock(PersonDTO.class), savedPersonDTOMock = mock(PersonDTO.class);
-  private PersonalDetailsDTO unsavedPersonDetailsDTOMock = mock(PersonalDetailsDTO.class), savedPersonDetailsDTOMock = mock(PersonalDetailsDTO.class);
+  private PersonDTO unsavedPersonDTOMock = mock(PersonDTO.class), savedPersonDTOMock = mock(
+      PersonDTO.class);
+  private PersonalDetailsDTO unsavedPersonDetailsDTOMock = mock(
+      PersonalDetailsDTO.class), savedPersonDetailsDTOMock = mock(PersonalDetailsDTO.class);
   private Person unsavedPersonMock = mock(Person.class), savedPersonMock = mock(Person.class);
 
   @Mock
@@ -196,15 +221,18 @@ public class PersonServiceImplTest {
     Set<ProgrammeMembershipDTO> programmeMemberships = result.getProgrammeMemberships();
     List<ProgrammeMembershipDTO> pmList = new ArrayList<>(programmeMemberships);
 
-    Assert.assertTrue(pmList.get(0).getProgrammeStartDate().isAfter(pmList.get(1).getProgrammeStartDate()));
-    Assert.assertTrue(pmList.get(1).getProgrammeStartDate().isAfter(pmList.get(2).getProgrammeStartDate()));
+    Assert.assertTrue(
+        pmList.get(0).getProgrammeStartDate().isAfter(pmList.get(1).getProgrammeStartDate()));
+    Assert.assertTrue(
+        pmList.get(1).getProgrammeStartDate().isAfter(pmList.get(2).getProgrammeStartDate()));
     Assert.assertNull(pmList.get(3).getProgrammeStartDate());
   }
 
   @Test
   public void findPersonV2WithProgrammeMembershipsSortedShouldReturnPersonV2WithoutQualifactions() {
     doReturn(personDTO).when(testObj).findPersonWithProgrammeMembershipsSorted(PERSON_ID);
-    doNothing().when(testObj).copyProperties(personDTOArgumentCaptor.capture(), personV2DTOArgumentCaptor.capture());
+    doNothing().when(testObj)
+        .copyProperties(personDTOArgumentCaptor.capture(), personV2DTOArgumentCaptor.capture());
 
     PersonV2DTO result = testObj.findPersonV2WithProgrammeMembershipsSorted(PERSON_ID);
 
@@ -240,7 +268,8 @@ public class PersonServiceImplTest {
     when(unsavedPersonDTOMock.getPersonalDetails()).thenReturn(unsavedPersonDetailsDTOMock);
     when(savedPersonDTOMock.getPersonalDetails()).thenReturn(savedPersonDetailsDTOMock);
 
-    Person unsavedPerson = new Person(), savedPerson = new Person(), originalPersonMock = mock(Person.class);
+    Person unsavedPerson = new Person(), savedPerson = new Person(), originalPersonMock = mock(
+        Person.class);
 
     PersonalDetails originalPersonalDetailsMock = mock(PersonalDetails.class);
     when(originalPersonalDetailsMock.getDisability()).thenReturn(DISABILITY_VALUE);
@@ -285,11 +314,16 @@ public class PersonServiceImplTest {
     when(personMapperMock.toEntity(unsavedPersonDTOMock)).thenReturn(unsavedPersonMock);
     when(personRepositoryMock.save(unsavedPersonMock)).thenReturn(savedPersonMock);
 
-    when(gdcDetailsRepositoryMock.save(gdcDetailsArgumentCaptor.capture())).thenReturn(gdcDetailsMock);
-    when(gmcDetailsRepositoryMock.save(gmcDetailsArgumentCaptor.capture())).thenReturn(gmcDetailsMock);
-    when(contactDetailsRepositoryMock.save(contactDetailsArgumentCaptor.capture())).thenReturn(contactDetailsMock);
-    when(personalDetailsRepositoryMock.save(personalDetailsArgumentCaptor.capture())).thenReturn(personalDetailsMock);
-    when(rightToWorkRepositoryMock.save(rightToWorkArgumentCaptor.capture())).thenReturn(rightToWorkMock);
+    when(gdcDetailsRepositoryMock.save(gdcDetailsArgumentCaptor.capture()))
+        .thenReturn(gdcDetailsMock);
+    when(gmcDetailsRepositoryMock.save(gmcDetailsArgumentCaptor.capture()))
+        .thenReturn(gmcDetailsMock);
+    when(contactDetailsRepositoryMock.save(contactDetailsArgumentCaptor.capture()))
+        .thenReturn(contactDetailsMock);
+    when(personalDetailsRepositoryMock.save(personalDetailsArgumentCaptor.capture()))
+        .thenReturn(personalDetailsMock);
+    when(rightToWorkRepositoryMock.save(rightToWorkArgumentCaptor.capture()))
+        .thenReturn(rightToWorkMock);
     when(personMapperMock.toDto(savedPersonMock)).thenReturn(savedPersonDTOMock);
 
     PersonDTO result = testObj.create(unsavedPersonDTOMock);

@@ -4,26 +4,26 @@ package com.transformuk.hee.tis.tcs.api.enumeration;
  * The Status enumeration.
  */
 public enum Status {
-	CURRENT("current"),
-	INACTIVE("inactive"),
-	DELETE("delete");
+  CURRENT("current"),
+  INACTIVE("inactive"),
+  DELETE("delete");
 
-	private final String text;
+  private final String text;
 
-	Status(final String s) {
-		text = s;
-	}
+  Status(final String s) {
+    text = s;
+  }
 
-	public String toString() {
-		return text;
-	}
+  public static Status fromString(String text) {
+    for (Status status : Status.values()) {
+      if (status.text.equalsIgnoreCase(text)) {
+        return status;
+      }
+    }
+    return null;
+  }
 
-	public static Status fromString(String text) {
-		for (Status status : Status.values()) {
-			if (status.text.equalsIgnoreCase(text)) {
-				return status;
-			}
-		}
-		return null;
-	}
+  public String toString() {
+    return text;
+  }
 }

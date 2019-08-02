@@ -1,7 +1,7 @@
 package com.transformuk.hee.tis.tcs.api.dto;
 
-import javax.validation.constraints.NotNull;
 import java.util.List;
+import javax.validation.constraints.NotNull;
 
 public class ColumnFilterDTO {
 

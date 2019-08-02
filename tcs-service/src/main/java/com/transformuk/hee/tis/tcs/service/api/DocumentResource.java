@@ -1,5 +1,9 @@
 package com.transformuk.hee.tis.tcs.service.api;
 
+import static com.transformuk.hee.tis.tcs.service.api.DocumentResource.PATH_API;
+import static javax.ws.rs.core.MediaType.APPLICATION_JSON;
+import static javax.ws.rs.core.MediaType.MULTIPART_FORM_DATA;
+
 import com.transformuk.hee.tis.security.model.UserProfile;
 import com.transformuk.hee.tis.security.util.TisSecurityHelper;
 import com.transformuk.hee.tis.tcs.api.dto.DocumentDTO;
@@ -9,6 +13,13 @@ import com.transformuk.hee.tis.tcs.service.api.util.ColumnFilterUtil;
 import com.transformuk.hee.tis.tcs.service.model.ColumnFilter;
 import com.transformuk.hee.tis.tcs.service.service.DocumentService;
 import com.transformuk.hee.tis.tcs.service.service.TagService;
+import java.io.IOException;
+import java.util.Collection;
+import java.util.Collections;
+import java.util.List;
+import java.util.Optional;
+import javax.servlet.http.HttpServletResponse;
+import javax.ws.rs.QueryParam;
 import org.apache.commons.collections4.CollectionUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
@@ -19,375 +30,394 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.validation.annotation.Validated;
-import org.springframework.web.bind.annotation.*;
+import org.springframework.web.bind.annotation.DeleteMapping;
+import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PatchMapping;
+import org.springframework.web.bind.annotation.PathVariable;
+import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.RequestBody;
+import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestParam;
+import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.multipart.MultipartFile;
-
-import javax.servlet.http.HttpServletResponse;
-import javax.ws.rs.QueryParam;
-import java.io.IOException;
-import java.util.Collection;
-import java.util.Collections;
-import java.util.List;
-import java.util.Optional;
-
-import static com.transformuk.hee.tis.tcs.service.api.DocumentResource.PATH_API;
-import static javax.ws.rs.core.MediaType.APPLICATION_JSON;
-import static javax.ws.rs.core.MediaType.MULTIPART_FORM_DATA;
 
 @RestController
 @RequestMapping(PATH_API)
 public class DocumentResource {
-    private static final Logger LOG = LoggerFactory.getLogger(DocumentResource.class);
-    static final String PATH_API = "/api";
-    static final String PATH_DOCUMENTS = "/documents";
-    static final String PATH_DOWNLOADS = "/downloads";
-    static final String PATH_TAGS = "/tags";
 
-    private final DocumentService documentService;
-    private final TagService tagService;
+  static final String PATH_API = "/api";
+  static final String PATH_DOCUMENTS = "/documents";
+  static final String PATH_DOWNLOADS = "/downloads";
+  static final String PATH_TAGS = "/tags";
+  private static final Logger LOG = LoggerFactory.getLogger(DocumentResource.class);
+  private final DocumentService documentService;
+  private final TagService tagService;
 
-    DocumentResource(final DocumentService documentService, final TagService tagService) {
-        this.documentService = documentService;
-        this.tagService = tagService;
+  DocumentResource(final DocumentService documentService, final TagService tagService) {
+    this.documentService = documentService;
+    this.tagService = tagService;
+  }
+
+  @GetMapping(value = PATH_DOCUMENTS + "/{entity}/{personId}", produces = APPLICATION_JSON)
+  public ResponseEntity<Page<DocumentDTO>> getAllDocuments(
+      @PathVariable(value = "entity") final String entity,
+      @PathVariable(value = "personId") final Long personId,
+      @RequestParam(value = "query", required = false) final String query,
+      @RequestParam(value = "columnFilters", required = false) final String columnFilterJson,
+      @RequestParam(value = "tags", required = false) final List<String> tagNames,
+      final Pageable pageable) throws IOException {
+    LOG.info("Received 'getAllDocuments' request for entity '{}', person id '{}' and query '{}'",
+        entity,
+        personId,
+        query);
+
+    if (StringUtils.isBlank(entity) || !entity.equalsIgnoreCase("person")) {
+      LOG.warn("Invalid or not implemented entity received '{}'",
+          entity);
+      return new ResponseEntity<>(HttpStatus.NOT_IMPLEMENTED);
     }
 
-    @GetMapping(value = PATH_DOCUMENTS + "/{entity}/{personId}", produces = APPLICATION_JSON)
-    public ResponseEntity<Page<DocumentDTO>> getAllDocuments(@PathVariable(value = "entity") final String entity,
-                                                             @PathVariable(value = "personId") final Long personId,
-                                                             @RequestParam(value = "query", required = false) final String query,
-                                                             @RequestParam(value = "columnFilters", required = false) final String columnFilterJson,
-                                                             @RequestParam(value = "tags", required = false) final List<String> tagNames,
-                                                             final Pageable pageable) throws IOException {
-        LOG.info("Received 'getAllDocuments' request for entity '{}', person id '{}' and query '{}'",
-                entity,
-                personId,
-                query);
-
-        if (StringUtils.isBlank(entity) || !entity.equalsIgnoreCase("person")) {
-            LOG.warn("Invalid or not implemented entity received '{}'",
-                    entity);
-            return new ResponseEntity<>(HttpStatus.NOT_IMPLEMENTED);
-        }
-
-        if (personId == null) {
-            LOG.warn("Invalid personId received '{}'",
-                    personId);
-            return new ResponseEntity<>(HttpStatus.BAD_REQUEST);
-        }
-
-        final List<Class> filterEnumList = Collections.singletonList(Status.class);
-        final List<ColumnFilter> columnFilters = ColumnFilterUtil.getColumnFilters(columnFilterJson, filterEnumList);
-
-        return ResponseEntity.ok(documentService.findAll(personId, query, columnFilters, tagNames, pageable));
+    if (personId == null) {
+      LOG.warn("Invalid personId received '{}'",
+          personId);
+      return new ResponseEntity<>(HttpStatus.BAD_REQUEST);
     }
 
-    @GetMapping(value = PATH_DOCUMENTS + "/{documentId}", produces = APPLICATION_JSON)
-    public ResponseEntity<DocumentDTO> getDocumentById(
-            @PathVariable(value = "documentId") final Long documentId) {
-        LOG.info("Received 'getDocumentById' request for document id '{}'",
-                documentId);
+    final List<Class> filterEnumList = Collections.singletonList(Status.class);
+    final List<ColumnFilter> columnFilters = ColumnFilterUtil
+        .getColumnFilters(columnFilterJson, filterEnumList);
 
-        LOG.debug("Accessing service to load document with id '{}'",
-                documentId);
+    return ResponseEntity
+        .ok(documentService.findAll(personId, query, columnFilters, tagNames, pageable));
+  }
 
-        final Optional<DocumentDTO> documentOptional = documentService.findOne(documentId);
+  @GetMapping(value = PATH_DOCUMENTS + "/{documentId}", produces = APPLICATION_JSON)
+  public ResponseEntity<DocumentDTO> getDocumentById(
+      @PathVariable(value = "documentId") final Long documentId) {
+    LOG.info("Received 'getDocumentById' request for document id '{}'",
+        documentId);
 
-        if (documentOptional.isPresent()) {
-            return ResponseEntity.ok(documentOptional.get());
-        } else {
-            LOG.warn("Document with id '{}' not found for 'getDocumentById'",
-                    documentId);
-            return new ResponseEntity<>(HttpStatus.NOT_FOUND);
-        }
+    LOG.debug("Accessing service to load document with id '{}'",
+        documentId);
+
+    final Optional<DocumentDTO> documentOptional = documentService.findOne(documentId);
+
+    if (documentOptional.isPresent()) {
+      return ResponseEntity.ok(documentOptional.get());
+    } else {
+      LOG.warn("Document with id '{}' not found for 'getDocumentById'",
+          documentId);
+      return new ResponseEntity<>(HttpStatus.NOT_FOUND);
     }
+  }
 
   /**
-   * Marking this endpoint as deprecated and changing the url to be /old
-   * please see {@link #downloadDocumentByIdV2} for its replacement
+   * Marking this endpoint as deprecated and changing the url to be /old please see {@link
+   * #downloadDocumentByIdV2} for its replacement
    *
    * @param response
    * @param documentId
    * @param view
    * @throws IOException
    */
-    @Deprecated
-    @GetMapping(value = PATH_DOCUMENTS + PATH_DOWNLOADS + "/old/{documentId}")
-    public void downloadDocumentById(final HttpServletResponse response,
-                                     @PathVariable(value = "documentId") final Long documentId,
-                                     @QueryParam("view") final boolean view) throws IOException {
-      UserProfile profileFromContext = null;
-      try {
-        profileFromContext = TisSecurityHelper.getProfileFromContext();
-      } catch (RuntimeException e) {
-        //oh wells - we tried
-      }
-      String username = profileFromContext != null ? profileFromContext.getUserName() : "No profile info available";
-      LOG.info("Received 'DownloadDocument' request for document [{}], for user [{}]", documentId, username);
+  @Deprecated
+  @GetMapping(value = PATH_DOCUMENTS + PATH_DOWNLOADS + "/old/{documentId}")
+  public void downloadDocumentById(final HttpServletResponse response,
+      @PathVariable(value = "documentId") final Long documentId,
+      @QueryParam("view") final boolean view) throws IOException {
+    UserProfile profileFromContext = null;
+    try {
+      profileFromContext = TisSecurityHelper.getProfileFromContext();
+    } catch (RuntimeException e) {
+      //oh wells - we tried
+    }
+    String username =
+        profileFromContext != null ? profileFromContext.getUserName() : "No profile info available";
+    LOG.info("Received 'DownloadDocument' request for document [{}], for user [{}]", documentId,
+        username);
 
-        if (documentId == null) {
-            LOG.warn("Received null documentId for 'DownloadDocument'; rejecting request");
-            response.setStatus(HttpStatus.BAD_REQUEST.value());
-            return;
-        }
-
-        LOG.debug("Accessing service to load document with id '{}'",
-                documentId);
-
-        final Optional<DocumentDTO> documentOptional = documentService.findOne(documentId);
-
-        if (!documentOptional.isPresent()) {
-            LOG.warn("Document with id '{}' not found for 'DownloadDocument'",
-                    documentId);
-            response.setStatus(HttpStatus.NOT_FOUND.value());
-            return;
-        }
-
-        try {
-            streamFile(documentOptional.get(), response, view);
-        } catch (final IOException ex) {
-            LOG.error("Failed to stream file with name '{}' on document with id '{}', the full stack trace follows",
-                    documentOptional.get().getFileName(),
-                    documentOptional.get().getId());
-            response.setStatus(HttpStatus.NOT_FOUND.value());
-            ex.printStackTrace();
-        }
+    if (documentId == null) {
+      LOG.warn("Received null documentId for 'DownloadDocument'; rejecting request");
+      response.setStatus(HttpStatus.BAD_REQUEST.value());
+      return;
     }
 
+    LOG.debug("Accessing service to load document with id '{}'",
+        documentId);
+
+    final Optional<DocumentDTO> documentOptional = documentService.findOne(documentId);
+
+    if (!documentOptional.isPresent()) {
+      LOG.warn("Document with id '{}' not found for 'DownloadDocument'",
+          documentId);
+      response.setStatus(HttpStatus.NOT_FOUND.value());
+      return;
+    }
+
+    try {
+      streamFile(documentOptional.get(), response, view);
+    } catch (final IOException ex) {
+      LOG.error(
+          "Failed to stream file with name '{}' on document with id '{}', the full stack trace follows",
+          documentOptional.get().getFileName(),
+          documentOptional.get().getId());
+      response.setStatus(HttpStatus.NOT_FOUND.value());
+      ex.printStackTrace();
+    }
+  }
+
   /**
-   * quick hack to fix all the prod issues. changed this endpoint to be the main one and the broken one to be '/old/'
+   * quick hack to fix all the prod issues. changed this endpoint to be the main one and the broken
+   * one to be '/old/'
    *
    * @param response
    * @param documentId
    * @param view
    * @throws IOException
    */
-    @GetMapping(value = PATH_DOCUMENTS + PATH_DOWNLOADS + "/{documentId}")
-    public void downloadDocumentByIdV2(final HttpServletResponse response,
-        @PathVariable(value = "documentId") final Long documentId, @QueryParam("view") final boolean view) throws IOException {
-        UserProfile profileFromContext = null;
-        try {
-            profileFromContext = TisSecurityHelper.getProfileFromContext();
-        } catch (RuntimeException e) {
-            //oh wells - we tried
-        }
-        String username = profileFromContext != null ? profileFromContext.getUserName() : "No profile info available";
-        LOG.info("Received 'DownloadDocument' request for document [{}], for user [{}]", documentId, username);
+  @GetMapping(value = PATH_DOCUMENTS + PATH_DOWNLOADS + "/{documentId}")
+  public void downloadDocumentByIdV2(final HttpServletResponse response,
+      @PathVariable(value = "documentId") final Long documentId,
+      @QueryParam("view") final boolean view) throws IOException {
+    UserProfile profileFromContext = null;
+    try {
+      profileFromContext = TisSecurityHelper.getProfileFromContext();
+    } catch (RuntimeException e) {
+      //oh wells - we tried
+    }
+    String username =
+        profileFromContext != null ? profileFromContext.getUserName() : "No profile info available";
+    LOG.info("Received 'DownloadDocument' request for document [{}], for user [{}]", documentId,
+        username);
 
-        if (documentId == null) {
-            LOG.warn("Received null documentId for 'DownloadDocument'; rejecting request");
-            response.setStatus(HttpStatus.BAD_REQUEST.value());
-            return;
-        }
+    if (documentId == null) {
+      LOG.warn("Received null documentId for 'DownloadDocument'; rejecting request");
+      response.setStatus(HttpStatus.BAD_REQUEST.value());
+      return;
+    }
 
-        LOG.debug("Accessing service to load document with id '{}'",
-            documentId);
+    LOG.debug("Accessing service to load document with id '{}'",
+        documentId);
 
-        final Optional<DocumentDTO> documentOptional = documentService.findOne(documentId);
+    final Optional<DocumentDTO> documentOptional = documentService.findOne(documentId);
 
-        if (!documentOptional.isPresent()) {
-            LOG.warn("Document with id '{}' not found for 'DownloadDocument'",
-                documentId);
-            response.setStatus(HttpStatus.NOT_FOUND.value());
-            return;
-        }
+    if (!documentOptional.isPresent()) {
+      LOG.warn("Document with id '{}' not found for 'DownloadDocument'",
+          documentId);
+      response.setStatus(HttpStatus.NOT_FOUND.value());
+      return;
+    }
 
-        try {
-            String downloadUrl = documentService.getDownloadUrl(documentOptional.get());
-            response.setStatus(HttpServletResponse.SC_MOVED_TEMPORARILY);
-            response.setHeader("Location", downloadUrl);
-        } catch (final IOException ex) {
-            LOG.error("Failed to stream file with name '{}' on document with id '{}', the full stack trace follows",
-                documentOptional.get().getFileName(),
-                documentOptional.get().getId());
-            response.setStatus(HttpStatus.NOT_FOUND.value());
-            ex.printStackTrace();
-        }
+    try {
+      String downloadUrl = documentService.getDownloadUrl(documentOptional.get());
+      response.setStatus(HttpServletResponse.SC_MOVED_TEMPORARILY);
+      response.setHeader("Location", downloadUrl);
+    } catch (final IOException ex) {
+      LOG.error(
+          "Failed to stream file with name '{}' on document with id '{}', the full stack trace follows",
+          documentOptional.get().getFileName(),
+          documentOptional.get().getId());
+      response.setStatus(HttpStatus.NOT_FOUND.value());
+      ex.printStackTrace();
+    }
 
+
+  }
+
+  @PreAuthorize("hasPermission('tis:people::person:', 'Create')")
+  @PostMapping(value = PATH_DOCUMENTS, consumes = MULTIPART_FORM_DATA, produces = APPLICATION_JSON)
+  public ResponseEntity<DocumentId> uploadDocument(
+      @RequestParam("personId") final Long personId,
+      @RequestParam("document") final MultipartFile documentParam
+  ) throws IOException {
+    LOG.info("Received 'UploadDocument' request with person '{}' and document name '{}'",
+        personId, documentParam.getOriginalFilename());
+
+    final Optional<DocumentDTO> newDocument = createDocument(documentParam, personId);
+
+    if (!newDocument.isPresent()) {
+      LOG.warn(
+          "Document with person '{}' and document name '{}' failed validation; rejecting request",
+          personId, documentParam.getOriginalFilename());
+      return new ResponseEntity<>(HttpStatus.BAD_REQUEST);
+    }
+
+    LOG.debug("Accessing service to save document with person '{}' and document name '{}'",
+        personId, documentParam.getOriginalFilename());
+
+    final DocumentDTO savedDocument = documentService.save(newDocument.get());
+
+    LOG.debug("Document with person '{}' and document name '{}' saved successfully",
+        personId, documentParam.getOriginalFilename());
+
+    return ResponseEntity.status(HttpStatus.CREATED).body(new DocumentId(savedDocument.getId()));
+  }
+
+  @PreAuthorize("hasPermission('tis:people::person:', 'Update')")
+  @PatchMapping(value = PATH_DOCUMENTS, consumes = APPLICATION_JSON, produces = APPLICATION_JSON)
+  public ResponseEntity<Void> bulkUpdateDocuments(
+      @RequestBody @Validated final Collection<DocumentDTO> documents) throws IOException {
+    LOG.info("Received 'BulkUpdateDocuments' request with '{}' documents",
+        documents.size());
+
+    LOG.debug("Accessing service to load '{}' documents",
+        documents.size());
+
+    documentService.save(documents);
+
+    return ResponseEntity.ok().build();
+  }
+
+  @DeleteMapping(PATH_DOCUMENTS + "/{entity}/{personId}")
+  public ResponseEntity<Void> deleteAllDocuments(
+      @PathVariable(value = "entity") final String entity,
+      @PathVariable(value = "personId") final Long personId,
+      @RequestBody final Collection<DocumentId> documents) {
+
+    documents.forEach(document -> deleteDocumentById(entity, personId, document.getId()));
+
+    return ResponseEntity.noContent().build();
+  }
+
+  @DeleteMapping(PATH_DOCUMENTS + "/{entity}/{personId}/{documentId}")
+  public ResponseEntity<Void> deleteDocumentById(
+      @PathVariable(value = "entity") final String entity,
+      @PathVariable(value = "personId") final Long personId,
+      @PathVariable(value = "documentId") final Long documentId) {
+
+    if (StringUtils.isBlank(entity) || !entity.equalsIgnoreCase("person")) {
+      LOG.warn("Invalid or not implemented entity received '{}'",
+          entity);
+      return new ResponseEntity<>(HttpStatus.NOT_IMPLEMENTED);
+    }
+
+    if (personId == null) {
+      LOG.warn("Invalid personId received '{}'",
+          personId);
+      return new ResponseEntity<>(HttpStatus.BAD_REQUEST);
+    }
+
+    if (documentId == null) {
+      LOG.warn("Invalid documentId received '{}'",
+          documentId);
+      return new ResponseEntity<>(HttpStatus.BAD_REQUEST);
+    }
+
+    final Optional<DocumentDTO> deletedDocumentOptional = documentService
+        .delete(personId, documentId);
+
+    if (deletedDocumentOptional.isPresent()) {
+      return ResponseEntity.noContent().build();
+    } else {
+      return ResponseEntity.notFound().build();
+    }
+  }
+
+  @GetMapping(value = PATH_DOCUMENTS + PATH_TAGS, produces = APPLICATION_JSON)
+  public ResponseEntity<Collection<TagDTO>> getAllTags(
+      @QueryParam("query") final String query) {
+    LOG.info("Received 'SearchTags' request with query '{}'",
+        query);
+
+    if (StringUtils.isEmpty(query)) {
+      LOG.warn("Received empty query to 'SearchTags'; rejecting request");
+      return new ResponseEntity<>(HttpStatus.BAD_REQUEST);
+    }
+
+    LOG.debug("Accessing service to find all '{}' with name starting with '{}'",
+        TagDTO.class.getSimpleName(), query);
+
+    final Collection<TagDTO> tags = tagService.findByNameStartingWithOrderByName(query);
+
+    if (CollectionUtils.isEmpty(tags)) {
+      LOG.debug("No '{}' found with name starting with '{}'",
+          TagDTO.class.getSimpleName(), query);
+
+      return new ResponseEntity<>(HttpStatus.NOT_FOUND);
+    } else {
+      LOG.debug("Found '{}' '{}' with name starting with '{}'",
+          tags.size(), TagDTO.class.getSimpleName(), query);
+
+      return ResponseEntity.status(HttpStatus.OK).body(tags);
+    }
+  }
+
+  private Optional<DocumentDTO> createDocument(final MultipartFile documentParam,
+      final Long personId) {
+    final DocumentDTO document = new DocumentDTO();
+
+    if (!Optional.ofNullable(documentParam.getOriginalFilename()).isPresent() || !documentParam
+        .getOriginalFilename().contains(".")) {
+      return Optional.empty();
+    }
+
+    try {
+      document.setUploadedBy(
+          TisSecurityHelper.getProfileFromContext().getFirstName() + " " + TisSecurityHelper
+              .getProfileFromContext().getLastName());
+      document.setPersonId(personId);
+      document.setFileName(documentParam.getOriginalFilename());
+      document.setTitle(documentParam.getOriginalFilename());
+      document.setFileExtension(documentParam.getOriginalFilename()
+          .substring(documentParam.getOriginalFilename().lastIndexOf('.') + 1));
+      document.setContentType(documentParam.getContentType());
+      document.setSize(documentParam.getSize());
+      document.setBytes(documentParam.getBytes());
+      document.setStatus(Status.CURRENT);
+    } catch (final Exception ex) {
+      LOG.error("Error creating {} object from '{}' object '{}'",
+          DocumentDTO.class.getSimpleName(), documentParam.getClass().getSimpleName(),
+          documentParam.toString(), ex);
+      return Optional.empty();
+    }
+
+    return Optional.of(document);
+  }
+
+  private void streamFile(final DocumentDTO document, final HttpServletResponse response,
+      final boolean view) throws IOException {
+    LOG.trace("Setting response headers to download document with id '{}' ",
+        document.getId());
+
+    response.setStatus(HttpStatus.OK.value());
+    response.addHeader("Content-disposition",
+        (view ? "inline" : "attachment") + ";filename=\"" + document.getFileName() + "\"");
+    response.setContentType(document.getContentType());
+    response.setContentLengthLong(document.getSize());
+
+    response.flushBuffer();
+
+    LOG.debug("Preparing to stream document with id '{}'",
+        document.getId());
+
+    documentService.download(document, response.getOutputStream());
+
+    LOG.debug("Finished streaming document with id '{}'",
+        document.getId());
+  }
+
+  public interface DocumentDTOPage extends Page<DocumentDTO> {
+
+  }
+
+  private static class DocumentId {
+
+    private Long id;
+
+    DocumentId() {
 
     }
 
-    @PreAuthorize("hasPermission('tis:people::person:', 'Create')")
-    @PostMapping(value = PATH_DOCUMENTS, consumes = MULTIPART_FORM_DATA, produces = APPLICATION_JSON)
-    public ResponseEntity<DocumentId> uploadDocument(
-            @RequestParam("personId") final Long personId,
-            @RequestParam("document") final MultipartFile documentParam
-    ) throws IOException {
-        LOG.info("Received 'UploadDocument' request with person '{}' and document name '{}'",
-                personId, documentParam.getOriginalFilename());
-
-        final Optional<DocumentDTO> newDocument = createDocument(documentParam, personId);
-
-        if (!newDocument.isPresent()) {
-            LOG.warn("Document with person '{}' and document name '{}' failed validation; rejecting request",
-                    personId, documentParam.getOriginalFilename());
-            return new ResponseEntity<>(HttpStatus.BAD_REQUEST);
-        }
-
-        LOG.debug("Accessing service to save document with person '{}' and document name '{}'",
-                personId, documentParam.getOriginalFilename());
-
-        final DocumentDTO savedDocument = documentService.save(newDocument.get());
-
-        LOG.debug("Document with person '{}' and document name '{}' saved successfully",
-                personId, documentParam.getOriginalFilename());
-
-        return ResponseEntity.status(HttpStatus.CREATED).body(new DocumentId(savedDocument.getId()));
+    DocumentId(final Long id) {
+      this.id = id;
     }
 
-    @PreAuthorize("hasPermission('tis:people::person:', 'Update')")
-    @PatchMapping(value = PATH_DOCUMENTS, consumes = APPLICATION_JSON, produces = APPLICATION_JSON)
-    public ResponseEntity<Void> bulkUpdateDocuments(
-            @RequestBody @Validated final Collection<DocumentDTO> documents) throws IOException {
-        LOG.info("Received 'BulkUpdateDocuments' request with '{}' documents",
-                documents.size());
-
-        LOG.debug("Accessing service to load '{}' documents",
-                documents.size());
-
-        documentService.save(documents);
-
-        return ResponseEntity.ok().build();
+    public Long getId() {
+      return id;
     }
 
-    @DeleteMapping(PATH_DOCUMENTS + "/{entity}/{personId}")
-    public ResponseEntity<Void> deleteAllDocuments(
-            @PathVariable(value = "entity") final String entity,
-            @PathVariable(value = "personId") final Long personId,
-            @RequestBody final Collection<DocumentId> documents) {
-
-        documents.forEach(document -> deleteDocumentById(entity, personId, document.getId()));
-
-        return ResponseEntity.noContent().build();
+    public void setId(final Long id) {
+      this.id = id;
     }
-
-    @DeleteMapping(PATH_DOCUMENTS + "/{entity}/{personId}/{documentId}")
-    public ResponseEntity<Void> deleteDocumentById(@PathVariable(value = "entity") final String entity,
-                                                   @PathVariable(value = "personId") final Long personId,
-                                                   @PathVariable(value = "documentId") final Long documentId) {
-
-        if (StringUtils.isBlank(entity) || !entity.equalsIgnoreCase("person")) {
-            LOG.warn("Invalid or not implemented entity received '{}'",
-                    entity);
-            return new ResponseEntity<>(HttpStatus.NOT_IMPLEMENTED);
-        }
-
-        if (personId == null) {
-            LOG.warn("Invalid personId received '{}'",
-                    personId);
-            return new ResponseEntity<>(HttpStatus.BAD_REQUEST);
-        }
-
-        if (documentId == null) {
-            LOG.warn("Invalid documentId received '{}'",
-                    documentId);
-            return new ResponseEntity<>(HttpStatus.BAD_REQUEST);
-        }
-
-        final Optional<DocumentDTO> deletedDocumentOptional = documentService.delete(personId, documentId);
-
-        if (deletedDocumentOptional.isPresent()) {
-            return ResponseEntity.noContent().build();
-        } else {
-            return ResponseEntity.notFound().build();
-        }
-    }
-
-    @GetMapping(value = PATH_DOCUMENTS + PATH_TAGS, produces = APPLICATION_JSON)
-    public ResponseEntity<Collection<TagDTO>> getAllTags(
-            @QueryParam("query") final String query) {
-        LOG.info("Received 'SearchTags' request with query '{}'",
-                query);
-
-        if (StringUtils.isEmpty(query)) {
-            LOG.warn("Received empty query to 'SearchTags'; rejecting request");
-            return new ResponseEntity<>(HttpStatus.BAD_REQUEST);
-        }
-
-        LOG.debug("Accessing service to find all '{}' with name starting with '{}'",
-                TagDTO.class.getSimpleName(), query);
-
-        final Collection<TagDTO> tags = tagService.findByNameStartingWithOrderByName(query);
-
-        if (CollectionUtils.isEmpty(tags)) {
-            LOG.debug("No '{}' found with name starting with '{}'",
-                    TagDTO.class.getSimpleName(), query);
-
-            return new ResponseEntity<>(HttpStatus.NOT_FOUND);
-        } else {
-            LOG.debug("Found '{}' '{}' with name starting with '{}'",
-                    tags.size(), TagDTO.class.getSimpleName(), query);
-
-            return ResponseEntity.status(HttpStatus.OK).body(tags);
-        }
-    }
-
-    private Optional<DocumentDTO> createDocument(final MultipartFile documentParam, final Long personId) {
-        final DocumentDTO document = new DocumentDTO();
-
-        if (!Optional.ofNullable(documentParam.getOriginalFilename()).isPresent() || !documentParam.getOriginalFilename().contains(".")) {
-            return Optional.empty();
-        }
-
-        try {
-            document.setUploadedBy(TisSecurityHelper.getProfileFromContext().getFirstName() + " " + TisSecurityHelper.getProfileFromContext().getLastName());
-            document.setPersonId(personId);
-            document.setFileName(documentParam.getOriginalFilename());
-            document.setTitle(documentParam.getOriginalFilename());
-            document.setFileExtension(documentParam.getOriginalFilename().substring(documentParam.getOriginalFilename().lastIndexOf('.') + 1));
-            document.setContentType(documentParam.getContentType());
-            document.setSize(documentParam.getSize());
-            document.setBytes(documentParam.getBytes());
-            document.setStatus(Status.CURRENT);
-        } catch (final Exception ex) {
-            LOG.error("Error creating {} object from '{}' object '{}'",
-                    DocumentDTO.class.getSimpleName(), documentParam.getClass().getSimpleName(), documentParam.toString(), ex);
-            return Optional.empty();
-        }
-
-        return Optional.of(document);
-    }
-
-    private void streamFile(final DocumentDTO document, final HttpServletResponse response, final boolean view) throws IOException {
-        LOG.trace("Setting response headers to download document with id '{}' ",
-                document.getId());
-
-        response.setStatus(HttpStatus.OK.value());
-        response.addHeader("Content-disposition", (view ? "inline" : "attachment") + ";filename=\"" + document.getFileName() + "\"");
-        response.setContentType(document.getContentType());
-        response.setContentLengthLong(document.getSize());
-
-        response.flushBuffer();
-
-        LOG.debug("Preparing to stream document with id '{}'",
-                document.getId());
-
-        documentService.download(document, response.getOutputStream());
-
-        LOG.debug("Finished streaming document with id '{}'",
-                document.getId());
-    }
-
-    private static class DocumentId {
-        private Long id;
-
-        DocumentId() {
-
-        }
-
-        DocumentId(final Long id) {
-            this.id = id;
-        }
-
-        public Long getId() {
-            return id;
-        }
-
-        public void setId(final Long id) {
-            this.id = id;
-        }
-    }
-
-    public interface DocumentDTOPage extends Page<DocumentDTO> {
-
-    }
+  }
 }

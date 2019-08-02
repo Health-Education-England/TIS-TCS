@@ -1,12 +1,11 @@
 package com.transformuk.hee.tis.tcs.service.mapper;
 
+import static org.assertj.core.api.Assertions.assertThat;
+
 import com.google.common.collect.Sets;
 import com.transformuk.hee.tis.tcs.service.service.mapper.DesignatedBodyMapper;
-import org.junit.Test;
-
 import java.util.Set;
-
-import static org.assertj.core.api.Assertions.assertThat;
+import org.junit.Test;
 
 public class DesignatedBodyMapperTest {
 
@@ -20,7 +19,8 @@ public class DesignatedBodyMapperTest {
     //Then
     assertThat(res).hasSize(4);
     assertThat(res).contains("Health Education England Kent, Surrey and Sussex",
-        "London LETBs", "Health Education England East Midlands", "Health Education England West Midlands");
+        "London LETBs", "Health Education England East Midlands",
+        "Health Education England West Midlands");
   }
 
   @Test
@@ -46,14 +46,15 @@ public class DesignatedBodyMapperTest {
     Set<String> ownerSet = DesignatedBodyMapper.getAllOwners();
 
     //then
-    assertThat(ownerSet).contains("Health Education England Kent, Surrey and Sussex", "London LETBs",
-        "Health Education England North Central and East London",
-        "Health Education England South London",
-        "Health Education England East Midlands",
-        "Health Education England East of England",
-        "Health Education England North East",
-        "Health Education England Thames Valley",
-        "Health Education England Yorkshire and the Humber",
-        "Health Education England West Midlands");
+    assertThat(ownerSet)
+        .contains("Health Education England Kent, Surrey and Sussex", "London LETBs",
+            "Health Education England North Central and East London",
+            "Health Education England South London",
+            "Health Education England East Midlands",
+            "Health Education England East of England",
+            "Health Education England North East",
+            "Health Education England Thames Valley",
+            "Health Education England Yorkshire and the Humber",
+            "Health Education England West Midlands");
   }
 }

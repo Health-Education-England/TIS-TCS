@@ -1,12 +1,11 @@
 package com.transformuk.hee.tis.tcs.service.api.util;
 
+import static org.assertj.core.api.Assertions.assertThatThrownBy;
+
 import com.transformuk.hee.tis.tcs.service.exception.InvalidDateException;
+import java.time.LocalDate;
 import org.assertj.core.api.Assertions;
 import org.junit.Test;
-
-import java.time.LocalDate;
-
-import static org.assertj.core.api.Assertions.assertThatThrownBy;
 
 public class DateUtilTest {
 

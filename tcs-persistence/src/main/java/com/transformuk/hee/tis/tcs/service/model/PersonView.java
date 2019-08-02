@@ -2,7 +2,7 @@ package com.transformuk.hee.tis.tcs.service.model;
 
 import com.transformuk.hee.tis.tcs.api.enumeration.PersonOwnerRule;
 import com.transformuk.hee.tis.tcs.api.enumeration.Status;
-
+import java.io.Serializable;
 import javax.persistence.Column;
 import javax.persistence.Entity;
 import javax.persistence.EnumType;
@@ -11,7 +11,6 @@ import javax.persistence.GeneratedValue;
 import javax.persistence.GenerationType;
 import javax.persistence.Id;
 import javax.persistence.Table;
-import java.io.Serializable;
 
 /**
  * This view is built to sit behind the person list.
@@ -240,35 +239,82 @@ public class PersonView implements Serializable {
 
   @Override
   public boolean equals(Object o) {
-    if (this == o) return true;
-    if (o == null || getClass() != o.getClass()) return false;
+    if (this == o) {
+      return true;
+    }
+    if (o == null || getClass() != o.getClass()) {
+      return false;
+    }
 
     PersonView that = (PersonView) o;
 
-    if (id != null ? !id.equals(that.id) : that.id != null) return false;
-    if (intrepidId != null ? !intrepidId.equals(that.intrepidId) : that.intrepidId != null) return false;
-    if (surname != null ? !surname.equals(that.surname) : that.surname != null) return false;
-    if (forenames != null ? !forenames.equals(that.forenames) : that.forenames != null) return false;
-    if (gmcNumber != null ? !gmcNumber.equals(that.gmcNumber) : that.gmcNumber != null) return false;
-    if (gdcNumber != null ? !gdcNumber.equals(that.gdcNumber) : that.gdcNumber != null) return false;
-    if (publicHealthNumber != null ? !publicHealthNumber.equals(that.publicHealthNumber) : that.publicHealthNumber != null)
+    if (id != null ? !id.equals(that.id) : that.id != null) {
       return false;
-    if (programmeId != null ? !programmeId.equals(that.programmeId) : that.programmeId != null) return false;
-    if (programmeName != null ? !programmeName.equals(that.programmeName) : that.programmeName != null) return false;
-    if (programmeNumber != null ? !programmeNumber.equals(that.programmeNumber) : that.programmeNumber != null)
+    }
+    if (intrepidId != null ? !intrepidId.equals(that.intrepidId) : that.intrepidId != null) {
       return false;
-    if (trainingNumber != null ? !trainingNumber.equals(that.trainingNumber) : that.trainingNumber != null)
+    }
+    if (surname != null ? !surname.equals(that.surname) : that.surname != null) {
       return false;
-    if (gradeId != null ? !gradeId.equals(that.gradeId) : that.gradeId != null) return false;
-    if (gradeAbbreviation != null ? !gradeAbbreviation.equals(that.gradeAbbreviation) : that.gradeAbbreviation != null)
+    }
+    if (forenames != null ? !forenames.equals(that.forenames) : that.forenames != null) {
       return false;
-    if (siteId != null ? !siteId.equals(that.siteId) : that.siteId != null) return false;
-    if (siteCode != null ? !siteCode.equals(that.siteCode) : that.siteCode != null) return false;
-    if (placementType != null ? !placementType.equals(that.placementType) : that.placementType != null) return false;
-    if (specialty != null ? !specialty.equals(that.specialty) : that.specialty != null) return false;
-    if (role != null ? !role.equals(that.role) : that.role != null) return false;
-    if (status != that.status) return false;
-    if (currentOwner != null ? !currentOwner.equals(that.currentOwner) : that.currentOwner != null) return false;
+    }
+    if (gmcNumber != null ? !gmcNumber.equals(that.gmcNumber) : that.gmcNumber != null) {
+      return false;
+    }
+    if (gdcNumber != null ? !gdcNumber.equals(that.gdcNumber) : that.gdcNumber != null) {
+      return false;
+    }
+    if (publicHealthNumber != null ? !publicHealthNumber.equals(that.publicHealthNumber)
+        : that.publicHealthNumber != null) {
+      return false;
+    }
+    if (programmeId != null ? !programmeId.equals(that.programmeId) : that.programmeId != null) {
+      return false;
+    }
+    if (programmeName != null ? !programmeName.equals(that.programmeName)
+        : that.programmeName != null) {
+      return false;
+    }
+    if (programmeNumber != null ? !programmeNumber.equals(that.programmeNumber)
+        : that.programmeNumber != null) {
+      return false;
+    }
+    if (trainingNumber != null ? !trainingNumber.equals(that.trainingNumber)
+        : that.trainingNumber != null) {
+      return false;
+    }
+    if (gradeId != null ? !gradeId.equals(that.gradeId) : that.gradeId != null) {
+      return false;
+    }
+    if (gradeAbbreviation != null ? !gradeAbbreviation.equals(that.gradeAbbreviation)
+        : that.gradeAbbreviation != null) {
+      return false;
+    }
+    if (siteId != null ? !siteId.equals(that.siteId) : that.siteId != null) {
+      return false;
+    }
+    if (siteCode != null ? !siteCode.equals(that.siteCode) : that.siteCode != null) {
+      return false;
+    }
+    if (placementType != null ? !placementType.equals(that.placementType)
+        : that.placementType != null) {
+      return false;
+    }
+    if (specialty != null ? !specialty.equals(that.specialty) : that.specialty != null) {
+      return false;
+    }
+    if (role != null ? !role.equals(that.role) : that.role != null) {
+      return false;
+    }
+    if (status != that.status) {
+      return false;
+    }
+    if (currentOwner != null ? !currentOwner.equals(that.currentOwner)
+        : that.currentOwner != null) {
+      return false;
+    }
     return currentOwnerRule == that.currentOwnerRule;
   }
 

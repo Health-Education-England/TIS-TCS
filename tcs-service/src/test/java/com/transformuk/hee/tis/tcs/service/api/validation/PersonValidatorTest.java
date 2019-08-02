@@ -1,8 +1,14 @@
 package com.transformuk.hee.tis.tcs.service.api.validation;
 
+import static org.mockito.ArgumentMatchers.anyString;
+import static org.mockito.Mockito.never;
+import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.when;
+
 import com.transformuk.hee.tis.tcs.api.dto.PersonDTO;
 import com.transformuk.hee.tis.tcs.service.model.Person;
 import com.transformuk.hee.tis.tcs.service.repository.PersonRepository;
+import java.util.List;
 import org.assertj.core.util.Lists;
 import org.junit.Assert;
 import org.junit.Before;
@@ -13,13 +19,6 @@ import org.mockito.Mock;
 import org.mockito.junit.MockitoJUnitRunner;
 import org.springframework.validation.FieldError;
 import org.springframework.web.bind.MethodArgumentNotValidException;
-
-import java.util.List;
-
-import static org.mockito.ArgumentMatchers.anyString;
-import static org.mockito.Mockito.never;
-import static org.mockito.Mockito.verify;
-import static org.mockito.Mockito.when;
 
 @RunWith(MockitoJUnitRunner.class)
 public class PersonValidatorTest {
@@ -47,8 +46,10 @@ public class PersonValidatorTest {
   }
 
   @Test(expected = MethodArgumentNotValidException.class)
-  public void validateShouldThrowExceptionWhenDifferentPersonWithPublicHealthNumberAlreadyExists() throws MethodArgumentNotValidException {
-    when(personRepositoryMock.findByPublicHealthNumber(PUBLIC_HEALTH_NUMBER)).thenReturn(Lists.newArrayList(personMock1));
+  public void validateShouldThrowExceptionWhenDifferentPersonWithPublicHealthNumberAlreadyExists()
+      throws MethodArgumentNotValidException {
+    when(personRepositoryMock.findByPublicHealthNumber(PUBLIC_HEALTH_NUMBER))
+        .thenReturn(Lists.newArrayList(personMock1));
     try {
       testObj.validate(personDTOMock);
     } catch (MethodArgumentNotValidException e) {
@@ -60,8 +61,10 @@ public class PersonValidatorTest {
 
 
   @Test(expected = MethodArgumentNotValidException.class)
-  public void validateShouldThrowExceptionWhenThereAreMultiplePeopleWithSamePublicHealthNumber() throws MethodArgumentNotValidException {
-    when(personRepositoryMock.findByPublicHealthNumber(PUBLIC_HEALTH_NUMBER)).thenReturn(Lists.newArrayList(personMock1, personMock2));
+  public void validateShouldThrowExceptionWhenThereAreMultiplePeopleWithSamePublicHealthNumber()
+      throws MethodArgumentNotValidException {
+    when(personRepositoryMock.findByPublicHealthNumber(PUBLIC_HEALTH_NUMBER))
+        .thenReturn(Lists.newArrayList(personMock1, personMock2));
     try {
       testObj.validate(personDTOMock);
     } catch (MethodArgumentNotValidException e) {
@@ -72,9 +75,11 @@ public class PersonValidatorTest {
   }
 
   @Test(expected = MethodArgumentNotValidException.class)
-  public void validateShouldThrowExceptionDuringCreatePublicHealthNumberAlreadyExists() throws MethodArgumentNotValidException {
+  public void validateShouldThrowExceptionDuringCreatePublicHealthNumberAlreadyExists()
+      throws MethodArgumentNotValidException {
     when(personDTOMock.getId()).thenReturn(null);
-    when(personRepositoryMock.findByPublicHealthNumber(PUBLIC_HEALTH_NUMBER)).thenReturn(Lists.newArrayList(personMock1, personMock2));
+    when(personRepositoryMock.findByPublicHealthNumber(PUBLIC_HEALTH_NUMBER))
+        .thenReturn(Lists.newArrayList(personMock1, personMock2));
     try {
       testObj.validate(personDTOMock);
     } catch (MethodArgumentNotValidException e) {
@@ -85,7 +90,8 @@ public class PersonValidatorTest {
   }
 
   @Test
-  public void validationSkippedIfPublicHealthNumberIsUnknownOrNA() throws MethodArgumentNotValidException {
+  public void validationSkippedIfPublicHealthNumberIsUnknownOrNA()
+      throws MethodArgumentNotValidException {
     when(personDTOMock.getPublicHealthNumber()).thenReturn(UNKNOWN_PUBLIC_HEALTH_NUMBER);
     testObj.validate(personDTOMock);
     verify(personRepositoryMock, never()).findByPublicHealthNumber(anyString());

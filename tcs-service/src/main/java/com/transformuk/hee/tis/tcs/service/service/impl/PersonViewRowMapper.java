@@ -2,11 +2,10 @@ package com.transformuk.hee.tis.tcs.service.service.impl;
 
 import com.transformuk.hee.tis.tcs.api.enumeration.Status;
 import com.transformuk.hee.tis.tcs.service.job.person.PersonView;
-import org.apache.commons.lang3.StringUtils;
-import org.springframework.jdbc.core.RowMapper;
-
 import java.sql.ResultSet;
 import java.sql.SQLException;
+import org.apache.commons.lang3.StringUtils;
+import org.springframework.jdbc.core.RowMapper;
 
 public class PersonViewRowMapper implements RowMapper<PersonView> {
 

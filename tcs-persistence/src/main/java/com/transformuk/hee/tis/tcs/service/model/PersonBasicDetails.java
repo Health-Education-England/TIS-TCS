@@ -21,8 +21,8 @@ public class PersonBasicDetails {
   private String lastName;
 
   @OneToOne
-  @JoinColumn(name="id", unique=true, nullable=false, updatable=false)
-  private  GmcDetails gmcDetails;
+  @JoinColumn(name = "id", unique = true, nullable = false, updatable = false)
+  private GmcDetails gmcDetails;
 
   public Long getId() {
     return id;
@@ -58,14 +58,24 @@ public class PersonBasicDetails {
 
   @Override
   public boolean equals(Object o) {
-    if (this == o) return true;
-    if (o == null || getClass() != o.getClass()) return false;
+    if (this == o) {
+      return true;
+    }
+    if (o == null || getClass() != o.getClass()) {
+      return false;
+    }
 
     PersonBasicDetails that = (PersonBasicDetails) o;
 
-    if (id != null ? !id.equals(that.id) : that.id != null) return false;
-    if (firstName != null ? !firstName.equals(that.firstName) : that.firstName != null) return false;
-    if (lastName != null ? !lastName.equals(that.lastName) : that.lastName != null) return false;
+    if (id != null ? !id.equals(that.id) : that.id != null) {
+      return false;
+    }
+    if (firstName != null ? !firstName.equals(that.firstName) : that.firstName != null) {
+      return false;
+    }
+    if (lastName != null ? !lastName.equals(that.lastName) : that.lastName != null) {
+      return false;
+    }
     return gmcDetails != null ? gmcDetails.equals(that.gmcDetails) : that.gmcDetails == null;
   }
 

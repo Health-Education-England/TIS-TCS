@@ -2,10 +2,9 @@ package com.transformuk.hee.tis.tcs.service.service.impl;
 
 import com.transformuk.hee.tis.tcs.api.enumeration.ProgrammeMembershipStatus;
 import com.transformuk.hee.tis.tcs.service.job.person.ProgrammeMembershipDto;
-import org.springframework.jdbc.core.RowMapper;
-
 import java.sql.ResultSet;
 import java.sql.SQLException;
+import org.springframework.jdbc.core.RowMapper;
 
 public class ProgrammeMembershipRowMapper implements RowMapper<ProgrammeMembershipDto> {
 
@@ -18,7 +17,8 @@ public class ProgrammeMembershipRowMapper implements RowMapper<ProgrammeMembersh
     dto.setProgrammeName(rs.getString("programmeName"));
     dto.setProgrammeNumber(rs.getString("programmeNumber"));
     dto.setTrainingNumber(rs.getString("trainingNumber"));
-    dto.setProgrammeMembershipStatus(ProgrammeMembershipStatus.valueOf(rs.getString("programmeMembershipStatus")));
+    dto.setProgrammeMembershipStatus(
+        ProgrammeMembershipStatus.valueOf(rs.getString("programmeMembershipStatus")));
     return dto;
   }
 }

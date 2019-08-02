@@ -3,14 +3,13 @@ package com.transformuk.hee.tis.tcs.service.api.validation;
 import com.transformuk.hee.tis.tcs.api.dto.CurriculumDTO;
 import com.transformuk.hee.tis.tcs.api.dto.SpecialtyDTO;
 import com.transformuk.hee.tis.tcs.service.repository.SpecialtyRepository;
+import java.util.ArrayList;
+import java.util.List;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 import org.springframework.validation.BeanPropertyBindingResult;
 import org.springframework.validation.FieldError;
 import org.springframework.web.bind.MethodArgumentNotValidException;
-
-import java.util.ArrayList;
-import java.util.List;
 
 @Component
 public class CurriculumValidator {
@@ -23,8 +22,9 @@ public class CurriculumValidator {
   }
 
   /**
-   * Custom validator used during create and update rest calls. Most structural validation is already on the DTO itself.
-   * This validation checks that the provided specialty is valid and that it exists
+   * Custom validator used during create and update rest calls. Most structural validation is
+   * already on the DTO itself. This validation checks that the provided specialty is valid and that
+   * it exists
    *
    * @param curriculumDTO The provided curriculum to validate
    * @throws MethodArgumentNotValidException
@@ -34,7 +34,8 @@ public class CurriculumValidator {
     fieldErrors.addAll(checkSpecialty(curriculumDTO));
 
     if (!fieldErrors.isEmpty()) {
-      BeanPropertyBindingResult bindingResult = new BeanPropertyBindingResult(curriculumDTO, "CurriculumDTO");
+      BeanPropertyBindingResult bindingResult = new BeanPropertyBindingResult(curriculumDTO,
+          "CurriculumDTO");
       fieldErrors.forEach(bindingResult::addError);
       throw new MethodArgumentNotValidException(null, bindingResult);
     }

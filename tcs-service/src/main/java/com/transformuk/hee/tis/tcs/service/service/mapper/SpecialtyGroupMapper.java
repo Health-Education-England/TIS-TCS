@@ -4,24 +4,23 @@ import com.transformuk.hee.tis.tcs.api.dto.SpecialtyDTO;
 import com.transformuk.hee.tis.tcs.api.dto.SpecialtyGroupDTO;
 import com.transformuk.hee.tis.tcs.service.model.Specialty;
 import com.transformuk.hee.tis.tcs.service.model.SpecialtyGroup;
-import org.apache.commons.collections4.CollectionUtils;
-import org.springframework.stereotype.Component;
-
 import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
+import org.apache.commons.collections4.CollectionUtils;
+import org.springframework.stereotype.Component;
 
 /**
- * Mapper for the entity SpecialtyGroup and its DTO SpecialtyGroupDTO.
- * Created this mapper as mapstruct was having problems mapping between entities and DTOs
- * Problem was the circular link between SpecialtyGroup to Specialty to SpecialtyGroup etc
+ * Mapper for the entity SpecialtyGroup and its DTO SpecialtyGroupDTO. Created this mapper as
+ * mapstruct was having problems mapping between entities and DTOs Problem was the circular link
+ * between SpecialtyGroup to Specialty to SpecialtyGroup etc
  */
 
 @Component
 public class SpecialtyGroupMapper {
 
-  public SpecialtyGroupDTO specialtyGroupToSpecialtyGroupDTO (SpecialtyGroup specialtyGroup) {
+  public SpecialtyGroupDTO specialtyGroupToSpecialtyGroupDTO(SpecialtyGroup specialtyGroup) {
     SpecialtyGroupDTO result = null;
 
     if (specialtyGroup != null) {
@@ -43,7 +42,8 @@ public class SpecialtyGroupMapper {
     return result;
   }
 
-  public List<SpecialtyGroupDTO> specialtyGroupsToSpecialtyGroupDTOs (List<SpecialtyGroup> specialtyGroupList) {
+  public List<SpecialtyGroupDTO> specialtyGroupsToSpecialtyGroupDTOs(
+      List<SpecialtyGroup> specialtyGroupList) {
     List<SpecialtyGroupDTO> result = new ArrayList<>();
     for (SpecialtyGroup specialtyGroup : specialtyGroupList) {
       result.add(specialtyGroupToSpecialtyGroupDTO(specialtyGroup));
@@ -51,7 +51,7 @@ public class SpecialtyGroupMapper {
     return result;
   }
 
-  public SpecialtyGroup specialtyGroupDTOToSpecialtyGroup (SpecialtyGroupDTO specialtyGroupDTO) {
+  public SpecialtyGroup specialtyGroupDTOToSpecialtyGroup(SpecialtyGroupDTO specialtyGroupDTO) {
     SpecialtyGroup result = null;
 
     if (specialtyGroupDTO != null) {
@@ -73,7 +73,8 @@ public class SpecialtyGroupMapper {
     return result;
   }
 
-  public List<SpecialtyGroup> specialtyGroupDTOsToSpecialtyGroups (List<SpecialtyGroupDTO> specialtyGroupDTOList) {
+  public List<SpecialtyGroup> specialtyGroupDTOsToSpecialtyGroups(
+      List<SpecialtyGroupDTO> specialtyGroupDTOList) {
     List<SpecialtyGroup> result = new ArrayList<>();
     for (SpecialtyGroupDTO specialtyGroupDTO : specialtyGroupDTOList) {
       result.add(specialtyGroupDTOToSpecialtyGroup(specialtyGroupDTO));

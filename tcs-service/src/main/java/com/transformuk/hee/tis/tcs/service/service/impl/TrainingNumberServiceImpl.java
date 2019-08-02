@@ -6,6 +6,7 @@ import com.transformuk.hee.tis.tcs.service.model.TrainingNumber;
 import com.transformuk.hee.tis.tcs.service.repository.TrainingNumberRepository;
 import com.transformuk.hee.tis.tcs.service.service.TrainingNumberService;
 import com.transformuk.hee.tis.tcs.service.service.mapper.TrainingNumberMapper;
+import java.util.List;
 import org.apache.commons.collections4.CollectionUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -14,8 +15,6 @@ import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
-
-import java.util.List;
 
 /**
  * Service Implementation for managing TrainingNumber.
@@ -30,8 +29,9 @@ public class TrainingNumberServiceImpl implements TrainingNumberService {
   private final TrainingNumberMapper trainingNumberMapper;
   private final ApplicationEventPublisher applicationEventPublisher;
 
-  public TrainingNumberServiceImpl(TrainingNumberRepository trainingNumberRepository, TrainingNumberMapper trainingNumberMapper,
-                                   ApplicationEventPublisher applicationEventPublisher) {
+  public TrainingNumberServiceImpl(TrainingNumberRepository trainingNumberRepository,
+      TrainingNumberMapper trainingNumberMapper,
+      ApplicationEventPublisher applicationEventPublisher) {
     this.trainingNumberRepository = trainingNumberRepository;
     this.trainingNumberMapper = trainingNumberMapper;
     this.applicationEventPublisher = applicationEventPublisher;
@@ -46,9 +46,11 @@ public class TrainingNumberServiceImpl implements TrainingNumberService {
   @Override
   public TrainingNumberDTO save(TrainingNumberDTO trainingNumberDTO) {
     log.debug("Request to save TrainingNumber : {}", trainingNumberDTO);
-    TrainingNumber trainingNumber = trainingNumberMapper.trainingNumberDTOToTrainingNumber(trainingNumberDTO);
+    TrainingNumber trainingNumber = trainingNumberMapper
+        .trainingNumberDTOToTrainingNumber(trainingNumberDTO);
     trainingNumber = trainingNumberRepository.save(trainingNumber);
-    TrainingNumberDTO trainingNumberDTO1 = trainingNumberMapper.trainingNumberToTrainingNumberDTO(trainingNumber);
+    TrainingNumberDTO trainingNumberDTO1 = trainingNumberMapper
+        .trainingNumberToTrainingNumberDTO(trainingNumber);
 
     applicationEventPublisher.publishEvent(new TrainingNumberSavedEvent(trainingNumberDTO));
 
@@ -64,12 +66,15 @@ public class TrainingNumberServiceImpl implements TrainingNumberService {
   @Override
   public List<TrainingNumberDTO> save(List<TrainingNumberDTO> trainingNumberDTO) {
     log.debug("Request to save TrainingNumber : {}", trainingNumberDTO);
-    List<TrainingNumber> trainingNumbers = trainingNumberMapper.trainingNumberDTOsToTrainingNumbers(trainingNumberDTO);
+    List<TrainingNumber> trainingNumbers = trainingNumberMapper
+        .trainingNumberDTOsToTrainingNumbers(trainingNumberDTO);
     trainingNumbers = trainingNumberRepository.saveAll(trainingNumbers);
-    List<TrainingNumberDTO> trainingNumberDTOS = trainingNumberMapper.trainingNumbersToTrainingNumberDTOs(trainingNumbers);
+    List<TrainingNumberDTO> trainingNumberDTOS = trainingNumberMapper
+        .trainingNumbersToTrainingNumberDTOs(trainingNumbers);
 
-    if(CollectionUtils.isNotEmpty(trainingNumberDTOS)) {
-      trainingNumberDTO.stream().forEach(tn -> applicationEventPublisher.publishEvent(new TrainingNumberSavedEvent(tn)));
+    if (CollectionUtils.isNotEmpty(trainingNumberDTOS)) {
+      trainingNumberDTO.stream()
+          .forEach(tn -> applicationEventPublisher.publishEvent(new TrainingNumberSavedEvent(tn)));
     }
 
     return trainingNumberDTOS;

@@ -8,6 +8,7 @@ import org.springframework.data.jpa.repository.JpaSpecificationExecutor;
  * Spring Data JPA repository for the PersonView entity.
  */
 @SuppressWarnings("unused")
-public interface PersonViewRepository extends JpaRepository<PersonView, Long>, JpaSpecificationExecutor<PersonView> {
+public interface PersonViewRepository extends JpaRepository<PersonView, Long>,
+    JpaSpecificationExecutor<PersonView> {
 
 }

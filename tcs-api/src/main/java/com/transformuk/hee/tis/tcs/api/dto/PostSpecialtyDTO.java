@@ -20,7 +20,7 @@ public class PostSpecialtyDTO implements Serializable {
   }
 
   public PostSpecialtyDTO(Long postId, SpecialtyDTO specialty,
-    PostSpecialtyType postSpecialtyType) {
+      PostSpecialtyType postSpecialtyType) {
     this.postId = postId;
     this.specialty = specialty;
     this.postSpecialtyType = postSpecialtyType;
@@ -86,10 +86,10 @@ public class PostSpecialtyDTO implements Serializable {
   @Override
   public String toString() {
     return "PostSpecialtyDTO{" +
-      "id=" + id +
-      ", postId=" + postId +
-      ", specialty=" + specialty +
-      ", postSpecialtyType=" + postSpecialtyType +
-      '}';
+        "id=" + id +
+        ", postId=" + postId +
+        ", specialty=" + specialty +
+        ", postSpecialtyType=" + postSpecialtyType +
+        '}';
   }
 }

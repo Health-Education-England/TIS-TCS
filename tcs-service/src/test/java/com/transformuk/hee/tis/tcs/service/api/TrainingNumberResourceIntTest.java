@@ -1,5 +1,16 @@
 package com.transformuk.hee.tis.tcs.service.api;
 
+import static org.assertj.core.api.Assertions.assertThat;
+import static org.hamcrest.Matchers.containsInAnyOrder;
+import static org.hamcrest.Matchers.hasItem;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.delete;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.put;
+import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.content;
+import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
+import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
+
 import com.transformuk.hee.tis.tcs.api.dto.TrainingNumberDTO;
 import com.transformuk.hee.tis.tcs.api.enumeration.TrainingNumberType;
 import com.transformuk.hee.tis.tcs.service.Application;
@@ -9,6 +20,8 @@ import com.transformuk.hee.tis.tcs.service.model.TrainingNumber;
 import com.transformuk.hee.tis.tcs.service.repository.TrainingNumberRepository;
 import com.transformuk.hee.tis.tcs.service.service.TrainingNumberService;
 import com.transformuk.hee.tis.tcs.service.service.mapper.TrainingNumberMapper;
+import java.util.List;
+import javax.persistence.EntityManager;
 import org.hamcrest.core.StringContains;
 import org.junit.Before;
 import org.junit.Test;
@@ -24,19 +37,11 @@ import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.setup.MockMvcBuilders;
 import org.springframework.transaction.annotation.Transactional;
 
-import javax.persistence.EntityManager;
-import java.util.List;
-
-import static org.assertj.core.api.Assertions.assertThat;
-import static org.hamcrest.Matchers.containsInAnyOrder;
-import static org.hamcrest.Matchers.hasItem;
-import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.*;
-import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.*;
-
 /**
  * Test class for the TrainingNumberResource REST controller.
  *
- * @see TrainingNumberResource*/
+ * @see TrainingNumberResource
+ */
 
 
 @RunWith(SpringRunner.class)
@@ -86,11 +91,12 @@ public class TrainingNumberResourceIntTest {
 
   private TrainingNumber trainingNumber;
 
-/**
+  /**
    * Create an entity for this test.
    * <p>
-   * This is a static method, as tests for other entities might also need it,
-   * if they test an entity which requires the current entity.*/
+   * This is a static method, as tests for other entities might also need it, if they test an entity
+   * which requires the current entity.
+   */
 
 
   public static TrainingNumber createEntity(EntityManager em) {
@@ -106,7 +112,8 @@ public class TrainingNumberResourceIntTest {
   @Before
   public void setup() {
     MockitoAnnotations.initMocks(this);
-    TrainingNumberResource trainingNumberResource = new TrainingNumberResource(trainingNumberService, trainingNumberValidator);
+    TrainingNumberResource trainingNumberResource = new TrainingNumberResource(
+        trainingNumberService, trainingNumberValidator);
     this.restTrainingNumberMockMvc = MockMvcBuilders.standaloneSetup(trainingNumberResource)
         .setCustomArgumentResolvers(pageableArgumentResolver)
         .setControllerAdvice(exceptionTranslator)
@@ -124,7 +131,8 @@ public class TrainingNumberResourceIntTest {
     int databaseSizeBeforeCreate = trainingNumberRepository.findAll().size();
 
     // Create the TrainingNumber
-    TrainingNumberDTO trainingNumberDTO = trainingNumberMapper.trainingNumberToTrainingNumberDTO(trainingNumber);
+    TrainingNumberDTO trainingNumberDTO = trainingNumberMapper
+        .trainingNumberToTrainingNumberDTO(trainingNumber);
     restTrainingNumberMockMvc.perform(post("/api/training-numbers")
         .contentType(TestUtil.APPLICATION_JSON_UTF8)
         .content(TestUtil.convertObjectToJsonBytes(trainingNumberDTO)))
@@ -154,7 +162,8 @@ public class TrainingNumberResourceIntTest {
         .andExpect(status().isBadRequest())
         .andExpect(jsonPath("$.message").value("error.validation"))
         .andExpect(jsonPath("$.fieldErrors[*].field").
-                value(containsInAnyOrder("trainingNumberType", "number", "appointmentYear", "typeOfContract")));
+            value(containsInAnyOrder("trainingNumberType", "number", "appointmentYear",
+                "typeOfContract")));
   }
 
   @Test
@@ -171,7 +180,8 @@ public class TrainingNumberResourceIntTest {
         .andExpect(status().isBadRequest())
         .andExpect(jsonPath("$.message").value("error.validation"))
         .andExpect(jsonPath("$.fieldErrors[*].field").
-                value(containsInAnyOrder("trainingNumberType", "number", "appointmentYear", "typeOfContract")));
+            value(containsInAnyOrder("trainingNumberType", "number", "appointmentYear",
+                "typeOfContract")));
   }
 
   @Test
@@ -179,7 +189,8 @@ public class TrainingNumberResourceIntTest {
   public void shouldValidateNumberUniqueWhenCreating() throws Exception {
     //given we have an exiting training number with DEFAULT_NUMBER
     trainingNumberRepository.saveAndFlush(createEntity(em));
-    TrainingNumberDTO trainingNumberDTO = trainingNumberMapper.trainingNumberToTrainingNumberDTO(createEntity(em));
+    TrainingNumberDTO trainingNumberDTO = trainingNumberMapper
+        .trainingNumberToTrainingNumberDTO(createEntity(em));
 
     //when & then
     restTrainingNumberMockMvc.perform(post("/api/training-numbers")
@@ -188,7 +199,8 @@ public class TrainingNumberResourceIntTest {
         .andExpect(status().isBadRequest())
         .andExpect(jsonPath("$.message").value("error.validation"))
         .andExpect(jsonPath("$.fieldErrors[0].field").value("number"))
-        .andExpect(jsonPath("$.fieldErrors[0].message").value(StringContains.containsString("unique")));
+        .andExpect(
+            jsonPath("$.fieldErrors[0].message").value(StringContains.containsString("unique")));
   }
 
   @Test
@@ -210,7 +222,8 @@ public class TrainingNumberResourceIntTest {
         .andExpect(status().isBadRequest())
         .andExpect(jsonPath("$.message").value("error.validation"))
         .andExpect(jsonPath("$.fieldErrors[0].field").value("number"))
-        .andExpect(jsonPath("$.fieldErrors[0].message").value(StringContains.containsString("unique")));
+        .andExpect(
+            jsonPath("$.fieldErrors[0].message").value(StringContains.containsString("unique")));
   }
 
   @Test
@@ -220,7 +233,8 @@ public class TrainingNumberResourceIntTest {
 
     // Create the TrainingNumber with an existing ID
     trainingNumber.setId(1L);
-    TrainingNumberDTO trainingNumberDTO = trainingNumberMapper.trainingNumberToTrainingNumberDTO(trainingNumber);
+    TrainingNumberDTO trainingNumberDTO = trainingNumberMapper
+        .trainingNumberToTrainingNumberDTO(trainingNumber);
 
     // An entity with an existing ID cannot be created, so this API call must fail
     restTrainingNumberMockMvc.perform(post("/api/training-numbers")
@@ -244,10 +258,12 @@ public class TrainingNumberResourceIntTest {
         .andExpect(status().isOk())
         .andExpect(content().contentType(MediaType.APPLICATION_JSON_UTF8_VALUE))
         .andExpect(jsonPath("$.[*].id").value(hasItem(trainingNumber.getId().intValue())))
-        .andExpect(jsonPath("$.[*].trainingNumberType").value(hasItem(DEFAULT_TRAINING_NUMBER_TYPE.toString())))
+        .andExpect(jsonPath("$.[*].trainingNumberType")
+            .value(hasItem(DEFAULT_TRAINING_NUMBER_TYPE.toString())))
         .andExpect(jsonPath("$.[*].number").value(hasItem(DEFAULT_NUMBER)))
         .andExpect(jsonPath("$.[*].appointmentYear").value(hasItem(DEFAULT_APPOINTMENT_YEAR)))
-        .andExpect(jsonPath("$.[*].typeOfContract").value(hasItem(DEFAULT_TYPE_OF_CONTRACT.toString())))
+        .andExpect(
+            jsonPath("$.[*].typeOfContract").value(hasItem(DEFAULT_TYPE_OF_CONTRACT.toString())))
         .andExpect(jsonPath("$.[*].suffix").value(hasItem(DEFAULT_SUFFIX.toString())));
   }
 
@@ -285,14 +301,16 @@ public class TrainingNumberResourceIntTest {
     int databaseSizeBeforeUpdate = trainingNumberRepository.findAll().size();
 
     // Update the trainingNumber
-    TrainingNumber updatedTrainingNumber = trainingNumberRepository.findById(trainingNumber.getId()).orElse(null);
+    TrainingNumber updatedTrainingNumber = trainingNumberRepository.findById(trainingNumber.getId())
+        .orElse(null);
     updatedTrainingNumber
         .trainingNumberType(UPDATED_TRAINING_NUMBER_TYPE)
         .number(UPDATED_NUMBER)
         .appointmentYear(UPDATED_APPOINTMENT_YEAR)
         .typeOfContract(UPDATED_TYPE_OF_CONTRACT)
         .suffix(UPDATED_SUFFIX);
-    TrainingNumberDTO trainingNumberDTO = trainingNumberMapper.trainingNumberToTrainingNumberDTO(updatedTrainingNumber);
+    TrainingNumberDTO trainingNumberDTO = trainingNumberMapper
+        .trainingNumberToTrainingNumberDTO(updatedTrainingNumber);
 
     restTrainingNumberMockMvc.perform(put("/api/training-numbers")
         .contentType(TestUtil.APPLICATION_JSON_UTF8)
@@ -317,7 +335,8 @@ public class TrainingNumberResourceIntTest {
 
     // Create the TrainingNumber
     trainingNumber.setId(1l);
-    TrainingNumberDTO trainingNumberDTO = trainingNumberMapper.trainingNumberToTrainingNumberDTO(trainingNumber);
+    TrainingNumberDTO trainingNumberDTO = trainingNumberMapper
+        .trainingNumberToTrainingNumberDTO(trainingNumber);
 
     // If the entity doesn't have an ID, it will be created instead of just being updated
     restTrainingNumberMockMvc.perform(put("/api/training-numbers")

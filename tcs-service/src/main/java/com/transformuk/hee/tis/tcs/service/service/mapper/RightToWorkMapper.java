@@ -9,4 +9,5 @@ import org.mapstruct.Mapper;
  */
 @Mapper(componentModel = "spring", uses = {})
 public interface RightToWorkMapper extends EntityMapper<RightToWorkDTO, RightToWork> {
+
 }

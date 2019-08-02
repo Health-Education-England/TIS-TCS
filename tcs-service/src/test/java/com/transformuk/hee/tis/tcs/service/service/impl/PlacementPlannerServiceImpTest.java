@@ -1,5 +1,11 @@
 package com.transformuk.hee.tis.tcs.service.service.impl;
 
+import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.eq;
+import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.verifyZeroInteractions;
+import static org.mockito.Mockito.when;
+
 import com.google.common.collect.Lists;
 import com.google.common.collect.Maps;
 import com.google.common.collect.Sets;
@@ -16,6 +22,12 @@ import com.transformuk.hee.tis.tcs.service.repository.PlacementRepository;
 import com.transformuk.hee.tis.tcs.service.repository.PostRepository;
 import com.transformuk.hee.tis.tcs.service.repository.SpecialtyRepository;
 import com.transformuk.hee.tis.tcs.service.service.mapper.PlacementPlannerMapper;
+import java.time.LocalDate;
+import java.util.HashSet;
+import java.util.List;
+import java.util.Map;
+import java.util.Optional;
+import java.util.Set;
 import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Test;
@@ -23,19 +35,6 @@ import org.junit.runner.RunWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.MockitoJUnitRunner;
-
-import java.time.LocalDate;
-import java.util.HashSet;
-import java.util.List;
-import java.util.Map;
-import java.util.Optional;
-import java.util.Set;
-
-import static org.mockito.ArgumentMatchers.any;
-import static org.mockito.ArgumentMatchers.eq;
-import static org.mockito.Mockito.verify;
-import static org.mockito.Mockito.verifyZeroInteractions;
-import static org.mockito.Mockito.when;
 
 @RunWith(MockitoJUnitRunner.class)
 public class PlacementPlannerServiceImpTest {
@@ -111,12 +110,15 @@ public class PlacementPlannerServiceImpTest {
     postIds.add(postMock.getId());
 
     when(specialtyRepositoryMock.findById(SPECIALTY_ID)).thenReturn(Optional.of(specialtyMock));
-    when(postRepositoryMock.findPostsByProgrammeIdAndSpecialtyId(PROGRAMME_ID, SPECIALTY_ID)).thenReturn(foundPosts);
+    when(postRepositoryMock.findPostsByProgrammeIdAndSpecialtyId(PROGRAMME_ID, SPECIALTY_ID))
+        .thenReturn(foundPosts);
     when(placementRepositoryMock.findPlacementsByPostIds(postIds)).thenReturn(foundPlacements);
     when(referenceServiceMock.findSitesIdIn(siteIds)).thenReturn(foundSites);
-    when(placementPlannerMapperMock.convertSpecialty(eq(specialtyMock), any())).thenReturn(specialtyDTOMock);
+    when(placementPlannerMapperMock.convertSpecialty(eq(specialtyMock), any()))
+        .thenReturn(specialtyDTOMock);
 
-    PlacementsResultDTO result = testObj.findPlacementsForProgrammeAndSpecialty(PROGRAMME_ID, SPECIALTY_ID, fromDate, toDate);
+    PlacementsResultDTO result = testObj
+        .findPlacementsForProgrammeAndSpecialty(PROGRAMME_ID, SPECIALTY_ID, fromDate, toDate);
 
     Assert.assertNotNull(result);
     Assert.assertNotNull(result.getSpecialties());
@@ -133,7 +135,8 @@ public class PlacementPlannerServiceImpTest {
   public void findPlacementForProgrammeAndSpecialtyShouldReturnResultWithEmptyList() {
     when(specialtyRepositoryMock.findById(SPECIALTY_ID)).thenReturn(Optional.empty());
 
-    PlacementsResultDTO result = testObj.findPlacementsForProgrammeAndSpecialty(PROGRAMME_ID, SPECIALTY_ID, null, null);
+    PlacementsResultDTO result = testObj
+        .findPlacementsForProgrammeAndSpecialty(PROGRAMME_ID, SPECIALTY_ID, null, null);
 
     Assert.assertNull(result.getSpecialties());
 

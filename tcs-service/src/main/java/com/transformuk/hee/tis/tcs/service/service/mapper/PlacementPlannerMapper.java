@@ -13,48 +13,52 @@ import com.transformuk.hee.tis.tcs.service.model.Person;
 import com.transformuk.hee.tis.tcs.service.model.Placement;
 import com.transformuk.hee.tis.tcs.service.model.Post;
 import com.transformuk.hee.tis.tcs.service.model.Specialty;
-import org.apache.commons.collections4.CollectionUtils;
-import org.springframework.stereotype.Component;
-
 import java.time.LocalDate;
 import java.util.Collections;
 import java.util.Comparator;
 import java.util.List;
 import java.util.Map;
+import org.apache.commons.collections4.CollectionUtils;
+import org.springframework.stereotype.Component;
 
 @Component
 public class PlacementPlannerMapper {
-  public SpecialtyDTO convertSpecialty(Specialty specialty, Map<SiteDTO, Map<Post, List<Placement>>> data) {
+
+  public SpecialtyDTO convertSpecialty(Specialty specialty,
+      Map<SiteDTO, Map<Post, List<Placement>>> data) {
     SpecialtyDTO result = new SpecialtyDTO();
 
     result.setId(specialty.getId());
     result.setName(specialty.getName());
     result.setCollege(specialty.getCollege());
-    List<com.transformuk.hee.tis.tcs.service.dto.placementmanager.SiteDTO> sites = Lists.newArrayList();
+    List<com.transformuk.hee.tis.tcs.service.dto.placementmanager.SiteDTO> sites = Lists
+        .newArrayList();
     result.setSites(sites);
 
     for (Map.Entry<SiteDTO, Map<Post, List<Placement>>> siteDTOMapEntry : data.entrySet()) {
       SiteDTO siteDTO = siteDTOMapEntry.getKey();
-        com.transformuk.hee.tis.tcs.service.dto.placementmanager.SiteDTO convertedSite = convertSite(siteDTO);
-        sites.add(convertedSite);
+      com.transformuk.hee.tis.tcs.service.dto.placementmanager.SiteDTO convertedSite = convertSite(
+          siteDTO);
+      sites.add(convertedSite);
 
-        Map<Post, List<Placement>> postToPlacements = siteDTOMapEntry.getValue();
-        List<PostDTO> posts = Lists.newArrayList();
-        convertedSite.setPosts(posts);
-        for (Map.Entry<Post, List<Placement>> postSetEntry : postToPlacements.entrySet()) {
-          Post post = postSetEntry.getKey();
-          PostDTO postDTO = convertPost(post);
-          posts.add(postDTO);
+      Map<Post, List<Placement>> postToPlacements = siteDTOMapEntry.getValue();
+      List<PostDTO> posts = Lists.newArrayList();
+      convertedSite.setPosts(posts);
+      for (Map.Entry<Post, List<Placement>> postSetEntry : postToPlacements.entrySet()) {
+        Post post = postSetEntry.getKey();
+        PostDTO postDTO = convertPost(post);
+        posts.add(postDTO);
 
-          List<Placement> placements = postSetEntry.getValue();
-          List<PlacementDTO> placementDTOS = convertPlacements(placements);
-          postDTO.setPlacements(placementDTOS);
-        }
+        List<Placement> placements = postSetEntry.getValue();
+        List<PlacementDTO> placementDTOS = convertPlacements(placements);
+        postDTO.setPlacements(placementDTOS);
+      }
     }
     return result;
   }
 
-  private com.transformuk.hee.tis.tcs.service.dto.placementmanager.SiteDTO convertSite(SiteDTO site) {
+  private com.transformuk.hee.tis.tcs.service.dto.placementmanager.SiteDTO convertSite(
+      SiteDTO site) {
     com.transformuk.hee.tis.tcs.service.dto.placementmanager.SiteDTO result = new com.transformuk.hee.tis.tcs.service.dto.placementmanager.SiteDTO();
     result.setId(site.getId());
     result.setName(site.getSiteName());

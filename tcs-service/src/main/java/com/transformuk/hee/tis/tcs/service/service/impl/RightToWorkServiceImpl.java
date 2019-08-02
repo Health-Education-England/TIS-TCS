@@ -5,14 +5,13 @@ import com.transformuk.hee.tis.tcs.service.model.RightToWork;
 import com.transformuk.hee.tis.tcs.service.repository.RightToWorkRepository;
 import com.transformuk.hee.tis.tcs.service.service.RightToWorkService;
 import com.transformuk.hee.tis.tcs.service.service.mapper.RightToWorkMapper;
+import java.util.List;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
-
-import java.util.List;
 
 
 /**
@@ -28,7 +27,8 @@ public class RightToWorkServiceImpl implements RightToWorkService {
 
   private final RightToWorkMapper rightToWorkMapper;
 
-  public RightToWorkServiceImpl(RightToWorkRepository rightToWorkRepository, RightToWorkMapper rightToWorkMapper) {
+  public RightToWorkServiceImpl(RightToWorkRepository rightToWorkRepository,
+      RightToWorkMapper rightToWorkMapper) {
     this.rightToWorkRepository = rightToWorkRepository;
     this.rightToWorkMapper = rightToWorkMapper;
   }

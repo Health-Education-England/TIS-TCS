@@ -1,5 +1,13 @@
 package com.transformuk.hee.tis.tcs.service.api;
 
+import static org.mockito.Mockito.when;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.put;
+import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.header;
+import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
+import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
+
 import com.transformuk.hee.tis.tcs.api.dto.PlacementCommentDTO;
 import com.transformuk.hee.tis.tcs.api.enumeration.CommentSource;
 import com.transformuk.hee.tis.tcs.service.Application;
@@ -22,14 +30,6 @@ import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.setup.MockMvcBuilders;
 import org.springframework.transaction.annotation.Transactional;
 
-import static org.mockito.Mockito.when;
-import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
-import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
-import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.put;
-import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.header;
-import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
-import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
-
 /**
  * Test class for the PlacementCommentResource REST controller.
  *
@@ -42,7 +42,9 @@ public class PlacementCommentResourceIntTest {
   private static final Long NEW_COMMENT_ID = 1L;
   private static final Long ID_LONG = 1L;
   private static final Long ID_PLACEMENT = 2L;
-
+  private static final String AUTHOR = "TEST_AUTHOR";
+  private static final String BODY = "THIS_IS_A_TEST_BODY";
+  private static final String SPECIAL_CHARACTERS = "#%$^&**(";
   @Autowired
   private MappingJackson2HttpMessageConverter jacksonMessageConverter;
   @Autowired
@@ -53,19 +55,14 @@ public class PlacementCommentResourceIntTest {
   private CommentService commentService;
   @Captor
   private ArgumentCaptor<PlacementCommentDTO> placementCommentDTOArgumentCaptor;
-
   private MockMvc restPlacementCommentMock;
   private PlacementCommentDTO placementCommentDTO;
-
-  private static final String AUTHOR = "TEST_AUTHOR";
-  private static final String BODY = "THIS_IS_A_TEST_BODY";
-  private static final String SPECIAL_CHARACTERS = "#%$^&**(";
 
   /**
    * Create an entity for this test.
    * <p>
-   * This is a static method, as tests for other entities might also need it,
-   * if they test an entity which requires the current entity.
+   * This is a static method, as tests for other entities might also need it, if they test an entity
+   * which requires the current entity.
    */
   public static PlacementCommentDTO createPlacementCommentDTO() {
     PlacementCommentDTO placementCommentDTO = new PlacementCommentDTO();
@@ -78,7 +75,8 @@ public class PlacementCommentResourceIntTest {
   @Before
   public void setup() {
     MockitoAnnotations.initMocks(this);
-    PlacementCommentResource placementCommentResource = new PlacementCommentResource(commentService);
+    PlacementCommentResource placementCommentResource = new PlacementCommentResource(
+        commentService);
     this.restPlacementCommentMock = MockMvcBuilders.standaloneSetup(placementCommentResource)
         .setCustomArgumentResolvers(pageableArgumentResolver)
         .setControllerAdvice(exceptionTranslator)
@@ -93,16 +91,19 @@ public class PlacementCommentResourceIntTest {
   public void shouldCreatePlacementComment() throws Exception {
     PlacementCommentDTO placementCommentDTOsaved = new PlacementCommentDTO();
     placementCommentDTOsaved.setId(NEW_COMMENT_ID);
-    when(commentService.save(placementCommentDTOArgumentCaptor.capture())).thenReturn(placementCommentDTOsaved);
+    when(commentService.save(placementCommentDTOArgumentCaptor.capture()))
+        .thenReturn(placementCommentDTOsaved);
 
     restPlacementCommentMock.perform(post("/api/placementComment")
         .contentType(TestUtil.APPLICATION_JSON_UTF8)
         .content(TestUtil.convertObjectToJsonBytes(placementCommentDTO)))
         .andExpect(status().isCreated())
         .andExpect(jsonPath("$.id").value(NEW_COMMENT_ID))
-        .andExpect(header().string("location", "/api/placementComment/" + NEW_COMMENT_ID.toString()));
+        .andExpect(
+            header().string("location", "/api/placementComment/" + NEW_COMMENT_ID.toString()));
 
-    PlacementCommentDTO placementCommentDTOArgumentCaptorValue = placementCommentDTOArgumentCaptor.getValue();
+    PlacementCommentDTO placementCommentDTOArgumentCaptorValue = placementCommentDTOArgumentCaptor
+        .getValue();
     Assert.assertEquals(placementCommentDTO, placementCommentDTOArgumentCaptorValue);
   }
 
@@ -123,13 +124,15 @@ public class PlacementCommentResourceIntTest {
     PlacementCommentDTO placementCommentDTOsaved = new PlacementCommentDTO();
     placementCommentDTOsaved.setId(ID_LONG);
     placementCommentDTOsaved.setBody(SPECIAL_CHARACTERS);
-    when(commentService.save(placementCommentDTOArgumentCaptor.capture())).thenReturn(placementCommentDTOsaved);
+    when(commentService.save(placementCommentDTOArgumentCaptor.capture()))
+        .thenReturn(placementCommentDTOsaved);
 
     restPlacementCommentMock.perform(post("/api/placementComment")
         .contentType(TestUtil.APPLICATION_JSON_UTF8)
         .content(TestUtil.convertObjectToJsonBytes(placementCommentDTO)))
         .andExpect(status().isCreated())
-        .andExpect(header().string("location", "/api/placementComment/" + NEW_COMMENT_ID.toString()))
+        .andExpect(
+            header().string("location", "/api/placementComment/" + NEW_COMMENT_ID.toString()))
         .andExpect(jsonPath("$.id").value(NEW_COMMENT_ID));
 
     PlacementCommentDTO placementCommentDTOcaptured = placementCommentDTOArgumentCaptor.getValue();
@@ -157,8 +160,9 @@ public class PlacementCommentResourceIntTest {
     placementCommentDTOreturned.setId(ID_LONG);
     when(commentService.findByPlacementId(ID_PLACEMENT)).thenReturn(placementCommentDTOreturned);
 
-    restPlacementCommentMock.perform(get("/api/placement/{placementId}/placementComment", ID_PLACEMENT)
-        .contentType(TestUtil.APPLICATION_JSON_UTF8))
+    restPlacementCommentMock
+        .perform(get("/api/placement/{placementId}/placementComment", ID_PLACEMENT)
+            .contentType(TestUtil.APPLICATION_JSON_UTF8))
         .andExpect(status().isOk())
         .andExpect(jsonPath("$.id").value(ID_LONG));
   }

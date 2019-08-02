@@ -3,15 +3,15 @@ package com.transformuk.hee.tis.tcs.service.api.decorator;
 import com.transformuk.hee.tis.tcs.api.dto.PlacementDetailsDTO;
 import com.transformuk.hee.tis.tcs.service.repository.OwnerProjection;
 import com.transformuk.hee.tis.tcs.service.repository.PostRepository;
+import java.util.Collections;
+import java.util.concurrent.CompletableFuture;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 import org.springframework.util.StringUtils;
 
-import java.util.Collections;
-import java.util.concurrent.CompletableFuture;
-
 /**
- * Used to decorate the {@link com.transformuk.hee.tis.tcs.api.dto.PlacementDetailsDTO} with label data
+ * Used to decorate the {@link com.transformuk.hee.tis.tcs.api.dto.PlacementDetailsDTO} with label
+ * data
  */
 @Component
 public class PlacementDetailsDecorator {
@@ -21,24 +21,28 @@ public class PlacementDetailsDecorator {
   private PersonBasicDetailsRepositoryAccessor personDetailsRepo;
 
   @Autowired
-  public PlacementDetailsDecorator(AsyncReferenceService asyncReferenceService, PersonBasicDetailsRepositoryAccessor personBasicDetailsRepositoryAccessor,
-                                   PostRepository postRepository) {
+  public PlacementDetailsDecorator(AsyncReferenceService asyncReferenceService,
+      PersonBasicDetailsRepositoryAccessor personBasicDetailsRepositoryAccessor,
+      PostRepository postRepository) {
     this.personDetailsRepo = personBasicDetailsRepositoryAccessor;
     this.postRepository = postRepository;
     this.referenceService = asyncReferenceService;
   }
 
   /**
-   * Decorates the given placement details with labels such as the trainee name, site name and grade name
+   * Decorates the given placement details with labels such as the trainee name, site name and grade
+   * name
    *
    * @param placementDetailsDTO the placement details to decorate
    */
   public PlacementDetailsDTO decorate(PlacementDetailsDTO placementDetailsDTO) {
-    if (placementDetailsDTO == null) return null;
+    if (placementDetailsDTO == null) {
+      return null;
+    }
 
     CompletableFuture<Void> futures = CompletableFuture.allOf(
-            decorateSiteName(placementDetailsDTO),
-            decorateGradeName(placementDetailsDTO));
+        decorateSiteName(placementDetailsDTO),
+        decorateGradeName(placementDetailsDTO));
 
     decorateTraineeName(placementDetailsDTO);
     decorateOwner(placementDetailsDTO);
@@ -58,7 +62,7 @@ public class PlacementDetailsDecorator {
           }
         });
   }
-  
+
   protected void decorateOwner(PlacementDetailsDTO placementDetailsDTO) {
     Long postId = placementDetailsDTO.getPostId();
     if (postId != null && postId != 0) {
@@ -72,20 +76,21 @@ public class PlacementDetailsDecorator {
 
   protected CompletableFuture<Void> decorateSiteName(PlacementDetailsDTO placementDetailsDTO) {
     return referenceService.doWithSitesAsync(
-            () -> !StringUtils.isEmpty(placementDetailsDTO.getSiteId()),
-            Collections.singleton(placementDetailsDTO.getSiteId()),
-            sites -> {
-              placementDetailsDTO.setSiteName(sites.values().iterator().next().getSiteName());
-              placementDetailsDTO.setSiteCode(sites.values().iterator().next().getSiteCode());
-            });
+        () -> !StringUtils.isEmpty(placementDetailsDTO.getSiteId()),
+        Collections.singleton(placementDetailsDTO.getSiteId()),
+        sites -> {
+          placementDetailsDTO.setSiteName(sites.values().iterator().next().getSiteName());
+          placementDetailsDTO.setSiteCode(sites.values().iterator().next().getSiteCode());
+        });
   }
 
   protected CompletableFuture<Void> decorateGradeName(PlacementDetailsDTO placementDetailsDTO) {
     return referenceService.doWithGradesAsync(
-            () -> !StringUtils.isEmpty(placementDetailsDTO.getGradeId()),
-            Collections.singleton(placementDetailsDTO.getGradeId()), grades -> {
-              placementDetailsDTO.setGradeAbbreviation(grades.values().iterator().next().getAbbreviation());
-              placementDetailsDTO.setGradeName(grades.values().iterator().next().getName());
-            });
+        () -> !StringUtils.isEmpty(placementDetailsDTO.getGradeId()),
+        Collections.singleton(placementDetailsDTO.getGradeId()), grades -> {
+          placementDetailsDTO
+              .setGradeAbbreviation(grades.values().iterator().next().getAbbreviation());
+          placementDetailsDTO.setGradeName(grades.values().iterator().next().getName());
+        });
   }
 }

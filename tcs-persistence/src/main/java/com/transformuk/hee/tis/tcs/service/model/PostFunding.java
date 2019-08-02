@@ -1,6 +1,9 @@
 package com.transformuk.hee.tis.tcs.service.model;
 
 
+import java.io.Serializable;
+import java.time.LocalDate;
+import java.util.Objects;
 import javax.persistence.Column;
 import javax.persistence.Entity;
 import javax.persistence.FetchType;
@@ -9,9 +12,6 @@ import javax.persistence.GenerationType;
 import javax.persistence.Id;
 import javax.persistence.JoinColumn;
 import javax.persistence.ManyToOne;
-import java.io.Serializable;
-import java.time.LocalDate;
-import java.util.Objects;
 
 /**
  * A PostFunding.
@@ -103,14 +103,22 @@ public class PostFunding implements Serializable {
     this.endDate = endDate;
   }
 
-  public String getFundingBodyId() {return fundingBodyId; }
+  public String getFundingBodyId() {
+    return fundingBodyId;
+  }
 
-  public void setFundingBodyId(String fundingBodyId) {this.fundingBodyId = fundingBodyId; }
+  public void setFundingBodyId(String fundingBodyId) {
+    this.fundingBodyId = fundingBodyId;
+  }
 
   @Override
   public boolean equals(Object o) {
-    if (this == o) return true;
-    if (o == null || getClass() != o.getClass()) return false;
+    if (this == o) {
+      return true;
+    }
+    if (o == null || getClass() != o.getClass()) {
+      return false;
+    }
     PostFunding that = (PostFunding) o;
     return Objects.equals(id, that.id) &&
         Objects.equals(intrepidId, that.intrepidId) &&

@@ -1,5 +1,16 @@
 package com.transformuk.hee.tis.tcs.service.api;
 
+import static org.assertj.core.api.Assertions.assertThat;
+import static org.hamcrest.Matchers.containsInAnyOrder;
+import static org.hamcrest.Matchers.hasItem;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.delete;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.put;
+import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.content;
+import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
+import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
+
 import com.transformuk.hee.tis.tcs.api.dto.GdcDetailsDTO;
 import com.transformuk.hee.tis.tcs.service.Application;
 import com.transformuk.hee.tis.tcs.service.api.validation.GdcDetailsValidator;
@@ -8,6 +19,11 @@ import com.transformuk.hee.tis.tcs.service.model.GdcDetails;
 import com.transformuk.hee.tis.tcs.service.repository.GdcDetailsRepository;
 import com.transformuk.hee.tis.tcs.service.service.GdcDetailsService;
 import com.transformuk.hee.tis.tcs.service.service.mapper.GdcDetailsMapper;
+import java.time.LocalDate;
+import java.time.LocalDateTime;
+import java.time.ZoneId;
+import java.util.List;
+import javax.persistence.EntityManager;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -22,18 +38,6 @@ import org.springframework.test.context.junit4.SpringRunner;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.setup.MockMvcBuilders;
 import org.springframework.transaction.annotation.Transactional;
-
-import javax.persistence.EntityManager;
-import java.time.LocalDate;
-import java.time.LocalDateTime;
-import java.time.ZoneId;
-import java.util.List;
-
-import static org.assertj.core.api.Assertions.assertThat;
-import static org.hamcrest.Matchers.containsInAnyOrder;
-import static org.hamcrest.Matchers.hasItem;
-import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.*;
-import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.*;
 
 /**
  * Test class for the GdcDetailsResource REST controller.
@@ -56,7 +60,8 @@ public class GdcDetailsResourceIntTest {
   private static final LocalDate DEFAULT_GDC_END_DATE = LocalDate.ofEpochDay(0L);
   private static final LocalDate UPDATED_GDC_END_DATE = LocalDate.now(ZoneId.systemDefault());
 
-  private static final LocalDateTime DEFAULT_AMENDED_DATE = LocalDateTime.now(ZoneId.systemDefault());
+  private static final LocalDateTime DEFAULT_AMENDED_DATE = LocalDateTime
+      .now(ZoneId.systemDefault());
 
   @Autowired
   private GdcDetailsRepository gdcDetailsRepository;
@@ -86,21 +91,11 @@ public class GdcDetailsResourceIntTest {
 
   private GdcDetails gdcDetails;
 
-  @Before
-  public void setup() {
-    MockitoAnnotations.initMocks(this);
-    GdcDetailsResource gdcDetailsResource = new GdcDetailsResource(gdcDetailsService, gdcDetailsValidator);
-    this.restGdcDetailsMockMvc = MockMvcBuilders.standaloneSetup(gdcDetailsResource)
-        .setCustomArgumentResolvers(pageableArgumentResolver)
-        .setControllerAdvice(exceptionTranslator)
-        .setMessageConverters(jacksonMessageConverter).build();
-  }
-
   /**
    * Create an entity for this test.
    * <p>
-   * This is a static method, as tests for other entities might also need it,
-   * if they test an entity which requires the current entity.
+   * This is a static method, as tests for other entities might also need it, if they test an entity
+   * which requires the current entity.
    */
   public static GdcDetails createEntity(EntityManager em) {
     GdcDetails gdcDetails = new GdcDetails()
@@ -110,6 +105,17 @@ public class GdcDetailsResourceIntTest {
         .gdcStartDate(DEFAULT_GDC_START_DATE)
         .gdcEndDate(DEFAULT_GDC_END_DATE);
     return gdcDetails;
+  }
+
+  @Before
+  public void setup() {
+    MockitoAnnotations.initMocks(this);
+    GdcDetailsResource gdcDetailsResource = new GdcDetailsResource(gdcDetailsService,
+        gdcDetailsValidator);
+    this.restGdcDetailsMockMvc = MockMvcBuilders.standaloneSetup(gdcDetailsResource)
+        .setCustomArgumentResolvers(pageableArgumentResolver)
+        .setControllerAdvice(exceptionTranslator)
+        .setMessageConverters(jacksonMessageConverter).build();
   }
 
   @Before

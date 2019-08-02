@@ -1,8 +1,7 @@
 package com.transformuk.hee.tis.tcs.service.event;
 
-import org.springframework.context.ApplicationEvent;
-
 import java.util.Objects;
+import org.springframework.context.ApplicationEvent;
 
 public class SpecialtyDeletedEvent extends ApplicationEvent {
 
@@ -19,8 +18,12 @@ public class SpecialtyDeletedEvent extends ApplicationEvent {
 
   @Override
   public boolean equals(Object o) {
-    if (this == o) return true;
-    if (o == null || getClass() != o.getClass()) return false;
+    if (this == o) {
+      return true;
+    }
+    if (o == null || getClass() != o.getClass()) {
+      return false;
+    }
     SpecialtyDeletedEvent that = (SpecialtyDeletedEvent) o;
     return Objects.equals(specialtyId, that.specialtyId);
   }

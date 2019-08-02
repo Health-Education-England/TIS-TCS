@@ -1,30 +1,28 @@
 package com.transformuk.hee.tis.tcs.service.api.util;
 
+import static java.util.Collections.EMPTY_LIST;
+import static java.util.stream.Collectors.toList;
+import static uk.nhs.tis.StringConverter.getConverter;
+
 import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.transformuk.hee.tis.tcs.api.enumeration.TCSDateColumns;
 import com.transformuk.hee.tis.tcs.service.model.ColumnFilter;
-import org.apache.commons.codec.DecoderException;
-import org.apache.commons.codec.net.URLCodec;
-import org.apache.commons.lang3.EnumUtils;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-import static uk.nhs.tis.StringConverter.getConverter;
-
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
-
-import static java.util.Collections.EMPTY_LIST;
-import static java.util.stream.Collectors.toList;
+import org.apache.commons.codec.DecoderException;
+import org.apache.commons.codec.net.URLCodec;
+import org.apache.commons.lang3.EnumUtils;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 /**
- * Utility class for Column filters
- * JPA is expecting Enum type if the entity column is Enum, this class checks for filter then convert string to Enum if
- * the column is type of Enum
+ * Utility class for Column filters JPA is expecting Enum type if the entity column is Enum, this
+ * class checks for filter then convert string to Enum if the column is type of Enum
  */
 public final class ColumnFilterUtil {
 
@@ -36,14 +34,16 @@ public final class ColumnFilterUtil {
   }
 
   /**
-   * Parse json string to column filter list and checks for filter column if enum then converts string to Enum
+   * Parse json string to column filter list and checks for filter column if enum then converts
+   * string to Enum
    *
    * @param columnFilterJson json string to parse
    * @param enumList         list of enums as column filter for the entity
    * @return
    * @throws IOException
    */
-  public static List<ColumnFilter> getColumnFilters(String columnFilterJson, List<Class> enumList) throws IOException {
+  public static List<ColumnFilter> getColumnFilters(String columnFilterJson, List<Class> enumList)
+      throws IOException {
     if (columnFilterJson != null) {
       if (!columnFilterJson.startsWith("{")) {
         //attempt to decode
@@ -51,7 +51,8 @@ public final class ColumnFilterUtil {
           columnFilterJson = new URLCodec().decode(columnFilterJson);
         } catch (DecoderException e) {
           log.error(e.getMessage(), e);
-          throw new IllegalArgumentException("Cannot interpret column filters: " + columnFilterJson);
+          throw new IllegalArgumentException(
+              "Cannot interpret column filters: " + columnFilterJson);
         }
       }
       TypeReference<HashMap<String, List<String>>> typeRef = new TypeReference<HashMap<String, List<String>>>() {
@@ -95,7 +96,8 @@ public final class ColumnFilterUtil {
    * @param e
    * @param en
    */
-  private static void addToCfList(List<ColumnFilter> cfList, Map.Entry<String, List<String>> e, Class en) {
+  private static void addToCfList(List<ColumnFilter> cfList, Map.Entry<String, List<String>> e,
+      Class en) {
     List<Object> values = new ArrayList<>();
     e.getValue().forEach(v -> {
       if (EnumUtils.isValidEnum(en, String.valueOf(v))) {

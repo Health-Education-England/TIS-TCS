@@ -3,13 +3,12 @@ package com.transformuk.hee.tis.tcs.api.dto;
 import com.transformuk.hee.tis.tcs.api.dto.validation.Create;
 import com.transformuk.hee.tis.tcs.api.dto.validation.Update;
 import com.transformuk.hee.tis.tcs.api.enumeration.ProgrammeMembershipType;
-
-import javax.validation.Valid;
-import javax.validation.constraints.NotNull;
 import java.io.Serializable;
 import java.time.LocalDate;
 import java.util.List;
 import java.util.Objects;
+import javax.validation.Valid;
+import javax.validation.constraints.NotNull;
 
 /**
  * A DTO for the ProgrammeMembership entity.
@@ -145,8 +144,12 @@ public class ProgrammeMembershipDTO implements Serializable {
 
   @Override
   public boolean equals(Object o) {
-    if (this == o) return true;
-    if (o == null || getClass() != o.getClass()) return false;
+    if (this == o) {
+      return true;
+    }
+    if (o == null || getClass() != o.getClass()) {
+      return false;
+    }
     ProgrammeMembershipDTO that = (ProgrammeMembershipDTO) o;
     return Objects.equals(getPersonIdOrNull(), that.getPersonIdOrNull()) &&
         Objects.equals(programmeStartDate, that.programmeStartDate) &&
@@ -157,7 +160,8 @@ public class ProgrammeMembershipDTO implements Serializable {
 
   @Override
   public int hashCode() {
-    return Objects.hash(getPersonIdOrNull(), programmeStartDate, programmeEndDate, programmeId, programmeMembershipType);
+    return Objects.hash(getPersonIdOrNull(), programmeStartDate, programmeEndDate, programmeId,
+        programmeMembershipType);
   }
 
   private Long getPersonIdOrNull() {

@@ -1,106 +1,119 @@
 package com.transformuk.hee.tis.tcs.service.model;
 
 import com.google.common.base.Strings;
-
-import javax.persistence.*;
 import java.io.Serializable;
 import java.time.LocalDateTime;
 import java.util.Objects;
 import java.util.Set;
+import javax.persistence.Column;
+import javax.persistence.Entity;
+import javax.persistence.GeneratedValue;
+import javax.persistence.GenerationType;
+import javax.persistence.Id;
+import javax.persistence.ManyToMany;
+import javax.persistence.PostLoad;
+import javax.persistence.PrePersist;
+import javax.persistence.PreUpdate;
+import javax.persistence.Version;
 
 @Entity
 public class Tag implements Serializable {
-    @Id
-    @GeneratedValue(strategy = GenerationType.IDENTITY)
-    private Long id;
-    @Column(name = "addedDate", updatable = false, insertable = false)
-    private LocalDateTime addedDate;
-    @Version
-    private LocalDateTime amendedDate;
-    @ManyToMany(mappedBy = "tags")
-    private Set<Document> documents;
-    @Column(unique = true)
-    private String name;
 
-    public Tag() {
+  @Id
+  @GeneratedValue(strategy = GenerationType.IDENTITY)
+  private Long id;
+  @Column(name = "addedDate", updatable = false, insertable = false)
+  private LocalDateTime addedDate;
+  @Version
+  private LocalDateTime amendedDate;
+  @ManyToMany(mappedBy = "tags")
+  private Set<Document> documents;
+  @Column(unique = true)
+  private String name;
+
+  public Tag() {
+  }
+
+  public Tag(final String name) {
+    this.name = name;
+  }
+
+  @PreUpdate
+  @PrePersist
+  @PostLoad
+  public void toLowerCase() {
+    name = name.toLowerCase();
+  }
+
+  @Override
+  public boolean equals(final Object o) {
+    if (this == o) {
+      return true;
+    }
+    if (o == null || getClass() != o.getClass()) {
+      return false;
+    }
+    final Tag tag = (Tag) o;
+
+    if (Strings.isNullOrEmpty(name) || Strings.isNullOrEmpty(tag.name)) {
+      return false;
     }
 
-    public Tag(final String name) {
-        this.name = name;
-    }
+    return Objects.equals(id, tag.id) || name.equalsIgnoreCase(tag.name);
+  }
 
-    @PreUpdate
-    @PrePersist
-    @PostLoad
-    public void toLowerCase() {
-        name = name.toLowerCase();
-    }
+  @Override
+  public int hashCode() {
+    return Objects.hash(name.toLowerCase());
+  }
 
-    @Override
-    public boolean equals(final Object o) {
-        if (this == o) return true;
-        if (o == null || getClass() != o.getClass()) return false;
-        final Tag tag = (Tag) o;
+  @Override
+  public String toString() {
+    return "Tag{" +
+        "id=" + id +
+        ", addedDate=" + addedDate +
+        ", amendedDate=" + amendedDate +
+        ", name='" + name + '\'' +
+        '}';
+  }
 
-        if (Strings.isNullOrEmpty(name) || Strings.isNullOrEmpty(tag.name)) {
-            return false;
-        }
+  public Long getId() {
+    return id;
+  }
 
-        return Objects.equals(id, tag.id) || name.equalsIgnoreCase(tag.name);
-    }
+  public void setId(final Long id) {
+    this.id = id;
+  }
 
-    @Override
-    public int hashCode() {
-        return Objects.hash(name.toLowerCase());
-    }
+  public LocalDateTime getAddedDate() {
+    return addedDate;
+  }
 
-    @Override
-    public String toString() {
-        return "Tag{" +
-                "id=" + id +
-                ", addedDate=" + addedDate +
-                ", amendedDate=" + amendedDate +
-                ", name='" + name + '\'' +
-                '}';
-    }
+  public void setAddedDate(final LocalDateTime addedDate) {
+    this.addedDate = addedDate;
+  }
 
-    public Long getId() {
-        return id;
-    }
+  public LocalDateTime getAmendedDate() {
+    return amendedDate;
+  }
 
-    public void setId(final Long id) {
-        this.id = id;
-    }
+  public void setAmendedDate(final LocalDateTime amendedDate) {
+    this.amendedDate = amendedDate;
+  }
 
-    public LocalDateTime getAddedDate() {
-        return addedDate;
-    }
+  public Set<Document> getDocuments() {
+    return documents;
+  }
 
-    public void setAddedDate(final LocalDateTime addedDate) {
-        this.addedDate = addedDate;
-    }
+  public void setDocuments(final Set<Document> documents) {
+    this.documents = documents;
+  }
 
-    public LocalDateTime getAmendedDate() {
-        return amendedDate;
-    }
+  public String getName() {
+    return name;
+  }
 
-    public void setAmendedDate(final LocalDateTime amendedDate) {
-        this.amendedDate = amendedDate;
-    }
-
-    public Set<Document> getDocuments() {
-        return documents;
-    }
-
-    public void setDocuments(final Set<Document> documents) {
-        this.documents = documents;
-    }
-
-    public String getName() {
-        return name;
-    }
-
-    public void setName(final String name) {
-        this.name = name;
-    }
+  public void setName(final String name) {
+    this.name = name;
+  }
 }

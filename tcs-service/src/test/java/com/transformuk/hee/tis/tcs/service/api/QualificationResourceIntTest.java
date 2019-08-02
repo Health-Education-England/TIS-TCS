@@ -1,5 +1,20 @@
 package com.transformuk.hee.tis.tcs.service.api;
 
+import static org.assertj.core.api.Assertions.assertThat;
+import static org.hamcrest.Matchers.containsInAnyOrder;
+import static org.hamcrest.Matchers.hasItem;
+import static org.mockito.BDDMockito.given;
+import static org.mockito.Matchers.any;
+import static org.mockito.Matchers.anyString;
+import static org.mockito.Mockito.when;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.delete;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.put;
+import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.content;
+import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
+import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
+
 import com.transformuk.hee.tis.reference.client.impl.ReferenceServiceImpl;
 import com.transformuk.hee.tis.tcs.api.dto.PersonDTO;
 import com.transformuk.hee.tis.tcs.api.dto.QualificationDTO;
@@ -14,6 +29,12 @@ import com.transformuk.hee.tis.tcs.service.repository.QualificationRepository;
 import com.transformuk.hee.tis.tcs.service.service.QualificationService;
 import com.transformuk.hee.tis.tcs.service.service.mapper.PersonMapper;
 import com.transformuk.hee.tis.tcs.service.service.mapper.QualificationMapper;
+import java.time.LocalDate;
+import java.time.LocalDateTime;
+import java.time.ZoneId;
+import java.util.List;
+import java.util.Map;
+import javax.persistence.EntityManager;
 import org.assertj.core.util.Lists;
 import org.assertj.core.util.Maps;
 import org.junit.Before;
@@ -30,23 +51,6 @@ import org.springframework.test.context.junit4.SpringRunner;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.setup.MockMvcBuilders;
 import org.springframework.transaction.annotation.Transactional;
-
-import javax.persistence.EntityManager;
-import java.time.LocalDate;
-import java.time.LocalDateTime;
-import java.time.ZoneId;
-import java.util.List;
-import java.util.Map;
-
-import static org.assertj.core.api.Assertions.assertThat;
-import static org.hamcrest.Matchers.containsInAnyOrder;
-import static org.hamcrest.Matchers.hasItem;
-import static org.mockito.BDDMockito.given;
-import static org.mockito.Matchers.any;
-import static org.mockito.Matchers.anyString;
-import static org.mockito.Mockito.when;
-import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.*;
-import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.*;
 
 /**
  * Test class for the QualificationResource REST controller.
@@ -67,7 +71,8 @@ public class QualificationResourceIntTest {
   private static final QualificationType UPDATED_QUALIFICATION_TYPE = QualificationType.HIGHER_DEGREE;
 
   private static final LocalDate DEFAULT_QUALIFICATION_ATTAINED_DATE = LocalDate.ofEpochDay(0L);
-  private static final LocalDate UPDATED_QUALIFICATION_ATTAINED_DATE = LocalDate.now(ZoneId.systemDefault());
+  private static final LocalDate UPDATED_QUALIFICATION_ATTAINED_DATE = LocalDate
+      .now(ZoneId.systemDefault());
 
   private static final String DEFAULT_MEDICAL_SCHOOL = "University of London";
   private static final String UPDATED_MEDICAL_SCHOOL = "United Medical & Dental School, London";
@@ -77,7 +82,8 @@ public class QualificationResourceIntTest {
   private static final String NOT_EXISTS_COUNTRY = "XYZ";
   private static final String NOT_EXISTS_MEDICAL_SCHOOL = "ABC";
 
-  private static final LocalDateTime DEFAULT_AMENDED_DATE = LocalDateTime.now(ZoneId.systemDefault());
+  private static final LocalDateTime DEFAULT_AMENDED_DATE = LocalDateTime
+      .now(ZoneId.systemDefault());
 
   @Autowired
   private QualificationRepository qualificationRepository;
@@ -117,22 +123,11 @@ public class QualificationResourceIntTest {
 
   private Person person;
 
-  @Before
-  public void setup() {
-    MockitoAnnotations.initMocks(this);
-    qualificationValidator = new QualificationValidator(personRepository, referenceService);
-    QualificationResource qualificationResource = new QualificationResource(qualificationService, qualificationValidator);
-    this.restQualificationMockMvc = MockMvcBuilders.standaloneSetup(qualificationResource)
-        .setCustomArgumentResolvers(pageableArgumentResolver)
-        .setControllerAdvice(exceptionTranslator)
-        .setMessageConverters(jacksonMessageConverter).build();
-  }
-
   /**
    * Create an entity for this test.
    * <p>
-   * This is a static method, as tests for other entities might also need it,
-   * if they test an entity which requires the current entity.
+   * This is a static method, as tests for other entities might also need it, if they test an entity
+   * which requires the current entity.
    */
   public static Qualification createEntity(EntityManager em) {
     Qualification qualification = new Qualification()
@@ -157,6 +152,18 @@ public class QualificationResourceIntTest {
   }
 
   @Before
+  public void setup() {
+    MockitoAnnotations.initMocks(this);
+    qualificationValidator = new QualificationValidator(personRepository, referenceService);
+    QualificationResource qualificationResource = new QualificationResource(qualificationService,
+        qualificationValidator);
+    this.restQualificationMockMvc = MockMvcBuilders.standaloneSetup(qualificationResource)
+        .setCustomArgumentResolvers(pageableArgumentResolver)
+        .setControllerAdvice(exceptionTranslator)
+        .setMessageConverters(jacksonMessageConverter).build();
+  }
+
+  @Before
   public void initTest() {
     person = createPersonEntity();
     qualification = createEntity(em);
@@ -171,7 +178,7 @@ public class QualificationResourceIntTest {
     // Create the Qualification
     qualification.setPerson(person);
     QualificationDTO qualificationDTO = qualificationMapper.toDto(qualification);
-    when(referenceService.isValueExists(any(),anyString())).thenReturn(true);
+    when(referenceService.isValueExists(any(), anyString())).thenReturn(true);
     restQualificationMockMvc.perform(post("/api/qualifications")
         .contentType(TestUtil.APPLICATION_JSON_UTF8)
         .content(TestUtil.convertObjectToJsonBytes(qualificationDTO)))
@@ -184,9 +191,11 @@ public class QualificationResourceIntTest {
     assertThat(testQualification.getIntrepidId()).isEqualTo(DEFAULT_INTREPID_ID);
     assertThat(testQualification.getQualification()).isEqualTo(DEFAULT_QUALIFICATION);
     assertThat(testQualification.getQualificationType()).isEqualTo(DEFAULT_QUALIFICATION_TYPE);
-    assertThat(testQualification.getQualificationAttainedDate()).isEqualTo(DEFAULT_QUALIFICATION_ATTAINED_DATE);
+    assertThat(testQualification.getQualificationAttainedDate())
+        .isEqualTo(DEFAULT_QUALIFICATION_ATTAINED_DATE);
     assertThat(testQualification.getMedicalSchool()).isEqualTo(DEFAULT_MEDICAL_SCHOOL);
-    assertThat(testQualification.getCountryOfQualification()).isEqualTo(DEFAULT_COUNTRY_OF_QUALIFICATION);
+    assertThat(testQualification.getCountryOfQualification())
+        .isEqualTo(DEFAULT_COUNTRY_OF_QUALIFICATION);
     assertThat(testQualification.getAmendedDate()).isAfter(DEFAULT_AMENDED_DATE);
   }
 
@@ -219,7 +228,8 @@ public class QualificationResourceIntTest {
         .andExpect(status().isBadRequest())
         .andExpect(jsonPath("$.message").value("error.validation"))
         .andExpect(jsonPath("$.fieldErrors[*].field").
-            value(containsInAnyOrder("id", "qualification", "medicalSchool", "countryOfQualification")));
+            value(containsInAnyOrder("id", "qualification", "medicalSchool",
+                "countryOfQualification")));
   }
 
   @Test
@@ -262,14 +272,16 @@ public class QualificationResourceIntTest {
   @Transactional
   public void shouldValidateMedicalSchool() throws Exception {
     //given
-    qualification.setMedicalSchool(NOT_EXISTS_MEDICAL_SCHOOL); // this medical school not exists in reference service
+    qualification.setMedicalSchool(
+        NOT_EXISTS_MEDICAL_SCHOOL); // this medical school not exists in reference service
     personRepository.saveAndFlush(person);
     QualificationDTO qualificationDTO = qualificationMapper.toDto(qualification);
     qualificationDTO.setPerson(personMapper.toDto(person));
 
     Map<String, Boolean> exists = Maps.newHashMap(NOT_EXISTS_MEDICAL_SCHOOL, false);
-    given(referenceService.medicalSchoolsExists(Lists.newArrayList(NOT_EXISTS_MEDICAL_SCHOOL))).willReturn(exists);
-    when(referenceService.isValueExists(any(),anyString())).thenReturn(true);
+    given(referenceService.medicalSchoolsExists(Lists.newArrayList(NOT_EXISTS_MEDICAL_SCHOOL)))
+        .willReturn(exists);
+    when(referenceService.isValueExists(any(), anyString())).thenReturn(true);
     //when & then
     restQualificationMockMvc.perform(post("/api/qualifications")
         .contentType(TestUtil.APPLICATION_JSON_UTF8)
@@ -278,21 +290,24 @@ public class QualificationResourceIntTest {
         .andExpect(jsonPath("$.message").value("error.validation"))
         .andExpect(jsonPath("$.fieldErrors[0].field").value("medicalSchool"))
         .andExpect(jsonPath("$.fieldErrors[0].message").
-            value(String.format("qualification with id %s does not exist", NOT_EXISTS_MEDICAL_SCHOOL)));
+            value(String
+                .format("qualification with id %s does not exist", NOT_EXISTS_MEDICAL_SCHOOL)));
   }
 
   @Test
   @Transactional
   public void shouldValidateCountry() throws Exception {
     //given
-    qualification.setCountryOfQualification(NOT_EXISTS_COUNTRY); // this country not exists in reference service
+    qualification.setCountryOfQualification(
+        NOT_EXISTS_COUNTRY); // this country not exists in reference service
     personRepository.saveAndFlush(person);
     QualificationDTO qualificationDTO = qualificationMapper.toDto(qualification);
     qualificationDTO.setPerson(personMapper.toDto(person));
 
     Map<String, Boolean> exists = Maps.newHashMap(NOT_EXISTS_COUNTRY, false);
-    given(referenceService.countryExists(Lists.newArrayList(NOT_EXISTS_COUNTRY))).willReturn(exists);
-    when(referenceService.isValueExists(any(),anyString())).thenReturn(true);
+    given(referenceService.countryExists(Lists.newArrayList(NOT_EXISTS_COUNTRY)))
+        .willReturn(exists);
+    when(referenceService.isValueExists(any(), anyString())).thenReturn(true);
     //when & then
     restQualificationMockMvc.perform(post("/api/qualifications")
         .contentType(TestUtil.APPLICATION_JSON_UTF8)
@@ -301,7 +316,8 @@ public class QualificationResourceIntTest {
         .andExpect(jsonPath("$.message").value("error.validation"))
         .andExpect(jsonPath("$.fieldErrors[0].field").value("countryOfQualification"))
         .andExpect(jsonPath("$.fieldErrors[0].message").
-            value(String.format("countryOfQualification with id %s does not exist", NOT_EXISTS_COUNTRY)));
+            value(String
+                .format("countryOfQualification with id %s does not exist", NOT_EXISTS_COUNTRY)));
   }
 
   @Test
@@ -332,7 +348,7 @@ public class QualificationResourceIntTest {
     // Create the Qualification with an existing ID
     qualification.setPerson(person);
     QualificationDTO qualificationDTO = qualificationMapper.toDto(qualification);
-    when(referenceService.isValueExists(any(),anyString())).thenReturn(true);
+    when(referenceService.isValueExists(any(), anyString())).thenReturn(true);
     // Qualification is part of person so the call must succeed
     restQualificationMockMvc.perform(post("/api/qualifications")
         .contentType(TestUtil.APPLICATION_JSON_UTF8)
@@ -359,10 +375,14 @@ public class QualificationResourceIntTest {
         .andExpect(jsonPath("$.[*].id").value(hasItem(qualification.getId().intValue())))
         .andExpect(jsonPath("$.[*].intrepidId").value(hasItem(DEFAULT_INTREPID_ID.toString())))
         .andExpect(jsonPath("$.[*].qualification").value(hasItem(DEFAULT_QUALIFICATION.toString())))
-        .andExpect(jsonPath("$.[*].qualificationType").value(hasItem(DEFAULT_QUALIFICATION_TYPE.toString())))
-        .andExpect(jsonPath("$.[*].qualificationAttainedDate").value(hasItem(DEFAULT_QUALIFICATION_ATTAINED_DATE.toString())))
-        .andExpect(jsonPath("$.[*].medicalSchool").value(hasItem(DEFAULT_MEDICAL_SCHOOL.toString())))
-        .andExpect(jsonPath("$.[*].countryOfQualification").value(hasItem(DEFAULT_COUNTRY_OF_QUALIFICATION.toString())))
+        .andExpect(jsonPath("$.[*].qualificationType")
+            .value(hasItem(DEFAULT_QUALIFICATION_TYPE.toString())))
+        .andExpect(jsonPath("$.[*].qualificationAttainedDate")
+            .value(hasItem(DEFAULT_QUALIFICATION_ATTAINED_DATE.toString())))
+        .andExpect(
+            jsonPath("$.[*].medicalSchool").value(hasItem(DEFAULT_MEDICAL_SCHOOL.toString())))
+        .andExpect(jsonPath("$.[*].countryOfQualification")
+            .value(hasItem(DEFAULT_COUNTRY_OF_QUALIFICATION.toString())))
         .andExpect(jsonPath("$.[*].amendedDate").isNotEmpty());
   }
 
@@ -382,9 +402,11 @@ public class QualificationResourceIntTest {
         .andExpect(jsonPath("$.intrepidId").value(DEFAULT_INTREPID_ID.toString()))
         .andExpect(jsonPath("$.qualification").value(DEFAULT_QUALIFICATION.toString()))
         .andExpect(jsonPath("$.qualificationType").value(DEFAULT_QUALIFICATION_TYPE.toString()))
-        .andExpect(jsonPath("$.qualificationAttainedDate").value(DEFAULT_QUALIFICATION_ATTAINED_DATE.toString()))
+        .andExpect(jsonPath("$.qualificationAttainedDate")
+            .value(DEFAULT_QUALIFICATION_ATTAINED_DATE.toString()))
         .andExpect(jsonPath("$.medicalSchool").value(DEFAULT_MEDICAL_SCHOOL.toString()))
-        .andExpect(jsonPath("$.countryOfQualification").value(DEFAULT_COUNTRY_OF_QUALIFICATION.toString()))
+        .andExpect(
+            jsonPath("$.countryOfQualification").value(DEFAULT_COUNTRY_OF_QUALIFICATION.toString()))
         .andExpect(jsonPath("$.amendedDate").isNotEmpty());
   }
 
@@ -406,7 +428,8 @@ public class QualificationResourceIntTest {
     int databaseSizeBeforeUpdate = qualificationRepository.findAll().size();
 
     // Update the qualification
-    Qualification updatedQualification = qualificationRepository.findById(qualification.getId()).orElse(null);
+    Qualification updatedQualification = qualificationRepository.findById(qualification.getId())
+        .orElse(null);
     updatedQualification
         .intrepidId(UPDATED_INTREPID_ID)
         .qualification(UPDATED_QUALIFICATION)
@@ -416,7 +439,7 @@ public class QualificationResourceIntTest {
         .countryOfQualification(UPDATED_COUNTRY_OF_QUALIFICATION);
     QualificationDTO qualificationDTO = qualificationMapper.toDto(updatedQualification);
 
-    when(referenceService.isValueExists(any(),anyString())).thenReturn(true);
+    when(referenceService.isValueExists(any(), anyString())).thenReturn(true);
 
     restQualificationMockMvc.perform(put("/api/qualifications")
         .contentType(TestUtil.APPLICATION_JSON_UTF8)
@@ -430,9 +453,11 @@ public class QualificationResourceIntTest {
     assertThat(testQualification.getIntrepidId()).isEqualTo(UPDATED_INTREPID_ID);
     assertThat(testQualification.getQualification()).isEqualTo(UPDATED_QUALIFICATION);
     assertThat(testQualification.getQualificationType()).isEqualTo(UPDATED_QUALIFICATION_TYPE);
-    assertThat(testQualification.getQualificationAttainedDate()).isEqualTo(UPDATED_QUALIFICATION_ATTAINED_DATE);
+    assertThat(testQualification.getQualificationAttainedDate())
+        .isEqualTo(UPDATED_QUALIFICATION_ATTAINED_DATE);
     assertThat(testQualification.getMedicalSchool()).isEqualTo(UPDATED_MEDICAL_SCHOOL);
-    assertThat(testQualification.getCountryOfQualification()).isEqualTo(UPDATED_COUNTRY_OF_QUALIFICATION);
+    assertThat(testQualification.getCountryOfQualification())
+        .isEqualTo(UPDATED_COUNTRY_OF_QUALIFICATION);
     assertThat(testQualification.getAmendedDate()).isAfter(DEFAULT_AMENDED_DATE);
   }
 

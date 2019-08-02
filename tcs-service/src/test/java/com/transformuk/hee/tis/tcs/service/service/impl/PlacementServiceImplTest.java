@@ -99,8 +99,8 @@ public class PlacementServiceImplTest {
 
   public static PlacementSummaryDTO createPlacementSummaryDTO() {
     return new PlacementSummaryDTO(null, null, number,
-      "Elbows", number, "In Post", "CURRENT", "Joe", "Bloggs",
-      number, number, null);
+        "Elbows", number, "In Post", "CURRENT", "Joe", "Bloggs",
+        number, number, null);
   }
 
   @Before
@@ -115,7 +115,7 @@ public class PlacementServiceImplTest {
     doNothing().when(placementMock).setDateTo(toDateCaptor.capture());
     when(placementRepositoryMock.saveAndFlush(placementMock)).thenReturn(placementMock);
     when(placementMapperMock.placementToPlacementDTO(eq(placementMock), anyMap()))
-      .thenReturn(placementDTOMock);
+        .thenReturn(placementDTOMock);
 
     PlacementDTO result = testObj.closePlacement(PLACEMENT_ID);
 
@@ -141,8 +141,8 @@ public class PlacementServiceImplTest {
     Long id5 = 5L;
 
     PlacementSummaryDTO placement_latest = createPlacementSummaryDTO(), placement_second_latest = createPlacementSummaryDTO(),
-      placement_earliest = createPlacementSummaryDTO(), placement_null = createPlacementSummaryDTO(),
-      placement_null_2 = createPlacementSummaryDTO();
+        placement_earliest = createPlacementSummaryDTO(), placement_null = createPlacementSummaryDTO(),
+        placement_null_2 = createPlacementSummaryDTO();
 
     placement_latest.setDateTo(latest_date);
     placement_latest.setPlacementId(id1);
@@ -156,8 +156,8 @@ public class PlacementServiceImplTest {
     placement_null_2.setPlacementId(id5);
 
     List<PlacementSummaryDTO> placements = Lists
-      .newArrayList(placement_second_latest, placement_earliest, placement_null,
-        placement_latest, placement_null_2);
+        .newArrayList(placement_second_latest, placement_earliest, placement_null,
+            placement_latest, placement_null_2);
 
     for (int i = 6; i < 2000; i++) {
       PlacementSummaryDTO placement = new PlacementSummaryDTO();
@@ -170,9 +170,9 @@ public class PlacementServiceImplTest {
     String sqlQueryMock = "SELECT * FROM PLACEMENT WHERE traineeId = :traineeId";
 
     when(sqlQuerySupplierMock.getQuery(SqlQuerySupplier.TRAINEE_PLACEMENT_SUMMARY))
-      .thenReturn(sqlQueryMock);
+        .thenReturn(sqlQueryMock);
     when(namedParameterJdbcTemplateMock.query(eq(sqlQueryMock), mapArgumentCaptor.capture(),
-      placementRowMapperArgumentCaptor.capture())).thenReturn(placements);
+        placementRowMapperArgumentCaptor.capture())).thenReturn(placements);
 
     List<PlacementSummaryDTO> result = testObj.getPlacementForTrainee(traineeId, "Dr in Training");
 
@@ -205,8 +205,8 @@ public class PlacementServiceImplTest {
     Long id5 = 5L;
 
     PlacementSummaryDTO placement_latest = createPlacementSummaryDTO(), placement_second_latest = createPlacementSummaryDTO(),
-      placement_earliest = createPlacementSummaryDTO(), placement_null = createPlacementSummaryDTO(),
-      placement_null_2 = createPlacementSummaryDTO();
+        placement_earliest = createPlacementSummaryDTO(), placement_null = createPlacementSummaryDTO(),
+        placement_null_2 = createPlacementSummaryDTO();
 
     placement_latest.setDateTo(latest_date);
     placement_latest.setPlacementId(id1);
@@ -220,8 +220,8 @@ public class PlacementServiceImplTest {
     placement_null_2.setPlacementId(id5);
 
     List<PlacementSummaryDTO> placements = Lists
-      .newArrayList(placement_second_latest, placement_earliest, placement_null,
-        placement_latest, placement_null_2);
+        .newArrayList(placement_second_latest, placement_earliest, placement_null,
+            placement_latest, placement_null_2);
 
     for (int i = 6; i < 1000; i++) {
       PlacementSummaryDTO placement = new PlacementSummaryDTO();
@@ -234,9 +234,9 @@ public class PlacementServiceImplTest {
     String sqlQueryMock = "SELECT * FROM PLACEMENT WHERE p.postId = :postId";
 
     when(sqlQuerySupplierMock.getQuery(SqlQuerySupplier.POST_PLACEMENT_SUMMARY))
-      .thenReturn(sqlQueryMock);
+        .thenReturn(sqlQueryMock);
     when(namedParameterJdbcTemplateMock.query(eq(sqlQueryMock), mapArgumentCaptor.capture(),
-      placementRowMapperArgumentCaptor.capture())).thenReturn(placements);
+        placementRowMapperArgumentCaptor.capture())).thenReturn(placements);
 
     List<PlacementSummaryDTO> result = testObj.getPlacementForPost(postId);
 
@@ -264,9 +264,9 @@ public class PlacementServiceImplTest {
     }
 
     when(sqlQuerySupplierMock.getQuery(SqlQuerySupplier.POST_PLACEMENT_SUMMARY))
-      .thenReturn(sqlQueryMock);
+        .thenReturn(sqlQueryMock);
     when(namedParameterJdbcTemplateMock.query(eq(sqlQueryMock), mapArgumentCaptor.capture(),
-      placementRowMapperArgumentCaptor.capture())).thenReturn(queryResult);
+        placementRowMapperArgumentCaptor.capture())).thenReturn(queryResult);
 
     List<PlacementSummaryDTO> result = testObj.getPlacementForPost(postId);
 
@@ -289,10 +289,10 @@ public class PlacementServiceImplTest {
     Post foundPostMock = mock(Post.class);
 
     when(postRepositoryMock.findPostByPlacementHistoryId(longArgumentCaptor.capture()))
-      .thenReturn(Optional.of(foundPostMock));
+        .thenReturn(Optional.of(foundPostMock));
 
     boolean result = testObj
-      .isEligibleForChangedDatesNotification(updatedPlacementDetails, currentPlacement);
+        .isEligibleForChangedDatesNotification(updatedPlacementDetails, currentPlacement);
 
     Assert.assertTrue(result);
 
@@ -313,7 +313,7 @@ public class PlacementServiceImplTest {
     updatedPlacementDetails.setDateFrom(dateFiveMonthsAgo);
 
     boolean result = testObj
-      .isEligibleForChangedDatesNotification(updatedPlacementDetails, currentPlacement);
+        .isEligibleForChangedDatesNotification(updatedPlacementDetails, currentPlacement);
 
     Assert.assertFalse(result);
 
@@ -334,11 +334,11 @@ public class PlacementServiceImplTest {
 
     // Record expectations.
     when(placementDetailsMapperMock.placementDetailsDTOToPlacementDetails(placementDetailsDto))
-      .thenReturn(placementDetails);
+        .thenReturn(placementDetails);
     when(placementDetailsRepositoryMock.saveAndFlush(placementDetails))
-      .thenReturn(savedPlacementDetails);
+        .thenReturn(savedPlacementDetails);
     when(placementDetailsMapperMock.placementDetailsToPlacementDetailsDTO(savedPlacementDetails))
-      .thenReturn(new PlacementDetailsDTO());
+        .thenReturn(new PlacementDetailsDTO());
     when(placementSpecialtyMapperMock.toDTOs(any())).thenReturn(Collections.emptySet());
     doNothing().when(placementSupervisorRepositoryMock).deleteAllByIdPlacementId(1L);
     when(placementSupervisorRepositoryMock.saveAll(any())).thenReturn(null);
@@ -348,9 +348,9 @@ public class PlacementServiceImplTest {
 
     // Perform assertions.
     Assert.assertThat("The placement's added date did not match the expected value.",
-      placementDetails.getAddedDate(), CoreMatchers.is(LocalDateTime.now(clock)));
+        placementDetails.getAddedDate(), CoreMatchers.is(LocalDateTime.now(clock)));
     Assert.assertThat("The placement's amended date did not match the expected value.",
-      placementDetails.getAmendedDate(), CoreMatchers.nullValue());
+        placementDetails.getAmendedDate(), CoreMatchers.nullValue());
   }
 
   /**
@@ -367,11 +367,11 @@ public class PlacementServiceImplTest {
 
     // Record expectations.
     when(placementDetailsMapperMock.placementDetailsDTOToPlacementDetails(placementDetailsDto))
-      .thenReturn(placementDetails);
+        .thenReturn(placementDetails);
     when(placementDetailsRepositoryMock.saveAndFlush(placementDetails))
-      .thenReturn(placementDetails);
+        .thenReturn(placementDetails);
     when(placementDetailsMapperMock.placementDetailsToPlacementDetailsDTO(placementDetails))
-      .thenReturn(new PlacementDetailsDTO());
+        .thenReturn(new PlacementDetailsDTO());
     when(placementSpecialtyMapperMock.toDTOs(any())).thenReturn(Collections.emptySet());
     doNothing().when(placementSupervisorRepositoryMock).deleteAllByIdPlacementId(1L);
     when(placementSupervisorRepositoryMock.saveAll(any())).thenReturn(null);
@@ -381,9 +381,9 @@ public class PlacementServiceImplTest {
 
     // Perform assertions.
     Assert.assertThat("The placement's added date did not match the expected value.",
-      placementDetails.getAddedDate(), CoreMatchers.nullValue());
+        placementDetails.getAddedDate(), CoreMatchers.nullValue());
     Assert.assertThat("The placement's amended date did not match the expected value.",
-      placementDetails.getAmendedDate(), CoreMatchers.is(LocalDateTime.now(clock)));
+        placementDetails.getAmendedDate(), CoreMatchers.is(LocalDateTime.now(clock)));
   }
 
   /**
@@ -398,11 +398,11 @@ public class PlacementServiceImplTest {
 
     // Record expectations.
     when(placementDetailsMapperMock.placementDetailsDTOToPlacementDetails(placementDetailsDto))
-      .thenReturn(placementDetails);
+        .thenReturn(placementDetails);
     when(placementDetailsRepositoryMock.saveAndFlush(placementDetails))
-      .thenReturn(placementDetails);
+        .thenReturn(placementDetails);
     when(placementDetailsMapperMock.placementDetailsToPlacementDetailsDTO(placementDetails))
-      .thenReturn(new PlacementDetailsDTO());
+        .thenReturn(new PlacementDetailsDTO());
     when(placementSpecialtyMapperMock.toDTOs(any())).thenReturn(Collections.emptySet());
     doNothing().when(placementSupervisorRepositoryMock).deleteAllByIdPlacementId(1L);
     when(placementSupervisorRepositoryMock.saveAll(any())).thenReturn(null);
@@ -413,8 +413,9 @@ public class PlacementServiceImplTest {
     // Perform assertions.
     Set<PlacementSiteDTO> sites = updatedPlacementDetailsDto.getSites();
     Assert
-      .assertThat("The placement's number of sites did not match the expected value.", sites.size(),
-        CoreMatchers.is(0));
+        .assertThat("The placement's number of sites did not match the expected value.",
+            sites.size(),
+            CoreMatchers.is(0));
   }
 
   /**
@@ -454,13 +455,13 @@ public class PlacementServiceImplTest {
 
     // Record expectations.
     when(placementDetailsMapperMock.placementDetailsDTOToPlacementDetails(placementDetailsDto))
-      .thenReturn(placementDetails);
+        .thenReturn(placementDetails);
     when(placementSiteMapper.toEntity(placementSiteDto1)).thenReturn(placementSite1);
     when(placementSiteMapper.toEntity(placementSiteDto2)).thenReturn(placementSite2);
     when(placementDetailsRepositoryMock.saveAndFlush(eq(updatedPlacementDetails)))
-      .thenReturn(updatedPlacementDetails);
+        .thenReturn(updatedPlacementDetails);
     when(placementDetailsMapperMock.placementDetailsToPlacementDetailsDTO(placementDetails))
-      .thenReturn(new PlacementDetailsDTO());
+        .thenReturn(new PlacementDetailsDTO());
     when(placementSpecialtyMapperMock.toDTOs(any())).thenReturn(Collections.emptySet());
     doNothing().when(placementSupervisorRepositoryMock).deleteAllByIdPlacementId(1L);
     when(placementSupervisorRepositoryMock.saveAll(any())).thenReturn(null);
@@ -473,14 +474,14 @@ public class PlacementServiceImplTest {
     // Perform assertions.
     Set<PlacementSiteDTO> sites = updatedPlacementDetailsDto.getSites();
     Assert
-      .assertThat("The number of placement sites did not match the expected value.", sites.size(),
-        CoreMatchers.is(2));
+        .assertThat("The number of placement sites did not match the expected value.", sites.size(),
+            CoreMatchers.is(2));
 
     for (PlacementSiteDTO site : sites) {
       Assert.assertThat("The placement site's type did not match the expected value.",
-        site.getPlacementSiteType(), CoreMatchers.is(PlacementSiteType.OTHER));
+          site.getPlacementSiteType(), CoreMatchers.is(PlacementSiteType.OTHER));
       Assert.assertThat("The placement site's placement ID did not match the expected value.",
-        site.getPlacementId(), CoreMatchers.is(1L));
+          site.getPlacementId(), CoreMatchers.is(1L));
     }
   }
 }

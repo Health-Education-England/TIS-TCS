@@ -5,18 +5,17 @@ import com.transformuk.hee.tis.tcs.api.dto.CurriculumDTO;
 import com.transformuk.hee.tis.tcs.api.dto.ProgrammeDTO;
 import com.transformuk.hee.tis.tcs.service.repository.CurriculumRepository;
 import com.transformuk.hee.tis.tcs.service.service.mapper.DesignatedBodyMapper;
+import java.util.ArrayList;
+import java.util.List;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 import org.springframework.validation.BeanPropertyBindingResult;
 import org.springframework.validation.FieldError;
 import org.springframework.web.bind.MethodArgumentNotValidException;
 
-import java.util.ArrayList;
-import java.util.List;
-
 /**
- * Holds more complex custom validation for a {@link ProgrammeDTO} that
- * cannot be easily done via annotations
+ * Holds more complex custom validation for a {@link ProgrammeDTO} that cannot be easily done via
+ * annotations
  */
 @Component
 public class ProgrammeValidator {
@@ -29,24 +28,26 @@ public class ProgrammeValidator {
   }
 
   /**
-   * Custom validation on the programme DTO, this is meant to supplement the annotation based validation
-   * already in place. It checks that the owner and curricula are valid.
-   * An owner is valid if the text matches exactly the name of a known owner and if the current
-   * user making the call can create or modify a programme within that owner.
-   * Curricula are valid if the ID's supplied already exist in the database.
+   * Custom validation on the programme DTO, this is meant to supplement the annotation based
+   * validation already in place. It checks that the owner and curricula are valid. An owner is
+   * valid if the text matches exactly the name of a known owner and if the current user making the
+   * call can create or modify a programme within that owner. Curricula are valid if the ID's
+   * supplied already exist in the database.
    *
    * @param programmeDTO the programme to check
    * @param userProfile  the current user making the call
    * @throws MethodArgumentNotValidException if there are validation errors
    */
-  public void validate(ProgrammeDTO programmeDTO, UserProfile userProfile) throws MethodArgumentNotValidException {
+  public void validate(ProgrammeDTO programmeDTO, UserProfile userProfile)
+      throws MethodArgumentNotValidException {
 
     List<FieldError> fieldErrors = new ArrayList<>();
     fieldErrors.addAll(checkOwner(programmeDTO, userProfile));
     fieldErrors.addAll(checkCurricula(programmeDTO));
 
     if (!fieldErrors.isEmpty()) {
-      BeanPropertyBindingResult bindingResult = new BeanPropertyBindingResult(programmeDTO, "ProgrammeDTO");
+      BeanPropertyBindingResult bindingResult = new BeanPropertyBindingResult(programmeDTO,
+          "ProgrammeDTO");
       fieldErrors.forEach(bindingResult::addError);
       throw new MethodArgumentNotValidException(null, bindingResult);
     }

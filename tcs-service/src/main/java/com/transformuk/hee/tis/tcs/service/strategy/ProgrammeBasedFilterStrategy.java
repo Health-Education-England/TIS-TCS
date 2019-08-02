@@ -3,6 +3,8 @@ package com.transformuk.hee.tis.tcs.service.strategy;
 import com.transformuk.hee.tis.security.model.Programme;
 import com.transformuk.hee.tis.security.model.UserProfile;
 import com.transformuk.hee.tis.security.util.TisSecurityHelper;
+import java.util.Optional;
+import java.util.Set;
 import org.apache.commons.collections4.CollectionUtils;
 import org.apache.lucene.search.join.ScoreMode;
 import org.elasticsearch.common.collect.Tuple;
@@ -10,9 +12,6 @@ import org.elasticsearch.index.query.BoolQueryBuilder;
 import org.elasticsearch.index.query.MatchQueryBuilder;
 import org.elasticsearch.index.query.NestedQueryBuilder;
 import org.springframework.stereotype.Component;
-
-import java.util.Optional;
-import java.util.Set;
 
 @Component
 public class ProgrammeBasedFilterStrategy implements RoleBasedFilterStrategy {
@@ -26,8 +25,9 @@ public class ProgrammeBasedFilterStrategy implements RoleBasedFilterStrategy {
     if (CollectionUtils.isNotEmpty(assignedProgrammes)) {
       BoolQueryBuilder programmeRoleFilter = new BoolQueryBuilder();
       assignedProgrammes.forEach(programme -> programmeRoleFilter.should(
-        new NestedQueryBuilder("programmeMemberships",
-          new MatchQueryBuilder("programmeMemberships.programmeId", programme.getId()), ScoreMode.None)));
+          new NestedQueryBuilder("programmeMemberships",
+              new MatchQueryBuilder("programmeMemberships.programmeId", programme.getId()),
+              ScoreMode.None)));
       return Optional.of(new Tuple<>(COLUMN_FILTER, programmeRoleFilter));
     }
     return Optional.empty();

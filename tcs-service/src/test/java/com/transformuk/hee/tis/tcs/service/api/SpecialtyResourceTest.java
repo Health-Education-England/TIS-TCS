@@ -1,5 +1,12 @@
 package com.transformuk.hee.tis.tcs.service.api;
 
+import static org.mockito.ArgumentMatchers.eq;
+import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.when;
+import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.content;
+import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
+import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
+
 import com.google.common.collect.Lists;
 import com.transformuk.hee.tis.tcs.api.dto.SpecialtyDTO;
 import com.transformuk.hee.tis.tcs.api.enumeration.Status;
@@ -7,6 +14,7 @@ import com.transformuk.hee.tis.tcs.service.Application;
 import com.transformuk.hee.tis.tcs.service.api.validation.SpecialtyValidator;
 import com.transformuk.hee.tis.tcs.service.exception.ExceptionTranslator;
 import com.transformuk.hee.tis.tcs.service.service.SpecialtyService;
+import java.util.List;
 import org.hamcrest.Matchers;
 import org.junit.Before;
 import org.junit.Test;
@@ -25,15 +33,6 @@ import org.springframework.test.context.junit4.SpringRunner;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.request.MockMvcRequestBuilders;
 import org.springframework.test.web.servlet.setup.MockMvcBuilders;
-
-import java.util.List;
-
-import static org.mockito.ArgumentMatchers.eq;
-import static org.mockito.Mockito.verify;
-import static org.mockito.Mockito.when;
-import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.content;
-import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
-import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
 @RunWith(SpringRunner.class)
 @SpringBootTest(classes = Application.class)
@@ -68,7 +67,8 @@ public class SpecialtyResourceTest {
 
   @Before
   public void setup() {
-    SpecialtyResource specialtyResource = new SpecialtyResource(specialtyServiceMock, specialtyValidatorMock);
+    SpecialtyResource specialtyResource = new SpecialtyResource(specialtyServiceMock,
+        specialtyValidatorMock);
     mockMvc = MockMvcBuilders.standaloneSetup(specialtyResource)
         .setMessageConverters(jacksonMessageConverter)
         .setCustomArgumentResolvers(pageableArgumentResolver)
@@ -97,10 +97,13 @@ public class SpecialtyResourceTest {
     Pageable page = PageRequest.of(0, 50);
     Page<SpecialtyDTO> mockedResults = new PageImpl<>(Lists.newArrayList(specialtyDTO), page, 1);
 
-    when(specialtyServiceMock.getPagedSpecialtiesForProgrammeId(eq(programmeId), eq(null), eq(page))).thenReturn(mockedResults);
+    when(
+        specialtyServiceMock.getPagedSpecialtiesForProgrammeId(eq(programmeId), eq(null), eq(page)))
+        .thenReturn(mockedResults);
 
-    mockMvc.perform(MockMvcRequestBuilders.get("/api/programme/{id}/specialties?page=0&size=50", programmeId)
-        .contentType(MediaType.APPLICATION_JSON_UTF8_VALUE))
+    mockMvc.perform(
+        MockMvcRequestBuilders.get("/api/programme/{id}/specialties?page=0&size=50", programmeId)
+            .contentType(MediaType.APPLICATION_JSON_UTF8_VALUE))
         .andExpect(status().isOk())
         .andExpect(content().contentType(MediaType.APPLICATION_JSON_UTF8_VALUE))
         .andExpect(jsonPath("$.number").value("0"))
@@ -124,9 +127,13 @@ public class SpecialtyResourceTest {
     Page<SpecialtyDTO> mockedResults = new PageImpl<>(Lists.newArrayList(specialtyDTO), page, 1);
     String query = "name";
 
-    when(specialtyServiceMock.getPagedSpecialtiesForProgrammeId(eq(programmeId), eq(query), eq(page))).thenReturn(mockedResults);
+    when(specialtyServiceMock
+        .getPagedSpecialtiesForProgrammeId(eq(programmeId), eq(query), eq(page)))
+        .thenReturn(mockedResults);
 
-    mockMvc.perform(MockMvcRequestBuilders.get("/api/programme/{id}/specialties?page=0&size=50&searchQuery={query}", programmeId, query)
+    mockMvc.perform(MockMvcRequestBuilders
+        .get("/api/programme/{id}/specialties?page=0&size=50&searchQuery={query}", programmeId,
+            query)
         .contentType(MediaType.APPLICATION_JSON_UTF8_VALUE))
         .andExpect(status().isOk())
         .andExpect(content().contentType(MediaType.APPLICATION_JSON_UTF8_VALUE))
@@ -144,21 +151,28 @@ public class SpecialtyResourceTest {
   }
 
   @Test
-  public void getSpecialtiesForProgrammeAndTraineeShouldReturnCollectionOfSpecialtiesForTrainee() throws Exception {
+  public void getSpecialtiesForProgrammeAndTraineeShouldReturnCollectionOfSpecialtiesForTrainee()
+      throws Exception {
     long programmeId = 1L;
     long personId = 2L;
 
     List<SpecialtyDTO> foundSpecialties = Lists.newArrayList(specialtyDTO, anotherSpecialtyDTO);
-    when(specialtyServiceMock.getSpecialtiesForProgrammeAndPerson(programmeId, personId)).thenReturn(foundSpecialties);
+    when(specialtyServiceMock.getSpecialtiesForProgrammeAndPerson(programmeId, personId))
+        .thenReturn(foundSpecialties);
 
-    mockMvc.perform(MockMvcRequestBuilders.get("/api/programme/{programmeId}/person/{personId}/specialties", programmeId, personId)
+    mockMvc.perform(MockMvcRequestBuilders
+        .get("/api/programme/{programmeId}/person/{personId}/specialties", programmeId, personId)
         .contentType(MediaType.APPLICATION_JSON_UTF8_VALUE))
         .andExpect(status().isOk())
         .andExpect(content().contentType(MediaType.APPLICATION_JSON_UTF8_VALUE))
-        .andExpect(jsonPath("$.[*].id").value(Matchers.hasItems(SPECIALTY_ID.intValue(), ANOTHER_SPECIALTY_ID.intValue())))
-        .andExpect(jsonPath("$.[*].college").value(Matchers.hasItems(SPECIALTY_COLLEGE, ANOTHER_SPECIALTY_COLLEGE)))
-        .andExpect(jsonPath("$.[*].specialtyCode").value(Matchers.hasItems(SPECIALTY_CODE, ANOTHER_SPECIALTY_CODE)))
-        .andExpect(jsonPath("$.[*].name").value(Matchers.hasItems(SPECIALTY_NAME, ANOTHER_SPECIALTY_NAME)))
+        .andExpect(jsonPath("$.[*].id")
+            .value(Matchers.hasItems(SPECIALTY_ID.intValue(), ANOTHER_SPECIALTY_ID.intValue())))
+        .andExpect(jsonPath("$.[*].college")
+            .value(Matchers.hasItems(SPECIALTY_COLLEGE, ANOTHER_SPECIALTY_COLLEGE)))
+        .andExpect(jsonPath("$.[*].specialtyCode")
+            .value(Matchers.hasItems(SPECIALTY_CODE, ANOTHER_SPECIALTY_CODE)))
+        .andExpect(
+            jsonPath("$.[*].name").value(Matchers.hasItems(SPECIALTY_NAME, ANOTHER_SPECIALTY_NAME)))
     ;
 
     verify(specialtyServiceMock).getSpecialtiesForProgrammeAndPerson(programmeId, personId);

@@ -85,10 +85,10 @@ public class PostGradeDTO implements Serializable {
   @Override
   public String toString() {
     return "PostGradeDTO{" +
-      "id=" + id +
-      ", postId=" + postId +
-      ", gradeId='" + gradeId + '\'' +
-      ", postGradeType=" + postGradeType +
-      '}';
+        "id=" + id +
+        ", postId=" + postId +
+        ", gradeId='" + gradeId + '\'' +
+        ", postGradeType=" + postGradeType +
+        '}';
   }
 }

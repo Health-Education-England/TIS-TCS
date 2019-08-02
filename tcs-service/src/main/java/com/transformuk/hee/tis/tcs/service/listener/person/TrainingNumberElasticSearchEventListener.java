@@ -5,6 +5,7 @@ import com.transformuk.hee.tis.tcs.service.event.TrainingNumberSavedEvent;
 import com.transformuk.hee.tis.tcs.service.model.ProgrammeMembership;
 import com.transformuk.hee.tis.tcs.service.repository.ProgrammeMembershipRepository;
 import com.transformuk.hee.tis.tcs.service.service.mapper.ProgrammeMembershipMapper;
+import java.util.List;
 import org.apache.commons.collections4.CollectionUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -13,12 +14,11 @@ import org.springframework.context.ApplicationEventPublisher;
 import org.springframework.context.event.EventListener;
 import org.springframework.stereotype.Component;
 
-import java.util.List;
-
 @Component
 public class TrainingNumberElasticSearchEventListener {
 
-  private static final Logger LOG = LoggerFactory.getLogger(TrainingNumberElasticSearchEventListener.class);
+  private static final Logger LOG = LoggerFactory
+      .getLogger(TrainingNumberElasticSearchEventListener.class);
 
   @Autowired
   private ProgrammeMembershipRepository programmeMembershipRepository;
@@ -31,18 +31,21 @@ public class TrainingNumberElasticSearchEventListener {
 
   @EventListener
   public void handleTrainingNumberSavedEvent(TrainingNumberSavedEvent event) {
-    LOG.info("Received TrainingNumber saved event for TrainingNumber id: [{}]", event.getTrainingNumberDTO().getId());
+    LOG.info("Received TrainingNumber saved event for TrainingNumber id: [{}]",
+        event.getTrainingNumberDTO().getId());
     publishEventsForRelatedProgrammeMemberships(event.getTrainingNumberDTO().getId());
   }
 
   @EventListener
   public void handleTrainingNumberDeletedEvent(TrainingNumberSavedEvent event) {
-    LOG.info("Received TrainingNumber deleted event for TrainingNumber id: [{}]", event.getTrainingNumberDTO().getId());
+    LOG.info("Received TrainingNumber deleted event for TrainingNumber id: [{}]",
+        event.getTrainingNumberDTO().getId());
     publishEventsForRelatedProgrammeMemberships(event.getTrainingNumberDTO().getId());
   }
 
   private void publishEventsForRelatedProgrammeMemberships(Long trainingNumberId) {
-    List<ProgrammeMembership> programmeMembershipsByTraineeId = programmeMembershipRepository.findByTraineeId(trainingNumberId);
+    List<ProgrammeMembership> programmeMembershipsByTraineeId = programmeMembershipRepository
+        .findByTraineeId(trainingNumberId);
 
     if (CollectionUtils.isNotEmpty(programmeMembershipsByTraineeId)) {
       programmeMembershipsByTraineeId.stream()

@@ -2,11 +2,10 @@ package com.transformuk.hee.tis.tcs.service.service;
 
 import com.transformuk.hee.tis.tcs.api.dto.ProgrammeDTO;
 import com.transformuk.hee.tis.tcs.service.model.ColumnFilter;
-import org.springframework.data.domain.Page;
-import org.springframework.data.domain.Pageable;
-
 import java.util.List;
 import java.util.Set;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 
 /**
  * Service Interface for managing Programme.
@@ -62,15 +61,16 @@ public interface ProgrammeService {
   Page<ProgrammeDTO> findAllCurrent(Pageable pageable);
 
   /**
-   * Get all the programmes within the given designated body codes using the
-   * given smart search string.
+   * Get all the programmes within the given designated body codes using the given smart search
+   * string.
    *
    * @param searchString the search string to match, can be null
    * @param columnFilers the exact key value filters to apply, can be null
    * @param pageable     the pagination information
    * @return the list of entities
    */
-  Page<ProgrammeDTO> advancedSearch(String searchString, List<ColumnFilter> columnFilers, Pageable pageable);
+  Page<ProgrammeDTO> advancedSearch(String searchString, List<ColumnFilter> columnFilers,
+      Pageable pageable);
 
   /**
    * Get the "id" programme.
@@ -82,6 +82,7 @@ public interface ProgrammeService {
 
   /**
    * Find a list of programmes that a trainee has enrolled to
+   *
    * @param traineeId
    * @return
    */

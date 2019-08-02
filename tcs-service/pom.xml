@@ -6,13 +6,13 @@
   <parent>
     <artifactId>tis-parent</artifactId>
     <groupId>com.transformuk.hee</groupId>
-    <version>3.0.0</version>
+    <version>3.0.2</version>
     <relativePath/>
   </parent>
 
   <groupId>com.transformuk.hee.tis</groupId>
   <artifactId>tcs-service</artifactId>
-  <version>4.5.1</version>
+  <version>4.5.2</version>
   <packaging>war</packaging>
   <name>tcs-service</name>
 

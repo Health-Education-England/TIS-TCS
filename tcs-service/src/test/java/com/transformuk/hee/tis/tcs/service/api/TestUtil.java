@@ -1,21 +1,20 @@
 package com.transformuk.hee.tis.tcs.service.api;
 
+import static org.assertj.core.api.Assertions.assertThat;
+
 import com.fasterxml.jackson.annotation.JsonInclude;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule;
+import java.io.IOException;
+import java.nio.charset.Charset;
+import java.time.ZonedDateTime;
+import java.time.format.DateTimeParseException;
 import org.hamcrest.Description;
 import org.hamcrest.TypeSafeDiagnosingMatcher;
 import org.springframework.format.datetime.standard.DateTimeFormatterRegistrar;
 import org.springframework.format.support.DefaultFormattingConversionService;
 import org.springframework.format.support.FormattingConversionService;
 import org.springframework.http.MediaType;
-
-import java.io.IOException;
-import java.nio.charset.Charset;
-import java.time.ZonedDateTime;
-import java.time.format.DateTimeParseException;
-
-import static org.assertj.core.api.Assertions.assertThat;
 
 /**
  * Utility class for testing REST controllers.
@@ -63,7 +62,8 @@ public class TestUtil {
   }
 
   /**
-   * Creates a matcher that matches when the examined string reprensents the same instant as the reference datetime
+   * Creates a matcher that matches when the examined string reprensents the same instant as the
+   * reference datetime
    *
    * @param date the reference datetime against which the examined string is checked
    */
@@ -90,7 +90,21 @@ public class TestUtil {
   }
 
   /**
-   * A matcher that tests that the examined string represents the same instant as the reference datetime.
+   * Create a FormattingConversionService which use ISO date format, instead of the localized one.
+   *
+   * @return the FormattingConversionService
+   */
+  public static FormattingConversionService createFormattingConversionService() {
+    DefaultFormattingConversionService dfcs = new DefaultFormattingConversionService();
+    DateTimeFormatterRegistrar registrar = new DateTimeFormatterRegistrar();
+    registrar.setUseIsoFormat(true);
+    registrar.registerFormatters(dfcs);
+    return dfcs;
+  }
+
+  /**
+   * A matcher that tests that the examined string represents the same instant as the reference
+   * datetime.
    */
   public static class ZonedDateTimeMatcher extends TypeSafeDiagnosingMatcher<String> {
 
@@ -121,17 +135,5 @@ public class TestUtil {
       description.appendText("a String representing the same Instant as ").appendValue(date);
     }
   }
-  
-  /**
-   * Create a FormattingConversionService which use ISO date format, instead of the localized one.
-   * @return the FormattingConversionService
-   */
-  public static FormattingConversionService createFormattingConversionService() {
-    DefaultFormattingConversionService dfcs = new DefaultFormattingConversionService ();
-    DateTimeFormatterRegistrar registrar = new DateTimeFormatterRegistrar();
-    registrar.setUseIsoFormat(true);
-    registrar.registerFormatters(dfcs);
-    return dfcs;
-  }
-  
+
 }

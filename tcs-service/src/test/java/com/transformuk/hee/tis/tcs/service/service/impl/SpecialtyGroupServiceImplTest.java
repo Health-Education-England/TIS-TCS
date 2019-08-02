@@ -1,5 +1,8 @@
 package com.transformuk.hee.tis.tcs.service.service.impl;
 
+import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.when;
+
 import com.transformuk.hee.tis.tcs.api.dto.SpecialtyDTO;
 import com.transformuk.hee.tis.tcs.api.dto.SpecialtyGroupDTO;
 import com.transformuk.hee.tis.tcs.api.enumeration.SpecialtyType;
@@ -8,6 +11,7 @@ import com.transformuk.hee.tis.tcs.service.model.SpecialtyGroup;
 import com.transformuk.hee.tis.tcs.service.repository.SpecialtyGroupRepository;
 import com.transformuk.hee.tis.tcs.service.repository.SpecialtyRepository;
 import com.transformuk.hee.tis.tcs.service.service.mapper.SpecialtyGroupMapper;
+import java.util.Set;
 import org.assertj.core.util.Sets;
 import org.junit.Assert;
 import org.junit.Before;
@@ -16,11 +20,6 @@ import org.junit.runner.RunWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.MockitoJUnitRunner;
-
-import java.util.Set;
-
-import static org.mockito.Mockito.verify;
-import static org.mockito.Mockito.when;
 
 ;
 
@@ -52,7 +51,7 @@ public class SpecialtyGroupServiceImplTest {
   private Specialty specialtyMock1;
 
   @Mock
-  private  Specialty specialtyMock2;
+  private Specialty specialtyMock2;
 
   @Mock
   private SpecialtyGroup specialtyGroupMock;
@@ -109,9 +108,11 @@ public class SpecialtyGroupServiceImplTest {
     SpecialtyGroupDTO expectedSpecialtyGroupDTO = specialtyGroupDTO;
 
     // When
-    when(specialtyGroupMapperMock.specialtyGroupDTOToSpecialtyGroup(specialtyGroupDTO)).thenReturn(specialtyGroupMock);
+    when(specialtyGroupMapperMock.specialtyGroupDTOToSpecialtyGroup(specialtyGroupDTO))
+        .thenReturn(specialtyGroupMock);
     when(specialtyGroupRepositoryMock.save(specialtyGroupMock)).thenReturn(specialtyGroupMock);
-    when(specialtyGroupMapperMock.specialtyGroupToSpecialtyGroupDTO(specialtyGroupMock)).thenReturn(expectedSpecialtyGroupDTO);
+    when(specialtyGroupMapperMock.specialtyGroupToSpecialtyGroupDTO(specialtyGroupMock))
+        .thenReturn(expectedSpecialtyGroupDTO);
 
     SpecialtyGroupDTO result = specialtyGroupServiceImpl.save(expectedSpecialtyGroupDTO);
 
@@ -128,9 +129,11 @@ public class SpecialtyGroupServiceImplTest {
     SpecialtyGroupDTO expectedSpecialtyGroupDTO = specialtyGroupDTO;
 
     // When
-    when(specialtyGroupMapperMock.specialtyGroupDTOToSpecialtyGroup(specialtyGroupDTO)).thenReturn(specialtyGroupMock);
+    when(specialtyGroupMapperMock.specialtyGroupDTOToSpecialtyGroup(specialtyGroupDTO))
+        .thenReturn(specialtyGroupMock);
     when(specialtyGroupRepositoryMock.save(specialtyGroupMock)).thenReturn(specialtyGroupMock);
-    when(specialtyGroupMapperMock.specialtyGroupToSpecialtyGroupDTO(specialtyGroupMock)).thenReturn(expectedSpecialtyGroupDTO);
+    when(specialtyGroupMapperMock.specialtyGroupToSpecialtyGroupDTO(specialtyGroupMock))
+        .thenReturn(expectedSpecialtyGroupDTO);
 
     // Save into repository
     SpecialtyGroupDTO result = specialtyGroupServiceImpl.save(expectedSpecialtyGroupDTO);
@@ -140,7 +143,8 @@ public class SpecialtyGroupServiceImplTest {
     specialtyDTOnew.setId(9876L);
     specialtyDTOnew.setName("NEW SPECIALTY");
 
-    Set<SpecialtyDTO> specialtyDTOS = Sets.newLinkedHashSet(specialtyDTO1, specialtyDTO2, specialtyDTOnew);
+    Set<SpecialtyDTO> specialtyDTOS = Sets
+        .newLinkedHashSet(specialtyDTO1, specialtyDTO2, specialtyDTOnew);
     expectedSpecialtyGroupDTO.setSpecialties(specialtyDTOS);
 
     // Update in repository
@@ -157,9 +161,11 @@ public class SpecialtyGroupServiceImplTest {
     SpecialtyGroupDTO expectedSpecialtyGroupDTO = specialtyGroupDTO;
 
     // When
-    when(specialtyGroupMapperMock.specialtyGroupDTOToSpecialtyGroup(specialtyGroupDTO)).thenReturn(specialtyGroupMock);
+    when(specialtyGroupMapperMock.specialtyGroupDTOToSpecialtyGroup(specialtyGroupDTO))
+        .thenReturn(specialtyGroupMock);
     when(specialtyGroupRepositoryMock.save(specialtyGroupMock)).thenReturn(specialtyGroupMock);
-    when(specialtyGroupMapperMock.specialtyGroupToSpecialtyGroupDTO(specialtyGroupMock)).thenReturn(expectedSpecialtyGroupDTO);
+    when(specialtyGroupMapperMock.specialtyGroupToSpecialtyGroupDTO(specialtyGroupMock))
+        .thenReturn(expectedSpecialtyGroupDTO);
 
     // Save into repository
     SpecialtyGroupDTO result = specialtyGroupServiceImpl.save(expectedSpecialtyGroupDTO);

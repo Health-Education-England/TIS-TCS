@@ -7,6 +7,7 @@ import org.springframework.data.jpa.repository.JpaRepository;
  * Spring Data JPA repository for the TariffFundingTypeFields entity.
  */
 @SuppressWarnings("unused")
-public interface TariffFundingTypeFieldsRepository extends JpaRepository<TariffFundingTypeFields, Long> {
+public interface TariffFundingTypeFieldsRepository extends
+    JpaRepository<TariffFundingTypeFields, Long> {
 
 }

@@ -2,16 +2,15 @@ package com.transformuk.hee.tis.tcs.service.model;
 
 
 import com.transformuk.hee.tis.tcs.api.enumeration.PermitToWorkType;
-
+import java.io.Serializable;
+import java.time.LocalDate;
+import java.time.LocalDateTime;
+import java.util.Objects;
 import javax.persistence.Entity;
 import javax.persistence.EnumType;
 import javax.persistence.Enumerated;
 import javax.persistence.Id;
 import javax.persistence.Version;
-import java.io.Serializable;
-import java.time.LocalDate;
-import java.time.LocalDateTime;
-import java.util.Objects;
 
 /**
  * A RightToWork.

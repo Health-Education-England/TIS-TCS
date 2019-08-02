@@ -28,8 +28,8 @@ public class PlacementSummaryDTO {
   }
 
   public PlacementSummaryDTO(Date dateFrom, Date dateTo, Long siteId, String primarySpecialtyName,
-                             Long gradeId, String placementType, String status, String forenames, String surname,
-                             Long traineeId, Long placementId, String placementSpecialtyType) {
+      Long gradeId, String placementType, String status, String forenames, String surname,
+      Long traineeId, Long placementId, String placementSpecialtyType) {
     this.dateFrom = dateFrom;
     this.dateTo = dateTo;
     this.siteId = siteId;
@@ -166,8 +166,12 @@ public class PlacementSummaryDTO {
 
   @Override
   public boolean equals(Object o) {
-    if (this == o) return true;
-    if (o == null || getClass() != o.getClass()) return false;
+    if (this == o) {
+      return true;
+    }
+    if (o == null || getClass() != o.getClass()) {
+      return false;
+    }
     PlacementSummaryDTO that = (PlacementSummaryDTO) o;
     return Objects.equals(dateFrom, that.dateFrom) &&
         Objects.equals(dateTo, that.dateTo) &&
@@ -189,6 +193,9 @@ public class PlacementSummaryDTO {
   @Override
   public int hashCode() {
 
-    return Objects.hash(dateFrom, dateTo, siteId, siteName, primarySpecialtyName, gradeId, gradeName, placementType, status, forenames, surname, traineeId, placementId, placementStatus, placementSpecialtyType);
+    return Objects
+        .hash(dateFrom, dateTo, siteId, siteName, primarySpecialtyName, gradeId, gradeName,
+            placementType, status, forenames, surname, traineeId, placementId, placementStatus,
+            placementSpecialtyType);
   }
 }

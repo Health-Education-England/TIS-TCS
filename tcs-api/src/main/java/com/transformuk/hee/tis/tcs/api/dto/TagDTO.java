@@ -3,93 +3,97 @@ package com.transformuk.hee.tis.tcs.api.dto;
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.google.common.base.Strings;
 import com.transformuk.hee.tis.tcs.api.dto.validation.Update;
-
+import java.time.LocalDateTime;
+import java.util.Objects;
 import javax.validation.constraints.DecimalMin;
 import javax.validation.constraints.NotNull;
 import javax.validation.constraints.Null;
-import java.time.LocalDateTime;
-import java.util.Objects;
 
 public class TagDTO {
-    @NotNull(groups = Update.class, message = "Id must not be null when updating a tag")
-    @DecimalMin(value = "0", groups = Update.class, message = "Id must not be negative")
-    @Null(groups = Update.class, message = "Id must be null when creating a new tag")
-    private Long id;
-    @JsonIgnore
-    private LocalDateTime addedDate;
-    @JsonIgnore
-    private LocalDateTime amendedDate;
-    private String name;
 
-    public TagDTO() {
+  @NotNull(groups = Update.class, message = "Id must not be null when updating a tag")
+  @DecimalMin(value = "0", groups = Update.class, message = "Id must not be negative")
+  @Null(groups = Update.class, message = "Id must be null when creating a new tag")
+  private Long id;
+  @JsonIgnore
+  private LocalDateTime addedDate;
+  @JsonIgnore
+  private LocalDateTime amendedDate;
+  private String name;
+
+  public TagDTO() {
+  }
+
+  public TagDTO(final Long id, final String name) {
+    this.id = id;
+    this.name = name;
+  }
+
+  public TagDTO(final String name) {
+    this.name = name;
+  }
+
+  @Override
+  public boolean equals(final Object o) {
+    if (this == o) {
+      return true;
+    }
+    if (o == null || getClass() != o.getClass()) {
+      return false;
+    }
+    final TagDTO tagDTO = (TagDTO) o;
+
+    if (Strings.isNullOrEmpty(name) || Strings.isNullOrEmpty(tagDTO.name)) {
+      return false;
     }
 
-    public TagDTO(final Long id, final String name) {
-        this.id = id;
-        this.name = name;
-    }
+    return Objects.equals(id, tagDTO.id) || name.equalsIgnoreCase(tagDTO.name);
+  }
 
-    public TagDTO(final String name) {
-        this.name = name;
-    }
+  @Override
+  public int hashCode() {
+    return Objects.hash(name.toLowerCase());
+  }
 
-    @Override
-    public boolean equals(final Object o) {
-        if (this == o) return true;
-        if (o == null || getClass() != o.getClass()) return false;
-        final TagDTO tagDTO = (TagDTO) o;
+  @Override
+  public String toString() {
+    return "TagDTO{" +
+        "id=" + id +
+        ", addedDate=" + addedDate +
+        ", amendedDate=" + amendedDate +
+        ", name='" + name + '\'' +
+        '}';
+  }
 
-        if (Strings.isNullOrEmpty(name) || Strings.isNullOrEmpty(tagDTO.name)) {
-            return false;
-        }
+  public Long getId() {
+    return id;
+  }
 
-        return Objects.equals(id, tagDTO.id) || name.equalsIgnoreCase(tagDTO.name);
-    }
+  public void setId(final Long id) {
+    this.id = id;
+  }
 
-    @Override
-    public int hashCode() {
-        return Objects.hash(name.toLowerCase());
-    }
+  public LocalDateTime getAddedDate() {
+    return addedDate;
+  }
 
-    @Override
-    public String toString() {
-        return "TagDTO{" +
-                "id=" + id +
-                ", addedDate=" + addedDate +
-                ", amendedDate=" + amendedDate +
-                ", name='" + name + '\'' +
-                '}';
-    }
+  public void setAddedDate(final LocalDateTime addedDate) {
+    this.addedDate = addedDate;
+  }
 
-    public Long getId() {
-        return id;
-    }
+  public LocalDateTime getAmendedDate() {
+    return amendedDate;
+  }
 
-    public void setId(final Long id) {
-        this.id = id;
-    }
+  public void setAmendedDate(final LocalDateTime amendedDate) {
+    this.amendedDate = amendedDate;
+  }
 
-    public LocalDateTime getAddedDate() {
-        return addedDate;
-    }
+  public String getName() {
+    return name;
+  }
 
-    public void setAddedDate(final LocalDateTime addedDate) {
-        this.addedDate = addedDate;
-    }
-
-    public LocalDateTime getAmendedDate() {
-        return amendedDate;
-    }
-
-    public void setAmendedDate(final LocalDateTime amendedDate) {
-        this.amendedDate = amendedDate;
-    }
-
-    public String getName() {
-        return name;
-    }
-
-    public void setName(final String name) {
-        this.name = name;
-    }
+  public void setName(final String name) {
+    this.name = name;
+  }
 }

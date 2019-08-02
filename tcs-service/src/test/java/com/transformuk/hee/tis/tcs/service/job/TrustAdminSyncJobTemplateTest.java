@@ -1,21 +1,20 @@
 package com.transformuk.hee.tis.tcs.service.job;
 
+import static org.mockito.Matchers.any;
+import static org.mockito.Mockito.times;
+import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.when;
+
+import java.util.List;
+import java.util.Set;
+import javax.persistence.EntityManager;
+import javax.persistence.EntityManagerFactory;
+import javax.persistence.EntityTransaction;
 import org.assertj.core.util.Lists;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.mockito.Mock;
 import org.mockito.runners.MockitoJUnitRunner;
-
-import javax.persistence.EntityManager;
-import javax.persistence.EntityManagerFactory;
-import javax.persistence.EntityTransaction;
-import java.util.HashSet;
-import java.util.List;
-import java.util.Set;
-
-import static org.mockito.Matchers.any;
-import static org.mockito.Matchers.anyList;
-import static org.mockito.Mockito.*;
 
 @RunWith(MockitoJUnitRunner.class)
 public class TrustAdminSyncJobTemplateTest {
@@ -49,12 +48,13 @@ public class TrustAdminSyncJobTemplateTest {
   }
 
   class TrustAdminSyncJobTemplateStub extends TrustAdminSyncJobTemplate<Object> {
+
     private EntityManagerFactory entityManagerFactoryMock;
     private List<EntityData> collectedData;
     private boolean firstCall = true;
 
     public TrustAdminSyncJobTemplateStub(EntityManagerFactory entityManagerFactoryMock,
-                                         List<EntityData> collectedData) {
+        List<EntityData> collectedData) {
       this.entityManagerFactoryMock = entityManagerFactoryMock;
       this.collectedData = collectedData;
     }
@@ -80,7 +80,8 @@ public class TrustAdminSyncJobTemplateTest {
     }
 
     @Override
-    protected List<EntityData> collectData(int pageSize, long lastId, long lastSiteId, EntityManager entityManager) {
+    protected List<EntityData> collectData(int pageSize, long lastId, long lastSiteId,
+        EntityManager entityManager) {
       if (firstCall) {
         firstCall = false;
         return this.collectedData;
@@ -89,7 +90,8 @@ public class TrustAdminSyncJobTemplateTest {
     }
 
     @Override
-    protected int convertData(int skipped, Set<Object> entitiesToSave, List<EntityData> entityData, EntityManager entityManager) {
+    protected int convertData(int skipped, Set<Object> entitiesToSave, List<EntityData> entityData,
+        EntityManager entityManager) {
       for (Object o : entityData) {
         entitiesToSave.add(new Object());
       }

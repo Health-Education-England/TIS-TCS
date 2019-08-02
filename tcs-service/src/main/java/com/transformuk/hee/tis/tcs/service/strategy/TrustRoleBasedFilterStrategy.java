@@ -3,6 +3,8 @@ package com.transformuk.hee.tis.tcs.service.strategy;
 import com.transformuk.hee.tis.security.model.Trust;
 import com.transformuk.hee.tis.security.model.UserProfile;
 import com.transformuk.hee.tis.security.util.TisSecurityHelper;
+import java.util.Optional;
+import java.util.Set;
 import org.apache.commons.collections4.CollectionUtils;
 import org.apache.lucene.search.join.ScoreMode;
 import org.elasticsearch.common.collect.Tuple;
@@ -10,9 +12,6 @@ import org.elasticsearch.index.query.BoolQueryBuilder;
 import org.elasticsearch.index.query.MatchQueryBuilder;
 import org.elasticsearch.index.query.NestedQueryBuilder;
 import org.springframework.stereotype.Component;
-
-import java.util.Optional;
-import java.util.Set;
 
 /**
  * Apply a filter if the current logged in user is a Trust user
@@ -30,7 +29,9 @@ public class TrustRoleBasedFilterStrategy implements RoleBasedFilterStrategy {
     Set<Trust> assignedTrusts = currentUserProfile.getAssignedTrusts();
     if (CollectionUtils.isNotEmpty(assignedTrusts)) {
       BoolQueryBuilder trustRoleFilter = new BoolQueryBuilder();
-      assignedTrusts.forEach(t -> trustRoleFilter.should(new NestedQueryBuilder("trusts", new MatchQueryBuilder(COLUMN_FILTER, t.getId()), ScoreMode.None)));
+      assignedTrusts.forEach(t -> trustRoleFilter.should(
+          new NestedQueryBuilder("trusts", new MatchQueryBuilder(COLUMN_FILTER, t.getId()),
+              ScoreMode.None)));
       return Optional.of(new Tuple<>(COLUMN_FILTER, trustRoleFilter));
     }
     return Optional.empty();

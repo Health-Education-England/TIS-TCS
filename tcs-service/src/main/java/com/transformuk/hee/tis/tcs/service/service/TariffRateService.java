@@ -2,10 +2,9 @@ package com.transformuk.hee.tis.tcs.service.service;
 
 
 import com.transformuk.hee.tis.tcs.api.dto.TariffRateDTO;
+import java.util.List;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
-
-import java.util.List;
 
 /**
  * Service Interface for managing TariffRate.

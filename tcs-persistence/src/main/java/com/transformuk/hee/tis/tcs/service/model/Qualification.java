@@ -2,7 +2,10 @@ package com.transformuk.hee.tis.tcs.service.model;
 
 
 import com.transformuk.hee.tis.tcs.api.enumeration.QualificationType;
-
+import java.io.Serializable;
+import java.time.LocalDate;
+import java.time.LocalDateTime;
+import java.util.Objects;
 import javax.persistence.Entity;
 import javax.persistence.EnumType;
 import javax.persistence.Enumerated;
@@ -12,10 +15,6 @@ import javax.persistence.Id;
 import javax.persistence.JoinColumn;
 import javax.persistence.ManyToOne;
 import javax.persistence.Version;
-import java.io.Serializable;
-import java.time.LocalDate;
-import java.time.LocalDateTime;
-import java.util.Objects;
 
 /**
  * A Qualification.
@@ -181,7 +180,7 @@ public class Qualification implements Serializable {
   public String toString() {
     return "Qualification{" +
         "id=" + getId() +
-        ", intrepidId='" + getIntrepidId() +  "'" +
+        ", intrepidId='" + getIntrepidId() + "'" +
         ", qualification='" + getQualification() + "'" +
         ", qualificationType='" + getQualificationType() + "'" +
         ", qualificationAttainedDate='" + getQualificationAttainedDate() + "'" +

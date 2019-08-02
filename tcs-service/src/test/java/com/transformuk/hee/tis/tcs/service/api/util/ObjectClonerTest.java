@@ -1,12 +1,11 @@
 package com.transformuk.hee.tis.tcs.service.api.util;
 
-import com.transformuk.hee.tis.tcs.service.model.EsrNotification;
-import org.junit.Test;
+import static org.assertj.core.api.Assertions.assertThat;
 
+import com.transformuk.hee.tis.tcs.service.model.EsrNotification;
 import java.io.IOException;
 import java.time.LocalDate;
-
-import static org.assertj.core.api.Assertions.assertThat;
+import org.junit.Test;
 
 
 public class ObjectClonerTest {
@@ -22,11 +21,16 @@ public class ObjectClonerTest {
     EsrNotification copiedNotification = ObjectCloner.deepCopy(esrNotification);
 
     assertThat(esrNotification != copiedNotification).isTrue();
-    assertThat(copiedNotification.getNotificationTitleCode()).isEqualTo(esrNotification.getNotificationTitleCode());
-    assertThat(copiedNotification.getChangeOfProjectedEndDate() != esrNotification.getChangeOfProjectedEndDate()).isTrue();
-    assertThat(copiedNotification.getChangeOfProjectedEndDate()).isEqualTo(esrNotification.getChangeOfProjectedEndDate());
-    assertThat(copiedNotification.getDeaneryPostNumber() != esrNotification.getDeaneryPostNumber()).isTrue();
-    assertThat(copiedNotification.getDeaneryPostNumber()).isEqualTo(esrNotification.getDeaneryPostNumber());
+    assertThat(copiedNotification.getNotificationTitleCode())
+        .isEqualTo(esrNotification.getNotificationTitleCode());
+    assertThat(copiedNotification.getChangeOfProjectedEndDate() != esrNotification
+        .getChangeOfProjectedEndDate()).isTrue();
+    assertThat(copiedNotification.getChangeOfProjectedEndDate())
+        .isEqualTo(esrNotification.getChangeOfProjectedEndDate());
+    assertThat(copiedNotification.getDeaneryPostNumber() != esrNotification.getDeaneryPostNumber())
+        .isTrue();
+    assertThat(copiedNotification.getDeaneryPostNumber())
+        .isEqualTo(esrNotification.getDeaneryPostNumber());
     assertThat(copiedNotification).isNotEqualTo(esrNotification);
   }
 

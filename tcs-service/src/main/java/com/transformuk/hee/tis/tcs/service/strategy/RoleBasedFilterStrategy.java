@@ -1,9 +1,8 @@
 package com.transformuk.hee.tis.tcs.service.strategy;
 
+import java.util.Optional;
 import org.elasticsearch.common.collect.Tuple;
 import org.elasticsearch.index.query.BoolQueryBuilder;
-
-import java.util.Optional;
 
 public interface RoleBasedFilterStrategy {
 

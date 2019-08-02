@@ -1,204 +1,220 @@
 package com.transformuk.hee.tis.tcs.service.model;
 
 import com.transformuk.hee.tis.tcs.api.enumeration.Status;
-
-import javax.persistence.*;
 import java.io.Serializable;
 import java.time.LocalDateTime;
 import java.util.Objects;
 import java.util.Set;
+import javax.persistence.CascadeType;
+import javax.persistence.Column;
+import javax.persistence.Entity;
+import javax.persistence.EnumType;
+import javax.persistence.Enumerated;
+import javax.persistence.GeneratedValue;
+import javax.persistence.GenerationType;
+import javax.persistence.Id;
+import javax.persistence.JoinColumn;
+import javax.persistence.JoinTable;
+import javax.persistence.ManyToMany;
+import javax.persistence.Transient;
+import javax.persistence.Version;
 
 @Entity
 public class Document implements Serializable {
-    private static final long serialVersionUID = -5728195363933266747L;
 
-    @Id
-    @GeneratedValue(strategy = GenerationType.IDENTITY)
-    private Long id;
-    @Column(name = "addedDate", updatable = false, insertable = false)
-    private LocalDateTime addedDate;
-    @Version
-    private LocalDateTime amendedDate;
-    private LocalDateTime inactiveDate;
-    private String uploadedBy;
-    private String title;
-    private String fileName;
-    private String fileExtension;
-    private String contentType;
-    private Long size;
-    private Long personId;
-    @Enumerated(EnumType.STRING)
-    private Status status;
-    private Integer version;
-    @Transient
-    private byte[] bytes;
-    @ManyToMany(cascade = CascadeType.ALL)
-    @JoinTable(name = "DocumentTag",
-            joinColumns = @JoinColumn(name = "documentId"),
-            inverseJoinColumns = @JoinColumn(name = "tagId")
-    )
-    private Set<Tag> tags;
+  private static final long serialVersionUID = -5728195363933266747L;
 
-    public void addTag(final Tag tag) {
-        tags.add(tag);
-        tag.getDocuments().add(this);
+  @Id
+  @GeneratedValue(strategy = GenerationType.IDENTITY)
+  private Long id;
+  @Column(name = "addedDate", updatable = false, insertable = false)
+  private LocalDateTime addedDate;
+  @Version
+  private LocalDateTime amendedDate;
+  private LocalDateTime inactiveDate;
+  private String uploadedBy;
+  private String title;
+  private String fileName;
+  private String fileExtension;
+  private String contentType;
+  private Long size;
+  private Long personId;
+  @Enumerated(EnumType.STRING)
+  private Status status;
+  private Integer version;
+  @Transient
+  private byte[] bytes;
+  @ManyToMany(cascade = CascadeType.ALL)
+  @JoinTable(name = "DocumentTag",
+      joinColumns = @JoinColumn(name = "documentId"),
+      inverseJoinColumns = @JoinColumn(name = "tagId")
+  )
+  private Set<Tag> tags;
+
+  public void addTag(final Tag tag) {
+    tags.add(tag);
+    tag.getDocuments().add(this);
+  }
+
+  public void removeTag(final Tag tag) {
+    tags.remove(tag);
+    tag.getDocuments().remove(this);
+  }
+
+  @Override
+  public boolean equals(final Object o) {
+    if (this == o) {
+      return true;
     }
-
-    public void removeTag(final Tag tag) {
-        tags.remove(tag);
-        tag.getDocuments().remove(this);
+    if (o == null || getClass() != o.getClass()) {
+      return false;
     }
+    final Document document = (Document) o;
+    return Objects.equals(id, document.id);
+  }
 
-    @Override
-    public boolean equals(final Object o) {
-        if (this == o) return true;
-        if (o == null || getClass() != o.getClass()) return false;
-        final Document document = (Document) o;
-        return Objects.equals(id, document.id);
-    }
+  @Override
+  public int hashCode() {
+    return Objects.hash(id);
+  }
 
-    @Override
-    public int hashCode() {
-        return Objects.hash(id);
-    }
+  @Override
+  public String toString() {
+    return "Document{" +
+        "id=" + id +
+        ", addedDate=" + addedDate +
+        ", amendedDate=" + amendedDate +
+        ", inactiveDate=" + inactiveDate +
+        ", uploadedBy='" + uploadedBy + '\'' +
+        ", name='" + title + '\'' +
+        ", fileName='" + fileName + '\'' +
+        ", fileExtension='" + fileExtension + '\'' +
+        ", contentType='" + contentType + '\'' +
+        ", size=" + size +
+        ", personId=" + personId +
+        ", status=" + status +
+        ", version=" + version +
+        ", tags=" + tags +
+        '}';
+  }
 
-    @Override
-    public String toString() {
-        return "Document{" +
-                "id=" + id +
-                ", addedDate=" + addedDate +
-                ", amendedDate=" + amendedDate +
-                ", inactiveDate=" + inactiveDate +
-                ", uploadedBy='" + uploadedBy + '\'' +
-                ", name='" + title + '\'' +
-                ", fileName='" + fileName + '\'' +
-                ", fileExtension='" + fileExtension + '\'' +
-                ", contentType='" + contentType + '\'' +
-                ", size=" + size +
-                ", personId=" + personId +
-                ", status=" + status +
-                ", version=" + version +
-                ", tags=" + tags +
-                '}';
-    }
+  public Long getId() {
+    return id;
+  }
 
-    public Long getId() {
-        return id;
-    }
+  public void setId(final Long id) {
+    this.id = id;
+  }
 
-    public void setId(final Long id) {
-        this.id = id;
-    }
+  public LocalDateTime getAddedDate() {
+    return addedDate;
+  }
 
-    public LocalDateTime getAddedDate() {
-        return addedDate;
-    }
+  public void setAddedDate(final LocalDateTime addedDate) {
+    this.addedDate = addedDate;
+  }
 
-    public void setAddedDate(final LocalDateTime addedDate) {
-        this.addedDate = addedDate;
-    }
+  public LocalDateTime getAmendedDate() {
+    return amendedDate;
+  }
 
-    public LocalDateTime getAmendedDate() {
-        return amendedDate;
-    }
+  public void setAmendedDate(final LocalDateTime amendedDate) {
+    this.amendedDate = amendedDate;
+  }
 
-    public void setAmendedDate(final LocalDateTime amendedDate) {
-        this.amendedDate = amendedDate;
-    }
+  public LocalDateTime getInactiveDate() {
+    return inactiveDate;
+  }
 
-    public LocalDateTime getInactiveDate() {
-        return inactiveDate;
-    }
+  public void setInactiveDate(final LocalDateTime inactiveDate) {
+    this.inactiveDate = inactiveDate;
+  }
 
-    public void setInactiveDate(final LocalDateTime inactiveDate) {
-        this.inactiveDate = inactiveDate;
-    }
+  public String getUploadedBy() {
+    return uploadedBy;
+  }
 
-    public String getUploadedBy() {
-        return uploadedBy;
-    }
+  public void setUploadedBy(final String uploadedBy) {
+    this.uploadedBy = uploadedBy;
+  }
 
-    public void setUploadedBy(final String uploadedBy) {
-        this.uploadedBy = uploadedBy;
-    }
+  public String getTitle() {
+    return title;
+  }
 
-    public String getTitle() {
-        return title;
-    }
+  public void setTitle(final String title) {
+    this.title = title;
+  }
 
-    public void setTitle(final String title) {
-        this.title = title;
-    }
+  public String getFileName() {
+    return fileName;
+  }
 
-    public String getFileName() {
-        return fileName;
-    }
+  public void setFileName(final String fileName) {
+    this.fileName = fileName;
+  }
 
-    public void setFileName(final String fileName) {
-        this.fileName = fileName;
-    }
+  public String getFileExtension() {
+    return fileExtension;
+  }
 
-    public String getFileExtension() {
-        return fileExtension;
-    }
+  public void setFileExtension(final String fileExtension) {
+    this.fileExtension = fileExtension;
+  }
 
-    public void setFileExtension(final String fileExtension) {
-        this.fileExtension = fileExtension;
-    }
+  public String getContentType() {
+    return contentType;
+  }
 
-    public String getContentType() {
-        return contentType;
-    }
+  public void setContentType(final String contentType) {
+    this.contentType = contentType;
+  }
 
-    public void setContentType(final String contentType) {
-        this.contentType = contentType;
-    }
+  public Long getSize() {
+    return size;
+  }
 
-    public Long getSize() {
-        return size;
-    }
+  public void setSize(final Long size) {
+    this.size = size;
+  }
 
-    public void setSize(final Long size) {
-        this.size = size;
-    }
+  public Long getPersonId() {
+    return personId;
+  }
 
-    public Long getPersonId() {
-        return personId;
-    }
+  public void setPersonId(final Long personId) {
+    this.personId = personId;
+  }
 
-    public void setPersonId(final Long personId) {
-        this.personId = personId;
-    }
+  public Status getStatus() {
+    return status;
+  }
 
-    public Status getStatus() {
-        return status;
-    }
+  public void setStatus(final Status status) {
+    this.status = status;
+  }
 
-    public void setStatus(final Status status) {
-        this.status = status;
-    }
+  public Integer getVersion() {
+    return version;
+  }
 
-    public Integer getVersion() {
-        return version;
-    }
+  public void setVersion(final Integer version) {
+    this.version = version;
+  }
 
-    public void setVersion(final Integer version) {
-        this.version = version;
-    }
+  public byte[] getBytes() {
+    return bytes;
+  }
 
-    public byte[] getBytes() {
-        return bytes;
-    }
+  public void setBytes(final byte[] bytes) {
+    this.bytes = bytes;
+  }
 
-    public void setBytes(final byte[] bytes) {
-        this.bytes = bytes;
-    }
+  public Set<Tag> getTags() {
+    return tags;
+  }
 
-    public Set<Tag> getTags() {
-        return tags;
-    }
-
-    public void setTags(final Set<Tag> tags) {
-        this.tags = tags;
-    }
+  public void setTags(final Set<Tag> tags) {
+    this.tags = tags;
+  }
 }

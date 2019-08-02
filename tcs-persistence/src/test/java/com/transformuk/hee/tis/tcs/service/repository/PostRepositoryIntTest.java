@@ -2,6 +2,8 @@ package com.transformuk.hee.tis.tcs.service.repository;
 
 import com.transformuk.hee.tis.tcs.service.TestConfig;
 import com.transformuk.hee.tis.tcs.service.model.Post;
+import java.util.Set;
+import javax.persistence.EntityManager;
 import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Test;
@@ -10,9 +12,6 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.test.context.junit4.SpringRunner;
 import org.springframework.transaction.annotation.Transactional;
-
-import javax.persistence.EntityManager;
-import java.util.Set;
 
 @RunWith(SpringRunner.class)
 @SpringBootTest(classes = TestConfig.class)
@@ -26,7 +25,7 @@ public class PostRepositoryIntTest {
   private Post post1, post2, post3;
 
   @Before
-  public void setup(){
+  public void setup() {
     post1 = new Post();
     post1.setNationalPostNumber("NTH/RTD01/007/STR/001");
     em.persist(post1);
@@ -40,8 +39,9 @@ public class PostRepositoryIntTest {
 
   @Transactional
   @Test
-  public void findByNationalPostNumberStartingWithShouldReturnPostsWithSimilarPostNumbers(){
-    Set<Post> byNationalPostNumber = postRepository.findByNationalPostNumberStartingWith("NTH/RTD01/007/STR");
+  public void findByNationalPostNumberStartingWithShouldReturnPostsWithSimilarPostNumbers() {
+    Set<Post> byNationalPostNumber = postRepository
+        .findByNationalPostNumberStartingWith("NTH/RTD01/007/STR");
     Assert.assertEquals(2, byNationalPostNumber.size());
   }
 

@@ -1,5 +1,10 @@
 package com.transformuk.hee.tis.tcs.service.api;
 
+import static org.mockito.Mockito.when;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
+import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.content;
+import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
+
 import com.transformuk.hee.tis.tcs.service.Application;
 import io.github.jhipster.config.JHipsterProperties;
 import org.junit.Before;
@@ -13,11 +18,6 @@ import org.springframework.http.MediaType;
 import org.springframework.test.context.junit4.SpringRunner;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.setup.MockMvcBuilders;
-
-import static org.mockito.Mockito.when;
-import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
-import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.content;
-import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
 /**
  * Test class for the ProfileInfoResource REST controller.
@@ -48,7 +48,8 @@ public class ProfileInfoResourceIntTest {
     when(environment.getDefaultProfiles()).thenReturn(activeProfiles);
     when(environment.getActiveProfiles()).thenReturn(activeProfiles);
 
-    ProfileInfoResource profileInfoResource = new ProfileInfoResource(environment, jHipsterProperties);
+    ProfileInfoResource profileInfoResource = new ProfileInfoResource(environment,
+        jHipsterProperties);
     this.restProfileMockMvc = MockMvcBuilders
         .standaloneSetup(profileInfoResource)
         .build();

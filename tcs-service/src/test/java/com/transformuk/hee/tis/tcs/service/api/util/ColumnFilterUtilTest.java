@@ -1,17 +1,16 @@
 package com.transformuk.hee.tis.tcs.service.api.util;
 
 
-import com.google.common.collect.Lists;
-import com.transformuk.hee.tis.tcs.api.enumeration.Status;
-import com.transformuk.hee.tis.tcs.service.model.ColumnFilter;
-import org.junit.Test;
-
-import java.io.IOException;
-import java.util.List;
-
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.core.Is.is;
 import static org.junit.Assert.assertTrue;
+
+import com.google.common.collect.Lists;
+import com.transformuk.hee.tis.tcs.api.enumeration.Status;
+import com.transformuk.hee.tis.tcs.service.model.ColumnFilter;
+import java.io.IOException;
+import java.util.List;
+import org.junit.Test;
 
 public class ColumnFilterUtilTest {
 
@@ -21,7 +20,8 @@ public class ColumnFilterUtilTest {
     List<Class> filterEnumList = Lists.newArrayList(Status.class);
     String filterJson = "{ \"status\": [\"CURRENT\"]}";
 
-    List<ColumnFilter> columnFilters = ColumnFilterUtil.getColumnFilters(filterJson, filterEnumList);
+    List<ColumnFilter> columnFilters = ColumnFilterUtil
+        .getColumnFilters(filterJson, filterEnumList);
 
     assertThat(columnFilters.size(), is(1));
     assertThat(columnFilters.get(0).getName(), is("status"));
@@ -34,7 +34,8 @@ public class ColumnFilterUtilTest {
     List<Class> filterEnumList = Lists.newArrayList(Status.class);
     String filterJson = "{ \"status\": [\"CURRENT\"], \"dateFrom\":[\"10-10-2017\", \"20-10-2017\"]}";
 
-    List<ColumnFilter> columnFilters = ColumnFilterUtil.getColumnFilters(filterJson, filterEnumList);
+    List<ColumnFilter> columnFilters = ColumnFilterUtil
+        .getColumnFilters(filterJson, filterEnumList);
 
     assertThat(columnFilters.size(), is(2));
     assertThat(columnFilters.get(0).getName(), is("dateFrom"));

@@ -85,10 +85,10 @@ public class PostSiteDTO implements Serializable {
   @Override
   public String toString() {
     return "PostSiteDTO{" +
-      "id=" + id +
-      ", postId=" + postId +
-      ", siteId='" + siteId + '\'' +
-      ", postSiteType=" + postSiteType +
-      '}';
+        "id=" + id +
+        ", postId=" + postId +
+        ", siteId='" + siteId + '\'' +
+        ", postSiteType=" + postSiteType +
+        '}';
   }
 }

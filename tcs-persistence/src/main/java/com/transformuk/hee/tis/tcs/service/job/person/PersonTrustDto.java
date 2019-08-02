@@ -4,6 +4,7 @@ import java.io.Serializable;
 import java.util.Objects;
 
 public class PersonTrustDto implements Serializable {
+
   private Long personId;
   private Long trustId;
 
@@ -33,8 +34,12 @@ public class PersonTrustDto implements Serializable {
 
   @Override
   public boolean equals(Object o) {
-    if (this == o) return true;
-    if (o == null || getClass() != o.getClass()) return false;
+    if (this == o) {
+      return true;
+    }
+    if (o == null || getClass() != o.getClass()) {
+      return false;
+    }
     PersonTrustDto that = (PersonTrustDto) o;
     return Objects.equals(personId, that.personId) &&
         Objects.equals(trustId, that.trustId);

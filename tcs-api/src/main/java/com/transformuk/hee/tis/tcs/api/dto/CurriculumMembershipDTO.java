@@ -2,15 +2,11 @@ package com.transformuk.hee.tis.tcs.api.dto;
 
 import com.transformuk.hee.tis.tcs.api.dto.validation.Create;
 import com.transformuk.hee.tis.tcs.api.dto.validation.Update;
-import com.transformuk.hee.tis.tcs.api.enumeration.ProgrammeMembershipType;
-
-import javax.validation.constraints.DecimalMin;
-import javax.validation.constraints.NotNull;
-import javax.validation.constraints.Null;
 import java.io.Serializable;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.util.Objects;
+import javax.validation.constraints.NotNull;
 
 /**
  * A DTO for the CurriculumMembershipDTO entity.
@@ -104,8 +100,12 @@ public class CurriculumMembershipDTO implements Serializable {
 
   @Override
   public boolean equals(Object o) {
-    if (this == o) return true;
-    if (o == null || getClass() != o.getClass()) return false;
+    if (this == o) {
+      return true;
+    }
+    if (o == null || getClass() != o.getClass()) {
+      return false;
+    }
     CurriculumMembershipDTO that = (CurriculumMembershipDTO) o;
     return Objects.equals(curriculumStartDate, that.curriculumStartDate) &&
         Objects.equals(curriculumEndDate, that.curriculumEndDate) &&
@@ -115,7 +115,8 @@ public class CurriculumMembershipDTO implements Serializable {
 
   @Override
   public int hashCode() {
-    return Objects.hash(curriculumStartDate, curriculumEndDate, curriculumCompletionDate, curriculumId);
+    return Objects
+        .hash(curriculumStartDate, curriculumEndDate, curriculumCompletionDate, curriculumId);
   }
 
   @Override

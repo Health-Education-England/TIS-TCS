@@ -3,6 +3,11 @@ package com.transformuk.hee.tis.tcs.service.config;
 import io.github.jhipster.config.JHipsterConstants;
 import io.github.jhipster.config.JHipsterProperties;
 import io.undertow.UndertowOptions;
+import java.io.File;
+import java.nio.file.Paths;
+import java.util.EnumSet;
+import javax.servlet.DispatcherType;
+import javax.servlet.ServletContext;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.boot.web.embedded.undertow.UndertowServletWebServerFactory;
@@ -15,12 +20,6 @@ import org.springframework.core.env.Environment;
 import org.springframework.web.cors.CorsConfiguration;
 import org.springframework.web.cors.UrlBasedCorsConfigurationSource;
 import org.springframework.web.filter.CorsFilter;
-
-import javax.servlet.DispatcherType;
-import javax.servlet.ServletContext;
-import java.io.File;
-import java.nio.file.Paths;
-import java.util.EnumSet;
 
 /**
  * Configuration of web application with Servlet 3.0 APIs.
@@ -42,9 +41,11 @@ public class WebConfigurer implements ServletContextInitializer {
   @Override
   public void onStartup(ServletContext servletContext) {
     if (env.getActiveProfiles().length != 0) {
-      log.info("Web application configuration, using profiles: {}", (Object[]) env.getActiveProfiles());
+      log.info("Web application configuration, using profiles: {}",
+          (Object[]) env.getActiveProfiles());
     }
-    EnumSet<DispatcherType> disps = EnumSet.of(DispatcherType.REQUEST, DispatcherType.FORWARD, DispatcherType.ASYNC);
+    EnumSet<DispatcherType> disps = EnumSet
+        .of(DispatcherType.REQUEST, DispatcherType.FORWARD, DispatcherType.ASYNC);
     if (env.acceptsProfiles(JHipsterConstants.SPRING_PROFILE_PRODUCTION)) {
       initCachingHttpHeadersFilter(servletContext, disps);
     }
@@ -75,7 +76,7 @@ public class WebConfigurer implements ServletContextInitializer {
      */
     if (jHipsterProperties.getHttp().getVersion().equals(JHipsterProperties.Http.Version.V_2_0)) {
       factory.addBuilderCustomizers(builder ->
-        builder.setServerOption(UndertowOptions.ENABLE_HTTP2, true));
+          builder.setServerOption(UndertowOptions.ENABLE_HTTP2, true));
     }
     return factory;
   }
@@ -107,7 +108,7 @@ public class WebConfigurer implements ServletContextInitializer {
    * Initializes the caching HTTP Headers Filter.
    */
   private void initCachingHttpHeadersFilter(ServletContext servletContext,
-                                            EnumSet<DispatcherType> disps) {
+      EnumSet<DispatcherType> disps) {
     log.debug("Registering Caching HTTP Headers Filter");
   }
 

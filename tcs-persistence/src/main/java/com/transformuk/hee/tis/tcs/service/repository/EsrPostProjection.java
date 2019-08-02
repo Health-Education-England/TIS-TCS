@@ -8,8 +8,11 @@ import com.transformuk.hee.tis.tcs.api.enumeration.Status;
 public interface EsrPostProjection {
 
   Long getId();
+
   String getOwner();
+
   String getNationalPostNumber();
+
   Status getStatus();
 
 }

@@ -2,6 +2,7 @@ package com.transformuk.hee.tis.tcs.service.repository;
 
 import com.transformuk.hee.tis.tcs.service.TestConfig;
 import com.transformuk.hee.tis.tcs.service.model.Comment;
+import java.util.Optional;
 import org.junit.Assert;
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -10,8 +11,6 @@ import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.test.context.jdbc.Sql;
 import org.springframework.test.context.junit4.SpringRunner;
 import org.springframework.transaction.annotation.Transactional;
-
-import java.util.Optional;
 
 @RunWith(SpringRunner.class)
 @Transactional
@@ -29,7 +28,8 @@ public class CommentRepositoryTest {
   @Sql(executionPhase = Sql.ExecutionPhase.AFTER_TEST_METHOD, scripts = "/scripts/deletePlacementComment.sql")
   @Test
   public void findByPlacementIdShouldReturnLatestComment() {
-    Optional<Comment> result = commentRepository.findFirstByPlacementIdOrderByAmendedDateDesc(PLACEMENT_ID_WITH_COMMENT);
+    Optional<Comment> result = commentRepository
+        .findFirstByPlacementIdOrderByAmendedDateDesc(PLACEMENT_ID_WITH_COMMENT);
 
     Assert.assertEquals(true, result.isPresent());
     Assert.assertEquals(EXPECTED_COMMENT_BODY, result.get().getBody());
@@ -39,7 +39,8 @@ public class CommentRepositoryTest {
   @Sql(executionPhase = Sql.ExecutionPhase.AFTER_TEST_METHOD, scripts = "/scripts/deletePlacementComment.sql")
   @Test
   public void findByPlacementIdShouldReturnEmptyOptionalWhenPlacementDoesntExist() {
-    Optional<Comment> result = commentRepository.findFirstByPlacementIdOrderByAmendedDateDesc(NON_EXISTING_PLACEMENT_ID);
+    Optional<Comment> result = commentRepository
+        .findFirstByPlacementIdOrderByAmendedDateDesc(NON_EXISTING_PLACEMENT_ID);
 
     Assert.assertEquals(false, result.isPresent());
   }

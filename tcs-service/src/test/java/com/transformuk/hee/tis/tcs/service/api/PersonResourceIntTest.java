@@ -1,5 +1,19 @@
 package com.transformuk.hee.tis.tcs.service.api;
 
+import static org.assertj.core.api.Assertions.assertThat;
+import static org.hamcrest.Matchers.containsInAnyOrder;
+import static org.hamcrest.Matchers.hasItem;
+import static org.hamcrest.Matchers.hasSize;
+import static org.mockito.Mockito.when;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.delete;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.patch;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.put;
+import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.content;
+import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
+import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
+
 import com.google.common.collect.Lists;
 import com.transformuk.hee.tis.reference.api.dto.RoleDTO;
 import com.transformuk.hee.tis.reference.client.impl.ReferenceServiceImpl;
@@ -9,19 +23,32 @@ import com.transformuk.hee.tis.tcs.service.Application;
 import com.transformuk.hee.tis.tcs.service.api.decorator.PersonViewDecorator;
 import com.transformuk.hee.tis.tcs.service.api.decorator.PlacementSummaryDecorator;
 import com.transformuk.hee.tis.tcs.service.api.decorator.PlacementViewDecorator;
-import com.transformuk.hee.tis.tcs.service.api.validation.*;
+import com.transformuk.hee.tis.tcs.service.api.validation.ContactDetailsValidator;
+import com.transformuk.hee.tis.tcs.service.api.validation.GdcDetailsValidator;
+import com.transformuk.hee.tis.tcs.service.api.validation.GmcDetailsValidator;
+import com.transformuk.hee.tis.tcs.service.api.validation.PersonValidator;
+import com.transformuk.hee.tis.tcs.service.api.validation.PersonalDetailsValidator;
 import com.transformuk.hee.tis.tcs.service.exception.ExceptionTranslator;
 import com.transformuk.hee.tis.tcs.service.model.ContactDetails;
 import com.transformuk.hee.tis.tcs.service.model.GdcDetails;
 import com.transformuk.hee.tis.tcs.service.model.GmcDetails;
 import com.transformuk.hee.tis.tcs.service.model.Person;
-import com.transformuk.hee.tis.tcs.service.repository.*;
+import com.transformuk.hee.tis.tcs.service.repository.ContactDetailsRepository;
+import com.transformuk.hee.tis.tcs.service.repository.GdcDetailsRepository;
+import com.transformuk.hee.tis.tcs.service.repository.GmcDetailsRepository;
+import com.transformuk.hee.tis.tcs.service.repository.PersonRepository;
+import com.transformuk.hee.tis.tcs.service.repository.PlacementViewRepository;
 import com.transformuk.hee.tis.tcs.service.service.PersonElasticSearchService;
 import com.transformuk.hee.tis.tcs.service.service.PersonService;
 import com.transformuk.hee.tis.tcs.service.service.PlacementService;
 import com.transformuk.hee.tis.tcs.service.service.impl.PermissionService;
 import com.transformuk.hee.tis.tcs.service.service.mapper.PersonMapper;
 import com.transformuk.hee.tis.tcs.service.service.mapper.PlacementViewMapper;
+import java.time.LocalDateTime;
+import java.time.ZoneId;
+import java.util.ArrayList;
+import java.util.Collection;
+import java.util.List;
 import org.apache.commons.codec.net.URLCodec;
 import org.junit.Before;
 import org.junit.Ignore;
@@ -39,29 +66,21 @@ import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.setup.MockMvcBuilders;
 import org.springframework.transaction.annotation.Transactional;
 
-import java.time.LocalDateTime;
-import java.time.ZoneId;
-import java.util.ArrayList;
-import java.util.Collection;
-import java.util.List;
-
-import static org.assertj.core.api.Assertions.assertThat;
-import static org.hamcrest.Matchers.*;
-import static org.mockito.Mockito.when;
-import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.*;
-import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.*;
-
 @RunWith(SpringRunner.class)
 @SpringBootTest(classes = Application.class, webEnvironment = SpringBootTest.WebEnvironment.RANDOM_PORT)
 public class PersonResourceIntTest {
+
   private static final String DEFAULT_INTREPID_ID = "AAAAAAAAAA";
   private static final String UPDATED_INTREPID_ID = "BBBBBBBBBB";
 
   private static final LocalDateTime DEFAULT_ADDED_DATE = LocalDateTime.now(ZoneId.systemDefault());
-  private static final LocalDateTime UPDATED_ADDED_DATE = LocalDateTime.now(ZoneId.systemDefault()).plusDays(1);
+  private static final LocalDateTime UPDATED_ADDED_DATE = LocalDateTime.now(ZoneId.systemDefault())
+      .plusDays(1);
 
-  private static final LocalDateTime DEFAULT_AMENDED_DATE = LocalDateTime.now(ZoneId.systemDefault());
-  private static final LocalDateTime UPDATED_AMENDED_DATE = LocalDateTime.now(ZoneId.systemDefault()).plusDays(1);
+  private static final LocalDateTime DEFAULT_AMENDED_DATE = LocalDateTime
+      .now(ZoneId.systemDefault());
+  private static final LocalDateTime UPDATED_AMENDED_DATE = LocalDateTime
+      .now(ZoneId.systemDefault()).plusDays(1);
 
   private static final String DEFAULT_ROLE = "AAAAAAAAAA";
   private static final String UPDATED_ROLE = "BBBBBBBBBB";
@@ -72,8 +91,10 @@ public class PersonResourceIntTest {
   private static final String DEFAULT_COMMENTS = "AAAAAAAAAA";
   private static final String UPDATED_COMMENTS = "BBBBBBBBBB";
 
-  private static final LocalDateTime DEFAULT_INACTIVE_DATE = LocalDateTime.now(ZoneId.systemDefault());
-  private static final LocalDateTime UPDATED_INACTIVE_DATE = LocalDateTime.now(ZoneId.systemDefault()).plusDays(1);
+  private static final LocalDateTime DEFAULT_INACTIVE_DATE = LocalDateTime
+      .now(ZoneId.systemDefault());
+  private static final LocalDateTime UPDATED_INACTIVE_DATE = LocalDateTime
+      .now(ZoneId.systemDefault()).plusDays(1);
 
   private static final String DEFAULT_INACTIVE_NOTES = "AAAAAAAAAA";
   private static final String UPDATED_INACTIVE_NOTES = "BBBBBBBBBB";
@@ -141,28 +162,11 @@ public class PersonResourceIntTest {
   private MockMvc restPersonMockMvc;
   private Person person;
 
-  @Before
-  public void setup() {
-    MockitoAnnotations.initMocks(this);
-    PersonResource personResource = new PersonResource(personService, placementViewRepository, placementViewMapper,
-        placementViewDecorator, personViewDecorator, placementService, placementSummaryDecorator, personValidator,
-        gmcDetailsValidator, gdcDetailsValidator, personalDetailsValidator, contactDetailsValidator, personElasticSearchServiceMock);
-    this.restPersonMockMvc = MockMvcBuilders.standaloneSetup(personResource)
-        .setCustomArgumentResolvers(pageableArgumentResolver)
-        .setControllerAdvice(exceptionTranslator)
-        .setMessageConverters(jacksonMessageConverter).build();
-
-    personRepository.deleteAllInBatch();
-
-    when(permissionServiceMock.canViewSensitiveData()).thenReturn(true);
-    when(permissionServiceMock.canEditSensitiveData()).thenReturn(true);
-  }
-
   /**
    * Create an entity for this test.
    * <p>
-   * This is a static method, as tests for other entities might also need it,
-   * if they test an entity which requires the current entity.
+   * This is a static method, as tests for other entities might also need it, if they test an entity
+   * which requires the current entity.
    */
   public static Person createEntity() {
     return new Person()
@@ -175,6 +179,26 @@ public class PersonResourceIntTest {
         .inactiveNotes(DEFAULT_INACTIVE_NOTES)
         .publicHealthNumber(DEFAULT_PUBLIC_HEALTH_NUMBER)
         .regulator(DEFAULT_REGULATOR);
+  }
+
+  @Before
+  public void setup() {
+    MockitoAnnotations.initMocks(this);
+    PersonResource personResource = new PersonResource(personService, placementViewRepository,
+        placementViewMapper,
+        placementViewDecorator, personViewDecorator, placementService, placementSummaryDecorator,
+        personValidator,
+        gmcDetailsValidator, gdcDetailsValidator, personalDetailsValidator, contactDetailsValidator,
+        personElasticSearchServiceMock);
+    this.restPersonMockMvc = MockMvcBuilders.standaloneSetup(personResource)
+        .setCustomArgumentResolvers(pageableArgumentResolver)
+        .setControllerAdvice(exceptionTranslator)
+        .setMessageConverters(jacksonMessageConverter).build();
+
+    personRepository.deleteAllInBatch();
+
+    when(permissionServiceMock.canViewSensitiveData()).thenReturn(true);
+    when(permissionServiceMock.canEditSensitiveData()).thenReturn(true);
   }
 
   private Person createPersonBlankSubSections(final Person person) {
@@ -304,7 +328,8 @@ public class PersonResourceIntTest {
   }
 
   /**
-   * FIXME Test works when executed alone, fails when executed with all the tests. Reason is JdbcTemplate can see the records created by JpaRepository but String fields are null.
+   * FIXME Test works when executed alone, fails when executed with all the tests. Reason is
+   * JdbcTemplate can see the records created by JpaRepository but String fields are null.
    */
   @Ignore
   @Test
@@ -322,7 +347,6 @@ public class PersonResourceIntTest {
     roles.add(roleDTO);
 
     when(referenceService.getRolesByCategory(1L)).thenReturn(roles);
-
 
     ContactDetails contactDetails = new ContactDetails()
         .id(1L)
@@ -473,7 +497,6 @@ public class PersonResourceIntTest {
     contactDetails.setForenames(PERSON_FORENAMES);
     contactDetailsRepository.saveAndFlush(contactDetails);
     anotherPerson.setContactDetails(contactDetails);
-
 
     restPersonMockMvc.perform(get("/api/people/basic?searchQuery=" + GMC_NUMBER))
         .andExpect(status().isOk())

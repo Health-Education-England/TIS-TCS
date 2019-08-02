@@ -1,5 +1,7 @@
 package com.transformuk.hee.tis.tcs.service.service.impl;
 
+import static com.transformuk.hee.tis.tcs.service.service.impl.SpecificationFactory.containsLike;
+
 import com.transformuk.hee.tis.tcs.api.dto.SpecialtyGroupDTO;
 import com.transformuk.hee.tis.tcs.service.model.Specialty;
 import com.transformuk.hee.tis.tcs.service.model.SpecialtyGroup;
@@ -7,6 +9,9 @@ import com.transformuk.hee.tis.tcs.service.repository.SpecialtyGroupRepository;
 import com.transformuk.hee.tis.tcs.service.repository.SpecialtyRepository;
 import com.transformuk.hee.tis.tcs.service.service.SpecialtyGroupService;
 import com.transformuk.hee.tis.tcs.service.service.mapper.SpecialtyGroupMapper;
+import java.util.ArrayList;
+import java.util.List;
+import java.util.Set;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.data.domain.Page;
@@ -15,12 +20,6 @@ import org.springframework.data.jpa.domain.Specification;
 import org.springframework.data.jpa.domain.Specifications;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
-
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Set;
-
-import static com.transformuk.hee.tis.tcs.service.service.impl.SpecificationFactory.containsLike;
 
 /**
  * Service Implementation for managing SpecialtyGroup.
@@ -35,7 +34,8 @@ public class SpecialtyGroupServiceImpl implements SpecialtyGroupService {
   private final SpecialtyGroupMapper specialtyGroupMapper;
   private final SpecialtyRepository specialtyRepository;
 
-  public SpecialtyGroupServiceImpl(SpecialtyGroupRepository specialtyGroupRepository, SpecialtyGroupMapper specialtyGroupMapper, SpecialtyRepository specialtyRepository) {
+  public SpecialtyGroupServiceImpl(SpecialtyGroupRepository specialtyGroupRepository,
+      SpecialtyGroupMapper specialtyGroupMapper, SpecialtyRepository specialtyRepository) {
     this.specialtyGroupRepository = specialtyGroupRepository;
     this.specialtyGroupMapper = specialtyGroupMapper;
     this.specialtyRepository = specialtyRepository;
@@ -51,7 +51,8 @@ public class SpecialtyGroupServiceImpl implements SpecialtyGroupService {
   @Override
   public SpecialtyGroupDTO save(SpecialtyGroupDTO specialtyGroupDTO) {
     log.debug("Request to update specialtyGroup : {}", specialtyGroupDTO);
-    SpecialtyGroup specialtyGroup =specialtyGroupMapper.specialtyGroupDTOToSpecialtyGroup(specialtyGroupDTO);
+    SpecialtyGroup specialtyGroup = specialtyGroupMapper
+        .specialtyGroupDTOToSpecialtyGroup(specialtyGroupDTO);
     Set<Specialty> groupSpecialties = specialtyGroup.getSpecialties();
     Long groupID = specialtyGroup.getId();
     // Update
@@ -92,7 +93,8 @@ public class SpecialtyGroupServiceImpl implements SpecialtyGroupService {
   @Override
   public List<SpecialtyGroupDTO> save(List<SpecialtyGroupDTO> specialtyGroupDTO) {
     log.debug("Request to save SpecialtyGroup : {}", specialtyGroupDTO);
-    List<SpecialtyGroup> specialtyGroups = specialtyGroupMapper.specialtyGroupDTOsToSpecialtyGroups(specialtyGroupDTO);
+    List<SpecialtyGroup> specialtyGroups = specialtyGroupMapper
+        .specialtyGroupDTOsToSpecialtyGroups(specialtyGroupDTO);
     specialtyGroups = specialtyGroupRepository.saveAll(specialtyGroups);
     return specialtyGroupMapper.specialtyGroupsToSpecialtyGroupDTOs(specialtyGroups);
   }
@@ -113,7 +115,8 @@ public class SpecialtyGroupServiceImpl implements SpecialtyGroupService {
     }
     Page<SpecialtyGroup> result = specialtyGroupRepository.findAll(fullSpec, pageable);
 
-    return result.map(specialtyGroup -> specialtyGroupMapper.specialtyGroupToSpecialtyGroupDTO(specialtyGroup));
+    return result.map(
+        specialtyGroup -> specialtyGroupMapper.specialtyGroupToSpecialtyGroupDTO(specialtyGroup));
   }
 
   /**
@@ -127,7 +130,8 @@ public class SpecialtyGroupServiceImpl implements SpecialtyGroupService {
   public Page<SpecialtyGroupDTO> findAll(Pageable pageable) {
     log.debug("Request to get all SpecialtyGroups");
     Page<SpecialtyGroup> specialtyGroupPage = specialtyGroupRepository.findAll(pageable);
-    return specialtyGroupPage.map(specialtyGroup -> specialtyGroupMapper.specialtyGroupToSpecialtyGroupDTO(specialtyGroup));
+    return specialtyGroupPage.map(
+        specialtyGroup -> specialtyGroupMapper.specialtyGroupToSpecialtyGroupDTO(specialtyGroup));
   }
 
   /**

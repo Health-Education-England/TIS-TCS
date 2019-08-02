@@ -2,9 +2,8 @@ package com.transformuk.hee.tis.tcs.service.service.mapper;
 
 import com.transformuk.hee.tis.tcs.api.dto.PostSiteDTO;
 import com.transformuk.hee.tis.tcs.service.model.PostSite;
-import org.mapstruct.Mapper;
-
 import java.util.List;
+import org.mapstruct.Mapper;
 
 @Mapper(componentModel = "spring", uses = {})
 public interface PostSiteMapper {

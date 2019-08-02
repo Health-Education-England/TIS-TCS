@@ -1,5 +1,16 @@
 package com.transformuk.hee.tis.tcs.service.api;
 
+import static org.assertj.core.api.Assertions.assertThat;
+import static org.hamcrest.Matchers.containsInAnyOrder;
+import static org.hamcrest.Matchers.hasItem;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.delete;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.put;
+import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.content;
+import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
+import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
+
 import com.transformuk.hee.tis.tcs.api.dto.ContactDetailsDTO;
 import com.transformuk.hee.tis.tcs.service.Application;
 import com.transformuk.hee.tis.tcs.service.api.validation.ContactDetailsValidator;
@@ -8,6 +19,11 @@ import com.transformuk.hee.tis.tcs.service.model.ContactDetails;
 import com.transformuk.hee.tis.tcs.service.repository.ContactDetailsRepository;
 import com.transformuk.hee.tis.tcs.service.service.ContactDetailsService;
 import com.transformuk.hee.tis.tcs.service.service.mapper.ContactDetailsMapper;
+import java.time.LocalDateTime;
+import java.time.ZoneId;
+import java.util.List;
+import javax.persistence.EntityManager;
+import javax.persistence.Query;
 import org.apache.commons.lang3.StringUtils;
 import org.junit.Before;
 import org.junit.Test;
@@ -23,18 +39,6 @@ import org.springframework.test.context.junit4.SpringRunner;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.setup.MockMvcBuilders;
 import org.springframework.transaction.annotation.Transactional;
-
-import javax.persistence.EntityManager;
-import javax.persistence.Query;
-import java.time.LocalDateTime;
-import java.time.ZoneId;
-import java.util.List;
-
-import static org.assertj.core.api.Assertions.assertThat;
-import static org.hamcrest.Matchers.containsInAnyOrder;
-import static org.hamcrest.Matchers.hasItem;
-import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.*;
-import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.*;
 
 /**
  * Test class for the ContactDetailsResource REST controller.
@@ -87,7 +91,8 @@ public class ContactDetailsResourceIntTest {
   private static final String DEFAULT_POST_CODE = "AAAAAAAAAA";
   private static final String UPDATED_POST_CODE = "BBBBBBBBBB";
 
-  private static final LocalDateTime DEFAULT_AMENDED_DATE = LocalDateTime.now(ZoneId.systemDefault());
+  private static final LocalDateTime DEFAULT_AMENDED_DATE = LocalDateTime
+      .now(ZoneId.systemDefault());
 
   @Autowired
   private ContactDetailsRepository contactDetailsRepository;
@@ -117,21 +122,11 @@ public class ContactDetailsResourceIntTest {
 
   private ContactDetails contactDetails;
 
-  @Before
-  public void setup() {
-    MockitoAnnotations.initMocks(this);
-    ContactDetailsResource contactDetailsResource = new ContactDetailsResource(contactDetailsService,contactDetailsValidator);
-    this.restContactDetailsMockMvc = MockMvcBuilders.standaloneSetup(contactDetailsResource)
-        .setCustomArgumentResolvers(pageableArgumentResolver)
-        .setControllerAdvice(exceptionTranslator)
-        .setMessageConverters(jacksonMessageConverter).build();
-  }
-
   /**
    * Create an entity for this test.
    * <p>
-   * This is a static method, as tests for other entities might also need it,
-   * if they test an entity which requires the current entity.
+   * This is a static method, as tests for other entities might also need it, if they test an entity
+   * which requires the current entity.
    */
   public static ContactDetails createEntity(EntityManager em) {
     ContactDetails contactDetails = new ContactDetails()
@@ -153,6 +148,17 @@ public class ContactDetailsResourceIntTest {
   }
 
   @Before
+  public void setup() {
+    MockitoAnnotations.initMocks(this);
+    ContactDetailsResource contactDetailsResource = new ContactDetailsResource(
+        contactDetailsService, contactDetailsValidator);
+    this.restContactDetailsMockMvc = MockMvcBuilders.standaloneSetup(contactDetailsResource)
+        .setCustomArgumentResolvers(pageableArgumentResolver)
+        .setControllerAdvice(exceptionTranslator)
+        .setMessageConverters(jacksonMessageConverter).build();
+  }
+
+  @Before
   public void initTest() {
     contactDetails = createEntity(em);
   }
@@ -166,7 +172,6 @@ public class ContactDetailsResourceIntTest {
     for (Object[] a : authors) {
       System.out.println(StringUtils.join(a, ", "));
     }
-
 
     int databaseSizeBeforeCreate = contactDetailsRepository.findAll().size();
 
@@ -283,13 +288,16 @@ public class ContactDetailsResourceIntTest {
         .andExpect(jsonPath("$.[*].maidenName").value(hasItem(DEFAULT_MAIDEN_NAME.toString())))
         .andExpect(jsonPath("$.[*].initials").value(hasItem(DEFAULT_INITIALS.toString())))
         .andExpect(jsonPath("$.[*].title").value(hasItem(DEFAULT_TITLE.toString())))
-        .andExpect(jsonPath("$.[*].telephoneNumber").value(hasItem(DEFAULT_CONTACT_PHONE_NR_1.toString())))
-        .andExpect(jsonPath("$.[*].mobileNumber").value(hasItem(DEFAULT_CONTACT_PHONE_NR_2.toString())))
+        .andExpect(
+            jsonPath("$.[*].telephoneNumber").value(hasItem(DEFAULT_CONTACT_PHONE_NR_1.toString())))
+        .andExpect(
+            jsonPath("$.[*].mobileNumber").value(hasItem(DEFAULT_CONTACT_PHONE_NR_2.toString())))
         .andExpect(jsonPath("$.[*].email").value(hasItem(DEFAULT_EMAIL.toString())))
         .andExpect(jsonPath("$.[*].address1").value(hasItem(DEFAULT_ADDRESS.toString())))
         .andExpect(jsonPath("$.[*].postCode").value(hasItem(DEFAULT_POST_CODE.toString())))
         .andExpect(jsonPath("$.[*].legalSurname").value(hasItem(DEFAULT_LEGAL_SURNAME.toString())))
-        .andExpect(jsonPath("$.[*].legalForenames").value(hasItem(DEFAULT_LEGAL_FORENAMES.toString())))
+        .andExpect(
+            jsonPath("$.[*].legalForenames").value(hasItem(DEFAULT_LEGAL_FORENAMES.toString())))
         .andExpect(jsonPath("$.[*].amendedDate").isNotEmpty());
   }
 
@@ -337,7 +345,8 @@ public class ContactDetailsResourceIntTest {
     int databaseSizeBeforeUpdate = contactDetailsRepository.findAll().size();
 
     // Update the contactDetails
-    ContactDetails updatedContactDetails = contactDetailsRepository.findById(contactDetails.getId()).orElse(null);
+    ContactDetails updatedContactDetails = contactDetailsRepository.findById(contactDetails.getId())
+        .orElse(null);
     updatedContactDetails
         .surname(UPDATED_SURNAME)
         .forenames(UPDATED_FORENAMES)

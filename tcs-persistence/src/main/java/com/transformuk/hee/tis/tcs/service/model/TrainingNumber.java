@@ -1,7 +1,7 @@
 package com.transformuk.hee.tis.tcs.service.model;
 
 import com.transformuk.hee.tis.tcs.api.enumeration.TrainingNumberType;
-
+import java.io.Serializable;
 import javax.persistence.Entity;
 import javax.persistence.EnumType;
 import javax.persistence.Enumerated;
@@ -10,7 +10,6 @@ import javax.persistence.GenerationType;
 import javax.persistence.Id;
 import javax.persistence.JoinColumn;
 import javax.persistence.ManyToOne;
-import java.io.Serializable;
 
 /**
  * A TrainingNumber.
@@ -142,20 +141,39 @@ public class TrainingNumber implements Serializable {
 
   @Override
   public boolean equals(Object o) {
-    if (this == o) return true;
-    if (o == null || getClass() != o.getClass()) return false;
+    if (this == o) {
+      return true;
+    }
+    if (o == null || getClass() != o.getClass()) {
+      return false;
+    }
 
     TrainingNumber that = (TrainingNumber) o;
 
-    if (trainingNumberType != that.trainingNumberType) return false;
-    if (trainingNumber != null ? !trainingNumber.equals(that.trainingNumber) : that.trainingNumber != null) return false;
-    if (number != null ? !number.equals(that.number) : that.number != null) return false;
-    if (appointmentYear != null ? !appointmentYear.equals(that.appointmentYear) : that.appointmentYear != null)
+    if (trainingNumberType != that.trainingNumberType) {
       return false;
-    if (typeOfContract != null ? !typeOfContract.equals(that.typeOfContract) : that.typeOfContract != null)
+    }
+    if (trainingNumber != null ? !trainingNumber.equals(that.trainingNumber)
+        : that.trainingNumber != null) {
       return false;
-    if (suffix != null ? !suffix.equals(that.suffix) : that.suffix != null) return false;
-    if (intrepidId != null ? !intrepidId.equals(that.intrepidId) : that.intrepidId != null) return false;
+    }
+    if (number != null ? !number.equals(that.number) : that.number != null) {
+      return false;
+    }
+    if (appointmentYear != null ? !appointmentYear.equals(that.appointmentYear)
+        : that.appointmentYear != null) {
+      return false;
+    }
+    if (typeOfContract != null ? !typeOfContract.equals(that.typeOfContract)
+        : that.typeOfContract != null) {
+      return false;
+    }
+    if (suffix != null ? !suffix.equals(that.suffix) : that.suffix != null) {
+      return false;
+    }
+    if (intrepidId != null ? !intrepidId.equals(that.intrepidId) : that.intrepidId != null) {
+      return false;
+    }
     return programme != null ? programme.equals(that.programme) : that.programme == null;
   }
 

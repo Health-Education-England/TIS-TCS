@@ -6,12 +6,11 @@ import com.transformuk.hee.tis.tcs.api.dto.PostFundingDTO;
 import com.transformuk.hee.tis.tcs.api.dto.PostViewDTO;
 import com.transformuk.hee.tis.tcs.service.api.util.BasicPage;
 import com.transformuk.hee.tis.tcs.service.model.ColumnFilter;
-import org.springframework.data.domain.Page;
-import org.springframework.data.domain.Pageable;
-
 import java.util.List;
 import java.util.Set;
 import java.util.concurrent.CompletableFuture;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 
 /**
  * Service Interface for managing Post.
@@ -35,8 +34,9 @@ public interface PostService {
   List<PostDTO> save(List<PostDTO> postDTO);
 
   /**
-   * Patch a list of post so that the links to old/new posts are saved. its important to note that if a related post
-   * cannot be found, the existing post is cleared but if related post id is null then it isnt cleared
+   * Patch a list of post so that the links to old/new posts are saved. its important to note that
+   * if a related post cannot be found, the existing post is cleared but if related post id is null
+   * then it isnt cleared
    *
    * @param postDTOList the list of entities to save
    * @return the list of persisted entities
@@ -125,7 +125,8 @@ public interface PostService {
    * @param pageable     the pagination information
    * @return the list of entities
    */
-  BasicPage<PostViewDTO> advancedSearch(String searchString, List<ColumnFilter> columnFilers, Pageable pageable);
+  BasicPage<PostViewDTO> advancedSearch(String searchString, List<ColumnFilter> columnFilers,
+      Pageable pageable);
 
   /**
    * Get the "id" post.
@@ -157,10 +158,12 @@ public interface PostService {
    * @param pageable
    * @return
    */
-  Page<PostViewDTO> findByNationalPostNumber(String query, List<ColumnFilter> columnFilers, Pageable pageable);
+  Page<PostViewDTO> findByNationalPostNumber(String query, List<ColumnFilter> columnFilers,
+      Pageable pageable);
 
   /**
-   * Method that will throw a not authorized exception if the current logged in user cannot view or modify the person record
+   * Method that will throw a not authorized exception if the current logged in user cannot view or
+   * modify the person record
    *
    * @param personId the db managed id of the person record
    */
@@ -169,8 +172,8 @@ public interface PostService {
   /**
    * Find all Posts that are linked to a certain Programme and NPN
    *
-   * @param programmeId  The id of the Programme
-   * @param npn the npn of the post
+   * @param programmeId The id of the Programme
+   * @param npn         the npn of the post
    * @return List of PostDTO of the found Posts
    */
   List<PostDTO> findPostsForProgrammeIdAndNpn(Long programmeId, String npn);

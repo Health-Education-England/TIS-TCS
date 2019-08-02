@@ -1,6 +1,7 @@
 package com.transformuk.hee.tis.tcs.service.exception;
 
 import com.transformuk.hee.tis.tcs.service.api.validation.ValidationException;
+import java.util.List;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.core.annotation.AnnotationUtils;
@@ -18,8 +19,6 @@ import org.springframework.web.bind.annotation.ControllerAdvice;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.ResponseBody;
 import org.springframework.web.bind.annotation.ResponseStatus;
-
-import java.util.List;
 
 /**
  * Controller advice to translate the server side exceptions to client-friendly json structures.
@@ -60,9 +59,9 @@ public class ExceptionTranslator {
   }
 
   /**
-   * This exception occurs if we have an enum in a DTO such as
-   * {@link com.transformuk.hee.tis.tcs.api.dto.ProgrammeDTO#status} and the REST request coming in
-   * does not provide the proper ENUM value.
+   * This exception occurs if we have an enum in a DTO such as {@link
+   * com.transformuk.hee.tis.tcs.api.dto.ProgrammeDTO#status} and the REST request coming in does
+   * not provide the proper ENUM value.
    *
    * @param ex the exception to intercept
    * @return the error object to return to the user
@@ -106,7 +105,8 @@ public class ExceptionTranslator {
   @ExceptionHandler(HttpRequestMethodNotSupportedException.class)
   @ResponseBody
   @ResponseStatus(HttpStatus.METHOD_NOT_ALLOWED)
-  public ErrorVM processMethodNotSupportedException(HttpRequestMethodNotSupportedException exception) {
+  public ErrorVM processMethodNotSupportedException(
+      HttpRequestMethodNotSupportedException exception) {
     log.error(exception.getMessage(), exception);
     return new ErrorVM(ErrorConstants.ERR_METHOD_NOT_SUPPORTED, exception.getMessage());
   }
@@ -124,7 +124,8 @@ public class ExceptionTranslator {
     BodyBuilder builder;
     ErrorVM errorVM;
     log.error(ex.getMessage(), ex);
-    ResponseStatus responseStatus = AnnotationUtils.findAnnotation(ex.getClass(), ResponseStatus.class);
+    ResponseStatus responseStatus = AnnotationUtils
+        .findAnnotation(ex.getClass(), ResponseStatus.class);
     if (responseStatus != null) {
       builder = ResponseEntity.status(responseStatus.value());
       errorVM = new ErrorVM("error." + responseStatus.value().value(), responseStatus.reason());
@@ -145,8 +146,8 @@ public class ExceptionTranslator {
   }
 
   /**
-   * Handler for an exception thrown at the service level, that checks if the current user is authorised to do a
-   * certain action
+   * Handler for an exception thrown at the service level, that checks if the current user is
+   * authorised to do a certain action
    *
    * @param ex
    * @return

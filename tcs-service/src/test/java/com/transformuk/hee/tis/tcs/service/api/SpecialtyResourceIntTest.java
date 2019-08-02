@@ -1,5 +1,16 @@
 package com.transformuk.hee.tis.tcs.service.api;
 
+import static com.google.common.collect.Sets.newHashSet;
+import static org.assertj.core.api.Assertions.assertThat;
+import static org.hamcrest.Matchers.hasItem;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.delete;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.put;
+import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.content;
+import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
+import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
+
 import com.google.common.collect.Lists;
 import com.transformuk.hee.tis.tcs.api.dto.SpecialtyDTO;
 import com.transformuk.hee.tis.tcs.api.dto.SpecialtyGroupDTO;
@@ -14,6 +25,7 @@ import com.transformuk.hee.tis.tcs.service.repository.SpecialtyGroupRepository;
 import com.transformuk.hee.tis.tcs.service.repository.SpecialtyRepository;
 import com.transformuk.hee.tis.tcs.service.service.SpecialtyService;
 import com.transformuk.hee.tis.tcs.service.service.mapper.SpecialtyMapper;
+import java.util.List;
 import org.apache.commons.codec.net.URLCodec;
 import org.junit.Before;
 import org.junit.Test;
@@ -28,14 +40,6 @@ import org.springframework.test.context.junit4.SpringRunner;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.setup.MockMvcBuilders;
 import org.springframework.transaction.annotation.Transactional;
-
-import java.util.List;
-
-import static com.google.common.collect.Sets.newHashSet;
-import static org.assertj.core.api.Assertions.assertThat;
-import static org.hamcrest.Matchers.hasItem;
-import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.*;
-import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.*;
 
 /**
  * Test class for the SpecialtyResource REST controller.
@@ -91,8 +95,8 @@ public class SpecialtyResourceIntTest {
   /**
    * Create an entity for this test.
    * <p>
-   * This is a static method, as tests for other entities might also need it,
-   * if they test an entity which requires the current entity.
+   * This is a static method, as tests for other entities might also need it, if they test an entity
+   * which requires the current entity.
    */
   public static Specialty createEntity() {
     return new Specialty()
@@ -112,7 +116,8 @@ public class SpecialtyResourceIntTest {
   @Before
   public void setup() {
     MockitoAnnotations.initMocks(this);
-    SpecialtyResource specialtyResource = new SpecialtyResource(specialtyService, specialtyValidator);
+    SpecialtyResource specialtyResource = new SpecialtyResource(specialtyService,
+        specialtyValidator);
     this.restSpecialtyMockMvc = MockMvcBuilders.standaloneSetup(specialtyResource)
         .setCustomArgumentResolvers(pageableArgumentResolver)
         .setControllerAdvice(exceptionTranslator)
@@ -132,7 +137,8 @@ public class SpecialtyResourceIntTest {
     SpecialtyGroup specialtyGroupEntity = createSpecialtyGroupEntity();
     specialtyGroupEntity = specialtyGroupRepository.saveAndFlush(specialtyGroupEntity);
     // Create the Specialty
-    SpecialtyDTO specialtyDTO = linkSpecialtyToSpecialtyGroup(specialty, specialtyGroupEntity.getId());
+    SpecialtyDTO specialtyDTO = linkSpecialtyToSpecialtyGroup(specialty,
+        specialtyGroupEntity.getId());
 
     restSpecialtyMockMvc.perform(post("/api/specialties")
         .contentType(TestUtil.APPLICATION_JSON_UTF8)
@@ -175,7 +181,8 @@ public class SpecialtyResourceIntTest {
     int databaseSizeBeforeCreate = specialtyRepository.findAll().size();
     SpecialtyGroup specialtyGroupEntity = createSpecialtyGroupEntity();
     specialtyGroupEntity = specialtyGroupRepository.saveAndFlush(specialtyGroupEntity);
-    SpecialtyDTO specialtyDTO = linkSpecialtyToSpecialtyGroup(specialty, specialtyGroupEntity.getId());
+    SpecialtyDTO specialtyDTO = linkSpecialtyToSpecialtyGroup(specialty,
+        specialtyGroupEntity.getId());
     specialtyDTO.setSpecialtyCode(null);
 
     // An entity with no nhs specialty code cannot be created
@@ -198,7 +205,8 @@ public class SpecialtyResourceIntTest {
     int databaseSizeBeforeCreate = specialtyRepository.findAll().size();
     SpecialtyGroup specialtyGroupEntity = createSpecialtyGroupEntity();
     specialtyGroupEntity = specialtyGroupRepository.saveAndFlush(specialtyGroupEntity);
-    SpecialtyDTO specialtyDTO = linkSpecialtyToSpecialtyGroup(specialty, specialtyGroupEntity.getId());
+    SpecialtyDTO specialtyDTO = linkSpecialtyToSpecialtyGroup(specialty,
+        specialtyGroupEntity.getId());
     specialtyDTO.setSpecialtyCode("             ");
 
     // An entity with no nhs specialty code cannot be created
@@ -220,7 +228,8 @@ public class SpecialtyResourceIntTest {
     SpecialtyGroup specialtyGroupEntity = createSpecialtyGroupEntity();
     specialtyGroupEntity = specialtyGroupRepository.saveAndFlush(specialtyGroupEntity);
 
-    SpecialtyDTO specialtyDTO = linkSpecialtyToSpecialtyGroup(specialty, specialtyGroupEntity.getId());
+    SpecialtyDTO specialtyDTO = linkSpecialtyToSpecialtyGroup(specialty,
+        specialtyGroupEntity.getId());
     specialtyDTO.setName(null);
 
     // An entity with no name cannot be created
@@ -244,7 +253,8 @@ public class SpecialtyResourceIntTest {
     SpecialtyGroup specialtyGroupEntity = createSpecialtyGroupEntity();
     specialtyGroupEntity = specialtyGroupRepository.saveAndFlush(specialtyGroupEntity);
 
-    SpecialtyDTO specialtyDTO = linkSpecialtyToSpecialtyGroup(specialty, specialtyGroupEntity.getId());
+    SpecialtyDTO specialtyDTO = linkSpecialtyToSpecialtyGroup(specialty,
+        specialtyGroupEntity.getId());
     specialtyDTO.setName("         ");
 
     // An entity cannot be created with name as spaces
@@ -271,8 +281,8 @@ public class SpecialtyResourceIntTest {
         .andExpect(content().contentType(MediaType.APPLICATION_JSON_UTF8_VALUE))
         .andExpect(jsonPath("$.[*].id").value(hasItem(specialty.getId().intValue())))
         .andExpect(jsonPath("$.[*].status").value(hasItem(DEFAULT_STATUS.toString().toUpperCase())))
-      .andExpect(jsonPath("$.[*].college").value(hasItem(DEFAULT_COLLEGE)))
-      .andExpect(jsonPath("$.[*].specialtyCode").value(hasItem(DEFAULT_NHS_SPECIALTY_CODE)))
+        .andExpect(jsonPath("$.[*].college").value(hasItem(DEFAULT_COLLEGE)))
+        .andExpect(jsonPath("$.[*].specialtyCode").value(hasItem(DEFAULT_NHS_SPECIALTY_CODE)))
         .andExpect(jsonPath("$.[*].specialtyTypes[0]").value(DEFAULT_SPECIALTY_TYPE.toString()));
   }
 
@@ -288,7 +298,7 @@ public class SpecialtyResourceIntTest {
         .andExpect(content().contentType(MediaType.APPLICATION_JSON_UTF8_VALUE))
         .andExpect(jsonPath("$.[*].id").value(hasItem(specialty.getId().intValue())))
         .andExpect(jsonPath("$.[*].status").value(hasItem(DEFAULT_STATUS.toString().toUpperCase())))
-      .andExpect(jsonPath("$.[*].college").value(hasItem(DEFAULT_COLLEGE)));
+        .andExpect(jsonPath("$.[*].college").value(hasItem(DEFAULT_COLLEGE)));
   }
 
   @Test
@@ -322,8 +332,8 @@ public class SpecialtyResourceIntTest {
         .andExpect(content().contentType(MediaType.APPLICATION_JSON_UTF8_VALUE))
         .andExpect(jsonPath("$.id").value(specialty.getId().intValue()))
         .andExpect(jsonPath("$.status").value(DEFAULT_STATUS.toString().toUpperCase()))
-      .andExpect(jsonPath("$.college").value(DEFAULT_COLLEGE))
-      .andExpect(jsonPath("$.specialtyCode").value(DEFAULT_NHS_SPECIALTY_CODE))
+        .andExpect(jsonPath("$.college").value(DEFAULT_COLLEGE))
+        .andExpect(jsonPath("$.specialtyCode").value(DEFAULT_NHS_SPECIALTY_CODE))
         .andExpect(jsonPath("$.specialtyTypes[0]").value(DEFAULT_SPECIALTY_TYPE.toString()))
         .andExpect(jsonPath("$.specialtyGroup.id").value(specialtyGroup.getId().intValue()));
   }
@@ -381,7 +391,8 @@ public class SpecialtyResourceIntTest {
     specialtyRepository.saveAndFlush(otherSpecialtyTypeSpecialty);
 
     //when & then
-    String colFilters = new URLCodec().encode("{\"specialtyGroup.name\":[\"" + DEFAULT_SPECIALTYGROUP_NAME + "\"]}");
+    String colFilters = new URLCodec()
+        .encode("{\"specialtyGroup.name\":[\"" + DEFAULT_SPECIALTYGROUP_NAME + "\"]}");
     // Get all the specialtyList
     restSpecialtyMockMvc.perform(get("/api/specialties?sort=id,desc&columnFilters=" +
         colFilters))
@@ -406,8 +417,9 @@ public class SpecialtyResourceIntTest {
     //when & then
     String colFilters = new URLCodec().encode("{\"specialtyCode\":[\"TestSpecialtyCode\"]}");
     // Get all the specialtyList
-    restSpecialtyMockMvc.perform(get("/api/specialties?sort=id,desc&searchQuery=other&columnFilters=" +
-        colFilters))
+    restSpecialtyMockMvc
+        .perform(get("/api/specialties?sort=id,desc&searchQuery=other&columnFilters=" +
+            colFilters))
         .andExpect(status().isOk())
         .andExpect(jsonPath("$.[*].specialtyCode").value("TestSpecialtyCode"));
   }
@@ -450,7 +462,8 @@ public class SpecialtyResourceIntTest {
         .specialtyCode(UPDATED_NHS_SPECIALTY_CODE)
         .specialtyTypes(newHashSet(UPDATED_SPECIALTY_TYPE))
         .name(UPDATED_NAME);
-    SpecialtyDTO specialtyDTO = linkSpecialtyToSpecialtyGroup(updatedSpecialty, specialtyGroupEntity.getId());
+    SpecialtyDTO specialtyDTO = linkSpecialtyToSpecialtyGroup(updatedSpecialty,
+        specialtyGroupEntity.getId());
 
     restSpecialtyMockMvc.perform(put("/api/specialties")
         .contentType(TestUtil.APPLICATION_JSON_UTF8)
@@ -504,7 +517,8 @@ public class SpecialtyResourceIntTest {
     SpecialtyGroup specialtyGroup = specialtyGroupRepository.saveAndFlush(specialtyGroupEntity);
 
     specialty = specialtyRepository.saveAndFlush(specialty);
-    SpecialtyDTO specialtyDTO = linkSpecialtyToSpecialtyGroup(this.specialty, specialtyGroup.getId());
+    SpecialtyDTO specialtyDTO = linkSpecialtyToSpecialtyGroup(this.specialty,
+        specialtyGroup.getId());
 
     // When status is null
     specialtyDTO.setStatus(null);
@@ -522,7 +536,8 @@ public class SpecialtyResourceIntTest {
     SpecialtyGroup specialtyGroup = specialtyGroupRepository.saveAndFlush(specialtyGroupEntity);
 
     specialty = specialtyRepository.saveAndFlush(specialty);
-    SpecialtyDTO specialtyDTO = linkSpecialtyToSpecialtyGroup(this.specialty, specialtyGroup.getId());
+    SpecialtyDTO specialtyDTO = linkSpecialtyToSpecialtyGroup(this.specialty,
+        specialtyGroup.getId());
 
     // When status is null
     specialtyDTO.setSpecialtyCode(null);
@@ -540,7 +555,8 @@ public class SpecialtyResourceIntTest {
     SpecialtyGroup specialtyGroup = specialtyGroupRepository.saveAndFlush(specialtyGroupEntity);
 
     specialty = specialtyRepository.saveAndFlush(specialty);
-    SpecialtyDTO specialtyDTO = linkSpecialtyToSpecialtyGroup(this.specialty, specialtyGroup.getId());
+    SpecialtyDTO specialtyDTO = linkSpecialtyToSpecialtyGroup(this.specialty,
+        specialtyGroup.getId());
 
     // When type is null
     specialtyDTO.setSpecialtyTypes(null);
@@ -558,7 +574,8 @@ public class SpecialtyResourceIntTest {
     SpecialtyGroup specialtyGroup = specialtyGroupRepository.saveAndFlush(specialtyGroupEntity);
 
     specialty = specialtyRepository.saveAndFlush(specialty);
-    SpecialtyDTO specialtyDTO = linkSpecialtyToSpecialtyGroup(this.specialty, specialtyGroup.getId());
+    SpecialtyDTO specialtyDTO = linkSpecialtyToSpecialtyGroup(this.specialty,
+        specialtyGroup.getId());
 
     // When status is null
     specialtyDTO.setName(null);
@@ -577,7 +594,8 @@ public class SpecialtyResourceIntTest {
     SpecialtyGroup specialtyGroup = specialtyGroupRepository.saveAndFlush(specialtyGroupEntity);
 
     specialty = specialtyRepository.saveAndFlush(specialty);
-    SpecialtyDTO specialtyDTO = linkSpecialtyToSpecialtyGroup(this.specialty, specialtyGroup.getId());
+    SpecialtyDTO specialtyDTO = linkSpecialtyToSpecialtyGroup(this.specialty,
+        specialtyGroup.getId());
 
     // When status is null
     specialtyDTO.setName(VERY_LONG_STRING);
@@ -620,9 +638,12 @@ public class SpecialtyResourceIntTest {
     int databaseSizeBeforeBulkCreate = specialtyGroupRepository.findAll().size();
     int expectedDatabaseSizeAfterBulkCreate = databaseSizeBeforeBulkCreate + 2;
 
-    SpecialtyGroup savedSpecialtyGroup = specialtyGroupRepository.saveAndFlush(specialtyGroupEntity);
-    SpecialtyDTO specialtyDTO = linkSpecialtyToSpecialtyGroup(specialty, savedSpecialtyGroup.getId());
-    SpecialtyDTO specialtyDTO1 = linkSpecialtyToSpecialtyGroup(anotherSpecialty, savedSpecialtyGroup.getId());
+    SpecialtyGroup savedSpecialtyGroup = specialtyGroupRepository
+        .saveAndFlush(specialtyGroupEntity);
+    SpecialtyDTO specialtyDTO = linkSpecialtyToSpecialtyGroup(specialty,
+        savedSpecialtyGroup.getId());
+    SpecialtyDTO specialtyDTO1 = linkSpecialtyToSpecialtyGroup(anotherSpecialty,
+        savedSpecialtyGroup.getId());
 
     List<SpecialtyDTO> payload = Lists.newArrayList(specialtyDTO, specialtyDTO1);
     restSpecialtyMockMvc.perform(post("/api/bulk-specialties")
@@ -652,8 +673,10 @@ public class SpecialtyResourceIntTest {
 
     int expectedDatabaseSizeAfterBulkCreate = specialtyRepository.findAll().size();
 
-    SpecialtyDTO specialtyDTO = linkSpecialtyToSpecialtyGroup(specialty, specialtyGroupEntity.getId());
-    SpecialtyDTO specialtyDTO1 = linkSpecialtyToSpecialtyGroup(anotherSpecialty, specialtyGroupEntity.getId());
+    SpecialtyDTO specialtyDTO = linkSpecialtyToSpecialtyGroup(specialty,
+        specialtyGroupEntity.getId());
+    SpecialtyDTO specialtyDTO1 = linkSpecialtyToSpecialtyGroup(anotherSpecialty,
+        specialtyGroupEntity.getId());
 
     List<SpecialtyDTO> payload = Lists.newArrayList(specialtyDTO, specialtyDTO1);
     restSpecialtyMockMvc.perform(post("/api/bulk-specialties")
@@ -679,8 +702,10 @@ public class SpecialtyResourceIntTest {
         .college("a college");
 
     specialtyGroupEntity = specialtyGroupRepository.saveAndFlush(specialtyGroupEntity);
-    SpecialtyDTO specialtyDTO = linkSpecialtyToSpecialtyGroup(specialty, specialtyGroupEntity.getId());
-    SpecialtyDTO specialtyDTO1 = linkSpecialtyToSpecialtyGroup(anotherSpecialty, specialtyGroupEntity.getId());
+    SpecialtyDTO specialtyDTO = linkSpecialtyToSpecialtyGroup(specialty,
+        specialtyGroupEntity.getId());
+    SpecialtyDTO specialtyDTO1 = linkSpecialtyToSpecialtyGroup(anotherSpecialty,
+        specialtyGroupEntity.getId());
 
     //ensure specialty is in the database before an update
     Specialty savedSpecialty = specialtyRepository.saveAndFlush(specialty);
@@ -716,8 +741,10 @@ public class SpecialtyResourceIntTest {
         .college("a college");
 
     specialtyGroupEntity = specialtyGroupRepository.save(specialtyGroupEntity);
-    SpecialtyDTO specialtyDTO = linkSpecialtyToSpecialtyGroup(specialty, specialtyGroupEntity.getId());
-    SpecialtyDTO specialtyDTO1 = linkSpecialtyToSpecialtyGroup(anotherSpecialty, specialtyGroupEntity.getId());
+    SpecialtyDTO specialtyDTO = linkSpecialtyToSpecialtyGroup(specialty,
+        specialtyGroupEntity.getId());
+    SpecialtyDTO specialtyDTO1 = linkSpecialtyToSpecialtyGroup(anotherSpecialty,
+        specialtyGroupEntity.getId());
 
     //ensure curricula is in the database before an update
     Specialty savedSpecialty = specialtyRepository.saveAndFlush(specialty);

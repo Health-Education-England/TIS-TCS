@@ -1,5 +1,15 @@
 package com.transformuk.hee.tis.tcs.service.api;
 
+import static org.hamcrest.CoreMatchers.equalTo;
+import static org.hamcrest.CoreMatchers.everyItem;
+import static org.hamcrest.CoreMatchers.nullValue;
+import static org.hamcrest.Matchers.hasSize;
+import static org.hamcrest.collection.IsIterableContainingInAnyOrder.containsInAnyOrder;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
+import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.content;
+import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
+import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
+
 import com.transformuk.hee.tis.tcs.service.Application;
 import com.transformuk.hee.tis.tcs.service.model.ContactDetails;
 import com.transformuk.hee.tis.tcs.service.model.GmcDetails;
@@ -7,6 +17,9 @@ import com.transformuk.hee.tis.tcs.service.model.Person;
 import com.transformuk.hee.tis.tcs.service.model.PlacementDetails;
 import com.transformuk.hee.tis.tcs.service.model.Post;
 import com.transformuk.hee.tis.tcs.service.service.EsrNotificationService;
+import java.math.BigDecimal;
+import java.time.LocalDate;
+import javax.persistence.EntityManager;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -19,19 +32,6 @@ import org.springframework.test.context.junit4.SpringRunner;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.setup.MockMvcBuilders;
 import org.springframework.transaction.annotation.Transactional;
-
-import javax.persistence.EntityManager;
-import java.math.BigDecimal;
-import java.time.LocalDate;
-import static org.hamcrest.CoreMatchers.everyItem;
-import static org.hamcrest.CoreMatchers.equalTo;
-import static org.hamcrest.CoreMatchers.nullValue;
-import static org.hamcrest.Matchers.hasSize;
-import static org.hamcrest.collection.IsIterableContainingInAnyOrder.containsInAnyOrder;
-import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
-import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.content;
-import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
-import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
 /**
  * Test class for functionality of the EsrNotification REST controller.
@@ -73,8 +73,8 @@ public class EsrNotificationResourceIntTest {
   /**
    * Create an entity for this test.
    * <p>
-   * This is a static method, as tests for other entities might also need it,
-   * if they test an entity which requires the current entity.
+   * This is a static method, as tests for other entities might also need it, if they test an entity
+   * which requires the current entity.
    */
   public static PlacementDetails createPlacementEntity(LocalDate from, LocalDate to) {
 
@@ -96,7 +96,8 @@ public class EsrNotificationResourceIntTest {
   public void setup() {
 
     MockitoAnnotations.initMocks(this);
-    EsrNotificationResource esrNotificationResource = new EsrNotificationResource(esrNotificationService);
+    EsrNotificationResource esrNotificationResource = new EsrNotificationResource(
+        esrNotificationService);
     this.restEsrNotificationMockMvc = MockMvcBuilders.standaloneSetup(esrNotificationResource)
         .setMessageConverters(jacksonMessageConverter).build();
   }
@@ -140,8 +141,10 @@ public class EsrNotificationResourceIntTest {
     entityManager.persist(trainee2GmcDetails);
 
     LocalDate from = LocalDate.now();
-    PlacementDetails placement1 = createPlacementEntity(from, from.plusDays(10)); // future becoming current today
-    PlacementDetails placement2 = createPlacementEntity(from.minusDays(10), from.minusDays(1)); // current finished yesterday
+    PlacementDetails placement1 = createPlacementEntity(from,
+        from.plusDays(10)); // future becoming current today
+    PlacementDetails placement2 = createPlacementEntity(from.minusDays(10),
+        from.minusDays(1)); // current finished yesterday
 
     placement1.setTraineeId(trainee1.getId());
     placement2.setTraineeId(trainee2.getId());
@@ -161,17 +164,24 @@ public class EsrNotificationResourceIntTest {
         .andExpect(jsonPath("$.[*].notificationTitleCode").value("1"))
         .andExpect(jsonPath("$.[*].deaneryPostNumber").value(post.getNationalPostNumber()))
         .andExpect(jsonPath("$.[*].managingDeaneryBodyCode").value("EOE"))
-        .andExpect(jsonPath("$.[*].currentTraineeFirstName").value(trainee2.getContactDetails().getLegalForenames()))
-        .andExpect(jsonPath("$.[*].currentTraineeLastName").value(trainee2.getContactDetails().getLegalSurname()))
-        .andExpect(jsonPath("$.[*].currentTraineeGmcNumber").value(trainee2GmcDetails.getGmcNumber()))
-        .andExpect(jsonPath("$.[*].nextAppointmentTraineeFirstName").value(trainee1.getContactDetails().getLegalForenames()))
-        .andExpect(jsonPath("$.[*].nextAppointmentTraineeLastName").value(trainee1.getContactDetails().getLegalSurname()))
-        .andExpect(jsonPath("$.[*].nextAppointmentTraineeGmcNumber").value(trainee1GmcDetails.getGmcNumber()));
+        .andExpect(jsonPath("$.[*].currentTraineeFirstName")
+            .value(trainee2.getContactDetails().getLegalForenames()))
+        .andExpect(jsonPath("$.[*].currentTraineeLastName")
+            .value(trainee2.getContactDetails().getLegalSurname()))
+        .andExpect(
+            jsonPath("$.[*].currentTraineeGmcNumber").value(trainee2GmcDetails.getGmcNumber()))
+        .andExpect(jsonPath("$.[*].nextAppointmentTraineeFirstName")
+            .value(trainee1.getContactDetails().getLegalForenames()))
+        .andExpect(jsonPath("$.[*].nextAppointmentTraineeLastName")
+            .value(trainee1.getContactDetails().getLegalSurname()))
+        .andExpect(jsonPath("$.[*].nextAppointmentTraineeGmcNumber")
+            .value(trainee1GmcDetails.getGmcNumber()));
   }
 
   @Test
   @Transactional
-  public void shouldLoadEarliestEligibleTraineePlacementsAndCreateEsrNotificationRecord() throws Exception {
+  public void shouldLoadEarliestEligibleTraineePlacementsAndCreateEsrNotificationRecord()
+      throws Exception {
 
     String localPostNumber = "EOE/RGT00/021/FY1/013";
     //given
@@ -212,8 +222,10 @@ public class EsrNotificationResourceIntTest {
     entityManager.persist(trainee2GmcDetails);
 
     LocalDate from = LocalDate.now();
-    PlacementDetails placement1 = createPlacementEntity(from.plusWeeks(13), from.plusMonths(6)); // future placement starting in 13 weeks
-    PlacementDetails placement2 = createPlacementEntity(from.minusMonths(1), from.plusMonths(2)); // current placement
+    PlacementDetails placement1 = createPlacementEntity(from.plusWeeks(13),
+        from.plusMonths(6)); // future placement starting in 13 weeks
+    PlacementDetails placement2 = createPlacementEntity(from.minusMonths(1),
+        from.plusMonths(2)); // current placement
 
     placement1.setTraineeId(trainee1.getId());
     placement2.setTraineeId(trainee2.getId());
@@ -233,17 +245,24 @@ public class EsrNotificationResourceIntTest {
         .andExpect(jsonPath("$.[*].notificationTitleCode").value("1"))
         .andExpect(jsonPath("$.[*].deaneryPostNumber").value(post.getNationalPostNumber()))
         .andExpect(jsonPath("$.[*].managingDeaneryBodyCode").value("EOE"))
-        .andExpect(jsonPath("$.[*].currentTraineeFirstName").value(trainee2.getContactDetails().getForenames()))
-        .andExpect(jsonPath("$.[*].currentTraineeLastName").value(trainee2.getContactDetails().getSurname()))
-        .andExpect(jsonPath("$.[*].currentTraineeGmcNumber").value(trainee2GmcDetails.getGmcNumber()))
-        .andExpect(jsonPath("$.[*].nextAppointmentTraineeFirstName").value(trainee1.getContactDetails().getLegalForenames()))
-        .andExpect(jsonPath("$.[*].nextAppointmentTraineeLastName").value(trainee1.getContactDetails().getLegalSurname()))
-        .andExpect(jsonPath("$.[*].nextAppointmentTraineeGmcNumber").value(trainee1GmcDetails.getGmcNumber()));
+        .andExpect(jsonPath("$.[*].currentTraineeFirstName")
+            .value(trainee2.getContactDetails().getForenames()))
+        .andExpect(jsonPath("$.[*].currentTraineeLastName")
+            .value(trainee2.getContactDetails().getSurname()))
+        .andExpect(
+            jsonPath("$.[*].currentTraineeGmcNumber").value(trainee2GmcDetails.getGmcNumber()))
+        .andExpect(jsonPath("$.[*].nextAppointmentTraineeFirstName")
+            .value(trainee1.getContactDetails().getLegalForenames()))
+        .andExpect(jsonPath("$.[*].nextAppointmentTraineeLastName")
+            .value(trainee1.getContactDetails().getLegalSurname()))
+        .andExpect(jsonPath("$.[*].nextAppointmentTraineeGmcNumber")
+            .value(trainee1GmcDetails.getGmcNumber()));
   }
 
   @Test
   @Transactional
-  public void shouldLoadAllRelatedEarliestEligibleTraineePlacementsAndCreateEsrNotificationRecords() throws Exception {
+  public void shouldLoadAllRelatedEarliestEligibleTraineePlacementsAndCreateEsrNotificationRecords()
+      throws Exception {
 
     String localPostNumber = "EOE/RGT00/021/FY1/013";
     //given
@@ -272,7 +291,7 @@ public class EsrNotificationResourceIntTest {
     ContactDetails trainee3ContactDetails = aContactDetail("trainee03-FN", "trainee03-LN");
     trainee3ContactDetails.setId(trainee3.getId());
     trainee3.setContactDetails(trainee3ContactDetails);
-    
+
     ContactDetails trainee4ContactDetails = aContactDetail("trainee04-FN", "trainee04-LN");
     trainee4ContactDetails.setId(trainee4.getId());
     trainee4.setContactDetails(trainee4ContactDetails);
@@ -303,11 +322,16 @@ public class EsrNotificationResourceIntTest {
     LocalDate today = LocalDate.now();
     LocalDate thirteenWeeks = today.plusWeeks(13);
     LocalDate sixMonths = today.plusMonths(6);
-    PlacementDetails placement1 = createPlacementEntity(thirteenWeeks, sixMonths); // future placement starting in 13 weeks
-    PlacementDetails placement2 = createPlacementEntity(today.minusMonths(1), today.plusMonths(2)); // current placement
-    PlacementDetails placement3 = createPlacementEntity(thirteenWeeks, sixMonths); // another placement starting in 13 weeks
-    PlacementDetails placement4 = createPlacementEntity(thirteenWeeks.plusDays(1), sixMonths.plusDays(5)); // another placement starting in 13 weeks and a day
-    PlacementDetails placement5 = createPlacementEntity(today.plusYears(2), sixMonths.plusYears(2).plusDays(5)); // another placement starting in 13 weeks and a day
+    PlacementDetails placement1 = createPlacementEntity(thirteenWeeks,
+        sixMonths); // future placement starting in 13 weeks
+    PlacementDetails placement2 = createPlacementEntity(today.minusMonths(1),
+        today.plusMonths(2)); // current placement
+    PlacementDetails placement3 = createPlacementEntity(thirteenWeeks,
+        sixMonths); // another placement starting in 13 weeks
+    PlacementDetails placement4 = createPlacementEntity(thirteenWeeks.plusDays(1),
+        sixMonths.plusDays(5)); // another placement starting in 13 weeks and a day
+    PlacementDetails placement5 = createPlacementEntity(today.plusYears(2),
+        sixMonths.plusYears(2).plusDays(5)); // another placement starting in 13 weeks and a day
 
     placement1.setTraineeId(trainee1.getId());
     placement2.setTraineeId(trainee2.getId());
@@ -336,23 +360,34 @@ public class EsrNotificationResourceIntTest {
         .andExpect(jsonPath("$", hasSize(2)))
         // For given data, these should be the same across notifications
         .andExpect(jsonPath("$.[*].notificationTitleCode").value(everyItem(equalTo("1"))))
-        .andExpect(jsonPath("$.[*].deaneryPostNumber").value(everyItem(equalTo(post.getNationalPostNumber()))))
+        .andExpect(jsonPath("$.[*].deaneryPostNumber")
+            .value(everyItem(equalTo(post.getNationalPostNumber()))))
         .andExpect(jsonPath("$.[*].managingDeaneryBodyCode").value(everyItem(equalTo("EOE"))))
-        .andExpect(jsonPath("$.[*].currentTraineeFirstName").value(everyItem(equalTo(trainee2.getContactDetails().getLegalForenames()))))
-        .andExpect(jsonPath("$.[*].currentTraineeLastName").value(everyItem(equalTo(trainee2.getContactDetails().getLegalSurname()))))
-        .andExpect(jsonPath("$.[*].currentTraineeGmcNumber").value(everyItem(equalTo(trainee2GmcDetails.getGmcNumber()))))
+        .andExpect(jsonPath("$.[*].currentTraineeFirstName")
+            .value(everyItem(equalTo(trainee2.getContactDetails().getLegalForenames()))))
+        .andExpect(jsonPath("$.[*].currentTraineeLastName")
+            .value(everyItem(equalTo(trainee2.getContactDetails().getLegalSurname()))))
+        .andExpect(jsonPath("$.[*].currentTraineeGmcNumber")
+            .value(everyItem(equalTo(trainee2GmcDetails.getGmcNumber()))))
         // The 2 placements starting on the same day
-        .andExpect(jsonPath("$.[0].nextAppointmentTraineeFirstName").value(trainee1.getContactDetails().getLegalForenames()))
-        .andExpect(jsonPath("$.[0].nextAppointmentTraineeLastName").value(trainee1.getContactDetails().getLegalSurname()))
-        .andExpect(jsonPath("$.[0].nextAppointmentTraineeGmcNumber").value(trainee1GmcDetails.getGmcNumber()))
-        .andExpect(jsonPath("$.[1].nextAppointmentTraineeFirstName").value(trainee3.getContactDetails().getLegalForenames()))
-        .andExpect(jsonPath("$.[1].nextAppointmentTraineeLastName").value(trainee3.getContactDetails().getLegalSurname()))
-        .andExpect(jsonPath("$.[1].nextAppointmentTraineeGmcNumber").value(trainee3GmcDetails.getGmcNumber()));
+        .andExpect(jsonPath("$.[0].nextAppointmentTraineeFirstName")
+            .value(trainee1.getContactDetails().getLegalForenames()))
+        .andExpect(jsonPath("$.[0].nextAppointmentTraineeLastName")
+            .value(trainee1.getContactDetails().getLegalSurname()))
+        .andExpect(jsonPath("$.[0].nextAppointmentTraineeGmcNumber")
+            .value(trainee1GmcDetails.getGmcNumber()))
+        .andExpect(jsonPath("$.[1].nextAppointmentTraineeFirstName")
+            .value(trainee3.getContactDetails().getLegalForenames()))
+        .andExpect(jsonPath("$.[1].nextAppointmentTraineeLastName")
+            .value(trainee3.getContactDetails().getLegalSurname()))
+        .andExpect(jsonPath("$.[1].nextAppointmentTraineeGmcNumber")
+            .value(trainee3GmcDetails.getGmcNumber()));
   }
 
   @Test
   @Transactional
-  public void shouldNotFindAnyEarliestEligibleTraineePlacementsAndShouldNotCreateEsrNotificationRecord() throws Exception {
+  public void shouldNotFindAnyEarliestEligibleTraineePlacementsAndShouldNotCreateEsrNotificationRecord()
+      throws Exception {
 
     String localPostNumber = "EOE/RGT00/021/FY1/013";
     //given
@@ -388,8 +423,10 @@ public class EsrNotificationResourceIntTest {
     entityManager.persist(trainee2GmcDetails);
 
     LocalDate from = LocalDate.now();
-    PlacementDetails placement1 = createPlacementEntity(from.plusDays(95), from.plusMonths(6)); // future placement just outside the earliest eligible window.
-    PlacementDetails placement2 = createPlacementEntity(from.minusMonths(1), from.plusMonths(2)); // current placement
+    PlacementDetails placement1 = createPlacementEntity(from.plusDays(95),
+        from.plusMonths(6)); // future placement just outside the earliest eligible window.
+    PlacementDetails placement2 = createPlacementEntity(from.minusMonths(1),
+        from.plusMonths(2)); // current placement
 
     placement1.setTraineeId(trainee1.getId());
     placement2.setTraineeId(trainee2.getId());
@@ -461,9 +498,12 @@ public class EsrNotificationResourceIntTest {
     entityManager.persist(trainee3GmcDetails);
 
     LocalDate from = LocalDate.now();
-    PlacementDetails placement1 = createPlacementEntity(from.minusMonths(3), from.minusDays(1)); // post placement ended yesterday
-    PlacementDetails placement2 = createPlacementEntity(from.minusMonths(2), from.plusMonths(1)); // post with an active placement
-    PlacementDetails placement3 = createPlacementEntity(from.minusMonths(3).plusDays(1), from.minusDays(1)); // post placement ended yesterday
+    PlacementDetails placement1 = createPlacementEntity(from.minusMonths(3),
+        from.minusDays(1)); // post placement ended yesterday
+    PlacementDetails placement2 = createPlacementEntity(from.minusMonths(2),
+        from.plusMonths(1)); // post with an active placement
+    PlacementDetails placement3 = createPlacementEntity(from.minusMonths(3).plusDays(1),
+        from.minusDays(1)); // post placement ended yesterday
 
     placement1.setTraineeId(trainee1.getId());
     placement2.setTraineeId(trainee2.getId());
@@ -484,16 +524,20 @@ public class EsrNotificationResourceIntTest {
         .andExpect(jsonPath("$.*").isArray())
         .andExpect(jsonPath("$", hasSize(2)))
         .andExpect(jsonPath("$.[*].notificationTitleCode").value(everyItem(equalTo("1"))))
-        .andExpect(jsonPath("$.[*].deaneryPostNumber").value(everyItem(equalTo(post1.getNationalPostNumber()))))
+        .andExpect(jsonPath("$.[*].deaneryPostNumber")
+            .value(everyItem(equalTo(post1.getNationalPostNumber()))))
         .andExpect(jsonPath("$.[*].managingDeaneryBodyCode").value(everyItem(equalTo("EOE"))))
-        //TODO The criteria for 'postVacantAtNextRotation' probably needs to be revised by ESR 
+        //TODO The criteria for 'postVacantAtNextRotation' probably needs to be revised by ESR
         .andExpect(jsonPath("$.[*].postVacantAtNextRotation").value(everyItem(equalTo(true))))
         .andExpect(jsonPath("$.[*].currentTraineeFirstName").value(
-            containsInAnyOrder(trainee1.getContactDetails().getLegalForenames(), trainee3.getContactDetails().getLegalForenames())))
+            containsInAnyOrder(trainee1.getContactDetails().getLegalForenames(),
+                trainee3.getContactDetails().getLegalForenames())))
         .andExpect(jsonPath("$.[*].currentTraineeLastName").value(
-            containsInAnyOrder(trainee1.getContactDetails().getLegalSurname(), trainee3.getContactDetails().getLegalSurname())))
+            containsInAnyOrder(trainee1.getContactDetails().getLegalSurname(),
+                trainee3.getContactDetails().getLegalSurname())))
         .andExpect(jsonPath("$.[*].currentTraineeGmcNumber").value(
-            containsInAnyOrder(trainee1GmcDetails.getGmcNumber(), trainee3GmcDetails.getGmcNumber())))
+            containsInAnyOrder(trainee1GmcDetails.getGmcNumber(),
+                trainee3GmcDetails.getGmcNumber())))
         .andExpect(jsonPath("$.[*].nextAppointmentTraineeFirstName").value(everyItem(nullValue())))
         .andExpect(jsonPath("$.[*].nextAppointmentTraineeLastName").value(everyItem(nullValue())))
         .andExpect(jsonPath("$.[*].nextAppointmentTraineeGmcNumber").value(everyItem(nullValue())));

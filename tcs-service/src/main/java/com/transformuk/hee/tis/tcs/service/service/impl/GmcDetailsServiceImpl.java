@@ -7,6 +7,7 @@ import com.transformuk.hee.tis.tcs.service.model.GmcDetails;
 import com.transformuk.hee.tis.tcs.service.repository.GmcDetailsRepository;
 import com.transformuk.hee.tis.tcs.service.service.GmcDetailsService;
 import com.transformuk.hee.tis.tcs.service.service.mapper.GmcDetailsMapper;
+import java.util.List;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.context.ApplicationEventPublisher;
@@ -14,8 +15,6 @@ import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
-
-import java.util.List;
 
 /**
  * Service Implementation for managing GmcDetails.
@@ -30,8 +29,9 @@ public class GmcDetailsServiceImpl implements GmcDetailsService {
   private final GmcDetailsMapper gmcDetailsMapper;
   private final ApplicationEventPublisher applicationEventPublisher;
 
-  public GmcDetailsServiceImpl(GmcDetailsRepository gmcDetailsRepository, GmcDetailsMapper gmcDetailsMapper,
-                               ApplicationEventPublisher applicationEventPublisher) {
+  public GmcDetailsServiceImpl(GmcDetailsRepository gmcDetailsRepository,
+      GmcDetailsMapper gmcDetailsMapper,
+      ApplicationEventPublisher applicationEventPublisher) {
     this.gmcDetailsRepository = gmcDetailsRepository;
     this.gmcDetailsMapper = gmcDetailsMapper;
     this.applicationEventPublisher = applicationEventPublisher;

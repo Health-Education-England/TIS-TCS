@@ -2,25 +2,22 @@ package com.transformuk.hee.tis.tcs.service.job;
 
 import com.google.common.base.Stopwatch;
 import com.google.common.collect.Sets;
+import java.util.List;
+import java.util.Set;
+import java.util.concurrent.CompletableFuture;
+import javax.persistence.EntityManager;
+import javax.persistence.EntityManagerFactory;
+import javax.persistence.EntityTransaction;
 import org.apache.commons.collections4.CollectionUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.jmx.export.annotation.ManagedOperation;
 
-import javax.persistence.EntityManager;
-import javax.persistence.EntityManagerFactory;
-import javax.persistence.EntityTransaction;
-import java.util.List;
-import java.util.Set;
-import java.util.concurrent.CompletableFuture;
-
 public abstract class TrustAdminSyncJobTemplate<ENTITY> {
 
-  private static final Logger LOG = LoggerFactory.getLogger(TrustAdminSyncJobTemplate.class);
-
-  private Stopwatch mainStopWatch;
-
   protected static final int DEFAULT_PAGE_SIZE = 5000;
+  private static final Logger LOG = LoggerFactory.getLogger(TrustAdminSyncJobTemplate.class);
+  private Stopwatch mainStopWatch;
 
   @ManagedOperation(description = "Is the Post Trust sync just currently running")
   public boolean isCurrentlyRunning() {
@@ -48,12 +45,13 @@ public abstract class TrustAdminSyncJobTemplate<ENTITY> {
 
   protected abstract void deleteData();
 
-  protected abstract List<EntityData> collectData(int pageSize, long lastId, long lastSiteId, EntityManager entityManager);
+  protected abstract List<EntityData> collectData(int pageSize, long lastId, long lastSiteId,
+      EntityManager entityManager);
 
-  protected abstract int convertData(int skipped, Set<ENTITY> entitiesToSave, List<EntityData> entityData, EntityManager entityManager);
+  protected abstract int convertData(int skipped, Set<ENTITY> entitiesToSave,
+      List<EntityData> entityData, EntityManager entityManager);
 
   protected void run() {
-
 
     LOG.info("Sync [{}] started", getJobName());
     mainStopWatch = Stopwatch.createStarted();
@@ -76,7 +74,8 @@ public abstract class TrustAdminSyncJobTemplate<ENTITY> {
         transaction = entityManager.getTransaction();
         transaction.begin();
 
-        List<EntityData> collectedData = collectData(getPageSize(), lastEntityId, lastSiteId, entityManager);
+        List<EntityData> collectedData = collectData(getPageSize(), lastEntityId, lastSiteId,
+            entityManager);
         hasMoreResults = collectedData.size() > 0;
         LOG.info("Time taken to read chunk : [{}]", stopwatch.toString());
 
@@ -108,7 +107,8 @@ public abstract class TrustAdminSyncJobTemplate<ENTITY> {
       LOG.info("Time taken to save chunk : [{}]", stopwatch.toString());
     }
     stopwatch.reset().start();
-    LOG.info("Sync job [{}] finished. Total time taken {} for processing [{}] records", getJobName(),
+    LOG.info("Sync job [{}] finished. Total time taken {} for processing [{}] records",
+        getJobName(),
         mainStopWatch.stop().toString(), totalRecords);
     LOG.info("Skipped records {}", skipped);
     mainStopWatch = null;

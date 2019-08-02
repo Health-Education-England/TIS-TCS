@@ -1,10 +1,8 @@
 package com.transformuk.hee.tis.tcs.service.event;
 
-import com.transformuk.hee.tis.tcs.api.dto.GmcDetailsDTO;
+import java.util.Objects;
 import org.springframework.context.ApplicationEvent;
 import org.springframework.lang.NonNull;
-
-import java.util.Objects;
 
 public class GmcDetailsDeletedEvent extends ApplicationEvent {
 
@@ -21,8 +19,12 @@ public class GmcDetailsDeletedEvent extends ApplicationEvent {
 
   @Override
   public boolean equals(Object o) {
-    if (this == o) return true;
-    if (o == null || getClass() != o.getClass()) return false;
+    if (this == o) {
+      return true;
+    }
+    if (o == null || getClass() != o.getClass()) {
+      return false;
+    }
     GmcDetailsDeletedEvent that = (GmcDetailsDeletedEvent) o;
     return Objects.equals(gmcDetailsId, that.gmcDetailsId);
   }

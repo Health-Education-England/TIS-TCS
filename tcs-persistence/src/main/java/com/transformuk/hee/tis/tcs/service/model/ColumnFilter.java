@@ -1,10 +1,10 @@
 package com.transformuk.hee.tis.tcs.service.model;
 
-import java.util.List;
-import java.util.Objects;
-
 import static com.google.common.base.Preconditions.checkArgument;
 import static com.google.common.base.Preconditions.checkNotNull;
+
+import java.util.List;
+import java.util.Objects;
 
 /**
  * Class to hold column filter values

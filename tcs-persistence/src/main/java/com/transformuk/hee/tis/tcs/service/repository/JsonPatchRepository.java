@@ -1,9 +1,8 @@
 package com.transformuk.hee.tis.tcs.service.repository;
 
 import com.transformuk.hee.tis.tcs.service.model.JsonPatch;
-import org.springframework.data.jpa.repository.JpaRepository;
-
 import java.util.List;
+import org.springframework.data.jpa.repository.JpaRepository;
 
 /**
  * Spring Data JPA repository for the JsonPatch entity.
@@ -25,6 +24,7 @@ public interface JsonPatchRepository extends JpaRepository<JsonPatch, Long> {
    * @param tableDtoName
    * @return
    */
-  List<JsonPatch> findByTableDtoNameAndEnabledTrueAndPatchIdIsNullOrderByDateAddedAsc(String tableDtoName);
+  List<JsonPatch> findByTableDtoNameAndEnabledTrueAndPatchIdIsNullOrderByDateAddedAsc(
+      String tableDtoName);
 
 }

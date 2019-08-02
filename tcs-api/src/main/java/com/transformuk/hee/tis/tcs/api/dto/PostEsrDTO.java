@@ -1,7 +1,6 @@
 package com.transformuk.hee.tis.tcs.api.dto;
 
 import com.transformuk.hee.tis.tcs.api.enumeration.Status;
-
 import java.io.Serializable;
 
 /**
@@ -55,14 +54,24 @@ public class PostEsrDTO implements Serializable {
 
   @Override
   public boolean equals(Object o) {
-    if (this == o) return true;
-    if (o == null || getClass() != o.getClass()) return false;
+    if (this == o) {
+      return true;
+    }
+    if (o == null || getClass() != o.getClass()) {
+      return false;
+    }
 
     PostEsrDTO that = (PostEsrDTO) o;
 
-    if (!id.equals(that.id)) return false;
-    if (!nationalPostNumber.equals(that.nationalPostNumber)) return false;
-    if (status != that.status) return false;
+    if (!id.equals(that.id)) {
+      return false;
+    }
+    if (!nationalPostNumber.equals(that.nationalPostNumber)) {
+      return false;
+    }
+    if (status != that.status) {
+      return false;
+    }
     return owner != null ? owner.equals(that.owner) : that.owner == null;
   }
 

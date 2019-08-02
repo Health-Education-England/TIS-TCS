@@ -5,53 +5,54 @@ import com.transformuk.hee.tis.tcs.service.model.Comment;
 import com.transformuk.hee.tis.tcs.service.repository.CommentRepository;
 import com.transformuk.hee.tis.tcs.service.service.CommentService;
 import com.transformuk.hee.tis.tcs.service.service.mapper.PlacementCommentMapper;
+import java.util.Optional;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
-import java.util.Optional;
-
 @Service
 @Transactional
 public class CommentServiceImpl implements CommentService {
-	private final Logger log = LoggerFactory.getLogger(CommentServiceImpl.class);
 
-	@Autowired
-	private PlacementCommentMapper placementCommentMapper;
-	@Autowired
-	private CommentRepository commentRepository;
+  private final Logger log = LoggerFactory.getLogger(CommentServiceImpl.class);
 
-	@Override
-	public PlacementCommentDTO save(PlacementCommentDTO placementCommentDTO) {
-		log.debug("Request to save Placement comment : {}", placementCommentDTO);
+  @Autowired
+  private PlacementCommentMapper placementCommentMapper;
+  @Autowired
+  private CommentRepository commentRepository;
 
-		Comment comment;
-		if(placementCommentDTO.getId() != null) {
+  @Override
+  public PlacementCommentDTO save(PlacementCommentDTO placementCommentDTO) {
+    log.debug("Request to save Placement comment : {}", placementCommentDTO);
+
+    Comment comment;
+    if (placementCommentDTO.getId() != null) {
       comment = commentRepository.findById(placementCommentDTO.getId()).orElse(null);
-			placementCommentMapper.overwriteCommentEntityWithDTOComment(comment, placementCommentDTO);
-		} else {
-			comment = placementCommentMapper.toEntity(placementCommentDTO);
-		}
+      placementCommentMapper.overwriteCommentEntityWithDTOComment(comment, placementCommentDTO);
+    } else {
+      comment = placementCommentMapper.toEntity(placementCommentDTO);
+    }
 
-		commentRepository.saveAndFlush(comment);
-		return placementCommentMapper.toDto(comment);
-	}
+    commentRepository.saveAndFlush(comment);
+    return placementCommentMapper.toDto(comment);
+  }
 
-	@Override
-	public PlacementCommentDTO findByPlacementId(Long placementId) {
-		log.debug("Request to retrieve Placement by placementId : {}", placementId);
+  @Override
+  public PlacementCommentDTO findByPlacementId(Long placementId) {
+    log.debug("Request to retrieve Placement by placementId : {}", placementId);
 
-		Optional<Comment> optionalComment = commentRepository.findFirstByPlacementIdOrderByAmendedDateDesc(placementId);
-		return placementCommentMapper.toDto(optionalComment.orElse(new Comment()));
-	}
+    Optional<Comment> optionalComment = commentRepository
+        .findFirstByPlacementIdOrderByAmendedDateDesc(placementId);
+    return placementCommentMapper.toDto(optionalComment.orElse(new Comment()));
+  }
 
-	@Override
-	public PlacementCommentDTO findById(Long id) {
-		log.debug("Request to retrieve Placement by Id : {}", id);
+  @Override
+  public PlacementCommentDTO findById(Long id) {
+    log.debug("Request to retrieve Placement by Id : {}", id);
 
     Comment comment = commentRepository.findById(id).orElse(null);
-		return placementCommentMapper.toDto(comment);
-	}
+    return placementCommentMapper.toDto(comment);
+  }
 }

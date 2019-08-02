@@ -1,13 +1,12 @@
 package com.transformuk.hee.tis.tcs.service.api.util;
 
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-
 import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.io.ObjectInputStream;
 import java.io.ObjectOutputStream;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 public class ObjectCloner {
 
@@ -38,8 +37,12 @@ public class ObjectCloner {
       LOG.error("Error while deep copying the object", e);
       throw e;
     } finally {
-      if (oos != null) oos.close();
-      if (ois != null) ois.close();
+      if (oos != null) {
+        oos.close();
+      }
+      if (ois != null) {
+        ois.close();
+      }
     }
   }
 }

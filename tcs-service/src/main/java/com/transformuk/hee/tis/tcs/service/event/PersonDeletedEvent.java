@@ -1,10 +1,8 @@
 package com.transformuk.hee.tis.tcs.service.event;
 
-import com.transformuk.hee.tis.tcs.api.dto.PersonDTO;
+import java.util.Objects;
 import org.springframework.context.ApplicationEvent;
 import org.springframework.lang.NonNull;
-
-import java.util.Objects;
 
 public class PersonDeletedEvent extends ApplicationEvent {
 
@@ -21,8 +19,12 @@ public class PersonDeletedEvent extends ApplicationEvent {
 
   @Override
   public boolean equals(Object o) {
-    if (this == o) return true;
-    if (o == null || getClass() != o.getClass()) return false;
+    if (this == o) {
+      return true;
+    }
+    if (o == null || getClass() != o.getClass()) {
+      return false;
+    }
     PersonDeletedEvent that = (PersonDeletedEvent) o;
     return Objects.equals(personId, that.personId);
   }

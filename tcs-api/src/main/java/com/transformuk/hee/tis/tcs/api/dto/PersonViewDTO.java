@@ -3,13 +3,12 @@ package com.transformuk.hee.tis.tcs.api.dto;
 import com.transformuk.hee.tis.tcs.api.enumeration.PersonOwnerRule;
 import com.transformuk.hee.tis.tcs.api.enumeration.ProgrammeMembershipStatus;
 import com.transformuk.hee.tis.tcs.api.enumeration.Status;
-
 import java.io.Serializable;
 import java.util.Objects;
 
 /**
- * This DTO is used in the person list, it's meant as a read only entity aggregating what the user needs to see
- * in a person list.
+ * This DTO is used in the person list, it's meant as a read only entity aggregating what the user
+ * needs to see in a person list.
  */
 public class PersonViewDTO implements Serializable {
 
@@ -257,70 +256,76 @@ public class PersonViewDTO implements Serializable {
 
   @Override
   public boolean equals(Object o) {
-    if (this == o) return true;
-    if (o == null || getClass() != o.getClass()) return false;
+    if (this == o) {
+      return true;
+    }
+    if (o == null || getClass() != o.getClass()) {
+      return false;
+    }
 
     PersonViewDTO that = (PersonViewDTO) o;
 
     return Objects.equals(id, that.id) &&
-      Objects.equals(intrepidId, that.intrepidId) &&
-      Objects.equals(surname, that.surname) &&
-      Objects.equals(forenames, that.forenames) &&
-      Objects.equals(gmcNumber, that.gmcNumber) &&
-      Objects.equals(gdcNumber, that.gdcNumber) &&
-      Objects.equals(publicHealthNumber, that.publicHealthNumber) &&
-      Objects.equals(programmeId, that.programmeId) &&
-      Objects.equals(programmeMembershipStatus, that.programmeMembershipStatus) &&
-      Objects.equals(programmeName, that.programmeName) &&
-      Objects.equals(programmeNumber, that.programmeNumber) &&
-      Objects.equals(trainingNumber, that.trainingNumber) &&
-      Objects.equals(gradeAbbreviation, that.gradeAbbreviation) &&
-      Objects.equals(gradeName, that.gradeName) &&
-      Objects.equals(siteCode, that.siteCode) &&
-      Objects.equals(siteName, that.siteName) &&
-      Objects.equals(placementType, that.placementType) &&
-      Objects.equals(specialty, that.specialty) &&
-      Objects.equals(role, that.role) &&
-      Objects.equals(status, that.status) &&
-      Objects.equals(currentOwner, that.currentOwner) &&
-      Objects.equals(currentOwnerRule, that.currentOwnerRule);
+        Objects.equals(intrepidId, that.intrepidId) &&
+        Objects.equals(surname, that.surname) &&
+        Objects.equals(forenames, that.forenames) &&
+        Objects.equals(gmcNumber, that.gmcNumber) &&
+        Objects.equals(gdcNumber, that.gdcNumber) &&
+        Objects.equals(publicHealthNumber, that.publicHealthNumber) &&
+        Objects.equals(programmeId, that.programmeId) &&
+        Objects.equals(programmeMembershipStatus, that.programmeMembershipStatus) &&
+        Objects.equals(programmeName, that.programmeName) &&
+        Objects.equals(programmeNumber, that.programmeNumber) &&
+        Objects.equals(trainingNumber, that.trainingNumber) &&
+        Objects.equals(gradeAbbreviation, that.gradeAbbreviation) &&
+        Objects.equals(gradeName, that.gradeName) &&
+        Objects.equals(siteCode, that.siteCode) &&
+        Objects.equals(siteName, that.siteName) &&
+        Objects.equals(placementType, that.placementType) &&
+        Objects.equals(specialty, that.specialty) &&
+        Objects.equals(role, that.role) &&
+        Objects.equals(status, that.status) &&
+        Objects.equals(currentOwner, that.currentOwner) &&
+        Objects.equals(currentOwnerRule, that.currentOwnerRule);
   }
 
   @Override
   public int hashCode() {
-    return Objects.hash(id, intrepidId, surname, forenames, gmcNumber, gdcNumber, publicHealthNumber,
-      programmeId, programmeMembershipStatus, programmeName, programmeNumber, trainingNumber,
-      gradeAbbreviation, gradeName, siteCode, siteName, placementType, specialty, role, status,
-      currentOwner, currentOwnerRule);
+    return Objects
+        .hash(id, intrepidId, surname, forenames, gmcNumber, gdcNumber, publicHealthNumber,
+            programmeId, programmeMembershipStatus, programmeName, programmeNumber, trainingNumber,
+            gradeAbbreviation, gradeName, siteCode, siteName, placementType, specialty, role,
+            status,
+            currentOwner, currentOwnerRule);
   }
 
   @Override
   public String toString() {
     return "PersonViewDTO{" +
-      "id=" + id +
-      ", intrepidId='" + intrepidId + '\'' +
-      ", surname='" + surname + '\'' +
-      ", forenames='" + forenames + '\'' +
-      ", gmcNumber='" + gmcNumber + '\'' +
-      ", gdcNumber='" + gdcNumber + '\'' +
-      ", publicHealthNumber='" + publicHealthNumber + '\'' +
-      ", programmeId=" + programmeId +
-      ", programmeMembershipStatus='" + programmeMembershipStatus + '\'' +
-      ", programmeName='" + programmeName + '\'' +
-      ", programmeNumber='" + programmeNumber + '\'' +
-      ", trainingNumber='" + trainingNumber + '\'' +
-      ", gradeId=" + gradeId +
-      ", gradeAbbreviation='" + gradeAbbreviation + '\'' +
-      ", gradeName='" + gradeName + '\'' +
-      ", siteId=" + siteId +
-      ", siteCode='" + siteCode + '\'' +
-      ", siteName='" + siteName + '\'' +
-      ", placementType='" + placementType + '\'' +
-      ", specialty='" + specialty + '\'' +
-      ", role='" + role + '\'' +
-      ", status=" + status +
-      ", currentOwner='" + currentOwner + '\'' +
-      ", currentOwnerRule=" + currentOwnerRule +
-      '}';
+        "id=" + id +
+        ", intrepidId='" + intrepidId + '\'' +
+        ", surname='" + surname + '\'' +
+        ", forenames='" + forenames + '\'' +
+        ", gmcNumber='" + gmcNumber + '\'' +
+        ", gdcNumber='" + gdcNumber + '\'' +
+        ", publicHealthNumber='" + publicHealthNumber + '\'' +
+        ", programmeId=" + programmeId +
+        ", programmeMembershipStatus='" + programmeMembershipStatus + '\'' +
+        ", programmeName='" + programmeName + '\'' +
+        ", programmeNumber='" + programmeNumber + '\'' +
+        ", trainingNumber='" + trainingNumber + '\'' +
+        ", gradeId=" + gradeId +
+        ", gradeAbbreviation='" + gradeAbbreviation + '\'' +
+        ", gradeName='" + gradeName + '\'' +
+        ", siteId=" + siteId +
+        ", siteCode='" + siteCode + '\'' +
+        ", siteName='" + siteName + '\'' +
+        ", placementType='" + placementType + '\'' +
+        ", specialty='" + specialty + '\'' +
+        ", role='" + role + '\'' +
+        ", status=" + status +
+        ", currentOwner='" + currentOwner + '\'' +
+        ", currentOwnerRule=" + currentOwnerRule +
+        '}';
   }
 }

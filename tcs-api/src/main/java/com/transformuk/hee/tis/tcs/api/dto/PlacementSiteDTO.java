@@ -1,7 +1,6 @@
 package com.transformuk.hee.tis.tcs.api.dto;
 
 import com.transformuk.hee.tis.tcs.api.enumeration.PlacementSiteType;
-
 import java.io.Serializable;
 import java.util.Objects;
 
@@ -12,7 +11,8 @@ public class PlacementSiteDTO implements Serializable {
   private Long siteId;
   private PlacementSiteType placementSiteType;
 
-  public PlacementSiteDTO() {}
+  public PlacementSiteDTO() {
+  }
 
   public PlacementSiteDTO(Long placementId, Long siteId, PlacementSiteType placementSiteType) {
     this.placementId = placementId;
@@ -54,8 +54,12 @@ public class PlacementSiteDTO implements Serializable {
 
   @Override
   public boolean equals(Object o) {
-    if (this == o) return true;
-    if (!(o instanceof PlacementSiteDTO)) return false;
+    if (this == o) {
+      return true;
+    }
+    if (!(o instanceof PlacementSiteDTO)) {
+      return false;
+    }
     PlacementSiteDTO that = (PlacementSiteDTO) o;
     return Objects.equals(getPlacementId(), that.getPlacementId()) &&
         Objects.equals(getSiteId(), that.getSiteId()) &&

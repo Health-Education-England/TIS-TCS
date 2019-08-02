@@ -10,22 +10,22 @@ import com.transformuk.hee.tis.tcs.service.model.PlacementSpecialty;
 import com.transformuk.hee.tis.tcs.service.repository.PersonRepository;
 import com.transformuk.hee.tis.tcs.service.repository.PostRepository;
 import com.transformuk.hee.tis.tcs.service.repository.SpecialtyRepository;
-import org.apache.commons.collections4.CollectionUtils;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.stereotype.Component;
-
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
 import java.util.stream.Collectors;
+import org.apache.commons.collections4.CollectionUtils;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Component;
 
 /**
  * Mapper for the entity Placement and its DTO PlacementDTO.
  */
 @Component
 public class PlacementMapper {
+
   @Autowired
   private PersonRepository personRepository;
   @Autowired
@@ -37,12 +37,14 @@ public class PlacementMapper {
   @Autowired
   private PersonLiteMapper personLiteMapper;
 
-  public PlacementDTO placementToPlacementDTO(final Placement placement, Map<Long, List<PlacementSupervisorDTO>> placementSupervisorMap) {
+  public PlacementDTO placementToPlacementDTO(final Placement placement,
+      Map<Long, List<PlacementSupervisorDTO>> placementSupervisorMap) {
     PlacementDTO placementDTO = null;
     if (placement != null) {
       placementDTO = new PlacementDTO();
       placementDTO.setId(placement.getId());
-      placementDTO.setTraineeId(placement.getTrainee() != null ? placement.getTrainee().getId() : null);
+      placementDTO
+          .setTraineeId(placement.getTrainee() != null ? placement.getTrainee().getId() : null);
       placementDTO.setPostId(placement.getPost() != null ? placement.getPost().getId() : null);
       placementDTO.setGradeId(placement.getGradeId());
       placementDTO.setGradeAbbreviation(placement.getGradeAbbreviation());
@@ -67,12 +69,16 @@ public class PlacementMapper {
     return placementDTO;
   }
 
-  public List<PlacementDTO> placementsToPlacementDTOs(final List<Placement> placements, Map<Long, List<PlacementSupervisorDTO>> placementSupervisorMap) {
-    return placements.stream().map(p -> placementToPlacementDTO(p, placementSupervisorMap)).collect(Collectors.toList());
+  public List<PlacementDTO> placementsToPlacementDTOs(final List<Placement> placements,
+      Map<Long, List<PlacementSupervisorDTO>> placementSupervisorMap) {
+    return placements.stream().map(p -> placementToPlacementDTO(p, placementSupervisorMap))
+        .collect(Collectors.toList());
   }
 
   public Placement placementDTOToPlacement(final PlacementDTO placementDTO) {
-    if (placementDTO == null) return null;
+    if (placementDTO == null) {
+      return null;
+    }
 
     final Placement placement = new Placement();
     placement.setId(placementDTO.getId());
@@ -96,9 +102,11 @@ public class PlacementMapper {
       final Set<PlacementSpecialty> specialties = Sets.newHashSet();
       for (final PlacementSpecialtyDTO placementSpecialtyDTO : placementDTO.getSpecialties()) {
         final PlacementSpecialty placementSpecialty = new PlacementSpecialty();
-        placementSpecialty.setPlacementSpecialtyType(placementSpecialtyDTO.getPlacementSpecialtyType());
+        placementSpecialty
+            .setPlacementSpecialtyType(placementSpecialtyDTO.getPlacementSpecialtyType());
         placementSpecialty.setPlacement(placement);
-        placementSpecialty.setSpecialty(specialtyRepository.findById(placementSpecialtyDTO.getSpecialtyId()).orElse(null));
+        placementSpecialty.setSpecialty(
+            specialtyRepository.findById(placementSpecialtyDTO.getSpecialtyId()).orElse(null));
         specialties.add(placementSpecialty);
       }
       placement.setSpecialties(specialties);

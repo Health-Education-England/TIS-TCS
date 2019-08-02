@@ -5,6 +5,10 @@ import com.transformuk.hee.tis.tcs.api.enumeration.Status;
 import com.transformuk.hee.tis.tcs.service.TestConfig;
 import com.transformuk.hee.tis.tcs.service.model.Post;
 import com.transformuk.hee.tis.tcs.service.model.PostTrust;
+import java.util.List;
+import java.util.Optional;
+import java.util.Set;
+import javax.persistence.EntityManager;
 import org.apache.commons.lang3.StringUtils;
 import org.junit.After;
 import org.junit.Assert;
@@ -16,11 +20,6 @@ import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.test.context.jdbc.Sql;
 import org.springframework.test.context.junit4.SpringRunner;
 import org.springframework.transaction.annotation.Transactional;
-
-import javax.persistence.EntityManager;
-import java.util.List;
-import java.util.Optional;
-import java.util.Set;
 
 @RunWith(SpringRunner.class)
 @SpringBootTest(classes = TestConfig.class)
@@ -38,7 +37,7 @@ public class PostRepositoryTest {
 
   @Before
   @Transactional
-  public void setup(){
+  public void setup() {
     associatedTrust1 = new PostTrust();
     associatedTrust1.setTrustId(1111L);
     associatedTrust2 = new PostTrust();
@@ -55,7 +54,7 @@ public class PostRepositoryTest {
 
   @After
   @Transactional
-  public void tearDown(){
+  public void tearDown() {
     entityManager.remove(postWithTrusts);
     entityManager.remove(associatedTrust1);
     entityManager.remove(associatedTrust2);
@@ -64,7 +63,7 @@ public class PostRepositoryTest {
 
   @Test
   @Transactional
-  public void findPersonByIdShouldAlsoRetrieveAssociatedTrusts(){
+  public void findPersonByIdShouldAlsoRetrieveAssociatedTrusts() {
     Optional<Post> result = postRepository.findPostWithTrustsById(postWithTrusts.getId());
 
     Assert.assertTrue(result.isPresent());
@@ -77,23 +76,29 @@ public class PostRepositoryTest {
 
   @Test
   @Sql(scripts = {"/scripts/posts.sql", "/scripts/programme.sql", "/scripts/programmePost.sql"})
-  @Sql(scripts = {"/scripts/deleteProgrammePost.sql", "/scripts/deletePosts.sql", "/scripts/deleteProgramme.sql"}, executionPhase = Sql.ExecutionPhase.AFTER_TEST_METHOD)
+  @Sql(scripts = {"/scripts/deleteProgrammePost.sql", "/scripts/deletePosts.sql",
+      "/scripts/deleteProgramme.sql"}, executionPhase = Sql.ExecutionPhase.AFTER_TEST_METHOD)
   public void findPostsForProgrammeIdShouldReturnLinkedPostThatAreActiveOnly() {
 
     long programmeIdWithInactivePosts = 1L;
-    List<Post> result = postRepository.findPostsForProgrammeIdAndNpnLike(programmeIdWithInactivePosts, StringUtils.EMPTY, Status.CURRENT);
+    List<Post> result = postRepository
+        .findPostsForProgrammeIdAndNpnLike(programmeIdWithInactivePosts, StringUtils.EMPTY,
+            Status.CURRENT);
 
     Assert.assertTrue(result.isEmpty());
   }
 
   @Test
   @Sql(scripts = {"/scripts/posts.sql", "/scripts/programme.sql", "/scripts/programmePost.sql"})
-  @Sql(scripts = {"/scripts/deleteProgrammePost.sql", "/scripts/deletePosts.sql", "/scripts/deleteProgramme.sql"}, executionPhase = Sql.ExecutionPhase.AFTER_TEST_METHOD)
+  @Sql(scripts = {"/scripts/deleteProgrammePost.sql", "/scripts/deletePosts.sql",
+      "/scripts/deleteProgramme.sql"}, executionPhase = Sql.ExecutionPhase.AFTER_TEST_METHOD)
   public void findPostsForProgrammeIdShouldReturnLinkedPost() {
 
     //there are 2 posts linked to programme 2, one is active, the other is inactive
     long programmeIdWithInactivePosts = 2L;
-    List<Post> result = postRepository.findPostsForProgrammeIdAndNpnLike(programmeIdWithInactivePosts, StringUtils.EMPTY, Status.CURRENT);
+    List<Post> result = postRepository
+        .findPostsForProgrammeIdAndNpnLike(programmeIdWithInactivePosts, StringUtils.EMPTY,
+            Status.CURRENT);
 
     Assert.assertEquals(1, result.size());
     Assert.assertEquals(new Long(2L), result.get(0).getId());
@@ -104,9 +109,10 @@ public class PostRepositoryTest {
 
   @Test
   @Sql(scripts = {"/scripts/posts.sql", "/scripts/placements.sql"})
-  @Sql(scripts = {"/scripts/deletePlacements.sql", "/scripts/deletePosts.sql"}, executionPhase = Sql.ExecutionPhase.AFTER_TEST_METHOD)
+  @Sql(scripts = {"/scripts/deletePlacements.sql",
+      "/scripts/deletePosts.sql"}, executionPhase = Sql.ExecutionPhase.AFTER_TEST_METHOD)
 
-  public void findPostByPlacementHistoryIdShouldReturnPostLinkedToPlacement(){
+  public void findPostByPlacementHistoryIdShouldReturnPostLinkedToPlacement() {
     long placementId = 1L;
     Long expectedPostId = 1L;
 
@@ -118,8 +124,9 @@ public class PostRepositoryTest {
 
   @Test
   @Sql(scripts = {"/scripts/posts.sql", "/scripts/placements.sql"})
-  @Sql(scripts = {"/scripts/deletePlacements.sql", "/scripts/deletePosts.sql"}, executionPhase = Sql.ExecutionPhase.AFTER_TEST_METHOD)
-  public void findPostByPlacementHistoryIdShouldReturnEmptyOptionalIfNotPostExistsForPlacement(){
+  @Sql(scripts = {"/scripts/deletePlacements.sql",
+      "/scripts/deletePosts.sql"}, executionPhase = Sql.ExecutionPhase.AFTER_TEST_METHOD)
+  public void findPostByPlacementHistoryIdShouldReturnEmptyOptionalIfNotPostExistsForPlacement() {
     long placementId = 9999L;
 
     Optional<Post> result = postRepository.findPostByPlacementHistoryId(placementId);
@@ -139,19 +146,30 @@ public class PostRepositoryTest {
     Long traineeId1 = 4L, traineeId2 = 40L;
     String traineeForename1 = "John", traineeForename2 = "Joanne";
 
-    Set<Post> results = postRepository.findPostsByProgrammeIdAndSpecialtyId(programmeId, specialtyId);
+    Set<Post> results = postRepository
+        .findPostsByProgrammeIdAndSpecialtyId(programmeId, specialtyId);
 
     Assert.assertNotNull(results);
     Assert.assertEquals(1, results.size());
 
     for (Post post : results) {
-        Assert.assertTrue(postId1.equals(post.getId()));
-        Assert.assertEquals(specialtyId, post.getSpecialties().iterator().next().getSpecialty().getId());
-        Assert.assertEquals(programmeId, post.getProgrammes().iterator().next().getId());
-        Assert.assertTrue(placementId1.equals(post.getPlacementHistory().iterator().next().getId()) || placementId2.equals(post.getPlacementHistory().iterator().next().getId()));
-        Assert.assertTrue(traineeId1.equals(post.getPlacementHistory().iterator().next().getTrainee().getId()) || traineeId2.equals(post.getPlacementHistory().iterator().next().getTrainee().getId()));
-        Assert.assertTrue(traineeForename1.equals(post.getPlacementHistory().iterator().next().getTrainee().getContactDetails().getForenames())
-          || traineeForename2.equals(post.getPlacementHistory().iterator().next().getTrainee().getContactDetails().getForenames()));
+      Assert.assertTrue(postId1.equals(post.getId()));
+      Assert.assertEquals(specialtyId,
+          post.getSpecialties().iterator().next().getSpecialty().getId());
+      Assert.assertEquals(programmeId, post.getProgrammes().iterator().next().getId());
+      Assert.assertTrue(
+          placementId1.equals(post.getPlacementHistory().iterator().next().getId()) || placementId2
+              .equals(post.getPlacementHistory().iterator().next().getId()));
+      Assert.assertTrue(
+          traineeId1.equals(post.getPlacementHistory().iterator().next().getTrainee().getId())
+              || traineeId2
+              .equals(post.getPlacementHistory().iterator().next().getTrainee().getId()));
+      Assert.assertTrue(traineeForename1.equals(
+          post.getPlacementHistory().iterator().next().getTrainee().getContactDetails()
+              .getForenames())
+          || traineeForename2.equals(
+          post.getPlacementHistory().iterator().next().getTrainee().getContactDetails()
+              .getForenames()));
 
     }
 

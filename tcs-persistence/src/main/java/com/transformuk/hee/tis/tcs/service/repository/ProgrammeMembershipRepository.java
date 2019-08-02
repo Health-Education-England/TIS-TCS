@@ -1,11 +1,10 @@
 package com.transformuk.hee.tis.tcs.service.repository;
 
 import com.transformuk.hee.tis.tcs.service.model.ProgrammeMembership;
+import java.util.List;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
-
-import java.util.List;
 
 /**
  * Spring Data JPA repository for the ProgrammeMembership entity.
@@ -18,7 +17,7 @@ public interface ProgrammeMembershipRepository extends JpaRepository<ProgrammeMe
       "WHERE personId = :traineeId " +
       "AND pm.programme.id = :programmeId")
   List<ProgrammeMembership> findByTraineeIdAndProgrammeId(@Param("traineeId") Long traineeId,
-                                                              @Param("programmeId") Long programmeId);
+      @Param("programmeId") Long programmeId);
 
   @Query(value = "SELECT pm " +
       "FROM ProgrammeMembership pm " +
