@@ -125,6 +125,7 @@ public class ProgrammeMembershipMapper {
     } else {
       result.setPerson(personToPersonDTO(programmeMembership.getPerson()));
     }
+    result.setCertificateType(programmeMembership.getCertificateType());
     return result;
   }
 
@@ -169,6 +170,7 @@ public class ProgrammeMembershipMapper {
     result.setProgrammeStartDate(programmeMembershipDTO.getProgrammeStartDate());
     result.setProgrammeEndDate(programmeMembershipDTO.getProgrammeEndDate());
     result.setLeavingDestination(programmeMembershipDTO.getLeavingDestination());
+    result.setCertificateType(programmeMembershipDTO.getCertificateType());
     if (programmeMembershipDTO.getProgrammeId() != null) {
       Programme programme = new Programme();
       programme.setId(programmeMembershipDTO.getProgrammeId());
