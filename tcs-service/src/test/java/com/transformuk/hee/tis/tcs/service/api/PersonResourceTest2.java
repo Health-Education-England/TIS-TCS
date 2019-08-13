@@ -16,6 +16,7 @@ import com.transformuk.hee.tis.tcs.TestUtils;
 import com.transformuk.hee.tis.tcs.api.dto.PersonDTO;
 import com.transformuk.hee.tis.tcs.api.dto.PersonV2DTO;
 import com.transformuk.hee.tis.tcs.api.dto.PersonViewDTO;
+import com.transformuk.hee.tis.tcs.api.dto.PersonalDetailsDTO;
 import com.transformuk.hee.tis.tcs.api.enumeration.Status;
 import com.transformuk.hee.tis.tcs.service.Application;
 import com.transformuk.hee.tis.tcs.service.api.decorator.PersonViewDecorator;
@@ -263,6 +264,25 @@ public class PersonResourceTest2 {
         .contentType(TestUtil.APPLICATION_JSON_UTF8))
         .andExpect(status().isOk())
         .andExpect(jsonPath("$.qualifications").doesNotExist());
+
+    verify(personServiceMock).findPersonV2WithProgrammeMembershipsSorted(personId);
+  }
+
+  @Test
+  public void getPersonV2ShouldReturnPersonWithNoNationalInsuranceNumber() throws Exception {
+    long personId = 1L;
+    PersonV2DTO foundPerson = new PersonV2DTO();
+    PersonalDetailsDTO personalDetailsDto = new PersonalDetailsDTO();
+    personalDetailsDto.setNationalInsuranceNumber("niNumber");
+    foundPerson.setPersonalDetails(personalDetailsDto);
+
+    when(personServiceMock.findPersonV2WithProgrammeMembershipsSorted(personId))
+        .thenReturn(foundPerson);
+
+    mockMvc.perform(get("/api/people/v2/{id}", personId)
+        .contentType(TestUtil.APPLICATION_JSON_UTF8))
+        .andExpect(status().isOk())
+        .andExpect(jsonPath("$.personalDetails.nationalInsuranceNumber").isEmpty());
 
     verify(personServiceMock).findPersonV2WithProgrammeMembershipsSorted(personId);
   }
