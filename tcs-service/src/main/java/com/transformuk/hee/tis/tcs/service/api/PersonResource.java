@@ -8,6 +8,7 @@ import com.transformuk.hee.tis.tcs.api.dto.PersonDTO;
 import com.transformuk.hee.tis.tcs.api.dto.PersonLiteDTO;
 import com.transformuk.hee.tis.tcs.api.dto.PersonV2DTO;
 import com.transformuk.hee.tis.tcs.api.dto.PersonViewDTO;
+import com.transformuk.hee.tis.tcs.api.dto.PersonalDetailsDTO;
 import com.transformuk.hee.tis.tcs.api.dto.PlacementSummaryDTO;
 import com.transformuk.hee.tis.tcs.api.dto.PlacementViewDTO;
 import com.transformuk.hee.tis.tcs.api.dto.validation.Create;
@@ -351,6 +352,13 @@ public class PersonResource {
     personService.canLoggedInUserViewOrAmend(id);
 
     PersonV2DTO personDTO = personService.findPersonV2WithProgrammeMembershipsSorted(id);
+
+    // Remove the national insurance number form personal details, as it is not needed in the UI.
+    PersonalDetailsDTO personalDetailsDto = personDTO.getPersonalDetails();
+    if (personalDetailsDto != null) {
+        personalDetailsDto.setNationalInsuranceNumber(null);
+    }
+
     return ResponseUtil.wrapOrNotFound(Optional.ofNullable(personDTO));
   }
 
