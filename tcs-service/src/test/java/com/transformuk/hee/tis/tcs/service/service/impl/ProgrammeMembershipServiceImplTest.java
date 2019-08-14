@@ -374,4 +374,70 @@ public class ProgrammeMembershipServiceImplTest {
     ProgrammeMembershipCurriculaDTO programmeMembershipCurriculaDTO = any.get();
     Assert.assertEquals(2, programmeMembershipCurriculaDTO.getCurriculumMemberships().size());
   }
+  @Test
+  public void testProgrammeMembershipWithCertificateType(){
+    ProgrammeMembershipCurriculaDTO pmc1 = new ProgrammeMembershipCurriculaDTO(),
+        pmc2 = new ProgrammeMembershipCurriculaDTO(),
+          pmc3 = new ProgrammeMembershipCurriculaDTO();
+    CurriculumMembershipDTO cm1 = new CurriculumMembershipDTO(),
+        cm2 = new CurriculumMembershipDTO(),
+          cm3 = new CurriculumMembershipDTO();
+
+    LocalDate pmc1DateFrom = LocalDate.of(2019, 12, 31);
+    LocalDate pmc1DateTo = LocalDate.of(2020, 12, 31);
+    LocalDate pmc2DateFrom = LocalDate.of(2011, 12, 31);
+    LocalDate pmc2DateTo = LocalDate.of(2015, 12, 31);
+    LocalDate pmc3DateFrom = LocalDate.of(2017, 12, 31);
+    LocalDate pmc3DateTo = LocalDate.of(2019, 12, 31);
+
+    cm1.setId(1L);
+    cm1.setCurriculumStartDate(pmc1DateFrom);
+    cm1.setCurriculumEndDate(pmc1DateTo);
+
+    cm2.setId(2L);
+    cm2.setCurriculumStartDate(pmc2DateFrom);
+    cm2.setCurriculumEndDate(pmc2DateTo);
+
+    cm3.setId(3L);
+    cm3.setCurriculumStartDate(pmc3DateFrom);
+    cm3.setCurriculumEndDate(pmc3DateTo);
+
+    pmc1.setId(1L);
+    pmc1.setProgrammeStartDate(pmc1DateFrom);
+    pmc1.setProgrammeEndDate(pmc1DateTo);
+    pmc1.setProgrammeMembershipType(ProgrammeMembershipType.FTSTA);
+    pmc1.setProgrammeId(1L);
+    pmc1.setCurriculumMemberships(Lists.newArrayList(cm1));
+    pmc1.setCertificateType("CCT");
+
+    pmc2.setId(2L);
+    pmc2.setProgrammeStartDate(pmc2DateFrom);
+    pmc2.setProgrammeEndDate(pmc2DateTo);
+    pmc2.setProgrammeMembershipType(ProgrammeMembershipType.SUBSTANTIVE);
+    pmc2.setProgrammeId(2L);
+    pmc2.setCurriculumMemberships(Lists.newArrayList(cm2));
+    pmc2.setCertificateType("CESR");
+
+    pmc3.setId(3L);
+    pmc3.setProgrammeStartDate(pmc3DateFrom);
+    pmc3.setProgrammeEndDate(pmc3DateTo);
+    pmc3.setProgrammeMembershipType(ProgrammeMembershipType.ACADEMIC);
+    pmc3.setProgrammeId(3L);
+    pmc3.setCurriculumMemberships(Lists.newArrayList(cm3));
+    pmc3.setCertificateType("CESR");
+
+    List<Object> programmeMemberships = Lists.newArrayList(pmc1, pmc2, pmc3);
+    doReturn(programmeMemberships).when(testObj).findProgrammeMembershipsForTrainee(TRAINEE_ID);
+    List<ProgrammeMembershipCurriculaDTO> result = testObj
+        .findProgrammeMembershipsForTraineeRolledUp(TRAINEE_ID);
+
+    long cctCount = result.stream().filter(pm -> pm.getCertificateType().equals("CCT")).count();
+    Assert.assertEquals(1L, cctCount);
+
+    long cesrCount = result.stream().filter(pm -> pm.getCertificateType().equals("CESR")).count();
+    Assert.assertEquals(2L, cesrCount);
+
+    long nullCount = result.stream().filter(pm -> pm.getCertificateType().equals(null)).count();
+    Assert.assertEquals(0L, nullCount);
+  }
 }
