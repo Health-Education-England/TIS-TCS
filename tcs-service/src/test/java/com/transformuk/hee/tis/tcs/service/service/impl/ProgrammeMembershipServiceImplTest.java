@@ -408,7 +408,7 @@ public class ProgrammeMembershipServiceImplTest {
     pmc1.setProgrammeMembershipType(ProgrammeMembershipType.FTSTA);
     pmc1.setProgrammeId(1L);
     pmc1.setCurriculumMemberships(Lists.newArrayList(cm1));
-    pmc1.setCertificateType("CCT");
+    pmc1.setTrainingPathway("CCT");
 
     pmc2.setId(2L);
     pmc2.setProgrammeStartDate(pmc2DateFrom);
@@ -416,7 +416,7 @@ public class ProgrammeMembershipServiceImplTest {
     pmc2.setProgrammeMembershipType(ProgrammeMembershipType.SUBSTANTIVE);
     pmc2.setProgrammeId(2L);
     pmc2.setCurriculumMemberships(Lists.newArrayList(cm2));
-    pmc2.setCertificateType("CESR");
+    pmc2.setTrainingPathway("CESR");
 
     pmc3.setId(3L);
     pmc3.setProgrammeStartDate(pmc3DateFrom);
@@ -424,20 +424,20 @@ public class ProgrammeMembershipServiceImplTest {
     pmc3.setProgrammeMembershipType(ProgrammeMembershipType.ACADEMIC);
     pmc3.setProgrammeId(3L);
     pmc3.setCurriculumMemberships(Lists.newArrayList(cm3));
-    pmc3.setCertificateType("CESR");
+    pmc3.setTrainingPathway("CESR");
 
     List<Object> programmeMemberships = Lists.newArrayList(pmc1, pmc2, pmc3);
     doReturn(programmeMemberships).when(testObj).findProgrammeMembershipsForTrainee(TRAINEE_ID);
     List<ProgrammeMembershipCurriculaDTO> result = testObj
         .findProgrammeMembershipsForTraineeRolledUp(TRAINEE_ID);
 
-    long cctCount = result.stream().filter(pm -> pm.getCertificateType().equals("CCT")).count();
+    long cctCount = result.stream().filter(pm -> pm.getTrainingPathway().equals("CCT")).count();
     Assert.assertEquals(1L, cctCount);
 
-    long cesrCount = result.stream().filter(pm -> pm.getCertificateType().equals("CESR")).count();
+    long cesrCount = result.stream().filter(pm -> pm.getTrainingPathway().equals("CESR")).count();
     Assert.assertEquals(2L, cesrCount);
 
-    long nullCount = result.stream().filter(pm -> pm.getCertificateType().equals(null)).count();
+    long nullCount = result.stream().filter(pm -> pm.getTrainingPathway().equals(null)).count();
     Assert.assertEquals(0L, nullCount);
   }
 }
