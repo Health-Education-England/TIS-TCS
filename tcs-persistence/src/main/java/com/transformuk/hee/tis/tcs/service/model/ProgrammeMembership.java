@@ -67,7 +67,7 @@ public class ProgrammeMembership implements Serializable {
   @Version
   private LocalDateTime amendedDate;
 
-  private String certificateType;
+  private String trainingPathway;
 
   public Long getId() {
     return id;
@@ -248,12 +248,12 @@ public class ProgrammeMembership implements Serializable {
     this.amendedDate = amendedDate;
   }
 
-  public String getCertificateType() {
-    return certificateType;
+  public String getTrainingPathway() {
+    return trainingPathway;
   }
 
-  public void setCertificateType(String certificateType) {
-    this.certificateType = certificateType;
+  public void setTrainingPathway(String trainingPathway) {
+    this.trainingPathway = trainingPathway;
   }
 
   @Override
@@ -290,7 +290,7 @@ public class ProgrammeMembership implements Serializable {
         ", curriculumCompletionDate='" + curriculumCompletionDate + "'" +
         ", programmeEndDate='" + programmeEndDate + "'" +
         ", leavingDestination='" + leavingDestination + "'" +
-        ", certificateType='" + certificateType + "'" +
+        ", trainingPathway='" + trainingPathway + "'" +
         ", amendedDate='" + getAmendedDate() + "'" +
         '}';
   }

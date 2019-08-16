@@ -125,7 +125,7 @@ public class ProgrammeMembershipMapper {
     } else {
       result.setPerson(personToPersonDTO(programmeMembership.getPerson()));
     }
-    result.setTrainingPathway(programmeMembership.getCertificateType());
+    result.setTrainingPathway(programmeMembership.getTrainingPathway());
     return result;
   }
 
@@ -170,7 +170,7 @@ public class ProgrammeMembershipMapper {
     result.setProgrammeStartDate(programmeMembershipDTO.getProgrammeStartDate());
     result.setProgrammeEndDate(programmeMembershipDTO.getProgrammeEndDate());
     result.setLeavingDestination(programmeMembershipDTO.getLeavingDestination());
-    result.setCertificateType(programmeMembershipDTO.getTrainingPathway());
+    result.setTrainingPathway(programmeMembershipDTO.getTrainingPathway());
     if (programmeMembershipDTO.getProgrammeId() != null) {
       Programme programme = new Programme();
       programme.setId(programmeMembershipDTO.getProgrammeId());

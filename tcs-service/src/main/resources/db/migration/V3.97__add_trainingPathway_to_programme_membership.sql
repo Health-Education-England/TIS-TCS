@@ -1,0 +1,2 @@
+ALTER TABLE ProgrammeMembership
+	ADD COLUMN trainingPathway VARCHAR(255) NULL DEFAULT NULL;

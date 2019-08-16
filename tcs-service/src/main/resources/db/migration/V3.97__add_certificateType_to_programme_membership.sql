@@ -1,2 +1,0 @@
-ALTER TABLE ProgrammeMembership
-	ADD COLUMN certificateType VARCHAR(255) NULL DEFAULT NULL;
