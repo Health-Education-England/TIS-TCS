@@ -39,6 +39,8 @@ public class ProgrammeMembershipDTO implements Serializable {
 
   private String programmeNumber;
 
+  private String trainingPathway;
+
   private TrainingNumberDTO trainingNumber;
 
   @Valid
@@ -118,6 +120,14 @@ public class ProgrammeMembershipDTO implements Serializable {
     this.programmeNumber = programmeNumber;
   }
 
+  public String getTrainingPathway() {
+    return trainingPathway;
+  }
+
+  public void setTrainingPathway(String trainingPathway) {
+    this.trainingPathway = trainingPathway;
+  }
+
   public TrainingNumberDTO getTrainingNumber() {
     return trainingNumber;
   }
@@ -177,6 +187,7 @@ public class ProgrammeMembershipDTO implements Serializable {
         ", programmeStartDate='" + programmeStartDate + "'" +
         ", programmeEndDate='" + programmeEndDate + "'" +
         ", leavingDestination='" + leavingDestination + "'" +
+        ", trainingPathway='" + trainingPathway + "'" +
         ", person='" + person + "'" +
         '}';
   }

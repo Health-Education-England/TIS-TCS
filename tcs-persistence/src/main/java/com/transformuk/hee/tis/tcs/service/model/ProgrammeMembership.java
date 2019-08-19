@@ -67,6 +67,7 @@ public class ProgrammeMembership implements Serializable {
   @Version
   private LocalDateTime amendedDate;
 
+  private String trainingPathway;
 
   public Long getId() {
     return id;
@@ -247,6 +248,14 @@ public class ProgrammeMembership implements Serializable {
     this.amendedDate = amendedDate;
   }
 
+  public String getTrainingPathway() {
+    return trainingPathway;
+  }
+
+  public void setTrainingPathway(String trainingPathway) {
+    this.trainingPathway = trainingPathway;
+  }
+
   @Override
   public boolean equals(Object o) {
     if (this == o) {
@@ -281,6 +290,7 @@ public class ProgrammeMembership implements Serializable {
         ", curriculumCompletionDate='" + curriculumCompletionDate + "'" +
         ", programmeEndDate='" + programmeEndDate + "'" +
         ", leavingDestination='" + leavingDestination + "'" +
+        ", trainingPathway='" + trainingPathway + "'" +
         ", amendedDate='" + getAmendedDate() + "'" +
         '}';
   }
