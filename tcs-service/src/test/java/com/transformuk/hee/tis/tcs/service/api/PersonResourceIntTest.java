@@ -33,10 +33,12 @@ import com.transformuk.hee.tis.tcs.service.model.ContactDetails;
 import com.transformuk.hee.tis.tcs.service.model.GdcDetails;
 import com.transformuk.hee.tis.tcs.service.model.GmcDetails;
 import com.transformuk.hee.tis.tcs.service.model.Person;
+import com.transformuk.hee.tis.tcs.service.model.Placement;
 import com.transformuk.hee.tis.tcs.service.repository.ContactDetailsRepository;
 import com.transformuk.hee.tis.tcs.service.repository.GdcDetailsRepository;
 import com.transformuk.hee.tis.tcs.service.repository.GmcDetailsRepository;
 import com.transformuk.hee.tis.tcs.service.repository.PersonRepository;
+import com.transformuk.hee.tis.tcs.service.repository.PlacementRepository;
 import com.transformuk.hee.tis.tcs.service.repository.PlacementViewRepository;
 import com.transformuk.hee.tis.tcs.service.service.PersonElasticSearchService;
 import com.transformuk.hee.tis.tcs.service.service.PersonService;
@@ -44,6 +46,7 @@ import com.transformuk.hee.tis.tcs.service.service.PlacementService;
 import com.transformuk.hee.tis.tcs.service.service.impl.PermissionService;
 import com.transformuk.hee.tis.tcs.service.service.mapper.PersonMapper;
 import com.transformuk.hee.tis.tcs.service.service.mapper.PlacementViewMapper;
+import java.math.BigDecimal;
 import java.time.LocalDateTime;
 import java.time.ZoneId;
 import java.util.ArrayList;
@@ -110,6 +113,7 @@ public class PersonResourceIntTest {
 
   private static final String DEFAULT_REGULATOR = "AAAAAAAAAA";
   private static final String UPDATED_REGULATOR = "BBBBBBBBBB";
+  private static final BigDecimal DEFAULT_PLACEMENT_WTE = new BigDecimal("0.6");
 
   @Autowired
   private PersonRepository personRepository;
@@ -125,6 +129,8 @@ public class PersonResourceIntTest {
   private PersonService personService;
   @Autowired
   private PlacementViewRepository placementViewRepository;
+  @Autowired
+  private PlacementRepository placementRepository;
   @Autowired
   private PlacementViewMapper placementViewMapper;
   @Autowired
@@ -180,6 +186,7 @@ public class PersonResourceIntTest {
         .publicHealthNumber(DEFAULT_PUBLIC_HEALTH_NUMBER)
         .regulator(DEFAULT_REGULATOR);
   }
+
 
   @Before
   public void setup() {
@@ -529,6 +536,25 @@ public class PersonResourceIntTest {
         .andExpect(jsonPath("$.inactiveNotes").value(DEFAULT_INACTIVE_NOTES))
         .andExpect(jsonPath("$.publicHealthNumber").value(DEFAULT_PUBLIC_HEALTH_NUMBER))
         .andExpect(jsonPath("$.regulator").value(DEFAULT_REGULATOR));
+  }
+
+  @Test
+  @Transactional
+  public void shouldGetPlacementSummaryFields() throws Exception {
+    // Given a person with one placement
+    personRepository.saveAndFlush(person);
+    Placement placement = PlacementResourceIntTest.createPlacementEntity();
+    placement.setTrainee(person);
+    placement.setPlacementWholeTimeEquivalent(DEFAULT_PLACEMENT_WTE);
+    placementRepository.saveAndFlush(placement);
+
+    // When I get use the new method of that person's placement summaries
+    restPersonMockMvc.perform(get("/api/people/{id}/placements/new", person.getId()))
+
+    // Then the placementWholeTimeEquivalent should be what was saved 
+        .andExpect(status().isOk())
+        .andExpect(content().contentType(MediaType.APPLICATION_JSON_UTF8_VALUE))
+        .andExpect(jsonPath("$.[0].placementWholeTimeEquivalent").value(DEFAULT_PLACEMENT_WTE));
   }
 
   @Test
