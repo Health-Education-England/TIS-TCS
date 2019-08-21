@@ -1,5 +1,6 @@
 package com.transformuk.hee.tis.tcs.api.dto;
 
+import java.math.BigDecimal;
 import java.util.Date;
 import java.util.Objects;
 
@@ -23,13 +24,14 @@ public class PlacementSummaryDTO {
   private Long placementId;
   private String placementStatus;
   private String placementSpecialtyType;
+  private BigDecimal placementWholeTimeEquivalent;
 
   public PlacementSummaryDTO() {
   }
 
   public PlacementSummaryDTO(Date dateFrom, Date dateTo, Long siteId, String primarySpecialtyName,
       Long gradeId, String placementType, String status, String forenames, String surname,
-      Long traineeId, Long placementId, String placementSpecialtyType) {
+      Long traineeId, Long placementId, String placementSpecialtyType, BigDecimal placementWholeTimeEquivalent) {
     this.dateFrom = dateFrom;
     this.dateTo = dateTo;
     this.siteId = siteId;
@@ -42,6 +44,7 @@ public class PlacementSummaryDTO {
     this.traineeId = traineeId;
     this.placementId = placementId;
     this.placementSpecialtyType = placementSpecialtyType;
+    this.placementWholeTimeEquivalent = placementWholeTimeEquivalent;
   }
 
   public Date getDateFrom() {
@@ -164,6 +167,14 @@ public class PlacementSummaryDTO {
     this.placementSpecialtyType = placementSpecialtyType;
   }
 
+  public BigDecimal getPlacementWholeTimeEquivalent() {
+    return placementWholeTimeEquivalent;
+  }
+
+  public void setPlacementWholeTimeEquivalent(BigDecimal placementWholeTimeEquivalent) {
+    this.placementWholeTimeEquivalent = placementWholeTimeEquivalent;
+  }
+
   @Override
   public boolean equals(Object o) {
     if (this == o) {
@@ -187,7 +198,8 @@ public class PlacementSummaryDTO {
         Objects.equals(traineeId, that.traineeId) &&
         Objects.equals(placementId, that.placementId) &&
         Objects.equals(placementStatus, that.placementStatus) &&
-        Objects.equals(placementSpecialtyType, that.placementSpecialtyType);
+        Objects.equals(placementSpecialtyType, that.placementSpecialtyType) &&
+        Objects.equals(placementWholeTimeEquivalent, that.placementWholeTimeEquivalent);
   }
 
   @Override
@@ -196,6 +208,6 @@ public class PlacementSummaryDTO {
     return Objects
         .hash(dateFrom, dateTo, siteId, siteName, primarySpecialtyName, gradeId, gradeName,
             placementType, status, forenames, surname, traineeId, placementId, placementStatus,
-            placementSpecialtyType);
+            placementSpecialtyType, placementWholeTimeEquivalent);
   }
 }
