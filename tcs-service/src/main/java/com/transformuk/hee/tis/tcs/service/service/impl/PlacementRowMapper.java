@@ -22,6 +22,7 @@ public class PlacementRowMapper implements RowMapper<PlacementSummaryDTO> {
     dto.setTraineeId(rs.getLong("traineeId"));
     dto.setPlacementId(rs.getLong("placementId"));
     dto.setPlacementSpecialtyType(rs.getString("placementSpecialtyType"));
+    dto.setPlacementWholeTimeEquivalent(rs.getBigDecimal("placementWholeTimeEquivalent"));
     return dto;
   }
 }

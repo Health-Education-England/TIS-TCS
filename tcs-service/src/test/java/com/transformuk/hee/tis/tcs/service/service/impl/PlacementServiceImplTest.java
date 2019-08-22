@@ -29,6 +29,7 @@ import com.transformuk.hee.tis.tcs.service.service.mapper.PlacementDetailsMapper
 import com.transformuk.hee.tis.tcs.service.service.mapper.PlacementMapper;
 import com.transformuk.hee.tis.tcs.service.service.mapper.PlacementSiteMapper;
 import com.transformuk.hee.tis.tcs.service.service.mapper.PlacementSpecialtyMapper;
+import java.math.BigDecimal;
 import java.text.SimpleDateFormat;
 import java.time.Clock;
 import java.time.Instant;
@@ -100,7 +101,7 @@ public class PlacementServiceImplTest {
   public static PlacementSummaryDTO createPlacementSummaryDTO() {
     return new PlacementSummaryDTO(null, null, number,
         "Elbows", number, "In Post", "CURRENT", "Joe", "Bloggs",
-        number, number, null);
+        number, number, null, null);
   }
 
   @Before
@@ -139,6 +140,7 @@ public class PlacementServiceImplTest {
     Long id3 = 3L;
     Long id4 = 4L;
     Long id5 = 5L;
+    BigDecimal wte = new BigDecimal(0.6);
 
     PlacementSummaryDTO placement_latest = createPlacementSummaryDTO(), placement_second_latest = createPlacementSummaryDTO(),
         placement_earliest = createPlacementSummaryDTO(), placement_null = createPlacementSummaryDTO(),
@@ -146,6 +148,7 @@ public class PlacementServiceImplTest {
 
     placement_latest.setDateTo(latest_date);
     placement_latest.setPlacementId(id1);
+    placement_latest.setPlacementWholeTimeEquivalent(wte);;
     placement_second_latest.setDateTo(second_latest_date);
     placement_second_latest.setPlacementId(id2);
     placement_earliest.setDateTo(earliest_date);
@@ -177,6 +180,7 @@ public class PlacementServiceImplTest {
     List<PlacementSummaryDTO> result = testObj.getPlacementForTrainee(traineeId, "Dr in Training");
 
     int sizeOfResult = result.size();
+    Assert.assertEquals(wte, result.get(0).getPlacementWholeTimeEquivalent());
     Assert.assertTrue(result.get(0).getDateTo().after(result.get(1).getDateTo()));
     Assert.assertTrue(result.get(1).getDateTo().after(result.get(2).getDateTo()));
     Assert.assertNull(result.get(sizeOfResult - 2).getDateTo());
