@@ -187,7 +187,6 @@ public class PersonResourceIntTest {
         .regulator(DEFAULT_REGULATOR);
   }
 
-
   @Before
   public void setup() {
     MockitoAnnotations.initMocks(this);
