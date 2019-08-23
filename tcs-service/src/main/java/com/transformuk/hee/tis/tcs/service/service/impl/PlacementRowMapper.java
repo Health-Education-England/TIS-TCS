@@ -1,6 +1,7 @@
 package com.transformuk.hee.tis.tcs.service.service.impl;
 
 import com.transformuk.hee.tis.tcs.api.dto.PlacementSummaryDTO;
+import java.math.BigDecimal;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import org.springframework.jdbc.core.RowMapper;
@@ -22,7 +23,8 @@ public class PlacementRowMapper implements RowMapper<PlacementSummaryDTO> {
     dto.setTraineeId(rs.getLong("traineeId"));
     dto.setPlacementId(rs.getLong("placementId"));
     dto.setPlacementSpecialtyType(rs.getString("placementSpecialtyType"));
-    dto.setPlacementWholeTimeEquivalent(rs.getBigDecimal("placementWholeTimeEquivalent"));
+    float floatWTE = rs.getFloat("placementWholeTimeEquivalent");
+    dto.setPlacementWholeTimeEquivalent(new BigDecimal(Float.toString(floatWTE)));
     return dto;
   }
 }
