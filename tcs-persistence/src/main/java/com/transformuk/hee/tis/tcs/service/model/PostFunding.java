@@ -4,14 +4,7 @@ package com.transformuk.hee.tis.tcs.service.model;
 import java.io.Serializable;
 import java.time.LocalDate;
 import java.util.Objects;
-import javax.persistence.Column;
-import javax.persistence.Entity;
-import javax.persistence.FetchType;
-import javax.persistence.GeneratedValue;
-import javax.persistence.GenerationType;
-import javax.persistence.Id;
-import javax.persistence.JoinColumn;
-import javax.persistence.ManyToOne;
+import javax.persistence.*;
 
 /**
  * A PostFunding.
@@ -28,7 +21,7 @@ public class PostFunding implements Serializable {
   @Column(name = "intrepidId")
   private String intrepidId;
 
-  @ManyToOne(targetEntity = Post.class, fetch = FetchType.LAZY)
+  @ManyToOne(targetEntity = Post.class, fetch = FetchType.LAZY, cascade=CascadeType.ALL)
   @JoinColumn(name = "postId")
   private Post post;
 
