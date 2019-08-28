@@ -4,6 +4,7 @@ import com.transformuk.hee.tis.tcs.api.dto.PostFundingDTO;
 import com.transformuk.hee.tis.tcs.service.model.PostFunding;
 import java.util.List;
 import org.mapstruct.Mapper;
+import org.mapstruct.Mapping;
 
 /**
  * Mapper for the entity PostFunding and its DTO PostFundingDTO.
@@ -11,10 +12,12 @@ import org.mapstruct.Mapper;
 @Mapper(componentModel = "spring", uses = {FundingMapper.class, FundingComponentsMapper.class,})
 public interface PostFundingMapper {
 
+  @Mapping(target="postId", source="postFunding.post.id")
   PostFundingDTO postFundingToPostFundingDTO(PostFunding postFunding);
 
   List<PostFundingDTO> postFundingsToPostFundingDTOs(List<PostFunding> postFundings);
 
+  @Mapping(target="post.id", source="postFundingDTO.postId")
   PostFunding postFundingDTOToPostFunding(PostFundingDTO postFundingDTO);
 
   List<PostFunding> postFundingDTOsToPostFundings(List<PostFundingDTO> postFundingDTOs);
