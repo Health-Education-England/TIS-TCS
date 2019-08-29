@@ -25,6 +25,8 @@ public class PostFundingDTO implements Serializable {
 
   private String fundingBodyId;
 
+  private Long postId;
+
   private List<String> messageList;
 
   public PostFundingDTO() {
@@ -94,6 +96,15 @@ public class PostFundingDTO implements Serializable {
   public void setMessageList(List<String> messageList) {
     this.messageList = messageList;
   }
+
+  public Long getPostId() {
+    return postId;
+  }
+
+  public void setPostId(Long postId) {
+    this.postId = postId;
+  }
+
 
   @Override
   public boolean equals(Object o) {

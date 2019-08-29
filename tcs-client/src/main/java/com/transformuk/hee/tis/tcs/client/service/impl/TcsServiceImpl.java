@@ -85,6 +85,7 @@ public class TcsServiceImpl extends AbstractClientService {
   private static final String API_TRAINEE_PROGRAMME_MEMBERSHIPS = "/api/trainee/"; // {traineeId}/programme-memberships;
   private static final String BASIC = "/basic";
   private static final String API_POST_FUNDINGS = "/api/post/fundings";
+  private static final String API_FUNDINGS = "/api/post-fundings/";
   private static final Map<Class, ParameterizedTypeReference> classToParamTypeRefMap;
   private static String curriculumJsonQuerystringURLEncoded, programmeJsonQuerystringURLEncoded, specialtyJsonQuerystringURLEncoded, placementJsonQuerystringURLEncoded, rotationJsonQuerystringURLEncoded;
 
@@ -291,6 +292,20 @@ public class TcsServiceImpl extends AbstractClientService {
             new ParameterizedTypeReference<List<PostFundingDTO>>() {
             })
         .getBody();
+  }
+
+  public PostFundingDTO updateFunding(PostFundingDTO postFundingDTO) {
+    HttpHeaders headers = new HttpHeaders();
+    HttpEntity<PostFundingDTO> httpEntity = new HttpEntity<>(postFundingDTO, headers);
+    return tcsRestTemplate.exchange(serviceUrl + API_FUNDINGS, HttpMethod.PUT, httpEntity,
+        new ParameterizedTypeReference<PostFundingDTO>() {
+        }).getBody();
+  }
+
+  public PostFundingDTO getPostFundingById(Long postFundingId) {
+    return tcsRestTemplate.exchange(serviceUrl + API_FUNDINGS + postFundingId,
+        HttpMethod.GET, null, new ParameterizedTypeReference<PostFundingDTO>() {
+        }).getBody();
   }
 
   public List<PlacementDetailsDTO> getPlacementForTrainee(Long traineeId) {

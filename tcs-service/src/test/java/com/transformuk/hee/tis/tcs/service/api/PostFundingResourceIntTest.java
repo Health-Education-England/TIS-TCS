@@ -14,13 +14,17 @@ import com.google.common.collect.Lists;
 import com.transformuk.hee.tis.tcs.api.dto.PostFundingDTO;
 import com.transformuk.hee.tis.tcs.service.Application;
 import com.transformuk.hee.tis.tcs.service.exception.ExceptionTranslator;
+import com.transformuk.hee.tis.tcs.service.model.Post;
 import com.transformuk.hee.tis.tcs.service.model.PostFunding;
 import com.transformuk.hee.tis.tcs.service.repository.PostFundingRepository;
+import com.transformuk.hee.tis.tcs.service.repository.PostRepository;
 import com.transformuk.hee.tis.tcs.service.service.PostFundingService;
 import com.transformuk.hee.tis.tcs.service.service.mapper.PostFundingMapper;
+
 import java.time.LocalDate;
 import java.util.List;
 import javax.persistence.EntityManager;
+
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -49,6 +53,8 @@ public class PostFundingResourceIntTest {
   private static final LocalDate END_DATE = LocalDate.of(2033, 7, 6);
   @Autowired
   private PostFundingRepository postFundingRepository;
+  @Autowired
+  private PostRepository postRepository;
   @Autowired
   private PostFundingMapper postFundingMapper;
   @Autowired
@@ -98,9 +104,15 @@ public class PostFundingResourceIntTest {
   }
 
   @Before
+  @Transactional
   public void initTest() {
     postFunding = createEntity(em);
     anotherPostFunding = createAnotherEntity(em);
+
+    Post post = new Post();
+    postRepository.saveAndFlush(post);
+    postFunding.setPost(post);
+    anotherPostFunding.setPost(post);
   }
 
   @Test
