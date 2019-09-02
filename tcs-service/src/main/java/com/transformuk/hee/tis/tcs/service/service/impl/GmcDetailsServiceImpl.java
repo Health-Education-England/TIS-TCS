@@ -30,8 +30,7 @@ public class GmcDetailsServiceImpl implements GmcDetailsService {
   private final ApplicationEventPublisher applicationEventPublisher;
 
   public GmcDetailsServiceImpl(GmcDetailsRepository gmcDetailsRepository,
-      GmcDetailsMapper gmcDetailsMapper,
-      ApplicationEventPublisher applicationEventPublisher) {
+      GmcDetailsMapper gmcDetailsMapper, ApplicationEventPublisher applicationEventPublisher) {
     this.gmcDetailsRepository = gmcDetailsRepository;
     this.gmcDetailsMapper = gmcDetailsMapper;
     this.applicationEventPublisher = applicationEventPublisher;
@@ -67,8 +66,7 @@ public class GmcDetailsServiceImpl implements GmcDetailsService {
     gmcDetailsList = gmcDetailsRepository.saveAll(gmcDetailsList);
     List<GmcDetailsDTO> gmcDetailsDTOS = gmcDetailsMapper.toDto(gmcDetailsList);
 
-    gmcDetailsDTOS.stream()
-        .map(GmcDetailsSavedEvent::new)
+    gmcDetailsDTOS.stream().map(GmcDetailsSavedEvent::new)
         .forEach(applicationEventPublisher::publishEvent);
 
     return gmcDetailsDTOS;
@@ -84,8 +82,7 @@ public class GmcDetailsServiceImpl implements GmcDetailsService {
   @Transactional(readOnly = true)
   public Page<GmcDetailsDTO> findAll(Pageable pageable) {
     log.debug("Request to get all GmcDetails");
-    return gmcDetailsRepository.findAll(pageable)
-        .map(gmcDetailsMapper::toDto);
+    return gmcDetailsRepository.findAll(pageable).map(gmcDetailsMapper::toDto);
   }
 
   @Override
@@ -112,7 +109,7 @@ public class GmcDetailsServiceImpl implements GmcDetailsService {
   }
 
   /**
-   * Delete the  gmcDetails by id.
+   * Delete the gmcDetails by id.
    *
    * @param id the id of the entity
    */
