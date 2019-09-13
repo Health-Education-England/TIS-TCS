@@ -12,7 +12,7 @@
 
   <groupId>com.transformuk.hee.tis</groupId>
   <artifactId>tcs-service</artifactId>
-  <version>4.6.1</version>
+  <version>5.0.0</version>
   <packaging>war</packaging>
   <name>tcs-service</name>
 
@@ -364,17 +364,6 @@
           <artifactId>jersey-core</artifactId>
         </exclusion>
       </exclusions>
-    </dependency>
-
-    <dependency>
-      <groupId>net.javacrumbs.shedlock</groupId>
-      <artifactId>shedlock-spring</artifactId>
-      <version>2.2.0</version>
-    </dependency>
-    <dependency>
-      <groupId>net.javacrumbs.shedlock</groupId>
-      <artifactId>shedlock-provider-jdbc-template</artifactId>
-      <version>2.2.0</version>
     </dependency>
     <dependency>
       <groupId>org.jboss.resteasy</groupId>

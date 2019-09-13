@@ -9,7 +9,6 @@ import java.net.UnknownHostException;
 import java.util.Arrays;
 import java.util.Collection;
 import javax.annotation.PostConstruct;
-import net.javacrumbs.shedlock.spring.annotation.EnableSchedulerLock;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.boot.SpringApplication;
@@ -32,7 +31,6 @@ import org.springframework.data.elasticsearch.repository.config.EnableElasticsea
     "classpath:/config/referenceclientapplication.properties"
 })
 @Import(TisFileStorageConfig.class)
-@EnableSchedulerLock(defaultLockAtLeastFor = "PT1M", defaultLockAtMostFor = "PT1M")
 public class Application {
 
   private static final Logger log = LoggerFactory.getLogger(Application.class);
