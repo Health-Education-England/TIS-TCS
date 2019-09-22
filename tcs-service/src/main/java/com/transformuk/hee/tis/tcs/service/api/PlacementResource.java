@@ -265,4 +265,22 @@ public class PlacementResource {
   public ResponseEntity<PlacementDetailsDTO> getPlacementDetails(@PathVariable final Long id) {
     return getPlacement(id);
   }
+
+  /**
+   * Get a list of overlapping placements
+   * @param npn national post number
+   * @param fromDate startDate of the placement which is waiting to be added
+   * @param toDate endDate of the placement which is waiting to be added
+   * @return validation result
+   */
+  @GetMapping("/placements/overlapping")
+  @PreAuthorize("hasAuthority('tcs:view:entities')")
+  public ResponseEntity<String> validateOverlappingPlacementsByNPN (
+      @RequestParam(required = true) String npn,
+      @RequestParam(required = true) @DateTimeFormat(pattern = "dd/MM/yyyy") LocalDate fromDate,
+      @RequestParam(required = true) @DateTimeFormat(pattern = "dd/MM/yyyy") LocalDate toDate) {
+
+    boolean overlapping = placementService.validateOverlappingPlacements(npn, fromDate, toDate);
+    return ResponseEntity.ok().body(String.format("{\"overlapping\": %b}", overlapping));
+  }
 }

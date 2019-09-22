@@ -6,8 +6,7 @@ import static java.time.temporal.ChronoUnit.DAYS;
 import static java.util.Arrays.asList;
 import static java.util.stream.Collectors.toList;
 import static org.assertj.core.api.Assertions.assertThat;
-import static org.hamcrest.Matchers.containsInAnyOrder;
-import static org.hamcrest.Matchers.hasItem;
+import static org.hamcrest.Matchers.*;
 import static org.mockito.BDDMockito.given;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.delete;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
@@ -1269,5 +1268,27 @@ public class PlacementResourceIntTest {
     supervisors.add(supervisor);
 
     placementDetailsDTO.setSupervisors(supervisors);
+  }
+
+  @Test
+  @Transactional
+  public void validateOverlappingPlacements() throws Exception {
+    String NPN = "YHD/RWA01/IMT/LT/003";
+    Post mockedPost = new Post();
+    mockedPost.setNationalPostNumber(NPN);
+    postRepository.saveAndFlush(mockedPost);
+
+    List<Post> posts = postRepository.findByNationalPostNumber(NPN);
+
+    Placement mockedPlacement = new Placement();
+    mockedPlacement.setPost(posts.get(0));
+    mockedPlacement.setDateFrom(LocalDate.of(2019, 6, 5));
+    mockedPlacement.setDateTo(LocalDate.of(2019, 9, 5));
+    placementRepository.saveAndFlush(mockedPlacement);
+
+    restPlacementMockMvc.perform(
+        get("/api/placements/overlapping?npn=YHD/RWA01/IMT/LT/003&fromDate=01/05/2019&toDate=04/06/2019"))
+        .andExpect(status().isOk()).andExpect(content().string(containsString("false")));
+    ;
   }
 }

@@ -5,7 +5,9 @@ import com.transformuk.hee.tis.tcs.api.dto.PlacementDetailsDTO;
 import com.transformuk.hee.tis.tcs.api.dto.PlacementSummaryDTO;
 import com.transformuk.hee.tis.tcs.service.model.Placement;
 import java.io.IOException;
+import java.time.LocalDate;
 import java.util.List;
+
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 
@@ -135,4 +137,14 @@ public interface PlacementService {
 
   void handleChangeOfPlacementDatesEsrNotification(PlacementDetailsDTO placementDetailsDTO,
       Placement placementBeforeUpdate, boolean currentPlacementEdit);
+
+  /**
+   * validate if overlapping placements exist
+   *
+   * @param npn national post number
+   * @param fromDate startDate of the placement which is waiting to be added
+   * @param toDate endDate of the placement which is waiting to be added
+   * @return if overlapping exists, return true, else return false
+   */
+  boolean validateOverlappingPlacements(String npn, LocalDate fromDate, LocalDate toDate);
 }

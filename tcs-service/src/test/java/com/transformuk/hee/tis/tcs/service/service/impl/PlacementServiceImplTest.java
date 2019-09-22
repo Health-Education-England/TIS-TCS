@@ -3,10 +3,7 @@ package com.transformuk.hee.tis.tcs.service.service.impl;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyMap;
 import static org.mockito.ArgumentMatchers.eq;
-import static org.mockito.Mockito.doNothing;
-import static org.mockito.Mockito.mock;
-import static org.mockito.Mockito.verifyZeroInteractions;
-import static org.mockito.Mockito.when;
+import static org.mockito.Mockito.*;
 
 import com.google.common.collect.Lists;
 import com.google.common.collect.Sets;
@@ -29,6 +26,7 @@ import com.transformuk.hee.tis.tcs.service.service.mapper.PlacementDetailsMapper
 import com.transformuk.hee.tis.tcs.service.service.mapper.PlacementMapper;
 import com.transformuk.hee.tis.tcs.service.service.mapper.PlacementSiteMapper;
 import com.transformuk.hee.tis.tcs.service.service.mapper.PlacementSpecialtyMapper;
+
 import java.math.BigDecimal;
 import java.text.SimpleDateFormat;
 import java.time.Clock;
@@ -36,12 +34,8 @@ import java.time.Instant;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.time.ZoneId;
-import java.util.Collections;
-import java.util.Date;
-import java.util.List;
-import java.util.Map;
-import java.util.Optional;
-import java.util.Set;
+import java.util.*;
+
 import org.hamcrest.CoreMatchers;
 import org.junit.Assert;
 import org.junit.Before;
@@ -148,7 +142,7 @@ public class PlacementServiceImplTest {
 
     placement_latest.setDateTo(latest_date);
     placement_latest.setPlacementId(id1);
-    placement_latest.setPlacementWholeTimeEquivalent(wte);;
+    placement_latest.setPlacementWholeTimeEquivalent(wte);
     placement_second_latest.setDateTo(second_latest_date);
     placement_second_latest.setPlacementId(id2);
     placement_earliest.setDateTo(earliest_date);
@@ -487,5 +481,105 @@ public class PlacementServiceImplTest {
       Assert.assertThat("The placement site's placement ID did not match the expected value.",
           site.getPlacementId(), CoreMatchers.is(1L));
     }
+  }
+
+  @Test
+  public void validateReturnTrueWhenOverlappingPlacementsExist() {
+    // prepare mocked data
+    String NPN = "YHD/RWA01/IMT/LT/003";
+    Post mockedPost = new Post();
+    mockedPost.setId(1L);
+    mockedPost.setNationalPostNumber(NPN);
+
+    doReturn(Arrays.asList(mockedPost)).when(postRepositoryMock).findByNationalPostNumber(NPN);
+
+    Set<Long> postIds = new HashSet<>();
+    postIds.add(1L);
+    Placement mockedPlacement = new Placement();
+    mockedPlacement.setPost(mockedPost);
+    mockedPlacement.setDateFrom(LocalDate.of(2019, 6, 5));
+    mockedPlacement.setDateTo(LocalDate.of(2019, 9, 5));
+
+    Set<Placement> mockedPlacementsSet = new HashSet<>();
+    mockedPlacementsSet.add(mockedPlacement);
+    doReturn(mockedPlacementsSet).when(placementRepositoryMock).findPlacementsByPostIds(postIds);
+
+    boolean result1 = testObj.validateOverlappingPlacements(NPN,
+        LocalDate.of(2019, 5, 1),
+        LocalDate.of(2019, 6, 5));
+    boolean result2 = testObj.validateOverlappingPlacements(NPN,
+        LocalDate.of(2019, 9, 5),
+        LocalDate.of(2019, 10, 10));
+    boolean result3 = testObj.validateOverlappingPlacements(NPN,
+        LocalDate.of(2019, 6, 4),
+        LocalDate.of(2019, 9, 6));
+    boolean result4 = testObj.validateOverlappingPlacements(NPN,
+        LocalDate.of(2019, 6, 6),
+        LocalDate.of(2019, 9, 4));
+
+
+    Assert.assertThat("When there's one day overlapping - case 1, should return true",
+        result1, CoreMatchers.is(true));
+    Assert.assertThat("When there's one day overlapping - case 2, should return true",
+        result2, CoreMatchers.is(true));
+    Assert.assertThat("When the mocked data are fully overlapped, should return true",
+        result3, CoreMatchers.is(true));
+    Assert.assertThat("When the testing data are fully overlapped, should return true",
+        result4, CoreMatchers.is(true));
+  }
+
+  @Test
+  public void validateReturnFalseWhenNoOverlappingPlacements() {
+    // prepare mocked data
+    String NPN = "YHD/RWA01/IMT/LT/003";
+    Post mockedPost = new Post();
+    mockedPost.setId(1L);
+    mockedPost.setNationalPostNumber(NPN);
+
+    doReturn(Arrays.asList(mockedPost)).when(postRepositoryMock).findByNationalPostNumber(NPN);
+
+    Set<Long> postIds = new HashSet<>();
+    postIds.add(1L);
+    Placement mockedPlacement = new Placement();
+    mockedPlacement.setPost(mockedPost);
+    mockedPlacement.setDateFrom(LocalDate.of(2019, 6, 5));
+    mockedPlacement.setDateTo(LocalDate.of(2019, 9, 5));
+
+    Set<Placement> mockedPlacementsSet = new HashSet<>();
+    mockedPlacementsSet.add(mockedPlacement);
+    doReturn(mockedPlacementsSet).when(placementRepositoryMock).findPlacementsByPostIds(postIds);
+
+    boolean result1 = testObj.validateOverlappingPlacements(NPN,
+        LocalDate.of(2019, 5, 1),
+        LocalDate.of(2019, 6, 4));
+    boolean result2 = testObj.validateOverlappingPlacements(NPN,
+        LocalDate.of(2019, 9, 6),
+        LocalDate.of(2019, 10, 10));
+
+    Assert.assertThat("When the endDate of testing data is ahead of the mocked data, should return false",
+        result1, CoreMatchers.is(false));
+    Assert.assertThat("When the startDate of testing data is after the mocked data, should return false",
+        result2, CoreMatchers.is(false));
+  }
+
+  @Test
+  public void validateReturnFalseWhenNoPlacementsFound() {
+    String NPN = "YHD/RWA01/IMT/LT/003";
+    Post mockedPost = new Post();
+    mockedPost.setId(1L);
+    mockedPost.setNationalPostNumber(NPN);
+
+    doReturn(Arrays.asList(mockedPost)).when(postRepositoryMock).findByNationalPostNumber(NPN);
+
+    Set<Long> postIds = new HashSet<>();
+    postIds.add(1L);
+    Set<Placement> mockedEmptyPlacementsSet = new HashSet<>();
+    doReturn(mockedEmptyPlacementsSet).when(placementRepositoryMock).findPlacementsByPostIds(postIds);
+    boolean result = testObj.validateOverlappingPlacements(NPN,
+        LocalDate.of(2019, 5, 1),
+        LocalDate.of(2019, 6, 4));
+
+    Assert.assertThat("When there's no placements found, should return false",
+        result, CoreMatchers.is(false));
   }
 }
