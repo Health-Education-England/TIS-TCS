@@ -18,7 +18,9 @@ import java.io.IOException;
 import java.net.URI;
 import java.net.URISyntaxException;
 import java.time.LocalDate;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 import java.util.Optional;
 import java.util.stream.Collectors;
 import org.apache.commons.lang3.StringUtils;
@@ -273,14 +275,16 @@ public class PlacementResource {
    * @param toDate endDate of the placement which is waiting to be added
    * @return validation result
    */
-  @GetMapping("/placements/overlapping")
+  @GetMapping(value = "/placements/overlapping", produces = "application/json")
   @PreAuthorize("hasAuthority('tcs:view:entities')")
-  public ResponseEntity<String> validateOverlappingPlacementsByNPN (
+  public ResponseEntity<Map<String, Boolean>> validateOverlappingPlacementsByNPN (
       @RequestParam(required = true) String npn,
       @RequestParam(required = true) @DateTimeFormat(pattern = "dd/MM/yyyy") LocalDate fromDate,
       @RequestParam(required = true) @DateTimeFormat(pattern = "dd/MM/yyyy") LocalDate toDate) {
 
     boolean overlapping = placementService.validateOverlappingPlacements(npn, fromDate, toDate);
-    return ResponseEntity.ok().body(String.format("{\"overlapping\": %b}", overlapping));
+    Map model = new HashMap<String, Boolean>();
+    model.put("overlapping", overlapping);
+    return ResponseEntity.ok().body(model);
   }
 }
