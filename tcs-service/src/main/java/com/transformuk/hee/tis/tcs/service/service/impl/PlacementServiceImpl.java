@@ -595,6 +595,27 @@ public class PlacementServiceImpl implements PlacementService {
     return resultList;
   }
 
+  @Transactional(readOnly = true)
+  @Override
+  public boolean validateOverlappingPlacements(String npn, LocalDate fromDate, LocalDate toDate) {
+    List<Post> posts = postRepository.findByNationalPostNumber(npn);
+    Set<Long> postIds = posts.stream().map(p -> p.getId()).collect(Collectors.toSet());
+    Set<Placement> allPlacements = placementRepository.findPlacementsByPostIds(postIds);
+
+    boolean ifOverlapping = false;
+    for (Placement placement : allPlacements) {
+      if (placement.getDateFrom() != null && placement.getDateTo() != null) {
+        if ((placement.getDateFrom().isBefore(toDate) || placement.getDateFrom().isEqual(toDate)) &&
+            (placement.getDateTo().isAfter(fromDate) || placement.getDateTo().isEqual(fromDate))) {
+          ifOverlapping = true;
+          break;
+        }
+      }
+    }
+    // if overlapping exists, return true
+    return ifOverlapping;
+  }
+
   /**
    * Convert a single Placement entity into a PlacementDTO
    *
