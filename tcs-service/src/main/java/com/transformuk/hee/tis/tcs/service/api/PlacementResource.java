@@ -279,8 +279,8 @@ public class PlacementResource {
   @PreAuthorize("hasAuthority('tcs:view:entities')")
   public ResponseEntity<Map<String, Boolean>> validateOverlappingPlacementsByNPN (
       @RequestParam(required = true) String npn,
-      @RequestParam(required = true) @DateTimeFormat(pattern = "dd/MM/yyyy") LocalDate fromDate,
-      @RequestParam(required = true) @DateTimeFormat(pattern = "dd/MM/yyyy") LocalDate toDate) {
+      @RequestParam(required = true) @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate fromDate,
+      @RequestParam(required = true) @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate toDate) {
 
     boolean overlapping = placementService.validateOverlappingPlacements(npn, fromDate, toDate);
     Map model = new HashMap<String, Boolean>();
