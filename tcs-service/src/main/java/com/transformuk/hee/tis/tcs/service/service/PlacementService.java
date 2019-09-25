@@ -144,7 +144,8 @@ public interface PlacementService {
    * @param npn national post number
    * @param fromDate startDate of the placement which is waiting to be added
    * @param toDate endDate of the placement which is waiting to be added
+   * @param placementId used to skip the current placement when updating
    * @return if overlapping exists, return true, else return false
    */
-  boolean validateOverlappingPlacements(String npn, LocalDate fromDate, LocalDate toDate);
+  boolean validateOverlappingPlacements(String npn, LocalDate fromDate, LocalDate toDate, Long placementId);
 }

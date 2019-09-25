@@ -506,16 +506,16 @@ public class PlacementServiceImplTest {
 
     boolean result1 = testObj.validateOverlappingPlacements(NPN,
         LocalDate.of(2019, 5, 1),
-        LocalDate.of(2019, 6, 5));
+        LocalDate.of(2019, 6, 5), null);
     boolean result2 = testObj.validateOverlappingPlacements(NPN,
         LocalDate.of(2019, 9, 5),
-        LocalDate.of(2019, 10, 10));
+        LocalDate.of(2019, 10, 10), null);
     boolean result3 = testObj.validateOverlappingPlacements(NPN,
         LocalDate.of(2019, 6, 4),
-        LocalDate.of(2019, 9, 6));
+        LocalDate.of(2019, 9, 6), null);
     boolean result4 = testObj.validateOverlappingPlacements(NPN,
         LocalDate.of(2019, 6, 6),
-        LocalDate.of(2019, 9, 4));
+        LocalDate.of(2019, 9, 4), null);
 
 
     Assert.assertThat("When there's one day overlapping - case 1, should return true",
@@ -551,10 +551,10 @@ public class PlacementServiceImplTest {
 
     boolean result1 = testObj.validateOverlappingPlacements(NPN,
         LocalDate.of(2019, 5, 1),
-        LocalDate.of(2019, 6, 4));
+        LocalDate.of(2019, 6, 4), null);
     boolean result2 = testObj.validateOverlappingPlacements(NPN,
         LocalDate.of(2019, 9, 6),
-        LocalDate.of(2019, 10, 10));
+        LocalDate.of(2019, 10, 10), null);
 
     Assert.assertThat("When the endDate of testing data is ahead of the mocked data, should return false",
         result1, CoreMatchers.is(false));
@@ -577,7 +577,7 @@ public class PlacementServiceImplTest {
     doReturn(mockedEmptyPlacementsSet).when(placementRepositoryMock).findPlacementsByPostIds(postIds);
     boolean result = testObj.validateOverlappingPlacements(NPN,
         LocalDate.of(2019, 5, 1),
-        LocalDate.of(2019, 6, 4));
+        LocalDate.of(2019, 6, 4), null);
 
     Assert.assertThat("When there's no placements found, should return false",
         result, CoreMatchers.is(false));

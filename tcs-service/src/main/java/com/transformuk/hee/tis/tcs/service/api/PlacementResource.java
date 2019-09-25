@@ -273,6 +273,7 @@ public class PlacementResource {
    * @param npn national post number
    * @param fromDate startDate of the placement which is waiting to be added
    * @param toDate endDate of the placement which is waiting to be added
+   * @param placementId used to skip the current placement when updating
    * @return validation result
    */
   @GetMapping(value = "/placements/overlapping", produces = "application/json")
@@ -280,9 +281,10 @@ public class PlacementResource {
   public ResponseEntity<Map<String, Boolean>> validateOverlappingPlacementsByNPN (
       @RequestParam(required = true) String npn,
       @RequestParam(required = true) @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate fromDate,
-      @RequestParam(required = true) @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate toDate) {
+      @RequestParam(required = true) @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate toDate,
+      @RequestParam(required = false) Long placementId) {
 
-    boolean overlapping = placementService.validateOverlappingPlacements(npn, fromDate, toDate);
+    boolean overlapping = placementService.validateOverlappingPlacements(npn, fromDate, toDate, placementId);
     Map model = new HashMap<String, Boolean>();
     model.put("overlapping", overlapping);
     return ResponseEntity.ok().body(model);
