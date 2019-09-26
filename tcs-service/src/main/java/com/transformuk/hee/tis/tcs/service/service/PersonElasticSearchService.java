@@ -109,8 +109,7 @@ public class PersonElasticSearchService {
 
     try {
       // iterate over the column filters, if they have multiple values per filter, place a should
-      // between then
-      // for each column filter set, place a must between them
+      // between then for each column filter set, place a must between them
       BoolQueryBuilder mustBetweenDifferentColumnFilters = new BoolQueryBuilder();
 
       ProgrammeMembershipStatus programmeMembershipStatusFilter = ProgrammeMembershipStatus.CURRENT;
@@ -120,13 +119,14 @@ public class PersonElasticSearchService {
           BoolQueryBuilder shouldBetweenSameColumnFilter = new BoolQueryBuilder();
 
           if (StringUtils.equals(columnFilter.getName(), "programmeMembershipStatus")) {
-            if (permissionService.isProgrammeObserver()) { // Only allow 'ProgrammeObserver's to
-                                                           // apply this filter
+            // Only allow 'ProgrammeObserver's to apply this filter
+            if (permissionService.isProgrammeObserver()) {
               Set<Long> programmeIds = permissionService.getUsersProgrammeIds();
               for (Long programmeId : programmeIds) {
                 BoolQueryBuilder shouldQuery = new BoolQueryBuilder();
                 MatchQueryBuilder statusQueryBuilder = null;
 
+                // TODO Loop over several status values
                 ProgrammeMembershipStatus status =
                     ProgrammeMembershipStatus.valueOf(columnFilter.getValues().get(0).toString());
                 programmeMembershipStatusFilter = status;
