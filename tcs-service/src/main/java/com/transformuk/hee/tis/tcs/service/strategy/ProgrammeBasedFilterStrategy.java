@@ -25,8 +25,6 @@ public class ProgrammeBasedFilterStrategy implements RoleBasedFilterStrategy {
   private static final String COLUMN_FILTER = "programmeName";
   private static final Set<String> APPLIED_FILTERS =
       Stream.of(COLUMN_FILTER).collect(Collectors.toSet());
-//  private static final Set<String> PROGRAMME_ROLES =
-//      Stream.of(PROGRAMME_ADMIN, PROGRAMME_OBSERVER).collect(Collectors.toSet());
 
   @Override
   public Optional<Tuple<Set<String>, BoolQueryBuilder>> getFilter() {
