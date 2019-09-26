@@ -36,7 +36,7 @@ public class TrustRoleBasedFilterStrategy implements RoleBasedFilterStrategy {
   public Optional<Tuple<Set<String>, BoolQueryBuilder>> getFilter() {
     UserProfile currentUserProfile = TisSecurityHelper.getProfileFromContext();
     Set<String> userRoles = currentUserProfile.getRoles();
-    // If User is a Trust Observer or Trust Admin only
+    // If User is a Trust{Admin,Observer} and not a Programme{Admin,Observer} 
     if (userRoles.contains(HEE_TRUST_ADMIN) && !userRoles.contains(HEE_PROGRAMME_ADMIN)
         || userRoles.contains(HEE_TRUST_OBSERVER) && !userRoles.contains(HEE_PROGRAMME_OBSERVER)) {
       Set<Trust> assignedTrusts = currentUserProfile.getAssignedTrusts();

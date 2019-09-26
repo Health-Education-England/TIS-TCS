@@ -32,7 +32,7 @@ public class ProgrammeBasedFilterStrategy implements RoleBasedFilterStrategy {
   public Optional<Tuple<Set<String>, BoolQueryBuilder>> getFilter() {
     UserProfile currentUserProfile = TisSecurityHelper.getProfileFromContext();
     Set<String> userRoles = currentUserProfile.getRoles();
-    // If User is a Programme{Admin,Observer) and not a Trust{Admin,Observer)
+    // If User is a Programme{Admin,Observer} and not a Trust{Admin,Observer}
     if ((userRoles.contains(HEE_PROGRAMME_ADMIN) || userRoles.contains(HEE_PROGRAMME_OBSERVER))
         && !(userRoles.contains(HEE_TRUST_ADMIN) ||userRoles.contains(HEE_TRUST_OBSERVER))) {
       Set<Programme> assignedProgrammes = currentUserProfile.getAssignedProgrammes();
