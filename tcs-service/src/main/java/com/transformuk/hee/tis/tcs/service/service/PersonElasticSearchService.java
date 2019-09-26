@@ -1,7 +1,6 @@
 package com.transformuk.hee.tis.tcs.service.service;
 
 import static org.elasticsearch.index.query.QueryBuilders.nestedQuery;
-
 import com.google.common.base.Preconditions;
 import com.google.common.collect.Lists;
 import com.google.common.collect.Sets;
@@ -57,7 +56,8 @@ public class PersonElasticSearchService {
 
   public static final String CURRENT_STATUS = "CURRENT";
   private static final Logger LOG = LoggerFactory.getLogger(PersonElasticSearchService.class);
-  private static final String PERSON_TRUST_QUERY = "SELECT personId, trustId FROM PersonTrust WHERE personId IN (:personIds)";
+  private static final String PERSON_TRUST_QUERY =
+      "SELECT personId, trustId FROM PersonTrust WHERE personId IN (:personIds)";
   @Autowired
   private PersonElasticSearchRepository personElasticSearchRepository;
   @Autowired
@@ -77,7 +77,7 @@ public class PersonElasticSearchService {
    *
    * @param programmeId the programme id to search for
    * @param searchQuery paramter that can map to a forename, surname, gmcid, gdcid
-   * @param pageable    the page in which we want to search for including any sorting
+   * @param pageable the page in which we want to search for including any sorting
    * @return a page of results
    */
   public Page<PersonViewDTO> findPeopleOnProgramme(Long programmeId, String searchQuery,
@@ -108,7 +108,8 @@ public class PersonElasticSearchService {
       List<ColumnFilter> columnFilters, Pageable pageable) {
 
     try {
-      // iterate over the column filters, if they have multiple values per filter, place a should between then
+      // iterate over the column filters, if they have multiple values per filter, place a should
+      // between then
       // for each column filter set, place a must between them
       BoolQueryBuilder mustBetweenDifferentColumnFilters = new BoolQueryBuilder();
 
@@ -119,14 +120,15 @@ public class PersonElasticSearchService {
           BoolQueryBuilder shouldBetweenSameColumnFilter = new BoolQueryBuilder();
 
           if (StringUtils.equals(columnFilter.getName(), "programmeMembershipStatus")) {
-            if (permissionService.isProgrammeObserver()) {
+            if (permissionService.isProgrammeObserver()) { // Only allow 'ProgrammeObserver's to
+                                                           // apply this filter
               Set<Long> programmeIds = permissionService.getUsersProgrammeIds();
               for (Long programmeId : programmeIds) {
                 BoolQueryBuilder shouldQuery = new BoolQueryBuilder();
                 MatchQueryBuilder statusQueryBuilder = null;
 
-                ProgrammeMembershipStatus status = ProgrammeMembershipStatus
-                    .valueOf(columnFilter.getValues().get(0).toString());
+                ProgrammeMembershipStatus status =
+                    ProgrammeMembershipStatus.valueOf(columnFilter.getValues().get(0).toString());
                 programmeMembershipStatusFilter = status;
                 if (status.equals(ProgrammeMembershipStatus.CURRENT)) {
                   statusQueryBuilder = QueryBuilders
@@ -151,24 +153,26 @@ public class PersonElasticSearchService {
           } else {
 
             for (Object value : columnFilter.getValues()) {
-              if (appliedFilters.contains(columnFilter
-                  .getName())) { // skip if we've already applied this type of filter via role based filters
+              // skip if we've already applied this type of filter via role based filters
+              if (appliedFilters.contains(columnFilter.getName())) {
                 continue;
               }
               if (StringUtils.equals(columnFilter.getName(), "programmeName")) {
                 BoolQueryBuilder shouldQuery = new BoolQueryBuilder();
-                shouldQuery.should(
-                    new MatchQueryBuilder("programmeMemberships.programmeName", value.toString())
-                        .operator(Operator.AND))
+                shouldQuery
+                    .should(new MatchQueryBuilder("programmeMemberships.programmeName",
+                        value.toString()).operator(Operator.AND))
                     .should(new MatchQueryBuilder("programmeMemberships.programmeMembershipStatus",
-                        "CURRENT")).minimumShouldMatch(2);
-                NestedQueryBuilder nested = nestedQuery("programmeMemberships", shouldQuery,
-                    ScoreMode.None);
+                        "CURRENT"))
+                    .minimumShouldMatch(2);
+                NestedQueryBuilder nested =
+                    nestedQuery("programmeMemberships", shouldQuery, ScoreMode.None);
                 shouldBetweenSameColumnFilter.should(nested);
                 shouldBetweenSameColumnFilter.minimumShouldMatch(1);
                 continue;
               }
-              //because the role column is a comma separated list of roles, we need to do a wildcard 'like' search
+              // because the role column is a comma separated list of roles, we need to do a
+              // wildcard 'like' search
               if (StringUtils.equals(columnFilter.getName(), "role")) {
                 shouldBetweenSameColumnFilter.should(
                     new WildcardQueryBuilder(columnFilter.getName(), "*" + value.toString() + "*"));
@@ -182,13 +186,13 @@ public class PersonElasticSearchService {
         }
       }
 
-      //apply free text search on the searchable columns
+      // apply free text search on the searchable columns
       BoolQueryBuilder shouldQuery = applyTextBasedSearchQuery(searchQuery);
 
       // add the free text query with a must to the column filters query
       BoolQueryBuilder fullQuery = mustBetweenDifferentColumnFilters.must(shouldQuery);
 
-//    LOG.info("Query {}", fullQuery.toString());
+      LOG.debug("Query {}", fullQuery.toString());
       pageable = replaceSortByIdHack(pageable);
 
       Page<PersonView> result = personElasticSearchRepository.search(fullQuery, pageable);
@@ -202,8 +206,8 @@ public class PersonElasticSearchService {
   }
 
   private Pageable replaceSortByIdHack(Pageable pageable) {
-    //hack as we dont sort by id but rather personId - this can be removed once we remove the duplicate trainees from the
-    //list view
+    // hack as we dont sort by id but rather personId - this can be removed once we remove the
+    // duplicate trainees from the list view
     Sort sort = pageable.getSort();
 
     Iterator<Sort.Order> sortIterator = sort.iterator();
@@ -218,7 +222,7 @@ public class PersonElasticSearchService {
         } else if (order.isDescending()) {
           sortOrders.add(Sort.Order.desc("personId"));
         } else {
-          //yes i know, we actually send sort by id with no direction - doh
+          // yes i know, we actually send sort by id with no direction - doh
         }
       }
     }
@@ -226,14 +230,20 @@ public class PersonElasticSearchService {
     return PageRequest.of(pageable.getPageNumber(), pageable.getPageSize(), Sort.by(sortOrders));
   }
 
+  /**
+   * 
+   * This part is the free text part of the query, place a should between all of the searchable
+   * fields
+   * 
+   * @param searchQuery - The string to look for
+   * @return A query builder based on the {@code searchQuery}
+   */
   private BoolQueryBuilder applyTextBasedSearchQuery(String searchQuery) {
-    // this part is the free text part of the query, place a should between all of the searchable fields
     BoolQueryBuilder shouldQuery = new BoolQueryBuilder();
     if (StringUtils.isNotEmpty(searchQuery)) {
-      searchQuery = StringUtils
-          .remove(searchQuery, '"'); //remove any quotations that were added from the FE
-      shouldQuery
-          .should(new MatchQueryBuilder("publicHealthNumber", searchQuery))
+      searchQuery = StringUtils.remove(searchQuery, '"'); // remove any quotations that were added
+                                                          // from the FE
+      shouldQuery.should(new MatchQueryBuilder("publicHealthNumber", searchQuery))
           .should(new MatchQueryBuilder("fullName", searchQuery))
           .should(new WildcardQueryBuilder("surname", "*" + searchQuery + "*"))
           .should(new WildcardQueryBuilder("forenames", "*" + searchQuery + "*"))
@@ -251,22 +261,21 @@ public class PersonElasticSearchService {
   }
 
   /**
-   * If the current user is a programme user of a trust user, apply the filters and return a list of
-   * filters applied so that any other selected programme or trust(owner) filters aren't applied
-   * too
+   * If the current user is a programme user or a trust user, apply the filters and return a list of
+   * filters applied so that any other selected programme or trust(owner) filters aren't applied too
    *
    * @param mustBetweenDifferentColumnFilters
    * @return
    */
   private Set<String> applyRoleBasedFilters(BoolQueryBuilder mustBetweenDifferentColumnFilters) {
-    //find if there are any strategies based off roles need executing
+    // find if there are any strategies based off roles need executing
     Set<String> appliedFilters = Sets.newHashSet();
     for (RoleBasedFilterStrategy roleBasedFilterStrategy : roleBasedFilterStrategies) {
-      Optional<Tuple<String, BoolQueryBuilder>> nameToFilterOptionalTuple = roleBasedFilterStrategy
-          .getFilter();
+      Optional<Tuple<Set<String>, BoolQueryBuilder>> nameToFilterOptionalTuple =
+          roleBasedFilterStrategy.getFilter();
       if (nameToFilterOptionalTuple.isPresent()) {
-        Tuple<String, BoolQueryBuilder> nameToFilterTuple = nameToFilterOptionalTuple.get();
-        appliedFilters.add(nameToFilterTuple.v1());
+        Tuple<Set<String>, BoolQueryBuilder> nameToFilterTuple = nameToFilterOptionalTuple.get();
+        appliedFilters.addAll(nameToFilterTuple.v1());
         mustBetweenDifferentColumnFilters.must(nameToFilterTuple.v2());
       }
     }
@@ -298,20 +307,19 @@ public class PersonElasticSearchService {
   public synchronized void updatePersonDocument(Long personId) {
     Preconditions.checkNotNull(personId, "Person Id cannot be null");
 
-    //horrible hack! we seem to have a race condition
+    // horrible hack! we seem to have a race condition
     try {
       Thread.sleep(500L);
     } catch (InterruptedException e) {
 
     }
-    String query = getQuery()
-        .replace("WHERECLAUSE", "WHERE p.id=:id");
+    String query = getQuery().replace("WHERECLAUSE", "WHERE p.id=:id");
 
     MapSqlParameterSource paramSource = new MapSqlParameterSource();
     paramSource.addValue("id", personId);
 
-    List<PersonView> queryResult = namedParameterJdbcTemplate
-        .query(query, paramSource, new PersonViewRowMapper());
+    List<PersonView> queryResult =
+        namedParameterJdbcTemplate.query(query, paramSource, new PersonViewRowMapper());
     if (CollectionUtils.isNotEmpty(queryResult)) {
       updateDocumentWithTrustData(queryResult);
       updateDocumentWithProgrammeMembershipData(queryResult);
@@ -325,21 +333,20 @@ public class PersonElasticSearchService {
 
   public void deletePersonDocument(Long personId) {
     Preconditions.checkNotNull(personId, "Person id cannot be null");
-    Iterable<PersonView> foundPersons = personElasticSearchRepository
-        .search(new MatchQueryBuilder("personId", personId));
+    Iterable<PersonView> foundPersons =
+        personElasticSearchRepository.search(new MatchQueryBuilder("personId", personId));
     personElasticSearchRepository.deleteAll(foundPersons);
   }
 
   public void updatePersonDocumentForProgramme(Long programmeId) {
-    String programmeMembershipQuery = sqlQuerySupplier
-        .getQuery(SqlQuerySupplier.PROGRAMME_MEMBERSHIP_VIEW)
-        .replace("WHERECLAUSE", "where programmeId=:programmeId");
+    String programmeMembershipQuery =
+        sqlQuerySupplier.getQuery(SqlQuerySupplier.PROGRAMME_MEMBERSHIP_VIEW).replace("WHERECLAUSE",
+            "where programmeId=:programmeId");
 
     MapSqlParameterSource paramSource = new MapSqlParameterSource();
     paramSource.addValue("programmeId", programmeId);
-    List<ProgrammeMembershipDto> programmeMembershipDtos =
-        namedParameterJdbcTemplate
-            .query(programmeMembershipQuery, paramSource, new ProgrammeMembershipRowMapper());
+    List<ProgrammeMembershipDto> programmeMembershipDtos = namedParameterJdbcTemplate
+        .query(programmeMembershipQuery, paramSource, new ProgrammeMembershipRowMapper());
     if (programmeMembershipDtos.size() == 0) {
       return;
     }
@@ -353,8 +360,7 @@ public class PersonElasticSearchService {
 
 
   public void updatePersonDocumentForSpecialty(Long specialtyId) {
-    String query = getQuery()
-        .replace("WHERECLAUSE", "WHERE s.id=:id");
+    String query = getQuery().replace("WHERECLAUSE", "WHERE s.id=:id");
 
     List<PersonView> personViews = runQuery(query, specialtyId);
     updateDocumentWithTrustData(personViews);
@@ -370,10 +376,8 @@ public class PersonElasticSearchService {
    */
   private String getQuery() {
     String query = sqlQuerySupplier.getQuery(SqlQuerySupplier.PERSON_VIEW);
-    return query.replace("TRUST_JOIN", "")
-        .replace("PROGRAMME_MEMBERSHIP_JOIN", "")
-        .replace("ORDERBYCLAUSE", "ORDER BY id DESC")
-        .replace("LIMITCLAUSE", "");
+    return query.replace("TRUST_JOIN", "").replace("PROGRAMME_MEMBERSHIP_JOIN", "")
+        .replace("ORDERBYCLAUSE", "ORDER BY id DESC").replace("LIMITCLAUSE", "");
   }
 
   private List<PersonView> runQuery(String query, Long id) {
@@ -391,17 +395,16 @@ public class PersonElasticSearchService {
 
   public void updateDocumentWithProgrammeMembershipData(List<PersonView> queryResult) {
     if (CollectionUtils.isNotEmpty(queryResult)) {
-      Set<Long> personIds = queryResult.stream().map(PersonView::getPersonId)
-          .collect(Collectors.toSet());
+      Set<Long> personIds =
+          queryResult.stream().map(PersonView::getPersonId).collect(Collectors.toSet());
 
-      String programmeMembershipQuery = sqlQuerySupplier
-          .getQuery(SqlQuerySupplier.PROGRAMME_MEMBERSHIP_VIEW)
-          .replace("WHERECLAUSE", "where personId IN (:personIds)");
+      String programmeMembershipQuery =
+          sqlQuerySupplier.getQuery(SqlQuerySupplier.PROGRAMME_MEMBERSHIP_VIEW)
+              .replace("WHERECLAUSE", "where personId IN (:personIds)");
 
-      List<ProgrammeMembershipDto> programmeMembershipDtos = namedParameterJdbcTemplate
-          .query(programmeMembershipQuery,
-              new MapSqlParameterSource("personIds", personIds),
-              new ProgrammeMembershipRowMapper());
+      List<ProgrammeMembershipDto> programmeMembershipDtos = namedParameterJdbcTemplate.query(
+          programmeMembershipQuery, new MapSqlParameterSource("personIds", personIds),
+          new ProgrammeMembershipRowMapper());
 
       Map<Long, Set<ProgrammeMembershipDto>> personIdToProgrammeMembershipDtos = new HashMap<>();
 
@@ -426,11 +429,10 @@ public class PersonElasticSearchService {
   public void updateDocumentWithTrustData(List<PersonView> queryResult) {
     if (CollectionUtils.isNotEmpty(queryResult)) {
 
-      Set<Long> personIds = queryResult.stream().map(PersonView::getPersonId)
-          .collect(Collectors.toSet());
-      List<PersonTrustDto> personTrustDtos = namedParameterJdbcTemplate
-          .query(PERSON_TRUST_QUERY, new MapSqlParameterSource("personIds", personIds),
-              new PersonTrustRowMapper());
+      Set<Long> personIds =
+          queryResult.stream().map(PersonView::getPersonId).collect(Collectors.toSet());
+      List<PersonTrustDto> personTrustDtos = namedParameterJdbcTemplate.query(PERSON_TRUST_QUERY,
+          new MapSqlParameterSource("personIds", personIds), new PersonTrustRowMapper());
 
       Map<Long, Set<PersonTrustDto>> personIdToTrustIds = new HashMap<>();
 
