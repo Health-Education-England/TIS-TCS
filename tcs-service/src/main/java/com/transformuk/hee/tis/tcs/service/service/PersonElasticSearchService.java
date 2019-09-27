@@ -126,7 +126,6 @@ public class PersonElasticSearchService {
                 BoolQueryBuilder shouldQuery = new BoolQueryBuilder();
                 MatchQueryBuilder statusQueryBuilder = null;
 
-                // TODO Loop over several status values
                 ProgrammeMembershipStatus status =
                     ProgrammeMembershipStatus.valueOf(columnFilter.getValues().get(0).toString());
                 programmeMembershipStatusFilter = status;
