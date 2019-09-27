@@ -56,7 +56,7 @@ public class ProgrammeOrTrustFilterStrategy implements RoleBasedFilterStrategy {
       if (CollectionUtils.isNotEmpty(assignedTrusts)) {
         assignedTrusts
             .forEach(trust -> programmeOrTrustFilter.should(new NestedQueryBuilder("trusts",
-                new MatchQueryBuilder(PROGRAMME_MEMBERSHIPS_PROGRAMME_ID, trust.getId()),
+                new MatchQueryBuilder(TRUSTS_TRUST_ID, trust.getId()),
                 ScoreMode.None)));
       }
       return Optional.of(new Tuple<>(APPLIED_FILTERS, programmeOrTrustFilter));
