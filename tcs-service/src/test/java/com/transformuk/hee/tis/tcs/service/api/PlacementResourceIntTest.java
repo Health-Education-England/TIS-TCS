@@ -1287,7 +1287,7 @@ public class PlacementResourceIntTest {
     placementRepository.saveAndFlush(mockedPlacement);
 
     restPlacementMockMvc.perform(
-        get("/api/placements/overlapping?npn=YHD/RWA01/IMT/LT/003&fromDate=01/05/2019&toDate=04/06/2019")
+        get("/api/placements/overlapping?npn=YHD/RWA01/IMT/LT/003&fromDate=2019-05-01&toDate=2019-06-04")
         .accept(MediaType.APPLICATION_JSON))
         .andExpect(status().isOk()).andExpect(jsonPath("$.overlapping").value(false));
   }
