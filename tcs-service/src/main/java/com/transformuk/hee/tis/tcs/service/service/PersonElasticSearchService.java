@@ -120,26 +120,29 @@ public class PersonElasticSearchService {
 
           if (StringUtils.equals(columnFilter.getName(), "programmeMembershipStatus")) {
             // Only allow 'ProgrammeObserver's to apply this filter
-            if (permissionService.isProgrammeObserver()) {
-              Set<Long> programmeIds = permissionService.getUsersProgrammeIds();
-              for (Long programmeId : programmeIds) {
-                BoolQueryBuilder shouldQuery = new BoolQueryBuilder();
-                MatchQueryBuilder statusQueryBuilder = null;
-
-                ProgrammeMembershipStatus status =
-                    ProgrammeMembershipStatus.valueOf(columnFilter.getValues().get(0).toString());
-                programmeMembershipStatusFilter = status;
-                if (status.equals(ProgrammeMembershipStatus.CURRENT)) {
+            if (permissionService.isProgrammeObserver()
+                && CollectionUtils.isNotEmpty(permissionService.getUsersProgrammeIds())) {
+              MatchQueryBuilder statusQueryBuilder = null;
+              programmeMembershipStatusFilter =
+                  ProgrammeMembershipStatus.valueOf(columnFilter.getValues().get(0).toString());
+              switch (programmeMembershipStatusFilter) {
+                case CURRENT:
                   statusQueryBuilder = QueryBuilders
                       .matchQuery("programmeMemberships.programmeMembershipStatus", "CURRENT");
-                } else if (status.equals(ProgrammeMembershipStatus.PAST)) {
+                  break;
+                case PAST:
                   statusQueryBuilder = QueryBuilders
                       .matchQuery("programmeMemberships.programmeMembershipStatus", "PAST");
-                } else if (status.equals(ProgrammeMembershipStatus.FUTURE)) {
+                  break;
+                case FUTURE:
                   statusQueryBuilder = QueryBuilders
                       .matchQuery("programmeMemberships.programmeMembershipStatus", "FUTURE");
-                }
-
+                  break;
+                default:
+                  break;
+              }
+              for (Long programmeId : permissionService.getUsersProgrammeIds()) {
+                BoolQueryBuilder shouldQuery = new BoolQueryBuilder();
                 shouldQuery
                     .should(new MatchQueryBuilder("programmeMemberships.programmeId", programmeId))
                     .should(statusQueryBuilder).minimumShouldMatch(2);
