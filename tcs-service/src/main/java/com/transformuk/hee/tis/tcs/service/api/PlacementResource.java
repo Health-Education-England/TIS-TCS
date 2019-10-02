@@ -44,6 +44,7 @@ import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
+import uk.nhs.tis.StringConverter;
 
 /**
  * REST controller for managing Placement.
@@ -284,7 +285,8 @@ public class PlacementResource {
       @RequestParam(required = true) @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate toDate,
       @RequestParam(required = false) Long placementId) {
 
-    boolean overlapping = placementService.validateOverlappingPlacements(npn, fromDate, toDate, placementId);
+    String decodedNpn = StringConverter.getConverter(npn).decodeUrl().toString();
+    boolean overlapping = placementService.validateOverlappingPlacements(decodedNpn, fromDate, toDate, placementId);
     Map model = new HashMap<String, Boolean>();
     model.put("overlapping", overlapping);
     return ResponseEntity.ok().body(model);
