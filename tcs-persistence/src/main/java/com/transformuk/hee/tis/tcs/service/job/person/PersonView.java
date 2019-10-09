@@ -29,8 +29,10 @@ public class PersonView implements Serializable {
   @Field(type = FieldType.Text, analyzer = "standard", searchAnalyzer = "standard")
   private String fullName;
 
+  @Field(type = FieldType.Keyword)
   private String gmcNumber;
 
+  @Field(type = FieldType.Keyword)
   private String gdcNumber;
 
   @Field(type = FieldType.Keyword)
