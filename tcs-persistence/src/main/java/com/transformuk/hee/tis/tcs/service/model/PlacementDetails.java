@@ -1,20 +1,14 @@
 package com.transformuk.hee.tis.tcs.service.model;
 
+import com.transformuk.hee.tis.tcs.api.enumeration.DraftStatus;
 import com.transformuk.hee.tis.tcs.api.enumeration.PlacementStatus;
 import java.math.BigDecimal;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.util.HashSet;
+import java.util.Objects;
 import java.util.Set;
-import javax.persistence.CascadeType;
-import javax.persistence.Column;
-import javax.persistence.Entity;
-import javax.persistence.FetchType;
-import javax.persistence.GeneratedValue;
-import javax.persistence.GenerationType;
-import javax.persistence.Id;
-import javax.persistence.OneToMany;
-import javax.persistence.Table;
+import javax.persistence.*;
 
 /**
  * Holds the data from the placements table necessary to populate the {@link
@@ -67,6 +61,9 @@ public class PlacementDetails {
 
   @OneToMany(mappedBy = "placement", cascade = CascadeType.ALL, fetch = FetchType.EAGER, orphanRemoval = true)
   private Set<Comment> comments = new HashSet<>();
+  
+  @Enumerated(EnumType.STRING)
+  private DraftStatus draftStatus;
 
   /**
    * @return the placement status based on dateFrom and dateTo
@@ -229,6 +226,14 @@ public class PlacementDetails {
     this.comments = comments;
   }
 
+  public DraftStatus getDraftStatus() {
+    return draftStatus;
+  }
+
+  public void setDraftStatus(DraftStatus draftStatus) {
+    this.draftStatus = draftStatus;
+  }
+
   @Override
   public boolean equals(Object o) {
     if (this == o) {
@@ -240,78 +245,31 @@ public class PlacementDetails {
 
     PlacementDetails that = (PlacementDetails) o;
 
-    if (id != null ? !id.equals(that.id) : that.id != null) {
-      return false;
-    }
-    if (intrepidId != null ? !intrepidId.equals(that.intrepidId) : that.intrepidId != null) {
-      return false;
-    }
-    if (traineeId != null ? !traineeId.equals(that.traineeId) : that.traineeId != null) {
-      return false;
-    }
-    if (postId != null ? !postId.equals(that.postId) : that.postId != null) {
-      return false;
-    }
-    if (dateFrom != null ? !dateFrom.equals(that.dateFrom) : that.dateFrom != null) {
-      return false;
-    }
-    if (dateTo != null ? !dateTo.equals(that.dateTo) : that.dateTo != null) {
-      return false;
-    }
-    if (wholeTimeEquivalent != null ? !wholeTimeEquivalent.equals(that.wholeTimeEquivalent)
-        : that.wholeTimeEquivalent != null) {
-      return false;
-    }
-    if (siteId != null ? !siteId.equals(that.siteId) : that.siteId != null) {
-      return false;
-    }
-    if (siteCode != null ? !siteCode.equals(that.siteCode) : that.siteCode != null) {
-      return false;
-    }
-    if (gradeId != null ? !gradeId.equals(that.gradeId) : that.gradeId != null) {
-      return false;
-    }
-    if (gradeAbbreviation != null ? !gradeAbbreviation.equals(that.gradeAbbreviation)
-        : that.gradeAbbreviation != null) {
-      return false;
-    }
-    if (placementType != null ? !placementType.equals(that.placementType)
-        : that.placementType != null) {
-      return false;
-    }
-    if (trainingDescription != null ? !trainingDescription.equals(that.trainingDescription)
-        : that.trainingDescription != null) {
-      return false;
-    }
-    if (addedDate != null ? !addedDate.equals(that.addedDate) : that.addedDate != null) {
-      return false;
-    }
-    if (amendedDate != null ? !amendedDate.equals(that.amendedDate) : that.amendedDate != null) {
-      return false;
-    }
-    return localPostNumber != null ? localPostNumber.equals(that.localPostNumber)
-        : that.localPostNumber == null;
+    return Objects.equals(id, that.id) &&
+        Objects.equals(intrepidId, that.intrepidId) &&
+        Objects.equals(traineeId, that.traineeId) &&
+        Objects.equals(postId, that.postId) &&
+        Objects.equals(dateFrom, that.dateFrom) &&
+        Objects.equals(dateTo, that.dateTo) &&
+        Objects.equals(wholeTimeEquivalent, that.wholeTimeEquivalent) &&
+        Objects.equals(siteId, that.siteId) &&
+        Objects.equals(siteCode, that.siteCode) &&
+        Objects.equals(gradeId, that.gradeId) &&
+        Objects.equals(gradeAbbreviation, that.gradeAbbreviation) &&
+        Objects.equals(placementType, that.placementType) &&
+        Objects.equals(trainingDescription, that.trainingDescription) &&
+        Objects.equals(addedDate, that.addedDate) &&
+        Objects.equals(amendedDate, that.amendedDate) &&
+        Objects.equals(localPostNumber, that.localPostNumber) &&
+        Objects.equals(draftStatus, that.draftStatus);
   }
 
   @Override
   public int hashCode() {
-    int result = id != null ? id.hashCode() : 0;
-    result = 31 * result + (intrepidId != null ? intrepidId.hashCode() : 0);
-    result = 31 * result + (traineeId != null ? traineeId.hashCode() : 0);
-    result = 31 * result + (postId != null ? postId.hashCode() : 0);
-    result = 31 * result + (dateFrom != null ? dateFrom.hashCode() : 0);
-    result = 31 * result + (dateTo != null ? dateTo.hashCode() : 0);
-    result = 31 * result + (wholeTimeEquivalent != null ? wholeTimeEquivalent.hashCode() : 0);
-    result = 31 * result + (siteId != null ? siteId.hashCode() : 0);
-    result = 31 * result + (siteCode != null ? siteCode.hashCode() : 0);
-    result = 31 * result + (gradeId != null ? gradeId.hashCode() : 0);
-    result = 31 * result + (gradeAbbreviation != null ? gradeAbbreviation.hashCode() : 0);
-    result = 31 * result + (placementType != null ? placementType.hashCode() : 0);
-    result = 31 * result + (trainingDescription != null ? trainingDescription.hashCode() : 0);
-    result = 31 * result + (localPostNumber != null ? localPostNumber.hashCode() : 0);
-    result = 31 * result + (addedDate != null ? addedDate.hashCode() : 0);
-    result = 31 * result + (amendedDate != null ? amendedDate.hashCode() : 0);
-    return result;
+    return Objects
+        .hash(id, intrepidId, traineeId, postId, dateFrom, dateTo, wholeTimeEquivalent, siteId,
+            siteCode, gradeId, gradeAbbreviation, placementType, trainingDescription, localPostNumber,
+            addedDate, amendedDate, draftStatus);
   }
 
   @Override
@@ -333,6 +291,7 @@ public class PlacementDetails {
         ", localPostNumber='" + localPostNumber + '\'' +
         ", addedDate='" + addedDate + '\'' +
         ", amendedDate='" + amendedDate + '\'' +
+        ", draftStatus='" + draftStatus + '\'' +
         '}';
   }
 }

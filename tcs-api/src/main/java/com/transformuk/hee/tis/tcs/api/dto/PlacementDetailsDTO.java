@@ -2,12 +2,14 @@ package com.transformuk.hee.tis.tcs.api.dto;
 
 import com.transformuk.hee.tis.tcs.api.dto.validation.Create;
 import com.transformuk.hee.tis.tcs.api.dto.validation.Update;
+import com.transformuk.hee.tis.tcs.api.enumeration.DraftStatus;
 import com.transformuk.hee.tis.tcs.api.enumeration.PlacementStatus;
 import java.io.Serializable;
 import java.math.BigDecimal;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.util.HashSet;
+import java.util.Objects;
 import java.util.Set;
 import javax.validation.constraints.DecimalMin;
 import javax.validation.constraints.NotNull;
@@ -82,6 +84,8 @@ public class PlacementDetailsDTO implements Serializable {
   private Set<PlacementSupervisorDTO> supervisors = new HashSet<>();
 
   private Set<PlacementCommentDTO> comments = new HashSet<>();
+
+  private DraftStatus draftStatus;
 
   public Long getId() {
     return id;
@@ -311,6 +315,14 @@ public class PlacementDetailsDTO implements Serializable {
     this.comments = comments;
   }
 
+  public DraftStatus getDraftStatus() {
+    return draftStatus;
+  }
+
+  public void setDraftStatus(DraftStatus draftStatus) {
+    this.draftStatus = draftStatus;
+  }
+
   @Override
   public boolean equals(final Object o) {
     if (this == o) {
@@ -322,106 +334,38 @@ public class PlacementDetailsDTO implements Serializable {
 
     final PlacementDetailsDTO that = (PlacementDetailsDTO) o;
 
-    if (id != null ? !id.equals(that.id) : that.id != null) {
-      return false;
-    }
-    if (intrepidId != null ? !intrepidId.equals(that.intrepidId) : that.intrepidId != null) {
-      return false;
-    }
-    if (traineeId != null ? !traineeId.equals(that.traineeId) : that.traineeId != null) {
-      return false;
-    }
-    if (traineeFirstName != null ? !traineeFirstName.equals(that.traineeFirstName)
-        : that.traineeFirstName != null) {
-      return false;
-    }
-    if (traineeLastName != null ? !traineeLastName.equals(that.traineeLastName)
-        : that.traineeLastName != null) {
-      return false;
-    }
-    if (traineeGmcNumber != null ? !traineeGmcNumber.equals(that.traineeGmcNumber)
-        : that.traineeGmcNumber != null) {
-      return false;
-    }
-    if (nationalPostNumber != null ? !nationalPostNumber.equals(that.nationalPostNumber)
-        : that.nationalPostNumber != null) {
-      return false;
-    }
-    if (dateFrom != null ? !dateFrom.equals(that.dateFrom) : that.dateFrom != null) {
-      return false;
-    }
-    if (dateTo != null ? !dateTo.equals(that.dateTo) : that.dateTo != null) {
-      return false;
-    }
-    if (wholeTimeEquivalent != null ? !wholeTimeEquivalent.equals(that.wholeTimeEquivalent)
-        : that.wholeTimeEquivalent != null) {
-      return false;
-    }
-    if (siteCode != null ? !siteCode.equals(that.siteCode) : that.siteCode != null) {
-      return false;
-    }
-    if (siteName != null ? !siteName.equals(that.siteName) : that.siteName != null) {
-      return false;
-    }
-    if (gradeAbbreviation != null ? !gradeAbbreviation.equals(that.gradeAbbreviation)
-        : that.gradeAbbreviation != null) {
-      return false;
-    }
-    if (gradeName != null ? !gradeName.equals(that.gradeName) : that.gradeName != null) {
-      return false;
-    }
-    if (placementType != null ? !placementType.equals(that.placementType)
-        : that.placementType != null) {
-      return false;
-    }
-    if (owner != null ? !owner.equals(that.owner) : that.owner != null) {
-      return false;
-    }
-    if (trainingDescription != null ? !trainingDescription.equals(that.trainingDescription)
-        : that.trainingDescription != null) {
-      return false;
-    }
-    if (status != that.status) {
-      return false;
-    }
-    if (postId != null ? !postId.equals(that.postId) : that.postId != null) {
-      return false;
-    }
-    if (addedDate != null ? !addedDate.equals(that.addedDate) : that.addedDate != null) {
-      return false;
-    }
-    if (amendedDate != null ? !amendedDate.equals(that.amendedDate) : that.amendedDate != null) {
-      return false;
-    }
-    return localPostNumber != null ? localPostNumber.equals(that.localPostNumber)
-        : that.localPostNumber == null;
+    return Objects.equals(id, that.id) &&
+        Objects.equals(intrepidId, that.intrepidId) &&
+        Objects.equals(traineeId, that.traineeId) &&
+        Objects.equals(traineeFirstName, that.traineeFirstName) &&
+        Objects.equals(traineeLastName, that.traineeLastName) &&
+        Objects.equals(traineeGmcNumber, that.traineeGmcNumber) &&
+        Objects.equals(nationalPostNumber, that.nationalPostNumber) &&
+        Objects.equals(dateFrom, that.dateFrom) &&
+        Objects.equals(dateTo, that.dateTo) &&
+        Objects.equals(wholeTimeEquivalent, that.wholeTimeEquivalent) &&
+        Objects.equals(siteCode, that.siteCode) &&
+        Objects.equals(siteName, that.siteName) &&
+        Objects.equals(gradeAbbreviation, that.gradeAbbreviation) &&
+        Objects.equals(gradeName, that.gradeName) &&
+        Objects.equals(placementType, that.placementType) &&
+        Objects.equals(owner, that.owner) &&
+        Objects.equals(trainingDescription, that.trainingDescription) &&
+        Objects.equals(status, that.status) &&
+        Objects.equals(postId, that.postId) &&
+        Objects.equals(addedDate, that.addedDate) &&
+        Objects.equals(amendedDate, that.amendedDate) &&
+        Objects.equals(localPostNumber, that.localPostNumber) &&
+        Objects.equals(draftStatus, that.draftStatus);
   }
 
   @Override
   public int hashCode() {
-    int result = id != null ? id.hashCode() : 0;
-    result = 31 * result + (intrepidId != null ? intrepidId.hashCode() : 0);
-    result = 31 * result + (traineeId != null ? traineeId.hashCode() : 0);
-    result = 31 * result + (traineeFirstName != null ? traineeFirstName.hashCode() : 0);
-    result = 31 * result + (traineeLastName != null ? traineeLastName.hashCode() : 0);
-    result = 31 * result + (traineeGmcNumber != null ? traineeGmcNumber.hashCode() : 0);
-    result = 31 * result + (nationalPostNumber != null ? nationalPostNumber.hashCode() : 0);
-    result = 31 * result + (dateFrom != null ? dateFrom.hashCode() : 0);
-    result = 31 * result + (dateTo != null ? dateTo.hashCode() : 0);
-    result = 31 * result + (wholeTimeEquivalent != null ? wholeTimeEquivalent.hashCode() : 0);
-    result = 31 * result + (siteCode != null ? siteCode.hashCode() : 0);
-    result = 31 * result + (siteName != null ? siteName.hashCode() : 0);
-    result = 31 * result + (gradeAbbreviation != null ? gradeAbbreviation.hashCode() : 0);
-    result = 31 * result + (gradeName != null ? gradeName.hashCode() : 0);
-    result = 31 * result + (placementType != null ? placementType.hashCode() : 0);
-    result = 31 * result + (owner != null ? owner.hashCode() : 0);
-    result = 31 * result + (trainingDescription != null ? trainingDescription.hashCode() : 0);
-    result = 31 * result + (status != null ? status.hashCode() : 0);
-    result = 31 * result + (postId != null ? postId.hashCode() : 0);
-    result = 31 * result + (addedDate != null ? addedDate.hashCode() : 0);
-    result = 31 * result + (amendedDate != null ? amendedDate.hashCode() : 0);
-    result = 31 * result + (localPostNumber != null ? localPostNumber.hashCode() : 0);
-    return result;
+    return Objects
+        .hash(id, intrepidId, traineeId, traineeFirstName, traineeLastName, traineeGmcNumber,
+            nationalPostNumber, dateFrom, dateTo, wholeTimeEquivalent, siteCode, siteName,
+            gradeAbbreviation, gradeName, placementType, owner, trainingDescription,
+            status, postId, addedDate, amendedDate, localPostNumber, draftStatus);
   }
 
   @Override
@@ -449,6 +393,7 @@ public class PlacementDetailsDTO implements Serializable {
         ", addedDate=" + addedDate +
         ", amendedDate=" + amendedDate +
         ", localPostNumber='" + localPostNumber + '\'' +
+        ", draftStatus='" + draftStatus + '\'' +
         '}';
   }
 }
