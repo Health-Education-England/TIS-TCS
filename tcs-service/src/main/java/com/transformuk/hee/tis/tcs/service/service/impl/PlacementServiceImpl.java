@@ -14,6 +14,7 @@ import com.transformuk.hee.tis.tcs.api.dto.PlacementSiteDTO;
 import com.transformuk.hee.tis.tcs.api.dto.PlacementSpecialtyDTO;
 import com.transformuk.hee.tis.tcs.api.dto.PlacementSummaryDTO;
 import com.transformuk.hee.tis.tcs.api.dto.PlacementSupervisorDTO;
+import com.transformuk.hee.tis.tcs.api.enumeration.DraftStatus;
 import com.transformuk.hee.tis.tcs.api.enumeration.PlacementStatus;
 import com.transformuk.hee.tis.tcs.api.enumeration.PostSpecialtyType;
 import com.transformuk.hee.tis.tcs.api.enumeration.TCSDateColumns;
@@ -154,6 +155,12 @@ public class PlacementServiceImpl implements PlacementService {
   @Transactional
   @Override
   public PlacementDetailsDTO createDetails(final PlacementDetailsDTO placementDetailsDTO) {
+    // Before the Draft Approval process is done, set the DraftStatus to Approved
+    // This should be removed when Draft Approval process is done
+    if (placementDetailsDTO.getDraftStatus() == null) {
+      placementDetailsDTO.setDraftStatus(DraftStatus.APPROVED);
+    }
+
     log.debug("Request to create Placement : {}", placementDetailsDTO);
     PlacementDetails placementDetails = placementDetailsMapper
         .placementDetailsDTOToPlacementDetails(placementDetailsDTO);
@@ -216,6 +223,9 @@ public class PlacementServiceImpl implements PlacementService {
   public boolean isEligibleForChangedDatesNotification(PlacementDetailsDTO updatedPlacementDetails,
       Placement existingPlacement) {
 
+    if (updatedPlacementDetails.getDraftStatus() != DraftStatus.APPROVED) {
+      return false;
+    }
     if (existingPlacement != null && updatedPlacementDetails != null &&
         isEligibleForNotification(existingPlacement, updatedPlacementDetails)) {
       Optional<Post> optionalExistingPlacementPost = postRepository
@@ -234,7 +244,8 @@ public class PlacementServiceImpl implements PlacementService {
       PlacementDetailsDTO updatedPlacementDetails, Placement placementBeforeUpdate,
       boolean currentPlacementEdit) {
 
-    if (placementBeforeUpdate != null && updatedPlacementDetails != null) {
+    if (updatedPlacementDetails.getDraftStatus() == DraftStatus.APPROVED
+      &&placementBeforeUpdate != null && updatedPlacementDetails != null) {
       // create NOT1 type record. Current and next trainee details for the post number.
       // Create NOT4 type record
       log.debug("Change in hire or end date. Marking for notification : {} ",
@@ -402,6 +413,9 @@ public class PlacementServiceImpl implements PlacementService {
     final List<EsrNotification> allEsrNotifications = new ArrayList<>();
 
     final Placement placementToDelete = placementRepository.findById(id).orElse(null);
+    if (placementToDelete.getDraftStatus() != DraftStatus.APPROVED) {
+      return;
+    }
     // Only future placements can be deleted.
     if (placementToDelete != null && placementToDelete.getDateFrom() != null && placementToDelete
         .getDateFrom().isBefore(LocalDate.now(clock).plusWeeks(13))) {
@@ -746,6 +760,10 @@ public class PlacementServiceImpl implements PlacementService {
 
   private void handleEsrNewPlacementNotification(final PlacementDetailsDTO placementDetailsDTO,
       final PlacementDetails placementDetails) {
+
+    if (placementDetailsDTO.getDraftStatus() != DraftStatus.APPROVED) {
+      return;
+    }
 
     log.debug("Handling ESR notifications for new placement creation for deanery number {}",
         placementDetailsDTO.getLocalPostNumber());
