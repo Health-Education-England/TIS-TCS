@@ -11,6 +11,7 @@ import com.transformuk.hee.tis.tcs.api.dto.PlacementDTO;
 import com.transformuk.hee.tis.tcs.api.dto.PlacementDetailsDTO;
 import com.transformuk.hee.tis.tcs.api.dto.PlacementSiteDTO;
 import com.transformuk.hee.tis.tcs.api.dto.PlacementSummaryDTO;
+import com.transformuk.hee.tis.tcs.api.enumeration.DraftStatus;
 import com.transformuk.hee.tis.tcs.api.enumeration.PlacementSiteType;
 import com.transformuk.hee.tis.tcs.service.model.Placement;
 import com.transformuk.hee.tis.tcs.service.model.PlacementDetails;
@@ -283,6 +284,7 @@ public class PlacementServiceImplTest {
 
     PlacementDetailsDTO updatedPlacementDetails = new PlacementDetailsDTO();
     updatedPlacementDetails.setDateFrom(dateOneMonthsAgo);
+    updatedPlacementDetails.setDraftStatus(DraftStatus.APPROVED);
 
     Post foundPostMock = mock(Post.class);
 
