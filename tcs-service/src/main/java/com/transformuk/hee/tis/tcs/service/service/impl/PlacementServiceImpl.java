@@ -245,7 +245,7 @@ public class PlacementServiceImpl implements PlacementService {
       boolean currentPlacementEdit) {
 
     if (updatedPlacementDetails.getDraftStatus() == DraftStatus.APPROVED
-      &&placementBeforeUpdate != null && updatedPlacementDetails != null) {
+      && placementBeforeUpdate != null && updatedPlacementDetails != null) {
       // create NOT1 type record. Current and next trainee details for the post number.
       // Create NOT4 type record
       log.debug("Change in hire or end date. Marking for notification : {} ",

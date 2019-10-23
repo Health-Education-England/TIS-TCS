@@ -584,4 +584,17 @@ public class PlacementServiceImplTest {
     Assert.assertThat("When there's no placements found, should return false",
         result, CoreMatchers.is(false));
   }
+
+  @Test
+  public void isEligibleForChangedDatesNotificationReturnFalseWhenDraftIsNotApproved() {
+    PlacementDetailsDTO placementDetailsDto = new PlacementDetailsDTO();
+    placementDetailsDto.setId(1L);
+    placementDetailsDto.setDraftStatus(DraftStatus.DRAFT);
+
+    Placement placement = new Placement();
+    placement.setId(1L);
+    boolean returnValue = testObj.isEligibleForChangedDatesNotification(placementDetailsDto, placement);
+    Assert.assertThat("When draft placement is not approved, it is not elegible for ChangedDatesNotification",
+        returnValue, CoreMatchers.is(false));
+  }
 }
