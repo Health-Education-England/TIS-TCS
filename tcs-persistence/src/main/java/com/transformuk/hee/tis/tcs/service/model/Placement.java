@@ -1,7 +1,7 @@
 package com.transformuk.hee.tis.tcs.service.model;
 
 import com.transformuk.hee.tis.tcs.api.dto.PlacementSummaryDTO;
-import com.transformuk.hee.tis.tcs.api.enumeration.DraftStatus;
+import com.transformuk.hee.tis.tcs.api.enumeration.LifecycleState;
 import com.transformuk.hee.tis.tcs.api.enumeration.Status;
 import java.io.Serializable;
 import java.math.BigDecimal;
@@ -43,7 +43,7 @@ import javax.persistence.SqlResultSetMapping;
             @ColumnResult(name = "traineeId"),
             @ColumnResult(name = "placementId"),
             @ColumnResult(name = "placementSpecialtyType"),
-            @ColumnResult(name = "draftStatus")
+            @ColumnResult(name = "lifecycleState")
         })
 })
 @Entity
@@ -91,7 +91,7 @@ public class Placement implements Serializable {
   @Enumerated(EnumType.STRING)
   private Status status;
   @Enumerated(EnumType.STRING)
-  private DraftStatus draftStatus;
+  private LifecycleState lifecycleState;
 
   public Long getId() {
     return id;
@@ -229,12 +229,12 @@ public class Placement implements Serializable {
     this.status = status;
   }
 
-  public DraftStatus getDraftStatus() {
-    return draftStatus;
+  public LifecycleState getLifecycleState() {
+    return lifecycleState;
   }
 
-  public void setDraftStatus(DraftStatus draftStatus) {
-    this.draftStatus = draftStatus;
+  public void setLifecycleState(LifecycleState lifecycleState) {
+    this.lifecycleState = lifecycleState;
   }
 
   @Override
@@ -259,7 +259,7 @@ public class Placement implements Serializable {
         Objects.equals(trainingDescription, placement.trainingDescription) &&
         Objects.equals(localPostNumber, placement.localPostNumber) &&
         status == placement.status &&
-        draftStatus == placement.draftStatus;
+        lifecycleState == placement.lifecycleState;
   }
 
   @Override
@@ -267,7 +267,7 @@ public class Placement implements Serializable {
     return Objects
         .hash(id, intrepidId, siteCode, gradeAbbreviation, siteId, gradeId, dateFrom, dateTo,
             placementType, placementWholeTimeEquivalent, trainingDescription, localPostNumber,
-            status, draftStatus);
+            status, lifecycleState);
   }
 
   @Override
@@ -286,7 +286,7 @@ public class Placement implements Serializable {
         ", trainingDescription='" + trainingDescription + '\'' +
         ", localPostNumber='" + localPostNumber + '\'' +
         ", status=" + status +
-        ". draftStatus='" + draftStatus + '\'' +
+        ". lifecycleState='" + lifecycleState + '\'' +
         '}';
   }
 }

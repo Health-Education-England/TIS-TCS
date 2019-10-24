@@ -2,7 +2,7 @@ package com.transformuk.hee.tis.tcs.api.dto;
 
 import com.transformuk.hee.tis.tcs.api.dto.validation.Create;
 import com.transformuk.hee.tis.tcs.api.dto.validation.Update;
-import com.transformuk.hee.tis.tcs.api.enumeration.DraftStatus;
+import com.transformuk.hee.tis.tcs.api.enumeration.LifecycleState;
 import com.transformuk.hee.tis.tcs.api.enumeration.PlacementStatus;
 import java.io.Serializable;
 import java.math.BigDecimal;
@@ -85,7 +85,7 @@ public class PlacementDetailsDTO implements Serializable {
 
   private Set<PlacementCommentDTO> comments = new HashSet<>();
 
-  private DraftStatus draftStatus;
+  private LifecycleState lifecycleState;
 
   public Long getId() {
     return id;
@@ -315,12 +315,12 @@ public class PlacementDetailsDTO implements Serializable {
     this.comments = comments;
   }
 
-  public DraftStatus getDraftStatus() {
-    return draftStatus;
+  public LifecycleState getLifecycleState() {
+    return lifecycleState;
   }
 
-  public void setDraftStatus(DraftStatus draftStatus) {
-    this.draftStatus = draftStatus;
+  public void setLifecycleState(LifecycleState lifecycleState) {
+    this.lifecycleState = lifecycleState;
   }
 
   @Override
@@ -356,7 +356,7 @@ public class PlacementDetailsDTO implements Serializable {
         Objects.equals(addedDate, that.addedDate) &&
         Objects.equals(amendedDate, that.amendedDate) &&
         Objects.equals(localPostNumber, that.localPostNumber) &&
-        Objects.equals(draftStatus, that.draftStatus);
+        Objects.equals(lifecycleState, that.lifecycleState);
   }
 
   @Override
@@ -365,7 +365,7 @@ public class PlacementDetailsDTO implements Serializable {
         .hash(id, intrepidId, traineeId, traineeFirstName, traineeLastName, traineeGmcNumber,
             nationalPostNumber, dateFrom, dateTo, wholeTimeEquivalent, siteCode, siteName,
             gradeAbbreviation, gradeName, placementType, owner, trainingDescription,
-            status, postId, addedDate, amendedDate, localPostNumber, draftStatus);
+            status, postId, addedDate, amendedDate, localPostNumber, lifecycleState);
   }
 
   @Override
@@ -393,7 +393,7 @@ public class PlacementDetailsDTO implements Serializable {
         ", addedDate=" + addedDate +
         ", amendedDate=" + amendedDate +
         ", localPostNumber='" + localPostNumber + '\'' +
-        ", draftStatus='" + draftStatus + '\'' +
+        ", lifecycleState='" + lifecycleState + '\'' +
         '}';
   }
 }

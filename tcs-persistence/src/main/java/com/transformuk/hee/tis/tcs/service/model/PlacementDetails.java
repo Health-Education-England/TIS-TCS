@@ -1,6 +1,6 @@
 package com.transformuk.hee.tis.tcs.service.model;
 
-import com.transformuk.hee.tis.tcs.api.enumeration.DraftStatus;
+import com.transformuk.hee.tis.tcs.api.enumeration.LifecycleState;
 import com.transformuk.hee.tis.tcs.api.enumeration.PlacementStatus;
 import java.math.BigDecimal;
 import java.time.LocalDate;
@@ -61,9 +61,9 @@ public class PlacementDetails {
 
   @OneToMany(mappedBy = "placement", cascade = CascadeType.ALL, fetch = FetchType.EAGER, orphanRemoval = true)
   private Set<Comment> comments = new HashSet<>();
-  
+
   @Enumerated(EnumType.STRING)
-  private DraftStatus draftStatus;
+  private LifecycleState lifecycleState;
 
   /**
    * @return the placement status based on dateFrom and dateTo
@@ -226,12 +226,12 @@ public class PlacementDetails {
     this.comments = comments;
   }
 
-  public DraftStatus getDraftStatus() {
-    return draftStatus;
+  public LifecycleState getLifecycleState() {
+    return lifecycleState;
   }
 
-  public void setDraftStatus(DraftStatus draftStatus) {
-    this.draftStatus = draftStatus;
+  public void setLifecycleState(LifecycleState lifecycleState) {
+    this.lifecycleState = lifecycleState;
   }
 
   @Override
@@ -261,7 +261,7 @@ public class PlacementDetails {
         Objects.equals(addedDate, that.addedDate) &&
         Objects.equals(amendedDate, that.amendedDate) &&
         Objects.equals(localPostNumber, that.localPostNumber) &&
-        Objects.equals(draftStatus, that.draftStatus);
+        Objects.equals(lifecycleState, that.lifecycleState);
   }
 
   @Override
@@ -269,7 +269,7 @@ public class PlacementDetails {
     return Objects
         .hash(id, intrepidId, traineeId, postId, dateFrom, dateTo, wholeTimeEquivalent, siteId,
             siteCode, gradeId, gradeAbbreviation, placementType, trainingDescription, localPostNumber,
-            addedDate, amendedDate, draftStatus);
+            addedDate, amendedDate, lifecycleState);
   }
 
   @Override
@@ -291,7 +291,7 @@ public class PlacementDetails {
         ", localPostNumber='" + localPostNumber + '\'' +
         ", addedDate='" + addedDate + '\'' +
         ", amendedDate='" + amendedDate + '\'' +
-        ", draftStatus='" + draftStatus + '\'' +
+        ", lifecycleState='" + lifecycleState + '\'' +
         '}';
   }
 }

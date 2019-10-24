@@ -27,7 +27,7 @@ import com.transformuk.hee.tis.tcs.api.dto.PlacementDTO;
 import com.transformuk.hee.tis.tcs.api.dto.PlacementDetailsDTO;
 import com.transformuk.hee.tis.tcs.api.dto.PlacementSupervisorDTO;
 import com.transformuk.hee.tis.tcs.api.enumeration.CommentSource;
-import com.transformuk.hee.tis.tcs.api.enumeration.DraftStatus;
+import com.transformuk.hee.tis.tcs.api.enumeration.LifecycleState;
 import com.transformuk.hee.tis.tcs.service.Application;
 import com.transformuk.hee.tis.tcs.service.api.decorator.AsyncReferenceService;
 import com.transformuk.hee.tis.tcs.service.api.decorator.PersonBasicDetailsRepositoryAccessor;
@@ -395,7 +395,7 @@ public class PlacementResourceIntTest {
     final String postNumber = "EOE/RGT00/021/FY1/010";
     final String placementType = "In Post";
 
-    placementDetails.setDraftStatus(DraftStatus.DRAFT);
+    placementDetails.setLifecycleState(LifecycleState.DRAFT);
 
     final Post post = postRepository.findById(placementDetails.getPostId()).orElse(null);
     post.setNationalPostNumber(postNumber);
@@ -426,7 +426,7 @@ public class PlacementResourceIntTest {
     placementDetails.setDateFrom(UPDATED_DATE_FROM.plusMonths(5));
     placementDetails.setDateTo(UPDATED_DATE_TO.plusMonths(8));
     placementDetails.setPlacementType(placementType);
-    placementDetails.setDraftStatus(DraftStatus.APPROVED);
+    placementDetails.setLifecycleState(LifecycleState.APPROVED);
 
     final Post post = postRepository.findById(placementDetails.getPostId()).orElse(null);
     post.setNationalPostNumber(postNumber);
@@ -674,7 +674,7 @@ public class PlacementResourceIntTest {
     final String placementType = "In Post";
 
     placementDetails.setPlacementType(placementType);
-    placementDetails.setDraftStatus(DraftStatus.DRAFT);
+    placementDetails.setLifecycleState(LifecycleState.DRAFT);
     placementDetailsRepository.saveAndFlush(placementDetails);
 
     final Post post = postRepository.findById(placementDetails.getPostId()).orElse(null);
@@ -694,7 +694,7 @@ public class PlacementResourceIntTest {
     updatedPlacement.setTrainingDescription(UPDATED_TRAINING_DESCRPTION);
     updatedPlacement.setPlacementType(placementType);
     updatedPlacement.setWholeTimeEquivalent(UPDATED_PLACEMENT_WHOLE_TIME_EQUIVALENT);
-    updatedPlacement.setDraftStatus(DraftStatus.DRAFT);
+    updatedPlacement.setLifecycleState(LifecycleState.DRAFT);
     final PlacementDetailsDTO placementDTO = placementDetailsMapper
         .placementDetailsToPlacementDetailsDTO(updatedPlacement);
 
@@ -718,7 +718,7 @@ public class PlacementResourceIntTest {
     placementDetails.setDateFrom(UPDATED_DATE_FROM.minusMonths(2));
     placementDetails.setDateTo(UPDATED_DATE_TO.plusMonths(2));
     placementDetails.setPlacementType(placementType);
-    placementDetails.setDraftStatus(DraftStatus.APPROVED);
+    placementDetails.setLifecycleState(LifecycleState.APPROVED);
     placementDetailsRepository.saveAndFlush(placementDetails);
 
     final Post post = postRepository.findById(placementDetails.getPostId()).orElse(null);
@@ -738,7 +738,7 @@ public class PlacementResourceIntTest {
     updatedPlacement.setTrainingDescription(UPDATED_TRAINING_DESCRPTION);
     updatedPlacement.setPlacementType(placementType);
     updatedPlacement.setWholeTimeEquivalent(UPDATED_PLACEMENT_WHOLE_TIME_EQUIVALENT);
-    updatedPlacement.setDraftStatus(DraftStatus.APPROVED);
+    updatedPlacement.setLifecycleState(LifecycleState.APPROVED);
     final PlacementDetailsDTO placementDTO = placementDetailsMapper
         .placementDetailsToPlacementDetailsDTO(updatedPlacement);
 
@@ -785,7 +785,7 @@ public class PlacementResourceIntTest {
     placementDetails.setDateFrom(UPDATED_DATE_FROM.plusMonths(1));
     placementDetails.setDateTo(UPDATED_DATE_TO.plusMonths(2));
     placementDetails.setPlacementType(placementType);
-    placementDetails.setDraftStatus(DraftStatus.APPROVED);
+    placementDetails.setLifecycleState(LifecycleState.APPROVED);
     placementDetailsRepository.saveAndFlush(placementDetails);
 
     final Post post = postRepository.findById(placementDetails.getPostId()).orElse(null);
@@ -806,7 +806,7 @@ public class PlacementResourceIntTest {
     updatedPlacement.setTrainingDescription(UPDATED_TRAINING_DESCRPTION);
     updatedPlacement.setPlacementType(placementType);
     updatedPlacement.setWholeTimeEquivalent(UPDATED_PLACEMENT_WHOLE_TIME_EQUIVALENT);
-    updatedPlacement.setDraftStatus(DraftStatus.APPROVED);
+    updatedPlacement.setLifecycleState(LifecycleState.APPROVED);
     final PlacementDetailsDTO placementDTO = placementDetailsMapper
         .placementDetailsToPlacementDetailsDTO(updatedPlacement);
 
@@ -932,7 +932,7 @@ public class PlacementResourceIntTest {
   @Test
   @Transactional
   public void deleteDraftPlacementShouldNotSendEsrNotification() throws Exception {
-    placementDetails.setDraftStatus(DraftStatus.DRAFT);
+    placementDetails.setLifecycleState(LifecycleState.DRAFT);
     placementDetailsRepository.saveAndFlush(placementDetails);
 
     final String localPostNumber = "EOE/RGT00/004/STR/704";
@@ -958,7 +958,7 @@ public class PlacementResourceIntTest {
     placementDetails.setDateFrom(tomorrow);
     placementDetails.setLocalPostNumber(localPostNumber);
     placementDetails.setPlacementType("In Post");
-    placementDetails.setDraftStatus(DraftStatus.APPROVED);
+    placementDetails.setLifecycleState(LifecycleState.APPROVED);
     placementDetailsRepository.saveAndFlush(placementDetails);
 
     final Post post = postRepository.findById(placementDetails.getPostId()).orElse(null);
@@ -1035,7 +1035,7 @@ public class PlacementResourceIntTest {
     placementDetails.setDateFrom(startDate);
     placementDetails.setDateTo(startDate.plusMonths(3));
     placementDetails.setLocalPostNumber(localPostNumber);
-    placementDetails.setDraftStatus(DraftStatus.APPROVED);
+    placementDetails.setLifecycleState(LifecycleState.APPROVED);
     placementDetailsRepository.saveAndFlush(placementDetails);
 
     final Post post = postRepository.findById(placementDetails.getPostId()).orElse(null);
@@ -1075,7 +1075,7 @@ public class PlacementResourceIntTest {
 
     futurePlacementToDelete.setDateFrom(tomorrow);
     futurePlacementToDelete.setLocalPostNumber(localPostNumber);
-    futurePlacementToDelete.setDraftStatus(DraftStatus.APPROVED);
+    futurePlacementToDelete.setLifecycleState(LifecycleState.APPROVED);
     placementDetailsRepository.saveAndFlush(futurePlacementToDelete);
 
     final Post post = postRepository.findById(futurePlacementToDelete.getPostId()).orElse(null);
@@ -1103,7 +1103,7 @@ public class PlacementResourceIntTest {
     currentPlacement.setPostId(post.getId());
     currentPlacement.setPlacementType("In Post");
     currentPlacement.setWholeTimeEquivalent(new BigDecimal(1.0));
-    currentPlacement.setDraftStatus(DraftStatus.APPROVED);
+    currentPlacement.setLifecycleState(LifecycleState.APPROVED);
     placementDetailsRepository.saveAndFlush(currentPlacement);
 
     final ContactDetails currentTraineeContactDetails = createContactDetails(currentPlacement,

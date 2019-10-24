@@ -14,7 +14,7 @@ import com.transformuk.hee.tis.tcs.api.dto.PlacementSiteDTO;
 import com.transformuk.hee.tis.tcs.api.dto.PlacementSpecialtyDTO;
 import com.transformuk.hee.tis.tcs.api.dto.PlacementSummaryDTO;
 import com.transformuk.hee.tis.tcs.api.dto.PlacementSupervisorDTO;
-import com.transformuk.hee.tis.tcs.api.enumeration.DraftStatus;
+import com.transformuk.hee.tis.tcs.api.enumeration.LifecycleState;
 import com.transformuk.hee.tis.tcs.api.enumeration.PlacementStatus;
 import com.transformuk.hee.tis.tcs.api.enumeration.PostSpecialtyType;
 import com.transformuk.hee.tis.tcs.api.enumeration.TCSDateColumns;
@@ -157,11 +157,10 @@ public class PlacementServiceImpl implements PlacementService {
   public PlacementDetailsDTO createDetails(final PlacementDetailsDTO placementDetailsDTO) {
     // Before the Draft Approval process is done, set the DraftStatus to Approved
     // This should be removed when Draft Approval process is done
-    if (placementDetailsDTO.getDraftStatus() == null) {
-      placementDetailsDTO.setDraftStatus(DraftStatus.APPROVED);
+    if (placementDetailsDTO.getLifecycleState() == null) {
+      placementDetailsDTO.setLifecycleState(LifecycleState.APPROVED);
     }
-
-    log.debug("Request to create Placement : {}", placementDetailsDTO);
+      log.debug("Request to create Placement : {}", placementDetailsDTO);
     PlacementDetails placementDetails = placementDetailsMapper
         .placementDetailsDTOToPlacementDetails(placementDetailsDTO);
     updateStoredCommentsWithChangesOrAdd(placementDetails);
@@ -223,7 +222,7 @@ public class PlacementServiceImpl implements PlacementService {
   public boolean isEligibleForChangedDatesNotification(PlacementDetailsDTO updatedPlacementDetails,
       Placement existingPlacement) {
 
-    if (updatedPlacementDetails.getDraftStatus() != DraftStatus.APPROVED) {
+    if (updatedPlacementDetails.getLifecycleState() != LifecycleState.APPROVED) {
       return false;
     }
     if (existingPlacement != null && updatedPlacementDetails != null &&
@@ -244,7 +243,7 @@ public class PlacementServiceImpl implements PlacementService {
       PlacementDetailsDTO updatedPlacementDetails, Placement placementBeforeUpdate,
       boolean currentPlacementEdit) {
 
-    if (updatedPlacementDetails.getDraftStatus() == DraftStatus.APPROVED
+    if (updatedPlacementDetails.getLifecycleState() == LifecycleState.APPROVED
       && placementBeforeUpdate != null && updatedPlacementDetails != null) {
       // create NOT1 type record. Current and next trainee details for the post number.
       // Create NOT4 type record
@@ -413,7 +412,7 @@ public class PlacementServiceImpl implements PlacementService {
     final List<EsrNotification> allEsrNotifications = new ArrayList<>();
 
     final Placement placementToDelete = placementRepository.findById(id).orElse(null);
-    if (placementToDelete.getDraftStatus() != DraftStatus.APPROVED) {
+    if (placementToDelete.getLifecycleState() != LifecycleState.APPROVED) {
       return;
     }
     // Only future placements can be deleted.
@@ -761,7 +760,7 @@ public class PlacementServiceImpl implements PlacementService {
   private void handleEsrNewPlacementNotification(final PlacementDetailsDTO placementDetailsDTO,
       final PlacementDetails placementDetails) {
 
-    if (placementDetailsDTO.getDraftStatus() != DraftStatus.APPROVED) {
+    if (placementDetailsDTO.getLifecycleState() != LifecycleState.APPROVED) {
       return;
     }
 
