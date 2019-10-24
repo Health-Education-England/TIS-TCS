@@ -1,7 +1,6 @@
 package com.transformuk.hee.tis.tcs.service.repository;
 
 import com.transformuk.hee.tis.tcs.service.model.ProgrammeCurriculum;
-import com.transformuk.hee.tis.tcs.service.model.ProgrammeCurriculumPK;
 import com.transformuk.hee.tis.tcs.service.model.ProgrammeMembership;
 import java.util.List;
 import org.springframework.data.jpa.repository.JpaRepository;
