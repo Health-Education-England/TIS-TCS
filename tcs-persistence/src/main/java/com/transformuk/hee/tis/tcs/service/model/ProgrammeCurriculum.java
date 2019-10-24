@@ -67,6 +67,11 @@ public class ProgrammeCurriculum implements Serializable {
   public void setGmcProgrammeCode(String gmcProgrammeCode) {
     this.gmcProgrammeCode = gmcProgrammeCode;
   }
+  
+  public ProgrammeCurriculum id(Long id) {
+    setId(id);
+    return this;
+  }
 
   public ProgrammeCurriculum programme(Programme programme) {
     setProgramme(programme);
