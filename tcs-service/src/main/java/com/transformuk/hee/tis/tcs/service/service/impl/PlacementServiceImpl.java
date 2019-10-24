@@ -155,7 +155,7 @@ public class PlacementServiceImpl implements PlacementService {
   @Transactional
   @Override
   public PlacementDetailsDTO createDetails(final PlacementDetailsDTO placementDetailsDTO) {
-    // Before the Draft Approval process is done, set the DraftStatus to Approved
+    // Before the Draft Approval process is done, set the lifecycleStatus to Approved
     // This should be removed when Draft Approval process is done
     if (placementDetailsDTO.getLifecycleState() == null) {
       placementDetailsDTO.setLifecycleState(LifecycleState.APPROVED);
