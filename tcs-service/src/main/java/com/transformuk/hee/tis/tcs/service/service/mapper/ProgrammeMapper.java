@@ -9,7 +9,7 @@ import org.mapstruct.Mapper;
 /**
  * Mapper for the entity Programme and its DTO ProgrammeDTO.
  */
-@Mapper(componentModel = "spring", uses = {CurriculumMapper.class, TrainingNumberMapper.class})
+@Mapper(componentModel = "spring", uses = {ProgrammeCurriculumMapper.class, TrainingNumberMapper.class})
 public interface ProgrammeMapper {
 
   ProgrammeDTO programmeToProgrammeDTO(Programme programme);

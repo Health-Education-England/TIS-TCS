@@ -21,6 +21,7 @@ import com.transformuk.hee.tis.tcs.service.api.validation.ProgrammeValidator;
 import com.transformuk.hee.tis.tcs.service.exception.ExceptionTranslator;
 import com.transformuk.hee.tis.tcs.service.model.Curriculum;
 import com.transformuk.hee.tis.tcs.service.model.Programme;
+import com.transformuk.hee.tis.tcs.service.model.ProgrammeCurriculum;
 import com.transformuk.hee.tis.tcs.service.repository.CurriculumRepository;
 import com.transformuk.hee.tis.tcs.service.repository.ProgrammeRepository;
 import com.transformuk.hee.tis.tcs.service.service.ProgrammeService;
@@ -65,6 +66,8 @@ public class ProgrammeResourceIntTest {
 
   private static final String DEFAULT_PROGRAMME_NUMBER = "AAAAAAAAAA";
   private static final String UPDATED_PROGRAMME_NUMBER = "BBBBBBBBBB";
+  private static final String DEFAULT_GMC_PROGRAMME_CODE = "AAAAAA-A";
+  private static final String UPDATED_GMC_PROGRAMME_CODE = "BBBBBB-1";
 
   @Autowired
   private ProgrammeRepository programmeRepository;
@@ -217,10 +220,10 @@ public class ProgrammeResourceIntTest {
   public void createProgrammeWithCurricula() throws Exception {
     int databaseSizeBeforeCreate = programmeRepository.findAll().size();
     Programme programme = createEntity();
-    Curriculum curriculum1 = curriculumRepository
-        .saveAndFlush(CurriculumResourceIntTest.createCurriculumEntity());
-    Curriculum curriculum2 = curriculumRepository
-        .saveAndFlush(CurriculumResourceIntTest.createCurriculumEntity());
+    ProgrammeCurriculum curriculum1 = new ProgrammeCurriculum().curriculum(
+        curriculumRepository.saveAndFlush(CurriculumResourceIntTest.createCurriculumEntity())).gmcProgrammeCode(DEFAULT_GMC_PROGRAMME_CODE);
+    ProgrammeCurriculum curriculum2 = new ProgrammeCurriculum().curriculum(
+        curriculumRepository.saveAndFlush(CurriculumResourceIntTest.createCurriculumEntity())).gmcProgrammeCode(UPDATED_GMC_PROGRAMME_CODE);
     programme.setCurricula(Sets.newHashSet(curriculum1, curriculum2));
 
     // Create the Programme
@@ -241,8 +244,11 @@ public class ProgrammeResourceIntTest {
     assertThat(testProgramme.getProgrammeNumber()).isEqualTo(DEFAULT_PROGRAMME_NUMBER);
     assertThat(testProgramme.getCurricula().size()).isEqualTo(2);
     assertThat(
-        testProgramme.getCurricula().stream().map(Curriculum::getId).collect(Collectors.toSet())).
-        containsAll(Sets.newHashSet(curriculum1.getId(), curriculum2.getId()));
+        testProgramme.getCurricula().stream().map(pc -> {return pc.getCurriculum().getId();}).collect(Collectors.toSet())).
+        containsAll(Sets.newHashSet(curriculum1.getCurriculum().getId(), curriculum2.getCurriculum().getId()));
+    assertThat(
+        testProgramme.getCurricula().stream().map(ProgrammeCurriculum::getGmcProgrammeCode).collect(Collectors.toSet())).
+        containsAll(Sets.newHashSet(curriculum1.getGmcProgrammeCode(), curriculum2.getGmcProgrammeCode()));
   }
 
   @Test
@@ -255,7 +261,9 @@ public class ProgrammeResourceIntTest {
         .saveAndFlush(CurriculumResourceIntTest.createCurriculumEntity());
     curriculum1.setId(-1L);
     curriculum2.setId(-2L);
-    programme.setCurricula(Sets.newHashSet(curriculum1, curriculum2));
+    ProgrammeCurriculum pc1 = new ProgrammeCurriculum().curriculum(curriculum1);
+    ProgrammeCurriculum pc2 = new ProgrammeCurriculum().curriculum(curriculum2);
+    programme.setCurricula(Sets.newHashSet(pc1, pc2));
 
     //when & then
     ProgrammeDTO programmeDTO = programmeMapper.programmeToProgrammeDTO(programme);
@@ -271,10 +279,10 @@ public class ProgrammeResourceIntTest {
   public void bulkCreateProgrammeWithCurricula() throws Exception {
     int databaseSizeBeforeCreate = programmeRepository.findAll().size();
     Programme programme = createEntity();
-    Curriculum curriculum1 = curriculumRepository
-        .saveAndFlush(CurriculumResourceIntTest.createCurriculumEntity());
-    Curriculum curriculum2 = curriculumRepository
-        .saveAndFlush(CurriculumResourceIntTest.createCurriculumEntity());
+    ProgrammeCurriculum curriculum1 = new ProgrammeCurriculum().curriculum(
+        curriculumRepository.saveAndFlush(CurriculumResourceIntTest.createCurriculumEntity()));
+    ProgrammeCurriculum curriculum2 = new ProgrammeCurriculum().curriculum(
+        curriculumRepository.saveAndFlush(CurriculumResourceIntTest.createCurriculumEntity()));
     programme.setCurricula(Sets.newHashSet(curriculum1, curriculum2));
 
     // Create the Programme
@@ -298,8 +306,8 @@ public class ProgrammeResourceIntTest {
     assertThat(testProgramme1.getProgrammeNumber()).isEqualTo(DEFAULT_PROGRAMME_NUMBER);
     assertThat(testProgramme1.getCurricula().size()).isEqualTo(2);
     assertThat(
-        testProgramme1.getCurricula().stream().map(Curriculum::getId).collect(Collectors.toSet())).
-        containsAll(Sets.newHashSet(curriculum1.getId(), curriculum2.getId()));
+        testProgramme1.getCurricula().stream().map(pc -> {return pc.getCurriculum().getId();}).collect(Collectors.toSet())).
+        containsAll(Sets.newHashSet(curriculum1.getCurriculum().getId(), curriculum2.getCurriculum().getId()));
 
     assertThat(testProgramme2.getStatus()).isEqualTo(DEFAULT_STATUS);
     assertThat(testProgramme2.getIntrepidId()).isEqualTo(DEFAULT_INTREPID_ID);
@@ -308,8 +316,8 @@ public class ProgrammeResourceIntTest {
     assertThat(testProgramme2.getProgrammeNumber()).isEqualTo(DEFAULT_PROGRAMME_NUMBER);
     assertThat(testProgramme2.getCurricula().size()).isEqualTo(2);
     assertThat(
-        testProgramme2.getCurricula().stream().map(Curriculum::getId).collect(Collectors.toSet())).
-        containsAll(Sets.newHashSet(curriculum1.getId(), curriculum2.getId()));
+        testProgramme2.getCurricula().stream().map(pc -> {return pc.getCurriculum().getId();}).collect(Collectors.toSet())).
+    containsAll(Sets.newHashSet(curriculum1.getCurriculum().getId(), curriculum2.getCurriculum().getId()));
   }
 
   @Test
@@ -433,15 +441,17 @@ public class ProgrammeResourceIntTest {
   public void updateProgrammeWithCurricula() throws Exception {
     // Initialize the database
     Programme programme = createEntity();
-    Curriculum curriculum1 = curriculumRepository
-        .saveAndFlush(CurriculumResourceIntTest.createCurriculumEntity());
-    Curriculum curriculum2 = curriculumRepository
-        .saveAndFlush(CurriculumResourceIntTest.createCurriculumEntity());
-    Curriculum curriculum3 = curriculumRepository
-        .saveAndFlush(CurriculumResourceIntTest.createCurriculumEntity());
-    programme.setCurricula(Sets.newHashSet(curriculum1, curriculum2));
+    ProgrammeCurriculum curriculum1 = new ProgrammeCurriculum().curriculum(
+        curriculumRepository.saveAndFlush(CurriculumResourceIntTest.createCurriculumEntity()));
+    ProgrammeCurriculum curriculum2 = new ProgrammeCurriculum().curriculum(
+        curriculumRepository.saveAndFlush(CurriculumResourceIntTest.createCurriculumEntity()));
+    ProgrammeCurriculum curriculum3 = new ProgrammeCurriculum().curriculum(
+        curriculumRepository.saveAndFlush(CurriculumResourceIntTest.createCurriculumEntity()));
+//    programme.setCurricula(Sets.newHashSet(curriculum1, curriculum2));
 
     programmeRepository.saveAndFlush(programme);
+    //TODO save `ProgCurr`s gmcProgCode
+
     int databaseSizeBeforeUpdate = programmeRepository.findAll().size();
 
     // Update the programme
@@ -471,8 +481,8 @@ public class ProgrammeResourceIntTest {
     assertThat(testProgramme.getProgrammeNumber()).isEqualTo(UPDATED_PROGRAMME_NUMBER);
     assertThat(testProgramme.getCurricula().size()).isEqualTo(2);
     assertThat(
-        testProgramme.getCurricula().stream().map(Curriculum::getId).collect(Collectors.toSet())).
-        containsAll(Sets.newHashSet(curriculum2.getId(), curriculum3.getId()));
+        testProgramme.getCurricula().stream().map(pc -> {return pc.getCurriculum().getId();}).collect(Collectors.toSet())).
+        containsAll(Sets.newHashSet(curriculum2.getCurriculum().getId(), curriculum3.getCurriculum().getId()));
   }
 
   @Test
@@ -480,12 +490,12 @@ public class ProgrammeResourceIntTest {
   public void bulkUpdateProgrammeWithCurricula() throws Exception {
     int databaseSizeBeforeCreate = programmeRepository.findAll().size();
     Programme programme1 = createEntity();
-    Curriculum curriculum1 = curriculumRepository
-        .saveAndFlush(CurriculumResourceIntTest.createCurriculumEntity());
-    Curriculum curriculum2 = curriculumRepository
-        .saveAndFlush(CurriculumResourceIntTest.createCurriculumEntity());
-    Curriculum curriculum3 = curriculumRepository
-        .saveAndFlush(CurriculumResourceIntTest.createCurriculumEntity());
+    ProgrammeCurriculum curriculum1 = new ProgrammeCurriculum().curriculum(
+        curriculumRepository.saveAndFlush(CurriculumResourceIntTest.createCurriculumEntity()));
+    ProgrammeCurriculum curriculum2 = new ProgrammeCurriculum().curriculum(
+        curriculumRepository.saveAndFlush(CurriculumResourceIntTest.createCurriculumEntity()));
+    ProgrammeCurriculum curriculum3 = new ProgrammeCurriculum().curriculum(
+        curriculumRepository.saveAndFlush(CurriculumResourceIntTest.createCurriculumEntity()));
     programme1.setCurricula(Sets.newHashSet(curriculum1, curriculum2));
     Programme programme2 = createEntity();
     programme1.setCurricula(Sets.newHashSet(curriculum2, curriculum3));
@@ -531,8 +541,8 @@ public class ProgrammeResourceIntTest {
     assertThat(testProgramme1.getProgrammeNumber()).isEqualTo(UPDATED_PROGRAMME_NUMBER);
     assertThat(testProgramme1.getCurricula().size()).isEqualTo(1);
     assertThat(
-        testProgramme1.getCurricula().stream().map(Curriculum::getId).collect(Collectors.toSet())).
-        containsAll(Sets.newHashSet(curriculum2.getId()));
+        testProgramme1.getCurricula().stream().map(pc -> {return pc.getCurriculum().getId();}).collect(Collectors.toSet())).
+        containsAll(Sets.newHashSet(curriculum2.getCurriculum().getId()));
 
     assertThat(testProgramme2.getStatus()).isEqualTo(UPDATED_STATUS);
     assertThat(testProgramme2.getIntrepidId()).isEqualTo(UPDATED_INTREPID_ID);
@@ -541,8 +551,8 @@ public class ProgrammeResourceIntTest {
     assertThat(testProgramme2.getProgrammeNumber()).isEqualTo(UPDATED_PROGRAMME_NUMBER);
     assertThat(testProgramme2.getCurricula().size()).isEqualTo(1);
     assertThat(
-        testProgramme2.getCurricula().stream().map(Curriculum::getId).collect(Collectors.toSet())).
-        containsAll(Sets.newHashSet(curriculum3.getId()));
+        testProgramme2.getCurricula().stream().map(pc -> {return pc.getCurriculum().getId();}).collect(Collectors.toSet())).
+        containsAll(Sets.newHashSet(curriculum3.getCurriculum().getId()));
   }
 
   @Test

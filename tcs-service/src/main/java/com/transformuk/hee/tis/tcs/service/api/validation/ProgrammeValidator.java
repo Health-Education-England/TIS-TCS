@@ -2,6 +2,7 @@ package com.transformuk.hee.tis.tcs.service.api.validation;
 
 import com.transformuk.hee.tis.security.model.UserProfile;
 import com.transformuk.hee.tis.tcs.api.dto.CurriculumDTO;
+import com.transformuk.hee.tis.tcs.api.dto.ProgrammeCurriculumDTO;
 import com.transformuk.hee.tis.tcs.api.dto.ProgrammeDTO;
 import com.transformuk.hee.tis.tcs.service.repository.CurriculumRepository;
 import com.transformuk.hee.tis.tcs.service.service.mapper.DesignatedBodyMapper;
@@ -58,8 +59,9 @@ public class ProgrammeValidator {
     List<FieldError> fieldErrors = new ArrayList<>();
     // then check the curricula
     if (programmeDTO.getCurricula() != null && !programmeDTO.getCurricula().isEmpty()) {
-      for (CurriculumDTO c : programmeDTO.getCurricula()) {
-        if (c.getId() == null || c.getId() < 0) {
+      for (ProgrammeCurriculumDTO pc : programmeDTO.getCurricula()) {
+        CurriculumDTO c = pc.getCurriculum();
+        if (c == null || c.getId() == null || c.getId() < 0) {
           fieldErrors.add(new FieldError("ProgrammeDTO", "curricula",
               "Curriculum ID cannot be null or negative"));
         } else {

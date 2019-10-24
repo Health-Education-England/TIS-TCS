@@ -4,15 +4,15 @@ import com.transformuk.hee.tis.tcs.api.enumeration.Status;
 import java.io.Serializable;
 import java.util.HashSet;
 import java.util.Set;
+import javax.persistence.CascadeType;
 import javax.persistence.Entity;
 import javax.persistence.EnumType;
 import javax.persistence.Enumerated;
 import javax.persistence.GeneratedValue;
 import javax.persistence.GenerationType;
 import javax.persistence.Id;
-import javax.persistence.JoinColumn;
-import javax.persistence.JoinTable;
 import javax.persistence.ManyToMany;
+import javax.persistence.OneToMany;
 
 @Entity
 public class Programme implements Serializable {
@@ -28,34 +28,32 @@ public class Programme implements Serializable {
   private String owner;
   private String programmeName;
   private String programmeNumber;
-  @ManyToMany
-  @JoinTable(name = "ProgrammeCurriculum",
-      joinColumns = @JoinColumn(name = "programmeId", referencedColumnName = "id"),
-      inverseJoinColumns = @JoinColumn(name = "curriculumId", referencedColumnName = "id"))
-  private Set<Curriculum> curricula = new HashSet<>();
+  
+  @OneToMany(mappedBy = "programme", cascade = CascadeType.ALL)
+  private Set<ProgrammeCurriculum> curricula = new HashSet<>();
 
   @ManyToMany(mappedBy = "programmes")
   private Set<Post> posts;
 
-  public Set<Curriculum> getCurricula() {
+  public Set<ProgrammeCurriculum> getCurricula() {
     return curricula;
   }
 
-  public void setCurricula(final Set<Curriculum> curricula) {
+  public void setCurricula(final Set<ProgrammeCurriculum> curricula) {
     this.curricula = curricula;
   }
 
-  public Programme curricula(final Set<Curriculum> curricula) {
+  public Programme curricula(final Set<ProgrammeCurriculum> curricula) {
     this.curricula = curricula;
     return this;
   }
 
-  public Programme addCurriculum(final Curriculum curriculum) {
+  public Programme addCurriculum(final ProgrammeCurriculum curriculum) {
     this.curricula.add(curriculum);
     return this;
   }
 
-  public Programme removeCurriculum(final Curriculum curriculum) {
+  public Programme removeCurriculum(final ProgrammeCurriculum curriculum) {
     this.curricula.remove(curriculum);
     return this;
   }

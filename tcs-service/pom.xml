@@ -149,14 +149,9 @@
       <version>4.3.0</version>
     </dependency>
     <dependency>
-      <groupId>com.transformuk.hee.tis</groupId>
-      <artifactId>tcs-api</artifactId>
-      <version>5.4.1</version>
-    </dependency>
-    <dependency>
       <groupId>uk.nhs.tis</groupId>
       <artifactId>tcs-persistence</artifactId>
-      <version>1.2.0</version>
+      <version>1.3.0-SNAPSHOT</version>
     </dependency>
     <dependency>
       <groupId>com.zaxxer</groupId>

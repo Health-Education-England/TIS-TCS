@@ -30,7 +30,7 @@ public class SpecialtyRepositoryTest {
   public void findSpecialtyDistinctByCurriculaProgrammesIdShouldGetSpecialtyForProgrammeId() {
     Pageable page = PageRequest.of(0, 100);
     Page<Specialty> result = specialtyRepository
-        .findSpecialtyDistinctByCurriculaProgrammesIdAndStatusIs(PROGRAMME_ID, Status.CURRENT,
+        .findSpecialtyDistinctByCurriculaProgrammesProgrammeIdAndStatusIs(PROGRAMME_ID, Status.CURRENT,
             page);
 
     Assert.assertEquals(2, result.getNumberOfElements());
@@ -48,8 +48,8 @@ public class SpecialtyRepositoryTest {
     Pageable page = PageRequest.of(0, 100);
     long programmeId = 3;
     Page<Specialty> result = specialtyRepository
-        .findSpecialtyDistinctByCurriculaProgrammesIdAndNameContainingIgnoreCaseAndStatusIs(
-            programmeId, "Medicine", Status.CURRENT, page);
+        .findSpecialtyDistinctByCurriculaPkAndNameContainingIgnoreCaseAndStatusIs(
+            programmeId, "MEDICINE", Status.CURRENT, page);
 
     Assert.assertEquals(2, result.getNumberOfElements());
     Assert.assertFalse(result.hasNext());
@@ -68,7 +68,7 @@ public class SpecialtyRepositoryTest {
     Pageable page = PageRequest.of(0, 100);
     long programmeWithMultipleCurriculaPointingToSameSpecialty = 4;
     Page<Specialty> result = specialtyRepository
-        .findSpecialtyDistinctByCurriculaProgrammesIdAndNameContainingIgnoreCaseAndStatusIs(
+        .findSpecialtyDistinctByCurriculaPkAndNameContainingIgnoreCaseAndStatusIs(
             programmeWithMultipleCurriculaPointingToSameSpecialty, "Medicine", Status.CURRENT,
             page);
 
@@ -87,7 +87,7 @@ public class SpecialtyRepositoryTest {
     Pageable page = PageRequest.of(0, 100);
     long programmeWithSpecialtiesThatAreBothActiveAndInactive = 6;
     Page<Specialty> result = specialtyRepository
-        .findSpecialtyDistinctByCurriculaProgrammesIdAndStatusIs(
+        .findSpecialtyDistinctByCurriculaProgrammesProgrammeIdAndStatusIs(
             programmeWithSpecialtiesThatAreBothActiveAndInactive, Status.INACTIVE, page);
 
     Assert.assertEquals(1, result.getNumberOfElements());

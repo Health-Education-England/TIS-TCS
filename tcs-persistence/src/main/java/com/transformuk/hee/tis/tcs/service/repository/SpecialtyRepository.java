@@ -30,7 +30,7 @@ public interface SpecialtyRepository extends JpaRepository<Specialty, Long>,
    * @param pageable    The requested page of results
    * @return Page of the found Specialties for a Programme Id and Page
    */
-  Page<Specialty> findSpecialtyDistinctByCurriculaProgrammesIdAndStatusIs(Long programmeId,
+  Page<Specialty> findSpecialtyDistinctByCurriculaProgrammesProgrammeIdAndStatusIs(Long programmeId,
       Status status, Pageable pageable);
 
   /**
@@ -42,8 +42,17 @@ public interface SpecialtyRepository extends JpaRepository<Specialty, Long>,
    * @param pageable    The requested page of results
    * @return Page of the found Specialties for a Programme Id and Page
    */
-  Page<Specialty> findSpecialtyDistinctByCurriculaProgrammesIdAndNameContainingIgnoreCaseAndStatusIs(
-      Long programmeId, String name, Status status, Pageable pageable);
+  @Query("SELECT DISTINCT sp " +
+      "FROM Specialty sp " +
+      "JOIN sp.curricula c " +
+      "JOIN c.programmes pc " +
+      "JOIN pc.programme p " +
+      "WHERE p.id = :programmeId " +
+      "AND sp.name LIKE %:name% " +
+      "AND sp.status = :status")
+  Page<Specialty> findSpecialtyDistinctByCurriculaPkAndNameContainingIgnoreCaseAndStatusIs(
+      @Param("programmeId") Long programmeId, @Param("name") String name,
+      @Param("status") Status status, Pageable pageable);
 
   /**
    * Get a Page of Specialties linked to a Post whereby the Post is linked to a Programme Id
