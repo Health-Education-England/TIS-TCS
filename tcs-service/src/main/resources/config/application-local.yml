@@ -11,11 +11,11 @@ spring:
     schemas: ${DBNAME:tcs}
   elasticsearch:
     rest:
-      uris: http://localhost:9200
+      uris: ${ES_URLS:http://localhost:9200}
   data:
     elasticsearch:
-      cluster-nodes: localhost:9300
-      cluster-name: docker-cluster
+      cluster-nodes: ${ES_CLUSTER_NODE_URLS:localhost:9300}
+      cluster-name: ${ES_CLUSTER_NAME:docker-cluster}
 
 logging:
     file: ${LOG_DIR:${HOME}}/tcs.log
@@ -38,4 +38,3 @@ kc:
   timeout: ${KC_TIMEOUT:10000}
 
 enable.es.search: true
-#enable.es.search: false
