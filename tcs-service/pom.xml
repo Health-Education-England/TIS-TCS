@@ -149,21 +149,14 @@
       <version>4.3.0</version>
     </dependency>
     <dependency>
-<<<<<<< HEAD
-=======
       <groupId>com.transformuk.hee.tis</groupId>
       <artifactId>tcs-api</artifactId>
-      <version>5.5.0</version>
+      <version>5.5.0-SNAPSHOT</version>
     </dependency>
     <dependency>
->>>>>>> refs/remotes/origin/master
       <groupId>uk.nhs.tis</groupId>
       <artifactId>tcs-persistence</artifactId>
-<<<<<<< HEAD
       <version>1.3.0-SNAPSHOT</version>
-=======
-      <version>1.3.0</version>
->>>>>>> refs/remotes/origin/master
     </dependency>
     <dependency>
       <groupId>com.zaxxer</groupId>
