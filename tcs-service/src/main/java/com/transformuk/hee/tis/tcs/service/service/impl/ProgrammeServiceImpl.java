@@ -18,6 +18,7 @@ import com.transformuk.hee.tis.tcs.service.service.ProgrammeService;
 import com.transformuk.hee.tis.tcs.service.service.mapper.ProgrammeMapper;
 import java.util.ArrayList;
 import java.util.Collection;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
 import org.apache.commons.lang3.StringUtils;
@@ -71,7 +72,15 @@ public class ProgrammeServiceImpl implements ProgrammeService {
   public ProgrammeDTO save(ProgrammeDTO programmeDTO) {
     log.debug("Request to save Programme : {}", programmeDTO);
     Programme programme = programmeMapper.programmeDTOToProgramme(programmeDTO);
+    Set<ProgrammeCurriculum> curricula = programme.getCurricula();
+    programme.setCurricula(null);
     programme = programmeRepository.save(programme);
+    
+    for (ProgrammeCurriculum curriculum : curricula) {
+      curriculum.setProgramme(programme);
+    }
+    curricula = new HashSet<ProgrammeCurriculum>(programmeCurriculumRepository.saveAll(curricula));
+    programme.setCurricula(curricula);
     ProgrammeDTO programmeDTO1 = programmeMapper.programmeToProgrammeDTO(programme);
     applicationEventPublisher.publishEvent(new ProgrammeCreatedEvent(programmeDTO1));
     return programmeDTO1;
@@ -88,9 +97,15 @@ public class ProgrammeServiceImpl implements ProgrammeService {
     log.debug("Request to update Programme : {}", programmeDTO);
 
     Programme programme = programmeMapper.programmeDTOToProgramme(programmeDTO);
-    // TODO Separate curricula to save separately?
+    Set<ProgrammeCurriculum> curricula = programme.getCurricula();
+    programme.setCurricula(null);
     programme = programmeRepository.save(programme);
-    // TODO If separated, save curricula links
+    
+    for (ProgrammeCurriculum curriculum : curricula) {
+      curriculum.setProgramme(programme);
+    }
+    curricula = new HashSet<ProgrammeCurriculum>(programmeCurriculumRepository.saveAll(curricula));
+    programme.setCurricula(curricula);
     ProgrammeDTO programmeDTO1 = programmeMapper.programmeToProgrammeDTO(programme);
     applicationEventPublisher.publishEvent(new ProgrammeSavedEvent(programmeDTO1));
     return programmeDTO1;
