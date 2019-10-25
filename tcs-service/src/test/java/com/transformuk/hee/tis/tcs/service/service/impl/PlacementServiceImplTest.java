@@ -11,6 +11,7 @@ import com.transformuk.hee.tis.tcs.api.dto.PlacementDTO;
 import com.transformuk.hee.tis.tcs.api.dto.PlacementDetailsDTO;
 import com.transformuk.hee.tis.tcs.api.dto.PlacementSiteDTO;
 import com.transformuk.hee.tis.tcs.api.dto.PlacementSummaryDTO;
+import com.transformuk.hee.tis.tcs.api.enumeration.LifecycleState;
 import com.transformuk.hee.tis.tcs.api.enumeration.PlacementSiteType;
 import com.transformuk.hee.tis.tcs.service.model.Placement;
 import com.transformuk.hee.tis.tcs.service.model.PlacementDetails;
@@ -283,6 +284,7 @@ public class PlacementServiceImplTest {
 
     PlacementDetailsDTO updatedPlacementDetails = new PlacementDetailsDTO();
     updatedPlacementDetails.setDateFrom(dateOneMonthsAgo);
+    updatedPlacementDetails.setLifecycleState(LifecycleState.APPROVED);
 
     Post foundPostMock = mock(Post.class);
 
@@ -581,5 +583,18 @@ public class PlacementServiceImplTest {
 
     Assert.assertThat("When there's no placements found, should return false",
         result, CoreMatchers.is(false));
+  }
+
+  @Test
+  public void isEligibleForChangedDatesNotificationReturnFalseWhenDraftIsNotApproved() {
+    PlacementDetailsDTO placementDetailsDto = new PlacementDetailsDTO();
+    placementDetailsDto.setId(1L);
+    placementDetailsDto.setLifecycleState(LifecycleState.DRAFT);
+
+    Placement placement = new Placement();
+    placement.setId(1L);
+    boolean returnValue = testObj.isEligibleForChangedDatesNotification(placementDetailsDto, placement);
+    Assert.assertThat("When draft placement is not approved, it is not elegible for ChangedDatesNotification",
+        returnValue, CoreMatchers.is(false));
   }
 }

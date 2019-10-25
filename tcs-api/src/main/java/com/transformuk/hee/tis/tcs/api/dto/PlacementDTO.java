@@ -2,6 +2,7 @@ package com.transformuk.hee.tis.tcs.api.dto;
 
 import com.transformuk.hee.tis.tcs.api.dto.validation.Create;
 import com.transformuk.hee.tis.tcs.api.dto.validation.Update;
+import com.transformuk.hee.tis.tcs.api.enumeration.LifecycleState;
 import com.transformuk.hee.tis.tcs.api.enumeration.PlacementStatus;
 import java.io.Serializable;
 import java.math.BigDecimal;
@@ -49,6 +50,7 @@ public class PlacementDTO implements Serializable {
   private String localPostNumber;
   private Set<PlacementSupervisorDTO> supervisors = new HashSet<>();
   private Set<PlacementCommentDTO> comments = new HashSet<>();
+  private LifecycleState lifecycleState;
 
   public Long getId() {
     return id;
@@ -202,6 +204,14 @@ public class PlacementDTO implements Serializable {
     this.comments = comments;
   }
 
+  public LifecycleState getLifecycleState() {
+    return lifecycleState;
+  }
+
+  public void setLifecycleState(LifecycleState lifecycleState) {
+    this.lifecycleState = lifecycleState;
+  }
+
   @Override
   public boolean equals(final Object o) {
     if (this == o) {
@@ -244,6 +254,7 @@ public class PlacementDTO implements Serializable {
         ", placementWholeTimeEquivalent=" + placementWholeTimeEquivalent +
         ", trainingDescription='" + trainingDescription + '\'' +
         ", localPostNumber='" + localPostNumber + '\'' +
+        ", lifecycleState='" + lifecycleState + '\'' +
         '}';
   }
 }

@@ -13,7 +13,11 @@
   <description>A module that would ideally be further decomposed into </description>
   <groupId>uk.nhs.tis</groupId>
   <artifactId>tcs-persistence</artifactId>
+<<<<<<< HEAD
   <version>1.3.0-SNAPSHOT</version>
+=======
+  <version>1.3.0</version>
+>>>>>>> refs/remotes/origin/master
   <packaging>jar</packaging>
 
   <properties>
@@ -26,7 +30,11 @@
     <dependency>
       <groupId>com.transformuk.hee.tis</groupId>
       <artifactId>tcs-api</artifactId>
+<<<<<<< HEAD
       <version>5.5.0-SNAPSHOT</version>
+=======
+      <version>5.5.0</version>
+>>>>>>> refs/remotes/origin/master
     </dependency>
     <dependency>
       <groupId>org.springframework.boot</groupId>
