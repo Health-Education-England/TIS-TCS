@@ -2,16 +2,6 @@ package com.transformuk.hee.tis.tcs.api.dto;
 
 public class ProgrammeCurriculumDTO {
 
-  public ProgrammeCurriculumDTO() {}
-
-  public ProgrammeCurriculumDTO(Long id, ProgrammeDTO programme, CurriculumDTO curriculum,
-      String gmcProgrammeCode) {
-    this.id = id;
-    this.programme = programme;
-    this.curriculum = curriculum;
-    this.gmcProgrammeCode = gmcProgrammeCode;
-  }
-
   private Long id;
   
   private ProgrammeDTO programme;
@@ -19,6 +9,16 @@ public class ProgrammeCurriculumDTO {
   private CurriculumDTO curriculum;
 
   private String gmcProgrammeCode;
+
+  public ProgrammeCurriculumDTO() {}
+
+  public ProgrammeCurriculumDTO(Long id,  ProgrammeDTO programme,  CurriculumDTO curriculum,
+      String gmcProgrammeCode) {
+    this.id = id;
+    this.programme = programme;
+    this.curriculum = curriculum;
+    this.gmcProgrammeCode = gmcProgrammeCode;
+  }
 
   public Long getId() {
     return id;
