@@ -75,7 +75,7 @@ public class ProgrammeServiceImpl implements ProgrammeService {
     Set<ProgrammeCurriculum> curricula = programme.getCurricula();
     programme.setCurricula(null);
     programme = programmeRepository.save(programme);
-    
+
     for (ProgrammeCurriculum curriculum : curricula) {
       curriculum.setProgramme(programme);
     }
@@ -100,7 +100,7 @@ public class ProgrammeServiceImpl implements ProgrammeService {
     Set<ProgrammeCurriculum> curricula = programme.getCurricula();
     programme.setCurricula(null);
     programme = programmeRepository.save(programme);
-    
+
     for (ProgrammeCurriculum curriculum : curricula) {
       curriculum.setProgramme(programme);
     }
@@ -121,13 +121,15 @@ public class ProgrammeServiceImpl implements ProgrammeService {
   public List<ProgrammeDTO> save(List<ProgrammeDTO> programmeDTO) {
     log.debug("Request to save Programme : {}", programmeDTO);
     List<Programme> programmes = programmeMapper.programmeDTOsToProgrammes(programmeDTO);
-    // TODO Look at separating the curricula
-    programmes = programmeRepository.saveAll(programmes);
-    // TODO Save curricula separately
-    List<ProgrammeDTO> programmeDTOS = programmeMapper.programmesToProgrammeDTOs(programmes);
-    programmeDTOS.stream().distinct().map(ProgrammeSavedEvent::new)
+
+    // Using a less efficient save as there is a problem automatically persisting the object graph
+    List<ProgrammeDTO> programmeDTOs = new ArrayList<ProgrammeDTO>();
+    for (ProgrammeDTO dto : programmeDTO) {
+      programmeDTOs.add(save(dto));
+    }
+    programmeDTOs.stream().distinct().map(ProgrammeSavedEvent::new)
         .forEach(applicationEventPublisher::publishEvent);
-    return programmeDTOS;
+    return programmeDTOs;
   }
 
   /**
