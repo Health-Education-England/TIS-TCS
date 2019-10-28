@@ -29,7 +29,7 @@ public class Programme implements Serializable {
   private String programmeName;
   private String programmeNumber;
   
-  @OneToMany(mappedBy = "programme", cascade = CascadeType.ALL)
+  @OneToMany(mappedBy = "programme", cascade = CascadeType.ALL, orphanRemoval = true)
   private Set<ProgrammeCurriculum> curricula = new HashSet<>();
 
   @ManyToMany(mappedBy = "programmes")

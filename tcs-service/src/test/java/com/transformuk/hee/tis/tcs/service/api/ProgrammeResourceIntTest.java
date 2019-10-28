@@ -25,6 +25,7 @@ import com.transformuk.hee.tis.tcs.service.model.ProgrammeCurriculum;
 import com.transformuk.hee.tis.tcs.service.repository.CurriculumRepository;
 import com.transformuk.hee.tis.tcs.service.repository.ProgrammeRepository;
 import com.transformuk.hee.tis.tcs.service.service.ProgrammeService;
+import com.transformuk.hee.tis.tcs.service.service.mapper.ProgrammeCurriculumMapper;
 import com.transformuk.hee.tis.tcs.service.service.mapper.ProgrammeMapper;
 import java.util.List;
 import java.util.stream.Collectors;
@@ -77,6 +78,9 @@ public class ProgrammeResourceIntTest {
 
   @Autowired
   private ProgrammeMapper programmeMapper;
+  
+  @Autowired
+  private ProgrammeCurriculumMapper programmeCurriculumMapper;
 
   @Autowired
   private ProgrammeService programmeService;
@@ -447,7 +451,7 @@ public class ProgrammeResourceIntTest {
         curriculumRepository.saveAndFlush(CurriculumResourceIntTest.createCurriculumEntity()));
     ProgrammeCurriculum curriculum3 = new ProgrammeCurriculum().curriculum(
         curriculumRepository.saveAndFlush(CurriculumResourceIntTest.createCurriculumEntity()));
-//    programme.setCurricula(Sets.newHashSet(curriculum1, curriculum2));
+    programme.setCurricula(Sets.newHashSet(curriculum1, curriculum2));
 
     programmeRepository.saveAndFlush(programme);
     //TODO save `ProgCurr`s gmcProgCode
@@ -456,14 +460,15 @@ public class ProgrammeResourceIntTest {
 
     // Update the programme
     Programme updatedProgramme = programmeRepository.findById(programme.getId()).orElse(null);
-    updatedProgramme
-        .status(UPDATED_STATUS)
-        .intrepidId(UPDATED_INTREPID_ID)
-        .owner(UPDATED_OWNER)
-        .programmeName(UPDATED_PROGRAMME_NAME)
-        .programmeNumber(UPDATED_PROGRAMME_NUMBER)
-        .curricula(Sets.newHashSet(curriculum2, curriculum3));
     ProgrammeDTO programmeDTO = programmeMapper.programmeToProgrammeDTO(updatedProgramme);
+    programmeDTO.setStatus(UPDATED_STATUS);
+    programmeDTO.setIntrepidId(UPDATED_INTREPID_ID);
+    programmeDTO.setOwner(UPDATED_OWNER);
+    programmeDTO.setProgrammeName(UPDATED_PROGRAMME_NAME);
+    programmeDTO.setProgrammeNumber(UPDATED_PROGRAMME_NUMBER);
+    programmeDTO.setCurricula(Sets.newHashSet(programmeCurriculumMapper.toDto(curriculum2), programmeCurriculumMapper.toDto(curriculum3)));
+        
+    updatedProgramme = programmeRepository.findById(programme.getId()).orElse(null);
 
     restProgrammeMockMvc.perform(put("/api/programmes")
         .contentType(TestUtil.APPLICATION_JSON_UTF8)
@@ -504,24 +509,21 @@ public class ProgrammeResourceIntTest {
 
     // Update the programme
     Programme updatedProgramme1 = programmeRepository.findById(programme1.getId()).orElse(null);
-    updatedProgramme1
-        .status(UPDATED_STATUS)
-        .intrepidId(UPDATED_INTREPID_ID)
-        .owner(UPDATED_OWNER)
-        .programmeName(UPDATED_PROGRAMME_NAME)
-        .programmeNumber(UPDATED_PROGRAMME_NUMBER)
-        .curricula(Sets.newHashSet(curriculum2));
     ProgrammeDTO programmeDTO1 = programmeMapper.programmeToProgrammeDTO(updatedProgramme1);
+    programmeDTO1.setStatus(UPDATED_STATUS);
+    programmeDTO1.setIntrepidId(UPDATED_INTREPID_ID);
+    programmeDTO1.setOwner(UPDATED_OWNER);
+    programmeDTO1.setProgrammeName(UPDATED_PROGRAMME_NAME);
+    programmeDTO1.setProgrammeNumber(UPDATED_PROGRAMME_NUMBER);
+        programmeDTO1.setCurricula(Sets.newHashSet(programmeCurriculumMapper.toDto(curriculum2)));
     Programme updatedProgramme2 = programmeRepository.findById(programme2.getId()).orElse(null);
-    updatedProgramme2
-        .status(UPDATED_STATUS)
-        .intrepidId(UPDATED_INTREPID_ID)
-        .owner(UPDATED_OWNER)
-        .programmeName(UPDATED_PROGRAMME_NAME)
-        .programmeNumber(UPDATED_PROGRAMME_NUMBER)
-        .curricula(Sets.newHashSet(curriculum3));
-    ProgrammeDTO programmeDTO2 = programmeMapper.programmeToProgrammeDTO(updatedProgramme1);
-
+    ProgrammeDTO programmeDTO2 = programmeMapper.programmeToProgrammeDTO(updatedProgramme2);
+    programmeDTO2.setStatus(UPDATED_STATUS);
+    programmeDTO2.setIntrepidId(UPDATED_INTREPID_ID);
+    programmeDTO2.setOwner(UPDATED_OWNER);
+    programmeDTO2.setProgrammeName(UPDATED_PROGRAMME_NAME);
+    programmeDTO2.setProgrammeNumber(UPDATED_PROGRAMME_NUMBER);
+        programmeDTO2.setCurricula(Sets.newHashSet(programmeCurriculumMapper.toDto(curriculum3)));
     // Bulk update the Programmes
     restProgrammeMockMvc.perform(put("/api/bulk-programmes")
         .contentType(TestUtil.APPLICATION_JSON_UTF8)

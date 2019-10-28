@@ -72,15 +72,7 @@ public class ProgrammeServiceImpl implements ProgrammeService {
   public ProgrammeDTO save(ProgrammeDTO programmeDTO) {
     log.debug("Request to save Programme : {}", programmeDTO);
     Programme programme = programmeMapper.programmeDTOToProgramme(programmeDTO);
-    Set<ProgrammeCurriculum> curricula = programme.getCurricula();
-    programme.setCurricula(null);
     programme = programmeRepository.save(programme);
-
-    for (ProgrammeCurriculum curriculum : curricula) {
-      curriculum.setProgramme(programme);
-    }
-    curricula = new HashSet<ProgrammeCurriculum>(programmeCurriculumRepository.saveAll(curricula));
-    programme.setCurricula(curricula);
     ProgrammeDTO programmeDTO1 = programmeMapper.programmeToProgrammeDTO(programme);
     applicationEventPublisher.publishEvent(new ProgrammeCreatedEvent(programmeDTO1));
     return programmeDTO1;
@@ -97,15 +89,8 @@ public class ProgrammeServiceImpl implements ProgrammeService {
     log.debug("Request to update Programme : {}", programmeDTO);
 
     Programme programme = programmeMapper.programmeDTOToProgramme(programmeDTO);
-    Set<ProgrammeCurriculum> curricula = programme.getCurricula();
-    programme.setCurricula(null);
     programme = programmeRepository.save(programme);
 
-    for (ProgrammeCurriculum curriculum : curricula) {
-      curriculum.setProgramme(programme);
-    }
-    curricula = new HashSet<ProgrammeCurriculum>(programmeCurriculumRepository.saveAll(curricula));
-    programme.setCurricula(curricula);
     ProgrammeDTO programmeDTO1 = programmeMapper.programmeToProgrammeDTO(programme);
     applicationEventPublisher.publishEvent(new ProgrammeSavedEvent(programmeDTO1));
     return programmeDTO1;
@@ -122,11 +107,8 @@ public class ProgrammeServiceImpl implements ProgrammeService {
     log.debug("Request to save Programme : {}", programmeDTO);
     List<Programme> programmes = programmeMapper.programmeDTOsToProgrammes(programmeDTO);
 
-    // Using a less efficient save as there is a problem automatically persisting the object graph
-    List<ProgrammeDTO> programmeDTOs = new ArrayList<ProgrammeDTO>();
-    for (ProgrammeDTO dto : programmeDTO) {
-      programmeDTOs.add(save(dto));
-    }
+    programmes = programmeRepository.saveAll(programmes);
+    List<ProgrammeDTO> programmeDTOs = programmeMapper.programmesToProgrammeDTOs(programmes);
     programmeDTOs.stream().distinct().map(ProgrammeSavedEvent::new)
         .forEach(applicationEventPublisher::publishEvent);
     return programmeDTOs;

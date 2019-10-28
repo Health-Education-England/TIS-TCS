@@ -352,9 +352,9 @@ public class ProgrammeMembershipResourceIntTest {
   @Transactional
   public void shouldValidateProgramme() throws Exception {
     //given
-    programmeRepository.saveAndFlush(programme);
     curriculumRepository.saveAndFlush(curriculum);
     programme.setCurricula(Collections.singleton(programmeCurriculum));
+    programmeRepository.saveAndFlush(programme);
     programmeMembership.setProgramme(programme); // this programme doesn't exists in DB
     programmeMembership.setCurriculumId(programme.getCurricula().iterator().next().getCurriculum().getId());
     ProgrammeMembershipDTO programmeMembershipDTO = programmeMembershipMapper
