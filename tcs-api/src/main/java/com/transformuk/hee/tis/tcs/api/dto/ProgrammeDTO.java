@@ -23,12 +23,12 @@ public class ProgrammeDTO implements Serializable {
   private String intrepidId;
 
   @NotNull(message = "Status is required", groups = {Update.class, Create.class})
-  //mandatory and must be a valid ENUM value
+  // mandatory and must be a valid ENUM value
   private Status status;
 
   @NotNull(message = "Owner is required", groups = {Update.class, Create.class})
-  //mandatory, must be a valid local team and the user must have permission to create a
-  //programme within that local team
+  // mandatory, must be a valid local team and the user must have permission to create a
+  // programme within that local team
   private String owner;
 
   @NotNull(message = "Programme name is required", groups = {Update.class, Create.class})
@@ -36,7 +36,7 @@ public class ProgrammeDTO implements Serializable {
 
   private String programmeNumber;
 
-  private Set<CurriculumDTO> curricula;
+  private Set<ProgrammeCurriculumDTO> curricula;
 
   public Long getId() {
     return id;
@@ -86,11 +86,11 @@ public class ProgrammeDTO implements Serializable {
     this.programmeNumber = programmeNumber;
   }
 
-  public Set<CurriculumDTO> getCurricula() {
+  public Set<ProgrammeCurriculumDTO> getCurricula() {
     return curricula;
   }
 
-  public void setCurricula(Set<CurriculumDTO> curricula) {
+  public void setCurricula(Set<ProgrammeCurriculumDTO> curricula) {
     this.curricula = curricula;
   }
 
@@ -119,14 +119,8 @@ public class ProgrammeDTO implements Serializable {
 
   @Override
   public String toString() {
-    return "ProgrammeDTO{" +
-        "id=" + id +
-        ", intrepidId=" + intrepidId +
-        ", status='" + status + "'" +
-        ", owner='" + owner + "'" +
-        ", programmeName='" + programmeName + "'" +
-        ", programmeNumber='" + programmeNumber + "'" +
-        ", curricula='" + curricula + "'" +
-        '}';
+    return "ProgrammeDTO{" + "id=" + id + ", intrepidId=" + intrepidId + ", status='" + status + "'"
+        + ", owner='" + owner + "'" + ", programmeName='" + programmeName + "'"
+        + ", programmeNumber='" + programmeNumber + "'" + ", curricula='" + curricula + "'" + '}';
   }
 }

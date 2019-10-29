@@ -221,7 +221,7 @@ public class SpecialtyServiceImplTest {
     Assert.assertEquals(specialtyDTO, result.getContent().get(0));
 
     verify(specialtyRepositoryMock, never())
-        .findSpecialtyDistinctByCurriculaProgrammesIdAndStatusIs(any(), any(), any());
+        .findSpecialtyDistinctByCurriculaProgrammesProgrammeIdAndStatusIs(any(), any(), any());
   }
 
   @Test(expected = NullPointerException.class)

@@ -2,7 +2,6 @@ package com.transformuk.hee.tis.tcs.service.service.impl;
 
 import static com.transformuk.hee.tis.tcs.service.service.impl.SpecificationFactory.containsLike;
 import static com.transformuk.hee.tis.tcs.service.service.impl.SpecificationFactory.in;
-
 import com.google.common.base.Preconditions;
 import com.transformuk.hee.tis.tcs.api.dto.ProgrammeDTO;
 import com.transformuk.hee.tis.tcs.api.enumeration.Status;
@@ -11,10 +10,15 @@ import com.transformuk.hee.tis.tcs.service.event.ProgrammeDeletedEvent;
 import com.transformuk.hee.tis.tcs.service.event.ProgrammeSavedEvent;
 import com.transformuk.hee.tis.tcs.service.model.ColumnFilter;
 import com.transformuk.hee.tis.tcs.service.model.Programme;
+import com.transformuk.hee.tis.tcs.service.model.ProgrammeCurriculum;
+import com.transformuk.hee.tis.tcs.service.repository.CurriculumRepository;
+import com.transformuk.hee.tis.tcs.service.repository.ProgrammeCurriculumRepository;
 import com.transformuk.hee.tis.tcs.service.repository.ProgrammeRepository;
 import com.transformuk.hee.tis.tcs.service.service.ProgrammeService;
 import com.transformuk.hee.tis.tcs.service.service.mapper.ProgrammeMapper;
 import java.util.ArrayList;
+import java.util.Collection;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
 import org.apache.commons.lang3.StringUtils;
@@ -39,14 +43,20 @@ public class ProgrammeServiceImpl implements ProgrammeService {
   private final Logger log = LoggerFactory.getLogger(ProgrammeServiceImpl.class);
 
   private final ProgrammeRepository programmeRepository;
+  // TODO Remove unused repositories
+  private final ProgrammeCurriculumRepository programmeCurriculumRepository;
+  private final CurriculumRepository curriculumRepository;
   private final ProgrammeMapper programmeMapper;
   private final ApplicationEventPublisher applicationEventPublisher;
   private final PermissionService permissionService;
 
   public ProgrammeServiceImpl(ProgrammeRepository programmeRepository,
-      ProgrammeMapper programmeMapper,
+      ProgrammeCurriculumRepository programmeCurriculumRepository,
+      CurriculumRepository curriculumRepository, ProgrammeMapper programmeMapper,
       ApplicationEventPublisher applicationEventPublisher, PermissionService permissionService) {
     this.programmeRepository = programmeRepository;
+    this.programmeCurriculumRepository = programmeCurriculumRepository;
+    this.curriculumRepository = curriculumRepository;
     this.programmeMapper = programmeMapper;
     this.applicationEventPublisher = applicationEventPublisher;
     this.permissionService = permissionService;
@@ -80,6 +90,7 @@ public class ProgrammeServiceImpl implements ProgrammeService {
 
     Programme programme = programmeMapper.programmeDTOToProgramme(programmeDTO);
     programme = programmeRepository.save(programme);
+
     ProgrammeDTO programmeDTO1 = programmeMapper.programmeToProgrammeDTO(programme);
     applicationEventPublisher.publishEvent(new ProgrammeSavedEvent(programmeDTO1));
     return programmeDTO1;
@@ -95,11 +106,12 @@ public class ProgrammeServiceImpl implements ProgrammeService {
   public List<ProgrammeDTO> save(List<ProgrammeDTO> programmeDTO) {
     log.debug("Request to save Programme : {}", programmeDTO);
     List<Programme> programmes = programmeMapper.programmeDTOsToProgrammes(programmeDTO);
+
     programmes = programmeRepository.saveAll(programmes);
-    List<ProgrammeDTO> programmeDTOS = programmeMapper.programmesToProgrammeDTOs(programmes);
-    programmeDTOS.stream().distinct().map(ProgrammeSavedEvent::new)
+    List<ProgrammeDTO> programmeDTOs = programmeMapper.programmesToProgrammeDTOs(programmes);
+    programmeDTOs.stream().distinct().map(ProgrammeSavedEvent::new)
         .forEach(applicationEventPublisher::publishEvent);
-    return programmeDTOS;
+    return programmeDTOs;
   }
 
   /**
@@ -143,24 +155,24 @@ public class ProgrammeServiceImpl implements ProgrammeService {
       Pageable pageable) {
 
     List<Specification<Programme>> specs = new ArrayList<>();
-    //add the text search criteria
+    // add the text search criteria
     if (StringUtils.isNotEmpty(searchString)) {
-      specs.add(Specifications.where(containsLike("programmeName", searchString)).
-          or(containsLike("programmeNumber", searchString)));
+      specs.add(Specifications.where(containsLike("programmeName", searchString))
+          .or(containsLike("programmeNumber", searchString)));
     }
 
     if (permissionService.isProgrammeObserver()) {
       specs.add(in("id", new ArrayList<>(permissionService.getUsersProgrammeIds())));
     }
 
-    //add the column filters criteria
+    // add the column filters criteria
     if (columnFilters != null && !columnFilters.isEmpty()) {
       columnFilters.forEach(cf -> specs.add(in(cf.getName(), cf.getValues())));
     }
     Page<Programme> result;
     if (!specs.isEmpty()) {
       Specifications<Programme> fullSpec = Specifications.where(specs.get(0));
-      //add the rest of the specs that made it in
+      // add the rest of the specs that made it in
       for (int i = 1; i < specs.size(); i++) {
         fullSpec = fullSpec.and(specs.get(i));
       }
@@ -190,13 +202,13 @@ public class ProgrammeServiceImpl implements ProgrammeService {
   @Override
   public List<ProgrammeDTO> findTraineeProgrammes(Long traineeId) {
     Preconditions.checkNotNull(traineeId);
-    List<Programme> traineeProgrammes = programmeRepository
-        .findByProgrammeMembershipPersonId(traineeId);
+    List<Programme> traineeProgrammes =
+        programmeRepository.findByProgrammeMembershipPersonId(traineeId);
     return programmeMapper.programmesToProgrammeDTOs(traineeProgrammes);
   }
 
   /**
-   * Delete the  programme by id.
+   * Delete the programme by id.
    *
    * @param id the id of the entity
    */

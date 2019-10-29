@@ -25,7 +25,7 @@ public interface ProgrammeRepository extends JpaRepository<Programme, Long>,
   List<Programme> findByProgrammeNumber(String programmeNumber);
 
   @Query(value = "select CASE WHEN count(p) > 0 THEN true ELSE false END from " +
-      "Programme p join p.curricula c where p.id = :programmeId and c.id = :curriculumId ")
+      "Programme p join p.curricula pc join pc.curriculum c where p.id = :programmeId and c.id = :curriculumId ")
   boolean programmeCurriculumAssociationExists(@Param("programmeId") Long programmeId,
       @Param("curriculumId") Long curriculumId);
 
@@ -37,7 +37,8 @@ public interface ProgrammeRepository extends JpaRepository<Programme, Long>,
 
   @Query("SELECT p " +
       "FROM Programme p " +
-      "LEFT JOIN FETCH p.curricula c " +
+      "LEFT JOIN FETCH p.curricula pc " +
+      "LEFT JOIN FETCH pc.curriculum c " +
       "LEFT JOIN FETCH c.specialty s " +
       "LEFT JOIN FETCH s.specialtyTypes st " +
       "WHERE p.id = :id ")

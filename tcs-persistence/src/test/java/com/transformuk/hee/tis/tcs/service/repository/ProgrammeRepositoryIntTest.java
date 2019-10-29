@@ -5,8 +5,10 @@ import com.transformuk.hee.tis.tcs.service.TestConfig;
 import com.transformuk.hee.tis.tcs.service.model.Curriculum;
 import com.transformuk.hee.tis.tcs.service.model.Person;
 import com.transformuk.hee.tis.tcs.service.model.Programme;
+import com.transformuk.hee.tis.tcs.service.model.ProgrammeCurriculum;
 import com.transformuk.hee.tis.tcs.service.model.ProgrammeMembership;
 import java.util.List;
+import javax.persistence.EntityManager;
 import org.assertj.core.util.Lists;
 import org.junit.Assert;
 import org.junit.Before;
@@ -20,7 +22,7 @@ import org.springframework.transaction.annotation.Transactional;
 @RunWith(SpringRunner.class)
 @SpringBootTest(classes = TestConfig.class)
 public class ProgrammeRepositoryIntTest {
-
+// TODO Rollback unneccessary parts of these changes
   @Autowired
   private ProgrammeRepository testObj;
 
@@ -31,7 +33,13 @@ public class ProgrammeRepositoryIntTest {
   private ProgrammeMembershipRepository programmeMembershipRepository;
 
   @Autowired
+  private ProgrammeCurriculumRepository programmeCurriculumRepository;
+
+  @Autowired
   private CurriculumRepository curriculumRepository;
+  
+  @Autowired
+  private EntityManager entityManager;
 
   @Before
   public void setup() {
@@ -84,20 +92,50 @@ public class ProgrammeRepositoryIntTest {
 
 
   @Test
+  @Transactional
   public void programmeCurriculumAssociationExistsShouldReturnTrueWhenThereIsALinkBetweenCurriculaAndProgramme() {
 
     Curriculum curriculum = new Curriculum();
     curriculum.setName("Curricula 1");
     curriculum = curriculumRepository.saveAndFlush(curriculum);
+    
+    ProgrammeCurriculum join = new ProgrammeCurriculum();
+    join.setCurriculum(curriculum);
 
     Programme programme = new Programme();
     programme.setProgrammeName("Programme 1");
-    programme.setCurricula(Sets.newHashSet(curriculum));
     programme = testObj.saveAndFlush(programme);
+    join.setProgramme(programme);
+    join.setCurriculum(curriculum);
+    //TODO Modify tests to save/get GMC Programme Code
+    join = entityManager.merge(join);
 
     boolean result = testObj
         .programmeCurriculumAssociationExists(programme.getId(), curriculum.getId());
 
     Assert.assertTrue(result);
+  }
+  
+  @Test
+  @Transactional
+  public void programCurriculumCanBeSavedFollowingProgramme() {
+    final String GMC_CODE = "GMC-XXX";
+    Curriculum curriculum = new Curriculum();
+    curriculum.setName("Curricula 1");
+    curriculum = curriculumRepository.saveAndFlush(curriculum);
+    
+    ProgrammeCurriculum join = new ProgrammeCurriculum();
+    join.setCurriculum(curriculum);
+
+    Programme programme = new Programme();
+    programme.setProgrammeName("Programme 1");
+    programme = testObj.saveAndFlush(programme);
+    join.setProgramme(programme);
+    join.setCurriculum(curriculum);
+    join.setGmcProgrammeCode(GMC_CODE);
+    join = entityManager.merge(join);
+    
+    ProgrammeCurriculum byId = programmeCurriculumRepository.getOne(join.getId());
+    Assert.assertEquals(GMC_CODE, byId.getGmcProgrammeCode());
   }
 }

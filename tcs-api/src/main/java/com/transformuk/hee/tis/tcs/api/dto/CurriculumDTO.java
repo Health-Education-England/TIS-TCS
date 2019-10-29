@@ -24,7 +24,7 @@ public class CurriculumDTO implements Serializable {
   private String intrepidId;
 
   @NotNull(message = "Status is required", groups = {Update.class, Create.class})
-  //mandatory and must be a valid ENUM value
+  // mandatory and must be a valid ENUM value
   private Status status;
 
   @NotNull(groups = {Create.class, Update.class}, message = "name must not be null")
@@ -32,20 +32,20 @@ public class CurriculumDTO implements Serializable {
 
   private CurriculumSubType curriculumSubType;
 
-  @DecimalMin(value = "0", groups = {Create.class,
-      Update.class}, message = "length must not be negative")
+  @DecimalMin(value = "0", groups = {Create.class, Update.class},
+      message = "length must not be negative")
   @NotNull(groups = {Create.class, Update.class}, message = "length must not be null")
   private Integer length;
 
   @NotNull(groups = {Create.class, Update.class}, message = "assessmentType must not be null")
   private AssessmentType assessmentType;
 
-  @NotNull(groups = {Create.class,
-      Update.class}, message = "doesThisCurriculumLeadToCct must not be null")
+  @NotNull(groups = {Create.class, Update.class},
+      message = "doesThisCurriculumLeadToCct must not be null")
   private Boolean doesThisCurriculumLeadToCct;
 
-  @DecimalMin(value = "0", groups = {Create.class,
-      Update.class}, message = "periodOfGrace must not be negative")
+  @DecimalMin(value = "0", groups = {Create.class, Update.class},
+      message = "periodOfGrace must not be negative")
   @NotNull(groups = {Create.class, Update.class}, message = "periodOfGrace must not be null")
   private Integer periodOfGrace;
 
@@ -157,16 +157,10 @@ public class CurriculumDTO implements Serializable {
 
   @Override
   public String toString() {
-    return "CurriculumDTO{" +
-        "id=" + id +
-        ", intrepidId='" + intrepidId + '\'' +
-        ", name='" + name + '\'' +
-        ", curriculumSubType=" + curriculumSubType +
-        ", length=" + length +
-        ", assessmentType=" + assessmentType +
-        ", doesThisCurriculumLeadToCct=" + doesThisCurriculumLeadToCct +
-        ", periodOfGrace=" + periodOfGrace +
-        ", specialty=" + specialty +
-        '}';
+    return "CurriculumDTO{" + "id=" + id + ", intrepidId='" + intrepidId + '\'' + ", name='" + name
+        + '\'' + ", curriculumSubType=" + curriculumSubType + ", length=" + length
+        + ", assessmentType=" + assessmentType + ", doesThisCurriculumLeadToCct="
+        + doesThisCurriculumLeadToCct + ", periodOfGrace=" + periodOfGrace + ", specialty="
+        + specialty + '}';
   }
 }
