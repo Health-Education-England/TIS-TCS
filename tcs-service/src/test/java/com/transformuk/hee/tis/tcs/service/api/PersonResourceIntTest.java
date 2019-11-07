@@ -497,6 +497,10 @@ public class PersonResourceIntTest {
     gmcDetails.setGmcNumber(GMC_NUMBER);
     gmcDetailsRepository.saveAndFlush(gmcDetails);
     anotherPerson.setGmcDetails(gmcDetails);
+    final GdcDetails gdcDetails = new GdcDetails();
+    gdcDetails.setId(anotherPerson.getId());
+    gdcDetails.setGdcNumber(GDC_NUMBER);
+    gdcDetailsRepository.saveAndFlush(gdcDetails);
     final ContactDetails contactDetails = new ContactDetails();
     contactDetails.setId(anotherPerson.getId());
     contactDetails.setSurname(PERSON_SURNAME);
@@ -509,6 +513,8 @@ public class PersonResourceIntTest {
         .andExpect(content().contentType(MediaType.APPLICATION_JSON_UTF8_VALUE))
         .andExpect(jsonPath("$.[*].id").value(anotherPerson.getId().intValue()))
         .andExpect(jsonPath("$.[*].gmcNumber").value(GMC_NUMBER))
+        .andExpect(jsonPath("$.[*].gdcNumber").value(GDC_NUMBER))
+        .andExpect(jsonPath("$.[*].publicHealthNumber").value(DEFAULT_PUBLIC_HEALTH_NUMBER))
         .andExpect(jsonPath("$.[*].firstName").value(PERSON_FORENAMES))
         .andExpect(jsonPath("$.[*].lastName").value(PERSON_SURNAME));
   }
@@ -550,7 +556,7 @@ public class PersonResourceIntTest {
     // When I get use the new method of that person's placement summaries
     restPersonMockMvc.perform(get("/api/people/{id}/placements/new", person.getId()))
 
-    // Then the placementWholeTimeEquivalent should be what was saved 
+    // Then the placementWholeTimeEquivalent should be what was saved
         .andExpect(status().isOk())
         .andExpect(content().contentType(MediaType.APPLICATION_JSON_UTF8_VALUE))
         .andExpect(jsonPath("$.[0].placementWholeTimeEquivalent").value(DEFAULT_PLACEMENT_WTE));

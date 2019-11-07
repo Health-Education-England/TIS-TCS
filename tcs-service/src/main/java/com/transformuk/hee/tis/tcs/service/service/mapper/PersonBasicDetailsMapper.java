@@ -16,6 +16,8 @@ public class PersonBasicDetailsMapper {
     dto.setFirstName(entity.getFirstName());
     dto.setLastName(entity.getLastName());
     dto.setGmcNumber(entity.getGmcDetails() != null ? entity.getGmcDetails().getGmcNumber() : null);
+    dto.setGdcNumber(entity.getGdcDetails() != null ? entity.getGdcDetails().getGdcNumber() : null);
+    dto.setPublicHealthNumber(entity.getPerson() != null ? entity.getPerson().getPublicHealthNumber() : null);
     return dto;
   }
 
