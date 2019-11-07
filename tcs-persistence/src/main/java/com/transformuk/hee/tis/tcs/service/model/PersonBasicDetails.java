@@ -24,6 +24,14 @@ public class PersonBasicDetails {
   @JoinColumn(name = "id", unique = true, nullable = false, updatable = false)
   private GmcDetails gmcDetails;
 
+  @OneToOne
+  @JoinColumn(name = "id", unique = true, nullable = false, updatable = false)
+  private GdcDetails gdcDetails;
+
+  @OneToOne
+  @JoinColumn(name = "id", unique = true, nullable = false, updatable = false)
+  private Person person;
+
   public Long getId() {
     return id;
   }
@@ -54,6 +62,22 @@ public class PersonBasicDetails {
 
   public void setGmcDetails(GmcDetails gmcDetails) {
     this.gmcDetails = gmcDetails;
+  }
+
+  public GdcDetails getGdcDetails() {
+    return gdcDetails;
+  }
+
+  public void setGdcDetails(GdcDetails gdcDetails) {
+    this.gdcDetails = gdcDetails;
+  }
+
+  public Person getPerson() {
+    return person;
+  }
+
+  public void setPerson(Person person) {
+    this.person = person;
   }
 
   @Override

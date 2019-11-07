@@ -11,6 +11,8 @@ public class PersonBasicDetailsDTO {
   private String firstName;
   private String lastName;
   private String gmcNumber;
+  private String gdcNumber;
+  private String publicHealthNumber;
 
   public Long getId() {
     return id;
@@ -42,5 +44,21 @@ public class PersonBasicDetailsDTO {
 
   public void setGmcNumber(String gmcNumber) {
     this.gmcNumber = gmcNumber;
+  }
+
+  public String getGdcNumber() {
+    return gdcNumber;
+  }
+
+  public void setGdcNumber(String gdcNumber) {
+    this.gdcNumber = gdcNumber;
+  }
+
+  public String getPublicHealthNumber() {
+    return publicHealthNumber;
+  }
+
+  public void setPublicHealthNumber(String publicHealthNumber) {
+    this.publicHealthNumber = publicHealthNumber;
   }
 }
