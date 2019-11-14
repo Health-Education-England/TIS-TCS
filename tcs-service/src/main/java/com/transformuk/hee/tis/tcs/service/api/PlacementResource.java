@@ -94,7 +94,7 @@ public class PlacementResource {
           "idexists", "A new placement cannot already have an ID")).body(null);
     }
 
-    final PlacementDetailsDTO result = placementService.createDetails(placementDetailsDTO);
+    final PlacementDetailsDTO result = placementService.createDetails(placementDetailsDTO, false);
     return ResponseEntity.created(new URI("/api/placements/" + result.getId()))
         .headers(HeaderUtil.createEntityCreationAlert(ENTITY_NAME, result.getId().toString()))
         .body(result);

@@ -140,8 +140,8 @@ public class PlacementServiceImpl implements PlacementService {
 
   @Transactional
   @Override
-  public PlacementDetailsDTO createDetails(final PlacementDetailsDTO placementDetailsDTO) {
-    // if user doesn't has 'approve placement' permission, set it to DRAFT.
+  public PlacementDetailsDTO createDetails(final PlacementDetailsDTO placementDetailsDTO, boolean approveDraft) {
+    // if user doesn't has 'approve placement' permission, set state to DRAFT.
     if (!permissionService.canApprovePlacement()) {
       placementDetailsDTO.setLifecycleState(LifecycleState.DRAFT);
     }
@@ -170,7 +170,9 @@ public class PlacementServiceImpl implements PlacementService {
     final PlacementDetailsDTO placementDetailsDTO1 = placementDetailsMapper
         .placementDetailsToPlacementDetailsDTO(placementDetails);
     placementDetailsDTO1.setSpecialties(placementSpecialtyMapper.toDTOs(placementSpecialties));
-    handleEsrNewPlacementNotification(placementDetailsDTO, placementDetails);
+    if (placementDetailsDTO.getId() == null || approveDraft == true) {
+      handleEsrNewPlacementNotification(placementDetailsDTO, placementDetails);
+    }
 
     saveSupervisors(placementDetailsDTO.getSupervisors(), placementDetails.getId());
 
@@ -208,9 +210,12 @@ public class PlacementServiceImpl implements PlacementService {
   public boolean isEligibleForChangedDatesNotification(PlacementDetailsDTO updatedPlacementDetails,
       Placement existingPlacement) {
 
-    if (updatedPlacementDetails.getLifecycleState() != LifecycleState.APPROVED) {
+    // Only when lifecycleState of the both are APPROVED, the eligibility would be checked
+    if (updatedPlacementDetails.getLifecycleState() != LifecycleState.APPROVED ||
+      existingPlacement.getLifecycleState() != LifecycleState.APPROVED) {
       return false;
     }
+
     if (existingPlacement != null && updatedPlacementDetails != null &&
         isEligibleForNotification(existingPlacement, updatedPlacementDetails)) {
       Optional<Post> optionalExistingPlacementPost = postRepository
@@ -248,7 +253,10 @@ public class PlacementServiceImpl implements PlacementService {
   @Override
   public PlacementDetailsDTO saveDetails(final PlacementDetailsDTO placementDetailsDTO) {
     log.debug("Request to save Placement : {}", placementDetailsDTO);
-    if (!permissionService.canApprovePlacement()) {
+
+    if (permissionService.isUserBulkUploadAdmin()) {
+      placementDetailsDTO.setLifecycleState(LifecycleState.APPROVED);
+    } else if(!permissionService.canApprovePlacement()) {
       placementDetailsDTO.setLifecycleState(LifecycleState.DRAFT);
     }
 
@@ -269,7 +277,12 @@ public class PlacementServiceImpl implements PlacementService {
     Placement savedPlacement = placementRepository.saveAndFlush(placement);
     PlacementDTO placementDTO = convertPlacementWithSupervisors(savedPlacement);
     applicationEventPublisher.publishEvent(new PlacementSavedEvent(placementDTO));
-    return createDetails(placementDetailsDTO);
+    boolean approveDraft = false;
+    if (placement.getLifecycleState() == LifecycleState.DRAFT
+        && placementDetailsDTO.getLifecycleState() == LifecycleState.APPROVED) {
+      approveDraft = true;
+    }
+    return createDetails(placementDetailsDTO, approveDraft);
   }
 
   @Transactional
@@ -748,33 +761,31 @@ public class PlacementServiceImpl implements PlacementService {
 
   private void handleEsrNewPlacementNotification(final PlacementDetailsDTO placementDetailsDTO,
       final PlacementDetails placementDetails) {
-
     if (placementDetailsDTO.getLifecycleState() != LifecycleState.APPROVED) {
       return;
     }
 
     log.debug("Handling ESR notifications for new placement creation for deanery number {}",
         placementDetailsDTO.getLocalPostNumber());
-    if (placementDetailsDTO.getId() == null) {
-      try {
-        final Placement savedPlacement = placementRepository.findById(placementDetails.getId())
-            .orElse(null);
-        if (savedPlacement.getDateFrom() != null && savedPlacement.getDateFrom()
-            .isBefore(LocalDate.now(clock).plusWeeks(13))) {
-          log.debug("Creating ESR notification for new placement creation for deanery number {}",
-              savedPlacement.getPost().getNationalPostNumber());
-          final List<EsrNotification> esrNotifications = esrNotificationService
-              .handleNewPlacementEsrNotification(savedPlacement);
-          log
-              .debug(
-                  "CREATED: ESR {} notifications for new placement creation for deanery number {}",
-                  esrNotifications.size(), savedPlacement.getPost().getNationalPostNumber());
-        }
-      } catch (final Exception e) {
-        // Ideally it should fail the entire update. Keeping the impact minimal for TCS and go live and revisit after go live.
-        // Log and continue
-        log.error("Error loading New Placement Notification : ", e);
+
+    try {
+      final Placement savedPlacement = placementRepository.findById(placementDetails.getId())
+          .orElse(null);
+      if (savedPlacement.getDateFrom() != null && savedPlacement.getDateFrom()
+          .isBefore(LocalDate.now(clock).plusWeeks(13))) {
+        log.debug("Creating ESR notification for new placement creation for deanery number {}",
+            savedPlacement.getPost().getNationalPostNumber());
+        final List<EsrNotification> esrNotifications = esrNotificationService
+            .handleNewPlacementEsrNotification(savedPlacement);
+        log
+            .debug(
+                "CREATED: ESR {} notifications for new placement creation for deanery number {}",
+                esrNotifications.size(), savedPlacement.getPost().getNationalPostNumber());
       }
+    } catch (final Exception e) {
+      // Ideally it should fail the entire update. Keeping the impact minimal for TCS and go live and revisit after go live.
+      // Log and continue
+      log.error("Error loading New Placement Notification : ", e);
     }
   }
 

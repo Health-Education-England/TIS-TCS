@@ -9,6 +9,7 @@ import java.util.Set;
 import java.util.stream.Collectors;
 import org.springframework.stereotype.Service;
 import org.springframework.util.CollectionUtils;
+import org.apache.commons.lang3.StringUtils;
 
 /**
  * Class that contains utility methods that work on the Principle of the logged in user
@@ -18,12 +19,13 @@ public class PermissionService {
 
   protected static final String VIEW_SENSITIVE_DATA_ROLE = "personsensitive:view:entities";
   protected static final String EDIT_SENSITIVE_DATA_ROLE = "personsensitive:add:modify:entities";
-  protected static final String APPROVE_PLACEMENT = "placement:approve";
+  protected static final String APPROVE_PLACEMENT_PERM = "placement:approve";
+  protected static final String BULK_UPLOAD_USER = "bulk_upload";
 
   public boolean canApprovePlacement() {
     UserProfile loggedInUserProfile = TisSecurityHelper.getProfileFromContext();
     Set<String> permissions = loggedInUserProfile.getPermissions();
-    return permissions.contains(APPROVE_PLACEMENT);
+    return permissions.contains(APPROVE_PLACEMENT_PERM);
   }
 
   public boolean canViewSensitiveData() {
@@ -48,6 +50,11 @@ public class PermissionService {
     UserProfile loggedInUserProfile = TisSecurityHelper.getProfileFromContext();
     Set<Programme> assignedProgrammes = loggedInUserProfile.getAssignedProgrammes();
     return !CollectionUtils.isEmpty(assignedProgrammes);
+  }
+
+  public boolean isUserBulkUploadAdmin() {
+    UserProfile loggedInUserProfile = TisSecurityHelper.getProfileFromContext();
+    return StringUtils.equals(loggedInUserProfile.getUserName(), BULK_UPLOAD_USER);
   }
 
   public Set<Long> getUsersTrustIds() {
