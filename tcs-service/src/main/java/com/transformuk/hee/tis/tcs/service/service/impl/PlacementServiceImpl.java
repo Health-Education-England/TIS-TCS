@@ -809,28 +809,40 @@ public class PlacementServiceImpl implements PlacementService {
 
   @Override
   @Transactional
-  public void approveAllPlacementByProgrammeId(Long programmeId) {
+  public long approveAllPlacementsByProgrammeId(Long programmeId) {
     if (!permissionService.canApprovePlacement()) {
-      return;
+      return 0;
     }
+    List<Placement> draftPlacements = getDraftPlacementsByProgrammeId(programmeId);
+    if (draftPlacements.size() > 0) {
+      draftPlacements.forEach(placement -> placement.setLifecycleState(LifecycleState.APPROVED));
+      placementRepository.saveAll(draftPlacements);
+    }
+    return draftPlacements.size();
+  }
+
+  @Override
+  @Transactional
+  public long getCountOfDraftPlacementsByProgrammeId(Long programmeId) {
+    return getDraftPlacementsByProgrammeId(programmeId).size();
+  }
+
+  private List<Placement> getDraftPlacementsByProgrammeId(Long programmeId) {
     Optional<Programme> programme = programmeRepository.findById(programmeId);
-    List<Placement> updatedPlacements = new ArrayList<>();
+    List<Placement> draftPlacements = new ArrayList<>();
     if (programme.isPresent()) {
       programme.get().getPosts().stream()
           .forEach(post -> {
             if (post.getStatus() == Status.CURRENT) { // only deal with current Posts
               post.getPlacementHistory().forEach(placement -> {
-                if (placement.getStatus() == Status.CURRENT && placement.getLifecycleState() == LifecycleState.DRAFT) {
-                  placement.setLifecycleState(LifecycleState.APPROVED);
-                  updatedPlacements.add(placement);
+                if (placement.getStatus() == Status.CURRENT
+                    && placement.getLifecycleState() == LifecycleState.DRAFT) {
+                  draftPlacements.add(placement);
                 }
               });
             }
-      });
-
-      if (updatedPlacements.size() > 0) {
-        placementRepository.saveAll(updatedPlacements);
-      }
+          });
     }
+    return draftPlacements;
   }
 }

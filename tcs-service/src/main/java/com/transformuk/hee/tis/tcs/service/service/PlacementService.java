@@ -149,5 +149,17 @@ public interface PlacementService {
    */
   boolean validateOverlappingPlacements(String npn, LocalDate fromDate, LocalDate toDate, Long placementId);
 
-  void approveAllPlacementByProgrammeId(Long programmeId);
+  /**
+   * Approve all the placements for the same programme id
+   * @param programmeId of which programme id the placements are going to be approved
+   * @return the count of updated placements
+   */
+  long approveAllPlacementsByProgrammeId(Long programmeId);
+
+  /**
+   * Get all the draft placements for the same programme id
+   * @param programmeId of which programme id the placements are draft
+   * @return
+   */
+  long getCountOfDraftPlacementsByProgrammeId(Long programmeId);
 }

@@ -292,12 +292,35 @@ public class PlacementResource {
     return ResponseEntity.ok().body(model);
   }
 
+  /**
+   * Approve all the placements for the same programme id
+   * @param programmeId of which programme id the placements are going to be approved
+   * @return the count of updated placements (by JSON)
+   */
   @PatchMapping(value = "/placements/approve/{programmeId}")
   @PreAuthorize("hasAuthority('tcs:view:entities')")
-  public ResponseEntity approveAllPlacementByProgrammeId (
+  public ResponseEntity<Map<String, Long>> approveAllPlacementsByProgrammeId (
       @PathVariable Long programmeId
   ) {
-    placementService.approveAllPlacementByProgrammeId(programmeId);
-    return new ResponseEntity<>(null, null, HttpStatus.OK);
+    long updatedCount = placementService.approveAllPlacementsByProgrammeId(programmeId);
+    Map model = new HashMap<String, Long>();
+    model.put("updatedCount", updatedCount);
+    return ResponseEntity.ok().body(model);
+  }
+
+  /**
+   * Get all the draft placements for the same programme id
+   * @param programmeId of which programme id the placements are draft
+   * @return the count of draft placements
+   */
+  @GetMapping(value = "/placements/draft/{programmeId}")
+  @PreAuthorize("hasAuthority('tcs:view:entities')")
+  public ResponseEntity<Map<String, Long>> getCountOfDraftPlacementsByProgrammed (
+      @PathVariable Long programmeId
+  ) {
+    long totalCount = placementService.getCountOfDraftPlacementsByProgrammeId(programmeId);
+    Map model = new HashMap<String, Long>();
+    model.put("totalCount", totalCount);
+    return ResponseEntity.ok().body(model);
   }
 }
