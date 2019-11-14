@@ -313,7 +313,7 @@ public class PlacementResource {
    * @param programmeId of which programme id the placements are draft
    * @return the count of draft placements
    */
-  @GetMapping(value = "/placements/draft/{programmeId}")
+  @GetMapping(value = "/placements/draftCount/{programmeId}")
   @PreAuthorize("hasAuthority('tcs:view:entities')")
   public ResponseEntity<Map<String, Long>> getCountOfDraftPlacementsByProgrammed (
       @PathVariable Long programmeId
