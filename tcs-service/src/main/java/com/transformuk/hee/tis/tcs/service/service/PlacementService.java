@@ -148,4 +148,6 @@ public interface PlacementService {
    * @return if overlapping exists, return true, else return false
    */
   boolean validateOverlappingPlacements(String npn, LocalDate fromDate, LocalDate toDate, Long placementId);
+
+  void approveAllPlacementByProgrammeId(Long programmeId);
 }

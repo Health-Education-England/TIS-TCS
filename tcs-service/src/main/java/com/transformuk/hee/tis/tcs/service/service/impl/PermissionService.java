@@ -18,6 +18,13 @@ public class PermissionService {
 
   protected static final String VIEW_SENSITIVE_DATA_ROLE = "personsensitive:view:entities";
   protected static final String EDIT_SENSITIVE_DATA_ROLE = "personsensitive:add:modify:entities";
+  protected static final String APPROVE_PLACEMENT = "placement:approve";
+
+  public boolean canApprovePlacement() {
+    UserProfile loggedInUserProfile = TisSecurityHelper.getProfileFromContext();
+    Set<String> permissions = loggedInUserProfile.getPermissions();
+    return permissions.contains(APPROVE_PLACEMENT);
+  }
 
   public boolean canViewSensitiveData() {
     UserProfile loggedInUserProfile = TisSecurityHelper.getProfileFromContext();

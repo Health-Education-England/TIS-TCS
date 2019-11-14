@@ -14,32 +14,13 @@ import com.transformuk.hee.tis.tcs.api.dto.PlacementSiteDTO;
 import com.transformuk.hee.tis.tcs.api.dto.PlacementSpecialtyDTO;
 import com.transformuk.hee.tis.tcs.api.dto.PlacementSummaryDTO;
 import com.transformuk.hee.tis.tcs.api.dto.PlacementSupervisorDTO;
-import com.transformuk.hee.tis.tcs.api.enumeration.LifecycleState;
-import com.transformuk.hee.tis.tcs.api.enumeration.PlacementStatus;
-import com.transformuk.hee.tis.tcs.api.enumeration.PostSpecialtyType;
-import com.transformuk.hee.tis.tcs.api.enumeration.TCSDateColumns;
+import com.transformuk.hee.tis.tcs.api.enumeration.*;
 import com.transformuk.hee.tis.tcs.service.api.util.ColumnFilterUtil;
 import com.transformuk.hee.tis.tcs.service.event.PlacementDeletedEvent;
 import com.transformuk.hee.tis.tcs.service.event.PlacementSavedEvent;
 import com.transformuk.hee.tis.tcs.service.exception.DateRangeColumnFilterException;
-import com.transformuk.hee.tis.tcs.service.model.ColumnFilter;
-import com.transformuk.hee.tis.tcs.service.model.Comment;
-import com.transformuk.hee.tis.tcs.service.model.EsrNotification;
-import com.transformuk.hee.tis.tcs.service.model.Placement;
-import com.transformuk.hee.tis.tcs.service.model.PlacementDetails;
-import com.transformuk.hee.tis.tcs.service.model.PlacementSite;
-import com.transformuk.hee.tis.tcs.service.model.PlacementSpecialty;
-import com.transformuk.hee.tis.tcs.service.model.PlacementSupervisor;
-import com.transformuk.hee.tis.tcs.service.model.Post;
-import com.transformuk.hee.tis.tcs.service.model.Specialty;
-import com.transformuk.hee.tis.tcs.service.repository.CommentRepository;
-import com.transformuk.hee.tis.tcs.service.repository.PersonRepositoryImpl;
-import com.transformuk.hee.tis.tcs.service.repository.PlacementDetailsRepository;
-import com.transformuk.hee.tis.tcs.service.repository.PlacementRepository;
-import com.transformuk.hee.tis.tcs.service.repository.PlacementSpecialtyRepository;
-import com.transformuk.hee.tis.tcs.service.repository.PlacementSupervisorRepository;
-import com.transformuk.hee.tis.tcs.service.repository.PostRepository;
-import com.transformuk.hee.tis.tcs.service.repository.SpecialtyRepository;
+import com.transformuk.hee.tis.tcs.service.model.*;
+import com.transformuk.hee.tis.tcs.service.repository.*;
 import com.transformuk.hee.tis.tcs.service.service.EsrNotificationService;
 import com.transformuk.hee.tis.tcs.service.service.PlacementService;
 import com.transformuk.hee.tis.tcs.service.service.helper.SqlQuerySupplier;
@@ -131,7 +112,12 @@ public class PlacementServiceImpl implements PlacementService {
   @Autowired
   private PostRepository postRepository;
   @Autowired
+  private ProgrammeRepository programmeRepository;
+  @Autowired
   private Clock clock;
+
+  @Autowired
+  private PermissionService permissionService;
 
   /**
    * Save a placement.
@@ -155,12 +141,12 @@ public class PlacementServiceImpl implements PlacementService {
   @Transactional
   @Override
   public PlacementDetailsDTO createDetails(final PlacementDetailsDTO placementDetailsDTO) {
-    // Before the Draft Approval process is done, set the lifecycleStatus to Approved
-    // This should be removed when Draft Approval process is done
-    if (placementDetailsDTO.getLifecycleState() == null) {
-      placementDetailsDTO.setLifecycleState(LifecycleState.APPROVED);
+    // if user doesn't has 'approve placement' permission, set it to DRAFT.
+    if (!permissionService.canApprovePlacement()) {
+      placementDetailsDTO.setLifecycleState(LifecycleState.DRAFT);
     }
-      log.debug("Request to create Placement : {}", placementDetailsDTO);
+
+    log.debug("Request to create Placement : {}", placementDetailsDTO);
     PlacementDetails placementDetails = placementDetailsMapper
         .placementDetailsDTOToPlacementDetails(placementDetailsDTO);
     updateStoredCommentsWithChangesOrAdd(placementDetails);
@@ -262,6 +248,9 @@ public class PlacementServiceImpl implements PlacementService {
   @Override
   public PlacementDetailsDTO saveDetails(final PlacementDetailsDTO placementDetailsDTO) {
     log.debug("Request to save Placement : {}", placementDetailsDTO);
+    if (!permissionService.canApprovePlacement()) {
+      placementDetailsDTO.setLifecycleState(LifecycleState.DRAFT);
+    }
 
     //clear any linked specialties before trying to save the placement
     final Placement placement = placementRepository.findById(placementDetailsDTO.getId())
@@ -815,6 +804,33 @@ public class PlacementServiceImpl implements PlacementService {
       }
       result.setPlacementSpecialtyType(postSpecialtyType);
       return result;
+    }
+  }
+
+  @Override
+  @Transactional
+  public void approveAllPlacementByProgrammeId(Long programmeId) {
+    if (!permissionService.canApprovePlacement()) {
+      return;
+    }
+    Optional<Programme> programme = programmeRepository.findById(programmeId);
+    List<Placement> updatedPlacements = new ArrayList<>();
+    if (programme.isPresent()) {
+      programme.get().getPosts().stream()
+          .forEach(post -> {
+            if (post.getStatus() == Status.CURRENT) { // only deal with current Posts
+              post.getPlacementHistory().forEach(placement -> {
+                if (placement.getStatus() == Status.CURRENT && placement.getLifecycleState() == LifecycleState.DRAFT) {
+                  placement.setLifecycleState(LifecycleState.APPROVED);
+                  updatedPlacements.add(placement);
+                }
+              });
+            }
+      });
+
+      if (updatedPlacements.size() > 0) {
+        placementRepository.saveAll(updatedPlacements);
+      }
     }
   }
 }

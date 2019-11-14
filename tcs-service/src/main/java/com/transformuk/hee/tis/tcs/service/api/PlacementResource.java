@@ -291,4 +291,13 @@ public class PlacementResource {
     model.put("overlapping", overlapping);
     return ResponseEntity.ok().body(model);
   }
+
+  @PatchMapping(value = "/placements/approve/{programmeId}")
+  @PreAuthorize("hasAuthority('tcs:view:entities')")
+  public ResponseEntity approveAllPlacementByProgrammeId (
+      @PathVariable Long programmeId
+  ) {
+    placementService.approveAllPlacementByProgrammeId(programmeId);
+    return new ResponseEntity<>(null, null, HttpStatus.OK);
+  }
 }
