@@ -88,6 +88,7 @@ public class PlacementPlannerMapper {
         result.setWte(placement.getPlacementWholeTimeEquivalent());
         result.setType(placement.getPlacementType());
         result.setTrainee(convertPerson(placement.getTrainee()));
+        result.setLifecycleState(placement.getLifecycleState());
 
         results.add(result);
       }
