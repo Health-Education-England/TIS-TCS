@@ -59,6 +59,7 @@ public class PlacementMapper {
       placementDTO.setPlacementWholeTimeEquivalent(placement.getPlacementWholeTimeEquivalent());
       placementDTO.setStatus(getStatus(placement.getDateFrom(), placement.getDateTo()));
       placementDTO.setSpecialties(placementSpecialtyMapper.toDTOs(placement.getSpecialties()));
+      placementDTO.setLifecycleState(placement.getLifecycleState());
 
       if (placementSupervisorMap != null && placementSupervisorMap.containsKey(placement.getId())) {
         List<PlacementSupervisorDTO> supervisors = placementSupervisorMap.get(placement.getId());
@@ -97,6 +98,7 @@ public class PlacementMapper {
     placement.setPlacementType(placementDTO.getPlacementType());
     placement.setTrainingDescription(placementDTO.getTrainingDescription());
     placement.setPlacementWholeTimeEquivalent(placementDTO.getPlacementWholeTimeEquivalent());
+    placement.setLifecycleState(placementDTO.getLifecycleState());
 
     if (CollectionUtils.isNotEmpty(placementDTO.getSpecialties())) {
       final Set<PlacementSpecialty> specialties = Sets.newHashSet();

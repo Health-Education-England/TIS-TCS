@@ -140,13 +140,27 @@ public class PlacementServiceImpl implements PlacementService {
 
   @Transactional
   @Override
-  public PlacementDetailsDTO createDetails(final PlacementDetailsDTO placementDetailsDTO, boolean approveDraft) {
-    // if user doesn't has 'approve placement' permission, set state to DRAFT.
-    if (!permissionService.canApprovePlacement()) {
-      placementDetailsDTO.setLifecycleState(LifecycleState.DRAFT);
-    }
+  public PlacementDetailsDTO createDetails(final PlacementDetailsDTO placementDetailsDTO) {
 
     log.debug("Request to create Placement : {}", placementDetailsDTO);
+    // if the user doesn't have `placement approve` perm, set the placement state to draft.
+    // bulk_upload user always needs to send approved state
+    if (!permissionService.canApprovePlacement()) {
+      placementDetailsDTO.setLifecycleState(LifecycleState.DRAFT);
+    } else if (placementDetailsDTO.getLifecycleState() == null) {
+      placementDetailsDTO.setLifecycleState(LifecycleState.APPROVED);
+    }
+
+    // check if this is an update and it's the first time of approval
+    final Placement placement = placementRepository.findById(placementDetailsDTO.getId())
+        .orElse(null);
+    boolean approveDraftFirstTime = false;
+    if (placement.getPlacementApprovedDate() == null
+        && placement.getLifecycleState() == LifecycleState.DRAFT
+        && placementDetailsDTO.getLifecycleState() == LifecycleState.APPROVED) {
+      approveDraftFirstTime = true;
+    }
+
     PlacementDetails placementDetails = placementDetailsMapper
         .placementDetailsDTOToPlacementDetails(placementDetailsDTO);
     updateStoredCommentsWithChangesOrAdd(placementDetails);
@@ -163,6 +177,9 @@ public class PlacementServiceImpl implements PlacementService {
       siteModels.add(placementSite);
     }
     placementDetails.setSites(siteModels);
+    if (placementDetails.getLifecycleState() == LifecycleState.APPROVED) {
+      placementDetails.setPlacementApprovedDate(LocalDateTime.now(clock));
+    }
     placementDetails = placementDetailsRepository.saveAndFlush(placementDetails);
 
     final Set<PlacementSpecialty> placementSpecialties = linkPlacementSpecialties(
@@ -170,7 +187,7 @@ public class PlacementServiceImpl implements PlacementService {
     final PlacementDetailsDTO placementDetailsDTO1 = placementDetailsMapper
         .placementDetailsToPlacementDetailsDTO(placementDetails);
     placementDetailsDTO1.setSpecialties(placementSpecialtyMapper.toDTOs(placementSpecialties));
-    if (placementDetailsDTO.getId() == null || approveDraft == true) {
+    if (placementDetailsDTO.getId() == null || approveDraftFirstTime == true) {
       handleEsrNewPlacementNotification(placementDetailsDTO, placementDetails);
     }
 
@@ -254,12 +271,6 @@ public class PlacementServiceImpl implements PlacementService {
   public PlacementDetailsDTO saveDetails(final PlacementDetailsDTO placementDetailsDTO) {
     log.debug("Request to save Placement : {}", placementDetailsDTO);
 
-    if (permissionService.isUserBulkUploadAdmin()) {
-      placementDetailsDTO.setLifecycleState(LifecycleState.APPROVED);
-    } else if(!permissionService.canApprovePlacement()) {
-      placementDetailsDTO.setLifecycleState(LifecycleState.DRAFT);
-    }
-
     //clear any linked specialties before trying to save the placement
     final Placement placement = placementRepository.findById(placementDetailsDTO.getId())
         .orElse(null);
@@ -274,15 +285,12 @@ public class PlacementServiceImpl implements PlacementService {
     updateStoredCommentsWithChangesOrAdd(placementDetails);
 
     placement.setSpecialties(new HashSet<>());
+
     Placement savedPlacement = placementRepository.saveAndFlush(placement);
     PlacementDTO placementDTO = convertPlacementWithSupervisors(savedPlacement);
     applicationEventPublisher.publishEvent(new PlacementSavedEvent(placementDTO));
-    boolean approveDraft = false;
-    if (placement.getLifecycleState() == LifecycleState.DRAFT
-        && placementDetailsDTO.getLifecycleState() == LifecycleState.APPROVED) {
-      approveDraft = true;
-    }
-    return createDetails(placementDetailsDTO, approveDraft);
+
+    return createDetails(placementDetailsDTO);
   }
 
   @Transactional

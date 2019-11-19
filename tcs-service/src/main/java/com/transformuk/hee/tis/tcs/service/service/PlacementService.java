@@ -71,7 +71,7 @@ public interface PlacementService {
    * @param placementDetailsDTO the placement details to save
    * @return the saved placement details
    */
-  PlacementDetailsDTO createDetails(PlacementDetailsDTO placementDetailsDTO, boolean approveDraft);
+  PlacementDetailsDTO createDetails(PlacementDetailsDTO placementDetailsDTO);
 
   /**
    * Delete the "id" placement.

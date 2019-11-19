@@ -8,6 +8,7 @@ import static java.util.stream.Collectors.toList;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.hamcrest.Matchers.*;
 import static org.mockito.BDDMockito.given;
+import static org.mockito.Mockito.when;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.delete;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
@@ -55,6 +56,7 @@ import com.transformuk.hee.tis.tcs.service.repository.PlacementSupervisorReposit
 import com.transformuk.hee.tis.tcs.service.repository.PostRepository;
 import com.transformuk.hee.tis.tcs.service.repository.SpecialtyRepository;
 import com.transformuk.hee.tis.tcs.service.service.PlacementService;
+import com.transformuk.hee.tis.tcs.service.service.impl.PermissionService;
 import com.transformuk.hee.tis.tcs.service.service.impl.PlacementPlannerServiceImp;
 import com.transformuk.hee.tis.tcs.service.service.mapper.PlacementDetailsMapper;
 import com.transformuk.hee.tis.tcs.service.service.mapper.PlacementMapper;
@@ -75,6 +77,7 @@ import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.mockito.Mock;
+import org.mockito.Mockito;
 import org.mockito.MockitoAnnotations;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
@@ -82,6 +85,7 @@ import org.springframework.data.web.PageableHandlerMethodArgumentResolver;
 import org.springframework.http.MediaType;
 import org.springframework.http.converter.json.MappingJackson2HttpMessageConverter;
 import org.springframework.test.context.junit4.SpringRunner;
+import org.springframework.test.util.ReflectionTestUtils;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.ResultActions;
 import org.springframework.test.web.servlet.setup.MockMvcBuilders;
@@ -130,7 +134,6 @@ public class PlacementResourceIntTest {
 
   private static final String COMMENT = "Hello world!";
 
-
   @Autowired
   private PlacementDetailsRepository placementDetailsRepository;
   @Autowired
@@ -155,6 +158,7 @@ public class PlacementResourceIntTest {
   private PlacementDetailsMapper placementDetailsMapper;
   @Autowired
   private PlacementMapper placementMapper;
+
   @Autowired
   private PlacementService placementService;
   @Autowired
@@ -172,6 +176,8 @@ public class PlacementResourceIntTest {
 
   @Mock
   private ReferenceService referenceService;
+
+  private PermissionService permissionService;
 
   @Autowired
   private EntityManager entityManager;
@@ -228,6 +234,8 @@ public class PlacementResourceIntTest {
 
   @Before
   public void setup() {
+    permissionService = Mockito.mock(PermissionService.class);
+    ReflectionTestUtils.setField(placementService, "permissionService", permissionService);
     MockitoAnnotations.initMocks(this);
     asyncReferenceService = new AsyncReferenceService(referenceService);
     placementValidator = new PlacementValidator(referenceService, postRepository, personRepository,
@@ -319,6 +327,7 @@ public class PlacementResourceIntTest {
     placementDetails.setDateFrom(UPDATED_DATE_FROM.plusMonths(1));
     placementDetails.setDateTo(UPDATED_DATE_TO.plusMonths(3));
     placementDetails.setPlacementType(placementType);
+    placementDetails.setLifecycleState(LifecycleState.APPROVED);
 
     final Post post = postRepository.findById(placementDetails.getPostId()).orElse(null);
     post.setNationalPostNumber(postNumber);
@@ -328,6 +337,8 @@ public class PlacementResourceIntTest {
         .placementDetailsToPlacementDetailsDTO(placementDetails);
 
     addSupervisorsToPlacement(placementDetailsDTO);
+
+    when(permissionService.canApprovePlacement()).thenReturn(true);
 
     restPlacementMockMvc.perform(post("/api/placements")
         .contentType(TestUtil.APPLICATION_JSON_UTF8)
@@ -353,7 +364,7 @@ public class PlacementResourceIntTest {
     assertThat(placementSupervisorRepository
         .findById(new PlacementSupervisorId(testPlacement.getId(), 2000L, 2))).isNotNull();
 
-    // Validate that there is no ESR notification record created
+    // Validate that there is an ESR notification record created
     final List<EsrNotification> esrNotifications = esrNotificationRepository.findAll();
     assertThat(esrNotifications).hasSize(1);
     final EsrNotification esrNotification = esrNotifications.get(0);
@@ -369,6 +380,7 @@ public class PlacementResourceIntTest {
 
     // Create the Placement with an existing ID
     placementDetails.setId(1L);
+
     final PlacementDetailsDTO placementDTO = placementDetailsMapper
         .placementDetailsToPlacementDetailsDTO(placementDetails);
 
@@ -389,7 +401,7 @@ public class PlacementResourceIntTest {
 
   @Test
   @Transactional
-  public void createDraftPlacementDraftShouldNotSendEsrNotification() throws Exception
+  public void createDraftPlacementShouldNotSendEsrNotification() throws Exception
   {
     // Create the Placement
     final String postNumber = "EOE/RGT00/021/FY1/010";
@@ -403,6 +415,9 @@ public class PlacementResourceIntTest {
 
     final PlacementDetailsDTO placementDetailsDTO = placementDetailsMapper
         .placementDetailsToPlacementDetailsDTO(placementDetails);
+
+    when(permissionService.canApprovePlacement()).thenReturn(false);
+
     restPlacementMockMvc.perform(post("/api/placements")
         .contentType(TestUtil.APPLICATION_JSON_UTF8)
         .content(TestUtil.convertObjectToJsonBytes(placementDetailsDTO)))
@@ -460,10 +475,12 @@ public class PlacementResourceIntTest {
   }
 
 
+
   @Test
   @Transactional
   public void getAllPlacements() throws Exception {
     // Initialize the database
+    placementDetails.setLifecycleState(LifecycleState.DRAFT);
     placementDetailsRepository.saveAndFlush(placementDetails);
 
     // Get all the placementList
@@ -481,7 +498,9 @@ public class PlacementResourceIntTest {
         .andExpect(jsonPath("$.[*].localPostNumber").value(DEFAULT_LOCAL_POST_NUMBER))
         .andExpect(jsonPath("$.[*].trainingDescription").value(DEFAULT_TRAINING_DESCRIPTION))
         .andExpect(jsonPath("$.[*].placementWholeTimeEquivalent")
-            .value(DEFAULT_PLACEMENT_WHOLE_TIME_EQUIVALENT.doubleValue()));
+            .value(DEFAULT_PLACEMENT_WHOLE_TIME_EQUIVALENT.doubleValue()))
+        .andExpect(jsonPath("$.[*].lifecycleState").value(LifecycleState.DRAFT.name()))
+        ;
   }
 
   @Test
@@ -522,6 +541,7 @@ public class PlacementResourceIntTest {
 
     placementDetails.setTraineeId(person.getId());
     placementDetails.setPostId(post.getId());
+    placementDetails.setLifecycleState(LifecycleState.DRAFT);
     placementDetailsRepository.saveAndFlush(placementDetails);
 
     // Get the placementDetails
@@ -544,7 +564,9 @@ public class PlacementResourceIntTest {
         .andExpect(jsonPath("$.localPostNumber").value(DEFAULT_LOCAL_POST_NUMBER))
         .andExpect(jsonPath("$.trainingDescription").value(DEFAULT_TRAINING_DESCRIPTION))
         .andExpect(jsonPath("$.wholeTimeEquivalent")
-            .value(DEFAULT_PLACEMENT_WHOLE_TIME_EQUIVALENT.floatValue()));
+            .value(DEFAULT_PLACEMENT_WHOLE_TIME_EQUIVALENT.floatValue()))
+        .andExpect(jsonPath("$.lifecycleState").value(LifecycleState.DRAFT.name()))
+        ;
   }
 
   @Test
@@ -560,6 +582,7 @@ public class PlacementResourceIntTest {
   public void updatePlacement() throws Exception {
     TestUtils.mockUserprofile("Test user", "DBC-1");
     // Initialize the database
+    placementDetails.setLifecycleState(LifecycleState.APPROVED);
     placementDetailsRepository.saveAndFlush(placementDetails);
 
     final Set<PlacementSupervisor> supervisors = new HashSet<>();
@@ -582,6 +605,7 @@ public class PlacementResourceIntTest {
     updatedPlacement.setTrainingDescription(UPDATED_TRAINING_DESCRPTION);
     updatedPlacement.setPlacementType(UPDATED_PLACEMENT_TYPE);
     updatedPlacement.setWholeTimeEquivalent(UPDATED_PLACEMENT_WHOLE_TIME_EQUIVALENT);
+    updatedPlacement.setLifecycleState(LifecycleState.APPROVED);
     final PlacementDetailsDTO placementDTO = placementDetailsMapper
         .placementDetailsToPlacementDetailsDTO(updatedPlacement);
 
@@ -698,6 +722,8 @@ public class PlacementResourceIntTest {
     final PlacementDetailsDTO placementDTO = placementDetailsMapper
         .placementDetailsToPlacementDetailsDTO(updatedPlacement);
 
+    when(permissionService.canApprovePlacement()).thenReturn(false);
+
     restPlacementMockMvc.perform(put("/api/placements")
         .contentType(TestUtil.APPLICATION_JSON_UTF8)
         .content(TestUtil.convertObjectToJsonBytes(placementDTO)))
@@ -741,6 +767,8 @@ public class PlacementResourceIntTest {
     updatedPlacement.setLifecycleState(LifecycleState.APPROVED);
     final PlacementDetailsDTO placementDTO = placementDetailsMapper
         .placementDetailsToPlacementDetailsDTO(updatedPlacement);
+
+    when(permissionService.canApprovePlacement()).thenReturn(true);
 
     restPlacementMockMvc.perform(put("/api/placements")
         .contentType(TestUtil.APPLICATION_JSON_UTF8)
@@ -810,6 +838,8 @@ public class PlacementResourceIntTest {
     final PlacementDetailsDTO placementDTO = placementDetailsMapper
         .placementDetailsToPlacementDetailsDTO(updatedPlacement);
 
+    when(permissionService.canApprovePlacement()).thenReturn(true);
+
     restPlacementMockMvc.perform(put("/api/placements")
         .contentType(TestUtil.APPLICATION_JSON_UTF8)
         .content(TestUtil.convertObjectToJsonBytes(placementDTO)))
@@ -864,6 +894,7 @@ public class PlacementResourceIntTest {
     placementDetails.setDateFrom(UPDATED_DATE_FROM.plusMonths(4));
     placementDetails.setDateTo(UPDATED_DATE_TO.plusMonths(6));
     placementDetails.setPlacementType(placementType);
+    placementDetails.setLifecycleState(LifecycleState.APPROVED);
     placementDetailsRepository.saveAndFlush(placementDetails);
 
     final Post post = postRepository.findById(placementDetails.getPostId()).orElse(null);
@@ -883,8 +914,11 @@ public class PlacementResourceIntTest {
     updatedPlacement.setTrainingDescription(UPDATED_TRAINING_DESCRPTION);
     updatedPlacement.setPlacementType(placementType);
     updatedPlacement.setWholeTimeEquivalent(UPDATED_PLACEMENT_WHOLE_TIME_EQUIVALENT);
+    updatedPlacement.setLifecycleState(LifecycleState.APPROVED);
     final PlacementDetailsDTO placementDTO = placementDetailsMapper
         .placementDetailsToPlacementDetailsDTO(updatedPlacement);
+
+    when(permissionService.canApprovePlacement()).thenReturn(true);
 
     restPlacementMockMvc.perform(put("/api/placements")
         .contentType(TestUtil.APPLICATION_JSON_UTF8)
@@ -1187,6 +1221,7 @@ public class PlacementResourceIntTest {
   public void shouldReturnAllPlacementsWhenNoFilter() throws Exception {
 
     // Initialize the database
+    placementDetails.setLifecycleState(LifecycleState.APPROVED);
     placementDetailsRepository.saveAndFlush(placementDetails);
 
     // Get all the placementList
@@ -1201,7 +1236,9 @@ public class PlacementResourceIntTest {
         .andExpect(jsonPath("$.[*].dateFrom").value(DEFAULT_DATE_FROM.toString()))
         .andExpect(jsonPath("$.[*].dateTo").value(DEFAULT_DATE_TO.toString()))
         .andExpect(jsonPath("$.[*].placementType").value(DEFAULT_PLACEMENT_TYPE))
-        .andExpect(jsonPath("$.[*].localPostNumber").value(DEFAULT_LOCAL_POST_NUMBER));
+        .andExpect(jsonPath("$.[*].localPostNumber").value(DEFAULT_LOCAL_POST_NUMBER))
+        .andExpect(jsonPath("$.[*].lifecycleState").value(LifecycleState.APPROVED.name()))
+        ;
   }
 
   @Test
@@ -1250,7 +1287,6 @@ public class PlacementResourceIntTest {
         .andExpect(jsonPath("$.[*].placementType").value(DEFAULT_PLACEMENT_TYPE))
         .andExpect(jsonPath("$.[*].localPostNumber").value(DEFAULT_LOCAL_POST_NUMBER))
         .andExpect(jsonPath("$.[*].trainingDescription").value(DEFAULT_TRAINING_DESCRIPTION));
-
   }
 
   @Test

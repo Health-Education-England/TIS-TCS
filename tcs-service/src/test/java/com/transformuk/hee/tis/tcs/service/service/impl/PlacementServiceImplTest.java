@@ -84,6 +84,8 @@ public class PlacementServiceImplTest {
   private PostRepository postRepositoryMock;
   @Mock
   private Clock clock;
+  @Mock
+  private PermissionService permissionService;
   @Captor
   private ArgumentCaptor<LocalDate> toDateCaptor;
   @Captor
@@ -281,6 +283,7 @@ public class PlacementServiceImplTest {
     Placement currentPlacement = new Placement();
     currentPlacement.setId(existingPlacementId);
     currentPlacement.setDateFrom(dateFiveMonthsAgo);
+    currentPlacement.setLifecycleState(LifecycleState.APPROVED);
 
     PlacementDetailsDTO updatedPlacementDetails = new PlacementDetailsDTO();
     updatedPlacementDetails.setDateFrom(dateOneMonthsAgo);
@@ -308,6 +311,7 @@ public class PlacementServiceImplTest {
     Placement currentPlacement = new Placement();
     currentPlacement.setId(existingPlacementId);
     currentPlacement.setDateFrom(dateFiveMonthsAgo);
+    currentPlacement.setLifecycleState(LifecycleState.APPROVED);
 
     PlacementDetailsDTO updatedPlacementDetails = new PlacementDetailsDTO();
     updatedPlacementDetails.setDateFrom(dateFiveMonthsAgo);
@@ -595,6 +599,20 @@ public class PlacementServiceImplTest {
     placement.setId(1L);
     boolean returnValue = testObj.isEligibleForChangedDatesNotification(placementDetailsDto, placement);
     Assert.assertThat("When draft placement is not approved, it is not elegible for ChangedDatesNotification",
+        returnValue, CoreMatchers.is(false));
+  }
+
+  @Test
+  public void isEligibleForChangedDatesNotificationReturnFalseWhenApprovedPlacementGoesBackToDraft() {
+    PlacementDetailsDTO placementDetailsDto = new PlacementDetailsDTO();
+    placementDetailsDto.setId(1L);
+    placementDetailsDto.setLifecycleState(LifecycleState.DRAFT);
+
+    Placement placement = new Placement();
+    placement.setId(1L);
+    placement.setLifecycleState(LifecycleState.APPROVED);
+    boolean returnValue = testObj.isEligibleForChangedDatesNotification(placementDetailsDto, placement);
+    Assert.assertThat("When approved placement goes back to draft, it is not elegible for ChangedDatesNotification",
         returnValue, CoreMatchers.is(false));
   }
 }

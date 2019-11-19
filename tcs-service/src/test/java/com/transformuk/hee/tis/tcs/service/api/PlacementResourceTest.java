@@ -7,6 +7,7 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
 import com.google.common.collect.Lists;
+import com.transformuk.hee.tis.tcs.api.enumeration.LifecycleState;
 import com.transformuk.hee.tis.tcs.service.api.decorator.PlacementDetailsDecorator;
 import com.transformuk.hee.tis.tcs.service.api.validation.PlacementValidator;
 import com.transformuk.hee.tis.tcs.service.dto.placementmanager.PersonDTO;
@@ -141,6 +142,7 @@ public class PlacementResourceTest {
     placement1DTO.setDateFrom(LocalDate.now().minusMonths(1));
     placement1DTO.setWte(BigDecimal.ONE);
     placement1DTO.setTrainee(trainee1DTO);
+    placement1DTO.setLifecycleState(LifecycleState.APPROVED);
     placement2DTO = new PlacementDTO();
     placement2DTO.setId(PLACEMENT2_ID);
     placement2DTO.setType(PLACEMENT_2_TYPE);
@@ -148,6 +150,7 @@ public class PlacementResourceTest {
     placement2DTO.setDateFrom(LocalDate.now().minusMonths(1));
     placement2DTO.setWte(BigDecimal.ONE);
     placement2DTO.setTrainee(trainee1DTO);
+    placement2DTO.setLifecycleState(LifecycleState.APPROVED);
     placement3DTO = new PlacementDTO();
     placement3DTO.setId(PLACEMENT3_ID);
     placement3DTO.setType(PLACEMENT_3_TYPE);
@@ -155,6 +158,7 @@ public class PlacementResourceTest {
     placement3DTO.setDateFrom(LocalDate.now().minusMonths(1));
     placement3DTO.setWte(BigDecimal.ONE);
     placement3DTO.setTrainee(trainee2DTO);
+    placement3DTO.setLifecycleState(LifecycleState.APPROVED);
     placement4DTO = new PlacementDTO();
     placement4DTO.setId(PLACEMENT4_ID);
     placement4DTO.setType(PLACEMENT_4_TYPE);
@@ -162,6 +166,7 @@ public class PlacementResourceTest {
     placement4DTO.setDateFrom(LocalDate.now().minusMonths(1));
     placement4DTO.setWte(BigDecimal.ONE);
     placement4DTO.setTrainee(trainee1DTO);
+    placement4DTO.setLifecycleState(LifecycleState.APPROVED);
   }
 
   private void setupTraineeData() {
@@ -219,6 +224,8 @@ public class PlacementResourceTest {
             .value(Matchers.hasItems(TRAINEE_SURNAME_1, TRAINEE_SURNAME_2)))
         .andExpect(jsonPath("$.specialties[*].sites[*].posts[*].placements[*].trainee.forename")
             .value(Matchers.hasItems(TRAINEE_FORENAME_1, TRAINEE_FORENAME_2)))
+        .andExpect(jsonPath("$.specialties[*].sites[*].posts[*].placements[*].lifecycleState")
+            .value(Matchers.hasItem(LifecycleState.APPROVED.name())))
     ;
   }
 
