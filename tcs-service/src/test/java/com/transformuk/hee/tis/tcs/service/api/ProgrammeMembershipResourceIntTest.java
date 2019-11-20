@@ -97,6 +97,9 @@ public class ProgrammeMembershipResourceIntTest {
   private static final String DEFAULT_LEAVING_DESTINATION = "AAAAAAAAAA";
   private static final String UPDATED_LEAVING_DESTINATION = "BBBBBBBBBB";
 
+  private static final String DEFAULT_LEAVING_REASON = "AAAAAAAAAA";
+  private static final String UPDATED_LEAVING_REASON= "BBBBBBBBBB";
+
   private static final Long NOT_EXISTS_PROGRAMME_ID = 10101010l;
   private static final Long NOT_EXISTS_CURRICULUM_ID = 20202020l;
 
@@ -156,7 +159,7 @@ public class ProgrammeMembershipResourceIntTest {
   private MockMvc restProgrammeMembershipMockMvc;
 
   private ProgrammeMembership programmeMembership;
-  
+
   private ProgrammeCurriculum programmeCurriculum;
 
   /**
@@ -175,7 +178,8 @@ public class ProgrammeMembershipResourceIntTest {
         .programmeStartDate(DEFAULT_PROGRAMME_START_DATE)
         .curriculumCompletionDate(DEFAULT_CURRICULUM_COMPLETION_DATE)
         .programmeEndDate(DEFAULT_PROGRAMME_END_DATE)
-        .leavingDestination(DEFAULT_LEAVING_DESTINATION);
+        .leavingDestination(DEFAULT_LEAVING_DESTINATION)
+        .leavingReason(DEFAULT_LEAVING_REASON);
     return programmeMembership;
   }
 
@@ -262,8 +266,8 @@ public class ProgrammeMembershipResourceIntTest {
     assertThat(testProgrammeMembership.getCurriculumCompletionDate())
         .isEqualTo(DEFAULT_CURRICULUM_COMPLETION_DATE);
     assertThat(testProgrammeMembership.getProgrammeEndDate()).isEqualTo(DEFAULT_PROGRAMME_END_DATE);
-    assertThat(testProgrammeMembership.getLeavingDestination())
-        .isEqualTo(DEFAULT_LEAVING_DESTINATION);
+    assertThat(testProgrammeMembership.getLeavingDestination()).isNull();
+    assertThat(testProgrammeMembership.getLeavingReason()).isEqualTo(DEFAULT_LEAVING_REASON);
   }
 
   @Test
@@ -490,8 +494,8 @@ public class ProgrammeMembershipResourceIntTest {
             .value(hasItem(DEFAULT_PROGRAMME_START_DATE.toString())))
         .andExpect(jsonPath("$.[*].programmeEndDate")
             .value(hasItem(DEFAULT_PROGRAMME_END_DATE.toString())))
-        .andExpect(jsonPath("$.[*].leavingDestination")
-            .value(hasItem(DEFAULT_LEAVING_DESTINATION.toString())))
+        .andExpect(jsonPath("$.[*].leavingDestination").doesNotExist())
+        .andExpect(jsonPath("$.[*].leavingReason").value(hasItem(DEFAULT_LEAVING_REASON)))
         .andExpect(jsonPath("$.[*].curriculumMemberships[*].amendedDate").isNotEmpty());
   }
 
@@ -525,7 +529,8 @@ public class ProgrammeMembershipResourceIntTest {
             .value(hasItem(DEFAULT_PERIOD_OF_GRACE)))
         .andExpect(jsonPath("$.programmeStartDate").value(DEFAULT_PROGRAMME_START_DATE.toString()))
         .andExpect(jsonPath("$.programmeEndDate").value(DEFAULT_PROGRAMME_END_DATE.toString()))
-        .andExpect(jsonPath("$.leavingDestination").value(DEFAULT_LEAVING_DESTINATION))
+        .andExpect(jsonPath("$.leavingDestination").doesNotExist())
+        .andExpect(jsonPath("$.leavingReason").value(DEFAULT_LEAVING_REASON))
         .andExpect(jsonPath("$.curriculumMemberships[*].amendedDate").isNotEmpty());
   }
 
@@ -567,7 +572,8 @@ public class ProgrammeMembershipResourceIntTest {
         .programmeStartDate(UPDATED_PROGRAMME_START_DATE)
         .curriculumCompletionDate(UPDATED_CURRICULUM_COMPLETION_DATE)
         .programmeEndDate(UPDATED_PROGRAMME_END_DATE)
-        .leavingDestination(UPDATED_LEAVING_DESTINATION);
+        .leavingDestination(UPDATED_LEAVING_DESTINATION)
+        .leavingReason(UPDATED_LEAVING_REASON);
     ProgrammeMembershipDTO programmeMembershipDTO = programmeMembershipMapper
         .toDto(updatedProgrammeMembership);
 
@@ -595,8 +601,8 @@ public class ProgrammeMembershipResourceIntTest {
     assertThat(testProgrammeMembership.getCurriculumCompletionDate())
         .isEqualTo(UPDATED_CURRICULUM_COMPLETION_DATE);
     assertThat(testProgrammeMembership.getProgrammeEndDate()).isEqualTo(UPDATED_PROGRAMME_END_DATE);
-    assertThat(testProgrammeMembership.getLeavingDestination())
-        .isEqualTo(UPDATED_LEAVING_DESTINATION);
+    assertThat(testProgrammeMembership.getLeavingDestination()).isNull();
+    assertThat(testProgrammeMembership.getLeavingReason()).isEqualTo(UPDATED_LEAVING_REASON);
     assertThat(testProgrammeMembership.getAmendedDate()).isAfter(DEFAULT_AMENDED_DATE);
   }
 
