@@ -13,6 +13,7 @@ import com.transformuk.hee.tis.tcs.api.dto.PlacementSiteDTO;
 import com.transformuk.hee.tis.tcs.api.dto.PlacementSummaryDTO;
 import com.transformuk.hee.tis.tcs.api.enumeration.LifecycleState;
 import com.transformuk.hee.tis.tcs.api.enumeration.PlacementSiteType;
+import com.transformuk.hee.tis.tcs.service.event.PlacementSavedEvent;
 import com.transformuk.hee.tis.tcs.service.model.Placement;
 import com.transformuk.hee.tis.tcs.service.model.PlacementDetails;
 import com.transformuk.hee.tis.tcs.service.model.PlacementSite;
@@ -42,11 +43,9 @@ import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
-import org.mockito.ArgumentCaptor;
-import org.mockito.Captor;
-import org.mockito.InjectMocks;
-import org.mockito.Mock;
+import org.mockito.*;
 import org.mockito.junit.MockitoJUnitRunner;
+import org.springframework.context.ApplicationEventPublisher;
 import org.springframework.jdbc.core.namedparam.NamedParameterJdbcTemplate;
 
 @RunWith(MockitoJUnitRunner.class)
@@ -54,6 +53,7 @@ public class PlacementServiceImplTest {
 
   private static final long PLACEMENT_ID = 1L;
   private static final Long number = 1L;
+  @Spy
   @InjectMocks
   private PlacementServiceImpl testObj;
   @Mock
@@ -86,6 +86,8 @@ public class PlacementServiceImplTest {
   private Clock clock;
   @Mock
   private PermissionService permissionService;
+  @Mock
+  private ApplicationEventPublisher applicationEventPublisher;
   @Captor
   private ArgumentCaptor<LocalDate> toDateCaptor;
   @Captor
@@ -348,7 +350,7 @@ public class PlacementServiceImplTest {
     when(placementSupervisorRepositoryMock.saveAll(any())).thenReturn(null);
 
     // Call the method under test.
-    testObj.createDetails(placementDetailsDto, false);
+    testObj.createDetails(placementDetailsDto);
 
     // Perform assertions.
     Assert.assertThat("The placement's added date did not match the expected value.",
@@ -369,6 +371,10 @@ public class PlacementServiceImplTest {
     PlacementDetails placementDetails = new PlacementDetails();
     placementDetails.setId(1L);
 
+    Placement placement = new Placement();
+    placement.setId(1L);
+    placement.setPlacementApprovedDate(LocalDate.now());
+
     // Record expectations.
     when(placementDetailsMapperMock.placementDetailsDTOToPlacementDetails(placementDetailsDto))
         .thenReturn(placementDetails);
@@ -379,9 +385,11 @@ public class PlacementServiceImplTest {
     when(placementSpecialtyMapperMock.toDTOs(any())).thenReturn(Collections.emptySet());
     doNothing().when(placementSupervisorRepositoryMock).deleteAllByIdPlacementId(1L);
     when(placementSupervisorRepositoryMock.saveAll(any())).thenReturn(null);
+    when(placementRepositoryMock.findById(1L)).thenReturn(Optional.of(placement));
+    doReturn(null).when(testObj).linkPlacementSpecialties(any(), any());
 
     // Call the method under test.
-    testObj.createDetails(placementDetailsDto, false);
+    testObj.createDetails(placementDetailsDto);
 
     // Perform assertions.
     Assert.assertThat("The placement's added date did not match the expected value.",
@@ -412,7 +420,7 @@ public class PlacementServiceImplTest {
     when(placementSupervisorRepositoryMock.saveAll(any())).thenReturn(null);
 
     // Call the method under test.
-    PlacementDetailsDTO updatedPlacementDetailsDto = testObj.createDetails(placementDetailsDto, false);
+    PlacementDetailsDTO updatedPlacementDetailsDto = testObj.createDetails(placementDetailsDto);
 
     // Perform assertions.
     Set<PlacementSiteDTO> sites = updatedPlacementDetailsDto.getSites();
@@ -473,7 +481,7 @@ public class PlacementServiceImplTest {
     when(placementSiteMapper.toDto(placementSite2)).thenReturn(placementSiteDto2);
 
     // Call the method under test.
-    PlacementDetailsDTO updatedPlacementDetailsDto = testObj.createDetails(placementDetailsDto, false);
+    PlacementDetailsDTO updatedPlacementDetailsDto = testObj.createDetails(placementDetailsDto);
 
     // Perform assertions.
     Set<PlacementSiteDTO> sites = updatedPlacementDetailsDto.getSites();

@@ -152,13 +152,15 @@ public class PlacementServiceImpl implements PlacementService {
     }
 
     // check if this is an update and it's the first time of approval
-    final Placement placement = placementRepository.findById(placementDetailsDTO.getId())
-        .orElse(null);
     boolean approveDraftFirstTime = false;
-    if (placement.getPlacementApprovedDate() == null
-        && placement.getLifecycleState() == LifecycleState.DRAFT
-        && placementDetailsDTO.getLifecycleState() == LifecycleState.APPROVED) {
-      approveDraftFirstTime = true;
+    if (placementDetailsDTO.getId() != null) {
+      final Placement placement = placementRepository.findById(placementDetailsDTO.getId())
+          .orElse(null);
+      if (placement.getPlacementApprovedDate() == null
+          && placement.getLifecycleState() == LifecycleState.DRAFT
+          && placementDetailsDTO.getLifecycleState() == LifecycleState.APPROVED) {
+        approveDraftFirstTime = true;
+      }
     }
 
     PlacementDetails placementDetails = placementDetailsMapper
