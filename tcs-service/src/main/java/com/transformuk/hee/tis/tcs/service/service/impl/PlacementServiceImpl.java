@@ -153,8 +153,9 @@ public class PlacementServiceImpl implements PlacementService {
 
     // check if this is an update and it's the first time of approval
     boolean approveDraftFirstTime = false;
+    Placement placement = null;
     if (placementDetailsDTO.getId() != null) {
-      final Placement placement = placementRepository.findById(placementDetailsDTO.getId())
+      placement = placementRepository.findById(placementDetailsDTO.getId())
           .orElse(null);
       if (placement.getPlacementApprovedDate() == null
           && placement.getLifecycleState() == LifecycleState.DRAFT
@@ -181,6 +182,8 @@ public class PlacementServiceImpl implements PlacementService {
     placementDetails.setSites(siteModels);
     if (placementDetails.getLifecycleState() == LifecycleState.APPROVED) {
       placementDetails.setPlacementApprovedDate(LocalDateTime.now(clock));
+    } else if (placement != null && placement.getPlacementApprovedDate() != null) {
+      placementDetails.setPlacementApprovedDate(placement.getPlacementApprovedDate().atStartOfDay());
     }
     placementDetails = placementDetailsRepository.saveAndFlush(placementDetails);
 
@@ -229,21 +232,27 @@ public class PlacementServiceImpl implements PlacementService {
   public boolean isEligibleForChangedDatesNotification(PlacementDetailsDTO updatedPlacementDetails,
       Placement existingPlacement) {
 
-    // Only when lifecycleState of the both are APPROVED, the eligibility would be checked
-    if (updatedPlacementDetails.getLifecycleState() != LifecycleState.APPROVED ||
-      existingPlacement.getLifecycleState() != LifecycleState.APPROVED) {
+    if (existingPlacement == null || updatedPlacementDetails == null) {
       return false;
     }
 
-    if (existingPlacement != null && updatedPlacementDetails != null &&
-        isEligibleForNotification(existingPlacement, updatedPlacementDetails)) {
-      Optional<Post> optionalExistingPlacementPost = postRepository
-          .findPostByPlacementHistoryId(existingPlacement.getId());
+    // When this is a update on an approved placement, it still remain approved
+    // Or when this is an approval on a draft placement which had been approved before
+    if ((existingPlacement.getLifecycleState() == LifecycleState.APPROVED
+        && updatedPlacementDetails.getLifecycleState() == LifecycleState.APPROVED) ||
+        (existingPlacement.getLifecycleState() == LifecycleState.DRAFT
+        && updatedPlacementDetails.getLifecycleState() == LifecycleState.APPROVED
+        && existingPlacement.getPlacementApprovedDate() != null)) {
 
-      log.debug("Change in hire or end date. Marking for notification : npn {} ",
-          optionalExistingPlacementPost.isPresent() ? optionalExistingPlacementPost.get()
-              .getNationalPostNumber() : null);
-      return true;
+      if (isEligibleForNotification(existingPlacement, updatedPlacementDetails)) {
+        Optional<Post> optionalExistingPlacementPost = postRepository
+            .findPostByPlacementHistoryId(existingPlacement.getId());
+
+        log.debug("Change in hire or end date. Marking for notification : npn {} ",
+            optionalExistingPlacementPost.isPresent() ? optionalExistingPlacementPost.get()
+                .getNationalPostNumber() : null);
+        return true;
+      }
     }
     return false;
   }

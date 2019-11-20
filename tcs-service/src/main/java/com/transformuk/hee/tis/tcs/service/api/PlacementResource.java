@@ -121,12 +121,14 @@ public class PlacementResource {
     }
     Placement placementBeforeUpdate = placementService
         .findPlacementById(placementDetailsDTO.getId());
-    boolean eligibleForEsrNotification = placementService
-        .isEligibleForChangedDatesNotification(placementDetailsDTO, placementBeforeUpdate);
+
     boolean currentPlacementEdit = placementBeforeUpdate.getDateFrom()
         .isBefore(LocalDate.now().plusDays(1));
 
     final PlacementDetailsDTO result = placementService.saveDetails(placementDetailsDTO);
+
+    boolean eligibleForEsrNotification = placementService
+        .isEligibleForChangedDatesNotification(placementDetailsDTO, placementBeforeUpdate);
 
     if (eligibleForEsrNotification) {
       log.info("Handling ESR Notification for date changes in placement edit: placement id {}",
