@@ -300,8 +300,8 @@ public class PlacementResource {
    * @return the count of updated placements (by JSON)
    */
   @PatchMapping(value = "/placements/approve/{programmeId}")
-  @PreAuthorize("hasAuthority('tcs:view:entities')")
-  public ResponseEntity<Map<String, Long>> approveAllPlacementsByProgrammeId (
+  @PreAuthorize("hasAuthority('placement:approve')")
+  public ResponseEntity<Map<String, Long>> approveAllDraftPlacementsByProgrammeId (
       @PathVariable Long programmeId
   ) {
     long updatedCount = placementService.approveAllPlacementsByProgrammeId(programmeId);
@@ -311,7 +311,7 @@ public class PlacementResource {
   }
 
   /**
-   * Get all the draft placements for the same programme id
+   * Get the count of all the draft placements for the same programme id
    * @param programmeId of which programme id the placements are draft
    * @return the count of draft placements
    */

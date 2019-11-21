@@ -8,10 +8,7 @@ import static java.util.stream.Collectors.toList;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.hamcrest.Matchers.*;
 import static org.mockito.BDDMockito.given;
-import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.delete;
-import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
-import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
-import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.put;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.*;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.content;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
@@ -28,32 +25,15 @@ import com.transformuk.hee.tis.tcs.api.dto.PlacementDetailsDTO;
 import com.transformuk.hee.tis.tcs.api.dto.PlacementSupervisorDTO;
 import com.transformuk.hee.tis.tcs.api.enumeration.CommentSource;
 import com.transformuk.hee.tis.tcs.api.enumeration.LifecycleState;
+import com.transformuk.hee.tis.tcs.api.enumeration.Status;
 import com.transformuk.hee.tis.tcs.service.Application;
 import com.transformuk.hee.tis.tcs.service.api.decorator.AsyncReferenceService;
 import com.transformuk.hee.tis.tcs.service.api.decorator.PersonBasicDetailsRepositoryAccessor;
 import com.transformuk.hee.tis.tcs.service.api.decorator.PlacementDetailsDecorator;
 import com.transformuk.hee.tis.tcs.service.api.validation.PlacementValidator;
 import com.transformuk.hee.tis.tcs.service.exception.ExceptionTranslator;
-import com.transformuk.hee.tis.tcs.service.model.ContactDetails;
-import com.transformuk.hee.tis.tcs.service.model.EsrNotification;
-import com.transformuk.hee.tis.tcs.service.model.GmcDetails;
-import com.transformuk.hee.tis.tcs.service.model.Person;
-import com.transformuk.hee.tis.tcs.service.model.Placement;
-import com.transformuk.hee.tis.tcs.service.model.PlacementDetails;
-import com.transformuk.hee.tis.tcs.service.model.PlacementSupervisor;
-import com.transformuk.hee.tis.tcs.service.model.PlacementSupervisorId;
-import com.transformuk.hee.tis.tcs.service.model.Post;
-import com.transformuk.hee.tis.tcs.service.model.Specialty;
-import com.transformuk.hee.tis.tcs.service.repository.CommentRepository;
-import com.transformuk.hee.tis.tcs.service.repository.ContactDetailsRepository;
-import com.transformuk.hee.tis.tcs.service.repository.EsrNotificationRepository;
-import com.transformuk.hee.tis.tcs.service.repository.PersonBasicDetailsRepository;
-import com.transformuk.hee.tis.tcs.service.repository.PersonRepository;
-import com.transformuk.hee.tis.tcs.service.repository.PlacementDetailsRepository;
-import com.transformuk.hee.tis.tcs.service.repository.PlacementRepository;
-import com.transformuk.hee.tis.tcs.service.repository.PlacementSupervisorRepository;
-import com.transformuk.hee.tis.tcs.service.repository.PostRepository;
-import com.transformuk.hee.tis.tcs.service.repository.SpecialtyRepository;
+import com.transformuk.hee.tis.tcs.service.model.*;
+import com.transformuk.hee.tis.tcs.service.repository.*;
 import com.transformuk.hee.tis.tcs.service.service.PlacementService;
 import com.transformuk.hee.tis.tcs.service.service.impl.PlacementPlannerServiceImp;
 import com.transformuk.hee.tis.tcs.service.service.mapper.PlacementDetailsMapper;
@@ -152,6 +132,8 @@ public class PlacementResourceIntTest {
   private PlacementDetailsMapper placementDetailsMapper;
   @Autowired
   private PlacementMapper placementMapper;
+  @Autowired
+  private ProgrammeRepository programmeRepository;
 
   @Autowired
   private PlacementService placementService;
@@ -1703,5 +1685,42 @@ public class PlacementResourceIntTest {
           assertThat(esrNotification.getChangeOfProjectedHireDate()).isEqualTo(UPDATED_DATE_FROM.plusMonths(1).plusDays(1));
           assertThat(esrNotification.getChangeOfProjectedEndDate()).isEqualTo(UPDATED_DATE_TO.plusMonths(3));
         });
+  }
+
+  @Test
+  @Transactional
+  public void shouldApproveAllDraftPlacementsByProgrammeId() throws Exception{
+    TestUtils.mockUserProfileWithPermissions("Test User", new HashSet<>(Arrays.asList("placement:approve")));
+    Placement placement1 = new Placement();
+    placement1.setLifecycleState(LifecycleState.DRAFT);
+    placement1.setStatus(Status.CURRENT);
+
+    Placement placement2 = new Placement();
+    placement2.setLifecycleState(LifecycleState.DRAFT);
+    placement2.setStatus(Status.CURRENT);
+
+    Placement placement3 = new Placement();
+    placement3.setLifecycleState(LifecycleState.APPROVED);
+    placement3.setStatus(Status.CURRENT);
+    List<Placement> placementList = placementRepository.saveAll(Arrays.asList(placement1, placement2, placement3));
+
+    Post post = new Post();
+    post.setId(1L);
+    post.setStatus(Status.CURRENT);
+    post.setPlacementHistory(new HashSet<>(placementList));
+    post = postRepository.saveAndFlush(post);
+
+    Programme programme = new Programme();
+    programme.setId(1L);
+    programme.setStatus(Status.CURRENT);
+    programme.setPosts(Sets.newHashSet(Arrays.asList(post)));
+    programmeRepository.saveAndFlush(programme);
+
+    restPlacementMockMvc.perform(patch("/api/placements/approve/1")
+        .contentType(TestUtil.APPLICATION_JSON_UTF8)
+        .content(TestUtil.convertObjectToJsonBytes(null)))
+        .andExpect(status().isOk())
+        .andExpect(content().contentType(MediaType.APPLICATION_JSON_UTF8))
+        .andExpect(jsonPath("$.updatedCount").value(2));
   }
 }
