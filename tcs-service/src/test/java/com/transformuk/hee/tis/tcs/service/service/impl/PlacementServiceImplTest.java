@@ -621,17 +621,14 @@ public class PlacementServiceImplTest {
     Placement placement1 = new Placement();
     placement1.setId(1L);
     placement1.setLifecycleState(LifecycleState.DRAFT);
-    placement1.setStatus(Status.CURRENT);
 
     Placement placement2 = new Placement();
     placement2.setId(2L);
     placement2.setLifecycleState(LifecycleState.DRAFT);
-    placement2.setStatus(Status.CURRENT);
 
     Placement placement3 = new Placement();
     placement3.setId(3L);
     placement3.setLifecycleState(LifecycleState.APPROVED);
-    placement3.setStatus(Status.CURRENT);
 
     Post post = new Post();
     post.setId(1L);

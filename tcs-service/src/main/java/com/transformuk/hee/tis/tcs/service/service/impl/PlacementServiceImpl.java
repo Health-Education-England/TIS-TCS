@@ -865,8 +865,7 @@ public class PlacementServiceImpl implements PlacementService {
           .forEach(post -> {
             if (post.getStatus() == Status.CURRENT) { // only deal with current Posts
               post.getPlacementHistory().forEach(placement -> {
-                if (placement.getStatus() == Status.CURRENT
-                    && placement.getLifecycleState() == LifecycleState.DRAFT) {
+                if (placement.getLifecycleState() == LifecycleState.DRAFT) {
                   draftPlacements.add(placement);
                 }
               });

@@ -1693,15 +1693,12 @@ public class PlacementResourceIntTest {
     TestUtils.mockUserProfileWithPermissions("Test User", new HashSet<>(Arrays.asList("placement:approve")));
     Placement placement1 = new Placement();
     placement1.setLifecycleState(LifecycleState.DRAFT);
-    placement1.setStatus(Status.CURRENT);
 
     Placement placement2 = new Placement();
     placement2.setLifecycleState(LifecycleState.DRAFT);
-    placement2.setStatus(Status.CURRENT);
 
     Placement placement3 = new Placement();
     placement3.setLifecycleState(LifecycleState.APPROVED);
-    placement3.setStatus(Status.CURRENT);
     List<Placement> placementList = placementRepository.saveAll(Arrays.asList(placement1, placement2, placement3));
 
     Post post = new Post();
