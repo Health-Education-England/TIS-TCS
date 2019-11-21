@@ -78,6 +78,8 @@ public class PlacementServiceImplTest {
   private Clock clock;
   @Mock
   private ProgrammeRepository programmeRepository;
+  @Mock
+  private PermissionService permissionService;
   @Captor
   private ArgumentCaptor<LocalDate> toDateCaptor;
   @Captor
