@@ -30,6 +30,8 @@ public class ProgrammeMembershipDTO implements Serializable {
   @NotNull(message = "ProgrammeEndDate is required", groups = {Update.class, Create.class})
   private LocalDate programmeEndDate;
 
+  private String leavingDestination;
+
   private String leavingReason;
 
   @NotNull(message = "Programme is required", groups = {Update.class, Create.class})
@@ -86,6 +88,14 @@ public class ProgrammeMembershipDTO implements Serializable {
 
   public void setProgrammeEndDate(LocalDate programmeEndDate) {
     this.programmeEndDate = programmeEndDate;
+  }
+
+  public String getLeavingDestination() {
+    return leavingDestination;
+  }
+
+  public void setLeavingDestination(String leavingDestination) {
+    this.leavingDestination = leavingDestination;
   }
 
   public String getLeavingReason() {
@@ -186,6 +196,7 @@ public class ProgrammeMembershipDTO implements Serializable {
         ", rotation='" + rotation + "'" +
         ", programmeStartDate='" + programmeStartDate + "'" +
         ", programmeEndDate='" + programmeEndDate + "'" +
+        ", leavingDestination='" + leavingDestination + "'" +
         ", leavingReason='" + leavingReason + "'" +
         ", trainingPathway='" + trainingPathway + "'" +
         ", person='" + person + "'" +

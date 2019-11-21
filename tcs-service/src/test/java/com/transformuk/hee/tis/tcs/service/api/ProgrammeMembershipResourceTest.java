@@ -39,6 +39,8 @@ public class ProgrammeMembershipResourceTest {
   private static final String TRAINEE_ID = "1";
   private static final Long TRAINEE_ID_LONG = Long.parseLong(TRAINEE_ID);
   private static final String PROGRAMME_ID = "4567";
+  private static final String DESTINATION_1 = "destination 1";
+  private static final String DESTINATION_2 = "destination 2";
   private static final String REASON_1 = "reason 1";
   private static final String REASON_2 = "reason 2";
   private static final long CURRICULUM_ID1 = 1L;
@@ -122,12 +124,14 @@ public class ProgrammeMembershipResourceTest {
     ProgrammeMembershipCurriculaDTO pmcDto1 = new ProgrammeMembershipCurriculaDTO(), pmcDto2 = new ProgrammeMembershipCurriculaDTO();
     pmcDto1.setId(1L);
     pmcDto1.setProgrammeId(Long.parseLong(PROGRAMME_ID));
+    pmcDto1.setLeavingDestination(DESTINATION_1);
     pmcDto1.setLeavingReason(REASON_1);
     pmcDto1.setProgrammeName(PROGRAMME_NAME);
     pmcDto1.setProgrammeNumber(PROGRAMME_NUMBER);
 
     pmcDto2.setId(2L);
     pmcDto2.setProgrammeId(Long.parseLong(PROGRAMME_ID));
+    pmcDto2.setLeavingDestination(DESTINATION_2);
     pmcDto2.setLeavingReason(REASON_2);
     pmcDto2.setProgrammeName(PROGRAMME_NAME);
     pmcDto2.setProgrammeNumber(PROGRAMME_NUMBER);
@@ -144,6 +148,8 @@ public class ProgrammeMembershipResourceTest {
         .andExpect(jsonPath("$.*.id").value(hasItem(1)))
         .andExpect(jsonPath("$.*.id").value(hasItem(2)))
         .andExpect(jsonPath("$.*.programmeId").value(hasItem(Integer.parseInt(PROGRAMME_ID))))
+        .andExpect(jsonPath("$.*.leavingDestination").value(hasItem(DESTINATION_1)))
+        .andExpect(jsonPath("$.*.leavingDestination").value(hasItem(DESTINATION_2)))
         .andExpect(jsonPath("$.*.leavingReason").value(hasItem(REASON_1)))
         .andExpect(jsonPath("$.*.leavingReason").value(hasItem(REASON_2)))
         .andExpect(jsonPath("$.*.programmeName").value(hasItem(PROGRAMME_NAME)))
@@ -173,7 +179,5 @@ public class ProgrammeMembershipResourceTest {
 
     verify(programmeMembershipServiceMock).delete(CURRICULUM_ID1);
     verify(programmeMembershipServiceMock).delete(CURRICULUM_ID2);
-
-
   }
 }
