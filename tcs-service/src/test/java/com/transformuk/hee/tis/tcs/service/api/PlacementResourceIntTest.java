@@ -1649,16 +1649,10 @@ public class PlacementResourceIntTest {
 
     // validate that no EsrNotification records are created in the database
     final List<EsrNotification> esrNotifications = esrNotificationRepository.findAll();
-    assertThat(esrNotifications).hasSize(2);
-    esrNotifications.stream().map(EsrNotification::getNotificationTitleCode)
-        .forEachOrdered(r -> asList("1", "4").contains(r));
-    esrNotifications.stream()
-        .filter(esrNotification -> esrNotification.getNotificationTitleCode().equals("4"))
-        .forEach(esrNotification -> {
-          assertThat(esrNotification.getChangeOfProjectedHireDate()).isNotNull();
-          assertThat(esrNotification.getChangeOfProjectedHireDate()).isEqualTo(UPDATED_DATE_FROM.plusMonths(1).plusDays(1));
-          assertThat(esrNotification.getChangeOfProjectedEndDate()).isEqualTo(UPDATED_DATE_TO.plusMonths(3));
-        });
+    assertThat(esrNotifications).hasSize(1);
+    final EsrNotification esrNotification = esrNotifications.get(0);
+    assertThat(esrNotification.getNotificationTitleCode()).isEqualTo("1");
+    assertThat(esrNotification.getId()).isNotNull();
   }
 
   @Test

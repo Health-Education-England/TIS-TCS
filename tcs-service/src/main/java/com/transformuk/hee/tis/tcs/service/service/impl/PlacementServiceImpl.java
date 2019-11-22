@@ -167,6 +167,17 @@ public class PlacementServiceImpl implements PlacementService {
 
     log.debug("Request to create Placement : {}", placementDetailsDTO);
 
+    Placement placement = null;
+    boolean newPlacementNotification = false;
+    if (placementDetailsDTO.getId() != null) {
+      placement = placementRepository.findById(placementDetailsDTO.getId())
+          .orElse(null);
+      if (placement != null && placement.getLifecycleState() == LifecycleState.DRAFT
+          && placementDetailsDTO.getLifecycleState() == LifecycleState.APPROVED) {
+        newPlacementNotification = true;
+      }
+    }
+
     PlacementDetails placementDetails = placementDetailsMapper
         .placementDetailsDTOToPlacementDetails(placementDetailsDTO);
     updateStoredCommentsWithChangesOrAdd(placementDetails);
@@ -190,7 +201,10 @@ public class PlacementServiceImpl implements PlacementService {
     final PlacementDetailsDTO placementDetailsDTO1 = placementDetailsMapper
         .placementDetailsToPlacementDetailsDTO(placementDetails);
     placementDetailsDTO1.setSpecialties(placementSpecialtyMapper.toDTOs(placementSpecialties));
-    handleEsrNewPlacementNotification(placementDetailsDTO, placementDetails);
+
+    if (placementDetailsDTO.getId() == null || newPlacementNotification ) {
+      handleEsrNewPlacementNotification(placementDetailsDTO, placementDetails);
+    }
 
     saveSupervisors(placementDetailsDTO.getSupervisors(), placementDetails.getId());
 
@@ -228,8 +242,7 @@ public class PlacementServiceImpl implements PlacementService {
   public boolean isEligibleForChangedDatesNotification(PlacementDetailsDTO updatedPlacementDetails,
       Placement existingPlacement) {
 
-    if (existingPlacement.getLifecycleState() == LifecycleState.APPROVED ||
-      updatedPlacementDetails.getLifecycleState() == LifecycleState.APPROVED) {
+    if (existingPlacement.getLifecycleState() == LifecycleState.APPROVED) {
 
       if (existingPlacement != null && updatedPlacementDetails != null &&
           isEligibleForNotification(existingPlacement, updatedPlacementDetails)) {
@@ -781,26 +794,24 @@ public class PlacementServiceImpl implements PlacementService {
 
     log.debug("Handling ESR notifications for new placement creation for deanery number {}",
         placementDetailsDTO.getLocalPostNumber());
-    if (placementDetailsDTO.getId() == null) {
-      try {
-        final Placement savedPlacement = placementRepository.findById(placementDetails.getId())
-            .orElse(null);
-        if (savedPlacement.getDateFrom() != null && savedPlacement.getDateFrom()
-            .isBefore(LocalDate.now(clock).plusWeeks(13))) {
-          log.debug("Creating ESR notification for new placement creation for deanery number {}",
-              savedPlacement.getPost().getNationalPostNumber());
-          final List<EsrNotification> esrNotifications = esrNotificationService
-              .handleNewPlacementEsrNotification(savedPlacement);
-          log
-              .debug(
-                  "CREATED: ESR {} notifications for new placement creation for deanery number {}",
-                  esrNotifications.size(), savedPlacement.getPost().getNationalPostNumber());
-        }
-      } catch (final Exception e) {
-        // Ideally it should fail the entire update. Keeping the impact minimal for TCS and go live and revisit after go live.
-        // Log and continue
-        log.error("Error loading New Placement Notification : ", e);
+    try {
+      final Placement savedPlacement = placementRepository.findById(placementDetails.getId())
+          .orElse(null);
+      if (savedPlacement.getDateFrom() != null && savedPlacement.getDateFrom()
+          .isBefore(LocalDate.now(clock).plusWeeks(13))) {
+        log.debug("Creating ESR notification for new placement creation for deanery number {}",
+            savedPlacement.getPost().getNationalPostNumber());
+        final List<EsrNotification> esrNotifications = esrNotificationService
+            .handleNewPlacementEsrNotification(savedPlacement);
+        log
+            .debug(
+                "CREATED: ESR {} notifications for new placement creation for deanery number {}",
+                esrNotifications.size(), savedPlacement.getPost().getNationalPostNumber());
       }
+    } catch (final Exception e) {
+      // Ideally it should fail the entire update. Keeping the impact minimal for TCS and go live and revisit after go live.
+      // Log and continue
+      log.error("Error loading New Placement Notification : ", e);
     }
   }
 
@@ -840,11 +851,29 @@ public class PlacementServiceImpl implements PlacementService {
       return 0;
     }
     List<Placement> draftPlacements = getDraftPlacementsByProgrammeId(programmeId);
+
     if (draftPlacements.size() > 0) {
-      draftPlacements.forEach(placement -> placement.setLifecycleState(LifecycleState.APPROVED));
-      placementRepository.saveAll(draftPlacements);
+      List<PlacementDetails> placementDetailsList = placementsToPlacementDetails(draftPlacements);
+      placementDetailsList.forEach(placementDetails -> {
+        placementDetails.setLifecycleState(LifecycleState.APPROVED);
+        placementDetailsRepository.saveAndFlush(placementDetails);
+        PlacementDetailsDTO placementDetailsDTO =
+            placementDetailsMapper.placementDetailsToPlacementDetailsDTO(placementDetails);
+        handleEsrNewPlacementNotification(placementDetailsDTO, placementDetails);
+      });
     }
     return draftPlacements.size();
+  }
+
+  private List<PlacementDetails> placementsToPlacementDetails(List<Placement> placements) {
+    List<PlacementDetails> placementDetailsList = new ArrayList<>();
+    placements.forEach(placement -> {
+      Optional<PlacementDetails> placementDetails = placementDetailsRepository.findById(placement.getId());
+      if (placementDetails.isPresent()) {
+        placementDetailsList.add(placementDetails.get());
+      }
+    });
+    return placementDetailsList;
   }
 
   @Override
