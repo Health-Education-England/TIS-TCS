@@ -38,8 +38,6 @@ import java.time.ZoneId;
 import java.util.Collections;
 import java.util.List;
 import javax.persistence.EntityManager;
-import org.assertj.core.util.Lists;
-import org.assertj.core.util.Sets;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -96,6 +94,9 @@ public class ProgrammeMembershipResourceIntTest {
 
   private static final String DEFAULT_LEAVING_DESTINATION = "AAAAAAAAAA";
   private static final String UPDATED_LEAVING_DESTINATION = "BBBBBBBBBB";
+
+  private static final String DEFAULT_LEAVING_REASON = "AAAAAAAAAA";
+  private static final String UPDATED_LEAVING_REASON = "BBBBBBBBBB";
 
   private static final Long NOT_EXISTS_PROGRAMME_ID = 10101010l;
   private static final Long NOT_EXISTS_CURRICULUM_ID = 20202020l;
@@ -156,7 +157,7 @@ public class ProgrammeMembershipResourceIntTest {
   private MockMvc restProgrammeMembershipMockMvc;
 
   private ProgrammeMembership programmeMembership;
-  
+
   private ProgrammeCurriculum programmeCurriculum;
 
   /**
@@ -175,7 +176,8 @@ public class ProgrammeMembershipResourceIntTest {
         .programmeStartDate(DEFAULT_PROGRAMME_START_DATE)
         .curriculumCompletionDate(DEFAULT_CURRICULUM_COMPLETION_DATE)
         .programmeEndDate(DEFAULT_PROGRAMME_END_DATE)
-        .leavingDestination(DEFAULT_LEAVING_DESTINATION);
+        .leavingDestination(DEFAULT_LEAVING_DESTINATION)
+        .leavingReason(DEFAULT_LEAVING_REASON);
     return programmeMembership;
   }
 
@@ -233,7 +235,8 @@ public class ProgrammeMembershipResourceIntTest {
 
     programmeMembership.setPerson(person);
     programmeMembership.setProgramme(programme);
-    programmeMembership.setCurriculumId(programme.getCurricula().iterator().next().getCurriculum().getId());
+    programmeMembership
+        .setCurriculumId(programme.getCurricula().iterator().next().getCurriculum().getId());
     programmeMembership.setRotation(rotation);
     // Create the ProgrammeMembership
     ProgrammeMembershipDTO programmeMembershipDTO = programmeMembershipMapper
@@ -264,6 +267,7 @@ public class ProgrammeMembershipResourceIntTest {
     assertThat(testProgrammeMembership.getProgrammeEndDate()).isEqualTo(DEFAULT_PROGRAMME_END_DATE);
     assertThat(testProgrammeMembership.getLeavingDestination())
         .isEqualTo(DEFAULT_LEAVING_DESTINATION);
+    assertThat(testProgrammeMembership.getLeavingReason()).isEqualTo(DEFAULT_LEAVING_REASON);
   }
 
   @Test
@@ -308,7 +312,8 @@ public class ProgrammeMembershipResourceIntTest {
     programme.setCurricula(Collections.singleton(programmeCurriculum));
     programmeRepository.saveAndFlush(programme);
     programmeMembership.setProgramme(programme);
-    programmeMembership.setCurriculumId(programme.getCurricula().iterator().next().getCurriculum().getId());
+    programmeMembership
+        .setCurriculumId(programme.getCurricula().iterator().next().getCurriculum().getId());
     ProgrammeMembershipDTO programmeMembershipDTO = programmeMembershipMapper
         .toDto(programmeMembership);
     programmeMembershipDTO.setPerson(null);
@@ -331,7 +336,8 @@ public class ProgrammeMembershipResourceIntTest {
     programme.setCurricula(Collections.singleton(programmeCurriculum));
     programmeRepository.saveAndFlush(programme);
     programmeMembership.setProgramme(programme);
-    programmeMembership.setCurriculumId(programme.getCurricula().iterator().next().getCurriculum().getId());
+    programmeMembership
+        .setCurriculumId(programme.getCurricula().iterator().next().getCurriculum().getId());
     ProgrammeMembershipDTO programmeMembershipDTO = programmeMembershipMapper
         .toDto(programmeMembership);
     person.setId(1020120L); // set not exists person Id
@@ -356,7 +362,8 @@ public class ProgrammeMembershipResourceIntTest {
     programme.setCurricula(Collections.singleton(programmeCurriculum));
     programmeRepository.saveAndFlush(programme);
     programmeMembership.setProgramme(programme); // this programme doesn't exists in DB
-    programmeMembership.setCurriculumId(programme.getCurricula().iterator().next().getCurriculum().getId());
+    programmeMembership
+        .setCurriculumId(programme.getCurricula().iterator().next().getCurriculum().getId());
     ProgrammeMembershipDTO programmeMembershipDTO = programmeMembershipMapper
         .toDto(programmeMembership);
     programmeMembershipDTO.setProgrammeId(NOT_EXISTS_PROGRAMME_ID);
@@ -442,7 +449,8 @@ public class ProgrammeMembershipResourceIntTest {
     programmeMembership.setId(1L);
     programmeMembership.setPerson(person);
     programmeMembership.setProgramme(programme);
-    programmeMembership.setCurriculumId(programme.getCurricula().iterator().next().getCurriculum().getId());
+    programmeMembership
+        .setCurriculumId(programme.getCurricula().iterator().next().getCurriculum().getId());
     //Save programme membership
     programmeMembership = programmeMembershipRepository.saveAndFlush(programmeMembership);
     int databaseSizeBeforeCreate = programmeMembershipRepository.findAll().size();
@@ -490,8 +498,8 @@ public class ProgrammeMembershipResourceIntTest {
             .value(hasItem(DEFAULT_PROGRAMME_START_DATE.toString())))
         .andExpect(jsonPath("$.[*].programmeEndDate")
             .value(hasItem(DEFAULT_PROGRAMME_END_DATE.toString())))
-        .andExpect(jsonPath("$.[*].leavingDestination")
-            .value(hasItem(DEFAULT_LEAVING_DESTINATION.toString())))
+        .andExpect(jsonPath("$.[*].leavingDestination").value(hasItem(DEFAULT_LEAVING_DESTINATION)))
+        .andExpect(jsonPath("$.[*].leavingReason").value(hasItem(DEFAULT_LEAVING_REASON)))
         .andExpect(jsonPath("$.[*].curriculumMemberships[*].amendedDate").isNotEmpty());
   }
 
@@ -526,6 +534,7 @@ public class ProgrammeMembershipResourceIntTest {
         .andExpect(jsonPath("$.programmeStartDate").value(DEFAULT_PROGRAMME_START_DATE.toString()))
         .andExpect(jsonPath("$.programmeEndDate").value(DEFAULT_PROGRAMME_END_DATE.toString()))
         .andExpect(jsonPath("$.leavingDestination").value(DEFAULT_LEAVING_DESTINATION))
+        .andExpect(jsonPath("$.leavingReason").value(DEFAULT_LEAVING_REASON))
         .andExpect(jsonPath("$.curriculumMemberships[*].amendedDate").isNotEmpty());
   }
 
@@ -549,7 +558,8 @@ public class ProgrammeMembershipResourceIntTest {
     rotationRepository.saveAndFlush(rotation);
     programmeMembership.setPerson(person);
     programmeMembership.setProgramme(programme);
-    programmeMembership.setCurriculumId(programme.getCurricula().iterator().next().getCurriculum().getId());
+    programmeMembership
+        .setCurriculumId(programme.getCurricula().iterator().next().getCurriculum().getId());
     programmeMembershipRepository.saveAndFlush(programmeMembership);
 
     int databaseSizeBeforeUpdate = programmeMembershipRepository.findAll().size();
@@ -567,7 +577,8 @@ public class ProgrammeMembershipResourceIntTest {
         .programmeStartDate(UPDATED_PROGRAMME_START_DATE)
         .curriculumCompletionDate(UPDATED_CURRICULUM_COMPLETION_DATE)
         .programmeEndDate(UPDATED_PROGRAMME_END_DATE)
-        .leavingDestination(UPDATED_LEAVING_DESTINATION);
+        .leavingDestination(UPDATED_LEAVING_DESTINATION)
+        .leavingReason(UPDATED_LEAVING_REASON);
     ProgrammeMembershipDTO programmeMembershipDTO = programmeMembershipMapper
         .toDto(updatedProgrammeMembership);
 
@@ -597,6 +608,7 @@ public class ProgrammeMembershipResourceIntTest {
     assertThat(testProgrammeMembership.getProgrammeEndDate()).isEqualTo(UPDATED_PROGRAMME_END_DATE);
     assertThat(testProgrammeMembership.getLeavingDestination())
         .isEqualTo(UPDATED_LEAVING_DESTINATION);
+    assertThat(testProgrammeMembership.getLeavingReason()).isEqualTo(UPDATED_LEAVING_REASON);
     assertThat(testProgrammeMembership.getAmendedDate()).isAfter(DEFAULT_AMENDED_DATE);
   }
 
@@ -609,7 +621,8 @@ public class ProgrammeMembershipResourceIntTest {
     programmeRepository.saveAndFlush(programme);
     programmeMembership.setPerson(person);
     programmeMembership.setProgramme(programme);
-    programmeMembership.setCurriculumId(programme.getCurricula().iterator().next().getCurriculum().getId());
+    programmeMembership
+        .setCurriculumId(programme.getCurricula().iterator().next().getCurriculum().getId());
 
     // Create the ProgrammeMembership
     ProgrammeMembershipDTO programmeMembershipDTO = programmeMembershipMapper

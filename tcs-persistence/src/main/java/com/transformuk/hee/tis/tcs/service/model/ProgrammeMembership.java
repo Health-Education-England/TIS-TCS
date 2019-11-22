@@ -50,6 +50,8 @@ public class ProgrammeMembership implements Serializable {
 
   private String leavingDestination;
 
+  private String leavingReason;
+
   @ManyToOne
   @JoinColumn(name = "programmeId")
   private Programme programme;
@@ -208,6 +210,19 @@ public class ProgrammeMembership implements Serializable {
     return this;
   }
 
+  public String getLeavingReason() {
+    return leavingReason;
+  }
+
+  public void setLeavingReason(String leavingReason) {
+    this.leavingReason = leavingReason;
+  }
+
+  public ProgrammeMembership leavingReason(String leavingReason) {
+    this.leavingReason = leavingReason;
+    return this;
+  }
+
   public Programme getProgramme() {
     return programme;
   }
@@ -290,6 +305,7 @@ public class ProgrammeMembership implements Serializable {
         ", curriculumCompletionDate='" + curriculumCompletionDate + "'" +
         ", programmeEndDate='" + programmeEndDate + "'" +
         ", leavingDestination='" + leavingDestination + "'" +
+        ", leavingReason='" + leavingReason + "'" +
         ", trainingPathway='" + trainingPathway + "'" +
         ", amendedDate='" + getAmendedDate() + "'" +
         '}';
