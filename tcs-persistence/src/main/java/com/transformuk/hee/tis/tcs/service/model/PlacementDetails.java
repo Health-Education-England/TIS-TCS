@@ -65,9 +65,6 @@ public class PlacementDetails {
   @Enumerated(EnumType.STRING)
   private LifecycleState lifecycleState;
 
-  @Column(name = "placementApprovedDate")
-  private LocalDateTime placementApprovedDate;
-
   /**
    * @return the placement status based on dateFrom and dateTo
    */
@@ -237,14 +234,6 @@ public class PlacementDetails {
     this.lifecycleState = lifecycleState;
   }
 
-  public LocalDateTime getPlacementApprovedDate() {
-    return placementApprovedDate;
-  }
-
-  public void setPlacementApprovedDate(LocalDateTime placementApprovedDate) {
-    this.placementApprovedDate = placementApprovedDate;
-  }
-
   @Override
   public boolean equals(Object o) {
     if (this == o) {
@@ -272,8 +261,7 @@ public class PlacementDetails {
         Objects.equals(addedDate, that.addedDate) &&
         Objects.equals(amendedDate, that.amendedDate) &&
         Objects.equals(localPostNumber, that.localPostNumber) &&
-        Objects.equals(lifecycleState, that.lifecycleState) &&
-        Objects.equals(placementApprovedDate, that.placementApprovedDate);
+        Objects.equals(lifecycleState, that.lifecycleState);
   }
 
   @Override
@@ -281,7 +269,7 @@ public class PlacementDetails {
     return Objects
         .hash(id, intrepidId, traineeId, postId, dateFrom, dateTo, wholeTimeEquivalent, siteId,
             siteCode, gradeId, gradeAbbreviation, placementType, trainingDescription, localPostNumber,
-            addedDate, amendedDate, lifecycleState, placementApprovedDate);
+            addedDate, amendedDate, lifecycleState);
   }
 
   @Override
@@ -304,7 +292,6 @@ public class PlacementDetails {
         ", addedDate='" + addedDate + '\'' +
         ", amendedDate='" + amendedDate + '\'' +
         ", lifecycleState='" + lifecycleState + '\'' +
-        ", placementApprovedDate='" + placementApprovedDate + '\'' +
         '}';
   }
 }

@@ -4,6 +4,7 @@ import com.transformuk.hee.tis.tcs.api.dto.PlacementDTO;
 import com.transformuk.hee.tis.tcs.api.dto.PlacementDetailsDTO;
 import com.transformuk.hee.tis.tcs.api.dto.validation.Create;
 import com.transformuk.hee.tis.tcs.api.dto.validation.Update;
+import com.transformuk.hee.tis.tcs.api.enumeration.LifecycleState;
 import com.transformuk.hee.tis.tcs.service.api.decorator.PlacementDetailsDecorator;
 import com.transformuk.hee.tis.tcs.service.api.util.HeaderUtil;
 import com.transformuk.hee.tis.tcs.service.api.util.PaginationUtil;
@@ -12,6 +13,7 @@ import com.transformuk.hee.tis.tcs.service.api.validation.ValidationException;
 import com.transformuk.hee.tis.tcs.service.dto.placementmanager.PlacementsResultDTO;
 import com.transformuk.hee.tis.tcs.service.model.Placement;
 import com.transformuk.hee.tis.tcs.service.service.PlacementService;
+import com.transformuk.hee.tis.tcs.service.service.impl.PermissionService;
 import com.transformuk.hee.tis.tcs.service.service.impl.PlacementPlannerServiceImp;
 import io.github.jhipster.web.util.ResponseUtil;
 import java.io.IOException;
@@ -63,15 +65,18 @@ public class PlacementResource {
   private final PlacementValidator placementValidator;
   private final PlacementDetailsDecorator placementDetailsDecorator;
   private final PlacementPlannerServiceImp placementPlannerService;
+  private final PermissionService permissionService;
 
   public PlacementResource(final PlacementService placementService,
       final PlacementValidator placementValidator,
       final PlacementDetailsDecorator placementDetailsDecorator,
-      PlacementPlannerServiceImp placementPlannerService) {
+      PlacementPlannerServiceImp placementPlannerService,
+      PermissionService permissionService) {
     this.placementService = placementService;
     this.placementValidator = placementValidator;
     this.placementDetailsDecorator = placementDetailsDecorator;
     this.placementPlannerService = placementPlannerService;
+    this.permissionService = permissionService;
   }
 
   /**
@@ -93,8 +98,9 @@ public class PlacementResource {
       return ResponseEntity.badRequest().headers(HeaderUtil.createFailureAlert(ENTITY_NAME,
           "idexists", "A new placement cannot already have an ID")).body(null);
     }
-
-    final PlacementDetailsDTO result = placementService.createDetails(placementDetailsDTO);
+    PlacementDetailsDTO placementDetailsDTOPermChecked
+        = placementService.checkApprovalPermWhenCreate(placementDetailsDTO);
+    final PlacementDetailsDTO result = placementService.createDetails(placementDetailsDTOPermChecked);
     return ResponseEntity.created(new URI("/api/placements/" + result.getId()))
         .headers(HeaderUtil.createEntityCreationAlert(ENTITY_NAME, result.getId().toString()))
         .body(result);
@@ -119,16 +125,22 @@ public class PlacementResource {
     if (placementDetailsDTO.getId() == null) {
       return createPlacement(placementDetailsDTO);
     }
+
     Placement placementBeforeUpdate = placementService
         .findPlacementById(placementDetailsDTO.getId());
 
+    if (placementBeforeUpdate.getLifecycleState() == LifecycleState.APPROVED
+      && !permissionService.canApprovePlacement()) {
+      return new ResponseEntity<PlacementDetailsDTO>(HttpStatus.UNAUTHORIZED);
+    }
+    PlacementDetailsDTO placementDetailsDTOPermChecked
+        = placementService.checkApprovalPermWhenUpdate(placementDetailsDTO);
+    boolean eligibleForEsrNotification = placementService
+        .isEligibleForChangedDatesNotification(placementDetailsDTO, placementBeforeUpdate);
     boolean currentPlacementEdit = placementBeforeUpdate.getDateFrom()
         .isBefore(LocalDate.now().plusDays(1));
 
     final PlacementDetailsDTO result = placementService.saveDetails(placementDetailsDTO);
-
-    boolean eligibleForEsrNotification = placementService
-        .isEligibleForChangedDatesNotification(placementDetailsDTO, placementBeforeUpdate);
 
     if (eligibleForEsrNotification) {
       log.info("Handling ESR Notification for date changes in placement edit: placement id {}",

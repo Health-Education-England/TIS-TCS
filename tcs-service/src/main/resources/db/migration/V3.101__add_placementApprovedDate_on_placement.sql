@@ -1,2 +1,0 @@
-ALTER TABLE `Placement`
-	ADD COLUMN `placementApprovedDate` DATETIME  NULL DEFAULT NULL;

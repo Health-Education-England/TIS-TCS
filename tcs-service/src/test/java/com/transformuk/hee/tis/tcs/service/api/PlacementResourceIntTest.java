@@ -35,6 +35,7 @@ import com.transformuk.hee.tis.tcs.service.exception.ExceptionTranslator;
 import com.transformuk.hee.tis.tcs.service.model.*;
 import com.transformuk.hee.tis.tcs.service.repository.*;
 import com.transformuk.hee.tis.tcs.service.service.PlacementService;
+import com.transformuk.hee.tis.tcs.service.service.impl.PermissionService;
 import com.transformuk.hee.tis.tcs.service.service.impl.PlacementPlannerServiceImp;
 import com.transformuk.hee.tis.tcs.service.service.mapper.PlacementDetailsMapper;
 import com.transformuk.hee.tis.tcs.service.service.mapper.PlacementMapper;
@@ -147,6 +148,8 @@ public class PlacementResourceIntTest {
   private ExceptionTranslator exceptionTranslator;
   @Autowired
   private PlacementPlannerServiceImp placementPlannerServiceImp;
+  @Autowired
+  private PermissionService permissionService;
 
   private AsyncReferenceService asyncReferenceService;
 
@@ -215,7 +218,7 @@ public class PlacementResourceIntTest {
     placementDetailsDecorator = new PlacementDetailsDecorator(asyncReferenceService,
         asyncPersonBasicDetailsRepository, postRepository);
     final PlacementResource placementResource = new PlacementResource(placementService,
-        placementValidator, placementDetailsDecorator, placementPlannerServiceImp);
+        placementValidator, placementDetailsDecorator, placementPlannerServiceImp, permissionService);
     this.restPlacementMockMvc = MockMvcBuilders.standaloneSetup(placementResource)
         .setCustomArgumentResolvers(pageableArgumentResolver)
         .setControllerAdvice(exceptionTranslator)
@@ -1255,6 +1258,7 @@ public class PlacementResourceIntTest {
         .andExpect(jsonPath("$.[*].placementType").value(DEFAULT_PLACEMENT_TYPE))
         .andExpect(jsonPath("$.[*].localPostNumber").value(DEFAULT_LOCAL_POST_NUMBER))
         .andExpect(jsonPath("$.[*].trainingDescription").value(DEFAULT_TRAINING_DESCRIPTION));
+
   }
 
   @Test
@@ -1514,15 +1518,40 @@ public class PlacementResourceIntTest {
     placementDetails.setDateFrom(UPDATED_DATE_FROM.plusMonths(1));
     placementDetails.setDateTo(UPDATED_DATE_TO.plusMonths(3));
     placementDetails.setLifecycleState(state);
-    placementDetails.setLifecycleState(LifecycleState.DRAFT);
-    if (state.equals(LifecycleState.APPROVED) && canApprovePlacement == true) {
-      placementDetails.setPlacementApprovedDate(LocalDateTime.now());
-    }
     placementDetailsRepository.saveAndFlush(placementDetails);
 
     final PlacementDetailsDTO placementDetailsDTO = placementDetailsMapper
         .placementDetailsToPlacementDetailsDTO(placementDetails);
     return placementDetailsDTO;
+  }
+
+  @Test
+  @Transactional
+  public void updateDraftPlacementToDraftWithoutApprovalPerm() throws Exception {
+
+    PlacementDetailsDTO placementDetailsDTO = prepareForApprovalUpdate(LifecycleState.DRAFT, false);
+
+    final int databaseSizeBeforeUpdate = placementDetailsRepository.findAll().size();
+
+    placementDetailsDTO.setLifecycleState(LifecycleState.DRAFT);
+    placementDetailsDTO.setDateFrom(placementDetailsDTO.getDateFrom().plusDays(1));
+
+    restPlacementMockMvc.perform(put("/api/placements")
+        .contentType(TestUtil.APPLICATION_JSON_UTF8)
+        .content(TestUtil.convertObjectToJsonBytes(placementDetailsDTO)))
+        .andExpect(status().isOk())
+        .andExpect(content().contentType(MediaType.APPLICATION_JSON_UTF8))
+        .andExpect(jsonPath("$.lifecycleState").value(LifecycleState.DRAFT.name()));
+
+    // Validate the Placement in the database
+    final List<PlacementDetails> placementList = placementDetailsRepository.findAll();
+    assertThat(placementList).hasSize(databaseSizeBeforeUpdate);
+    final PlacementDetails testPlacement = placementList.get(placementList.size() - 1);
+    assertThat(testPlacement.getLifecycleState()).isEqualTo(LifecycleState.DRAFT);
+
+    // validate that no EsrNotification records are created in the database
+    final List<EsrNotification> esrNotifications = esrNotificationRepository.findAll();
+    assertThat(esrNotifications).hasSize(0);
   }
 
   @Test
@@ -1565,19 +1594,7 @@ public class PlacementResourceIntTest {
     restPlacementMockMvc.perform(put("/api/placements")
         .contentType(TestUtil.APPLICATION_JSON_UTF8)
         .content(TestUtil.convertObjectToJsonBytes(placementDetailsDTO)))
-        .andExpect(status().isOk())
-        .andExpect(content().contentType(MediaType.APPLICATION_JSON_UTF8))
-        .andExpect(jsonPath("$.lifecycleState").value(LifecycleState.DRAFT.name()));
-
-    // Validate the Placement in the database
-    final List<PlacementDetails> placementList = placementDetailsRepository.findAll();
-    assertThat(placementList).hasSize(databaseSizeBeforeUpdate);
-    final PlacementDetails testPlacement = placementList.get(placementList.size() - 1);
-    assertThat(testPlacement.getLifecycleState()).isEqualTo(LifecycleState.DRAFT);
-
-    // validate that no EsrNotification records are created in the database
-    final List<EsrNotification> esrNotifications = esrNotificationRepository.findAll();
-    assertThat(esrNotifications).hasSize(0);
+        .andExpect(status().isUnauthorized());
   }
 
   @Test
@@ -1594,13 +1611,13 @@ public class PlacementResourceIntTest {
         .content(TestUtil.convertObjectToJsonBytes(placementDetailsDTO)))
         .andExpect(status().isOk())
         .andExpect(content().contentType(MediaType.APPLICATION_JSON_UTF8))
-        .andExpect(jsonPath("$.lifecycleState").value(LifecycleState.DRAFT.name()));
+        .andExpect(jsonPath("$.lifecycleState").value(LifecycleState.APPROVED.name()));
 
     // Validate the Placement in the database
     final List<PlacementDetails> placementList = placementDetailsRepository.findAll();
     assertThat(placementList).hasSize(databaseSizeBeforeUpdate);
     final PlacementDetails testPlacement = placementList.get(placementList.size() - 1);
-    assertThat(testPlacement.getLifecycleState()).isEqualTo(LifecycleState.DRAFT);
+    assertThat(testPlacement.getLifecycleState()).isEqualTo(LifecycleState.APPROVED);
 
     // validate that no EsrNotification records are created in the database
     final List<EsrNotification> esrNotifications = esrNotificationRepository.findAll();
@@ -1609,12 +1626,13 @@ public class PlacementResourceIntTest {
 
   @Test
   @Transactional
-  public void updateDraftPlacementToApprovedWithApprovalPerm_firstTime() throws Exception {
+  public void updateDraftPlacementToApprovedWithApprovalPerm() throws Exception {
     PlacementDetailsDTO placementDetailsDTO = prepareForApprovalUpdate(LifecycleState.DRAFT, true);
 
     final int databaseSizeBeforeUpdate = placementDetailsRepository.findAll().size();
 
     placementDetailsDTO.setLifecycleState(LifecycleState.APPROVED);
+    placementDetailsDTO.setDateFrom(placementDetailsDTO.getDateFrom().plusDays(1));
 
     restPlacementMockMvc.perform(put("/api/placements")
         .contentType(TestUtil.APPLICATION_JSON_UTF8)
@@ -1628,35 +1646,27 @@ public class PlacementResourceIntTest {
     assertThat(placementList).hasSize(databaseSizeBeforeUpdate);
     final PlacementDetails testPlacement = placementList.get(placementList.size() - 1);
     assertThat(testPlacement.getLifecycleState()).isEqualTo(LifecycleState.APPROVED);
-    assertThat(testPlacement.getPlacementApprovedDate()).isNotNull();
 
     // validate that no EsrNotification records are created in the database
     final List<EsrNotification> esrNotifications = esrNotificationRepository.findAll();
-    assertThat(esrNotifications).hasSize(1);
-    final EsrNotification esrNotification = esrNotifications.get(0);
-    assertThat(esrNotification.getNotificationTitleCode()).isEqualTo("1");
-    assertThat(esrNotification.getId()).isNotNull();
+    assertThat(esrNotifications).hasSize(2);
+    esrNotifications.stream().map(EsrNotification::getNotificationTitleCode)
+        .forEachOrdered(r -> asList("1", "4").contains(r));
+    esrNotifications.stream()
+        .filter(esrNotification -> esrNotification.getNotificationTitleCode().equals("4"))
+        .forEach(esrNotification -> {
+          assertThat(esrNotification.getChangeOfProjectedHireDate()).isNotNull();
+          assertThat(esrNotification.getChangeOfProjectedHireDate()).isEqualTo(UPDATED_DATE_FROM.plusMonths(1).plusDays(1));
+          assertThat(esrNotification.getChangeOfProjectedEndDate()).isEqualTo(UPDATED_DATE_TO.plusMonths(3));
+        });
   }
 
   @Test
   @Transactional
-  public void updateDraftPlacementToApprovedWithApprovalPerm_SecondTime() throws Exception {
+  public void updateApprovedPlacementToApprovedWithApprovalPerm() throws Exception {
     PlacementDetailsDTO placementDetailsDTO = prepareForApprovalUpdate(LifecycleState.APPROVED, true);
-    placementDetailsDTO.setLifecycleState(LifecycleState.DRAFT);
 
-    final List<PlacementDetails> placementList0 = placementDetailsRepository.findAll();
-
-    restPlacementMockMvc.perform(put("/api/placements")
-        .contentType(TestUtil.APPLICATION_JSON_UTF8)
-        .content(TestUtil.convertObjectToJsonBytes(placementDetailsDTO)))
-        .andExpect(status().isOk())
-        .andExpect(content().contentType(MediaType.APPLICATION_JSON_UTF8))
-        .andExpect(jsonPath("$.lifecycleState").value(LifecycleState.DRAFT.name()));
-
-    final List<PlacementDetails> placementList = placementDetailsRepository.findAll();
-    final PlacementDetails testPlacement = placementList.get(placementList.size() - 1);
-    assertThat(testPlacement.getLifecycleState()).isEqualTo(LifecycleState.DRAFT);
-    assertThat(testPlacement.getPlacementApprovedDate()).isNotNull();
+    final int databaseSizeBeforeUpdate = placementDetailsRepository.findAll().size();
 
     placementDetailsDTO.setLifecycleState(LifecycleState.APPROVED);
     placementDetailsDTO.setDateFrom(placementDetailsDTO.getDateFrom().plusDays(1));
@@ -1668,12 +1678,13 @@ public class PlacementResourceIntTest {
         .andExpect(content().contentType(MediaType.APPLICATION_JSON_UTF8))
         .andExpect(jsonPath("$.lifecycleState").value(LifecycleState.APPROVED.name()));
 
-    final List<PlacementDetails> placementList2 = placementDetailsRepository.findAll();
-    final PlacementDetails testPlacement2 = placementList.get(placementList2.size() - 1);
-    assertThat(testPlacement2.getLifecycleState()).isEqualTo(LifecycleState.APPROVED);
-    assertThat(testPlacement2.getPlacementApprovedDate()).isNotNull();
+    // Validate the Placement in the database
+    final List<PlacementDetails> placementList = placementDetailsRepository.findAll();
+    assertThat(placementList).hasSize(databaseSizeBeforeUpdate);
+    final PlacementDetails testPlacement = placementList.get(placementList.size() - 1);
+    assertThat(testPlacement.getLifecycleState()).isEqualTo(LifecycleState.APPROVED);
 
-    // validate the EsrNotification in the database
+    // validate that no EsrNotification records are created in the database
     final List<EsrNotification> esrNotifications = esrNotificationRepository.findAll();
     assertThat(esrNotifications).hasSize(2);
     esrNotifications.stream().map(EsrNotification::getNotificationTitleCode)

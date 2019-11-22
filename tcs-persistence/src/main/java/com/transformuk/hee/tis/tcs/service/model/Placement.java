@@ -43,8 +43,7 @@ import javax.persistence.SqlResultSetMapping;
             @ColumnResult(name = "traineeId"),
             @ColumnResult(name = "placementId"),
             @ColumnResult(name = "placementSpecialtyType"),
-            @ColumnResult(name = "lifecycleState"),
-            @ColumnResult(name = "placementApprovedDate")
+            @ColumnResult(name = "lifecycleState")
         })
 })
 @Entity
@@ -93,8 +92,6 @@ public class Placement implements Serializable {
   private Status status;
   @Enumerated(EnumType.STRING)
   private LifecycleState lifecycleState;
-  @Column(name = "placementApprovedDate")
-  private LocalDate placementApprovedDate;
 
   public Long getId() {
     return id;
@@ -240,14 +237,6 @@ public class Placement implements Serializable {
     this.lifecycleState = lifecycleState;
   }
 
-  public LocalDate getPlacementApprovedDate() {
-    return placementApprovedDate;
-  }
-
-  public void setPlacementApprovedDate(LocalDate placementApprovedDate) {
-    this.placementApprovedDate = placementApprovedDate;
-  }
-
   @Override
   public boolean equals(Object o) {
     if (this == o) {
@@ -270,8 +259,7 @@ public class Placement implements Serializable {
         Objects.equals(trainingDescription, placement.trainingDescription) &&
         Objects.equals(localPostNumber, placement.localPostNumber) &&
         status == placement.status &&
-        lifecycleState == placement.lifecycleState &&
-        Objects.equals(placementApprovedDate, placement.placementApprovedDate);
+        lifecycleState == placement.lifecycleState;
   }
 
   @Override
@@ -279,7 +267,7 @@ public class Placement implements Serializable {
     return Objects
         .hash(id, intrepidId, siteCode, gradeAbbreviation, siteId, gradeId, dateFrom, dateTo,
             placementType, placementWholeTimeEquivalent, trainingDescription, localPostNumber,
-            status, lifecycleState, placementApprovedDate);
+            status, lifecycleState);
   }
 
   @Override
@@ -298,8 +286,7 @@ public class Placement implements Serializable {
         ", trainingDescription='" + trainingDescription + '\'' +
         ", localPostNumber='" + localPostNumber + '\'' +
         ", status=" + status +
-        ", lifecycleState='" + lifecycleState + '\'' +
-        ", placementApprovedDate='" + placementApprovedDate + '\'' +
+        ". lifecycleState='" + lifecycleState + '\'' +
         '}';
   }
 }

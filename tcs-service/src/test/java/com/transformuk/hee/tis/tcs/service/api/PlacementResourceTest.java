@@ -17,6 +17,7 @@ import com.transformuk.hee.tis.tcs.service.dto.placementmanager.PostDTO;
 import com.transformuk.hee.tis.tcs.service.dto.placementmanager.SiteDTO;
 import com.transformuk.hee.tis.tcs.service.dto.placementmanager.SpecialtyDTO;
 import com.transformuk.hee.tis.tcs.service.service.PlacementService;
+import com.transformuk.hee.tis.tcs.service.service.impl.PermissionService;
 import com.transformuk.hee.tis.tcs.service.service.impl.PlacementPlannerServiceImp;
 import java.math.BigDecimal;
 import java.time.LocalDate;
@@ -74,6 +75,8 @@ public class PlacementResourceTest {
   private PlacementDetailsDecorator placementDetailsDecoratorMock;
   @MockBean
   private PlacementPlannerServiceImp placementPlannerServiceMock;
+  @MockBean
+  private PermissionService permissionServiceMock;
 
   private PlacementsResultDTO placements;
   private SpecialtyDTO specialtyDTO;
@@ -85,7 +88,7 @@ public class PlacementResourceTest {
   @Before
   public void setup() {
     placementResource = new PlacementResource(placementServiceMock, placementValidatorMock,
-        placementDetailsDecoratorMock, placementPlannerServiceMock);
+        placementDetailsDecoratorMock, placementPlannerServiceMock, permissionServiceMock);
     mockMvc = MockMvcBuilders.standaloneSetup(placementResource).build();
 
     setupData();

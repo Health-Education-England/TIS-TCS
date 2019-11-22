@@ -138,11 +138,8 @@ public class PlacementServiceImpl implements PlacementService {
     return placementRepository.findPlacementById(placementId).orElse(null);
   }
 
-  @Transactional
   @Override
-  public PlacementDetailsDTO createDetails(final PlacementDetailsDTO placementDetailsDTO) {
-
-    log.debug("Request to create Placement : {}", placementDetailsDTO);
+  public PlacementDetailsDTO checkApprovalPermWhenCreate(final PlacementDetailsDTO placementDetailsDTO) {
     // if the user doesn't have `placement approve` perm, set the placement state to draft.
     // bulk_upload user always needs to send approved state
     if (!permissionService.canApprovePlacement()) {
@@ -150,19 +147,25 @@ public class PlacementServiceImpl implements PlacementService {
     } else if (placementDetailsDTO.getLifecycleState() == null) {
       placementDetailsDTO.setLifecycleState(LifecycleState.APPROVED);
     }
+    return placementDetailsDTO;
+  }
 
-    // check if this is an update and it's the first time of approval
-    boolean approveDraftFirstTime = false;
-    Placement placement = null;
-    if (placementDetailsDTO.getId() != null) {
-      placement = placementRepository.findById(placementDetailsDTO.getId())
-          .orElse(null);
-      if (placement.getPlacementApprovedDate() == null
-          && placement.getLifecycleState() == LifecycleState.DRAFT
-          && placementDetailsDTO.getLifecycleState() == LifecycleState.APPROVED) {
-        approveDraftFirstTime = true;
-      }
+  @Override
+  public PlacementDetailsDTO checkApprovalPermWhenUpdate(final PlacementDetailsDTO placementDetailsDTO) {
+    if (!permissionService.canApprovePlacement()) {
+      placementDetailsDTO.setLifecycleState(null); // null state means there's no change
+      // currently the appoved placement can NOT go back to draft
+    } else if (placementDetailsDTO.getLifecycleState() == LifecycleState.DRAFT){
+      placementDetailsDTO.setLifecycleState(null);
     }
+    return placementDetailsDTO;
+  }
+
+  @Transactional
+  @Override
+  public PlacementDetailsDTO createDetails(final PlacementDetailsDTO placementDetailsDTO) {
+
+    log.debug("Request to create Placement : {}", placementDetailsDTO);
 
     PlacementDetails placementDetails = placementDetailsMapper
         .placementDetailsDTOToPlacementDetails(placementDetailsDTO);
@@ -180,11 +183,6 @@ public class PlacementServiceImpl implements PlacementService {
       siteModels.add(placementSite);
     }
     placementDetails.setSites(siteModels);
-    if (placementDetails.getLifecycleState() == LifecycleState.APPROVED) {
-      placementDetails.setPlacementApprovedDate(LocalDateTime.now(clock));
-    } else if (placement != null && placement.getPlacementApprovedDate() != null) {
-      placementDetails.setPlacementApprovedDate(placement.getPlacementApprovedDate().atStartOfDay());
-    }
     placementDetails = placementDetailsRepository.saveAndFlush(placementDetails);
 
     final Set<PlacementSpecialty> placementSpecialties = linkPlacementSpecialties(
@@ -192,9 +190,7 @@ public class PlacementServiceImpl implements PlacementService {
     final PlacementDetailsDTO placementDetailsDTO1 = placementDetailsMapper
         .placementDetailsToPlacementDetailsDTO(placementDetails);
     placementDetailsDTO1.setSpecialties(placementSpecialtyMapper.toDTOs(placementSpecialties));
-    if (placementDetailsDTO.getId() == null || approveDraftFirstTime == true) {
-      handleEsrNewPlacementNotification(placementDetailsDTO, placementDetails);
-    }
+    handleEsrNewPlacementNotification(placementDetailsDTO, placementDetails);
 
     saveSupervisors(placementDetailsDTO.getSupervisors(), placementDetails.getId());
 
@@ -232,19 +228,11 @@ public class PlacementServiceImpl implements PlacementService {
   public boolean isEligibleForChangedDatesNotification(PlacementDetailsDTO updatedPlacementDetails,
       Placement existingPlacement) {
 
-    if (existingPlacement == null || updatedPlacementDetails == null) {
-      return false;
-    }
+    if (existingPlacement.getLifecycleState() == LifecycleState.APPROVED ||
+      updatedPlacementDetails.getLifecycleState() == LifecycleState.APPROVED) {
 
-    // When this is a update on an approved placement, it still remain approved
-    // Or when this is an approval on a draft placement which had been approved before
-    if ((existingPlacement.getLifecycleState() == LifecycleState.APPROVED
-        && updatedPlacementDetails.getLifecycleState() == LifecycleState.APPROVED) ||
-        (existingPlacement.getLifecycleState() == LifecycleState.DRAFT
-        && updatedPlacementDetails.getLifecycleState() == LifecycleState.APPROVED
-        && existingPlacement.getPlacementApprovedDate() != null)) {
-
-      if (isEligibleForNotification(existingPlacement, updatedPlacementDetails)) {
+      if (existingPlacement != null && updatedPlacementDetails != null &&
+          isEligibleForNotification(existingPlacement, updatedPlacementDetails)) {
         Optional<Post> optionalExistingPlacementPost = postRepository
             .findPostByPlacementHistoryId(existingPlacement.getId());
 
@@ -285,6 +273,12 @@ public class PlacementServiceImpl implements PlacementService {
     //clear any linked specialties before trying to save the placement
     final Placement placement = placementRepository.findById(placementDetailsDTO.getId())
         .orElse(null);
+
+    // null means lifecycleState should remain the same, so set it with previous value
+    if (placementDetailsDTO.getLifecycleState() == null) {
+      placementDetailsDTO.setLifecycleState(placement.getLifecycleState());
+    }
+
     //Instead of batch delete we need to unlink specialties from placement one by one
     Set<PlacementSpecialty> specialties = placement.getSpecialties();
     for (PlacementSpecialty specialty : specialties) {
@@ -780,31 +774,33 @@ public class PlacementServiceImpl implements PlacementService {
 
   private void handleEsrNewPlacementNotification(final PlacementDetailsDTO placementDetailsDTO,
       final PlacementDetails placementDetails) {
+
     if (placementDetailsDTO.getLifecycleState() != LifecycleState.APPROVED) {
       return;
     }
 
     log.debug("Handling ESR notifications for new placement creation for deanery number {}",
         placementDetailsDTO.getLocalPostNumber());
-
-    try {
-      final Placement savedPlacement = placementRepository.findById(placementDetails.getId())
-          .orElse(null);
-      if (savedPlacement.getDateFrom() != null && savedPlacement.getDateFrom()
-          .isBefore(LocalDate.now(clock).plusWeeks(13))) {
-        log.debug("Creating ESR notification for new placement creation for deanery number {}",
-            savedPlacement.getPost().getNationalPostNumber());
-        final List<EsrNotification> esrNotifications = esrNotificationService
-            .handleNewPlacementEsrNotification(savedPlacement);
-        log
-            .debug(
-                "CREATED: ESR {} notifications for new placement creation for deanery number {}",
-                esrNotifications.size(), savedPlacement.getPost().getNationalPostNumber());
+    if (placementDetailsDTO.getId() == null) {
+      try {
+        final Placement savedPlacement = placementRepository.findById(placementDetails.getId())
+            .orElse(null);
+        if (savedPlacement.getDateFrom() != null && savedPlacement.getDateFrom()
+            .isBefore(LocalDate.now(clock).plusWeeks(13))) {
+          log.debug("Creating ESR notification for new placement creation for deanery number {}",
+              savedPlacement.getPost().getNationalPostNumber());
+          final List<EsrNotification> esrNotifications = esrNotificationService
+              .handleNewPlacementEsrNotification(savedPlacement);
+          log
+              .debug(
+                  "CREATED: ESR {} notifications for new placement creation for deanery number {}",
+                  esrNotifications.size(), savedPlacement.getPost().getNationalPostNumber());
+        }
+      } catch (final Exception e) {
+        // Ideally it should fail the entire update. Keeping the impact minimal for TCS and go live and revisit after go live.
+        // Log and continue
+        log.error("Error loading New Placement Notification : ", e);
       }
-    } catch (final Exception e) {
-      // Ideally it should fail the entire update. Keeping the impact minimal for TCS and go live and revisit after go live.
-      // Log and continue
-      log.error("Error loading New Placement Notification : ", e);
     }
   }
 

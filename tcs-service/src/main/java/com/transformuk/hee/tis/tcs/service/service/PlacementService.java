@@ -162,4 +162,18 @@ public interface PlacementService {
    * @return
    */
   long getCountOfDraftPlacementsByProgrammeId(Long programmeId);
+
+  /**
+   * check approval permission when create a new placement
+   * @param placementDetailsDTO
+   * @return placementDetailsDTO
+   */
+  PlacementDetailsDTO checkApprovalPermWhenCreate(final PlacementDetailsDTO placementDetailsDTO);
+
+  /**
+   * check approval permission when update a placement
+   * @param placementDetailsDTO
+   * @return placementDetailsDTO
+   */
+  PlacementDetailsDTO checkApprovalPermWhenUpdate(final PlacementDetailsDTO placementDetailsDTO);
 }

@@ -78,8 +78,6 @@ public class PlacementServiceImplTest {
   private Clock clock;
   @Mock
   private ProgrammeRepository programmeRepository;
-  @Mock
-  private PermissionService permissionService;
   @Captor
   private ArgumentCaptor<LocalDate> toDateCaptor;
   @Captor
@@ -365,7 +363,6 @@ public class PlacementServiceImplTest {
 
     Placement placement = new Placement();
     placement.setId(1L);
-    placement.setPlacementApprovedDate(LocalDate.now());
 
     // Record expectations.
     when(placementDetailsMapperMock.placementDetailsDTOToPlacementDetails(placementDetailsDto))
@@ -377,7 +374,6 @@ public class PlacementServiceImplTest {
     when(placementSpecialtyMapperMock.toDTOs(any())).thenReturn(Collections.emptySet());
     doNothing().when(placementSupervisorRepositoryMock).deleteAllByIdPlacementId(1L);
     when(placementSupervisorRepositoryMock.saveAll(any())).thenReturn(null);
-    when(placementRepositoryMock.findById(1L)).thenReturn(Optional.of(placement));
     doReturn(null).when(testObj).linkPlacementSpecialties(any(), any());
 
     // Call the method under test.
