@@ -7,6 +7,8 @@ import com.transformuk.hee.tis.security.util.TisSecurityHelper;
 import java.util.Collections;
 import java.util.Set;
 import java.util.stream.Collectors;
+
+import org.apache.commons.lang3.StringUtils;
 import org.springframework.stereotype.Service;
 import org.springframework.util.CollectionUtils;
 
@@ -19,6 +21,13 @@ public class PermissionService {
   protected static final String VIEW_SENSITIVE_DATA_ROLE = "personsensitive:view:entities";
   protected static final String EDIT_SENSITIVE_DATA_ROLE = "personsensitive:add:modify:entities";
   protected static final String APPROVE_PLACEMENT_PERM = "placement:approve";
+  protected static final String BULK_UPLOAD_USER = "bulk_upload";
+
+  public boolean isUserNameBulkUpload() {
+    UserProfile loggedInUserProfile = TisSecurityHelper.getProfileFromContext();
+    String username = loggedInUserProfile.getUserName();
+    return StringUtils.equals(username, BULK_UPLOAD_USER);
+  }
 
   public boolean canApprovePlacement() {
     UserProfile loggedInUserProfile = TisSecurityHelper.getProfileFromContext();

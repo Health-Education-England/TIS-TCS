@@ -1725,4 +1725,81 @@ public class PlacementResourceIntTest {
         .andExpect(content().contentType(MediaType.APPLICATION_JSON_UTF8))
         .andExpect(jsonPath("$.updatedCount").value(2));
   }
+
+  @Test
+  @Transactional
+  public void createPlacementByBulkUploadShouldBeApproved() throws Exception{
+    TestUtils.mockUserprofile("bulk_upload");
+    final int databaseSizeBeforeCreate = placementDetailsRepository.findAll().size();
+    placementDetails.setDateFrom(UPDATED_DATE_FROM.plusMonths(1));
+    placementDetails.setDateTo(UPDATED_DATE_TO.plusMonths(3));
+    placementDetails.setLifecycleState(LifecycleState.APPROVED);
+
+    final PlacementDetailsDTO placementDetailsDTO = placementDetailsMapper
+        .placementDetailsToPlacementDetailsDTO(placementDetails);
+
+    restPlacementMockMvc.perform(post("/api/placements")
+        .contentType(TestUtil.APPLICATION_JSON_UTF8)
+        .content(TestUtil.convertObjectToJsonBytes(placementDetailsDTO)))
+        .andExpect(status().isCreated())
+        .andExpect(jsonPath("$.lifecycleState").value(LifecycleState.APPROVED.name()));
+
+    final List<PlacementDetails> placementList = placementDetailsRepository.findAll();
+    assertThat(placementList).hasSize(databaseSizeBeforeCreate + 1);
+    final PlacementDetails testPlacement = placementList.get(placementList.size() - 1);
+    assertThat(testPlacement.getLifecycleState()).isEqualTo(LifecycleState.APPROVED);
+
+    // Validate that there is no ESR notification record created
+    final List<EsrNotification> esrNotifications = esrNotificationRepository.findAll();
+    assertThat(esrNotifications).hasSize(1);
+    final EsrNotification esrNotification = esrNotifications.get(0);
+    assertThat(esrNotification.getNotificationTitleCode()).isEqualTo("1");
+    assertThat(esrNotification.getId()).isNotNull();
+  }
+
+  @Test
+  @Transactional
+  public void updatePlacementByBulkUploadShouldBeApproved() throws Exception {
+    TestUtils.mockUserprofile("bulk_upload");
+
+    placementDetails.setDateFrom(UPDATED_DATE_FROM.plusMonths(1));
+    placementDetails.setDateTo(UPDATED_DATE_TO.plusMonths(3));
+    placementDetails.setLifecycleState(LifecycleState.APPROVED);
+    placementDetailsRepository.saveAndFlush(placementDetails);
+
+    final int databaseSizeBeforeUpdate = placementDetailsRepository.findAll().size();
+
+    final PlacementDetailsDTO placementDetailsDTO = placementDetailsMapper
+        .placementDetailsToPlacementDetailsDTO(placementDetails);
+
+    placementDetailsDTO.setLifecycleState(LifecycleState.APPROVED);
+    placementDetailsDTO.setDateFrom(placementDetailsDTO.getDateFrom().plusDays(1));
+
+    restPlacementMockMvc.perform(put("/api/placements")
+        .contentType(TestUtil.APPLICATION_JSON_UTF8)
+        .content(TestUtil.convertObjectToJsonBytes(placementDetailsDTO)))
+        .andExpect(status().isOk())
+        .andExpect(content().contentType(MediaType.APPLICATION_JSON_UTF8))
+        .andExpect(jsonPath("$.lifecycleState").value(LifecycleState.APPROVED.name()));
+
+    // Validate the Placement in the database
+    final List<PlacementDetails> placementList = placementDetailsRepository.findAll();
+    assertThat(placementList).hasSize(databaseSizeBeforeUpdate);
+    final PlacementDetails testPlacement = placementList.get(placementList.size() - 1);
+    assertThat(testPlacement.getLifecycleState()).isEqualTo(LifecycleState.APPROVED);
+
+    // validate that no EsrNotification records are created in the database
+    final List<EsrNotification> esrNotifications = esrNotificationRepository.findAll();
+    assertThat(esrNotifications).hasSize(2);
+    esrNotifications.stream().map(EsrNotification::getNotificationTitleCode)
+        .forEachOrdered(r -> asList("1", "4").contains(r));
+    esrNotifications.stream()
+        .filter(esrNotification -> esrNotification.getNotificationTitleCode().equals("4"))
+        .forEach(esrNotification -> {
+          assertThat(esrNotification.getChangeOfProjectedHireDate()).isNotNull();
+          assertThat(esrNotification.getChangeOfProjectedHireDate()).isEqualTo(UPDATED_DATE_FROM.plusMonths(1).plusDays(1));
+          assertThat(esrNotification.getChangeOfProjectedEndDate()).isEqualTo(UPDATED_DATE_TO.plusMonths(3));
+        });
+  }
+
 }

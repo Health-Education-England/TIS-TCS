@@ -129,7 +129,8 @@ public class PlacementResource {
     Placement placementBeforeUpdate = placementService
         .findPlacementById(placementDetailsDTO.getId());
 
-    if (placementBeforeUpdate.getLifecycleState() == LifecycleState.APPROVED
+    if (!permissionService.isUserNameBulkUpload()
+      && placementBeforeUpdate.getLifecycleState() == LifecycleState.APPROVED
       && !permissionService.canApprovePlacement()) {
       return new ResponseEntity<PlacementDetailsDTO>(HttpStatus.UNAUTHORIZED);
     }

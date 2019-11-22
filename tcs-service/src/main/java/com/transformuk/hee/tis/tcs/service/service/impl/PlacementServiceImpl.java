@@ -142,7 +142,9 @@ public class PlacementServiceImpl implements PlacementService {
   public PlacementDetailsDTO checkApprovalPermWhenCreate(final PlacementDetailsDTO placementDetailsDTO) {
     // if the user doesn't have `placement approve` perm, set the placement state to draft.
     // bulk_upload user always needs to send approved state
-    if (!permissionService.canApprovePlacement()) {
+    if (permissionService.isUserNameBulkUpload()) {
+      placementDetailsDTO.setLifecycleState(LifecycleState.APPROVED);
+    } else if (!permissionService.canApprovePlacement()) {
       placementDetailsDTO.setLifecycleState(LifecycleState.DRAFT);
     } else if (placementDetailsDTO.getLifecycleState() == null) {
       placementDetailsDTO.setLifecycleState(LifecycleState.APPROVED);
@@ -152,7 +154,9 @@ public class PlacementServiceImpl implements PlacementService {
 
   @Override
   public PlacementDetailsDTO checkApprovalPermWhenUpdate(final PlacementDetailsDTO placementDetailsDTO) {
-    if (!permissionService.canApprovePlacement()) {
+    if (permissionService.isUserNameBulkUpload()) {
+      placementDetailsDTO.setLifecycleState(LifecycleState.APPROVED);
+    } else if (!permissionService.canApprovePlacement()) {
       placementDetailsDTO.setLifecycleState(null); // null state means there's no change
       // currently the appoved placement can NOT go back to draft
     } else if (placementDetailsDTO.getLifecycleState() == LifecycleState.DRAFT){
@@ -167,6 +171,7 @@ public class PlacementServiceImpl implements PlacementService {
 
     log.debug("Request to create Placement : {}", placementDetailsDTO);
 
+    // if this is an update and state is changed from draft to approved
     Placement placement = null;
     boolean newPlacementNotification = false;
     if (placementDetailsDTO.getId() != null) {
