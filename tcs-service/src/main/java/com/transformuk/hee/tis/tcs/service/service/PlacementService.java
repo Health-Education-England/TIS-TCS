@@ -148,4 +148,32 @@ public interface PlacementService {
    * @return if overlapping exists, return true, else return false
    */
   boolean validateOverlappingPlacements(String npn, LocalDate fromDate, LocalDate toDate, Long placementId);
+
+  /**
+   * Approve all the placements for the same programme id
+   * @param programmeId of which programme id the placements are going to be approved
+   * @return the count of updated placements
+   */
+  long approveAllPlacementsByProgrammeId(Long programmeId);
+
+  /**
+   * Get all the draft placements for the same programme id
+   * @param programmeId of which programme id the placements are draft
+   * @return
+   */
+  long getCountOfDraftPlacementsByProgrammeId(Long programmeId);
+
+  /**
+   * check approval permission when create a new placement
+   * @param placementDetailsDTO
+   * @return placementDetailsDTO
+   */
+  PlacementDetailsDTO checkApprovalPermWhenCreate(final PlacementDetailsDTO placementDetailsDTO);
+
+  /**
+   * check approval permission when update a placement
+   * @param placementDetailsDTO
+   * @return placementDetailsDTO
+   */
+  PlacementDetailsDTO checkApprovalPermWhenUpdate(final PlacementDetailsDTO placementDetailsDTO);
 }

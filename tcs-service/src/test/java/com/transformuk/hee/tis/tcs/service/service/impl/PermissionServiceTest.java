@@ -2,6 +2,7 @@ package com.transformuk.hee.tis.tcs.service.service.impl;
 
 import com.transformuk.hee.tis.security.model.Trust;
 import com.transformuk.hee.tis.tcs.TestUtils;
+import com.transformuk.hee.tis.tcs.service.api.TestUtil;
 import org.assertj.core.util.Sets;
 import org.junit.Assert;
 import org.junit.Test;
@@ -77,4 +78,20 @@ public class PermissionServiceTest {
     Assert.assertFalse(result2);
   }
 
+  @Test
+  public void canApprovePlacementWillReturnTrueWhenUserHasCorrectPermission() {
+    TestUtils.mockUserProfileWithPermissions(TEST_USER,
+        Sets.newLinkedHashSet(PermissionService.APPROVE_PLACEMENT_PERM));
+    boolean result = testObj.canApprovePlacement();
+
+    Assert.assertTrue(result);
+  }
+
+  @Test
+  public void canApprovePlacementWillReturnFalseWhenUserDoesNotHaveCorrectPermission() {
+    TestUtils.mockUserProfileWithPermissions(TEST_USER, Sets.newLinkedHashSet(OTHER_PERMISSION));
+    boolean result = testObj.canApprovePlacement();
+
+    Assert.assertFalse(result);
+  }
 }

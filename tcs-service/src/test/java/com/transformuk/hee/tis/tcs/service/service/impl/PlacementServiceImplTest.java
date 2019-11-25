@@ -13,15 +13,9 @@ import com.transformuk.hee.tis.tcs.api.dto.PlacementSiteDTO;
 import com.transformuk.hee.tis.tcs.api.dto.PlacementSummaryDTO;
 import com.transformuk.hee.tis.tcs.api.enumeration.LifecycleState;
 import com.transformuk.hee.tis.tcs.api.enumeration.PlacementSiteType;
-import com.transformuk.hee.tis.tcs.service.model.Placement;
-import com.transformuk.hee.tis.tcs.service.model.PlacementDetails;
-import com.transformuk.hee.tis.tcs.service.model.PlacementSite;
-import com.transformuk.hee.tis.tcs.service.model.Post;
-import com.transformuk.hee.tis.tcs.service.repository.CommentRepository;
-import com.transformuk.hee.tis.tcs.service.repository.PlacementDetailsRepository;
-import com.transformuk.hee.tis.tcs.service.repository.PlacementRepository;
-import com.transformuk.hee.tis.tcs.service.repository.PlacementSupervisorRepository;
-import com.transformuk.hee.tis.tcs.service.repository.PostRepository;
+import com.transformuk.hee.tis.tcs.api.enumeration.Status;
+import com.transformuk.hee.tis.tcs.service.model.*;
+import com.transformuk.hee.tis.tcs.service.repository.*;
 import com.transformuk.hee.tis.tcs.service.service.helper.SqlQuerySupplier;
 import com.transformuk.hee.tis.tcs.service.service.mapper.PlacementDetailsMapper;
 import com.transformuk.hee.tis.tcs.service.service.mapper.PlacementMapper;
@@ -42,10 +36,7 @@ import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
-import org.mockito.ArgumentCaptor;
-import org.mockito.Captor;
-import org.mockito.InjectMocks;
-import org.mockito.Mock;
+import org.mockito.*;
 import org.mockito.junit.MockitoJUnitRunner;
 import org.springframework.jdbc.core.namedparam.NamedParameterJdbcTemplate;
 
@@ -54,6 +45,7 @@ public class PlacementServiceImplTest {
 
   private static final long PLACEMENT_ID = 1L;
   private static final Long number = 1L;
+  @Spy
   @InjectMocks
   private PlacementServiceImpl testObj;
   @Mock
@@ -84,6 +76,8 @@ public class PlacementServiceImplTest {
   private PostRepository postRepositoryMock;
   @Mock
   private Clock clock;
+  @Mock
+  private ProgrammeRepository programmeRepository;
   @Captor
   private ArgumentCaptor<LocalDate> toDateCaptor;
   @Captor
@@ -281,6 +275,7 @@ public class PlacementServiceImplTest {
     Placement currentPlacement = new Placement();
     currentPlacement.setId(existingPlacementId);
     currentPlacement.setDateFrom(dateFiveMonthsAgo);
+    currentPlacement.setLifecycleState(LifecycleState.APPROVED);
 
     PlacementDetailsDTO updatedPlacementDetails = new PlacementDetailsDTO();
     updatedPlacementDetails.setDateFrom(dateOneMonthsAgo);
@@ -308,6 +303,7 @@ public class PlacementServiceImplTest {
     Placement currentPlacement = new Placement();
     currentPlacement.setId(existingPlacementId);
     currentPlacement.setDateFrom(dateFiveMonthsAgo);
+    currentPlacement.setLifecycleState(LifecycleState.APPROVED);
 
     PlacementDetailsDTO updatedPlacementDetails = new PlacementDetailsDTO();
     updatedPlacementDetails.setDateFrom(dateFiveMonthsAgo);
@@ -365,6 +361,9 @@ public class PlacementServiceImplTest {
     PlacementDetails placementDetails = new PlacementDetails();
     placementDetails.setId(1L);
 
+    Placement placement = new Placement();
+    placement.setId(1L);
+
     // Record expectations.
     when(placementDetailsMapperMock.placementDetailsDTOToPlacementDetails(placementDetailsDto))
         .thenReturn(placementDetails);
@@ -375,6 +374,7 @@ public class PlacementServiceImplTest {
     when(placementSpecialtyMapperMock.toDTOs(any())).thenReturn(Collections.emptySet());
     doNothing().when(placementSupervisorRepositoryMock).deleteAllByIdPlacementId(1L);
     when(placementSupervisorRepositoryMock.saveAll(any())).thenReturn(null);
+    doReturn(null).when(testObj).linkPlacementSpecialties(any(), any());
 
     // Call the method under test.
     testObj.createDetails(placementDetailsDto);
@@ -596,5 +596,48 @@ public class PlacementServiceImplTest {
     boolean returnValue = testObj.isEligibleForChangedDatesNotification(placementDetailsDto, placement);
     Assert.assertThat("When draft placement is not approved, it is not elegible for ChangedDatesNotification",
         returnValue, CoreMatchers.is(false));
+  }
+
+  @Test
+  public void isEligibleForChangedDatesNotificationReturnFalseWhenApprovedPlacementGoesBackToDraft() {
+    PlacementDetailsDTO placementDetailsDto = new PlacementDetailsDTO();
+    placementDetailsDto.setId(1L);
+    placementDetailsDto.setLifecycleState(LifecycleState.DRAFT);
+
+    Placement placement = new Placement();
+    placement.setId(1L);
+    placement.setLifecycleState(LifecycleState.APPROVED);
+    boolean returnValue = testObj.isEligibleForChangedDatesNotification(placementDetailsDto, placement);
+    Assert.assertThat("When approved placement goes back to draft, it is not elegible for ChangedDatesNotification",
+        returnValue, CoreMatchers.is(false));
+  }
+
+  @Test
+  public void testGetCountOfAllDraftPlacementForProgrammeId() {
+    Placement placement1 = new Placement();
+    placement1.setId(1L);
+    placement1.setLifecycleState(LifecycleState.DRAFT);
+
+    Placement placement2 = new Placement();
+    placement2.setId(2L);
+    placement2.setLifecycleState(LifecycleState.DRAFT);
+
+    Placement placement3 = new Placement();
+    placement3.setId(3L);
+    placement3.setLifecycleState(LifecycleState.APPROVED);
+
+    Post post = new Post();
+    post.setId(1L);
+    post.setStatus(Status.CURRENT);
+    post.setPlacementHistory(Sets.newHashSet(Arrays.asList(placement1, placement2, placement3)));
+
+    Programme programme = new Programme();
+    programme.setId(1L);
+    programme.setPosts(Sets.newHashSet(Arrays.asList(post)));
+
+    when(programmeRepository.findById(1L)).thenReturn(Optional.of(programme));
+    long count = testObj.getCountOfDraftPlacementsByProgrammeId(1L);
+    Assert.assertThat("Should get the count of all draft placement for the programme id",
+        count, CoreMatchers.is(2L));
   }
 }

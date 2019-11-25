@@ -14,32 +14,13 @@ import com.transformuk.hee.tis.tcs.api.dto.PlacementSiteDTO;
 import com.transformuk.hee.tis.tcs.api.dto.PlacementSpecialtyDTO;
 import com.transformuk.hee.tis.tcs.api.dto.PlacementSummaryDTO;
 import com.transformuk.hee.tis.tcs.api.dto.PlacementSupervisorDTO;
-import com.transformuk.hee.tis.tcs.api.enumeration.LifecycleState;
-import com.transformuk.hee.tis.tcs.api.enumeration.PlacementStatus;
-import com.transformuk.hee.tis.tcs.api.enumeration.PostSpecialtyType;
-import com.transformuk.hee.tis.tcs.api.enumeration.TCSDateColumns;
+import com.transformuk.hee.tis.tcs.api.enumeration.*;
 import com.transformuk.hee.tis.tcs.service.api.util.ColumnFilterUtil;
 import com.transformuk.hee.tis.tcs.service.event.PlacementDeletedEvent;
 import com.transformuk.hee.tis.tcs.service.event.PlacementSavedEvent;
 import com.transformuk.hee.tis.tcs.service.exception.DateRangeColumnFilterException;
-import com.transformuk.hee.tis.tcs.service.model.ColumnFilter;
-import com.transformuk.hee.tis.tcs.service.model.Comment;
-import com.transformuk.hee.tis.tcs.service.model.EsrNotification;
-import com.transformuk.hee.tis.tcs.service.model.Placement;
-import com.transformuk.hee.tis.tcs.service.model.PlacementDetails;
-import com.transformuk.hee.tis.tcs.service.model.PlacementSite;
-import com.transformuk.hee.tis.tcs.service.model.PlacementSpecialty;
-import com.transformuk.hee.tis.tcs.service.model.PlacementSupervisor;
-import com.transformuk.hee.tis.tcs.service.model.Post;
-import com.transformuk.hee.tis.tcs.service.model.Specialty;
-import com.transformuk.hee.tis.tcs.service.repository.CommentRepository;
-import com.transformuk.hee.tis.tcs.service.repository.PersonRepositoryImpl;
-import com.transformuk.hee.tis.tcs.service.repository.PlacementDetailsRepository;
-import com.transformuk.hee.tis.tcs.service.repository.PlacementRepository;
-import com.transformuk.hee.tis.tcs.service.repository.PlacementSpecialtyRepository;
-import com.transformuk.hee.tis.tcs.service.repository.PlacementSupervisorRepository;
-import com.transformuk.hee.tis.tcs.service.repository.PostRepository;
-import com.transformuk.hee.tis.tcs.service.repository.SpecialtyRepository;
+import com.transformuk.hee.tis.tcs.service.model.*;
+import com.transformuk.hee.tis.tcs.service.repository.*;
 import com.transformuk.hee.tis.tcs.service.service.EsrNotificationService;
 import com.transformuk.hee.tis.tcs.service.service.PlacementService;
 import com.transformuk.hee.tis.tcs.service.service.helper.SqlQuerySupplier;
@@ -131,7 +112,12 @@ public class PlacementServiceImpl implements PlacementService {
   @Autowired
   private PostRepository postRepository;
   @Autowired
+  private ProgrammeRepository programmeRepository;
+  @Autowired
   private Clock clock;
+
+  @Autowired
+  private PermissionService permissionService;
 
   /**
    * Save a placement.
@@ -152,15 +138,51 @@ public class PlacementServiceImpl implements PlacementService {
     return placementRepository.findPlacementById(placementId).orElse(null);
   }
 
+  @Override
+  public PlacementDetailsDTO checkApprovalPermWhenCreate(final PlacementDetailsDTO placementDetailsDTO) {
+    // if the user doesn't have `placement approve` perm, set the placement state to draft.
+    // bulk_upload user always needs to send approved state
+    if (permissionService.isUserNameBulkUpload()) {
+      placementDetailsDTO.setLifecycleState(LifecycleState.APPROVED);
+    } else if (!permissionService.canApprovePlacement()) {
+      placementDetailsDTO.setLifecycleState(LifecycleState.DRAFT);
+    } else if (placementDetailsDTO.getLifecycleState() == null) {
+      placementDetailsDTO.setLifecycleState(LifecycleState.APPROVED);
+    }
+    return placementDetailsDTO;
+  }
+
+  @Override
+  public PlacementDetailsDTO checkApprovalPermWhenUpdate(final PlacementDetailsDTO placementDetailsDTO) {
+    if (permissionService.isUserNameBulkUpload()) {
+      placementDetailsDTO.setLifecycleState(LifecycleState.APPROVED);
+    } else if (!permissionService.canApprovePlacement()) {
+      placementDetailsDTO.setLifecycleState(null); // null state means there's no change
+      // currently the appoved placement can NOT go back to draft
+    } else if (placementDetailsDTO.getLifecycleState() == LifecycleState.DRAFT){
+      placementDetailsDTO.setLifecycleState(null);
+    }
+    return placementDetailsDTO;
+  }
+
   @Transactional
   @Override
   public PlacementDetailsDTO createDetails(final PlacementDetailsDTO placementDetailsDTO) {
-    // Before the Draft Approval process is done, set the lifecycleStatus to Approved
-    // This should be removed when Draft Approval process is done
-    if (placementDetailsDTO.getLifecycleState() == null) {
-      placementDetailsDTO.setLifecycleState(LifecycleState.APPROVED);
+
+    log.debug("Request to create Placement : {}", placementDetailsDTO);
+
+    // if this is an update and state is changed from draft to approved
+    Placement placement = null;
+    boolean newPlacementNotification = false;
+    if (placementDetailsDTO.getId() != null) {
+      placement = placementRepository.findById(placementDetailsDTO.getId())
+          .orElse(null);
+      if (placement != null && placement.getLifecycleState() == LifecycleState.DRAFT
+          && placementDetailsDTO.getLifecycleState() == LifecycleState.APPROVED) {
+        newPlacementNotification = true;
+      }
     }
-      log.debug("Request to create Placement : {}", placementDetailsDTO);
+
     PlacementDetails placementDetails = placementDetailsMapper
         .placementDetailsDTOToPlacementDetails(placementDetailsDTO);
     updateStoredCommentsWithChangesOrAdd(placementDetails);
@@ -184,7 +206,10 @@ public class PlacementServiceImpl implements PlacementService {
     final PlacementDetailsDTO placementDetailsDTO1 = placementDetailsMapper
         .placementDetailsToPlacementDetailsDTO(placementDetails);
     placementDetailsDTO1.setSpecialties(placementSpecialtyMapper.toDTOs(placementSpecialties));
-    handleEsrNewPlacementNotification(placementDetailsDTO, placementDetails);
+
+    if (placementDetailsDTO.getId() == null || newPlacementNotification ) {
+      handleEsrNewPlacementNotification(placementDetailsDTO, placementDetails);
+    }
 
     saveSupervisors(placementDetailsDTO.getSupervisors(), placementDetails.getId());
 
@@ -222,18 +247,18 @@ public class PlacementServiceImpl implements PlacementService {
   public boolean isEligibleForChangedDatesNotification(PlacementDetailsDTO updatedPlacementDetails,
       Placement existingPlacement) {
 
-    if (updatedPlacementDetails.getLifecycleState() != LifecycleState.APPROVED) {
-      return false;
-    }
-    if (existingPlacement != null && updatedPlacementDetails != null &&
-        isEligibleForNotification(existingPlacement, updatedPlacementDetails)) {
-      Optional<Post> optionalExistingPlacementPost = postRepository
-          .findPostByPlacementHistoryId(existingPlacement.getId());
+    if (existingPlacement.getLifecycleState() == LifecycleState.APPROVED) {
 
-      log.debug("Change in hire or end date. Marking for notification : npn {} ",
-          optionalExistingPlacementPost.isPresent() ? optionalExistingPlacementPost.get()
-              .getNationalPostNumber() : null);
-      return true;
+      if (existingPlacement != null && updatedPlacementDetails != null &&
+          isEligibleForNotification(existingPlacement, updatedPlacementDetails)) {
+        Optional<Post> optionalExistingPlacementPost = postRepository
+            .findPostByPlacementHistoryId(existingPlacement.getId());
+
+        log.debug("Change in hire or end date. Marking for notification : npn {} ",
+            optionalExistingPlacementPost.isPresent() ? optionalExistingPlacementPost.get()
+                .getNationalPostNumber() : null);
+        return true;
+      }
     }
     return false;
   }
@@ -266,6 +291,12 @@ public class PlacementServiceImpl implements PlacementService {
     //clear any linked specialties before trying to save the placement
     final Placement placement = placementRepository.findById(placementDetailsDTO.getId())
         .orElse(null);
+
+    // null means lifecycleState should remain the same, so set it with previous value
+    if (placementDetailsDTO.getLifecycleState() == null) {
+      placementDetailsDTO.setLifecycleState(placement.getLifecycleState());
+    }
+
     //Instead of batch delete we need to unlink specialties from placement one by one
     Set<PlacementSpecialty> specialties = placement.getSpecialties();
     for (PlacementSpecialty specialty : specialties) {
@@ -277,9 +308,11 @@ public class PlacementServiceImpl implements PlacementService {
     updateStoredCommentsWithChangesOrAdd(placementDetails);
 
     placement.setSpecialties(new HashSet<>());
+
     Placement savedPlacement = placementRepository.saveAndFlush(placement);
     PlacementDTO placementDTO = convertPlacementWithSupervisors(savedPlacement);
     applicationEventPublisher.publishEvent(new PlacementSavedEvent(placementDTO));
+
     return createDetails(placementDetailsDTO);
   }
 
@@ -766,26 +799,24 @@ public class PlacementServiceImpl implements PlacementService {
 
     log.debug("Handling ESR notifications for new placement creation for deanery number {}",
         placementDetailsDTO.getLocalPostNumber());
-    if (placementDetailsDTO.getId() == null) {
-      try {
-        final Placement savedPlacement = placementRepository.findById(placementDetails.getId())
-            .orElse(null);
-        if (savedPlacement.getDateFrom() != null && savedPlacement.getDateFrom()
-            .isBefore(LocalDate.now(clock).plusWeeks(13))) {
-          log.debug("Creating ESR notification for new placement creation for deanery number {}",
-              savedPlacement.getPost().getNationalPostNumber());
-          final List<EsrNotification> esrNotifications = esrNotificationService
-              .handleNewPlacementEsrNotification(savedPlacement);
-          log
-              .debug(
-                  "CREATED: ESR {} notifications for new placement creation for deanery number {}",
-                  esrNotifications.size(), savedPlacement.getPost().getNationalPostNumber());
-        }
-      } catch (final Exception e) {
-        // Ideally it should fail the entire update. Keeping the impact minimal for TCS and go live and revisit after go live.
-        // Log and continue
-        log.error("Error loading New Placement Notification : ", e);
+    try {
+      final Placement savedPlacement = placementRepository.findById(placementDetails.getId())
+          .orElse(null);
+      if (savedPlacement.getDateFrom() != null && savedPlacement.getDateFrom()
+          .isBefore(LocalDate.now(clock).plusWeeks(13))) {
+        log.debug("Creating ESR notification for new placement creation for deanery number {}",
+            savedPlacement.getPost().getNationalPostNumber());
+        final List<EsrNotification> esrNotifications = esrNotificationService
+            .handleNewPlacementEsrNotification(savedPlacement);
+        log
+            .debug(
+                "CREATED: ESR {} notifications for new placement creation for deanery number {}",
+                esrNotifications.size(), savedPlacement.getPost().getNationalPostNumber());
       }
+    } catch (final Exception e) {
+      // Ideally it should fail the entire update. Keeping the impact minimal for TCS and go live and revisit after go live.
+      // Log and continue
+      log.error("Error loading New Placement Notification : ", e);
     }
   }
 
@@ -816,5 +847,61 @@ public class PlacementServiceImpl implements PlacementService {
       result.setPlacementSpecialtyType(postSpecialtyType);
       return result;
     }
+  }
+
+  @Override
+  @Transactional
+  public long approveAllPlacementsByProgrammeId(Long programmeId) {
+    if (!permissionService.canApprovePlacement()) {
+      return 0;
+    }
+    List<Placement> draftPlacements = getDraftPlacementsByProgrammeId(programmeId);
+
+    if (draftPlacements.size() > 0) {
+      List<PlacementDetails> placementDetailsList = placementsToPlacementDetails(draftPlacements);
+      placementDetailsList.forEach(placementDetails -> {
+        placementDetails.setLifecycleState(LifecycleState.APPROVED);
+        placementDetailsRepository.saveAndFlush(placementDetails);
+        PlacementDetailsDTO placementDetailsDTO =
+            placementDetailsMapper.placementDetailsToPlacementDetailsDTO(placementDetails);
+        handleEsrNewPlacementNotification(placementDetailsDTO, placementDetails);
+      });
+    }
+    return draftPlacements.size();
+  }
+
+  private List<PlacementDetails> placementsToPlacementDetails(List<Placement> placements) {
+    List<PlacementDetails> placementDetailsList = new ArrayList<>();
+    placements.forEach(placement -> {
+      Optional<PlacementDetails> placementDetails = placementDetailsRepository.findById(placement.getId());
+      if (placementDetails.isPresent()) {
+        placementDetailsList.add(placementDetails.get());
+      }
+    });
+    return placementDetailsList;
+  }
+
+  @Override
+  @Transactional
+  public long getCountOfDraftPlacementsByProgrammeId(Long programmeId) {
+    return getDraftPlacementsByProgrammeId(programmeId).size();
+  }
+
+  private List<Placement> getDraftPlacementsByProgrammeId(Long programmeId) {
+    Optional<Programme> programme = programmeRepository.findById(programmeId);
+    List<Placement> draftPlacements = new ArrayList<>();
+    if (programme.isPresent()) {
+      programme.get().getPosts().stream()
+          .forEach(post -> {
+            if (post.getStatus() == Status.CURRENT) { // only deal with current Posts
+              post.getPlacementHistory().forEach(placement -> {
+                if (placement.getLifecycleState() == LifecycleState.DRAFT) {
+                  draftPlacements.add(placement);
+                }
+              });
+            }
+          });
+    }
+    return draftPlacements;
   }
 }

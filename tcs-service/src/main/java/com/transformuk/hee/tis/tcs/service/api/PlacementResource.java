@@ -4,6 +4,7 @@ import com.transformuk.hee.tis.tcs.api.dto.PlacementDTO;
 import com.transformuk.hee.tis.tcs.api.dto.PlacementDetailsDTO;
 import com.transformuk.hee.tis.tcs.api.dto.validation.Create;
 import com.transformuk.hee.tis.tcs.api.dto.validation.Update;
+import com.transformuk.hee.tis.tcs.api.enumeration.LifecycleState;
 import com.transformuk.hee.tis.tcs.service.api.decorator.PlacementDetailsDecorator;
 import com.transformuk.hee.tis.tcs.service.api.util.HeaderUtil;
 import com.transformuk.hee.tis.tcs.service.api.util.PaginationUtil;
@@ -12,6 +13,7 @@ import com.transformuk.hee.tis.tcs.service.api.validation.ValidationException;
 import com.transformuk.hee.tis.tcs.service.dto.placementmanager.PlacementsResultDTO;
 import com.transformuk.hee.tis.tcs.service.model.Placement;
 import com.transformuk.hee.tis.tcs.service.service.PlacementService;
+import com.transformuk.hee.tis.tcs.service.service.impl.PermissionService;
 import com.transformuk.hee.tis.tcs.service.service.impl.PlacementPlannerServiceImp;
 import io.github.jhipster.web.util.ResponseUtil;
 import java.io.IOException;
@@ -63,15 +65,18 @@ public class PlacementResource {
   private final PlacementValidator placementValidator;
   private final PlacementDetailsDecorator placementDetailsDecorator;
   private final PlacementPlannerServiceImp placementPlannerService;
+  private final PermissionService permissionService;
 
   public PlacementResource(final PlacementService placementService,
       final PlacementValidator placementValidator,
       final PlacementDetailsDecorator placementDetailsDecorator,
-      PlacementPlannerServiceImp placementPlannerService) {
+      PlacementPlannerServiceImp placementPlannerService,
+      PermissionService permissionService) {
     this.placementService = placementService;
     this.placementValidator = placementValidator;
     this.placementDetailsDecorator = placementDetailsDecorator;
     this.placementPlannerService = placementPlannerService;
+    this.permissionService = permissionService;
   }
 
   /**
@@ -93,8 +98,9 @@ public class PlacementResource {
       return ResponseEntity.badRequest().headers(HeaderUtil.createFailureAlert(ENTITY_NAME,
           "idexists", "A new placement cannot already have an ID")).body(null);
     }
-
-    final PlacementDetailsDTO result = placementService.createDetails(placementDetailsDTO);
+    PlacementDetailsDTO placementDetailsDTOPermChecked
+        = placementService.checkApprovalPermWhenCreate(placementDetailsDTO);
+    final PlacementDetailsDTO result = placementService.createDetails(placementDetailsDTOPermChecked);
     return ResponseEntity.created(new URI("/api/placements/" + result.getId()))
         .headers(HeaderUtil.createEntityCreationAlert(ENTITY_NAME, result.getId().toString()))
         .body(result);
@@ -119,8 +125,17 @@ public class PlacementResource {
     if (placementDetailsDTO.getId() == null) {
       return createPlacement(placementDetailsDTO);
     }
+
     Placement placementBeforeUpdate = placementService
         .findPlacementById(placementDetailsDTO.getId());
+
+    if (!permissionService.isUserNameBulkUpload()
+      && placementBeforeUpdate.getLifecycleState() == LifecycleState.APPROVED
+      && !permissionService.canApprovePlacement()) {
+      return new ResponseEntity<PlacementDetailsDTO>(HttpStatus.UNAUTHORIZED);
+    }
+    PlacementDetailsDTO placementDetailsDTOPermChecked
+        = placementService.checkApprovalPermWhenUpdate(placementDetailsDTO);
     boolean eligibleForEsrNotification = placementService
         .isEligibleForChangedDatesNotification(placementDetailsDTO, placementBeforeUpdate);
     boolean currentPlacementEdit = placementBeforeUpdate.getDateFrom()
@@ -289,6 +304,38 @@ public class PlacementResource {
     boolean overlapping = placementService.validateOverlappingPlacements(decodedNpn, fromDate, toDate, placementId);
     Map model = new HashMap<String, Boolean>();
     model.put("overlapping", overlapping);
+    return ResponseEntity.ok().body(model);
+  }
+
+  /**
+   * Approve all the placements for the same programme id
+   * @param programmeId of which programme id the placements are going to be approved
+   * @return the count of updated placements (by JSON)
+   */
+  @PatchMapping(value = "/placements/approve/{programmeId}")
+  @PreAuthorize("hasAuthority('placement:approve')")
+  public ResponseEntity<Map<String, Long>> approveAllDraftPlacementsByProgrammeId (
+      @PathVariable Long programmeId
+  ) {
+    long updatedCount = placementService.approveAllPlacementsByProgrammeId(programmeId);
+    Map model = new HashMap<String, Long>();
+    model.put("updatedCount", updatedCount);
+    return ResponseEntity.ok().body(model);
+  }
+
+  /**
+   * Get the count of all the draft placements for the same programme id
+   * @param programmeId of which programme id the placements are draft
+   * @return the count of draft placements
+   */
+  @GetMapping(value = "/placements/draftCount/{programmeId}")
+  @PreAuthorize("hasAuthority('tcs:view:entities')")
+  public ResponseEntity<Map<String, Long>> getCountOfDraftPlacementsByProgrammed (
+      @PathVariable Long programmeId
+  ) {
+    long totalCount = placementService.getCountOfDraftPlacementsByProgrammeId(programmeId);
+    Map model = new HashMap<String, Long>();
+    model.put("totalCount", totalCount);
     return ResponseEntity.ok().body(model);
   }
 }

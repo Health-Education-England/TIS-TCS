@@ -1,5 +1,7 @@
 package com.transformuk.hee.tis.tcs.service.dto.placementmanager;
 
+import com.transformuk.hee.tis.tcs.api.enumeration.LifecycleState;
+
 import java.io.Serializable;
 import java.math.BigDecimal;
 import java.time.LocalDate;
@@ -13,6 +15,7 @@ public class PlacementDTO implements Serializable {
   private BigDecimal wte;
   private String type;
   private PersonDTO trainee;
+  private LifecycleState lifecycleState;
 
   public Long getId() {
     return id;
@@ -62,6 +65,14 @@ public class PlacementDTO implements Serializable {
     this.trainee = trainee;
   }
 
+  public LifecycleState getLifecycleState() {
+    return lifecycleState;
+  }
+
+  public void setLifecycleState(LifecycleState lifecycleState) {
+    this.lifecycleState = lifecycleState;
+  }
+
   @Override
   public boolean equals(Object o) {
     if (this == o) {
@@ -76,11 +87,12 @@ public class PlacementDTO implements Serializable {
         Objects.equals(dateTo, that.dateTo) &&
         Objects.equals(wte, that.wte) &&
         Objects.equals(type, that.type) &&
-        Objects.equals(trainee, that.trainee);
+        Objects.equals(trainee, that.trainee) &&
+        Objects.equals(lifecycleState, that.lifecycleState);
   }
 
   @Override
   public int hashCode() {
-    return Objects.hash(id, dateFrom, dateTo, wte, type, trainee);
+    return Objects.hash(id, dateFrom, dateTo, wte, type, trainee, lifecycleState);
   }
 }
