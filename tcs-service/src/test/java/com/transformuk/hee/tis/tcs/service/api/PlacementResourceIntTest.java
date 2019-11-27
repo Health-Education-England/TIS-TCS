@@ -1584,21 +1584,6 @@ public class PlacementResourceIntTest {
 
   @Test
   @Transactional
-  public void updateApprovedPlacementToDraftWithoutApprovalPerm() throws Exception {
-    PlacementDetailsDTO placementDetailsDTO = prepareForApprovalUpdate(LifecycleState.APPROVED, false);
-
-    final int databaseSizeBeforeUpdate = placementDetailsRepository.findAll().size();
-
-    placementDetailsDTO.setLifecycleState(LifecycleState.DRAFT);
-
-    restPlacementMockMvc.perform(put("/api/placements")
-        .contentType(TestUtil.APPLICATION_JSON_UTF8)
-        .content(TestUtil.convertObjectToJsonBytes(placementDetailsDTO)))
-        .andExpect(status().isUnauthorized());
-  }
-
-  @Test
-  @Transactional
   public void updateApprovedPlacementToDraftWithApprovalPerm() throws Exception {
     PlacementDetailsDTO placementDetailsDTO = prepareForApprovalUpdate(LifecycleState.APPROVED, true);
 
