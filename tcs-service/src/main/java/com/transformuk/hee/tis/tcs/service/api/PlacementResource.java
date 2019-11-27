@@ -129,11 +129,6 @@ public class PlacementResource {
     Placement placementBeforeUpdate = placementService
         .findPlacementById(placementDetailsDTO.getId());
 
-    if (!permissionService.isUserNameBulkUpload()
-      && placementBeforeUpdate.getLifecycleState() == LifecycleState.APPROVED
-      && !permissionService.canApprovePlacement()) {
-      return new ResponseEntity<PlacementDetailsDTO>(HttpStatus.UNAUTHORIZED);
-    }
     PlacementDetailsDTO placementDetailsDTOPermChecked
         = placementService.checkApprovalPermWhenUpdate(placementDetailsDTO);
     boolean eligibleForEsrNotification = placementService
