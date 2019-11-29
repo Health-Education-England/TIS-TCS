@@ -15,6 +15,7 @@ import com.transformuk.hee.tis.reference.api.dto.SiteDTO;
 import com.transformuk.hee.tis.reference.client.ReferenceService;
 import com.transformuk.hee.tis.tcs.api.dto.EsrNotificationDTO;
 import com.transformuk.hee.tis.tcs.api.dto.PostDTO;
+import com.transformuk.hee.tis.tcs.api.enumeration.LifecycleState;
 import com.transformuk.hee.tis.tcs.service.model.ContactDetails;
 import com.transformuk.hee.tis.tcs.service.model.EsrNotification;
 import com.transformuk.hee.tis.tcs.service.model.Person;
@@ -45,6 +46,7 @@ public class EsrNotificationServiceImplTest {
   private static final List<String> placementTypes = Arrays
       .asList("In post", "In Post - Acting Up", "In post - Extension", "Parental Leave",
           "Long-term sick", "Suspended", "Phased Return");
+  private static final List<String> lifecycleStates = asList(LifecycleState.APPROVED.name());
   @InjectMocks
   private EsrNotificationServiceImpl testService;
   @Mock
@@ -404,7 +406,7 @@ public class EsrNotificationServiceImplTest {
     Placement placement = aPlacement(deaneryPostNumber);
 
     when(placementRepository.findCurrentPlacementsForPosts(asOfDate,
-        singletonList(deaneryPostNumber), placementTypes)).thenReturn(emptyList());
+        singletonList(deaneryPostNumber), placementTypes, lifecycleStates)).thenReturn(emptyList());
     EsrNotification returnedNotification = anEsrNotification(deaneryPostNumber);
     when(esrNotificationRepository.saveAll(any(List.class))).thenReturn(
         singletonList(returnedNotification));
@@ -419,7 +421,7 @@ public class EsrNotificationServiceImplTest {
         .isEqualTo(returnedNotification.getDeaneryPostNumber());
 
     verify(placementRepository).findCurrentPlacementsForPosts(asOfDate,
-        singletonList(deaneryPostNumber), placementTypes);
+        singletonList(deaneryPostNumber), placementTypes, lifecycleStates);
     verify(esrNotificationRepository).saveAll(any(List.class));
   }
 
@@ -440,7 +442,7 @@ public class EsrNotificationServiceImplTest {
     currentPlacement.setPlacementWholeTimeEquivalent(new BigDecimal(1.0F));
 
     when(placementRepository.findCurrentPlacementsForPosts(
-        asOfDate, singletonList(deaneryPostNumber), placementTypes))
+        asOfDate, singletonList(deaneryPostNumber), placementTypes, lifecycleStates))
         .thenReturn(singletonList(currentPlacement));
     EsrNotification returnedNotification = anEsrNotification(deaneryPostNumber);
     when(esrNotificationRepository.saveAll(savedEsrNotificationsCaptor.capture())).thenReturn(
@@ -465,7 +467,7 @@ public class EsrNotificationServiceImplTest {
         .isEqualTo(placement.getPlacementWholeTimeEquivalent().doubleValue());
 
     verify(placementRepository).findCurrentPlacementsForPosts(asOfDate,
-        singletonList(deaneryPostNumber), placementTypes);
+        singletonList(deaneryPostNumber), placementTypes, lifecycleStates);
     verify(esrNotificationRepository).saveAll(any(List.class));
   }
 
@@ -484,7 +486,7 @@ public class EsrNotificationServiceImplTest {
     currentPlacement.setSiteCode(null);
 
     when(placementRepository.findCurrentPlacementsForPosts(
-        asOfDate, singletonList(deaneryPostNumber), placementTypes))
+        asOfDate, singletonList(deaneryPostNumber), placementTypes, lifecycleStates))
         .thenReturn(singletonList(currentPlacement));
     EsrNotification returnedNotification = anEsrNotification(deaneryPostNumber);
 
@@ -501,7 +503,7 @@ public class EsrNotificationServiceImplTest {
         .isEqualTo(returnedNotification.getDeaneryPostNumber());
 
     verify(placementRepository).findCurrentPlacementsForPosts(asOfDate,
-        singletonList(deaneryPostNumber), placementTypes);
+        singletonList(deaneryPostNumber), placementTypes, lifecycleStates);
     verify(esrNotificationRepository).saveAll(any(List.class));
   }
 
