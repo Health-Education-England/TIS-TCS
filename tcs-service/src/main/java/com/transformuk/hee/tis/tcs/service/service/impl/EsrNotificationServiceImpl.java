@@ -12,6 +12,7 @@ import com.transformuk.hee.tis.reference.client.ReferenceService;
 import com.transformuk.hee.tis.tcs.api.dto.EsrNotificationDTO;
 import com.transformuk.hee.tis.tcs.api.dto.PlacementDetailsDTO;
 import com.transformuk.hee.tis.tcs.api.dto.PostDTO;
+import com.transformuk.hee.tis.tcs.api.enumeration.LifecycleState;
 import com.transformuk.hee.tis.tcs.service.api.util.ObjectCloner;
 import com.transformuk.hee.tis.tcs.service.model.ContactDetails;
 import com.transformuk.hee.tis.tcs.service.model.EsrNotification;
@@ -23,15 +24,8 @@ import com.transformuk.hee.tis.tcs.service.service.mapper.EsrNotificationMapper;
 import java.io.IOException;
 import java.text.DecimalFormat;
 import java.time.LocalDate;
-import java.util.ArrayList;
-import java.util.Collections;
-import java.util.Comparator;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 import java.util.Map.Entry;
-import java.util.Optional;
-import java.util.Set;
 import java.util.stream.Collectors;
 import org.apache.commons.collections4.CollectionUtils;
 import org.slf4j.Logger;
@@ -50,6 +44,7 @@ public class EsrNotificationServiceImpl implements EsrNotificationService {
   private static final DecimalFormat DECIMAL_FORMAT = new DecimalFormat("#.#");
   private static final List<String> placementTypes = asList("In post", "In Post - Acting Up",
       "In post - Extension", "Parental Leave", "Long-term sick", "Suspended", "Phased Return");
+  private static final List<String> lifecycleStates = asList(LifecycleState.APPROVED.name());
   private final PlacementRepository placementRepository;
   private EsrNotificationRepository esrNotificationRepository;
   private EsrNotificationMapper esrNotificationMapper;
@@ -259,7 +254,7 @@ public class EsrNotificationServiceImpl implements EsrNotificationService {
       Map<Long, String> siteIdsToKnownAs) {
 
     List<Placement> currentPlacements = placementRepository.findCurrentPlacementsForPosts(
-        asOfDate, Collections.singletonList(nationalPostNumber), placementTypes);
+        asOfDate, Collections.singletonList(nationalPostNumber), placementTypes, lifecycleStates);
     LOG.info("Identified {} current Placements for post {} as of date {}",
         isNotEmpty(currentPlacements) ? currentPlacements.size() : 0, nationalPostNumber, asOfDate);
 
@@ -287,7 +282,7 @@ public class EsrNotificationServiceImpl implements EsrNotificationService {
 
     List<Placement> futurePlacements = placementRepository.findFuturePlacementsForPosts(
         asOfDate.plusDays(2), getNotificationPeriodEndDate(asOfDate),
-        Collections.singletonList(nationalPostNumber), placementTypes);
+        Collections.singletonList(nationalPostNumber), placementTypes, lifecycleStates);
     LOG.info("Identified {} future Placements for post {} as of date {}", futurePlacements.size(),
         nationalPostNumber, asOfDate);
 
@@ -316,7 +311,7 @@ public class EsrNotificationServiceImpl implements EsrNotificationService {
     String nationalPostNumber = newFuturePlacement.getPost().getNationalPostNumber();
 
     List<Placement> currentPlacements = placementRepository.findCurrentPlacementsForPosts(
-        asOfDate, Collections.singletonList(nationalPostNumber), placementTypes);
+        asOfDate, Collections.singletonList(nationalPostNumber), placementTypes, lifecycleStates);
 
     LOG.info("Identified {} current Placements for post {} as of date {}", currentPlacements.size(),
         nationalPostNumber, asOfDate);
@@ -361,10 +356,10 @@ public class EsrNotificationServiceImpl implements EsrNotificationService {
     LocalDate asOfDate = LocalDate.now();
     String nationalPostNumber = placementToDelete.getPost().getNationalPostNumber();
     List<Placement> currentPlacements = placementRepository.findCurrentPlacementsForPosts(asOfDate,
-        Collections.singletonList(nationalPostNumber), placementTypes);
+        Collections.singletonList(nationalPostNumber), placementTypes, lifecycleStates);
     List<Placement> futurePlacements = placementRepository
         .findFuturePlacementsForPosts(asOfDate, asOfDate.plusMonths(3),
-            Collections.singletonList(nationalPostNumber), placementTypes);
+            Collections.singletonList(nationalPostNumber), placementTypes, lifecycleStates);
 
     Placement currentPlacement = null;
     Placement futurePlacement = null;

@@ -72,22 +72,24 @@ public interface PlacementRepository extends JpaRepository<Placement, Long> {
   @Query(value =
       "SELECT pl.* FROM Placement pl WHERE pl.placementType IN (:placementTypes) AND postId IN " +
           "(SELECT id FROM Post WHERE nationalPostNumber IN (:deaneryNumbers))" +
-          "AND (dateFrom >= :futureStartDate AND dateFrom < :futureEndDate)", nativeQuery = true)
+          "AND (dateFrom >= :futureStartDate AND dateFrom < :futureEndDate)" +
+          "AND lifecycleState IN (:lifecycleState)", nativeQuery = true)
   List<Placement> findFuturePlacementsForPosts(
       @Param("futureStartDate") LocalDate futureStartDate,
       @Param("futureEndDate") LocalDate futureEndDate,
       @Param("deaneryNumbers") List<String> deaneryNumbers,
-      @Param("placementTypes") List<String> placementTypes);
+      @Param("placementTypes") List<String> placementTypes,
+      @Param("lifecycleState") List<String> lifecycleState);
 
   @Query(value =
       "SELECT pl.* FROM Placement pl WHERE pl.placementType IN (:placementTypes) AND postId IN " +
           "(SELECT id FROM Post WHERE nationalPostNumber IN (:deaneryNumbers))" +
-          "AND (dateFrom <= :asOfDate AND dateTo >= :asOfDate)", nativeQuery = true)
+          "AND (dateFrom <= :asOfDate AND dateTo >= :asOfDate) AND lifecycleState IN (:lifecycleState)", nativeQuery = true)
   List<Placement> findCurrentPlacementsForPosts(
       @Param("asOfDate") LocalDate asOfDate,
       @Param("deaneryNumbers") List<String> deaneryNumbers,
-      @Param("placementTypes") List<String> placementTypes);
-
+      @Param("placementTypes") List<String> placementTypes,
+      @Param("lifecycleState") List<String> lifecycleState);
 
   @Query(value =
       "select pl.* from Placement pl where traineeId = :traineeId and pl.placementType IN (:placementTypes) "

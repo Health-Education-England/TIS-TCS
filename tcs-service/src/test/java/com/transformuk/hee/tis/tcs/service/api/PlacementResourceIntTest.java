@@ -983,6 +983,7 @@ public class PlacementResourceIntTest {
     nextPlacement.setDateTo(tomorrow.plusMonths(3));
     nextPlacement.setPostId(post.getId());
     nextPlacement.setPlacementType("In Post");
+    nextPlacement.setLifecycleState(LifecycleState.APPROVED);
     placementDetailsRepository.saveAndFlush(nextPlacement);
 
     final ContactDetails cd1 = createContactDetails(nextPlacement, "NextTraineeFN",
