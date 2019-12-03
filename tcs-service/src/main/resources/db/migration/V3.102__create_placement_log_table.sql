@@ -1,0 +1,27 @@
+CREATE TABLE `PlacementLog` (
+  `id` bigint(20) NOT NULL AUTO_INCREMENT,
+  `dateFrom` date DEFAULT NULL,
+  `dateTo` date DEFAULT NULL,
+  `placementWholeTimeEquivalent` float DEFAULT NULL,
+  `intrepidId` varchar(255) DEFAULT NULL,
+  `traineeId` bigint(20) DEFAULT NULL,
+  `postId` bigint(20) DEFAULT NULL,
+  `localPostNumber` varchar(255) DEFAULT NULL,
+  `siteCode` varchar(255) DEFAULT NULL,
+  `gradeAbbreviation` varchar(255) DEFAULT NULL,
+  `placementType` varchar(255) DEFAULT NULL,
+  `status` varchar(255) DEFAULT NULL,
+  `trainingDescription` text,
+  `siteId` bigint(20) DEFAULT NULL,
+  `gradeId` bigint(20) DEFAULT NULL,
+  `placementAddedDate` datetime DEFAULT NULL,
+  `placementAmendedDate` datetime DEFAULT NULL,
+  `lifecycleState` enum('DRAFT','APPROVED') DEFAULT NULL,
+  `placementId` bigint(20) NOT NULL,
+  `operation` enum('CREATE','UPDATE','DELETE') DEFAULT NULL,
+  `validDateFrom` date DEFAULT NULL,
+  `validDateTo` date DEFAULT NULL,
+  PRIMARY KEY (`id`),
+  CONSTRAINT `fk_placement_approval_record_placement_id` FOREIGN KEY (`placementId`) REFERENCES `Placement` (`id`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8;
+
