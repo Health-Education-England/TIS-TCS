@@ -8,7 +8,7 @@ import org.springframework.data.repository.query.Param;
 import java.util.Optional;
 
 /**
- * Spring Data JPA repository for the FundingComponents entity.
+ * Spring Data JPA repository for the PlacementLog entity.
  */
 public interface PlacementLogRepository extends JpaRepository<PlacementLog, Long> {
 

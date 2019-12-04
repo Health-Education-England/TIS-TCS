@@ -59,6 +59,7 @@ public class PlacementLog {
 
   private Long placementId;
 
+  @Enumerated(EnumType.STRING)
   private PlacementLogType logType;
 
   private LocalDateTime validDateFrom;
