@@ -5,7 +5,6 @@ import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
 
-import java.util.List;
 import java.util.Optional;
 
 /**
@@ -16,17 +15,13 @@ public interface PlacementLogRepository extends JpaRepository<PlacementLog, Long
   @Query(value =
       "SELECT * FROM PlacementLog WHERE placementId = :placementId AND validDateTo IS NULL"
       , nativeQuery = true)
-  public Optional<PlacementLog> findLatestLogOfCurrentPlacement(@Param("placementId") Long placementId);
+  public Optional<PlacementLog> findLatestLogOfCurrentPlacement(
+      @Param("placementId") Long placementId);
 
-//  @Query(value =
-//      "SELECT * FROM PlacementLog WHERE validDateFrom =" +
-//          "(SELECT max(id) FROM PlacementLog WHERE lifecycleState = :lifecycleState AND placementId = :placementId)"
-//      , nativeQuery = true)
   @Query(value =
       "SELECT * FROM PlacementLog WHERE id =" +
           "(SELECT max(id) FROM PlacementLog WHERE lifecycleState = 'APPROVED' AND placementId = :placementId)"
       , nativeQuery = true)
   public Optional<PlacementLog> findLatestLogOfCurrentApprovedPlacement(
-//      @Param("lifecycleState") LifecycleState lifecycleState,
       @Param("placementId") Long placementId);
 }
