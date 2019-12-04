@@ -132,11 +132,11 @@ public class PlacementResource {
     PlacementDetailsDTO placementDetailsDTOPermChecked
         = placementService.checkApprovalPermWhenUpdate(placementDetailsDTO);
     boolean eligibleForEsrNotification = placementService
-        .isEligibleForChangedDatesNotification(placementDetailsDTO, placementBeforeUpdate);
+        .isEligibleForChangedDatesNotification(placementDetailsDTOPermChecked, placementBeforeUpdate);
     boolean currentPlacementEdit = placementBeforeUpdate.getDateFrom()
         .isBefore(LocalDate.now().plusDays(1));
 
-    final PlacementDetailsDTO result = placementService.saveDetails(placementDetailsDTO);
+    final PlacementDetailsDTO result = placementService.saveDetails(placementDetailsDTOPermChecked);
 
     if (eligibleForEsrNotification) {
       log.info("Handling ESR Notification for date changes in placement edit: placement id {}",

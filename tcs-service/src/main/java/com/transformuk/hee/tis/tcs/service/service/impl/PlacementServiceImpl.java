@@ -22,6 +22,7 @@ import com.transformuk.hee.tis.tcs.service.exception.DateRangeColumnFilterExcept
 import com.transformuk.hee.tis.tcs.service.model.*;
 import com.transformuk.hee.tis.tcs.service.repository.*;
 import com.transformuk.hee.tis.tcs.service.service.EsrNotificationService;
+import com.transformuk.hee.tis.tcs.service.service.PlacementLogService;
 import com.transformuk.hee.tis.tcs.service.service.PlacementService;
 import com.transformuk.hee.tis.tcs.service.service.helper.SqlQuerySupplier;
 import com.transformuk.hee.tis.tcs.service.service.mapper.PersonLiteMapper;
@@ -119,6 +120,9 @@ public class PlacementServiceImpl implements PlacementService {
   @Autowired
   private PermissionService permissionService;
 
+  @Autowired
+  private PlacementLogService placementLogService;
+
   /**
    * Save a placement.
    *
@@ -157,10 +161,7 @@ public class PlacementServiceImpl implements PlacementService {
     if (permissionService.isUserNameBulkUpload()) {
       placementDetailsDTO.setLifecycleState(LifecycleState.APPROVED);
     } else if (!permissionService.canApprovePlacement()) {
-      placementDetailsDTO.setLifecycleState(null); // null state means there's no change
-      // currently the appoved placement can NOT go back to draft
-    } else if (placementDetailsDTO.getLifecycleState() == LifecycleState.DRAFT){
-      placementDetailsDTO.setLifecycleState(null);
+      placementDetailsDTO.setLifecycleState(LifecycleState.DRAFT);
     }
     return placementDetailsDTO;
   }
@@ -174,11 +175,11 @@ public class PlacementServiceImpl implements PlacementService {
     // if this is an update and state is changed from draft to approved
     Placement placement = null;
     boolean newPlacementNotification = false;
-    if (placementDetailsDTO.getId() != null) {
-      placement = placementRepository.findById(placementDetailsDTO.getId())
-          .orElse(null);
-      if (placement != null && placement.getLifecycleState() == LifecycleState.DRAFT
-          && placementDetailsDTO.getLifecycleState() == LifecycleState.APPROVED) {
+    if (placementDetailsDTO.getId() != null
+        && placementDetailsDTO.getLifecycleState() == LifecycleState.APPROVED) {
+      Optional<PlacementLog> placementLog =
+          placementLogService.getLatestLogOfCurrentApprovedPlacement(placementDetailsDTO.getId());
+      if (!placementLog.isPresent()) {
         newPlacementNotification = true;
       }
     }
@@ -207,7 +208,10 @@ public class PlacementServiceImpl implements PlacementService {
         .placementDetailsToPlacementDetailsDTO(placementDetails);
     placementDetailsDTO1.setSpecialties(placementSpecialtyMapper.toDTOs(placementSpecialties));
 
-    if (placementDetailsDTO.getId() == null || newPlacementNotification ) {
+    if (placementDetailsDTO.getId() == null) {
+      placementLogService.placementLog(placementDetails, PlacementLogType.CREATE);
+      handleEsrNewPlacementNotification(placementDetailsDTO, placementDetails);
+    } else if (newPlacementNotification) {
       handleEsrNewPlacementNotification(placementDetailsDTO, placementDetails);
     }
 
@@ -246,19 +250,28 @@ public class PlacementServiceImpl implements PlacementService {
   @Override
   public boolean isEligibleForChangedDatesNotification(PlacementDetailsDTO updatedPlacementDetails,
       Placement existingPlacement) {
+    if (updatedPlacementDetails == null ||
+        existingPlacement == null ||
+        updatedPlacementDetails.getLifecycleState() != LifecycleState.APPROVED) {
+      return false;
+    }
+    // check if latest approved log exists
+    Optional<PlacementLog> optionalPlacementLog =
+        placementLogService.getLatestLogOfCurrentApprovedPlacement(updatedPlacementDetails.getId());
+    if (!optionalPlacementLog.isPresent()) {
+      return false;
+    }
 
-    if (existingPlacement.getLifecycleState() == LifecycleState.APPROVED) {
+    PlacementLog placementLog = optionalPlacementLog.get();
 
-      if (existingPlacement != null && updatedPlacementDetails != null &&
-          isEligibleForNotification(existingPlacement, updatedPlacementDetails)) {
-        Optional<Post> optionalExistingPlacementPost = postRepository
-            .findPostByPlacementHistoryId(existingPlacement.getId());
+    if (isEligibleForNotification(existingPlacement, updatedPlacementDetails, placementLog)) {
+      Optional<Post> optionalExistingPlacementPost = postRepository
+          .findPostByPlacementHistoryId(existingPlacement.getId());
 
-        log.debug("Change in hire or end date. Marking for notification : npn {} ",
-            optionalExistingPlacementPost.isPresent() ? optionalExistingPlacementPost.get()
-                .getNationalPostNumber() : null);
-        return true;
-      }
+      log.debug("Change in hire or end date. Marking for notification : npn {} ",
+          optionalExistingPlacementPost.isPresent() ? optionalExistingPlacementPost.get()
+              .getNationalPostNumber() : null);
+      return true;
     }
     return false;
   }
@@ -268,8 +281,7 @@ public class PlacementServiceImpl implements PlacementService {
       PlacementDetailsDTO updatedPlacementDetails, Placement placementBeforeUpdate,
       boolean currentPlacementEdit) {
 
-    if (updatedPlacementDetails.getLifecycleState() == LifecycleState.APPROVED
-      && placementBeforeUpdate != null && updatedPlacementDetails != null) {
+    if (placementBeforeUpdate != null && updatedPlacementDetails != null) {
       // create NOT1 type record. Current and next trainee details for the post number.
       // Create NOT4 type record
       log.debug("Change in hire or end date. Marking for notification : {} ",
@@ -292,11 +304,6 @@ public class PlacementServiceImpl implements PlacementService {
     final Placement placement = placementRepository.findById(placementDetailsDTO.getId())
         .orElse(null);
 
-    // null means lifecycleState should remain the same, so set it with previous value
-    if (placementDetailsDTO.getLifecycleState() == null) {
-      placementDetailsDTO.setLifecycleState(placement.getLifecycleState());
-    }
-
     //Instead of batch delete we need to unlink specialties from placement one by one
     Set<PlacementSpecialty> specialties = placement.getSpecialties();
     for (PlacementSpecialty specialty : specialties) {
@@ -312,6 +319,8 @@ public class PlacementServiceImpl implements PlacementService {
     Placement savedPlacement = placementRepository.saveAndFlush(placement);
     PlacementDTO placementDTO = convertPlacementWithSupervisors(savedPlacement);
     applicationEventPublisher.publishEvent(new PlacementSavedEvent(placementDTO));
+
+    placementLogService.placementLog(placementDetails, PlacementLogType.UPDATE);
 
     return createDetails(placementDetailsDTO);
   }
@@ -776,14 +785,14 @@ public class PlacementServiceImpl implements PlacementService {
   }
 
   private boolean isEligibleForNotification(final Placement currentPlacement,
-      final PlacementDetailsDTO updatedPlacementDetails) {
+      final PlacementDetailsDTO updatedPlacementDetails, final PlacementLog latestApprovedLog) {
     // I really do not like this null checks :-( but keeping it to work around the data from intrepid
     return
-        ((currentPlacement.getDateFrom() != null && !currentPlacement.getDateFrom()
+        ((latestApprovedLog.getDateFrom() != null && !latestApprovedLog.getDateFrom()
             .equals(updatedPlacementDetails.getDateFrom())) ||
-            (currentPlacement.getDateTo() != null && !currentPlacement.getDateTo()
+            (latestApprovedLog.getDateTo() != null && !latestApprovedLog.getDateTo()
                 .equals(updatedPlacementDetails.getDateTo()))) &&
-            ((currentPlacement.getDateFrom() != null && currentPlacement.getDateFrom()
+            ((latestApprovedLog.getDateFrom() != null && latestApprovedLog.getDateFrom()
                 .isBefore(LocalDate.now(clock).plusWeeks(13))) ||
                 (updatedPlacementDetails.getDateFrom() != null && updatedPlacementDetails
                     .getDateFrom()

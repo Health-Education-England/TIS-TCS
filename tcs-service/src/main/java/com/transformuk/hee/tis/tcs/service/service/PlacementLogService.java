@@ -3,6 +3,7 @@ package com.transformuk.hee.tis.tcs.service.service;
 import com.transformuk.hee.tis.tcs.api.enumeration.PlacementLogType;
 import com.transformuk.hee.tis.tcs.service.model.PlacementDetails;
 import com.transformuk.hee.tis.tcs.service.model.PlacementLog;
+import org.springframework.stereotype.Service;
 
 import java.util.Optional;
 
