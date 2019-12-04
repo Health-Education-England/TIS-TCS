@@ -18,9 +18,15 @@ public interface PlacementLogRepository extends JpaRepository<PlacementLog, Long
       , nativeQuery = true)
   public Optional<PlacementLog> findLatestLogOfCurrentPlacement(@Param("placementId") Long placementId);
 
+//  @Query(value =
+//      "SELECT * FROM PlacementLog WHERE validDateFrom =" +
+//          "(SELECT max(id) FROM PlacementLog WHERE lifecycleState = :lifecycleState AND placementId = :placementId)"
+//      , nativeQuery = true)
   @Query(value =
-      "SELECT * FROM PlacementLog WHERE validDateFrom =" +
-          "(SELECT MAX(validDateFrom) FROM PlacementLog WHERE lifecycleState = 'APPROVED' AND placementId = :placementId)" +
-          " AND lifecycleState = 'APPROVED' AND placementId = :placementId")
-  public Optional<PlacementLog> findLatestLogOfCurrentApprovedPlacement(@Param("placementId") Long placementId);
+      "SELECT * FROM PlacementLog WHERE id =" +
+          "(SELECT max(id) FROM PlacementLog WHERE lifecycleState = 'APPROVED' AND placementId = :placementId)"
+      , nativeQuery = true)
+  public Optional<PlacementLog> findLatestLogOfCurrentApprovedPlacement(
+//      @Param("lifecycleState") LifecycleState lifecycleState,
+      @Param("placementId") Long placementId);
 }
