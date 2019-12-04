@@ -18,7 +18,7 @@ CREATE TABLE `PlacementLog` (
   `placementAmendedDate` datetime DEFAULT NULL,
   `lifecycleState` enum('DRAFT','APPROVED') DEFAULT NULL,
   `placementId` bigint(20) NOT NULL,
-  `operation` enum('CREATE','UPDATE','DELETE') DEFAULT NULL,
+  `logType` enum('CREATE','UPDATE','DELETE') DEFAULT NULL,
   `validDateFrom` date DEFAULT NULL,
   `validDateTo` date DEFAULT NULL,
   PRIMARY KEY (`id`),

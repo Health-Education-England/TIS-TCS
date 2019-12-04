@@ -1,6 +1,6 @@
 package com.transformuk.hee.tis.tcs.api.enumeration;
 
-public enum PlacementLogOperation {
+public enum PlacementLogType {
   CREATE,
   UPDATE,
   DELETE
