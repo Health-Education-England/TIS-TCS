@@ -166,23 +166,34 @@ public class PlacementServiceImpl implements PlacementService {
     return placementDetailsDTO;
   }
 
+  private boolean isEligibleForNewNotificationWhenUpdate(PlacementDetailsDTO updatedPlacementDetails,
+                                               Placement existingPlacement) {
+    if (updatedPlacementDetails.getId() != null
+        && existingPlacement != null
+        && existingPlacement.getLifecycleState() == LifecycleState.DRAFT
+        && updatedPlacementDetails.getLifecycleState() == LifecycleState.APPROVED) {
+      Optional<PlacementLog> placementLog =
+          placementLogService.getLatestLogOfCurrentApprovedPlacement(updatedPlacementDetails.getId());
+      if (!placementLog.isPresent()) {
+        return true;
+      }
+    }
+    return false;
+  }
+
   @Transactional
   @Override
-  public PlacementDetailsDTO createDetails(final PlacementDetailsDTO placementDetailsDTO) {
+  public PlacementDetailsDTO createDetails(final PlacementDetailsDTO placementDetailsDTO,
+                                           final Placement placementBeforeUpdate) {
 
     log.debug("Request to create Placement : {}", placementDetailsDTO);
 
-    // if this is an update and state is changed from draft to approved
-    Placement placement = null;
-    boolean newPlacementNotification = false;
-    if (placementDetailsDTO.getId() != null
-        && placementDetailsDTO.getLifecycleState() == LifecycleState.APPROVED) {
-      Optional<PlacementLog> placementLog =
-          placementLogService.getLatestLogOfCurrentApprovedPlacement(placementDetailsDTO.getId());
-      if (!placementLog.isPresent()) {
-        newPlacementNotification = true;
-      }
-    }
+    boolean eligibleForEsrDateChangeNotification = isEligibleForChangedDatesNotification(
+        placementDetailsDTO, placementBeforeUpdate);
+
+    // if this is an update and state is changed from draft to approved at the first time
+    boolean eligibleForEsrNewPlacementNotificationWhenUpdate = isEligibleForNewNotificationWhenUpdate(
+        placementDetailsDTO, placementBeforeUpdate);
 
     PlacementDetails placementDetails = placementDetailsMapper
         .placementDetailsDTOToPlacementDetails(placementDetailsDTO);
@@ -208,11 +219,22 @@ public class PlacementServiceImpl implements PlacementService {
         .placementDetailsToPlacementDetailsDTO(placementDetails);
     placementDetailsDTO1.setSpecialties(placementSpecialtyMapper.toDTOs(placementSpecialties));
 
-    if (placementDetailsDTO.getId() == null) {
+    // send ESR notification and record log
+    if (placementDetailsDTO.getId() == null) { // create
       placementLogService.placementLog(placementDetails, PlacementLogType.CREATE);
       handleEsrNewPlacementNotification(placementDetailsDTO, placementDetails);
-    } else if (newPlacementNotification) {
-      handleEsrNewPlacementNotification(placementDetailsDTO, placementDetails);
+    } else { // update
+      placementLogService.placementLog(placementDetails, PlacementLogType.UPDATE);
+      if (eligibleForEsrNewPlacementNotificationWhenUpdate) {
+        handleEsrNewPlacementNotification(placementDetailsDTO, placementDetails);
+      } else if (eligibleForEsrDateChangeNotification) {
+        placementLogService.placementLog(placementDetails, PlacementLogType.UPDATE);
+        log.info("Handling ESR Notification for date changes in placement edit: placement id {}",
+            placementDetailsDTO.getId());
+        boolean currentPlacementEdit = placementBeforeUpdate.getDateFrom()
+            .isBefore(LocalDate.now().plusDays(1));
+        handleChangeOfPlacementDatesEsrNotification(placementDetailsDTO, placementBeforeUpdate, currentPlacementEdit);
+      }
     }
 
     saveSupervisors(placementDetailsDTO.getSupervisors(), placementDetails.getId());
@@ -258,11 +280,13 @@ public class PlacementServiceImpl implements PlacementService {
     // check if latest approved log exists
     Optional<PlacementLog> optionalPlacementLog =
         placementLogService.getLatestLogOfCurrentApprovedPlacement(updatedPlacementDetails.getId());
-    if (!optionalPlacementLog.isPresent()) {
+    PlacementLog placementLog = null;
+    if (optionalPlacementLog.isPresent()) {
+      placementLog = optionalPlacementLog.get();
+    }
+    if (placementLog == null || existingPlacement.getLifecycleState() != LifecycleState.APPROVED) {
       return false;
     }
-
-    PlacementLog placementLog = optionalPlacementLog.get();
 
     if (isEligibleForNotification(existingPlacement, updatedPlacementDetails, placementLog)) {
       Optional<Post> optionalExistingPlacementPost = postRepository
@@ -320,9 +344,7 @@ public class PlacementServiceImpl implements PlacementService {
     PlacementDTO placementDTO = convertPlacementWithSupervisors(savedPlacement);
     applicationEventPublisher.publishEvent(new PlacementSavedEvent(placementDTO));
 
-    placementLogService.placementLog(placementDetails, PlacementLogType.UPDATE);
-
-    return createDetails(placementDetailsDTO);
+    return createDetails(placementDetailsDTO, placement);
   }
 
   @Transactional
@@ -787,12 +809,20 @@ public class PlacementServiceImpl implements PlacementService {
   private boolean isEligibleForNotification(final Placement currentPlacement,
       final PlacementDetailsDTO updatedPlacementDetails, final PlacementLog latestApprovedLog) {
     // I really do not like this null checks :-( but keeping it to work around the data from intrepid
+
+    LocalDate currentDateFrom = currentPlacement.getDateFrom();
+    LocalDate currentDateTo = currentPlacement.getDateTo();
+    if (latestApprovedLog != null) {
+      currentDateFrom = latestApprovedLog.getDateFrom();
+      currentDateTo = latestApprovedLog.getDateTo();
+    }
+
     return
-        ((latestApprovedLog.getDateFrom() != null && !latestApprovedLog.getDateFrom()
+        ((currentDateFrom != null && !currentDateFrom
             .equals(updatedPlacementDetails.getDateFrom())) ||
-            (latestApprovedLog.getDateTo() != null && !latestApprovedLog.getDateTo()
+            (currentDateTo != null && !currentDateTo
                 .equals(updatedPlacementDetails.getDateTo()))) &&
-            ((latestApprovedLog.getDateFrom() != null && latestApprovedLog.getDateFrom()
+            ((currentDateFrom != null && currentDateFrom
                 .isBefore(LocalDate.now(clock).plusWeeks(13))) ||
                 (updatedPlacementDetails.getDateFrom() != null && updatedPlacementDetails
                     .getDateFrom()

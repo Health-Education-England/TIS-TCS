@@ -100,7 +100,7 @@ public class PlacementResource {
     }
     PlacementDetailsDTO placementDetailsDTOPermChecked
         = placementService.checkApprovalPermWhenCreate(placementDetailsDTO);
-    final PlacementDetailsDTO result = placementService.createDetails(placementDetailsDTOPermChecked);
+    final PlacementDetailsDTO result = placementService.createDetails(placementDetailsDTOPermChecked, null);
     return ResponseEntity.created(new URI("/api/placements/" + result.getId()))
         .headers(HeaderUtil.createEntityCreationAlert(ENTITY_NAME, result.getId().toString()))
         .body(result);
@@ -126,25 +126,11 @@ public class PlacementResource {
       return createPlacement(placementDetailsDTO);
     }
 
-    Placement placementBeforeUpdate = placementService
-        .findPlacementById(placementDetailsDTO.getId());
-
     PlacementDetailsDTO placementDetailsDTOPermChecked
         = placementService.checkApprovalPermWhenUpdate(placementDetailsDTO);
-    boolean eligibleForEsrNotification = placementService
-        .isEligibleForChangedDatesNotification(placementDetailsDTOPermChecked, placementBeforeUpdate);
-    boolean currentPlacementEdit = placementBeforeUpdate.getDateFrom()
-        .isBefore(LocalDate.now().plusDays(1));
 
     final PlacementDetailsDTO result = placementService.saveDetails(placementDetailsDTOPermChecked);
 
-    if (eligibleForEsrNotification) {
-      log.info("Handling ESR Notification for date changes in placement edit: placement id {}",
-          placementDetailsDTO.getId());
-      placementService
-          .handleChangeOfPlacementDatesEsrNotification(placementDetailsDTO, placementBeforeUpdate,
-              currentPlacementEdit);
-    }
     return ResponseEntity.ok()
         .headers(HeaderUtil.createEntityUpdateAlert(ENTITY_NAME, result.getId().toString()))
         .body(result);
