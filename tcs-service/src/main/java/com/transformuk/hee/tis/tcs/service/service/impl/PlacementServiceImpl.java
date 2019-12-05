@@ -67,6 +67,7 @@ import org.springframework.jdbc.core.namedparam.MapSqlParameterSource;
 import org.springframework.jdbc.core.namedparam.NamedParameterJdbcTemplate;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+import com.transformuk.hee.tis.tcs.service.service.PlacementLogService;
 
 /**
  * Service Implementation for managing Placement.
@@ -116,7 +117,8 @@ public class PlacementServiceImpl implements PlacementService {
   private ProgrammeRepository programmeRepository;
   @Autowired
   private Clock clock;
-
+  @Autowired
+  private PlacementLogService placementLogService;
   @Autowired
   private PermissionService permissionService;
 
@@ -246,6 +248,8 @@ public class PlacementServiceImpl implements PlacementService {
       sitesToReturnToFE.add(placementSiteDTO);
     }
     placementDetailsDTO1.setSites(sitesToReturnToFE);
+
+    placementLogService.placementLog(placementDetails, PlacementLogType.CREATE);
 
     return placementDetailsDTO1;
   }
