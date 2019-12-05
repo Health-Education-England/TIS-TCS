@@ -340,7 +340,7 @@ public class PlacementServiceImplTest {
     when(placementSupervisorRepositoryMock.saveAll(any())).thenReturn(null);
 
     // Call the method under test.
-    testObj.createDetails(placementDetailsDto);
+    testObj.createDetails(placementDetailsDto, null);
 
     // Perform assertions.
     Assert.assertThat("The placement's added date did not match the expected value.",
@@ -377,7 +377,7 @@ public class PlacementServiceImplTest {
     doReturn(null).when(testObj).linkPlacementSpecialties(any(), any());
 
     // Call the method under test.
-    testObj.createDetails(placementDetailsDto);
+    testObj.createDetails(placementDetailsDto, null);
 
     // Perform assertions.
     Assert.assertThat("The placement's added date did not match the expected value.",
@@ -408,7 +408,7 @@ public class PlacementServiceImplTest {
     when(placementSupervisorRepositoryMock.saveAll(any())).thenReturn(null);
 
     // Call the method under test.
-    PlacementDetailsDTO updatedPlacementDetailsDto = testObj.createDetails(placementDetailsDto);
+    PlacementDetailsDTO updatedPlacementDetailsDto = testObj.createDetails(placementDetailsDto, null);
 
     // Perform assertions.
     Set<PlacementSiteDTO> sites = updatedPlacementDetailsDto.getSites();
@@ -469,7 +469,7 @@ public class PlacementServiceImplTest {
     when(placementSiteMapper.toDto(placementSite2)).thenReturn(placementSiteDto2);
 
     // Call the method under test.
-    PlacementDetailsDTO updatedPlacementDetailsDto = testObj.createDetails(placementDetailsDto);
+    PlacementDetailsDTO updatedPlacementDetailsDto = testObj.createDetails(placementDetailsDto, null);
 
     // Perform assertions.
     Set<PlacementSiteDTO> sites = updatedPlacementDetailsDto.getSites();

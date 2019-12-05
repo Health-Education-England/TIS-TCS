@@ -59,23 +59,10 @@ public class PlacementLogServiceImpl implements PlacementLogService {
 
   private PlacementLog buildPlacementLog(PlacementDetails placementDetails, PlacementLogType logType) {
     PlacementLog placementLog = new PlacementLog();
-    placementLog.setAddedDate(placementDetails.getAddedDate());
-    placementLog.setAmendedDate(placementDetails.getAmendedDate());
     placementLog.setDateFrom(placementDetails.getDateFrom());
     placementLog.setDateTo(placementDetails.getDateTo());
-    placementLog.setGradeAbbreviation(placementDetails.getGradeAbbreviation());
-    placementLog.setGradeId(placementDetails.getGradeId());
-    placementLog.setIntrepidId(placementDetails.getIntrepidId());
     placementLog.setLifecycleState(placementDetails.getLifecycleState());
-    placementLog.setLocalPostNumber(placementDetails.getLocalPostNumber());
     placementLog.setPlacementId(placementDetails.getId());
-    placementLog.setPlacementType(placementDetails.getPlacementType());
-    placementLog.setPostId(placementDetails.getPostId());
-    placementLog.setSiteCode(placementDetails.getSiteCode());
-    placementLog.setSiteId(placementDetails.getSiteId());
-    placementLog.setTraineeId(placementDetails.getTraineeId());
-    placementLog.setTrainingDescription(placementDetails.getTrainingDescription());
-    placementLog.setWholeTimeEquivalent(placementDetails.getWholeTimeEquivalent());
 
     placementLog.setLogType(logType);
     placementLog.setValidDateFrom(LocalDateTime.now(clock));
