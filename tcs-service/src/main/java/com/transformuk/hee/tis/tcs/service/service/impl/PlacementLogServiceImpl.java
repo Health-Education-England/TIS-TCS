@@ -7,11 +7,13 @@ import com.transformuk.hee.tis.tcs.service.repository.PlacementLogRepository;
 import com.transformuk.hee.tis.tcs.service.service.PlacementLogService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.transaction.annotation.Transactional;
+import org.springframework.stereotype.Service;
 
 import java.time.Clock;
 import java.time.LocalDateTime;
 import java.util.Optional;
 
+@Service
 public class PlacementLogServiceImpl implements PlacementLogService {
 
   @Autowired
