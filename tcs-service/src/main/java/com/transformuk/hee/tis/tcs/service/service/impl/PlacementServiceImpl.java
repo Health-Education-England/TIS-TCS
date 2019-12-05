@@ -227,7 +227,6 @@ public class PlacementServiceImpl implements PlacementService {
       if (eligibleForEsrNewPlacementNotificationWhenUpdate) {
         handleEsrNewPlacementNotification(placementDetailsDTO, placementDetails);
       } else if (eligibleForEsrDateChangeNotification) {
-        placementLogService.placementLog(placementDetails, PlacementLogType.UPDATE);
         log.info("Handling ESR Notification for date changes in placement edit: placement id {}",
             placementDetailsDTO.getId());
         boolean currentPlacementEdit = placementBeforeUpdate.getDateFrom()
@@ -283,7 +282,7 @@ public class PlacementServiceImpl implements PlacementService {
     if (optionalPlacementLog.isPresent()) {
       placementLog = optionalPlacementLog.get();
     }
-    if (placementLog == null || existingPlacement.getLifecycleState() != LifecycleState.APPROVED) {
+    if (placementLog == null && existingPlacement.getLifecycleState() != LifecycleState.APPROVED) {
       return false;
     }
 
