@@ -463,11 +463,35 @@ public class PlacementServiceImpl implements PlacementService {
 
     placementSupervisorRepository.deleteAllByIdPlacementId(id);
     Placement placement = placementRepository.getOne(id);
+    PlacementDetails placementDetails = placementToPlacementDetails(placement);
+    placementLogService.placementLog(placementDetails, PlacementLogType.DELETE);
     PlacementDeletedEvent event = new PlacementDeletedEvent(id, placement.getTrainee().getId());
 
     placementRepository.delete(placement);
 
     applicationEventPublisher.publishEvent(event);
+  }
+
+  private PlacementDetails placementToPlacementDetails(Placement placement) {
+    PlacementDetails placementDetails = new PlacementDetails();
+    placementDetails.setId(placement.getId());
+    placementDetails.setLifecycleState(placement.getLifecycleState());
+    placementDetails.setDateFrom(placement.getDateFrom());
+    placementDetails.setDateTo(placement.getDateTo());
+    placementDetails.setPostId(placement.getPost().getId());
+    placementDetails.setTraineeId(placement.getTrainee().getId());
+    placementDetails.setLocalPostNumber(placement.getLocalPostNumber());
+    placementDetails.setSiteCode(placement.getSiteCode());
+    placementDetails.setPlacementType(placement.getPlacementType());
+    placementDetails.setWholeTimeEquivalent(placement.getPlacementWholeTimeEquivalent());
+    placementDetails.setGradeAbbreviation(placement.getGradeAbbreviation());
+    placementDetails.setTrainingDescription(placement.getTrainingDescription());
+    placementDetails.setGradeId(placement.getGradeId());
+    placementDetails.setSiteId(placement.getSiteId());
+    placementDetails.setIntrepidId(placement.getIntrepidId());
+    placementDetails.setComments(placement.getComments());
+
+    return placementDetails;
   }
 
   private void handleEsrNotificationForPlacementDelete(final Long id) {
