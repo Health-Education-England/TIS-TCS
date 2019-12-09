@@ -282,7 +282,7 @@ public class PlacementServiceImpl implements PlacementService {
     if (optionalPlacementLog.isPresent()) {
       placementLog = optionalPlacementLog.get();
     }
-    if (placementLog == null && existingPlacement.getLifecycleState() != LifecycleState.APPROVED) {
+    if (placementLog == null) {
       return false;
     }
 
@@ -325,6 +325,10 @@ public class PlacementServiceImpl implements PlacementService {
     //clear any linked specialties before trying to save the placement
     final Placement placement = placementRepository.findById(placementDetailsDTO.getId())
         .orElse(null);
+
+    // deal with the log for existing placements which doesn't exist in PlacmentLog table
+    PlacementDetails exsitingPlacementDetails = placementToPlacementDetails(placement);
+    placementLogService.addLogForExistingPlacement(exsitingPlacementDetails);
 
     //Instead of batch delete we need to unlink specialties from placement one by one
     Set<PlacementSpecialty> specialties = placement.getSpecialties();
@@ -463,6 +467,10 @@ public class PlacementServiceImpl implements PlacementService {
 
     placementSupervisorRepository.deleteAllByIdPlacementId(id);
     Placement placement = placementRepository.getOne(id);
+
+    PlacementDetails placementDetails = placementToPlacementDetails(placement);
+    placementLogService.placementLog(placementDetails, PlacementLogType.DELETE);
+
     PlacementDeletedEvent event = new PlacementDeletedEvent(id, placement.getTrainee().getId());
 
     placementRepository.delete(placement);
@@ -470,13 +478,40 @@ public class PlacementServiceImpl implements PlacementService {
     applicationEventPublisher.publishEvent(event);
   }
 
+  private PlacementDetails placementToPlacementDetails(Placement placement) {
+    PlacementDetails placementDetails = new PlacementDetails();
+    placementDetails.setId(placement.getId());
+    placementDetails.setLifecycleState(placement.getLifecycleState());
+    placementDetails.setDateFrom(placement.getDateFrom());
+    placementDetails.setDateTo(placement.getDateTo());
+    placementDetails.setPostId(placement.getPost().getId());
+    placementDetails.setTraineeId(placement.getTrainee().getId());
+    placementDetails.setLocalPostNumber(placement.getLocalPostNumber());
+    placementDetails.setSiteCode(placement.getSiteCode());
+    placementDetails.setPlacementType(placement.getPlacementType());
+    placementDetails.setWholeTimeEquivalent(placement.getPlacementWholeTimeEquivalent());
+    placementDetails.setGradeAbbreviation(placement.getGradeAbbreviation());
+    placementDetails.setTrainingDescription(placement.getTrainingDescription());
+    placementDetails.setGradeId(placement.getGradeId());
+    placementDetails.setSiteId(placement.getSiteId());
+    placementDetails.setIntrepidId(placement.getIntrepidId());
+    placementDetails.setComments(placement.getComments());
+
+    return placementDetails;
+  }
+
   private void handleEsrNotificationForPlacementDelete(final Long id) {
     final List<EsrNotification> allEsrNotifications = new ArrayList<>();
 
+    Optional<PlacementLog> optionalPlacementLog =
+        placementLogService.getLatestLogOfCurrentApprovedPlacement(id);
     final Placement placementToDelete = placementRepository.findById(id).orElse(null);
-    if (placementToDelete.getLifecycleState() != LifecycleState.APPROVED) {
+    // when there's no approved records in log table, then check if the current one is approved
+    if (!optionalPlacementLog.isPresent() &&
+        placementToDelete.getLifecycleState() != LifecycleState.APPROVED) {
       return;
     }
+
     // Only future placements can be deleted.
     if (placementToDelete != null && placementToDelete.getDateFrom() != null && placementToDelete
         .getDateFrom().isBefore(LocalDate.now(clock).plusWeeks(13))) {
@@ -807,13 +842,8 @@ public class PlacementServiceImpl implements PlacementService {
   private boolean isEligibleForNotification(final Placement currentPlacement,
       final PlacementDetailsDTO updatedPlacementDetails, final PlacementLog latestApprovedLog) {
     // I really do not like this null checks :-( but keeping it to work around the data from intrepid
-
-    LocalDate currentDateFrom = currentPlacement.getDateFrom();
-    LocalDate currentDateTo = currentPlacement.getDateTo();
-    if (latestApprovedLog != null) {
-      currentDateFrom = latestApprovedLog.getDateFrom();
-      currentDateTo = latestApprovedLog.getDateTo();
-    }
+    LocalDate currentDateFrom = latestApprovedLog.getDateFrom();
+    LocalDate currentDateTo = latestApprovedLog.getDateTo();
 
     return
         ((currentDateFrom != null && !currentDateFrom

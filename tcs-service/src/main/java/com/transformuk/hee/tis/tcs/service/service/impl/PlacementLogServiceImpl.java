@@ -39,7 +39,7 @@ public class PlacementLogServiceImpl implements PlacementLogService {
         placementLog = buildPlacementLog(placementDetails, logType);
         placementLog.setValidDateTo(placementLog.getValidDateFrom());
     }
-    return placementLogRepository.saveAndFlush(placementLog);
+    return placementLogRepository.save(placementLog);
   }
 
   @Override
@@ -53,20 +53,29 @@ public class PlacementLogServiceImpl implements PlacementLogService {
     if (optionalPreviousLog.isPresent()) {
       PlacementLog previousLog = optionalPreviousLog.get();
       previousLog.setValidDateTo(LocalDateTime.now(clock));
-      PlacementLog updatedPreLog = placementLogRepository.saveAndFlush(previousLog);
+      PlacementLog updatedPreLog = placementLogRepository.save(previousLog);
     }
   }
 
-  private PlacementLog buildPlacementLog(PlacementDetails placementDetails, PlacementLogType logType) {
+  private PlacementLog buildPlacementLog(PlacementDetails placementDetails,
+                                         PlacementLogType logType) {
     PlacementLog placementLog = new PlacementLog();
     placementLog.setDateFrom(placementDetails.getDateFrom());
     placementLog.setDateTo(placementDetails.getDateTo());
     placementLog.setLifecycleState(placementDetails.getLifecycleState());
     placementLog.setPlacementId(placementDetails.getId());
-
     placementLog.setLogType(logType);
     placementLog.setValidDateFrom(LocalDateTime.now(clock));
 
     return placementLog;
+  }
+
+  @Override
+  public void addLogForExistingPlacement(PlacementDetails existingPlacementDetails) {
+    Optional<PlacementLog> optionalPreLog = placementLogRepository.findLatestLogOfCurrentPlacement(existingPlacementDetails.getId());
+    if (!optionalPreLog.isPresent()) {
+      PlacementLog placementLog = buildPlacementLog(existingPlacementDetails, null);
+      placementLogRepository.save(placementLog);
+    }
   }
 }
