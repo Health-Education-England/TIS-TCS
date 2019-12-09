@@ -78,6 +78,8 @@ public class PlacementServiceImplTest {
   private Clock clock;
   @Mock
   private ProgrammeRepository programmeRepository;
+  @Mock
+  private PlacementLogServiceImpl placementLogServiceImplMock;
   @Captor
   private ArgumentCaptor<LocalDate> toDateCaptor;
   @Captor
@@ -339,8 +341,10 @@ public class PlacementServiceImplTest {
     doNothing().when(placementSupervisorRepositoryMock).deleteAllByIdPlacementId(1L);
     when(placementSupervisorRepositoryMock.saveAll(any())).thenReturn(null);
 
+    final Placement placement = placementRepositoryMock.findById(placementDetailsDto.getId())
+        .orElse(null);
     // Call the method under test.
-    testObj.createDetails(placementDetailsDto, null);
+    testObj.createDetails(placementDetailsDto, placement);
 
     // Perform assertions.
     Assert.assertThat("The placement's added date did not match the expected value.",
@@ -377,7 +381,7 @@ public class PlacementServiceImplTest {
     doReturn(null).when(testObj).linkPlacementSpecialties(any(), any());
 
     // Call the method under test.
-    testObj.createDetails(placementDetailsDto, null);
+    testObj.createDetails(placementDetailsDto, placement);
 
     // Perform assertions.
     Assert.assertThat("The placement's added date did not match the expected value.",
@@ -407,8 +411,10 @@ public class PlacementServiceImplTest {
     doNothing().when(placementSupervisorRepositoryMock).deleteAllByIdPlacementId(1L);
     when(placementSupervisorRepositoryMock.saveAll(any())).thenReturn(null);
 
+    final Placement placement = placementRepositoryMock.findById(placementDetailsDto.getId())
+        .orElse(null);
     // Call the method under test.
-    PlacementDetailsDTO updatedPlacementDetailsDto = testObj.createDetails(placementDetailsDto, null);
+    PlacementDetailsDTO updatedPlacementDetailsDto = testObj.createDetails(placementDetailsDto, placement);
 
     // Perform assertions.
     Set<PlacementSiteDTO> sites = updatedPlacementDetailsDto.getSites();
@@ -468,8 +474,10 @@ public class PlacementServiceImplTest {
     when(placementSiteMapper.toDto(placementSite1)).thenReturn(placementSiteDto1);
     when(placementSiteMapper.toDto(placementSite2)).thenReturn(placementSiteDto2);
 
+    final Placement placement = placementRepositoryMock.findById(placementDetailsDto.getId())
+        .orElse(null);
     // Call the method under test.
-    PlacementDetailsDTO updatedPlacementDetailsDto = testObj.createDetails(placementDetailsDto, null);
+    PlacementDetailsDTO updatedPlacementDetailsDto = testObj.createDetails(placementDetailsDto, placement);
 
     // Perform assertions.
     Set<PlacementSiteDTO> sites = updatedPlacementDetailsDto.getSites();
@@ -640,4 +648,5 @@ public class PlacementServiceImplTest {
     Assert.assertThat("Should get the count of all draft placement for the programme id",
         count, CoreMatchers.is(2L));
   }
+
 }
