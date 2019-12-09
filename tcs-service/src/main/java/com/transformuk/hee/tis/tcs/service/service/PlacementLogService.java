@@ -8,7 +8,6 @@ import java.util.Optional;
 
 public interface PlacementLogService {
 
-
   /**
    * add log in the PlacementLog table
    * @param placementDetails The placement details which users operates
@@ -23,4 +22,10 @@ public interface PlacementLogService {
    * @return the latest log
    */
   Optional<PlacementLog> getLatestLogOfCurrentApprovedPlacement(Long placementId);
+
+  /**
+   * add log for existing placement which doesn't have any logs in PlacementLog table
+   * @param existingPlacementDetails exsiting placement
+   */
+  void addLogForExistingPlacement(PlacementDetails existingPlacementDetails);
 }
