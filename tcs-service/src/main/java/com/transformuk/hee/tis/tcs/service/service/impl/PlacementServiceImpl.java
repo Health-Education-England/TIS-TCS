@@ -279,12 +279,10 @@ public class PlacementServiceImpl implements PlacementService {
     Optional<PlacementLog> optionalPlacementLog =
         placementLogService.getLatestLogOfCurrentApprovedPlacement(updatedPlacementDetails.getId());
     PlacementLog placementLog = null;
-    if (optionalPlacementLog.isPresent()) {
-      placementLog = optionalPlacementLog.get();
-    }
-    if (placementLog == null) {
+    if (!optionalPlacementLog.isPresent()) {
       return false;
     }
+    placementLog = optionalPlacementLog.get();
 
     if (isEligibleForNotification(existingPlacement, updatedPlacementDetails, placementLog)) {
       Optional<Post> optionalExistingPlacementPost = postRepository

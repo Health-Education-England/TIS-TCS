@@ -280,13 +280,22 @@ public class PlacementServiceImplTest {
     currentPlacement.setLifecycleState(LifecycleState.APPROVED);
 
     PlacementDetailsDTO updatedPlacementDetails = new PlacementDetailsDTO();
+    updatedPlacementDetails.setId(existingPlacementId);
     updatedPlacementDetails.setDateFrom(dateOneMonthsAgo);
     updatedPlacementDetails.setLifecycleState(LifecycleState.APPROVED);
 
     Post foundPostMock = mock(Post.class);
 
+    PlacementLog placementLog = new PlacementLog();
+    placementLog.setPlacementId(existingPlacementId);
+    placementLog.setLifecycleState(LifecycleState.APPROVED);
+    placementLog.setDateFrom(dateFiveMonthsAgo);
+    placementLog.setDateTo(dateOneMonthsAgo);
+
     when(postRepositoryMock.findPostByPlacementHistoryId(longArgumentCaptor.capture()))
         .thenReturn(Optional.of(foundPostMock));
+    when(placementLogServiceImplMock.getLatestLogOfCurrentApprovedPlacement(existingPlacementId))
+        .thenReturn(Optional.of(placementLog));
 
     boolean result = testObj
         .isEligibleForChangedDatesNotification(updatedPlacementDetails, currentPlacement);
@@ -341,10 +350,8 @@ public class PlacementServiceImplTest {
     doNothing().when(placementSupervisorRepositoryMock).deleteAllByIdPlacementId(1L);
     when(placementSupervisorRepositoryMock.saveAll(any())).thenReturn(null);
 
-    final Placement placement = placementRepositoryMock.findById(placementDetailsDto.getId())
-        .orElse(null);
     // Call the method under test.
-    testObj.createDetails(placementDetailsDto, placement);
+    testObj.createDetails(placementDetailsDto, null);
 
     // Perform assertions.
     Assert.assertThat("The placement's added date did not match the expected value.",
@@ -381,7 +388,7 @@ public class PlacementServiceImplTest {
     doReturn(null).when(testObj).linkPlacementSpecialties(any(), any());
 
     // Call the method under test.
-    testObj.createDetails(placementDetailsDto, placement);
+    testObj.createDetails(placementDetailsDto, null);
 
     // Perform assertions.
     Assert.assertThat("The placement's added date did not match the expected value.",
@@ -414,7 +421,7 @@ public class PlacementServiceImplTest {
     final Placement placement = placementRepositoryMock.findById(placementDetailsDto.getId())
         .orElse(null);
     // Call the method under test.
-    PlacementDetailsDTO updatedPlacementDetailsDto = testObj.createDetails(placementDetailsDto, placement);
+    PlacementDetailsDTO updatedPlacementDetailsDto = testObj.createDetails(placementDetailsDto, null);
 
     // Perform assertions.
     Set<PlacementSiteDTO> sites = updatedPlacementDetailsDto.getSites();
@@ -477,7 +484,7 @@ public class PlacementServiceImplTest {
     final Placement placement = placementRepositoryMock.findById(placementDetailsDto.getId())
         .orElse(null);
     // Call the method under test.
-    PlacementDetailsDTO updatedPlacementDetailsDto = testObj.createDetails(placementDetailsDto, placement);
+    PlacementDetailsDTO updatedPlacementDetailsDto = testObj.createDetails(placementDetailsDto, null);
 
     // Perform assertions.
     Set<PlacementSiteDTO> sites = updatedPlacementDetailsDto.getSites();
@@ -648,5 +655,4 @@ public class PlacementServiceImplTest {
     Assert.assertThat("Should get the count of all draft placement for the programme id",
         count, CoreMatchers.is(2L));
   }
-
 }
