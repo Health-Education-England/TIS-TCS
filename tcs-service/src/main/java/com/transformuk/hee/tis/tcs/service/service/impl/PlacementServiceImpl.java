@@ -15,6 +15,7 @@ import com.transformuk.hee.tis.tcs.api.dto.PlacementSpecialtyDTO;
 import com.transformuk.hee.tis.tcs.api.dto.PlacementSummaryDTO;
 import com.transformuk.hee.tis.tcs.api.dto.PlacementSupervisorDTO;
 import com.transformuk.hee.tis.tcs.api.enumeration.*;
+import com.transformuk.hee.tis.tcs.service.api.decorator.PlacementDetailsDecorator;
 import com.transformuk.hee.tis.tcs.service.api.util.ColumnFilterUtil;
 import com.transformuk.hee.tis.tcs.service.event.PlacementDeletedEvent;
 import com.transformuk.hee.tis.tcs.service.event.PlacementSavedEvent;
@@ -121,6 +122,9 @@ public class PlacementServiceImpl implements PlacementService {
 
   @Autowired
   private PlacementLogService placementLogService;
+  @Autowired
+  private PlacementDetailsDecorator placementDetailsDecorator;
+
 
   /**
    * Save a placement.
@@ -969,4 +973,26 @@ public class PlacementServiceImpl implements PlacementService {
     }
     return draftPlacements;
   }
+
+  @Override
+  @Transactional
+  public List<PlacementDetailsDTO> getListOfDraftPlacementsByProgrammeId(Long programmeId) {
+    Optional<Programme> programme = programmeRepository.findById(programmeId);
+    List<PlacementDetailsDTO> draftPlacements = new ArrayList<>();
+    if (programme.isPresent()) {
+      programme.get().getPosts().stream()
+          .forEach(post -> {
+            if (post.getStatus() == Status.CURRENT) { // only deal with current Posts
+              post.getPlacementHistory().forEach(placement -> {
+                if (placement.getLifecycleState() == LifecycleState.DRAFT) {
+                  PlacementDetailsDTO placementDetails = getDetails(placement.getId());
+                  draftPlacements.add(placementDetailsDecorator.decorate(placementDetails));
+                }
+              });
+            }
+          });
+    }
+    return draftPlacements;
+  }
+
 }

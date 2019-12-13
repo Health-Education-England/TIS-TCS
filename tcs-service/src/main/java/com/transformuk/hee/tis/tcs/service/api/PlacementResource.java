@@ -319,4 +319,19 @@ public class PlacementResource {
     model.put("totalCount", totalCount);
     return ResponseEntity.ok().body(model);
   }
+
+  /**
+   * Get the list of all the draft placements for the same programme id
+   * @param programmeId of which programme id the placements are draft
+   * @return the list of draft placements
+   */
+  @GetMapping(value = "/placements/draftList/{programmeId}")
+  @PreAuthorize("hasAuthority('tcs:view:entities')")
+  public ResponseEntity<List<PlacementDetailsDTO>> getListOfDraftPlacementsByProgrammeId (
+      @PathVariable Long programmeId
+  ) {
+    List<PlacementDetailsDTO> result = placementService.getListOfDraftPlacementsByProgrammeId(programmeId);
+    return ResponseEntity.ok(result);
+  }
+
 }

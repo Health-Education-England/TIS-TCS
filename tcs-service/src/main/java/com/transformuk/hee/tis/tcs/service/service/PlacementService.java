@@ -165,6 +165,13 @@ public interface PlacementService {
   long getCountOfDraftPlacementsByProgrammeId(Long programmeId);
 
   /**
+   * Get all the draft placements for the same programme id
+   * @param programmeId of which programme id the placements are draft
+   * @return
+   */
+  List<PlacementDetailsDTO> getListOfDraftPlacementsByProgrammeId(Long programmeId);
+
+  /**
    * check approval permission when create a new placement
    * @param placementDetailsDTO
    * @return placementDetailsDTO
