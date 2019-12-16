@@ -9,6 +9,7 @@ public class PlacementSpecialtyDTO implements Serializable {
   private Long placementId;
   private Long specialtyId;
   private PostSpecialtyType placementSpecialtyType;
+  private String specialtyName;
 
   public Long getPlacementId() {
     return placementId;
@@ -34,6 +35,14 @@ public class PlacementSpecialtyDTO implements Serializable {
     this.placementSpecialtyType = placementSpecialtyType;
   }
 
+  public String getSpecialtyName() {
+    return specialtyName;
+  }
+
+  public void setSpecialtyName(String specialtyName) {
+    this.specialtyName = specialtyName;
+  }
+
   @Override
   public boolean equals(Object o) {
     if (this == o) {
@@ -44,12 +53,13 @@ public class PlacementSpecialtyDTO implements Serializable {
     }
     PlacementSpecialtyDTO that = (PlacementSpecialtyDTO) o;
     return Objects.equals(placementId, that.placementId) &&
-        Objects.equals(specialtyId, that.specialtyId);
+        Objects.equals(specialtyId, that.specialtyId) &&
+        Objects.equals(specialtyName, that.specialtyName);
   }
 
   @Override
   public int hashCode() {
-    return Objects.hash(placementId, specialtyId);
+    return Objects.hash(placementId, specialtyId, specialtyName);
   }
 
   @Override
@@ -58,6 +68,7 @@ public class PlacementSpecialtyDTO implements Serializable {
         "placementId=" + placementId +
         ", specialtyId=" + specialtyId +
         ", placementSpecialtyType=" + placementSpecialtyType +
+        ", specialtyName=" + specialtyName +
         '}';
   }
 }

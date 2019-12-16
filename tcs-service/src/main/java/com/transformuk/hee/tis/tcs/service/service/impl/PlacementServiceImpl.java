@@ -908,6 +908,7 @@ public class PlacementServiceImpl implements PlacementService {
       final PlacementSpecialtyDTO result = new PlacementSpecialtyDTO();
       result.setPlacementId(rs.getLong("placementId"));
       result.setSpecialtyId(rs.getLong("specialtyId"));
+      result.setSpecialtyName(rs.getString("specialtyName"));
       final String placementSpecialtyType = rs.getString("placementSpecialtyType");
       PostSpecialtyType postSpecialtyType = null;
       if (StringUtils.isNotBlank(placementSpecialtyType)) {
