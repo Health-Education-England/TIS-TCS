@@ -1,5 +1,6 @@
 package com.transformuk.hee.tis.tcs.service.service.impl;
 
+import static org.junit.Assert.assertEquals;
 import static org.mockito.Matchers.any;
 import static org.mockito.Matchers.anyList;
 import static org.mockito.Matchers.anyLong;
@@ -15,6 +16,7 @@ import com.transformuk.hee.tis.tcs.api.dto.ProgrammeMembershipCurriculaDTO;
 import com.transformuk.hee.tis.tcs.api.dto.ProgrammeMembershipDTO;
 import com.transformuk.hee.tis.tcs.api.dto.TrainingNumberDTO;
 import com.transformuk.hee.tis.tcs.api.enumeration.ProgrammeMembershipType;
+import com.transformuk.hee.tis.tcs.api.enumeration.Status;
 import com.transformuk.hee.tis.tcs.service.model.Curriculum;
 import com.transformuk.hee.tis.tcs.service.model.Programme;
 import com.transformuk.hee.tis.tcs.service.model.ProgrammeMembership;
@@ -25,6 +27,8 @@ import com.transformuk.hee.tis.tcs.service.repository.ProgrammeRepository;
 import com.transformuk.hee.tis.tcs.service.service.mapper.CurriculumMapper;
 import com.transformuk.hee.tis.tcs.service.service.mapper.ProgrammeMembershipMapper;
 import java.time.LocalDate;
+import java.util.Arrays;
+import java.util.Collections;
 import java.util.List;
 import java.util.Optional;
 import java.util.Set;
@@ -37,7 +41,7 @@ import org.junit.runner.RunWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.Spy;
-import org.mockito.runners.MockitoJUnitRunner;
+import org.mockito.junit.MockitoJUnitRunner;
 
 @RunWith(MockitoJUnitRunner.class)
 public class ProgrammeMembershipServiceImplTest {
@@ -66,16 +70,45 @@ public class ProgrammeMembershipServiceImplTest {
   @Mock
   private ProgrammeRepository programmeRepositoryMock;
 
-  private ProgrammeMembership programmeMembership1 = new ProgrammeMembership(), programmeMembership2 = new ProgrammeMembership();
-  private ProgrammeMembershipDTO programmeMembershipDTO1 = new ProgrammeMembershipDTO(), programmeMembershipDTO2 = new ProgrammeMembershipDTO();
+  private ProgrammeMembership programmeMembership1 = new ProgrammeMembership(),
+      programmeMembership2 = new ProgrammeMembership();
+  private ProgrammeMembershipDTO programmeMembershipDTO1 = new ProgrammeMembershipDTO(),
+      programmeMembershipDTO2 = new ProgrammeMembershipDTO();
   private Curriculum curriculum1 = new Curriculum(), curriculum2 = new Curriculum();
   private CurriculumDTO curriculumDTO1 = new CurriculumDTO(), curriculumDTO2 = new CurriculumDTO();
   private TrainingNumber trainingNumber = new TrainingNumber();
   private TrainingNumberDTO trainingNumberDTO = new TrainingNumberDTO();
-  private CurriculumMembershipDTO curriculumMembershipDTO1 = new CurriculumMembershipDTO(), curriculumMembershipDTO2 = new CurriculumMembershipDTO();
-  ;
+  private CurriculumMembershipDTO curriculumMembershipDTO1 = new CurriculumMembershipDTO(),
+      curriculumMembershipDTO2 = new CurriculumMembershipDTO();
   private Programme programme = new Programme();
 
+  private ProgrammeMembership pastMembership;
+  private ProgrammeMembership futureMembership;
+  private ProgrammeMembership currentMembership;
+
+  private LocalDate today = LocalDate.now();
+  private LocalDate yesterday = today.minusDays(1);
+  private LocalDate lastMonth = today.minusMonths(1);
+  private LocalDate lastYear = today.minusYears(1);
+  private LocalDate tomorrow = today.plusDays(1);
+  private LocalDate nextMonth = today.plusMonths(1);
+  private LocalDate nextYear = today.plusYears(1);
+
+
+  public ProgrammeMembershipServiceImplTest() {
+
+    pastMembership = new ProgrammeMembership();
+    pastMembership.setProgrammeEndDate(yesterday);
+    pastMembership.setProgrammeStartDate(lastYear);
+
+    futureMembership = new ProgrammeMembership();
+    futureMembership.setProgrammeEndDate(nextYear);
+    futureMembership.setProgrammeStartDate(tomorrow);
+
+    currentMembership = new ProgrammeMembership();
+    currentMembership.setProgrammeEndDate(nextMonth);
+    currentMembership.setProgrammeStartDate(lastMonth);
+  }
   @Before
   public void setup() {
 
@@ -378,10 +411,10 @@ public class ProgrammeMembershipServiceImplTest {
   public void testProgrammeMembershipWithCertificateType(){
     ProgrammeMembershipCurriculaDTO pmc1 = new ProgrammeMembershipCurriculaDTO(),
         pmc2 = new ProgrammeMembershipCurriculaDTO(),
-          pmc3 = new ProgrammeMembershipCurriculaDTO();
+        pmc3 = new ProgrammeMembershipCurriculaDTO();
     CurriculumMembershipDTO cm1 = new CurriculumMembershipDTO(),
         cm2 = new CurriculumMembershipDTO(),
-          cm3 = new CurriculumMembershipDTO();
+        cm3 = new CurriculumMembershipDTO();
 
     LocalDate pmc1DateFrom = LocalDate.of(2019, 12, 31);
     LocalDate pmc1DateTo = LocalDate.of(2020, 12, 31);
@@ -439,5 +472,35 @@ public class ProgrammeMembershipServiceImplTest {
 
     long nullCount = result.stream().filter(pm -> pm.getTrainingPathway().equals(null)).count();
     Assert.assertEquals(0L, nullCount);
+  }
+
+  @Test
+  public void testCalculateTrainingStatusWithNoProgrammes() {
+    assertPersonRecordStatusEquals(Status.INACTIVE, null);
+    assertPersonRecordStatusEquals(Status.INACTIVE,
+        Collections.<ProgrammeMembership>emptyList());
+  }
+
+  @Test
+  public void testCalculateTrainingStatusWithPastProgramme() {
+    assertPersonRecordStatusEquals(Status.INACTIVE, Collections.singletonList(pastMembership));
+  }
+
+  @Test
+  public void testCalculateTrainingStatusWithFutureProgramme() {
+    assertPersonRecordStatusEquals(Status.INACTIVE, Collections.singletonList(futureMembership));
+  }
+
+  @Test
+  public void testCalculateTrainingStatusWithCurrentProgramme() {
+    assertPersonRecordStatusEquals(Status.CURRENT, Collections.singletonList(currentMembership));
+    assertPersonRecordStatusEquals(Status.CURRENT,
+        Arrays.asList(pastMembership, currentMembership, futureMembership));
+  }
+
+  private void assertPersonRecordStatusEquals(Status expected,
+      List<ProgrammeMembership> programmeMemberships) {
+    Status actual = ProgrammeMembershipServiceImpl.calculatePersonTrainingStatus(programmeMemberships);
+    assertEquals(expected, actual);
   }
 }

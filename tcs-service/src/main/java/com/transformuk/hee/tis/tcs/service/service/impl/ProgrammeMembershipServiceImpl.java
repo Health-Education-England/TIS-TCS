@@ -7,16 +7,20 @@ import com.transformuk.hee.tis.tcs.api.dto.CurriculumDTO;
 import com.transformuk.hee.tis.tcs.api.dto.CurriculumMembershipDTO;
 import com.transformuk.hee.tis.tcs.api.dto.ProgrammeMembershipCurriculaDTO;
 import com.transformuk.hee.tis.tcs.api.dto.ProgrammeMembershipDTO;
+import com.transformuk.hee.tis.tcs.api.enumeration.Status;
 import com.transformuk.hee.tis.tcs.service.event.ProgrammeMembershipSavedEvent;
 import com.transformuk.hee.tis.tcs.service.model.Curriculum;
+import com.transformuk.hee.tis.tcs.service.model.Person;
 import com.transformuk.hee.tis.tcs.service.model.Programme;
 import com.transformuk.hee.tis.tcs.service.model.ProgrammeMembership;
 import com.transformuk.hee.tis.tcs.service.repository.CurriculumRepository;
+import com.transformuk.hee.tis.tcs.service.repository.PersonRepository;
 import com.transformuk.hee.tis.tcs.service.repository.ProgrammeMembershipRepository;
 import com.transformuk.hee.tis.tcs.service.repository.ProgrammeRepository;
 import com.transformuk.hee.tis.tcs.service.service.ProgrammeMembershipService;
 import com.transformuk.hee.tis.tcs.service.service.mapper.CurriculumMapper;
 import com.transformuk.hee.tis.tcs.service.service.mapper.ProgrammeMembershipMapper;
+import java.time.LocalDate;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.List;
@@ -51,18 +55,20 @@ public class ProgrammeMembershipServiceImpl implements ProgrammeMembershipServic
   private final CurriculumMapper curriculumMapper;
   private final ProgrammeRepository programmeRepository;
   private final ApplicationEventPublisher applicationEventPublisher;
+  private final PersonRepository personRepository;
 
   public ProgrammeMembershipServiceImpl(ProgrammeMembershipRepository programmeMembershipRepository,
       ProgrammeMembershipMapper programmeMembershipMapper,
-      CurriculumRepository curriculumRepository,
-      CurriculumMapper curriculumMapper, ProgrammeRepository programmeRepository,
-      ApplicationEventPublisher applicationEventPublisher) {
+      CurriculumRepository curriculumRepository, CurriculumMapper curriculumMapper,
+      ProgrammeRepository programmeRepository, ApplicationEventPublisher applicationEventPublisher,
+      PersonRepository personRepository) {
     this.programmeMembershipRepository = programmeMembershipRepository;
     this.programmeMembershipMapper = programmeMembershipMapper;
     this.curriculumRepository = curriculumRepository;
     this.curriculumMapper = curriculumMapper;
     this.programmeRepository = programmeRepository;
     this.applicationEventPublisher = applicationEventPublisher;
+    this.personRepository = personRepository;
   }
 
   /**
@@ -77,6 +83,7 @@ public class ProgrammeMembershipServiceImpl implements ProgrammeMembershipServic
     List<ProgrammeMembership> programmeMembershipList = programmeMembershipMapper
         .toEntity(programmeMembershipDTO);
     programmeMembershipList = programmeMembershipRepository.saveAll(programmeMembershipList);
+    updatePersonWhenStatusIsStale(programmeMembershipList.get(0).getPerson().getId());
     List<ProgrammeMembershipDTO> resultDtos = programmeMembershipMapper
         .programmeMembershipsToProgrammeMembershipDTOs(programmeMembershipList);
 
@@ -96,6 +103,7 @@ public class ProgrammeMembershipServiceImpl implements ProgrammeMembershipServic
     List<ProgrammeMembership> programmeMemberships = programmeMembershipMapper
         .programmeMembershipDTOsToProgrammeMemberships(programmeMembershipDTO);
     programmeMemberships = programmeMembershipRepository.saveAll(programmeMemberships);
+    updatePersonWhenStatusIsStale(programmeMemberships.get(0).getPerson().getId());
     List<ProgrammeMembershipDTO> programmeMembershipDTOS = programmeMembershipMapper
         .programmeMembershipsToProgrammeMembershipDTOs(programmeMemberships);
     emitProgrammeMembershipSavedEvents(programmeMembershipDTOS);
@@ -149,7 +157,10 @@ public class ProgrammeMembershipServiceImpl implements ProgrammeMembershipServic
   @Override
   public void delete(Long id) {
     log.debug("Request to delete ProgrammeMembership : {}", id);
+    //Get the person id from the programme membership before deleting it
+    Long personId = programmeMembershipRepository.getOne(id).getPerson().getId();
     programmeMembershipRepository.deleteById(id);
+    updatePersonWhenStatusIsStale(personId);
   }
 
   @Transactional(readOnly = true)
@@ -238,7 +249,6 @@ public class ProgrammeMembershipServiceImpl implements ProgrammeMembershipServic
                 programmeMembershipCurriculaDTO.getProgrammeEndDate());
   }
 
-
   @Transactional(readOnly = true)
   @Override
   public List<ProgrammeMembershipCurriculaDTO> findProgrammeMembershipsForTrainee(Long traineeId) {
@@ -274,7 +284,6 @@ public class ProgrammeMembershipServiceImpl implements ProgrammeMembershipServic
       return result;
     }
     return Collections.EMPTY_LIST;
-
   }
 
   private List<ProgrammeMembershipCurriculaDTO> attachCurricula(
@@ -306,5 +315,27 @@ public class ProgrammeMembershipServiceImpl implements ProgrammeMembershipServic
       result.add(programmeMembershipCurriculaDTO);
     }
     return result;
+  }
+
+  private void updatePersonWhenStatusIsStale(Long personId) {
+    Person person = personRepository.getOne(personId);
+    Status newStatus = calculatePersonTrainingStatus(person.getProgrammeMemberships());
+    log.debug("person id:{} was {} and re-evaluated is {}.", personId, person.getStatus(),
+        newStatus);
+    if (!newStatus.equals(person.getStatus())) {
+      person.setStatus(newStatus);
+      personRepository.save(person);
+    }
+  }
+
+  public static Status calculatePersonTrainingStatus(Collection<ProgrammeMembership> programmeMemberships) {
+    if(CollectionUtils.isEmpty(programmeMemberships)) {
+      return Status.INACTIVE;
+    }
+    return programmeMemberships.parallelStream()
+        .anyMatch(pm -> !LocalDate.now().isBefore(pm.getProgrammeStartDate())
+            && !LocalDate.now().isAfter(pm.getProgrammeEndDate()))
+        ? Status.CURRENT
+        : Status.INACTIVE;
   }
 }
