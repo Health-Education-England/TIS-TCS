@@ -953,8 +953,14 @@ public class PlacementServiceImpl implements PlacementService {
 
   @Override
   @Transactional
-  public long getCountOfDraftPlacementsByProgrammeId(Long programmeId) {
-    return getDraftPlacementsByProgrammeId(programmeId).size();
+  public List<PlacementDetailsDTO> getListOfDraftPlacementsByProgrammeId(Long programmeId) {
+    List<Placement> placements = getDraftPlacementsByProgrammeId(programmeId);
+    List<PlacementDetailsDTO> draftPlacements = new ArrayList<>();
+    placements.forEach(placement -> {
+      PlacementDetailsDTO placementDetails = getDetails(placement.getId());
+      draftPlacements.add(placementDetailsDecorator.decorate(placementDetails));
+    });
+    return draftPlacements;
   }
 
   private List<Placement> getDraftPlacementsByProgrammeId(Long programmeId) {
@@ -967,27 +973,6 @@ public class PlacementServiceImpl implements PlacementService {
               post.getPlacementHistory().forEach(placement -> {
                 if (placement.getLifecycleState() == LifecycleState.DRAFT) {
                   draftPlacements.add(placement);
-                }
-              });
-            }
-          });
-    }
-    return draftPlacements;
-  }
-
-  @Override
-  @Transactional
-  public List<PlacementDetailsDTO> getListOfDraftPlacementsByProgrammeId(Long programmeId) {
-    Optional<Programme> programme = programmeRepository.findById(programmeId);
-    List<PlacementDetailsDTO> draftPlacements = new ArrayList<>();
-    if (programme.isPresent()) {
-      programme.get().getPosts().stream()
-          .forEach(post -> {
-            if (post.getStatus() == Status.CURRENT) { // only deal with current Posts
-              post.getPlacementHistory().forEach(placement -> {
-                if (placement.getLifecycleState() == LifecycleState.DRAFT) {
-                  PlacementDetailsDTO placementDetails = getDetails(placement.getId());
-                  draftPlacements.add(placementDetailsDecorator.decorate(placementDetails));
                 }
               });
             }

@@ -158,14 +158,7 @@ public interface PlacementService {
   long approveAllPlacementsByProgrammeId(Long programmeId);
 
   /**
-   * Get all the draft placements for the same programme id
-   * @param programmeId of which programme id the placements are draft
-   * @return
-   */
-  long getCountOfDraftPlacementsByProgrammeId(Long programmeId);
-
-  /**
-   * Get all the draft placements for the same programme id
+   * Get all the draft placements details for the same programme id
    * @param programmeId of which programme id the placements are draft
    * @return
    */

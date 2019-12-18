@@ -305,23 +305,7 @@ public class PlacementResource {
   }
 
   /**
-   * Get the count of all the draft placements for the same programme id
-   * @param programmeId of which programme id the placements are draft
-   * @return the count of draft placements
-   */
-  @GetMapping(value = "/placements/draftCount/{programmeId}")
-  @PreAuthorize("hasAuthority('tcs:view:entities')")
-  public ResponseEntity<Map<String, Long>> getCountOfDraftPlacementsByProgrammed (
-      @PathVariable Long programmeId
-  ) {
-    long totalCount = placementService.getCountOfDraftPlacementsByProgrammeId(programmeId);
-    Map model = new HashMap<String, Long>();
-    model.put("totalCount", totalCount);
-    return ResponseEntity.ok().body(model);
-  }
-
-  /**
-   * Get the list of all the draft placements for the same programme id
+   * Get the details of all the draft placements for the same programme id
    * @param programmeId of which programme id the placements are draft
    * @return the list of draft placements
    */
