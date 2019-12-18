@@ -191,7 +191,7 @@ public class ProgrammeMembershipDTO implements Serializable {
   @Override
   public String toString() {
     return "ProgrammeMembershipDTO{" +
-        ", id='" + id + "'" +
+        "id='" + id + "'" +
         ", programmeMembershipType='" + programmeMembershipType + "'" +
         ", rotation='" + rotation + "'" +
         ", programmeStartDate='" + programmeStartDate + "'" +
