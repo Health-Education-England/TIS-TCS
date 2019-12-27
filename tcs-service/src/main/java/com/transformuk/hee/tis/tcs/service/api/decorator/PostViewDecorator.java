@@ -70,6 +70,7 @@ public class PostViewDecorator {
             .containsKey(postView.getPrimarySiteId())) {
           postView.setPrimarySiteCode(siteMap.get(postView.getPrimarySiteId()).getSiteCode());
           postView.setPrimarySiteName(siteMap.get(postView.getPrimarySiteId()).getSiteName());
+          postView.setPrimarySiteKnownAs(siteMap.get(postView.getPrimarySiteId()).getSiteKnownAs());
         }
       }
     });

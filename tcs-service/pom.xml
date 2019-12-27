@@ -12,7 +12,7 @@
 
   <groupId>com.transformuk.hee.tis</groupId>
   <artifactId>tcs-service</artifactId>
-  <version>5.6.5</version>
+  <version>5.7.0</version>
   <packaging>war</packaging>
   <name>tcs-service</name>
 
@@ -151,7 +151,7 @@
     <dependency>
       <groupId>com.transformuk.hee.tis</groupId>
       <artifactId>tcs-api</artifactId>
-      <version>5.7.1</version>
+      <version>5.8.0</version>
     </dependency>
     <dependency>
       <groupId>uk.nhs.tis</groupId>
