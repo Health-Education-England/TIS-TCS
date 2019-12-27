@@ -30,6 +30,8 @@ public class PostViewDTO implements Serializable {
 
   private String primarySiteName;
 
+  private String primarySiteKnownAs;
+
   private Long approvedGradeId;
 
   private String approvedGradeCode;
@@ -118,6 +120,14 @@ public class PostViewDTO implements Serializable {
 
   public void setPrimarySiteName(String primarySiteName) {
     this.primarySiteName = primarySiteName;
+  }
+
+  public String getPrimarySiteKnownAs() {
+    return primarySiteKnownAs;
+  }
+
+  public void setPrimarySiteKnownAs(String primarySiteKnownAs) {
+    this.primarySiteKnownAs = primarySiteKnownAs;
   }
 
   public String getApprovedGradeCode() {
@@ -258,6 +268,10 @@ public class PostViewDTO implements Serializable {
         : that.primarySiteName != null) {
       return false;
     }
+    if (primarySiteKnownAs != null ? !primarySiteKnownAs.equals(that.primarySiteKnownAs)
+        : that.primarySiteKnownAs != null) {
+      return false;
+    }
     if (approvedGradeCode != null ? !approvedGradeCode.equals(that.approvedGradeCode)
         : that.approvedGradeCode != null) {
       return false;
@@ -306,6 +320,7 @@ public class PostViewDTO implements Serializable {
     result = 31 * result + (nationalPostNumber != null ? nationalPostNumber.hashCode() : 0);
     result = 31 * result + (primarySiteCode != null ? primarySiteCode.hashCode() : 0);
     result = 31 * result + (primarySiteName != null ? primarySiteName.hashCode() : 0);
+    result = 31 * result + (primarySiteKnownAs != null ? primarySiteKnownAs.hashCode() : 0);
     result = 31 * result + (approvedGradeCode != null ? approvedGradeCode.hashCode() : 0);
     result = 31 * result + (approvedGradeName != null ? approvedGradeName.hashCode() : 0);
     result = 31 * result + (primarySpecialtyId != null ? primarySpecialtyId.hashCode() : 0);
@@ -331,6 +346,7 @@ public class PostViewDTO implements Serializable {
         ", primarySiteId=" + primarySiteId +
         ", primarySiteCode='" + primarySiteCode + '\'' +
         ", primarySiteName='" + primarySiteName + '\'' +
+        ", primarySiteKnownAs='" + primarySiteKnownAs + '\'' +
         ", approvedGradeId='" + approvedGradeId + '\'' +
         ", approvedGradeCode='" + approvedGradeCode + '\'' +
         ", approvedGradeName='" + approvedGradeName + '\'' +
