@@ -7,6 +7,7 @@ import static org.apache.commons.collections4.CollectionUtils.isNotEmpty;
 import static org.apache.commons.lang3.StringUtils.isEmpty;
 import static org.apache.commons.lang3.StringUtils.isNotEmpty;
 
+import com.google.common.collect.Lists;
 import com.transformuk.hee.tis.reference.api.dto.SiteDTO;
 import com.transformuk.hee.tis.reference.client.ReferenceService;
 import com.transformuk.hee.tis.tcs.api.dto.EsrNotificationDTO;
@@ -45,6 +46,7 @@ public class EsrNotificationServiceImpl implements EsrNotificationService {
   private static final List<String> placementTypes = asList("In post", "In Post - Acting Up",
       "In post - Extension", "Parental Leave", "Long-term sick", "Suspended", "Phased Return");
   private static final List<String> lifecycleStates = asList(LifecycleState.APPROVED.name());
+  public static final int PROCESSING_PLACEMENTS_CHUNK = 500;
   private final PlacementRepository placementRepository;
   private EsrNotificationRepository esrNotificationRepository;
   private EsrNotificationMapper esrNotificationMapper;
@@ -132,11 +134,19 @@ public class EsrNotificationServiceImpl implements EsrNotificationService {
         "Identified {} earliest eligible future Placements based on current date {} and earliest available date {} ",
         placements.size(), fromDate, earliestEligibleDate);
     // Have a separate mapper when time permits
-    List<EsrNotification> esrNotifications = mapNextToCurrentPlacementsToNotification(placements,
-        getSiteIdsToKnownAs(placements));
-    LOG.info("Saving ESR Notifications for earliest eligible future Placements scenario : {}",
-        esrNotifications.size());
-    List<EsrNotification> savedNotifications = esrNotificationRepository.saveAll(esrNotifications);
+    List<List<Placement>> placementToProcess = Lists.partition(placements, PROCESSING_PLACEMENTS_CHUNK);
+    List<EsrNotification> result = Lists.newArrayList();
+    for (int i = 0; i < placementToProcess.size(); i++) {
+      LOG.info("=============== Mapping placements chunk ({} of {})", i+1, placementToProcess.size());
+      List<Placement> placementChunk = placementToProcess.get(i);
+      List<EsrNotification> esrNotifications = mapNextToCurrentPlacementsToNotification(placementChunk,
+          getSiteIdsToKnownAs(placements));
+      LOG.info("Saving ESR Notifications for earliest eligible future Placements scenario : {}",
+          esrNotifications.size());
+      result.addAll(esrNotifications);
+    }
+
+    List<EsrNotification> savedNotifications = esrNotificationRepository.saveAll(result);
     return esrNotificationMapper.esrNotificationsToPlacementDetailDTOs(savedNotifications);
   }
 
@@ -198,15 +208,22 @@ public class EsrNotificationServiceImpl implements EsrNotificationService {
     LOG.info("Identified {} Posts with current or future placements as of date {}",
         currentAndFuturePlacements.size(), asOfDate);
 
-    List<EsrNotification> esrNotifications = mapCurrentAndFuturePlacementsToNotification(
-        currentAndFuturePlacements, asOfDate, getSiteIdsToKnownAs(currentAndFuturePlacements));
+    List<EsrNotification> result = Lists.newArrayList();
+    List<List<Placement>> placementChunks = Lists.partition(currentAndFuturePlacements,
+        PROCESSING_PLACEMENTS_CHUNK);
+    for (int i = 0; i < placementChunks.size(); i++) {
+      LOG.info("=============== Mapping placements chunk ({} of {})", i+1, placementChunks.size());
+      List<Placement> placementChunk = placementChunks.get(i);
+      List<EsrNotification> esrNotifications = mapCurrentAndFuturePlacementsToNotification(
+          placementChunk, asOfDate, getSiteIdsToKnownAs(currentAndFuturePlacements));
 
-    LOG.info("Saving ESR Notifications for full notifications scenario : {}",
-        esrNotifications.size());
-    esrNotifications
-        .forEach(esrNotification -> esrNotification.setManagingDeaneryBodyCode(deaneryBody));
-    List<EsrNotification> savedNotifications = esrNotificationRepository.saveAll(esrNotifications);
-    return esrNotificationMapper.esrNotificationsToPlacementDetailDTOs(savedNotifications);
+      LOG.info("Saving ESR Notifications for full notifications scenario : {}",
+          esrNotifications.size());
+      esrNotifications
+          .forEach(esrNotification -> esrNotification.setManagingDeaneryBodyCode(deaneryBody));
+      result.addAll(esrNotificationRepository.saveAll(esrNotifications));
+    }
+    return esrNotificationMapper.esrNotificationsToPlacementDetailDTOs(result);
   }
 
   @Override
