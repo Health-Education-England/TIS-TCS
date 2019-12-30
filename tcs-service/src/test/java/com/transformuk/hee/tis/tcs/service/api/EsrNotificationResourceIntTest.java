@@ -240,23 +240,7 @@ public class EsrNotificationResourceIntTest {
         .param("fromDate", from.toString()))
         .andExpect(status().isOk())
         .andExpect(content().contentType(MediaType.APPLICATION_JSON_UTF8_VALUE))
-        .andExpect(jsonPath("$.*").isArray())
-        .andExpect(jsonPath("$", hasSize(1)))
-        .andExpect(jsonPath("$.[*].notificationTitleCode").value("1"))
-        .andExpect(jsonPath("$.[*].deaneryPostNumber").value(post.getNationalPostNumber()))
-        .andExpect(jsonPath("$.[*].managingDeaneryBodyCode").value("EOE"))
-        .andExpect(jsonPath("$.[*].currentTraineeFirstName")
-            .value(trainee2.getContactDetails().getForenames()))
-        .andExpect(jsonPath("$.[*].currentTraineeLastName")
-            .value(trainee2.getContactDetails().getSurname()))
-        .andExpect(
-            jsonPath("$.[*].currentTraineeGmcNumber").value(trainee2GmcDetails.getGmcNumber()))
-        .andExpect(jsonPath("$.[*].nextAppointmentTraineeFirstName")
-            .value(trainee1.getContactDetails().getLegalForenames()))
-        .andExpect(jsonPath("$.[*].nextAppointmentTraineeLastName")
-            .value(trainee1.getContactDetails().getLegalSurname()))
-        .andExpect(jsonPath("$.[*].nextAppointmentTraineeGmcNumber")
-            .value(trainee1GmcDetails.getGmcNumber()));
+        .andExpect(content().string("1"));
   }
 
   @Test
@@ -356,32 +340,7 @@ public class EsrNotificationResourceIntTest {
         .param("fromDate", today.toString()))
         .andExpect(status().isOk())
         .andExpect(content().contentType(MediaType.APPLICATION_JSON_UTF8_VALUE))
-        .andExpect(jsonPath("$.*").isArray())
-        .andExpect(jsonPath("$", hasSize(2)))
-        // For given data, these should be the same across notifications
-        .andExpect(jsonPath("$.[*].notificationTitleCode").value(everyItem(equalTo("1"))))
-        .andExpect(jsonPath("$.[*].deaneryPostNumber")
-            .value(everyItem(equalTo(post.getNationalPostNumber()))))
-        .andExpect(jsonPath("$.[*].managingDeaneryBodyCode").value(everyItem(equalTo("EOE"))))
-        .andExpect(jsonPath("$.[*].currentTraineeFirstName")
-            .value(everyItem(equalTo(trainee2.getContactDetails().getLegalForenames()))))
-        .andExpect(jsonPath("$.[*].currentTraineeLastName")
-            .value(everyItem(equalTo(trainee2.getContactDetails().getLegalSurname()))))
-        .andExpect(jsonPath("$.[*].currentTraineeGmcNumber")
-            .value(everyItem(equalTo(trainee2GmcDetails.getGmcNumber()))))
-        // The 2 placements starting on the same day
-        .andExpect(jsonPath("$.[0].nextAppointmentTraineeFirstName")
-            .value(trainee1.getContactDetails().getLegalForenames()))
-        .andExpect(jsonPath("$.[0].nextAppointmentTraineeLastName")
-            .value(trainee1.getContactDetails().getLegalSurname()))
-        .andExpect(jsonPath("$.[0].nextAppointmentTraineeGmcNumber")
-            .value(trainee1GmcDetails.getGmcNumber()))
-        .andExpect(jsonPath("$.[1].nextAppointmentTraineeFirstName")
-            .value(trainee3.getContactDetails().getLegalForenames()))
-        .andExpect(jsonPath("$.[1].nextAppointmentTraineeLastName")
-            .value(trainee3.getContactDetails().getLegalSurname()))
-        .andExpect(jsonPath("$.[1].nextAppointmentTraineeGmcNumber")
-            .value(trainee3GmcDetails.getGmcNumber()));
+        .andExpect(content().string("2"));
   }
 
   @Test

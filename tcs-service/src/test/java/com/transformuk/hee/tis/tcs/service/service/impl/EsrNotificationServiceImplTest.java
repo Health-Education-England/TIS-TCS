@@ -37,7 +37,7 @@ import org.mockito.ArgumentCaptor;
 import org.mockito.Captor;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
-import org.mockito.runners.MockitoJUnitRunner;
+import org.mockito.junit.MockitoJUnitRunner;
 
 @RunWith(MockitoJUnitRunner.class)
 public class EsrNotificationServiceImplTest {
@@ -82,8 +82,6 @@ public class EsrNotificationServiceImplTest {
     when(placementRepository
         .findCurrentAndFuturePlacementsForPosts(asOfDate, expectedStartDate, expectedEndDate,
             deaneryNumbers, placementTypes)).thenReturn(emptyList());
-    when(esrNotificationRepository.saveAll(anyListOf(EsrNotification.class)))
-        .thenReturn(emptyList());
 
     List<EsrNotificationDTO> esrNotificationDTOS = testService
         .loadFullNotification(asOfDate, deaneryNumbers, deaneryBody);
