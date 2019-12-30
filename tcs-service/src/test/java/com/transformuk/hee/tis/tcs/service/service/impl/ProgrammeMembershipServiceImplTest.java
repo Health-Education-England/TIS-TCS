@@ -470,35 +470,4 @@ public class ProgrammeMembershipServiceImplTest {
     long nullCount = result.stream().filter(pm -> pm.getTrainingPathway().equals(null)).count();
     Assert.assertEquals(0L, nullCount);
   }
-
-//TODO Move to person test
-//  @Test
-//  public void testCalculateTrainingStatusWithNoProgrammes() {
-//    assertPersonRecordStatusEquals(Status.INACTIVE, null);
-//    assertPersonRecordStatusEquals(Status.INACTIVE,
-//        Collections.<ProgrammeMembership>emptyList());
-//  }
-//
-//  @Test
-//  public void testCalculateTrainingStatusWithPastProgramme() {
-//    assertPersonRecordStatusEquals(Status.INACTIVE, Collections.singletonList(pastMembership));
-//  }
-//
-//  @Test
-//  public void testCalculateTrainingStatusWithFutureProgramme() {
-//    assertPersonRecordStatusEquals(Status.INACTIVE, Collections.singletonList(futureMembership));
-//  }
-//
-//  @Test
-//  public void testCalculateTrainingStatusWithCurrentProgramme() {
-//    assertPersonRecordStatusEquals(Status.CURRENT, Collections.singletonList(currentMembership));
-//    assertPersonRecordStatusEquals(Status.CURRENT,
-//        Arrays.asList(pastMembership, currentMembership, futureMembership));
-//  }
-//
-//  private void assertPersonRecordStatusEquals(Status expected,
-//      List<ProgrammeMembership> programmeMemberships) {
-//    Status actual = ProgrammeMembershipServiceImpl.calculatePersonTrainingStatus(programmeMemberships);
-//    assertEquals(expected, actual);
-//  }
 }
