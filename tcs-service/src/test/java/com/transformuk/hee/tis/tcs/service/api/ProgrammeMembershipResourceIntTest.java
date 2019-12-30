@@ -437,7 +437,6 @@ public class ProgrammeMembershipResourceIntTest {
                 String.valueOf(notAssociatedCurriculum.getId()))));
   }
 
-
   @Test
   @Transactional
   public void createProgrammeMembershipWithExistingId() throws Exception {

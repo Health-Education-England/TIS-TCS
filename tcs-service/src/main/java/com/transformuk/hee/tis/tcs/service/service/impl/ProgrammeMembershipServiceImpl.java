@@ -319,23 +319,12 @@ public class ProgrammeMembershipServiceImpl implements ProgrammeMembershipServic
 
   private void updatePersonWhenStatusIsStale(Long personId) {
     Person person = personRepository.getOne(personId);
-    Status newStatus = calculatePersonTrainingStatus(person.getProgrammeMemberships());
+    Status newStatus = person.programmeMembershipsStatus();
     log.debug("person id:{} was {} and re-evaluated is {}.", personId, person.getStatus(),
         newStatus);
     if (!newStatus.equals(person.getStatus())) {
       person.setStatus(newStatus);
       personRepository.save(person);
     }
-  }
-
-  public static Status calculatePersonTrainingStatus(Collection<ProgrammeMembership> programmeMemberships) {
-    if(CollectionUtils.isEmpty(programmeMemberships)) {
-      return Status.INACTIVE;
-    }
-    return programmeMemberships.parallelStream()
-        .anyMatch(pm -> !LocalDate.now().isBefore(pm.getProgrammeStartDate())
-            && !LocalDate.now().isAfter(pm.getProgrammeEndDate()))
-        ? Status.CURRENT
-        : Status.INACTIVE;
   }
 }
