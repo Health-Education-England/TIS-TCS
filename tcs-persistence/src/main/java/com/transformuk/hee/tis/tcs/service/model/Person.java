@@ -161,6 +161,7 @@ public class Person implements Serializable {
     }
     LocalDate today = LocalDate.now();
     return getProgrammeMemberships().parallelStream()
+        .filter(pm -> pm.getProgrammeStartDate() != null && pm.getProgrammeEndDate() != null)
         .anyMatch(pm -> !today.isBefore(pm.getProgrammeStartDate())
             && !today.isAfter(pm.getProgrammeEndDate()))
         ? Status.CURRENT : Status.INACTIVE;

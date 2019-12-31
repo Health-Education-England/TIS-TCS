@@ -1,6 +1,5 @@
 package com.transformuk.hee.tis.tcs.service.service.impl;
 
-import static org.junit.Assert.assertEquals;
 import static org.mockito.Matchers.any;
 import static org.mockito.Matchers.anyList;
 import static org.mockito.Matchers.anyLong;

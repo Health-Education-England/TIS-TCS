@@ -10,10 +10,10 @@
   </parent>
 
   <name>TCS Persistence</name>
-  <description>A module that would ideally be further decomposed into </description>
+  <description>A module containing the model and persistence layer for TCS</description>
   <groupId>uk.nhs.tis</groupId>
   <artifactId>tcs-persistence</artifactId>
-  <version>1.7.0</version>
+  <version>1.7.1</version>
   <packaging>jar</packaging>
 
   <properties>

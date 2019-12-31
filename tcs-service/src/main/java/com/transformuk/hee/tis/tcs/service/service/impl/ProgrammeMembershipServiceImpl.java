@@ -20,7 +20,6 @@ import com.transformuk.hee.tis.tcs.service.repository.ProgrammeRepository;
 import com.transformuk.hee.tis.tcs.service.service.ProgrammeMembershipService;
 import com.transformuk.hee.tis.tcs.service.service.mapper.CurriculumMapper;
 import com.transformuk.hee.tis.tcs.service.service.mapper.ProgrammeMembershipMapper;
-import java.time.LocalDate;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.List;
@@ -283,7 +282,7 @@ public class ProgrammeMembershipServiceImpl implements ProgrammeMembershipServic
       }
       return result;
     }
-    return Collections.EMPTY_LIST;
+    return Collections.emptyList();
   }
 
   private List<ProgrammeMembershipCurriculaDTO> attachCurricula(
