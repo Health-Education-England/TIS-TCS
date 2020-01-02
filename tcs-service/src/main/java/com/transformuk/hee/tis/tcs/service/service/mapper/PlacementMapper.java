@@ -133,4 +133,15 @@ public class PlacementMapper {
     }
     return PlacementStatus.CURRENT;
   }
+
+  public Placement fromId(Long id) {
+    Placement placement = null;
+
+    if (id != null) {
+      placement = new Placement();
+      placement.setId(id);
+    }
+
+    return placement;
+  }
 }

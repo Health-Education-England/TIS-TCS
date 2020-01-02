@@ -2,37 +2,18 @@ package com.transformuk.hee.tis.tcs.service.service.mapper;
 
 import com.transformuk.hee.tis.tcs.api.dto.PlacementCommentDTO;
 import com.transformuk.hee.tis.tcs.service.model.Comment;
-import org.springframework.stereotype.Component;
+import org.mapstruct.Mapper;
+import org.mapstruct.Mapping;
+import org.mapstruct.MappingTarget;
 
-@Component
-public class PlacementCommentMapper {
+@Mapper(componentModel = "spring")
+public interface PlacementCommentMapper {
 
-  public Comment toEntity(PlacementCommentDTO dto) {
-    Comment comment = new Comment();
-    comment.setId(dto.getId());
-    comment.setBody(dto.getBody());
-    comment.setAuthor(dto.getAuthor());
-    comment.setSource(dto.getSource());
-    comment.setAmendedDate(dto.getAmendedDate());
-    return comment;
-  }
+  Comment toEntity(PlacementCommentDTO dto);
 
-  public PlacementCommentDTO toDto(Comment comment) {
-    PlacementCommentDTO placementCommentDTO = new PlacementCommentDTO();
-    placementCommentDTO.setId(comment.getId());
-    placementCommentDTO.setBody(comment.getBody());
-    placementCommentDTO.setAuthor(comment.getAuthor());
-    placementCommentDTO.setSource(comment.getSource());
-    placementCommentDTO.setAmendedDate(comment.getAmendedDate());
-    return placementCommentDTO;
-  }
+  PlacementCommentDTO toDto(Comment comment);
 
-  public Comment overwriteCommentEntityWithDTOComment(Comment comment,
-      PlacementCommentDTO commentDTO) {
-    comment.setBody(commentDTO.getBody());
-    comment.setAuthor(commentDTO.getAuthor());
-    comment.setSource(commentDTO.getSource());
-    comment.setAmendedDate(commentDTO.getAmendedDate());
-    return comment;
-  }
+  @Mapping(target = "id", ignore = true)
+  Comment overwriteCommentEntityWithDTOComment(@MappingTarget Comment comment,
+      PlacementCommentDTO commentDto);
 }
