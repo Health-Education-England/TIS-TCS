@@ -78,33 +78,6 @@ public class ProgrammeMembershipServiceImplTest {
       curriculumMembershipDTO2 = new CurriculumMembershipDTO();
   private Programme programme = new Programme();
 
-  private ProgrammeMembership pastMembership;
-  private ProgrammeMembership futureMembership;
-  private ProgrammeMembership currentMembership;
-
-  private LocalDate today = LocalDate.now();
-  private LocalDate yesterday = today.minusDays(1);
-  private LocalDate lastMonth = today.minusMonths(1);
-  private LocalDate lastYear = today.minusYears(1);
-  private LocalDate tomorrow = today.plusDays(1);
-  private LocalDate nextMonth = today.plusMonths(1);
-  private LocalDate nextYear = today.plusYears(1);
-
-
-  public ProgrammeMembershipServiceImplTest() {
-
-    pastMembership = new ProgrammeMembership();
-    pastMembership.setProgrammeEndDate(yesterday);
-    pastMembership.setProgrammeStartDate(lastYear);
-
-    futureMembership = new ProgrammeMembership();
-    futureMembership.setProgrammeEndDate(nextYear);
-    futureMembership.setProgrammeStartDate(tomorrow);
-
-    currentMembership = new ProgrammeMembership();
-    currentMembership.setProgrammeEndDate(nextMonth);
-    currentMembership.setProgrammeStartDate(lastMonth);
-  }
   @Before
   public void setup() {
 
