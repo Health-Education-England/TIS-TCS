@@ -268,6 +268,7 @@ public class ProgrammeMembershipResourceIntTest {
     assertThat(testProgrammeMembership.getLeavingDestination())
         .isEqualTo(DEFAULT_LEAVING_DESTINATION);
     assertThat(testProgrammeMembership.getLeavingReason()).isEqualTo(DEFAULT_LEAVING_REASON);
+    assertThat(person.getStatus()).isEqualTo(Status.INACTIVE);
   }
 
   @Test
@@ -361,7 +362,7 @@ public class ProgrammeMembershipResourceIntTest {
     curriculumRepository.saveAndFlush(curriculum);
     programme.setCurricula(Collections.singleton(programmeCurriculum));
     programmeRepository.saveAndFlush(programme);
-    programmeMembership.setProgramme(programme); // this programme doesn't exists in DB
+    programmeMembership.setProgramme(programme); // this programme doesn't exist in DB
     programmeMembership
         .setCurriculumId(programme.getCurricula().iterator().next().getCurriculum().getId());
     ProgrammeMembershipDTO programmeMembershipDTO = programmeMembershipMapper
@@ -435,7 +436,6 @@ public class ProgrammeMembershipResourceIntTest {
                 "The selected Programme and Curriculum are not linked. They must be linked before a Programme Membership can be made",
                 String.valueOf(notAssociatedCurriculum.getId()))));
   }
-
 
   @Test
   @Transactional
@@ -643,6 +643,8 @@ public class ProgrammeMembershipResourceIntTest {
   @Transactional
   public void deleteProgrammeMembership() throws Exception {
     // Initialize the database
+    personRepository.saveAndFlush(person);
+    programmeMembership.setPerson(person);
     programmeMembershipRepository.saveAndFlush(programmeMembership);
     int databaseSizeBeforeDelete = programmeMembershipRepository.findAll().size();
 

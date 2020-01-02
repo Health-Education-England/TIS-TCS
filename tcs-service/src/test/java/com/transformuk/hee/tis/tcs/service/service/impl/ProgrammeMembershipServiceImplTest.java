@@ -37,7 +37,7 @@ import org.junit.runner.RunWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.Spy;
-import org.mockito.runners.MockitoJUnitRunner;
+import org.mockito.junit.MockitoJUnitRunner;
 
 @RunWith(MockitoJUnitRunner.class)
 public class ProgrammeMembershipServiceImplTest {
@@ -66,14 +66,16 @@ public class ProgrammeMembershipServiceImplTest {
   @Mock
   private ProgrammeRepository programmeRepositoryMock;
 
-  private ProgrammeMembership programmeMembership1 = new ProgrammeMembership(), programmeMembership2 = new ProgrammeMembership();
-  private ProgrammeMembershipDTO programmeMembershipDTO1 = new ProgrammeMembershipDTO(), programmeMembershipDTO2 = new ProgrammeMembershipDTO();
+  private ProgrammeMembership programmeMembership1 = new ProgrammeMembership(),
+      programmeMembership2 = new ProgrammeMembership();
+  private ProgrammeMembershipDTO programmeMembershipDTO1 = new ProgrammeMembershipDTO(),
+      programmeMembershipDTO2 = new ProgrammeMembershipDTO();
   private Curriculum curriculum1 = new Curriculum(), curriculum2 = new Curriculum();
   private CurriculumDTO curriculumDTO1 = new CurriculumDTO(), curriculumDTO2 = new CurriculumDTO();
   private TrainingNumber trainingNumber = new TrainingNumber();
   private TrainingNumberDTO trainingNumberDTO = new TrainingNumberDTO();
-  private CurriculumMembershipDTO curriculumMembershipDTO1 = new CurriculumMembershipDTO(), curriculumMembershipDTO2 = new CurriculumMembershipDTO();
-  ;
+  private CurriculumMembershipDTO curriculumMembershipDTO1 = new CurriculumMembershipDTO(),
+      curriculumMembershipDTO2 = new CurriculumMembershipDTO();
   private Programme programme = new Programme();
 
   @Before
@@ -378,10 +380,10 @@ public class ProgrammeMembershipServiceImplTest {
   public void testProgrammeMembershipWithCertificateType(){
     ProgrammeMembershipCurriculaDTO pmc1 = new ProgrammeMembershipCurriculaDTO(),
         pmc2 = new ProgrammeMembershipCurriculaDTO(),
-          pmc3 = new ProgrammeMembershipCurriculaDTO();
+        pmc3 = new ProgrammeMembershipCurriculaDTO();
     CurriculumMembershipDTO cm1 = new CurriculumMembershipDTO(),
         cm2 = new CurriculumMembershipDTO(),
-          cm3 = new CurriculumMembershipDTO();
+        cm3 = new CurriculumMembershipDTO();
 
     LocalDate pmc1DateFrom = LocalDate.of(2019, 12, 31);
     LocalDate pmc1DateTo = LocalDate.of(2020, 12, 31);

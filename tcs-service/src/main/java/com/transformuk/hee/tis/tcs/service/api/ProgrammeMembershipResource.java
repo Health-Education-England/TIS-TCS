@@ -59,12 +59,12 @@ public class ProgrammeMembershipResource {
   }
 
   /**
-   * POST  /programme-memberships : Create a new programmeMembership.
+   * POST /programme-memberships : Create a new programmeMembership.
    *
    * @param programmeMembershipDTO the programmeMembershipDTO to create
    * @return the ResponseEntity with status 201 (Created) and with body the new
-   * programmeMembershipDTO, or with status 400 (Bad Request) if the programmeMembership has already
-   * an ID
+   *         programmeMembershipDTO, or with status 400 (Bad Request) if the programmeMembership has
+   *         already an ID
    * @throws URISyntaxException if the Location URI syntax is incorrect
    */
   @PostMapping("/programme-memberships")
@@ -75,8 +75,8 @@ public class ProgrammeMembershipResource {
     log.debug("REST request to save ProgrammeMembership : {}", programmeMembershipDTO);
     programmeMembershipValidator.validate(programmeMembershipDTO);
     if (programmeMembershipDTO.getCurriculumMemberships().get(0).getId() != null) {
-      return ResponseEntity.badRequest().headers(HeaderUtil.
-          createFailureAlert(ENTITY_NAME, "idexists",
+      return ResponseEntity.badRequest().headers(HeaderUtil
+          .createFailureAlert(ENTITY_NAME, "idexists",
               "A new programmeMembership cannot already have an ID")).body(null);
     }
     ProgrammeMembershipDTO result = programmeMembershipService.save(programmeMembershipDTO);
@@ -88,34 +88,32 @@ public class ProgrammeMembershipResource {
   }
 
   /**
-   * PUT  /programme-memberships : Updates an existing programmeMembership.
+   * PUT /programme-memberships : Updates an existing programmeMembership.
    *
-   * @param programmeMembershipDTO the programmeMembershipDTO to update
+   * @param programmeMembershipDto the programmeMembershipDTO to update
    * @return the ResponseEntity with status 200 (OK) and with body the updated
-   * programmeMembershipDTO, or with status 400 (Bad Request) if the programmeMembershipDTO is not
-   * valid, or with status 500 (Internal Server Error) if the programmeMembershipDTO couldnt be
-   * updated
+   *         programmeMembershipDTO, or with status 400 (Bad Request) if the programmeMembershipDTO
+   *         is not valid, or with status 500 (Internal Server Error) if the programmeMembershipDTO
+   *         couldn't be updated
    * @throws URISyntaxException if the Location URI syntax is incorrect
    */
   @PutMapping("/programme-memberships")
   @PreAuthorize("hasPermission('tis:people::person:', 'Update')")
   public ResponseEntity<ProgrammeMembershipDTO> updateProgrammeMembership(
-      @RequestBody @Validated(Update.class) ProgrammeMembershipDTO programmeMembershipDTO)
+      @RequestBody @Validated(Update.class) ProgrammeMembershipDTO programmeMembershipDto)
       throws URISyntaxException, MethodArgumentNotValidException {
-    log.debug("REST request to update ProgrammeMembership : {}", programmeMembershipDTO);
-    programmeMembershipValidator.validate(programmeMembershipDTO);
-    if (programmeMembershipDTO.getCurriculumMemberships().get(0).getId() == null) {
-      return createProgrammeMembership(programmeMembershipDTO);
+    log.debug("REST request to update ProgrammeMembership : {}", programmeMembershipDto);
+    programmeMembershipValidator.validate(programmeMembershipDto);
+    if (programmeMembershipDto.getCurriculumMemberships().get(0).getId() == null) {
+      return createProgrammeMembership(programmeMembershipDto);
     }
-    ProgrammeMembershipDTO result = programmeMembershipService.save(programmeMembershipDTO);
-    return ResponseEntity.ok()
-        .headers(HeaderUtil.createEntityUpdateAlert(ENTITY_NAME,
-            programmeMembershipDTO.getCurriculumMemberships().get(0).toString()))
-        .body(result);
+    ProgrammeMembershipDTO result = programmeMembershipService.save(programmeMembershipDto);
+    return ResponseEntity.ok().headers(HeaderUtil.createEntityUpdateAlert(ENTITY_NAME,
+        programmeMembershipDto.getCurriculumMemberships().get(0).toString())).body(result);
   }
 
   /**
-   * GET  /programme-memberships : get all the programmeMemberships.
+   * GET /programme-memberships : get all the programmeMemberships.
    *
    * @param pageable the pagination information
    * @return the ResponseEntity with status 200 (OK) and the list of programmeMemberships in body
@@ -127,28 +125,28 @@ public class ProgrammeMembershipResource {
       Pageable pageable) {
     log.debug("REST request to get a page of ProgrammeMemberships");
     Page<ProgrammeMembershipDTO> page = programmeMembershipService.findAll(pageable);
-    HttpHeaders headers = PaginationUtil
-        .generatePaginationHttpHeaders(page, "/api/programme-memberships");
+    HttpHeaders headers =
+        PaginationUtil.generatePaginationHttpHeaders(page, "/api/programme-memberships");
     return new ResponseEntity<>(page.getContent(), headers, HttpStatus.OK);
   }
 
   /**
-   * GET  /programme-memberships/:id : get the "id" programmeMembership.
+   * GET /programme-memberships/:id : get the "id" programmeMembership.
    *
    * @param id the id of the programmeMembershipDTO to retrieve
    * @return the ResponseEntity with status 200 (OK) and with body the programmeMembershipDTO, or
-   * with status 404 (Not Found)
+   *         with status 404 (Not Found)
    */
   @GetMapping("/programme-memberships/{id}")
   @PreAuthorize("hasPermission('tis:people::person:', 'View')")
   public ResponseEntity<ProgrammeMembershipDTO> getProgrammeMembership(@PathVariable Long id) {
     log.debug("REST request to get ProgrammeMembership : {}", id);
-    ProgrammeMembershipDTO programmeMembershipDTO = programmeMembershipService.findOne(id);
-    return ResponseUtil.wrapOrNotFound(Optional.ofNullable(programmeMembershipDTO));
+    ProgrammeMembershipDTO programmeMembershipDto = programmeMembershipService.findOne(id);
+    return ResponseUtil.wrapOrNotFound(Optional.ofNullable(programmeMembershipDto));
   }
 
   /**
-   * POST  /programme-memberships/ : delete the programmeMembership using the pm id stored on the cm
+   * POST /programme-memberships/ : delete the programmeMembership using the pm id stored on the cm
    * id.
    *
    * @param programmeMembershipDTO the programmeMembershipDTO to update
@@ -160,23 +158,25 @@ public class ProgrammeMembershipResource {
       @RequestBody ProgrammeMembershipDTO programmeMembershipDTO) {
     log.debug("REST request to delete ProgrammeMembership : {}", programmeMembershipDTO);
     List<String> idsDeleted = new ArrayList<>();
-    if (programmeMembershipDTO != null && CollectionUtils
-        .isNotEmpty(programmeMembershipDTO.getCurriculumMemberships())) {
+    if (programmeMembershipDTO != null
+        && CollectionUtils.isNotEmpty(programmeMembershipDTO.getCurriculumMemberships())) {
       programmeMembershipDTO.getCurriculumMemberships().stream()
           .forEach(curriculumMembershipDTO -> {
-            // Note: The curriculum membership id is set in the mapper with the contents of the programme membership id
+            // Note: The curriculum membership id is set in the mapper with the contents of the
+            // programme membership id
             programmeMembershipService.delete(curriculumMembershipDTO.getId());
             idsDeleted.add(curriculumMembershipDTO.getId().toString());
           });
     }
-    return ResponseEntity.ok().headers(
-        HeaderUtil.createEntityDeletionAlert(ENTITY_NAME, StringUtils.join(idsDeleted, ",")))
+    return ResponseEntity.ok()
+        .headers(
+            HeaderUtil.createEntityDeletionAlert(ENTITY_NAME, StringUtils.join(idsDeleted, ",")))
         .build();
   }
 
 
   /**
-   * DELETE  /programme-memberships/:id : delete the "id" programmeMembership.
+   * DELETE /programme-memberships/:id : delete the "id" programmeMembership.
    *
    * @param id the id of the programmeMembershipDTO to delete
    * @return the ResponseEntity with status 200 (OK)
@@ -191,21 +191,21 @@ public class ProgrammeMembershipResource {
   }
 
   /**
-   * PATCH  /programme-memberships : Patch Programme Memberships.
+   * PATCH /programme-memberships : Patch Programme Memberships.
    *
-   * @param programmeMembershipDTOS List of the programmeMembershipDTOS to patch
+   * @param programmeMembershipDtos List of the programmeMembershipDTOS to patch
    * @return the ResponseEntity with status 200 (OK) and with body the updated
-   * programmeMembershipDTOS
+   *         programmeMembershipDTOS
    */
   @PatchMapping("/programme-memberships")
   @PreAuthorize("hasPermission('tis:people::person:', 'Update')")
   public ResponseEntity<List<ProgrammeMembershipDTO>> patchProgrammeMemberships(
-      @Valid @RequestBody List<ProgrammeMembershipDTO> programmeMembershipDTOS) {
-    log.debug("REST request to bulk patch Programme Memberships : {}", programmeMembershipDTOS);
+      @Valid @RequestBody List<ProgrammeMembershipDTO> programmeMembershipDtos) {
+    log.debug("REST request to bulk patch Programme Memberships : {}", programmeMembershipDtos);
 
-    List<ProgrammeMembershipDTO> results = programmeMembershipService.save(programmeMembershipDTOS);
-    List<Long> ids = results.stream().map(ProgrammeMembershipDTO::getCurriculumMemberships).
-        flatMap(Collection::stream).map(CurriculumMembershipDTO::getId)
+    List<ProgrammeMembershipDTO> results = programmeMembershipService.save(programmeMembershipDtos);
+    List<Long> ids = results.stream().map(ProgrammeMembershipDTO::getCurriculumMemberships)
+        .flatMap(Collection::stream).map(CurriculumMembershipDTO::getId)
         .collect(Collectors.toList());
     return ResponseEntity.ok()
         .headers(HeaderUtil.createEntityUpdateAlert(ENTITY_NAME, StringUtils.join(ids, ",")))
@@ -214,7 +214,7 @@ public class ProgrammeMembershipResource {
 
 
   /**
-   * GET  /trainee/:traineeId/programme/:programmeId/programme-memberships : get all the
+   * GET /trainee/:traineeId/programme/:programmeId/programme-memberships : get all the
    * programmeMemberships relating to a trainee and their programme.
    *
    * @return the ResponseEntity with status 200 (OK) and the list of programmeMemberships in body
@@ -222,28 +222,30 @@ public class ProgrammeMembershipResource {
   @GetMapping("/trainee/{traineeId}/programme/{programmeId}/programme-memberships")
   @PreAuthorize("hasPermission('tis:people::person:', 'View')")
   public ResponseEntity<List<ProgrammeMembershipCurriculaDTO>> getProgrammeMembershipForTraineeAndProgramme(
-      @PathVariable Long traineeId,
-      @PathVariable Long programmeId) {
+      @PathVariable Long traineeId, @PathVariable Long programmeId) {
     log.debug("REST request to get ProgrammeMemberships for trainee {}, programme {}", traineeId,
         programmeId);
-    List<ProgrammeMembershipCurriculaDTO> programmeMembershipDTOS = programmeMembershipService
+    List<ProgrammeMembershipCurriculaDTO> programmeMembershipDtos = programmeMembershipService
         .findProgrammeMembershipsForTraineeAndProgramme(traineeId, programmeId);
 
-    return new ResponseEntity<>(programmeMembershipDTOS, HttpStatus.OK);
+    return new ResponseEntity<>(programmeMembershipDtos, HttpStatus.OK);
   }
 
   /**
-   * GET  /trainee/:traineeId/programme-memberships : get all the programmeMemberships relating to a
+   * GET /trainee/:traineeId/programme-memberships : get all the programmeMemberships relating to a
    * trainee
+   * 
    * <p>
    * This was originally created as we thought that the users on the assessment event page needed a
    * list of all programme memberships but what they really want is a unique list of programmes that
    * the trainee has been enrolled on.
+   * 
    * <p>
    * This is all very poorly designed and named
+   * 
    * <p>
-   * If you want a list of all the programme that a trainee is enrolled on, look at the {@link
-   * ProgrammeResource#getTraineeProgrammes(Long)}
+   * If you want a list of all the programme that a trainee is enrolled on, look at the
+   * {@link ProgrammeResource#getTraineeProgrammes(Long)}
    *
    * @return the ResponseEntity with status 200 (OK) and the list of programmeMemberships in body
    */
@@ -252,14 +254,15 @@ public class ProgrammeMembershipResource {
   public ResponseEntity<List<ProgrammeMembershipCurriculaDTO>> getProgrammeMembershipForTrainee(
       @PathVariable Long traineeId) {
     log.debug("REST request to get ProgrammeMemberships for trainee {}", traineeId);
-    List<ProgrammeMembershipCurriculaDTO> programmeMembershipDTOS = programmeMembershipService
-        .findProgrammeMembershipsForTrainee(traineeId);
+    List<ProgrammeMembershipCurriculaDTO> programmeMembershipDtos =
+        programmeMembershipService.findProgrammeMembershipsForTrainee(traineeId);
 
-    return new ResponseEntity<>(programmeMembershipDTOS, HttpStatus.OK);
+    return new ResponseEntity<>(programmeMembershipDtos, HttpStatus.OK);
   }
 
   /**
-   * GET  /trainee/:traineeId/programme-memberships/rolled-up
+   * GET /trainee/:traineeId/programme-memberships/rolled-up
+   * 
    * <p>
    * This endpoint is very much like getProgrammeMembershipForTrainee method but it rolls up (group
    * by and dedupes) the programme memberships that have the same programme and dates (imagine doing
@@ -273,8 +276,8 @@ public class ProgrammeMembershipResource {
   public ResponseEntity<List<ProgrammeMembershipCurriculaDTO>> getRolledUpProgrammeMembershipForTrainee(
       @PathVariable Long traineeId) {
     log.debug("REST request to get ProgrammeMemberships for trainee {}", traineeId);
-    List<ProgrammeMembershipCurriculaDTO> programmeMembershipDTOS = programmeMembershipService
-        .findProgrammeMembershipsForTraineeRolledUp(traineeId);
+    List<ProgrammeMembershipCurriculaDTO> programmeMembershipDTOS =
+        programmeMembershipService.findProgrammeMembershipsForTraineeRolledUp(traineeId);
 
     return new ResponseEntity<>(programmeMembershipDTOS, HttpStatus.OK);
   }

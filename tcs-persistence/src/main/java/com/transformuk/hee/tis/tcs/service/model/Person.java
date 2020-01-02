@@ -3,6 +3,7 @@ package com.transformuk.hee.tis.tcs.service.model;
 
 import com.transformuk.hee.tis.tcs.api.enumeration.Status;
 import java.io.Serializable;
+import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.util.HashSet;
 import java.util.Objects;
@@ -22,6 +23,7 @@ import javax.persistence.NamedStoredProcedureQuery;
 import javax.persistence.OneToMany;
 import javax.persistence.OneToOne;
 import javax.persistence.Version;
+import org.apache.commons.collections4.CollectionUtils;
 
 /**
  * A Person.
@@ -151,6 +153,18 @@ public class Person implements Serializable {
   public Person role(String role) {
     this.role = role;
     return this;
+  }
+
+  public Status programmeMembershipsStatus() {
+    if (CollectionUtils.isEmpty(getProgrammeMemberships())) {
+      return Status.INACTIVE;
+    }
+    LocalDate today = LocalDate.now();
+    return getProgrammeMemberships().parallelStream()
+        .filter(pm -> pm.getProgrammeStartDate() != null && pm.getProgrammeEndDate() != null)
+        .anyMatch(pm -> !today.isBefore(pm.getProgrammeStartDate())
+            && !today.isAfter(pm.getProgrammeEndDate()))
+        ? Status.CURRENT : Status.INACTIVE;
   }
 
   public Status getStatus() {

@@ -10,10 +10,10 @@
   </parent>
 
   <name>TCS Persistence</name>
-  <description>A module that would ideally be further decomposed into </description>
+  <description>A module containing the model and persistence layer for TCS</description>
   <groupId>uk.nhs.tis</groupId>
   <artifactId>tcs-persistence</artifactId>
-  <version>1.5.2</version>
+  <version>1.7.1</version>
   <packaging>jar</packaging>
 
   <properties>
@@ -26,7 +26,7 @@
     <dependency>
       <groupId>com.transformuk.hee.tis</groupId>
       <artifactId>tcs-api</artifactId>
-      <version>5.7.1</version>
+      <version>5.8.1</version>
     </dependency>
     <dependency>
       <groupId>org.springframework.boot</groupId>
@@ -44,6 +44,12 @@
       <version>5.2.4</version>
     </dependency>
     <dependency>
+      <groupId>org.apache.commons</groupId>
+      <artifactId>commons-collections4</artifactId>
+      <version>4.1</version>
+    </dependency>
+
+    <dependency>
       <groupId>com.fasterxml.jackson.datatype</groupId>
       <artifactId>jackson-datatype-hibernate5</artifactId>
       <scope>test</scope>
@@ -54,7 +60,6 @@
       <version>1.4.194</version>
       <scope>test</scope>
     </dependency>
-
     <dependency>
       <groupId>org.springframework.boot</groupId>
       <artifactId>spring-boot-test</artifactId>
