@@ -1,6 +1,5 @@
 package com.transformuk.hee.tis.tcs.api.dto;
 
-
 import com.transformuk.hee.tis.tcs.api.dto.validation.Create;
 import com.transformuk.hee.tis.tcs.api.dto.validation.Update;
 import com.transformuk.hee.tis.tcs.api.enumeration.PostSuffix;
@@ -11,10 +10,12 @@ import java.util.Set;
 import javax.validation.constraints.DecimalMin;
 import javax.validation.constraints.NotNull;
 import javax.validation.constraints.Null;
+import lombok.Data;
 
 /**
  * A DTO for the Post entity.
  */
+@Data
 public class PostDTO implements Serializable {
 
   private static final long serialVersionUID = 3386087275695471446L;
@@ -45,25 +46,9 @@ public class PostDTO implements Serializable {
   private Set<PostFundingDTO> fundings;
   private boolean bypassNPNGeneration;
 
-  public Long getId() {
-    return id;
-  }
-
-  public void setId(final Long id) {
-    this.id = id;
-  }
-
   public PostDTO id(final Long id) {
     this.id = id;
     return this;
-  }
-
-  public String getIntrepidId() {
-    return intrepidId;
-  }
-
-  public void setIntrepidId(final String intrepidId) {
-    this.intrepidId = intrepidId;
   }
 
   public PostDTO intrepidId(final String intrepidId) {
@@ -71,25 +56,9 @@ public class PostDTO implements Serializable {
     return this;
   }
 
-  public String getNationalPostNumber() {
-    return nationalPostNumber;
-  }
-
-  public void setNationalPostNumber(final String nationalPostNumber) {
-    this.nationalPostNumber = nationalPostNumber;
-  }
-
   public PostDTO nationalPostNumber(final String nationalPostNumber) {
     this.nationalPostNumber = nationalPostNumber;
     return this;
-  }
-
-  public Status getStatus() {
-    return status;
-  }
-
-  public void setStatus(final Status status) {
-    this.status = status;
   }
 
   public PostDTO status(final Status status) {
@@ -97,25 +66,9 @@ public class PostDTO implements Serializable {
     return this;
   }
 
-  public PostSuffix getSuffix() {
-    return suffix;
-  }
-
-  public void setSuffix(final PostSuffix suffix) {
-    this.suffix = suffix;
-  }
-
   public PostDTO suffix(final PostSuffix suffix) {
     this.suffix = suffix;
     return this;
-  }
-
-  public String getOwner() {
-    return owner;
-  }
-
-  public void setOwner(final String owner) {
-    this.owner = owner;
   }
 
   public PostDTO owner(final String owner) {
@@ -123,25 +76,9 @@ public class PostDTO implements Serializable {
     return this;
   }
 
-  public String getPostFamily() {
-    return postFamily;
-  }
-
-  public void setPostFamily(final String postFamily) {
-    this.postFamily = postFamily;
-  }
-
   public PostDTO postFamily(final String postFamily) {
     this.postFamily = postFamily;
     return this;
-  }
-
-  public PostDTO getOldPost() {
-    return oldPost;
-  }
-
-  public void setOldPost(final PostDTO oldPost) {
-    this.oldPost = oldPost;
   }
 
   public PostDTO oldPost(final PostDTO oldPost) {
@@ -149,25 +86,9 @@ public class PostDTO implements Serializable {
     return this;
   }
 
-  public PostDTO getNewPost() {
-    return newPost;
-  }
-
-  public void setNewPost(final PostDTO newPost) {
-    this.newPost = newPost;
-  }
-
   public PostDTO newPost(final PostDTO newPost) {
     this.newPost = newPost;
     return this;
-  }
-
-  public Long getEmployingBodyId() {
-    return employingBodyId;
-  }
-
-  public void setEmployingBodyId(final Long employingBodyId) {
-    this.employingBodyId = employingBodyId;
   }
 
   public PostDTO employingBodyId(final Long employingBodyId) {
@@ -175,25 +96,9 @@ public class PostDTO implements Serializable {
     return this;
   }
 
-  public Long getTrainingBodyId() {
-    return trainingBodyId;
-  }
-
-  public void setTrainingBodyId(final Long trainingBodyId) {
-    this.trainingBodyId = trainingBodyId;
-  }
-
   public PostDTO trainingBodyId(final Long trainingBodyId) {
     this.trainingBodyId = trainingBodyId;
     return this;
-  }
-
-  public String getTrainingDescription() {
-    return trainingDescription;
-  }
-
-  public void setTrainingDescription(final String trainingDescription) {
-    this.trainingDescription = trainingDescription;
   }
 
   public PostDTO trainingDescription(final String trainingDescription) {
@@ -201,25 +106,9 @@ public class PostDTO implements Serializable {
     return this;
   }
 
-  public String getLocalPostNumber() {
-    return localPostNumber;
-  }
-
-  public void setLocalPostNumber(final String localPostNumber) {
-    this.localPostNumber = localPostNumber;
-  }
-
   public PostDTO localPostNumber(final String localPostNumber) {
     this.localPostNumber = localPostNumber;
     return this;
-  }
-
-  public Set<PlacementDTO> getPlacementHistory() {
-    return placementHistory;
-  }
-
-  public void setPlacementHistory(final Set<PlacementDTO> placementHistory) {
-    this.placementHistory = placementHistory;
   }
 
   public PostDTO placementHistory(final Set<PlacementDTO> placementHistory) {
@@ -227,25 +116,9 @@ public class PostDTO implements Serializable {
     return this;
   }
 
-  public Set<ProgrammeDTO> getProgrammes() {
-    return programmes;
-  }
-
-  public void setProgrammes(final Set<ProgrammeDTO> programmes) {
-    this.programmes = programmes;
-  }
-
   public PostDTO programmes(final Set<ProgrammeDTO> programmes) {
     this.programmes = programmes;
     return this;
-  }
-
-  public Set<PostSiteDTO> getSites() {
-    return sites;
-  }
-
-  public void setSites(final Set<PostSiteDTO> sites) {
-    this.sites = sites;
   }
 
   public PostDTO sites(final Set<PostSiteDTO> sites) {
@@ -253,38 +126,14 @@ public class PostDTO implements Serializable {
     return this;
   }
 
-  public Set<PostGradeDTO> getGrades() {
-    return grades;
-  }
-
-  public void setGrades(final Set<PostGradeDTO> grades) {
-    this.grades = grades;
-  }
-
   public PostDTO grades(final Set<PostGradeDTO> grades) {
     this.grades = grades;
     return this;
   }
 
-  public Set<PostSpecialtyDTO> getSpecialties() {
-    return specialties;
-  }
-
-  public void setSpecialties(final Set<PostSpecialtyDTO> specialties) {
-    this.specialties = specialties;
-  }
-
   public PostDTO specialties(final Set<PostSpecialtyDTO> specialties) {
     this.specialties = specialties;
     return this;
-  }
-
-  public Set<PostFundingDTO> getFundings() {
-    return fundings;
-  }
-
-  public void setFundings(final Set<PostFundingDTO> fundings) {
-    this.fundings = fundings;
   }
 
   public void addFunding(final PostFundingDTO funding) {
@@ -293,14 +142,6 @@ public class PostDTO implements Serializable {
     }
 
     fundings.add(funding);
-  }
-
-  public boolean isBypassNPNGeneration() {
-    return bypassNPNGeneration;
-  }
-
-  public void setBypassNPNGeneration(final boolean bypassNPNGeneration) {
-    this.bypassNPNGeneration = bypassNPNGeneration;
   }
 
   @Override

@@ -5,10 +5,12 @@ import java.time.LocalDate;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Objects;
+import lombok.Data;
 
 /**
  * A DTO for the PostFunding entity.
  */
+@Data
 public class PostFundingDTO implements Serializable {
 
   private Long id;
@@ -27,84 +29,7 @@ public class PostFundingDTO implements Serializable {
 
   private Long postId;
 
-  private List<String> messageList;
-
-  public PostFundingDTO() {
-    this.messageList = new ArrayList<>();
-  }
-
-  public Long getId() {
-    return id;
-  }
-
-  public void setId(Long id) {
-    this.id = id;
-  }
-
-  public String getIntrepidId() {
-    return intrepidId;
-  }
-
-  public void setIntrepidId(String intrepidId) {
-    this.intrepidId = intrepidId;
-  }
-
-  public String getFundingType() {
-    return fundingType;
-  }
-
-  public void setFundingType(String fundingType) {
-    this.fundingType = fundingType;
-  }
-
-  public String getInfo() {
-    return info;
-  }
-
-  public void setInfo(String info) {
-    this.info = info;
-  }
-
-  public LocalDate getEndDate() {
-    return endDate;
-  }
-
-  public void setEndDate(LocalDate endDate) {
-    this.endDate = endDate;
-  }
-
-  public LocalDate getStartDate() {
-    return startDate;
-  }
-
-  public void setStartDate(LocalDate startDate) {
-    this.startDate = startDate;
-  }
-
-  public String getFundingBodyId() {
-    return fundingBodyId;
-  }
-
-  public void setFundingBodyId(String fundingBodyId) {
-    this.fundingBodyId = fundingBodyId;
-  }
-
-  public List<String> getMessageList() {
-    return this.messageList;
-  }
-
-  public void setMessageList(List<String> messageList) {
-    this.messageList = messageList;
-  }
-
-  public Long getPostId() {
-    return postId;
-  }
-
-  public void setPostId(Long postId) {
-    this.postId = postId;
-  }
-
+  private List<String> messageList = new ArrayList<>();
 
   @Override
   public boolean equals(Object o) {
@@ -129,19 +54,5 @@ public class PostFundingDTO implements Serializable {
   public int hashCode() {
     return Objects
         .hash(id, intrepidId, fundingType, info, startDate, endDate, fundingBodyId, messageList);
-  }
-
-  @Override
-  public String toString() {
-    return "PostFundingDTO{" +
-        "id=" + id +
-        ", intrepidId='" + intrepidId + '\'' +
-        ", fundingType='" + fundingType + '\'' +
-        ", info='" + info + '\'' +
-        ", startDate=" + startDate +
-        ", endDate=" + endDate +
-        ", fundingBodyId='" + fundingBodyId + '\'' +
-        ", messageList='" + messageList + '\'' +
-        '}';
   }
 }

@@ -1,13 +1,16 @@
 package com.transformuk.hee.tis.tcs.api.dto;
 
-
 import com.transformuk.hee.tis.tcs.api.dto.validation.Update;
 import java.io.Serializable;
 import java.util.Objects;
 import javax.validation.constraints.DecimalMin;
 import javax.validation.constraints.NotNull;
 import javax.validation.constraints.Null;
+import lombok.Data;
+import lombok.NoArgsConstructor;
 
+@Data
+@NoArgsConstructor
 public class RotationPostDTO implements Serializable {
 
   private Long id;
@@ -23,44 +26,9 @@ public class RotationPostDTO implements Serializable {
   @Null(groups = Update.class, message = "Programme Id must be null when updating rotation-post relationships")
   private Long programmeId;
 
-  public RotationPostDTO() {
-  }
-
   public RotationPostDTO(final Long rotationId, final Long postId) {
     this.rotationId = rotationId;
     this.postId = postId;
-  }
-
-  public Long getId() {
-    return id;
-  }
-
-  public void setId(final Long id) {
-    this.id = id;
-  }
-
-  public Long getPostId() {
-    return postId;
-  }
-
-  public void setPostId(final Long postId) {
-    this.postId = postId;
-  }
-
-  public Long getRotationId() {
-    return rotationId;
-  }
-
-  public void setRotationId(final Long rotationId) {
-    this.rotationId = rotationId;
-  }
-
-  public Long getProgrammeId() {
-    return programmeId;
-  }
-
-  public void setProgrammeId(final Long programmeId) {
-    this.programmeId = programmeId;
   }
 
   @Override
@@ -79,16 +47,6 @@ public class RotationPostDTO implements Serializable {
 
   @Override
   public int hashCode() {
-
     return Objects.hash(postId, rotationId, programmeId);
-  }
-
-  @Override
-  public String toString() {
-    return "RotationPostDTO{" +
-        "postId=" + postId +
-        ", rotationId=" + rotationId +
-        ", programmeId=" + programmeId +
-        '}';
   }
 }

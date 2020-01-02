@@ -9,7 +9,9 @@ import java.util.Objects;
 import javax.validation.constraints.DecimalMin;
 import javax.validation.constraints.NotNull;
 import javax.validation.constraints.Null;
+import lombok.Data;
 
+@Data
 public class PlacementCommentDTO implements Serializable {
 
   private static final long serialVersionUID = -1543336084132879227L;
@@ -28,46 +30,6 @@ public class PlacementCommentDTO implements Serializable {
   protected LocalDate amendedDate;
 
   protected CommentSource source;
-
-  public Long getId() {
-    return id;
-  }
-
-  public void setId(Long id) {
-    this.id = id;
-  }
-
-  public String getBody() {
-    return body;
-  }
-
-  public void setBody(String body) {
-    this.body = body;
-  }
-
-  public String getAuthor() {
-    return author;
-  }
-
-  public void setAuthor(String author) {
-    this.author = author;
-  }
-
-  public CommentSource getSource() {
-    return source;
-  }
-
-  public void setSource(CommentSource source) {
-    this.source = source;
-  }
-
-  public LocalDate getAmendedDate() {
-    return amendedDate;
-  }
-
-  public void setAmendedDate(LocalDate amendedDate) {
-    this.amendedDate = amendedDate;
-  }
 
   @Override
   public boolean equals(Object o) {

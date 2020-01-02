@@ -3,7 +3,9 @@ package com.transformuk.hee.tis.tcs.api.dto;
 import com.transformuk.hee.tis.tcs.api.enumeration.PostSpecialtyType;
 import java.io.Serializable;
 import java.util.Objects;
+import lombok.Data;
 
+@Data
 public class PostSpecialtyDTO implements Serializable {
 
   private Long id;
@@ -23,38 +25,6 @@ public class PostSpecialtyDTO implements Serializable {
       PostSpecialtyType postSpecialtyType) {
     this.postId = postId;
     this.specialty = specialty;
-    this.postSpecialtyType = postSpecialtyType;
-  }
-
-  public Long getId() {
-    return id;
-  }
-
-  public void setId(Long id) {
-    this.id = id;
-  }
-
-  public Long getPostId() {
-    return postId;
-  }
-
-  public void setPostId(Long postId) {
-    this.postId = postId;
-  }
-
-  public SpecialtyDTO getSpecialty() {
-    return specialty;
-  }
-
-  public void setSpecialty(SpecialtyDTO specialty) {
-    this.specialty = specialty;
-  }
-
-  public PostSpecialtyType getPostSpecialtyType() {
-    return postSpecialtyType;
-  }
-
-  public void setPostSpecialtyType(PostSpecialtyType postSpecialtyType) {
     this.postSpecialtyType = postSpecialtyType;
   }
 
@@ -81,15 +51,5 @@ public class PostSpecialtyDTO implements Serializable {
   @Override
   public int hashCode() {
     return Objects.hash(postId, specialty, postSpecialtyType);
-  }
-
-  @Override
-  public String toString() {
-    return "PostSpecialtyDTO{" +
-        "id=" + id +
-        ", postId=" + postId +
-        ", specialty=" + specialty +
-        ", postSpecialtyType=" + postSpecialtyType +
-        '}';
   }
 }

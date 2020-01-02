@@ -8,10 +8,12 @@ import java.util.Objects;
 import javax.validation.constraints.DecimalMin;
 import javax.validation.constraints.NotNull;
 import javax.validation.constraints.Null;
+import lombok.Data;
 
 /**
  * A DTO for the TrainingNumber entity.
  */
+@Data
 public class TrainingNumberDTO implements Serializable {
 
   @NotNull(groups = Update.class, message = "Id must not be null when updating a training number")
@@ -43,76 +45,20 @@ public class TrainingNumberDTO implements Serializable {
 
   private String intrepidId;
 
-  public Long getId() {
-    return id;
-  }
-
-  public void setId(Long id) {
-    this.id = id;
-  }
-
-  public String getTrainingNumber() {
-    return trainingNumber;
-  }
-
-  public void setTrainingNumber(String trainingNumber) {
-    this.trainingNumber = trainingNumber;
-  }
-
+  /**
+   * @deprecated Use {@link #getProgrammeId()}
+   */
+  @Deprecated
   public Long getProgramme() {
     return programmeId;
   }
 
-  public void setProgramme(Long programme) {
-    this.programmeId = programme;
-  }
-
-  public TrainingNumberType getTrainingNumberType() {
-    return trainingNumberType;
-  }
-
-  public void setTrainingNumberType(TrainingNumberType trainingNumberType) {
-    this.trainingNumberType = trainingNumberType;
-  }
-
-  public Integer getNumber() {
-    return number;
-  }
-
-  public void setNumber(Integer number) {
-    this.number = number;
-  }
-
-  public Integer getAppointmentYear() {
-    return appointmentYear;
-  }
-
-  public void setAppointmentYear(Integer appointmentYear) {
-    this.appointmentYear = appointmentYear;
-  }
-
-  public String getTypeOfContract() {
-    return typeOfContract;
-  }
-
-  public void setTypeOfContract(String typeOfContract) {
-    this.typeOfContract = typeOfContract;
-  }
-
-  public String getSuffix() {
-    return suffix;
-  }
-
-  public void setSuffix(String suffix) {
-    this.suffix = suffix;
-  }
-
-  public String getIntrepidId() {
-    return intrepidId;
-  }
-
-  public void setIntrepidId(String intrepidId) {
-    this.intrepidId = intrepidId;
+  /**
+   * @deprecated Use {@link #setProgrammeId(Long)}
+   */
+  @Deprecated
+  public void setProgramme(Long programmeId) {
+    this.programmeId = programmeId;
   }
 
   @Override
@@ -136,20 +82,5 @@ public class TrainingNumberDTO implements Serializable {
   @Override
   public int hashCode() {
     return Objects.hashCode(id);
-  }
-
-  @Override
-  public String toString() {
-    return "TrainingNumberDTO{" +
-        "id=" + id +
-        ", trainingNumberType='" + trainingNumberType + "'" +
-        ", trainingNumber='" + trainingNumber + "'" +
-        ", number='" + number + "'" +
-        ", appointmentYear='" + appointmentYear + "'" +
-        ", typeOfContract='" + typeOfContract + "'" +
-        ", suffix='" + suffix + "'" +
-        ", intrepidId='" + intrepidId + "'" +
-        ", programmeId='" + programmeId + "'" +
-        '}';
   }
 }
