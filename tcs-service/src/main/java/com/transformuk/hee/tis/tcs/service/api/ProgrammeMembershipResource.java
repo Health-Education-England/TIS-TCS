@@ -174,7 +174,6 @@ public class ProgrammeMembershipResource {
         .build();
   }
 
-
   /**
    * DELETE /programme-memberships/:id : delete the "id" programmeMembership.
    *
