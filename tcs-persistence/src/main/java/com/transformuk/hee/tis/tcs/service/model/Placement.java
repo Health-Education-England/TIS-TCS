@@ -24,10 +24,12 @@ import javax.persistence.JoinColumn;
 import javax.persistence.ManyToOne;
 import javax.persistence.OneToMany;
 import javax.persistence.SqlResultSetMapping;
+import lombok.Data;
 
 /**
  * A Placement.
  */
+@Data
 @SqlResultSetMapping(name = "PlacementsSummary", classes = {
     @ConstructorResult(targetClass = PlacementSummaryDTO.class,
         columns = {
@@ -93,150 +95,6 @@ public class Placement implements Serializable {
   @Enumerated(EnumType.STRING)
   private LifecycleState lifecycleState;
 
-  public Long getId() {
-    return id;
-  }
-
-  public void setId(final Long id) {
-    this.id = id;
-  }
-
-  public String getIntrepidId() {
-    return intrepidId;
-  }
-
-  public void setIntrepidId(final String intrepidId) {
-    this.intrepidId = intrepidId;
-  }
-
-  public Person getTrainee() {
-    return trainee;
-  }
-
-  public void setTrainee(final Person trainee) {
-    this.trainee = trainee;
-  }
-
-  public Post getPost() {
-    return post;
-  }
-
-  public void setPost(final Post post) {
-    this.post = post;
-  }
-
-  public Set<PlacementSpecialty> getSpecialties() {
-    return specialties;
-  }
-
-  public void setSpecialties(final Set<PlacementSpecialty> specialties) {
-    this.specialties = specialties;
-  }
-
-  public String getSiteCode() {
-    return siteCode;
-  }
-
-  public void setSiteCode(final String siteCode) {
-    this.siteCode = siteCode;
-  }
-
-  public String getGradeAbbreviation() {
-    return gradeAbbreviation;
-  }
-
-  public void setGradeAbbreviation(final String gradeAbbreviation) {
-    this.gradeAbbreviation = gradeAbbreviation;
-  }
-
-  public String getTrainingDescription() {
-    return trainingDescription;
-  }
-
-  public void setTrainingDescription(final String trainingDescription) {
-    this.trainingDescription = trainingDescription;
-  }
-
-  public String getLocalPostNumber() {
-    return localPostNumber;
-  }
-
-  public void setLocalPostNumber(final String localPostNumber) {
-    this.localPostNumber = localPostNumber;
-  }
-
-  public LocalDate getDateFrom() {
-    return dateFrom;
-  }
-
-  public void setDateFrom(final LocalDate dateFrom) {
-    this.dateFrom = dateFrom;
-  }
-
-  public LocalDate getDateTo() {
-    return dateTo;
-  }
-
-  public void setDateTo(final LocalDate dateTo) {
-    this.dateTo = dateTo;
-  }
-
-  public String getPlacementType() {
-    return placementType;
-  }
-
-  public void setPlacementType(final String placementType) {
-    this.placementType = placementType;
-  }
-
-  public BigDecimal getPlacementWholeTimeEquivalent() {
-    return placementWholeTimeEquivalent;
-  }
-
-  public void setPlacementWholeTimeEquivalent(final BigDecimal placementWholeTimeEquivalent) {
-    this.placementWholeTimeEquivalent = placementWholeTimeEquivalent;
-  }
-
-  public Long getSiteId() {
-    return siteId;
-  }
-
-  public void setSiteId(final Long siteId) {
-    this.siteId = siteId;
-  }
-
-  public Long getGradeId() {
-    return gradeId;
-  }
-
-  public void setGradeId(final Long gradeId) {
-    this.gradeId = gradeId;
-  }
-
-  public Set<Comment> getComments() {
-    return comments;
-  }
-
-  public void setComments(Set<Comment> comments) {
-    this.comments = comments;
-  }
-
-  public Status getStatus() {
-    return status;
-  }
-
-  public void setStatus(Status status) {
-    this.status = status;
-  }
-
-  public LifecycleState getLifecycleState() {
-    return lifecycleState;
-  }
-
-  public void setLifecycleState(LifecycleState lifecycleState) {
-    this.lifecycleState = lifecycleState;
-  }
-
   @Override
   public boolean equals(Object o) {
     if (this == o) {
@@ -268,25 +126,5 @@ public class Placement implements Serializable {
         .hash(id, intrepidId, siteCode, gradeAbbreviation, siteId, gradeId, dateFrom, dateTo,
             placementType, placementWholeTimeEquivalent, trainingDescription, localPostNumber,
             status, lifecycleState);
-  }
-
-  @Override
-  public String toString() {
-    return "Placement{" +
-        "id=" + id +
-        ", intrepidId='" + intrepidId + '\'' +
-        ", siteCode='" + siteCode + '\'' +
-        ", gradeAbbreviation='" + gradeAbbreviation + '\'' +
-        ", siteId=" + siteId +
-        ", gradeId=" + gradeId +
-        ", dateFrom=" + dateFrom +
-        ", dateTo=" + dateTo +
-        ", placementType='" + placementType + '\'' +
-        ", placementWholeTimeEquivalent=" + placementWholeTimeEquivalent +
-        ", trainingDescription='" + trainingDescription + '\'' +
-        ", localPostNumber='" + localPostNumber + '\'' +
-        ", status=" + status +
-        ". lifecycleState='" + lifecycleState + '\'' +
-        '}';
   }
 }

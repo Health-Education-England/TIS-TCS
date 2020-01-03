@@ -10,8 +10,10 @@ import javax.persistence.Id;
 import javax.persistence.Temporal;
 import javax.persistence.TemporalType;
 import javax.validation.constraints.NotNull;
+import lombok.Data;
 import org.hibernate.annotations.DynamicInsert;
 
+@Data
 @Entity
 @DynamicInsert
 public class JsonPatch implements Serializable {
@@ -32,54 +34,6 @@ public class JsonPatch implements Serializable {
   private Date dateAdded;
 
   private Boolean enabled;
-
-  public Long getId() {
-    return id;
-  }
-
-  public void setId(Long id) {
-    this.id = id;
-  }
-
-  public String getTableDtoName() {
-    return tableDtoName;
-  }
-
-  public void setTableDtoName(String tableDtoName) {
-    this.tableDtoName = tableDtoName;
-  }
-
-  public String getPatchId() {
-    return patchId;
-  }
-
-  public void setPatchId(String patchId) {
-    this.patchId = patchId;
-  }
-
-  public String getPatch() {
-    return patch;
-  }
-
-  public void setPatch(String patch) {
-    this.patch = patch;
-  }
-
-  public Date getDateAdded() {
-    return dateAdded;
-  }
-
-  public void setDateAdded(Date dateAdded) {
-    this.dateAdded = dateAdded;
-  }
-
-  public Boolean getEnabled() {
-    return enabled;
-  }
-
-  public void setEnabled(Boolean enabled) {
-    this.enabled = enabled;
-  }
 
   public JsonPatch tableDtoName(String tableDtoName) {
     this.tableDtoName = tableDtoName;
@@ -124,17 +78,5 @@ public class JsonPatch implements Serializable {
   @Override
   public int hashCode() {
     return Objects.hashCode(id);
-  }
-
-  @Override
-  public String toString() {
-    return "JsonPatch{" +
-        "id=" + id +
-        ", tableDtoName='" + tableDtoName + '\'' +
-        ", patchId='" + patchId + '\'' +
-        ", patch='" + patch + '\'' +
-        ", dateAdded=" + dateAdded +
-        ", enabled=" + enabled +
-        '}';
   }
 }

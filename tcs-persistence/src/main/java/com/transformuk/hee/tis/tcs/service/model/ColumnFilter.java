@@ -4,11 +4,12 @@ import static com.google.common.base.Preconditions.checkArgument;
 import static com.google.common.base.Preconditions.checkNotNull;
 
 import java.util.List;
-import java.util.Objects;
+import lombok.Data;
 
 /**
  * Class to hold column filter values
  */
+@Data
 public class ColumnFilter {
 
   private String name;
@@ -20,39 +21,5 @@ public class ColumnFilter {
     checkArgument(!values.isEmpty(), "values must not be empty");
     this.name = name;
     this.values = values;
-  }
-
-  public String getName() {
-    return name;
-  }
-
-  public List<Object> getValues() {
-    return values;
-  }
-
-  @Override
-  public int hashCode() {
-    return Objects.hash(name, values);
-  }
-
-  @Override
-  public boolean equals(Object obj) {
-    if (this == obj) {
-      return true;
-    }
-    if (obj == null || getClass() != obj.getClass()) {
-      return false;
-    }
-    final ColumnFilter other = (ColumnFilter) obj;
-    return Objects.equals(this.name, other.name)
-        && Objects.equals(this.values, other.values);
-  }
-
-  @Override
-  public String toString() {
-    return "ColumnFilter{" +
-        "name='" + name + '\'' +
-        ", values=" + values +
-        '}';
   }
 }

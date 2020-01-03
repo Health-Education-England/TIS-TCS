@@ -15,7 +15,11 @@ import javax.persistence.PostLoad;
 import javax.persistence.PrePersist;
 import javax.persistence.PreUpdate;
 import javax.persistence.Version;
+import lombok.Data;
+import lombok.NoArgsConstructor;
 
+@Data
+@NoArgsConstructor
 @Entity
 public class Tag implements Serializable {
 
@@ -30,9 +34,6 @@ public class Tag implements Serializable {
   private Set<Document> documents;
   @Column(unique = true)
   private String name;
-
-  public Tag() {
-  }
 
   public Tag(final String name) {
     this.name = name;
@@ -65,55 +66,5 @@ public class Tag implements Serializable {
   @Override
   public int hashCode() {
     return Objects.hash(name.toLowerCase());
-  }
-
-  @Override
-  public String toString() {
-    return "Tag{" +
-        "id=" + id +
-        ", addedDate=" + addedDate +
-        ", amendedDate=" + amendedDate +
-        ", name='" + name + '\'' +
-        '}';
-  }
-
-  public Long getId() {
-    return id;
-  }
-
-  public void setId(final Long id) {
-    this.id = id;
-  }
-
-  public LocalDateTime getAddedDate() {
-    return addedDate;
-  }
-
-  public void setAddedDate(final LocalDateTime addedDate) {
-    this.addedDate = addedDate;
-  }
-
-  public LocalDateTime getAmendedDate() {
-    return amendedDate;
-  }
-
-  public void setAmendedDate(final LocalDateTime amendedDate) {
-    this.amendedDate = amendedDate;
-  }
-
-  public Set<Document> getDocuments() {
-    return documents;
-  }
-
-  public void setDocuments(final Set<Document> documents) {
-    this.documents = documents;
-  }
-
-  public String getName() {
-    return name;
-  }
-
-  public void setName(final String name) {
-    this.name = name;
   }
 }
