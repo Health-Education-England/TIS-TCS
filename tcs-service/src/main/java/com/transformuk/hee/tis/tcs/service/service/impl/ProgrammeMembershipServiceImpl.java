@@ -159,6 +159,7 @@ public class ProgrammeMembershipServiceImpl implements ProgrammeMembershipServic
     //Get the person id from the programme membership before deleting it
     Long personId = programmeMembershipRepository.getOne(id).getPerson().getId();
     programmeMembershipRepository.deleteById(id);
+    programmeRepository.flush();
     updatePersonWhenStatusIsStale(personId);
   }
 
