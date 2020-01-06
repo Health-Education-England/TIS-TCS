@@ -43,9 +43,6 @@ public class ProgrammeServiceImpl implements ProgrammeService {
   private final Logger log = LoggerFactory.getLogger(ProgrammeServiceImpl.class);
 
   private final ProgrammeRepository programmeRepository;
-  // TODO Remove unused repositories
-  private final ProgrammeCurriculumRepository programmeCurriculumRepository;
-  private final CurriculumRepository curriculumRepository;
   private final ProgrammeMapper programmeMapper;
   private final ApplicationEventPublisher applicationEventPublisher;
   private final PermissionService permissionService;
@@ -55,8 +52,6 @@ public class ProgrammeServiceImpl implements ProgrammeService {
       CurriculumRepository curriculumRepository, ProgrammeMapper programmeMapper,
       ApplicationEventPublisher applicationEventPublisher, PermissionService permissionService) {
     this.programmeRepository = programmeRepository;
-    this.programmeCurriculumRepository = programmeCurriculumRepository;
-    this.curriculumRepository = curriculumRepository;
     this.programmeMapper = programmeMapper;
     this.applicationEventPublisher = applicationEventPublisher;
     this.permissionService = permissionService;

@@ -32,7 +32,6 @@ public class ProgrammeMembershipEventListener {
         event.getProgrammeMembershipDTO().getId());
     personElasticSearchService
         .updatePersonDocument(event.getProgrammeMembershipDTO().getPerson().getId());
-
   }
 
   @EventListener
@@ -42,4 +41,5 @@ public class ProgrammeMembershipEventListener {
     personElasticSearchService
         .deletePersonDocument(event.getProgrammeMembershipDTO().getPerson().getId());
   }
+
 }
