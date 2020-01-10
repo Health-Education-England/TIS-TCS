@@ -2,6 +2,7 @@ package com.transformuk.hee.tis.tcs.client.service.impl;
 
 import com.google.common.collect.Maps;
 import com.transformuk.hee.tis.client.impl.AbstractClientService;
+import com.transformuk.hee.tis.tcs.api.dto.AbsenceDTO;
 import com.transformuk.hee.tis.tcs.api.dto.ContactDetailsDTO;
 import com.transformuk.hee.tis.tcs.api.dto.CurriculumDTO;
 import com.transformuk.hee.tis.tcs.api.dto.FundingComponentsDTO;
@@ -34,6 +35,7 @@ import java.io.UnsupportedEncodingException;
 import java.net.URLEncoder;
 import java.util.List;
 import java.util.Map;
+import java.util.Optional;
 import java.util.Set;
 import java.util.stream.Collectors;
 import javax.annotation.PostConstruct;
@@ -48,6 +50,8 @@ import org.springframework.core.ParameterizedTypeReference;
 import org.springframework.http.HttpEntity;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpMethod;
+import org.springframework.http.HttpStatus;
+import org.springframework.http.RequestEntity;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
 import org.springframework.web.client.RestTemplate;
@@ -86,6 +90,8 @@ public class TcsServiceImpl extends AbstractClientService {
   private static final String BASIC = "/basic";
   private static final String API_POST_FUNDINGS = "/api/post/fundings";
   private static final String API_FUNDINGS = "/api/post-fundings/";
+  private static final String API_ABSENCE = "/api/absence/";
+  private static final String API_ABSENCE_BY_ABS_ID = API_ABSENCE + "absenceId/";
   private static final Map<Class, ParameterizedTypeReference> classToParamTypeRefMap;
   private static String curriculumJsonQuerystringURLEncoded, programmeJsonQuerystringURLEncoded, specialtyJsonQuerystringURLEncoded, placementJsonQuerystringURLEncoded, rotationJsonQuerystringURLEncoded;
 
@@ -589,6 +595,63 @@ public class TcsServiceImpl extends AbstractClientService {
             new ParameterizedTypeReference<List<PersonBasicDetailsDTO>>() {
             });
     return responseEntity.getBody();
+  }
+
+  public Optional<AbsenceDTO> findAbsenceById(Long id) {
+    String url = serviceUrl + API_ABSENCE + id;
+    ResponseEntity<AbsenceDTO> response = tcsRestTemplate.exchange(url, HttpMethod.GET, null, AbsenceDTO.class);
+    if (HttpStatus.OK.equals(response.getStatusCode())) {
+      return Optional.of(response.getBody());
+    }
+    log.debug("Did not find absence by id [{}]", id);
+    return Optional.empty();
+  }
+
+  //use third party pk to lookup record
+  public Optional<AbsenceDTO> findAbsenceByAbsenceId(String absenceId) {
+    String url = serviceUrl + API_ABSENCE_BY_ABS_ID + absenceId;
+    ResponseEntity<AbsenceDTO> response = tcsRestTemplate.exchange(url, HttpMethod.GET, null, AbsenceDTO.class);
+    if (HttpStatus.OK.equals(response.getStatusCode())) {
+      return Optional.of(response.getBody());
+    }
+    log.debug("Did not find absence by id [{}]", absenceId);
+    return Optional.empty();
+  }
+
+  //POST
+  public boolean addAbsence(AbsenceDTO absenceDTO) {
+    String url = serviceUrl + API_ABSENCE;
+    HttpHeaders headers = new HttpHeaders();
+    HttpEntity<AbsenceDTO> httpEntity = new HttpEntity<>(absenceDTO, headers);
+
+    ResponseEntity<AbsenceDTO> response = tcsRestTemplate.exchange(url, HttpMethod.POST,
+        httpEntity, AbsenceDTO.class);
+
+    return HttpStatus.OK.equals(response.getStatusCode());
+  }
+
+  //PUT
+  public boolean putAbsence(AbsenceDTO absenceDTO) {
+    String url = serviceUrl + API_ABSENCE;
+    HttpHeaders headers = new HttpHeaders();
+    HttpEntity<AbsenceDTO> httpEntity = new HttpEntity<>(absenceDTO, headers);
+
+    ResponseEntity<AbsenceDTO> response = tcsRestTemplate.exchange(url, HttpMethod.PUT,
+        httpEntity, AbsenceDTO.class);
+
+    return HttpStatus.OK.equals(response.getStatusCode());
+  }
+
+  //PATCH
+  public boolean patchAbsence(AbsenceDTO absenceDTO) {
+    String url = serviceUrl + API_ABSENCE;
+    HttpHeaders headers = new HttpHeaders();
+    HttpEntity<AbsenceDTO> httpEntity = new HttpEntity<>(absenceDTO, headers);
+
+    ResponseEntity<AbsenceDTO> response = tcsRestTemplate.exchange(url, HttpMethod.PATCH,
+        httpEntity, AbsenceDTO.class);
+
+    return HttpStatus.OK.equals(response.getStatusCode());
   }
 
   @Override

@@ -520,6 +520,16 @@
         <artifactId>versions-maven-plugin</artifactId>
         <version>2.5</version>
       </plugin>
+<!--      <plugin>-->
+<!--        <groupId>org.springframework.boot</groupId>-->
+<!--        <artifactId>spring-boot-maven-plugin</artifactId>-->
+<!--        <version>2.2.2.RELEASE</version>-->
+<!--        <configuration>-->
+<!--          <jvmArguments>-->
+<!--            -Xdebug -Xrunjdwp:transport=dt_socket,server=y,suspend=y,address=5005-->
+<!--          </jvmArguments>-->
+<!--        </configuration>-->
+<!--      </plugin>-->
     </plugins>
   </build>
   <profiles>
