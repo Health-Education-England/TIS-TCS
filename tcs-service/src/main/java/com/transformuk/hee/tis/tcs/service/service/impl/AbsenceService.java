@@ -9,8 +9,11 @@ import com.transformuk.hee.tis.tcs.service.repository.AbsenceRepository;
 import com.transformuk.hee.tis.tcs.service.repository.PersonRepository;
 import com.transformuk.hee.tis.tcs.service.service.mapper.AbsenceMapper;
 import java.lang.reflect.Field;
+import java.lang.reflect.Method;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
+import javax.naming.ldap.PagedResultsControl;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
@@ -79,6 +82,8 @@ public class AbsenceService {
 
 
   public Optional<AbsenceDTO> patchAbsence(AbsenceDTO absenceDTO) throws Exception {
+    Preconditions.checkArgument(absenceDTO != null, "absenceDto cannot be null");
+
     Optional<Absence> optionalAbsence = Optional.empty();
     Optional<AbsenceDTO> result = Optional.empty();
     if (absenceDTO.getId() != null) {

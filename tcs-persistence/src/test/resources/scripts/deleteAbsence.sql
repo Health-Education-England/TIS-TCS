@@ -1,0 +1,1 @@
+DELETE FROM `Absence` WHERE ID IN(1, 2, 3);
