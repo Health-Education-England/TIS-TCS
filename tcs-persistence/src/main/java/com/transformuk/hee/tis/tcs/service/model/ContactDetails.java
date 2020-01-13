@@ -1,12 +1,12 @@
 package com.transformuk.hee.tis.tcs.service.model;
 
 
-import java.io.Serializable;
-import java.time.LocalDateTime;
-import java.util.Objects;
 import javax.persistence.Entity;
 import javax.persistence.Id;
 import javax.persistence.Version;
+import java.io.Serializable;
+import java.time.LocalDateTime;
+import java.util.Objects;
 
 /**
  * A ContactDetails.
@@ -54,6 +54,9 @@ public class ContactDetails implements Serializable {
   @Version
   private LocalDateTime amendedDate;
 
+  private String workEmail;
+
+  private String country;
 
   public Long getId() {
     return id;
@@ -269,6 +272,32 @@ public class ContactDetails implements Serializable {
     this.amendedDate = amendedDate;
   }
 
+  public String getWorkEmail() {
+    return workEmail;
+  }
+
+  public void setWorkEmail(String workEmail) {
+    this.workEmail = workEmail;
+  }
+
+  public ContactDetails workEmail(String workEmail){
+    this.workEmail = workEmail;
+    return this;
+  }
+
+  public String getCountry() {
+    return country;
+  }
+
+  public void setCountry(String country) {
+    this.country = country;
+  }
+
+  public ContactDetails country(String country){
+    this.country = country;
+    return this;
+  }
+
   @Override
   public boolean equals(Object o) {
     if (this == o) {
@@ -310,6 +339,8 @@ public class ContactDetails implements Serializable {
         ", address4='" + address4 + '\'' +
         ", postCode='" + postCode + '\'' +
         ", amendedDate='" + amendedDate + '\'' +
+        ", workEmail='" + workEmail + '\'' +
+        ", country='" + country + '\'' +
         '}';
   }
 }

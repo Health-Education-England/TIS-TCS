@@ -1,9 +1,11 @@
 package com.transformuk.hee.tis.tcs.service.service;
 
 import com.transformuk.hee.tis.tcs.api.dto.ContactDetailsDTO;
-import java.util.List;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
+
+import java.util.List;
+import java.util.Optional;
 
 /**
  * Service Interface for managing ContactDetails.
@@ -48,4 +50,11 @@ public interface ContactDetailsService {
    * @param id the id of the entity
    */
   void delete(Long id);
+
+  /**
+   * Update Contact Details of a person which are not null in incoming DTO.
+   * @param contactDetailsDTO updated contactDetailsDTO object
+   * @return up to date object
+   */
+  Optional<ContactDetailsDTO> patch(ContactDetailsDTO contactDetailsDTO);
 }

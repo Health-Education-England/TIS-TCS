@@ -1,16 +1,5 @@
 package com.transformuk.hee.tis.tcs.service.api;
 
-import static org.assertj.core.api.Assertions.assertThat;
-import static org.hamcrest.Matchers.containsInAnyOrder;
-import static org.hamcrest.Matchers.hasItem;
-import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.delete;
-import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
-import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
-import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.put;
-import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.content;
-import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
-import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
-
 import com.transformuk.hee.tis.tcs.api.dto.ContactDetailsDTO;
 import com.transformuk.hee.tis.tcs.service.Application;
 import com.transformuk.hee.tis.tcs.service.api.validation.ContactDetailsValidator;
@@ -19,11 +8,6 @@ import com.transformuk.hee.tis.tcs.service.model.ContactDetails;
 import com.transformuk.hee.tis.tcs.service.repository.ContactDetailsRepository;
 import com.transformuk.hee.tis.tcs.service.service.ContactDetailsService;
 import com.transformuk.hee.tis.tcs.service.service.mapper.ContactDetailsMapper;
-import java.time.LocalDateTime;
-import java.time.ZoneId;
-import java.util.List;
-import javax.persistence.EntityManager;
-import javax.persistence.Query;
 import org.apache.commons.lang3.StringUtils;
 import org.junit.Before;
 import org.junit.Test;
@@ -39,6 +23,18 @@ import org.springframework.test.context.junit4.SpringRunner;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.setup.MockMvcBuilders;
 import org.springframework.transaction.annotation.Transactional;
+
+import javax.persistence.EntityManager;
+import javax.persistence.Query;
+import java.time.LocalDateTime;
+import java.time.ZoneId;
+import java.util.List;
+
+import static org.assertj.core.api.Assertions.assertThat;
+import static org.hamcrest.Matchers.containsInAnyOrder;
+import static org.hamcrest.Matchers.hasItem;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.*;
+import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.*;
 
 /**
  * Test class for the ContactDetailsResource REST controller.
@@ -90,6 +86,10 @@ public class ContactDetailsResourceIntTest {
 
   private static final String DEFAULT_POST_CODE = "AAAAAAAAAA";
   private static final String UPDATED_POST_CODE = "BBBBBBBBBB";
+
+  private static final String DEFAULT_COUNTRY = "AAAAAAAAAA";
+  private static final String UPDATED_COUNTRY = "BBBBBBBBBB";
+
 
   private static final LocalDateTime DEFAULT_AMENDED_DATE = LocalDateTime
       .now(ZoneId.systemDefault());
@@ -454,5 +454,57 @@ public class ContactDetailsResourceIntTest {
     assertThat(contactDetailsDTO1).isNotEqualTo(contactDetailsDTO2);
     contactDetailsDTO1.setId(null);
     assertThat(contactDetailsDTO1).isNotEqualTo(contactDetailsDTO2);
+  }
+
+  @Test
+  @Transactional
+  public void patchContactDetails() throws Exception {
+    // Initialize the database
+    contactDetailsRepository.saveAndFlush(contactDetails);
+    ContactDetails updatedContactDetails = contactDetailsRepository.findById(contactDetails.getId())
+        .orElse(null);
+    updatedContactDetails
+        .knownAs(UPDATED_KNOWN_AS)
+        .maidenName(UPDATED_MAIDEN_NAME)
+        .initials(UPDATED_INITIALS)
+        .title(UPDATED_TITLE)
+        .telephoneNumber(UPDATED_CONTACT_PHONE_NR_1)
+        .mobileNumber(UPDATED_CONTACT_PHONE_NR_2)
+        .email(UPDATED_EMAIL)
+        .address1(UPDATED_ADDRESS)
+        .postCode(UPDATED_POST_CODE)
+        .legalForenames(UPDATED_LEGAL_FORENAMES)
+        .workEmail(UPDATED_WORK_EMAIL)
+        .country(UPDATED_COUNTRY);
+
+    ContactDetailsDTO contactDetailsDTO = contactDetailsMapper.toDto(updatedContactDetails);
+    int databaseSizeBeforeUpdate = contactDetailsRepository.findAll().size();
+
+    // Get the contactDetails
+    restContactDetailsMockMvc.perform(patch("/api/contact-details/{id}",contactDetails.getId())
+        .contentType(TestUtil.APPLICATION_JSON_UTF8)
+        .content(TestUtil.convertObjectToJsonBytes(contactDetailsDTO)))
+        .andExpect(status().isOk());
+
+    List<ContactDetails> contactDetailsList = contactDetailsRepository.findAll();
+    assertThat(contactDetailsList).hasSize(databaseSizeBeforeUpdate);
+    ContactDetails testContactDetails = contactDetailsList.get(contactDetailsList.size() - 1);
+    assertThat(testContactDetails.getSurname()).isEqualTo(DEFAULT_SURNAME);
+    assertThat(testContactDetails.getForenames()).isEqualTo(DEFAULT_FORENAMES);
+    assertThat(testContactDetails.getKnownAs()).isEqualTo(UPDATED_KNOWN_AS);
+    assertThat(testContactDetails.getMaidenName()).isEqualTo(UPDATED_MAIDEN_NAME);
+    assertThat(testContactDetails.getInitials()).isEqualTo(UPDATED_INITIALS);
+    assertThat(testContactDetails.getTitle()).isEqualTo(UPDATED_TITLE);
+    assertThat(testContactDetails.getTelephoneNumber()).isEqualTo(UPDATED_CONTACT_PHONE_NR_1);
+    assertThat(testContactDetails.getMobileNumber()).isEqualTo(UPDATED_CONTACT_PHONE_NR_2);
+    assertThat(testContactDetails.getEmail()).isEqualTo(UPDATED_EMAIL);
+    assertThat(testContactDetails.getAddress1()).isEqualTo(UPDATED_ADDRESS);
+    assertThat(testContactDetails.getPostCode()).isEqualTo(UPDATED_POST_CODE);
+    assertThat(testContactDetails.getLegalSurname()).isEqualTo(DEFAULT_LEGAL_SURNAME);
+    assertThat(testContactDetails.getLegalForenames()).isEqualTo(UPDATED_LEGAL_FORENAMES);
+    assertThat(testContactDetails.getCountry()).isEqualTo(UPDATED_COUNTRY);
+    assertThat(testContactDetails.getWorkEmail()).isEqualTo(UPDATED_WORK_EMAIL);
+    assertThat(testContactDetails.getAmendedDate()).isAfter(DEFAULT_AMENDED_DATE);
+
   }
 }
