@@ -1,12 +1,12 @@
 package com.transformuk.hee.tis.tcs.service.model;
 
 
-import javax.persistence.Entity;
-import javax.persistence.Id;
-import javax.persistence.Version;
 import java.io.Serializable;
 import java.time.LocalDateTime;
 import java.util.Objects;
+import javax.persistence.Entity;
+import javax.persistence.Id;
+import javax.persistence.Version;
 
 /**
  * A ContactDetails.
@@ -280,7 +280,7 @@ public class ContactDetails implements Serializable {
     this.workEmail = workEmail;
   }
 
-  public ContactDetails workEmail(String workEmail){
+  public ContactDetails workEmail(String workEmail) {
     this.workEmail = workEmail;
     return this;
   }
@@ -293,7 +293,7 @@ public class ContactDetails implements Serializable {
     this.country = country;
   }
 
-  public ContactDetails country(String country){
+  public ContactDetails country(String country) {
     this.country = country;
     return this;
   }

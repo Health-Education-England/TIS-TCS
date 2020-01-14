@@ -8,6 +8,12 @@ import com.transformuk.hee.tis.tcs.service.api.util.PaginationUtil;
 import com.transformuk.hee.tis.tcs.service.api.validation.PersonalDetailsValidator;
 import com.transformuk.hee.tis.tcs.service.service.PersonalDetailsService;
 import io.github.jhipster.web.util.ResponseUtil;
+import java.net.URI;
+import java.net.URISyntaxException;
+import java.util.List;
+import java.util.Optional;
+import java.util.stream.Collectors;
+import javax.validation.Valid;
 import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -19,14 +25,15 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.MethodArgumentNotValidException;
-import org.springframework.web.bind.annotation.*;
-
-import javax.validation.Valid;
-import java.net.URI;
-import java.net.URISyntaxException;
-import java.util.List;
-import java.util.Optional;
-import java.util.stream.Collectors;
+import org.springframework.web.bind.annotation.DeleteMapping;
+import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PatchMapping;
+import org.springframework.web.bind.annotation.PathVariable;
+import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.PutMapping;
+import org.springframework.web.bind.annotation.RequestBody;
+import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RestController;
 
 /**
  * REST controller for managing PersonalDetails.
@@ -163,15 +170,15 @@ public class PersonalDetailsResource {
 
 
   /**
-   * PATCH /personal-details/person : Patch personalDetails.
-   * Only non Null values in personalDetails will be updated, rest will remain as it is.
+   * PATCH /personal-details/person : Patch personalDetails. Only non Null values in personalDetails
+   * will be updated, rest will remain as it is.
    *
    * @param personalDetailsDTO to update.
    * @return the ResponseEntity with status 200 and with body of the upated personalDetails
    */
   @PatchMapping("/personal-details/{id}")
   @PreAuthorize("hasPermission('tis:people::person:', 'Update')")
-  public  ResponseEntity<PersonalDetailsDTO> patchPersonDetails(
+  public ResponseEntity<PersonalDetailsDTO> patchPersonDetails(
       @Valid @RequestBody PersonalDetailsDTO personalDetailsDTO, @PathVariable Long id) {
     log.debug("REST Request to patch personalDetails: {}", personalDetailsDTO);
     //PersonalDetailsDTO existingPersonalDetailsDTO = personalDetailsService.findby(personalDetailsDTO.getId());
@@ -179,8 +186,10 @@ public class PersonalDetailsResource {
     Optional<PersonalDetailsDTO> result = personalDetailsService.patchUpdate(personalDetailsDTO);
 
     return result.map(detailsDTO -> ResponseEntity.ok()
-        .headers(HeaderUtil.createEntityUpdateAlert(ENTITY_NAME, detailsDTO.getId().toString())).body(detailsDTO))
-        .orElseGet(() -> ResponseEntity.badRequest().headers(HeaderUtil.createEntityUpdateAlert(ENTITY_NAME, personalDetailsDTO.getId().toString()))
-        .body(personalDetailsDTO));
+        .headers(HeaderUtil.createEntityUpdateAlert(ENTITY_NAME, detailsDTO.getId().toString()))
+        .body(detailsDTO))
+        .orElseGet(() -> ResponseEntity.badRequest().headers(
+            HeaderUtil.createEntityUpdateAlert(ENTITY_NAME, personalDetailsDTO.getId().toString()))
+            .body(personalDetailsDTO));
   }
 }

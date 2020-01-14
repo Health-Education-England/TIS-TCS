@@ -2,15 +2,15 @@ package com.transformuk.hee.tis.tcs.service.service.mapper;
 
 import com.transformuk.hee.tis.tcs.api.dto.PersonalDetailsDTO;
 import com.transformuk.hee.tis.tcs.service.model.PersonalDetails;
-import org.mapstruct.Mapper;
-
 import java.util.Optional;
+import org.mapstruct.Mapper;
 
 /**
  * Mapper for the entity PersonalDetails and its DTO PersonalDetailsDTO.
  */
 @Mapper(componentModel = "spring")
-public abstract class PersonalDetailsMapper implements EntityMapper<PersonalDetailsDTO, PersonalDetails> {
+public abstract class PersonalDetailsMapper implements
+    EntityMapper<PersonalDetailsDTO, PersonalDetails> {
 
 
   public PersonalDetails fromId(Long id) {
@@ -22,35 +22,49 @@ public abstract class PersonalDetailsMapper implements EntityMapper<PersonalDeta
     return personalDetails;
   }
 
-  public Optional<PersonalDetails> toPatchedEntity(PersonalDetails originalPersonDetail, PersonalDetailsDTO personalDetailsDTO){
-    if(originalPersonDetail ==null || personalDetailsDTO ==null ){
+  public Optional<PersonalDetails> toPatchedEntity(PersonalDetails originalPersonDetail,
+      PersonalDetailsDTO personalDetailsDTO) {
+    if (originalPersonDetail == null || personalDetailsDTO == null) {
       return Optional.empty();
-    }else{
+    } else {
 
-      if(personalDetailsDTO.getSexualOrientation() !=null)
+      if (personalDetailsDTO.getSexualOrientation() != null) {
         originalPersonDetail.setSexualOrientation(personalDetailsDTO.getSexualOrientation());
-      if(personalDetailsDTO.getReligiousBelief() !=null)
+      }
+      if (personalDetailsDTO.getReligiousBelief() != null) {
         originalPersonDetail.setReligiousBelief(personalDetailsDTO.getReligiousBelief());
-      if(personalDetailsDTO.getNationality() !=null)
+      }
+      if (personalDetailsDTO.getNationality() != null) {
         originalPersonDetail.setNationality(personalDetailsDTO.getNationality());
-      if(personalDetailsDTO.getNationalInsuranceNumber() !=null)
-        originalPersonDetail.setNationalInsuranceNumber(personalDetailsDTO.getNationalInsuranceNumber());
-      if(personalDetailsDTO.getMaritalStatus() !=null)
+      }
+      if (personalDetailsDTO.getNationalInsuranceNumber() != null) {
+        originalPersonDetail
+            .setNationalInsuranceNumber(personalDetailsDTO.getNationalInsuranceNumber());
+      }
+      if (personalDetailsDTO.getMaritalStatus() != null) {
         originalPersonDetail.setMaritalStatus(personalDetailsDTO.getMaritalStatus());
-      if(personalDetailsDTO.getGender() !=null)
+      }
+      if (personalDetailsDTO.getGender() != null) {
         originalPersonDetail.setGender(personalDetailsDTO.getGender());
-      if(personalDetailsDTO.getEthnicOrigin() !=null)
+      }
+      if (personalDetailsDTO.getEthnicOrigin() != null) {
         originalPersonDetail.setEthnicOrigin(personalDetailsDTO.getEthnicOrigin());
-      if(personalDetailsDTO.getDualNationality() !=null)
+      }
+      if (personalDetailsDTO.getDualNationality() != null) {
         originalPersonDetail.setDualNationality(personalDetailsDTO.getDualNationality());
-      if(personalDetailsDTO.getDisability() !=null)
+      }
+      if (personalDetailsDTO.getDisability() != null) {
         originalPersonDetail.setDisability(personalDetailsDTO.getDisability());
-      if(personalDetailsDTO.getDisabilityDetails() !=null)
+      }
+      if (personalDetailsDTO.getDisabilityDetails() != null) {
         originalPersonDetail.setDisabilityDetails(personalDetailsDTO.getDisabilityDetails());
-      if(personalDetailsDTO.getDateOfBirth() !=null)
+      }
+      if (personalDetailsDTO.getDateOfBirth() != null) {
         originalPersonDetail.setDateOfBirth(personalDetailsDTO.getDateOfBirth());
-      if(personalDetailsDTO.getAmendedDate() !=null)
+      }
+      if (personalDetailsDTO.getAmendedDate() != null) {
         originalPersonDetail.setAmendedDate(personalDetailsDTO.getAmendedDate());
+      }
 
       return Optional.ofNullable(originalPersonDetail);
     }
