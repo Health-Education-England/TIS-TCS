@@ -1,5 +1,6 @@
 package com.transformuk.hee.tis.tcs.client.service.impl;
 
+import com.google.common.base.Preconditions;
 import com.google.common.collect.Maps;
 import com.transformuk.hee.tis.client.impl.AbstractClientService;
 import com.transformuk.hee.tis.tcs.api.dto.AbsenceDTO;
@@ -41,6 +42,7 @@ import java.util.stream.Collectors;
 import javax.annotation.PostConstruct;
 import org.apache.commons.codec.EncoderException;
 import org.apache.commons.lang3.StringUtils;
+import org.apache.commons.lang3.exception.ExceptionUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -51,7 +53,6 @@ import org.springframework.http.HttpEntity;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpMethod;
 import org.springframework.http.HttpStatus;
-import org.springframework.http.RequestEntity;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
 import org.springframework.web.client.RestTemplate;
@@ -598,10 +599,17 @@ public class TcsServiceImpl extends AbstractClientService {
   }
 
   public Optional<AbsenceDTO> findAbsenceById(Long id) {
+    Preconditions.checkArgument(id != null, "Id for absence cannot be null");
     String url = serviceUrl + API_ABSENCE + id;
-    ResponseEntity<AbsenceDTO> response = tcsRestTemplate.exchange(url, HttpMethod.GET, null, AbsenceDTO.class);
-    if (HttpStatus.OK.equals(response.getStatusCode())) {
-      return Optional.of(response.getBody());
+    try {
+      ResponseEntity<AbsenceDTO> response = tcsRestTemplate
+          .exchange(url, HttpMethod.GET, null, AbsenceDTO.class);
+      if (HttpStatus.OK.equals(response.getStatusCode())) {
+        return Optional.of(response.getBody());
+      }
+    } catch (Exception e) {
+      log.error("An exception was thrown when requesting absence for id [{}]. [{}]", id,
+          ExceptionUtils.getStackTrace(e));
     }
     log.debug("Did not find absence by id [{}]", id);
     return Optional.empty();
@@ -609,17 +617,25 @@ public class TcsServiceImpl extends AbstractClientService {
 
   //use third party pk to lookup record
   public Optional<AbsenceDTO> findAbsenceByAbsenceId(String absenceId) {
+    Preconditions.checkArgument(absenceId != null, "absenceId cannot be null");
     String url = serviceUrl + API_ABSENCE_BY_ABS_ID + absenceId;
-    ResponseEntity<AbsenceDTO> response = tcsRestTemplate.exchange(url, HttpMethod.GET, null, AbsenceDTO.class);
-    if (HttpStatus.OK.equals(response.getStatusCode())) {
-      return Optional.of(response.getBody());
+    try {
+      ResponseEntity<AbsenceDTO> response = tcsRestTemplate
+          .exchange(url, HttpMethod.GET, null, AbsenceDTO.class);
+      if (HttpStatus.OK.equals(response.getStatusCode())) {
+        return Optional.of(response.getBody());
+      }
+    } catch (Exception e) {
+      log.error("An exception was thrown when requesting absence for absenceId [{}]. [{}]", absenceId,
+          ExceptionUtils.getStackTrace(e));
     }
-    log.debug("Did not find absence by id [{}]", absenceId);
+    log.debug("Did not find absence by absenceId [{}]", absenceId);
     return Optional.empty();
   }
 
   //POST
   public boolean addAbsence(AbsenceDTO absenceDTO) {
+    Preconditions.checkArgument(absenceDTO != null, "cannot create absence when absence is null");
     String url = serviceUrl + API_ABSENCE;
     HttpHeaders headers = new HttpHeaders();
     HttpEntity<AbsenceDTO> httpEntity = new HttpEntity<>(absenceDTO, headers);
@@ -632,6 +648,7 @@ public class TcsServiceImpl extends AbstractClientService {
 
   //PUT
   public boolean putAbsence(AbsenceDTO absenceDTO) {
+    Preconditions.checkArgument(absenceDTO != null, "cannot update absence when absence is null");
     String url = serviceUrl + API_ABSENCE;
     HttpHeaders headers = new HttpHeaders();
     HttpEntity<AbsenceDTO> httpEntity = new HttpEntity<>(absenceDTO, headers);
@@ -644,14 +661,14 @@ public class TcsServiceImpl extends AbstractClientService {
 
   //PATCH
   public boolean patchAbsence(AbsenceDTO absenceDTO) {
+    Preconditions.checkArgument(absenceDTO != null, "cannot patch absence when absence is null");
     String url = serviceUrl + API_ABSENCE;
     HttpHeaders headers = new HttpHeaders();
     HttpEntity<AbsenceDTO> httpEntity = new HttpEntity<>(absenceDTO, headers);
 
-    ResponseEntity<AbsenceDTO> response = tcsRestTemplate.exchange(url, HttpMethod.PATCH,
-        httpEntity, AbsenceDTO.class);
+    AbsenceDTO response = tcsRestTemplate.patchForObject(url, absenceDTO, AbsenceDTO.class, Maps.newHashMap());
 
-    return HttpStatus.OK.equals(response.getStatusCode());
+    return response != null ? true : false;
   }
 
   @Override
@@ -681,5 +698,13 @@ public class TcsServiceImpl extends AbstractClientService {
   @Override
   public Map<Class, ParameterizedTypeReference> getClassToParamTypeRefMap() {
     return classToParamTypeRefMap;
+  }
+
+  public RestTemplate getTcsRestTemplate() {
+    return tcsRestTemplate;
+  }
+
+  public void setTcsRestTemplate(RestTemplate tcsRestTemplate) {
+    this.tcsRestTemplate = tcsRestTemplate;
   }
 }
