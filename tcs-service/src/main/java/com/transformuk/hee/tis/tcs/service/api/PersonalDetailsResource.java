@@ -181,7 +181,6 @@ public class PersonalDetailsResource {
   public ResponseEntity<PersonalDetailsDTO> patchPersonDetails(
       @Valid @RequestBody PersonalDetailsDTO personalDetailsDTO, @PathVariable Long id) {
     log.debug("REST Request to patch personalDetails: {}", personalDetailsDTO);
-    //PersonalDetailsDTO existingPersonalDetailsDTO = personalDetailsService.findby(personalDetailsDTO.getId());
 
     Optional<PersonalDetailsDTO> result = personalDetailsService.patchUpdate(personalDetailsDTO);
 

@@ -109,7 +109,7 @@ public class ContactDetailsServiceImpl implements ContactDetailsService {
    */
   @Override
   public Optional<ContactDetailsDTO> patch(ContactDetailsDTO contactDetailsDTO) {
-    log.debug("Request to patch contact details ");
+    log.debug("Request to patch contact details: {}", contactDetailsDTO);
 
     ContactDetails originalContactDetails = contactDetailsRepository
         .findById(contactDetailsDTO.getId())

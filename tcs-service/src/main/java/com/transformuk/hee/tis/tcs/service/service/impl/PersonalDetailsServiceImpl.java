@@ -148,7 +148,7 @@ public class PersonalDetailsServiceImpl implements PersonalDetailsService {
 
   @Override
   public Optional<PersonalDetailsDTO> patchUpdate(PersonalDetailsDTO personalDetailsDTO) {
-    log.debug("Request to patch person details ");
+    log.debug("Request to patch person details {}", personalDetailsDTO);
     PersonalDetails originalPersonDetail = personalDetailsRepository
         .findById(personalDetailsDTO.getId())
         .orElse(null);
