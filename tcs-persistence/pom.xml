@@ -13,7 +13,7 @@
   <description>A module containing the model and persistence layer for TCS</description>
   <groupId>uk.nhs.tis</groupId>
   <artifactId>tcs-persistence</artifactId>
-  <version>1.7.2</version>
+  <version>1.8.0</version>
   <packaging>jar</packaging>
 
   <properties>
