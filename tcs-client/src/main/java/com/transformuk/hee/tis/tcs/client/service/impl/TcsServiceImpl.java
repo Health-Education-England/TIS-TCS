@@ -647,9 +647,11 @@ public class TcsServiceImpl extends AbstractClientService {
   }
 
   //PUT
-  public boolean putAbsence(AbsenceDTO absenceDTO) {
+  public boolean putAbsence(Long id, AbsenceDTO absenceDTO) {
+    Preconditions.checkArgument(id != null, "cannot update absence when id is null");
     Preconditions.checkArgument(absenceDTO != null, "cannot update absence when absence is null");
-    String url = serviceUrl + API_ABSENCE;
+
+    String url = serviceUrl + API_ABSENCE + id;
     HttpHeaders headers = new HttpHeaders();
     HttpEntity<AbsenceDTO> httpEntity = new HttpEntity<>(absenceDTO, headers);
 
@@ -660,15 +662,18 @@ public class TcsServiceImpl extends AbstractClientService {
   }
 
   //PATCH
-  public boolean patchAbsence(AbsenceDTO absenceDTO) {
-    Preconditions.checkArgument(absenceDTO != null, "cannot patch absence when absence is null");
-    String url = serviceUrl + API_ABSENCE;
+  public boolean patchAbsence(Long id, Map<String, Object> absenceMap) {
+    Preconditions.checkArgument(id != null, "cannot patch absence when id is null");
+    Preconditions.checkArgument(absenceMap != null, "cannot patch absence when absence is null");
+
+    String url = serviceUrl + API_ABSENCE + id;
     HttpHeaders headers = new HttpHeaders();
-    HttpEntity<AbsenceDTO> httpEntity = new HttpEntity<>(absenceDTO, headers);
+    HttpEntity<Map<String, Object>> httpEntity = new HttpEntity<>(absenceMap, headers);
 
-    AbsenceDTO response = tcsRestTemplate.patchForObject(url, absenceDTO, AbsenceDTO.class, Maps.newHashMap());
+    ResponseEntity<Map> response = tcsRestTemplate
+        .exchange(url, HttpMethod.PATCH, httpEntity, Map.class, Maps.newHashMap());
 
-    return response != null ? true : false;
+    return response.getStatusCode().equals(HttpStatus.OK);
   }
 
   @Override

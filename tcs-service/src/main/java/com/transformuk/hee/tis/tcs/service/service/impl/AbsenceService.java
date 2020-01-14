@@ -1,7 +1,6 @@
 package com.transformuk.hee.tis.tcs.service.service.impl;
 
 import com.google.common.base.Preconditions;
-import com.google.common.collect.Lists;
 import com.transformuk.hee.tis.tcs.api.dto.AbsenceDTO;
 import com.transformuk.hee.tis.tcs.service.model.Absence;
 import com.transformuk.hee.tis.tcs.service.model.Person;
@@ -9,11 +8,10 @@ import com.transformuk.hee.tis.tcs.service.repository.AbsenceRepository;
 import com.transformuk.hee.tis.tcs.service.repository.PersonRepository;
 import com.transformuk.hee.tis.tcs.service.service.mapper.AbsenceMapper;
 import java.lang.reflect.Field;
-import java.lang.reflect.Method;
-import java.util.ArrayList;
-import java.util.List;
+import java.time.LocalDate;
+import java.util.Map;
+import java.util.Map.Entry;
 import java.util.Optional;
-import javax.naming.ldap.PagedResultsControl;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
@@ -81,27 +79,33 @@ public class AbsenceService {
   }
 
 
-  public Optional<AbsenceDTO> patchAbsence(AbsenceDTO absenceDTO) throws Exception {
+  public Optional<AbsenceDTO> patchAbsence(Map<String, Object> absenceDTO) throws Exception {
     Preconditions.checkArgument(absenceDTO != null, "absenceDto cannot be null");
 
     Optional<Absence> optionalAbsence = Optional.empty();
     Optional<AbsenceDTO> result = Optional.empty();
-    if (absenceDTO.getId() != null) {
-      optionalAbsence = absenceRepository.findById(absenceDTO.getId());
-    } else if (absenceDTO.getAbsenceAttendanceId() != null) {
+    if (absenceDTO.containsKey("id")) {
+      optionalAbsence = absenceRepository.findById(new Long((Integer) absenceDTO.get("id")));
+    } else if (absenceDTO.containsKey("absenceAttendanceId")) {
       optionalAbsence = absenceRepository
-          .findByAbsenceAttendanceId(absenceDTO.getAbsenceAttendanceId());
+          .findByAbsenceAttendanceId((String) absenceDTO.get("absenceAttendanceId"));
     }
 
     if (optionalAbsence.isPresent()) {
       Absence foundAbsence = optionalAbsence.get();
-      List<Field> absenceFields = Lists.newArrayList(AbsenceDTO.class.getDeclaredFields());
-      for (Field absenceFieldDto : absenceFields) {
-        absenceFieldDto.setAccessible(true);
-        String fieldName = absenceFieldDto.getName();
-        Object fieldValue = absenceFieldDto.get(absenceDTO);
+      for (Entry<String, Object> entry : absenceDTO.entrySet()) {
+        String fieldName = entry.getKey();
+        Object fieldValue = entry.getValue();
+        if(fieldValue != null) {
+          if (fieldName.equals("startDate") || fieldName.equals("endDate")) {
+            fieldValue = LocalDate.parse((String) entry.getValue());
+          } else if (fieldName.equals("durationInDays")) {
+            fieldValue = new Long((Integer) entry.getValue());
+          }
+        }
 
-        if (StringUtils.equals("personId", fieldName) || fieldValue == null) {
+        if (StringUtils.equals("personId", fieldName) ||
+            StringUtils.equals("id", fieldName)) {
           continue;
         }
         Field absenceField = Absence.class.getDeclaredField(fieldName);

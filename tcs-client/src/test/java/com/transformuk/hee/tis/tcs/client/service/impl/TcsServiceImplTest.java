@@ -3,8 +3,10 @@ package com.transformuk.hee.tis.tcs.client.service.impl;
 import static org.junit.Assert.*;
 
 import com.github.tomakehurst.wiremock.junit.WireMockClassRule;
+import com.google.common.collect.Maps;
 import com.transformuk.hee.tis.tcs.api.dto.AbsenceDTO;
 import java.time.LocalDate;
+import java.util.HashMap;
 import java.util.Optional;
 import org.junit.Before;
 import org.junit.ClassRule;
@@ -117,31 +119,40 @@ public class TcsServiceImplTest {
     absenceDTO.setDurationInDays(1L);
     absenceDTO.setAbsenceAttendanceId("d-e-w");
     absenceDTO.setPersonId(12345L);
-    boolean result = testObj.putAbsence(absenceDTO);
+    boolean result = testObj.putAbsence(1L, absenceDTO);
 
     assertTrue(result);
   }
 
 
   @Test(expected = IllegalArgumentException.class)
-  public void putAbsenceShouldThrowExceptionWhenParameterIsNull(){
-    testObj.putAbsence(null);
+  public void putAbsenceShouldThrowExceptionWhenIdIsNull(){
+    testObj.putAbsence(null, new AbsenceDTO());
+  }
+
+  @Test(expected = IllegalArgumentException.class)
+  public void putAbsenceShouldThrowExceptionWhenAbsenceIsNull(){
+    testObj.putAbsence(1L, null);
   }
 
   @Test
-  public void patchAbsenceShouldPostAndReturnTrue(){
-    AbsenceDTO absenceDTO = new AbsenceDTO();
-    absenceDTO.setId(1L);
-    absenceDTO.setStartDate(LocalDate.of(2019, 12, 5));
-    absenceDTO.setAbsenceAttendanceId("d-e-w");
-    boolean result = testObj.patchAbsence(absenceDTO);
+  public void patchAbsenceShouldPostAndReturnTrue() {
+    HashMap<String, Object> data = Maps.newHashMap();
+    data.put("id", 1L);
+    data.put("startDate", LocalDate.of(2019, 12, 5));
+    data.put("absenceAttendanceId", "d-e-w");
+    boolean result = testObj.patchAbsence(1L, data);
 
     assertTrue(result);
   }
 
+  @Test(expected = IllegalArgumentException.class)
+  public void patchAbsenceShouldThrowExceptionWhenParameterIdIsNull(){
+    testObj.patchAbsence(null, new HashMap<>());
+  }
 
   @Test(expected = IllegalArgumentException.class)
-  public void patchAbsenceShouldThrowExceptionWhenParameterIsNull(){
-    testObj.patchAbsence(null);
+  public void patchAbsenceShouldThrowExceptionWhenParameterMapIsNull(){
+    testObj.patchAbsence(1L, null);
   }
 }

@@ -29,6 +29,7 @@ import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.test.context.ContextConfiguration;
 import org.springframework.test.context.junit4.SpringRunner;
 import org.springframework.test.web.servlet.MockMvc;
+import org.springframework.ui.ModelMap;
 
 @RunWith(SpringRunner.class)
 @WebMvcTest(value = AbsenceResource.class, secure = false)
@@ -46,6 +47,8 @@ public class AbsenceResourceTest {
 
   @Captor
   private ArgumentCaptor<AbsenceDTO> absenceDTOArgumentCaptor;
+  @Captor
+  private ArgumentCaptor<ModelMap> modelMapArgumentCaptor;
 
   private AbsenceDTO absenceDTOStub, newAbsenceDtoStub;
   private Gson gson;
@@ -96,7 +99,8 @@ public class AbsenceResourceTest {
 
   @Test
   public void getByAbsenceIdShouldReturnAbsenceWhenExists() throws Exception {
-    when(absenceServiceMock.findAbsenceById(ESR_ABSENCE_ID)).thenReturn(Optional.of(absenceDTOStub));
+    when(absenceServiceMock.findAbsenceById(ESR_ABSENCE_ID))
+        .thenReturn(Optional.of(absenceDTOStub));
     this.mockMvc.perform(get("/api/absence/absenceId/{absenceId}", ESR_ABSENCE_ID))
         .andDo(print())
         .andExpect(status().isOk())
@@ -143,7 +147,7 @@ public class AbsenceResourceTest {
     when(absenceServiceMock.updateAbsence(absenceDTOArgumentCaptor.capture()))
         .thenReturn(absenceDTOStub);
     String jsonContent = asJsonString(absenceDTOStub);
-    this.mockMvc.perform(put("/api/absence")
+    this.mockMvc.perform(put("/api/absence/1")
         .content(jsonContent)
         .contentType(TestUtil.APPLICATION_JSON_UTF8))
         .andDo(print())
@@ -160,36 +164,57 @@ public class AbsenceResourceTest {
 
   @Test
   public void patchAbsenceShouldReturnOkWhenExists() throws Exception {
-    when(absenceServiceMock.patchAbsence(absenceDTOArgumentCaptor.capture()))
+    absenceDTOStub.setStartDate(null);
+    absenceDTOStub.setEndDate(LocalDate.of(2020, 2, 29));
+    absenceDTOStub.setDurationInDays(0L);
+    when(absenceServiceMock.patchAbsence(modelMapArgumentCaptor.capture()))
         .thenReturn(Optional.of(absenceDTOStub));
-    String jsonContent = asJsonString(absenceDTOStub);
-    this.mockMvc.perform(patch("/api/absence")
-        .content(jsonContent)
+    this.mockMvc.perform(patch("/api/absence/1")
+        .content("{\n"
+            + "      \"id\": 1,\n"
+            + "      \"startDate\": null,\n"
+            + "      \"endDate\": \"2020-02-29\",\n"
+            + "      \"durationInDays\": 0\n"
+            + "    }")
         .contentType(TestUtil.APPLICATION_JSON_UTF8))
         .andDo(print())
         .andExpect(status().isOk())
         .andExpect(jsonPath("$.id").value(ABSENCE_ID))
-        .andExpect(jsonPath("$.startDate").value("2020-01-01"))
-        .andExpect(jsonPath("$.endDate").value("2020-02-01"))
-        .andExpect(jsonPath("$.durationInDays").value(30))
+        .andExpect(jsonPath("$.startDate").isEmpty())
+        .andExpect(jsonPath("$.endDate").value("2020-02-29"))
+        .andExpect(jsonPath("$.durationInDays").value(0))
         .andExpect(jsonPath("$.absenceAttendanceId").value(ESR_ABSENCE_ID))
         .andExpect(jsonPath("$.personId").value(PERSON_ID));
 
-    Assert.assertEquals(absenceDTOStub, absenceDTOArgumentCaptor.getValue());
+    ModelMap capturedModelMap = modelMapArgumentCaptor.getValue();
+    Assert.assertEquals(4, capturedModelMap.size());
+    Assert.assertEquals(1, capturedModelMap.get("id"));
+    Assert.assertNull(capturedModelMap.get("startDate"));
+    Assert.assertEquals("2020-02-29", capturedModelMap.get("endDate"));
+    Assert.assertEquals(0, capturedModelMap.get("durationInDays"));
   }
 
   @Test
   public void patchAbsenceShouldReturn404WhenDoesntExist() throws Exception {
-    when(absenceServiceMock.patchAbsence(absenceDTOArgumentCaptor.capture()))
+    when(absenceServiceMock.patchAbsence(modelMapArgumentCaptor.capture()))
         .thenReturn(Optional.empty());
-    String jsonContent = asJsonString(absenceDTOStub);
-    this.mockMvc.perform(patch("/api/absence")
-        .content(jsonContent)
+    this.mockMvc.perform(patch("/api/absence/1")
+        .content("{\n"
+            + "      \"id\": 1,\n"
+            + "      \"startDate\": null,\n"
+            + "      \"endDate\": \"2020/02/29\",\n"
+            + "      \"durationInDays\": 91\n"
+            + "    }")
         .contentType(TestUtil.APPLICATION_JSON_UTF8))
         .andDo(print())
         .andExpect(status().isNotFound());
 
-    Assert.assertEquals(absenceDTOStub, absenceDTOArgumentCaptor.getValue());
+    ModelMap capturedModelMap = modelMapArgumentCaptor.getValue();
+    Assert.assertEquals(4, capturedModelMap.size());
+    Assert.assertEquals(1, capturedModelMap.get("id"));
+    Assert.assertNull(capturedModelMap.get("startDate"));
+    Assert.assertEquals("2020/02/29", capturedModelMap.get("endDate"));
+    Assert.assertEquals(91, capturedModelMap.get("durationInDays"));
   }
 
 

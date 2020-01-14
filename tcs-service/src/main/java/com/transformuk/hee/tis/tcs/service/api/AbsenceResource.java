@@ -2,10 +2,13 @@ package com.transformuk.hee.tis.tcs.service.api;
 
 import com.transformuk.hee.tis.tcs.api.dto.AbsenceDTO;
 import com.transformuk.hee.tis.tcs.service.service.impl.AbsenceService;
+import java.util.Map;
 import java.util.Optional;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
+import org.springframework.ui.Model;
+import org.springframework.ui.ModelMap;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PatchMapping;
 import org.springframework.web.bind.annotation.PathVariable;
@@ -59,15 +62,17 @@ public class AbsenceResource {
     return ResponseEntity.ok(result);
   }
 
-  @PutMapping
+  @PutMapping("/{id}")
   @PreAuthorize("hasPermission('tis:people::person:', 'Update')")
-  public ResponseEntity<AbsenceDTO> updateCreateAbsence(@RequestBody AbsenceDTO absenceDTO) {
+  public ResponseEntity<AbsenceDTO> updateCreateAbsence(@PathVariable Long id,
+      @RequestBody AbsenceDTO absenceDTO) {
     return ResponseEntity.ok(absenceService.updateAbsence(absenceDTO));
   }
 
-  @PatchMapping
+  @PatchMapping("/{id}")
   @PreAuthorize("hasPermission('tis:people::person:', 'Update')")
-  public ResponseEntity<AbsenceDTO> patchAbsence(@RequestBody AbsenceDTO absenceDTO)
+  public ResponseEntity<AbsenceDTO> patchAbsence(@PathVariable Long id,
+      @RequestBody ModelMap absenceDTO)
       throws Exception {
     Optional<AbsenceDTO> optionalAbsence = absenceService.patchAbsence(absenceDTO);
     return optionalAbsence.map(ResponseEntity::ok)

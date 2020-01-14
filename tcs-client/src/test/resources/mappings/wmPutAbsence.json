@@ -1,6 +1,6 @@
 {
   "request": {
-    "url": "/tcs/api/absence/",
+    "url": "/tcs/api/absence/1",
     "method": "PUT"
   },
   "response": {
