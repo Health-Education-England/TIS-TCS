@@ -3,13 +3,14 @@ package com.transformuk.hee.tis.tcs.api.dto;
 
 import com.transformuk.hee.tis.tcs.api.dto.validation.Create;
 import com.transformuk.hee.tis.tcs.api.dto.validation.Update;
-import java.io.Serializable;
-import java.time.LocalDateTime;
-import java.util.Objects;
+import org.hibernate.validator.constraints.Email;
+
 import javax.validation.constraints.DecimalMin;
 import javax.validation.constraints.NotNull;
 import javax.validation.constraints.Pattern;
-import org.hibernate.validator.constraints.Email;
+import java.io.Serializable;
+import java.time.LocalDateTime;
+import java.util.Objects;
 
 /**
  * A DTO for the ContactDetails entity.
@@ -86,6 +87,14 @@ public class ContactDetailsDTO implements Serializable {
   private String postCode;
 
   private LocalDateTime amendedDate;
+
+  @Email(message = "Valid email format required", groups = {Update.class, Create.class})
+  private String workEmail;
+
+  @Pattern(regexp = "^$|^[A-Za-z0-9\\-\\\\' ]+",
+      message = "No special characters, with the exception of apostrophes, hyphens and spaces",
+      groups = {Update.class, Create.class})
+  private String country;
 
   public Long getId() {
     return id;
@@ -231,6 +240,22 @@ public class ContactDetailsDTO implements Serializable {
     this.amendedDate = amendedDate;
   }
 
+  public String getWorkEmail() {
+    return workEmail;
+  }
+
+  public void setWorkEmail(String workEmail) {
+    this.workEmail = workEmail;
+  }
+
+  public String getCountry() {
+    return country;
+  }
+
+  public void setCountry(String country) {
+    this.country = country;
+  }
+
   @Override
   public boolean equals(Object o) {
     if (this == o) {
@@ -273,6 +298,8 @@ public class ContactDetailsDTO implements Serializable {
         ", address4='" + address4 + '\'' +
         ", postCode='" + postCode + '\'' +
         ", amendedDate='" + amendedDate + '\'' +
+        ", workEmail='" + workEmail + '\'' +
+        ", country='" + country + '\'' +
         '}';
   }
 }

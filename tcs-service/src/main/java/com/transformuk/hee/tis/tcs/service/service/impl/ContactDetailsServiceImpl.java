@@ -6,6 +6,7 @@ import com.transformuk.hee.tis.tcs.service.repository.ContactDetailsRepository;
 import com.transformuk.hee.tis.tcs.service.service.ContactDetailsService;
 import com.transformuk.hee.tis.tcs.service.service.mapper.ContactDetailsMapper;
 import java.util.List;
+import java.util.Optional;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.data.domain.Page;
@@ -99,4 +100,34 @@ public class ContactDetailsServiceImpl implements ContactDetailsService {
     log.debug("Request to delete ContactDetails : {}", id);
     contactDetailsRepository.deleteById(id);
   }
+
+  /**
+   * Update Contact Details of a person which are not null in incoming DTO.
+   *
+   * @param contactDetailsDTO contactDetailsDTO to be updated
+   * @return updated DTO
+   */
+  @Override
+  public Optional<ContactDetailsDTO> patch(ContactDetailsDTO contactDetailsDTO) {
+    log.debug("Request to patch contact details: {}", contactDetailsDTO);
+
+    ContactDetails originalContactDetails = contactDetailsRepository
+        .findById(contactDetailsDTO.getId())
+        .orElse(null);
+
+    Optional<ContactDetails> updatedContactDetailsOptional = contactDetailsMapper
+        .toPatchedEntity(originalContactDetails, contactDetailsDTO);
+
+    if (updatedContactDetailsOptional.isPresent()) {
+      ContactDetails updatedContactDetails = updatedContactDetailsOptional.get();
+
+      updatedContactDetails = contactDetailsRepository.saveAndFlush(updatedContactDetails);
+
+      ContactDetailsDTO contactDetailsDTO1 = contactDetailsMapper.toDto(updatedContactDetails);
+
+      return Optional.ofNullable(contactDetailsDTO1);
+    }
+    return Optional.empty();
+  }
+
 }

@@ -165,4 +165,26 @@ public class ContactDetailsResource {
         .headers(HeaderUtil.createEntityUpdateAlert(ENTITY_NAME, StringUtils.join(ids, ",")))
         .body(result);
   }
+
+  /**
+   * PATCH /contact-details/contact : Patch contactDetails. Only non Null values in contactDetails
+   * will be updated, rest will remain as it is.
+   *
+   * @param contactDetailsDTO the contactDetailsDTOs to create/update
+   * @return the ResponseEntity with status 200 and with body the new contactDetailsDTOs
+   */
+  @PatchMapping("/contact-details/{id}")
+  @PreAuthorize("hasPermission('tis:people::person:', 'Update')")
+  public ResponseEntity<ContactDetailsDTO> patchPersonContactDetails(
+      @Valid @RequestBody ContactDetailsDTO contactDetailsDTO, @PathVariable Long id) {
+    log.debug("REST request to patch contactDetails: {}", contactDetailsDTO);
+    Optional<ContactDetailsDTO> result = contactDetailsService.patch(contactDetailsDTO);
+
+    return result.map(detailsDTO -> ResponseEntity.ok()
+        .headers(HeaderUtil.createEntityUpdateAlert(ENTITY_NAME, detailsDTO.getId().toString()))
+        .body(detailsDTO))
+        .orElseGet(() -> ResponseEntity.badRequest().headers(
+            HeaderUtil.createEntityUpdateAlert(ENTITY_NAME, contactDetailsDTO.getId().toString()))
+            .body(contactDetailsDTO));
+  }
 }

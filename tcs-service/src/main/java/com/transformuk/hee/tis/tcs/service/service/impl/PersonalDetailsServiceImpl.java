@@ -6,6 +6,7 @@ import com.transformuk.hee.tis.tcs.service.repository.PersonalDetailsRepository;
 import com.transformuk.hee.tis.tcs.service.service.PersonalDetailsService;
 import com.transformuk.hee.tis.tcs.service.service.mapper.PersonalDetailsMapper;
 import java.util.List;
+import java.util.Optional;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -143,5 +144,30 @@ public class PersonalDetailsServiceImpl implements PersonalDetailsService {
   public void delete(Long id) {
     log.debug("Request to delete PersonalDetails : {}", id);
     personalDetailsRepository.deleteById(id);
+  }
+
+  @Override
+  public Optional<PersonalDetailsDTO> patchUpdate(PersonalDetailsDTO personalDetailsDTO) {
+    log.debug("Request to patch person details {}", personalDetailsDTO);
+    PersonalDetails originalPersonDetail = personalDetailsRepository
+        .findById(personalDetailsDTO.getId())
+        .orElse(null);
+
+    PersonalDetails personalDetails;
+
+    Optional<PersonalDetails> origPersonalDetailsOptional = personalDetailsMapper
+        .toPatchedEntity(originalPersonDetail, personalDetailsDTO);
+
+    if (origPersonalDetailsOptional.isPresent()) {
+      personalDetails = origPersonalDetailsOptional.get();
+
+      personalDetails = personalDetailsRepository.saveAndFlush(personalDetails);
+
+      PersonalDetailsDTO personalDetailsDTO1 = personalDetailsMapper.toDto(personalDetails);
+
+      return Optional.ofNullable(personalDetailsDTO1);
+    } else {
+      return Optional.empty();
+    }
   }
 }

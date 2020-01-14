@@ -54,6 +54,9 @@ public class ContactDetails implements Serializable {
   @Version
   private LocalDateTime amendedDate;
 
+  private String workEmail;
+
+  private String country;
 
   public Long getId() {
     return id;
@@ -269,6 +272,32 @@ public class ContactDetails implements Serializable {
     this.amendedDate = amendedDate;
   }
 
+  public String getWorkEmail() {
+    return workEmail;
+  }
+
+  public void setWorkEmail(String workEmail) {
+    this.workEmail = workEmail;
+  }
+
+  public ContactDetails workEmail(String workEmail) {
+    this.workEmail = workEmail;
+    return this;
+  }
+
+  public String getCountry() {
+    return country;
+  }
+
+  public void setCountry(String country) {
+    this.country = country;
+  }
+
+  public ContactDetails country(String country) {
+    this.country = country;
+    return this;
+  }
+
   @Override
   public boolean equals(Object o) {
     if (this == o) {
@@ -310,6 +339,8 @@ public class ContactDetails implements Serializable {
         ", address4='" + address4 + '\'' +
         ", postCode='" + postCode + '\'' +
         ", amendedDate='" + amendedDate + '\'' +
+        ", workEmail='" + workEmail + '\'' +
+        ", country='" + country + '\'' +
         '}';
   }
 }
