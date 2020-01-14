@@ -26,48 +26,47 @@ public abstract class PersonalDetailsMapper implements
       PersonalDetailsDTO personalDetailsDTO) {
     if (originalPersonDetail == null || personalDetailsDTO == null) {
       return Optional.empty();
-    } else {
-
-      if (personalDetailsDTO.getSexualOrientation() != null) {
-        originalPersonDetail.setSexualOrientation(personalDetailsDTO.getSexualOrientation());
-      }
-      if (personalDetailsDTO.getReligiousBelief() != null) {
-        originalPersonDetail.setReligiousBelief(personalDetailsDTO.getReligiousBelief());
-      }
-      if (personalDetailsDTO.getNationality() != null) {
-        originalPersonDetail.setNationality(personalDetailsDTO.getNationality());
-      }
-      if (personalDetailsDTO.getNationalInsuranceNumber() != null) {
-        originalPersonDetail
-            .setNationalInsuranceNumber(personalDetailsDTO.getNationalInsuranceNumber());
-      }
-      if (personalDetailsDTO.getMaritalStatus() != null) {
-        originalPersonDetail.setMaritalStatus(personalDetailsDTO.getMaritalStatus());
-      }
-      if (personalDetailsDTO.getGender() != null) {
-        originalPersonDetail.setGender(personalDetailsDTO.getGender());
-      }
-      if (personalDetailsDTO.getEthnicOrigin() != null) {
-        originalPersonDetail.setEthnicOrigin(personalDetailsDTO.getEthnicOrigin());
-      }
-      if (personalDetailsDTO.getDualNationality() != null) {
-        originalPersonDetail.setDualNationality(personalDetailsDTO.getDualNationality());
-      }
-      if (personalDetailsDTO.getDisability() != null) {
-        originalPersonDetail.setDisability(personalDetailsDTO.getDisability());
-      }
-      if (personalDetailsDTO.getDisabilityDetails() != null) {
-        originalPersonDetail.setDisabilityDetails(personalDetailsDTO.getDisabilityDetails());
-      }
-      if (personalDetailsDTO.getDateOfBirth() != null) {
-        originalPersonDetail.setDateOfBirth(personalDetailsDTO.getDateOfBirth());
-      }
-      if (personalDetailsDTO.getAmendedDate() != null) {
-        originalPersonDetail.setAmendedDate(personalDetailsDTO.getAmendedDate());
-      }
-
-      return Optional.ofNullable(originalPersonDetail);
     }
+
+    if (personalDetailsDTO.getSexualOrientation() != null) {
+      originalPersonDetail.setSexualOrientation(personalDetailsDTO.getSexualOrientation());
+    }
+    if (personalDetailsDTO.getReligiousBelief() != null) {
+      originalPersonDetail.setReligiousBelief(personalDetailsDTO.getReligiousBelief());
+    }
+    if (personalDetailsDTO.getNationality() != null) {
+      originalPersonDetail.setNationality(personalDetailsDTO.getNationality());
+    }
+    if (personalDetailsDTO.getNationalInsuranceNumber() != null) {
+      originalPersonDetail
+          .setNationalInsuranceNumber(personalDetailsDTO.getNationalInsuranceNumber());
+    }
+    if (personalDetailsDTO.getMaritalStatus() != null) {
+      originalPersonDetail.setMaritalStatus(personalDetailsDTO.getMaritalStatus());
+    }
+    if (personalDetailsDTO.getGender() != null) {
+      originalPersonDetail.setGender(personalDetailsDTO.getGender());
+    }
+    if (personalDetailsDTO.getEthnicOrigin() != null) {
+      originalPersonDetail.setEthnicOrigin(personalDetailsDTO.getEthnicOrigin());
+    }
+    if (personalDetailsDTO.getDualNationality() != null) {
+      originalPersonDetail.setDualNationality(personalDetailsDTO.getDualNationality());
+    }
+    if (personalDetailsDTO.getDisability() != null) {
+      originalPersonDetail.setDisability(personalDetailsDTO.getDisability());
+    }
+    if (personalDetailsDTO.getDisabilityDetails() != null) {
+      originalPersonDetail.setDisabilityDetails(personalDetailsDTO.getDisabilityDetails());
+    }
+    if (personalDetailsDTO.getDateOfBirth() != null) {
+      originalPersonDetail.setDateOfBirth(personalDetailsDTO.getDateOfBirth());
+    }
+    if (personalDetailsDTO.getAmendedDate() != null) {
+      originalPersonDetail.setAmendedDate(personalDetailsDTO.getAmendedDate());
+    }
+
+    return Optional.ofNullable(originalPersonDetail);
   }
 
 }
