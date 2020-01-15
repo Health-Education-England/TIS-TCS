@@ -1,0 +1,12 @@
+{
+  "request": {
+    "url": "/tcs/api/absence/9",
+    "method": "GET"
+  },
+  "response": {
+    "status": 404,
+    "headers": {
+      "Content-Type": "application/json"
+    }
+  }
+}

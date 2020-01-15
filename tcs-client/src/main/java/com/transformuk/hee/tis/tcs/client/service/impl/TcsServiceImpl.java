@@ -1,7 +1,9 @@
 package com.transformuk.hee.tis.tcs.client.service.impl;
 
+import com.google.common.base.Preconditions;
 import com.google.common.collect.Maps;
 import com.transformuk.hee.tis.client.impl.AbstractClientService;
+import com.transformuk.hee.tis.tcs.api.dto.AbsenceDTO;
 import com.transformuk.hee.tis.tcs.api.dto.ContactDetailsDTO;
 import com.transformuk.hee.tis.tcs.api.dto.CurriculumDTO;
 import com.transformuk.hee.tis.tcs.api.dto.FundingComponentsDTO;
@@ -34,11 +36,14 @@ import java.io.UnsupportedEncodingException;
 import java.net.URLEncoder;
 import java.util.List;
 import java.util.Map;
+import java.util.Objects;
+import java.util.Optional;
 import java.util.Set;
 import java.util.stream.Collectors;
 import javax.annotation.PostConstruct;
 import org.apache.commons.codec.EncoderException;
 import org.apache.commons.lang3.StringUtils;
+import org.apache.commons.lang3.exception.ExceptionUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -86,6 +91,8 @@ public class TcsServiceImpl extends AbstractClientService {
   private static final String BASIC = "/basic";
   private static final String API_POST_FUNDINGS = "/api/post/fundings";
   private static final String API_FUNDINGS = "/api/post-fundings/";
+  private static final String API_ABSENCE = "/api/absence/";
+  private static final String API_ABSENCE_BY_ABS_ID = API_ABSENCE + "absenceId/";
   private static final Map<Class, ParameterizedTypeReference> classToParamTypeRefMap;
   private static String curriculumJsonQuerystringURLEncoded, programmeJsonQuerystringURLEncoded, specialtyJsonQuerystringURLEncoded, placementJsonQuerystringURLEncoded, rotationJsonQuerystringURLEncoded;
 
@@ -591,6 +598,102 @@ public class TcsServiceImpl extends AbstractClientService {
     return responseEntity.getBody();
   }
 
+  public Optional<AbsenceDTO> findAbsenceById(Long id) {
+    Preconditions.checkArgument(id != null, "Id for absence cannot be null");
+    String url = serviceUrl + API_ABSENCE + id;
+    return requestAbsenceById(id, url,
+        "An exception was thrown when requesting absence for id [{}]. [{}]");
+  }
+
+  //use third party pk to lookup record
+  public Optional<AbsenceDTO> findAbsenceByAbsenceId(String absenceId) {
+    Preconditions.checkArgument(StringUtils.isNoneBlank(absenceId),
+        "absenceId cannot be null or empty");
+
+    String url = serviceUrl + API_ABSENCE_BY_ABS_ID + absenceId;
+    return requestAbsenceById(absenceId, url,
+        "An exception was thrown when requesting absence for absenceId [{}]. [{}]");
+  }
+
+  private Optional<AbsenceDTO> requestAbsenceById(Object absenceId, String url,
+      String errorMessage) {
+    try {
+      ResponseEntity<AbsenceDTO> response = tcsRestTemplate
+          .exchange(url, HttpMethod.GET, null, AbsenceDTO.class);
+      if (response.getStatusCode().is2xxSuccessful()) {
+        return Optional.of(response.getBody());
+      }
+    } catch (Exception e) {
+      log.error(errorMessage, absenceId,
+          ExceptionUtils.getStackTrace(e));
+    }
+    return Optional.empty();
+  }
+
+  //POST
+  public boolean addAbsence(AbsenceDTO absenceDTO) {
+    Preconditions.checkArgument(absenceDTO != null, "cannot create absence when absence is null");
+    Preconditions.checkState(StringUtils.isNotBlank(absenceDTO.getAbsenceAttendanceId()),
+        "cannot create absence with no attendanceId");
+
+    String url = serviceUrl + API_ABSENCE;
+    HttpHeaders headers = new HttpHeaders();
+    HttpEntity<AbsenceDTO> httpEntity = new HttpEntity<>(absenceDTO, headers);
+
+    try {
+      ResponseEntity<AbsenceDTO> response = tcsRestTemplate.exchange(url, HttpMethod.POST,
+          httpEntity, AbsenceDTO.class);
+      return response.getStatusCode().is2xxSuccessful();
+    } catch (Exception e) {
+      log.error(
+          "An exception was thrown when adding a new absence for absenceAttendanceId [{}]. [{}]",
+          absenceDTO.getAbsenceAttendanceId(), ExceptionUtils.getStackTrace(e));
+    }
+    return false;
+  }
+
+  //PUT
+  public boolean putAbsence(Long id, AbsenceDTO absenceDTO) {
+    Preconditions.checkArgument(id != null, "cannot update absence when id is null");
+    Preconditions.checkArgument(absenceDTO != null, "cannot update absence when absence is null");
+
+    String url = serviceUrl + API_ABSENCE + id;
+    HttpHeaders headers = new HttpHeaders();
+    HttpEntity<AbsenceDTO> httpEntity = new HttpEntity<>(absenceDTO, headers);
+
+    try {
+      ResponseEntity<AbsenceDTO> response = tcsRestTemplate.exchange(url, HttpMethod.PUT,
+          httpEntity, AbsenceDTO.class);
+      return response.getStatusCode().is2xxSuccessful();
+    } catch (Exception e) {
+      log.error(
+          "An exception was thrown when updating an absence for Id [{}]. [{}]",
+          id, ExceptionUtils.getStackTrace(e));
+    }
+    return false;
+  }
+
+  //PATCH
+  public boolean patchAbsence(Long id, Map<String, Object> absenceMap) {
+    Preconditions.checkArgument(id != null, "cannot patch absence when id is null");
+    Preconditions.checkArgument(absenceMap != null, "cannot patch absence when absence is null");
+
+    String url = serviceUrl + API_ABSENCE + id;
+    HttpHeaders headers = new HttpHeaders();
+    HttpEntity<Map<String, Object>> httpEntity = new HttpEntity<>(absenceMap, headers);
+
+    try {
+      ResponseEntity<Map> response = tcsRestTemplate
+          .exchange(url, HttpMethod.PATCH, httpEntity, Map.class, Maps.newHashMap());
+      return response.getStatusCode().is2xxSuccessful();
+    } catch (Exception e) {
+      log.error(
+          "An exception was thrown when patching an absence for Id [{}]. [{}]",
+          id, ExceptionUtils.getStackTrace(e));
+    }
+    return false;
+  }
+
   @Override
   public List<JsonPatchDTO> getJsonPathByTableDtoNameOrderByDateAddedAsc(String endpointUrl,
       Class objectDTO) {
@@ -618,5 +721,13 @@ public class TcsServiceImpl extends AbstractClientService {
   @Override
   public Map<Class, ParameterizedTypeReference> getClassToParamTypeRefMap() {
     return classToParamTypeRefMap;
+  }
+
+  public RestTemplate getTcsRestTemplate() {
+    return tcsRestTemplate;
+  }
+
+  public void setTcsRestTemplate(RestTemplate tcsRestTemplate) {
+    this.tcsRestTemplate = tcsRestTemplate;
   }
 }

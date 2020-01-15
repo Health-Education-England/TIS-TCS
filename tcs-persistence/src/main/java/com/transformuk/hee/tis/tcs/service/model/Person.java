@@ -95,6 +95,9 @@ public class Person implements Serializable {
   @OneToMany(mappedBy = "person", fetch = FetchType.LAZY)
   private Set<PersonTrust> associatedTrusts;
 
+  @OneToMany(mappedBy = "person", fetch = FetchType.LAZY)
+  private Set<Absence> absences ;
+
   public Long getId() {
     return id;
   }
@@ -344,6 +347,14 @@ public class Person implements Serializable {
 
   public void setAssociatedTrusts(Set<PersonTrust> associatedTrusts) {
     this.associatedTrusts = associatedTrusts;
+  }
+
+  public Set<Absence> getAbsences() {
+    return absences;
+  }
+
+  public void setAbsences(Set<Absence> absences) {
+    this.absences = absences;
   }
 
   @Override

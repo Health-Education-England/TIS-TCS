@@ -25,7 +25,6 @@ import org.springframework.security.web.firewall.HttpFirewall;
 
 @Configuration
 @EnableWebSecurity
-@EnableAutoConfiguration
 @Import(JwtSpringSecurityConfig.class)
 public class WebSecurityConfig extends WebSecurityConfigurerAdapter {
 
