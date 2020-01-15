@@ -1,6 +1,7 @@
 package com.transformuk.hee.tis.tcs.service.service.impl;
 
 import com.google.common.base.Preconditions;
+import com.google.common.collect.Maps;
 import com.transformuk.hee.tis.tcs.api.dto.AbsenceDTO;
 import com.transformuk.hee.tis.tcs.service.model.Absence;
 import com.transformuk.hee.tis.tcs.service.model.Person;
@@ -21,6 +22,13 @@ import org.springframework.transaction.annotation.Transactional;
 @Transactional
 public class AbsenceService {
 
+  private static final String ABSENCE_ID_KEY = "id";
+  private static final String ABSENCE_ATTENDANCE_ID_KEY = "absenceAttendanceId";
+  private static final String PERSON_ID_KEY = "personIdx";
+  private static final String DURATION_IN_DAYS_KEY = "durationInDays";
+  private static final String START_DATE_KEY = "startDate";
+  private static final String END_DATE_KEY = "endDate";
+
   @Autowired
   private AbsenceMapper absenceMapper;
   @Autowired
@@ -34,9 +42,11 @@ public class AbsenceService {
     return optionalAbsence.map(absenceMapper::toDto);
   }
 
-  public Optional<AbsenceDTO> findAbsenceById(String id) {
-    Preconditions.checkArgument(id != null, "The id cannot be null");
-    Optional<Absence> optionalAbsence = absenceRepository.findByAbsenceAttendanceId(id);
+  public Optional<AbsenceDTO> findAbsenceByAbsenceAttendanceId(String absenceAttendanceId) {
+    Preconditions.checkArgument(StringUtils.isNotBlank(absenceAttendanceId),
+        "The absenceAttendanceId cannot be null or blank");
+    Optional<Absence> optionalAbsence = absenceRepository
+        .findByAbsenceAttendanceId(absenceAttendanceId);
     return optionalAbsence.map(absenceMapper::toDto);
   }
 
@@ -79,41 +89,60 @@ public class AbsenceService {
   }
 
 
-  public Optional<AbsenceDTO> patchAbsence(Map<String, Object> absenceDTO) throws Exception {
-    Preconditions.checkArgument(absenceDTO != null, "absenceDto cannot be null");
+  public Optional<AbsenceDTO> patchAbsence(Map<String, Object> absenceDtoPatchMap)
+      throws Exception {
+    Preconditions.checkArgument(absenceDtoPatchMap != null, "absenceDto cannot be null");
 
+    Map<String, Object> params = fixPatchParams(absenceDtoPatchMap);
     Optional<Absence> optionalAbsence = Optional.empty();
-    Optional<AbsenceDTO> result = Optional.empty();
-    if (absenceDTO.containsKey("id")) {
-      optionalAbsence = absenceRepository.findById(new Long((Integer) absenceDTO.get("id")));
-    } else if (absenceDTO.containsKey("absenceAttendanceId")) {
+    if (absenceDtoPatchMap.containsKey(ABSENCE_ID_KEY)) {
+      optionalAbsence = absenceRepository.findById((Long) params.get(ABSENCE_ID_KEY));
+    } else if (absenceDtoPatchMap.containsKey(ABSENCE_ATTENDANCE_ID_KEY)) {
       optionalAbsence = absenceRepository
-          .findByAbsenceAttendanceId((String) absenceDTO.get("absenceAttendanceId"));
+          .findByAbsenceAttendanceId((String) params.get(ABSENCE_ATTENDANCE_ID_KEY));
     }
 
-    if (optionalAbsence.isPresent()) {
-      Absence foundAbsence = optionalAbsence.get();
-      for (Entry<String, Object> entry : absenceDTO.entrySet()) {
-        String fieldName = entry.getKey();
-        Object fieldValue = entry.getValue();
-        if(fieldValue != null) {
-          if (fieldName.equals("startDate") || fieldName.equals("endDate")) {
-            fieldValue = LocalDate.parse((String) entry.getValue());
-          } else if (fieldName.equals("durationInDays")) {
-            fieldValue = new Long((Integer) entry.getValue());
-          }
-        }
+    if (!optionalAbsence.isPresent()) {
+      return Optional.empty();
+    }
+    Absence foundAbsence = optionalAbsence.get();
+    for (Entry<String, Object> entry : params.entrySet()) {
+      String fieldName = entry.getKey();
+      Object fieldValue = entry.getValue();
 
-        if (StringUtils.equals("personId", fieldName) ||
-            StringUtils.equals("id", fieldName)) {
-          continue;
-        }
-        Field absenceField = Absence.class.getDeclaredField(fieldName);
-        absenceField.setAccessible(true);
-        absenceField.set(foundAbsence, fieldValue);
+      if (StringUtils.equals(PERSON_ID_KEY, fieldName) ||
+          StringUtils.equals(ABSENCE_ID_KEY, fieldName)) {
+        continue;
       }
 
-      result = Optional.of(absenceMapper.toDto(absenceRepository.saveAndFlush(foundAbsence)));
+      Field absenceField = Absence.class.getDeclaredField(fieldName);
+      absenceField.setAccessible(true);
+      absenceField.set(foundAbsence, fieldValue);
+    }
+
+    return Optional.of(absenceMapper.toDto(absenceRepository.saveAndFlush(foundAbsence)));
+  }
+
+  //because the endpoint converts json to a maps, it only knows about simple types and not the types
+  //of the absenceDTO, so this is to fix the types so that they will match the Absence entity
+  private Map<String, Object> fixPatchParams(Map<String, Object> params) {
+    Map<String, Object> result = Maps.newHashMap();
+
+    for (Entry<String, Object> entry : params.entrySet()) {
+      String key = entry.getKey();
+      if (entry.getValue() == null) {
+        result.put(key, entry.getValue());
+      } else {
+        if (StringUtils.equals(key, ABSENCE_ID_KEY) || StringUtils
+            .equals(key, DURATION_IN_DAYS_KEY)) {
+          result.put(key, new Long((Integer) entry.getValue()));
+        } else if (StringUtils.equals(key, START_DATE_KEY) || StringUtils
+            .equals(key, END_DATE_KEY)) {
+          result.put(key, LocalDate.parse((String) entry.getValue()));
+        } else {
+          result.put(key, entry.getValue());
+        }
+      }
     }
 
     return result;

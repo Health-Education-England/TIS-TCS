@@ -1,6 +1,8 @@
 package com.transformuk.hee.tis.tcs.client.service.impl;
 
-import static org.junit.Assert.*;
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertFalse;
+import static org.junit.Assert.assertTrue;
 
 import com.github.tomakehurst.wiremock.junit.WireMockClassRule;
 import com.google.common.collect.Maps;
@@ -53,13 +55,13 @@ public class TcsServiceImplTest {
   }
 
   @Test
-  public void findAbsenceByIdShouldReturnEmptyOptionalWhenDoesntExist(){
+  public void findAbsenceByIdShouldReturnEmptyOptionalWhenDoesntExist() {
     Optional<AbsenceDTO> result = testObj.findAbsenceById(9L);
     assertFalse(result.isPresent());
   }
 
   @Test(expected = IllegalArgumentException.class)
-  public void findAbsenceByIdShouldThrowExceptionWhenParameterIsNull(){
+  public void findAbsenceByIdShouldThrowExceptionWhenParameterIsNull() {
     testObj.findAbsenceById(null);
   }
 
@@ -82,18 +84,29 @@ public class TcsServiceImplTest {
   }
 
   @Test
-  public void findAbsenceByAbsenceIdShouldReturnEmptyOptionalWhenDoesntExist(){
+  public void findAbsenceByAbsenceIdShouldReturnEmptyOptionalWhenDoesntExist() {
     Optional<AbsenceDTO> result = testObj.findAbsenceByAbsenceId("qqq");
     assertFalse(result.isPresent());
   }
 
   @Test(expected = IllegalArgumentException.class)
-  public void findAbsenceByAbsenceIdShouldThrowExceptionWhenParameterIsNull(){
+  public void findAbsenceByAbsenceIdShouldThrowExceptionWhenParameterIsNull() {
     testObj.findAbsenceByAbsenceId(null);
   }
 
+  @Test(expected = IllegalArgumentException.class)
+  public void findAbsenceByAbsenceIdShouldThrowExceptionWhenParameterIsBlank() {
+    testObj.findAbsenceByAbsenceId("   ");
+  }
+
+  @Test(expected = IllegalArgumentException.class)
+  public void findAbsenceByAbsenceIdShouldThrowExceptionWhenParameterIsEmpty() {
+    testObj.findAbsenceByAbsenceId("");
+  }
+
+
   @Test
-  public void addAbsenceShouldPostAndReturnTrue(){
+  public void addAbsenceShouldPostAndReturnTrue() {
     AbsenceDTO absenceDTO = new AbsenceDTO();
     absenceDTO.setStartDate(LocalDate.of(2019, 12, 5));
     absenceDTO.setEndDate(LocalDate.of(2019, 12, 6));
@@ -106,12 +119,24 @@ public class TcsServiceImplTest {
   }
 
   @Test(expected = IllegalArgumentException.class)
-  public void addAbsenceShouldThrowExceptionWhenParameterIsNull(){
+  public void addAbsenceShouldThrowExceptionWhenParameterIsNull() {
     testObj.addAbsence(null);
   }
 
+  @Test(expected = IllegalStateException.class)
+  public void addAbsenceShouldThrowExceptionWhenAbsenceAttendanceIdIsNull() {
+    testObj.addAbsence(new AbsenceDTO());
+  }
+
+  @Test(expected = IllegalStateException.class)
+  public void addAbsenceShouldThrowExceptionWhenAbsenceAttendanceIdIsBlank() {
+    AbsenceDTO absenceDTO = new AbsenceDTO();
+    absenceDTO.setAbsenceAttendanceId("  ");
+    testObj.addAbsence(absenceDTO);
+  }
+
   @Test
-  public void putAbsenceShouldPostAndReturnTrue(){
+  public void putAbsenceShouldPostAndReturnTrue() {
     AbsenceDTO absenceDTO = new AbsenceDTO();
     absenceDTO.setId(1L);
     absenceDTO.setStartDate(LocalDate.of(2019, 12, 5));
@@ -126,12 +151,12 @@ public class TcsServiceImplTest {
 
 
   @Test(expected = IllegalArgumentException.class)
-  public void putAbsenceShouldThrowExceptionWhenIdIsNull(){
+  public void putAbsenceShouldThrowExceptionWhenIdIsNull() {
     testObj.putAbsence(null, new AbsenceDTO());
   }
 
   @Test(expected = IllegalArgumentException.class)
-  public void putAbsenceShouldThrowExceptionWhenAbsenceIsNull(){
+  public void putAbsenceShouldThrowExceptionWhenAbsenceIsNull() {
     testObj.putAbsence(1L, null);
   }
 
@@ -147,12 +172,12 @@ public class TcsServiceImplTest {
   }
 
   @Test(expected = IllegalArgumentException.class)
-  public void patchAbsenceShouldThrowExceptionWhenParameterIdIsNull(){
+  public void patchAbsenceShouldThrowExceptionWhenParameterIdIsNull() {
     testObj.patchAbsence(null, new HashMap<>());
   }
 
   @Test(expected = IllegalArgumentException.class)
-  public void patchAbsenceShouldThrowExceptionWhenParameterMapIsNull(){
+  public void patchAbsenceShouldThrowExceptionWhenParameterMapIsNull() {
     testObj.patchAbsence(1L, null);
   }
 }

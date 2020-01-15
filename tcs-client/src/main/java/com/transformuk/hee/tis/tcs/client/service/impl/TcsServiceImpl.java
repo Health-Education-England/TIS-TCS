@@ -36,6 +36,7 @@ import java.io.UnsupportedEncodingException;
 import java.net.URLEncoder;
 import java.util.List;
 import java.util.Map;
+import java.util.Objects;
 import java.util.Optional;
 import java.util.Set;
 import java.util.stream.Collectors;
@@ -52,7 +53,6 @@ import org.springframework.core.ParameterizedTypeReference;
 import org.springframework.http.HttpEntity;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpMethod;
-import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
 import org.springframework.web.client.RestTemplate;
@@ -601,49 +601,55 @@ public class TcsServiceImpl extends AbstractClientService {
   public Optional<AbsenceDTO> findAbsenceById(Long id) {
     Preconditions.checkArgument(id != null, "Id for absence cannot be null");
     String url = serviceUrl + API_ABSENCE + id;
-    try {
-      ResponseEntity<AbsenceDTO> response = tcsRestTemplate
-          .exchange(url, HttpMethod.GET, null, AbsenceDTO.class);
-      if (HttpStatus.OK.equals(response.getStatusCode())) {
-        return Optional.of(response.getBody());
-      }
-    } catch (Exception e) {
-      log.error("An exception was thrown when requesting absence for id [{}]. [{}]", id,
-          ExceptionUtils.getStackTrace(e));
-    }
-    log.debug("Did not find absence by id [{}]", id);
-    return Optional.empty();
+    return requestAbsenceById(id, url,
+        "An exception was thrown when requesting absence for id [{}]. [{}]");
   }
 
   //use third party pk to lookup record
   public Optional<AbsenceDTO> findAbsenceByAbsenceId(String absenceId) {
-    Preconditions.checkArgument(absenceId != null, "absenceId cannot be null");
+    Preconditions.checkArgument(StringUtils.isNoneBlank(absenceId),
+        "absenceId cannot be null or empty");
+
     String url = serviceUrl + API_ABSENCE_BY_ABS_ID + absenceId;
+    return requestAbsenceById(absenceId, url,
+        "An exception was thrown when requesting absence for absenceId [{}]. [{}]");
+  }
+
+  private Optional<AbsenceDTO> requestAbsenceById(Object absenceId, String url,
+      String errorMessage) {
     try {
       ResponseEntity<AbsenceDTO> response = tcsRestTemplate
           .exchange(url, HttpMethod.GET, null, AbsenceDTO.class);
-      if (HttpStatus.OK.equals(response.getStatusCode())) {
+      if (response.getStatusCode().is2xxSuccessful()) {
         return Optional.of(response.getBody());
       }
     } catch (Exception e) {
-      log.error("An exception was thrown when requesting absence for absenceId [{}]. [{}]", absenceId,
+      log.error(errorMessage, absenceId,
           ExceptionUtils.getStackTrace(e));
     }
-    log.debug("Did not find absence by absenceId [{}]", absenceId);
     return Optional.empty();
   }
 
   //POST
   public boolean addAbsence(AbsenceDTO absenceDTO) {
     Preconditions.checkArgument(absenceDTO != null, "cannot create absence when absence is null");
+    Preconditions.checkState(StringUtils.isNotBlank(absenceDTO.getAbsenceAttendanceId()),
+        "cannot create absence with no attendanceId");
+
     String url = serviceUrl + API_ABSENCE;
     HttpHeaders headers = new HttpHeaders();
     HttpEntity<AbsenceDTO> httpEntity = new HttpEntity<>(absenceDTO, headers);
 
-    ResponseEntity<AbsenceDTO> response = tcsRestTemplate.exchange(url, HttpMethod.POST,
-        httpEntity, AbsenceDTO.class);
-
-    return HttpStatus.OK.equals(response.getStatusCode());
+    try {
+      ResponseEntity<AbsenceDTO> response = tcsRestTemplate.exchange(url, HttpMethod.POST,
+          httpEntity, AbsenceDTO.class);
+      return response.getStatusCode().is2xxSuccessful();
+    } catch (Exception e) {
+      log.error(
+          "An exception was thrown when adding a new absence for absenceAttendanceId [{}]. [{}]",
+          absenceDTO.getAbsenceAttendanceId(), ExceptionUtils.getStackTrace(e));
+    }
+    return false;
   }
 
   //PUT
@@ -655,10 +661,16 @@ public class TcsServiceImpl extends AbstractClientService {
     HttpHeaders headers = new HttpHeaders();
     HttpEntity<AbsenceDTO> httpEntity = new HttpEntity<>(absenceDTO, headers);
 
-    ResponseEntity<AbsenceDTO> response = tcsRestTemplate.exchange(url, HttpMethod.PUT,
-        httpEntity, AbsenceDTO.class);
-
-    return HttpStatus.OK.equals(response.getStatusCode());
+    try {
+      ResponseEntity<AbsenceDTO> response = tcsRestTemplate.exchange(url, HttpMethod.PUT,
+          httpEntity, AbsenceDTO.class);
+      return response.getStatusCode().is2xxSuccessful();
+    } catch (Exception e) {
+      log.error(
+          "An exception was thrown when updating an absence for Id [{}]. [{}]",
+          id, ExceptionUtils.getStackTrace(e));
+    }
+    return false;
   }
 
   //PATCH
@@ -670,10 +682,16 @@ public class TcsServiceImpl extends AbstractClientService {
     HttpHeaders headers = new HttpHeaders();
     HttpEntity<Map<String, Object>> httpEntity = new HttpEntity<>(absenceMap, headers);
 
-    ResponseEntity<Map> response = tcsRestTemplate
-        .exchange(url, HttpMethod.PATCH, httpEntity, Map.class, Maps.newHashMap());
-
-    return response.getStatusCode().equals(HttpStatus.OK);
+    try {
+      ResponseEntity<Map> response = tcsRestTemplate
+          .exchange(url, HttpMethod.PATCH, httpEntity, Map.class, Maps.newHashMap());
+      return response.getStatusCode().is2xxSuccessful();
+    } catch (Exception e) {
+      log.error(
+          "An exception was thrown when patching an absence for Id [{}]. [{}]",
+          id, ExceptionUtils.getStackTrace(e));
+    }
+    return false;
   }
 
   @Override

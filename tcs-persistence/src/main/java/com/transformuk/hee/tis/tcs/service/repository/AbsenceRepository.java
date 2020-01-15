@@ -8,5 +8,5 @@ import org.springframework.stereotype.Repository;
 @Repository
 public interface AbsenceRepository extends JpaRepository<Absence, Long> {
 
-  Optional<Absence> findByAbsenceAttendanceId(String id);
+  Optional<Absence> findByAbsenceAttendanceId(String absenceAttendanceId);
 }

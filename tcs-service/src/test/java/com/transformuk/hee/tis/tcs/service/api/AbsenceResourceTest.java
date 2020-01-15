@@ -99,7 +99,7 @@ public class AbsenceResourceTest {
 
   @Test
   public void getByAbsenceIdShouldReturnAbsenceWhenExists() throws Exception {
-    when(absenceServiceMock.findAbsenceById(ESR_ABSENCE_ID))
+    when(absenceServiceMock.findAbsenceByAbsenceAttendanceId(ESR_ABSENCE_ID))
         .thenReturn(Optional.of(absenceDTOStub));
     this.mockMvc.perform(get("/api/absence/absenceId/{absenceId}", ESR_ABSENCE_ID))
         .andDo(print())

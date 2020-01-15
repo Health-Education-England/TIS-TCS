@@ -2,12 +2,10 @@ package com.transformuk.hee.tis.tcs.service.api;
 
 import com.transformuk.hee.tis.tcs.api.dto.AbsenceDTO;
 import com.transformuk.hee.tis.tcs.service.service.impl.AbsenceService;
-import java.util.Map;
 import java.util.Optional;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
-import org.springframework.ui.Model;
 import org.springframework.ui.ModelMap;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PatchMapping;
@@ -22,19 +20,18 @@ import org.springframework.web.bind.annotation.RestController;
 @RequestMapping("/api/absence")
 public class AbsenceResource {
 
+  public static final String PERMISSION_PERSON_VIEW = "hasPermission('tis:people::person:', 'View')";
+  public static final String PERMISSION_PERSON_CREATE = "hasPermission('tis:people::person:', 'Create')";
+  public static final String PERMISSION_PERSON_UPDATE = "hasPermission('tis:people::person:', 'Update')";
   @Autowired
   private AbsenceService absenceService;
 
   @GetMapping("/{id}")
-  @PreAuthorize("hasPermission('tis:people::person:', 'View')")
+  @PreAuthorize(PERMISSION_PERSON_VIEW)
   public ResponseEntity<AbsenceDTO> getById(@PathVariable Long id) {
     Optional<AbsenceDTO> optionalAbsence = absenceService.findById(id);
-
-    if (optionalAbsence.isPresent()) {
-      AbsenceDTO absenceDTO = optionalAbsence.get();
-      return ResponseEntity.ok(absenceDTO);
-    }
-    return ResponseEntity.notFound().build();
+    return optionalAbsence.map(ResponseEntity::ok)
+        .orElseGet(() -> ResponseEntity.notFound().build());
   }
 
   /**
@@ -44,33 +41,30 @@ public class AbsenceResource {
    * @return
    */
   @GetMapping("/absenceId/{absenceId}")
-  @PreAuthorize("hasPermission('tis:people::person:', 'View')")
+  @PreAuthorize(AbsenceResource.PERMISSION_PERSON_VIEW)
   public ResponseEntity<AbsenceDTO> getByAbsenceId(@PathVariable String absenceId) {
-    Optional<AbsenceDTO> optionalAbsence = absenceService.findAbsenceById(absenceId);
-
-    if (optionalAbsence.isPresent()) {
-      AbsenceDTO absenceDTO = optionalAbsence.get();
-      return ResponseEntity.ok(absenceDTO);
-    }
-    return ResponseEntity.notFound().build();
+    Optional<AbsenceDTO> optionalAbsence = absenceService
+        .findAbsenceByAbsenceAttendanceId(absenceId);
+    return optionalAbsence.map(ResponseEntity::ok)
+        .orElseGet(() -> ResponseEntity.notFound().build());
   }
 
   @PostMapping
-  @PreAuthorize("hasPermission('tis:people::person:', 'Create')")
+  @PreAuthorize(PERMISSION_PERSON_CREATE)
   public ResponseEntity<AbsenceDTO> createAbsence(@RequestBody AbsenceDTO absenceDTO) {
     AbsenceDTO result = absenceService.createAbsence(absenceDTO);
     return ResponseEntity.ok(result);
   }
 
   @PutMapping("/{id}")
-  @PreAuthorize("hasPermission('tis:people::person:', 'Update')")
+  @PreAuthorize(PERMISSION_PERSON_UPDATE)
   public ResponseEntity<AbsenceDTO> updateCreateAbsence(@PathVariable Long id,
       @RequestBody AbsenceDTO absenceDTO) {
     return ResponseEntity.ok(absenceService.updateAbsence(absenceDTO));
   }
 
   @PatchMapping("/{id}")
-  @PreAuthorize("hasPermission('tis:people::person:', 'Update')")
+  @PreAuthorize(PERMISSION_PERSON_UPDATE)
   public ResponseEntity<AbsenceDTO> patchAbsence(@PathVariable Long id,
       @RequestBody ModelMap absenceDTO)
       throws Exception {

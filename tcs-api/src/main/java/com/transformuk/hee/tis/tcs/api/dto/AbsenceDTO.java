@@ -4,10 +4,12 @@ import java.time.LocalDate;
 
 public class AbsenceDTO {
 
+  //the id field is TIS's internal ID that we generate
   private Long id;
   private LocalDate startDate;
   private LocalDate endDate;
   private Long durationInDays;
+  //this is esr's absence id
   private String absenceAttendanceId;
   private Long personId;
 
