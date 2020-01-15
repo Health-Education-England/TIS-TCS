@@ -24,7 +24,7 @@ public class AbsenceService {
 
   private static final String ABSENCE_ID_KEY = "id";
   private static final String ABSENCE_ATTENDANCE_ID_KEY = "absenceAttendanceId";
-  private static final String PERSON_ID_KEY = "personIdx";
+  private static final String PERSON_ID_KEY = "personId";
   private static final String DURATION_IN_DAYS_KEY = "durationInDays";
   private static final String START_DATE_KEY = "startDate";
   private static final String END_DATE_KEY = "endDate";
