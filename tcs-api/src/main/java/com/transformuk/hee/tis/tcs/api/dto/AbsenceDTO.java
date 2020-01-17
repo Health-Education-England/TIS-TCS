@@ -1,6 +1,7 @@
 package com.transformuk.hee.tis.tcs.api.dto;
 
 import java.time.LocalDate;
+import java.time.LocalDateTime;
 
 public class AbsenceDTO {
 
@@ -11,6 +12,7 @@ public class AbsenceDTO {
   private Long durationInDays;
   //this is esr's absence id
   private String absenceAttendanceId;
+  private LocalDateTime amendedDate;
   private Long personId;
 
   public Long getId() {
@@ -53,6 +55,14 @@ public class AbsenceDTO {
     this.absenceAttendanceId = absenceAttendanceId;
   }
 
+  public LocalDateTime getAmendedDate() {
+    return amendedDate;
+  }
+
+  public void setAmendedDate(LocalDateTime amendedDate) {
+    this.amendedDate = amendedDate;
+  }
+
   public Long getPersonId() {
     return personId;
   }
@@ -89,6 +99,9 @@ public class AbsenceDTO {
         : that.absenceAttendanceId != null) {
       return false;
     }
+    if (amendedDate != null ? !amendedDate.equals(that.amendedDate) : that.amendedDate != null) {
+      return false;
+    }
     return personId != null ? personId.equals(that.personId) : that.personId == null;
   }
 
@@ -99,6 +112,7 @@ public class AbsenceDTO {
     result = 31 * result + (endDate != null ? endDate.hashCode() : 0);
     result = 31 * result + (durationInDays != null ? durationInDays.hashCode() : 0);
     result = 31 * result + (absenceAttendanceId != null ? absenceAttendanceId.hashCode() : 0);
+    result = 31 * result + (amendedDate != null ? amendedDate.hashCode() : 0);
     result = 31 * result + (personId != null ? personId.hashCode() : 0);
     return result;
   }
@@ -111,6 +125,7 @@ public class AbsenceDTO {
         ", endDate=" + endDate +
         ", durationInDays=" + durationInDays +
         ", absenceAttendanceId='" + absenceAttendanceId + '\'' +
+        ", amendedDate=" + amendedDate +
         ", personId=" + personId +
         '}';
   }

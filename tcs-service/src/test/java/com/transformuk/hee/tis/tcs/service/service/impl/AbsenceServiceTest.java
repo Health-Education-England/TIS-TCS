@@ -13,8 +13,10 @@ import com.transformuk.hee.tis.tcs.service.repository.AbsenceRepository;
 import com.transformuk.hee.tis.tcs.service.repository.PersonRepository;
 import com.transformuk.hee.tis.tcs.service.service.mapper.AbsenceMapper;
 import java.time.LocalDate;
+import java.time.LocalDateTime;
 import java.util.Map;
 import java.util.Optional;
+import javax.persistence.EntityManager;
 import org.junit.Assert;
 import org.junit.Test;
 import org.junit.jupiter.api.Assertions;
@@ -53,6 +55,8 @@ public class AbsenceServiceTest {
   private Person personMock;
   @Captor
   private ArgumentCaptor<Absence> absenceArgumentCaptor;
+  @Mock
+  private EntityManager entityManager;
 
   @Test(expected = IllegalArgumentException.class)
   public void findByIdShouldThrowExceptionWhenIdIsNull() {
@@ -219,12 +223,15 @@ public class AbsenceServiceTest {
   public void patchAbsenceShouldUpdateOnlyFieldsProvidedInMap() throws Exception {
     Integer newDuration = new Integer(30);
     String newEndDateString = "2000-02-01";
+    String newAmendedDateString = "2000-02-09T09:00:00.000";
     LocalDate newEndDate = LocalDate.parse(newEndDateString);
+    LocalDateTime newAmendedDate = LocalDateTime.parse(newAmendedDateString);
 
     Map<String, Object> params = Maps.newHashMap();
     params.put("id", ABSENCE_ID_INT);
     params.put("endDate", newEndDateString);
     params.put("durationInDays", newDuration);
+    params.put("amendedDate", newAmendedDateString);
 
     LocalDate originalStartDate = LocalDate.of(2000, 1, 1);
     LocalDate originalEndDate = null;
@@ -237,6 +244,7 @@ public class AbsenceServiceTest {
     absenceStub.setEndDate(originalEndDate);
     absenceStub.setDurationInDays(originalDuration);
     absenceStub.setAbsenceAttendanceId(originalAttendanceId);
+    absenceStub.setAmendedDate(LocalDateTime.of(2000, 1, 1, 9, 0));
     absenceStub.setPerson(new Person());
 
     when(absenceRepositoryMock.findById(1L)).thenReturn(Optional.of(absenceStub));
@@ -253,6 +261,7 @@ public class AbsenceServiceTest {
     Assertions.assertEquals(newEndDate, capturedModifiedAbsence.getEndDate());
     Assertions.assertEquals(new Long(newDuration), capturedModifiedAbsence.getDurationInDays());
     Assertions.assertEquals(originalAttendanceId, capturedModifiedAbsence.getAbsenceAttendanceId());
+    Assertions.assertEquals(newAmendedDate, capturedModifiedAbsence.getAmendedDate());
   }
 
 
