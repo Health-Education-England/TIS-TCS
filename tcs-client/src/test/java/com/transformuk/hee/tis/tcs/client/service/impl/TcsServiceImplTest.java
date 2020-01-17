@@ -8,6 +8,7 @@ import com.github.tomakehurst.wiremock.junit.WireMockClassRule;
 import com.google.common.collect.Maps;
 import com.transformuk.hee.tis.tcs.api.dto.AbsenceDTO;
 import java.time.LocalDate;
+import java.time.LocalDateTime;
 import java.util.HashMap;
 import java.util.Optional;
 import org.junit.Before;
@@ -51,6 +52,7 @@ public class TcsServiceImplTest {
     assertEquals(29, absenceDTO.getEndDate().getDayOfMonth());
     assertEquals(Long.valueOf(91), absenceDTO.getDurationInDays());
     assertEquals("aaa-bbb-ccc", absenceDTO.getAbsenceAttendanceId());
+    assertEquals(LocalDateTime.parse("2020-01-16T21:58:58.150"), absenceDTO.getAmendedDate());
     assertEquals(Long.valueOf(1111), absenceDTO.getPersonId());
   }
 
@@ -80,6 +82,7 @@ public class TcsServiceImplTest {
     assertEquals(29, absenceDTO.getEndDate().getDayOfMonth());
     assertEquals(Long.valueOf(91), absenceDTO.getDurationInDays());
     assertEquals("aaa-bbb-ccc", absenceDTO.getAbsenceAttendanceId());
+    assertEquals(LocalDateTime.parse("2020-01-16T21:58:58.150"), absenceDTO.getAmendedDate());
     assertEquals(Long.valueOf(1111), absenceDTO.getPersonId());
   }
 

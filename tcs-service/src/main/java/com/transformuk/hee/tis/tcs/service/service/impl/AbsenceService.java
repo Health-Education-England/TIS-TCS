@@ -10,9 +10,11 @@ import com.transformuk.hee.tis.tcs.service.repository.PersonRepository;
 import com.transformuk.hee.tis.tcs.service.service.mapper.AbsenceMapper;
 import java.lang.reflect.Field;
 import java.time.LocalDate;
+import java.time.LocalDateTime;
 import java.util.Map;
 import java.util.Map.Entry;
 import java.util.Optional;
+import javax.persistence.EntityManager;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
@@ -28,6 +30,7 @@ public class AbsenceService {
   private static final String DURATION_IN_DAYS_KEY = "durationInDays";
   private static final String START_DATE_KEY = "startDate";
   private static final String END_DATE_KEY = "endDate";
+  public static final String AMENDED_DATE_KEY = "amendedDate";
 
   @Autowired
   private AbsenceMapper absenceMapper;
@@ -35,6 +38,8 @@ public class AbsenceService {
   private AbsenceRepository absenceRepository;
   @Autowired
   private PersonRepository personRepository;
+  @Autowired
+  private EntityManager entityManager;
 
   public Optional<AbsenceDTO> findById(Long id) {
     Preconditions.checkArgument(id != null, "The id cannot be null");
@@ -106,6 +111,9 @@ public class AbsenceService {
       return Optional.empty();
     }
     Absence foundAbsence = optionalAbsence.get();
+    entityManager.detach(foundAbsence); //must detach as changes to the entity while attached wont
+    //trigger a version check, even if we change the version
+    foundAbsence.setAmendedDate(null);
     for (Entry<String, Object> entry : params.entrySet()) {
       String fieldName = entry.getKey();
       Object fieldValue = entry.getValue();
@@ -136,9 +144,11 @@ public class AbsenceService {
         if (StringUtils.equals(key, ABSENCE_ID_KEY) || StringUtils
             .equals(key, DURATION_IN_DAYS_KEY)) {
           result.put(key, new Long((Integer) entry.getValue()));
-        } else if (StringUtils.equals(key, START_DATE_KEY) || StringUtils
-            .equals(key, END_DATE_KEY)) {
+        } else if (StringUtils.equals(key, START_DATE_KEY) ||
+            StringUtils.equals(key, END_DATE_KEY)) {
           result.put(key, LocalDate.parse((String) entry.getValue()));
+        } else if (StringUtils.equals(key, AMENDED_DATE_KEY)) {
+          result.put(key, LocalDateTime.parse((String) entry.getValue()));
         } else {
           result.put(key, entry.getValue());
         }

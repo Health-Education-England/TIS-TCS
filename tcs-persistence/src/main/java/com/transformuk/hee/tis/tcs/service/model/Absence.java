@@ -1,6 +1,7 @@
 package com.transformuk.hee.tis.tcs.service.model;
 
 import java.time.LocalDate;
+import java.time.LocalDateTime;
 import javax.persistence.Column;
 import javax.persistence.Entity;
 import javax.persistence.GeneratedValue;
@@ -9,6 +10,7 @@ import javax.persistence.Id;
 import javax.persistence.JoinColumn;
 import javax.persistence.ManyToOne;
 import javax.persistence.Table;
+import javax.persistence.Version;
 
 @Entity
 @Table(name = "Absence")
@@ -26,6 +28,9 @@ public class Absence {
   //The ESR primary key used to update this exact record
   @Column(name = "absenceAttendanceId")
   private String absenceAttendanceId;
+  @Version
+  @Column(name = "amendedDate")
+  private LocalDateTime amendedDate;
   @ManyToOne
   @JoinColumn(name="personId", nullable=false, updatable=false)
   private Person person;
@@ -70,6 +75,14 @@ public class Absence {
     this.absenceAttendanceId = absenceAttendanceId;
   }
 
+  public LocalDateTime getAmendedDate() {
+    return amendedDate;
+  }
+
+  public void setAmendedDate(LocalDateTime amendedDate) {
+    this.amendedDate = amendedDate;
+  }
+
   public Person getPerson() {
     return person;
   }
@@ -106,6 +119,10 @@ public class Absence {
         : absence.absenceAttendanceId != null) {
       return false;
     }
+    if (amendedDate != null ? !amendedDate.equals(absence.amendedDate)
+        : absence.amendedDate != null) {
+      return false;
+    }
     return person != null ? person.equals(absence.person) : absence.person == null;
   }
 
@@ -116,19 +133,22 @@ public class Absence {
     result = 31 * result + (endDate != null ? endDate.hashCode() : 0);
     result = 31 * result + (durationInDays != null ? durationInDays.hashCode() : 0);
     result = 31 * result + (absenceAttendanceId != null ? absenceAttendanceId.hashCode() : 0);
+    result = 31 * result + (amendedDate != null ? amendedDate.hashCode() : 0);
     result = 31 * result + (person != null ? person.hashCode() : 0);
     return result;
   }
 
   @Override
-  public String toString() {
+  public String
+  toString() {
     return "Absence{" +
         "id=" + id +
         ", startDate=" + startDate +
         ", endDate=" + endDate +
         ", durationInDays=" + durationInDays +
         ", absenceAttendanceId='" + absenceAttendanceId + '\'' +
-        ", personId=" + person.getId() +
+        ", amendedDate=" + amendedDate +
+        ", person=" + person +
         '}';
   }
 }
