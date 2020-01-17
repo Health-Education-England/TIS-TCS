@@ -1,6 +1,5 @@
 package com.transformuk.hee.tis.tcs.service.model;
 
-
 import com.transformuk.hee.tis.tcs.api.enumeration.Status;
 import java.io.Serializable;
 import java.time.LocalDate;
@@ -85,6 +84,10 @@ public class Person implements Serializable {
   private Set<Qualification> qualifications = new HashSet<>();
 
   @OneToMany(mappedBy = "person", cascade = {CascadeType.REMOVE,
+    CascadeType.REFRESH}, orphanRemoval = true)
+  private Set<TrainerApproval> trainerApprovals = new HashSet<>();
+
+  @OneToMany(mappedBy = "person", cascade = {CascadeType.REMOVE,
       CascadeType.REFRESH}, orphanRemoval = true)
   private Set<ProgrammeMembership> programmeMemberships = new HashSet<>();
 
@@ -104,6 +107,11 @@ public class Person implements Serializable {
 
   public void setId(Long id) {
     this.id = id;
+  }
+
+  public Person id(Long id){
+    this.id = id;
+    return this;
   }
 
   public String getIntrepidId() {
@@ -305,6 +313,14 @@ public class Person implements Serializable {
     return this;
   }
 
+  public Set<TrainerApproval> getTrainerApprovals() {
+    return trainerApprovals;
+  }
+
+  public void setTrainerApprovals(
+    Set<TrainerApproval> trainerApprovals) {
+    this.trainerApprovals = trainerApprovals;
+  }
 
   public Set<ProgrammeMembership> getProgrammeMemberships() {
     return programmeMemberships;

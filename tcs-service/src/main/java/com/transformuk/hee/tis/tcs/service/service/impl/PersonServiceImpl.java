@@ -27,6 +27,7 @@ import com.transformuk.hee.tis.tcs.service.model.PersonBasicDetails;
 import com.transformuk.hee.tis.tcs.service.model.PersonTrust;
 import com.transformuk.hee.tis.tcs.service.model.PersonalDetails;
 import com.transformuk.hee.tis.tcs.service.model.RightToWork;
+import com.transformuk.hee.tis.tcs.service.model.TrainerApproval;
 import com.transformuk.hee.tis.tcs.service.repository.ContactDetailsRepository;
 import com.transformuk.hee.tis.tcs.service.repository.GdcDetailsRepository;
 import com.transformuk.hee.tis.tcs.service.repository.GmcDetailsRepository;
@@ -34,6 +35,7 @@ import com.transformuk.hee.tis.tcs.service.repository.PersonBasicDetailsReposito
 import com.transformuk.hee.tis.tcs.service.repository.PersonRepository;
 import com.transformuk.hee.tis.tcs.service.repository.PersonalDetailsRepository;
 import com.transformuk.hee.tis.tcs.service.repository.RightToWorkRepository;
+import com.transformuk.hee.tis.tcs.service.repository.TrainerApprovalRepository;
 import com.transformuk.hee.tis.tcs.service.service.PersonService;
 import com.transformuk.hee.tis.tcs.service.service.helper.SqlQuerySupplier;
 import com.transformuk.hee.tis.tcs.service.service.mapper.PersonBasicDetailsMapper;
@@ -89,6 +91,8 @@ public class PersonServiceImpl implements PersonService {
 
   @Autowired
   private PersonRepository personRepository;
+  @Autowired
+  private TrainerApprovalRepository trainerApprovalRepository;
   @Autowired
   private GmcDetailsRepository gmcDetailsRepository;
   @Autowired
@@ -147,6 +151,7 @@ public class PersonServiceImpl implements PersonService {
       personalDetails.setReligiousBelief(originalPersonalDetails.getReligiousBelief());
       personalDetails.setSexualOrientation(originalPersonalDetails.getSexualOrientation());
     }
+
     person = personRepository.saveAndFlush(person);
     final PersonDTO personDTO1 = personMapper.toDto(person);
     if (!permissionService.canEditSensitiveData() && personDtoId != null) {
