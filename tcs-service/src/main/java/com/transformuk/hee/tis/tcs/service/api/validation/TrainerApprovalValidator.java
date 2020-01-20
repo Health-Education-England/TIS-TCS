@@ -29,9 +29,6 @@ public class TrainerApprovalValidator {
 
     List<FieldError> fieldErrors = new ArrayList<>();
     fieldErrors.addAll(checkPerson(trainerApprovalDTO));
-    //fieldErrors.addAll(checkQualification(qualificationDTO));
-    //fieldErrors.addAll(checkMedicalSchool(qualificationDTO));
-    //fieldErrors.addAll(checkCountryOfQualification(qualificationDTO));
     if (!fieldErrors.isEmpty()) {
       BeanPropertyBindingResult bindingResult = new BeanPropertyBindingResult(trainerApprovalDTO,
         TRAINER_APPROVAL_DTO_NAME);

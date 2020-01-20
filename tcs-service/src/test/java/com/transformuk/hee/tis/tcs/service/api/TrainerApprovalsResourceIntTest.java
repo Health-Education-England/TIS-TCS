@@ -168,9 +168,7 @@ public class TrainerApprovalsResourceIntTest {
   @Transactional
   public void shouldValidatePersonWhenPersonDoesNotExist() throws Exception {
     //given
-
     TrainerApprovalDTO trainerApprovalDTO = trainerApprovalMapper.toDto(trainerApproval);
-
     trainerApprovalDTO.setPerson(new PersonDTO());
 
     //when & then

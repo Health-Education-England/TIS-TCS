@@ -1,11 +1,5 @@
 package com.transformuk.hee.tis.tcs.service.service.impl;
 
-import static org.mockito.ArgumentMatchers.any;
-import static org.mockito.ArgumentMatchers.anyList;
-import static org.mockito.Mockito.mock;
-import static org.mockito.Mockito.never;
-import static org.mockito.Mockito.times;
-import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
 import com.transformuk.hee.tis.tcs.api.dto.TrainerApprovalDTO;
@@ -17,7 +11,6 @@ import java.util.Optional;
 import org.assertj.core.util.Lists;
 import org.junit.Assert;
 import org.junit.Before;
-import org.junit.Ignore;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.mockito.ArgumentCaptor;
@@ -27,13 +20,12 @@ import org.mockito.Mock;
 import org.mockito.runners.MockitoJUnitRunner;
 import org.springframework.core.convert.converter.Converter;
 import org.springframework.data.domain.Example;
-import org.springframework.data.domain.Page;
-import org.springframework.data.domain.Pageable;
 
 @RunWith(MockitoJUnitRunner.class)
 public class TrainerApprovalServiceImplTest {
   public static final long TRAINER_APPROVAL_ID = 1L;
   private static final Long PERSON_ID = 12345L;
+
   @InjectMocks
   private TrainerApprovalServiceImpl testObject;
 
@@ -89,27 +81,6 @@ public class TrainerApprovalServiceImplTest {
 
     Assert.assertEquals(dtoOfEntity, result);
   }
-
-  /*@Test
-  public void saveShouldConvertDtosAndSaveEntities() {
-    TrainerApprovalDTO trainerApprovalDTO1 = new TrainerApprovalDTO(), trainerApprovalDTO2 = new TrainerApprovalDTO();
-    List<TrainerApprovalDTO> toSave = Lists.newArrayList(trainerApprovalDTO1, trainerApprovalDTO2);
-
-    TrainerApproval trainerApproval1 = new TrainerApproval(), trainerApproval2 = new TrainerApproval();
-    List<TrainerApproval> convertedDtos = Lists.newArrayList(trainerApproval1, trainerApproval1);
-
-    List<TrainerApproval> savedEntities = Lists.newArrayList(q1, q2);
-
-    List<TrainerApprovalDTO> savedAndConvertedDtos = Lists.newArrayList(dto1, dto2);
-
-    when(qualificationMapper.toEntities(toSave)).thenReturn(convertedDtos);
-    when(qualificationRepository.saveAll(convertedDtos)).thenReturn(savedEntities);
-    when(qualificationMapper.toDTOs(savedEntities)).thenReturn(savedAndConvertedDtos);
-
-    List<QualificationDTO> result = testObj.save(toSave);
-
-    Assert.assertSame(savedAndConvertedDtos, result);
-  }*/
 
   @Test
   public void saveActionShouldConvertSingleDtoAndSaveEntity() {

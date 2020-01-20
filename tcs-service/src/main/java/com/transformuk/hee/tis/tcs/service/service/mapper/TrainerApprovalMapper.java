@@ -2,23 +2,12 @@ package com.transformuk.hee.tis.tcs.service.service.mapper;
 
 import com.google.common.collect.Lists;
 import com.transformuk.hee.tis.tcs.api.dto.PersonDTO;
-
 import com.transformuk.hee.tis.tcs.api.dto.TrainerApprovalDTO;
 import com.transformuk.hee.tis.tcs.service.model.Person;
-
 import com.transformuk.hee.tis.tcs.service.model.TrainerApproval;
+
 import java.util.List;
-import org.mapstruct.Mapper;
 import org.springframework.stereotype.Component;
-
-/*@Mapper(componentModel = "spring", uses = {PersonMapper.class})
-public interface TrainerApprovalMapper {
-
-  TrainerApprovalDTO trainerApprovalToTrainerApprovalDTO(TrainerApproval trainerApproval);
-  List<TrainerApprovalDTO> trainerApprovalToTrainerApprovalDTOs(List<TrainerApproval> trainerApprovals);
-  TrainerApproval trainerApprovalDTOToTrainerApproval(TrainerApprovalDTO trainerApprovalDTO);
-}*/
-
 
 @Component
 public class TrainerApprovalMapper {

@@ -50,8 +50,7 @@ public class TrainerApprovalServiceImpl implements TrainerApprovalService {
   @Transactional(readOnly = true)
   public Page<TrainerApprovalDTO> findAll(Pageable pageable){
     log.debug("Request to get all Trainer approvals");
-    return trainerApprovalRepository.findAll(pageable)
-      .map(trainerApprovalMapper::toDto);
+    return trainerApprovalRepository.findAll(pageable).map(trainerApprovalMapper::toDto);
   }
 
   @Override
