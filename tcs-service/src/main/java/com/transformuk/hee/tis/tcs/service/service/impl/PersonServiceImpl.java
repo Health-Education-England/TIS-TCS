@@ -147,6 +147,7 @@ public class PersonServiceImpl implements PersonService {
       personalDetails.setReligiousBelief(originalPersonalDetails.getReligiousBelief());
       personalDetails.setSexualOrientation(originalPersonalDetails.getSexualOrientation());
     }
+
     person = personRepository.saveAndFlush(person);
     final PersonDTO personDTO1 = personMapper.toDto(person);
     if (!permissionService.canEditSensitiveData() && personDtoId != null) {
