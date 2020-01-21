@@ -63,9 +63,9 @@ public class TrainerApprovalServiceImplTest {
     Assert.assertEquals(foundTrainerApprovalDTOs.get(1), result.get(1));
 
     Example<TrainerApproval> exampleArgumentCaptorValue = exampleArgumentCaptor.getValue();
-    TrainerApproval capturedQualification = exampleArgumentCaptorValue.getProbe();
+    TrainerApproval capturedTrainerApproval = exampleArgumentCaptorValue.getProbe();
 
-    Assert.assertEquals(PERSON_ID, capturedQualification.getPerson().getId());
+    Assert.assertEquals(PERSON_ID, capturedTrainerApproval.getPerson().getId());
   }
 
   @Test
