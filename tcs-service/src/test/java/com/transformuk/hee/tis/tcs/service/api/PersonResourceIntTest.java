@@ -18,6 +18,7 @@ import com.google.common.collect.Lists;
 import com.transformuk.hee.tis.reference.api.dto.RoleDTO;
 import com.transformuk.hee.tis.reference.client.impl.ReferenceServiceImpl;
 import com.transformuk.hee.tis.tcs.api.dto.PersonDTO;
+import com.transformuk.hee.tis.tcs.api.enumeration.ApprovalStatus;
 import com.transformuk.hee.tis.tcs.api.enumeration.Status;
 import com.transformuk.hee.tis.tcs.service.Application;
 import com.transformuk.hee.tis.tcs.service.api.decorator.PersonViewDecorator;
@@ -29,29 +30,21 @@ import com.transformuk.hee.tis.tcs.service.api.validation.GmcDetailsValidator;
 import com.transformuk.hee.tis.tcs.service.api.validation.PersonValidator;
 import com.transformuk.hee.tis.tcs.service.api.validation.PersonalDetailsValidator;
 import com.transformuk.hee.tis.tcs.service.exception.ExceptionTranslator;
-import com.transformuk.hee.tis.tcs.service.model.ContactDetails;
-import com.transformuk.hee.tis.tcs.service.model.GdcDetails;
-import com.transformuk.hee.tis.tcs.service.model.GmcDetails;
-import com.transformuk.hee.tis.tcs.service.model.Person;
-import com.transformuk.hee.tis.tcs.service.model.Placement;
-import com.transformuk.hee.tis.tcs.service.repository.ContactDetailsRepository;
-import com.transformuk.hee.tis.tcs.service.repository.GdcDetailsRepository;
-import com.transformuk.hee.tis.tcs.service.repository.GmcDetailsRepository;
-import com.transformuk.hee.tis.tcs.service.repository.PersonRepository;
-import com.transformuk.hee.tis.tcs.service.repository.PlacementRepository;
-import com.transformuk.hee.tis.tcs.service.repository.PlacementViewRepository;
+import com.transformuk.hee.tis.tcs.service.model.*;
+import com.transformuk.hee.tis.tcs.service.repository.*;
 import com.transformuk.hee.tis.tcs.service.service.PersonElasticSearchService;
 import com.transformuk.hee.tis.tcs.service.service.PersonService;
 import com.transformuk.hee.tis.tcs.service.service.PlacementService;
 import com.transformuk.hee.tis.tcs.service.service.impl.PermissionService;
 import com.transformuk.hee.tis.tcs.service.service.mapper.PersonMapper;
 import com.transformuk.hee.tis.tcs.service.service.mapper.PlacementViewMapper;
+
+import java.io.Console;
 import java.math.BigDecimal;
 import java.time.LocalDateTime;
 import java.time.ZoneId;
-import java.util.ArrayList;
-import java.util.Collection;
-import java.util.List;
+import java.util.*;
+
 import org.apache.commons.codec.net.URLCodec;
 import org.junit.Before;
 import org.junit.Ignore;
@@ -149,6 +142,8 @@ public class PersonResourceIntTest {
   private ExceptionTranslator exceptionTranslator;
   @Autowired
   private PersonValidator personValidator;
+  @Autowired
+  private TrainerApprovalRepository trainerApprovalRepository;
 
   @MockBean
   private PermissionService permissionServiceMock;
@@ -337,7 +332,6 @@ public class PersonResourceIntTest {
    * FIXME Test works when executed alone, fails when executed with all the tests. Reason is
    * JdbcTemplate can see the records created by JpaRepository but String fields are null.
    */
-  @Ignore
   @Test
   @Transactional
   public void shouldGetPersonsByRoleCategory() throws Exception {
@@ -353,15 +347,21 @@ public class PersonResourceIntTest {
     roles.add(roleDTO);
 
     when(referenceService.getRolesByCategory(1L)).thenReturn(roles);
-
     ContactDetails contactDetails = new ContactDetails()
         .id(1L)
         .forenames("User 1");
     contactDetailsRepository.saveAndFlush(contactDetails);
-    personRepository.saveAndFlush(new Person()
+
+    Person person1 = personRepository.saveAndFlush(new Person()
         .role("role1")
         .status(Status.CURRENT)
         .contactDetails(contactDetails));
+
+    TrainerApproval trainerApproval = new TrainerApproval()
+        .id(1L)
+        .approvalStatus(ApprovalStatus.CURRENT)
+        .person(person1);
+    trainerApprovalRepository.saveAndFlush(trainerApproval);
 
     contactDetails = new ContactDetails()
         .id(2L)
@@ -393,9 +393,9 @@ public class PersonResourceIntTest {
     restPersonMockMvc.perform(get("/api/people/roles/categories/1?query=user"))
         .andExpect(status().isOk())
         .andExpect(content().contentType(MediaType.APPLICATION_JSON_UTF8_VALUE))
-        .andExpect(jsonPath("$", hasSize(2)))
-        .andExpect(jsonPath("$.[*].name", hasItem("User 1")))
-        .andExpect(jsonPath("$.[*].name", hasItem("User 2")));
+        .andExpect(jsonPath("$", hasSize(1)))
+        .andExpect(jsonPath("$.[*].name", hasItem("User 1")));
+
   }
 
   @Test
