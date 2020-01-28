@@ -38,8 +38,7 @@ public class PersonRepositoryImpl implements CustomPersonRepository {
           "join TrainerApproval ta \n" +
           "  on ta.personId = p.id and ta.approvalStatus = 'CURRENT' \n";
   private static final String BASE_QUERY_PERSON_SEARCH =
-      "where p.status = 'CURRENT' \n" +
-          "  and (surname like '%$(query)%'\n" +
+      "where (surname like '%$(query)%'\n" +
           "  or forenames like '%$(query)%'\n" +
           "  or gmcNumber like '%$(query)%'\n" +
           "  or gdcNumber like '%$(query)%'\n" +
