@@ -16,6 +16,7 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
 import com.transformuk.hee.tis.reference.client.impl.ReferenceServiceImpl;
+import com.transformuk.hee.tis.tcs.TestConfig;
 import com.transformuk.hee.tis.tcs.api.dto.PersonalDetailsDTO;
 import com.transformuk.hee.tis.tcs.service.Application;
 import com.transformuk.hee.tis.tcs.service.api.validation.PersonalDetailsValidator;
@@ -41,6 +42,7 @@ import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.data.web.PageableHandlerMethodArgumentResolver;
 import org.springframework.http.MediaType;
 import org.springframework.http.converter.json.MappingJackson2HttpMessageConverter;
+import org.springframework.test.context.ActiveProfiles;
 import org.springframework.test.context.junit4.SpringRunner;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.setup.MockMvcBuilders;
@@ -52,7 +54,8 @@ import org.springframework.transaction.annotation.Transactional;
  * @see PersonalDetailsResource
  */
 @RunWith(SpringRunner.class)
-@SpringBootTest(classes = Application.class)
+@SpringBootTest(classes = {Application.class, TestConfig.class})
+@ActiveProfiles("test")
 public class PersonalDetailsResourceIntTest {
 
   private static final String DEFAULT_MARITAL_STATUS = "AAAAAAAAAA";

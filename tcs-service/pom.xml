@@ -12,7 +12,7 @@
 
   <groupId>com.transformuk.hee.tis</groupId>
   <artifactId>tcs-service</artifactId>
-  <version>6.4.0</version>
+  <version>6.5.0</version>
   <packaging>war</packaging>
   <name>tcs-service</name>
 
@@ -98,6 +98,11 @@
 
   <dependencies>
     <dependency>
+      <groupId>org.springframework.cloud</groupId>
+      <artifactId>spring-cloud-starter-netflix-eureka-client</artifactId>
+      <version>2.1.4.RELEASE</version>
+    </dependency>
+    <dependency>
       <groupId>com.fasterxml.jackson.datatype</groupId>
       <artifactId>jackson-datatype-hibernate5</artifactId>
     </dependency>
@@ -142,7 +147,7 @@
     <dependency>
       <groupId>com.transformuk.hee</groupId>
       <artifactId>profile-client</artifactId>
-      <version>2.8.2</version>
+      <version>3.0.0</version>
     </dependency>
     <dependency>
       <groupId>com.transformuk.hee</groupId>

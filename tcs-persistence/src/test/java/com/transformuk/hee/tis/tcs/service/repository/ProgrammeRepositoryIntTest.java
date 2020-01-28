@@ -16,11 +16,13 @@ import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
+import org.springframework.test.context.ActiveProfiles;
 import org.springframework.test.context.junit4.SpringRunner;
 import org.springframework.transaction.annotation.Transactional;
 
 @RunWith(SpringRunner.class)
 @SpringBootTest(classes = TestConfig.class)
+@ActiveProfiles("test")
 public class ProgrammeRepositoryIntTest {
 // TODO Rollback unneccessary parts of these changes
   @Autowired
@@ -37,7 +39,7 @@ public class ProgrammeRepositoryIntTest {
 
   @Autowired
   private CurriculumRepository curriculumRepository;
-  
+
   @Autowired
   private EntityManager entityManager;
 
@@ -98,7 +100,7 @@ public class ProgrammeRepositoryIntTest {
     Curriculum curriculum = new Curriculum();
     curriculum.setName("Curricula 1");
     curriculum = curriculumRepository.saveAndFlush(curriculum);
-    
+
     ProgrammeCurriculum join = new ProgrammeCurriculum();
     join.setCurriculum(curriculum);
 
@@ -115,7 +117,7 @@ public class ProgrammeRepositoryIntTest {
 
     Assert.assertTrue(result);
   }
-  
+
   @Test
   @Transactional
   public void programCurriculumCanBeSavedFollowingProgramme() {
@@ -123,7 +125,7 @@ public class ProgrammeRepositoryIntTest {
     Curriculum curriculum = new Curriculum();
     curriculum.setName("Curricula 1");
     curriculum = curriculumRepository.saveAndFlush(curriculum);
-    
+
     ProgrammeCurriculum join = new ProgrammeCurriculum();
     join.setCurriculum(curriculum);
 
@@ -134,7 +136,7 @@ public class ProgrammeRepositoryIntTest {
     join.setCurriculum(curriculum);
     join.setGmcProgrammeCode(GMC_CODE);
     join = entityManager.merge(join);
-    
+
     ProgrammeCurriculum byId = programmeCurriculumRepository.getOne(join.getId());
     Assert.assertEquals(GMC_CODE, byId.getGmcProgrammeCode());
   }

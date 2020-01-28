@@ -3,6 +3,7 @@ package com.transformuk.hee.tis.tcs.service.service.impl;
 import static org.mockito.Matchers.any;
 import static org.mockito.Mockito.when;
 
+import com.transformuk.hee.tis.tcs.TestConfig;
 import com.transformuk.hee.tis.tcs.api.dto.ContactDetailsDTO;
 import com.transformuk.hee.tis.tcs.api.dto.GdcDetailsDTO;
 import com.transformuk.hee.tis.tcs.api.dto.GmcDetailsDTO;
@@ -28,11 +29,13 @@ import org.mockito.MockitoAnnotations;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.boot.test.mock.mockito.MockBean;
+import org.springframework.test.context.ActiveProfiles;
 import org.springframework.test.context.junit4.SpringRunner;
 import org.springframework.transaction.annotation.Transactional;
 
 @RunWith(SpringRunner.class)
-@SpringBootTest(classes = Application.class)
+@SpringBootTest(classes = {Application.class, TestConfig.class})
+@ActiveProfiles("test")
 public class PersonServiceIntTest {
 
   @Autowired

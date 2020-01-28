@@ -138,6 +138,11 @@ info:
   project:
     version: #project.version#
 
+profile:
+  service:
+    use:
+      sd: true
+
 # ===================================================================
 # JHipster specific properties
 #
@@ -206,8 +211,9 @@ kc:
 
 logging:
   file: ${LOG_DIR:${HOME}}/tcs.log
-    # level:
-  # com.transformuk.hee.tis.tcs: DEBUG
+  level:
+    '*': INFO
+    com.transformuk.hee.tis.tcs: DEBUG
 
 
 auto.generate.npn: true

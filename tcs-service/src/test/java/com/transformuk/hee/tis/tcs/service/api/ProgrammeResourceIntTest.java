@@ -13,6 +13,7 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 
 import com.google.common.collect.Lists;
 import com.google.common.collect.Sets;
+import com.transformuk.hee.tis.tcs.TestConfig;
 import com.transformuk.hee.tis.tcs.TestUtils;
 import com.transformuk.hee.tis.tcs.api.dto.ProgrammeDTO;
 import com.transformuk.hee.tis.tcs.api.enumeration.Status;
@@ -39,6 +40,7 @@ import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.data.web.PageableHandlerMethodArgumentResolver;
 import org.springframework.http.MediaType;
 import org.springframework.http.converter.json.MappingJackson2HttpMessageConverter;
+import org.springframework.test.context.ActiveProfiles;
 import org.springframework.test.context.junit4.SpringRunner;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.setup.MockMvcBuilders;
@@ -50,7 +52,8 @@ import org.springframework.transaction.annotation.Transactional;
  * @see ProgrammeResource
  */
 @RunWith(SpringRunner.class)
-@SpringBootTest(classes = Application.class)
+@SpringBootTest(classes = {Application.class, TestConfig.class})
+@ActiveProfiles("test")
 public class ProgrammeResourceIntTest {
 
   private static final Status DEFAULT_STATUS = Status.CURRENT;
@@ -78,7 +81,7 @@ public class ProgrammeResourceIntTest {
 
   @Autowired
   private ProgrammeMapper programmeMapper;
-  
+
   @Autowired
   private ProgrammeCurriculumMapper programmeCurriculumMapper;
 
@@ -467,7 +470,7 @@ public class ProgrammeResourceIntTest {
     programmeDTO.setProgrammeName(UPDATED_PROGRAMME_NAME);
     programmeDTO.setProgrammeNumber(UPDATED_PROGRAMME_NUMBER);
     programmeDTO.setCurricula(Sets.newHashSet(programmeCurriculumMapper.toDto(curriculum2), programmeCurriculumMapper.toDto(curriculum3)));
-        
+
     updatedProgramme = programmeRepository.findById(programme.getId()).orElse(null);
 
     restProgrammeMockMvc.perform(put("/api/programmes")
