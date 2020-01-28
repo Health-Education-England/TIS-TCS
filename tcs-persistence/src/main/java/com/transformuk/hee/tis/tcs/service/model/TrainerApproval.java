@@ -66,4 +66,9 @@ public class TrainerApproval implements Serializable {
     this.approvalStatus = approvalStatus;
     return this;
   }
+
+  public TrainerApproval person(Person person){
+    this.person = person;
+    return this;
+  }
 }

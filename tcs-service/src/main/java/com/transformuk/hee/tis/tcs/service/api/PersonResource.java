@@ -257,7 +257,7 @@ public class PersonResource {
         searchQuery);
 
     final Page<PersonLiteDTO> page = personService.searchByRoleCategory(
-        Optional.ofNullable(searchQuery).orElse("").replace("\"", ""), categoryId, pageable);
+        Optional.ofNullable(searchQuery).orElse("").replace("\"", ""), categoryId, pageable, true);
 
     final HttpHeaders headers = PaginationUtil
         .generatePaginationHttpHeaders(page, "/api/people/roles/categories/" + categoryId);
