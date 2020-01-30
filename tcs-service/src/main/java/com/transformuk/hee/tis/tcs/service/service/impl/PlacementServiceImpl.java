@@ -15,6 +15,7 @@ import com.transformuk.hee.tis.tcs.api.dto.PlacementSpecialtyDTO;
 import com.transformuk.hee.tis.tcs.api.dto.PlacementSummaryDTO;
 import com.transformuk.hee.tis.tcs.api.dto.PlacementSupervisorDTO;
 import com.transformuk.hee.tis.tcs.api.enumeration.*;
+import com.transformuk.hee.tis.tcs.service.api.decorator.PlacementDetailsDecorator;
 import com.transformuk.hee.tis.tcs.service.api.util.ColumnFilterUtil;
 import com.transformuk.hee.tis.tcs.service.event.PlacementDeletedEvent;
 import com.transformuk.hee.tis.tcs.service.event.PlacementSavedEvent;
@@ -121,6 +122,9 @@ public class PlacementServiceImpl implements PlacementService {
 
   @Autowired
   private PlacementLogService placementLogService;
+  @Autowired
+  private PlacementDetailsDecorator placementDetailsDecorator;
+
 
   /**
    * Save a placement.
@@ -904,6 +908,7 @@ public class PlacementServiceImpl implements PlacementService {
       final PlacementSpecialtyDTO result = new PlacementSpecialtyDTO();
       result.setPlacementId(rs.getLong("placementId"));
       result.setSpecialtyId(rs.getLong("specialtyId"));
+      result.setSpecialtyName(rs.getString("specialtyName"));
       final String placementSpecialtyType = rs.getString("placementSpecialtyType");
       PostSpecialtyType postSpecialtyType = null;
       if (StringUtils.isNotBlank(placementSpecialtyType)) {
@@ -948,8 +953,14 @@ public class PlacementServiceImpl implements PlacementService {
 
   @Override
   @Transactional
-  public long getCountOfDraftPlacementsByProgrammeId(Long programmeId) {
-    return getDraftPlacementsByProgrammeId(programmeId).size();
+  public List<PlacementDetailsDTO> getListOfDraftPlacementsByProgrammeId(Long programmeId) {
+    List<Placement> placements = getDraftPlacementsByProgrammeId(programmeId);
+    List<PlacementDetailsDTO> draftPlacements = new ArrayList<>();
+    placements.forEach(placement -> {
+      PlacementDetailsDTO placementDetails = getDetails(placement.getId());
+      draftPlacements.add(placementDetailsDecorator.decorate(placementDetails));
+    });
+    return draftPlacements;
   }
 
   private List<Placement> getDraftPlacementsByProgrammeId(Long programmeId) {
@@ -969,4 +980,5 @@ public class PlacementServiceImpl implements PlacementService {
     }
     return draftPlacements;
   }
+
 }

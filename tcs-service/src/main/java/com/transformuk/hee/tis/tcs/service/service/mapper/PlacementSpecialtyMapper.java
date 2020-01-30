@@ -22,6 +22,7 @@ public class PlacementSpecialtyMapper {
         placementSpecialtyDTO
             .setPlacementSpecialtyType(placementSpecialty.getPlacementSpecialtyType());
         placementSpecialtyDTO.setSpecialtyId(placementSpecialty.getSpecialty().getId());
+        placementSpecialtyDTO.setSpecialtyName(placementSpecialty.getSpecialty().getName());
         specialties.add(placementSpecialtyDTO);
       }
     }

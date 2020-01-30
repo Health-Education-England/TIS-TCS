@@ -14,6 +14,7 @@ import com.transformuk.hee.tis.tcs.api.dto.PlacementSummaryDTO;
 import com.transformuk.hee.tis.tcs.api.enumeration.LifecycleState;
 import com.transformuk.hee.tis.tcs.api.enumeration.PlacementSiteType;
 import com.transformuk.hee.tis.tcs.api.enumeration.Status;
+import com.transformuk.hee.tis.tcs.service.api.decorator.PlacementDetailsDecorator;
 import com.transformuk.hee.tis.tcs.service.model.*;
 import com.transformuk.hee.tis.tcs.service.repository.*;
 import com.transformuk.hee.tis.tcs.service.service.helper.SqlQuerySupplier;
@@ -80,6 +81,8 @@ public class PlacementServiceImplTest {
   private ProgrammeRepository programmeRepository;
   @Mock
   private PlacementLogServiceImpl placementLogServiceImplMock;
+  @Mock
+  private PlacementDetailsDecorator placementDetailsDecorator;
   @Captor
   private ArgumentCaptor<LocalDate> toDateCaptor;
   @Captor
@@ -628,7 +631,7 @@ public class PlacementServiceImplTest {
   }
 
   @Test
-  public void testGetCountOfAllDraftPlacementForProgrammeId() {
+  public void testGetListOfAllDraftPlacementForProgrammeId() {
     Placement placement1 = new Placement();
     placement1.setId(1L);
     placement1.setLifecycleState(LifecycleState.DRAFT);
@@ -650,9 +653,16 @@ public class PlacementServiceImplTest {
     programme.setId(1L);
     programme.setPosts(Sets.newHashSet(Arrays.asList(post)));
 
-    when(programmeRepository.findById(1L)).thenReturn(Optional.of(programme));
-    long count = testObj.getCountOfDraftPlacementsByProgrammeId(1L);
-    Assert.assertThat("Should get the count of all draft placement for the programme id",
-        count, CoreMatchers.is(2L));
+    PlacementDetailsDTO placementDetailsDto = new PlacementDetailsDTO();
+    PlacementDetails placementDetails = new PlacementDetails();
+    placementDetails.setId(1L);
+
+    when(programmeRepository.findById(any())).thenReturn(Optional.of(programme));
+    when(placementDetailsRepositoryMock.findById(any())).thenReturn(Optional.of(placementDetails));
+    when(placementDetailsMapperMock.placementDetailsToPlacementDetailsDTO(placementDetails)).thenReturn(placementDetailsDto);
+    when(placementDetailsDecorator.decorate(placementDetailsDto)).thenReturn(placementDetailsDto);
+    List<PlacementDetailsDTO> draftPlacements = testObj.getListOfDraftPlacementsByProgrammeId(any());
+    Assert.assertThat("Should get the list of all draft placement for the programme id",
+        draftPlacements.size(), CoreMatchers.is(2));
   }
 }
