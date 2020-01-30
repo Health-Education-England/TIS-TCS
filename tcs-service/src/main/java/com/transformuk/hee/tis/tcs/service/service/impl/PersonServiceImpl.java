@@ -18,22 +18,8 @@ import com.transformuk.hee.tis.tcs.service.event.PersonCreatedEvent;
 import com.transformuk.hee.tis.tcs.service.event.PersonDeletedEvent;
 import com.transformuk.hee.tis.tcs.service.event.PersonSavedEvent;
 import com.transformuk.hee.tis.tcs.service.exception.AccessUnauthorisedException;
-import com.transformuk.hee.tis.tcs.service.model.ColumnFilter;
-import com.transformuk.hee.tis.tcs.service.model.ContactDetails;
-import com.transformuk.hee.tis.tcs.service.model.GdcDetails;
-import com.transformuk.hee.tis.tcs.service.model.GmcDetails;
-import com.transformuk.hee.tis.tcs.service.model.Person;
-import com.transformuk.hee.tis.tcs.service.model.PersonBasicDetails;
-import com.transformuk.hee.tis.tcs.service.model.PersonTrust;
-import com.transformuk.hee.tis.tcs.service.model.PersonalDetails;
-import com.transformuk.hee.tis.tcs.service.model.RightToWork;
-import com.transformuk.hee.tis.tcs.service.repository.ContactDetailsRepository;
-import com.transformuk.hee.tis.tcs.service.repository.GdcDetailsRepository;
-import com.transformuk.hee.tis.tcs.service.repository.GmcDetailsRepository;
-import com.transformuk.hee.tis.tcs.service.repository.PersonBasicDetailsRepository;
-import com.transformuk.hee.tis.tcs.service.repository.PersonRepository;
-import com.transformuk.hee.tis.tcs.service.repository.PersonalDetailsRepository;
-import com.transformuk.hee.tis.tcs.service.repository.RightToWorkRepository;
+import com.transformuk.hee.tis.tcs.service.model.*;
+import com.transformuk.hee.tis.tcs.service.repository.*;
 import com.transformuk.hee.tis.tcs.service.service.PersonService;
 import com.transformuk.hee.tis.tcs.service.service.helper.SqlQuerySupplier;
 import com.transformuk.hee.tis.tcs.service.service.mapper.PersonBasicDetailsMapper;
@@ -111,6 +97,8 @@ public class PersonServiceImpl implements PersonService {
   private PermissionService permissionService;
   @Autowired
   private ReferenceService referenceService;
+  @Autowired
+  private TrainerApprovalRepository trainerApprovalRepository;
 
   @Autowired
   private SqlQuerySupplier sqlQuerySupplier;
@@ -147,6 +135,7 @@ public class PersonServiceImpl implements PersonService {
       personalDetails.setReligiousBelief(originalPersonalDetails.getReligiousBelief());
       personalDetails.setSexualOrientation(originalPersonalDetails.getSexualOrientation());
     }
+
     person = personRepository.saveAndFlush(person);
     final PersonDTO personDTO1 = personMapper.toDto(person);
     if (!permissionService.canEditSensitiveData() && personDtoId != null) {
@@ -629,7 +618,7 @@ public class PersonServiceImpl implements PersonService {
 
   @Override
   public Page<PersonLiteDTO> searchByRoleCategory(final String query, final Long categoryId,
-      final Pageable pageable) {
+      final Pageable pageable, final boolean filterByTrainerApprovalStatus) {
     log.debug("Received request to search '{}' with RoleCategory ID '{}' and query '{}'",
         PersonLiteDTO.class.getSimpleName(), categoryId, query);
 
@@ -659,7 +648,7 @@ public class PersonServiceImpl implements PersonService {
         personRepository.getClass().getSimpleName(), PersonLiteDTO.class.getSimpleName(),
         categoryId, query);
 
-    return personRepository.searchByRoleCategory(query, roles, pageable)
+    return personRepository.searchByRoleCategory(query, roles, pageable, filterByTrainerApprovalStatus)
         .map(personLiteMapper::toDto);
   }
 

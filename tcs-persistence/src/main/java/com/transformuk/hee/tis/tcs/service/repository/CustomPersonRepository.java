@@ -8,5 +8,5 @@ import org.springframework.data.domain.Pageable;
 public interface CustomPersonRepository {
 
   Page<PersonLite> searchByRoleCategory(final String query, Set<String> roles,
-      final Pageable pageable);
+      final Pageable pageable, final boolean filterBYTrainerApprovalStatus);
 }

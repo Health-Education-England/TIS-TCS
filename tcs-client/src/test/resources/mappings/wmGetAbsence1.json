@@ -1,0 +1,21 @@
+{
+  "request": {
+    "url": "/tcs/api/absence/1",
+    "method": "GET"
+  },
+  "response": {
+    "status": 200,
+    "headers": {
+      "Content-Type": "application/json"
+    },
+    "jsonBody": {
+      "id": 1,
+      "startDate": "2019-11-30",
+      "endDate": "2020-02-29",
+      "durationInDays": 91,
+      "absenceAttendanceId": "aaa-bbb-ccc",
+      "amendedDate": "2020-01-16T21:58:58.150",
+      "personId": 1111
+    }
+  }
+}

@@ -1,0 +1,2 @@
+DELETE FROM `Absence` WHERE ID IN (1, 2, 3);
+DELETE FROM `Person` WHERE ID IN (1, 2);

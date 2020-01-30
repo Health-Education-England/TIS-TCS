@@ -34,9 +34,11 @@ public class PersonRepositoryImpl implements CustomPersonRepository {
           "  on gmc.id = p.id \n" +
           "left join GdcDetails gdc \n" +
           "  on gdc.id = p.id \n";
+  private static final String TRAINER_APPROVAL_STATUS_QUERY =
+          "join TrainerApproval ta \n" +
+          "  on ta.personId = p.id and ta.approvalStatus = 'CURRENT' \n";
   private static final String BASE_QUERY_PERSON_SEARCH =
-      "where p.status = 'CURRENT' \n" +
-          "  and (surname like '%$(query)%'\n" +
+      "where (surname like '%$(query)%'\n" +
           "  or forenames like '%$(query)%'\n" +
           "  or gmcNumber like '%$(query)%'\n" +
           "  or gdcNumber like '%$(query)%'\n" +
@@ -53,7 +55,7 @@ public class PersonRepositoryImpl implements CustomPersonRepository {
 
   @Override
   public Page<PersonLite> searchByRoleCategory(final String query, final Set<String> roles,
-      final Pageable pageable) {
+      final Pageable pageable, final boolean filterByTrainerApprovalStatus) {
     log.debug("Received request to search '{}' with roles '{}' and query '{}'",
         PersonLite.class.getSimpleName(), roles, query);
 
@@ -76,6 +78,10 @@ public class PersonRepositoryImpl implements CustomPersonRepository {
     final Map<String, String> values = new HashMap<>();
     values.put("join", join.toString());
     String sql = BASE_QUERY_PERSON_ROLES;
+
+    if(filterByTrainerApprovalStatus){
+      sql += TRAINER_APPROVAL_STATUS_QUERY;
+    }
 
     if (StringUtils.isNotBlank(query)) {
       values.put("query", query);

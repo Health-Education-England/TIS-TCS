@@ -111,7 +111,7 @@ public interface PersonService {
    */
   List<PersonDTO> findPersonsByPublicHealthNumbersIn(List<String> publicHealthNumbers);
 
-  Page<PersonLiteDTO> searchByRoleCategory(String query, Long categoryId, final Pageable pageable);
+  Page<PersonLiteDTO> searchByRoleCategory(String query, Long categoryId, final Pageable pageable, final boolean filterByTrainerApprovalStatus);
 
   /**
    * Retrieve the basic details of persons

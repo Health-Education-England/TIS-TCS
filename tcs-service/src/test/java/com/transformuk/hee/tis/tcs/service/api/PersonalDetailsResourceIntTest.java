@@ -8,6 +8,7 @@ import static org.mockito.Matchers.anyString;
 import static org.mockito.Mockito.when;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.delete;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.patch;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.put;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.content;
@@ -433,5 +434,51 @@ public class PersonalDetailsResourceIntTest {
   public void testEntityFromId() {
     assertThat(personalDetailsMapper.fromId(42L).getId()).isEqualTo(42);
     assertThat(personalDetailsMapper.fromId(null)).isNull();
+  }
+
+  @Test
+  @Transactional
+  public void patchPersonalDetails() throws Exception {
+    // Initialize the database
+    personalDetailsRepository.saveAndFlush(personalDetails);
+    int databaseSizeBeforeUpdate = personalDetailsRepository.findAll().size();
+
+    // Update the personalDetails
+    PersonalDetails updatedPersonalDetails = personalDetailsRepository
+        .findById(personalDetails.getId()).orElse(null);
+    updatedPersonalDetails
+        .dateOfBirth(UPDATED_DATE_OF_BIRTH)
+        .nationality(UPDATED_NATIONALITY)
+        .dualNationality(UPDATED_DUAL_NATIONALITY)
+        .sexualOrientation(UPDATED_SEXUAL_ORIENTATION)
+        .religiousBelief(UPDATED_RELIGIOUS_BELIEF)
+        .ethnicOrigin(UPDATED_ETHNIC_ORIGIN)
+        .disability(UPDATED_DISABILITY)
+        .nationalInsuranceNumber(UPDATED_NI_NUMBER)
+        .disabilityDetails(UPDATED_DISABILITY_DETAILS);
+    PersonalDetailsDTO personalDetailsDTO = personalDetailsMapper.toDto(updatedPersonalDetails);
+    when(referenceService.isValueExists(any(), anyString())).thenReturn(true);
+    restPersonalDetailsMockMvc
+        .perform(patch("/api/personal-details/{id}", personalDetailsDTO.getId())
+            .contentType(TestUtil.APPLICATION_JSON_UTF8)
+            .content(TestUtil.convertObjectToJsonBytes(personalDetailsDTO)))
+        .andExpect(status().isOk());
+
+    // Validate the PersonalDetails in the database
+    List<PersonalDetails> personalDetailsList = personalDetailsRepository.findAll();
+    assertThat(personalDetailsList).hasSize(databaseSizeBeforeUpdate);
+    PersonalDetails testPersonalDetails = personalDetailsList.get(personalDetailsList.size() - 1);
+    assertThat(testPersonalDetails.getGender()).isEqualTo(DEFAULT_GENDER);
+    assertThat(testPersonalDetails.getMaritalStatus()).isEqualTo(DEFAULT_MARITAL_STATUS);
+    assertThat(testPersonalDetails.getDateOfBirth()).isEqualTo(UPDATED_DATE_OF_BIRTH);
+    assertThat(testPersonalDetails.getNationality()).isEqualTo(UPDATED_NATIONALITY);
+    assertThat(testPersonalDetails.getDualNationality()).isEqualTo(UPDATED_DUAL_NATIONALITY);
+    assertThat(testPersonalDetails.getSexualOrientation()).isEqualTo(UPDATED_SEXUAL_ORIENTATION);
+    assertThat(testPersonalDetails.getReligiousBelief()).isEqualTo(UPDATED_RELIGIOUS_BELIEF);
+    assertThat(testPersonalDetails.getEthnicOrigin()).isEqualTo(UPDATED_ETHNIC_ORIGIN);
+    assertThat(testPersonalDetails.getDisability()).isEqualTo(UPDATED_DISABILITY);
+    assertThat(testPersonalDetails.getDisabilityDetails()).isEqualTo(UPDATED_DISABILITY_DETAILS);
+    assertThat(testPersonalDetails.getNationalInsuranceNumber()).isEqualTo(UPDATED_NI_NUMBER);
+    assertThat(testPersonalDetails.getAmendedDate()).isAfter(DEFAULT_AMENDED_DATE);
   }
 }

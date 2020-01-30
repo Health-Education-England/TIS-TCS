@@ -1,0 +1,5 @@
+ALTER TABLE `ContactDetails`
+ADD COLUMN `country` VARCHAR(255) DEFAULT NULL AFTER `address4`;
+
+ALTER TABLE `ContactDetails`
+ADD COLUMN `workEmail` VARCHAR(255) DEFAULT NULL AFTER `email`;
