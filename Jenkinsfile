@@ -102,7 +102,7 @@ node {
             withEnv(["endpoint=${healthcheckEndpoint}"]) {
             def httpStatus=sh(returnStdout: true, script: 'sleep 15; curl -m 300 -s -o /dev/null -w "%{http_code}" 10.160.0.137:8093${endpoint}').trim()
             if("200" == "${httpStatus}")  println "Status is 200"
-              else  throw new Exception("health check failed on DEV with http status: $httpStatus")
+              else  throw new Exception("health check failed on Stage with http status: $httpStatus")
           }
 
           milestone 5
@@ -124,7 +124,7 @@ node {
             withEnv(["endpoint=${healthcheckEndpoint}"]) {
             def httpStatus=sh(returnStdout: true, script: 'sleep 15; curl -m 300 -s -o /dev/null -w "%{http_code}" 10.170.0.137:8093${endpoint}').trim()
             if("200" == "${httpStatus}")  println "Status is 200"
-              else  throw new Exception("health check failed on DEV with http status: $httpStatus")
+              else  throw new Exception("health check failed on Prod with http status: $httpStatus")
           }
         }
     } catch (hudson.AbortException ae) {
