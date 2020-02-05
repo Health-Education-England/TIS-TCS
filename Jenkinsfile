@@ -81,6 +81,23 @@ node {
 
             }
           }
+         stage('Health check on Development') {
+            withEnv(["endpoint=${healthcheckEndpoint}"]) {
+              def counter = 0;
+              def httpStatus = "";
+              while(counter < 20){
+                println "Counter: "+counter;
+                try{
+                  httpStatus=sh(returnStdout: true, script: 'sleep 15; curl -m 300 -s -o /dev/null -w "%{http_code}" 10.150.0.137:8093${endpoint}').trim()
+                  break;
+                } catch (hudson.AbortException ae){
+                  counter ++;
+                }
+              }
+              if("200" == "${httpStatus}")  println "Status is 200"
+                else  throw new Exception("health check failed on DEV with http status: $httpStatus")
+            }
+          }
 
           milestone 4
 
@@ -91,6 +108,24 @@ node {
               sh "ansible-playbook -i $env.DEVOPS_BASE/ansible/inventory/stage $env.DEVOPS_BASE/ansible/${service}.yml --extra-vars=\"{\'versions\': {\'${service}\': \'${env.GIT_COMMIT}\'}}\""
             }
           }
+         stage('Health check on Staging') {
+            withEnv(["endpoint=${healthcheckEndpoint}"]) {
+              def counter = 0;
+              def httpStatus = "";
+              while(counter < 20){
+                println "Counter: "+counter;
+                try{
+                  httpStatus=sh(returnStdout: true, script: 'sleep 15; curl -m 300 -s -o /dev/null -w "%{http_code}" 10.160.0.137:8093${endpoint}').trim()
+                  break;
+                } catch (hudson.AbortException ae){
+                  counter ++;
+                }
+              }
+              if("200" == "${httpStatus}")  println "Status is 200"
+                else  throw new Exception("health check failed on Stage with http status: $httpStatus")
+            }
+          }
+
 
           milestone 5
 
@@ -107,6 +142,24 @@ node {
               sh "ansible-playbook -i $env.DEVOPS_BASE/ansible/inventory/prod $env.DEVOPS_BASE/ansible/${service}.yml --extra-vars=\"{\'versions\': {\'${service}\': \'${env.GIT_COMMIT}\'}}\""
             }
           }
+         stage('Health check on Production') {
+            withEnv(["endpoint=${healthcheckEndpoint}"]) {
+              def counter = 0;
+              def httpStatus = "";
+              while(counter < 20){
+                println "Counter: "+counter;
+                try{
+                  httpStatus=sh(returnStdout: true, script: 'sleep 15; curl -m 300 -s -o /dev/null -w "%{http_code}" 10.170.0.137:8093${endpoint}').trim()
+                  break;
+                } catch (hudson.AbortException ae){
+                  counter ++;
+                }
+              }
+              if("200" == "${httpStatus}")  println "Status is 200"
+                else  throw new Exception("health check failed on Production with http status: $httpStatus")
+            }
+          }
+
 
         }
     } catch (hudson.AbortException ae) {
