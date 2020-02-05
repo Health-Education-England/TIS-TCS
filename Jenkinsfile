@@ -70,6 +70,7 @@ node {
         }
 
         if (env.BRANCH_NAME == "master") {
+        def healthcheckEndpoint = "/tcs/actuator/health"
 
           milestone 3
 
