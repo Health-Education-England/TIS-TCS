@@ -1,7 +1,7 @@
 package com.transformuk.hee.tis.tcs.service.api.validation;
 
 
-import com.transformuk.hee.tis.reference.api.dto.GmcStatusDTO;
+import com.transformuk.hee.tis.reference.api.dto.GdcStatusDTO;
 import com.transformuk.hee.tis.reference.client.impl.ReferenceServiceImpl;
 import com.transformuk.hee.tis.tcs.api.dto.GdcDetailsDTO;
 import com.transformuk.hee.tis.tcs.service.model.GdcDetails;
@@ -65,6 +65,10 @@ public class GdcDetailsValidator {
   private List<FieldError> checkGdcNumber(GdcDetailsDTO gdcDetailsDTO) {
     List<FieldError> fieldErrors = new ArrayList<>();
     String gdcNumber = gdcDetailsDTO.getGdcNumber();
+    if (StringUtils.containsWhitespace(gdcNumber)) {
+      fieldErrors.add(new FieldError(GDC_DETAILS_DTO_NAME, "gdcNumber", "gdcNumber should not contain any whitespaces"));
+      return fieldErrors;
+    }
     // Ignore if gdcNumber is N/A or UNKNOWN
     if (NA.equalsIgnoreCase(gdcNumber) || UNKNOWN.equalsIgnoreCase(gdcNumber)) {
       return fieldErrors;
@@ -107,7 +111,7 @@ public class GdcDetailsValidator {
     // then check the gmc status
     if (StringUtils.isNotEmpty(gdcDetailsDTO.getGdcStatus())) {
       Boolean isExists = referenceService
-          .isValueExists(GmcStatusDTO.class, gdcDetailsDTO.getGdcStatus());
+          .isValueExists(GdcStatusDTO.class, gdcDetailsDTO.getGdcStatus());
       if (!isExists) {
         fieldErrors.add(new FieldError(GDC_DETAILS_DTO_NAME, "gdcStatus",
             String.format("gdcStatus %s does not exist", gdcDetailsDTO.getGdcStatus())));

@@ -60,6 +60,10 @@ public class PersonValidator {
   private List<FieldError> checkPublicHealthNumber(PersonDTO personDTO) {
     List<FieldError> fieldErrors = new ArrayList<>();
     String publicHealthNumber = personDTO.getPublicHealthNumber();
+    if (StringUtils.containsWhitespace(publicHealthNumber)) {
+      fieldErrors.add(new FieldError(PERSON_DTO_NAME, "publicHealthNumber", "publicHealthNumber should not contain any whitespaces"));
+      return fieldErrors;
+    }
     // Ignore if publicHealthNumber is N/A or UNKNOWN
     if (NA.equalsIgnoreCase(publicHealthNumber) || UNKNOWN.equalsIgnoreCase(publicHealthNumber)) {
       return fieldErrors;

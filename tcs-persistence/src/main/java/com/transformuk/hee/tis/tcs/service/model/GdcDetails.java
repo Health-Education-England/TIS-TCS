@@ -1,10 +1,13 @@
 package com.transformuk.hee.tis.tcs.service.model;
 
 
+import com.transformuk.hee.tis.tcs.service.model.converter.RegistrationNumberConverter;
+
 import java.io.Serializable;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.util.Objects;
+import javax.persistence.Convert;
 import javax.persistence.Entity;
 import javax.persistence.Id;
 import javax.persistence.Version;
@@ -20,6 +23,7 @@ public class GdcDetails implements Serializable {
   @Id
   private Long id;
 
+  @Convert(converter = RegistrationNumberConverter.class)
   private String gdcNumber;
 
   private String gdcStatus;
