@@ -1,9 +1,7 @@
 package com.transformuk.hee.tis.tcs.service.api;
 
 import static org.assertj.core.api.Assertions.assertThat;
-import static org.hamcrest.Matchers.containsInAnyOrder;
-import static org.hamcrest.Matchers.hasItem;
-import static org.hamcrest.Matchers.hasSize;
+import static org.hamcrest.Matchers.*;
 import static org.mockito.Mockito.when;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.delete;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
@@ -860,5 +858,24 @@ public class PersonResourceIntTest {
     assertThat(personDTO1).isNotEqualTo(personDTO2);
     personDTO1.setId(null);
     assertThat(personDTO1).isNotEqualTo(personDTO2);
+  }
+
+  @Test
+  @Transactional
+  public void shouldValidateWhitespaceInPhWhenUpdatePerson() throws Exception{
+    // Initialize the database
+    Person savedPerson = personRepository.saveAndFlush(person);
+
+    // Update the person
+    final Person updatedPerson = personRepository.findById(savedPerson.getId()).orElse(null);
+    final PersonDTO updatedPersonDTO = personMapper.toDto(updatedPerson);
+
+    updatedPersonDTO.setPublicHealthNumber(" 1111111");
+
+    restPersonMockMvc.perform(put("/api/people")
+        .contentType(TestUtil.APPLICATION_JSON_UTF8)
+        .content(TestUtil.convertObjectToJsonBytes(updatedPersonDTO)))
+        .andExpect(status().isBadRequest())
+        .andExpect(jsonPath("$.fieldErrors[0].message").value("publicHealthNumber should not contain any whitespaces"));
   }
 }

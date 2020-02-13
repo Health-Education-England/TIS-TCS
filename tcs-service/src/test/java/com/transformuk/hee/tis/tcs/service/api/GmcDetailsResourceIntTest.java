@@ -447,4 +447,23 @@ public class GmcDetailsResourceIntTest {
     gmcDetailsDTO1.setId(null);
     assertThat(gmcDetailsDTO1).isNotEqualTo(gmcDetailsDTO2);
   }
+
+  @Test
+  @Transactional
+  public void shouldValidateWhitespaceInGMCWhenUpdateGmcDetails() throws Exception{
+    // Initialize the database
+    GmcDetails savedGmcDetails = gmcDetailsRepository.saveAndFlush(gmcDetails);
+
+    // Update the person
+    GmcDetails updatedGmcDetails = gmcDetailsRepository.findById(savedGmcDetails.getId()).orElse(null);
+    GmcDetailsDTO updatedGmcDetailsDTO = gmcDetailsMapper.toDto(updatedGmcDetails);
+
+    updatedGmcDetailsDTO.setGmcNumber(" 1111111");
+
+    restGmcDetailsMockMvc.perform(put("/api/gmc-details")
+        .contentType(TestUtil.APPLICATION_JSON_UTF8)
+        .content(TestUtil.convertObjectToJsonBytes(updatedGmcDetailsDTO)))
+        .andExpect(status().isBadRequest())
+        .andExpect(jsonPath("$.fieldErrors[0].message").value("gmcNumber should not contain any whitespaces"));
+  }
 }

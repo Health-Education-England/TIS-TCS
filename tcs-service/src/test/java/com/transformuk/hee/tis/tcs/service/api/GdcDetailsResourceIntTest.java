@@ -11,6 +11,8 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
+import com.transformuk.hee.tis.reference.api.dto.GdcStatusDTO;
+import com.transformuk.hee.tis.reference.client.impl.ReferenceServiceImpl;
 import com.transformuk.hee.tis.tcs.api.dto.GdcDetailsDTO;
 import com.transformuk.hee.tis.tcs.service.Application;
 import com.transformuk.hee.tis.tcs.service.api.validation.GdcDetailsValidator;
@@ -28,6 +30,7 @@ import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.mockito.Mock;
+import org.mockito.Mockito;
 import org.mockito.MockitoAnnotations;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
@@ -81,7 +84,6 @@ public class GdcDetailsResourceIntTest {
   @Autowired
   private ExceptionTranslator exceptionTranslator;
 
-  @Mock
   private GdcDetailsValidator gdcDetailsValidator;
 
   @Autowired
@@ -90,6 +92,9 @@ public class GdcDetailsResourceIntTest {
   private MockMvc restGdcDetailsMockMvc;
 
   private GdcDetails gdcDetails;
+
+  @Mock
+  private ReferenceServiceImpl referenceService;
 
   /**
    * Create an entity for this test.
@@ -110,6 +115,7 @@ public class GdcDetailsResourceIntTest {
   @Before
   public void setup() {
     MockitoAnnotations.initMocks(this);
+    gdcDetailsValidator = new GdcDetailsValidator(gdcDetailsRepository, referenceService);
     GdcDetailsResource gdcDetailsResource = new GdcDetailsResource(gdcDetailsService,
         gdcDetailsValidator);
     this.restGdcDetailsMockMvc = MockMvcBuilders.standaloneSetup(gdcDetailsResource)
@@ -130,6 +136,10 @@ public class GdcDetailsResourceIntTest {
 
     // Create the GdcDetails
     GdcDetailsDTO gdcDetailsDTO = gdcDetailsMapper.toDto(gdcDetails);
+
+    Mockito.when(referenceService.isValueExists(GdcStatusDTO.class, gdcDetailsDTO.getGdcStatus()))
+        .thenReturn(true);
+
     restGdcDetailsMockMvc.perform(post("/api/gdc-details")
         .contentType(TestUtil.APPLICATION_JSON_UTF8)
         .content(TestUtil.convertObjectToJsonBytes(gdcDetailsDTO)))
@@ -204,6 +214,9 @@ public class GdcDetailsResourceIntTest {
     gdcDetails.setId(1L);
     GdcDetailsDTO gdcDetailsDTO = gdcDetailsMapper.toDto(gdcDetails);
 
+    Mockito.when(referenceService.isValueExists(GdcStatusDTO.class, gdcDetailsDTO.getGdcStatus()))
+        .thenReturn(true);
+
     // Gdc details is part of person so the call must succeed
     restGdcDetailsMockMvc.perform(post("/api/gdc-details")
         .contentType(TestUtil.APPLICATION_JSON_UTF8)
@@ -271,6 +284,9 @@ public class GdcDetailsResourceIntTest {
     GdcDetailsDTO updatedGdcDetailsDTO = gdcDetailsMapper.toDto(updatedGdcDetails);
     updatedGdcDetailsDTO.setGdcNumber(UPDATED_GDC_NUMBER);
     updatedGdcDetailsDTO.setGdcStatus(UPDATED_GDC_STATUS);
+
+    Mockito.when(referenceService.isValueExists(GdcStatusDTO.class, updatedGdcDetailsDTO.getGdcStatus()))
+        .thenReturn(true);
 
     restGdcDetailsMockMvc.perform(put("/api/gdc-details")
         .contentType(TestUtil.APPLICATION_JSON_UTF8)
@@ -353,5 +369,24 @@ public class GdcDetailsResourceIntTest {
     assertThat(gdcDetailsDTO1).isNotEqualTo(gdcDetailsDTO2);
     gdcDetailsDTO1.setId(null);
     assertThat(gdcDetailsDTO1).isNotEqualTo(gdcDetailsDTO2);
+  }
+
+  @Test
+  @Transactional
+  public void shouldValidateWhitespaceInGdCWhenUpdateGdcDetails() throws Exception{
+    // Initialize the database
+    GdcDetails savedGdcDetails = gdcDetailsRepository.saveAndFlush(gdcDetails);
+
+    // Update the person
+    GdcDetails updatedGdcDetails = gdcDetailsRepository.findById(savedGdcDetails.getId()).orElse(null);
+    GdcDetailsDTO updatedGdcDetailsDTO = gdcDetailsMapper.toDto(updatedGdcDetails);
+
+    updatedGdcDetailsDTO.setGdcNumber(" 1111111");
+
+    restGdcDetailsMockMvc.perform(put("/api/gdc-details")
+        .contentType(TestUtil.APPLICATION_JSON_UTF8)
+        .content(TestUtil.convertObjectToJsonBytes(updatedGdcDetailsDTO)))
+        .andExpect(status().isBadRequest())
+        .andExpect(jsonPath("$.fieldErrors[0].message").value("gdcNumber should not contain any whitespaces"));
   }
 }

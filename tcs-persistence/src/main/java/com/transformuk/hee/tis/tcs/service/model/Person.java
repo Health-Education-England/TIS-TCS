@@ -7,21 +7,9 @@ import java.time.LocalDateTime;
 import java.util.HashSet;
 import java.util.Objects;
 import java.util.Set;
-import javax.persistence.CascadeType;
-import javax.persistence.Column;
-import javax.persistence.Entity;
-import javax.persistence.EnumType;
-import javax.persistence.Enumerated;
-import javax.persistence.FetchType;
-import javax.persistence.GeneratedValue;
-import javax.persistence.GenerationType;
-import javax.persistence.Id;
-import javax.persistence.JoinColumn;
-import javax.persistence.NamedStoredProcedureQueries;
-import javax.persistence.NamedStoredProcedureQuery;
-import javax.persistence.OneToMany;
-import javax.persistence.OneToOne;
-import javax.persistence.Version;
+import javax.persistence.*;
+
+import com.transformuk.hee.tis.tcs.service.model.converter.RegistrationNumberConverter;
 import org.apache.commons.collections4.CollectionUtils;
 
 /**
@@ -59,6 +47,7 @@ public class Person implements Serializable {
 
   private String inactiveNotes;
 
+  @Convert(converter = RegistrationNumberConverter.class)
   private String publicHealthNumber;
 
   private String regulator;

@@ -63,6 +63,10 @@ public class GmcDetailsValidator {
   private List<FieldError> checkGmcNumber(GmcDetailsDTO gmcDetailsDTO) {
     List<FieldError> fieldErrors = new ArrayList<>();
     String gmcNumber = gmcDetailsDTO.getGmcNumber();
+    if (StringUtils.containsWhitespace(gmcNumber)) {
+      fieldErrors.add(new FieldError(GMC_DETAILS_DTO_NAME, "gmcNumber", "gmcNumber should not contain any whitespaces"));
+      return fieldErrors;
+    }
     // Ignore if gmcNumber is N/A or UNKNOWN
     if (NA.equalsIgnoreCase(gmcNumber) || UNKNOWN.equalsIgnoreCase(gmcNumber)) {
       return fieldErrors;
