@@ -77,4 +77,13 @@ public class PermissionService {
 
     return Collections.EMPTY_SET;
   }
+
+  public Set<String> getAssignedEntities() {
+    UserProfile loggedInUserProfile = TisSecurityHelper.getProfileFromContext();
+    if (!CollectionUtils.isEmpty(loggedInUserProfile.getAssignedEntities())) {
+      return loggedInUserProfile.getAssignedEntities().stream()
+          .collect(Collectors.toSet());
+    }
+    return Collections.EMPTY_SET;
+  }
 }

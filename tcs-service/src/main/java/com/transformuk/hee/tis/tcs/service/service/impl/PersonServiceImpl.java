@@ -243,7 +243,8 @@ public class PersonServiceImpl implements PersonService {
         permissionService.isUserTrustAdmin() ? " left join PersonTrust pt on (pt.personId = p.id)"
             : StringUtils.EMPTY);
 
-    String whereClause = " WHERE 1=1 ";
+    String whereClause = " WHERE lo.entity IN (:assignedEntities) ";
+    paramSource.addValue("assignedEntities", permissionService.getAssignedEntities());
 
     if (permissionService.isUserTrustAdmin()) {
       whereClause = whereClause + "AND trustId IN (:trustList) ";
@@ -327,6 +328,7 @@ public class PersonServiceImpl implements PersonService {
             : StringUtils.EMPTY);
 
     String whereClause = createWhereClause(searchString, columnFilters);
+    paramSource.addValue("assignedEntities", permissionService.getAssignedEntities());
 
     if (permissionService.isUserTrustAdmin()) {
       paramSource.addValue("trustList", permissionService.getUsersTrustIds());
@@ -436,7 +438,7 @@ public class PersonServiceImpl implements PersonService {
   private String createWhereClause(final String searchString,
       final List<ColumnFilter> columnFilters) {
     final StringBuilder whereClause = new StringBuilder();
-    whereClause.append(" WHERE 1=1 ");
+    whereClause.append(" WHERE lo.entity IN (:assignedEntities) ");
 
     if (permissionService.isUserTrustAdmin()) {
       whereClause.append("AND trustId in (:trustList) ");

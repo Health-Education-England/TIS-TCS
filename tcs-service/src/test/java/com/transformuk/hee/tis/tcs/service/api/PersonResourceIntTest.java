@@ -13,6 +13,7 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
 import com.google.common.collect.Lists;
+import com.google.common.collect.Sets;
 import com.transformuk.hee.tis.reference.api.dto.RoleDTO;
 import com.transformuk.hee.tis.reference.client.impl.ReferenceServiceImpl;
 import com.transformuk.hee.tis.tcs.api.dto.PersonDTO;
@@ -198,6 +199,7 @@ public class PersonResourceIntTest {
 
     when(permissionServiceMock.canViewSensitiveData()).thenReturn(true);
     when(permissionServiceMock.canEditSensitiveData()).thenReturn(true);
+    when(permissionServiceMock.getAssignedEntities()).thenReturn(Sets.newHashSet("unknown"));
   }
 
   private Person createPersonBlankSubSections(final Person person) {
