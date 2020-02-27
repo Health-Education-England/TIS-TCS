@@ -40,7 +40,7 @@ import org.springframework.web.bind.annotation.RestController;
  * REST controller for managing TrainingNumber.
  */
 @RestController
-@RequestMapping("/api")
+@RequestMapping({"/api", "/etl/api"})
 @Validated
 public class TrainingNumberResource {
 
@@ -143,7 +143,7 @@ public class TrainingNumberResource {
    * status 404 (Not Found)
    */
   @GetMapping("/training-numbers/{id}")
-  @PreAuthorize("hasAuthority('tcs:view:entities')")
+  @PreAuthorize("hasRole('ETL') or hasAuthority('tcs:view:entities')")
   public ResponseEntity<TrainingNumberDTO> getTrainingNumber(@PathVariable Long id) {
     log.debug("REST request to get TrainingNumber : {}", id);
     TrainingNumberDTO trainingNumberDTO = trainingNumberService.findOne(id);

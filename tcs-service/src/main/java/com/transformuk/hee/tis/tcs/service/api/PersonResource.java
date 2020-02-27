@@ -72,7 +72,7 @@ import org.springframework.web.bind.annotation.RestController;
  * REST controller for managing Person.
  */
 @RestController
-@RequestMapping("/api")
+@RequestMapping({"/api", "/etc/api"})
 public class PersonResource {
 
   private static final String ENTITY_NAME = "person";
@@ -326,7 +326,7 @@ public class PersonResource {
    * (Not Found)
    */
   @GetMapping("/people/{id}")
-  @PreAuthorize("hasPermission('tis:people::person:', 'View')")
+  @PreAuthorize("hasRole('ETL') or hasPermission('tis:people::person:', 'View')")
   public ResponseEntity<PersonDTO> getPerson(@PathVariable Long id) {
     log.debug("REST request to get Person : {}", id);
     personService.canLoggedInUserViewOrAmend(id);
