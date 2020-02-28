@@ -72,7 +72,7 @@ import org.springframework.web.bind.annotation.RestController;
  * REST controller for managing Person.
  */
 @RestController
-@RequestMapping({"/api", "/etc/api"})
+@RequestMapping({"/api", "/etl/api"})
 public class PersonResource {
 
   private static final String ENTITY_NAME = "person";
