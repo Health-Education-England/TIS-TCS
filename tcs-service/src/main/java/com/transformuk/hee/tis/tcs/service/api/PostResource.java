@@ -65,7 +65,7 @@ import org.springframework.web.bind.annotation.RestController;
  * REST controller for managing Post.
  */
 @RestController
-@RequestMapping("/api")
+@RequestMapping({"/api", "/etl/api"})
 public class PostResource {
 
   private static final String ENTITY_NAME = "post";
@@ -207,7 +207,7 @@ public class PostResource {
   }
 
   @PostMapping("/posts/filter/deanery")
-  @PreAuthorize("hasAuthority('post:view')")
+  @PreAuthorize("hasRole('ETL') or hasAuthority('post:view')")
   public ResponseEntity<List<PostEsrDTO>> filterPostsByDeaneryNumbers(
       Pageable pageable,
       @RequestBody List<String> deaneryNumbers) {

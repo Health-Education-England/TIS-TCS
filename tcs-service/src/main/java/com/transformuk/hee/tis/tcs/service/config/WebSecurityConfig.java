@@ -3,6 +3,7 @@ package com.transformuk.hee.tis.tcs.service.config;
 import com.transformuk.hee.tis.profile.client.config.JwtSpringSecurityConfig;
 import com.transformuk.hee.tis.security.JwtAuthenticationEntryPoint;
 import com.transformuk.hee.tis.security.JwtAuthenticationProvider;
+import com.transformuk.hee.tis.security.JwtAuthenticationRoleProvider;
 import com.transformuk.hee.tis.security.JwtAuthenticationSuccessHandler;
 import com.transformuk.hee.tis.security.RestAccessDeniedHandler;
 import com.transformuk.hee.tis.security.filter.JwtAuthenticationTokenFilter;
@@ -34,11 +35,17 @@ public class WebSecurityConfig extends WebSecurityConfigurerAdapter {
   private RestAccessDeniedHandler accessDeniedHandler;
   @Autowired
   private JwtAuthenticationProvider authenticationProvider;
+  @Autowired
+  private JwtAuthenticationRoleProvider jwtAuthenticationRoleProvider;
 
   @Bean
   @Override
   public AuthenticationManager authenticationManager() throws Exception {
     return new ProviderManager(Arrays.asList(authenticationProvider));
+  }
+
+  private AuthenticationManager authenticationRoleManager() throws Exception {
+    return new ProviderManager(Arrays.asList(jwtAuthenticationRoleProvider));
   }
 
   @Bean
@@ -50,6 +57,17 @@ public class WebSecurityConfig extends WebSecurityConfigurerAdapter {
         .setAuthenticationSuccessHandler(new JwtAuthenticationSuccessHandler());
     return authenticationTokenFilter;
   }
+
+  @Bean
+  public JwtAuthenticationTokenFilter authenticationTokenRoleFilterBean() throws Exception {
+    JwtAuthenticationTokenFilter authenticationTokenFilter = new JwtAuthenticationTokenFilter(
+        "/etl/api/**");
+    authenticationTokenFilter.setAuthenticationManager(authenticationRoleManager());
+    authenticationTokenFilter
+        .setAuthenticationSuccessHandler(new JwtAuthenticationSuccessHandler());
+    return authenticationTokenFilter;
+  }
+
 
   @Override
   protected void configure(HttpSecurity httpSecurity) throws Exception {
@@ -66,8 +84,9 @@ public class WebSecurityConfig extends WebSecurityConfigurerAdapter {
         .sessionManagement().sessionCreationPolicy(SessionCreationPolicy.STATELESS)
         .and()
         // Custom JWT based security filter
-        .addFilterBefore(authenticationTokenFilterBean(),
-            UsernamePasswordAuthenticationFilter.class);
+        .addFilterBefore(authenticationTokenRoleFilterBean(), UsernamePasswordAuthenticationFilter.class)
+        .addFilterAfter(authenticationTokenFilterBean(),
+            JwtAuthenticationTokenFilter.class);
   }
 
   //npn have slashes, allowing GET requests with slashes through https://stackoverflow.com/a/41593282

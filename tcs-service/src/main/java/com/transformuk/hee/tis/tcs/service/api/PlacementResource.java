@@ -52,7 +52,7 @@ import uk.nhs.tis.StringConverter;
  * REST controller for managing Placement.
  */
 @RestController
-@RequestMapping("/api")
+@RequestMapping({"/api", "/etl/api"})
 public class PlacementResource {
 
   private static final String ENTITY_NAME = "placement";
@@ -215,7 +215,7 @@ public class PlacementResource {
    * @throws IOException
    */
   @GetMapping("/placements/filter")
-  @PreAuthorize("hasAuthority('tcs:view:entities')")
+  @PreAuthorize("hasRole('ETL') or hasAuthority('tcs:view:entities')")
   public ResponseEntity<List<PlacementDetailsDTO>> getFilteredPlacementDetails(
       Pageable pageable,
       @RequestParam(value = "columnFilters", required = false) final String columnFilterJson)

@@ -20,7 +20,7 @@ import org.springframework.web.bind.annotation.RestController;
  * REST controller for managing ESR Notification.
  */
 @RestController
-@RequestMapping("/api")
+@RequestMapping({"/api", "/etl/api"})
 public class EsrNotificationResource {
 
   private static final Logger LOG = LoggerFactory.getLogger(EsrNotificationResource.class);
@@ -38,7 +38,7 @@ public class EsrNotificationResource {
    * status 404 (Not Found)
    */
   @GetMapping("/notifications/load/next-to-current-trainee")
-  @PreAuthorize("hasAuthority('tcs:view:entities')")
+  @PreAuthorize("hasRole('ESR') or hasAuthority('tcs:view:entities')")
   public ResponseEntity<List<EsrNotificationDTO>> loadNextTraineeToCurrentTraineeNotification(
       @RequestParam @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate fromDate) {
     LOG.info("REST request to load Next to current Trainee Notification for effective date : {}",
@@ -56,7 +56,7 @@ public class EsrNotificationResource {
    * status 404 (Not Found)
    */
   @GetMapping("/notifications/load/future-eligible-trainee")
-  @PreAuthorize("hasAuthority('tcs:view:entities')")
+  @PreAuthorize("hasRole('ESR') or hasAuthority('tcs:view:entities')")
   public ResponseEntity<Integer> findEarliestEligiblePlacementWithin3MonthsForEsrNotification(
       @RequestParam @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate fromDate) {
     LOG.info("REST request to load earliest eligible Trainee Notification for effective date : {}",
@@ -74,7 +74,7 @@ public class EsrNotificationResource {
    * status 404 (Not Found)
    */
   @GetMapping("/notifications/load/vacant-posts")
-  @PreAuthorize("hasAuthority('tcs:view:entities')")
+  @PreAuthorize("hasRole('ESR') or hasAuthority('tcs:view:entities')")
   public ResponseEntity<List<EsrNotificationDTO>> loadVacantPostsForNotification(
       @RequestParam @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate asOfDate) {
     LOG.info("REST request to load Vacant Posts as of date : {}", asOfDate);
@@ -91,7 +91,7 @@ public class EsrNotificationResource {
    * status 404 (Not Found)
    */
   @PostMapping("/notifications/load/full")
-  @PreAuthorize("hasAuthority('tcs:view:entities')")
+  @PreAuthorize("hasRole('ESR') or hasAuthority('tcs:view:entities')")
   public ResponseEntity<Integer> loadFullNotification(
       @RequestParam(required = false) String deaneryBody,
       @RequestBody List<String> deaneryNumbers,
@@ -110,7 +110,7 @@ public class EsrNotificationResource {
    * status 404 (Not Found)
    */
   @GetMapping("/notifications")
-  @PreAuthorize("hasAuthority('tcs:view:entities')")
+  @PreAuthorize("hasRole('ESR') or hasAuthority('tcs:view:entities')")
   public ResponseEntity<List<EsrNotificationDTO>> getNotifications(
       @RequestParam String deanery,
       @RequestParam(required = false) @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate fromDate
