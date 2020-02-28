@@ -18,6 +18,8 @@ import org.springframework.util.CollectionUtils;
 @Service
 public class PermissionService {
 
+
+  protected static final String VIEW_SENSITIVE_DATA_ETL_ROLE = "ETL";
   protected static final String VIEW_SENSITIVE_DATA_ROLE = "personsensitive:view:entities";
   protected static final String EDIT_SENSITIVE_DATA_ROLE = "personsensitive:add:modify:entities";
   protected static final String APPROVE_PLACEMENT_PERM = "placement:approve";
@@ -38,7 +40,7 @@ public class PermissionService {
   public boolean canViewSensitiveData() {
     UserProfile loggedInUserProfile = TisSecurityHelper.getProfileFromContext();
     Set<String> permissions = loggedInUserProfile.getPermissions();
-    return permissions.contains(VIEW_SENSITIVE_DATA_ROLE);
+    return permissions.contains(VIEW_SENSITIVE_DATA_ROLE) || permissions.contains(VIEW_SENSITIVE_DATA_ETL_ROLE);
   }
 
   public boolean canEditSensitiveData() {
