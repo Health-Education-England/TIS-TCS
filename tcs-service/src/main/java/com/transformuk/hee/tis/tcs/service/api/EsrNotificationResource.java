@@ -55,7 +55,7 @@ public class EsrNotificationResource {
    * @return the ResponseEntity with status 200 (OK) and with body the EsrNotificationDTO, or with
    * status 404 (Not Found)
    */
-  @GetMapping({"/notifications/load/future-eligible-trainee"})
+  @GetMapping("/notifications/load/future-eligible-trainee")
   @PreAuthorize("hasRole('ESR') or hasAuthority('tcs:view:entities')")
   public ResponseEntity<Integer> findEarliestEligiblePlacementWithin3MonthsForEsrNotification(
       @RequestParam @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate fromDate) {
@@ -73,7 +73,7 @@ public class EsrNotificationResource {
    * @return the ResponseEntity with status 200 (OK) and with body the EsrNotificationDTO, or with
    * status 404 (Not Found)
    */
-  @GetMapping({"/notifications/load/vacant-posts"})
+  @GetMapping("/notifications/load/vacant-posts")
   @PreAuthorize("hasRole('ESR') or hasAuthority('tcs:view:entities')")
   public ResponseEntity<List<EsrNotificationDTO>> loadVacantPostsForNotification(
       @RequestParam @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate asOfDate) {
@@ -90,7 +90,7 @@ public class EsrNotificationResource {
    * @return the ResponseEntity with status 200 (OK) and with body the EsrNotificationDTO, or with
    * status 404 (Not Found)
    */
-  @PostMapping({"/notifications/load/full"})
+  @PostMapping("/notifications/load/full")
   @PreAuthorize("hasRole('ESR') or hasAuthority('tcs:view:entities')")
   public ResponseEntity<Integer> loadFullNotification(
       @RequestParam(required = false) String deaneryBody,
@@ -109,7 +109,7 @@ public class EsrNotificationResource {
    * @return the ResponseEntity with status 200 (OK) and with body the EsrNotificationDTO, or with
    * status 404 (Not Found)
    */
-  @GetMapping({"/notifications"})
+  @GetMapping("/notifications")
   @PreAuthorize("hasRole('ESR') or hasAuthority('tcs:view:entities')")
   public ResponseEntity<List<EsrNotificationDTO>> getNotifications(
       @RequestParam String deanery,
