@@ -14,4 +14,48 @@
     <module>tcs-persistence</module>
     <module>tcs-service</module>
   </modules>
+
+  <properties>
+    <sonar.host.url>https://sonarcloud.io</sonar.host.url>
+    <sonar.login>${env.SONAR_TOKEN}</sonar.login>
+    <sonar.organization>health-education-england</sonar.organization>
+    <sonar.projectKey>Health-Education-England_TIS-TCS</sonar.projectKey>
+
+    <sonar.java.checkstyle.reportPaths>${project.build.directory}/checkstyle-result.xml
+    </sonar.java.checkstyle.reportPaths>
+  </properties>
+
+  <build>
+    <plugins>
+      <plugin>
+        <groupId>org.sonarsource.scanner.maven</groupId>
+        <artifactId>sonar-maven-plugin</artifactId>
+      </plugin>
+      <plugin>
+        <artifactId>maven-checkstyle-plugin</artifactId>
+        <groupId>org.apache.maven.plugins</groupId>
+        <version>3.0.0</version>
+        <configuration>
+          <configLocation>google_checks.xml</configLocation>
+          <consoleOutput>true</consoleOutput>
+        </configuration>
+        <dependencies>
+          <dependency>
+            <groupId>com.puppycrawl.tools</groupId>
+            <artifactId>checkstyle</artifactId>
+            <version>8.22</version>
+          </dependency>
+        </dependencies>
+        <executions>
+          <execution>
+            <id>validate</id>
+            <phase>validate</phase>
+            <goals>
+              <goal>checkstyle-aggregate</goal>
+            </goals>
+          </execution>
+        </executions>
+      </plugin>
+    </plugins>
+  </build>
 </project>
