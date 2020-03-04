@@ -13,8 +13,4 @@ public enum PostSuffix {
   public String getSuffixValue() {
     return suffixValue;
   }
-
-  public void setSuffixValue(String suffixValue) {
-    this.suffixValue = suffixValue;
-  }
 }
