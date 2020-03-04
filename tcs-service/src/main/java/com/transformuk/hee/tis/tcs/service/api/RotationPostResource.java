@@ -31,7 +31,8 @@ public class RotationPostResource {
   private final RotationPostService rotationPostService;
 
   private static final String REQUEST_BODY_EMPTY = "request.body.empty";
-  private static final String REQUEST_BODY_CANNOT_BE_EMPTY = "The request body for this end point cannot be empty";
+  private static final String REQUEST_BODY_CANNOT_BE_EMPTY =
+      "The request body for this end point cannot be empty";
 
 
   public RotationPostResource(RotationPostService rotationPostService) {
