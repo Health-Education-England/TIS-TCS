@@ -35,7 +35,7 @@ public class CommentServiceImpl implements CommentService {
       comment = placementCommentMapper.toEntity(placementCommentDTO);
     }
 
-    commentRepository.saveAndFlush(comment);
+    comment = commentRepository.saveAndFlush(comment);
     return placementCommentMapper.toDto(comment);
   }
 

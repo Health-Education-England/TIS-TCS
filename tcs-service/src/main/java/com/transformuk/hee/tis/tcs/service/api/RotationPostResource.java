@@ -30,6 +30,10 @@ public class RotationPostResource {
   private final Logger log = LoggerFactory.getLogger(RotationPostResource.class);
   private final RotationPostService rotationPostService;
 
+  private static final String REQUEST_BODY_EMPTY = "request.body.empty";
+  private static final String REQUEST_BODY_CANNOT_BE_EMPTY = "The request body for this end point cannot be empty";
+
+
   public RotationPostResource(RotationPostService rotationPostService) {
     this.rotationPostService = rotationPostService;
   }
@@ -48,7 +52,9 @@ public class RotationPostResource {
       throws URISyntaxException {
     log.debug("REST request to save RotationPost : {}", rotationPostDTOs);
     if (rotationPostDTOs.isEmpty()) {
-      return ResponseEntity.badRequest().body(rotationPostDTOs);
+      return ResponseEntity.badRequest()
+          .headers(HeaderUtil.createFailureAlert(ENTITY_NAME, REQUEST_BODY_EMPTY,
+              REQUEST_BODY_CANNOT_BE_EMPTY)).body(null);
     } else {
       List<RotationPostDTO> result = rotationPostService.saveAll(rotationPostDTOs);
       Long postId = result.get(0).getPostId();
