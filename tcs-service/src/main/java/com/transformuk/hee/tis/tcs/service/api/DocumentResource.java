@@ -160,9 +160,9 @@ public class DocumentResource {
       LOG.error(
           "Failed to stream file with name '{}' on document with id '{}', the full stack trace follows",
           documentOptional.get().getFileName(),
-          documentOptional.get().getId());
+          documentOptional.get().getId(),
+          ex);
       response.setStatus(HttpStatus.NOT_FOUND.value());
-      ex.printStackTrace();
     }
   }
 
@@ -216,9 +216,9 @@ public class DocumentResource {
       LOG.error(
           "Failed to stream file with name '{}' on document with id '{}', the full stack trace follows",
           documentOptional.get().getFileName(),
-          documentOptional.get().getId());
+          documentOptional.get().getId(),
+          ex);
       response.setStatus(HttpStatus.NOT_FOUND.value());
-      ex.printStackTrace();
     }
 
 

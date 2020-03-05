@@ -6,6 +6,7 @@ import static org.springframework.test.web.servlet.request.MockMvcRequestBuilder
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.content;
+import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.header;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
@@ -100,6 +101,23 @@ public class RotationPostResourceIntTest {
   @Before
   public void initTest() {
     rotationPost = createEntity(em);
+  }
+
+  @Test
+  @Transactional
+  public void createRotationPostsWithEmptyBody() throws Exception {
+    int databaseSizeBeforeCreate = rotationPostRepository.findAll().size();
+
+    restRotationPostMockMvc.perform(post("/api/rotation-posts")
+        .contentType(TestUtil.APPLICATION_JSON_UTF8)
+        .content(TestUtil.convertObjectToJsonBytes(Collections.emptyList())))
+        .andExpect(status().isBadRequest())
+        .andExpect(header().string("X-tcsApp-params", "rotationPost"))
+        .andExpect(header().string("X-tcsApp-error", "error.request.body.empty"));
+
+    // Validate the RotationPost in the database
+    List<RotationPost> rotationPostList = rotationPostRepository.findAll();
+    assertThat(rotationPostList).hasSize(databaseSizeBeforeCreate);
   }
 
   @Test

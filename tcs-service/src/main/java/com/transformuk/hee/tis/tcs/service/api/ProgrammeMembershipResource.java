@@ -109,7 +109,7 @@ public class ProgrammeMembershipResource {
     }
     ProgrammeMembershipDTO result = programmeMembershipService.save(programmeMembershipDto);
     return ResponseEntity.ok().headers(HeaderUtil.createEntityUpdateAlert(ENTITY_NAME,
-        programmeMembershipDto.getCurriculumMemberships().get(0).toString())).body(result);
+        programmeMembershipDto.getCurriculumMemberships().get(0).getId().toString())).body(result);
   }
 
   /**
@@ -233,15 +233,15 @@ public class ProgrammeMembershipResource {
   /**
    * GET /trainee/:traineeId/programme-memberships : get all the programmeMemberships relating to a
    * trainee
-   * 
+   *
    * <p>
    * This was originally created as we thought that the users on the assessment event page needed a
    * list of all programme memberships but what they really want is a unique list of programmes that
    * the trainee has been enrolled on.
-   * 
+   *
    * <p>
    * This is all very poorly designed and named
-   * 
+   *
    * <p>
    * If you want a list of all the programme that a trainee is enrolled on, look at the
    * {@link ProgrammeResource#getTraineeProgrammes(Long)}
@@ -261,7 +261,7 @@ public class ProgrammeMembershipResource {
 
   /**
    * GET /trainee/:traineeId/programme-memberships/rolled-up
-   * 
+   *
    * <p>
    * This endpoint is very much like getProgrammeMembershipForTrainee method but it rolls up (group
    * by and dedupes) the programme memberships that have the same programme and dates (imagine doing

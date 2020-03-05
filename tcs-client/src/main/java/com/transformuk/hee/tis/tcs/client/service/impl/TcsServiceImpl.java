@@ -109,7 +109,7 @@ public class TcsServiceImpl extends AbstractClientService {
       rotationJsonQuerystringURLEncoded = new org.apache.commons.codec.net.URLCodec()
           .encode("{\"programmeId\":[\"PARAMETER_PROGRAMME_ID\"],\"status\":[\"CURRENT\"]}");
     } catch (EncoderException e) {
-      e.printStackTrace();
+      log.error("URL encoding failed.", e);
     }
   }
 
