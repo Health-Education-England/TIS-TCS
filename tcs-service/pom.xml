@@ -6,7 +6,7 @@
   <parent>
     <artifactId>tis-parent</artifactId>
     <groupId>com.transformuk.hee</groupId>
-    <version>3.0.2</version>
+    <version>3.0.4</version>
     <relativePath/>
   </parent>
 

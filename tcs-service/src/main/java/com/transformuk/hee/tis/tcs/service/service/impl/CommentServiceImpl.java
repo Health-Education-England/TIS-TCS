@@ -8,7 +8,6 @@ import com.transformuk.hee.tis.tcs.service.service.mapper.PlacementCommentMapper
 import java.util.Optional;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -16,20 +15,32 @@ import org.springframework.transaction.annotation.Transactional;
 @Transactional
 public class CommentServiceImpl implements CommentService {
 
-  private final Logger log = LoggerFactory.getLogger(CommentServiceImpl.class);
+  private static final Logger LOGGER = LoggerFactory.getLogger(CommentServiceImpl.class);
 
-  @Autowired
-  private PlacementCommentMapper placementCommentMapper;
-  @Autowired
-  private CommentRepository commentRepository;
+  private static final String COMMENT_NOT_FOUND =
+      "The placement comment record for id '%d' could not be found.";
+
+  private final PlacementCommentMapper placementCommentMapper;
+  private final CommentRepository commentRepository;
+
+  public CommentServiceImpl(PlacementCommentMapper placementCommentMapper,
+      CommentRepository commentRepository) {
+    this.placementCommentMapper = placementCommentMapper;
+    this.commentRepository = commentRepository;
+  }
 
   @Override
   public PlacementCommentDTO save(PlacementCommentDTO placementCommentDTO) {
-    log.debug("Request to save Placement comment : {}", placementCommentDTO);
+    LOGGER.debug("Request to save Placement comment : {}", placementCommentDTO);
 
     Comment comment;
     if (placementCommentDTO.getId() != null) {
-      comment = commentRepository.findById(placementCommentDTO.getId()).orElse(null);
+      long id = placementCommentDTO.getId();
+
+      comment = commentRepository.findById(id).orElseThrow(() ->
+          new IllegalArgumentException(String.format(COMMENT_NOT_FOUND, id))
+      );
+
       placementCommentMapper.overwriteCommentEntityWithDTOComment(comment, placementCommentDTO);
     } else {
       comment = placementCommentMapper.toEntity(placementCommentDTO);
@@ -41,7 +52,7 @@ public class CommentServiceImpl implements CommentService {
 
   @Override
   public PlacementCommentDTO findByPlacementId(Long placementId) {
-    log.debug("Request to retrieve Placement by placementId : {}", placementId);
+    LOGGER.debug("Request to retrieve Placement by placementId : {}", placementId);
 
     Optional<Comment> optionalComment = commentRepository
         .findFirstByPlacementIdOrderByAmendedDateDesc(placementId);
@@ -50,9 +61,11 @@ public class CommentServiceImpl implements CommentService {
 
   @Override
   public PlacementCommentDTO findById(Long id) {
-    log.debug("Request to retrieve Placement by Id : {}", id);
+    LOGGER.debug("Request to retrieve Placement by Id : {}", id);
 
-    Comment comment = commentRepository.findById(id).orElse(null);
+    Comment comment = commentRepository.findById(id).orElseThrow(() ->
+        new IllegalArgumentException(String.format(COMMENT_NOT_FOUND, id))
+    );
     return placementCommentMapper.toDto(comment);
   }
 }
