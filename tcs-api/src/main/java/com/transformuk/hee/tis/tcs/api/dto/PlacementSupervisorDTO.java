@@ -1,7 +1,6 @@
 package com.transformuk.hee.tis.tcs.api.dto;
 
 import java.io.Serializable;
-import java.util.Objects;
 import lombok.Data;
 
 @Data

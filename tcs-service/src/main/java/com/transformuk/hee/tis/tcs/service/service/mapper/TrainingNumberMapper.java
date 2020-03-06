@@ -5,7 +5,6 @@ import com.transformuk.hee.tis.tcs.service.model.TrainingNumber;
 import java.util.List;
 import org.mapstruct.Mapper;
 import org.mapstruct.Mapping;
-import org.mapstruct.Mappings;
 
 /**
  * Mapper for the entity TrainingNumber and its DTO TrainingNumberDTO.
@@ -13,10 +12,8 @@ import org.mapstruct.Mappings;
 @Mapper(componentModel = "spring", uses = {ProgrammeMapper.class})
 public interface TrainingNumberMapper {
 
-  @Mappings({
-      @Mapping(target = "programmeId", source = "programme.id"),
-      @Mapping(target = "programme", ignore = true)
-  })
+  @Mapping(target = "programmeId", source = "programme.id")
+  @Mapping(target = "programme", ignore = true)
   TrainingNumberDTO trainingNumberToTrainingNumberDTO(TrainingNumber trainingNumber);
 
   @Mapping(target = "programme", source = "programmeId")

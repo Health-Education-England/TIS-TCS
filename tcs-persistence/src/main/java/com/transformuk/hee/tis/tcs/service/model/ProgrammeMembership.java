@@ -113,6 +113,7 @@ public class ProgrammeMembership implements Serializable {
     this.curriculumCompletionDate = curriculumCompletionDate;
     return this;
   }
+
   public ProgrammeMembership programmeEndDate(LocalDate programmeEndDate) {
     this.programmeEndDate = programmeEndDate;
     return this;

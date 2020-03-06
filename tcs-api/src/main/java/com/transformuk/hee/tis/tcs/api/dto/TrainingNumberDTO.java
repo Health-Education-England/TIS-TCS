@@ -46,6 +46,7 @@ public class TrainingNumberDTO implements Serializable {
   private String intrepidId;
 
   /**
+   * Get the programme ID.
    * @deprecated Use {@link #getProgrammeId()}
    */
   @Deprecated
@@ -54,6 +55,7 @@ public class TrainingNumberDTO implements Serializable {
   }
 
   /**
+   * Set the programme ID.
    * @deprecated Use {@link #setProgrammeId(Long)}
    */
   @Deprecated
