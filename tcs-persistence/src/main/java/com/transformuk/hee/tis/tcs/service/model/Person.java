@@ -1,20 +1,36 @@
 package com.transformuk.hee.tis.tcs.service.model;
 
 import com.transformuk.hee.tis.tcs.api.enumeration.Status;
+import com.transformuk.hee.tis.tcs.service.model.converter.RegistrationNumberConverter;
 import java.io.Serializable;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.util.HashSet;
 import java.util.Objects;
 import java.util.Set;
-import javax.persistence.*;
-
-import com.transformuk.hee.tis.tcs.service.model.converter.RegistrationNumberConverter;
+import javax.persistence.CascadeType;
+import javax.persistence.Column;
+import javax.persistence.Convert;
+import javax.persistence.Entity;
+import javax.persistence.EnumType;
+import javax.persistence.Enumerated;
+import javax.persistence.FetchType;
+import javax.persistence.GeneratedValue;
+import javax.persistence.GenerationType;
+import javax.persistence.Id;
+import javax.persistence.JoinColumn;
+import javax.persistence.NamedStoredProcedureQueries;
+import javax.persistence.NamedStoredProcedureQuery;
+import javax.persistence.OneToMany;
+import javax.persistence.OneToOne;
+import javax.persistence.Version;
+import lombok.Data;
 import org.apache.commons.collections4.CollectionUtils;
 
 /**
  * A Person.
  */
+@Data
 @Entity
 @NamedStoredProcedureQueries({
     @NamedStoredProcedureQuery(name = "build_person_localoffice",
@@ -73,7 +89,7 @@ public class Person implements Serializable {
   private Set<Qualification> qualifications = new HashSet<>();
 
   @OneToMany(mappedBy = "person", cascade = {CascadeType.REMOVE,
-    CascadeType.REFRESH}, orphanRemoval = true)
+      CascadeType.REFRESH}, orphanRemoval = true)
   private Set<TrainerApproval> trainerApprovals = new HashSet<>();
 
   @OneToMany(mappedBy = "person", cascade = {CascadeType.REMOVE,
@@ -88,27 +104,11 @@ public class Person implements Serializable {
   private Set<PersonTrust> associatedTrusts;
 
   @OneToMany(mappedBy = "person", fetch = FetchType.LAZY)
-  private Set<Absence> absences ;
-
-  public Long getId() {
-    return id;
-  }
-
-  public void setId(Long id) {
-    this.id = id;
-  }
+  private Set<Absence> absences;
 
   public Person id(Long id){
     this.id = id;
     return this;
-  }
-
-  public String getIntrepidId() {
-    return intrepidId;
-  }
-
-  public void setIntrepidId(String intrepidId) {
-    this.intrepidId = intrepidId;
   }
 
   public Person intrepidId(String intrepidId) {
@@ -116,38 +116,14 @@ public class Person implements Serializable {
     return this;
   }
 
-  public LocalDateTime getAddedDate() {
-    return addedDate;
-  }
-
-  public void setAddedDate(LocalDateTime addedDate) {
-    this.addedDate = addedDate;
-  }
-
   public Person addedDate(LocalDateTime addedDate) {
     this.addedDate = addedDate;
     return this;
   }
 
-  public LocalDateTime getAmendedDate() {
-    return amendedDate;
-  }
-
-  public void setAmendedDate(LocalDateTime amendedDate) {
-    this.amendedDate = amendedDate;
-  }
-
   public Person amendedDate(LocalDateTime amendedDate) {
     this.amendedDate = amendedDate;
     return this;
-  }
-
-  public String getRole() {
-    return role;
-  }
-
-  public void setRole(String role) {
-    this.role = role;
   }
 
   public Person role(String role) {
@@ -167,25 +143,9 @@ public class Person implements Serializable {
         ? Status.CURRENT : Status.INACTIVE;
   }
 
-  public Status getStatus() {
-    return status;
-  }
-
-  public void setStatus(Status status) {
-    this.status = status;
-  }
-
   public Person status(Status status) {
     this.status = status;
     return this;
-  }
-
-  public String getComments() {
-    return comments;
-  }
-
-  public void setComments(String comments) {
-    this.comments = comments;
   }
 
   public Person comments(String comments) {
@@ -193,38 +153,14 @@ public class Person implements Serializable {
     return this;
   }
 
-  public LocalDateTime getInactiveDate() {
-    return inactiveDate;
-  }
-
-  public void setInactiveDate(LocalDateTime inactiveDate) {
-    this.inactiveDate = inactiveDate;
-  }
-
   public Person inactiveDate(LocalDateTime inactiveDate) {
     this.inactiveDate = inactiveDate;
     return this;
   }
 
-  public String getInactiveNotes() {
-    return inactiveNotes;
-  }
-
-  public void setInactiveNotes(String inactiveNotes) {
-    this.inactiveNotes = inactiveNotes;
-  }
-
   public Person inactiveNotes(String inactiveNotes) {
     this.inactiveNotes = inactiveNotes;
     return this;
-  }
-
-  public String getPublicHealthNumber() {
-    return publicHealthNumber;
-  }
-
-  public void setPublicHealthNumber(String publicHealthNumber) {
-    this.publicHealthNumber = publicHealthNumber;
   }
 
   public Person publicHealthNumber(String publicHealthNumber) {
@@ -237,14 +173,6 @@ public class Person implements Serializable {
     return this;
   }
 
-  public ContactDetails getContactDetails() {
-    return contactDetails;
-  }
-
-  public void setContactDetails(ContactDetails contactDetails) {
-    this.contactDetails = contactDetails;
-  }
-
   public Person contactDetails(ContactDetails contactDetails) {
     this.contactDetails = contactDetails;
     return this;
@@ -254,34 +182,9 @@ public class Person implements Serializable {
     return personalDetails;
   }
 
-  public void setPersonalDetails(PersonalDetails personalDetails) {
-    this.personalDetails = personalDetails;
-  }
-
-  public Person personalDetails(PersonalDetails personalDetails) {
-    this.personalDetails = personalDetails;
-    return this;
-  }
-
-  public GmcDetails getGmcDetails() {
-    return gmcDetails;
-  }
-
-  public void setGmcDetails(GmcDetails gmcDetails) {
-    this.gmcDetails = gmcDetails;
-  }
-
   public Person gmcDetails(GmcDetails gmcDetails) {
     this.gmcDetails = gmcDetails;
     return this;
-  }
-
-  public GdcDetails getGdcDetails() {
-    return gdcDetails;
-  }
-
-  public void setGdcDetails(GdcDetails gdcDetails) {
-    this.gdcDetails = gdcDetails;
   }
 
   public Person gdcDetails(GdcDetails gdcDetails) {
@@ -289,34 +192,9 @@ public class Person implements Serializable {
     return this;
   }
 
-  public Set<Qualification> getQualifications() {
-    return qualifications;
-  }
-
-  public void setQualifications(Set<Qualification> qualifications) {
-    this.qualifications = qualifications;
-  }
-
   public Person qualifications(Set<Qualification> qualifications) {
     this.qualifications = qualifications;
     return this;
-  }
-
-  public Set<TrainerApproval> getTrainerApprovals() {
-    return trainerApprovals;
-  }
-
-  public void setTrainerApprovals(
-    Set<TrainerApproval> trainerApprovals) {
-    this.trainerApprovals = trainerApprovals;
-  }
-
-  public Set<ProgrammeMembership> getProgrammeMemberships() {
-    return programmeMemberships;
-  }
-
-  public void setProgrammeMemberships(Set<ProgrammeMembership> programmeMemberships) {
-    this.programmeMemberships = programmeMemberships;
   }
 
   public Person programmeMemberships(Set<ProgrammeMembership> programmeMemberships) {
@@ -324,42 +202,9 @@ public class Person implements Serializable {
     return this;
   }
 
-
-  public RightToWork getRightToWork() {
-    return rightToWork;
-  }
-
-  public void setRightToWork(RightToWork rightToWork) {
-    this.rightToWork = rightToWork;
-  }
-
   public Person rightToWork(RightToWork rightToWork) {
     this.rightToWork = rightToWork;
     return this;
-  }
-
-  public String getRegulator() {
-    return regulator;
-  }
-
-  public void setRegulator(String regulator) {
-    this.regulator = regulator;
-  }
-
-  public Set<PersonTrust> getAssociatedTrusts() {
-    return associatedTrusts;
-  }
-
-  public void setAssociatedTrusts(Set<PersonTrust> associatedTrusts) {
-    this.associatedTrusts = associatedTrusts;
-  }
-
-  public Set<Absence> getAbsences() {
-    return absences;
-  }
-
-  public void setAbsences(Set<Absence> absences) {
-    this.absences = absences;
   }
 
   @Override
@@ -380,22 +225,5 @@ public class Person implements Serializable {
   @Override
   public int hashCode() {
     return Objects.hashCode(getId());
-  }
-
-  @Override
-  public String toString() {
-    return "Person{" +
-        "id=" + getId() +
-        ", intrepidId='" + getIntrepidId() + "'" +
-        ", addedDate='" + getAddedDate() + "'" +
-        ", amendedDate='" + getAmendedDate() + "'" +
-        ", role='" + getRole() + "'" +
-        ", status='" + getStatus() + "'" +
-        ", comments='" + getComments() + "'" +
-        ", inactiveDate='" + getInactiveDate() + "'" +
-        ", inactiveNotes='" + getInactiveNotes() + "'" +
-        ", publicHealthNumber='" + getPublicHealthNumber() + "'" +
-        ", regulator='" + getRegulator() + "'" +
-        "}";
   }
 }

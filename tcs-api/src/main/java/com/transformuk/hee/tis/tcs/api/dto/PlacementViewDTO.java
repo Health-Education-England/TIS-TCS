@@ -3,10 +3,12 @@ package com.transformuk.hee.tis.tcs.api.dto;
 import com.transformuk.hee.tis.tcs.api.enumeration.PlacementStatus;
 import java.io.Serializable;
 import java.time.LocalDate;
+import lombok.Data;
 
 /**
  * Holds the fields necessary for an item in a placement list
  */
+@Data
 public class PlacementViewDTO implements Serializable {
 
   private Long id;
@@ -42,142 +44,6 @@ public class PlacementViewDTO implements Serializable {
   private LocalDate dateTo;
 
   private String placementType;
-
-  public Long getId() {
-    return id;
-  }
-
-  public void setId(Long id) {
-    this.id = id;
-  }
-
-  public PlacementStatus getStatus() {
-    return status;
-  }
-
-  public void setStatus(PlacementStatus status) {
-    this.status = status;
-  }
-
-  public String getIntrepidId() {
-    return intrepidId;
-  }
-
-  public void setIntrepidId(String intrepidId) {
-    this.intrepidId = intrepidId;
-  }
-
-  public Long getTraineeId() {
-    return traineeId;
-  }
-
-  public void setTraineeId(Long traineeId) {
-    this.traineeId = traineeId;
-  }
-
-  public String getTraineeFirstName() {
-    return traineeFirstName;
-  }
-
-  public void setTraineeFirstName(String traineeFirstName) {
-    this.traineeFirstName = traineeFirstName;
-  }
-
-  public String getTraineeLastName() {
-    return traineeLastName;
-  }
-
-  public void setTraineeLastName(String traineeLastName) {
-    this.traineeLastName = traineeLastName;
-  }
-
-  public String getTraineeGmcNumber() {
-    return traineeGmcNumber;
-  }
-
-  public void setTraineeGmcNumber(String traineeGmcNumber) {
-    this.traineeGmcNumber = traineeGmcNumber;
-  }
-
-  public Long getPostId() {
-    return postId;
-  }
-
-  public void setPostId(Long postId) {
-    this.postId = postId;
-  }
-
-  public String getSiteCode() {
-    return siteCode;
-  }
-
-  public void setSiteCode(String siteCode) {
-    this.siteCode = siteCode;
-  }
-
-  public String getSiteName() {
-    return siteName;
-  }
-
-  public void setSiteName(String siteName) {
-    this.siteName = siteName;
-  }
-
-  public String getGradeName() {
-    return gradeName;
-  }
-
-  public void setGradeName(String gradeName) {
-    this.gradeName = gradeName;
-  }
-
-  public String getGradeAbbreviation() {
-    return gradeAbbreviation;
-  }
-
-  public void setGradeAbbreviation(String gradeAbbreviation) {
-    this.gradeAbbreviation = gradeAbbreviation;
-  }
-
-  public LocalDate getDateFrom() {
-    return dateFrom;
-  }
-
-  public void setDateFrom(LocalDate dateFrom) {
-    this.dateFrom = dateFrom;
-  }
-
-  public LocalDate getDateTo() {
-    return dateTo;
-  }
-
-  public void setDateTo(LocalDate dateTo) {
-    this.dateTo = dateTo;
-  }
-
-  public String getPlacementType() {
-    return placementType;
-  }
-
-  public void setPlacementType(String placementType) {
-    this.placementType = placementType;
-  }
-
-  public Long getSiteId() {
-    return siteId;
-  }
-
-  public void setSiteId(Long siteId) {
-    this.siteId = siteId;
-  }
-
-  public Long getGradeId() {
-    return gradeId;
-  }
-
-  public void setGradeId(Long gradeId) {
-    this.gradeId = gradeId;
-  }
 
   @Override
   public boolean equals(Object o) {
@@ -258,28 +124,5 @@ public class PlacementViewDTO implements Serializable {
     result = 31 * result + (dateTo != null ? dateTo.hashCode() : 0);
     result = 31 * result + (placementType != null ? placementType.hashCode() : 0);
     return result;
-  }
-
-  @Override
-  public String toString() {
-    return "PlacementViewDTO{" +
-        "id=" + id +
-        ", intrepidId='" + intrepidId + '\'' +
-        ", status=" + status +
-        ", traineeId=" + traineeId +
-        ", traineeFirstName='" + traineeFirstName + '\'' +
-        ", traineeLastName='" + traineeLastName + '\'' +
-        ", traineeGmcNumber='" + traineeGmcNumber + '\'' +
-        ", postId=" + postId +
-        ", siteId=" + siteId +
-        ", siteCode='" + siteCode + '\'' +
-        ", siteName='" + siteName + '\'' +
-        ", gradeId=" + gradeId +
-        ", gradeAbbreviation='" + gradeAbbreviation + '\'' +
-        ", gradeName='" + gradeName + '\'' +
-        ", dateFrom=" + dateFrom +
-        ", dateTo=" + dateTo +
-        ", placementType='" + placementType + '\'' +
-        '}';
   }
 }

@@ -1,6 +1,5 @@
 package com.transformuk.hee.tis.tcs.service.model;
 
-
 import java.io.Serializable;
 import java.util.HashSet;
 import java.util.Objects;
@@ -11,11 +10,12 @@ import javax.persistence.GenerationType;
 import javax.persistence.Id;
 import javax.persistence.OneToMany;
 import javax.persistence.Table;
+import lombok.Data;
 
 /**
  * A SpecialtyGroup.
  */
-
+@Data
 @Entity
 @Table(name = "SpecialtyGroup")
 public class SpecialtyGroup implements Serializable {
@@ -33,14 +33,6 @@ public class SpecialtyGroup implements Serializable {
   @OneToMany(mappedBy = "specialtyGroup")
   private Set<Specialty> specialties = new HashSet<>();
 
-  public Set<Specialty> getSpecialties() {
-    return specialties;
-  }
-
-  public void setSpecialties(Set<Specialty> specialties) {
-    this.specialties = specialties;
-  }
-
   public SpecialtyGroup specialties(Set<Specialty> specialties) {
     this.specialties = specialties;
     return this;
@@ -56,33 +48,9 @@ public class SpecialtyGroup implements Serializable {
     return this;
   }
 
-  public Long getId() {
-    return id;
-  }
-
-  public void setId(Long id) {
-    this.id = id;
-  }
-
-  public String getName() {
-    return name;
-  }
-
-  public void setName(String name) {
-    this.name = name;
-  }
-
   public SpecialtyGroup name(String name) {
     this.name = name;
     return this;
-  }
-
-  public String getIntrepidId() {
-    return intrepidId;
-  }
-
-  public void setIntrepidId(String intrepidId) {
-    this.intrepidId = intrepidId;
   }
 
   public SpecialtyGroup intrepidId(String intrepidId) {
@@ -108,14 +76,5 @@ public class SpecialtyGroup implements Serializable {
   @Override
   public int hashCode() {
     return Objects.hashCode(id);
-  }
-
-  @Override
-  public String toString() {
-    return "SpecialtyGroup{" +
-        "id=" + id +
-        ", intrepidId='" + intrepidId + '\'' +
-        ", name='" + name + '\'' +
-        '}';
   }
 }

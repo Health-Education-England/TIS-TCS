@@ -8,7 +8,11 @@ import java.util.Objects;
 import javax.validation.constraints.DecimalMin;
 import javax.validation.constraints.NotNull;
 import javax.validation.constraints.Null;
+import lombok.Data;
+import lombok.NoArgsConstructor;
 
+@Data
+@NoArgsConstructor
 public class TagDTO {
 
   @NotNull(groups = Update.class, message = "Id must not be null when updating a tag")
@@ -20,9 +24,6 @@ public class TagDTO {
   @JsonIgnore
   private LocalDateTime amendedDate;
   private String name;
-
-  public TagDTO() {
-  }
 
   public TagDTO(final Long id, final String name) {
     this.id = id;
@@ -53,47 +54,5 @@ public class TagDTO {
   @Override
   public int hashCode() {
     return Objects.hash(name.toLowerCase());
-  }
-
-  @Override
-  public String toString() {
-    return "TagDTO{" +
-        "id=" + id +
-        ", addedDate=" + addedDate +
-        ", amendedDate=" + amendedDate +
-        ", name='" + name + '\'' +
-        '}';
-  }
-
-  public Long getId() {
-    return id;
-  }
-
-  public void setId(final Long id) {
-    this.id = id;
-  }
-
-  public LocalDateTime getAddedDate() {
-    return addedDate;
-  }
-
-  public void setAddedDate(final LocalDateTime addedDate) {
-    this.addedDate = addedDate;
-  }
-
-  public LocalDateTime getAmendedDate() {
-    return amendedDate;
-  }
-
-  public void setAmendedDate(final LocalDateTime amendedDate) {
-    this.amendedDate = amendedDate;
-  }
-
-  public String getName() {
-    return name;
-  }
-
-  public void setName(final String name) {
-    this.name = name;
   }
 }

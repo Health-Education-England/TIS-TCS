@@ -1,6 +1,5 @@
 package com.transformuk.hee.tis.tcs.service.model;
 
-
 import com.transformuk.hee.tis.tcs.api.enumeration.Status;
 import com.transformuk.hee.tis.tcs.service.model.converter.StatusConverter;
 import java.io.Serializable;
@@ -12,10 +11,12 @@ import javax.persistence.GeneratedValue;
 import javax.persistence.GenerationType;
 import javax.persistence.Id;
 import javax.persistence.Table;
+import lombok.Data;
 
 /**
  * A Rotation.
  */
+@Data
 @Entity
 @Table(name = "Rotation")
 public class Rotation implements Serializable {
@@ -37,46 +38,15 @@ public class Rotation implements Serializable {
   private Status status;
 
   // jhipster-needle-entity-add-field - JHipster will add fields here, do not remove
-  public Long getId() {
-    return id;
-  }
-
-  public void setId(Long id) {
-    this.id = id;
-  }
-
-  public Long getProgrammeId() {
-    return programmeId;
-  }
-
-  public void setProgrammeId(Long programmeId) {
-    this.programmeId = programmeId;
-  }
 
   public Rotation programmeId(Long programmeId) {
     this.programmeId = programmeId;
     return this;
   }
 
-  public String getName() {
-    return name;
-  }
-
-  public void setName(String name) {
-    this.name = name;
-  }
-
   public Rotation name(String name) {
     this.name = name;
     return this;
-  }
-
-  public Status getStatus() {
-    return status;
-  }
-
-  public void setStatus(Status status) {
-    this.status = status;
   }
 
   public Rotation status(Status status) {
@@ -103,15 +73,5 @@ public class Rotation implements Serializable {
   @Override
   public int hashCode() {
     return Objects.hashCode(getId());
-  }
-
-  @Override
-  public String toString() {
-    return "Rotation{" +
-        "id=" + getId() +
-        ", programmeId=" + getProgrammeId() +
-        ", name='" + getName() + "'" +
-        ", status='" + getStatus() + "'" +
-        "}";
   }
 }

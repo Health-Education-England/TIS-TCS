@@ -1,12 +1,13 @@
 package com.transformuk.hee.tis.tcs.api.dto;
 
-
 import java.io.Serializable;
 import java.util.Objects;
+import lombok.Data;
 
 /**
  * A DTO for the PlacementFunder entity.
  */
+@Data
 public class PlacementFunderDTO implements Serializable {
 
   private Long id;
@@ -14,30 +15,6 @@ public class PlacementFunderDTO implements Serializable {
   private String localOffice;
 
   private String trust;
-
-  public Long getId() {
-    return id;
-  }
-
-  public void setId(Long id) {
-    this.id = id;
-  }
-
-  public String getLocalOffice() {
-    return localOffice;
-  }
-
-  public void setLocalOffice(String localOffice) {
-    this.localOffice = localOffice;
-  }
-
-  public String getTrust() {
-    return trust;
-  }
-
-  public void setTrust(String trust) {
-    this.trust = trust;
-  }
 
   @Override
   public boolean equals(Object o) {
@@ -60,14 +37,5 @@ public class PlacementFunderDTO implements Serializable {
   @Override
   public int hashCode() {
     return Objects.hashCode(id);
-  }
-
-  @Override
-  public String toString() {
-    return "PlacementFunderDTO{" +
-        "id=" + id +
-        ", localOffice='" + localOffice + "'" +
-        ", trust='" + trust + "'" +
-        '}';
   }
 }

@@ -10,10 +10,12 @@ import javax.persistence.GenerationType;
 import javax.persistence.Id;
 import javax.persistence.JoinColumn;
 import javax.persistence.ManyToOne;
+import lombok.Data;
 
 /**
  * A TrainingNumber.
  */
+@Data
 @Entity
 public class TrainingNumber implements Serializable {
 
@@ -42,41 +44,9 @@ public class TrainingNumber implements Serializable {
   @JoinColumn(name = "programmeID")
   private Programme programme;
 
-  public Long getId() {
-    return id;
-  }
-
-  public void setId(Long id) {
-    this.id = id;
-  }
-
-  public TrainingNumberType getTrainingNumberType() {
-    return trainingNumberType;
-  }
-
-  public void setTrainingNumberType(TrainingNumberType trainingNumberType) {
-    this.trainingNumberType = trainingNumberType;
-  }
-
   public TrainingNumber trainingNumberType(TrainingNumberType trainingNumberType) {
     this.trainingNumberType = trainingNumberType;
     return this;
-  }
-
-  public String getTrainingNumber() {
-    return trainingNumber;
-  }
-
-  public void setTrainingNumber(String trainingNumber) {
-    this.trainingNumber = trainingNumber;
-  }
-
-  public Integer getNumber() {
-    return number;
-  }
-
-  public void setNumber(Integer number) {
-    this.number = number;
   }
 
   public TrainingNumber number(Integer number) {
@@ -84,25 +54,9 @@ public class TrainingNumber implements Serializable {
     return this;
   }
 
-  public Integer getAppointmentYear() {
-    return appointmentYear;
-  }
-
-  public void setAppointmentYear(Integer appointmentYear) {
-    this.appointmentYear = appointmentYear;
-  }
-
   public TrainingNumber appointmentYear(Integer appointmentYear) {
     this.appointmentYear = appointmentYear;
     return this;
-  }
-
-  public String getTypeOfContract() {
-    return typeOfContract;
-  }
-
-  public void setTypeOfContract(String typeOfContract) {
-    this.typeOfContract = typeOfContract;
   }
 
   public TrainingNumber typeOfContract(String typeOfContract) {
@@ -110,33 +64,9 @@ public class TrainingNumber implements Serializable {
     return this;
   }
 
-  public String getSuffix() {
-    return suffix;
-  }
-
-  public void setSuffix(String suffix) {
-    this.suffix = suffix;
-  }
-
   public TrainingNumber suffix(String suffix) {
     this.suffix = suffix;
     return this;
-  }
-
-  public Programme getProgramme() {
-    return programme;
-  }
-
-  public void setProgramme(Programme programme) {
-    this.programme = programme;
-  }
-
-  public String getIntrepidId() {
-    return intrepidId;
-  }
-
-  public void setIntrepidId(String intrepidId) {
-    this.intrepidId = intrepidId;
   }
 
   @Override
@@ -188,20 +118,5 @@ public class TrainingNumber implements Serializable {
     result = 31 * result + (intrepidId != null ? intrepidId.hashCode() : 0);
     result = 31 * result + (programme != null ? programme.hashCode() : 0);
     return result;
-  }
-
-  @Override
-  public String toString() {
-    return "TrainingNumber{" +
-        "id=" + id +
-        ", trainingNumberType='" + trainingNumberType + "'" +
-        ", trainingNumber='" + trainingNumber + "'" +
-        ", number='" + number + "'" +
-        ", appointmentYear='" + appointmentYear + "'" +
-        ", typeOfContract='" + typeOfContract + "'" +
-        ", suffix='" + suffix + "'" +
-        ", intrepidId='" + intrepidId + "'" +
-        ", programme='" + programme + "'" +
-        '}';
   }
 }

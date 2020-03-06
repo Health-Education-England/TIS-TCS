@@ -13,7 +13,9 @@ import javax.persistence.GenerationType;
 import javax.persistence.Id;
 import javax.persistence.ManyToMany;
 import javax.persistence.OneToMany;
+import lombok.Data;
 
+@Data
 @Entity
 public class Programme implements Serializable {
 
@@ -28,20 +30,12 @@ public class Programme implements Serializable {
   private String owner;
   private String programmeName;
   private String programmeNumber;
-  
+
   @OneToMany(mappedBy = "programme", cascade = CascadeType.ALL, orphanRemoval = true)
   private Set<ProgrammeCurriculum> curricula = new HashSet<>();
 
   @ManyToMany(mappedBy = "programmes")
   private Set<Post> posts;
-
-  public Set<ProgrammeCurriculum> getCurricula() {
-    return curricula;
-  }
-
-  public void setCurricula(final Set<ProgrammeCurriculum> curricula) {
-    this.curricula = curricula;
-  }
 
   public Programme curricula(final Set<ProgrammeCurriculum> curricula) {
     this.curricula = curricula;
@@ -58,33 +52,9 @@ public class Programme implements Serializable {
     return this;
   }
 
-  public Long getId() {
-    return id;
-  }
-
-  public void setId(final Long id) {
-    this.id = id;
-  }
-
-  public String getIntrepidId() {
-    return intrepidId;
-  }
-
-  public void setIntrepidId(final String intrepidId) {
-    this.intrepidId = intrepidId;
-  }
-
   public Programme intrepidId(final String intrepidId) {
     this.intrepidId = intrepidId;
     return this;
-  }
-
-  public Status getStatus() {
-    return status;
-  }
-
-  public void setStatus(final Status status) {
-    this.status = status;
   }
 
   public Programme status(final Status status) {
@@ -92,25 +62,9 @@ public class Programme implements Serializable {
     return this;
   }
 
-  public String getOwner() {
-    return owner;
-  }
-
-  public void setOwner(final String owner) {
-    this.owner = owner;
-  }
-
   public Programme owner(final String owner) {
     this.owner = owner;
     return this;
-  }
-
-  public String getProgrammeName() {
-    return programmeName;
-  }
-
-  public void setProgrammeName(final String programmeName) {
-    this.programmeName = programmeName;
   }
 
   public Programme programmeName(final String programmeName) {
@@ -118,25 +72,9 @@ public class Programme implements Serializable {
     return this;
   }
 
-  public String getProgrammeNumber() {
-    return programmeNumber;
-  }
-
-  public void setProgrammeNumber(final String programmeNumber) {
-    this.programmeNumber = programmeNumber;
-  }
-
   public Programme programmeNumber(final String programmeNumber) {
     this.programmeNumber = programmeNumber;
     return this;
-  }
-
-  public Set<Post> getPosts() {
-    return posts;
-  }
-
-  public void setPosts(final Set<Post> posts) {
-    this.posts = posts;
   }
 
   public Programme posts(final Set<Post> posts) {
@@ -195,17 +133,5 @@ public class Programme implements Serializable {
     result = 31 * result + (programmeName != null ? programmeName.hashCode() : 0);
     result = 31 * result + (programmeNumber != null ? programmeNumber.hashCode() : 0);
     return result;
-  }
-
-  @Override
-  public String toString() {
-    return "Programme{" +
-        "id=" + id +
-        ", intrepidId=" + intrepidId +
-        ", status='" + status + "'" +
-        ", owner='" + owner + "'" +
-        ", programmeName='" + programmeName + "'" +
-        ", programmeNumber='" + programmeNumber + "'" +
-        '}';
   }
 }

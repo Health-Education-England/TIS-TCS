@@ -11,11 +11,13 @@ import javax.validation.constraints.DecimalMin;
 import javax.validation.constraints.NotNull;
 import javax.validation.constraints.Null;
 import javax.validation.constraints.Size;
+import lombok.Data;
 import org.hibernate.validator.constraints.NotBlank;
 
 /**
  * A DTO for the Specialty entity.
  */
+@Data
 public class SpecialtyDTO implements Serializable {
 
   @NotNull(groups = Update.class, message = "Id cannot be null when updating")
@@ -42,70 +44,6 @@ public class SpecialtyDTO implements Serializable {
       Update.class}, min = 1, max = 100, message = "Name cannot be less than 1 and more than 100 characters")
   private String name;
 
-  public Long getId() {
-    return id;
-  }
-
-  public void setId(Long id) {
-    this.id = id;
-  }
-
-  public Status getStatus() {
-    return status;
-  }
-
-  public void setStatus(Status status) {
-    this.status = status;
-  }
-
-  public String getCollege() {
-    return college;
-  }
-
-  public void setCollege(String college) {
-    this.college = college;
-  }
-
-  public String getSpecialtyCode() {
-    return specialtyCode;
-  }
-
-  public void setSpecialtyCode(String specialtyCode) {
-    this.specialtyCode = specialtyCode;
-  }
-
-  public Set<SpecialtyType> getSpecialtyTypes() {
-    return specialtyTypes;
-  }
-
-  public void setSpecialtyTypes(Set<SpecialtyType> specialtyTypes) {
-    this.specialtyTypes = specialtyTypes;
-  }
-
-  public String getIntrepidId() {
-    return intrepidId;
-  }
-
-  public void setIntrepidId(String intrepidId) {
-    this.intrepidId = intrepidId;
-  }
-
-  public SpecialtyGroupDTO getSpecialtyGroup() {
-    return specialtyGroup;
-  }
-
-  public void setSpecialtyGroup(SpecialtyGroupDTO specialtyGroup) {
-    this.specialtyGroup = specialtyGroup;
-  }
-
-  public String getName() {
-    return name;
-  }
-
-  public void setName(String name) {
-    this.name = name;
-  }
-
   @Override
   public boolean equals(Object o) {
     if (this == o) {
@@ -127,19 +65,5 @@ public class SpecialtyDTO implements Serializable {
   @Override
   public int hashCode() {
     return Objects.hashCode(id);
-  }
-
-  @Override
-  public String toString() {
-    return "SpecialtyDTO{" +
-        "id=" + id +
-        ", intrepidId='" + intrepidId + '\'' +
-        ", status=" + status +
-        ", college='" + college + '\'' +
-        ", specialtyCode='" + specialtyCode + '\'' +
-        ", specialtyTypes=" + specialtyTypes +
-        ", specialtyGroup=" + specialtyGroup +
-        ", name=" + name +
-        '}';
   }
 }

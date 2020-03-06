@@ -9,10 +9,12 @@ import java.util.List;
 import java.util.Objects;
 import javax.validation.Valid;
 import javax.validation.constraints.NotNull;
+import lombok.Data;
 
 /**
  * A DTO for the ProgrammeMembership entity.
  */
+@Data
 public class ProgrammeMembershipDTO implements Serializable {
 
   private Long id;
@@ -48,120 +50,6 @@ public class ProgrammeMembershipDTO implements Serializable {
   @Valid
   private List<CurriculumMembershipDTO> curriculumMemberships;
 
-  public Long getId() {
-    return id;
-  }
-
-  public void setId(Long id) {
-    this.id = id;
-  }
-
-  public ProgrammeMembershipType getProgrammeMembershipType() {
-    return programmeMembershipType;
-  }
-
-  public void setProgrammeMembershipType(ProgrammeMembershipType programmeMembershipType) {
-    this.programmeMembershipType = programmeMembershipType;
-  }
-
-  public RotationDTO getRotation() {
-    return rotation;
-  }
-
-  public void setRotation(RotationDTO rotation) {
-    this.rotation = rotation;
-  }
-
-
-  public LocalDate getProgrammeStartDate() {
-    return programmeStartDate;
-  }
-
-  public void setProgrammeStartDate(LocalDate programmeStartDate) {
-    this.programmeStartDate = programmeStartDate;
-  }
-
-
-  public LocalDate getProgrammeEndDate() {
-    return programmeEndDate;
-  }
-
-  public void setProgrammeEndDate(LocalDate programmeEndDate) {
-    this.programmeEndDate = programmeEndDate;
-  }
-
-  public String getLeavingDestination() {
-    return leavingDestination;
-  }
-
-  public void setLeavingDestination(String leavingDestination) {
-    this.leavingDestination = leavingDestination;
-  }
-
-  public String getLeavingReason() {
-    return leavingReason;
-  }
-
-  public void setLeavingReason(String leavingReason) {
-    this.leavingReason = leavingReason;
-  }
-
-  public Long getProgrammeId() {
-    return programmeId;
-  }
-
-  public void setProgrammeId(Long programmeId) {
-    this.programmeId = programmeId;
-  }
-
-  public String getProgrammeName() {
-    return programmeName;
-  }
-
-  public void setProgrammeName(String programmeName) {
-    this.programmeName = programmeName;
-  }
-
-  public String getProgrammeNumber() {
-    return programmeNumber;
-  }
-
-  public void setProgrammeNumber(String programmeNumber) {
-    this.programmeNumber = programmeNumber;
-  }
-
-  public String getTrainingPathway() {
-    return trainingPathway;
-  }
-
-  public void setTrainingPathway(String trainingPathway) {
-    this.trainingPathway = trainingPathway;
-  }
-
-  public TrainingNumberDTO getTrainingNumber() {
-    return trainingNumber;
-  }
-
-  public void setTrainingNumber(TrainingNumberDTO trainingNumber) {
-    this.trainingNumber = trainingNumber;
-  }
-
-  public PersonDTO getPerson() {
-    return person;
-  }
-
-  public void setPerson(PersonDTO person) {
-    this.person = person;
-  }
-
-  public List<CurriculumMembershipDTO> getCurriculumMemberships() {
-    return curriculumMemberships;
-  }
-
-  public void setCurriculumMemberships(List<CurriculumMembershipDTO> curriculumMemberships) {
-    this.curriculumMemberships = curriculumMemberships;
-  }
-
   @Override
   public boolean equals(Object o) {
     if (this == o) {
@@ -186,20 +74,5 @@ public class ProgrammeMembershipDTO implements Serializable {
 
   private Long getPersonIdOrNull() {
     return person != null ? person.getId() : null;
-  }
-
-  @Override
-  public String toString() {
-    return "ProgrammeMembershipDTO{" +
-        "id='" + id + "'" +
-        ", programmeMembershipType='" + programmeMembershipType + "'" +
-        ", rotation='" + rotation + "'" +
-        ", programmeStartDate='" + programmeStartDate + "'" +
-        ", programmeEndDate='" + programmeEndDate + "'" +
-        ", leavingDestination='" + leavingDestination + "'" +
-        ", leavingReason='" + leavingReason + "'" +
-        ", trainingPathway='" + trainingPathway + "'" +
-        ", person='" + person + "'" +
-        '}';
   }
 }
