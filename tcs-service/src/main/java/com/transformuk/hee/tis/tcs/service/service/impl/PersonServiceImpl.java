@@ -13,13 +13,27 @@ import com.transformuk.hee.tis.tcs.api.dto.PersonalDetailsDTO;
 import com.transformuk.hee.tis.tcs.api.dto.ProgrammeMembershipDTO;
 import com.transformuk.hee.tis.tcs.api.enumeration.PersonOwnerRule;
 import com.transformuk.hee.tis.tcs.api.enumeration.Status;
-import com.transformuk.hee.tis.tcs.service.api.util.BasicPage;
 import com.transformuk.hee.tis.tcs.service.event.PersonCreatedEvent;
 import com.transformuk.hee.tis.tcs.service.event.PersonDeletedEvent;
 import com.transformuk.hee.tis.tcs.service.event.PersonSavedEvent;
 import com.transformuk.hee.tis.tcs.service.exception.AccessUnauthorisedException;
-import com.transformuk.hee.tis.tcs.service.model.*;
-import com.transformuk.hee.tis.tcs.service.repository.*;
+import com.transformuk.hee.tis.tcs.service.model.ColumnFilter;
+import com.transformuk.hee.tis.tcs.service.model.ContactDetails;
+import com.transformuk.hee.tis.tcs.service.model.GdcDetails;
+import com.transformuk.hee.tis.tcs.service.model.GmcDetails;
+import com.transformuk.hee.tis.tcs.service.model.Person;
+import com.transformuk.hee.tis.tcs.service.model.PersonBasicDetails;
+import com.transformuk.hee.tis.tcs.service.model.PersonTrust;
+import com.transformuk.hee.tis.tcs.service.model.PersonalDetails;
+import com.transformuk.hee.tis.tcs.service.model.RightToWork;
+import com.transformuk.hee.tis.tcs.service.repository.ContactDetailsRepository;
+import com.transformuk.hee.tis.tcs.service.repository.GdcDetailsRepository;
+import com.transformuk.hee.tis.tcs.service.repository.GmcDetailsRepository;
+import com.transformuk.hee.tis.tcs.service.repository.PersonBasicDetailsRepository;
+import com.transformuk.hee.tis.tcs.service.repository.PersonRepository;
+import com.transformuk.hee.tis.tcs.service.repository.PersonalDetailsRepository;
+import com.transformuk.hee.tis.tcs.service.repository.RightToWorkRepository;
+import com.transformuk.hee.tis.tcs.service.repository.TrainerApprovalRepository;
 import com.transformuk.hee.tis.tcs.service.service.PersonService;
 import com.transformuk.hee.tis.tcs.service.service.helper.SqlQuerySupplier;
 import com.transformuk.hee.tis.tcs.service.service.mapper.PersonBasicDetailsMapper;
@@ -231,7 +245,7 @@ public class PersonServiceImpl implements PersonService {
   @Cacheable(value = "personFindAll", sync = true)
   @Override
   @Transactional(readOnly = true)
-  public BasicPage<PersonViewDTO> findAll(final Pageable pageable) {
+  public Page<PersonViewDTO> findAll(final Pageable pageable) {
     log.debug("Request to get all People");
 
     final int size = pageable.getPageSize() + 1;
@@ -271,15 +285,16 @@ public class PersonServiceImpl implements PersonService {
     stopWatch.stop();
     log.debug("full person query finished in: [{}]s", stopWatch.getTotalTimeSeconds());
 
-    final boolean hasNext = persons.size() > pageable.getPageSize();
-    if (hasNext) {
+    if (CollectionUtils.isEmpty(persons)) {
+      return Page.empty(pageable);
+    }
+
+    int personCount = persons.size();
+    if (personCount > pageable.getPageSize()) {
       persons = persons.subList(0, pageable.getPageSize()); //ignore any additional
     }
 
-    if (CollectionUtils.isEmpty(persons)) {
-      return new BasicPage<>(persons, pageable);
-    }
-    return new BasicPage<>(persons, pageable, hasNext);
+    return new PageImpl<>(persons, pageable, personCount);
   }
 
   /**
@@ -316,7 +331,7 @@ public class PersonServiceImpl implements PersonService {
   @Cacheable(value = "personAdvSearch", sync = true)
   @Override
   @Transactional(readOnly = true)
-  public BasicPage<PersonViewDTO> advancedSearch(final String searchString,
+  public Page<PersonViewDTO> advancedSearch(final String searchString,
       final List<ColumnFilter> columnFilters, final Pageable pageable) {
     final int size = pageable.getPageSize() + 1;
     final long offset = pageable.getOffset();
@@ -357,16 +372,16 @@ public class PersonServiceImpl implements PersonService {
     List<PersonViewDTO> persons = namedParameterJdbcTemplate
         .query(query, paramSource, new PersonViewRowMapper());
 
-    final boolean hasNext = persons.size() > pageable.getPageSize();
-    if (hasNext) {
+    if (CollectionUtils.isEmpty(persons)) {
+      return Page.empty(pageable);
+    }
+
+    int personCount = persons.size();
+    if (personCount > pageable.getPageSize()) {
       persons = persons.subList(0, pageable.getPageSize()); //ignore any additional
     }
 
-    if (CollectionUtils.isEmpty(persons)) {
-      return new BasicPage<>(persons, pageable);
-    }
-
-    return new BasicPage<>(persons, pageable, hasNext);
+    return new PageImpl<>(persons, pageable, personCount);
   }
 
   /**
@@ -648,7 +663,8 @@ public class PersonServiceImpl implements PersonService {
         personRepository.getClass().getSimpleName(), PersonLiteDTO.class.getSimpleName(),
         categoryId, query);
 
-    return personRepository.searchByRoleCategory(query, roles, pageable, filterByTrainerApprovalStatus)
+    return personRepository
+        .searchByRoleCategory(query, roles, pageable, filterByTrainerApprovalStatus)
         .map(personLiteMapper::toDto);
   }
 
