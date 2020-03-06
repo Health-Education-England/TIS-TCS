@@ -8,12 +8,17 @@ import javax.persistence.GenerationType;
 import javax.persistence.Id;
 import javax.persistence.Table;
 import lombok.Data;
+import lombok.Getter;
+import lombok.Setter;
+import lombok.ToString;
 
 /**
  * Holds the data from the EsrNotification table necessary to populate the {@link
  * com.transformuk.hee.tis.tcs.api.dto.EsrNotificationDTO}
  */
-@Data
+@Getter
+@Setter
+@ToString
 @Entity
 @Table(name = "EsrNotification")
 public class EsrNotification implements Serializable {
@@ -86,17 +91,8 @@ public class EsrNotification implements Serializable {
 
   private Double workingHourIndicator;
 
-  private Boolean postVacantAtNextRotation = true; // default to true and to be overwritten wherever there is a next placement.
+  // Default to true and to be overwritten wherever there is a next placement.
+  private Boolean postVacantAtNextRotation = true;
 
   private String medicalRotationPostDeleteIndicator;
-
-  @Override
-  public boolean equals(Object that) {
-    return super.equals(that);
-  }
-
-  @Override
-  public int hashCode() {
-    return super.hashCode();
-  }
 }
