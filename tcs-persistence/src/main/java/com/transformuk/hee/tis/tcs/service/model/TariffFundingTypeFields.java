@@ -1,5 +1,6 @@
 package com.transformuk.hee.tis.tcs.service.model;
 
+
 import java.io.Serializable;
 import java.math.BigDecimal;
 import java.time.LocalDate;
@@ -9,12 +10,10 @@ import javax.persistence.Entity;
 import javax.persistence.GeneratedValue;
 import javax.persistence.GenerationType;
 import javax.persistence.Id;
-import lombok.Data;
 
 /**
  * A TariffFundingTypeFields.
  */
-@Data
 @Entity
 public class TariffFundingTypeFields implements Serializable {
 
@@ -45,9 +44,33 @@ public class TariffFundingTypeFields implements Serializable {
   @Column(name = "placementRateProvidedToId")
   private String placementRateProvidedToId;
 
+  public Long getId() {
+    return id;
+  }
+
+  public void setId(Long id) {
+    this.id = id;
+  }
+
+  public LocalDate getEffectiveDateFrom() {
+    return effectiveDateFrom;
+  }
+
+  public void setEffectiveDateFrom(LocalDate effectiveDateFrom) {
+    this.effectiveDateFrom = effectiveDateFrom;
+  }
+
   public TariffFundingTypeFields effectiveDateFrom(LocalDate effectiveDateFrom) {
     this.effectiveDateFrom = effectiveDateFrom;
     return this;
+  }
+
+  public LocalDate getEffectiveDateTo() {
+    return effectiveDateTo;
+  }
+
+  public void setEffectiveDateTo(LocalDate effectiveDateTo) {
+    this.effectiveDateTo = effectiveDateTo;
   }
 
   public TariffFundingTypeFields effectiveDateTo(LocalDate effectiveDateTo) {
@@ -55,14 +78,54 @@ public class TariffFundingTypeFields implements Serializable {
     return this;
   }
 
+  public BigDecimal getTariffRate() {
+    return tariffRate;
+  }
+
+  public void setTariffRate(BigDecimal tariffRate) {
+    this.tariffRate = tariffRate;
+  }
+
   public TariffFundingTypeFields tariffRate(BigDecimal tariffRate) {
     this.tariffRate = tariffRate;
     return this;
   }
 
+  public BigDecimal getPlacementRate() {
+    return placementRate;
+  }
+
+  public void setPlacementRate(BigDecimal placementRate) {
+    this.placementRate = placementRate;
+  }
+
   public TariffFundingTypeFields placementRate(BigDecimal placementRate) {
     this.placementRate = placementRate;
     return this;
+  }
+
+  public String getLevelOfPostId() {
+    return levelOfPostId;
+  }
+
+  public void setLevelOfPostId(String levelOfPostId) {
+    this.levelOfPostId = levelOfPostId;
+  }
+
+  public String getPlacementRateFundedById() {
+    return placementRateFundedById;
+  }
+
+  public void setPlacementRateFundedById(String placementRateFundedById) {
+    this.placementRateFundedById = placementRateFundedById;
+  }
+
+  public String getPlacementRateProvidedToId() {
+    return placementRateProvidedToId;
+  }
+
+  public void setPlacementRateProvidedToId(String placementRateProvidedToId) {
+    this.placementRateProvidedToId = placementRateProvidedToId;
   }
 
   @Override
@@ -83,5 +146,16 @@ public class TariffFundingTypeFields implements Serializable {
   @Override
   public int hashCode() {
     return Objects.hashCode(id);
+  }
+
+  @Override
+  public String toString() {
+    return "TariffFundingTypeFields{" +
+        "id=" + id +
+        ", effectiveDateFrom='" + effectiveDateFrom + "'" +
+        ", effectiveDateTo='" + effectiveDateTo + "'" +
+        ", tariffRate='" + tariffRate + "'" +
+        ", placementRate='" + placementRate + "'" +
+        '}';
   }
 }

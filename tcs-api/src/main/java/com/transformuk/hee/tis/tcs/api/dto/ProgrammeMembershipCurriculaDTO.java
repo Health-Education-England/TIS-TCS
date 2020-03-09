@@ -1,14 +1,19 @@
 package com.transformuk.hee.tis.tcs.api.dto;
 
-import lombok.Data;
-
 /**
  * A DTO that extends the ProgrammeMembership entity and adds curricula data.
  */
-@Data
 public class ProgrammeMembershipCurriculaDTO extends ProgrammeMembershipDTO {
 
   private CurriculumDTO curriculumDTO;
+
+  public CurriculumDTO getCurriculumDTO() {
+    return curriculumDTO;
+  }
+
+  public void setCurriculumDTO(CurriculumDTO curriculumDTO) {
+    this.curriculumDTO = curriculumDTO;
+  }
 
   @Override
   public boolean equals(Object o) {
@@ -33,5 +38,12 @@ public class ProgrammeMembershipCurriculaDTO extends ProgrammeMembershipDTO {
     int result = super.hashCode();
     result = 31 * result + (curriculumDTO != null ? curriculumDTO.hashCode() : 0);
     return result;
+  }
+
+  @Override
+  public String toString() {
+    return "ProgrammeMembershipCurriculaDTO{" +
+        "curriculumDTO=" + curriculumDTO +
+        '}';
   }
 }

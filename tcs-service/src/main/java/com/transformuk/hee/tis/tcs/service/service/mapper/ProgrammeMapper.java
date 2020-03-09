@@ -12,8 +12,7 @@ import org.mapstruct.MappingTarget;
 /**
  * Mapper for the entity Programme and its DTO ProgrammeDTO.
  */
-@Mapper(componentModel = "spring", uses = {ProgrammeCurriculumMapper.class,
-    TrainingNumberMapper.class})
+@Mapper(componentModel = "spring", uses = {ProgrammeCurriculumMapper.class, TrainingNumberMapper.class})
 public interface ProgrammeMapper {
 
   ProgrammeDTO programmeToProgrammeDTO(Programme programme);
@@ -24,10 +23,15 @@ public interface ProgrammeMapper {
 
   List<Programme> programmeDTOsToProgrammes(List<ProgrammeDTO> programmeDTOs);
 
-  Programme fromId(Long id);
-
-  Curriculum corriculumFromId(Long id);
-
+  default Curriculum corriculumFromId(Long id) {
+    if (id == null) {
+      return null;
+    }
+    Curriculum curriculum = new Curriculum();
+    curriculum.setId(id);
+    return curriculum;
+  }
+  
   @AfterMapping
   default void addProgrammeToCurricula(ProgrammeDTO source, @MappingTarget Programme target) {
     for (ProgrammeCurriculum curriculum : target.getCurricula()) {

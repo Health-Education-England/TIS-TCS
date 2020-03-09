@@ -1,5 +1,6 @@
 package com.transformuk.hee.tis.tcs.api.dto;
 
+
 import com.transformuk.hee.tis.tcs.api.dto.validation.Create;
 import com.transformuk.hee.tis.tcs.api.dto.validation.Update;
 import com.transformuk.hee.tis.tcs.api.enumeration.QualificationType;
@@ -10,12 +11,10 @@ import java.util.Objects;
 import javax.validation.constraints.DecimalMin;
 import javax.validation.constraints.NotNull;
 import javax.validation.constraints.Null;
-import lombok.Data;
 
 /**
  * A DTO for the Qualification entity.
  */
-@Data
 public class QualificationDTO implements Serializable {
 
   @NotNull(groups = Update.class, message = "Id must not be null when updating a qualification")
@@ -41,6 +40,78 @@ public class QualificationDTO implements Serializable {
   private String countryOfQualification;
 
   private LocalDateTime amendedDate;
+
+  public Long getId() {
+    return id;
+  }
+
+  public void setId(Long id) {
+    this.id = id;
+  }
+
+  public String getIntrepidId() {
+    return intrepidId;
+  }
+
+  public void setIntrepidId(String intrepidId) {
+    this.intrepidId = intrepidId;
+  }
+
+  public String getQualification() {
+    return qualification;
+  }
+
+  public void setQualification(String qualification) {
+    this.qualification = qualification;
+  }
+
+  public QualificationType getQualificationType() {
+    return qualificationType;
+  }
+
+  public void setQualificationType(QualificationType qualificationType) {
+    this.qualificationType = qualificationType;
+  }
+
+  public LocalDate getQualificationAttainedDate() {
+    return qualificationAttainedDate;
+  }
+
+  public void setQualificationAttainedDate(LocalDate qualificationAttainedDate) {
+    this.qualificationAttainedDate = qualificationAttainedDate;
+  }
+
+  public String getMedicalSchool() {
+    return medicalSchool;
+  }
+
+  public void setMedicalSchool(String medicalSchool) {
+    this.medicalSchool = medicalSchool;
+  }
+
+  public String getCountryOfQualification() {
+    return countryOfQualification;
+  }
+
+  public void setCountryOfQualification(String countryOfQualification) {
+    this.countryOfQualification = countryOfQualification;
+  }
+
+  public PersonDTO getPerson() {
+    return person;
+  }
+
+  public void setPerson(PersonDTO person) {
+    this.person = person;
+  }
+
+  public LocalDateTime getAmendedDate() {
+    return amendedDate;
+  }
+
+  public void setAmendedDate(LocalDateTime amendedDate) {
+    this.amendedDate = amendedDate;
+  }
 
   @Override
   public boolean equals(Object o) {
@@ -68,5 +139,20 @@ public class QualificationDTO implements Serializable {
 
   private Long getPersonIdOrNull() {
     return person != null ? person.getId() : null;
+  }
+
+  @Override
+  public String toString() {
+    return "QualificationDTO{" +
+        "id=" + getId() +
+        ", intrepidId='" + getIntrepidId() + "'" +
+        ", qualification='" + getQualification() + "'" +
+        ", qualificationType='" + getQualificationType() + "'" +
+        ", qualifiactionAttainedDate='" + getQualificationAttainedDate() + "'" +
+        ", medicalSchool='" + getMedicalSchool() + "'" +
+        ", countryOfQualification='" + getCountryOfQualification() + "'" +
+        ", person='" + getPerson() + "'" +
+        ", amendedDate='" + getAmendedDate() + "'" +
+        "}";
   }
 }

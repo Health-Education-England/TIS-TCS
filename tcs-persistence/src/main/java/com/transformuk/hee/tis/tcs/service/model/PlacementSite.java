@@ -14,9 +14,7 @@ import javax.persistence.Id;
 import javax.persistence.JoinColumn;
 import javax.persistence.ManyToOne;
 import javax.persistence.Table;
-import lombok.Data;
 
-@Data
 @Entity
 @Table(name = "PlacementSite")
 public class PlacementSite implements Serializable {
@@ -37,6 +35,38 @@ public class PlacementSite implements Serializable {
   @Column(name = "placementSiteType")
   private PlacementSiteType placementSiteType;
 
+  public Long getId() {
+    return id;
+  }
+
+  public void setId(Long id) {
+    this.id = id;
+  }
+
+  public PlacementDetails getPlacement() {
+    return placement;
+  }
+
+  public void setPlacement(PlacementDetails placement) {
+    this.placement = placement;
+  }
+
+  public Long getSiteId() {
+    return siteId;
+  }
+
+  public void setSiteId(Long siteId) {
+    this.siteId = siteId;
+  }
+
+  public PlacementSiteType getPlacementSiteType() {
+    return placementSiteType;
+  }
+
+  public void setPlacementSiteType(PlacementSiteType placementSiteType) {
+    this.placementSiteType = placementSiteType;
+  }
+
   @Override
   public boolean equals(Object o) {
     if (this == o) {
@@ -54,6 +84,7 @@ public class PlacementSite implements Serializable {
 
   @Override
   public int hashCode() {
+
     return Objects.hash(getId(), getPlacement(), getSiteId(), getPlacementSiteType());
   }
 }

@@ -3,12 +3,10 @@ package com.transformuk.hee.tis.tcs.api.dto;
 import java.io.Serializable;
 import java.time.LocalDate;
 import java.util.Objects;
-import lombok.Data;
 
 /**
  * A DTO for the Funding entity.
  */
-@Data
 public class FundingDTO implements Serializable {
 
   private Long id;
@@ -22,6 +20,54 @@ public class FundingDTO implements Serializable {
   private String fundingType;
 
   private String fundingIssue;
+
+  public Long getId() {
+    return id;
+  }
+
+  public void setId(Long id) {
+    this.id = id;
+  }
+
+  public String getStatus() {
+    return status;
+  }
+
+  public void setStatus(String status) {
+    this.status = status;
+  }
+
+  public LocalDate getStartDate() {
+    return startDate;
+  }
+
+  public void setStartDate(LocalDate startDate) {
+    this.startDate = startDate;
+  }
+
+  public LocalDate getEndDate() {
+    return endDate;
+  }
+
+  public void setEndDate(LocalDate endDate) {
+    this.endDate = endDate;
+  }
+
+  public String getFundingType() {
+    return fundingType;
+  }
+
+  public void setFundingType(String fundingType) {
+    this.fundingType = fundingType;
+  }
+
+  public String getFundingIssue() {
+    return fundingIssue;
+  }
+
+  public void setFundingIssue(String fundingIssue) {
+    this.fundingIssue = fundingIssue;
+  }
 
   @Override
   public boolean equals(Object o) {
@@ -44,5 +90,17 @@ public class FundingDTO implements Serializable {
   @Override
   public int hashCode() {
     return Objects.hashCode(id);
+  }
+
+  @Override
+  public String toString() {
+    return "FundingDTO{" +
+        "id=" + id +
+        ", status='" + status + "'" +
+        ", startDate='" + startDate + "'" +
+        ", endDate='" + endDate + "'" +
+        ", fundingType='" + fundingType + "'" +
+        ", fundingIssue='" + fundingIssue + "'" +
+        '}';
   }
 }

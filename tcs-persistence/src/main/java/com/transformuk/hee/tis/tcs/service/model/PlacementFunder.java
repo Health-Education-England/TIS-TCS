@@ -1,5 +1,6 @@
 package com.transformuk.hee.tis.tcs.service.model;
 
+
 import java.io.Serializable;
 import java.util.Objects;
 import javax.persistence.Column;
@@ -7,12 +8,10 @@ import javax.persistence.Entity;
 import javax.persistence.GeneratedValue;
 import javax.persistence.GenerationType;
 import javax.persistence.Id;
-import lombok.Data;
 
 /**
  * A PlacementFunder.
  */
-@Data
 @Entity
 public class PlacementFunder implements Serializable {
 
@@ -28,9 +27,33 @@ public class PlacementFunder implements Serializable {
   @Column(name = "trust")
   private String trust;
 
+  public Long getId() {
+    return id;
+  }
+
+  public void setId(Long id) {
+    this.id = id;
+  }
+
+  public String getLocalOffice() {
+    return localOffice;
+  }
+
+  public void setLocalOffice(String localOffice) {
+    this.localOffice = localOffice;
+  }
+
   public PlacementFunder localOffice(String localOffice) {
     this.localOffice = localOffice;
     return this;
+  }
+
+  public String getTrust() {
+    return trust;
+  }
+
+  public void setTrust(String trust) {
+    this.trust = trust;
   }
 
   public PlacementFunder trust(String trust) {
@@ -56,5 +79,14 @@ public class PlacementFunder implements Serializable {
   @Override
   public int hashCode() {
     return Objects.hashCode(id);
+  }
+
+  @Override
+  public String toString() {
+    return "PlacementFunder{" +
+        "id=" + id +
+        ", localOffice='" + localOffice + "'" +
+        ", trust='" + trust + "'" +
+        '}';
   }
 }

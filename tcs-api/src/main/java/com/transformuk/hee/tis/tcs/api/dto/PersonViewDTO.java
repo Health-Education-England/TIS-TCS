@@ -5,13 +5,11 @@ import com.transformuk.hee.tis.tcs.api.enumeration.ProgrammeMembershipStatus;
 import com.transformuk.hee.tis.tcs.api.enumeration.Status;
 import java.io.Serializable;
 import java.util.Objects;
-import lombok.Data;
 
 /**
  * This DTO is used in the person list, it's meant as a read only entity aggregating what the user
  * needs to see in a person list.
  */
-@Data
 public class PersonViewDTO implements Serializable {
 
   private static final long serialVersionUID = 1L;
@@ -64,6 +62,198 @@ public class PersonViewDTO implements Serializable {
 
   private PersonOwnerRule currentOwnerRule;
 
+  public Long getId() {
+    return id;
+  }
+
+  public void setId(Long id) {
+    this.id = id;
+  }
+
+  public String getIntrepidId() {
+    return intrepidId;
+  }
+
+  public void setIntrepidId(String intrepidId) {
+    this.intrepidId = intrepidId;
+  }
+
+  public String getSurname() {
+    return surname;
+  }
+
+  public void setSurname(String surname) {
+    this.surname = surname;
+  }
+
+  public String getForenames() {
+    return forenames;
+  }
+
+  public void setForenames(String forenames) {
+    this.forenames = forenames;
+  }
+
+  public String getGmcNumber() {
+    return gmcNumber;
+  }
+
+  public void setGmcNumber(String gmcNumber) {
+    this.gmcNumber = gmcNumber;
+  }
+
+  public String getGdcNumber() {
+    return gdcNumber;
+  }
+
+  public void setGdcNumber(String gdcNumber) {
+    this.gdcNumber = gdcNumber;
+  }
+
+  public String getPublicHealthNumber() {
+    return publicHealthNumber;
+  }
+
+  public void setPublicHealthNumber(String publicHealthNumber) {
+    this.publicHealthNumber = publicHealthNumber;
+  }
+
+  public Long getProgrammeId() {
+    return programmeId;
+  }
+
+  public void setProgrammeId(Long programmeId) {
+    this.programmeId = programmeId;
+  }
+
+  public ProgrammeMembershipStatus getProgrammeMembershipStatus() {
+    return programmeMembershipStatus;
+  }
+
+  public void setProgrammeMembershipStatus(ProgrammeMembershipStatus programmeMembershipStatus) {
+    this.programmeMembershipStatus = programmeMembershipStatus;
+  }
+
+  public String getProgrammeName() {
+    return programmeName;
+  }
+
+  public void setProgrammeName(String programmeName) {
+    this.programmeName = programmeName;
+  }
+
+  public String getProgrammeNumber() {
+    return programmeNumber;
+  }
+
+  public void setProgrammeNumber(String programmeNumber) {
+    this.programmeNumber = programmeNumber;
+  }
+
+  public String getTrainingNumber() {
+    return trainingNumber;
+  }
+
+  public void setTrainingNumber(String trainingNumber) {
+    this.trainingNumber = trainingNumber;
+  }
+
+  public String getGradeAbbreviation() {
+    return gradeAbbreviation;
+  }
+
+  public void setGradeAbbreviation(String gradeAbbreviation) {
+    this.gradeAbbreviation = gradeAbbreviation;
+  }
+
+  public String getGradeName() {
+    return gradeName;
+  }
+
+  public void setGradeName(String gradeName) {
+    this.gradeName = gradeName;
+  }
+
+  public String getSiteCode() {
+    return siteCode;
+  }
+
+  public void setSiteCode(String siteCode) {
+    this.siteCode = siteCode;
+  }
+
+  public String getSiteName() {
+    return siteName;
+  }
+
+  public void setSiteName(String siteName) {
+    this.siteName = siteName;
+  }
+
+  public String getPlacementType() {
+    return placementType;
+  }
+
+  public void setPlacementType(String placementType) {
+    this.placementType = placementType;
+  }
+
+  public String getSpecialty() {
+    return specialty;
+  }
+
+  public void setSpecialty(String specialty) {
+    this.specialty = specialty;
+  }
+
+  public String getRole() {
+    return role;
+  }
+
+  public void setRole(String role) {
+    this.role = role;
+  }
+
+  public Status getStatus() {
+    return status;
+  }
+
+  public void setStatus(Status status) {
+    this.status = status;
+  }
+
+  public String getCurrentOwner() {
+    return currentOwner;
+  }
+
+  public void setCurrentOwner(String currentOwner) {
+    this.currentOwner = currentOwner;
+  }
+
+  public PersonOwnerRule getCurrentOwnerRule() {
+    return currentOwnerRule;
+  }
+
+  public void setCurrentOwnerRule(PersonOwnerRule currentOwnerRule) {
+    this.currentOwnerRule = currentOwnerRule;
+  }
+
+  public Long getGradeId() {
+    return gradeId;
+  }
+
+  public void setGradeId(Long gradeId) {
+    this.gradeId = gradeId;
+  }
+
+  public Long getSiteId() {
+    return siteId;
+  }
+
+  public void setSiteId(Long siteId) {
+    this.siteId = siteId;
+  }
+
   @Override
   public boolean equals(Object o) {
     if (this == o) {
@@ -107,5 +297,35 @@ public class PersonViewDTO implements Serializable {
             gradeAbbreviation, gradeName, siteCode, siteName, placementType, specialty, role,
             status,
             currentOwner, currentOwnerRule);
+  }
+
+  @Override
+  public String toString() {
+    return "PersonViewDTO{" +
+        "id=" + id +
+        ", intrepidId='" + intrepidId + '\'' +
+        ", surname='" + surname + '\'' +
+        ", forenames='" + forenames + '\'' +
+        ", gmcNumber='" + gmcNumber + '\'' +
+        ", gdcNumber='" + gdcNumber + '\'' +
+        ", publicHealthNumber='" + publicHealthNumber + '\'' +
+        ", programmeId=" + programmeId +
+        ", programmeMembershipStatus='" + programmeMembershipStatus + '\'' +
+        ", programmeName='" + programmeName + '\'' +
+        ", programmeNumber='" + programmeNumber + '\'' +
+        ", trainingNumber='" + trainingNumber + '\'' +
+        ", gradeId=" + gradeId +
+        ", gradeAbbreviation='" + gradeAbbreviation + '\'' +
+        ", gradeName='" + gradeName + '\'' +
+        ", siteId=" + siteId +
+        ", siteCode='" + siteCode + '\'' +
+        ", siteName='" + siteName + '\'' +
+        ", placementType='" + placementType + '\'' +
+        ", specialty='" + specialty + '\'' +
+        ", role='" + role + '\'' +
+        ", status=" + status +
+        ", currentOwner='" + currentOwner + '\'' +
+        ", currentOwnerRule=" + currentOwnerRule +
+        '}';
   }
 }

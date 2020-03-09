@@ -1,5 +1,6 @@
 package com.transformuk.hee.tis.tcs.service.model;
 
+
 import java.io.Serializable;
 import java.time.LocalDate;
 import java.util.Objects;
@@ -8,12 +9,10 @@ import javax.persistence.Entity;
 import javax.persistence.GeneratedValue;
 import javax.persistence.GenerationType;
 import javax.persistence.Id;
-import lombok.Data;
 
 /**
  * A Funding.
  */
-@Data
 @Entity
 public class Funding implements Serializable {
 
@@ -38,9 +37,33 @@ public class Funding implements Serializable {
   @Column(name = "fundingIssue")
   private String fundingIssue;
 
+  public Long getId() {
+    return id;
+  }
+
+  public void setId(Long id) {
+    this.id = id;
+  }
+
+  public String getStatus() {
+    return status;
+  }
+
+  public void setStatus(String status) {
+    this.status = status;
+  }
+
   public Funding status(String status) {
     this.status = status;
     return this;
+  }
+
+  public LocalDate getStartDate() {
+    return startDate;
+  }
+
+  public void setStartDate(LocalDate startDate) {
+    this.startDate = startDate;
   }
 
   public Funding startDate(LocalDate startDate) {
@@ -48,14 +71,38 @@ public class Funding implements Serializable {
     return this;
   }
 
+  public LocalDate getEndDate() {
+    return endDate;
+  }
+
+  public void setEndDate(LocalDate endDate) {
+    this.endDate = endDate;
+  }
+
   public Funding endDate(LocalDate endDate) {
     this.endDate = endDate;
     return this;
   }
 
+  public String getFundingType() {
+    return fundingType;
+  }
+
+  public void setFundingType(String fundingType) {
+    this.fundingType = fundingType;
+  }
+
   public Funding fundingType(String fundingType) {
     this.fundingType = fundingType;
     return this;
+  }
+
+  public String getFundingIssue() {
+    return fundingIssue;
+  }
+
+  public void setFundingIssue(String fundingIssue) {
+    this.fundingIssue = fundingIssue;
   }
 
   public Funding fundingIssue(String fundingIssue) {
@@ -81,5 +128,17 @@ public class Funding implements Serializable {
   @Override
   public int hashCode() {
     return Objects.hashCode(id);
+  }
+
+  @Override
+  public String toString() {
+    return "Funding{" +
+        "id=" + id +
+        ", status='" + status + "'" +
+        ", startDate='" + startDate + "'" +
+        ", endDate='" + endDate + "'" +
+        ", fundingType='" + fundingType + "'" +
+        ", fundingIssue='" + fundingIssue + "'" +
+        '}';
   }
 }

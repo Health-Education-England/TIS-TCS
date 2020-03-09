@@ -1,5 +1,6 @@
 package com.transformuk.hee.tis.tcs.api.dto;
 
+
 import com.transformuk.hee.tis.tcs.api.dto.validation.Create;
 import com.transformuk.hee.tis.tcs.api.dto.validation.Update;
 import java.io.Serializable;
@@ -9,14 +10,12 @@ import javax.validation.constraints.DecimalMin;
 import javax.validation.constraints.NotNull;
 import javax.validation.constraints.Null;
 import javax.validation.constraints.Pattern;
-import lombok.Data;
 import org.hibernate.validator.constraints.Length;
 import org.hibernate.validator.constraints.NotBlank;
 
 /**
  * A DTO for the SpecialtyGroup entity.
  */
-@Data
 public class SpecialtyGroupDTO implements Serializable {
 
   @NotNull(groups = Update.class, message = "Id cannot be null when updating")
@@ -35,6 +34,38 @@ public class SpecialtyGroupDTO implements Serializable {
   private String name;
 
   private Set<SpecialtyDTO> specialties;
+
+  public Long getId() {
+    return id;
+  }
+
+  public void setId(Long id) {
+    this.id = id;
+  }
+
+  public String getName() {
+    return name;
+  }
+
+  public void setName(String name) {
+    this.name = name;
+  }
+
+  public String getIntrepidId() {
+    return intrepidId;
+  }
+
+  public void setIntrepidId(String intrepidId) {
+    this.intrepidId = intrepidId;
+  }
+
+  public Set<SpecialtyDTO> getSpecialties() {
+    return specialties;
+  }
+
+  public void setSpecialties(Set<SpecialtyDTO> specialties) {
+    this.specialties = specialties;
+  }
 
   @Override
   public boolean equals(Object o) {
@@ -57,5 +88,15 @@ public class SpecialtyGroupDTO implements Serializable {
   @Override
   public int hashCode() {
     return Objects.hashCode(id);
+  }
+
+  @Override
+  public String toString() {
+    return "SpecialtyGroupDTO{" +
+        "id=" + id +
+        ", intrepidId='" + intrepidId + '\'' +
+        ", name='" + name + '\'' +
+        ", specialties=" + specialties +
+        '}';
   }
 }

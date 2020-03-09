@@ -4,13 +4,7 @@ import java.io.Serializable;
 import java.util.Objects;
 import javax.persistence.Column;
 import javax.persistence.Embeddable;
-import lombok.AllArgsConstructor;
-import lombok.Data;
-import lombok.NoArgsConstructor;
 
-@Data
-@NoArgsConstructor
-@AllArgsConstructor
 @Embeddable
 public class PlacementSupervisorId implements Serializable {
 
@@ -22,6 +16,15 @@ public class PlacementSupervisorId implements Serializable {
 
   @Column(name = "type")
   private Integer type;
+
+  public PlacementSupervisorId() {
+  }
+
+  public PlacementSupervisorId(final Long placementId, final Long personId, final Integer type) {
+    this.placementId = placementId;
+    this.personId = personId;
+    this.type = type;
+  }
 
   @Override
   public boolean equals(Object o) {
@@ -39,6 +42,31 @@ public class PlacementSupervisorId implements Serializable {
 
   @Override
   public int hashCode() {
+
     return Objects.hash(placementId, personId, type);
+  }
+
+  public Long getPlacementId() {
+    return placementId;
+  }
+
+  public void setPlacementId(Long placementId) {
+    this.placementId = placementId;
+  }
+
+  public Long getPersonId() {
+    return personId;
+  }
+
+  public void setPersonId(Long personId) {
+    this.personId = personId;
+  }
+
+  public Integer getType() {
+    return type;
+  }
+
+  public void setType(Integer type) {
+    this.type = type;
   }
 }

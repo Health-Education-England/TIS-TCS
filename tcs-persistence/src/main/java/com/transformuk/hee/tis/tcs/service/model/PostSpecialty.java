@@ -14,9 +14,7 @@ import javax.persistence.Id;
 import javax.persistence.JoinColumn;
 import javax.persistence.ManyToOne;
 import javax.persistence.Table;
-import lombok.Data;
 
-@Data
 @Entity
 @Table(name = "PostSpecialty")
 public class PostSpecialty implements Serializable {
@@ -38,6 +36,38 @@ public class PostSpecialty implements Serializable {
   @Column(name = "postSpecialtyType")
   private PostSpecialtyType postSpecialtyType;
 
+  public Long getId() {
+    return id;
+  }
+
+  public void setId(Long id) {
+    this.id = id;
+  }
+
+  public Post getPost() {
+    return post;
+  }
+
+  public void setPost(Post post) {
+    this.post = post;
+  }
+
+  public Specialty getSpecialty() {
+    return specialty;
+  }
+
+  public void setSpecialty(Specialty specialty) {
+    this.specialty = specialty;
+  }
+
+  public PostSpecialtyType getPostSpecialtyType() {
+    return postSpecialtyType;
+  }
+
+  public void setPostSpecialtyType(PostSpecialtyType postSpecialtyType) {
+    this.postSpecialtyType = postSpecialtyType;
+  }
+
   @Override
   public boolean equals(Object o) {
     if (this == o) {
@@ -55,5 +85,13 @@ public class PostSpecialty implements Serializable {
   @Override
   public int hashCode() {
     return Objects.hash(id, specialty, postSpecialtyType);
+  }
+
+  @Override
+  public String toString() {
+    return "PostSpecialty{" +
+        "id=" + id +
+        ", postSpecialtyType=" + postSpecialtyType +
+        '}';
   }
 }

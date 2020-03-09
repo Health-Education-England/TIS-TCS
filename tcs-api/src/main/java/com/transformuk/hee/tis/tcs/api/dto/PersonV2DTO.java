@@ -1,5 +1,6 @@
 package com.transformuk.hee.tis.tcs.api.dto;
 
+
 import com.transformuk.hee.tis.tcs.api.dto.validation.Create;
 import com.transformuk.hee.tis.tcs.api.dto.validation.Update;
 import com.transformuk.hee.tis.tcs.api.enumeration.Status;
@@ -8,7 +9,6 @@ import java.time.LocalDateTime;
 import javax.validation.constraints.DecimalMin;
 import javax.validation.constraints.NotNull;
 import javax.validation.constraints.Null;
-import lombok.Data;
 
 /**
  * Copy of the PersonDTO without the Qualification.
@@ -19,7 +19,6 @@ import lombok.Data;
  * will be used in a new endpoint so have as little impact on other services on the origin get
  * person endpoint as possible
  */
-@Data
 public class PersonV2DTO implements Serializable {
 
   @NotNull(groups = Update.class, message = "Id must not be null when updating a person")
@@ -57,6 +56,134 @@ public class PersonV2DTO implements Serializable {
   private GdcDetailsDTO gdcDetails;
 
   private RightToWorkDTO rightToWork;
+
+  public Long getId() {
+    return id;
+  }
+
+  public void setId(Long id) {
+    this.id = id;
+  }
+
+  public String getIntrepidId() {
+    return intrepidId;
+  }
+
+  public void setIntrepidId(String intrepidId) {
+    this.intrepidId = intrepidId;
+  }
+
+  public LocalDateTime getAddedDate() {
+    return addedDate;
+  }
+
+  public void setAddedDate(LocalDateTime addedDate) {
+    this.addedDate = addedDate;
+  }
+
+  public LocalDateTime getAmendedDate() {
+    return amendedDate;
+  }
+
+  public void setAmendedDate(LocalDateTime amendedDate) {
+    this.amendedDate = amendedDate;
+  }
+
+  public String getRole() {
+    return role;
+  }
+
+  public void setRole(String role) {
+    this.role = role;
+  }
+
+  public Status getStatus() {
+    return status;
+  }
+
+  public void setStatus(Status status) {
+    this.status = status;
+  }
+
+  public String getComments() {
+    return comments;
+  }
+
+  public void setComments(String comments) {
+    this.comments = comments;
+  }
+
+  public LocalDateTime getInactiveDate() {
+    return inactiveDate;
+  }
+
+  public void setInactiveDate(LocalDateTime inactiveDate) {
+    this.inactiveDate = inactiveDate;
+  }
+
+  public String getInactiveNotes() {
+    return inactiveNotes;
+  }
+
+  public void setInactiveNotes(String inactiveNotes) {
+    this.inactiveNotes = inactiveNotes;
+  }
+
+  public String getPublicHealthNumber() {
+    return publicHealthNumber;
+  }
+
+  public void setPublicHealthNumber(String publicHealthNumber) {
+    this.publicHealthNumber = publicHealthNumber;
+  }
+
+  public ContactDetailsDTO getContactDetails() {
+    return contactDetails;
+  }
+
+  public void setContactDetails(ContactDetailsDTO contactDetails) {
+    this.contactDetails = contactDetails;
+  }
+
+  public PersonalDetailsDTO getPersonalDetails() {
+    return personalDetails;
+  }
+
+  public void setPersonalDetails(PersonalDetailsDTO personalDetails) {
+    this.personalDetails = personalDetails;
+  }
+
+  public GmcDetailsDTO getGmcDetails() {
+    return gmcDetails;
+  }
+
+  public void setGmcDetails(GmcDetailsDTO gmcDetails) {
+    this.gmcDetails = gmcDetails;
+  }
+
+  public GdcDetailsDTO getGdcDetails() {
+    return gdcDetails;
+  }
+
+  public void setGdcDetails(GdcDetailsDTO gdcDetails) {
+    this.gdcDetails = gdcDetails;
+  }
+
+  public RightToWorkDTO getRightToWork() {
+    return rightToWork;
+  }
+
+  public void setRightToWork(RightToWorkDTO rightToWork) {
+    this.rightToWork = rightToWork;
+  }
+
+  public String getRegulator() {
+    return regulator;
+  }
+
+  public void setRegulator(String regulator) {
+    this.regulator = regulator;
+  }
 
   @Override
   public boolean equals(Object o) {
@@ -146,5 +273,27 @@ public class PersonV2DTO implements Serializable {
     result = 31 * result + (gdcDetails != null ? gdcDetails.hashCode() : 0);
     result = 31 * result + (rightToWork != null ? rightToWork.hashCode() : 0);
     return result;
+  }
+
+  @Override
+  public String toString() {
+    return "PersonDTO{" +
+        "id=" + id +
+        ", intrepidId='" + intrepidId + '\'' +
+        ", addedDate=" + addedDate +
+        ", amendedDate=" + amendedDate +
+        ", role='" + role + '\'' +
+        ", status=" + status +
+        ", comments='" + comments + '\'' +
+        ", inactiveDate=" + inactiveDate +
+        ", inactiveNotes='" + inactiveNotes + '\'' +
+        ", publicHealthNumber='" + publicHealthNumber + '\'' +
+        ", regulator='" + regulator + '\'' +
+        ", contactDetails=" + contactDetails +
+        ", personalDetails=" + personalDetails +
+        ", gmcDetails=" + gmcDetails +
+        ", gdcDetails=" + gdcDetails +
+        ", rightToWork=" + rightToWork +
+        '}';
   }
 }

@@ -1,14 +1,13 @@
 package com.transformuk.hee.tis.tcs.api.dto;
 
+
 import java.io.Serializable;
 import java.math.BigDecimal;
 import java.util.Objects;
-import lombok.Data;
 
 /**
  * A DTO for the FundingComponents entity.
  */
-@Data
 public class FundingComponentsDTO implements Serializable {
 
   private Long id;
@@ -18,6 +17,38 @@ public class FundingComponentsDTO implements Serializable {
   private BigDecimal amount;
 
   private String fundingOrganisationId;
+
+  public Long getId() {
+    return id;
+  }
+
+  public void setId(Long id) {
+    this.id = id;
+  }
+
+  public Integer getPercentage() {
+    return percentage;
+  }
+
+  public void setPercentage(Integer percentage) {
+    this.percentage = percentage;
+  }
+
+  public BigDecimal getAmount() {
+    return amount;
+  }
+
+  public void setAmount(BigDecimal amount) {
+    this.amount = amount;
+  }
+
+  public String getFundingOrganisationId() {
+    return fundingOrganisationId;
+  }
+
+  public void setFundingOrganisationId(String placementFunderId) {
+    this.fundingOrganisationId = placementFunderId;
+  }
 
   @Override
   public boolean equals(Object o) {
@@ -40,5 +71,14 @@ public class FundingComponentsDTO implements Serializable {
   @Override
   public int hashCode() {
     return Objects.hashCode(id);
+  }
+
+  @Override
+  public String toString() {
+    return "FundingComponentsDTO{" +
+        "id=" + id +
+        ", percentage='" + percentage + "'" +
+        ", amount='" + amount + "'" +
+        '}';
   }
 }

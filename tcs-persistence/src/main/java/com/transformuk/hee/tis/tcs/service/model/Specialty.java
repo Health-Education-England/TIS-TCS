@@ -21,12 +21,10 @@ import javax.persistence.Id;
 import javax.persistence.JoinColumn;
 import javax.persistence.ManyToOne;
 import javax.persistence.OneToMany;
-import lombok.Data;
 
 /**
  * A Specialty.
  */
-@Data
 @Entity
 public class Specialty implements Serializable {
 
@@ -69,9 +67,33 @@ public class Specialty implements Serializable {
   @OneToMany(mappedBy = "specialty", fetch = FetchType.LAZY)
   private Set<PlacementSpecialty> placementSpecialty;
 
+  public Long getId() {
+    return id;
+  }
+
+  public void setId(Long id) {
+    this.id = id;
+  }
+
+  public Status getStatus() {
+    return status;
+  }
+
+  public void setStatus(Status status) {
+    this.status = status;
+  }
+
   public Specialty status(Status status) {
     this.status = status;
     return this;
+  }
+
+  public String getCollege() {
+    return college;
+  }
+
+  public void setCollege(String college) {
+    this.college = college;
   }
 
   public Specialty college(String college) {
@@ -79,9 +101,25 @@ public class Specialty implements Serializable {
     return this;
   }
 
+  public String getSpecialtyCode() {
+    return specialtyCode;
+  }
+
+  public void setSpecialtyCode(String specialtyCode) {
+    this.specialtyCode = specialtyCode;
+  }
+
   public Specialty specialtyCode(String specialtyCode) {
     this.specialtyCode = specialtyCode;
     return this;
+  }
+
+  public Set<SpecialtyType> getSpecialtyTypes() {
+    return specialtyTypes;
+  }
+
+  public void setSpecialtyTypes(Set<SpecialtyType> specialtyTypes) {
+    this.specialtyTypes = specialtyTypes;
   }
 
   public Specialty specialtyTypes(Set<SpecialtyType> specialtyTypes) {
@@ -89,9 +127,25 @@ public class Specialty implements Serializable {
     return this;
   }
 
+  public String getIntrepidId() {
+    return intrepidId;
+  }
+
+  public void setIntrepidId(String intrepidId) {
+    this.intrepidId = intrepidId;
+  }
+
   public Specialty intrepidId(String intrepidId) {
     this.intrepidId = intrepidId;
     return this;
+  }
+
+  public SpecialtyGroup getSpecialtyGroup() {
+    return specialtyGroup;
+  }
+
+  public void setSpecialtyGroup(SpecialtyGroup specialtyGroup) {
+    this.specialtyGroup = specialtyGroup;
   }
 
   public Specialty specialtyGroup(SpecialtyGroup specialtyGroup) {
@@ -99,9 +153,41 @@ public class Specialty implements Serializable {
     return this;
   }
 
+  public String getName() {
+    return name;
+  }
+
+  public void setName(String name) {
+    this.name = name;
+  }
+
   public Specialty name(String name) {
     this.name = name;
     return this;
+  }
+
+  public List<Curriculum> getCurricula() {
+    return curricula;
+  }
+
+  public void setCurricula(List<Curriculum> curricula) {
+    this.curricula = curricula;
+  }
+
+  public Set<PostSpecialty> getPosts() {
+    return posts;
+  }
+
+  public void setPosts(Set<PostSpecialty> posts) {
+    this.posts = posts;
+  }
+
+  public Set<PlacementSpecialty> getPlacementSpecialty() {
+    return placementSpecialty;
+  }
+
+  public void setPlacementSpecialty(Set<PlacementSpecialty> placementSpecialty) {
+    this.placementSpecialty = placementSpecialty;
   }
 
   @Override
@@ -119,5 +205,12 @@ public class Specialty implements Serializable {
   @Override
   public int hashCode() {
     return Objects.hash(id);
+  }
+
+  @Override
+  public String toString() {
+    return "Specialty{" +
+        "id=" + id +
+        '}';
   }
 }

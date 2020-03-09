@@ -7,12 +7,10 @@ import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.util.Objects;
 import javax.validation.constraints.NotNull;
-import lombok.Data;
 
 /**
  * A DTO for the CurriculumMembershipDTO entity.
  */
-@Data
 public class CurriculumMembershipDTO implements Serializable {
 
   private Long id;
@@ -34,6 +32,72 @@ public class CurriculumMembershipDTO implements Serializable {
 
   private LocalDateTime amendedDate;
 
+  public Long getId() {
+    return id;
+  }
+
+  public void setId(Long id) {
+    this.id = id;
+  }
+
+  public String getIntrepidId() {
+    return intrepidId;
+  }
+
+  public void setIntrepidId(String intrepidId) {
+    this.intrepidId = intrepidId;
+  }
+
+
+  public LocalDate getCurriculumStartDate() {
+    return curriculumStartDate;
+  }
+
+  public void setCurriculumStartDate(LocalDate curriculumStartDate) {
+    this.curriculumStartDate = curriculumStartDate;
+  }
+
+  public LocalDate getCurriculumEndDate() {
+    return curriculumEndDate;
+  }
+
+  public void setCurriculumEndDate(LocalDate curriculumEndDate) {
+    this.curriculumEndDate = curriculumEndDate;
+  }
+
+  public Integer getPeriodOfGrace() {
+    return periodOfGrace;
+  }
+
+  public void setPeriodOfGrace(Integer periodOfGrace) {
+    this.periodOfGrace = periodOfGrace;
+  }
+
+  public LocalDate getCurriculumCompletionDate() {
+    return curriculumCompletionDate;
+  }
+
+  public void setCurriculumCompletionDate(LocalDate curriculumCompletionDate) {
+    this.curriculumCompletionDate = curriculumCompletionDate;
+  }
+
+
+  public Long getCurriculumId() {
+    return curriculumId;
+  }
+
+  public void setCurriculumId(Long curriculumId) {
+    this.curriculumId = curriculumId;
+  }
+
+  public LocalDateTime getAmendedDate() {
+    return amendedDate;
+  }
+
+  public void setAmendedDate(LocalDateTime amendedDate) {
+    this.amendedDate = amendedDate;
+  }
+
   @Override
   public boolean equals(Object o) {
     if (this == o) {
@@ -53,5 +117,18 @@ public class CurriculumMembershipDTO implements Serializable {
   public int hashCode() {
     return Objects
         .hash(curriculumStartDate, curriculumEndDate, curriculumCompletionDate, curriculumId);
+  }
+
+  @Override
+  public String toString() {
+    return "ProgrammeMembershipDTO{" +
+        "id=" + id +
+        ", intrepidId='" + intrepidId + "'" +
+        ", curriculumStartDate='" + curriculumStartDate + "'" +
+        ", curriculumEndDate='" + curriculumEndDate + "'" +
+        ", periodOfGrace='" + periodOfGrace + "'" +
+        ", curriculumCompletionDate='" + curriculumCompletionDate + "'" +
+        ", amendedDate='" + amendedDate + "'" +
+        '}';
   }
 }

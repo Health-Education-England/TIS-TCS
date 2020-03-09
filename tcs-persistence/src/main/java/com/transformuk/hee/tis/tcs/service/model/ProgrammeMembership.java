@@ -14,12 +14,10 @@ import javax.persistence.Id;
 import javax.persistence.JoinColumn;
 import javax.persistence.ManyToOne;
 import javax.persistence.Version;
-import lombok.Data;
 
 /**
  * A ProgrammeMembership.
  */
-@Data
 @Entity
 public class ProgrammeMembership implements Serializable {
 
@@ -73,9 +71,33 @@ public class ProgrammeMembership implements Serializable {
 
   private String trainingPathway;
 
+  public Long getId() {
+    return id;
+  }
+
+  public void setId(Long id) {
+    this.id = id;
+  }
+
+  public String getIntrepidId() {
+    return intrepidId;
+  }
+
+  public void setIntrepidId(String intrepidId) {
+    this.intrepidId = intrepidId;
+  }
+
   public ProgrammeMembership intrepidId(String intrepidId) {
     this.intrepidId = intrepidId;
     return this;
+  }
+
+  public ProgrammeMembershipType getProgrammeMembershipType() {
+    return programmeMembershipType;
+  }
+
+  public void setProgrammeMembershipType(ProgrammeMembershipType programmeMembershipType) {
+    this.programmeMembershipType = programmeMembershipType;
   }
 
   public ProgrammeMembership programmeMembershipType(
@@ -84,9 +106,25 @@ public class ProgrammeMembership implements Serializable {
     return this;
   }
 
+  public Rotation getRotation() {
+    return rotation;
+  }
+
+  public void setRotation(Rotation rotation) {
+    this.rotation = rotation;
+  }
+
   public ProgrammeMembership rotation(Rotation rotation) {
     this.rotation = rotation;
     return this;
+  }
+
+  public LocalDate getCurriculumStartDate() {
+    return curriculumStartDate;
+  }
+
+  public void setCurriculumStartDate(LocalDate curriculumStartDate) {
+    this.curriculumStartDate = curriculumStartDate;
   }
 
   public ProgrammeMembership curriculumStartDate(LocalDate curriculumStartDate) {
@@ -94,9 +132,25 @@ public class ProgrammeMembership implements Serializable {
     return this;
   }
 
+  public LocalDate getCurriculumEndDate() {
+    return curriculumEndDate;
+  }
+
+  public void setCurriculumEndDate(LocalDate curriculumEndDate) {
+    this.curriculumEndDate = curriculumEndDate;
+  }
+
   public ProgrammeMembership curriculumEndDate(LocalDate curriculumEndDate) {
     this.curriculumEndDate = curriculumEndDate;
     return this;
+  }
+
+  public Integer getPeriodOfGrace() {
+    return periodOfGrace;
+  }
+
+  public void setPeriodOfGrace(Integer periodOfGrace) {
+    this.periodOfGrace = periodOfGrace;
   }
 
   public ProgrammeMembership periodOfGrace(Integer periodOfGrace) {
@@ -104,9 +158,25 @@ public class ProgrammeMembership implements Serializable {
     return this;
   }
 
+  public LocalDate getProgrammeStartDate() {
+    return programmeStartDate;
+  }
+
+  public void setProgrammeStartDate(LocalDate programmeStartDate) {
+    this.programmeStartDate = programmeStartDate;
+  }
+
   public ProgrammeMembership programmeStartDate(LocalDate programmeStartDate) {
     this.programmeStartDate = programmeStartDate;
     return this;
+  }
+
+  public LocalDate getCurriculumCompletionDate() {
+    return curriculumCompletionDate;
+  }
+
+  public void setCurriculumCompletionDate(LocalDate curriculumCompletionDate) {
+    this.curriculumCompletionDate = curriculumCompletionDate;
   }
 
   public ProgrammeMembership curriculumCompletionDate(LocalDate curriculumCompletionDate) {
@@ -114,9 +184,25 @@ public class ProgrammeMembership implements Serializable {
     return this;
   }
 
+  public LocalDate getProgrammeEndDate() {
+    return programmeEndDate;
+  }
+
+  public void setProgrammeEndDate(LocalDate programmeEndDate) {
+    this.programmeEndDate = programmeEndDate;
+  }
+
   public ProgrammeMembership programmeEndDate(LocalDate programmeEndDate) {
     this.programmeEndDate = programmeEndDate;
     return this;
+  }
+
+  public String getLeavingDestination() {
+    return leavingDestination;
+  }
+
+  public void setLeavingDestination(String leavingDestination) {
+    this.leavingDestination = leavingDestination;
   }
 
   public ProgrammeMembership leavingDestination(String leavingDestination) {
@@ -124,9 +210,65 @@ public class ProgrammeMembership implements Serializable {
     return this;
   }
 
+  public String getLeavingReason() {
+    return leavingReason;
+  }
+
+  public void setLeavingReason(String leavingReason) {
+    this.leavingReason = leavingReason;
+  }
+
   public ProgrammeMembership leavingReason(String leavingReason) {
     this.leavingReason = leavingReason;
     return this;
+  }
+
+  public Programme getProgramme() {
+    return programme;
+  }
+
+  public void setProgramme(Programme programme) {
+    this.programme = programme;
+  }
+
+  public Long getCurriculumId() {
+    return curriculumId;
+  }
+
+  public void setCurriculumId(Long curriculumId) {
+    this.curriculumId = curriculumId;
+  }
+
+  public TrainingNumber getTrainingNumber() {
+    return trainingNumber;
+  }
+
+  public void setTrainingNumber(TrainingNumber trainingNumber) {
+    this.trainingNumber = trainingNumber;
+  }
+
+  public Person getPerson() {
+    return person;
+  }
+
+  public void setPerson(Person person) {
+    this.person = person;
+  }
+
+  public LocalDateTime getAmendedDate() {
+    return amendedDate;
+  }
+
+  public void setAmendedDate(LocalDateTime amendedDate) {
+    this.amendedDate = amendedDate;
+  }
+
+  public String getTrainingPathway() {
+    return trainingPathway;
+  }
+
+  public void setTrainingPathway(String trainingPathway) {
+    this.trainingPathway = trainingPathway;
   }
 
   @Override
@@ -147,5 +289,25 @@ public class ProgrammeMembership implements Serializable {
   @Override
   public int hashCode() {
     return Objects.hashCode(id);
+  }
+
+  @Override
+  public String toString() {
+    return "ProgrammeMembership{" +
+        "id=" + id +
+        ", intrepidId='" + intrepidId + "'" +
+        ", programmeMembershipType='" + programmeMembershipType + "'" +
+        ", rotation='" + rotation + "'" +
+        ", curriculumStartDate='" + curriculumStartDate + "'" +
+        ", curriculumEndDate='" + curriculumEndDate + "'" +
+        ", periodOfGrace='" + periodOfGrace + "'" +
+        ", programmeStartDate='" + programmeStartDate + "'" +
+        ", curriculumCompletionDate='" + curriculumCompletionDate + "'" +
+        ", programmeEndDate='" + programmeEndDate + "'" +
+        ", leavingDestination='" + leavingDestination + "'" +
+        ", leavingReason='" + leavingReason + "'" +
+        ", trainingPathway='" + trainingPathway + "'" +
+        ", amendedDate='" + getAmendedDate() + "'" +
+        '}';
   }
 }

@@ -3,9 +3,7 @@ package com.transformuk.hee.tis.tcs.api.dto;
 import com.transformuk.hee.tis.tcs.api.enumeration.PostSiteType;
 import java.io.Serializable;
 import java.util.Objects;
-import lombok.Data;
 
-@Data
 public class PostSiteDTO implements Serializable {
 
   private Long id;
@@ -24,6 +22,38 @@ public class PostSiteDTO implements Serializable {
   public PostSiteDTO(Long postId, Long siteId, PostSiteType postSiteType) {
     this.postId = postId;
     this.siteId = siteId;
+    this.postSiteType = postSiteType;
+  }
+
+  public Long getId() {
+    return id;
+  }
+
+  public void setId(Long id) {
+    this.id = id;
+  }
+
+  public Long getPostId() {
+    return postId;
+  }
+
+  public void setPostId(Long postId) {
+    this.postId = postId;
+  }
+
+  public Long getSiteId() {
+    return siteId;
+  }
+
+  public void setSiteId(Long siteId) {
+    this.siteId = siteId;
+  }
+
+  public PostSiteType getPostSiteType() {
+    return postSiteType;
+  }
+
+  public void setPostSiteType(PostSiteType postSiteType) {
     this.postSiteType = postSiteType;
   }
 
@@ -50,5 +80,15 @@ public class PostSiteDTO implements Serializable {
   @Override
   public int hashCode() {
     return Objects.hash(postId, siteId, postSiteType);
+  }
+
+  @Override
+  public String toString() {
+    return "PostSiteDTO{" +
+        "id=" + id +
+        ", postId=" + postId +
+        ", siteId='" + siteId + '\'' +
+        ", postSiteType=" + postSiteType +
+        '}';
   }
 }

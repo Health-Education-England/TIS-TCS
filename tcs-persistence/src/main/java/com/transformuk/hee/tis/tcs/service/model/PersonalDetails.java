@@ -1,5 +1,6 @@
 package com.transformuk.hee.tis.tcs.service.model;
 
+
 import java.io.Serializable;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
@@ -7,12 +8,10 @@ import java.util.Objects;
 import javax.persistence.Entity;
 import javax.persistence.Id;
 import javax.persistence.Version;
-import lombok.Data;
 
 /**
  * A PersonalDetails.
  */
-@Data
 @Entity
 public class PersonalDetails implements Serializable {
 
@@ -46,9 +45,26 @@ public class PersonalDetails implements Serializable {
   @Version
   private LocalDateTime amendedDate;
 
+
+  public Long getId() {
+    return id;
+  }
+
+  public void setId(Long id) {
+    this.id = id;
+  }
+
   public PersonalDetails id(Long id) {
     this.id = id;
     return this;
+  }
+
+  public String getMaritalStatus() {
+    return maritalStatus;
+  }
+
+  public void setMaritalStatus(String maritalStatus) {
+    this.maritalStatus = maritalStatus;
   }
 
   public PersonalDetails maritalStatus(String maritalStatus) {
@@ -56,9 +72,25 @@ public class PersonalDetails implements Serializable {
     return this;
   }
 
+  public LocalDate getDateOfBirth() {
+    return dateOfBirth;
+  }
+
+  public void setDateOfBirth(LocalDate dateOfBirth) {
+    this.dateOfBirth = dateOfBirth;
+  }
+
   public PersonalDetails dateOfBirth(LocalDate dateOfBirth) {
     this.dateOfBirth = dateOfBirth;
     return this;
+  }
+
+  public String getGender() {
+    return gender;
+  }
+
+  public void setGender(String gender) {
+    this.gender = gender;
   }
 
   public PersonalDetails gender(String gender) {
@@ -66,9 +98,25 @@ public class PersonalDetails implements Serializable {
     return this;
   }
 
+  public String getNationality() {
+    return nationality;
+  }
+
+  public void setNationality(String nationality) {
+    this.nationality = nationality;
+  }
+
   public PersonalDetails nationality(String nationality) {
     this.nationality = nationality;
     return this;
+  }
+
+  public String getDualNationality() {
+    return dualNationality;
+  }
+
+  public void setDualNationality(String dualNationality) {
+    this.dualNationality = dualNationality;
   }
 
   public PersonalDetails dualNationality(String dualNationality) {
@@ -76,9 +124,25 @@ public class PersonalDetails implements Serializable {
     return this;
   }
 
+  public String getSexualOrientation() {
+    return sexualOrientation;
+  }
+
+  public void setSexualOrientation(String sexualOrientation) {
+    this.sexualOrientation = sexualOrientation;
+  }
+
   public PersonalDetails sexualOrientation(String sexualOrientation) {
     this.sexualOrientation = sexualOrientation;
     return this;
+  }
+
+  public String getReligiousBelief() {
+    return religiousBelief;
+  }
+
+  public void setReligiousBelief(String religiousBelief) {
+    this.religiousBelief = religiousBelief;
   }
 
   public PersonalDetails religiousBelief(String religiousBelief) {
@@ -86,9 +150,25 @@ public class PersonalDetails implements Serializable {
     return this;
   }
 
+  public String getEthnicOrigin() {
+    return ethnicOrigin;
+  }
+
+  public void setEthnicOrigin(String ethnicOrigin) {
+    this.ethnicOrigin = ethnicOrigin;
+  }
+
   public PersonalDetails ethnicOrigin(String ethnicOrigin) {
     this.ethnicOrigin = ethnicOrigin;
     return this;
+  }
+
+  public String getDisability() {
+    return disability;
+  }
+
+  public void setDisability(String disability) {
+    this.disability = disability;
   }
 
   public PersonalDetails disability(String disability) {
@@ -96,14 +176,38 @@ public class PersonalDetails implements Serializable {
     return this;
   }
 
+  public String getDisabilityDetails() {
+    return disabilityDetails;
+  }
+
+  public void setDisabilityDetails(String disabilityDetails) {
+    this.disabilityDetails = disabilityDetails;
+  }
+
   public PersonalDetails disabilityDetails(String disabilityDetails) {
     this.disabilityDetails = disabilityDetails;
     return this;
   }
 
+  public String getNationalInsuranceNumber() {
+    return nationalInsuranceNumber;
+  }
+
+  public void setNationalInsuranceNumber(String nationalInsuranceNumber) {
+    this.nationalInsuranceNumber = nationalInsuranceNumber;
+  }
+
   public PersonalDetails nationalInsuranceNumber(String nationalInsuranceNumber) {
     this.nationalInsuranceNumber = nationalInsuranceNumber;
     return this;
+  }
+
+  public LocalDateTime getAmendedDate() {
+    return amendedDate;
+  }
+
+  public void setAmendedDate(LocalDateTime amendedDate) {
+    this.amendedDate = amendedDate;
   }
 
   @Override
@@ -124,5 +228,24 @@ public class PersonalDetails implements Serializable {
   @Override
   public int hashCode() {
     return Objects.hashCode(getId());
+  }
+
+  @Override
+  public String toString() {
+    return "PersonalDetails{" +
+        "id=" + getId() +
+        ", maritalStatus='" + getMaritalStatus() + "'" +
+        ", dateOfBirth='" + getDateOfBirth() + "'" +
+        ", gender='" + getGender() + "'" +
+        ", nationality='" + getNationality() + "'" +
+        ", dualNationality='" + getDualNationality() + "'" +
+        ", sexualOrientation='" + getSexualOrientation() + "'" +
+        ", religiousBelief='" + getReligiousBelief() + "'" +
+        ", ethnicOrigin='" + getEthnicOrigin() + "'" +
+        ", disability='" + getDisability() + "'" +
+        ", disabilityDetails='" + getDisabilityDetails() + "'" +
+        ", nationalInsuranceNumber='" + getNationalInsuranceNumber() + "'" +
+        ", amendedDate='" + getAmendedDate() + "'" +
+        "}";
   }
 }
