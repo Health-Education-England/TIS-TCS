@@ -79,8 +79,9 @@ node {
           sh "cp ./tcs-service/target/tcs-service-*.war ./tcs-service/target/app.jar"
           sh "docker build -t heetiscontainerregistry.azurecr.io/tcs:$buildVersion -f ./tcs-service/Dockerfile ./tcs-service"
           sh "docker push heetiscontainerregistry.azurecr.io/tcs:$buildVersion"
-          //sh "ansible-playbook -i $env.DEVOPS_BASE/ansible/inventory/dev $env.DEVOPS_BASE/ansible/tasks/spring-boot-build.yml"
 
+          sh "docker tag heetiscontainerregistry.azurecr.io/tcs:$buildVersion heetiscontainerregistry.azurecr.io/tcs:latest"
+          sh "docker push heetiscontainerregistry.azurecr.io/tcs:latest"
           println "[Jenkinsfile INFO] Stage Dockerize completed..."
         }
 
