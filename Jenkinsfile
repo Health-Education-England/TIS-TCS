@@ -76,7 +76,7 @@ node {
 
           //urghhh
           sh "mvn package -DskipTests"
-          sh "cp ./tcs-service/target/tcs-service-$env.VERSION.war ./tcs-service/target/app.jar" //copy file to app.jar so that the dockerfile is simpler
+          sh "cp ./tcs-service/target/tcs-service-*.war ./tcs-service/target/app.jar"
           sh "docker build -t heetiscontainerregistry.azurecr.io/tcs:$buildVersion -f ./tcs-service/Dockerfile ./tcs-service"
           sh "docker push heetiscontainerregistry.azurecr.io/tcs:$buildVersion"
           //sh "ansible-playbook -i $env.DEVOPS_BASE/ansible/inventory/dev $env.DEVOPS_BASE/ansible/tasks/spring-boot-build.yml"
