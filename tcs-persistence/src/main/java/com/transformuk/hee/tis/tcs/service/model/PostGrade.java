@@ -14,9 +14,8 @@ import javax.persistence.Id;
 import javax.persistence.JoinColumn;
 import javax.persistence.ManyToOne;
 import javax.persistence.Table;
-import lombok.Data;
 
-@Data
+
 @Entity
 @Table(name = "PostGrade")
 public class PostGrade implements Serializable {
@@ -37,6 +36,38 @@ public class PostGrade implements Serializable {
   @Column(name = "postGradeType")
   private PostGradeType postGradeType;
 
+  public Long getId() {
+    return id;
+  }
+
+  public void setId(Long id) {
+    this.id = id;
+  }
+
+  public Post getPost() {
+    return post;
+  }
+
+  public void setPost(Post post) {
+    this.post = post;
+  }
+
+  public Long getGradeId() {
+    return gradeId;
+  }
+
+  public void setGradeId(Long gradeId) {
+    this.gradeId = gradeId;
+  }
+
+  public PostGradeType getPostGradeType() {
+    return postGradeType;
+  }
+
+  public void setPostGradeType(PostGradeType postGradeType) {
+    this.postGradeType = postGradeType;
+  }
+
   @Override
   public boolean equals(Object o) {
     if (this == o) {
@@ -54,5 +85,14 @@ public class PostGrade implements Serializable {
   @Override
   public int hashCode() {
     return Objects.hash(id, gradeId, postGradeType);
+  }
+
+  @Override
+  public String toString() {
+    return "PostGrade{" +
+        "id=" + id +
+        ", gradeId=" + gradeId +
+        ", postGradeType=" + postGradeType +
+        '}';
   }
 }

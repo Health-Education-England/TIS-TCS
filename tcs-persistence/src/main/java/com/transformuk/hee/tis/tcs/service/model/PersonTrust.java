@@ -8,13 +8,11 @@ import javax.persistence.GenerationType;
 import javax.persistence.Id;
 import javax.persistence.JoinColumn;
 import javax.persistence.ManyToOne;
-import lombok.Data;
 
 /**
  * Entity that links a Person record to a trust. This is used to filter out what People records
  * Trust admin users can see
  */
-@Data
 @Entity
 public class PersonTrust {
 
@@ -35,4 +33,44 @@ public class PersonTrust {
 
   @Column(name = "trustName")
   private String trustName;
+
+  public Long getId() {
+    return id;
+  }
+
+  public void setId(Long id) {
+    this.id = id;
+  }
+
+  public Person getPerson() {
+    return person;
+  }
+
+  public void setPerson(Person person) {
+    this.person = person;
+  }
+
+  public Long getTrustId() {
+    return trustId;
+  }
+
+  public void setTrustId(Long trustId) {
+    this.trustId = trustId;
+  }
+
+  public String getTrustCode() {
+    return trustCode;
+  }
+
+  public void setTrustCode(String trustCode) {
+    this.trustCode = trustCode;
+  }
+
+  public String getTrustName() {
+    return trustName;
+  }
+
+  public void setTrustName(String trustName) {
+    this.trustName = trustName;
+  }
 }

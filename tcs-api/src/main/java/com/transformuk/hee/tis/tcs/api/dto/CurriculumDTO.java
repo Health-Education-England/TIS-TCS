@@ -10,12 +10,10 @@ import java.util.Objects;
 import javax.validation.constraints.DecimalMin;
 import javax.validation.constraints.NotNull;
 import javax.validation.constraints.Null;
-import lombok.Data;
 
 /**
  * A DTO for the Curriculum entity.
  */
-@Data
 public class CurriculumDTO implements Serializable {
 
   @NotNull(groups = Update.class, message = "Id must not be null when updating a curriculum")
@@ -54,6 +52,86 @@ public class CurriculumDTO implements Serializable {
   @NotNull(groups = {Create.class, Update.class}, message = "specialty must not be null")
   private SpecialtyDTO specialty;
 
+  public Long getId() {
+    return id;
+  }
+
+  public void setId(Long id) {
+    this.id = id;
+  }
+
+  public String getIntrepidId() {
+    return intrepidId;
+  }
+
+  public void setIntrepidId(String intrepidId) {
+    this.intrepidId = intrepidId;
+  }
+
+  public Status getStatus() {
+    return status;
+  }
+
+  public void setStatus(Status status) {
+    this.status = status;
+  }
+
+  public String getName() {
+    return name;
+  }
+
+  public void setName(String name) {
+    this.name = name;
+  }
+
+  public CurriculumSubType getCurriculumSubType() {
+    return curriculumSubType;
+  }
+
+  public void setCurriculumSubType(CurriculumSubType curriculumSubType) {
+    this.curriculumSubType = curriculumSubType;
+  }
+
+  public Integer getLength() {
+    return length;
+  }
+
+  public void setLength(Integer length) {
+    this.length = length;
+  }
+
+  public AssessmentType getAssessmentType() {
+    return assessmentType;
+  }
+
+  public void setAssessmentType(AssessmentType assessmentType) {
+    this.assessmentType = assessmentType;
+  }
+
+  public Boolean getDoesThisCurriculumLeadToCct() {
+    return doesThisCurriculumLeadToCct;
+  }
+
+  public void setDoesThisCurriculumLeadToCct(Boolean doesThisCurriculumLeadToCct) {
+    this.doesThisCurriculumLeadToCct = doesThisCurriculumLeadToCct;
+  }
+
+  public Integer getPeriodOfGrace() {
+    return periodOfGrace;
+  }
+
+  public void setPeriodOfGrace(Integer periodOfGrace) {
+    this.periodOfGrace = periodOfGrace;
+  }
+
+  public SpecialtyDTO getSpecialty() {
+    return specialty;
+  }
+
+  public void setSpecialty(SpecialtyDTO specialty) {
+    this.specialty = specialty;
+  }
+
   @Override
   public boolean equals(Object o) {
     if (this == o) {
@@ -75,5 +153,14 @@ public class CurriculumDTO implements Serializable {
   @Override
   public int hashCode() {
     return Objects.hashCode(id);
+  }
+
+  @Override
+  public String toString() {
+    return "CurriculumDTO{" + "id=" + id + ", intrepidId='" + intrepidId + '\'' + ", name='" + name
+        + '\'' + ", curriculumSubType=" + curriculumSubType + ", length=" + length
+        + ", assessmentType=" + assessmentType + ", doesThisCurriculumLeadToCct="
+        + doesThisCurriculumLeadToCct + ", periodOfGrace=" + periodOfGrace + ", specialty="
+        + specialty + '}';
   }
 }

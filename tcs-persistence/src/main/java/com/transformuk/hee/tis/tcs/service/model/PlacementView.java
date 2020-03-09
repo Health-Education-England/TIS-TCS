@@ -9,12 +9,10 @@ import javax.persistence.GeneratedValue;
 import javax.persistence.GenerationType;
 import javax.persistence.Id;
 import javax.persistence.Table;
-import lombok.Data;
 
 /**
  * A Placement. Contains the fields necessary for presenting an item in a placement list.
  */
-@Data
 @Entity
 @Table(name = "Placement")
 public class PlacementView implements Serializable {
@@ -70,6 +68,94 @@ public class PlacementView implements Serializable {
       return PlacementStatus.PAST;
     }
     return PlacementStatus.CURRENT;
+  }
+
+  public Long getId() {
+    return id;
+  }
+
+  public void setId(Long id) {
+    this.id = id;
+  }
+
+  public Long getTraineeId() {
+    return traineeId;
+  }
+
+  public void setTraineeId(Long traineeId) {
+    this.traineeId = traineeId;
+  }
+
+  public String getIntrepidId() {
+    return intrepidId;
+  }
+
+  public void setIntrepidId(String intrepidId) {
+    this.intrepidId = intrepidId;
+  }
+
+  public Long getPostId() {
+    return postId;
+  }
+
+  public void setPostId(Long postId) {
+    this.postId = postId;
+  }
+
+  public String getSiteCode() {
+    return siteCode;
+  }
+
+  public void setSiteCode(String siteCode) {
+    this.siteCode = siteCode;
+  }
+
+  public String getGradeAbbreviation() {
+    return gradeAbbreviation;
+  }
+
+  public void setGradeAbbreviation(String gradeAbbreviation) {
+    this.gradeAbbreviation = gradeAbbreviation;
+  }
+
+  public LocalDate getDateFrom() {
+    return dateFrom;
+  }
+
+  public void setDateFrom(LocalDate dateFrom) {
+    this.dateFrom = dateFrom;
+  }
+
+  public LocalDate getDateTo() {
+    return dateTo;
+  }
+
+  public void setDateTo(LocalDate dateTo) {
+    this.dateTo = dateTo;
+  }
+
+  public String getPlacementType() {
+    return placementType;
+  }
+
+  public void setPlacementType(String placementType) {
+    this.placementType = placementType;
+  }
+
+  public Long getSiteId() {
+    return siteId;
+  }
+
+  public void setSiteId(Long siteId) {
+    this.siteId = siteId;
+  }
+
+  public Long getGradeId() {
+    return gradeId;
+  }
+
+  public void setGradeId(Long gradeId) {
+    this.gradeId = gradeId;
   }
 
   @Override
@@ -132,5 +218,22 @@ public class PlacementView implements Serializable {
     result = 31 * result + (dateTo != null ? dateTo.hashCode() : 0);
     result = 31 * result + (placementType != null ? placementType.hashCode() : 0);
     return result;
+  }
+
+  @Override
+  public String toString() {
+    return "PlacementView{" +
+        "id=" + id +
+        ", traineeId=" + traineeId +
+        ", intrepidId='" + intrepidId + '\'' +
+        ", postId=" + postId +
+        ", siteId=" + siteId +
+        ", siteCode='" + siteCode + '\'' +
+        ", gradeId=" + gradeId +
+        ", gradeAbbreviation='" + gradeAbbreviation + '\'' +
+        ", dateFrom=" + dateFrom +
+        ", dateTo=" + dateTo +
+        ", placementType='" + placementType + '\'' +
+        '}';
   }
 }

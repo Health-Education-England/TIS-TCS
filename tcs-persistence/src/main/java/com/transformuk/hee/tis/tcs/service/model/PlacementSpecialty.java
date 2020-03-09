@@ -12,9 +12,7 @@ import javax.persistence.IdClass;
 import javax.persistence.JoinColumn;
 import javax.persistence.ManyToOne;
 import javax.persistence.Table;
-import lombok.Data;
 
-@Data
 @Entity
 @IdClass(PlacementSpecialtyPK.class)
 @Table(name = "PlacementSpecialty")
@@ -33,4 +31,29 @@ public class PlacementSpecialty implements Serializable {
   @Enumerated(EnumType.STRING)
   @Column(name = "placementSpecialtyType")
   private PostSpecialtyType placementSpecialtyType;
+
+  public Placement getPlacement() {
+    return placement;
+  }
+
+  public void setPlacement(Placement placement) {
+    this.placement = placement;
+  }
+
+  public Specialty getSpecialty() {
+    return specialty;
+  }
+
+  public void setSpecialty(Specialty specialty) {
+    this.specialty = specialty;
+  }
+
+  public PostSpecialtyType getPlacementSpecialtyType() {
+    return placementSpecialtyType;
+  }
+
+  public void setPlacementSpecialtyType(PostSpecialtyType placementSpecialtyType) {
+    this.placementSpecialtyType = placementSpecialtyType;
+  }
+
 }

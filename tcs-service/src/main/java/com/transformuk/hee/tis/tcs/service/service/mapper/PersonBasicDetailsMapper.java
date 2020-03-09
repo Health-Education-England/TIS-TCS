@@ -2,17 +2,23 @@ package com.transformuk.hee.tis.tcs.service.service.mapper;
 
 import com.transformuk.hee.tis.tcs.api.dto.PersonBasicDetailsDTO;
 import com.transformuk.hee.tis.tcs.service.model.PersonBasicDetails;
-import org.mapstruct.Mapper;
-import org.mapstruct.Mapping;
+import org.springframework.stereotype.Component;
 
 /**
  * Mapper for the entity PersonBasicDetails and its DTO PersonBasicDetailsDTO.
  */
-@Mapper(componentModel = "spring")
-public interface PersonBasicDetailsMapper {
+@Component
+public class PersonBasicDetailsMapper {
 
-  @Mapping(target = "gmcNumber", source = "gmcDetails.gmcNumber")
-  @Mapping(target = "gdcNumber", source = "gdcDetails.gdcNumber")
-  @Mapping(target = "publicHealthNumber", source = "person.publicHealthNumber")
-  PersonBasicDetailsDTO toDto(PersonBasicDetails entity);
+  public PersonBasicDetailsDTO toDto(PersonBasicDetails entity) {
+    PersonBasicDetailsDTO dto = new PersonBasicDetailsDTO();
+    dto.setId(entity.getId());
+    dto.setFirstName(entity.getFirstName());
+    dto.setLastName(entity.getLastName());
+    dto.setGmcNumber(entity.getGmcDetails() != null ? entity.getGmcDetails().getGmcNumber() : null);
+    dto.setGdcNumber(entity.getGdcDetails() != null ? entity.getGdcDetails().getGdcNumber() : null);
+    dto.setPublicHealthNumber(entity.getPerson() != null ? entity.getPerson().getPublicHealthNumber() : null);
+    return dto;
+  }
+
 }

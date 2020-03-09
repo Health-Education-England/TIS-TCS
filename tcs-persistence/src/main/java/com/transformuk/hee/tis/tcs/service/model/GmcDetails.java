@@ -1,6 +1,8 @@
 package com.transformuk.hee.tis.tcs.service.model;
 
+
 import com.transformuk.hee.tis.tcs.service.model.converter.RegistrationNumberConverter;
+
 import java.io.Serializable;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
@@ -9,12 +11,10 @@ import javax.persistence.Convert;
 import javax.persistence.Entity;
 import javax.persistence.Id;
 import javax.persistence.Version;
-import lombok.Data;
 
 /**
  * A GmcDetails.
  */
-@Data
 @Entity
 public class GmcDetails implements Serializable {
 
@@ -35,9 +35,26 @@ public class GmcDetails implements Serializable {
   @Version
   private LocalDateTime amendedDate;
 
+
+  public Long getId() {
+    return id;
+  }
+
+  public void setId(Long id) {
+    this.id = id;
+  }
+
   public GmcDetails id(Long id) {
     this.id = id;
     return this;
+  }
+
+  public String getGmcNumber() {
+    return gmcNumber;
+  }
+
+  public void setGmcNumber(String gmcNumber) {
+    this.gmcNumber = gmcNumber;
   }
 
   public GmcDetails gmcNumber(String gmcNumber) {
@@ -45,9 +62,25 @@ public class GmcDetails implements Serializable {
     return this;
   }
 
+  public String getGmcStatus() {
+    return gmcStatus;
+  }
+
+  public void setGmcStatus(String gmcStatus) {
+    this.gmcStatus = gmcStatus;
+  }
+
   public GmcDetails gmcStatus(String gmcStatus) {
     this.gmcStatus = gmcStatus;
     return this;
+  }
+
+  public LocalDate getGmcStartDate() {
+    return gmcStartDate;
+  }
+
+  public void setGmcStartDate(LocalDate gmcStartDate) {
+    this.gmcStartDate = gmcStartDate;
   }
 
   public GmcDetails gmcStartDate(LocalDate gmcStartDate) {
@@ -55,9 +88,25 @@ public class GmcDetails implements Serializable {
     return this;
   }
 
+  public LocalDate getGmcEndDate() {
+    return gmcEndDate;
+  }
+
+  public void setGmcEndDate(LocalDate gmcEndDate) {
+    this.gmcEndDate = gmcEndDate;
+  }
+
   public GmcDetails gmcEndDate(LocalDate gmcEndDate) {
     this.gmcEndDate = gmcEndDate;
     return this;
+  }
+
+  public LocalDateTime getAmendedDate() {
+    return amendedDate;
+  }
+
+  public void setAmendedDate(LocalDateTime amendedDate) {
+    this.amendedDate = amendedDate;
   }
 
   @Override
@@ -78,5 +127,17 @@ public class GmcDetails implements Serializable {
   @Override
   public int hashCode() {
     return Objects.hashCode(getId());
+  }
+
+  @Override
+  public String toString() {
+    return "GmcDetails{" +
+        "id=" + getId() +
+        ", gmcNumber='" + getGmcNumber() + "'" +
+        ", gmcStatus='" + getGmcStatus() + "'" +
+        ", gmcStartDate='" + getGmcStartDate() + "'" +
+        ", gmcEndDate='" + getGmcEndDate() + "'" +
+        ", amendedDate='" + getAmendedDate() + "'" +
+        "}";
   }
 }

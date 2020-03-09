@@ -1,5 +1,6 @@
 package com.transformuk.hee.tis.tcs.api.dto;
 
+
 import com.transformuk.hee.tis.tcs.api.dto.validation.Create;
 import com.transformuk.hee.tis.tcs.api.dto.validation.Update;
 import com.transformuk.hee.tis.tcs.api.enumeration.Status;
@@ -10,12 +11,10 @@ import java.util.Set;
 import javax.validation.constraints.DecimalMin;
 import javax.validation.constraints.NotNull;
 import javax.validation.constraints.Null;
-import lombok.Data;
 
 /**
  * A DTO for the Person entity.
  */
-@Data
 public class PersonDTO implements Serializable {
 
   @NotNull(groups = Update.class, message = "Id must not be null when updating a person")
@@ -57,6 +56,150 @@ public class PersonDTO implements Serializable {
   private Set<ProgrammeMembershipDTO> programmeMemberships = new HashSet<>();
 
   private RightToWorkDTO rightToWork;
+
+  public Long getId() {
+    return id;
+  }
+
+  public void setId(Long id) {
+    this.id = id;
+  }
+
+  public String getIntrepidId() {
+    return intrepidId;
+  }
+
+  public void setIntrepidId(String intrepidId) {
+    this.intrepidId = intrepidId;
+  }
+
+  public LocalDateTime getAddedDate() {
+    return addedDate;
+  }
+
+  public void setAddedDate(LocalDateTime addedDate) {
+    this.addedDate = addedDate;
+  }
+
+  public LocalDateTime getAmendedDate() {
+    return amendedDate;
+  }
+
+  public void setAmendedDate(LocalDateTime amendedDate) {
+    this.amendedDate = amendedDate;
+  }
+
+  public String getRole() {
+    return role;
+  }
+
+  public void setRole(String role) {
+    this.role = role;
+  }
+
+  public Status getStatus() {
+    return status;
+  }
+
+  public void setStatus(Status status) {
+    this.status = status;
+  }
+
+  public String getComments() {
+    return comments;
+  }
+
+  public void setComments(String comments) {
+    this.comments = comments;
+  }
+
+  public LocalDateTime getInactiveDate() {
+    return inactiveDate;
+  }
+
+  public void setInactiveDate(LocalDateTime inactiveDate) {
+    this.inactiveDate = inactiveDate;
+  }
+
+  public String getInactiveNotes() {
+    return inactiveNotes;
+  }
+
+  public void setInactiveNotes(String inactiveNotes) {
+    this.inactiveNotes = inactiveNotes;
+  }
+
+  public String getPublicHealthNumber() {
+    return publicHealthNumber;
+  }
+
+  public void setPublicHealthNumber(String publicHealthNumber) {
+    this.publicHealthNumber = publicHealthNumber;
+  }
+
+  public ContactDetailsDTO getContactDetails() {
+    return contactDetails;
+  }
+
+  public void setContactDetails(ContactDetailsDTO contactDetails) {
+    this.contactDetails = contactDetails;
+  }
+
+  public PersonalDetailsDTO getPersonalDetails() {
+    return personalDetails;
+  }
+
+  public void setPersonalDetails(PersonalDetailsDTO personalDetails) {
+    this.personalDetails = personalDetails;
+  }
+
+  public GmcDetailsDTO getGmcDetails() {
+    return gmcDetails;
+  }
+
+  public void setGmcDetails(GmcDetailsDTO gmcDetails) {
+    this.gmcDetails = gmcDetails;
+  }
+
+  public GdcDetailsDTO getGdcDetails() {
+    return gdcDetails;
+  }
+
+  public void setGdcDetails(GdcDetailsDTO gdcDetails) {
+    this.gdcDetails = gdcDetails;
+  }
+
+  public Set<QualificationDTO> getQualifications() {
+    return qualifications;
+  }
+
+  public void setQualifications(Set<QualificationDTO> qualifications) {
+    this.qualifications = qualifications;
+  }
+
+  public RightToWorkDTO getRightToWork() {
+    return rightToWork;
+  }
+
+  public void setRightToWork(RightToWorkDTO rightToWork) {
+    this.rightToWork = rightToWork;
+  }
+
+  public String getRegulator() {
+    return regulator;
+  }
+
+  public void setRegulator(String regulator) {
+    this.regulator = regulator;
+  }
+
+  public Set<ProgrammeMembershipDTO> getProgrammeMemberships() {
+    return programmeMemberships;
+  }
+
+  public void setProgrammeMemberships(Set<ProgrammeMembershipDTO> programmeMemberships) {
+    this.programmeMemberships = programmeMemberships;
+  }
 
   @Override
   public boolean equals(Object o) {
@@ -156,5 +299,29 @@ public class PersonDTO implements Serializable {
     result = 31 * result + (programmeMemberships != null ? programmeMemberships.hashCode() : 0);
     result = 31 * result + (rightToWork != null ? rightToWork.hashCode() : 0);
     return result;
+  }
+
+  @Override
+  public String toString() {
+    return "PersonDTO{" +
+        "id=" + id +
+        ", intrepidId='" + intrepidId + '\'' +
+        ", addedDate=" + addedDate +
+        ", amendedDate=" + amendedDate +
+        ", role='" + role + '\'' +
+        ", status=" + status +
+        ", comments='" + comments + '\'' +
+        ", inactiveDate=" + inactiveDate +
+        ", inactiveNotes='" + inactiveNotes + '\'' +
+        ", publicHealthNumber='" + publicHealthNumber + '\'' +
+        ", regulator='" + regulator + '\'' +
+        ", contactDetails=" + contactDetails +
+        ", personalDetails=" + personalDetails +
+        ", gmcDetails=" + gmcDetails +
+        ", gdcDetails=" + gdcDetails +
+        ", qualifications=" + qualifications +
+        ", programmeMemberships=" + programmeMemberships +
+        ", rightToWork=" + rightToWork +
+        '}';
   }
 }

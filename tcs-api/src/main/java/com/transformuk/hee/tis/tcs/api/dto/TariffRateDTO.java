@@ -1,13 +1,12 @@
 package com.transformuk.hee.tis.tcs.api.dto;
 
+
 import java.io.Serializable;
 import java.util.Objects;
-import lombok.Data;
 
 /**
  * A DTO for the TariffRate entity.
  */
-@Data
 public class TariffRateDTO implements Serializable {
 
   private Long id;
@@ -19,6 +18,46 @@ public class TariffRateDTO implements Serializable {
   private String tariffRateFringe;
 
   private String tariffRateLondon;
+
+  public Long getId() {
+    return id;
+  }
+
+  public void setId(Long id) {
+    this.id = id;
+  }
+
+  public String getGradeAbbreviation() {
+    return gradeAbbreviation;
+  }
+
+  public void setGradeAbbreviation(String gradeAbbreviation) {
+    this.gradeAbbreviation = gradeAbbreviation;
+  }
+
+  public String getTariffRate() {
+    return tariffRate;
+  }
+
+  public void setTariffRate(String tariffRate) {
+    this.tariffRate = tariffRate;
+  }
+
+  public String getTariffRateFringe() {
+    return tariffRateFringe;
+  }
+
+  public void setTariffRateFringe(String tariffRateFringe) {
+    this.tariffRateFringe = tariffRateFringe;
+  }
+
+  public String getTariffRateLondon() {
+    return tariffRateLondon;
+  }
+
+  public void setTariffRateLondon(String tariffRateLondon) {
+    this.tariffRateLondon = tariffRateLondon;
+  }
 
   @Override
   public boolean equals(Object o) {
@@ -41,5 +80,16 @@ public class TariffRateDTO implements Serializable {
   @Override
   public int hashCode() {
     return Objects.hashCode(id);
+  }
+
+  @Override
+  public String toString() {
+    return "TariffRateDTO{" +
+        "id=" + id +
+        ", gradeAbbreviation='" + gradeAbbreviation + "'" +
+        ", tariffRate='" + tariffRate + "'" +
+        ", tariffRateFringe='" + tariffRateFringe + "'" +
+        ", tariffRateLondon='" + tariffRateLondon + "'" +
+        '}';
   }
 }

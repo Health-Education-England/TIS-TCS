@@ -1,5 +1,6 @@
 package com.transformuk.hee.tis.tcs.service.model;
 
+
 import java.io.Serializable;
 import java.math.BigDecimal;
 import java.util.Objects;
@@ -8,12 +9,10 @@ import javax.persistence.Entity;
 import javax.persistence.GeneratedValue;
 import javax.persistence.GenerationType;
 import javax.persistence.Id;
-import lombok.Data;
 
 /**
  * A FundingComponents.
  */
-@Data
 @Entity
 public class FundingComponents implements Serializable {
 
@@ -32,14 +31,46 @@ public class FundingComponents implements Serializable {
   @Column(name = "fundingOrganisationId")
   private String fundingOrganisationId;
 
+  public Long getId() {
+    return id;
+  }
+
+  public void setId(Long id) {
+    this.id = id;
+  }
+
+  public Integer getPercentage() {
+    return percentage;
+  }
+
+  public void setPercentage(Integer percentage) {
+    this.percentage = percentage;
+  }
+
   public FundingComponents percentage(Integer percentage) {
     this.percentage = percentage;
     return this;
   }
 
+  public BigDecimal getAmount() {
+    return amount;
+  }
+
+  public void setAmount(BigDecimal amount) {
+    this.amount = amount;
+  }
+
   public FundingComponents amount(BigDecimal amount) {
     this.amount = amount;
     return this;
+  }
+
+  public String getFundingOrganisationId() {
+    return fundingOrganisationId;
+  }
+
+  public void setFundingOrganisationId(String fundingOrganisationId) {
+    this.fundingOrganisationId = fundingOrganisationId;
   }
 
   @Override
@@ -60,5 +91,14 @@ public class FundingComponents implements Serializable {
   @Override
   public int hashCode() {
     return Objects.hashCode(id);
+  }
+
+  @Override
+  public String toString() {
+    return "FundingComponents{" +
+        "id=" + id +
+        ", percentage='" + percentage + "'" +
+        ", amount='" + amount + "'" +
+        '}';
   }
 }

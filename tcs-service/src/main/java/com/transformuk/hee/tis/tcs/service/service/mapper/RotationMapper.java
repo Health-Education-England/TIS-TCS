@@ -10,5 +10,13 @@ import org.mapstruct.Mapper;
 @Mapper(componentModel = "spring", uses = {})
 public interface RotationMapper extends EntityMapper<RotationDTO, Rotation> {
 
-  Rotation fromId(Long id);
+
+  default Rotation fromId(Long id) {
+    if (id == null) {
+      return null;
+    }
+    Rotation rotation = new Rotation();
+    rotation.setId(id);
+    return rotation;
+  }
 }

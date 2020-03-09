@@ -2,13 +2,11 @@ package com.transformuk.hee.tis.tcs.api.dto;
 
 import com.transformuk.hee.tis.tcs.api.enumeration.Status;
 import java.io.Serializable;
-import lombok.Data;
 
 /**
  * This DTO is used in the post list, it's meant as a read only entity aggregating what the user
  * needs to see in a post list.
  */
-@Data
 public class PostViewDTO implements Serializable {
 
   private static final long serialVersionUID = 1L;
@@ -55,6 +53,178 @@ public class PostViewDTO implements Serializable {
   private String owner;
 
   private String intrepidId;
+
+  public static long getSerialVersionUID() {
+    return serialVersionUID;
+  }
+
+  public Long getId() {
+    return id;
+  }
+
+  public void setId(Long id) {
+    this.id = id;
+  }
+
+  public Long getCurrentTraineeId() {
+    return currentTraineeId;
+  }
+
+  public void setCurrentTraineeId(Long currentTraineeId) {
+    this.currentTraineeId = currentTraineeId;
+  }
+
+  public String getCurrentTraineeGmcNumber() {
+    return currentTraineeGmcNumber;
+  }
+
+  public void setCurrentTraineeGmcNumber(String currentTraineeGmcNumber) {
+    this.currentTraineeGmcNumber = currentTraineeGmcNumber;
+  }
+
+  public String getCurrentTraineeSurname() {
+    return currentTraineeSurname;
+  }
+
+  public void setCurrentTraineeSurname(String currentTraineeSurname) {
+    this.currentTraineeSurname = currentTraineeSurname;
+  }
+
+  public String getCurrentTraineeForenames() {
+    return currentTraineeForenames;
+  }
+
+  public void setCurrentTraineeForenames(String currentTraineeForenames) {
+    this.currentTraineeForenames = currentTraineeForenames;
+  }
+
+  public String getNationalPostNumber() {
+    return nationalPostNumber;
+  }
+
+  public void setNationalPostNumber(String nationalPostNumber) {
+    this.nationalPostNumber = nationalPostNumber;
+  }
+
+  public String getPrimarySiteCode() {
+    return primarySiteCode;
+  }
+
+  public void setPrimarySiteCode(String primarySiteCode) {
+    this.primarySiteCode = primarySiteCode;
+  }
+
+  public String getPrimarySiteName() {
+    return primarySiteName;
+  }
+
+  public void setPrimarySiteName(String primarySiteName) {
+    this.primarySiteName = primarySiteName;
+  }
+
+  public String getPrimarySiteKnownAs() {
+    return primarySiteKnownAs;
+  }
+
+  public void setPrimarySiteKnownAs(String primarySiteKnownAs) {
+    this.primarySiteKnownAs = primarySiteKnownAs;
+  }
+
+  public String getApprovedGradeCode() {
+    return approvedGradeCode;
+  }
+
+  public void setApprovedGradeCode(String approvedGradeCode) {
+    this.approvedGradeCode = approvedGradeCode;
+  }
+
+  public String getApprovedGradeName() {
+    return approvedGradeName;
+  }
+
+  public void setApprovedGradeName(String approvedGradeName) {
+    this.approvedGradeName = approvedGradeName;
+  }
+
+  public Long getPrimarySpecialtyId() {
+    return primarySpecialtyId;
+  }
+
+  public void setPrimarySpecialtyId(Long primarySpecialtyId) {
+    this.primarySpecialtyId = primarySpecialtyId;
+  }
+
+  public String getPrimarySpecialtyCode() {
+    return primarySpecialtyCode;
+  }
+
+  public void setPrimarySpecialtyCode(String primarySpecialtyCode) {
+    this.primarySpecialtyCode = primarySpecialtyCode;
+  }
+
+  public String getPrimarySpecialtyName() {
+    return primarySpecialtyName;
+  }
+
+  public void setPrimarySpecialtyName(String primarySpecialtyName) {
+    this.primarySpecialtyName = primarySpecialtyName;
+  }
+
+  public String getProgrammeNames() {
+    return programmeNames;
+  }
+
+  public void setProgrammeNames(String programmeNames) {
+    this.programmeNames = programmeNames;
+  }
+
+  public Status getStatus() {
+    return status;
+  }
+
+  public void setStatus(Status status) {
+    this.status = status;
+  }
+
+  public String getFundingType() {
+    return fundingType;
+  }
+
+  public void setFundingType(String fundingType) {
+    this.fundingType = fundingType;
+  }
+
+  public String getOwner() {
+    return owner;
+  }
+
+  public void setOwner(String owner) {
+    this.owner = owner;
+  }
+
+  public String getIntrepidId() {
+    return intrepidId;
+  }
+
+  public void setIntrepidId(String intrepidId) {
+    this.intrepidId = intrepidId;
+  }
+
+  public Long getPrimarySiteId() {
+    return primarySiteId;
+  }
+
+  public void setPrimarySiteId(Long primarySiteId) {
+    this.primarySiteId = primarySiteId;
+  }
+
+  public Long getApprovedGradeId() {
+    return approvedGradeId;
+  }
+
+  public void setApprovedGradeId(Long approvedGradeId) {
+    this.approvedGradeId = approvedGradeId;
+  }
 
   @Override
   public boolean equals(Object o) {
@@ -162,6 +332,33 @@ public class PostViewDTO implements Serializable {
     result = 31 * result + (owner != null ? owner.hashCode() : 0);
     result = 31 * result + (intrepidId != null ? intrepidId.hashCode() : 0);
     return result;
+  }
+
+  @Override
+  public String toString() {
+    return "PostViewDTO{" +
+        "id=" + id +
+        ", currentTraineeId=" + currentTraineeId +
+        ", currentTraineeGmcNumber='" + currentTraineeGmcNumber + '\'' +
+        ", currentTraineeSurname='" + currentTraineeSurname + '\'' +
+        ", currentTraineeForenames='" + currentTraineeForenames + '\'' +
+        ", nationalPostNumber='" + nationalPostNumber + '\'' +
+        ", primarySiteId=" + primarySiteId +
+        ", primarySiteCode='" + primarySiteCode + '\'' +
+        ", primarySiteName='" + primarySiteName + '\'' +
+        ", primarySiteKnownAs='" + primarySiteKnownAs + '\'' +
+        ", approvedGradeId='" + approvedGradeId + '\'' +
+        ", approvedGradeCode='" + approvedGradeCode + '\'' +
+        ", approvedGradeName='" + approvedGradeName + '\'' +
+        ", primarySpecialtyId=" + primarySpecialtyId +
+        ", primarySpecialtyCode='" + primarySpecialtyCode + '\'' +
+        ", primarySpecialtyName='" + primarySpecialtyName + '\'' +
+        ", programmeNames='" + programmeNames + '\'' +
+        ", status=" + status +
+        ", fundingType=" + fundingType +
+        ", owner='" + owner + '\'' +
+        ", intrepidId='" + intrepidId + '\'' +
+        '}';
   }
 }
 

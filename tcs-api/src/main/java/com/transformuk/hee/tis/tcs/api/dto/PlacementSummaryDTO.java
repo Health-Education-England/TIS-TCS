@@ -3,14 +3,10 @@ package com.transformuk.hee.tis.tcs.api.dto;
 import java.math.BigDecimal;
 import java.util.Date;
 import java.util.Objects;
-import lombok.Data;
-import lombok.NoArgsConstructor;
 
 /**
  * DTO to display placement details for a post or person
  */
-@Data
-@NoArgsConstructor
 public class PlacementSummaryDTO {
 
   private Date dateFrom;
@@ -30,6 +26,9 @@ public class PlacementSummaryDTO {
   private String placementSpecialtyType;
   private BigDecimal placementWholeTimeEquivalent;
 
+  public PlacementSummaryDTO() {
+  }
+
   public PlacementSummaryDTO(Date dateFrom, Date dateTo, Long siteId, String primarySpecialtyName,
       Long gradeId, String placementType, String status, String forenames, String surname,
       Long traineeId, Long placementId, String placementSpecialtyType, BigDecimal placementWholeTimeEquivalent) {
@@ -45,6 +44,134 @@ public class PlacementSummaryDTO {
     this.traineeId = traineeId;
     this.placementId = placementId;
     this.placementSpecialtyType = placementSpecialtyType;
+    this.placementWholeTimeEquivalent = placementWholeTimeEquivalent;
+  }
+
+  public Date getDateFrom() {
+    return dateFrom;
+  }
+
+  public void setDateFrom(Date dateFrom) {
+    this.dateFrom = dateFrom;
+  }
+
+  public Date getDateTo() {
+    return dateTo;
+  }
+
+  public void setDateTo(Date dateTo) {
+    this.dateTo = dateTo;
+  }
+
+  public Long getSiteId() {
+    return siteId;
+  }
+
+  public void setSiteId(Long siteId) {
+    this.siteId = siteId;
+  }
+
+  public String getSiteName() {
+    return siteName;
+  }
+
+  public void setSiteName(String siteName) {
+    this.siteName = siteName;
+  }
+
+  public String getPrimarySpecialtyName() {
+    return primarySpecialtyName;
+  }
+
+  public void setPrimarySpecialtyName(String primarySpecialtyName) {
+    this.primarySpecialtyName = primarySpecialtyName;
+  }
+
+  public Long getGradeId() {
+    return gradeId;
+  }
+
+  public void setGradeId(Long gradeId) {
+    this.gradeId = gradeId;
+  }
+
+  public String getGradeName() {
+    return gradeName;
+  }
+
+  public void setGradeName(String gradeName) {
+    this.gradeName = gradeName;
+  }
+
+  public String getPlacementType() {
+    return placementType;
+  }
+
+  public void setPlacementType(String placementType) {
+    this.placementType = placementType;
+  }
+
+  public String getStatus() {
+    return status;
+  }
+
+  public void setStatus(String status) {
+    this.status = status;
+  }
+
+  public String getForenames() {
+    return forenames;
+  }
+
+  public void setForenames(String forenames) {
+    this.forenames = forenames;
+  }
+
+  public String getSurname() {
+    return surname;
+  }
+
+  public void setSurname(String surname) {
+    this.surname = surname;
+  }
+
+  public Long getTraineeId() {
+    return traineeId;
+  }
+
+  public void setTraineeId(Long traineeId) {
+    this.traineeId = traineeId;
+  }
+
+  public Long getPlacementId() {
+    return placementId;
+  }
+
+  public void setPlacementId(Long placementId) {
+    this.placementId = placementId;
+  }
+
+  public String getPlacementStatus() {
+    return placementStatus;
+  }
+
+  public void setPlacementStatus(String placementStatus) {
+    this.placementStatus = placementStatus;
+  }
+
+  public String getPlacementSpecialtyType() {
+    return placementSpecialtyType;
+  }
+
+  public void setPlacementSpecialtyType(String placementSpecialtyType) {
+    this.placementSpecialtyType = placementSpecialtyType;
+  }
+
+  public BigDecimal getPlacementWholeTimeEquivalent() {
+    return placementWholeTimeEquivalent;
+  }
+
+  public void setPlacementWholeTimeEquivalent(BigDecimal placementWholeTimeEquivalent) {
     this.placementWholeTimeEquivalent = placementWholeTimeEquivalent;
   }
 

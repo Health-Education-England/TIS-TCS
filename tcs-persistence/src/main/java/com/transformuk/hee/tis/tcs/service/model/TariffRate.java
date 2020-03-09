@@ -1,5 +1,6 @@
 package com.transformuk.hee.tis.tcs.service.model;
 
+
 import java.io.Serializable;
 import java.util.Objects;
 import javax.persistence.Column;
@@ -7,12 +8,10 @@ import javax.persistence.Entity;
 import javax.persistence.GeneratedValue;
 import javax.persistence.GenerationType;
 import javax.persistence.Id;
-import lombok.Data;
 
 /**
  * A TariffRate.
  */
-@Data
 @Entity
 public class TariffRate implements Serializable {
 
@@ -34,9 +33,33 @@ public class TariffRate implements Serializable {
   @Column(name = "tariffRateLondon")
   private String tariffRateLondon;
 
+  public Long getId() {
+    return id;
+  }
+
+  public void setId(Long id) {
+    this.id = id;
+  }
+
+  public String getGradeAbbreviation() {
+    return gradeAbbreviation;
+  }
+
+  public void setGradeAbbreviation(String gradeAbbreviation) {
+    this.gradeAbbreviation = gradeAbbreviation;
+  }
+
   public TariffRate gradeAbbreviation(String gradeAbbreviation) {
     this.gradeAbbreviation = gradeAbbreviation;
     return this;
+  }
+
+  public String getTariffRate() {
+    return tariffRate;
+  }
+
+  public void setTariffRate(String tariffRate) {
+    this.tariffRate = tariffRate;
   }
 
   public TariffRate tariffRate(String tariffRate) {
@@ -44,9 +67,25 @@ public class TariffRate implements Serializable {
     return this;
   }
 
+  public String getTariffRateFringe() {
+    return tariffRateFringe;
+  }
+
+  public void setTariffRateFringe(String tariffRateFringe) {
+    this.tariffRateFringe = tariffRateFringe;
+  }
+
   public TariffRate tariffRateFringe(String tariffRateFringe) {
     this.tariffRateFringe = tariffRateFringe;
     return this;
+  }
+
+  public String getTariffRateLondon() {
+    return tariffRateLondon;
+  }
+
+  public void setTariffRateLondon(String tariffRateLondon) {
+    this.tariffRateLondon = tariffRateLondon;
   }
 
   public TariffRate tariffRateLondon(String tariffRateLondon) {
@@ -72,5 +111,16 @@ public class TariffRate implements Serializable {
   @Override
   public int hashCode() {
     return Objects.hashCode(id);
+  }
+
+  @Override
+  public String toString() {
+    return "TariffRate{" +
+        "id=" + id +
+        ", gradeAbbreviation='" + gradeAbbreviation + "'" +
+        ", tariffRate='" + tariffRate + "'" +
+        ", tariffRateFringe='" + tariffRateFringe + "'" +
+        ", tariffRateLondon='" + tariffRateLondon + "'" +
+        '}';
   }
 }
