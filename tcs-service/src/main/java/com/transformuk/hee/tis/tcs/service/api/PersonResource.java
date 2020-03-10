@@ -17,7 +17,6 @@ import com.transformuk.hee.tis.tcs.api.enumeration.Status;
 import com.transformuk.hee.tis.tcs.service.api.decorator.PersonViewDecorator;
 import com.transformuk.hee.tis.tcs.service.api.decorator.PlacementSummaryDecorator;
 import com.transformuk.hee.tis.tcs.service.api.decorator.PlacementViewDecorator;
-import com.transformuk.hee.tis.tcs.service.api.util.BasicPage;
 import com.transformuk.hee.tis.tcs.service.api.util.ColumnFilterUtil;
 import com.transformuk.hee.tis.tcs.service.api.util.HeaderUtil;
 import com.transformuk.hee.tis.tcs.service.api.util.PaginationUtil;
@@ -201,7 +200,7 @@ public class PersonResource {
     final List<Class> filterEnumList = Lists.newArrayList(Status.class);
     final List<ColumnFilter> columnFilters = ColumnFilterUtil
         .getColumnFilters(columnFilterJson, filterEnumList);
-    final BasicPage<PersonViewDTO> page;
+    final Page<PersonViewDTO> page;
 
     //feature flag to enable es, allow the enabling from the FE
     if (enableEsSearch || enableES) {
@@ -356,7 +355,7 @@ public class PersonResource {
     // Remove the national insurance number form personal details, as it is not needed in the UI.
     PersonalDetailsDTO personalDetailsDto = personDTO.getPersonalDetails();
     if (personalDetailsDto != null) {
-        personalDetailsDto.setNationalInsuranceNumber(null);
+      personalDetailsDto.setNationalInsuranceNumber(null);
     }
 
     return ResponseUtil.wrapOrNotFound(Optional.ofNullable(personDTO));

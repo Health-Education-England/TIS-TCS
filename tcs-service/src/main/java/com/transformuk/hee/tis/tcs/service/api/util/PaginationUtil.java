@@ -39,11 +39,11 @@ public final class PaginationUtil {
     return headers;
   }
 
-  public static HttpHeaders generateBasicPaginationHttpHeaders(BasicPage page, String baseUrl) {
+  public static HttpHeaders generateBasicPaginationHttpHeaders(Page page, String baseUrl) {
 
     HttpHeaders headers = new HttpHeaders();
     String link = "";
-    if (page.isHasNext()) {
+    if (page.hasNext()) {
       link = "<" + generateUri(baseUrl, page.getNumber() + 1, page.getSize()) + ">; rel=\"next\"";
     }
     headers.add(HttpHeaders.LINK, link);

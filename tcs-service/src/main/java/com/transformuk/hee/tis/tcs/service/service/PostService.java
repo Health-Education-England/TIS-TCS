@@ -4,7 +4,6 @@ import com.transformuk.hee.tis.tcs.api.dto.PostDTO;
 import com.transformuk.hee.tis.tcs.api.dto.PostEsrDTO;
 import com.transformuk.hee.tis.tcs.api.dto.PostFundingDTO;
 import com.transformuk.hee.tis.tcs.api.dto.PostViewDTO;
-import com.transformuk.hee.tis.tcs.service.api.util.BasicPage;
 import com.transformuk.hee.tis.tcs.service.model.ColumnFilter;
 import java.util.List;
 import java.util.Set;
@@ -115,7 +114,7 @@ public interface PostService {
    * @param pageable the pagination information
    * @return the list of entities
    */
-  BasicPage<PostViewDTO> findAll(Pageable pageable);
+  Page<PostViewDTO> findAll(Pageable pageable);
 
   /**
    * Get all the posts using the given smart search string and filters.
@@ -125,7 +124,7 @@ public interface PostService {
    * @param pageable     the pagination information
    * @return the list of entities
    */
-  BasicPage<PostViewDTO> advancedSearch(String searchString, List<ColumnFilter> columnFilers,
+  Page<PostViewDTO> advancedSearch(String searchString, List<ColumnFilter> columnFilers,
       Pageable pageable);
 
   /**

@@ -9,7 +9,6 @@ import com.transformuk.hee.tis.tcs.api.dto.PersonViewDTO;
 import com.transformuk.hee.tis.tcs.api.enumeration.PersonOwnerRule;
 import com.transformuk.hee.tis.tcs.api.enumeration.ProgrammeMembershipStatus;
 import com.transformuk.hee.tis.tcs.service.api.decorator.PersonViewDecorator;
-import com.transformuk.hee.tis.tcs.service.api.util.BasicPage;
 import com.transformuk.hee.tis.tcs.service.job.person.PersonTrustDto;
 import com.transformuk.hee.tis.tcs.service.job.person.PersonView;
 import com.transformuk.hee.tis.tcs.service.job.person.ProgrammeMembershipDto;
@@ -57,7 +56,8 @@ public class PersonElasticSearchService {
 
   public static final String CURRENT_STATUS = "CURRENT";
   private static final Logger LOG = LoggerFactory.getLogger(PersonElasticSearchService.class);
-  private static final String PERSON_TRUST_QUERY = "SELECT personId, trustId FROM PersonTrust WHERE personId IN (:personIds)";
+  private static final String PERSON_TRUST_QUERY =
+      "SELECT personId, trustId FROM PersonTrust WHERE personId IN (:personIds)";
   @Autowired
   private PersonElasticSearchRepository personElasticSearchRepository;
   @Autowired
@@ -104,7 +104,7 @@ public class PersonElasticSearchService {
     return new PageImpl<>(decoratedPersonViews, pageable, result.getTotalElements());
   }
 
-  public BasicPage<PersonViewDTO> searchForPage(String searchQuery,
+  public Page<PersonViewDTO> searchForPage(String searchQuery,
       List<ColumnFilter> columnFilters, Pageable pageable) {
 
     try {
@@ -192,9 +192,10 @@ public class PersonElasticSearchService {
       pageable = replaceSortByIdHack(pageable);
 
       Page<PersonView> result = personElasticSearchRepository.search(fullQuery, pageable);
-      return new BasicPage<>(
+
+      return new PageImpl<>(
           convertPersonViewToDTO(result.getContent(), programmeMembershipStatusFilter), pageable,
-          result.hasNext());
+          result.getTotalElements());
     } catch (RuntimeException re) {
       LOG.error("An exception occurred while attempting to do an ES search", re);
       throw re;

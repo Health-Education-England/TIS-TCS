@@ -14,7 +14,6 @@ import com.transformuk.hee.tis.tcs.api.dto.PostViewDTO;
 import com.transformuk.hee.tis.tcs.api.dto.ProgrammeDTO;
 import com.transformuk.hee.tis.tcs.api.enumeration.Status;
 import com.transformuk.hee.tis.tcs.service.api.decorator.PostViewDecorator;
-import com.transformuk.hee.tis.tcs.service.api.util.BasicPage;
 import com.transformuk.hee.tis.tcs.service.api.validation.PostFundingValidator;
 import com.transformuk.hee.tis.tcs.service.exception.AccessUnauthorisedException;
 import com.transformuk.hee.tis.tcs.service.model.ColumnFilter;
@@ -421,7 +420,7 @@ public class PostServiceImpl implements PostService {
   @Cacheable(value = "postFindAll", sync = true)
   @Override
   @Transactional(readOnly = true)
-  public BasicPage<PostViewDTO> findAll(Pageable pageable) {
+  public Page<PostViewDTO> findAll(Pageable pageable) {
     log.debug("Request to get all Posts");
     final int size = pageable.getPageSize() + 1;
     final long offset = pageable.getOffset();
@@ -449,20 +448,22 @@ public class PostServiceImpl implements PostService {
     query = query.replaceAll("LIMITCLAUSE", "limit " + size + " offset " + offset);
     List<PostViewDTO> posts = namedParameterJdbcTemplate
         .query(query, paramSource, new PostServiceImpl.PostViewRowMapper());
-    final boolean hasNext = posts.size() > pageable.getPageSize();
-    if (hasNext) {
+
+    if (CollectionUtils.isEmpty(posts)) {
+      return Page.empty(pageable);
+    }
+
+    final int postCount = posts.size();
+    if (postCount > pageable.getPageSize()) {
       posts = posts.subList(0, pageable.getPageSize()); //ignore any additional
     }
-    if (org.springframework.util.CollectionUtils.isEmpty(posts)) {
-      return new BasicPage<>(posts, pageable);
-    }
-    return new BasicPage<>(posts, pageable, hasNext);
+    return new PageImpl<>(posts, pageable, postCount);
   }
 
   @Cacheable(value = "postAdvSearch", sync = true)
   @Override
   @Transactional(readOnly = true)
-  public BasicPage<PostViewDTO> advancedSearch(String searchString,
+  public Page<PostViewDTO> advancedSearch(String searchString,
       List<ColumnFilter> columnFilters, Pageable pageable) {
     MapSqlParameterSource paramSource = new MapSqlParameterSource();
     String whereClause = createWhereClause(searchString, columnFilters);
@@ -503,14 +504,13 @@ public class PostServiceImpl implements PostService {
     log.debug("REST request for the Post query finished in: [{}]s",
         stopWatch.getTotalTimeSeconds());
     if (CollectionUtils.isEmpty(posts)) {
-      return new BasicPage<>(posts, pageable);
+      return Page.empty(pageable);
     }
-    boolean hasNext = posts.size() > pageable.getPageSize();
-    BasicPage<PostViewDTO> dtoPage;
-    if (hasNext) {
+    int postCount = posts.size();
+    if (postCount > pageable.getPageSize()) {
       posts = posts.subList(0, pageable.getPageSize()); //ignore any additional
     }
-    dtoPage = new BasicPage<>(posts, pageable, hasNext);
+    Page<PostViewDTO> dtoPage = new PageImpl<>(posts, pageable, postCount);
     postViewDecorator.decorate(dtoPage.getContent());
     return dtoPage;
   }
@@ -761,7 +761,7 @@ public class PostServiceImpl implements PostService {
     if (pageable.getSort() != null) {
       if (pageable.getSort().iterator().hasNext()) {
         Sort.Order order = pageable.getSort().iterator().next();
-        if ("currentTraineeSurname".equalsIgnoreCase(order.getProperty())) {
+        if ("currentTraineeSurname" .equalsIgnoreCase(order.getProperty())) {
           orderByClause.append(" ORDER BY ").append("surnames ").append(order.getDirection())
               .append(" ");
         } else {
