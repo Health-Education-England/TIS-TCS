@@ -6,7 +6,9 @@ import javax.persistence.Id;
 import javax.persistence.JoinColumn;
 import javax.persistence.OneToOne;
 import javax.persistence.Table;
+import lombok.Data;
 
+@Data
 @Entity
 @Table(name = "ContactDetails")
 public class PersonBasicDetails {
@@ -31,54 +33,6 @@ public class PersonBasicDetails {
   @OneToOne
   @JoinColumn(name = "id", unique = true, nullable = false, updatable = false)
   private Person person;
-
-  public Long getId() {
-    return id;
-  }
-
-  public void setId(Long id) {
-    this.id = id;
-  }
-
-  public String getFirstName() {
-    return firstName;
-  }
-
-  public void setFirstName(String firstName) {
-    this.firstName = firstName;
-  }
-
-  public String getLastName() {
-    return lastName;
-  }
-
-  public void setLastName(String lastName) {
-    this.lastName = lastName;
-  }
-
-  public GmcDetails getGmcDetails() {
-    return gmcDetails;
-  }
-
-  public void setGmcDetails(GmcDetails gmcDetails) {
-    this.gmcDetails = gmcDetails;
-  }
-
-  public GdcDetails getGdcDetails() {
-    return gdcDetails;
-  }
-
-  public void setGdcDetails(GdcDetails gdcDetails) {
-    this.gdcDetails = gdcDetails;
-  }
-
-  public Person getPerson() {
-    return person;
-  }
-
-  public void setPerson(Person person) {
-    this.person = person;
-  }
 
   @Override
   public boolean equals(Object o) {
@@ -110,15 +64,5 @@ public class PersonBasicDetails {
     result = 31 * result + (lastName != null ? lastName.hashCode() : 0);
     result = 31 * result + (gmcDetails != null ? gmcDetails.hashCode() : 0);
     return result;
-  }
-
-  @Override
-  public String toString() {
-    return "PersonBasicDetails{" +
-        "id=" + id +
-        ", firstName='" + firstName + '\'' +
-        ", lastName='" + lastName + '\'' +
-        ", gmcDetails=" + gmcDetails +
-        '}';
   }
 }

@@ -1,6 +1,5 @@
 package com.transformuk.hee.tis.tcs.api.dto;
 
-
 import com.transformuk.hee.tis.tcs.api.dto.validation.Create;
 import com.transformuk.hee.tis.tcs.api.dto.validation.Update;
 import java.io.Serializable;
@@ -9,10 +8,12 @@ import java.time.LocalDateTime;
 import java.util.Objects;
 import javax.validation.constraints.DecimalMin;
 import javax.validation.constraints.NotNull;
+import lombok.Data;
 
 /**
  * A DTO for the GmcDetails entity.
  */
+@Data
 public class GmcDetailsDTO implements Serializable {
 
   @NotNull(message = "Id is required", groups = {Update.class, Create.class})
@@ -29,54 +30,6 @@ public class GmcDetailsDTO implements Serializable {
   private LocalDate gmcEndDate;
 
   private LocalDateTime amendedDate;
-
-  public Long getId() {
-    return id;
-  }
-
-  public void setId(Long id) {
-    this.id = id;
-  }
-
-  public String getGmcNumber() {
-    return gmcNumber;
-  }
-
-  public void setGmcNumber(String gmcNumber) {
-    this.gmcNumber = gmcNumber;
-  }
-
-  public String getGmcStatus() {
-    return gmcStatus;
-  }
-
-  public void setGmcStatus(String gmcStatus) {
-    this.gmcStatus = gmcStatus;
-  }
-
-  public LocalDate getGmcStartDate() {
-    return gmcStartDate;
-  }
-
-  public void setGmcStartDate(LocalDate gmcStartDate) {
-    this.gmcStartDate = gmcStartDate;
-  }
-
-  public LocalDate getGmcEndDate() {
-    return gmcEndDate;
-  }
-
-  public void setGmcEndDate(LocalDate gmcEndDate) {
-    this.gmcEndDate = gmcEndDate;
-  }
-
-  public LocalDateTime getAmendedDate() {
-    return amendedDate;
-  }
-
-  public void setAmendedDate(LocalDateTime amendedDate) {
-    this.amendedDate = amendedDate;
-  }
 
   @Override
   public boolean equals(Object o) {
@@ -97,17 +50,5 @@ public class GmcDetailsDTO implements Serializable {
   @Override
   public int hashCode() {
     return Objects.hashCode(getId());
-  }
-
-  @Override
-  public String toString() {
-    return "GmcDetailsDTO{" +
-        "id=" + getId() +
-        ", gmcNumber='" + getGmcNumber() + "'" +
-        ", gmcStatus='" + getGmcStatus() + "'" +
-        ", gmcStartDate='" + getGmcStartDate() + "'" +
-        ", gmcEndDate='" + getGmcEndDate() + "'" +
-        ", amendedDate='" + getAmendedDate() + "'" +
-        "}";
   }
 }

@@ -133,4 +133,21 @@ public class PlacementMapper {
     }
     return PlacementStatus.CURRENT;
   }
+
+  /**
+   * Build a {@link Placement} with the given ID.
+   *
+   * @param id The ID to set on the {@code Placement}.
+   * @return The built {@code Placement}.
+   */
+  public Placement fromId(Long id) {
+    Placement placement = null;
+
+    if (id != null) {
+      placement = new Placement();
+      placement.setId(id);
+    }
+
+    return placement;
+  }
 }

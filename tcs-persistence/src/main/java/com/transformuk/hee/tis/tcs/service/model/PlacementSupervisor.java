@@ -4,19 +4,18 @@ import java.io.Serializable;
 import java.util.Objects;
 import javax.persistence.EmbeddedId;
 import javax.persistence.Entity;
+import lombok.AllArgsConstructor;
+import lombok.Data;
+import lombok.NoArgsConstructor;
 
+@Data
+@NoArgsConstructor
+@AllArgsConstructor
 @Entity(name = "PlacementSupervisor")
 public class PlacementSupervisor implements Serializable {
 
   @EmbeddedId
   private PlacementSupervisorId id;
-
-  public PlacementSupervisor() {
-  }
-
-  public PlacementSupervisor(PlacementSupervisorId id) {
-    this.id = id;
-  }
 
   public PlacementSupervisor(final Long placementId, final Long personId, final Integer type) {
     this.id = new PlacementSupervisorId(placementId, personId, type);
@@ -38,13 +37,5 @@ public class PlacementSupervisor implements Serializable {
   public int hashCode() {
 
     return Objects.hash(id);
-  }
-
-  public PlacementSupervisorId getId() {
-    return id;
-  }
-
-  public void setId(PlacementSupervisorId id) {
-    this.id = id;
   }
 }

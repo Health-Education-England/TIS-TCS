@@ -13,10 +13,12 @@ import java.util.Set;
 import javax.validation.constraints.DecimalMin;
 import javax.validation.constraints.NotNull;
 import javax.validation.constraints.Null;
+import lombok.Data;
 
 /**
  * A DTO for the Placement entity.
  */
+@Data
 public class PlacementDTO implements Serializable {
 
   private static final long serialVersionUID = 2794590706651836140L;
@@ -52,166 +54,6 @@ public class PlacementDTO implements Serializable {
   private Set<PlacementCommentDTO> comments = new HashSet<>();
   private LifecycleState lifecycleState;
 
-  public Long getId() {
-    return id;
-  }
-
-  public void setId(final Long id) {
-    this.id = id;
-  }
-
-  public PlacementStatus getStatus() {
-    return status;
-  }
-
-  public void setStatus(final PlacementStatus status) {
-    this.status = status;
-  }
-
-  public String getIntrepidId() {
-    return intrepidId;
-  }
-
-  public void setIntrepidId(final String intrepidId) {
-    this.intrepidId = intrepidId;
-  }
-
-  public Long getTraineeId() {
-    return traineeId;
-  }
-
-  public void setTraineeId(final Long traineeId) {
-    this.traineeId = traineeId;
-  }
-
-  public Long getPostId() {
-    return postId;
-  }
-
-  public void setPostId(final Long postId) {
-    this.postId = postId;
-  }
-
-  public String getSiteCode() {
-    return siteCode;
-  }
-
-  public void setSiteCode(final String siteCode) {
-    this.siteCode = siteCode;
-  }
-
-  public String getGradeAbbreviation() {
-    return gradeAbbreviation;
-  }
-
-  public void setGradeAbbreviation(final String gradeAbbreviation) {
-    this.gradeAbbreviation = gradeAbbreviation;
-  }
-
-  public String getTrainingDescription() {
-    return trainingDescription;
-  }
-
-  public void setTrainingDescription(final String trainingDescription) {
-    this.trainingDescription = trainingDescription;
-  }
-
-  public String getLocalPostNumber() {
-    return localPostNumber;
-  }
-
-  public void setLocalPostNumber(final String localPostNumber) {
-    this.localPostNumber = localPostNumber;
-  }
-
-  public LocalDate getDateFrom() {
-    return dateFrom;
-  }
-
-  public void setDateFrom(final LocalDate dateFrom) {
-    this.dateFrom = dateFrom;
-  }
-
-  public LocalDate getDateTo() {
-    return dateTo;
-  }
-
-  public void setDateTo(final LocalDate dateTo) {
-    this.dateTo = dateTo;
-  }
-
-  public String getPlacementType() {
-    return placementType;
-  }
-
-  public void setPlacementType(final String placementType) {
-    this.placementType = placementType;
-  }
-
-  public BigDecimal getPlacementWholeTimeEquivalent() {
-    return placementWholeTimeEquivalent;
-  }
-
-  public void setPlacementWholeTimeEquivalent(final BigDecimal placementWholeTimeEquivalent) {
-    this.placementWholeTimeEquivalent = placementWholeTimeEquivalent;
-  }
-
-  public Set<PlacementSpecialtyDTO> getSpecialties() {
-    return specialties;
-  }
-
-  public void setSpecialties(final Set<PlacementSpecialtyDTO> specialties) {
-    this.specialties = specialties;
-  }
-
-  public Long getSiteId() {
-    return siteId;
-  }
-
-  public void setSiteId(final Long siteId) {
-    this.siteId = siteId;
-  }
-
-  public Set<PlacementSiteDTO> getSites() {
-    return sites;
-  }
-
-  public void setSites(Set<PlacementSiteDTO> sites) {
-    this.sites = sites;
-  }
-
-  public Long getGradeId() {
-    return gradeId;
-  }
-
-  public void setGradeId(final Long gradeId) {
-    this.gradeId = gradeId;
-  }
-
-  public Set<PlacementSupervisorDTO> getSupervisors() {
-    return supervisors;
-  }
-
-  public void setSupervisors(Set<PlacementSupervisorDTO> supervisors) {
-    this.supervisors = supervisors;
-  }
-
-  public Set<PlacementCommentDTO> getComments() {
-    return comments;
-  }
-
-  public void setComments(Set<PlacementCommentDTO> comments) {
-    this.comments = comments;
-  }
-
-  public LifecycleState getLifecycleState() {
-    return lifecycleState;
-  }
-
-  public void setLifecycleState(LifecycleState lifecycleState) {
-    this.lifecycleState = lifecycleState;
-  }
-
   @Override
   public boolean equals(final Object o) {
     if (this == o) {
@@ -233,28 +75,5 @@ public class PlacementDTO implements Serializable {
   @Override
   public int hashCode() {
     return Objects.hashCode(id);
-  }
-
-  @Override
-  public String toString() {
-    return "PlacementDTO{" +
-        "id=" + id +
-        ", intrepidId='" + intrepidId + '\'' +
-        ", status=" + status +
-        ", traineeId=" + traineeId +
-        ", postId=" + postId +
-        ", siteId=" + siteId +
-        ", siteCode='" + siteCode + '\'' +
-        ", gradeId=" + gradeId +
-        ", gradeAbbreviation='" + gradeAbbreviation + '\'' +
-        ", specialties=" + specialties +
-        ", dateFrom=" + dateFrom +
-        ", dateTo=" + dateTo +
-        ", placementType='" + placementType + '\'' +
-        ", placementWholeTimeEquivalent=" + placementWholeTimeEquivalent +
-        ", trainingDescription='" + trainingDescription + '\'' +
-        ", localPostNumber='" + localPostNumber + '\'' +
-        ", lifecycleState='" + lifecycleState + '\'' +
-        '}';
   }
 }
