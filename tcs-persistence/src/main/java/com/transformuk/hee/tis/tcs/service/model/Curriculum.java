@@ -17,10 +17,13 @@ import javax.persistence.Id;
 import javax.persistence.JoinColumn;
 import javax.persistence.ManyToOne;
 import javax.persistence.OneToMany;
+import lombok.Data;
+import lombok.experimental.Accessors;
 
 /**
  * A Curriculum.
  */
+@Data
 @Entity
 public class Curriculum implements Serializable {
 
@@ -50,6 +53,7 @@ public class Curriculum implements Serializable {
   @Enumerated(EnumType.STRING)
   private AssessmentType assessmentType;
 
+  @Accessors(fluent = true, chain = false)
   @Column(name = "doesThisCurriculumLeadToCct")
   private Boolean doesThisCurriculumLeadToCct;
 
@@ -63,33 +67,9 @@ public class Curriculum implements Serializable {
   @OneToMany(mappedBy = "curriculum")
   private Set<ProgrammeCurriculum> programmes;
 
-  public Long getId() {
-    return id;
-  }
-
-  public void setId(Long id) {
-    this.id = id;
-  }
-
-  public String getIntrepidId() {
-    return intrepidId;
-  }
-
-  public void setIntrepidId(String intrepidId) {
-    this.intrepidId = intrepidId;
-  }
-
   public Curriculum intrepidId(String intrepidId) {
     this.intrepidId = intrepidId;
     return this;
-  }
-
-  public Status getStatus() {
-    return status;
-  }
-
-  public void setStatus(Status status) {
-    this.status = status;
   }
 
   public Curriculum status(Status status) {
@@ -97,25 +77,9 @@ public class Curriculum implements Serializable {
     return this;
   }
 
-  public String getName() {
-    return name;
-  }
-
-  public void setName(String name) {
-    this.name = name;
-  }
-
   public Curriculum name(String name) {
     this.name = name;
     return this;
-  }
-
-  public CurriculumSubType getCurriculumSubType() {
-    return curriculumSubType;
-  }
-
-  public void setCurriculumSubType(CurriculumSubType curriculumSubType) {
-    this.curriculumSubType = curriculumSubType;
   }
 
   public Curriculum curriculumSubType(CurriculumSubType curriculumSubType) {
@@ -123,25 +87,9 @@ public class Curriculum implements Serializable {
     return this;
   }
 
-  public Integer getLength() {
-    return length;
-  }
-
-  public void setLength(Integer length) {
-    this.length = length;
-  }
-
   public Curriculum length(Integer length) {
     this.length = length;
     return this;
-  }
-
-  public AssessmentType getAssessmentType() {
-    return assessmentType;
-  }
-
-  public void setAssessmentType(AssessmentType assessmentType) {
-    this.assessmentType = assessmentType;
   }
 
   public Curriculum assessmentType(AssessmentType assessmentType) {
@@ -162,25 +110,9 @@ public class Curriculum implements Serializable {
     this.doesThisCurriculumLeadToCct = doesThisCurriculumLeadToCct;
   }
 
-  public Integer getPeriodOfGrace() {
-    return periodOfGrace;
-  }
-
-  public void setPeriodOfGrace(Integer periodOfGrace) {
-    this.periodOfGrace = periodOfGrace;
-  }
-
   public Curriculum periodOfGrace(Integer periodOfGrace) {
     this.periodOfGrace = periodOfGrace;
     return this;
-  }
-
-  public Specialty getSpecialty() {
-    return specialty;
-  }
-
-  public void setSpecialty(Specialty specialty) {
-    this.specialty = specialty;
   }
 
   @Override
@@ -201,12 +133,5 @@ public class Curriculum implements Serializable {
   @Override
   public int hashCode() {
     return Objects.hashCode(id);
-  }
-
-  @Override
-  public String toString() {
-    return "Curriculum{" +
-        "id=" + id +
-        '}';
   }
 }

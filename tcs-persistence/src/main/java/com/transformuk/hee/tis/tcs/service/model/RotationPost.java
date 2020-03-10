@@ -1,6 +1,5 @@
 package com.transformuk.hee.tis.tcs.service.model;
 
-
 import java.io.Serializable;
 import java.util.Objects;
 import javax.persistence.Column;
@@ -9,10 +8,12 @@ import javax.persistence.GeneratedValue;
 import javax.persistence.GenerationType;
 import javax.persistence.Id;
 import javax.persistence.Table;
+import lombok.Data;
 
 /**
  * A RotationPost.
  */
+@Data
 @Entity
 @Table(name = "RotationPost")
 public class RotationPost implements Serializable {
@@ -29,33 +30,9 @@ public class RotationPost implements Serializable {
   @Column(name = "rotationId")
   private Long rotationId;
 
-  public Long getId() {
-    return id;
-  }
-
-  public void setId(Long id) {
-    this.id = id;
-  }
-
-  public Long getPostId() {
-    return postId;
-  }
-
-  public void setPostId(Long postId) {
-    this.postId = postId;
-  }
-
   public RotationPost postId(Long postId) {
     this.postId = postId;
     return this;
-  }
-
-  public Long getRotationId() {
-    return rotationId;
-  }
-
-  public void setRotationId(Long rotationId) {
-    this.rotationId = rotationId;
   }
 
   public RotationPost rotationId(Long rotationId) {
@@ -79,15 +56,6 @@ public class RotationPost implements Serializable {
 
   @Override
   public int hashCode() {
-
     return Objects.hash(postId, rotationId);
-  }
-
-  @Override
-  public String toString() {
-    return "RotationPost{" +
-        "postId=" + postId +
-        ", rotationId=" + rotationId +
-        '}';
   }
 }

@@ -14,7 +14,9 @@ import javax.persistence.GenerationType;
 import javax.persistence.Id;
 import javax.persistence.JoinColumn;
 import javax.persistence.ManyToOne;
+import lombok.Data;
 
+@Data
 @Entity
 public class Comment implements Serializable {
 
@@ -55,85 +57,5 @@ public class Comment implements Serializable {
   @Override
   public int hashCode() {
     return Objects.hash(id);
-  }
-
-  public Long getId() {
-    return id;
-  }
-
-  public void setId(Long id) {
-    this.id = id;
-  }
-
-  public Long getThreadId() {
-    return threadId;
-  }
-
-  public void setThreadId(Long threadId) {
-    this.threadId = threadId;
-  }
-
-  public Long getParentId() {
-    return parentId;
-  }
-
-  public void setParentId(Long parentId) {
-    this.parentId = parentId;
-  }
-
-  public String getAuthor() {
-    return author;
-  }
-
-  public void setAuthor(String author) {
-    this.author = author;
-  }
-
-  public String getBody() {
-    return body;
-  }
-
-  public void setBody(String body) {
-    this.body = body;
-  }
-
-  public LocalDate getAddedDate() {
-    return addedDate;
-  }
-
-  public void setAddedDate(LocalDate addedDate) {
-    this.addedDate = addedDate;
-  }
-
-  public LocalDate getAmendedDate() {
-    return amendedDate;
-  }
-
-  public void setAmendedDate(LocalDate amendedDate) {
-    this.amendedDate = amendedDate;
-  }
-
-  public LocalDate getInactiveDate() {
-    return inactiveDate;
-  }
-
-  public void setInactiveDate(LocalDate inactiveDate) {
-    this.inactiveDate = inactiveDate;
-  }
-
-  public PlacementDetails getPlacement() {
-    return placement;
-  }
-
-  public void setPlacement(PlacementDetails placement) {
-    this.placement = placement;
-  }
-
-  public CommentSource getSource() {
-    return source;
-  }
-
-  public void setSource(CommentSource source) {
-    this.source = source;
   }
 }
