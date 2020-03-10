@@ -25,8 +25,15 @@ import com.transformuk.hee.tis.tcs.service.service.mapper.EsrNotificationMapper;
 import java.io.IOException;
 import java.text.DecimalFormat;
 import java.time.LocalDate;
-import java.util.*;
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.Comparator;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
 import java.util.Map.Entry;
+import java.util.Optional;
+import java.util.Set;
 import java.util.stream.Collectors;
 import org.apache.commons.collections4.CollectionUtils;
 import org.slf4j.Logger;
@@ -658,6 +665,8 @@ public class EsrNotificationServiceImpl implements EsrNotificationService {
 
     esrNotification.setCurrentTraineeVpdForNextPlacement(
         getNextPlacementForTrainee(currentPlacement.getTrainee().getId(), siteIdsToKnownAs));
+    esrNotification.setCurrentTraineeWorkingHoursIndicator(
+        getWorkingHourIndicatorFromPlacement(currentPlacement));
   }
 
   private void mapNextTrainee(Placement nextPlacement, EsrNotification esrNotification,
@@ -682,7 +691,7 @@ public class EsrNotificationServiceImpl implements EsrNotificationService {
         nextPlacement.getTrainee().getGmcDetails() != null ? nextPlacement.getTrainee()
             .getGmcDetails().getGmcNumber() : null);
     esrNotification.setNextAppointmentTraineeGrade(nextPlacement.getGradeAbbreviation());
-    setWorkingHourIndicatorFromPlacement(nextPlacement, esrNotification);
+    esrNotification.setWorkingHourIndicator(getWorkingHourIndicatorFromPlacement(nextPlacement));
     esrNotification.setNextAppointmentCurrentPlacementVpd(
         getCurrentPlacementForTrainee(nextPlacement.getTrainee().getId(), siteIdsToKnownAs));
   }
@@ -740,14 +749,11 @@ public class EsrNotificationServiceImpl implements EsrNotificationService {
     }
   }
 
-  private void setWorkingHourIndicatorFromPlacement(Placement placement,
-      EsrNotification esrNotification) {
-    esrNotification.setWorkingHourIndicator(
-        placement.getPlacementWholeTimeEquivalent() != null
-            ? parseDouble(
-            DECIMAL_FORMAT.format(placement.getPlacementWholeTimeEquivalent().floatValue()))
-            : null
-    );
+  private Double getWorkingHourIndicatorFromPlacement(Placement placement) {
+    return placement.getPlacementWholeTimeEquivalent() != null
+        ? parseDouble(
+        DECIMAL_FORMAT.format(placement.getPlacementWholeTimeEquivalent().floatValue()))
+        : null;
   }
 
   /**

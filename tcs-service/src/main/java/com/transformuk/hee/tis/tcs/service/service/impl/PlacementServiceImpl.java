@@ -14,14 +14,38 @@ import com.transformuk.hee.tis.tcs.api.dto.PlacementSiteDTO;
 import com.transformuk.hee.tis.tcs.api.dto.PlacementSpecialtyDTO;
 import com.transformuk.hee.tis.tcs.api.dto.PlacementSummaryDTO;
 import com.transformuk.hee.tis.tcs.api.dto.PlacementSupervisorDTO;
-import com.transformuk.hee.tis.tcs.api.enumeration.*;
+import com.transformuk.hee.tis.tcs.api.enumeration.LifecycleState;
+import com.transformuk.hee.tis.tcs.api.enumeration.PlacementLogType;
+import com.transformuk.hee.tis.tcs.api.enumeration.PlacementStatus;
+import com.transformuk.hee.tis.tcs.api.enumeration.PostSpecialtyType;
+import com.transformuk.hee.tis.tcs.api.enumeration.Status;
+import com.transformuk.hee.tis.tcs.api.enumeration.TCSDateColumns;
 import com.transformuk.hee.tis.tcs.service.api.decorator.PlacementDetailsDecorator;
 import com.transformuk.hee.tis.tcs.service.api.util.ColumnFilterUtil;
 import com.transformuk.hee.tis.tcs.service.event.PlacementDeletedEvent;
 import com.transformuk.hee.tis.tcs.service.event.PlacementSavedEvent;
 import com.transformuk.hee.tis.tcs.service.exception.DateRangeColumnFilterException;
-import com.transformuk.hee.tis.tcs.service.model.*;
-import com.transformuk.hee.tis.tcs.service.repository.*;
+import com.transformuk.hee.tis.tcs.service.model.ColumnFilter;
+import com.transformuk.hee.tis.tcs.service.model.Comment;
+import com.transformuk.hee.tis.tcs.service.model.EsrNotification;
+import com.transformuk.hee.tis.tcs.service.model.Placement;
+import com.transformuk.hee.tis.tcs.service.model.PlacementDetails;
+import com.transformuk.hee.tis.tcs.service.model.PlacementLog;
+import com.transformuk.hee.tis.tcs.service.model.PlacementSite;
+import com.transformuk.hee.tis.tcs.service.model.PlacementSpecialty;
+import com.transformuk.hee.tis.tcs.service.model.PlacementSupervisor;
+import com.transformuk.hee.tis.tcs.service.model.Post;
+import com.transformuk.hee.tis.tcs.service.model.Programme;
+import com.transformuk.hee.tis.tcs.service.model.Specialty;
+import com.transformuk.hee.tis.tcs.service.repository.CommentRepository;
+import com.transformuk.hee.tis.tcs.service.repository.PersonRepositoryImpl;
+import com.transformuk.hee.tis.tcs.service.repository.PlacementDetailsRepository;
+import com.transformuk.hee.tis.tcs.service.repository.PlacementRepository;
+import com.transformuk.hee.tis.tcs.service.repository.PlacementSpecialtyRepository;
+import com.transformuk.hee.tis.tcs.service.repository.PlacementSupervisorRepository;
+import com.transformuk.hee.tis.tcs.service.repository.PostRepository;
+import com.transformuk.hee.tis.tcs.service.repository.ProgrammeRepository;
+import com.transformuk.hee.tis.tcs.service.repository.SpecialtyRepository;
 import com.transformuk.hee.tis.tcs.service.service.EsrNotificationService;
 import com.transformuk.hee.tis.tcs.service.service.PlacementLogService;
 import com.transformuk.hee.tis.tcs.service.service.PlacementService;
@@ -191,7 +215,7 @@ public class PlacementServiceImpl implements PlacementService {
 
     log.debug("Request to create Placement : {}", placementDetailsDTO);
 
-    boolean eligibleForEsrDateChangeNotification = isEligibleForChangedDatesNotification(
+    boolean eligibleForEsrNotification = isEligibleForEsrNotification(
         placementDetailsDTO, placementBeforeUpdate);
 
     // if this is an update and state is changed from draft to approved at the first time
@@ -230,12 +254,13 @@ public class PlacementServiceImpl implements PlacementService {
       placementLogService.placementLog(placementDetails, PlacementLogType.UPDATE);
       if (eligibleForEsrNewPlacementNotificationWhenUpdate) {
         handleEsrNewPlacementNotification(placementDetailsDTO, placementDetails);
-      } else if (eligibleForEsrDateChangeNotification) {
+      } else if (eligibleForEsrNotification) {
         log.info("Handling ESR Notification for date changes in placement edit: placement id {}",
             placementDetailsDTO.getId());
         boolean currentPlacementEdit = placementBeforeUpdate.getDateFrom()
             .isBefore(LocalDate.now().plusDays(1));
-        handleChangeOfPlacementDatesEsrNotification(placementDetailsDTO, placementBeforeUpdate, currentPlacementEdit);
+        handleChangeOfPlacementDatesEsrNotification(placementDetailsDTO, placementBeforeUpdate,
+            currentPlacementEdit);
       }
     }
 
@@ -272,7 +297,7 @@ public class PlacementServiceImpl implements PlacementService {
   }
 
   @Override
-  public boolean isEligibleForChangedDatesNotification(PlacementDetailsDTO updatedPlacementDetails,
+  public boolean isEligibleForEsrNotification(PlacementDetailsDTO updatedPlacementDetails,
       Placement existingPlacement) {
     if (updatedPlacementDetails == null ||
         existingPlacement == null ||
@@ -292,7 +317,7 @@ public class PlacementServiceImpl implements PlacementService {
       Optional<Post> optionalExistingPlacementPost = postRepository
           .findPostByPlacementHistoryId(existingPlacement.getId());
 
-      log.debug("Change in hire or end date. Marking for notification : npn {} ",
+      log.debug("Change in hire or end date or WTE. Marking for notification : npn {} ",
           optionalExistingPlacementPost.isPresent() ? optionalExistingPlacementPost.get()
               .getNationalPostNumber() : null);
       return true;
@@ -851,7 +876,10 @@ public class PlacementServiceImpl implements PlacementService {
         ((currentDateFrom != null && !currentDateFrom
             .equals(updatedPlacementDetails.getDateFrom())) ||
             (currentDateTo != null && !currentDateTo
-                .equals(updatedPlacementDetails.getDateTo()))) &&
+                .equals(updatedPlacementDetails.getDateTo())) ||
+            (updatedPlacementDetails.getWholeTimeEquivalent() != null && !updatedPlacementDetails
+                .getWholeTimeEquivalent()
+                .equals(currentPlacement.getPlacementWholeTimeEquivalent()))) &&
             ((currentDateFrom != null && currentDateFrom
                 .isBefore(LocalDate.now(clock).plusWeeks(13))) ||
                 (updatedPlacementDetails.getDateFrom() != null && updatedPlacementDetails

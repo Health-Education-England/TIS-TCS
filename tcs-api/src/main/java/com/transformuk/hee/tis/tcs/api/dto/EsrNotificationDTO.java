@@ -42,6 +42,8 @@ public class EsrNotificationDTO implements Serializable {
 
   private String currentTraineeVpdForNextPlacement;
 
+  private Double currentTraineeWorkingHoursIndicator;
+
   private String nextAppointmentTraineeLastName;
 
   private String nextAppointmentTraineeFirstName;
