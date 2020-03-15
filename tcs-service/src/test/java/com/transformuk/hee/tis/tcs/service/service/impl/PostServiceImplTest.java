@@ -26,7 +26,6 @@ import com.transformuk.hee.tis.tcs.api.enumeration.PostSiteType;
 import com.transformuk.hee.tis.tcs.api.enumeration.PostSpecialtyType;
 import com.transformuk.hee.tis.tcs.api.enumeration.Status;
 import com.transformuk.hee.tis.tcs.service.api.decorator.PostViewDecorator;
-import com.transformuk.hee.tis.tcs.service.api.util.BasicPage;
 import com.transformuk.hee.tis.tcs.service.api.validation.PostFundingValidator;
 import com.transformuk.hee.tis.tcs.service.exception.AccessUnauthorisedException;
 import com.transformuk.hee.tis.tcs.service.model.ColumnFilter;
@@ -62,6 +61,7 @@ import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.Spy;
 import org.mockito.junit.MockitoJUnitRunner;
+import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Sort;
@@ -253,7 +253,7 @@ public class PostServiceImplTest {
         .thenReturn(mappedPosts);
     when(pageableMock.getPageSize()).thenReturn(20);
 
-    BasicPage<PostViewDTO> result = testObj.findAll(pageableMock);
+    Page<PostViewDTO> result = testObj.findAll(pageableMock);
 
     Assert.assertEquals(1, result.getContent().size());
     verify(sqlQuerySupplierMock).getQuery(SqlQuerySupplier.POST_VIEW);
@@ -610,7 +610,7 @@ public class PostServiceImplTest {
     Assert.assertTrue(indexOfGroupBy < indexOfOrderBy);
     //multiples
     Assert.assertFalse(
-        capturedQueryString.substring(indexOfGroupBy + "group by".length()).contains("group by"));
+        capturedQueryString.substring(indexOfGroupBy + "group by" .length()).contains("group by"));
   }
 
   @Test
@@ -641,7 +641,7 @@ public class PostServiceImplTest {
     Assert.assertTrue(indexOfGroupBy < indexOfOrderBy);
     //multiples
     Assert.assertFalse(
-        capturedQueryString.substring(indexOfGroupBy + "group by".length()).contains("group by"));
+        capturedQueryString.substring(indexOfGroupBy + "group by" .length()).contains("group by"));
   }
 
   @Test(expected = NullPointerException.class)

@@ -17,7 +17,6 @@ import com.transformuk.hee.tis.tcs.api.enumeration.PostSuffix;
 import com.transformuk.hee.tis.tcs.api.enumeration.Status;
 import com.transformuk.hee.tis.tcs.service.api.decorator.PlacementSummaryDecorator;
 import com.transformuk.hee.tis.tcs.service.api.decorator.PlacementViewDecorator;
-import com.transformuk.hee.tis.tcs.service.api.util.BasicPage;
 import com.transformuk.hee.tis.tcs.service.api.util.ColumnFilterUtil;
 import com.transformuk.hee.tis.tcs.service.api.util.HeaderUtil;
 import com.transformuk.hee.tis.tcs.service.api.util.PaginationUtil;
@@ -70,9 +69,11 @@ public class PostResource {
 
   private static final String ENTITY_NAME = "post";
   private static final String REQUEST_BODY_EMPTY = "request.body.empty";
-  private static final String REQUEST_BODY_CANNOT_BE_EMPTY = "The request body for this end point cannot be empty";
+  private static final String REQUEST_BODY_CANNOT_BE_EMPTY =
+      "The request body for this end point cannot be empty";
   private static final String BULK_UPDATE_FAILED_NOID = "bulk.update.failed.noId";
-  private static final String NOID_ERR_MSG = "Some DTOs you've provided have no Id, cannot update entities that don't exist";
+  private static final String NOID_ERR_MSG =
+      "Some DTOs you've provided have no Id, cannot update entities that don't exist";
   private final Logger log = LoggerFactory.getLogger(PostResource.class);
   private final PostService postService;
   private final PostValidator postValidator;
@@ -169,7 +170,7 @@ public class PostResource {
         PostGradeType.class, PostSpecialtyType.class);
     List<ColumnFilter> columnFilters = ColumnFilterUtil
         .getColumnFilters(columnFilterJson, filterEnumList);
-    BasicPage<PostViewDTO> page;
+    Page<PostViewDTO> page;
     if (StringUtils.isEmpty(searchQuery) && StringUtils.isEmpty(columnFilterJson)) {
       page = postService.findAll(pageable);
     } else {

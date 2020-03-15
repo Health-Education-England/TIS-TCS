@@ -5,7 +5,6 @@ import com.transformuk.hee.tis.tcs.api.dto.PersonDTO;
 import com.transformuk.hee.tis.tcs.api.dto.PersonLiteDTO;
 import com.transformuk.hee.tis.tcs.api.dto.PersonV2DTO;
 import com.transformuk.hee.tis.tcs.api.dto.PersonViewDTO;
-import com.transformuk.hee.tis.tcs.service.api.util.BasicPage;
 import com.transformuk.hee.tis.tcs.service.model.ColumnFilter;
 import com.transformuk.hee.tis.tcs.service.repository.RightToWorkRepository;
 import java.util.List;
@@ -52,7 +51,7 @@ public interface PersonService {
    * @param pageable the pagination information
    * @return the list of entities
    */
-  BasicPage<PersonViewDTO> findAll(Pageable pageable);
+  Page<PersonViewDTO> findAll(Pageable pageable);
 
   /**
    * Get all the people using the given smart search string and filters.
@@ -62,7 +61,7 @@ public interface PersonService {
    * @param pageable     the pagination information
    * @return the list of entities
    */
-  BasicPage<PersonViewDTO> advancedSearch(String searchString, List<ColumnFilter> columnFilers,
+  Page<PersonViewDTO> advancedSearch(String searchString, List<ColumnFilter> columnFilers,
       Pageable pageable);
 
 
@@ -111,7 +110,8 @@ public interface PersonService {
    */
   List<PersonDTO> findPersonsByPublicHealthNumbersIn(List<String> publicHealthNumbers);
 
-  Page<PersonLiteDTO> searchByRoleCategory(String query, Long categoryId, final Pageable pageable, final boolean filterByTrainerApprovalStatus);
+  Page<PersonLiteDTO> searchByRoleCategory(String query, Long categoryId, final Pageable pageable,
+      final boolean filterByTrainerApprovalStatus);
 
   /**
    * Retrieve the basic details of persons
