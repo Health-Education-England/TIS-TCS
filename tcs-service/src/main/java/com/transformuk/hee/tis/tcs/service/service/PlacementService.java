@@ -7,7 +7,6 @@ import com.transformuk.hee.tis.tcs.service.model.Placement;
 import java.io.IOException;
 import java.time.LocalDate;
 import java.util.List;
-
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 
@@ -133,7 +132,7 @@ public interface PlacementService {
 
   Placement findPlacementById(Long placementId);
 
-  boolean isEligibleForChangedDatesNotification(PlacementDetailsDTO updatedPlacementDetails,
+  boolean isEligibleForEsrNotification(PlacementDetailsDTO updatedPlacementDetails,
       Placement existingPlacement);
 
   void handleChangeOfPlacementDatesEsrNotification(PlacementDetailsDTO placementDetailsDTO,

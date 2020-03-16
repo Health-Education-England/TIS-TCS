@@ -7,7 +7,6 @@ import javax.persistence.GeneratedValue;
 import javax.persistence.GenerationType;
 import javax.persistence.Id;
 import javax.persistence.Table;
-import lombok.Data;
 import lombok.Getter;
 import lombok.Setter;
 import lombok.ToString;
@@ -50,6 +49,8 @@ public class EsrNotification implements Serializable {
   private LocalDate currentTraineeProjectedEndDate;
 
   private String currentTraineeVpdForNextPlacement;
+
+  private Double currentTraineeWorkingHoursIndicator;
 
   private String nextAppointmentTraineeLastName;
 

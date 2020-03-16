@@ -1,9 +1,14 @@
 package com.transformuk.hee.tis.tcs.service.service.impl;
 
+import static com.transformuk.hee.tis.tcs.api.enumeration.LifecycleState.APPROVED;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyMap;
 import static org.mockito.ArgumentMatchers.eq;
-import static org.mockito.Mockito.*;
+import static org.mockito.Mockito.doNothing;
+import static org.mockito.Mockito.doReturn;
+import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.verifyZeroInteractions;
+import static org.mockito.Mockito.when;
 
 import com.google.common.collect.Lists;
 import com.google.common.collect.Sets;
@@ -15,14 +20,23 @@ import com.transformuk.hee.tis.tcs.api.enumeration.LifecycleState;
 import com.transformuk.hee.tis.tcs.api.enumeration.PlacementSiteType;
 import com.transformuk.hee.tis.tcs.api.enumeration.Status;
 import com.transformuk.hee.tis.tcs.service.api.decorator.PlacementDetailsDecorator;
-import com.transformuk.hee.tis.tcs.service.model.*;
-import com.transformuk.hee.tis.tcs.service.repository.*;
+import com.transformuk.hee.tis.tcs.service.model.Placement;
+import com.transformuk.hee.tis.tcs.service.model.PlacementDetails;
+import com.transformuk.hee.tis.tcs.service.model.PlacementLog;
+import com.transformuk.hee.tis.tcs.service.model.PlacementSite;
+import com.transformuk.hee.tis.tcs.service.model.Post;
+import com.transformuk.hee.tis.tcs.service.model.Programme;
+import com.transformuk.hee.tis.tcs.service.repository.CommentRepository;
+import com.transformuk.hee.tis.tcs.service.repository.PlacementDetailsRepository;
+import com.transformuk.hee.tis.tcs.service.repository.PlacementRepository;
+import com.transformuk.hee.tis.tcs.service.repository.PlacementSupervisorRepository;
+import com.transformuk.hee.tis.tcs.service.repository.PostRepository;
+import com.transformuk.hee.tis.tcs.service.repository.ProgrammeRepository;
 import com.transformuk.hee.tis.tcs.service.service.helper.SqlQuerySupplier;
 import com.transformuk.hee.tis.tcs.service.service.mapper.PlacementDetailsMapper;
 import com.transformuk.hee.tis.tcs.service.service.mapper.PlacementMapper;
 import com.transformuk.hee.tis.tcs.service.service.mapper.PlacementSiteMapper;
 import com.transformuk.hee.tis.tcs.service.service.mapper.PlacementSpecialtyMapper;
-
 import java.math.BigDecimal;
 import java.text.SimpleDateFormat;
 import java.time.Clock;
@@ -30,14 +44,24 @@ import java.time.Instant;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.time.ZoneId;
-import java.util.*;
-
+import java.util.Arrays;
+import java.util.Collections;
+import java.util.Date;
+import java.util.HashSet;
+import java.util.List;
+import java.util.Map;
+import java.util.Optional;
+import java.util.Set;
 import org.hamcrest.CoreMatchers;
 import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
-import org.mockito.*;
+import org.mockito.ArgumentCaptor;
+import org.mockito.Captor;
+import org.mockito.InjectMocks;
+import org.mockito.Mock;
+import org.mockito.Spy;
 import org.mockito.junit.MockitoJUnitRunner;
 import org.springframework.jdbc.core.namedparam.NamedParameterJdbcTemplate;
 
@@ -280,18 +304,18 @@ public class PlacementServiceImplTest {
     Placement currentPlacement = new Placement();
     currentPlacement.setId(existingPlacementId);
     currentPlacement.setDateFrom(dateFiveMonthsAgo);
-    currentPlacement.setLifecycleState(LifecycleState.APPROVED);
+    currentPlacement.setLifecycleState(APPROVED);
 
     PlacementDetailsDTO updatedPlacementDetails = new PlacementDetailsDTO();
     updatedPlacementDetails.setId(existingPlacementId);
     updatedPlacementDetails.setDateFrom(dateOneMonthsAgo);
-    updatedPlacementDetails.setLifecycleState(LifecycleState.APPROVED);
+    updatedPlacementDetails.setLifecycleState(APPROVED);
 
     Post foundPostMock = mock(Post.class);
 
     PlacementLog placementLog = new PlacementLog();
     placementLog.setPlacementId(existingPlacementId);
-    placementLog.setLifecycleState(LifecycleState.APPROVED);
+    placementLog.setLifecycleState(APPROVED);
     placementLog.setDateFrom(dateFiveMonthsAgo);
     placementLog.setDateTo(dateOneMonthsAgo);
 
@@ -301,7 +325,7 @@ public class PlacementServiceImplTest {
         .thenReturn(Optional.of(placementLog));
 
     boolean result = testObj
-        .isEligibleForChangedDatesNotification(updatedPlacementDetails, currentPlacement);
+        .isEligibleForEsrNotification(updatedPlacementDetails, currentPlacement);
 
     Assert.assertTrue(result);
 
@@ -317,13 +341,13 @@ public class PlacementServiceImplTest {
     Placement currentPlacement = new Placement();
     currentPlacement.setId(existingPlacementId);
     currentPlacement.setDateFrom(dateFiveMonthsAgo);
-    currentPlacement.setLifecycleState(LifecycleState.APPROVED);
+    currentPlacement.setLifecycleState(APPROVED);
 
     PlacementDetailsDTO updatedPlacementDetails = new PlacementDetailsDTO();
     updatedPlacementDetails.setDateFrom(dateFiveMonthsAgo);
 
     boolean result = testObj
-        .isEligibleForChangedDatesNotification(updatedPlacementDetails, currentPlacement);
+        .isEligibleForEsrNotification(updatedPlacementDetails, currentPlacement);
 
     Assert.assertFalse(result);
 
@@ -611,7 +635,7 @@ public class PlacementServiceImplTest {
 
     Placement placement = new Placement();
     placement.setId(1L);
-    boolean returnValue = testObj.isEligibleForChangedDatesNotification(placementDetailsDto, placement);
+    boolean returnValue = testObj.isEligibleForEsrNotification(placementDetailsDto, placement);
     Assert.assertThat("When draft placement is not approved, it is not elegible for ChangedDatesNotification",
         returnValue, CoreMatchers.is(false));
   }
@@ -624,9 +648,10 @@ public class PlacementServiceImplTest {
 
     Placement placement = new Placement();
     placement.setId(1L);
-    placement.setLifecycleState(LifecycleState.APPROVED);
-    boolean returnValue = testObj.isEligibleForChangedDatesNotification(placementDetailsDto, placement);
-    Assert.assertThat("When approved placement goes back to draft, it is not elegible for ChangedDatesNotification",
+    placement.setLifecycleState(APPROVED);
+    boolean returnValue = testObj.isEligibleForEsrNotification(placementDetailsDto, placement);
+    Assert.assertThat(
+        "When approved placement goes back to draft, it is not elegible for ChangedDatesNotification",
         returnValue, CoreMatchers.is(false));
   }
 
@@ -642,7 +667,7 @@ public class PlacementServiceImplTest {
 
     Placement placement3 = new Placement();
     placement3.setId(3L);
-    placement3.setLifecycleState(LifecycleState.APPROVED);
+    placement3.setLifecycleState(APPROVED);
 
     Post post = new Post();
     post.setId(1L);
@@ -659,10 +684,55 @@ public class PlacementServiceImplTest {
 
     when(programmeRepository.findById(any())).thenReturn(Optional.of(programme));
     when(placementDetailsRepositoryMock.findById(any())).thenReturn(Optional.of(placementDetails));
-    when(placementDetailsMapperMock.placementDetailsToPlacementDetailsDTO(placementDetails)).thenReturn(placementDetailsDto);
+    when(placementDetailsMapperMock.placementDetailsToPlacementDetailsDTO(placementDetails))
+        .thenReturn(placementDetailsDto);
     when(placementDetailsDecorator.decorate(placementDetailsDto)).thenReturn(placementDetailsDto);
-    List<PlacementDetailsDTO> draftPlacements = testObj.getListOfDraftPlacementsByProgrammeId(any());
+    List<PlacementDetailsDTO> draftPlacements = testObj
+        .getListOfDraftPlacementsByProgrammeId(any());
     Assert.assertThat("Should get the list of all draft placement for the programme id",
         draftPlacements.size(), CoreMatchers.is(2));
+  }
+
+  @Test
+  public void isEligibleForChangedWholeTimeEquivalentShouldReturnTrueWhenUpdatedPlacementIsEligibleForNotification() {
+    LocalDate dateFiveMonthsAgo = LocalDate.now().minusMonths(5);
+    Long existingPlacementId = 1L;
+    BigDecimal existingWholeTimeEquivalent = new BigDecimal(1.0);
+    BigDecimal updatedWholeTimeEquivalent = new BigDecimal(0.5);
+
+    Placement currentPlacement = new Placement();
+    currentPlacement.setId(existingPlacementId);
+    currentPlacement.setDateFrom(dateFiveMonthsAgo);
+    currentPlacement.setLifecycleState(APPROVED);
+    currentPlacement.setPlacementWholeTimeEquivalent(existingWholeTimeEquivalent);
+
+    PlacementDetailsDTO updatedPlacementDetails = new PlacementDetailsDTO();
+    updatedPlacementDetails.setId(existingPlacementId);
+    updatedPlacementDetails.setDateFrom(dateFiveMonthsAgo);
+    updatedPlacementDetails.setDateTo(dateFiveMonthsAgo);
+    updatedPlacementDetails.setWholeTimeEquivalent(updatedWholeTimeEquivalent);
+    updatedPlacementDetails.setWholeTimeEquivalent(updatedWholeTimeEquivalent);
+    updatedPlacementDetails.setLifecycleState(APPROVED);
+
+    Post foundPostMock = mock(Post.class);
+
+    PlacementLog placementLog = new PlacementLog();
+    placementLog.setPlacementId(existingPlacementId);
+    placementLog.setLifecycleState(APPROVED);
+    placementLog.setDateFrom(dateFiveMonthsAgo);
+    placementLog.setDateTo(dateFiveMonthsAgo);
+
+    when(postRepositoryMock.findPostByPlacementHistoryId(longArgumentCaptor.capture()))
+        .thenReturn(Optional.of(foundPostMock));
+    when(placementLogServiceImplMock.getLatestLogOfCurrentApprovedPlacement(existingPlacementId))
+        .thenReturn(Optional.of(placementLog));
+
+    boolean result = testObj
+        .isEligibleForEsrNotification(updatedPlacementDetails, currentPlacement);
+
+    Assert.assertTrue(result);
+
+    Long capturedPlacementId = longArgumentCaptor.getValue();
+    Assert.assertEquals(existingPlacementId, capturedPlacementId);
   }
 }

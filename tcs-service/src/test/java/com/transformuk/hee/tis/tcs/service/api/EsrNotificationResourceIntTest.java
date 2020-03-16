@@ -58,6 +58,7 @@ public class EsrNotificationResourceIntTest {
   private static final String DEFAULT_PLACEMENT_TYPE = "In Post";
 
   private static final BigDecimal DEFAULT_PLACEMENT_WHOLE_TIME_EQUIVALENT = new BigDecimal(1);
+  private static final BigDecimal SECOND_PLACEMENT_WHOLE_TIME_EQUIVALENT = new BigDecimal(0.5);
 
   @Autowired
   private MappingJackson2HttpMessageConverter jacksonMessageConverter;
@@ -145,6 +146,8 @@ public class EsrNotificationResourceIntTest {
         from.plusDays(10)); // future becoming current today
     PlacementDetails placement2 = createPlacementEntity(from.minusDays(10),
         from.minusDays(1)); // current finished yesterday
+    //override second placement's whole time equivalent
+    placement2.setWholeTimeEquivalent(SECOND_PLACEMENT_WHOLE_TIME_EQUIVALENT);
 
     placement1.setTraineeId(trainee1.getId());
     placement2.setTraineeId(trainee2.getId());
@@ -175,7 +178,11 @@ public class EsrNotificationResourceIntTest {
         .andExpect(jsonPath("$.[*].nextAppointmentTraineeLastName")
             .value(trainee1.getContactDetails().getLegalSurname()))
         .andExpect(jsonPath("$.[*].nextAppointmentTraineeGmcNumber")
-            .value(trainee1GmcDetails.getGmcNumber()));
+            .value(trainee1GmcDetails.getGmcNumber()))
+        .andExpect(jsonPath("$.[0].currentTraineeWorkingHoursIndicator")
+            .value(placement2.getWholeTimeEquivalent().setScale(1)))
+        .andExpect(jsonPath("$.[0].workingHourIndicator")
+            .value(placement1.getWholeTimeEquivalent().setScale(1)));
   }
 
   @Test
