@@ -445,6 +445,7 @@ public class PlacementResourceIntTest {
     placementDetails.setDateFrom(UPDATED_DATE_FROM.plusMonths(5));
     placementDetails.setDateTo(UPDATED_DATE_TO.plusMonths(8));
     placementDetails.setPlacementType(placementType);
+    placementDetails.setWholeTimeEquivalent(UPDATED_PLACEMENT_WHOLE_TIME_EQUIVALENT);
     placementDetails.setLifecycleState(LifecycleState.APPROVED);
 
     final Post post = postRepository.findById(placementDetails.getPostId()).orElse(null);
@@ -471,7 +472,7 @@ public class PlacementResourceIntTest {
     assertThat(testPlacement.getTrainingDescription()).isEqualTo(DEFAULT_TRAINING_DESCRIPTION);
     assertThat(testPlacement.getPlacementType()).isEqualTo(placementType);
     assertThat(testPlacement.getWholeTimeEquivalent())
-        .isEqualTo(DEFAULT_PLACEMENT_WHOLE_TIME_EQUIVALENT.setScale(2, BigDecimal.ROUND_HALF_UP));
+        .isEqualTo(UPDATED_PLACEMENT_WHOLE_TIME_EQUIVALENT.setScale(2, BigDecimal.ROUND_HALF_UP));
 
     // Validate that there is no ESR notification record created
     final List<EsrNotification> esrNotifications = esrNotificationRepository.findAll();

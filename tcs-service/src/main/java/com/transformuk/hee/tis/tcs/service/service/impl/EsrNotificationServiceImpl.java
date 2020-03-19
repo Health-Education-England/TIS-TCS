@@ -317,6 +317,10 @@ public class EsrNotificationServiceImpl implements EsrNotificationService {
 
     Placement currentPlacement = placementRepository.findById(changedPlacement.getId())
         .orElse(null);
+    if (changedPlacement.getWholeTimeEquivalent() != null && !changedPlacement
+        .getWholeTimeEquivalent().equals(currentPlacement.getPlacementWholeTimeEquivalent())) {
+      currentPlacement.setPlacementWholeTimeEquivalent(changedPlacement.getWholeTimeEquivalent());
+    }
     if (CollectionUtils.isEmpty(matchedFuturePlacements)) {
       allEsrNotifications.add(buildNotification(null, currentPlacement, siteIdsToKnownAs));
     } else {
