@@ -35,9 +35,12 @@ import java.util.Map.Entry;
 import java.util.Optional;
 import java.util.Set;
 import java.util.stream.Collectors;
+import javax.persistence.EntityManager;
 import org.apache.commons.collections4.CollectionUtils;
+import org.hibernate.Session;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -58,6 +61,9 @@ public class EsrNotificationServiceImpl implements EsrNotificationService {
   private EsrNotificationRepository esrNotificationRepository;
   private EsrNotificationMapper esrNotificationMapper;
   private ReferenceService referenceService;
+
+  @Autowired
+  private EntityManager entityManager;
 
   public EsrNotificationServiceImpl(EsrNotificationRepository esrNotificationRepository,
       EsrNotificationMapper esrNotificationMapper,
@@ -317,10 +323,24 @@ public class EsrNotificationServiceImpl implements EsrNotificationService {
 
     Placement currentPlacement = placementRepository.findById(changedPlacement.getId())
         .orElse(null);
-    if (changedPlacement.getWholeTimeEquivalent() != null && !changedPlacement
-        .getWholeTimeEquivalent().equals(currentPlacement.getPlacementWholeTimeEquivalent())) {
-      currentPlacement.setPlacementWholeTimeEquivalent(changedPlacement.getWholeTimeEquivalent());
+
+    boolean isWteSameWithCurrentAndUpdatedPlacement = true;
+    if (currentPlacement != null && changedPlacement.getWholeTimeEquivalent() != null) {
+      if (currentPlacement.getPlacementWholeTimeEquivalent() == null) {
+        isWteSameWithCurrentAndUpdatedPlacement = false;
+      } else {
+        isWteSameWithCurrentAndUpdatedPlacement = changedPlacement.getWholeTimeEquivalent()
+            .compareTo(currentPlacement.getPlacementWholeTimeEquivalent()) == 0;
+      }
     }
+    // The currentPlacement entity is getting refreshed only when wte changes of current trainee as I don't want to change the existing functionality.
+    if (!isWteSameWithCurrentAndUpdatedPlacement) {
+      Session entityManagerDelegate = (Session) entityManager.getDelegate();
+      entityManagerDelegate.evict(currentPlacement);
+      currentPlacement = placementRepository.findById(changedPlacement.getId())
+          .orElse(null);
+    }
+
     if (CollectionUtils.isEmpty(matchedFuturePlacements)) {
       allEsrNotifications.add(buildNotification(null, currentPlacement, siteIdsToKnownAs));
     } else {
