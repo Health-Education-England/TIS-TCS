@@ -33,6 +33,10 @@ public interface EsrNotificationService {
   List<EsrNotificationDTO> loadFullNotification(LocalDate asOfDate, List<String> deaneryNumbers,
       String deaneryBody);
 
+  void loadChangeOfWholeTimeEquivalentNotification(PlacementDetailsDTO changedPlacement,
+      String nationalPostNumber, boolean currentPlacementEdit)
+      throws IOException, ClassNotFoundException;
+
   void loadChangeOfPlacementDatesNotification(PlacementDetailsDTO changedPlacement,
       String nationalPostNumber, boolean currentPlacementEdit)
       throws IOException, ClassNotFoundException;

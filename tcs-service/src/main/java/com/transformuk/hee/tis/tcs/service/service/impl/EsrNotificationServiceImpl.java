@@ -240,6 +240,27 @@ public class EsrNotificationServiceImpl implements EsrNotificationService {
   }
 
   @Override
+  public void loadChangeOfWholeTimeEquivalentNotification(PlacementDetailsDTO changedPlacement,
+      String nationalPostNumber, boolean currentPlacementEdit) {
+
+    LocalDate asOfDate = LocalDate.now(); // find placements as of today.
+    List<EsrNotification> allEsrNotifications = new ArrayList<>();
+
+    if (currentPlacementEdit) {
+      handleCurrentPlacementEdit(changedPlacement, nationalPostNumber, asOfDate,
+          allEsrNotifications, new HashMap<>());
+      LOG.info("Saving ESR notification for Edit in Whole time equivalent for Placement : {}",
+          nationalPostNumber);
+      List<EsrNotification> savedNotifications = esrNotificationRepository
+          .saveAll(allEsrNotifications);
+      LOG.info("Saved ESR notifications {} Edit in Whole time equivalent for Placement  : {} ",
+          savedNotifications.size(), nationalPostNumber);
+    } else {
+      LOG.debug("Whole time equivalent update is for Future trainee, No notification generated");
+    }
+  }
+
+  @Override
   public void loadChangeOfPlacementDatesNotification(PlacementDetailsDTO changedPlacement,
       String nationalPostNumber, boolean currentPlacementEdit)
       throws IOException, ClassNotFoundException {
@@ -335,8 +356,8 @@ public class EsrNotificationServiceImpl implements EsrNotificationService {
     }
     // The currentPlacement entity is getting refreshed only when wte changes of current trainee as I don't want to change the existing functionality.
     if (!isWteSameWithCurrentAndUpdatedPlacement) {
-      Session entityManagerDelegate = (Session) entityManager.getDelegate();
-      entityManagerDelegate.evict(currentPlacement);
+      Session session = (Session) entityManager.getDelegate();
+      session.evict(currentPlacement);
       currentPlacement = placementRepository.findById(changedPlacement.getId())
           .orElse(null);
     }

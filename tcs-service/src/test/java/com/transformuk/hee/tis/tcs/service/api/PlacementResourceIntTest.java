@@ -2020,7 +2020,7 @@ public class PlacementResourceIntTest {
 
   @Test
   @Transactional
-  public void updateCurrentPlacementWithWholeTimeEquivalentChangeAndWithoutAnyFuturePlacementToTriggerNotification()
+  public void updateCurrentPlacementWithWholeTimeEquivalentChangeAndWithoutAnyFuturePlacementToTriggerType1And4Notifications()
       throws Exception {
     TestUtils.mockUserProfileWithPermissions("Test User",
         new HashSet<>(Arrays.asList("placement:approve")));
@@ -2085,6 +2085,76 @@ public class PlacementResourceIntTest {
           assertThat(esrNotification.getChangeOfProjectedHireDate()).isNull();
           assertThat(esrNotification.getChangeOfProjectedEndDate()).isEqualTo(UPDATED_DATE_TO);
         });
+    esrNotifications.stream()
+        .filter(esrNotification -> esrNotification.getNotificationTitleCode().equals("1"))
+        .forEach(esrNotification -> {
+          assertThat(esrNotification.getChangeOfProjectedHireDate()).isNull();
+          assertThat(esrNotification.getCurrentTraineeWorkingHoursIndicator()).isEqualTo(
+              UPDATED_PLACEMENT_WHOLE_TIME_EQUIVALENT.setScale(2, BigDecimal.ROUND_HALF_UP)
+                  .doubleValue());
+        });
+  }
+
+  @Test
+  @Transactional
+  public void updateCurrentPlacementWithWholeTimeEquivalentChangeAndWithoutAnyChangeInDateToTriggerType1NotificationOnly()
+      throws Exception {
+    TestUtils.mockUserProfileWithPermissions("Test User",
+        new HashSet<>(Arrays.asList("placement:approve")));
+    // Initialize the database
+    final String localPostNumber = "EOE/RGT00/004/STR/704";
+    final String placementType = "In Post";
+
+    placementDetails.setDateFrom(UPDATED_DATE_FROM.minusMonths(2));
+    placementDetails.setDateTo(UPDATED_DATE_TO.plusMonths(2));
+    placementDetails.setPlacementType(placementType);
+    placementDetails.setLifecycleState(LifecycleState.APPROVED);
+    placementDetailsRepository.saveAndFlush(placementDetails);
+
+    final Post post = postRepository.findById(placementDetails.getPostId()).orElse(null);
+    post.setNationalPostNumber(localPostNumber);
+    postRepository.saveAndFlush(post);
+
+    final int databaseSizeBeforeUpdate = placementDetailsRepository.findAll().size();
+
+    // Update the placement details
+    final PlacementDetails updatedPlacement = placementDetailsRepository
+        .findById(placementDetails.getId()).orElse(null);
+    entityManager.detach(updatedPlacement);
+    updatedPlacement.setSiteCode(UPDATED_SITE);
+    updatedPlacement.setGradeAbbreviation(UPDATED_GRADE);
+    updatedPlacement.setLocalPostNumber(localPostNumber);
+    updatedPlacement.setTrainingDescription(UPDATED_TRAINING_DESCRPTION);
+    updatedPlacement.setPlacementType(placementType);
+    updatedPlacement.setWholeTimeEquivalent(UPDATED_PLACEMENT_WHOLE_TIME_EQUIVALENT);
+    updatedPlacement.setLifecycleState(LifecycleState.APPROVED);
+    final PlacementDetailsDTO placementDTO = placementDetailsMapper
+        .placementDetailsToPlacementDetailsDTO(updatedPlacement);
+
+    restPlacementMockMvc.perform(put("/api/placements")
+        .contentType(TestUtil.APPLICATION_JSON_UTF8)
+        .content(TestUtil.convertObjectToJsonBytes(placementDTO)))
+        .andExpect(status().isOk());
+
+    // Validate the Placement in the database
+    final List<PlacementDetails> placementList = placementDetailsRepository.findAll();
+    assertThat(placementList).hasSize(databaseSizeBeforeUpdate);
+    final PlacementDetails testPlacement = placementList.get(placementList.size() - 1);
+    assertThat(testPlacement.getSiteCode()).isEqualTo(UPDATED_SITE);
+    assertThat(testPlacement.getGradeAbbreviation()).isEqualTo(UPDATED_GRADE);
+    assertThat(testPlacement.getDateFrom()).isEqualTo(UPDATED_DATE_FROM.minusMonths(2));
+    assertThat(testPlacement.getDateTo()).isEqualTo(UPDATED_DATE_TO.plusMonths(2));
+    assertThat(testPlacement.getLocalPostNumber()).isEqualTo(localPostNumber);
+    assertThat(testPlacement.getTrainingDescription()).isEqualTo(UPDATED_TRAINING_DESCRPTION);
+    assertThat(testPlacement.getPlacementType()).isEqualTo(placementType);
+    assertThat(testPlacement.getWholeTimeEquivalent())
+        .isEqualTo(UPDATED_PLACEMENT_WHOLE_TIME_EQUIVALENT.setScale(2, BigDecimal.ROUND_HALF_UP));
+
+    // validate the EsrNotification in the database
+    final List<EsrNotification> esrNotifications = esrNotificationRepository.findAll();
+    assertThat(esrNotifications).hasSize(1);
+    esrNotifications.stream().map(EsrNotification::getNotificationTitleCode)
+        .forEachOrdered(r -> asList("1").contains(r));
     esrNotifications.stream()
         .filter(esrNotification -> esrNotification.getNotificationTitleCode().equals("1"))
         .forEach(esrNotification -> {

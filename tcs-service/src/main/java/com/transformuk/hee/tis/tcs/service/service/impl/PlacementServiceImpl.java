@@ -200,7 +200,8 @@ public class PlacementServiceImpl implements PlacementService {
         && existingPlacement.getLifecycleState() == LifecycleState.DRAFT
         && updatedPlacementDetails.getLifecycleState() == LifecycleState.APPROVED) {
       Optional<PlacementLog> placementLog =
-          placementLogService.getLatestLogOfCurrentApprovedPlacement(updatedPlacementDetails.getId());
+          placementLogService
+              .getLatestLogOfCurrentApprovedPlacement(updatedPlacementDetails.getId());
       if (!placementLog.isPresent()) {
         return true;
       }
@@ -208,18 +209,51 @@ public class PlacementServiceImpl implements PlacementService {
     return false;
   }
 
+  private boolean isEligibleForNewNotificationWhenUpdateWte(
+      PlacementDetailsDTO updatedPlacementDetails,
+      Placement existingPlacement) {
+    if (updatedPlacementDetails == null ||
+        existingPlacement == null ||
+        updatedPlacementDetails.getLifecycleState() != LifecycleState.APPROVED) {
+      return false;
+    }
+    // check if latest approved log exists
+    Optional<PlacementLog> optionalPlacementLog =
+        placementLogService.getLatestLogOfCurrentApprovedPlacement(updatedPlacementDetails.getId());
+    PlacementLog placementLog;
+    if (!optionalPlacementLog.isPresent()) {
+      return false;
+    }
+    placementLog = optionalPlacementLog.get();
+
+    if (isEligibleForCurrentTraineeWteChangeNotification(existingPlacement, updatedPlacementDetails,
+        placementLog)) {
+      Optional<Post> optionalExistingPlacementPost = postRepository
+          .findPostByPlacementHistoryId(existingPlacement.getId());
+
+      log.debug("Change in Whole Time Equivalent. Marking for notification : npn {} ",
+          optionalExistingPlacementPost.<Object>map(Post::getNationalPostNumber).orElse(null));
+      return true;
+    }
+    return false;
+  }
+
   @Transactional
   @Override
   public PlacementDetailsDTO createDetails(final PlacementDetailsDTO placementDetailsDTO,
-                                           final Placement placementBeforeUpdate) {
+      final Placement placementBeforeUpdate) {
 
     log.debug("Request to create Placement : {}", placementDetailsDTO);
 
-    boolean eligibleForEsrNotification = isEligibleForEsrNotification(
+    boolean eligibleForEsrDateChangeNotification = isEligibleForChangedDatesNotification(
         placementDetailsDTO, placementBeforeUpdate);
 
     // if this is an update and state is changed from draft to approved at the first time
     boolean eligibleForEsrNewPlacementNotificationWhenUpdate = isEligibleForNewNotificationWhenUpdate(
+        placementDetailsDTO, placementBeforeUpdate);
+
+    // If there is an update on whole time equivalent
+    boolean eligibleForEsrNewPlacementNotificationWhenUpdateWte = isEligibleForNewNotificationWhenUpdateWte(
         placementDetailsDTO, placementBeforeUpdate);
 
     PlacementDetails placementDetails = placementDetailsMapper
@@ -254,12 +288,19 @@ public class PlacementServiceImpl implements PlacementService {
       placementLogService.placementLog(placementDetails, PlacementLogType.UPDATE);
       if (eligibleForEsrNewPlacementNotificationWhenUpdate) {
         handleEsrNewPlacementNotification(placementDetailsDTO, placementDetails);
-      } else if (eligibleForEsrNotification) {
+      } else if (eligibleForEsrDateChangeNotification) {
         log.info("Handling ESR Notification for date changes in placement edit: placement id {}",
             placementDetailsDTO.getId());
         boolean currentPlacementEdit = placementBeforeUpdate.getDateFrom()
             .isBefore(LocalDate.now().plusDays(1));
         handleChangeOfPlacementDatesEsrNotification(placementDetailsDTO, placementBeforeUpdate,
+            currentPlacementEdit);
+      } else if (eligibleForEsrNewPlacementNotificationWhenUpdateWte) {
+        log.info("Handling ESR Notification for whole time equivalent edit: placement id {}",
+            placementDetailsDTO.getId());
+        boolean currentPlacementEdit = placementBeforeUpdate.getDateFrom()
+            .isBefore(LocalDate.now().plusDays(1));
+        handleChangeOfWholeTimeEquivalentEsrNotification(placementDetailsDTO, placementBeforeUpdate,
             currentPlacementEdit);
       }
     }
@@ -297,7 +338,7 @@ public class PlacementServiceImpl implements PlacementService {
   }
 
   @Override
-  public boolean isEligibleForEsrNotification(PlacementDetailsDTO updatedPlacementDetails,
+  public boolean isEligibleForChangedDatesNotification(PlacementDetailsDTO updatedPlacementDetails,
       Placement existingPlacement) {
     if (updatedPlacementDetails == null ||
         existingPlacement == null ||
@@ -337,6 +378,24 @@ public class PlacementServiceImpl implements PlacementService {
           placementBeforeUpdate.getPost().getNationalPostNumber());
       try {
         esrNotificationService.loadChangeOfPlacementDatesNotification(updatedPlacementDetails,
+            placementBeforeUpdate.getPost().getNationalPostNumber(), currentPlacementEdit);
+      } catch (final Exception e) {
+        log.error("Error loading Change of Placement Dates Notification : ", e);
+      }
+    }
+  }
+
+  @Override
+  public void handleChangeOfWholeTimeEquivalentEsrNotification(
+      PlacementDetailsDTO updatedPlacementDetails, Placement placementBeforeUpdate,
+      boolean currentPlacementEdit) {
+
+    if (placementBeforeUpdate != null && updatedPlacementDetails != null) {
+      // create NOT1 type record. Current and next trainee details for the post number.
+      log.debug("Change in whole time equivalent. Marking for notification : {} ",
+          placementBeforeUpdate.getPost().getNationalPostNumber());
+      try {
+        esrNotificationService.loadChangeOfWholeTimeEquivalentNotification(updatedPlacementDetails,
             placementBeforeUpdate.getPost().getNationalPostNumber(), currentPlacementEdit);
       } catch (final Exception e) {
         log.error("Error loading Change of Placement Dates Notification : ", e);
@@ -876,10 +935,23 @@ public class PlacementServiceImpl implements PlacementService {
         ((currentDateFrom != null && !currentDateFrom
             .equals(updatedPlacementDetails.getDateFrom())) ||
             (currentDateTo != null && !currentDateTo
-                .equals(updatedPlacementDetails.getDateTo())) ||
-            (updatedPlacementDetails.getWholeTimeEquivalent() != null && !updatedPlacementDetails
-                .getWholeTimeEquivalent()
-                .equals(currentPlacement.getPlacementWholeTimeEquivalent()))) &&
+                .equals(updatedPlacementDetails.getDateTo()))) &&
+            ((currentDateFrom != null && currentDateFrom
+                .isBefore(LocalDate.now(clock).plusWeeks(13))) ||
+                (updatedPlacementDetails.getDateFrom() != null && updatedPlacementDetails
+                    .getDateFrom()
+                    .isBefore(LocalDate.now(clock).plusWeeks(13))));
+  }
+
+  public boolean isEligibleForCurrentTraineeWteChangeNotification(final Placement currentPlacement,
+      final PlacementDetailsDTO updatedPlacementDetails, final PlacementLog latestApprovedLog) {
+
+    LocalDate currentDateFrom = latestApprovedLog.getDateFrom();
+
+    return
+        ((updatedPlacementDetails.getWholeTimeEquivalent() != null && !updatedPlacementDetails
+            .getWholeTimeEquivalent()
+            .equals(currentPlacement.getPlacementWholeTimeEquivalent()))) &&
             ((currentDateFrom != null && currentDateFrom
                 .isBefore(LocalDate.now(clock).plusWeeks(13))) ||
                 (updatedPlacementDetails.getDateFrom() != null && updatedPlacementDetails
