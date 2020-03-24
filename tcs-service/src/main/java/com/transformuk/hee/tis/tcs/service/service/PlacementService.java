@@ -55,7 +55,6 @@ public interface PlacementService {
    */
   PlacementDetailsDTO getDetails(Long id);
 
-
   /**
    * Updates an existing placement
    *
@@ -132,18 +131,22 @@ public interface PlacementService {
 
   Placement findPlacementById(Long placementId);
 
-  boolean isEligibleForEsrNotification(PlacementDetailsDTO updatedPlacementDetails,
+  boolean isEligibleForChangedDatesNotification(PlacementDetailsDTO updatedPlacementDetails,
       Placement existingPlacement);
 
   void handleChangeOfPlacementDatesEsrNotification(PlacementDetailsDTO placementDetailsDTO,
       Placement placementBeforeUpdate, boolean currentPlacementEdit);
 
+  void handleChangeOfWholeTimeEquivalentEsrNotification(
+      PlacementDetailsDTO updatedPlacementDetails, Placement placementBeforeUpdate,
+      boolean currentPlacementEdit);
+
   /**
    * validate if overlapping placements exist
    *
-   * @param npn national post number
-   * @param fromDate startDate of the placement which is waiting to be added
-   * @param toDate endDate of the placement which is waiting to be added
+   * @param npn         national post number
+   * @param fromDate    startDate of the placement which is waiting to be added
+   * @param toDate      endDate of the placement which is waiting to be added
    * @param placementId used to skip the current placement when updating
    * @return if overlapping exists, return true, else return false
    */

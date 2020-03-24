@@ -325,7 +325,7 @@ public class PlacementServiceImplTest {
         .thenReturn(Optional.of(placementLog));
 
     boolean result = testObj
-        .isEligibleForEsrNotification(updatedPlacementDetails, currentPlacement);
+        .isEligibleForChangedDatesNotification(updatedPlacementDetails, currentPlacement);
 
     Assert.assertTrue(result);
 
@@ -347,7 +347,7 @@ public class PlacementServiceImplTest {
     updatedPlacementDetails.setDateFrom(dateFiveMonthsAgo);
 
     boolean result = testObj
-        .isEligibleForEsrNotification(updatedPlacementDetails, currentPlacement);
+        .isEligibleForChangedDatesNotification(updatedPlacementDetails, currentPlacement);
 
     Assert.assertFalse(result);
 
@@ -635,8 +635,10 @@ public class PlacementServiceImplTest {
 
     Placement placement = new Placement();
     placement.setId(1L);
-    boolean returnValue = testObj.isEligibleForEsrNotification(placementDetailsDto, placement);
-    Assert.assertThat("When draft placement is not approved, it is not elegible for ChangedDatesNotification",
+    boolean returnValue = testObj
+        .isEligibleForChangedDatesNotification(placementDetailsDto, placement);
+    Assert.assertThat(
+        "When draft placement is not approved, it is not elegible for ChangedDatesNotification",
         returnValue, CoreMatchers.is(false));
   }
 
@@ -649,7 +651,8 @@ public class PlacementServiceImplTest {
     Placement placement = new Placement();
     placement.setId(1L);
     placement.setLifecycleState(APPROVED);
-    boolean returnValue = testObj.isEligibleForEsrNotification(placementDetailsDto, placement);
+    boolean returnValue = testObj
+        .isEligibleForChangedDatesNotification(placementDetailsDto, placement);
     Assert.assertThat(
         "When approved placement goes back to draft, it is not elegible for ChangedDatesNotification",
         returnValue, CoreMatchers.is(false));
@@ -714,25 +717,16 @@ public class PlacementServiceImplTest {
     updatedPlacementDetails.setWholeTimeEquivalent(updatedWholeTimeEquivalent);
     updatedPlacementDetails.setLifecycleState(APPROVED);
 
-    Post foundPostMock = mock(Post.class);
-
     PlacementLog placementLog = new PlacementLog();
     placementLog.setPlacementId(existingPlacementId);
     placementLog.setLifecycleState(APPROVED);
     placementLog.setDateFrom(dateFiveMonthsAgo);
     placementLog.setDateTo(dateFiveMonthsAgo);
 
-    when(postRepositoryMock.findPostByPlacementHistoryId(longArgumentCaptor.capture()))
-        .thenReturn(Optional.of(foundPostMock));
-    when(placementLogServiceImplMock.getLatestLogOfCurrentApprovedPlacement(existingPlacementId))
-        .thenReturn(Optional.of(placementLog));
+    boolean eligibleForCurrentTraineeWteChangeNotification = testObj
+        .isEligibleForCurrentTraineeWteChangeNotification(currentPlacement, updatedPlacementDetails,
+            placementLog);
 
-    boolean result = testObj
-        .isEligibleForEsrNotification(updatedPlacementDetails, currentPlacement);
-
-    Assert.assertTrue(result);
-
-    Long capturedPlacementId = longArgumentCaptor.getValue();
-    Assert.assertEquals(existingPlacementId, capturedPlacementId);
+    Assert.assertTrue(eligibleForCurrentTraineeWteChangeNotification);
   }
 }
