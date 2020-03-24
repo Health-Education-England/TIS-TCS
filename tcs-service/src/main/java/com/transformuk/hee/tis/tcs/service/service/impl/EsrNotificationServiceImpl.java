@@ -243,10 +243,9 @@ public class EsrNotificationServiceImpl implements EsrNotificationService {
   public void loadChangeOfWholeTimeEquivalentNotification(PlacementDetailsDTO changedPlacement,
       String nationalPostNumber, boolean currentPlacementEdit) {
 
-    LocalDate asOfDate = LocalDate.now(); // find placements as of today.
-    List<EsrNotification> allEsrNotifications = new ArrayList<>();
-
     if (currentPlacementEdit) {
+      LocalDate asOfDate = LocalDate.now(); // find placements as of today.
+      List<EsrNotification> allEsrNotifications = new ArrayList<>();
       handleCurrentPlacementEdit(changedPlacement, nationalPostNumber, asOfDate,
           allEsrNotifications, new HashMap<>());
       LOG.info("Saving ESR notification for Edit in Whole time equivalent for Placement : {}",
@@ -356,10 +355,13 @@ public class EsrNotificationServiceImpl implements EsrNotificationService {
     }
     // The currentPlacement entity is getting refreshed only when wte changes of current trainee as I don't want to change the existing functionality.
     if (!isWteSameWithCurrentAndUpdatedPlacement) {
+      assert entityManager != null;
       Session session = (Session) entityManager.getDelegate();
-      session.evict(currentPlacement);
-      currentPlacement = placementRepository.findById(changedPlacement.getId())
-          .orElse(null);
+      if (session != null) {
+        session.evict(currentPlacement);
+        currentPlacement = placementRepository.findById(changedPlacement.getId())
+            .orElse(null);
+      }
     }
 
     if (CollectionUtils.isEmpty(matchedFuturePlacements)) {

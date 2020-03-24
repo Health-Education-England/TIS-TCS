@@ -220,19 +220,17 @@ public class PlacementServiceImpl implements PlacementService {
     // check if latest approved log exists
     Optional<PlacementLog> optionalPlacementLog =
         placementLogService.getLatestLogOfCurrentApprovedPlacement(updatedPlacementDetails.getId());
-    PlacementLog placementLog;
     if (!optionalPlacementLog.isPresent()) {
       return false;
     }
-    placementLog = optionalPlacementLog.get();
+    PlacementLog placementLog = optionalPlacementLog.get();
 
     if (isEligibleForCurrentTraineeWteChangeNotification(existingPlacement, updatedPlacementDetails,
         placementLog)) {
-      Optional<Post> optionalExistingPlacementPost = postRepository
-          .findPostByPlacementHistoryId(existingPlacement.getId());
 
-      log.debug("Change in Whole Time Equivalent. Marking for notification : npn {} ",
-          optionalExistingPlacementPost.<Object>map(Post::getNationalPostNumber).orElse(null));
+      String npn = postRepository.findPostByPlacementHistoryId(existingPlacement.getId())
+          .map(Post::getNationalPostNumber).orElse(null);
+      log.debug("Change in Whole Time Equivalent. Marking for notification : npn {} ", npn);
       return true;
     }
     return false;
@@ -298,8 +296,9 @@ public class PlacementServiceImpl implements PlacementService {
       } else if (eligibleForEsrNewPlacementNotificationWhenUpdateWte) {
         log.info("Handling ESR Notification for whole time equivalent edit: placement id {}",
             placementDetailsDTO.getId());
+        LocalDate tomorrow = LocalDate.now().plusDays(1);
         boolean currentPlacementEdit = placementBeforeUpdate.getDateFrom()
-            .isBefore(LocalDate.now().plusDays(1));
+            .isBefore(tomorrow);
         handleChangeOfWholeTimeEquivalentEsrNotification(placementDetailsDTO, placementBeforeUpdate,
             currentPlacementEdit);
       }
@@ -392,11 +391,11 @@ public class PlacementServiceImpl implements PlacementService {
 
     if (placementBeforeUpdate != null && updatedPlacementDetails != null) {
       // create NOT1 type record. Current and next trainee details for the post number.
-      log.debug("Change in whole time equivalent. Marking for notification : {} ",
-          placementBeforeUpdate.getPost().getNationalPostNumber());
+      String npn = placementBeforeUpdate.getPost().getNationalPostNumber();
+      log.debug("Change in whole time equivalent. Marking for notification : {} ", npn);
       try {
         esrNotificationService.loadChangeOfWholeTimeEquivalentNotification(updatedPlacementDetails,
-            placementBeforeUpdate.getPost().getNationalPostNumber(), currentPlacementEdit);
+            npn, currentPlacementEdit);
       } catch (final Exception e) {
         log.error("Error loading Change of Placement Dates Notification : ", e);
       }
