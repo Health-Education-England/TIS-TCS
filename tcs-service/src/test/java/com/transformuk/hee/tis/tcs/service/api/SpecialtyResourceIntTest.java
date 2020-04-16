@@ -14,18 +14,22 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 import com.google.common.collect.Lists;
 import com.transformuk.hee.tis.tcs.api.dto.SpecialtyDTO;
 import com.transformuk.hee.tis.tcs.api.dto.SpecialtyGroupDTO;
+import com.transformuk.hee.tis.tcs.api.enumeration.PostSpecialtyType;
 import com.transformuk.hee.tis.tcs.api.enumeration.SpecialtyType;
 import com.transformuk.hee.tis.tcs.api.enumeration.Status;
 import com.transformuk.hee.tis.tcs.service.Application;
 import com.transformuk.hee.tis.tcs.service.api.validation.SpecialtyValidator;
 import com.transformuk.hee.tis.tcs.service.exception.ExceptionTranslator;
+import com.transformuk.hee.tis.tcs.service.model.PostSpecialty;
 import com.transformuk.hee.tis.tcs.service.model.Specialty;
 import com.transformuk.hee.tis.tcs.service.model.SpecialtyGroup;
+import com.transformuk.hee.tis.tcs.service.repository.PostSpecialtyRepository;
 import com.transformuk.hee.tis.tcs.service.repository.SpecialtyGroupRepository;
 import com.transformuk.hee.tis.tcs.service.repository.SpecialtyRepository;
 import com.transformuk.hee.tis.tcs.service.service.SpecialtyService;
 import com.transformuk.hee.tis.tcs.service.service.mapper.SpecialtyMapper;
 import java.util.List;
+import java.util.Optional;
 import org.apache.commons.codec.net.URLCodec;
 import org.junit.Before;
 import org.junit.Test;
@@ -71,6 +75,9 @@ public class SpecialtyResourceIntTest {
   private SpecialtyGroupRepository specialtyGroupRepository;
 
   @Autowired
+  private PostSpecialtyRepository postSpecialtyRepository;
+
+  @Autowired
   private SpecialtyMapper specialtyMapper;
 
   @Autowired
@@ -111,6 +118,13 @@ public class SpecialtyResourceIntTest {
   public static SpecialtyGroup createSpecialtyGroupEntity() {
     return new SpecialtyGroup()
         .intrepidId("123333");
+  }
+
+  public static PostSpecialty createPostSpecialtyEntity(Specialty specialty) {
+    PostSpecialty postSpecialty = new PostSpecialty();
+    postSpecialty.setPostSpecialtyType(PostSpecialtyType.PRIMARY);
+    postSpecialty.setSpecialty(specialty);
+    return postSpecialty;
   }
 
   @Before
@@ -451,11 +465,19 @@ public class SpecialtyResourceIntTest {
     SpecialtyGroup specialtyGroupEntity = createSpecialtyGroupEntity();
     specialtyGroupRepository.saveAndFlush(specialtyGroupEntity);
 
-    specialtyRepository.saveAndFlush(specialty);
+    Specialty specialtySaved = specialtyRepository.saveAndFlush(specialty);
+
+    PostSpecialty postSpecialty = createPostSpecialtyEntity(specialtySaved);
+    PostSpecialty postSpecialtySaved = postSpecialtyRepository.saveAndFlush(postSpecialty);
+
+    specialtySaved.getPosts().add(postSpecialty);
+    specialtyRepository.saveAndFlush(specialtySaved);
+
     int databaseSizeBeforeUpdate = specialtyRepository.findAll().size();
 
     // Update the specialty
-    Specialty updatedSpecialty = specialtyRepository.findById(specialty.getId()).orElse(null);
+    Specialty updatedSpecialty = new Specialty();
+    updatedSpecialty.setId(specialtySaved.getId());
     updatedSpecialty
         .status(UPDATED_STATUS)
         .college(UPDATED_COLLEGE)
@@ -478,6 +500,14 @@ public class SpecialtyResourceIntTest {
     assertThat(testSpecialty.getCollege()).isEqualTo(UPDATED_COLLEGE);
     assertThat(testSpecialty.getSpecialtyCode()).isEqualTo(UPDATED_NHS_SPECIALTY_CODE);
     assertThat(testSpecialty.getSpecialtyTypes()).isEqualTo(newHashSet(UPDATED_SPECIALTY_TYPE));
+
+    // validate if the PostSpecialty still exists and if it's updated
+    Optional<PostSpecialty> optionalPostSpecialty =
+        postSpecialtyRepository.findById(postSpecialtySaved.getId());
+    assertThat(optionalPostSpecialty.isPresent()).isTrue();
+    PostSpecialty postSpecialtyValidate = optionalPostSpecialty.get();
+    assertThat(postSpecialtyValidate.getSpecialty().getId()).isEqualTo(specialty.getId());
+    assertThat(postSpecialtyValidate.getSpecialty().getName()).isEqualTo(UPDATED_NAME);
   }
 
   @Test
