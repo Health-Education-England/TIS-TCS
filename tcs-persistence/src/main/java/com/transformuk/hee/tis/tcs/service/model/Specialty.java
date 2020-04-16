@@ -63,7 +63,8 @@ public class Specialty implements Serializable {
   @OneToMany(mappedBy = "specialty", fetch = FetchType.LAZY)
   private List<Curriculum> curricula;
 
-  @OneToMany(mappedBy = "specialty", cascade = CascadeType.ALL, orphanRemoval = true)
+  @OneToMany(mappedBy = "specialty", cascade = {CascadeType.REMOVE,
+      CascadeType.REFRESH}, orphanRemoval = true)
   private Set<PostSpecialty> posts = new HashSet<>();
 
   @OneToMany(mappedBy = "specialty", fetch = FetchType.LAZY)
