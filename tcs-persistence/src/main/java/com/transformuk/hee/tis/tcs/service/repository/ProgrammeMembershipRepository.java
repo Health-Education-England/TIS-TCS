@@ -13,7 +13,7 @@ import org.springframework.data.repository.query.Param;
 public interface ProgrammeMembershipRepository extends JpaRepository<ProgrammeMembership, Long> {
 
   @Query(value = "SELECT pm "
-      + "FROM ProgrammeMembership pm " 
+      + "FROM ProgrammeMembership pm "
       + "WHERE personId = :traineeId "
       + "AND pm.programme.id = :programmeId")
   List<ProgrammeMembership> findByTraineeIdAndProgrammeId(@Param("traineeId") Long traineeId,
@@ -23,4 +23,7 @@ public interface ProgrammeMembershipRepository extends JpaRepository<ProgrammeMe
       + "FROM ProgrammeMembership pm "
       + "WHERE personId = :traineeId")
   List<ProgrammeMembership> findByTraineeId(@Param("traineeId") Long traineeId);
+
+  //find latest membership
+  //SELECT * FROM ProgrammeMembership pm WHERE personId = 2459 order by programmeEndDate DESC limit 1;
 }

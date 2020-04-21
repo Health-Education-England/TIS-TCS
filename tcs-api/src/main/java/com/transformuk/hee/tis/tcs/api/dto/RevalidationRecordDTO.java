@@ -7,10 +7,13 @@ import java.util.List;
 
 public class RevalidationRecordDTO {
   private String gmcId;
+  //no req
   private String traineeName;
   private LocalDate cctDate;
   private String programmeMembershipType;
+  //no req
   private List<ProgrammeMembershipDTO> programmeMemberships = new ArrayList<>();
+  //programme name required
   String currentGrade;
 
   public RevalidationRecordDTO gmcId(){

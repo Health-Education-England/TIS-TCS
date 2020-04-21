@@ -49,37 +49,40 @@ public class RevalidationServiceImpl implements RevalidationService {
     this.programmeMembershipMapper = programmeMembershipMapper;
     this.referenceService = referenceService;
   }
+
   @Override
-  public List<RevalidationRecordDTO> findAllRevalidationsByGmcIds(final List<String> gmcIds){
+  public List<RevalidationRecordDTO> findAllRevalidationsByGmcIds(final List<String> gmcIds) {
     log.info("INSIDE findAllRevalidationsByGmcIds: {}", gmcIds);
     List<GmcDetails> gmcDetails = gmcDetailsRepository.findByGmcNumberIn(gmcIds);
 
-    List<Long> tisPersonIds = gmcDetails.stream().map(GmcDetails::getId).collect(Collectors.toList());
+    //List<Long> tisPersonIds = gmcDetails.stream().map(GmcDetails::getId).collect(Collectors.toList());
 
     List<RevalidationRecordDTO> revalidationRecordDTOList = new ArrayList<>();
-    for(Long personId : tisPersonIds){
-      RevalidationRecordDTO revalidationRecordDTO = new RevalidationRecordDTO();
-      gmcDetails.forEach(gmcDetails1 -> {
-        if(gmcDetails1.getId()==personId){
-          revalidationRecordDTO.setGmcId(gmcDetails1.getGmcNumber());
-        }
-      });
+    //for(Long personId : tisPersonIds) {
+    RevalidationRecordDTO revalidationRecordDTO = new RevalidationRecordDTO();
+    gmcDetails.forEach(gmcDetails1 -> {
+      final long personId = gmcDetails1.getId();
+      revalidationRecordDTO.setGmcId(gmcDetails1.getGmcNumber());
 
-      ContactDetails contactDetails = contactDetailsRepository.findById(personId).orElse(null);
-      log.info("ID : {}", personId);
-      revalidationRecordDTO.setTraineeName(contactDetails.getForenames()+" "+contactDetails.getSurname());
+
+//      ContactDetails contactDetails = contactDetailsRepository.findById(personId).orElse(null);
+//      log.info("ID : {}", personId);
+//      revalidationRecordDTO.setTraineeName(contactDetails.getForenames() + " " + contactDetails.getSurname());
 
       //Programme Memberships
-      List<ProgrammeMembership> programmeMembershipList= programmeMembershipRepository.findByTraineeId(personId);
+      //get single object
+      List<ProgrammeMembership> programmeMembershipList = programmeMembershipRepository.findByTraineeId(personId);
       List<ProgrammeMembershipDTO> programmeMembershipDtos = programmeMembershipMapper
           .programmeMembershipsToProgrammeMembershipDTOs(programmeMembershipList);
-      programmeMembershipDtos.forEach(pm ->{
+      //add programme name
+      programmeMembershipDtos.forEach(pm -> {
         revalidationRecordDTO.setCctDate(pm.getProgrammeEndDate());
         revalidationRecordDTO.setProgrammeMembershipType(pm.getProgrammeMembershipType().toString());
       });
-      revalidationRecordDTO.setProgrammeMemberships(programmeMembershipDtos);
+      //revalidationRecordDTO.setProgrammeMemberships(programmeMembershipDtos);
 
       //Placements
+      //find latest placement (check findCurrentPlacementForTrainee)
       List<Placement> placements = placementRepository.findPlacementsByTraineeId(personId);
 
       placements.forEach(placement -> {
@@ -88,13 +91,13 @@ public class RevalidationServiceImpl implements RevalidationService {
           gradeIds.add(placement.getGradeId());
         }
         List<GradeDTO> grades = referenceService.findGradesIdIn(gradeIds);
-         grades.forEach(gradeDTO -> {
-           revalidationRecordDTO.setCurrentGrade(gradeDTO.getName());
+        grades.forEach(gradeDTO -> {
+          revalidationRecordDTO.setCurrentGrade(gradeDTO.getName());
         });
 
       });
       revalidationRecordDTOList.add(revalidationRecordDTO);
-    }
+    });
     return revalidationRecordDTOList;
   }
 }
