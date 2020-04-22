@@ -193,7 +193,8 @@ public class ProgrammeMembershipResourceIntTest {
    * Create Rotation entity
    */
   public static Rotation createRotationEntity() {
-    return new Rotation().name(DEFAULT_ROTATION).status(Status.CURRENT);
+    return new Rotation().name(DEFAULT_ROTATION)
+        .status(Status.CURRENT);
   }
 
 

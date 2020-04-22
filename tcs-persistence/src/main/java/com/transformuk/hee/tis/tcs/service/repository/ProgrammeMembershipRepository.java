@@ -24,6 +24,8 @@ public interface ProgrammeMembershipRepository extends JpaRepository<ProgrammeMe
       + "WHERE personId = :traineeId")
   List<ProgrammeMembership> findByTraineeId(@Param("traineeId") Long traineeId);
 
-  //find latest membership
-  //SELECT * FROM ProgrammeMembership pm WHERE personId = 2459 order by programmeEndDate DESC limit 1;
+  //Find latest programme membership of a trainee
+  @Query(value = "SELECT pm.* FROM ProgrammeMembership pm " +
+      "WHERE pm.personId = :traineeId ORDER BY pm.programmeEndDate DESC LIMIT 1", nativeQuery=true)
+  ProgrammeMembership findLatestProgrammeMembershipByTraineeId(@Param("traineeId") Long traineeId);
 }

@@ -17,9 +17,6 @@ public interface PlacementRepository extends JpaRepository<Placement, Long> {
 
   Placement findByIntrepidId(String intrepidId);
 
-  @Query(value = "SELECT pl.* FROM Placement pl where pl.traineeId=:traineeId order by pl.dateFrom desc", nativeQuery = true)
-  List<Placement> findPlacementsByTraineeId(Long traineeId);
-
   Set<Placement> findByIntrepidIdIn(Set<String> intrepidId);
 
   @Query(value =
