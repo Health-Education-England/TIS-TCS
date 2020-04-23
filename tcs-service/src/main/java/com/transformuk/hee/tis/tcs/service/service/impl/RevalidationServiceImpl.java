@@ -43,11 +43,10 @@ public class RevalidationServiceImpl implements RevalidationService {
   }
 
   @Override
-  public List<RevalidationRecordDTO> findAllRevalidationsByGmcIds(final List<String> gmcIds) {
+  public Map<String, RevalidationRecordDTO> findAllRevalidationsByGmcIds(final List<String> gmcIds) {
     log.info("GMC Nos received from Revalidation application: {}", gmcIds); //Need to change this info to debug
+    Map<String, RevalidationRecordDTO> revalidationRecordDTOMap = new HashMap<>();
     List<GmcDetails> gmcDetails = gmcDetailsRepository.findByGmcNumberIn(gmcIds);
-    List<RevalidationRecordDTO> revalidationRecordDTOList = new ArrayList<>();
-
     gmcDetails.forEach(gmcDetail -> {
       RevalidationRecordDTO revalidationRecordDTO = new RevalidationRecordDTO();
       final long personId = gmcDetail.getId();
@@ -73,8 +72,8 @@ public class RevalidationServiceImpl implements RevalidationService {
           revalidationRecordDTO.setCurrentGrade(gradeDTO.getName());
         });
       }
-      revalidationRecordDTOList.add(revalidationRecordDTO);
+      revalidationRecordDTOMap.put(gmcDetail.getGmcNumber(), revalidationRecordDTO);
     });
-    return revalidationRecordDTOList;
+    return revalidationRecordDTOMap;
   }
 }

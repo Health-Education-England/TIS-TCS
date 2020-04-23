@@ -1,131 +1,93 @@
 package com.transformuk.hee.tis.tcs.service.api;
 
+import com.google.common.reflect.TypeToken;
+import com.google.gson.Gson;
 import com.transformuk.hee.tis.tcs.api.dto.RevalidationRecordDTO;
-import com.transformuk.hee.tis.tcs.service.Application;
-import com.transformuk.hee.tis.tcs.service.exception.ExceptionTranslator;
-import com.transformuk.hee.tis.tcs.service.model.GmcDetails;
-import com.transformuk.hee.tis.tcs.service.model.Placement;
-import com.transformuk.hee.tis.tcs.service.model.ProgrammeMembership;
-import com.transformuk.hee.tis.tcs.service.repository.GmcDetailsRepository;
-import com.transformuk.hee.tis.tcs.service.repository.PlacementRepository;
-import com.transformuk.hee.tis.tcs.service.repository.ProgrammeMembershipRepository;
-import com.transformuk.hee.tis.tcs.service.service.RevalidationService;
+import com.transformuk.hee.tis.tcs.service.service.impl.RevalidationServiceImpl;
+import org.junit.Assert;
 import org.junit.Before;
-import org.junit.Ignore;
 import org.junit.Test;
 import org.junit.runner.RunWith;
-import org.mockito.MockitoAnnotations;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.boot.test.mock.mockito.MockBean;
-import org.springframework.data.web.PageableHandlerMethodArgumentResolver;
-import org.springframework.http.converter.json.MappingJackson2HttpMessageConverter;
+import org.springframework.http.MediaType;
+import org.springframework.mock.web.MockHttpServletResponse;
 import org.springframework.test.context.junit4.SpringRunner;
 import org.springframework.test.web.servlet.MockMvc;
+import org.springframework.test.web.servlet.MvcResult;
 import org.springframework.test.web.servlet.setup.MockMvcBuilders;
-import org.springframework.transaction.annotation.Transactional;
-
-import javax.persistence.EntityManager;
-import java.util.ArrayList;
-import java.util.List;
-
+import static org.mockito.Mockito.when;
+import java.lang.reflect.Type;
+import java.time.LocalDate;
+import java.util.*;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
+import static org.springframework.test.web.servlet.result.MockMvcResultHandlers.print;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.*;
 
 @RunWith(SpringRunner.class)
-@SpringBootTest(classes = Application.class)
 public class RevalidationResourceIntTest {
-  private static final Long GMC_ID = 100L;
-  private static final String GMC_NUMBER = "1234567";
-  private static final String GMC_ID0 = "400";
-  private static final String GMC_ID1 = "100";
-  private static final String GMC_ID2 = "200";
-  private static final String GMC_ID3 = "300";
-
-  @Autowired
-  private GmcDetailsRepository gmcDetailsRepository;
-  @Autowired
-  private ProgrammeMembershipRepository programmeMembershipRepository;
-  @Autowired
-  private PlacementRepository placementRepository;
-  @Autowired
-  private EntityManager entityManager;
-  @Autowired
-  private MappingJackson2HttpMessageConverter jacksonMessageConverter;
-  @Autowired
-  private PageableHandlerMethodArgumentResolver pageableArgumentResolver;
-  @Autowired
-  private ExceptionTranslator exceptionTranslator;
-  @MockBean
-  RevalidationService revalidationService;
+  private static final String GMC_ID = "1234567";
+  private static final LocalDate CCT_DATE = LocalDate.of(2021,02,28);
+  private static final String PROGRAMME_MEMBERSHIP_TYPE = "Substantive";
+  private static final String PROGRAMME_NAME = "Clinical Radiology";
+  private static final String CURRENT_GRADE = "Foundation Year 2";
 
   private MockMvc restRevalidationMock;
   private RevalidationRecordDTO revalidationRecordDTO;
-  private GmcDetails gmcDetails;
-  private ProgrammeMembership programmeMembership;
-  private Placement placement;
 
-  public static RevalidationRecordDTO createRevalidationRecordDTO() {
-    RevalidationRecordDTO revalidationRecordDTO = new RevalidationRecordDTO();
-    revalidationRecordDTO.setGmcId(GMC_ID0);
+  @MockBean
+  private RevalidationServiceImpl revalidationServiceImplMock;
+  private RevalidationResource revalidationResource;
+
+  private RevalidationRecordDTO createRevalidationRecordDTO() {
+    revalidationRecordDTO = new RevalidationRecordDTO();
+    revalidationRecordDTO.setGmcId(GMC_ID);
+    //revalidationRecordDTO.setCctDate(CCT_DATE);
+    revalidationRecordDTO.setProgrammeMembershipType(PROGRAMME_MEMBERSHIP_TYPE);
+    revalidationRecordDTO.setProgrammeName(PROGRAMME_NAME);
+    revalidationRecordDTO.setCurrentGrade(CURRENT_GRADE);
     return revalidationRecordDTO;
-  }
-
-  public static GmcDetails createGmcDetailsEntity() {
-    return new GmcDetails()
-        .id(GMC_ID)
-        .gmcNumber(GMC_NUMBER);
   }
 
   @Before
   public void setup() {
-    MockitoAnnotations.initMocks(this);
-    RevalidationResource revalidationResource = new RevalidationResource(
-        revalidationService);
-    this.restRevalidationMock = MockMvcBuilders.standaloneSetup(revalidationResource)
-        .setCustomArgumentResolvers(pageableArgumentResolver)
-        .setControllerAdvice(exceptionTranslator)
-        .setMessageConverters(jacksonMessageConverter).build();
-    //revalidationRecordDTO = createRevalidationRecordDTO();
-
+    revalidationResource = new RevalidationResource(revalidationServiceImplMock);
+    restRevalidationMock = MockMvcBuilders.standaloneSetup(revalidationResource).build();
+    revalidationRecordDTO = createRevalidationRecordDTO();
   }
 
-  @Before
-  public void initTest() {
-    gmcDetails = createGmcDetailsEntity();
-  }
-
-  //@Ignore
   @Test
-  @Transactional
-  public void shouldGetRevalidationRecords() throws Exception {
-    gmcDetailsRepository.saveAndFlush(gmcDetails);
-    /*RevalidationRecordDTO revalidationRecordDTOReturned1 = new RevalidationRecordDTO();
-    revalidationRecordDTOReturned1.setGmcId(GMC_ID1);
-    RevalidationRecordDTO revalidationRecordDTOReturned2 = new RevalidationRecordDTO();
-    revalidationRecordDTOReturned2.setGmcId(GMC_ID2);
-    RevalidationRecordDTO revalidationRecordDTOReturned3 = new RevalidationRecordDTO();
-    revalidationRecordDTOReturned3.setGmcId(GMC_ID3);
-
-    List<RevalidationRecordDTO> revalidationRecordDTOList = new ArrayList<>();
-    revalidationRecordDTOList.add(revalidationRecordDTOReturned1);
-    revalidationRecordDTOList.add(revalidationRecordDTOReturned2);
-    revalidationRecordDTOList.add(revalidationRecordDTOReturned3);
-*/
-    //when(revalidationService.findAllRevalidationsByGmcIds(gmcIds)).thenReturn(revalidationRecordDTOList);
-
+  public void findRevalidationRecords() throws Exception {
     List<String> gmcIds = new ArrayList<>();
-    gmcIds.add(GMC_ID1);
-    gmcIds.add(GMC_ID2);
-    gmcIds.add(GMC_ID3);
-
-    restRevalidationMock
-        .perform(get("/api/revalidation/{gmcIds}", gmcIds))
-           // .params(gmcIds)
-            .andExpect(status().isOk());
-        /*.contentType(TestUtil.APPLICATION_JSON_UTF8)
-        .content(TestUtil.convertObjectToJsonBytes(revalidationRecordDTO)))
+    gmcIds.add(GMC_ID);
+    //gmcIds.add(GMC_ID2);
+    //gmcIds.add(GMC_ID3);
+    Map<String, RevalidationRecordDTO> revalidationRecordDTOMap = new HashMap<>();
+    revalidationRecordDTOMap.put(GMC_ID, revalidationRecordDTO);
+    when(revalidationServiceImplMock
+        .findAllRevalidationsByGmcIds(gmcIds))
+        .thenReturn(revalidationRecordDTOMap);
+    //MvcResult result = (MvcResult) restRevalidationMock.perform(get("/api/revalidation/1234567,200"))
+    MvcResult result = (MvcResult) restRevalidationMock.perform(get("/api/revalidation/{gmcIds}", "1234567", "200"))
         .andExpect(status().isOk())
-        .andExpect(jsonPath("$.[0].gmcId").value(GMC_ID1));*/
-  }
+        .andExpect(content().contentType(MediaType.APPLICATION_JSON_UTF8))
+        .andDo(print())
+        .andReturn();
+    MockHttpServletResponse response = result.getResponse();
+
+    String content = response.getContentAsString();
+    Gson gson = new Gson();
+    Type empMapType = new TypeToken<Map<String, RevalidationRecordDTO>>() {}.getType();
+    Map<String, RevalidationRecordDTO> map = gson.fromJson(content, empMapType);
+
+    map.entrySet().stream()
+        .forEach(e -> {
+          Assert.assertEquals("1234567", e.getKey());
+          Assert.assertEquals("1234567", e.getValue().getGmcId());
+          //Assert.assertEquals("2021,2,28", e.getValue().getCctDate());
+          Assert.assertEquals("Substantive", e.getValue().getProgrammeMembershipType());
+          Assert.assertEquals("Clinical Radiology", e.getValue().getProgrammeName());
+          Assert.assertEquals("Foundation Year 2", e.getValue().getCurrentGrade());
+        });
+    }
 }
+
