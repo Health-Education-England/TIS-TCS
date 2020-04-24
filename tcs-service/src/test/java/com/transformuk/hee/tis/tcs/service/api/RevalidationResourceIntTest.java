@@ -1,7 +1,8 @@
 package com.transformuk.hee.tis.tcs.service.api;
 
-import com.google.common.reflect.TypeToken;
-import com.google.gson.Gson;
+import com.fasterxml.jackson.core.type.TypeReference;
+import com.fasterxml.jackson.databind.ObjectMapper;
+import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule;
 import com.transformuk.hee.tis.tcs.api.dto.RevalidationRecordDTO;
 import com.transformuk.hee.tis.tcs.service.service.impl.RevalidationServiceImpl;
 import org.junit.Assert;
@@ -15,79 +16,92 @@ import org.springframework.test.context.junit4.SpringRunner;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.MvcResult;
 import org.springframework.test.web.servlet.setup.MockMvcBuilders;
-import static org.mockito.Mockito.when;
-import java.lang.reflect.Type;
+
 import java.time.LocalDate;
-import java.util.*;
+import java.util.Arrays;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+
+import static com.fasterxml.jackson.databind.SerializationFeature.WRITE_DATES_AS_TIMESTAMPS;
+import static java.util.stream.Collectors.joining;
+import static org.mockito.Mockito.when;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
 import static org.springframework.test.web.servlet.result.MockMvcResultHandlers.print;
-import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.*;
+import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.content;
+import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
 @RunWith(SpringRunner.class)
 public class RevalidationResourceIntTest {
   private static final String GMC_ID = "1234567";
-  private static final LocalDate CCT_DATE = LocalDate.of(2021,02,28);
+  private static final String GMC_ID2 = "1234568";
+  private static final String GMC_ID3 = "1234569";
+  private static final LocalDate CCT_DATE = LocalDate.now();
   private static final String PROGRAMME_MEMBERSHIP_TYPE = "Substantive";
   private static final String PROGRAMME_NAME = "Clinical Radiology";
   private static final String CURRENT_GRADE = "Foundation Year 2";
 
   private MockMvc restRevalidationMock;
-  private RevalidationRecordDTO revalidationRecordDTO;
 
   @MockBean
   private RevalidationServiceImpl revalidationServiceImplMock;
   private RevalidationResource revalidationResource;
+  private ObjectMapper mapper;
 
-  private RevalidationRecordDTO createRevalidationRecordDTO() {
-    revalidationRecordDTO = new RevalidationRecordDTO();
-    revalidationRecordDTO.setGmcId(GMC_ID);
-    //revalidationRecordDTO.setCctDate(CCT_DATE);
-    revalidationRecordDTO.setProgrammeMembershipType(PROGRAMME_MEMBERSHIP_TYPE);
-    revalidationRecordDTO.setProgrammeName(PROGRAMME_NAME);
-    revalidationRecordDTO.setCurrentGrade(CURRENT_GRADE);
-    return revalidationRecordDTO;
+  private RevalidationRecordDTO createRevalidationRecordDTO(final String gmcId) {
+    final RevalidationRecordDTO recordDTO = new RevalidationRecordDTO();
+    recordDTO.setGmcId(gmcId);
+    recordDTO.setCctDate(CCT_DATE);
+    recordDTO.setProgrammeMembershipType(PROGRAMME_MEMBERSHIP_TYPE);
+    recordDTO.setProgrammeName(PROGRAMME_NAME);
+    recordDTO.setCurrentGrade(CURRENT_GRADE);
+    return recordDTO;
   }
 
   @Before
   public void setup() {
     revalidationResource = new RevalidationResource(revalidationServiceImplMock);
     restRevalidationMock = MockMvcBuilders.standaloneSetup(revalidationResource).build();
-    revalidationRecordDTO = createRevalidationRecordDTO();
+    mapper = new ObjectMapper();
+    mapper.registerModule(new JavaTimeModule());
+    mapper.configure(WRITE_DATES_AS_TIMESTAMPS, false);
   }
 
   @Test
   public void findRevalidationRecords() throws Exception {
-    List<String> gmcIds = new ArrayList<>();
-    gmcIds.add(GMC_ID);
-    //gmcIds.add(GMC_ID2);
-    //gmcIds.add(GMC_ID3);
-    Map<String, RevalidationRecordDTO> revalidationRecordDTOMap = new HashMap<>();
-    revalidationRecordDTOMap.put(GMC_ID, revalidationRecordDTO);
+    final List<String> gmcIds = Arrays.asList(GMC_ID,GMC_ID2,GMC_ID3);
+    final Map<String, RevalidationRecordDTO> revalidationRecordDTOMap = new HashMap<>();
+
+    revalidationRecordDTOMap.put(GMC_ID, createRevalidationRecordDTO(GMC_ID));
+    revalidationRecordDTOMap.put(GMC_ID2, createRevalidationRecordDTO(GMC_ID2));
+    revalidationRecordDTOMap.put(GMC_ID3, createRevalidationRecordDTO(GMC_ID3));
+
     when(revalidationServiceImplMock
         .findAllRevalidationsByGmcIds(gmcIds))
         .thenReturn(revalidationRecordDTOMap);
-    //MvcResult result = (MvcResult) restRevalidationMock.perform(get("/api/revalidation/1234567,200"))
-    MvcResult result = (MvcResult) restRevalidationMock.perform(get("/api/revalidation/{gmcIds}", "1234567", "200"))
+    final String gmcId = gmcIds.stream().collect(joining(","));
+    MvcResult result = restRevalidationMock.perform(get("/api/revalidation/{gmcIds}", gmcId))
         .andExpect(status().isOk())
         .andExpect(content().contentType(MediaType.APPLICATION_JSON_UTF8))
         .andDo(print())
         .andReturn();
     MockHttpServletResponse response = result.getResponse();
 
-    String content = response.getContentAsString();
-    Gson gson = new Gson();
-    Type empMapType = new TypeToken<Map<String, RevalidationRecordDTO>>() {}.getType();
-    Map<String, RevalidationRecordDTO> map = gson.fromJson(content, empMapType);
+    final String content = response.getContentAsString();
+    final TypeReference<HashMap<String, RevalidationRecordDTO>> typeRef
+        = new TypeReference<HashMap<String, RevalidationRecordDTO>>() {
+    };
+    final Map<String, RevalidationRecordDTO> map = mapper.readValue(content, typeRef);
 
-    map.entrySet().stream()
-        .forEach(e -> {
-          Assert.assertEquals("1234567", e.getKey());
-          Assert.assertEquals("1234567", e.getValue().getGmcId());
-          //Assert.assertEquals("2021,2,28", e.getValue().getCctDate());
-          Assert.assertEquals("Substantive", e.getValue().getProgrammeMembershipType());
-          Assert.assertEquals("Clinical Radiology", e.getValue().getProgrammeName());
-          Assert.assertEquals("Foundation Year 2", e.getValue().getCurrentGrade());
-        });
-    }
+    gmcIds.stream().forEach(id -> {
+      RevalidationRecordDTO revalidationRecordDTO = map.get(id);
+      Assert.assertEquals(id, revalidationRecordDTO.getGmcId());
+      Assert.assertEquals(CCT_DATE, revalidationRecordDTO.getCctDate());
+      Assert.assertEquals("Substantive", revalidationRecordDTO.getProgrammeMembershipType());
+      Assert.assertEquals("Clinical Radiology", revalidationRecordDTO.getProgrammeName());
+      Assert.assertEquals("Foundation Year 2", revalidationRecordDTO.getCurrentGrade());
+    });
+
+  }
 }
 
