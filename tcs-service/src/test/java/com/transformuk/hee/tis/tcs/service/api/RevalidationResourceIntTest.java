@@ -27,13 +27,12 @@ import static com.fasterxml.jackson.databind.SerializationFeature.WRITE_DATES_AS
 import static java.util.stream.Collectors.joining;
 import static org.mockito.Mockito.when;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
-import static org.springframework.test.web.servlet.result.MockMvcResultHandlers.print;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.content;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
 @RunWith(SpringRunner.class)
 public class RevalidationResourceIntTest {
-  private static final String GMC_ID = "1234567";
+  private static final String GMC_ID1 = "1234567";
   private static final String GMC_ID2 = "1234568";
   private static final String GMC_ID3 = "1234569";
   private static final LocalDate CCT_DATE = LocalDate.now();
@@ -68,29 +67,26 @@ public class RevalidationResourceIntTest {
   }
 
   @Test
-  public void findRevalidationRecords() throws Exception {
-    final List<String> gmcIds = Arrays.asList(GMC_ID,GMC_ID2,GMC_ID3);
+  public void findRevalidationRecordsAgainstListOfGmcIds() throws Exception {
+    final List<String> gmcIds = Arrays.asList(GMC_ID1,GMC_ID2,GMC_ID3);
     final Map<String, RevalidationRecordDTO> revalidationRecordDTOMap = new HashMap<>();
 
-    revalidationRecordDTOMap.put(GMC_ID, createRevalidationRecordDTO(GMC_ID));
+    revalidationRecordDTOMap.put(GMC_ID1, createRevalidationRecordDTO(GMC_ID1));
     revalidationRecordDTOMap.put(GMC_ID2, createRevalidationRecordDTO(GMC_ID2));
     revalidationRecordDTOMap.put(GMC_ID3, createRevalidationRecordDTO(GMC_ID3));
 
-    when(revalidationServiceImplMock
-        .findAllRevalidationsByGmcIds(gmcIds))
+    when(revalidationServiceImplMock.findAllRevalidationsByGmcIds(gmcIds))
         .thenReturn(revalidationRecordDTOMap);
     final String gmcId = gmcIds.stream().collect(joining(","));
     MvcResult result = restRevalidationMock.perform(get("/api/revalidation/{gmcIds}", gmcId))
         .andExpect(status().isOk())
         .andExpect(content().contentType(MediaType.APPLICATION_JSON_UTF8))
-        .andDo(print())
         .andReturn();
     MockHttpServletResponse response = result.getResponse();
 
     final String content = response.getContentAsString();
     final TypeReference<HashMap<String, RevalidationRecordDTO>> typeRef
-        = new TypeReference<HashMap<String, RevalidationRecordDTO>>() {
-    };
+        = new TypeReference<HashMap<String, RevalidationRecordDTO>>() {};
     final Map<String, RevalidationRecordDTO> map = mapper.readValue(content, typeRef);
 
     gmcIds.stream().forEach(id -> {
@@ -101,7 +97,6 @@ public class RevalidationResourceIntTest {
       Assert.assertEquals("Clinical Radiology", revalidationRecordDTO.getProgrammeName());
       Assert.assertEquals("Foundation Year 2", revalidationRecordDTO.getCurrentGrade());
     });
-
   }
 }
 

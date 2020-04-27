@@ -44,18 +44,19 @@ public class RevalidationServiceImpl implements RevalidationService {
 
   @Override
   public Map<String, RevalidationRecordDTO> findAllRevalidationsByGmcIds(final List<String> gmcIds) {
-    log.info("GMC Nos received from Revalidation application: {}", gmcIds); //Need to change this info to debug
+    log.debug("GMC Nos received from Revalidation application: {}", gmcIds);
     Map<String, RevalidationRecordDTO> revalidationRecordDTOMap = new HashMap<>();
     List<GmcDetails> gmcDetails = gmcDetailsRepository.findByGmcNumberIn(gmcIds);
     gmcDetails.forEach(gmcDetail -> {
       RevalidationRecordDTO revalidationRecordDTO = new RevalidationRecordDTO();
       final long personId = gmcDetail.getId();
-      log.info("ID : {}", personId);
+      log.debug("Person ID : {}", personId);
       revalidationRecordDTO.setGmcId(gmcDetail.getGmcNumber());
 
       //Programme Membership
       ProgrammeMembership programmeMembership = programmeMembershipRepository
           .findLatestProgrammeMembershipByTraineeId(personId);
+      log.debug("Programme Membership End Date : {}", programmeMembership.getProgrammeEndDate());
       revalidationRecordDTO.setCctDate(programmeMembership.getProgrammeEndDate());
       revalidationRecordDTO.setProgrammeMembershipType(programmeMembership
           .getProgrammeMembershipType().toString());
@@ -64,9 +65,10 @@ public class RevalidationServiceImpl implements RevalidationService {
       //Placement
       List<Placement> currentPlacementsForTrainee = placementRepository
           .findCurrentPlacementForTrainee(personId, LocalDate.now(), placementTypes);
+      log.debug("Placement ID : {}", currentPlacementsForTrainee.get(0).getId());
       if (CollectionUtils.isNotEmpty(currentPlacementsForTrainee) && currentPlacementsForTrainee.get(0).getGradeId() != null) {
         long gradeId = currentPlacementsForTrainee.get(0).getGradeId();
-        log.info("GRADE ID : {}", gradeId);
+        log.debug("GRADE ID : {}", gradeId);
         List<GradeDTO> grades = referenceService.findGradesIdIn(Collections.singleton(gradeId));
         grades.forEach(gradeDTO -> {
           revalidationRecordDTO.setCurrentGrade(gradeDTO.getName());
