@@ -1,12 +1,11 @@
 package com.transformuk.hee.tis.tcs.api.dto;
 
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
+import java.time.LocalDate;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
-
-import java.time.LocalDate;
 
 @Data
 @Builder
@@ -19,6 +18,6 @@ public class RevalidationRecordDTO {
   private LocalDate cctDate;
   private String programmeMembershipType;
   private String programmeName;
-  String currentGrade;
+  private String currentGrade;
 
 }

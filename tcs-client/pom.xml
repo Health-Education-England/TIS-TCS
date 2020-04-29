@@ -6,6 +6,7 @@
 
   <groupId>com.transformuk.hee.tis</groupId>
   <artifactId>tcs-client</artifactId>
+  <version>5.4.0</version>
   <dependencies>
     <dependency>
       <groupId>com.transformuk.hee</groupId>
@@ -80,8 +81,6 @@
     <project.reporting.outputEncoding>UTF-8</project.reporting.outputEncoding>
     <spring.framework.version>5.1.2.RELEASE</spring.framework.version>
   </properties>
-
-  <version>5.3.1</version>
 
   <build>
     <plugins>

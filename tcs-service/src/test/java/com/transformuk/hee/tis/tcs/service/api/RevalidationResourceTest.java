@@ -1,10 +1,22 @@
 package com.transformuk.hee.tis.tcs.service.api;
 
+import static com.fasterxml.jackson.databind.SerializationFeature.WRITE_DATES_AS_TIMESTAMPS;
+import static java.util.stream.Collectors.joining;
+import static org.mockito.Mockito.when;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
+import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.content;
+import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
+
 import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule;
 import com.transformuk.hee.tis.tcs.api.dto.RevalidationRecordDTO;
 import com.transformuk.hee.tis.tcs.service.service.impl.RevalidationServiceImpl;
+import java.time.LocalDate;
+import java.util.Arrays;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
 import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Test;
@@ -17,21 +29,9 @@ import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.MvcResult;
 import org.springframework.test.web.servlet.setup.MockMvcBuilders;
 
-import java.time.LocalDate;
-import java.util.Arrays;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
-
-import static com.fasterxml.jackson.databind.SerializationFeature.WRITE_DATES_AS_TIMESTAMPS;
-import static java.util.stream.Collectors.joining;
-import static org.mockito.Mockito.when;
-import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
-import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.content;
-import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
-
 @RunWith(SpringRunner.class)
-public class RevalidationResourceIntTest {
+public class RevalidationResourceTest {
+
   private static final String GMC_ID1 = "1234567";
   private static final String GMC_ID2 = "1234568";
   private static final String GMC_ID3 = "1234569";
@@ -68,7 +68,7 @@ public class RevalidationResourceIntTest {
 
   @Test
   public void findRevalidationRecordsAgainstListOfGmcIds() throws Exception {
-    final List<String> gmcIds = Arrays.asList(GMC_ID1,GMC_ID2,GMC_ID3);
+    final List<String> gmcIds = Arrays.asList(GMC_ID1, GMC_ID2, GMC_ID3);
     final Map<String, RevalidationRecordDTO> revalidationRecordDTOMap = new HashMap<>();
 
     revalidationRecordDTOMap.put(GMC_ID1, createRevalidationRecordDTO(GMC_ID1));
@@ -86,7 +86,8 @@ public class RevalidationResourceIntTest {
 
     final String content = response.getContentAsString();
     final TypeReference<HashMap<String, RevalidationRecordDTO>> typeRef
-        = new TypeReference<HashMap<String, RevalidationRecordDTO>>() {};
+        = new TypeReference<HashMap<String, RevalidationRecordDTO>>() {
+    };
     final Map<String, RevalidationRecordDTO> map = mapper.readValue(content, typeRef);
 
     gmcIds.stream().forEach(id -> {
