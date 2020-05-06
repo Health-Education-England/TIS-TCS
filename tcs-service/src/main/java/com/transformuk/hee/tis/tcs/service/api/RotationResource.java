@@ -23,6 +23,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
+import org.springframework.data.web.PageableDefault;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -57,7 +58,7 @@ public class RotationResource {
    *
    * @param rotationDTO the rotationDTO to create
    * @return the ResponseEntity with status 201 (Created) and with body the new rotationDTO, or with
-   * status 400 (Bad Request) if the rotation has already an ID
+   *     status 400 (Bad Request) if the rotation has already an ID
    * @throws URISyntaxException if the Location URI syntax is incorrect
    */
   @PostMapping("/rotations")
@@ -75,8 +76,8 @@ public class RotationResource {
    *
    * @param rotationDTO the rotationDTO to update
    * @return the ResponseEntity with status 200 (OK) and with body the updated rotationDTO, or with
-   * status 400 (Bad Request) if the rotationDTO is not valid, or with status 500 (Internal Server
-   * Error) if the rotationDTO couldn't be updated
+   *     status 400 (Bad Request) if the rotationDTO is not valid, or with status 500 (Internal
+   *     Server Error) if the rotationDTO couldn't be updated
    * @throws URISyntaxException if the Location URI syntax is incorrect
    */
   @PutMapping("/rotations")
@@ -102,7 +103,7 @@ public class RotationResource {
   public ResponseEntity<List<RotationDTO>> getRotations(
       @RequestParam(value = "searchQuery", required = false) String searchQuery,
       @RequestParam(value = "columnFilters", required = false) String columnFilterJson,
-      Pageable pageable) throws IOException {
+      @PageableDefault(Integer.MAX_VALUE) Pageable pageable) throws IOException {
     log.debug("REST request to get a page of Rotations");
     searchQuery = getConverter(searchQuery).fromJson().decodeUrl().escapeForSql().toString();
     List<Class> filterEnumList = Collections.singletonList(Status.class);
@@ -123,7 +124,7 @@ public class RotationResource {
    *
    * @param id the id of the rotationDTO to retrieve
    * @return the ResponseEntity with status 200 (OK) and with body the rotationDTO, or with status
-   * 404 (Not Found)
+   *     404 (Not Found)
    */
   @GetMapping("/rotations/{id}")
   public ResponseEntity<RotationDTO> getRotation(@PathVariable Long id) {
