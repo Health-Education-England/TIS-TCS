@@ -25,6 +25,8 @@ public class PlacementSummaryDTO {
   private String forenames;
   private String surname;
   private Long traineeId;
+  private String email;
+  private String gradeAbbreviation;
   private Long placementId;
   private String placementStatus;
   private String placementSpecialtyType;
@@ -32,7 +34,9 @@ public class PlacementSummaryDTO {
 
   public PlacementSummaryDTO(Date dateFrom, Date dateTo, Long siteId, String primarySpecialtyName,
       Long gradeId, String placementType, String status, String forenames, String surname,
-      Long traineeId, Long placementId, String placementSpecialtyType, BigDecimal placementWholeTimeEquivalent) {
+      Long traineeId, String email, String gradeAbbreviation, Long placementId,
+      String placementSpecialtyType,
+      BigDecimal placementWholeTimeEquivalent) {
     this.dateFrom = dateFrom;
     this.dateTo = dateTo;
     this.siteId = siteId;
@@ -43,6 +47,8 @@ public class PlacementSummaryDTO {
     this.forenames = forenames;
     this.surname = surname;
     this.traineeId = traineeId;
+    this.email = email;
+    this.gradeAbbreviation = gradeAbbreviation;
     this.placementId = placementId;
     this.placementSpecialtyType = placementSpecialtyType;
     this.placementWholeTimeEquivalent = placementWholeTimeEquivalent;
@@ -69,6 +75,8 @@ public class PlacementSummaryDTO {
         Objects.equals(forenames, that.forenames) &&
         Objects.equals(surname, that.surname) &&
         Objects.equals(traineeId, that.traineeId) &&
+        Objects.equals(email, that.email) &&
+        Objects.equals(gradeAbbreviation, that.gradeAbbreviation) &&
         Objects.equals(placementId, that.placementId) &&
         Objects.equals(placementStatus, that.placementStatus) &&
         Objects.equals(placementSpecialtyType, that.placementSpecialtyType) &&
@@ -80,7 +88,7 @@ public class PlacementSummaryDTO {
 
     return Objects
         .hash(dateFrom, dateTo, siteId, siteName, primarySpecialtyName, gradeId, gradeName,
-            placementType, status, forenames, surname, traineeId, placementId, placementStatus,
-            placementSpecialtyType, placementWholeTimeEquivalent);
+            placementType, status, forenames, surname, traineeId, email, gradeAbbreviation,
+            placementId, placementStatus, placementSpecialtyType, placementWholeTimeEquivalent);
   }
 }

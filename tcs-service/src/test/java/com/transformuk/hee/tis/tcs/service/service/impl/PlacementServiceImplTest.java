@@ -119,7 +119,7 @@ public class PlacementServiceImplTest {
   public static PlacementSummaryDTO createPlacementSummaryDTO() {
     return new PlacementSummaryDTO(null, null, number,
         "Elbows", number, "In Post", "CURRENT", "Joe", "Bloggs",
-        number, number, null, null);
+        number, "emailId", "F1", number, null, null);
   }
 
   @Before
