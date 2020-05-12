@@ -43,6 +43,8 @@ import lombok.Data;
             @ColumnResult(name = "forenames"),
             @ColumnResult(name = "surname"),
             @ColumnResult(name = "traineeId"),
+            @ColumnResult(name = "email"),
+            @ColumnResult(name = "gradeAbbreviation"),
             @ColumnResult(name = "placementId"),
             @ColumnResult(name = "placementSpecialtyType"),
             @ColumnResult(name = "lifecycleState")
