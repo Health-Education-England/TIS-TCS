@@ -40,6 +40,9 @@ import com.transformuk.hee.tis.tcs.service.api.decorator.PlacementViewDecorator;
 import com.transformuk.hee.tis.tcs.service.api.validation.PostFundingValidator;
 import com.transformuk.hee.tis.tcs.service.api.validation.PostValidator;
 import com.transformuk.hee.tis.tcs.service.exception.ExceptionTranslator;
+import com.transformuk.hee.tis.tcs.service.model.ContactDetails;
+import com.transformuk.hee.tis.tcs.service.model.Person;
+import com.transformuk.hee.tis.tcs.service.model.Placement;
 import com.transformuk.hee.tis.tcs.service.model.Post;
 import com.transformuk.hee.tis.tcs.service.model.PostFunding;
 import com.transformuk.hee.tis.tcs.service.model.PostGrade;
@@ -47,6 +50,9 @@ import com.transformuk.hee.tis.tcs.service.model.PostSite;
 import com.transformuk.hee.tis.tcs.service.model.PostSpecialty;
 import com.transformuk.hee.tis.tcs.service.model.Programme;
 import com.transformuk.hee.tis.tcs.service.model.Specialty;
+import com.transformuk.hee.tis.tcs.service.repository.ContactDetailsRepository;
+import com.transformuk.hee.tis.tcs.service.repository.PersonRepository;
+import com.transformuk.hee.tis.tcs.service.repository.PlacementRepository;
 import com.transformuk.hee.tis.tcs.service.repository.PlacementViewRepository;
 import com.transformuk.hee.tis.tcs.service.repository.PostRepository;
 import com.transformuk.hee.tis.tcs.service.repository.SpecialtyRepository;
@@ -54,6 +60,7 @@ import com.transformuk.hee.tis.tcs.service.service.PlacementService;
 import com.transformuk.hee.tis.tcs.service.service.impl.PostServiceImpl;
 import com.transformuk.hee.tis.tcs.service.service.mapper.PlacementViewMapper;
 import com.transformuk.hee.tis.tcs.service.service.mapper.PostMapper;
+import java.math.BigDecimal;
 import java.net.URLEncoder;
 import java.time.LocalDate;
 import java.util.Arrays;
@@ -77,6 +84,7 @@ import org.springframework.http.MediaType;
 import org.springframework.http.converter.json.MappingJackson2HttpMessageConverter;
 import org.springframework.test.context.junit4.SpringRunner;
 import org.springframework.test.web.servlet.MockMvc;
+import org.springframework.test.web.servlet.MvcResult;
 import org.springframework.test.web.servlet.setup.MockMvcBuilders;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -125,6 +133,10 @@ public class PostResourceIntTest {
   private static final String FUNDING_TYPE_TRUST = "TRUST";
   private static final String FUNDING_TYPE_TARIFF = "TARIFF";
   private static final String UPDATED_OWNER = "Health Education England North West London";
+  public static final String DEFAULT_TRAINEE_EMAIL = "EMAIL@email.com";
+  public static final String DEFAULT_TRAINEE_SURNAME = "PERSON_SURNAME";
+  public static final String DEFAULT_TRAINEE_FORENAMES = "PERSON_FORENAMES";
+  public static final String DEFAULT_TRAINEE_GRADE_ABBREVIATION = "F1";
   @Autowired
   private PostRepository postRepository;
   @Autowired
@@ -159,6 +171,12 @@ public class PostResourceIntTest {
   private ExceptionTranslator exceptionTranslator;
   @Autowired
   private EntityManager em;
+  @Autowired
+  private PersonRepository personRepository;
+  @Autowired
+  private ContactDetailsRepository contactDetailsRepository;
+  @Autowired
+  private PlacementRepository placementRepository;
   private MockMvc restPostMockMvc;
   private Post post;
   private Specialty specialty;
@@ -185,7 +203,7 @@ public class PostResourceIntTest {
   }
 
   public static Post createEntity() {
-    Post post = new Post()
+    return new Post()
         .nationalPostNumber(DEFAULT_NATIONAL_POST_NUMBER)
         .status(DEFAULT_STATUS)
         .suffix(DEFAULT_SUFFIX)
@@ -196,7 +214,6 @@ public class PostResourceIntTest {
         .trainingDescription(DEFAULT_TRAINING_DESCRIPTION)
         .localPostNumber(DEFAULT_LOCAL_POST_NUMBER)
         .intrepidId(DEFAULT_INTREPID_ID);
-    return post;
   }
 
   public static Specialty createSpecialty() {
@@ -1180,6 +1197,42 @@ public class PostResourceIntTest {
         .andExpect(content().contentType(MediaType.APPLICATION_JSON_UTF8_VALUE))
         .andExpect(jsonPath("$").isArray())
         .andExpect(jsonPath("$", hasSize(3)));
+  }
+
+  @Test
+  @Transactional
+  public void shouldGetPlacementsSummaryByPostId() throws Exception {
+    Person person = PersonResourceIntTest.createEntity();
+    person = personRepository.saveAndFlush(person);
+    final ContactDetails contactDetails = new ContactDetails();
+    contactDetails.setId(person.getId());
+    contactDetails.setSurname(DEFAULT_TRAINEE_SURNAME);
+    contactDetails.setForenames(DEFAULT_TRAINEE_FORENAMES);
+    contactDetails.setEmail(DEFAULT_TRAINEE_EMAIL);
+    contactDetailsRepository.saveAndFlush(contactDetails);
+    Placement placement = PlacementResourceIntTest.createPlacementEntity();
+    placement.setTrainee(person);
+    placement.setPlacementWholeTimeEquivalent(new BigDecimal("1.0"));
+    placement.setGradeAbbreviation(DEFAULT_TRAINEE_GRADE_ABBREVIATION);
+    placement.setPost(post);
+    placementRepository.saveAndFlush(placement);
+
+    MvcResult mvcResult = restPostMockMvc
+        .perform(get("/api/posts/{postId}/placements/new", post.getId())
+            .contentType(TestUtil.APPLICATION_JSON_UTF8)
+            .param("size", "10")
+            .content(TestUtil.convertObjectToJsonBytes(person)))
+        .andExpect(status().isOk())
+        .andExpect(content().contentType(MediaType.APPLICATION_JSON_UTF8_VALUE))
+        .andExpect(jsonPath("$").isArray())
+        .andExpect(jsonPath("$", hasSize(1)))
+        .andExpect(jsonPath("$.[*].gradeAbbreviation").value(hasItem(DEFAULT_TRAINEE_GRADE_ABBREVIATION)))
+        .andExpect(jsonPath("$.[*].email").value(hasItem(DEFAULT_TRAINEE_EMAIL)))
+        .andExpect(jsonPath("$.[*].forenames").value(hasItem(DEFAULT_TRAINEE_FORENAMES)))
+        .andExpect(jsonPath("$.[*].surname").value(hasItem(DEFAULT_TRAINEE_SURNAME)))
+        .andReturn();
+
+    mvcResult.getResponse().getContentAsString();
   }
 
   private List<String> preparePostRecords() {
