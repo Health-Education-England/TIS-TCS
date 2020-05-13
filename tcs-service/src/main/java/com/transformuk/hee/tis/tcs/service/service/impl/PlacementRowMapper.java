@@ -21,6 +21,8 @@ public class PlacementRowMapper implements RowMapper<PlacementSummaryDTO> {
     dto.setForenames(rs.getString("forenames"));
     dto.setSurname(rs.getString("surname"));
     dto.setTraineeId(rs.getLong("traineeId"));
+    dto.setEmail(rs.getString("email"));
+    dto.setGradeAbbreviation(rs.getString("gradeAbbreviation"));
     dto.setPlacementId(rs.getLong("placementId"));
     dto.setPlacementSpecialtyType(rs.getString("placementSpecialtyType"));
     float floatWTE = rs.getFloat("placementWholeTimeEquivalent");
