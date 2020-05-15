@@ -152,9 +152,7 @@ public class PlacementPlannerServiceImp {
           if (sitesToPosts.containsKey(siteDTO)) {
             Map<Post, List<Placement>> postListMap = sitesToPosts.get(siteDTO);
             if (!postListMap.containsKey(foundPost)) {
-              Map<Post, List<Placement>> emptyPlacementPosts = Maps.newHashMap();
-              emptyPlacementPosts.put(foundPost, Lists.newArrayList());
-              sitesToPosts.put(siteDTO, emptyPlacementPosts);
+              sitesToPosts.get(siteDTO).put(foundPost, Lists.newArrayList());
             }
           }
         }

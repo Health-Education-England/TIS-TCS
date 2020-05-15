@@ -32,6 +32,8 @@ import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
+import org.mockito.ArgumentCaptor;
+import org.mockito.Captor;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.MockitoJUnitRunner;
@@ -46,6 +48,8 @@ public class PlacementPlannerServiceImpTest {
   private static final LocalDate DATE_TO_1 = LocalDate.now().minusMonths(3);
   private static final LocalDate DATE_FROM_2 = LocalDate.now().minusMonths(12);
   private static final LocalDate DATE_TO_2 = LocalDate.now().minusMonths(9);
+  private static final Long POST1_ID = 1L;
+  private static final Long POST2_ID = 2L;
 
   @Mock
   private PlacementRepository placementRepositoryMock;
@@ -62,7 +66,7 @@ public class PlacementPlannerServiceImpTest {
   @Mock
   private Placement placementMock1, placementMock2;
   @Mock
-  private Post postMock;
+  private Post postMock1, postMock2;
   @Mock
   private PostSite postSiteMock;
   @Mock
@@ -72,23 +76,29 @@ public class PlacementPlannerServiceImpTest {
   @InjectMocks
   private PlacementPlannerServiceImp testObj;
   private Set<PostSite> postSites;
+  @Captor
+  private ArgumentCaptor<Map<SiteDTO, Map<Post, List<Placement>>>> siteMapCaptor;
 
 
   @Before
   public void setup() {
     when(siteDTOMock.getId()).thenReturn(SITE_ID);
     when(placementMock1.getSiteId()).thenReturn(SITE_ID);
-    when(placementMock1.getPost()).thenReturn(postMock);
+    when(placementMock1.getPost()).thenReturn(postMock1);
     when(placementMock1.getDateFrom()).thenReturn(DATE_FROM_1);
     when(placementMock1.getDateTo()).thenReturn(DATE_TO_1);
     when(placementMock2.getSiteId()).thenReturn(SITE_ID);
-    when(placementMock2.getPost()).thenReturn(postMock);
+    when(placementMock2.getPost()).thenReturn(postMock1);
     when(placementMock2.getDateFrom()).thenReturn(DATE_FROM_2);
     when(placementMock2.getDateTo()).thenReturn(DATE_TO_2);
-    when(postMock.getPlacementHistory()).thenReturn(new HashSet<>());
+    when(postMock1.getPlacementHistory()).thenReturn(new HashSet<>());
+    when(postMock2.getPlacementHistory()).thenReturn(new HashSet<>());
     postSites = Sets.newHashSet();
     postSites.add(postSiteMock);
-    when(postMock.getSites()).thenReturn(postSites);
+    when(postMock1.getSites()).thenReturn(postSites);
+    when(postMock2.getSites()).thenReturn(postSites);
+    when(postMock1.getId()).thenReturn(POST1_ID);
+    when(postMock2.getId()).thenReturn(POST2_ID);
     when(postSiteMock.getPostSiteType()).thenReturn(PostSiteType.PRIMARY);
     when(postSiteMock.getSiteId()).thenReturn(SITE_ID);
   }
@@ -98,23 +108,24 @@ public class PlacementPlannerServiceImpTest {
 
     HashSet<Long> siteIds = Sets.newHashSet(SITE_ID);
     Set<Placement> foundPlacements = Sets.newHashSet(placementMock1, placementMock2);
-    Set<Post> foundPosts = Sets.newHashSet(postMock);
+    Set<Post> foundPosts = Sets.newHashSet(postMock1, postMock2); // postMock2 has no placements
     List<SiteDTO> foundSites = Lists.newArrayList(siteDTOMock);
     Map<SiteDTO, Set<Post>> siteToPosts = Maps.newHashMap();
-    siteToPosts.put(siteDTOMock, Sets.newHashSet(postMock));
+    siteToPosts.put(siteDTOMock, Sets.newHashSet(postMock1));
     Map<Post, Set<Placement>> postToPlacements = Maps.newHashMap();
-    postToPlacements.put(postMock, Sets.newHashSet(placementMock1, placementMock2));
+    postToPlacements.put(postMock1, Sets.newHashSet(placementMock1, placementMock2));
     LocalDate fromDate = LocalDate.now().minusYears(2);
     LocalDate toDate = LocalDate.now().plusYears(2);
     Set<Long> postIds = new HashSet<>();
-    postIds.add(postMock.getId());
+    postIds.add(postMock1.getId());
+    postIds.add(postMock2.getId());
 
     when(specialtyRepositoryMock.findById(SPECIALTY_ID)).thenReturn(Optional.of(specialtyMock));
     when(postRepositoryMock.findPostsByProgrammeIdAndSpecialtyId(PROGRAMME_ID, SPECIALTY_ID))
         .thenReturn(foundPosts);
     when(placementRepositoryMock.findPlacementsByPostIds(postIds)).thenReturn(foundPlacements);
     when(referenceServiceMock.findSitesIdIn(siteIds)).thenReturn(foundSites);
-    when(placementPlannerMapperMock.convertSpecialty(eq(specialtyMock), any()))
+    when(placementPlannerMapperMock.convertSpecialty(eq(specialtyMock), siteMapCaptor.capture()))
         .thenReturn(specialtyDTOMock);
 
     PlacementsResultDTO result = testObj
@@ -124,6 +135,13 @@ public class PlacementPlannerServiceImpTest {
     Assert.assertNotNull(result.getSpecialties());
     Assert.assertEquals(1, result.getSpecialties().size());
     Assert.assertEquals(specialtyDTOMock, result.getSpecialties().get(0));
+    Map<SiteDTO, Map<Post, List<Placement>>> siteDTOMap = siteMapCaptor.getValue();
+    Map<Post, List<Placement>> postMap = siteDTOMap.get(siteDTOMock);
+    Assert.assertEquals(2, postMap.size());
+    Assert.assertTrue(postMap.containsKey(postMock1));
+    Assert.assertTrue(postMap.containsKey(postMock2));
+    Assert.assertEquals(2, postMap.get(postMock1).size());
+    Assert.assertEquals(0, postMap.get(postMock2).size());
 
     verify(specialtyRepositoryMock).findById(SPECIALTY_ID);
     verify(placementRepositoryMock).findPlacementsByPostIds(postIds);
