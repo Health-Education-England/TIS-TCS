@@ -5,7 +5,7 @@ import static org.mockito.Mockito.when;
 
 import com.transformuk.hee.tis.reference.api.dto.GradeDTO;
 import com.transformuk.hee.tis.reference.client.ReferenceService;
-import com.transformuk.hee.tis.tcs.api.dto.RevalidationRecordDTO;
+import com.transformuk.hee.tis.tcs.api.dto.RevalidationRecordDto;
 import com.transformuk.hee.tis.tcs.api.enumeration.ProgrammeMembershipType;
 import com.transformuk.hee.tis.tcs.service.model.GmcDetails;
 import com.transformuk.hee.tis.tcs.service.model.Placement;
@@ -94,13 +94,13 @@ public class RevalidationServiceImplTest {
         .thenReturn(currentPlacementsForTrainee);
     when(referenceServiceMock.findGradesIdIn(Collections.singleton(GRADE_ID))).thenReturn(grades);
 
-    Map<String, RevalidationRecordDTO> result = testObj.findAllRevalidationsByGmcIds(GMC_IDS);
+    Map<String, RevalidationRecordDto> result = testObj.findAllRevalidationsByGmcIds(GMC_IDS);
 
     Assert.assertNotNull(result);
     Assert.assertEquals(1, result.size());
 
     GMC_IDS.stream().forEach(id -> {
-      RevalidationRecordDTO record = result.get(id);
+      RevalidationRecordDto record = result.get(id);
       Assert.assertEquals(id, record.getGmcId());
       Assert.assertEquals(CCT_DATE, record.getCctDate());
       Assert

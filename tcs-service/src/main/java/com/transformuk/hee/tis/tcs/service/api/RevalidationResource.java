@@ -1,6 +1,6 @@
 package com.transformuk.hee.tis.tcs.service.api;
 
-import com.transformuk.hee.tis.tcs.api.dto.RevalidationRecordDTO;
+import com.transformuk.hee.tis.tcs.api.dto.RevalidationRecordDto;
 import com.transformuk.hee.tis.tcs.service.api.util.UrlDecoderUtil;
 import com.transformuk.hee.tis.tcs.service.service.RevalidationService;
 import java.util.HashMap;
@@ -21,21 +21,24 @@ import org.springframework.web.bind.annotation.RestController;
 public class RevalidationResource {
 
   private final RevalidationService revalidationService;
-  private final Logger log = LoggerFactory.getLogger(RevalidationResource.class);
+  private final Logger LOG = LoggerFactory.getLogger(RevalidationResource.class);
+
   public RevalidationResource(RevalidationService revalidationService) {
     this.revalidationService = revalidationService;
   }
+
   @GetMapping("/revalidation/{gmcIds}")
   @PreAuthorize("hasPermission('tis:people::person:', 'View')")
-  public ResponseEntity<Map<String, RevalidationRecordDTO>> getRevalidationRecord(
-     @PathVariable("gmcIds") List<String> gmcIds) {
-    log.info("REST request to find Revalidation Records: {}", gmcIds);
+  public ResponseEntity<Map<String, RevalidationRecordDto>> getRevalidationRecord(
+      @PathVariable("gmcIds") List<String> gmcIds) {
+    LOG.debug("REST request to find Revalidation Records: {}", gmcIds);
 
     if (!gmcIds.isEmpty()) {
       UrlDecoderUtil.decode(gmcIds);
-      return new ResponseEntity<>(revalidationService.findAllRevalidationsByGmcIds(gmcIds), HttpStatus.OK);
+      return new ResponseEntity<>(revalidationService.findAllRevalidationsByGmcIds(gmcIds),
+          HttpStatus.OK);
     } else {
-      return new ResponseEntity<>(new HashMap<String, RevalidationRecordDTO>(),
+      return new ResponseEntity<>(new HashMap<String, RevalidationRecordDto>(),
           HttpStatus.BAD_REQUEST);
     }
   }

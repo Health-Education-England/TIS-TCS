@@ -10,7 +10,7 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule;
-import com.transformuk.hee.tis.tcs.api.dto.RevalidationRecordDTO;
+import com.transformuk.hee.tis.tcs.api.dto.RevalidationRecordDto;
 import com.transformuk.hee.tis.tcs.service.service.impl.RevalidationServiceImpl;
 import java.time.LocalDate;
 import java.util.Arrays;
@@ -47,8 +47,8 @@ public class RevalidationResourceTest {
   private RevalidationResource revalidationResource;
   private ObjectMapper mapper;
 
-  private RevalidationRecordDTO createRevalidationRecordDTO(final String gmcId) {
-    final RevalidationRecordDTO recordDTO = new RevalidationRecordDTO();
+  private RevalidationRecordDto createRevalidationRecordDTO(final String gmcId) {
+    final RevalidationRecordDto recordDTO = new RevalidationRecordDto();
     recordDTO.setGmcId(gmcId);
     recordDTO.setCctDate(CCT_DATE);
     recordDTO.setProgrammeMembershipType(PROGRAMME_MEMBERSHIP_TYPE);
@@ -69,7 +69,7 @@ public class RevalidationResourceTest {
   @Test
   public void findRevalidationRecordsAgainstListOfGmcIds() throws Exception {
     final List<String> gmcIds = Arrays.asList(GMC_ID1, GMC_ID2, GMC_ID3);
-    final Map<String, RevalidationRecordDTO> revalidationRecordDTOMap = new HashMap<>();
+    final Map<String, RevalidationRecordDto> revalidationRecordDTOMap = new HashMap<>();
 
     revalidationRecordDTOMap.put(GMC_ID1, createRevalidationRecordDTO(GMC_ID1));
     revalidationRecordDTOMap.put(GMC_ID2, createRevalidationRecordDTO(GMC_ID2));
@@ -85,13 +85,13 @@ public class RevalidationResourceTest {
     MockHttpServletResponse response = result.getResponse();
 
     final String content = response.getContentAsString();
-    final TypeReference<HashMap<String, RevalidationRecordDTO>> typeRef
-        = new TypeReference<HashMap<String, RevalidationRecordDTO>>() {
+    final TypeReference<HashMap<String, RevalidationRecordDto>> typeRef
+        = new TypeReference<HashMap<String, RevalidationRecordDto>>() {
     };
-    final Map<String, RevalidationRecordDTO> map = mapper.readValue(content, typeRef);
+    final Map<String, RevalidationRecordDto> map = mapper.readValue(content, typeRef);
 
     gmcIds.stream().forEach(id -> {
-      RevalidationRecordDTO revalidationRecordDTO = map.get(id);
+      RevalidationRecordDto revalidationRecordDTO = map.get(id);
       Assert.assertEquals(id, revalidationRecordDTO.getGmcId());
       Assert.assertEquals(CCT_DATE, revalidationRecordDTO.getCctDate());
       Assert.assertEquals("Substantive", revalidationRecordDTO.getProgrammeMembershipType());

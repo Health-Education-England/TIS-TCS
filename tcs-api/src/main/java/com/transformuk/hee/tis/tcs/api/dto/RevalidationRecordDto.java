@@ -12,7 +12,7 @@ import lombok.NoArgsConstructor;
 @NoArgsConstructor
 @AllArgsConstructor
 @JsonIgnoreProperties(ignoreUnknown = true)
-public class RevalidationRecordDTO {
+public class RevalidationRecordDto {
 
   private String gmcId;
   private LocalDate cctDate;
