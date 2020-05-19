@@ -1,22 +1,30 @@
 package com.transformuk.hee.tis.tcs.client.service.impl;
 
+import static org.hamcrest.CoreMatchers.is;
+import static org.hamcrest.MatcherAssert.assertThat;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyMap;
 import static org.mockito.ArgumentMatchers.anyString;
+import static org.mockito.ArgumentMatchers.same;
 import static org.mockito.Mockito.doThrow;
+import static org.mockito.Mockito.when;
 
 import com.google.common.collect.Maps;
 import com.transformuk.hee.tis.tcs.api.dto.AbsenceDTO;
+import com.transformuk.hee.tis.tcs.api.dto.PersonDTO;
+import java.util.Collections;
+import java.util.List;
 import java.util.Map;
 import java.util.Optional;
-import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.mockito.Mock;
 import org.mockito.junit.MockitoJUnitRunner;
+import org.springframework.core.ParameterizedTypeReference;
 import org.springframework.http.HttpEntity;
 import org.springframework.http.HttpMethod;
+import org.springframework.http.ResponseEntity;
 import org.springframework.web.client.RestTemplate;
 
 @RunWith(MockitoJUnitRunner.class)
@@ -42,7 +50,7 @@ public class TcsServiceImplMockTest {
 
     Optional<AbsenceDTO> result = testObj.findAbsenceById(1L);
 
-    Assert.assertFalse(result.isPresent());
+    assertThat(result.isPresent(), is(false));
   }
 
   @Test
@@ -52,7 +60,7 @@ public class TcsServiceImplMockTest {
 
     Optional<AbsenceDTO> result = testObj.findAbsenceByAbsenceId("sadffds");
 
-    Assert.assertFalse(result.isPresent());
+    assertThat(result.isPresent(), is(false));
   }
 
   @Test
@@ -64,7 +72,7 @@ public class TcsServiceImplMockTest {
     absenceDTO.setAbsenceAttendanceId("sadfdsdf");
     boolean result = testObj.addAbsence(absenceDTO);
 
-    Assert.assertFalse(result);
+    assertThat(result, is(false));
   }
 
   @Test
@@ -77,7 +85,7 @@ public class TcsServiceImplMockTest {
     absenceDTO.setAbsenceAttendanceId("sadfdsdf");
     boolean result = testObj.putAbsence(1L, absenceDTO);
 
-    Assert.assertFalse(result);
+    assertThat(result, is(false));
   }
 
   @Test
@@ -90,7 +98,28 @@ public class TcsServiceImplMockTest {
     params.put("id", 1L);
     boolean result = testObj.patchAbsence(1L, params);
 
-    Assert.assertFalse(result);
+    assertThat(result, is(false));
+  }
 
+  @Test
+  public void patchPeopleShouldReturnResponseBody() {
+    // Given.
+    PersonDTO dto = new PersonDTO();
+    dto.setId(1L);
+
+    PersonDTO patchedDto = new PersonDTO();
+    patchedDto.setId(2L);
+    ResponseEntity<List<PersonDTO>> response =
+        ResponseEntity.ok(Collections.singletonList(patchedDto));
+
+    when(restTemplateMock.exchange(anyString(), same(HttpMethod.PATCH), any(HttpEntity.class), any(
+        ParameterizedTypeReference.class))).thenReturn(response);
+
+    // When.
+    List<PersonDTO> patchedDtos = testObj.patchPeople(Collections.singletonList(dto));
+
+    // Then.
+    assertThat("Unexpected number of patched DTOs.", patchedDtos.size(), is(1));
+    assertThat("Unexpected patched DTOs.", patchedDtos.get(0), is(patchedDto));
   }
 }

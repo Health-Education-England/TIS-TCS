@@ -36,7 +36,6 @@ import java.io.UnsupportedEncodingException;
 import java.net.URLEncoder;
 import java.util.List;
 import java.util.Map;
-import java.util.Objects;
 import java.util.Optional;
 import java.util.Set;
 import java.util.stream.Collectors;
@@ -65,6 +64,7 @@ public class TcsServiceImpl extends AbstractClientService {
   private static final String API_PERSONAL_DETAILS = "/api/personal-details/";
   private static final String API_QUALIFICATIONS = "/api/qualifications/";
   private static final String API_PEOPLE = "/api/people/";
+  private static final String API_PEOPLE_BULK = "/api/bulk-people/";
   private static final String API_PLACEMENT = "/api/placement/";
   private static final String API_PLACEMENTS = "/api/placements/";
   private static final String API_POSTS = "/api/posts/";
@@ -75,26 +75,32 @@ public class TcsServiceImpl extends AbstractClientService {
   private static final String API_RIGHT_TO_WORKS = "/api/right-to-works/";
   private static final String API_PROGRAMME_MEMBERSHIPS = "/api/programme-memberships/";
   private static final String API_TRAINEE_PLACEMENTS = "/api/people/%d/placements/new";
-  private static final String API_CURRENT_SPECIALTIES_COLUMN_FILTERS = "/api/specialties?columnFilters=";
+  private static final String API_CURRENT_SPECIALTIES_COLUMN_FILTERS =
+      "/api/specialties?columnFilters=";
   private static final String API_ROTATION_COLUMN_FILTERS = "/api/rotations?columnFilters=";
   private static final String API_ROTATION_POST = "/api/rotation-posts/";
-  private static final String API_CURRENT_CURRICULA_COLUMN_FILTERS = "/api/current/curricula?columnFilters=";
+  private static final String API_CURRENT_CURRICULA_COLUMN_FILTERS =
+      "/api/current/curricula?columnFilters=";
   private static final String API_PROGRAMMES_COLUMN_FILTERS = "/api/programmes?columnFilters=";
   private static final String API_PROGRAMMES_IN = "/api/programmes/in/";
-  private static final String API_PLACEMENTS_FILTER_COLUMN_FILTERS = "/api/placements/filter?columnFilters=";
+  private static final String API_PLACEMENTS_FILTER_COLUMN_FILTERS =
+      "/api/placements/filter?columnFilters=";
   private static final String API_GDC_DETAILS_IN = "/api/gdc-details/in/";
   private static final String API_GMC_DETAILS_IN = "/api/gmc-details/in/";
   private static final String API_POSTS_IN = "/api/posts/in/";
   private static final String API_PEOPLE_IN = "/api/people/in/";
   private static final String API_PEOPLE_PHN_IN = "/api/people/phn/in/";
-  private static final String API_TRAINEE_PROGRAMME_MEMBERSHIPS = "/api/trainee/"; // {traineeId}/programme-memberships;
+  private static final String API_TRAINEE_PROGRAMME_MEMBERSHIPS = "/api/trainee/";
+  // {traineeId}/programme-memberships;
   private static final String BASIC = "/basic";
   private static final String API_POST_FUNDINGS = "/api/post/fundings";
   private static final String API_FUNDINGS = "/api/post-fundings/";
   private static final String API_ABSENCE = "/api/absence/";
   private static final String API_ABSENCE_BY_ABS_ID = API_ABSENCE + "absenceId/";
   private static final Map<Class, ParameterizedTypeReference> classToParamTypeRefMap;
-  private static String curriculumJsonQuerystringURLEncoded, programmeJsonQuerystringURLEncoded, specialtyJsonQuerystringURLEncoded, placementJsonQuerystringURLEncoded, rotationJsonQuerystringURLEncoded;
+  private static String curriculumJsonQuerystringURLEncoded, programmeJsonQuerystringURLEncoded,
+      specialtyJsonQuerystringURLEncoded, placementJsonQuerystringURLEncoded,
+      rotationJsonQuerystringURLEncoded;
 
   static {
     try {
@@ -389,6 +395,15 @@ public class TcsServiceImpl extends AbstractClientService {
         .getBody());
 
     return personDTOUpdated;
+  }
+
+  public List<PersonDTO> patchPeople(List<PersonDTO> personDtos) {
+    HttpHeaders headers = new HttpHeaders();
+    HttpEntity<List<PersonDTO>> httpEntity = new HttpEntity<>(personDtos, headers);
+
+    return tcsRestTemplate.exchange(serviceUrl + API_PEOPLE_BULK, HttpMethod.PATCH, httpEntity,
+        new ParameterizedTypeReference<List<PersonDTO>>() {
+        }).getBody();
   }
 
   public PersonDTO getPerson(String id) {
