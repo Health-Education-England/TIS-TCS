@@ -212,11 +212,6 @@ public class TcsServiceImpl extends AbstractClientService {
     };
   }
 
-  @PostConstruct
-  public void init() {
-    tcsRestTemplate.setErrorHandler(new TCSClientErrorHandler());
-  }
-
   public QualificationDTO createQualification(QualificationDTO qualificationDTO) {
     HttpHeaders headers = new HttpHeaders();
     HttpEntity<QualificationDTO> httpEntity = new HttpEntity<>(qualificationDTO, headers);
