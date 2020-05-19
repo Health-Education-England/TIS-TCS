@@ -1,7 +1,9 @@
 package com.transformuk.hee.tis.tcs.service.api;
 
 import static org.assertj.core.api.Assertions.assertThat;
-import static org.hamcrest.Matchers.*;
+import static org.hamcrest.Matchers.containsInAnyOrder;
+import static org.hamcrest.Matchers.hasItem;
+import static org.hamcrest.Matchers.hasSize;
 import static org.mockito.Mockito.when;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.delete;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
@@ -28,21 +30,32 @@ import com.transformuk.hee.tis.tcs.service.api.validation.GmcDetailsValidator;
 import com.transformuk.hee.tis.tcs.service.api.validation.PersonValidator;
 import com.transformuk.hee.tis.tcs.service.api.validation.PersonalDetailsValidator;
 import com.transformuk.hee.tis.tcs.service.exception.ExceptionTranslator;
-import com.transformuk.hee.tis.tcs.service.model.*;
-import com.transformuk.hee.tis.tcs.service.repository.*;
+import com.transformuk.hee.tis.tcs.service.model.ContactDetails;
+import com.transformuk.hee.tis.tcs.service.model.GdcDetails;
+import com.transformuk.hee.tis.tcs.service.model.GmcDetails;
+import com.transformuk.hee.tis.tcs.service.model.Person;
+import com.transformuk.hee.tis.tcs.service.model.Placement;
+import com.transformuk.hee.tis.tcs.service.model.TrainerApproval;
+import com.transformuk.hee.tis.tcs.service.repository.ContactDetailsRepository;
+import com.transformuk.hee.tis.tcs.service.repository.GdcDetailsRepository;
+import com.transformuk.hee.tis.tcs.service.repository.GmcDetailsRepository;
+import com.transformuk.hee.tis.tcs.service.repository.PersonRepository;
+import com.transformuk.hee.tis.tcs.service.repository.PlacementRepository;
+import com.transformuk.hee.tis.tcs.service.repository.PlacementViewRepository;
+import com.transformuk.hee.tis.tcs.service.repository.TrainerApprovalRepository;
 import com.transformuk.hee.tis.tcs.service.service.PersonElasticSearchService;
 import com.transformuk.hee.tis.tcs.service.service.PersonService;
 import com.transformuk.hee.tis.tcs.service.service.PlacementService;
 import com.transformuk.hee.tis.tcs.service.service.impl.PermissionService;
 import com.transformuk.hee.tis.tcs.service.service.mapper.PersonMapper;
 import com.transformuk.hee.tis.tcs.service.service.mapper.PlacementViewMapper;
-
-import java.io.Console;
 import java.math.BigDecimal;
 import java.time.LocalDateTime;
 import java.time.ZoneId;
-import java.util.*;
-
+import java.util.ArrayList;
+import java.util.Collection;
+import java.util.Collections;
+import java.util.List;
 import org.apache.commons.codec.net.URLCodec;
 import org.junit.Before;
 import org.junit.Ignore;
@@ -392,8 +405,8 @@ public class PersonResourceIntTest {
         .andExpect(status().isOk())
         .andExpect(content().contentType(MediaType.APPLICATION_JSON_UTF8_VALUE))
         .andExpect(jsonPath("$", hasSize(1)));
-        //It's better to comment this line here, rather than ignoring the test-Refer to top
-        //.andExpect(jsonPath("$.[*].forenames", hasItem("User 1")));
+    //It's better to comment this line here, rather than ignoring the test-Refer to top
+    //.andExpect(jsonPath("$.[*].forenames", hasItem("User 1")));
 
   }
 
@@ -555,7 +568,7 @@ public class PersonResourceIntTest {
     // When I get use the new method of that person's placement summaries
     restPersonMockMvc.perform(get("/api/people/{id}/placements/new", person.getId()))
 
-    // Then the placementWholeTimeEquivalent should be what was saved
+        // Then the placementWholeTimeEquivalent should be what was saved
         .andExpect(status().isOk())
         .andExpect(content().contentType(MediaType.APPLICATION_JSON_UTF8_VALUE))
         .andExpect(jsonPath("$.[0].placementWholeTimeEquivalent").value(DEFAULT_PLACEMENT_WTE));
@@ -862,7 +875,7 @@ public class PersonResourceIntTest {
 
   @Test
   @Transactional
-  public void shouldValidateWhitespaceInPhWhenUpdatePerson() throws Exception{
+  public void shouldValidateWhitespaceInPhWhenUpdatePerson() throws Exception {
     // Initialize the database
     Person savedPerson = personRepository.saveAndFlush(person);
 
@@ -876,6 +889,19 @@ public class PersonResourceIntTest {
         .contentType(TestUtil.APPLICATION_JSON_UTF8)
         .content(TestUtil.convertObjectToJsonBytes(updatedPersonDTO)))
         .andExpect(status().isBadRequest())
-        .andExpect(jsonPath("$.fieldErrors[0].message").value("publicHealthNumber should not contain any whitespaces"));
+        .andExpect(jsonPath("$.fieldErrors[0].message")
+            .value("publicHealthNumber should not contain any whitespaces"));
+  }
+
+  @Test
+  public void patchPersonShouldReturnNotImplemented() throws Exception {
+    PersonDTO dto = new PersonDTO();
+    dto.setId(1L);
+
+    restPersonMockMvc.perform(patch("/api/bulk-people")
+        .contentType(TestUtil.APPLICATION_JSON_UTF8)
+        .content(TestUtil.convertObjectToJsonBytes(Collections.singletonList(dto))))
+        .andExpect(status().isNotImplemented())
+        .andExpect(jsonPath("$").doesNotExist());
   }
 }
