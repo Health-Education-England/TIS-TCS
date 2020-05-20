@@ -3,7 +3,6 @@ package com.transformuk.hee.tis.tcs.service.dto.placementmanager;
 import com.transformuk.hee.tis.tcs.api.enumeration.LifecycleState;
 
 import java.io.Serializable;
-import java.math.BigDecimal;
 import java.time.LocalDate;
 import java.util.Objects;
 
