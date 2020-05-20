@@ -104,7 +104,7 @@ public class PersonResourceIntTest {
 
   private static final String DEFAULT_REGULATOR = "AAAAAAAAAA";
   private static final String UPDATED_REGULATOR = "BBBBBBBBBB";
-  private static final BigDecimal DEFAULT_PLACEMENT_WTE = new BigDecimal("0.6");
+  private static final Float DEFAULT_PLACEMENT_WTE = new Float(0.6);
 
   @Autowired
   private PersonRepository personRepository;

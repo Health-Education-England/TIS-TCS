@@ -4,7 +4,6 @@ import com.transformuk.hee.tis.tcs.api.dto.PlacementSummaryDTO;
 import com.transformuk.hee.tis.tcs.api.enumeration.LifecycleState;
 import com.transformuk.hee.tis.tcs.api.enumeration.Status;
 import java.io.Serializable;
-import java.math.BigDecimal;
 import java.time.LocalDate;
 import java.util.HashSet;
 import java.util.Objects;
@@ -85,7 +84,7 @@ public class Placement implements Serializable {
   @Column(name = "placementType")
   private String placementType;
   @Column(name = "placementWholeTimeEquivalent")
-  private BigDecimal placementWholeTimeEquivalent;
+  private Float placementWholeTimeEquivalent;
   @Column(name = "trainingDescription")
   private String trainingDescription;
   @Column(name = "localPostNumber")

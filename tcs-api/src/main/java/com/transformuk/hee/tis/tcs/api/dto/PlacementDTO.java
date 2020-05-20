@@ -5,7 +5,6 @@ import com.transformuk.hee.tis.tcs.api.dto.validation.Update;
 import com.transformuk.hee.tis.tcs.api.enumeration.LifecycleState;
 import com.transformuk.hee.tis.tcs.api.enumeration.PlacementStatus;
 import java.io.Serializable;
-import java.math.BigDecimal;
 import java.time.LocalDate;
 import java.util.HashSet;
 import java.util.Objects;
@@ -47,7 +46,7 @@ public class PlacementDTO implements Serializable {
   private LocalDate dateTo;
   @NotNull(message = "PlacementType is required", groups = {Update.class, Create.class})
   private String placementType;
-  private BigDecimal placementWholeTimeEquivalent;
+  private Float placementWholeTimeEquivalent;
   private String trainingDescription;
   private String localPostNumber;
   private Set<PlacementSupervisorDTO> supervisors = new HashSet<>();

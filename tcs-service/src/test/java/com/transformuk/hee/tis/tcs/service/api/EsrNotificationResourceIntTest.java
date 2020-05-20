@@ -57,8 +57,8 @@ public class EsrNotificationResourceIntTest {
 
   private static final String DEFAULT_PLACEMENT_TYPE = "In Post";
 
-  private static final BigDecimal DEFAULT_PLACEMENT_WHOLE_TIME_EQUIVALENT = new BigDecimal(1);
-  private static final BigDecimal SECOND_PLACEMENT_WHOLE_TIME_EQUIVALENT = new BigDecimal(0.5);
+  private static final Float DEFAULT_PLACEMENT_WHOLE_TIME_EQUIVALENT = new Float(1);
+  private static final Float SECOND_PLACEMENT_WHOLE_TIME_EQUIVALENT = new Float(0.5);
 
   @Autowired
   private MappingJackson2HttpMessageConverter jacksonMessageConverter;
@@ -180,9 +180,9 @@ public class EsrNotificationResourceIntTest {
         .andExpect(jsonPath("$.[*].nextAppointmentTraineeGmcNumber")
             .value(trainee1GmcDetails.getGmcNumber()))
         .andExpect(jsonPath("$.[0].currentTraineeWorkingHoursIndicator")
-            .value(placement2.getWholeTimeEquivalent().setScale(1)))
+            .value(placement2.getWholeTimeEquivalent()))
         .andExpect(jsonPath("$.[0].workingHourIndicator")
-            .value(placement1.getWholeTimeEquivalent().setScale(1)));
+            .value(placement1.getWholeTimeEquivalent()));
   }
 
   @Test

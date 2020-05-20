@@ -63,6 +63,7 @@ public class PlacementResourceTest {
   private static final String TRAINEE_SURNAME_2 = "TRAINEE SURNAME 2";
   private static final String GMC1 = "2222222";
   private static final Long TRAINEE2_ID = 2L;
+  private static final Float WTE = 1.0F;
   private MockMvc mockMvc;
 
   private PlacementResource placementResource;
@@ -143,7 +144,7 @@ public class PlacementResourceTest {
     placement1DTO.setType(PLACEMENT_1_TYPE);
     placement1DTO.setDateTo(LocalDate.now().plusMonths(1));
     placement1DTO.setDateFrom(LocalDate.now().minusMonths(1));
-    placement1DTO.setWte(BigDecimal.ONE);
+    placement1DTO.setWte(WTE);
     placement1DTO.setTrainee(trainee1DTO);
     placement1DTO.setLifecycleState(LifecycleState.APPROVED);
     placement2DTO = new PlacementDTO();
@@ -151,7 +152,7 @@ public class PlacementResourceTest {
     placement2DTO.setType(PLACEMENT_2_TYPE);
     placement2DTO.setDateTo(LocalDate.now().plusMonths(1));
     placement2DTO.setDateFrom(LocalDate.now().minusMonths(1));
-    placement2DTO.setWte(BigDecimal.ONE);
+    placement2DTO.setWte(WTE);
     placement2DTO.setTrainee(trainee1DTO);
     placement2DTO.setLifecycleState(LifecycleState.APPROVED);
     placement3DTO = new PlacementDTO();
@@ -159,7 +160,7 @@ public class PlacementResourceTest {
     placement3DTO.setType(PLACEMENT_3_TYPE);
     placement3DTO.setDateTo(LocalDate.now().plusMonths(1));
     placement3DTO.setDateFrom(LocalDate.now().minusMonths(1));
-    placement3DTO.setWte(BigDecimal.ONE);
+    placement3DTO.setWte(WTE);
     placement3DTO.setTrainee(trainee2DTO);
     placement3DTO.setLifecycleState(LifecycleState.APPROVED);
     placement4DTO = new PlacementDTO();
@@ -167,7 +168,7 @@ public class PlacementResourceTest {
     placement4DTO.setType(PLACEMENT_4_TYPE);
     placement4DTO.setDateTo(LocalDate.now().plusMonths(1));
     placement4DTO.setDateFrom(LocalDate.now().minusMonths(1));
-    placement4DTO.setWte(BigDecimal.ONE);
+    placement4DTO.setWte(WTE);
     placement4DTO.setTrainee(trainee1DTO);
     placement4DTO.setLifecycleState(LifecycleState.APPROVED);
   }

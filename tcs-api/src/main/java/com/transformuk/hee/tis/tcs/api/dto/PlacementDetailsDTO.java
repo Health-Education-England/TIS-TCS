@@ -5,7 +5,6 @@ import com.transformuk.hee.tis.tcs.api.dto.validation.Update;
 import com.transformuk.hee.tis.tcs.api.enumeration.LifecycleState;
 import com.transformuk.hee.tis.tcs.api.enumeration.PlacementStatus;
 import java.io.Serializable;
-import java.math.BigDecimal;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.util.HashSet;
@@ -43,7 +42,7 @@ public class PlacementDetailsDTO implements Serializable {
   @NotNull(message = "Date to is required", groups = {Update.class, Create.class})
   private LocalDate dateTo;
 
-  private BigDecimal wholeTimeEquivalent;
+  private Float wholeTimeEquivalent;
 
   private String siteCode;
 
@@ -88,14 +87,6 @@ public class PlacementDetailsDTO implements Serializable {
   private Set<PlacementCommentDTO> comments = new HashSet<>();
 
   private LifecycleState lifecycleState;
-
-  public void setWholeTimeEquivalent(final BigDecimal wholeTimeEquivalent) {
-    if (wholeTimeEquivalent != null) {
-      this.wholeTimeEquivalent = wholeTimeEquivalent.setScale(2, BigDecimal.ROUND_HALF_UP);
-    } else {
-      this.wholeTimeEquivalent = wholeTimeEquivalent;
-    }
-  }
 
   @Override
   public boolean equals(final Object o) {

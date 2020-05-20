@@ -134,8 +134,8 @@ public class PlacementResourceIntTest {
   private static final String DEFAULT_PLACEMENT_TYPE = "OOPT";
   private static final String UPDATED_PLACEMENT_TYPE = "PWA";
 
-  private static final BigDecimal DEFAULT_PLACEMENT_WHOLE_TIME_EQUIVALENT = new BigDecimal(1);
-  private static final BigDecimal UPDATED_PLACEMENT_WHOLE_TIME_EQUIVALENT = new BigDecimal(2);
+  private static final Float DEFAULT_PLACEMENT_WHOLE_TIME_EQUIVALENT = new Float(1);
+  private static final Float UPDATED_PLACEMENT_WHOLE_TIME_EQUIVALENT = new Float(2);
 
   private static final String COMMENT = "Hello world!";
 
@@ -363,7 +363,7 @@ public class PlacementResourceIntTest {
     assertThat(testPlacement.getTrainingDescription()).isEqualTo(DEFAULT_TRAINING_DESCRIPTION);
     assertThat(testPlacement.getPlacementType()).isEqualTo(placementType);
     assertThat(testPlacement.getWholeTimeEquivalent())
-        .isEqualTo(DEFAULT_PLACEMENT_WHOLE_TIME_EQUIVALENT.setScale(2, BigDecimal.ROUND_HALF_UP));
+        .isEqualTo(DEFAULT_PLACEMENT_WHOLE_TIME_EQUIVALENT);
     assertThat(placementSupervisorRepository
         .findById(new PlacementSupervisorId(testPlacement.getId(), 1000L, 1))).isNotNull();
     assertThat(placementSupervisorRepository
@@ -472,7 +472,7 @@ public class PlacementResourceIntTest {
     assertThat(testPlacement.getTrainingDescription()).isEqualTo(DEFAULT_TRAINING_DESCRIPTION);
     assertThat(testPlacement.getPlacementType()).isEqualTo(placementType);
     assertThat(testPlacement.getWholeTimeEquivalent())
-        .isEqualTo(UPDATED_PLACEMENT_WHOLE_TIME_EQUIVALENT.setScale(2, BigDecimal.ROUND_HALF_UP));
+        .isEqualTo(UPDATED_PLACEMENT_WHOLE_TIME_EQUIVALENT);
 
     // Validate that there is no ESR notification record created
     final List<EsrNotification> esrNotifications = esrNotificationRepository.findAll();
@@ -642,7 +642,7 @@ public class PlacementResourceIntTest {
     assertThat(testPlacement.getTrainingDescription()).isEqualTo(UPDATED_TRAINING_DESCRPTION);
     assertThat(testPlacement.getPlacementType()).isEqualTo(UPDATED_PLACEMENT_TYPE);
     assertThat(testPlacement.getWholeTimeEquivalent())
-        .isEqualTo(DEFAULT_PLACEMENT_WHOLE_TIME_EQUIVALENT.setScale(2, BigDecimal.ROUND_HALF_UP));
+        .isEqualTo(DEFAULT_PLACEMENT_WHOLE_TIME_EQUIVALENT);
     assertThat(placementSupervisorRepository
         .findById(new PlacementSupervisorId(testPlacement.getId(), 1000L, 1))).isNotNull();
     assertThat(placementSupervisorRepository
@@ -792,7 +792,7 @@ public class PlacementResourceIntTest {
     assertThat(testPlacement.getTrainingDescription()).isEqualTo(UPDATED_TRAINING_DESCRPTION);
     assertThat(testPlacement.getPlacementType()).isEqualTo(placementType);
     assertThat(testPlacement.getWholeTimeEquivalent())
-        .isEqualTo(UPDATED_PLACEMENT_WHOLE_TIME_EQUIVALENT.setScale(2, BigDecimal.ROUND_HALF_UP));
+        .isEqualTo(UPDATED_PLACEMENT_WHOLE_TIME_EQUIVALENT);
 
     // validate the EsrNotification in the database
     final List<EsrNotification> esrNotifications = esrNotificationRepository.findAll();
@@ -861,7 +861,7 @@ public class PlacementResourceIntTest {
     assertThat(testPlacement.getTrainingDescription()).isEqualTo(UPDATED_TRAINING_DESCRPTION);
     assertThat(testPlacement.getPlacementType()).isEqualTo(placementType);
     assertThat(testPlacement.getWholeTimeEquivalent())
-        .isEqualTo(UPDATED_PLACEMENT_WHOLE_TIME_EQUIVALENT.setScale(2, BigDecimal.ROUND_HALF_UP));
+        .isEqualTo(UPDATED_PLACEMENT_WHOLE_TIME_EQUIVALENT);
 
     // validate the EsrNotification in the database
     final List<EsrNotification> esrNotifications = esrNotificationRepository.findAll();
@@ -940,7 +940,7 @@ public class PlacementResourceIntTest {
     assertThat(testPlacement.getTrainingDescription()).isEqualTo(UPDATED_TRAINING_DESCRPTION);
     assertThat(testPlacement.getPlacementType()).isEqualTo(placementType);
     assertThat(testPlacement.getWholeTimeEquivalent())
-        .isEqualTo(UPDATED_PLACEMENT_WHOLE_TIME_EQUIVALENT.setScale(2, BigDecimal.ROUND_HALF_UP));
+        .isEqualTo(UPDATED_PLACEMENT_WHOLE_TIME_EQUIVALENT);
 
     // validate the EsrNotification in the database
     final List<EsrNotification> esrNotifications = esrNotificationRepository.findAll();
@@ -1140,7 +1140,7 @@ public class PlacementResourceIntTest {
     currentPlacement.setTraineeId(currentTrainee.getId());
     currentPlacement.setPostId(post.getId());
     currentPlacement.setPlacementType("In Post");
-    currentPlacement.setWholeTimeEquivalent(new BigDecimal(1.0));
+    currentPlacement.setWholeTimeEquivalent(1.0F);
     currentPlacement.setLifecycleState(LifecycleState.APPROVED);
     placementDetailsRepository.saveAndFlush(currentPlacement);
 
@@ -2072,7 +2072,7 @@ public class PlacementResourceIntTest {
     assertThat(testPlacement.getTrainingDescription()).isEqualTo(UPDATED_TRAINING_DESCRPTION);
     assertThat(testPlacement.getPlacementType()).isEqualTo(placementType);
     assertThat(testPlacement.getWholeTimeEquivalent())
-        .isEqualTo(UPDATED_PLACEMENT_WHOLE_TIME_EQUIVALENT.setScale(2, BigDecimal.ROUND_HALF_UP));
+        .isEqualTo(UPDATED_PLACEMENT_WHOLE_TIME_EQUIVALENT);
 
     // validate the EsrNotification in the database
     final List<EsrNotification> esrNotifications = esrNotificationRepository.findAll();
@@ -2090,8 +2090,7 @@ public class PlacementResourceIntTest {
         .forEach(esrNotification -> {
           assertThat(esrNotification.getChangeOfProjectedHireDate()).isNull();
           assertThat(esrNotification.getCurrentTraineeWorkingHoursIndicator()).isEqualTo(
-              UPDATED_PLACEMENT_WHOLE_TIME_EQUIVALENT.setScale(2, BigDecimal.ROUND_HALF_UP)
-                  .doubleValue());
+              UPDATED_PLACEMENT_WHOLE_TIME_EQUIVALENT.floatValue());
         });
   }
 
@@ -2148,7 +2147,7 @@ public class PlacementResourceIntTest {
     assertThat(testPlacement.getTrainingDescription()).isEqualTo(UPDATED_TRAINING_DESCRPTION);
     assertThat(testPlacement.getPlacementType()).isEqualTo(placementType);
     assertThat(testPlacement.getWholeTimeEquivalent())
-        .isEqualTo(UPDATED_PLACEMENT_WHOLE_TIME_EQUIVALENT.setScale(2, BigDecimal.ROUND_HALF_UP));
+        .isEqualTo(UPDATED_PLACEMENT_WHOLE_TIME_EQUIVALENT);
 
     // validate the EsrNotification in the database
     final List<EsrNotification> esrNotifications = esrNotificationRepository.findAll();
@@ -2160,8 +2159,7 @@ public class PlacementResourceIntTest {
         .forEach(esrNotification -> {
           assertThat(esrNotification.getChangeOfProjectedHireDate()).isNull();
           assertThat(esrNotification.getCurrentTraineeWorkingHoursIndicator()).isEqualTo(
-              UPDATED_PLACEMENT_WHOLE_TIME_EQUIVALENT.setScale(2, BigDecimal.ROUND_HALF_UP)
-                  .doubleValue());
+              UPDATED_PLACEMENT_WHOLE_TIME_EQUIVALENT.floatValue());
         });
   }
 }

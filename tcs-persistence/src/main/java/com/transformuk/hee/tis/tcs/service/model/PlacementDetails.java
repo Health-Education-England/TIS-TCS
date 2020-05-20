@@ -2,7 +2,6 @@ package com.transformuk.hee.tis.tcs.service.model;
 
 import com.transformuk.hee.tis.tcs.api.enumeration.LifecycleState;
 import com.transformuk.hee.tis.tcs.api.enumeration.PlacementStatus;
-import java.math.BigDecimal;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.util.HashSet;
@@ -45,7 +44,7 @@ public class PlacementDetails {
   private LocalDate dateTo;
 
   @Column(name = "placementWholeTimeEquivalent")
-  private BigDecimal wholeTimeEquivalent;
+  private Float wholeTimeEquivalent;
 
   private Long siteId;
 
