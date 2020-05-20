@@ -45,7 +45,7 @@ public class PlacementDetails {
   private LocalDate dateTo;
 
   @Column(name = "placementWholeTimeEquivalent")
-  private BigDecimal wholeTimeEquivalent;
+  private Float wholeTimeEquivalent;
 
   private Long siteId;
 

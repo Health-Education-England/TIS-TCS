@@ -47,7 +47,7 @@ public class PlacementDTO implements Serializable {
   private LocalDate dateTo;
   @NotNull(message = "PlacementType is required", groups = {Update.class, Create.class})
   private String placementType;
-  private BigDecimal placementWholeTimeEquivalent;
+  private Float placementWholeTimeEquivalent;
   private String trainingDescription;
   private String localPostNumber;
   private Set<PlacementSupervisorDTO> supervisors = new HashSet<>();

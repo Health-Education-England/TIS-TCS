@@ -435,13 +435,13 @@ public class EsrNotificationServiceImplTest {
     LocalDate asOfDate = LocalDate.now();
     Placement placement = aPlacement(deaneryPostNumber);
     placement.setSiteCode("SITE-01");
-    placement.setPlacementWholeTimeEquivalent(new BigDecimal(0.5F));
+    placement.setPlacementWholeTimeEquivalent(0.5F);
 
     Placement currentPlacement = aPlacement(deaneryPostNumber);
     currentPlacement.setDateFrom(asOfDate.minusMonths(1));
     currentPlacement.setDateTo(asOfDate.plusMonths(2));
     currentPlacement.setSiteCode("SITE-01");
-    currentPlacement.setPlacementWholeTimeEquivalent(new BigDecimal(1.0F));
+    currentPlacement.setPlacementWholeTimeEquivalent(1.0F);
 
     when(placementRepository.findCurrentPlacementsForPosts(
         asOfDate, singletonList(deaneryPostNumber), placementTypes, lifecycleStates))
@@ -635,7 +635,7 @@ public class EsrNotificationServiceImplTest {
     currentPlacement.setDateFrom(placementDetailsDTO.getDateFrom());
     currentPlacement.setDateTo(placementDetailsDTO.getDateTo());
     currentPlacement.setSiteCode(placementDetailsDTO.getSiteCode());
-    currentPlacement.setPlacementWholeTimeEquivalent(new BigDecimal(1.0));
+    currentPlacement.setPlacementWholeTimeEquivalent(1.0F);
 
     when(placementRepository.findFuturePlacementsForPosts(
         asOfDate.plusDays(2), asOfDate.plusWeeks(13), singletonList(deaneryPostNumber),
@@ -668,7 +668,7 @@ public class EsrNotificationServiceImplTest {
     placement.setLocalPostNumber(deaneryPostNumber);
     placement.setPost(aPost(deaneryPostNumber));
     placement.setTrainee(aTrainee("aTrainee-FN", "aTrainee-SN", "trainee@xyz.com"));
-    placement.setPlacementWholeTimeEquivalent(new BigDecimal(1.0F));
+    placement.setPlacementWholeTimeEquivalent(1.0F);
     return placement;
   }
 
@@ -690,7 +690,7 @@ public class EsrNotificationServiceImplTest {
 
     PlacementDetailsDTO placementDetailsDTO = new PlacementDetailsDTO();
     placementDetailsDTO.setId(1L);
-    placementDetailsDTO.setWholeTimeEquivalent(new BigDecimal("1.0"));
+    placementDetailsDTO.setWholeTimeEquivalent(1.0F);
     return placementDetailsDTO;
   }
 
@@ -716,7 +716,7 @@ public class EsrNotificationServiceImplTest {
     placement.setId(id);
     placement.setDateFrom(from);
     placement.setDateTo(to);
-    placement.setPlacementWholeTimeEquivalent(new BigDecimal(1.0F));
+    placement.setPlacementWholeTimeEquivalent(1.0F);
 //    placement.setLocalPostNumber("EOE/RGT00/021/FY1/010");
     placement.setTrainee(aTrainee("aTrainee-FN", "aTrainee-SN", "trainee@xyz.com"));
     placement.setPost(aPost(deaneryNumber));

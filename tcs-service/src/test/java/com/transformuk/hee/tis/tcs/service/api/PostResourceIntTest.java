@@ -1212,7 +1212,7 @@ public class PostResourceIntTest {
     contactDetailsRepository.saveAndFlush(contactDetails);
     Placement placement = PlacementResourceIntTest.createPlacementEntity();
     placement.setTrainee(person);
-    placement.setPlacementWholeTimeEquivalent(new BigDecimal("1.0"));
+    placement.setPlacementWholeTimeEquivalent(1.0F);
     placement.setGradeAbbreviation(DEFAULT_TRAINEE_GRADE_ABBREVIATION);
     placement.setPost(post);
     placementRepository.saveAndFlush(placement);

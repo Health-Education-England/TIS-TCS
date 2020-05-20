@@ -85,7 +85,7 @@ public class Placement implements Serializable {
   @Column(name = "placementType")
   private String placementType;
   @Column(name = "placementWholeTimeEquivalent")
-  private BigDecimal placementWholeTimeEquivalent;
+  private Float placementWholeTimeEquivalent;
   @Column(name = "trainingDescription")
   private String trainingDescription;
   @Column(name = "localPostNumber")
