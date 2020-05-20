@@ -25,10 +25,12 @@ public interface QualificationMapper {
   // TODO: Look at other options to avoid cyclic mapping such as using @Context.
   @Mapping(target = "programmeMemberships", ignore = true)
   @Mapping(target = "qualifications", ignore = true)
+  @Mapping(target = "trainerApprovals", ignore = true)
   PersonDTO personToPersonDto(Person person);
 
   // TODO: Look at other options to avoid cyclic mapping such as using @Context.
   @Mapping(target = "programmeMemberships", ignore = true)
   @Mapping(target = "qualifications", ignore = true)
+  @Mapping(target = "trainerApprovals", ignore = true)
   Person personDtoToPerson(PersonDTO personDto);
 }

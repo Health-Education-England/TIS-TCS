@@ -2,6 +2,8 @@ package com.transformuk.hee.tis.tcs.service.service.mapper;
 
 import com.transformuk.hee.tis.tcs.api.dto.PersonDTO;
 import com.transformuk.hee.tis.tcs.service.model.Person;
+import java.util.ArrayList;
+import java.util.HashSet;
 import java.util.List;
 import java.util.stream.Collectors;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -34,6 +36,9 @@ public class PersonMapper {
   @Autowired
   private ProgrammeMembershipMapper programmeMembershipMapper;
 
+  @Autowired
+  private TrainerApprovalMapper trainerApprovalMapper;
+
   public Person toEntity(PersonDTO dto) {
     if (dto == null) {
       return null;
@@ -53,21 +58,25 @@ public class PersonMapper {
     person.setPersonalDetails(personalDetailsMapper.toEntity(dto.getPersonalDetails()));
     person.setGmcDetails(gmcDetailsMapper.toEntity(dto.getGmcDetails()));
     person.setGdcDetails(gdcDetailsMapper.toEntity(dto.getGdcDetails()));
+
     if (dto.getQualifications() != null) {
-      person.setQualifications(qualificationMapper.toEntities(
-          dto.getQualifications().stream().collect(Collectors.toList())).stream()
-          .collect(Collectors.toSet())
-      );
+      person.setQualifications(
+          new HashSet<>(qualificationMapper.toEntities(new ArrayList<>(dto.getQualifications()))));
     }
+
     if (dto.getProgrammeMemberships() != null) {
-      person.setProgrammeMemberships(
-          programmeMembershipMapper.programmeMembershipDTOsToProgrammeMemberships(
-              dto.getProgrammeMemberships().stream().collect(Collectors.toList())).stream()
-              .collect(Collectors.toSet())
-      );
+      person.setProgrammeMemberships(new HashSet<>(programmeMembershipMapper
+          .programmeMembershipDTOsToProgrammeMemberships(
+              new ArrayList<>(dto.getProgrammeMemberships()))));
     }
+
     person.setRightToWork(rightToWorkMapper.toEntity(dto.getRightToWork()));
     person.setRegulator(dto.getRegulator());
+
+    if (dto.getTrainerApprovals() != null) {
+      person.setTrainerApprovals(new HashSet<>(
+          trainerApprovalMapper.toEntities(new ArrayList<>(dto.getTrainerApprovals()))));
+    }
 
     return person;
   }
@@ -95,20 +104,24 @@ public class PersonMapper {
     personDTO.setPersonalDetails(personalDetailsMapper.toDto(entity.getPersonalDetails()));
     personDTO.setGmcDetails(gmcDetailsMapper.toDto(entity.getGmcDetails()));
     personDTO.setGdcDetails(gdcDetailsMapper.toDto(entity.getGdcDetails()));
+
     if (entity.getQualifications() != null) {
-      personDTO.setQualifications(qualificationMapper.toDTOs(
-          entity.getQualifications().stream().collect(Collectors.toList())).stream()
-          .collect(Collectors.toSet())
-      );
+      personDTO.setQualifications(
+          new HashSet<>(qualificationMapper.toDTOs(new ArrayList<>(entity.getQualifications()))));
     }
+
     personDTO.setRightToWork(rightToWorkMapper.toDto(entity.getRightToWork()));
     personDTO.setRegulator(entity.getRegulator());
+
     if (entity.getProgrammeMemberships() != null) {
-      personDTO.setProgrammeMemberships(
-          programmeMembershipMapper.programmeMembershipsToProgrammeMembershipDTOs(
-              entity.getProgrammeMemberships().stream().collect(Collectors.toList())).stream()
-              .collect(Collectors.toSet())
-      );
+      personDTO.setProgrammeMemberships(new HashSet<>(programmeMembershipMapper
+          .programmeMembershipsToProgrammeMembershipDTOs(
+              new ArrayList<>(entity.getProgrammeMemberships()))));
+    }
+
+    if (entity.getTrainerApprovals() != null) {
+      personDTO.setTrainerApprovals(new HashSet<>(
+          trainerApprovalMapper.toDTOs(new ArrayList<>(entity.getTrainerApprovals()))));
     }
 
     return personDTO;

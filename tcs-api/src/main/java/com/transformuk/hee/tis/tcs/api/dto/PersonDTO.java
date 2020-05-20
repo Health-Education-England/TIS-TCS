@@ -60,6 +60,8 @@ public class PersonDTO implements Serializable {
 
   private RightToWorkDTO rightToWork;
 
+  private Set<TrainerApprovalDTO> trainerApprovals = new HashSet<>();
+
   private List<String> messageList = new ArrayList<>();
 
   public void addMessage(String message) {
