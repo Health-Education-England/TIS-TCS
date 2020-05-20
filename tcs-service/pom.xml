@@ -12,54 +12,6 @@
 
   <groupId>com.transformuk.hee.tis</groupId>
   <artifactId>tcs-service</artifactId>
-  <version>6.7.14</version>
-  <packaging>war</packaging>
-  <name>tcs-service</name>
-
-  <prerequisites>
-    <maven>${maven.version}</maven>
-  </prerequisites>
-
-  <properties>
-    <argLine>-Djava.security.egd=file:/dev/./urandom -Xmx1g</argLine>
-    <assertj.version>3.6.2</assertj.version>
-    <awaitility.version>2.0.0</awaitility.version>
-    <commons-io.version>2.5</commons-io.version>
-    <commons-lang.version>3.5</commons-lang.version>
-    <docker-maven-plugin.version>0.4.13</docker-maven-plugin.version>
-    <frontend.maven.plugin.version>1.3</frontend.maven.plugin.version>
-    <groovy.version>2.4.13</groovy.version>
-    <hibernate.version>5.3.7.Final</hibernate.version>
-    <hikaricp.version>3.2.0</hikaricp.version>
-    <java.version>1.8</java.version>
-    <javassist.version>3.21.0-GA</javassist.version>
-    <javax.servlet.version>4.0.1</javax.servlet.version>
-    <jhipster.server.version>1.2.0</jhipster.server.version>
-    <jjwt.version>0.7.0</jjwt.version>
-    <logstash-logback-encoder.version>4.8</logstash-logback-encoder.version>
-    <m2e.apt.activation>jdt_apt</m2e.apt.activation>
-    <mapstruct.version>1.3.0.Final</mapstruct.version>
-    <maven-compiler-plugin.version>3.6.0</maven-compiler-plugin.version>
-    <maven-enforcer-plugin.version>1.4.1</maven-enforcer-plugin.version>
-    <maven-resources-plugin.version>3.0.1</maven-resources-plugin.version>
-    <maven.build.timestamp.format>yyyyMMddHHmmss</maven.build.timestamp.format>
-    <maven.compiler.source>${java.version}</maven.compiler.source>
-    <maven.compiler.target>${java.version}</maven.compiler.target>
-    <maven.version>3.0.0</maven.version>
-
-    <project.testresult.directory>${project.build.directory}/test-results</project.testresult.directory>
-    <run.addResources>false</run.addResources>
-    <scala-maven-plugin.version>3.2.2</scala-maven-plugin.version>
-    <scala.version>2.12.1</scala.version>
-
-    <spock.version>1.1-groovy-2.4</spock.version>
-    <surefire.forkCount>1</surefire.forkCount>
-    <!-- Spring properties -->
-    <tis.shared.modules.version>2.3.0</tis.shared.modules.version>
-    <undertow.version>2.0.15.Final</undertow.version>
-    <validation-api.version>1.1.0.Final</validation-api.version>
-  </properties>
-
   <dependencies>
     <dependency>
       <groupId>com.fasterxml.jackson.datatype</groupId>
@@ -116,7 +68,7 @@
     <dependency>
       <groupId>uk.nhs.tis</groupId>
       <artifactId>tcs-persistence</artifactId>
-      <version>2.6.6</version>
+      <version>2.7.0</version>
     </dependency>
     <dependency>
       <groupId>com.zaxxer</groupId>
@@ -337,6 +289,54 @@
     </dependency>
 
   </dependencies>
+  <packaging>war</packaging>
+  <name>tcs-service</name>
+
+  <prerequisites>
+    <maven>${maven.version}</maven>
+  </prerequisites>
+
+  <properties>
+    <argLine>-Djava.security.egd=file:/dev/./urandom -Xmx1g</argLine>
+    <assertj.version>3.6.2</assertj.version>
+    <awaitility.version>2.0.0</awaitility.version>
+    <commons-io.version>2.5</commons-io.version>
+    <commons-lang.version>3.5</commons-lang.version>
+    <docker-maven-plugin.version>0.4.13</docker-maven-plugin.version>
+    <frontend.maven.plugin.version>1.3</frontend.maven.plugin.version>
+    <groovy.version>2.4.13</groovy.version>
+    <hibernate.version>5.3.7.Final</hibernate.version>
+    <hikaricp.version>3.2.0</hikaricp.version>
+    <java.version>1.8</java.version>
+    <javassist.version>3.21.0-GA</javassist.version>
+    <javax.servlet.version>4.0.1</javax.servlet.version>
+    <jhipster.server.version>1.2.0</jhipster.server.version>
+    <jjwt.version>0.7.0</jjwt.version>
+    <logstash-logback-encoder.version>4.8</logstash-logback-encoder.version>
+    <m2e.apt.activation>jdt_apt</m2e.apt.activation>
+    <mapstruct.version>1.3.0.Final</mapstruct.version>
+    <maven-compiler-plugin.version>3.6.0</maven-compiler-plugin.version>
+    <maven-enforcer-plugin.version>1.4.1</maven-enforcer-plugin.version>
+    <maven-resources-plugin.version>3.0.1</maven-resources-plugin.version>
+    <maven.build.timestamp.format>yyyyMMddHHmmss</maven.build.timestamp.format>
+    <maven.compiler.source>${java.version}</maven.compiler.source>
+    <maven.compiler.target>${java.version}</maven.compiler.target>
+    <maven.version>3.0.0</maven.version>
+
+    <project.testresult.directory>${project.build.directory}/test-results</project.testresult.directory>
+    <run.addResources>false</run.addResources>
+    <scala-maven-plugin.version>3.2.2</scala-maven-plugin.version>
+    <scala.version>2.12.1</scala.version>
+
+    <spock.version>1.1-groovy-2.4</spock.version>
+    <surefire.forkCount>1</surefire.forkCount>
+    <!-- Spring properties -->
+    <tis.shared.modules.version>2.3.0</tis.shared.modules.version>
+    <undertow.version>2.0.15.Final</undertow.version>
+    <validation-api.version>1.1.0.Final</validation-api.version>
+  </properties>
+
+  <version>6.8.0</version>
   <build>
     <defaultGoal>spring-boot:run</defaultGoal>
     <plugins>
