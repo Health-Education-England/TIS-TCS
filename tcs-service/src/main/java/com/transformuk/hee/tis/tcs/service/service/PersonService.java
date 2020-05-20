@@ -21,10 +21,10 @@ public interface PersonService {
   /**
    * Save a person.
    *
-   * @param personDTO the entity to save
+   * @param personDto the entity to save
    * @return the persisted entity
    */
-  PersonDTO save(PersonDTO personDTO);
+  PersonDTO save(PersonDTO personDto);
 
   /**
    * Create a person.
@@ -32,18 +32,26 @@ public interface PersonService {
    * Person is one of those entities that share the ID with the joining tables Save the person
    * object and ensure we copy the generated id to the linked entities
    *
-   * @param personDTO the entity to save
+   * @param personDto the entity to save
    * @return the persisted entity
    */
-  PersonDTO create(PersonDTO personDTO);
+  PersonDTO create(PersonDTO personDto);
 
   /**
    * Save a list of persons
    *
-   * @param personDTOs the list of entities to save
+   * @param personDtos the list of entities to save
    * @return a list of persisted entities
    */
-  List<PersonDTO> save(List<PersonDTO> personDTOs);
+  List<PersonDTO> save(List<PersonDTO> personDtos);
+
+  /**
+   * Patch a list of persons.
+   *
+   * @param personDtos the list of entities to patch.
+   * @return The patched entities.
+   */
+  List<PersonDTO> patch(List<PersonDTO> personDtos);
 
   /**
    * Get all the people.
@@ -90,7 +98,7 @@ public interface PersonService {
    * qualification data. Implemented for the Trust Access work
    *
    * @param id the ID of the trainee
-   * @return
+   * @return The found person.
    */
   PersonV2DTO findPersonV2WithProgrammeMembershipsSorted(Long id);
 

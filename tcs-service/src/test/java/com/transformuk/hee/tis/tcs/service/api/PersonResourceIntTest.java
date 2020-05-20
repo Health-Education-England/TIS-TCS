@@ -894,14 +894,14 @@ public class PersonResourceIntTest {
   }
 
   @Test
-  public void patchPersonShouldReturnNotImplemented() throws Exception {
+  public void patchPersonShouldReturnNotImplementedMessage() throws Exception {
     PersonDTO dto = new PersonDTO();
     dto.setId(1L);
 
     restPersonMockMvc.perform(patch("/api/bulk-people")
         .contentType(TestUtil.APPLICATION_JSON_UTF8)
         .content(TestUtil.convertObjectToJsonBytes(Collections.singletonList(dto))))
-        .andExpect(status().isNotImplemented())
-        .andExpect(jsonPath("$").doesNotExist());
+        .andExpect(status().isOk())
+        .andExpect(jsonPath("$[0].messageList[0]").value("Not yet implemented."));
   }
 }

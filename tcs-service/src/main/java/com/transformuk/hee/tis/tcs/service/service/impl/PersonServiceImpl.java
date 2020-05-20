@@ -13,6 +13,7 @@ import com.transformuk.hee.tis.tcs.api.dto.PersonalDetailsDTO;
 import com.transformuk.hee.tis.tcs.api.dto.ProgrammeMembershipDTO;
 import com.transformuk.hee.tis.tcs.api.enumeration.PersonOwnerRule;
 import com.transformuk.hee.tis.tcs.api.enumeration.Status;
+import com.transformuk.hee.tis.tcs.service.api.validation.PersonValidator;
 import com.transformuk.hee.tis.tcs.service.event.PersonCreatedEvent;
 import com.transformuk.hee.tis.tcs.service.event.PersonDeletedEvent;
 import com.transformuk.hee.tis.tcs.service.event.PersonSavedEvent;
@@ -122,6 +123,9 @@ public class PersonServiceImpl implements PersonService {
 
   @Autowired
   private ApplicationEventPublisher applicationEventPublisher;
+
+  @Autowired
+  private PersonValidator personValidator;
 
   /**
    * Save a person.
@@ -234,6 +238,27 @@ public class PersonServiceImpl implements PersonService {
         .forEach(applicationEventPublisher::publishEvent);
 
     return personDTOS;
+  }
+
+  /**
+   * Patch a list of persons, patching will be skipped for any entities which fail validation.
+   *
+   * @param personDtos the list of entities to patch.
+   * @return The patched entities and skipped entities with validation errors added.
+   */
+  @Override
+  public List<PersonDTO> patch(List<PersonDTO> personDtos) {
+    // Perform validation.
+    personValidator.validateForBulk(personDtos);
+
+    // Patch valid persons.
+    for (PersonDTO personDto : personDtos) {
+      if (personDto.getMessageList().size() == 0) {
+        log.warn("People patching not yet implemented.");
+      }
+    }
+
+    return personDtos;
   }
 
   /**
