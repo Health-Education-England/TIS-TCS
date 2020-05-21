@@ -1,6 +1,5 @@
 package com.transformuk.hee.tis.tcs.service.api.validation;
 
-
 import com.transformuk.hee.tis.reference.api.dto.EthnicOriginDTO;
 import com.transformuk.hee.tis.reference.api.dto.GenderDTO;
 import com.transformuk.hee.tis.reference.api.dto.MaritalStatusDTO;
@@ -9,10 +8,14 @@ import com.transformuk.hee.tis.reference.api.dto.ReligiousBeliefDTO;
 import com.transformuk.hee.tis.reference.api.dto.SexualOrientationDTO;
 import com.transformuk.hee.tis.reference.client.impl.ReferenceServiceImpl;
 import com.transformuk.hee.tis.tcs.api.dto.PersonalDetailsDTO;
+import com.transformuk.hee.tis.tcs.api.enumeration.Disability;
 import com.transformuk.hee.tis.tcs.service.model.PersonalDetails;
+import java.lang.reflect.Method;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
 import org.apache.commons.lang3.StringUtils;
+import org.springframework.core.MethodParameter;
 import org.springframework.stereotype.Component;
 import org.springframework.validation.BeanPropertyBindingResult;
 import org.springframework.validation.FieldError;
@@ -26,9 +29,7 @@ import org.springframework.web.bind.MethodArgumentNotValidException;
 public class PersonalDetailsValidator {
 
   private static final String PERSONAL_DETAILS_DTO_NAME = "PersonalDetailsDTO";
-  private static final String NA = "N/A";
-  private static final String UNKNOWN = "UNKNOWN";
-  private ReferenceServiceImpl referenceService;
+  private final ReferenceServiceImpl referenceService;
 
   public PersonalDetailsValidator(ReferenceServiceImpl referenceService) {
     this.referenceService = referenceService;
@@ -47,6 +48,7 @@ public class PersonalDetailsValidator {
     List<FieldError> fieldErrors = new ArrayList<>();
     fieldErrors.addAll(checkGender(personalDetailsDTO));
     fieldErrors.addAll(checkNationality(personalDetailsDTO));
+    fieldErrors.addAll(checkDisability(personalDetailsDTO));
     fieldErrors.addAll(checkDualNationality(personalDetailsDTO));
     fieldErrors.addAll(checkEhtinicOrigin(personalDetailsDTO));
     fieldErrors.addAll(checkMaritalStatus(personalDetailsDTO));
@@ -57,7 +59,10 @@ public class PersonalDetailsValidator {
       BeanPropertyBindingResult bindingResult = new BeanPropertyBindingResult(personalDetailsDTO,
           PERSONAL_DETAILS_DTO_NAME);
       fieldErrors.forEach(bindingResult::addError);
-      throw new MethodArgumentNotValidException(null, bindingResult);
+
+      Method method = this.getClass().getMethods()[0];
+      MethodParameter methodParameter = new MethodParameter(method, 0);
+      throw new MethodArgumentNotValidException(methodParameter, bindingResult);
     }
   }
 
@@ -86,6 +91,21 @@ public class PersonalDetailsValidator {
             String.format("Gender %s does not exist", personalDetailsDTO.getGender())));
       }
     }
+    return fieldErrors;
+  }
+
+  private List<FieldError> checkDisability(PersonalDetailsDTO dto) {
+    List<FieldError> fieldErrors = new ArrayList<>();
+    String disability = dto.getDisability();
+
+    if (disability != null) {
+      if (Arrays.stream(Disability.values()).map(Enum::name).noneMatch(n -> n.equals(disability))) {
+        FieldError fieldError = new FieldError(PERSONAL_DETAILS_DTO_NAME, "disability",
+            "disability must match a reference value.");
+        fieldErrors.add(fieldError);
+      }
+    }
+
     return fieldErrors;
   }
 
