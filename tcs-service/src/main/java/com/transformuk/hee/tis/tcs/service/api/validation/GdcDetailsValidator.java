@@ -1,6 +1,5 @@
 package com.transformuk.hee.tis.tcs.service.api.validation;
 
-
 import com.transformuk.hee.tis.reference.api.dto.GdcStatusDTO;
 import com.transformuk.hee.tis.reference.client.impl.ReferenceServiceImpl;
 import com.transformuk.hee.tis.tcs.api.dto.GdcDetailsDTO;
@@ -28,11 +27,18 @@ public class GdcDetailsValidator {
 
   private GdcDetailsRepository gdcDetailsRepository;
   private ReferenceServiceImpl referenceService;
+  private final boolean currentOnly;
 
   public GdcDetailsValidator(GdcDetailsRepository gdcDetailsRepository,
       ReferenceServiceImpl referenceService) {
+    this(gdcDetailsRepository, referenceService, false);
+  }
+
+  public GdcDetailsValidator(GdcDetailsRepository gdcDetailsRepository,
+      ReferenceServiceImpl referenceService, boolean currentOnly) {
     this.gdcDetailsRepository = gdcDetailsRepository;
     this.referenceService = referenceService;
+    this.currentOnly = currentOnly;
   }
 
   /**
@@ -66,7 +72,8 @@ public class GdcDetailsValidator {
     List<FieldError> fieldErrors = new ArrayList<>();
     String gdcNumber = gdcDetailsDTO.getGdcNumber();
     if (StringUtils.containsWhitespace(gdcNumber)) {
-      fieldErrors.add(new FieldError(GDC_DETAILS_DTO_NAME, "gdcNumber", "gdcNumber should not contain any whitespaces"));
+      fieldErrors.add(new FieldError(GDC_DETAILS_DTO_NAME, "gdcNumber",
+          "gdcNumber should not contain any whitespaces"));
       return fieldErrors;
     }
     // Ignore if gdcNumber is N/A or UNKNOWN
@@ -111,7 +118,7 @@ public class GdcDetailsValidator {
     // then check the gmc status
     if (StringUtils.isNotEmpty(gdcDetailsDTO.getGdcStatus())) {
       Boolean isExists = referenceService
-          .isValueExists(GdcStatusDTO.class, gdcDetailsDTO.getGdcStatus());
+          .isValueExists(GdcStatusDTO.class, gdcDetailsDTO.getGdcStatus(), currentOnly);
       if (!isExists) {
         fieldErrors.add(new FieldError(GDC_DETAILS_DTO_NAME, "gdcStatus",
             String.format("gdcStatus %s does not exist", gdcDetailsDTO.getGdcStatus())));
@@ -136,5 +143,4 @@ public class GdcDetailsValidator {
     fieldErrors.add(new FieldError(GDC_DETAILS_DTO_NAME, field,
         String.format("%s is required", field)));
   }
-
 }

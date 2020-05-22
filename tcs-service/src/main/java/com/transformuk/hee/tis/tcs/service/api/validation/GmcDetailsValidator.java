@@ -1,6 +1,5 @@
 package com.transformuk.hee.tis.tcs.service.api.validation;
 
-
 import com.transformuk.hee.tis.reference.api.dto.GmcStatusDTO;
 import com.transformuk.hee.tis.reference.client.impl.ReferenceServiceImpl;
 import com.transformuk.hee.tis.tcs.api.dto.GmcDetailsDTO;
@@ -26,11 +25,16 @@ public class GmcDetailsValidator {
   private static final String UNKNOWN = "UNKNOWN";
   private GmcDetailsRepository gmcDetailsRepository;
   private ReferenceServiceImpl referenceService;
+  private final boolean currentOnly;
 
-  public GmcDetailsValidator(GmcDetailsRepository gmcDetailsRepository,
-      ReferenceServiceImpl referenceService) {
+  public GmcDetailsValidator(GmcDetailsRepository gmcDetailsRepository, ReferenceServiceImpl referenceService) {
+    this(gmcDetailsRepository, referenceService, false);
+  }
+
+  public GmcDetailsValidator(GmcDetailsRepository gmcDetailsRepository, ReferenceServiceImpl referenceService, boolean currentOnly) {
     this.gmcDetailsRepository = gmcDetailsRepository;
     this.referenceService = referenceService;
+    this.currentOnly = currentOnly;
   }
 
   /**
@@ -64,7 +68,8 @@ public class GmcDetailsValidator {
     List<FieldError> fieldErrors = new ArrayList<>();
     String gmcNumber = gmcDetailsDTO.getGmcNumber();
     if (StringUtils.containsWhitespace(gmcNumber)) {
-      fieldErrors.add(new FieldError(GMC_DETAILS_DTO_NAME, "gmcNumber", "gmcNumber should not contain any whitespaces"));
+      fieldErrors.add(new FieldError(GMC_DETAILS_DTO_NAME, "gmcNumber",
+          "gmcNumber should not contain any whitespaces"));
       return fieldErrors;
     }
     // Ignore if gmcNumber is N/A or UNKNOWN
@@ -110,8 +115,7 @@ public class GmcDetailsValidator {
     List<FieldError> fieldErrors = new ArrayList<>();
     // then check the gmc status
     if (StringUtils.isNotEmpty(gmcDetailsDTO.getGmcStatus())) {
-      Boolean isExists = referenceService
-          .isValueExists(GmcStatusDTO.class, gmcDetailsDTO.getGmcStatus());
+      Boolean isExists = referenceService.isValueExists(GmcStatusDTO.class, gmcDetailsDTO.getGmcStatus(), currentOnly);
       if (!isExists) {
         fieldErrors.add(new FieldError(GMC_DETAILS_DTO_NAME, "gmcStatus",
             String.format("gmcStatus %s does not exist", gmcDetailsDTO.getGmcStatus())));
