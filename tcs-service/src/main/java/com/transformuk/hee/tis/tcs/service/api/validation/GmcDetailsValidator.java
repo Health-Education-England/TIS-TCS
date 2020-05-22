@@ -8,6 +8,7 @@ import com.transformuk.hee.tis.tcs.service.repository.GmcDetailsRepository;
 import java.util.ArrayList;
 import java.util.List;
 import org.apache.commons.lang3.StringUtils;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 import org.springframework.validation.BeanPropertyBindingResult;
 import org.springframework.validation.FieldError;
@@ -27,11 +28,14 @@ public class GmcDetailsValidator {
   private ReferenceServiceImpl referenceService;
   private final boolean currentOnly;
 
-  public GmcDetailsValidator(GmcDetailsRepository gmcDetailsRepository, ReferenceServiceImpl referenceService) {
+  @Autowired
+  public GmcDetailsValidator(GmcDetailsRepository gmcDetailsRepository,
+      ReferenceServiceImpl referenceService) {
     this(gmcDetailsRepository, referenceService, false);
   }
 
-  public GmcDetailsValidator(GmcDetailsRepository gmcDetailsRepository, ReferenceServiceImpl referenceService, boolean currentOnly) {
+  public GmcDetailsValidator(GmcDetailsRepository gmcDetailsRepository,
+      ReferenceServiceImpl referenceService, boolean currentOnly) {
     this.gmcDetailsRepository = gmcDetailsRepository;
     this.referenceService = referenceService;
     this.currentOnly = currentOnly;
@@ -115,7 +119,8 @@ public class GmcDetailsValidator {
     List<FieldError> fieldErrors = new ArrayList<>();
     // then check the gmc status
     if (StringUtils.isNotEmpty(gmcDetailsDTO.getGmcStatus())) {
-      Boolean isExists = referenceService.isValueExists(GmcStatusDTO.class, gmcDetailsDTO.getGmcStatus(), currentOnly);
+      Boolean isExists = referenceService
+          .isValueExists(GmcStatusDTO.class, gmcDetailsDTO.getGmcStatus(), currentOnly);
       if (!isExists) {
         fieldErrors.add(new FieldError(GMC_DETAILS_DTO_NAME, "gmcStatus",
             String.format("gmcStatus %s does not exist", gmcDetailsDTO.getGmcStatus())));

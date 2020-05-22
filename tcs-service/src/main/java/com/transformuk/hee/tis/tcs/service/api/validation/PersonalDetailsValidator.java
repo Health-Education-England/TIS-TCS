@@ -15,6 +15,7 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 import org.apache.commons.lang3.StringUtils;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.core.MethodParameter;
 import org.springframework.stereotype.Component;
 import org.springframework.validation.BeanPropertyBindingResult;
@@ -32,6 +33,7 @@ public class PersonalDetailsValidator {
   private final ReferenceServiceImpl referenceService;
   private final boolean currentOnly;
 
+  @Autowired
   public PersonalDetailsValidator(ReferenceServiceImpl referenceService) {
     this(referenceService, false);
   }
