@@ -208,7 +208,7 @@ class RightToWorkValidatorTest {
   }
 
   @Test
-  void shouldThrowExceptionWhenEmpty() {
+  void shouldNotThrowExceptionWhenEmpty() {
     // Given.
     RightToWorkDTO dto = new RightToWorkDTO();
 

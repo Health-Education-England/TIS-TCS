@@ -1,13 +1,16 @@
 package com.transformuk.hee.tis.tcs.service.api.validation;
 
 
+import com.transformuk.hee.tis.reference.client.ReferenceService;
 import com.transformuk.hee.tis.tcs.api.dto.PersonDTO;
 import com.transformuk.hee.tis.tcs.service.model.Person;
 import com.transformuk.hee.tis.tcs.service.repository.PersonRepository;
 import java.lang.reflect.Method;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
+import java.util.Map;
 import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -30,10 +33,12 @@ public class PersonValidator {
   private static final String PERSON_DTO_NAME = "PersonDTO";
   private static final String NA = "N/A";
   private static final String UNKNOWN = "UNKNOWN";
-  private PersonRepository personRepository;
+  private final PersonRepository personRepository;
+  private final ReferenceService referenceService;
 
-  public PersonValidator(PersonRepository personRepository) {
+  public PersonValidator(PersonRepository personRepository, ReferenceService referenceService) {
     this.personRepository = personRepository;
+    this.referenceService = referenceService;
   }
 
   /**
@@ -45,9 +50,10 @@ public class PersonValidator {
    * @throws MethodArgumentNotValidException if there are validation errors
    */
   public void validate(PersonDTO personDto) throws MethodArgumentNotValidException {
-
     List<FieldError> fieldErrors = new ArrayList<>();
     fieldErrors.addAll(checkPublicHealthNumber(personDto));
+    fieldErrors.addAll(checkRole(personDto));
+
     if (!fieldErrors.isEmpty()) {
       BeanPropertyBindingResult bindingResult = new BeanPropertyBindingResult(personDto,
           PERSON_DTO_NAME);
@@ -148,5 +154,22 @@ public class PersonValidator {
     return fieldErrors;
   }
 
+  private List<FieldError> checkRole(PersonDTO personDto) {
+    List<FieldError> fieldErrors = new ArrayList<>();
 
+    String roleMultiValue = personDto.getRole();
+    if (roleMultiValue != null) {
+      String[] roles = roleMultiValue.split(";");
+      Map<String, Boolean> rolesExist = referenceService.rolesExist(Arrays.asList(roles), true);
+
+      for (String role : roles) {
+        if (!rolesExist.getOrDefault(role, false)) {
+          fieldErrors.add(new FieldError(PERSON_DTO_NAME, "role",
+              String.format("role '%s' did not match a reference value.", role)));
+        }
+      }
+    }
+
+    return fieldErrors;
+  }
 }
