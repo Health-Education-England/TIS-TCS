@@ -9,7 +9,6 @@ import com.transformuk.hee.tis.tcs.service.repository.IdProjection;
 import java.util.ArrayList;
 import java.util.List;
 import org.apache.commons.lang3.StringUtils;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 import org.springframework.validation.BeanPropertyBindingResult;
 import org.springframework.validation.FieldError;
@@ -28,19 +27,11 @@ public class GdcDetailsValidator {
 
   private GdcDetailsRepository gdcDetailsRepository;
   private ReferenceServiceImpl referenceService;
-  private final boolean currentOnly;
 
-  @Autowired
   public GdcDetailsValidator(GdcDetailsRepository gdcDetailsRepository,
       ReferenceServiceImpl referenceService) {
-    this(gdcDetailsRepository, referenceService, false);
-  }
-
-  public GdcDetailsValidator(GdcDetailsRepository gdcDetailsRepository,
-      ReferenceServiceImpl referenceService, boolean currentOnly) {
     this.gdcDetailsRepository = gdcDetailsRepository;
     this.referenceService = referenceService;
-    this.currentOnly = currentOnly;
   }
 
   /**
@@ -52,10 +43,11 @@ public class GdcDetailsValidator {
    */
   public void validate(GdcDetailsDTO gdcDetailsDTO) throws MethodArgumentNotValidException {
 
+    final boolean currentOnly = false;
     List<FieldError> fieldErrors = new ArrayList<>();
 //    fieldErrors.addAll(checkGdcStatus(gdcDetailsDTO));
     fieldErrors.addAll(checkGdcNumber(gdcDetailsDTO));
-    fieldErrors.addAll(checkGdcStatusExists(gdcDetailsDTO));
+    fieldErrors.addAll(checkGdcStatusExists(gdcDetailsDTO, currentOnly));
     if (!fieldErrors.isEmpty()) {
       BeanPropertyBindingResult bindingResult = new BeanPropertyBindingResult(gdcDetailsDTO,
           "GdcDetailsDTO");
@@ -115,7 +107,7 @@ public class GdcDetailsValidator {
     return fieldErrors;
   }
 
-  private List<FieldError> checkGdcStatusExists(GdcDetailsDTO gdcDetailsDTO) {
+  private List<FieldError> checkGdcStatusExists(GdcDetailsDTO gdcDetailsDTO, boolean currentOnly) {
     List<FieldError> fieldErrors = new ArrayList<>();
     // then check the gmc status
     if (StringUtils.isNotEmpty(gdcDetailsDTO.getGdcStatus())) {
@@ -144,5 +136,13 @@ public class GdcDetailsValidator {
   private void requireFieldErrors(List<FieldError> fieldErrors, String field) {
     fieldErrors.add(new FieldError(GDC_DETAILS_DTO_NAME, field,
         String.format("%s is required", field)));
+  }
+
+  public List<FieldError> validateForBulk(GdcDetailsDTO gdcDetailsDTO) {
+    final boolean currentOnly = true;
+    List<FieldError> fieldErrors = new ArrayList<>();
+    fieldErrors.addAll(checkGdcNumber(gdcDetailsDTO));
+    fieldErrors.addAll(checkGdcStatusExists(gdcDetailsDTO, currentOnly));
+    return fieldErrors;
   }
 }

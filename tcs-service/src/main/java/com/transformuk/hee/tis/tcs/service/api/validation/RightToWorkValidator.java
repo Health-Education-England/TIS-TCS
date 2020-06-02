@@ -85,4 +85,12 @@ public class RightToWorkValidator {
       fieldErrors.add(fieldError);
     }
   }
+
+  public List<FieldError> validateForBulk(RightToWorkDTO rightToWorkDTO) {
+    List<FieldError> fieldErrors = new ArrayList<>();
+    checkEeaResident(rightToWorkDTO, fieldErrors);
+    checkSettled(rightToWorkDTO, fieldErrors);
+    checkVisaDates(rightToWorkDTO, fieldErrors);
+    return fieldErrors;
+  }
 }

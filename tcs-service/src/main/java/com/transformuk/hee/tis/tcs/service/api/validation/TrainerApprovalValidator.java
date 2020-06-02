@@ -100,4 +100,12 @@ public class TrainerApprovalValidator {
     fieldErrors.add(new FieldError(TRAINER_APPROVAL_DTO_NAME, field,
         String.format("%s is required", field)));
   }
+
+  public List<FieldError> validateForBulk(TrainerApprovalDTO trainerApprovalDTO) {
+    List<FieldError> fieldErrors = new ArrayList<>();
+    fieldErrors.addAll(checkStartDate(trainerApprovalDTO));
+    fieldErrors.addAll(checkEndDate(trainerApprovalDTO));
+    fieldErrors.addAll(checkApprovalStatus(trainerApprovalDTO));
+    return fieldErrors;
+  }
 }

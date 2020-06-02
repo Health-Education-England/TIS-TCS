@@ -35,8 +35,9 @@ public class ContactDetailsValidator {
    * @throws MethodArgumentNotValidException if there are validation errors
    */
   public void validate(ContactDetailsDTO dto) throws MethodArgumentNotValidException {
+    final boolean currentOnly = false;
     List<FieldError> fieldErrors = new ArrayList<>();
-    fieldErrors.addAll(checkTitle(dto));
+    fieldErrors.addAll(checkTitle(dto, false));
     fieldErrors.addAll(checkAddress1(dto));
     fieldErrors.addAll(checkAddress2(dto));
     fieldErrors.addAll(checkPostCode(dto));
@@ -49,12 +50,12 @@ public class ContactDetailsValidator {
     }
   }
 
-  private List<FieldError> checkTitle(ContactDetailsDTO contactDetailsDTO) {
+  private List<FieldError> checkTitle(ContactDetailsDTO contactDetailsDTO, boolean currentOnly) {
     List<FieldError> fieldErrors = new ArrayList<>();
     // then check the grades
     if (StringUtils.isNotEmpty(contactDetailsDTO.getTitle())) {
       Boolean isExists = referenceService
-          .isValueExists(TitleDTO.class, contactDetailsDTO.getTitle());
+          .isValueExists(TitleDTO.class, contactDetailsDTO.getTitle(), currentOnly);
       if (!isExists) {
         fieldErrors.add(new FieldError(CONTACT_DETAILS_DTO_NAME, "title",
             String.format("title %s does not exist", contactDetailsDTO.getTitle())));
@@ -112,6 +113,16 @@ public class ContactDetailsValidator {
       fieldErrors.add(fieldError);
     }
 
+    return fieldErrors;
+  }
+
+  public List<FieldError> validateForBulk(ContactDetailsDTO dto) {
+    final boolean currentOnly = true;
+    List<FieldError> fieldErrors = new ArrayList<>();
+    fieldErrors.addAll(checkTitle(dto, currentOnly));
+    fieldErrors.addAll(checkAddress1(dto));
+    fieldErrors.addAll(checkAddress2(dto));
+    fieldErrors.addAll(checkPostCode(dto));
     return fieldErrors;
   }
 }

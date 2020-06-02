@@ -4,6 +4,9 @@ import static com.transformuk.hee.tis.tcs.service.service.impl.SpecificationFact
 
 import com.transformuk.hee.tis.reference.api.dto.RoleDTO;
 import com.transformuk.hee.tis.reference.client.ReferenceService;
+import com.transformuk.hee.tis.tcs.api.dto.ContactDetailsDTO;
+import com.transformuk.hee.tis.tcs.api.dto.GdcDetailsDTO;
+import com.transformuk.hee.tis.tcs.api.dto.GmcDetailsDTO;
 import com.transformuk.hee.tis.tcs.api.dto.PersonBasicDetailsDTO;
 import com.transformuk.hee.tis.tcs.api.dto.PersonDTO;
 import com.transformuk.hee.tis.tcs.api.dto.PersonLiteDTO;
@@ -11,6 +14,9 @@ import com.transformuk.hee.tis.tcs.api.dto.PersonV2DTO;
 import com.transformuk.hee.tis.tcs.api.dto.PersonViewDTO;
 import com.transformuk.hee.tis.tcs.api.dto.PersonalDetailsDTO;
 import com.transformuk.hee.tis.tcs.api.dto.ProgrammeMembershipDTO;
+import com.transformuk.hee.tis.tcs.api.dto.RightToWorkDTO;
+import com.transformuk.hee.tis.tcs.api.dto.TrainerApprovalDTO;
+import com.transformuk.hee.tis.tcs.api.enumeration.PermitToWorkType;
 import com.transformuk.hee.tis.tcs.api.enumeration.PersonOwnerRule;
 import com.transformuk.hee.tis.tcs.api.enumeration.Status;
 import com.transformuk.hee.tis.tcs.service.api.validation.PersonValidator;
@@ -35,13 +41,19 @@ import com.transformuk.hee.tis.tcs.service.repository.PersonRepository;
 import com.transformuk.hee.tis.tcs.service.repository.PersonalDetailsRepository;
 import com.transformuk.hee.tis.tcs.service.repository.RightToWorkRepository;
 import com.transformuk.hee.tis.tcs.service.repository.TrainerApprovalRepository;
+import com.transformuk.hee.tis.tcs.service.service.ContactDetailsService;
+import com.transformuk.hee.tis.tcs.service.service.GdcDetailsService;
+import com.transformuk.hee.tis.tcs.service.service.GmcDetailsService;
 import com.transformuk.hee.tis.tcs.service.service.PersonService;
+import com.transformuk.hee.tis.tcs.service.service.PersonalDetailsService;
+import com.transformuk.hee.tis.tcs.service.service.TrainerApprovalService;
 import com.transformuk.hee.tis.tcs.service.service.helper.SqlQuerySupplier;
 import com.transformuk.hee.tis.tcs.service.service.mapper.PersonBasicDetailsMapper;
 import com.transformuk.hee.tis.tcs.service.service.mapper.PersonLiteMapper;
 import com.transformuk.hee.tis.tcs.service.service.mapper.PersonMapper;
 import java.sql.ResultSet;
 import java.sql.SQLException;
+import java.time.LocalDate;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
@@ -126,6 +138,21 @@ public class PersonServiceImpl implements PersonService {
 
   @Autowired
   private PersonValidator personValidator;
+
+  @Autowired
+  private PersonalDetailsService personalDetailsService;
+
+  @Autowired
+  private ContactDetailsService contactDetailsService;
+
+  @Autowired
+  private GmcDetailsService gmcDetailsService;
+
+  @Autowired
+  private GdcDetailsService gdcDetailsService;
+
+  @Autowired
+  private TrainerApprovalService trainerApprovalService;
 
   /**
    * Save a person.
@@ -254,11 +281,233 @@ public class PersonServiceImpl implements PersonService {
     // Patch valid persons.
     for (PersonDTO personDto : personDtos) {
       if (personDto.getMessageList().size() == 0) {
-        log.warn("People patching not yet implemented.");
+        PersonDTO existingPersonDto = this.findOne(personDto.getId());
+        if (existingPersonDto != null) {
+          updateDtoForBulk(existingPersonDto, personDto);
+          PersonalDetailsDTO personalDetailsDto = personalDetailsService
+              .save(existingPersonDto.getPersonalDetails());
+          ContactDetailsDTO contactDetailsDto = contactDetailsService
+              .save(existingPersonDto.getContactDetails());
+          GmcDetailsDTO gmcDetailsDTO = gmcDetailsService.save(existingPersonDto.getGmcDetails());
+          GdcDetailsDTO gdcDetailsDTO = gdcDetailsService.save(existingPersonDto.getGdcDetails());
+          PersonDTO savedPersonDto = save(existingPersonDto);
+
+          existingPersonDto.getTrainerApprovals().forEach(r -> r.setPerson(savedPersonDto));
+          List<TrainerApprovalDTO> trainerApprovalDTO = trainerApprovalService.save(new ArrayList<>(existingPersonDto.getTrainerApprovals()));
+          log.warn("People patching not yet implemented.");
+        }
       }
     }
 
     return personDtos;
+  }
+
+  private void updateDtoForBulk(PersonDTO existingPersonDto, PersonDTO personDto) {
+    updatePerson(existingPersonDto, personDto);
+    updateContactDetails(existingPersonDto.getContactDetails(), personDto.getContactDetails());
+    updatePersonDetails(existingPersonDto.getPersonalDetails(), personDto.getPersonalDetails());
+    updateGmcDetails(existingPersonDto.getGmcDetails(), personDto.getGmcDetails());
+    updateGdcDetails(existingPersonDto.getGdcDetails(), personDto.getGdcDetails());
+    updateRightToWork(existingPersonDto.getRightToWork(), personDto.getRightToWork());
+
+    Set<TrainerApprovalDTO> existingDtoSet = existingPersonDto.getTrainerApprovals();
+    Set<TrainerApprovalDTO> trainerApprovalDtoSet = personDto.getTrainerApprovals();
+    if (trainerApprovalDtoSet != null || trainerApprovalDtoSet.size() != 0) {
+      if (existingDtoSet == null || existingDtoSet.size() == 0) {
+        existingPersonDto.setTrainerApprovals(trainerApprovalDtoSet);
+      } else {
+        updateTrainerApproval(existingPersonDto.getTrainerApprovals(), personDto.getTrainerApprovals());
+      }
+    }
+  }
+
+  private void updatePerson(PersonDTO existingPersonDto, PersonDTO personDto) {
+    String publicHealthNumber = personDto.getPublicHealthNumber();
+    String role = personDto.getRole();
+    if (personDto.getPublicHealthNumber() != null) {
+      existingPersonDto.setPublicHealthNumber(publicHealthNumber);
+    }
+    if (role != null) {
+      existingPersonDto.setRole(role);
+    }
+  }
+
+  private void updateContactDetails(ContactDetailsDTO existingDto,
+      ContactDetailsDTO contactDetailsDto) {
+    if (contactDetailsDto == null) {
+      return;
+    }
+    String address1 = contactDetailsDto.getAddress1();
+    String address2 = contactDetailsDto.getAddress2();
+    String address3 = contactDetailsDto.getAddress3();
+    String postcode = contactDetailsDto.getPostCode();
+    String forenames = contactDetailsDto.getForenames();
+    String surname = contactDetailsDto.getSurname();
+    String title = contactDetailsDto.getTitle();
+    String knownAs = contactDetailsDto.getKnownAs();
+    String email = contactDetailsDto.getEmail();
+    String mobile = contactDetailsDto.getMobileNumber();
+    String telephone = contactDetailsDto.getTelephoneNumber();
+    if (address1 != null) {
+      existingDto.setAddress1(address1);
+      existingDto.setAddress2(null);
+      existingDto.setAddress3(null);
+      existingDto.setAddress4(null);
+    }
+    if (address2 != null) {
+      existingDto.setAddress2(address2);
+    }
+    if (address3 != null) {
+      existingDto.setAddress3(address3);
+    }
+    if (postcode != null) {
+      existingDto.setPostCode(postcode);
+    }
+    if (forenames != null) {
+      existingDto.setForenames(forenames);
+    }
+    if (surname != null) {
+      existingDto.setSurname(surname);
+    }
+    if (title != null) {
+      existingDto.setTitle(title);
+    }
+    if (knownAs != null) {
+      existingDto.setKnownAs(knownAs);
+    }
+    if (email != null) {
+      existingDto.setEmail(email);
+    }
+    if (mobile != null) {
+      existingDto.setMobileNumber(mobile);
+    }
+    if (telephone != null) {
+      existingDto.setTelephoneNumber(telephone);
+    }
+  }
+
+  private void updatePersonDetails(PersonalDetailsDTO existingDto,
+      PersonalDetailsDTO personalDetailsDto) {
+    if (personalDetailsDto == null) {
+      return;
+    }
+    LocalDate dateOfBirth = personalDetailsDto.getDateOfBirth();
+    String nationalInsuranceNumber = personalDetailsDto.getNationalInsuranceNumber();
+    String gender = personalDetailsDto.getGender();
+    String nationality = personalDetailsDto.getNationality();
+    String maritalStatus = personalDetailsDto.getMaritalStatus();
+    String religiousBelief = personalDetailsDto.getReligiousBelief();
+    String ethnicOrigin = personalDetailsDto.getEthnicOrigin();
+    String sexualOrientation = personalDetailsDto.getSexualOrientation();
+    String disability = personalDetailsDto.getDisability();
+    String disabilityDetails = personalDetailsDto.getDisabilityDetails();
+    if (dateOfBirth != null) {
+      existingDto.setDateOfBirth(dateOfBirth);
+    }
+    if (nationalInsuranceNumber != null) {
+      existingDto.setNationalInsuranceNumber(nationalInsuranceNumber);
+    }
+    if (gender != null) {
+      existingDto.setGender(gender);
+    }
+    if (nationality != null) {
+      existingDto.setNationality(nationality);
+    }
+    if (maritalStatus != null) {
+      existingDto.setMaritalStatus(maritalStatus);
+    }
+    if (religiousBelief != null) {
+      existingDto.setReligiousBelief(religiousBelief);
+    }
+    if (ethnicOrigin != null) {
+      existingDto.setEthnicOrigin(ethnicOrigin);
+    }
+    if (sexualOrientation != null) {
+      existingDto.setSexualOrientation(sexualOrientation);
+    }
+    if (disability != null) {
+      existingDto.setDisability(disability);
+    }
+    if (disabilityDetails != null) {
+      existingDto.setDisabilityDetails(disabilityDetails);
+    }
+  }
+
+  private void updateGmcDetails(GmcDetailsDTO existingDto, GmcDetailsDTO gmcDetailsDto) {
+    if (gmcDetailsDto == null) {
+      return;
+    }
+    String gmcNumber = gmcDetailsDto.getGmcNumber();
+    String gmcStatus = gmcDetailsDto.getGmcStatus();
+    if (gmcNumber != null) {
+      existingDto.setGmcNumber(gmcNumber);
+    }
+    if (gmcStatus != null) {
+      existingDto.setGmcStatus(gmcStatus);
+    }
+  }
+
+  private void updateGdcDetails(GdcDetailsDTO existingDto, GdcDetailsDTO gdcDetailsDto) {
+    if (gdcDetailsDto == null) {
+      return;
+    }
+    String gdcNumber = gdcDetailsDto.getGdcNumber();
+    String gdcStatus = gdcDetailsDto.getGdcStatus();
+    if (gdcNumber != null) {
+      existingDto.setGdcNumber(gdcNumber);
+    }
+    if (gdcStatus != null) {
+      existingDto.setGdcStatus(gdcStatus);
+    }
+  }
+
+  private void updateRightToWork(RightToWorkDTO existingDto, RightToWorkDTO rightToWorkDto) {
+    if (rightToWorkDto == null) {
+      return;
+    }
+    String eeaResident = rightToWorkDto.getEeaResident();
+    PermitToWorkType permitToWork = rightToWorkDto.getPermitToWork();
+    String settled = rightToWorkDto.getSettled();
+    String visaDetails = rightToWorkDto.getVisaDetails();
+    LocalDate visaIssued = rightToWorkDto.getVisaIssued();
+    LocalDate visaValidTo = rightToWorkDto.getVisaValidTo();
+    if (eeaResident != null) {
+      existingDto.setEeaResident(eeaResident);
+    }
+    if (permitToWork != null) {
+      existingDto.setPermitToWork(permitToWork);
+    }
+    if (settled != null) {
+      existingDto.setSettled(settled);
+    }
+    if (visaDetails != null) {
+      existingDto.setVisaDetails(visaDetails);
+    }
+    if (visaIssued != null) {
+      existingDto.setVisaIssued(visaIssued);
+    }
+    if (visaValidTo != null) {
+      existingDto.setVisaValidTo(visaValidTo);
+    }
+  }
+
+  private void updateTrainerApproval(
+      Set<TrainerApprovalDTO> existingDtoSet, Set<TrainerApprovalDTO> trainerApprovalDtoSet) {
+    if (existingDtoSet.size() == 1 && trainerApprovalDtoSet.size() == 1) {
+      trainerApprovalDtoSet.forEach(ta -> {
+        existingDtoSet.forEach(eta -> {
+          if (ta.getApprovalStatus() != null) {
+            eta.setApprovalStatus(ta.getApprovalStatus());
+          }
+          if (ta.getStartDate() != null) {
+            eta.setStartDate(ta.getStartDate());
+          }
+          if (ta.getEndDate() != null) {
+            eta.setEndDate(ta.getEndDate());
+          }
+        });
+      });
+    }
   }
 
   /**

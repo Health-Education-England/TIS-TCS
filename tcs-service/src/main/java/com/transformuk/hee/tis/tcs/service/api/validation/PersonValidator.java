@@ -1,14 +1,13 @@
 package com.transformuk.hee.tis.tcs.service.api.validation;
 
-
 import com.transformuk.hee.tis.reference.client.ReferenceService;
 import com.transformuk.hee.tis.tcs.api.dto.PersonDTO;
+import com.transformuk.hee.tis.tcs.api.dto.TrainerApprovalDTO;
 import com.transformuk.hee.tis.tcs.service.model.Person;
 import com.transformuk.hee.tis.tcs.service.repository.PersonRepository;
 import java.lang.reflect.Method;
 import java.util.ArrayList;
 import java.util.Arrays;
-import java.util.Collections;
 import java.util.List;
 import java.util.Map;
 import org.apache.commons.lang3.StringUtils;
@@ -18,7 +17,6 @@ import org.springframework.core.MethodParameter;
 import org.springframework.stereotype.Component;
 import org.springframework.validation.BeanPropertyBindingResult;
 import org.springframework.validation.FieldError;
-import org.springframework.validation.ObjectError;
 import org.springframework.web.bind.MethodArgumentNotValidException;
 
 /**
@@ -35,10 +33,26 @@ public class PersonValidator {
   private static final String UNKNOWN = "UNKNOWN";
   private final PersonRepository personRepository;
   private final ReferenceService referenceService;
+  private final ContactDetailsValidator contactDetailsValidator;
+  private final GdcDetailsValidator gdcDetailsValidator;
+  private final GmcDetailsValidator gmcDetailsValidator;
+  private final PersonalDetailsValidator personalDetailsValidator;
+  private final RightToWorkValidator rightToWorkValidator;
+  private final TrainerApprovalValidator trainerApprovalValidator;
 
-  public PersonValidator(PersonRepository personRepository, ReferenceService referenceService) {
+  public PersonValidator(PersonRepository personRepository, ReferenceService referenceService,
+      ContactDetailsValidator contactDetailsValidator, GdcDetailsValidator gdcDetailsValidator,
+      GmcDetailsValidator gmcDetailsValidator, PersonalDetailsValidator personalDetailsValidator,
+      RightToWorkValidator rightToWorkValidator,
+      TrainerApprovalValidator trainerApprovalValidator) {
     this.personRepository = personRepository;
     this.referenceService = referenceService;
+    this.contactDetailsValidator = contactDetailsValidator;
+    this.gdcDetailsValidator = gdcDetailsValidator;
+    this.gmcDetailsValidator = gmcDetailsValidator;
+    this.personalDetailsValidator = personalDetailsValidator;
+    this.rightToWorkValidator = rightToWorkValidator;
+    this.trainerApprovalValidator = trainerApprovalValidator;
   }
 
   /**
@@ -72,7 +86,7 @@ public class PersonValidator {
    */
   public void validateForBulk(List<PersonDTO> personDtos) {
     for (PersonDTO personDto : personDtos) {
-      List<ObjectError> errors = validateForBulk(personDto);
+      List<FieldError> errors = validateForBulk(personDto);
 
       if (errors.isEmpty()) {
         continue;
@@ -80,7 +94,7 @@ public class PersonValidator {
 
       LOGGER.debug("Validation errors occurred for Person: {}", personDto);
 
-      for (ObjectError error : errors) {
+      for (FieldError error : errors) {
         String errorMessage = error.getDefaultMessage();
         personDto.addMessage(errorMessage);
 
@@ -97,8 +111,20 @@ public class PersonValidator {
    * @param personDto The person to check.
    * @return The collection of any validation errors, empty when there are no errors.
    */
-  private List<ObjectError> validateForBulk(PersonDTO personDto) {
-    return Collections.singletonList(new ObjectError(PERSON_DTO_NAME, "Not yet implemented."));
+  private List<FieldError> validateForBulk(PersonDTO personDto) {
+    List<FieldError> fieldErrors = new ArrayList<>();
+    fieldErrors.addAll(checkPerson(personDto));
+    fieldErrors.addAll(checkPublicHealthNumber(personDto));
+    fieldErrors.addAll(checkRole(personDto));
+    fieldErrors.addAll(contactDetailsValidator.validateForBulk(personDto.getContactDetails()));
+    fieldErrors.addAll(gdcDetailsValidator.validateForBulk(personDto.getGdcDetails()));
+    fieldErrors.addAll(gmcDetailsValidator.validateForBulk(personDto.getGmcDetails()));
+    fieldErrors.addAll(personalDetailsValidator.validateForBulk(personDto.getPersonalDetails()));
+    fieldErrors.addAll(rightToWorkValidator.validateForBulk(personDto.getRightToWork()));
+    personDto.getTrainerApprovals()
+        .forEach(ta -> fieldErrors.addAll(trainerApprovalValidator.validateForBulk(ta)));
+
+    return fieldErrors;
   }
 
   /**
@@ -157,9 +183,11 @@ public class PersonValidator {
   private List<FieldError> checkRole(PersonDTO personDto) {
     List<FieldError> fieldErrors = new ArrayList<>();
 
-    String roleMultiValue = personDto.getRole();
+    String roleMultiValue = personDto.getRole().replace(';', ',');
+    personDto.setRole(roleMultiValue);
+
     if (roleMultiValue != null) {
-      String[] roles = roleMultiValue.split(";");
+      String[] roles = roleMultiValue.split(",");
       Map<String, Boolean> rolesExist = referenceService.rolesExist(Arrays.asList(roles), true);
 
       for (String role : roles) {
@@ -170,6 +198,19 @@ public class PersonValidator {
       }
     }
 
+    return fieldErrors;
+  }
+
+  private List<FieldError> checkPerson(PersonDTO personDto) {
+    List<FieldError> fieldErrors = new ArrayList<>();
+    // check the Person
+    Long id = personDto.getId();
+    if (id != null) {
+      if (!personRepository.existsById(id)) {
+        fieldErrors.add(new FieldError(PERSON_DTO_NAME, "person",
+            String.format("Person with id %d does not exist", id)));
+      }
+    }
     return fieldErrors;
   }
 }

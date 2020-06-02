@@ -8,7 +8,6 @@ import com.transformuk.hee.tis.tcs.service.repository.GmcDetailsRepository;
 import java.util.ArrayList;
 import java.util.List;
 import org.apache.commons.lang3.StringUtils;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 import org.springframework.validation.BeanPropertyBindingResult;
 import org.springframework.validation.FieldError;
@@ -26,19 +25,11 @@ public class GmcDetailsValidator {
   private static final String UNKNOWN = "UNKNOWN";
   private GmcDetailsRepository gmcDetailsRepository;
   private ReferenceServiceImpl referenceService;
-  private final boolean currentOnly;
 
-  @Autowired
   public GmcDetailsValidator(GmcDetailsRepository gmcDetailsRepository,
       ReferenceServiceImpl referenceService) {
-    this(gmcDetailsRepository, referenceService, false);
-  }
-
-  public GmcDetailsValidator(GmcDetailsRepository gmcDetailsRepository,
-      ReferenceServiceImpl referenceService, boolean currentOnly) {
     this.gmcDetailsRepository = gmcDetailsRepository;
     this.referenceService = referenceService;
-    this.currentOnly = currentOnly;
   }
 
   /**
@@ -50,10 +41,11 @@ public class GmcDetailsValidator {
    */
   public void validate(GmcDetailsDTO gmcDetailsDTO) throws MethodArgumentNotValidException {
 
+    final boolean currentOnly = false;
     List<FieldError> fieldErrors = new ArrayList<>();
 //    fieldErrors.addAll(checkGmcStatus(gmcDetailsDTO));
     fieldErrors.addAll(checkGmcNumber(gmcDetailsDTO));
-    fieldErrors.addAll(checkGmcStatusExists(gmcDetailsDTO));
+    fieldErrors.addAll(checkGmcStatusExists(gmcDetailsDTO, currentOnly));
     if (!fieldErrors.isEmpty()) {
       BeanPropertyBindingResult bindingResult = new BeanPropertyBindingResult(gmcDetailsDTO,
           "GmcDetailsDTO");
@@ -115,7 +107,7 @@ public class GmcDetailsValidator {
     return fieldErrors;
   }
 
-  private List<FieldError> checkGmcStatusExists(GmcDetailsDTO gmcDetailsDTO) {
+  private List<FieldError> checkGmcStatusExists(GmcDetailsDTO gmcDetailsDTO, boolean currentOnly) {
     List<FieldError> fieldErrors = new ArrayList<>();
     // then check the gmc status
     if (StringUtils.isNotEmpty(gmcDetailsDTO.getGmcStatus())) {
@@ -152,4 +144,11 @@ public class GmcDetailsValidator {
         String.format("%s is required", field)));
   }
 
+  public List<FieldError> validateForBulk(GmcDetailsDTO gmcDetailsDTO) {
+    final boolean currentOnly = true;
+    List<FieldError> fieldErrors = new ArrayList<>();
+    fieldErrors.addAll(checkGmcNumber(gmcDetailsDTO));
+    fieldErrors.addAll(checkGmcStatusExists(gmcDetailsDTO, currentOnly));
+    return fieldErrors;
+  }
 }

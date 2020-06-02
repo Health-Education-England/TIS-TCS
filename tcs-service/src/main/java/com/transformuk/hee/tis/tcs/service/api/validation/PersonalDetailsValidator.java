@@ -15,7 +15,6 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 import org.apache.commons.lang3.StringUtils;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.core.MethodParameter;
 import org.springframework.stereotype.Component;
 import org.springframework.validation.BeanPropertyBindingResult;
@@ -31,16 +30,9 @@ public class PersonalDetailsValidator {
 
   private static final String PERSONAL_DETAILS_DTO_NAME = "PersonalDetailsDTO";
   private final ReferenceServiceImpl referenceService;
-  private final boolean currentOnly;
 
-  @Autowired
   public PersonalDetailsValidator(ReferenceServiceImpl referenceService) {
-    this(referenceService, false);
-  }
-
-  public PersonalDetailsValidator(ReferenceServiceImpl referenceService, boolean currentOnly) {
     this.referenceService = referenceService;
-    this.currentOnly = currentOnly;
   }
 
   /**
@@ -52,16 +44,16 @@ public class PersonalDetailsValidator {
    */
   public void validate(PersonalDetailsDTO personalDetailsDTO)
       throws MethodArgumentNotValidException {
-
+    final boolean currentOnly = false;
     List<FieldError> fieldErrors = new ArrayList<>();
-    fieldErrors.addAll(checkGender(personalDetailsDTO));
-    fieldErrors.addAll(checkNationality(personalDetailsDTO));
+    fieldErrors.addAll(checkGender(personalDetailsDTO, currentOnly));
+    fieldErrors.addAll(checkNationality(personalDetailsDTO, currentOnly));
     fieldErrors.addAll(checkDisability(personalDetailsDTO));
-    fieldErrors.addAll(checkDualNationality(personalDetailsDTO));
-    fieldErrors.addAll(checkEthnicOrigin(personalDetailsDTO));
-    fieldErrors.addAll(checkMaritalStatus(personalDetailsDTO));
-    fieldErrors.addAll(checkSexualOrientation(personalDetailsDTO));
-    fieldErrors.addAll(checkReligiousBelief(personalDetailsDTO));
+    fieldErrors.addAll(checkDualNationality(personalDetailsDTO, currentOnly));
+    fieldErrors.addAll(checkEthnicOrigin(personalDetailsDTO, currentOnly));
+    fieldErrors.addAll(checkMaritalStatus(personalDetailsDTO, currentOnly));
+    fieldErrors.addAll(checkSexualOrientation(personalDetailsDTO, currentOnly));
+    fieldErrors.addAll(checkReligiousBelief(personalDetailsDTO, currentOnly));
 
     if (!fieldErrors.isEmpty()) {
       BeanPropertyBindingResult bindingResult = new BeanPropertyBindingResult(personalDetailsDTO,
@@ -74,7 +66,8 @@ public class PersonalDetailsValidator {
     }
   }
 
-  private List<FieldError> checkNationality(PersonalDetailsDTO personalDetailsDTO) {
+  private List<FieldError> checkNationality(PersonalDetailsDTO personalDetailsDTO,
+      boolean currentOnly) {
     List<FieldError> fieldErrors = new ArrayList<>();
     // then check the Gender
     if (StringUtils.isNotEmpty(personalDetailsDTO.getNationality())) {
@@ -88,7 +81,7 @@ public class PersonalDetailsValidator {
     return fieldErrors;
   }
 
-  private List<FieldError> checkGender(PersonalDetailsDTO personalDetailsDTO) {
+  private List<FieldError> checkGender(PersonalDetailsDTO personalDetailsDTO, boolean currentOnly) {
     List<FieldError> fieldErrors = new ArrayList<>();
     // then check the Gender
     if (StringUtils.isNotEmpty(personalDetailsDTO.getGender())) {
@@ -117,7 +110,8 @@ public class PersonalDetailsValidator {
     return fieldErrors;
   }
 
-  private List<FieldError> checkDualNationality(PersonalDetailsDTO personalDetailsDTO) {
+  private List<FieldError> checkDualNationality(PersonalDetailsDTO personalDetailsDTO,
+      boolean currentOnly) {
     List<FieldError> fieldErrors = new ArrayList<>();
     // then check the DualNationality
     if (StringUtils.isNotEmpty(personalDetailsDTO.getDualNationality())) {
@@ -133,7 +127,8 @@ public class PersonalDetailsValidator {
     return fieldErrors;
   }
 
-  private List<FieldError> checkEthnicOrigin(PersonalDetailsDTO personalDetailsDTO) {
+  private List<FieldError> checkEthnicOrigin(PersonalDetailsDTO personalDetailsDTO,
+      boolean currentOnly) {
     List<FieldError> fieldErrors = new ArrayList<>();
     // then check the EhtinicOrigin
     if (StringUtils.isNotEmpty(personalDetailsDTO.getEthnicOrigin())) {
@@ -147,7 +142,8 @@ public class PersonalDetailsValidator {
     return fieldErrors;
   }
 
-  private List<FieldError> checkMaritalStatus(PersonalDetailsDTO personalDetailsDTO) {
+  private List<FieldError> checkMaritalStatus(PersonalDetailsDTO personalDetailsDTO,
+      boolean currentOnly) {
     List<FieldError> fieldErrors = new ArrayList<>();
     // then check the MaritalStatus
     if (StringUtils.isNotEmpty(personalDetailsDTO.getMaritalStatus())) {
@@ -163,7 +159,8 @@ public class PersonalDetailsValidator {
     return fieldErrors;
   }
 
-  private List<FieldError> checkSexualOrientation(PersonalDetailsDTO personalDetailsDTO) {
+  private List<FieldError> checkSexualOrientation(PersonalDetailsDTO personalDetailsDTO,
+      boolean currentOnly) {
     List<FieldError> fieldErrors = new ArrayList<>();
     // then check the SexualOrientation
     if (StringUtils.isNotEmpty(personalDetailsDTO.getSexualOrientation())) {
@@ -179,7 +176,8 @@ public class PersonalDetailsValidator {
     return fieldErrors;
   }
 
-  private List<FieldError> checkReligiousBelief(PersonalDetailsDTO personalDetailsDTO) {
+  private List<FieldError> checkReligiousBelief(PersonalDetailsDTO personalDetailsDTO,
+      boolean currentOnly) {
     List<FieldError> fieldErrors = new ArrayList<>();
     // then check the ReligiousBelie
     if (StringUtils.isNotEmpty(personalDetailsDTO.getReligiousBelief())) {
@@ -192,6 +190,20 @@ public class PersonalDetailsValidator {
                 personalDetailsDTO.getReligiousBelief())));
       }
     }
+    return fieldErrors;
+  }
+
+  public List<FieldError> validateForBulk(PersonalDetailsDTO personalDetailsDTO) {
+    final boolean currentOnly = true;
+    List<FieldError> fieldErrors = new ArrayList<>();
+    fieldErrors.addAll(checkGender(personalDetailsDTO, currentOnly));
+    fieldErrors.addAll(checkNationality(personalDetailsDTO, currentOnly));
+    fieldErrors.addAll(checkDisability(personalDetailsDTO));
+    fieldErrors.addAll(checkEthnicOrigin(personalDetailsDTO, currentOnly));
+    fieldErrors.addAll(checkMaritalStatus(personalDetailsDTO, currentOnly));
+    fieldErrors.addAll(checkSexualOrientation(personalDetailsDTO, currentOnly));
+    fieldErrors.addAll(checkReligiousBelief(personalDetailsDTO, currentOnly));
+
     return fieldErrors;
   }
 }
