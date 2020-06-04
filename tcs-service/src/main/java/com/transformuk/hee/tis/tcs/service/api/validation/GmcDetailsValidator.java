@@ -7,6 +7,7 @@ import com.transformuk.hee.tis.tcs.service.model.GmcDetails;
 import com.transformuk.hee.tis.tcs.service.repository.GmcDetailsRepository;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.stream.Collectors;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.stereotype.Component;
 import org.springframework.validation.BeanPropertyBindingResult;
@@ -72,36 +73,26 @@ public class GmcDetailsValidator {
     if (NA.equalsIgnoreCase(gmcNumber) || UNKNOWN.equalsIgnoreCase(gmcNumber)) {
       return fieldErrors;
     }
-    if (gmcDetailsDTO.getId() != null) {
-      if (StringUtils.isNotEmpty(gmcNumber)) {
-        List<GmcDetails> existingGmcDetails = gmcDetailsRepository
-            .findByGmcNumberOrderById(gmcNumber);
-        if (existingGmcDetails.size() > 1) {
-          fieldErrors.add(new FieldError(GMC_DETAILS_DTO_NAME, "gmcNumber",
-              String.format(
-                  "gmcNumber %s is not unique, there are currently %d persons with this number: %s",
-                  gmcDetailsDTO.getGmcNumber(), existingGmcDetails.size(),
-                  existingGmcDetails)));
-        } else if (existingGmcDetails.size() == 1) {
-          if (!gmcDetailsDTO.getId().equals(existingGmcDetails.get(0).getId())) {
-            fieldErrors.add(new FieldError(GMC_DETAILS_DTO_NAME, "gmcNumber",
-                String.format(
-                    "gmcNumber %s is not unique, there is currently one person with this number: %s",
-                    gmcDetailsDTO.getGmcNumber(), existingGmcDetails.get(0))));
-          }
-        }
+
+    if (StringUtils.isNotEmpty(gmcNumber)) {
+      List<GmcDetails> existingGmcDetails = gmcDetailsRepository
+          .findByGmcNumberOrderById(gmcNumber);
+
+      if (existingGmcDetails.size() > 0
+          && gmcDetailsDTO.getId() != null) { // should exclude the current one when update
+        existingGmcDetails.removeIf(r -> r.getId() == gmcDetailsDTO.getId());
       }
-    } else {
-      //if we create a gmc details
-      if (StringUtils.isNotEmpty(gmcNumber)) {
-        List<GmcDetails> existingGmcDetails = gmcDetailsRepository
-            .findByGmcNumberOrderById(gmcNumber);
-        if (!existingGmcDetails.isEmpty()) {
-          fieldErrors.add(new FieldError(GMC_DETAILS_DTO_NAME, "gmcNumber",
-              String.format(
-                  "gmcNumber %s is not unique, there is currently one person with this number: %s",
-                  gmcDetailsDTO.getGmcNumber(), existingGmcDetails.get(0))));
-        }
+
+      int existingSize = existingGmcDetails.size();
+      if (existingSize > 0) {
+        fieldErrors.add(new FieldError(GMC_DETAILS_DTO_NAME, "gmcNumber",
+            String.format(
+                "gmcNumber %s is not unique, there %s currently %d %s with this number (Person ID: %s)",
+                gmcDetailsDTO.getGmcNumber(), existingSize > 1 ? "are" : "is", existingSize,
+                existingSize > 1 ? "persons" : "person",
+                existingGmcDetails.stream().map(r -> r.getId().toString()).collect(
+                    Collectors.joining(","))
+            )));
       }
     }
     return fieldErrors;

@@ -12,6 +12,7 @@ import java.util.Arrays;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
+import java.util.stream.Collectors;
 import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -153,36 +154,26 @@ public class PersonValidator {
     if (NA.equalsIgnoreCase(publicHealthNumber) || UNKNOWN.equalsIgnoreCase(publicHealthNumber)) {
       return fieldErrors;
     }
-    if (personDto.getId() != null) {
-      if (StringUtils.isNotEmpty(publicHealthNumber)) {
-        List<Person> existingPersons = personRepository
-            .findByPublicHealthNumber(publicHealthNumber);
-        if (existingPersons.size() > 1) {
-          fieldErrors.add(new FieldError(PERSON_DTO_NAME, "publicHealthNumber",
-              String.format(
-                  "publicHealthNumber %s is not unique, there are currently %d persons with this number: %s",
-                  personDto.getPublicHealthNumber(), existingPersons.size(),
-                  existingPersons)));
-        } else if (existingPersons.size() == 1) {
-          if (!personDto.getId().equals(existingPersons.get(0).getId())) {
-            fieldErrors.add(new FieldError(PERSON_DTO_NAME, "publicHealthNumber",
-                String.format(
-                    "publicHealthNumber %s is not unique, there is currently one person with this number: %s",
-                    personDto.getPublicHealthNumber(), existingPersons.get(0))));
-          }
-        }
+
+    if (StringUtils.isNotEmpty(publicHealthNumber)) {
+      List<Person> existingPersons = personRepository
+          .findByPublicHealthNumber(publicHealthNumber);
+
+      if (existingPersons.size() > 0
+          && personDto.getId() != null) { // should exclude the current one when update
+        existingPersons.removeIf(r -> r.getId() == personDto.getId());
       }
-    } else {
-      //if we create a person
-      if (StringUtils.isNotEmpty(publicHealthNumber)) {
-        List<Person> existingPersons = personRepository
-            .findByPublicHealthNumber(publicHealthNumber);
-        if (!existingPersons.isEmpty()) {
-          fieldErrors.add(new FieldError(PERSON_DTO_NAME, "publicHealthNumber",
-              String.format(
-                  "publicHealthNumber %s is not unique, there is currently one person with this number: %s",
-                  personDto.getPublicHealthNumber(), existingPersons.get(0))));
-        }
+
+      int existingSize = existingPersons.size();
+      if (existingSize > 0) {
+        fieldErrors.add(new FieldError(PERSON_DTO_NAME, "publicHealthNumber",
+            String.format(
+                "publicHealthNumber %s is not unique, there %s currently %d %s with this number (Person ID: %s)",
+                personDto.getPublicHealthNumber(), existingSize > 1 ? "are" : "is", existingSize,
+                existingSize > 1 ? "persons" : "person",
+                existingPersons.stream().map(r -> r.getId().toString()).collect(
+                    Collectors.joining(","))
+            )));
       }
     }
     return fieldErrors;

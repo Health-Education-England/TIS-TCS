@@ -8,6 +8,7 @@ import com.transformuk.hee.tis.tcs.service.repository.GdcDetailsRepository;
 import com.transformuk.hee.tis.tcs.service.repository.IdProjection;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.stream.Collectors;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.stereotype.Component;
 import org.springframework.validation.BeanPropertyBindingResult;
@@ -74,34 +75,25 @@ public class GdcDetailsValidator {
     if (NA.equalsIgnoreCase(gdcNumber) || UNKNOWN.equalsIgnoreCase(gdcNumber)) {
       return fieldErrors;
     }
-    if (gdcDetailsDTO.getId() != null) {
-      if (StringUtils.isNotEmpty(gdcNumber)) {
-        List<IdProjection> existingGdcDetails = gdcDetailsRepository.findByGdcNumber(gdcNumber);
-        if (existingGdcDetails.size() > 1) {
-          fieldErrors.add(new FieldError(GDC_DETAILS_DTO_NAME, "gdcNumber",
-              String.format(
-                  "gdcNumber %s is not unique, there are currently %d persons with this number: %s",
-                  gdcDetailsDTO.getGdcNumber(), existingGdcDetails.size(),
-                  existingGdcDetails)));
-        } else if (existingGdcDetails.size() == 1) {
-          if (!gdcDetailsDTO.getId().equals(existingGdcDetails.get(0).getId())) {
-            fieldErrors.add(new FieldError(GDC_DETAILS_DTO_NAME, "gdcNumber",
-                String.format(
-                    "gdcNumber %s is not unique, there is currently one person with this number: %s",
-                    gdcDetailsDTO.getGdcNumber(), existingGdcDetails.get(0))));
-          }
-        }
+
+    if (StringUtils.isNotEmpty(gdcNumber)) {
+      List<IdProjection> existingGdcDetails = gdcDetailsRepository.findByGdcNumber(gdcNumber);
+
+      if (existingGdcDetails.size() > 0
+          && gdcDetailsDTO.getId() != null) { /// should exclude the current one when update
+        existingGdcDetails.removeIf(r -> r.getId() == gdcDetailsDTO.getId());
       }
-    } else {
-      //if we create a gmc details
-      if (StringUtils.isNotEmpty(gdcNumber)) {
-        List<IdProjection> existingGdcDetails = gdcDetailsRepository.findByGdcNumber(gdcNumber);
-        if (!existingGdcDetails.isEmpty()) {
-          fieldErrors.add(new FieldError(GDC_DETAILS_DTO_NAME, "gdcNumber",
-              String.format(
-                  "gdcNumber %s is not unique, there is currently one person with this number: %s",
-                  gdcDetailsDTO.getGdcNumber(), existingGdcDetails.get(0))));
-        }
+
+      int existingSize = existingGdcDetails.size();
+      if (existingSize > 0) {
+        fieldErrors.add(new FieldError(GDC_DETAILS_DTO_NAME, "gdcNumber",
+            String.format(
+                "gdcNumber %s is not unique, there %s currently %d %s with this number (Person ID: %s)",
+                gdcDetailsDTO.getGdcNumber(), existingSize > 1 ? "are" : "is", existingSize,
+                existingSize > 1 ? "persons" : "person",
+                existingGdcDetails.stream().map(r -> r.getId().toString())
+                    .collect(Collectors.joining(","))
+            )));
       }
     }
     return fieldErrors;
