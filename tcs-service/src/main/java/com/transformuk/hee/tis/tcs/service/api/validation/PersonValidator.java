@@ -1,5 +1,6 @@
 package com.transformuk.hee.tis.tcs.service.api.validation;
 
+import com.transformuk.hee.tis.reference.api.dto.RoleDTO;
 import com.transformuk.hee.tis.reference.client.ReferenceService;
 import com.transformuk.hee.tis.tcs.api.dto.PersonDTO;
 import com.transformuk.hee.tis.tcs.api.dto.TrainerApprovalDTO;
@@ -10,6 +11,7 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -113,9 +115,15 @@ public class PersonValidator {
    */
   private List<FieldError> validateForBulk(PersonDTO personDto) {
     List<FieldError> fieldErrors = new ArrayList<>();
+
     fieldErrors.addAll(checkPerson(personDto));
     fieldErrors.addAll(checkPublicHealthNumber(personDto));
-    fieldErrors.addAll(checkRole(personDto));
+    List<FieldError> checkRoleFieldError = checkRole(personDto);
+    if (checkRoleFieldError.size() == 0) {
+      fieldErrors.addAll(checkRoleForTrainerApproval(personDto));
+    } else {
+      fieldErrors.addAll(checkRoleFieldError);
+    }
     fieldErrors.addAll(contactDetailsValidator.validateForBulk(personDto.getContactDetails()));
     fieldErrors.addAll(gdcDetailsValidator.validateForBulk(personDto.getGdcDetails()));
     fieldErrors.addAll(gmcDetailsValidator.validateForBulk(personDto.getGmcDetails()));
@@ -183,10 +191,14 @@ public class PersonValidator {
   private List<FieldError> checkRole(PersonDTO personDto) {
     List<FieldError> fieldErrors = new ArrayList<>();
 
-    String roleMultiValue = personDto.getRole().replace(';', ',');
-    personDto.setRole(roleMultiValue);
+    String roleMultiValue = personDto.getRole();
 
-    if (roleMultiValue != null) {
+    if (!StringUtils.isEmpty(roleMultiValue)) {
+      // bulk upload uses a ';' separator
+      roleMultiValue = roleMultiValue.replaceAll("\\s*;\\s*", ",");
+      roleMultiValue = roleMultiValue.replaceAll(",$", "");
+      personDto.setRole(roleMultiValue);
+
       String[] roles = roleMultiValue.split(",");
       Map<String, Boolean> rolesExist = referenceService.rolesExist(Arrays.asList(roles), true);
 
@@ -211,6 +223,38 @@ public class PersonValidator {
             String.format("Person with id %d does not exist", id)));
       }
     }
+    return fieldErrors;
+  }
+
+  private List<FieldError> checkRoleForTrainerApproval(PersonDTO personDto) {
+    List<FieldError> fieldErrors = new ArrayList<>();
+    String role = personDto.getRole();
+    String roleForCheck = "";
+
+    if (!StringUtils.isEmpty(role)) { // new role exists
+      roleForCheck = role;
+    } else {
+      // no new role, use the existing role
+      Set<TrainerApprovalDTO> trainerApprovalDTO = personDto.getTrainerApprovals();
+      if (trainerApprovalDTO != null && !trainerApprovalDTO.isEmpty()) {
+        Person existingPerson = personRepository.findById(personDto.getId()).get();
+        if (existingPerson != null && !StringUtils.isEmpty(existingPerson.getRole())) {
+          roleForCheck = existingPerson.getRole();
+        }
+      }
+    }
+
+    // check role categories
+    if (!StringUtils.isEmpty(roleForCheck)) {
+      List<RoleDTO> roleDtos = referenceService.findRolesIn(roleForCheck);
+      boolean eligibleForTrainerApproval =
+          roleDtos.stream().filter(roleDTO -> roleDTO.getRoleCategory().getId() != 3).count() > 0;
+      if (!eligibleForTrainerApproval && personDto.getTrainerApprovals().size() != 0) {
+        fieldErrors.add(new FieldError(PERSON_DTO_NAME, "role",
+            "To have a Trainer Approval, the role should contain at least one of 'Educational supervisors/Clinical supervisors/Leave approvers' categories"));
+      }
+    }
+
     return fieldErrors;
   }
 }

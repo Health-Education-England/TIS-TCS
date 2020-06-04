@@ -46,6 +46,7 @@ import com.transformuk.hee.tis.tcs.service.service.GdcDetailsService;
 import com.transformuk.hee.tis.tcs.service.service.GmcDetailsService;
 import com.transformuk.hee.tis.tcs.service.service.PersonService;
 import com.transformuk.hee.tis.tcs.service.service.PersonalDetailsService;
+import com.transformuk.hee.tis.tcs.service.service.RightToWorkService;
 import com.transformuk.hee.tis.tcs.service.service.TrainerApprovalService;
 import com.transformuk.hee.tis.tcs.service.service.helper.SqlQuerySupplier;
 import com.transformuk.hee.tis.tcs.service.service.mapper.PersonBasicDetailsMapper;
@@ -150,6 +151,9 @@ public class PersonServiceImpl implements PersonService {
 
   @Autowired
   private GdcDetailsService gdcDetailsService;
+
+  @Autowired
+  private RightToWorkService rightToWorkService;
 
   @Autowired
   private TrainerApprovalService trainerApprovalService;
@@ -284,14 +288,17 @@ public class PersonServiceImpl implements PersonService {
         PersonDTO existingPersonDto = this.findOne(personDto.getId());
         if (existingPersonDto != null) {
           updateDtoForBulk(existingPersonDto, personDto);
+          // No cascades for DTOs inside PersonDTO, so need to save each of them
           PersonalDetailsDTO personalDetailsDto = personalDetailsService
               .save(existingPersonDto.getPersonalDetails());
           ContactDetailsDTO contactDetailsDto = contactDetailsService
               .save(existingPersonDto.getContactDetails());
           GmcDetailsDTO gmcDetailsDTO = gmcDetailsService.save(existingPersonDto.getGmcDetails());
           GdcDetailsDTO gdcDetailsDTO = gdcDetailsService.save(existingPersonDto.getGdcDetails());
+          RightToWorkDTO rightToWorkDTO = rightToWorkService.save(existingPersonDto.getRightToWork());
           PersonDTO savedPersonDto = save(existingPersonDto);
 
+          // Need to set the updated Person into TrainerApprovals
           existingPersonDto.getTrainerApprovals().forEach(r -> r.setPerson(savedPersonDto));
           List<TrainerApprovalDTO> trainerApprovalDTO = trainerApprovalService.save(new ArrayList<>(existingPersonDto.getTrainerApprovals()));
           log.warn("People patching not yet implemented.");
