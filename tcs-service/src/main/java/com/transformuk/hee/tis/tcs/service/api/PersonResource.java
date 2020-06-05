@@ -484,7 +484,7 @@ public class PersonResource {
   @PatchMapping("/people")
   @PreAuthorize("hasPermission('tis:people::person:consolidated_etl', 'Update')")
   public ResponseEntity<List<PersonDTO>> patchPersons(
-      @Valid @RequestBody final List<PersonDTO> personDTOs) {
+      @RequestBody @Validated(Update.class) final List<PersonDTO> personDTOs) {
     log.debug("REST request to patch Persons: {}", personDTOs);
     final List<PersonDTO> result = personService.save(personDTOs);
     final List<Long> ids = result.stream().map(PersonDTO::getId).collect(Collectors.toList());

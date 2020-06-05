@@ -1,6 +1,7 @@
 package com.transformuk.hee.tis.tcs.service.service.impl;
 
 import static com.transformuk.hee.tis.tcs.service.service.impl.SpecificationFactory.containsLike;
+import static com.transformuk.hee.tis.tcs.service.util.ReflectionUtil.copyIfNotNullOrEmpty;
 
 import com.transformuk.hee.tis.reference.api.dto.RoleDTO;
 import com.transformuk.hee.tis.reference.client.ReferenceService;
@@ -16,7 +17,6 @@ import com.transformuk.hee.tis.tcs.api.dto.PersonalDetailsDTO;
 import com.transformuk.hee.tis.tcs.api.dto.ProgrammeMembershipDTO;
 import com.transformuk.hee.tis.tcs.api.dto.RightToWorkDTO;
 import com.transformuk.hee.tis.tcs.api.dto.TrainerApprovalDTO;
-import com.transformuk.hee.tis.tcs.api.enumeration.PermitToWorkType;
 import com.transformuk.hee.tis.tcs.api.enumeration.PersonOwnerRule;
 import com.transformuk.hee.tis.tcs.api.enumeration.Status;
 import com.transformuk.hee.tis.tcs.service.api.validation.PersonValidator;
@@ -54,7 +54,6 @@ import com.transformuk.hee.tis.tcs.service.service.mapper.PersonLiteMapper;
 import com.transformuk.hee.tis.tcs.service.service.mapper.PersonMapper;
 import java.sql.ResultSet;
 import java.sql.SQLException;
-import java.time.LocalDate;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
@@ -295,12 +294,14 @@ public class PersonServiceImpl implements PersonService {
               .save(existingPersonDto.getContactDetails());
           GmcDetailsDTO gmcDetailsDTO = gmcDetailsService.save(existingPersonDto.getGmcDetails());
           GdcDetailsDTO gdcDetailsDTO = gdcDetailsService.save(existingPersonDto.getGdcDetails());
-          RightToWorkDTO rightToWorkDTO = rightToWorkService.save(existingPersonDto.getRightToWork());
+          RightToWorkDTO rightToWorkDTO = rightToWorkService
+              .save(existingPersonDto.getRightToWork());
           PersonDTO savedPersonDto = save(existingPersonDto);
 
           // Need to set the updated Person into TrainerApprovals
           existingPersonDto.getTrainerApprovals().forEach(r -> r.setPerson(savedPersonDto));
-          List<TrainerApprovalDTO> trainerApprovalDTO = trainerApprovalService.save(new ArrayList<>(existingPersonDto.getTrainerApprovals()));
+          List<TrainerApprovalDTO> trainerApprovalDTO = trainerApprovalService
+              .save(new ArrayList<>(existingPersonDto.getTrainerApprovals()));
           log.warn("People patching not yet implemented.");
         }
       }
@@ -310,12 +311,27 @@ public class PersonServiceImpl implements PersonService {
   }
 
   private void updateDtoForBulk(PersonDTO existingPersonDto, PersonDTO personDto) {
-    updatePerson(existingPersonDto, personDto);
-    updateContactDetails(existingPersonDto.getContactDetails(), personDto.getContactDetails());
-    updatePersonDetails(existingPersonDto.getPersonalDetails(), personDto.getPersonalDetails());
-    updateGmcDetails(existingPersonDto.getGmcDetails(), personDto.getGmcDetails());
-    updateGdcDetails(existingPersonDto.getGdcDetails(), personDto.getGdcDetails());
-    updateRightToWork(existingPersonDto.getRightToWork(), personDto.getRightToWork());
+    copyIfNotNullOrEmpty(personDto, existingPersonDto, "role", "publicHealthNumber");
+    // if address1 provided, 4 existing address lines are cleared and overwritten
+    if (personDto.getContactDetails().getAddress1() != null) {
+      existingPersonDto.getContactDetails().setAddress2(null);
+      existingPersonDto.getContactDetails().setAddress3(null);
+      existingPersonDto.getContactDetails().setAddress4(null);
+    }
+    copyIfNotNullOrEmpty(personDto.getContactDetails(), existingPersonDto.getContactDetails(),
+        "address1", "address2", "address3",
+        "postcode", "forenames", "surname", "title", "knownAs", "email", "mobile", "telephone");
+    copyIfNotNullOrEmpty(personDto.getPersonalDetails(), existingPersonDto.getPersonalDetails(),
+        "dateOfBirth", "nationalInsuranceNumber", "gender",
+        "nationality", "maritalStatus", "religiousBelief", "ethnicOrigin", "sexualOrientation",
+        "disability", "disabilityDetails");
+    copyIfNotNullOrEmpty(personDto.getGmcDetails(), existingPersonDto.getGmcDetails(), "gmcNumber",
+        "gmcStatus");
+    copyIfNotNullOrEmpty(personDto.getGdcDetails(), existingPersonDto.getGdcDetails(), "gdcNumber",
+        "gdcStatus");
+    copyIfNotNullOrEmpty(personDto.getRightToWork(), existingPersonDto.getRightToWork(),
+        "eeaResident", "permitToWork", "settled",
+        "visaDetails", "visaIssued", "visaValidTo");
 
     Set<TrainerApprovalDTO> existingDtoSet = existingPersonDto.getTrainerApprovals();
     Set<TrainerApprovalDTO> trainerApprovalDtoSet = personDto.getTrainerApprovals();
@@ -323,178 +339,9 @@ public class PersonServiceImpl implements PersonService {
       if (existingDtoSet == null || existingDtoSet.size() == 0) {
         existingPersonDto.setTrainerApprovals(trainerApprovalDtoSet);
       } else {
-        updateTrainerApproval(existingPersonDto.getTrainerApprovals(), personDto.getTrainerApprovals());
+        updateTrainerApproval(existingPersonDto.getTrainerApprovals(),
+            personDto.getTrainerApprovals());
       }
-    }
-  }
-
-  private void updatePerson(PersonDTO existingPersonDto, PersonDTO personDto) {
-    String publicHealthNumber = personDto.getPublicHealthNumber();
-    String role = personDto.getRole();
-    if (personDto.getPublicHealthNumber() != null) {
-      existingPersonDto.setPublicHealthNumber(publicHealthNumber);
-    }
-    if (role != null) {
-      existingPersonDto.setRole(role);
-    }
-  }
-
-  private void updateContactDetails(ContactDetailsDTO existingDto,
-      ContactDetailsDTO contactDetailsDto) {
-    if (contactDetailsDto == null) {
-      return;
-    }
-    String address1 = contactDetailsDto.getAddress1();
-    String address2 = contactDetailsDto.getAddress2();
-    String address3 = contactDetailsDto.getAddress3();
-    String postcode = contactDetailsDto.getPostCode();
-    String forenames = contactDetailsDto.getForenames();
-    String surname = contactDetailsDto.getSurname();
-    String title = contactDetailsDto.getTitle();
-    String knownAs = contactDetailsDto.getKnownAs();
-    String email = contactDetailsDto.getEmail();
-    String mobile = contactDetailsDto.getMobileNumber();
-    String telephone = contactDetailsDto.getTelephoneNumber();
-    if (address1 != null) {
-      existingDto.setAddress1(address1);
-      existingDto.setAddress2(null);
-      existingDto.setAddress3(null);
-      existingDto.setAddress4(null);
-    }
-    if (address2 != null) {
-      existingDto.setAddress2(address2);
-    }
-    if (address3 != null) {
-      existingDto.setAddress3(address3);
-    }
-    if (postcode != null) {
-      existingDto.setPostCode(postcode);
-    }
-    if (forenames != null) {
-      existingDto.setForenames(forenames);
-    }
-    if (surname != null) {
-      existingDto.setSurname(surname);
-    }
-    if (title != null) {
-      existingDto.setTitle(title);
-    }
-    if (knownAs != null) {
-      existingDto.setKnownAs(knownAs);
-    }
-    if (email != null) {
-      existingDto.setEmail(email);
-    }
-    if (mobile != null) {
-      existingDto.setMobileNumber(mobile);
-    }
-    if (telephone != null) {
-      existingDto.setTelephoneNumber(telephone);
-    }
-  }
-
-  private void updatePersonDetails(PersonalDetailsDTO existingDto,
-      PersonalDetailsDTO personalDetailsDto) {
-    if (personalDetailsDto == null) {
-      return;
-    }
-    LocalDate dateOfBirth = personalDetailsDto.getDateOfBirth();
-    String nationalInsuranceNumber = personalDetailsDto.getNationalInsuranceNumber();
-    String gender = personalDetailsDto.getGender();
-    String nationality = personalDetailsDto.getNationality();
-    String maritalStatus = personalDetailsDto.getMaritalStatus();
-    String religiousBelief = personalDetailsDto.getReligiousBelief();
-    String ethnicOrigin = personalDetailsDto.getEthnicOrigin();
-    String sexualOrientation = personalDetailsDto.getSexualOrientation();
-    String disability = personalDetailsDto.getDisability();
-    String disabilityDetails = personalDetailsDto.getDisabilityDetails();
-    if (dateOfBirth != null) {
-      existingDto.setDateOfBirth(dateOfBirth);
-    }
-    if (nationalInsuranceNumber != null) {
-      existingDto.setNationalInsuranceNumber(nationalInsuranceNumber);
-    }
-    if (gender != null) {
-      existingDto.setGender(gender);
-    }
-    if (nationality != null) {
-      existingDto.setNationality(nationality);
-    }
-    if (maritalStatus != null) {
-      existingDto.setMaritalStatus(maritalStatus);
-    }
-    if (religiousBelief != null) {
-      existingDto.setReligiousBelief(religiousBelief);
-    }
-    if (ethnicOrigin != null) {
-      existingDto.setEthnicOrigin(ethnicOrigin);
-    }
-    if (sexualOrientation != null) {
-      existingDto.setSexualOrientation(sexualOrientation);
-    }
-    if (disability != null) {
-      existingDto.setDisability(disability);
-    }
-    if (disabilityDetails != null) {
-      existingDto.setDisabilityDetails(disabilityDetails);
-    }
-  }
-
-  private void updateGmcDetails(GmcDetailsDTO existingDto, GmcDetailsDTO gmcDetailsDto) {
-    if (gmcDetailsDto == null) {
-      return;
-    }
-    String gmcNumber = gmcDetailsDto.getGmcNumber();
-    String gmcStatus = gmcDetailsDto.getGmcStatus();
-    if (gmcNumber != null) {
-      existingDto.setGmcNumber(gmcNumber);
-    }
-    if (gmcStatus != null) {
-      existingDto.setGmcStatus(gmcStatus);
-    }
-  }
-
-  private void updateGdcDetails(GdcDetailsDTO existingDto, GdcDetailsDTO gdcDetailsDto) {
-    if (gdcDetailsDto == null) {
-      return;
-    }
-    String gdcNumber = gdcDetailsDto.getGdcNumber();
-    String gdcStatus = gdcDetailsDto.getGdcStatus();
-    if (gdcNumber != null) {
-      existingDto.setGdcNumber(gdcNumber);
-    }
-    if (gdcStatus != null) {
-      existingDto.setGdcStatus(gdcStatus);
-    }
-  }
-
-  private void updateRightToWork(RightToWorkDTO existingDto, RightToWorkDTO rightToWorkDto) {
-    if (rightToWorkDto == null) {
-      return;
-    }
-    String eeaResident = rightToWorkDto.getEeaResident();
-    PermitToWorkType permitToWork = rightToWorkDto.getPermitToWork();
-    String settled = rightToWorkDto.getSettled();
-    String visaDetails = rightToWorkDto.getVisaDetails();
-    LocalDate visaIssued = rightToWorkDto.getVisaIssued();
-    LocalDate visaValidTo = rightToWorkDto.getVisaValidTo();
-    if (eeaResident != null) {
-      existingDto.setEeaResident(eeaResident);
-    }
-    if (permitToWork != null) {
-      existingDto.setPermitToWork(permitToWork);
-    }
-    if (settled != null) {
-      existingDto.setSettled(settled);
-    }
-    if (visaDetails != null) {
-      existingDto.setVisaDetails(visaDetails);
-    }
-    if (visaIssued != null) {
-      existingDto.setVisaIssued(visaIssued);
-    }
-    if (visaValidTo != null) {
-      existingDto.setVisaValidTo(visaValidTo);
     }
   }
 
