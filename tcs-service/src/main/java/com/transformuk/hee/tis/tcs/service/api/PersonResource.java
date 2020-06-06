@@ -121,7 +121,7 @@ public class PersonResource {
    *
    * @param personDTO the personDTO to create
    * @return the ResponseEntity with status 201 (Created) and with body the new personDTO, or with
-   *     status 400 (Bad Request) if the person has already an ID
+   * status 400 (Bad Request) if the person has already an ID
    * @throws URISyntaxException if the Location URI syntax is incorrect
    */
   @PostMapping("/people")
@@ -152,8 +152,8 @@ public class PersonResource {
    *
    * @param personDTO the personDTO to update
    * @return the ResponseEntity with status 200 (OK) and with body the updated personDTO, or with
-   *     status 400 (Bad Request) if the personDTO is not valid, or with status 500 (Internal Server
-   *     Error) if the personDTO couldn't be updated
+   * status 400 (Bad Request) if the personDTO is not valid, or with status 500 (Internal Server
+   * Error) if the personDTO couldn't be updated
    * @throws URISyntaxException if the Location URI syntax is incorrect
    */
   @PutMapping("/people")
@@ -287,7 +287,7 @@ public class PersonResource {
    *
    * @param ids the ids to search by
    * @return the ResponseEntity with status 200 (OK)  and the list of personBasicDetails in body, or
-   *     empty list
+   * empty list
    */
   @GetMapping("/people/in/{ids}/basic")
   @PreAuthorize("hasPermission('tis:people::person:', 'View')")
@@ -322,7 +322,7 @@ public class PersonResource {
    *
    * @param id the id of the personDTO to retrieve
    * @return the ResponseEntity with status 200 (OK) and with body the personDTO, or with status 404
-   *     (Not Found)
+   * (Not Found)
    */
   @GetMapping("/people/{id}")
   @PreAuthorize("hasRole('ETL') or hasPermission('tis:people::person:', 'View')")
@@ -342,7 +342,7 @@ public class PersonResource {
    *
    * @param id the id of the personDTO to retrieve
    * @return the ResponseEntity with status 200 (OK) and with body the personDTO, or with status 404
-   *     (Not Found)
+   * (Not Found)
    */
   @GetMapping("/people/v2/{id}")
   @PreAuthorize("hasPermission('tis:people::person:', 'View')")
@@ -484,7 +484,7 @@ public class PersonResource {
   @PatchMapping("/people")
   @PreAuthorize("hasPermission('tis:people::person:consolidated_etl', 'Update')")
   public ResponseEntity<List<PersonDTO>> patchPersons(
-      @RequestBody @Validated(Update.class) final List<PersonDTO> personDTOs) {
+      @Valid @RequestBody final List<PersonDTO> personDTOs) {
     log.debug("REST request to patch Persons: {}", personDTOs);
     final List<PersonDTO> result = personService.save(personDTOs);
     final List<Long> ids = result.stream().map(PersonDTO::getId).collect(Collectors.toList());

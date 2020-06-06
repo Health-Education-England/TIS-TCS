@@ -302,7 +302,6 @@ public class PersonServiceImpl implements PersonService {
           existingPersonDto.getTrainerApprovals().forEach(r -> r.setPerson(savedPersonDto));
           List<TrainerApprovalDTO> trainerApprovalDTO = trainerApprovalService
               .save(new ArrayList<>(existingPersonDto.getTrainerApprovals()));
-          log.warn("People patching not yet implemented.");
         }
       }
     }
@@ -320,7 +319,7 @@ public class PersonServiceImpl implements PersonService {
     }
     copyIfNotNullOrEmpty(personDto.getContactDetails(), existingPersonDto.getContactDetails(),
         "address1", "address2", "address3",
-        "postcode", "forenames", "surname", "title", "knownAs", "email", "mobile", "telephone");
+        "postCode", "forenames", "surname", "title", "knownAs", "email", "mobileNumber", "telephoneNumber");
     copyIfNotNullOrEmpty(personDto.getPersonalDetails(), existingPersonDto.getPersonalDetails(),
         "dateOfBirth", "nationalInsuranceNumber", "gender",
         "nationality", "maritalStatus", "religiousBelief", "ethnicOrigin", "sexualOrientation",
