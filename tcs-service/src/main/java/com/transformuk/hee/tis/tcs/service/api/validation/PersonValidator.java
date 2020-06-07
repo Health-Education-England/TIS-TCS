@@ -68,6 +68,7 @@ public class PersonValidator {
    */
   public void validate(PersonDTO personDto) throws MethodArgumentNotValidException {
     List<FieldError> fieldErrors = new ArrayList<>();
+    fieldErrors.addAll(checkPerson(personDto));
     fieldErrors.addAll(checkPublicHealthNumber(personDto));
     fieldErrors.addAll(checkRole(personDto));
 
@@ -187,6 +188,7 @@ public class PersonValidator {
     if (!StringUtils.isEmpty(roleMultiValue)) {
       // bulk upload uses a ';' separator
       roleMultiValue = roleMultiValue.replaceAll("\\s*;\\s*", ",");
+      // remove the ',' in the end if it exists
       roleMultiValue = roleMultiValue.replaceAll(",$", "");
       personDto.setRole(roleMultiValue);
 

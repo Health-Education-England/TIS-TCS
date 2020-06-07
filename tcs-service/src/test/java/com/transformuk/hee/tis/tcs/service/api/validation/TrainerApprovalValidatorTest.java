@@ -1,5 +1,6 @@
 package com.transformuk.hee.tis.tcs.service.api.validation;
 
+import static org.hamcrest.CoreMatchers.equalTo;
 import static org.hamcrest.CoreMatchers.hasItem;
 import static org.hamcrest.CoreMatchers.is;
 import static org.hamcrest.MatcherAssert.assertThat;
@@ -12,6 +13,7 @@ import com.transformuk.hee.tis.tcs.api.dto.TrainerApprovalDTO;
 import com.transformuk.hee.tis.tcs.api.enumeration.ApprovalStatus;
 import com.transformuk.hee.tis.tcs.service.repository.PersonRepository;
 import java.time.LocalDate;
+import java.util.List;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -24,10 +26,10 @@ import org.springframework.web.bind.MethodArgumentNotValidException;
 @ExtendWith(MockitoExtension.class)
 class TrainerApprovalValidatorTest {
 
-  private TrainerApprovalValidator validator;
-
   @Mock
   PersonRepository personRepository;
+
+  private TrainerApprovalValidator validator;
 
   @BeforeEach
   void setUp() {
@@ -184,4 +186,32 @@ class TrainerApprovalValidatorTest {
     // When, Then.
     assertDoesNotThrow(() -> validator.validate(dto));
   }
+
+  @Test
+  void shouldReturnEmptyFieldErrorsWhenValidateForBulkIsOkay() {
+    // Given.
+    TrainerApprovalDTO dto = new TrainerApprovalDTO();
+    dto.setStartDate(LocalDate.now().minusDays(1));
+    dto.setEndDate(LocalDate.now());
+    dto.setApprovalStatus(ApprovalStatus.CURRENT);
+
+    // When.
+    List<FieldError> fieldErrors = validator.validateForBulk(dto);
+    // Then.
+    assertThat("Error list should be empty.", fieldErrors.size(), equalTo(0));
+  }
+
+  @Test
+  void shouldReturnAllFieldErrorsWhenValidateForBulkGetsErrors() {
+    // Given.
+    TrainerApprovalDTO dto = new TrainerApprovalDTO();
+    dto.setStartDate(LocalDate.now().plusDays(1));
+    dto.setEndDate(LocalDate.now());
+
+    // When.
+    List<FieldError> fieldErrors = validator.validateForBulk(dto);
+    // Then.
+    assertThat("Error list should contain 3 errors.", fieldErrors.size(), equalTo(2));
+  }
+
 }

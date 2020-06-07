@@ -1,5 +1,6 @@
 package com.transformuk.hee.tis.tcs.service.api.validation;
 
+import static org.hamcrest.CoreMatchers.equalTo;
 import static org.hamcrest.CoreMatchers.hasItem;
 import static org.hamcrest.CoreMatchers.is;
 import static org.hamcrest.MatcherAssert.assertThat;
@@ -7,8 +8,8 @@ import static org.junit.jupiter.api.Assertions.assertDoesNotThrow;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 
 import com.transformuk.hee.tis.tcs.api.dto.RightToWorkDTO;
-import com.transformuk.hee.tis.tcs.api.enumeration.PermitToWorkType;
 import java.time.LocalDate;
+import java.util.List;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.springframework.validation.BindingResult;
@@ -24,16 +25,6 @@ class RightToWorkValidatorTest {
   @BeforeEach
   void setUp() {
     validator = new RightToWorkValidator();
-  }
-
-  @Test
-  void shouldThrowExceptionWhenPermitToWorkValid() {
-    // Given.
-    RightToWorkDTO dto = new RightToWorkDTO();
-    dto.setPermitToWork(PermitToWorkType.OTHER);
-
-    // When, Then.
-    assertDoesNotThrow(() -> validator.validate(dto));
   }
 
   @Test
@@ -214,5 +205,35 @@ class RightToWorkValidatorTest {
 
     // When, Then.
     assertDoesNotThrow(() -> validator.validate(dto));
+  }
+
+  @Test
+  void shouldReturnEmptyFieldErrorsWhenValidateForBulkIsOkay() {
+    // Given.
+    RightToWorkDTO dto = new RightToWorkDTO();
+    dto.setEeaResident("YES");
+    dto.setSettled("YES");
+    dto.setVisaIssued(LocalDate.now().minusDays(1));
+    dto.setVisaValidTo(LocalDate.now());
+
+    // When.
+    List<FieldError> fieldErrors = validator.validateForBulk(dto);
+    // Then.
+    assertThat("Error list should be empty.", fieldErrors.size(), equalTo(0));
+  }
+
+  @Test
+  void shouldReturnAllFieldErrorsWhenValidateForBulkGetsErrors() {
+    // Given.
+    RightToWorkDTO dto = new RightToWorkDTO();
+    dto.setEeaResident("Invalid");
+    dto.setSettled("Invalid");
+    dto.setVisaIssued(LocalDate.now().plusDays(1));
+    dto.setVisaValidTo(LocalDate.now());
+
+    // When.
+    List<FieldError> fieldErrors = validator.validateForBulk(dto);
+    // Then.
+    assertThat("Error list should contain 3 errors.", fieldErrors.size(), equalTo(3));
   }
 }

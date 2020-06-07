@@ -1,5 +1,6 @@
 package com.transformuk.hee.tis.tcs.service.api.validation;
 
+import static org.hamcrest.CoreMatchers.equalTo;
 import static org.hamcrest.CoreMatchers.hasItem;
 import static org.hamcrest.CoreMatchers.is;
 import static org.hamcrest.MatcherAssert.assertThat;
@@ -39,7 +40,7 @@ class ContactDetailsValidatorTest {
     ContactDetailsDTO dto = new ContactDetailsDTO();
     dto.setTitle("myTitle");
 
-    when(referenceService.isValueExists(TitleDTO.class, "myTitle")).thenReturn(false);
+    when(referenceService.isValueExists(TitleDTO.class, "myTitle", false)).thenReturn(false);
 
     // When.
     MethodArgumentNotValidException thrown =
@@ -62,7 +63,7 @@ class ContactDetailsValidatorTest {
     ContactDetailsDTO dto = new ContactDetailsDTO();
     dto.setTitle("myTitle");
 
-    when(referenceService.isValueExists(TitleDTO.class, "myTitle")).thenReturn(true);
+    when(referenceService.isValueExists(TitleDTO.class, "myTitle", false)).thenReturn(true);
 
     // When.
     assertDoesNotThrow(() -> validator.validate(dto));
@@ -267,7 +268,7 @@ class ContactDetailsValidatorTest {
     dto.setAddress3("address3");
     dto.setPostCode("postCode");
 
-    when(referenceService.isValueExists(TitleDTO.class, "myTitle")).thenReturn(true);
+    when(referenceService.isValueExists(TitleDTO.class, "myTitle", false)).thenReturn(true);
 
     // When, Then.
     assertDoesNotThrow(() -> validator.validate(dto));
@@ -280,5 +281,42 @@ class ContactDetailsValidatorTest {
 
     // When, Then.
     assertDoesNotThrow(() -> validator.validate(dto));
+  }
+
+  @Test
+  void shouldReturnEmptyFieldErrorsWhenValidateForBulkIsOkay() {
+    // Given.
+    ContactDetailsDTO dto = new ContactDetailsDTO();
+    dto.setTitle("myTitle");
+    dto.setAddress1("address1");
+    dto.setAddress2("address2");
+    dto.setAddress3("address3");
+    dto.setPostCode("postCode");
+
+    when(referenceService.isValueExists(TitleDTO.class, "myTitle", true)).thenReturn(true);
+
+    // When.
+    List<FieldError> fieldErrors = validator.validateForBulk(dto);
+
+    // Then.
+    assertThat("Error list should be empty.", fieldErrors.size(), equalTo(0));
+  }
+
+  @Test
+  void shouldReturnAllFieldErrorsWhenValidateForBulkGetsErrors() {
+    // Given.
+    ContactDetailsDTO dto = new ContactDetailsDTO();
+    dto.setTitle("myTitle");
+    dto.setAddress1("address1");
+    dto.setAddress2("address2");
+    dto.setAddress3("address3");
+
+    when(referenceService.isValueExists(TitleDTO.class, "myTitle", true)).thenReturn(false);
+
+    // When.
+    List<FieldError> fieldErrors = validator.validateForBulk(dto);
+
+    // Then.
+    assertThat("Error list should contain 2 errors.", fieldErrors.size(), equalTo(2));
   }
 }
