@@ -274,6 +274,7 @@ public class PersonServiceImpl implements PersonService {
    */
   @Override
   public List<PersonDTO> patch(List<PersonDTO> personDtos) {
+    List<PersonDTO> personDTOList = new ArrayList<>();
     // Perform validation.
     personValidator.validateForBulk(personDtos);
 
@@ -294,11 +295,15 @@ public class PersonServiceImpl implements PersonService {
           // Need to set the updated Person into TrainerApprovals
           personDtoFromDb.getTrainerApprovals().forEach(r -> r.setPerson(savedPersonDto));
           trainerApprovalService.save(new ArrayList<>(personDtoFromDb.getTrainerApprovals()));
+
+          personDTOList.add(savedPersonDto);
         }
+      } else {
+        personDTOList.add(personDto);
       }
     }
 
-    return personDtos;
+    return personDTOList;
   }
 
   private void updateDtoForBulk(PersonDTO personDtoFromDB, PersonDTO personDto) {

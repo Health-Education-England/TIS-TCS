@@ -433,6 +433,8 @@ public class PersonServiceImplTest {
     verify(gmcDetailsServiceMock).save(personDto.getGmcDetails());
     verify(gdcDetailsServiceMock).save(personDto.getGdcDetails());
     verify(rightToWorkServiceMock).save(personDto.getRightToWork());
-    Assert.assertSame(personDTOList, returnedPersonDtoList);
+
+    Assert.assertEquals(returnedPersonDtoList.size(), 1);
+    Assert.assertEquals(returnedPersonDtoList.get(0).getMessageList().size(), 0);
   }
 }
