@@ -915,6 +915,10 @@ public class PersonResourceIntTest {
 
     updatedPersonDTO.setPublicHealthNumber(" 1111111");
 
+    Map<String, Boolean> roleToExists = new HashMap<>();
+    roleToExists.put(DEFAULT_ROLE, true);
+    when(referenceService.rolesExist(any(), eq(true))).thenReturn(roleToExists);
+
     restPersonMockMvc.perform(put("/api/people")
         .contentType(TestUtil.APPLICATION_JSON_UTF8)
         .content(TestUtil.convertObjectToJsonBytes(updatedPersonDTO)))
