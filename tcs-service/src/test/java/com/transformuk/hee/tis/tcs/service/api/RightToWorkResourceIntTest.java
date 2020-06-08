@@ -50,14 +50,14 @@ import org.springframework.transaction.annotation.Transactional;
 @SpringBootTest(classes = Application.class)
 public class RightToWorkResourceIntTest {
 
-  private static final String DEFAULT_EEA_RESIDENT = "AAAAAAAAAA";
-  private static final String UPDATED_EEA_RESIDENT = "BBBBBBBBBB";
+  private static final String DEFAULT_EEA_RESIDENT = "YES";
+  private static final String UPDATED_EEA_RESIDENT = "NO";
 
   private static final PermitToWorkType DEFAULT_PERMIT_TO_WORK = PermitToWorkType.WORK_PERMIT;
   private static final PermitToWorkType UPDATED_PERMIT_TO_WORK = PermitToWorkType.INDEFINITE_LEAVE_TO_REMAIN;
 
-  private static final String DEFAULT_SETTLED = "AAAAAAAAAA";
-  private static final String UPDATED_SETTLED = "BBBBBBBBBB";
+  private static final String DEFAULT_SETTLED = "YES";
+  private static final String UPDATED_SETTLED = "NO";
 
   private static final LocalDate DEFAULT_VISA_ISSUED = LocalDate.ofEpochDay(0L);
   private static final LocalDate UPDATED_VISA_ISSUED = LocalDate.now(ZoneId.systemDefault());

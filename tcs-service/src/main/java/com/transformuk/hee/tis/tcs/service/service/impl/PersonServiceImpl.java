@@ -5,9 +5,6 @@ import static com.transformuk.hee.tis.tcs.service.util.ReflectionUtil.copyIfNotN
 
 import com.transformuk.hee.tis.reference.api.dto.RoleDTO;
 import com.transformuk.hee.tis.reference.client.ReferenceService;
-import com.transformuk.hee.tis.tcs.api.dto.ContactDetailsDTO;
-import com.transformuk.hee.tis.tcs.api.dto.GdcDetailsDTO;
-import com.transformuk.hee.tis.tcs.api.dto.GmcDetailsDTO;
 import com.transformuk.hee.tis.tcs.api.dto.PersonBasicDetailsDTO;
 import com.transformuk.hee.tis.tcs.api.dto.PersonDTO;
 import com.transformuk.hee.tis.tcs.api.dto.PersonLiteDTO;
@@ -15,7 +12,6 @@ import com.transformuk.hee.tis.tcs.api.dto.PersonV2DTO;
 import com.transformuk.hee.tis.tcs.api.dto.PersonViewDTO;
 import com.transformuk.hee.tis.tcs.api.dto.PersonalDetailsDTO;
 import com.transformuk.hee.tis.tcs.api.dto.ProgrammeMembershipDTO;
-import com.transformuk.hee.tis.tcs.api.dto.RightToWorkDTO;
 import com.transformuk.hee.tis.tcs.api.dto.TrainerApprovalDTO;
 import com.transformuk.hee.tis.tcs.api.enumeration.PersonOwnerRule;
 import com.transformuk.hee.tis.tcs.api.enumeration.Status;
@@ -284,24 +280,21 @@ public class PersonServiceImpl implements PersonService {
     // Patch valid persons.
     for (PersonDTO personDto : personDtos) {
       if (personDto.getMessageList().size() == 0) {
-        PersonDTO existingPersonDto = this.findOne(personDto.getId());
-        if (existingPersonDto != null) {
-          updateDtoForBulk(existingPersonDto, personDto);
+        PersonDTO PersonDtoFromDB = this.findOne(personDto.getId());
+        if (PersonDtoFromDB != null) {
+          updateDtoForBulk(PersonDtoFromDB, personDto);
           // No cascades for DTOs inside PersonDTO, so need to save each of them
-          PersonalDetailsDTO personalDetailsDto = personalDetailsService
-              .save(existingPersonDto.getPersonalDetails());
-          ContactDetailsDTO contactDetailsDto = contactDetailsService
-              .save(existingPersonDto.getContactDetails());
-          GmcDetailsDTO gmcDetailsDTO = gmcDetailsService.save(existingPersonDto.getGmcDetails());
-          GdcDetailsDTO gdcDetailsDTO = gdcDetailsService.save(existingPersonDto.getGdcDetails());
-          RightToWorkDTO rightToWorkDTO = rightToWorkService
-              .save(existingPersonDto.getRightToWork());
-          PersonDTO savedPersonDto = save(existingPersonDto);
+          personalDetailsService.save(PersonDtoFromDB.getPersonalDetails());
+          contactDetailsService.save(PersonDtoFromDB.getContactDetails());
+          gmcDetailsService.save(PersonDtoFromDB.getGmcDetails());
+          gdcDetailsService.save(PersonDtoFromDB.getGdcDetails());
+          rightToWorkService.save(PersonDtoFromDB.getRightToWork());
+          PersonDTO savedPersonDto = save(PersonDtoFromDB);
 
           // Need to set the updated Person into TrainerApprovals
-          existingPersonDto.getTrainerApprovals().forEach(r -> r.setPerson(savedPersonDto));
+          PersonDtoFromDB.getTrainerApprovals().forEach(r -> r.setPerson(savedPersonDto));
           List<TrainerApprovalDTO> trainerApprovalDTO = trainerApprovalService
-              .save(new ArrayList<>(existingPersonDto.getTrainerApprovals()));
+              .save(new ArrayList<>(PersonDtoFromDB.getTrainerApprovals()));
         }
       }
     }
@@ -309,36 +302,38 @@ public class PersonServiceImpl implements PersonService {
     return personDtos;
   }
 
-  private void updateDtoForBulk(PersonDTO existingPersonDto, PersonDTO personDto) {
-    copyIfNotNullOrEmpty(personDto, existingPersonDto, "role", "publicHealthNumber");
+  private void updateDtoForBulk(PersonDTO personDtoFromDB, PersonDTO personDto) {
+    copyIfNotNullOrEmpty(personDto, personDtoFromDB, "role", "publicHealthNumber");
     // if address1 provided, 4 existing address lines are cleared and overwritten
-    if (personDto.getContactDetails().getAddress1() != null) {
-      existingPersonDto.getContactDetails().setAddress2(null);
-      existingPersonDto.getContactDetails().setAddress3(null);
-      existingPersonDto.getContactDetails().setAddress4(null);
+    if (personDto.getContactDetails() != null
+        && personDto.getContactDetails().getAddress1() != null) {
+      personDtoFromDB.getContactDetails().setAddress2(null);
+      personDtoFromDB.getContactDetails().setAddress3(null);
+      personDtoFromDB.getContactDetails().setAddress4(null);
     }
-    copyIfNotNullOrEmpty(personDto.getContactDetails(), existingPersonDto.getContactDetails(),
+    copyIfNotNullOrEmpty(personDto.getContactDetails(), personDtoFromDB.getContactDetails(),
         "address1", "address2", "address3",
-        "postCode", "forenames", "surname", "title", "knownAs", "email", "mobileNumber", "telephoneNumber");
-    copyIfNotNullOrEmpty(personDto.getPersonalDetails(), existingPersonDto.getPersonalDetails(),
+        "postCode", "forenames", "surname", "title", "knownAs", "email", "mobileNumber",
+        "telephoneNumber");
+    copyIfNotNullOrEmpty(personDto.getPersonalDetails(), personDtoFromDB.getPersonalDetails(),
         "dateOfBirth", "nationalInsuranceNumber", "gender",
         "nationality", "maritalStatus", "religiousBelief", "ethnicOrigin", "sexualOrientation",
         "disability", "disabilityDetails");
-    copyIfNotNullOrEmpty(personDto.getGmcDetails(), existingPersonDto.getGmcDetails(), "gmcNumber",
+    copyIfNotNullOrEmpty(personDto.getGmcDetails(), personDtoFromDB.getGmcDetails(), "gmcNumber",
         "gmcStatus");
-    copyIfNotNullOrEmpty(personDto.getGdcDetails(), existingPersonDto.getGdcDetails(), "gdcNumber",
+    copyIfNotNullOrEmpty(personDto.getGdcDetails(), personDtoFromDB.getGdcDetails(), "gdcNumber",
         "gdcStatus");
-    copyIfNotNullOrEmpty(personDto.getRightToWork(), existingPersonDto.getRightToWork(),
+    copyIfNotNullOrEmpty(personDto.getRightToWork(), personDtoFromDB.getRightToWork(),
         "eeaResident", "permitToWork", "settled",
         "visaDetails", "visaIssued", "visaValidTo");
 
-    Set<TrainerApprovalDTO> existingDtoSet = existingPersonDto.getTrainerApprovals();
+    Set<TrainerApprovalDTO> existingDtoSet = personDtoFromDB.getTrainerApprovals();
     Set<TrainerApprovalDTO> trainerApprovalDtoSet = personDto.getTrainerApprovals();
-    if (trainerApprovalDtoSet != null || trainerApprovalDtoSet.size() != 0) {
+    if (trainerApprovalDtoSet != null && trainerApprovalDtoSet.size() != 0) {
       if (existingDtoSet == null || existingDtoSet.size() == 0) {
-        existingPersonDto.setTrainerApprovals(trainerApprovalDtoSet);
+        personDtoFromDB.setTrainerApprovals(trainerApprovalDtoSet);
       } else {
-        updateTrainerApproval(existingPersonDto.getTrainerApprovals(),
+        updateTrainerApproval(personDtoFromDB.getTrainerApprovals(),
             personDto.getTrainerApprovals());
       }
     }

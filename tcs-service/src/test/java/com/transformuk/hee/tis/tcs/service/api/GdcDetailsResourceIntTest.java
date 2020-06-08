@@ -137,7 +137,7 @@ public class GdcDetailsResourceIntTest {
     // Create the GdcDetails
     GdcDetailsDTO gdcDetailsDTO = gdcDetailsMapper.toDto(gdcDetails);
 
-    Mockito.when(referenceService.isValueExists(GdcStatusDTO.class, gdcDetailsDTO.getGdcStatus()))
+    Mockito.when(referenceService.isValueExists(GdcStatusDTO.class, gdcDetailsDTO.getGdcStatus(), false))
         .thenReturn(true);
 
     restGdcDetailsMockMvc.perform(post("/api/gdc-details")
@@ -214,7 +214,7 @@ public class GdcDetailsResourceIntTest {
     gdcDetails.setId(1L);
     GdcDetailsDTO gdcDetailsDTO = gdcDetailsMapper.toDto(gdcDetails);
 
-    Mockito.when(referenceService.isValueExists(GdcStatusDTO.class, gdcDetailsDTO.getGdcStatus()))
+    Mockito.when(referenceService.isValueExists(GdcStatusDTO.class, gdcDetailsDTO.getGdcStatus(), false))
         .thenReturn(true);
 
     // Gdc details is part of person so the call must succeed
@@ -285,7 +285,7 @@ public class GdcDetailsResourceIntTest {
     updatedGdcDetailsDTO.setGdcNumber(UPDATED_GDC_NUMBER);
     updatedGdcDetailsDTO.setGdcStatus(UPDATED_GDC_STATUS);
 
-    Mockito.when(referenceService.isValueExists(GdcStatusDTO.class, updatedGdcDetailsDTO.getGdcStatus()))
+    Mockito.when(referenceService.isValueExists(GdcStatusDTO.class, updatedGdcDetailsDTO.getGdcStatus(), false))
         .thenReturn(true);
 
     restGdcDetailsMockMvc.perform(put("/api/gdc-details")

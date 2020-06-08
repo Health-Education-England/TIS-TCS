@@ -4,12 +4,15 @@ import static org.assertj.core.api.Assertions.assertThat;
 import static org.hamcrest.Matchers.containsInAnyOrder;
 import static org.hamcrest.Matchers.hasItem;
 import static org.hamcrest.Matchers.hasSize;
+import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.when;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.delete;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.patch;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.put;
+import static org.springframework.test.web.servlet.result.MockMvcResultHandlers.print;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.content;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
@@ -17,7 +20,12 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 import com.google.common.collect.Lists;
 import com.transformuk.hee.tis.reference.api.dto.RoleDTO;
 import com.transformuk.hee.tis.reference.client.impl.ReferenceServiceImpl;
+import com.transformuk.hee.tis.tcs.api.dto.ContactDetailsDTO;
+import com.transformuk.hee.tis.tcs.api.dto.GdcDetailsDTO;
+import com.transformuk.hee.tis.tcs.api.dto.GmcDetailsDTO;
 import com.transformuk.hee.tis.tcs.api.dto.PersonDTO;
+import com.transformuk.hee.tis.tcs.api.dto.PersonalDetailsDTO;
+import com.transformuk.hee.tis.tcs.api.dto.RightToWorkDTO;
 import com.transformuk.hee.tis.tcs.api.enumeration.ApprovalStatus;
 import com.transformuk.hee.tis.tcs.api.enumeration.Status;
 import com.transformuk.hee.tis.tcs.service.Application;
@@ -29,19 +37,25 @@ import com.transformuk.hee.tis.tcs.service.api.validation.GdcDetailsValidator;
 import com.transformuk.hee.tis.tcs.service.api.validation.GmcDetailsValidator;
 import com.transformuk.hee.tis.tcs.service.api.validation.PersonValidator;
 import com.transformuk.hee.tis.tcs.service.api.validation.PersonalDetailsValidator;
+import com.transformuk.hee.tis.tcs.service.api.validation.RightToWorkValidator;
+import com.transformuk.hee.tis.tcs.service.api.validation.TrainerApprovalValidator;
 import com.transformuk.hee.tis.tcs.service.exception.ExceptionTranslator;
 import com.transformuk.hee.tis.tcs.service.model.ContactDetails;
 import com.transformuk.hee.tis.tcs.service.model.GdcDetails;
 import com.transformuk.hee.tis.tcs.service.model.GmcDetails;
 import com.transformuk.hee.tis.tcs.service.model.Person;
+import com.transformuk.hee.tis.tcs.service.model.PersonalDetails;
 import com.transformuk.hee.tis.tcs.service.model.Placement;
+import com.transformuk.hee.tis.tcs.service.model.RightToWork;
 import com.transformuk.hee.tis.tcs.service.model.TrainerApproval;
 import com.transformuk.hee.tis.tcs.service.repository.ContactDetailsRepository;
 import com.transformuk.hee.tis.tcs.service.repository.GdcDetailsRepository;
 import com.transformuk.hee.tis.tcs.service.repository.GmcDetailsRepository;
 import com.transformuk.hee.tis.tcs.service.repository.PersonRepository;
+import com.transformuk.hee.tis.tcs.service.repository.PersonalDetailsRepository;
 import com.transformuk.hee.tis.tcs.service.repository.PlacementRepository;
 import com.transformuk.hee.tis.tcs.service.repository.PlacementViewRepository;
+import com.transformuk.hee.tis.tcs.service.repository.RightToWorkRepository;
 import com.transformuk.hee.tis.tcs.service.repository.TrainerApprovalRepository;
 import com.transformuk.hee.tis.tcs.service.service.PersonElasticSearchService;
 import com.transformuk.hee.tis.tcs.service.service.PersonService;
@@ -49,13 +63,14 @@ import com.transformuk.hee.tis.tcs.service.service.PlacementService;
 import com.transformuk.hee.tis.tcs.service.service.impl.PermissionService;
 import com.transformuk.hee.tis.tcs.service.service.mapper.PersonMapper;
 import com.transformuk.hee.tis.tcs.service.service.mapper.PlacementViewMapper;
-import java.math.BigDecimal;
 import java.time.LocalDateTime;
 import java.time.ZoneId;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 import org.apache.commons.codec.net.URLCodec;
 import org.junit.Before;
 import org.junit.Ignore;
@@ -124,6 +139,10 @@ public class PersonResourceIntTest {
   @Autowired
   private ContactDetailsRepository contactDetailsRepository;
   @Autowired
+  private PersonalDetailsRepository personalDetailsRepository;
+  @Autowired
+  private RightToWorkRepository rightToWorkRepository;
+  @Autowired
   private GmcDetailsRepository gmcDetailsRepository;
   @Autowired
   private GdcDetailsRepository gdcDetailsRepository;
@@ -168,6 +187,10 @@ public class PersonResourceIntTest {
   private PersonalDetailsValidator personalDetailsValidator;
   @MockBean
   private ContactDetailsValidator contactDetailsValidator;
+  @MockBean
+  private RightToWorkValidator rightToWorkValidator;
+  @MockBean
+  private TrainerApprovalValidator trainerApprovalValidator;
   @MockBean
   private PersonElasticSearchService personElasticSearchServiceMock;
 
@@ -243,6 +266,10 @@ public class PersonResourceIntTest {
   public void createPerson() throws Exception {
     // Create the Person
     final PersonDTO personDTO = personMapper.toDto(person);
+    Map<String, Boolean> roleToExists = new HashMap<>();
+    roleToExists.put(DEFAULT_ROLE, true);
+    when(referenceService.rolesExist(any(), eq(true))).thenReturn(roleToExists);
+
     restPersonMockMvc.perform(post("/api/people")
         .contentType(TestUtil.APPLICATION_JSON_UTF8)
         .content(TestUtil.convertObjectToJsonBytes(personDTO)))
@@ -586,11 +613,10 @@ public class PersonResourceIntTest {
   @Transactional
   public void updatePerson() throws Exception {
     // Initialize the database
-    personRepository.saveAndFlush(person);
+    Person savedPerson = personRepository.saveAndFlush(person);
 
     // Update the person
-    final Person updatedPerson = personRepository.findById(person.getId()).orElse(null);
-    final PersonDTO updatedPersonDTO = personMapper.toDto(updatedPerson);
+    final PersonDTO updatedPersonDTO = personMapper.toDto(savedPerson);
     updatedPersonDTO.setIntrepidId(UPDATED_INTREPID_ID);
     updatedPersonDTO.setAddedDate(UPDATED_ADDED_DATE);
     updatedPersonDTO.setRole(UPDATED_ROLE);
@@ -600,6 +626,10 @@ public class PersonResourceIntTest {
     updatedPersonDTO.setInactiveNotes(UPDATED_INACTIVE_NOTES);
     updatedPersonDTO.setPublicHealthNumber(UPDATED_PUBLIC_HEALTH_NUMBER);
     updatedPersonDTO.setRegulator(UPDATED_REGULATOR);
+
+    Map<String, Boolean> roleToExists = new HashMap<>();
+    roleToExists.put(UPDATED_ROLE, true);
+    when(referenceService.rolesExist(any(), eq(true))).thenReturn(roleToExists);
 
     restPersonMockMvc.perform(put("/api/people")
         .contentType(TestUtil.APPLICATION_JSON_UTF8)
@@ -895,13 +925,70 @@ public class PersonResourceIntTest {
 
   @Test
   public void patchPersonShouldReturnNotImplementedMessage() throws Exception {
-    PersonDTO dto = new PersonDTO();
-    dto.setId(1L);
+    Person savedPerson = personRepository.saveAndFlush(person);
+    Long savedId = savedPerson.getId();
+
+    final PersonDTO updatedPersonDTO = personMapper.toDto(savedPerson);
+    updatedPersonDTO.setRole(UPDATED_ROLE);
+    updatedPersonDTO.setPublicHealthNumber(UPDATED_PUBLIC_HEALTH_NUMBER);
+
+    PersonalDetails personalDetails = new PersonalDetails();
+    personalDetails.setId(savedId);
+    personalDetailsRepository.save(personalDetails);
+
+    PersonalDetailsDTO personalDetailsDTO = new PersonalDetailsDTO();
+    personalDetailsDTO.setId(savedId);
+    personalDetailsDTO.setDisabilityDetails("disabilityDetails");
+    updatedPersonDTO.setPersonalDetails(personalDetailsDTO);
+
+    ContactDetails contactDetails = new ContactDetails();
+    contactDetails.setId(savedId);
+    contactDetailsRepository.save(contactDetails);
+
+    ContactDetailsDTO contactDetailsDTO = new ContactDetailsDTO();
+    contactDetailsDTO.setId(savedId);
+    contactDetailsDTO.setKnownAs("knownAs");
+    updatedPersonDTO.setContactDetails(contactDetailsDTO);
+
+    GmcDetails gmcDetails = new GmcDetails();
+    gmcDetails.setId(savedId);
+    gmcDetailsRepository.save(gmcDetails);
+
+    GmcDetailsDTO gmcDetailsDTO = new GmcDetailsDTO();
+    gmcDetailsDTO.setId(savedId);
+    gmcDetailsDTO.setGmcNumber("N/A");
+    updatedPersonDTO.setGmcDetails(gmcDetailsDTO);
+
+    GdcDetails gdcDetails = new GdcDetails();
+    gdcDetails.setId(savedId);
+    gdcDetailsRepository.save(gdcDetails);
+
+    GdcDetailsDTO gdcDetailsDTO = new GdcDetailsDTO();
+    gdcDetailsDTO.setId(savedId);
+    gdcDetailsDTO.setGdcNumber("N/A");
+    updatedPersonDTO.setGdcDetails(gdcDetailsDTO);
+
+    RightToWork rightToWork = new RightToWork();
+    rightToWork.setId(savedId);
+    rightToWorkRepository.save(rightToWork);
+
+    RightToWorkDTO rightToWorkDTO = new RightToWorkDTO();
+    rightToWorkDTO.setId(savedId);
+    rightToWorkDTO.setVisaDetails("visaDetails");
+    updatedPersonDTO.setRightToWork(rightToWorkDTO);
+
+    Map<String, Boolean> roleToExists = new HashMap<>();
+    roleToExists.put(UPDATED_ROLE, true);
+    when(referenceService.rolesExist(any(), eq(true))).thenReturn(roleToExists);
 
     restPersonMockMvc.perform(patch("/api/bulk-people")
         .contentType(TestUtil.APPLICATION_JSON_UTF8)
-        .content(TestUtil.convertObjectToJsonBytes(Collections.singletonList(dto))))
+        .content(TestUtil.convertObjectToJsonBytes(Collections.singletonList(updatedPersonDTO))))
+        .andDo(print())
         .andExpect(status().isOk())
-        .andExpect(jsonPath("$[0].messageList[0]").value("Not yet implemented."));
+        .andExpect(jsonPath("$.[*].role", hasItem(UPDATED_ROLE)))
+        .andExpect(jsonPath("$.[*].publicHealthNumber", hasItem(UPDATED_PUBLIC_HEALTH_NUMBER)))
+        .andExpect(jsonPath("$.[*].contactDetails.knownAs").value("knownAs"))
+        .andExpect(jsonPath("$.[0].messageList").isEmpty());
   }
 }
