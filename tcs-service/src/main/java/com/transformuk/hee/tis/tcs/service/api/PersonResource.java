@@ -505,7 +505,7 @@ public class PersonResource {
     log.debug("REST request to patch People: {}", personDtos);
 
     List<PersonDTO> result = personService.patch(personDtos);
-    final List<Long> ids = result.stream().map(PersonDTO::getId).collect(Collectors.toList());
+    final List<String> ids = result.stream().map(dto -> dto.getId().toString()).collect(Collectors.toList());
 
     return ResponseEntity.ok()
         .headers(HeaderUtil.createEntityUpdateAlert(ENTITY_NAME, StringUtils.join(ids, ",")))

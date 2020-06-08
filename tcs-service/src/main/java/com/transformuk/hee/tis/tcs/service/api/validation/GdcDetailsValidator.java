@@ -79,9 +79,9 @@ public class GdcDetailsValidator {
     if (StringUtils.isNotEmpty(gdcNumber)) {
       List<IdProjection> existingGdcDetails = gdcDetailsRepository.findByGdcNumber(gdcNumber);
 
-      if (existingGdcDetails.size() > 0
+      if (!existingGdcDetails.isEmpty()
           && gdcDetailsDTO.getId() != null) { /// should exclude the current one when update
-        existingGdcDetails.removeIf(r -> r.getId() == gdcDetailsDTO.getId());
+        existingGdcDetails.removeIf(r -> r.getId().equals(gdcDetailsDTO.getId()));
       }
 
       int existingSize = existingGdcDetails.size();
@@ -99,15 +99,15 @@ public class GdcDetailsValidator {
     return fieldErrors;
   }
 
-  private List<FieldError> checkGdcStatusExists(GdcDetailsDTO gdcDetailsDTO, boolean currentOnly) {
+  private List<FieldError> checkGdcStatusExists(GdcDetailsDTO gdcDetailsDto, boolean currentOnly) {
     List<FieldError> fieldErrors = new ArrayList<>();
     // then check the gmc status
-    if (StringUtils.isNotEmpty(gdcDetailsDTO.getGdcStatus())) {
+    if (StringUtils.isNotEmpty(gdcDetailsDto.getGdcStatus())) {
       Boolean isExists = referenceService
-          .isValueExists(GdcStatusDTO.class, gdcDetailsDTO.getGdcStatus(), currentOnly);
+          .isValueExists(GdcStatusDTO.class, gdcDetailsDto.getGdcStatus(), currentOnly);
       if (!isExists) {
         fieldErrors.add(new FieldError(GDC_DETAILS_DTO_NAME, "gdcStatus",
-            String.format("gdcStatus %s does not exist", gdcDetailsDTO.getGdcStatus())));
+            String.format("gdcStatus %s does not exist", gdcDetailsDto.getGdcStatus())));
       }
     }
     return fieldErrors;
@@ -130,11 +130,17 @@ public class GdcDetailsValidator {
         String.format("%s is required", field)));
   }
 
-  public List<FieldError> validateForBulk(GdcDetailsDTO gdcDetailsDTO) {
+  /**
+   * Custom validation on the GdcDetailsDTO for bulk upload
+   *
+   * @param gdcDetailsDto the GdcDetailsDTO to check
+   * @return list of FieldErrors
+   */
+  public List<FieldError> validateForBulk(GdcDetailsDTO gdcDetailsDto) {
     final boolean currentOnly = true;
     List<FieldError> fieldErrors = new ArrayList<>();
-    fieldErrors.addAll(checkGdcNumber(gdcDetailsDTO));
-    fieldErrors.addAll(checkGdcStatusExists(gdcDetailsDTO, currentOnly));
+    fieldErrors.addAll(checkGdcNumber(gdcDetailsDto));
+    fieldErrors.addAll(checkGdcStatusExists(gdcDetailsDto, currentOnly));
     return fieldErrors;
   }
 }

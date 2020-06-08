@@ -78,9 +78,9 @@ public class GmcDetailsValidator {
       List<GmcDetails> existingGmcDetails = gmcDetailsRepository
           .findByGmcNumberOrderById(gmcNumber);
 
-      if (existingGmcDetails.size() > 0
+      if (!existingGmcDetails.isEmpty()
           && gmcDetailsDTO.getId() != null) { // should exclude the current one when update
-        existingGmcDetails.removeIf(r -> r.getId() == gmcDetailsDTO.getId());
+        existingGmcDetails.removeIf(r -> r.getId().equals(gmcDetailsDTO.getId()));
       }
 
       int existingSize = existingGmcDetails.size();
@@ -98,15 +98,15 @@ public class GmcDetailsValidator {
     return fieldErrors;
   }
 
-  private List<FieldError> checkGmcStatusExists(GmcDetailsDTO gmcDetailsDTO, boolean currentOnly) {
+  private List<FieldError> checkGmcStatusExists(GmcDetailsDTO gmcDetailsDto, boolean currentOnly) {
     List<FieldError> fieldErrors = new ArrayList<>();
     // then check the gmc status
-    if (StringUtils.isNotEmpty(gmcDetailsDTO.getGmcStatus())) {
+    if (StringUtils.isNotEmpty(gmcDetailsDto.getGmcStatus())) {
       Boolean isExists = referenceService
-          .isValueExists(GmcStatusDTO.class, gmcDetailsDTO.getGmcStatus(), currentOnly);
+          .isValueExists(GmcStatusDTO.class, gmcDetailsDto.getGmcStatus(), currentOnly);
       if (!isExists) {
         fieldErrors.add(new FieldError(GMC_DETAILS_DTO_NAME, "gmcStatus",
-            String.format("gmcStatus %s does not exist", gmcDetailsDTO.getGmcStatus())));
+            String.format("gmcStatus %s does not exist", gmcDetailsDto.getGmcStatus())));
       }
     }
     return fieldErrors;
@@ -135,11 +135,17 @@ public class GmcDetailsValidator {
         String.format("%s is required", field)));
   }
 
-  public List<FieldError> validateForBulk(GmcDetailsDTO gmcDetailsDTO) {
+  /**
+   * Custom validation on the GmcDetailsDTO for bulk upload
+   *
+   * @param gmcDetailsDto the GmcDetailsDTO to check
+   * @return list of FieldErrors
+   */
+  public List<FieldError> validateForBulk(GmcDetailsDTO gmcDetailsDto) {
     final boolean currentOnly = true;
     List<FieldError> fieldErrors = new ArrayList<>();
-    fieldErrors.addAll(checkGmcNumber(gmcDetailsDTO));
-    fieldErrors.addAll(checkGmcStatusExists(gmcDetailsDTO, currentOnly));
+    fieldErrors.addAll(checkGmcNumber(gmcDetailsDto));
+    fieldErrors.addAll(checkGmcStatusExists(gmcDetailsDto, currentOnly));
     return fieldErrors;
   }
 }

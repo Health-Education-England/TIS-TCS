@@ -11,6 +11,7 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 import java.util.Map;
+import java.util.Optional;
 import java.util.Set;
 import java.util.stream.Collectors;
 import org.apache.commons.lang3.StringUtils;
@@ -121,7 +122,7 @@ public class PersonValidator {
     fieldErrors.addAll(checkPerson(personDto));
     fieldErrors.addAll(checkPublicHealthNumber(personDto));
     List<FieldError> checkRoleFieldError = checkRole(personDto);
-    if (checkRoleFieldError.size() == 0) {
+    if (checkRoleFieldError.isEmpty()) {
       fieldErrors.addAll(checkRoleForTrainerApproval(personDto));
     } else {
       fieldErrors.addAll(checkRoleFieldError);
@@ -140,8 +141,8 @@ public class PersonValidator {
   /**
    * Check public health number is already exists
    *
-   * @param personDto
-   * @return
+   * @param personDto the PersonDTO to check
+   * @return list of FieldErrors
    */
   private List<FieldError> checkPublicHealthNumber(PersonDTO personDto) {
     List<FieldError> fieldErrors = new ArrayList<>();
@@ -160,9 +161,9 @@ public class PersonValidator {
       List<Person> existingPersons = personRepository
           .findByPublicHealthNumber(publicHealthNumber);
 
-      if (existingPersons.size() > 0
+      if (!existingPersons.isEmpty()
           && personDto.getId() != null) { // should exclude the current one when update
-        existingPersons.removeIf(r -> r.getId() == personDto.getId());
+        existingPersons.removeIf(r -> r.getId().equals(personDto.getId()));
       }
 
       int existingSize = existingPersons.size();
@@ -196,7 +197,7 @@ public class PersonValidator {
       Map<String, Boolean> rolesExist = referenceService.rolesExist(Arrays.asList(roles), true);
 
       for (String role : roles) {
-        if (!rolesExist.getOrDefault(role, false)) {
+        if (rolesExist.get(role).equals(false)) {
           fieldErrors.add(new FieldError(PERSON_DTO_NAME, "role",
               String.format("role '%s' did not match a reference value.", role)));
         }
@@ -210,11 +211,9 @@ public class PersonValidator {
     List<FieldError> fieldErrors = new ArrayList<>();
     // check the Person
     Long id = personDto.getId();
-    if (id != null) {
-      if (!personRepository.existsById(id)) {
-        fieldErrors.add(new FieldError(PERSON_DTO_NAME, "person",
-            String.format("Person with id %d does not exist", id)));
-      }
+    if (id != null && !personRepository.existsById(id)) {
+      fieldErrors.add(new FieldError(PERSON_DTO_NAME, "person",
+          String.format("Person with id %d does not exist", id)));
     }
     return fieldErrors;
   }
@@ -228,11 +227,14 @@ public class PersonValidator {
       roleForCheck = role;
     } else {
       // no new role, use the existing role
-      Set<TrainerApprovalDTO> trainerApprovalDTO = personDto.getTrainerApprovals();
-      if (trainerApprovalDTO != null && !trainerApprovalDTO.isEmpty()) {
-        Person existingPerson = personRepository.findById(personDto.getId()).get();
-        if (existingPerson != null && !StringUtils.isEmpty(existingPerson.getRole())) {
-          roleForCheck = existingPerson.getRole();
+      Set<TrainerApprovalDTO> trainerApprovalDto = personDto.getTrainerApprovals();
+      if (trainerApprovalDto != null && !trainerApprovalDto.isEmpty()) {
+        Optional<Person> optionalPerson = personRepository.findById(personDto.getId());
+        if (optionalPerson.isPresent()) {
+          Person existingPerson = optionalPerson.get();
+          if (existingPerson != null && !StringUtils.isEmpty(existingPerson.getRole())) {
+            roleForCheck = existingPerson.getRole();
+          }
         }
       }
     }
@@ -242,7 +244,7 @@ public class PersonValidator {
       List<RoleDTO> roleDtos = referenceService.findRolesIn(roleForCheck);
       boolean eligibleForTrainerApproval =
           roleDtos.stream().filter(roleDTO -> roleDTO.getRoleCategory().getId() != 3).count() > 0;
-      if (!eligibleForTrainerApproval && personDto.getTrainerApprovals().size() != 0) {
+      if (!eligibleForTrainerApproval && !personDto.getTrainerApprovals().isEmpty()) {
         fieldErrors.add(new FieldError(PERSON_DTO_NAME, "role",
             "To have a Trainer Approval, the role should contain at least one of 'Educational supervisors/Clinical supervisors/Leave approvers' categories"));
       }

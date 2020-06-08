@@ -25,7 +25,7 @@ import org.springframework.validation.FieldError;
 import org.springframework.web.bind.MethodArgumentNotValidException;
 
 @ExtendWith(MockitoExtension.class)
-public class GmcDetailsValidatorTest {
+class GmcDetailsValidatorTest {
 
   private static final String DEFAULT_GMC_NUMBER = "DEFAULT_GMC_NUMBER";
   private static final String WHITESPACE_GMC_NUMBER = "WHITESPACE_GMC_NUMBER  ";
@@ -52,7 +52,7 @@ public class GmcDetailsValidatorTest {
   private GmcDetails gmcDetailsMock1, gmcDetailsMock2;
 
   @Test
-  public void validateShouldThrowExceptionWhenGmcNumberContainsWhitespace() {
+  void validateShouldThrowExceptionWhenGmcNumberContainsWhitespace() {
     // Given.
     when(gmcDetailsDtoMock_whitespace.getGmcNumber()).thenReturn(WHITESPACE_GMC_NUMBER);
 
@@ -72,7 +72,7 @@ public class GmcDetailsValidatorTest {
   }
 
   @Test
-  public void validateDuringUpdateShouldThrowExceptionWhenOneGmcNumberAlreadyExists() {
+  void validateDuringUpdateShouldThrowExceptionWhenOneGmcNumberAlreadyExists() {
     // Given.
     when(gmcDetailsDtoMock.getId()).thenReturn(GMC_DETAILS_ID);
     when(gmcDetailsDtoMock.getGmcNumber()).thenReturn(DEFAULT_GMC_NUMBER);
@@ -99,7 +99,7 @@ public class GmcDetailsValidatorTest {
   }
 
   @Test
-  public void validateDuringUpdateShouldThrowExceptionWhenMultiplePeopleWithSameGmcNumbers() {
+  void validateDuringUpdateShouldThrowExceptionWhenMultiplePeopleWithSameGmcNumbers() {
     // Given.
     when(gmcDetailsDtoMock.getId()).thenReturn(GMC_DETAILS_ID);
     when(gmcDetailsDtoMock.getGmcNumber()).thenReturn(DEFAULT_GMC_NUMBER);
@@ -126,7 +126,7 @@ public class GmcDetailsValidatorTest {
   }
 
   @Test
-  public void validateDuringCreateShouldThrowExceptionWhenOneGmcNumberAlreadyExists() {
+  void validateDuringCreateShouldThrowExceptionWhenOneGmcNumberAlreadyExists() {
     // Given.
     when(gmcDetailsDtoMock.getId()).thenReturn(null);
     when(gmcDetailsDtoMock.getGmcNumber()).thenReturn(DEFAULT_GMC_NUMBER);
@@ -153,7 +153,7 @@ public class GmcDetailsValidatorTest {
   }
 
   @Test
-  public void validateShouldNotThrowExceptionWhenNoGmcNumberExists() {
+  void validateShouldNotThrowExceptionWhenNoGmcNumberExists() {
     // Given.
     when(gmcDetailsDtoMock.getGmcNumber()).thenReturn(DEFAULT_GMC_NUMBER);
 
@@ -165,7 +165,7 @@ public class GmcDetailsValidatorTest {
   }
 
   @Test
-  public void validationSkippedIfGmcNumberIsUnknownOrNA() {
+  void validationSkippedIfGmcNumberIsUnknownOrNA() {
     // Given.
     when(gmcDetailsDtoMock.getGmcNumber()).thenReturn(UNKNOWN_GMC_NUMBER);
 
@@ -174,7 +174,7 @@ public class GmcDetailsValidatorTest {
   }
 
   @Test
-  public void shouldThrowExceptionWhenGmcStatusNotExists() {
+  void shouldThrowExceptionWhenGmcStatusNotExists() {
     // Given.
     when(gmcDetailsDtoMock.getGmcNumber()).thenReturn(DEFAULT_GMC_NUMBER);
     when(gmcDetailsDtoMock.getGmcStatus()).thenReturn(DEFAULT_GMC_STATUS);
@@ -197,7 +197,7 @@ public class GmcDetailsValidatorTest {
   }
 
   @Test
-  public void shouldNotThrowExceptionWhenGmcStatusExists() {
+  void shouldNotThrowExceptionWhenGmcStatusExists() {
     // Given.
     when(gmcDetailsDtoMock.getGmcNumber()).thenReturn(DEFAULT_GMC_NUMBER);
     when(gmcDetailsDtoMock.getGmcStatus()).thenReturn(DEFAULT_GMC_STATUS);

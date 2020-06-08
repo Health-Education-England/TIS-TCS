@@ -279,22 +279,21 @@ public class PersonServiceImpl implements PersonService {
 
     // Patch valid persons.
     for (PersonDTO personDto : personDtos) {
-      if (personDto.getMessageList().size() == 0) {
-        PersonDTO PersonDtoFromDB = this.findOne(personDto.getId());
-        if (PersonDtoFromDB != null) {
-          updateDtoForBulk(PersonDtoFromDB, personDto);
+      if (personDto.getMessageList().isEmpty()) {
+        PersonDTO personDtoFromDb = this.findOne(personDto.getId());
+        if (personDtoFromDb != null) {
+          updateDtoForBulk(personDtoFromDb, personDto);
           // No cascades for DTOs inside PersonDTO, so need to save each of them
-          personalDetailsService.save(PersonDtoFromDB.getPersonalDetails());
-          contactDetailsService.save(PersonDtoFromDB.getContactDetails());
-          gmcDetailsService.save(PersonDtoFromDB.getGmcDetails());
-          gdcDetailsService.save(PersonDtoFromDB.getGdcDetails());
-          rightToWorkService.save(PersonDtoFromDB.getRightToWork());
-          PersonDTO savedPersonDto = save(PersonDtoFromDB);
+          personalDetailsService.save(personDtoFromDb.getPersonalDetails());
+          contactDetailsService.save(personDtoFromDb.getContactDetails());
+          gmcDetailsService.save(personDtoFromDb.getGmcDetails());
+          gdcDetailsService.save(personDtoFromDb.getGdcDetails());
+          rightToWorkService.save(personDtoFromDb.getRightToWork());
+          PersonDTO savedPersonDto = save(personDtoFromDb);
 
           // Need to set the updated Person into TrainerApprovals
-          PersonDtoFromDB.getTrainerApprovals().forEach(r -> r.setPerson(savedPersonDto));
-          List<TrainerApprovalDTO> trainerApprovalDTO = trainerApprovalService
-              .save(new ArrayList<>(PersonDtoFromDB.getTrainerApprovals()));
+          personDtoFromDb.getTrainerApprovals().forEach(r -> r.setPerson(savedPersonDto));
+          trainerApprovalService.save(new ArrayList<>(personDtoFromDb.getTrainerApprovals()));
         }
       }
     }
@@ -329,8 +328,8 @@ public class PersonServiceImpl implements PersonService {
 
     Set<TrainerApprovalDTO> existingDtoSet = personDtoFromDB.getTrainerApprovals();
     Set<TrainerApprovalDTO> trainerApprovalDtoSet = personDto.getTrainerApprovals();
-    if (trainerApprovalDtoSet != null && trainerApprovalDtoSet.size() != 0) {
-      if (existingDtoSet == null || existingDtoSet.size() == 0) {
+    if (trainerApprovalDtoSet != null && !trainerApprovalDtoSet.isEmpty()) {
+      if (existingDtoSet == null || existingDtoSet.isEmpty()) {
         personDtoFromDB.setTrainerApprovals(trainerApprovalDtoSet);
       } else {
         updateTrainerApproval(personDtoFromDB.getTrainerApprovals(),
@@ -342,19 +341,19 @@ public class PersonServiceImpl implements PersonService {
   private void updateTrainerApproval(
       Set<TrainerApprovalDTO> existingDtoSet, Set<TrainerApprovalDTO> trainerApprovalDtoSet) {
     if (existingDtoSet.size() == 1 && trainerApprovalDtoSet.size() == 1) {
-      trainerApprovalDtoSet.forEach(ta -> {
-        existingDtoSet.forEach(eta -> {
-          if (ta.getApprovalStatus() != null) {
-            eta.setApprovalStatus(ta.getApprovalStatus());
-          }
-          if (ta.getStartDate() != null) {
-            eta.setStartDate(ta.getStartDate());
-          }
-          if (ta.getEndDate() != null) {
-            eta.setEndDate(ta.getEndDate());
-          }
-        });
-      });
+      trainerApprovalDtoSet.forEach(ta ->
+          existingDtoSet.forEach(eta -> {
+            if (ta.getApprovalStatus() != null) {
+              eta.setApprovalStatus(ta.getApprovalStatus());
+            }
+            if (ta.getStartDate() != null) {
+              eta.setStartDate(ta.getStartDate());
+            }
+            if (ta.getEndDate() != null) {
+              eta.setEndDate(ta.getEndDate());
+            }
+          })
+      );
     }
   }
 

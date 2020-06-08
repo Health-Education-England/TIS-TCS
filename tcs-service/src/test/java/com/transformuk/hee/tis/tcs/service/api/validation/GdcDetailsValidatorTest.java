@@ -26,7 +26,7 @@ import org.springframework.validation.FieldError;
 import org.springframework.web.bind.MethodArgumentNotValidException;
 
 @ExtendWith(MockitoExtension.class)
-public class GdcDetailsValidatorTest {
+class GdcDetailsValidatorTest {
 
   private static final String DEFAULT_GDC_NUMBER = "DEFAULT_GDC_NUMBER";
   private static final String WHITESPACE_GDC_NUMBER = "WHITESPACE_GDC_NUMBER  ";
@@ -53,7 +53,7 @@ public class GdcDetailsValidatorTest {
   private GdcDetails GdcDetailsMock1, GdcDetailsMock2;
 
   @Test
-  public void validateShouldThrowExceptionWhenGdcNumberContainsWhitespace() {
+  void validateShouldThrowExceptionWhenGdcNumberContainsWhitespace() {
     // Given.
     when(GdcDetailsDTOMock_whitespace.getGdcNumber()).thenReturn(WHITESPACE_GDC_NUMBER);
 
@@ -73,7 +73,7 @@ public class GdcDetailsValidatorTest {
   }
 
   @Test
-  public void validateDuringUpdateShouldThrowExceptionWhenOneGdcNumberAlreadyExists() {
+  void validateDuringUpdateShouldThrowExceptionWhenOneGdcNumberAlreadyExists() {
     // Given.
     when(GdcDetailsDTOMock.getId()).thenReturn(GDC_DETAILS_ID);
     when(GdcDetailsDTOMock.getGdcNumber()).thenReturn(DEFAULT_GDC_NUMBER);
@@ -106,7 +106,7 @@ public class GdcDetailsValidatorTest {
   }
 
   @Test
-  public void validateDuringUpdateShouldThrowExceptionWhenMultiplePeopleWithSameGdcNumbers() {
+  void validateDuringUpdateShouldThrowExceptionWhenMultiplePeopleWithSameGdcNumbers() {
     // Given.
     when(GdcDetailsDTOMock.getId()).thenReturn(GDC_DETAILS_ID);
     when(GdcDetailsDTOMock.getGdcNumber()).thenReturn(DEFAULT_GDC_NUMBER);
@@ -139,7 +139,7 @@ public class GdcDetailsValidatorTest {
   }
 
   @Test
-  public void validateDuringCreateShouldThrowExceptionWhenOneGdcNumberAlreadyExists() {
+  void validateDuringCreateShouldThrowExceptionWhenOneGdcNumberAlreadyExists() {
     // Given.
     when(GdcDetailsDTOMock.getId()).thenReturn(null);
     when(GdcDetailsDTOMock.getGdcNumber()).thenReturn(DEFAULT_GDC_NUMBER);
@@ -172,7 +172,7 @@ public class GdcDetailsValidatorTest {
   }
 
   @Test
-  public void validateShouldNotThrowExceptionWhenNoGdcNumberExists() {
+  void validateShouldNotThrowExceptionWhenNoGdcNumberExists() {
     // Given.
     when(GdcDetailsDTOMock.getGdcNumber()).thenReturn(DEFAULT_GDC_NUMBER);
 
@@ -184,7 +184,7 @@ public class GdcDetailsValidatorTest {
   }
 
   @Test
-  public void validationSkippedIfGdcNumberIsUnknownOrNA() {
+  void validationSkippedIfGdcNumberIsUnknownOrNA() {
     // Given.
     when(GdcDetailsDTOMock.getGdcNumber()).thenReturn(UNKNOWN_GDC_NUMBER);
 
@@ -193,7 +193,7 @@ public class GdcDetailsValidatorTest {
   }
 
   @Test
-  public void shouldThrowExceptionWhenGdcStatusNotExists() {
+  void shouldThrowExceptionWhenGdcStatusNotExists() {
     // Given.
     when(GdcDetailsDTOMock.getGdcNumber()).thenReturn(DEFAULT_GDC_NUMBER);
     when(GdcDetailsDTOMock.getGdcStatus()).thenReturn(DEFAULT_GDC_STATUS);
@@ -216,7 +216,7 @@ public class GdcDetailsValidatorTest {
   }
 
   @Test
-  public void shouldNotThrowExceptionWhenGdcStatusExists() {
+  void shouldNotThrowExceptionWhenGdcStatusExists() {
     // Given.
     when(GdcDetailsDTOMock.getGdcNumber()).thenReturn(DEFAULT_GDC_NUMBER);
     when(GdcDetailsDTOMock.getGdcStatus()).thenReturn(DEFAULT_GDC_STATUS);

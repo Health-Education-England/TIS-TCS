@@ -24,6 +24,12 @@ public class TrainerApprovalValidator {
     this.personRepository = personRepository;
   }
 
+  /**
+   * Custom validation on the TrainerApprovalDTO DTO
+   *
+   * @param dto the TrainerApprovalDTO to check
+   * @throws MethodArgumentNotValidException if there are validation errors
+   */
   public void validate(TrainerApprovalDTO dto) throws MethodArgumentNotValidException {
     List<FieldError> fieldErrors = new ArrayList<>();
     fieldErrors.addAll(checkPerson(dto));
@@ -44,11 +50,10 @@ public class TrainerApprovalValidator {
     // check the Person
     if (dto.getPerson() == null || dto.getPerson().getId() == null) {
       requireFieldErrors(fieldErrors, "person");
-    } else if (dto.getPerson() != null && dto.getPerson().getId() != null) {
-      if (!personRepository.existsById(dto.getPerson().getId())) {
-        fieldErrors.add(new FieldError(TRAINER_APPROVAL_DTO_NAME, "person",
-            String.format("Person with id %d does not exist", dto.getPerson().getId())));
-      }
+    } else if (dto.getPerson() != null && dto.getPerson().getId() != null &&
+        !personRepository.existsById(dto.getPerson().getId())) {
+      fieldErrors.add(new FieldError(TRAINER_APPROVAL_DTO_NAME, "person",
+          String.format("Person with id %d does not exist", dto.getPerson().getId())));
     }
     return fieldErrors;
   }
@@ -101,11 +106,17 @@ public class TrainerApprovalValidator {
         String.format("%s is required", field)));
   }
 
-  public List<FieldError> validateForBulk(TrainerApprovalDTO trainerApprovalDTO) {
+  /**
+   * Custom validation on the TrainerApprovalDTO for bulk upload
+   *
+   * @param trainerApprovalDto the TrainerApprovalDTO to check
+   * @throws MethodArgumentNotValidException if there are validation errors
+   */
+  public List<FieldError> validateForBulk(TrainerApprovalDTO trainerApprovalDto) {
     List<FieldError> fieldErrors = new ArrayList<>();
-    fieldErrors.addAll(checkStartDate(trainerApprovalDTO));
-    fieldErrors.addAll(checkEndDate(trainerApprovalDTO));
-    fieldErrors.addAll(checkApprovalStatus(trainerApprovalDTO));
+    fieldErrors.addAll(checkStartDate(trainerApprovalDto));
+    fieldErrors.addAll(checkEndDate(trainerApprovalDto));
+    fieldErrors.addAll(checkApprovalStatus(trainerApprovalDto));
     return fieldErrors;
   }
 }

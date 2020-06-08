@@ -39,7 +39,6 @@ import java.util.Map;
 import java.util.Optional;
 import java.util.Set;
 import java.util.stream.Collectors;
-import javax.annotation.PostConstruct;
 import org.apache.commons.codec.EncoderException;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.lang3.exception.ExceptionUtils;
@@ -91,7 +90,6 @@ public class TcsServiceImpl extends AbstractClientService {
   private static final String API_PEOPLE_IN = "/api/people/in/";
   private static final String API_PEOPLE_PHN_IN = "/api/people/phn/in/";
   private static final String API_TRAINEE_PROGRAMME_MEMBERSHIPS = "/api/trainee/";
-  // {traineeId}/programme-memberships;
   private static final String BASIC = "/basic";
   private static final String API_POST_FUNDINGS = "/api/post/fundings";
   private static final String API_FUNDINGS = "/api/post-fundings/";
