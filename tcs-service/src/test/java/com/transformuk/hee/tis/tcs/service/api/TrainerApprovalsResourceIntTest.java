@@ -1,15 +1,11 @@
 package com.transformuk.hee.tis.tcs.service.api;
 
 import static org.assertj.core.api.Assertions.assertThat;
-import static org.mockito.Matchers.any;
-import static org.mockito.Matchers.anyString;
-import static org.mockito.Mockito.when;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.put;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
-import com.transformuk.hee.tis.reference.client.impl.ReferenceServiceImpl;
 import com.transformuk.hee.tis.tcs.api.dto.PersonDTO;
 import com.transformuk.hee.tis.tcs.api.dto.TrainerApprovalDTO;
 import com.transformuk.hee.tis.tcs.api.enumeration.ApprovalStatus;
@@ -21,7 +17,6 @@ import com.transformuk.hee.tis.tcs.service.model.TrainerApproval;
 import com.transformuk.hee.tis.tcs.service.repository.PersonRepository;
 import com.transformuk.hee.tis.tcs.service.repository.TrainerApprovalRepository;
 import com.transformuk.hee.tis.tcs.service.service.TrainerApprovalService;
-import com.transformuk.hee.tis.tcs.service.service.mapper.PersonMapper;
 import com.transformuk.hee.tis.tcs.service.service.mapper.TrainerApprovalMapper;
 import java.time.LocalDate;
 import java.util.List;
@@ -32,7 +27,6 @@ import org.junit.runner.RunWith;
 import org.mockito.MockitoAnnotations;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
-import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.data.web.PageableHandlerMethodArgumentResolver;
 import org.springframework.http.converter.json.MappingJackson2HttpMessageConverter;
 import org.springframework.test.context.junit4.SpringRunner;
@@ -65,8 +59,6 @@ public class TrainerApprovalsResourceIntTest {
   @Autowired
   private TrainerApprovalService trainerApprovalService;
 
-  private TrainerApprovalValidator trainerApprovalValidator;
-
   @Autowired
   private MappingJackson2HttpMessageConverter jacksonMessageConverter;
 
@@ -80,13 +72,7 @@ public class TrainerApprovalsResourceIntTest {
   private PersonRepository personRepository;
 
   @Autowired
-  private PersonMapper personMapper;
-
-  @Autowired
   private EntityManager em;
-
-  @MockBean
-  private ReferenceServiceImpl referenceService;
 
   private MockMvc restTrainerApprovalMockMvc;
   private TrainerApproval trainerApproval;
@@ -94,29 +80,30 @@ public class TrainerApprovalsResourceIntTest {
 
   public static TrainerApproval createEntity(EntityManager em) {
     TrainerApproval trainerApproval = new TrainerApproval()
-      .startDate(DEFAULT_START_DATE)
-      .endDate(DEFAULT_END_DATE)
-      .trainerType(DEFAULT_TRAINER_TYPE)
-      .approvalStatus(DEFAULT_APPROVAL_STATUS);
+        .startDate(DEFAULT_START_DATE)
+        .endDate(DEFAULT_END_DATE)
+        .trainerType(DEFAULT_TRAINER_TYPE)
+        .approvalStatus(DEFAULT_APPROVAL_STATUS);
     return trainerApproval;
   }
 
   public static Person createPersonEntity() {
     Person person = new Person()
-      .id(DEFAULT_PERSON_ID);
+        .id(DEFAULT_PERSON_ID);
     return person;
   }
 
   @Before
   public void setup() {
     MockitoAnnotations.initMocks(this);
-    trainerApprovalValidator = new TrainerApprovalValidator(personRepository, referenceService);
-    TrainerApprovalResource trainerApprovalResource = new TrainerApprovalResource(trainerApprovalService,
-      trainerApprovalValidator );
+    TrainerApprovalValidator trainerApprovalValidator =
+        new TrainerApprovalValidator(personRepository);
+    TrainerApprovalResource trainerApprovalResource =
+        new TrainerApprovalResource(trainerApprovalService, trainerApprovalValidator);
     this.restTrainerApprovalMockMvc = MockMvcBuilders.standaloneSetup(trainerApprovalResource)
-      .setCustomArgumentResolvers(pageableArgumentResolver)
-      .setControllerAdvice(exceptionTranslator)
-      .setMessageConverters(jacksonMessageConverter).build();
+        .setCustomArgumentResolvers(pageableArgumentResolver)
+        .setControllerAdvice(exceptionTranslator)
+        .setMessageConverters(jacksonMessageConverter).build();
   }
 
   @Before
@@ -132,11 +119,10 @@ public class TrainerApprovalsResourceIntTest {
     int databaseSizeBeforeCreate = trainerApprovalRepository.findAll().size();
     trainerApproval.setPerson(person);
     TrainerApprovalDTO trainerApprovalDTO = trainerApprovalMapper.toDto(trainerApproval);
-    when(referenceService.isValueExists(any(), anyString())).thenReturn(true);
     restTrainerApprovalMockMvc.perform(post("/api/trainer-approvals")
-      .contentType(TestUtil.APPLICATION_JSON_UTF8)
-      .content(TestUtil.convertObjectToJsonBytes(trainerApprovalDTO)))
-      .andExpect(status().isCreated());
+        .contentType(TestUtil.APPLICATION_JSON_UTF8)
+        .content(TestUtil.convertObjectToJsonBytes(trainerApprovalDTO)))
+        .andExpect(status().isCreated());
 
     List<TrainerApproval> trainerApprovalList = trainerApprovalRepository.findAll();
     assertThat(trainerApprovalList).hasSize(databaseSizeBeforeCreate + 1);
@@ -156,12 +142,12 @@ public class TrainerApprovalsResourceIntTest {
 
     //when & then
     restTrainerApprovalMockMvc.perform(post("/api/trainer-approvals")
-      .contentType(TestUtil.APPLICATION_JSON_UTF8)
-      .content(TestUtil.convertObjectToJsonBytes(trainerApprovalDTO)))
-      .andExpect(status().isBadRequest())
-      .andExpect(jsonPath("$.message").value("error.validation"))
-      .andExpect(jsonPath("$.fieldErrors[0].field").value("person"))
-      .andExpect(jsonPath("$.fieldErrors[0].message").value("person is required"));
+        .contentType(TestUtil.APPLICATION_JSON_UTF8)
+        .content(TestUtil.convertObjectToJsonBytes(trainerApprovalDTO)))
+        .andExpect(status().isBadRequest())
+        .andExpect(jsonPath("$.message").value("error.validation"))
+        .andExpect(jsonPath("$.fieldErrors[0].field").value("person"))
+        .andExpect(jsonPath("$.fieldErrors[0].message").value("person is required"));
   }
 
   @Test
@@ -173,12 +159,12 @@ public class TrainerApprovalsResourceIntTest {
 
     //when & then
     restTrainerApprovalMockMvc.perform(post("/api/trainer-approvals")
-      .contentType(TestUtil.APPLICATION_JSON_UTF8)
-      .content(TestUtil.convertObjectToJsonBytes(trainerApprovalDTO)))
-      .andExpect(status().isBadRequest())
-      .andExpect(jsonPath("$.message").value("error.validation"))
-      .andExpect(jsonPath("$.fieldErrors[0].field").value("person"))
-      .andExpect(jsonPath("$.fieldErrors[0].message").value("person is required"));
+        .contentType(TestUtil.APPLICATION_JSON_UTF8)
+        .content(TestUtil.convertObjectToJsonBytes(trainerApprovalDTO)))
+        .andExpect(status().isBadRequest())
+        .andExpect(jsonPath("$.message").value("error.validation"))
+        .andExpect(jsonPath("$.fieldErrors[0].field").value("person"))
+        .andExpect(jsonPath("$.fieldErrors[0].message").value("person is required"));
   }
 
   @Test
@@ -188,21 +174,20 @@ public class TrainerApprovalsResourceIntTest {
     trainerApproval.setPerson(person);
     trainerApprovalRepository.saveAndFlush(trainerApproval);
     int recordSizeBeforeUpdate = trainerApprovalRepository.findAll().size();
-    TrainerApproval updatedTrainerApproval = trainerApprovalRepository.findById(trainerApproval.getId())
-      .orElse(null);
+    TrainerApproval updatedTrainerApproval =
+        trainerApprovalRepository.findById(trainerApproval.getId())
+            .orElse(null);
     updatedTrainerApproval
-      .startDate(UPDATED_START_DATE)
-      .endDate(UPDATED_END_DATE)
-      .trainerType(UPDATED_TRAINER_TYPE)
-      .approvalStatus(UPDATED_APPROVAL_STATUS);
+        .startDate(UPDATED_START_DATE)
+        .endDate(UPDATED_END_DATE)
+        .trainerType(UPDATED_TRAINER_TYPE)
+        .approvalStatus(UPDATED_APPROVAL_STATUS);
     TrainerApprovalDTO trainerApprovalDTO = trainerApprovalMapper.toDto(updatedTrainerApproval);
 
-    when(referenceService.isValueExists(any(), anyString())).thenReturn(true);
-
     restTrainerApprovalMockMvc.perform(put("/api/trainer-approvals")
-      .contentType(TestUtil.APPLICATION_JSON_UTF8)
-      .content(TestUtil.convertObjectToJsonBytes(trainerApprovalDTO)))
-      .andExpect(status().isOk());
+        .contentType(TestUtil.APPLICATION_JSON_UTF8)
+        .content(TestUtil.convertObjectToJsonBytes(trainerApprovalDTO)))
+        .andExpect(status().isOk());
 
     List<TrainerApproval> trainerApprovalList = trainerApprovalRepository.findAll();
     assertThat(trainerApprovalList).hasSize(recordSizeBeforeUpdate);
@@ -211,7 +196,7 @@ public class TrainerApprovalsResourceIntTest {
     assertThat(testTrainerApproval.getEndDate()).isEqualTo(UPDATED_END_DATE);
     assertThat(testTrainerApproval.getTrainerType()).isEqualTo(UPDATED_TRAINER_TYPE);
     assertThat(testTrainerApproval.getApprovalStatus())
-      .isEqualTo(UPDATED_APPROVAL_STATUS);
+        .isEqualTo(UPDATED_APPROVAL_STATUS);
     assertThat(testTrainerApproval.getStartDate()).isAfter(DEFAULT_START_DATE);
   }
 }

@@ -474,7 +474,6 @@ public class PersonResource {
     return getPersonPlacements(personId);
   }
 
-
   /**
    * POST  /people : Bulk patch people.
    *
@@ -489,6 +488,26 @@ public class PersonResource {
     log.debug("REST request to patch Persons: {}", personDTOs);
     final List<PersonDTO> result = personService.save(personDTOs);
     final List<Long> ids = result.stream().map(PersonDTO::getId).collect(Collectors.toList());
+    return ResponseEntity.ok()
+        .headers(HeaderUtil.createEntityUpdateAlert(ENTITY_NAME, StringUtils.join(ids, ",")))
+        .body(result);
+  }
+
+  /**
+   * PATCH /bulk-people : People patch for bulk operations.
+   *
+   * @param personDtos The {@link PersonDTO PersonDTOs} with data to patch.
+   * @return the ResponseEntity with status 200 (OK) and the list of patched people in body.
+   */
+  @PatchMapping("/bulk-people")
+  @PreAuthorize("hasPermission('tis:people::person:', 'Update')")
+  public ResponseEntity<List<PersonDTO>> patchPeople(@RequestBody List<PersonDTO> personDtos) {
+    log.debug("REST request to patch People: {}", personDtos);
+
+    List<PersonDTO> result = personService.patch(personDtos);
+    final List<String> ids = result.stream().map(dto -> dto.getId().toString())
+        .collect(Collectors.toList());
+
     return ResponseEntity.ok()
         .headers(HeaderUtil.createEntityUpdateAlert(ENTITY_NAME, StringUtils.join(ids, ",")))
         .body(result);

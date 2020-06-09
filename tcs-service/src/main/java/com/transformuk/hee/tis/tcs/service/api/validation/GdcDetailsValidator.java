@@ -1,6 +1,5 @@
 package com.transformuk.hee.tis.tcs.service.api.validation;
 
-
 import com.transformuk.hee.tis.reference.api.dto.GdcStatusDTO;
 import com.transformuk.hee.tis.reference.client.impl.ReferenceServiceImpl;
 import com.transformuk.hee.tis.tcs.api.dto.GdcDetailsDTO;
@@ -9,6 +8,7 @@ import com.transformuk.hee.tis.tcs.service.repository.GdcDetailsRepository;
 import com.transformuk.hee.tis.tcs.service.repository.IdProjection;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.stream.Collectors;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.stereotype.Component;
 import org.springframework.validation.BeanPropertyBindingResult;
@@ -44,10 +44,11 @@ public class GdcDetailsValidator {
    */
   public void validate(GdcDetailsDTO gdcDetailsDTO) throws MethodArgumentNotValidException {
 
+    final boolean currentOnly = false;
     List<FieldError> fieldErrors = new ArrayList<>();
 //    fieldErrors.addAll(checkGdcStatus(gdcDetailsDTO));
     fieldErrors.addAll(checkGdcNumber(gdcDetailsDTO));
-    fieldErrors.addAll(checkGdcStatusExists(gdcDetailsDTO));
+    fieldErrors.addAll(checkGdcStatusExists(gdcDetailsDTO, currentOnly));
     if (!fieldErrors.isEmpty()) {
       BeanPropertyBindingResult bindingResult = new BeanPropertyBindingResult(gdcDetailsDTO,
           "GdcDetailsDTO");
@@ -66,55 +67,47 @@ public class GdcDetailsValidator {
     List<FieldError> fieldErrors = new ArrayList<>();
     String gdcNumber = gdcDetailsDTO.getGdcNumber();
     if (StringUtils.containsWhitespace(gdcNumber)) {
-      fieldErrors.add(new FieldError(GDC_DETAILS_DTO_NAME, "gdcNumber", "gdcNumber should not contain any whitespaces"));
+      fieldErrors.add(new FieldError(GDC_DETAILS_DTO_NAME, "gdcNumber",
+          "gdcNumber should not contain any whitespaces"));
       return fieldErrors;
     }
     // Ignore if gdcNumber is N/A or UNKNOWN
     if (NA.equalsIgnoreCase(gdcNumber) || UNKNOWN.equalsIgnoreCase(gdcNumber)) {
       return fieldErrors;
     }
-    if (gdcDetailsDTO.getId() != null) {
-      if (StringUtils.isNotEmpty(gdcNumber)) {
-        List<IdProjection> existingGdcDetails = gdcDetailsRepository.findByGdcNumber(gdcNumber);
-        if (existingGdcDetails.size() > 1) {
-          fieldErrors.add(new FieldError(GDC_DETAILS_DTO_NAME, "gdcNumber",
-              String.format(
-                  "gdcNumber %s is not unique, there are currently %d persons with this number: %s",
-                  gdcDetailsDTO.getGdcNumber(), existingGdcDetails.size(),
-                  existingGdcDetails)));
-        } else if (existingGdcDetails.size() == 1) {
-          if (!gdcDetailsDTO.getId().equals(existingGdcDetails.get(0).getId())) {
-            fieldErrors.add(new FieldError(GDC_DETAILS_DTO_NAME, "gdcNumber",
-                String.format(
-                    "gdcNumber %s is not unique, there is currently one person with this number: %s",
-                    gdcDetailsDTO.getGdcNumber(), existingGdcDetails.get(0))));
-          }
-        }
+
+    if (StringUtils.isNotEmpty(gdcNumber)) {
+      List<IdProjection> existingGdcDetails = gdcDetailsRepository.findByGdcNumber(gdcNumber);
+
+      if (!existingGdcDetails.isEmpty()
+          && gdcDetailsDTO.getId() != null) { /// should exclude the current one when update
+        existingGdcDetails.removeIf(r -> r.getId().equals(gdcDetailsDTO.getId()));
       }
-    } else {
-      //if we create a gmc details
-      if (StringUtils.isNotEmpty(gdcNumber)) {
-        List<IdProjection> existingGdcDetails = gdcDetailsRepository.findByGdcNumber(gdcNumber);
-        if (!existingGdcDetails.isEmpty()) {
-          fieldErrors.add(new FieldError(GDC_DETAILS_DTO_NAME, "gdcNumber",
-              String.format(
-                  "gdcNumber %s is not unique, there is currently one person with this number: %s",
-                  gdcDetailsDTO.getGdcNumber(), existingGdcDetails.get(0))));
-        }
+
+      int existingSize = existingGdcDetails.size();
+      if (existingSize > 0) {
+        fieldErrors.add(new FieldError(GDC_DETAILS_DTO_NAME, "gdcNumber",
+            String.format(
+                "gdcNumber %s is not unique, there %s currently %d %s with this number (Person ID: %s)",
+                gdcDetailsDTO.getGdcNumber(), existingSize > 1 ? "are" : "is", existingSize,
+                existingSize > 1 ? "persons" : "person",
+                existingGdcDetails.stream().map(r -> r.getId().toString())
+                    .collect(Collectors.joining(","))
+            )));
       }
     }
     return fieldErrors;
   }
 
-  private List<FieldError> checkGdcStatusExists(GdcDetailsDTO gdcDetailsDTO) {
+  private List<FieldError> checkGdcStatusExists(GdcDetailsDTO gdcDetailsDto, boolean currentOnly) {
     List<FieldError> fieldErrors = new ArrayList<>();
     // then check the gmc status
-    if (StringUtils.isNotEmpty(gdcDetailsDTO.getGdcStatus())) {
+    if (StringUtils.isNotEmpty(gdcDetailsDto.getGdcStatus())) {
       Boolean isExists = referenceService
-          .isValueExists(GdcStatusDTO.class, gdcDetailsDTO.getGdcStatus());
+          .isValueExists(GdcStatusDTO.class, gdcDetailsDto.getGdcStatus(), currentOnly);
       if (!isExists) {
         fieldErrors.add(new FieldError(GDC_DETAILS_DTO_NAME, "gdcStatus",
-            String.format("gdcStatus %s does not exist", gdcDetailsDTO.getGdcStatus())));
+            String.format("gdcStatus %s does not exist", gdcDetailsDto.getGdcStatus())));
       }
     }
     return fieldErrors;
@@ -137,4 +130,17 @@ public class GdcDetailsValidator {
         String.format("%s is required", field)));
   }
 
+  /**
+   * Custom validation on the GdcDetailsDTO for bulk upload.
+   *
+   * @param gdcDetailsDto the GdcDetailsDTO to check
+   * @return list of FieldErrors
+   */
+  public List<FieldError> validateForBulk(GdcDetailsDTO gdcDetailsDto) {
+    final boolean currentOnly = true;
+    List<FieldError> fieldErrors = new ArrayList<>();
+    fieldErrors.addAll(checkGdcNumber(gdcDetailsDto));
+    fieldErrors.addAll(checkGdcStatusExists(gdcDetailsDto, currentOnly));
+    return fieldErrors;
+  }
 }

@@ -11,8 +11,10 @@ import com.transformuk.hee.tis.tcs.api.dto.PersonV2DTO;
 import com.transformuk.hee.tis.tcs.api.dto.PersonViewDTO;
 import com.transformuk.hee.tis.tcs.api.dto.PersonalDetailsDTO;
 import com.transformuk.hee.tis.tcs.api.dto.ProgrammeMembershipDTO;
+import com.transformuk.hee.tis.tcs.api.dto.TrainerApprovalDTO;
 import com.transformuk.hee.tis.tcs.api.enumeration.PersonOwnerRule;
 import com.transformuk.hee.tis.tcs.api.enumeration.Status;
+import com.transformuk.hee.tis.tcs.service.api.validation.PersonValidator;
 import com.transformuk.hee.tis.tcs.service.event.PersonCreatedEvent;
 import com.transformuk.hee.tis.tcs.service.event.PersonDeletedEvent;
 import com.transformuk.hee.tis.tcs.service.event.PersonSavedEvent;
@@ -34,11 +36,23 @@ import com.transformuk.hee.tis.tcs.service.repository.PersonRepository;
 import com.transformuk.hee.tis.tcs.service.repository.PersonalDetailsRepository;
 import com.transformuk.hee.tis.tcs.service.repository.RightToWorkRepository;
 import com.transformuk.hee.tis.tcs.service.repository.TrainerApprovalRepository;
+import com.transformuk.hee.tis.tcs.service.service.ContactDetailsService;
+import com.transformuk.hee.tis.tcs.service.service.GdcDetailsService;
+import com.transformuk.hee.tis.tcs.service.service.GmcDetailsService;
 import com.transformuk.hee.tis.tcs.service.service.PersonService;
+import com.transformuk.hee.tis.tcs.service.service.PersonalDetailsService;
+import com.transformuk.hee.tis.tcs.service.service.RightToWorkService;
+import com.transformuk.hee.tis.tcs.service.service.TrainerApprovalService;
 import com.transformuk.hee.tis.tcs.service.service.helper.SqlQuerySupplier;
+import com.transformuk.hee.tis.tcs.service.service.mapper.ContactDetailsDtoMapper;
+import com.transformuk.hee.tis.tcs.service.service.mapper.GdcDetailsDtoMapper;
+import com.transformuk.hee.tis.tcs.service.service.mapper.GmcDetailsDtoMapper;
 import com.transformuk.hee.tis.tcs.service.service.mapper.PersonBasicDetailsMapper;
+import com.transformuk.hee.tis.tcs.service.service.mapper.PersonDtoMapper;
 import com.transformuk.hee.tis.tcs.service.service.mapper.PersonLiteMapper;
 import com.transformuk.hee.tis.tcs.service.service.mapper.PersonMapper;
+import com.transformuk.hee.tis.tcs.service.service.mapper.PersonalDetailsDtoMapper;
+import com.transformuk.hee.tis.tcs.service.service.mapper.RightToWorkDtoMapper;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.util.ArrayList;
@@ -122,6 +136,45 @@ public class PersonServiceImpl implements PersonService {
 
   @Autowired
   private ApplicationEventPublisher applicationEventPublisher;
+
+  @Autowired
+  private PersonValidator personValidator;
+
+  @Autowired
+  private PersonalDetailsService personalDetailsService;
+
+  @Autowired
+  private ContactDetailsService contactDetailsService;
+
+  @Autowired
+  private GmcDetailsService gmcDetailsService;
+
+  @Autowired
+  private GdcDetailsService gdcDetailsService;
+
+  @Autowired
+  private RightToWorkService rightToWorkService;
+
+  @Autowired
+  private TrainerApprovalService trainerApprovalService;
+
+  @Autowired
+  private PersonDtoMapper personDtoMapper;
+
+  @Autowired
+  private ContactDetailsDtoMapper contactDetailsDtoMapper;
+
+  @Autowired
+  private PersonalDetailsDtoMapper personalDetailsDtoMapper;
+
+  @Autowired
+  private GdcDetailsDtoMapper gdcDetailsDtoMapper;
+
+  @Autowired
+  private GmcDetailsDtoMapper gmcDetailsDtoMapper;
+
+  @Autowired
+  private RightToWorkDtoMapper rightToWorkDtoMapper;
 
   /**
    * Save a person.
@@ -234,6 +287,93 @@ public class PersonServiceImpl implements PersonService {
         .forEach(applicationEventPublisher::publishEvent);
 
     return personDTOS;
+  }
+
+  /**
+   * Patch a list of persons, patching will be skipped for any entities which fail validation.
+   *
+   * @param personDtos the list of entities to patch.
+   * @return The patched entities and skipped entities with validation errors added.
+   */
+  @Override
+  public List<PersonDTO> patch(List<PersonDTO> personDtos) {
+    List<PersonDTO> personDtoList = new ArrayList<>();
+    // Perform validation.
+    personValidator.validateForBulk(personDtos);
+
+    // Patch valid persons.
+    for (PersonDTO personDto : personDtos) {
+      if (personDto.getMessageList().isEmpty()) {
+        PersonDTO personDtoFromDb = this.findOne(personDto.getId());
+        if (personDtoFromDb != null) {
+          updateDtoForBulk(personDtoFromDb, personDto);
+          // No cascades for DTOs inside PersonDTO, so need to save each of them
+          personalDetailsService.save(personDtoFromDb.getPersonalDetails());
+          contactDetailsService.save(personDtoFromDb.getContactDetails());
+          gmcDetailsService.save(personDtoFromDb.getGmcDetails());
+          gdcDetailsService.save(personDtoFromDb.getGdcDetails());
+          rightToWorkService.save(personDtoFromDb.getRightToWork());
+          PersonDTO savedPersonDto = save(personDtoFromDb);
+
+          // Need to set the updated Person into TrainerApprovals
+          personDtoFromDb.getTrainerApprovals().forEach(r -> r.setPerson(savedPersonDto));
+          trainerApprovalService.save(new ArrayList<>(personDtoFromDb.getTrainerApprovals()));
+
+          personDtoList.add(savedPersonDto);
+        }
+      } else {
+        // TODO: for the PersonDTOs with errors, copy the messageList only, need to be refactored
+        PersonDTO errorPersonDto = new PersonDTO();
+        errorPersonDto.setId(personDto.getId());
+        errorPersonDto.setMessageList(personDto.getMessageList());
+        personDtoList.add(errorPersonDto);
+      }
+    }
+
+    return personDtoList;
+  }
+
+  private void updateDtoForBulk(PersonDTO personDtoFromDB, PersonDTO personDto) {
+    // if address1 provided, 4 existing address lines are cleared and overwritten
+    if (personDto.getContactDetails() != null
+        && personDto.getContactDetails().getAddress1() != null
+        && personDtoFromDB.getContactDetails() != null) {
+      personDtoFromDB.getContactDetails().setAddress2(null);
+      personDtoFromDB.getContactDetails().setAddress3(null);
+      personDtoFromDB.getContactDetails().setAddress4(null);
+    }
+
+    personDtoMapper.copyIfNotNull(personDto, personDtoFromDB);
+
+    Set<TrainerApprovalDTO> existingDtoSet = personDtoFromDB.getTrainerApprovals();
+    Set<TrainerApprovalDTO> trainerApprovalDtoSet = personDto.getTrainerApprovals();
+    if (trainerApprovalDtoSet != null && !trainerApprovalDtoSet.isEmpty()) {
+      if (existingDtoSet == null || existingDtoSet.isEmpty()) {
+        personDtoFromDB.setTrainerApprovals(trainerApprovalDtoSet);
+      } else {
+        updateTrainerApproval(personDtoFromDB.getTrainerApprovals(),
+            personDto.getTrainerApprovals());
+      }
+    }
+  }
+
+  private void updateTrainerApproval(
+      Set<TrainerApprovalDTO> existingDtoSet, Set<TrainerApprovalDTO> trainerApprovalDtoSet) {
+    if (existingDtoSet.size() == 1 && trainerApprovalDtoSet.size() == 1) {
+      trainerApprovalDtoSet.forEach(ta ->
+          existingDtoSet.forEach(eta -> {
+            if (ta.getApprovalStatus() != null) {
+              eta.setApprovalStatus(ta.getApprovalStatus());
+            }
+            if (ta.getStartDate() != null) {
+              eta.setStartDate(ta.getStartDate());
+            }
+            if (ta.getEndDate() != null) {
+              eta.setEndDate(ta.getEndDate());
+            }
+          })
+      );
+    }
   }
 
   /**

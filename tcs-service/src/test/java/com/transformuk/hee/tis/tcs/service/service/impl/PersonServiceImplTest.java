@@ -9,11 +9,19 @@ import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
+import com.google.common.collect.Lists;
 import com.google.common.collect.Sets;
+import com.transformuk.hee.tis.tcs.api.dto.ContactDetailsDTO;
+import com.transformuk.hee.tis.tcs.api.dto.GdcDetailsDTO;
+import com.transformuk.hee.tis.tcs.api.dto.GmcDetailsDTO;
 import com.transformuk.hee.tis.tcs.api.dto.PersonDTO;
 import com.transformuk.hee.tis.tcs.api.dto.PersonV2DTO;
 import com.transformuk.hee.tis.tcs.api.dto.PersonalDetailsDTO;
 import com.transformuk.hee.tis.tcs.api.dto.ProgrammeMembershipDTO;
+import com.transformuk.hee.tis.tcs.api.dto.RightToWorkDTO;
+import com.transformuk.hee.tis.tcs.api.dto.TrainerApprovalDTO;
+import com.transformuk.hee.tis.tcs.api.enumeration.ApprovalStatus;
+import com.transformuk.hee.tis.tcs.service.api.validation.PersonValidator;
 import com.transformuk.hee.tis.tcs.service.exception.AccessUnauthorisedException;
 import com.transformuk.hee.tis.tcs.service.model.ContactDetails;
 import com.transformuk.hee.tis.tcs.service.model.GdcDetails;
@@ -30,6 +38,13 @@ import com.transformuk.hee.tis.tcs.service.repository.GmcDetailsRepository;
 import com.transformuk.hee.tis.tcs.service.repository.PersonRepository;
 import com.transformuk.hee.tis.tcs.service.repository.PersonalDetailsRepository;
 import com.transformuk.hee.tis.tcs.service.repository.RightToWorkRepository;
+import com.transformuk.hee.tis.tcs.service.service.ContactDetailsService;
+import com.transformuk.hee.tis.tcs.service.service.GdcDetailsService;
+import com.transformuk.hee.tis.tcs.service.service.GmcDetailsService;
+import com.transformuk.hee.tis.tcs.service.service.PersonalDetailsService;
+import com.transformuk.hee.tis.tcs.service.service.RightToWorkService;
+import com.transformuk.hee.tis.tcs.service.service.TrainerApprovalService;
+import com.transformuk.hee.tis.tcs.service.service.mapper.PersonDtoMapper;
 import com.transformuk.hee.tis.tcs.service.service.mapper.PersonMapper;
 import java.time.LocalDate;
 import java.util.ArrayList;
@@ -65,6 +80,8 @@ public class PersonServiceImplTest {
   @Mock
   private PermissionService permissionServiceMock;
   @Mock
+  private PersonValidator personValidatorMock;
+  @Mock
   private PersonRepository personRepositoryMock;
   @Mock
   private PersonMapper personMapperMock;
@@ -93,6 +110,18 @@ public class PersonServiceImplTest {
   private PersonalDetailsRepository personalDetailsRepositoryMock;
   @Mock
   private RightToWorkRepository rightToWorkRepositoryMock;
+  @Mock
+  private PersonalDetailsService personalDetailsServiceMock;
+  @Mock
+  private ContactDetailsService contactDetailsServiceMock;
+  @Mock
+  private GmcDetailsService gmcDetailsServiceMock;
+  @Mock
+  private GdcDetailsService gdcDetailsServiceMock;
+  @Mock
+  private RightToWorkService rightToWorkServiceMock;
+  @Mock
+  private TrainerApprovalService trainerApprovalServiceMock;
 
   @Captor
   private ArgumentCaptor<GdcDetails> gdcDetailsArgumentCaptor;
@@ -107,6 +136,9 @@ public class PersonServiceImplTest {
 
   @Mock
   private ApplicationEventPublisher applicationEventPublisherMock;
+
+  @Mock
+  private PersonDtoMapper personDtoMapperMock;
 
   @Before
   public void setup() {
@@ -350,5 +382,35 @@ public class PersonServiceImplTest {
     verify(savedPersonMock).setContactDetails(contactDetailsMock);
     verify(savedPersonMock).setPersonalDetails(personalDetailsMock);
     verify(savedPersonMock).setRightToWork(rightToWorkMock);
+  }
+
+  @Test
+  public void patchShouldPatchPersonsAndReturnDtos() {
+    // Given.
+    PersonDTO personDto = new PersonDTO();
+    personDto.setId(PERSON_ID);
+
+    List<PersonDTO> personDTOList = Lists.newArrayList(personDto);
+
+    when(personRepositoryMock.findById(PERSON_ID)).thenReturn(Optional.of(person));
+    when(permissionServiceMock.canViewSensitiveData()).thenReturn(true);
+    when(permissionServiceMock.canEditSensitiveData()).thenReturn(true);
+    when(personMapperMock.toDto(person)).thenReturn(personDto);
+    when(personMapperMock.toEntity(personDto)).thenReturn(person);
+    when(personRepositoryMock.saveAndFlush(person)).thenReturn(person);
+
+    // When.
+    List<PersonDTO> returnedPersonDtoList = testObj.patch(personDTOList);
+
+    // Then.
+    verify(personDtoMapperMock).copyIfNotNull(any(), any());
+    verify(personalDetailsServiceMock).save(personDto.getPersonalDetails());
+    verify(contactDetailsServiceMock).save(personDto.getContactDetails());
+    verify(gmcDetailsServiceMock).save(personDto.getGmcDetails());
+    verify(gdcDetailsServiceMock).save(personDto.getGdcDetails());
+    verify(rightToWorkServiceMock).save(personDto.getRightToWork());
+
+    Assert.assertEquals(1, returnedPersonDtoList.size());
+    Assert.assertEquals(0, returnedPersonDtoList.get(0).getMessageList().size());
   }
 }

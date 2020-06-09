@@ -1,6 +1,5 @@
 package com.transformuk.hee.tis.tcs.service.api.validation;
 
-
 import com.transformuk.hee.tis.reference.api.dto.TitleDTO;
 import com.transformuk.hee.tis.reference.client.impl.ReferenceServiceImpl;
 import com.transformuk.hee.tis.tcs.api.dto.ContactDetailsDTO;
@@ -21,9 +20,8 @@ import org.springframework.web.bind.MethodArgumentNotValidException;
 public class ContactDetailsValidator {
 
   private static final String CONTACT_DETAILS_DTO_NAME = "ContactDetailsDTO";
-  private static final String NA = "N/A";
-  private static final String UNKNOWN = "UNKNOWN";
-  private ReferenceServiceImpl referenceService;
+
+  private final ReferenceServiceImpl referenceService;
 
   public ContactDetailsValidator(ReferenceServiceImpl referenceService) {
     this.referenceService = referenceService;
@@ -33,34 +31,105 @@ public class ContactDetailsValidator {
    * Custom validation on the gmcDetailsDTO DTO, this is meant to supplement the annotation based
    * validation already in place. It checks that the gmc status if gmc number is entered.
    *
-   * @param contactDetailsDTO the contactDetails to check
+   * @param dto the contactDetails to check
    * @throws MethodArgumentNotValidException if there are validation errors
    */
-  public void validate(ContactDetailsDTO contactDetailsDTO) throws MethodArgumentNotValidException {
-
+  public void validate(ContactDetailsDTO dto) throws MethodArgumentNotValidException {
+    final boolean currentOnly = false;
     List<FieldError> fieldErrors = new ArrayList<>();
-    fieldErrors.addAll(checkTitle(contactDetailsDTO));
+    fieldErrors.addAll(checkTitle(dto, currentOnly));
+    fieldErrors.addAll(checkAddress1(dto));
+    fieldErrors.addAll(checkAddress2(dto));
+    fieldErrors.addAll(checkPostCode(dto));
+
     if (!fieldErrors.isEmpty()) {
-      BeanPropertyBindingResult bindingResult = new BeanPropertyBindingResult(contactDetailsDTO,
-          "ContactDetailsDTO");
+      BeanPropertyBindingResult bindingResult =
+          new BeanPropertyBindingResult(dto, CONTACT_DETAILS_DTO_NAME);
       fieldErrors.forEach(bindingResult::addError);
       throw new MethodArgumentNotValidException(null, bindingResult);
     }
   }
 
-  private List<FieldError> checkTitle(ContactDetailsDTO contactDetailsDTO) {
+  private List<FieldError> checkTitle(ContactDetailsDTO contactDetailsDto, boolean currentOnly) {
     List<FieldError> fieldErrors = new ArrayList<>();
     // then check the grades
-    if (StringUtils.isNotEmpty(contactDetailsDTO.getTitle())) {
+    if (StringUtils.isNotEmpty(contactDetailsDto.getTitle())) {
       Boolean isExists = referenceService
-          .isValueExists(TitleDTO.class, contactDetailsDTO.getTitle());
+          .isValueExists(TitleDTO.class, contactDetailsDto.getTitle(), currentOnly);
       if (!isExists) {
         fieldErrors.add(new FieldError(CONTACT_DETAILS_DTO_NAME, "title",
-            String.format("title %s does not exist", contactDetailsDTO.getTitle())));
+            String.format("title %s does not exist", contactDetailsDto.getTitle())));
       }
     }
     return fieldErrors;
   }
 
+  private List<FieldError> checkAddress1(ContactDetailsDTO dto) {
+    List<FieldError> fieldErrors = new ArrayList<>();
+    final String field_address1 = "address1";
 
+    if (StringUtils.isEmpty(dto.getAddress1())) {
+      if (StringUtils.isNotEmpty(dto.getAddress2())) {
+        FieldError fieldError = new FieldError(CONTACT_DETAILS_DTO_NAME, field_address1,
+            "address1 is required when address2 is populated.");
+        fieldErrors.add(fieldError);
+      }
+
+      if (StringUtils.isNotEmpty(dto.getAddress3())) {
+        FieldError fieldError = new FieldError(CONTACT_DETAILS_DTO_NAME, field_address1,
+            "address1 is required when address3 is populated.");
+        fieldErrors.add(fieldError);
+      }
+
+      if (StringUtils.isNotEmpty(dto.getPostCode())) {
+        FieldError fieldError = new FieldError(CONTACT_DETAILS_DTO_NAME, field_address1,
+            "address1 is required when postCode is populated.");
+        fieldErrors.add(fieldError);
+      }
+    }
+
+    return fieldErrors;
+  }
+
+  private List<FieldError> checkAddress2(ContactDetailsDTO dto) {
+    List<FieldError> fieldErrors = new ArrayList<>();
+
+    if (StringUtils.isEmpty(dto.getAddress2()) && StringUtils.isNotEmpty(dto.getAddress3())) {
+      FieldError fieldError = new FieldError(CONTACT_DETAILS_DTO_NAME, "address2",
+          "address2 is required when address3 is populated.");
+      fieldErrors.add(fieldError);
+    }
+
+    return fieldErrors;
+  }
+
+  private List<FieldError> checkPostCode(ContactDetailsDTO dto) {
+    List<FieldError> fieldErrors = new ArrayList<>();
+
+    if (StringUtils.isEmpty(dto.getPostCode()) && (StringUtils.isNotEmpty(dto.getAddress1())
+        || StringUtils.isNotEmpty(dto.getAddress2()) || StringUtils
+        .isNotEmpty(dto.getAddress3()))) {
+      FieldError fieldError = new FieldError(CONTACT_DETAILS_DTO_NAME, "postCode",
+          "postCode is required when address is populated.");
+      fieldErrors.add(fieldError);
+    }
+
+    return fieldErrors;
+  }
+
+  /**
+   * Custom validation on the ContactDetailsDTO for bulk upload.
+   *
+   * @param dto the ContactDetailsDTO to check
+   * @return list of FieldErrors
+   */
+  public List<FieldError> validateForBulk(ContactDetailsDTO dto) {
+    final boolean currentOnly = true;
+    List<FieldError> fieldErrors = new ArrayList<>();
+    fieldErrors.addAll(checkTitle(dto, currentOnly));
+    fieldErrors.addAll(checkAddress1(dto));
+    fieldErrors.addAll(checkAddress2(dto));
+    fieldErrors.addAll(checkPostCode(dto));
+    return fieldErrors;
+  }
 }

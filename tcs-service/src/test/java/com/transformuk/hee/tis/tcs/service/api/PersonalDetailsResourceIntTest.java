@@ -3,6 +3,7 @@ package com.transformuk.hee.tis.tcs.service.api;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.hamcrest.Matchers.containsInAnyOrder;
 import static org.hamcrest.Matchers.hasItem;
+import static org.mockito.ArgumentMatchers.anyBoolean;
 import static org.mockito.Matchers.any;
 import static org.mockito.Matchers.anyString;
 import static org.mockito.Mockito.when;
@@ -79,8 +80,8 @@ public class PersonalDetailsResourceIntTest {
   private static final String DEFAULT_ETHNIC_ORIGIN = "AAAAAAAAAA";
   private static final String UPDATED_ETHNIC_ORIGIN = "BBBBBBBBBB";
 
-  private static final String DEFAULT_DISABILITY = "AAAAAAAAAA";
-  private static final String UPDATED_DISABILITY = "BBBBBBBBBB";
+  private static final String DEFAULT_DISABILITY = "YES";
+  private static final String UPDATED_DISABILITY = "NO";
 
   private static final String DEFAULT_DISABILITY_DETAILS = "AAAAAAAAAA";
   private static final String UPDATED_DISABILITY_DETAILS = "BBBBBBBBBB";
@@ -174,7 +175,7 @@ public class PersonalDetailsResourceIntTest {
 
     // Create the PersonalDetails
     PersonalDetailsDTO personalDetailsDTO = personalDetailsMapper.toDto(personalDetails);
-    when(referenceService.isValueExists(any(), anyString())).thenReturn(true);
+    when(referenceService.isValueExists(any(), anyString(), anyBoolean())).thenReturn(true);
     restPersonalDetailsMockMvc.perform(post("/api/personal-details")
         .contentType(TestUtil.APPLICATION_JSON_UTF8)
         .content(TestUtil.convertObjectToJsonBytes(personalDetailsDTO)))
@@ -238,7 +239,7 @@ public class PersonalDetailsResourceIntTest {
     // Create the PersonalDetails with an existing ID
     personalDetails.setId(1L);
     PersonalDetailsDTO personalDetailsDTO = personalDetailsMapper.toDto(personalDetails);
-    when(referenceService.isValueExists(any(), anyString())).thenReturn(true);
+    when(referenceService.isValueExists(any(), anyString(), anyBoolean())).thenReturn(true);
     // Personal details is part of person so the call must succeed
     restPersonalDetailsMockMvc.perform(post("/api/personal-details")
         .contentType(TestUtil.APPLICATION_JSON_UTF8)
@@ -337,7 +338,7 @@ public class PersonalDetailsResourceIntTest {
         .nationalInsuranceNumber(UPDATED_NI_NUMBER)
         .disabilityDetails(UPDATED_DISABILITY_DETAILS);
     PersonalDetailsDTO personalDetailsDTO = personalDetailsMapper.toDto(updatedPersonalDetails);
-    when(referenceService.isValueExists(any(), anyString())).thenReturn(true);
+    when(referenceService.isValueExists(any(), anyString(), anyBoolean())).thenReturn(true);
     restPersonalDetailsMockMvc.perform(put("/api/personal-details")
         .contentType(TestUtil.APPLICATION_JSON_UTF8)
         .content(TestUtil.convertObjectToJsonBytes(personalDetailsDTO)))

@@ -1,6 +1,5 @@
 package com.transformuk.hee.tis.tcs.service.api.validation;
 
-
 import com.transformuk.hee.tis.reference.api.dto.GmcStatusDTO;
 import com.transformuk.hee.tis.reference.client.impl.ReferenceServiceImpl;
 import com.transformuk.hee.tis.tcs.api.dto.GmcDetailsDTO;
@@ -8,6 +7,7 @@ import com.transformuk.hee.tis.tcs.service.model.GmcDetails;
 import com.transformuk.hee.tis.tcs.service.repository.GmcDetailsRepository;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.stream.Collectors;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.stereotype.Component;
 import org.springframework.validation.BeanPropertyBindingResult;
@@ -42,10 +42,11 @@ public class GmcDetailsValidator {
    */
   public void validate(GmcDetailsDTO gmcDetailsDTO) throws MethodArgumentNotValidException {
 
+    final boolean currentOnly = false;
     List<FieldError> fieldErrors = new ArrayList<>();
 //    fieldErrors.addAll(checkGmcStatus(gmcDetailsDTO));
     fieldErrors.addAll(checkGmcNumber(gmcDetailsDTO));
-    fieldErrors.addAll(checkGmcStatusExists(gmcDetailsDTO));
+    fieldErrors.addAll(checkGmcStatusExists(gmcDetailsDTO, currentOnly));
     if (!fieldErrors.isEmpty()) {
       BeanPropertyBindingResult bindingResult = new BeanPropertyBindingResult(gmcDetailsDTO,
           "GmcDetailsDTO");
@@ -64,64 +65,55 @@ public class GmcDetailsValidator {
     List<FieldError> fieldErrors = new ArrayList<>();
     String gmcNumber = gmcDetailsDTO.getGmcNumber();
     if (StringUtils.containsWhitespace(gmcNumber)) {
-      fieldErrors.add(new FieldError(GMC_DETAILS_DTO_NAME, "gmcNumber", "gmcNumber should not contain any whitespaces"));
+      fieldErrors.add(new FieldError(GMC_DETAILS_DTO_NAME, "gmcNumber",
+          "gmcNumber should not contain any whitespaces"));
       return fieldErrors;
     }
     // Ignore if gmcNumber is N/A or UNKNOWN
     if (NA.equalsIgnoreCase(gmcNumber) || UNKNOWN.equalsIgnoreCase(gmcNumber)) {
       return fieldErrors;
     }
-    if (gmcDetailsDTO.getId() != null) {
-      if (StringUtils.isNotEmpty(gmcNumber)) {
-        List<GmcDetails> existingGmcDetails = gmcDetailsRepository
-            .findByGmcNumberOrderById(gmcNumber);
-        if (existingGmcDetails.size() > 1) {
-          fieldErrors.add(new FieldError(GMC_DETAILS_DTO_NAME, "gmcNumber",
-              String.format(
-                  "gmcNumber %s is not unique, there are currently %d persons with this number: %s",
-                  gmcDetailsDTO.getGmcNumber(), existingGmcDetails.size(),
-                  existingGmcDetails)));
-        } else if (existingGmcDetails.size() == 1) {
-          if (!gmcDetailsDTO.getId().equals(existingGmcDetails.get(0).getId())) {
-            fieldErrors.add(new FieldError(GMC_DETAILS_DTO_NAME, "gmcNumber",
-                String.format(
-                    "gmcNumber %s is not unique, there is currently one person with this number: %s",
-                    gmcDetailsDTO.getGmcNumber(), existingGmcDetails.get(0))));
-          }
-        }
+
+    if (StringUtils.isNotEmpty(gmcNumber)) {
+      List<GmcDetails> existingGmcDetails = gmcDetailsRepository
+          .findByGmcNumberOrderById(gmcNumber);
+
+      if (!existingGmcDetails.isEmpty()
+          && gmcDetailsDTO.getId() != null) { // should exclude the current one when update
+        existingGmcDetails.removeIf(r -> r.getId().equals(gmcDetailsDTO.getId()));
       }
-    } else {
-      //if we create a gmc details
-      if (StringUtils.isNotEmpty(gmcNumber)) {
-        List<GmcDetails> existingGmcDetails = gmcDetailsRepository
-            .findByGmcNumberOrderById(gmcNumber);
-        if (!existingGmcDetails.isEmpty()) {
-          fieldErrors.add(new FieldError(GMC_DETAILS_DTO_NAME, "gmcNumber",
-              String.format(
-                  "gmcNumber %s is not unique, there is currently one person with this number: %s",
-                  gmcDetailsDTO.getGmcNumber(), existingGmcDetails.get(0))));
-        }
+
+      int existingSize = existingGmcDetails.size();
+      if (existingSize > 0) {
+        fieldErrors.add(new FieldError(GMC_DETAILS_DTO_NAME, "gmcNumber",
+            String.format(
+                "gmcNumber %s is not unique, there %s currently %d %s with this number (Person ID: %s)",
+                gmcDetailsDTO.getGmcNumber(), existingSize > 1 ? "are" : "is", existingSize,
+                existingSize > 1 ? "persons" : "person",
+                existingGmcDetails.stream().map(r -> r.getId().toString()).collect(
+                    Collectors.joining(","))
+            )));
       }
     }
     return fieldErrors;
   }
 
-  private List<FieldError> checkGmcStatusExists(GmcDetailsDTO gmcDetailsDTO) {
+  private List<FieldError> checkGmcStatusExists(GmcDetailsDTO gmcDetailsDto, boolean currentOnly) {
     List<FieldError> fieldErrors = new ArrayList<>();
     // then check the gmc status
-    if (StringUtils.isNotEmpty(gmcDetailsDTO.getGmcStatus())) {
+    if (StringUtils.isNotEmpty(gmcDetailsDto.getGmcStatus())) {
       Boolean isExists = referenceService
-          .isValueExists(GmcStatusDTO.class, gmcDetailsDTO.getGmcStatus());
+          .isValueExists(GmcStatusDTO.class, gmcDetailsDto.getGmcStatus(), currentOnly);
       if (!isExists) {
         fieldErrors.add(new FieldError(GMC_DETAILS_DTO_NAME, "gmcStatus",
-            String.format("gmcStatus %s does not exist", gmcDetailsDTO.getGmcStatus())));
+            String.format("gmcStatus %s does not exist", gmcDetailsDto.getGmcStatus())));
       }
     }
     return fieldErrors;
   }
 
   /**
-   * Check gmc status required field populated
+   * Check gmc status required field populated.
    *
    * @param gmcDetailsDTO
    * @return
@@ -143,4 +135,17 @@ public class GmcDetailsValidator {
         String.format("%s is required", field)));
   }
 
+  /**
+   * Custom validation on the GmcDetailsDTO for bulk upload
+   *
+   * @param gmcDetailsDto the GmcDetailsDTO to check
+   * @return list of FieldErrors
+   */
+  public List<FieldError> validateForBulk(GmcDetailsDTO gmcDetailsDto) {
+    final boolean currentOnly = true;
+    List<FieldError> fieldErrors = new ArrayList<>();
+    fieldErrors.addAll(checkGmcNumber(gmcDetailsDto));
+    fieldErrors.addAll(checkGmcStatusExists(gmcDetailsDto, currentOnly));
+    return fieldErrors;
+  }
 }

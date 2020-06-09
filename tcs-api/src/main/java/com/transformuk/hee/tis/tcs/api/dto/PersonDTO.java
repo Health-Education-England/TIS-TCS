@@ -5,7 +5,9 @@ import com.transformuk.hee.tis.tcs.api.dto.validation.Update;
 import com.transformuk.hee.tis.tcs.api.enumeration.Status;
 import java.io.Serializable;
 import java.time.LocalDateTime;
+import java.util.ArrayList;
 import java.util.HashSet;
+import java.util.List;
 import java.util.Set;
 import javax.validation.constraints.DecimalMin;
 import javax.validation.constraints.NotNull;
@@ -57,6 +59,14 @@ public class PersonDTO implements Serializable {
   private Set<ProgrammeMembershipDTO> programmeMemberships = new HashSet<>();
 
   private RightToWorkDTO rightToWork;
+
+  private Set<TrainerApprovalDTO> trainerApprovals = new HashSet<>();
+
+  private List<String> messageList = new ArrayList<>();
+
+  public void addMessage(String message) {
+    messageList.add(message);
+  }
 
   @Override
   public boolean equals(Object o) {
@@ -131,6 +141,10 @@ public class PersonDTO implements Serializable {
         : personDTO.programmeMemberships != null) {
       return false;
     }
+    if (messageList != null ? !messageList.equals(personDTO.messageList)
+        : personDTO.messageList != null) {
+      return false;
+    }
     return rightToWork != null ? rightToWork.equals(personDTO.rightToWork)
         : personDTO.rightToWork == null;
   }
@@ -155,6 +169,8 @@ public class PersonDTO implements Serializable {
     result = 31 * result + (qualifications != null ? qualifications.hashCode() : 0);
     result = 31 * result + (programmeMemberships != null ? programmeMemberships.hashCode() : 0);
     result = 31 * result + (rightToWork != null ? rightToWork.hashCode() : 0);
+    result = 31 * result + (messageList != null ? messageList.hashCode() : 0);
+
     return result;
   }
 }
