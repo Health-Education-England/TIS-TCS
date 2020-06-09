@@ -1,7 +1,6 @@
 package com.transformuk.hee.tis.tcs.service.service.impl;
 
 import static com.transformuk.hee.tis.tcs.service.service.impl.SpecificationFactory.containsLike;
-import static com.transformuk.hee.tis.tcs.service.util.ReflectionUtil.copyIfNotNullOrEmpty;
 
 import com.transformuk.hee.tis.reference.api.dto.RoleDTO;
 import com.transformuk.hee.tis.reference.client.ReferenceService;
@@ -45,9 +44,15 @@ import com.transformuk.hee.tis.tcs.service.service.PersonalDetailsService;
 import com.transformuk.hee.tis.tcs.service.service.RightToWorkService;
 import com.transformuk.hee.tis.tcs.service.service.TrainerApprovalService;
 import com.transformuk.hee.tis.tcs.service.service.helper.SqlQuerySupplier;
+import com.transformuk.hee.tis.tcs.service.service.mapper.ContactDetailsDtoMapper;
+import com.transformuk.hee.tis.tcs.service.service.mapper.GdcDetailsDtoMapper;
+import com.transformuk.hee.tis.tcs.service.service.mapper.GmcDetailsDtoMapper;
 import com.transformuk.hee.tis.tcs.service.service.mapper.PersonBasicDetailsMapper;
+import com.transformuk.hee.tis.tcs.service.service.mapper.PersonDtoMapper;
 import com.transformuk.hee.tis.tcs.service.service.mapper.PersonLiteMapper;
 import com.transformuk.hee.tis.tcs.service.service.mapper.PersonMapper;
+import com.transformuk.hee.tis.tcs.service.service.mapper.PersonalDetailsDtoMapper;
+import com.transformuk.hee.tis.tcs.service.service.mapper.RightToWorkDtoMapper;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.util.ArrayList;
@@ -152,6 +157,24 @@ public class PersonServiceImpl implements PersonService {
 
   @Autowired
   private TrainerApprovalService trainerApprovalService;
+
+  @Autowired
+  private PersonDtoMapper personDtoMapper;
+
+  @Autowired
+  private ContactDetailsDtoMapper contactDetailsDtoMapper;
+
+  @Autowired
+  private PersonalDetailsDtoMapper personalDetailsDtoMapper;
+
+  @Autowired
+  private GdcDetailsDtoMapper gdcDetailsDtoMapper;
+
+  @Autowired
+  private GmcDetailsDtoMapper gmcDetailsDtoMapper;
+
+  @Autowired
+  private RightToWorkDtoMapper rightToWorkDtoMapper;
 
   /**
    * Save a person.
@@ -311,29 +334,16 @@ public class PersonServiceImpl implements PersonService {
   }
 
   private void updateDtoForBulk(PersonDTO personDtoFromDB, PersonDTO personDto) {
-    copyIfNotNullOrEmpty(personDto, personDtoFromDB, "role", "publicHealthNumber");
     // if address1 provided, 4 existing address lines are cleared and overwritten
     if (personDto.getContactDetails() != null
-        && personDto.getContactDetails().getAddress1() != null) {
+        && personDto.getContactDetails().getAddress1() != null
+        && personDtoFromDB.getContactDetails() != null) {
       personDtoFromDB.getContactDetails().setAddress2(null);
       personDtoFromDB.getContactDetails().setAddress3(null);
       personDtoFromDB.getContactDetails().setAddress4(null);
     }
-    copyIfNotNullOrEmpty(personDto.getContactDetails(), personDtoFromDB.getContactDetails(),
-        "address1", "address2", "address3",
-        "postCode", "forenames", "surname", "title", "knownAs", "email", "mobileNumber",
-        "telephoneNumber");
-    copyIfNotNullOrEmpty(personDto.getPersonalDetails(), personDtoFromDB.getPersonalDetails(),
-        "dateOfBirth", "nationalInsuranceNumber", "gender",
-        "nationality", "maritalStatus", "religiousBelief", "ethnicOrigin", "sexualOrientation",
-        "disability", "disabilityDetails");
-    copyIfNotNullOrEmpty(personDto.getGmcDetails(), personDtoFromDB.getGmcDetails(), "gmcNumber",
-        "gmcStatus");
-    copyIfNotNullOrEmpty(personDto.getGdcDetails(), personDtoFromDB.getGdcDetails(), "gdcNumber",
-        "gdcStatus");
-    copyIfNotNullOrEmpty(personDto.getRightToWork(), personDtoFromDB.getRightToWork(),
-        "eeaResident", "permitToWork", "settled",
-        "visaDetails", "visaIssued", "visaValidTo");
+
+    personDtoMapper.copyIfNotNull(personDto, personDtoFromDB);
 
     Set<TrainerApprovalDTO> existingDtoSet = personDtoFromDB.getTrainerApprovals();
     Set<TrainerApprovalDTO> trainerApprovalDtoSet = personDto.getTrainerApprovals();

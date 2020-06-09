@@ -44,6 +44,7 @@ import com.transformuk.hee.tis.tcs.service.service.GmcDetailsService;
 import com.transformuk.hee.tis.tcs.service.service.PersonalDetailsService;
 import com.transformuk.hee.tis.tcs.service.service.RightToWorkService;
 import com.transformuk.hee.tis.tcs.service.service.TrainerApprovalService;
+import com.transformuk.hee.tis.tcs.service.service.mapper.PersonDtoMapper;
 import com.transformuk.hee.tis.tcs.service.service.mapper.PersonMapper;
 import java.time.LocalDate;
 import java.util.ArrayList;
@@ -135,6 +136,9 @@ public class PersonServiceImplTest {
 
   @Mock
   private ApplicationEventPublisher applicationEventPublisherMock;
+
+  @Mock
+  private PersonDtoMapper personDtoMapperMock;
 
   @Before
   public void setup() {
@@ -386,36 +390,7 @@ public class PersonServiceImplTest {
     PersonDTO personDto = new PersonDTO();
     personDto.setId(PERSON_ID);
 
-    ContactDetailsDTO contactDetailsDto = new ContactDetailsDTO();
-    personDto.setContactDetails(contactDetailsDto);
-    PersonalDetailsDTO personalDetailsDto = new PersonalDetailsDTO();
-    personDto.setPersonalDetails(personalDetailsDto);
-    RightToWorkDTO rightToWorkDto = new RightToWorkDTO();
-    personDto.setRightToWork(rightToWorkDto);
-    GdcDetailsDTO gdcDetailsDto = new GdcDetailsDTO();
-    personDto.setGdcDetails(gdcDetailsDto);
-    GmcDetailsDTO gmcDetailsDto = new GmcDetailsDTO();
-    personDto.setGmcDetails(gmcDetailsDto);
-    TrainerApprovalDTO trainerApprovalDto = new TrainerApprovalDTO();
-    trainerApprovalDto.setApprovalStatus(ApprovalStatus.CURRENT);
-    trainerApprovalDto.setStartDate(LocalDate.now());
-    trainerApprovalDto.setEndDate(LocalDate.now().plusDays(1));
-    personDto.setTrainerApprovals(Sets.newHashSet(trainerApprovalDto));
-
     List<PersonDTO> personDTOList = Lists.newArrayList(personDto);
-
-    Person person = new Person();
-    person.setId(PERSON_ID);
-    ContactDetails contactDetails = new ContactDetails();
-    person.setContactDetails(contactDetails);
-    PersonalDetails personalDetails = new PersonalDetails();
-    person.setPersonalDetails(personalDetails);
-    RightToWork rightToWork = new RightToWork();
-    person.setRightToWork(rightToWork);
-    GdcDetails gdcDetails = new GdcDetails();
-    person.setGdcDetails(gdcDetails);
-    GmcDetails gmcDetails = new GmcDetails();
-    person.setGmcDetails(gmcDetails);
 
     when(personRepositoryMock.findById(PERSON_ID)).thenReturn(Optional.of(person));
     when(permissionServiceMock.canViewSensitiveData()).thenReturn(true);
@@ -428,6 +403,7 @@ public class PersonServiceImplTest {
     List<PersonDTO> returnedPersonDtoList = testObj.patch(personDTOList);
 
     // Then.
+    verify(personDtoMapperMock).copyIfNotNull(any(), any());
     verify(personalDetailsServiceMock).save(personDto.getPersonalDetails());
     verify(contactDetailsServiceMock).save(personDto.getContactDetails());
     verify(gmcDetailsServiceMock).save(personDto.getGmcDetails());
