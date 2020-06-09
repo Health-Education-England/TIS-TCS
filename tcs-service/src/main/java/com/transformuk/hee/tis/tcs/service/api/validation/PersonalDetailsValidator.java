@@ -99,8 +99,8 @@ public class PersonalDetailsValidator {
     List<FieldError> fieldErrors = new ArrayList<>();
     String disability = dto.getDisability();
 
-    if (disability != null &&
-        Arrays.stream(Disability.values()).map(Enum::name).noneMatch(n -> n.equals(disability))) {
+    if (disability != null && Arrays.stream(Disability.values()).map(Enum::name)
+        .noneMatch(n -> n.equals(disability))) {
       FieldError fieldError = new FieldError(PERSONAL_DETAILS_DTO_NAME, "disability",
           "disability must match a reference value.");
       fieldErrors.add(fieldError);
@@ -193,7 +193,7 @@ public class PersonalDetailsValidator {
   }
 
   /**
-   * Custom validation on the PersonalDetailsDTO for bulk upload
+   * Custom validation on the PersonalDetailsDTO for bulk upload.
    *
    * @param personalDetailsDto the PersonalDetailsDTO to check
    * @return list of FieldErrors

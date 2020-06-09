@@ -5,7 +5,6 @@ import org.mapstruct.BeanMapping;
 import org.mapstruct.Mapper;
 import org.mapstruct.Mapping;
 import org.mapstruct.MappingTarget;
-import org.mapstruct.Mappings;
 import org.mapstruct.NullValueCheckStrategy;
 import org.mapstruct.NullValuePropertyMappingStrategy;
 
@@ -14,12 +13,10 @@ import org.mapstruct.NullValuePropertyMappingStrategy;
     RightToWorkDtoMapper.class})
 public interface PersonDtoMapper {
 
-  @Mappings({
-      @Mapping(target = "trainerApprovals", ignore = true),
-      @Mapping(target = "qualifications", ignore = true),
-      @Mapping(target = "programmeMemberships", ignore = true),
-      @Mapping(target = "messageList", ignore = true)
-  })
+  @Mapping(target = "trainerApprovals", ignore = true)
+  @Mapping(target = "qualifications", ignore = true)
+  @Mapping(target = "programmeMemberships", ignore = true)
+  @Mapping(target = "messageList", ignore = true)
   @BeanMapping(nullValuePropertyMappingStrategy = NullValuePropertyMappingStrategy.IGNORE,
       nullValueCheckStrategy = NullValueCheckStrategy.ALWAYS)
   void copyIfNotNull(PersonDTO personDto, @MappingTarget PersonDTO personDtoTarget);

@@ -12,5 +12,6 @@ public interface PersonalDetailsDtoMapper {
 
   @BeanMapping(nullValuePropertyMappingStrategy = NullValuePropertyMappingStrategy.IGNORE,
       nullValueCheckStrategy = NullValueCheckStrategy.ALWAYS)
-  void copyIfNotNull(PersonalDetailsDTO personalDetailsDto, @MappingTarget PersonalDetailsDTO personalDetailsDtoTarget);
+  void copyIfNotNull(PersonalDetailsDTO personalDetailsDto,
+      @MappingTarget PersonalDetailsDTO personalDetailsDtoTarget);
 }

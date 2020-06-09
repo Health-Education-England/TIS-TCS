@@ -9,6 +9,7 @@ import org.mapstruct.NullValuePropertyMappingStrategy;
 
 @Mapper(componentModel = "spring")
 public interface GmcDetailsDtoMapper {
+
   @BeanMapping(nullValuePropertyMappingStrategy = NullValuePropertyMappingStrategy.IGNORE,
       nullValueCheckStrategy = NullValueCheckStrategy.ALWAYS)
   void copyIfNotNull(GmcDetailsDTO gmcDetailsDto, @MappingTarget GmcDetailsDTO gmcDetailsDtoTarget);

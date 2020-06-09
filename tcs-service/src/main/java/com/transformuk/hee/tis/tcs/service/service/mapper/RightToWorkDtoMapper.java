@@ -12,5 +12,6 @@ public interface RightToWorkDtoMapper {
 
   @BeanMapping(nullValuePropertyMappingStrategy = NullValuePropertyMappingStrategy.IGNORE,
       nullValueCheckStrategy = NullValueCheckStrategy.ALWAYS)
-  void copyIfNotNull(RightToWorkDTO rightToWorkDto, @MappingTarget RightToWorkDTO rightToWorkDtoTarget);
+  void copyIfNotNull(RightToWorkDTO rightToWorkDto,
+      @MappingTarget RightToWorkDTO rightToWorkDtoTarget);
 }

@@ -118,7 +118,7 @@ public class ContactDetailsValidator {
   }
 
   /**
-   * Custom validation on the ContactDetailsDTO for bulk upload
+   * Custom validation on the ContactDetailsDTO for bulk upload.
    *
    * @param dto the ContactDetailsDTO to check
    * @return list of FieldErrors

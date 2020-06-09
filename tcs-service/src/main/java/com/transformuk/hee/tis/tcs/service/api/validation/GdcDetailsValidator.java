@@ -131,7 +131,7 @@ public class GdcDetailsValidator {
   }
 
   /**
-   * Custom validation on the GdcDetailsDTO for bulk upload
+   * Custom validation on the GdcDetailsDTO for bulk upload.
    *
    * @param gdcDetailsDto the GdcDetailsDTO to check
    * @return list of FieldErrors

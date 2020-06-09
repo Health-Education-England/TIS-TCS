@@ -66,8 +66,8 @@ public class RightToWorkValidator {
   private void checkSettled(RightToWorkDTO dto, List<FieldError> fieldErrors) {
     String settled = dto.getSettled();
 
-    if (settled != null &&
-        Arrays.stream(Settled.values()).map(Enum::name).noneMatch(n -> n.equals(settled))) {
+    if (settled != null && Arrays.stream(Settled.values()).map(Enum::name)
+        .noneMatch(n -> n.equals(settled))) {
       FieldError fieldError =
           new FieldError(DTO_NAME, "settled", "settled must match a reference value.");
       fieldErrors.add(fieldError);
@@ -86,7 +86,7 @@ public class RightToWorkValidator {
   }
 
   /**
-   * Custom validation on the RightToWorkDTO for bulk upload
+   * Custom validation on the RightToWorkDTO for bulk upload.
    *
    * @param rightToWorkDto the rightToWorkDto to check
    * @return list of FieldErrors

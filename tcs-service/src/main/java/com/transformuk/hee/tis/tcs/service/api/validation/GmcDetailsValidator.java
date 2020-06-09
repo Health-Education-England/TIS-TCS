@@ -113,7 +113,7 @@ public class GmcDetailsValidator {
   }
 
   /**
-   * Check gmc status required field populated
+   * Check gmc status required field populated.
    *
    * @param gmcDetailsDTO
    * @return
