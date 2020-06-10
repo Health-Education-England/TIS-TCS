@@ -25,10 +25,10 @@ class ContactDetailsValidatorTest {
 
   private static final String REGEX_EMAIL_ERROR = "Valid email format required.";
   private static final String REGEX_NAME_ERROR =
-      "No special characters, with the exception of apostrophes, hyphens and spaces.";
+      "No special characters allowed for %s, with the exception of apostrophes, hyphens and spaces.";
   private static final String NULL_NAME_ERROR = "%s is required to create or update the record.";
   private static final String REGEX_PHONE_ERROR =
-      "Only numerical values allowed for TelephoneNumber, no special characters, with the exception of plus, minus and spaces.";
+      "Only numerical values allowed for %s, no special characters, with the exception of plus, minus and spaces.";
 
   private ContactDetailsValidator validator;
 
@@ -345,12 +345,13 @@ class ContactDetailsValidatorTest {
     assertThat("Unexpected number of field errors.", fieldErrors.size(), is(1));
 
     FieldError fieldError =
-        new FieldError(ContactDetailsDTO.class.getSimpleName(), "forenames", REGEX_NAME_ERROR);
+        new FieldError(ContactDetailsDTO.class.getSimpleName(), "forenames",
+            String.format(REGEX_NAME_ERROR, "forenames"));
     assertThat("Expected field error not found", fieldErrors, hasItem(fieldError));
   }
 
   @Test
-  void shouldReturnErrorsWhenForenamesNull() {
+  void shouldNotReturnErrorsWhenForenamesNull() {
     // Given.
     ContactDetailsDTO dto = new ContactDetailsDTO();
     dto.setSurname("");
@@ -359,11 +360,7 @@ class ContactDetailsValidatorTest {
     List<FieldError> fieldErrors = validator.validateForBulk(dto);
 
     // Then.
-    assertThat("Unexpected number of field errors.", fieldErrors.size(), is(1));
-
-    FieldError fieldError = new FieldError(ContactDetailsDTO.class.getSimpleName(), "forenames",
-        String.format(NULL_NAME_ERROR, "forenames"));
-    assertThat("Expected field error not found", fieldErrors, hasItem(fieldError));
+    assertThat("Unexpected number of field errors.", fieldErrors.size(), is(0));
   }
 
   @Test
@@ -394,25 +391,6 @@ class ContactDetailsValidatorTest {
 
     // Then.
     assertThat("Unexpected number of field errors.", fieldErrors.size(), is(0));
-  }
-
-  @Test
-  void shouldReturnErrorsWhenLegalForenamesHasSpecialCharacters() {
-    // Given.
-    ContactDetailsDTO dto = new ContactDetailsDTO();
-    dto.setForenames("");
-    dto.setSurname("");
-    dto.setLegalForenames("name1 name2-'name3 *;'");
-
-    // When.
-    List<FieldError> fieldErrors = validator.validateForBulk(dto);
-
-    // Then.
-    assertThat("Unexpected number of field errors.", fieldErrors.size(), is(1));
-
-    FieldError fieldError =
-        new FieldError(ContactDetailsDTO.class.getSimpleName(), "legalForenames", REGEX_NAME_ERROR);
-    assertThat("Expected field error not found", fieldErrors, hasItem(fieldError));
   }
 
   @Test
@@ -473,12 +451,13 @@ class ContactDetailsValidatorTest {
     assertThat("Unexpected number of field errors.", fieldErrors.size(), is(1));
 
     FieldError fieldError =
-        new FieldError(ContactDetailsDTO.class.getSimpleName(), "surname", REGEX_NAME_ERROR);
+        new FieldError(ContactDetailsDTO.class.getSimpleName(), "surname",
+            String.format(REGEX_NAME_ERROR, "surname"));
     assertThat("Expected field error not found", fieldErrors, hasItem(fieldError));
   }
 
   @Test
-  void shouldReturnErrorsWhenSurnameNull() {
+  void shouldNotReturnErrorsWhenSurnameNull() {
     // Given.
     ContactDetailsDTO dto = new ContactDetailsDTO();
     dto.setForenames("");
@@ -487,11 +466,7 @@ class ContactDetailsValidatorTest {
     List<FieldError> fieldErrors = validator.validateForBulk(dto);
 
     // Then.
-    assertThat("Unexpected number of field errors.", fieldErrors.size(), is(1));
-
-    FieldError fieldError = new FieldError(ContactDetailsDTO.class.getSimpleName(), "surname",
-        String.format(NULL_NAME_ERROR, "surname"));
-    assertThat("Expected field error not found", fieldErrors, hasItem(fieldError));
+    assertThat("Unexpected number of field errors.", fieldErrors.size(), is(0));
   }
 
   @Test
@@ -520,25 +495,6 @@ class ContactDetailsValidatorTest {
 
     // Then.
     assertThat("Unexpected number of field errors.", fieldErrors.size(), is(0));
-  }
-
-  @Test
-  void shouldReturnErrorsWhenLegalSurnameHasSpecialCharacters() {
-    // Given.
-    ContactDetailsDTO dto = new ContactDetailsDTO();
-    dto.setForenames("");
-    dto.setSurname("");
-    dto.setLegalSurname("name1 name2-'name3 *;'");
-
-    // When.
-    List<FieldError> fieldErrors = validator.validateForBulk(dto);
-
-    // Then.
-    assertThat("Unexpected number of field errors.", fieldErrors.size(), is(1));
-
-    FieldError fieldError =
-        new FieldError(ContactDetailsDTO.class.getSimpleName(), "legalSurname", REGEX_NAME_ERROR);
-    assertThat("Expected field error not found", fieldErrors, hasItem(fieldError));
   }
 
   @Test
@@ -600,7 +556,8 @@ class ContactDetailsValidatorTest {
     assertThat("Unexpected number of field errors.", fieldErrors.size(), is(1));
 
     FieldError fieldError =
-        new FieldError(ContactDetailsDTO.class.getSimpleName(), "knownAs", REGEX_NAME_ERROR);
+        new FieldError(ContactDetailsDTO.class.getSimpleName(), "knownAs",
+            String.format(REGEX_NAME_ERROR, "knownAs"));
     assertThat("Expected field error not found", fieldErrors, hasItem(fieldError));
   }
 
@@ -649,25 +606,6 @@ class ContactDetailsValidatorTest {
   }
 
   @Test
-  void shouldReturnErrorsWhenMaidenNameHasSpecialCharacters() {
-    // Given.
-    ContactDetailsDTO dto = new ContactDetailsDTO();
-    dto.setForenames("");
-    dto.setSurname("");
-    dto.setMaidenName("name1 name2-'name3 *;'");
-
-    // When.
-    List<FieldError> fieldErrors = validator.validateForBulk(dto);
-
-    // Then.
-    assertThat("Unexpected number of field errors.", fieldErrors.size(), is(1));
-
-    FieldError fieldError =
-        new FieldError(ContactDetailsDTO.class.getSimpleName(), "maidenName", REGEX_NAME_ERROR);
-    assertThat("Expected field error not found", fieldErrors, hasItem(fieldError));
-  }
-
-  @Test
   void shouldNotReturnErrorsWhenMaidenNameNull() {
     // Given.
     ContactDetailsDTO dto = new ContactDetailsDTO();
@@ -712,25 +650,6 @@ class ContactDetailsValidatorTest {
   }
 
   @Test
-  void shouldReturnErrorsWhenInitialsHasSpecialCharacters() {
-    // Given.
-    ContactDetailsDTO dto = new ContactDetailsDTO();
-    dto.setForenames("");
-    dto.setSurname("");
-    dto.setInitials("name1 name2-'name3 *;'");
-
-    // When.
-    List<FieldError> fieldErrors = validator.validateForBulk(dto);
-
-    // Then.
-    assertThat("Unexpected number of field errors.", fieldErrors.size(), is(1));
-
-    FieldError fieldError =
-        new FieldError(ContactDetailsDTO.class.getSimpleName(), "initials", REGEX_NAME_ERROR);
-    assertThat("Expected field error not found", fieldErrors, hasItem(fieldError));
-  }
-
-  @Test
   void shouldNotReturnErrorsWhenInitialsNull() {
     // Given.
     ContactDetailsDTO dto = new ContactDetailsDTO();
@@ -772,25 +691,6 @@ class ContactDetailsValidatorTest {
 
     // Then.
     assertThat("Unexpected number of field errors.", fieldErrors.size(), is(0));
-  }
-
-  @Test
-  void shouldReturnErrorsWhenCountryHasSpecialCharacters() {
-    // Given.
-    ContactDetailsDTO dto = new ContactDetailsDTO();
-    dto.setForenames("");
-    dto.setSurname("");
-    dto.setCountry("name1 name2-'name3 *;'");
-
-    // When.
-    List<FieldError> fieldErrors = validator.validateForBulk(dto);
-
-    // Then.
-    assertThat("Unexpected number of field errors.", fieldErrors.size(), is(1));
-
-    FieldError fieldError =
-        new FieldError(ContactDetailsDTO.class.getSimpleName(), "country", REGEX_NAME_ERROR);
-    assertThat("Expected field error not found", fieldErrors, hasItem(fieldError));
   }
 
   @Test
@@ -853,7 +753,7 @@ class ContactDetailsValidatorTest {
 
     FieldError fieldError =
         new FieldError(ContactDetailsDTO.class.getSimpleName(), "telephoneNumber",
-            REGEX_PHONE_ERROR);
+            String.format(REGEX_PHONE_ERROR, "telephoneNumber"));
     assertThat("Expected field error not found", fieldErrors, hasItem(fieldError));
   }
 
@@ -916,7 +816,8 @@ class ContactDetailsValidatorTest {
     assertThat("Unexpected number of field errors.", fieldErrors.size(), is(1));
 
     FieldError fieldError =
-        new FieldError(ContactDetailsDTO.class.getSimpleName(), "mobileNumber", REGEX_PHONE_ERROR);
+        new FieldError(ContactDetailsDTO.class.getSimpleName(), "mobileNumber",
+            String.format(REGEX_PHONE_ERROR, "mobileNumber"));
     assertThat("Expected field error not found", fieldErrors, hasItem(fieldError));
   }
 
@@ -1025,25 +926,6 @@ class ContactDetailsValidatorTest {
 
     // Then.
     assertThat("Unexpected number of field errors.", fieldErrors.size(), is(0));
-  }
-
-  @Test
-  void shouldReturnErrorsWhenWorkEmailNotValid() {
-    // Given.
-    ContactDetailsDTO dto = new ContactDetailsDTO();
-    dto.setForenames("");
-    dto.setSurname("");
-    dto.setWorkEmail("@b.com");
-
-    // When.
-    List<FieldError> fieldErrors = validator.validateForBulk(dto);
-
-    // Then.
-    assertThat("Unexpected number of field errors.", fieldErrors.size(), is(1));
-
-    FieldError fieldError =
-        new FieldError(ContactDetailsDTO.class.getSimpleName(), "workEmail", REGEX_EMAIL_ERROR);
-    assertThat("Expected field error not found", fieldErrors, hasItem(fieldError));
   }
 
   @Test

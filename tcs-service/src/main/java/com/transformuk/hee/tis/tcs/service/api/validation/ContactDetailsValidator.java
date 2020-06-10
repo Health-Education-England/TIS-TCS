@@ -28,12 +28,12 @@ public class ContactDetailsValidator {
 
   private static final String REGEX_NAME = "^$|^[A-Za-z0-9\\-\\\\' ]+";
   private static final String REGEX_NAME_ERROR =
-      "No special characters, with the exception of apostrophes, hyphens and spaces.";
+      "No special characters allowed for %s, with the exception of apostrophes, hyphens and spaces.";
   private static final String NULL_NAME_ERROR = "%s is required to create or update the record.";
 
   private static final String REGEX_PHONE = "^$|^[0-9\\\\+\\- ]+";
   private static final String REGEX_PHONE_ERROR =
-      "Only numerical values allowed for TelephoneNumber, no special characters, with the exception of plus, minus and spaces.";
+      "Only numerical values allowed for %s, no special characters, with the exception of plus, minus and spaces.";
 
   private final ReferenceServiceImpl referenceService;
 
@@ -80,25 +80,13 @@ public class ContactDetailsValidator {
 
   private List<FieldError> checkForenames(ContactDetailsDTO dto) {
     List<FieldError> fieldErrors = new ArrayList<>();
-    validateName("forenames", dto.getForenames(), fieldErrors, true);
-    return fieldErrors;
-  }
-
-  private List<FieldError> checkLegalForenames(ContactDetailsDTO dto) {
-    List<FieldError> fieldErrors = new ArrayList<>();
-    validateName("legalForenames", dto.getLegalForenames(), fieldErrors, false);
+    validateName("forenames", dto.getForenames(), fieldErrors, false);
     return fieldErrors;
   }
 
   private List<FieldError> checkSurname(ContactDetailsDTO dto) {
     List<FieldError> fieldErrors = new ArrayList<>();
-    validateName("surname", dto.getSurname(), fieldErrors, true);
-    return fieldErrors;
-  }
-
-  private List<FieldError> checkLegalSurname(ContactDetailsDTO dto) {
-    List<FieldError> fieldErrors = new ArrayList<>();
-    validateName("legalSurname", dto.getLegalSurname(), fieldErrors, false);
+    validateName("surname", dto.getSurname(), fieldErrors, false);
     return fieldErrors;
   }
 
@@ -108,31 +96,14 @@ public class ContactDetailsValidator {
     return fieldErrors;
   }
 
-  private List<FieldError> checkMaidenName(ContactDetailsDTO dto) {
-    List<FieldError> fieldErrors = new ArrayList<>();
-    validateName("maidenName", dto.getMaidenName(), fieldErrors, false);
-    return fieldErrors;
-  }
-
-  private List<FieldError> checkInitials(ContactDetailsDTO dto) {
-    List<FieldError> fieldErrors = new ArrayList<>();
-    validateName("initials", dto.getInitials(), fieldErrors, false);
-    return fieldErrors;
-  }
-
-  private List<FieldError> checkCountry(ContactDetailsDTO dto) {
-    List<FieldError> fieldErrors = new ArrayList<>();
-    validateName("country", dto.getCountry(), fieldErrors, false);
-    return fieldErrors;
-  }
-
   private void validateName(String fieldName, String value, List<FieldError> fieldErrors,
       boolean required) {
     if (required && value == null) {
       fieldErrors.add(new FieldError(CONTACT_DETAILS_DTO_NAME, fieldName,
           String.format(NULL_NAME_ERROR, fieldName)));
     } else if (value != null && !value.matches(REGEX_NAME)) {
-      fieldErrors.add(new FieldError(CONTACT_DETAILS_DTO_NAME, fieldName, REGEX_NAME_ERROR));
+      fieldErrors.add(new FieldError(CONTACT_DETAILS_DTO_NAME, fieldName,
+          String.format(REGEX_NAME_ERROR, fieldName)));
     }
   }
 
@@ -150,7 +121,8 @@ public class ContactDetailsValidator {
 
   private void validatePhoneNumber(String fieldName, String value, List<FieldError> fieldErrors) {
     if (value != null && !value.matches(REGEX_PHONE)) {
-      fieldErrors.add(new FieldError(CONTACT_DETAILS_DTO_NAME, fieldName, REGEX_PHONE_ERROR));
+      fieldErrors.add(new FieldError(CONTACT_DETAILS_DTO_NAME, fieldName,
+          String.format(REGEX_PHONE_ERROR, fieldName)));
     }
   }
 
@@ -160,15 +132,10 @@ public class ContactDetailsValidator {
     return fieldErrors;
   }
 
-  private List<FieldError> checkWorkEmail(ContactDetailsDTO dto) {
-    List<FieldError> fieldErrors = new ArrayList<>();
-    validateEmail("workEmail", dto.getWorkEmail(), fieldErrors);
-    return fieldErrors;
-  }
-
   private void validateEmail(String fieldName, String value, List<FieldError> fieldErrors) {
     if (value != null && !value.matches(REGEX_EMAIL)) {
-      fieldErrors.add(new FieldError(CONTACT_DETAILS_DTO_NAME, fieldName, REGEX_EMAIL_ERROR));
+      fieldErrors.add(new FieldError(CONTACT_DETAILS_DTO_NAME, fieldName,
+          String.format(REGEX_EMAIL_ERROR, fieldName)));
     }
   }
 
@@ -236,17 +203,11 @@ public class ContactDetailsValidator {
     List<FieldError> fieldErrors = new ArrayList<>();
     fieldErrors.addAll(checkTitle(dto, currentOnly));
     fieldErrors.addAll(checkForenames(dto));
-    fieldErrors.addAll(checkLegalForenames(dto));
     fieldErrors.addAll(checkSurname(dto));
-    fieldErrors.addAll(checkLegalSurname(dto));
     fieldErrors.addAll(checkKnownAs(dto));
-    fieldErrors.addAll(checkMaidenName(dto));
-    fieldErrors.addAll(checkInitials(dto));
-    fieldErrors.addAll(checkCountry(dto));
     fieldErrors.addAll(checkTelephoneNumber(dto));
     fieldErrors.addAll(checkMobileNumber(dto));
     fieldErrors.addAll(checkEmail(dto));
-    fieldErrors.addAll(checkWorkEmail(dto));
     fieldErrors.addAll(checkAddress1(dto));
     fieldErrors.addAll(checkAddress2(dto));
     fieldErrors.addAll(checkPostCode(dto));
