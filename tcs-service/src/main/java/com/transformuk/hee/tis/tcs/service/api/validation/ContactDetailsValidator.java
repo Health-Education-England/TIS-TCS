@@ -21,6 +21,20 @@ public class ContactDetailsValidator {
 
   private static final String CONTACT_DETAILS_DTO_NAME = "ContactDetailsDTO";
 
+  // TODO: Better way to validate emails.
+  private static final String REGEX_EMAIL = "^$|^[A-Za-z0-9+_.-]+@(.+)$";
+  private static final String REGEX_EMAIL_ERROR = "Valid email format required.";
+
+
+  private static final String REGEX_NAME = "^$|^[A-Za-z0-9\\-\\\\' ]+";
+  private static final String REGEX_NAME_ERROR =
+      "No special characters allowed for %s, with the exception of apostrophes, hyphens and spaces.";
+  private static final String NULL_NAME_ERROR = "%s is required to create or update the record.";
+
+  private static final String REGEX_PHONE = "^$|^[0-9\\\\+\\- ]+";
+  private static final String REGEX_PHONE_ERROR =
+      "Only numerical values allowed for %s, no special characters, with the exception of plus, minus and spaces.";
+
   private final ReferenceServiceImpl referenceService;
 
   public ContactDetailsValidator(ReferenceServiceImpl referenceService) {
@@ -62,6 +76,67 @@ public class ContactDetailsValidator {
       }
     }
     return fieldErrors;
+  }
+
+  private List<FieldError> checkForenames(ContactDetailsDTO dto) {
+    List<FieldError> fieldErrors = new ArrayList<>();
+    validateName("forenames", dto.getForenames(), fieldErrors, false);
+    return fieldErrors;
+  }
+
+  private List<FieldError> checkSurname(ContactDetailsDTO dto) {
+    List<FieldError> fieldErrors = new ArrayList<>();
+    validateName("surname", dto.getSurname(), fieldErrors, false);
+    return fieldErrors;
+  }
+
+  private List<FieldError> checkKnownAs(ContactDetailsDTO dto) {
+    List<FieldError> fieldErrors = new ArrayList<>();
+    validateName("knownAs", dto.getKnownAs(), fieldErrors, false);
+    return fieldErrors;
+  }
+
+  private void validateName(String fieldName, String value, List<FieldError> fieldErrors,
+      boolean required) {
+    if (required && value == null) {
+      fieldErrors.add(new FieldError(CONTACT_DETAILS_DTO_NAME, fieldName,
+          String.format(NULL_NAME_ERROR, fieldName)));
+    } else if (value != null && !value.matches(REGEX_NAME)) {
+      fieldErrors.add(new FieldError(CONTACT_DETAILS_DTO_NAME, fieldName,
+          String.format(REGEX_NAME_ERROR, fieldName)));
+    }
+  }
+
+  private List<FieldError> checkMobileNumber(ContactDetailsDTO dto) {
+    List<FieldError> fieldErrors = new ArrayList<>();
+    validatePhoneNumber("mobileNumber", dto.getMobileNumber(), fieldErrors);
+    return fieldErrors;
+  }
+
+  private List<FieldError> checkTelephoneNumber(ContactDetailsDTO dto) {
+    List<FieldError> fieldErrors = new ArrayList<>();
+    validatePhoneNumber("telephoneNumber", dto.getTelephoneNumber(), fieldErrors);
+    return fieldErrors;
+  }
+
+  private void validatePhoneNumber(String fieldName, String value, List<FieldError> fieldErrors) {
+    if (value != null && !value.matches(REGEX_PHONE)) {
+      fieldErrors.add(new FieldError(CONTACT_DETAILS_DTO_NAME, fieldName,
+          String.format(REGEX_PHONE_ERROR, fieldName)));
+    }
+  }
+
+  private List<FieldError> checkEmail(ContactDetailsDTO dto) {
+    List<FieldError> fieldErrors = new ArrayList<>();
+    validateEmail("email", dto.getEmail(), fieldErrors);
+    return fieldErrors;
+  }
+
+  private void validateEmail(String fieldName, String value, List<FieldError> fieldErrors) {
+    if (value != null && !value.matches(REGEX_EMAIL)) {
+      fieldErrors.add(new FieldError(CONTACT_DETAILS_DTO_NAME, fieldName,
+          String.format(REGEX_EMAIL_ERROR, fieldName)));
+    }
   }
 
   private List<FieldError> checkAddress1(ContactDetailsDTO dto) {
@@ -127,6 +202,12 @@ public class ContactDetailsValidator {
     final boolean currentOnly = true;
     List<FieldError> fieldErrors = new ArrayList<>();
     fieldErrors.addAll(checkTitle(dto, currentOnly));
+    fieldErrors.addAll(checkForenames(dto));
+    fieldErrors.addAll(checkSurname(dto));
+    fieldErrors.addAll(checkKnownAs(dto));
+    fieldErrors.addAll(checkTelephoneNumber(dto));
+    fieldErrors.addAll(checkMobileNumber(dto));
+    fieldErrors.addAll(checkEmail(dto));
     fieldErrors.addAll(checkAddress1(dto));
     fieldErrors.addAll(checkAddress2(dto));
     fieldErrors.addAll(checkPostCode(dto));
