@@ -2,6 +2,7 @@ package com.transformuk.hee.tis.tcs.service.service.impl;
 
 import static com.transformuk.hee.tis.tcs.service.service.impl.SpecificationFactory.containsLike;
 
+import com.google.common.collect.Sets;
 import com.transformuk.hee.tis.reference.api.dto.RoleDTO;
 import com.transformuk.hee.tis.reference.client.ReferenceService;
 import com.transformuk.hee.tis.tcs.api.dto.PersonBasicDetailsDTO;
@@ -12,6 +13,7 @@ import com.transformuk.hee.tis.tcs.api.dto.PersonViewDTO;
 import com.transformuk.hee.tis.tcs.api.dto.PersonalDetailsDTO;
 import com.transformuk.hee.tis.tcs.api.dto.ProgrammeMembershipDTO;
 import com.transformuk.hee.tis.tcs.api.dto.TrainerApprovalDTO;
+import com.transformuk.hee.tis.tcs.api.enumeration.ApprovalStatus;
 import com.transformuk.hee.tis.tcs.api.enumeration.PersonOwnerRule;
 import com.transformuk.hee.tis.tcs.api.enumeration.Status;
 import com.transformuk.hee.tis.tcs.service.api.validation.PersonValidator;
@@ -53,6 +55,7 @@ import com.transformuk.hee.tis.tcs.service.service.mapper.PersonLiteMapper;
 import com.transformuk.hee.tis.tcs.service.service.mapper.PersonMapper;
 import com.transformuk.hee.tis.tcs.service.service.mapper.PersonalDetailsDtoMapper;
 import com.transformuk.hee.tis.tcs.service.service.mapper.RightToWorkDtoMapper;
+import com.transformuk.hee.tis.tcs.service.service.mapper.TrainerApprovalDtoMapper;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.util.ArrayList;
@@ -175,6 +178,9 @@ public class PersonServiceImpl implements PersonService {
 
   @Autowired
   private RightToWorkDtoMapper rightToWorkDtoMapper;
+
+  @Autowired
+  private TrainerApprovalDtoMapper trainerApprovalDtoMapper;
 
   /**
    * Save a person.
@@ -316,8 +322,11 @@ public class PersonServiceImpl implements PersonService {
           PersonDTO savedPersonDto = save(personDtoFromDb);
 
           // Need to set the updated Person into TrainerApprovals
-          personDtoFromDb.getTrainerApprovals().forEach(r -> r.setPerson(savedPersonDto));
-          trainerApprovalService.save(new ArrayList<>(personDtoFromDb.getTrainerApprovals()));
+          TrainerApprovalDTO trainerApprovalDto = getTrainerApproveFromPersonDto(personDtoFromDb);
+          if (trainerApprovalDto != null) {
+            trainerApprovalDto.setPerson(savedPersonDto);
+            trainerApprovalService.save(new ArrayList<>(personDtoFromDb.getTrainerApprovals()));
+          }
 
           personDtoList.add(savedPersonDto);
         }
@@ -345,35 +354,47 @@ public class PersonServiceImpl implements PersonService {
 
     personDtoMapper.copyIfNotNull(personDto, personDtoFromDB);
 
-    Set<TrainerApprovalDTO> existingDtoSet = personDtoFromDB.getTrainerApprovals();
-    Set<TrainerApprovalDTO> trainerApprovalDtoSet = personDto.getTrainerApprovals();
-    if (trainerApprovalDtoSet != null && !trainerApprovalDtoSet.isEmpty()) {
-      if (existingDtoSet == null || existingDtoSet.isEmpty()) {
-        personDtoFromDB.setTrainerApprovals(trainerApprovalDtoSet);
-      } else {
-        updateTrainerApproval(personDtoFromDB.getTrainerApprovals(),
-            personDto.getTrainerApprovals());
+    updateTrainerApprovalWithRole(personDto, personDtoFromDB);
+  }
+
+  private void updateTrainerApprovalWithRole(PersonDTO personDto, PersonDTO personDtoFromDB) {
+    String role = personDto.getRole();
+    TrainerApprovalDTO newTrainerApprovalDto = getTrainerApproveFromPersonDto(personDto);
+    TrainerApprovalDTO trainerApprovalDtoFromDB = getTrainerApproveFromPersonDto(personDtoFromDB);
+
+    if (StringUtils.isEmpty(role)) {
+      trainerApprovalDtoMapper.copyIfNotNull(newTrainerApprovalDto, trainerApprovalDtoFromDB);
+    } else {
+      // if user input new role, delete the existing trainerApproval first
+      if (trainerApprovalDtoFromDB != null && trainerApprovalDtoFromDB.getId() != null) {
+        trainerApprovalService.delete(trainerApprovalDtoFromDB.getId());
+      }
+      personDtoFromDB.setTrainerApprovals(null);
+
+      // if the new role contains one of the 3 catogories(ES/CS/LM), create a new trainerApproval
+      List<RoleDTO> roleDtos = referenceService.findRolesIn(role);
+      String trainerType = roleDtos.stream()
+          .filter(roleDTO -> roleDTO.getRoleCategory().getId() != 3)
+          .map(roleDTO -> roleDTO.getCode()).collect(Collectors.joining(","));
+
+      if (!StringUtils.isEmpty(trainerType)) {
+        TrainerApprovalDTO updatedTrainerApproval = new TrainerApprovalDTO();
+        trainerApprovalDtoMapper.copyIfNotNull(newTrainerApprovalDto, updatedTrainerApproval);
+        updatedTrainerApproval.setTrainerType(trainerType);
+        if (updatedTrainerApproval.getApprovalStatus() == null) { // set default ApprovalStatus
+          updatedTrainerApproval.setApprovalStatus(ApprovalStatus.CURRENT);
+        }
+        personDtoFromDB.setTrainerApprovals(Sets.newHashSet(updatedTrainerApproval));
       }
     }
   }
 
-  private void updateTrainerApproval(
-      Set<TrainerApprovalDTO> existingDtoSet, Set<TrainerApprovalDTO> trainerApprovalDtoSet) {
-    if (existingDtoSet.size() == 1 && trainerApprovalDtoSet.size() == 1) {
-      trainerApprovalDtoSet.forEach(ta ->
-          existingDtoSet.forEach(eta -> {
-            if (ta.getApprovalStatus() != null) {
-              eta.setApprovalStatus(ta.getApprovalStatus());
-            }
-            if (ta.getStartDate() != null) {
-              eta.setStartDate(ta.getStartDate());
-            }
-            if (ta.getEndDate() != null) {
-              eta.setEndDate(ta.getEndDate());
-            }
-          })
-      );
+  private TrainerApprovalDTO getTrainerApproveFromPersonDto(PersonDTO dto) {
+    Set<TrainerApprovalDTO> trainerApprovalDtoSet = dto.getTrainerApprovals();
+    if (trainerApprovalDtoSet != null && !trainerApprovalDtoSet.isEmpty()) {
+      return trainerApprovalDtoSet.iterator().next();
     }
+    return null;
   }
 
   /**
