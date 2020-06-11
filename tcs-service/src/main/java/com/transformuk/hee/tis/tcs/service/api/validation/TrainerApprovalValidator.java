@@ -34,8 +34,6 @@ public class TrainerApprovalValidator {
     List<FieldError> fieldErrors = new ArrayList<>();
     fieldErrors.addAll(checkPerson(dto));
     fieldErrors.addAll(checkStartDate(dto));
-    fieldErrors.addAll(checkEndDate(dto));
-    fieldErrors.addAll(checkApprovalStatus(dto));
 
     if (!fieldErrors.isEmpty()) {
       BeanPropertyBindingResult bindingResult =
@@ -73,34 +71,6 @@ public class TrainerApprovalValidator {
     return fieldErrors;
   }
 
-  private List<FieldError> checkEndDate(TrainerApprovalDTO dto) {
-    List<FieldError> fieldErrors = new ArrayList<>();
-
-    if (dto.getStartDate() != null && dto.getEndDate() == null) {
-      FieldError fieldError = new FieldError(TRAINER_APPROVAL_DTO_NAME, "endDate",
-          "endDate is required when startDate is populated.");
-      fieldErrors.add(fieldError);
-    }
-
-    return fieldErrors;
-  }
-
-  private List<FieldError> checkApprovalStatus(TrainerApprovalDTO dto) {
-    List<FieldError> fieldErrors = new ArrayList<>();
-
-    LocalDate startDate = dto.getStartDate();
-    LocalDate endDate = dto.getEndDate();
-    ApprovalStatus approvalStatus = dto.getApprovalStatus();
-
-    if ((startDate != null || endDate != null) && approvalStatus == null) {
-      FieldError fieldError = new FieldError(TRAINER_APPROVAL_DTO_NAME, "approvalStatus",
-          "approvalStatus is required when dates are populated.");
-      fieldErrors.add(fieldError);
-    }
-
-    return fieldErrors;
-  }
-
   private void requireFieldErrors(List<FieldError> fieldErrors, String field) {
     fieldErrors.add(new FieldError(TRAINER_APPROVAL_DTO_NAME, field,
         String.format("%s is required", field)));
@@ -115,8 +85,6 @@ public class TrainerApprovalValidator {
   public List<FieldError> validateForBulk(TrainerApprovalDTO trainerApprovalDto) {
     List<FieldError> fieldErrors = new ArrayList<>();
     fieldErrors.addAll(checkStartDate(trainerApprovalDto));
-    fieldErrors.addAll(checkEndDate(trainerApprovalDto));
-    fieldErrors.addAll(checkApprovalStatus(trainerApprovalDto));
     return fieldErrors;
   }
 }

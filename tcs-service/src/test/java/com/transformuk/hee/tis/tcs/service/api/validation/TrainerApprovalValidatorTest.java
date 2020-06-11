@@ -103,27 +103,6 @@ class TrainerApprovalValidatorTest {
   }
 
   @Test
-  void shouldThrowExceptionWhenStartDateAndNotEndDate() {
-    // Given.
-    TrainerApprovalDTO dto = new TrainerApprovalDTO();
-    dto.setStartDate(LocalDate.now());
-
-    // When.
-    MethodArgumentNotValidException thrown =
-        assertThrows(MethodArgumentNotValidException.class, () -> validator.validate(dto));
-
-    // Then
-    BindingResult result = thrown.getBindingResult();
-    assertThat("Unexpected object name.", result.getObjectName(),
-        is(TrainerApprovalDTO.class.getSimpleName()));
-    assertThat("Unexpected target object.", result.getTarget(), is(dto));
-
-    FieldError fieldError = new FieldError(TrainerApprovalDTO.class.getSimpleName(), "endDate",
-        "endDate is required when startDate is populated.");
-    assertThat("Unexpected error object name.", result.getFieldErrors(), hasItem(fieldError));
-  }
-
-  @Test
   void shouldThrowExceptionWhenStartDateAfterEndDate() {
     // Given.
     TrainerApprovalDTO dto = new TrainerApprovalDTO();
@@ -142,29 +121,6 @@ class TrainerApprovalValidatorTest {
 
     FieldError fieldError = new FieldError(TrainerApprovalDTO.class.getSimpleName(), "startDate",
         "startDate must be before endDate.");
-    assertThat("Unexpected error object name.", result.getFieldErrors(), hasItem(fieldError));
-  }
-
-  @Test
-  void shouldThrowExceptionWhenDateAndNotApprovalStatus() {
-    // Given.
-    TrainerApprovalDTO dto = new TrainerApprovalDTO();
-    dto.setStartDate(LocalDate.now().minusDays(1));
-    dto.setEndDate(LocalDate.now());
-
-    // When.
-    MethodArgumentNotValidException thrown =
-        assertThrows(MethodArgumentNotValidException.class, () -> validator.validate(dto));
-
-    // Then
-    BindingResult result = thrown.getBindingResult();
-    assertThat("Unexpected object name.", result.getObjectName(),
-        is(TrainerApprovalDTO.class.getSimpleName()));
-    assertThat("Unexpected target object.", result.getTarget(), is(dto));
-
-    FieldError fieldError =
-        new FieldError(TrainerApprovalDTO.class.getSimpleName(), "approvalStatus",
-            "approvalStatus is required when dates are populated.");
     assertThat("Unexpected error object name.", result.getFieldErrors(), hasItem(fieldError));
   }
 
@@ -211,7 +167,7 @@ class TrainerApprovalValidatorTest {
     // When.
     List<FieldError> fieldErrors = validator.validateForBulk(dto);
     // Then.
-    assertThat("Error list should contain 3 errors.", fieldErrors.size(), equalTo(2));
+    assertThat("Error list should contain 3 errors.", fieldErrors.size(), equalTo(1));
   }
 
 }
