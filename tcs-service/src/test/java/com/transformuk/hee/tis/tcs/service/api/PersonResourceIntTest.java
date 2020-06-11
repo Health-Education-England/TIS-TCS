@@ -12,12 +12,12 @@ import static org.springframework.test.web.servlet.request.MockMvcRequestBuilder
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.patch;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.put;
-import static org.springframework.test.web.servlet.result.MockMvcResultHandlers.print;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.content;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
 import com.google.common.collect.Lists;
+import com.transformuk.hee.tis.reference.api.dto.RoleCategoryDTO;
 import com.transformuk.hee.tis.reference.api.dto.RoleDTO;
 import com.transformuk.hee.tis.reference.client.impl.ReferenceServiceImpl;
 import com.transformuk.hee.tis.tcs.api.dto.ContactDetailsDTO;
@@ -60,6 +60,7 @@ import com.transformuk.hee.tis.tcs.service.repository.TrainerApprovalRepository;
 import com.transformuk.hee.tis.tcs.service.service.PersonElasticSearchService;
 import com.transformuk.hee.tis.tcs.service.service.PersonService;
 import com.transformuk.hee.tis.tcs.service.service.PlacementService;
+import com.transformuk.hee.tis.tcs.service.service.TrainerApprovalService;
 import com.transformuk.hee.tis.tcs.service.service.impl.PermissionService;
 import com.transformuk.hee.tis.tcs.service.service.mapper.PersonMapper;
 import com.transformuk.hee.tis.tcs.service.service.mapper.PlacementViewMapper;
@@ -174,6 +175,8 @@ public class PersonResourceIntTest {
   private PersonValidator personValidator;
   @Autowired
   private TrainerApprovalRepository trainerApprovalRepository;
+  @Autowired
+  private TrainerApprovalService trainerApprovalService;
 
   @MockBean
   private PermissionService permissionServiceMock;
@@ -230,6 +233,7 @@ public class PersonResourceIntTest {
         .setControllerAdvice(exceptionTranslator)
         .setMessageConverters(jacksonMessageConverter).build();
 
+    trainerApprovalRepository.deleteAllInBatch();
     personRepository.deleteAllInBatch();
 
     when(permissionServiceMock.canViewSensitiveData()).thenReturn(true);
@@ -927,59 +931,66 @@ public class PersonResourceIntTest {
             .value("publicHealthNumber should not contain any whitespaces"));
   }
 
-  @Test
-  public void patchPersonShouldReturnNotImplementedMessage() throws Exception {
-    Person savedPerson = personRepository.saveAndFlush(person);
+  private PersonDTO initialPersonDataForBulk(Person savedPerson) {
     Long savedId = savedPerson.getId();
 
-    final PersonDTO updatedPersonDTO = personMapper.toDto(savedPerson);
-    updatedPersonDTO.setRole(UPDATED_ROLE);
-    updatedPersonDTO.setPublicHealthNumber(UPDATED_PUBLIC_HEALTH_NUMBER);
+    final PersonDTO updatedPersonDto = personMapper.toDto(savedPerson);
+    updatedPersonDto.setRole(UPDATED_ROLE);
+    updatedPersonDto.setPublicHealthNumber(UPDATED_PUBLIC_HEALTH_NUMBER);
 
     PersonalDetails personalDetails = new PersonalDetails();
     personalDetails.setId(savedId);
     personalDetailsRepository.save(personalDetails);
 
-    PersonalDetailsDTO personalDetailsDTO = new PersonalDetailsDTO();
-    personalDetailsDTO.setId(savedId);
-    personalDetailsDTO.setDisabilityDetails("disabilityDetails");
-    updatedPersonDTO.setPersonalDetails(personalDetailsDTO);
+    PersonalDetailsDTO personalDetailsDto = new PersonalDetailsDTO();
+    personalDetailsDto.setId(savedId);
+    personalDetailsDto.setDisabilityDetails("disabilityDetails");
+    updatedPersonDto.setPersonalDetails(personalDetailsDto);
 
     ContactDetails contactDetails = new ContactDetails();
     contactDetails.setId(savedId);
     contactDetailsRepository.save(contactDetails);
 
-    ContactDetailsDTO contactDetailsDTO = new ContactDetailsDTO();
-    contactDetailsDTO.setId(savedId);
-    contactDetailsDTO.setKnownAs("knownAs");
-    updatedPersonDTO.setContactDetails(contactDetailsDTO);
+    ContactDetailsDTO contactDetailsDto = new ContactDetailsDTO();
+    contactDetailsDto.setId(savedId);
+    contactDetailsDto.setKnownAs("knownAs");
+    updatedPersonDto.setContactDetails(contactDetailsDto);
 
     GmcDetails gmcDetails = new GmcDetails();
     gmcDetails.setId(savedId);
     gmcDetailsRepository.save(gmcDetails);
 
-    GmcDetailsDTO gmcDetailsDTO = new GmcDetailsDTO();
-    gmcDetailsDTO.setId(savedId);
-    gmcDetailsDTO.setGmcNumber("N/A");
-    updatedPersonDTO.setGmcDetails(gmcDetailsDTO);
+    GmcDetailsDTO gmcDetailsDto = new GmcDetailsDTO();
+    gmcDetailsDto.setId(savedId);
+    gmcDetailsDto.setGmcNumber("N/A");
+    updatedPersonDto.setGmcDetails(gmcDetailsDto);
 
     GdcDetails gdcDetails = new GdcDetails();
     gdcDetails.setId(savedId);
     gdcDetailsRepository.save(gdcDetails);
 
-    GdcDetailsDTO gdcDetailsDTO = new GdcDetailsDTO();
-    gdcDetailsDTO.setId(savedId);
-    gdcDetailsDTO.setGdcNumber("N/A");
-    updatedPersonDTO.setGdcDetails(gdcDetailsDTO);
+    GdcDetailsDTO gdcDetailsDto = new GdcDetailsDTO();
+    gdcDetailsDto.setId(savedId);
+    gdcDetailsDto.setGdcNumber("N/A");
+    updatedPersonDto.setGdcDetails(gdcDetailsDto);
 
     RightToWork rightToWork = new RightToWork();
     rightToWork.setId(savedId);
     rightToWorkRepository.save(rightToWork);
 
-    RightToWorkDTO rightToWorkDTO = new RightToWorkDTO();
-    rightToWorkDTO.setId(savedId);
-    rightToWorkDTO.setVisaDetails("visaDetails");
-    updatedPersonDTO.setRightToWork(rightToWorkDTO);
+    RightToWorkDTO rightToWorkDto = new RightToWorkDTO();
+    rightToWorkDto.setId(savedId);
+    rightToWorkDto.setVisaDetails("visaDetails");
+    updatedPersonDto.setRightToWork(rightToWorkDto);
+
+    return updatedPersonDto;
+  }
+
+  @Test
+  public void patchPersonShouldNotReturnErrorMessage() throws Exception {
+    Person savedPerson = personRepository.saveAndFlush(person);
+
+    PersonDTO updatedPersonDto = initialPersonDataForBulk(savedPerson);
 
     Map<String, Boolean> roleToExists = new HashMap<>();
     roleToExists.put(UPDATED_ROLE, true);
@@ -987,12 +998,99 @@ public class PersonResourceIntTest {
 
     restPersonMockMvc.perform(patch("/api/bulk-people")
         .contentType(TestUtil.APPLICATION_JSON_UTF8)
-        .content(TestUtil.convertObjectToJsonBytes(Collections.singletonList(updatedPersonDTO))))
-        .andDo(print())
+        .content(TestUtil.convertObjectToJsonBytes(Collections.singletonList(updatedPersonDto))))
         .andExpect(status().isOk())
         .andExpect(jsonPath("$.[*].role", hasItem(UPDATED_ROLE)))
         .andExpect(jsonPath("$.[*].publicHealthNumber", hasItem(UPDATED_PUBLIC_HEALTH_NUMBER)))
         .andExpect(jsonPath("$.[*].contactDetails.knownAs").value("knownAs"))
         .andExpect(jsonPath("$.[0].messageList").isEmpty());
+  }
+
+  @Test
+  public void patchPersonShouldDeleteExistingTrainerApprovalAndCreateNewOne() throws Exception {
+    Person savedPerson = personRepository.saveAndFlush(person);
+    PersonDTO updatedPersonDto = initialPersonDataForBulk(savedPerson);
+
+    TrainerApproval trainerApproval = new TrainerApproval();
+    trainerApproval.setPerson(savedPerson);
+    TrainerApproval savedTrainerApproval = trainerApprovalRepository.saveAndFlush(trainerApproval);
+    int trainerApprovalAmount = trainerApprovalRepository.findAll().size();
+
+    Map<String, Boolean> roleToExists = new HashMap<>();
+    roleToExists.put(UPDATED_ROLE, true);
+    when(referenceService.rolesExist(any(), eq(true))).thenReturn(roleToExists);
+    RoleDTO roleDto = new RoleDTO();
+    roleDto.setCode(UPDATED_ROLE);
+    RoleCategoryDTO roleCategoryDto = new RoleCategoryDTO();
+    roleCategoryDto.setId(1L);
+    roleDto.setRoleCategory(roleCategoryDto);
+    when(referenceService.findRolesIn(UPDATED_ROLE)).thenReturn(Lists.newArrayList(roleDto));
+
+    restPersonMockMvc.perform(patch("/api/bulk-people")
+        .contentType(TestUtil.APPLICATION_JSON_UTF8)
+        .content(TestUtil.convertObjectToJsonBytes(Collections.singletonList(updatedPersonDto))))
+        .andExpect(status().isOk())
+        .andExpect(jsonPath("$.[*].role", hasItem(UPDATED_ROLE)))
+        .andExpect(jsonPath("$.[0].messageList").isEmpty());
+
+    assertThat(trainerApprovalRepository.findAll().size()).isEqualTo(trainerApprovalAmount);
+    assertThat(trainerApprovalRepository.findById(savedTrainerApproval.getId()).isPresent())
+        .isFalse();
+  }
+
+  @Test
+  public void patchPersonShouldDeleteExistingTrainerApproval() throws Exception {
+    Person savedPerson = personRepository.saveAndFlush(person);
+    PersonDTO updatedPersonDto = initialPersonDataForBulk(savedPerson);
+
+    TrainerApproval trainerApproval = new TrainerApproval();
+    trainerApproval.setPerson(savedPerson);
+    TrainerApproval savedTrainerApproval = trainerApprovalRepository.saveAndFlush(trainerApproval);
+    int trainerApprovalAmount = trainerApprovalRepository.findAll().size();
+
+    Map<String, Boolean> roleToExists = new HashMap<>();
+    roleToExists.put(UPDATED_ROLE, true);
+    when(referenceService.rolesExist(any(), eq(true))).thenReturn(roleToExists);
+    RoleDTO roleDto = new RoleDTO();
+    roleDto.setCode(UPDATED_ROLE);
+    RoleCategoryDTO roleCategoryDto = new RoleCategoryDTO();
+    roleCategoryDto.setId(3L);
+    roleDto.setRoleCategory(roleCategoryDto);
+    when(referenceService.findRolesIn(UPDATED_ROLE)).thenReturn(Lists.newArrayList(roleDto));
+
+    restPersonMockMvc.perform(patch("/api/bulk-people")
+        .contentType(TestUtil.APPLICATION_JSON_UTF8)
+        .content(TestUtil.convertObjectToJsonBytes(Collections.singletonList(updatedPersonDto))))
+        .andExpect(status().isOk())
+        .andExpect(jsonPath("$.[*].role", hasItem(UPDATED_ROLE)))
+        .andExpect(jsonPath("$.[0].messageList").isEmpty());
+
+    assertThat(trainerApprovalRepository.findAll().size()).isEqualTo(trainerApprovalAmount - 1);
+    assertThat(trainerApprovalRepository.findById(savedTrainerApproval.getId()).isPresent())
+        .isFalse();
+  }
+
+  @Test
+  public void patchPersonShouldNotDeleteExistingTrainerApprovalWhenNoNewRole() throws Exception {
+    Person savedPerson = personRepository.saveAndFlush(person);
+    PersonDTO updatedPersonDto = initialPersonDataForBulk(savedPerson);
+
+    TrainerApproval trainerApproval = new TrainerApproval();
+    trainerApproval.setPerson(savedPerson);
+    TrainerApproval savedTrainerApproval = trainerApprovalRepository.saveAndFlush(trainerApproval);
+    int trainerApprovalAmount = trainerApprovalRepository.findAll().size();
+
+    updatedPersonDto.setRole(null);
+
+    restPersonMockMvc.perform(patch("/api/bulk-people")
+        .contentType(TestUtil.APPLICATION_JSON_UTF8)
+        .content(TestUtil.convertObjectToJsonBytes(Collections.singletonList(updatedPersonDto))))
+        .andExpect(status().isOk())
+        .andExpect(jsonPath("$.[*].role", hasItem(DEFAULT_ROLE)))
+        .andExpect(jsonPath("$.[0].messageList").isEmpty());
+
+    assertThat(trainerApprovalRepository.findAll().size()).isEqualTo(trainerApprovalAmount);
+    assertThat(trainerApprovalRepository.findById(savedTrainerApproval.getId()).isPresent())
+        .isTrue();
   }
 }

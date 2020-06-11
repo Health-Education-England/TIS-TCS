@@ -11,16 +11,10 @@ import static org.mockito.Mockito.when;
 
 import com.google.common.collect.Lists;
 import com.google.common.collect.Sets;
-import com.transformuk.hee.tis.tcs.api.dto.ContactDetailsDTO;
-import com.transformuk.hee.tis.tcs.api.dto.GdcDetailsDTO;
-import com.transformuk.hee.tis.tcs.api.dto.GmcDetailsDTO;
 import com.transformuk.hee.tis.tcs.api.dto.PersonDTO;
 import com.transformuk.hee.tis.tcs.api.dto.PersonV2DTO;
 import com.transformuk.hee.tis.tcs.api.dto.PersonalDetailsDTO;
 import com.transformuk.hee.tis.tcs.api.dto.ProgrammeMembershipDTO;
-import com.transformuk.hee.tis.tcs.api.dto.RightToWorkDTO;
-import com.transformuk.hee.tis.tcs.api.dto.TrainerApprovalDTO;
-import com.transformuk.hee.tis.tcs.api.enumeration.ApprovalStatus;
 import com.transformuk.hee.tis.tcs.service.api.validation.PersonValidator;
 import com.transformuk.hee.tis.tcs.service.exception.AccessUnauthorisedException;
 import com.transformuk.hee.tis.tcs.service.model.ContactDetails;
@@ -46,6 +40,7 @@ import com.transformuk.hee.tis.tcs.service.service.RightToWorkService;
 import com.transformuk.hee.tis.tcs.service.service.TrainerApprovalService;
 import com.transformuk.hee.tis.tcs.service.service.mapper.PersonDtoMapper;
 import com.transformuk.hee.tis.tcs.service.service.mapper.PersonMapper;
+import com.transformuk.hee.tis.tcs.service.service.mapper.TrainerApprovalDtoMapper;
 import java.time.LocalDate;
 import java.util.ArrayList;
 import java.util.List;
@@ -139,6 +134,8 @@ public class PersonServiceImplTest {
 
   @Mock
   private PersonDtoMapper personDtoMapperMock;
+  @Mock
+  private TrainerApprovalDtoMapper trainerApprovalDtoMapperMock;
 
   @Before
   public void setup() {
