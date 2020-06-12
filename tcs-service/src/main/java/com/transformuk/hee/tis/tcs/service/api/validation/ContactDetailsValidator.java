@@ -25,8 +25,7 @@ public class ContactDetailsValidator {
   private static final String REGEX_EMAIL = "^$|^[A-Za-z0-9+_.-]+@(.+)$";
   private static final String REGEX_EMAIL_ERROR = "Valid email format required.";
 
-
-  private static final String REGEX_NAME = "^$|^[A-Za-z0-9\\-\\\\' ]+";
+  private static final String REGEX_NAME = "^$|^[A-Za-z0-9\\-' ]+";
   private static final String REGEX_NAME_ERROR =
       "No special characters allowed for %s, with the exception of apostrophes, hyphens and spaces.";
   private static final String NULL_NAME_ERROR = "%s is required to create or update the record.";
