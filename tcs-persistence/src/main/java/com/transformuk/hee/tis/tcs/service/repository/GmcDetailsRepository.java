@@ -15,8 +15,9 @@ public interface GmcDetailsRepository extends JpaRepository<GmcDetails, Long> {
 
   IdProjection findByGmcNumber(String gmcNumber);
 
+  GmcDetails findGmcDetailsByGmcNumber(String gmcNumber);
+
   List<GmcDetails> findByGmcNumberOrderById(String gmcNumber);
 
   List<GmcDetails> findByGmcNumberIn(List<String> gmcIds);
-
 }

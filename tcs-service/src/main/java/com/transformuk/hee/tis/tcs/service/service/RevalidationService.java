@@ -6,5 +6,7 @@ import java.util.Map;
 
 public interface RevalidationService {
 
+  RevalidationRecordDto findRevalidationByGmcId(String gmcId);
+
   Map<String, RevalidationRecordDto> findAllRevalidationsByGmcIds(List<String> gmcIds);
 }
