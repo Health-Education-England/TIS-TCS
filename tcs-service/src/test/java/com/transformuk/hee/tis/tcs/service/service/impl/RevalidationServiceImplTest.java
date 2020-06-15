@@ -50,6 +50,7 @@ public class RevalidationServiceImplTest {
   private static final String CURRENT_GRADE = "GP Specialty Training";
   GradeDTO gradeDTO;
   List<GradeDTO> grades;
+  private GmcDetails gmcDetails;
   List<GmcDetails> gmcDetailList;
   List<Placement> currentPlacementsForTrainee;
   private ProgrammeMembership programmeMembership;
@@ -73,7 +74,7 @@ public class RevalidationServiceImplTest {
     contactDetails.setForenames(FORENAME);
     contactDetails.setSurname(SURNAME);
 
-    GmcDetails gmcDetails = new GmcDetails();
+    gmcDetails = new GmcDetails();
     gmcDetails.setId(PERSON_ID);
     gmcDetails.setGmcNumber(GMC_NUMBER);
     programmeMembership = new ProgrammeMembership();
@@ -91,6 +92,29 @@ public class RevalidationServiceImplTest {
     grades = Lists.newArrayList(gradeDTO);
     gmcDetailList = Lists.newArrayList(gmcDetails);
     currentPlacementsForTrainee = Lists.newArrayList(placement);
+  }
+
+  @Test
+  public void findRevalidationRecordByGmcIdShouldRetrieveOne() {
+    when(contactDetailsService.findOne(PERSON_ID)).thenReturn(contactDetails);
+    when(gmcDetailsRepositoryMock.findGmcDetailsByGmcNumber("1000")).thenReturn(gmcDetails);
+    when(programmeMembershipRepositoryMock.findLatestProgrammeMembershipByTraineeId(PERSON_ID))
+        .thenReturn(programmeMembership);
+    when(placementRepositoryMock
+        .findCurrentPlacementForTrainee(PERSON_ID, LocalDate.now(), PLACEMENT_TYPES))
+        .thenReturn(currentPlacementsForTrainee);
+    when(referenceServiceMock.findGradesIdIn(Collections.singleton(GRADE_ID))).thenReturn(grades);
+
+    RevalidationRecordDto result = testObj.findRevalidationByGmcId("1000");
+
+    assertThat(result, notNullValue());
+    assertThat(result.getGmcNumber(), is("1000"));
+    assertThat(result.getForenames(), is(FORENAME));
+    assertThat(result.getSurname(), is(SURNAME));
+    assertThat(result.getCctDate(), is(CCT_DATE));
+    assertThat(result.getProgrammeMembershipType(), is(PROGRAMME_MEMBERSHIP_TYPE.toString()));
+    assertThat(result.getProgrammeName(), is(PROGRAMME_NAME));
+    assertThat(result.getCurrentGrade(), is(CURRENT_GRADE));
   }
 
   @Test
