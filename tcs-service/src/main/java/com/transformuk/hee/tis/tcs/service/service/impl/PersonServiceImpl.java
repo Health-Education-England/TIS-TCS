@@ -375,7 +375,8 @@ public class PersonServiceImpl implements PersonService {
       List<RoleDTO> roleDtos = referenceService.findRolesIn(role);
       String trainerType = roleDtos.stream()
           .filter(roleDTO -> roleDTO.getRoleCategory().getId() != 3)
-          .map(roleDTO -> roleDTO.getCode()).collect(Collectors.joining(","));
+          .map(roleDTO -> roleDTO.getRoleCategory().getName()).distinct()
+          .collect(Collectors.joining(","));
 
       if (!StringUtils.isEmpty(trainerType)) {
         TrainerApprovalDTO updatedTrainerApproval = new TrainerApprovalDTO();
