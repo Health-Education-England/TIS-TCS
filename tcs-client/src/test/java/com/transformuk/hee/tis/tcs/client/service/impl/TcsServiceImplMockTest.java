@@ -5,13 +5,16 @@ import static org.hamcrest.MatcherAssert.assertThat;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyMap;
 import static org.mockito.ArgumentMatchers.anyString;
+import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.ArgumentMatchers.same;
 import static org.mockito.Mockito.doThrow;
 import static org.mockito.Mockito.when;
 
+import com.google.common.collect.Lists;
 import com.google.common.collect.Maps;
 import com.transformuk.hee.tis.tcs.api.dto.AbsenceDTO;
 import com.transformuk.hee.tis.tcs.api.dto.PersonDTO;
+import com.transformuk.hee.tis.tcs.api.dto.TrainerApprovalDTO;
 import java.util.Collections;
 import java.util.List;
 import java.util.Map;
@@ -121,5 +124,58 @@ public class TcsServiceImplMockTest {
     // Then.
     assertThat("Unexpected number of patched DTOs.", patchedDtos.size(), is(1));
     assertThat("Unexpected patched DTOs.", patchedDtos.get(0), is(patchedDto));
+  }
+
+  @Test
+  public void createTrainerApprovalShouldReturnResponseBody() {
+    // Given.
+    TrainerApprovalDTO dto = new TrainerApprovalDTO();
+    dto.setId(1L);
+    ResponseEntity<TrainerApprovalDTO> response = ResponseEntity.ok(dto);
+
+    final String API_TRAINER_APPROVAL = "/api/trainer-approvals";
+    when(restTemplateMock.exchange(anyString(), same(HttpMethod.POST), any(HttpEntity.class), any(
+        ParameterizedTypeReference.class))).thenReturn(response);
+
+    // When.
+    TrainerApprovalDTO returnedDto = testObj.createTrainerApproval(dto);
+    // Then.
+    assertThat("Unexpected patched DTOs.", returnedDto, is(dto));
+  }
+
+  @Test
+  public void updateTrainerApprovalShouldReturnResponseBody() {
+    // Given.
+    TrainerApprovalDTO dto = new TrainerApprovalDTO();
+    dto.setId(1L);
+    ResponseEntity<TrainerApprovalDTO> response = ResponseEntity.ok(dto);
+
+    when(restTemplateMock.exchange(anyString(), eq(HttpMethod.PUT), any(HttpEntity.class), any(
+        ParameterizedTypeReference.class))).thenReturn(response);
+
+    // When.
+    TrainerApprovalDTO returnedDto = testObj.updateTrainerApproval(dto);
+    // Then.
+    assertThat("Unexpected patched DTOs.", returnedDto, is(dto));
+  }
+
+  @Test
+  public void getTrainerApprovalShouldReturnResponse() {
+    TrainerApprovalDTO dto = new TrainerApprovalDTO();
+    dto.setId(1L);
+    PersonDTO person = new PersonDTO();
+    person.setId(1L);
+    dto.setPerson(person);
+
+    ResponseEntity<List<TrainerApprovalDTO>> response = ResponseEntity.ok(Lists.newArrayList(dto));
+    when(restTemplateMock.exchange(anyString(), eq(HttpMethod.GET), eq(null), any(
+        ParameterizedTypeReference.class))).thenReturn(response);
+
+    // When.
+    List<TrainerApprovalDTO> returnDtos = testObj
+        .getTrainerApprovalForPerson(dto.getPerson().getId());
+    // Then.
+    assertThat("Unexpected number of patched DTOs.", returnDtos.size(), is(1));
+    assertThat("Unexpected patched DTOs.", returnDtos.get(0), is(dto));
   }
 }

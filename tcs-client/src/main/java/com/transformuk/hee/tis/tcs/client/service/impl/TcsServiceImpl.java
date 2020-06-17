@@ -31,6 +31,7 @@ import com.transformuk.hee.tis.tcs.api.dto.SpecialtyDTO;
 import com.transformuk.hee.tis.tcs.api.dto.SpecialtyGroupDTO;
 import com.transformuk.hee.tis.tcs.api.dto.TariffFundingTypeFieldsDTO;
 import com.transformuk.hee.tis.tcs.api.dto.TariffRateDTO;
+import com.transformuk.hee.tis.tcs.api.dto.TrainerApprovalDTO;
 import com.transformuk.hee.tis.tcs.api.dto.TrainingNumberDTO;
 import java.io.UnsupportedEncodingException;
 import java.net.URLEncoder;
@@ -64,6 +65,8 @@ public class TcsServiceImpl extends AbstractClientService {
   private static final String API_QUALIFICATIONS = "/api/qualifications/";
   private static final String API_PEOPLE = "/api/people/";
   private static final String API_PEOPLE_BULK = "/api/bulk-people/";
+  private static final String API_TRAINER_APPROVAL = "/api/trainer-approvals";
+  private static final String API_PERSON_TRAINER_APPROVALS = "/api/people/%d/trainer-approvals";
   private static final String API_PLACEMENT = "/api/placement/";
   private static final String API_PLACEMENTS = "/api/placements/";
   private static final String API_POSTS = "/api/posts/";
@@ -226,6 +229,33 @@ public class TcsServiceImpl extends AbstractClientService {
     return tcsRestTemplate
         .exchange(serviceUrl + API_PEOPLE, HttpMethod.POST, httpEntity,
             new ParameterizedTypeReference<PersonDTO>() {
+            })
+        .getBody();
+  }
+
+  public List<TrainerApprovalDTO> getTrainerApprovalForPerson(Long personId) {
+    String uri = String.format(API_PERSON_TRAINER_APPROVALS, personId);
+    return tcsRestTemplate.exchange(serviceUrl + uri,
+        HttpMethod.GET, null, new ParameterizedTypeReference<List<TrainerApprovalDTO>>() {
+        }).getBody();
+  }
+
+  public TrainerApprovalDTO createTrainerApproval(TrainerApprovalDTO trainerApprovalDto) {
+    HttpHeaders headers = new HttpHeaders();
+    HttpEntity<TrainerApprovalDTO> httpEntity = new HttpEntity<>(trainerApprovalDto, headers);
+    return tcsRestTemplate
+        .exchange(serviceUrl + API_TRAINER_APPROVAL, HttpMethod.POST, httpEntity,
+            new ParameterizedTypeReference<TrainerApprovalDTO>() {
+            })
+        .getBody();
+  }
+
+  public TrainerApprovalDTO updateTrainerApproval(TrainerApprovalDTO trainerApprovalDto) {
+    HttpHeaders headers = new HttpHeaders();
+    HttpEntity<TrainerApprovalDTO> httpEntity = new HttpEntity<>(trainerApprovalDto, headers);
+    return tcsRestTemplate
+        .exchange(serviceUrl + API_TRAINER_APPROVAL, HttpMethod.PUT, httpEntity,
+            new ParameterizedTypeReference<TrainerApprovalDTO>() {
             })
         .getBody();
   }
