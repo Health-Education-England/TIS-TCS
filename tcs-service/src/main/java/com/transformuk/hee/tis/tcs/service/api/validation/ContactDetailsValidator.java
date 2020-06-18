@@ -51,9 +51,6 @@ public class ContactDetailsValidator {
     final boolean currentOnly = false;
     List<FieldError> fieldErrors = new ArrayList<>();
     fieldErrors.addAll(checkTitle(dto, currentOnly));
-    fieldErrors.addAll(checkAddress1(dto));
-    fieldErrors.addAll(checkAddress2(dto));
-    fieldErrors.addAll(checkPostCode(dto));
 
     if (!fieldErrors.isEmpty()) {
       BeanPropertyBindingResult bindingResult =

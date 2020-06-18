@@ -3,7 +3,6 @@ package com.transformuk.hee.tis.tcs.service.api.validation;
 import static org.hamcrest.CoreMatchers.hasItem;
 import static org.hamcrest.CoreMatchers.is;
 import static org.hamcrest.MatcherAssert.assertThat;
-import static org.junit.jupiter.api.Assertions.assertDoesNotThrow;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.ArgumentMatchers.eq;
@@ -20,6 +19,7 @@ import com.transformuk.hee.tis.tcs.api.dto.PersonDTO;
 import com.transformuk.hee.tis.tcs.api.dto.TrainerApprovalDTO;
 import com.transformuk.hee.tis.tcs.service.model.Person;
 import com.transformuk.hee.tis.tcs.service.repository.PersonRepository;
+import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -32,7 +32,6 @@ import org.junit.runner.RunWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.MockitoJUnitRunner;
-import org.springframework.validation.BindingResult;
 import org.springframework.validation.FieldError;
 import org.springframework.web.bind.MethodArgumentNotValidException;
 
@@ -124,90 +123,79 @@ public class PersonValidatorTest {
   public void validationSkippedIfPublicHealthNumberIsUnknownOrNA()
       throws MethodArgumentNotValidException {
     when(personDTOMock.getPublicHealthNumber()).thenReturn(UNKNOWN_PUBLIC_HEALTH_NUMBER);
-    when(personRepositoryMock.existsById(123L)).thenReturn(true);
     testObj.validate(personDTOMock);
     verify(personRepositoryMock, never()).findByPublicHealthNumber(anyString());
   }
 
-  @Test(expected = MethodArgumentNotValidException.class)
-  public void shouldThrowExceptionWhenRolesNotExist() throws MethodArgumentNotValidException {
+  @Test
+  public void bulkShouldGetErrorWhenRoleNotExists() {
     // Given.
     PersonDTO dto = new PersonDTO();
     dto.setRole("role1;role2");
+    List<PersonDTO> dtoList = new ArrayList<>();
+    dtoList.add(dto);
 
     Map<String, Boolean> roleToExists = new HashMap<>();
     roleToExists.put("role1", true);
     roleToExists.put("role2", false);
     when(referenceService.rolesExist(any(), eq(true))).thenReturn(roleToExists);
 
-    try {
-      // When.
-      testObj.validate(dto);
-    } catch (MethodArgumentNotValidException e) {
-      // Then
-      BindingResult result = e.getBindingResult();
-      assertThat("Unexpected object name.", result.getObjectName(),
-          is(PersonDTO.class.getSimpleName()));
-      assertThat("Unexpected target object.", result.getTarget(), is(dto));
-
-      FieldError fieldError = new FieldError(PersonDTO.class.getSimpleName(), "role",
-          "role 'role2' did not match a reference value.");
-      assertThat("Unexpected error object name.", result.getFieldErrors(), hasItem(fieldError));
-
-      throw e;
-    }
+    // When.
+    testObj.validateForBulk(dtoList);
+    // Then.
+    assertThat("should contain 1 error", dtoList.get(0).getMessageList().size(), is(1));
+    assertThat("Unexpected error message", dtoList.get(0).getMessageList(),
+        hasItem("role 'role2' did not match a reference value."));
   }
 
   @Test
-  public void shouldNotThrowExceptionWhenRolesExist() throws MethodArgumentNotValidException {
+  public void bulkShouldNotGetErrorWhenRoleExists() throws MethodArgumentNotValidException {
     // Given.
     PersonDTO dto = new PersonDTO();
     dto.setRole("role1 ; role2,");
+    List<PersonDTO> dtoList = new ArrayList<>();
+    dtoList.add(dto);
 
     Map<String, Boolean> roleToExists = new HashMap<>();
     roleToExists.put("role1", true);
     roleToExists.put("role2", true);
     when(referenceService.rolesExist(any(), eq(true))).thenReturn(roleToExists);
 
-    // When, then.
-    assertDoesNotThrow(() -> testObj.validate(dto));
-  }
-
-  @Test(expected = MethodArgumentNotValidException.class)
-  public void shouldThrowExceptionWhenPersonNotExist() throws MethodArgumentNotValidException {
-    // Given.
-    PersonDTO dto = new PersonDTO();
-    dto.setId(1L);
-    when(personRepositoryMock.existsById(1L)).thenReturn(false);
-
     // When.
-    try {
-      // When.
-      testObj.validate(dto);
-    } catch (MethodArgumentNotValidException e) {
-      // Then
-      BindingResult result = e.getBindingResult();
-      assertThat("Unexpected object name.", result.getObjectName(),
-          is(PersonDTO.class.getSimpleName()));
-      assertThat("Unexpected target object.", result.getTarget(), is(dto));
-
-      FieldError fieldError = new FieldError(PersonDTO.class.getSimpleName(), "person",
-          "Person with id 1 does not exist");
-      assertThat("Unexpected error object name.", result.getFieldErrors(), hasItem(fieldError));
-
-      throw e;
-    }
+    testObj.validateForBulk(dtoList);
+    // Then.
+    assertThat("should not contain any errors", dtoList.get(0).getMessageList().size(), is(0));
   }
 
   @Test
-  public void shouldNotThrowExceptionWhenPersonExist() {
+  public void bulkShouldGetErrorWhenPersonNotExists() {
     // Given.
     PersonDTO dto = new PersonDTO();
     dto.setId(1L);
+    List<PersonDTO> dtoList = new ArrayList<>();
+    dtoList.add(dto);
+    when(personRepositoryMock.existsById(1L)).thenReturn(false);
+
+    testObj.validateForBulk(dtoList);
+
+    assertThat("should contain 1 error", dtoList.get(0).getMessageList().size(), is(1));
+    assertThat("Unexpected error message", dtoList.get(0).getMessageList(),
+        hasItem("Person with id 1 does not exist"));
+  }
+
+  @Test
+  public void bulkShouldNotGetErrorWhenPersonExists() {
+    // Given.
+    PersonDTO dto = new PersonDTO();
+    dto.setId(1L);
+    List<PersonDTO> dtoList = new ArrayList<>();
+    dtoList.add(dto);
     when(personRepositoryMock.existsById(1L)).thenReturn(true);
 
-    // When, then.
-    assertDoesNotThrow(() -> testObj.validate(dto));
+    // When.
+    testObj.validateForBulk(dtoList);
+    // Then.
+    assertThat("should not contain any errors", dtoList.get(0).getMessageList().size(), is(0));
   }
 
   private boolean exceptionContainsFieldError(MethodArgumentNotValidException e, String field) {

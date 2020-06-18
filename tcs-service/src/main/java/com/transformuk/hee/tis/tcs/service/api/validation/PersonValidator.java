@@ -69,9 +69,7 @@ public class PersonValidator {
    */
   public void validate(PersonDTO personDto) throws MethodArgumentNotValidException {
     List<FieldError> fieldErrors = new ArrayList<>();
-    fieldErrors.addAll(checkPerson(personDto));
     fieldErrors.addAll(checkPublicHealthNumber(personDto));
-    fieldErrors.addAll(checkRole(personDto));
 
     if (!fieldErrors.isEmpty()) {
       BeanPropertyBindingResult bindingResult = new BeanPropertyBindingResult(personDto,

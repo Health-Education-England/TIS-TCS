@@ -1,20 +1,15 @@
 package com.transformuk.hee.tis.tcs.service.api.validation;
 
 import static org.hamcrest.CoreMatchers.equalTo;
-import static org.hamcrest.CoreMatchers.hasItem;
 import static org.hamcrest.CoreMatchers.is;
 import static org.hamcrest.MatcherAssert.assertThat;
-import static org.junit.jupiter.api.Assertions.assertDoesNotThrow;
-import static org.junit.jupiter.api.Assertions.assertThrows;
 
 import com.transformuk.hee.tis.tcs.api.dto.RightToWorkDTO;
 import java.time.LocalDate;
 import java.util.List;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
-import org.springframework.validation.BindingResult;
 import org.springframework.validation.FieldError;
-import org.springframework.web.bind.MethodArgumentNotValidException;
 
 class RightToWorkValidatorTest {
 
@@ -28,183 +23,182 @@ class RightToWorkValidatorTest {
   }
 
   @Test
-  void shouldThrowExceptionWhenEeaResidentNotValid() {
+  void bulkValidateShouldReturnErrorWhenEeaResidentNotValid() {
     // Given.
     RightToWorkDTO dto = new RightToWorkDTO();
     dto.setEeaResident("invalid");
 
     // When.
-    MethodArgumentNotValidException thrown =
-        assertThrows(MethodArgumentNotValidException.class, () -> validator.validate(dto));
+    List<FieldError> fieldErrors = validator.validateForBulk(dto);
 
-    // Then
-    BindingResult result = thrown.getBindingResult();
-    assertThat("Unexpected object name.", result.getObjectName(), is(DTO_NAME));
-    assertThat("Unexpected target object.", result.getTarget(), is(dto));
-
-    FieldError fieldError =
-        new FieldError(DTO_NAME, "eeaResident", "eeaResident must match a reference value.");
-    assertThat("Unexpected error object name.", result.getFieldErrors(), hasItem(fieldError));
+    // Then.
+    assertThat("should return 1 error", fieldErrors.size(), is(1));
+    assertThat("Unexpected error message", fieldErrors.get(0).getDefaultMessage(),
+        is("eeaResident must match a reference value."));
   }
 
   @Test
-  void shouldThrowExceptionWhenEeaResidentIncorrectCase() {
+  void bulkValidateShouldReturnErrorWhenEeaResidentIncorrectCase() {
     // Given.
     RightToWorkDTO dto = new RightToWorkDTO();
     dto.setEeaResident("Yes");
 
     // When.
-    MethodArgumentNotValidException thrown =
-        assertThrows(MethodArgumentNotValidException.class, () -> validator.validate(dto));
+    List<FieldError> fieldErrors = validator.validateForBulk(dto);
 
-    // Then
-    BindingResult result = thrown.getBindingResult();
-    assertThat("Unexpected object name.", result.getObjectName(), is(DTO_NAME));
-    assertThat("Unexpected target object.", result.getTarget(), is(dto));
-
-    FieldError fieldError =
-        new FieldError(DTO_NAME, "eeaResident", "eeaResident must match a reference value.");
-    assertThat("Unexpected error object name.", result.getFieldErrors(), hasItem(fieldError));
+    // Then.
+    assertThat("should return 1 error", fieldErrors.size(), is(1));
+    assertThat("Unexpected error message", fieldErrors.get(0).getDefaultMessage(),
+        is("eeaResident must match a reference value."));
   }
 
   @Test
-  void shouldNotThrowExceptionWhenEeaResidentYes() {
+  void bulkValidateShouldNotReturnErrorWhenEeaResidentYes() {
     // Given.
     RightToWorkDTO dto = new RightToWorkDTO();
     dto.setEeaResident("YES");
 
     // When.
-    assertDoesNotThrow(() -> validator.validate(dto));
+    List<FieldError> fieldErrors = validator.validateForBulk(dto);
+
+    // Then.
+    assertThat("should not return errors", fieldErrors.size(), is(0));
   }
 
   @Test
-  void shouldNotThrowExceptionWhenEeaResidentNo() {
+  void bulkValidateShouldNotReturnErrorWhenEeaResidentNo() {
     // Given.
     RightToWorkDTO dto = new RightToWorkDTO();
     dto.setEeaResident("NO");
 
     // When.
-    assertDoesNotThrow(() -> validator.validate(dto));
+    List<FieldError> fieldErrors = validator.validateForBulk(dto);
+
+    // Then.
+    assertThat("should not return errors", fieldErrors.size(), is(0));
   }
 
   @Test
-  void shouldNotThrowExceptionWhenEeaResidentUnknown() {
+  void bulkValidateShouldNotReturnErrorWhenEeaResidentUnknown() {
     // Given.
     RightToWorkDTO dto = new RightToWorkDTO();
     dto.setEeaResident("UNKNOWN");
 
     // When.
-    assertDoesNotThrow(() -> validator.validate(dto));
+    List<FieldError> fieldErrors = validator.validateForBulk(dto);
+
+    // Then.
+    assertThat("should not return errors", fieldErrors.size(), is(0));
   }
 
   @Test
-  void shouldThrowExceptionWhenSettledNotValid() {
+  void bulkValidateShouldReturnErrorWhenSettledNotValid() {
     // Given.
     RightToWorkDTO dto = new RightToWorkDTO();
     dto.setSettled("invalid");
 
     // When.
-    MethodArgumentNotValidException thrown =
-        assertThrows(MethodArgumentNotValidException.class, () -> validator.validate(dto));
+    List<FieldError> fieldErrors = validator.validateForBulk(dto);
 
-    // Then
-    BindingResult result = thrown.getBindingResult();
-    assertThat("Unexpected object name.", result.getObjectName(), is(DTO_NAME));
-    assertThat("Unexpected target object.", result.getTarget(), is(dto));
-
-    FieldError fieldError =
-        new FieldError(DTO_NAME, "settled", "settled must match a reference value.");
-    assertThat("Unexpected error object name.", result.getFieldErrors(), hasItem(fieldError));
+    // Then.
+    assertThat("should return 1 error", fieldErrors.size(), is(1));
+    assertThat("Unexpected error message", fieldErrors.get(0).getDefaultMessage(),
+        is("settled must match a reference value."));
   }
 
   @Test
-  void shouldThrowExceptionWhenSettledIncorrectCase() {
+  void bulkValidateShouldReturnErrorWhenSettledIncorrectCase() {
     // Given.
     RightToWorkDTO dto = new RightToWorkDTO();
     dto.setSettled("Yes");
 
     // When.
-    MethodArgumentNotValidException thrown =
-        assertThrows(MethodArgumentNotValidException.class, () -> validator.validate(dto));
+    List<FieldError> fieldErrors = validator.validateForBulk(dto);
 
     // Then
-    BindingResult result = thrown.getBindingResult();
-    assertThat("Unexpected object name.", result.getObjectName(), is(DTO_NAME));
-    assertThat("Unexpected target object.", result.getTarget(), is(dto));
-
-    FieldError fieldError =
-        new FieldError(DTO_NAME, "settled", "settled must match a reference value.");
-    assertThat("Unexpected error object name.", result.getFieldErrors(), hasItem(fieldError));
+    assertThat("should return 1 error", fieldErrors.size(), is(1));
+    assertThat("Unexpected error message", fieldErrors.get(0).getDefaultMessage(),
+        is("settled must match a reference value."));
   }
 
   @Test
-  void shouldNotThrowExceptionWhenSettledYes() {
+  void bulkValidateShouldNotReturnErrorWhenSettledYes() {
     // Given.
     RightToWorkDTO dto = new RightToWorkDTO();
     dto.setSettled("YES");
 
     // When.
-    assertDoesNotThrow(() -> validator.validate(dto));
+    List<FieldError> fieldErrors = validator.validateForBulk(dto);
+
+    // Then
+    assertThat("should not return errors", fieldErrors.size(), is(0));
   }
 
   @Test
-  void shouldNotThrowExceptionWhenSettledNo() {
+  void bulkValidateShouldNotReturnErrorWhenSettledNo() {
     // Given.
     RightToWorkDTO dto = new RightToWorkDTO();
     dto.setSettled("NO");
 
     // When.
-    assertDoesNotThrow(() -> validator.validate(dto));
+    List<FieldError> fieldErrors = validator.validateForBulk(dto);
+
+    // Then
+    assertThat("should not return errors", fieldErrors.size(), is(0));
   }
 
   @Test
-  void shouldThrowExceptionWhenVisaIssuedAfterVisaValidTo() {
+  void bulkValidateShouldReturnErrorWhenVisaIssuedAfterVisaValidTo() {
     // Given.
     RightToWorkDTO dto = new RightToWorkDTO();
     dto.setVisaIssued(LocalDate.now().plusDays(1));
     dto.setVisaValidTo(LocalDate.now());
 
     // When.
-    MethodArgumentNotValidException thrown =
-        assertThrows(MethodArgumentNotValidException.class, () -> validator.validate(dto));
+    List<FieldError> fieldErrors = validator.validateForBulk(dto);
 
     // Then
-    BindingResult result = thrown.getBindingResult();
-    assertThat("Unexpected object name.", result.getObjectName(), is(DTO_NAME));
-    assertThat("Unexpected target object.", result.getTarget(), is(dto));
-
-    FieldError fieldError =
-        new FieldError(DTO_NAME, "visaIssued", "visaIssued must be before visaValidTo.");
-    assertThat("Unexpected error object name.", result.getFieldErrors(), hasItem(fieldError));
+    assertThat("should return 1 error", fieldErrors.size(), is(1));
+    assertThat("Unexpected error message", fieldErrors.get(0).getDefaultMessage(),
+        is("visaIssued must be before visaValidTo."));
   }
 
   @Test
-  void shouldNotThrowExceptionWhenVisaIssuedAndNoVisaValidTo() {
+  void bulkValidateShouldNotReturnErrorWhenVisaIssuedAndNoVisaValidTo() {
     // Given.
     RightToWorkDTO dto = new RightToWorkDTO();
     dto.setVisaIssued(LocalDate.now());
 
-    // When, Then.
-    assertDoesNotThrow(() -> validator.validate(dto));
+    // When.
+    List<FieldError> fieldErrors = validator.validateForBulk(dto);
+
+    // Then
+    assertThat("should not return errors", fieldErrors.size(), is(0));
   }
 
   @Test
-  void shouldNotThrowExceptionWhenNotVisaIssuedAndVisaValidTo() {
+  void shouldNotReturnErrorWhenNotVisaIssuedAndVisaValidTo() {
     // Given.
     RightToWorkDTO dto = new RightToWorkDTO();
     dto.setVisaValidTo(LocalDate.now());
 
-    // When, Then.
-    assertDoesNotThrow(() -> validator.validate(dto));
+    // When.
+    List<FieldError> fieldErrors = validator.validateForBulk(dto);
+
+    // Then
+    assertThat("should not return errors", fieldErrors.size(), is(0));
   }
 
   @Test
-  void shouldNotThrowExceptionWhenEmpty() {
+  void shouldNotReturnErrorWhenEmpty() {
     // Given.
     RightToWorkDTO dto = new RightToWorkDTO();
 
-    // When, Then.
-    assertDoesNotThrow(() -> validator.validate(dto));
+    // When.
+    List<FieldError> fieldErrors = validator.validateForBulk(dto);
+
+    // Then
+    assertThat("should not return errors", fieldErrors.size(), is(0));
   }
 
   @Test
