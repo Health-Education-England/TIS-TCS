@@ -182,6 +182,7 @@ node {
     } catch (hudson.AbortException ae) {
       // We do nothing for Aborts.
     } catch (err) {
+      currentBuild.result = 'FAILURE'
       throw err
     }
 }
