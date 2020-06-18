@@ -34,9 +34,6 @@ public class RightToWorkValidator {
   public void validate(RightToWorkDTO dto) throws MethodArgumentNotValidException {
 
     List<FieldError> fieldErrors = new ArrayList<>();
-    checkEeaResident(dto, fieldErrors);
-    checkSettled(dto, fieldErrors);
-    checkVisaDates(dto, fieldErrors);
 
     if (!fieldErrors.isEmpty()) {
       BeanPropertyBindingResult bindingResult = new BeanPropertyBindingResult(dto, DTO_NAME);

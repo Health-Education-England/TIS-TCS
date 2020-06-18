@@ -11,6 +11,7 @@ import com.transformuk.hee.tis.reference.api.dto.TitleDTO;
 import com.transformuk.hee.tis.reference.client.impl.ReferenceServiceImpl;
 import com.transformuk.hee.tis.tcs.api.dto.ContactDetailsDTO;
 import java.util.List;
+import java.util.stream.Collectors;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -76,160 +77,122 @@ class ContactDetailsValidatorTest {
   }
 
   @Test
-  void shouldThrowExceptionWhenAddress1AndNotPostcode() {
+  void bulkValidateShouldReturnErrorWhenAddress1AndNotPostcode() {
     // Given.
     ContactDetailsDTO dto = new ContactDetailsDTO();
     dto.setAddress1("address1");
 
     // When.
-    MethodArgumentNotValidException thrown =
-        assertThrows(MethodArgumentNotValidException.class, () -> validator.validate(dto));
+    List<FieldError> fieldErrors = validator.validateForBulk(dto);
 
-    // Then
-    BindingResult bindingResult = thrown.getBindingResult();
-    assertThat("Unexpected object name.", bindingResult.getObjectName(),
-        is(ContactDetailsDTO.class.getSimpleName()));
-    assertThat("Unexpected target object.", bindingResult.getTarget(), is(dto));
-
-    List<FieldError> fieldErrors = bindingResult.getFieldErrors();
-    assertThat("Unexpected number of errors.", fieldErrors.size(), is(1));
-
-    FieldError fieldError = fieldErrors.get(0);
-    assertThat("Unexpected error object name.", fieldError.getObjectName(),
-        is(ContactDetailsDTO.class.getSimpleName()));
-    assertThat("Unexpected error field.", fieldError.getField(), is("postCode"));
-    assertThat("Unexpected error message.", fieldError.getDefaultMessage(),
+    // Then.
+    assertThat("should return 1 error", fieldErrors.size(), is(1));
+    assertThat("Unexpected error message", fieldErrors.get(0).getDefaultMessage(),
         is("postCode is required when address is populated."));
   }
 
   @Test
-  void shouldThrowExceptionWhenAddress2AndNotAddress1() {
+  void bulkValidateShouldReturnErrorWhenAddress2AndNotAddress1() {
     // Given.
     ContactDetailsDTO dto = new ContactDetailsDTO();
     dto.setAddress2("address2");
 
     // When.
-    MethodArgumentNotValidException thrown =
-        assertThrows(MethodArgumentNotValidException.class, () -> validator.validate(dto));
+    List<FieldError> fieldErrors = validator.validateForBulk(dto);
 
-    // Then
-    BindingResult result = thrown.getBindingResult();
-    assertThat("Unexpected object name.", result.getObjectName(),
-        is(ContactDetailsDTO.class.getSimpleName()));
-    assertThat("Unexpected target object.", result.getTarget(), is(dto));
-
-    FieldError fieldError = new FieldError(ContactDetailsDTO.class.getSimpleName(), "address1",
-        "address1 is required when address2 is populated.");
-    assertThat("Expected field error not found.", result.getFieldErrors(), hasItem(fieldError));
+    // Then.
+    List<String> errorMessages = fieldErrors.stream()
+        .map(fieldError -> fieldError.getDefaultMessage()).collect(
+            Collectors.toList());
+    assertThat("Unexpected error message", errorMessages,
+        hasItem("address1 is required when address2 is populated."));
   }
 
   @Test
-  void shouldThrowExceptionWhenAddress2AndNotPostcode() {
+  void bulkValidateShouldReturnErrorWhenAddress2AndNotPostcode() {
     // Given.
     ContactDetailsDTO dto = new ContactDetailsDTO();
     dto.setAddress2("address2");
 
     // When.
-    MethodArgumentNotValidException thrown =
-        assertThrows(MethodArgumentNotValidException.class, () -> validator.validate(dto));
+    List<FieldError> fieldErrors = validator.validateForBulk(dto);
 
-    // Then
-    BindingResult result = thrown.getBindingResult();
-    assertThat("Unexpected object name.", result.getObjectName(),
-        is(ContactDetailsDTO.class.getSimpleName()));
-    assertThat("Unexpected target object.", result.getTarget(), is(dto));
-
-    FieldError fieldError = new FieldError(ContactDetailsDTO.class.getSimpleName(), "postCode",
-        "postCode is required when address is populated.");
-    assertThat("Expected field error not found.", result.getFieldErrors(), hasItem(fieldError));
+    // Then.
+    List<String> errorMessages = fieldErrors.stream()
+        .map(fieldError -> fieldError.getDefaultMessage()).collect(
+            Collectors.toList());
+    assertThat("Unexpected error message", errorMessages,
+        hasItem("postCode is required when address is populated."));
   }
 
   @Test
-  void shouldThrowExceptionWhenAddress3AndNotAddress1() {
+  void bulkValidateShouldReturnErrorWhenAddress3AndNotAddress1() {
     // Given.
     ContactDetailsDTO dto = new ContactDetailsDTO();
     dto.setAddress3("address3");
 
     // When.
-    MethodArgumentNotValidException thrown =
-        assertThrows(MethodArgumentNotValidException.class, () -> validator.validate(dto));
+    List<FieldError> fieldErrors = validator.validateForBulk(dto);
 
-    // Then
-    BindingResult result = thrown.getBindingResult();
-    assertThat("Unexpected object name.", result.getObjectName(),
-        is(ContactDetailsDTO.class.getSimpleName()));
-    assertThat("Unexpected target object.", result.getTarget(), is(dto));
-
-    FieldError fieldError = new FieldError(ContactDetailsDTO.class.getSimpleName(), "address1",
-        "address1 is required when address3 is populated.");
-    assertThat("Expected field error not found.", result.getFieldErrors(), hasItem(fieldError));
+    // Then.
+    List<String> errorMessages = fieldErrors.stream()
+        .map(fieldError -> fieldError.getDefaultMessage()).collect(
+            Collectors.toList());
+    assertThat("Unexpected error message", errorMessages,
+        hasItem("address1 is required when address3 is populated."));
   }
 
   @Test
-  void shouldThrowExceptionWhenAddress3AndNotAddress2() {
+  void bulkValidateShouldReturnErrorWhenAddress3AndNotAddress2() {
     // Given.
     ContactDetailsDTO dto = new ContactDetailsDTO();
     dto.setAddress3("address2");
 
     // When.
-    MethodArgumentNotValidException thrown =
-        assertThrows(MethodArgumentNotValidException.class, () -> validator.validate(dto));
+    List<FieldError> fieldErrors = validator.validateForBulk(dto);
 
-    // Then
-    BindingResult result = thrown.getBindingResult();
-    assertThat("Unexpected object name.", result.getObjectName(),
-        is(ContactDetailsDTO.class.getSimpleName()));
-    assertThat("Unexpected target object.", result.getTarget(), is(dto));
-
-    FieldError fieldError = new FieldError(ContactDetailsDTO.class.getSimpleName(), "address2",
-        "address2 is required when address3 is populated.");
-    assertThat("Expected field error not found.", result.getFieldErrors(), hasItem(fieldError));
+    // Then.
+    List<String> errorMessages = fieldErrors.stream()
+        .map(fieldError -> fieldError.getDefaultMessage()).collect(
+            Collectors.toList());
+    assertThat("Unexpected error message", errorMessages,
+        hasItem("address2 is required when address3 is populated."));
   }
 
   @Test
-  void shouldThrowExceptionWhenAddress3AndNotPostcode() {
+  void bulkValidateShouldReturnErrorWhenAddress3AndNotPostcode() {
     // Given.
     ContactDetailsDTO dto = new ContactDetailsDTO();
     dto.setAddress3("address3");
 
     // When.
-    MethodArgumentNotValidException thrown =
-        assertThrows(MethodArgumentNotValidException.class, () -> validator.validate(dto));
+    List<FieldError> fieldErrors = validator.validateForBulk(dto);
 
-    // Then
-    BindingResult result = thrown.getBindingResult();
-    assertThat("Unexpected object name.", result.getObjectName(),
-        is(ContactDetailsDTO.class.getSimpleName()));
-    assertThat("Unexpected target object.", result.getTarget(), is(dto));
-
-    FieldError fieldError = new FieldError(ContactDetailsDTO.class.getSimpleName(), "postCode",
-        "postCode is required when address is populated.");
-    assertThat("Expected field error not found.", result.getFieldErrors(), hasItem(fieldError));
+    // Then.
+    List<String> errorMessages = fieldErrors.stream()
+        .map(fieldError -> fieldError.getDefaultMessage()).collect(
+            Collectors.toList());
+    assertThat("Unexpected error message", errorMessages,
+        hasItem("postCode is required when address is populated."));
   }
 
   @Test
-  void shouldThrowExceptionWhenPostCodeAndNotAddress1() {
+  void bulkValidateShouldReturnErrorWhenPostCodeAndNotAddress1() {
     // Given.
     ContactDetailsDTO dto = new ContactDetailsDTO();
     dto.setPostCode("postCode");
 
     // When.
-    MethodArgumentNotValidException thrown =
-        assertThrows(MethodArgumentNotValidException.class, () -> validator.validate(dto));
+    List<FieldError> fieldErrors = validator.validateForBulk(dto);
 
-    // Then
-    BindingResult result = thrown.getBindingResult();
-    assertThat("Unexpected object name.", result.getObjectName(),
-        is(ContactDetailsDTO.class.getSimpleName()));
-    assertThat("Unexpected target object.", result.getTarget(), is(dto));
-
-    FieldError fieldError = new FieldError(ContactDetailsDTO.class.getSimpleName(), "address1",
-        "address1 is required when postCode is populated.");
-    assertThat("Expected field error not found.", result.getFieldErrors(), hasItem(fieldError));
+    // Then.
+    assertThat("should return 1 error", fieldErrors.size(), is(1));
+    assertThat("Unexpected error message", fieldErrors.get(0).getDefaultMessage(),
+        is("address1 is required when postCode is populated."));
   }
 
   @Test
-  void shouldNotThrowExceptionWhenAddressValid() {
+  void bulkValidateShouldNotReturnErrorWhenAddressValid() {
     // Given.
     ContactDetailsDTO dto = new ContactDetailsDTO();
     dto.setAddress1("address1");
@@ -238,11 +201,12 @@ class ContactDetailsValidatorTest {
     dto.setPostCode("postCode");
 
     // When, Then.
-    assertDoesNotThrow(() -> validator.validate(dto));
+    List<FieldError> fieldErrors = validator.validateForBulk(dto);
+    assertThat("should not return errors", fieldErrors.size(), is(0));
   }
 
   @Test
-  void shouldNotThrowExceptionWhenAddressValidNoAddress3() {
+  void bulkValidateShouldNotReturnErrorWhenAddressValidNoAddress3() {
     // Given.
     ContactDetailsDTO dto = new ContactDetailsDTO();
     dto.setAddress1("address1");
@@ -250,22 +214,24 @@ class ContactDetailsValidatorTest {
     dto.setPostCode("postCode");
 
     // When, Then.
-    assertDoesNotThrow(() -> validator.validate(dto));
+    List<FieldError> fieldErrors = validator.validateForBulk(dto);
+    assertThat("should not return errors", fieldErrors.size(), is(0));
   }
 
   @Test
-  void shouldNotThrowExceptionWhenAddressValidNoAddress2() {
+  void bulkValidateShouldNotReturnErrorWhenAddressValidNoAddress2() {
     // Given.
     ContactDetailsDTO dto = new ContactDetailsDTO();
     dto.setAddress1("address1");
     dto.setPostCode("postCode");
 
     // When, Then.
-    assertDoesNotThrow(() -> validator.validate(dto));
+    List<FieldError> fieldErrors = validator.validateForBulk(dto);
+    assertThat("should not return errors", fieldErrors.size(), is(0));
   }
 
   @Test
-  void shouldNotThrowExceptionWhenAllValid() {
+  void bulkValidateShouldNotReturnErrorWhenAllValid() {
     // Given.
     ContactDetailsDTO dto = new ContactDetailsDTO();
     dto.setTitle("myTitle");
@@ -274,10 +240,11 @@ class ContactDetailsValidatorTest {
     dto.setAddress3("address3");
     dto.setPostCode("postCode");
 
-    when(referenceService.isValueExists(TitleDTO.class, "myTitle", false)).thenReturn(true);
+    when(referenceService.isValueExists(TitleDTO.class, "myTitle", true)).thenReturn(true);
 
     // When, Then.
-    assertDoesNotThrow(() -> validator.validate(dto));
+    List<FieldError> fieldErrors = validator.validateForBulk(dto);
+    assertThat("should not return errors", fieldErrors.size(), is(0));
   }
 
   @Test

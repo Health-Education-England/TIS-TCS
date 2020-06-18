@@ -1,11 +1,8 @@
 package com.transformuk.hee.tis.tcs.service.api.validation;
 
 import static org.hamcrest.CoreMatchers.equalTo;
-import static org.hamcrest.CoreMatchers.hasItem;
-import static org.hamcrest.CoreMatchers.is;
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.junit.jupiter.api.Assertions.assertDoesNotThrow;
-import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.mockito.Mockito.lenient;
 
 import com.transformuk.hee.tis.reference.api.dto.EthnicOriginDTO;
@@ -22,9 +19,7 @@ import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
-import org.springframework.validation.BindingResult;
 import org.springframework.validation.FieldError;
-import org.springframework.web.bind.MethodArgumentNotValidException;
 
 @ExtendWith(MockitoExtension.class)
 class PersonalDetailsValidatorTest {
@@ -46,46 +41,6 @@ class PersonalDetailsValidatorTest {
   @BeforeEach
   void setUp() {
     validator = new PersonalDetailsValidator(referenceService);
-  }
-
-  @Test
-  void shouldThrowExceptionWhenDisabilityNotValid() {
-    // Given.
-    PersonalDetailsDTO dto = new PersonalDetailsDTO();
-    dto.setDisability("invalid");
-
-    // When.
-    MethodArgumentNotValidException thrown =
-        assertThrows(MethodArgumentNotValidException.class, () -> validator.validate(dto));
-
-    // Then
-    BindingResult result = thrown.getBindingResult();
-    assertThat("Unexpected object name.", result.getObjectName(), is(DTO_NAME));
-    assertThat("Unexpected target object.", result.getTarget(), is(dto));
-
-    FieldError fieldError =
-        new FieldError(DTO_NAME, "disability", "disability must match a reference value.");
-    assertThat("Unexpected error object name.", result.getFieldErrors(), hasItem(fieldError));
-  }
-
-  @Test
-  void shouldThrowExceptionWhenDisabilityIncorrectCase() {
-    // Given.
-    PersonalDetailsDTO dto = new PersonalDetailsDTO();
-    dto.setDisability("Yes");
-
-    // When.
-    MethodArgumentNotValidException thrown =
-        assertThrows(MethodArgumentNotValidException.class, () -> validator.validate(dto));
-
-    // Then
-    BindingResult result = thrown.getBindingResult();
-    assertThat("Unexpected object name.", result.getObjectName(), is(DTO_NAME));
-    assertThat("Unexpected target object.", result.getTarget(), is(dto));
-
-    FieldError fieldError =
-        new FieldError(DTO_NAME, "disability", "disability must match a reference value.");
-    assertThat("Unexpected error object name.", result.getFieldErrors(), hasItem(fieldError));
   }
 
   @Test

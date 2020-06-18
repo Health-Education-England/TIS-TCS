@@ -48,7 +48,6 @@ public class PersonalDetailsValidator {
     List<FieldError> fieldErrors = new ArrayList<>();
     fieldErrors.addAll(checkGender(personalDetailsDTO, currentOnly));
     fieldErrors.addAll(checkNationality(personalDetailsDTO, currentOnly));
-    fieldErrors.addAll(checkDisability(personalDetailsDTO));
     fieldErrors.addAll(checkDualNationality(personalDetailsDTO, currentOnly));
     fieldErrors.addAll(checkEthnicOrigin(personalDetailsDTO, currentOnly));
     fieldErrors.addAll(checkMaritalStatus(personalDetailsDTO, currentOnly));
