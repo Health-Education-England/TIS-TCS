@@ -57,7 +57,7 @@ public class SpecialtyGroupServiceImpl implements SpecialtyGroupService {
     Long groupID = specialtyGroup.getId();
     // Update
     if (groupID != null) {
-      Set<Specialty> beforeSaveSet = specialtyRepository.findBySpecialtyGroupIdIn(groupID);
+      Set<Specialty> beforeSaveSet = specialtyRepository.findBySpecialtyGroupIdIs(groupID);
       // Set the specialty groups to null on the specialties
       for (Specialty specialty : beforeSaveSet) {
         specialty.setSpecialtyGroup(null);

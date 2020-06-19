@@ -167,7 +167,7 @@ public class SpecialtyGroupResource {
   public ResponseEntity<List<SpecialtyDTO>> getAllSpecialtyGroupSpecialties(@PathVariable Long id,
       Pageable pageable) {
     log.debug("REST request to get all specialties linked to specialtyGroup : {}", id);
-    Page<Specialty> specialtyPage = specialtyRepository.findBySpecialtyGroupIdIn(id, pageable);
+    Page<Specialty> specialtyPage = specialtyRepository.findBySpecialtyGroupIdIs(id, pageable);
     HttpHeaders headers = PaginationUtil
         .generatePaginationHttpHeaders(specialtyPage, "/api/specialty-groups/specialties");
     return new ResponseEntity<>(
