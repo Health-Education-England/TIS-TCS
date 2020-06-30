@@ -329,7 +329,7 @@
     <validation-api.version>1.1.0.Final</validation-api.version>
   </properties>
 
-  <version>6.10.2</version>
+  <version>6.10.3</version>
   <build>
     <defaultGoal>spring-boot:run</defaultGoal>
     <plugins>

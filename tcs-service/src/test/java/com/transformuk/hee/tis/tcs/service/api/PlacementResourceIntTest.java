@@ -2162,4 +2162,38 @@ public class PlacementResourceIntTest {
               UPDATED_PLACEMENT_WHOLE_TIME_EQUIVALENT.floatValue());
         });
   }
+
+  @Test
+  @Transactional
+  public void createPlacementWithWteGreaterThanOne() throws Exception {
+    final int databaseSizeBeforeCreate = placementDetailsRepository.findAll().size();
+
+    PlacementDetailsDTO placementDetailsDTO = createPlacementForApproval(LifecycleState.DRAFT,
+        false);
+    placementDetailsDTO.setWholeTimeEquivalent(BigDecimal.valueOf(2));
+
+    restPlacementMockMvc.perform(post("/api/placements")
+        .contentType(TestUtil.APPLICATION_JSON_UTF8)
+        .content(TestUtil.convertObjectToJsonBytes(placementDetailsDTO)))
+        .andExpect(status().isBadRequest())
+        .andExpect(jsonPath("$.fieldErrors[*].message")
+            .value("WholeTimeEquivalent should be between 0 and 1"));
+  }
+
+  @Test
+  @Transactional
+  public void createPlacementWithWteFormatNotValid() throws Exception {
+    final int databaseSizeBeforeCreate = placementDetailsRepository.findAll().size();
+
+    PlacementDetailsDTO placementDetailsDTO = createPlacementForApproval(LifecycleState.DRAFT,
+        false);
+    placementDetailsDTO.setWholeTimeEquivalent(BigDecimal.valueOf(0.001));
+
+    restPlacementMockMvc.perform(post("/api/placements")
+        .contentType(TestUtil.APPLICATION_JSON_UTF8)
+        .content(TestUtil.convertObjectToJsonBytes(placementDetailsDTO)))
+        .andExpect(status().isBadRequest())
+        .andExpect(jsonPath("$.fieldErrors[*].message")
+            .value("Format of wholeTimeEquivalent is not correct"));
+  }
 }
