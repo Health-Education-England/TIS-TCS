@@ -134,8 +134,8 @@ public class PlacementResourceIntTest {
   private static final String DEFAULT_PLACEMENT_TYPE = "OOPT";
   private static final String UPDATED_PLACEMENT_TYPE = "PWA";
 
-  private static final Float DEFAULT_PLACEMENT_WHOLE_TIME_EQUIVALENT = new Float(1);
-  private static final Float UPDATED_PLACEMENT_WHOLE_TIME_EQUIVALENT = new Float(2);
+  private static final BigDecimal DEFAULT_PLACEMENT_WHOLE_TIME_EQUIVALENT = BigDecimal.valueOf(1);
+  private static final BigDecimal UPDATED_PLACEMENT_WHOLE_TIME_EQUIVALENT = BigDecimal.valueOf(0.5);
 
   private static final String COMMENT = "Hello world!";
 
@@ -1140,7 +1140,7 @@ public class PlacementResourceIntTest {
     currentPlacement.setTraineeId(currentTrainee.getId());
     currentPlacement.setPostId(post.getId());
     currentPlacement.setPlacementType("In Post");
-    currentPlacement.setWholeTimeEquivalent(1.0F);
+    currentPlacement.setWholeTimeEquivalent(new BigDecimal(1.0));
     currentPlacement.setLifecycleState(LifecycleState.APPROVED);
     placementDetailsRepository.saveAndFlush(currentPlacement);
 

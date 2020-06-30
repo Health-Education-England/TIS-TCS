@@ -5,15 +5,18 @@ import com.transformuk.hee.tis.tcs.api.dto.validation.Update;
 import com.transformuk.hee.tis.tcs.api.enumeration.LifecycleState;
 import com.transformuk.hee.tis.tcs.api.enumeration.PlacementStatus;
 import java.io.Serializable;
+import java.math.BigDecimal;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.util.HashSet;
 import java.util.Objects;
 import java.util.Set;
 import javax.validation.constraints.DecimalMin;
+import javax.validation.constraints.Digits;
 import javax.validation.constraints.NotNull;
 import javax.validation.constraints.Null;
 import lombok.Data;
+import org.hibernate.validator.constraints.Range;
 
 @Data
 public class PlacementDetailsDTO implements Serializable {
@@ -42,7 +45,11 @@ public class PlacementDetailsDTO implements Serializable {
   @NotNull(message = "Date to is required", groups = {Update.class, Create.class})
   private LocalDate dateTo;
 
-  private Float wholeTimeEquivalent;
+  @Range(message = "WholeTimeEquivalent should be between 0 and 1", min = 0, max = 1, groups = {
+      Update.class, Create.class})
+  @Digits(message = "Format of wholeTimeEquivalent is not correct", integer = 1, fraction = 2, groups = {
+      Update.class, Create.class})
+  private BigDecimal wholeTimeEquivalent;
 
   private String siteCode;
 

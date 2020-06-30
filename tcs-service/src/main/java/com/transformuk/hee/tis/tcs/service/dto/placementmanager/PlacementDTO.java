@@ -3,6 +3,7 @@ package com.transformuk.hee.tis.tcs.service.dto.placementmanager;
 import com.transformuk.hee.tis.tcs.api.enumeration.LifecycleState;
 
 import java.io.Serializable;
+import java.math.BigDecimal;
 import java.time.LocalDate;
 import java.util.Objects;
 
@@ -11,7 +12,7 @@ public class PlacementDTO implements Serializable {
   private Long id;
   private LocalDate dateFrom;
   private LocalDate dateTo;
-  private Float wte;
+  private BigDecimal wte;
   private String type;
   private PersonDTO trainee;
   private LifecycleState lifecycleState;
@@ -40,11 +41,11 @@ public class PlacementDTO implements Serializable {
     this.dateTo = dateTo;
   }
 
-  public Float getWte() {
+  public BigDecimal getWte() {
     return wte;
   }
 
-  public void setWte(Float wte) {
+  public void setWte(BigDecimal wte) {
     this.wte = wte;
   }
 

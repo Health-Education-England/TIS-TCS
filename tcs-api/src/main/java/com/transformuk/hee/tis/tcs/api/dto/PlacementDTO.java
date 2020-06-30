@@ -5,14 +5,17 @@ import com.transformuk.hee.tis.tcs.api.dto.validation.Update;
 import com.transformuk.hee.tis.tcs.api.enumeration.LifecycleState;
 import com.transformuk.hee.tis.tcs.api.enumeration.PlacementStatus;
 import java.io.Serializable;
+import java.math.BigDecimal;
 import java.time.LocalDate;
 import java.util.HashSet;
 import java.util.Objects;
 import java.util.Set;
 import javax.validation.constraints.DecimalMin;
+import javax.validation.constraints.Digits;
 import javax.validation.constraints.NotNull;
 import javax.validation.constraints.Null;
 import lombok.Data;
+import org.hibernate.validator.constraints.Range;
 
 /**
  * A DTO for the Placement entity.
@@ -46,7 +49,11 @@ public class PlacementDTO implements Serializable {
   private LocalDate dateTo;
   @NotNull(message = "PlacementType is required", groups = {Update.class, Create.class})
   private String placementType;
-  private Float placementWholeTimeEquivalent;
+  @Range(message = "WholeTimeEquivalent should be between 0 and 1", min = 0, max = 1, groups = {
+      Update.class, Create.class})
+  @Digits(message = "Format of wholeTimeEquivalent is not correct", integer = 1, fraction = 2, groups = {
+      Update.class, Create.class})
+  private BigDecimal placementWholeTimeEquivalent;
   private String trainingDescription;
   private String localPostNumber;
   private Set<PlacementSupervisorDTO> supervisors = new HashSet<>();
@@ -64,11 +71,7 @@ public class PlacementDTO implements Serializable {
 
     final PlacementDTO placementDTO = (PlacementDTO) o;
 
-    if (!Objects.equals(id, placementDTO.id)) {
-      return false;
-    }
-
-    return true;
+    return Objects.equals(id, placementDTO.id);
   }
 
   @Override

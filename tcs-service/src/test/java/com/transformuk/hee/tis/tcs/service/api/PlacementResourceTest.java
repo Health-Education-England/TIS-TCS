@@ -63,7 +63,7 @@ public class PlacementResourceTest {
   private static final String TRAINEE_SURNAME_2 = "TRAINEE SURNAME 2";
   private static final String GMC1 = "2222222";
   private static final Long TRAINEE2_ID = 2L;
-  private static final Float WTE = 1.0F;
+  private static final BigDecimal WTE = BigDecimal.ONE;
   private MockMvc mockMvc;
 
   private PlacementResource placementResource;

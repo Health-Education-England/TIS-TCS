@@ -700,8 +700,8 @@ public class PlacementServiceImplTest {
   public void isEligibleForChangedWholeTimeEquivalentShouldReturnTrueWhenUpdatedPlacementIsEligibleForNotification() {
     LocalDate dateFiveMonthsAgo = LocalDate.now().minusMonths(5);
     Long existingPlacementId = 1L;
-    Float existingWholeTimeEquivalent = new Float(1.0);
-    Float updatedWholeTimeEquivalent = new Float(0.5);
+    BigDecimal existingWholeTimeEquivalent = new BigDecimal(1.0);
+    BigDecimal updatedWholeTimeEquivalent = new BigDecimal(0.5);
 
     Placement currentPlacement = new Placement();
     currentPlacement.setId(existingPlacementId);
