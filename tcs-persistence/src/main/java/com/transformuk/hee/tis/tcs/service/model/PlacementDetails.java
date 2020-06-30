@@ -2,6 +2,8 @@ package com.transformuk.hee.tis.tcs.service.model;
 
 import com.transformuk.hee.tis.tcs.api.enumeration.LifecycleState;
 import com.transformuk.hee.tis.tcs.api.enumeration.PlacementStatus;
+import com.transformuk.hee.tis.tcs.service.model.converter.WholeTimeEquivalentConverter;
+import java.math.BigDecimal;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.util.HashSet;
@@ -9,6 +11,7 @@ import java.util.Objects;
 import java.util.Set;
 import javax.persistence.CascadeType;
 import javax.persistence.Column;
+import javax.persistence.Convert;
 import javax.persistence.Entity;
 import javax.persistence.EnumType;
 import javax.persistence.Enumerated;
@@ -43,8 +46,9 @@ public class PlacementDetails {
 
   private LocalDate dateTo;
 
+  @Convert(converter = WholeTimeEquivalentConverter.class)
   @Column(name = "placementWholeTimeEquivalent")
-  private Float wholeTimeEquivalent;
+  private BigDecimal wholeTimeEquivalent;
 
   private Long siteId;
 

@@ -64,6 +64,7 @@ import com.transformuk.hee.tis.tcs.service.service.TrainerApprovalService;
 import com.transformuk.hee.tis.tcs.service.service.impl.PermissionService;
 import com.transformuk.hee.tis.tcs.service.service.mapper.PersonMapper;
 import com.transformuk.hee.tis.tcs.service.service.mapper.PlacementViewMapper;
+import java.math.BigDecimal;
 import java.time.LocalDateTime;
 import java.time.ZoneId;
 import java.util.ArrayList;
@@ -133,7 +134,7 @@ public class PersonResourceIntTest {
 
   private static final String DEFAULT_REGULATOR = "AAAAAAAAAA";
   private static final String UPDATED_REGULATOR = "BBBBBBBBBB";
-  private static final Float DEFAULT_PLACEMENT_WTE = new Float(0.6);
+  private static final BigDecimal DEFAULT_PLACEMENT_WTE = BigDecimal.valueOf(0.6);
 
   @Autowired
   private PersonRepository personRepository;
@@ -342,7 +343,7 @@ public class PersonResourceIntTest {
 
     // Validate the Alice in the database
     final List<Person> personList = personRepository.findAll();
-    assertThat(personList).hasSize(0);
+    assertThat(personList).isEmpty();
   }
 
   @Test
@@ -673,7 +674,7 @@ public class PersonResourceIntTest {
 
     // Validate the Person in the database
     final List<Person> personList = personRepository.findAll();
-    assertThat(personList).hasSize(0);
+    assertThat(personList).isEmpty();
   }
 
   @Test
@@ -827,7 +828,7 @@ public class PersonResourceIntTest {
 
     // Validate the database is empty
     final List<Person> personList = personRepository.findAll();
-    assertThat(personList).hasSize(0);
+    assertThat(personList).isEmpty();
   }
 
   @Test
@@ -1034,8 +1035,7 @@ public class PersonResourceIntTest {
         .andExpect(jsonPath("$.[0].messageList").isEmpty());
 
     assertThat(trainerApprovalRepository.findAll().size()).isEqualTo(trainerApprovalAmount);
-    assertThat(trainerApprovalRepository.findById(savedTrainerApproval.getId()).isPresent())
-        .isFalse();
+    assertThat(trainerApprovalRepository.findById(savedTrainerApproval.getId())).isNotPresent();
   }
 
   @Test

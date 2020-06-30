@@ -3,7 +3,9 @@ package com.transformuk.hee.tis.tcs.service.model;
 import com.transformuk.hee.tis.tcs.api.dto.PlacementSummaryDTO;
 import com.transformuk.hee.tis.tcs.api.enumeration.LifecycleState;
 import com.transformuk.hee.tis.tcs.api.enumeration.Status;
+import com.transformuk.hee.tis.tcs.service.model.converter.WholeTimeEquivalentConverter;
 import java.io.Serializable;
+import java.math.BigDecimal;
 import java.time.LocalDate;
 import java.util.HashSet;
 import java.util.Objects;
@@ -12,6 +14,7 @@ import javax.persistence.CascadeType;
 import javax.persistence.Column;
 import javax.persistence.ColumnResult;
 import javax.persistence.ConstructorResult;
+import javax.persistence.Convert;
 import javax.persistence.Entity;
 import javax.persistence.EnumType;
 import javax.persistence.Enumerated;
@@ -83,8 +86,9 @@ public class Placement implements Serializable {
   private LocalDate dateTo;
   @Column(name = "placementType")
   private String placementType;
+  @Convert(converter = WholeTimeEquivalentConverter.class)
   @Column(name = "placementWholeTimeEquivalent")
-  private Float placementWholeTimeEquivalent;
+  private BigDecimal placementWholeTimeEquivalent;
   @Column(name = "trainingDescription")
   private String trainingDescription;
   @Column(name = "localPostNumber")

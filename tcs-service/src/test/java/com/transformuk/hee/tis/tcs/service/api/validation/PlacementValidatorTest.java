@@ -47,7 +47,7 @@ public class PlacementValidatorTest {
   private static final LocalDate DEFAULT_DATE_FROM = LocalDate.ofEpochDay(0L);
   private static final LocalDate DEFAULT_DATE_TO = LocalDate.ofEpochDay(0L);
   private static final String DEFAULT_PLACEMENT_TYPE = "OOPT";
-  private static final Float DEFAULT_PLACEMENT_WHOLE_TIME_EQUIVALENT = new Float(1);
+  private static final BigDecimal DEFAULT_PLACEMENT_WHOLE_TIME_EQUIVALENT = new BigDecimal(1);
   private PlacementDetailsDTO placementDTO;
 
   @Mock
