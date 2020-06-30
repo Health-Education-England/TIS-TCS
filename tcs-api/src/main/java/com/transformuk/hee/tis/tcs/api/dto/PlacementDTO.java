@@ -49,10 +49,10 @@ public class PlacementDTO implements Serializable {
   private LocalDate dateTo;
   @NotNull(message = "PlacementType is required", groups = {Update.class, Create.class})
   private String placementType;
-  @Range(message = "WholeTimeEquivalent should be between 0 and 1", min = 0, max = 1, groups = {
-      Update.class, Create.class})
-  @Digits(message = "Format of wholeTimeEquivalent is not correct", integer = 1, fraction = 2, groups = {
-      Update.class, Create.class})
+  @Range(message = "WholeTimeEquivalent should be between 0 and 1", min = 0, max = 1,
+      groups = {Update.class, Create.class})
+  @Digits(message = "Format of wholeTimeEquivalent is not correct", integer = 1, fraction = 2,
+      groups = {Update.class, Create.class})
   private BigDecimal placementWholeTimeEquivalent;
   private String trainingDescription;
   private String localPostNumber;

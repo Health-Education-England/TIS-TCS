@@ -464,7 +464,7 @@ public class EsrNotificationServiceImplTest {
         .isEqualTo(returnedNotification.getDeaneryPostNumber());
 
     assertThat(mappedNotification.getWorkingHourIndicator())
-        .isNotEqualTo(currentPlacement.getPlacementWholeTimeEquivalent());
+        .isNotEqualTo(currentPlacement.getPlacementWholeTimeEquivalent().doubleValue());
     assertThat(mappedNotification.getWorkingHourIndicator())
         .isEqualTo(placement.getPlacementWholeTimeEquivalent().doubleValue());
 

@@ -19,8 +19,7 @@ public class WholeTimeEquivalentConverter implements AttributeConverter<BigDecim
   @Override
   public BigDecimal convertToEntityAttribute(Float dbData) {
     if (dbData != null) {
-      BigDecimal bigDecimal = BigDecimal.valueOf(dbData).setScale(2, BigDecimal.ROUND_HALF_UP);
-      return bigDecimal;
+      return BigDecimal.valueOf(dbData).setScale(2, BigDecimal.ROUND_HALF_UP);
     } else {
       return null;
     }

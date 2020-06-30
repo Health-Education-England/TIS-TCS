@@ -343,7 +343,7 @@ public class PersonResourceIntTest {
 
     // Validate the Alice in the database
     final List<Person> personList = personRepository.findAll();
-    assertThat(personList).hasSize(0);
+    assertThat(personList).isEmpty();
   }
 
   @Test
@@ -674,7 +674,7 @@ public class PersonResourceIntTest {
 
     // Validate the Person in the database
     final List<Person> personList = personRepository.findAll();
-    assertThat(personList).hasSize(0);
+    assertThat(personList).isEmpty();
   }
 
   @Test
@@ -828,7 +828,7 @@ public class PersonResourceIntTest {
 
     // Validate the database is empty
     final List<Person> personList = personRepository.findAll();
-    assertThat(personList).hasSize(0);
+    assertThat(personList).isEmpty();
   }
 
   @Test
@@ -1035,8 +1035,7 @@ public class PersonResourceIntTest {
         .andExpect(jsonPath("$.[0].messageList").isEmpty());
 
     assertThat(trainerApprovalRepository.findAll().size()).isEqualTo(trainerApprovalAmount);
-    assertThat(trainerApprovalRepository.findById(savedTrainerApproval.getId()).isPresent())
-        .isFalse();
+    assertThat(trainerApprovalRepository.findById(savedTrainerApproval.getId())).isNotPresent();
   }
 
   @Test

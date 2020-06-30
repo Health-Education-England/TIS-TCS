@@ -401,7 +401,7 @@ public class PlacementResourceIntTest {
 
     // Validate that there is no ESR notification record created
     final List<EsrNotification> esrNotifications = esrNotificationRepository.findAll();
-    assertThat(esrNotifications).hasSize(0);
+    assertThat(esrNotifications).isEmpty();
   }
 
   @Test
@@ -428,7 +428,7 @@ public class PlacementResourceIntTest {
         .andExpect(status().isCreated());
 
     final List<EsrNotification> esrNotifications = esrNotificationRepository.findAll();
-    assertThat(esrNotifications).hasSize(0);
+    assertThat(esrNotifications).isEmpty();
   }
 
   @Test
@@ -476,7 +476,7 @@ public class PlacementResourceIntTest {
 
     // Validate that there is no ESR notification record created
     final List<EsrNotification> esrNotifications = esrNotificationRepository.findAll();
-    assertThat(esrNotifications).hasSize(0);
+    assertThat(esrNotifications).isEmpty();
   }
 
 
@@ -653,7 +653,7 @@ public class PlacementResourceIntTest {
 
     // validate that no EsrNotification records are created in the database
     final List<EsrNotification> esrNotifications = esrNotificationRepository.findAll();
-    assertThat(esrNotifications).hasSize(0);
+    assertThat(esrNotifications).isEmpty();
   }
 
   @Test
@@ -736,7 +736,7 @@ public class PlacementResourceIntTest {
         .andExpect(status().isOk());
 
     final List<EsrNotification> esrNotifications = esrNotificationRepository.findAll();
-    assertThat(esrNotifications).hasSize(0);
+    assertThat(esrNotifications).isEmpty();
   }
 
   @Test
@@ -944,7 +944,7 @@ public class PlacementResourceIntTest {
 
     // validate the EsrNotification in the database
     final List<EsrNotification> esrNotifications = esrNotificationRepository.findAll();
-    assertThat(esrNotifications).hasSize(0);
+    assertThat(esrNotifications).isEmpty();
   }
 
   @Test
@@ -982,7 +982,7 @@ public class PlacementResourceIntTest {
         .andExpect(status().isOk());
 
     final List<EsrNotification> esrNotifications = esrNotificationRepository.findAll();
-    assertThat(esrNotifications).hasSize(0);
+    assertThat(esrNotifications).isEmpty();
   }
 
   @Test
@@ -1096,7 +1096,7 @@ public class PlacementResourceIntTest {
     assertThat(placementList).hasSize(databaseSizeBeforeDelete - 1);
 
     final List<EsrNotification> esrNotifications = esrNotificationRepository.findAll();
-    assertThat(esrNotifications).hasSize(0);
+    assertThat(esrNotifications).isEmpty();
   }
 
   @Test
@@ -1473,7 +1473,7 @@ public class PlacementResourceIntTest {
 
     // Validate that there is no ESR notification record created
     final List<EsrNotification> esrNotifications = esrNotificationRepository.findAll();
-    assertThat(esrNotifications).hasSize(0);
+    assertThat(esrNotifications).isEmpty();
   }
 
   @Test
@@ -1503,7 +1503,7 @@ public class PlacementResourceIntTest {
 
     // Validate that there is no ESR notification record created
     final List<EsrNotification> esrNotifications = esrNotificationRepository.findAll();
-    assertThat(esrNotifications).hasSize(0);
+    assertThat(esrNotifications).isEmpty();
   }
 
   @Test
@@ -1526,7 +1526,7 @@ public class PlacementResourceIntTest {
 
     // Validate that there is no ESR notification record created
     final List<EsrNotification> esrNotifications = esrNotificationRepository.findAll();
-    assertThat(esrNotifications).hasSize(0);
+    assertThat(esrNotifications).isEmpty();
   }
 
   @Test
@@ -1612,7 +1612,7 @@ public class PlacementResourceIntTest {
 
     // validate that no EsrNotification records are created in the database
     final List<EsrNotification> esrNotifications = esrNotificationRepository.findAll();
-    assertThat(esrNotifications).hasSize(0);
+    assertThat(esrNotifications).isEmpty();
   }
 
   @Test
@@ -1641,7 +1641,7 @@ public class PlacementResourceIntTest {
 
     // validate that no EsrNotification records are created in the database
     final List<EsrNotification> esrNotifications = esrNotificationRepository.findAll();
-    assertThat(esrNotifications).hasSize(0);
+    assertThat(esrNotifications).isEmpty();
   }
 
   @Test
@@ -1670,7 +1670,7 @@ public class PlacementResourceIntTest {
 
     // validate that no EsrNotification records are created in the database
     final List<EsrNotification> esrNotifications = esrNotificationRepository.findAll();
-    assertThat(esrNotifications).hasSize(0);
+    assertThat(esrNotifications).isEmpty();
   }
 
   @Test
@@ -1699,7 +1699,7 @@ public class PlacementResourceIntTest {
 
     // validate that no EsrNotification records are created in the database
     final List<EsrNotification> esrNotifications = esrNotificationRepository.findAll();
-    assertThat(esrNotifications).hasSize(0);
+    assertThat(esrNotifications).isEmpty();
   }
 
   @Test
@@ -1727,7 +1727,7 @@ public class PlacementResourceIntTest {
 
     // validate that no EsrNotification records are created in the database
     final List<EsrNotification> esrNotifications = esrNotificationRepository.findAll();
-    assertThat(esrNotifications).hasSize(0);
+    assertThat(esrNotifications).isEmpty();
   }
 
   @Test
