@@ -18,7 +18,7 @@ public interface PlacementLogRepository extends JpaRepository<PlacementLog, Long
   @Query(value =
       "SELECT * FROM PlacementLog WHERE placementId = :placementId AND validDateTo IS NULL"
       , nativeQuery = true)
-  Optional<PlacementLog> findLatestLogOfCurrentPlacement(
+  List<PlacementLog> findLatestLogOfCurrentPlacement(
       @Param("placementId") Long placementId);
 
   @Query(value =

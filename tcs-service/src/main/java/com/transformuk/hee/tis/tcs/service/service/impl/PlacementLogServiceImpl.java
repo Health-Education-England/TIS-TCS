@@ -5,6 +5,7 @@ import com.transformuk.hee.tis.tcs.service.model.PlacementDetails;
 import com.transformuk.hee.tis.tcs.service.model.PlacementLog;
 import com.transformuk.hee.tis.tcs.service.repository.PlacementLogRepository;
 import com.transformuk.hee.tis.tcs.service.service.PlacementLogService;
+import java.util.List;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.stereotype.Service;
@@ -44,17 +45,18 @@ public class PlacementLogServiceImpl implements PlacementLogService {
 
   @Override
   public Optional<PlacementLog> getLatestLogOfCurrentApprovedPlacement(Long placementId) {
-    Optional<PlacementLog> optionalPreLog = placementLogRepository.findLatestLogOfCurrentApprovedPlacement(placementId);
+    Optional<PlacementLog> optionalPreLog = placementLogRepository
+        .findLatestLogOfCurrentApprovedPlacement(placementId);
     return optionalPreLog;
   }
 
   private void updatePreviousLogForPlacementId(Long placementId) {
-    Optional<PlacementLog> optionalPreviousLog = placementLogRepository.findLatestLogOfCurrentPlacement(placementId);
-    if (optionalPreviousLog.isPresent()) {
-      PlacementLog previousLog = optionalPreviousLog.get();
-      previousLog.setValidDateTo(LocalDateTime.now(clock));
-      PlacementLog updatedPreLog = placementLogRepository.save(previousLog);
-    }
+    List<PlacementLog> previousLogs = placementLogRepository.findLatestLogOfCurrentPlacement(placementId);
+    LocalDateTime now = LocalDateTime.now(clock);
+    previousLogs.forEach(placementLog -> {
+      placementLog.setValidDateTo(now);
+      placementLogRepository.save(placementLog);
+    });
   }
 
   private PlacementLog buildPlacementLog(PlacementDetails placementDetails,
@@ -72,8 +74,9 @@ public class PlacementLogServiceImpl implements PlacementLogService {
 
   @Override
   public void addLogForExistingPlacement(PlacementDetails existingPlacementDetails) {
-    Optional<PlacementLog> optionalPreLog = placementLogRepository.findLatestLogOfCurrentPlacement(existingPlacementDetails.getId());
-    if (!optionalPreLog.isPresent()) {
+    List<PlacementLog> preLogs = placementLogRepository
+        .findLatestLogOfCurrentPlacement(existingPlacementDetails.getId());
+    if (preLogs.isEmpty()) {
       PlacementLog placementLog = buildPlacementLog(existingPlacementDetails, null);
       placementLogRepository.save(placementLog);
     }
