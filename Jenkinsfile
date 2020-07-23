@@ -90,34 +90,6 @@ node {
 
           milestone 3
 
-          stage('Development') {
-            node {
-              println "[Jenkinsfile INFO] Development Deploy starting..."
-
-              sh "ansible-playbook -i $env.DEVOPS_BASE/ansible/inventory/dev $env.DEVOPS_BASE/ansible/${service}.yml --extra-vars=\"{\'versions\': {\'${service}\': \'${env.GIT_COMMIT}\'}}\""
-
-            }
-          }
-         stage('Health check on Development') {
-            withEnv(["endpoint=${healthcheckEndpoint}"]) {
-              def counter = 0;
-              def httpStatus = "";
-              while(counter < 20){
-                println "Counter: "+counter;
-                try{
-                  httpStatus=sh(returnStdout: true, script: 'sleep 15; curl -m 300 -s -o /dev/null -w "%{http_code}" 10.150.0.137:8093${endpoint}').trim()
-                  break;
-                } catch (hudson.AbortException ae){
-                  counter ++;
-                }
-              }
-              if("200" == "${httpStatus}")  println "Status is 200"
-                else  throw new Exception("health check failed on DEV with http status: $httpStatus")
-            }
-          }
-
-          milestone 4
-
           stage('Staging') {
             node {
               println "[Jenkinsfile INFO] Stage Deploy starting..."
@@ -144,7 +116,7 @@ node {
           }
 
 
-          milestone 5
+          milestone 4
 
           stage('Approval') {
             timeout(time:5, unit:'HOURS') {
@@ -152,7 +124,7 @@ node {
             }
           }
 
-          milestone 6
+          milestone 5
 
           stage('Production') {
             node {
