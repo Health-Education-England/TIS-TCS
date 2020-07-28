@@ -1,5 +1,6 @@
 package com.transformuk.hee.tis.tcs.service.api;
 
+import static com.transformuk.hee.tis.tcs.api.enumeration.LifecycleState.APPROVED;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.hamcrest.Matchers.containsInAnyOrder;
 import static org.hamcrest.Matchers.hasItem;
@@ -87,6 +88,7 @@ import org.springframework.http.MediaType;
 import org.springframework.http.converter.json.MappingJackson2HttpMessageConverter;
 import org.springframework.test.context.junit4.SpringRunner;
 import org.springframework.test.web.servlet.MockMvc;
+import org.springframework.test.web.servlet.MvcResult;
 import org.springframework.test.web.servlet.setup.MockMvcBuilders;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -604,6 +606,25 @@ public class PersonResourceIntTest {
         .andExpect(status().isOk())
         .andExpect(content().contentType(MediaType.APPLICATION_JSON_UTF8_VALUE))
         .andExpect(jsonPath("$.[0].placementWholeTimeEquivalent").value(DEFAULT_PLACEMENT_WTE));
+  }
+
+  @Test
+  @Transactional
+  public void shouldGetPlacementViewFields() throws Exception {
+    // Given a person with one placement
+    personRepository.saveAndFlush(person);
+    Placement placement = PlacementResourceIntTest.createPlacementEntity();
+    placement.setTrainee(person);
+    placement.setPlacementWholeTimeEquivalent(DEFAULT_PLACEMENT_WTE);
+    placement.setLifecycleState(APPROVED);
+    placementRepository.saveAndFlush(placement);
+
+    restPersonMockMvc
+        .perform(get("/api/people/{id}/placements", person.getId()))
+        .andExpect(status().isOk())
+        .andExpect(content().contentType(MediaType.APPLICATION_JSON_UTF8_VALUE))
+        .andExpect(jsonPath("$.[0].lifecycleState").value(APPROVED.name()))
+        .andReturn();
   }
 
   @Test

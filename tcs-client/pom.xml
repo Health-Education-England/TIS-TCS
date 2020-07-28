@@ -6,6 +6,8 @@
 
   <groupId>com.transformuk.hee.tis</groupId>
   <artifactId>tcs-client</artifactId>
+  <version>5.5.5</version>
+  <packaging>jar</packaging>
   <dependencies>
     <dependency>
       <groupId>com.transformuk.hee</groupId>
@@ -35,7 +37,7 @@
     <dependency>
       <groupId>com.transformuk.hee.tis</groupId>
       <artifactId>tcs-api</artifactId>
-      <version>6.6.3</version>
+      <version>6.6.4</version>
     </dependency>
     <dependency>
       <groupId>com.transformuk.hee</groupId>
@@ -70,8 +72,7 @@
       <scope>test</scope>
     </dependency>
   </dependencies>
-  <version>5.5.4</version>
-  <packaging>jar</packaging>
+
 
   <properties>
     <java.version>1.8</java.version>

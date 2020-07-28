@@ -1,10 +1,14 @@
 package com.transformuk.hee.tis.tcs.service.model;
 
+import com.transformuk.hee.tis.tcs.api.enumeration.LifecycleState;
 import com.transformuk.hee.tis.tcs.api.enumeration.PlacementStatus;
 import java.io.Serializable;
 import java.time.LocalDate;
+import java.util.Objects;
 import javax.persistence.Column;
 import javax.persistence.Entity;
+import javax.persistence.EnumType;
+import javax.persistence.Enumerated;
 import javax.persistence.GeneratedValue;
 import javax.persistence.GenerationType;
 import javax.persistence.Id;
@@ -54,6 +58,9 @@ public class PlacementView implements Serializable {
 
   @Column(name = "placementType")
   private String placementType;
+
+  @Enumerated(EnumType.STRING)
+  private LifecycleState lifecycleState;
 
   /**
    * @return the placement status based on dateFrom and dateTo
@@ -114,8 +121,10 @@ public class PlacementView implements Serializable {
     if (dateTo != null ? !dateTo.equals(that.dateTo) : that.dateTo != null) {
       return false;
     }
-    return placementType != null ? placementType.equals(that.placementType)
-        : that.placementType == null;
+    if (lifecycleState != null ? lifecycleState != that.lifecycleState : that.lifecycleState != null) {
+      return false;
+    }
+    return Objects.equals(placementType, that.placementType);
   }
 
   @Override
@@ -131,6 +140,7 @@ public class PlacementView implements Serializable {
     result = 31 * result + (dateFrom != null ? dateFrom.hashCode() : 0);
     result = 31 * result + (dateTo != null ? dateTo.hashCode() : 0);
     result = 31 * result + (placementType != null ? placementType.hashCode() : 0);
+    result = 31 * result + (lifecycleState != null ? lifecycleState.hashCode() : 0);
     return result;
   }
 }

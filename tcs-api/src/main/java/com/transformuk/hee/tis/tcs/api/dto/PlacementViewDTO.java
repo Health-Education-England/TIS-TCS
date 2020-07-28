@@ -1,5 +1,6 @@
 package com.transformuk.hee.tis.tcs.api.dto;
 
+import com.transformuk.hee.tis.tcs.api.enumeration.LifecycleState;
 import com.transformuk.hee.tis.tcs.api.enumeration.PlacementStatus;
 import java.io.Serializable;
 import java.time.LocalDate;
@@ -44,6 +45,8 @@ public class PlacementViewDTO implements Serializable {
   private LocalDate dateTo;
 
   private String placementType;
+
+  private LifecycleState lifecycleState;
 
   @Override
   public boolean equals(Object o) {
@@ -102,6 +105,9 @@ public class PlacementViewDTO implements Serializable {
     if (dateTo != null ? !dateTo.equals(that.dateTo) : that.dateTo != null) {
       return false;
     }
+    if (lifecycleState != null ? lifecycleState != that.lifecycleState : that.lifecycleState != null) {
+      return false;
+    }
     return placementType != null ? placementType.equals(that.placementType)
         : that.placementType == null;
   }
@@ -123,6 +129,7 @@ public class PlacementViewDTO implements Serializable {
     result = 31 * result + (dateFrom != null ? dateFrom.hashCode() : 0);
     result = 31 * result + (dateTo != null ? dateTo.hashCode() : 0);
     result = 31 * result + (placementType != null ? placementType.hashCode() : 0);
+    result = 31 * result + (lifecycleState != null ? lifecycleState.hashCode() : 0);
     return result;
   }
 }
