@@ -105,7 +105,8 @@ public class PlacementViewDTO implements Serializable {
     if (dateTo != null ? !dateTo.equals(that.dateTo) : that.dateTo != null) {
       return false;
     }
-    if (lifecycleState != null ? lifecycleState != that.lifecycleState : that.lifecycleState != null) {
+    if (lifecycleState != null ? lifecycleState != that.lifecycleState
+        : that.lifecycleState != null) {
       return false;
     }
     return placementType != null ? placementType.equals(that.placementType)

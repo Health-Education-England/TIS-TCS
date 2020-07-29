@@ -121,7 +121,8 @@ public class PlacementView implements Serializable {
     if (dateTo != null ? !dateTo.equals(that.dateTo) : that.dateTo != null) {
       return false;
     }
-    if (lifecycleState != null ? lifecycleState != that.lifecycleState : that.lifecycleState != null) {
+    if (lifecycleState != null ? lifecycleState != that.lifecycleState
+        : that.lifecycleState != null) {
       return false;
     }
     return Objects.equals(placementType, that.placementType);
