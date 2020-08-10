@@ -79,8 +79,7 @@ node {
           sh "cp ./tcs-service/target/tcs-service-*.war ./tcs-service/target/app.jar"
 
           def dockerImageName = "tcs"
-          def containerRegistryLocaltion = "heetiscontainerregistry.azurecr.io"
-          def awsContainerRegistryLocaltion = "430723991443.dkr.ecr.eu-west-2.amazonaws.com"
+          def containerRegistryLocaltion = "430723991443.dkr.ecr.eu-west-2.amazonaws.com"
 
           // log into aws docker
           sh "aws ecr get-login-password --region eu-west-2 | docker login --username AWS --password-stdin 430723991443.dkr.ecr.eu-west-2.amazonaws.com"
@@ -91,15 +90,8 @@ node {
           sh "docker tag ${containerRegistryLocaltion}/${dockerImageName}:$buildVersion heetiscontainerregistry.azurecr.io/tcs:latest"
           sh "docker push ${containerRegistryLocaltion}/${dockerImageName}:latest"
 
-          sh "docker tag ${containerRegistryLocaltion}/${dockerImageName}:${buildVersion} ${awsContainerRegistryLocaltion}/${dockerImageName}:${buildVersion}"
-          sh "docker tag ${containerRegistryLocaltion}/${dockerImageName}:${buildVersion} ${awsContainerRegistryLocaltion}/${dockerImageName}:latest"
-          sh "docker push ${awsContainerRegistryLocaltion}/${dockerImageName}:${buildVersion}"
-          sh "docker push ${awsContainerRegistryLocaltion}/${dockerImageName}:latest"
-
           sh "docker rmi ${containerRegistryLocaltion}/${dockerImageName}:latest"
           sh "docker rmi ${containerRegistryLocaltion}/${dockerImageName}:$buildVersion"
-          sh "docker rmi ${awsContainerRegistryLocaltion}/${dockerImageName}:${buildVersion}"
-          sh "docker rmi ${awsContainerRegistryLocaltion}/${dockerImageName}:latest"
 
           println "[Jenkinsfile INFO] Stage Dockerize completed..."
         }
