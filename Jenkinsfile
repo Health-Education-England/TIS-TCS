@@ -87,7 +87,7 @@ node {
           sh "docker build -t ${containerRegistryLocaltion}/${dockerImageName}:$buildVersion -f ./tcs-service/Dockerfile ./tcs-service"
           sh "docker push ${containerRegistryLocaltion}/${dockerImageName}:$buildVersion"
 
-          sh "docker tag ${containerRegistryLocaltion}/${dockerImageName}:$buildVersion heetiscontainerregistry.azurecr.io/tcs:latest"
+          sh "docker tag ${containerRegistryLocaltion}/${dockerImageName}:$buildVersion ${containerRegistryLocaltion}/tcs:latest"
           sh "docker push ${containerRegistryLocaltion}/${dockerImageName}:latest"
 
           sh "docker rmi ${containerRegistryLocaltion}/${dockerImageName}:latest"
