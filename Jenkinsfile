@@ -77,13 +77,29 @@ node {
           //urghhh
           sh "mvn package -DskipTests"
           sh "cp ./tcs-service/target/tcs-service-*.war ./tcs-service/target/app.jar"
-          sh "docker build -t heetiscontainerregistry.azurecr.io/tcs:$buildVersion -f ./tcs-service/Dockerfile ./tcs-service"
-          sh "docker push heetiscontainerregistry.azurecr.io/tcs:$buildVersion"
 
-          sh "docker tag heetiscontainerregistry.azurecr.io/tcs:$buildVersion heetiscontainerregistry.azurecr.io/tcs:latest"
-          sh "docker push heetiscontainerregistry.azurecr.io/tcs:latest"
-          sh "docker rmi heetiscontainerregistry.azurecr.io/tcs:latest"
-          sh "docker rmi heetiscontainerregistry.azurecr.io/tcs:$buildVersion"
+          def dockerImageName = "tcs"
+          def containerRegistryLocaltion = "heetiscontainerregistry.azurecr.io"
+          def awsContainerRegistryLocaltion = "430723991443.dkr.ecr.eu-west-2.amazonaws.com"
+
+          // log into aws docker
+          sh "aws ecr get-login-password --region eu-west-2 | docker login --username AWS --password-stdin 430723991443.dkr.ecr.eu-west-2.amazonaws.com"
+
+          sh "docker build -t ${containerRegistryLocaltion}/${dockerImageName}:$buildVersion -f ./tcs-service/Dockerfile ./tcs-service"
+          sh "docker push ${containerRegistryLocaltion}/${dockerImageName}:$buildVersion"
+
+          sh "docker tag ${containerRegistryLocaltion}/${dockerImageName}:$buildVersion heetiscontainerregistry.azurecr.io/tcs:latest"
+          sh "docker push ${containerRegistryLocaltion}/${dockerImageName}:latest"
+
+          sh "docker tag ${containerRegistryLocaltion}/${dockerImageName}:${buildVersion} ${awsContainerRegistryLocaltion}/${dockerImageName}:${buildVersion}"
+          sh "docker tag ${containerRegistryLocaltion}/${dockerImageName}:${buildVersion} ${awsContainerRegistryLocaltion}/${dockerImageName}:latest"
+          sh "docker push ${awsContainerRegistryLocaltion}/${dockerImageName}:${buildVersion}"
+          sh "docker push ${awsContainerRegistryLocaltion}/${dockerImageName}:latest"
+
+          sh "docker rmi ${containerRegistryLocaltion}/${dockerImageName}:latest"
+          sh "docker rmi ${containerRegistryLocaltion}/${dockerImageName}:$buildVersion"
+          sh "docker rmi ${awsContainerRegistryLocaltion}/${dockerImageName}:${buildVersion}"
+          sh "docker rmi ${awsContainerRegistryLocaltion}/${dockerImageName}:latest"
 
           println "[Jenkinsfile INFO] Stage Dockerize completed..."
         }
