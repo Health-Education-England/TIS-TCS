@@ -4,6 +4,7 @@ import static java.util.Arrays.asList;
 
 import com.transformuk.hee.tis.reference.api.dto.GradeDTO;
 import com.transformuk.hee.tis.reference.client.ReferenceService;
+import com.transformuk.hee.tis.tcs.api.dto.ConnectionRecordDto;
 import com.transformuk.hee.tis.tcs.api.dto.ContactDetailsDTO;
 import com.transformuk.hee.tis.tcs.api.dto.RevalidationRecordDto;
 import com.transformuk.hee.tis.tcs.service.model.GmcDetails;
@@ -17,6 +18,7 @@ import com.transformuk.hee.tis.tcs.service.service.RevalidationService;
 import java.time.LocalDate;
 import java.util.ArrayList;
 import java.util.Collections;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.stream.Collectors;
@@ -105,5 +107,37 @@ public class RevalidationServiceImpl implements RevalidationService {
     }
 
     return revalidationRecordDto;
+  }
+
+  public Map<String, ConnectionRecordDto> findAllConnectionsByGmcIds(List<String> gmcIds) {
+    LOG.debug("GMCNo received from Connection service: {}", gmcIds);
+    List<GmcDetails> gmcDetails = gmcDetailsRepository.findByGmcNumberIn(gmcIds);
+    Map<String, ConnectionRecordDto> connectionRecordDtoMap = new HashMap<>();
+    gmcDetails.forEach(gmcDetail -> {
+      ConnectionRecordDto connectionRecordDto = new ConnectionRecordDto();
+      final long personId = gmcDetail.getId();
+      LOG.debug("Person ID : {}", personId);
+
+      ProgrammeMembership programmeMembership = programmeMembershipRepository
+          .findLatestProgrammeMembershipByTraineeId(personId);
+      String owner = programmeMembership.getProgramme().getOwner();
+      connectionRecordDto.setProgrammeOwner(owner);
+      LocalDate pmStartDate = programmeMembership.getProgrammeStartDate();
+      LOG.debug("Programme Membership Start Date: {}", pmStartDate);
+
+      LocalDate pmEndDate = programmeMembership.getProgrammeEndDate();
+      LOG.debug("Programme Membership End Date : {}", pmEndDate);
+
+      if (pmStartDate != null && pmEndDate.isAfter(LocalDate.now())) {
+        connectionRecordDto.setConnectionStatus("Yes");
+      } else {
+        connectionRecordDto.setConnectionStatus("No");
+      }
+      connectionRecordDto.setProgrammeMembershipStartDate(pmStartDate);
+      connectionRecordDto.setProgrammeMembershipEndDate(pmEndDate);
+
+      connectionRecordDtoMap.put(gmcDetail.getGmcNumber(), connectionRecordDto);
+    });
+    return connectionRecordDtoMap;
   }
 }
