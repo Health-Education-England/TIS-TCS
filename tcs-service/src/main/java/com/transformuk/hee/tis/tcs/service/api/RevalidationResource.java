@@ -1,5 +1,6 @@
 package com.transformuk.hee.tis.tcs.service.api;
 
+import com.transformuk.hee.tis.tcs.api.dto.ConnectionRecordDto;
 import com.transformuk.hee.tis.tcs.api.dto.RevalidationRecordDto;
 import com.transformuk.hee.tis.tcs.service.api.util.UrlDecoderUtil;
 import com.transformuk.hee.tis.tcs.service.service.RevalidationService;
@@ -47,5 +48,19 @@ public class RevalidationResource {
       @PathVariable String gmcId) {
     LOG.debug("REST request to find Revalidation Record: {}", gmcId);
     return ResponseEntity.ok(revalidationService.findRevalidationByGmcId(gmcId));
+  }
+
+  @GetMapping("/revalidation/connection/{gmcIds}")
+  @PreAuthorize("hasPermission('tis:people::person:', 'View')")
+  public ResponseEntity<Map<String, ConnectionRecordDto>> getConnectionRecords(
+      @PathVariable List<String> gmcIds) {
+    LOG.debug("REST request to find Revalidation Connection Records: {}", gmcIds);
+
+    if (!gmcIds.isEmpty()) {
+      UrlDecoderUtil.decode(gmcIds);
+      return ResponseEntity.ok(revalidationService.findAllConnectionsByGmcIds(gmcIds));
+    } else {
+      return ResponseEntity.badRequest().body(Collections.emptyMap());
+    }
   }
 }

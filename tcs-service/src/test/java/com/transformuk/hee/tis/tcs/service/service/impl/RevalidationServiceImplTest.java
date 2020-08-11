@@ -8,6 +8,7 @@ import static org.mockito.Mockito.when;
 
 import com.transformuk.hee.tis.reference.api.dto.GradeDTO;
 import com.transformuk.hee.tis.reference.client.ReferenceService;
+import com.transformuk.hee.tis.tcs.api.dto.ConnectionRecordDto;
 import com.transformuk.hee.tis.tcs.api.dto.ContactDetailsDTO;
 import com.transformuk.hee.tis.tcs.api.dto.RevalidationRecordDto;
 import com.transformuk.hee.tis.tcs.api.enumeration.ProgrammeMembershipType;
@@ -47,13 +48,18 @@ public class RevalidationServiceImplTest {
   private static final ProgrammeMembershipType PROGRAMME_MEMBERSHIP_TYPE =
       ProgrammeMembershipType.SUBSTANTIVE;
   private static final String PROGRAMME_NAME = "Corona Medicine";
+  private static final String PROGRAMME_OWNER = "Health Education England Yorkshire and the Humber";
   private static final String CURRENT_GRADE = "GP Specialty Training";
+  private static final String CONNECTION_STATUS = "Yes";
+  private static final LocalDate PM_START_DATE = LocalDate.now();
+  private static final LocalDate PM_END_DATE = LocalDate.now().plusDays(10);
+
   GradeDTO gradeDTO;
   List<GradeDTO> grades;
   private GmcDetails gmcDetails;
   List<GmcDetails> gmcDetailList;
   List<Placement> currentPlacementsForTrainee;
-  private ProgrammeMembership programmeMembership;
+  private ProgrammeMembership programmeMembership, programmeMembership1;
   @Mock
   private ContactDetailsService contactDetailsService;
   @Mock
@@ -80,10 +86,15 @@ public class RevalidationServiceImplTest {
     programmeMembership = new ProgrammeMembership();
     programmeMembership.setProgrammeEndDate(CCT_DATE);
     programmeMembership.setProgrammeMembershipType(PROGRAMME_MEMBERSHIP_TYPE);
+    programmeMembership1 = new ProgrammeMembership();
+    programmeMembership1.setProgrammeStartDate(PM_START_DATE);
+    programmeMembership1.setProgrammeEndDate(PM_END_DATE);
 
     Programme programme = new Programme();
     programme.setProgrammeName(PROGRAMME_NAME);
+    programme.setOwner(PROGRAMME_OWNER);
     programmeMembership.setProgramme(programme);
+    programmeMembership1.setProgramme(programme);
     Placement placement = new Placement();
     placement.setId(PLACEMENT_ID);
     placement.setGradeId(GRADE_ID);
@@ -141,5 +152,53 @@ public class RevalidationServiceImplTest {
     assertThat(record.getProgrammeMembershipType(), is(PROGRAMME_MEMBERSHIP_TYPE.toString()));
     assertThat(record.getProgrammeName(), is(PROGRAMME_NAME));
     assertThat(record.getCurrentGrade(), is(CURRENT_GRADE));
+  }
+
+  @Test
+  public void findAllConnectionRecordsByGmcIdsShouldRetrieveAll() {
+    when(gmcDetailsRepositoryMock.findByGmcNumberIn(GMC_IDS)).thenReturn(gmcDetailList);
+    when(programmeMembershipRepositoryMock.findLatestProgrammeMembershipByTraineeId(PERSON_ID))
+        .thenReturn(programmeMembership1);
+
+    Map<String, ConnectionRecordDto> result = testObj.findAllConnectionsByGmcIds(GMC_IDS);
+
+    assertThat(result, notNullValue());
+    assertThat(result.size(), is(1));
+
+    ConnectionRecordDto record = result.get("1000");
+    assertThat(record.getProgrammeOwner(), is(PROGRAMME_OWNER));
+    assertThat(record.getConnectionStatus(), is(CONNECTION_STATUS));
+    assertThat(record.getProgrammeMembershipStartDate(), is(PM_START_DATE));
+    assertThat(record.getProgrammeMembershipEndDate(), is(PM_END_DATE));
+  }
+
+  @Test
+  public void connectionStatusMustBeYesIfProgrammeStartDateIsTodayOrOlder() {
+    when(gmcDetailsRepositoryMock.findByGmcNumberIn(GMC_IDS)).thenReturn(gmcDetailList);
+    programmeMembership1.setProgrammeStartDate(PM_START_DATE.plusDays(1));
+    when(programmeMembershipRepositoryMock.findLatestProgrammeMembershipByTraineeId(PERSON_ID))
+        .thenReturn(programmeMembership1);
+    Map<String, ConnectionRecordDto> result = testObj.findAllConnectionsByGmcIds(GMC_IDS);
+    assertThat(result, notNullValue());
+    assertThat(result.size(), is(1));
+    ConnectionRecordDto record = result.get("1000");
+    //programme membership start date is tomorrow so the status is No
+    assertThat(record.getConnectionStatus(), is("No"));
+
+  }
+
+  @Test
+  public void connectionStatusMustBeYesIfProgrammeStartDateIsTodayOrOlderAndEndDateIsTomorrow() {
+    when(gmcDetailsRepositoryMock.findByGmcNumberIn(GMC_IDS)).thenReturn(gmcDetailList);
+    programmeMembership1.setProgrammeStartDate(PM_START_DATE.minusDays(1));
+    programmeMembership1.setProgrammeEndDate(LocalDate.now().plusDays(1));
+    when(programmeMembershipRepositoryMock.findLatestProgrammeMembershipByTraineeId(PERSON_ID))
+        .thenReturn(programmeMembership1);
+    Map<String, ConnectionRecordDto> result = testObj.findAllConnectionsByGmcIds(GMC_IDS);
+    assertThat(result, notNullValue());
+    assertThat(result.size(), is(1));
+    ConnectionRecordDto record = result.get("1000");
+    assertThat(record.getConnectionStatus(), is(CONNECTION_STATUS));
+
   }
 }

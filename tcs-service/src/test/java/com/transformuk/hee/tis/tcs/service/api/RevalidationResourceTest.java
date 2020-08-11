@@ -12,6 +12,7 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule;
+import com.transformuk.hee.tis.tcs.api.dto.ConnectionRecordDto;
 import com.transformuk.hee.tis.tcs.api.dto.RevalidationRecordDto;
 import com.transformuk.hee.tis.tcs.service.service.impl.RevalidationServiceImpl;
 import java.time.LocalDate;
@@ -42,6 +43,10 @@ public class RevalidationResourceTest {
   private static final String PROGRAMME_MEMBERSHIP_TYPE = "Substantive";
   private static final String PROGRAMME_NAME = "Clinical Radiology";
   private static final String CURRENT_GRADE = "Foundation Year 2";
+  private static final String PROGRAMME_OWNER = "Health Education England Yorkshire and the Humber";
+  private static final String CONNECTION_STATUS = "Yes";
+  private static final LocalDate PM_START_DATE = LocalDate.now();
+  private static final LocalDate PM_END_DATE = LocalDate.now().plusDays(10);
 
   private MockMvc restRevalidationMock;
 
@@ -58,6 +63,15 @@ public class RevalidationResourceTest {
     recordDto.setProgrammeMembershipType(PROGRAMME_MEMBERSHIP_TYPE);
     recordDto.setProgrammeName(PROGRAMME_NAME);
     recordDto.setCurrentGrade(CURRENT_GRADE);
+    return recordDto;
+  }
+
+  private ConnectionRecordDto createConnectionRecordDto(final String gmcId) {
+    final ConnectionRecordDto recordDto = new ConnectionRecordDto();
+    recordDto.setProgrammeOwner(PROGRAMME_OWNER);
+    recordDto.setConnectionStatus(CONNECTION_STATUS);
+    recordDto.setProgrammeMembershipStartDate(PM_START_DATE);
+    recordDto.setProgrammeMembershipEndDate(PM_END_DATE);
     return recordDto;
   }
 
@@ -134,6 +148,43 @@ public class RevalidationResourceTest {
       assertThat(revalidationRecordDto.getProgrammeMembershipType(), is(PROGRAMME_MEMBERSHIP_TYPE));
       assertThat(revalidationRecordDto.getProgrammeName(), is(PROGRAMME_NAME));
       assertThat(revalidationRecordDto.getCurrentGrade(), is(CURRENT_GRADE));
+    });
+  }
+
+  @Test
+  public void shouldFindConnectionRecordsFromListOfGmcIds() throws Exception {
+    final List<String> gmcIds = Arrays.asList(GMC_ID1, GMC_ID2, GMC_ID3);
+    final Map<String, ConnectionRecordDto> connectionRecordDtoMap = new HashMap<>();
+
+    connectionRecordDtoMap.put(GMC_ID1, createConnectionRecordDto(GMC_ID1));
+    connectionRecordDtoMap.put(GMC_ID2, createConnectionRecordDto(GMC_ID2));
+    connectionRecordDtoMap.put(GMC_ID3, createConnectionRecordDto(GMC_ID3));
+
+    when(revalidationServiceImplMock.findAllConnectionsByGmcIds(gmcIds))
+        .thenReturn(connectionRecordDtoMap);
+    final String gmcId = String.join(",", gmcIds);
+    MvcResult result =
+        restRevalidationMock.perform(get("/api/revalidation/connection/{gmcIds}", gmcId))
+            .andExpect(status().isOk())
+            .andExpect(content().contentType(MediaType.APPLICATION_JSON_UTF8))
+            .andReturn();
+    MockHttpServletResponse response = result.getResponse();
+
+    final String content = response.getContentAsString();
+    final TypeReference<HashMap<String, ConnectionRecordDto>> typeRef
+        = new TypeReference<HashMap<String, ConnectionRecordDto>>() {
+    };
+    final Map<String, ConnectionRecordDto> map = mapper.readValue(content, typeRef);
+
+    assertThat(result, notNullValue());
+    assertThat(map.size(), is(3));
+
+    gmcIds.forEach(id -> {
+      ConnectionRecordDto connectionRecordDto = map.get(id);
+      assertThat(connectionRecordDto.getProgrammeOwner(), is(PROGRAMME_OWNER));
+      assertThat(connectionRecordDto.getConnectionStatus(), is(CONNECTION_STATUS));
+      assertThat(connectionRecordDto.getProgrammeMembershipStartDate(), is(PM_START_DATE));
+      assertThat(connectionRecordDto.getProgrammeMembershipEndDate(), is(PM_END_DATE));
     });
   }
 }
