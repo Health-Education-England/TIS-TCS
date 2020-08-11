@@ -128,7 +128,9 @@ public class RevalidationServiceImpl implements RevalidationService {
       LocalDate pmEndDate = programmeMembership.getProgrammeEndDate();
       LOG.debug("Programme Membership End Date : {}", pmEndDate);
 
-      if (pmStartDate != null && pmEndDate.isAfter(LocalDate.now())) {
+      LocalDate currentTime = LocalDate.now();
+      if (pmStartDate != null && !(pmStartDate.isAfter(currentTime)) && pmEndDate
+          .isAfter(currentTime)) {
         connectionRecordDto.setConnectionStatus("Yes");
       } else {
         connectionRecordDto.setConnectionStatus("No");
