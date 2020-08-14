@@ -1,5 +1,6 @@
 package com.transformuk.hee.tis.tcs.service.service.impl;
 
+import static java.time.LocalDate.now;
 import static java.util.Arrays.asList;
 
 import com.transformuk.hee.tis.reference.api.dto.GradeDTO;
@@ -21,6 +22,7 @@ import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Objects;
 import java.util.stream.Collectors;
 import javax.transaction.Transactional;
 import org.apache.commons.collections4.CollectionUtils;
@@ -71,6 +73,53 @@ public class RevalidationServiceImpl implements RevalidationService {
         .collect(Collectors.toMap(RevalidationRecordDto::getGmcNumber, dto -> dto));
   }
 
+  @Override
+  public Map<String, ConnectionRecordDto> findAllConnectionsByGmcIds(List<String> gmcIds) {
+    LOG.debug("GMCNo received from Connection service: {}", gmcIds);
+    final List<GmcDetails> gmcDetails = gmcDetailsRepository.findByGmcNumberIn(gmcIds);
+    final Map<String, ConnectionRecordDto> connectionRecordDtoMap = new HashMap<>();
+    gmcDetails.forEach(gmcDetail -> {
+
+      final ProgrammeMembership programmeMembership = programmeMembershipRepository
+          .findLatestProgrammeMembershipByTraineeId(gmcDetail.getId());
+      LOG.info("Programe membership found for person: {}, membership: {}", gmcDetail.getId(),
+          programmeMembership);
+
+      final ConnectionRecordDto connectionRecordDto = getConnectionStatus(programmeMembership);
+      connectionRecordDtoMap.put(gmcDetail.getGmcNumber(), connectionRecordDto);
+    });
+    return connectionRecordDtoMap;
+  }
+
+  private ConnectionRecordDto getConnectionStatus(final ProgrammeMembership programmeMembership) {
+    final ConnectionRecordDto connectionRecordDto = new ConnectionRecordDto();
+    connectionRecordDto.setConnectionStatus("No");
+    final LocalDate currentDate = now();
+
+    if (Objects.nonNull(programmeMembership)) {
+      if (!isDisconnected(currentDate, programmeMembership)) {
+        connectionRecordDto.setConnectionStatus("Yes");
+      }
+      connectionRecordDto
+          .setProgrammeMembershipStartDate(programmeMembership.getProgrammeStartDate());
+      connectionRecordDto.setProgrammeMembershipEndDate(programmeMembership.getProgrammeEndDate());
+      final String owner = Objects.nonNull(programmeMembership.getProgramme())
+          ? programmeMembership.getProgramme().getOwner() : null;
+      connectionRecordDto.setProgrammeOwner(owner);
+    }
+
+    return connectionRecordDto;
+  }
+
+  private boolean isDisconnected(LocalDate currentDate, ProgrammeMembership programmeMembership) {
+    return Objects.isNull(programmeMembership) ||
+        Objects.isNull(programmeMembership.getProgrammeStartDate()) ||
+        Objects.isNull(programmeMembership.getProgrammeEndDate()) ||
+        programmeMembership.getProgrammeStartDate().isAfter(currentDate) ||
+        programmeMembership.getProgrammeEndDate().isBefore(currentDate);
+  }
+
+
   private RevalidationRecordDto buildRevalidationRecord(GmcDetails gmcDetails) {
     RevalidationRecordDto revalidationRecordDto = new RevalidationRecordDto();
     final long personId = gmcDetails.getId();
@@ -93,7 +142,7 @@ public class RevalidationServiceImpl implements RevalidationService {
 
     //Placement
     List<Placement> currentPlacementsForTrainee = placementRepository
-        .findCurrentPlacementForTrainee(personId, LocalDate.now(), placementTypes);
+        .findCurrentPlacementForTrainee(personId, now(), placementTypes);
     if (CollectionUtils.isNotEmpty(currentPlacementsForTrainee)
         && currentPlacementsForTrainee.get(0).getGradeId() != null) {
       LOG.debug("Placement ID : {}", currentPlacementsForTrainee.get(0).getId());
@@ -107,39 +156,5 @@ public class RevalidationServiceImpl implements RevalidationService {
     }
 
     return revalidationRecordDto;
-  }
-
-  public Map<String, ConnectionRecordDto> findAllConnectionsByGmcIds(List<String> gmcIds) {
-    LOG.debug("GMCNo received from Connection service: {}", gmcIds);
-    List<GmcDetails> gmcDetails = gmcDetailsRepository.findByGmcNumberIn(gmcIds);
-    Map<String, ConnectionRecordDto> connectionRecordDtoMap = new HashMap<>();
-    gmcDetails.forEach(gmcDetail -> {
-      ConnectionRecordDto connectionRecordDto = new ConnectionRecordDto();
-      final long personId = gmcDetail.getId();
-      LOG.debug("Person ID : {}", personId);
-
-      ProgrammeMembership programmeMembership = programmeMembershipRepository
-          .findLatestProgrammeMembershipByTraineeId(personId);
-      String owner = programmeMembership.getProgramme().getOwner();
-      connectionRecordDto.setProgrammeOwner(owner);
-      LocalDate pmStartDate = programmeMembership.getProgrammeStartDate();
-      LOG.debug("Programme Membership Start Date: {}", pmStartDate);
-
-      LocalDate pmEndDate = programmeMembership.getProgrammeEndDate();
-      LOG.debug("Programme Membership End Date : {}", pmEndDate);
-
-      LocalDate currentTime = LocalDate.now();
-      if (pmStartDate != null && !(pmStartDate.isAfter(currentTime)) && pmEndDate
-          .isAfter(currentTime)) {
-        connectionRecordDto.setConnectionStatus("Yes");
-      } else {
-        connectionRecordDto.setConnectionStatus("No");
-      }
-      connectionRecordDto.setProgrammeMembershipStartDate(pmStartDate);
-      connectionRecordDto.setProgrammeMembershipEndDate(pmEndDate);
-
-      connectionRecordDtoMap.put(gmcDetail.getGmcNumber(), connectionRecordDto);
-    });
-    return connectionRecordDtoMap;
   }
 }
