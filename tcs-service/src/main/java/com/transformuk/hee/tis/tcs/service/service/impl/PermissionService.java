@@ -24,6 +24,8 @@ public class PermissionService {
   protected static final String EDIT_SENSITIVE_DATA_ROLE = "personsensitive:add:modify:entities";
   protected static final String APPROVE_PLACEMENT_PERM = "placement:approve";
   protected static final String BULK_UPLOAD_USER = "bulk_upload";
+  protected static final String HEE_ENTITY = "HEE";
+  protected static final String NI_ENTITY = "NI";
 
   public boolean isUserNameBulkUpload() {
     UserProfile loggedInUserProfile = TisSecurityHelper.getProfileFromContext();
@@ -78,5 +80,13 @@ public class PermissionService {
     }
 
     return Collections.EMPTY_SET;
+  }
+
+  public Set<String> getUserEntities() {
+    UserProfile loggedInUserProfile = TisSecurityHelper.getProfileFromContext();
+    Set<String> roles = loggedInUserProfile.getRoles();
+    return roles.stream()
+        .filter(r -> StringUtils.equals(r, HEE_ENTITY) || StringUtils.equals(r, NI_ENTITY)).collect(
+            Collectors.toSet());
   }
 }

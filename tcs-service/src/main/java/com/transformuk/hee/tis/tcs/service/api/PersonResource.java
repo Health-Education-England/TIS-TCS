@@ -325,7 +325,7 @@ public class PersonResource {
    * (Not Found)
    */
   @GetMapping("/people/{id}")
-  @PreAuthorize("hasRole('ETL') or hasPermission('tis:people::person:', 'View')")
+  @PreAuthorize("(hasRole('ETL') or hasPermission('tis:people::person:', 'View')) AND hasPermission(#id, 'com.transformuk.hee.tis.tcs.service.model.Person', 'read')")
   public ResponseEntity<PersonDTO> getPerson(@PathVariable Long id) {
     log.debug("REST request to get Person : {}", id);
     personService.canLoggedInUserViewOrAmend(id);
@@ -345,7 +345,7 @@ public class PersonResource {
    * (Not Found)
    */
   @GetMapping("/people/v2/{id}")
-  @PreAuthorize("hasPermission('tis:people::person:', 'View')")
+  @PreAuthorize("hasPermission('tis:people::person:', 'View') AND hasPermission(#id, 'com.transformuk.hee.tis.tcs.service.model.Person', 'read')")
   public ResponseEntity<PersonV2DTO> getPersonV2(@PathVariable Long id) {
     log.debug("REST request to get Person : {}", id);
     personService.canLoggedInUserViewOrAmend(id);
@@ -385,7 +385,7 @@ public class PersonResource {
    * @return the ResponseEntity with status 200 (OK) and the list of placements in body
    */
   @GetMapping("/people/{id}/basic")
-  @PreAuthorize("hasPermission('tis:people::person:', 'View')")
+  @PreAuthorize("hasPermission('tis:people::person:', 'View') AND hasPermission(#id, 'com.transformuk.hee.tis.tcs.service.model.Person', 'read')")
   public ResponseEntity<PersonBasicDetailsDTO> getBasicDetails(@PathVariable Long id) {
     log.debug("REST request to get basic details");
     personService.canLoggedInUserViewOrAmend(id);
@@ -401,7 +401,7 @@ public class PersonResource {
    * @return the ResponseEntity with status 200 (OK) and the list of placements in body
    */
   @GetMapping("/people/{id}/placements")
-  @PreAuthorize("hasPermission('tis:people::person:', 'View')")
+  @PreAuthorize("hasPermission('tis:people::person:', 'View') AND hasPermission(#id, 'com.transformuk.hee.tis.tcs.service.model.Person', 'read')")
   public ResponseEntity<List<PlacementViewDTO>> getPlacementsForTrainee(@PathVariable Long id) {
     log.debug("REST request to get a page of Placements");
     personService.canLoggedInUserViewOrAmend(id);
@@ -440,7 +440,7 @@ public class PersonResource {
    * @return the ResponseEntity with status 200 (OK) and the list of placements in body
    */
   @GetMapping("/people/{id}/placements/new")
-  @PreAuthorize("hasPermission('tis:people::person:', 'View')")
+  @PreAuthorize("hasPermission('tis:people::person:', 'View') AND hasPermission(#id, 'com.transformuk.hee.tis.tcs.service.model.Person', 'read')")
   public ResponseEntity<List<PlacementSummaryDTO>> getPersonPlacements(@PathVariable Long id) {
     log.debug("REST request to get a page of Placements");
     personService.canLoggedInUserViewOrAmend(id);

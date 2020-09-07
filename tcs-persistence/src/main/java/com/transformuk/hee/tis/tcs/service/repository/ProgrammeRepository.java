@@ -10,6 +10,9 @@ import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.JpaSpecificationExecutor;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
+import org.springframework.security.access.prepost.PostAuthorize;
+import org.springframework.security.access.prepost.PostFilter;
+import org.springframework.security.access.prepost.PreAuthorize;
 
 /**
  * Spring Data JPA repository for the Programme entity.
@@ -18,6 +21,10 @@ import org.springframework.data.repository.query.Param;
 public interface ProgrammeRepository extends JpaRepository<Programme, Long>,
     JpaSpecificationExecutor<Programme> {
 
+  @PreAuthorize("hasPermission(#programme, 'WRITE')")
+  Programme save(Programme programme);
+
+  @PostFilter("hasPermission(filterObject, 'READ')")
   List<Programme> findByIdIn(Set<Long> ids);
 
   Page<Programme> findByOwnerIn(Set<String> deaneries, Pageable pageable);
@@ -29,6 +36,7 @@ public interface ProgrammeRepository extends JpaRepository<Programme, Long>,
   boolean programmeCurriculumAssociationExists(@Param("programmeId") Long programmeId,
       @Param("curriculumId") Long curriculumId);
 
+  @PostFilter("hasPermission(filterObject, 'READ')")
   @Query(value =
       "SELECT distinct pm.programme " +
           "FROM ProgrammeMembership pm " +

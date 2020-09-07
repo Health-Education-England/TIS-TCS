@@ -2,7 +2,9 @@ package com.transformuk.hee.tis.tcs.service.service.impl;
 
 import static com.transformuk.hee.tis.tcs.service.service.impl.SpecificationFactory.containsLike;
 import static com.transformuk.hee.tis.tcs.service.service.impl.SpecificationFactory.in;
+
 import com.google.common.base.Preconditions;
+import com.google.common.collect.Sets;
 import com.transformuk.hee.tis.tcs.api.dto.ProgrammeDTO;
 import com.transformuk.hee.tis.tcs.api.enumeration.Status;
 import com.transformuk.hee.tis.tcs.service.event.ProgrammeCreatedEvent;
@@ -10,15 +12,12 @@ import com.transformuk.hee.tis.tcs.service.event.ProgrammeDeletedEvent;
 import com.transformuk.hee.tis.tcs.service.event.ProgrammeSavedEvent;
 import com.transformuk.hee.tis.tcs.service.model.ColumnFilter;
 import com.transformuk.hee.tis.tcs.service.model.Programme;
-import com.transformuk.hee.tis.tcs.service.model.ProgrammeCurriculum;
 import com.transformuk.hee.tis.tcs.service.repository.CurriculumRepository;
 import com.transformuk.hee.tis.tcs.service.repository.ProgrammeCurriculumRepository;
 import com.transformuk.hee.tis.tcs.service.repository.ProgrammeRepository;
 import com.transformuk.hee.tis.tcs.service.service.ProgrammeService;
 import com.transformuk.hee.tis.tcs.service.service.mapper.ProgrammeMapper;
 import java.util.ArrayList;
-import java.util.Collection;
-import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
 import org.apache.commons.lang3.StringUtils;
@@ -30,6 +29,9 @@ import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.domain.Specification;
 import org.springframework.data.jpa.domain.Specifications;
+import org.springframework.security.access.annotation.Secured;
+import org.springframework.security.access.prepost.PreAuthorize;
+import org.springframework.security.acls.domain.BasePermission;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -46,15 +48,18 @@ public class ProgrammeServiceImpl implements ProgrammeService {
   private final ProgrammeMapper programmeMapper;
   private final ApplicationEventPublisher applicationEventPublisher;
   private final PermissionService permissionService;
+  private final AclSupportService aclService;
 
   public ProgrammeServiceImpl(ProgrammeRepository programmeRepository,
       ProgrammeCurriculumRepository programmeCurriculumRepository,
       CurriculumRepository curriculumRepository, ProgrammeMapper programmeMapper,
-      ApplicationEventPublisher applicationEventPublisher, PermissionService permissionService) {
+      ApplicationEventPublisher applicationEventPublisher, PermissionService permissionService,
+      AclSupportService aclService) {
     this.programmeRepository = programmeRepository;
     this.programmeMapper = programmeMapper;
     this.applicationEventPublisher = applicationEventPublisher;
     this.permissionService = permissionService;
+    this.aclService = aclService;
   }
 
   /**
@@ -64,10 +69,17 @@ public class ProgrammeServiceImpl implements ProgrammeService {
    * @return the persisted entity
    */
   @Override
+  @Secured({"HEE", "NI", "RUN_AS_Machine User"})
   public ProgrammeDTO save(ProgrammeDTO programmeDTO) {
     log.debug("Request to save Programme : {}", programmeDTO);
+    Set<String> principals = permissionService.getUserEntities();
+
     Programme programme = programmeMapper.programmeDTOToProgramme(programmeDTO);
     programme = programmeRepository.save(programme);
+
+    aclService.grantPermissionsToUser(Programme.class.getName(), programme.getId(), principals,
+        Sets.newHashSet(BasePermission.READ, BasePermission.WRITE));
+
     ProgrammeDTO programmeDTO1 = programmeMapper.programmeToProgrammeDTO(programme);
     applicationEventPublisher.publishEvent(new ProgrammeCreatedEvent(programmeDTO1));
     return programmeDTO1;
@@ -187,6 +199,7 @@ public class ProgrammeServiceImpl implements ProgrammeService {
    */
   @Override
   @Transactional(readOnly = true)
+  @PreAuthorize("hasPermission(#id, 'com.transformuk.hee.tis.tcs.service.model.Programme', 'read')")
   public ProgrammeDTO findOne(Long id) {
     log.debug("Request to get Programme : {}", id);
     Programme programme = programmeRepository.findProgrammeByIdEagerFetch(id).orElse(null);

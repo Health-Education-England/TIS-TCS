@@ -88,6 +88,9 @@ import org.springframework.jdbc.core.RowMapper;
 import org.springframework.jdbc.core.namedparam.MapSqlParameterSource;
 import org.springframework.jdbc.core.namedparam.NamedParameterJdbcTemplate;
 import org.springframework.scheduling.annotation.Async;
+import org.springframework.security.access.annotation.Secured;
+import org.springframework.security.access.prepost.PreAuthorize;
+import org.springframework.security.acls.domain.BasePermission;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.util.CollectionUtils;
@@ -182,6 +185,9 @@ public class PersonServiceImpl implements PersonService {
   @Autowired
   private TrainerApprovalDtoMapper trainerApprovalDtoMapper;
 
+  @Autowired
+  private AclSupportService aclService;
+
   /**
    * Save a person.
    *
@@ -232,6 +238,7 @@ public class PersonServiceImpl implements PersonService {
    */
   @Override
   @Transactional()
+  @Secured({"HEE", "NI", "RUN_AS_Machine User"})
   public PersonDTO create(PersonDTO personDTO) {
     log.debug("Request to save Person : {}", personDTO);
     Person person = personMapper.toEntity(personDTO);
@@ -269,6 +276,10 @@ public class PersonServiceImpl implements PersonService {
     rightToWork.setId(person.getId());
     rightToWork = rightToWorkRepository.save(rightToWork);
     person.setRightToWork(rightToWork);
+
+    Set<String> principals = permissionService.getUserEntities();
+    aclService.grantPermissionsToUser(Person.class.getName(), person.getId(), principals,
+        Sets.newHashSet(BasePermission.READ, BasePermission.WRITE));
 
     personDTO = personMapper.toDto(person);
     applicationEventPublisher.publishEvent(new PersonCreatedEvent(personDTO));
