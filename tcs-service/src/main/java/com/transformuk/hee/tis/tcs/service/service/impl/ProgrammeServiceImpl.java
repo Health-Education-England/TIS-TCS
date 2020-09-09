@@ -92,6 +92,7 @@ public class ProgrammeServiceImpl implements ProgrammeService {
    * @return the persisted entity
    */
   @Override
+  @PreAuthorize("hasPermission(#programmeDTO.id, 'com.transformuk.hee.tis.tcs.service.model.Programme', 'write')")
   public ProgrammeDTO update(ProgrammeDTO programmeDTO) {
     log.debug("Request to update Programme : {}", programmeDTO);
 

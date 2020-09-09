@@ -3,6 +3,7 @@ package com.transformuk.hee.tis.tcs.service.api;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.hamcrest.Matchers.containsInAnyOrder;
 import static org.hamcrest.Matchers.hasItem;
+import static org.mockito.Mockito.when;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.delete;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
@@ -25,9 +26,12 @@ import com.transformuk.hee.tis.tcs.service.model.ProgrammeCurriculum;
 import com.transformuk.hee.tis.tcs.service.repository.CurriculumRepository;
 import com.transformuk.hee.tis.tcs.service.repository.ProgrammeRepository;
 import com.transformuk.hee.tis.tcs.service.service.ProgrammeService;
+import com.transformuk.hee.tis.tcs.service.service.impl.PermissionService;
 import com.transformuk.hee.tis.tcs.service.service.mapper.ProgrammeCurriculumMapper;
 import com.transformuk.hee.tis.tcs.service.service.mapper.ProgrammeMapper;
+import java.util.Arrays;
 import java.util.List;
+import java.util.Set;
 import java.util.stream.Collectors;
 import org.apache.commons.codec.net.URLCodec;
 import org.junit.Before;
@@ -36,9 +40,19 @@ import org.junit.runner.RunWith;
 import org.mockito.MockitoAnnotations;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
+import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.data.web.PageableHandlerMethodArgumentResolver;
 import org.springframework.http.MediaType;
 import org.springframework.http.converter.json.MappingJackson2HttpMessageConverter;
+import org.springframework.security.acls.domain.BasePermission;
+import org.springframework.security.acls.domain.GrantedAuthoritySid;
+import org.springframework.security.acls.domain.ObjectIdentityImpl;
+import org.springframework.security.acls.jdbc.JdbcMutableAclService;
+import org.springframework.security.acls.model.AccessControlEntry;
+import org.springframework.security.acls.model.Acl;
+import org.springframework.security.acls.model.MutableAcl;
+import org.springframework.security.acls.model.Sid;
+import org.springframework.security.test.context.support.WithMockUser;
 import org.springframework.test.context.junit4.SpringRunner;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.setup.MockMvcBuilders;
@@ -96,6 +110,12 @@ public class ProgrammeResourceIntTest {
   @Autowired
   private ExceptionTranslator exceptionTranslator;
 
+  @Autowired
+  private JdbcMutableAclService mutableAclService;
+
+  @MockBean
+  private PermissionService permissionServiceMock;
+
   private MockMvc restProgrammeMockMvc;
 
   private Programme programme;
@@ -124,7 +144,10 @@ public class ProgrammeResourceIntTest {
         .setCustomArgumentResolvers(pageableArgumentResolver)
         .setControllerAdvice(exceptionTranslator)
         .setMessageConverters(jacksonMessageConverter).build();
-    TestUtils.mockUserprofile("jamesh", "1-AIIDR8", "1-AIIDWA");
+
+    // Set dialect for H2 database
+    this.mutableAclService.setClassIdentityQuery("call identity()");
+    this.mutableAclService.setSidIdentityQuery("call identity()");
   }
 
   @Before
@@ -135,6 +158,9 @@ public class ProgrammeResourceIntTest {
   @Test
   @Transactional
   public void createProgramme() throws Exception {
+    TestUtils.mockUserprofile("jamesh", "1-AIIDR8", "1-AIIDWA");
+    when(permissionServiceMock.getUserEntities()).thenReturn(Sets.newHashSet("HEE"));
+
     int databaseSizeBeforeCreate = programmeRepository.findAll().size();
 
     // Create the Programme
@@ -153,6 +179,12 @@ public class ProgrammeResourceIntTest {
     assertThat(testProgramme.getOwner()).isEqualTo(DEFAULT_OWNER);
     assertThat(testProgramme.getProgrammeName()).isEqualTo(DEFAULT_PROGRAMME_NAME);
     assertThat(testProgramme.getProgrammeNumber()).isEqualTo(DEFAULT_PROGRAMME_NUMBER);
+
+    Acl acl = mutableAclService.readAclById(new ObjectIdentityImpl(Programme.class.getName(), testProgramme.getId()));
+    List<AccessControlEntry> aclEntires = acl.getEntries();
+    assertThat(aclEntires.size()).isEqualTo(2);
+    Set<Sid> sids = aclEntires.stream().map(e -> e.getSid()).collect(Collectors.toSet());
+    assertThat(sids).contains(new GrantedAuthoritySid("HEE"));
   }
 
   @Test
@@ -208,6 +240,7 @@ public class ProgrammeResourceIntTest {
   @Transactional
   public void shouldAllowProgrammeNumberContentsWhenCreatingNowAllCharactersAreAllowed()
       throws Exception {
+    TestUtils.mockUserprofile("jamesh", "1-AIIDR8", "1-AIIDWA");
     //given
     ProgrammeDTO programmeDTO = programmeMapper.programmeToProgrammeDTO(createEntity());
     programmeDTO.setProgrammeNumber("#%$^&**(");
@@ -222,6 +255,7 @@ public class ProgrammeResourceIntTest {
   @Test
   @Transactional
   public void createProgrammeWithCurricula() throws Exception {
+    TestUtils.mockUserprofile("jamesh", "1-AIIDR8", "1-AIIDWA");
     int databaseSizeBeforeCreate = programmeRepository.findAll().size();
     Programme programme = createEntity();
     ProgrammeCurriculum curriculum1 = new ProgrammeCurriculum().curriculum(
@@ -257,6 +291,7 @@ public class ProgrammeResourceIntTest {
 
   @Test
   public void shouldComplainIfBadProgrammeWithCurriculaRequest() throws Exception {
+    TestUtils.mockUserprofile("jamesh", "1-AIIDR8", "1-AIIDWA");
     //given
     Programme programme = createEntity();
     Curriculum curriculum1 = curriculumRepository
@@ -383,8 +418,17 @@ public class ProgrammeResourceIntTest {
   @Test
   @Transactional
   public void getProgramme() throws Exception {
+    TestUtils.mockUserprofileWithAuthorities("jamesh", Arrays.asList("HEE", "ROLE_RUN_AS_Machine User"));
+
     // Initialize the database
     programmeRepository.saveAndFlush(programme);
+
+    ObjectIdentityImpl programmeIdentity = new ObjectIdentityImpl(programme);
+    MutableAcl acl = mutableAclService.createAcl(programmeIdentity);
+    GrantedAuthoritySid heeSid = new GrantedAuthoritySid("HEE");
+    acl.setOwner(heeSid);
+    acl.insertAce(0, BasePermission.READ, heeSid, true);
+    mutableAclService.updateAcl(acl);
 
     // Get the programme
     restProgrammeMockMvc.perform(get("/api/programmes/{id}", programme.getId()))
@@ -401,17 +445,27 @@ public class ProgrammeResourceIntTest {
   @Test
   @Transactional
   public void getNonExistingProgramme() throws Exception {
+    TestUtils.mockUserprofile("jamesh", "1-AIIDR8", "1-AIIDWA");
     // Get the programme
     restProgrammeMockMvc.perform(get("/api/programmes/{id}", Long.MAX_VALUE))
-        .andExpect(status().isNotFound());
+        .andExpect(status().isForbidden()); // TODO: as the non existing programme doesn't have any ACL records, the resource will return a 403 error, this might need a change
   }
 
   @Test
   @Transactional
   public void updateProgramme() throws Exception {
+    TestUtils.mockUserprofileWithAuthorities("jamesh", Arrays.asList("HEE", "ROLE_RUN_AS_Machine User"), "1-AIIDR8", "1-AIIDWA");
+
     // Initialize the database
     programmeRepository.saveAndFlush(programme);
     int databaseSizeBeforeUpdate = programmeRepository.findAll().size();
+
+    ObjectIdentityImpl programmeIdentity = new ObjectIdentityImpl(programme);
+    MutableAcl acl = mutableAclService.createAcl(programmeIdentity);
+    GrantedAuthoritySid heeSid = new GrantedAuthoritySid("HEE");
+    acl.setOwner(heeSid);
+    acl.insertAce(0, BasePermission.WRITE, heeSid, true);
+    mutableAclService.updateAcl(acl);
 
     // Update the programme
     Programme updatedProgramme = programmeRepository.findById(programme.getId()).orElse(null);
@@ -443,6 +497,8 @@ public class ProgrammeResourceIntTest {
   @Test
   @Transactional
   public void updateProgrammeWithCurricula() throws Exception {
+    TestUtils.mockUserprofileWithAuthorities("jamesh", Arrays.asList("HEE", "ROLE_RUN_AS_Machine User"), "1-AIIDR8", "1-AIIDWA");
+
     // Initialize the database
     Programme programme = createEntity();
     ProgrammeCurriculum curriculum1 = new ProgrammeCurriculum().curriculum(
@@ -454,6 +510,13 @@ public class ProgrammeResourceIntTest {
     programme.setCurricula(Sets.newHashSet(curriculum1, curriculum2));
 
     programmeRepository.saveAndFlush(programme);
+
+    ObjectIdentityImpl programmeIdentity = new ObjectIdentityImpl(programme);
+    MutableAcl acl = mutableAclService.createAcl(programmeIdentity);
+    GrantedAuthoritySid heeSid = new GrantedAuthoritySid("HEE");
+    acl.setOwner(heeSid);
+    acl.insertAce(0, BasePermission.WRITE, heeSid, true);
+    mutableAclService.updateAcl(acl);
     //TODO save `ProgCurr`s gmcProgCode
 
     int databaseSizeBeforeUpdate = programmeRepository.findAll().size();

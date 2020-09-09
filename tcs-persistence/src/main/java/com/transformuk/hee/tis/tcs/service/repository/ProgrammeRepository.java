@@ -21,9 +21,6 @@ import org.springframework.security.access.prepost.PreAuthorize;
 public interface ProgrammeRepository extends JpaRepository<Programme, Long>,
     JpaSpecificationExecutor<Programme> {
 
-  @PreAuthorize("hasPermission(#programme, 'WRITE')")
-  Programme save(Programme programme);
-
   @PostFilter("hasPermission(filterObject, 'READ')")
   List<Programme> findByIdIn(Set<Long> ids);
 
