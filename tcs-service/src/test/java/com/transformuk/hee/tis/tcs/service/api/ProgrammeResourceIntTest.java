@@ -3,7 +3,7 @@ package com.transformuk.hee.tis.tcs.service.api;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.hamcrest.Matchers.containsInAnyOrder;
 import static org.hamcrest.Matchers.hasItem;
-import static org.mockito.Mockito.when;
+import static org.mockito.internal.util.collections.Sets.newSet;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.delete;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
@@ -26,10 +26,8 @@ import com.transformuk.hee.tis.tcs.service.model.ProgrammeCurriculum;
 import com.transformuk.hee.tis.tcs.service.repository.CurriculumRepository;
 import com.transformuk.hee.tis.tcs.service.repository.ProgrammeRepository;
 import com.transformuk.hee.tis.tcs.service.service.ProgrammeService;
-import com.transformuk.hee.tis.tcs.service.service.impl.PermissionService;
 import com.transformuk.hee.tis.tcs.service.service.mapper.ProgrammeCurriculumMapper;
 import com.transformuk.hee.tis.tcs.service.service.mapper.ProgrammeMapper;
-import java.util.Arrays;
 import java.util.List;
 import java.util.Set;
 import java.util.stream.Collectors;
@@ -40,7 +38,6 @@ import org.junit.runner.RunWith;
 import org.mockito.MockitoAnnotations;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
-import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.data.web.PageableHandlerMethodArgumentResolver;
 import org.springframework.http.MediaType;
 import org.springframework.http.converter.json.MappingJackson2HttpMessageConverter;
@@ -52,7 +49,6 @@ import org.springframework.security.acls.model.AccessControlEntry;
 import org.springframework.security.acls.model.Acl;
 import org.springframework.security.acls.model.MutableAcl;
 import org.springframework.security.acls.model.Sid;
-import org.springframework.security.test.context.support.WithMockUser;
 import org.springframework.test.context.junit4.SpringRunner;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.setup.MockMvcBuilders;
@@ -92,7 +88,7 @@ public class ProgrammeResourceIntTest {
 
   @Autowired
   private ProgrammeMapper programmeMapper;
-  
+
   @Autowired
   private ProgrammeCurriculumMapper programmeCurriculumMapper;
 
@@ -112,9 +108,6 @@ public class ProgrammeResourceIntTest {
 
   @Autowired
   private JdbcMutableAclService mutableAclService;
-
-  @MockBean
-  private PermissionService permissionServiceMock;
 
   private MockMvc restProgrammeMockMvc;
 
@@ -140,14 +133,14 @@ public class ProgrammeResourceIntTest {
     MockitoAnnotations.initMocks(this);
     ProgrammeResource programmeResource = new ProgrammeResource(programmeService,
         programmeValidator);
-    this.restProgrammeMockMvc = MockMvcBuilders.standaloneSetup(programmeResource)
+    restProgrammeMockMvc = MockMvcBuilders.standaloneSetup(programmeResource)
         .setCustomArgumentResolvers(pageableArgumentResolver)
         .setControllerAdvice(exceptionTranslator)
         .setMessageConverters(jacksonMessageConverter).build();
 
     // Set dialect for H2 database
-    this.mutableAclService.setClassIdentityQuery("call identity()");
-    this.mutableAclService.setSidIdentityQuery("call identity()");
+    mutableAclService.setClassIdentityQuery("call identity()");
+    mutableAclService.setSidIdentityQuery("call identity()");
   }
 
   @Before
@@ -155,11 +148,14 @@ public class ProgrammeResourceIntTest {
     programme = createEntity();
   }
 
+//  @BeforeEach
+//  public void setDefaultUser() { TestUtils.mockUserprofile("jamesh", "1-AIIDR8", "1-AIIDWA");}
+
   @Test
   @Transactional
   public void createProgramme() throws Exception {
+    // Alt to default User
     TestUtils.mockUserprofile("jamesh", "1-AIIDR8", "1-AIIDWA");
-    when(permissionServiceMock.getUserEntities()).thenReturn(Sets.newHashSet("HEE"));
 
     int databaseSizeBeforeCreate = programmeRepository.findAll().size();
 
@@ -180,10 +176,11 @@ public class ProgrammeResourceIntTest {
     assertThat(testProgramme.getProgrammeName()).isEqualTo(DEFAULT_PROGRAMME_NAME);
     assertThat(testProgramme.getProgrammeNumber()).isEqualTo(DEFAULT_PROGRAMME_NUMBER);
 
-    Acl acl = mutableAclService.readAclById(new ObjectIdentityImpl(Programme.class.getName(), testProgramme.getId()));
+    Acl acl = mutableAclService
+        .readAclById(new ObjectIdentityImpl(Programme.class.getName(), testProgramme.getId()));
     List<AccessControlEntry> aclEntires = acl.getEntries();
     assertThat(aclEntires.size()).isEqualTo(2);
-    Set<Sid> sids = aclEntires.stream().map(e -> e.getSid()).collect(Collectors.toSet());
+    Set<Sid> sids = aclEntires.stream().map(AccessControlEntry::getSid).collect(Collectors.toSet());
     assertThat(sids).contains(new GrantedAuthoritySid("HEE"));
   }
 
@@ -240,6 +237,7 @@ public class ProgrammeResourceIntTest {
   @Transactional
   public void shouldAllowProgrammeNumberContentsWhenCreatingNowAllCharactersAreAllowed()
       throws Exception {
+    // Alt to default User
     TestUtils.mockUserprofile("jamesh", "1-AIIDR8", "1-AIIDWA");
     //given
     ProgrammeDTO programmeDTO = programmeMapper.programmeToProgrammeDTO(createEntity());
@@ -255,13 +253,16 @@ public class ProgrammeResourceIntTest {
   @Test
   @Transactional
   public void createProgrammeWithCurricula() throws Exception {
+    // Alt to default User
     TestUtils.mockUserprofile("jamesh", "1-AIIDR8", "1-AIIDWA");
     int databaseSizeBeforeCreate = programmeRepository.findAll().size();
     Programme programme = createEntity();
     ProgrammeCurriculum curriculum1 = new ProgrammeCurriculum().curriculum(
-        curriculumRepository.saveAndFlush(CurriculumResourceIntTest.createCurriculumEntity())).gmcProgrammeCode(DEFAULT_GMC_PROGRAMME_CODE);
+        curriculumRepository.saveAndFlush(CurriculumResourceIntTest.createCurriculumEntity()))
+        .gmcProgrammeCode(DEFAULT_GMC_PROGRAMME_CODE);
     ProgrammeCurriculum curriculum2 = new ProgrammeCurriculum().curriculum(
-        curriculumRepository.saveAndFlush(CurriculumResourceIntTest.createCurriculumEntity())).gmcProgrammeCode(UPDATED_GMC_PROGRAMME_CODE);
+        curriculumRepository.saveAndFlush(CurriculumResourceIntTest.createCurriculumEntity()))
+        .gmcProgrammeCode(UPDATED_GMC_PROGRAMME_CODE);
     programme.setCurricula(Sets.newHashSet(curriculum1, curriculum2));
 
     // Create the Programme
@@ -282,16 +283,22 @@ public class ProgrammeResourceIntTest {
     assertThat(testProgramme.getProgrammeNumber()).isEqualTo(DEFAULT_PROGRAMME_NUMBER);
     assertThat(testProgramme.getCurricula().size()).isEqualTo(2);
     assertThat(
-        testProgramme.getCurricula().stream().map(pc -> {return pc.getCurriculum().getId();}).collect(Collectors.toSet())).
-        containsAll(Sets.newHashSet(curriculum1.getCurriculum().getId(), curriculum2.getCurriculum().getId()));
+        testProgramme.getCurricula().stream().map(pc -> pc.getCurriculum().getId())
+            .collect(Collectors.toSet())).
+        containsAll(Sets.newHashSet(curriculum1.getCurriculum().getId(),
+            curriculum2.getCurriculum().getId()));
     assertThat(
-        testProgramme.getCurricula().stream().map(ProgrammeCurriculum::getGmcProgrammeCode).collect(Collectors.toSet())).
-        containsAll(Sets.newHashSet(curriculum1.getGmcProgrammeCode(), curriculum2.getGmcProgrammeCode()));
+        testProgramme.getCurricula().stream().map(ProgrammeCurriculum::getGmcProgrammeCode)
+            .collect(Collectors.toSet())).
+        containsAll(
+            Sets.newHashSet(curriculum1.getGmcProgrammeCode(), curriculum2.getGmcProgrammeCode()));
   }
 
   @Test
   public void shouldComplainIfBadProgrammeWithCurriculaRequest() throws Exception {
+    // Alt to default User
     TestUtils.mockUserprofile("jamesh", "1-AIIDR8", "1-AIIDWA");
+
     //given
     Programme programme = createEntity();
     Curriculum curriculum1 = curriculumRepository
@@ -345,8 +352,10 @@ public class ProgrammeResourceIntTest {
     assertThat(testProgramme1.getProgrammeNumber()).isEqualTo(DEFAULT_PROGRAMME_NUMBER);
     assertThat(testProgramme1.getCurricula().size()).isEqualTo(2);
     assertThat(
-        testProgramme1.getCurricula().stream().map(pc -> {return pc.getCurriculum().getId();}).collect(Collectors.toSet())).
-        containsAll(Sets.newHashSet(curriculum1.getCurriculum().getId(), curriculum2.getCurriculum().getId()));
+        testProgramme1.getCurricula().stream().map(pc -> pc.getCurriculum().getId())
+            .collect(Collectors.toSet())).
+        containsAll(Sets.newHashSet(curriculum1.getCurriculum().getId(),
+            curriculum2.getCurriculum().getId()));
 
     assertThat(testProgramme2.getStatus()).isEqualTo(DEFAULT_STATUS);
     assertThat(testProgramme2.getIntrepidId()).isEqualTo(DEFAULT_INTREPID_ID);
@@ -355,8 +364,10 @@ public class ProgrammeResourceIntTest {
     assertThat(testProgramme2.getProgrammeNumber()).isEqualTo(DEFAULT_PROGRAMME_NUMBER);
     assertThat(testProgramme2.getCurricula().size()).isEqualTo(2);
     assertThat(
-        testProgramme2.getCurricula().stream().map(pc -> {return pc.getCurriculum().getId();}).collect(Collectors.toSet())).
-    containsAll(Sets.newHashSet(curriculum1.getCurriculum().getId(), curriculum2.getCurriculum().getId()));
+        testProgramme2.getCurricula().stream().map(pc -> pc.getCurriculum().getId())
+            .collect(Collectors.toSet())).
+        containsAll(Sets.newHashSet(curriculum1.getCurriculum().getId(),
+            curriculum2.getCurriculum().getId()));
   }
 
   @Test
@@ -382,6 +393,8 @@ public class ProgrammeResourceIntTest {
   @Test
   @Transactional
   public void getAllProgrammes() throws Exception {
+    // Alt to default User
+    TestUtils.mockUserprofile("jamesh", "1-AIIDR8", "1-AIIDWA");
     // Initialize the database
     programmeRepository.saveAndFlush(programme);
 
@@ -400,6 +413,8 @@ public class ProgrammeResourceIntTest {
   @Test
   @Transactional
   public void getAllProgrammesForETL() throws Exception {
+    // Alt to default User
+    TestUtils.mockUserprofile("jamesh", "1-AIIDR8", "1-AIIDWA");
     // Initialize the database
     programmeRepository.saveAndFlush(programme);
 
@@ -418,7 +433,7 @@ public class ProgrammeResourceIntTest {
   @Test
   @Transactional
   public void getProgramme() throws Exception {
-    TestUtils.mockUserprofileWithAuthorities("jamesh", Arrays.asList("HEE", "ROLE_RUN_AS_Machine User"));
+    TestUtils.mockUserprofileWithAuthorities("jamesh", newSet("HEE", "ROLE_RUN_AS_Machine User"));
 
     // Initialize the database
     programmeRepository.saveAndFlush(programme);
@@ -445,16 +460,19 @@ public class ProgrammeResourceIntTest {
   @Test
   @Transactional
   public void getNonExistingProgramme() throws Exception {
+    // Alt to default User
     TestUtils.mockUserprofile("jamesh", "1-AIIDR8", "1-AIIDWA");
     // Get the programme
     restProgrammeMockMvc.perform(get("/api/programmes/{id}", Long.MAX_VALUE))
-        .andExpect(status().isForbidden()); // TODO: as the non existing programme doesn't have any ACL records, the resource will return a 403 error, this might need a change
+        // TODO: as the non existing programme doesn't have any ACL records, the resource will return a 403 error, this might need a change
+        .andExpect(status().isForbidden());
   }
 
   @Test
   @Transactional
   public void updateProgramme() throws Exception {
-    TestUtils.mockUserprofileWithAuthorities("jamesh", Arrays.asList("HEE", "ROLE_RUN_AS_Machine User"), "1-AIIDR8", "1-AIIDWA");
+    TestUtils.mockUserprofileWithAuthorities("jamesh", newSet("HEE", "ROLE_RUN_AS_Machine User"),
+        "1-AIIDR8", "1-AIIDWA");
 
     // Initialize the database
     programmeRepository.saveAndFlush(programme);
@@ -497,7 +515,8 @@ public class ProgrammeResourceIntTest {
   @Test
   @Transactional
   public void updateProgrammeWithCurricula() throws Exception {
-    TestUtils.mockUserprofileWithAuthorities("jamesh", Arrays.asList("HEE", "ROLE_RUN_AS_Machine User"), "1-AIIDR8", "1-AIIDWA");
+    TestUtils.mockUserprofileWithAuthorities("jamesh", newSet("HEE", "ROLE_RUN_AS_Machine User"),
+        "1-AIIDR8", "1-AIIDWA");
 
     // Initialize the database
     Programme programme = createEntity();
@@ -529,9 +548,8 @@ public class ProgrammeResourceIntTest {
     programmeDTO.setOwner(UPDATED_OWNER);
     programmeDTO.setProgrammeName(UPDATED_PROGRAMME_NAME);
     programmeDTO.setProgrammeNumber(UPDATED_PROGRAMME_NUMBER);
-    programmeDTO.setCurricula(Sets.newHashSet(programmeCurriculumMapper.toDto(curriculum2), programmeCurriculumMapper.toDto(curriculum3)));
-        
-    updatedProgramme = programmeRepository.findById(programme.getId()).orElse(null);
+    programmeDTO.setCurricula(Sets.newHashSet(programmeCurriculumMapper.toDto(curriculum2),
+        programmeCurriculumMapper.toDto(curriculum3)));
 
     restProgrammeMockMvc.perform(put("/api/programmes")
         .contentType(TestUtil.APPLICATION_JSON_UTF8)
@@ -549,8 +567,10 @@ public class ProgrammeResourceIntTest {
     assertThat(testProgramme.getProgrammeNumber()).isEqualTo(UPDATED_PROGRAMME_NUMBER);
     assertThat(testProgramme.getCurricula().size()).isEqualTo(2);
     assertThat(
-        testProgramme.getCurricula().stream().map(pc -> {return pc.getCurriculum().getId();}).collect(Collectors.toSet())).
-        containsAll(Sets.newHashSet(curriculum2.getCurriculum().getId(), curriculum3.getCurriculum().getId()));
+        testProgramme.getCurricula().stream().map(pc -> pc.getCurriculum().getId())
+            .collect(Collectors.toSet())).
+        containsAll(Sets.newHashSet(curriculum2.getCurriculum().getId(),
+            curriculum3.getCurriculum().getId()));
   }
 
   @Test
@@ -578,7 +598,7 @@ public class ProgrammeResourceIntTest {
     programmeDTO1.setOwner(UPDATED_OWNER);
     programmeDTO1.setProgrammeName(UPDATED_PROGRAMME_NAME);
     programmeDTO1.setProgrammeNumber(UPDATED_PROGRAMME_NUMBER);
-        programmeDTO1.setCurricula(Sets.newHashSet(programmeCurriculumMapper.toDto(curriculum2)));
+    programmeDTO1.setCurricula(Sets.newHashSet(programmeCurriculumMapper.toDto(curriculum2)));
     Programme updatedProgramme2 = programmeRepository.findById(programme2.getId()).orElse(null);
     ProgrammeDTO programmeDTO2 = programmeMapper.programmeToProgrammeDTO(updatedProgramme2);
     programmeDTO2.setStatus(UPDATED_STATUS);
@@ -586,7 +606,7 @@ public class ProgrammeResourceIntTest {
     programmeDTO2.setOwner(UPDATED_OWNER);
     programmeDTO2.setProgrammeName(UPDATED_PROGRAMME_NAME);
     programmeDTO2.setProgrammeNumber(UPDATED_PROGRAMME_NUMBER);
-        programmeDTO2.setCurricula(Sets.newHashSet(programmeCurriculumMapper.toDto(curriculum3)));
+    programmeDTO2.setCurricula(Sets.newHashSet(programmeCurriculumMapper.toDto(curriculum3)));
     // Bulk update the Programmes
     restProgrammeMockMvc.perform(put("/api/bulk-programmes")
         .contentType(TestUtil.APPLICATION_JSON_UTF8)
@@ -606,7 +626,8 @@ public class ProgrammeResourceIntTest {
     assertThat(testProgramme1.getProgrammeNumber()).isEqualTo(UPDATED_PROGRAMME_NUMBER);
     assertThat(testProgramme1.getCurricula().size()).isEqualTo(1);
     assertThat(
-        testProgramme1.getCurricula().stream().map(pc -> {return pc.getCurriculum().getId();}).collect(Collectors.toSet())).
+        testProgramme1.getCurricula().stream().map(pc -> pc.getCurriculum().getId())
+            .collect(Collectors.toSet())).
         containsAll(Sets.newHashSet(curriculum2.getCurriculum().getId()));
 
     assertThat(testProgramme2.getStatus()).isEqualTo(UPDATED_STATUS);
@@ -616,7 +637,8 @@ public class ProgrammeResourceIntTest {
     assertThat(testProgramme2.getProgrammeNumber()).isEqualTo(UPDATED_PROGRAMME_NUMBER);
     assertThat(testProgramme2.getCurricula().size()).isEqualTo(1);
     assertThat(
-        testProgramme2.getCurricula().stream().map(pc -> {return pc.getCurriculum().getId();}).collect(Collectors.toSet())).
+        testProgramme2.getCurricula().stream().map(pc -> pc.getCurriculum().getId())
+            .collect(Collectors.toSet())).
         containsAll(Sets.newHashSet(curriculum3.getCurriculum().getId()));
   }
 
@@ -640,6 +662,8 @@ public class ProgrammeResourceIntTest {
   @Test
   @Transactional
   public void shouldNotFilterByDeaneries() throws Exception {
+    // Alt to default User
+    TestUtils.mockUserprofile("jamesh", "1-AIIDR8", "1-AIIDWA");
     //given
     // Initialize the database
     Programme otherDeaneryProgramme = createEntity();
@@ -662,6 +686,8 @@ public class ProgrammeResourceIntTest {
   @Test
   @Transactional
   public void shouldTextSearch() throws Exception {
+    // Alt to default User
+    TestUtils.mockUserprofile("jamesh", "1-AIIDR8", "1-AIIDWA");
     //given
     // Initialize the database
     programmeRepository.saveAndFlush(programme);
@@ -681,6 +707,8 @@ public class ProgrammeResourceIntTest {
   @Test
   @Transactional
   public void shouldFilterColumns() throws Exception {
+    // Alt to default User
+    TestUtils.mockUserprofile("jamesh", "1-AIIDR8", "1-AIIDWA");
     //given
     // Initialize the database
     programmeRepository.saveAndFlush(programme);
@@ -702,6 +730,8 @@ public class ProgrammeResourceIntTest {
   @Test
   @Transactional
   public void shouldTextSearchAndFilterColumns() throws Exception {
+    // Alt to default User
+    TestUtils.mockUserprofile("jamesh", "1-AIIDR8", "1-AIIDWA");
     //given
     // Initialize the database
     programmeRepository.saveAndFlush(programme);
@@ -727,6 +757,8 @@ public class ProgrammeResourceIntTest {
 
   @Test
   public void shouldComplainIfBadRequest() throws Exception {
+    // Alt to default User
+    TestUtils.mockUserprofile("jamesh", "1-AIIDR8", "1-AIIDWA");
     //given
     URLCodec codec = new URLCodec();
     String colFilters = codec.encode("{\"status\":[\"malformed json\"");

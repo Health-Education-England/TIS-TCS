@@ -112,8 +112,8 @@ jhipster:
 logging:
   # file: ${LOG_DIR:${HOME}}/tcs.log
   level:
-       # org.springframework.web: WARN
-       org.flywaydb.core: ERROR
+    # org.springframework.web: WARN
+    org.flywaydb.core: ERROR
 
 application:
 
