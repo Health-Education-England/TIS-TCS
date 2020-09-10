@@ -3,6 +3,7 @@ package com.transformuk.hee.tis.tcs.service.api;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.hamcrest.Matchers.containsInAnyOrder;
 import static org.hamcrest.Matchers.hasItem;
+import static org.mockito.internal.util.collections.Sets.newSet;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.delete;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
@@ -11,6 +12,7 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
+import com.transformuk.hee.tis.tcs.TestUtils;
 import com.transformuk.hee.tis.tcs.api.dto.ProgrammeMembershipDTO;
 import com.transformuk.hee.tis.tcs.api.enumeration.ProgrammeMembershipType;
 import com.transformuk.hee.tis.tcs.api.enumeration.Status;
@@ -47,6 +49,12 @@ import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.data.web.PageableHandlerMethodArgumentResolver;
 import org.springframework.http.MediaType;
 import org.springframework.http.converter.json.MappingJackson2HttpMessageConverter;
+import org.springframework.security.acls.domain.BasePermission;
+import org.springframework.security.acls.domain.GrantedAuthoritySid;
+import org.springframework.security.acls.domain.ObjectIdentityImpl;
+import org.springframework.security.acls.jdbc.JdbcMutableAclService;
+import org.springframework.security.acls.model.MutableAcl;
+import org.springframework.security.acls.model.NotFoundException;
 import org.springframework.test.context.junit4.SpringRunner;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.setup.MockMvcBuilders;
@@ -63,48 +71,37 @@ public class ProgrammeMembershipResourceIntTest {
 
   private static final ProgrammeMembershipType DEFAULT_PROGRAMME_MEMBERSHIP_TYPE = ProgrammeMembershipType.SUBSTANTIVE;
   private static final ProgrammeMembershipType UPDATED_PROGRAMME_MEMBERSHIP_TYPE = ProgrammeMembershipType.LAT;
-
   private static final String DEFAULT_INTREPID_ID = "AAAAAAAAAA";
   private static final String UPDATED_INTREPID_ID = "BBBBBBBBBB";
-
   private static final String DEFAULT_ROTATION = "AAAAAAAAAA";
   private static final String UPDATED_ROTATION = "BBBBBBBBBB";
-
   private static final LocalDate DEFAULT_CURRICULUM_START_DATE = LocalDate.ofEpochDay(0L);
   private static final LocalDate UPDATED_CURRICULUM_START_DATE = LocalDate
       .now(ZoneId.systemDefault());
-
   private static final LocalDate DEFAULT_CURRICULUM_END_DATE = LocalDate.ofEpochDay(0L);
   private static final LocalDate UPDATED_CURRICULUM_END_DATE = LocalDate
       .now(ZoneId.systemDefault());
-
   private static final Integer DEFAULT_PERIOD_OF_GRACE = 1;
   private static final Integer UPDATED_PERIOD_OF_GRACE = 2;
-
   private static final LocalDate DEFAULT_PROGRAMME_START_DATE = LocalDate.ofEpochDay(0L);
   private static final LocalDate UPDATED_PROGRAMME_START_DATE = LocalDate
       .now(ZoneId.systemDefault());
-
   private static final LocalDate DEFAULT_CURRICULUM_COMPLETION_DATE = LocalDate.ofEpochDay(0L);
   private static final LocalDate UPDATED_CURRICULUM_COMPLETION_DATE = LocalDate
       .now(ZoneId.systemDefault());
-
   private static final LocalDate DEFAULT_PROGRAMME_END_DATE = LocalDate.ofEpochDay(0L);
   private static final LocalDate UPDATED_PROGRAMME_END_DATE = LocalDate.now(ZoneId.systemDefault());
-
   private static final String DEFAULT_LEAVING_DESTINATION = "AAAAAAAAAA";
   private static final String UPDATED_LEAVING_DESTINATION = "BBBBBBBBBB";
-
   private static final String DEFAULT_LEAVING_REASON = "AAAAAAAAAA";
   private static final String UPDATED_LEAVING_REASON = "BBBBBBBBBB";
-
-  private static final Long NOT_EXISTS_PROGRAMME_ID = 10101010l;
-  private static final Long NOT_EXISTS_CURRICULUM_ID = 20202020l;
-
+  private static final Long NOT_EXISTS_PROGRAMME_ID = 10101010L;
+  private static final Long NOT_EXISTS_CURRICULUM_ID = 20202020L;
   private static final LocalDateTime DEFAULT_AMENDED_DATE = LocalDateTime
       .now(ZoneId.systemDefault());
   private static final String DEFAULT_PROGRAMME_CODE = "GMCGMC";
-
+  private static final String HEE_AUTHORITY = "HEE";
+  public static final String RUN_AS_AUTHORITY = "ROLE_RUN_AS_Machine User";
   @Autowired
   private ProgrammeMembershipRepository programmeMembershipRepository;
 
@@ -146,6 +143,9 @@ public class ProgrammeMembershipResourceIntTest {
   @Autowired
   private PersonMapper personMapper;
 
+  @Autowired
+  private JdbcMutableAclService mutableAclService;
+
   private Person person;
 
   private Programme programme;
@@ -167,7 +167,7 @@ public class ProgrammeMembershipResourceIntTest {
    * which requires the current entity.
    */
   public static ProgrammeMembership createEntity(EntityManager em) {
-    ProgrammeMembership programmeMembership = new ProgrammeMembership()
+    return new ProgrammeMembership()
         .intrepidId(DEFAULT_INTREPID_ID)
         .programmeMembershipType(DEFAULT_PROGRAMME_MEMBERSHIP_TYPE)
         .curriculumStartDate(DEFAULT_CURRICULUM_START_DATE)
@@ -178,7 +178,6 @@ public class ProgrammeMembershipResourceIntTest {
         .programmeEndDate(DEFAULT_PROGRAMME_END_DATE)
         .leavingDestination(DEFAULT_LEAVING_DESTINATION)
         .leavingReason(DEFAULT_LEAVING_REASON);
-    return programmeMembership;
   }
 
   /**
@@ -196,6 +195,24 @@ public class ProgrammeMembershipResourceIntTest {
     return new Rotation().name(DEFAULT_ROTATION).status(Status.CURRENT);
   }
 
+  private void createAcl(Object object, String authority, boolean isGrant,
+      BasePermission... permissions) {
+    ObjectIdentityImpl objectIdentity = new ObjectIdentityImpl(object);
+    GrantedAuthoritySid sid = new GrantedAuthoritySid(authority);
+    for (BasePermission p : permissions) {
+
+      MutableAcl acl;
+      try {
+        acl = (MutableAcl) mutableAclService.readAclById(objectIdentity);
+      } catch (NotFoundException e) {
+        acl = mutableAclService.createAcl(objectIdentity);
+      }
+      acl.setOwner(sid);
+      acl.insertAce(acl.getEntries().size(), p, sid, isGrant);
+      mutableAclService.updateAcl(acl);
+    }
+  }
+
 
   @Before
   public void setup() {
@@ -210,6 +227,12 @@ public class ProgrammeMembershipResourceIntTest {
         .setCustomArgumentResolvers(pageableArgumentResolver)
         .setControllerAdvice(exceptionTranslator)
         .setMessageConverters(jacksonMessageConverter).build();
+    //TODO: Is the `RUN_AS` role representative of real use?
+    TestUtils.mockUserprofileWithAuthorities("Foo40", newSet(HEE_AUTHORITY, RUN_AS_AUTHORITY));
+
+    // Set dialect for H2 database
+    mutableAclService.setClassIdentityQuery("call identity()");
+    mutableAclService.setSidIdentityQuery("call identity()");
   }
 
   @Before
@@ -225,7 +248,9 @@ public class ProgrammeMembershipResourceIntTest {
   @Test
   @Transactional
   public void createProgrammeMembership() throws Exception {
-    personRepository.saveAndFlush(person);
+    person = personRepository.saveAndFlush(person);
+    createAcl(person, HEE_AUTHORITY, true, (BasePermission) BasePermission.READ,
+        (BasePermission) BasePermission.WRITE);
     curriculumRepository.saveAndFlush(curriculum);
     programme.setCurricula(Collections.singleton(programmeCurriculum));
     programmeRepository.saveAndFlush(programme);
@@ -431,10 +456,8 @@ public class ProgrammeMembershipResourceIntTest {
         .andExpect(status().isBadRequest())
         .andExpect(jsonPath("$.message").value("error.validation"))
         .andExpect(jsonPath("$.fieldErrors[0].field").value("curriculumId"))
-        .andExpect(jsonPath("$.fieldErrors[0].message").
-            value(String.format(
-                "The selected Programme and Curriculum are not linked. They must be linked before a Programme Membership can be made",
-                String.valueOf(notAssociatedCurriculum.getId()))));
+        .andExpect(jsonPath("$.fieldErrors[0].message").value(
+            "The selected Programme and Curriculum are not linked. They must be linked before a Programme Membership can be made"));
   }
 
   @Test
@@ -484,7 +507,7 @@ public class ProgrammeMembershipResourceIntTest {
         .andExpect(status().isOk())
         .andExpect(content().contentType(MediaType.APPLICATION_JSON_UTF8_VALUE))
         .andExpect(jsonPath("$.[*].curriculumMemberships[*].intrepidId")
-            .value(hasItem(DEFAULT_INTREPID_ID.toString())))
+            .value(hasItem(DEFAULT_INTREPID_ID)))
         .andExpect(jsonPath("$.[*].programmeMembershipType")
             .value(hasItem(DEFAULT_PROGRAMME_MEMBERSHIP_TYPE.toString().toUpperCase())))
         .andExpect(jsonPath("$.[*].rotation.name").value(rotation.getName()))

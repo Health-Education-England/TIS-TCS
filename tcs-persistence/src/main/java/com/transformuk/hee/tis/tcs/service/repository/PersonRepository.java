@@ -17,8 +17,9 @@ import org.springframework.stereotype.Repository;
 public interface PersonRepository extends JpaRepository<Person, Long>,
     JpaSpecificationExecutor<Person>, CustomPersonRepository {
 
-  @PreAuthorize("hasPermission(#person, 'WRITE')")
-  Person saveAndFlush(Person person);
+// Looks to only be used in tests
+//  @PreAuthorize("hasPermission(#person, 'WRITE')")
+//  Person saveAndFlush(Person person);
 
   @PostFilter("hasPermission(filterObject, 'READ')")
   List<Person> findAllById(Set<Long> ids);
