@@ -2,6 +2,7 @@ package com.transformuk.hee.tis.tcs.service.api;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.hamcrest.Matchers.hasItem;
+import static org.mockito.internal.util.collections.Sets.newSet;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.delete;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
@@ -10,6 +11,7 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
+import com.transformuk.hee.tis.tcs.TestUtils;
 import com.transformuk.hee.tis.tcs.api.dto.RotationDTO;
 import com.transformuk.hee.tis.tcs.api.enumeration.Status;
 import com.transformuk.hee.tis.tcs.service.Application;
@@ -34,6 +36,11 @@ import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.data.web.PageableHandlerMethodArgumentResolver;
 import org.springframework.http.MediaType;
 import org.springframework.http.converter.json.MappingJackson2HttpMessageConverter;
+import org.springframework.security.acls.domain.BasePermission;
+import org.springframework.security.acls.domain.GrantedAuthoritySid;
+import org.springframework.security.acls.domain.ObjectIdentityImpl;
+import org.springframework.security.acls.jdbc.JdbcMutableAclService;
+import org.springframework.security.acls.model.MutableAcl;
 import org.springframework.test.context.junit4.SpringRunner;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.setup.MockMvcBuilders;
@@ -58,6 +65,7 @@ public class RotationResourceIntTest {
 
   private static final String PROGRAMME_NAME = "programme name";
   private static final String PROGRAMME_NUMBER = "programme number";
+  private static final String HEE = "HEE";
 
   @Autowired
   private ProgrammeRepository programmeRepository;
@@ -82,6 +90,9 @@ public class RotationResourceIntTest {
 
   @Autowired
   private EntityManager em;
+
+  @Autowired
+  private JdbcMutableAclService mutableAclService;
 
   private MockMvc restRotationMockMvc;
 
@@ -120,8 +131,20 @@ public class RotationResourceIntTest {
 
   @Before
   public void initTest() {
+    TestUtils.mockUserprofileWithAuthorities("jamesh", newSet(HEE, "ROLE_RUN_AS_Machine User"));
+    // Set dialect for H2 database
+    mutableAclService.setClassIdentityQuery("call identity()");
+    mutableAclService.setSidIdentityQuery("call identity()");
+
     programme = buildProgramme();
     programmeRepository.saveAndFlush(programme);
+    ObjectIdentityImpl programmeIdentity = new ObjectIdentityImpl(programme);
+    MutableAcl acl = mutableAclService.createAcl(programmeIdentity);
+    GrantedAuthoritySid heeSid = new GrantedAuthoritySid(HEE);
+    acl.setOwner(heeSid);
+    acl.insertAce(0, BasePermission.READ, heeSid, true);
+    mutableAclService.updateAcl(acl);
+
     em.detach(programme);
     rotation = buildRotation(programme.getId());
     rotationRepository.saveAndFlush(rotation);
@@ -227,6 +250,12 @@ public class RotationResourceIntTest {
     // Initialize the database
     Programme p2 = buildProgramme();
     programmeRepository.saveAndFlush(p2);
+    ObjectIdentityImpl programmeIdentity = new ObjectIdentityImpl(p2);
+    MutableAcl acl = mutableAclService.createAcl(programmeIdentity);
+    GrantedAuthoritySid heeSid = new GrantedAuthoritySid(HEE);
+    acl.setOwner(heeSid);
+    acl.insertAce(0, BasePermission.READ, heeSid, true);
+    mutableAclService.updateAcl(acl);
     long progId = p2.getId();
 
     Rotation rotation2 = buildRotation(p2.getId());
@@ -255,6 +284,12 @@ public class RotationResourceIntTest {
     // Initialize the database
     Programme p2 = buildProgramme();
     programmeRepository.saveAndFlush(p2);
+    ObjectIdentityImpl programmeIdentity = new ObjectIdentityImpl(p2);
+    MutableAcl acl = mutableAclService.createAcl(programmeIdentity);
+    GrantedAuthoritySid heeSid = new GrantedAuthoritySid(HEE);
+    acl.setOwner(heeSid);
+    acl.insertAce(0, BasePermission.READ, heeSid, true);
+    mutableAclService.updateAcl(acl);
     long progId = p2.getId();
 
     Rotation rotation2 = buildRotation(p2.getId());
@@ -282,6 +317,12 @@ public class RotationResourceIntTest {
     // Initialize the database
     Programme p2 = buildProgramme();
     programmeRepository.saveAndFlush(p2);
+    ObjectIdentityImpl programmeIdentity = new ObjectIdentityImpl(p2);
+    MutableAcl acl = mutableAclService.createAcl(programmeIdentity);
+    GrantedAuthoritySid heeSid = new GrantedAuthoritySid(HEE);
+    acl.setOwner(heeSid);
+    acl.insertAce(0, BasePermission.READ, heeSid, true);
+    mutableAclService.updateAcl(acl);
     long progId = p2.getId();
 
     Rotation rotation2 = buildRotation(p2.getId());
