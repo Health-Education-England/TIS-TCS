@@ -148,9 +148,6 @@ public class ProgrammeResourceIntTest {
     programme = createEntity();
   }
 
-//  @BeforeEach
-//  public void setDefaultUser() { TestUtils.mockUserprofile("jamesh", "1-AIIDR8", "1-AIIDWA");}
-
   @Test
   @Transactional
   public void createProgramme() throws Exception {

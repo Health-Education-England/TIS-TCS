@@ -1,5 +1,8 @@
 package com.transformuk.hee.tis.tcs.service.service.impl;
 
+import static org.hamcrest.MatcherAssert.assertThat;
+import static org.hamcrest.Matchers.contains;
+import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.any;
 import static org.mockito.Mockito.anyLong;
 import static org.mockito.Mockito.doNothing;
@@ -57,6 +60,8 @@ import org.mockito.Mock;
 import org.mockito.Spy;
 import org.mockito.junit.MockitoJUnitRunner;
 import org.springframework.context.ApplicationEventPublisher;
+import org.springframework.security.acls.domain.BasePermission;
+import org.springframework.security.acls.model.Permission;
 
 @RunWith(MockitoJUnitRunner.class)
 public class PersonServiceImplTest {
@@ -67,6 +72,7 @@ public class PersonServiceImplTest {
   private static final String DISABILITY_DETAILS_VALUE = "DISABILITY DETAILS";
   private static final String RELIGIOUS_BELIEF_VALUE = "RELIGIOUS BELIEF";
   private static final String SEXUAL_ORIENTATION_VALUE = "SEXUAL ORIENTATION";
+  private static final Set<String> USER_ENTITIES = Sets.newHashSet("HEE");
 
   @Spy
   @InjectMocks
@@ -117,6 +123,8 @@ public class PersonServiceImplTest {
   private RightToWorkService rightToWorkServiceMock;
   @Mock
   private TrainerApprovalService trainerApprovalServiceMock;
+  @Mock
+  private AclSupportService aclSupportServiceMock;
 
   @Captor
   private ArgumentCaptor<GdcDetails> gdcDetailsArgumentCaptor;
@@ -128,6 +136,8 @@ public class PersonServiceImplTest {
   private ArgumentCaptor<PersonalDetails> personalDetailsArgumentCaptor;
   @Captor
   private ArgumentCaptor<RightToWork> rightToWorkArgumentCaptor;
+  @Captor
+  private ArgumentCaptor<Set<Permission>> permissionsCaptor;
 
   @Mock
   private ApplicationEventPublisher applicationEventPublisherMock;
@@ -342,6 +352,7 @@ public class PersonServiceImplTest {
     when(savedPersonMock.getId()).thenReturn(PERSON_ID);
     when(personMapperMock.toEntity(unsavedPersonDTOMock)).thenReturn(unsavedPersonMock);
     when(personRepositoryMock.save(unsavedPersonMock)).thenReturn(savedPersonMock);
+    when(permissionServiceMock.getUserEntities()).thenReturn(USER_ENTITIES);
 
     when(gdcDetailsRepositoryMock.save(gdcDetailsArgumentCaptor.capture()))
         .thenReturn(gdcDetailsMock);
@@ -379,6 +390,10 @@ public class PersonServiceImplTest {
     verify(savedPersonMock).setContactDetails(contactDetailsMock);
     verify(savedPersonMock).setPersonalDetails(personalDetailsMock);
     verify(savedPersonMock).setRightToWork(rightToWorkMock);
+    verify(aclSupportServiceMock)
+        .grantPermissionsToUser(eq(Person.class.getName()), eq(PERSON_ID), eq(USER_ENTITIES),
+            permissionsCaptor.capture());
+    assertThat(permissionsCaptor.getValue(), contains(BasePermission.READ, BasePermission.WRITE));
   }
 
   @Test
