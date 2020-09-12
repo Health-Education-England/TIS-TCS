@@ -8,6 +8,7 @@ import static org.hamcrest.Matchers.hasSize;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.when;
+import static org.mockito.internal.util.collections.Sets.newSet;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.delete;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.patch;
@@ -21,6 +22,7 @@ import com.google.common.collect.Lists;
 import com.transformuk.hee.tis.reference.api.dto.RoleCategoryDTO;
 import com.transformuk.hee.tis.reference.api.dto.RoleDTO;
 import com.transformuk.hee.tis.reference.client.impl.ReferenceServiceImpl;
+import com.transformuk.hee.tis.tcs.TestUtils;
 import com.transformuk.hee.tis.tcs.api.dto.ContactDetailsDTO;
 import com.transformuk.hee.tis.tcs.api.dto.GdcDetailsDTO;
 import com.transformuk.hee.tis.tcs.api.dto.GmcDetailsDTO;
@@ -74,6 +76,8 @@ import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
+import java.util.stream.Collectors;
 import org.apache.commons.codec.net.URLCodec;
 import org.junit.Before;
 import org.junit.Ignore;
@@ -86,9 +90,16 @@ import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.data.web.PageableHandlerMethodArgumentResolver;
 import org.springframework.http.MediaType;
 import org.springframework.http.converter.json.MappingJackson2HttpMessageConverter;
+import org.springframework.security.acls.domain.BasePermission;
+import org.springframework.security.acls.domain.GrantedAuthoritySid;
+import org.springframework.security.acls.domain.ObjectIdentityImpl;
+import org.springframework.security.acls.jdbc.JdbcMutableAclService;
+import org.springframework.security.acls.model.AccessControlEntry;
+import org.springframework.security.acls.model.Acl;
+import org.springframework.security.acls.model.MutableAcl;
+import org.springframework.security.acls.model.Sid;
 import org.springframework.test.context.junit4.SpringRunner;
 import org.springframework.test.web.servlet.MockMvc;
-import org.springframework.test.web.servlet.MvcResult;
 import org.springframework.test.web.servlet.setup.MockMvcBuilders;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -137,6 +148,7 @@ public class PersonResourceIntTest {
   private static final String DEFAULT_REGULATOR = "AAAAAAAAAA";
   private static final String UPDATED_REGULATOR = "BBBBBBBBBB";
   private static final BigDecimal DEFAULT_PLACEMENT_WTE = BigDecimal.valueOf(0.6);
+  public static final String HEE = "HEE";
 
   @Autowired
   private PersonRepository personRepository;
@@ -180,6 +192,8 @@ public class PersonResourceIntTest {
   private TrainerApprovalRepository trainerApprovalRepository;
   @Autowired
   private TrainerApprovalService trainerApprovalService;
+  @Autowired
+  private JdbcMutableAclService mutableAclService;
 
   @MockBean
   private PermissionService permissionServiceMock;
@@ -241,6 +255,12 @@ public class PersonResourceIntTest {
 
     when(permissionServiceMock.canViewSensitiveData()).thenReturn(true);
     when(permissionServiceMock.canEditSensitiveData()).thenReturn(true);
+
+    // Set dialect for H2 database
+    mutableAclService.setClassIdentityQuery("call identity()");
+    mutableAclService.setSidIdentityQuery("call identity()");
+    TestUtils.mockUserprofileWithAuthorities("jamesh", newSet(HEE, "ROLE_RUN_AS_Machine User"),
+        "1-AIIDR8", "1-AIIDWA");
   }
 
   private Person createPersonBlankSubSections(final Person person) {
@@ -276,6 +296,7 @@ public class PersonResourceIntTest {
     Map<String, Boolean> roleToExists = new HashMap<>();
     roleToExists.put(DEFAULT_ROLE, true);
     when(referenceService.rolesExist(any(), eq(true))).thenReturn(roleToExists);
+    when(permissionServiceMock.getUserEntities()).thenReturn(newSet(HEE));
 
     restPersonMockMvc.perform(post("/api/people")
         .contentType(TestUtil.APPLICATION_JSON_UTF8)
@@ -296,6 +317,13 @@ public class PersonResourceIntTest {
     assertThat(testPerson.getInactiveNotes()).isEqualTo(DEFAULT_INACTIVE_NOTES);
     assertThat(testPerson.getPublicHealthNumber()).isEqualTo(DEFAULT_PUBLIC_HEALTH_NUMBER);
     assertThat(testPerson.getRegulator()).isEqualTo(DEFAULT_REGULATOR);
+
+    Acl acl = mutableAclService
+        .readAclById(new ObjectIdentityImpl(Person.class.getName(), testPerson.getId()));
+    List<AccessControlEntry> aclEntires = acl.getEntries();
+    assertThat(aclEntires.size()).isEqualTo(2);
+    Set<Sid> sids = aclEntires.stream().map(AccessControlEntry::getSid).collect(Collectors.toSet());
+    assertThat(sids).contains(new GrantedAuthoritySid(HEE));
   }
 
   @Test
@@ -486,10 +514,22 @@ public class PersonResourceIntTest {
   @Transactional
   public void shouldGetMultiplePersons() throws Exception {
     // given
-    personRepository.saveAndFlush(person);
+    person = personRepository.saveAndFlush(person);
+    ObjectIdentityImpl personIdentity = new ObjectIdentityImpl(person);
+    MutableAcl acl = mutableAclService.createAcl(personIdentity);
+    GrantedAuthoritySid heeSid = new GrantedAuthoritySid(HEE);
+    acl.setOwner(heeSid);
+    acl.insertAce(0, BasePermission.READ, heeSid, true);
+    mutableAclService.updateAcl(acl);
 
     final Person person2 = createEntity();
     personRepository.saveAndFlush(person2);
+    personIdentity = new ObjectIdentityImpl(person2);
+    acl = mutableAclService.createAcl(personIdentity);
+    heeSid = new GrantedAuthoritySid(HEE);
+    acl.setOwner(heeSid);
+    acl.insertAce(0, BasePermission.READ, heeSid, true);
+    mutableAclService.updateAcl(acl);
 
     final String personsIDs = this.person.getId() + "," + person2.getId();
 
@@ -640,6 +680,12 @@ public class PersonResourceIntTest {
   public void updatePerson() throws Exception {
     // Initialize the database
     Person savedPerson = personRepository.saveAndFlush(person);
+    ObjectIdentityImpl personIdentity = new ObjectIdentityImpl(savedPerson);
+    MutableAcl acl = mutableAclService.createAcl(personIdentity);
+    GrantedAuthoritySid heeSid = new GrantedAuthoritySid(HEE);
+    acl.setOwner(heeSid);
+    acl.insertAce(0, BasePermission.WRITE, heeSid, true);
+    mutableAclService.updateAcl(acl);
 
     // Update the person
     final PersonDTO updatedPersonDTO = personMapper.toDto(savedPerson);

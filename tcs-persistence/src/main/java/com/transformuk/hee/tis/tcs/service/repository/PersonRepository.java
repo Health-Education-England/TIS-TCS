@@ -20,9 +20,9 @@ public interface PersonRepository extends JpaRepository<Person, Long>,
 // Looks to only be used in tests
 //  @PreAuthorize("hasPermission(#person, 'WRITE')")
 //  Person saveAndFlush(Person person);
-
+// Might need to add the query syntax
   @PostFilter("hasPermission(filterObject, 'READ')")
-  List<Person> findAllById(Set<Long> ids);
+  List<Person> findByIdIn(Set<Long> ids);
 
   @Procedure(name = "build_person_localoffice")
   void buildPersonView();
