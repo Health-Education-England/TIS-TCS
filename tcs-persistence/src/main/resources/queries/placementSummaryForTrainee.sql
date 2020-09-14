@@ -1,4 +1,4 @@
-SELECT p.*, s.name primarySpecialtyName, c.forenames, c.surname, c.id traineeId, c.email, p.id placementId, ps.placementSpecialtyType
+SELECT p.*, s.name primarySpecialtyName, c.forenames, c.legalforenames, c.surname, c.legalsurname, c.id traineeId, c.email, p.id placementId, ps.placementSpecialtyType
 FROM Placement p
 LEFT JOIN PlacementSpecialty ps
 ON p.id = ps.placementId

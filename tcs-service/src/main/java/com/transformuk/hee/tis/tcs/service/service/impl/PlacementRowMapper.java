@@ -19,7 +19,9 @@ public class PlacementRowMapper implements RowMapper<PlacementSummaryDTO> {
     dto.setPlacementType(rs.getString("placementType"));
     dto.setStatus(rs.getString("status"));
     dto.setForenames(rs.getString("forenames"));
+    dto.setLegalforenames(rs.getString("legalforenames"));
     dto.setSurname(rs.getString("surname"));
+    dto.setLegalsurname(rs.getString("legalsurname"));
     dto.setTraineeId(rs.getLong("traineeId"));
     dto.setEmail(rs.getString("email"));
     dto.setGradeAbbreviation(rs.getString("gradeAbbreviation"));
