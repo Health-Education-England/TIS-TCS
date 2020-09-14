@@ -1208,6 +1208,8 @@ public class PostResourceIntTest {
     contactDetails.setId(person.getId());
     contactDetails.setSurname(DEFAULT_TRAINEE_SURNAME);
     contactDetails.setForenames(DEFAULT_TRAINEE_FORENAMES);
+    contactDetails.setLegalSurname(DEFAULT_TRAINEE_SURNAME);
+    contactDetails.setLegalForenames(DEFAULT_TRAINEE_FORENAMES);
     contactDetails.setEmail(DEFAULT_TRAINEE_EMAIL);
     contactDetailsRepository.saveAndFlush(contactDetails);
     Placement placement = PlacementResourceIntTest.createPlacementEntity();
@@ -1230,6 +1232,8 @@ public class PostResourceIntTest {
         .andExpect(jsonPath("$.[*].email").value(hasItem(DEFAULT_TRAINEE_EMAIL)))
         .andExpect(jsonPath("$.[*].forenames").value(hasItem(DEFAULT_TRAINEE_FORENAMES)))
         .andExpect(jsonPath("$.[*].surname").value(hasItem(DEFAULT_TRAINEE_SURNAME)))
+        .andExpect(jsonPath("$.[*].legalforenames").value(hasItem(DEFAULT_TRAINEE_FORENAMES)))
+        .andExpect(jsonPath("$.[*].legalsurname").value(hasItem(DEFAULT_TRAINEE_SURNAME)))
         .andReturn();
 
     mvcResult.getResponse().getContentAsString();

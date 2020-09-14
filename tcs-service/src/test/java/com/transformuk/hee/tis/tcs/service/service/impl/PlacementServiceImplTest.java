@@ -118,7 +118,7 @@ public class PlacementServiceImplTest {
 
   public static PlacementSummaryDTO createPlacementSummaryDTO() {
     return new PlacementSummaryDTO(null, null, number,
-        "Elbows", number, "In Post", "CURRENT", "Joe", "Bloggs",
+        "Elbows", number, "In Post", "CURRENT", "Joe", "Bloggs", "Joe", "Bloggs",
         number, "emailId", "F1", number, null, null);
   }
 
@@ -448,7 +448,8 @@ public class PlacementServiceImplTest {
     final Placement placement = placementRepositoryMock.findById(placementDetailsDto.getId())
         .orElse(null);
     // Call the method under test.
-    PlacementDetailsDTO updatedPlacementDetailsDto = testObj.createDetails(placementDetailsDto, null);
+    PlacementDetailsDTO updatedPlacementDetailsDto = testObj
+        .createDetails(placementDetailsDto, null);
 
     // Perform assertions.
     Set<PlacementSiteDTO> sites = updatedPlacementDetailsDto.getSites();
@@ -511,7 +512,8 @@ public class PlacementServiceImplTest {
     final Placement placement = placementRepositoryMock.findById(placementDetailsDto.getId())
         .orElse(null);
     // Call the method under test.
-    PlacementDetailsDTO updatedPlacementDetailsDto = testObj.createDetails(placementDetailsDto, null);
+    PlacementDetailsDTO updatedPlacementDetailsDto = testObj
+        .createDetails(placementDetailsDto, null);
 
     // Perform assertions.
     Set<PlacementSiteDTO> sites = updatedPlacementDetailsDto.getSites();
@@ -561,7 +563,6 @@ public class PlacementServiceImplTest {
         LocalDate.of(2019, 6, 6),
         LocalDate.of(2019, 9, 4), null);
 
-
     Assert.assertThat("When there's one day overlapping - case 1, should return true",
         result1, CoreMatchers.is(true));
     Assert.assertThat("When there's one day overlapping - case 2, should return true",
@@ -600,9 +601,11 @@ public class PlacementServiceImplTest {
         LocalDate.of(2019, 9, 6),
         LocalDate.of(2019, 10, 10), null);
 
-    Assert.assertThat("When the endDate of testing data is ahead of the mocked data, should return false",
+    Assert.assertThat(
+        "When the endDate of testing data is ahead of the mocked data, should return false",
         result1, CoreMatchers.is(false));
-    Assert.assertThat("When the startDate of testing data is after the mocked data, should return false",
+    Assert.assertThat(
+        "When the startDate of testing data is after the mocked data, should return false",
         result2, CoreMatchers.is(false));
   }
 
@@ -618,7 +621,8 @@ public class PlacementServiceImplTest {
     Set<Long> postIds = new HashSet<>();
     postIds.add(1L);
     Set<Placement> mockedEmptyPlacementsSet = new HashSet<>();
-    doReturn(mockedEmptyPlacementsSet).when(placementRepositoryMock).findPlacementsByPostIds(postIds);
+    doReturn(mockedEmptyPlacementsSet).when(placementRepositoryMock)
+        .findPlacementsByPostIds(postIds);
     boolean result = testObj.validateOverlappingPlacements(NPN,
         LocalDate.of(2019, 5, 1),
         LocalDate.of(2019, 6, 4), null);

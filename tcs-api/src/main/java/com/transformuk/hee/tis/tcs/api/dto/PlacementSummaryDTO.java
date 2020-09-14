@@ -23,7 +23,9 @@ public class PlacementSummaryDTO {
   private String placementType;
   private String status;
   private String forenames;
+  private String legalforenames;
   private String surname;
+  private String legalsurname;
   private Long traineeId;
   private String email;
   private String gradeAbbreviation;
@@ -33,10 +35,9 @@ public class PlacementSummaryDTO {
   private BigDecimal placementWholeTimeEquivalent;
 
   public PlacementSummaryDTO(Date dateFrom, Date dateTo, Long siteId, String primarySpecialtyName,
-      Long gradeId, String placementType, String status, String forenames, String surname,
-      Long traineeId, String email, String gradeAbbreviation, Long placementId,
-      String placementSpecialtyType,
-      BigDecimal placementWholeTimeEquivalent) {
+      Long gradeId, String placementType, String status, String forenames, String legalforenames,
+      String surname, String legalsurname, Long traineeId, String email, String gradeAbbreviation,
+      Long placementId, String placementSpecialtyType, BigDecimal placementWholeTimeEquivalent) {
     this.dateFrom = dateFrom;
     this.dateTo = dateTo;
     this.siteId = siteId;
@@ -45,7 +46,9 @@ public class PlacementSummaryDTO {
     this.placementType = placementType;
     this.status = status;
     this.forenames = forenames;
+    this.legalforenames = legalforenames;
     this.surname = surname;
+    this.legalsurname = legalsurname;
     this.traineeId = traineeId;
     this.email = email;
     this.gradeAbbreviation = gradeAbbreviation;
@@ -73,7 +76,9 @@ public class PlacementSummaryDTO {
         Objects.equals(placementType, that.placementType) &&
         Objects.equals(status, that.status) &&
         Objects.equals(forenames, that.forenames) &&
+        Objects.equals(legalforenames, that.legalforenames) &&
         Objects.equals(surname, that.surname) &&
+        Objects.equals(legalsurname, that.legalsurname) &&
         Objects.equals(traineeId, that.traineeId) &&
         Objects.equals(email, that.email) &&
         Objects.equals(gradeAbbreviation, that.gradeAbbreviation) &&
@@ -88,7 +93,8 @@ public class PlacementSummaryDTO {
 
     return Objects
         .hash(dateFrom, dateTo, siteId, siteName, primarySpecialtyName, gradeId, gradeName,
-            placementType, status, forenames, surname, traineeId, email, gradeAbbreviation,
-            placementId, placementStatus, placementSpecialtyType, placementWholeTimeEquivalent);
+            placementType, status, forenames, legalforenames, surname, legalsurname, traineeId,
+            email, gradeAbbreviation, placementId, placementStatus, placementSpecialtyType,
+            placementWholeTimeEquivalent);
   }
 }
