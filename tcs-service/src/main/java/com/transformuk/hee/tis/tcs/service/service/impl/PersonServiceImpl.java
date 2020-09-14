@@ -83,13 +83,11 @@ import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Sort;
 import org.springframework.data.jpa.domain.Specification;
-import org.springframework.data.jpa.domain.Specifications;
 import org.springframework.jdbc.core.RowMapper;
 import org.springframework.jdbc.core.namedparam.MapSqlParameterSource;
 import org.springframework.jdbc.core.namedparam.NamedParameterJdbcTemplate;
 import org.springframework.scheduling.annotation.Async;
 import org.springframework.security.access.annotation.Secured;
-import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.security.acls.domain.BasePermission;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -484,17 +482,17 @@ public class PersonServiceImpl implements PersonService {
   public List<PersonBasicDetailsDTO> basicDetailsSearch(String searchString) {
     List<Specification<PersonBasicDetails>> specs = new ArrayList<>();
     if (StringUtils.isNotEmpty(searchString)) {
-      specs.add(Specifications.where(containsLike("firstName", searchString)).
+      specs.add(Specification.where(containsLike("firstName", searchString)).
           or(containsLike("lastName", searchString)).
           or(containsLike("gmcDetails.gmcNumber", searchString)));
     }
-    Pageable pageable = new PageRequest(0, PERSON_BASIC_DETAILS_MAX_RESULTS);
+    Pageable pageable = PageRequest.of(0, PERSON_BASIC_DETAILS_MAX_RESULTS);
 
     Page<PersonBasicDetails> result;
     if (org.apache.commons.collections4.CollectionUtils.isEmpty(specs)) {
       result = personBasicDetailsRepository.findAll(pageable);
     } else {
-      Specifications<PersonBasicDetails> fullSpec = Specifications.where(specs.get(0));
+      Specification<PersonBasicDetails> fullSpec = Specification.where(specs.get(0));
       result = personBasicDetailsRepository.findAll(fullSpec, pageable);
     }
 
@@ -779,7 +777,7 @@ public class PersonServiceImpl implements PersonService {
   public List<PersonDTO> findByIdIn(final Set<Long> ids) {
     log.debug("Request to get all persons {} ", ids);
 
-    return personRepository.findAllById(ids).stream()
+    return personRepository.findByIdIn(ids).stream()
         .map(personMapper::toDto)
         .collect(Collectors.toList());
   }
@@ -909,10 +907,9 @@ public class PersonServiceImpl implements PersonService {
   }
 
   private String getLoggedInUsersAssociatedTrusts() {
-    String commaSepTrustIds = permissionService.getUsersTrustIds().stream()
+    return permissionService.getUsersTrustIds().stream()
         .map(Object::toString)
         .reduce((x, y) -> x + ", " + y).orElse(StringUtils.EMPTY);
-    return commaSepTrustIds;
   }
 
   public class PersonViewRowMapper implements RowMapper<PersonViewDTO> {

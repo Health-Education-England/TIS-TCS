@@ -1,8 +1,10 @@
 package com.transformuk.hee.tis.tcs.service.service.impl;
 
-import static org.mockito.Matchers.any;
+import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.when;
+import static org.mockito.internal.util.collections.Sets.newSet;
 
+import com.transformuk.hee.tis.tcs.TestUtils;
 import com.transformuk.hee.tis.tcs.api.dto.ContactDetailsDTO;
 import com.transformuk.hee.tis.tcs.api.dto.GdcDetailsDTO;
 import com.transformuk.hee.tis.tcs.api.dto.GmcDetailsDTO;
@@ -28,6 +30,7 @@ import org.mockito.MockitoAnnotations;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.boot.test.mock.mockito.MockBean;
+import org.springframework.security.acls.jdbc.JdbcMutableAclService;
 import org.springframework.test.context.junit4.SpringRunner;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -35,6 +38,7 @@ import org.springframework.transaction.annotation.Transactional;
 @SpringBootTest(classes = Application.class)
 public class PersonServiceIntTest {
 
+  private static final String HEE = "HEE";
   @Autowired
   private PersonService personService;
   @Autowired
@@ -51,6 +55,8 @@ public class PersonServiceIntTest {
   private PersonalDetailsRepository personalDetailsRepository;
   @Autowired
   private RightToWorkRepository rightToWorkRepository;
+  @Autowired
+  private JdbcMutableAclService mutableAclService;
   @MockBean
   private PermissionService permissionServiceMock;
 
@@ -68,6 +74,11 @@ public class PersonServiceIntTest {
 
     when(permissionServiceMock.canEditSensitiveData()).thenReturn(true);
     when(permissionServiceMock.canEditSensitiveData()).thenReturn(true);
+    when(permissionServiceMock.getUserEntities()).thenReturn(newSet(HEE));
+    TestUtils.mockUserprofileWithAuthorities("jamesh", newSet(HEE, "ROLE_RUN_AS_Machine User"));
+    // Set dialect for H2 database
+    mutableAclService.setClassIdentityQuery("call identity()");
+    mutableAclService.setSidIdentityQuery("call identity()");
   }
 
   private PersonalDetailsDTO buildPersonalDetails() {
@@ -118,7 +129,7 @@ public class PersonServiceIntTest {
     int beforePersonalDetailsSize = personalDetailsRepository.findAll().size();
     int beforeRightToWorkSize = rightToWorkRepository.findAll().size();
 
-    PersonDTO result = personService.create(this.personDTO);
+    PersonDTO result = personService.create(personDTO);
 
     Assert.assertNotNull(result.getId());
     Assert.assertEquals(result.getId(), result.getGdcDetails().getId());
@@ -164,5 +175,4 @@ public class PersonServiceIntTest {
       throw e;
     }
   }
-
 }

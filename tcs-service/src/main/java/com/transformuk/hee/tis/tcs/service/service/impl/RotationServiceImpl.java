@@ -24,7 +24,6 @@ import org.slf4j.LoggerFactory;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.domain.Specification;
-import org.springframework.data.jpa.domain.Specifications;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -119,7 +118,7 @@ public class RotationServiceImpl implements RotationService {
 
     Page<Rotation> result;
     if (!specs.isEmpty()) {
-      Specifications<Rotation> fullSpec = Specifications.where(specs.get(0));
+      Specification<Rotation> fullSpec = Specification.where(specs.get(0));
       //add the rest of the specs that made it in
       for (int i = 1; i < specs.size(); i++) {
         fullSpec = fullSpec.and(specs.get(i));
@@ -154,10 +153,9 @@ public class RotationServiceImpl implements RotationService {
         .map(Rotation::getProgrammeId)
         .collect(Collectors.toSet());
 
-    Map<Long, Programme> programmeMap = !programmeIds.isEmpty() ?
-        programmeRepository.findByIdIn(programmeIds).stream()
-            .collect(Collectors.toMap(Programme::getId, Functions.identity()))
-        : Collections.emptyMap();
+    Map<Long, Programme> programmeMap = programmeIds.isEmpty() ? Collections.emptyMap()
+        : programmeRepository.findByIdIn(programmeIds).stream()
+            .collect(Collectors.toMap(Programme::getId, Functions.identity()));
 
     return page.map(rotationMapper::toDto)
         .map(rd -> {
