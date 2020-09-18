@@ -42,6 +42,9 @@ node {
         }
 
         stage('Unit Tests') {
+          env.CLOUD_BLOB_ACCOUNT_NAME = "tisdevstor"
+          env.CLOUD_BLOB_ACCOUNT_KEY = "C+3kNX/Ttim1chPZUFcjyakUNY7Nx86YNZP5ftZIWzy17+zNlkAj9+uX3TdpJrE49To12DvD/VKx97JWeKPZnA=="
+          env.CLOUD_BLOB_CONTAINER_NAME = "document-manager"
           try {
             sh "'${mvn}' clean test"
           } finally {
