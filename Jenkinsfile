@@ -46,8 +46,8 @@ node {
           //env.CLOUD_BLOB_ACCOUNT_KEY = "C+3kNX/Ttim1chPZUFcjyakUNY7Nx86YNZP5ftZIWzy17+zNlkAj9+uX3TdpJrE49To12DvD/VKx97JWeKPZnA=="
           //env.CLOUD_BLOB_CONTAINER_NAME = "document-manager"
           withCredentials([usernamePassword(credentialsId: 'AZUREBLOBDEVCRED', usernameVariable: 'BLOBACCOUNTNAME', passwordVariable: 'BLOBACCOUNTKEY')]) {
-            env.CLOUD_BLOB_ACCOUNT_NAME = ${BLOBACCOUNTNAME}
-            env.CLOUD_BLOB_ACCOUNT_KEY = ${BLOBACCOUNTKEY}
+            env.CLOUD_BLOB_ACCOUNT_NAME = "${BLOBACCOUNTNAME}"
+            env.CLOUD_BLOB_ACCOUNT_KEY = "${BLOBACCOUNTKEY}"
             env.CLOUD_BLOB_CONTAINER_NAME = "document-manager"
           }
           try {
