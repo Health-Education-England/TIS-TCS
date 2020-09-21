@@ -133,3 +133,5 @@ kc:
   timeout: ${KC_TIMEOUT:10000}
 
 enable.es.search: false
+
+aws.s3.bucket: tisdevstor

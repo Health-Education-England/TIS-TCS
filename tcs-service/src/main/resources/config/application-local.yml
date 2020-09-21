@@ -27,6 +27,8 @@ azure:
   accountKey: ${CLOUD_BLOB_ACCOUNT_KEY:C+3kNX/Ttim1chPZUFcjyakUNY7Nx86YNZP5ftZIWzy17+zNlkAj9+uX3TdpJrE49To12DvD/VKx97JWeKPZnA==}
   containerName: ${CLOUD_BLOB_CONTAINER_NAME:document-manager}
 
+aws.s3.bucket: tisdevstor
+
 kc:
   realm: ${KC_REALM:lin}
   client:
