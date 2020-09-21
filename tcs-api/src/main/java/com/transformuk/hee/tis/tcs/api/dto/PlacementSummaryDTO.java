@@ -33,11 +33,12 @@ public class PlacementSummaryDTO {
   private String placementStatus;
   private String placementSpecialtyType;
   private BigDecimal placementWholeTimeEquivalent;
+  private String nationalPostNumber;
 
   public PlacementSummaryDTO(Date dateFrom, Date dateTo, Long siteId, String primarySpecialtyName,
       Long gradeId, String placementType, String status, String forenames, String legalforenames,
       String surname, String legalsurname, Long traineeId, String email, String gradeAbbreviation,
-      Long placementId, String placementSpecialtyType, BigDecimal placementWholeTimeEquivalent) {
+      Long placementId, String placementSpecialtyType, BigDecimal placementWholeTimeEquivalent, String nationalPostNumber) {
     this.dateFrom = dateFrom;
     this.dateTo = dateTo;
     this.siteId = siteId;
@@ -55,6 +56,7 @@ public class PlacementSummaryDTO {
     this.placementId = placementId;
     this.placementSpecialtyType = placementSpecialtyType;
     this.placementWholeTimeEquivalent = placementWholeTimeEquivalent;
+    this.nationalPostNumber = nationalPostNumber;
   }
 
   @Override
@@ -85,7 +87,8 @@ public class PlacementSummaryDTO {
         Objects.equals(placementId, that.placementId) &&
         Objects.equals(placementStatus, that.placementStatus) &&
         Objects.equals(placementSpecialtyType, that.placementSpecialtyType) &&
-        Objects.equals(placementWholeTimeEquivalent, that.placementWholeTimeEquivalent);
+        Objects.equals(placementWholeTimeEquivalent, that.placementWholeTimeEquivalent) &&
+        Objects.equals(nationalPostNumber, that.nationalPostNumber);
   }
 
   @Override
@@ -95,6 +98,6 @@ public class PlacementSummaryDTO {
         .hash(dateFrom, dateTo, siteId, siteName, primarySpecialtyName, gradeId, gradeName,
             placementType, status, forenames, legalforenames, surname, legalsurname, traineeId,
             email, gradeAbbreviation, placementId, placementStatus, placementSpecialtyType,
-            placementWholeTimeEquivalent);
+            placementWholeTimeEquivalent, nationalPostNumber);
   }
 }

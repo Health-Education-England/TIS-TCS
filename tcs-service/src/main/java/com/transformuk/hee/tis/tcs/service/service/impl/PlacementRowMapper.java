@@ -29,6 +29,7 @@ public class PlacementRowMapper implements RowMapper<PlacementSummaryDTO> {
     dto.setPlacementSpecialtyType(rs.getString("placementSpecialtyType"));
     float floatWTE = rs.getFloat("placementWholeTimeEquivalent");
     dto.setPlacementWholeTimeEquivalent(new BigDecimal(Float.toString(floatWTE)));
+    dto.setNationalPostNumber(rs.getString("nationalPostNumber"));
     return dto;
   }
 }
