@@ -37,6 +37,7 @@ import org.apache.commons.collections4.ListUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.domain.Specification;
@@ -59,7 +60,7 @@ public class DocumentServiceImpl implements DocumentService {
   private final AzureProperties azureProperties;
 
   public DocumentServiceImpl(final DocumentRepository documentRepository,
-      final TagRepository tagRepository, final FileStorageRepository fileStorageRepository,
+      final TagRepository tagRepository, @Qualifier("awsFileStorageRepository") final FileStorageRepository fileStorageRepository,
       final DocumentMapper documentMapper, final TagMapper tagMapper,
       final AzureProperties azureProperties) {
     this.documentRepository = documentRepository;

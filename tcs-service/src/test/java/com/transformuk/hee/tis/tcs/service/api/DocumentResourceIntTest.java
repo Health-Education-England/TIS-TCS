@@ -43,11 +43,11 @@ import java.util.List;
 import java.util.Set;
 import java.util.function.Function;
 import javax.annotation.Resource;
-import javax.inject.Inject;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.mockito.MockitoAnnotations;
+import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.core.io.ByteArrayResource;
 import org.springframework.data.domain.Page;
@@ -99,9 +99,10 @@ public class DocumentResourceIntTest {
   private JdbcTemplate jdbcTemplate;
   @Resource
   private AzureProperties azureProperties;
-  @Inject
+  @Resource
   private PageableHandlerMethodArgumentResolver pageableArgumentResolver;
   @Resource
+  @Qualifier("awsFileStorageRepository")
   private FileStorageRepository fileStorageRepository;
   private MockMvc mockMvc;
 
