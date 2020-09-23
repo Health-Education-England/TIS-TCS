@@ -80,32 +80,6 @@ spring:
       cluster-nodes: localhost:9300
       cluster-name: docker-cluster
 
-# ===================================================================
-# JHipster specific properties
-#
-# Full reference is available at: https://jhipster.github.io/common-application-properties/
-# ===================================================================
-
-#jhipster:
-#  async:
-#    core-pool-size: 2
-#    max-pool-size: 50
-#    queue-capacity: 10000
-#  security:
-#    authentication:
-#      jwt:
-#        secret: 20fb0c95203947e254dd09243256257d9abc1f9a
-#        # Token is valid 24 hours
-#        token-validity-in-seconds: 86400
-
-# ===================================================================
-# .TestApplication specific properties
-# Add your own application properties here, see the ApplicationProperties class
-# to have type-safe configuration, like in the JHipsterProperties above
-#
-# More documentation is available at:
-# https://jhipster.github.io/common-application-properties/
-# ===================================================================
 logging:
   # file: ${LOG_DIR:${HOME}}/tcs.log
   level:
