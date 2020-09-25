@@ -92,6 +92,7 @@ public class RevalidationServiceImplTest {
     programmeMembership1 = new ProgrammeMembership();
     programmeMembership1.setProgrammeStartDate(PM_START_DATE);
     programmeMembership1.setProgrammeEndDate(PM_END_DATE);
+    programmeMembership1.setProgrammeMembershipType(PROGRAMME_MEMBERSHIP_TYPE);
 
     Programme programme = new Programme();
     programme.setProgrammeName(PROGRAMME_NAME);
@@ -169,6 +170,8 @@ public class RevalidationServiceImplTest {
     assertThat(result.size(), is(1));
 
     ConnectionRecordDto record = result.get("1000");
+    assertThat(record.getProgrammeMembershipType(), is(PROGRAMME_MEMBERSHIP_TYPE.toString()));
+    assertThat(record.getProgrammeName(), is(PROGRAMME_NAME));
     assertThat(record.getProgrammeOwner(), is(PROGRAMME_OWNER));
     assertThat(record.getConnectionStatus(), is(CONNECTION_STATUS_CONNECTED));
     assertThat(record.getProgrammeMembershipStartDate(), is(PM_START_DATE));
@@ -253,6 +256,8 @@ public class RevalidationServiceImplTest {
     assertThat(result, notNullValue());
     assertThat(result.size(), is(1));
     ConnectionRecordDto record = result.get("1000");
+    assertThat(record.getProgrammeMembershipType(), is(PROGRAMME_MEMBERSHIP_TYPE.toString()));
+    assertThat(record.getProgrammeName(), is(PROGRAMME_NAME));
     assertThat(record.getConnectionStatus(), is(CONNECTION_STATUS_DISCONNECTED));
     assertThat(record.getProgrammeMembershipStartDate(), is(PM_START_DATE));
     assertThat(record.getProgrammeMembershipEndDate(), is(nullValue()));

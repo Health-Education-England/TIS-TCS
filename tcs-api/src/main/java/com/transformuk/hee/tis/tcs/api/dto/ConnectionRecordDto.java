@@ -6,6 +6,8 @@ import lombok.Data;
 @Data
 public class ConnectionRecordDto {
 
+  private String programmeMembershipType;
+  private String programmeName;
   private String programmeOwner;
   private String connectionStatus;
   private LocalDate programmeMembershipStartDate;

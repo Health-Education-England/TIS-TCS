@@ -100,12 +100,15 @@ public class RevalidationServiceImpl implements RevalidationService {
       if (!isDisconnected(currentDate, programmeMembership)) {
         connectionRecordDto.setConnectionStatus("Yes");
       }
+      connectionRecordDto.setProgrammeMembershipType(programmeMembership.getProgrammeMembershipType().toString());
       connectionRecordDto
           .setProgrammeMembershipStartDate(programmeMembership.getProgrammeStartDate());
       connectionRecordDto.setProgrammeMembershipEndDate(programmeMembership.getProgrammeEndDate());
-      final String owner = Objects.nonNull(programmeMembership.getProgramme())
-          ? programmeMembership.getProgramme().getOwner() : null;
-      connectionRecordDto.setProgrammeOwner(owner);
+      if (Objects.nonNull(programmeMembership.getProgramme())) {
+        connectionRecordDto.setProgrammeOwner(programmeMembership.getProgramme().getOwner());
+        connectionRecordDto.setProgrammeName(programmeMembership.getProgramme().getProgrammeName());
+      }
+
     }
 
     return connectionRecordDto;
@@ -134,12 +137,13 @@ public class RevalidationServiceImpl implements RevalidationService {
     //Programme Membership
     ProgrammeMembership programmeMembership = programmeMembershipRepository
         .findLatestProgrammeMembershipByTraineeId(personId);
-    LOG.debug("Programme Membership End Date : {}", programmeMembership.getProgrammeEndDate());
-    revalidationRecordDto.setCctDate(programmeMembership.getProgrammeEndDate());
-    revalidationRecordDto.setProgrammeMembershipType(programmeMembership
-        .getProgrammeMembershipType().toString());
-    revalidationRecordDto.setProgrammeName(programmeMembership.getProgramme().getProgrammeName());
-
+    if (Objects.nonNull(programmeMembership)) {
+      LOG.debug("Programme Membership End Date : {}", programmeMembership.getProgrammeEndDate());
+      revalidationRecordDto.setCctDate(programmeMembership.getProgrammeEndDate());
+      revalidationRecordDto.setProgrammeMembershipType(programmeMembership
+          .getProgrammeMembershipType().toString());
+      revalidationRecordDto.setProgrammeName(programmeMembership.getProgramme().getProgrammeName());
+    }
     //Placement
     List<Placement> currentPlacementsForTrainee = placementRepository
         .findCurrentPlacementForTrainee(personId, now(), placementTypes);
