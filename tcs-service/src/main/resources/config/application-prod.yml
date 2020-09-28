@@ -38,17 +38,6 @@ spring:
       cluster-nodes: ${ES_CLUSTER_NODE_URLS}
       cluster-name: ${ES_CLUSTER_NAME}
 
-jhipster:
-  http:
-    cache: # Used by the CachingHttpHeadersFilter
-      timeToLiveInDays: 1461
-  security:
-    authentication:
-      jwt:
-        secret: 20fb0c95203947e254dd09243256257d9abc1f9a
-  mail: # specific JHipster mail property, for standard properties see MailProperties
-    base-url: http://my-server-url-to-change # Modify according to your server's URL
-
 application:
 
 enable.es.search: ${ENABLE_ES_SEARCH}
