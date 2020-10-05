@@ -100,7 +100,10 @@ public class RevalidationServiceImpl implements RevalidationService {
       if (!isDisconnected(currentDate, programmeMembership)) {
         connectionRecordDto.setConnectionStatus("Yes");
       }
-      connectionRecordDto.setProgrammeMembershipType(programmeMembership.getProgrammeMembershipType().toString());
+      final String programmeMemberShipType =
+          Objects.nonNull(programmeMembership.getProgrammeMembershipType()) ? programmeMembership
+              .getProgrammeMembershipType().toString() : null;
+      connectionRecordDto.setProgrammeMembershipType(programmeMemberShipType);
       connectionRecordDto
           .setProgrammeMembershipStartDate(programmeMembership.getProgrammeStartDate());
       connectionRecordDto.setProgrammeMembershipEndDate(programmeMembership.getProgrammeEndDate());
