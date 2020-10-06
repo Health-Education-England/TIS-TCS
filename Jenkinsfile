@@ -42,6 +42,11 @@ node {
         }
 
         stage('Unit Tests') {
+          withCredentials([usernamePassword(credentialsId: 'AZUREBLOBTISDEVCRED', usernameVariable: 'BLOBACCOUNTNAME', passwordVariable: 'BLOBACCOUNTKEY')]) {
+            env.CLOUD_BLOB_ACCOUNT_NAME = "${BLOBACCOUNTNAME}"
+            env.CLOUD_BLOB_ACCOUNT_KEY = "${BLOBACCOUNTKEY}"
+            env.CLOUD_BLOB_CONTAINER_NAME = "document-manager"
+          }
           try {
             sh "'${mvn}' clean test"
           } finally {
