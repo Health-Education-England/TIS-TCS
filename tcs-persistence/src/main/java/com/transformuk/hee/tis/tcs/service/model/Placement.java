@@ -99,6 +99,8 @@ public class Placement implements Serializable {
   private Status status;
   @Enumerated(EnumType.STRING)
   private LifecycleState lifecycleState;
+  @OneToMany(mappedBy = "placement", fetch = FetchType.LAZY)
+  private Set<PlacementEsrEvent> placementEsrExported;
 
   @Override
   public boolean equals(Object o) {

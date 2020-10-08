@@ -15,6 +15,7 @@ import com.transformuk.hee.tis.tcs.api.dto.PlacementSpecialtyDTO;
 import com.transformuk.hee.tis.tcs.api.dto.PlacementSummaryDTO;
 import com.transformuk.hee.tis.tcs.api.dto.PlacementSupervisorDTO;
 import com.transformuk.hee.tis.tcs.api.enumeration.LifecycleState;
+import com.transformuk.hee.tis.tcs.api.enumeration.PlacementEsrEventStatus;
 import com.transformuk.hee.tis.tcs.api.enumeration.PlacementLogType;
 import com.transformuk.hee.tis.tcs.api.enumeration.PlacementStatus;
 import com.transformuk.hee.tis.tcs.api.enumeration.PostSpecialtyType;
@@ -22,6 +23,7 @@ import com.transformuk.hee.tis.tcs.api.enumeration.Status;
 import com.transformuk.hee.tis.tcs.api.enumeration.TCSDateColumns;
 import com.transformuk.hee.tis.tcs.service.api.decorator.PlacementDetailsDecorator;
 import com.transformuk.hee.tis.tcs.service.api.util.ColumnFilterUtil;
+import com.transformuk.hee.tis.tcs.service.dto.placement.PlacementEsrExportedDto;
 import com.transformuk.hee.tis.tcs.service.event.PlacementDeletedEvent;
 import com.transformuk.hee.tis.tcs.service.event.PlacementSavedEvent;
 import com.transformuk.hee.tis.tcs.service.exception.DateRangeColumnFilterException;
@@ -30,6 +32,7 @@ import com.transformuk.hee.tis.tcs.service.model.Comment;
 import com.transformuk.hee.tis.tcs.service.model.EsrNotification;
 import com.transformuk.hee.tis.tcs.service.model.Placement;
 import com.transformuk.hee.tis.tcs.service.model.PlacementDetails;
+import com.transformuk.hee.tis.tcs.service.model.PlacementEsrEvent;
 import com.transformuk.hee.tis.tcs.service.model.PlacementLog;
 import com.transformuk.hee.tis.tcs.service.model.PlacementSite;
 import com.transformuk.hee.tis.tcs.service.model.PlacementSpecialty;
@@ -40,6 +43,7 @@ import com.transformuk.hee.tis.tcs.service.model.Specialty;
 import com.transformuk.hee.tis.tcs.service.repository.CommentRepository;
 import com.transformuk.hee.tis.tcs.service.repository.PersonRepositoryImpl;
 import com.transformuk.hee.tis.tcs.service.repository.PlacementDetailsRepository;
+import com.transformuk.hee.tis.tcs.service.repository.PlacementEsrEventRepository;
 import com.transformuk.hee.tis.tcs.service.repository.PlacementRepository;
 import com.transformuk.hee.tis.tcs.service.repository.PlacementSpecialtyRepository;
 import com.transformuk.hee.tis.tcs.service.repository.PlacementSupervisorRepository;
@@ -149,6 +153,9 @@ public class PlacementServiceImpl implements PlacementService {
   @Autowired
   private PlacementDetailsDecorator placementDetailsDecorator;
 
+  @Autowired
+  private PlacementEsrEventRepository placementEsrEventRepository;
+
 
   /**
    * Save a placement.
@@ -191,6 +198,27 @@ public class PlacementServiceImpl implements PlacementService {
       placementDetailsDTO.setLifecycleState(LifecycleState.DRAFT);
     }
     return placementDetailsDTO;
+  }
+
+  @Override
+  public Optional<PlacementEsrEvent> markPlacementAsEsrExported(Long placementId,
+      PlacementEsrExportedDto placementEsrExportedDto) {
+    Optional<Placement> optionalPlacementId = placementRepository.findPlacementById(placementId);
+    if(!optionalPlacementId.isPresent()) {
+      return Optional.empty();
+    }
+
+    Placement placement = optionalPlacementId.get();
+    PlacementEsrEvent newPlacementEsrEvent = new PlacementEsrEvent();
+    newPlacementEsrEvent.setFilename(placementEsrExportedDto.getFilename());
+    newPlacementEsrEvent.setPositionId(placementEsrExportedDto.getPositionId());
+    newPlacementEsrEvent.setPositionNumber(placementEsrExportedDto.getPositionNumber());
+    newPlacementEsrEvent.setPlacement(placement);
+    newPlacementEsrEvent.setEventDateTime(placementEsrExportedDto.getExportedAt());
+    newPlacementEsrEvent.setStatus(PlacementEsrEventStatus.EXPORTED);
+
+    PlacementEsrEvent newPlacement = placementEsrEventRepository.save(newPlacementEsrEvent);
+    return Optional.ofNullable(newPlacement);
   }
 
   private boolean isEligibleForNewNotificationWhenUpdate(PlacementDetailsDTO updatedPlacementDetails,
