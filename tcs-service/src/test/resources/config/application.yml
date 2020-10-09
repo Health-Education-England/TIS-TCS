@@ -101,9 +101,9 @@ kc:
   client:
     id: ${KC_CLIENT_ID:api-tokens}
   server:
-    url: ${KC_SERVER_URL:https://dev-apps.tis.nhs.uk/auth/}
-  username: ${KC_USERNAME:tcs_trust_admin}
-  password: ${KC_PASSWORD:tcs_trust_admin}
+    url: ${KC_SERVER_URL:}
+  username: ${KC_USERNAME:}
+  password: ${KC_PASSWORD:}
   timeout: ${KC_TIMEOUT:10000}
 
 enable.es.search: false
