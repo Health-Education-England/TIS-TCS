@@ -4,15 +4,13 @@ import com.transformuk.hee.tis.tcs.api.dto.PlacementDTO;
 import com.transformuk.hee.tis.tcs.api.dto.PlacementDetailsDTO;
 import com.transformuk.hee.tis.tcs.api.dto.validation.Create;
 import com.transformuk.hee.tis.tcs.api.dto.validation.Update;
-import com.transformuk.hee.tis.tcs.api.enumeration.LifecycleState;
 import com.transformuk.hee.tis.tcs.service.api.decorator.PlacementDetailsDecorator;
 import com.transformuk.hee.tis.tcs.service.api.util.HeaderUtil;
 import com.transformuk.hee.tis.tcs.service.api.util.PaginationUtil;
 import com.transformuk.hee.tis.tcs.service.api.validation.PlacementValidator;
 import com.transformuk.hee.tis.tcs.service.api.validation.ValidationException;
-import com.transformuk.hee.tis.tcs.service.dto.placement.PlacementEsrExportedDto;
+import com.transformuk.hee.tis.tcs.api.dto.PlacementEsrExportedDto;
 import com.transformuk.hee.tis.tcs.service.dto.placementmanager.PlacementsResultDTO;
-import com.transformuk.hee.tis.tcs.service.model.Placement;
 import com.transformuk.hee.tis.tcs.service.model.PlacementEsrEvent;
 import com.transformuk.hee.tis.tcs.service.service.PlacementService;
 import com.transformuk.hee.tis.tcs.service.service.impl.PermissionService;
@@ -327,10 +325,7 @@ public class PlacementResource {
     Optional<PlacementEsrEvent> optionalPlacementEvent = placementService
         .markPlacementAsEsrExported(placementId, placementEsrExportedDto);
 
-    if(optionalPlacementEvent.isPresent()) {
-      return ResponseEntity.ok().body(optionalPlacementEvent.get());
-    }
-    return ResponseEntity.badRequest().build();
+    return ResponseEntity.of(optionalPlacementEvent);
   }
 
 }

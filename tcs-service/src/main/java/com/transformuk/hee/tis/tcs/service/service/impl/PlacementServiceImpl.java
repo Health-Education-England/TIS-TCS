@@ -23,7 +23,7 @@ import com.transformuk.hee.tis.tcs.api.enumeration.Status;
 import com.transformuk.hee.tis.tcs.api.enumeration.TCSDateColumns;
 import com.transformuk.hee.tis.tcs.service.api.decorator.PlacementDetailsDecorator;
 import com.transformuk.hee.tis.tcs.service.api.util.ColumnFilterUtil;
-import com.transformuk.hee.tis.tcs.service.dto.placement.PlacementEsrExportedDto;
+import com.transformuk.hee.tis.tcs.api.dto.PlacementEsrExportedDto;
 import com.transformuk.hee.tis.tcs.service.event.PlacementDeletedEvent;
 import com.transformuk.hee.tis.tcs.service.event.PlacementSavedEvent;
 import com.transformuk.hee.tis.tcs.service.exception.DateRangeColumnFilterException;
@@ -56,6 +56,7 @@ import com.transformuk.hee.tis.tcs.service.service.PlacementService;
 import com.transformuk.hee.tis.tcs.service.service.helper.SqlQuerySupplier;
 import com.transformuk.hee.tis.tcs.service.service.mapper.PersonLiteMapper;
 import com.transformuk.hee.tis.tcs.service.service.mapper.PlacementDetailsMapper;
+import com.transformuk.hee.tis.tcs.service.service.mapper.PlacementEsrExportedDtoMapper;
 import com.transformuk.hee.tis.tcs.service.service.mapper.PlacementMapper;
 import com.transformuk.hee.tis.tcs.service.service.mapper.PlacementSiteMapper;
 import com.transformuk.hee.tis.tcs.service.service.mapper.PlacementSpecialtyMapper;
@@ -155,6 +156,8 @@ public class PlacementServiceImpl implements PlacementService {
 
   @Autowired
   private PlacementEsrEventRepository placementEsrEventRepository;
+  @Autowired
+  private PlacementEsrExportedDtoMapper placementEsrExportedDtoMapper;
 
 
   /**
@@ -209,10 +212,8 @@ public class PlacementServiceImpl implements PlacementService {
     }
 
     Placement placement = optionalPlacementId.get();
-    PlacementEsrEvent newPlacementEsrEvent = new PlacementEsrEvent();
-    newPlacementEsrEvent.setFilename(placementEsrExportedDto.getFilename());
-    newPlacementEsrEvent.setPositionId(placementEsrExportedDto.getPositionId());
-    newPlacementEsrEvent.setPositionNumber(placementEsrExportedDto.getPositionNumber());
+    PlacementEsrEvent newPlacementEsrEvent = placementEsrExportedDtoMapper
+        .placementEsrExportedDtoToPlacementEsrEvent(placementEsrExportedDto);
     newPlacementEsrEvent.setPlacement(placement);
     newPlacementEsrEvent.setEventDateTime(placementEsrExportedDto.getExportedAt());
     newPlacementEsrEvent.setStatus(PlacementEsrEventStatus.EXPORTED);

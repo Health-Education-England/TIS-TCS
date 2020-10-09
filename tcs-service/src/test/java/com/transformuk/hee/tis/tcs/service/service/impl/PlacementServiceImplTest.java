@@ -23,7 +23,7 @@ import com.transformuk.hee.tis.tcs.api.enumeration.PlacementEsrEventStatus;
 import com.transformuk.hee.tis.tcs.api.enumeration.PlacementSiteType;
 import com.transformuk.hee.tis.tcs.api.enumeration.Status;
 import com.transformuk.hee.tis.tcs.service.api.decorator.PlacementDetailsDecorator;
-import com.transformuk.hee.tis.tcs.service.dto.placement.PlacementEsrExportedDto;
+import com.transformuk.hee.tis.tcs.api.dto.PlacementEsrExportedDto;
 import com.transformuk.hee.tis.tcs.service.model.Placement;
 import com.transformuk.hee.tis.tcs.service.model.PlacementDetails;
 import com.transformuk.hee.tis.tcs.service.model.PlacementEsrEvent;
@@ -40,6 +40,7 @@ import com.transformuk.hee.tis.tcs.service.repository.PostRepository;
 import com.transformuk.hee.tis.tcs.service.repository.ProgrammeRepository;
 import com.transformuk.hee.tis.tcs.service.service.helper.SqlQuerySupplier;
 import com.transformuk.hee.tis.tcs.service.service.mapper.PlacementDetailsMapper;
+import com.transformuk.hee.tis.tcs.service.service.mapper.PlacementEsrExportedDtoMapper;
 import com.transformuk.hee.tis.tcs.service.service.mapper.PlacementMapper;
 import com.transformuk.hee.tis.tcs.service.service.mapper.PlacementSiteMapper;
 import com.transformuk.hee.tis.tcs.service.service.mapper.PlacementSpecialtyMapper;
@@ -67,6 +68,7 @@ import org.mockito.ArgumentCaptor;
 import org.mockito.Captor;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
+import org.mockito.Mockito;
 import org.mockito.Spy;
 import org.mockito.junit.MockitoJUnitRunner;
 import org.springframework.jdbc.core.namedparam.NamedParameterJdbcTemplate;
@@ -118,6 +120,8 @@ public class PlacementServiceImplTest {
   private PlacementDetailsDecorator placementDetailsDecorator;
   @Mock
   private PlacementEsrEventRepository placementEsrEventRepositoryMock;
+  @Mock
+  private PlacementEsrExportedDtoMapper placementEsrExportedDtoMapper;
   @Captor
   private ArgumentCaptor<LocalDate> toDateCaptor;
   @Captor
@@ -749,31 +753,22 @@ public class PlacementServiceImplTest {
 
   @Test
   public void markPlacementAsEsrExportedShouldFindPlacementAndCreateNewEventAgainstIt() {
-    PlacementEsrEvent placementEsrEvent = new PlacementEsrEvent();
+    PlacementEsrEvent placementEsrEventMock = mock(PlacementEsrEvent.class);
+    PlacementEsrExportedDto placementEsrExportedDtoMock = mock(PlacementEsrExportedDto.class);
     when(placementRepositoryMock.findPlacementById(PLACEMENT_ID)).thenReturn(Optional.of(placementMock));
-    when(placementEsrEventRepositoryMock.save(placementEsrEventArgumentCaptor.capture())).thenReturn(placementEsrEvent);
-
-    PlacementEsrExportedDto placementEsrExportedDto = new PlacementEsrExportedDto();
-    placementEsrExportedDto.setPositionNumber(POSITION_NUMBER);
-    placementEsrExportedDto.setPositionId(POSITION_ID);
-    placementEsrExportedDto.setPlacementId(PLACEMENT_ID);
-    placementEsrExportedDto.setFilename(ESR_FILENAME_TXT);
-    Date exportedAt = new Date(111L);
-    placementEsrExportedDto.setExportedAt(exportedAt);
+    when(placementEsrExportedDtoMapper
+        .placementEsrExportedDtoToPlacementEsrEvent(placementEsrExportedDtoMock))
+        .thenReturn(placementEsrEventMock);
+    when(placementEsrEventRepositoryMock.save(placementEsrEventArgumentCaptor.capture())).thenReturn(placementEsrEventMock);
 
     Optional<PlacementEsrEvent> result = testObj
-        .markPlacementAsEsrExported(PLACEMENT_ID, placementEsrExportedDto);
+        .markPlacementAsEsrExported(PLACEMENT_ID, placementEsrExportedDtoMock);
 
     Assert.assertTrue(result.isPresent());
-    Assert.assertEquals(placementEsrEvent, result.get());
+    Assert.assertEquals(placementEsrEventMock, result.get());
 
     PlacementEsrEvent capturedPlacementEvent = placementEsrEventArgumentCaptor.getValue();
-    Assert.assertEquals(exportedAt, capturedPlacementEvent.getEventDateTime());
-    Assert.assertEquals(ESR_FILENAME_TXT, capturedPlacementEvent.getFilename());
-    Assert.assertEquals(POSITION_ID, capturedPlacementEvent.getPositionId());
-    Assert.assertEquals(POSITION_NUMBER, capturedPlacementEvent.getPositionNumber());
-    Assert.assertEquals(PlacementEsrEventStatus.EXPORTED, capturedPlacementEvent.getStatus());
-    Assert.assertEquals(placementMock, capturedPlacementEvent.getPlacement());
+    Assert.assertSame(placementEsrEventMock, capturedPlacementEvent);
   }
 
   @Test

@@ -12,7 +12,7 @@ import com.google.common.collect.Lists;
 import com.transformuk.hee.tis.tcs.api.enumeration.LifecycleState;
 import com.transformuk.hee.tis.tcs.service.api.decorator.PlacementDetailsDecorator;
 import com.transformuk.hee.tis.tcs.service.api.validation.PlacementValidator;
-import com.transformuk.hee.tis.tcs.service.dto.placement.PlacementEsrExportedDto;
+import com.transformuk.hee.tis.tcs.api.dto.PlacementEsrExportedDto;
 import com.transformuk.hee.tis.tcs.service.dto.placementmanager.PersonDTO;
 import com.transformuk.hee.tis.tcs.service.dto.placementmanager.PlacementDTO;
 import com.transformuk.hee.tis.tcs.service.dto.placementmanager.PlacementsResultDTO;

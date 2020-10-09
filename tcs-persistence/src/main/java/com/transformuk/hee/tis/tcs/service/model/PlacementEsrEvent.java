@@ -12,6 +12,7 @@ import javax.persistence.Id;
 import javax.persistence.JoinColumn;
 import javax.persistence.ManyToOne;
 import javax.persistence.Table;
+import lombok.Data;
 
 /**
  * A list of placement events that are linked to ESR
@@ -20,6 +21,7 @@ import javax.persistence.Table;
  */
 @Entity
 @Table(name = "PlacementEsrEvent")
+@Data
 public class PlacementEsrEvent {
 
   @Id
@@ -41,106 +43,4 @@ public class PlacementEsrEvent {
   @Column(name = "status")
   @Enumerated(EnumType.STRING)
   private PlacementEsrEventStatus status;
-
-  public Long getId() {
-    return id;
-  }
-
-  public void setId(Long id) {
-    this.id = id;
-  }
-
-  public Placement getPlacement() {
-    return placement;
-  }
-
-  public void setPlacement(Placement placement) {
-    this.placement = placement;
-  }
-
-  public Date getEventDateTime() {
-    return eventDateTime;
-  }
-
-  public void setEventDateTime(Date eventDateTime) {
-    this.eventDateTime = eventDateTime;
-  }
-
-  public String getFilename() {
-    return filename;
-  }
-
-  public void setFilename(String filename) {
-    this.filename = filename;
-  }
-
-  public Long getPositionNumber() {
-    return positionNumber;
-  }
-
-  public void setPositionNumber(Long positionNumber) {
-    this.positionNumber = positionNumber;
-  }
-
-  public Long getPositionId() {
-    return positionId;
-  }
-
-  public void setPositionId(Long positionId) {
-    this.positionId = positionId;
-  }
-
-  public PlacementEsrEventStatus getStatus() {
-    return status;
-  }
-
-  public void setStatus(PlacementEsrEventStatus status) {
-    this.status = status;
-  }
-
-  @Override
-  public boolean equals(Object o) {
-    if (this == o) {
-      return true;
-    }
-    if (o == null || getClass() != o.getClass()) {
-      return false;
-    }
-
-    PlacementEsrEvent that = (PlacementEsrEvent) o;
-
-    if (id != null ? !id.equals(that.id) : that.id != null) {
-      return false;
-    }
-    if (placement != null ? !placement.equals(that.placement) : that.placement != null) {
-      return false;
-    }
-    if (eventDateTime != null ? !eventDateTime.equals(that.eventDateTime)
-        : that.eventDateTime != null) {
-      return false;
-    }
-    if (filename != null ? !filename.equals(that.filename) : that.filename != null) {
-      return false;
-    }
-    if (positionNumber != null ? !positionNumber.equals(that.positionNumber)
-        : that.positionNumber != null) {
-      return false;
-    }
-    if (positionId != null ? !positionId.equals(that.positionId) : that.positionId != null) {
-      return false;
-    }
-    return status == that.status;
-  }
-
-  @Override
-  public int hashCode() {
-    int result = id != null ? id.hashCode() : 0;
-    result = 31 * result + (placement != null ? placement.hashCode() : 0);
-    result = 31 * result + (eventDateTime != null ? eventDateTime.hashCode() : 0);
-    result = 31 * result + (filename != null ? filename.hashCode() : 0);
-    result = 31 * result + (positionNumber != null ? positionNumber.hashCode() : 0);
-    result = 31 * result + (positionId != null ? positionId.hashCode() : 0);
-    result = 31 * result + (status != null ? status.hashCode() : 0);
-    return result;
-  }
 }
