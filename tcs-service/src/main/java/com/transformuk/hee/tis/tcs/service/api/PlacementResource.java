@@ -4,14 +4,14 @@ import com.transformuk.hee.tis.tcs.api.dto.PlacementDTO;
 import com.transformuk.hee.tis.tcs.api.dto.PlacementDetailsDTO;
 import com.transformuk.hee.tis.tcs.api.dto.validation.Create;
 import com.transformuk.hee.tis.tcs.api.dto.validation.Update;
-import com.transformuk.hee.tis.tcs.api.enumeration.LifecycleState;
 import com.transformuk.hee.tis.tcs.service.api.decorator.PlacementDetailsDecorator;
 import com.transformuk.hee.tis.tcs.service.api.util.HeaderUtil;
 import com.transformuk.hee.tis.tcs.service.api.util.PaginationUtil;
 import com.transformuk.hee.tis.tcs.service.api.validation.PlacementValidator;
 import com.transformuk.hee.tis.tcs.service.api.validation.ValidationException;
+import com.transformuk.hee.tis.tcs.api.dto.PlacementEsrExportedDto;
 import com.transformuk.hee.tis.tcs.service.dto.placementmanager.PlacementsResultDTO;
-import com.transformuk.hee.tis.tcs.service.model.Placement;
+import com.transformuk.hee.tis.tcs.service.model.PlacementEsrEvent;
 import com.transformuk.hee.tis.tcs.service.service.PlacementService;
 import com.transformuk.hee.tis.tcs.service.service.impl.PermissionService;
 import com.transformuk.hee.tis.tcs.service.service.impl.PlacementPlannerServiceImp;
@@ -316,6 +316,16 @@ public class PlacementResource {
   ) {
     List<PlacementDetailsDTO> result = placementService.getListOfDraftPlacementsByProgrammeId(programmeId);
     return ResponseEntity.ok(result);
+  }
+
+  @PostMapping(value = "/placements/{placementId}/esr-exported")
+  @PreAuthorize("hasAuthority('tcs:add:modify:entities')")
+  public ResponseEntity<PlacementEsrEvent> markPlacementAsEsrExported(@PathVariable Long placementId,
+      @RequestBody PlacementEsrExportedDto placementEsrExportedDto) {
+    Optional<PlacementEsrEvent> optionalPlacementEvent = placementService
+        .markPlacementAsEsrExported(placementId, placementEsrExportedDto);
+
+    return ResponseEntity.of(optionalPlacementEvent);
   }
 
 }

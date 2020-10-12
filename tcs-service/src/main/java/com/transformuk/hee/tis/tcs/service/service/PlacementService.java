@@ -3,10 +3,13 @@ package com.transformuk.hee.tis.tcs.service.service;
 import com.transformuk.hee.tis.tcs.api.dto.PlacementDTO;
 import com.transformuk.hee.tis.tcs.api.dto.PlacementDetailsDTO;
 import com.transformuk.hee.tis.tcs.api.dto.PlacementSummaryDTO;
+import com.transformuk.hee.tis.tcs.api.dto.PlacementEsrExportedDto;
 import com.transformuk.hee.tis.tcs.service.model.Placement;
+import com.transformuk.hee.tis.tcs.service.model.PlacementEsrEvent;
 import java.io.IOException;
 import java.time.LocalDate;
 import java.util.List;
+import java.util.Optional;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 
@@ -179,4 +182,6 @@ public interface PlacementService {
    * @return placementDetailsDTO
    */
   PlacementDetailsDTO checkApprovalPermWhenUpdate(final PlacementDetailsDTO placementDetailsDTO);
+
+  Optional<PlacementEsrEvent> markPlacementAsEsrExported(Long placementId, PlacementEsrExportedDto placementEsrExportedDto);
 }

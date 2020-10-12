@@ -7,6 +7,8 @@ import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.doNothing;
 import static org.mockito.Mockito.doReturn;
 import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.verifyNoMoreInteractions;
 import static org.mockito.Mockito.verifyZeroInteractions;
 import static org.mockito.Mockito.when;
 
@@ -17,23 +19,28 @@ import com.transformuk.hee.tis.tcs.api.dto.PlacementDetailsDTO;
 import com.transformuk.hee.tis.tcs.api.dto.PlacementSiteDTO;
 import com.transformuk.hee.tis.tcs.api.dto.PlacementSummaryDTO;
 import com.transformuk.hee.tis.tcs.api.enumeration.LifecycleState;
+import com.transformuk.hee.tis.tcs.api.enumeration.PlacementEsrEventStatus;
 import com.transformuk.hee.tis.tcs.api.enumeration.PlacementSiteType;
 import com.transformuk.hee.tis.tcs.api.enumeration.Status;
 import com.transformuk.hee.tis.tcs.service.api.decorator.PlacementDetailsDecorator;
+import com.transformuk.hee.tis.tcs.api.dto.PlacementEsrExportedDto;
 import com.transformuk.hee.tis.tcs.service.model.Placement;
 import com.transformuk.hee.tis.tcs.service.model.PlacementDetails;
+import com.transformuk.hee.tis.tcs.service.model.PlacementEsrEvent;
 import com.transformuk.hee.tis.tcs.service.model.PlacementLog;
 import com.transformuk.hee.tis.tcs.service.model.PlacementSite;
 import com.transformuk.hee.tis.tcs.service.model.Post;
 import com.transformuk.hee.tis.tcs.service.model.Programme;
 import com.transformuk.hee.tis.tcs.service.repository.CommentRepository;
 import com.transformuk.hee.tis.tcs.service.repository.PlacementDetailsRepository;
+import com.transformuk.hee.tis.tcs.service.repository.PlacementEsrEventRepository;
 import com.transformuk.hee.tis.tcs.service.repository.PlacementRepository;
 import com.transformuk.hee.tis.tcs.service.repository.PlacementSupervisorRepository;
 import com.transformuk.hee.tis.tcs.service.repository.PostRepository;
 import com.transformuk.hee.tis.tcs.service.repository.ProgrammeRepository;
 import com.transformuk.hee.tis.tcs.service.service.helper.SqlQuerySupplier;
 import com.transformuk.hee.tis.tcs.service.service.mapper.PlacementDetailsMapper;
+import com.transformuk.hee.tis.tcs.service.service.mapper.PlacementEsrExportedDtoMapper;
 import com.transformuk.hee.tis.tcs.service.service.mapper.PlacementMapper;
 import com.transformuk.hee.tis.tcs.service.service.mapper.PlacementSiteMapper;
 import com.transformuk.hee.tis.tcs.service.service.mapper.PlacementSpecialtyMapper;
@@ -61,6 +68,7 @@ import org.mockito.ArgumentCaptor;
 import org.mockito.Captor;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
+import org.mockito.Mockito;
 import org.mockito.Spy;
 import org.mockito.junit.MockitoJUnitRunner;
 import org.springframework.jdbc.core.namedparam.NamedParameterJdbcTemplate;
@@ -68,8 +76,11 @@ import org.springframework.jdbc.core.namedparam.NamedParameterJdbcTemplate;
 @RunWith(MockitoJUnitRunner.class)
 public class PlacementServiceImplTest {
 
-  private static final long PLACEMENT_ID = 1L;
+  private static final Long PLACEMENT_ID = 1L;
   private static final Long number = 1L;
+  public static final Long POSITION_NUMBER = 1111L;
+  public static final Long POSITION_ID = 2222L;
+  public static final String ESR_FILENAME_TXT = "esr_filename.txt";
   @Spy
   @InjectMocks
   private PlacementServiceImpl testObj;
@@ -107,6 +118,10 @@ public class PlacementServiceImplTest {
   private PlacementLogServiceImpl placementLogServiceImplMock;
   @Mock
   private PlacementDetailsDecorator placementDetailsDecorator;
+  @Mock
+  private PlacementEsrEventRepository placementEsrEventRepositoryMock;
+  @Mock
+  private PlacementEsrExportedDtoMapper placementEsrExportedDtoMapper;
   @Captor
   private ArgumentCaptor<LocalDate> toDateCaptor;
   @Captor
@@ -115,6 +130,8 @@ public class PlacementServiceImplTest {
   private ArgumentCaptor<PlacementRowMapper> placementRowMapperArgumentCaptor;
   @Captor
   private ArgumentCaptor<Long> longArgumentCaptor;
+  @Captor
+  private ArgumentCaptor<PlacementEsrEvent> placementEsrEventArgumentCaptor;
 
   public static PlacementSummaryDTO createPlacementSummaryDTO() {
     return new PlacementSummaryDTO(null, null, number,
@@ -732,5 +749,42 @@ public class PlacementServiceImplTest {
             placementLog);
 
     Assert.assertTrue(eligibleForCurrentTraineeWteChangeNotification);
+  }
+
+  @Test
+  public void markPlacementAsEsrExportedShouldFindPlacementAndCreateNewEventAgainstIt() {
+    PlacementEsrEvent placementEsrEventMock = mock(PlacementEsrEvent.class);
+    PlacementEsrExportedDto placementEsrExportedDtoMock = mock(PlacementEsrExportedDto.class);
+    when(placementRepositoryMock.findPlacementById(PLACEMENT_ID)).thenReturn(Optional.of(placementMock));
+    when(placementEsrExportedDtoMapper
+        .placementEsrExportedDtoToPlacementEsrEvent(placementEsrExportedDtoMock))
+        .thenReturn(placementEsrEventMock);
+    when(placementEsrEventRepositoryMock.save(placementEsrEventArgumentCaptor.capture())).thenReturn(placementEsrEventMock);
+
+    Optional<PlacementEsrEvent> result = testObj
+        .markPlacementAsEsrExported(PLACEMENT_ID, placementEsrExportedDtoMock);
+
+    Assert.assertTrue(result.isPresent());
+    Assert.assertEquals(placementEsrEventMock, result.get());
+
+    PlacementEsrEvent capturedPlacementEvent = placementEsrEventArgumentCaptor.getValue();
+    Assert.assertSame(placementEsrEventMock, capturedPlacementEvent);
+  }
+
+  @Test
+  public void markPlacementAsEsrExportedShouldReturnEmptyOptionalWhenPlacementCannotBeFound() {
+    when(placementRepositoryMock.findPlacementById(PLACEMENT_ID)).thenReturn(Optional.empty());
+    PlacementEsrExportedDto placementEsrExportedDto = new PlacementEsrExportedDto();
+    placementEsrExportedDto.setPositionNumber(POSITION_NUMBER);
+    placementEsrExportedDto.setPositionId(POSITION_ID);
+    placementEsrExportedDto.setPlacementId(PLACEMENT_ID);
+    placementEsrExportedDto.setFilename(ESR_FILENAME_TXT);
+    placementEsrExportedDto.setExportedAt(new Date(111L));
+
+    Optional<PlacementEsrEvent> result = testObj
+        .markPlacementAsEsrExported(PLACEMENT_ID, placementEsrExportedDto);
+
+    Assert.assertFalse(result.isPresent());
+    verifyNoMoreInteractions(placementEsrEventRepositoryMock);
   }
 }
