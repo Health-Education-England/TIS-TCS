@@ -12,7 +12,7 @@
 
   <groupId>com.transformuk.hee.tis</groupId>
   <artifactId>tcs-service</artifactId>
-  <version>6.12.0</version>
+  <version>6.12.1</version>
   <dependencies>
     <dependency>
       <groupId>com.fasterxml.jackson.datatype</groupId>
