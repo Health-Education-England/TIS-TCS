@@ -9,10 +9,10 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.google.common.collect.Lists;
+import com.transformuk.hee.tis.tcs.api.dto.PlacementEsrEventDto;
 import com.transformuk.hee.tis.tcs.api.enumeration.LifecycleState;
 import com.transformuk.hee.tis.tcs.service.api.decorator.PlacementDetailsDecorator;
 import com.transformuk.hee.tis.tcs.service.api.validation.PlacementValidator;
-import com.transformuk.hee.tis.tcs.api.dto.PlacementEsrExportedDto;
 import com.transformuk.hee.tis.tcs.service.dto.placementmanager.PersonDTO;
 import com.transformuk.hee.tis.tcs.service.dto.placementmanager.PlacementDTO;
 import com.transformuk.hee.tis.tcs.service.dto.placementmanager.PlacementsResultDTO;
@@ -93,7 +93,7 @@ public class PlacementResourceTest {
   @MockBean
   private PermissionService permissionServiceMock;
   @Captor
-  private ArgumentCaptor<PlacementEsrExportedDto> placementEsrExportedDtoArgumentCaptor;
+  private ArgumentCaptor<PlacementEsrEventDto> placementEsrExportedDtoArgumentCaptor;
 
   private PlacementsResultDTO placements;
   private SpecialtyDTO specialtyDTO;
@@ -101,7 +101,7 @@ public class PlacementResourceTest {
   private PostDTO post1DTO, post2DTO;
   private PlacementDTO placement1DTO, placement2DTO, placement3DTO, placement4DTO;
   private PersonDTO trainee1DTO, trainee2DTO;
-  private PlacementEsrExportedDto placementEsrExportedDto;
+  private PlacementEsrEventDto placementEsrExportedDto;
 
   @Before
   public void setup() {
@@ -125,7 +125,7 @@ public class PlacementResourceTest {
   }
 
   private void setupPlacementEsrExportedDto() {
-    placementEsrExportedDto = new PlacementEsrExportedDto();
+    placementEsrExportedDto = new PlacementEsrEventDto();
     placementEsrExportedDto.setExportedAt(new Date(111L));
     placementEsrExportedDto.setFilename(EXPORTED_FILENAME);
     placementEsrExportedDto.setPlacementId(EXPORTED_PLACEMENT_ID);
@@ -273,7 +273,7 @@ public class PlacementResourceTest {
         .contentType(MediaType.APPLICATION_JSON_UTF8))
         .andExpect(status().isOk());
 
-    PlacementEsrExportedDto capturedPayload = placementEsrExportedDtoArgumentCaptor.getValue();
+    PlacementEsrEventDto capturedPayload = placementEsrExportedDtoArgumentCaptor.getValue();
     Assert.assertEquals(placementEsrExportedDto.getExportedAt(), capturedPayload.getExportedAt());
     Assert.assertEquals(placementEsrExportedDto.getFilename(), capturedPayload.getFilename());
     Assert.assertEquals(placementEsrExportedDto.getPlacementId(), capturedPayload.getPlacementId());

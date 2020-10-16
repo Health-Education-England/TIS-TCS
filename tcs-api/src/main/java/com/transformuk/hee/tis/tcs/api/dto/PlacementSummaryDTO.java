@@ -3,6 +3,7 @@ package com.transformuk.hee.tis.tcs.api.dto;
 import java.math.BigDecimal;
 import java.util.Date;
 import java.util.Objects;
+import java.util.Set;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
@@ -34,6 +35,7 @@ public class PlacementSummaryDTO {
   private String placementSpecialtyType;
   private BigDecimal placementWholeTimeEquivalent;
   private String nationalPostNumber;
+  private Set<PlacementEsrEventDto> esrEvents;
 
   public PlacementSummaryDTO(Date dateFrom, Date dateTo, Long siteId, String primarySpecialtyName,
       Long gradeId, String placementType, String status, String forenames, String legalforenames,
@@ -88,7 +90,8 @@ public class PlacementSummaryDTO {
         Objects.equals(placementStatus, that.placementStatus) &&
         Objects.equals(placementSpecialtyType, that.placementSpecialtyType) &&
         Objects.equals(placementWholeTimeEquivalent, that.placementWholeTimeEquivalent) &&
-        Objects.equals(nationalPostNumber, that.nationalPostNumber);
+        Objects.equals(nationalPostNumber, that.nationalPostNumber) &&
+        Objects.equals(esrEvents, that.esrEvents);
   }
 
   @Override
@@ -98,6 +101,6 @@ public class PlacementSummaryDTO {
         .hash(dateFrom, dateTo, siteId, siteName, primarySpecialtyName, gradeId, gradeName,
             placementType, status, forenames, legalforenames, surname, legalsurname, traineeId,
             email, gradeAbbreviation, placementId, placementStatus, placementSpecialtyType,
-            placementWholeTimeEquivalent, nationalPostNumber);
+            placementWholeTimeEquivalent, nationalPostNumber, esrEvents);
   }
 }

@@ -3,7 +3,7 @@ package com.transformuk.hee.tis.tcs.service.service;
 import com.transformuk.hee.tis.tcs.api.dto.PlacementDTO;
 import com.transformuk.hee.tis.tcs.api.dto.PlacementDetailsDTO;
 import com.transformuk.hee.tis.tcs.api.dto.PlacementSummaryDTO;
-import com.transformuk.hee.tis.tcs.api.dto.PlacementEsrExportedDto;
+import com.transformuk.hee.tis.tcs.api.dto.PlacementEsrEventDto;
 import com.transformuk.hee.tis.tcs.service.model.Placement;
 import com.transformuk.hee.tis.tcs.service.model.PlacementEsrEvent;
 import java.io.IOException;
@@ -183,5 +183,5 @@ public interface PlacementService {
    */
   PlacementDetailsDTO checkApprovalPermWhenUpdate(final PlacementDetailsDTO placementDetailsDTO);
 
-  Optional<PlacementEsrEvent> markPlacementAsEsrExported(Long placementId, PlacementEsrExportedDto placementEsrExportedDto);
+  Optional<PlacementEsrEvent> markPlacementAsEsrExported(Long placementId, PlacementEsrEventDto placementEsrExportedDto);
 }

@@ -9,7 +9,7 @@ import com.transformuk.hee.tis.tcs.service.api.util.HeaderUtil;
 import com.transformuk.hee.tis.tcs.service.api.util.PaginationUtil;
 import com.transformuk.hee.tis.tcs.service.api.validation.PlacementValidator;
 import com.transformuk.hee.tis.tcs.service.api.validation.ValidationException;
-import com.transformuk.hee.tis.tcs.api.dto.PlacementEsrExportedDto;
+import com.transformuk.hee.tis.tcs.api.dto.PlacementEsrEventDto;
 import com.transformuk.hee.tis.tcs.service.dto.placementmanager.PlacementsResultDTO;
 import com.transformuk.hee.tis.tcs.service.model.PlacementEsrEvent;
 import com.transformuk.hee.tis.tcs.service.service.PlacementService;
@@ -321,7 +321,7 @@ public class PlacementResource {
   @PostMapping(value = "/placements/{placementId}/esr-exported")
   @PreAuthorize("hasAuthority('tcs:add:modify:entities')")
   public ResponseEntity<PlacementEsrEvent> markPlacementAsEsrExported(@PathVariable Long placementId,
-      @RequestBody PlacementEsrExportedDto placementEsrExportedDto) {
+      @RequestBody PlacementEsrEventDto placementEsrExportedDto) {
     Optional<PlacementEsrEvent> optionalPlacementEvent = placementService
         .markPlacementAsEsrExported(placementId, placementEsrExportedDto);
 
