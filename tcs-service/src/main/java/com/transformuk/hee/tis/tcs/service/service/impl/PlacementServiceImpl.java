@@ -157,7 +157,7 @@ public class PlacementServiceImpl implements PlacementService {
   @Autowired
   private PlacementEsrEventRepository placementEsrEventRepository;
   @Autowired
-  private PlacementEsrEventDtoMapper placementEsrExportedDtoMapper;
+  private PlacementEsrEventDtoMapper placementEsrEventDtoMapper;
 
 
   /**
@@ -212,7 +212,7 @@ public class PlacementServiceImpl implements PlacementService {
     }
 
     Placement placement = optionalPlacementId.get();
-    PlacementEsrEvent newPlacementEsrEvent = placementEsrExportedDtoMapper
+    PlacementEsrEvent newPlacementEsrEvent = placementEsrEventDtoMapper
         .placementEsrEventDtoToPlacementEsrEvent(placementEsrExportedDto);
     newPlacementEsrEvent.setPlacement(placement);
     newPlacementEsrEvent.setEventDateTime(placementEsrExportedDto.getExportedAt());
@@ -795,11 +795,11 @@ public class PlacementServiceImpl implements PlacementService {
           .collect(Collectors.toList());
     }
 
-    populateEsrEvents(resultList);
+    populateEsrEventsForPlacementSummary(resultList);
     return resultList;
   }
 
-  protected void populateEsrEvents(List<PlacementSummaryDTO> resultList) {
+  protected void populateEsrEventsForPlacementSummary(List<PlacementSummaryDTO> resultList) {
     if(CollectionUtils.isNotEmpty(resultList)) {
 
       List<Long> placementIds = resultList.stream().map(PlacementSummaryDTO::getPlacementId)
@@ -814,7 +814,7 @@ public class PlacementServiceImpl implements PlacementService {
               if(CollectionUtils.isEmpty(pl.getEsrEvents())){
                 pl.setEsrEvents(new HashSet<>());
               }
-              pl.getEsrEvents().add(placementEsrExportedDtoMapper
+              pl.getEsrEvents().add(placementEsrEventDtoMapper
                   .placementEsrEvenToPlacementEsrEventDto(esrEvent));
             });
       }
@@ -839,6 +839,7 @@ public class PlacementServiceImpl implements PlacementService {
       resultList = resultList.subList(0, 1000);
     }
 
+    populateEsrEventsForPlacementSummary(resultList);
     return resultList;
   }
 

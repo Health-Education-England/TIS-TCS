@@ -67,7 +67,6 @@ import org.mockito.ArgumentCaptor;
 import org.mockito.Captor;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
-import org.mockito.Mockito;
 import org.mockito.Spy;
 import org.mockito.junit.MockitoJUnitRunner;
 import org.springframework.jdbc.core.namedparam.NamedParameterJdbcTemplate;
@@ -256,7 +255,7 @@ public class PlacementServiceImplTest {
     when(placementEsrExportedDtoMapper.placementEsrEvenToPlacementEsrEventDto(event2Mock))
         .thenReturn(placementEsrEventDto2);
 
-    testObj.populateEsrEvents(placements);
+    testObj.populateEsrEventsForPlacementSummary(placements);
 
     for (PlacementSummaryDTO placement : placements) {
       Assert.assertNotNull(placement.getEsrEvents());
