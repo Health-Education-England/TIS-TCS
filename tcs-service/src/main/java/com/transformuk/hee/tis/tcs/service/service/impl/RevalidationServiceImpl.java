@@ -80,10 +80,10 @@ public class RevalidationServiceImpl implements RevalidationService {
     final Map<String, ConnectionRecordDto> connectionRecordDtoMap = new HashMap<>();
     gmcDetails.forEach(gmcDetail -> {
 
+      LOG.info("Searching Programme membership for person: {}", gmcDetail.getId());
+
       final ProgrammeMembership programmeMembership = programmeMembershipRepository
           .findLatestProgrammeMembershipByTraineeId(gmcDetail.getId());
-      LOG.info("Programe membership found for person: {}, membership: {}", gmcDetail.getId(),
-          programmeMembership);
 
       final ConnectionRecordDto connectionRecordDto = getConnectionStatus(programmeMembership);
       connectionRecordDtoMap.put(gmcDetail.getGmcNumber(), connectionRecordDto);
@@ -97,6 +97,9 @@ public class RevalidationServiceImpl implements RevalidationService {
     final LocalDate currentDate = now();
 
     if (Objects.nonNull(programmeMembership)) {
+
+      LOG.info("Programme membership found membership: {}", programmeMembership.getId());
+
       if (!isDisconnected(currentDate, programmeMembership)) {
         connectionRecordDto.setConnectionStatus("Yes");
       }
@@ -111,7 +114,6 @@ public class RevalidationServiceImpl implements RevalidationService {
         connectionRecordDto.setProgrammeOwner(programmeMembership.getProgramme().getOwner());
         connectionRecordDto.setProgrammeName(programmeMembership.getProgramme().getProgrammeName());
       }
-
     }
 
     return connectionRecordDto;
