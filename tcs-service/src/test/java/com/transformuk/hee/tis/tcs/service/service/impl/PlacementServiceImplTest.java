@@ -16,14 +16,13 @@ import com.google.common.collect.Lists;
 import com.google.common.collect.Sets;
 import com.transformuk.hee.tis.tcs.api.dto.PlacementDTO;
 import com.transformuk.hee.tis.tcs.api.dto.PlacementDetailsDTO;
+import com.transformuk.hee.tis.tcs.api.dto.PlacementEsrEventDto;
 import com.transformuk.hee.tis.tcs.api.dto.PlacementSiteDTO;
 import com.transformuk.hee.tis.tcs.api.dto.PlacementSummaryDTO;
 import com.transformuk.hee.tis.tcs.api.enumeration.LifecycleState;
-import com.transformuk.hee.tis.tcs.api.enumeration.PlacementEsrEventStatus;
 import com.transformuk.hee.tis.tcs.api.enumeration.PlacementSiteType;
 import com.transformuk.hee.tis.tcs.api.enumeration.Status;
 import com.transformuk.hee.tis.tcs.service.api.decorator.PlacementDetailsDecorator;
-import com.transformuk.hee.tis.tcs.api.dto.PlacementEsrExportedDto;
 import com.transformuk.hee.tis.tcs.service.model.Placement;
 import com.transformuk.hee.tis.tcs.service.model.PlacementDetails;
 import com.transformuk.hee.tis.tcs.service.model.PlacementEsrEvent;
@@ -40,7 +39,7 @@ import com.transformuk.hee.tis.tcs.service.repository.PostRepository;
 import com.transformuk.hee.tis.tcs.service.repository.ProgrammeRepository;
 import com.transformuk.hee.tis.tcs.service.service.helper.SqlQuerySupplier;
 import com.transformuk.hee.tis.tcs.service.service.mapper.PlacementDetailsMapper;
-import com.transformuk.hee.tis.tcs.service.service.mapper.PlacementEsrExportedDtoMapper;
+import com.transformuk.hee.tis.tcs.service.service.mapper.PlacementEsrEventDtoMapper;
 import com.transformuk.hee.tis.tcs.service.service.mapper.PlacementMapper;
 import com.transformuk.hee.tis.tcs.service.service.mapper.PlacementSiteMapper;
 import com.transformuk.hee.tis.tcs.service.service.mapper.PlacementSpecialtyMapper;
@@ -68,7 +67,6 @@ import org.mockito.ArgumentCaptor;
 import org.mockito.Captor;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
-import org.mockito.Mockito;
 import org.mockito.Spy;
 import org.mockito.junit.MockitoJUnitRunner;
 import org.springframework.jdbc.core.namedparam.NamedParameterJdbcTemplate;
@@ -76,7 +74,7 @@ import org.springframework.jdbc.core.namedparam.NamedParameterJdbcTemplate;
 @RunWith(MockitoJUnitRunner.class)
 public class PlacementServiceImplTest {
 
-  private static final Long PLACEMENT_ID = 1L;
+  private static final Long PLACEMENT_ID = 1L, PLACEMENT2_ID = 2L;
   private static final Long number = 1L;
   public static final Long POSITION_NUMBER = 1111L;
   public static final Long POSITION_ID = 2222L;
@@ -121,7 +119,7 @@ public class PlacementServiceImplTest {
   @Mock
   private PlacementEsrEventRepository placementEsrEventRepositoryMock;
   @Mock
-  private PlacementEsrExportedDtoMapper placementEsrExportedDtoMapper;
+  private PlacementEsrEventDtoMapper placementEsrExportedDtoMapper;
   @Captor
   private ArgumentCaptor<LocalDate> toDateCaptor;
   @Captor
@@ -226,6 +224,44 @@ public class PlacementServiceImplTest {
 
     PlacementRowMapper capturedRowMapper = placementRowMapperArgumentCaptor.getValue();
     Assert.assertNotNull(capturedRowMapper);
+  }
+
+  @Test
+  public void populateEsrEventsShouldFindEventsForThePlacementsAndAddToList() {
+    PlacementSummaryDTO placement1 = new PlacementSummaryDTO(), placement2 = new PlacementSummaryDTO();
+    placement1.setPlacementId(PLACEMENT_ID);
+    placement2.setPlacementId(PLACEMENT2_ID);
+    List<PlacementSummaryDTO> placements = Lists.newArrayList(placement1, placement2);
+
+    Placement placement1Mock = mock(Placement.class);
+    Placement placement2Mock = mock(Placement.class);
+    when(placement1Mock.getId()).thenReturn(PLACEMENT_ID);
+    when(placement2Mock.getId()).thenReturn(PLACEMENT2_ID);
+
+    PlacementEsrEvent event1Mock = mock(PlacementEsrEvent.class);
+    PlacementEsrEvent event2Mock = mock(PlacementEsrEvent.class);
+    when(event1Mock.getPlacement()).thenReturn(placement1Mock);
+    when(event2Mock.getPlacement()).thenReturn(placement2Mock);
+
+    Set<PlacementEsrEvent> foundEvents = Sets.newHashSet(event1Mock, event2Mock);
+    when(placementEsrEventRepositoryMock
+        .findPlacementEsrEventByPlacementIdIn(Lists.newArrayList(PLACEMENT_ID, PLACEMENT2_ID)))
+        .thenReturn(foundEvents);
+
+    PlacementEsrEventDto placementEsrEventDto1 = mock(PlacementEsrEventDto.class);
+    PlacementEsrEventDto placementEsrEventDto2 = mock(PlacementEsrEventDto.class);
+    when(placementEsrExportedDtoMapper.placementEsrEvenToPlacementEsrEventDto(event1Mock))
+        .thenReturn(placementEsrEventDto1);
+    when(placementEsrExportedDtoMapper.placementEsrEvenToPlacementEsrEventDto(event2Mock))
+        .thenReturn(placementEsrEventDto2);
+
+    testObj.populateEsrEventsForPlacementSummary(placements);
+
+    for (PlacementSummaryDTO placement : placements) {
+      Assert.assertNotNull(placement.getEsrEvents());
+      Assert.assertTrue(placement.getEsrEvents().contains(placementEsrEventDto1)
+      || placement.getEsrEvents().contains(placementEsrEventDto2));
+    }
   }
 
   @Test
@@ -754,10 +790,10 @@ public class PlacementServiceImplTest {
   @Test
   public void markPlacementAsEsrExportedShouldFindPlacementAndCreateNewEventAgainstIt() {
     PlacementEsrEvent placementEsrEventMock = mock(PlacementEsrEvent.class);
-    PlacementEsrExportedDto placementEsrExportedDtoMock = mock(PlacementEsrExportedDto.class);
+    PlacementEsrEventDto placementEsrExportedDtoMock = mock(PlacementEsrEventDto.class);
     when(placementRepositoryMock.findPlacementById(PLACEMENT_ID)).thenReturn(Optional.of(placementMock));
     when(placementEsrExportedDtoMapper
-        .placementEsrExportedDtoToPlacementEsrEvent(placementEsrExportedDtoMock))
+        .placementEsrEventDtoToPlacementEsrEvent(placementEsrExportedDtoMock))
         .thenReturn(placementEsrEventMock);
     when(placementEsrEventRepositoryMock.save(placementEsrEventArgumentCaptor.capture())).thenReturn(placementEsrEventMock);
 
@@ -774,7 +810,7 @@ public class PlacementServiceImplTest {
   @Test
   public void markPlacementAsEsrExportedShouldReturnEmptyOptionalWhenPlacementCannotBeFound() {
     when(placementRepositoryMock.findPlacementById(PLACEMENT_ID)).thenReturn(Optional.empty());
-    PlacementEsrExportedDto placementEsrExportedDto = new PlacementEsrExportedDto();
+    PlacementEsrEventDto placementEsrExportedDto = new PlacementEsrEventDto();
     placementEsrExportedDto.setPositionNumber(POSITION_NUMBER);
     placementEsrExportedDto.setPositionId(POSITION_ID);
     placementEsrExportedDto.setPlacementId(PLACEMENT_ID);

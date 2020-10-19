@@ -1,9 +1,9 @@
 package com.transformuk.hee.tis.tcs.service.service.mapper;
 
-import com.transformuk.hee.tis.tcs.api.dto.PlacementEsrExportedDto;
+import com.transformuk.hee.tis.tcs.api.dto.PlacementEsrEventDto;
+import com.transformuk.hee.tis.tcs.api.enumeration.PlacementEsrEventStatus;
 import com.transformuk.hee.tis.tcs.service.Application;
 import com.transformuk.hee.tis.tcs.service.model.PlacementEsrEvent;
-import java.time.Instant;
 import java.util.Date;
 import org.junit.Assert;
 import org.junit.Test;
@@ -14,7 +14,7 @@ import org.springframework.test.context.junit4.SpringRunner;
 
 @RunWith(SpringRunner.class)
 @SpringBootTest(classes = Application.class)
-public class PlacementEsrExportedDtoMapperTest {
+public class PlacementEsrEventDtoMapperTest {
 
   public static final String FILENAME = "filename";
   public static final Date FIXED_DATE = new Date(111L);
@@ -23,23 +23,41 @@ public class PlacementEsrExportedDtoMapperTest {
   public static final Long POSITION_NUMBER = 4444L;
 
   @Autowired
-  private PlacementEsrExportedDtoMapper placementEsrExportedDtoMapper;
+  private PlacementEsrEventDtoMapper placementEsrExportedDtoMapper;
 
   @Test
   public void mapperShouldConvertDtoToEntity(){
-    PlacementEsrExportedDto dto = new PlacementEsrExportedDto();
+    PlacementEsrEventDto dto = new PlacementEsrEventDto();
     dto.setExportedAt(FIXED_DATE);
     dto.setFilename(FILENAME);
     dto.setPositionId(POSITION_ID);
     dto.setPositionNumber(POSITION_NUMBER);
 
     PlacementEsrEvent result = placementEsrExportedDtoMapper
-        .placementEsrExportedDtoToPlacementEsrEvent(dto);
+        .placementEsrEventDtoToPlacementEsrEvent(dto);
 
     Assert.assertEquals(FIXED_DATE, result.getEventDateTime());
     Assert.assertEquals(FILENAME, result.getFilename());
     Assert.assertEquals(POSITION_ID, result.getPositionId());
     Assert.assertEquals(POSITION_NUMBER, result.getPositionNumber());
+  }
 
+  @Test
+  public void mapperShouldConvertEntityToDto() {
+    PlacementEsrEvent entity = new PlacementEsrEvent();
+    entity.setStatus(PlacementEsrEventStatus.EXPORTED);
+    entity.setPositionId(POSITION_ID);
+    entity.setPositionNumber(POSITION_NUMBER);
+    entity.setFilename(FILENAME);
+    entity.setEventDateTime(FIXED_DATE);
+
+    PlacementEsrEventDto result = placementEsrExportedDtoMapper
+        .placementEsrEvenToPlacementEsrEventDto(entity);
+
+    Assert.assertEquals(PlacementEsrEventStatus.EXPORTED, result.getStatus());
+    Assert.assertEquals(POSITION_ID, result.getPositionId());
+    Assert.assertEquals(POSITION_NUMBER, result.getPositionNumber());
+    Assert.assertEquals(FILENAME, result.getFilename());
+    Assert.assertEquals(FIXED_DATE, result.getExportedAt());
   }
 }

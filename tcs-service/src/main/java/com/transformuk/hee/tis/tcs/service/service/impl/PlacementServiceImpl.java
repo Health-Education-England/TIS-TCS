@@ -23,7 +23,7 @@ import com.transformuk.hee.tis.tcs.api.enumeration.Status;
 import com.transformuk.hee.tis.tcs.api.enumeration.TCSDateColumns;
 import com.transformuk.hee.tis.tcs.service.api.decorator.PlacementDetailsDecorator;
 import com.transformuk.hee.tis.tcs.service.api.util.ColumnFilterUtil;
-import com.transformuk.hee.tis.tcs.api.dto.PlacementEsrExportedDto;
+import com.transformuk.hee.tis.tcs.api.dto.PlacementEsrEventDto;
 import com.transformuk.hee.tis.tcs.service.event.PlacementDeletedEvent;
 import com.transformuk.hee.tis.tcs.service.event.PlacementSavedEvent;
 import com.transformuk.hee.tis.tcs.service.exception.DateRangeColumnFilterException;
@@ -56,7 +56,7 @@ import com.transformuk.hee.tis.tcs.service.service.PlacementService;
 import com.transformuk.hee.tis.tcs.service.service.helper.SqlQuerySupplier;
 import com.transformuk.hee.tis.tcs.service.service.mapper.PersonLiteMapper;
 import com.transformuk.hee.tis.tcs.service.service.mapper.PlacementDetailsMapper;
-import com.transformuk.hee.tis.tcs.service.service.mapper.PlacementEsrExportedDtoMapper;
+import com.transformuk.hee.tis.tcs.service.service.mapper.PlacementEsrEventDtoMapper;
 import com.transformuk.hee.tis.tcs.service.service.mapper.PlacementMapper;
 import com.transformuk.hee.tis.tcs.service.service.mapper.PlacementSiteMapper;
 import com.transformuk.hee.tis.tcs.service.service.mapper.PlacementSpecialtyMapper;
@@ -157,7 +157,7 @@ public class PlacementServiceImpl implements PlacementService {
   @Autowired
   private PlacementEsrEventRepository placementEsrEventRepository;
   @Autowired
-  private PlacementEsrExportedDtoMapper placementEsrExportedDtoMapper;
+  private PlacementEsrEventDtoMapper placementEsrEventDtoMapper;
 
 
   /**
@@ -205,15 +205,15 @@ public class PlacementServiceImpl implements PlacementService {
 
   @Override
   public Optional<PlacementEsrEvent> markPlacementAsEsrExported(Long placementId,
-      PlacementEsrExportedDto placementEsrExportedDto) {
+      PlacementEsrEventDto placementEsrExportedDto) {
     Optional<Placement> optionalPlacementId = placementRepository.findPlacementById(placementId);
     if(!optionalPlacementId.isPresent()) {
       return Optional.empty();
     }
 
     Placement placement = optionalPlacementId.get();
-    PlacementEsrEvent newPlacementEsrEvent = placementEsrExportedDtoMapper
-        .placementEsrExportedDtoToPlacementEsrEvent(placementEsrExportedDto);
+    PlacementEsrEvent newPlacementEsrEvent = placementEsrEventDtoMapper
+        .placementEsrEventDtoToPlacementEsrEvent(placementEsrExportedDto);
     newPlacementEsrEvent.setPlacement(placement);
     newPlacementEsrEvent.setEventDateTime(placementEsrExportedDto.getExportedAt());
     newPlacementEsrEvent.setStatus(PlacementEsrEventStatus.EXPORTED);
@@ -795,7 +795,30 @@ public class PlacementServiceImpl implements PlacementService {
           .collect(Collectors.toList());
     }
 
+    populateEsrEventsForPlacementSummary(resultList);
     return resultList;
+  }
+
+  protected void populateEsrEventsForPlacementSummary(List<PlacementSummaryDTO> resultList) {
+    if(CollectionUtils.isNotEmpty(resultList)) {
+
+      List<Long> placementIds = resultList.stream().map(PlacementSummaryDTO::getPlacementId)
+          .collect(Collectors.toList());
+      //get esr status
+      Set<PlacementEsrEvent> esrEvents = placementEsrEventRepository.findPlacementEsrEventByPlacementIdIn(placementIds);
+
+      for (PlacementEsrEvent esrEvent : esrEvents) {
+        resultList.stream()
+            .filter(pl -> pl.getPlacementId().equals(esrEvent.getPlacement().getId()))
+            .forEach(pl -> {
+              if(CollectionUtils.isEmpty(pl.getEsrEvents())){
+                pl.setEsrEvents(new HashSet<>());
+              }
+              pl.getEsrEvents().add(placementEsrEventDtoMapper
+                  .placementEsrEvenToPlacementEsrEventDto(esrEvent));
+            });
+      }
+    }
   }
 
   @Transactional(readOnly = true)
@@ -816,6 +839,7 @@ public class PlacementServiceImpl implements PlacementService {
       resultList = resultList.subList(0, 1000);
     }
 
+    populateEsrEventsForPlacementSummary(resultList);
     return resultList;
   }
 
