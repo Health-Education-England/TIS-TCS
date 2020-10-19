@@ -54,7 +54,7 @@ public class PlacementEsrEventDtoMapperTest {
     PlacementEsrEventDto result = placementEsrExportedDtoMapper
         .placementEsrEvenToPlacementEsrEventDto(entity);
 
-    Assert.assertEquals(PlacementEsrEventStatus.EXPORTED.toString(), result.getStatus());
+    Assert.assertEquals(PlacementEsrEventStatus.EXPORTED, result.getStatus());
     Assert.assertEquals(POSITION_ID, result.getPositionId());
     Assert.assertEquals(POSITION_NUMBER, result.getPositionNumber());
     Assert.assertEquals(FILENAME, result.getFilename());
