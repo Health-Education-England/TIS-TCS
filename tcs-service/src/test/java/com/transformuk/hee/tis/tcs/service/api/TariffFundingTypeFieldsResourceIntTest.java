@@ -124,7 +124,7 @@ public class TariffFundingTypeFieldsResourceIntTest {
     TariffFundingTypeFieldsDTO tariffFundingTypeFieldsDTO = tariffFundingTypeFieldsMapper
         .tariffFundingTypeFieldsToTariffFundingTypeFieldsDTO(tariffFundingTypeFields);
     restTariffFundingTypeFieldsMockMvc.perform(post("/api/tariff-funding-type-fields")
-        .contentType(TestUtil.APPLICATION_JSON_UTF8)
+        .contentType(MediaType.APPLICATION_JSON)
         .content(TestUtil.convertObjectToJsonBytes(tariffFundingTypeFieldsDTO)))
         .andExpect(status().isCreated());
 
@@ -154,7 +154,7 @@ public class TariffFundingTypeFieldsResourceIntTest {
 
     // An entity with an existing ID cannot be created, so this API call must fail
     restTariffFundingTypeFieldsMockMvc.perform(post("/api/tariff-funding-type-fields")
-        .contentType(TestUtil.APPLICATION_JSON_UTF8)
+        .contentType(MediaType.APPLICATION_JSON)
         .content(TestUtil.convertObjectToJsonBytes(tariffFundingTypeFieldsDTO)))
         .andExpect(status().isBadRequest());
 
@@ -173,7 +173,7 @@ public class TariffFundingTypeFieldsResourceIntTest {
     // Get all the tariffFundingTypeFieldsList
     restTariffFundingTypeFieldsMockMvc.perform(get("/api/tariff-funding-type-fields?sort=id,desc"))
         .andExpect(status().isOk())
-        .andExpect(content().contentType(MediaType.APPLICATION_JSON_UTF8_VALUE))
+        .andExpect(content().contentType(MediaType.APPLICATION_JSON_VALUE))
         .andExpect(jsonPath("$.[*].id").value(hasItem(tariffFundingTypeFields.getId().intValue())))
         .andExpect(jsonPath("$.[*].effectiveDateFrom")
             .value(hasItem(DEFAULT_EFFECTIVE_DATE_FROM.toString())))
@@ -194,7 +194,7 @@ public class TariffFundingTypeFieldsResourceIntTest {
     restTariffFundingTypeFieldsMockMvc
         .perform(get("/api/tariff-funding-type-fields/{id}", tariffFundingTypeFields.getId()))
         .andExpect(status().isOk())
-        .andExpect(content().contentType(MediaType.APPLICATION_JSON_UTF8_VALUE))
+        .andExpect(content().contentType(MediaType.APPLICATION_JSON_VALUE))
         .andExpect(jsonPath("$.id").value(tariffFundingTypeFields.getId().intValue()))
         .andExpect(jsonPath("$.effectiveDateFrom").value(DEFAULT_EFFECTIVE_DATE_FROM.toString()))
         .andExpect(jsonPath("$.effectiveDateTo").value(DEFAULT_EFFECTIVE_DATE_TO.toString()))
@@ -230,7 +230,7 @@ public class TariffFundingTypeFieldsResourceIntTest {
         .tariffFundingTypeFieldsToTariffFundingTypeFieldsDTO(updatedTariffFundingTypeFields);
 
     restTariffFundingTypeFieldsMockMvc.perform(put("/api/tariff-funding-type-fields")
-        .contentType(TestUtil.APPLICATION_JSON_UTF8)
+        .contentType(MediaType.APPLICATION_JSON)
         .content(TestUtil.convertObjectToJsonBytes(tariffFundingTypeFieldsDTO)))
         .andExpect(status().isOk());
 
@@ -259,7 +259,7 @@ public class TariffFundingTypeFieldsResourceIntTest {
 
     // If the entity doesn't have an ID, it will be created instead of just being updated
     restTariffFundingTypeFieldsMockMvc.perform(put("/api/tariff-funding-type-fields")
-        .contentType(TestUtil.APPLICATION_JSON_UTF8)
+        .contentType(MediaType.APPLICATION_JSON)
         .content(TestUtil.convertObjectToJsonBytes(tariffFundingTypeFieldsDTO)))
         .andExpect(status().isCreated());
 
@@ -279,7 +279,7 @@ public class TariffFundingTypeFieldsResourceIntTest {
     // Get the tariffFundingTypeFields
     restTariffFundingTypeFieldsMockMvc
         .perform(delete("/api/tariff-funding-type-fields/{id}", tariffFundingTypeFields.getId())
-            .accept(TestUtil.APPLICATION_JSON_UTF8))
+            .accept(MediaType.APPLICATION_JSON))
         .andExpect(status().isOk());
 
     // Validate the database is empty

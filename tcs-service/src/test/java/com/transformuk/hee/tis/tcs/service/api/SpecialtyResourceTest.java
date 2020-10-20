@@ -103,9 +103,9 @@ public class SpecialtyResourceTest {
 
     mockMvc.perform(
         MockMvcRequestBuilders.get("/api/programme/{id}/specialties?page=0&size=50", programmeId)
-            .contentType(MediaType.APPLICATION_JSON_UTF8_VALUE))
+            .contentType(MediaType.APPLICATION_JSON_VALUE))
         .andExpect(status().isOk())
-        .andExpect(content().contentType(MediaType.APPLICATION_JSON_UTF8_VALUE))
+        .andExpect(content().contentType(MediaType.APPLICATION_JSON_VALUE))
         .andExpect(jsonPath("$.number").value("0"))
         .andExpect(jsonPath("$.size").value("50"))
         .andExpect(jsonPath("$.totalPages").value(1))
@@ -134,9 +134,9 @@ public class SpecialtyResourceTest {
     mockMvc.perform(MockMvcRequestBuilders
         .get("/api/programme/{id}/specialties?page=0&size=50&searchQuery={query}", programmeId,
             query)
-        .contentType(MediaType.APPLICATION_JSON_UTF8_VALUE))
+        .contentType(MediaType.APPLICATION_JSON_VALUE))
         .andExpect(status().isOk())
-        .andExpect(content().contentType(MediaType.APPLICATION_JSON_UTF8_VALUE))
+        .andExpect(content().contentType(MediaType.APPLICATION_JSON_VALUE))
         .andExpect(jsonPath("$.number").value("0"))
         .andExpect(jsonPath("$.size").value("50"))
         .andExpect(jsonPath("$.totalPages").value(1))
@@ -162,9 +162,9 @@ public class SpecialtyResourceTest {
 
     mockMvc.perform(MockMvcRequestBuilders
         .get("/api/programme/{programmeId}/person/{personId}/specialties", programmeId, personId)
-        .contentType(MediaType.APPLICATION_JSON_UTF8_VALUE))
+        .contentType(MediaType.APPLICATION_JSON_VALUE))
         .andExpect(status().isOk())
-        .andExpect(content().contentType(MediaType.APPLICATION_JSON_UTF8_VALUE))
+        .andExpect(content().contentType(MediaType.APPLICATION_JSON_VALUE))
         .andExpect(jsonPath("$.[*].id")
             .value(Matchers.hasItems(SPECIALTY_ID.intValue(), ANOTHER_SPECIALTY_ID.intValue())))
         .andExpect(jsonPath("$.[*].college")

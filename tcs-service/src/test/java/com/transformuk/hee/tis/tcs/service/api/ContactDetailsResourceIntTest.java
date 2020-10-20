@@ -183,7 +183,7 @@ public class ContactDetailsResourceIntTest {
     // Create the ContactDetails
     ContactDetailsDTO contactDetailsDTO = contactDetailsMapper.toDto(contactDetails);
     restContactDetailsMockMvc.perform(post("/api/contact-details")
-        .contentType(TestUtil.APPLICATION_JSON_UTF8)
+        .contentType(MediaType.APPLICATION_JSON)
         .content(TestUtil.convertObjectToJsonBytes(contactDetailsDTO)))
         .andExpect(status().isCreated());
 
@@ -215,7 +215,7 @@ public class ContactDetailsResourceIntTest {
 
     //when & then
     restContactDetailsMockMvc.perform(post("/api/contact-details")
-        .contentType(TestUtil.APPLICATION_JSON_UTF8)
+        .contentType(MediaType.APPLICATION_JSON)
         .content(TestUtil.convertObjectToJsonBytes(contactDetailsDTO)))
         .andExpect(status().isBadRequest())
         .andExpect(jsonPath("$.message").value("error.validation"))
@@ -231,7 +231,7 @@ public class ContactDetailsResourceIntTest {
 
     //when & then
     restContactDetailsMockMvc.perform(put("/api/contact-details")
-        .contentType(TestUtil.APPLICATION_JSON_UTF8)
+        .contentType(MediaType.APPLICATION_JSON)
         .content(TestUtil.convertObjectToJsonBytes(contactDetailsDTO)))
         .andExpect(status().isBadRequest())
         .andExpect(jsonPath("$.message").value("error.validation"))
@@ -248,7 +248,7 @@ public class ContactDetailsResourceIntTest {
 
     //when & then
     restContactDetailsMockMvc.perform(put("/api/contact-details")
-        .contentType(TestUtil.APPLICATION_JSON_UTF8)
+        .contentType(MediaType.APPLICATION_JSON)
         .content(TestUtil.convertObjectToJsonBytes(contactDetailsDTO)))
         .andExpect(status().isBadRequest())
         .andExpect(jsonPath("$.message").value("error.validation"))
@@ -267,7 +267,7 @@ public class ContactDetailsResourceIntTest {
 
     // Contact details is part of person so the call must succeed
     restContactDetailsMockMvc.perform(post("/api/contact-details")
-        .contentType(TestUtil.APPLICATION_JSON_UTF8)
+        .contentType(MediaType.APPLICATION_JSON)
         .content(TestUtil.convertObjectToJsonBytes(contactDetailsDTO)))
         .andExpect(status().isCreated());
 
@@ -285,7 +285,7 @@ public class ContactDetailsResourceIntTest {
     // Get all the contactDetailsList
     restContactDetailsMockMvc.perform(get("/api/contact-details?sort=id,desc"))
         .andExpect(status().isOk())
-        .andExpect(content().contentType(MediaType.APPLICATION_JSON_UTF8_VALUE))
+        .andExpect(content().contentType(MediaType.APPLICATION_JSON_VALUE))
         .andExpect(jsonPath("$.[*].id").value(hasItem(contactDetails.getId().intValue())))
         .andExpect(jsonPath("$.[*].surname").value(hasItem(DEFAULT_SURNAME.toString())))
         .andExpect(jsonPath("$.[*].forenames").value(hasItem(DEFAULT_FORENAMES.toString())))
@@ -315,7 +315,7 @@ public class ContactDetailsResourceIntTest {
     // Get the contactDetails
     restContactDetailsMockMvc.perform(get("/api/contact-details/{id}", contactDetails.getId()))
         .andExpect(status().isOk())
-        .andExpect(content().contentType(MediaType.APPLICATION_JSON_UTF8_VALUE))
+        .andExpect(content().contentType(MediaType.APPLICATION_JSON_VALUE))
         .andExpect(jsonPath("$.id").value(contactDetails.getId().intValue()))
         .andExpect(jsonPath("$.surname").value(DEFAULT_SURNAME.toString()))
         .andExpect(jsonPath("$.forenames").value(DEFAULT_FORENAMES.toString()))
@@ -369,7 +369,7 @@ public class ContactDetailsResourceIntTest {
     ContactDetailsDTO contactDetailsDTO = contactDetailsMapper.toDto(updatedContactDetails);
 
     restContactDetailsMockMvc.perform(put("/api/contact-details")
-        .contentType(TestUtil.APPLICATION_JSON_UTF8)
+        .contentType(MediaType.APPLICATION_JSON)
         .content(TestUtil.convertObjectToJsonBytes(contactDetailsDTO)))
         .andExpect(status().isOk());
 
@@ -404,7 +404,7 @@ public class ContactDetailsResourceIntTest {
 
     // If the entity doesn't have an ID creation will fail
     restContactDetailsMockMvc.perform(put("/api/contact-details")
-        .contentType(TestUtil.APPLICATION_JSON_UTF8)
+        .contentType(MediaType.APPLICATION_JSON)
         .content(TestUtil.convertObjectToJsonBytes(contactDetailsDTO)))
         .andExpect(status().isBadRequest());
 
@@ -422,7 +422,7 @@ public class ContactDetailsResourceIntTest {
 
     // Get the contactDetails
     restContactDetailsMockMvc.perform(delete("/api/contact-details/{id}", contactDetails.getId())
-        .accept(TestUtil.APPLICATION_JSON_UTF8))
+        .accept(MediaType.APPLICATION_JSON))
         .andExpect(status().isOk());
 
     // Validate the database is empty
@@ -487,7 +487,7 @@ public class ContactDetailsResourceIntTest {
 
     // Get the contactDetails
     restContactDetailsMockMvc.perform(patch("/api/contact-details/{id}", contactDetails.getId())
-        .contentType(TestUtil.APPLICATION_JSON_UTF8)
+        .contentType(MediaType.APPLICATION_JSON)
         .content(TestUtil.convertObjectToJsonBytes(contactDetailsDTO)))
         .andExpect(status().isOk());
 

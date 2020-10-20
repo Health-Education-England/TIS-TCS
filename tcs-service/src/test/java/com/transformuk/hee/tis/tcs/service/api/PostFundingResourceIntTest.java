@@ -20,11 +20,9 @@ import com.transformuk.hee.tis.tcs.service.repository.PostFundingRepository;
 import com.transformuk.hee.tis.tcs.service.repository.PostRepository;
 import com.transformuk.hee.tis.tcs.service.service.PostFundingService;
 import com.transformuk.hee.tis.tcs.service.service.mapper.PostFundingMapper;
-
 import java.time.LocalDate;
 import java.util.List;
 import javax.persistence.EntityManager;
-
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -123,7 +121,7 @@ public class PostFundingResourceIntTest {
     // Create the PostFunding
     PostFundingDTO postFundingDTO = postFundingMapper.postFundingToPostFundingDTO(postFunding);
     restPostFundingMockMvc.perform(post("/api/post-fundings")
-        .contentType(TestUtil.APPLICATION_JSON_UTF8)
+        .contentType(MediaType.APPLICATION_JSON)
         .content(TestUtil.convertObjectToJsonBytes(postFundingDTO)))
         .andExpect(status().isCreated());
 
@@ -148,7 +146,7 @@ public class PostFundingResourceIntTest {
     List<PostFundingDTO> postFundingDTOS = Lists
         .newArrayList(postFundingDTO, anotherPostFundingDTO);
     restPostFundingMockMvc.perform(post("/api/bulk-post-fundings")
-        .contentType(TestUtil.APPLICATION_JSON_UTF8)
+        .contentType(MediaType.APPLICATION_JSON)
         .content(TestUtil.convertObjectToJsonBytes(postFundingDTOS)))
         .andExpect(status().isOk());
 
@@ -181,7 +179,7 @@ public class PostFundingResourceIntTest {
     List<PostFundingDTO> postFundingDTOS = Lists
         .newArrayList(postFundingDTO, anotherPostFundingDTO);
     restPostFundingMockMvc.perform(put("/api/bulk-post-fundings")
-        .contentType(TestUtil.APPLICATION_JSON_UTF8)
+        .contentType(MediaType.APPLICATION_JSON)
         .content(TestUtil.convertObjectToJsonBytes(postFundingDTOS)))
         .andExpect(status().isOk());
 
@@ -208,7 +206,7 @@ public class PostFundingResourceIntTest {
 
     // An entity with an existing ID cannot be created, so this API call must fail
     restPostFundingMockMvc.perform(post("/api/post-fundings")
-        .contentType(TestUtil.APPLICATION_JSON_UTF8)
+        .contentType(MediaType.APPLICATION_JSON)
         .content(TestUtil.convertObjectToJsonBytes(postFundingDTO)))
         .andExpect(status().isBadRequest());
 
@@ -226,7 +224,7 @@ public class PostFundingResourceIntTest {
     // Get all the postFundingList
     restPostFundingMockMvc.perform(get("/api/post-fundings?sort=id,desc"))
         .andExpect(status().isOk())
-        .andExpect(content().contentType(MediaType.APPLICATION_JSON_UTF8_VALUE))
+        .andExpect(content().contentType(MediaType.APPLICATION_JSON_VALUE))
         .andExpect(jsonPath("$.[*].id").value(hasItem(postFunding.getId().intValue())));
   }
 
@@ -239,7 +237,7 @@ public class PostFundingResourceIntTest {
     // Get the postFunding
     restPostFundingMockMvc.perform(get("/api/post-fundings/{id}", postFunding.getId()))
         .andExpect(status().isOk())
-        .andExpect(content().contentType(MediaType.APPLICATION_JSON_UTF8_VALUE))
+        .andExpect(content().contentType(MediaType.APPLICATION_JSON_VALUE))
         .andExpect(jsonPath("$.id").value(postFunding.getId().intValue()));
   }
 
@@ -265,7 +263,7 @@ public class PostFundingResourceIntTest {
         .postFundingToPostFundingDTO(updatedPostFunding);
 
     restPostFundingMockMvc.perform(put("/api/post-fundings")
-        .contentType(TestUtil.APPLICATION_JSON_UTF8)
+        .contentType(MediaType.APPLICATION_JSON)
         .content(TestUtil.convertObjectToJsonBytes(postFundingDTO)))
         .andExpect(status().isOk());
 
@@ -284,7 +282,7 @@ public class PostFundingResourceIntTest {
 
     // If the entity doesn't have an ID, it will be created instead of just being updated
     restPostFundingMockMvc.perform(put("/api/post-fundings")
-        .contentType(TestUtil.APPLICATION_JSON_UTF8)
+        .contentType(MediaType.APPLICATION_JSON)
         .content(TestUtil.convertObjectToJsonBytes(postFundingDTO)))
         .andExpect(status().isCreated());
 
@@ -302,7 +300,7 @@ public class PostFundingResourceIntTest {
 
     // Get the postFunding
     restPostFundingMockMvc.perform(delete("/api/post-fundings/{id}", postFunding.getId())
-        .accept(TestUtil.APPLICATION_JSON_UTF8))
+        .accept(MediaType.APPLICATION_JSON))
         .andExpect(status().isOk());
 
     // Validate the database is empty

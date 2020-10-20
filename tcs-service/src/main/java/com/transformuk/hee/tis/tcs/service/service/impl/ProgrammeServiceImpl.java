@@ -2,6 +2,7 @@ package com.transformuk.hee.tis.tcs.service.service.impl;
 
 import static com.transformuk.hee.tis.tcs.service.service.impl.SpecificationFactory.containsLike;
 import static com.transformuk.hee.tis.tcs.service.service.impl.SpecificationFactory.in;
+
 import com.google.common.base.Preconditions;
 import com.transformuk.hee.tis.tcs.api.dto.ProgrammeDTO;
 import com.transformuk.hee.tis.tcs.api.enumeration.Status;
@@ -10,15 +11,12 @@ import com.transformuk.hee.tis.tcs.service.event.ProgrammeDeletedEvent;
 import com.transformuk.hee.tis.tcs.service.event.ProgrammeSavedEvent;
 import com.transformuk.hee.tis.tcs.service.model.ColumnFilter;
 import com.transformuk.hee.tis.tcs.service.model.Programme;
-import com.transformuk.hee.tis.tcs.service.model.ProgrammeCurriculum;
 import com.transformuk.hee.tis.tcs.service.repository.CurriculumRepository;
 import com.transformuk.hee.tis.tcs.service.repository.ProgrammeCurriculumRepository;
 import com.transformuk.hee.tis.tcs.service.repository.ProgrammeRepository;
 import com.transformuk.hee.tis.tcs.service.service.ProgrammeService;
 import com.transformuk.hee.tis.tcs.service.service.mapper.ProgrammeMapper;
 import java.util.ArrayList;
-import java.util.Collection;
-import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
 import org.apache.commons.lang3.StringUtils;
@@ -29,7 +27,6 @@ import org.springframework.data.domain.Example;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.domain.Specification;
-import org.springframework.data.jpa.domain.Specifications;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -152,7 +149,7 @@ public class ProgrammeServiceImpl implements ProgrammeService {
     List<Specification<Programme>> specs = new ArrayList<>();
     // add the text search criteria
     if (StringUtils.isNotEmpty(searchString)) {
-      specs.add(Specifications.where(containsLike("programmeName", searchString))
+      specs.add(Specification.where(containsLike("programmeName", searchString))
           .or(containsLike("programmeNumber", searchString)));
     }
 
@@ -166,7 +163,7 @@ public class ProgrammeServiceImpl implements ProgrammeService {
     }
     Page<Programme> result;
     if (!specs.isEmpty()) {
-      Specifications<Programme> fullSpec = Specifications.where(specs.get(0));
+      Specification<Programme> fullSpec = Specification.where(specs.get(0));
       // add the rest of the specs that made it in
       for (int i = 1; i < specs.size(); i++) {
         fullSpec = fullSpec.and(specs.get(i));

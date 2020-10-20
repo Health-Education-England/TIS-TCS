@@ -20,7 +20,6 @@ import org.springframework.data.domain.Example;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.domain.Specification;
-import org.springframework.data.jpa.domain.Specifications;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -75,12 +74,12 @@ public class CurriculumServiceImpl implements CurriculumService {
     List<Specification<Curriculum>> specs = new ArrayList<>();
     //add the text search criteria
     if (StringUtils.isNotEmpty(searchString)) {
-      specs.add(Specifications.where(containsLike("name", searchString)));
+      specs.add(Specification.where(containsLike("name", searchString)));
     }
 
     //add status
     if (current) {
-      specs.add(Specifications.where(isEqual("status", Status.CURRENT)));
+      specs.add(Specification.where(isEqual("status", Status.CURRENT)));
     }
 
     //add the column filters criteria
@@ -92,7 +91,7 @@ public class CurriculumServiceImpl implements CurriculumService {
     if (specs.isEmpty()) {
       return findAll(pageable);
     } else {
-      Specifications<Curriculum> fullSpec = Specifications.where(specs.get(0));
+      Specification<Curriculum> fullSpec = Specification.where(specs.get(0));
       //add the rest of the specs that made it in
       for (int i = 1; i < specs.size(); i++) {
         fullSpec = fullSpec.and(specs.get(i));

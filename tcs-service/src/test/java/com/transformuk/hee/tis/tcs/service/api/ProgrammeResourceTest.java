@@ -44,7 +44,7 @@ public class ProgrammeResourceTest {
   @Test
   public void shouldExcludeNonAlphanumericFromSearchInput() throws Exception {
     // given
-    Pageable p = new PageRequest(1, 20);
+    Pageable p = PageRequest.of(1, 20);
     PageImpl<ProgrammeDTO> page = new PageImpl<>(Lists.newArrayList(new ProgrammeDTO()));
 
     ArgumentCaptor<String> searchStringCaptor = ArgumentCaptor.forClass(String.class);
@@ -61,7 +61,7 @@ public class ProgrammeResourceTest {
   @Test
   public void shouldExcludeNonAlphanumericFromColumnFilters() throws Exception {
     // given
-    Pageable p = new PageRequest(1, 20);
+    Pageable p = PageRequest.of(1, 20);
     PageImpl<ProgrammeDTO> page = new PageImpl<>(Lists.newArrayList(new ProgrammeDTO()));
     String colFilter = "{\"owner\":[\"Health Ed:uc#%ation §±England@$% West Mid^la*nds\"]}";
 
@@ -82,7 +82,7 @@ public class ProgrammeResourceTest {
   @Test
   public void shouldIgnoreBadStatusColumnFilters() throws Exception {
     // given
-    Pageable p = new PageRequest(1, 20);
+    Pageable p = PageRequest.of(1, 20);
     PageImpl<ProgrammeDTO> page = new PageImpl<>(Lists.newArrayList(new ProgrammeDTO()));
     String colFilter = "{\"status\":[\"badstatus\",\"CURRENT\"]}";
 
@@ -103,7 +103,7 @@ public class ProgrammeResourceTest {
   @Test
   public void shouldIgnoreBadEmptyColumnFilters() throws Exception {
     // given
-    Pageable p = new PageRequest(1, 20);
+    Pageable p = PageRequest.of(1, 20);
     PageImpl<ProgrammeDTO> page = new PageImpl<>(Lists.newArrayList(new ProgrammeDTO()));
     String colFilter = "{\"status\":[\"badstatus\"]}";
 

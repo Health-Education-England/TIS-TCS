@@ -78,7 +78,7 @@ public class ProgrammeResourceIntTest {
 
   @Autowired
   private ProgrammeMapper programmeMapper;
-  
+
   @Autowired
   private ProgrammeCurriculumMapper programmeCurriculumMapper;
 
@@ -140,7 +140,7 @@ public class ProgrammeResourceIntTest {
     // Create the Programme
     ProgrammeDTO programmeDTO = programmeMapper.programmeToProgrammeDTO(programme);
     restProgrammeMockMvc.perform(post("/api/programmes")
-        .contentType(TestUtil.APPLICATION_JSON_UTF8)
+        .contentType(MediaType.APPLICATION_JSON)
         .content(TestUtil.convertObjectToJsonBytes(programmeDTO)))
         .andExpect(status().isCreated());
 
@@ -163,7 +163,7 @@ public class ProgrammeResourceIntTest {
 
     //when & then
     restProgrammeMockMvc.perform(post("/api/programmes")
-        .contentType(TestUtil.APPLICATION_JSON_UTF8)
+        .contentType(MediaType.APPLICATION_JSON)
         .content(TestUtil.convertObjectToJsonBytes(programmeDTO)))
         .andExpect(status().isBadRequest())
         .andExpect(jsonPath("$.message").value("error.validation"))
@@ -180,7 +180,7 @@ public class ProgrammeResourceIntTest {
 
     //when & then
     restProgrammeMockMvc.perform(put("/api/programmes")
-        .contentType(TestUtil.APPLICATION_JSON_UTF8)
+        .contentType(MediaType.APPLICATION_JSON)
         .content(TestUtil.convertObjectToJsonBytes(programmeDTO)))
         .andExpect(status().isBadRequest())
         .andExpect(jsonPath("$.message").value("error.validation"))
@@ -197,7 +197,7 @@ public class ProgrammeResourceIntTest {
 
     //when & then
     restProgrammeMockMvc.perform(post("/api/programmes")
-        .contentType(TestUtil.APPLICATION_JSON_UTF8)
+        .contentType(MediaType.APPLICATION_JSON)
         .content(TestUtil.convertObjectToJsonBytes(programmeDTO)))
         .andExpect(status().isBadRequest())
         .andExpect(jsonPath("$.message").value("error.validation"))
@@ -213,7 +213,7 @@ public class ProgrammeResourceIntTest {
     programmeDTO.setProgrammeNumber("#%$^&**(");
     //when & then
     restProgrammeMockMvc.perform(post("/api/programmes")
-        .contentType(TestUtil.APPLICATION_JSON_UTF8)
+        .contentType(MediaType.APPLICATION_JSON)
         .content(TestUtil.convertObjectToJsonBytes(programmeDTO)))
         .andExpect(status().isCreated());
   }
@@ -233,7 +233,7 @@ public class ProgrammeResourceIntTest {
     // Create the Programme
     ProgrammeDTO programmeDTO = programmeMapper.programmeToProgrammeDTO(programme);
     restProgrammeMockMvc.perform(post("/api/programmes")
-        .contentType(TestUtil.APPLICATION_JSON_UTF8)
+        .contentType(MediaType.APPLICATION_JSON)
         .content(TestUtil.convertObjectToJsonBytes(programmeDTO)))
         .andExpect(status().isCreated());
 
@@ -272,7 +272,7 @@ public class ProgrammeResourceIntTest {
     //when & then
     ProgrammeDTO programmeDTO = programmeMapper.programmeToProgrammeDTO(programme);
     restProgrammeMockMvc.perform(post("/api/programmes")
-        .contentType(TestUtil.APPLICATION_JSON_UTF8)
+        .contentType(MediaType.APPLICATION_JSON)
         .content(TestUtil.convertObjectToJsonBytes(programmeDTO)))
         .andExpect(status().isBadRequest())
         .andExpect(jsonPath("$.message").value("error.validation"));
@@ -293,7 +293,7 @@ public class ProgrammeResourceIntTest {
     ProgrammeDTO programmeDTO1 = programmeMapper.programmeToProgrammeDTO(programme);
     ProgrammeDTO programmeDTO2 = programmeMapper.programmeToProgrammeDTO(programme);
     restProgrammeMockMvc.perform(post("/api/bulk-programmes")
-        .contentType(TestUtil.APPLICATION_JSON_UTF8)
+        .contentType(MediaType.APPLICATION_JSON)
         .content(
             TestUtil.convertObjectToJsonBytes(Lists.newArrayList(programmeDTO1, programmeDTO2))))
         .andExpect(status().isOk());
@@ -335,7 +335,7 @@ public class ProgrammeResourceIntTest {
 
     // An entity with an existing ID cannot be created, so this API call must fail
     restProgrammeMockMvc.perform(post("/api/programmes")
-        .contentType(TestUtil.APPLICATION_JSON_UTF8)
+        .contentType(MediaType.APPLICATION_JSON)
         .content(TestUtil.convertObjectToJsonBytes(programmeDTO)))
         .andExpect(status().isBadRequest());
 
@@ -353,7 +353,7 @@ public class ProgrammeResourceIntTest {
     // Get all the programmeList
     restProgrammeMockMvc.perform(get("/api/programmes?sort=id,desc"))
         .andExpect(status().isOk())
-        .andExpect(content().contentType(MediaType.APPLICATION_JSON_UTF8_VALUE))
+        .andExpect(content().contentType(MediaType.APPLICATION_JSON_VALUE))
         .andExpect(jsonPath("$.[*].id").value(hasItem(programme.getId().intValue())))
         .andExpect(jsonPath("$.[*].intrepidId").value(hasItem(DEFAULT_INTREPID_ID)))
         .andExpect(jsonPath("$.[*].status").value(hasItem(DEFAULT_STATUS.toString().toUpperCase())))
@@ -371,7 +371,7 @@ public class ProgrammeResourceIntTest {
     // Get all the programmeList
     restProgrammeMockMvc.perform(get("/api/bulk-programmes?pageNumber=0,pageSize=100"))
         .andExpect(status().isOk())
-        .andExpect(content().contentType(MediaType.APPLICATION_JSON_UTF8_VALUE))
+        .andExpect(content().contentType(MediaType.APPLICATION_JSON_VALUE))
         .andExpect(jsonPath("$.[*].id").value(hasItem(programme.getId().intValue())))
         .andExpect(jsonPath("$.[*].intrepidId").value(hasItem(DEFAULT_INTREPID_ID)))
         .andExpect(jsonPath("$.[*].status").value(hasItem(DEFAULT_STATUS.toString().toUpperCase())))
@@ -389,7 +389,7 @@ public class ProgrammeResourceIntTest {
     // Get the programme
     restProgrammeMockMvc.perform(get("/api/programmes/{id}", programme.getId()))
         .andExpect(status().isOk())
-        .andExpect(content().contentType(MediaType.APPLICATION_JSON_UTF8_VALUE))
+        .andExpect(content().contentType(MediaType.APPLICATION_JSON_VALUE))
         .andExpect(jsonPath("$.id").value(programme.getId().intValue()))
         .andExpect(jsonPath("$.intrepidId").value(DEFAULT_INTREPID_ID))
         .andExpect(jsonPath("$.status").value(DEFAULT_STATUS.toString().toUpperCase()))
@@ -424,7 +424,7 @@ public class ProgrammeResourceIntTest {
     ProgrammeDTO programmeDTO = programmeMapper.programmeToProgrammeDTO(updatedProgramme);
 
     restProgrammeMockMvc.perform(put("/api/programmes")
-        .contentType(TestUtil.APPLICATION_JSON_UTF8)
+        .contentType(MediaType.APPLICATION_JSON)
         .content(TestUtil.convertObjectToJsonBytes(programmeDTO)))
         .andExpect(status().isOk());
 
@@ -467,11 +467,11 @@ public class ProgrammeResourceIntTest {
     programmeDTO.setProgrammeName(UPDATED_PROGRAMME_NAME);
     programmeDTO.setProgrammeNumber(UPDATED_PROGRAMME_NUMBER);
     programmeDTO.setCurricula(Sets.newHashSet(programmeCurriculumMapper.toDto(curriculum2), programmeCurriculumMapper.toDto(curriculum3)));
-        
+
     updatedProgramme = programmeRepository.findById(programme.getId()).orElse(null);
 
     restProgrammeMockMvc.perform(put("/api/programmes")
-        .contentType(TestUtil.APPLICATION_JSON_UTF8)
+        .contentType(MediaType.APPLICATION_JSON)
         .content(TestUtil.convertObjectToJsonBytes(programmeDTO)))
         .andExpect(status().isOk());
 
@@ -526,7 +526,7 @@ public class ProgrammeResourceIntTest {
         programmeDTO2.setCurricula(Sets.newHashSet(programmeCurriculumMapper.toDto(curriculum3)));
     // Bulk update the Programmes
     restProgrammeMockMvc.perform(put("/api/bulk-programmes")
-        .contentType(TestUtil.APPLICATION_JSON_UTF8)
+        .contentType(MediaType.APPLICATION_JSON)
         .content(
             TestUtil.convertObjectToJsonBytes(Lists.newArrayList(programmeDTO1, programmeDTO2))))
         .andExpect(status().isOk());
@@ -566,7 +566,7 @@ public class ProgrammeResourceIntTest {
 
     //when and then
     restProgrammeMockMvc.perform(put("/api/programmes")
-        .contentType(TestUtil.APPLICATION_JSON_UTF8)
+        .contentType(MediaType.APPLICATION_JSON)
         .content(TestUtil.convertObjectToJsonBytes(programmeDTO)))
         .andExpect(status().isBadRequest());
 
@@ -587,7 +587,7 @@ public class ProgrammeResourceIntTest {
     // Get all the programmeList
     restProgrammeMockMvc.perform(get("/api/programmes?sort=id,desc"))
         .andExpect(status().isOk())
-        .andExpect(content().contentType(MediaType.APPLICATION_JSON_UTF8_VALUE))
+        .andExpect(content().contentType(MediaType.APPLICATION_JSON_VALUE))
         .andExpect(jsonPath("$.[*].id").value(hasItem(otherDeaneryProgramme.getId().intValue())))
         .andExpect(jsonPath("$.[*].status").value(hasItem(DEFAULT_STATUS.toString().toUpperCase())))
         .andExpect(jsonPath("$.[*].intrepidId").value(hasItem(DEFAULT_INTREPID_ID)))
@@ -683,7 +683,7 @@ public class ProgrammeResourceIntTest {
 
     // Get the programme
     restProgrammeMockMvc.perform(delete("/api/programmes/{id}", programme.getId())
-        .accept(TestUtil.APPLICATION_JSON_UTF8))
+        .accept(MediaType.APPLICATION_JSON))
         .andExpect(status().isOk());
 
     // Validate the database is empty

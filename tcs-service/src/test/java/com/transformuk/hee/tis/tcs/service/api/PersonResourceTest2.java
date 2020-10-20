@@ -130,7 +130,7 @@ public class PersonResourceTest2 {
 
     mockMvc.perform(
         MockMvcRequestBuilders.put("/api/people")
-            .contentType(TestUtil.APPLICATION_JSON_UTF8)
+            .contentType(MediaType.APPLICATION_JSON)
             .content(TestUtil.convertObjectToJsonBytes(personDTOStub))
     )
         .andExpect(status().isUnauthorized())
@@ -148,7 +148,7 @@ public class PersonResourceTest2 {
 
     mockMvc.perform(
         get("/api/people/{id}", 1L)
-            .contentType(TestUtil.APPLICATION_JSON_UTF8))
+            .contentType(MediaType.APPLICATION_JSON))
         .andExpect(status().isUnauthorized())
         .andExpect(jsonPath("$.message").value("error.accessDenied"));
 
@@ -163,7 +163,7 @@ public class PersonResourceTest2 {
 
     mockMvc.perform(
         MockMvcRequestBuilders.delete("/api/people/{id}", 1L)
-            .contentType(TestUtil.APPLICATION_JSON_UTF8))
+            .contentType(MediaType.APPLICATION_JSON))
         .andExpect(status().isUnauthorized())
         .andExpect(jsonPath("$.message").value("error.accessDenied"));
 
@@ -179,7 +179,7 @@ public class PersonResourceTest2 {
 
     mockMvc.perform(
         get("/api/people/{id}/basic", 1L)
-            .contentType(TestUtil.APPLICATION_JSON_UTF8))
+            .contentType(MediaType.APPLICATION_JSON))
         .andExpect(status().isUnauthorized())
         .andExpect(jsonPath("$.message").value("error.accessDenied"));
 
@@ -194,7 +194,7 @@ public class PersonResourceTest2 {
 
     mockMvc.perform(
         get("/api/people/{id}/placements", 1L)
-            .contentType(TestUtil.APPLICATION_JSON_UTF8))
+            .contentType(MediaType.APPLICATION_JSON))
         .andExpect(status().isUnauthorized())
         .andExpect(jsonPath("$.message").value("error.accessDenied"));
 
@@ -214,7 +214,7 @@ public class PersonResourceTest2 {
 
     mockMvc.perform(
         get("/api/people/gmc/{gmcId}/placements", gmcId)
-            .contentType(TestUtil.APPLICATION_JSON_UTF8))
+            .contentType(MediaType.APPLICATION_JSON))
         .andExpect(status().isUnauthorized())
         .andExpect(jsonPath("$.message").value("error.accessDenied"));
   }
@@ -231,7 +231,7 @@ public class PersonResourceTest2 {
 
     mockMvc.perform(
         get("/api/people/gmc/{gmcId}/placements/new", gmcId)
-            .contentType(TestUtil.APPLICATION_JSON_UTF8))
+            .contentType(MediaType.APPLICATION_JSON))
         .andExpect(status().isUnauthorized())
         .andExpect(jsonPath("$.message").value("error.accessDenied"));
   }
@@ -246,7 +246,7 @@ public class PersonResourceTest2 {
 
     mockMvc.perform(
         get("/api/people/{id}/placements/new", personId)
-            .contentType(TestUtil.APPLICATION_JSON_UTF8))
+            .contentType(MediaType.APPLICATION_JSON))
         .andExpect(status().isUnauthorized())
         .andExpect(jsonPath("$.message").value("error.accessDenied"));
     verify(placementServiceMock, never()).getPlacementForTrainee(any(), any());
@@ -261,7 +261,7 @@ public class PersonResourceTest2 {
         .thenReturn(foundPerson);
 
     mockMvc.perform(get("/api/people/v2/{id}", personId)
-        .contentType(TestUtil.APPLICATION_JSON_UTF8))
+        .contentType(MediaType.APPLICATION_JSON))
         .andExpect(status().isOk())
         .andExpect(jsonPath("$.qualifications").doesNotExist());
 
@@ -280,7 +280,7 @@ public class PersonResourceTest2 {
         .thenReturn(foundPerson);
 
     mockMvc.perform(get("/api/people/v2/{id}", personId)
-        .contentType(TestUtil.APPLICATION_JSON_UTF8))
+        .contentType(MediaType.APPLICATION_JSON))
         .andExpect(status().isOk())
         .andExpect(jsonPath("$.personalDetails.nationalInsuranceNumber").isEmpty());
 
@@ -307,8 +307,8 @@ public class PersonResourceTest2 {
         .thenReturn(searchResults);
 
     mockMvc.perform(get("/api/programme/{id}/people?page=0&size=100&searchQuery=john", programmeId)
-        .contentType(MediaType.APPLICATION_JSON_UTF8))
-        .andExpect(content().contentType(MediaType.APPLICATION_JSON_UTF8))
+        .contentType(MediaType.APPLICATION_JSON))
+        .andExpect(content().contentType(MediaType.APPLICATION_JSON))
         .andExpect(status().isOk())
         .andExpect(jsonPath("$.size").value(size))
         .andExpect(jsonPath("$.number").value(page))

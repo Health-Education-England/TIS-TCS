@@ -314,7 +314,7 @@ public class PostResourceIntTest {
     restPostMockMvc.perform(
         get("/api/posts?page=0&size=100&sort=nationalPostNumber,asc&sort=id&columnFilters="
             + colFilters)
-            .contentType(TestUtil.APPLICATION_JSON_UTF8))
+            .contentType(MediaType.APPLICATION_JSON))
         .andExpect(jsonPath("$.[*].nationalPostNumber").value(TEST_POST_NUMBER))
         .andExpect(jsonPath("$.[*].fundingType").value(contains("TRUST, TARIFF")));
   }
@@ -326,7 +326,7 @@ public class PostResourceIntTest {
     PostDTO postDTO = new PostDTO();
     //when & then
     restPostMockMvc.perform(post("/api/posts")
-        .contentType(TestUtil.APPLICATION_JSON_UTF8)
+        .contentType(MediaType.APPLICATION_JSON)
         .content(TestUtil.convertObjectToJsonBytes(postDTO)))
         .andExpect(status().isBadRequest())
         .andExpect(jsonPath("$.message").value("error.validation"))
@@ -342,7 +342,7 @@ public class PostResourceIntTest {
     postDTO.setId(1L);
     //when & then
     restPostMockMvc.perform(put("/api/posts")
-        .contentType(TestUtil.APPLICATION_JSON_UTF8)
+        .contentType(MediaType.APPLICATION_JSON)
         .content(TestUtil.convertObjectToJsonBytes(postDTO)))
         .andExpect(status().isBadRequest())
         .andExpect(jsonPath("$.message").value("error.validation"))
@@ -358,7 +358,7 @@ public class PostResourceIntTest {
     postDTO.setId(-1L);
     //when & then
     restPostMockMvc.perform(post("/api/posts")
-        .contentType(TestUtil.APPLICATION_JSON_UTF8)
+        .contentType(MediaType.APPLICATION_JSON)
         .content(TestUtil.convertObjectToJsonBytes(postDTO)))
         .andExpect(status().isBadRequest())
         .andExpect(jsonPath("$.message").value("error.validation"))
@@ -387,7 +387,7 @@ public class PostResourceIntTest {
     PostDTO postDTO = postMapper.postToPostDTO(updatedPost);
     //when & then
     restPostMockMvc.perform(put("/api/posts")
-        .contentType(TestUtil.APPLICATION_JSON_UTF8)
+        .contentType(MediaType.APPLICATION_JSON)
         .content(TestUtil.convertObjectToJsonBytes(postDTO)))
         .andExpect(status().isOk());
     Post dbUpdatedPost = postRepository.findById(post.getId()).orElse(null);
@@ -405,7 +405,7 @@ public class PostResourceIntTest {
     PostDTO postDTO = postMapper.postToPostDTO(anotherPost);
     // An entity with an existing ID cannot be created, so this API call must fail
     restPostMockMvc.perform(post("/api/posts")
-        .contentType(TestUtil.APPLICATION_JSON_UTF8)
+        .contentType(MediaType.APPLICATION_JSON)
         .content(TestUtil.convertObjectToJsonBytes(postDTO)))
         .andExpect(status().isBadRequest());
     // Validate the Alice in the database
@@ -419,7 +419,7 @@ public class PostResourceIntTest {
     // Get all the postList
     restPostMockMvc.perform(get("/api/posts?sort=id,desc"))
         .andExpect(status().isOk())
-        .andExpect(content().contentType(MediaType.APPLICATION_JSON_UTF8_VALUE))
+        .andExpect(content().contentType(MediaType.APPLICATION_JSON_VALUE))
         .andExpect(jsonPath("$.[*].id").value(hasItem(post.getId().intValue())))
         .andExpect(
             jsonPath("$.[*].nationalPostNumber").value(hasItem(DEFAULT_NATIONAL_POST_NUMBER)))
@@ -440,7 +440,7 @@ public class PostResourceIntTest {
     restPostMockMvc.perform(get("/api/posts?sort=id,asc"))
         .andExpect(status().isOk())
         .andExpect(jsonPath("$", hasSize(databaseSize))) // checking the size of the post
-        .andExpect(content().contentType(MediaType.APPLICATION_JSON_UTF8_VALUE))
+        .andExpect(content().contentType(MediaType.APPLICATION_JSON_VALUE))
         .andExpect(jsonPath("$.[*].id").value(hasItem(post.getId().intValue())))
         .andExpect(
             jsonPath("$.[*].nationalPostNumber").value(hasItem(DEFAULT_NATIONAL_POST_NUMBER)))
@@ -457,7 +457,7 @@ public class PostResourceIntTest {
     postRepository.saveAndFlush(post);
     restPostMockMvc.perform(get("/api/posts?searchQuery=TEST"))
         .andExpect(status().isOk())
-        .andExpect(content().contentType(MediaType.APPLICATION_JSON_UTF8_VALUE))
+        .andExpect(content().contentType(MediaType.APPLICATION_JSON_VALUE))
         .andExpect(jsonPath("$.[*].id").value(hasItem(post.getId().intValue())))
         .andExpect(jsonPath("$.[*].nationalPostNumber").value(hasItem(TEST_POST_NUMBER)))
         .andExpect(jsonPath("$.[*].status").value(hasItem(DEFAULT_STATUS.toString().toUpperCase())))
@@ -471,7 +471,7 @@ public class PostResourceIntTest {
     postRepository.saveAndFlush(post);
     restPostMockMvc.perform(get("/api/posts?searchQuery=TESTPOST"))
         .andExpect(status().isOk())
-        .andExpect(content().contentType(MediaType.APPLICATION_JSON_UTF8_VALUE))
+        .andExpect(content().contentType(MediaType.APPLICATION_JSON_VALUE))
         .andExpect(jsonPath("$.[*].id").value(hasItem(post.getId().intValue())))
         .andExpect(jsonPath("$.[*].nationalPostNumber").value(hasItem(TEST_POST_NUMBER)))
         .andExpect(
@@ -485,7 +485,7 @@ public class PostResourceIntTest {
     postRepository.saveAndFlush(post);
     restPostMockMvc.perform(get("/api/findByNationalPostNumber?searchQuery=TESTPOST"))
         .andExpect(status().isOk())
-        .andExpect(content().contentType(MediaType.APPLICATION_JSON_UTF8_VALUE))
+        .andExpect(content().contentType(MediaType.APPLICATION_JSON_VALUE))
         .andExpect(jsonPath("$.[*].id").value(hasItem(post.getId().intValue())))
         .andExpect(jsonPath("$.[*].nationalPostNumber").value(hasItem(TEST_POST_NUMBER)))
         .andExpect(
@@ -502,7 +502,7 @@ public class PostResourceIntTest {
     restPostMockMvc.perform(
         get("/api/findByNationalPostNumber?searchQuery=TESTPOST&columnFilters=" + colFilters))
         .andExpect(status().isOk())
-        .andExpect(content().contentType(MediaType.APPLICATION_JSON_UTF8_VALUE))
+        .andExpect(content().contentType(MediaType.APPLICATION_JSON_VALUE))
         .andExpect(jsonPath("$.[*].id").value(hasItem(post.getId().intValue())))
         .andExpect(jsonPath("$.[*].nationalPostNumber").value(hasItem(TEST_POST_NUMBER)))
         .andExpect(jsonPath("$.[*].status").value(hasItem(Status.CURRENT.name())));
@@ -522,7 +522,7 @@ public class PostResourceIntTest {
     post3.setNationalPostNumber(npns.get(2));
     postRepository.saveAndFlush(post3);
     restPostMockMvc.perform(get("/api/posts?page=0&size=100&sort=nationalPostNumber,desc")
-        .contentType(TestUtil.APPLICATION_JSON_UTF8))
+        .contentType(MediaType.APPLICATION_JSON))
         .andExpect(jsonPath("$[0].nationalPostNumber").value("npn-03"))
         .andExpect(jsonPath("$[1].nationalPostNumber").value("npn-02"))
         .andExpect(jsonPath("$[2].nationalPostNumber").value("npn-01"))
@@ -544,7 +544,7 @@ public class PostResourceIntTest {
     postRepository.saveAndFlush(post33);
     List<Post> posts = postRepository.findAll();
     restPostMockMvc.perform(get("/api/posts?page=0&size=100&sort=nationalPostNumber,asc")
-        .contentType(TestUtil.APPLICATION_JSON_UTF8))
+        .contentType(MediaType.APPLICATION_JSON))
         .andExpect(jsonPath("$[0].nationalPostNumber").value("AAAAAAAAAA"))
         .andExpect(jsonPath("$[1].nationalPostNumber").value("npn-01"))
         .andExpect(jsonPath("$[2].nationalPostNumber").value("npn-02"))
@@ -648,7 +648,7 @@ public class PostResourceIntTest {
     // Get the post
     restPostMockMvc.perform(get("/api/posts/{id}", post.getId()))
         .andExpect(status().isOk())
-        .andExpect(content().contentType(MediaType.APPLICATION_JSON_UTF8_VALUE))
+        .andExpect(content().contentType(MediaType.APPLICATION_JSON_VALUE))
         .andExpect(jsonPath("$.id").value(post.getId().intValue()))
         .andExpect(jsonPath("$.nationalPostNumber").value(DEFAULT_NATIONAL_POST_NUMBER))
         .andExpect(jsonPath("$.status").value(DEFAULT_STATUS.toString().toUpperCase()))
@@ -670,7 +670,7 @@ public class PostResourceIntTest {
     restPostMockMvc.perform(get("/api/posts/in/{nationalPostNumbers}",
         URLEncoder.encode(nationalPostNumberWithSpecialCharacters, "UTF-8")))
         .andExpect(status().isFound())
-        .andExpect(content().contentType(MediaType.APPLICATION_JSON_UTF8_VALUE))
+        .andExpect(content().contentType(MediaType.APPLICATION_JSON_VALUE))
         .andExpect(jsonPath("$.[0].id").value(post.getId().intValue()))
         .andExpect(
             jsonPath("$.[0].nationalPostNumber").value(nationalPostNumberWithSpecialCharacters))
@@ -712,7 +712,7 @@ public class PostResourceIntTest {
         .localPostNumber(UPDATED_LOCAL_POST_NUMBER);
     PostDTO postDTO = postMapper.postToPostDTO(updatedPost);
     restPostMockMvc.perform(put("/api/posts")
-        .contentType(TestUtil.APPLICATION_JSON_UTF8)
+        .contentType(MediaType.APPLICATION_JSON)
         .content(TestUtil.convertObjectToJsonBytes(postDTO)))
         .andExpect(status().isOk());
     // Validate the Post in the database
@@ -741,7 +741,7 @@ public class PostResourceIntTest {
     PostDTO postDTO = postMapper.postToPostDTO(post);
     // If the entity doesn't have an ID, it will be created instead of just being updated
     restPostMockMvc.perform(put("/api/posts")
-        .contentType(TestUtil.APPLICATION_JSON_UTF8)
+        .contentType(MediaType.APPLICATION_JSON)
         .content(TestUtil.convertObjectToJsonBytes(postDTO)))
         .andExpect(status().isBadRequest());
     // Validate the Post in the database
@@ -756,7 +756,7 @@ public class PostResourceIntTest {
     int databaseSizeBeforeDelete = postRepository.findAll().size();
     // Get the post
     restPostMockMvc.perform(delete("/api/posts/{id}", post.getId())
-        .accept(TestUtil.APPLICATION_JSON_UTF8))
+        .accept(MediaType.APPLICATION_JSON))
         .andExpect(status().isOk());
     // Validate the database is empty
     List<Post> postList = postRepository.findAll();
@@ -790,7 +790,7 @@ public class PostResourceIntTest {
     int expectedDatabaseSizeAfterBulkCreate = databaseSizeBeforeBulkCreate + 2;
     List<PostDTO> payload = Lists.newArrayList(postDTO, anotherPostDTO);
     restPostMockMvc.perform(post("/api/bulk-posts")
-        .contentType(TestUtil.APPLICATION_JSON_UTF8)
+        .contentType(MediaType.APPLICATION_JSON)
         .content(TestUtil.convertObjectToJsonBytes(payload)))
         .andExpect(status().isOk());
     // Validate that both Post are in the database
@@ -829,7 +829,7 @@ public class PostResourceIntTest {
     int expectedDatabaseSizeAfterBulkUpdate = postRepository.findAll().size();
     List<PostDTO> payload = Lists.newArrayList(postDTO, anotherPostDTO);
     restPostMockMvc.perform(put("/api/bulk-posts")
-        .contentType(TestUtil.APPLICATION_JSON_UTF8)
+        .contentType(MediaType.APPLICATION_JSON)
         .content(TestUtil.convertObjectToJsonBytes(payload)))
         .andExpect(status().isOk());
     // Validate that both Post are still in the database
@@ -870,7 +870,7 @@ public class PostResourceIntTest {
     int expectedDatabaseSizeAfterBulkUpdate = postRepository.findAll().size();
     List<PostDTO> payload = Lists.newArrayList(postDTO);
     restPostMockMvc.perform(patch("/api/bulk-patch-new-old-posts")
-        .contentType(TestUtil.APPLICATION_JSON_UTF8)
+        .contentType(MediaType.APPLICATION_JSON)
         .content(TestUtil.convertObjectToJsonBytes(payload)))
         .andExpect(status().isOk());
     // Validate that both Post are still in the database
@@ -884,7 +884,7 @@ public class PostResourceIntTest {
     int expectedDatabaseSizeAfterBulkUpdate = postRepository.findAll().size();
     List<PostDTO> payload = Lists.newArrayList();
     restPostMockMvc.perform(patch("/api/bulk-patch-new-old-posts")
-        .contentType(TestUtil.APPLICATION_JSON_UTF8)
+        .contentType(MediaType.APPLICATION_JSON)
         .content(TestUtil.convertObjectToJsonBytes(payload)))
         .andExpect(status().isBadRequest());
     // Validate that both Post are still in the database
@@ -900,7 +900,7 @@ public class PostResourceIntTest {
     postDTO.setTrainingDescription("RANDOM DATA");
     List<PostDTO> payload = Lists.newArrayList(postDTO);
     restPostMockMvc.perform(patch("/api/bulk-patch-new-old-posts")
-        .contentType(TestUtil.APPLICATION_JSON_UTF8)
+        .contentType(MediaType.APPLICATION_JSON)
         .content(TestUtil.convertObjectToJsonBytes(payload)))
         .andExpect(status().isBadRequest());
     // Validate that both Post are still in the database
@@ -923,7 +923,7 @@ public class PostResourceIntTest {
     int expectedDatabaseSizeAfterBulkUpdate = postRepository.findAll().size();
     List<PostDTO> payload = Lists.newArrayList(postDTO);
     restPostMockMvc.perform(patch("/api/bulk-patch-post-sites")
-        .contentType(TestUtil.APPLICATION_JSON_UTF8)
+        .contentType(MediaType.APPLICATION_JSON)
         .content(TestUtil.convertObjectToJsonBytes(payload)))
         .andExpect(status().isOk());
     // Validate that both Post are still in the database
@@ -937,7 +937,7 @@ public class PostResourceIntTest {
     int expectedDatabaseSizeAfterBulkUpdate = postRepository.findAll().size();
     List<PostDTO> payload = Lists.newArrayList();
     restPostMockMvc.perform(patch("/api/bulk-patch-post-sites")
-        .contentType(TestUtil.APPLICATION_JSON_UTF8)
+        .contentType(MediaType.APPLICATION_JSON)
         .content(TestUtil.convertObjectToJsonBytes(payload)))
         .andExpect(status().isBadRequest());
     // Validate that both Post are still in the database
@@ -953,7 +953,7 @@ public class PostResourceIntTest {
     postDTO.setTrainingDescription("RANDOM DATA");
     List<PostDTO> payload = Lists.newArrayList(postDTO);
     restPostMockMvc.perform(patch("/api/bulk-patch-post-sites")
-        .contentType(TestUtil.APPLICATION_JSON_UTF8)
+        .contentType(MediaType.APPLICATION_JSON)
         .content(TestUtil.convertObjectToJsonBytes(payload)))
         .andExpect(status().isBadRequest());
     // Validate that both Post are still in the database
@@ -973,7 +973,7 @@ public class PostResourceIntTest {
     int expectedDatabaseSizeAfterBulkUpdate = postRepository.findAll().size();
     List<PostDTO> payload = Lists.newArrayList(postDTO);
     restPostMockMvc.perform(patch("/api/bulk-patch-post-grades")
-        .contentType(TestUtil.APPLICATION_JSON_UTF8)
+        .contentType(MediaType.APPLICATION_JSON)
         .content(TestUtil.convertObjectToJsonBytes(payload)))
         .andExpect(status().isOk());
     // Validate that both Post are still in the database
@@ -987,7 +987,7 @@ public class PostResourceIntTest {
     int expectedDatabaseSizeAfterBulkUpdate = postRepository.findAll().size();
     List<PostDTO> payload = Lists.newArrayList();
     restPostMockMvc.perform(patch("/api/bulk-patch-post-grades")
-        .contentType(TestUtil.APPLICATION_JSON_UTF8)
+        .contentType(MediaType.APPLICATION_JSON)
         .content(TestUtil.convertObjectToJsonBytes(payload)))
         .andExpect(status().isBadRequest());
     // Validate that both Post are still in the database
@@ -1003,7 +1003,7 @@ public class PostResourceIntTest {
     postDTO.setTrainingDescription("RANDOM DATA");
     List<PostDTO> payload = Lists.newArrayList(postDTO);
     restPostMockMvc.perform(patch("/api/bulk-patch-post-grades")
-        .contentType(TestUtil.APPLICATION_JSON_UTF8)
+        .contentType(MediaType.APPLICATION_JSON)
         .content(TestUtil.convertObjectToJsonBytes(payload)))
         .andExpect(status().isBadRequest());
     // Validate that both Post are still in the database
@@ -1026,7 +1026,7 @@ public class PostResourceIntTest {
     int expectedDatabaseSizeAfterBulkUpdate = postRepository.findAll().size();
     List<PostDTO> payload = Lists.newArrayList(postDTO);
     restPostMockMvc.perform(patch("/api/bulk-patch-post-programmes")
-        .contentType(TestUtil.APPLICATION_JSON_UTF8)
+        .contentType(MediaType.APPLICATION_JSON)
         .content(TestUtil.convertObjectToJsonBytes(payload)))
         .andExpect(status().isOk())
         .andExpect(jsonPath("$").isArray())
@@ -1044,7 +1044,7 @@ public class PostResourceIntTest {
     int expectedDatabaseSizeAfterBulkUpdate = postRepository.findAll().size();
     List<PostDTO> payload = Lists.newArrayList();
     restPostMockMvc.perform(patch("/api/bulk-patch-post-programmes")
-        .contentType(TestUtil.APPLICATION_JSON_UTF8)
+        .contentType(MediaType.APPLICATION_JSON)
         .content(TestUtil.convertObjectToJsonBytes(payload)))
         .andExpect(status().isBadRequest());
     // Validate that both Post are still in the database
@@ -1060,7 +1060,7 @@ public class PostResourceIntTest {
     postDTO.setTrainingDescription("RANDOM DATA");
     List<PostDTO> payload = Lists.newArrayList(postDTO);
     restPostMockMvc.perform(patch("/api/bulk-patch-post-programmes")
-        .contentType(TestUtil.APPLICATION_JSON_UTF8)
+        .contentType(MediaType.APPLICATION_JSON)
         .content(TestUtil.convertObjectToJsonBytes(payload)))
         .andExpect(status().isBadRequest());
     // Validate that both Post are still in the database
@@ -1082,7 +1082,7 @@ public class PostResourceIntTest {
     int expectedDatabaseSizeAfterBulkUpdate = postRepository.findAll().size();
     List<PostDTO> payload = Lists.newArrayList(postDTO);
     restPostMockMvc.perform(patch("/api/bulk-patch-post-specialties")
-        .contentType(TestUtil.APPLICATION_JSON_UTF8)
+        .contentType(MediaType.APPLICATION_JSON)
         .content(TestUtil.convertObjectToJsonBytes(payload)))
         .andExpect(status().isOk())
         .andExpect(jsonPath("$").isArray())
@@ -1103,7 +1103,7 @@ public class PostResourceIntTest {
     int expectedDatabaseSizeAfterBulkUpdate = postRepository.findAll().size();
     List<PostDTO> payload = Lists.newArrayList();
     restPostMockMvc.perform(patch("/api/bulk-patch-post-specialties")
-        .contentType(TestUtil.APPLICATION_JSON_UTF8)
+        .contentType(MediaType.APPLICATION_JSON)
         .content(TestUtil.convertObjectToJsonBytes(payload)))
         .andExpect(status().isBadRequest());
     // Validate that both Post are still in the database
@@ -1119,7 +1119,7 @@ public class PostResourceIntTest {
     postDTO.setTrainingDescription("RANDOM DATA");
     List<PostDTO> payload = Lists.newArrayList(postDTO);
     restPostMockMvc.perform(patch("/api/bulk-patch-post-specialties")
-        .contentType(TestUtil.APPLICATION_JSON_UTF8)
+        .contentType(MediaType.APPLICATION_JSON)
         .content(TestUtil.convertObjectToJsonBytes(payload)))
         .andExpect(status().isBadRequest());
     // Validate that both Post are still in the database
@@ -1162,7 +1162,7 @@ public class PostResourceIntTest {
         .thenReturn(Collections.singletonList(fundingTypeDto));
 
     restPostMockMvc.perform(patch("/api/post/fundings")
-        .contentType(TestUtil.APPLICATION_JSON_UTF8)
+        .contentType(MediaType.APPLICATION_JSON)
         .content(TestUtil.convertObjectToJsonBytes(postDTO)))
         .andExpect(status().isOk())
         .andExpect(jsonPath("$").isArray())
@@ -1176,11 +1176,11 @@ public class PostResourceIntTest {
   public void shouldFilterPostsByDeaneryNumbers() throws Exception {
     List<String> npns = preparePostRecords();
     restPostMockMvc.perform(post("/api/posts/filter/deanery")
-        .contentType(TestUtil.APPLICATION_JSON_UTF8)
+        .contentType(MediaType.APPLICATION_JSON)
         .param("size", "2")
         .content(TestUtil.convertObjectToJsonBytes(npns)))
         .andExpect(status().isOk())
-        .andExpect(content().contentType(MediaType.APPLICATION_JSON_UTF8_VALUE))
+        .andExpect(content().contentType(MediaType.APPLICATION_JSON_VALUE))
         .andExpect(jsonPath("$").isArray())
         .andExpect(jsonPath("$", hasSize(2)));
   }
@@ -1190,11 +1190,11 @@ public class PostResourceIntTest {
   public void shouldFilterPostsByDeaneryNumbersAndHonorsPageSize() throws Exception {
     List<String> npns = preparePostRecords();
     restPostMockMvc.perform(post("/api/posts/filter/deanery")
-        .contentType(TestUtil.APPLICATION_JSON_UTF8)
+        .contentType(MediaType.APPLICATION_JSON)
         .param("size", "10")
         .content(TestUtil.convertObjectToJsonBytes(npns)))
         .andExpect(status().isOk())
-        .andExpect(content().contentType(MediaType.APPLICATION_JSON_UTF8_VALUE))
+        .andExpect(content().contentType(MediaType.APPLICATION_JSON_VALUE))
         .andExpect(jsonPath("$").isArray())
         .andExpect(jsonPath("$", hasSize(3)));
   }
@@ -1221,11 +1221,11 @@ public class PostResourceIntTest {
 
     MvcResult mvcResult = restPostMockMvc
         .perform(get("/api/posts/{postId}/placements/new", post.getId())
-            .contentType(TestUtil.APPLICATION_JSON_UTF8)
+            .contentType(MediaType.APPLICATION_JSON)
             .param("size", "10")
             .content(TestUtil.convertObjectToJsonBytes(person)))
         .andExpect(status().isOk())
-        .andExpect(content().contentType(MediaType.APPLICATION_JSON_UTF8_VALUE))
+        .andExpect(content().contentType(MediaType.APPLICATION_JSON_VALUE))
         .andExpect(jsonPath("$").isArray())
         .andExpect(jsonPath("$", hasSize(1)))
         .andExpect(jsonPath("$.[*].gradeAbbreviation").value(hasItem(DEFAULT_TRAINEE_GRADE_ABBREVIATION)))

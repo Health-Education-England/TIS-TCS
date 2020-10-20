@@ -17,6 +17,7 @@ import org.mockito.MockitoAnnotations;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.data.web.PageableHandlerMethodArgumentResolver;
+import org.springframework.http.MediaType;
 import org.springframework.http.converter.json.MappingJackson2HttpMessageConverter;
 import org.springframework.test.context.junit4.SpringRunner;
 import org.springframework.test.web.servlet.MockMvc;
@@ -57,7 +58,7 @@ public class EnumTypeResourceIntTest {
   @Transactional
   public void getAllAssessmentTypesShouldReturnAllAssessmentTypes() throws Exception {
     restCurriculumMockMvc.perform(get("/api/assessment-types")
-        .contentType(TestUtil.APPLICATION_JSON_UTF8))
+        .contentType(MediaType.APPLICATION_JSON))
         .andExpect(status().isOk())
         .andExpect(jsonPath("$.[*]").isArray())
         .andExpect(jsonPath("$.[*]").value(hasItem(AssessmentType.ACADEMIC.name())));
@@ -68,7 +69,7 @@ public class EnumTypeResourceIntTest {
   @Transactional
   public void getAllCurriculumSubTypesShouldReturnAllCurriculumSubTypes() throws Exception {
     restCurriculumMockMvc.perform(get("/api/curriculum-sub-types")
-        .contentType(TestUtil.APPLICATION_JSON_UTF8))
+        .contentType(MediaType.APPLICATION_JSON))
         .andExpect(status().isOk())
         .andExpect(jsonPath("$.[*]").isArray())
         .andExpect(jsonPath("$.[*]").value(hasItem(CurriculumSubType.ACFNIHR_FUNDING.name())));
@@ -78,7 +79,7 @@ public class EnumTypeResourceIntTest {
   @Transactional
   public void getAllSpecialtyTypesShouldReturnAllSpecialtyTypes() throws Exception {
     restCurriculumMockMvc.perform(get("/api/specialty-types")
-        .contentType(TestUtil.APPLICATION_JSON_UTF8))
+        .contentType(MediaType.APPLICATION_JSON))
         .andExpect(status().isOk())
         .andExpect(jsonPath("$.[*]").isArray())
         .andExpect(jsonPath("$.[*]").value(hasItem(SpecialtyType.CURRICULUM.name())));

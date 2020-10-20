@@ -111,7 +111,7 @@ public class PlacementFunderResourceIntTest {
     PlacementFunderDTO placementFunderDTO = placementFunderMapper
         .placementFunderToPlacementFunderDTO(placementFunder);
     restPlacementFunderMockMvc.perform(post("/api/placement-funders")
-        .contentType(TestUtil.APPLICATION_JSON_UTF8)
+        .contentType(MediaType.APPLICATION_JSON)
         .content(TestUtil.convertObjectToJsonBytes(placementFunderDTO)))
         .andExpect(status().isCreated());
 
@@ -135,7 +135,7 @@ public class PlacementFunderResourceIntTest {
 
     // An entity with an existing ID cannot be created, so this API call must fail
     restPlacementFunderMockMvc.perform(post("/api/placement-funders")
-        .contentType(TestUtil.APPLICATION_JSON_UTF8)
+        .contentType(MediaType.APPLICATION_JSON)
         .content(TestUtil.convertObjectToJsonBytes(placementFunderDTO)))
         .andExpect(status().isBadRequest());
 
@@ -153,7 +153,7 @@ public class PlacementFunderResourceIntTest {
     // Get all the placementFunderList
     restPlacementFunderMockMvc.perform(get("/api/placement-funders?sort=id,desc"))
         .andExpect(status().isOk())
-        .andExpect(content().contentType(MediaType.APPLICATION_JSON_UTF8_VALUE))
+        .andExpect(content().contentType(MediaType.APPLICATION_JSON_VALUE))
         .andExpect(jsonPath("$.[*].id").value(hasItem(placementFunder.getId().intValue())))
         .andExpect(jsonPath("$.[*].localOffice").value(hasItem(DEFAULT_LOCAL_OFFICE)))
         .andExpect(jsonPath("$.[*].trust").value(hasItem(DEFAULT_TRUST)));
@@ -168,7 +168,7 @@ public class PlacementFunderResourceIntTest {
     // Get the placementFunder
     restPlacementFunderMockMvc.perform(get("/api/placement-funders/{id}", placementFunder.getId()))
         .andExpect(status().isOk())
-        .andExpect(content().contentType(MediaType.APPLICATION_JSON_UTF8_VALUE))
+        .andExpect(content().contentType(MediaType.APPLICATION_JSON_VALUE))
         .andExpect(jsonPath("$.id").value(placementFunder.getId().intValue()))
         .andExpect(jsonPath("$.localOffice").value(DEFAULT_LOCAL_OFFICE))
         .andExpect(jsonPath("$.trust").value(DEFAULT_TRUST));
@@ -199,7 +199,7 @@ public class PlacementFunderResourceIntTest {
         .placementFunderToPlacementFunderDTO(updatedPlacementFunder);
 
     restPlacementFunderMockMvc.perform(put("/api/placement-funders")
-        .contentType(TestUtil.APPLICATION_JSON_UTF8)
+        .contentType(MediaType.APPLICATION_JSON)
         .content(TestUtil.convertObjectToJsonBytes(placementFunderDTO)))
         .andExpect(status().isOk());
 
@@ -222,7 +222,7 @@ public class PlacementFunderResourceIntTest {
 
     // If the entity doesn't have an ID, it will be created instead of just being updated
     restPlacementFunderMockMvc.perform(put("/api/placement-funders")
-        .contentType(TestUtil.APPLICATION_JSON_UTF8)
+        .contentType(MediaType.APPLICATION_JSON)
         .content(TestUtil.convertObjectToJsonBytes(placementFunderDTO)))
         .andExpect(status().isCreated());
 
@@ -241,7 +241,7 @@ public class PlacementFunderResourceIntTest {
     // Get the placementFunder
     restPlacementFunderMockMvc
         .perform(delete("/api/placement-funders/{id}", placementFunder.getId())
-            .accept(TestUtil.APPLICATION_JSON_UTF8))
+            .accept(MediaType.APPLICATION_JSON))
         .andExpect(status().isOk());
 
     // Validate the database is empty

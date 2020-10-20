@@ -141,7 +141,7 @@ public class GmcDetailsResourceIntTest {
         .thenReturn(true);
 
     restGmcDetailsMockMvc.perform(post("/api/gmc-details")
-        .contentType(TestUtil.APPLICATION_JSON_UTF8)
+        .contentType(MediaType.APPLICATION_JSON)
         .content(TestUtil.convertObjectToJsonBytes(gmcDetailsDTO)))
         .andExpect(status().isCreated());
 
@@ -164,7 +164,7 @@ public class GmcDetailsResourceIntTest {
 
     //when & then
     restGmcDetailsMockMvc.perform(post("/api/gmc-details")
-        .contentType(TestUtil.APPLICATION_JSON_UTF8)
+        .contentType(MediaType.APPLICATION_JSON)
         .content(TestUtil.convertObjectToJsonBytes(gmcDetailsDTO)))
         .andExpect(status().isBadRequest())
         .andExpect(jsonPath("$.message").value("error.validation"))
@@ -180,7 +180,7 @@ public class GmcDetailsResourceIntTest {
 
     //when & then
     restGmcDetailsMockMvc.perform(put("/api/gmc-details")
-        .contentType(TestUtil.APPLICATION_JSON_UTF8)
+        .contentType(MediaType.APPLICATION_JSON)
         .content(TestUtil.convertObjectToJsonBytes(gmcDetailsDTO)))
         .andExpect(status().isBadRequest())
         .andExpect(jsonPath("$.message").value("error.validation"))
@@ -197,7 +197,7 @@ public class GmcDetailsResourceIntTest {
 //    gmcDetailsDTO.setGmcNumber(DEFAULT_GMC_NUMBER);
 //    //when & then
 //    restGmcDetailsMockMvc.perform(post("/api/gmc-details")
-//        .contentType(TestUtil.APPLICATION_JSON_UTF8)
+//        .contentType(MediaType.APPLICATION_JSON)
 //        .content(TestUtil.convertObjectToJsonBytes(gmcDetailsDTO)))
 //        .andExpect(status().isBadRequest())
 //        .andExpect(jsonPath("$.message").value("error.validation"))
@@ -221,7 +221,7 @@ public class GmcDetailsResourceIntTest {
 
     // Create the GmcDetails
     restGmcDetailsMockMvc.perform(post("/api/gmc-details")
-        .contentType(TestUtil.APPLICATION_JSON_UTF8)
+        .contentType(MediaType.APPLICATION_JSON)
         .content(TestUtil.convertObjectToJsonBytes(anotherGmcDetailsDTO)))
         .andExpect(status().isBadRequest())
         .andExpect(jsonPath("$.message").value("error.validation"))
@@ -252,7 +252,7 @@ public class GmcDetailsResourceIntTest {
 
     // Create the GmcDetails
     restGmcDetailsMockMvc.perform(put("/api/gmc-details")
-        .contentType(TestUtil.APPLICATION_JSON_UTF8)
+        .contentType(MediaType.APPLICATION_JSON)
         .content(TestUtil.convertObjectToJsonBytes(anotherGmcDetailsDTO)))
         .andExpect(status().isBadRequest())
         .andExpect(jsonPath("$.message").value("error.validation"))
@@ -271,7 +271,7 @@ public class GmcDetailsResourceIntTest {
     gmcDetailsDTO.setGmcNumber(DEFAULT_GMC_NUMBER);
     //when & then
     restGmcDetailsMockMvc.perform(post("/api/gmc-details")
-        .contentType(TestUtil.APPLICATION_JSON_UTF8)
+        .contentType(MediaType.APPLICATION_JSON)
         .content(TestUtil.convertObjectToJsonBytes(gmcDetailsDTO)))
         .andExpect(status().isBadRequest())
         .andExpect(jsonPath("$.message").value("error.validation"))
@@ -293,7 +293,7 @@ public class GmcDetailsResourceIntTest {
 
     // GMC details is part of person so the call must succeed
     restGmcDetailsMockMvc.perform(post("/api/gmc-details")
-        .contentType(TestUtil.APPLICATION_JSON_UTF8)
+        .contentType(MediaType.APPLICATION_JSON)
         .content(TestUtil.convertObjectToJsonBytes(gmcDetailsDTO)))
         .andExpect(status().isCreated());
 
@@ -311,7 +311,7 @@ public class GmcDetailsResourceIntTest {
     // Get all the gmcDetailsList
     restGmcDetailsMockMvc.perform(get("/api/gmc-details?sort=id,desc"))
         .andExpect(status().isOk())
-        .andExpect(content().contentType(MediaType.APPLICATION_JSON_UTF8_VALUE))
+        .andExpect(content().contentType(MediaType.APPLICATION_JSON_VALUE))
         .andExpect(jsonPath("$.[*].id").value(hasItem(gmcDetails.getId().intValue())))
         .andExpect(jsonPath("$.[*].gmcNumber").value(hasItem(DEFAULT_GMC_NUMBER.toString())))
         .andExpect(jsonPath("$.[*].gmcStatus").value(hasItem(DEFAULT_GMC_STATUS.toString())))
@@ -329,7 +329,7 @@ public class GmcDetailsResourceIntTest {
     // Get the gmcDetails
     restGmcDetailsMockMvc.perform(get("/api/gmc-details/{id}", gmcDetails.getId()))
         .andExpect(status().isOk())
-        .andExpect(content().contentType(MediaType.APPLICATION_JSON_UTF8_VALUE))
+        .andExpect(content().contentType(MediaType.APPLICATION_JSON_VALUE))
         .andExpect(jsonPath("$.id").value(gmcDetails.getId().intValue()))
         .andExpect(jsonPath("$.gmcNumber").value(DEFAULT_GMC_NUMBER.toString()))
         .andExpect(jsonPath("$.gmcStatus").value(DEFAULT_GMC_STATUS.toString()))
@@ -365,7 +365,7 @@ public class GmcDetailsResourceIntTest {
         .thenReturn(true);
 
     restGmcDetailsMockMvc.perform(put("/api/gmc-details")
-        .contentType(TestUtil.APPLICATION_JSON_UTF8)
+        .contentType(MediaType.APPLICATION_JSON)
         .content(TestUtil.convertObjectToJsonBytes(updatedGmcDetailsDTO)))
         .andExpect(status().isOk());
 
@@ -391,7 +391,7 @@ public class GmcDetailsResourceIntTest {
 
     // If the entity doesn't have an ID creation will fail
     restGmcDetailsMockMvc.perform(put("/api/gmc-details")
-        .contentType(TestUtil.APPLICATION_JSON_UTF8)
+        .contentType(MediaType.APPLICATION_JSON)
         .content(TestUtil.convertObjectToJsonBytes(gmcDetailsDTO)))
         .andExpect(status().isBadRequest());
 
@@ -409,7 +409,7 @@ public class GmcDetailsResourceIntTest {
 
     // Get the gmcDetails
     restGmcDetailsMockMvc.perform(delete("/api/gmc-details/{id}", gmcDetails.getId())
-        .accept(TestUtil.APPLICATION_JSON_UTF8))
+        .accept(MediaType.APPLICATION_JSON))
         .andExpect(status().isOk());
 
     // Validate the database is empty
@@ -461,7 +461,7 @@ public class GmcDetailsResourceIntTest {
     updatedGmcDetailsDTO.setGmcNumber(" 1111111");
 
     restGmcDetailsMockMvc.perform(put("/api/gmc-details")
-        .contentType(TestUtil.APPLICATION_JSON_UTF8)
+        .contentType(MediaType.APPLICATION_JSON)
         .content(TestUtil.convertObjectToJsonBytes(updatedGmcDetailsDTO)))
         .andExpect(status().isBadRequest())
         .andExpect(jsonPath("$.fieldErrors[0].message").value("gmcNumber should not contain any whitespaces"));

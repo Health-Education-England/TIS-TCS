@@ -17,7 +17,6 @@ import org.slf4j.LoggerFactory;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.domain.Specification;
-import org.springframework.data.jpa.domain.Specifications;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -57,7 +56,7 @@ public class SpecialtyGroupServiceImpl implements SpecialtyGroupService {
     Long groupID = specialtyGroup.getId();
     // Update
     if (groupID != null) {
-      Set<Specialty> beforeSaveSet = specialtyRepository.findBySpecialtyGroupIdIn(groupID);
+      Set<Specialty> beforeSaveSet = specialtyRepository.findBySpecialtyGroupId(groupID);
       // Set the specialty groups to null on the specialties
       for (Specialty specialty : beforeSaveSet) {
         specialty.setSpecialtyGroup(null);
@@ -106,9 +105,9 @@ public class SpecialtyGroupServiceImpl implements SpecialtyGroupService {
 
     List<Specification<SpecialtyGroup>> specs = new ArrayList<>();
     //add the text search criteria
-    specs.add(Specifications.where(containsLike("name", searchString)));
+    specs.add(Specification.where(containsLike("name", searchString)));
 
-    Specifications<SpecialtyGroup> fullSpec = Specifications.where(specs.get(0));
+    Specification<SpecialtyGroup> fullSpec = Specification.where(specs.get(0));
     //add the rest of the specs that made it in
     for (int i = 1; i < specs.size(); i++) {
       fullSpec = fullSpec.and(specs.get(i));

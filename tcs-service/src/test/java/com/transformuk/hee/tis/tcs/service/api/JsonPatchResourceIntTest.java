@@ -110,7 +110,7 @@ public class JsonPatchResourceIntTest {
     // Create the JsonPatch
     JsonPatchDTO jsonPatchDTO = jsonPatchMapper.jsonPatchToJsonPatchDTO(jsonPatch);
     restCountryMockMvc.perform(post("/api/jsonPatches")
-        .contentType(TestUtil.APPLICATION_JSON_UTF8)
+        .contentType(MediaType.APPLICATION_JSON)
         .content(TestUtil.convertObjectToJsonBytes(jsonPatchDTO)))
         .andExpect(status().isCreated());
 
@@ -136,7 +136,7 @@ public class JsonPatchResourceIntTest {
 
     // An entity with an existing ID cannot be created, so this API call must fail
     restCountryMockMvc.perform(post("/api/jsonPatches")
-        .contentType(TestUtil.APPLICATION_JSON_UTF8)
+        .contentType(MediaType.APPLICATION_JSON)
         .content(TestUtil.convertObjectToJsonBytes(jsonPatchDTO)))
         .andExpect(status().isBadRequest());
 
@@ -156,7 +156,7 @@ public class JsonPatchResourceIntTest {
     JsonPatchDTO jsonPatchDTO = jsonPatchMapper.jsonPatchToJsonPatchDTO(jsonPatch);
 
     restCountryMockMvc.perform(post("/api/jsonPatches")
-        .contentType(TestUtil.APPLICATION_JSON_UTF8)
+        .contentType(MediaType.APPLICATION_JSON)
         .content(TestUtil.convertObjectToJsonBytes(jsonPatchDTO)))
         .andExpect(status().isBadRequest());
 
@@ -173,7 +173,7 @@ public class JsonPatchResourceIntTest {
     // Get all the jsonPatchList
     restCountryMockMvc.perform(get("/api/jsonPatches?sort=id,desc"))
         .andExpect(status().isOk())
-        .andExpect(content().contentType(MediaType.APPLICATION_JSON_UTF8_VALUE))
+        .andExpect(content().contentType(MediaType.APPLICATION_JSON_VALUE))
         .andExpect(jsonPath("$.[*].id").value(hasItem(jsonPatch.getId().intValue())))
         .andExpect(jsonPath("$.[*].tableDtoName").value(hasItem(DEFAULT_TABLE_DTO_NAME.toString())))
         .andExpect(jsonPath("$.[*].patchId").value(hasItem(DEFAULT_PATCH_ID.toString())))
@@ -190,7 +190,7 @@ public class JsonPatchResourceIntTest {
     // Get the jsonPatch
     restCountryMockMvc.perform(get("/api/jsonPatches/{id}", jsonPatch.getId()))
         .andExpect(status().isOk())
-        .andExpect(content().contentType(MediaType.APPLICATION_JSON_UTF8_VALUE))
+        .andExpect(content().contentType(MediaType.APPLICATION_JSON_VALUE))
         .andExpect(jsonPath("$.id").value(jsonPatch.getId().intValue()))
         .andExpect(jsonPath("$.tableDtoName").value(DEFAULT_TABLE_DTO_NAME.toString()))
         .andExpect(jsonPath("$.patchId").value(DEFAULT_PATCH_ID.toString()))
@@ -221,7 +221,7 @@ public class JsonPatchResourceIntTest {
     JsonPatchDTO jsonPatchDTO = jsonPatchMapper.jsonPatchToJsonPatchDTO(updateJsonPatch);
 
     restCountryMockMvc.perform(put("/api/jsonPatches")
-        .contentType(TestUtil.APPLICATION_JSON_UTF8)
+        .contentType(MediaType.APPLICATION_JSON)
         .content(TestUtil.convertObjectToJsonBytes(jsonPatchDTO)))
         .andExpect(status().isOk());
 
@@ -243,7 +243,7 @@ public class JsonPatchResourceIntTest {
 
     // If the entity doesn't have an ID, it will be created instead of just being updated
     restCountryMockMvc.perform(put("/api/jsonPatches")
-        .contentType(TestUtil.APPLICATION_JSON_UTF8)
+        .contentType(MediaType.APPLICATION_JSON)
         .content(TestUtil.convertObjectToJsonBytes(jsonPatchDTO)))
         .andExpect(status().isCreated());
 
@@ -261,7 +261,7 @@ public class JsonPatchResourceIntTest {
 
     // Get the jsonPatch
     restCountryMockMvc.perform(put("/api/jsonPatches/{id}", jsonPatch.getId())
-        .accept(TestUtil.APPLICATION_JSON_UTF8))
+        .accept(MediaType.APPLICATION_JSON))
         .andExpect(status().isOk());
 
     // Validate the database is soft deleted
