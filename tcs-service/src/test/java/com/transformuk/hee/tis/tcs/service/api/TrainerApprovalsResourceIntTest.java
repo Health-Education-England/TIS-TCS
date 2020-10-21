@@ -28,6 +28,7 @@ import org.mockito.MockitoAnnotations;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.data.web.PageableHandlerMethodArgumentResolver;
+import org.springframework.http.MediaType;
 import org.springframework.http.converter.json.MappingJackson2HttpMessageConverter;
 import org.springframework.test.context.junit4.SpringRunner;
 import org.springframework.test.web.servlet.MockMvc;
@@ -120,7 +121,7 @@ public class TrainerApprovalsResourceIntTest {
     trainerApproval.setPerson(person);
     TrainerApprovalDTO trainerApprovalDTO = trainerApprovalMapper.toDto(trainerApproval);
     restTrainerApprovalMockMvc.perform(post("/api/trainer-approvals")
-        .contentType(TestUtil.APPLICATION_JSON_UTF8)
+        .contentType(MediaType.APPLICATION_JSON)
         .content(TestUtil.convertObjectToJsonBytes(trainerApprovalDTO)))
         .andExpect(status().isCreated());
 
@@ -142,7 +143,7 @@ public class TrainerApprovalsResourceIntTest {
 
     //when & then
     restTrainerApprovalMockMvc.perform(post("/api/trainer-approvals")
-        .contentType(TestUtil.APPLICATION_JSON_UTF8)
+        .contentType(MediaType.APPLICATION_JSON)
         .content(TestUtil.convertObjectToJsonBytes(trainerApprovalDTO)))
         .andExpect(status().isBadRequest())
         .andExpect(jsonPath("$.message").value("error.validation"))
@@ -159,7 +160,7 @@ public class TrainerApprovalsResourceIntTest {
 
     //when & then
     restTrainerApprovalMockMvc.perform(post("/api/trainer-approvals")
-        .contentType(TestUtil.APPLICATION_JSON_UTF8)
+        .contentType(MediaType.APPLICATION_JSON)
         .content(TestUtil.convertObjectToJsonBytes(trainerApprovalDTO)))
         .andExpect(status().isBadRequest())
         .andExpect(jsonPath("$.message").value("error.validation"))
@@ -185,7 +186,7 @@ public class TrainerApprovalsResourceIntTest {
     TrainerApprovalDTO trainerApprovalDTO = trainerApprovalMapper.toDto(updatedTrainerApproval);
 
     restTrainerApprovalMockMvc.perform(put("/api/trainer-approvals")
-        .contentType(TestUtil.APPLICATION_JSON_UTF8)
+        .contentType(MediaType.APPLICATION_JSON)
         .content(TestUtil.convertObjectToJsonBytes(trainerApprovalDTO)))
         .andExpect(status().isOk());
 

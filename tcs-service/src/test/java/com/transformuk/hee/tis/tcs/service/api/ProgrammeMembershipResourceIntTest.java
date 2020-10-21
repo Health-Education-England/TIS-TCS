@@ -242,7 +242,7 @@ public class ProgrammeMembershipResourceIntTest {
     ProgrammeMembershipDTO programmeMembershipDTO = programmeMembershipMapper
         .toDto(programmeMembership);
     restProgrammeMembershipMockMvc.perform(post("/api/programme-memberships")
-        .contentType(TestUtil.APPLICATION_JSON_UTF8)
+        .contentType(MediaType.APPLICATION_JSON)
         .content(TestUtil.convertObjectToJsonBytes(programmeMembershipDTO)))
         .andExpect(status().isCreated());
 
@@ -279,7 +279,7 @@ public class ProgrammeMembershipResourceIntTest {
 
     //when & then
     restProgrammeMembershipMockMvc.perform(post("/api/programme-memberships")
-        .contentType(TestUtil.APPLICATION_JSON_UTF8)
+        .contentType(MediaType.APPLICATION_JSON)
         .content(TestUtil.convertObjectToJsonBytes(programmeMembershipDTO)))
         .andExpect(status().isBadRequest())
         .andExpect(jsonPath("$.message").value("error.validation"))
@@ -296,7 +296,7 @@ public class ProgrammeMembershipResourceIntTest {
 
     //when & then
     restProgrammeMembershipMockMvc.perform(put("/api/programme-memberships")
-        .contentType(TestUtil.APPLICATION_JSON_UTF8)
+        .contentType(MediaType.APPLICATION_JSON)
         .content(TestUtil.convertObjectToJsonBytes(programmeMembershipDTO)))
         .andExpect(status().isBadRequest())
         .andExpect(jsonPath("$.message").value("error.validation"))
@@ -321,7 +321,7 @@ public class ProgrammeMembershipResourceIntTest {
 
     //when & then
     restProgrammeMembershipMockMvc.perform(post("/api/programme-memberships")
-        .contentType(TestUtil.APPLICATION_JSON_UTF8)
+        .contentType(MediaType.APPLICATION_JSON)
         .content(TestUtil.convertObjectToJsonBytes(programmeMembershipDTO)))
         .andExpect(status().isBadRequest())
         .andExpect(jsonPath("$.message").value("error.validation"))
@@ -346,7 +346,7 @@ public class ProgrammeMembershipResourceIntTest {
 
     //when & then
     restProgrammeMembershipMockMvc.perform(post("/api/programme-memberships")
-        .contentType(TestUtil.APPLICATION_JSON_UTF8)
+        .contentType(MediaType.APPLICATION_JSON)
         .content(TestUtil.convertObjectToJsonBytes(programmeMembershipDTO)))
         .andExpect(status().isBadRequest())
         .andExpect(jsonPath("$.message").value("error.validation"))
@@ -373,7 +373,7 @@ public class ProgrammeMembershipResourceIntTest {
 
     //when & then
     restProgrammeMembershipMockMvc.perform(post("/api/programme-memberships")
-        .contentType(TestUtil.APPLICATION_JSON_UTF8)
+        .contentType(MediaType.APPLICATION_JSON)
         .content(TestUtil.convertObjectToJsonBytes(programmeMembershipDTO)))
         .andExpect(status().isBadRequest())
         .andExpect(jsonPath("$.message").value("error.validation"))
@@ -398,7 +398,7 @@ public class ProgrammeMembershipResourceIntTest {
 
     //when & then
     restProgrammeMembershipMockMvc.perform(post("/api/programme-memberships")
-        .contentType(TestUtil.APPLICATION_JSON_UTF8)
+        .contentType(MediaType.APPLICATION_JSON)
         .content(TestUtil.convertObjectToJsonBytes(programmeMembershipDTO)))
         .andExpect(status().isBadRequest())
         .andExpect(jsonPath("$.message").value("error.validation"))
@@ -426,7 +426,7 @@ public class ProgrammeMembershipResourceIntTest {
 
     //when & then
     restProgrammeMembershipMockMvc.perform(post("/api/programme-memberships")
-        .contentType(TestUtil.APPLICATION_JSON_UTF8)
+        .contentType(MediaType.APPLICATION_JSON)
         .content(TestUtil.convertObjectToJsonBytes(programmeMembershipDTO)))
         .andExpect(status().isBadRequest())
         .andExpect(jsonPath("$.message").value("error.validation"))
@@ -460,7 +460,7 @@ public class ProgrammeMembershipResourceIntTest {
 
     // An entity with an existing ID cannot be created, so this API call must fail
     restProgrammeMembershipMockMvc.perform(post("/api/programme-memberships")
-        .contentType(TestUtil.APPLICATION_JSON_UTF8)
+        .contentType(MediaType.APPLICATION_JSON)
         .content(TestUtil.convertObjectToJsonBytes(programmeMembershipDTO)))
         .andExpect(status().isBadRequest());
 
@@ -482,7 +482,7 @@ public class ProgrammeMembershipResourceIntTest {
     // Get all the programmeMembershipList
     restProgrammeMembershipMockMvc.perform(get("/api/programme-memberships?sort=id,desc"))
         .andExpect(status().isOk())
-        .andExpect(content().contentType(MediaType.APPLICATION_JSON_UTF8_VALUE))
+        .andExpect(content().contentType(MediaType.APPLICATION_JSON_VALUE))
         .andExpect(jsonPath("$.[*].curriculumMemberships[*].intrepidId")
             .value(hasItem(DEFAULT_INTREPID_ID.toString())))
         .andExpect(jsonPath("$.[*].programmeMembershipType")
@@ -517,7 +517,7 @@ public class ProgrammeMembershipResourceIntTest {
     restProgrammeMembershipMockMvc
         .perform(get("/api/programme-memberships/{id}", programmeMembership.getId()))
         .andExpect(status().isOk())
-        .andExpect(content().contentType(MediaType.APPLICATION_JSON_UTF8_VALUE))
+        .andExpect(content().contentType(MediaType.APPLICATION_JSON_VALUE))
         .andExpect(jsonPath("$.curriculumMemberships[*].id")
             .value(hasItem(programmeMembership.getId().intValue())))
         .andExpect(
@@ -583,7 +583,7 @@ public class ProgrammeMembershipResourceIntTest {
         .toDto(updatedProgrammeMembership);
 
     restProgrammeMembershipMockMvc.perform(put("/api/programme-memberships")
-        .contentType(TestUtil.APPLICATION_JSON_UTF8)
+        .contentType(MediaType.APPLICATION_JSON)
         .content(TestUtil.convertObjectToJsonBytes(programmeMembershipDTO)))
         .andExpect(status().isOk());
 
@@ -630,7 +630,7 @@ public class ProgrammeMembershipResourceIntTest {
 
     // If the entity doesn't have an ID, it will give error instead of creating due to validation
     restProgrammeMembershipMockMvc.perform(put("/api/programme-memberships")
-        .contentType(TestUtil.APPLICATION_JSON_UTF8)
+        .contentType(MediaType.APPLICATION_JSON)
         .content(TestUtil.convertObjectToJsonBytes(programmeMembershipDTO)))
         .andExpect(status().isBadRequest());
 
@@ -651,7 +651,7 @@ public class ProgrammeMembershipResourceIntTest {
     // Get the programmeMembership
     restProgrammeMembershipMockMvc
         .perform(delete("/api/programme-memberships/{id}", programmeMembership.getId())
-            .accept(TestUtil.APPLICATION_JSON_UTF8))
+            .accept(MediaType.APPLICATION_JSON))
         .andExpect(status().isOk());
 
     // Validate the database is empty

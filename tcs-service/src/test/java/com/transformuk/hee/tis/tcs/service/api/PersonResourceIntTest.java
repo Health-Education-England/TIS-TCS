@@ -88,7 +88,6 @@ import org.springframework.http.MediaType;
 import org.springframework.http.converter.json.MappingJackson2HttpMessageConverter;
 import org.springframework.test.context.junit4.SpringRunner;
 import org.springframework.test.web.servlet.MockMvc;
-import org.springframework.test.web.servlet.MvcResult;
 import org.springframework.test.web.servlet.setup.MockMvcBuilders;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -278,7 +277,7 @@ public class PersonResourceIntTest {
     when(referenceService.rolesExist(any(), eq(true))).thenReturn(roleToExists);
 
     restPersonMockMvc.perform(post("/api/people")
-        .contentType(TestUtil.APPLICATION_JSON_UTF8)
+        .contentType(MediaType.APPLICATION_JSON)
         .content(TestUtil.convertObjectToJsonBytes(personDTO)))
         .andExpect(status().isCreated());
 
@@ -306,7 +305,7 @@ public class PersonResourceIntTest {
 
     //when & then
     restPersonMockMvc.perform(post("/api/people")
-        .contentType(TestUtil.APPLICATION_JSON_UTF8)
+        .contentType(MediaType.APPLICATION_JSON)
         .content(TestUtil.convertObjectToJsonBytes(personDTO)))
         .andExpect(status().isBadRequest())
         .andExpect(jsonPath("$.message").value("error.validation"))
@@ -322,7 +321,7 @@ public class PersonResourceIntTest {
 
     //when & then
     restPersonMockMvc.perform(put("/api/people")
-        .contentType(TestUtil.APPLICATION_JSON_UTF8)
+        .contentType(MediaType.APPLICATION_JSON)
         .content(TestUtil.convertObjectToJsonBytes(personDTO)))
         .andExpect(status().isBadRequest())
         .andExpect(jsonPath("$.message").value("error.validation"))
@@ -339,7 +338,7 @@ public class PersonResourceIntTest {
 
     // An entity with an existing ID cannot be created, so this API call must fail
     restPersonMockMvc.perform(post("/api/people")
-        .contentType(TestUtil.APPLICATION_JSON_UTF8)
+        .contentType(MediaType.APPLICATION_JSON)
         .content(TestUtil.convertObjectToJsonBytes(personDTO)))
         .andExpect(status().isBadRequest());
 
@@ -366,7 +365,7 @@ public class PersonResourceIntTest {
     // when & then
     restPersonMockMvc.perform(get("/api/people/" + person.getId() + "/basic"))
         .andExpect(status().isOk())
-        .andExpect(content().contentType(MediaType.APPLICATION_JSON_UTF8_VALUE))
+        .andExpect(content().contentType(MediaType.APPLICATION_JSON_VALUE))
         .andExpect(jsonPath("$.id").value(person.getId().intValue()))
         .andExpect(jsonPath("$.firstName").value(PERSON_FORENAMES))
         .andExpect(jsonPath("$.lastName").value(PERSON_SURNAME))
@@ -437,7 +436,7 @@ public class PersonResourceIntTest {
 
     restPersonMockMvc.perform(get("/api/people/roles/categories/1?query=user"))
         .andExpect(status().isOk())
-        .andExpect(content().contentType(MediaType.APPLICATION_JSON_UTF8_VALUE))
+        .andExpect(content().contentType(MediaType.APPLICATION_JSON_VALUE))
         .andExpect(jsonPath("$", hasSize(1)));
     //It's better to comment this line here, rather than ignoring the test-Refer to top
     //.andExpect(jsonPath("$.[*].forenames", hasItem("User 1")));
@@ -472,7 +471,7 @@ public class PersonResourceIntTest {
     // when & then
     restPersonMockMvc.perform(get("/api/people/in/" + personsIDs + "/basic"))
         .andExpect(status().isFound())
-        .andExpect(content().contentType(MediaType.APPLICATION_JSON_UTF8_VALUE))
+        .andExpect(content().contentType(MediaType.APPLICATION_JSON_VALUE))
         .andExpect(jsonPath("$[0].id").value(this.person.getId().intValue()))
         .andExpect(jsonPath("$[0].firstName").value(PERSON_FORENAMES))
         .andExpect(jsonPath("$[0].lastName").value(PERSON_SURNAME))
@@ -496,7 +495,7 @@ public class PersonResourceIntTest {
     // when & then
     restPersonMockMvc.perform(get("/api/people/in/" + personsIDs))
         .andExpect(status().isFound())
-        .andExpect(content().contentType(MediaType.APPLICATION_JSON_UTF8_VALUE))
+        .andExpect(content().contentType(MediaType.APPLICATION_JSON_VALUE))
         .andExpect(jsonPath("$[0].id").value(this.person.getId().intValue()))
         .andExpect(jsonPath("$[1].id").value(person2.getId().intValue()));
   }
@@ -524,7 +523,7 @@ public class PersonResourceIntTest {
     // Get all the personList
     restPersonMockMvc.perform(get("/api/people?sort=id,desc"))
         .andExpect(status().isOk())
-        .andExpect(content().contentType(MediaType.APPLICATION_JSON_UTF8_VALUE))
+        .andExpect(content().contentType(MediaType.APPLICATION_JSON_VALUE))
         .andExpect(jsonPath("$.[*].id").value(hasItem(person.getId().intValue())))
         .andExpect(jsonPath("$.[*].intrepidId").value(hasItem(DEFAULT_INTREPID_ID)))
         .andExpect(jsonPath("$.[*].forenames").value(hasItem(PERSON_FORENAMES)))
@@ -556,7 +555,7 @@ public class PersonResourceIntTest {
 
     restPersonMockMvc.perform(get("/api/people/basic?searchQuery=" + GMC_NUMBER))
         .andExpect(status().isOk())
-        .andExpect(content().contentType(MediaType.APPLICATION_JSON_UTF8_VALUE))
+        .andExpect(content().contentType(MediaType.APPLICATION_JSON_VALUE))
         .andExpect(jsonPath("$.[*].id").value(anotherPerson.getId().intValue()))
         .andExpect(jsonPath("$.[*].gmcNumber").value(GMC_NUMBER))
         .andExpect(jsonPath("$.[*].gdcNumber").value(GDC_NUMBER))
@@ -575,7 +574,7 @@ public class PersonResourceIntTest {
     // Get the person
     restPersonMockMvc.perform(get("/api/people/{id}", person.getId()))
         .andExpect(status().isOk())
-        .andExpect(content().contentType(MediaType.APPLICATION_JSON_UTF8_VALUE))
+        .andExpect(content().contentType(MediaType.APPLICATION_JSON_VALUE))
         .andExpect(jsonPath("$.id").value(person.getId().intValue()))
         .andExpect(jsonPath("$.intrepidId").value(DEFAULT_INTREPID_ID))
         .andExpect(jsonPath("$.addedDate").value(DEFAULT_ADDED_DATE.toString()))
@@ -604,7 +603,7 @@ public class PersonResourceIntTest {
 
         // Then the placementWholeTimeEquivalent should be what was saved
         .andExpect(status().isOk())
-        .andExpect(content().contentType(MediaType.APPLICATION_JSON_UTF8_VALUE))
+        .andExpect(content().contentType(MediaType.APPLICATION_JSON_VALUE))
         .andExpect(jsonPath("$.[0].placementWholeTimeEquivalent").value(DEFAULT_PLACEMENT_WTE));
   }
 
@@ -622,7 +621,7 @@ public class PersonResourceIntTest {
     restPersonMockMvc
         .perform(get("/api/people/{id}/placements", person.getId()))
         .andExpect(status().isOk())
-        .andExpect(content().contentType(MediaType.APPLICATION_JSON_UTF8_VALUE))
+        .andExpect(content().contentType(MediaType.APPLICATION_JSON_VALUE))
         .andExpect(jsonPath("$.[0].lifecycleState").value(APPROVED.name()))
         .andReturn();
   }
@@ -658,7 +657,7 @@ public class PersonResourceIntTest {
     when(referenceService.rolesExist(any(), eq(true))).thenReturn(roleToExists);
 
     restPersonMockMvc.perform(put("/api/people")
-        .contentType(TestUtil.APPLICATION_JSON_UTF8)
+        .contentType(MediaType.APPLICATION_JSON)
         .content(TestUtil.convertObjectToJsonBytes(updatedPersonDTO)))
         .andExpect(status().isOk());
 
@@ -686,7 +685,7 @@ public class PersonResourceIntTest {
 
     // If the entity doesn't have an ID, it will be created instead of just being updated
     restPersonMockMvc.perform(put("/api/people")
-        .contentType(TestUtil.APPLICATION_JSON_UTF8)
+        .contentType(MediaType.APPLICATION_JSON)
         .content(TestUtil.convertObjectToJsonBytes(personDTO)))
         .andExpect(status().isBadRequest())
         .andExpect(jsonPath("$.message").value("error.validation"))
@@ -711,7 +710,7 @@ public class PersonResourceIntTest {
 
     restPersonMockMvc.perform(get("/api/people?searchQuery=" + PERSON_SURNAME))
         .andExpect(status().isOk())
-        .andExpect(content().contentType(MediaType.APPLICATION_JSON_UTF8_VALUE))
+        .andExpect(content().contentType(MediaType.APPLICATION_JSON_VALUE))
         .andExpect(jsonPath("$.[*].id").value(anotherPerson.getId().intValue()))
         .andExpect(jsonPath("$.[*].forenames").value(hasItem(PERSON_FORENAMES)))
         .andExpect(jsonPath("$.[*].surname").value(hasItem(PERSON_SURNAME)))
@@ -732,7 +731,7 @@ public class PersonResourceIntTest {
 
     restPersonMockMvc.perform(get("/api/people?searchQuery=" + GMC_NUMBER))
         .andExpect(status().isOk())
-        .andExpect(content().contentType(MediaType.APPLICATION_JSON_UTF8_VALUE))
+        .andExpect(content().contentType(MediaType.APPLICATION_JSON_VALUE))
         .andExpect(jsonPath("$.[*].id").value(anotherPerson.getId().intValue()))
         .andExpect(jsonPath("$.[*].gmcNumber").value(GMC_NUMBER))
         .andExpect(jsonPath("$.[*].intrepidId").value(DEFAULT_INTREPID_ID))
@@ -757,7 +756,7 @@ public class PersonResourceIntTest {
 
     restPersonMockMvc.perform(get("/api/people?searchQuery=" + GDC_NUMBER))
         .andExpect(status().isOk())
-        .andExpect(content().contentType(MediaType.APPLICATION_JSON_UTF8_VALUE))
+        .andExpect(content().contentType(MediaType.APPLICATION_JSON_VALUE))
         .andExpect(jsonPath("$.[*].id").value(anotherPerson.getId().intValue()))
         .andExpect(jsonPath("$.[*].gdcNumber").value(GDC_NUMBER))
         .andExpect(jsonPath("$.[*].forenames").value(hasItem(PERSON_FORENAMES)))
@@ -776,7 +775,7 @@ public class PersonResourceIntTest {
 
     restPersonMockMvc.perform(get("/api/people?searchQuery=" + DEFAULT_PUBLIC_HEALTH_NUMBER))
         .andExpect(status().isOk())
-        .andExpect(content().contentType(MediaType.APPLICATION_JSON_UTF8_VALUE))
+        .andExpect(content().contentType(MediaType.APPLICATION_JSON_VALUE))
         .andExpect(jsonPath("$.[*].id").value(anotherPerson.getId().intValue()))
         .andExpect(jsonPath("$.[*].intrepidId").value(DEFAULT_INTREPID_ID))
         .andExpect(jsonPath("$.[*].role").value(DEFAULT_ROLE))
@@ -844,7 +843,7 @@ public class PersonResourceIntTest {
 
     // Get the person
     restPersonMockMvc.perform(delete("/api/people/{id}", person.getId())
-        .accept(TestUtil.APPLICATION_JSON_UTF8))
+        .accept(MediaType.APPLICATION_JSON))
         .andExpect(status().isOk());
 
     // Validate the database is empty
@@ -879,7 +878,7 @@ public class PersonResourceIntTest {
     personDTO2.setId(null);
 
     restPersonMockMvc.perform(patch("/api/people")
-        .contentType(TestUtil.APPLICATION_JSON_UTF8)
+        .contentType(MediaType.APPLICATION_JSON)
         .content(TestUtil.convertObjectToJsonBytes(Lists.newArrayList(personDTO, personDTO2))))
         .andExpect(status().isOk());
 
@@ -946,7 +945,7 @@ public class PersonResourceIntTest {
     when(referenceService.rolesExist(any(), eq(true))).thenReturn(roleToExists);
 
     restPersonMockMvc.perform(put("/api/people")
-        .contentType(TestUtil.APPLICATION_JSON_UTF8)
+        .contentType(MediaType.APPLICATION_JSON)
         .content(TestUtil.convertObjectToJsonBytes(updatedPersonDTO)))
         .andExpect(status().isBadRequest())
         .andExpect(jsonPath("$.fieldErrors[0].message")
@@ -1019,7 +1018,7 @@ public class PersonResourceIntTest {
     when(referenceService.rolesExist(any(), eq(true))).thenReturn(roleToExists);
 
     restPersonMockMvc.perform(patch("/api/bulk-people")
-        .contentType(TestUtil.APPLICATION_JSON_UTF8)
+        .contentType(MediaType.APPLICATION_JSON)
         .content(TestUtil.convertObjectToJsonBytes(Collections.singletonList(updatedPersonDto))))
         .andExpect(status().isOk())
         .andExpect(jsonPath("$.[*].role", hasItem(UPDATED_ROLE)))
@@ -1049,7 +1048,7 @@ public class PersonResourceIntTest {
     when(referenceService.findRolesIn(UPDATED_ROLE)).thenReturn(Lists.newArrayList(roleDto));
 
     restPersonMockMvc.perform(patch("/api/bulk-people")
-        .contentType(TestUtil.APPLICATION_JSON_UTF8)
+        .contentType(MediaType.APPLICATION_JSON)
         .content(TestUtil.convertObjectToJsonBytes(Collections.singletonList(updatedPersonDto))))
         .andExpect(status().isOk())
         .andExpect(jsonPath("$.[*].role", hasItem(UPDATED_ROLE)))
@@ -1080,7 +1079,7 @@ public class PersonResourceIntTest {
     when(referenceService.findRolesIn(UPDATED_ROLE)).thenReturn(Lists.newArrayList(roleDto));
 
     restPersonMockMvc.perform(patch("/api/bulk-people")
-        .contentType(TestUtil.APPLICATION_JSON_UTF8)
+        .contentType(MediaType.APPLICATION_JSON)
         .content(TestUtil.convertObjectToJsonBytes(Collections.singletonList(updatedPersonDto))))
         .andExpect(status().isOk())
         .andExpect(jsonPath("$.[*].role", hasItem(UPDATED_ROLE)))
@@ -1104,7 +1103,7 @@ public class PersonResourceIntTest {
     updatedPersonDto.setRole(null);
 
     restPersonMockMvc.perform(patch("/api/bulk-people")
-        .contentType(TestUtil.APPLICATION_JSON_UTF8)
+        .contentType(MediaType.APPLICATION_JSON)
         .content(TestUtil.convertObjectToJsonBytes(Collections.singletonList(updatedPersonDto))))
         .andExpect(status().isOk())
         .andExpect(jsonPath("$.[*].role", hasItem(DEFAULT_ROLE)))

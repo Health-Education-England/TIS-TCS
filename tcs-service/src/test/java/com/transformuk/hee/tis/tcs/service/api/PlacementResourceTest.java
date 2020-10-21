@@ -227,9 +227,9 @@ public class PlacementResourceTest {
     mockMvc.perform(
         get("/api/programme/{programmeId}/specialty/{specialtyId}/placements", programmeId,
             specialtyId)
-            .contentType(MediaType.APPLICATION_JSON_UTF8))
+            .contentType(MediaType.APPLICATION_JSON))
         .andExpect(status().isOk())
-        .andExpect(content().contentType(MediaType.APPLICATION_JSON_UTF8))
+        .andExpect(content().contentType(MediaType.APPLICATION_JSON))
         .andExpect(jsonPath("$.specialties[*].id").value(SPECIALTY_ID.intValue()))
         .andExpect(jsonPath("$.specialties[*].name").value(SPECIALTY_NAME))
         .andExpect(jsonPath("$.specialties[*].college").value(SPECIALTY_COLLEGE))

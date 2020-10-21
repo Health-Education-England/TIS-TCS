@@ -141,7 +141,7 @@ public class GdcDetailsResourceIntTest {
         .thenReturn(true);
 
     restGdcDetailsMockMvc.perform(post("/api/gdc-details")
-        .contentType(TestUtil.APPLICATION_JSON_UTF8)
+        .contentType(MediaType.APPLICATION_JSON)
         .content(TestUtil.convertObjectToJsonBytes(gdcDetailsDTO)))
         .andExpect(status().isCreated());
 
@@ -164,7 +164,7 @@ public class GdcDetailsResourceIntTest {
 
     //when & then
     restGdcDetailsMockMvc.perform(post("/api/gdc-details")
-        .contentType(TestUtil.APPLICATION_JSON_UTF8)
+        .contentType(MediaType.APPLICATION_JSON)
         .content(TestUtil.convertObjectToJsonBytes(gdcDetailsDTO)))
         .andExpect(status().isBadRequest())
         .andExpect(jsonPath("$.message").value("error.validation"))
@@ -180,7 +180,7 @@ public class GdcDetailsResourceIntTest {
 
     //when & then
     restGdcDetailsMockMvc.perform(put("/api/gdc-details")
-        .contentType(TestUtil.APPLICATION_JSON_UTF8)
+        .contentType(MediaType.APPLICATION_JSON)
         .content(TestUtil.convertObjectToJsonBytes(gdcDetailsDTO)))
         .andExpect(status().isBadRequest())
         .andExpect(jsonPath("$.message").value("error.validation"))
@@ -197,7 +197,7 @@ public class GdcDetailsResourceIntTest {
 //    gdcDetailsDTO.setGdcNumber(DEFAULT_GDC_NUMBER);
 //    //when & then
 //    restGdcDetailsMockMvc.perform(post("/api/gdc-details")
-//        .contentType(TestUtil.APPLICATION_JSON_UTF8)
+//        .contentType(MediaType.APPLICATION_JSON)
 //        .content(TestUtil.convertObjectToJsonBytes(gdcDetailsDTO)))
 //        .andExpect(status().isBadRequest())
 //        .andExpect(jsonPath("$.message").value("error.validation"))
@@ -219,7 +219,7 @@ public class GdcDetailsResourceIntTest {
 
     // Gdc details is part of person so the call must succeed
     restGdcDetailsMockMvc.perform(post("/api/gdc-details")
-        .contentType(TestUtil.APPLICATION_JSON_UTF8)
+        .contentType(MediaType.APPLICATION_JSON)
         .content(TestUtil.convertObjectToJsonBytes(gdcDetailsDTO)))
         .andExpect(status().isCreated());
 
@@ -237,7 +237,7 @@ public class GdcDetailsResourceIntTest {
     // Get all the gdcDetailsList
     restGdcDetailsMockMvc.perform(get("/api/gdc-details?sort=id,desc"))
         .andExpect(status().isOk())
-        .andExpect(content().contentType(MediaType.APPLICATION_JSON_UTF8_VALUE))
+        .andExpect(content().contentType(MediaType.APPLICATION_JSON_VALUE))
         .andExpect(jsonPath("$.[*].id").value(hasItem(gdcDetails.getId().intValue())))
         .andExpect(jsonPath("$.[*].gdcNumber").value(hasItem(DEFAULT_GDC_NUMBER.toString())))
         .andExpect(jsonPath("$.[*].gdcStatus").value(hasItem(DEFAULT_GDC_STATUS.toString())))
@@ -255,7 +255,7 @@ public class GdcDetailsResourceIntTest {
     // Get the gdcDetails
     restGdcDetailsMockMvc.perform(get("/api/gdc-details/{id}", gdcDetails.getId()))
         .andExpect(status().isOk())
-        .andExpect(content().contentType(MediaType.APPLICATION_JSON_UTF8_VALUE))
+        .andExpect(content().contentType(MediaType.APPLICATION_JSON_VALUE))
         .andExpect(jsonPath("$.id").value(gdcDetails.getId().intValue()))
         .andExpect(jsonPath("$.gdcNumber").value(DEFAULT_GDC_NUMBER.toString()))
         .andExpect(jsonPath("$.gdcStatus").value(DEFAULT_GDC_STATUS.toString()))
@@ -289,7 +289,7 @@ public class GdcDetailsResourceIntTest {
         .thenReturn(true);
 
     restGdcDetailsMockMvc.perform(put("/api/gdc-details")
-        .contentType(TestUtil.APPLICATION_JSON_UTF8)
+        .contentType(MediaType.APPLICATION_JSON)
         .content(TestUtil.convertObjectToJsonBytes(updatedGdcDetailsDTO)))
         .andExpect(status().isOk());
 
@@ -314,7 +314,7 @@ public class GdcDetailsResourceIntTest {
 
     // If the entity doesn't have an ID creation will fail
     restGdcDetailsMockMvc.perform(put("/api/gdc-details")
-        .contentType(TestUtil.APPLICATION_JSON_UTF8)
+        .contentType(MediaType.APPLICATION_JSON)
         .content(TestUtil.convertObjectToJsonBytes(gdcDetailsDTO)))
         .andExpect(status().isBadRequest());
 
@@ -332,7 +332,7 @@ public class GdcDetailsResourceIntTest {
 
     // Get the gdcDetails
     restGdcDetailsMockMvc.perform(delete("/api/gdc-details/{id}", gdcDetails.getId())
-        .accept(TestUtil.APPLICATION_JSON_UTF8))
+        .accept(MediaType.APPLICATION_JSON))
         .andExpect(status().isOk());
 
     // Validate the database is empty
@@ -384,7 +384,7 @@ public class GdcDetailsResourceIntTest {
     updatedGdcDetailsDTO.setGdcNumber(" 1111111");
 
     restGdcDetailsMockMvc.perform(put("/api/gdc-details")
-        .contentType(TestUtil.APPLICATION_JSON_UTF8)
+        .contentType(MediaType.APPLICATION_JSON)
         .content(TestUtil.convertObjectToJsonBytes(updatedGdcDetailsDTO)))
         .andExpect(status().isBadRequest())
         .andExpect(jsonPath("$.fieldErrors[0].message").value("gdcNumber should not contain any whitespaces"));

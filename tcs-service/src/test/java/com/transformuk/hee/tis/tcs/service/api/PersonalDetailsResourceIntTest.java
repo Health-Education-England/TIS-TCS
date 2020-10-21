@@ -177,7 +177,7 @@ public class PersonalDetailsResourceIntTest {
     PersonalDetailsDTO personalDetailsDTO = personalDetailsMapper.toDto(personalDetails);
     when(referenceService.isValueExists(any(), anyString(), anyBoolean())).thenReturn(true);
     restPersonalDetailsMockMvc.perform(post("/api/personal-details")
-        .contentType(TestUtil.APPLICATION_JSON_UTF8)
+        .contentType(MediaType.APPLICATION_JSON)
         .content(TestUtil.convertObjectToJsonBytes(personalDetailsDTO)))
         .andExpect(status().isCreated());
 
@@ -207,7 +207,7 @@ public class PersonalDetailsResourceIntTest {
 
     //when & then
     restPersonalDetailsMockMvc.perform(post("/api/personal-details")
-        .contentType(TestUtil.APPLICATION_JSON_UTF8)
+        .contentType(MediaType.APPLICATION_JSON)
         .content(TestUtil.convertObjectToJsonBytes(personalDetailsDTO)))
         .andExpect(status().isBadRequest())
         .andExpect(jsonPath("$.message").value("error.validation"))
@@ -223,7 +223,7 @@ public class PersonalDetailsResourceIntTest {
 
     //when & then
     restPersonalDetailsMockMvc.perform(put("/api/personal-details")
-        .contentType(TestUtil.APPLICATION_JSON_UTF8)
+        .contentType(MediaType.APPLICATION_JSON)
         .content(TestUtil.convertObjectToJsonBytes(personalDetailsDTO)))
         .andExpect(status().isBadRequest())
         .andExpect(jsonPath("$.message").value("error.validation"))
@@ -242,7 +242,7 @@ public class PersonalDetailsResourceIntTest {
     when(referenceService.isValueExists(any(), anyString(), anyBoolean())).thenReturn(true);
     // Personal details is part of person so the call must succeed
     restPersonalDetailsMockMvc.perform(post("/api/personal-details")
-        .contentType(TestUtil.APPLICATION_JSON_UTF8)
+        .contentType(MediaType.APPLICATION_JSON)
         .content(TestUtil.convertObjectToJsonBytes(personalDetailsDTO)))
         .andExpect(status().isCreated());
 
@@ -260,7 +260,7 @@ public class PersonalDetailsResourceIntTest {
     // Get all the personalDetailsList
     restPersonalDetailsMockMvc.perform(get("/api/personal-details?sort=id,desc"))
         .andExpect(status().isOk())
-        .andExpect(content().contentType(MediaType.APPLICATION_JSON_UTF8_VALUE))
+        .andExpect(content().contentType(MediaType.APPLICATION_JSON_VALUE))
         .andExpect(jsonPath("$.[*].id").value(hasItem(personalDetails.getId().intValue())))
         .andExpect(
             jsonPath("$.[*].maritalStatus").value(hasItem(DEFAULT_MARITAL_STATUS.toString())))
@@ -291,7 +291,7 @@ public class PersonalDetailsResourceIntTest {
     // Get the personalDetails
     restPersonalDetailsMockMvc.perform(get("/api/personal-details/{id}", personalDetails.getId()))
         .andExpect(status().isOk())
-        .andExpect(content().contentType(MediaType.APPLICATION_JSON_UTF8_VALUE))
+        .andExpect(content().contentType(MediaType.APPLICATION_JSON_VALUE))
         .andExpect(jsonPath("$.id").value(personalDetails.getId().intValue()))
         .andExpect(jsonPath("$.maritalStatus").value(DEFAULT_MARITAL_STATUS.toString()))
         .andExpect(jsonPath("$.dateOfBirth").value(DEFAULT_DATE_OF_BIRTH.toString()))
@@ -340,7 +340,7 @@ public class PersonalDetailsResourceIntTest {
     PersonalDetailsDTO personalDetailsDTO = personalDetailsMapper.toDto(updatedPersonalDetails);
     when(referenceService.isValueExists(any(), anyString(), anyBoolean())).thenReturn(true);
     restPersonalDetailsMockMvc.perform(put("/api/personal-details")
-        .contentType(TestUtil.APPLICATION_JSON_UTF8)
+        .contentType(MediaType.APPLICATION_JSON)
         .content(TestUtil.convertObjectToJsonBytes(personalDetailsDTO)))
         .andExpect(status().isOk());
 
@@ -373,7 +373,7 @@ public class PersonalDetailsResourceIntTest {
 
     // If the entity doesn't have an ID creation will fail
     restPersonalDetailsMockMvc.perform(put("/api/personal-details")
-        .contentType(TestUtil.APPLICATION_JSON_UTF8)
+        .contentType(MediaType.APPLICATION_JSON)
         .content(TestUtil.convertObjectToJsonBytes(personalDetailsDTO)))
         .andExpect(status().isBadRequest());
 
@@ -391,7 +391,7 @@ public class PersonalDetailsResourceIntTest {
 
     // Get the personalDetails
     restPersonalDetailsMockMvc.perform(delete("/api/personal-details/{id}", personalDetails.getId())
-        .accept(TestUtil.APPLICATION_JSON_UTF8))
+        .accept(MediaType.APPLICATION_JSON))
         .andExpect(status().isOk());
 
     // Validate the database is empty
@@ -461,7 +461,7 @@ public class PersonalDetailsResourceIntTest {
     when(referenceService.isValueExists(any(), anyString())).thenReturn(true);
     restPersonalDetailsMockMvc
         .perform(patch("/api/personal-details/{id}", personalDetailsDTO.getId())
-            .contentType(TestUtil.APPLICATION_JSON_UTF8)
+            .contentType(MediaType.APPLICATION_JSON)
             .content(TestUtil.convertObjectToJsonBytes(personalDetailsDTO)))
         .andExpect(status().isOk());
 

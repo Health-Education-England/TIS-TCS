@@ -19,9 +19,9 @@ import org.springframework.stereotype.Repository;
 public interface SpecialtyRepository extends JpaRepository<Specialty, Long>,
     JpaSpecificationExecutor<Specialty> {
 
-  Page<Specialty> findBySpecialtyGroupIdIn(Long groupId, Pageable pageable);
+  Page<Specialty> findBySpecialtyGroupId(Long groupId, Pageable pageable);
 
-  Set<Specialty> findBySpecialtyGroupIdIn(Long groupId);
+  Set<Specialty> findBySpecialtyGroupId(Long groupId);
 
   /**
    * Find a page of specialties related to a Programme via the Curricula

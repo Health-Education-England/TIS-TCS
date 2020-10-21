@@ -112,7 +112,7 @@ public class FundingComponentsResourceIntTest {
     FundingComponentsDTO fundingComponentsDTO = fundingComponentsMapper
         .fundingComponentsToFundingComponentsDTO(fundingComponents);
     restFundingComponentsMockMvc.perform(post("/api/funding-components")
-        .contentType(TestUtil.APPLICATION_JSON_UTF8)
+        .contentType(MediaType.APPLICATION_JSON)
         .content(TestUtil.convertObjectToJsonBytes(fundingComponentsDTO)))
         .andExpect(status().isCreated());
 
@@ -137,7 +137,7 @@ public class FundingComponentsResourceIntTest {
 
     // An entity with an existing ID cannot be created, so this API call must fail
     restFundingComponentsMockMvc.perform(post("/api/funding-components")
-        .contentType(TestUtil.APPLICATION_JSON_UTF8)
+        .contentType(MediaType.APPLICATION_JSON)
         .content(TestUtil.convertObjectToJsonBytes(fundingComponentsDTO)))
         .andExpect(status().isBadRequest());
 
@@ -155,7 +155,7 @@ public class FundingComponentsResourceIntTest {
     // Get all the fundingComponentsList
     restFundingComponentsMockMvc.perform(get("/api/funding-components?sort=id,desc"))
         .andExpect(status().isOk())
-        .andExpect(content().contentType(MediaType.APPLICATION_JSON_UTF8_VALUE))
+        .andExpect(content().contentType(MediaType.APPLICATION_JSON_VALUE))
         .andExpect(jsonPath("$.[*].id").value(hasItem(fundingComponents.getId().intValue())))
         .andExpect(jsonPath("$.[*].percentage").value(hasItem(DEFAULT_PERCENTAGE)))
         .andExpect(jsonPath("$.[*].amount").value(hasItem(DEFAULT_AMOUNT.intValue())));
@@ -171,7 +171,7 @@ public class FundingComponentsResourceIntTest {
     restFundingComponentsMockMvc
         .perform(get("/api/funding-components/{id}", fundingComponents.getId()))
         .andExpect(status().isOk())
-        .andExpect(content().contentType(MediaType.APPLICATION_JSON_UTF8_VALUE))
+        .andExpect(content().contentType(MediaType.APPLICATION_JSON_VALUE))
         .andExpect(jsonPath("$.id").value(fundingComponents.getId().intValue()))
         .andExpect(jsonPath("$.percentage").value(DEFAULT_PERCENTAGE))
         .andExpect(jsonPath("$.amount").value(DEFAULT_AMOUNT.intValue()));
@@ -202,7 +202,7 @@ public class FundingComponentsResourceIntTest {
         .fundingComponentsToFundingComponentsDTO(updatedFundingComponents);
 
     restFundingComponentsMockMvc.perform(put("/api/funding-components")
-        .contentType(TestUtil.APPLICATION_JSON_UTF8)
+        .contentType(MediaType.APPLICATION_JSON)
         .content(TestUtil.convertObjectToJsonBytes(fundingComponentsDTO)))
         .andExpect(status().isOk());
 
@@ -226,7 +226,7 @@ public class FundingComponentsResourceIntTest {
 
     // If the entity doesn't have an ID, it will be created instead of just being updated
     restFundingComponentsMockMvc.perform(put("/api/funding-components")
-        .contentType(TestUtil.APPLICATION_JSON_UTF8)
+        .contentType(MediaType.APPLICATION_JSON)
         .content(TestUtil.convertObjectToJsonBytes(fundingComponentsDTO)))
         .andExpect(status().isCreated());
 
@@ -245,7 +245,7 @@ public class FundingComponentsResourceIntTest {
     // Get the fundingComponents
     restFundingComponentsMockMvc
         .perform(delete("/api/funding-components/{id}", fundingComponents.getId())
-            .accept(TestUtil.APPLICATION_JSON_UTF8))
+            .accept(MediaType.APPLICATION_JSON))
         .andExpect(status().isOk());
 
     // Validate the database is empty

@@ -93,7 +93,7 @@ public class RevalidationResourceTest {
     MvcResult result =
         restRevalidationMock.perform(get("/api/revalidation/trainee/{gmcId}", GMC_ID1))
             .andExpect(status().isOk())
-            .andExpect(content().contentType(MediaType.APPLICATION_JSON_UTF8))
+            .andExpect(content().contentType(MediaType.APPLICATION_JSON))
             .andReturn();
     MockHttpServletResponse response = result.getResponse();
 
@@ -126,7 +126,7 @@ public class RevalidationResourceTest {
     MvcResult result =
         restRevalidationMock.perform(get("/api/revalidation/trainees/{gmcIds}", gmcId))
             .andExpect(status().isOk())
-            .andExpect(content().contentType(MediaType.APPLICATION_JSON_UTF8))
+            .andExpect(content().contentType(MediaType.APPLICATION_JSON))
             .andReturn();
     MockHttpServletResponse response = result.getResponse();
 
@@ -166,7 +166,7 @@ public class RevalidationResourceTest {
     MvcResult result =
         restRevalidationMock.perform(get("/api/revalidation/connection/{gmcIds}", gmcId))
             .andExpect(status().isOk())
-            .andExpect(content().contentType(MediaType.APPLICATION_JSON_UTF8))
+            .andExpect(content().contentType(MediaType.APPLICATION_JSON))
             .andReturn();
     MockHttpServletResponse response = result.getResponse();
 

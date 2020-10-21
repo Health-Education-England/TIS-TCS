@@ -161,7 +161,7 @@ public class EsrNotificationResourceIntTest {
     restEsrNotificationMockMvc.perform(get("/api/notifications/load/next-to-current-trainee")
         .param("fromDate", from.toString()))
         .andExpect(status().isOk())
-        .andExpect(content().contentType(MediaType.APPLICATION_JSON_UTF8_VALUE))
+        .andExpect(content().contentType(MediaType.APPLICATION_JSON_VALUE))
         .andExpect(jsonPath("$.*").isArray())
         .andExpect(jsonPath("$", hasSize(1)))
         .andExpect(jsonPath("$.[*].notificationTitleCode").value("1"))
@@ -246,7 +246,7 @@ public class EsrNotificationResourceIntTest {
     restEsrNotificationMockMvc.perform(get(API_LOAD_FUTURE_TRAINEE)
         .param("fromDate", from.toString()))
         .andExpect(status().isOk())
-        .andExpect(content().contentType(MediaType.APPLICATION_JSON_UTF8_VALUE))
+        .andExpect(content().contentType(MediaType.APPLICATION_JSON_VALUE))
         .andExpect(content().string("1"));
   }
 
@@ -346,7 +346,7 @@ public class EsrNotificationResourceIntTest {
     restEsrNotificationMockMvc.perform(get(API_LOAD_FUTURE_TRAINEE)
         .param("fromDate", today.toString()))
         .andExpect(status().isOk())
-        .andExpect(content().contentType(MediaType.APPLICATION_JSON_UTF8_VALUE))
+        .andExpect(content().contentType(MediaType.APPLICATION_JSON_VALUE))
         .andExpect(content().string("2"));
   }
 
@@ -406,7 +406,7 @@ public class EsrNotificationResourceIntTest {
     restEsrNotificationMockMvc.perform(get(API_LOAD_FUTURE_TRAINEE)
         .param("fromDate", from.toString()))
         .andExpect(status().isOk())
-        .andExpect(content().contentType(MediaType.APPLICATION_JSON_UTF8_VALUE))
+        .andExpect(content().contentType(MediaType.APPLICATION_JSON_VALUE))
         .andExpect(jsonPath("$.*").isEmpty());
   }
 
@@ -486,7 +486,7 @@ public class EsrNotificationResourceIntTest {
     restEsrNotificationMockMvc.perform(get(API_LOAD_VACANT_POSTS)
         .param("asOfDate", from.toString()))
         .andExpect(status().isOk())
-        .andExpect(content().contentType(MediaType.APPLICATION_JSON_UTF8_VALUE))
+        .andExpect(content().contentType(MediaType.APPLICATION_JSON_VALUE))
         .andExpect(jsonPath("$.*").isArray())
         .andExpect(jsonPath("$", hasSize(2)))
         .andExpect(jsonPath("$.[*].notificationTitleCode").value(everyItem(equalTo("1"))))

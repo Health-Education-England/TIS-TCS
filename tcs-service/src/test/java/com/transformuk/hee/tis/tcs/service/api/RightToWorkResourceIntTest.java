@@ -143,7 +143,7 @@ public class RightToWorkResourceIntTest {
     // Create the RightToWork
     RightToWorkDTO rightToWorkDTO = rightToWorkMapper.toDto(rightToWork);
     restRightToWorkMockMvc.perform(post("/api/right-to-works")
-        .contentType(TestUtil.APPLICATION_JSON_UTF8)
+        .contentType(MediaType.APPLICATION_JSON)
         .content(TestUtil.convertObjectToJsonBytes(rightToWorkDTO)))
         .andExpect(status().isCreated());
 
@@ -168,7 +168,7 @@ public class RightToWorkResourceIntTest {
 
     //when & then
     restRightToWorkMockMvc.perform(post("/api/right-to-works")
-        .contentType(TestUtil.APPLICATION_JSON_UTF8)
+        .contentType(MediaType.APPLICATION_JSON)
         .content(TestUtil.convertObjectToJsonBytes(rightToWorkDTO)))
         .andExpect(status().isBadRequest())
         .andExpect(jsonPath("$.message").value("error.validation"))
@@ -184,7 +184,7 @@ public class RightToWorkResourceIntTest {
 
     //when & then
     restRightToWorkMockMvc.perform(put("/api/right-to-works")
-        .contentType(TestUtil.APPLICATION_JSON_UTF8)
+        .contentType(MediaType.APPLICATION_JSON)
         .content(TestUtil.convertObjectToJsonBytes(rightToWorkDTO)))
         .andExpect(status().isBadRequest())
         .andExpect(jsonPath("$.message").value("error.validation"))
@@ -201,7 +201,7 @@ public class RightToWorkResourceIntTest {
     rightToWorkDTO.setSettled("YES");
     //when & then
     restRightToWorkMockMvc.perform(post("/api/right-to-works")
-        .contentType(TestUtil.APPLICATION_JSON_UTF8)
+        .contentType(MediaType.APPLICATION_JSON)
         .content(TestUtil.convertObjectToJsonBytes(rightToWorkDTO)))
         .andExpect(status().isCreated());
 
@@ -221,7 +221,7 @@ public class RightToWorkResourceIntTest {
 
     // Right to work is part of person so the call must succeed
     restRightToWorkMockMvc.perform(post("/api/right-to-works")
-        .contentType(TestUtil.APPLICATION_JSON_UTF8)
+        .contentType(MediaType.APPLICATION_JSON)
         .content(TestUtil.convertObjectToJsonBytes(rightToWorkDTO)))
         .andExpect(status().isCreated());
 
@@ -249,7 +249,7 @@ public class RightToWorkResourceIntTest {
     // Get all the rightToWorkList
     restRightToWorkMockMvc.perform(get("/api/right-to-works?sort=id,desc"))
         .andExpect(status().isOk())
-        .andExpect(content().contentType(MediaType.APPLICATION_JSON_UTF8_VALUE))
+        .andExpect(content().contentType(MediaType.APPLICATION_JSON_VALUE))
         .andExpect(jsonPath("$.[*].id").value(hasItem(rightToWork.getId().intValue())))
         .andExpect(jsonPath("$.[*].eeaResident").value(hasItem(DEFAULT_EEA_RESIDENT)))
         .andExpect(jsonPath("$.[*].permitToWork").value(hasItem(DEFAULT_PERMIT_TO_WORK.name())))
@@ -269,7 +269,7 @@ public class RightToWorkResourceIntTest {
     // Get the rightToWork
     restRightToWorkMockMvc.perform(get("/api/right-to-works/{id}", rightToWork.getId()))
         .andExpect(status().isOk())
-        .andExpect(content().contentType(MediaType.APPLICATION_JSON_UTF8_VALUE))
+        .andExpect(content().contentType(MediaType.APPLICATION_JSON_VALUE))
         .andExpect(jsonPath("$.id").value(rightToWork.getId().intValue()))
         .andExpect(jsonPath("$.eeaResident").value(DEFAULT_EEA_RESIDENT))
         .andExpect(jsonPath("$.permitToWork").value(DEFAULT_PERMIT_TO_WORK.name()))
@@ -308,7 +308,7 @@ public class RightToWorkResourceIntTest {
     RightToWorkDTO rightToWorkDTO = rightToWorkMapper.toDto(updatedRightToWork);
 
     restRightToWorkMockMvc.perform(put("/api/right-to-works")
-        .contentType(TestUtil.APPLICATION_JSON_UTF8)
+        .contentType(MediaType.APPLICATION_JSON)
         .content(TestUtil.convertObjectToJsonBytes(rightToWorkDTO)))
         .andExpect(status().isOk());
 
@@ -336,7 +336,7 @@ public class RightToWorkResourceIntTest {
 
     // If the entity doesn't have an ID creation will fail
     restRightToWorkMockMvc.perform(put("/api/right-to-works")
-        .contentType(TestUtil.APPLICATION_JSON_UTF8)
+        .contentType(MediaType.APPLICATION_JSON)
         .content(TestUtil.convertObjectToJsonBytes(rightToWorkDTO)))
         .andExpect(status().isBadRequest());
 
@@ -354,7 +354,7 @@ public class RightToWorkResourceIntTest {
 
     // Get the rightToWork
     restRightToWorkMockMvc.perform(delete("/api/right-to-works/{id}", rightToWork.getId())
-        .accept(TestUtil.APPLICATION_JSON_UTF8))
+        .accept(MediaType.APPLICATION_JSON))
         .andExpect(status().isOk());
 
     // Validate the database is empty

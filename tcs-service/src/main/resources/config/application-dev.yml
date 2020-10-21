@@ -12,10 +12,6 @@ spring:
   elasticsearch:
     rest:
       uris: ${ES_URLS}
-  data:
-    elasticsearch:
-      cluster-nodes: ${ES_CLUSTER_NODE_URLS}
-      cluster-name: ${ES_CLUSTER_NAME}
 
 logging:
   file: ${LOG_DIR:${HOME}}/tcs.log

@@ -155,7 +155,7 @@ public class SpecialtyResourceIntTest {
         specialtyGroupEntity.getId());
 
     restSpecialtyMockMvc.perform(post("/api/specialties")
-        .contentType(TestUtil.APPLICATION_JSON_UTF8)
+        .contentType(MediaType.APPLICATION_JSON)
         .content(TestUtil.convertObjectToJsonBytes(specialtyDTO)))
         .andExpect(status().isCreated());
 
@@ -180,7 +180,7 @@ public class SpecialtyResourceIntTest {
 
     // An entity with an existing ID cannot be created, so this API call must fail
     restSpecialtyMockMvc.perform(post("/api/specialties")
-        .contentType(TestUtil.APPLICATION_JSON_UTF8)
+        .contentType(MediaType.APPLICATION_JSON)
         .content(TestUtil.convertObjectToJsonBytes(specialtyDTO)))
         .andExpect(status().isBadRequest());
 
@@ -201,7 +201,7 @@ public class SpecialtyResourceIntTest {
 
     // An entity with no nhs specialty code cannot be created
     restSpecialtyMockMvc.perform(post("/api/specialties")
-        .contentType(TestUtil.APPLICATION_JSON_UTF8)
+        .contentType(MediaType.APPLICATION_JSON)
         .content(TestUtil.convertObjectToJsonBytes(specialtyDTO)))
         .andExpect(jsonPath("$.fieldErrors[:1].field").value("specialtyCode"))
         .andExpect(status().isBadRequest());
@@ -225,7 +225,7 @@ public class SpecialtyResourceIntTest {
 
     // An entity with no nhs specialty code cannot be created
     restSpecialtyMockMvc.perform(post("/api/specialties")
-        .contentType(TestUtil.APPLICATION_JSON_UTF8)
+        .contentType(MediaType.APPLICATION_JSON)
         .content(TestUtil.convertObjectToJsonBytes(specialtyDTO)))
         .andExpect(jsonPath("$.fieldErrors[:1].field").value("specialtyCode"))
         .andExpect(status().isBadRequest());
@@ -248,7 +248,7 @@ public class SpecialtyResourceIntTest {
 
     // An entity with no name cannot be created
     restSpecialtyMockMvc.perform(post("/api/specialties")
-        .contentType(TestUtil.APPLICATION_JSON_UTF8)
+        .contentType(MediaType.APPLICATION_JSON)
         .content(TestUtil.convertObjectToJsonBytes(specialtyDTO)))
         .andExpect(jsonPath("$.fieldErrors[:1].field").value("name"))
         .andExpect(status().isBadRequest());
@@ -273,7 +273,7 @@ public class SpecialtyResourceIntTest {
 
     // An entity cannot be created with name as spaces
     restSpecialtyMockMvc.perform(post("/api/specialties")
-        .contentType(TestUtil.APPLICATION_JSON_UTF8)
+        .contentType(MediaType.APPLICATION_JSON)
         .content(TestUtil.convertObjectToJsonBytes(specialtyDTO)))
         .andExpect(jsonPath("$.fieldErrors[:1].field").value("name"))
         .andExpect(status().isBadRequest());
@@ -292,7 +292,7 @@ public class SpecialtyResourceIntTest {
     // Get all the specialtyList
     restSpecialtyMockMvc.perform(get("/api/specialties?sort=id,desc"))
         .andExpect(status().isOk())
-        .andExpect(content().contentType(MediaType.APPLICATION_JSON_UTF8_VALUE))
+        .andExpect(content().contentType(MediaType.APPLICATION_JSON_VALUE))
         .andExpect(jsonPath("$.[*].id").value(hasItem(specialty.getId().intValue())))
         .andExpect(jsonPath("$.[*].status").value(hasItem(DEFAULT_STATUS.toString().toUpperCase())))
         .andExpect(jsonPath("$.[*].college").value(hasItem(DEFAULT_COLLEGE)))
@@ -309,7 +309,7 @@ public class SpecialtyResourceIntTest {
     // Get all the specialtyList
     restSpecialtyMockMvc.perform(get("/api/specialties/in/" + specialty.getId() + "," + 123))
         .andExpect(status().isFound())
-        .andExpect(content().contentType(MediaType.APPLICATION_JSON_UTF8_VALUE))
+        .andExpect(content().contentType(MediaType.APPLICATION_JSON_VALUE))
         .andExpect(jsonPath("$.[*].id").value(hasItem(specialty.getId().intValue())))
         .andExpect(jsonPath("$.[*].status").value(hasItem(DEFAULT_STATUS.toString().toUpperCase())))
         .andExpect(jsonPath("$.[*].college").value(hasItem(DEFAULT_COLLEGE)));
@@ -324,7 +324,7 @@ public class SpecialtyResourceIntTest {
     // Get all the specialtyList
     restSpecialtyMockMvc.perform(get("/api/specialties/in/invalid"))
         .andExpect(status().isOk())
-        .andExpect(content().contentType(MediaType.APPLICATION_JSON_UTF8_VALUE));
+        .andExpect(content().contentType(MediaType.APPLICATION_JSON_VALUE));
   }
 
 
@@ -343,7 +343,7 @@ public class SpecialtyResourceIntTest {
     // Get the specialty
     restSpecialtyMockMvc.perform(get("/api/specialties/{id}", specialty.getId()))
         .andExpect(status().isOk())
-        .andExpect(content().contentType(MediaType.APPLICATION_JSON_UTF8_VALUE))
+        .andExpect(content().contentType(MediaType.APPLICATION_JSON_VALUE))
         .andExpect(jsonPath("$.id").value(specialty.getId().intValue()))
         .andExpect(jsonPath("$.status").value(DEFAULT_STATUS.toString().toUpperCase()))
         .andExpect(jsonPath("$.college").value(DEFAULT_COLLEGE))
@@ -488,7 +488,7 @@ public class SpecialtyResourceIntTest {
         specialtyGroupEntity.getId());
 
     restSpecialtyMockMvc.perform(put("/api/specialties")
-        .contentType(TestUtil.APPLICATION_JSON_UTF8)
+        .contentType(MediaType.APPLICATION_JSON)
         .content(TestUtil.convertObjectToJsonBytes(specialtyDTO)))
         .andExpect(status().isOk());
 
@@ -519,7 +519,7 @@ public class SpecialtyResourceIntTest {
     SpecialtyDTO specialtyDTO = linkSpecialtyToSpecialtyGroup(specialty, specialtyGroup.getId());
 
     restSpecialtyMockMvc.perform(put("/api/specialties")
-        .contentType(TestUtil.APPLICATION_JSON_UTF8)
+        .contentType(MediaType.APPLICATION_JSON)
         .content(TestUtil.convertObjectToJsonBytes(specialtyDTO)))
         .andExpect(status().isBadRequest());
   }
@@ -534,7 +534,7 @@ public class SpecialtyResourceIntTest {
     SpecialtyDTO specialtyDTO = linkSpecialtyToSpecialtyGroup(specialty, specialtyGroup.getId());
 
     restSpecialtyMockMvc.perform(put("/api/specialties")
-        .contentType(TestUtil.APPLICATION_JSON_UTF8)
+        .contentType(MediaType.APPLICATION_JSON)
         .content(TestUtil.convertObjectToJsonBytes(specialtyDTO)))
         .andExpect(jsonPath("$.fieldErrors[:1].field").value("id"))
         .andExpect(status().isBadRequest());
@@ -553,7 +553,7 @@ public class SpecialtyResourceIntTest {
     // When status is null
     specialtyDTO.setStatus(null);
     restSpecialtyMockMvc.perform(put("/api/specialties")
-        .contentType(TestUtil.APPLICATION_JSON_UTF8)
+        .contentType(MediaType.APPLICATION_JSON)
         .content(TestUtil.convertObjectToJsonBytes(specialtyDTO)))
         .andExpect(jsonPath("$.fieldErrors[:1].field").value("status"))
         .andExpect(status().isBadRequest());
@@ -572,7 +572,7 @@ public class SpecialtyResourceIntTest {
     // When status is null
     specialtyDTO.setSpecialtyCode(null);
     restSpecialtyMockMvc.perform(put("/api/specialties")
-        .contentType(TestUtil.APPLICATION_JSON_UTF8)
+        .contentType(MediaType.APPLICATION_JSON)
         .content(TestUtil.convertObjectToJsonBytes(specialtyDTO)))
         .andExpect(jsonPath("$.fieldErrors[:1].field").value("specialtyCode"))
         .andExpect(status().isBadRequest());
@@ -591,7 +591,7 @@ public class SpecialtyResourceIntTest {
     // When type is null
     specialtyDTO.setSpecialtyTypes(null);
     restSpecialtyMockMvc.perform(put("/api/specialties")
-        .contentType(TestUtil.APPLICATION_JSON_UTF8)
+        .contentType(MediaType.APPLICATION_JSON)
         .content(TestUtil.convertObjectToJsonBytes(specialtyDTO)))
         .andExpect(jsonPath("$.fieldErrors[:1].field").value("specialtyTypes"))
         .andExpect(status().isBadRequest());
@@ -610,7 +610,7 @@ public class SpecialtyResourceIntTest {
     // When status is null
     specialtyDTO.setName(null);
     restSpecialtyMockMvc.perform(put("/api/specialties")
-        .contentType(TestUtil.APPLICATION_JSON_UTF8)
+        .contentType(MediaType.APPLICATION_JSON)
         .content(TestUtil.convertObjectToJsonBytes(specialtyDTO)))
         .andExpect(jsonPath("$.fieldErrors[:1].field").value("name"))
         .andExpect(status().isBadRequest());
@@ -630,7 +630,7 @@ public class SpecialtyResourceIntTest {
     // When status is null
     specialtyDTO.setName(VERY_LONG_STRING);
     restSpecialtyMockMvc.perform(put("/api/specialties")
-        .contentType(TestUtil.APPLICATION_JSON_UTF8)
+        .contentType(MediaType.APPLICATION_JSON)
         .content(TestUtil.convertObjectToJsonBytes(specialtyDTO)))
         .andExpect(jsonPath("$.fieldErrors[:1].field").value("name"))
         .andExpect(status().isBadRequest());
@@ -645,7 +645,7 @@ public class SpecialtyResourceIntTest {
 
     // Get the specialty
     restSpecialtyMockMvc.perform(delete("/api/specialties/{id}", specialty.getId())
-        .accept(TestUtil.APPLICATION_JSON_UTF8))
+        .accept(MediaType.APPLICATION_JSON))
         .andExpect(status().isOk());
 
     // Validate the database is empty
@@ -677,7 +677,7 @@ public class SpecialtyResourceIntTest {
 
     List<SpecialtyDTO> payload = Lists.newArrayList(specialtyDTO, specialtyDTO1);
     restSpecialtyMockMvc.perform(post("/api/bulk-specialties")
-        .contentType(TestUtil.APPLICATION_JSON_UTF8)
+        .contentType(MediaType.APPLICATION_JSON)
         .content(TestUtil.convertObjectToJsonBytes(payload)))
         .andExpect(status().isOk());
 
@@ -710,7 +710,7 @@ public class SpecialtyResourceIntTest {
 
     List<SpecialtyDTO> payload = Lists.newArrayList(specialtyDTO, specialtyDTO1);
     restSpecialtyMockMvc.perform(post("/api/bulk-specialties")
-        .contentType(TestUtil.APPLICATION_JSON_UTF8)
+        .contentType(MediaType.APPLICATION_JSON)
         .content(TestUtil.convertObjectToJsonBytes(payload)))
         .andExpect(status().isBadRequest());
 
@@ -749,7 +749,7 @@ public class SpecialtyResourceIntTest {
 
     List<SpecialtyDTO> payload = Lists.newArrayList(specialtyDTO, specialtyDTO1);
     restSpecialtyMockMvc.perform(put("/api/bulk-specialties")
-        .contentType(TestUtil.APPLICATION_JSON_UTF8)
+        .contentType(MediaType.APPLICATION_JSON)
         .content(TestUtil.convertObjectToJsonBytes(payload)))
         .andExpect(status().isOk());
 
@@ -789,7 +789,7 @@ public class SpecialtyResourceIntTest {
 
     List<SpecialtyDTO> payload = Lists.newArrayList(specialtyDTO, specialtyDTO1);
     restSpecialtyMockMvc.perform(put("/api/bulk-specialties")
-        .contentType(TestUtil.APPLICATION_JSON_UTF8)
+        .contentType(MediaType.APPLICATION_JSON)
         .content(TestUtil.convertObjectToJsonBytes(payload)))
         .andExpect(status().isBadRequest());
 

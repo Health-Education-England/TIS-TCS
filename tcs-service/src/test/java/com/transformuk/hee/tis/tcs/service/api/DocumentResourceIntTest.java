@@ -17,7 +17,6 @@ import com.fasterxml.jackson.databind.JsonDeserializer;
 import com.fasterxml.jackson.databind.JsonSerializer;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.module.SimpleModule;
-import com.microsoft.azure.storage.StorageException;
 import com.transformuk.hee.tis.filestorage.repository.FileStorageRepository;
 import com.transformuk.hee.tis.tcs.TestUtils;
 import com.transformuk.hee.tis.tcs.api.dto.DocumentDTO;
@@ -30,8 +29,6 @@ import com.transformuk.hee.tis.tcs.service.config.AzureProperties;
 import com.transformuk.hee.tis.tcs.service.service.DocumentService;
 import com.transformuk.hee.tis.tcs.service.service.TagService;
 import java.io.IOException;
-import java.net.URISyntaxException;
-import java.security.InvalidKeyException;
 import java.sql.Connection;
 import java.sql.SQLException;
 import java.time.LocalDateTime;
@@ -149,13 +146,11 @@ public class DocumentResourceIntTest {
             .param("personId", String.valueOf(PERSON_BASE_ID))
             .contentType(MediaType.MULTIPART_FORM_DATA))
         .andExpect(status().isCreated())
-        .andExpect(content().contentType(MediaType.APPLICATION_JSON_UTF8))
+        .andExpect(content().contentType(MediaType.APPLICATION_JSON))
         .andExpect(content().string(containsString("{\"id\":"))).andReturn();
 
     final DocumentId documentId = jacksonMapper
         .readValue(uploadResponse.getResponse().getContentAsString(), DocumentId.class);
-
-    deleteTestFile(documentId.getId() + TEST_FILE_NAME.substring(TEST_FILE_NAME.indexOf(".")));
   }
 
   @Test
@@ -193,7 +188,7 @@ public class DocumentResourceIntTest {
         DocumentResource.PATH_DOCUMENTS +
         "/" +
         documentId))
-        .andExpect(content().contentType(MediaType.APPLICATION_JSON_UTF8))
+        .andExpect(content().contentType(MediaType.APPLICATION_JSON))
         .andExpect(status().isOk())
         .andReturn();
 
@@ -229,7 +224,7 @@ public class DocumentResourceIntTest {
         DocumentResource.PATH_DOCUMENTS +
         "/" +
         documentId))
-        .andExpect(content().contentType(MediaType.APPLICATION_JSON_UTF8))
+        .andExpect(content().contentType(MediaType.APPLICATION_JSON))
         .andExpect(status().isOk())
         .andReturn();
 
@@ -307,7 +302,7 @@ public class DocumentResourceIntTest {
             .param("personId", String.valueOf(PERSON_BASE_ID))
             .contentType(MediaType.MULTIPART_FORM_DATA))
         .andExpect(status().isCreated())
-        .andExpect(content().contentType(MediaType.APPLICATION_JSON_UTF8))
+        .andExpect(content().contentType(MediaType.APPLICATION_JSON))
         .andExpect(content().string(containsString("{\"id\":"))).andReturn();
 
     final DocumentId documentId = jacksonMapper
@@ -317,7 +312,7 @@ public class DocumentResourceIntTest {
         DocumentResource.PATH_DOCUMENTS +
         "/" +
         documentId.getId()))
-        .andExpect(content().contentType(MediaType.APPLICATION_JSON_UTF8))
+        .andExpect(content().contentType(MediaType.APPLICATION_JSON))
         .andExpect(status().isOk()).andReturn();
 
     final DocumentDTO document = jacksonMapper
@@ -332,8 +327,6 @@ public class DocumentResourceIntTest {
     assertThat(document.getSize()).isEqualTo(TEST_FILE_CONTENT.length);
     assertThat(document.getPersonId()).isEqualTo(PERSON_BASE_ID);
     assertThat(document.getTags()).isEmpty();
-
-    deleteTestFile(documentId.getId() + TEST_FILE_NAME.substring(TEST_FILE_NAME.indexOf(".")));
   }
 
   @Test
@@ -410,7 +403,7 @@ public class DocumentResourceIntTest {
         PERSON_BASE_ID +
         "?query=" + query
     ))
-        .andExpect(content().contentType(MediaType.APPLICATION_JSON_UTF8))
+        .andExpect(content().contentType(MediaType.APPLICATION_JSON))
         .andExpect(status().isOk())
         .andReturn();
 
@@ -440,7 +433,7 @@ public class DocumentResourceIntTest {
         PERSON_BASE_ID +
         "?query=" + query
     ))
-        .andExpect(content().contentType(MediaType.APPLICATION_JSON_UTF8))
+        .andExpect(content().contentType(MediaType.APPLICATION_JSON))
         .andExpect(status().isOk()).andReturn();
 
     final List<DocumentDTO> documents = assertPaginationDocumentsExist(
@@ -469,7 +462,7 @@ public class DocumentResourceIntTest {
         PERSON_BASE_ID +
         "?query=" + query
     ))
-        .andExpect(content().contentType(MediaType.APPLICATION_JSON_UTF8))
+        .andExpect(content().contentType(MediaType.APPLICATION_JSON))
         .andExpect(status().isOk()).andReturn();
 
     final List<DocumentDTO> documents = assertPaginationDocumentsExist(
@@ -507,7 +500,7 @@ public class DocumentResourceIntTest {
         PERSON_BASE_ID +
         "?query=" + query
     ))
-        .andExpect(content().contentType(MediaType.APPLICATION_JSON_UTF8))
+        .andExpect(content().contentType(MediaType.APPLICATION_JSON))
         .andExpect(status().isOk()).andReturn();
 
     final List<DocumentDTO> documents = assertPaginationDocumentsExist(
@@ -535,7 +528,7 @@ public class DocumentResourceIntTest {
         (PERSON_BASE_ID + 4) +
         "?tags=" + tags
     ))
-        .andExpect(content().contentType(MediaType.APPLICATION_JSON_UTF8))
+        .andExpect(content().contentType(MediaType.APPLICATION_JSON))
         .andExpect(status().isOk()).andReturn();
 
     final List<DocumentDTO> documents = assertPaginationDocumentsExist(
@@ -563,7 +556,7 @@ public class DocumentResourceIntTest {
         (PERSON_BASE_ID + 4) +
         "?tags=" + tags
     ))
-        .andExpect(content().contentType(MediaType.APPLICATION_JSON_UTF8))
+        .andExpect(content().contentType(MediaType.APPLICATION_JSON))
         .andExpect(status().isOk()).andReturn();
 
     final List<DocumentDTO> documents = assertPaginationDocumentsExist(
@@ -598,7 +591,7 @@ public class DocumentResourceIntTest {
         (PERSON_BASE_ID + 2) +
         "?page=0&size=2"
     ))
-        .andExpect(content().contentType(MediaType.APPLICATION_JSON_UTF8))
+        .andExpect(content().contentType(MediaType.APPLICATION_JSON))
         .andExpect(status().isOk()).andReturn();
 
     final PageImplTest<DocumentDTO> documents = jacksonMapper
@@ -625,7 +618,7 @@ public class DocumentResourceIntTest {
         (PERSON_BASE_ID + 2) +
         "?page=1&size=2"
     ))
-        .andExpect(content().contentType(MediaType.APPLICATION_JSON_UTF8))
+        .andExpect(content().contentType(MediaType.APPLICATION_JSON))
         .andExpect(status().isOk()).andReturn();
 
     final PageImplTest<DocumentDTO> documents = jacksonMapper
@@ -652,7 +645,7 @@ public class DocumentResourceIntTest {
         (PERSON_BASE_ID + 2) +
         "?page=2&size=2"
     ))
-        .andExpect(content().contentType(MediaType.APPLICATION_JSON_UTF8))
+        .andExpect(content().contentType(MediaType.APPLICATION_JSON))
         .andExpect(status().isOk()).andReturn();
 
     final PageImplTest<DocumentDTO> documents = jacksonMapper
@@ -679,7 +672,7 @@ public class DocumentResourceIntTest {
         DocumentResource.PATH_DOCUMENTS +
         DocumentResource.PATH_TAGS +
         "/?query=" + query))
-        .andExpect(content().contentType(MediaType.APPLICATION_JSON_UTF8))
+        .andExpect(content().contentType(MediaType.APPLICATION_JSON))
         .andExpect(status().isOk())
         .andReturn();
 
@@ -811,7 +804,7 @@ public class DocumentResourceIntTest {
         "/person/" +
         (PERSON_BASE_ID + 3)
     ))
-        .andExpect(content().contentType(MediaType.APPLICATION_JSON_UTF8))
+        .andExpect(content().contentType(MediaType.APPLICATION_JSON))
         .andExpect(status().isOk()).andReturn();
 
     final List<DocumentDTO> documents = assertPaginationDocumentsExist(
@@ -861,7 +854,7 @@ public class DocumentResourceIntTest {
         DocumentResource.PATH_DOCUMENTS +
         "/" +
         documentId))
-        .andExpect(content().contentType(MediaType.APPLICATION_JSON_UTF8))
+        .andExpect(content().contentType(MediaType.APPLICATION_JSON))
         .andExpect(status().isOk())
         .andReturn();
 
@@ -876,11 +869,6 @@ public class DocumentResourceIntTest {
     assertThat(updatedDocument.getTags()).hasSize(2).containsAll(document.getTags());
 
     return updatedDocument;
-  }
-
-  private void deleteTestFile(final String fileName)
-      throws URISyntaxException, InvalidKeyException, StorageException {
-    fileStorageRepository.deleteFile(azureProperties.getContainerName(), fileName);
   }
 
   private void initDB() throws SQLException {

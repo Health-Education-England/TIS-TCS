@@ -586,13 +586,13 @@ public class PostServiceImplTest {
   public void advancedSearchShouldSearchWithDescOrderByCurrentTraineeSurname() {
     final int PAGE = 1;
     final int SIZE = 100;
-    final Sort surnameSortOrder = new Sort(Sort.Direction.DESC, "currentTraineeSurname");
+    final Sort surnameSortOrder = Sort.by(Sort.Direction.DESC, "currentTraineeSurname");
     final String SEARCH_STRING = StringUtils.EMPTY;
     final List<ColumnFilter> COLUMN_FILTERS = new ArrayList<>();
     final String WHERE_CLAUSE = StringUtils.EMPTY;
     List<PostViewDTO> resultsFromQuery = new ArrayList<>();
     resultsFromQuery.add(new PostViewDTO());
-    PageRequest pageable = new PageRequest(PAGE, SIZE, surnameSortOrder);
+    PageRequest pageable = PageRequest.of(PAGE, SIZE, surnameSortOrder);
     doReturn(WHERE_CLAUSE).when(testObj).createWhereClause(SEARCH_STRING, COLUMN_FILTERS);
     when(sqlQuerySupplierMock.getQuery(SqlQuerySupplier.POST_VIEW)).thenReturn(query);
     when(permissionServiceMock.isUserTrustAdmin()).thenReturn(false);
@@ -617,13 +617,13 @@ public class PostServiceImplTest {
   public void advancedSearchShouldSearchWithAscendingOrderByCurrentTraineeSurname() {
     final int PAGE = 1;
     final int SIZE = 100;
-    final Sort surnameSortOrder = new Sort(Sort.Direction.ASC, "currentTraineeSurname");
+    final Sort surnameSortOrder = Sort.by(Sort.Direction.ASC, "currentTraineeSurname");
     final String SEARCH_STRING = StringUtils.EMPTY;
     final List<ColumnFilter> COLUMN_FILTERS = new ArrayList<>();
     final String WHERE_CLAUSE = StringUtils.EMPTY;
     List<PostViewDTO> resultsFromQuery = new ArrayList<>();
     resultsFromQuery.add(new PostViewDTO());
-    PageRequest pageable = new PageRequest(PAGE, SIZE, surnameSortOrder);
+    PageRequest pageable = PageRequest.of(PAGE, SIZE, surnameSortOrder);
     doReturn(WHERE_CLAUSE).when(testObj).createWhereClause(SEARCH_STRING, COLUMN_FILTERS);
     when(sqlQuerySupplierMock.getQuery(SqlQuerySupplier.POST_VIEW)).thenReturn(query);
     when(permissionServiceMock.isUserTrustAdmin()).thenReturn(false);

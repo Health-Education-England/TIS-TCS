@@ -180,7 +180,7 @@ public class QualificationResourceIntTest {
     QualificationDTO qualificationDTO = qualificationMapper.toDto(qualification);
     when(referenceService.isValueExists(any(), anyString())).thenReturn(true);
     restQualificationMockMvc.perform(post("/api/qualifications")
-        .contentType(TestUtil.APPLICATION_JSON_UTF8)
+        .contentType(MediaType.APPLICATION_JSON)
         .content(TestUtil.convertObjectToJsonBytes(qualificationDTO)))
         .andExpect(status().isCreated());
 
@@ -207,7 +207,7 @@ public class QualificationResourceIntTest {
 
     //when & then
     restQualificationMockMvc.perform(post("/api/qualifications")
-        .contentType(TestUtil.APPLICATION_JSON_UTF8)
+        .contentType(MediaType.APPLICATION_JSON)
         .content(TestUtil.convertObjectToJsonBytes(qualificationDTO)))
         .andExpect(status().isBadRequest())
         .andExpect(jsonPath("$.message").value("error.validation"))
@@ -223,7 +223,7 @@ public class QualificationResourceIntTest {
 
     //when & then
     restQualificationMockMvc.perform(put("/api/qualifications")
-        .contentType(TestUtil.APPLICATION_JSON_UTF8)
+        .contentType(MediaType.APPLICATION_JSON)
         .content(TestUtil.convertObjectToJsonBytes(qualificationDTO)))
         .andExpect(status().isBadRequest())
         .andExpect(jsonPath("$.message").value("error.validation"))
@@ -241,7 +241,7 @@ public class QualificationResourceIntTest {
 
     //when & then
     restQualificationMockMvc.perform(post("/api/qualifications")
-        .contentType(TestUtil.APPLICATION_JSON_UTF8)
+        .contentType(MediaType.APPLICATION_JSON)
         .content(TestUtil.convertObjectToJsonBytes(qualificationDTO)))
         .andExpect(status().isBadRequest())
         .andExpect(jsonPath("$.message").value("error.validation"))
@@ -259,7 +259,7 @@ public class QualificationResourceIntTest {
 
     //when & then
     restQualificationMockMvc.perform(post("/api/qualifications")
-        .contentType(TestUtil.APPLICATION_JSON_UTF8)
+        .contentType(MediaType.APPLICATION_JSON)
         .content(TestUtil.convertObjectToJsonBytes(qualificationDTO)))
         .andExpect(status().isBadRequest())
         .andExpect(jsonPath("$.message").value("error.validation"))
@@ -284,7 +284,7 @@ public class QualificationResourceIntTest {
     when(referenceService.isValueExists(any(), anyString())).thenReturn(true);
     //when & then
     restQualificationMockMvc.perform(post("/api/qualifications")
-        .contentType(TestUtil.APPLICATION_JSON_UTF8)
+        .contentType(MediaType.APPLICATION_JSON)
         .content(TestUtil.convertObjectToJsonBytes(qualificationDTO)))
         .andExpect(status().isBadRequest())
         .andExpect(jsonPath("$.message").value("error.validation"))
@@ -310,7 +310,7 @@ public class QualificationResourceIntTest {
     when(referenceService.isValueExists(any(), anyString())).thenReturn(true);
     //when & then
     restQualificationMockMvc.perform(post("/api/qualifications")
-        .contentType(TestUtil.APPLICATION_JSON_UTF8)
+        .contentType(MediaType.APPLICATION_JSON)
         .content(TestUtil.convertObjectToJsonBytes(qualificationDTO)))
         .andExpect(status().isBadRequest())
         .andExpect(jsonPath("$.message").value("error.validation"))
@@ -331,7 +331,7 @@ public class QualificationResourceIntTest {
 
     //when & then
     restQualificationMockMvc.perform(post("/api/qualifications")
-        .contentType(TestUtil.APPLICATION_JSON_UTF8)
+        .contentType(MediaType.APPLICATION_JSON)
         .content(TestUtil.convertObjectToJsonBytes(qualificationDTO)))
         .andExpect(status().isBadRequest())
         .andExpect(jsonPath("$.message").value("error.validation"))
@@ -351,7 +351,7 @@ public class QualificationResourceIntTest {
     when(referenceService.isValueExists(any(), anyString())).thenReturn(true);
     // Qualification is part of person so the call must succeed
     restQualificationMockMvc.perform(post("/api/qualifications")
-        .contentType(TestUtil.APPLICATION_JSON_UTF8)
+        .contentType(MediaType.APPLICATION_JSON)
         .content(TestUtil.convertObjectToJsonBytes(qualificationDTO)))
         .andExpect(status().isCreated());
 
@@ -371,7 +371,7 @@ public class QualificationResourceIntTest {
     // Get all the qualificationList
     restQualificationMockMvc.perform(get("/api/qualifications?sort=id,desc"))
         .andExpect(status().isOk())
-        .andExpect(content().contentType(MediaType.APPLICATION_JSON_UTF8_VALUE))
+        .andExpect(content().contentType(MediaType.APPLICATION_JSON_VALUE))
         .andExpect(jsonPath("$.[*].id").value(hasItem(qualification.getId().intValue())))
         .andExpect(jsonPath("$.[*].intrepidId").value(hasItem(DEFAULT_INTREPID_ID.toString())))
         .andExpect(jsonPath("$.[*].qualification").value(hasItem(DEFAULT_QUALIFICATION.toString())))
@@ -397,7 +397,7 @@ public class QualificationResourceIntTest {
     // Get the qualification
     restQualificationMockMvc.perform(get("/api/qualifications/{id}", qualification.getId()))
         .andExpect(status().isOk())
-        .andExpect(content().contentType(MediaType.APPLICATION_JSON_UTF8_VALUE))
+        .andExpect(content().contentType(MediaType.APPLICATION_JSON_VALUE))
         .andExpect(jsonPath("$.id").value(qualification.getId().intValue()))
         .andExpect(jsonPath("$.intrepidId").value(DEFAULT_INTREPID_ID.toString()))
         .andExpect(jsonPath("$.qualification").value(DEFAULT_QUALIFICATION.toString()))
@@ -442,7 +442,7 @@ public class QualificationResourceIntTest {
     when(referenceService.isValueExists(any(), anyString())).thenReturn(true);
 
     restQualificationMockMvc.perform(put("/api/qualifications")
-        .contentType(TestUtil.APPLICATION_JSON_UTF8)
+        .contentType(MediaType.APPLICATION_JSON)
         .content(TestUtil.convertObjectToJsonBytes(qualificationDTO)))
         .andExpect(status().isOk());
 
@@ -472,7 +472,7 @@ public class QualificationResourceIntTest {
 
     // If the entity doesn't have an ID creation will fail
     restQualificationMockMvc.perform(put("/api/qualifications")
-        .contentType(TestUtil.APPLICATION_JSON_UTF8)
+        .contentType(MediaType.APPLICATION_JSON)
         .content(TestUtil.convertObjectToJsonBytes(qualificationDTO)))
         .andExpect(status().isBadRequest());
 
@@ -490,7 +490,7 @@ public class QualificationResourceIntTest {
 
     // Get the qualification
     restQualificationMockMvc.perform(delete("/api/qualifications/{id}", qualification.getId())
-        .accept(TestUtil.APPLICATION_JSON_UTF8))
+        .accept(MediaType.APPLICATION_JSON))
         .andExpect(status().isOk());
 
     // Validate the database is empty

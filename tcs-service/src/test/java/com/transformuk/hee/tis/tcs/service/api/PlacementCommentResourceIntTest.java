@@ -24,6 +24,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.data.web.PageableHandlerMethodArgumentResolver;
+import org.springframework.http.MediaType;
 import org.springframework.http.converter.json.MappingJackson2HttpMessageConverter;
 import org.springframework.test.context.junit4.SpringRunner;
 import org.springframework.test.web.servlet.MockMvc;
@@ -95,7 +96,7 @@ public class PlacementCommentResourceIntTest {
         .thenReturn(placementCommentDTOsaved);
 
     restPlacementCommentMock.perform(post("/api/placementComment")
-        .contentType(TestUtil.APPLICATION_JSON_UTF8)
+        .contentType(MediaType.APPLICATION_JSON)
         .content(TestUtil.convertObjectToJsonBytes(placementCommentDTO)))
         .andExpect(status().isCreated())
         .andExpect(jsonPath("$.id").value(NEW_COMMENT_ID))
@@ -112,7 +113,7 @@ public class PlacementCommentResourceIntTest {
   public void shouldNotAllowCreatePlacementIfIdisNotNull() throws Exception {
     placementCommentDTO.setId(ID_LONG);
     restPlacementCommentMock.perform(post("/api/placementComment")
-        .contentType(TestUtil.APPLICATION_JSON_UTF8)
+        .contentType(MediaType.APPLICATION_JSON)
         .content(TestUtil.convertObjectToJsonBytes(placementCommentDTO)))
         .andExpect(status().isBadRequest());
   }
@@ -128,7 +129,7 @@ public class PlacementCommentResourceIntTest {
         .thenReturn(placementCommentDTOsaved);
 
     restPlacementCommentMock.perform(post("/api/placementComment")
-        .contentType(TestUtil.APPLICATION_JSON_UTF8)
+        .contentType(MediaType.APPLICATION_JSON)
         .content(TestUtil.convertObjectToJsonBytes(placementCommentDTO)))
         .andExpect(status().isCreated())
         .andExpect(
@@ -148,7 +149,7 @@ public class PlacementCommentResourceIntTest {
     when(commentService.findById(ID_LONG)).thenReturn(placementCommentDTOreturned);
 
     restPlacementCommentMock.perform(get("/api/placementComment/{id}", ID_LONG)
-        .contentType(TestUtil.APPLICATION_JSON_UTF8))
+        .contentType(MediaType.APPLICATION_JSON))
         .andExpect(status().isOk())
         .andExpect(jsonPath("$.id").value(ID_LONG));
   }
@@ -162,7 +163,7 @@ public class PlacementCommentResourceIntTest {
 
     restPlacementCommentMock
         .perform(get("/api/placement/{placementId}/placementComment", ID_PLACEMENT)
-            .contentType(TestUtil.APPLICATION_JSON_UTF8))
+            .contentType(MediaType.APPLICATION_JSON))
         .andExpect(status().isOk())
         .andExpect(jsonPath("$.id").value(ID_LONG));
   }
@@ -177,7 +178,7 @@ public class PlacementCommentResourceIntTest {
     when(commentService.save(placementCommentDTO)).thenReturn(placementCommentDTOupdated);
 
     restPlacementCommentMock.perform(put("/api/placementComment")
-        .contentType(TestUtil.APPLICATION_JSON_UTF8)
+        .contentType(MediaType.APPLICATION_JSON)
         .content(TestUtil.convertObjectToJsonBytes(placementCommentDTO)))
         .andExpect(status().isOk())
         .andExpect(jsonPath("$.id").value(ID_LONG));
@@ -186,7 +187,7 @@ public class PlacementCommentResourceIntTest {
   @Test
   public void updateShouldReturnBadRequestIfIdIsNull() throws Exception {
     restPlacementCommentMock.perform(put("/api/placementComment")
-        .contentType(TestUtil.APPLICATION_JSON_UTF8)
+        .contentType(MediaType.APPLICATION_JSON)
         .content(TestUtil.convertObjectToJsonBytes(placementCommentDTO)))
         .andExpect(status().isBadRequest());
   }

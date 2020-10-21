@@ -143,7 +143,7 @@ public class SpecialtyGroupResourceIntTest {
     SpecialtyGroupDTO specialtyGroupDTO = specialtyGroupMapper
         .specialtyGroupToSpecialtyGroupDTO(specialtyGroup);
     restSpecialtyGroupMockMvc.perform(post("/api/specialty-groups")
-        .contentType(TestUtil.APPLICATION_JSON_UTF8)
+        .contentType(MediaType.APPLICATION_JSON)
         .content(TestUtil.convertObjectToJsonBytes(specialtyGroupDTO)))
         .andExpect(status().isCreated());
 
@@ -166,7 +166,7 @@ public class SpecialtyGroupResourceIntTest {
 
     // An entity with an existing ID cannot be created, so this API call must fail
     restSpecialtyGroupMockMvc.perform(post("/api/specialty-groups")
-        .contentType(TestUtil.APPLICATION_JSON_UTF8)
+        .contentType(MediaType.APPLICATION_JSON)
         .content(TestUtil.convertObjectToJsonBytes(specialtyGroupDTO)))
         .andExpect(status().isBadRequest());
 
@@ -184,7 +184,7 @@ public class SpecialtyGroupResourceIntTest {
     // Get all the specialtyGroupList
     restSpecialtyGroupMockMvc.perform(get("/api/specialty-groups?sort=id,desc"))
         .andExpect(status().isOk())
-        .andExpect(content().contentType(MediaType.APPLICATION_JSON_UTF8_VALUE))
+        .andExpect(content().contentType(MediaType.APPLICATION_JSON_VALUE))
         .andExpect(jsonPath("$.[*].id").value(hasItem(specialtyGroup.getId().intValue())))
         .andExpect(jsonPath("$.[*].name").value(hasItem(DEFAULT_NAME)));
   }
@@ -211,7 +211,7 @@ public class SpecialtyGroupResourceIntTest {
     // Get the group and inspect the result
     restSpecialtyGroupMockMvc.perform(get("/api/specialty-groups/"))
         .andExpect(status().isOk())
-        .andExpect(content().contentType(MediaType.APPLICATION_JSON_UTF8_VALUE))
+        .andExpect(content().contentType(MediaType.APPLICATION_JSON_VALUE))
         .andExpect(jsonPath("$.[*].specialties.[*].name").value(hasItem("specialty1")))
         .andExpect(jsonPath("$.[*].specialties.[*].name").value(hasItem("specialty2")))
         .andExpect(jsonPath("$.[*].name").value((hasItem(DEFAULT_NAME))));
@@ -265,7 +265,7 @@ public class SpecialtyGroupResourceIntTest {
         .specialtyGroupToSpecialtyGroupDTO(addSpecialtySpecialtyGroup);
     //specialtyGroupRepository.saveAndFlush(addSpecialtySpecialtyGroup);
     restSpecialtyGroupMockMvc.perform(put("/api/specialty-groups/")
-        .contentType(TestUtil.APPLICATION_JSON_UTF8)
+        .contentType(MediaType.APPLICATION_JSON)
         .content(TestUtil.convertObjectToJsonBytes(addSpecialtySpecialtyGroupDTO)))
         .andExpect(status().isOk());
 
@@ -317,7 +317,7 @@ public class SpecialtyGroupResourceIntTest {
     SpecialtyGroupDTO removeSpecialtyGroupDTO = specialtyGroupMapper
         .specialtyGroupToSpecialtyGroupDTO(removeSpecialtySpecialtyGroup);
     restSpecialtyGroupMockMvc.perform(put("/api/specialty-groups/")
-        .contentType(TestUtil.APPLICATION_JSON_UTF8)
+        .contentType(MediaType.APPLICATION_JSON)
         .content(TestUtil.convertObjectToJsonBytes(removeSpecialtyGroupDTO)))
         .andExpect(status().isOk());
 
@@ -373,7 +373,7 @@ public class SpecialtyGroupResourceIntTest {
     //when & then
     restSpecialtyGroupMockMvc.perform(get("/api/specialty-groups/specialties/" + groupID))
         .andExpect(status().isOk())
-        .andExpect(content().contentType(MediaType.APPLICATION_JSON_UTF8_VALUE))
+        .andExpect(content().contentType(MediaType.APPLICATION_JSON_VALUE))
         .andExpect(jsonPath("$.[*].id").value(hasItem(specialty.getId().intValue())))
         .andExpect(jsonPath("$.[*].id").value(hasItem(otherSpecialty.getId().intValue())))
         .andExpect(jsonPath("$.[*].name").value(hasItem(DEFAULT_NAME)))
@@ -390,7 +390,7 @@ public class SpecialtyGroupResourceIntTest {
     // Get the specialtyGroup
     restSpecialtyGroupMockMvc.perform(get("/api/specialty-groups/{id}", specialtyGroup.getId()))
         .andExpect(status().isOk())
-        .andExpect(content().contentType(MediaType.APPLICATION_JSON_UTF8_VALUE))
+        .andExpect(content().contentType(MediaType.APPLICATION_JSON_VALUE))
         .andExpect(jsonPath("$.id").value(specialtyGroup.getId().intValue()))
         .andExpect(jsonPath("$.name").value(DEFAULT_NAME));
   }
@@ -419,7 +419,7 @@ public class SpecialtyGroupResourceIntTest {
         .specialtyGroupToSpecialtyGroupDTO(updatedSpecialtyGroup);
 
     restSpecialtyGroupMockMvc.perform(put("/api/specialty-groups")
-        .contentType(TestUtil.APPLICATION_JSON_UTF8)
+        .contentType(MediaType.APPLICATION_JSON)
         .content(TestUtil.convertObjectToJsonBytes(specialtyGroupDTO)))
         .andExpect(status().isOk());
 
@@ -440,7 +440,7 @@ public class SpecialtyGroupResourceIntTest {
 
     //when and then
     restSpecialtyGroupMockMvc.perform(put("/api/specialty-groups")
-        .contentType(TestUtil.APPLICATION_JSON_UTF8)
+        .contentType(MediaType.APPLICATION_JSON)
         .content(TestUtil.convertObjectToJsonBytes(specialtyGroupDTO)))
         .andExpect(status().isBadRequest());
 
@@ -458,7 +458,7 @@ public class SpecialtyGroupResourceIntTest {
 
     // Get the specialtyGroup
     restSpecialtyGroupMockMvc.perform(delete("/api/specialty-groups/{id}", specialtyGroup.getId())
-        .accept(TestUtil.APPLICATION_JSON_UTF8))
+        .accept(MediaType.APPLICATION_JSON))
         .andExpect(status().isOk());
 
     // Validate the database is empty
@@ -475,7 +475,7 @@ public class SpecialtyGroupResourceIntTest {
     specialtyGroupDTO.setName("");
     //when & then
     restSpecialtyGroupMockMvc.perform(post("/api/specialty-groups")
-        .contentType(TestUtil.APPLICATION_JSON_UTF8)
+        .contentType(MediaType.APPLICATION_JSON)
         .content(TestUtil.convertObjectToJsonBytes(specialtyGroupDTO)))
         .andExpect(status().isBadRequest())
         .andExpect(jsonPath("$.message").value("error.validation"))
@@ -492,7 +492,7 @@ public class SpecialtyGroupResourceIntTest {
         "more_than_100_chars_more_than_100_chars_more_than_100_chars_more_than_100_chars_more_than_100_chars_1");
     //when & then
     restSpecialtyGroupMockMvc.perform(post("/api/specialty-groups")
-        .contentType(TestUtil.APPLICATION_JSON_UTF8)
+        .contentType(MediaType.APPLICATION_JSON)
         .content(TestUtil.convertObjectToJsonBytes(specialtyGroupDTO)))
         .andExpect(status().isBadRequest())
         .andExpect(jsonPath("$.message").value("error.validation"))
@@ -508,7 +508,7 @@ public class SpecialtyGroupResourceIntTest {
     specialtyGroupDTO.setName("$^%&*()_");
     //when & then
     restSpecialtyGroupMockMvc.perform(post("/api/specialty-groups")
-        .contentType(TestUtil.APPLICATION_JSON_UTF8)
+        .contentType(MediaType.APPLICATION_JSON)
         .content(TestUtil.convertObjectToJsonBytes(specialtyGroupDTO)))
         .andExpect(status().isBadRequest())
         .andExpect(jsonPath("$.message").value("error.validation"))
@@ -525,7 +525,7 @@ public class SpecialtyGroupResourceIntTest {
     specialtyGroupDTO.setId(1L);
     //when & then
     restSpecialtyGroupMockMvc.perform(put("/api/specialty-groups")
-        .contentType(TestUtil.APPLICATION_JSON_UTF8)
+        .contentType(MediaType.APPLICATION_JSON)
         .content(TestUtil.convertObjectToJsonBytes(specialtyGroupDTO)))
         .andExpect(status().isBadRequest())
         .andExpect(jsonPath("$.message").value("error.validation"))
@@ -543,7 +543,7 @@ public class SpecialtyGroupResourceIntTest {
     specialtyGroupDTO.setId(1L);
     //when & then
     restSpecialtyGroupMockMvc.perform(put("/api/specialty-groups")
-        .contentType(TestUtil.APPLICATION_JSON_UTF8)
+        .contentType(MediaType.APPLICATION_JSON)
         .content(TestUtil.convertObjectToJsonBytes(specialtyGroupDTO)))
         .andExpect(status().isBadRequest())
         .andExpect(jsonPath("$.message").value("error.validation"))
@@ -560,7 +560,7 @@ public class SpecialtyGroupResourceIntTest {
     specialtyGroupDTO.setId(1L);
     //when & then
     restSpecialtyGroupMockMvc.perform(put("/api/specialty-groups")
-        .contentType(TestUtil.APPLICATION_JSON_UTF8)
+        .contentType(MediaType.APPLICATION_JSON)
         .content(TestUtil.convertObjectToJsonBytes(specialtyGroupDTO)))
         .andExpect(status().isBadRequest())
         .andExpect(jsonPath("$.message").value("error.validation"))

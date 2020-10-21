@@ -144,7 +144,7 @@ public class RotationResourceIntTest {
 //        r2.setId(rotation.getId() + 1);
     RotationDTO rotationDTO = rotationMapper.toDto(r2);
     restRotationMockMvc.perform(post("/api/rotations")
-        .contentType(TestUtil.APPLICATION_JSON_UTF8)
+        .contentType(MediaType.APPLICATION_JSON)
         .content(TestUtil.convertObjectToJsonBytes(rotationDTO)))
         .andExpect(status().isCreated());
 
@@ -171,7 +171,7 @@ public class RotationResourceIntTest {
 
     // An entity with an existing ID cannot be created, so this API call must fail
     restRotationMockMvc.perform(post("/api/rotations")
-        .contentType(TestUtil.APPLICATION_JSON_UTF8)
+        .contentType(MediaType.APPLICATION_JSON)
         .content(TestUtil.convertObjectToJsonBytes(rotationDTO)))
         .andExpect(status().isBadRequest());
 
@@ -187,7 +187,7 @@ public class RotationResourceIntTest {
     // Get all the rotationList
     restRotationMockMvc.perform(get("/api/rotations?sort=id,desc"))
         .andExpect(status().isOk())
-        .andExpect(content().contentType(MediaType.APPLICATION_JSON_UTF8_VALUE))
+        .andExpect(content().contentType(MediaType.APPLICATION_JSON_VALUE))
         .andExpect(jsonPath("$.[*].id").value(hasItem(rotation.getId().intValue())))
         .andExpect(jsonPath("$.[*].programmeId").value(hasItem(programme.getId().intValue())))
         .andExpect(jsonPath("$.[*].programmeName").value(PROGRAMME_NAME))
@@ -211,7 +211,7 @@ public class RotationResourceIntTest {
     // Get all the rotationList
     restRotationMockMvc.perform(get("/api/rotations?sort=id,desc&columnFilters=" + colFilters))
         .andExpect(status().isOk())
-        .andExpect(content().contentType(MediaType.APPLICATION_JSON_UTF8_VALUE))
+        .andExpect(content().contentType(MediaType.APPLICATION_JSON_VALUE))
         .andExpect(jsonPath("$.[*].id").value(hasItem(inactiveRotation.getId().intValue())))
         .andExpect(jsonPath("$.[*].programmeId").value(hasItem(programme.getId().intValue())))
         .andExpect(jsonPath("$.[*].programmeName").value(PROGRAMME_NAME))
@@ -239,7 +239,7 @@ public class RotationResourceIntTest {
     // Get all the rotationList
     restRotationMockMvc.perform(get("/api/rotations?sort=id,desc&columnFilters=" + colFilters))
         .andExpect(status().isOk())
-        .andExpect(content().contentType(MediaType.APPLICATION_JSON_UTF8_VALUE))
+        .andExpect(content().contentType(MediaType.APPLICATION_JSON_VALUE))
         .andExpect(jsonPath("$.[*].id").value(hasItem(rotation2.getId().intValue())))
         .andExpect(jsonPath("$.[*].programmeId").value(hasItem((int) progId)))
         .andExpect(jsonPath("$.[*].programmeName").value(PROGRAMME_NAME))
@@ -266,7 +266,7 @@ public class RotationResourceIntTest {
     restRotationMockMvc
         .perform(get("/api/rotations?sort=id,desc&searchQuery=" + rotation2.getName()))
         .andExpect(status().isOk())
-        .andExpect(content().contentType(MediaType.APPLICATION_JSON_UTF8_VALUE))
+        .andExpect(content().contentType(MediaType.APPLICATION_JSON_VALUE))
         .andExpect(jsonPath("$.[*].id").value(hasItem(rotation2.getId().intValue())))
         .andExpect(jsonPath("$.[*].programmeId").value(hasItem((int) progId)))
         .andExpect(jsonPath("$.[*].programmeName").value(PROGRAMME_NAME))
@@ -292,7 +292,7 @@ public class RotationResourceIntTest {
     // Get all the rotationList
     restRotationMockMvc.perform(get("/api/rotations?sort=id,desc&searchQuery=A"))
         .andExpect(status().isOk())
-        .andExpect(content().contentType(MediaType.APPLICATION_JSON_UTF8_VALUE))
+        .andExpect(content().contentType(MediaType.APPLICATION_JSON_VALUE))
         .andExpect(jsonPath("$.[*].id").value(hasItem(rotation2.getId().intValue())))
         .andExpect(jsonPath("$.[*].programmeId").value(hasItem((int) progId)))
         .andExpect(jsonPath("$.[*].programmeName").value(hasItem(PROGRAMME_NAME)))
@@ -309,7 +309,7 @@ public class RotationResourceIntTest {
     // Get the rotation
     restRotationMockMvc.perform(get("/api/rotations/{id}", rotation.getId()))
         .andExpect(status().isOk())
-        .andExpect(content().contentType(MediaType.APPLICATION_JSON_UTF8_VALUE))
+        .andExpect(content().contentType(MediaType.APPLICATION_JSON_VALUE))
         .andExpect(jsonPath("$.id").value(rotation.getId().intValue()))
         .andExpect(jsonPath("$.programmeId").value(programme.getId().intValue()))
         .andExpect(jsonPath("$.programmeName").value(PROGRAMME_NAME))
@@ -343,7 +343,7 @@ public class RotationResourceIntTest {
     RotationDTO rotationDTO = rotationMapper.toDto(updatedRotation);
 
     restRotationMockMvc.perform(put("/api/rotations")
-        .contentType(TestUtil.APPLICATION_JSON_UTF8)
+        .contentType(MediaType.APPLICATION_JSON)
         .content(TestUtil.convertObjectToJsonBytes(rotationDTO)))
         .andExpect(status().isOk());
 
@@ -367,7 +367,7 @@ public class RotationResourceIntTest {
 
     // If the entity doesn't have an ID, it will be created instead of just being updated
     restRotationMockMvc.perform(put("/api/rotations")
-        .contentType(TestUtil.APPLICATION_JSON_UTF8)
+        .contentType(MediaType.APPLICATION_JSON)
         .content(TestUtil.convertObjectToJsonBytes(rotationDTO)))
         .andExpect(status().isCreated());
 
@@ -384,7 +384,7 @@ public class RotationResourceIntTest {
 
     // Get the rotation
     restRotationMockMvc.perform(delete("/api/rotations/{id}", rotation.getId())
-        .accept(TestUtil.APPLICATION_JSON_UTF8))
+        .accept(MediaType.APPLICATION_JSON))
         .andExpect(status().isOk());
 
     // Validate the database is empty

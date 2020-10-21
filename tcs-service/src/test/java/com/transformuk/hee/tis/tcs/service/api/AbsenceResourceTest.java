@@ -24,21 +24,24 @@ import org.junit.runner.RunWith;
 import org.mockito.ArgumentCaptor;
 import org.mockito.Captor;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
 import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest;
 import org.springframework.boot.test.mock.mockito.MockBean;
+import org.springframework.http.MediaType;
 import org.springframework.test.context.ContextConfiguration;
 import org.springframework.test.context.junit4.SpringRunner;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.ui.ModelMap;
 
 @RunWith(SpringRunner.class)
-@WebMvcTest(value = AbsenceResource.class, secure = false)
+@WebMvcTest(value = AbsenceResource.class)
+@AutoConfigureMockMvc(addFilters = false)
 @ContextConfiguration(classes = {AbsenceResource.class})
 public class AbsenceResourceTest {
 
-  public static final long ABSENCE_ID = 1L;
-  public static final String ESR_ABSENCE_ID = "2222";
-  public static final long PERSON_ID = 9999L;
+  private static final long ABSENCE_ID = 1L;
+  private static final String ESR_ABSENCE_ID = "2222";
+  private static final long PERSON_ID = 9999L;
   @Autowired
   private MockMvc mockMvc;
 
@@ -128,7 +131,7 @@ public class AbsenceResourceTest {
     String jsonContent = asJsonString(newAbsenceDtoStub);
     this.mockMvc.perform(post("/api/absence")
         .content(jsonContent)
-        .contentType(TestUtil.APPLICATION_JSON_UTF8))
+        .contentType(MediaType.APPLICATION_JSON))
         .andDo(print())
         .andExpect(status().isOk())
         .andExpect(jsonPath("$.id").value(ABSENCE_ID))
@@ -149,7 +152,7 @@ public class AbsenceResourceTest {
     String jsonContent = asJsonString(absenceDTOStub);
     this.mockMvc.perform(put("/api/absence/1")
         .content(jsonContent)
-        .contentType(TestUtil.APPLICATION_JSON_UTF8))
+        .contentType(MediaType.APPLICATION_JSON))
         .andDo(print())
         .andExpect(status().isOk())
         .andExpect(jsonPath("$.id").value(ABSENCE_ID))
@@ -176,7 +179,7 @@ public class AbsenceResourceTest {
             + "      \"endDate\": \"2020-02-29\",\n"
             + "      \"durationInDays\": 0\n"
             + "    }")
-        .contentType(TestUtil.APPLICATION_JSON_UTF8))
+        .contentType(MediaType.APPLICATION_JSON))
         .andDo(print())
         .andExpect(status().isOk())
         .andExpect(jsonPath("$.id").value(ABSENCE_ID))
@@ -205,7 +208,7 @@ public class AbsenceResourceTest {
             + "      \"endDate\": \"2020/02/29\",\n"
             + "      \"durationInDays\": 91\n"
             + "    }")
-        .contentType(TestUtil.APPLICATION_JSON_UTF8))
+        .contentType(MediaType.APPLICATION_JSON))
         .andDo(print())
         .andExpect(status().isNotFound());
 

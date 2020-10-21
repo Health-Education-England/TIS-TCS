@@ -109,7 +109,7 @@ public class RotationPostResourceIntTest {
     int databaseSizeBeforeCreate = rotationPostRepository.findAll().size();
 
     restRotationPostMockMvc.perform(post("/api/rotation-posts")
-        .contentType(TestUtil.APPLICATION_JSON_UTF8)
+        .contentType(MediaType.APPLICATION_JSON)
         .content(TestUtil.convertObjectToJsonBytes(Collections.emptyList())))
         .andExpect(status().isBadRequest())
         .andExpect(header().string("X-tcsApp-params", "rotationPost"))
@@ -130,7 +130,7 @@ public class RotationPostResourceIntTest {
         .singletonList(rotationPostMapper.toDto(rotationPost));
 
     restRotationPostMockMvc.perform(post("/api/rotation-posts")
-        .contentType(TestUtil.APPLICATION_JSON_UTF8)
+        .contentType(MediaType.APPLICATION_JSON)
         .content(TestUtil.convertObjectToJsonBytes(rotationPostDTO)))
         .andExpect(status().isCreated());
 
@@ -159,7 +159,7 @@ public class RotationPostResourceIntTest {
 
     // An entity with an existing ID cannot be created, so this API call must fail
     restRotationPostMockMvc.perform(post("/api/rotation-posts")
-        .contentType(TestUtil.APPLICATION_JSON_UTF8)
+        .contentType(MediaType.APPLICATION_JSON)
         .content(TestUtil.convertObjectToJsonBytes(rotationPostDTOs)))
         .andExpect(status().isCreated());
 
@@ -186,7 +186,7 @@ public class RotationPostResourceIntTest {
 
     // An entity with an existing ID cannot be created, so this API call must fail
     restRotationPostMockMvc.perform(delete("/api/rotation-posts/" + rotationPost.getPostId())
-        .contentType(TestUtil.APPLICATION_JSON_UTF8)
+        .contentType(MediaType.APPLICATION_JSON)
         .content(TestUtil.convertObjectToJsonBytes(rotationPostDTOs)))
         .andExpect(status().isOk());
 
@@ -204,7 +204,7 @@ public class RotationPostResourceIntTest {
     // Get all the rotationPostList
     restRotationPostMockMvc.perform(get("/api/rotation-posts?sort=id,desc"))
         .andExpect(status().isOk())
-        .andExpect(content().contentType(MediaType.APPLICATION_JSON_UTF8_VALUE))
+        .andExpect(content().contentType(MediaType.APPLICATION_JSON_VALUE))
         .andExpect(jsonPath("$.[*].postId").value(hasItem(DEFAULT_POST_ID.intValue())))
         .andExpect(jsonPath("$.[*].rotationId").value(hasItem(DEFAULT_ROTATION_ID.intValue())));
   }
@@ -218,7 +218,7 @@ public class RotationPostResourceIntTest {
     // Get the rotationPost
     restRotationPostMockMvc.perform(get("/api/rotation-posts/{id}", rotationPost.getPostId()))
         .andExpect(status().isOk())
-        .andExpect(content().contentType(MediaType.APPLICATION_JSON_UTF8_VALUE))
+        .andExpect(content().contentType(MediaType.APPLICATION_JSON_VALUE))
         .andExpect(jsonPath("$.[*].postId").value(DEFAULT_POST_ID.intValue()))
         .andExpect(jsonPath("$.[*].rotationId").value(DEFAULT_ROTATION_ID.intValue()));
   }

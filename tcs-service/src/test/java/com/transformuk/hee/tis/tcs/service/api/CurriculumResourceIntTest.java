@@ -191,7 +191,7 @@ public class CurriculumResourceIntTest {
     CurriculumDTO curriculumDTO = linkCurriculumToSpecialty(curriculum, savedSpecialty.getId());
 
     restCurriculumMockMvc.perform(post("/api/curricula")
-        .contentType(TestUtil.APPLICATION_JSON_UTF8)
+        .contentType(MediaType.APPLICATION_JSON)
         .content(TestUtil.convertObjectToJsonBytes(curriculumDTO)))
         .andExpect(status().isCreated());
 
@@ -219,7 +219,7 @@ public class CurriculumResourceIntTest {
     CurriculumDTO curriculumDTO = linkCurriculumToSpecialty(curriculum, savedSpecialty.getId());
 
     restCurriculumMockMvc.perform(post("/api/curricula")
-        .contentType(TestUtil.APPLICATION_JSON_UTF8)
+        .contentType(MediaType.APPLICATION_JSON)
         .content(TestUtil.convertObjectToJsonBytes(curriculumDTO)))
         .andExpect(status().isBadRequest());
 
@@ -239,7 +239,7 @@ public class CurriculumResourceIntTest {
     CurriculumDTO curriculumDTO = linkCurriculumToSpecialty(curriculum, savedSpecialty.getId());
 
     restCurriculumMockMvc.perform(post("/api/curricula")
-        .contentType(TestUtil.APPLICATION_JSON_UTF8)
+        .contentType(MediaType.APPLICATION_JSON)
         .content(TestUtil.convertObjectToJsonBytes(curriculumDTO)))
         .andExpect(status().isBadRequest());
 
@@ -249,7 +249,7 @@ public class CurriculumResourceIntTest {
 
     //update
     restCurriculumMockMvc.perform(put("/api/curricula")
-        .contentType(TestUtil.APPLICATION_JSON_UTF8)
+        .contentType(MediaType.APPLICATION_JSON)
         .content(TestUtil.convertObjectToJsonBytes(curriculumDTO)))
         .andExpect(status().isBadRequest());
 
@@ -269,7 +269,7 @@ public class CurriculumResourceIntTest {
     CurriculumDTO curriculumDTO = linkCurriculumToSpecialty(curriculum, savedSpecialty.getId());
 
     restCurriculumMockMvc.perform(post("/api/curricula")
-        .contentType(TestUtil.APPLICATION_JSON_UTF8)
+        .contentType(MediaType.APPLICATION_JSON)
         .content(TestUtil.convertObjectToJsonBytes(curriculumDTO)))
         .andExpect(status().isBadRequest());
 
@@ -279,7 +279,7 @@ public class CurriculumResourceIntTest {
 
     //update
     restCurriculumMockMvc.perform(put("/api/curricula")
-        .contentType(TestUtil.APPLICATION_JSON_UTF8)
+        .contentType(MediaType.APPLICATION_JSON)
         .content(TestUtil.convertObjectToJsonBytes(curriculumDTO)))
         .andExpect(status().isBadRequest());
 
@@ -299,7 +299,7 @@ public class CurriculumResourceIntTest {
     CurriculumDTO curriculumDTO = linkCurriculumToSpecialty(curriculum, savedSpecialty.getId());
 
     restCurriculumMockMvc.perform(post("/api/curricula")
-        .contentType(TestUtil.APPLICATION_JSON_UTF8)
+        .contentType(MediaType.APPLICATION_JSON)
         .content(TestUtil.convertObjectToJsonBytes(curriculumDTO)))
         .andExpect(status().isBadRequest());
 
@@ -309,7 +309,7 @@ public class CurriculumResourceIntTest {
 
     //update
     restCurriculumMockMvc.perform(put("/api/curricula")
-        .contentType(TestUtil.APPLICATION_JSON_UTF8)
+        .contentType(MediaType.APPLICATION_JSON)
         .content(TestUtil.convertObjectToJsonBytes(curriculumDTO)))
         .andExpect(status().isBadRequest());
 
@@ -330,7 +330,7 @@ public class CurriculumResourceIntTest {
     CurriculumDTO curriculumDTO = linkCurriculumToSpecialty(curriculum, savedSpecialty.getId());
 
     restCurriculumMockMvc.perform(post("/api/curricula")
-        .contentType(TestUtil.APPLICATION_JSON_UTF8)
+        .contentType(MediaType.APPLICATION_JSON)
         .content(TestUtil.convertObjectToJsonBytes(curriculumDTO)))
         .andExpect(status().isBadRequest());
 
@@ -340,7 +340,7 @@ public class CurriculumResourceIntTest {
 
     //update
     restCurriculumMockMvc.perform(put("/api/curricula")
-        .contentType(TestUtil.APPLICATION_JSON_UTF8)
+        .contentType(MediaType.APPLICATION_JSON)
         .content(TestUtil.convertObjectToJsonBytes(curriculumDTO)))
         .andExpect(status().isBadRequest());
 
@@ -353,7 +353,7 @@ public class CurriculumResourceIntTest {
     curriculumDTO = linkCurriculumToSpecialty(curriculum, savedSpecialty.getId());
 
     restCurriculumMockMvc.perform(post("/api/curricula")
-        .contentType(TestUtil.APPLICATION_JSON_UTF8)
+        .contentType(MediaType.APPLICATION_JSON)
         .content(TestUtil.convertObjectToJsonBytes(curriculumDTO)))
         .andExpect(status().isBadRequest());
 
@@ -363,7 +363,7 @@ public class CurriculumResourceIntTest {
 
     //update with negative value
     restCurriculumMockMvc.perform(put("/api/curricula")
-        .contentType(TestUtil.APPLICATION_JSON_UTF8)
+        .contentType(MediaType.APPLICATION_JSON)
         .content(TestUtil.convertObjectToJsonBytes(curriculumDTO)))
         .andExpect(status().isBadRequest());
 
@@ -382,7 +382,7 @@ public class CurriculumResourceIntTest {
     CurriculumDTO curriculumDTO = linkCurriculumToSpecialty(curriculum, SPECIALTY_ID_DOESNT_EXIST);
 
     restCurriculumMockMvc.perform(post("/api/curricula")
-        .contentType(TestUtil.APPLICATION_JSON_UTF8)
+        .contentType(MediaType.APPLICATION_JSON)
         .content(TestUtil.convertObjectToJsonBytes(curriculumDTO)))
         .andExpect(status().isBadRequest());
 
@@ -400,7 +400,7 @@ public class CurriculumResourceIntTest {
     CurriculumDTO curriculumDTO = linkCurriculumToSpecialty(curriculum, NEGATIVE_SPECIALTY_ID);
 
     restCurriculumMockMvc.perform(post("/api/curricula")
-        .contentType(TestUtil.APPLICATION_JSON_UTF8)
+        .contentType(MediaType.APPLICATION_JSON)
         .content(TestUtil.convertObjectToJsonBytes(curriculumDTO)))
         .andExpect(status().isBadRequest());
 
@@ -420,7 +420,7 @@ public class CurriculumResourceIntTest {
 
     // An entity with an existing ID cannot be created, so this API call must fail
     restCurriculumMockMvc.perform(post("/api/curricula")
-        .contentType(TestUtil.APPLICATION_JSON_UTF8)
+        .contentType(MediaType.APPLICATION_JSON)
         .content(TestUtil.convertObjectToJsonBytes(curriculumDTO)))
         .andExpect(status().isBadRequest());
 
@@ -438,7 +438,7 @@ public class CurriculumResourceIntTest {
     // Get all the curriculumList
     restCurriculumMockMvc.perform(get("/api/curricula?sort=id,desc"))
         .andExpect(status().isOk())
-        .andExpect(content().contentType(MediaType.APPLICATION_JSON_UTF8_VALUE))
+        .andExpect(content().contentType(MediaType.APPLICATION_JSON_VALUE))
         .andExpect(jsonPath("$.[*].id").value(hasItem(curriculum.getId().intValue())))
         .andExpect(jsonPath("$.[*].intrepidId").value(hasItem(DEFAULT_INTREPID_ID)))
         .andExpect(jsonPath("$.[*].name").value(hasItem(DEFAULT_NAME)))
@@ -461,7 +461,7 @@ public class CurriculumResourceIntTest {
     // Get the curriculum
     restCurriculumMockMvc.perform(get("/api/curricula/{id}", curriculum.getId()))
         .andExpect(status().isOk())
-        .andExpect(content().contentType(MediaType.APPLICATION_JSON_UTF8_VALUE))
+        .andExpect(content().contentType(MediaType.APPLICATION_JSON_VALUE))
         .andExpect(jsonPath("$.id").value(curriculum.getId().intValue()))
         .andExpect(jsonPath("$.intrepidId").value(DEFAULT_INTREPID_ID))
         .andExpect(jsonPath("$.name").value(DEFAULT_NAME))
@@ -575,7 +575,7 @@ public class CurriculumResourceIntTest {
         savedSpecialty.getId());
 
     restCurriculumMockMvc.perform(put("/api/curricula")
-        .contentType(TestUtil.APPLICATION_JSON_UTF8)
+        .contentType(MediaType.APPLICATION_JSON)
         .content(TestUtil.convertObjectToJsonBytes(curriculumDTO)))
         .andExpect(status().isOk());
 
@@ -602,7 +602,7 @@ public class CurriculumResourceIntTest {
 
     // If the entity doesn't have an ID, it will be created instead of just being updated
     restCurriculumMockMvc.perform(put("/api/curricula")
-        .contentType(TestUtil.APPLICATION_JSON_UTF8)
+        .contentType(MediaType.APPLICATION_JSON)
         .content(TestUtil.convertObjectToJsonBytes(curriculumDTO)))
         .andExpect(status().isBadRequest());
 
@@ -620,7 +620,7 @@ public class CurriculumResourceIntTest {
 
     // If the entity doesn't have an ID, it will be created instead of just being updated
     restCurriculumMockMvc.perform(put("/api/curricula")
-        .contentType(TestUtil.APPLICATION_JSON_UTF8)
+        .contentType(MediaType.APPLICATION_JSON)
         .content(TestUtil.convertObjectToJsonBytes(curriculumDTO)))
         .andExpect(status().isBadRequest());
   }
@@ -634,7 +634,7 @@ public class CurriculumResourceIntTest {
 
     // If the entity doesn't have an ID, it will be created instead of just being updated
     restCurriculumMockMvc.perform(put("/api/curricula")
-        .contentType(TestUtil.APPLICATION_JSON_UTF8)
+        .contentType(MediaType.APPLICATION_JSON)
         .content(TestUtil.convertObjectToJsonBytes(curriculumDTO)))
         .andExpect(status().isBadRequest());
   }
@@ -648,7 +648,7 @@ public class CurriculumResourceIntTest {
 
     // Get the curriculum
     restCurriculumMockMvc.perform(delete("/api/curricula/{id}", curriculum.getId())
-        .accept(TestUtil.APPLICATION_JSON_UTF8))
+        .accept(MediaType.APPLICATION_JSON))
         .andExpect(status().isOk());
 
     // Validate the database is empty
@@ -685,7 +685,7 @@ public class CurriculumResourceIntTest {
 
     List<CurriculumDTO> payload = Lists.newArrayList(curriculumDTO, curriculum2DTO);
     restCurriculumMockMvc.perform(post("/api/bulk-curricula")
-        .contentType(TestUtil.APPLICATION_JSON_UTF8)
+        .contentType(MediaType.APPLICATION_JSON)
         .content(TestUtil.convertObjectToJsonBytes(payload)))
         .andExpect(status().isOk());
 
@@ -718,7 +718,7 @@ public class CurriculumResourceIntTest {
 
     List<CurriculumDTO> payload = Lists.newArrayList(curriculumDTO, curriculum2DTO);
     restCurriculumMockMvc.perform(post("/api/bulk-curricula")
-        .contentType(TestUtil.APPLICATION_JSON_UTF8)
+        .contentType(MediaType.APPLICATION_JSON)
         .content(TestUtil.convertObjectToJsonBytes(payload)))
         .andExpect(status().isBadRequest());
 
@@ -756,7 +756,7 @@ public class CurriculumResourceIntTest {
 
     List<CurriculumDTO> payload = Lists.newArrayList(curriculumDTO, curriculum2DTO);
     restCurriculumMockMvc.perform(put("/api/bulk-curricula")
-        .contentType(TestUtil.APPLICATION_JSON_UTF8)
+        .contentType(MediaType.APPLICATION_JSON)
         .content(TestUtil.convertObjectToJsonBytes(payload)))
         .andExpect(status().isOk());
 
@@ -831,7 +831,7 @@ public class CurriculumResourceIntTest {
 
     List<CurriculumDTO> payload = Lists.newArrayList(curriculumDTO, curriculum2DTO);
     restCurriculumMockMvc.perform(put("/api/bulk-curricula")
-        .contentType(TestUtil.APPLICATION_JSON_UTF8)
+        .contentType(MediaType.APPLICATION_JSON)
         .content(TestUtil.convertObjectToJsonBytes(payload)))
         .andExpect(status().isBadRequest());
 

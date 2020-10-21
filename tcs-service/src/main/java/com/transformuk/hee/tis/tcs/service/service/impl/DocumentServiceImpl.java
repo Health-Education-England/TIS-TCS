@@ -41,7 +41,6 @@ import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.domain.Specification;
-import org.springframework.data.jpa.domain.Specifications;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.multipart.MultipartFile;
@@ -93,7 +92,7 @@ public class DocumentServiceImpl implements DocumentService {
 
     final Specification<Document> personSpec = (root, criteriaQuery, sb) -> sb
         .equal(root.get("personId"), personId);
-    Specifications<Document> fullSpec = Specifications.where(personSpec);
+    Specification<Document> fullSpec = Specification.where(personSpec);
 
     fullSpec = addStatusFilterToSpec(fullSpec, Status.CURRENT);
 
@@ -347,13 +346,13 @@ public class DocumentServiceImpl implements DocumentService {
     return page.map(documentMapper::toDto);
   }
 
-  private Specifications<Document> addStatusFilterToSpec(Specifications<Document> fullSpec,
+  private Specification<Document> addStatusFilterToSpec(Specification<Document> fullSpec,
       final Status status) {
     final Specification<Document> statusFilter = (root, criteriaQuery, sb) -> sb
         .equal(root.get("status"), status);
 
     if (fullSpec == null) {
-      fullSpec = Specifications.where(statusFilter);
+      fullSpec = Specification.where(statusFilter);
     } else {
       fullSpec = fullSpec.and(statusFilter);
     }
@@ -361,7 +360,7 @@ public class DocumentServiceImpl implements DocumentService {
     return fullSpec;
   }
 
-  private Specifications<Document> addTagFilterToSpec(Specifications<Document> fullSpec,
+  private Specification<Document> addTagFilterToSpec(Specification<Document> fullSpec,
       final List<String> tagNames) {
     final List<Specification<Document>> tagNameSpecs = new ArrayList<>();
 
@@ -372,7 +371,7 @@ public class DocumentServiceImpl implements DocumentService {
     tagNames.forEach(tagName -> tagNameSpecs.add(isEqual("tags.name", tagName)));
 
     int i = 0;
-    Specifications<Document> orSpec = Specifications.where(tagNameSpecs.get(0));
+    Specification<Document> orSpec = Specification.where(tagNameSpecs.get(0));
     i++;
 
     for (; i < tagNameSpecs.size(); i++) {
@@ -384,7 +383,7 @@ public class DocumentServiceImpl implements DocumentService {
     return fullSpec;
   }
 
-  private Specifications<Document> addColumnFiltersToSpec(Specifications<Document> fullSpec,
+  private Specification<Document> addColumnFiltersToSpec(Specification<Document> fullSpec,
       final List<ColumnFilter> columnFilters) {
     if (columnFilters == null || columnFilters.isEmpty()) {
       return fullSpec;
@@ -395,7 +394,7 @@ public class DocumentServiceImpl implements DocumentService {
 
     int i = 0;
     if (fullSpec == null) {
-      fullSpec = Specifications.where(columnFilterSpecs.get(0));
+      fullSpec = Specification.where(columnFilterSpecs.get(0));
       i++;
     }
 
@@ -406,7 +405,7 @@ public class DocumentServiceImpl implements DocumentService {
     return fullSpec;
   }
 
-  private Specifications<Document> addSearchQueryToSpec(Specifications<Document> fullSpec,
+  private Specification<Document> addSearchQueryToSpec(Specification<Document> fullSpec,
       final String query) {
     final List<Specification<Document>> querySpecs = new ArrayList<>();
 
@@ -422,7 +421,7 @@ public class DocumentServiceImpl implements DocumentService {
         .add((root, criteriaQuery, sb) -> sb.like(root.get("contentType"), "%" + query + "%"));
 
     int i = 0;
-    Specifications<Document> orSpec = Specifications.where(querySpecs.get(0));
+    Specification<Document> orSpec = Specification.where(querySpecs.get(0));
     i++;
 
     for (; i < querySpecs.size(); i++) {

@@ -33,11 +33,8 @@ spring:
   elasticsearch:
     rest:
       uris: ${ES_URLS}
-  data:
-    elasticsearch:
-      cluster-nodes: ${ES_CLUSTER_NODE_URLS}
-      cluster-name: ${ES_CLUSTER_NAME}
 
 application:
 
 enable.es.search: ${ENABLE_ES_SEARCH}
+

@@ -47,6 +47,7 @@ import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.core.MethodParameter;
 import org.springframework.data.web.PageableHandlerMethodArgumentResolver;
+import org.springframework.http.MediaType;
 import org.springframework.http.converter.json.MappingJackson2HttpMessageConverter;
 import org.springframework.test.context.junit4.SpringRunner;
 import org.springframework.test.web.servlet.MockMvc;
@@ -117,7 +118,7 @@ public class PostResourceTest2 {
 
     // Create the Post
     restPostMockMvc.perform(post("/api/posts")
-        .contentType(TestUtil.APPLICATION_JSON_UTF8)
+        .contentType(MediaType.APPLICATION_JSON)
         .content(TestUtil.convertObjectToJsonBytes(postDTO)))
         .andExpect(status().isBadRequest());
   }
@@ -127,7 +128,7 @@ public class PostResourceTest2 {
     postDTO.setId(1L);
     // Create the Post
     restPostMockMvc.perform(post("/api/posts")
-        .contentType(TestUtil.APPLICATION_JSON_UTF8)
+        .contentType(MediaType.APPLICATION_JSON)
         .content(TestUtil.convertObjectToJsonBytes(postDTO)))
         .andExpect(status().isBadRequest());
   }
@@ -140,7 +141,7 @@ public class PostResourceTest2 {
 
     // Create the Post
     restPostMockMvc.perform(post("/api/posts")
-        .contentType(TestUtil.APPLICATION_JSON_UTF8)
+        .contentType(MediaType.APPLICATION_JSON)
         .content(TestUtil.convertObjectToJsonBytes(postDTO)))
         .andExpect(status().isCreated())
         .andExpect(header().string("location", "/api/posts/1"))
@@ -162,7 +163,7 @@ public class PostResourceTest2 {
 
     // Create the Post
     restPostMockMvc.perform(post("/api/posts")
-        .contentType(TestUtil.APPLICATION_JSON_UTF8)
+        .contentType(MediaType.APPLICATION_JSON)
         .content(TestUtil.convertObjectToJsonBytes(postDTO)))
         .andExpect(status().isCreated())
         .andExpect(header().string("location", "/api/posts/1"))
@@ -176,7 +177,7 @@ public class PostResourceTest2 {
   @Test
   public void updatePostShouldFailValidationWhenNoIdIsProvided() throws Exception {
     restPostMockMvc.perform(put("/api/posts")
-        .contentType(TestUtil.APPLICATION_JSON_UTF8)
+        .contentType(MediaType.APPLICATION_JSON)
         .content(TestUtil.convertObjectToJsonBytes(postDTO)))
         .andExpect(status().isBadRequest());
   }
@@ -188,7 +189,7 @@ public class PostResourceTest2 {
         .validate(postDTO);
 
     restPostMockMvc.perform(put("/api/posts")
-        .contentType(TestUtil.APPLICATION_JSON_UTF8)
+        .contentType(MediaType.APPLICATION_JSON)
         .content(TestUtil.convertObjectToJsonBytes(postDTO)))
         .andExpect(status().isBadRequest());
   }
@@ -201,7 +202,7 @@ public class PostResourceTest2 {
     when(postService.update(postDTO)).thenReturn(updatedPost);
 
     restPostMockMvc.perform(put("/api/posts")
-        .contentType(TestUtil.APPLICATION_JSON_UTF8)
+        .contentType(MediaType.APPLICATION_JSON)
         .content(TestUtil.convertObjectToJsonBytes(postDTO)))
         .andExpect(status().isOk())
         .andExpect(jsonPath("$.id").value("1"));
@@ -217,7 +218,7 @@ public class PostResourceTest2 {
         .canLoggedInUserViewOrAmend(postId);
 
     restPostMockMvc.perform(put("/api/posts")
-        .contentType(TestUtil.APPLICATION_JSON_UTF8)
+        .contentType(MediaType.APPLICATION_JSON)
         .content(TestUtil.convertObjectToJsonBytes(postDTO)))
         .andExpect(status().isUnauthorized())
         .andExpect(jsonPath("$.message").value("error.accessDenied"));
@@ -231,7 +232,7 @@ public class PostResourceTest2 {
         .canLoggedInUserViewOrAmend(postId);
 
     restPostMockMvc.perform(get("/api/posts/{id}", postId)
-        .contentType(TestUtil.APPLICATION_JSON_UTF8))
+        .contentType(MediaType.APPLICATION_JSON))
         .andExpect(status().isUnauthorized())
         .andExpect(jsonPath("$.message").value("error.accessDenied"));
     verify(postService, never()).findOne(any());
@@ -245,7 +246,7 @@ public class PostResourceTest2 {
         .canLoggedInUserViewOrAmend(personId);
 
     restPostMockMvc.perform(get("/api/posts/{id}/placements", personId)
-        .contentType(TestUtil.APPLICATION_JSON_UTF8))
+        .contentType(MediaType.APPLICATION_JSON))
         .andExpect(status().isUnauthorized())
         .andExpect(jsonPath("$.message").value("error.accessDenied"));
     verify(placementViewRepository, never()).findAllByPostIdOrderByDateToDesc(any());
@@ -261,7 +262,7 @@ public class PostResourceTest2 {
         .canLoggedInUserViewOrAmend(postId);
 
     restPostMockMvc.perform(get("/api/posts/{postId}/placements/new", postId)
-        .contentType(TestUtil.APPLICATION_JSON_UTF8))
+        .contentType(MediaType.APPLICATION_JSON))
         .andExpect(status().isUnauthorized())
         .andExpect(jsonPath("$.message").value("error.accessDenied"));
     verify(placementService, never()).getPlacementForPost(any());
@@ -277,7 +278,7 @@ public class PostResourceTest2 {
         .canLoggedInUserViewOrAmend(personId);
 
     restPostMockMvc.perform(delete("/api/posts/{id}", personId)
-        .contentType(TestUtil.APPLICATION_JSON_UTF8))
+        .contentType(MediaType.APPLICATION_JSON))
         .andExpect(status().isUnauthorized())
         .andExpect(jsonPath("$.message").value("error.accessDenied"));
     verify(postService, never()).delete(any());
@@ -301,7 +302,7 @@ public class PostResourceTest2 {
             postValidator).validate(any(PostDTO.class));
 
     restPostMockMvc.perform(put("/api/posts")
-        .contentType(TestUtil.APPLICATION_JSON_UTF8)
+        .contentType(MediaType.APPLICATION_JSON)
         .content(TestUtil.convertObjectToJsonBytes(postDTO)))
         .andExpect(status().isBadRequest())
         .andExpect(jsonPath("$.message").value("error.validation"))
@@ -332,9 +333,9 @@ public class PostResourceTest2 {
         .thenReturn(expectedList);
 
     restPostMockMvc.perform(get("/api/programme/{id}/posts", programmeId)
-        .contentType(TestUtil.APPLICATION_JSON_UTF8))
+        .contentType(MediaType.APPLICATION_JSON))
         .andExpect(status().isOk())
-        .andExpect(header().string("Content-Type", TestUtil.APPLICATION_JSON_UTF8.toString()))
+        .andExpect(header().string("Content-Type", MediaType.APPLICATION_JSON.toString()))
         .andExpect(jsonPath("$[0].id").value(postId))
         .andExpect(jsonPath("$[0].nationalPostNumber").value(postNpn))
         .andExpect(jsonPath("$[0].programmes[0].id").value(programmeId))
@@ -364,9 +365,9 @@ public class PostResourceTest2 {
     when(postService.findPostsForProgrammeIdAndNpn(programmeId, postNpn)).thenReturn(expectedList);
 
     restPostMockMvc.perform(get("/api/programme/{id}/posts?npn=NPN", programmeId)
-        .contentType(TestUtil.APPLICATION_JSON_UTF8))
+        .contentType(MediaType.APPLICATION_JSON))
         .andExpect(status().isOk())
-        .andExpect(header().string("Content-Type", TestUtil.APPLICATION_JSON_UTF8.toString()))
+        .andExpect(header().string("Content-Type", MediaType.APPLICATION_JSON.toString()))
         .andExpect(jsonPath("$[0].id").value(postId))
         .andExpect(jsonPath("$[0].nationalPostNumber").value(postNpn))
         .andExpect(jsonPath("$[0].programmes[0].id").value(programmeId))
