@@ -11,9 +11,9 @@ public class PlacementSpecialtyPK implements Serializable {
 
   private static final long serialVersionUID = 1L;
 
-  private Placement placement;
+  private Long placement;
 
-  private Specialty specialty;
+  private Long specialty;
 
   @Override
   public boolean equals(Object o) {
