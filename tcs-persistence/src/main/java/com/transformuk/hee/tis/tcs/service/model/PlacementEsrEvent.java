@@ -1,6 +1,7 @@
 package com.transformuk.hee.tis.tcs.service.model;
 
 import com.transformuk.hee.tis.tcs.api.enumeration.PlacementEsrEventStatus;
+import java.io.Serializable;
 import java.util.Date;
 import javax.persistence.Column;
 import javax.persistence.Entity;
@@ -22,7 +23,7 @@ import lombok.Data;
 @Entity
 @Table(name = "PlacementEsrEvent")
 @Data
-public class PlacementEsrEvent {
+public class PlacementEsrEvent implements Serializable {
 
   @Id
   @GeneratedValue(strategy = GenerationType.IDENTITY)
