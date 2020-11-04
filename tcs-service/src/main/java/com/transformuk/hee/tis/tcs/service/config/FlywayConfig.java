@@ -40,7 +40,7 @@ public class FlywayConfig {
   Flyway flyway() {
     Flyway flyway = new Flyway();
     flyway.setBaselineOnMigrate(baseLineOnMigrate);
-    flyway.setLocations(migrationFilesLocations);
+    flyway.setLocations(migrationFilesLocations.split(","));
     flyway.setDataSource(url, user, password);
     flyway.setCleanOnValidationError(cleanOnValidationError);
     flyway.setOutOfOrder(outOfOrder);
