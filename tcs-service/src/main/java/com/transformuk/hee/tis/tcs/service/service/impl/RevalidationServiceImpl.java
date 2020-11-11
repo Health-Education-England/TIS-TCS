@@ -2,9 +2,11 @@ package com.transformuk.hee.tis.tcs.service.service.impl;
 
 import static java.time.LocalDate.now;
 import static java.util.Arrays.asList;
+import static java.util.stream.Collectors.toList;
 
 import com.transformuk.hee.tis.reference.api.dto.GradeDTO;
 import com.transformuk.hee.tis.reference.client.ReferenceService;
+import com.transformuk.hee.tis.tcs.api.dto.ConnectionDetailDto;
 import com.transformuk.hee.tis.tcs.api.dto.ConnectionRecordDto;
 import com.transformuk.hee.tis.tcs.api.dto.ContactDetailsDTO;
 import com.transformuk.hee.tis.tcs.api.dto.RevalidationRecordDto;
@@ -89,6 +91,37 @@ public class RevalidationServiceImpl implements RevalidationService {
       connectionRecordDtoMap.put(gmcDetail.getGmcNumber(), connectionRecordDto);
     });
     return connectionRecordDtoMap;
+  }
+
+  @Override
+  public ConnectionDetailDto findAllConnectionsHistoryByGmcId(String gmcId) {
+    ConnectionDetailDto connectionDetailDto = new ConnectionDetailDto();
+
+    LOG.debug("GMCNo received from Connection History service: {}", gmcId);
+    final GmcDetails gmcDetail = gmcDetailsRepository.findGmcDetailsByGmcNumber(gmcId);
+
+    final List<ProgrammeMembership> programmeMemberships = programmeMembershipRepository.findByTraineeId(gmcDetail.getId());
+    LOG.info("Programe memberships found for person: {}, membership: {}", gmcDetail.getId(),
+        programmeMemberships);
+
+    List<ConnectionRecordDto> connectionHistory = programmeMemberships.stream().map(pm -> getConnectionStatus(pm)).collect(toList());
+    connectionDetailDto.setConnectionHistory(connectionHistory);
+
+    return connectionDetailDto;
+
+//    final List<GmcDetails> gmcDetails = gmcDetailsRepository.findByGmcNumberIn(gmcId);
+//    final Map<String, ConnectionRecordDto> connectionRecordDtoMap = new HashMap<>();
+//    gmcDetails.forEach(gmcDetail -> {
+//
+//      final ProgrammeMembership programmeMembership = programmeMembershipRepository
+//          .findLatestProgrammeMembershipByTraineeId(gmcDetail.getId());
+//      LOG.info("Programe membership found for person: {}, membership: {}", gmcDetail.getId(),
+//          programmeMembership);
+//
+//      final ConnectionRecordDto connectionRecordDto = getConnectionStatus(programmeMembership);
+//      connectionRecordDtoMap.put(gmcDetail.getGmcNumber(), connectionRecordDto);
+//    });
+//    return connectionRecordDtoMap;
   }
 
   private ConnectionRecordDto getConnectionStatus(final ProgrammeMembership programmeMembership) {
