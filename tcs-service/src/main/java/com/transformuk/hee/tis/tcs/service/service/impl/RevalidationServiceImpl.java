@@ -99,9 +99,18 @@ public class RevalidationServiceImpl implements RevalidationService {
 
     LOG.debug("GMCNo received from Connection History service: {}", gmcId);
     final GmcDetails gmcDetail = gmcDetailsRepository.findGmcDetailsByGmcNumber(gmcId);
+    final RevalidationRecordDto revalidationRecordDto = buildRevalidationRecord(gmcDetail);
+
+    connectionDetailDto.setGmcNumber(revalidationRecordDto.getGmcNumber());
+    connectionDetailDto.setForenames(revalidationRecordDto.getForenames());
+    connectionDetailDto.setSurname(revalidationRecordDto.getSurname());
+    connectionDetailDto.setCctDate(revalidationRecordDto.getCctDate());
+    connectionDetailDto.setProgrammeMembershipType(revalidationRecordDto.getProgrammeMembershipType());
+    connectionDetailDto.setProgrammeName(revalidationRecordDto.getProgrammeName());
+    connectionDetailDto.setCurrentGrade(revalidationRecordDto.getCurrentGrade());
 
     final List<ProgrammeMembership> programmeMemberships = programmeMembershipRepository.findByTraineeId(gmcDetail.getId());
-    LOG.info("Programe memberships found for person: {}, membership: {}", gmcDetail.getId(),
+    LOG.info("Programme memberships found for person: {}, membership: {}", gmcDetail.getId(),
         programmeMemberships);
 
     List<ConnectionRecordDto> connectionHistory = programmeMemberships.stream().map(pm -> getConnectionStatus(pm)).collect(toList());
