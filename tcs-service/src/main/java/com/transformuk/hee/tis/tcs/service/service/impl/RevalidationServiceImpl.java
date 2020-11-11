@@ -108,8 +108,8 @@ public class RevalidationServiceImpl implements RevalidationService {
 //      final ConnectionRecordDto connectionRecordDto = getConnectionStatus(programmeMembership);
 //      connectionRecordDtoMap.put(gmcDetail.getGmcNumber(), connectionRecordDto);
 //    });
-//    return connectionRecordDtoMap;
-    return null;
+    return new ConnectionDetailDto();
+    //return null;
   }
 
   private ConnectionRecordDto getConnectionStatus(final ProgrammeMembership programmeMembership) {
