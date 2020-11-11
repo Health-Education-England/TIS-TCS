@@ -108,20 +108,6 @@ public class RevalidationServiceImpl implements RevalidationService {
     connectionDetailDto.setConnectionHistory(connectionHistory);
 
     return connectionDetailDto;
-
-//    final List<GmcDetails> gmcDetails = gmcDetailsRepository.findByGmcNumberIn(gmcId);
-//    final Map<String, ConnectionRecordDto> connectionRecordDtoMap = new HashMap<>();
-//    gmcDetails.forEach(gmcDetail -> {
-//
-//      final ProgrammeMembership programmeMembership = programmeMembershipRepository
-//          .findLatestProgrammeMembershipByTraineeId(gmcDetail.getId());
-//      LOG.info("Programe membership found for person: {}, membership: {}", gmcDetail.getId(),
-//          programmeMembership);
-//
-//      final ConnectionRecordDto connectionRecordDto = getConnectionStatus(programmeMembership);
-//      connectionRecordDtoMap.put(gmcDetail.getGmcNumber(), connectionRecordDto);
-//    });
-//    return connectionRecordDtoMap;
   }
 
   private ConnectionRecordDto getConnectionStatus(final ProgrammeMembership programmeMembership) {
