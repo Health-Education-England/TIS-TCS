@@ -10,6 +10,7 @@ public class ConnectionRecordDto {
   private String programmeName;
   private String programmeOwner;
   private String connectionStatus;
+  private String designatedBodyCode;
   private LocalDate programmeMembershipStartDate;
   private LocalDate programmeMembershipEndDate;
 

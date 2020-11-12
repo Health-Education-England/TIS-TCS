@@ -18,6 +18,7 @@ import com.transformuk.hee.tis.tcs.service.repository.PlacementRepository;
 import com.transformuk.hee.tis.tcs.service.repository.ProgrammeMembershipRepository;
 import com.transformuk.hee.tis.tcs.service.service.ContactDetailsService;
 import com.transformuk.hee.tis.tcs.service.service.RevalidationService;
+import com.transformuk.hee.tis.tcs.service.service.mapper.DesignatedBodyMapper;
 import java.time.LocalDate;
 import java.util.ArrayList;
 import java.util.Collections;
@@ -139,7 +140,9 @@ public class RevalidationServiceImpl implements RevalidationService {
           .setProgrammeMembershipStartDate(programmeMembership.getProgrammeStartDate());
       connectionRecordDto.setProgrammeMembershipEndDate(programmeMembership.getProgrammeEndDate());
       if (Objects.nonNull(programmeMembership.getProgramme())) {
-        connectionRecordDto.setProgrammeOwner(programmeMembership.getProgramme().getOwner());
+        String programmeOwner = programmeMembership.getProgramme().getOwner();
+        connectionRecordDto.setProgrammeOwner(programmeOwner);
+        connectionRecordDto.setDesignatedBodyCode(DesignatedBodyMapper.getDbcByOwner(programmeOwner));
         connectionRecordDto.setProgrammeName(programmeMembership.getProgramme().getProgrammeName());
       }
     }
