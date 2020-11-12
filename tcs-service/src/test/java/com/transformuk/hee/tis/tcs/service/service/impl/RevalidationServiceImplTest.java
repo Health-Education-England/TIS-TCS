@@ -10,6 +10,7 @@ import static org.mockito.Mockito.when;
 
 import com.transformuk.hee.tis.reference.api.dto.GradeDTO;
 import com.transformuk.hee.tis.reference.client.ReferenceService;
+import com.transformuk.hee.tis.tcs.api.dto.ConnectionDetailDto;
 import com.transformuk.hee.tis.tcs.api.dto.ConnectionRecordDto;
 import com.transformuk.hee.tis.tcs.api.dto.ContactDetailsDTO;
 import com.transformuk.hee.tis.tcs.api.dto.RevalidationRecordDto;
@@ -23,6 +24,7 @@ import com.transformuk.hee.tis.tcs.service.repository.PlacementRepository;
 import com.transformuk.hee.tis.tcs.service.repository.ProgrammeMembershipRepository;
 import com.transformuk.hee.tis.tcs.service.service.ContactDetailsService;
 import java.time.LocalDate;
+import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 import java.util.Map;
@@ -54,6 +56,7 @@ public class RevalidationServiceImplTest {
   private static final String CURRENT_GRADE = "GP Specialty Training";
   private static final String CONNECTION_STATUS_CONNECTED = "Yes";
   private static final String CONNECTION_STATUS_DISCONNECTED = "No";
+  private static final String DESIGNATED_BODY_CODE = "1-AIIDQQ";
   private static final LocalDate PM_START_DATE = now();
   private static final LocalDate PM_END_DATE = now().plusDays(10);
 
@@ -176,6 +179,42 @@ public class RevalidationServiceImplTest {
     assertThat(record.getConnectionStatus(), is(CONNECTION_STATUS_CONNECTED));
     assertThat(record.getProgrammeMembershipStartDate(), is(PM_START_DATE));
     assertThat(record.getProgrammeMembershipEndDate(), is(PM_END_DATE));
+  }
+
+  @Test
+  public void findAllConnectionDetailByTraineeGmcIdShouldRetrieveAll() {
+    final List<ProgrammeMembership> programmeMembershipList = new ArrayList<>();
+    programmeMembershipList.add(programmeMembership);
+    programmeMembershipList.add(programmeMembership1);
+    when(gmcDetailsRepositoryMock.findGmcDetailsByGmcNumber(GMC_NUMBER)).thenReturn(gmcDetails);
+    when(contactDetailsService.findOne(PERSON_ID)).thenReturn(contactDetails);
+    when(programmeMembershipRepositoryMock.findByTraineeId(PERSON_ID))
+        .thenReturn(programmeMembershipList);
+    when(programmeMembershipRepositoryMock.findLatestProgrammeMembershipByTraineeId(PERSON_ID))
+        .thenReturn(programmeMembership);
+    when(placementRepositoryMock
+        .findCurrentPlacementForTrainee(PERSON_ID, now(), PLACEMENT_TYPES)).thenReturn(currentPlacementsForTrainee);
+    when(referenceServiceMock.findGradesIdIn(Collections.singleton(GRADE_ID))).thenReturn(grades);
+    ConnectionDetailDto result = testObj.findAllConnectionsHistoryByGmcId(GMC_NUMBER);
+
+    assertThat(result, notNullValue());
+    assertThat(result.getGmcNumber(), is(GMC_NUMBER));
+    assertThat(result.getForenames(), is(FORENAME));
+    assertThat(result.getSurname(), is(SURNAME));
+    assertThat(result.getCctDate(), is(CCT_DATE));
+    assertThat(result.getProgrammeMembershipType(), is(PROGRAMME_MEMBERSHIP_TYPE.toString()));
+    assertThat(result.getProgrammeName(), is(PROGRAMME_NAME));
+    assertThat(result.getCurrentGrade(), is(CURRENT_GRADE));
+
+    assertThat(result.getConnectionHistory().size(), is(2));
+    assertThat(result.getConnectionHistory().get(0).getProgrammeMembershipType(),
+        is(PROGRAMME_MEMBERSHIP_TYPE.toString()));
+    assertThat(result.getConnectionHistory().get(0).getProgrammeName(), is(PROGRAMME_NAME));
+    assertThat(result.getConnectionHistory().get(0).getProgrammeOwner(), is(PROGRAMME_OWNER));
+    assertThat(result.getConnectionHistory().get(0).getConnectionStatus(), is(CONNECTION_STATUS_DISCONNECTED));
+    assertThat(result.getConnectionHistory().get(0).getDesignatedBodyCode(), is(DESIGNATED_BODY_CODE));
+    assertThat(result.getConnectionHistory().get(1).getProgrammeMembershipStartDate(), is(PM_START_DATE));
+    assertThat(result.getConnectionHistory().get(1).getProgrammeMembershipEndDate(), is(PM_END_DATE));
   }
 
   @Test

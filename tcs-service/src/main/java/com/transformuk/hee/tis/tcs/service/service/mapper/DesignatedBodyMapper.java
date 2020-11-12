@@ -6,6 +6,7 @@ import com.google.common.collect.Lists;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
+import java.util.Map.Entry;
 import java.util.Set;
 
 /**
@@ -65,4 +66,18 @@ public class DesignatedBodyMapper {
     }
     return allOwners;
   }
+
+  /**
+   * @param owner name
+   * @return the corresponding designated body code
+   */
+  public static String getDbcByOwner(String owner) {
+    for (Entry<String, List<String>> entry : dbToOwnerMap.entrySet()) {
+      if (entry.getValue().contains(owner)) {
+        return entry.getKey();
+      }
+    }
+    return null;
+  }
+
 }
