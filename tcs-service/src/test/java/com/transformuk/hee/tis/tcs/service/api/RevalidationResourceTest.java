@@ -12,10 +12,12 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule;
+import com.transformuk.hee.tis.tcs.api.dto.ConnectionDetailDto;
 import com.transformuk.hee.tis.tcs.api.dto.ConnectionRecordDto;
 import com.transformuk.hee.tis.tcs.api.dto.RevalidationRecordDto;
 import com.transformuk.hee.tis.tcs.service.service.impl.RevalidationServiceImpl;
 import java.time.LocalDate;
+import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.HashMap;
 import java.util.List;
@@ -186,5 +188,49 @@ public class RevalidationResourceTest {
       assertThat(connectionRecordDto.getProgrammeMembershipStartDate(), is(PM_START_DATE));
       assertThat(connectionRecordDto.getProgrammeMembershipEndDate(), is(PM_END_DATE));
     });
+  }
+
+  @Test
+  public void shouldFindConnectionDetailsFromTrainerGmcId() throws Exception {
+    ConnectionDetailDto connectionDetailDto = new ConnectionDetailDto();
+    connectionDetailDto.setGmcNumber(GMC_ID1);
+    connectionDetailDto.setForenames(FORENAME);
+    connectionDetailDto.setSurname(SURNAME);
+    connectionDetailDto.setCctDate(CCT_DATE);
+    connectionDetailDto.setProgrammeMembershipType(PROGRAMME_MEMBERSHIP_TYPE);
+    connectionDetailDto.setProgrammeName(PROGRAMME_NAME);
+    connectionDetailDto.setCurrentGrade(CURRENT_GRADE);
+    final List<ConnectionRecordDto> connectionHistory = new ArrayList<>();
+    connectionHistory.add(createConnectionRecordDto(GMC_ID1));
+    connectionDetailDto.setConnectionHistory(connectionHistory);
+
+    final String gmcId = GMC_ID1;
+    when(revalidationServiceImplMock.findAllConnectionsHistoryByGmcId(gmcId))
+        .thenReturn(connectionDetailDto);
+
+    MvcResult result =
+        restRevalidationMock.perform(get("/api/revalidation/connection/detail/{gmcId}", gmcId))
+            .andExpect(status().isOk())
+            .andExpect(content().contentType(MediaType.APPLICATION_JSON))
+            .andReturn();
+    MockHttpServletResponse response = result.getResponse();
+    final String content = response.getContentAsString();
+    final ConnectionDetailDto contentConnectionDetailDto =
+        mapper.readValue(content, ConnectionDetailDto.class);
+
+    assertThat(contentConnectionDetailDto, notNullValue());
+    assertThat(contentConnectionDetailDto.getGmcNumber(), is(GMC_ID1));
+    assertThat(contentConnectionDetailDto.getForenames(), is(FORENAME));
+    assertThat(contentConnectionDetailDto.getSurname(), is(SURNAME));
+    assertThat(contentConnectionDetailDto.getCctDate(), is(CCT_DATE));
+    assertThat(contentConnectionDetailDto.getProgrammeMembershipType(), is(PROGRAMME_MEMBERSHIP_TYPE));
+    assertThat(contentConnectionDetailDto.getProgrammeName(), is(PROGRAMME_NAME));
+    assertThat(contentConnectionDetailDto.getCurrentGrade(), is(CURRENT_GRADE));
+
+    assertThat(contentConnectionDetailDto.getConnectionHistory().size(), is(1));
+    assertThat(contentConnectionDetailDto.getConnectionHistory().get(0).getProgrammeOwner(), is(PROGRAMME_OWNER));
+    assertThat(contentConnectionDetailDto.getConnectionHistory().get(0).getConnectionStatus(), is(CONNECTION_STATUS));
+    assertThat(contentConnectionDetailDto.getConnectionHistory().get(0).getProgrammeMembershipStartDate(), is(PM_START_DATE));
+    assertThat(contentConnectionDetailDto.getConnectionHistory().get(0).getProgrammeMembershipEndDate(), is(PM_END_DATE));
   }
 }

@@ -2,6 +2,7 @@ package com.transformuk.hee.tis.tcs.service.api;
 
 import com.transformuk.hee.tis.tcs.api.dto.ConnectionRecordDto;
 import com.transformuk.hee.tis.tcs.api.dto.RevalidationRecordDto;
+import com.transformuk.hee.tis.tcs.api.dto.ConnectionDetailDto;
 import com.transformuk.hee.tis.tcs.service.api.util.UrlDecoderUtil;
 import com.transformuk.hee.tis.tcs.service.service.RevalidationService;
 import java.util.Collections;
@@ -61,6 +62,20 @@ public class RevalidationResource {
       return ResponseEntity.ok(revalidationService.findAllConnectionsByGmcIds(gmcIds));
     } else {
       return ResponseEntity.badRequest().body(Collections.emptyMap());
+    }
+  }
+
+  @GetMapping("/revalidation/connection/detail/{gmcId}")
+  @PreAuthorize("hasPermission('tis:people::person:', 'View')")
+  public ResponseEntity<ConnectionDetailDto> getConnectionDetailForATrainee(
+      @PathVariable String gmcId) {
+    LOG.debug("REST request to find Revalidation Connection Detail for a trainee: {}", gmcId);
+
+    if (!gmcId.isEmpty()) {
+      UrlDecoderUtil.decode(gmcId);
+      return ResponseEntity.ok(revalidationService.findAllConnectionsHistoryByGmcId(gmcId));
+    } else {
+      return ResponseEntity.badRequest().body(null);
     }
   }
 }

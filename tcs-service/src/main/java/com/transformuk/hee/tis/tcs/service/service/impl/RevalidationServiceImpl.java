@@ -2,9 +2,11 @@ package com.transformuk.hee.tis.tcs.service.service.impl;
 
 import static java.time.LocalDate.now;
 import static java.util.Arrays.asList;
+import static java.util.stream.Collectors.toList;
 
 import com.transformuk.hee.tis.reference.api.dto.GradeDTO;
 import com.transformuk.hee.tis.reference.client.ReferenceService;
+import com.transformuk.hee.tis.tcs.api.dto.ConnectionDetailDto;
 import com.transformuk.hee.tis.tcs.api.dto.ConnectionRecordDto;
 import com.transformuk.hee.tis.tcs.api.dto.ContactDetailsDTO;
 import com.transformuk.hee.tis.tcs.api.dto.RevalidationRecordDto;
@@ -16,6 +18,7 @@ import com.transformuk.hee.tis.tcs.service.repository.PlacementRepository;
 import com.transformuk.hee.tis.tcs.service.repository.ProgrammeMembershipRepository;
 import com.transformuk.hee.tis.tcs.service.service.ContactDetailsService;
 import com.transformuk.hee.tis.tcs.service.service.RevalidationService;
+import com.transformuk.hee.tis.tcs.service.service.mapper.DesignatedBodyMapper;
 import java.time.LocalDate;
 import java.util.ArrayList;
 import java.util.Collections;
@@ -91,6 +94,32 @@ public class RevalidationServiceImpl implements RevalidationService {
     return connectionRecordDtoMap;
   }
 
+  @Override
+  public ConnectionDetailDto findAllConnectionsHistoryByGmcId(String gmcId) {
+    ConnectionDetailDto connectionDetailDto = new ConnectionDetailDto();
+
+    LOG.debug("GMCNo received from Connection History service: {}", gmcId);
+    final GmcDetails gmcDetail = gmcDetailsRepository.findGmcDetailsByGmcNumber(gmcId);
+    final RevalidationRecordDto revalidationRecordDto = buildRevalidationRecord(gmcDetail);
+
+    connectionDetailDto.setGmcNumber(revalidationRecordDto.getGmcNumber());
+    connectionDetailDto.setForenames(revalidationRecordDto.getForenames());
+    connectionDetailDto.setSurname(revalidationRecordDto.getSurname());
+    connectionDetailDto.setCctDate(revalidationRecordDto.getCctDate());
+    connectionDetailDto.setProgrammeMembershipType(revalidationRecordDto.getProgrammeMembershipType());
+    connectionDetailDto.setProgrammeName(revalidationRecordDto.getProgrammeName());
+    connectionDetailDto.setCurrentGrade(revalidationRecordDto.getCurrentGrade());
+
+    final List<ProgrammeMembership> programmeMemberships = programmeMembershipRepository.findByTraineeId(gmcDetail.getId());
+    LOG.info("Programme memberships found for person: {}, membership: {}", gmcDetail.getId(),
+        programmeMemberships);
+
+    List<ConnectionRecordDto> connectionHistory = programmeMemberships.stream().map(pm -> getConnectionStatus(pm)).collect(toList());
+    connectionDetailDto.setConnectionHistory(connectionHistory);
+
+    return connectionDetailDto;
+  }
+
   private ConnectionRecordDto getConnectionStatus(final ProgrammeMembership programmeMembership) {
     final ConnectionRecordDto connectionRecordDto = new ConnectionRecordDto();
     connectionRecordDto.setConnectionStatus("No");
@@ -111,7 +140,9 @@ public class RevalidationServiceImpl implements RevalidationService {
           .setProgrammeMembershipStartDate(programmeMembership.getProgrammeStartDate());
       connectionRecordDto.setProgrammeMembershipEndDate(programmeMembership.getProgrammeEndDate());
       if (Objects.nonNull(programmeMembership.getProgramme())) {
-        connectionRecordDto.setProgrammeOwner(programmeMembership.getProgramme().getOwner());
+        String programmeOwner = programmeMembership.getProgramme().getOwner();
+        connectionRecordDto.setProgrammeOwner(programmeOwner);
+        connectionRecordDto.setDesignatedBodyCode(DesignatedBodyMapper.getDbcByOwner(programmeOwner));
         connectionRecordDto.setProgrammeName(programmeMembership.getProgramme().getProgrammeName());
       }
     }
