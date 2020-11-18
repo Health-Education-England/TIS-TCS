@@ -57,4 +57,16 @@ public class DesignatedBodyMapperTest {
             "Health Education England Yorkshire and the Humber",
             "Health Education England West Midlands");
   }
+
+  @Test
+  public void shouldgetDbcByOwner() {
+    //Given
+    String owner = "Health Education England West Midlands";
+
+    //When
+    String res = DesignatedBodyMapper.getDbcByOwner(owner);
+
+    //Then
+    assertThat(res).isEqualTo("1-AIIDMY");
+  }
 }
