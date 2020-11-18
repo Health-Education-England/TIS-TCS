@@ -40,7 +40,6 @@ spring:
     locations: classpath:db/migration/schema
     out-of-order: true
     password:
-    schemas: ${DBNAME:tcs}
     sql-migration-prefix: V
     url: ${spring.datasource.url}
     user: sa

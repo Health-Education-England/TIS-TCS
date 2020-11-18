@@ -3,7 +3,9 @@ package com.transformuk.hee.tis.tcs.service.service.helper;
 import static org.slf4j.LoggerFactory.getLogger;
 
 import com.google.common.base.Preconditions;
+import com.google.common.io.CharStreams;
 import java.io.IOException;
+import java.io.Reader;
 import java.nio.charset.StandardCharsets;
 import java.util.HashMap;
 import java.util.Map;
@@ -44,21 +46,31 @@ public class SqlQuerySupplier {
    * @param fileName the sql file to get the query from, use one of the public string constants of
    *                 this class as a parameter here, never null
    * @return the sql query ready to run, never null
-   * @throws IOException when the file is not found or there is a problem reading the file.
    */
   public String getQuery(final String fileName) {
     Preconditions.checkNotNull(fileName);
-    final String content;
-    if (files.containsKey(fileName)) {
-      content = files.get(fileName);
-    } else {
-      content = new String(
-          new ClassPathResource(null, fileName, Thread.currentThread().getContextClassLoader(),
-              StandardCharsets.UTF_8)
-              .loadAsBytes(), StandardCharsets.UTF_8);
-      files.put(fileName, content);
-    }
+    String content = files.computeIfAbsent(fileName, this::readContents);
     LOG.debug("Running query:\n {}", content);
+    return content;
+  }
+
+  /**
+   * Read the file contents.
+   *
+   * @param fileName The name of the file to read.
+   * @return The read contents.
+   */
+  private String readContents(String fileName) {
+    String content = "";
+    ClassPathResource resource = new ClassPathResource(null, fileName,
+        Thread.currentThread().getContextClassLoader(), StandardCharsets.UTF_8);
+
+    try (Reader reader = resource.read()) {
+      content = CharStreams.toString(reader);
+    } catch (IOException e) {
+      LOG.error("Unable to load content from {}.", fileName);
+    }
+
     return content;
   }
 }
