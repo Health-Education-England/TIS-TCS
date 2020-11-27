@@ -1,1 +1,1 @@
-ALTER TABLE tcs.TrainingNumber MODIFY trainingNumber varchar(25);
+ALTER TABLE `TrainingNumber` MODIFY `trainingNumber` varchar(25);
