@@ -1,0 +1,54 @@
+name: PR Analysis Workflow
+
+on:
+  pull_request:
+  workflow_dispatch:
+
+jobs:
+  pipeline:
+    name: Build, Test and Analyse
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v2
+
+      - name: Set up JDK
+        uses: actions/setup-java@v1
+        with:
+          java-version: 11
+
+      - name: Configure AWS credentials
+        uses: aws-actions/configure-aws-credentials@v1
+        with:
+          aws-access-key-id: ${{ secrets.AWS_MAVEN_USERNAME }}
+          aws-secret-access-key: ${{ secrets.AWS_MAVEN_PASSWORD }}
+          aws-region: eu-west-1
+
+      - name: Add CodeArtifact env var
+        run: echo "CODEARTIFACT_AUTH_TOKEN=$(aws codeartifact get-authorization-token --domain hee --domain-owner 430723991443 --query authorizationToken --output text)" >> $GITHUB_ENV
+
+      - name: maven-settings-xml-action
+        uses: whelk-io/maven-settings-xml-action@v4
+        with:
+          servers: '[{ "id": "hee--Health-Education-England", "username": "aws", "password": "${env.CODEARTIFACT_AUTH_TOKEN}" }]'
+          repositories: '[{ "id": "hee--Health-Education-England", "url": "https://hee-430723991443.d.codeartifact.eu-west-1.amazonaws.com/maven/Health-Education-England/" }]'
+
+      - name: Build
+        run: mvn install -DskipTests
+
+      - name: Configure AWS credentials
+        uses: aws-actions/configure-aws-credentials@v1
+        with:
+          aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID }}
+          aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+          aws-region: eu-west-2
+
+      - name: Run tests
+        run: mvn test
+
+      - name: Run quality analysis
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }}
+        run: mvn sonar:sonar
