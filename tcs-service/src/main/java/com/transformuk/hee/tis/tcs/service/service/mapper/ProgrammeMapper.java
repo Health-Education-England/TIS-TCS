@@ -5,6 +5,7 @@ import com.transformuk.hee.tis.tcs.service.model.Curriculum;
 import com.transformuk.hee.tis.tcs.service.model.Programme;
 import com.transformuk.hee.tis.tcs.service.model.ProgrammeCurriculum;
 import java.util.List;
+import java.util.Set;
 import org.mapstruct.AfterMapping;
 import org.mapstruct.Mapper;
 import org.mapstruct.MappingTarget;
@@ -30,8 +31,13 @@ public interface ProgrammeMapper {
 
   @AfterMapping
   default void addProgrammeToCurricula(ProgrammeDTO source, @MappingTarget Programme target) {
-    for (ProgrammeCurriculum curriculum : target.getCurricula()) {
-      curriculum.setProgramme(target);
+    Set<ProgrammeCurriculum> curricula = target.getCurricula();
+
+    if (curricula != null) {
+
+      for (ProgrammeCurriculum curriculum : target.getCurricula()) {
+        curriculum.setProgramme(target);
+      }
     }
   }
 }
