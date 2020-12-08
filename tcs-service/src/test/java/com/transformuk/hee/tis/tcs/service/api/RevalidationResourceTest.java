@@ -200,9 +200,9 @@ public class RevalidationResourceTest {
     connectionDetailDto.setProgrammeMembershipType(PROGRAMME_MEMBERSHIP_TYPE);
     connectionDetailDto.setProgrammeName(PROGRAMME_NAME);
     connectionDetailDto.setCurrentGrade(CURRENT_GRADE);
-    final List<ConnectionRecordDto> connectionHistory = new ArrayList<>();
-    connectionHistory.add(createConnectionRecordDto(GMC_ID1));
-    connectionDetailDto.setConnectionHistory(connectionHistory);
+    final List<ConnectionRecordDto> programmeHistory = new ArrayList<>();
+    programmeHistory.add(createConnectionRecordDto(GMC_ID1));
+    connectionDetailDto.setProgrammeHistory(programmeHistory);
 
     final String gmcId = GMC_ID1;
     when(revalidationServiceImplMock.findAllConnectionsHistoryByGmcId(gmcId))
@@ -227,10 +227,10 @@ public class RevalidationResourceTest {
     assertThat(contentConnectionDetailDto.getProgrammeName(), is(PROGRAMME_NAME));
     assertThat(contentConnectionDetailDto.getCurrentGrade(), is(CURRENT_GRADE));
 
-    assertThat(contentConnectionDetailDto.getConnectionHistory().size(), is(1));
-    assertThat(contentConnectionDetailDto.getConnectionHistory().get(0).getProgrammeOwner(), is(PROGRAMME_OWNER));
-    assertThat(contentConnectionDetailDto.getConnectionHistory().get(0).getConnectionStatus(), is(CONNECTION_STATUS));
-    assertThat(contentConnectionDetailDto.getConnectionHistory().get(0).getProgrammeMembershipStartDate(), is(PM_START_DATE));
-    assertThat(contentConnectionDetailDto.getConnectionHistory().get(0).getProgrammeMembershipEndDate(), is(PM_END_DATE));
+    assertThat(contentConnectionDetailDto.getProgrammeHistory().size(), is(1));
+    assertThat(contentConnectionDetailDto.getProgrammeHistory().get(0).getProgrammeOwner(), is(PROGRAMME_OWNER));
+    assertThat(contentConnectionDetailDto.getProgrammeHistory().get(0).getConnectionStatus(), is(CONNECTION_STATUS));
+    assertThat(contentConnectionDetailDto.getProgrammeHistory().get(0).getProgrammeMembershipStartDate(), is(PM_START_DATE));
+    assertThat(contentConnectionDetailDto.getProgrammeHistory().get(0).getProgrammeMembershipEndDate(), is(PM_END_DATE));
   }
 }

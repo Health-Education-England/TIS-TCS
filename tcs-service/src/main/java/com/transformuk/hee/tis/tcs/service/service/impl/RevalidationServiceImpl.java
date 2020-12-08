@@ -114,8 +114,8 @@ public class RevalidationServiceImpl implements RevalidationService {
     LOG.info("Programme memberships found for person: {}, membership: {}", gmcDetail.getId(),
         programmeMemberships);
 
-    List<ConnectionRecordDto> connectionHistory = programmeMemberships.stream().map(pm -> getConnectionStatus(pm)).collect(toList());
-    connectionDetailDto.setConnectionHistory(connectionHistory);
+    List<ConnectionRecordDto> programmeHistory = programmeMemberships.stream().map(pm -> getConnectionStatus(pm)).collect(toList());
+    connectionDetailDto.setProgrammeHistory(programmeHistory);
 
     return connectionDetailDto;
   }

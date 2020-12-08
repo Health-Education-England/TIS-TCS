@@ -14,6 +14,6 @@ public class ConnectionDetailDto {
   private String programmeMembershipType;
   private String programmeName;
   private String currentGrade;
-  private List<ConnectionRecordDto> connectionHistory;
+  private List<ConnectionRecordDto> programmeHistory;
 
 }

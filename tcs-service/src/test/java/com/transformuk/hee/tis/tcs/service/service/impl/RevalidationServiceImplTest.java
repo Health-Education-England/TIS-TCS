@@ -206,15 +206,15 @@ public class RevalidationServiceImplTest {
     assertThat(result.getProgrammeName(), is(PROGRAMME_NAME));
     assertThat(result.getCurrentGrade(), is(CURRENT_GRADE));
 
-    assertThat(result.getConnectionHistory().size(), is(2));
-    assertThat(result.getConnectionHistory().get(0).getProgrammeMembershipType(),
+    assertThat(result.getProgrammeHistory().size(), is(2));
+    assertThat(result.getProgrammeHistory().get(0).getProgrammeMembershipType(),
         is(PROGRAMME_MEMBERSHIP_TYPE.toString()));
-    assertThat(result.getConnectionHistory().get(0).getProgrammeName(), is(PROGRAMME_NAME));
-    assertThat(result.getConnectionHistory().get(0).getProgrammeOwner(), is(PROGRAMME_OWNER));
-    assertThat(result.getConnectionHistory().get(0).getConnectionStatus(), is(CONNECTION_STATUS_DISCONNECTED));
-    assertThat(result.getConnectionHistory().get(0).getDesignatedBodyCode(), is(DESIGNATED_BODY_CODE));
-    assertThat(result.getConnectionHistory().get(1).getProgrammeMembershipStartDate(), is(PM_START_DATE));
-    assertThat(result.getConnectionHistory().get(1).getProgrammeMembershipEndDate(), is(PM_END_DATE));
+    assertThat(result.getProgrammeHistory().get(0).getProgrammeName(), is(PROGRAMME_NAME));
+    assertThat(result.getProgrammeHistory().get(0).getProgrammeOwner(), is(PROGRAMME_OWNER));
+    assertThat(result.getProgrammeHistory().get(0).getConnectionStatus(), is(CONNECTION_STATUS_DISCONNECTED));
+    assertThat(result.getProgrammeHistory().get(0).getDesignatedBodyCode(), is(DESIGNATED_BODY_CODE));
+    assertThat(result.getProgrammeHistory().get(1).getProgrammeMembershipStartDate(), is(PM_START_DATE));
+    assertThat(result.getProgrammeHistory().get(1).getProgrammeMembershipEndDate(), is(PM_END_DATE));
   }
 
   @Test
