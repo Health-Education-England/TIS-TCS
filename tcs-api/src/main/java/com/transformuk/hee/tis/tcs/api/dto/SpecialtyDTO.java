@@ -26,7 +26,6 @@ public class SpecialtyDTO implements Serializable {
   @DecimalMin(value = "0", groups = Update.class, message = "Id must not be negative")
   private Long id;
 
-  @NotNull
   private UUID uuid;
 
   private String intrepidId;

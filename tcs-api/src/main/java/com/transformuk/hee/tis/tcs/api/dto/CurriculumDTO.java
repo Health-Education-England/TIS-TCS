@@ -24,7 +24,6 @@ public class CurriculumDTO implements Serializable {
   @Null(groups = Create.class, message = "Id must be null when creating a new curriculum")
   private Long id;
 
-  @NotNull
   private UUID uuid;
 
   private String intrepidId;
