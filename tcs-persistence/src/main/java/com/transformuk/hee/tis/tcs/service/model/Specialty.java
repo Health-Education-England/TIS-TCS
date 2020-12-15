@@ -3,10 +3,7 @@ package com.transformuk.hee.tis.tcs.service.model;
 import com.transformuk.hee.tis.tcs.api.enumeration.SpecialtyType;
 import com.transformuk.hee.tis.tcs.api.enumeration.Status;
 import java.io.Serializable;
-import java.util.HashSet;
-import java.util.List;
-import java.util.Objects;
-import java.util.Set;
+import java.util.*;
 import javax.persistence.CascadeType;
 import javax.persistence.CollectionTable;
 import javax.persistence.Column;
@@ -21,6 +18,8 @@ import javax.persistence.Id;
 import javax.persistence.JoinColumn;
 import javax.persistence.ManyToOne;
 import javax.persistence.OneToMany;
+import javax.validation.constraints.NotNull;
+
 import lombok.Data;
 
 /**
@@ -35,6 +34,10 @@ public class Specialty implements Serializable {
   @Id
   @GeneratedValue(strategy = GenerationType.IDENTITY)
   private Long id;
+
+  @NotNull
+  @Column(name = "uuid", nullable = false)
+  private UUID uuid;
 
   private String intrepidId;
 

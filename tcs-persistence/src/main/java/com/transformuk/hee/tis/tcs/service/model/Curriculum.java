@@ -6,6 +6,7 @@ import com.transformuk.hee.tis.tcs.api.enumeration.Status;
 import java.io.Serializable;
 import java.util.Objects;
 import java.util.Set;
+import java.util.UUID;
 import javax.persistence.Column;
 import javax.persistence.Entity;
 import javax.persistence.EnumType;
@@ -17,6 +18,8 @@ import javax.persistence.Id;
 import javax.persistence.JoinColumn;
 import javax.persistence.ManyToOne;
 import javax.persistence.OneToMany;
+import javax.validation.constraints.NotNull;
+
 import lombok.Data;
 import lombok.experimental.Accessors;
 
@@ -32,6 +35,10 @@ public class Curriculum implements Serializable {
   @Id
   @GeneratedValue(strategy = GenerationType.IDENTITY)
   private Long id;
+
+  @NotNull
+  @Column(name = "uuid", nullable = false)
+  private UUID uuid;
 
   @Column(name = "intrepidId")
   private String intrepidId;

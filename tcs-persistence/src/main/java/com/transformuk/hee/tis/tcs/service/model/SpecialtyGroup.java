@@ -4,12 +4,10 @@ import java.io.Serializable;
 import java.util.HashSet;
 import java.util.Objects;
 import java.util.Set;
-import javax.persistence.Entity;
-import javax.persistence.GeneratedValue;
-import javax.persistence.GenerationType;
-import javax.persistence.Id;
-import javax.persistence.OneToMany;
-import javax.persistence.Table;
+import java.util.UUID;
+import javax.persistence.*;
+import javax.validation.constraints.NotNull;
+
 import lombok.Data;
 
 /**
@@ -25,6 +23,10 @@ public class SpecialtyGroup implements Serializable {
   @Id
   @GeneratedValue(strategy = GenerationType.IDENTITY)
   private Long id;
+  
+  @NotNull
+  @Column(name = "uuid", nullable = false)
+  private UUID uuid;
 
   private String intrepidId;
 
