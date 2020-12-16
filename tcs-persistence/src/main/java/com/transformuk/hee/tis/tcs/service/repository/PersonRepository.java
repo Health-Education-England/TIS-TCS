@@ -1,5 +1,6 @@
 package com.transformuk.hee.tis.tcs.service.repository;
 
+import com.transformuk.hee.tis.tcs.api.dto.ConnectionHiddenRecordDto;
 import com.transformuk.hee.tis.tcs.service.model.Person;
 import java.util.List;
 import java.util.Optional;
@@ -11,6 +12,7 @@ import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.jpa.repository.query.Procedure;
 import org.springframework.data.repository.query.Param;
 import org.springframework.stereotype.Repository;
+
 
 @Repository
 public interface PersonRepository extends JpaRepository<Person, Long>,
@@ -31,7 +33,7 @@ public interface PersonRepository extends JpaRepository<Person, Long>,
       "WHERE p.id = :id")
   Optional<Person> findPersonById(@Param(value = "id") Long id);
 
-  @Query("Select cd.surname, cd.forenames, prg.programmeName, pm.programmeMembershipType, pm.programmeStartDate, pm.programmeEndDate "
+  @Query("Select new com.transformuk.hee.tis.tcs.api.dto.ConnectionHiddenRecordDto(cd.surname, cd.forenames, gmc.gmcNumber, prg.programmeName, pm.programmeMembershipType, pm.programmeStartDate, pm.programmeEndDate) "
       + "FROM Person p "
       + "JOIN ContactDetails cd on (cd.id = p.id) "
       + "JOIN GmcDetails gmc on (gmc.id = p.id) and gmc.gmcNumber <> 'UNKNOWN' "
@@ -39,5 +41,5 @@ public interface PersonRepository extends JpaRepository<Person, Long>,
       + "LEFT JOIN Programme prg on (prg.id = pm.programme) "
       + "LEFT JOIN Placement pl on (pl.trainee = p.id) and curdate() between pl.dateFrom and pl.dateTo "
       + "WHERE pm.programmeMembershipType = 'MILITARY' OR pl.gradeId = 279 or gmc.gmcNumber in (:gmcIds)")
-  Page<Object> getMilitaryAndF1Person(final Pageable pageable, @Param(value = "gmcIds") String... gmcIds);
+  Page<ConnectionHiddenRecordDto> getHiddenTraineeRecords(final Pageable pageable, @Param(value = "gmcIds") List<String> gmcIds);
 }

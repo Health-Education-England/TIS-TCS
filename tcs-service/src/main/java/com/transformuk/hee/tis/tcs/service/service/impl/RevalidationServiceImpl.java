@@ -45,6 +45,7 @@ public class RevalidationServiceImpl implements RevalidationService {
   private static final Logger LOG = LoggerFactory.getLogger(RevalidationServiceImpl.class);
   private static final List<String> placementTypes = asList("In post", "In Post - Acting Up",
       "In post - Extension", "Parental Leave", "Long-term sick", "Suspended", "Phased Return");
+  public static final int SIZE = 20;
   private final ContactDetailsService contactDetailsService;
   private final GmcDetailsRepository gmcDetailsRepository;
   private final ProgrammeMembershipRepository programmeMembershipRepository;
@@ -128,17 +129,16 @@ public class RevalidationServiceImpl implements RevalidationService {
     return connectionDetailDto;
   }
 
-  public ConnectionHiddenDto getHiddenTrainees(final int pageNumber) {
-    final PageRequest pageRequest = PageRequest.of(1, 20);
-    final Page<Object> militaryAndF1Person = personRepository.getMilitaryAndF1Person(pageRequest, "");
-    final List<ConnectionHiddenRecordDto> connectionHiddenRecordDtos = militaryAndF1Person.get().map(obj -> {
-      return (ConnectionHiddenRecordDto) obj;
-    }).collect(toList());
+  @Override
+  public ConnectionHiddenDto getHiddenTrainees(final List<String> gmcIds, final int pageNumber) {
+    final PageRequest pageRequest = PageRequest.of(pageNumber, SIZE);
+    final Page<ConnectionHiddenRecordDto> hiddenRecords = personRepository.getHiddenTraineeRecords(pageRequest, gmcIds);
+    final List<ConnectionHiddenRecordDto> connectionHiddenRecords = hiddenRecords.get().collect(toList());
 
     return ConnectionHiddenDto.builder()
-        .connections(connectionHiddenRecordDtos)
-        .totalCounts(militaryAndF1Person.getTotalElements())
-        .totalPages(militaryAndF1Person.getTotalPages())
+        .connections(connectionHiddenRecords)
+        .totalCounts(hiddenRecords.getTotalElements())
+        .totalPages(hiddenRecords.getTotalPages())
         .build();
   }
 

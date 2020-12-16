@@ -81,10 +81,11 @@ public class RevalidationResource {
     }
   }
 
-  @GetMapping("/revalidation/connection/hidden")
+  @GetMapping("/revalidation/connection/hidden/{gmcIds}")
   @PreAuthorize("hasPermission('tis:people::person:', 'View')")
-  public ResponseEntity<ConnectionHiddenDto> getHiddenTrainee(@RequestParam(value = "pageNumber", required = false) int pageNumber) {
-    final ConnectionHiddenDto hiddenTrainees = revalidationService.getHiddenTrainees(pageNumber);
+  public ResponseEntity<ConnectionHiddenDto> getHiddenTrainee( @PathVariable List<String> gmcIds,
+      @RequestParam(value = "pageNumber", required = false, defaultValue = "0") int pageNumber) {
+    final ConnectionHiddenDto hiddenTrainees = revalidationService.getHiddenTrainees(gmcIds, pageNumber);
     return ResponseEntity.ok().body(hiddenTrainees);
   }
 }
