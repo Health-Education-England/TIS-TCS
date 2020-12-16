@@ -3,6 +3,8 @@ package com.transformuk.hee.tis.tcs.service.repository;
 import com.transformuk.hee.tis.tcs.service.model.Person;
 import java.util.List;
 import java.util.Optional;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.JpaSpecificationExecutor;
 import org.springframework.data.jpa.repository.Query;
@@ -28,4 +30,14 @@ public interface PersonRepository extends JpaRepository<Person, Long>,
       "LEFT JOIN FETCH p.associatedTrusts " +
       "WHERE p.id = :id")
   Optional<Person> findPersonById(@Param(value = "id") Long id);
+
+  @Query("Select cd.surname, cd.forenames, prg.programmeName, pm.programmeMembershipType, pm.programmeStartDate, pm.programmeEndDate "
+      + "FROM Person p "
+      + "JOIN ContactDetails cd on (cd.id = p.id) "
+      + "JOIN GmcDetails gmc on (gmc.id = p.id) and gmc.gmcNumber <> 'UNKNOWN' "
+      + "LEFT JOIN ProgrammeMembership pm on (pm.person = p.id) and curdate() between pm.programmeStartDate and pm.programmeEndDate "
+      + "LEFT JOIN Programme prg on (prg.id = pm.programme) "
+      + "LEFT JOIN Placement pl on (pl.trainee = p.id) and curdate() between pl.dateFrom and pl.dateTo "
+      + "WHERE pm.programmeMembershipType = 'MILITARY' OR pl.gradeId = 279 or gmc.gmcNumber in (:gmcIds)")
+  Page<Object> getMilitaryAndF1Person(final Pageable pageable, @Param(value = "gmcIds") String... gmcIds);
 }

@@ -7,6 +7,8 @@ import static java.util.stream.Collectors.toList;
 import com.transformuk.hee.tis.reference.api.dto.GradeDTO;
 import com.transformuk.hee.tis.reference.client.ReferenceService;
 import com.transformuk.hee.tis.tcs.api.dto.ConnectionDetailDto;
+import com.transformuk.hee.tis.tcs.api.dto.ConnectionHiddenDto;
+import com.transformuk.hee.tis.tcs.api.dto.ConnectionHiddenRecordDto;
 import com.transformuk.hee.tis.tcs.api.dto.ConnectionRecordDto;
 import com.transformuk.hee.tis.tcs.api.dto.ContactDetailsDTO;
 import com.transformuk.hee.tis.tcs.api.dto.RevalidationRecordDto;
@@ -14,6 +16,7 @@ import com.transformuk.hee.tis.tcs.service.model.GmcDetails;
 import com.transformuk.hee.tis.tcs.service.model.Placement;
 import com.transformuk.hee.tis.tcs.service.model.ProgrammeMembership;
 import com.transformuk.hee.tis.tcs.service.repository.GmcDetailsRepository;
+import com.transformuk.hee.tis.tcs.service.repository.PersonRepository;
 import com.transformuk.hee.tis.tcs.service.repository.PlacementRepository;
 import com.transformuk.hee.tis.tcs.service.repository.ProgrammeMembershipRepository;
 import com.transformuk.hee.tis.tcs.service.service.ContactDetailsService;
@@ -31,6 +34,8 @@ import javax.transaction.Transactional;
 import org.apache.commons.collections4.CollectionUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
 import org.springframework.stereotype.Service;
 
 @Service
@@ -45,17 +50,20 @@ public class RevalidationServiceImpl implements RevalidationService {
   private final ProgrammeMembershipRepository programmeMembershipRepository;
   private final PlacementRepository placementRepository;
   private final ReferenceService referenceService;
+  private final PersonRepository personRepository;
 
   public RevalidationServiceImpl(ContactDetailsService contactDetailsService,
       GmcDetailsRepository gmcDetailsRepository,
       ProgrammeMembershipRepository programmeMembershipRepository,
       PlacementRepository placementRepository,
-      ReferenceService referenceService) {
+      ReferenceService referenceService,
+      PersonRepository personRepository) {
     this.contactDetailsService = contactDetailsService;
     this.gmcDetailsRepository = gmcDetailsRepository;
     this.programmeMembershipRepository = programmeMembershipRepository;
     this.placementRepository = placementRepository;
     this.referenceService = referenceService;
+    this.personRepository = personRepository;
   }
 
   @Override
@@ -118,6 +126,20 @@ public class RevalidationServiceImpl implements RevalidationService {
     connectionDetailDto.setProgrammeHistory(programmeHistory);
 
     return connectionDetailDto;
+  }
+
+  public ConnectionHiddenDto getHiddenTrainees(final int pageNumber) {
+    final PageRequest pageRequest = PageRequest.of(1, 20);
+    final Page<Object> militaryAndF1Person = personRepository.getMilitaryAndF1Person(pageRequest, "");
+    final List<ConnectionHiddenRecordDto> connectionHiddenRecordDtos = militaryAndF1Person.get().map(obj -> {
+      return (ConnectionHiddenRecordDto) obj;
+    }).collect(toList());
+
+    return ConnectionHiddenDto.builder()
+        .connections(connectionHiddenRecordDtos)
+        .totalCounts(militaryAndF1Person.getTotalElements())
+        .totalPages(militaryAndF1Person.getTotalPages())
+        .build();
   }
 
   private ConnectionRecordDto getConnectionStatus(final ProgrammeMembership programmeMembership) {
