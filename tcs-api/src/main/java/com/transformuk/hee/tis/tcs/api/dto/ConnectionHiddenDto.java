@@ -14,6 +14,5 @@ public class ConnectionHiddenDto {
 
   private long totalResults;
   private long totalPages;
-  private long countTotal;
   private List<ConnectionHiddenRecordDto> connections;
 }

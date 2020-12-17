@@ -256,7 +256,7 @@ public class RevalidationResourceTest {
         DB_CODE, CONNECTION_STATUS, PM_END_DATE, PM_START_DATE, SUBSTANTIVE.toString(),
         PROGRAMME_NAME, PROGRAMME_OWNER, SUBMISSION_DATE);
     final ConnectionHiddenDto connectionHiddenDto = ConnectionHiddenDto.builder().totalPages(5)
-        .totalResults(48).countTotal(48).connections(asList(record1)).build();
+        .totalResults(48).connections(asList(record1)).build();
 
     when(revalidationServiceImplMock.getHiddenTrainees(gmcIds, 0))
         .thenReturn(connectionHiddenDto);

@@ -152,7 +152,6 @@ public class RevalidationServiceImpl implements RevalidationService {
     return ConnectionHiddenDto.builder()
         .connections(connectionHiddenRecords)
         .totalResults(hiddenRecords.getTotalElements())
-        .countTotal(hiddenRecords.getTotalElements())
         .totalPages(hiddenRecords.getTotalPages())
         .build();
   }
