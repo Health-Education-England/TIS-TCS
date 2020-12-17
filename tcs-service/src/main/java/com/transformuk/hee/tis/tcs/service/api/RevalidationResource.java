@@ -1,8 +1,9 @@
 package com.transformuk.hee.tis.tcs.service.api;
 
+import com.transformuk.hee.tis.tcs.api.dto.ConnectionDetailDto;
+import com.transformuk.hee.tis.tcs.api.dto.ConnectionHiddenDto;
 import com.transformuk.hee.tis.tcs.api.dto.ConnectionRecordDto;
 import com.transformuk.hee.tis.tcs.api.dto.RevalidationRecordDto;
-import com.transformuk.hee.tis.tcs.api.dto.ConnectionDetailDto;
 import com.transformuk.hee.tis.tcs.service.api.util.UrlDecoderUtil;
 import com.transformuk.hee.tis.tcs.service.service.RevalidationService;
 import java.util.Collections;
@@ -15,6 +16,7 @@ import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
 @RestController
@@ -77,5 +79,13 @@ public class RevalidationResource {
     } else {
       return ResponseEntity.badRequest().body(null);
     }
+  }
+
+  @GetMapping("/revalidation/connection/hidden/{gmcIds}")
+  @PreAuthorize("hasPermission('tis:people::person:', 'View')")
+  public ResponseEntity<ConnectionHiddenDto> getHiddenTrainee( @PathVariable List<String> gmcIds,
+      @RequestParam(value = "pageNumber", required = false, defaultValue = "0") int pageNumber) {
+    final ConnectionHiddenDto hiddenTrainees = revalidationService.getHiddenTrainees(gmcIds, pageNumber);
+    return ResponseEntity.ok().body(hiddenTrainees);
   }
 }

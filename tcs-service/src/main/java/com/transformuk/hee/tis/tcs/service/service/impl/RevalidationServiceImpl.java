@@ -7,6 +7,8 @@ import static java.util.stream.Collectors.toList;
 import com.transformuk.hee.tis.reference.api.dto.GradeDTO;
 import com.transformuk.hee.tis.reference.client.ReferenceService;
 import com.transformuk.hee.tis.tcs.api.dto.ConnectionDetailDto;
+import com.transformuk.hee.tis.tcs.api.dto.ConnectionHiddenDto;
+import com.transformuk.hee.tis.tcs.api.dto.ConnectionHiddenRecordDto;
 import com.transformuk.hee.tis.tcs.api.dto.ConnectionRecordDto;
 import com.transformuk.hee.tis.tcs.api.dto.ContactDetailsDTO;
 import com.transformuk.hee.tis.tcs.api.dto.RevalidationRecordDto;
@@ -14,6 +16,7 @@ import com.transformuk.hee.tis.tcs.service.model.GmcDetails;
 import com.transformuk.hee.tis.tcs.service.model.Placement;
 import com.transformuk.hee.tis.tcs.service.model.ProgrammeMembership;
 import com.transformuk.hee.tis.tcs.service.repository.GmcDetailsRepository;
+import com.transformuk.hee.tis.tcs.service.repository.PersonRepository;
 import com.transformuk.hee.tis.tcs.service.repository.PlacementRepository;
 import com.transformuk.hee.tis.tcs.service.repository.ProgrammeMembershipRepository;
 import com.transformuk.hee.tis.tcs.service.service.ContactDetailsService;
@@ -31,6 +34,8 @@ import javax.transaction.Transactional;
 import org.apache.commons.collections4.CollectionUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
 import org.springframework.stereotype.Service;
 
 @Service
@@ -40,22 +45,26 @@ public class RevalidationServiceImpl implements RevalidationService {
   private static final Logger LOG = LoggerFactory.getLogger(RevalidationServiceImpl.class);
   private static final List<String> placementTypes = asList("In post", "In Post - Acting Up",
       "In post - Extension", "Parental Leave", "Long-term sick", "Suspended", "Phased Return");
+  public static final int SIZE = 20;
   private final ContactDetailsService contactDetailsService;
   private final GmcDetailsRepository gmcDetailsRepository;
   private final ProgrammeMembershipRepository programmeMembershipRepository;
   private final PlacementRepository placementRepository;
   private final ReferenceService referenceService;
+  private final PersonRepository personRepository;
 
   public RevalidationServiceImpl(ContactDetailsService contactDetailsService,
       GmcDetailsRepository gmcDetailsRepository,
       ProgrammeMembershipRepository programmeMembershipRepository,
       PlacementRepository placementRepository,
-      ReferenceService referenceService) {
+      ReferenceService referenceService,
+      PersonRepository personRepository) {
     this.contactDetailsService = contactDetailsService;
     this.gmcDetailsRepository = gmcDetailsRepository;
     this.programmeMembershipRepository = programmeMembershipRepository;
     this.placementRepository = placementRepository;
     this.referenceService = referenceService;
+    this.personRepository = personRepository;
   }
 
   @Override
@@ -118,6 +127,19 @@ public class RevalidationServiceImpl implements RevalidationService {
     connectionDetailDto.setProgrammeHistory(programmeHistory);
 
     return connectionDetailDto;
+  }
+
+  @Override
+  public ConnectionHiddenDto getHiddenTrainees(final List<String> gmcIds, final int pageNumber) {
+    final PageRequest pageRequest = PageRequest.of(pageNumber, SIZE);
+    final Page<ConnectionHiddenRecordDto> hiddenRecords = personRepository.getHiddenTraineeRecords(pageRequest, gmcIds);
+    final List<ConnectionHiddenRecordDto> connectionHiddenRecords = hiddenRecords.get().collect(toList());
+
+    return ConnectionHiddenDto.builder()
+        .connections(connectionHiddenRecords)
+        .totalCounts(hiddenRecords.getTotalElements())
+        .totalPages(hiddenRecords.getTotalPages())
+        .build();
   }
 
   private ConnectionRecordDto getConnectionStatus(final ProgrammeMembership programmeMembership) {

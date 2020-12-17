@@ -1,9 +1,11 @@
 package com.transformuk.hee.tis.tcs.service.api;
 
 import static com.fasterxml.jackson.databind.SerializationFeature.WRITE_DATES_AS_TIMESTAMPS;
+import static com.transformuk.hee.tis.tcs.api.enumeration.ProgrammeMembershipType.*;
 import static org.hamcrest.CoreMatchers.is;
 import static org.hamcrest.CoreMatchers.notNullValue;
 import static org.hamcrest.MatcherAssert.assertThat;
+import static org.hamcrest.Matchers.hasSize;
 import static org.mockito.Mockito.when;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.content;
@@ -13,8 +15,11 @@ import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule;
 import com.transformuk.hee.tis.tcs.api.dto.ConnectionDetailDto;
+import com.transformuk.hee.tis.tcs.api.dto.ConnectionHiddenDto;
+import com.transformuk.hee.tis.tcs.api.dto.ConnectionHiddenRecordDto;
 import com.transformuk.hee.tis.tcs.api.dto.ConnectionRecordDto;
 import com.transformuk.hee.tis.tcs.api.dto.RevalidationRecordDto;
+import com.transformuk.hee.tis.tcs.api.enumeration.ProgrammeMembershipType;
 import com.transformuk.hee.tis.tcs.service.service.impl.RevalidationServiceImpl;
 import java.time.LocalDate;
 import java.util.ArrayList;
@@ -232,5 +237,36 @@ public class RevalidationResourceTest {
     assertThat(contentConnectionDetailDto.getProgrammeHistory().get(0).getConnectionStatus(), is(CONNECTION_STATUS));
     assertThat(contentConnectionDetailDto.getProgrammeHistory().get(0).getProgrammeMembershipStartDate(), is(PM_START_DATE));
     assertThat(contentConnectionDetailDto.getProgrammeHistory().get(0).getProgrammeMembershipEndDate(), is(PM_END_DATE));
+  }
+
+  @Test
+  public void shouldReturnHiddenConnectionRecords() throws Exception {
+    final List<String> gmcIds = Arrays.asList(GMC_ID1);
+    final ConnectionHiddenRecordDto record1 = new ConnectionHiddenRecordDto(SURNAME, FORENAME, GMC_ID1, PROGRAMME_NAME, SUBSTANTIVE, PM_START_DATE, PM_END_DATE);
+    final ConnectionHiddenDto connectionHiddenDto = ConnectionHiddenDto.builder().totalPages(5).totalCounts(48).connections(Arrays.asList(record1)).build();
+
+    when(revalidationServiceImplMock.getHiddenTrainees(gmcIds, 0))
+        .thenReturn(connectionHiddenDto);
+    final String gmcId = String.join(",", gmcIds);
+    MvcResult result =
+        restRevalidationMock.perform(get("/api/revalidation/connection/hidden/{gmcIds}", gmcId))
+            .andExpect(status().isOk())
+            .andReturn();
+    MockHttpServletResponse response = result.getResponse();
+
+    final String content = response.getContentAsString();
+    final ConnectionHiddenDto hiddenDto = mapper.readValue(content, ConnectionHiddenDto.class);
+
+    assertThat(result, notNullValue());
+    assertThat(hiddenDto.getTotalCounts(), is(48L));
+    assertThat(hiddenDto.getTotalPages(), is(5L));
+    assertThat(hiddenDto.getConnections(), hasSize(1));
+    assertThat(hiddenDto.getConnections().get(0).getSurname(), is(SURNAME));
+    assertThat(hiddenDto.getConnections().get(0).getForenames(), is(FORENAME));
+    assertThat(hiddenDto.getConnections().get(0).getGmcNumber(), is(GMC_ID1));
+    assertThat(hiddenDto.getConnections().get(0).getProgrammeName(), is(PROGRAMME_NAME));
+    assertThat(hiddenDto.getConnections().get(0).getProgrammeMembershipType(), is(SUBSTANTIVE));
+    assertThat(hiddenDto.getConnections().get(0).getProgrammeStartDate(), is(PM_START_DATE));
+    assertThat(hiddenDto.getConnections().get(0).getProgrammeEndDate(), is(PM_END_DATE));
   }
 }
