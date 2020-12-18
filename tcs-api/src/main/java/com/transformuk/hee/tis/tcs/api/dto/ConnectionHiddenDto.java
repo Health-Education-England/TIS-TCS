@@ -12,7 +12,7 @@ import lombok.NoArgsConstructor;
 @Builder
 public class ConnectionHiddenDto {
 
-  private long totalCounts;
+  private long totalResults;
   private long totalPages;
   private List<ConnectionHiddenRecordDto> connections;
 }

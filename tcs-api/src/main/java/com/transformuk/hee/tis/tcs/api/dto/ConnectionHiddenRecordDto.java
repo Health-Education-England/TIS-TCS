@@ -1,21 +1,26 @@
 package com.transformuk.hee.tis.tcs.api.dto;
 
-import com.transformuk.hee.tis.tcs.api.enumeration.ProgrammeMembershipType;
 import java.time.LocalDate;
 import lombok.AllArgsConstructor;
+import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
 @Data
+@Builder
 @AllArgsConstructor
 @NoArgsConstructor
 public class ConnectionHiddenRecordDto {
 
-  public String surname;
-  public String forenames;
-  private String gmcNumber;
+  private String gmcReferenceNumber;
+  private String doctorFirstName;
+  private String doctorLastName;
+  private String designatedBody;
+  private String connectionStatus;
+  private LocalDate programmeMembershipEndDate;
+  private LocalDate programmeMembershipStartDate;
+  private String programmeMembershipType;
   private String programmeName;
-  private ProgrammeMembershipType programmeMembershipType;
-  private LocalDate programmeStartDate;
-  private LocalDate programmeEndDate;
+  private String programmeOwner;
+  private LocalDate submissionDate;
 }

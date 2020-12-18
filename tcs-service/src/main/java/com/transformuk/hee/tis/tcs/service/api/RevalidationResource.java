@@ -81,9 +81,9 @@ public class RevalidationResource {
     }
   }
 
-  @GetMapping("/revalidation/connection/hidden/{gmcIds}")
+  @GetMapping(value = {"/revalidation/connection/hidden/{gmcIds}", "/revalidation/connection/hidden"})
   @PreAuthorize("hasPermission('tis:people::person:', 'View')")
-  public ResponseEntity<ConnectionHiddenDto> getHiddenTrainee( @PathVariable List<String> gmcIds,
+  public ResponseEntity<ConnectionHiddenDto> getHiddenTrainee( @PathVariable(value = "gmcIds", required = false) List<String> gmcIds,
       @RequestParam(value = "pageNumber", required = false, defaultValue = "0") int pageNumber) {
     final ConnectionHiddenDto hiddenTrainees = revalidationService.getHiddenTrainees(gmcIds, pageNumber);
     return ResponseEntity.ok().body(hiddenTrainees);
