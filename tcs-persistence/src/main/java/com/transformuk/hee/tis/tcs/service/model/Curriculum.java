@@ -72,6 +72,11 @@ public class Curriculum implements Serializable {
   @OneToMany(mappedBy = "curriculum")
   private Set<ProgrammeCurriculum> programmes;
 
+  public Curriculum uuid(UUID uuid) {
+    this.uuid = uuid;
+    return this;
+  }
+
   public Curriculum intrepidId(String intrepidId) {
     this.intrepidId = intrepidId;
     return this;

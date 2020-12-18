@@ -91,6 +91,11 @@ public class Specialty implements Serializable {
     return this;
   }
 
+  public Specialty uuid(UUID uuid) {
+    this.uuid = uuid;
+    return this;
+  }
+
   public Specialty intrepidId(String intrepidId) {
     this.intrepidId = intrepidId;
     return this;

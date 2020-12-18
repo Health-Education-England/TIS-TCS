@@ -26,6 +26,7 @@ public class SpecialtyGroupMapper {
     if (specialtyGroup != null) {
       result = new SpecialtyGroupDTO();
       result.setId(specialtyGroup.getId());
+      result.setUuid(specialtyGroup.getUuid());
       result.setIntrepidId(specialtyGroup.getIntrepidId());
       result.setName(specialtyGroup.getName());
 
@@ -57,6 +58,7 @@ public class SpecialtyGroupMapper {
     if (specialtyGroupDTO != null) {
       result = new SpecialtyGroup();
       result.setId(specialtyGroupDTO.getId());
+      result.setUuid(specialtyGroupDTO.getUuid());
       result.setName(specialtyGroupDTO.getName());
       result.setIntrepidId(specialtyGroupDTO.getIntrepidId());
 
@@ -87,6 +89,7 @@ public class SpecialtyGroupMapper {
     if (specialtyDTO != null) {
       result = new Specialty();
       result.setId(specialtyDTO.getId());
+      result.setUuid(specialtyDTO.getUuid());
       result.setName(specialtyDTO.getName());
       result.setSpecialtyTypes(specialtyDTO.getSpecialtyTypes());
       result.setSpecialtyCode(specialtyDTO.getSpecialtyCode());
@@ -102,6 +105,7 @@ public class SpecialtyGroupMapper {
     if (specialty != null) {
       result = new SpecialtyDTO();
       result.setId(specialty.getId());
+      result.setUuid(specialty.getUuid());
       result.setName(specialty.getName());
       result.setSpecialtyTypes(specialty.getSpecialtyTypes());
       result.setSpecialtyCode(specialty.getSpecialtyCode());

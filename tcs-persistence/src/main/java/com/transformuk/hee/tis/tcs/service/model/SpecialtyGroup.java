@@ -53,6 +53,11 @@ public class SpecialtyGroup implements Serializable {
     return this;
   }
 
+  public SpecialtyGroup uuid(UUID uuid) {
+    this.uuid = uuid;
+    return this;
+  }
+
   public SpecialtyGroup intrepidId(String intrepidId) {
     this.intrepidId = intrepidId;
     return this;
