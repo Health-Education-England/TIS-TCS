@@ -1,16 +1,21 @@
 package com.transformuk.hee.tis.tcs.service.service.impl;
 
+import static com.transformuk.hee.tis.tcs.api.enumeration.ProgrammeMembershipType.SUBSTANTIVE;
 import static java.time.LocalDate.now;
 import static java.util.Arrays.asList;
 import static org.hamcrest.CoreMatchers.is;
 import static org.hamcrest.CoreMatchers.notNullValue;
 import static org.hamcrest.CoreMatchers.nullValue;
 import static org.hamcrest.MatcherAssert.assertThat;
+import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.when;
 
 import com.transformuk.hee.tis.reference.api.dto.GradeDTO;
 import com.transformuk.hee.tis.reference.client.ReferenceService;
 import com.transformuk.hee.tis.tcs.api.dto.ConnectionDetailDto;
+import com.transformuk.hee.tis.tcs.api.dto.ConnectionDto;
+import com.transformuk.hee.tis.tcs.api.dto.ConnectionHiddenDto;
+import com.transformuk.hee.tis.tcs.api.dto.ConnectionHiddenRecordDto;
 import com.transformuk.hee.tis.tcs.api.dto.ConnectionRecordDto;
 import com.transformuk.hee.tis.tcs.api.dto.ContactDetailsDTO;
 import com.transformuk.hee.tis.tcs.api.dto.RevalidationRecordDto;
@@ -20,14 +25,17 @@ import com.transformuk.hee.tis.tcs.service.model.Placement;
 import com.transformuk.hee.tis.tcs.service.model.Programme;
 import com.transformuk.hee.tis.tcs.service.model.ProgrammeMembership;
 import com.transformuk.hee.tis.tcs.service.repository.GmcDetailsRepository;
+import com.transformuk.hee.tis.tcs.service.repository.PersonRepository;
 import com.transformuk.hee.tis.tcs.service.repository.PlacementRepository;
 import com.transformuk.hee.tis.tcs.service.repository.ProgrammeMembershipRepository;
 import com.transformuk.hee.tis.tcs.service.service.ContactDetailsService;
+import com.transformuk.hee.tis.tcs.service.service.mapper.DesignatedBodyMapper;
 import java.time.LocalDate;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 import java.util.Map;
+import java.util.stream.Stream;
 import org.assertj.core.util.Lists;
 import org.junit.Before;
 import org.junit.Test;
@@ -35,6 +43,9 @@ import org.junit.runner.RunWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.MockitoJUnitRunner;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
 
 @RunWith(MockitoJUnitRunner.class)
 public class RevalidationServiceImplTest {
@@ -76,6 +87,12 @@ public class RevalidationServiceImplTest {
   private PlacementRepository placementRepositoryMock;
   @Mock
   private ReferenceService referenceServiceMock;
+  @Mock
+  private PersonRepository personRepository;
+  @Mock
+  private Page page;
+  @Mock
+  private Stream stream;
   private ContactDetailsDTO contactDetails;
   @InjectMocks
   private RevalidationServiceImpl testObj;
@@ -193,7 +210,8 @@ public class RevalidationServiceImplTest {
     when(programmeMembershipRepositoryMock.findLatestProgrammeMembershipByTraineeId(PERSON_ID))
         .thenReturn(programmeMembership);
     when(placementRepositoryMock
-        .findCurrentPlacementForTrainee(PERSON_ID, now(), PLACEMENT_TYPES)).thenReturn(currentPlacementsForTrainee);
+        .findCurrentPlacementForTrainee(PERSON_ID, now(), PLACEMENT_TYPES))
+        .thenReturn(currentPlacementsForTrainee);
     when(referenceServiceMock.findGradesIdIn(Collections.singleton(GRADE_ID))).thenReturn(grades);
     ConnectionDetailDto result = testObj.findAllConnectionsHistoryByGmcId(GMC_NUMBER);
 
@@ -206,15 +224,19 @@ public class RevalidationServiceImplTest {
     assertThat(result.getProgrammeName(), is(PROGRAMME_NAME));
     assertThat(result.getCurrentGrade(), is(CURRENT_GRADE));
 
-    assertThat(result.getConnectionHistory().size(), is(2));
-    assertThat(result.getConnectionHistory().get(0).getProgrammeMembershipType(),
+    assertThat(result.getProgrammeHistory().size(), is(2));
+    assertThat(result.getProgrammeHistory().get(0).getProgrammeMembershipType(),
         is(PROGRAMME_MEMBERSHIP_TYPE.toString()));
-    assertThat(result.getConnectionHistory().get(0).getProgrammeName(), is(PROGRAMME_NAME));
-    assertThat(result.getConnectionHistory().get(0).getProgrammeOwner(), is(PROGRAMME_OWNER));
-    assertThat(result.getConnectionHistory().get(0).getConnectionStatus(), is(CONNECTION_STATUS_DISCONNECTED));
-    assertThat(result.getConnectionHistory().get(0).getDesignatedBodyCode(), is(DESIGNATED_BODY_CODE));
-    assertThat(result.getConnectionHistory().get(1).getProgrammeMembershipStartDate(), is(PM_START_DATE));
-    assertThat(result.getConnectionHistory().get(1).getProgrammeMembershipEndDate(), is(PM_END_DATE));
+    assertThat(result.getProgrammeHistory().get(0).getProgrammeName(), is(PROGRAMME_NAME));
+    assertThat(result.getProgrammeHistory().get(0).getProgrammeOwner(), is(PROGRAMME_OWNER));
+    assertThat(result.getProgrammeHistory().get(0).getConnectionStatus(),
+        is(CONNECTION_STATUS_DISCONNECTED));
+    assertThat(result.getProgrammeHistory().get(0).getDesignatedBodyCode(),
+        is(DESIGNATED_BODY_CODE));
+    assertThat(result.getProgrammeHistory().get(1).getProgrammeMembershipStartDate(),
+        is(PM_START_DATE));
+    assertThat(result.getProgrammeHistory().get(1).getProgrammeMembershipEndDate(),
+        is(PM_END_DATE));
   }
 
   @Test
@@ -335,5 +357,33 @@ public class RevalidationServiceImplTest {
     assertThat(record.getProgrammeMembershipStartDate(), is(PM_START_DATE));
     assertThat(record.getProgrammeMembershipEndDate(), is(programmeEndDate));
     assertThat(record.getProgrammeOwner(), is(PROGRAMME_OWNER));
+  }
+
+  @Test
+  public void shouldGetHiddenTraineeRecords() {
+    final Pageable pageable = PageRequest.of(0, 20);
+    final ConnectionDto record1 = new ConnectionDto(SURNAME, FORENAME, GMC_NUMBER, PROGRAMME_OWNER,
+        PROGRAMME_NAME, SUBSTANTIVE, PM_START_DATE, PM_END_DATE);
+    when(personRepository.getHiddenTraineeRecords(pageable, GMC_IDS)).thenReturn(page);
+
+    when(page.get()).thenReturn(Stream.of(record1));
+    when(page.getTotalElements()).thenReturn(5L);
+    when(page.getTotalPages()).thenReturn(1);
+    final ConnectionHiddenDto hiddenTrainees = testObj.getHiddenTrainees(GMC_IDS, 0);
+    assertThat(hiddenTrainees.getTotalPages(), is(1L));
+    assertThat(hiddenTrainees.getTotalResults(), is(5L));
+    assertThat(hiddenTrainees.getConnections().get(0).getDoctorFirstName(), is(FORENAME));
+    assertThat(hiddenTrainees.getConnections().get(0).getDoctorLastName(), is(SURNAME));
+    assertThat(hiddenTrainees.getConnections().get(0).getGmcReferenceNumber(), is(GMC_NUMBER));
+    assertThat(hiddenTrainees.getConnections().get(0).getProgrammeName(), is(PROGRAMME_NAME));
+    assertThat(hiddenTrainees.getConnections().get(0).getProgrammeOwner(), is(PROGRAMME_OWNER));
+    assertThat(hiddenTrainees.getConnections().get(0).getDesignatedBody(),
+        is(DesignatedBodyMapper.getDbcByOwner(PROGRAMME_OWNER)));
+    assertThat(hiddenTrainees.getConnections().get(0).getProgrammeMembershipType(),
+        is(SUBSTANTIVE.toString()));
+    assertThat(hiddenTrainees.getConnections().get(0).getProgrammeMembershipStartDate(),
+        is(PM_START_DATE));
+    assertThat(hiddenTrainees.getConnections().get(0).getProgrammeMembershipEndDate(),
+        is(PM_END_DATE));
   }
 }

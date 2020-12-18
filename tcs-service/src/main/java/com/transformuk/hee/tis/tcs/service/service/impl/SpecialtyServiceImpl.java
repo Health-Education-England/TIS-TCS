@@ -95,7 +95,7 @@ public class SpecialtyServiceImpl implements SpecialtyService {
     specialty = specialtyRepository.saveAll(specialty);
     List<SpecialtyDTO> specialtyDTOS = specialtyMapper.specialtiesToSpecialtyDTOs(specialty);
 
-    specialtyDTO.stream()
+    specialtyDTOS.stream()
         .map(SpecialtySavedEvent::new)
         .forEach(applicationEventPublisher::publishEvent);
 
