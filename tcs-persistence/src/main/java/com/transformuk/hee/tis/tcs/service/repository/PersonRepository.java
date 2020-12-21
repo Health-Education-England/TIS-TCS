@@ -42,7 +42,7 @@ public interface PersonRepository extends JpaRepository<Person, Long>,
           + "LEFT JOIN Programme prg on (prg.id = pm.programme) "
           + "LEFT JOIN Placement pl on (pl.trainee = p.id) and curdate() between pl.dateFrom and pl.dateTo "
           + "WHERE (pm.programmeMembershipType = 'MILITARY' OR pl.gradeId = 279 or gmc.gmcNumber in (:gmcIds)) "
-          + "AND (:search is false or gmc.gmcNumber = :gmcNumber)")
+          + "AND (:search is true or gmc.gmcNumber = :gmcNumber)")
   Page<ConnectionDto> getHiddenTraineeRecords(final Pageable pageable,
       @Param(value = "gmcIds") List<String> gmcIds, @Param(value = "search") boolean search,
       @Param(value = "gmcNumber") String gmcNumber);
