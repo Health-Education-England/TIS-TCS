@@ -38,6 +38,7 @@ import org.slf4j.LoggerFactory;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.stereotype.Service;
+import org.springframework.util.StringUtils;
 
 @Service
 @Transactional
@@ -131,9 +132,10 @@ public class RevalidationServiceImpl implements RevalidationService {
   }
 
   @Override
-  public ConnectionHiddenDto getHiddenTrainees(final List<String> gmcIds, final int pageNumber) {
+  public ConnectionHiddenDto getHiddenTrainees(final List<String> gmcIds, final int pageNumber, final String searchGmcNumber) {
+    final boolean searchAble = StringUtils.isEmpty(searchGmcNumber) ? true : false;
     final PageRequest pageRequest = PageRequest.of(pageNumber, SIZE);
-    final Page<ConnectionDto> hiddenRecords = personRepository.getHiddenTraineeRecords(pageRequest, gmcIds);
+    final Page<ConnectionDto> hiddenRecords = personRepository.getHiddenTraineeRecords(pageRequest, gmcIds, searchAble, searchGmcNumber);
     final List<ConnectionHiddenRecordDto> connectionHiddenRecords = hiddenRecords.get().map(conn -> {
       return ConnectionHiddenRecordDto.builder()
           .gmcReferenceNumber(conn.getGmcNumber())

@@ -17,5 +17,6 @@ public interface RevalidationService {
 
   ConnectionDetailDto findAllConnectionsHistoryByGmcId(String gmcId);
 
-  public ConnectionHiddenDto getHiddenTrainees(final List<String> gmcIds, final int pageNumber);
+  public ConnectionHiddenDto getHiddenTrainees(final List<String> gmcIds, final int pageNumber,
+      final String searchGmcNumber);
 }
