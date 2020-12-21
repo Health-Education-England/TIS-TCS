@@ -56,6 +56,9 @@ public class RevalidationResourceTest {
   private static final LocalDate PM_END_DATE = LocalDate.now().plusDays(10);
   private static final LocalDate SUBMISSION_DATE = LocalDate.now();
   private static final String DB_CODE = "AAAAAA";
+  private static final String PAGE_NUMBER = "pageNumber";
+  private static final String PAGE_NUMBER_VALUE = "0";
+  private static final String SEARCH_QUERY = "searchQuery";
 
   private MockMvc restRevalidationMock;
 
@@ -258,11 +261,13 @@ public class RevalidationResourceTest {
     final ConnectionHiddenDto connectionHiddenDto = ConnectionHiddenDto.builder().totalPages(5)
         .totalResults(48).connections(asList(record1)).build();
 
-    when(revalidationServiceImplMock.getHiddenTrainees(gmcIds, 0))
+    when(revalidationServiceImplMock.getHiddenTrainees(gmcIds, 0, GMC_ID1))
         .thenReturn(connectionHiddenDto);
     final String gmcId = String.join(",", gmcIds);
     MvcResult result =
-        restRevalidationMock.perform(get("/api/revalidation/connection/hidden/{gmcIds}", gmcId))
+        restRevalidationMock.perform(get("/api/revalidation/connection/hidden/{gmcIds}", gmcId)
+            .param(PAGE_NUMBER, PAGE_NUMBER_VALUE)
+            .param(SEARCH_QUERY, GMC_ID1))
             .andExpect(status().isOk())
             .andReturn();
     MockHttpServletResponse response = result.getResponse();
