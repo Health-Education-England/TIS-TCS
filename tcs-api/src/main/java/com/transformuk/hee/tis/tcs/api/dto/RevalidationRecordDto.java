@@ -13,4 +13,5 @@ public class RevalidationRecordDto {
   private String programmeMembershipType;
   private String programmeName;
   private String currentGrade;
+  private Long tisPersonId;
 }

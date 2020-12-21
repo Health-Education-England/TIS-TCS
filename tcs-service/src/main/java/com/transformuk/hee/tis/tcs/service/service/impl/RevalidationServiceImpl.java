@@ -212,6 +212,9 @@ public class RevalidationServiceImpl implements RevalidationService {
     LOG.debug("Person ID : {}", personId);
     revalidationRecordDto.setGmcNumber(gmcDetails.getGmcNumber());
 
+    //tisPersonId - it is needed in the Reval FE to call different TCS api
+    revalidationRecordDto.setTisPersonId(personId);
+
     // Contact details.
     ContactDetailsDTO contactDetailsDto = contactDetailsService.findOne(personId);
     revalidationRecordDto.setForenames(contactDetailsDto.getForenames());
