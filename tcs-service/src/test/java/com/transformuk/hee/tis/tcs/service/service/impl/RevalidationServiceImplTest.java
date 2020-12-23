@@ -364,12 +364,12 @@ public class RevalidationServiceImplTest {
     final Pageable pageable = PageRequest.of(0, 20);
     final ConnectionDto record1 = new ConnectionDto(SURNAME, FORENAME, GMC_NUMBER, PROGRAMME_OWNER,
         PROGRAMME_NAME, SUBSTANTIVE, PM_START_DATE, PM_END_DATE);
-    when(personRepository.getHiddenTraineeRecords(pageable, GMC_IDS)).thenReturn(page);
+    when(personRepository.getHiddenTraineeRecords(pageable, GMC_IDS, false, GMC_NUMBER)).thenReturn(page);
 
     when(page.get()).thenReturn(Stream.of(record1));
     when(page.getTotalElements()).thenReturn(5L);
     when(page.getTotalPages()).thenReturn(1);
-    final ConnectionHiddenDto hiddenTrainees = testObj.getHiddenTrainees(GMC_IDS, 0);
+    final ConnectionHiddenDto hiddenTrainees = testObj.getHiddenTrainees(GMC_IDS, 0, GMC_NUMBER);
     assertThat(hiddenTrainees.getTotalPages(), is(1L));
     assertThat(hiddenTrainees.getTotalResults(), is(5L));
     assertThat(hiddenTrainees.getConnections().get(0).getDoctorFirstName(), is(FORENAME));
