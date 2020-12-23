@@ -18,6 +18,7 @@ import com.transformuk.hee.tis.tcs.api.dto.ConnectionHiddenDto;
 import com.transformuk.hee.tis.tcs.api.dto.ConnectionHiddenRecordDto;
 import com.transformuk.hee.tis.tcs.api.dto.ConnectionRecordDto;
 import com.transformuk.hee.tis.tcs.api.dto.ContactDetailsDTO;
+import com.transformuk.hee.tis.tcs.api.dto.ProgrammeMembershipDTO;
 import com.transformuk.hee.tis.tcs.api.dto.RevalidationRecordDto;
 import com.transformuk.hee.tis.tcs.api.enumeration.ProgrammeMembershipType;
 import com.transformuk.hee.tis.tcs.service.model.GmcDetails;
@@ -30,6 +31,7 @@ import com.transformuk.hee.tis.tcs.service.repository.PlacementRepository;
 import com.transformuk.hee.tis.tcs.service.repository.ProgrammeMembershipRepository;
 import com.transformuk.hee.tis.tcs.service.service.ContactDetailsService;
 import com.transformuk.hee.tis.tcs.service.service.mapper.DesignatedBodyMapper;
+import com.transformuk.hee.tis.tcs.service.service.mapper.ProgrammeMembershipMapper;
 import java.time.LocalDate;
 import java.util.ArrayList;
 import java.util.Collections;
@@ -43,6 +45,7 @@ import org.junit.runner.RunWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.MockitoJUnitRunner;
+import org.mockito.stubbing.OngoingStubbing;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
@@ -92,7 +95,10 @@ public class RevalidationServiceImplTest {
   @Mock
   private Page page;
   @Mock
-  private Stream stream;
+  private ProgrammeMembershipMapper pmMapper;
+  @Mock
+  private ProgrammeMembershipDTO programmeMembershipDTO;
+
   private ContactDetailsDTO contactDetails;
   @InjectMocks
   private RevalidationServiceImpl testObj;
@@ -362,13 +368,23 @@ public class RevalidationServiceImplTest {
   @Test
   public void shouldGetHiddenTraineeRecords() {
     final Pageable pageable = PageRequest.of(0, 20);
-    final ConnectionDto record1 = new ConnectionDto(SURNAME, FORENAME, GMC_NUMBER, PROGRAMME_OWNER,
-        PROGRAMME_NAME, SUBSTANTIVE, PM_START_DATE, PM_END_DATE);
-    when(personRepository.getHiddenTraineeRecords(pageable, GMC_IDS, false, GMC_NUMBER)).thenReturn(page);
+    final ConnectionDto record1 = new ConnectionDto(SURNAME, FORENAME, GMC_NUMBER, PERSON_ID,
+        PROGRAMME_OWNER, PROGRAMME_NAME, SUBSTANTIVE, PM_START_DATE, PM_END_DATE);
+    when(personRepository.getHiddenTraineeRecords(pageable, GMC_IDS, false, GMC_NUMBER))
+        .thenReturn(page);
+    when(programmeMembershipRepositoryMock.findLatestProgrammeMembershipByTraineeId(PERSON_ID))
+        .thenReturn(programmeMembership);
+    final OngoingStubbing<ProgrammeMembershipDTO> when = when(pmMapper.toDto(programmeMembership))
+        .thenReturn(programmeMembershipDTO);
 
     when(page.get()).thenReturn(Stream.of(record1));
     when(page.getTotalElements()).thenReturn(5L);
     when(page.getTotalPages()).thenReturn(1);
+    when(programmeMembershipDTO.getProgrammeName()).thenReturn(PROGRAMME_NAME);
+    when(programmeMembershipDTO.getProgrammeOwner()).thenReturn(PROGRAMME_OWNER);
+    when(programmeMembershipDTO.getProgrammeMembershipType()).thenReturn(PROGRAMME_MEMBERSHIP_TYPE);
+    when(programmeMembershipDTO.getProgrammeStartDate()).thenReturn(PM_START_DATE);
+    when(programmeMembershipDTO.getProgrammeEndDate()).thenReturn(PM_END_DATE);
     final ConnectionHiddenDto hiddenTrainees = testObj.getHiddenTrainees(GMC_IDS, 0, GMC_NUMBER);
     assertThat(hiddenTrainees.getTotalPages(), is(1L));
     assertThat(hiddenTrainees.getTotalResults(), is(5L));
