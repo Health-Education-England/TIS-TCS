@@ -4,12 +4,9 @@ import java.io.Serializable;
 import java.util.HashSet;
 import java.util.Objects;
 import java.util.Set;
-import javax.persistence.Entity;
-import javax.persistence.GeneratedValue;
-import javax.persistence.GenerationType;
-import javax.persistence.Id;
-import javax.persistence.OneToMany;
-import javax.persistence.Table;
+import java.util.UUID;
+import javax.persistence.*;
+
 import lombok.Data;
 
 /**
@@ -25,6 +22,9 @@ public class SpecialtyGroup implements Serializable {
   @Id
   @GeneratedValue(strategy = GenerationType.IDENTITY)
   private Long id;
+
+  @Column(name = "uuid")
+  private UUID uuid;
 
   private String intrepidId;
 
@@ -50,6 +50,11 @@ public class SpecialtyGroup implements Serializable {
 
   public SpecialtyGroup name(String name) {
     this.name = name;
+    return this;
+  }
+
+  public SpecialtyGroup uuid(UUID uuid) {
+    this.uuid = uuid;
     return this;
   }
 

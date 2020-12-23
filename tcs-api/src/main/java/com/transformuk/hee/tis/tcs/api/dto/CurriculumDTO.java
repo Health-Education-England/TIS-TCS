@@ -7,6 +7,7 @@ import com.transformuk.hee.tis.tcs.api.enumeration.CurriculumSubType;
 import com.transformuk.hee.tis.tcs.api.enumeration.Status;
 import java.io.Serializable;
 import java.util.Objects;
+import java.util.UUID;
 import javax.validation.constraints.DecimalMin;
 import javax.validation.constraints.NotNull;
 import javax.validation.constraints.Null;
@@ -22,6 +23,8 @@ public class CurriculumDTO implements Serializable {
   @DecimalMin(value = "0", groups = Update.class, message = "Id must not be negative")
   @Null(groups = Create.class, message = "Id must be null when creating a new curriculum")
   private Long id;
+
+  private UUID uuid;
 
   private String intrepidId;
 

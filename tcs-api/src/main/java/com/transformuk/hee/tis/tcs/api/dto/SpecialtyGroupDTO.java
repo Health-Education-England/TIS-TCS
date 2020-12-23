@@ -5,6 +5,7 @@ import com.transformuk.hee.tis.tcs.api.dto.validation.Update;
 import java.io.Serializable;
 import java.util.Objects;
 import java.util.Set;
+import java.util.UUID;
 import javax.validation.constraints.DecimalMin;
 import javax.validation.constraints.NotNull;
 import javax.validation.constraints.Null;
@@ -23,6 +24,8 @@ public class SpecialtyGroupDTO implements Serializable {
   @Null(groups = Create.class, message = "Id must be null when creating")
   @DecimalMin(value = "0", groups = Update.class, message = "Id must not be negative")
   private Long id;
+
+  private UUID uuid;
 
   private String intrepidId;
 
