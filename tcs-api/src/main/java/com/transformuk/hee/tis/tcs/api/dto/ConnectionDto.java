@@ -13,6 +13,7 @@ public class ConnectionDto {
   public String surname;
   public String forenames;
   private String gmcNumber;
+  private long personId;
   private String programmeOwner;
   private String programmeName;
   private ProgrammeMembershipType programmeMembershipType;

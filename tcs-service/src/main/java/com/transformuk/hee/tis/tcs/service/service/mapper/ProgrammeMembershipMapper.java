@@ -114,6 +114,7 @@ public class ProgrammeMembershipMapper {
     Programme programme = programmeMembership.getProgramme();
     if (programme != null) {
       result.setProgrammeId(programme.getId());
+      result.setProgrammeOwner(programme.getOwner());
       result.setProgrammeName(programme.getProgrammeName());
       result.setProgrammeNumber(programme.getProgrammeNumber());
       result.setRotation(rotationToRotationDTO(programmeMembership.getRotation(), programme));

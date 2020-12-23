@@ -34,7 +34,7 @@ public interface PersonRepository extends JpaRepository<Person, Long>,
   Optional<Person> findPersonById(@Param(value = "id") Long id);
 
   @Query(
-      "Select new com.transformuk.hee.tis.tcs.api.dto.ConnectionDto(cd.surname, cd.forenames, gmc.gmcNumber, prg.owner, prg.programmeName, pm.programmeMembershipType, pm.programmeStartDate, pm.programmeEndDate) "
+      "Select new com.transformuk.hee.tis.tcs.api.dto.ConnectionDto(cd.surname, cd.forenames, gmc.gmcNumber, gmc.id, prg.owner, prg.programmeName, pm.programmeMembershipType, pm.programmeStartDate, pm.programmeEndDate) "
           + "FROM Person p "
           + "JOIN ContactDetails cd on (cd.id = p.id) "
           + "JOIN GmcDetails gmc on (gmc.id = p.id) and gmc.gmcNumber <> 'UNKNOWN' "

@@ -10,11 +10,15 @@ import com.transformuk.hee.tis.tcs.api.dto.ConnectionDetailDto;
 import com.transformuk.hee.tis.tcs.api.dto.ConnectionDto;
 import com.transformuk.hee.tis.tcs.api.dto.ConnectionHiddenDto;
 import com.transformuk.hee.tis.tcs.api.dto.ConnectionHiddenRecordDto;
+import com.transformuk.hee.tis.tcs.api.dto.ConnectionHiddenRecordDto.ConnectionHiddenRecordDtoBuilder;
 import com.transformuk.hee.tis.tcs.api.dto.ConnectionRecordDto;
 import com.transformuk.hee.tis.tcs.api.dto.ContactDetailsDTO;
+import com.transformuk.hee.tis.tcs.api.dto.ProgrammeMembershipDTO;
 import com.transformuk.hee.tis.tcs.api.dto.RevalidationRecordDto;
+import com.transformuk.hee.tis.tcs.api.enumeration.ProgrammeMembershipType;
 import com.transformuk.hee.tis.tcs.service.model.GmcDetails;
 import com.transformuk.hee.tis.tcs.service.model.Placement;
+import com.transformuk.hee.tis.tcs.service.model.Programme;
 import com.transformuk.hee.tis.tcs.service.model.ProgrammeMembership;
 import com.transformuk.hee.tis.tcs.service.repository.GmcDetailsRepository;
 import com.transformuk.hee.tis.tcs.service.repository.PersonRepository;
@@ -23,6 +27,7 @@ import com.transformuk.hee.tis.tcs.service.repository.ProgrammeMembershipReposit
 import com.transformuk.hee.tis.tcs.service.service.ContactDetailsService;
 import com.transformuk.hee.tis.tcs.service.service.RevalidationService;
 import com.transformuk.hee.tis.tcs.service.service.mapper.DesignatedBodyMapper;
+import com.transformuk.hee.tis.tcs.service.service.mapper.ProgrammeMembershipMapper;
 import java.time.LocalDate;
 import java.util.ArrayList;
 import java.util.Collections;
@@ -54,19 +59,22 @@ public class RevalidationServiceImpl implements RevalidationService {
   private final PlacementRepository placementRepository;
   private final ReferenceService referenceService;
   private final PersonRepository personRepository;
+  private final ProgrammeMembershipMapper programmeMembershipMapper;
 
   public RevalidationServiceImpl(ContactDetailsService contactDetailsService,
       GmcDetailsRepository gmcDetailsRepository,
       ProgrammeMembershipRepository programmeMembershipRepository,
       PlacementRepository placementRepository,
       ReferenceService referenceService,
-      PersonRepository personRepository) {
+      PersonRepository personRepository,
+      ProgrammeMembershipMapper programmeMembershipMapper) {
     this.contactDetailsService = contactDetailsService;
     this.gmcDetailsRepository = gmcDetailsRepository;
     this.programmeMembershipRepository = programmeMembershipRepository;
     this.placementRepository = placementRepository;
     this.referenceService = referenceService;
     this.personRepository = personRepository;
+    this.programmeMembershipMapper = programmeMembershipMapper;
   }
 
   @Override
@@ -117,45 +125,69 @@ public class RevalidationServiceImpl implements RevalidationService {
     connectionDetailDto.setForenames(revalidationRecordDto.getForenames());
     connectionDetailDto.setSurname(revalidationRecordDto.getSurname());
     connectionDetailDto.setCctDate(revalidationRecordDto.getCctDate());
-    connectionDetailDto.setProgrammeMembershipType(revalidationRecordDto.getProgrammeMembershipType());
+    connectionDetailDto
+        .setProgrammeMembershipType(revalidationRecordDto.getProgrammeMembershipType());
     connectionDetailDto.setProgrammeName(revalidationRecordDto.getProgrammeName());
     connectionDetailDto.setCurrentGrade(revalidationRecordDto.getCurrentGrade());
 
-    final List<ProgrammeMembership> programmeMemberships = programmeMembershipRepository.findByTraineeId(gmcDetail.getId());
+    final List<ProgrammeMembership> programmeMemberships = programmeMembershipRepository
+        .findByTraineeId(gmcDetail.getId());
     LOG.info("Programme memberships found for person: {}, membership: {}", gmcDetail.getId(),
         programmeMemberships);
 
-    List<ConnectionRecordDto> programmeHistory = programmeMemberships.stream().map(pm -> getConnectionStatus(pm)).collect(toList());
+    List<ConnectionRecordDto> programmeHistory = programmeMemberships.stream()
+        .map(pm -> getConnectionStatus(pm)).collect(toList());
     connectionDetailDto.setProgrammeHistory(programmeHistory);
 
     return connectionDetailDto;
   }
 
   @Override
-  public ConnectionHiddenDto getHiddenTrainees(final List<String> gmcIds, final int pageNumber, final String searchGmcNumber) {
+  public ConnectionHiddenDto getHiddenTrainees(final List<String> gmcIds, final int pageNumber,
+      final String searchGmcNumber) {
     final boolean searchAble = StringUtils.isEmpty(searchGmcNumber) ? true : false;
     final PageRequest pageRequest = PageRequest.of(pageNumber, SIZE);
-    final Page<ConnectionDto> hiddenRecords = personRepository.getHiddenTraineeRecords(pageRequest, gmcIds, searchAble, searchGmcNumber);
-    final List<ConnectionHiddenRecordDto> connectionHiddenRecords = hiddenRecords.get().map(conn -> {
-      return ConnectionHiddenRecordDto.builder()
-          .gmcReferenceNumber(conn.getGmcNumber())
-          .doctorFirstName(conn.forenames)
-          .doctorLastName(conn.surname)
-          .designatedBody(conn.getProgrammeOwner() != null ? DesignatedBodyMapper.getDbcByOwner(conn.getProgrammeOwner()) : null)
-          .programmeName(conn.getProgrammeName())
-          .programmeOwner(conn.getProgrammeOwner())
-          .programmeMembershipStartDate(conn.getProgrammeStartDate())
-          .programmeMembershipEndDate(conn.getProgrammeEndDate())
-          .programmeMembershipType(conn.getProgrammeMembershipType() != null ? conn.getProgrammeMembershipType().toString() : null)
-          .connectionStatus(getHiddenConnectionStatus(conn))
-          .build();
-    }).collect(toList());
+    final Page<ConnectionDto> hiddenRecords = personRepository
+        .getHiddenTraineeRecords(pageRequest, gmcIds, searchAble, searchGmcNumber);
+    final List<ConnectionHiddenRecordDto> connectionHiddenRecords = hiddenRecords.get()
+        .map(conn -> {
+          return buildHiddenConnectionList(conn);
+        }).collect(toList());
 
     return ConnectionHiddenDto.builder()
         .connections(connectionHiddenRecords)
         .totalResults(hiddenRecords.getTotalElements())
         .totalPages(hiddenRecords.getTotalPages())
         .build();
+  }
+
+  private ConnectionHiddenRecordDto buildHiddenConnectionList(ConnectionDto conn) {
+    final ProgrammeMembership latestProgrammeMembership = programmeMembershipRepository
+        .findLatestProgrammeMembershipByTraineeId(conn.getPersonId());
+    final ProgrammeMembershipDTO programmeMembershipDTO = programmeMembershipMapper
+        .toDto(latestProgrammeMembership);
+
+    final ConnectionHiddenRecordDtoBuilder connectionHiddenRecordDtoBuilder = ConnectionHiddenRecordDto
+        .builder()
+        .gmcReferenceNumber(conn.getGmcNumber())
+        .doctorFirstName(conn.forenames)
+        .doctorLastName(conn.surname)
+        .connectionStatus(getHiddenConnectionStatus(conn));
+
+    if (programmeMembershipDTO != null) {
+      final String owner = programmeMembershipDTO.getProgrammeOwner();
+      final ProgrammeMembershipType membershipType = programmeMembershipDTO
+          .getProgrammeMembershipType();
+      connectionHiddenRecordDtoBuilder
+          .designatedBody(owner != null ? DesignatedBodyMapper.getDbcByOwner(owner) : null)
+          .programmeOwner(owner)
+          .programmeName(programmeMembershipDTO.getProgrammeName())
+          .programmeMembershipStartDate(programmeMembershipDTO.getProgrammeStartDate())
+          .programmeMembershipEndDate(programmeMembershipDTO.getProgrammeEndDate())
+          .programmeMembershipType(membershipType != null ? membershipType.toString() : null);
+    }
+
+    return connectionHiddenRecordDtoBuilder.build();
   }
 
   private String getHiddenConnectionStatus(final ConnectionDto conn) {
@@ -189,7 +221,8 @@ public class RevalidationServiceImpl implements RevalidationService {
       if (Objects.nonNull(programmeMembership.getProgramme())) {
         String programmeOwner = programmeMembership.getProgramme().getOwner();
         connectionRecordDto.setProgrammeOwner(programmeOwner);
-        connectionRecordDto.setDesignatedBodyCode(DesignatedBodyMapper.getDbcByOwner(programmeOwner));
+        connectionRecordDto
+            .setDesignatedBodyCode(DesignatedBodyMapper.getDbcByOwner(programmeOwner));
         connectionRecordDto.setProgrammeName(programmeMembership.getProgramme().getProgrammeName());
       }
     }

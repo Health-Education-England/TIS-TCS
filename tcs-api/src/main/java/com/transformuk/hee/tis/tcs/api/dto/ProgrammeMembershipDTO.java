@@ -41,6 +41,8 @@ public class ProgrammeMembershipDTO implements Serializable {
 
   private String programmeName;
 
+  private String programmeOwner;
+
   private String programmeNumber;
 
   private String trainingPathway;
