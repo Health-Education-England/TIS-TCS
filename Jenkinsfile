@@ -5,8 +5,7 @@ def utils = new hee.tis.utils()
 node {
 
     if (env.BRANCH_NAME != "master") {
-        // Flagged as successful to avoid PRs appearing to fail checks.
-        currentBuild.result = 'SUCCESS'
+        // PR and branch builds are done by GitHub Actions.
         return
     }
 
