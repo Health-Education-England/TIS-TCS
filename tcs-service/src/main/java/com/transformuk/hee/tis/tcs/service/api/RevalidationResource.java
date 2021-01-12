@@ -53,17 +53,17 @@ public class RevalidationResource {
     return ResponseEntity.ok(revalidationService.findRevalidationByGmcId(gmcId));
   }
 
-  @GetMapping("/revalidation/connection/{gmcIds}")
+  @GetMapping(value= {"/revalidation/connection", "/revalidation/connection/{gmcIds}"})
   @PreAuthorize("hasPermission('tis:people::person:', 'View')")
   public ResponseEntity<Map<String, ConnectionRecordDto>> getConnectionRecords(
-      @PathVariable List<String> gmcIds) {
+      @PathVariable(value = "gmcIds", required = false) List<String> gmcIds) {
     LOG.debug("REST request to find Revalidation Connection Records: {}", gmcIds);
 
-    if (!gmcIds.isEmpty()) {
+    if (gmcIds != null) {
       UrlDecoderUtil.decode(gmcIds);
       return ResponseEntity.ok(revalidationService.findAllConnectionsByGmcIds(gmcIds));
     } else {
-      return ResponseEntity.badRequest().body(Collections.emptyMap());
+      return ResponseEntity.ok(Collections.emptyMap());
     }
   }
 
