@@ -201,6 +201,27 @@ public class RevalidationResourceTest {
   }
 
   @Test
+  public void shouldNotFailFindConnectionRecordsNoGmcIds() throws Exception {
+    final Map<String, ConnectionRecordDto> connectionRecordDtoMap = new HashMap<>();
+
+    MvcResult result =
+        restRevalidationMock.perform(get("/api/revalidation/connection/"))
+            .andExpect(status().isOk())
+            .andExpect(content().contentType(MediaType.APPLICATION_JSON))
+            .andReturn();
+    MockHttpServletResponse response = result.getResponse();
+
+    final String content = response.getContentAsString();
+    final TypeReference<HashMap<String, ConnectionRecordDto>> typeRef
+        = new TypeReference<HashMap<String, ConnectionRecordDto>>() {
+    };
+    final Map<String, ConnectionRecordDto> map = mapper.readValue(content, typeRef);
+
+    assertThat(result, notNullValue());
+    assertThat(map.size(), is(0));
+  }
+
+  @Test
   public void shouldFindConnectionDetailsFromTrainerGmcId() throws Exception {
     ConnectionDetailDto connectionDetailDto = new ConnectionDetailDto();
     connectionDetailDto.setGmcNumber(GMC_ID1);
