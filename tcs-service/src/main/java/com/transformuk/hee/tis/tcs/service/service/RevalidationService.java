@@ -19,4 +19,7 @@ public interface RevalidationService {
 
   public ConnectionHiddenDto getHiddenTrainees(final List<String> gmcIds, final int pageNumber,
       final String searchGmcNumber);
+
+  public ConnectionHiddenDto getExceptionTrainees(final List<String> gmcIds, final int pageNumber,
+      final String searchGmcNumber);
 }

@@ -3,6 +3,7 @@ package com.transformuk.hee.tis.tcs.service.repository;
 import com.transformuk.hee.tis.tcs.api.dto.ConnectionDto;
 import com.transformuk.hee.tis.tcs.service.model.Person;
 import java.util.List;
+import java.util.Map;
 import java.util.Optional;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
@@ -44,6 +45,30 @@ public interface PersonRepository extends JpaRepository<Person, Long>,
           + "WHERE (pm.programmeMembershipType = 'MILITARY' OR pl.gradeId = 279 or gmc.gmcNumber in (:gmcIds)) "
           + "AND (:search is true or gmc.gmcNumber = :gmcNumber)")
   Page<ConnectionDto> getHiddenTraineeRecords(final Pageable pageable,
+      @Param(value = "gmcIds") List<String> gmcIds, @Param(value = "search") boolean search,
+      @Param(value = "gmcNumber") String gmcNumber);
+
+  /**
+   * Query for Revalidation Connection Summary page (All, Exception Tab).
+   * Get trainees where (latest programmeMembership which is visitor OR expired) AND in the restricted local office.
+   */
+  final String getExceptionQuery =
+      "Select distinct cd.surname, cd.forenames, gmc.gmcNumber, gmc.id, prg.owner, prg.programmeName, pm.programmeMembershipType, pm.programmeStartDate, pm.programmeEndDate "
+      + "FROM Person p "
+      + "JOIN ContactDetails cd on (cd.id = p.id) "
+      + "JOIN GmcDetails gmc on (gmc.id = p.id) and gmc.gmcNumber <> 'UNKNOWN' "
+      + "INNER JOIN (SELECT personId, MAX(programmeEndDate) as latestEndDate "
+          + "FROM ProgrammeMembership "
+          + "GROUP BY personId) latest "
+      + "LEFT JOIN ProgrammeMembership pm on (pm.personId = p.id) and pm.personId = latest.personId and pm.programmeEndDate = latest.latestEndDate "
+      + "LEFT JOIN Programme prg on (prg.id = pm.programmeId) "
+      + "WHERE (curdate() > latest.latestEndDate or pm.programmeMembershipType = 'VISITOR' or gmc.gmcNumber in (:gmcIds)) "
+      + "AND (prg.owner = 'Health Education England East Midlands') "
+      + "AND (:search is true or gmc.gmcNumber = :gmcNumber)";
+  @Query(value = getExceptionQuery,
+      countQuery = getExceptionQuery,
+      nativeQuery = true)
+  Page<Map<String,Object>> getExceptionTraineeRecords(final Pageable pageable,
       @Param(value = "gmcIds") List<String> gmcIds, @Param(value = "search") boolean search,
       @Param(value = "gmcNumber") String gmcNumber);
 }
