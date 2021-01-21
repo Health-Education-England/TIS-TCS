@@ -1,7 +1,7 @@
 package com.transformuk.hee.tis.tcs.service.service;
 
 import com.transformuk.hee.tis.tcs.api.dto.ConnectionDetailDto;
-import com.transformuk.hee.tis.tcs.api.dto.ConnectionHiddenDto;
+import com.transformuk.hee.tis.tcs.api.dto.ConnectionSummaryDto;
 import com.transformuk.hee.tis.tcs.api.dto.ConnectionRecordDto;
 import com.transformuk.hee.tis.tcs.api.dto.RevalidationRecordDto;
 import java.util.List;
@@ -17,9 +17,9 @@ public interface RevalidationService {
 
   ConnectionDetailDto findAllConnectionsHistoryByGmcId(String gmcId);
 
-  public ConnectionHiddenDto getHiddenTrainees(final List<String> gmcIds, final int pageNumber,
+  public ConnectionSummaryDto getHiddenTrainees(final List<String> gmcIds, final int pageNumber,
       final String searchGmcNumber);
 
-  public ConnectionHiddenDto getExceptionTrainees(final List<String> gmcIds, final int pageNumber,
+  public ConnectionSummaryDto getExceptionTrainees(final List<String> gmcIds, final int pageNumber,
       final String searchGmcNumber);
 }

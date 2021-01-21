@@ -14,8 +14,7 @@ import com.transformuk.hee.tis.reference.api.dto.GradeDTO;
 import com.transformuk.hee.tis.reference.client.ReferenceService;
 import com.transformuk.hee.tis.tcs.api.dto.ConnectionDetailDto;
 import com.transformuk.hee.tis.tcs.api.dto.ConnectionDto;
-import com.transformuk.hee.tis.tcs.api.dto.ConnectionHiddenDto;
-import com.transformuk.hee.tis.tcs.api.dto.ConnectionHiddenRecordDto;
+import com.transformuk.hee.tis.tcs.api.dto.ConnectionSummaryDto;
 import com.transformuk.hee.tis.tcs.api.dto.ConnectionRecordDto;
 import com.transformuk.hee.tis.tcs.api.dto.ContactDetailsDTO;
 import com.transformuk.hee.tis.tcs.api.dto.ProgrammeMembershipDTO;
@@ -385,7 +384,7 @@ public class RevalidationServiceImplTest {
     when(programmeMembershipDTO.getProgrammeMembershipType()).thenReturn(PROGRAMME_MEMBERSHIP_TYPE);
     when(programmeMembershipDTO.getProgrammeStartDate()).thenReturn(PM_START_DATE);
     when(programmeMembershipDTO.getProgrammeEndDate()).thenReturn(PM_END_DATE);
-    final ConnectionHiddenDto hiddenTrainees = testObj.getHiddenTrainees(GMC_IDS, 0, GMC_NUMBER);
+    final ConnectionSummaryDto hiddenTrainees = testObj.getHiddenTrainees(GMC_IDS, 0, GMC_NUMBER);
     assertThat(hiddenTrainees.getTotalPages(), is(1L));
     assertThat(hiddenTrainees.getTotalResults(), is(5L));
     assertThat(hiddenTrainees.getConnections().get(0).getDoctorFirstName(), is(FORENAME));

@@ -10,7 +10,7 @@ import lombok.NoArgsConstructor;
 @Builder
 @AllArgsConstructor
 @NoArgsConstructor
-public class ConnectionHiddenRecordDto {
+public class ConnectionSummaryRecordDto {
 
   private String gmcReferenceNumber;
   private String doctorFirstName;

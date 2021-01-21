@@ -1,7 +1,7 @@
 package com.transformuk.hee.tis.tcs.service.api;
 
 import com.transformuk.hee.tis.tcs.api.dto.ConnectionDetailDto;
-import com.transformuk.hee.tis.tcs.api.dto.ConnectionHiddenDto;
+import com.transformuk.hee.tis.tcs.api.dto.ConnectionSummaryDto;
 import com.transformuk.hee.tis.tcs.api.dto.ConnectionRecordDto;
 import com.transformuk.hee.tis.tcs.api.dto.RevalidationRecordDto;
 import com.transformuk.hee.tis.tcs.service.api.util.UrlDecoderUtil;
@@ -83,19 +83,19 @@ public class RevalidationResource {
 
   @GetMapping(value = {"/revalidation/connection/hidden/{gmcIds}", "/revalidation/connection/hidden"})
   @PreAuthorize("hasPermission('tis:people::person:', 'View')")
-  public ResponseEntity<ConnectionHiddenDto> getHiddenTrainee( @PathVariable(value = "gmcIds", required = false) List<String> gmcIds,
+  public ResponseEntity<ConnectionSummaryDto> getHiddenTrainee( @PathVariable(value = "gmcIds", required = false) List<String> gmcIds,
       @RequestParam(value = "pageNumber", required = false, defaultValue = "0") int pageNumber,
       @RequestParam(value = "searchQuery", required = false, defaultValue = "") String searchQuery) {
-    final ConnectionHiddenDto hiddenTrainees = revalidationService.getHiddenTrainees(gmcIds, pageNumber, searchQuery);
+    final ConnectionSummaryDto hiddenTrainees = revalidationService.getHiddenTrainees(gmcIds, pageNumber, searchQuery);
     return ResponseEntity.ok().body(hiddenTrainees);
   }
 
   @GetMapping(value = {"/revalidation/connection/exception/{gmcIds}", "/revalidation/connection/exception"})
   @PreAuthorize("hasPermission('tis:people::person:', 'View')")
-  public ResponseEntity<ConnectionHiddenDto> getExceptionTrainee( @PathVariable(value = "gmcIds", required = false) List<String> gmcIds,
+  public ResponseEntity<ConnectionSummaryDto> getExceptionTrainee( @PathVariable(value = "gmcIds", required = false) List<String> gmcIds,
       @RequestParam(value = "pageNumber", required = false, defaultValue = "0") int pageNumber,
       @RequestParam(value = "searchQuery", required = false, defaultValue = "") String searchQuery) {
-    final ConnectionHiddenDto exceptionTrainees = revalidationService.getExceptionTrainees(gmcIds, pageNumber, searchQuery);
+    final ConnectionSummaryDto exceptionTrainees = revalidationService.getExceptionTrainees(gmcIds, pageNumber, searchQuery);
     return ResponseEntity.ok().body(exceptionTrainees);
   }
 }
