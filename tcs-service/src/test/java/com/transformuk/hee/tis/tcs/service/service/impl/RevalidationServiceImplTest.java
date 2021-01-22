@@ -1,6 +1,7 @@
 package com.transformuk.hee.tis.tcs.service.service.impl;
 
 import static com.transformuk.hee.tis.tcs.api.enumeration.ProgrammeMembershipType.SUBSTANTIVE;
+import static com.transformuk.hee.tis.tcs.api.enumeration.ProgrammeMembershipType.VISITOR;
 import static java.time.LocalDate.now;
 import static java.util.Arrays.asList;
 import static org.hamcrest.CoreMatchers.is;
@@ -10,6 +11,7 @@ import static org.hamcrest.MatcherAssert.assertThat;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.when;
 
+import com.google.common.collect.Sets;
 import com.transformuk.hee.tis.reference.api.dto.GradeDTO;
 import com.transformuk.hee.tis.reference.client.ReferenceService;
 import com.transformuk.hee.tis.tcs.api.dto.ConnectionDetailDto;
@@ -34,6 +36,7 @@ import com.transformuk.hee.tis.tcs.service.service.mapper.ProgrammeMembershipMap
 import java.time.LocalDate;
 import java.util.ArrayList;
 import java.util.Collections;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.stream.Stream;
@@ -64,6 +67,8 @@ public class RevalidationServiceImplTest {
       "In post - Extension", "Parental Leave", "Long-term sick", "Suspended", "Phased Return");
   private static final ProgrammeMembershipType PROGRAMME_MEMBERSHIP_TYPE =
       ProgrammeMembershipType.SUBSTANTIVE;
+  private static final ProgrammeMembershipType PROGRAMME_MEMBERSHIP_TYPE_VISITOR =
+      ProgrammeMembershipType.VISITOR;
   private static final String PROGRAMME_NAME = "Corona Medicine";
   private static final String PROGRAMME_OWNER = "Health Education England Yorkshire and the Humber";
   private static final String CURRENT_GRADE = "GP Specialty Training";
@@ -72,12 +77,15 @@ public class RevalidationServiceImplTest {
   private static final String DESIGNATED_BODY_CODE = "1-AIIDQQ";
   private static final LocalDate PM_START_DATE = now();
   private static final LocalDate PM_END_DATE = now().plusDays(10);
+  private static final LocalDate EXPIRED_PM_START_DATE = now().minusYears(1);
+  private static final LocalDate EXPIRED_PM_END_DATE = now().minusMonths(6);
 
   GradeDTO gradeDTO;
   List<GradeDTO> grades;
   private GmcDetails gmcDetails;
   List<GmcDetails> gmcDetailList;
   List<Placement> currentPlacementsForTrainee;
+  Map<String,Object> connectionMap;
   private ProgrammeMembership programmeMembership, programmeMembership1;
   @Mock
   private ContactDetailsService contactDetailsService;
@@ -132,6 +140,17 @@ public class RevalidationServiceImplTest {
     grades = Lists.newArrayList(gradeDTO);
     gmcDetailList = Lists.newArrayList(gmcDetails);
     currentPlacementsForTrainee = Lists.newArrayList(placement);
+
+    connectionMap = new HashMap<>();
+    connectionMap.put("surname",SURNAME);
+    connectionMap.put("forenames",FORENAME);
+    connectionMap.put("gmcNumber",GMC_NUMBER);
+    connectionMap.put("personId",PERSON_ID);
+    connectionMap.put("owner",PROGRAMME_OWNER);
+    connectionMap.put("programmeName",PROGRAMME_NAME);
+    connectionMap.put("programmeMembershipType",VISITOR);
+    connectionMap.put("programmeStartDate",EXPIRED_PM_START_DATE);
+    connectionMap.put("programmeEndDate",EXPIRED_PM_END_DATE);
   }
 
   @Test
@@ -400,5 +419,31 @@ public class RevalidationServiceImplTest {
         is(PM_START_DATE));
     assertThat(hiddenTrainees.getConnections().get(0).getProgrammeMembershipEndDate(),
         is(PM_END_DATE));
+  }
+
+  @Test
+  public void shouldGetExceptionTraineeRecords() {
+    final Pageable pageable = PageRequest.of(0, 20);
+    when(personRepository.getExceptionTraineeRecords(pageable, GMC_IDS, false, GMC_NUMBER, Sets.newHashSet(PROGRAMME_OWNER)))
+        .thenReturn(page);
+    when(page.getContent()).thenReturn(Lists.newArrayList(connectionMap));
+    when(page.getTotalElements()).thenReturn(5L);
+    when(page.getTotalPages()).thenReturn(1);
+    final ConnectionSummaryDto exceptionTrainees = testObj.getExceptionTrainees(GMC_IDS, 0, GMC_NUMBER, Lists.newArrayList(DESIGNATED_BODY_CODE));
+    assertThat(exceptionTrainees.getTotalPages(), is(1L));
+    assertThat(exceptionTrainees.getTotalResults(), is(5L));
+    assertThat(exceptionTrainees.getConnections().get(0).getDoctorFirstName(), is(FORENAME));
+    assertThat(exceptionTrainees.getConnections().get(0).getDoctorLastName(), is(SURNAME));
+    assertThat(exceptionTrainees.getConnections().get(0).getGmcReferenceNumber(), is(GMC_NUMBER));
+    assertThat(exceptionTrainees.getConnections().get(0).getProgrammeName(), is(PROGRAMME_NAME));
+    assertThat(exceptionTrainees.getConnections().get(0).getProgrammeOwner(), is(PROGRAMME_OWNER));
+    assertThat(exceptionTrainees.getConnections().get(0).getDesignatedBody(),
+        is(DesignatedBodyMapper.getDbcByOwner(PROGRAMME_OWNER)));
+    assertThat(exceptionTrainees.getConnections().get(0).getProgrammeMembershipType(),
+        is(PROGRAMME_MEMBERSHIP_TYPE_VISITOR.toString()));
+    assertThat(exceptionTrainees.getConnections().get(0).getProgrammeMembershipStartDate(),
+        is(EXPIRED_PM_START_DATE));
+    assertThat(exceptionTrainees.getConnections().get(0).getProgrammeMembershipEndDate(),
+        is(EXPIRED_PM_END_DATE));
   }
 }
