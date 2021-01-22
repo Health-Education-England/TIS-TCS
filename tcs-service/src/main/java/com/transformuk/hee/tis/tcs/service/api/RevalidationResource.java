@@ -92,10 +92,12 @@ public class RevalidationResource {
 
   @GetMapping(value = {"/revalidation/connection/exception/{gmcIds}", "/revalidation/connection/exception"})
   @PreAuthorize("hasPermission('tis:people::person:', 'View')")
-  public ResponseEntity<ConnectionSummaryDto> getExceptionTrainee( @PathVariable(value = "gmcIds", required = false) List<String> gmcIds,
+  public ResponseEntity<ConnectionSummaryDto> getExceptionTrainee(
+      @PathVariable(value = "gmcIds", required = false) List<String> gmcIds,
       @RequestParam(value = "pageNumber", required = false, defaultValue = "0") int pageNumber,
-      @RequestParam(value = "searchQuery", required = false, defaultValue = "") String searchQuery) {
-    final ConnectionSummaryDto exceptionTrainees = revalidationService.getExceptionTrainees(gmcIds, pageNumber, searchQuery);
+      @RequestParam(value = "searchQuery", required = false, defaultValue = "") String searchQuery,
+      @RequestParam(value = "dbcs", required = false) final List<String> dbcs) {
+    final ConnectionSummaryDto exceptionTrainees = revalidationService.getExceptionTrainees(gmcIds, pageNumber, searchQuery, dbcs);
     return ResponseEntity.ok().body(exceptionTrainees);
   }
 }

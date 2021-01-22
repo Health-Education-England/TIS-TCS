@@ -5,6 +5,7 @@ import com.transformuk.hee.tis.tcs.service.model.Person;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
+import java.util.Set;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.repository.JpaRepository;
@@ -63,12 +64,14 @@ public interface PersonRepository extends JpaRepository<Person, Long>,
       + "LEFT JOIN ProgrammeMembership pm on (pm.personId = p.id) and pm.personId = latest.personId and pm.programmeEndDate = latest.latestEndDate "
       + "LEFT JOIN Programme prg on (prg.id = pm.programmeId) "
       + "WHERE (curdate() > latest.latestEndDate or pm.programmeMembershipType = 'VISITOR' or gmc.gmcNumber in (:gmcIds)) "
-      + "AND (prg.owner = 'Health Education England East Midlands') "
+      + "AND (prg.owner in (:owner)) "
       + "AND (:search is true or gmc.gmcNumber = :gmcNumber)";
   @Query(value = getExceptionQuery,
       countQuery = getExceptionQuery,
       nativeQuery = true)
   Page<Map<String,Object>> getExceptionTraineeRecords(final Pageable pageable,
-      @Param(value = "gmcIds") List<String> gmcIds, @Param(value = "search") boolean search,
-      @Param(value = "gmcNumber") String gmcNumber);
+      @Param(value = "gmcIds") List<String> gmcIds,
+      @Param(value = "search") boolean search,
+      @Param(value = "gmcNumber") String gmcNumber,
+      @Param(value = "owner") Set<String> owner);
 }

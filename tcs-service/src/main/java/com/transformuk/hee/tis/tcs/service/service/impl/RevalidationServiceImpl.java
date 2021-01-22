@@ -4,6 +4,7 @@ import static java.time.LocalDate.now;
 import static java.util.Arrays.asList;
 import static java.util.stream.Collectors.toList;
 
+import com.google.common.collect.Sets;
 import com.transformuk.hee.tis.reference.api.dto.GradeDTO;
 import com.transformuk.hee.tis.reference.client.ReferenceService;
 import com.transformuk.hee.tis.tcs.api.dto.ConnectionDetailDto;
@@ -34,6 +35,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Objects;
+import java.util.Set;
 import java.util.stream.Collectors;
 import javax.transaction.Transactional;
 import org.apache.commons.collections4.CollectionUtils;
@@ -191,12 +193,13 @@ public class RevalidationServiceImpl implements RevalidationService {
 
   @Override
   public ConnectionSummaryDto getExceptionTrainees(final List<String> gmcIds, final int pageNumber,
-      final String searchGmcNumber) {
-    final boolean searchAble = StringUtils.isEmpty(searchGmcNumber) ? true : false;
+      final String searchGmcNumber, final List<String> dbcs) {
+    final boolean searchable = StringUtils.isEmpty(searchGmcNumber) ? true : false;
     final PageRequest pageRequest = PageRequest.of(pageNumber, SIZE);
+    final Set<String> owner = (dbcs == null) ? null : DesignatedBodyMapper.map(Sets.newHashSet(dbcs));
 
     final Page<Map<String,Object>> exceptionRecordsPage = personRepository
-        .getExceptionTraineeRecords(pageRequest, gmcIds, searchAble, searchGmcNumber);
+        .getExceptionTraineeRecords(pageRequest, gmcIds, searchable, searchGmcNumber, owner);
 
     final List<ConnectionSummaryRecordDto> connectionExceptionRecords = exceptionRecordsPage.getContent()
     .stream().map(obj -> {

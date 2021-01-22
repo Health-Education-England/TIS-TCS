@@ -21,5 +21,5 @@ public interface RevalidationService {
       final String searchGmcNumber);
 
   public ConnectionSummaryDto getExceptionTrainees(final List<String> gmcIds, final int pageNumber,
-      final String searchGmcNumber);
+      final String searchGmcNumber, final List<String> dbcs);
 }
