@@ -51,23 +51,29 @@ public interface PersonRepository extends JpaRepository<Person, Long>,
 
   /**
    * Query for Revalidation Connection Summary page (All, Exception Tab).
-   * Get trainees where (latest programmeMembership which is visitor OR expired) AND in the restricted local office.
+   * Get trainees where (latest programmeMembership which is visitor OR expired)
+   *                    AND in the restricted local office.
    */
-  final String getExceptionQuery =
-      "Select distinct cd.surname, cd.forenames, gmc.gmcNumber, gmc.id, prg.owner, prg.programmeName, pm.programmeMembershipType, pm.programmeStartDate, pm.programmeEndDate "
+  final String GET_EXCEPTION_QUERY =
+      "Select distinct cd.surname, cd.forenames, gmc.gmcNumber, gmc.id, prg.owner, "
+          + "prg.programmeName, pm.programmeMembershipType, pm.programmeStartDate, "
+          + "pm.programmeEndDate "
       + "FROM Person p "
       + "JOIN ContactDetails cd on (cd.id = p.id) "
       + "JOIN GmcDetails gmc on (gmc.id = p.id) and gmc.gmcNumber <> 'UNKNOWN' "
       + "INNER JOIN (SELECT personId, MAX(programmeEndDate) as latestEndDate "
           + "FROM ProgrammeMembership "
           + "GROUP BY personId) latest "
-      + "LEFT JOIN ProgrammeMembership pm on (pm.personId = p.id) and pm.personId = latest.personId and pm.programmeEndDate = latest.latestEndDate "
+      + "LEFT JOIN ProgrammeMembership pm "
+          + "on (pm.personId = p.id) and pm.personId = latest.personId "
+          + "and pm.programmeEndDate = latest.latestEndDate "
       + "LEFT JOIN Programme prg on (prg.id = pm.programmeId) "
-      + "WHERE (curdate() > latest.latestEndDate or pm.programmeMembershipType = 'VISITOR' or gmc.gmcNumber in (:gmcIds)) "
+      + "WHERE (curdate() > latest.latestEndDate or pm.programmeMembershipType = 'VISITOR' "
+          + "or gmc.gmcNumber in (:gmcIds)) "
       + "AND (prg.owner in (:owner)) "
       + "AND (:search is true or gmc.gmcNumber = :gmcNumber)";
-  @Query(value = getExceptionQuery,
-      countQuery = getExceptionQuery,
+  @Query(value = GET_EXCEPTION_QUERY,
+      countQuery = GET_EXCEPTION_QUERY,
       nativeQuery = true)
   Page<Map<String,Object>> getExceptionTraineeRecords(final Pageable pageable,
       @Param(value = "gmcIds") List<String> gmcIds,
