@@ -196,7 +196,7 @@ public class RevalidationServiceImpl implements RevalidationService {
       final String searchGmcNumber, final List<String> dbcs) {
     final boolean searchable = StringUtils.isEmpty(searchGmcNumber) ? true : false;
     final PageRequest pageRequest = PageRequest.of(pageNumber, SIZE);
-    final Set<String> owner = (dbcs == null) ? null : DesignatedBodyMapper.map(Sets.newHashSet(dbcs));
+    final Set<String> owner = (dbcs == null || dbcs.isEmpty()) ? null : DesignatedBodyMapper.map(Sets.newHashSet(dbcs));
 
     final Page<Map<String,Object>> exceptionRecordsPage = personRepository
         .getExceptionTraineeRecords(pageRequest, gmcIds, searchable, searchGmcNumber, owner);
