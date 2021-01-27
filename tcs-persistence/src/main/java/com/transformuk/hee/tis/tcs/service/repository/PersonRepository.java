@@ -50,9 +50,13 @@ public interface PersonRepository extends JpaRepository<Person, Long>,
       @Param(value = "gmcNumber") String gmcNumber);
 
   /**
-   * Query for Revalidation Connection Summary page (All, Exception Tab).
-   * Get trainees where (latest programmeMembership which is visitor OR expired)
-   *                    AND in the restricted local office.
+   * Query for Revalidation Connection Summary page (Exception Tab).
+   * Get trainees where (it is in the search gmcNumber)
+   *                    AND
+   *                      (it is in the gmcId list for reval exception queue)
+   *                      OR
+   *                      (latest programmeMembership which is visitor OR expired)
+   *                      AND in the restricted local office.
    */
   final String GET_EXCEPTION_QUERY =
       "Select distinct cd.surname, cd.forenames, gmc.gmcNumber, gmc.id, prg.owner, "
@@ -64,6 +68,7 @@ public interface PersonRepository extends JpaRepository<Person, Long>,
       + "LEFT JOIN (SELECT pmi.personId, pmi.programmeStartDate, pmi.programmeEndDate, "
           + "pmi.programmeId, pmi.programmeMembershipType "
           + "FROM ProgrammeMembership pmi "
+          // this inner join is to get the latest programmerMembership of each trainee
           + "INNER JOIN (SELECT personId, MAX(programmeEndDate) AS latestEndDate "
               + "FROM ProgrammeMembership "
               + "GROUP BY personId) latest ON pmi.personId = latest.personId "
@@ -71,6 +76,7 @@ public interface PersonRepository extends JpaRepository<Person, Long>,
           + ") latestPm ON (latestPm.personId = p.id) "
       + "LEFT JOIN Programme prg on (prg.id = latestPm.programmeId) "
       + "WHERE ( "
+              // get trainees from gmcId list even if some of them have no programmeMembership
               + "( latestPm.personId IS NULL AND gmc.gmcNumber IN :gmcIds ) "
           + "OR ( "
               + "( curdate() > latestPm.programmeEndDate "
