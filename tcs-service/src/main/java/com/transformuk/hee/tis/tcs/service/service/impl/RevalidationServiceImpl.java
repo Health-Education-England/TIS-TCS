@@ -217,19 +217,17 @@ public class RevalidationServiceImpl implements RevalidationService {
   }
 
   private ConnectionSummaryRecordDto buildConnectionList(Map<String, Object> conn) {
-    final String owner = conn.get("owner").toString();
-
     return ConnectionSummaryRecordDto
         .builder()
-        .gmcReferenceNumber(conn.get("gmcNumber").toString())
-        .doctorFirstName(conn.get("forenames").toString())
-        .doctorLastName(conn.get("surname").toString())
-        .designatedBody(owner != null ? DesignatedBodyMapper.getDbcByOwner(owner) : null)
-        .programmeMembershipEndDate(LocalDate.parse(conn.get("programmeEndDate").toString()))
-        .programmeMembershipStartDate(LocalDate.parse(conn.get("programmeStartDate").toString()))
-        .programmeMembershipType(conn.get("programmeMembershipType").toString())
-        .programmeName(conn.get("programmeName").toString())
-        .programmeOwner(conn.get("owner").toString())
+        .gmcReferenceNumber(conn.get("gmcNumber") == null ? null : conn.get("gmcNumber").toString())
+        .doctorFirstName(conn.get("forenames") == null ? null : conn.get("forenames").toString())
+        .doctorLastName(conn.get("surname") == null ? null : conn.get("surname").toString())
+        .designatedBody(conn.get("owner") != null ? DesignatedBodyMapper.getDbcByOwner(conn.get("owner").toString()) : null)
+        .programmeMembershipEndDate(conn.get("programmeEndDate") == null ? null : LocalDate.parse(conn.get("programmeEndDate").toString()))
+        .programmeMembershipStartDate(conn.get("programmeStartDate") == null ? null : LocalDate.parse(conn.get("programmeStartDate").toString()))
+        .programmeMembershipType(conn.get("programmeMembershipType") == null ? null : conn.get("programmeMembershipType").toString())
+        .programmeName(conn.get("programmeName") == null ? null : conn.get("programmeName").toString())
+        .programmeOwner(conn.get("owner") == null ? null : conn.get("owner").toString())
         .build();
   }
 

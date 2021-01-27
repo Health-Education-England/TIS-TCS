@@ -56,22 +56,28 @@ public interface PersonRepository extends JpaRepository<Person, Long>,
    */
   final String GET_EXCEPTION_QUERY =
       "Select distinct cd.surname, cd.forenames, gmc.gmcNumber, gmc.id, prg.owner, "
-          + "prg.programmeName, pm.programmeMembershipType, pm.programmeStartDate, "
-          + "pm.programmeEndDate "
+          + "prg.programmeName, latestPm.programmeMembershipType, latestPm.programmeStartDate, "
+          + "latestPm.programmeEndDate "
       + "FROM Person p "
-      + "JOIN ContactDetails cd on (cd.id = p.id) "
-      + "JOIN GmcDetails gmc on (gmc.id = p.id) and gmc.gmcNumber <> 'UNKNOWN' "
-      + "INNER JOIN (SELECT personId, MAX(programmeEndDate) as latestEndDate "
-          + "FROM ProgrammeMembership "
-          + "GROUP BY personId) latest "
-      + "LEFT JOIN ProgrammeMembership pm "
-          + "on (pm.personId = p.id) and pm.personId = latest.personId "
-          + "and pm.programmeEndDate = latest.latestEndDate "
-      + "LEFT JOIN Programme prg on (prg.id = pm.programmeId) "
-      + "WHERE (curdate() > latest.latestEndDate or pm.programmeMembershipType = 'VISITOR' "
-          + "or gmc.gmcNumber in (:gmcIds)) "
-      + "AND (prg.owner in (:owner)) "
-      + "AND (:search is true or gmc.gmcNumber = :gmcNumber)";
+      + "INNER JOIN ContactDetails cd on (cd.id = p.id) "
+      + "INNER JOIN GmcDetails gmc on (gmc.id = p.id) and gmc.gmcNumber <> 'UNKNOWN' "
+      + "LEFT JOIN (SELECT pmi.personId, pmi.programmeStartDate, pmi.programmeEndDate, "
+          + "pmi.programmeId, pmi.programmeMembershipType "
+          + "FROM ProgrammeMembership pmi "
+          + "INNER JOIN (SELECT personId, MAX(programmeEndDate) AS latestEndDate "
+              + "FROM ProgrammeMembership "
+              + "GROUP BY personId) latest ON pmi.personId = latest.personId "
+              + "AND pmi.programmeEndDate = latest.latestEndDate "
+          + ") latestPm ON (latestPm.personId = p.id) "
+      + "LEFT JOIN Programme prg on (prg.id = latestPm.programmeId) "
+      + "WHERE ( "
+              + "( latestPm.personId IS NULL AND gmc.gmcNumber IN :gmcIds ) "
+          + "OR ( "
+              + "( curdate() > latestPm.programmeEndDate "
+                  + "OR latestPm.programmeMembershipType = 'VISITOR' "
+                  + "OR gmc.gmcNumber in :gmcIds ) "
+              + "AND prg.OWNER in :owner ) "
+      + ") AND (:search is true or gmc.gmcNumber = :gmcNumber)";
   @Query(value = GET_EXCEPTION_QUERY,
       countQuery = GET_EXCEPTION_QUERY,
       nativeQuery = true)
