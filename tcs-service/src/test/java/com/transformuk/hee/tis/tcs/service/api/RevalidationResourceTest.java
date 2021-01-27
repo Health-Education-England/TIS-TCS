@@ -15,15 +15,15 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule;
+import com.google.common.collect.Lists;
 import com.transformuk.hee.tis.tcs.api.dto.ConnectionDetailDto;
-import com.transformuk.hee.tis.tcs.api.dto.ConnectionHiddenDto;
-import com.transformuk.hee.tis.tcs.api.dto.ConnectionHiddenRecordDto;
+import com.transformuk.hee.tis.tcs.api.dto.ConnectionSummaryDto;
+import com.transformuk.hee.tis.tcs.api.dto.ConnectionSummaryRecordDto;
 import com.transformuk.hee.tis.tcs.api.dto.ConnectionRecordDto;
 import com.transformuk.hee.tis.tcs.api.dto.RevalidationRecordDto;
 import com.transformuk.hee.tis.tcs.service.service.impl.RevalidationServiceImpl;
 import java.time.LocalDate;
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -275,15 +275,15 @@ public class RevalidationResourceTest {
   @Test
   public void shouldReturnHiddenConnectionRecords() throws Exception {
     final List<String> gmcIds = asList(GMC_ID1);
-    final ConnectionHiddenRecordDto record1 = new ConnectionHiddenRecordDto(GMC_ID1, FORENAME,
+    final ConnectionSummaryRecordDto record1 = new ConnectionSummaryRecordDto(GMC_ID1, FORENAME,
         SURNAME,
         DB_CODE, CONNECTION_STATUS, PM_END_DATE, PM_START_DATE, SUBSTANTIVE.toString(),
         PROGRAMME_NAME, PROGRAMME_OWNER, SUBMISSION_DATE);
-    final ConnectionHiddenDto connectionHiddenDto = ConnectionHiddenDto.builder().totalPages(5)
+    final ConnectionSummaryDto connectionSummaryDto = ConnectionSummaryDto.builder().totalPages(5)
         .totalResults(48).connections(asList(record1)).build();
 
     when(revalidationServiceImplMock.getHiddenTrainees(gmcIds, 0, GMC_ID1))
-        .thenReturn(connectionHiddenDto);
+        .thenReturn(connectionSummaryDto);
     final String gmcId = String.join(",", gmcIds);
     MvcResult result =
         restRevalidationMock.perform(get("/api/revalidation/connection/hidden/{gmcIds}", gmcId)
@@ -294,7 +294,7 @@ public class RevalidationResourceTest {
     MockHttpServletResponse response = result.getResponse();
 
     final String content = response.getContentAsString();
-    final ConnectionHiddenDto hiddenDto = mapper.readValue(content, ConnectionHiddenDto.class);
+    final ConnectionSummaryDto hiddenDto = mapper.readValue(content, ConnectionSummaryDto.class);
 
     assertThat(result, notNullValue());
     assertThat(hiddenDto.getTotalResults(), is(48L));
@@ -309,5 +309,45 @@ public class RevalidationResourceTest {
     assertThat(hiddenDto.getConnections().get(0).getProgrammeMembershipStartDate(),
         is(PM_START_DATE));
     assertThat(hiddenDto.getConnections().get(0).getProgrammeMembershipEndDate(), is(PM_END_DATE));
+  }
+
+  @Test
+  public void shouldReturnExceptionConnectionRecords() throws Exception {
+    final List<String> gmcIds = asList(GMC_ID1);
+    final ConnectionSummaryRecordDto record1 = new ConnectionSummaryRecordDto(GMC_ID1, FORENAME,
+        SURNAME,
+        DB_CODE, CONNECTION_STATUS, PM_END_DATE, PM_START_DATE, SUBSTANTIVE.toString(),
+        PROGRAMME_NAME, PROGRAMME_OWNER, SUBMISSION_DATE);
+    final ConnectionSummaryDto connectionSummaryDto = ConnectionSummaryDto.builder().totalPages(5)
+        .totalResults(48).connections(asList(record1)).build();
+
+    when(revalidationServiceImplMock.getExceptionTrainees(gmcIds, 0, GMC_ID1, Lists.newArrayList(DB_CODE)))
+        .thenReturn(connectionSummaryDto);
+    final String gmcId = String.join(",", gmcIds);
+    MvcResult result =
+        restRevalidationMock.perform(get("/api/revalidation/connection/exception/{gmcIds}", gmcId)
+            .param(PAGE_NUMBER, PAGE_NUMBER_VALUE)
+            .param(SEARCH_QUERY, GMC_ID1)
+            .param("dbcs", DB_CODE))
+            .andExpect(status().isOk())
+            .andReturn();
+    MockHttpServletResponse response = result.getResponse();
+
+    final String content = response.getContentAsString();
+    final ConnectionSummaryDto exceptionDto = mapper.readValue(content, ConnectionSummaryDto.class);
+
+    assertThat(result, notNullValue());
+    assertThat(exceptionDto.getTotalResults(), is(48L));
+    assertThat(exceptionDto.getTotalPages(), is(5L));
+    assertThat(exceptionDto.getConnections(), hasSize(1));
+    assertThat(exceptionDto.getConnections().get(0).getDoctorLastName(), is(SURNAME));
+    assertThat(exceptionDto.getConnections().get(0).getDoctorFirstName(), is(FORENAME));
+    assertThat(exceptionDto.getConnections().get(0).getGmcReferenceNumber(), is(GMC_ID1));
+    assertThat(exceptionDto.getConnections().get(0).getProgrammeName(), is(PROGRAMME_NAME));
+    assertThat(exceptionDto.getConnections().get(0).getProgrammeMembershipType(),
+        is(SUBSTANTIVE.toString()));
+    assertThat(exceptionDto.getConnections().get(0).getProgrammeMembershipStartDate(),
+        is(PM_START_DATE));
+    assertThat(exceptionDto.getConnections().get(0).getProgrammeMembershipEndDate(), is(PM_END_DATE));
   }
 }
