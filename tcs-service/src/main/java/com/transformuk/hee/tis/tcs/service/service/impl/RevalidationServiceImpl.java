@@ -4,21 +4,21 @@ import static java.time.LocalDate.now;
 import static java.util.Arrays.asList;
 import static java.util.stream.Collectors.toList;
 
+import com.google.common.collect.Sets;
 import com.transformuk.hee.tis.reference.api.dto.GradeDTO;
 import com.transformuk.hee.tis.reference.client.ReferenceService;
 import com.transformuk.hee.tis.tcs.api.dto.ConnectionDetailDto;
 import com.transformuk.hee.tis.tcs.api.dto.ConnectionDto;
-import com.transformuk.hee.tis.tcs.api.dto.ConnectionHiddenDto;
-import com.transformuk.hee.tis.tcs.api.dto.ConnectionHiddenRecordDto;
-import com.transformuk.hee.tis.tcs.api.dto.ConnectionHiddenRecordDto.ConnectionHiddenRecordDtoBuilder;
 import com.transformuk.hee.tis.tcs.api.dto.ConnectionRecordDto;
+import com.transformuk.hee.tis.tcs.api.dto.ConnectionSummaryDto;
+import com.transformuk.hee.tis.tcs.api.dto.ConnectionSummaryRecordDto;
+import com.transformuk.hee.tis.tcs.api.dto.ConnectionSummaryRecordDto.ConnectionSummaryRecordDtoBuilder;
 import com.transformuk.hee.tis.tcs.api.dto.ContactDetailsDTO;
 import com.transformuk.hee.tis.tcs.api.dto.ProgrammeMembershipDTO;
 import com.transformuk.hee.tis.tcs.api.dto.RevalidationRecordDto;
 import com.transformuk.hee.tis.tcs.api.enumeration.ProgrammeMembershipType;
 import com.transformuk.hee.tis.tcs.service.model.GmcDetails;
 import com.transformuk.hee.tis.tcs.service.model.Placement;
-import com.transformuk.hee.tis.tcs.service.model.Programme;
 import com.transformuk.hee.tis.tcs.service.model.ProgrammeMembership;
 import com.transformuk.hee.tis.tcs.service.repository.GmcDetailsRepository;
 import com.transformuk.hee.tis.tcs.service.repository.PersonRepository;
@@ -35,6 +35,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Objects;
+import java.util.Set;
 import java.util.stream.Collectors;
 import javax.transaction.Transactional;
 import org.apache.commons.collections4.CollectionUtils;
@@ -49,10 +50,10 @@ import org.springframework.util.StringUtils;
 @Transactional
 public class RevalidationServiceImpl implements RevalidationService {
 
+  public static final int SIZE = 20;
   private static final Logger LOG = LoggerFactory.getLogger(RevalidationServiceImpl.class);
   private static final List<String> placementTypes = asList("In post", "In Post - Acting Up",
       "In post - Extension", "Parental Leave", "Long-term sick", "Suspended", "Phased Return");
-  public static final int SIZE = 20;
   private final ContactDetailsService contactDetailsService;
   private final GmcDetailsRepository gmcDetailsRepository;
   private final ProgrammeMembershipRepository programmeMembershipRepository;
@@ -143,31 +144,32 @@ public class RevalidationServiceImpl implements RevalidationService {
   }
 
   @Override
-  public ConnectionHiddenDto getHiddenTrainees(final List<String> gmcIds, final int pageNumber,
+  public ConnectionSummaryDto getHiddenTrainees(final List<String> gmcIds, final int pageNumber,
       final String searchGmcNumber) {
-    final boolean searchAble = StringUtils.isEmpty(searchGmcNumber) ? true : false;
+    final boolean searchAble = StringUtils.isEmpty(searchGmcNumber);
     final PageRequest pageRequest = PageRequest.of(pageNumber, SIZE);
     final Page<ConnectionDto> hiddenRecords = personRepository
         .getHiddenTraineeRecords(pageRequest, gmcIds, searchAble, searchGmcNumber);
-    final List<ConnectionHiddenRecordDto> connectionHiddenRecords = hiddenRecords.get()
+    final List<ConnectionSummaryRecordDto> connectionHiddenRecords = hiddenRecords.get()
         .map(conn -> {
           return buildHiddenConnectionList(conn);
         }).collect(toList());
 
-    return ConnectionHiddenDto.builder()
+    return ConnectionSummaryDto.builder()
         .connections(connectionHiddenRecords)
         .totalResults(hiddenRecords.getTotalElements())
         .totalPages(hiddenRecords.getTotalPages())
         .build();
   }
 
-  private ConnectionHiddenRecordDto buildHiddenConnectionList(ConnectionDto conn) {
+  private ConnectionSummaryRecordDto buildHiddenConnectionList(ConnectionDto conn) {
     final ProgrammeMembership latestProgrammeMembership = programmeMembershipRepository
         .findLatestProgrammeMembershipByTraineeId(conn.getPersonId());
     final ProgrammeMembershipDTO programmeMembershipDTO = programmeMembershipMapper
         .toDto(latestProgrammeMembership);
 
-    final ConnectionHiddenRecordDtoBuilder connectionHiddenRecordDtoBuilder = ConnectionHiddenRecordDto
+    final ConnectionSummaryRecordDtoBuilder connectionHiddenRecordDtoBuilder =
+        ConnectionSummaryRecordDto
         .builder()
         .gmcReferenceNumber(conn.getGmcNumber())
         .doctorFirstName(conn.forenames)
@@ -188,6 +190,51 @@ public class RevalidationServiceImpl implements RevalidationService {
     }
 
     return connectionHiddenRecordDtoBuilder.build();
+  }
+
+  @Override
+  public ConnectionSummaryDto getExceptionTrainees(final List<String> gmcIds, final int pageNumber,
+      final String searchGmcNumber, final List<String> dbcs) {
+    final boolean searchable = StringUtils.isEmpty(searchGmcNumber);
+    final PageRequest pageRequest = PageRequest.of(pageNumber, SIZE);
+    final Set<String> owner =
+        (dbcs == null || dbcs.isEmpty()) ? null : DesignatedBodyMapper.map(Sets.newHashSet(dbcs));
+
+    final Page<Map<String, Object>> exceptionRecordsPage = personRepository
+        .getExceptionTraineeRecords(pageRequest, gmcIds, searchable, searchGmcNumber, owner);
+
+    final List<ConnectionSummaryRecordDto> connectionExceptionRecords = exceptionRecordsPage
+        .getContent()
+        .stream()
+        .map(this::buildConnectionList)
+        .collect(toList());
+
+    return ConnectionSummaryDto.builder()
+        .connections(connectionExceptionRecords)
+        .totalResults(exceptionRecordsPage.getTotalElements())
+        .totalPages(exceptionRecordsPage.getTotalPages())
+        .build();
+  }
+
+  private ConnectionSummaryRecordDto buildConnectionList(Map<String, Object> conn) {
+    final String owner = conn.get("owner") == null ? null : conn.get("owner").toString();
+
+    return ConnectionSummaryRecordDto
+        .builder()
+        .gmcReferenceNumber(conn.get("gmcNumber") == null ? null : conn.get("gmcNumber").toString())
+        .doctorFirstName(conn.get("forenames") == null ? null : conn.get("forenames").toString())
+        .doctorLastName(conn.get("surname") == null ? null : conn.get("surname").toString())
+        .designatedBody(owner != null ? DesignatedBodyMapper.getDbcByOwner(owner) : null)
+        .programmeMembershipEndDate(conn.get("programmeEndDate") == null
+            ? null : LocalDate.parse(conn.get("programmeEndDate").toString()))
+        .programmeMembershipStartDate(conn.get("programmeStartDate") == null
+            ? null : LocalDate.parse(conn.get("programmeStartDate").toString()))
+        .programmeMembershipType(conn.get("programmeMembershipType") == null
+            ? null : conn.get("programmeMembershipType").toString())
+        .programmeName(conn.get("programmeName") == null
+            ? null : conn.get("programmeName").toString())
+        .programmeOwner(owner)
+        .build();
   }
 
   private String getHiddenConnectionStatus(final ConnectionDto conn) {

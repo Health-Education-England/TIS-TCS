@@ -10,9 +10,9 @@ import lombok.NoArgsConstructor;
 @AllArgsConstructor
 @NoArgsConstructor
 @Builder
-public class ConnectionHiddenDto {
+public class ConnectionSummaryDto {
 
   private long totalResults;
   private long totalPages;
-  private List<ConnectionHiddenRecordDto> connections;
+  private List<ConnectionSummaryRecordDto> connections;
 }

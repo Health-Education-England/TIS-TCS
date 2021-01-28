@@ -1,8 +1,8 @@
 package com.transformuk.hee.tis.tcs.service.api;
 
 import com.transformuk.hee.tis.tcs.api.dto.ConnectionDetailDto;
-import com.transformuk.hee.tis.tcs.api.dto.ConnectionHiddenDto;
 import com.transformuk.hee.tis.tcs.api.dto.ConnectionRecordDto;
+import com.transformuk.hee.tis.tcs.api.dto.ConnectionSummaryDto;
 import com.transformuk.hee.tis.tcs.api.dto.RevalidationRecordDto;
 import com.transformuk.hee.tis.tcs.service.api.util.UrlDecoderUtil;
 import com.transformuk.hee.tis.tcs.service.service.RevalidationService;
@@ -53,7 +53,7 @@ public class RevalidationResource {
     return ResponseEntity.ok(revalidationService.findRevalidationByGmcId(gmcId));
   }
 
-  @GetMapping(value= {"/revalidation/connection", "/revalidation/connection/{gmcIds}"})
+  @GetMapping(value = {"/revalidation/connection", "/revalidation/connection/{gmcIds}"})
   @PreAuthorize("hasPermission('tis:people::person:', 'View')")
   public ResponseEntity<Map<String, ConnectionRecordDto>> getConnectionRecords(
       @PathVariable(value = "gmcIds", required = false) List<String> gmcIds) {
@@ -67,6 +67,12 @@ public class RevalidationResource {
     }
   }
 
+  /**
+   * GET  /revalidation/connection/detail/{gmcId} : Get revalidation connections details by gmcId.
+   *
+   * @param gmcId the gmcId of trainee
+   * @return reval connection details information by gmcId
+   */
   @GetMapping("/revalidation/connection/detail/{gmcId}")
   @PreAuthorize("hasPermission('tis:people::person:', 'View')")
   public ResponseEntity<ConnectionDetailDto> getConnectionDetailForATrainee(
@@ -81,12 +87,44 @@ public class RevalidationResource {
     }
   }
 
-  @GetMapping(value = {"/revalidation/connection/hidden/{gmcIds}", "/revalidation/connection/hidden"})
+  /**
+   * GET  /revalidation/connection/hidden/{gmcIds} : Get hidden revalidation connections.
+   *
+   * @param gmcIds the gmcIds of trainee in reval hidden log
+   * @param pageNumber page number of data to get
+   * @param searchQuery gmcId of trainee to search
+   * @return reval connection summary information for the hidden trainees
+   */
+  @GetMapping(value = {"/revalidation/connection/hidden/{gmcIds}",
+      "/revalidation/connection/hidden"})
   @PreAuthorize("hasPermission('tis:people::person:', 'View')")
-  public ResponseEntity<ConnectionHiddenDto> getHiddenTrainee( @PathVariable(value = "gmcIds", required = false) List<String> gmcIds,
+  public ResponseEntity<ConnectionSummaryDto> getHiddenTrainee(
+      @PathVariable(value = "gmcIds", required = false) List<String> gmcIds,
       @RequestParam(value = "pageNumber", required = false, defaultValue = "0") int pageNumber,
       @RequestParam(value = "searchQuery", required = false, defaultValue = "") String searchQuery) {
-    final ConnectionHiddenDto hiddenTrainees = revalidationService.getHiddenTrainees(gmcIds, pageNumber, searchQuery);
+    final ConnectionSummaryDto hiddenTrainees = revalidationService
+        .getHiddenTrainees(gmcIds, pageNumber, searchQuery);
     return ResponseEntity.ok().body(hiddenTrainees);
+  }
+
+  /**
+   * GET  /revalidation/connection/exception/{gmcIds} : Get exception revalidation connections.
+   *
+   * @param gmcIds the gmcIds of trainee in reval exception log
+   * @param pageNumber page number of data to get
+   * @param searchQuery gmcId of trainee to search
+   * @return reval connection summary information for the exception trainees
+   */
+  @GetMapping(value = {"/revalidation/connection/exception/{gmcIds}",
+      "/revalidation/connection/exception"})
+  @PreAuthorize("hasPermission('tis:people::person:', 'View')")
+  public ResponseEntity<ConnectionSummaryDto> getExceptionTrainee(
+      @PathVariable(value = "gmcIds", required = false) List<String> gmcIds,
+      @RequestParam(value = "pageNumber", required = false, defaultValue = "0") int pageNumber,
+      @RequestParam(value = "searchQuery", required = false, defaultValue = "") String searchQuery,
+      @RequestParam(value = "dbcs", required = false) final List<String> dbcs) {
+    final ConnectionSummaryDto exceptionTrainees = revalidationService
+        .getExceptionTrainees(gmcIds, pageNumber, searchQuery, dbcs);
+    return ResponseEntity.ok().body(exceptionTrainees);
   }
 }
