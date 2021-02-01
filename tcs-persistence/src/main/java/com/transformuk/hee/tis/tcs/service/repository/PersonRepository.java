@@ -77,12 +77,12 @@ public interface PersonRepository extends JpaRepository<Person, Long>,
       + "LEFT JOIN Programme prg on (prg.id = latestPm.programmeId) "
       + "WHERE ( "
               // get trainees from gmcId list even if some of them have no programmeMembership
-              + "( latestPm.personId IS NULL AND gmc.gmcNumber IN :gmcIds ) "
+              + "( latestPm.personId IS NULL AND gmc.gmcNumber IN (:gmcIds) ) "
           + "OR ( "
               + "( curdate() > latestPm.programmeEndDate "
                   + "OR latestPm.programmeMembershipType = 'VISITOR' "
-                  + "OR gmc.gmcNumber in :gmcIds ) "
-              + "AND prg.OWNER in :owner ) "
+                  + "OR gmc.gmcNumber in (:gmcIds) ) "
+              + "AND prg.OWNER in (:owner) ) "
       + ") AND (:search is true or gmc.gmcNumber = :gmcNumber)";
   @Query(value = GET_EXCEPTION_QUERY,
       countQuery = GET_EXCEPTION_QUERY,
