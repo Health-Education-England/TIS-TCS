@@ -46,9 +46,8 @@ public class DesignatedBodyMapperTest {
     Set<String> ownerSet = DesignatedBodyMapper.getAllOwners();
 
     //then
-    assertThat(ownerSet).hasSize(15);
-
     assertThat(ownerSet)
+        .hasSize(15)
         .contains("Health Education England Kent, Surrey and Sussex",
             "London LETBs",
             "Health Education England North West London",
