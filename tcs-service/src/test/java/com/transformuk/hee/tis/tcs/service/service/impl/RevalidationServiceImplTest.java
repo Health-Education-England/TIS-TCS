@@ -229,7 +229,7 @@ public class RevalidationServiceImplTest {
     programmeMembershipList.add(programmeMembership1);
     when(gmcDetailsRepositoryMock.findGmcDetailsByGmcNumber(GMC_NUMBER)).thenReturn(gmcDetails);
     when(contactDetailsService.findOne(PERSON_ID)).thenReturn(contactDetails);
-    when(programmeMembershipRepositoryMock.findByTraineeId(PERSON_ID))
+    when(programmeMembershipRepositoryMock.findAllProgrammeMembershipInDescOrderByTraineeId(PERSON_ID))
         .thenReturn(programmeMembershipList);
     when(programmeMembershipRepositoryMock.findLatestProgrammeMembershipByTraineeId(PERSON_ID))
         .thenReturn(programmeMembership);

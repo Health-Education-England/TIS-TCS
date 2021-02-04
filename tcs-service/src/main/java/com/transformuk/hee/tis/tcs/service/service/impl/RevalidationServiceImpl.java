@@ -132,7 +132,7 @@ public class RevalidationServiceImpl implements RevalidationService {
     connectionDetailDto.setCurrentGrade(revalidationRecordDto.getCurrentGrade());
 
     final List<ProgrammeMembership> programmeMemberships = programmeMembershipRepository
-        .findByTraineeId(gmcDetail.getId());
+        .findAllProgrammeMembershipInDescOrderByTraineeId(gmcDetail.getId());
     LOG.info("Programme memberships found for person: {}, membership: {}", gmcDetail.getId(),
         programmeMemberships);
 
