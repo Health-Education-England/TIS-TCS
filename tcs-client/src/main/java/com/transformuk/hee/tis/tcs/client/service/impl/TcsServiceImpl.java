@@ -435,6 +435,12 @@ public class TcsServiceImpl extends AbstractClientService {
         }).getBody();
   }
 
+  public ProgrammeMembershipDTO getProgrammeMembershipById(Long id) {
+    return tcsRestTemplate.exchange(serviceUrl + API_PROGRAMME_MEMBERSHIPS + id,
+        HttpMethod.GET, null, new ParameterizedTypeReference<ProgrammeMembershipDTO>() {
+        }).getBody();
+  }
+
   public List<ProgrammeMembershipCurriculaDTO> getProgrammeMembershipForTrainee(Long traineeId) {
     return tcsRestTemplate.exchange(
         serviceUrl + API_TRAINEE_PROGRAMME_MEMBERSHIPS + traineeId + "/programme-memberships",
@@ -489,6 +495,13 @@ public class TcsServiceImpl extends AbstractClientService {
             new ParameterizedTypeReference<List<SpecialtyDTO>>() {
             })
         .getBody();
+  }
+
+  public ProgrammeDTO getProgrammeById(Long id) {
+    return tcsRestTemplate
+        .exchange(serviceUrl + API_PROGRAMMES_IN + id,
+            HttpMethod.GET, null, new ParameterizedTypeReference<ProgrammeDTO>() {
+            }).getBody();
   }
 
   @Cacheable("programme")

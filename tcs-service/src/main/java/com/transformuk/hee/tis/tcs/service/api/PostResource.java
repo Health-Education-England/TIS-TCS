@@ -25,6 +25,7 @@ import com.transformuk.hee.tis.tcs.service.api.validation.PostValidator;
 import com.transformuk.hee.tis.tcs.service.model.ColumnFilter;
 import com.transformuk.hee.tis.tcs.service.model.PlacementView;
 import com.transformuk.hee.tis.tcs.service.repository.PlacementViewRepository;
+import com.transformuk.hee.tis.tcs.service.repository.PostRepository;
 import com.transformuk.hee.tis.tcs.service.service.PlacementService;
 import com.transformuk.hee.tis.tcs.service.service.PostService;
 import com.transformuk.hee.tis.tcs.service.service.mapper.PlacementViewMapper;
@@ -279,6 +280,12 @@ public class PostResource {
             .decorate(placementViewMapper.placementViewsToPlacementViewDTOs(placementViews)) :
         null));
   }
+
+//  @GetMapping("/findByPlacement")
+//  @PreAuthorize("hasAuthority('post:view')")
+//  public ResponseEntity<PostDTO> findPostByPlacementId(Long id) {
+//
+//  }
 
   /**
    * GET  /posts/:postId/placements/new : get the placements for a post.

@@ -629,6 +629,15 @@ public class PostServiceImpl implements PostService {
     return postMapper.postsToPostDTOs(result);
   }
 
+//  @Override
+//  public PostDTO findPostByPlacementId(Long placementId) {
+//    Preconditions.checkNotNull(placementId, "Placement placementId cannot be null");
+//
+//    Post result = postRepository
+//        .findPostByPlacementId(placementId);
+//    return postMapper.postToPostDTO(result);
+//  }
+
   protected String createWhereClause(final String searchString,
       final List<ColumnFilter> columnFilters) {
     final StringBuilder whereClause = new StringBuilder();
