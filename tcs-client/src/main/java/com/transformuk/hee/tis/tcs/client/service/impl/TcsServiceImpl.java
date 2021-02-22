@@ -510,10 +510,7 @@ public class TcsServiceImpl extends AbstractClientService {
    */
   public ProgrammeDTO getProgrammeById(Long id) {
     log.debug("calling getProgrammeById with id {}", id);
-//    return tcsRestTemplate.exchange(serviceUrl + API_PROGRAMMES + id,
-//        HttpMethod.GET, null, new ParameterizedTypeReference<ProgrammeDTO>() {
-//        }).getBody();
-    String url = serviceUrl + "/api/programmes/" + id;
+    String url = serviceUrl + API_PROGRAMMES + id;
     return tcsRestTemplate.getForEntity(url, ProgrammeDTO.class).getBody();
   }
 

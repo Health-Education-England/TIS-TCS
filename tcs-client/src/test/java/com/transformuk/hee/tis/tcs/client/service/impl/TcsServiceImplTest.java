@@ -18,6 +18,7 @@ import java.util.HashMap;
 import java.util.Optional;
 
 import com.transformuk.hee.tis.tcs.api.dto.ProgrammeDTO;
+import com.transformuk.hee.tis.tcs.api.dto.ProgrammeMembershipDTO;
 import org.junit.Before;
 import org.junit.ClassRule;
 import org.junit.Test;
@@ -214,6 +215,7 @@ public class TcsServiceImplTest {
 
     //when
     ProgrammeDTO response = testObj.getProgrammeById(10L);
+
     //then
     verify(tcsRestTemplate).getForEntity("http://localhost:9999/tcs/api/programmes/10",
         ProgrammeDTO.class);
@@ -229,5 +231,37 @@ public class TcsServiceImplTest {
         .willThrow(new HttpClientErrorException(HttpStatus.NOT_FOUND));
 
     testObj.getProgrammeById(10L);
+  }
+
+  @Test
+  public void getProgrammeMembershipByIdShouldFindProgrammeMembershipDto() {
+    //given
+    ProgrammeMembershipDTO programmeMembershipDto = new ProgrammeMembershipDTO();
+    programmeMembershipDto.setId(20L);
+
+    ResponseEntity<ProgrammeMembershipDTO> responseEntity =
+        new ResponseEntity(programmeMembershipDto, HttpStatus.OK);
+    given(tcsRestTemplate.getForEntity(anyString(), eq(ProgrammeMembershipDTO.class)))
+        .willReturn(responseEntity);
+    testObj.setTcsRestTemplate(tcsRestTemplate);
+
+    //when
+    ProgrammeMembershipDTO response = testObj.getProgrammeMembershipById(20L);
+
+    //then
+    verify(tcsRestTemplate).getForEntity("http://localhost:9999/tcs/api/programme-memberships/20",
+        ProgrammeMembershipDTO.class);
+    assertEquals(programmeMembershipDto, response);
+  }
+
+  @Test(expected = RestClientException.class)
+  public void getProgrammeMembershipByIdShouldThrowErrorWhenNotFound() {
+    ProgrammeMembershipDTO programmeMembershipDto = new ProgrammeMembershipDTO();
+    programmeMembershipDto.setId(20L);
+
+    given(tcsRestTemplate.getForEntity(anyString(), eq(ProgrammeMembershipDTO.class)))
+        .willThrow(new HttpClientErrorException(HttpStatus.NOT_FOUND));
+
+    testObj.getProgrammeMembershipById(20L);
   }
 }
