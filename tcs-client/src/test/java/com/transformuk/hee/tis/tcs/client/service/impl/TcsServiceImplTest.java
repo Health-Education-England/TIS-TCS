@@ -3,6 +3,11 @@ package com.transformuk.hee.tis.tcs.client.service.impl;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertTrue;
+import static org.mockito.BDDMockito.given;
+import static org.mockito.Matchers.anyString;
+import static org.mockito.Matchers.eq;
+import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.verify;
 
 import com.github.tomakehurst.wiremock.junit.WireMockClassRule;
 import com.google.common.collect.Maps;
@@ -11,13 +16,20 @@ import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.util.HashMap;
 import java.util.Optional;
+
+import com.transformuk.hee.tis.tcs.api.dto.ProgrammeDTO;
 import org.junit.Before;
 import org.junit.ClassRule;
 import org.junit.Test;
 import org.junit.runner.RunWith;
+import org.mockito.Mock;
 import org.springframework.cloud.contract.wiremock.WireMockSpring;
+import org.springframework.http.HttpStatus;
+import org.springframework.http.ResponseEntity;
 import org.springframework.http.client.HttpComponentsClientHttpRequestFactory;
 import org.springframework.test.context.junit4.SpringRunner;
+import org.springframework.web.client.HttpClientErrorException;
+import org.springframework.web.client.RestClientException;
 import org.springframework.web.client.RestTemplate;
 
 @RunWith(SpringRunner.class)
@@ -25,6 +37,9 @@ public class TcsServiceImplTest {
 
   private static int WIRE_MOCK_PORT = 9999;
   private TcsServiceImpl testObj;
+
+  @Mock
+  private RestTemplate tcsRestTemplate;
 
   @ClassRule
   public static WireMockClassRule wiremock = new WireMockClassRule(
@@ -35,6 +50,8 @@ public class TcsServiceImplTest {
     testObj = new TcsServiceImpl(1000D, 1000D);
     testObj.setTcsRestTemplate(new RestTemplate(new HttpComponentsClientHttpRequestFactory()));
     testObj.setServiceUrl("http://localhost:9999/tcs");
+
+    tcsRestTemplate = mock(RestTemplate.class);
   }
 
   @Test
@@ -182,5 +199,35 @@ public class TcsServiceImplTest {
   @Test(expected = IllegalArgumentException.class)
   public void patchAbsenceShouldThrowExceptionWhenParameterMapIsNull() {
     testObj.patchAbsence(1L, null);
+  }
+
+  @Test
+  public void getProgrammeByIdShouldFindProgrammeDto() {
+    //given
+    ProgrammeDTO programmeDto = new ProgrammeDTO();
+    programmeDto.setId(10L);
+
+    ResponseEntity<ProgrammeDTO> responseEntity = new ResponseEntity(programmeDto, HttpStatus.OK);
+    given(tcsRestTemplate.getForEntity(anyString(),eq(ProgrammeDTO.class)))
+        .willReturn(responseEntity);
+    testObj.setTcsRestTemplate(tcsRestTemplate);
+
+    //when
+    ProgrammeDTO response = testObj.getProgrammeById(10L);
+    //then
+    verify(tcsRestTemplate).getForEntity("http://localhost:9999/tcs/api/programmes/10",
+        ProgrammeDTO.class);
+    assertEquals(programmeDto, response);
+  }
+
+  @Test(expected = RestClientException.class)
+  public void getProgrammeByIdShouldThrowErrorWhenNotFound() {
+    ProgrammeDTO programmeDto = new ProgrammeDTO();
+    programmeDto.setId(10L);
+
+    given(tcsRestTemplate.getForEntity(anyString(), eq(ProgrammeDTO.class)))
+        .willThrow(new HttpClientErrorException(HttpStatus.NOT_FOUND));
+
+    testObj.getProgrammeById(10L);
   }
 }

@@ -85,6 +85,7 @@ public class TcsServiceImpl extends AbstractClientService {
       "/api/current/curricula?columnFilters=";
   private static final String API_PROGRAMMES_COLUMN_FILTERS = "/api/programmes?columnFilters=";
   private static final String API_PROGRAMMES_IN = "/api/programmes/in/";
+  private static final String API_PROGRAMMES = "/api/programmes/";
   private static final String API_PLACEMENTS_FILTER_COLUMN_FILTERS =
       "/api/placements/filter?columnFilters=";
   private static final String API_GDC_DETAILS_IN = "/api/gdc-details/in/";
@@ -435,10 +436,15 @@ public class TcsServiceImpl extends AbstractClientService {
         }).getBody();
   }
 
+  /**
+   * Endpoint to get a ProgrammeMembershipDtos by id.
+   * @param id The id of the ProgrammeMembership to be retrieved
+   * @return   The ProgrammeMembershipDto
+   */
   public ProgrammeMembershipDTO getProgrammeMembershipById(Long id) {
-    return tcsRestTemplate.exchange(serviceUrl + API_PROGRAMME_MEMBERSHIPS + id,
-        HttpMethod.GET, null, new ParameterizedTypeReference<ProgrammeMembershipDTO>() {
-        }).getBody();
+    log.debug("calling getProgrammeMembershipById with {}", id);
+    String url = serviceUrl + API_PROGRAMME_MEMBERSHIPS + id;
+    return tcsRestTemplate.getForEntity(url, ProgrammeMembershipDTO.class).getBody();
   }
 
   public List<ProgrammeMembershipCurriculaDTO> getProgrammeMembershipForTrainee(Long traineeId) {
@@ -497,10 +503,18 @@ public class TcsServiceImpl extends AbstractClientService {
         .getBody();
   }
 
+  /**
+   * Endpoint to get a ProgrammeDto by id.
+   * @param id The id of the Programme to be retrieved.
+   * @return   The ProgrammeDto.
+   */
   public ProgrammeDTO getProgrammeById(Long id) {
-    return tcsRestTemplate.exchange(serviceUrl + API_PROGRAMMES_IN + id,
-            HttpMethod.GET, null, new ParameterizedTypeReference<ProgrammeDTO>() {
-            }).getBody();
+    log.debug("calling getProgrammeById with id {}", id);
+//    return tcsRestTemplate.exchange(serviceUrl + API_PROGRAMMES + id,
+//        HttpMethod.GET, null, new ParameterizedTypeReference<ProgrammeDTO>() {
+//        }).getBody();
+    String url = serviceUrl + "/api/programmes/" + id;
+    return tcsRestTemplate.getForEntity(url, ProgrammeDTO.class).getBody();
   }
 
   @Cacheable("programme")
