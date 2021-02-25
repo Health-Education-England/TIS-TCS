@@ -49,7 +49,7 @@ import org.springframework.util.StringUtils;
 @Service
 @Transactional
 public class RevalidationServiceImpl implements RevalidationService {
-
+// test pipeline
   public static final int SIZE = 20;
   private static final Logger LOG = LoggerFactory.getLogger(RevalidationServiceImpl.class);
   private static final List<String> placementTypes = asList("In post", "In Post - Acting Up",
