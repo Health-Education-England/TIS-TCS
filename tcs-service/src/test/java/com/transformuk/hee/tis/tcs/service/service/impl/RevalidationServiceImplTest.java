@@ -16,9 +16,11 @@ import com.transformuk.hee.tis.reference.api.dto.GradeDTO;
 import com.transformuk.hee.tis.reference.client.ReferenceService;
 import com.transformuk.hee.tis.tcs.api.dto.ConnectionDetailDto;
 import com.transformuk.hee.tis.tcs.api.dto.ConnectionDto;
+import com.transformuk.hee.tis.tcs.api.dto.ConnectionInfoDto;
 import com.transformuk.hee.tis.tcs.api.dto.ConnectionSummaryDto;
 import com.transformuk.hee.tis.tcs.api.dto.ConnectionRecordDto;
 import com.transformuk.hee.tis.tcs.api.dto.ContactDetailsDTO;
+import com.transformuk.hee.tis.tcs.api.dto.GmcDetailsDTO;
 import com.transformuk.hee.tis.tcs.api.dto.ProgrammeMembershipDTO;
 import com.transformuk.hee.tis.tcs.api.dto.RevalidationRecordDto;
 import com.transformuk.hee.tis.tcs.api.enumeration.ProgrammeMembershipType;
@@ -31,6 +33,7 @@ import com.transformuk.hee.tis.tcs.service.repository.PersonRepository;
 import com.transformuk.hee.tis.tcs.service.repository.PlacementRepository;
 import com.transformuk.hee.tis.tcs.service.repository.ProgrammeMembershipRepository;
 import com.transformuk.hee.tis.tcs.service.service.ContactDetailsService;
+import com.transformuk.hee.tis.tcs.service.service.GmcDetailsService;
 import com.transformuk.hee.tis.tcs.service.service.mapper.DesignatedBodyMapper;
 import com.transformuk.hee.tis.tcs.service.service.mapper.ProgrammeMembershipMapper;
 import java.time.LocalDate;
@@ -90,6 +93,8 @@ public class RevalidationServiceImplTest {
   @Mock
   private ContactDetailsService contactDetailsService;
   @Mock
+  private GmcDetailsService gmcDetailsServiceMock;
+  @Mock
   private GmcDetailsRepository gmcDetailsRepositoryMock;
   @Mock
   private ProgrammeMembershipRepository programmeMembershipRepositoryMock;
@@ -107,6 +112,7 @@ public class RevalidationServiceImplTest {
   private ProgrammeMembershipDTO programmeMembershipDTO;
 
   private ContactDetailsDTO contactDetails;
+  private GmcDetailsDTO gmcDetailsDTO;
   @InjectMocks
   private RevalidationServiceImpl testObj;
 
@@ -119,6 +125,11 @@ public class RevalidationServiceImplTest {
     gmcDetails = new GmcDetails();
     gmcDetails.setId(PERSON_ID);
     gmcDetails.setGmcNumber(GMC_NUMBER);
+
+    gmcDetailsDTO = new GmcDetailsDTO();
+    gmcDetailsDTO.setId(PERSON_ID);
+    gmcDetailsDTO.setGmcNumber(GMC_NUMBER);
+
     programmeMembership = new ProgrammeMembership();
     programmeMembership.setProgrammeEndDate(CCT_DATE);
     programmeMembership.setProgrammeMembershipType(PROGRAMME_MEMBERSHIP_TYPE);
@@ -445,5 +456,25 @@ public class RevalidationServiceImplTest {
         is(EXPIRED_PM_START_DATE));
     assertThat(exceptionTrainees.getConnections().get(0).getProgrammeMembershipEndDate(),
         is(EXPIRED_PM_END_DATE));
+  }
+
+  @Test
+  public void shouldBuildTcsConnectionInfo() {
+    when(contactDetailsService.findOne(PERSON_ID)).thenReturn(contactDetails);
+    when(gmcDetailsServiceMock.findOne(PERSON_ID)).thenReturn(gmcDetailsDTO);
+    when(programmeMembershipRepositoryMock.findLatestProgrammeMembershipByTraineeId(PERSON_ID))
+        .thenReturn(programmeMembership);
+    when(pmMapper.toDto(programmeMembership)).thenReturn(programmeMembershipDTO);
+    when(programmeMembershipDTO.getProgrammeName()).thenReturn(PROGRAMME_NAME);
+    when(programmeMembershipDTO.getProgrammeMembershipType()).thenReturn(PROGRAMME_MEMBERSHIP_TYPE);
+
+    ConnectionInfoDto result = testObj.buildTcsConnectionInfo(PERSON_ID);
+
+    assertThat(result, notNullValue());
+    assertThat(result.getGmcReferenceNumber(), is("1000"));
+    assertThat(result.getDoctorFirstName(), is(FORENAME));
+    assertThat(result.getDoctorLastName(), is(SURNAME));
+    assertThat(result.getProgrammeMembershipType(), is(PROGRAMME_MEMBERSHIP_TYPE.toString()));
+    assertThat(result.getProgrammeName(), is(PROGRAMME_NAME));
   }
 }

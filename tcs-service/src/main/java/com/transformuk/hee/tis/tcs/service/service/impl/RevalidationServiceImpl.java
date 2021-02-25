@@ -8,12 +8,15 @@ import com.google.common.collect.Sets;
 import com.transformuk.hee.tis.reference.api.dto.GradeDTO;
 import com.transformuk.hee.tis.reference.client.ReferenceService;
 import com.transformuk.hee.tis.tcs.api.dto.ConnectionDetailDto;
-import com.transformuk.hee.tis.tcs.api.dto.ConnectionDto;
+import com.transformuk.hee.tis.tcs.api.dto.ConnectionDto;;
+import com.transformuk.hee.tis.tcs.api.dto.ConnectionInfoDto;
+import com.transformuk.hee.tis.tcs.api.dto.ConnectionInfoDto.ConnectionInfoDtoBuilder;
 import com.transformuk.hee.tis.tcs.api.dto.ConnectionRecordDto;
 import com.transformuk.hee.tis.tcs.api.dto.ConnectionSummaryDto;
 import com.transformuk.hee.tis.tcs.api.dto.ConnectionSummaryRecordDto;
 import com.transformuk.hee.tis.tcs.api.dto.ConnectionSummaryRecordDto.ConnectionSummaryRecordDtoBuilder;
 import com.transformuk.hee.tis.tcs.api.dto.ContactDetailsDTO;
+import com.transformuk.hee.tis.tcs.api.dto.GmcDetailsDTO;
 import com.transformuk.hee.tis.tcs.api.dto.ProgrammeMembershipDTO;
 import com.transformuk.hee.tis.tcs.api.dto.RevalidationRecordDto;
 import com.transformuk.hee.tis.tcs.api.enumeration.ProgrammeMembershipType;
@@ -25,6 +28,7 @@ import com.transformuk.hee.tis.tcs.service.repository.PersonRepository;
 import com.transformuk.hee.tis.tcs.service.repository.PlacementRepository;
 import com.transformuk.hee.tis.tcs.service.repository.ProgrammeMembershipRepository;
 import com.transformuk.hee.tis.tcs.service.service.ContactDetailsService;
+import com.transformuk.hee.tis.tcs.service.service.GmcDetailsService;
 import com.transformuk.hee.tis.tcs.service.service.RevalidationService;
 import com.transformuk.hee.tis.tcs.service.service.mapper.DesignatedBodyMapper;
 import com.transformuk.hee.tis.tcs.service.service.mapper.ProgrammeMembershipMapper;
@@ -55,6 +59,7 @@ public class RevalidationServiceImpl implements RevalidationService {
   private static final List<String> placementTypes = asList("In post", "In Post - Acting Up",
       "In post - Extension", "Parental Leave", "Long-term sick", "Suspended", "Phased Return");
   private final ContactDetailsService contactDetailsService;
+  private final GmcDetailsService gmcDetailsService;
   private final GmcDetailsRepository gmcDetailsRepository;
   private final ProgrammeMembershipRepository programmeMembershipRepository;
   private final PlacementRepository placementRepository;
@@ -63,6 +68,7 @@ public class RevalidationServiceImpl implements RevalidationService {
   private final ProgrammeMembershipMapper programmeMembershipMapper;
 
   public RevalidationServiceImpl(ContactDetailsService contactDetailsService,
+      GmcDetailsService gmcDetailsService,
       GmcDetailsRepository gmcDetailsRepository,
       ProgrammeMembershipRepository programmeMembershipRepository,
       PlacementRepository placementRepository,
@@ -70,6 +76,7 @@ public class RevalidationServiceImpl implements RevalidationService {
       PersonRepository personRepository,
       ProgrammeMembershipMapper programmeMembershipMapper) {
     this.contactDetailsService = contactDetailsService;
+    this.gmcDetailsService = gmcDetailsService;
     this.gmcDetailsRepository = gmcDetailsRepository;
     this.programmeMembershipRepository = programmeMembershipRepository;
     this.placementRepository = placementRepository;
@@ -162,6 +169,70 @@ public class RevalidationServiceImpl implements RevalidationService {
         .build();
   }
 
+  @Override
+  public ConnectionSummaryDto getExceptionTrainees(final List<String> gmcIds, final int pageNumber,
+      final String searchGmcNumber, final List<String> dbcs) {
+    final boolean searchable = StringUtils.isEmpty(searchGmcNumber);
+    final PageRequest pageRequest = PageRequest.of(pageNumber, SIZE);
+    final Set<String> owner =
+        (dbcs == null || dbcs.isEmpty()) ? null : DesignatedBodyMapper.map(Sets.newHashSet(dbcs));
+
+    final Page<Map<String, Object>> exceptionRecordsPage = personRepository
+        .getExceptionTraineeRecords(pageRequest, gmcIds, searchable, searchGmcNumber, owner);
+
+    final List<ConnectionSummaryRecordDto> connectionExceptionRecords = exceptionRecordsPage
+        .getContent()
+        .stream()
+        .map(this::buildConnectionList)
+        .collect(toList());
+
+    return ConnectionSummaryDto.builder()
+        .connections(connectionExceptionRecords)
+        .totalResults(exceptionRecordsPage.getTotalElements())
+        .totalPages(exceptionRecordsPage.getTotalPages())
+        .build();
+  }
+
+  @Override
+  public ConnectionInfoDto buildTcsConnectionInfo(Long personId) {
+
+    final ConnectionInfoDtoBuilder connectionInfoDtoBuilder = ConnectionInfoDto.builder();
+
+    // GMC Details
+    final GmcDetailsDTO gmcDetailsDTO = gmcDetailsService.findOne(personId);
+    if (gmcDetailsDTO != null) {
+      connectionInfoDtoBuilder.gmcReferenceNumber(gmcDetailsDTO.getGmcNumber());
+    }
+
+    // Contact Details
+    final ContactDetailsDTO contactDetailsDto = contactDetailsService.findOne(personId);
+    if (contactDetailsDto != null) {
+      connectionInfoDtoBuilder.doctorFirstName(contactDetailsDto.getForenames());
+      connectionInfoDtoBuilder.doctorLastName(contactDetailsDto.getSurname());
+    }
+
+    // latest Programme Membership
+    final ProgrammeMembership latestProgrammeMembership = programmeMembershipRepository
+        .findLatestProgrammeMembershipByTraineeId(personId);
+    final ProgrammeMembershipDTO programmeMembershipDTO = programmeMembershipMapper
+        .toDto(latestProgrammeMembership);
+    if (programmeMembershipDTO != null) {
+      final String owner = programmeMembershipDTO.getProgrammeOwner();
+      final ProgrammeMembershipType membershipType = programmeMembershipDTO
+          .getProgrammeMembershipType();
+      connectionInfoDtoBuilder
+          .tcsDesignatedBody(owner != null ? DesignatedBodyMapper.getDbcByOwner(owner) : null)
+          .programmeOwner(owner)
+          .programmeName(programmeMembershipDTO.getProgrammeName())
+          .programmeMembershipStartDate(programmeMembershipDTO.getProgrammeStartDate())
+          .programmeMembershipEndDate(programmeMembershipDTO.getProgrammeEndDate())
+          .programmeMembershipType(membershipType != null ? membershipType.toString() : null);
+    }
+
+    connectionInfoDtoBuilder.dataSource("TCS");
+    return connectionInfoDtoBuilder.build();
+  }
+
   private ConnectionSummaryRecordDto buildHiddenConnectionList(ConnectionDto conn) {
     final ProgrammeMembership latestProgrammeMembership = programmeMembershipRepository
         .findLatestProgrammeMembershipByTraineeId(conn.getPersonId());
@@ -190,30 +261,6 @@ public class RevalidationServiceImpl implements RevalidationService {
     }
 
     return connectionHiddenRecordDtoBuilder.build();
-  }
-
-  @Override
-  public ConnectionSummaryDto getExceptionTrainees(final List<String> gmcIds, final int pageNumber,
-      final String searchGmcNumber, final List<String> dbcs) {
-    final boolean searchable = StringUtils.isEmpty(searchGmcNumber);
-    final PageRequest pageRequest = PageRequest.of(pageNumber, SIZE);
-    final Set<String> owner =
-        (dbcs == null || dbcs.isEmpty()) ? null : DesignatedBodyMapper.map(Sets.newHashSet(dbcs));
-
-    final Page<Map<String, Object>> exceptionRecordsPage = personRepository
-        .getExceptionTraineeRecords(pageRequest, gmcIds, searchable, searchGmcNumber, owner);
-
-    final List<ConnectionSummaryRecordDto> connectionExceptionRecords = exceptionRecordsPage
-        .getContent()
-        .stream()
-        .map(this::buildConnectionList)
-        .collect(toList());
-
-    return ConnectionSummaryDto.builder()
-        .connections(connectionExceptionRecords)
-        .totalResults(exceptionRecordsPage.getTotalElements())
-        .totalPages(exceptionRecordsPage.getTotalPages())
-        .build();
   }
 
   private ConnectionSummaryRecordDto buildConnectionList(Map<String, Object> conn) {

@@ -121,6 +121,11 @@ spring:
       max-request-size: 10MB
   cache:
     caffeine.spec: maximumSize=100,expireAfterAccess=1m
+  rabbitmq:
+    host: ${RABBITMQ_HOST:localhost}
+    port: ${RABBITMQ_PORT:5672}
+    username: ${RABBITMQ_USERNAME:guest}
+    password: ${RABBITMQ_PASSWORD:guest}
 
 server:
   port: 8093
@@ -213,3 +218,9 @@ logging:
 
 
 auto.generate.npn: true
+
+app:
+  rabbit:
+    exchange: ${REVAL_RABBIT_EXCHANGE:reval-es-exchange}
+    queue: ${REVAL_RABBIT_QUEUE:reval-es-queue}
+    routingKey: ${REVAL_RABBIT_ROUTING_KEY:uk.nhs.hee.reval.es}
