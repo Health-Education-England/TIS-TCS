@@ -32,6 +32,7 @@ public interface ProgrammeMembershipRepository extends JpaRepository<ProgrammeMe
   @Query(value = "SELECT pm.* FROM ProgrammeMembership pm "
       + "WHERE pm.personId = :traineeId "
       + "ORDER BY pm.programmeEndDate DESC", nativeQuery = true)
-  List<ProgrammeMembership> findAllProgrammeMembershipInDescOrderByTraineeId(@Param("traineeId") Long traineeId);
+  List<ProgrammeMembership> findAllProgrammeMembershipInDescOrderByTraineeId(
+      @Param("traineeId") Long traineeId);
 
 }
