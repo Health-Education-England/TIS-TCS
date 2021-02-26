@@ -78,6 +78,12 @@ spring:
     elasticsearch:
       cluster-nodes: localhost:9300
       cluster-name: docker-cluster
+  rabbitmq:
+    host: localhost
+    port: 5672
+    username: guest
+    password: guest
+
 server:
   port: 10344
   address: localhost
@@ -108,3 +114,9 @@ kc:
 enable.es.search: false
 
 aws.s3.bucket: tisdevstor
+
+app:
+  rabbit:
+    exchange: reval-es-exchange
+    queue: reval-es-queue
+    routingKey: uk.nhs.hee.reval.es

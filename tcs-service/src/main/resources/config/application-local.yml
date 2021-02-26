@@ -12,6 +12,11 @@ spring:
   elasticsearch:
     rest:
       uris: ${ES_URLS:http://localhost:9200}
+  rabbitmq:
+    host: ${REVAL_RABBITMQ_HOST:localhost}
+    port: ${REVAL_RABBITMQ_PORT:5672}
+    username: ${REVAL_RABBITMQ_USERNAME:guest}
+    password: ${REVAL_RABBITMQ_PASSWORD:guest}
 
 logging:
     file: ${LOG_DIR:${HOME}}/tcs.log
@@ -36,3 +41,9 @@ kc:
   timeout: ${KC_TIMEOUT:10000}
 
 enable.es.search: true
+
+app:
+  rabbit:
+    exchange: ${REVAL_RABBIT_EXCHANGE:reval-es-exchange}
+    queue: ${REVAL_RABBIT_QUEUE:reval-es-queue}
+    routingKey: ${REVAL_RABBIT_ROUTING_KEY:uk.nhs.hee.reval.es}
