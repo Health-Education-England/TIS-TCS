@@ -48,7 +48,7 @@ public class RabbitConfig {
   }
 
   /**
-   * Rabbit template for setting message to RabbitMQ
+   * Rabbit template for setting message to RabbitMQ.
    */
   @Bean
   public RabbitTemplate rabbitTemplate(final ConnectionFactory connectionFactory) {

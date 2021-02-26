@@ -9,6 +9,7 @@ import static org.hamcrest.CoreMatchers.notNullValue;
 import static org.hamcrest.CoreMatchers.nullValue;
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.isNull;
 import static org.mockito.Mockito.when;
 
 import com.google.common.collect.Sets;
@@ -44,6 +45,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.stream.Stream;
 import org.assertj.core.util.Lists;
+import org.checkerframework.checker.units.qual.C;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -476,5 +478,62 @@ public class RevalidationServiceImplTest {
     assertThat(result.getDoctorLastName(), is(SURNAME));
     assertThat(result.getProgrammeMembershipType(), is(PROGRAMME_MEMBERSHIP_TYPE.toString()));
     assertThat(result.getProgrammeName(), is(PROGRAMME_NAME));
+  }
+
+  @Test
+  public void shouldBuildTcsConnectionInfoWithoutContactDetails() {
+    when(contactDetailsService.findOne(PERSON_ID)).thenReturn(null);
+    when(gmcDetailsServiceMock.findOne(PERSON_ID)).thenReturn(gmcDetailsDTO);
+    when(programmeMembershipRepositoryMock.findLatestProgrammeMembershipByTraineeId(PERSON_ID))
+        .thenReturn(programmeMembership);
+    when(pmMapper.toDto(programmeMembership)).thenReturn(programmeMembershipDTO);
+    when(programmeMembershipDTO.getProgrammeName()).thenReturn(PROGRAMME_NAME);
+    when(programmeMembershipDTO.getProgrammeMembershipType()).thenReturn(PROGRAMME_MEMBERSHIP_TYPE);
+
+    ConnectionInfoDto result = testObj.buildTcsConnectionInfo(PERSON_ID);
+
+    assertThat(result, notNullValue());
+    assertThat(result.getGmcReferenceNumber(), is("1000"));
+    assertThat(result.getDoctorFirstName(), is(nullValue()));
+    assertThat(result.getDoctorLastName(), is(nullValue()));
+    assertThat(result.getProgrammeMembershipType(), is(PROGRAMME_MEMBERSHIP_TYPE.toString()));
+    assertThat(result.getProgrammeName(), is(PROGRAMME_NAME));
+  }
+
+  @Test
+  public void shouldBuildTcsConnectionInfoWithoutGMCDetails() {
+    when(contactDetailsService.findOne(PERSON_ID)).thenReturn(contactDetails);
+    when(gmcDetailsServiceMock.findOne(PERSON_ID)).thenReturn(null);
+    when(programmeMembershipRepositoryMock.findLatestProgrammeMembershipByTraineeId(PERSON_ID))
+        .thenReturn(programmeMembership);
+    when(pmMapper.toDto(programmeMembership)).thenReturn(programmeMembershipDTO);
+    when(programmeMembershipDTO.getProgrammeName()).thenReturn(PROGRAMME_NAME);
+    when(programmeMembershipDTO.getProgrammeMembershipType()).thenReturn(PROGRAMME_MEMBERSHIP_TYPE);
+
+    ConnectionInfoDto result = testObj.buildTcsConnectionInfo(PERSON_ID);
+
+    assertThat(result, notNullValue());
+    assertThat(result.getGmcReferenceNumber(), is(nullValue()));
+    assertThat(result.getDoctorFirstName(), is(FORENAME));
+    assertThat(result.getDoctorLastName(), is(SURNAME));
+    assertThat(result.getProgrammeMembershipType(), is(PROGRAMME_MEMBERSHIP_TYPE.toString()));
+    assertThat(result.getProgrammeName(), is(PROGRAMME_NAME));
+  }
+
+  @Test
+  public void shouldBuildTcsConnectionInfoWithoutProgrammeMembership() {
+    when(contactDetailsService.findOne(PERSON_ID)).thenReturn(contactDetails);
+    when(gmcDetailsServiceMock.findOne(PERSON_ID)).thenReturn(gmcDetailsDTO);
+    when(programmeMembershipRepositoryMock.findLatestProgrammeMembershipByTraineeId(PERSON_ID))
+        .thenReturn(null);
+
+    ConnectionInfoDto result = testObj.buildTcsConnectionInfo(PERSON_ID);
+
+    assertThat(result, notNullValue());
+    assertThat(result.getGmcReferenceNumber(), is("1000"));
+    assertThat(result.getDoctorFirstName(), is(FORENAME));
+    assertThat(result.getDoctorLastName(), is(SURNAME));
+    assertThat(result.getProgrammeMembershipType(), is(nullValue()));
+    assertThat(result.getProgrammeName(), is(nullValue()));
   }
 }
