@@ -47,6 +47,9 @@ public class RabbitConfig {
     return new Jackson2JsonMessageConverter(mapper);
   }
 
+  /**
+   * Rabbit template for setting message to RabbitMQ
+   */
   @Bean
   public RabbitTemplate rabbitTemplate(final ConnectionFactory connectionFactory) {
     final RabbitTemplate rabbitTemplate = new RabbitTemplate(connectionFactory);

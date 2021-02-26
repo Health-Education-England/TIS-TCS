@@ -8,7 +8,7 @@ import com.google.common.collect.Sets;
 import com.transformuk.hee.tis.reference.api.dto.GradeDTO;
 import com.transformuk.hee.tis.reference.client.ReferenceService;
 import com.transformuk.hee.tis.tcs.api.dto.ConnectionDetailDto;
-import com.transformuk.hee.tis.tcs.api.dto.ConnectionDto;;
+import com.transformuk.hee.tis.tcs.api.dto.ConnectionDto;
 import com.transformuk.hee.tis.tcs.api.dto.ConnectionInfoDto;
 import com.transformuk.hee.tis.tcs.api.dto.ConnectionInfoDto.ConnectionInfoDtoBuilder;
 import com.transformuk.hee.tis.tcs.api.dto.ConnectionRecordDto;
@@ -199,9 +199,9 @@ public class RevalidationServiceImpl implements RevalidationService {
     final ConnectionInfoDtoBuilder connectionInfoDtoBuilder = ConnectionInfoDto.builder();
 
     // GMC Details
-    final GmcDetailsDTO gmcDetailsDTO = gmcDetailsService.findOne(personId);
-    if (gmcDetailsDTO != null) {
-      connectionInfoDtoBuilder.gmcReferenceNumber(gmcDetailsDTO.getGmcNumber());
+    final GmcDetailsDTO gmcDetailsDto = gmcDetailsService.findOne(personId);
+    if (gmcDetailsDto != null) {
+      connectionInfoDtoBuilder.gmcReferenceNumber(gmcDetailsDto.getGmcNumber());
     }
 
     // Contact Details
@@ -214,18 +214,18 @@ public class RevalidationServiceImpl implements RevalidationService {
     // latest Programme Membership
     final ProgrammeMembership latestProgrammeMembership = programmeMembershipRepository
         .findLatestProgrammeMembershipByTraineeId(personId);
-    final ProgrammeMembershipDTO programmeMembershipDTO = programmeMembershipMapper
+    final ProgrammeMembershipDTO programmeMembershipDto = programmeMembershipMapper
         .toDto(latestProgrammeMembership);
-    if (programmeMembershipDTO != null) {
-      final String owner = programmeMembershipDTO.getProgrammeOwner();
-      final ProgrammeMembershipType membershipType = programmeMembershipDTO
+    if (programmeMembershipDto != null) {
+      final String owner = programmeMembershipDto.getProgrammeOwner();
+      final ProgrammeMembershipType membershipType = programmeMembershipDto
           .getProgrammeMembershipType();
       connectionInfoDtoBuilder
           .tcsDesignatedBody(owner != null ? DesignatedBodyMapper.getDbcByOwner(owner) : null)
           .programmeOwner(owner)
-          .programmeName(programmeMembershipDTO.getProgrammeName())
-          .programmeMembershipStartDate(programmeMembershipDTO.getProgrammeStartDate())
-          .programmeMembershipEndDate(programmeMembershipDTO.getProgrammeEndDate())
+          .programmeName(programmeMembershipDto.getProgrammeName())
+          .programmeMembershipStartDate(programmeMembershipDto.getProgrammeStartDate())
+          .programmeMembershipEndDate(programmeMembershipDto.getProgrammeEndDate())
           .programmeMembershipType(membershipType != null ? membershipType.toString() : null);
     }
 
