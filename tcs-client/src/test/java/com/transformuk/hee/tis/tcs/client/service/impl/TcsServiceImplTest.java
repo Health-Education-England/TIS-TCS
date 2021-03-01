@@ -219,7 +219,7 @@ public class TcsServiceImplTest {
   }
 
   @Test(expected = RestClientException.class)
-  public void getProgrammeByIdShouldThrowErrorWhenNotFound() {
+  public void getCurriculumByIdShouldThrowErrorWhenNotFound() {
     CurriculumDTO curriculumDto = new CurriculumDTO();
     curriculumDto.setId(10L);
 

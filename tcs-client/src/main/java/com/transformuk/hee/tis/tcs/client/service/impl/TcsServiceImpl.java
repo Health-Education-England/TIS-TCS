@@ -81,6 +81,7 @@ public class TcsServiceImpl extends AbstractClientService {
       "/api/specialties?columnFilters=";
   private static final String API_ROTATION_COLUMN_FILTERS = "/api/rotations?columnFilters=";
   private static final String API_ROTATION_POST = "/api/rotation-posts/";
+  private static final String API_CURRICULA = "/api/curricula/";
   private static final String API_CURRENT_CURRICULA_COLUMN_FILTERS =
       "/api/current/curricula?columnFilters=";
   private static final String API_PROGRAMMES_COLUMN_FILTERS = "/api/programmes?columnFilters=";
@@ -465,6 +466,12 @@ public class TcsServiceImpl extends AbstractClientService {
             new ParameterizedTypeReference<ProgrammeMembershipDTO>() {
             })
         .getBody();
+  }
+
+  public CurriculumDTO getCurriculumById(Long id) {
+    log.debug("calling getCurriculumById with {}", id);
+    String url = serviceUrl + API_CURRICULA + id;
+    return tcsRestTemplate.getForEntity(url, CurriculumDTO.class).getBody();
   }
 
   @Cacheable("curricula")
