@@ -1,8 +1,11 @@
 package com.transformuk.hee.tis.tcs.client.service.impl;
 
+import static org.hamcrest.CoreMatchers.is;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
+import static org.junit.Assert.assertThat;
 import static org.junit.Assert.assertTrue;
+import static org.mockito.Mockito.doReturn;
 import static org.mockito.Mockito.spy;
 import static org.mockito.Mockito.verify;
 
@@ -22,6 +25,8 @@ import org.junit.Test;
 import org.junit.rules.ExpectedException;
 import org.junit.runner.RunWith;
 import org.springframework.cloud.contract.wiremock.WireMockSpring;
+import org.springframework.http.HttpStatus;
+import org.springframework.http.ResponseEntity;
 import org.springframework.http.client.HttpComponentsClientHttpRequestFactory;
 import org.springframework.test.context.junit4.SpringRunner;
 import org.springframework.web.client.HttpClientErrorException;
@@ -198,15 +203,17 @@ public class TcsServiceImplTest {
 
   @Test
   public void getCurriculumByIdShouldFindCurriculumDto() {
-    try {
-      testObj.getCurriculumById(10L);
-    } catch (HttpClientErrorException e) {
-      // Ignoring the 404 NOT FOUND exception
-      // Only verifying that restTemplate makes the right call
-    }
+    CurriculumDTO curriculum = new CurriculumDTO();
+    curriculum.setId(10L);
 
-    verify(restTemplate).getForEntity("http://localhost:9999/tcs/api/curricula/10",
-        CurriculumDTO.class);
+    String url = "http://localhost:9999/tcs/api/curricula/10";
+
+    ResponseEntity responseEntity = new ResponseEntity(curriculum, HttpStatus.OK);
+    doReturn(responseEntity).when(restTemplate).getForEntity(url, CurriculumDTO.class);
+
+    CurriculumDTO result = testObj.getCurriculumById(10L);
+    assertThat("Unexpected result", result, is(curriculum));
+    verify(restTemplate).getForEntity(url, CurriculumDTO.class);
   }
 
   @Test
