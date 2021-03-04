@@ -1,8 +1,13 @@
 package com.transformuk.hee.tis.tcs.client.service.impl;
 
+import static org.hamcrest.CoreMatchers.is;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
+import static org.junit.Assert.assertThat;
 import static org.junit.Assert.assertTrue;
+import static org.mockito.Mockito.doReturn;
+import static org.mockito.Mockito.spy;
+import static org.mockito.Mockito.verify;
 
 import com.github.tomakehurst.wiremock.junit.WireMockClassRule;
 import com.google.common.collect.Maps;
@@ -11,13 +16,20 @@ import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.util.HashMap;
 import java.util.Optional;
+
+import com.transformuk.hee.tis.tcs.api.dto.CurriculumDTO;
 import org.junit.Before;
 import org.junit.ClassRule;
+import org.junit.Rule;
 import org.junit.Test;
+import org.junit.rules.ExpectedException;
 import org.junit.runner.RunWith;
 import org.springframework.cloud.contract.wiremock.WireMockSpring;
+import org.springframework.http.HttpStatus;
+import org.springframework.http.ResponseEntity;
 import org.springframework.http.client.HttpComponentsClientHttpRequestFactory;
 import org.springframework.test.context.junit4.SpringRunner;
+import org.springframework.web.client.HttpClientErrorException;
 import org.springframework.web.client.RestTemplate;
 
 @RunWith(SpringRunner.class)
@@ -25,6 +37,10 @@ public class TcsServiceImplTest {
 
   private static int WIRE_MOCK_PORT = 9999;
   private TcsServiceImpl testObj;
+  private RestTemplate restTemplate;
+
+  @Rule
+  public ExpectedException exceptionRule = ExpectedException.none();
 
   @ClassRule
   public static WireMockClassRule wiremock = new WireMockClassRule(
@@ -33,7 +49,8 @@ public class TcsServiceImplTest {
   @Before
   public void setup() {
     testObj = new TcsServiceImpl(1000D, 1000D);
-    testObj.setTcsRestTemplate(new RestTemplate(new HttpComponentsClientHttpRequestFactory()));
+    restTemplate = spy(new RestTemplate(new HttpComponentsClientHttpRequestFactory()));
+    testObj.setTcsRestTemplate(restTemplate);
     testObj.setServiceUrl("http://localhost:9999/tcs");
   }
 
@@ -182,5 +199,28 @@ public class TcsServiceImplTest {
   @Test(expected = IllegalArgumentException.class)
   public void patchAbsenceShouldThrowExceptionWhenParameterMapIsNull() {
     testObj.patchAbsence(1L, null);
+  }
+
+  @Test
+  public void getCurriculumByIdShouldFindCurriculumDto() {
+    CurriculumDTO curriculum = new CurriculumDTO();
+    curriculum.setId(10L);
+
+    String url = "http://localhost:9999/tcs/api/curricula/10";
+
+    ResponseEntity responseEntity = new ResponseEntity(curriculum, HttpStatus.OK);
+    doReturn(responseEntity).when(restTemplate).getForEntity(url, CurriculumDTO.class);
+
+    CurriculumDTO result = testObj.getCurriculumById(10L);
+    assertThat("Unexpected result", result, is(curriculum));
+    verify(restTemplate).getForEntity(url, CurriculumDTO.class);
+  }
+
+  @Test
+  public void getCurriculumByIdShouldThrowErrorWhenNotFound() {
+    exceptionRule.expect(HttpClientErrorException.class);
+    exceptionRule.expectMessage("404 Not Found");
+    // RestTemplate hasn't been set up to find any curriculum, so should throw exception
+    testObj.getCurriculumById(10L);
   }
 }
