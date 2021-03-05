@@ -12,6 +12,7 @@ import static org.mockito.Mockito.verify;
 import com.github.tomakehurst.wiremock.junit.WireMockClassRule;
 import com.google.common.collect.Maps;
 import com.transformuk.hee.tis.tcs.api.dto.AbsenceDTO;
+import com.transformuk.hee.tis.tcs.api.dto.SpecialtyDTO;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.util.HashMap;
@@ -222,5 +223,28 @@ public class TcsServiceImplTest {
     exceptionRule.expectMessage("404 Not Found");
     // RestTemplate hasn't been set up to find any curriculum, so should throw exception
     testObj.getCurriculumById(10L);
+  }
+
+  @Test
+  public void getSpecialtyByIdShouldFindSpecialtyDto() {
+    SpecialtyDTO specialty = new SpecialtyDTO();
+    specialty.setId(20L);
+
+    String url = "http://localhost:9999/tcs/api/specialties/20";
+
+    ResponseEntity responseEntity = new ResponseEntity(specialty, HttpStatus.OK);
+    doReturn(responseEntity).when(restTemplate).getForEntity(url, SpecialtyDTO.class);
+
+    SpecialtyDTO result = testObj.getSpecialtyById(20L);
+    assertThat("Unexpected result", result, is(specialty));
+    verify(restTemplate).getForEntity(url, SpecialtyDTO.class);
+  }
+
+  @Test
+  public void getSpecialtyByIdShouldThrowErrorWhenNotFound() {
+    exceptionRule.expect(HttpClientErrorException.class);
+    exceptionRule.expectMessage("404 Not Found");
+    // RestTemplate hasn't been set up to find any specialty, so should throw exception
+    testObj.getSpecialtyById(20L);
   }
 }
