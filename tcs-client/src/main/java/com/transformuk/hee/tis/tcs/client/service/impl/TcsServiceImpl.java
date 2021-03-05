@@ -469,6 +469,11 @@ public class TcsServiceImpl extends AbstractClientService {
         .getBody();
   }
 
+  /**
+   * Calls the endpoint to retrieve a CurriculumDto by id.
+   * @param id The id of the Curriculum.
+   * @return   The CurriculumDto.
+   */
   public CurriculumDTO getCurriculumById(Long id) {
     log.debug("calling getCurriculumById with {}", id);
     String url = serviceUrl + API_CURRICULA + id;
@@ -499,6 +504,11 @@ public class TcsServiceImpl extends AbstractClientService {
         .getBody();
   }
 
+  /**
+   * Calls the endpoint to retrieve a specialtyDto by id.
+   * @param id The id of the specialty.
+   * @return The SpecialtyDto.
+   */
   public SpecialtyDTO getSpecialtyById(Long id) {
     log.debug("calling getSpecialtyById with {}", id);
     String url = serviceUrl + API_SPECIALTIES + id;
