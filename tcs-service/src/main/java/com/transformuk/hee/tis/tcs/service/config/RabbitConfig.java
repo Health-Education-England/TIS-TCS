@@ -61,7 +61,7 @@ public class RabbitConfig {
     final RabbitTemplate rabbitTemplate = new RabbitTemplate(connectionFactory);
     rabbitTemplate.setMessageConverter(jsonMessageConverter());
     rabbitTemplate.containerAckMode(AcknowledgeMode.AUTO);
-    log.info("creating rabbit template {} ", rabbitTemplate);
+    log.debug("Creating rabbit template {} ", rabbitTemplate);
     return rabbitTemplate;
   }
 }
