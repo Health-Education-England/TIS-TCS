@@ -39,8 +39,10 @@ public class ProgrammeMembershipEventListener {
         event.getProgrammeMembershipDTO().getId());
     final Long personId = event.getProgrammeMembershipDTO().getPerson().getId();
     personElasticSearchService.updatePersonDocument(personId);
-    rabbitTemplate.convertAndSend(exchange, routingKey,
-        revalidationService.buildTcsConnectionInfo(personId));
+    if (!exchange.equals("false")) {
+      rabbitTemplate.convertAndSend(exchange, routingKey,
+          revalidationService.buildTcsConnectionInfo(personId));
+    }
   }
 
   @EventListener
@@ -49,8 +51,10 @@ public class ProgrammeMembershipEventListener {
         event.getProgrammeMembershipDTO().getId());
     final Long personId = event.getProgrammeMembershipDTO().getPerson().getId();
     personElasticSearchService.updatePersonDocument(personId);
-    rabbitTemplate.convertAndSend(exchange, routingKey,
-        revalidationService.buildTcsConnectionInfo(personId));
+    if (!exchange.equals("false")) {
+      rabbitTemplate.convertAndSend(exchange, routingKey,
+          revalidationService.buildTcsConnectionInfo(personId));
+    }
   }
 
   @EventListener
@@ -59,8 +63,10 @@ public class ProgrammeMembershipEventListener {
         event.getProgrammeMembershipDTO().getId());
     final Long personId = event.getProgrammeMembershipDTO().getPerson().getId();
     personElasticSearchService.deletePersonDocument(personId);
-    rabbitTemplate.convertAndSend(exchange, routingKey,
-        revalidationService.buildTcsConnectionInfo(personId));
+    if (!exchange.equals("false")) {
+      rabbitTemplate.convertAndSend(exchange, routingKey,
+          revalidationService.buildTcsConnectionInfo(personId));
+    }
   }
 
 }
