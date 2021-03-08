@@ -77,6 +77,7 @@ public class TcsServiceImpl extends AbstractClientService {
   private static final String API_RIGHT_TO_WORKS = "/api/right-to-works/";
   private static final String API_PROGRAMME_MEMBERSHIPS = "/api/programme-memberships/";
   private static final String API_TRAINEE_PLACEMENTS = "/api/people/%d/placements/new";
+  private static final String API_SPECIALTIES = "/api/specialties/";
   private static final String API_CURRENT_SPECIALTIES_COLUMN_FILTERS =
       "/api/specialties?columnFilters=";
   private static final String API_ROTATION_COLUMN_FILTERS = "/api/rotations?columnFilters=";
@@ -468,6 +469,11 @@ public class TcsServiceImpl extends AbstractClientService {
         .getBody();
   }
 
+  /**
+   * Calls the endpoint to retrieve a CurriculumDto by id.
+   * @param id The id of the Curriculum.
+   * @return   The CurriculumDto.
+   */
   public CurriculumDTO getCurriculumById(Long id) {
     log.debug("calling getCurriculumById with {}", id);
     String url = serviceUrl + API_CURRICULA + id;
@@ -496,6 +502,17 @@ public class TcsServiceImpl extends AbstractClientService {
             new ParameterizedTypeReference<List<SpecialtyDTO>>() {
             })
         .getBody();
+  }
+
+  /**
+   * Calls the endpoint to retrieve a specialtyDto by id.
+   * @param id The id of the specialty.
+   * @return The SpecialtyDto.
+   */
+  public SpecialtyDTO getSpecialtyById(Long id) {
+    log.debug("calling getSpecialtyById with {}", id);
+    String url = serviceUrl + API_SPECIALTIES + id;
+    return tcsRestTemplate.getForEntity(url, SpecialtyDTO.class).getBody();
   }
 
   @Cacheable("programme")
