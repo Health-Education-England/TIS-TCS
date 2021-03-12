@@ -2,7 +2,6 @@ package com.transformuk.hee.tis.tcs.api.dto;
 
 import com.transformuk.hee.tis.tcs.api.dto.validation.Create;
 import com.transformuk.hee.tis.tcs.api.dto.validation.Update;
-import com.transformuk.hee.tis.tcs.api.enumeration.PermitToWorkType;
 import java.io.Serializable;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
@@ -24,7 +23,7 @@ public class RightToWorkDTO implements Serializable {
 
   private String eeaResident;
 
-  private PermitToWorkType permitToWork;
+  private String permitToWork;
 
   private String settled;
 

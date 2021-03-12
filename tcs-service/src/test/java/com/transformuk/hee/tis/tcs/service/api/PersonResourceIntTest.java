@@ -7,6 +7,8 @@ import static org.hamcrest.Matchers.hasItem;
 import static org.hamcrest.Matchers.hasSize;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.eq;
+import static org.mockito.Mockito.spy;
+import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.delete;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
@@ -202,6 +204,8 @@ public class PersonResourceIntTest {
   private MockMvc restPersonMockMvc;
   private Person person;
 
+  private PersonValidator personValidatorSpy;
+
   /**
    * Create an entity for this test.
    * <p>
@@ -224,12 +228,14 @@ public class PersonResourceIntTest {
   @Before
   public void setup() {
     MockitoAnnotations.initMocks(this);
+    personValidatorSpy = spy(personValidator);
+
     PersonResource personResource = new PersonResource(personService, placementViewRepository,
         placementViewMapper,
         placementViewDecorator, personViewDecorator, placementService, placementSummaryDecorator,
-        personValidator,
+        personValidatorSpy,
         gmcDetailsValidator, gdcDetailsValidator, personalDetailsValidator, contactDetailsValidator,
-        personElasticSearchServiceMock);
+        rightToWorkValidator, personElasticSearchServiceMock);
     this.restPersonMockMvc = MockMvcBuilders.standaloneSetup(personResource)
         .setCustomArgumentResolvers(pageableArgumentResolver)
         .setControllerAdvice(exceptionTranslator)
@@ -259,6 +265,16 @@ public class PersonResourceIntTest {
     gdcDetails = gdcDetailsRepository.saveAndFlush(gdcDetails);
     person.setGdcDetails(gdcDetails);
 
+    RightToWork rightToWork = new RightToWork();
+    rightToWork.setId(id);
+    rightToWork = rightToWorkRepository.saveAndFlush(rightToWork);
+    person.setRightToWork(rightToWork);
+
+    PersonalDetails personalDetails = new PersonalDetails();
+    personalDetails.setId(id);
+    personalDetails = personalDetailsRepository.saveAndFlush(personalDetails);
+    person.setPersonalDetails(personalDetails);
+
     return person;
   }
 
@@ -271,6 +287,17 @@ public class PersonResourceIntTest {
   @Transactional
   public void createPerson() throws Exception {
     // Create the Person
+    ContactDetails contactDetails = new ContactDetails();
+    person.setContactDetails(contactDetails);
+    GmcDetails gmcDetails = new GmcDetails();
+    person.setGmcDetails(gmcDetails);
+    GdcDetails gdcDetails = new GdcDetails();
+    person.setGdcDetails(gdcDetails);
+    RightToWork rightToWork = new RightToWork();
+    person.setRightToWork(rightToWork);
+    PersonalDetails personalDetails = new PersonalDetails();
+    person.setPersonalDetails(personalDetails);
+
     final PersonDTO personDTO = personMapper.toDto(person);
     Map<String, Boolean> roleToExists = new HashMap<>();
     roleToExists.put(DEFAULT_ROLE, true);
@@ -295,6 +322,13 @@ public class PersonResourceIntTest {
     assertThat(testPerson.getInactiveNotes()).isEqualTo(DEFAULT_INACTIVE_NOTES);
     assertThat(testPerson.getPublicHealthNumber()).isEqualTo(DEFAULT_PUBLIC_HEALTH_NUMBER);
     assertThat(testPerson.getRegulator()).isEqualTo(DEFAULT_REGULATOR);
+
+    verify(personValidatorSpy).validate(any(PersonDTO.class));
+    verify(gmcDetailsValidator).validate(any(GmcDetailsDTO.class));
+    verify(gdcDetailsValidator).validate(any(GdcDetailsDTO.class));
+    verify(personalDetailsValidator).validate(any(PersonalDetailsDTO.class));
+    verify(contactDetailsValidator).validate(any(ContactDetailsDTO.class));
+    verify(rightToWorkValidator).validate(any(RightToWorkDTO.class));
   }
 
   @Test
@@ -639,6 +673,7 @@ public class PersonResourceIntTest {
   public void updatePerson() throws Exception {
     // Initialize the database
     Person savedPerson = personRepository.saveAndFlush(person);
+    savedPerson = createPersonBlankSubSections(savedPerson);
 
     // Update the person
     final PersonDTO updatedPersonDTO = personMapper.toDto(savedPerson);
@@ -675,6 +710,13 @@ public class PersonResourceIntTest {
     assertThat(testPerson.getInactiveNotes()).isEqualTo(UPDATED_INACTIVE_NOTES);
     assertThat(testPerson.getPublicHealthNumber()).isEqualTo(UPDATED_PUBLIC_HEALTH_NUMBER);
     assertThat(testPerson.getRegulator()).isEqualTo(UPDATED_REGULATOR);
+
+    verify(personValidatorSpy).validate(any(PersonDTO.class));
+    verify(gmcDetailsValidator).validate(any(GmcDetailsDTO.class));
+    verify(gdcDetailsValidator).validate(any(GdcDetailsDTO.class));
+    verify(personalDetailsValidator).validate(any(PersonalDetailsDTO.class));
+    verify(contactDetailsValidator).validate(any(ContactDetailsDTO.class));
+    verify(rightToWorkValidator).validate(any(RightToWorkDTO.class));
   }
 
   @Test

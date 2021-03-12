@@ -1,5 +1,7 @@
 package com.transformuk.hee.tis.tcs.service.api.validation;
 
+import com.transformuk.hee.tis.reference.api.dto.PermitToWorkDTO;
+import com.transformuk.hee.tis.reference.client.ReferenceService;
 import com.transformuk.hee.tis.tcs.api.dto.RightToWorkDTO;
 import com.transformuk.hee.tis.tcs.api.enumeration.EeaResident;
 import com.transformuk.hee.tis.tcs.api.enumeration.Settled;
@@ -24,6 +26,12 @@ public class RightToWorkValidator {
 
   private static final String DTO_NAME = "RightToWorkDTO";
 
+  private final ReferenceService referenceService;
+
+  RightToWorkValidator(ReferenceService referenceService) {
+    this.referenceService = referenceService;
+  }
+
   /**
    * Custom validation on the rightToWork DTO, this is meant to supplement the annotation based
    * validation already in place. It checks that the permit to work, visa status and EEA residency.
@@ -32,8 +40,8 @@ public class RightToWorkValidator {
    * @throws MethodArgumentNotValidException if there are validation errors
    */
   public void validate(RightToWorkDTO dto) throws MethodArgumentNotValidException {
-
     List<FieldError> fieldErrors = new ArrayList<>();
+    checkPermitToWork(dto, fieldErrors);
 
     if (!fieldErrors.isEmpty()) {
       BeanPropertyBindingResult bindingResult = new BeanPropertyBindingResult(dto, DTO_NAME);
@@ -82,6 +90,20 @@ public class RightToWorkValidator {
     }
   }
 
+  private void checkPermitToWork(RightToWorkDTO dto, List<FieldError> fieldErrors) {
+    String permitToWork = dto.getPermitToWork();
+
+    if (permitToWork != null) {
+      boolean exists = referenceService.isValueExists(PermitToWorkDTO.class, permitToWork, true);
+
+      if (!exists) {
+        FieldError fieldError = new FieldError(DTO_NAME, "permitToWork",
+            "permitToWork must match a current reference value.");
+        fieldErrors.add(fieldError);
+      }
+    }
+  }
+
   /**
    * Custom validation on the RightToWorkDTO for bulk upload.
    *
@@ -93,6 +115,7 @@ public class RightToWorkValidator {
     checkEeaResident(rightToWorkDto, fieldErrors);
     checkSettled(rightToWorkDto, fieldErrors);
     checkVisaDates(rightToWorkDto, fieldErrors);
+    checkPermitToWork(rightToWorkDto, fieldErrors);
     return fieldErrors;
   }
 }
