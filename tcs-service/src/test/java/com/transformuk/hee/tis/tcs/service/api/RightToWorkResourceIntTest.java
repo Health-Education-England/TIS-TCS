@@ -3,6 +3,7 @@ package com.transformuk.hee.tis.tcs.service.api;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.hamcrest.Matchers.containsInAnyOrder;
 import static org.hamcrest.Matchers.hasItem;
+import static org.mockito.Mockito.when;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.delete;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
@@ -11,6 +12,8 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
+import com.transformuk.hee.tis.reference.api.dto.PermitToWorkDTO;
+import com.transformuk.hee.tis.reference.client.impl.ReferenceServiceImpl;
 import com.transformuk.hee.tis.tcs.api.dto.RightToWorkDTO;
 import com.transformuk.hee.tis.tcs.service.Application;
 import com.transformuk.hee.tis.tcs.service.api.validation.RightToWorkValidator;
@@ -31,6 +34,7 @@ import org.junit.runner.RunWith;
 import org.mockito.MockitoAnnotations;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
+import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.data.web.PageableHandlerMethodArgumentResolver;
 import org.springframework.http.MediaType;
 import org.springframework.http.converter.json.MappingJackson2HttpMessageConverter;
@@ -92,6 +96,9 @@ public class RightToWorkResourceIntTest {
   @Autowired
   private RightToWorkValidator rightToWorkValidator;
 
+  @MockBean
+  private ReferenceServiceImpl referenceService;
+
   private MockMvc restRightToWorkMockMvc;
 
   private RightToWork rightToWork;
@@ -133,6 +140,8 @@ public class RightToWorkResourceIntTest {
   @Test
   @Transactional
   public void createRightToWork() throws Exception {
+    when(referenceService.isValueExists(PermitToWorkDTO.class, DEFAULT_PERMIT_TO_WORK, true))
+        .thenReturn(true);
     int databaseSizeBeforeCreate = rightToWorkRepository.findAll().size();
 
     // Create the RightToWork
@@ -167,8 +176,27 @@ public class RightToWorkResourceIntTest {
         .content(TestUtil.convertObjectToJsonBytes(rightToWorkDTO)))
         .andExpect(status().isBadRequest())
         .andExpect(jsonPath("$.message").value("error.validation"))
-        .andExpect(jsonPath("$.fieldErrors[*].field").
-            value(containsInAnyOrder("id")));
+        .andExpect(jsonPath("$.fieldErrors[*].field").value(containsInAnyOrder("id")));
+  }
+
+  @Test
+  @Transactional
+  public void shouldValidateNonMandatoryFieldsWhenCreating() throws Exception {
+    //given
+    when(referenceService.isValueExists(PermitToWorkDTO.class, DEFAULT_PERMIT_TO_WORK, true))
+        .thenReturn(false);
+
+    RightToWorkDTO rightToWorkDTO = new RightToWorkDTO();
+    rightToWorkDTO.setId(1L);
+    rightToWorkDTO.setPermitToWork(DEFAULT_PERMIT_TO_WORK);
+
+    //when & then
+    restRightToWorkMockMvc.perform(post("/api/right-to-works")
+        .contentType(MediaType.APPLICATION_JSON)
+        .content(TestUtil.convertObjectToJsonBytes(rightToWorkDTO)))
+        .andExpect(status().isBadRequest())
+        .andExpect(jsonPath("$.message").value("error.validation"))
+        .andExpect(jsonPath("$.fieldErrors[*].field").value(containsInAnyOrder("permitToWork")));
   }
 
   @Test
@@ -183,8 +211,27 @@ public class RightToWorkResourceIntTest {
         .content(TestUtil.convertObjectToJsonBytes(rightToWorkDTO)))
         .andExpect(status().isBadRequest())
         .andExpect(jsonPath("$.message").value("error.validation"))
-        .andExpect(jsonPath("$.fieldErrors[*].field").
-            value(containsInAnyOrder("id")));
+        .andExpect(jsonPath("$.fieldErrors[*].field").value(containsInAnyOrder("id")));
+  }
+
+  @Test
+  @Transactional
+  public void shouldValidateNonMandatoryFieldsWhenUpdating() throws Exception {
+    //given
+    when(referenceService.isValueExists(PermitToWorkDTO.class, DEFAULT_PERMIT_TO_WORK, true))
+        .thenReturn(false);
+
+    RightToWorkDTO rightToWorkDTO = new RightToWorkDTO();
+    rightToWorkDTO.setId(1L);
+    rightToWorkDTO.setPermitToWork(DEFAULT_PERMIT_TO_WORK);
+
+    //when & then
+    restRightToWorkMockMvc.perform(put("/api/right-to-works")
+        .contentType(MediaType.APPLICATION_JSON)
+        .content(TestUtil.convertObjectToJsonBytes(rightToWorkDTO)))
+        .andExpect(status().isBadRequest())
+        .andExpect(jsonPath("$.message").value("error.validation"))
+        .andExpect(jsonPath("$.fieldErrors[*].field").value(containsInAnyOrder("permitToWork")));
   }
 
   @Test
@@ -199,13 +246,14 @@ public class RightToWorkResourceIntTest {
         .contentType(MediaType.APPLICATION_JSON)
         .content(TestUtil.convertObjectToJsonBytes(rightToWorkDTO)))
         .andExpect(status().isCreated());
-
   }
-
 
   @Test
   @Transactional
   public void createRightToWorkWithExistingId() throws Exception {
+    when(referenceService.isValueExists(PermitToWorkDTO.class, DEFAULT_PERMIT_TO_WORK, true))
+        .thenReturn(true);
+
     //given
     int databaseSizeBeforeCreate = rightToWorkRepository.findAll().size();
     getOrCreateParent();
@@ -286,6 +334,9 @@ public class RightToWorkResourceIntTest {
   @Test
   @Transactional
   public void updateRightToWork() throws Exception {
+    when(referenceService.isValueExists(PermitToWorkDTO.class, UPDATED_PERMIT_TO_WORK, true))
+        .thenReturn(true);
+
     // Initialize the database
     rightToWorkRepository.saveAndFlush(rightToWork);
     int databaseSizeBeforeUpdate = rightToWorkRepository.findAll().size();
