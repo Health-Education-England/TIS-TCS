@@ -3,6 +3,7 @@ package com.transformuk.hee.tis.tcs.service.api;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.hamcrest.Matchers.containsInAnyOrder;
 import static org.hamcrest.Matchers.hasItem;
+import static org.mockito.Mockito.when;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.delete;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
@@ -11,8 +12,9 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
+import com.transformuk.hee.tis.reference.api.dto.PermitToWorkDTO;
+import com.transformuk.hee.tis.reference.client.impl.ReferenceServiceImpl;
 import com.transformuk.hee.tis.tcs.api.dto.RightToWorkDTO;
-import com.transformuk.hee.tis.tcs.api.enumeration.PermitToWorkType;
 import com.transformuk.hee.tis.tcs.service.Application;
 import com.transformuk.hee.tis.tcs.service.api.validation.RightToWorkValidator;
 import com.transformuk.hee.tis.tcs.service.exception.ExceptionTranslator;
@@ -26,13 +28,13 @@ import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.time.ZoneId;
 import java.util.List;
-import javax.persistence.EntityManager;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.mockito.MockitoAnnotations;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
+import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.data.web.PageableHandlerMethodArgumentResolver;
 import org.springframework.http.MediaType;
 import org.springframework.http.converter.json.MappingJackson2HttpMessageConverter;
@@ -53,8 +55,8 @@ public class RightToWorkResourceIntTest {
   private static final String DEFAULT_EEA_RESIDENT = "YES";
   private static final String UPDATED_EEA_RESIDENT = "NO";
 
-  private static final PermitToWorkType DEFAULT_PERMIT_TO_WORK = PermitToWorkType.WORK_PERMIT;
-  private static final PermitToWorkType UPDATED_PERMIT_TO_WORK = PermitToWorkType.INDEFINITE_LEAVE_TO_REMAIN;
+  private static final String DEFAULT_PERMIT_TO_WORK = "Work permit";
+  private static final String UPDATED_PERMIT_TO_WORK = "Indefinite leave to Remain";
 
   private static final String DEFAULT_SETTLED = "YES";
   private static final String UPDATED_SETTLED = "NO";
@@ -94,8 +96,8 @@ public class RightToWorkResourceIntTest {
   @Autowired
   private RightToWorkValidator rightToWorkValidator;
 
-  @Autowired
-  private EntityManager em;
+  @MockBean
+  private ReferenceServiceImpl referenceService;
 
   private MockMvc restRightToWorkMockMvc;
 
@@ -107,15 +109,15 @@ public class RightToWorkResourceIntTest {
    * This is a static method, as tests for other entities might also need it, if they test an entity
    * which requires the current entity.
    */
-  public static RightToWork createEntity(EntityManager em) {
-    RightToWork rightToWork = new RightToWork()
-        .id(1L)
-        .eeaResident(DEFAULT_EEA_RESIDENT)
-        .permitToWork(DEFAULT_PERMIT_TO_WORK)
-        .settled(DEFAULT_SETTLED)
-        .visaIssued(DEFAULT_VISA_ISSUED)
-        .visaValidTo(DEFAULT_VISA_VALID_TO)
-        .visaDetails(DEFAULT_VISA_DETAILS);
+  private static RightToWork createEntity() {
+    RightToWork rightToWork = new RightToWork();
+    rightToWork.setId(1L);
+    rightToWork.setEeaResident(DEFAULT_EEA_RESIDENT);
+    rightToWork.setPermitToWork(DEFAULT_PERMIT_TO_WORK);
+    rightToWork.setSettled(DEFAULT_SETTLED);
+    rightToWork.setVisaIssued(DEFAULT_VISA_ISSUED);
+    rightToWork.setVisaValidTo(DEFAULT_VISA_VALID_TO);
+    rightToWork.setVisaDetails(DEFAULT_VISA_DETAILS);
     return rightToWork;
   }
 
@@ -132,12 +134,14 @@ public class RightToWorkResourceIntTest {
 
   @Before
   public void initTest() {
-    rightToWork = createEntity(em);
+    rightToWork = createEntity();
   }
 
   @Test
   @Transactional
   public void createRightToWork() throws Exception {
+    when(referenceService.isValueExists(PermitToWorkDTO.class, DEFAULT_PERMIT_TO_WORK, true))
+        .thenReturn(true);
     int databaseSizeBeforeCreate = rightToWorkRepository.findAll().size();
 
     // Create the RightToWork
@@ -172,8 +176,27 @@ public class RightToWorkResourceIntTest {
         .content(TestUtil.convertObjectToJsonBytes(rightToWorkDTO)))
         .andExpect(status().isBadRequest())
         .andExpect(jsonPath("$.message").value("error.validation"))
-        .andExpect(jsonPath("$.fieldErrors[*].field").
-            value(containsInAnyOrder("id")));
+        .andExpect(jsonPath("$.fieldErrors[*].field").value(containsInAnyOrder("id")));
+  }
+
+  @Test
+  @Transactional
+  public void shouldValidateNonMandatoryFieldsWhenCreating() throws Exception {
+    //given
+    when(referenceService.isValueExists(PermitToWorkDTO.class, DEFAULT_PERMIT_TO_WORK, true))
+        .thenReturn(false);
+
+    RightToWorkDTO rightToWorkDTO = new RightToWorkDTO();
+    rightToWorkDTO.setId(1L);
+    rightToWorkDTO.setPermitToWork(DEFAULT_PERMIT_TO_WORK);
+
+    //when & then
+    restRightToWorkMockMvc.perform(post("/api/right-to-works")
+        .contentType(MediaType.APPLICATION_JSON)
+        .content(TestUtil.convertObjectToJsonBytes(rightToWorkDTO)))
+        .andExpect(status().isBadRequest())
+        .andExpect(jsonPath("$.message").value("error.validation"))
+        .andExpect(jsonPath("$.fieldErrors[*].field").value(containsInAnyOrder("permitToWork")));
   }
 
   @Test
@@ -188,8 +211,27 @@ public class RightToWorkResourceIntTest {
         .content(TestUtil.convertObjectToJsonBytes(rightToWorkDTO)))
         .andExpect(status().isBadRequest())
         .andExpect(jsonPath("$.message").value("error.validation"))
-        .andExpect(jsonPath("$.fieldErrors[*].field").
-            value(containsInAnyOrder("id")));
+        .andExpect(jsonPath("$.fieldErrors[*].field").value(containsInAnyOrder("id")));
+  }
+
+  @Test
+  @Transactional
+  public void shouldValidateNonMandatoryFieldsWhenUpdating() throws Exception {
+    //given
+    when(referenceService.isValueExists(PermitToWorkDTO.class, DEFAULT_PERMIT_TO_WORK, true))
+        .thenReturn(false);
+
+    RightToWorkDTO rightToWorkDTO = new RightToWorkDTO();
+    rightToWorkDTO.setId(1L);
+    rightToWorkDTO.setPermitToWork(DEFAULT_PERMIT_TO_WORK);
+
+    //when & then
+    restRightToWorkMockMvc.perform(put("/api/right-to-works")
+        .contentType(MediaType.APPLICATION_JSON)
+        .content(TestUtil.convertObjectToJsonBytes(rightToWorkDTO)))
+        .andExpect(status().isBadRequest())
+        .andExpect(jsonPath("$.message").value("error.validation"))
+        .andExpect(jsonPath("$.fieldErrors[*].field").value(containsInAnyOrder("permitToWork")));
   }
 
   @Test
@@ -204,13 +246,14 @@ public class RightToWorkResourceIntTest {
         .contentType(MediaType.APPLICATION_JSON)
         .content(TestUtil.convertObjectToJsonBytes(rightToWorkDTO)))
         .andExpect(status().isCreated());
-
   }
-
 
   @Test
   @Transactional
   public void createRightToWorkWithExistingId() throws Exception {
+    when(referenceService.isValueExists(PermitToWorkDTO.class, DEFAULT_PERMIT_TO_WORK, true))
+        .thenReturn(true);
+
     //given
     int databaseSizeBeforeCreate = rightToWorkRepository.findAll().size();
     getOrCreateParent();
@@ -252,7 +295,7 @@ public class RightToWorkResourceIntTest {
         .andExpect(content().contentType(MediaType.APPLICATION_JSON_VALUE))
         .andExpect(jsonPath("$.[*].id").value(hasItem(rightToWork.getId().intValue())))
         .andExpect(jsonPath("$.[*].eeaResident").value(hasItem(DEFAULT_EEA_RESIDENT)))
-        .andExpect(jsonPath("$.[*].permitToWork").value(hasItem(DEFAULT_PERMIT_TO_WORK.name())))
+        .andExpect(jsonPath("$.[*].permitToWork").value(hasItem(DEFAULT_PERMIT_TO_WORK)))
         .andExpect(jsonPath("$.[*].settled").value(hasItem(DEFAULT_SETTLED)))
         .andExpect(jsonPath("$.[*].visaIssued").value(hasItem(DEFAULT_VISA_ISSUED.toString())))
         .andExpect(jsonPath("$.[*].visaValidTo").value(hasItem(DEFAULT_VISA_VALID_TO.toString())))
@@ -272,7 +315,7 @@ public class RightToWorkResourceIntTest {
         .andExpect(content().contentType(MediaType.APPLICATION_JSON_VALUE))
         .andExpect(jsonPath("$.id").value(rightToWork.getId().intValue()))
         .andExpect(jsonPath("$.eeaResident").value(DEFAULT_EEA_RESIDENT))
-        .andExpect(jsonPath("$.permitToWork").value(DEFAULT_PERMIT_TO_WORK.name()))
+        .andExpect(jsonPath("$.permitToWork").value(DEFAULT_PERMIT_TO_WORK))
         .andExpect(jsonPath("$.settled").value(DEFAULT_SETTLED))
         .andExpect(jsonPath("$.visaIssued").value(DEFAULT_VISA_ISSUED.toString()))
         .andExpect(jsonPath("$.visaValidTo").value(DEFAULT_VISA_VALID_TO.toString()))
@@ -291,20 +334,22 @@ public class RightToWorkResourceIntTest {
   @Test
   @Transactional
   public void updateRightToWork() throws Exception {
+    when(referenceService.isValueExists(PermitToWorkDTO.class, UPDATED_PERMIT_TO_WORK, true))
+        .thenReturn(true);
+
     // Initialize the database
     rightToWorkRepository.saveAndFlush(rightToWork);
     int databaseSizeBeforeUpdate = rightToWorkRepository.findAll().size();
 
     // Update the rightToWork
     RightToWork updatedRightToWork = rightToWorkRepository.findById(rightToWork.getId())
-        .orElse(null);
-    updatedRightToWork
-        .eeaResident(UPDATED_EEA_RESIDENT)
-        .permitToWork(UPDATED_PERMIT_TO_WORK)
-        .settled(UPDATED_SETTLED)
-        .visaIssued(UPDATED_VISA_ISSUED)
-        .visaValidTo(UPDATED_VISA_VALID_TO)
-        .visaDetails(UPDATED_VISA_DETAILS);
+        .orElseThrow(() -> new Exception("Expected record not found."));
+    updatedRightToWork.setEeaResident(UPDATED_EEA_RESIDENT);
+    updatedRightToWork.setPermitToWork(UPDATED_PERMIT_TO_WORK);
+    updatedRightToWork.setSettled(UPDATED_SETTLED);
+    updatedRightToWork.setVisaIssued(UPDATED_VISA_ISSUED);
+    updatedRightToWork.setVisaValidTo(UPDATED_VISA_VALID_TO);
+    updatedRightToWork.setVisaDetails(UPDATED_VISA_DETAILS);
     RightToWorkDTO rightToWorkDTO = rightToWorkMapper.toDto(updatedRightToWork);
 
     restRightToWorkMockMvc.perform(put("/api/right-to-works")

@@ -27,6 +27,7 @@ import com.transformuk.hee.tis.tcs.service.api.validation.GdcDetailsValidator;
 import com.transformuk.hee.tis.tcs.service.api.validation.GmcDetailsValidator;
 import com.transformuk.hee.tis.tcs.service.api.validation.PersonValidator;
 import com.transformuk.hee.tis.tcs.service.api.validation.PersonalDetailsValidator;
+import com.transformuk.hee.tis.tcs.service.api.validation.RightToWorkValidator;
 import com.transformuk.hee.tis.tcs.service.exception.AccessUnauthorisedException;
 import com.transformuk.hee.tis.tcs.service.exception.ExceptionTranslator;
 import com.transformuk.hee.tis.tcs.service.repository.PlacementViewRepository;
@@ -92,6 +93,8 @@ public class PersonResourceTest2 {
   @MockBean
   private ContactDetailsValidator contactDetailsValidator;
   @MockBean
+  private RightToWorkValidator rightToWorkValidator;
+  @MockBean
   private PersonElasticSearchService personElasticSearchServiceMock;
 
   private PersonDTO personDTOStub;
@@ -106,7 +109,8 @@ public class PersonResourceTest2 {
         placementServiceMock,
         placementSummaryDecoratorMock, personValidatorMock, gmcDetailsValidator,
         gdcDetailsValidator,
-        personalDetailsValidator, contactDetailsValidator, personElasticSearchServiceMock);
+        personalDetailsValidator, contactDetailsValidator, rightToWorkValidator,
+        personElasticSearchServiceMock);
 
     this.mockMvc = MockMvcBuilders.standaloneSetup(personResource)
         .setCustomArgumentResolvers(pageableArgumentResolver)
@@ -314,9 +318,11 @@ public class PersonResourceTest2 {
         .andExpect(jsonPath("$.number").value(page))
         .andExpect(jsonPath("$.numberOfElements").value(content.size()))
         .andExpect(jsonPath("$.content.[*].id").value(containsInAnyOrder(1, 2)))
-        .andExpect(jsonPath("$.content.[0].programmeId").value(1))
-    ;
-
+        .andExpect(jsonPath("$.content.[0].programmeId").value(1));
   }
 
+//  @Test
+//  public void shouldPerformValidationOnPersonCreate() {
+//    mockMvc.perform(post("/api/person"))
+//  }
 }

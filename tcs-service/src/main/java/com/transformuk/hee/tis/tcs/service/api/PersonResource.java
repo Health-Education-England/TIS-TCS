@@ -26,6 +26,7 @@ import com.transformuk.hee.tis.tcs.service.api.validation.GdcDetailsValidator;
 import com.transformuk.hee.tis.tcs.service.api.validation.GmcDetailsValidator;
 import com.transformuk.hee.tis.tcs.service.api.validation.PersonValidator;
 import com.transformuk.hee.tis.tcs.service.api.validation.PersonalDetailsValidator;
+import com.transformuk.hee.tis.tcs.service.api.validation.RightToWorkValidator;
 import com.transformuk.hee.tis.tcs.service.model.ColumnFilter;
 import com.transformuk.hee.tis.tcs.service.model.PlacementView;
 import com.transformuk.hee.tis.tcs.service.repository.PlacementViewRepository;
@@ -88,6 +89,7 @@ public class PersonResource {
   private final GdcDetailsValidator gdcDetailsValidator;
   private final PersonalDetailsValidator personalDetailsValidator;
   private final ContactDetailsValidator contactDetailsValidator;
+  private final RightToWorkValidator rightToWorkValidator;
   private final PersonElasticSearchService personElasticSearchService;
   @Value("${enable.es.search}")
   private boolean enableEsSearch;
@@ -100,6 +102,7 @@ public class PersonResource {
       GmcDetailsValidator gmcDetailsValidator, GdcDetailsValidator gdcDetailsValidator,
       PersonalDetailsValidator personalDetailsValidator,
       ContactDetailsValidator contactDetailsValidator,
+      RightToWorkValidator rightToWorkValidator,
       PersonElasticSearchService personElasticSearchService) {
     this.personService = personService;
     this.placementViewRepository = placementViewRepository;
@@ -113,6 +116,7 @@ public class PersonResource {
     this.gdcDetailsValidator = gdcDetailsValidator;
     this.personalDetailsValidator = personalDetailsValidator;
     this.contactDetailsValidator = contactDetailsValidator;
+    this.rightToWorkValidator = rightToWorkValidator;
     this.personElasticSearchService = personElasticSearchService;
   }
 
@@ -121,7 +125,7 @@ public class PersonResource {
    *
    * @param personDTO the personDTO to create
    * @return the ResponseEntity with status 201 (Created) and with body the new personDTO, or with
-   * status 400 (Bad Request) if the person has already an ID
+   *     status 400 (Bad Request) if the person has already an ID
    * @throws URISyntaxException if the Location URI syntax is incorrect
    */
   @PostMapping("/people")
@@ -140,6 +144,7 @@ public class PersonResource {
     gdcDetailsValidator.validate(personDTO.getGdcDetails());
     personalDetailsValidator.validate(personDTO.getPersonalDetails());
     contactDetailsValidator.validate(personDTO.getContactDetails());
+    rightToWorkValidator.validate(personDTO.getRightToWork());
 
     final PersonDTO result = personService.create(personDTO);
     return ResponseEntity.created(new URI("/api/people/" + result.getId()))
@@ -152,8 +157,8 @@ public class PersonResource {
    *
    * @param personDTO the personDTO to update
    * @return the ResponseEntity with status 200 (OK) and with body the updated personDTO, or with
-   * status 400 (Bad Request) if the personDTO is not valid, or with status 500 (Internal Server
-   * Error) if the personDTO couldn't be updated
+   *     status 400 (Bad Request) if the personDTO is not valid, or with status 500 (Internal Server
+   *     Error) if the personDTO couldn't be updated
    * @throws URISyntaxException if the Location URI syntax is incorrect
    */
   @PutMapping("/people")
@@ -172,6 +177,7 @@ public class PersonResource {
     gdcDetailsValidator.validate(personDTO.getGdcDetails());
     personalDetailsValidator.validate(personDTO.getPersonalDetails());
     contactDetailsValidator.validate(personDTO.getContactDetails());
+    rightToWorkValidator.validate(personDTO.getRightToWork());
 
     PersonDTO result = personService.save(personDTO);
     return ResponseEntity.ok()
@@ -287,7 +293,7 @@ public class PersonResource {
    *
    * @param ids the ids to search by
    * @return the ResponseEntity with status 200 (OK)  and the list of personBasicDetails in body, or
-   * empty list
+   *     empty list
    */
   @GetMapping("/people/in/{ids}/basic")
   @PreAuthorize("hasPermission('tis:people::person:', 'View')")
@@ -322,7 +328,7 @@ public class PersonResource {
    *
    * @param id the id of the personDTO to retrieve
    * @return the ResponseEntity with status 200 (OK) and with body the personDTO, or with status 404
-   * (Not Found)
+   *     (Not Found)
    */
   @GetMapping("/people/{id}")
   @PreAuthorize("hasRole('ETL') or hasPermission('tis:people::person:', 'View')")
@@ -342,7 +348,7 @@ public class PersonResource {
    *
    * @param id the id of the personDTO to retrieve
    * @return the ResponseEntity with status 200 (OK) and with body the personDTO, or with status 404
-   * (Not Found)
+   *     (Not Found)
    */
   @GetMapping("/people/v2/{id}")
   @PreAuthorize("hasPermission('tis:people::person:', 'View')")

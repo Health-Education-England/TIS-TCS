@@ -3,7 +3,9 @@ package com.transformuk.hee.tis.tcs.service.api.validation;
 import static org.hamcrest.CoreMatchers.equalTo;
 import static org.hamcrest.CoreMatchers.is;
 import static org.hamcrest.MatcherAssert.assertThat;
+import static org.mockito.Mockito.mock;
 
+import com.transformuk.hee.tis.reference.client.ReferenceService;
 import com.transformuk.hee.tis.tcs.api.dto.RightToWorkDTO;
 import java.time.LocalDate;
 import java.util.List;
@@ -13,13 +15,12 @@ import org.springframework.validation.FieldError;
 
 class RightToWorkValidatorTest {
 
-  private static final String DTO_NAME = RightToWorkDTO.class.getSimpleName();
-
   private RightToWorkValidator validator;
 
   @BeforeEach
   void setUp() {
-    validator = new RightToWorkValidator();
+    ReferenceService referenceService = mock(ReferenceService.class);
+    validator = new RightToWorkValidator(referenceService);
   }
 
   @Test

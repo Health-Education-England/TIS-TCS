@@ -20,6 +20,7 @@ import com.transformuk.hee.tis.tcs.service.api.validation.GdcDetailsValidator;
 import com.transformuk.hee.tis.tcs.service.api.validation.GmcDetailsValidator;
 import com.transformuk.hee.tis.tcs.service.api.validation.PersonValidator;
 import com.transformuk.hee.tis.tcs.service.api.validation.PersonalDetailsValidator;
+import com.transformuk.hee.tis.tcs.service.api.validation.RightToWorkValidator;
 import com.transformuk.hee.tis.tcs.service.exception.ExceptionTranslator;
 import com.transformuk.hee.tis.tcs.service.model.ContactDetails;
 import com.transformuk.hee.tis.tcs.service.model.Person;
@@ -96,6 +97,8 @@ public class ContactDetailsDTOValidatorTest {
   private PersonalDetailsValidator personalDetailsValidator;
   @Mock
   private ContactDetailsValidator contactDetailsValidator;
+  @MockBean
+  private RightToWorkValidator rightToWorkValidator;
 
   @MockBean
   private PermissionService permissionServiceMock;
@@ -115,7 +118,7 @@ public class ContactDetailsDTOValidatorTest {
         placementViewDecorator, personViewDecorator, placementService, placementSummaryDecorator,
         personValidator,
         gmcDetailsValidator, gdcDetailsValidator, personalDetailsValidator, contactDetailsValidator,
-        personElasticSearchServiceMock);
+        rightToWorkValidator, personElasticSearchServiceMock);
     this.restContactDetailsMockMvc = MockMvcBuilders.standaloneSetup(contactDetailsResource)
         .setCustomArgumentResolvers(pageableArgumentResolver)
         .setControllerAdvice(exceptionTranslator)
