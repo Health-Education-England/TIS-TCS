@@ -3,8 +3,12 @@ package com.transformuk.hee.tis.tcs.service.api.validation;
 import static org.hamcrest.CoreMatchers.equalTo;
 import static org.hamcrest.CoreMatchers.is;
 import static org.hamcrest.MatcherAssert.assertThat;
+import static org.junit.jupiter.api.Assertions.assertDoesNotThrow;
+import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.when;
 
+import com.transformuk.hee.tis.reference.api.dto.PermitToWorkDTO;
 import com.transformuk.hee.tis.reference.client.ReferenceService;
 import com.transformuk.hee.tis.tcs.api.dto.RightToWorkDTO;
 import java.time.LocalDate;
@@ -12,15 +16,24 @@ import java.util.List;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.springframework.validation.FieldError;
+import org.springframework.web.bind.MethodArgumentNotValidException;
 
 class RightToWorkValidatorTest {
 
   private RightToWorkValidator validator;
 
+  private ReferenceService referenceService;
+
   @BeforeEach
   void setUp() {
-    ReferenceService referenceService = mock(ReferenceService.class);
+    referenceService = mock(ReferenceService.class);
     validator = new RightToWorkValidator(referenceService);
+  }
+
+  @Test
+  void shouldPassBulkValidationWhenDtoNull() {
+    List<FieldError> fieldErrors = validator.validateForBulk(null);
+    assertThat("Unexpected number of errors", fieldErrors.size(), is(0));
   }
 
   @Test
@@ -230,5 +243,40 @@ class RightToWorkValidatorTest {
     List<FieldError> fieldErrors = validator.validateForBulk(dto);
     // Then.
     assertThat("Error list should contain 3 errors.", fieldErrors.size(), equalTo(3));
+  }
+
+  @Test
+  void shouldPassValidationWhenDtoNull() {
+    assertDoesNotThrow(() -> validator.validate(null));
+  }
+
+  @Test
+  void shouldFailValidationPermitToWorkNotExists() {
+    RightToWorkDTO dto = new RightToWorkDTO();
+    dto.setPermitToWork("doesNotExist");
+
+    when(referenceService.isValueExists(PermitToWorkDTO.class, "doesNotExist", true))
+        .thenReturn(false);
+
+    MethodArgumentNotValidException exception = assertThrows(MethodArgumentNotValidException.class,
+        () -> validator.validate(dto));
+
+    List<FieldError> permitToWorkErrors = exception.getBindingResult()
+        .getFieldErrors("permitToWork");
+    assertThat("Unexpected number of errors.", permitToWorkErrors.size(), is(1));
+
+    FieldError permitToWorkError = permitToWorkErrors.get(0);
+    assertThat("Unexpected rejected value.", permitToWorkError.getDefaultMessage(),
+        is("permitToWork must match a current reference value."));
+  }
+
+  @Test
+  void shouldPassValidationPermitToWorkExists() {
+    RightToWorkDTO dto = new RightToWorkDTO();
+    dto.setPermitToWork("doesExist");
+
+    when(referenceService.isValueExists(PermitToWorkDTO.class, "doesExist", true)).thenReturn(true);
+
+    assertDoesNotThrow(() -> validator.validate(dto));
   }
 }
