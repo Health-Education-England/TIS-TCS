@@ -40,6 +40,10 @@ public class RightToWorkValidator {
    * @throws MethodArgumentNotValidException if there are validation errors
    */
   public void validate(RightToWorkDTO dto) throws MethodArgumentNotValidException {
+    if (dto == null) {
+      return;
+    }
+
     List<FieldError> fieldErrors = new ArrayList<>();
     checkPermitToWork(dto, fieldErrors);
 
@@ -112,10 +116,13 @@ public class RightToWorkValidator {
    */
   public List<FieldError> validateForBulk(RightToWorkDTO rightToWorkDto) {
     List<FieldError> fieldErrors = new ArrayList<>();
-    checkEeaResident(rightToWorkDto, fieldErrors);
-    checkSettled(rightToWorkDto, fieldErrors);
-    checkVisaDates(rightToWorkDto, fieldErrors);
-    checkPermitToWork(rightToWorkDto, fieldErrors);
+
+    if (rightToWorkDto != null) {
+      checkEeaResident(rightToWorkDto, fieldErrors);
+      checkSettled(rightToWorkDto, fieldErrors);
+      checkVisaDates(rightToWorkDto, fieldErrors);
+      checkPermitToWork(rightToWorkDto, fieldErrors);
+    }
     return fieldErrors;
   }
 }
