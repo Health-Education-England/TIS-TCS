@@ -8,8 +8,6 @@ import static org.hamcrest.CoreMatchers.is;
 import static org.hamcrest.CoreMatchers.notNullValue;
 import static org.hamcrest.CoreMatchers.nullValue;
 import static org.hamcrest.MatcherAssert.assertThat;
-import static org.mockito.ArgumentMatchers.any;
-import static org.mockito.ArgumentMatchers.isNull;
 import static org.mockito.Mockito.when;
 
 import com.google.common.collect.Sets;
@@ -45,7 +43,6 @@ import java.util.List;
 import java.util.Map;
 import java.util.stream.Stream;
 import org.assertj.core.util.Lists;
-import org.checkerframework.checker.units.qual.C;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -473,6 +470,7 @@ public class RevalidationServiceImplTest {
     ConnectionInfoDto result = testObj.buildTcsConnectionInfo(PERSON_ID);
 
     assertThat(result, notNullValue());
+    assertThat(result.getTcsPersonId(), is(PERSON_ID));
     assertThat(result.getGmcReferenceNumber(), is("1000"));
     assertThat(result.getDoctorFirstName(), is(FORENAME));
     assertThat(result.getDoctorLastName(), is(SURNAME));
@@ -493,6 +491,7 @@ public class RevalidationServiceImplTest {
     ConnectionInfoDto result = testObj.buildTcsConnectionInfo(PERSON_ID);
 
     assertThat(result, notNullValue());
+    assertThat(result.getTcsPersonId(), is(PERSON_ID));
     assertThat(result.getGmcReferenceNumber(), is("1000"));
     assertThat(result.getDoctorFirstName(), is(nullValue()));
     assertThat(result.getDoctorLastName(), is(nullValue()));
@@ -513,6 +512,7 @@ public class RevalidationServiceImplTest {
     ConnectionInfoDto result = testObj.buildTcsConnectionInfo(PERSON_ID);
 
     assertThat(result, notNullValue());
+    assertThat(result.getTcsPersonId(), is(PERSON_ID));
     assertThat(result.getGmcReferenceNumber(), is(nullValue()));
     assertThat(result.getDoctorFirstName(), is(FORENAME));
     assertThat(result.getDoctorLastName(), is(SURNAME));

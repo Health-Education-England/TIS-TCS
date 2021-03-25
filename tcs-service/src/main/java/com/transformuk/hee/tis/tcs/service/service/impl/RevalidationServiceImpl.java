@@ -197,6 +197,7 @@ public class RevalidationServiceImpl implements RevalidationService {
   public ConnectionInfoDto buildTcsConnectionInfo(Long personId) {
 
     final ConnectionInfoDtoBuilder connectionInfoDtoBuilder = ConnectionInfoDto.builder();
+    connectionInfoDtoBuilder.tcsPersonId(personId);
 
     // GMC Details
     final GmcDetailsDTO gmcDetailsDto = gmcDetailsService.findOne(personId);
