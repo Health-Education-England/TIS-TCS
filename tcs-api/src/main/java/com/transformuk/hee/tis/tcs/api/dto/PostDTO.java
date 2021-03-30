@@ -35,7 +35,9 @@ public class PostDTO implements Serializable {
   private PostDTO oldPost;
   private PostDTO newPost;
   private Set<PostSiteDTO> sites;
+  @NotNull(message = "Employing body is required", groups = {Update.class, Create.class})
   private Long employingBodyId;
+  @NotNull(message = "Training body is required", groups = {Update.class, Create.class})
   private Long trainingBodyId;
   private Set<PostGradeDTO> grades;
   private Set<PostSpecialtyDTO> specialties;
