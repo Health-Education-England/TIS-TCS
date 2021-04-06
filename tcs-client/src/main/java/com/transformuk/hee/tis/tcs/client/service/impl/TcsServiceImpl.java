@@ -18,6 +18,7 @@ import com.transformuk.hee.tis.tcs.api.dto.PlacementCommentDTO;
 import com.transformuk.hee.tis.tcs.api.dto.PlacementDTO;
 import com.transformuk.hee.tis.tcs.api.dto.PlacementDetailsDTO;
 import com.transformuk.hee.tis.tcs.api.dto.PlacementFunderDTO;
+import com.transformuk.hee.tis.tcs.api.dto.PlacementSpecialtyDTO;
 import com.transformuk.hee.tis.tcs.api.dto.PostDTO;
 import com.transformuk.hee.tis.tcs.api.dto.PostFundingDTO;
 import com.transformuk.hee.tis.tcs.api.dto.ProgrammeDTO;
@@ -80,6 +81,7 @@ public class TcsServiceImpl extends AbstractClientService {
   private static final String API_SPECIALTIES = "/api/specialties/";
   private static final String API_CURRENT_SPECIALTIES_COLUMN_FILTERS =
       "/api/specialties?columnFilters=";
+  private static final String API_PLACEMENT_SPECIALTIES = "/api/placement-specialties/";
   private static final String API_ROTATION_COLUMN_FILTERS = "/api/rotations?columnFilters=";
   private static final String API_ROTATION_POST = "/api/rotation-posts/";
   private static final String API_CURRICULA = "/api/curricula/";
@@ -513,6 +515,18 @@ public class TcsServiceImpl extends AbstractClientService {
     log.debug("calling getSpecialtyById with {}", id);
     String url = serviceUrl + API_SPECIALTIES + id;
     return tcsRestTemplate.getForEntity(url, SpecialtyDTO.class).getBody();
+  }
+
+  /**
+   * Calls the endpoint to retrieve a PlacementSpecialtyDto by placement id and specialty id.
+   * @param placementId The id of the Placement.
+   * @param specialtyId The id of the Specialty.
+   * @return   The PlacementSpecialtyDto.
+   */
+  public PlacementSpecialtyDTO getPlacementSpecialtyByCompositeId(Long placementId, Long specialtyId) {
+    log.debug("calling getPlacementSpecialtyByIds with {},{}", placementId, specialtyId);
+    String url = serviceUrl + API_PLACEMENT_SPECIALTIES + placementId + "/" + specialtyId;
+    return tcsRestTemplate.getForEntity(url, PlacementSpecialtyDTO.class).getBody();
   }
 
   @Cacheable("programme")

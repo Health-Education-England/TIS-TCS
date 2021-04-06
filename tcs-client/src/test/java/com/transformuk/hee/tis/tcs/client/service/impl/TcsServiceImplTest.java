@@ -12,6 +12,7 @@ import static org.mockito.Mockito.verify;
 import com.github.tomakehurst.wiremock.junit.WireMockClassRule;
 import com.google.common.collect.Maps;
 import com.transformuk.hee.tis.tcs.api.dto.AbsenceDTO;
+import com.transformuk.hee.tis.tcs.api.dto.PlacementSpecialtyDTO;
 import com.transformuk.hee.tis.tcs.api.dto.SpecialtyDTO;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
@@ -246,5 +247,29 @@ public class TcsServiceImplTest {
     exceptionRule.expectMessage("404 Not Found");
     // RestTemplate hasn't been set up to find any specialty, so should throw exception
     testObj.getSpecialtyById(20L);
+  }
+
+  @Test
+  public void getPlacementSpecialtyByCompositeIdShouldFindPlacementSpecialtyDto() {
+    PlacementSpecialtyDTO placementSpecialty = new PlacementSpecialtyDTO();
+    placementSpecialty.setPlacementId(20L);
+    placementSpecialty.setSpecialtyId(21L);
+
+    String url = "http://localhost:9999/tcs/api/placement-specialties/20/21";
+
+    ResponseEntity responseEntity = new ResponseEntity(placementSpecialty, HttpStatus.OK);
+    doReturn(responseEntity).when(restTemplate).getForEntity(url, PlacementSpecialtyDTO.class);
+
+    PlacementSpecialtyDTO result = testObj.getPlacementSpecialtyByCompositeId(20L, 21L);
+    assertThat("Unexpected result", result, is(placementSpecialty));
+    verify(restTemplate).getForEntity(url, PlacementSpecialtyDTO.class);
+  }
+
+  @Test
+  public void getPlacementSpecialtyByCompositeIdShouldThrowErrorWhenNotFound() {
+    exceptionRule.expect(HttpClientErrorException.class);
+    exceptionRule.expectMessage("404 Not Found");
+    // RestTemplate hasn't been set up to find any placement specialty, so should throw exception
+    testObj.getPlacementSpecialtyByCompositeId(20L, 21L);
   }
 }
