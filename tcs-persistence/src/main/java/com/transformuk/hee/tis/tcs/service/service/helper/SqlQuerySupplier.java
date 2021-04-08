@@ -33,6 +33,7 @@ public class SqlQuerySupplier {
   public static final String PERSON_PLACEMENT_TRAININGBODY = "queries/personPlacementTrainingBody.sql";
   public static final String POST_EMPLOYINGBODY = "queries/postEmployingBody.sql";
   public static final String POST_TRAININGBODY = "queries/postTrainingBody.sql";
+  public static final String TRAINEE_CONNECTION_INFO = "queries/traineeInfoForConnection.sql";
   private static final Logger LOG = getLogger(SqlQuerySupplier.class);
   private Map<String, String> files;
 

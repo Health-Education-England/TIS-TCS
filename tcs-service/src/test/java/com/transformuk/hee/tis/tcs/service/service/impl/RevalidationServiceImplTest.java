@@ -8,7 +8,9 @@ import static org.hamcrest.CoreMatchers.is;
 import static org.hamcrest.CoreMatchers.notNullValue;
 import static org.hamcrest.CoreMatchers.nullValue;
 import static org.hamcrest.MatcherAssert.assertThat;
+import static org.mockito.ArgumentMatchers.*;
 import static org.mockito.Mockito.when;
+import static org.mockito.Mockito.verify;
 
 import com.google.common.collect.Sets;
 import com.transformuk.hee.tis.reference.api.dto.GradeDTO;
@@ -33,6 +35,7 @@ import com.transformuk.hee.tis.tcs.service.repository.PlacementRepository;
 import com.transformuk.hee.tis.tcs.service.repository.ProgrammeMembershipRepository;
 import com.transformuk.hee.tis.tcs.service.service.ContactDetailsService;
 import com.transformuk.hee.tis.tcs.service.service.GmcDetailsService;
+import com.transformuk.hee.tis.tcs.service.service.helper.SqlQuerySupplier;
 import com.transformuk.hee.tis.tcs.service.service.mapper.DesignatedBodyMapper;
 import com.transformuk.hee.tis.tcs.service.service.mapper.ProgrammeMembershipMapper;
 import java.time.LocalDate;
@@ -48,11 +51,15 @@ import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
+import org.mockito.MockitoAnnotations;
 import org.mockito.junit.MockitoJUnitRunner;
 import org.mockito.stubbing.OngoingStubbing;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
+import org.springframework.jdbc.core.RowMapper;
+import org.springframework.jdbc.core.namedparam.MapSqlParameterSource;
+import org.springframework.jdbc.core.namedparam.NamedParameterJdbcTemplate;
 
 @RunWith(MockitoJUnitRunner.class)
 public class RevalidationServiceImplTest {
@@ -109,6 +116,10 @@ public class RevalidationServiceImplTest {
   private ProgrammeMembershipMapper pmMapper;
   @Mock
   private ProgrammeMembershipDTO programmeMembershipDTO;
+  @Mock
+  private NamedParameterJdbcTemplate namedParameterJdbcTemplateMock;
+  @Mock
+  private SqlQuerySupplier sqlQuerySupplier;
 
   private ContactDetailsDTO contactDetails;
   private GmcDetailsDTO gmcDetailsDTO;
@@ -535,5 +546,18 @@ public class RevalidationServiceImplTest {
     assertThat(result.getDoctorLastName(), is(SURNAME));
     assertThat(result.getProgrammeMembershipType(), is(nullValue()));
     assertThat(result.getProgrammeName(), is(nullValue()));
+  }
+
+  @Test
+  public void shouldExtractTraineeConnectionInfo() {
+    MockitoAnnotations.initMocks(this);
+    when(sqlQuerySupplier.getQuery(any(String.class))).thenReturn("Query");
+
+    when(namedParameterJdbcTemplateMock
+        .query(anyString(), any(MapSqlParameterSource.class), any(RowMapper.class))).thenReturn(new ArrayList<>());
+
+    List<ConnectionInfoDto> result = testObj.extractConnectionInfoForSync();
+    verify(namedParameterJdbcTemplateMock).query(any(String.class), any(MapSqlParameterSource.class), any(RowMapper.class));
+
   }
 }
