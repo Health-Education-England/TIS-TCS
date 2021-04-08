@@ -30,23 +30,27 @@ import com.transformuk.hee.tis.tcs.service.repository.ProgrammeMembershipReposit
 import com.transformuk.hee.tis.tcs.service.service.ContactDetailsService;
 import com.transformuk.hee.tis.tcs.service.service.GmcDetailsService;
 import com.transformuk.hee.tis.tcs.service.service.RevalidationService;
+import com.transformuk.hee.tis.tcs.service.service.helper.SqlQuerySupplier;
 import com.transformuk.hee.tis.tcs.service.service.mapper.DesignatedBodyMapper;
 import com.transformuk.hee.tis.tcs.service.service.mapper.ProgrammeMembershipMapper;
+
+import java.sql.ResultSet;
+import java.sql.SQLException;
+import java.time.Instant;
 import java.time.LocalDate;
-import java.util.ArrayList;
-import java.util.Collections;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
-import java.util.Objects;
-import java.util.Set;
+import java.time.ZoneId;
+import java.util.*;
 import java.util.stream.Collectors;
 import javax.transaction.Transactional;
 import org.apache.commons.collections4.CollectionUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
+import org.springframework.jdbc.core.RowMapper;
+import org.springframework.jdbc.core.namedparam.MapSqlParameterSource;
+import org.springframework.jdbc.core.namedparam.NamedParameterJdbcTemplate;
 import org.springframework.stereotype.Service;
 import org.springframework.util.StringUtils;
 
@@ -66,6 +70,10 @@ public class RevalidationServiceImpl implements RevalidationService {
   private final ReferenceService referenceService;
   private final PersonRepository personRepository;
   private final ProgrammeMembershipMapper programmeMembershipMapper;
+  @Autowired
+  private NamedParameterJdbcTemplate namedParameterJdbcTemplate;
+  @Autowired
+  private SqlQuerySupplier sqlQuerySupplier;
 
   public RevalidationServiceImpl(ContactDetailsService contactDetailsService,
       GmcDetailsService gmcDetailsService,
@@ -234,6 +242,16 @@ public class RevalidationServiceImpl implements RevalidationService {
     return connectionInfoDtoBuilder.build();
   }
 
+  @Override
+  public List<ConnectionInfoDto> extractConnectionInfoForSync() {
+    final String query = sqlQuerySupplier
+        .getQuery(SqlQuerySupplier.TRAINEE_CONNECTION_INFO);
+    MapSqlParameterSource paramSource = new MapSqlParameterSource();
+    List<ConnectionInfoDto> persons = namedParameterJdbcTemplate
+        .query(query, paramSource, new RevalidationConnectionInfoMapper());
+    return persons;
+  }
+
   private ConnectionSummaryRecordDto buildHiddenConnectionList(ConnectionDto conn) {
     final ProgrammeMembership latestProgrammeMembership = programmeMembershipRepository
         .findLatestProgrammeMembershipByTraineeId(conn.getPersonId());
@@ -333,7 +351,6 @@ public class RevalidationServiceImpl implements RevalidationService {
         programmeMembership.getProgrammeEndDate().isBefore(currentDate);
   }
 
-
   private RevalidationRecordDto buildRevalidationRecord(GmcDetails gmcDetails) {
     RevalidationRecordDto revalidationRecordDto = new RevalidationRecordDto();
     final long personId = gmcDetails.getId();
@@ -374,5 +391,35 @@ public class RevalidationServiceImpl implements RevalidationService {
     }
 
     return revalidationRecordDto;
+  }
+
+  private class RevalidationConnectionInfoMapper implements RowMapper<ConnectionInfoDto> {
+
+    @Override
+    public ConnectionInfoDto mapRow(ResultSet rs, int rowNum) throws SQLException {
+      String owner = rs.getString("owner");
+      LocalDate start;
+      LocalDate end;
+      try {
+        start = rs.getDate("programmeStartDate").toLocalDate();
+        end = rs.getDate("programmeEndDate").toLocalDate();
+      } catch (Exception e) {
+        start = null;
+        end = null;
+      }
+      return ConnectionInfoDto.builder()
+          .tcsPersonId(rs.getLong("id"))
+          .gmcReferenceNumber(rs.getString("gmcNumber"))
+          .doctorFirstName(rs.getString("forenames"))
+          .doctorLastName(rs.getString("surname"))
+          .programmeName(rs.getString("programmeName"))
+          .programmeMembershipType(rs.getString("programmeMembershipType"))
+          .tcsDesignatedBody(owner != null ? DesignatedBodyMapper.getDbcByOwner(owner) : null)
+          .programmeOwner(owner)
+          .programmeMembershipStartDate(start)
+          .programmeMembershipEndDate(end)
+          .dataSource("TCS")
+          .build();
+    }
   }
 }

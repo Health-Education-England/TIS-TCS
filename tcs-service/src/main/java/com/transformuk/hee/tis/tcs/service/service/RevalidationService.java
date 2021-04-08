@@ -25,4 +25,6 @@ public interface RevalidationService {
       final String searchGmcNumber, final List<String> dbcs);
 
   ConnectionInfoDto buildTcsConnectionInfo(Long personId);
+
+  List<ConnectionInfoDto> extractConnectionInfoForSync();
 }
