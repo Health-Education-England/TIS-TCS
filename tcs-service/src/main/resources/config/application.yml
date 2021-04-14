@@ -221,6 +221,10 @@ auto.generate.npn: true
 
 app:
   rabbit:
-    exchange: ${REVAL_RABBIT_EXCHANGE}
-    queue: ${REVAL_RABBIT_QUEUE}
-    routingKey: ${REVAL_RABBIT_ROUTING_KEY}
+    reval.exchange: ${REVAL_RABBIT_EXCHANGE}
+    reval.queue.connection.update: ${REVAL_RABBIT_QUEUE}
+    reval.queue.connection.syncstart: ${REVAL_RABBIT_SYNC_START_QUEUE}
+    reval.queue.connection.syncdata: ${REVAL_RABBIT_SYNC_DATA_QUEUE}
+    reval.routingKey.connection.update: ${REVAL_RABBIT_ROUTING_KEY}
+    reval.routingKey.connection.syncstart: ${REVAL_RABBIT_SYNCSTART_ROUTING_KEY}
+    reval.routingKey.connection.syncdata: ${REVAL_RABBIT_SYNCDATA_ROUTING_KEY}

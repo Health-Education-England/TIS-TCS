@@ -18,10 +18,10 @@ public class ProgrammeMembershipEventListener {
 
   private static final Logger LOG = LoggerFactory.getLogger(ProgrammeMembershipEventListener.class);
 
-  @Value("${app.rabbit.exchange}")
+  @Value("${app.rabbit.reval.exchange}")
   private String exchange;
 
-  @Value("${app.rabbit.routingkey}")
+  @Value("${app.rabbit.reval.routingKey.connection.update}")
   private String routingKey;
 
   @Autowired

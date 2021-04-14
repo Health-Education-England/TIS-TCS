@@ -44,6 +44,10 @@ enable.es.search: true
 
 app:
   rabbit:
-    exchange: ${REVAL_RABBIT_EXCHANGE:reval-es-exchange}
-    queue: ${REVAL_RABBIT_QUEUE:reval-es-queue}
-    routingKey: ${REVAL_RABBIT_ROUTING_KEY:uk.nhs.hee.reval.es}
+    reval.exchange: ${REVAL_RABBIT_EXCHANGE:reval.exchange}
+    reval.queue.connection.update: ${REVAL_RABBIT_QUEUE:reval.queue.connection.update}
+    reval.queue.connection.syncstart: ${REVAL_RABBIT_SYNC_START_QUEUE:reval.queue.connection.syncstart}
+    reval.queue.connection.syncdata: ${REVAL_RABBIT_SYNC_DATA_QUEUE:reval.queue.connection.syncdata}
+    reval.routingKey.connection.update: ${REVAL_RABBIT_ROUTING_KEY:reval.connection.update}
+    reval.routingKey.connection.syncstart: ${REVAL_RABBIT_SYNCSTART_ROUTING_KEY:reval.connection.syncstart}
+    reval.routingKey.connection.syncdata: ${REVAL_RABBIT_SYNCDATA_ROUTING_KEY:reval.connection.syncdata}

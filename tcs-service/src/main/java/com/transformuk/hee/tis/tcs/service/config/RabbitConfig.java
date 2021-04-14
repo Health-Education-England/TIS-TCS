@@ -1,8 +1,6 @@
 package com.transformuk.hee.tis.tcs.service.config;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 import org.springframework.amqp.core.AcknowledgeMode;
 import org.springframework.amqp.core.Binding;
 import org.springframework.amqp.core.BindingBuilder;
@@ -21,30 +19,60 @@ import org.springframework.context.annotation.Configuration;
 @Configuration
 public class RabbitConfig {
 
-  private final Logger log = LoggerFactory.getLogger(RabbitConfig.class);
+  @Value("${app.rabbit.reval.queue.connection.update}")
+  private String revalQueueName;
 
-  @Value("${app.rabbit.queue}")
-  private String queueName;
+  @Value("${app.rabbit.reval.queue.connection.syncstart}")
+  private String revalSyncQueueName;
 
-  @Value("${app.rabbit.exchange}")
-  private String exchange;
+  @Value("${app.rabbit.reval.queue.connection.syncdata}")
+  private String revalSyncDataQueueName;
 
-  @Value("${app.rabbit.routingkey}")
-  private String routingKey;
+  @Value("${app.rabbit.reval.exchange}")
+  private String revalExchange;
+
+  @Value("${app.rabbit.reval.routingKey.connection.update}")
+  private String revalRoutingKey;
+
+  @Value("${app.rabbit.reval.routingKey.connection.syncstart}")
+  private String revalSyncStartRoutingKey;
+
+  @Value("${app.rabbit.reval.routingKey.connection.syncdata}")
+  private String revalSyncDataRoutingKey;
 
   @Bean
-  public Queue queue() {
-    return new Queue(queueName, false);
+  public Queue revalQueue() {
+    return new Queue(revalQueueName, false);
+  }
+
+  @Bean
+  public Queue revalSyncqueue() {
+    return new Queue(revalSyncQueueName, false);
+  }
+
+  @Bean
+  public Queue revalDataqueue() {
+    return new Queue(revalSyncDataQueueName, false);
   }
 
   @Bean
   public DirectExchange exchange() {
-    return new DirectExchange(exchange);
+    return new DirectExchange(revalExchange);
   }
 
   @Bean
-  public Binding binding(final Queue queue, final DirectExchange exchange) {
-    return BindingBuilder.bind(queue).to(exchange).with(routingKey);
+  public Binding revalBinding(final Queue revalQueue, final DirectExchange exchange) {
+    return BindingBuilder.bind(revalQueue).to(exchange).with(revalRoutingKey);
+  }
+
+  @Bean
+  public Binding revalSyncBinding(final Queue revalSyncqueue, final DirectExchange exchange) {
+    return BindingBuilder.bind(revalSyncqueue).to(exchange).with(revalSyncStartRoutingKey);
+  }
+
+  @Bean
+  public Binding revalDataBinding(final Queue revalDataqueue, final DirectExchange exchange) {
+    return BindingBuilder.bind(revalDataqueue).to(exchange).with(revalSyncDataRoutingKey);
   }
 
   @Bean
@@ -61,7 +89,6 @@ public class RabbitConfig {
     final RabbitTemplate rabbitTemplate = new RabbitTemplate(connectionFactory);
     rabbitTemplate.setMessageConverter(jsonMessageConverter());
     rabbitTemplate.containerAckMode(AcknowledgeMode.AUTO);
-    log.debug("Creating rabbit template {} ", rabbitTemplate);
     return rabbitTemplate;
   }
 }
