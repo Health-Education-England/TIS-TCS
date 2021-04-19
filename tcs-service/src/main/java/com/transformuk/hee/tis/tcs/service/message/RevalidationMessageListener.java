@@ -28,11 +28,12 @@ public class RevalidationMessageListener {
 
   @RabbitListener(queues = "${app.rabbit.reval.queue.connection.syncstart}")
   public void receiveMessage(final String start) {
-    //TODO perform some kind of check to prevent running multiple times?
-      List<ConnectionInfoDto> connections =  revalidationService.extractConnectionInfoForSync();
-    if (!exchange.equals("false")) {
-      for(ConnectionInfoDto connection: connections) {
-        rabbitTemplate.convertAndSend(exchange, routingKey, connection);
+    if (start.equals("syncStart")) {
+      List<ConnectionInfoDto> connections = revalidationService.extractConnectionInfoForSync();
+      if (!exchange.equals("false")) {
+        for (ConnectionInfoDto connection : connections) {
+          rabbitTemplate.convertAndSend(exchange, routingKey, connection);
+        }
       }
     }
   }
