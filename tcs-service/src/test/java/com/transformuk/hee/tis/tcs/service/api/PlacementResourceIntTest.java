@@ -8,7 +8,9 @@ import static java.util.stream.Collectors.toList;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.hamcrest.Matchers.containsInAnyOrder;
 import static org.hamcrest.Matchers.hasItem;
+import static org.mockito.ArgumentMatchers.anySet;
 import static org.mockito.BDDMockito.given;
+import static org.mockito.Mockito.when;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.delete;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.patch;
@@ -71,6 +73,7 @@ import java.text.SimpleDateFormat;
 import java.time.LocalDate;
 import java.time.ZoneId;
 import java.util.Arrays;
+import java.util.Collections;
 import java.util.Date;
 import java.util.HashSet;
 import java.util.List;
@@ -1424,6 +1427,28 @@ public class PlacementResourceIntTest {
 
     restPlacementMockMvc.perform(
         get("/api/placements/overlapping?npn=YHD/RWA01/IMT/LT/003&fromDate=2019-05-01&toDate=2019-06-04")
+        .accept(MediaType.APPLICATION_JSON))
+        .andExpect(status().isOk()).andExpect(jsonPath("$.overlapping").value(false));
+  }
+
+  @Test
+  @Transactional
+  public void validateOverlappingPlacementsWithNpnHavingLeadingSpaceDoesNotFail() throws Exception {
+    String NPN = " LDN/R1K01/IMT3/LT/009";
+    Post mockedPost = new Post();
+    mockedPost.setNationalPostNumber(NPN);
+    postRepository.saveAndFlush(mockedPost);
+
+    List<Post> posts = postRepository.findByNationalPostNumber(NPN);
+
+    Placement mockedPlacement = new Placement();
+    mockedPlacement.setPost(posts.get(0));
+    mockedPlacement.setDateFrom(LocalDate.of(2019, 6, 5));
+    mockedPlacement.setDateTo(LocalDate.of(2019, 9, 5));
+    placementRepository.saveAndFlush(mockedPlacement);
+
+    restPlacementMockMvc.perform(
+        get("/api/placements/overlapping?npn=" + NPN + "&fromDate=2019-05-01&toDate=2019-06-04")
         .accept(MediaType.APPLICATION_JSON))
         .andExpect(status().isOk()).andExpect(jsonPath("$.overlapping").value(false));
   }

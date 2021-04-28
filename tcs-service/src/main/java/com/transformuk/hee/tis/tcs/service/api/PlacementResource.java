@@ -17,8 +17,10 @@ import com.transformuk.hee.tis.tcs.service.service.impl.PermissionService;
 import com.transformuk.hee.tis.tcs.service.service.impl.PlacementPlannerServiceImp;
 import io.github.jhipster.web.util.ResponseUtil;
 import java.io.IOException;
+import java.io.UnsupportedEncodingException;
 import java.net.URI;
 import java.net.URISyntaxException;
+import java.net.URLDecoder;
 import java.time.LocalDate;
 import java.util.HashMap;
 import java.util.List;
@@ -46,7 +48,6 @@ import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
-import uk.nhs.tis.StringConverter;
 
 /**
  * REST controller for managing Placement.
@@ -281,7 +282,12 @@ public class PlacementResource {
       @RequestParam(required = true) @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate toDate,
       @RequestParam(required = false) Long placementId) {
 
-    String decodedNpn = StringConverter.getConverter(npn).decodeUrl().toString();
+    String decodedNpn = "";
+    try {
+      decodedNpn = URLDecoder.decode(npn, "UTF-8");
+    } catch (IllegalArgumentException | UnsupportedEncodingException var2) {
+      log.warn("Unable to URL decode string.", var2);
+    }
     boolean overlapping = placementService.validateOverlappingPlacements(decodedNpn, fromDate, toDate, placementId);
     Map model = new HashMap<String, Boolean>();
     model.put("overlapping", overlapping);
