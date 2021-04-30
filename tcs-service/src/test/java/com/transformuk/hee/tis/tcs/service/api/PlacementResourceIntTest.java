@@ -44,9 +44,11 @@ import com.transformuk.hee.tis.tcs.service.model.Person;
 import com.transformuk.hee.tis.tcs.service.model.Placement;
 import com.transformuk.hee.tis.tcs.service.model.PlacementDetails;
 import com.transformuk.hee.tis.tcs.service.model.PlacementLog;
+import com.transformuk.hee.tis.tcs.service.model.PlacementSpecialty;
 import com.transformuk.hee.tis.tcs.service.model.PlacementSupervisor;
 import com.transformuk.hee.tis.tcs.service.model.PlacementSupervisorId;
 import com.transformuk.hee.tis.tcs.service.model.Post;
+import com.transformuk.hee.tis.tcs.service.model.PostSpecialty;
 import com.transformuk.hee.tis.tcs.service.model.Programme;
 import com.transformuk.hee.tis.tcs.service.model.Specialty;
 import com.transformuk.hee.tis.tcs.service.repository.CommentRepository;
@@ -57,8 +59,10 @@ import com.transformuk.hee.tis.tcs.service.repository.PersonRepository;
 import com.transformuk.hee.tis.tcs.service.repository.PlacementDetailsRepository;
 import com.transformuk.hee.tis.tcs.service.repository.PlacementLogRepository;
 import com.transformuk.hee.tis.tcs.service.repository.PlacementRepository;
+import com.transformuk.hee.tis.tcs.service.repository.PlacementSpecialtyRepository;
 import com.transformuk.hee.tis.tcs.service.repository.PlacementSupervisorRepository;
 import com.transformuk.hee.tis.tcs.service.repository.PostRepository;
+import com.transformuk.hee.tis.tcs.service.repository.PostSpecialtyRepository;
 import com.transformuk.hee.tis.tcs.service.repository.ProgrammeRepository;
 import com.transformuk.hee.tis.tcs.service.repository.SpecialtyRepository;
 import com.transformuk.hee.tis.tcs.service.service.PlacementService;
@@ -71,6 +75,7 @@ import java.text.SimpleDateFormat;
 import java.time.LocalDate;
 import java.time.ZoneId;
 import java.util.Arrays;
+import java.util.Collections;
 import java.util.Date;
 import java.util.HashSet;
 import java.util.List;
@@ -155,6 +160,8 @@ public class PlacementResourceIntTest {
   private PersonRepository personRepository;
   @Autowired
   private PlacementRepository placementRepository;
+  @Autowired
+  private PostSpecialtyRepository postSpecialtyRepository;
   @Autowired
   private CommentRepository commentRepository;
   @Autowired
@@ -1423,7 +1430,7 @@ public class PlacementResourceIntTest {
     placementRepository.saveAndFlush(mockedPlacement);
 
     restPlacementMockMvc.perform(
-        get("/api/placements/overlapping?npn=YHD/RWA01/IMT/LT/003&fromDate=2019-05-01&toDate=2019-06-04")
+        get("/api/placements/overlapping?npn=YHD/RWA01/IMT/LT/003&fromDate=2019-06-01&toDate=2019-07-04")
         .accept(MediaType.APPLICATION_JSON))
         .andExpect(status().isOk()).andExpect(jsonPath("$.overlapping").value(false));
   }
@@ -1431,23 +1438,42 @@ public class PlacementResourceIntTest {
   @Test
   @Transactional
   public void validateOverlappingPlacementsWithNpnHavingLeadingSpaceDoesNotFail() throws Exception {
-    String NPN = " LDN/R1K01/IMT3/LT/009";
+    String npn = " LDN/R1K01/IMT3/LT/009";
+
+    Programme mockedProgramme = new Programme();
+    mockedProgramme.setId(1L);
+    programmeRepository.saveAndFlush(mockedProgramme);
+
+    Specialty mockedSpecialty = new Specialty();
+    mockedSpecialty.setId(1L);
+    specialtyRepository.saveAndFlush(mockedSpecialty);
+
+    PostSpecialty mockedPostSpecialty = new PostSpecialty();
+    mockedPostSpecialty.setId(1L);
+    mockedPostSpecialty.setSpecialty(mockedSpecialty);
+
     Post mockedPost = new Post();
-    mockedPost.setNationalPostNumber(NPN);
+    mockedPost.setId(1L);
+    mockedPost.setNationalPostNumber(npn);
+    mockedPost.setProgrammes(Collections.singleton(mockedProgramme));
+    mockedPost.setSpecialties(Collections.singleton(mockedPostSpecialty));
     postRepository.saveAndFlush(mockedPost);
 
-    List<Post> posts = postRepository.findByNationalPostNumber(NPN);
+    mockedPostSpecialty.setPost(mockedPost);
+    postSpecialtyRepository.saveAndFlush(mockedPostSpecialty);
 
     Placement mockedPlacement = new Placement();
+    mockedPlacement.setId(1L);
+    List<Post> posts = postRepository.findByNationalPostNumber(npn);
     mockedPlacement.setPost(posts.get(0));
     mockedPlacement.setDateFrom(LocalDate.of(2019, 6, 5));
     mockedPlacement.setDateTo(LocalDate.of(2019, 9, 5));
     placementRepository.saveAndFlush(mockedPlacement);
 
     restPlacementMockMvc.perform(
-        get("/api/placements/overlapping?npn=" + NPN + "&fromDate=2019-05-01&toDate=2019-06-04")
+        get("/api/placements/overlapping?npn=" + npn + "&fromDate=2019-06-01&toDate=2019-07-04")
         .accept(MediaType.APPLICATION_JSON))
-        .andExpect(status().isOk()).andExpect(jsonPath("$.overlapping").value(false));
+        .andExpect(status().isOk()).andExpect(jsonPath("$.overlapping").value(true));
   }
 
   private PlacementDetailsDTO createPlacementForApproval(LifecycleState state, boolean canApprovePlacement) {
