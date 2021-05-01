@@ -584,12 +584,12 @@ public class PlacementServiceImplTest {
   @Test
   public void validateReturnTrueWhenOverlappingPlacementsExist() {
     // prepare mocked data
-    String NPN = "YHD/RWA01/IMT/LT/003";
+    String npn = "YHD/RWA01/IMT/LT/003";
     Post mockedPost = new Post();
     mockedPost.setId(1L);
-    mockedPost.setNationalPostNumber(NPN);
+    mockedPost.setNationalPostNumber(npn);
 
-    doReturn(Arrays.asList(mockedPost)).when(postRepositoryMock).findByNationalPostNumber(NPN);
+    doReturn(Arrays.asList(mockedPost)).when(postRepositoryMock).findByNationalPostNumber(npn);
 
     Set<Long> postIds = new HashSet<>();
     postIds.add(1L);
@@ -602,16 +602,16 @@ public class PlacementServiceImplTest {
     mockedPlacementsSet.add(mockedPlacement);
     doReturn(mockedPlacementsSet).when(placementRepositoryMock).findPlacementsByPostIds(postIds);
 
-    boolean result1 = testObj.validateOverlappingPlacements(NPN,
+    boolean result1 = testObj.validateOverlappingPlacements(npn,
         LocalDate.of(2019, 5, 1),
         LocalDate.of(2019, 6, 5), null);
-    boolean result2 = testObj.validateOverlappingPlacements(NPN,
+    boolean result2 = testObj.validateOverlappingPlacements(npn,
         LocalDate.of(2019, 9, 5),
         LocalDate.of(2019, 10, 10), null);
-    boolean result3 = testObj.validateOverlappingPlacements(NPN,
+    boolean result3 = testObj.validateOverlappingPlacements(npn,
         LocalDate.of(2019, 6, 4),
         LocalDate.of(2019, 9, 6), null);
-    boolean result4 = testObj.validateOverlappingPlacements(NPN,
+    boolean result4 = testObj.validateOverlappingPlacements(npn,
         LocalDate.of(2019, 6, 6),
         LocalDate.of(2019, 9, 4), null);
 
@@ -628,12 +628,12 @@ public class PlacementServiceImplTest {
   @Test
   public void validateReturnFalseWhenNoOverlappingPlacements() {
     // prepare mocked data
-    String NPN = "YHD/RWA01/IMT/LT/003";
+    String npn = "YHD/RWA01/IMT/LT/003";
     Post mockedPost = new Post();
     mockedPost.setId(1L);
-    mockedPost.setNationalPostNumber(NPN);
+    mockedPost.setNationalPostNumber(npn);
 
-    doReturn(Arrays.asList(mockedPost)).when(postRepositoryMock).findByNationalPostNumber(NPN);
+    doReturn(Arrays.asList(mockedPost)).when(postRepositoryMock).findByNationalPostNumber(npn);
 
     Set<Long> postIds = new HashSet<>();
     postIds.add(1L);
@@ -646,10 +646,10 @@ public class PlacementServiceImplTest {
     mockedPlacementsSet.add(mockedPlacement);
     doReturn(mockedPlacementsSet).when(placementRepositoryMock).findPlacementsByPostIds(postIds);
 
-    boolean result1 = testObj.validateOverlappingPlacements(NPN,
+    boolean result1 = testObj.validateOverlappingPlacements(npn,
         LocalDate.of(2019, 5, 1),
         LocalDate.of(2019, 6, 4), null);
-    boolean result2 = testObj.validateOverlappingPlacements(NPN,
+    boolean result2 = testObj.validateOverlappingPlacements(npn,
         LocalDate.of(2019, 9, 6),
         LocalDate.of(2019, 10, 10), null);
 
@@ -663,19 +663,19 @@ public class PlacementServiceImplTest {
 
   @Test
   public void validateReturnFalseWhenNoPlacementsFound() {
-    String NPN = "YHD/RWA01/IMT/LT/003";
+    String npn = "YHD/RWA01/IMT/LT/003";
     Post mockedPost = new Post();
     mockedPost.setId(1L);
-    mockedPost.setNationalPostNumber(NPN);
+    mockedPost.setNationalPostNumber(npn);
 
-    doReturn(Arrays.asList(mockedPost)).when(postRepositoryMock).findByNationalPostNumber(NPN);
+    doReturn(Arrays.asList(mockedPost)).when(postRepositoryMock).findByNationalPostNumber(npn);
 
     Set<Long> postIds = new HashSet<>();
     postIds.add(1L);
     Set<Placement> mockedEmptyPlacementsSet = new HashSet<>();
     doReturn(mockedEmptyPlacementsSet).when(placementRepositoryMock)
         .findPlacementsByPostIds(postIds);
-    boolean result = testObj.validateOverlappingPlacements(NPN,
+    boolean result = testObj.validateOverlappingPlacements(npn,
         LocalDate.of(2019, 5, 1),
         LocalDate.of(2019, 6, 4), null);
 

@@ -44,7 +44,6 @@ import com.transformuk.hee.tis.tcs.service.model.Person;
 import com.transformuk.hee.tis.tcs.service.model.Placement;
 import com.transformuk.hee.tis.tcs.service.model.PlacementDetails;
 import com.transformuk.hee.tis.tcs.service.model.PlacementLog;
-import com.transformuk.hee.tis.tcs.service.model.PlacementSpecialty;
 import com.transformuk.hee.tis.tcs.service.model.PlacementSupervisor;
 import com.transformuk.hee.tis.tcs.service.model.PlacementSupervisorId;
 import com.transformuk.hee.tis.tcs.service.model.Post;
@@ -59,7 +58,6 @@ import com.transformuk.hee.tis.tcs.service.repository.PersonRepository;
 import com.transformuk.hee.tis.tcs.service.repository.PlacementDetailsRepository;
 import com.transformuk.hee.tis.tcs.service.repository.PlacementLogRepository;
 import com.transformuk.hee.tis.tcs.service.repository.PlacementRepository;
-import com.transformuk.hee.tis.tcs.service.repository.PlacementSpecialtyRepository;
 import com.transformuk.hee.tis.tcs.service.repository.PlacementSupervisorRepository;
 import com.transformuk.hee.tis.tcs.service.repository.PostRepository;
 import com.transformuk.hee.tis.tcs.service.repository.PostSpecialtyRepository;
@@ -247,6 +245,44 @@ public class PlacementResourceIntTest {
     return placement;
   }
 
+  /**
+   * Create a placement and its necessary related entities to support a call to
+   * PlacementRepository.findPlacementsByPostIds().
+   *
+   * @param npn               National Post Number
+   * @param idForAll          id to be assigned to all entities
+   * @param placementDateFrom placement date from
+   * @param placementDateTo   placement date to
+   */
+  public void createPlacementWithRelatedEntities(String npn,
+      LocalDate placementDateFrom, LocalDate placementDateTo) {
+
+    Programme mockedProgramme = new Programme();
+    programmeRepository.saveAndFlush(mockedProgramme);
+
+    Specialty mockedSpecialty = new Specialty();
+    specialtyRepository.saveAndFlush(mockedSpecialty);
+
+    PostSpecialty mockedPostSpecialty = new PostSpecialty();
+    mockedPostSpecialty.setSpecialty(mockedSpecialty);
+
+    Post mockedPost = new Post();
+    mockedPost.setNationalPostNumber(npn);
+    mockedPost.setProgrammes(Collections.singleton(mockedProgramme));
+    mockedPost.setSpecialties(Collections.singleton(mockedPostSpecialty));
+    postRepository.saveAndFlush(mockedPost);
+
+    mockedPostSpecialty.setPost(mockedPost);
+    postSpecialtyRepository.saveAndFlush(mockedPostSpecialty);
+
+    Placement mockedPlacement = new Placement();
+    List<Post> posts = postRepository.findByNationalPostNumber(npn);
+    mockedPlacement.setPost(posts.get(0));
+    mockedPlacement.setDateFrom(placementDateFrom);
+    mockedPlacement.setDateTo(placementDateTo);
+    placementRepository.saveAndFlush(mockedPlacement);
+  }
+
   @Before
   public void setup() {
     MockitoAnnotations.initMocks(this);
@@ -269,6 +305,8 @@ public class PlacementResourceIntTest {
         .willReturn(Maps.newHashMap(DEFAULT_GRADE, true));
     given(referenceService.gradeExists(Lists.newArrayList(UPDATED_GRADE)))
         .willReturn(Maps.newHashMap(UPDATED_GRADE, true));
+
+    //createPlacementWithRelatedEntities()
   }
 
   @Before
@@ -1413,67 +1451,58 @@ public class PlacementResourceIntTest {
     placementDetailsDTO.setSupervisors(supervisors);
   }
 
+  // note, full testing of all overlap scenarios is done in PlacementServiceImplTest
+
   @Test
   @Transactional
   public void validateOverlappingPlacements() throws Exception {
-    String NPN = "YHD/RWA01/IMT/LT/003";
-    Post mockedPost = new Post();
-    mockedPost.setNationalPostNumber(NPN);
-    postRepository.saveAndFlush(mockedPost);
-
-    List<Post> posts = postRepository.findByNationalPostNumber(NPN);
-
-    Placement mockedPlacement = new Placement();
-    mockedPlacement.setPost(posts.get(0));
-    mockedPlacement.setDateFrom(LocalDate.of(2019, 6, 5));
-    mockedPlacement.setDateTo(LocalDate.of(2019, 9, 5));
-    placementRepository.saveAndFlush(mockedPlacement);
+    String npn = "YHD/RWA01/IMT/LT/003";
+    createPlacementWithRelatedEntities(npn, LocalDate.of(2019, 6, 5),
+        LocalDate.of(2019, 9, 5));
 
     restPlacementMockMvc.perform(
-        get("/api/placements/overlapping?npn=YHD/RWA01/IMT/LT/003&fromDate=2019-06-01&toDate=2019-07-04")
+        get("/api/placements/overlapping?npn=" + npn + "&fromDate=2019-05-01&toDate=2019-06-06")
         .accept(MediaType.APPLICATION_JSON))
+        .andExpect(status().isOk()).andExpect(jsonPath("$.overlapping").value(true));
+  }
+
+  @Test
+  @Transactional
+  public void validateNotOverlappingPlacements() throws Exception {
+    String npn = "YHD/RWA01/IMT/LT/003";
+    createPlacementWithRelatedEntities(npn, LocalDate.of(2019, 6, 5),
+        LocalDate.of(2019, 9, 5));
+
+    restPlacementMockMvc.perform(
+        get("/api/placements/overlapping?npn=" + npn + "&fromDate=2019-05-01&toDate=2019-06-04")
+            .accept(MediaType.APPLICATION_JSON))
         .andExpect(status().isOk()).andExpect(jsonPath("$.overlapping").value(false));
   }
 
   @Test
   @Transactional
-  public void validateOverlappingPlacementsWithNpnHavingLeadingSpaceDoesNotFail() throws Exception {
+  public void validateOverlappingPlacementsWithNpnHavingLeadingSpace() throws Exception {
     String npn = " LDN/R1K01/IMT3/LT/009";
-
-    Programme mockedProgramme = new Programme();
-    mockedProgramme.setId(1L);
-    programmeRepository.saveAndFlush(mockedProgramme);
-
-    Specialty mockedSpecialty = new Specialty();
-    mockedSpecialty.setId(1L);
-    specialtyRepository.saveAndFlush(mockedSpecialty);
-
-    PostSpecialty mockedPostSpecialty = new PostSpecialty();
-    mockedPostSpecialty.setId(1L);
-    mockedPostSpecialty.setSpecialty(mockedSpecialty);
-
-    Post mockedPost = new Post();
-    mockedPost.setId(1L);
-    mockedPost.setNationalPostNumber(npn);
-    mockedPost.setProgrammes(Collections.singleton(mockedProgramme));
-    mockedPost.setSpecialties(Collections.singleton(mockedPostSpecialty));
-    postRepository.saveAndFlush(mockedPost);
-
-    mockedPostSpecialty.setPost(mockedPost);
-    postSpecialtyRepository.saveAndFlush(mockedPostSpecialty);
-
-    Placement mockedPlacement = new Placement();
-    mockedPlacement.setId(1L);
-    List<Post> posts = postRepository.findByNationalPostNumber(npn);
-    mockedPlacement.setPost(posts.get(0));
-    mockedPlacement.setDateFrom(LocalDate.of(2019, 6, 5));
-    mockedPlacement.setDateTo(LocalDate.of(2019, 9, 5));
-    placementRepository.saveAndFlush(mockedPlacement);
+    createPlacementWithRelatedEntities(npn, LocalDate.of(2019, 6, 5),
+        LocalDate.of(2019, 9, 5));
 
     restPlacementMockMvc.perform(
         get("/api/placements/overlapping?npn=" + npn + "&fromDate=2019-06-01&toDate=2019-07-04")
         .accept(MediaType.APPLICATION_JSON))
         .andExpect(status().isOk()).andExpect(jsonPath("$.overlapping").value(true));
+  }
+
+  @Test
+  @Transactional
+  public void validateNotOverlappingPlacementsWithNpnHavingLeadingSpace() throws Exception {
+    String npn = " LDN/R1K01/IMT3/LT/009";
+    createPlacementWithRelatedEntities(npn, LocalDate.of(2019, 6, 5),
+        LocalDate.of(2019, 9, 5));
+
+    restPlacementMockMvc.perform(
+        get("/api/placements/overlapping?npn=" + npn + "&fromDate=2019-05-01&toDate=2019-06-04")
+            .accept(MediaType.APPLICATION_JSON))
+        .andExpect(status().isOk()).andExpect(jsonPath("$.overlapping").value(false));
   }
 
   private PlacementDetailsDTO createPlacementForApproval(LifecycleState state, boolean canApprovePlacement) {
