@@ -294,12 +294,17 @@ public class RevalidationServiceImpl implements RevalidationService {
   }
 
   private ConnectionSummaryRecordDto buildConnectionList(Map<String, Object> conn) {
-    final String owner = conn.get(CONNECTION_OWNER) == null ? null : conn.get(CONNECTION_OWNER).toString();
+    final String owner =
+        conn.get(CONNECTION_OWNER) == null ? null : conn.get(CONNECTION_OWNER).toString();
 
     return ConnectionSummaryRecordDto
         .builder()
-        .gmcReferenceNumber(conn.get(GMC_NUMBER_FIELD) == null ? null : conn.get(GMC_NUMBER_FIELD).toString())
-        .doctorFirstName(conn.get(FORENAMES_FIELD) == null ? null : conn.get(FORENAMES_FIELD).toString())
+        .gmcReferenceNumber(
+            conn.get(GMC_NUMBER_FIELD) == null ? null : conn.get(GMC_NUMBER_FIELD).toString()
+        )
+        .doctorFirstName(
+            conn.get(FORENAMES_FIELD) == null ? null : conn.get(FORENAMES_FIELD).toString()
+        )
         .doctorLastName(conn.get(SURNAME_FIELD) == null ? null : conn.get(SURNAME_FIELD).toString())
         .designatedBody(owner != null ? DesignatedBodyMapper.getDbcByOwner(owner) : null)
         .programmeMembershipEndDate(conn.get(PROGRAMME_END_DATE_FIELD) == null
