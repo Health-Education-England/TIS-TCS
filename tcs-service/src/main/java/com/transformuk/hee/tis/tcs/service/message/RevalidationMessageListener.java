@@ -24,6 +24,11 @@ public class RevalidationMessageListener {
   @Autowired
   RevalidationService revalidationService;
 
+  /**
+   * Receive message from the Rabbit queue if app is configured for the Reval exchange.
+   *
+   * @param start set to 'syncStart' to receive messages from the reval rabbit queue
+   */
   @RabbitListener(queues = "${app.rabbit.reval.queue.connection.syncstart}")
   public void receiveMessage(final String start) {
     if (start.equals("syncStart") && !exchange.equals("false")) {
@@ -31,8 +36,8 @@ public class RevalidationMessageListener {
       for (ConnectionInfoDto connection : connections) {
         rabbitTemplate.convertAndSend(exchange, routingKey, connection);
       }
-        rabbitTemplate.convertAndSend(exchange, routingKey, getSyncEndMessageDto());
-      }
+      rabbitTemplate.convertAndSend(exchange, routingKey, getSyncEndMessageDto());
+    }
   }
 
   private ConnectionInfoDto getSyncEndMessageDto() {

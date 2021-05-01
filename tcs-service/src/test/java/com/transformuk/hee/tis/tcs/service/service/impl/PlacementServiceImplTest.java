@@ -551,7 +551,7 @@ public class PlacementServiceImplTest {
         .thenReturn(placementDetails);
     when(placementSiteMapper.toEntity(placementSiteDto1)).thenReturn(placementSite1);
     when(placementSiteMapper.toEntity(placementSiteDto2)).thenReturn(placementSite2);
-    when(placementDetailsRepositoryMock.saveAndFlush(eq(updatedPlacementDetails)))
+    when(placementDetailsRepositoryMock.saveAndFlush(updatedPlacementDetails))
         .thenReturn(updatedPlacementDetails);
     when(placementDetailsMapperMock.placementDetailsToPlacementDetailsDTO(placementDetails))
         .thenReturn(new PlacementDetailsDTO());

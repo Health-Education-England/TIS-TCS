@@ -305,8 +305,6 @@ public class PlacementResourceIntTest {
         .willReturn(Maps.newHashMap(DEFAULT_GRADE, true));
     given(referenceService.gradeExists(Lists.newArrayList(UPDATED_GRADE)))
         .willReturn(Maps.newHashMap(UPDATED_GRADE, true));
-
-    //createPlacementWithRelatedEntities()
   }
 
   @Before

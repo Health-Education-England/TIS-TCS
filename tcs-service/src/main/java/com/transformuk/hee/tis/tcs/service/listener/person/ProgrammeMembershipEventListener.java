@@ -18,6 +18,8 @@ public class ProgrammeMembershipEventListener {
 
   private static final Logger LOG = LoggerFactory.getLogger(ProgrammeMembershipEventListener.class);
 
+  private static final String NO_EXCHANGE = "false";
+
   @Value("${app.rabbit.reval.exchange}")
   private String exchange;
 
@@ -39,7 +41,7 @@ public class ProgrammeMembershipEventListener {
         event.getProgrammeMembershipDTO().getId());
     final Long personId = event.getProgrammeMembershipDTO().getPerson().getId();
     personElasticSearchService.updatePersonDocument(personId);
-    if (!exchange.equals("false")) {
+    if (!exchange.equals(NO_EXCHANGE)) {
       rabbitTemplate.convertAndSend(exchange, routingKey,
           revalidationService.buildTcsConnectionInfo(personId));
     }
@@ -51,7 +53,7 @@ public class ProgrammeMembershipEventListener {
         event.getProgrammeMembershipDTO().getId());
     final Long personId = event.getProgrammeMembershipDTO().getPerson().getId();
     personElasticSearchService.updatePersonDocument(personId);
-    if (!exchange.equals("false")) {
+    if (!exchange.equals(NO_EXCHANGE)) {
       rabbitTemplate.convertAndSend(exchange, routingKey,
           revalidationService.buildTcsConnectionInfo(personId));
     }
@@ -63,7 +65,7 @@ public class ProgrammeMembershipEventListener {
         event.getProgrammeMembershipDTO().getId());
     final Long personId = event.getProgrammeMembershipDTO().getPerson().getId();
     personElasticSearchService.deletePersonDocument(personId);
-    if (!exchange.equals("false")) {
+    if (!exchange.equals(NO_EXCHANGE)) {
       rabbitTemplate.convertAndSend(exchange, routingKey,
           revalidationService.buildTcsConnectionInfo(personId));
     }
