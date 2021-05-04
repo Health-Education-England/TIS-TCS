@@ -282,11 +282,12 @@ public class PlacementResource {
       @RequestParam(required = true) @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate toDate,
       @RequestParam(required = false) Long placementId) {
 
-    String decodedNpn = "";
+    String decodedNpn;
     try {
       decodedNpn = URLDecoder.decode(npn, "UTF-8");
     } catch (IllegalArgumentException | UnsupportedEncodingException var2) {
       log.warn("Unable to URL decode string.", var2);
+      decodedNpn = npn;
     }
     boolean overlapping = placementService.validateOverlappingPlacements(decodedNpn, fromDate, toDate, placementId);
     Map model = new HashMap<String, Boolean>();
