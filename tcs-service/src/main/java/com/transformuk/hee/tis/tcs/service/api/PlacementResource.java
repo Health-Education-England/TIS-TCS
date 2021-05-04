@@ -27,6 +27,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.Optional;
 import java.util.stream.Collectors;
+import org.apache.commons.lang3.RegExUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -221,7 +222,8 @@ public class PlacementResource {
       Pageable pageable,
       @RequestParam(value = "columnFilters", required = false) final String columnFilterJson)
       throws IOException {
-    log.debug("REST request to get Placements by filter : {}", columnFilterJson);
+    String columnFilterJsonSanitised = RegExUtils.replaceAll(columnFilterJson, "[\n\r\t]", "_");
+    log.debug("REST request to get Placements by filter : {}", columnFilterJsonSanitised);
     final Page<PlacementDetailsDTO> page;
     if (org.apache.commons.lang.StringUtils.isEmpty(columnFilterJson)) {
       page = placementService.findAllPlacementDetails(pageable);

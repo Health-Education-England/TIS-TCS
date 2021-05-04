@@ -45,6 +45,7 @@ import java.util.Optional;
 import java.util.Set;
 import java.util.stream.Collectors;
 import javax.validation.Valid;
+import org.apache.commons.lang3.RegExUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -256,10 +257,11 @@ public class PersonResource {
     log.info(
         "Received request to search '{}' with RoleCategory ID '{}', searchQuery '{}' and pageable '{}'",
         PersonLiteDTO.class.getSimpleName(), categoryId, searchQuery, pageable);
-
+    
+    String searchQuerySanitised = RegExUtils.replaceAll(searchQuery, "[\n\r\t]", "_");
     log.debug("Accessing '{}' to search '{}' with RoleCategory ID '{}' and searchQuery '{}'",
         personService.getClass().getSimpleName(), PersonLiteDTO.class.getSimpleName(), categoryId,
-        searchQuery);
+        searchQuerySanitised);
 
     final Page<PersonLiteDTO> page = personService.searchByRoleCategory(
         Optional.ofNullable(searchQuery).orElse("").replace("\"", ""), categoryId, pageable, true);
