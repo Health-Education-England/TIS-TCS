@@ -410,9 +410,4 @@ public class PersonServiceImplTest {
     Assert.assertEquals(1, returnedPersonDtoList.size());
     Assert.assertEquals(0, returnedPersonDtoList.get(0).getMessageList().size());
   }
-
-  @Test
-  public void buildPersonViewShouldHandleDuplicateKeys() {
-    testObj.buildPersonView();
-  }
 }
