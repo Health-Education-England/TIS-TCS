@@ -9,8 +9,8 @@ begin
 	select p.id, get_localoffice(id, 'LO') localoffice, get_localoffice(id, 'R') which_rule
 	from Person p
 	on duplicate key update
-	  owner = get_localoffice(id, 'PO'),
-	  rule = get_localoffice(id, 'R');
+	  owner = get_localoffice(p.id, 'PO'),
+	  rule = get_localoffice(p.id, 'R');
 
 end//
 delimiter ;
