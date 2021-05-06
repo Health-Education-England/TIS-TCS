@@ -10,8 +10,8 @@ begin
 	from Person p
 	on duplicate key update
 	  id = p.id,
-	  owner = get_localoffice(id, 'LO'),
-	  rule = get_localoffice(id, 'R') which_rule;
+	  owner = p.owner,
+	  rule = p.rule;
 
 end//
 delimiter ;
