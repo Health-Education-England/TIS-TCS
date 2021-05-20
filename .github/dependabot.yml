@@ -11,7 +11,6 @@ updates:
     directory: /
     schedule:
       interval: weekly
-    rebase-strategy: disabled
     registries:
       - maven-jenkins
     reviewers:
@@ -21,7 +20,6 @@ updates:
     directory: /
     schedule:
       interval: weekly
-    rebase-strategy: disabled
     reviewers:
       - Health-Education-England/full-stack
       - Health-Education-England/operations
