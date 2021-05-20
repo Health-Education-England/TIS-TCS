@@ -11,43 +11,6 @@ updates:
     directory: /
     schedule:
       interval: weekly
-    rebase-strategy: disabled
-    reviewers:
-      - Health-Education-England/full-stack
-
-  - package-ecosystem: maven
-    directory: /tcs-service
-    schedule:
-      interval: weekly
-    rebase-strategy: disabled
-    registries:
-      - maven-jenkins
-    reviewers:
-      - Health-Education-England/full-stack
-
-  - package-ecosystem: maven
-    directory: /tcs-client
-    schedule:
-      interval: weekly
-    rebase-strategy: disabled
-    registries:
-      - maven-jenkins
-    reviewers:
-      - Health-Education-England/full-stack
-
-  - package-ecosystem: maven
-    directory: /tcs-api
-    schedule:
-      interval: weekly
-    rebase-strategy: disabled
-    reviewers:
-      - Health-Education-England/full-stack
-
-  - package-ecosystem: maven
-    directory: /tcs-persistence
-    schedule:
-      interval: weekly
-    rebase-strategy: disabled
     registries:
       - maven-jenkins
     reviewers:
@@ -57,7 +20,6 @@ updates:
     directory: /
     schedule:
       interval: weekly
-    rebase-strategy: disabled
     reviewers:
       - Health-Education-England/full-stack
       - Health-Education-England/operations
