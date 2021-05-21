@@ -26,7 +26,7 @@ spring:
     caffeine.spec: maximumSize=100,expireAfterAccess=1m
   datasource:
     type: com.zaxxer.hikari.HikariDataSource
-    url: jdbc:h2:mem:tcs;DB_CLOSE_DELAY=-1;IGNORECASE=TRUE;MODE=MySQL;DATABASE_TO_LOWER=TRUE
+    url: jdbc:h2:mem:tcs;DB_CLOSE_DELAY=-1;IGNORECASE=TRUE;MODE=MySQL
     name:
     username: sa
     password:
