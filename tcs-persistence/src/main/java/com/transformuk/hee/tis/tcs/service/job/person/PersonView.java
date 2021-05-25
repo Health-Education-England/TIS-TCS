@@ -8,7 +8,7 @@ import org.springframework.data.elasticsearch.annotations.Document;
 import org.springframework.data.elasticsearch.annotations.Field;
 import org.springframework.data.elasticsearch.annotations.FieldType;
 
-@Document(indexName = "persons", type = "person")
+@Document(indexName = "persons")
 public class PersonView implements Serializable {
 
   private static final long serialVersionUID = 1L;
