@@ -17,6 +17,7 @@ spring:
     port: ${REVAL_RABBITMQ_PORT:5672}
     username: ${REVAL_RABBITMQ_USERNAME:guest}
     password: ${REVAL_RABBITMQ_PASSWORD:guest}
+    ssl.enabled: ${RABBITMQ_USE_SSL:false}
 
 logging:
     file: ${LOG_DIR:${HOME}}/tcs.log
