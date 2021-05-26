@@ -126,6 +126,7 @@ spring:
     port: ${REVAL_RABBITMQ_PORT}
     username: ${REVAL_RABBITMQ_USERNAME}
     password: ${REVAL_RABBITMQ_PASSWORD}
+    ssl.enabled: ${RABBITMQ_USE_SSL}
 
 server:
   port: 8093
@@ -228,4 +229,3 @@ app:
     reval.routingKey.connection.update: ${REVAL_RABBIT_ROUTING_KEY}
     reval.routingKey.connection.syncstart: ${REVAL_RABBIT_SYNCSTART_ROUTING_KEY}
     reval.routingKey.connection.syncdata: ${REVAL_RABBIT_SYNCDATA_ROUTING_KEY}
-    ssl.enabled: ${RABBITMQ_USE_SSL}
