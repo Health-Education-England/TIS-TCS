@@ -126,6 +126,7 @@ spring:
     port: ${REVAL_RABBITMQ_PORT}
     username: ${REVAL_RABBITMQ_USERNAME}
     password: ${REVAL_RABBITMQ_PASSWORD}
+    ssl.enabled: ${RABBITMQ_USE_SSL}
 
 server:
   port: 8093
