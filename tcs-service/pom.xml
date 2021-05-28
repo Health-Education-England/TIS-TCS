@@ -303,7 +303,7 @@
     <dependency>
       <groupId>org.jboss.resteasy</groupId>
       <artifactId>resteasy-client</artifactId>
-      <version>3.15.0.Final</version>
+      <version>4.6.0.Final</version>
     </dependency>
     <dependency>
       <groupId>org.springframework.boot</groupId>
@@ -355,7 +355,7 @@
     <scala-maven-plugin.version>3.2.2</scala-maven-plugin.version>
     <scala.version>2.12.1</scala.version>
 
-    <spock.version>1.1-groovy-2.4</spock.version>
+    <spock.version>2.0-groovy-3.0</spock.version>
     <surefire.forkCount>1</surefire.forkCount>
     <!-- Spring properties -->
     <tis.shared.modules.version>2.3.0</tis.shared.modules.version>
