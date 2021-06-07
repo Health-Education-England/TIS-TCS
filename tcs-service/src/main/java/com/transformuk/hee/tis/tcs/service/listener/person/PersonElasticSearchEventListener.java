@@ -4,6 +4,8 @@ import com.transformuk.hee.tis.tcs.service.event.PersonCreatedEvent;
 import com.transformuk.hee.tis.tcs.service.event.PersonDeletedEvent;
 import com.transformuk.hee.tis.tcs.service.event.PersonSavedEvent;
 import com.transformuk.hee.tis.tcs.service.service.PersonElasticSearchService;
+import com.transformuk.hee.tis.tcs.service.service.RevalidationRabbitService;
+import com.transformuk.hee.tis.tcs.service.service.RevalidationService;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -21,22 +23,48 @@ public class PersonElasticSearchEventListener {
   @Autowired
   private PersonElasticSearchService personElasticSearchService;
 
+  @Autowired
+  private RevalidationRabbitService revalidationRabbitService;
+
+  @Autowired
+  private RevalidationService revalidationService;
+
+  /**
+   * handle Person save event.
+   *
+   * @param personSavedEvent details of the person saved event
+   */
   @EventListener
   public void handlePersonSavedEvent(PersonSavedEvent personSavedEvent) {
-    LOG.info("Received person saved event for personId [{}]",
-        personSavedEvent.getPersonDTO().getId());
-    personElasticSearchService.updatePersonDocument(personSavedEvent.getPersonDTO().getId());
+    final Long personId = personSavedEvent.getPersonDTO().getId();
+    LOG.info("Received person saved event for personId [{}]", personId);
+    personElasticSearchService.updatePersonDocument(personId);
+    revalidationRabbitService.updateReval(revalidationService.buildTcsConnectionInfo(personId));
   }
 
+  /**
+   * handle Person created event.
+   *
+   * @param event details of the person created event
+   */
   @EventListener
   public void handlePersonCreatedEvent(PersonCreatedEvent event) {
-    LOG.info("Received Person created event for personId [{}]", event.getPersonDTO().getId());
-    personElasticSearchService.updatePersonDocument(event.getPersonDTO().getId());
+    final Long personId = event.getPersonDTO().getId();
+    LOG.info("Received Person created event for personId [{}]", personId);
+    personElasticSearchService.updatePersonDocument(personId);
+    revalidationRabbitService.updateReval(revalidationService.buildTcsConnectionInfo(personId));
   }
 
+  /**
+   * handle Person deleted event.
+   *
+   * @param event details of the person deleted event
+   */
   @EventListener
   public void handlePersonDeletedEvent(PersonDeletedEvent event) {
-    LOG.info("Received Person deleted event for personId [{}]", event.getPersonId());
-    personElasticSearchService.deletePersonDocument(event.getPersonId());
+    final Long personId = event.getPersonId();
+    LOG.info("Received Person deleted event for personId [{}]", personId);
+    personElasticSearchService.deletePersonDocument(personId);
+    revalidationRabbitService.updateReval(revalidationService.buildTcsConnectionInfo(personId));
   }
 }
