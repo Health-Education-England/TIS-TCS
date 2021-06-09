@@ -286,6 +286,19 @@ public class ProgrammeMembershipServiceImpl implements ProgrammeMembershipServic
     return Collections.emptyList();
   }
 
+  @Transactional(readOnly = true)
+  @Override
+  public List<ProgrammeMembershipDTO> findProgrammeMembershipsByProgramme(
+      Long programmeId) {
+    Preconditions.checkNotNull(programmeId);
+
+    List<ProgrammeMembership> foundProgrammeMemberships = programmeMembershipRepository
+        .findByProgrammeId(programmeId);
+    return programmeMembershipMapper
+        .programmeMembershipsToProgrammeMembershipDTOs(foundProgrammeMemberships);
+  }
+
+
   private List<ProgrammeMembershipCurriculaDTO> attachCurricula(
       List<ProgrammeMembershipDTO> programmeMembershipDTOS) {
     List<ProgrammeMembershipCurriculaDTO> result = Lists.newArrayList();

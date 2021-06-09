@@ -3,10 +3,9 @@ package com.transformuk.hee.tis.tcs.service.listener.person;
 import static org.mockito.Mockito.verify;
 
 import com.transformuk.hee.tis.tcs.api.dto.PersonDTO;
-import com.transformuk.hee.tis.tcs.api.dto.ProgrammeMembershipDTO;
-import com.transformuk.hee.tis.tcs.service.event.ProgrammeMembershipCreatedEvent;
-import com.transformuk.hee.tis.tcs.service.event.ProgrammeMembershipDeletedEvent;
-import com.transformuk.hee.tis.tcs.service.event.ProgrammeMembershipSavedEvent;
+import com.transformuk.hee.tis.tcs.service.event.PersonCreatedEvent;
+import com.transformuk.hee.tis.tcs.service.event.PersonDeletedEvent;
+import com.transformuk.hee.tis.tcs.service.event.PersonSavedEvent;
 import com.transformuk.hee.tis.tcs.service.service.PersonElasticSearchService;
 import com.transformuk.hee.tis.tcs.service.service.RevalidationRabbitService;
 import com.transformuk.hee.tis.tcs.service.service.RevalidationService;
@@ -18,15 +17,13 @@ import org.mockito.Mock;
 import org.mockito.junit.MockitoJUnitRunner;
 
 @RunWith(MockitoJUnitRunner.class)
-public class ProgrammeMembershipEventListenerTest {
+public class PersonElacticSearchEventListenerTest {
 
-  private ProgrammeMembershipSavedEvent savedEvent;
-  private ProgrammeMembershipCreatedEvent createdEvent;
-  private ProgrammeMembershipDeletedEvent deletedEvent;
-  private ProgrammeMembershipDTO source;
-  private PersonDTO person;
+  private PersonSavedEvent savedEvent;
+  private PersonCreatedEvent createdEvent;
+  private PersonDeletedEvent deletedEvent;
+  private PersonDTO source;
   private static final Long PERSONID = Long.valueOf(11111111);
-  private static final Long PROGRAMME_MEMBERSHIP_ID = Long.valueOf(22222222);
 
   @Mock
   RevalidationRabbitService revalidationRabbitService;
@@ -38,39 +35,35 @@ public class ProgrammeMembershipEventListenerTest {
   RevalidationService revalidationService;
 
   @InjectMocks
-  ProgrammeMembershipEventListener testObj;
+  PersonElasticSearchEventListener testObj;
 
   @Before
   public void setup() {
-    person = new PersonDTO();
-    person.setId(PERSONID);
+    source = new PersonDTO();
+    source.setId(PERSONID);
 
-    source = new ProgrammeMembershipDTO();
-    source.setId(PROGRAMME_MEMBERSHIP_ID);
-    source.setPerson(person);
-
-    savedEvent = new ProgrammeMembershipSavedEvent(source);
-    createdEvent = new ProgrammeMembershipCreatedEvent(source);
-    deletedEvent = new ProgrammeMembershipDeletedEvent(source);
+    savedEvent = new PersonSavedEvent(source);
+    createdEvent = new PersonCreatedEvent(source);
+    deletedEvent = new PersonDeletedEvent(PERSONID);
   }
 
   @Test
-  public void shouldHandleProgrammeMembershipSavedEvent() {
-    testObj.handleProgrammeMembershipSavedEvent(savedEvent);
+  public void shouldHandlePersonSavedEvent() {
+    testObj.handlePersonSavedEvent(savedEvent);
     verify(personElasticSearchService).updatePersonDocument(PERSONID);
     verify(revalidationRabbitService).updateReval(revalidationService.buildTcsConnectionInfo(PERSONID));
   }
 
   @Test
-  public void shouldHandleProgrammeMembershipCreatedEvent() {
-    testObj.handleProgrammeMembershipCreatedEvent(createdEvent);
+  public void shouldHandlePersonCreatedEvent() {
+    testObj.handlePersonCreatedEvent(createdEvent);
     verify(personElasticSearchService).updatePersonDocument(PERSONID);
     verify(revalidationRabbitService).updateReval(revalidationService.buildTcsConnectionInfo(PERSONID));
   }
 
   @Test
-  public void shouldHandleProgrammeMembershipDeletedEvent() {
-    testObj.handleProgrammeMembershipDeletedEvent(deletedEvent);
+  public void shouldHandlePersonDeletedEvent() {
+    testObj.handlePersonDeletedEvent(deletedEvent);
     verify(personElasticSearchService).deletePersonDocument(PERSONID);
     verify(revalidationRabbitService).updateReval(revalidationService.buildTcsConnectionInfo(PERSONID));
   }

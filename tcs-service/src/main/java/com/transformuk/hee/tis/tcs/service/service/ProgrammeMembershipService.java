@@ -68,4 +68,12 @@ public interface ProgrammeMembershipService {
 
   List<ProgrammeMembershipCurriculaDTO> findProgrammeMembershipsForTraineeRolledUp(Long traineeId);
 
+  /**
+   * Get a list of programme memberships for a programme.
+   *
+   * @param programmeId the id of the programme
+   * @return a list of programme memberships of the programme
+   */
+  List<ProgrammeMembershipDTO> findProgrammeMembershipsByProgramme(Long programmeId);
+
 }

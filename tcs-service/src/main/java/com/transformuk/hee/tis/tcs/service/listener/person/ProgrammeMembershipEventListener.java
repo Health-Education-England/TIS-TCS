@@ -4,12 +4,11 @@ import com.transformuk.hee.tis.tcs.service.event.ProgrammeMembershipCreatedEvent
 import com.transformuk.hee.tis.tcs.service.event.ProgrammeMembershipDeletedEvent;
 import com.transformuk.hee.tis.tcs.service.event.ProgrammeMembershipSavedEvent;
 import com.transformuk.hee.tis.tcs.service.service.PersonElasticSearchService;
+import com.transformuk.hee.tis.tcs.service.service.RevalidationRabbitService;
 import com.transformuk.hee.tis.tcs.service.service.RevalidationService;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.springframework.amqp.rabbit.core.RabbitTemplate;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.event.EventListener;
 import org.springframework.stereotype.Component;
 
@@ -18,16 +17,8 @@ public class ProgrammeMembershipEventListener {
 
   private static final Logger LOG = LoggerFactory.getLogger(ProgrammeMembershipEventListener.class);
 
-  private static final String NO_EXCHANGE = "false";
-
-  @Value("${app.rabbit.reval.exchange}")
-  private String exchange;
-
-  @Value("${app.rabbit.reval.routingKey.connection.update}")
-  private String routingKey;
-
   @Autowired
-  private RabbitTemplate rabbitTemplate;
+  private RevalidationRabbitService revalidationRabbitService;
 
   @Autowired
   private PersonElasticSearchService personElasticSearchService;
@@ -35,40 +26,46 @@ public class ProgrammeMembershipEventListener {
   @Autowired
   private RevalidationService revalidationService;
 
+  /**
+   * handle Programme membership saved event.
+   *
+   * @param event details of the programme saved event
+   */
   @EventListener
   public void handleProgrammeMembershipSavedEvent(ProgrammeMembershipSavedEvent event) {
     LOG.info("Received ProgrammeMembership saved event for ProgrammeMembership id: [{}]",
         event.getProgrammeMembershipDTO().getId());
     final Long personId = event.getProgrammeMembershipDTO().getPerson().getId();
     personElasticSearchService.updatePersonDocument(personId);
-    if (!exchange.equals(NO_EXCHANGE)) {
-      rabbitTemplate.convertAndSend(exchange, routingKey,
-          revalidationService.buildTcsConnectionInfo(personId));
-    }
+    revalidationRabbitService.updateReval(revalidationService.buildTcsConnectionInfo(personId));
   }
 
+  /**
+   * handle Programme membership created event.
+   *
+   * @param event details of the programme created event
+   */
   @EventListener
   public void handleProgrammeMembershipCreatedEvent(ProgrammeMembershipCreatedEvent event) {
     LOG.info("Received ProgrammeMembership created event for ProgrammeMembership id: [{}]",
         event.getProgrammeMembershipDTO().getId());
     final Long personId = event.getProgrammeMembershipDTO().getPerson().getId();
     personElasticSearchService.updatePersonDocument(personId);
-    if (!exchange.equals(NO_EXCHANGE)) {
-      rabbitTemplate.convertAndSend(exchange, routingKey,
-          revalidationService.buildTcsConnectionInfo(personId));
-    }
+    revalidationRabbitService.updateReval(revalidationService.buildTcsConnectionInfo(personId));
   }
 
+  /**
+   * handle Programme membership deleted event.
+   *
+   * @param event details of the programme deleted event
+   */
   @EventListener
   public void handleProgrammeMembershipDeletedEvent(ProgrammeMembershipDeletedEvent event) {
     LOG.info("Received ProgrammeMembership deleted event for ProgrammeMembership id: [{}]",
         event.getProgrammeMembershipDTO().getId());
     final Long personId = event.getProgrammeMembershipDTO().getPerson().getId();
     personElasticSearchService.deletePersonDocument(personId);
-    if (!exchange.equals(NO_EXCHANGE)) {
-      rabbitTemplate.convertAndSend(exchange, routingKey,
-          revalidationService.buildTcsConnectionInfo(personId));
-    }
+    revalidationRabbitService.updateReval(revalidationService.buildTcsConnectionInfo(personId));
   }
 
 }
