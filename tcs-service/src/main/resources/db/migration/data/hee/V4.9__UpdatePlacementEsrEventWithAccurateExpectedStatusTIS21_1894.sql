@@ -3997,7 +3997,7 @@ and (exists (select id from Placement where id = '2048760'));
 insert into PlacementEsrEvent (placementId, eventDateTime, filename, positionNumber, positionId, status)
 select '2048761', '2021-07-30 13:10:00', 'DE_LDN_APP_20210730_00003794.DAT', '11784250', '5778429', 'EXPORTED'
 where not (exists (select placementId from PlacementEsrEvent where placementId = '2048761'))
-and (exists (select id from Placement where id = '2048761'))
+and (exists (select id from Placement where id = '2048761'));
 insert into PlacementEsrEvent (placementId, eventDateTime, filename, positionNumber, positionId, status)
 select '2048715', '2021-07-30 13:10:00', 'DE_LDN_APP_20210730_00003794.DAT', '36698524', '9000003', 'EXPORTED'
 where not (exists (select placementId from PlacementEsrEvent where placementId = '2048715'))
