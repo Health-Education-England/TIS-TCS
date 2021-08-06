@@ -170,4 +170,19 @@ public class ContactDetailsDTOValidatorTest {
         .andExpect(jsonPath("$.fieldErrors[*].field").
             value(containsInAnyOrder("contactDetails.email")));
   }
+
+  @Test
+  public void noValidationOfWorkEmailBeforeUpdatingContact() throws Exception {
+    ContactDetails contactDetails = ContactDetailsResourceIntTest.createEntity(em);
+
+    //given
+    ContactDetailsDTO contactDetailsDTO = contactDetailsMapper.toDto(contactDetails);
+    contactDetailsDTO.setWorkEmail("/NULL/");
+
+    //when & then
+    restContactDetailsMockMvc.perform(put("/api/contact-details")
+        .contentType(MediaType.APPLICATION_JSON)
+        .content(TestUtil.convertObjectToJsonBytes(contactDetailsDTO)))
+        .andExpect(status().isOk());
+  }
 }

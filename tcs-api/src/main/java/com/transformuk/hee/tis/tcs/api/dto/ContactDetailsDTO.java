@@ -88,7 +88,7 @@ public class ContactDetailsDTO implements Serializable {
 
   private LocalDateTime amendedDate;
 
-  @Email(message = "Valid email format required", groups = {Update.class, Create.class})
+  @Email(message = "Valid email format required", groups = {Create.class})
   private String workEmail;
 
   @Pattern(regexp = "^$|^[A-Za-z0-9\\-\\\\' ]+",
