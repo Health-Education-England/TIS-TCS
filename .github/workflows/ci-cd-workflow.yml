@@ -12,7 +12,7 @@ jobs:
     steps:
       - name: Checkout
         uses: actions/checkout@v2
-        
+
       - name: Set up maven cache
         uses: actions/cache@v2
         with:
@@ -21,7 +21,7 @@ jobs:
           restore-keys: |
             ${{ runner.os }}-maven-
 
-      - name: Set up JDK 8
+      - name: Set up JDK
         uses: actions/setup-java@v2.1.0
         with:
           distribution: adopt
@@ -100,7 +100,7 @@ jobs:
     steps:
       - name: Checkout
         uses: actions/checkout@v2
-        
+
       - name: Set up maven cache
         uses: actions/cache@v2
         with:
@@ -136,7 +136,7 @@ jobs:
         id: login-ecr
         uses: aws-actions/amazon-ecr-login@v1
 
-      - name: Set up JDK 8
+      - name: Set up JDK
         uses: actions/setup-java@v1
         with:
           java-version: 8
@@ -152,7 +152,6 @@ jobs:
 
   deploy-pre-prod:
     name: Deploy pre-production definition
-    environment: pre-prod
     needs: dockerize
     runs-on: ubuntu-latest
 
@@ -183,37 +182,3 @@ jobs:
         uses: aws-actions/amazon-ecs-deploy-task-definition@v1
         with:
           task-definition: ${{ steps.task-def.outputs.task-definition }}
-
-  deploy-prod:
-    name: Deploy prod
-    environment: prod
-    needs: deploy-pre-prod
-    runs-on: ubuntu-latest
-
-    steps:
-      - name: Checkout
-        uses: actions/checkout@v2
-
-      - name: Configure AWS credentials
-        uses: aws-actions/configure-aws-credentials@v1
-        with:
-          aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID }}
-          aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
-          aws-region: eu-west-2
-
-      - name: Log in to Amazon ECR
-        id: login-ecr
-        uses: aws-actions/amazon-ecr-login@v1
-
-      - name: Fill in the new image ID in the HEE PROD Amazon ECS task definition
-        id: task-def-prod
-        uses: aws-actions/amazon-ecs-render-task-definition@v1
-        with:
-          task-definition: .aws/tis-tcs-prod.json
-          container-name: tcs
-          image: ${{ steps.login-ecr.outputs.registry }}/tcs:${{ github.sha }}
-
-      - name: Deploy Amazon ECS task definition
-        uses: aws-actions/amazon-ecs-deploy-task-definition@v1
-        with:
-          task-definition: ${{ steps.task-def-prod.outputs.task-definition }}
