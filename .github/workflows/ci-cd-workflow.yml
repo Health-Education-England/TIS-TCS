@@ -1,0 +1,184 @@
+name: CI CD Workflow
+
+on:
+  push:
+  workflow_dispatch:
+
+jobs:
+  build:
+    name: Build, Test and Analyse
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v2
+
+      - name: Set up maven cache
+        uses: actions/cache@v2
+        with:
+          path: ~/.m2/repository
+          key: ${{ runner.os }}-maven-${{ hashFiles('**/pom.xml') }}
+          restore-keys: |
+            ${{ runner.os }}-maven-
+
+      - name: Set up JDK
+        uses: actions/setup-java@v2.1.0
+        with:
+          distribution: adopt
+          java-version: 11
+
+      - name: Configure AWS credentials
+        uses: aws-actions/configure-aws-credentials@v1
+        with:
+          aws-access-key-id: ${{ secrets.AWS_MAVEN_USERNAME }}
+          aws-secret-access-key: ${{ secrets.AWS_MAVEN_PASSWORD }}
+          aws-region: eu-west-1
+
+      - name: Add CodeArtifact env var
+        run: echo "CODEARTIFACT_AUTH_TOKEN=$(aws codeartifact get-authorization-token --domain hee --domain-owner 430723991443 --query authorizationToken --output text)" >> $GITHUB_ENV
+
+      - name: maven-settings-xml-action
+        uses: whelk-io/maven-settings-xml-action@v17
+        with:
+          servers: '[{ "id": "hee--Health-Education-England", "username": "aws", "password": "${env.CODEARTIFACT_AUTH_TOKEN}" }]'
+          repositories: '[{ "id": "hee--Health-Education-England", "url": "https://hee-430723991443.d.codeartifact.eu-west-1.amazonaws.com/maven/Health-Education-England/" }]'
+
+      - name: Build
+        run: mvn install -DskipTests
+
+      - name: Upload build artifact
+        uses: actions/upload-artifact@v2
+        with:
+          name: app-jar
+          path: tcs-*/target/*.jar
+
+      - name: Configure AWS credentials
+        uses: aws-actions/configure-aws-credentials@v1
+        with:
+          aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID }}
+          aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+          aws-region: eu-west-2
+
+      - name: Run tests
+        run: mvn test
+
+      - name: Run quality analysis
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }}
+        run: mvn org.sonarsource.scanner.maven:sonar-maven-plugin:sonar
+
+  backup-artifacts:
+    name: Backup build artifacts
+    needs: build
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Download build artifacts
+        uses: actions/download-artifact@v2
+        with:
+          path: build-artifacts
+
+      - name: Configure AWS credentials
+        uses: aws-actions/configure-aws-credentials@v1
+        with:
+          aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID }}
+          aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+          aws-region: eu-west-2
+
+      - name: Backup build artifacts
+        run: |
+          workflow=$(echo ${{ github.workflow }} | sed -e 's/\W/-/g' -e 's/\(.*\)/\L\1/')
+          aws s3 sync build-artifacts s3://tis-build-artifacts/${{ github.event.repository.name }}/$workflow/${{ github.run_number }}
+
+  dockerize:
+    name: Dockerize
+    needs: build
+    runs-on: ubuntu-latest
+    if: github.ref == 'refs/heads/master'
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v2
+
+      - name: Set up maven cache
+        uses: actions/cache@v2
+        with:
+          path: ~/.m2/repository
+          key: ${{ runner.os }}-maven-${{ hashFiles('**/pom.xml') }}
+          restore-keys: |
+            ${{ runner.os }}-maven-
+
+      - name: Configure AWS credentials
+        uses: aws-actions/configure-aws-credentials@v1
+        with:
+          aws-access-key-id: ${{ secrets.AWS_MAVEN_USERNAME }}
+          aws-secret-access-key: ${{ secrets.AWS_MAVEN_PASSWORD }}
+          aws-region: eu-west-1
+
+      - name: Add CodeArtifact env var
+        run: echo "CODEARTIFACT_AUTH_TOKEN=$(aws codeartifact get-authorization-token --domain hee --domain-owner 430723991443 --query authorizationToken --output text)" >> $GITHUB_ENV
+
+      - name: maven-settings-xml-action
+        uses: whelk-io/maven-settings-xml-action@v4
+        with:
+          servers: '[{ "id": "hee--Health-Education-England", "username": "aws", "password": "${env.CODEARTIFACT_AUTH_TOKEN}" }]'
+          repositories: '[{ "id": "hee--Health-Education-England", "url": "https://hee-430723991443.d.codeartifact.eu-west-1.amazonaws.com/maven/Health-Education-England/" }]'
+
+      - name: Configure AWS credentials
+        uses: aws-actions/configure-aws-credentials@v1
+        with:
+          aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID }}
+          aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+          aws-region: eu-west-2
+
+      - name: Log in to Amazon ECR
+        id: login-ecr
+        uses: aws-actions/amazon-ecr-login@v1
+
+      - name: Set up JDK
+        uses: actions/setup-java@v1
+        with:
+          java-version: 8
+
+      - name: Build, tag and push image to Amazon ECR
+        env:
+          ECR_REGISTRY: ${{ steps.login-ecr.outputs.registry }}
+          ECR_REPOSITORY: tcs
+        run: |
+          mvn spring-boot:build-image -Dspring-boot.build-image.imageName=$ECR_REGISTRY/$ECR_REPOSITORY:${{ github.sha }}
+          docker tag $ECR_REGISTRY/$ECR_REPOSITORY:${{ github.sha }} $ECR_REGISTRY/$ECR_REPOSITORY:latest
+          docker push --all-tags $ECR_REGISTRY/$ECR_REPOSITORY
+
+  deploy-pre-prod:
+    name: Deploy pre-production definition
+    needs: dockerize
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v2
+
+      - name: Configure AWS credentials
+        uses: aws-actions/configure-aws-credentials@v1
+        with:
+          aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID }}
+          aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+          aws-region: eu-west-2
+
+      - name: Log in to Amazon ECR
+        id: login-ecr
+        uses: aws-actions/amazon-ecr-login@v1
+
+      - name: Fill in the new image ID in the Amazon ECS task definition
+        id: task-def
+        uses: aws-actions/amazon-ecs-render-task-definition@v1
+        with:
+          task-definition: .aws/tis-tcs-preprod.json
+          container-name: tcs
+          image: ${{ steps.login-ecr.outputs.registry }}/tcs:${{ github.sha }}
+
+      - name: Deploy Amazon ECS task definition
+        uses: aws-actions/amazon-ecs-deploy-task-definition@v1
+        with:
+          task-definition: ${{ steps.task-def.outputs.task-definition }}
