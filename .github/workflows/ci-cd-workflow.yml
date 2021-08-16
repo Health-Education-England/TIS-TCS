@@ -109,6 +109,12 @@ jobs:
           restore-keys: |
             ${{ runner.os }}-maven-
 
+      - name: Set up JDK
+        uses: actions/setup-java@v2.1.0
+        with:
+          distribution: adopt
+          java-version: 11
+
       - name: Configure AWS credentials
         uses: aws-actions/configure-aws-credentials@v1
         with:
@@ -120,10 +126,15 @@ jobs:
         run: echo "CODEARTIFACT_AUTH_TOKEN=$(aws codeartifact get-authorization-token --domain hee --domain-owner 430723991443 --query authorizationToken --output text)" >> $GITHUB_ENV
 
       - name: maven-settings-xml-action
-        uses: whelk-io/maven-settings-xml-action@v4
+        uses: whelk-io/maven-settings-xml-action@v17
         with:
           servers: '[{ "id": "hee--Health-Education-England", "username": "aws", "password": "${env.CODEARTIFACT_AUTH_TOKEN}" }]'
           repositories: '[{ "id": "hee--Health-Education-England", "url": "https://hee-430723991443.d.codeartifact.eu-west-1.amazonaws.com/maven/Health-Education-England/" }]'
+
+      - name: package java
+        run: |
+          mvn install -DskipTests
+          cp ./tcs-service/target/tcs-service-*.war ./tcs-service/target/app.jar
 
       - name: Configure AWS credentials
         uses: aws-actions/configure-aws-credentials@v1
@@ -136,18 +147,12 @@ jobs:
         id: login-ecr
         uses: aws-actions/amazon-ecr-login@v1
 
-      - name: Set up JDK
-        uses: actions/setup-java@v1
-        with:
-          java-version: 8
-
       - name: Build, tag and push image to Amazon ECR
         env:
           ECR_REGISTRY: ${{ steps.login-ecr.outputs.registry }}
           ECR_REPOSITORY: tcs
         run: |
-          cd tcs-service
-          mvn spring-boot:build-image -DskipTests -Dspring-boot.build-image.imageName=$ECR_REGISTRY/$ECR_REPOSITORY:${{ github.sha }}
+          docker build -t $ECR_REGISTRY/$ECR_REPOSITORY:${{ github.sha }} -f ./tcs-service/Dockerfile ./tcs-service
           docker tag $ECR_REGISTRY/$ECR_REPOSITORY:${{ github.sha }} $ECR_REGISTRY/$ECR_REPOSITORY:latest
           docker push --all-tags $ECR_REGISTRY/$ECR_REPOSITORY
 
