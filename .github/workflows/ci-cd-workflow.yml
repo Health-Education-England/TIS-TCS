@@ -181,7 +181,7 @@ jobs:
         uses: aws-actions/amazon-ecs-render-task-definition@v1
         with:
           task-definition: .aws/tis-tcs-preprod.json
-          container-name: tcs
+          container-name: tis-tcs
           image: ${{ steps.login-ecr.outputs.registry }}/tcs:${{ github.sha }}
 
       - name: Deploy Amazon ECS task definition
