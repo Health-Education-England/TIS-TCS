@@ -148,13 +148,15 @@ jobs:
         uses: aws-actions/amazon-ecr-login@v1
 
       - name: Build, tag and push image to Amazon ECR
+        id: docker-image
         env:
           ECR_REGISTRY: ${{ steps.login-ecr.outputs.registry }}
           ECR_REPOSITORY: tcs
+          IMAGE_TAG: ${{ github.sha }}
         run: |
-          docker build -t $ECR_REGISTRY/$ECR_REPOSITORY:${{ github.sha }} -f ./tcs-service/Dockerfile ./tcs-service
-          docker tag $ECR_REGISTRY/$ECR_REPOSITORY:${{ github.sha }} $ECR_REGISTRY/$ECR_REPOSITORY:latest
+          docker build -t $ECR_REGISTRY/$ECR_REPOSITORY:$IMAGE_TAG -t $ECR_REGISTRY/$ECR_REPOSITORY:latest -f ./tcs-service/Dockerfile ./tcs-service
           docker push --all-tags $ECR_REGISTRY/$ECR_REPOSITORY
+          echo "::set-output name=image::$ECR_REGISTRY/$ECR_REPOSITORY:$IMAGE_TAG"
 
   deploy-pre-prod:
     name: Deploy pre-production definition
@@ -182,7 +184,7 @@ jobs:
         with:
           task-definition: .aws/tis-tcs-preprod.json
           container-name: tis-tcs
-          image: ${{ steps.login-ecr.outputs.registry }}/tcs:${{ github.sha }}
+          image: ${{ steps.docker-image.outputs.image }}
 
       - name: Deploy Amazon ECS task definition
         uses: aws-actions/amazon-ecs-deploy-task-definition@v1
