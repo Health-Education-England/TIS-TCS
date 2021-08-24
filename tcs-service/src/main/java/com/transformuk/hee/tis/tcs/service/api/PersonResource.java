@@ -253,11 +253,12 @@ public class PersonResource {
   public ResponseEntity<Collection<PersonLiteDTO>> getPersonsByRoleCategory(
       final Pageable pageable,
       @PathVariable("categoryId") final Long categoryId,
-      @RequestParam(value = "searchQuery", required = false) final String searchQuery) {
+      @RequestParam(value = "searchQuery", required = false) String searchQuery) {
+    searchQuery = getConverter(searchQuery).fromJson().decodeUrl().escapeForSql().toString();
     log.info(
         "Received request to search '{}' with RoleCategory ID '{}', searchQuery '{}' and pageable '{}'",
         PersonLiteDTO.class.getSimpleName(), categoryId, searchQuery, pageable);
-    
+
     String searchQuerySanitised = RegExUtils.replaceAll(searchQuery, "[\n\r\t]", "_");
     log.debug("Accessing '{}' to search '{}' with RoleCategory ID '{}' and searchQuery '{}'",
         personService.getClass().getSimpleName(), PersonLiteDTO.class.getSimpleName(), categoryId,
@@ -510,7 +511,8 @@ public class PersonResource {
   @PatchMapping("/bulk-people")
   @PreAuthorize("hasPermission('tis:people::person:', 'Update')")
   public ResponseEntity<List<PersonDTO>> patchPeople(@RequestBody List<PersonDTO> personDtos) {
-    log.debug("REST request to patch People: {}", personDtos);
+    log.debug("REST request to patch People with ids: {}",
+        personDtos.stream().map(PersonDTO::getId).collect(Collectors.toList()));
 
     List<PersonDTO> result = personService.patch(personDtos);
     final List<String> ids = result.stream().map(dto -> dto.getId().toString())

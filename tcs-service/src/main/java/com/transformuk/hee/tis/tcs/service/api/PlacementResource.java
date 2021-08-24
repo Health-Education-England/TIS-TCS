@@ -2,6 +2,7 @@ package com.transformuk.hee.tis.tcs.service.api;
 
 import com.transformuk.hee.tis.tcs.api.dto.PlacementDTO;
 import com.transformuk.hee.tis.tcs.api.dto.PlacementDetailsDTO;
+import com.transformuk.hee.tis.tcs.api.dto.PlacementEsrEventDto;
 import com.transformuk.hee.tis.tcs.api.dto.validation.Create;
 import com.transformuk.hee.tis.tcs.api.dto.validation.Update;
 import com.transformuk.hee.tis.tcs.service.api.decorator.PlacementDetailsDecorator;
@@ -9,7 +10,6 @@ import com.transformuk.hee.tis.tcs.service.api.util.HeaderUtil;
 import com.transformuk.hee.tis.tcs.service.api.util.PaginationUtil;
 import com.transformuk.hee.tis.tcs.service.api.validation.PlacementValidator;
 import com.transformuk.hee.tis.tcs.service.api.validation.ValidationException;
-import com.transformuk.hee.tis.tcs.api.dto.PlacementEsrEventDto;
 import com.transformuk.hee.tis.tcs.service.dto.placementmanager.PlacementsResultDTO;
 import com.transformuk.hee.tis.tcs.service.model.PlacementEsrEvent;
 import com.transformuk.hee.tis.tcs.service.service.PlacementService;
@@ -190,16 +190,16 @@ public class PlacementResource {
   /**
    * PATCH  /placements : Bulk patch Placements.
    *
-   * @param placementDTOS List of the placementDTOS to create
+   * @param placementDtos List of the placementDTOS to create
    * @return the ResponseEntity with status 200 (OK) and with body the new placementDTOS
-   * @throws URISyntaxException if the Location URI syntax is incorrect
    */
   @PatchMapping("/placements")
   @PreAuthorize("hasAuthority('tcs:add:modify:entities')")
   public ResponseEntity<List<PlacementDTO>> patchPlacements(
-      @RequestBody final List<PlacementDTO> placementDTOS) {
-    log.debug("REST request to bulk save Placement : {}", placementDTOS);
-    final List<PlacementDTO> result = placementService.save(placementDTOS);
+      @RequestBody final List<PlacementDTO> placementDtos) {
+    log.debug("REST request to bulk patch Placements with IDs : {}",
+        placementDtos.stream().map(PlacementDTO::getId).collect(Collectors.toList()));
+    final List<PlacementDTO> result = placementService.save(placementDtos);
     final List<Long> ids = result.stream().map(PlacementDTO::getId).collect(Collectors.toList());
     return ResponseEntity.ok()
         .headers(HeaderUtil.createEntityUpdateAlert(ENTITY_NAME, StringUtils.join(ids, ",")))
