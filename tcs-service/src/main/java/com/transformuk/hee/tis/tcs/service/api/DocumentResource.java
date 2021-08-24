@@ -3,6 +3,7 @@ package com.transformuk.hee.tis.tcs.service.api;
 import static com.transformuk.hee.tis.tcs.service.api.DocumentResource.PATH_API;
 import static javax.ws.rs.core.MediaType.APPLICATION_JSON;
 import static javax.ws.rs.core.MediaType.MULTIPART_FORM_DATA;
+import static uk.nhs.tis.StringConverter.getConverter;
 
 import com.transformuk.hee.tis.security.model.UserProfile;
 import com.transformuk.hee.tis.security.util.TisSecurityHelper;
@@ -62,10 +63,11 @@ public class DocumentResource {
   public ResponseEntity<Page<DocumentDTO>> getAllDocuments(
       @PathVariable(value = "entity") final String entity,
       @PathVariable(value = "personId") final Long personId,
-      @RequestParam(value = "query", required = false) final String query,
+      @RequestParam(value = "query", required = false) String query,
       @RequestParam(value = "columnFilters", required = false) final String columnFilterJson,
       @RequestParam(value = "tags", required = false) final List<String> tagNames,
       final Pageable pageable) throws IOException {
+    query = getConverter(query).decodeUrl().toString();
     LOG.info("Received 'getAllDocuments' request for entity '{}', person id '{}' and query '{}'",
         entity,
         personId,
@@ -230,25 +232,26 @@ public class DocumentResource {
       @RequestParam("personId") final Long personId,
       @RequestParam("document") final MultipartFile documentParam
   ) throws IOException {
+    String filename = getConverter(documentParam.getOriginalFilename()).decodeUrl().toString();
     LOG.info("Received 'UploadDocument' request with person '{}' and document name '{}'",
-        personId, documentParam.getOriginalFilename());
+        personId, filename);
 
     final Optional<DocumentDTO> newDocument = createDocument(documentParam, personId);
 
     if (!newDocument.isPresent()) {
       LOG.warn(
           "Document with person '{}' and document name '{}' failed validation; rejecting request",
-          personId, documentParam.getOriginalFilename());
+          personId, filename);
       return new ResponseEntity<>(HttpStatus.BAD_REQUEST);
     }
 
     LOG.debug("Accessing service to save document with person '{}' and document name '{}'",
-        personId, documentParam.getOriginalFilename());
+        personId, filename);
 
     final DocumentDTO savedDocument = documentService.save(newDocument.get());
 
     LOG.debug("Document with person '{}' and document name '{}' saved successfully",
-        personId, documentParam.getOriginalFilename());
+        personId, filename);
 
     return ResponseEntity.status(HttpStatus.CREATED).body(new DocumentId(savedDocument.getId()));
   }
@@ -314,8 +317,8 @@ public class DocumentResource {
   }
 
   @GetMapping(value = PATH_DOCUMENTS + PATH_TAGS, produces = APPLICATION_JSON)
-  public ResponseEntity<Collection<TagDTO>> getAllTags(
-      @QueryParam("query") final String query) {
+  public ResponseEntity<Collection<TagDTO>> getAllTags(@QueryParam("query") String query) {
+    query = getConverter(query).decodeUrl().toString();
     LOG.info("Received 'SearchTags' request with query '{}'",
         query);
 

@@ -1,5 +1,7 @@
 package com.transformuk.hee.tis.tcs.service.api;
 
+import static uk.nhs.tis.StringConverter.getConverter;
+
 import com.transformuk.hee.tis.tcs.api.dto.EsrNotificationDTO;
 import com.transformuk.hee.tis.tcs.service.service.EsrNotificationService;
 import java.time.LocalDate;
@@ -115,7 +117,7 @@ public class EsrNotificationResource {
       @RequestParam String deanery,
       @RequestParam(required = false) @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate fromDate
   ) {
-
+    deanery = getConverter(deanery).decodeUrl().toString();
     LOG.info("REST request to get notifications for deanery {} from date : {}", deanery, fromDate);
     List<EsrNotificationDTO> esrNotificationDTOS;
     if (fromDate == null) {
@@ -125,5 +127,4 @@ public class EsrNotificationResource {
     }
     return ResponseEntity.ok().body(esrNotificationDTOS);
   }
-
 }
