@@ -4,12 +4,14 @@ import static com.transformuk.hee.tis.security.util.TisSecurityHelper.getProfile
 import static com.transformuk.hee.tis.tcs.service.api.util.DateUtil.getLocalDateFromString;
 import static com.transformuk.hee.tis.tcs.service.service.impl.SpecificationFactory.in;
 import static com.transformuk.hee.tis.tcs.service.service.impl.SpecificationFactory.isBetween;
+import static uk.nhs.tis.StringConverter.getConverter;
 
 import com.google.common.collect.Lists;
 import com.google.common.collect.Maps;
 import com.google.common.collect.Sets;
 import com.transformuk.hee.tis.tcs.api.dto.PlacementDTO;
 import com.transformuk.hee.tis.tcs.api.dto.PlacementDetailsDTO;
+import com.transformuk.hee.tis.tcs.api.dto.PlacementEsrEventDto;
 import com.transformuk.hee.tis.tcs.api.dto.PlacementSiteDTO;
 import com.transformuk.hee.tis.tcs.api.dto.PlacementSpecialtyDTO;
 import com.transformuk.hee.tis.tcs.api.dto.PlacementSummaryDTO;
@@ -23,7 +25,6 @@ import com.transformuk.hee.tis.tcs.api.enumeration.Status;
 import com.transformuk.hee.tis.tcs.api.enumeration.TCSDateColumns;
 import com.transformuk.hee.tis.tcs.service.api.decorator.PlacementDetailsDecorator;
 import com.transformuk.hee.tis.tcs.service.api.util.ColumnFilterUtil;
-import com.transformuk.hee.tis.tcs.api.dto.PlacementEsrEventDto;
 import com.transformuk.hee.tis.tcs.service.event.PlacementDeletedEvent;
 import com.transformuk.hee.tis.tcs.service.event.PlacementSavedEvent;
 import com.transformuk.hee.tis.tcs.service.exception.DateRangeColumnFilterException;
@@ -492,17 +493,17 @@ public class PlacementServiceImpl implements PlacementService {
   /**
    * Save a list of placements.
    *
-   * @param placementDTO the list of entities to save
+   * @param placementDtos the list of entities to save
    * @return the list of persisted entities
    */
   @Override
-  public List<PlacementDTO> save(final List<PlacementDTO> placementDTO) {
-    log.debug("Request to save Placements : {}", placementDTO);
-    List<Placement> placements = placementMapper.placementDTOsToPlacements(placementDTO);
+  public List<PlacementDTO> save(final List<PlacementDTO> placementDtos) {
+    log.debug("Request to save {} placements.", placementDtos.size());
+    List<Placement> placements = placementMapper.placementDTOsToPlacements(placementDtos);
     placements = placementRepository.saveAll(placements);
     List<PlacementDTO> placementDTOS = convertPlacements(placements);
 
-    placementDTO.stream()
+    placementDtos.stream()
         .map(PlacementSavedEvent::new)
         .forEach(applicationEventPublisher::publishEvent);
 
@@ -716,9 +717,9 @@ public class PlacementServiceImpl implements PlacementService {
    */
   @Override
   @Transactional(readOnly = true)
-  public Page<PlacementDetailsDTO> findFilteredPlacements(final String columnFilterJson,
+  public Page<PlacementDetailsDTO> findFilteredPlacements(String columnFilterJson,
       final Pageable pageable) throws IOException {
-
+    columnFilterJson = getConverter(columnFilterJson).decodeUrl().toString();
     log.debug("Request to get all Revalidations filtered by columns {}", columnFilterJson);
     final List<Class> filterEnumList = Collections.emptyList();
     final List<ColumnFilter> columnFilters = ColumnFilterUtil

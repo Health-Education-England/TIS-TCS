@@ -95,7 +95,7 @@ public class PersonValidator {
         continue;
       }
 
-      LOGGER.debug("Validation errors occurred for Person: {}", personDto);
+      LOGGER.debug("Validation errors occurred for Person with ID '{}'.", personDto.getId());
 
       for (FieldError error : errors) {
         String errorMessage = error.getDefaultMessage();
