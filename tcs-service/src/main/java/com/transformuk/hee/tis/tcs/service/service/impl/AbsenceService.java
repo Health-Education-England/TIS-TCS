@@ -83,6 +83,13 @@ public class AbsenceService {
     return result.orElseThrow(() -> new RuntimeException("Failed to create new Absence record"));
   }
 
+  /**
+   * Patch the absence represented by the patch map, the Absence ID of Absence attendance ID is used
+   * to find the correct absence to patch.
+   *
+   * @param absenceDtoPatchMap The value map representing the absence to be patched.
+   * @return The patched Absence, empty if no existing absence could be found.
+   */
   public Optional<AbsenceDTO> patchAbsence(Map<String, Object> absenceDtoPatchMap) {
     Preconditions.checkArgument(absenceDtoPatchMap != null, "absenceDto cannot be null");
 

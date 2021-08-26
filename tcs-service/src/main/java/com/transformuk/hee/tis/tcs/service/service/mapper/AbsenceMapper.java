@@ -21,29 +21,36 @@ public interface AbsenceMapper extends EntityMapper<AbsenceDTO, Absence> {
   @Mappings(@Mapping(source = "person.id", target = "personId"))
   AbsenceDTO toDto(Absence entity);
 
+  /**
+   * Update the {@Link Absence} based on the values in the source map.
+   *
+   * @param source The map of values to update the target with.
+   * @param target The Absence to be patched.
+   */
   default void patch(Map<String, Object> source, @MappingTarget Absence target) {
 
     target.setAbsenceAttendanceId(
         (String) source.getOrDefault("absenceAttendanceId", target.getAbsenceAttendanceId()));
 
     if (source.containsKey("durationInDays")) {
-      int durationInDays = (int) source.get("durationInDays");
-      target.setDurationInDays((long) durationInDays);
+      Integer durationInDays = (Integer) source.get("durationInDays");
+      target.setDurationInDays(durationInDays == null ? null : (long) durationInDays);
     }
 
     if (source.containsKey("startDate")) {
       String startDate = (String) source.get("startDate");
-      target.setStartDate(LocalDate.parse(startDate));
+
+      target.setStartDate(startDate == null ? null : LocalDate.parse(startDate));
     }
 
     if (source.containsKey("endDate")) {
       String endDate = (String) source.get("endDate");
-      target.setEndDate(LocalDate.parse(endDate));
+      target.setEndDate(endDate == null ? null : LocalDate.parse(endDate));
     }
 
     if (source.containsKey("amendedDate")) {
       String amendedDate = (String) source.get("amendedDate");
-      target.setAmendedDate(LocalDateTime.parse(amendedDate));
+      target.setAmendedDate(amendedDate == null ? null : LocalDateTime.parse(amendedDate));
     }
   }
 }
