@@ -91,13 +91,13 @@ public class ProgrammeServiceImpl implements ProgrammeService {
   /**
    * Save a list of programmes.
    *
-   * @param programmeDTO the list of entities to save
+   * @param programmeDtos the list of entities to save
    * @return the list of persisted entities
    */
   @Override
-  public List<ProgrammeDTO> save(List<ProgrammeDTO> programmeDTO) {
-    log.debug("Request to save Programme : {}", programmeDTO);
-    List<Programme> programmes = programmeMapper.programmeDTOsToProgrammes(programmeDTO);
+  public List<ProgrammeDTO> save(List<ProgrammeDTO> programmeDtos) {
+    log.debug("Request to save {} programmes.", programmeDtos.size());
+    List<Programme> programmes = programmeMapper.programmeDTOsToProgrammes(programmeDtos);
 
     programmes = programmeRepository.saveAll(programmes);
     List<ProgrammeDTO> programmeDTOs = programmeMapper.programmesToProgrammeDTOs(programmes);
