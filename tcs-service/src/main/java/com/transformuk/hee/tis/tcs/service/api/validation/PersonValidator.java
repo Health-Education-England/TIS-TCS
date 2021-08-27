@@ -11,6 +11,7 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 import java.util.Map;
+import java.util.Map.Entry;
 import java.util.Optional;
 import java.util.Set;
 import java.util.stream.Collectors;
@@ -185,19 +186,19 @@ public class PersonValidator {
     String roleMultiValue = personDto.getRole();
 
     if (!StringUtils.isEmpty(roleMultiValue)) {
-      // bulk upload uses a ';' separator
-      roleMultiValue = roleMultiValue.replaceAll("\\s*;\\s*", ",");
-      // remove the ',' in the end if it exists
-      roleMultiValue = roleMultiValue.replaceAll(",$", "");
-      personDto.setRole(roleMultiValue);
+      // Bulk upload uses a ";" separator, account for both that and the default ",".
+      List<String> roles = Arrays.stream(roleMultiValue.split("[;,]"))
+          .map(String::trim)
+          .collect(Collectors.toList());
 
-      String[] roles = roleMultiValue.split(",");
-      Map<String, Boolean> rolesExist = referenceService.rolesExist(Arrays.asList(roles), true);
+      personDto.setRole(String.join(",", roles));
 
-      for (String role : roles) {
-        if (rolesExist.get(role).equals(false)) {
+      Map<String, Boolean> rolesExist = referenceService.rolesExist(roles, true);
+
+      for (Entry<String, Boolean> roleExists : rolesExist.entrySet()) {
+        if (!roleExists.getValue()) {
           fieldErrors.add(new FieldError(PERSON_DTO_NAME, "role",
-              String.format("role '%s' did not match a reference value.", role)));
+              String.format("Role '%s' did not match a reference value.", roleExists.getKey())));
         }
       }
     }
