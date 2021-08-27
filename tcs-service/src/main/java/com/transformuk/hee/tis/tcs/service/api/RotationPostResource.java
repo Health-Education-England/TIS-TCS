@@ -51,7 +51,7 @@ public class RotationPostResource {
   public ResponseEntity<List<RotationPostDTO>> createRotationPost(
       @RequestBody @Validated(Create.class) List<RotationPostDTO> rotationPostDTOs)
       throws URISyntaxException {
-    log.debug("REST request to save RotationPost : {}", rotationPostDTOs);
+    log.debug("REST request to create {} RotationPosts.", rotationPostDTOs.size());
     if (rotationPostDTOs.isEmpty()) {
       return ResponseEntity.badRequest()
           .headers(HeaderUtil.createFailureAlert(ENTITY_NAME, REQUEST_BODY_EMPTY,

@@ -21,6 +21,7 @@ import java.net.URI;
 import java.net.URISyntaxException;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Objects;
 import java.util.Optional;
 import java.util.Set;
 import java.util.stream.Collectors;
@@ -246,19 +247,17 @@ public class ProgrammeResource {
    * @param programmeDTOS List of the programmeDTOS to create
    * @return the ResponseEntity with status 200 (Created) and with body the new programmeDTOS, or
    * with status 400 (Bad Request) if the Programme has already an ID
-   * @throws URISyntaxException if the Location URI syntax is incorrect
    */
   @PostMapping("/bulk-programmes")
   @PreAuthorize("hasAuthority('programme:bulk:add:modify')")
   public ResponseEntity<List<ProgrammeDTO>> bulkCreateProgrammes(
-      @RequestBody List<ProgrammeDTO> programmeDTOS)
-      throws URISyntaxException, MethodArgumentNotValidException {
-    log.debug("REST request to bulk save Programmes : {}", programmeDTOS);
+      @RequestBody List<ProgrammeDTO> programmeDTOS) {
+    log.debug("REST request to bulk create {} Programmes.", programmeDTOS.size());
     try {
       if (!Collections.isEmpty(programmeDTOS)) {
         List<Long> entityIds = programmeDTOS.stream()
-            .filter(p -> p.getId() != null)
-            .map(p -> p.getId())
+            .map(ProgrammeDTO::getId)
+            .filter(Objects::nonNull)
             .collect(Collectors.toList());
         if (!Collections.isEmpty(entityIds)) {
           return ResponseEntity.badRequest().headers(HeaderUtil
