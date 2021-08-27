@@ -1,6 +1,8 @@
 package com.transformuk.hee.tis.tcs.service.service.impl;
 
 
+import static org.mockito.AdditionalAnswers.returnsFirstArg;
+import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.verifyZeroInteractions;
 import static org.mockito.Mockito.when;
@@ -12,6 +14,7 @@ import com.transformuk.hee.tis.tcs.service.model.Person;
 import com.transformuk.hee.tis.tcs.service.repository.AbsenceRepository;
 import com.transformuk.hee.tis.tcs.service.repository.PersonRepository;
 import com.transformuk.hee.tis.tcs.service.service.mapper.AbsenceMapper;
+import com.transformuk.hee.tis.tcs.service.service.mapper.AbsenceMapperImpl;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.util.Map;
@@ -26,37 +29,32 @@ import org.mockito.Captor;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.Mockito;
+import org.mockito.Spy;
 import org.mockito.junit.MockitoJUnitRunner;
 
 @RunWith(MockitoJUnitRunner.class)
 public class AbsenceServiceTest {
 
-  public static final long NON_EXISTING_ABSENCE_ID = 1111L;
-  public static final long ABSENCE_ID = 8888L;
+  public static final Long NON_EXISTING_ABSENCE_ID = 1111L;
+  public static final Long ABSENCE_ID = 8888L;
   public static final String ESR_ABSENCE_ID = "1208";
   public static final String NON_EXISTING_ESR_ABSENCE_ID = "sdfsdfsd";
-  public static final long PERSON_ID = 5555L;
-  public static final Integer ABSENCE_ID_INT = new Integer(1);
+  public static final Long PERSON_ID = 5555L;
+  public static final Integer ABSENCE_ID_INT = 1;
 
   @InjectMocks
   private AbsenceService testObj;
 
-  @Mock
-  private AbsenceMapper absenceMapperMock;
+  @Spy
+  private final AbsenceMapper absenceMapper = new AbsenceMapperImpl();
   @Mock
   private AbsenceRepository absenceRepositoryMock;
   @Mock
   private PersonRepository personRepositoryMock;
-  @Mock
-  private Absence absenceMock, savedAbsenceMock;
-  @Mock
-  private AbsenceDTO absenceDTOMock, savedAbsenceDtoMock;
-  @Mock
-  private Person personMock;
   @Captor
   private ArgumentCaptor<Absence> absenceArgumentCaptor;
   @Mock
-  private EntityManager entityManager;
+  EntityManager entityManager;
 
   @Test(expected = IllegalArgumentException.class)
   public void findByIdShouldThrowExceptionWhenIdIsNull() {
@@ -64,7 +62,7 @@ public class AbsenceServiceTest {
       testObj.findById(null);
     } finally {
       Mockito.verifyZeroInteractions(absenceRepositoryMock);
-      Mockito.verifyZeroInteractions(absenceMapperMock);
+      Mockito.verifyZeroInteractions(absenceMapper);
     }
   }
 
@@ -75,19 +73,20 @@ public class AbsenceServiceTest {
     Optional<AbsenceDTO> result = testObj.findById(NON_EXISTING_ABSENCE_ID);
 
     Assert.assertFalse(result.isPresent());
-    verifyZeroInteractions(absenceMapperMock);
+    verifyZeroInteractions(absenceMapper);
   }
 
   @Test
   public void findByIdShouldReturnFilledOptional() {
-    when(absenceRepositoryMock.findById(NON_EXISTING_ABSENCE_ID))
-        .thenReturn(Optional.of(absenceMock));
-    when(absenceMapperMock.toDto(absenceMock)).thenReturn(absenceDTOMock);
+    Absence absence = new Absence();
+    absence.setId(ABSENCE_ID);
+
+    when(absenceRepositoryMock.findById(NON_EXISTING_ABSENCE_ID)).thenReturn(Optional.of(absence));
 
     Optional<AbsenceDTO> result = testObj.findById(NON_EXISTING_ABSENCE_ID);
 
     Assert.assertTrue(result.isPresent());
-    Assert.assertSame(absenceDTOMock, result.get());
+    Assert.assertEquals(ABSENCE_ID, result.get().getId());
   }
 
   @Test(expected = IllegalArgumentException.class)
@@ -96,7 +95,7 @@ public class AbsenceServiceTest {
       testObj.findAbsenceByAbsenceAttendanceId(null);
     } finally {
       Mockito.verifyZeroInteractions(absenceRepositoryMock);
-      Mockito.verifyZeroInteractions(absenceMapperMock);
+      Mockito.verifyZeroInteractions(absenceMapper);
     }
   }
 
@@ -108,19 +107,21 @@ public class AbsenceServiceTest {
     Optional<AbsenceDTO> result = testObj.findAbsenceByAbsenceAttendanceId(NON_EXISTING_ESR_ABSENCE_ID);
 
     Assert.assertFalse(result.isPresent());
-    verifyZeroInteractions(absenceMapperMock);
+    verifyZeroInteractions(absenceMapper);
   }
 
   @Test
   public void findByAbsenceIdShouldReturnFilledOptional() {
+    Absence absence = new Absence();
+    absence.setId(ABSENCE_ID);
+
     when(absenceRepositoryMock.findByAbsenceAttendanceId(NON_EXISTING_ESR_ABSENCE_ID))
-        .thenReturn(Optional.of(absenceMock));
-    when(absenceMapperMock.toDto(absenceMock)).thenReturn(absenceDTOMock);
+        .thenReturn(Optional.of(absence));
 
     Optional<AbsenceDTO> result = testObj.findAbsenceByAbsenceAttendanceId(NON_EXISTING_ESR_ABSENCE_ID);
 
     Assert.assertTrue(result.isPresent());
-    Assert.assertSame(absenceDTOMock, result.get());
+    Assert.assertEquals(absence.getId(), result.get().getId());
   }
 
   @Test(expected = IllegalArgumentException.class)
@@ -128,7 +129,7 @@ public class AbsenceServiceTest {
     try {
       testObj.createAbsence(null);
     } finally {
-      verifyZeroInteractions(absenceMapperMock);
+      verifyZeroInteractions(absenceMapper);
       verifyZeroInteractions(personRepositoryMock);
       verifyZeroInteractions(absenceRepositoryMock);
     }
@@ -137,10 +138,12 @@ public class AbsenceServiceTest {
   @Test(expected = IllegalArgumentException.class)
   public void createAbsenceShouldThrowExceptionWhenAbsenceIdIsNotNull() {
     try {
-      when(absenceDTOMock.getId()).thenReturn(ABSENCE_ID);
-      testObj.createAbsence(absenceDTOMock);
+      AbsenceDTO absenceDto = new AbsenceDTO();
+      absenceDto.setId(ABSENCE_ID);
+
+      testObj.createAbsence(absenceDto);
     } finally {
-      verifyZeroInteractions(absenceMapperMock);
+      verifyZeroInteractions(absenceMapper);
       verifyZeroInteractions(personRepositoryMock);
       verifyZeroInteractions(absenceRepositoryMock);
     }
@@ -148,31 +151,38 @@ public class AbsenceServiceTest {
 
   @Test
   public void createAbsenceShouldSaveAbsence() {
-    when(absenceDTOMock.getId()).thenReturn(null);
-    when(absenceMapperMock.toEntity(absenceDTOMock)).thenReturn(absenceMock);
-    when(absenceDTOMock.getPersonId()).thenReturn(PERSON_ID);
-    when(personRepositoryMock.findById(PERSON_ID)).thenReturn(Optional.of(personMock));
-    when(absenceRepositoryMock.saveAndFlush(absenceMock)).thenReturn(savedAbsenceMock);
-    when(absenceMapperMock.toDto(savedAbsenceMock)).thenReturn(savedAbsenceDtoMock);
+    AbsenceDTO absenceDto = new AbsenceDTO();
+    absenceDto.setPersonId(PERSON_ID);
 
-    AbsenceDTO result = testObj.createAbsence(absenceDTOMock);
+    Absence absence = new Absence();
+    absence.setId(ABSENCE_ID);
+    Person person = new Person();
+    person.setId(PERSON_ID);
+    absence.setPerson(person);
 
-    Assert.assertSame(savedAbsenceDtoMock, result);
+    when(personRepositoryMock.findById(PERSON_ID)).thenReturn(Optional.of(person));
 
-    verify(absenceMapperMock).toEntity(absenceDTOMock);
+    ArgumentCaptor<Absence> absenceCaptor = ArgumentCaptor.forClass(Absence.class);
+    when(absenceRepositoryMock.saveAndFlush(absenceCaptor.capture())).thenReturn(absence);
+
+    AbsenceDTO result = testObj.createAbsence(absenceDto);
+
+    Assert.assertEquals(ABSENCE_ID, result.getId());
+    Assert.assertEquals(PERSON_ID, result.getPersonId());
+
+    Absence savedAbsence = absenceCaptor.getValue();
+    Assert.assertEquals(person, savedAbsence.getPerson());
+
     verify(personRepositoryMock).findById(PERSON_ID);
-    verify(absenceMock).setPerson(personMock);
-    verify(absenceRepositoryMock).saveAndFlush(absenceMock);
-    verify(absenceMapperMock).toDto(savedAbsenceMock);
+    verify(absenceRepositoryMock).saveAndFlush(any());
   }
 
 
   @Test(expected = IllegalArgumentException.class)
   public void updateAbsenceShouldThrowExceptionWhenAbsenceIsNull() {
     try {
-      testObj.createAbsence(null);
+      testObj.updateAbsence(null);
     } finally {
-      verifyZeroInteractions(absenceMapperMock);
       verifyZeroInteractions(personRepositoryMock);
       verifyZeroInteractions(absenceRepositoryMock);
     }
@@ -181,9 +191,9 @@ public class AbsenceServiceTest {
   @Test(expected = IllegalArgumentException.class)
   public void updateAbsenceShouldThrowExceptionWhenAbsenceIdIsNull() {
     try {
-      testObj.createAbsence(absenceDTOMock);
+      testObj.updateAbsence(new AbsenceDTO());
     } finally {
-      verifyZeroInteractions(absenceMapperMock);
+      verifyZeroInteractions(absenceMapper);
       verifyZeroInteractions(personRepositoryMock);
       verifyZeroInteractions(absenceRepositoryMock);
     }
@@ -191,22 +201,33 @@ public class AbsenceServiceTest {
 
   @Test
   public void updateAbsenceShouldSaveAbsence() {
-    when(absenceDTOMock.getId()).thenReturn(ABSENCE_ID);
-    when(absenceMapperMock.toEntity(absenceDTOMock)).thenReturn(absenceMock);
-    when(absenceDTOMock.getPersonId()).thenReturn(PERSON_ID);
-    when(personRepositoryMock.findById(PERSON_ID)).thenReturn(Optional.of(personMock));
-    when(absenceRepositoryMock.saveAndFlush(absenceMock)).thenReturn(savedAbsenceMock);
-    when(absenceMapperMock.toDto(savedAbsenceMock)).thenReturn(savedAbsenceDtoMock);
+    AbsenceDTO absenceDto = new AbsenceDTO();
+    absenceDto.setId(ABSENCE_ID);
+    absenceDto.setPersonId(PERSON_ID);
 
-    AbsenceDTO result = testObj.updateAbsence(absenceDTOMock);
+    Absence absence = new Absence();
+    absence.setId(ABSENCE_ID);
+    Person person = new Person();
+    person.setId(PERSON_ID);
+    absence.setPerson(person);
 
-    Assert.assertSame(savedAbsenceDtoMock, result);
+    when(personRepositoryMock.findById(PERSON_ID)).thenReturn(Optional.of(person));
 
-    verify(absenceMapperMock).toEntity(absenceDTOMock);
+    ArgumentCaptor<Absence> absenceCaptor = ArgumentCaptor.forClass(Absence.class);
+    when(absenceRepositoryMock.saveAndFlush(absenceCaptor.capture())).thenReturn(absence);
+
+
+    AbsenceDTO result = testObj.updateAbsence(absenceDto);
+
+    Assert.assertEquals(ABSENCE_ID, result.getId());
+    Assert.assertEquals(PERSON_ID, result.getPersonId());
+
+    Absence savedAbsence = absenceCaptor.getValue();
+    Assert.assertEquals(ABSENCE_ID, savedAbsence.getId());
+    Assert.assertEquals(person, savedAbsence.getPerson());
+
     verify(personRepositoryMock).findById(PERSON_ID);
-    verify(absenceMock).setPerson(personMock);
-    verify(absenceRepositoryMock).saveAndFlush(absenceMock);
-    verify(absenceMapperMock).toDto(savedAbsenceMock);
+    verify(absenceRepositoryMock).saveAndFlush(any());
   }
 
   @Test(expected = IllegalArgumentException.class)
@@ -215,7 +236,7 @@ public class AbsenceServiceTest {
       testObj.patchAbsence(null);
     } finally {
       verifyZeroInteractions(absenceRepositoryMock);
-      verifyZeroInteractions(absenceMapperMock);
+      verifyZeroInteractions(absenceMapper);
     }
   }
 
@@ -248,8 +269,7 @@ public class AbsenceServiceTest {
     absenceStub.setPerson(new Person());
 
     when(absenceRepositoryMock.findById(1L)).thenReturn(Optional.of(absenceStub));
-    when(absenceRepositoryMock.saveAndFlush(absenceArgumentCaptor.capture())).thenReturn(absenceMock);
-    when(absenceMapperMock.toDto(absenceMock)).thenReturn(absenceDTOMock);
+    when(absenceRepositoryMock.saveAndFlush(absenceArgumentCaptor.capture())).then(returnsFirstArg());
 
     Optional<AbsenceDTO> result = testObj.patchAbsence(params);
 
@@ -263,6 +283,4 @@ public class AbsenceServiceTest {
     Assertions.assertEquals(originalAttendanceId, capturedModifiedAbsence.getAbsenceAttendanceId());
     Assertions.assertEquals(newAmendedDate, capturedModifiedAbsence.getAmendedDate());
   }
-
-
 }
