@@ -255,9 +255,10 @@ public class PersonResource {
       @PathVariable("categoryId") final Long categoryId,
       @RequestParam(value = "searchQuery", required = false) String searchQuery) {
     searchQuery = getConverter(searchQuery).fromJson().decodeUrl().escapeForSql().toString();
+    String pageableString = getConverter(pageable.toString()).decodeUrl().toString();
     log.info(
         "Received request to search '{}' with RoleCategory ID '{}', searchQuery '{}' and pageable '{}'",
-        PersonLiteDTO.class.getSimpleName(), categoryId, searchQuery, pageable);
+        PersonLiteDTO.class.getSimpleName(), categoryId, searchQuery, pageableString);
 
     String searchQuerySanitised = RegExUtils.replaceAll(searchQuery, "[\n\r\t]", "_");
     log.debug("Accessing '{}' to search '{}' with RoleCategory ID '{}' and searchQuery '{}'",
