@@ -1,6 +1,7 @@
 package com.transformuk.hee.tis.tcs.service.api.validation;
 
 import static org.hamcrest.CoreMatchers.hasItem;
+import static org.hamcrest.CoreMatchers.hasItems;
 import static org.hamcrest.CoreMatchers.is;
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.mockito.ArgumentMatchers.any;
@@ -29,6 +30,7 @@ import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
+import org.mockito.ArgumentCaptor;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.MockitoJUnitRunner;
@@ -145,7 +147,7 @@ public class PersonValidatorTest {
     // Then.
     assertThat("should contain 1 error", dtoList.get(0).getMessageList().size(), is(1));
     assertThat("Unexpected error message", dtoList.get(0).getMessageList(),
-        hasItem("role 'role2' did not match a reference value."));
+        hasItem("Role 'role2' did not match a reference value."));
   }
 
   @Test
@@ -312,4 +314,78 @@ public class PersonValidatorTest {
         "To have a Trainer Approval, the role should contain at least one of 'Educational supervisors/Clinical supervisors/Leave approvers' categories");
   }
 
+  @Test
+  public void roleCheckShouldHandleCommaSeparator() throws MethodArgumentNotValidException {
+    // Given.
+    PersonDTO dto = new PersonDTO();
+    dto.setRole("role1 , role2,role3,");
+    List<PersonDTO> dtoList = new ArrayList<>();
+    dtoList.add(dto);
+
+    Map<String, Boolean> roleToExists = new HashMap<>();
+    roleToExists.put("role1", true);
+    roleToExists.put("role2", true);
+    roleToExists.put("role3", true);
+
+    ArgumentCaptor<List<String>> rolesCaptor = ArgumentCaptor.forClass(List.class);
+    when(referenceService.rolesExist(rolesCaptor.capture(), eq(true))).thenReturn(roleToExists);
+
+    // When.
+    testObj.validateForBulk(dtoList);
+    // Then.
+    assertThat("should not contain any errors", dtoList.get(0).getMessageList().size(), is(0));
+
+    List<String> splitRoles = rolesCaptor.getValue();
+    assertThat("Unexpected roles.", splitRoles, hasItems("role1", "role2", "role3"));
+  }
+
+  @Test
+  public void roleCheckShouldHandleSemiColonSeparator() throws MethodArgumentNotValidException {
+    // Given.
+    PersonDTO dto = new PersonDTO();
+    dto.setRole("role1 ; role2;role3;");
+    List<PersonDTO> dtoList = new ArrayList<>();
+    dtoList.add(dto);
+
+    Map<String, Boolean> roleToExists = new HashMap<>();
+    roleToExists.put("role1", true);
+    roleToExists.put("role2", true);
+    roleToExists.put("role3", true);
+
+    ArgumentCaptor<List<String>> rolesCaptor = ArgumentCaptor.forClass(List.class);
+    when(referenceService.rolesExist(rolesCaptor.capture(), eq(true))).thenReturn(roleToExists);
+
+    // When.
+    testObj.validateForBulk(dtoList);
+    // Then.
+    assertThat("should not contain any errors", dtoList.get(0).getMessageList().size(), is(0));
+
+    List<String> splitRoles = rolesCaptor.getValue();
+    assertThat("Unexpected roles.", splitRoles, hasItems("role1", "role2", "role3"));
+  }
+
+  @Test
+  public void roleCheckShouldHandleMixedSeparators() throws MethodArgumentNotValidException {
+    // Given.
+    PersonDTO dto = new PersonDTO();
+    dto.setRole("role1 ; role2,role3,");
+    List<PersonDTO> dtoList = new ArrayList<>();
+    dtoList.add(dto);
+
+    Map<String, Boolean> roleToExists = new HashMap<>();
+    roleToExists.put("role1", true);
+    roleToExists.put("role2", true);
+    roleToExists.put("role3", true);
+
+    ArgumentCaptor<List<String>> rolesCaptor = ArgumentCaptor.forClass(List.class);
+    when(referenceService.rolesExist(rolesCaptor.capture(), eq(true))).thenReturn(roleToExists);
+
+    // When.
+    testObj.validateForBulk(dtoList);
+    // Then.
+    assertThat("should not contain any errors", dtoList.get(0).getMessageList().size(), is(0));
+
+    List<String> splitRoles = rolesCaptor.getValue();
+    assertThat("Unexpected roles.", splitRoles, hasItems("role1", "role2", "role3"));
+  }
 }
