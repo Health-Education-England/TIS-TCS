@@ -75,8 +75,6 @@ public class WebSecurityConfig extends WebSecurityConfigurerAdapter {
         // to allow browser to render contents in frames
         .headers().frameOptions().sameOrigin()
         .and()
-        // we don't need CSRF because our token is invulnerable
-        .csrf().disable()
         .exceptionHandling().authenticationEntryPoint(unauthorizedHandler)
         .accessDeniedHandler(accessDeniedHandler)
         .and()
