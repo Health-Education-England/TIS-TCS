@@ -44,6 +44,7 @@ public class PersonValidatorTest {
   public static final String UNKNOWN_PUBLIC_HEALTH_NUMBER = "UNKNOWN";
   public static final long PERSON_ID = 123L;
   public static final long DIFFERENT_PERSON_ID = 999L;
+  public static final String PERSON_ROLE = "VALID_ROLE";
 
   @InjectMocks
   private PersonValidator testObj;
@@ -73,6 +74,7 @@ public class PersonValidatorTest {
   public void setup() {
     when(personDTOMock.getId()).thenReturn(PERSON_ID);
     when(personDTOMock.getPublicHealthNumber()).thenReturn(PUBLIC_HEALTH_NUMBER);
+    when(personDTOMock.getRole()).thenReturn(PERSON_ROLE);
   }
 
   @Test(expected = MethodArgumentNotValidException.class)
@@ -130,6 +132,72 @@ public class PersonValidatorTest {
   }
 
   @Test
+  public void validatePersonShouldThrowExceptionWhenRoleIsNull()
+      throws MethodArgumentNotValidException {
+    when(personDTOMock.getRole()).thenReturn(null);
+    try {
+      testObj.validate(personDTOMock);
+    } catch (MethodArgumentNotValidException e) {
+      Assert.assertTrue(exceptionContainsFieldError(e, "role"));
+    }
+  }
+
+  @Test
+  public void validatePersonShouldThrowExceptionWhenRoleIsEmptyString()
+      throws MethodArgumentNotValidException {
+    when(personDTOMock.getRole()).thenReturn("");
+    try {
+      testObj.validate(personDTOMock);
+    } catch (MethodArgumentNotValidException e) {
+      Assert.assertTrue(exceptionContainsFieldError(e, "role"));
+    }
+  }
+
+  @Test
+  public void bulkShouldGetErrorWhenRoleIsEmptyAndNotExistsInDB() {
+    // Given.
+    PersonDTO dto = new PersonDTO();
+    dto.setId(PERSON_ID);
+    dto.setRole(null);
+
+    List<PersonDTO> dtoList = new ArrayList<>();
+    dtoList.add(dto);
+
+    Person person = new Person();
+    person.setId(PERSON_ID);
+    person.setRole(null);
+    when(personRepositoryMock.existsById(PERSON_ID)).thenReturn(true);
+    when(personRepositoryMock.findById(PERSON_ID)).thenReturn(Optional.of(person));
+    // When.
+    testObj.validateForBulk(dtoList);
+    // Then.
+    assertThat("should contain 1 error", dtoList.get(0).getMessageList().size(), is(1));
+    assertThat("Unexpected error message", dtoList.get(0).getMessageList(),
+        hasItem("Existing person record does not have a role, role is required."));
+  }
+
+  @Test
+  public void bulkShouldNotGetErrorWhenRoleIsEmptyButExistsInDB() {
+    // Given.
+    PersonDTO dto = new PersonDTO();
+    dto.setId(PERSON_ID);
+    dto.setRole(null);
+
+    List<PersonDTO> dtoList = new ArrayList<>();
+    dtoList.add(dto);
+
+    Person person = new Person();
+    person.setId(PERSON_ID);
+    person.setRole(PERSON_ROLE);
+    when(personRepositoryMock.existsById(PERSON_ID)).thenReturn(true);
+    when(personRepositoryMock.findById(PERSON_ID)).thenReturn(Optional.of(person));
+    // When.
+    testObj.validateForBulk(dtoList);
+    // Then.
+    assertThat("should not contain any errors", dtoList.get(0).getMessageList().size(), is(0));
+  }
+
+  @Test
   public void bulkShouldGetErrorWhenRoleNotExists() {
     // Given.
     PersonDTO dto = new PersonDTO();
@@ -174,6 +242,7 @@ public class PersonValidatorTest {
     // Given.
     PersonDTO dto = new PersonDTO();
     dto.setId(1L);
+    dto.setRole(PERSON_ROLE);
     List<PersonDTO> dtoList = new ArrayList<>();
     dtoList.add(dto);
     when(personRepositoryMock.existsById(1L)).thenReturn(false);
@@ -190,6 +259,7 @@ public class PersonValidatorTest {
     // Given.
     PersonDTO dto = new PersonDTO();
     dto.setId(1L);
+    dto.setRole(PERSON_ROLE);
     List<PersonDTO> dtoList = new ArrayList<>();
     dtoList.add(dto);
     when(personRepositoryMock.existsById(1L)).thenReturn(true);
@@ -287,7 +357,6 @@ public class PersonValidatorTest {
         .thenReturn(Lists.newArrayList(personMock1));
     Person existingPerson = new Person();
     existingPerson.setRole("role1");
-    when(personRepositoryMock.findById(PERSON_ID)).thenReturn(Optional.of(existingPerson));
 
     Map<String, Boolean> roleToExists = new HashMap<>();
     roleToExists.put("role1", true);
@@ -296,7 +365,6 @@ public class PersonValidatorTest {
     RoleCategoryDTO roleCategoryDto = new RoleCategoryDTO();
     roleCategoryDto.setId(3L);
     roleDto.setRoleCategory(roleCategoryDto);
-    when(referenceService.findRolesIn("role1")).thenReturn(Lists.newArrayList(roleDto));
     TrainerApprovalDTO trainerApprovalDto = new TrainerApprovalDTO();
     when(personDTOMock.getTrainerApprovals()).thenReturn(Sets.newHashSet(trainerApprovalDto));
 
