@@ -12,7 +12,7 @@
 
   <groupId>com.transformuk.hee.tis</groupId>
   <artifactId>tcs-service</artifactId>
-  <version>6.22.5</version>
+  <version>6.22.6</version>
   <dependencies>
     <dependency>
       <groupId>org.springframework.boot</groupId>
@@ -303,7 +303,7 @@
     <dependency>
       <groupId>org.jboss.resteasy</groupId>
       <artifactId>resteasy-client</artifactId>
-      <version>3.15.0.Final</version>
+      <version>4.7.2.Final</version>
     </dependency>
     <dependency>
       <groupId>org.springframework.boot</groupId>
