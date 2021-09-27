@@ -70,6 +70,8 @@ public class PersonValidator {
    */
   public void validate(PersonDTO personDto) throws MethodArgumentNotValidException {
     List<FieldError> fieldErrors = new ArrayList<>();
+    fieldErrors.addAll(checkMandatoryFields(personDto));
+    fieldErrors.addAll(checkRole(personDto));
     fieldErrors.addAll(checkPublicHealthNumber(personDto));
 
     if (!fieldErrors.isEmpty()) {
@@ -120,6 +122,7 @@ public class PersonValidator {
 
     fieldErrors.addAll(checkPerson(personDto));
     fieldErrors.addAll(checkPublicHealthNumber(personDto));
+    fieldErrors.addAll(isUpdatable(personDto));
     List<FieldError> checkRoleFieldError = checkRole(personDto);
     if (checkRoleFieldError.isEmpty()) {
       fieldErrors.addAll(checkRoleForTrainerApproval(personDto));
@@ -138,7 +141,7 @@ public class PersonValidator {
   }
 
   /**
-   * Check public health number is already exists
+   * Check public health number is already exists.
    *
    * @param personDto the PersonDTO to check
    * @return list of FieldErrors
@@ -180,6 +183,50 @@ public class PersonValidator {
     return fieldErrors;
   }
 
+  /**
+   * If the Role in the DTO is empty, check if the Person's role in the DB exists
+   *
+   * @param personDto the PersonDTO to check
+   * @return list of FieldErrors
+   */
+  private List<FieldError> isUpdatable(PersonDTO personDto) {
+    List<FieldError> fieldErrors = new ArrayList<>();
+    // if the role in Dto is empty, check the record in DB
+    if (StringUtils.isEmpty(personDto.getRole())) {
+      Optional<Person> optionalPerson = personRepository.findById(personDto.getId());
+      if (optionalPerson.isPresent()) {
+        Person existingPerson = optionalPerson.get();
+        if (existingPerson != null && StringUtils.isEmpty(existingPerson.getRole())) {
+          fieldErrors.add(new FieldError(PERSON_DTO_NAME, "role",
+              "Existing person record does not have a role, role is required."));
+        }
+      }
+    }
+    return fieldErrors;
+  }
+
+  /**
+   * Check mandatory fields.
+   *
+   * @param personDto the PersonDTO to check
+   * @return list of FieldErrors
+   */
+  private List<FieldError> checkMandatoryFields(PersonDTO personDto) {
+    List<FieldError> fieldErrors = new ArrayList<>();
+    String roles = personDto.getRole();
+    if (roles == null || StringUtils.isEmpty(roles)) {
+      fieldErrors.add(new FieldError(PERSON_DTO_NAME, "role",
+          "Role is required."));
+    }
+    return fieldErrors;
+  }
+
+  /**
+   * Check if the Roles match Reference values.
+   *
+   * @param personDto the PersonDTO to check
+   * @return list of FieldErrors
+   */
   private List<FieldError> checkRole(PersonDTO personDto) {
     List<FieldError> fieldErrors = new ArrayList<>();
 
@@ -206,6 +253,12 @@ public class PersonValidator {
     return fieldErrors;
   }
 
+  /**
+   * Check if the Person exists in the DB.
+   *
+   * @param personDto the PersonDTO to check
+   * @return list of FieldErrors
+   */
   private List<FieldError> checkPerson(PersonDTO personDto) {
     List<FieldError> fieldErrors = new ArrayList<>();
     // check the Person
@@ -217,6 +270,14 @@ public class PersonValidator {
     return fieldErrors;
   }
 
+  /**
+   * Check if the Person is eligible to have a Trainer Approval. Check eligibility: the roles should
+   * contain at least one of the categories as below: Educational supervisors/Clinical
+   * supervisors/Leave approvers.
+   *
+   * @param personDto the PersonDTO to check
+   * @return list of FieldErrors
+   */
   private List<FieldError> checkRoleForTrainerApproval(PersonDTO personDto) {
     List<FieldError> fieldErrors = new ArrayList<>();
     String role = personDto.getRole();
