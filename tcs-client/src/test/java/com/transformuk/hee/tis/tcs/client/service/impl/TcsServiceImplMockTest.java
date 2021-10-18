@@ -13,7 +13,9 @@ import static org.mockito.Mockito.when;
 import com.google.common.collect.Lists;
 import com.google.common.collect.Maps;
 import com.transformuk.hee.tis.tcs.api.dto.AbsenceDTO;
+import com.transformuk.hee.tis.tcs.api.dto.CurriculumDTO;
 import com.transformuk.hee.tis.tcs.api.dto.PersonDTO;
+import com.transformuk.hee.tis.tcs.api.dto.ProgrammeMembershipCurriculaDTO;
 import com.transformuk.hee.tis.tcs.api.dto.TrainerApprovalDTO;
 import java.util.Collections;
 import java.util.List;
@@ -174,6 +176,26 @@ public class TcsServiceImplMockTest {
     // When.
     List<TrainerApprovalDTO> returnDtos = testObj
         .getTrainerApprovalForPerson(dto.getPerson().getId());
+    // Then.
+    assertThat("Unexpected number of patched DTOs.", returnDtos.size(), is(1));
+    assertThat("Unexpected patched DTOs.", returnDtos.get(0), is(dto));
+  }
+
+  @Test
+  public void getProgrammeMembershipDetailsByIds() {
+    ProgrammeMembershipCurriculaDTO dto = new ProgrammeMembershipCurriculaDTO();
+    dto.setId(1L);
+    CurriculumDTO curriculumDto = new CurriculumDTO();
+    curriculumDto.setId(1L);
+    dto.setCurriculumDTO(curriculumDto);
+
+    ResponseEntity<List<ProgrammeMembershipCurriculaDTO>> response = ResponseEntity.ok(
+        Collections.singletonList(dto));
+    when(restTemplateMock.exchange(anyString(), eq(HttpMethod.GET), eq(null), any(
+        ParameterizedTypeReference.class))).thenReturn(response);
+    // When.
+    List<ProgrammeMembershipCurriculaDTO> returnDtos = testObj.getProgrammeMembershipDetailsByIds(
+        Collections.singleton("1"));
     // Then.
     assertThat("Unexpected number of patched DTOs.", returnDtos.size(), is(1));
     assertThat("Unexpected patched DTOs.", returnDtos.get(0), is(dto));

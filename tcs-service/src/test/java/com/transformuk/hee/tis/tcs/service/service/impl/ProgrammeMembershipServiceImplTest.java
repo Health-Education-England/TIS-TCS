@@ -25,6 +25,7 @@ import com.transformuk.hee.tis.tcs.service.repository.ProgrammeRepository;
 import com.transformuk.hee.tis.tcs.service.service.mapper.CurriculumMapper;
 import com.transformuk.hee.tis.tcs.service.service.mapper.ProgrammeMembershipMapper;
 import java.time.LocalDate;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Optional;
 import java.util.Set;
@@ -66,17 +67,19 @@ public class ProgrammeMembershipServiceImplTest {
   @Mock
   private ProgrammeRepository programmeRepositoryMock;
 
-  private ProgrammeMembership programmeMembership1 = new ProgrammeMembership(),
-      programmeMembership2 = new ProgrammeMembership();
-  private ProgrammeMembershipDTO programmeMembershipDTO1 = new ProgrammeMembershipDTO(),
-      programmeMembershipDTO2 = new ProgrammeMembershipDTO();
-  private Curriculum curriculum1 = new Curriculum(), curriculum2 = new Curriculum();
-  private CurriculumDTO curriculumDTO1 = new CurriculumDTO(), curriculumDTO2 = new CurriculumDTO();
-  private TrainingNumber trainingNumber = new TrainingNumber();
-  private TrainingNumberDTO trainingNumberDTO = new TrainingNumberDTO();
-  private CurriculumMembershipDTO curriculumMembershipDTO1 = new CurriculumMembershipDTO(),
-      curriculumMembershipDTO2 = new CurriculumMembershipDTO();
-  private Programme programme = new Programme();
+  private final ProgrammeMembership programmeMembership1 = new ProgrammeMembership();
+  private final ProgrammeMembership programmeMembership2 = new ProgrammeMembership();
+  private final ProgrammeMembershipDTO programmeMembershipDTO1 = new ProgrammeMembershipDTO();
+  private final ProgrammeMembershipDTO programmeMembershipDTO2 = new ProgrammeMembershipDTO();
+  private final Curriculum curriculum1 = new Curriculum();
+  private final Curriculum curriculum2 = new Curriculum();
+  private final CurriculumDTO curriculumDTO1 = new CurriculumDTO();
+  private final CurriculumDTO curriculumDTO2 = new CurriculumDTO();
+  private final TrainingNumber trainingNumber = new TrainingNumber();
+  private final TrainingNumberDTO trainingNumberDTO = new TrainingNumberDTO();
+  private final CurriculumMembershipDTO curriculumMembershipDTO1 = new CurriculumMembershipDTO();
+  private final CurriculumMembershipDTO curriculumMembershipDTO2 = new CurriculumMembershipDTO();
+  private final Programme programme = new Programme();
 
   @Before
   public void setup() {
@@ -376,8 +379,9 @@ public class ProgrammeMembershipServiceImplTest {
     ProgrammeMembershipCurriculaDTO programmeMembershipCurriculaDTO = any.get();
     Assert.assertEquals(2, programmeMembershipCurriculaDTO.getCurriculumMemberships().size());
   }
+
   @Test
-  public void testProgrammeMembershipWithCertificateType(){
+  public void testProgrammeMembershipWithCertificateType() {
     ProgrammeMembershipCurriculaDTO pmc1 = new ProgrammeMembershipCurriculaDTO(),
         pmc2 = new ProgrammeMembershipCurriculaDTO(),
         pmc3 = new ProgrammeMembershipCurriculaDTO();
@@ -441,5 +445,44 @@ public class ProgrammeMembershipServiceImplTest {
 
     long nullCount = result.stream().filter(pm -> pm.getTrainingPathway().equals(null)).count();
     Assert.assertEquals(0L, nullCount);
+  }
+
+  @Test
+  public void shouldFindProgrammeMembershipDetailsByIds() {
+    Set<Long> ids = new HashSet<>();
+    ids.add(1L);
+    ids.add(2L);
+
+    programmeMembershipDTO1.getCurriculumMemberships().add(curriculumMembershipDTO1);
+    programmeMembershipDTO2.getCurriculumMemberships().add(curriculumMembershipDTO2);
+
+    List<ProgrammeMembership> programmeMemberships = Lists
+        .newArrayList(programmeMembership1, programmeMembership2);
+    List<ProgrammeMembershipDTO> programmeMembershipDtos = Lists
+        .newArrayList(programmeMembershipDTO1, programmeMembershipDTO2);
+
+    List<Curriculum> foundCurricula = Lists.newArrayList(curriculum1, curriculum2);
+    Set<Long> curriculumIds = Sets.newLinkedHashSet(5L, 6L);
+    when(curriculumRepositoryMock.findAllById(curriculumIds)).thenReturn(foundCurricula);
+    when(curriculumMapperMock.curriculumToCurriculumDTO(curriculum1)).thenReturn(curriculumDTO1);
+    when(curriculumMapperMock.curriculumToCurriculumDTO(curriculum2)).thenReturn(curriculumDTO2);
+
+    when(programmeMembershipRepositoryMock.findByIdIn(ids)).thenReturn(programmeMemberships);
+    when(programmeMembershipMapperMock.allEntityToDto(programmeMemberships)).thenReturn(
+        programmeMembershipDtos);
+
+    List<ProgrammeMembershipCurriculaDTO> result = testObj.findProgrammeMembershipDetailsByIds(ids);
+
+    Assert.assertNotNull(result);
+    Assert.assertEquals(2, result.size());
+    ProgrammeMembershipCurriculaDTO programmeMembershipCurriculaDto = result.get(0);
+    Assert.assertEquals(PROGRAMME_ID, programmeMembershipCurriculaDto.getProgrammeId().longValue());
+    Assert.assertEquals(5L, programmeMembershipCurriculaDto.getCurriculumDTO().getId().longValue());
+
+    verify(programmeMembershipRepositoryMock).findByIdIn(ids);
+    verify(programmeMembershipMapperMock).allEntityToDto(programmeMemberships);
+    verify(curriculumRepositoryMock).findAllById(curriculumIds);
+    verify(curriculumMapperMock).curriculumToCurriculumDTO(curriculum1);
+    verify(curriculumMapperMock).curriculumToCurriculumDTO(curriculum2);
   }
 }

@@ -2,6 +2,7 @@ package com.transformuk.hee.tis.tcs.service.repository;
 
 import com.transformuk.hee.tis.tcs.service.model.ProgrammeMembership;
 import java.util.List;
+import java.util.Set;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
@@ -40,4 +41,5 @@ public interface ProgrammeMembershipRepository extends JpaRepository<ProgrammeMe
       + "WHERE pm.programme.id = :programmeId")
   List<ProgrammeMembership> findByProgrammeId(@Param("programmeId") Long programmeId);
 
+  List<ProgrammeMembership> findByIdIn(Set<Long> ids);
 }

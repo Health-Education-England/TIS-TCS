@@ -445,6 +445,15 @@ public class TcsServiceImpl extends AbstractClientService {
         }).getBody();
   }
 
+  public List<ProgrammeMembershipCurriculaDTO> getProgrammeMembershipDetailsByIds(Set<String> ids) {
+    String joinedIds = StringUtils.join(ids, ",");
+    return tcsRestTemplate.exchange(
+        serviceUrl + API_PROGRAMME_MEMBERSHIPS + "/details/" + joinedIds,
+        HttpMethod.GET, null,
+        new ParameterizedTypeReference<List<ProgrammeMembershipCurriculaDTO>>() {
+        }).getBody();
+  }
+
   public ProgrammeMembershipDTO createProgrammeMembership(
       ProgrammeMembershipDTO programmeMembershipDTO) {
     HttpHeaders headers = new HttpHeaders();
@@ -471,8 +480,9 @@ public class TcsServiceImpl extends AbstractClientService {
 
   /**
    * Calls the endpoint to retrieve a CurriculumDto by id.
+   *
    * @param id The id of the Curriculum.
-   * @return   The CurriculumDto.
+   * @return The CurriculumDto.
    */
   public CurriculumDTO getCurriculumById(Long id) {
     log.debug("calling getCurriculumById with {}", id);
@@ -506,6 +516,7 @@ public class TcsServiceImpl extends AbstractClientService {
 
   /**
    * Calls the endpoint to retrieve a specialtyDto by id.
+   *
    * @param id The id of the specialty.
    * @return The SpecialtyDto.
    */

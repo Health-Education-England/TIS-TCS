@@ -17,7 +17,9 @@ import com.transformuk.hee.tis.tcs.service.Application;
 import com.transformuk.hee.tis.tcs.service.api.validation.ProgrammeMembershipValidator;
 import com.transformuk.hee.tis.tcs.service.service.ProgrammeMembershipService;
 import java.time.LocalDate;
+import java.util.Collections;
 import java.util.List;
+import java.util.Set;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -81,6 +83,29 @@ public class ProgrammeMembershipResourceTest {
         .andExpect(jsonPath("$.*.id").value(hasItem(PROGRAMME_MEMBERSHIP_ID.intValue())))
         .andExpect(status().isOk());
     verify(programmeMembershipServiceMock).findProgrammeMembershipsForTrainee(TRAINEE_ID_LONG);
+  }
+
+  @Test
+  public void getProgrammeMembershipDetailsShouldReturnFoundDto() throws Exception {
+    ProgrammeMembershipCurriculaDTO programmeMembershipCurriculaDTO = new ProgrammeMembershipCurriculaDTO();
+    programmeMembershipCurriculaDTO.setProgrammeNumber(PROGRAMME_NUMBER);
+    programmeMembershipCurriculaDTO.setProgrammeName(PROGRAMME_NAME);
+    programmeMembershipCurriculaDTO.setProgrammeId(1L);
+    programmeMembershipCurriculaDTO.setId(PROGRAMME_MEMBERSHIP_ID);
+
+    Set<Long> ids = Collections.singleton(PROGRAMME_MEMBERSHIP_ID);
+
+    when(programmeMembershipServiceMock.findProgrammeMembershipDetailsByIds(ids))
+        .thenReturn(Collections.singletonList(programmeMembershipCurriculaDTO));
+
+    mockMvc.perform(get("/api/programme-memberships/details/{id}", PROGRAMME_MEMBERSHIP_ID)
+            .contentType(MediaType.APPLICATION_JSON))
+        .andExpect(jsonPath("$.*.programmeId").value(hasItem(1)))
+        .andExpect(jsonPath("$.*.programmeName").value(hasItem(PROGRAMME_NAME)))
+        .andExpect(jsonPath("$.*.programmeNumber").value(hasItem(PROGRAMME_NUMBER)))
+        .andExpect(jsonPath("$.*.id").value(hasItem(PROGRAMME_MEMBERSHIP_ID.intValue())))
+        .andExpect(status().isOk());
+    verify(programmeMembershipServiceMock).findProgrammeMembershipDetailsByIds(ids);
   }
 
   @Test
