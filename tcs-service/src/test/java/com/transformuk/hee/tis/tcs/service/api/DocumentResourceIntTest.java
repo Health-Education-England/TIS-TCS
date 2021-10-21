@@ -143,7 +143,7 @@ public class DocumentResourceIntTest {
         TEST_FILE_NAME, TEST_FILE_CONTENT_TYPE, TEST_FILE_CONTENT);
 
     final MvcResult uploadResponse = mockMvc
-        .perform(fileUpload(DocumentResource.PATH_API + DocumentResource.PATH_DOCUMENTS)
+        .perform(multipart(DocumentResource.PATH_API + DocumentResource.PATH_DOCUMENTS)
             .file(mockFile)
             .param("personId", String.valueOf(PERSON_BASE_ID))
             .contentType(MediaType.MULTIPART_FORM_DATA))
