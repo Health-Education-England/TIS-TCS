@@ -294,11 +294,12 @@ public class ProgrammeMembershipResource {
   @PreAuthorize("hasPermission('tis:people::person:', 'View')")
   public ResponseEntity<List<ProgrammeMembershipCurriculaDTO>> getProgrammeMembershipDetailsByIds(
       @PathVariable String ids) {
-    log.debug("REST request to get several ProgrammeMemberships with Curricula");
+
     List<ProgrammeMembershipCurriculaDTO> resp = new ArrayList<>();
-    if (ids == null || ids.isEmpty()) {
+    if (StringUtils.isEmpty(ids)) {
       return new ResponseEntity<>(resp, HttpStatus.OK);
     }
+    log.debug("REST request to get ProgrammeMemberships with Curricula for ID: {}", ids);
 
     Set<Long> idSet = Arrays.stream(ids.split(",")).map(Long::valueOf)
         .collect(Collectors.toSet());
