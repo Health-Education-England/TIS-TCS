@@ -179,6 +179,17 @@ public class ProgrammeMembershipServiceImpl implements ProgrammeMembershipServic
     return attachCurricula(programmeMembershipDTOS);
   }
 
+  @Transactional(readOnly = true)
+  @Override
+  public List<ProgrammeMembershipCurriculaDTO> findProgrammeMembershipDetailsByIds(
+      Set<Long> ids) {
+    List<ProgrammeMembership> programmeMemberships = programmeMembershipRepository.findByIdIn(ids);
+    List<ProgrammeMembershipDTO> programmeMembershipDtos = programmeMembershipMapper.
+        allEntityToDto(programmeMemberships);
+
+    return attachCurricula(programmeMembershipDtos);
+  }
+
   /**
    * Method just like the find programme memberships for trainee but rolls up the programme (group
    * by) and also attaches all the curricula on those rolled up programmes into a single programme
@@ -297,7 +308,6 @@ public class ProgrammeMembershipServiceImpl implements ProgrammeMembershipServic
     return programmeMembershipMapper
         .programmeMembershipsToProgrammeMembershipDTOs(foundProgrammeMemberships);
   }
-
 
   private List<ProgrammeMembershipCurriculaDTO> attachCurricula(
       List<ProgrammeMembershipDTO> programmeMembershipDTOS) {

@@ -13,9 +13,11 @@ import io.github.jhipster.web.util.ResponseUtil;
 import java.net.URI;
 import java.net.URISyntaxException;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Collection;
 import java.util.List;
 import java.util.Optional;
+import java.util.Set;
 import java.util.stream.Collectors;
 import javax.validation.Valid;
 import org.apache.commons.collections4.CollectionUtils;
@@ -279,5 +281,32 @@ public class ProgrammeMembershipResource {
         programmeMembershipService.findProgrammeMembershipsForTraineeRolledUp(traineeId);
 
     return new ResponseEntity<>(programmeMembershipDTOS, HttpStatus.OK);
+  }
+
+  /**
+   * GET /programme-memberships/details/ids : Get all programme memberships with curricula details
+   * for all the ids.
+   *
+   * @param ids a list of ids, separated by comma(,)
+   * @return the list of found ProgrammeMembershipCurriculaDtos
+   */
+  @GetMapping("/programme-memberships/details/{ids}")
+  @PreAuthorize("hasPermission('tis:people::person:', 'View')")
+  public ResponseEntity<List<ProgrammeMembershipCurriculaDTO>> getProgrammeMembershipDetailsByIds(
+      @PathVariable String ids) {
+
+    List<ProgrammeMembershipCurriculaDTO> resp = new ArrayList<>();
+    if (StringUtils.isEmpty(ids)) {
+      return new ResponseEntity<>(resp, HttpStatus.OK);
+    }
+    log.debug("REST request to get ProgrammeMemberships with Curricula for ID: {}", ids);
+
+    Set<Long> idSet = Arrays.stream(ids.split(",")).map(Long::valueOf)
+        .collect(Collectors.toSet());
+
+    if (!idSet.isEmpty()) {
+      resp = programmeMembershipService.findProgrammeMembershipDetailsByIds(idSet);
+    }
+    return new ResponseEntity<>(resp, HttpStatus.OK);
   }
 }

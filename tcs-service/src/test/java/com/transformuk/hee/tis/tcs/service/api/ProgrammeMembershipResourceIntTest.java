@@ -224,6 +224,42 @@ public class ProgrammeMembershipResourceIntTest {
 
   @Test
   @Transactional
+  public void shouldGetProgrammeMembershipByIds() throws Exception {
+    personRepository.saveAndFlush(person);
+    curriculumRepository.saveAndFlush(curriculum);
+    programme.setCurricula(Collections.singleton(programmeCurriculum));
+    programmeRepository.saveAndFlush(programme);
+
+    programmeMembership.setPerson(person);
+    programmeMembership.setProgramme(programme);
+    programmeMembership
+        .setCurriculumId(programme.getCurricula().iterator().next().getCurriculum().getId());
+    ProgrammeMembership savedProgrammeMembership = programmeMembershipRepository.saveAndFlush(
+        programmeMembership);
+
+    restProgrammeMembershipMockMvc.perform(
+            get("/api/programme-memberships/details/{ids}", savedProgrammeMembership.getId()))
+        .andExpect(status().isOk())
+        .andExpect(content().contentType(MediaType.APPLICATION_JSON_VALUE))
+        .andExpect(jsonPath("$.[*].curriculumMemberships[*].intrepidId")
+            .value(hasItem(DEFAULT_INTREPID_ID)))
+        .andExpect(jsonPath("$.[*].programmeMembershipType")
+            .value(hasItem(DEFAULT_PROGRAMME_MEMBERSHIP_TYPE.toString().toUpperCase())))
+        .andExpect(jsonPath("$.[*].curriculumMemberships[*].curriculumStartDate")
+            .value(hasItem(DEFAULT_CURRICULUM_START_DATE.toString())))
+        .andExpect(jsonPath("$.[*].curriculumMemberships[*].curriculumEndDate")
+            .value(hasItem(DEFAULT_CURRICULUM_END_DATE.toString())))
+        .andExpect(jsonPath("$.[*].curriculumMemberships[*].periodOfGrace")
+            .value(hasItem(DEFAULT_PERIOD_OF_GRACE)))
+        .andExpect(jsonPath("$.[*].programmeStartDate")
+            .value(hasItem(DEFAULT_PROGRAMME_START_DATE.toString())))
+        .andExpect(jsonPath("$.[*].programmeEndDate")
+            .value(hasItem(DEFAULT_PROGRAMME_END_DATE.toString())))
+        .andExpect(jsonPath("$.[*].curriculumMemberships[*].amendedDate").isNotEmpty());
+  }
+
+  @Test
+  @Transactional
   public void createProgrammeMembership() throws Exception {
     personRepository.saveAndFlush(person);
     curriculumRepository.saveAndFlush(curriculum);
@@ -242,8 +278,8 @@ public class ProgrammeMembershipResourceIntTest {
     ProgrammeMembershipDTO programmeMembershipDTO = programmeMembershipMapper
         .toDto(programmeMembership);
     restProgrammeMembershipMockMvc.perform(post("/api/programme-memberships")
-        .contentType(MediaType.APPLICATION_JSON)
-        .content(TestUtil.convertObjectToJsonBytes(programmeMembershipDTO)))
+            .contentType(MediaType.APPLICATION_JSON)
+            .content(TestUtil.convertObjectToJsonBytes(programmeMembershipDTO)))
         .andExpect(status().isCreated());
 
     // Validate the ProgrammeMembership in the database
@@ -279,8 +315,8 @@ public class ProgrammeMembershipResourceIntTest {
 
     //when & then
     restProgrammeMembershipMockMvc.perform(post("/api/programme-memberships")
-        .contentType(MediaType.APPLICATION_JSON)
-        .content(TestUtil.convertObjectToJsonBytes(programmeMembershipDTO)))
+            .contentType(MediaType.APPLICATION_JSON)
+            .content(TestUtil.convertObjectToJsonBytes(programmeMembershipDTO)))
         .andExpect(status().isBadRequest())
         .andExpect(jsonPath("$.message").value("error.validation"))
         .andExpect(jsonPath("$.fieldErrors[*].field").
@@ -296,8 +332,8 @@ public class ProgrammeMembershipResourceIntTest {
 
     //when & then
     restProgrammeMembershipMockMvc.perform(put("/api/programme-memberships")
-        .contentType(MediaType.APPLICATION_JSON)
-        .content(TestUtil.convertObjectToJsonBytes(programmeMembershipDTO)))
+            .contentType(MediaType.APPLICATION_JSON)
+            .content(TestUtil.convertObjectToJsonBytes(programmeMembershipDTO)))
         .andExpect(status().isBadRequest())
         .andExpect(jsonPath("$.message").value("error.validation"))
         .andExpect(jsonPath("$.fieldErrors[*].field").
@@ -321,8 +357,8 @@ public class ProgrammeMembershipResourceIntTest {
 
     //when & then
     restProgrammeMembershipMockMvc.perform(post("/api/programme-memberships")
-        .contentType(MediaType.APPLICATION_JSON)
-        .content(TestUtil.convertObjectToJsonBytes(programmeMembershipDTO)))
+            .contentType(MediaType.APPLICATION_JSON)
+            .content(TestUtil.convertObjectToJsonBytes(programmeMembershipDTO)))
         .andExpect(status().isBadRequest())
         .andExpect(jsonPath("$.message").value("error.validation"))
         .andExpect(jsonPath("$.fieldErrors[0].field").value("person"))
@@ -346,8 +382,8 @@ public class ProgrammeMembershipResourceIntTest {
 
     //when & then
     restProgrammeMembershipMockMvc.perform(post("/api/programme-memberships")
-        .contentType(MediaType.APPLICATION_JSON)
-        .content(TestUtil.convertObjectToJsonBytes(programmeMembershipDTO)))
+            .contentType(MediaType.APPLICATION_JSON)
+            .content(TestUtil.convertObjectToJsonBytes(programmeMembershipDTO)))
         .andExpect(status().isBadRequest())
         .andExpect(jsonPath("$.message").value("error.validation"))
         .andExpect(jsonPath("$.fieldErrors[0].field").value("person"))
@@ -373,8 +409,8 @@ public class ProgrammeMembershipResourceIntTest {
 
     //when & then
     restProgrammeMembershipMockMvc.perform(post("/api/programme-memberships")
-        .contentType(MediaType.APPLICATION_JSON)
-        .content(TestUtil.convertObjectToJsonBytes(programmeMembershipDTO)))
+            .contentType(MediaType.APPLICATION_JSON)
+            .content(TestUtil.convertObjectToJsonBytes(programmeMembershipDTO)))
         .andExpect(status().isBadRequest())
         .andExpect(jsonPath("$.message").value("error.validation"))
         .andExpect(jsonPath("$.fieldErrors[0].field").value("programmeId"))
@@ -398,8 +434,8 @@ public class ProgrammeMembershipResourceIntTest {
 
     //when & then
     restProgrammeMembershipMockMvc.perform(post("/api/programme-memberships")
-        .contentType(MediaType.APPLICATION_JSON)
-        .content(TestUtil.convertObjectToJsonBytes(programmeMembershipDTO)))
+            .contentType(MediaType.APPLICATION_JSON)
+            .content(TestUtil.convertObjectToJsonBytes(programmeMembershipDTO)))
         .andExpect(status().isBadRequest())
         .andExpect(jsonPath("$.message").value("error.validation"))
         .andExpect(jsonPath("$.fieldErrors[0].field").value("curriculumId"))
@@ -426,15 +462,15 @@ public class ProgrammeMembershipResourceIntTest {
 
     //when & then
     restProgrammeMembershipMockMvc.perform(post("/api/programme-memberships")
-        .contentType(MediaType.APPLICATION_JSON)
-        .content(TestUtil.convertObjectToJsonBytes(programmeMembershipDTO)))
+            .contentType(MediaType.APPLICATION_JSON)
+            .content(TestUtil.convertObjectToJsonBytes(programmeMembershipDTO)))
         .andExpect(status().isBadRequest())
         .andExpect(jsonPath("$.message").value("error.validation"))
         .andExpect(jsonPath("$.fieldErrors[0].field").value("curriculumId"))
         .andExpect(jsonPath("$.fieldErrors[0].message").
             value(String.format(
                 "The selected Programme and Curriculum are not linked. They must be linked before a Programme Membership can be made",
-                String.valueOf(notAssociatedCurriculum.getId()))));
+                notAssociatedCurriculum.getId())));
   }
 
   @Test
@@ -460,8 +496,8 @@ public class ProgrammeMembershipResourceIntTest {
 
     // An entity with an existing ID cannot be created, so this API call must fail
     restProgrammeMembershipMockMvc.perform(post("/api/programme-memberships")
-        .contentType(MediaType.APPLICATION_JSON)
-        .content(TestUtil.convertObjectToJsonBytes(programmeMembershipDTO)))
+            .contentType(MediaType.APPLICATION_JSON)
+            .content(TestUtil.convertObjectToJsonBytes(programmeMembershipDTO)))
         .andExpect(status().isBadRequest());
 
     // Validate the Alice in the database
@@ -484,7 +520,7 @@ public class ProgrammeMembershipResourceIntTest {
         .andExpect(status().isOk())
         .andExpect(content().contentType(MediaType.APPLICATION_JSON_VALUE))
         .andExpect(jsonPath("$.[*].curriculumMemberships[*].intrepidId")
-            .value(hasItem(DEFAULT_INTREPID_ID.toString())))
+            .value(hasItem(DEFAULT_INTREPID_ID)))
         .andExpect(jsonPath("$.[*].programmeMembershipType")
             .value(hasItem(DEFAULT_PROGRAMME_MEMBERSHIP_TYPE.toString().toUpperCase())))
         .andExpect(jsonPath("$.[*].rotation.name").value(rotation.getName()))
@@ -583,8 +619,8 @@ public class ProgrammeMembershipResourceIntTest {
         .toDto(updatedProgrammeMembership);
 
     restProgrammeMembershipMockMvc.perform(put("/api/programme-memberships")
-        .contentType(MediaType.APPLICATION_JSON)
-        .content(TestUtil.convertObjectToJsonBytes(programmeMembershipDTO)))
+            .contentType(MediaType.APPLICATION_JSON)
+            .content(TestUtil.convertObjectToJsonBytes(programmeMembershipDTO)))
         .andExpect(status().isOk());
 
     // Validate the ProgrammeMembership in the database
@@ -630,8 +666,8 @@ public class ProgrammeMembershipResourceIntTest {
 
     // If the entity doesn't have an ID, it will give error instead of creating due to validation
     restProgrammeMembershipMockMvc.perform(put("/api/programme-memberships")
-        .contentType(MediaType.APPLICATION_JSON)
-        .content(TestUtil.convertObjectToJsonBytes(programmeMembershipDTO)))
+            .contentType(MediaType.APPLICATION_JSON)
+            .content(TestUtil.convertObjectToJsonBytes(programmeMembershipDTO)))
         .andExpect(status().isBadRequest());
 
     // Validate the ProgrammeMembership in the database

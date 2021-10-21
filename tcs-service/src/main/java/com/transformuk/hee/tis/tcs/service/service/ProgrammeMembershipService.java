@@ -3,6 +3,7 @@ package com.transformuk.hee.tis.tcs.service.service;
 import com.transformuk.hee.tis.tcs.api.dto.ProgrammeMembershipCurriculaDTO;
 import com.transformuk.hee.tis.tcs.api.dto.ProgrammeMembershipDTO;
 import java.util.List;
+import java.util.Set;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 
@@ -65,6 +66,15 @@ public interface ProgrammeMembershipService {
    * @return a list of programme curricula memberships for the trainee
    */
   List<ProgrammeMembershipCurriculaDTO> findProgrammeMembershipsForTrainee(Long traineeId);
+
+  /**
+   * Get a list of programme memberships with curricula
+   *
+   * @param ids set of all the programme memberships
+   * @return a list of programme memberships with curricula for all the ids
+   */
+  List<ProgrammeMembershipCurriculaDTO> findProgrammeMembershipDetailsByIds(
+      Set<Long> ids);
 
   List<ProgrammeMembershipCurriculaDTO> findProgrammeMembershipsForTraineeRolledUp(Long traineeId);
 
