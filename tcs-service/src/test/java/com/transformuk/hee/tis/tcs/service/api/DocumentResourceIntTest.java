@@ -137,6 +137,7 @@ public class DocumentResourceIntTest {
         .andExpect(status().isBadRequest());
   }
 
+  @Ignore("Re-enable test when S3 can be properly mocked.")
   @Test
   public void uploadDocument_shouldReturnHTTP201_WhenUploadingValidDocument() throws Exception {
     final MockMultipartFile mockFile = new MockMultipartFile(TEST_FILE_FORM_FIELD_NAME,
@@ -293,6 +294,7 @@ public class DocumentResourceIntTest {
         .andExpect(status().isNotFound());
   }
 
+  @Ignore("Re-enable test when S3 can be properly mocked.")
   @Test
   public void getDocumentById_shouldReturnHTTP200_WhenDocumentDoesExist() throws Exception {
     final MockMultipartFile mockFile = new MockMultipartFile(TEST_FILE_FORM_FIELD_NAME,
