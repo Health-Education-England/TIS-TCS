@@ -1,0 +1,15 @@
+name: PR Analysis
+
+on:
+  pull_request:
+    branches:
+      - master
+
+jobs:
+  analysis:
+    name: Analyse PR
+    uses: health-education-england/.github/.github/workflows/pr-analysis-maven.yml@main
+    secrets:
+      sonar-token: ${{ secrets.SONAR_TOKEN }}
+      codeartifact-username: ${{ secrets.AWS_MAVEN_USERNAME }}
+      codeartifact-password: ${{ secrets.AWS_MAVEN_PASSWORD }}
