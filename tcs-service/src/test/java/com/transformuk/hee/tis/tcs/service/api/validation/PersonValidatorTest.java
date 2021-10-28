@@ -238,6 +238,25 @@ public class PersonValidatorTest {
   }
 
   @Test
+  public void bulkShouldAutofixInaccurateRoleThatExists() {
+    // Given.
+    PersonDTO dto = new PersonDTO();
+    dto.setRole("dr. in training ; role 2,");
+    List<PersonDTO> dtoList = new ArrayList<>();
+    dtoList.add(dto);
+
+    Map<String, Boolean> roleToExists = new HashMap<>();
+    roleToExists.put("DR in Training", true);
+    roleToExists.put("role 2", true);
+    when(referenceService.rolesExist(any(), eq(true))).thenReturn(roleToExists);
+
+    // When.
+    testObj.validateForBulk(dtoList);
+    // Then.
+    assertThat("should not contain any errors", dtoList.get(0).getMessageList().size(), is(0));
+  }
+
+  @Test
   public void bulkShouldGetErrorWhenPersonNotExists() {
     // Given.
     PersonDTO dto = new PersonDTO();

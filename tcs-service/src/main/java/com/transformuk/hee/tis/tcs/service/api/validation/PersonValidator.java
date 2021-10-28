@@ -236,6 +236,7 @@ public class PersonValidator {
       // Bulk upload uses a ";" separator, account for both that and the default ",".
       List<String> roles = Arrays.stream(roleMultiValue.split("[;,]"))
           .map(String::trim)
+          .map(this::standardizeDRinTraining)
           .collect(Collectors.toList());
 
       personDto.setRole(String.join(",", roles));
@@ -311,5 +312,10 @@ public class PersonValidator {
     }
 
     return fieldErrors;
+  }
+
+  private String standardizeDRinTraining(String role) {
+    String shorthandRole = role.replaceAll("[\\.]?[\\s]","");
+    return shorthandRole.equalsIgnoreCase("DRinTraining") ? "DR in Training" : role;
   }
 }
