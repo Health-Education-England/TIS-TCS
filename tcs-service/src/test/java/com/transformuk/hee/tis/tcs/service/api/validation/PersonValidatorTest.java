@@ -8,7 +8,6 @@ import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.never;
-import static org.mockito.Mockito.reset;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
@@ -23,15 +22,11 @@ import com.transformuk.hee.tis.tcs.service.model.Person;
 import com.transformuk.hee.tis.tcs.service.repository.PersonRepository;
 import java.util.ArrayList;
 import java.util.Arrays;
-import java.util.Collections;
 import java.util.HashMap;
-import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
-import java.util.Set;
 import org.assertj.core.util.Lists;
-import org.junit.After;
 import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Test;
@@ -39,7 +34,7 @@ import org.junit.runner.RunWith;
 import org.mockito.ArgumentCaptor;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
-import org.mockito.Mockito;
+import org.mockito.Spy;
 import org.mockito.junit.MockitoJUnitRunner;
 import org.springframework.validation.FieldError;
 import org.springframework.web.bind.MethodArgumentNotValidException;
@@ -54,6 +49,7 @@ public class PersonValidatorTest {
   public static final String PERSON_ROLE = "VALID_ROLE";
 
   @InjectMocks
+  @Spy
   private PersonValidator testObj;
 
   @Mock
@@ -419,7 +415,7 @@ public class PersonValidatorTest {
   }
 
   @Test
-  public void roleCheckShouldHandleCommaSeparator() throws MethodArgumentNotValidException {
+  public void roleCheckShouldHandleCommaSeparator() {
     // Given.
     PersonDTO dto = new PersonDTO();
     dto.setRole("role1 , role2,role3,");
@@ -430,6 +426,17 @@ public class PersonValidatorTest {
     roleToExists.put("role1", true);
     roleToExists.put("role2", true);
     roleToExists.put("role3", true);
+
+    RoleDTO role1 = new RoleDTO();
+    role1.setCode("role1");
+    role1.setId(0L);
+    RoleDTO role2 = new RoleDTO();
+    role2.setCode("role2");
+    role2.setId(1L);
+    RoleDTO role3 = new RoleDTO();
+    role3.setCode("role3");
+    role3.setId(2L);
+    when(referenceService.getAllRoles()).thenReturn(Sets.newHashSet(role1, role2, role3));
 
     ArgumentCaptor<List<String>> rolesCaptor = ArgumentCaptor.forClass(List.class);
     when(referenceService.rolesExist(rolesCaptor.capture(), eq(true))).thenReturn(roleToExists);
@@ -469,27 +476,36 @@ public class PersonValidatorTest {
   }
 
   @Test
-  public void roleCheckShouldHandleMixedSeparators() throws MethodArgumentNotValidException {
+  public void roleCheckShouldHandleMixedSeparators() {
     // Given.
     PersonDTO dto = new PersonDTO();
     dto.setRole("role1 ; role2,role3,");
     List<PersonDTO> dtoList = new ArrayList<>();
     dtoList.add(dto);
 
-    Map<String, Boolean> roleToExists = new HashMap<>();
-    roleToExists.put("role1", true);
-    roleToExists.put("role2", true);
-    roleToExists.put("role3", true);
+    RoleDTO role1 = new RoleDTO();
+    role1.setCode("role1");
+    role1.setId(0L);
+    RoleDTO role2 = new RoleDTO();
+    role2.setCode("role2");
+    role2.setId(1L);
+    RoleDTO role3 = new RoleDTO();
+    role3.setCode("role3");
+    role3.setId(2L);
+    when(referenceService.getAllRoles()).thenReturn(Sets.newHashSet(role1, role2, role3));
 
-    ArgumentCaptor<List<String>> rolesCaptor = ArgumentCaptor.forClass(List.class);
-    when(referenceService.rolesExist(rolesCaptor.capture(), eq(true))).thenReturn(roleToExists);
+    ArgumentCaptor<List<PersonDTO>> personsListCaptor = ArgumentCaptor.forClass(List.class);
 
     // When.
     testObj.validateForBulk(dtoList);
     // Then.
-    assertThat("should not contain any errors", dtoList.get(0).getMessageList().size(), is(0));
+    assertThat("should not contain any errors",
+        dtoList.get(0).getMessageList().size(), is(0));
 
-    List<String> splitRoles = rolesCaptor.getValue();
+    verify(testObj).validateForBulk(personsListCaptor.capture());
+    List<String> splitRoles = Arrays.asList(
+        personsListCaptor.getValue().get(0).getRole().split(","));
+
     assertThat("Unexpected roles.", splitRoles, hasItems("role1", "role2", "role3"));
   }
 }
