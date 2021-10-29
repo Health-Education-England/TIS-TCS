@@ -235,23 +235,15 @@ public class PersonValidator {
 
     String roleMultiValue = personDto.getRole();
 
-    // To be swapped for a simple referenceService.getAllRoles() method
-    Collection<RoleDTO> allRoles1 = referenceService.getRolesByCategory(1L);
-    Collection<RoleDTO> allRoles2 = referenceService.getRolesByCategory(2L);
-    Collection<RoleDTO> allRoles3 = referenceService.getRolesByCategory(3L);
-    Collection<RoleDTO> allRoles4 = referenceService.getRolesByCategory(4L);
+    Set<String> allRolesAvailable = referenceService.getAllRoles()
+        .stream()
+        .map(RoleDTO::getCode)
+        .collect(Collectors.toSet());
 
-    List<String> allRoles = Streams.concat(
-        allRoles1.stream().map(RoleDTO::getCode),
-        allRoles2.stream().map(RoleDTO::getCode),
-        allRoles3.stream().map(RoleDTO::getCode),
-        allRoles4.stream().map(RoleDTO::getCode)
-    ).collect(Collectors.toList());
-
-    List<String> shorthandRoles = allRoles.stream()
+    Set<String> shorthandsForAllRolesAvailable = allRolesAvailable.stream()
         .map(String::toLowerCase)
         .map(this::makeShorthand)
-        .collect(Collectors.toList());
+        .collect(Collectors.toSet());
 
     if (!StringUtils.isEmpty(roleMultiValue)) {
       // Bulk upload uses a ";" separator, account for both that and the default ",".
@@ -261,21 +253,12 @@ public class PersonValidator {
 
       personDto.setRole(String.join(",", roles));
 
-//      Map<String, Boolean> rolesExist = referenceService.rolesExist(roles, true);
-
       roles.forEach(role -> {
-        if (!shorthandRoles.contains(makeShorthand(role))) {
+        if (!shorthandsForAllRolesAvailable.contains(makeShorthand(role))) {
           fieldErrors.add(new FieldError(PERSON_DTO_NAME, "role",
               String.format("Role '%s' did not match a reference value.", role)));
         }
       });
-
-//      for (Entry<String, Boolean> roleExists : rolesExist.entrySet()) {
-//        if (!roleExists.getValue()) {
-//          fieldErrors.add(new FieldError(PERSON_DTO_NAME, "role",
-//              String.format("Role '%s' did not match a reference value.", roleExists.getKey())));
-//        }
-//      }
     }
 
     return fieldErrors;
