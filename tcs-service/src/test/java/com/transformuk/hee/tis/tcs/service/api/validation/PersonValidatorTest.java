@@ -20,6 +20,7 @@ import com.transformuk.hee.tis.tcs.api.dto.PersonDTO;
 import com.transformuk.hee.tis.tcs.api.dto.TrainerApprovalDTO;
 import com.transformuk.hee.tis.tcs.service.model.Person;
 import com.transformuk.hee.tis.tcs.service.repository.PersonRepository;
+import gherkin.lexer.Ro;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.HashMap;
@@ -298,6 +299,10 @@ public class PersonValidatorTest {
     dto.setRole(PERSON_ROLE);
     List<PersonDTO> dtoList = new ArrayList<>();
     dtoList.add(dto);
+
+    RoleDTO roleDTO = new RoleDTO();
+    roleDTO.setCode(PERSON_ROLE);
+    when(referenceService.getAllRoles()).thenReturn(Sets.newHashSet(roleDTO));
     when(personRepositoryMock.existsById(1L)).thenReturn(true);
 
     // When.
