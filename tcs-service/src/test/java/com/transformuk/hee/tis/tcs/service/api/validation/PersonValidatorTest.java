@@ -20,7 +20,6 @@ import com.transformuk.hee.tis.tcs.api.dto.PersonDTO;
 import com.transformuk.hee.tis.tcs.api.dto.TrainerApprovalDTO;
 import com.transformuk.hee.tis.tcs.service.model.Person;
 import com.transformuk.hee.tis.tcs.service.repository.PersonRepository;
-import gherkin.lexer.Ro;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.HashMap;
@@ -131,6 +130,11 @@ public class PersonValidatorTest {
   public void validationSkippedIfPublicHealthNumberIsUnknownOrNA()
       throws MethodArgumentNotValidException {
     when(personDTOMock.getPublicHealthNumber()).thenReturn(UNKNOWN_PUBLIC_HEALTH_NUMBER);
+
+    RoleDTO roleDto = new RoleDTO();
+    roleDto.setCode("VALID_ROLE");
+    when(referenceService.getAllRoles()).thenReturn(Sets.newHashSet(roleDto));
+
     testObj.validate(personDTOMock);
     verify(personRepositoryMock, never()).findByPublicHealthNumber(anyString());
   }
@@ -332,15 +336,9 @@ public class PersonValidatorTest {
     when(personRepositoryMock.findByPublicHealthNumber(PUBLIC_HEALTH_NUMBER))
         .thenReturn(Lists.newArrayList(personMock1));
 
-    Map<String, Boolean> roleToExists = new HashMap<>();
-    roleToExists.put("role1", true);
-    when(referenceService.rolesExist(any(), eq(true))).thenReturn(roleToExists);
-
     RoleDTO roleDto = new RoleDTO();
-    RoleCategoryDTO roleCategoryDto = new RoleCategoryDTO();
-    roleCategoryDto.setId(2L);
-    roleDto.setRoleCategory(roleCategoryDto);
-    when(referenceService.findRolesIn("role1")).thenReturn(Lists.newArrayList(roleDto));
+    roleDto.setCode("role1");
+    when(referenceService.getAllRoles()).thenReturn(Sets.newHashSet(roleDto));
 
     when(contactDetailsValidatorMock.validateForBulk(any())).thenReturn(Lists.emptyList());
     when(gdcDetailsValidatorMock.validateForBulk(any())).thenReturn(Lists.emptyList());
@@ -399,13 +397,10 @@ public class PersonValidatorTest {
     Person existingPerson = new Person();
     existingPerson.setRole("role1");
 
-    Map<String, Boolean> roleToExists = new HashMap<>();
-    roleToExists.put("role1", true);
-
     RoleDTO roleDto = new RoleDTO();
-    RoleCategoryDTO roleCategoryDto = new RoleCategoryDTO();
-    roleCategoryDto.setId(3L);
-    roleDto.setRoleCategory(roleCategoryDto);
+    roleDto.setCode("VALID_ROLE");
+    when(referenceService.getAllRoles()).thenReturn(Sets.newHashSet(roleDto));
+
     TrainerApprovalDTO trainerApprovalDto = new TrainerApprovalDTO();
     when(personDTOMock.getTrainerApprovals()).thenReturn(Sets.newHashSet(trainerApprovalDto));
 
