@@ -243,6 +243,33 @@ public class PersonValidatorTest {
     // When.
     testObj.validateForBulk(dtoList);
     // Then.
+    assertThat("should not contain any errors",
+        dtoList.get(0).getMessageList().size(), is(0));
+  }
+
+  /**
+   * When role exists but is inaccurately spelt (different casing or spacing), fix it before
+   * accepting the row
+   */
+  @Test
+  public void bulkShouldFixWhenRoleExistsButIsInaccurate() {
+    // Given.
+    PersonDTO dto = new PersonDTO();
+    dto.setRole("role1 ; ROle  2,");
+    List<PersonDTO> dtoList = new ArrayList<>();
+    dtoList.add(dto);
+
+    RoleDTO role1 = new RoleDTO();
+    role1.setCode("role1");
+    role1.setId(0L);
+    RoleDTO role2 = new RoleDTO();
+    role2.setCode("role2");
+    role2.setId(1L);
+    when(referenceService.getAllRoles()).thenReturn(Sets.newHashSet(role1, role2));
+
+    // When.
+    testObj.validateForBulk(dtoList);
+    // Then.
     assertThat("should not contain any errors", dtoList.get(0).getMessageList().size(), is(0));
   }
 
