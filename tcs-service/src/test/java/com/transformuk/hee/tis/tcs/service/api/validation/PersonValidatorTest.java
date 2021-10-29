@@ -283,9 +283,9 @@ public class PersonValidatorTest {
     List<PersonDTO> dtoList = new ArrayList<>();
     dtoList.add(dto);
 
-    RoleDTO roleDTO = new RoleDTO();
-    roleDTO.setCode(PERSON_ROLE);
-    when(referenceService.getAllRoles()).thenReturn(Sets.newHashSet(roleDTO));
+    RoleDTO roleDto = new RoleDTO();
+    roleDto.setCode(PERSON_ROLE);
+    when(referenceService.getAllRoles()).thenReturn(Sets.newHashSet(roleDto));
     when(personRepositoryMock.existsById(1L)).thenReturn(false);
 
     testObj.validateForBulk(dtoList);
@@ -304,9 +304,9 @@ public class PersonValidatorTest {
     List<PersonDTO> dtoList = new ArrayList<>();
     dtoList.add(dto);
 
-    RoleDTO roleDTO = new RoleDTO();
-    roleDTO.setCode(PERSON_ROLE);
-    when(referenceService.getAllRoles()).thenReturn(Sets.newHashSet(roleDTO));
+    RoleDTO roleDto = new RoleDTO();
+    roleDto.setCode(PERSON_ROLE);
+    when(referenceService.getAllRoles()).thenReturn(Sets.newHashSet(roleDto));
     when(personRepositoryMock.existsById(1L)).thenReturn(true);
 
     // When.
