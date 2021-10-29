@@ -431,10 +431,39 @@ public class PersonValidatorTest {
     List<PersonDTO> dtoList = new ArrayList<>();
     dtoList.add(dto);
 
-    Map<String, Boolean> roleToExists = new HashMap<>();
-    roleToExists.put("role1", true);
-    roleToExists.put("role2", true);
-    roleToExists.put("role3", true);
+    RoleDTO role1 = new RoleDTO();
+    role1.setCode("role1");
+    role1.setId(0L);
+    RoleDTO role2 = new RoleDTO();
+    role2.setCode("role2");
+    role2.setId(1L);
+    RoleDTO role3 = new RoleDTO();
+    role3.setCode("role3");
+    role3.setId(2L);
+    when(referenceService.getAllRoles()).thenReturn(Sets.newHashSet(role1, role2, role3));
+
+    ArgumentCaptor<List<PersonDTO>> personsListCaptor = ArgumentCaptor.forClass(List.class);
+
+    // When.
+    testObj.validateForBulk(dtoList);
+    // Then.
+    assertThat("should not contain any errors",
+        dtoList.get(0).getMessageList().size(), is(0));
+
+    verify(testObj).validateForBulk(personsListCaptor.capture());
+    List<String> splitRoles = Arrays.asList(
+        personsListCaptor.getValue().get(0).getRole().split(","));
+
+    assertThat("Unexpected roles.", splitRoles, hasItems("role1", "role2", "role3"));
+  }
+
+  @Test
+  public void roleCheckShouldHandleSemiColonSeparator() throws MethodArgumentNotValidException {
+    // Given.
+    PersonDTO dto = new PersonDTO();
+    dto.setRole("role1 ; role2;role3;");
+    List<PersonDTO> dtoList = new ArrayList<>();
+    dtoList.add(dto);
 
     RoleDTO role1 = new RoleDTO();
     role1.setCode("role1");
@@ -447,40 +476,18 @@ public class PersonValidatorTest {
     role3.setId(2L);
     when(referenceService.getAllRoles()).thenReturn(Sets.newHashSet(role1, role2, role3));
 
-    ArgumentCaptor<List<String>> rolesCaptor = ArgumentCaptor.forClass(List.class);
-    when(referenceService.rolesExist(rolesCaptor.capture(), eq(true))).thenReturn(roleToExists);
+    ArgumentCaptor<List<PersonDTO>> personsListCaptor = ArgumentCaptor.forClass(List.class);
 
     // When.
     testObj.validateForBulk(dtoList);
     // Then.
-    assertThat("should not contain any errors", dtoList.get(0).getMessageList().size(), is(0));
+    assertThat("should not contain any errors",
+        dtoList.get(0).getMessageList().size(), is(0));
 
-    List<String> splitRoles = rolesCaptor.getValue();
-    assertThat("Unexpected roles.", splitRoles, hasItems("role1", "role2", "role3"));
-  }
+    verify(testObj).validateForBulk(personsListCaptor.capture());
+    List<String> splitRoles = Arrays.asList(
+        personsListCaptor.getValue().get(0).getRole().split(","));
 
-  @Test
-  public void roleCheckShouldHandleSemiColonSeparator() throws MethodArgumentNotValidException {
-    // Given.
-    PersonDTO dto = new PersonDTO();
-    dto.setRole("role1 ; role2;role3;");
-    List<PersonDTO> dtoList = new ArrayList<>();
-    dtoList.add(dto);
-
-    Map<String, Boolean> roleToExists = new HashMap<>();
-    roleToExists.put("role1", true);
-    roleToExists.put("role2", true);
-    roleToExists.put("role3", true);
-
-    ArgumentCaptor<List<String>> rolesCaptor = ArgumentCaptor.forClass(List.class);
-    when(referenceService.rolesExist(rolesCaptor.capture(), eq(true))).thenReturn(roleToExists);
-
-    // When.
-    testObj.validateForBulk(dtoList);
-    // Then.
-    assertThat("should not contain any errors", dtoList.get(0).getMessageList().size(), is(0));
-
-    List<String> splitRoles = rolesCaptor.getValue();
     assertThat("Unexpected roles.", splitRoles, hasItems("role1", "role2", "role3"));
   }
 
