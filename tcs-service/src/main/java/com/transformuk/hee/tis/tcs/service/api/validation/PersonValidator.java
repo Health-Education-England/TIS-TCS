@@ -1,5 +1,6 @@
 package com.transformuk.hee.tis.tcs.service.api.validation;
 
+import com.google.common.collect.Streams;
 import com.transformuk.hee.tis.reference.api.dto.RoleDTO;
 import com.transformuk.hee.tis.reference.client.ReferenceService;
 import com.transformuk.hee.tis.tcs.api.dto.PersonDTO;
@@ -9,7 +10,9 @@ import com.transformuk.hee.tis.tcs.service.repository.PersonRepository;
 import java.lang.reflect.Method;
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Collection;
 import java.util.List;
+import java.util.Locale;
 import java.util.Map;
 import java.util.Map.Entry;
 import java.util.Optional;
@@ -232,6 +235,24 @@ public class PersonValidator {
 
     String roleMultiValue = personDto.getRole();
 
+    // To be swapped for a simple referenceService.getAllRoles() method
+    Collection<RoleDTO> allRoles1 = referenceService.getRolesByCategory(1L);
+    Collection<RoleDTO> allRoles2 = referenceService.getRolesByCategory(2L);
+    Collection<RoleDTO> allRoles3 = referenceService.getRolesByCategory(3L);
+    Collection<RoleDTO> allRoles4 = referenceService.getRolesByCategory(4L);
+
+    List<String> allRoles = Streams.concat(
+        allRoles1.stream().map(RoleDTO::getCode),
+        allRoles2.stream().map(RoleDTO::getCode),
+        allRoles3.stream().map(RoleDTO::getCode),
+        allRoles4.stream().map(RoleDTO::getCode)
+    ).collect(Collectors.toList());
+
+    List<String> shorthandRoles = allRoles.stream()
+        .map(String::toLowerCase)
+        .map(this::makeShorthand)
+        .collect(Collectors.toList());
+
     if (!StringUtils.isEmpty(roleMultiValue)) {
       // Bulk upload uses a ";" separator, account for both that and the default ",".
       List<String> roles = Arrays.stream(roleMultiValue.split("[;,]"))
@@ -240,14 +261,21 @@ public class PersonValidator {
 
       personDto.setRole(String.join(",", roles));
 
-      Map<String, Boolean> rolesExist = referenceService.rolesExist(roles, true);
+//      Map<String, Boolean> rolesExist = referenceService.rolesExist(roles, true);
 
-      for (Entry<String, Boolean> roleExists : rolesExist.entrySet()) {
-        if (!roleExists.getValue()) {
+      roles.forEach(role -> {
+        if (!shorthandRoles.contains(makeShorthand(role))) {
           fieldErrors.add(new FieldError(PERSON_DTO_NAME, "role",
-              String.format("Role '%s' did not match a reference value.", roleExists.getKey())));
+              String.format("Role '%s' did not match a reference value.", role)));
         }
-      }
+      });
+
+//      for (Entry<String, Boolean> roleExists : rolesExist.entrySet()) {
+//        if (!roleExists.getValue()) {
+//          fieldErrors.add(new FieldError(PERSON_DTO_NAME, "role",
+//              String.format("Role '%s' did not match a reference value.", roleExists.getKey())));
+//        }
+//      }
     }
 
     return fieldErrors;
@@ -311,5 +339,9 @@ public class PersonValidator {
     }
 
     return fieldErrors;
+  }
+
+  private String makeShorthand(String role) {
+    return role.replaceAll("[\\s]", "").toLowerCase();
   }
 }
