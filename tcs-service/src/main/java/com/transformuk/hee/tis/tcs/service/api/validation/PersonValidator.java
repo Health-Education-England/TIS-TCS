@@ -10,6 +10,8 @@ import java.lang.reflect.Method;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
+import java.util.Locale;
+import java.util.Map;
 import java.util.Optional;
 import java.util.Set;
 import java.util.stream.Collectors;
@@ -230,20 +232,26 @@ public class PersonValidator {
 
     String roleMultiValue = personDto.getRole();
 
-    Set<String> allExistingRolesShorthands = allRolesSet().stream()
-        .map(this::shorthand)
-        .collect(Collectors.toSet());
+    // Map where key: lowercase role; value: role as in the database
+    Map<String, String> allExistingRolesMap = allRolesSet().stream()
+        .collect(Collectors.toMap(String::toLowerCase, role -> role));
 
     if (!StringUtils.isEmpty(roleMultiValue)) {
       // Bulk upload uses a ";" separator, account for both that and the default ",".
       List<String> roles = Arrays.stream(roleMultiValue.split("[;,]"))
           .map(String::trim)
+          .map(role -> {
+            if (allExistingRolesMap.containsKey(role.toLowerCase())) {
+              return allExistingRolesMap.get(role.toLowerCase());
+            }
+            return role;
+          })
           .collect(Collectors.toList());
 
       personDto.setRole(String.join(",", roles));
 
       roles.forEach(role -> {
-        if (!allExistingRolesShorthands.contains(shorthand(role))) {
+        if (!allExistingRolesMap.containsValue(role)) {
           fieldErrors.add(new FieldError(PERSON_DTO_NAME, "role",
               String.format("Role '%s' did not match a reference value.", role)));
         }
@@ -318,9 +326,5 @@ public class PersonValidator {
         .stream()
         .map(RoleDTO::getCode)
         .collect(Collectors.toSet());
-  }
-
-  private String shorthand(String role) {
-    return role.replaceAll("[\\s]", "").toLowerCase();
   }
 }
