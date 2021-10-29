@@ -253,10 +253,10 @@ public class PersonValidatorTest {
    * accepting the row
    */
   @Test
-  public void bulkShouldFixWhenRoleExistsButIsInaccurate() {
+  public void bulkShouldFixWhenRoleExistsButCasingIsInaccurate() {
     // Given.
     PersonDTO dto = new PersonDTO();
-    dto.setRole("role1 ; ROle  2,");
+    dto.setRole("role1 ; ROle2,");
     List<PersonDTO> dtoList = new ArrayList<>();
     dtoList.add(dto);
 
