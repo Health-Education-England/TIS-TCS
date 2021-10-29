@@ -1,6 +1,5 @@
 package com.transformuk.hee.tis.tcs.service.api.validation;
 
-import com.google.common.collect.Streams;
 import com.transformuk.hee.tis.reference.api.dto.RoleDTO;
 import com.transformuk.hee.tis.reference.client.ReferenceService;
 import com.transformuk.hee.tis.tcs.api.dto.PersonDTO;
@@ -10,11 +9,7 @@ import com.transformuk.hee.tis.tcs.service.repository.PersonRepository;
 import java.lang.reflect.Method;
 import java.util.ArrayList;
 import java.util.Arrays;
-import java.util.Collection;
 import java.util.List;
-import java.util.Locale;
-import java.util.Map;
-import java.util.Map.Entry;
 import java.util.Optional;
 import java.util.Set;
 import java.util.stream.Collectors;
@@ -235,14 +230,8 @@ public class PersonValidator {
 
     String roleMultiValue = personDto.getRole();
 
-    Set<String> allRolesAvailable = referenceService.getAllRoles()
-        .stream()
-        .map(RoleDTO::getCode)
-        .collect(Collectors.toSet());
-
-    Set<String> shorthandsForAllRolesAvailable = allRolesAvailable.stream()
-        .map(String::toLowerCase)
-        .map(this::makeShorthand)
+    Set<String> allExistingRolesShorthands = allRolesSet().stream()
+        .map(this::shorthand)
         .collect(Collectors.toSet());
 
     if (!StringUtils.isEmpty(roleMultiValue)) {
@@ -254,7 +243,7 @@ public class PersonValidator {
       personDto.setRole(String.join(",", roles));
 
       roles.forEach(role -> {
-        if (!shorthandsForAllRolesAvailable.contains(makeShorthand(role))) {
+        if (!allExistingRolesShorthands.contains(shorthand(role))) {
           fieldErrors.add(new FieldError(PERSON_DTO_NAME, "role",
               String.format("Role '%s' did not match a reference value.", role)));
         }
@@ -324,7 +313,14 @@ public class PersonValidator {
     return fieldErrors;
   }
 
-  private String makeShorthand(String role) {
+  private Set<String> allRolesSet() {
+    return referenceService.getAllRoles()
+        .stream()
+        .map(RoleDTO::getCode)
+        .collect(Collectors.toSet());
+  }
+
+  private String shorthand(String role) {
     return role.replaceAll("[\\s]", "").toLowerCase();
   }
 }
