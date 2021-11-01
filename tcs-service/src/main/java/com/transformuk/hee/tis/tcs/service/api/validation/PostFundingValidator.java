@@ -14,8 +14,8 @@ import org.springframework.stereotype.Component;
 public class PostFundingValidator {
 
   protected static final String FUNDING_TYPE_EMPTY = "funding type is empty";
-  protected static final String FUNDING_TYPE_NOT_OTHER_ERROR =
-      "funding type specified filled although type is not Other or an academic type.";
+  protected static final String FUNDING_TYPE_NOT_OTHER_OR_NOT_ACADEMIC_ERROR =
+      "funding type specified filled although type is not Other or not an academic type.";
   protected static final String FUNDING_TYPE_NOT_FOUND_ERROR = "funding type does not exist.";
   protected static final String FUNDING_TYPE_MULTIPLE_FOUND_ERROR = "found multiple funding type.";
 
@@ -23,11 +23,11 @@ public class PostFundingValidator {
   private ReferenceServiceImpl referenceService;
 
   public List<PostFundingDTO> validateFundingType(List<PostFundingDTO> checkList) {
-    if (checkList.size() == 0) {
+    if (checkList.isEmpty()) {
       return checkList;
     }
 
-    Set<String> labels = checkList.stream().map(postFundingDTO -> postFundingDTO.getFundingType())
+    Set<String> labels = checkList.stream().map(PostFundingDTO::getFundingType)
         .collect(Collectors.toSet());
     List<FundingTypeDTO> fundingTypeDtos = referenceService
         .findCurrentFundingTypesByLabelIn(labels);
@@ -52,11 +52,11 @@ public class PostFundingValidator {
   private FundingTypeDTO checkFundingTypeExists(PostFundingDTO pfDto,
       List<FundingTypeDTO> fundingTypeDtos) {
     List<FundingTypeDTO> filteredFundingTypeDtos = fundingTypeDtos.stream().filter(
-            fundingTypeDto -> StringUtils.equals(fundingTypeDto.getLabel(), pfDto.getFundingType()))
+        fundingTypeDto -> StringUtils.equals(fundingTypeDto.getLabel(), pfDto.getFundingType()))
         .collect(Collectors.toList());
     if (filteredFundingTypeDtos.size() == 1) {
       return filteredFundingTypeDtos.get(0);
-    } else if (filteredFundingTypeDtos.size() == 0) {
+    } else if (filteredFundingTypeDtos.isEmpty()) {
       pfDto.getMessageList().add(FUNDING_TYPE_NOT_FOUND_ERROR);
     } else {
       pfDto.getMessageList().add(FUNDING_TYPE_MULTIPLE_FOUND_ERROR);
@@ -66,9 +66,9 @@ public class PostFundingValidator {
 
   private void checkInfoForFundingType(PostFundingDTO pfDto, FundingTypeDTO matchedFundingTypeDto) {
     // Only when fundingType is Other or an academic type, the info(fundingDetails) is enabled.
-    if ((pfDto.getFundingType().equals("Other") || !matchedFundingTypeDto.isAcademic())
+    if (!(pfDto.getFundingType().equals("Other") || matchedFundingTypeDto.isAcademic())
         && pfDto.getInfo() != null) {
-      pfDto.getMessageList().add(FUNDING_TYPE_NOT_OTHER_ERROR);
+      pfDto.getMessageList().add(FUNDING_TYPE_NOT_OTHER_OR_NOT_ACADEMIC_ERROR);
     }
   }
 }

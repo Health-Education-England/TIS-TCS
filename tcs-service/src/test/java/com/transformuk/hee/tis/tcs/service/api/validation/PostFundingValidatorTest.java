@@ -110,11 +110,12 @@ public class PostFundingValidatorTest {
   }
 
   @Test
-  public void testValidateFailsInfoGivenForFundingTypeNotOtherOrAcademic() {
+  public void testValidateFailsInfoGivenForFundingTypeNotOtherOrNotAcademic() {
     pfDTOs = buildCheckedList(notOtherDTO);
     List<PostFundingDTO> result = postFundingValidator.validateFundingType(pfDTOs);
     assertThat(
-        result.get(0).getMessageList().contains(PostFundingValidator.FUNDING_TYPE_NOT_OTHER_ERROR),
+        result.get(0).getMessageList()
+            .contains(PostFundingValidator.FUNDING_TYPE_NOT_OTHER_OR_NOT_ACADEMIC_ERROR),
         is(true));
   }
 
