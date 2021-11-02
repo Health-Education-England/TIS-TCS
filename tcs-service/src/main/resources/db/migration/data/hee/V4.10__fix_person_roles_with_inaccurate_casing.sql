@@ -22,10 +22,14 @@ update PersonPerRole
 inner join reference.Role ref_role on PersonPerRole.role = ref_role.code
 set PersonPerRole.role = ref_role.code;
 
+-- Remove duplicates
+create temporary table PersonPerRoleDistinct as
+select distinct * from PersonPerRole;
+
 -- Merge rows with same id back into one, where role is concatenated
 create temporary table ConcatenatedRoles as
 select id, group_concat(role separator ',') as role
-from PersonPerRole
+from PersonPerRoleDistinct
 group by id;
 
 update Person
