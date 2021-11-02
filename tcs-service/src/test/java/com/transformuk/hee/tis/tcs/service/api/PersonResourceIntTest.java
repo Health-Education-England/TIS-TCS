@@ -299,8 +299,8 @@ public class PersonResourceIntTest {
     person.setPersonalDetails(personalDetails);
 
     final PersonDTO personDTO = personMapper.toDto(person);
-    Map<String, Boolean> roleToExists = new HashMap<>();
-    roleToExists.put(DEFAULT_ROLE, true);
+    Map<String, String> roleToExists = new HashMap<>();
+    roleToExists.put(DEFAULT_ROLE, DEFAULT_ROLE);
     when(referenceService.rolesExist(any(), eq(true))).thenReturn(roleToExists);
 
     restPersonMockMvc.perform(post("/api/people")
@@ -687,8 +687,8 @@ public class PersonResourceIntTest {
     updatedPersonDTO.setPublicHealthNumber(UPDATED_PUBLIC_HEALTH_NUMBER);
     updatedPersonDTO.setRegulator(UPDATED_REGULATOR);
 
-    Map<String, Boolean> roleToExists = new HashMap<>();
-    roleToExists.put(UPDATED_ROLE, true);
+    Map<String, String> roleToExists = new HashMap<>();
+    roleToExists.put(UPDATED_ROLE, UPDATED_ROLE);
     when(referenceService.rolesExist(any(), eq(true))).thenReturn(roleToExists);
 
     restPersonMockMvc.perform(put("/api/people")
@@ -982,8 +982,8 @@ public class PersonResourceIntTest {
 
     updatedPersonDTO.setPublicHealthNumber(" 1111111");
 
-    Map<String, Boolean> roleToExists = new HashMap<>();
-    roleToExists.put(DEFAULT_ROLE, true);
+    Map<String, String> roleToExists = new HashMap<>();
+    roleToExists.put(DEFAULT_ROLE, DEFAULT_ROLE);
     when(referenceService.rolesExist(any(), eq(true))).thenReturn(roleToExists);
 
     restPersonMockMvc.perform(put("/api/people")
@@ -1055,8 +1055,8 @@ public class PersonResourceIntTest {
 
     PersonDTO updatedPersonDto = initialPersonDataForBulk(savedPerson);
 
-    Map<String, Boolean> roleToExists = new HashMap<>();
-    roleToExists.put(UPDATED_ROLE, true);
+    Map<String, String> roleToExists = new HashMap<>();
+    roleToExists.put(UPDATED_ROLE, UPDATED_ROLE);
     when(referenceService.rolesExist(any(), eq(true))).thenReturn(roleToExists);
 
     restPersonMockMvc.perform(patch("/api/bulk-people")
@@ -1079,8 +1079,8 @@ public class PersonResourceIntTest {
     TrainerApproval savedTrainerApproval = trainerApprovalRepository.saveAndFlush(trainerApproval);
     int trainerApprovalAmount = trainerApprovalRepository.findAll().size();
 
-    Map<String, Boolean> roleToExists = new HashMap<>();
-    roleToExists.put(UPDATED_ROLE, true);
+    Map<String, String> roleToExists = new HashMap<>();
+    roleToExists.put(UPDATED_ROLE, UPDATED_ROLE);
     when(referenceService.rolesExist(any(), eq(true))).thenReturn(roleToExists);
     RoleDTO roleDto = new RoleDTO();
     roleDto.setCode(UPDATED_ROLE);
@@ -1110,8 +1110,8 @@ public class PersonResourceIntTest {
     TrainerApproval savedTrainerApproval = trainerApprovalRepository.saveAndFlush(trainerApproval);
     int trainerApprovalAmount = trainerApprovalRepository.findAll().size();
 
-    Map<String, Boolean> roleToExists = new HashMap<>();
-    roleToExists.put(UPDATED_ROLE, true);
+    Map<String, String> roleToExists = new HashMap<>();
+    roleToExists.put(UPDATED_ROLE, UPDATED_ROLE);
     when(referenceService.rolesExist(any(), eq(true))).thenReturn(roleToExists);
     RoleDTO roleDto = new RoleDTO();
     roleDto.setCode(UPDATED_ROLE);

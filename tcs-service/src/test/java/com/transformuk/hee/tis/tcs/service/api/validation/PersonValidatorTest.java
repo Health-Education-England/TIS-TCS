@@ -205,9 +205,9 @@ public class PersonValidatorTest {
     List<PersonDTO> dtoList = new ArrayList<>();
     dtoList.add(dto);
 
-    Map<String, Boolean> roleToExists = new HashMap<>();
-    roleToExists.put("role1", true);
-    roleToExists.put("role2", false);
+    Map<String, String> roleToExists = new HashMap<>();
+    roleToExists.put("role1", "role1");
+    roleToExists.put("role2", "");
     when(referenceService.rolesExist(any(), eq(true))).thenReturn(roleToExists);
 
     // When.
@@ -219,16 +219,16 @@ public class PersonValidatorTest {
   }
 
   @Test
-  public void bulkShouldNotGetErrorWhenRoleExists() throws MethodArgumentNotValidException {
+  public void bulkShouldNotGetErrorWhenRoleExists() {
     // Given.
     PersonDTO dto = new PersonDTO();
     dto.setRole("role1 ; role2,");
     List<PersonDTO> dtoList = new ArrayList<>();
     dtoList.add(dto);
 
-    Map<String, Boolean> roleToExists = new HashMap<>();
-    roleToExists.put("role1", true);
-    roleToExists.put("role2", true);
+    Map<String, String> roleToExists = new HashMap<>();
+    roleToExists.put("role1", "role1");
+    roleToExists.put("role2", "role2");
     when(referenceService.rolesExist(any(), eq(true))).thenReturn(roleToExists);
 
     // When.
@@ -291,8 +291,8 @@ public class PersonValidatorTest {
     when(personRepositoryMock.findByPublicHealthNumber(PUBLIC_HEALTH_NUMBER))
         .thenReturn(Lists.newArrayList(personMock1));
 
-    Map<String, Boolean> roleToExists = new HashMap<>();
-    roleToExists.put("role1", true);
+    Map<String, String> roleToExists = new HashMap<>();
+    roleToExists.put("role1", "role1");
     when(referenceService.rolesExist(any(), eq(true))).thenReturn(roleToExists);
 
     RoleDTO roleDto = new RoleDTO();
@@ -323,8 +323,8 @@ public class PersonValidatorTest {
     when(personRepositoryMock.findByPublicHealthNumber(PUBLIC_HEALTH_NUMBER))
         .thenReturn(Lists.newArrayList(personMock1, personMock2)); // second error
 
-    Map<String, Boolean> roleToExists = new HashMap<>();
-    roleToExists.put("role1", true);
+    Map<String, String> roleToExists = new HashMap<>();
+    roleToExists.put("role1", "role1");
     when(referenceService.rolesExist(any(), eq(true))).thenReturn(roleToExists);
 
     RoleDTO roleDto = new RoleDTO();
@@ -383,17 +383,17 @@ public class PersonValidatorTest {
   }
 
   @Test
-  public void roleCheckShouldHandleCommaSeparator() throws MethodArgumentNotValidException {
+  public void roleCheckShouldHandleCommaSeparator() {
     // Given.
     PersonDTO dto = new PersonDTO();
     dto.setRole("role1 , role2,role3,");
     List<PersonDTO> dtoList = new ArrayList<>();
     dtoList.add(dto);
 
-    Map<String, Boolean> roleToExists = new HashMap<>();
-    roleToExists.put("role1", true);
-    roleToExists.put("role2", true);
-    roleToExists.put("role3", true);
+    Map<String, String> roleToExists = new HashMap<>();
+    roleToExists.put("role1", "role1");
+    roleToExists.put("role2", "role2");
+    roleToExists.put("role3", "role3");
 
     ArgumentCaptor<List<String>> rolesCaptor = ArgumentCaptor.forClass(List.class);
     when(referenceService.rolesExist(rolesCaptor.capture(), eq(true))).thenReturn(roleToExists);
@@ -408,17 +408,17 @@ public class PersonValidatorTest {
   }
 
   @Test
-  public void roleCheckShouldHandleSemiColonSeparator() throws MethodArgumentNotValidException {
+  public void roleCheckShouldHandleSemiColonSeparator() {
     // Given.
     PersonDTO dto = new PersonDTO();
     dto.setRole("role1 ; role2;role3;");
     List<PersonDTO> dtoList = new ArrayList<>();
     dtoList.add(dto);
 
-    Map<String, Boolean> roleToExists = new HashMap<>();
-    roleToExists.put("role1", true);
-    roleToExists.put("role2", true);
-    roleToExists.put("role3", true);
+    Map<String, String> roleToExists = new HashMap<>();
+    roleToExists.put("role1", "role1");
+    roleToExists.put("role2", "role2");
+    roleToExists.put("role3", "role3");
 
     ArgumentCaptor<List<String>> rolesCaptor = ArgumentCaptor.forClass(List.class);
     when(referenceService.rolesExist(rolesCaptor.capture(), eq(true))).thenReturn(roleToExists);
@@ -433,17 +433,17 @@ public class PersonValidatorTest {
   }
 
   @Test
-  public void roleCheckShouldHandleMixedSeparators() throws MethodArgumentNotValidException {
+  public void roleCheckShouldHandleMixedSeparators() {
     // Given.
     PersonDTO dto = new PersonDTO();
     dto.setRole("role1 ; role2,role3,");
     List<PersonDTO> dtoList = new ArrayList<>();
     dtoList.add(dto);
 
-    Map<String, Boolean> roleToExists = new HashMap<>();
-    roleToExists.put("role1", true);
-    roleToExists.put("role2", true);
-    roleToExists.put("role3", true);
+    Map<String, String> roleToExists = new HashMap<>();
+    roleToExists.put("role1", "role1");
+    roleToExists.put("role2", "role2");
+    roleToExists.put("role3", "role3");
 
     ArgumentCaptor<List<String>> rolesCaptor = ArgumentCaptor.forClass(List.class);
     when(referenceService.rolesExist(rolesCaptor.capture(), eq(true))).thenReturn(roleToExists);
