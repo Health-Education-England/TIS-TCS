@@ -38,4 +38,5 @@ set Person.role = ConcatenatedRoles.role;
 
 drop table Numbers;
 drop table PersonPerRole;
+drop table PersonPerRoleDistinct;
 drop table ConcatenatedRoles;
