@@ -1,3 +1,3 @@
-UPDATE Person person
-SET person.role = 'DR in Training'
-WHERE UPPER(person.role) = 'DR IN TRAINING';
+UPDATE Person
+SET role = 'DR in Training'
+WHERE UPPER(role) = 'DR IN TRAINING';
