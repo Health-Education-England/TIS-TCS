@@ -238,7 +238,7 @@ public class PersonValidator {
           .map(String::trim)
           .collect(Collectors.toList());
 
-      Map<String, String> rolesExist = referenceService.rolesExist(roles, true);
+      Map<String, String> rolesExist = referenceService.rolesMatch(roles, true);
       List<String> correctedRoles = rolesExist.entrySet().stream()
           .map(entry -> entry.getValue().isEmpty() ? entry.getKey() : entry.getValue())
           .collect(Collectors.toList());
