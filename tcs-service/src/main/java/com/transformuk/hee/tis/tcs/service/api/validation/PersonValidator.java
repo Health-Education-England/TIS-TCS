@@ -239,11 +239,11 @@ public class PersonValidator {
           .collect(Collectors.toList());
 
       Map<String, String> rolesMatch = referenceService.rolesMatch(roles, true);
-      List<String> correctedRoles = rolesMatch.entrySet().stream()
+      List<String> matchedRoles = rolesMatch.entrySet().stream()
           .map(entry -> entry.getValue().isEmpty() ? entry.getKey() : entry.getValue())
           .collect(Collectors.toList());
 
-      personDto.setRole(String.join(",", correctedRoles));
+      personDto.setRole(String.join(",", matchedRoles));
 
       for (Entry<String, String> roleMatch : rolesMatch.entrySet()) {
         if (roleMatch.getValue().isEmpty()) {
