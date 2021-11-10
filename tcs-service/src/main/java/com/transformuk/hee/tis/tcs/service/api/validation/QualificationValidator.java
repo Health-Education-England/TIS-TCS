@@ -2,7 +2,6 @@ package com.transformuk.hee.tis.tcs.service.api.validation;
 
 
 import com.google.common.collect.Lists;
-import com.transformuk.hee.tis.reference.api.dto.QualificationReferenceDTO;
 import com.transformuk.hee.tis.reference.client.impl.ReferenceServiceImpl;
 import com.transformuk.hee.tis.tcs.api.dto.QualificationDTO;
 import com.transformuk.hee.tis.tcs.service.model.Qualification;
@@ -27,8 +26,8 @@ public class QualificationValidator {
 
   private static final String QUALIFICATION_DTO_NAME = "QualificationDTO";
 
-  private PersonRepository personRepository;
-  private ReferenceServiceImpl referenceService;
+  private final PersonRepository personRepository;
+  private final ReferenceServiceImpl referenceService;
 
   @Autowired
   public QualificationValidator(PersonRepository personRepository,
@@ -49,7 +48,6 @@ public class QualificationValidator {
 
     List<FieldError> fieldErrors = new ArrayList<>();
     fieldErrors.addAll(checkPerson(qualificationDTO));
-    //fieldErrors.addAll(checkQualification(qualificationDTO));
     fieldErrors.addAll(checkCountryOfQualification(qualificationDTO));
     if (!fieldErrors.isEmpty()) {
       BeanPropertyBindingResult bindingResult = new BeanPropertyBindingResult(qualificationDTO,
@@ -64,13 +62,10 @@ public class QualificationValidator {
     // check the Person
     if (qualificationDTO.getPerson() == null || qualificationDTO.getPerson().getId() == null) {
       requireFieldErrors(fieldErrors, "person");
-    } else if (qualificationDTO.getPerson() != null
-        && qualificationDTO.getPerson().getId() != null) {
-      if (!personRepository.existsById(qualificationDTO.getPerson().getId())) {
-        fieldErrors.add(new FieldError(QUALIFICATION_DTO_NAME, "person",
-            String
-                .format("Person with id %d does not exist", qualificationDTO.getPerson().getId())));
-      }
+    } else if (!personRepository.existsById(qualificationDTO.getPerson().getId())) {
+      fieldErrors.add(new FieldError(QUALIFICATION_DTO_NAME, "person",
+          String
+              .format("Person with id %d does not exist", qualificationDTO.getPerson().getId())));
     }
     return fieldErrors;
   }
@@ -87,27 +82,13 @@ public class QualificationValidator {
         Map<String, Boolean> countryOfQualificationsExistsMap = referenceService
             .countryExists(countryOfQualifications);
         countryOfQualificationsExistsMap.forEach((k, v) -> {
-          if (!v) {
+          if (Boolean.FALSE.equals(v)) {
             fieldErrors.add(new FieldError(QUALIFICATION_DTO_NAME, "countryOfQualification",
                 String.format("%s with id %s does not exist", "countryOfQualification", k)));
           }
         });
       }
 
-    }
-    return fieldErrors;
-  }
-
-  private List<FieldError> checkQualification(QualificationDTO qualificationDTO) {
-    List<FieldError> fieldErrors = new ArrayList<>();
-    // then check the Gender
-    if (StringUtils.isNotEmpty(qualificationDTO.getQualification())) {
-      Boolean isExists = referenceService
-          .isValueExists(QualificationReferenceDTO.class, qualificationDTO.getQualification());
-      if (!isExists) {
-        fieldErrors.add(new FieldError(QUALIFICATION_DTO_NAME, "qualification",
-            String.format("qualification %s does not exist", qualificationDTO.getQualification())));
-      }
     }
     return fieldErrors;
   }

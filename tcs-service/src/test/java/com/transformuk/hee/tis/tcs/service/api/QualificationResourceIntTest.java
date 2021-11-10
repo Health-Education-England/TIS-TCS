@@ -3,9 +3,9 @@ package com.transformuk.hee.tis.tcs.service.api;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.hamcrest.Matchers.containsInAnyOrder;
 import static org.hamcrest.Matchers.hasItem;
+import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.BDDMockito.given;
-import static org.mockito.Matchers.any;
-import static org.mockito.Matchers.anyString;
 import static org.mockito.Mockito.when;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.delete;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
@@ -80,7 +80,6 @@ public class QualificationResourceIntTest {
   private static final String DEFAULT_COUNTRY_OF_QUALIFICATION = "United Kingdom";
   private static final String UPDATED_COUNTRY_OF_QUALIFICATION = "New Zealand";
   private static final String NOT_EXISTS_COUNTRY = "XYZ";
-  private static final String NOT_EXISTS_MEDICAL_SCHOOL = "ABC";
 
   private static final LocalDateTime DEFAULT_AMENDED_DATE = LocalDateTime
       .now(ZoneId.systemDefault());
@@ -93,8 +92,6 @@ public class QualificationResourceIntTest {
 
   @Autowired
   private QualificationService qualificationService;
-
-  private QualificationValidator qualificationValidator;
 
   @Autowired
   private MappingJackson2HttpMessageConverter jacksonMessageConverter;
@@ -130,31 +127,30 @@ public class QualificationResourceIntTest {
    * which requires the current entity.
    */
   public static Qualification createEntity(EntityManager em) {
-    Qualification qualification = new Qualification()
+    return new Qualification()
         .intrepidId(DEFAULT_INTREPID_ID)
         .qualification(DEFAULT_QUALIFICATION)
         .qualificationType(DEFAULT_QUALIFICATION_TYPE)
         .qualificationAttainedDate(DEFAULT_QUALIFICATION_ATTAINED_DATE)
         .medicalSchool(DEFAULT_MEDICAL_SCHOOL)
         .countryOfQualification(DEFAULT_COUNTRY_OF_QUALIFICATION);
-    return qualification;
   }
 
   /**
    * Create Person entity
    *
-   * @return
+   * @return A minimally detailed {@link Person}
    */
   public static Person createPersonEntity() {
-    Person person = new Person()
+    return new Person()
         .intrepidId(DEFAULT_INTREPID_ID);
-    return person;
   }
 
   @Before
   public void setup() {
     MockitoAnnotations.initMocks(this);
-    qualificationValidator = new QualificationValidator(personRepository, referenceService);
+    QualificationValidator qualificationValidator = new QualificationValidator(personRepository,
+        referenceService);
     QualificationResource qualificationResource = new QualificationResource(qualificationService,
         qualificationValidator);
     this.restQualificationMockMvc = MockMvcBuilders.standaloneSetup(qualificationResource)
@@ -347,16 +343,16 @@ public class QualificationResourceIntTest {
         .andExpect(status().isOk())
         .andExpect(content().contentType(MediaType.APPLICATION_JSON_VALUE))
         .andExpect(jsonPath("$.[*].id").value(hasItem(qualification.getId().intValue())))
-        .andExpect(jsonPath("$.[*].intrepidId").value(hasItem(DEFAULT_INTREPID_ID.toString())))
-        .andExpect(jsonPath("$.[*].qualification").value(hasItem(DEFAULT_QUALIFICATION.toString())))
+        .andExpect(jsonPath("$.[*].intrepidId").value(hasItem(DEFAULT_INTREPID_ID)))
+        .andExpect(jsonPath("$.[*].qualification").value(hasItem(DEFAULT_QUALIFICATION)))
         .andExpect(jsonPath("$.[*].qualificationType")
             .value(hasItem(DEFAULT_QUALIFICATION_TYPE.toString())))
         .andExpect(jsonPath("$.[*].qualificationAttainedDate")
             .value(hasItem(DEFAULT_QUALIFICATION_ATTAINED_DATE.toString())))
         .andExpect(
-            jsonPath("$.[*].medicalSchool").value(hasItem(DEFAULT_MEDICAL_SCHOOL.toString())))
+            jsonPath("$.[*].medicalSchool").value(hasItem(DEFAULT_MEDICAL_SCHOOL)))
         .andExpect(jsonPath("$.[*].countryOfQualification")
-            .value(hasItem(DEFAULT_COUNTRY_OF_QUALIFICATION.toString())))
+            .value(hasItem(DEFAULT_COUNTRY_OF_QUALIFICATION)))
         .andExpect(jsonPath("$.[*].amendedDate").isNotEmpty());
   }
 
@@ -373,14 +369,14 @@ public class QualificationResourceIntTest {
         .andExpect(status().isOk())
         .andExpect(content().contentType(MediaType.APPLICATION_JSON_VALUE))
         .andExpect(jsonPath("$.id").value(qualification.getId().intValue()))
-        .andExpect(jsonPath("$.intrepidId").value(DEFAULT_INTREPID_ID.toString()))
-        .andExpect(jsonPath("$.qualification").value(DEFAULT_QUALIFICATION.toString()))
+        .andExpect(jsonPath("$.intrepidId").value(DEFAULT_INTREPID_ID))
+        .andExpect(jsonPath("$.qualification").value(DEFAULT_QUALIFICATION))
         .andExpect(jsonPath("$.qualificationType").value(DEFAULT_QUALIFICATION_TYPE.toString()))
         .andExpect(jsonPath("$.qualificationAttainedDate")
             .value(DEFAULT_QUALIFICATION_ATTAINED_DATE.toString()))
-        .andExpect(jsonPath("$.medicalSchool").value(DEFAULT_MEDICAL_SCHOOL.toString()))
+        .andExpect(jsonPath("$.medicalSchool").value(DEFAULT_MEDICAL_SCHOOL))
         .andExpect(
-            jsonPath("$.countryOfQualification").value(DEFAULT_COUNTRY_OF_QUALIFICATION.toString()))
+            jsonPath("$.countryOfQualification").value(DEFAULT_COUNTRY_OF_QUALIFICATION))
         .andExpect(jsonPath("$.amendedDate").isNotEmpty());
   }
 
