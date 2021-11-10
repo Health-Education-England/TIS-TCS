@@ -270,32 +270,6 @@ public class QualificationResourceIntTest {
 
   @Test
   @Transactional
-  public void shouldValidateMedicalSchool() throws Exception {
-    //given
-    qualification.setMedicalSchool(
-        NOT_EXISTS_MEDICAL_SCHOOL); // this medical school not exists in reference service
-    personRepository.saveAndFlush(person);
-    QualificationDTO qualificationDTO = qualificationMapper.toDto(qualification);
-    qualificationDTO.setPerson(personMapper.toDto(person));
-
-    Map<String, Boolean> exists = Maps.newHashMap(NOT_EXISTS_MEDICAL_SCHOOL, false);
-    given(referenceService.medicalSchoolsExists(Lists.newArrayList(NOT_EXISTS_MEDICAL_SCHOOL)))
-        .willReturn(exists);
-    when(referenceService.isValueExists(any(), anyString())).thenReturn(true);
-    //when & then
-    restQualificationMockMvc.perform(post("/api/qualifications")
-        .contentType(MediaType.APPLICATION_JSON)
-        .content(TestUtil.convertObjectToJsonBytes(qualificationDTO)))
-        .andExpect(status().isBadRequest())
-        .andExpect(jsonPath("$.message").value("error.validation"))
-        .andExpect(jsonPath("$.fieldErrors[0].field").value("medicalSchool"))
-        .andExpect(jsonPath("$.fieldErrors[0].message").
-            value(String
-                .format("qualification with id %s does not exist", NOT_EXISTS_MEDICAL_SCHOOL)));
-  }
-
-  @Test
-  @Transactional
   public void shouldValidateCountry() throws Exception {
     //given
     qualification.setCountryOfQualification(

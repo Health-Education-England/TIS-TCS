@@ -50,7 +50,6 @@ public class QualificationValidator {
     List<FieldError> fieldErrors = new ArrayList<>();
     fieldErrors.addAll(checkPerson(qualificationDTO));
     //fieldErrors.addAll(checkQualification(qualificationDTO));
-    fieldErrors.addAll(checkMedicalSchool(qualificationDTO));
     fieldErrors.addAll(checkCountryOfQualification(qualificationDTO));
     if (!fieldErrors.isEmpty()) {
       BeanPropertyBindingResult bindingResult = new BeanPropertyBindingResult(qualificationDTO,
@@ -72,27 +71,6 @@ public class QualificationValidator {
             String
                 .format("Person with id %d does not exist", qualificationDTO.getPerson().getId())));
       }
-    }
-    return fieldErrors;
-  }
-
-  private List<FieldError> checkMedicalSchool(QualificationDTO qualificationDTO) {
-    List<FieldError> fieldErrors = new ArrayList<>();
-    // check the MedicalSchool
-    if (StringUtils.isNotEmpty(qualificationDTO.getMedicalSchool())) {
-      List<String> medicalSchools = Lists.newArrayList(qualificationDTO.getMedicalSchool());
-
-      if (!CollectionUtils.isEmpty(medicalSchools)) {
-        Map<String, Boolean> medicalSchoolExistsMap = referenceService
-            .medicalSchoolsExists(medicalSchools);
-        medicalSchoolExistsMap.forEach((k, v) -> {
-          if (!v) {
-            fieldErrors.add(new FieldError(QUALIFICATION_DTO_NAME, "medicalSchool",
-                String.format("%s with id %s does not exist", "qualification", k)));
-          }
-        });
-      }
-
     }
     return fieldErrors;
   }
