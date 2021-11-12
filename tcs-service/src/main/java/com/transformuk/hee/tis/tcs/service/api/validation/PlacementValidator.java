@@ -128,10 +128,7 @@ public class PlacementValidator {
 
   private List<FieldError> checkGrade(final PlacementDetailsDTO placementDetailsDTO) {
     final List<FieldError> fieldErrors = new ArrayList<>();
-    if (placementDetailsDTO.getGradeId() == null) {
-      fieldErrors.add(new FieldError(PLACEMENT_DTO_NAME, "gradeId",
-          "Grade ID cannot be empty"));
-    } else {
+    if (placementDetailsDTO.getGradeId() != null) {
       final Map<Long, Boolean> gradeIdsExistsMap = referenceService
           .gradeIdsExists(newArrayList(placementDetailsDTO.getGradeId()));
       notExistsFieldErrors(fieldErrors, gradeIdsExistsMap, "gradeId", "Grade");

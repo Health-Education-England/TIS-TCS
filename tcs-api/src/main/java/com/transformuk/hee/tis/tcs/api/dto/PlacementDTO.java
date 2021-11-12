@@ -39,7 +39,7 @@ public class PlacementDTO implements Serializable {
   private Long siteId;
   private Set<PlacementSiteDTO> sites = new HashSet<>();
   private String siteCode;
-  @NotNull(message = "GradeId is required", groups = {Update.class, Create.class})
+  //@NotNull(message = "GradeId is required", groups = {Update.class, Create.class})
   private Long gradeId;
   private String gradeAbbreviation;
   private Set<PlacementSpecialtyDTO> specialties;

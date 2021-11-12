@@ -343,7 +343,7 @@ public class PlacementResourceIntTest {
         .andExpect(jsonPath("$.message").value("error.validation"))
         .andExpect(jsonPath("$.fieldErrors[*].field").
             value(containsInAnyOrder("dateFrom", "dateTo", "placementType",
-                "traineeId", "postId", "gradeId", "siteId")));
+                "traineeId", "postId", "siteId")));
   }
 
   @Test
@@ -361,7 +361,7 @@ public class PlacementResourceIntTest {
         .andExpect(jsonPath("$.message").value("error.validation"))
         .andExpect(jsonPath("$.fieldErrors[*].field").
             value(containsInAnyOrder("dateFrom", "dateTo", "placementType",
-                "traineeId", "postId", "gradeId", "siteId")));
+                "traineeId", "postId", "siteId")));
   }
 
   @Test
