@@ -62,7 +62,6 @@ public class PlacementDetailsDTO implements Serializable {
 
   private String gradeAbbreviation;
 
-  //@NotNull(message = "GradeId is required", groups = {Update.class, Create.class})
   private Long gradeId;
 
   private String gradeName;
