@@ -39,7 +39,7 @@ public class PlacementDTO implements Serializable {
   private Long siteId;
   private Set<PlacementSiteDTO> sites = new HashSet<>();
   private String siteCode;
-  private Long gradeId; //nullable: this may need to change based on PO feedback
+  private Long gradeId;
   private String gradeAbbreviation;
   private Set<PlacementSpecialtyDTO> specialties;
   @NotNull(message = "Date from is required", groups = {Update.class, Create.class})
