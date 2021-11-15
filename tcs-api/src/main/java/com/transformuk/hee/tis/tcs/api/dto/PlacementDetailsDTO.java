@@ -62,7 +62,7 @@ public class PlacementDetailsDTO implements Serializable {
 
   private String gradeAbbreviation;
 
-  private Long gradeId;
+  private Long gradeId; //nullable: this may need to change based on PO feedback
 
   private String gradeName;
 
