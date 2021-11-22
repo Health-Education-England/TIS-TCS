@@ -48,13 +48,13 @@ public class ContactDetailsValidator {
   }
 
   /**
-   * Custom validation on the gmcDetailsDTO DTO, this is meant to supplement the annotation based
-   * validation already in place. It checks that the gmc status if gmc number is entered.
+   * Custom validation on the ContactDetails DTO, this is meant to supplement the annotation based
+   * validation already in place. It checks that the title and email address of the person.
    *
    * @param dto the contactDetails to check
    * @throws MethodArgumentNotValidException if there are validation errors
    */
-  public void validate(ContactDetailsDTO dto) throws MethodArgumentNotValidException {
+  public void validate(ContactDetailsDTO dto) throws MethodArgumentNotValidException, NoSuchMethodException {
     final boolean currentOnly = false;
     List<FieldError> fieldErrors = new ArrayList<>();
     fieldErrors.addAll(checkTitle(dto, currentOnly));
@@ -65,7 +65,7 @@ public class ContactDetailsValidator {
           new BeanPropertyBindingResult(dto, CONTACT_DETAILS_DTO_NAME);
       fieldErrors.forEach(bindingResult::addError);
 
-      Method method = this.getClass().getMethods()[0];
+      Method method = this.getClass().getMethod("validate", ContactDetailsDTO.class);
       MethodParameter methodParameter = new MethodParameter(method, 0);
       throw new MethodArgumentNotValidException(methodParameter, bindingResult);
     }

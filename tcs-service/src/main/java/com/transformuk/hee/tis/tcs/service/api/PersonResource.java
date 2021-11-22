@@ -133,7 +133,7 @@ public class PersonResource {
   @PreAuthorize("hasPermission('tis:people::person:', 'Create')")
   public ResponseEntity<PersonDTO> createPerson(
       @RequestBody @Validated(Create.class) final PersonDTO personDTO)
-      throws URISyntaxException, MethodArgumentNotValidException {
+      throws URISyntaxException, MethodArgumentNotValidException, NoSuchMethodException {
     log.debug("REST request to save Person : {}", personDTO);
     if (personDTO.getId() != null) {
       return ResponseEntity.badRequest().headers(HeaderUtil
@@ -166,7 +166,7 @@ public class PersonResource {
   @PreAuthorize("hasPermission('tis:people::person:', 'Update')")
   public ResponseEntity<PersonDTO> updatePerson(
       @RequestBody @Validated(Update.class) PersonDTO personDTO)
-      throws URISyntaxException, MethodArgumentNotValidException {
+      throws URISyntaxException, MethodArgumentNotValidException, NoSuchMethodException {
     log.debug("REST request to update Person : {}", personDTO);
     if (personDTO.getId() == null) {
       return createPerson(personDTO);
