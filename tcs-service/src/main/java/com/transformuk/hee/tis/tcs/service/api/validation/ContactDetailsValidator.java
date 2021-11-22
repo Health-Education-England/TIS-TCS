@@ -135,8 +135,9 @@ public class ContactDetailsValidator {
 
   private List<FieldError> checkEmail(ContactDetailsDTO dto) {
     List<FieldError> fieldErrors = new ArrayList<>();
-    validateEmailFormat("email", dto.getEmail(), fieldErrors);
-    validateEmailUniqueness("email", dto, fieldErrors);
+    String fieldName = "email";
+    validateEmailFormat(fieldName, dto.getEmail(), fieldErrors);
+    validateEmailUniqueness(fieldName, dto, fieldErrors);
     return fieldErrors;
   }
 
