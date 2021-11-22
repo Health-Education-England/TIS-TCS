@@ -54,7 +54,8 @@ public class ContactDetailsValidator {
    * @param dto the contactDetails to check
    * @throws MethodArgumentNotValidException if there are validation errors
    */
-  public void validate(ContactDetailsDTO dto) throws MethodArgumentNotValidException, NoSuchMethodException {
+  public void validate(ContactDetailsDTO dto)
+      throws MethodArgumentNotValidException, NoSuchMethodException {
     final boolean currentOnly = false;
     List<FieldError> fieldErrors = new ArrayList<>();
     fieldErrors.addAll(checkTitle(dto, currentOnly));
