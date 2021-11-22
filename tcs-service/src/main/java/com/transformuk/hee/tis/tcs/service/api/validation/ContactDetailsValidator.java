@@ -4,9 +4,13 @@ import com.transformuk.hee.tis.reference.api.dto.TitleDTO;
 import com.transformuk.hee.tis.reference.client.impl.ReferenceServiceImpl;
 import com.transformuk.hee.tis.tcs.api.dto.ContactDetailsDTO;
 import com.transformuk.hee.tis.tcs.service.model.ContactDetails;
+import com.transformuk.hee.tis.tcs.service.repository.ContactDetailsRepository;
+import java.lang.reflect.Method;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.stream.Collectors;
 import org.apache.commons.lang3.StringUtils;
+import org.springframework.core.MethodParameter;
 import org.springframework.stereotype.Component;
 import org.springframework.validation.BeanPropertyBindingResult;
 import org.springframework.validation.FieldError;
@@ -35,28 +39,36 @@ public class ContactDetailsValidator {
       "Only numerical values allowed for %s, no special characters, with the exception of plus, minus and spaces.";
 
   private final ReferenceServiceImpl referenceService;
+  private final ContactDetailsRepository contactDetailsRepository;
 
-  public ContactDetailsValidator(ReferenceServiceImpl referenceService) {
+  public ContactDetailsValidator(ReferenceServiceImpl referenceService,
+      ContactDetailsRepository contactDetailsRepository) {
     this.referenceService = referenceService;
+    this.contactDetailsRepository = contactDetailsRepository;
   }
 
   /**
-   * Custom validation on the gmcDetailsDTO DTO, this is meant to supplement the annotation based
-   * validation already in place. It checks that the gmc status if gmc number is entered.
+   * Custom validation on the ContactDetails DTO, this is meant to supplement the annotation based
+   * validation already in place. It checks that the title and email address of the person.
    *
    * @param dto the contactDetails to check
    * @throws MethodArgumentNotValidException if there are validation errors
    */
-  public void validate(ContactDetailsDTO dto) throws MethodArgumentNotValidException {
+  public void validate(ContactDetailsDTO dto)
+      throws MethodArgumentNotValidException, NoSuchMethodException {
     final boolean currentOnly = false;
     List<FieldError> fieldErrors = new ArrayList<>();
     fieldErrors.addAll(checkTitle(dto, currentOnly));
+    fieldErrors.addAll(checkEmail(dto));
 
     if (!fieldErrors.isEmpty()) {
       BeanPropertyBindingResult bindingResult =
           new BeanPropertyBindingResult(dto, CONTACT_DETAILS_DTO_NAME);
       fieldErrors.forEach(bindingResult::addError);
-      throw new MethodArgumentNotValidException(null, bindingResult);
+
+      Method method = this.getClass().getMethod("validate", ContactDetailsDTO.class);
+      MethodParameter methodParameter = new MethodParameter(method, 0);
+      throw new MethodArgumentNotValidException(methodParameter, bindingResult);
     }
   }
 
@@ -124,14 +136,42 @@ public class ContactDetailsValidator {
 
   private List<FieldError> checkEmail(ContactDetailsDTO dto) {
     List<FieldError> fieldErrors = new ArrayList<>();
-    validateEmail("email", dto.getEmail(), fieldErrors);
+    String fieldName = "email";
+    validateEmailFormat(fieldName, dto.getEmail(), fieldErrors);
+    validateEmailUniqueness(fieldName, dto, fieldErrors);
     return fieldErrors;
   }
 
-  private void validateEmail(String fieldName, String value, List<FieldError> fieldErrors) {
+  private void validateEmailFormat(String fieldName, String value, List<FieldError> fieldErrors) {
     if (value != null && !value.matches(REGEX_EMAIL)) {
+      fieldErrors.add(new FieldError(CONTACT_DETAILS_DTO_NAME, fieldName, REGEX_EMAIL_ERROR));
+    }
+  }
+
+  private void validateEmailUniqueness(String fieldName, ContactDetailsDTO dto,
+      List<FieldError> fieldErrors) {
+    String email = dto.getEmail();
+    if (StringUtils.isEmpty(email)) {
+      return;
+    }
+    List<ContactDetails> existingContactDetails = contactDetailsRepository.
+        findContactDetailsByEmail(email);
+    if (!existingContactDetails.isEmpty() && dto.getId() != null) {
+      existingContactDetails.removeIf(cd -> {
+        Long id = cd.getId();
+        return id.equals((dto.getId()));
+      });
+    }
+    int existingSize = existingContactDetails.size();
+    if (existingSize > 0) {
       fieldErrors.add(new FieldError(CONTACT_DETAILS_DTO_NAME, fieldName,
-          String.format(REGEX_EMAIL_ERROR, fieldName)));
+          String.format(
+              "email %s is not unique, there %s currently %d %s with this email (Person ID: %s)",
+              dto.getEmail(), existingSize > 1 ? "are" : "is", existingSize,
+              existingSize > 1 ? "persons" : "person",
+              existingContactDetails.stream().map(cd -> cd.getId().toString()).collect(
+                  Collectors.joining(","))
+          )));
     }
   }
 

@@ -65,7 +65,7 @@ public class ContactDetailsResource {
   @PreAuthorize("hasPermission('tis:people::person:', 'Create')")
   public ResponseEntity<ContactDetailsDTO> createContactDetails(
       @RequestBody @Validated(Create.class) ContactDetailsDTO contactDetailsDTO)
-      throws URISyntaxException, MethodArgumentNotValidException {
+      throws URISyntaxException, MethodArgumentNotValidException, NoSuchMethodException {
     log.debug("REST request to save ContactDetails : {}", contactDetailsDTO);
 
     contactDetailsValidator.validate(contactDetailsDTO);
@@ -87,7 +87,7 @@ public class ContactDetailsResource {
   @PreAuthorize("hasPermission('tis:people::person:', 'Update')")
   public ResponseEntity<ContactDetailsDTO> updateContactDetails(
       @RequestBody @Validated(Update.class) ContactDetailsDTO contactDetailsDTO)
-      throws MethodArgumentNotValidException {
+      throws MethodArgumentNotValidException, NoSuchMethodException {
     log.debug("REST request to update ContactDetails : {}", contactDetailsDTO);
     if (contactDetailsDTO.getId() == null) {
       return ResponseEntity.badRequest()
