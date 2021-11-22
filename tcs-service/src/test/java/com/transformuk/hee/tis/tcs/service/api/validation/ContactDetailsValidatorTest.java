@@ -886,7 +886,7 @@ class ContactDetailsValidatorTest {
     assertThat("Unexpected target object.", result.getTarget(), is(dto));
 
     String errorMessage = String.format(EMAIL_NOT_UNIQUE_ERROR,
-        email, "is", 1, "email", idMocked);
+        email, "is", 1, "person", idMocked);
     assertThat("Unexpected error message.", result.getFieldErrors().get(0).getDefaultMessage(),
         containsString(errorMessage));
   }
@@ -915,7 +915,7 @@ class ContactDetailsValidatorTest {
     assertThat("Unexpected target object.", result.getTarget(), is(dto));
 
     String errorMessage = String.format(EMAIL_NOT_UNIQUE_ERROR,
-        email, "are", 2, "emails", idMocked1 + "," + idMocked2);
+        email, "are", 2, "persons", idMocked1 + "," + idMocked2);
     assertThat("Unexpected error message.", result.getFieldErrors().get(0).getDefaultMessage(),
         containsString(errorMessage));
   }

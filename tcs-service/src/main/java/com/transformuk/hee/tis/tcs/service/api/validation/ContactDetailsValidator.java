@@ -167,7 +167,7 @@ public class ContactDetailsValidator {
           String.format(
               "email %s is not unique, there %s currently %d %s with this email (Person ID: %s)",
               dto.getEmail(), existingSize > 1 ? "are" : "is", existingSize,
-              existingSize > 1 ? "emails" : "email",
+              existingSize > 1 ? "persons" : "person",
               existingContactDetails.stream().map(cd -> cd.getId().toString()).collect(
                   Collectors.joining(","))
           )));
