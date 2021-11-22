@@ -1,5 +1,6 @@
 package com.transformuk.hee.tis.tcs.service.api.validation;
 
+import static org.hamcrest.CoreMatchers.containsString;
 import static org.hamcrest.CoreMatchers.hasItem;
 import static org.hamcrest.CoreMatchers.is;
 import static org.hamcrest.MatcherAssert.assertThat;
@@ -7,9 +8,13 @@ import static org.junit.jupiter.api.Assertions.assertDoesNotThrow;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.mockito.Mockito.when;
 
+import com.google.common.collect.Lists;
 import com.transformuk.hee.tis.reference.api.dto.TitleDTO;
 import com.transformuk.hee.tis.reference.client.impl.ReferenceServiceImpl;
 import com.transformuk.hee.tis.tcs.api.dto.ContactDetailsDTO;
+import com.transformuk.hee.tis.tcs.service.model.ContactDetails;
+import com.transformuk.hee.tis.tcs.service.repository.ContactDetailsRepository;
+import java.util.Collections;
 import java.util.List;
 import java.util.stream.Collectors;
 import org.junit.jupiter.api.BeforeEach;
@@ -17,6 +22,7 @@ import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
+import org.springframework.context.support.DefaultMessageSourceResolvable;
 import org.springframework.validation.BindingResult;
 import org.springframework.validation.FieldError;
 import org.springframework.web.bind.MethodArgumentNotValidException;
@@ -27,18 +33,24 @@ class ContactDetailsValidatorTest {
   private static final String REGEX_EMAIL_ERROR = "Valid email format required.";
   private static final String REGEX_NAME_ERROR =
       "No special characters allowed for %s, with the exception of apostrophes, hyphens and spaces.";
-  private static final String NULL_NAME_ERROR = "%s is required to create or update the record.";
   private static final String REGEX_PHONE_ERROR =
       "Only numerical values allowed for %s, no special characters, with the exception of plus, minus and spaces.";
+  private static final String EMAIL_NOT_UNIQUE_ERROR = "email %s is not unique, there %s currently %d %s with this email (Person ID: %s)";
+
+  private static final String DTO_NAME = ContactDetailsDTO.class.getSimpleName();
 
   private ContactDetailsValidator validator;
 
   @Mock
   private ReferenceServiceImpl referenceService;
+  @Mock
+  private ContactDetailsRepository contactDetailsRepository;
+  @Mock
+  private ContactDetails contactDetailsMock1, contactDetailsMock2;
 
   @BeforeEach
   void setUp() {
-    validator = new ContactDetailsValidator(referenceService);
+    validator = new ContactDetailsValidator(referenceService, contactDetailsRepository);
   }
 
   @Test
@@ -102,7 +114,7 @@ class ContactDetailsValidatorTest {
 
     // Then.
     List<String> errorMessages = fieldErrors.stream()
-        .map(fieldError -> fieldError.getDefaultMessage()).collect(
+        .map(DefaultMessageSourceResolvable::getDefaultMessage).collect(
             Collectors.toList());
     assertThat("Unexpected error message", errorMessages,
         hasItem("address1 is required when address2 is populated."));
@@ -119,7 +131,7 @@ class ContactDetailsValidatorTest {
 
     // Then.
     List<String> errorMessages = fieldErrors.stream()
-        .map(fieldError -> fieldError.getDefaultMessage()).collect(
+        .map(DefaultMessageSourceResolvable::getDefaultMessage).collect(
             Collectors.toList());
     assertThat("Unexpected error message", errorMessages,
         hasItem("postCode is required when address is populated."));
@@ -136,7 +148,7 @@ class ContactDetailsValidatorTest {
 
     // Then.
     List<String> errorMessages = fieldErrors.stream()
-        .map(fieldError -> fieldError.getDefaultMessage()).collect(
+        .map(DefaultMessageSourceResolvable::getDefaultMessage).collect(
             Collectors.toList());
     assertThat("Unexpected error message", errorMessages,
         hasItem("address1 is required when address3 is populated."));
@@ -153,7 +165,7 @@ class ContactDetailsValidatorTest {
 
     // Then.
     List<String> errorMessages = fieldErrors.stream()
-        .map(fieldError -> fieldError.getDefaultMessage()).collect(
+        .map(DefaultMessageSourceResolvable::getDefaultMessage).collect(
             Collectors.toList());
     assertThat("Unexpected error message", errorMessages,
         hasItem("address2 is required when address3 is populated."));
@@ -170,7 +182,7 @@ class ContactDetailsValidatorTest {
 
     // Then.
     List<String> errorMessages = fieldErrors.stream()
-        .map(fieldError -> fieldError.getDefaultMessage()).collect(
+        .map(DefaultMessageSourceResolvable::getDefaultMessage).collect(
             Collectors.toList());
     assertThat("Unexpected error message", errorMessages,
         hasItem("postCode is required when address is populated."));
@@ -833,7 +845,7 @@ class ContactDetailsValidatorTest {
   }
 
   @Test
-  void shouldReturnErrorsWhenEmailNotValid() {
+  void shouldReturnErrorsWhenEmailFormatNotValid() {
     // Given.
     ContactDetailsDTO dto = new ContactDetailsDTO();
     dto.setForenames("");
@@ -849,6 +861,83 @@ class ContactDetailsValidatorTest {
     FieldError fieldError =
         new FieldError(ContactDetailsDTO.class.getSimpleName(), "email", REGEX_EMAIL_ERROR);
     assertThat("Expected field error not found", fieldErrors, hasItem(fieldError));
+  }
+
+  @Test
+  void shouldThrowErrorsWhenOneEmailAlreadyExists() {
+    // Given.
+    String email = "a@b.com";
+    ContactDetailsDTO dto = new ContactDetailsDTO();
+    dto.setEmail(email);
+    dto.setId(null);
+
+    Long idMocked = 1L;
+    when(contactDetailsRepository.findContactDetailsByEmail(email)).thenReturn(
+        Collections.singletonList(contactDetailsMock1));
+    when(contactDetailsMock1.getId()).thenReturn(idMocked);
+
+    // When.
+    MethodArgumentNotValidException thrown =
+        assertThrows(MethodArgumentNotValidException.class, () -> validator.validate(dto));
+
+    // Then
+    BindingResult result = thrown.getBindingResult();
+    assertThat("Unexpected object name.", result.getObjectName(), is(DTO_NAME));
+    assertThat("Unexpected target object.", result.getTarget(), is(dto));
+
+    String errorMessage = String.format(EMAIL_NOT_UNIQUE_ERROR,
+        email, "is", 1, "email", idMocked);
+    assertThat("Unexpected error message.", result.getFieldErrors().get(0).getDefaultMessage(),
+        containsString(errorMessage));
+  }
+
+  @Test
+  void shouldThrowErrorsWhenMultipleEmailsAlreadyExists() {
+    // Given.
+    String email = "a@b.com";
+    ContactDetailsDTO dto = new ContactDetailsDTO();
+    dto.setEmail(email);
+    dto.setId(null);
+
+    Long idMocked1 = 1L, idMocked2 = 2L;
+    when(contactDetailsRepository.findContactDetailsByEmail(email)).thenReturn(
+        Lists.newArrayList(contactDetailsMock1, contactDetailsMock2));
+    when(contactDetailsMock1.getId()).thenReturn(idMocked1);
+    when(contactDetailsMock2.getId()).thenReturn(idMocked2);
+
+    // When.
+    MethodArgumentNotValidException thrown =
+        assertThrows(MethodArgumentNotValidException.class, () -> validator.validate(dto));
+
+    // Then
+    BindingResult result = thrown.getBindingResult();
+    assertThat("Unexpected object name.", result.getObjectName(), is(DTO_NAME));
+    assertThat("Unexpected target object.", result.getTarget(), is(dto));
+
+    String errorMessage = String.format(EMAIL_NOT_UNIQUE_ERROR,
+        email, "are", 2, "emails", idMocked1 + "," + idMocked2);
+    assertThat("Unexpected error message.", result.getFieldErrors().get(0).getDefaultMessage(),
+        containsString(errorMessage));
+  }
+
+  @Test
+  void shouldNotReturnErrorsWhenCurrentEmailIsFoundWithTheSameId() {
+    // Given.
+    String email = "a@b.com";
+    Long id = 1L;
+    ContactDetailsDTO dto = new ContactDetailsDTO();
+    dto.setEmail(email);
+    dto.setId(id);
+
+    when(contactDetailsRepository.findContactDetailsByEmail(email)).thenReturn(
+        Lists.newArrayList(contactDetailsMock1));
+    when(contactDetailsMock1.getId()).thenReturn(id);
+
+    // When.
+    List<FieldError> fieldErrors = validator.validateForBulk(dto);
+
+    // Then
+    assertThat("Unexpected number of field errors.", fieldErrors.size(), is(0));
   }
 
   @Test
