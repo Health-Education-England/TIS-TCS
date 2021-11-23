@@ -1,7 +1,7 @@
 package com.transformuk.hee.tis.tcs.service.api.validation;
 
 import static org.hamcrest.CoreMatchers.is;
-import static org.junit.Assert.assertThat;
+import static org.hamcrest.MatcherAssert.assertThat;
 import static org.mockito.Mockito.when;
 
 import com.google.common.collect.Lists;
@@ -10,28 +10,25 @@ import com.transformuk.hee.tis.reference.client.impl.ReferenceServiceImpl;
 import com.transformuk.hee.tis.tcs.api.dto.PostFundingDTO;
 import java.time.LocalDate;
 import java.util.ArrayList;
-import java.util.HashSet;
+import java.util.Collections;
 import java.util.List;
-import java.util.Set;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
-import org.mockito.runners.MockitoJUnitRunner;
+import org.mockito.junit.MockitoJUnitRunner;
 
 @RunWith(MockitoJUnitRunner.class)
 public class PostFundingValidatorTest {
 
-  String FUNDING_TYPE_EMPTY = "funding type is empty";
-  String FUNDING_TYPE_NOT_OTHER_ERROR = "funding type specified filled although type is not Other.";
-  String NOT_FOUND_ERROR = "funding type does not exist.";
-  String MULTIPLE_FOUND_ERROR = "found multiple funding type.";
   Long FUNDING_TYPE_ID = 2L;
   String FUNDING_TYPE_LABEL = "1234funding";
   String FUNDING_TYPE_LABEL2 = "5678funding";
   String FUNDING_TYPE_LABEL3 = "8910funding";
+  String FUNDING_TYPE_LABEL4 = "academicFunding";
   FundingTypeDTO fundingTypeDTO;
+  FundingTypeDTO academicFundingTypeDto;
   FundingTypeDTO multipleFundingTypeDTO;
   private List<PostFundingDTO> pfDTOs;
   private PostFundingDTO fundingTypeMissingDTO;
@@ -39,6 +36,7 @@ public class PostFundingValidatorTest {
   private PostFundingDTO validDTO;
   private PostFundingDTO fundingTypeFilledDTO;
   private PostFundingDTO multipleFundingTypesDTO;
+  private PostFundingDTO academicTypeDTO;
 
   @Mock
   private ReferenceServiceImpl referenceService;
@@ -68,33 +66,37 @@ public class PostFundingValidatorTest {
   public void setup() {
     fundingTypeDTO = new FundingTypeDTO();
     fundingTypeDTO.setId(FUNDING_TYPE_ID);
+    fundingTypeDTO.setAcademic(false);
     fundingTypeDTO.setLabel(FUNDING_TYPE_LABEL);
 
     multipleFundingTypeDTO = new FundingTypeDTO();
     multipleFundingTypeDTO.setId(FUNDING_TYPE_ID);
     multipleFundingTypeDTO.setLabel(FUNDING_TYPE_LABEL3);
 
-    Set<String> labels = new HashSet<>();
-    labels.add(FUNDING_TYPE_LABEL);
+    academicFundingTypeDto = new FundingTypeDTO();
+    academicFundingTypeDto.setId(FUNDING_TYPE_ID);
+    academicFundingTypeDto.setLabel(FUNDING_TYPE_LABEL4);
+    academicFundingTypeDto.setAcademic(true);
 
-    Set<String> labels2 = new HashSet<>();
-    labels2.add(FUNDING_TYPE_LABEL2);
-
-    Set<String> labels3 = new HashSet<>();
-    labels3.add(FUNDING_TYPE_LABEL3);
-
-    when(referenceService.findCurrentFundingTypesByLabelIn(labels))
-        .thenReturn(Lists.newArrayList(fundingTypeDTO));
-    when(referenceService.findCurrentFundingTypesByLabelIn(labels2))
-        .thenReturn(Lists.newArrayList(fundingTypeDTO));
-    when(referenceService.findCurrentFundingTypesByLabelIn(labels3))
+    when(referenceService.findCurrentFundingTypesByLabelIn(
+        Collections.singleton(FUNDING_TYPE_LABEL)))
+        .thenReturn(Collections.singletonList(fundingTypeDTO));
+    when(referenceService.findCurrentFundingTypesByLabelIn(
+        Collections.singleton(FUNDING_TYPE_LABEL2)))
+        .thenReturn(Collections.singletonList(fundingTypeDTO));
+    when(referenceService.findCurrentFundingTypesByLabelIn(
+        Collections.singleton(FUNDING_TYPE_LABEL3)))
         .thenReturn(Lists.newArrayList(multipleFundingTypeDTO, multipleFundingTypeDTO));
+    when(referenceService.findCurrentFundingTypesByLabelIn(
+        Collections.singleton(FUNDING_TYPE_LABEL4)))
+        .thenReturn(Collections.singletonList(academicFundingTypeDto));
 
     validDTO = buildMockFundingTypeDTO(1L, FUNDING_TYPE_LABEL, null, "foo");
     fundingTypeMissingDTO = buildMockFundingTypeDTO(1L, null, "info", "foo");
     notOtherDTO = buildMockFundingTypeDTO(1L, FUNDING_TYPE_LABEL, "info", "foo");
+    academicTypeDTO = buildMockFundingTypeDTO(1L, FUNDING_TYPE_LABEL4, "info", "foo");
     fundingTypeFilledDTO = buildMockFundingTypeDTO(1L, FUNDING_TYPE_LABEL2, null, "foo");
-    multipleFundingTypesDTO = buildMockFundingTypeDTO(1L, FUNDING_TYPE_LABEL3, null, "foo");
+    multipleFundingTypesDTO = buildMockFundingTypeDTO(1L, FUNDING_TYPE_LABEL3, "info", "foo");
   }
 
   @Test
@@ -102,29 +104,36 @@ public class PostFundingValidatorTest {
     pfDTOs = buildCheckedList(fundingTypeMissingDTO);
 
     List<PostFundingDTO> result = postFundingValidator.validateFundingType(pfDTOs);
-    assertThat(result.get(0).getMessageList().contains(FUNDING_TYPE_EMPTY), is(true));
+
+    assertThat(result.get(0).getMessageList().contains(PostFundingValidator.FUNDING_TYPE_EMPTY),
+        is(true));
   }
 
   @Test
-  public void testValidateFailsInfoGivenForFundingTypeNoOther() {
+  public void testValidateFailsInfoGivenForFundingTypeNotOtherOrNotAcademic() {
     pfDTOs = buildCheckedList(notOtherDTO);
     List<PostFundingDTO> result = postFundingValidator.validateFundingType(pfDTOs);
-    assertThat(result.get(0).getMessageList().contains(FUNDING_TYPE_NOT_OTHER_ERROR), is(true));
-
+    assertThat(
+        result.get(0).getMessageList()
+            .contains(PostFundingValidator.FUNDING_TYPE_NOT_OTHER_OR_NOT_ACADEMIC_ERROR),
+        is(true));
   }
 
   @Test
   public void testValidateFailsIfFundingTypeNotFound() {
     pfDTOs = buildCheckedList(fundingTypeFilledDTO);
     List<PostFundingDTO> result = postFundingValidator.validateFundingType(pfDTOs);
-    assertThat(result.get(0).getMessageList().contains(NOT_FOUND_ERROR), is(true));
+    assertThat(
+        result.get(0).getMessageList().contains(PostFundingValidator.FUNDING_TYPE_NOT_FOUND_ERROR),
+        is(true));
   }
 
   @Test
   public void testValidateFailsIfFundingTypeIsNotUnique() {
     pfDTOs = buildCheckedList(multipleFundingTypesDTO);
     List<PostFundingDTO> result = postFundingValidator.validateFundingType(pfDTOs);
-    assertThat(result.get(0).getMessageList().contains(MULTIPLE_FOUND_ERROR), is(true));
+    assertThat(result.get(0).getMessageList()
+        .contains(PostFundingValidator.FUNDING_TYPE_MULTIPLE_FOUND_ERROR), is(true));
   }
 
   @Test
@@ -134,4 +143,10 @@ public class PostFundingValidatorTest {
     assertThat(result.get(0).getMessageList().isEmpty(), is(true));
   }
 
+  @Test
+  public void testValidateOKInfoGivenForFundingTypeAcademic() {
+    pfDTOs = buildCheckedList(academicTypeDTO);
+    List<PostFundingDTO> result = postFundingValidator.validateFundingType(pfDTOs);
+    assertThat(result.get(0).getMessageList().isEmpty(), is(true));
+  }
 }

@@ -238,14 +238,17 @@ public class PersonValidator {
           .map(String::trim)
           .collect(Collectors.toList());
 
-      personDto.setRole(String.join(",", roles));
+      Map<String, String> rolesMatch = referenceService.rolesMatch(roles, true);
+      List<String> matchedRoles = rolesMatch.entrySet().stream()
+          .map(entry -> StringUtils.isEmpty(entry.getValue()) ? entry.getKey() : entry.getValue())
+          .collect(Collectors.toList());
 
-      Map<String, Boolean> rolesExist = referenceService.rolesExist(roles, true);
+      personDto.setRole(String.join(",", matchedRoles));
 
-      for (Entry<String, Boolean> roleExists : rolesExist.entrySet()) {
-        if (!roleExists.getValue()) {
+      for (Entry<String, String> roleMatch : rolesMatch.entrySet()) {
+        if (StringUtils.isEmpty(roleMatch.getValue())) {
           fieldErrors.add(new FieldError(PERSON_DTO_NAME, "role",
-              String.format("Role '%s' did not match a reference value.", roleExists.getKey())));
+              String.format("Role '%s' did not match a reference value.", roleMatch.getKey())));
         }
       }
     }
