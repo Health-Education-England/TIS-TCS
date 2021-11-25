@@ -32,6 +32,8 @@ CREATE TABLE `CurriculumMembershipInterim` (
   `curriculumEndDate` date DEFAULT NULL,
   `periodOfGrace` int(11) DEFAULT NULL,
   `amendedDate` datetime(3) NOT NULL DEFAULT CURRENT_TIMESTAMP(3),
+  `curriculumCompletionDate` date DEFAULT NULL,
+  `intrepidId` varchar(255) DEFAULT NULL,
   PRIMARY KEY (`id`),
   KEY `fk_curriculumMembershipInterim_programmeMembership_id` (`programmeMembershipId`),
   KEY `fk_curriculumMembershipInterim_curriculum_id` (`curriculumId`),
@@ -50,8 +52,11 @@ WHERE `id` IN (
 -- select count(*) from (
 -- select distinct personId, programmeStartDate, programmeEndDate, programmeId, programmeMembershipType from ProgrammeMembership) a;
 
-INSERT INTO `CurriculumMembershipInterim` (`id`, `programmeMembershipId`, `curriculumId`, `curriculumStartDate`, `curriculumEndDate`, `periodOfGrace`, `amendedDate`)
-SELECT `b`.`id` AS `id`, `a`.`id` AS `programmeMembershipId`, `curriculumId`, `curriculumStartDate`, `curriculumEndDate`, `periodOfGrace`, `b`.`amendedDate`
+INSERT INTO `CurriculumMembershipInterim` (
+	`id`, `programmeMembershipId`, `curriculumId`, `curriculumStartDate`, `curriculumEndDate`,
+    `periodOfGrace`, `amendedDate`, `curriculumCompletionDate`, `intrepidId`)
+SELECT `b`.`id` AS `id`, `a`.`id` AS `programmeMembershipId`, `curriculumId`, `curriculumStartDate`,
+    `curriculumEndDate`, `periodOfGrace`, `b`.`amendedDate`, `curriculumCompletionDate`, `intrepidId`
 FROM `ProgrammeMembershipInterim` `a`
 JOIN `ProgrammeMembership` `b`
 ON `a`.`personId` = `b`.`personId` AND `a`.`programmeId` = `b`.`programmeId` AND `a`.`programmeStartDate` = `b`.`programmeStartDate`
