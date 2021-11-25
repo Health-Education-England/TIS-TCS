@@ -32,13 +32,7 @@
     <dependency>
       <groupId>com.transformuk.hee</groupId>
       <artifactId>tis-security-jwt</artifactId>
-      <version>5.1.2</version>
-      <exclusions>
-        <exclusion>
-          <groupId>com.fasterxml.jackson.core</groupId>
-          <artifactId>jackson-annotations</artifactId>
-        </exclusion>
-      </exclusions>
+      <version>5.0.0</version>
     </dependency>
     <dependency>
       <groupId>com.transformuk.hee.tis</groupId>
