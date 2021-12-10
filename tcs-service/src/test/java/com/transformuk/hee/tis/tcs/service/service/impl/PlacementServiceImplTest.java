@@ -239,10 +239,11 @@ public class PlacementServiceImplTest {
 
     PlacementEsrEventDto placementEsrEventDto1 = mock(PlacementEsrEventDto.class);
     PlacementEsrEventDto placementEsrEventDto2 = mock(PlacementEsrEventDto.class);
-    when(placementEsrExportedDtoMapper.placementEsrEvenToPlacementEsrEventDto(event1Mock))
-        .thenReturn(placementEsrEventDto1);
-    when(placementEsrExportedDtoMapper.placementEsrEvenToPlacementEsrEventDto(event2Mock))
-        .thenReturn(placementEsrEventDto2);
+    Set<PlacementEsrEventDto> placementEsrEventDtos = new HashSet<>();
+    placementEsrEventDtos.add(placementEsrEventDto1);
+    placementEsrEventDtos.add(placementEsrEventDto2);
+    when(placementEsrExportedDtoMapper.placementEsrEventSetToPlacementEsrEventDtoSet(foundEvents))
+        .thenReturn(placementEsrEventDtos);
 
     testObj.populateEsrEventsForPlacementDetail(placementDetailsDto);
 
