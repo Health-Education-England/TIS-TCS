@@ -801,10 +801,12 @@ public class PlacementServiceImpl implements PlacementService {
   }
 
   protected void populateEsrEventForPlacementDetail(PlacementDetailsDTO placementDetailsDto) {
-    Set<PlacementEsrEvent> esrEvents = placementEsrEventRepository.findPlacementEsrEventByPlacementIdIn(
-        Collections.singletonList(placementDetailsDto.getId()));
+    Set<PlacementEsrEvent> esrEvents = placementEsrEventRepository.
+        findPlacementEsrEventByPlacementIdIn(Collections.singletonList(
+            placementDetailsDto.getId()));
     Set<PlacementEsrEventDto> esrEventDtos = new HashSet<>();
-    esrEvents.forEach(e -> esrEventDtos.add(placementEsrEventDtoMapper.placementEsrEvenToPlacementEsrEventDto(e)));
+    esrEvents.forEach(e -> esrEventDtos.add(
+        placementEsrEventDtoMapper.placementEsrEvenToPlacementEsrEventDto(e)));
     placementDetailsDto.setEsrEvents(esrEventDtos);
   }
 
