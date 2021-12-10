@@ -226,6 +226,33 @@ public class PlacementServiceImplTest {
   }
 
   @Test
+  public void populateEsrEventsShouldFindEventsForPlacementDetails() {
+    PlacementDetailsDTO placementDetailsDto = new PlacementDetailsDTO();
+    placementDetailsDto.setId(PLACEMENT_ID);
+
+    PlacementEsrEvent event1Mock = mock(PlacementEsrEvent.class);
+    PlacementEsrEvent event2Mock = mock(PlacementEsrEvent.class);
+    Set<PlacementEsrEvent> foundEvents = Sets.newHashSet(event1Mock, event2Mock);
+    when(placementEsrEventRepositoryMock
+        .findPlacementEsrEventByPlacementIdIn(Collections.singletonList(PLACEMENT_ID)))
+        .thenReturn(foundEvents);
+
+    PlacementEsrEventDto placementEsrEventDto1 = mock(PlacementEsrEventDto.class);
+    PlacementEsrEventDto placementEsrEventDto2 = mock(PlacementEsrEventDto.class);
+    when(placementEsrExportedDtoMapper.placementEsrEvenToPlacementEsrEventDto(event1Mock))
+        .thenReturn(placementEsrEventDto1);
+    when(placementEsrExportedDtoMapper.placementEsrEvenToPlacementEsrEventDto(event2Mock))
+        .thenReturn(placementEsrEventDto2);
+
+    testObj.populateEsrEventsForPlacementDetail(placementDetailsDto);
+
+    Set<PlacementEsrEventDto> esrEventDtos = placementDetailsDto.getEsrEvents();
+    Assert.assertNotNull(esrEventDtos);
+    Assert.assertTrue(esrEventDtos.contains(placementEsrEventDto1));
+    Assert.assertTrue(esrEventDtos.contains(placementEsrEventDto2));
+  }
+
+  @Test
   public void populateEsrEventsShouldFindEventsForThePlacementsAndAddToList() {
     PlacementSummaryDTO placement1 = new PlacementSummaryDTO(), placement2 = new PlacementSummaryDTO();
     placement1.setPlacementId(PLACEMENT_ID);

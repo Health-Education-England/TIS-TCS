@@ -562,7 +562,7 @@ public class PlacementServiceImpl implements PlacementService {
               new PlacementDetailSupervisorRowMapper(new PersonRepositoryImpl.PersonLiteRowMapper(),
                   personLiteMapper));
       placementDetailsDTO.setSupervisors(Sets.newHashSet(supervisors));
-      populateEsrEventForPlacementDetail(placementDetailsDTO);
+      populateEsrEventsForPlacementDetail(placementDetailsDTO);
     }
 
     return placementDetailsDTO;
@@ -800,7 +800,7 @@ public class PlacementServiceImpl implements PlacementService {
     return resultList;
   }
 
-  protected void populateEsrEventForPlacementDetail(PlacementDetailsDTO placementDetailsDto) {
+  protected void populateEsrEventsForPlacementDetail(PlacementDetailsDTO placementDetailsDto) {
     Set<PlacementEsrEvent> esrEvents = placementEsrEventRepository.
         findPlacementEsrEventByPlacementIdIn(Collections.singletonList(
             placementDetailsDto.getId()));
