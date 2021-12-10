@@ -14,7 +14,7 @@ public interface PlacementEsrEventDtoMapper {
       PlacementEsrEventDto placementEsrExportedDto);
 
   @Mapping(target = "exportedAt", source = "eventDateTime")
-  PlacementEsrEventDto placementEsrEvenToPlacementEsrEventDto(
+  PlacementEsrEventDto placementEsrEventToPlacementEsrEventDto(
       PlacementEsrEvent placementEsrEvent);
 
   Set<PlacementEsrEventDto> placementEsrEventSetToPlacementEsrEventDtoSet(

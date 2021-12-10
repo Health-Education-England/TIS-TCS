@@ -52,7 +52,7 @@ public class PlacementEsrEventDtoMapperTest {
     entity.setEventDateTime(FIXED_DATE);
 
     PlacementEsrEventDto result = placementEsrExportedDtoMapper
-        .placementEsrEvenToPlacementEsrEventDto(entity);
+        .placementEsrEventToPlacementEsrEventDto(entity);
 
     Assert.assertEquals(PlacementEsrEventStatus.EXPORTED, result.getStatus());
     Assert.assertEquals(POSITION_ID, result.getPositionId());

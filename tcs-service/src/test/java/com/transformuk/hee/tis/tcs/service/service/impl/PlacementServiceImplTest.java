@@ -277,9 +277,9 @@ public class PlacementServiceImplTest {
 
     PlacementEsrEventDto placementEsrEventDto1 = mock(PlacementEsrEventDto.class);
     PlacementEsrEventDto placementEsrEventDto2 = mock(PlacementEsrEventDto.class);
-    when(placementEsrExportedDtoMapper.placementEsrEvenToPlacementEsrEventDto(event1Mock))
+    when(placementEsrExportedDtoMapper.placementEsrEventToPlacementEsrEventDto(event1Mock))
         .thenReturn(placementEsrEventDto1);
-    when(placementEsrExportedDtoMapper.placementEsrEvenToPlacementEsrEventDto(event2Mock))
+    when(placementEsrExportedDtoMapper.placementEsrEventToPlacementEsrEventDto(event2Mock))
         .thenReturn(placementEsrEventDto2);
 
     testObj.populateEsrEventsForPlacementSummary(placements);

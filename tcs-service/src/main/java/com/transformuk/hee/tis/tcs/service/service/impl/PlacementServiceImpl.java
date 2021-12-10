@@ -824,7 +824,7 @@ public class PlacementServiceImpl implements PlacementService {
                 pl.setEsrEvents(new HashSet<>());
               }
               pl.getEsrEvents().add(placementEsrEventDtoMapper
-                  .placementEsrEvenToPlacementEsrEventDto(esrEvent));
+                  .placementEsrEventToPlacementEsrEventDto(esrEvent));
             });
       }
     }
