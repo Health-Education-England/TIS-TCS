@@ -95,6 +95,8 @@ public class PlacementDetailsDTO implements Serializable {
 
   private LifecycleState lifecycleState;
 
+  private Set<PlacementEsrEventDto> esrEvents;
+
   @Override
   public boolean equals(final Object o) {
     if (this == o) {
