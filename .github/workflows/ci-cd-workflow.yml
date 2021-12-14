@@ -217,3 +217,19 @@ jobs:
           service: tis-tcs
           cluster: tis-prod
           wait-for-service-stability: true
+
+      - name: Fill in the new image ID in the Amazon ECS task definition for NIMDTA
+        id: task-def
+        uses: aws-actions/amazon-ecs-render-task-definition@v1
+        with:
+          task-definition: .aws/tis-tcs-nimdta.json
+          container-name: tis-tcs
+          image: ${{ steps.login-ecr.outputs.registry }}/tcs:${{ github.sha }}
+
+      - name: Deploy Amazon ECS task definition for NIMDTA
+        uses: aws-actions/amazon-ecs-deploy-task-definition@v1
+        with:
+          task-definition: ${{ steps.task-def.outputs.task-definition }}
+          service: tis-tcs
+          cluster: tis-nimdta
+          wait-for-service-stability: true
