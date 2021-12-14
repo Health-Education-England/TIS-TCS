@@ -218,15 +218,31 @@ jobs:
           cluster: tis-prod
           wait-for-service-stability: true
 
-      - name: Fill in the new image ID in the Amazon ECS task definition for NIMDTA
+  deploy-nimdta:
+    name: Deploy NIMDTA definition
+    environment: nimdta
+    needs: deploy-pre-prod
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v2
+      - name: Configure AWS credentials
+        uses: aws-actions/configure-aws-credentials@v1
+        with:
+          aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID }}
+          aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+          aws-region: eu-west-2
+      - name: Log in to Amazon ECR
+        id: login-ecr
+        uses: aws-actions/amazon-ecr-login@v1
+      - name: Fill in the new image ID in the Amazon ECS task definition
         id: task-def
         uses: aws-actions/amazon-ecs-render-task-definition@v1
         with:
           task-definition: .aws/tis-tcs-nimdta.json
           container-name: tis-tcs
           image: ${{ steps.login-ecr.outputs.registry }}/tcs:${{ github.sha }}
-
-      - name: Deploy Amazon ECS task definition for NIMDTA
+      - name: Deploy Amazon ECS task definition
         uses: aws-actions/amazon-ecs-deploy-task-definition@v1
         with:
           task-definition: ${{ steps.task-def.outputs.task-definition }}
