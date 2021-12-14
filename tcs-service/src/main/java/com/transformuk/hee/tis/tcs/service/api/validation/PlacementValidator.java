@@ -15,6 +15,8 @@ import java.time.LocalDate;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
+import java.util.Objects;
+import java.util.Optional;
 import java.util.Set;
 import org.apache.commons.collections4.CollectionUtils;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -57,6 +59,7 @@ public class PlacementValidator {
     // TODO add specialties and clinical supervisors
     //fieldErrors.addAll(checkSpecialties(placementDetailsDTO));
     fieldErrors.addAll(checkPersons(placementDetailsDTO));
+    fieldErrors.addAll(checkPlacementEsrStatusForNpnUpdate(placementDetailsDTO));
 
     if (!fieldErrors.isEmpty()) {
       final BeanPropertyBindingResult bindingResult = new BeanPropertyBindingResult(
@@ -203,5 +206,25 @@ public class PlacementValidator {
       fieldErrors.add(new FieldError(PLACEMENT_DTO_NAME, "specialties",
           String.format("Only one Specialty of type %s allowed", PostSpecialtyType.SUB_SPECIALTY)));
     }
+  }
+
+  private List<FieldError> checkPlacementEsrStatusForNpnUpdate(final PlacementDetailsDTO placementDetailsDTO) {
+    final List<FieldError> fieldErrors = new ArrayList<>();
+
+    Optional<Placement> dbPlacement = placementRepository.findPlacementById(
+        placementDetailsDTO.getId());
+
+    if (!dbPlacement.isPresent()) {
+      return fieldErrors;
+    }
+    if (placementDetailsDTO.getEsrEvents().size() > 0) {
+      String oldNpn = dbPlacement.get().getPost().getNationalPostNumber();
+      String newNpn = postRepository.findPostById(placementDetailsDTO.getPostId()).getNationalPostNumber();
+      if (!Objects.equals(newNpn, oldNpn)) {
+        fieldErrors.add(new FieldError(PLACEMENT_DTO_NAME, "nationalPostNumber",
+            "National Post Number can't be edited for Placement exported to ESR"));
+      }
+    }
+    return fieldErrors;
   }
 }
