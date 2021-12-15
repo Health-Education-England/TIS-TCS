@@ -208,11 +208,11 @@ public class PlacementValidator {
     }
   }
 
-  private List<FieldError> checkNpnUpdateIsAllowed(final PlacementDetailsDTO placementDetailsDTO) {
+  private List<FieldError> checkNpnUpdateIsAllowed(final PlacementDetailsDTO placementDetailsDto) {
     final List<FieldError> fieldErrors = new ArrayList<>();
 
     Optional<Placement> dbPlacement = placementRepository.findPlacementById(
-        placementDetailsDTO.getId());
+        placementDetailsDto.getId());
 
     if (!dbPlacement.isPresent()) {
       return fieldErrors;
@@ -220,7 +220,7 @@ public class PlacementValidator {
 
     if (!dbPlacement.get().getPlacementEsrEvents().isEmpty()) {
       String oldNpn = dbPlacement.get().getPost().getNationalPostNumber();
-      String newNpn = placementDetailsDTO.getNationalPostNumber();
+      String newNpn = placementDetailsDto.getNationalPostNumber();
       if (!StringUtils.equals(newNpn, oldNpn)) {
         fieldErrors.add(new FieldError(PLACEMENT_DTO_NAME, "nationalPostNumber",
             "National Post Number can't be edited for Placement exported to ESR"));
