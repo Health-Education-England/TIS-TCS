@@ -14,9 +14,7 @@ import com.google.common.collect.Sets;
 import com.transformuk.hee.tis.reference.client.impl.ReferenceServiceImpl;
 import com.transformuk.hee.tis.tcs.api.dto.PlacementCommentDTO;
 import com.transformuk.hee.tis.tcs.api.dto.PlacementDetailsDTO;
-import com.transformuk.hee.tis.tcs.api.dto.PlacementEsrEventDto;
 import com.transformuk.hee.tis.tcs.api.dto.PlacementSpecialtyDTO;
-import com.transformuk.hee.tis.tcs.api.enumeration.PlacementEsrEventStatus;
 import com.transformuk.hee.tis.tcs.api.enumeration.PostSpecialtyType;
 import com.transformuk.hee.tis.tcs.service.model.Placement;
 import com.transformuk.hee.tis.tcs.service.model.PlacementEsrEvent;
@@ -26,7 +24,6 @@ import com.transformuk.hee.tis.tcs.service.repository.PersonRepository;
 import com.transformuk.hee.tis.tcs.service.repository.PlacementRepository;
 import com.transformuk.hee.tis.tcs.service.repository.PostRepository;
 import com.transformuk.hee.tis.tcs.service.repository.SpecialtyRepository;
-import gherkin.lexer.Pl;
 import java.math.BigDecimal;
 import java.time.LocalDate;
 import java.util.Arrays;
@@ -314,22 +311,20 @@ public class PlacementValidatorTest {
     dbPost.setId(DEFAULT_POST);
     dbPost.setNationalPostNumber(DEFAULT_NATIONAL_POST_NUMBER);
 
+    PlacementEsrEvent exportedEvent = new PlacementEsrEvent();
+    Set<PlacementEsrEvent> esrEvents = new HashSet<>(Arrays.asList(exportedEvent));
+
     Placement dbPlacement = new Placement();
     dbPlacement.setId(PLACEMENT_ID);
     dbPlacement.setPost(dbPost);
-
-    // arrange PlacementDto with the fields to be updated (different NPN)
-    PlacementEsrEventDto exportedEvent = new PlacementEsrEventDto();
-    Set<PlacementEsrEventDto> esrEvents = new HashSet<>(Arrays.asList(exportedEvent));
+    dbPlacement.setPlacementEsrEvents(esrEvents);
 
     placementDTO.setId(PLACEMENT_ID);
     placementDTO.setNationalPostNumber("NEW_NATIONAL_POST_NUMBER");
-    placementDTO.setEsrEvents(esrEvents);
 
     // stubs
     OwnerProjection ownerProjection = Mockito.mock(OwnerProjection.class);
     given(ownerProjection.getNationalPostNumber()).willReturn(placementDTO.getNationalPostNumber());
-    given(postRepository.findPostById(DEFAULT_POST)).willReturn(ownerProjection);
     given(placementRepository.findPlacementById(PLACEMENT_ID)).willReturn(Optional.of(dbPlacement));
 
     // act
