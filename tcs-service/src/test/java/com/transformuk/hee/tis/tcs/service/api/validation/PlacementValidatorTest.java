@@ -319,6 +319,7 @@ public class PlacementValidatorTest {
     dbPlacement.setPost(dbPost);
     dbPlacement.setPlacementEsrEvents(esrEvents);
 
+    // arrange new PlacementDetailsDto being passed in by the user
     placementDTO.setId(PLACEMENT_ID);
     placementDTO.setNationalPostNumber("NEW_NATIONAL_POST_NUMBER");
 
