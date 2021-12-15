@@ -218,7 +218,7 @@ public class PlacementValidator {
       return fieldErrors;
     }
 
-    if (dbPlacement.get().getPlacementEsrEvents() != null) {
+    if (!dbPlacement.get().getPlacementEsrEvents().isEmpty()) {
       String oldNpn = dbPlacement.get().getPost().getNationalPostNumber();
       String newNpn = placementDetailsDTO.getNationalPostNumber();
       if (!StringUtils.equals(newNpn, oldNpn)) {
