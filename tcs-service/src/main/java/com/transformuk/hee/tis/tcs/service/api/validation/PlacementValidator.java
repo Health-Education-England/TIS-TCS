@@ -218,13 +218,11 @@ public class PlacementValidator {
       return fieldErrors;
     }
 
-    if (!dbPlacement.get().getPlacementEsrEvents().isEmpty()) {
-      String oldNpn = dbPlacement.get().getPost().getNationalPostNumber();
-      String newNpn = placementDetailsDto.getNationalPostNumber();
-      if (!StringUtils.equals(newNpn, oldNpn)) {
-        fieldErrors.add(new FieldError(PLACEMENT_DTO_NAME, "nationalPostNumber",
-            "National Post Number can't be edited for Placement exported to ESR"));
-      }
+    String oldNpn = dbPlacement.get().getPost().getNationalPostNumber();
+    String newNpn = placementDetailsDto.getNationalPostNumber();
+    if (!StringUtils.equals(newNpn, oldNpn) && !dbPlacement.get().getPlacementEsrEvents().isEmpty()) {
+      fieldErrors.add(new FieldError(PLACEMENT_DTO_NAME, "nationalPostNumber",
+          "National Post Number can't be edited for Placement exported to ESR"));
     }
 
     return fieldErrors;
