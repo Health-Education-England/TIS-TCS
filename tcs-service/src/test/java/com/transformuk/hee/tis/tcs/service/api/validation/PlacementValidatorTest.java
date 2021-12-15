@@ -324,8 +324,6 @@ public class PlacementValidatorTest {
     placementDTO.setNationalPostNumber("NEW_NATIONAL_POST_NUMBER");
 
     // stubs
-    OwnerProjection ownerProjection = Mockito.mock(OwnerProjection.class);
-    given(ownerProjection.getNationalPostNumber()).willReturn(placementDTO.getNationalPostNumber());
     given(placementRepository.findPlacementById(PLACEMENT_ID)).willReturn(Optional.of(dbPlacement));
 
     // act
