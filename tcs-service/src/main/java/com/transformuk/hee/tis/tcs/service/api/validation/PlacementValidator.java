@@ -59,7 +59,7 @@ public class PlacementValidator {
     // TODO add specialties and clinical supervisors
     //fieldErrors.addAll(checkSpecialties(placementDetailsDTO));
     fieldErrors.addAll(checkPersons(placementDetailsDTO));
-    if (placementDetailsDTO.getEsrEvents().size() > 0) {
+    if (placementDetailsDTO.getEsrEvents() != null) {
       fieldErrors.addAll(checkNpnUpdateIsAllowed(placementDetailsDTO));
     }
 
