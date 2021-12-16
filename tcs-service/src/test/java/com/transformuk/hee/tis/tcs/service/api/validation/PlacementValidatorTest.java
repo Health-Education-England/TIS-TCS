@@ -17,13 +17,19 @@ import com.transformuk.hee.tis.tcs.api.dto.PlacementDetailsDTO;
 import com.transformuk.hee.tis.tcs.api.dto.PlacementSpecialtyDTO;
 import com.transformuk.hee.tis.tcs.api.enumeration.PostSpecialtyType;
 import com.transformuk.hee.tis.tcs.service.model.Placement;
+import com.transformuk.hee.tis.tcs.service.model.PlacementEsrEvent;
+import com.transformuk.hee.tis.tcs.service.model.Post;
+import com.transformuk.hee.tis.tcs.service.repository.OwnerProjection;
 import com.transformuk.hee.tis.tcs.service.repository.PersonRepository;
 import com.transformuk.hee.tis.tcs.service.repository.PlacementRepository;
 import com.transformuk.hee.tis.tcs.service.repository.PostRepository;
 import com.transformuk.hee.tis.tcs.service.repository.SpecialtyRepository;
 import java.math.BigDecimal;
 import java.time.LocalDate;
+import java.util.Arrays;
+import java.util.HashSet;
 import java.util.Optional;
+import java.util.Set;
 import org.assertj.core.util.Maps;
 import org.junit.Before;
 import org.junit.Ignore;
@@ -31,6 +37,7 @@ import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
+import org.mockito.Mockito;
 import org.mockito.runners.MockitoJUnitRunner;
 
 @RunWith(MockitoJUnitRunner.class)
@@ -48,6 +55,7 @@ public class PlacementValidatorTest {
   private static final LocalDate DEFAULT_DATE_TO = LocalDate.ofEpochDay(0L);
   private static final String DEFAULT_PLACEMENT_TYPE = "OOPT";
   private static final BigDecimal DEFAULT_PLACEMENT_WHOLE_TIME_EQUIVALENT = new BigDecimal(1);
+  private static final String DEFAULT_NATIONAL_POST_NUMBER = "NATIONAL_POST_NUMBER";
   private PlacementDetailsDTO placementDTO;
 
   @Mock
@@ -293,6 +301,32 @@ public class PlacementValidatorTest {
     PlacementCommentDTO placementCommentDTO2 = new PlacementCommentDTO();
     placementCommentDTO2.setBody("comment2");
     placementDTO.setComments(Sets.newHashSet(placementCommentDTO1, placementCommentDTO2));
+    placementValidator.validate(placementDTO);
+  }
+
+  @Test(expected = ValidationException.class)
+  public void validateNpnForPlacementExportedToEsr() throws ValidationException {
+    // arrange old Placement already present in DB
+    Post dbPost = new Post();
+    dbPost.setId(DEFAULT_POST);
+    dbPost.setNationalPostNumber(DEFAULT_NATIONAL_POST_NUMBER);
+
+    PlacementEsrEvent exportedEvent = new PlacementEsrEvent();
+    Set<PlacementEsrEvent> esrEvents = new HashSet<>(Arrays.asList(exportedEvent));
+
+    Placement dbPlacement = new Placement();
+    dbPlacement.setId(PLACEMENT_ID);
+    dbPlacement.setPost(dbPost);
+    dbPlacement.setPlacementEsrEvents(esrEvents);
+
+    // arrange new PlacementDetailsDto being passed in by the user
+    placementDTO.setId(PLACEMENT_ID);
+    placementDTO.setNationalPostNumber("NEW_NATIONAL_POST_NUMBER");
+
+    // stubs
+    given(placementRepository.findPlacementById(PLACEMENT_ID)).willReturn(Optional.of(dbPlacement));
+
+    // act
     placementValidator.validate(placementDTO);
   }
 
