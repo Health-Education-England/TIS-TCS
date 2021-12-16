@@ -219,7 +219,8 @@ public class PlacementValidator {
     }
 
     String oldNpn = dbPlacement.get().getPost().getNationalPostNumber();
-    String newNpn = postRepository.findPostById(placementDetailsDto.getPostId()).getNationalPostNumber();
+    String newNpn = postRepository.findPostById(placementDetailsDto.getPostId())
+        .getNationalPostNumber();
     if (!StringUtils.equals(newNpn, oldNpn) && !dbPlacement.get().getPlacementEsrEvents()
         .isEmpty()) {
       fieldErrors.add(new FieldError(PLACEMENT_DTO_NAME, "nationalPostNumber",
