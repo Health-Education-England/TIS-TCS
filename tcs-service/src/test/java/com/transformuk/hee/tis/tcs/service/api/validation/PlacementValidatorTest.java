@@ -56,6 +56,7 @@ public class PlacementValidatorTest {
   private static final String DEFAULT_PLACEMENT_TYPE = "OOPT";
   private static final BigDecimal DEFAULT_PLACEMENT_WHOLE_TIME_EQUIVALENT = new BigDecimal(1);
   private static final String DEFAULT_NATIONAL_POST_NUMBER = "NATIONAL_POST_NUMBER";
+  private static final String UPDATED_NATIONAL_POST_NUMBER = "UPDATED_NATIONAL_POST_NUMBER";
   private PlacementDetailsDTO placementDTO;
 
   @Mock
@@ -305,26 +306,54 @@ public class PlacementValidatorTest {
   }
 
   @Test(expected = ValidationException.class)
-  public void validateNpnForPlacementExportedToEsr() throws ValidationException {
-    // arrange old Placement already present in DB
-    Post dbPost = new Post();
-    dbPost.setId(DEFAULT_POST);
-    dbPost.setNationalPostNumber(DEFAULT_NATIONAL_POST_NUMBER);
+  public void validateNpnForPlacementExportedToEsrWhenUpdatingViaBulkUpload() throws ValidationException {
+    // when updating a Placement's NPN via bulk-upload, a PlacementDetailsDto is sent to TCS's
+    // updatePlacement() endpoint with a new postId but with the old NPN.
+    placementDTO.setNationalPostNumber(DEFAULT_NATIONAL_POST_NUMBER); // old NPN
+    placementDTO.setPostId(456L); // new PostId
+    placementDTO.setId(PLACEMENT_ID);
 
     PlacementEsrEvent exportedEvent = new PlacementEsrEvent();
     Set<PlacementEsrEvent> esrEvents = new HashSet<>(Arrays.asList(exportedEvent));
-
+    Post post = new Post();
+    post.setId(DEFAULT_POST);
+    post.setNationalPostNumber(DEFAULT_NATIONAL_POST_NUMBER);
     Placement dbPlacement = new Placement();
-    dbPlacement.setId(PLACEMENT_ID);
-    dbPlacement.setPost(dbPost);
     dbPlacement.setPlacementEsrEvents(esrEvents);
+    dbPlacement.setPost(post);
 
-    // arrange new PlacementDetailsDto being passed in by the user
-    placementDTO.setId(PLACEMENT_ID);
-    placementDTO.setNationalPostNumber("NEW_NATIONAL_POST_NUMBER");
-
-    // stubs
     given(placementRepository.findPlacementById(PLACEMENT_ID)).willReturn(Optional.of(dbPlacement));
+
+    OwnerProjection ownerProjection = Mockito.mock(OwnerProjection.class);
+    given(ownerProjection.getNationalPostNumber()).willReturn(UPDATED_NATIONAL_POST_NUMBER);
+    given(postRepository.findPostById(456L)).willReturn(ownerProjection);
+
+    // act
+    placementValidator.validate(placementDTO);
+  }
+
+  @Test(expected = ValidationException.class)
+  public void validateNpnForPlacementExportedToEsrWhenUpdatingViaPlacementPage() throws ValidationException {
+    // when updating a Placement's NPN via its page on the FE, a PlacementDetailsDto is sent to TCS's
+    // updatePlacement() endpoint with a new postId and a new NPN
+    placementDTO.setNationalPostNumber(UPDATED_NATIONAL_POST_NUMBER); // new NPN
+    placementDTO.setPostId(456L); // new PostId
+    placementDTO.setId(PLACEMENT_ID);
+
+    PlacementEsrEvent exportedEvent = new PlacementEsrEvent();
+    Set<PlacementEsrEvent> esrEvents = new HashSet<>(Arrays.asList(exportedEvent));
+    Post post = new Post();
+    post.setId(DEFAULT_POST);
+    post.setNationalPostNumber(DEFAULT_NATIONAL_POST_NUMBER);
+    Placement dbPlacement = new Placement();
+    dbPlacement.setPlacementEsrEvents(esrEvents);
+    dbPlacement.setPost(post);
+
+    given(placementRepository.findPlacementById(PLACEMENT_ID)).willReturn(Optional.of(dbPlacement));
+
+    OwnerProjection ownerProjection = Mockito.mock(OwnerProjection.class);
+    given(ownerProjection.getNationalPostNumber()).willReturn(UPDATED_NATIONAL_POST_NUMBER);
+    given(postRepository.findPostById(456L)).willReturn(ownerProjection);
 
     // act
     placementValidator.validate(placementDTO);
