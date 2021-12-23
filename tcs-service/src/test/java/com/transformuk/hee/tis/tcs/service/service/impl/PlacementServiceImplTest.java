@@ -815,6 +815,39 @@ public class PlacementServiceImplTest {
   }
 
   @Test
+  public void isEligibleForChangedWholeTimeEquivalentShouldDealWithNullCurrentWte() {
+    LocalDate dateFiveMonthsAgo = LocalDate.now().minusMonths(5);
+    Long existingPlacementId = 1L;
+    BigDecimal updatedWholeTimeEquivalent = new BigDecimal(0.5);
+
+    Placement currentPlacement = new Placement();
+    currentPlacement.setId(existingPlacementId);
+    currentPlacement.setDateFrom(dateFiveMonthsAgo);
+    currentPlacement.setLifecycleState(APPROVED);
+    currentPlacement.setPlacementWholeTimeEquivalent(null);
+
+    PlacementDetailsDTO updatedPlacementDetails = new PlacementDetailsDTO();
+    updatedPlacementDetails.setId(existingPlacementId);
+    updatedPlacementDetails.setDateFrom(dateFiveMonthsAgo);
+    updatedPlacementDetails.setDateTo(dateFiveMonthsAgo);
+    updatedPlacementDetails.setWholeTimeEquivalent(updatedWholeTimeEquivalent);
+    updatedPlacementDetails.setWholeTimeEquivalent(updatedWholeTimeEquivalent);
+    updatedPlacementDetails.setLifecycleState(APPROVED);
+
+    PlacementLog placementLog = new PlacementLog();
+    placementLog.setPlacementId(existingPlacementId);
+    placementLog.setLifecycleState(APPROVED);
+    placementLog.setDateFrom(dateFiveMonthsAgo);
+    placementLog.setDateTo(dateFiveMonthsAgo);
+
+    boolean eligibleForCurrentTraineeWteChangeNotification = testObj
+        .isEligibleForCurrentTraineeWteChangeNotification(currentPlacement, updatedPlacementDetails,
+            placementLog);
+
+    Assert.assertTrue(eligibleForCurrentTraineeWteChangeNotification);
+  }
+
+  @Test
   public void markPlacementAsEsrExportedShouldFindPlacementAndCreateNewEventAgainstIt() {
     PlacementEsrEvent placementEsrEventMock = mock(PlacementEsrEvent.class);
     PlacementEsrEventDto placementEsrExportedDtoMock = mock(PlacementEsrEventDto.class);
