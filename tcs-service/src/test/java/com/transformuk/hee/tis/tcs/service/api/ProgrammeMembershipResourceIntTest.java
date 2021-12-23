@@ -32,6 +32,7 @@ import java.util.List;
 import javax.persistence.EntityManager;
 import org.junit.Before;
 import org.junit.Test;
+import org.junit.jupiter.api.AfterAll;
 import org.junit.runner.RunWith;
 import org.mockito.MockitoAnnotations;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -39,6 +40,7 @@ import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.data.web.PageableHandlerMethodArgumentResolver;
 import org.springframework.http.MediaType;
 import org.springframework.http.converter.json.MappingJackson2HttpMessageConverter;
+import org.springframework.test.annotation.DirtiesContext;
 import org.springframework.test.context.junit4.SpringRunner;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.setup.MockMvcBuilders;
@@ -341,7 +343,7 @@ public class ProgrammeMembershipResourceIntTest {
     programmeMembership
         .setCurriculumId(programme.getCurricula().iterator().next().getCurriculum().getId());
     programmeMembership.setRotation(rotation);
-    // Create the CurriculumMembership
+    // Create the ProgrammeMembership
     ProgrammeMembershipDTO programmeMembershipDTO = programmeMembershipMapper
         .toDto(programmeMembership);
     restProgrammeMembershipMockMvc.perform(post("/api/programme-memberships")
@@ -810,27 +812,27 @@ public class ProgrammeMembershipResourceIntTest {
 
   @Test
   @Transactional
+  @DirtiesContext(methodMode = DirtiesContext.MethodMode.BEFORE_METHOD)
+  @AfterAll
   public void deleteProgrammeAndCurriculumMemberships() throws Exception {
     // Initialize the database
     personRepository.saveAndFlush(person);
     curriculumMembership.setPerson(person);
-    curriculumMembership.setId(RECORD_ID);
     curriculumMembershipRepository.deleteAll();
     curriculumMembershipRepository.saveAndFlush(curriculumMembership);
     int databaseCmSizeBeforeDelete = curriculumMembershipRepository.findAll().size();
-    assertThat(databaseCmSizeBeforeDelete).isEqualTo(1);
+    List<CurriculumMembership> cms = curriculumMembershipRepository.findAll();
 
     //deprecated: when the programmeMembershipRepository is no longer updated in parallel,
     //these lines should be removed
     programmeMembership.setPerson(person);
-    programmeMembership.setId(RECORD_ID);
     programmeMembershipRepository.deleteAll();
     programmeMembershipRepository.saveAndFlush(programmeMembership);
     int databasePmSizeBeforeDelete = programmeMembershipRepository.findAll().size();
 
-    // Get the curriculumMembership
+    // Delete the first record, which will have id 1 because of the @DirtiesContext annotation
     restProgrammeMembershipMockMvc
-        .perform(delete("/api/programme-memberships/{id}", curriculumMembership.getId())
+        .perform(delete("/api/programme-memberships/{id}", RECORD_ID)
             .accept(MediaType.APPLICATION_JSON))
         .andExpect(status().isOk());
 
