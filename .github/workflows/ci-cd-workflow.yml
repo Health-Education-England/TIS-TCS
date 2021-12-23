@@ -126,7 +126,10 @@ jobs:
 
       - name: Publish artifacts
         continue-on-error: true
-        run: mvn --batch-mode deploy -DskipTests
+        run: |
+          mvn --batch-mode deploy -DskipTests --file tcs-api/pom.xml
+          mvn --batch-mode deploy -DskipTests --file tcs-client/pom.xml
+          mvn --batch-mode deploy -DskipTests --file tcs-persistence/pom.xml
 
       - name: Configure AWS credentials
         uses: aws-actions/configure-aws-credentials@v1
