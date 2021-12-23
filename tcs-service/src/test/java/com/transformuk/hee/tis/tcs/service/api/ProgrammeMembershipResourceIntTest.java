@@ -821,7 +821,6 @@ public class ProgrammeMembershipResourceIntTest {
     curriculumMembershipRepository.deleteAll();
     curriculumMembershipRepository.saveAndFlush(curriculumMembership);
     int databaseCmSizeBeforeDelete = curriculumMembershipRepository.findAll().size();
-    List<CurriculumMembership> cms = curriculumMembershipRepository.findAll();
 
     //deprecated: when the programmeMembershipRepository is no longer updated in parallel,
     //these lines should be removed
