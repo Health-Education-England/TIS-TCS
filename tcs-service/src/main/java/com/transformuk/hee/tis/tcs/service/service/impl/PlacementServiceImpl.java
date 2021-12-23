@@ -1010,11 +1010,11 @@ public class PlacementServiceImpl implements PlacementService {
     LocalDate currentDateFrom = latestApprovedLog.getDateFrom();
 
     return
-        ((updatedPlacementDetails.getWholeTimeEquivalent() != null
-            && (currentPlacement.getPlacementWholeTimeEquivalent() == null
-            || updatedPlacementDetails.getWholeTimeEquivalent()
-                .compareTo(currentPlacement.getPlacementWholeTimeEquivalent()) != 0))) &&
-            ((currentDateFrom != null && currentDateFrom
+        (updatedPlacementDetails.getWholeTimeEquivalent() != null && (
+            currentPlacement.getPlacementWholeTimeEquivalent() == null
+                || updatedPlacementDetails.getWholeTimeEquivalent()
+                .compareTo(currentPlacement.getPlacementWholeTimeEquivalent()) != 0))
+            && ((currentDateFrom != null && currentDateFrom
                 .isBefore(LocalDate.now(clock).plusWeeks(13))) ||
                 (updatedPlacementDetails.getDateFrom() != null && updatedPlacementDetails
                     .getDateFrom()
