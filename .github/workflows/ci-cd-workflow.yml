@@ -125,6 +125,7 @@ jobs:
           cp ./tcs-service/target/tcs-service-*.war ./tcs-service/target/app.jar
 
       - name: Publish artifacts
+        continue-on-error: true
         run: mvn --batch-mode deploy -DskipTests
 
       - name: Configure AWS credentials
