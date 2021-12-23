@@ -6,7 +6,7 @@
 
   <groupId>com.transformuk.hee.tis</groupId>
   <artifactId>tcs-client</artifactId>
-  <version>5.13.4</version>
+  <version>5.13.5</version>
   <packaging>jar</packaging>
   <dependencies>
     <dependency>
@@ -37,7 +37,7 @@
     <dependency>
       <groupId>com.transformuk.hee.tis</groupId>
       <artifactId>tcs-api</artifactId>
-      <version>6.14.1</version>
+      <version>6.14.2</version>
     </dependency>
     <dependency>
       <groupId>com.transformuk.hee</groupId>
@@ -106,4 +106,12 @@
       </plugin>
     </plugins>
   </build>
+
+  <distributionManagement>
+    <repository>
+      <id>codeartifact</id>
+      <name>CodeArtifact</name>
+      <url>https://hee-430723991443.d.codeartifact.eu-west-1.amazonaws.com/maven/Health-Education-England/</url>
+    </repository>
+  </distributionManagement>
 </project>
