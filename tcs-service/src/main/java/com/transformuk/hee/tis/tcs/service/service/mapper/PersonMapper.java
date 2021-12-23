@@ -34,7 +34,7 @@ public class PersonMapper {
   private RightToWorkMapper rightToWorkMapper;
 
   @Autowired
-  private ProgrammeMembershipMapper programmeMembershipMapper;
+  private CurriculumMembershipMapper curriculumMembershipMapper;
 
   @Autowired
   private TrainerApprovalMapper trainerApprovalMapper;
@@ -65,8 +65,8 @@ public class PersonMapper {
     }
 
     if (dto.getProgrammeMemberships() != null) {
-      person.setProgrammeMemberships(new HashSet<>(programmeMembershipMapper
-          .programmeMembershipDTOsToProgrammeMemberships(
+      person.setProgrammeMemberships(new HashSet<>(curriculumMembershipMapper
+          .programmeMembershipDTOsToCurriculumMemberships(
               new ArrayList<>(dto.getProgrammeMemberships()))));
     }
 
@@ -114,8 +114,8 @@ public class PersonMapper {
     personDTO.setRegulator(entity.getRegulator());
 
     if (entity.getProgrammeMemberships() != null) {
-      personDTO.setProgrammeMemberships(new HashSet<>(programmeMembershipMapper
-          .programmeMembershipsToProgrammeMembershipDTOs(
+      personDTO.setProgrammeMemberships(new HashSet<>(curriculumMembershipMapper
+          .curriculumMembershipsToProgrammeMembershipDTOs(
               new ArrayList<>(entity.getProgrammeMemberships()))));
     }
 

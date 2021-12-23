@@ -94,7 +94,7 @@ public class Person implements Serializable {
 
   @OneToMany(mappedBy = "person", cascade = {CascadeType.REMOVE,
       CascadeType.REFRESH}, orphanRemoval = true)
-  private Set<ProgrammeMembership> programmeMemberships = new HashSet<>();
+  private Set<CurriculumMembership> programmeMemberships = new HashSet<>();
 
   @OneToOne
   @JoinColumn(unique = true, name = "id")
@@ -197,7 +197,7 @@ public class Person implements Serializable {
     return this;
   }
 
-  public Person programmeMemberships(Set<ProgrammeMembership> programmeMemberships) {
+  public Person programmeMemberships(Set<CurriculumMembership> programmeMemberships) {
     this.programmeMemberships = programmeMemberships;
     return this;
   }

@@ -17,14 +17,9 @@ import com.transformuk.hee.tis.tcs.service.model.Curriculum;
 import com.transformuk.hee.tis.tcs.service.model.Programme;
 import com.transformuk.hee.tis.tcs.service.model.ProgrammeMembership;
 import com.transformuk.hee.tis.tcs.service.model.TrainingNumber;
-import com.transformuk.hee.tis.tcs.service.repository.CurriculumRepository;
-import com.transformuk.hee.tis.tcs.service.repository.PersonRepository;
-import com.transformuk.hee.tis.tcs.service.repository.ProgrammeMembershipRepository;
-import com.transformuk.hee.tis.tcs.service.repository.ProgrammeRepository;
-import com.transformuk.hee.tis.tcs.service.service.mapper.CurriculumMapper;
-import com.transformuk.hee.tis.tcs.service.service.mapper.CurriculumMapperImpl;
-import com.transformuk.hee.tis.tcs.service.service.mapper.ProgrammeMembershipMapper;
-import com.transformuk.hee.tis.tcs.service.service.mapper.SpecialtyMapperImpl;
+import com.transformuk.hee.tis.tcs.service.repository.*;
+import com.transformuk.hee.tis.tcs.service.service.mapper.*;
+
 import java.time.LocalDate;
 import java.util.HashSet;
 import java.util.List;
@@ -69,6 +64,8 @@ public class ProgrammeMembershipServiceImplTest {
   @Mock
   private ProgrammeMembershipRepository programmeMembershipRepositoryMock;
   @Mock
+  private CurriculumMembershipRepository curriculumMembershipRepositoryMock;
+  @Mock
   private CurriculumRepository curriculumRepositoryMock;
   @Mock
   private ProgrammeRepository programmeRepositoryMock;
@@ -80,11 +77,13 @@ public class ProgrammeMembershipServiceImplTest {
   @Before
   public void setup() {
     ProgrammeMembershipMapper programmeMembershipMapper = new ProgrammeMembershipMapper();
+    CurriculumMembershipMapper curriculumMembershipMapper = new CurriculumMembershipMapper();
     CurriculumMapper curriculumMapper = new CurriculumMapperImpl();
     ReflectionTestUtils.setField(curriculumMapper, "specialtyMapper",
         new SpecialtyMapperImpl());
     testObj = new ProgrammeMembershipServiceImpl(programmeMembershipRepositoryMock,
-        programmeMembershipMapper, curriculumRepositoryMock, curriculumMapper,
+        curriculumMembershipRepositoryMock,
+        programmeMembershipMapper, curriculumMembershipMapper, curriculumRepositoryMock, curriculumMapper,
         programmeRepositoryMock, applicationEventPublisherMock, personRepositoryMock);
 
     initialiseData();
