@@ -130,6 +130,7 @@ public class ProgrammeMembershipServiceImplTest {
     curriculumMembership2.setProgramme(programme);
     curriculumMembership2.setTrainingNumber(trainingNumber);
     curriculumMembership2.setCurriculumId(6L);
+    curriculumMembership2.setPerson(person);
 
     trainingNumberDto.setId(TRAINEE_ID);
     trainingNumberDto.setTrainingNumber(TRAINEE_NUMBER);
@@ -216,9 +217,8 @@ public class ProgrammeMembershipServiceImplTest {
         .findProgrammeMembershipsForTraineeAndProgramme(TRAINEE_ID, PROGRAMME_ID);
 
     Assert.assertNotNull(result);
-    //TODO: has the logic changed here?? confirm
-    Assert.assertEquals(2, result.size());
-    Assert.assertEquals(1, result.get(0).getCurriculumMemberships().size());
+    Assert.assertEquals(1, result.size());
+    Assert.assertEquals(2, result.get(0).getCurriculumMemberships().size());
   }
 
   @Test()
@@ -238,7 +238,7 @@ public class ProgrammeMembershipServiceImplTest {
 
     //then
     Assert.assertNotNull(result);
-    Assert.assertEquals(curriculumIds.size(), result.toList().size());
+    Assert.assertEquals(curriculumMemberships.size(), result.toList().size());
     Assert.assertEquals(1, result.toList().get(0).getCurriculumMemberships().size());
   }
 
