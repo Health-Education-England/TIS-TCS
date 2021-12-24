@@ -124,12 +124,17 @@ jobs:
           mvn install -DskipTests
           cp ./tcs-service/target/tcs-service-*.war ./tcs-service/target/app.jar
 
-      - name: Publish artifacts
+      - name: Publish api artifact
         continue-on-error: true
-        run: |
-          mvn --batch-mode deploy -DskipTests --file tcs-api/pom.xml
-          mvn --batch-mode deploy -DskipTests --file tcs-client/pom.xml
-          mvn --batch-mode deploy -DskipTests --file tcs-persistence/pom.xml
+        run: mvn --batch-mode deploy -DskipTests --file tcs-api/pom.xml
+
+      - name: Publish client artifact
+        continue-on-error: true
+        run: mvn --batch-mode deploy -DskipTests --file tcs-client/pom.xml
+
+      - name: Publish persistence artifact
+        continue-on-error: true
+        run: mvn --batch-mode deploy -DskipTests --file tcs-persistence/pom.xml
 
       - name: Configure AWS credentials
         uses: aws-actions/configure-aws-credentials@v1
