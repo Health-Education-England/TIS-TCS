@@ -14,11 +14,20 @@ import com.transformuk.hee.tis.tcs.api.dto.ProgrammeMembershipDTO;
 import com.transformuk.hee.tis.tcs.api.dto.TrainingNumberDTO;
 import com.transformuk.hee.tis.tcs.api.enumeration.ProgrammeMembershipType;
 import com.transformuk.hee.tis.tcs.service.model.Curriculum;
+import com.transformuk.hee.tis.tcs.service.model.CurriculumMembership;
 import com.transformuk.hee.tis.tcs.service.model.Programme;
 import com.transformuk.hee.tis.tcs.service.model.ProgrammeMembership;
 import com.transformuk.hee.tis.tcs.service.model.TrainingNumber;
-import com.transformuk.hee.tis.tcs.service.repository.*;
-import com.transformuk.hee.tis.tcs.service.service.mapper.*;
+import com.transformuk.hee.tis.tcs.service.repository.CurriculumMembershipRepository;
+import com.transformuk.hee.tis.tcs.service.repository.CurriculumRepository;
+import com.transformuk.hee.tis.tcs.service.repository.PersonRepository;
+import com.transformuk.hee.tis.tcs.service.repository.ProgrammeMembershipRepository;
+import com.transformuk.hee.tis.tcs.service.repository.ProgrammeRepository;
+import com.transformuk.hee.tis.tcs.service.service.mapper.CurriculumMapper;
+import com.transformuk.hee.tis.tcs.service.service.mapper.CurriculumMapperImpl;
+import com.transformuk.hee.tis.tcs.service.service.mapper.CurriculumMembershipMapper;
+import com.transformuk.hee.tis.tcs.service.service.mapper.ProgrammeMembershipMapper;
+import com.transformuk.hee.tis.tcs.service.service.mapper.SpecialtyMapperImpl;
 
 import java.time.LocalDate;
 import java.util.HashSet;
@@ -47,8 +56,8 @@ public class ProgrammeMembershipServiceImplTest {
   private static final Long PROGRAMME_MEMBERSHIP_ID_2 = 8888L;
   private static final String PROGRAMME_NUMBER1 = "Programme number";
   private static final String PROGRAMME_NAME = "Programme Name";
-  private final ProgrammeMembership programmeMembership1 = new ProgrammeMembership();
-  private final ProgrammeMembership programmeMembership2 = new ProgrammeMembership();
+  private final CurriculumMembership curriculumMembership1 = new CurriculumMembership();
+  private final CurriculumMembership curriculumMembership2 = new CurriculumMembership();
   private final ProgrammeMembershipDTO programmeMembershipDTO1 = new ProgrammeMembershipDTO();
   private final ProgrammeMembershipDTO programmeMembershipDTO2 = new ProgrammeMembershipDTO();
   private final Curriculum curriculum1 = new Curriculum();
@@ -82,9 +91,9 @@ public class ProgrammeMembershipServiceImplTest {
     ReflectionTestUtils.setField(curriculumMapper, "specialtyMapper",
         new SpecialtyMapperImpl());
     testObj = new ProgrammeMembershipServiceImpl(programmeMembershipRepositoryMock,
-        curriculumMembershipRepositoryMock,
-        programmeMembershipMapper, curriculumMembershipMapper, curriculumRepositoryMock, curriculumMapper,
-        programmeRepositoryMock, applicationEventPublisherMock, personRepositoryMock);
+        curriculumMembershipRepositoryMock, programmeMembershipMapper, curriculumMembershipMapper,
+        curriculumRepositoryMock, curriculumMapper, programmeRepositoryMock,
+        applicationEventPublisherMock, personRepositoryMock);
 
     initialiseData();
   }
@@ -97,15 +106,15 @@ public class ProgrammeMembershipServiceImplTest {
     programme.setProgrammeNumber(PROGRAMME_NUMBER1);
     programme.setProgrammeName(PROGRAMME_NAME);
 
-    programmeMembership1.setId(PROGRAMME_MEMBERSHIP_ID_1);
-    programmeMembership1.setProgramme(programme);
-    programmeMembership1.setTrainingNumber(trainingNumber);
-    programmeMembership1.setCurriculumId(5L);
+    curriculumMembership1.setId(PROGRAMME_MEMBERSHIP_ID_1);
+    curriculumMembership1.setProgramme(programme);
+    curriculumMembership1.setTrainingNumber(trainingNumber);
+    curriculumMembership1.setCurriculumId(5L);
 
-    programmeMembership2.setId(PROGRAMME_MEMBERSHIP_ID_2);
-    programmeMembership2.setProgramme(programme);
-    programmeMembership2.setTrainingNumber(trainingNumber);
-    programmeMembership2.setCurriculumId(6L);
+    curriculumMembership2.setId(PROGRAMME_MEMBERSHIP_ID_2);
+    curriculumMembership2.setProgramme(programme);
+    curriculumMembership2.setTrainingNumber(trainingNumber);
+    curriculumMembership2.setCurriculumId(6L);
 
     trainingNumberDTO.setId(TRAINEE_ID);
     trainingNumberDTO.setTrainingNumber(TRAINEE_NUMBER);
@@ -136,7 +145,7 @@ public class ProgrammeMembershipServiceImplTest {
     try {
       testObj.findProgrammeMembershipsForTraineeAndProgramme(null, PROGRAMME_ID);
     } catch (Exception e) {
-      verify(programmeMembershipRepositoryMock, never())
+      verify(curriculumMembershipRepositoryMock, never())
           .findByTraineeIdAndProgrammeId(anyLong(), anyLong());
       verify(curriculumRepositoryMock, never()).findAllById(anyCollection());
       throw e;
@@ -148,7 +157,7 @@ public class ProgrammeMembershipServiceImplTest {
     try {
       testObj.findProgrammeMembershipsForTraineeAndProgramme(TRAINEE_ID, null);
     } catch (Exception e) {
-      verify(programmeMembershipRepositoryMock, never())
+      verify(curriculumMembershipRepositoryMock, never())
           .findByTraineeIdAndProgrammeId(anyLong(), anyLong());
       verify(curriculumRepositoryMock, never()).findAllById(anyCollection());
       throw e;
@@ -157,9 +166,9 @@ public class ProgrammeMembershipServiceImplTest {
 
   @Test()
   public void findProgrammeMembershipsForTraineeAndProgrammeShouldReturnEmptyListWhenNoResultsFound() {
-    List<ProgrammeMembership> emptyProgrammeMembershipList = Lists.emptyList();
-    when(programmeMembershipRepositoryMock.findByTraineeIdAndProgrammeId(TRAINEE_ID, PROGRAMME_ID))
-        .thenReturn(emptyProgrammeMembershipList);
+    List<CurriculumMembership> emptyCurriculumMembershipList = Lists.emptyList();
+    when(curriculumMembershipRepositoryMock.findByTraineeIdAndProgrammeId(TRAINEE_ID, PROGRAMME_ID))
+        .thenReturn(emptyCurriculumMembershipList);
 
     List<ProgrammeMembershipCurriculaDTO> result = testObj
         .findProgrammeMembershipsForTraineeAndProgramme(TRAINEE_ID, PROGRAMME_ID);
@@ -170,13 +179,13 @@ public class ProgrammeMembershipServiceImplTest {
 
   @Test()
   public void findProgrammeMembershipsForTraineeAndProgrammeShouldReturnPopulatedDTO() {
-    List<ProgrammeMembership> programmeMemberships = Lists
-        .newArrayList(programmeMembership1, programmeMembership2);
+    List<CurriculumMembership> curriculumMemberships = Lists
+        .newArrayList(curriculumMembership1, curriculumMembership2);
     List<Curriculum> foundCurricula = Lists.newArrayList(curriculum1, curriculum2);
     Set<Long> curriculumIds = Sets.newLinkedHashSet(5L, 6L);
 
-    when(programmeMembershipRepositoryMock.findByTraineeIdAndProgrammeId(TRAINEE_ID, PROGRAMME_ID))
-        .thenReturn(programmeMemberships);
+    when(curriculumMembershipRepositoryMock.findByTraineeIdAndProgrammeId(TRAINEE_ID, PROGRAMME_ID))
+        .thenReturn(curriculumMemberships);
     when(curriculumRepositoryMock.findAllById(curriculumIds)).thenReturn(foundCurricula);
 
     List<ProgrammeMembershipCurriculaDTO> result = testObj
@@ -193,7 +202,7 @@ public class ProgrammeMembershipServiceImplTest {
     try {
       testObj.findProgrammeMembershipsForTrainee(null);
     } catch (Exception e) {
-      verify(programmeMembershipRepositoryMock, never())
+      verify(curriculumMembershipRepositoryMock, never())
           .findByTraineeIdAndProgrammeId(anyLong(), anyLong());
       verify(curriculumRepositoryMock, never()).findAllById(anyCollection());
       verify(programmeRepositoryMock, never()).findByIdIn(anySet());
@@ -203,9 +212,9 @@ public class ProgrammeMembershipServiceImplTest {
 
   @Test()
   public void findProgrammeMembershipsForTraineeShouldReturnEmptyListWhenNoResultsFound() {
-    List<ProgrammeMembership> emptyProgrammeMembershipList = Lists.emptyList();
-    when(programmeMembershipRepositoryMock.findByTraineeId(TRAINEE_ID))
-        .thenReturn(emptyProgrammeMembershipList);
+    List<CurriculumMembership> emptyCurriculumMembershipList = Lists.emptyList();
+    when(curriculumMembershipRepositoryMock.findByTraineeId(TRAINEE_ID))
+        .thenReturn(emptyCurriculumMembershipList);
 
     List<ProgrammeMembershipCurriculaDTO> result = testObj
         .findProgrammeMembershipsForTrainee(TRAINEE_ID);
@@ -216,13 +225,13 @@ public class ProgrammeMembershipServiceImplTest {
 
   @Test()
   public void findProgrammeMembershipsForTraineeShouldReturnPopulatedDTOList() {
-    List<ProgrammeMembership> programmeMemberships = Lists
-        .newArrayList(programmeMembership1, programmeMembership2);
+    List<CurriculumMembership> curriculumMemberships = Lists
+        .newArrayList(curriculumMembership1, curriculumMembership2);
     List<Curriculum> foundCurricula = Lists.newArrayList(curriculum1, curriculum2);
     Set<Long> curriculumIds = Sets.newLinkedHashSet(new Long(5L), new Long(6L));
 
-    when(programmeMembershipRepositoryMock.findByTraineeId(TRAINEE_ID))
-        .thenReturn(programmeMemberships);
+    when(curriculumMembershipRepositoryMock.findByTraineeId(TRAINEE_ID))
+        .thenReturn(curriculumMemberships);
     when(curriculumRepositoryMock.findAllById(curriculumIds)).thenReturn(foundCurricula);
     when(programmeRepositoryMock.findByIdIn(Sets.newLinkedHashSet(PROGRAMME_ID)))
         .thenReturn(Lists.newArrayList(programme));
@@ -257,36 +266,36 @@ public class ProgrammeMembershipServiceImplTest {
     LocalDate anotherDateFrom = LocalDate.of(2011, 12, 31);
     LocalDate anotherDateTo = LocalDate.of(2015, 12, 31);
 
-    ProgrammeMembership pm1 = new ProgrammeMembership();
-    ProgrammeMembership pm2 = new ProgrammeMembership();
-    ProgrammeMembership pm3 = new ProgrammeMembership();
+    CurriculumMembership cm1 = new CurriculumMembership();
+    CurriculumMembership cm2 = new CurriculumMembership();
+    CurriculumMembership cm3 = new CurriculumMembership();
 
-    pm1.setProgramme(programme);
-    pm1.setProgrammeStartDate(dateFrom);
-    pm1.setProgrammeEndDate(dateTo);
-    pm1.setCurriculumId(curriculum1.getId());
-    pm1.setCurriculumStartDate(dateFrom);
-    pm1.setCurriculumEndDate(dateTo);
-    pm1.setProgrammeMembershipType(ProgrammeMembershipType.FTSTA);
+    cm1.setProgramme(programme);
+    cm1.setProgrammeStartDate(dateFrom);
+    cm1.setProgrammeEndDate(dateTo);
+    cm1.setCurriculumId(curriculum1.getId());
+    cm1.setCurriculumStartDate(dateFrom);
+    cm1.setCurriculumEndDate(dateTo);
+    cm1.setProgrammeMembershipType(ProgrammeMembershipType.FTSTA);
 
-    pm2.setProgramme(programme);
-    pm2.setProgrammeStartDate(dateFrom);
-    pm2.setProgrammeEndDate(dateTo);
-    pm2.setCurriculumId(curriculum1.getId());
-    pm2.setCurriculumStartDate(anotherDateFrom);
-    pm2.setCurriculumEndDate(anotherDateTo);
-    pm2.setProgrammeMembershipType(ProgrammeMembershipType.FTSTA);
+    cm2.setProgramme(programme);
+    cm2.setProgrammeStartDate(dateFrom);
+    cm2.setProgrammeEndDate(dateTo);
+    cm2.setCurriculumId(curriculum1.getId());
+    cm2.setCurriculumStartDate(anotherDateFrom);
+    cm2.setCurriculumEndDate(anotherDateTo);
+    cm2.setProgrammeMembershipType(ProgrammeMembershipType.FTSTA);
 
-    pm3.setProgramme(programme);
-    pm3.setProgrammeStartDate(anotherDateFrom);
-    pm3.setProgrammeEndDate(anotherDateTo);
-    pm3.setCurriculumId(curriculum2.getId());
-    pm3.setCurriculumStartDate(anotherDateFrom);
-    pm3.setCurriculumEndDate(anotherDateTo);
-    pm3.setProgrammeMembershipType(ProgrammeMembershipType.ACADEMIC);
+    cm3.setProgramme(programme);
+    cm3.setProgrammeStartDate(anotherDateFrom);
+    cm3.setProgrammeEndDate(anotherDateTo);
+    cm3.setCurriculumId(curriculum2.getId());
+    cm3.setCurriculumStartDate(anotherDateFrom);
+    cm3.setCurriculumEndDate(anotherDateTo);
+    cm3.setProgrammeMembershipType(ProgrammeMembershipType.ACADEMIC);
 
-    when(programmeMembershipRepositoryMock.findByTraineeId(TRAINEE_ID))
-        .thenReturn(Lists.newArrayList(pm1, pm2, pm3));
+    when(curriculumMembershipRepositoryMock.findByTraineeId(TRAINEE_ID))
+        .thenReturn(Lists.newArrayList(cm1, cm2, cm3));
     Set<Long> curriculumIds = Sets.newLinkedHashSet(Long.valueOf(5L), Long.valueOf(6L));
     when(curriculumRepositoryMock.findAllById(curriculumIds))
         .thenReturn(Lists.newArrayList(curriculum1, curriculum2));
@@ -321,39 +330,39 @@ public class ProgrammeMembershipServiceImplTest {
     LocalDate pm3DateFrom = LocalDate.of(2017, 12, 31);
     LocalDate pm3DateTo = LocalDate.of(2019, 12, 31);
 
-    ProgrammeMembership pm1 = new ProgrammeMembership();
-    ProgrammeMembership pm2 = new ProgrammeMembership();
-    ProgrammeMembership pm3 = new ProgrammeMembership();
+    CurriculumMembership cm1 = new CurriculumMembership();
+    CurriculumMembership cm2 = new CurriculumMembership();
+    CurriculumMembership cm3 = new CurriculumMembership();
 
-    pm1.setProgramme(programme);
-    pm1.setProgrammeStartDate(pm1DateFrom);
-    pm1.setProgrammeEndDate(pm1DateTo);
-    pm1.setCurriculumId(curriculum1.getId());
-    pm1.setCurriculumStartDate(pm1DateFrom);
-    pm1.setCurriculumEndDate(pm1DateTo);
-    pm1.setProgrammeMembershipType(ProgrammeMembershipType.FTSTA);
-    pm1.setTrainingPathway("CCT");
+    cm1.setProgramme(programme);
+    cm1.setProgrammeStartDate(pm1DateFrom);
+    cm1.setProgrammeEndDate(pm1DateTo);
+    cm1.setCurriculumId(curriculum1.getId());
+    cm1.setCurriculumStartDate(pm1DateFrom);
+    cm1.setCurriculumEndDate(pm1DateTo);
+    cm1.setProgrammeMembershipType(ProgrammeMembershipType.FTSTA);
+    cm1.setTrainingPathway("CCT");
 
-    pm2.setProgramme(programme);
-    pm2.setProgrammeStartDate(pm2DateFrom);
-    pm2.setProgrammeEndDate(pm2DateTo);
-    pm2.setCurriculumId(curriculum1.getId());
-    pm2.setCurriculumStartDate(pm2DateFrom);
-    pm2.setCurriculumEndDate(pm2DateTo);
-    pm2.setProgrammeMembershipType(ProgrammeMembershipType.SUBSTANTIVE);
-    pm2.setTrainingPathway("CESR");
+    cm2.setProgramme(programme);
+    cm2.setProgrammeStartDate(pm2DateFrom);
+    cm2.setProgrammeEndDate(pm2DateTo);
+    cm2.setCurriculumId(curriculum1.getId());
+    cm2.setCurriculumStartDate(pm2DateFrom);
+    cm2.setCurriculumEndDate(pm2DateTo);
+    cm2.setProgrammeMembershipType(ProgrammeMembershipType.SUBSTANTIVE);
+    cm2.setTrainingPathway("CESR");
 
-    pm3.setProgramme(programme);
-    pm3.setProgrammeStartDate(pm3DateFrom);
-    pm3.setProgrammeEndDate(pm3DateTo);
-    pm3.setCurriculumId(curriculum2.getId());
-    pm3.setCurriculumStartDate(pm3DateFrom);
-    pm3.setCurriculumEndDate(pm3DateTo);
-    pm3.setProgrammeMembershipType(ProgrammeMembershipType.ACADEMIC);
-    pm3.setTrainingPathway("CESR");
+    cm3.setProgramme(programme);
+    cm3.setProgrammeStartDate(pm3DateFrom);
+    cm3.setProgrammeEndDate(pm3DateTo);
+    cm3.setCurriculumId(curriculum2.getId());
+    cm3.setCurriculumStartDate(pm3DateFrom);
+    cm3.setCurriculumEndDate(pm3DateTo);
+    cm3.setProgrammeMembershipType(ProgrammeMembershipType.ACADEMIC);
+    cm3.setTrainingPathway("CESR");
 
-    when(programmeMembershipRepositoryMock.findByTraineeId(TRAINEE_ID)).thenReturn(
-        Lists.newArrayList(pm1, pm2, pm3));
+    when(curriculumMembershipRepositoryMock.findByTraineeId(TRAINEE_ID)).thenReturn(
+        Lists.newArrayList(cm1, cm2, cm3));
     Set<Long> curriculumIds = Sets.newLinkedHashSet(Long.valueOf(5L), Long.valueOf(6L));
     when(curriculumRepositoryMock.findAllById(curriculumIds)).thenReturn(
         Lists.newArrayList(curriculum1, curriculum2));
@@ -379,17 +388,17 @@ public class ProgrammeMembershipServiceImplTest {
     ids.add(1L);
     ids.add(2L);
 
-    programmeMembership1.setCurriculumId(curriculum1.getId());
-    programmeMembership2.setCurriculumId(curriculum2.getId());
+    curriculumMembership1.setCurriculumId(curriculum1.getId());
+    curriculumMembership2.setCurriculumId(curriculum2.getId());
 
-    List<ProgrammeMembership> programmeMemberships = Lists
-        .newArrayList(programmeMembership1, programmeMembership2);
+    List<CurriculumMembership> curriculumMemberships = Lists
+        .newArrayList(curriculumMembership1, curriculumMembership2);
 
     List<Curriculum> foundCurricula = Lists.newArrayList(curriculum1, curriculum2);
     Set<Long> curriculumIds = Sets.newLinkedHashSet(5L, 6L);
     when(curriculumRepositoryMock.findAllById(curriculumIds)).thenReturn(foundCurricula);
 
-    when(programmeMembershipRepositoryMock.findByIdIn(ids)).thenReturn(programmeMemberships);
+    when(curriculumMembershipRepositoryMock.findByIdIn(ids)).thenReturn(curriculumMemberships);
 
     List<ProgrammeMembershipCurriculaDTO> result = testObj.findProgrammeMembershipDetailsByIds(ids);
 

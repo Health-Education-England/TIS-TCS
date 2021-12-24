@@ -17,8 +17,19 @@ import com.transformuk.hee.tis.tcs.api.enumeration.Status;
 import com.transformuk.hee.tis.tcs.service.Application;
 import com.transformuk.hee.tis.tcs.service.api.validation.ProgrammeMembershipValidator;
 import com.transformuk.hee.tis.tcs.service.exception.ExceptionTranslator;
-import com.transformuk.hee.tis.tcs.service.model.*;
-import com.transformuk.hee.tis.tcs.service.repository.*;
+import com.transformuk.hee.tis.tcs.service.model.Curriculum;
+import com.transformuk.hee.tis.tcs.service.model.CurriculumMembership;
+import com.transformuk.hee.tis.tcs.service.model.Person;
+import com.transformuk.hee.tis.tcs.service.model.Programme;
+import com.transformuk.hee.tis.tcs.service.model.ProgrammeCurriculum;
+import com.transformuk.hee.tis.tcs.service.model.ProgrammeMembership;
+import com.transformuk.hee.tis.tcs.service.model.Rotation;
+import com.transformuk.hee.tis.tcs.service.repository.CurriculumMembershipRepository;
+import com.transformuk.hee.tis.tcs.service.repository.CurriculumRepository;
+import com.transformuk.hee.tis.tcs.service.repository.PersonRepository;
+import com.transformuk.hee.tis.tcs.service.repository.ProgrammeMembershipRepository;
+import com.transformuk.hee.tis.tcs.service.repository.ProgrammeRepository;
+import com.transformuk.hee.tis.tcs.service.repository.RotationRepository;
 import com.transformuk.hee.tis.tcs.service.service.ProgrammeMembershipService;
 import com.transformuk.hee.tis.tcs.service.service.RotationService;
 import com.transformuk.hee.tis.tcs.service.service.mapper.CurriculumMembershipMapper;
@@ -32,7 +43,6 @@ import java.util.List;
 import javax.persistence.EntityManager;
 import org.junit.Before;
 import org.junit.Test;
-import org.junit.jupiter.api.AfterAll;
 import org.junit.runner.RunWith;
 import org.mockito.MockitoAnnotations;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -60,8 +70,6 @@ public class ProgrammeMembershipResourceIntTest {
 
   private static final String DEFAULT_INTREPID_ID = "AAAAAAAAAA";
   private static final String UPDATED_INTREPID_ID = "BBBBBBBBBB";
-
-  private static final Long RECORD_ID = 1L;
 
   private static final String DEFAULT_ROTATION = "AAAAAAAAAA";
   private static final String UPDATED_ROTATION = "BBBBBBBBBB";
@@ -813,9 +821,11 @@ public class ProgrammeMembershipResourceIntTest {
   @Test
   @Transactional
   @DirtiesContext(methodMode = DirtiesContext.MethodMode.BEFORE_METHOD)
-  @AfterAll
   public void deleteProgrammeAndCurriculumMemberships() throws Exception {
     // Initialize the database
+    // The reason this test needs to run with a fresh context is that the delete function expects
+    // the record to have the same ID in both the CurriculumMembership and ProgrammeMembership
+    // tables. During the process of running the other tests these get out of sync.
     personRepository.saveAndFlush(person);
     curriculumMembership.setPerson(person);
     curriculumMembershipRepository.deleteAll();
@@ -831,7 +841,7 @@ public class ProgrammeMembershipResourceIntTest {
 
     // Delete the first record, which will have id 1 because of the @DirtiesContext annotation
     restProgrammeMembershipMockMvc
-        .perform(delete("/api/programme-memberships/{id}", RECORD_ID)
+        .perform(delete("/api/programme-memberships/{id}", 1L)
             .accept(MediaType.APPLICATION_JSON))
         .andExpect(status().isOk());
 
