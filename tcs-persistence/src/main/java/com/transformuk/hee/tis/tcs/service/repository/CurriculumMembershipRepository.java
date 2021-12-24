@@ -27,8 +27,10 @@ public interface CurriculumMembershipRepository extends JpaRepository<Curriculum
 
   //Find latest curriculum membership of a trainee
   @Query(value = "SELECT cm.* FROM CurriculumMembership cm "
-      + "WHERE cm.personId = :traineeId ORDER BY cm.programmeEndDate DESC LIMIT 1", nativeQuery = true)
-  CurriculumMembership findLatestCurriculumMembershipByTraineeId(@Param("traineeId") Long traineeId);
+      + "WHERE cm.personId = :traineeId ORDER BY cm.programmeEndDate DESC LIMIT 1",
+      nativeQuery = true)
+  CurriculumMembership findLatestCurriculumMembershipByTraineeId(@Param("traineeId")
+                                                                     Long traineeId);
 
   @Query(value = "SELECT cm.* FROM CurriculumMembership cm "
       + "WHERE cm.personId = :traineeId "

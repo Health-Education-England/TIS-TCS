@@ -66,7 +66,7 @@ public class PersonMapper {
 
     if (dto.getProgrammeMemberships() != null) {
       person.setProgrammeMemberships(new HashSet<>(curriculumMembershipMapper
-          .programmeMembershipDTOsToCurriculumMemberships(
+          .programmeMembershipDtosToCurriculumMemberships(
               new ArrayList<>(dto.getProgrammeMemberships()))));
     }
 
@@ -115,7 +115,7 @@ public class PersonMapper {
 
     if (entity.getProgrammeMemberships() != null) {
       personDTO.setProgrammeMemberships(new HashSet<>(curriculumMembershipMapper
-          .curriculumMembershipsToProgrammeMembershipDTOs(
+          .curriculumMembershipsToProgrammeMembershipDtos(
               new ArrayList<>(entity.getProgrammeMemberships()))));
     }
 

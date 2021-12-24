@@ -36,17 +36,19 @@ public interface PersonRepository extends JpaRepository<Person, Long>,
   Optional<Person> findPersonById(@Param(value = "id") Long id);
 
   @Query(
-      "Select new com.transformuk.hee.tis.tcs.api.dto.ConnectionDto(cd.surname, cd.forenames, " +
-          "gmc.gmcNumber, gmc.id, prg.owner, prg.programmeName, cm.programmeMembershipType, " +
-          "cm.programmeStartDate, cm.programmeEndDate) "
+      "Select new com.transformuk.hee.tis.tcs.api.dto.ConnectionDto(cd.surname, cd.forenames, "
+          + "gmc.gmcNumber, gmc.id, prg.owner, prg.programmeName, cm.programmeMembershipType, "
+          + "cm.programmeStartDate, cm.programmeEndDate) "
           + "FROM Person p "
           + "JOIN ContactDetails cd on (cd.id = p.id) "
           + "JOIN GmcDetails gmc on (gmc.id = p.id) and gmc.gmcNumber <> 'UNKNOWN' "
-          + "LEFT JOIN CurriculumMembership cm on (cm.person = p.id) " +
-          "and curdate() between cm.programmeStartDate and cm.programmeEndDate "
+          + "LEFT JOIN CurriculumMembership cm on (cm.person = p.id) "
+          + "and curdate() between cm.programmeStartDate and cm.programmeEndDate "
           + "LEFT JOIN Programme prg on (prg.id = cm.programme) "
-          + "LEFT JOIN Placement pl on (pl.trainee = p.id) and curdate() between pl.dateFrom and pl.dateTo "
-          + "WHERE (cm.programmeMembershipType = 'MILITARY' OR pl.gradeId = 279 or gmc.gmcNumber in (:gmcIds)) "
+          + "LEFT JOIN Placement pl on (pl.trainee = p.id) "
+          + "and curdate() between pl.dateFrom and pl.dateTo "
+          + "WHERE (cm.programmeMembershipType = 'MILITARY' "
+          + "OR pl.gradeId = 279 or gmc.gmcNumber in (:gmcIds)) "
           + "AND (:search is true or gmc.gmcNumber = :gmcNumber)")
   Page<ConnectionDto> getHiddenTraineeRecords(final Pageable pageable,
       @Param(value = "gmcIds") List<String> gmcIds, @Param(value = "search") boolean search,
@@ -63,8 +65,8 @@ public interface PersonRepository extends JpaRepository<Person, Long>,
    */
   final String GET_EXCEPTION_QUERY =
       "Select distinct cd.surname, cd.forenames, gmc.gmcNumber, gmc.id, prg.owner, "
-          + "prg.programmeName, latestCm.programmeMembershipType, latestCm.programmeStartDate, "
-          + "latestCm.programmeEndDate "
+      + "prg.programmeName, latestCm.programmeMembershipType, latestCm.programmeStartDate, "
+      + "latestCm.programmeEndDate "
       + "FROM Person p "
       + "INNER JOIN ContactDetails cd on (cd.id = p.id) "
       + "INNER JOIN GmcDetails gmc on (gmc.id = p.id) and gmc.gmcNumber <> 'UNKNOWN' "

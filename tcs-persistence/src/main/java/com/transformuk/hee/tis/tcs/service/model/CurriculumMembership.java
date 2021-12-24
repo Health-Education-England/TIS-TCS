@@ -35,7 +35,6 @@ public class CurriculumMembership implements Serializable {
   @JoinColumn(name = "personId")
   private Person person;
 
-  //TODO: create equivalent CurriculumMembershipType to improve consistency?
   @Enumerated(EnumType.STRING)
   private ProgrammeMembershipType programmeMembershipType;
 

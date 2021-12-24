@@ -82,25 +82,25 @@ public class ProgrammeMembershipServiceImpl implements ProgrammeMembershipServic
   /**
    * Save a programmeMembership.
    *
-   * @param programmeMembershipDTO the entity to save
+   * @param programmeMembershipDto the entity to save
    * @return the persisted entity
    */
   @Override
-  public ProgrammeMembershipDTO save(ProgrammeMembershipDTO programmeMembershipDTO) {
-    log.debug("Request to save ProgrammeMembership : {}", programmeMembershipDTO);
+  public ProgrammeMembershipDTO save(ProgrammeMembershipDTO programmeMembershipDto) {
+    log.debug("Request to save ProgrammeMembership : {}", programmeMembershipDto);
     //below is deprecated
     List<ProgrammeMembership> programmeMembershipList = programmeMembershipMapper
-        .toEntity(programmeMembershipDTO);
-    programmeMembershipList = programmeMembershipRepository.saveAll(programmeMembershipList);
+        .toEntity(programmeMembershipDto);
+    programmeMembershipRepository.saveAll(programmeMembershipList);
 
     //new
     List<CurriculumMembership> curriculumMembershipList = curriculumMembershipMapper
-        .toEntity(programmeMembershipDTO);
+        .toEntity(programmeMembershipDto);
     curriculumMembershipList = curriculumMembershipRepository.saveAll(curriculumMembershipList);
 
     updatePersonWhenStatusIsStale(curriculumMembershipList.get(0).getPerson().getId());
     List<ProgrammeMembershipDTO> resultDtos = curriculumMembershipMapper
-        .curriculumMembershipsToProgrammeMembershipDTOs(curriculumMembershipList);
+        .curriculumMembershipsToProgrammeMembershipDtos(curriculumMembershipList);
 
     emitProgrammeMembershipSavedEvents(resultDtos);
     return CollectionUtils.isNotEmpty(resultDtos) ? resultDtos.get(0) : null;
@@ -109,32 +109,32 @@ public class ProgrammeMembershipServiceImpl implements ProgrammeMembershipServic
   /**
    * Save a list of programmeMembership.
    *
-   * @param programmeMembershipDTO the list of entities to save
+   * @param programmeMembershipDto the list of entities to save
    * @return the list of persisted entities
    */
   @Override
-  public List<ProgrammeMembershipDTO> save(List<ProgrammeMembershipDTO> programmeMembershipDTO) {
-    log.debug("Request to save ProgrammeMembership : {}", programmeMembershipDTO);
+  public List<ProgrammeMembershipDTO> save(List<ProgrammeMembershipDTO> programmeMembershipDto) {
+    log.debug("Request to save ProgrammeMembership : {}", programmeMembershipDto);
     //below is deprecated
     List<ProgrammeMembership> programmeMemberships = programmeMembershipMapper
-        .programmeMembershipDTOsToProgrammeMemberships(programmeMembershipDTO);
-    programmeMemberships = programmeMembershipRepository.saveAll(programmeMemberships);
+        .programmeMembershipDTOsToProgrammeMemberships(programmeMembershipDto);
+    programmeMembershipRepository.saveAll(programmeMemberships);
 
     List<CurriculumMembership> curriculumMemberships = curriculumMembershipMapper
-        .programmeMembershipDTOsToCurriculumMemberships(programmeMembershipDTO);
+        .programmeMembershipDtosToCurriculumMemberships(programmeMembershipDto);
     curriculumMemberships = curriculumMembershipRepository.saveAll(curriculumMemberships);
 
     updatePersonWhenStatusIsStale(curriculumMemberships.get(0).getPerson().getId());
-    List<ProgrammeMembershipDTO> programmeMembershipDTOS = curriculumMembershipMapper
-        .curriculumMembershipsToProgrammeMembershipDTOs(curriculumMemberships);
-    emitProgrammeMembershipSavedEvents(programmeMembershipDTOS);
-    return programmeMembershipDTOS;
+    List<ProgrammeMembershipDTO> programmeMembershipDtos = curriculumMembershipMapper
+        .curriculumMembershipsToProgrammeMembershipDtos(curriculumMemberships);
+    emitProgrammeMembershipSavedEvents(programmeMembershipDtos);
+    return programmeMembershipDtos;
   }
 
   private void emitProgrammeMembershipSavedEvents(
-      List<ProgrammeMembershipDTO> programmeMembershipDTOS) {
-    if (CollectionUtils.isNotEmpty(programmeMembershipDTOS)) {
-      programmeMembershipDTOS.stream()
+      List<ProgrammeMembershipDTO> programmeMembershipDtos) {
+    if (CollectionUtils.isNotEmpty(programmeMembershipDtos)) {
+      programmeMembershipDtos.stream()
           .distinct()
           .map(ProgrammeMembershipSavedEvent::new)
           .forEach(applicationEventPublisher::publishEvent);
@@ -178,11 +178,12 @@ public class ProgrammeMembershipServiceImpl implements ProgrammeMembershipServic
   @Override
   public void delete(Long id) {
     log.debug("Request to delete ProgrammeMembership : {}", id);
-    //Get the person id from the programme membership before deleting it
-    Long personId = curriculumMembershipRepository.getOne(id).getPerson().getId();
     //below is deprecated
     programmeMembershipRepository.deleteById(id);
     programmeRepository.flush();
+
+    //Get the person id from the programme membership before deleting it
+    Long personId = curriculumMembershipRepository.getOne(id).getPerson().getId();
     //new
     curriculumMembershipRepository.deleteById(id);
     curriculumRepository.flush();
@@ -199,20 +200,21 @@ public class ProgrammeMembershipServiceImpl implements ProgrammeMembershipServic
 
     List<CurriculumMembership> foundCurriculumMemberships = curriculumMembershipRepository
         .findByTraineeIdAndProgrammeId(traineeId, programmeId);
-    List<ProgrammeMembershipDTO> programmeMembershipDTOS = curriculumMembershipMapper
-        .curriculumMembershipsToProgrammeMembershipDTOs(foundCurriculumMemberships);
+    List<ProgrammeMembershipDTO> programmeMembershipDtos = curriculumMembershipMapper
+        .curriculumMembershipsToProgrammeMembershipDtos(foundCurriculumMemberships);
 
     //get all curriculum ids
-    return attachCurricula(programmeMembershipDTOS);
+    return attachCurricula(programmeMembershipDtos);
   }
 
   @Transactional(readOnly = true)
   @Override
   public List<ProgrammeMembershipCurriculaDTO> findProgrammeMembershipDetailsByIds(
       Set<Long> ids) {
-    List<CurriculumMembership> curriculumMemberships = curriculumMembershipRepository.findByIdIn(ids);
-    List<ProgrammeMembershipDTO> programmeMembershipDtos = curriculumMembershipMapper.
-        allEntityToDto(curriculumMemberships);
+    List<CurriculumMembership> curriculumMemberships
+        = curriculumMembershipRepository.findByIdIn(ids);
+    List<ProgrammeMembershipDTO> programmeMembershipDtos
+        = curriculumMembershipMapper.allEntityToDto(curriculumMemberships);
 
     return attachCurricula(programmeMembershipDtos);
   }
@@ -233,14 +235,15 @@ public class ProgrammeMembershipServiceImpl implements ProgrammeMembershipServic
       Long traineeId) {
     Preconditions.checkNotNull(traineeId);
 
-    List<ProgrammeMembershipCurriculaDTO> programmeMembershipsForTrainee = findProgrammeMembershipsForTrainee(
-        traineeId);
+    List<ProgrammeMembershipCurriculaDTO> programmeMembershipsForTrainee
+        = findProgrammeMembershipsForTrainee(traineeId);
 
     List<ProgrammeMembershipCurriculaDTO> result = Lists.newArrayList();
     if (CollectionUtils.isNotEmpty(programmeMembershipsForTrainee)) {
-      for (ProgrammeMembershipCurriculaDTO programmeMembershipCurriculaDTO : programmeMembershipsForTrainee) {
-        Optional<ProgrammeMembershipCurriculaDTO> foundPMCOptional = getSameProgrammeMembershipForDates(
-            result, programmeMembershipCurriculaDTO);
+      for (ProgrammeMembershipCurriculaDTO programmeMembershipCurriculaDto
+          : programmeMembershipsForTrainee) {
+        Optional<ProgrammeMembershipCurriculaDTO> foundPMCOptional
+            = getSameProgrammeMembershipForDates(result, programmeMembershipCurriculaDto);
         if (foundPMCOptional.isPresent()) {
           ProgrammeMembershipCurriculaDTO foundPMC = foundPMCOptional.get();
 
@@ -249,42 +252,43 @@ public class ProgrammeMembershipServiceImpl implements ProgrammeMembershipServic
             curriculumMemberships.addAll(foundPMC.getCurriculumMemberships());
           }
           //merge the existing curricula memberships with the new ones
-          if (programmeMembershipCurriculaDTO.getCurriculumMemberships() != null) {
+          if (programmeMembershipCurriculaDto.getCurriculumMemberships() != null) {
             curriculumMemberships
-                .addAll(programmeMembershipCurriculaDTO.getCurriculumMemberships());
+                .addAll(programmeMembershipCurriculaDto.getCurriculumMemberships());
           }
 
           foundPMC.setCurriculumMemberships(curriculumMemberships);
         } else {
-          result.add(programmeMembershipCurriculaDTO);
+          result.add(programmeMembershipCurriculaDto);
         }
       }
     }
     return result;
   }
 
-  //Loop through a collection of PMC DTO and if theres one already that matches the programme id, dates and type then return that one
+  //Loop through a collection of PMC DTO and if theres one already that matches
+  // the programme id, dates and type then return that one
   private Optional<ProgrammeMembershipCurriculaDTO> getSameProgrammeMembershipForDates(
       List<ProgrammeMembershipCurriculaDTO> result,
-      ProgrammeMembershipCurriculaDTO programmeMembershipCurriculaDTO) {
+      ProgrammeMembershipCurriculaDTO programmeMembershipCurriculaDto) {
     if (CollectionUtils.isNotEmpty(result)) {
       return result.stream()
-          .filter(isProgrammeMembershipEffectivelyTheSame(programmeMembershipCurriculaDTO))
+          .filter(isProgrammeMembershipEffectivelyTheSame(programmeMembershipCurriculaDto))
           .findAny();
     }
     return Optional.empty();
   }
 
   private Predicate<ProgrammeMembershipCurriculaDTO> isProgrammeMembershipEffectivelyTheSame(
-      ProgrammeMembershipCurriculaDTO programmeMembershipCurriculaDTO) {
+      ProgrammeMembershipCurriculaDTO programmeMembershipCurriculaDto) {
     return pmc ->
-        Objects.equals(pmc.getProgrammeId(), programmeMembershipCurriculaDTO.getProgrammeId()) &&
+        Objects.equals(pmc.getProgrammeId(), programmeMembershipCurriculaDto.getProgrammeId()) &&
             Objects.equals(pmc.getProgrammeMembershipType(),
-                programmeMembershipCurriculaDTO.getProgrammeMembershipType()) &&
+                programmeMembershipCurriculaDto.getProgrammeMembershipType()) &&
             Objects.equals(pmc.getProgrammeStartDate(),
-                programmeMembershipCurriculaDTO.getProgrammeStartDate()) &&
+                programmeMembershipCurriculaDto.getProgrammeStartDate()) &&
             Objects.equals(pmc.getProgrammeEndDate(),
-                programmeMembershipCurriculaDTO.getProgrammeEndDate());
+                programmeMembershipCurriculaDto.getProgrammeEndDate());
   }
 
   @Transactional(readOnly = true)
@@ -296,9 +300,9 @@ public class ProgrammeMembershipServiceImpl implements ProgrammeMembershipServic
         .findByTraineeId(traineeId);
 
     if (CollectionUtils.isNotEmpty(foundCurriculumMemberships)) {
-      List<ProgrammeMembershipDTO> programmeMembershipDTOS = curriculumMembershipMapper
+      List<ProgrammeMembershipDTO> programmeMembershipDtos = curriculumMembershipMapper
           .allEntityToDto(foundCurriculumMemberships);
-      List<ProgrammeMembershipCurriculaDTO> result = attachCurricula(programmeMembershipDTOS);
+      List<ProgrammeMembershipCurriculaDTO> result = attachCurricula(programmeMembershipDtos);
 
       //get the programme names and numbers
       Set<Long> programmeIds = foundCurriculumMemberships.stream()
@@ -313,11 +317,11 @@ public class ProgrammeMembershipServiceImpl implements ProgrammeMembershipServic
             .filter(Objects::nonNull)
             .collect(Collectors.toMap(Programme::getId, p -> p));
       }
-      for (ProgrammeMembershipCurriculaDTO programmeMembershipCurriculaDTO : result) {
+      for (ProgrammeMembershipCurriculaDTO programmeMembershipCurriculaDto : result) {
         Programme programme = programmeIdToProgramme
-            .get(programmeMembershipCurriculaDTO.getProgrammeId());
-        programmeMembershipCurriculaDTO.setProgrammeName(programme.getProgrammeName());
-        programmeMembershipCurriculaDTO.setProgrammeNumber(programme.getProgrammeNumber());
+            .get(programmeMembershipCurriculaDto.getProgrammeId());
+        programmeMembershipCurriculaDto.setProgrammeName(programme.getProgrammeName());
+        programmeMembershipCurriculaDto.setProgrammeNumber(programme.getProgrammeNumber());
       }
       return result;
     }
@@ -333,15 +337,15 @@ public class ProgrammeMembershipServiceImpl implements ProgrammeMembershipServic
     List<CurriculumMembership> foundCurriculumMemberships = curriculumMembershipRepository
         .findByProgrammeId(programmeId);
     return curriculumMembershipMapper
-        .curriculumMembershipsToProgrammeMembershipDTOs(foundCurriculumMemberships);
+        .curriculumMembershipsToProgrammeMembershipDtos(foundCurriculumMemberships);
   }
 
   private List<ProgrammeMembershipCurriculaDTO> attachCurricula(
-      List<ProgrammeMembershipDTO> programmeMembershipDTOS) {
+      List<ProgrammeMembershipDTO> programmeMembershipDtos) {
     List<ProgrammeMembershipCurriculaDTO> result = Lists.newArrayList();
 
     //get all curriculum ids
-    Set<Long> curriculumIds = programmeMembershipDTOS.stream().
+    Set<Long> curriculumIds = programmeMembershipDtos.stream().
         map(ProgrammeMembershipDTO::getCurriculumMemberships).
         flatMap(Collection::stream).
         map(CurriculumMembershipDTO::getCurriculumId).
@@ -355,14 +359,14 @@ public class ProgrammeMembershipServiceImpl implements ProgrammeMembershipServic
     }
 
     //attach the curriculum data to the programme membership
-    for (ProgrammeMembershipDTO pm : programmeMembershipDTOS) {
-      ProgrammeMembershipCurriculaDTO programmeMembershipCurriculaDTO = new ProgrammeMembershipCurriculaDTO();
-      BeanUtils.copyProperties(pm, programmeMembershipCurriculaDTO);
+    for (ProgrammeMembershipDTO pm : programmeMembershipDtos) {
+      ProgrammeMembershipCurriculaDTO programmeMembershipCurriculaDto = new ProgrammeMembershipCurriculaDTO();
+      BeanUtils.copyProperties(pm, programmeMembershipCurriculaDto);
       for (CurriculumMembershipDTO cm : pm.getCurriculumMemberships()) {
-        programmeMembershipCurriculaDTO
+        programmeMembershipCurriculaDto
             .setCurriculumDTO(curriculumDTOMap.get(cm.getCurriculumId()));
       }
-      result.add(programmeMembershipCurriculaDTO);
+      result.add(programmeMembershipCurriculaDto);
     }
     return result;
   }
