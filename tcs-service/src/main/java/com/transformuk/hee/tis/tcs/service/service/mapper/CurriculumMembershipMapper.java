@@ -25,7 +25,8 @@ import org.springframework.util.CollectionUtils;
 public class CurriculumMembershipMapper {
 
   /**
-   * Convert a CurriculumMembership to a ProgrammeMembershipDTO, including its curriculumMemberships
+   * Convert a CurriculumMembership to a ProgrammeMembershipDTO, including its
+   * curriculumMemberships.
    *
    * @param curriculumMembership the CurriculumMembership object to convert
    * @return a ProgrammeMembershipDTO object
@@ -44,7 +45,7 @@ public class CurriculumMembershipMapper {
   }
 
   /**
-   * Convert a list of CurriculumMemberships to a list of ProgrammeMembershipDTOs
+   * Convert a list of CurriculumMemberships to a list of ProgrammeMembershipDTOs.
    *
    * @param curriculumMemberships the list of CurriculumMembership objects to convert
    * @return a list of ProgrammeMembershipDTO objects
@@ -68,7 +69,7 @@ public class CurriculumMembershipMapper {
   }
 
   /**
-   * Convert a list of CurriculumMemberships to a list of distinct ProgrammeMembershipDTOs
+   * Convert a list of CurriculumMemberships to a list of distinct ProgrammeMembershipDTOs.
    *
    * @param curriculumMemberships the list of CurriculumMembership objects to convert
    * @return a list of distinct ProgrammeMembershipDTO objects
@@ -96,7 +97,7 @@ public class CurriculumMembershipMapper {
 
   /**
    * Convert a ProgrammeMembershipDTO to a CurriculumMembership object, enriched with all
-   * curriculum membership details from the ProgrammeMembershipDTO
+   * curriculum membership details from the ProgrammeMembershipDTO.
    *
    * @param programmeMembershipDto the ProgrammeMembershipDTO object to convert
    * @return a CurriculumMembership object
@@ -115,7 +116,7 @@ public class CurriculumMembershipMapper {
   }
 
   /**
-   * Convert a list of ProgrammeMembershipDTOs to a list of CurriculumMembership objects
+   * Convert a list of ProgrammeMembershipDTOs to a list of CurriculumMembership objects.
    *
    * @param programmeMembershipDtos the list of ProgrammeMembershipDTO objects to convert
    * @return a list of CurriculumMembership objects
@@ -132,7 +133,7 @@ public class CurriculumMembershipMapper {
   }
 
   /**
-   * Convert a CurriculumMembership to a ProgrammeMembershipDTO, without its curriculumMemberships
+   * Convert a CurriculumMembership to a ProgrammeMembershipDTO, without its curriculumMemberships.
    *
    * @param curriculumMembership the CurriculumMembership object to convert
    * @return a ProgrammeMembershipDTO object
@@ -168,7 +169,7 @@ public class CurriculumMembershipMapper {
   }
 
   /**
-   * Convert a CurriculumMembership to a CurriculumMembershipDTO
+   * Convert a CurriculumMembership to a CurriculumMembershipDTO.
    *
    * @param curriculumMembership the CurriculumMembership object to convert
    * @return a CurriculumMembershipDTO object
@@ -191,7 +192,7 @@ public class CurriculumMembershipMapper {
   }
 
   /**
-   * Amend a CurriculumMembership object with details from a CurriculumMembershipDTO
+   * Amend a CurriculumMembership object with details from a CurriculumMembershipDTO.
    *
    * @param curriculumMembershipDto the CurriculumMembershipDTO to use
    * @param curriculumMembership the CurriculumMembership object to amend
@@ -213,7 +214,7 @@ public class CurriculumMembershipMapper {
   }
 
   /**
-   * Convert a ProgrammeMembershipDTO to a CurriculumMembership object
+   * Convert a ProgrammeMembershipDTO to a CurriculumMembership object.
    *
    * @param programmeMembershipDto the ProgrammeMembershipDTO object to convert
    * @return a CurriculumMembership object
@@ -249,7 +250,7 @@ public class CurriculumMembershipMapper {
   }
 
   /**
-   * Convert a Person to a PersonDTO object
+   * Convert a Person to a PersonDTO object.
    *
    * @param person the Person object to convert
    * @return a PersonDTO object
@@ -274,7 +275,7 @@ public class CurriculumMembershipMapper {
   }
 
   /**
-   * Convert a PersonDTO to a Person object
+   * Convert a PersonDTO to a Person object.
    *
    * @param personDto the PersonDTO object to convert
    * @return a Person object
@@ -300,7 +301,7 @@ public class CurriculumMembershipMapper {
   }
 
   /**
-   * Convert a TrainingNumber to a TrainingNumberDTO object
+   * Convert a TrainingNumber to a TrainingNumberDTO object.
    *
    * @param trainingNumber the TrainingNumber object to convert
    * @return a TrainingNumberDTO object
@@ -317,7 +318,7 @@ public class CurriculumMembershipMapper {
   }
 
   /**
-   * Convert a TrainingNumberDTO to a TrainingNumber object
+   * Convert a TrainingNumberDTO to a TrainingNumber object.
    *
    * @param trainingNumberDto the TrainingNumberDTO object to convert
    * @return a TrainingNumber object
@@ -334,7 +335,7 @@ public class CurriculumMembershipMapper {
   }
 
   /**
-   * Convert a Rotation to a RotationDTO object
+   * Convert a Rotation to a RotationDTO object.
    *
    * @param rotation the Rotation object to convert
    * @param programme the rotation Programme
@@ -355,7 +356,7 @@ public class CurriculumMembershipMapper {
   }
 
   /**
-   * Convert a RotationDTO to a Rotation object
+   * Convert a RotationDTO to a Rotation object.
    *
    * @param rotationDto the RotationDTO object to convert
    * @return a Rotation object

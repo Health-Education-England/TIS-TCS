@@ -493,9 +493,9 @@ public class ProgrammeMembershipServiceImplTest {
     //then
     verify(curriculumMembershipRepositoryMock, times(1))
         .saveAll(anyCollection());
-    Assert.assertEquals(programmeMembershipDTO.getProgrammeId().longValue(), PROGRAMME_ID);
-    Assert.assertEquals(programmeMembershipDTO.getCurriculumMemberships()
-            .get(0).getCurriculumId().longValue(), CURRICULUM_1_ID);
+    Assert.assertEquals(PROGRAMME_ID, programmeMembershipDTO.getProgrammeId().longValue());
+    Assert.assertEquals(CURRICULUM_1_ID, programmeMembershipDTO.getCurriculumMemberships()
+            .get(0).getCurriculumId().longValue());
   }
 
   @Test
@@ -539,10 +539,10 @@ public class ProgrammeMembershipServiceImplTest {
     //then
     verify(curriculumMembershipRepositoryMock, times(1))
         .saveAll(anyCollection());
-    Assert.assertEquals(programmeMembershipDTOList.get(0)
-        .getProgrammeId().longValue(), PROGRAMME_ID);
-    Assert.assertEquals(programmeMembershipDTOList.get(0)
-        .getCurriculumMemberships().get(0).getCurriculumId().longValue(), CURRICULUM_1_ID);
+    Assert.assertEquals(PROGRAMME_ID, programmeMembershipDTOList.get(0)
+        .getProgrammeId().longValue());
+    Assert.assertEquals(CURRICULUM_1_ID, programmeMembershipDTOList.get(0)
+        .getCurriculumMemberships().get(0).getCurriculumId().longValue());
   }
 
   @Test

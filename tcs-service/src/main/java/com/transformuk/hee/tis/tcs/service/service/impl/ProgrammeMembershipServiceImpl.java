@@ -242,10 +242,10 @@ public class ProgrammeMembershipServiceImpl implements ProgrammeMembershipServic
     if (CollectionUtils.isNotEmpty(programmeMembershipsForTrainee)) {
       for (ProgrammeMembershipCurriculaDTO programmeMembershipCurriculaDto
           : programmeMembershipsForTrainee) {
-        Optional<ProgrammeMembershipCurriculaDTO> foundPMCOptional
+        Optional<ProgrammeMembershipCurriculaDTO> foundPmcOptional
             = getSameProgrammeMembershipForDates(result, programmeMembershipCurriculaDto);
-        if (foundPMCOptional.isPresent()) {
-          ProgrammeMembershipCurriculaDTO foundPMC = foundPMCOptional.get();
+        if (foundPmcOptional.isPresent()) {
+          ProgrammeMembershipCurriculaDTO foundPMC = foundPmcOptional.get();
 
           List<CurriculumMembershipDTO> curriculumMemberships = Lists.newArrayList();
           if (foundPMC.getCurriculumMemberships() != null) {
@@ -282,12 +282,12 @@ public class ProgrammeMembershipServiceImpl implements ProgrammeMembershipServic
   private Predicate<ProgrammeMembershipCurriculaDTO> isProgrammeMembershipEffectivelyTheSame(
       ProgrammeMembershipCurriculaDTO programmeMembershipCurriculaDto) {
     return pmc ->
-        Objects.equals(pmc.getProgrammeId(), programmeMembershipCurriculaDto.getProgrammeId()) &&
-            Objects.equals(pmc.getProgrammeMembershipType(),
-                programmeMembershipCurriculaDto.getProgrammeMembershipType()) &&
-            Objects.equals(pmc.getProgrammeStartDate(),
-                programmeMembershipCurriculaDto.getProgrammeStartDate()) &&
-            Objects.equals(pmc.getProgrammeEndDate(),
+        Objects.equals(pmc.getProgrammeId(), programmeMembershipCurriculaDto.getProgrammeId())
+            && Objects.equals(pmc.getProgrammeMembershipType(),
+                programmeMembershipCurriculaDto.getProgrammeMembershipType())
+            && Objects.equals(pmc.getProgrammeStartDate(),
+                programmeMembershipCurriculaDto.getProgrammeStartDate())
+            && Objects.equals(pmc.getProgrammeEndDate(),
                 programmeMembershipCurriculaDto.getProgrammeEndDate());
   }
 
@@ -360,7 +360,8 @@ public class ProgrammeMembershipServiceImpl implements ProgrammeMembershipServic
 
     //attach the curriculum data to the programme membership
     for (ProgrammeMembershipDTO pm : programmeMembershipDtos) {
-      ProgrammeMembershipCurriculaDTO programmeMembershipCurriculaDto = new ProgrammeMembershipCurriculaDTO();
+      ProgrammeMembershipCurriculaDTO programmeMembershipCurriculaDto
+          = new ProgrammeMembershipCurriculaDTO();
       BeanUtils.copyProperties(pm, programmeMembershipCurriculaDto);
       for (CurriculumMembershipDTO cm : pm.getCurriculumMemberships()) {
         programmeMembershipCurriculaDto
