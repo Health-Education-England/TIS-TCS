@@ -245,11 +245,11 @@ public class ProgrammeMembershipServiceImpl implements ProgrammeMembershipServic
         Optional<ProgrammeMembershipCurriculaDTO> foundPmcOptional
             = getSameProgrammeMembershipForDates(result, programmeMembershipCurriculaDto);
         if (foundPmcOptional.isPresent()) {
-          ProgrammeMembershipCurriculaDTO foundPMC = foundPmcOptional.get();
+          ProgrammeMembershipCurriculaDTO foundPmc = foundPmcOptional.get();
 
           List<CurriculumMembershipDTO> curriculumMemberships = Lists.newArrayList();
-          if (foundPMC.getCurriculumMemberships() != null) {
-            curriculumMemberships.addAll(foundPMC.getCurriculumMemberships());
+          if (foundPmc.getCurriculumMemberships() != null) {
+            curriculumMemberships.addAll(foundPmc.getCurriculumMemberships());
           }
           //merge the existing curricula memberships with the new ones
           if (programmeMembershipCurriculaDto.getCurriculumMemberships() != null) {
@@ -257,7 +257,7 @@ public class ProgrammeMembershipServiceImpl implements ProgrammeMembershipServic
                 .addAll(programmeMembershipCurriculaDto.getCurriculumMemberships());
           }
 
-          foundPMC.setCurriculumMemberships(curriculumMemberships);
+          foundPmc.setCurriculumMemberships(curriculumMemberships);
         } else {
           result.add(programmeMembershipCurriculaDto);
         }
