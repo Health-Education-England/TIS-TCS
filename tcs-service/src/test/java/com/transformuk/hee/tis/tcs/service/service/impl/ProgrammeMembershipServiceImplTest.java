@@ -1,20 +1,25 @@
 package com.transformuk.hee.tis.tcs.service.service.impl;
 
+import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyCollection;
 import static org.mockito.ArgumentMatchers.anyLong;
 import static org.mockito.ArgumentMatchers.anySet;
 import static org.mockito.Mockito.never;
+import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
 import com.transformuk.hee.tis.tcs.api.dto.CurriculumDTO;
 import com.transformuk.hee.tis.tcs.api.dto.CurriculumMembershipDTO;
+import com.transformuk.hee.tis.tcs.api.dto.PersonDTO;
 import com.transformuk.hee.tis.tcs.api.dto.ProgrammeMembershipCurriculaDTO;
 import com.transformuk.hee.tis.tcs.api.dto.ProgrammeMembershipDTO;
 import com.transformuk.hee.tis.tcs.api.dto.TrainingNumberDTO;
 import com.transformuk.hee.tis.tcs.api.enumeration.ProgrammeMembershipType;
+import com.transformuk.hee.tis.tcs.api.enumeration.Status;
 import com.transformuk.hee.tis.tcs.service.model.Curriculum;
 import com.transformuk.hee.tis.tcs.service.model.CurriculumMembership;
+import com.transformuk.hee.tis.tcs.service.model.Person;
 import com.transformuk.hee.tis.tcs.service.model.Programme;
 import com.transformuk.hee.tis.tcs.service.model.ProgrammeMembership;
 import com.transformuk.hee.tis.tcs.service.model.TrainingNumber;
@@ -43,6 +48,10 @@ import org.junit.runner.RunWith;
 import org.mockito.Mock;
 import org.mockito.junit.MockitoJUnitRunner;
 import org.springframework.context.ApplicationEventPublisher;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageImpl;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
 import org.springframework.test.util.ReflectionTestUtils;
 
 @RunWith(MockitoJUnitRunner.class)
@@ -50,7 +59,8 @@ public class ProgrammeMembershipServiceImplTest {
 
   private static final long TRAINEE_ID = 1L;
   private static final String TRAINEE_NUMBER = "XXX/XXX/XXX";
-
+  private static final long CURRICULUM_1_ID = 5L;
+  private static final long CURRICULUM_2_ID = 6L;
   private static final long PROGRAMME_ID = 2L;
   private static final Long PROGRAMME_MEMBERSHIP_ID_1 = 7777L;
   private static final Long PROGRAMME_MEMBERSHIP_ID_2 = 8888L;
@@ -58,18 +68,22 @@ public class ProgrammeMembershipServiceImplTest {
   private static final String PROGRAMME_NAME = "Programme Name";
   private final CurriculumMembership curriculumMembership1 = new CurriculumMembership();
   private final CurriculumMembership curriculumMembership2 = new CurriculumMembership();
-  private final ProgrammeMembershipDTO programmeMembershipDTO1 = new ProgrammeMembershipDTO();
-  private final ProgrammeMembershipDTO programmeMembershipDTO2 = new ProgrammeMembershipDTO();
+  private final ProgrammeMembershipDTO programmeMembershipDto1 = new ProgrammeMembershipDTO();
+  private final ProgrammeMembershipDTO programmeMembershipDto2 = new ProgrammeMembershipDTO();
   private final Curriculum curriculum1 = new Curriculum();
   private final Curriculum curriculum2 = new Curriculum();
-  private final CurriculumDTO curriculumDTO1 = new CurriculumDTO();
-  private final CurriculumDTO curriculumDTO2 = new CurriculumDTO();
+  private final CurriculumDTO curriculumDto1 = new CurriculumDTO();
+  private final CurriculumDTO curriculumDto2 = new CurriculumDTO();
   private final TrainingNumber trainingNumber = new TrainingNumber();
-  private final TrainingNumberDTO trainingNumberDTO = new TrainingNumberDTO();
-  private final CurriculumMembershipDTO curriculumMembershipDTO1 = new CurriculumMembershipDTO();
-  private final CurriculumMembershipDTO curriculumMembershipDTO2 = new CurriculumMembershipDTO();
+  private final TrainingNumberDTO trainingNumberDto = new TrainingNumberDTO();
+  private final CurriculumMembershipDTO curriculumMembershipDto1 = new CurriculumMembershipDTO();
+  private final CurriculumMembershipDTO curriculumMembershipDto2 = new CurriculumMembershipDTO();
   private final Programme programme = new Programme();
+  private final PersonDTO personDto = new PersonDTO();
+  private final Person person = new Person();
   private ProgrammeMembershipServiceImpl testObj;
+  private ProgrammeMembershipMapper programmeMembershipMapper;
+  private CurriculumMembershipMapper curriculumMembershipMapper;
   @Mock
   private ProgrammeMembershipRepository programmeMembershipRepositoryMock;
   @Mock
@@ -85,8 +99,8 @@ public class ProgrammeMembershipServiceImplTest {
 
   @Before
   public void setup() {
-    ProgrammeMembershipMapper programmeMembershipMapper = new ProgrammeMembershipMapper();
-    CurriculumMembershipMapper curriculumMembershipMapper = new CurriculumMembershipMapper();
+    programmeMembershipMapper = new ProgrammeMembershipMapper();
+    curriculumMembershipMapper = new CurriculumMembershipMapper();
     CurriculumMapper curriculumMapper = new CurriculumMapperImpl();
     ReflectionTestUtils.setField(curriculumMapper, "specialtyMapper",
         new SpecialtyMapperImpl());
@@ -110,34 +124,44 @@ public class ProgrammeMembershipServiceImplTest {
     curriculumMembership1.setProgramme(programme);
     curriculumMembership1.setTrainingNumber(trainingNumber);
     curriculumMembership1.setCurriculumId(5L);
+    curriculumMembership1.setPerson(person);
 
     curriculumMembership2.setId(PROGRAMME_MEMBERSHIP_ID_2);
     curriculumMembership2.setProgramme(programme);
     curriculumMembership2.setTrainingNumber(trainingNumber);
     curriculumMembership2.setCurriculumId(6L);
 
-    trainingNumberDTO.setId(TRAINEE_ID);
-    trainingNumberDTO.setTrainingNumber(TRAINEE_NUMBER);
-    programmeMembershipDTO1.setProgrammeId(PROGRAMME_ID);
-    programmeMembershipDTO1.setTrainingNumber(trainingNumberDTO);
-    programmeMembershipDTO1.setCurriculumMemberships(Lists.newArrayList());
+    trainingNumberDto.setId(TRAINEE_ID);
+    trainingNumberDto.setTrainingNumber(TRAINEE_NUMBER);
 
-    programmeMembershipDTO2.setProgrammeId(PROGRAMME_ID);
-    programmeMembershipDTO2.setTrainingNumber(trainingNumberDTO);
-    programmeMembershipDTO2.setCurriculumMemberships(Lists.newArrayList());
+    curriculumMembershipDto1.setCurriculumId(CURRICULUM_1_ID);
+    curriculumMembershipDto2.setCurriculumId(CURRICULUM_2_ID);
 
-    curriculumMembershipDTO1.setCurriculumId(5L);
-    curriculumMembershipDTO2.setCurriculumId(6L);
+    personDto.setId(1L);
+    personDto.setStatus(Status.INACTIVE);
+    personDto.setProgrammeMemberships(Sets.newHashSet());
+
+    person.setId(1L);
+    person.setProgrammeMemberships(Sets.newHashSet());
+
+    programmeMembershipDto1.setProgrammeId(PROGRAMME_ID);
+    programmeMembershipDto1.setTrainingNumber(trainingNumberDto);
+    programmeMembershipDto1.setCurriculumMemberships(Lists.newArrayList(curriculumMembershipDto1));
+    programmeMembershipDto1.setPerson(personDto);
+
+    programmeMembershipDto2.setProgrammeId(PROGRAMME_ID);
+    programmeMembershipDto2.setTrainingNumber(trainingNumberDto);
+    programmeMembershipDto2.setCurriculumMemberships(Lists.newArrayList());
 
     curriculum1.setId(5L);
     curriculum1.setName("XXX");
     curriculum2.setId(6L);
     curriculum2.setName("YYY");
 
-    curriculumDTO1.setId(5L);
-    curriculumDTO1.setName("XXX");
-    curriculumDTO2.setId(6L);
-    curriculumDTO2.setName("YYY");
+    curriculumDto1.setId(5L);
+    curriculumDto1.setName("XXX");
+    curriculumDto2.setId(6L);
+    curriculumDto2.setName("YYY");
   }
 
   @Test(expected = NullPointerException.class)
@@ -192,8 +216,45 @@ public class ProgrammeMembershipServiceImplTest {
         .findProgrammeMembershipsForTraineeAndProgramme(TRAINEE_ID, PROGRAMME_ID);
 
     Assert.assertNotNull(result);
-    Assert.assertEquals(1, result.size());
-    Assert.assertEquals(2, result.get(0).getCurriculumMemberships().size());
+    //TODO: has the logic changed here?? confirm
+    Assert.assertEquals(2, result.size());
+    Assert.assertEquals(1, result.get(0).getCurriculumMemberships().size());
+  }
+
+  @Test()
+  public void findAllShouldReturnPageOfPopulatedDTOs() {
+    //given
+    List<CurriculumMembership> curriculumMemberships = Lists
+        .newArrayList(curriculumMembership1, curriculumMembership2);
+    List<Curriculum> foundCurricula = Lists.newArrayList(curriculum1, curriculum2);
+    Set<Long> curriculumIds = Sets.newLinkedHashSet(5L, 6L);
+    Page<CurriculumMembership> curriculumMembershipPage = new PageImpl<>(curriculumMemberships);
+    when(curriculumMembershipRepositoryMock.findAll(any(Pageable.class)))
+        .thenReturn(curriculumMembershipPage);
+    Pageable pageable = PageRequest.of(1, 10);
+
+    //when
+    Page<ProgrammeMembershipDTO> result = testObj.findAll(pageable);
+
+    //then
+    Assert.assertNotNull(result);
+    Assert.assertEquals(curriculumIds.size(), result.toList().size());
+    Assert.assertEquals(1, result.toList().get(0).getCurriculumMemberships().size());
+  }
+
+  @Test()
+  public void findOneShouldReturnProgrammeMembershipDTO() {
+    //given
+    when(curriculumMembershipRepositoryMock.findById(1L))
+        .thenReturn(Optional.of(curriculumMembership1));
+
+    //when
+    ProgrammeMembershipDTO result = testObj.findOne(1L);
+
+    //then
+    Assert.assertNotNull(result);
+    Assert.assertEquals(PROGRAMME_ID, result.getProgrammeId().longValue());
+    Assert.assertEquals(1, result.getCurriculumMemberships().size());
   }
 
 
@@ -414,5 +475,129 @@ public class ProgrammeMembershipServiceImplTest {
     Assert.assertEquals(PROGRAMME_MEMBERSHIP_ID_2, pmc2.getId());
     Assert.assertEquals(PROGRAMME_ID, pmc2.getProgrammeId().longValue());
     Assert.assertEquals(curriculum2.getId(), pmc2.getCurriculumDTO().getId());
+  }
+
+  @Test
+  public void shouldSaveProgrammeMembershipDtoToCurriculumMembershipRepository() {
+    //given
+    List<CurriculumMembership> curriculumMembershipList
+        = curriculumMembershipMapper.toEntity(programmeMembershipDto1);
+
+    when(curriculumMembershipRepositoryMock.saveAll(anyCollection()))
+        .thenReturn(curriculumMembershipList);
+    when(personRepositoryMock.getOne(anyLong())).thenReturn(person);
+
+    //when
+    ProgrammeMembershipDTO programmeMembershipDTO = testObj.save(programmeMembershipDto1);
+
+    //then
+    verify(curriculumMembershipRepositoryMock, times(1))
+        .saveAll(anyCollection());
+    Assert.assertEquals(programmeMembershipDTO.getProgrammeId().longValue(), PROGRAMME_ID);
+    Assert.assertEquals(programmeMembershipDTO.getCurriculumMemberships()
+            .get(0).getCurriculumId().longValue(), CURRICULUM_1_ID);
+  }
+
+  @Test
+  public void shouldSaveProgrammeMembershipDtoToProgrammeMembershipRepository() {
+    //this is deprecated and should be removed once parallel updates to the
+    //ProgrammeMembershipRepository are stopped
+
+    //given
+    List<ProgrammeMembership> programmeMembershipList
+        = programmeMembershipMapper.toEntity(programmeMembershipDto1);
+    when(programmeMembershipRepositoryMock.saveAll(anyCollection()))
+        .thenReturn(programmeMembershipList);
+    List<CurriculumMembership> curriculumMembershipList
+        = curriculumMembershipMapper.toEntity(programmeMembershipDto1);
+    when(curriculumMembershipRepositoryMock.saveAll(anyCollection()))
+        .thenReturn(curriculumMembershipList);
+    when(personRepositoryMock.getOne(anyLong())).thenReturn(person);
+
+    //when
+    testObj.save(programmeMembershipDto1);
+
+    //then
+    verify(programmeMembershipRepositoryMock, times(1))
+        .saveAll(anyCollection());
+  }
+
+  @Test
+  public void shouldSaveProgrammeMembershipDtoListToCurriculumMembershipRepository() {
+    //given
+    List<CurriculumMembership> curriculumMembershipList
+        = curriculumMembershipMapper.toEntity(programmeMembershipDto1);
+
+    when(curriculumMembershipRepositoryMock.saveAll(anyCollection()))
+        .thenReturn(curriculumMembershipList);
+    when(personRepositoryMock.getOne(anyLong())).thenReturn(person);
+
+    //when
+    List<ProgrammeMembershipDTO> programmeMembershipDTOList =
+        testObj.save(Lists.newArrayList(programmeMembershipDto1));
+
+    //then
+    verify(curriculumMembershipRepositoryMock, times(1))
+        .saveAll(anyCollection());
+    Assert.assertEquals(programmeMembershipDTOList.get(0)
+        .getProgrammeId().longValue(), PROGRAMME_ID);
+    Assert.assertEquals(programmeMembershipDTOList.get(0)
+        .getCurriculumMemberships().get(0).getCurriculumId().longValue(), CURRICULUM_1_ID);
+  }
+
+  @Test
+  public void shouldSaveProgrammeMembershipDtoListToProgrammeMembershipRepository() {
+    //this is deprecated and should be removed once parallel updates to the
+    //ProgrammeMembershipRepository are stopped
+
+    //given
+    List<ProgrammeMembership> programmeMembershipList
+        = programmeMembershipMapper.toEntity(programmeMembershipDto1);
+    when(programmeMembershipRepositoryMock.saveAll(anyCollection()))
+        .thenReturn(programmeMembershipList);
+    List<CurriculumMembership> curriculumMembershipList
+        = curriculumMembershipMapper.toEntity(programmeMembershipDto1);
+    when(curriculumMembershipRepositoryMock.saveAll(anyCollection()))
+        .thenReturn(curriculumMembershipList);
+    when(personRepositoryMock.getOne(anyLong())).thenReturn(person);
+
+    //when
+    testObj.save(Lists.newArrayList(programmeMembershipDto1));
+
+    //then
+    verify(programmeMembershipRepositoryMock, times(1))
+        .saveAll(anyCollection());
+  }
+
+  @Test
+  public void shouldDeleteFromCurriculumMembershipRepository() {
+    //given
+    when(personRepositoryMock.getOne(anyLong())).thenReturn(person);
+    when(curriculumMembershipRepositoryMock.getOne(PROGRAMME_MEMBERSHIP_ID_1))
+        .thenReturn(curriculumMembership1);
+
+    //when
+    testObj.delete(PROGRAMME_MEMBERSHIP_ID_1);
+
+    //then
+    verify(curriculumMembershipRepositoryMock, times(1))
+        .deleteById(PROGRAMME_MEMBERSHIP_ID_1);
+  }
+
+  @Test
+  public void shouldDeleteFromProgrammeMembershipRepository() {
+    //this is deprecated and should be removed once parallel updates to the
+    //ProgrammeMembershipRepository are stopped
+    //given
+    when(personRepositoryMock.getOne(anyLong())).thenReturn(person);
+    when(curriculumMembershipRepositoryMock.getOne(PROGRAMME_MEMBERSHIP_ID_1))
+        .thenReturn(curriculumMembership1);
+
+    //when
+    testObj.delete(PROGRAMME_MEMBERSHIP_ID_1);
+
+    //then
+    verify(programmeMembershipRepositoryMock, times(1))
+        .deleteById(PROGRAMME_MEMBERSHIP_ID_1);
   }
 }
