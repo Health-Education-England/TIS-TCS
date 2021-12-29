@@ -120,6 +120,7 @@ public class ProgrammeMembershipServiceImpl implements ProgrammeMembershipServic
         .programmeMembershipDTOsToProgrammeMemberships(programmeMembershipDto);
     programmeMembershipRepository.saveAll(programmeMemberships);
 
+    //new
     List<CurriculumMembership> curriculumMemberships = curriculumMembershipMapper
         .programmeMembershipDtosToCurriculumMemberships(programmeMembershipDto);
     curriculumMemberships = curriculumMembershipRepository.saveAll(curriculumMemberships);

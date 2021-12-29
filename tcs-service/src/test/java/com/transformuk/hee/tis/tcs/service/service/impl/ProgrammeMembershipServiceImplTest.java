@@ -143,7 +143,7 @@ public class ProgrammeMembershipServiceImplTest {
     personDto.setProgrammeMemberships(Sets.newHashSet());
 
     person.setId(1L);
-    person.setProgrammeMemberships(Sets.newHashSet());
+    person.setCurriculumMemberships(Sets.newHashSet());
 
     programmeMembershipDto1.setProgrammeId(PROGRAMME_ID);
     programmeMembershipDto1.setTrainingNumber(trainingNumberDto);

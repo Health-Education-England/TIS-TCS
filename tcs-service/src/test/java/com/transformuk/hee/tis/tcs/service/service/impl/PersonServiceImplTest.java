@@ -153,7 +153,7 @@ public class PersonServiceImplTest {
     pm3 = new CurriculumMembership().programmeStartDate(pm3Date);
     pm4 = new CurriculumMembership().programmeStartDate(pm4Date);
 
-    person.setProgrammeMemberships(Sets.newHashSet(pm1, pm2, pm3, pm4));
+    person.setCurriculumMemberships(Sets.newHashSet(pm1, pm2, pm3, pm4));
 
     personDTO = new PersonDTO();
     pmDTO1 = new ProgrammeMembershipDTO();

@@ -94,7 +94,7 @@ public class Person implements Serializable {
 
   @OneToMany(mappedBy = "person", cascade = {CascadeType.REMOVE,
       CascadeType.REFRESH}, orphanRemoval = true)
-  private Set<CurriculumMembership> programmeMemberships = new HashSet<>();
+  private Set<CurriculumMembership> curriculumMemberships = new HashSet<>();
 
   @OneToOne
   @JoinColumn(unique = true, name = "id")
@@ -132,11 +132,11 @@ public class Person implements Serializable {
   }
 
   public Status programmeMembershipsStatus() {
-    if (CollectionUtils.isEmpty(getProgrammeMemberships())) {
+    if (CollectionUtils.isEmpty(this.getCurriculumMemberships())) {
       return Status.INACTIVE;
     }
     LocalDate today = LocalDate.now();
-    return getProgrammeMemberships().parallelStream()
+    return this.getCurriculumMemberships().parallelStream()
         .filter(pm -> pm.getProgrammeStartDate() != null && pm.getProgrammeEndDate() != null)
         .anyMatch(pm -> !today.isBefore(pm.getProgrammeStartDate())
             && !today.isAfter(pm.getProgrammeEndDate()))
@@ -198,7 +198,7 @@ public class Person implements Serializable {
   }
 
   public Person programmeMemberships(Set<CurriculumMembership> programmeMemberships) {
-    this.programmeMemberships = programmeMemberships;
+    this.curriculumMemberships = programmeMemberships;
     return this;
   }
 

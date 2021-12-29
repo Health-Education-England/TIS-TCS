@@ -65,7 +65,7 @@ public class PersonMapper {
     }
 
     if (dto.getProgrammeMemberships() != null) {
-      person.setProgrammeMemberships(new HashSet<>(curriculumMembershipMapper
+      person.setCurriculumMemberships(new HashSet<>(curriculumMembershipMapper
           .programmeMembershipDtosToCurriculumMemberships(
               new ArrayList<>(dto.getProgrammeMemberships()))));
     }
@@ -113,10 +113,10 @@ public class PersonMapper {
     personDTO.setRightToWork(rightToWorkMapper.toDto(entity.getRightToWork()));
     personDTO.setRegulator(entity.getRegulator());
 
-    if (entity.getProgrammeMemberships() != null) {
+    if (entity.getCurriculumMemberships() != null) {
       personDTO.setProgrammeMemberships(new HashSet<>(curriculumMembershipMapper
           .curriculumMembershipsToProgrammeMembershipDtos(
-              new ArrayList<>(entity.getProgrammeMemberships()))));
+              new ArrayList<>(entity.getCurriculumMemberships()))));
     }
 
     if (entity.getTrainerApprovals() != null) {

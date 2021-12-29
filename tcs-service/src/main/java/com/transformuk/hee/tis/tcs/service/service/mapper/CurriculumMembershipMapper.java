@@ -128,7 +128,6 @@ public class CurriculumMembershipMapper {
     for (ProgrammeMembershipDTO programmeMembershipDto : programmeMembershipDtos) {
       result.addAll(toEntity(programmeMembershipDto));
     }
-
     return result;
   }
 
