@@ -91,6 +91,7 @@ public class ProgrammeMembershipServiceImpl implements ProgrammeMembershipServic
     //below is deprecated
     List<ProgrammeMembership> programmeMembershipList = programmeMembershipMapper
         .toEntity(programmeMembershipDto);
+    programmeMembershipList.forEach(this::setProgrammeMembershipAmendedDateInDatabase);
     programmeMembershipRepository.saveAll(programmeMembershipList);
 
     //new
@@ -118,6 +119,7 @@ public class ProgrammeMembershipServiceImpl implements ProgrammeMembershipServic
     //below is deprecated
     List<ProgrammeMembership> programmeMemberships = programmeMembershipMapper
         .programmeMembershipDTOsToProgrammeMemberships(programmeMembershipDto);
+    programmeMemberships.forEach(this::setProgrammeMembershipAmendedDateInDatabase);
     programmeMembershipRepository.saveAll(programmeMemberships);
 
     //new
@@ -382,5 +384,35 @@ public class ProgrammeMembershipServiceImpl implements ProgrammeMembershipServic
       person.setStatus(newStatus);
       personRepository.save(person);
     }
+  }
+
+  /**
+   * Set the AmendedDate for a ProgrammeMembership from its database record.
+   *
+   * The reason for this is that the amendedDate of programmeMembershipDto is for the entry
+   * in the CurriculumMembership table, which will have a slightly different value from that
+   * in the ProgrammeMembership table. Since this field is used for @Version optimistic
+   * locking, we need the actual value from the ProgrammeMembership table otherwise we will
+   * get 'You are acting on stale data, please refresh' concurrency failures.
+   *
+   * However, it is possible that this approach will result in concurrent updates to the same
+   * ProgrammeMembership being handled incorrectly: if record A is updated to A' and this is
+   * committed, and then update B (which was based on A not A') is committed, this should fail as
+   * B needs to be based on A'. The code below will cause this commit to incorrectly succeed afaik.
+   *
+   * @param pm the ProgrammeMembership to set the amended date for
+   * @return the updated ProgrammeMembership
+   */
+  private ProgrammeMembership setProgrammeMembershipAmendedDateInDatabase(ProgrammeMembership pm) {
+    if (pm.getId() != null) {
+      Optional<ProgrammeMembership> programmeMembership = programmeMembershipRepository.findById(pm.getId());
+      if (programmeMembership.isPresent()) {
+        pm.setAmendedDate(programmeMembership.get().getAmendedDate());
+        //see note in above function
+      } else {
+        log.error("ProgrammeMembership record missing: {}", pm.getId());
+      }
+    }
+    return pm;
   }
 }
