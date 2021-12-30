@@ -1,0 +1,1 @@
+/* There is no CREATE TABLE LIKE or PREPARE so for testing keep this blank */
