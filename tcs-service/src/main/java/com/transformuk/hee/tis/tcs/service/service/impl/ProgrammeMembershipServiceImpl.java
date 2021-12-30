@@ -88,17 +88,19 @@ public class ProgrammeMembershipServiceImpl implements ProgrammeMembershipServic
   @Override
   public ProgrammeMembershipDTO save(ProgrammeMembershipDTO programmeMembershipDto) {
     log.debug("Request to save ProgrammeMembership : {}", programmeMembershipDto);
-    //below is deprecated
-    List<ProgrammeMembership> programmeMembershipList = programmeMembershipMapper
-        .toEntity(programmeMembershipDto);
-    programmeMembershipList.forEach(this::setProgrammeMembershipAmendedDateInDatabase);
-    programmeMembershipRepository.saveAll(programmeMembershipList);
 
     //new
     List<CurriculumMembership> curriculumMembershipList = curriculumMembershipMapper
         .toEntity(programmeMembershipDto);
     curriculumMembershipList = curriculumMembershipRepository.saveAll(curriculumMembershipList);
 
+    //below is deprecated
+    List<ProgrammeMembership> programmeMembershipList = programmeMembershipMapper
+        .toEntity(programmeMembershipDto);
+    programmeMembershipList.forEach(this::setProgrammeMembershipAmendedDateFromDbRecord);
+    programmeMembershipRepository.saveAll(programmeMembershipList);
+
+    //emit events
     updatePersonWhenStatusIsStale(curriculumMembershipList.get(0).getPerson().getId());
     List<ProgrammeMembershipDTO> resultDtos = curriculumMembershipMapper
         .curriculumMembershipsToProgrammeMembershipDtos(curriculumMembershipList);
@@ -116,17 +118,19 @@ public class ProgrammeMembershipServiceImpl implements ProgrammeMembershipServic
   @Override
   public List<ProgrammeMembershipDTO> save(List<ProgrammeMembershipDTO> programmeMembershipDto) {
     log.debug("Request to save ProgrammeMembership : {}", programmeMembershipDto);
-    //below is deprecated
-    List<ProgrammeMembership> programmeMemberships = programmeMembershipMapper
-        .programmeMembershipDTOsToProgrammeMemberships(programmeMembershipDto);
-    programmeMemberships.forEach(this::setProgrammeMembershipAmendedDateInDatabase);
-    programmeMembershipRepository.saveAll(programmeMemberships);
 
     //new
     List<CurriculumMembership> curriculumMemberships = curriculumMembershipMapper
         .programmeMembershipDtosToCurriculumMemberships(programmeMembershipDto);
     curriculumMemberships = curriculumMembershipRepository.saveAll(curriculumMemberships);
 
+    //below is deprecated
+    List<ProgrammeMembership> programmeMemberships = programmeMembershipMapper
+        .programmeMembershipDTOsToProgrammeMemberships(programmeMembershipDto);
+    programmeMemberships.forEach(this::setProgrammeMembershipAmendedDateFromDbRecord);
+    programmeMembershipRepository.saveAll(programmeMemberships);
+
+    //emit events
     updatePersonWhenStatusIsStale(curriculumMemberships.get(0).getPerson().getId());
     List<ProgrammeMembershipDTO> programmeMembershipDtos = curriculumMembershipMapper
         .curriculumMembershipsToProgrammeMembershipDtos(curriculumMemberships);
@@ -387,28 +391,33 @@ public class ProgrammeMembershipServiceImpl implements ProgrammeMembershipServic
   }
 
   /**
-   * Set the AmendedDate for a ProgrammeMembership from its database record.
+   * Set a ProgrammeMembership AmendedDate from its database record.
    *
-   * The reason for this is that the amendedDate of programmeMembershipDto is for the entry
-   * in the CurriculumMembership table, which will have a slightly different value from that
-   * in the ProgrammeMembership table. Since this field is used for @Version optimistic
-   * locking, we need the actual value from the ProgrammeMembership table otherwise we will
-   * get 'You are acting on stale data, please refresh' concurrency failures.
+   * <p>The amendedDate of the programmeMembershipDto which is being saved is based on the entry
+   * in the CurriculumMembership table, which will have a slightly different AmendedDate value
+   * from the record in the ProgrammeMembership table. Since this field is used for @Version
+   * optimistic locking, we need the actual value from the ProgrammeMembership table otherwise we
+   * will get 'You are acting on stale data, please refresh' concurrency failures.
    *
-   * However, it is possible that this approach will result in concurrent updates to the same
-   * ProgrammeMembership being handled incorrectly: if record A is updated to A' and this is
+   * <p>Caution: by overwriting the AmendedDate, it is possible to handle concurrent updates to the
+   * same ProgrammeMembership incorrectly: for exampel, if record A is updated to A' and this is
    * committed, and then update B (which was based on A not A') is committed, this should fail as
-   * B needs to be based on A'. The code below will cause this commit to incorrectly succeed afaik.
+   * B needs to be based on A', otherwise the A' update is lost. To avoid this, apply the
+   * ProgrammeMembership record Save after the parallel CurriculumMembership Save in the same
+   * code block: in the event of stale data (the B update in the example above) the
+   * CurriculumMembership Save will fail and throw an exception before the incorrect
+   * ProgrammeMembership Save is applied.
    *
    * @param pm the ProgrammeMembership to set the amended date for
    * @return the updated ProgrammeMembership
    */
-  private ProgrammeMembership setProgrammeMembershipAmendedDateInDatabase(ProgrammeMembership pm) {
+  private ProgrammeMembership setProgrammeMembershipAmendedDateFromDbRecord(
+      ProgrammeMembership pm) {
     if (pm.getId() != null) {
-      Optional<ProgrammeMembership> programmeMembership = programmeMembershipRepository.findById(pm.getId());
+      Optional<ProgrammeMembership> programmeMembership
+          = programmeMembershipRepository.findById(pm.getId());
       if (programmeMembership.isPresent()) {
         pm.setAmendedDate(programmeMembership.get().getAmendedDate());
-        //see note in above function
       } else {
         log.error("ProgrammeMembership record missing: {}", pm.getId());
       }
