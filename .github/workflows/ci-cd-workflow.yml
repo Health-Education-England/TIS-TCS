@@ -3,7 +3,7 @@ name: CI CD Workflow
 on:
   push:
     branches:
-      - master
+      - main
   workflow_dispatch:
 
 jobs:
@@ -90,7 +90,7 @@ jobs:
     name: Dockerize
     needs: build
     runs-on: ubuntu-latest
-    if: github.ref == 'refs/heads/master'
+    if: github.ref == 'refs/heads/main'
 
     steps:
       - name: Checkout
