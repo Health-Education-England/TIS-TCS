@@ -448,30 +448,25 @@ public class SpecialtyResourceIntTest {
     Set<SpecialtyType> subspecialtyAndPlacementAndCurriculum = new HashSet<>(Arrays.asList(SpecialtyType.SUB_SPECIALTY, SpecialtyType.PLACEMENT, SpecialtyType.CURRICULUM));
     specialty.setSpecialtyTypes(subspecialtyAndPlacementAndCurriculum);
     specialty.setStatus(Status.CURRENT);
-    specialty.setId(1L);
 
     Set<SpecialtyType> subspecialtyAndPlacement = new HashSet<>(Arrays.asList(SpecialtyType.SUB_SPECIALTY, SpecialtyType.PLACEMENT));
     Specialty specialty2 = createEntity();
     specialty2.setSpecialtyTypes(subspecialtyAndPlacement);
     specialty2.setStatus(Status.CURRENT);
-    specialty2.setId(2L);
 
     Set<SpecialtyType> subspecialty = new HashSet<>(Arrays.asList(SpecialtyType.SUB_SPECIALTY));
     Specialty specialty3 = createEntity();
     specialty3.setSpecialtyTypes(subspecialty);
     specialty3.setStatus(Status.CURRENT);
-    specialty3.setId(3L);
 
     Set<SpecialtyType> curriculum = new HashSet<>(Arrays.asList(SpecialtyType.CURRICULUM));
     Specialty specialty4 = createEntity();
     specialty4.setSpecialtyTypes(curriculum);
     specialty4.setStatus(Status.CURRENT);
-    specialty4.setId(4L);
 
     Specialty specialty5 = createEntity();
     specialty5.setSpecialtyTypes(subspecialty);
     specialty5.setStatus(Status.INACTIVE);
-    specialty5.setId(5L);
 
     specialtyRepository.saveAll(Arrays.asList(specialty, specialty2, specialty3, specialty4, specialty5));
     specialtyRepository.flush();
@@ -479,13 +474,16 @@ public class SpecialtyResourceIntTest {
     // look to retrieve only the ones that are current && with specialtyTypes SUB_SPECIALTY and PLACEMENT
     String colFilters = new URLCodec().encode("{\"status\":[\"CURRENT\"], \"specialtyTypes\": [\"SUB_SPECIALTY\", \"PLACEMENT\"] }");
 
-    // Get all the specialties that match the columnFilters (i.e. specialty with id 1 and specialty with id 2)
+    // Get all the specialties that match at least the columnFilters. Should retrieve:
+    // specialty2 (with specialtyTypes SUB_SPECIALTY and PLACEMENT)
+    // specialty (with specialtyTypes SUB_SPECIALTY, PLACEMENT and CURRICULUM)
     restSpecialtyMockMvc
         .perform(get("/api/specialties?sort=id,desc&columnFilters=" + colFilters))
         .andExpect(status().isOk())
-        .andExpect(jsonPath("$.[0].id").value("2"))
-        .andExpect(jsonPath("$.[1].id").value("1"))
+        .andExpect(jsonPath("$.[0].id").value(specialty2.getId()))
+        .andExpect(jsonPath("$.[1].id").value(specialty.getId()))
         .andExpect(jsonPath("$.[2]").doesNotExist());
+    // and nothing else
   }
 
   @Test
