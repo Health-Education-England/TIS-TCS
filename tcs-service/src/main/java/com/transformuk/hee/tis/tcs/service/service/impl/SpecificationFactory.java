@@ -3,7 +3,6 @@ package com.transformuk.hee.tis.tcs.service.service.impl;
 import java.time.LocalDate;
 import java.util.Collection;
 import javax.persistence.criteria.CriteriaBuilder;
-import javax.persistence.criteria.Expression;
 import javax.persistence.criteria.Join;
 import javax.persistence.criteria.JoinType;
 import org.apache.commons.lang3.StringUtils;

@@ -125,7 +125,8 @@ public class SpecialtyServiceImpl implements SpecialtyService {
               .map(value -> SpecialtyType.valueOf((String) value))
               .collect(Collectors.toList());
 
-          specialtyTypesValues.forEach(specialtyTypeValue -> specs.add(isMember(cf.getName(), specialtyTypeValue)));
+          specialtyTypesValues.forEach(specialtyTypeValue ->
+              specs.add(isMember(cf.getName(), specialtyTypeValue)));
         } else {
           specs.add(in(cf.getName(), cf.getValues()));
         }
