@@ -3,6 +3,7 @@ package com.transformuk.hee.tis.tcs.service.service.impl;
 import java.time.LocalDate;
 import java.util.Collection;
 import javax.persistence.criteria.CriteriaBuilder;
+import javax.persistence.criteria.Expression;
 import javax.persistence.criteria.Join;
 import javax.persistence.criteria.JoinType;
 import org.apache.commons.lang3.StringUtils;
@@ -86,6 +87,10 @@ public final class SpecificationFactory {
       });
       return cbi;
     };
+  }
+
+  public static Specification isMember(String attribute, Object value) {
+    return (root, query, cb) -> cb.isMember(value, root.get(attribute));
   }
 
   public static Specification isBetween(String attribute, int min, int max) {
