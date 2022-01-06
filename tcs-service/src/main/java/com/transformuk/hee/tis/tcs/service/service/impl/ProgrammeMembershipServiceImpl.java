@@ -400,7 +400,7 @@ public class ProgrammeMembershipServiceImpl implements ProgrammeMembershipServic
    * will get 'You are acting on stale data, please refresh' concurrency failures.
    *
    * <p>Caution: by overwriting the AmendedDate, it is possible to handle concurrent updates to the
-   * same ProgrammeMembership incorrectly: for exampel, if record A is updated to A' and this is
+   * same ProgrammeMembership incorrectly: for example, if record A is updated to A' and this is
    * committed, and then update B (which was based on A not A') is committed, this should fail as
    * B needs to be based on A', otherwise the A' update is lost. To avoid this, apply the
    * ProgrammeMembership record Save after the parallel CurriculumMembership Save in the same
