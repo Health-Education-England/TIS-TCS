@@ -2,11 +2,13 @@ package com.transformuk.hee.tis.tcs.service.service.impl;
 
 import static com.transformuk.hee.tis.tcs.service.service.impl.SpecificationFactory.containsLike;
 import static com.transformuk.hee.tis.tcs.service.service.impl.SpecificationFactory.in;
+import static com.transformuk.hee.tis.tcs.service.service.impl.SpecificationFactory.isMember;
 
 import com.google.common.base.Preconditions;
 import com.google.common.collect.Lists;
 import com.transformuk.hee.tis.tcs.api.dto.SpecialtyDTO;
 import com.transformuk.hee.tis.tcs.api.dto.SpecialtySimpleDTO;
+import com.transformuk.hee.tis.tcs.api.enumeration.SpecialtyType;
 import com.transformuk.hee.tis.tcs.api.enumeration.Status;
 import com.transformuk.hee.tis.tcs.service.event.SpecialtyDeletedEvent;
 import com.transformuk.hee.tis.tcs.service.event.SpecialtySavedEvent;
@@ -21,6 +23,7 @@ import com.transformuk.hee.tis.tcs.service.service.mapper.SpecialtySimpleMapper;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Set;
+import java.util.stream.Collectors;
 import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -116,7 +119,18 @@ public class SpecialtyServiceImpl implements SpecialtyService {
     }
     //add the column filters criteria
     if (columnFilters != null && !columnFilters.isEmpty()) {
-      columnFilters.forEach(cf -> specs.add(in(cf.getName(), cf.getValues())));
+      columnFilters.forEach(cf -> {
+        if (StringUtils.equals(cf.getName(), "specialtyTypes")) {
+          List<SpecialtyType> specialtyTypesValues = cf.getValues().stream()
+              .map(value -> SpecialtyType.valueOf((String) value))
+              .collect(Collectors.toList());
+
+          specialtyTypesValues.forEach(specialtyTypeValue ->
+              specs.add(isMember(cf.getName(), specialtyTypeValue)));
+        } else {
+          specs.add(in(cf.getName(), cf.getValues()));
+        }
+      });
     }
     Specification<Specialty> fullSpec = Specification.where(specs.get(0));
     //add the rest of the specs that made it in

@@ -88,6 +88,10 @@ public final class SpecificationFactory {
     };
   }
 
+  public static Specification isMember(String attribute, Object value) {
+    return (root, query, cb) -> cb.isMember(value, root.get(attribute));
+  }
+
   public static Specification isBetween(String attribute, int min, int max) {
     return (root, query, cb) -> cb.between(root.get(attribute), min, max);
   }
