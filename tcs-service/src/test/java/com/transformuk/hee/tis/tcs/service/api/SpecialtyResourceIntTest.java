@@ -33,8 +33,8 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Optional;
 import java.util.Set;
-import org.apache.commons.codec.EncoderException;
 import org.apache.commons.codec.net.URLCodec;
+import org.hamcrest.Matchers;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -443,6 +443,7 @@ public class SpecialtyResourceIntTest {
   }
 
   @Test
+  @Transactional
   public void shouldGetSpecialtiesFilteredByStatusAndSpecialtyType() throws Exception {
     // initialize database with 5 specialties with different Statuses and SpecialtyTypes
     Set<SpecialtyType> subspecialtyAndPlacementAndCurriculum = new HashSet<>(Arrays.asList(SpecialtyType.SUB_SPECIALTY, SpecialtyType.PLACEMENT, SpecialtyType.CURRICULUM));
@@ -468,11 +469,13 @@ public class SpecialtyResourceIntTest {
     specialty5.setSpecialtyTypes(subspecialty);
     specialty5.setStatus(Status.INACTIVE);
 
-    specialtyRepository.saveAll(Arrays.asList(specialty, specialty2, specialty3, specialty4, specialty5));
+    specialtyRepository.saveAll(Arrays.asList(specialty, specialty2, specialty3, specialty4,
+        specialty5));
     specialtyRepository.flush();
 
-    // look to retrieve only the ones that are current && with specialtyTypes SUB_SPECIALTY and PLACEMENT
-    String colFilters = new URLCodec().encode("{\"status\":[\"CURRENT\"], \"specialtyTypes\": [\"SUB_SPECIALTY\", \"PLACEMENT\"] }");
+    // retrieve only the ones that are current && with specialtyTypes SUB_SPECIALTY and PLACEMENT
+    String colFilters = new URLCodec().encode("{\"status\":[\"CURRENT\"], \"specialtyTypes\": "
+        + "[\"SUB_SPECIALTY\", \"PLACEMENT\"] }");
 
     // Get all the specialties that match at least the columnFilters. Should retrieve:
     // specialty2 (with specialtyTypes SUB_SPECIALTY and PLACEMENT)
@@ -481,7 +484,11 @@ public class SpecialtyResourceIntTest {
         .perform(get("/api/specialties?sort=id,desc&columnFilters=" + colFilters))
         .andExpect(status().isOk())
         .andExpect(jsonPath("$.[0].id").value(specialty2.getId()))
+        .andExpect(jsonPath("$.[0].specialtyTypes")
+            .value(Matchers.containsInAnyOrder("PLACEMENT", "SUB_SPECIALTY")))
         .andExpect(jsonPath("$.[1].id").value(specialty.getId()))
+        .andExpect(jsonPath("$.[1].specialtyTypes")
+            .value(Matchers.containsInAnyOrder("PLACEMENT", "SUB_SPECIALTY", "CURRICULUM")))
         .andExpect(jsonPath("$.[2]").doesNotExist());
     // and nothing else
   }
