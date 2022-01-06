@@ -121,7 +121,7 @@ public class SpecialtyServiceImpl implements SpecialtyService {
     if (columnFilters != null && !columnFilters.isEmpty()) {
       columnFilters.forEach(cf -> {
         if (StringUtils.equals(cf.getName(), "specialtyTypes")) {
-          List<Object> specialtyTypesValues = cf.getValues().stream()
+          List<SpecialtyType> specialtyTypesValues = cf.getValues().stream()
               .map(value -> SpecialtyType.valueOf((String) value))
               .collect(Collectors.toList());
 
