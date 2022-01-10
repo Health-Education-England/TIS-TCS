@@ -189,8 +189,8 @@ public class PostValidator {
           } else if (PostSpecialtyType.PRIMARY.equals(ps.getPostSpecialtyType())) {
             ++noOfPrimarySpecialtyCount;
           } else if (PostSpecialtyType.SUB_SPECIALTY.equals(ps.getPostSpecialtyType())) {
-            Optional<Specialty> specialty = specialtyRepository.findSpecialtyByIdEagerFetch(ps.getSpecialty().getId());
-            specialty.ifPresent(s -> checkSubspecialtyIsOfTypeSubspecialty(fieldErrors, s));
+            specialtyRepository.findSpecialtyByIdEagerFetch(ps.getSpecialty().getId())
+                .ifPresent(s -> checkSubspecialtyIsOfTypeSubspecialty(fieldErrors, s));
           }
         }
       }
