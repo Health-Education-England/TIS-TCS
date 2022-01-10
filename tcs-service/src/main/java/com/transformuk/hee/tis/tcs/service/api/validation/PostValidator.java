@@ -9,7 +9,9 @@ import com.transformuk.hee.tis.tcs.api.dto.PostSiteDTO;
 import com.transformuk.hee.tis.tcs.api.dto.PostSpecialtyDTO;
 import com.transformuk.hee.tis.tcs.api.dto.ProgrammeDTO;
 import com.transformuk.hee.tis.tcs.api.enumeration.PostSpecialtyType;
+import com.transformuk.hee.tis.tcs.api.enumeration.SpecialtyType;
 import com.transformuk.hee.tis.tcs.service.model.Post;
+import com.transformuk.hee.tis.tcs.service.model.Specialty;
 import com.transformuk.hee.tis.tcs.service.repository.PlacementRepository;
 import com.transformuk.hee.tis.tcs.service.repository.PostRepository;
 import com.transformuk.hee.tis.tcs.service.repository.ProgrammeRepository;
@@ -20,6 +22,7 @@ import java.lang.reflect.Method;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
+import java.util.Optional;
 import org.apache.commons.collections4.CollectionUtils;
 import org.apache.commons.lang.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -185,12 +188,22 @@ public class PostValidator {
                 String.format("Specialty with id %d does not exist", ps.getSpecialty().getId())));
           } else if (PostSpecialtyType.PRIMARY.equals(ps.getPostSpecialtyType())) {
             ++noOfPrimarySpecialtyCount;
+          } else if (PostSpecialtyType.SUB_SPECIALTY.equals(ps.getPostSpecialtyType())) {
+            Optional<Specialty> specialty = specialtyRepository.findSpecialtyByIdEagerFetch(ps.getSpecialty().getId());
+            specialty.ifPresent(s -> checkSubspecialtyIsOfTypeSubspecialty(fieldErrors, s));
           }
         }
       }
       checkSpecialtyType(fieldErrors, noOfPrimarySpecialtyCount);
     }
     return fieldErrors;
+  }
+
+  private void checkSubspecialtyIsOfTypeSubspecialty(List<FieldError> fieldErrors, Specialty specialty) {
+    if (!specialty.getSpecialtyTypes().contains(SpecialtyType.SUB_SPECIALTY)) {
+      fieldErrors.add(new FieldError(POST_DTO_NAME, SPECIALTIES,
+          String.format("The specialty %s is not a %s", specialty.getName(), SpecialtyType.SUB_SPECIALTY)));
+    }
   }
 
   private void checkSpecialtyType(List<FieldError> fieldErrors, int noOfPrimarySpecialtyCount) {
