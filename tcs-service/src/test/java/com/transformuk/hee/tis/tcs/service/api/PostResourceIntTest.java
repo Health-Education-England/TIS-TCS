@@ -68,7 +68,6 @@ import java.util.Arrays;
 import java.util.Collections;
 import java.util.HashSet;
 import java.util.List;
-import java.util.Optional;
 import java.util.Set;
 import java.util.stream.Collectors;
 import javax.persistence.EntityManager;
@@ -434,7 +433,9 @@ public class PostResourceIntTest {
     restPostMockMvc.perform(put("/api/posts")
         .contentType(MediaType.APPLICATION_JSON)
         .content(TestUtil.convertObjectToJsonBytes(updatedPostDto)))
-        .andExpect(status().isBadRequest());
+        .andExpect(status().isBadRequest())
+        .andExpect(jsonPath("$.message").value("error.validation"))
+        .andExpect(jsonPath("$.fieldErrors[0].field").value("specialties"));
 
     Post postAfterUpdate = postRepository.findById(post.getId()).orElse(null);
     Set<PostSpecialty> updatedPostSpecialtySet = postAfterUpdate.getSpecialties();
@@ -495,28 +496,35 @@ public class PostResourceIntTest {
   @Test
   @Transactional
   public void shouldFailToCreatePostIfSubspecialtyIsNotASubspecialty() throws Exception {
-    Optional<Post> postBeforeUpdate = postRepository.findById(1L);
+    int databaseSizeBeforeCreate = postRepository.findAll().size();
 
     // Attempt to save a Post that has a specialty of specialtyType PLACEMENT as a subspecialty
     // (i.e. link Post and a Specialty that is SpecialtyType.PLACEMENT in a PostSpecialty in
     // a PostSpecialty of PostSpecialtyType.SUB_SPECIALTY)
     // The update should fail.
 
+    Post post = createEntity();
+    post.setNationalPostNumber("NEW_NPN");
     Specialty notASubspecialty = createSpecialty();
     notASubspecialty.setSpecialtyTypes(new HashSet<>(
         Collections.singletonList(SpecialtyType.PLACEMENT)));
-    em.persist(notASubspecialty);
-    PostSpecialty postSpecialty = createPostSpecialty(notASubspecialty,
+
+    Specialty persistedNonSubspecialty = specialtyRepository.save(notASubspecialty);
+
+    PostSpecialty postSpecialty = createPostSpecialty(persistedNonSubspecialty,
         PostSpecialtyType.SUB_SPECIALTY, post);
     post.setSpecialties(new HashSet<>(Collections.singletonList(postSpecialty)));
     PostDTO postDto = postMapper.postToPostDTO(post);
 
-    restPostMockMvc.perform(put("/api/posts")
+    restPostMockMvc.perform(post("/api/posts")
         .contentType(MediaType.APPLICATION_JSON)
         .content(TestUtil.convertObjectToJsonBytes(postDto)))
-        .andExpect(status().isInternalServerError());
+        .andExpect(status().isBadRequest())
+        .andExpect(jsonPath("$.message").value("error.validation"))
+        .andExpect(jsonPath("$.fieldErrors[0].field").value("specialties"));
 
-    assertThat(postRepository.findById(1L)).isEqualTo(postBeforeUpdate);
+    List<Post> postList = postRepository.findAll();
+    assertThat(postList).hasSize(databaseSizeBeforeCreate);
   }
 
   @Test
