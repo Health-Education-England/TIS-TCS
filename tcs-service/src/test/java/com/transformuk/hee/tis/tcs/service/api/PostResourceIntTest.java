@@ -497,9 +497,9 @@ public class PostResourceIntTest {
   public void shouldFailToCreatePostIfSubspecialtyIsNotASubspecialty() throws Exception {
     Optional<Post> postBeforeUpdate = postRepository.findById(1L);
 
-    // Attempt to update a Post that has a specialty of specialtyType PLACEMENT as a subspecialty
-    // (i.e. link Post and a Specialty that is SpecialtyType.SUB_SPECIALTY in a PostSpecialty in
-    // a PostSpecialty of PostSpecialtyType.PLACEMENT)
+    // Attempt to save a Post that has a specialty of specialtyType PLACEMENT as a subspecialty
+    // (i.e. link Post and a Specialty that is SpecialtyType.PLACEMENT in a PostSpecialty in
+    // a PostSpecialty of PostSpecialtyType.SUB_SPECIALTY)
     // The update should fail.
 
     Specialty notASubspecialty = createSpecialty();
@@ -508,7 +508,6 @@ public class PostResourceIntTest {
     em.persist(notASubspecialty);
     PostSpecialty postSpecialty = createPostSpecialty(notASubspecialty,
         PostSpecialtyType.SUB_SPECIALTY, post);
-    em.persist(postSpecialty);
     post.setSpecialties(new HashSet<>(Collections.singletonList(postSpecialty)));
     PostDTO postDto = postMapper.postToPostDTO(post);
 
