@@ -443,7 +443,7 @@ public class PostResourceIntTest {
         .filter(ps -> ps.getPostSpecialtyType().equals(PostSpecialtyType.SUB_SPECIALTY))
         .collect(Collectors.toList());
 
-    assertThat(addedSubspecialties.size()).isEqualTo(0);
+    assertThat(addedSubspecialties.size()).isZero();
     assertThat(postAfterUpdate).isEqualTo(post);
   }
 

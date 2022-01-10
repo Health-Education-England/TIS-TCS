@@ -22,7 +22,6 @@ import java.lang.reflect.Method;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
-import java.util.Optional;
 import org.apache.commons.collections4.CollectionUtils;
 import org.apache.commons.lang.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -199,10 +198,12 @@ public class PostValidator {
     return fieldErrors;
   }
 
-  private void checkSubspecialtyIsOfTypeSubspecialty(List<FieldError> fieldErrors, Specialty specialty) {
+  private void checkSubspecialtyIsOfTypeSubspecialty(List<FieldError> fieldErrors,
+      Specialty specialty) {
     if (!specialty.getSpecialtyTypes().contains(SpecialtyType.SUB_SPECIALTY)) {
       fieldErrors.add(new FieldError(POST_DTO_NAME, SPECIALTIES,
-          String.format("The specialty %s is not a %s", specialty.getName(), SpecialtyType.SUB_SPECIALTY)));
+          String.format("The specialty %s is not a %s", specialty.getName(),
+              SpecialtyType.SUB_SPECIALTY)));
     }
   }
 
