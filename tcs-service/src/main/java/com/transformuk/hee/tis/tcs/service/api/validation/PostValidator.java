@@ -189,7 +189,7 @@ public class PostValidator {
             ++noOfPrimarySpecialtyCount;
           } else if (PostSpecialtyType.SUB_SPECIALTY.equals(ps.getPostSpecialtyType())) {
             specialtyRepository.findSpecialtyByIdEagerFetch(ps.getSpecialty().getId())
-                .ifPresent(s -> checkSubspecialtyIsOfTypeSubspecialty(fieldErrors, s));
+                .ifPresent(specialty -> checkSpecialtyIsOfTypeSubspecialty(fieldErrors, specialty));
           }
         }
       }
@@ -198,7 +198,7 @@ public class PostValidator {
     return fieldErrors;
   }
 
-  private void checkSubspecialtyIsOfTypeSubspecialty(List<FieldError> fieldErrors,
+  private void checkSpecialtyIsOfTypeSubspecialty(List<FieldError> fieldErrors,
       Specialty specialty) {
     if (!specialty.getSpecialtyTypes().contains(SpecialtyType.SUB_SPECIALTY)) {
       fieldErrors.add(new FieldError(POST_DTO_NAME, SPECIALTIES,

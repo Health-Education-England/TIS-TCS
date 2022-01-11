@@ -401,7 +401,7 @@ public class PostResourceIntTest {
 
   @Test
   @Transactional
-  public void shouldFailToUpdatePostIfSubspecialtyIsNotASubspecialty() throws Exception {
+  public void shouldFailToUpdatePostIfSubspecialtyIsNotOfTypeSubspecialty() throws Exception {
     // initialize database with a Post
     // the Post needs a Primary specialty as well, otherwise it wouldn't be possible to set a
     // sub_specialty
@@ -410,9 +410,9 @@ public class PostResourceIntTest {
     post.setSpecialties(new HashSet<>(Arrays.asList(primaryPostSpecialty)));
     postRepository.saveAndFlush(post);
 
-    // Attempt to update a Post that has a specialty of specialtyType PLACEMENT as a subspecialty
-    // (i.e. link Post and a Specialty of SpecialtyType.PLACEMENT via a PostSpecialty that is
-    // of PostSpecialtyType.SUB_SPECIALTY)
+    // Attempt to update a Post with a specialty of specialtyType.PLACEMENT.
+    // This involves: creating a PostSpecialty of PostSpecialtyType.SUB_SPECIALTY where the
+    // postSpecialty.specialty is NOT of specialtyType.SUB_SPECIALTY (but specialtyType.PLACEMENT).
     // The update should fail.
 
     Post updatedPost = createEntity();
@@ -449,7 +449,7 @@ public class PostResourceIntTest {
 
   @Test
   @Transactional
-  public void shouldAllowUpdateOfPostIfSubspecialtyIsNotASubspecialty() throws Exception {
+  public void shouldAllowUpdateOfPostIfSubspecialtyIsOfTypeSubspecialty() throws Exception {
     // initialize database with a Post
     // the Post needs a Primary specialty as well, otherwise it wouldn't be possible to set a
     // sub_specialty
@@ -458,9 +458,9 @@ public class PostResourceIntTest {
     post.setSpecialties(new HashSet<>(Arrays.asList(primaryPostSpecialty)));
     postRepository.saveAndFlush(post);
 
-    // Attempt to update a Post that has a specialty of specialtyType SUB_SPECIALTY as a subspecialty
-    // (i.e. link Post and a Specialty that is SpecialtyType.SUB_SPECIALTY in a PostSpecialty in
-    // a PostSpecialty of PostSpecialtyType.SUB_SPECIALTY)
+    // Attempt to update a Post with a specialty of specialtyType.SUB_SPECIALTY.
+    // This involves: creating a PostSpecialty of PostSpecialtyType.SUB_SPECIALTY where the
+    // postSpecialty.specialty is indeed of specialtyType.SUB_SPECIALTY.
     // The update should succeed.
 
     Post updatedPost = createEntity();
@@ -495,13 +495,13 @@ public class PostResourceIntTest {
 
   @Test
   @Transactional
-  public void shouldFailToCreatePostIfSubspecialtyIsNotASubspecialty() throws Exception {
+  public void shouldFailToCreatePostIfSubspecialtyIsNotOfTypeSubspecialty() throws Exception {
     int databaseSizeBeforeCreate = postRepository.findAll().size();
 
-    // Attempt to save a Post that has a specialty of specialtyType PLACEMENT as a subspecialty
-    // (i.e. link Post and a Specialty that is SpecialtyType.PLACEMENT in a PostSpecialty in
-    // a PostSpecialty of PostSpecialtyType.SUB_SPECIALTY)
-    // The update should fail.
+    // Attempt to save a Post whose specialty is of specialtyType.PLACEMENT.
+    // This involves: creating a PostSpecialty of PostSpecialtyType.SUB_SPECIALTY where the
+    // postSpecialty.specialty is NOT of specialtyType.SUB_SPECIALTY (but specialtyType.PLACEMENT).
+    // The creation should fail.
 
     Post post = createEntity();
     post.setNationalPostNumber("NEW_NPN");
@@ -529,12 +529,14 @@ public class PostResourceIntTest {
 
   @Test
   @Transactional
-  public void shouldAllowCreationOfPostIfSubspecialtyIsASubspecialty() throws Exception {
+  public void shouldAllowCreationOfPostIfSubspecialtyIsOfTypeSubspecialty() throws Exception {
     int databaseSizeBeforeCreate = postRepository.findAll().size();
 
-    // Attempt to save a Post that has a specialty of specialtyType PLACEMENT as a subspecialty
-    // (i.e. link Post and a Specialty that is SpecialtyType.PLACEMENT in a PostSpecialty in
-    // a PostSpecialty of PostSpecialtyType.SUB_SPECIALTY)
+    // Attempt to save a Post whose specialty is of specialtyType.SUB_SPECIALTY.
+    // This involves: creating a PostSpecialty of PostSpecialtyType.SUB_SPECIALTY where the
+    // postSpecialty.specialty is indeed of specialtyType.SUB_SPECIALTY.
+    // The creation should succeed.
+
     Post post = createEntity();
     post.setNationalPostNumber("NEW_NPN");
     Specialty subspecialty = createSpecialty();
