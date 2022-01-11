@@ -33,6 +33,7 @@ import com.transformuk.hee.tis.tcs.api.enumeration.PostGradeType;
 import com.transformuk.hee.tis.tcs.api.enumeration.PostSiteType;
 import com.transformuk.hee.tis.tcs.api.enumeration.PostSpecialtyType;
 import com.transformuk.hee.tis.tcs.api.enumeration.PostSuffix;
+import com.transformuk.hee.tis.tcs.api.enumeration.SpecialtyType;
 import com.transformuk.hee.tis.tcs.api.enumeration.Status;
 import com.transformuk.hee.tis.tcs.service.Application;
 import com.transformuk.hee.tis.tcs.service.api.decorator.PlacementSummaryDecorator;
@@ -68,6 +69,7 @@ import java.util.Collections;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
+import java.util.stream.Collectors;
 import javax.persistence.EntityManager;
 import org.apache.commons.codec.net.URLCodec;
 import org.junit.Before;
@@ -395,6 +397,166 @@ public class PostResourceIntTest {
     Post dbUpdatedPost = postRepository.findById(post.getId()).orElse(null);
     assertThat(dbUpdatedPost.getSpecialties().iterator().next().getPostSpecialtyType())
         .isEqualTo(PostSpecialtyType.OTHER);
+  }
+
+  @Test
+  @Transactional
+  public void shouldFailToUpdatePostIfSubspecialtyIsNotOfTypeSubspecialty() throws Exception {
+    // initialize database with a Post
+    // the Post needs a Primary specialty as well, otherwise it wouldn't be possible to set a
+    // sub_specialty
+    post = createEntity();
+    PostSpecialty primaryPostSpecialty = createPostSpecialty(specialty, PostSpecialtyType.PRIMARY, post);
+    post.setSpecialties(new HashSet<>(Arrays.asList(primaryPostSpecialty)));
+    postRepository.saveAndFlush(post);
+
+    // Attempt to update a Post with a specialty of specialtyType.PLACEMENT.
+    // This involves: creating a PostSpecialty of PostSpecialtyType.SUB_SPECIALTY where the
+    // postSpecialty.specialty is NOT of specialtyType.SUB_SPECIALTY (but specialtyType.PLACEMENT).
+    // The update should fail.
+
+    Post updatedPost = createEntity();
+    updatedPost.setId(post.getId());
+
+    Specialty notASubspecialty = createSpecialty();
+    notASubspecialty.setSpecialtyTypes(new HashSet<>(
+        Collections.singletonList(SpecialtyType.PLACEMENT)));
+    em.persist(notASubspecialty);
+
+    PostSpecialty subspecialtyPostSpecialty = createPostSpecialty(notASubspecialty,
+        PostSpecialtyType.SUB_SPECIALTY, post);
+    post.getSpecialties().stream().findFirst().ifPresent(ps -> primaryPostSpecialty.setId(ps.getId()));
+    updatedPost.setSpecialties(new HashSet<>(Arrays.asList(primaryPostSpecialty, subspecialtyPostSpecialty)));
+
+    PostDTO updatedPostDto = postMapper.postToPostDTO(updatedPost);
+
+    restPostMockMvc.perform(put("/api/posts")
+        .contentType(MediaType.APPLICATION_JSON)
+        .content(TestUtil.convertObjectToJsonBytes(updatedPostDto)))
+        .andExpect(status().isBadRequest())
+        .andExpect(jsonPath("$.message").value("error.validation"))
+        .andExpect(jsonPath("$.fieldErrors[0].field").value("specialties"));
+
+    Post postAfterUpdate = postRepository.findById(post.getId()).orElse(null);
+    Set<PostSpecialty> updatedPostSpecialtySet = postAfterUpdate.getSpecialties();
+    List <PostSpecialty> addedSubspecialties = updatedPostSpecialtySet.stream()
+        .filter(ps -> ps.getPostSpecialtyType().equals(PostSpecialtyType.SUB_SPECIALTY))
+        .collect(Collectors.toList());
+
+    assertThat(addedSubspecialties.size()).isZero();
+    assertThat(postAfterUpdate).isEqualTo(post);
+  }
+
+  @Test
+  @Transactional
+  public void shouldAllowUpdateOfPostIfSubspecialtyIsOfTypeSubspecialty() throws Exception {
+    // initialize database with a Post
+    // the Post needs a Primary specialty as well, otherwise it wouldn't be possible to set a
+    // sub_specialty
+    post = createEntity();
+    PostSpecialty primaryPostSpecialty = createPostSpecialty(specialty, PostSpecialtyType.PRIMARY, post);
+    post.setSpecialties(new HashSet<>(Arrays.asList(primaryPostSpecialty)));
+    postRepository.saveAndFlush(post);
+
+    // Attempt to update a Post with a specialty of specialtyType.SUB_SPECIALTY.
+    // This involves: creating a PostSpecialty of PostSpecialtyType.SUB_SPECIALTY where the
+    // postSpecialty.specialty is indeed of specialtyType.SUB_SPECIALTY.
+    // The update should succeed.
+
+    Post updatedPost = createEntity();
+    updatedPost.setId(post.getId());
+
+    Specialty aSubspecialty = createSpecialty();
+    aSubspecialty.setSpecialtyTypes(new HashSet<>(
+        Collections.singletonList(SpecialtyType.SUB_SPECIALTY)));
+    em.persist(aSubspecialty);
+
+    PostSpecialty subspecialtyPostSpecialty = createPostSpecialty(aSubspecialty,
+        PostSpecialtyType.SUB_SPECIALTY, post);
+    post.getSpecialties().stream().findFirst().ifPresent(ps -> primaryPostSpecialty.setId(ps.getId()));
+    updatedPost.setSpecialties(new HashSet<>(Arrays.asList(primaryPostSpecialty, subspecialtyPostSpecialty)));
+
+    PostDTO updatedPostDto = postMapper.postToPostDTO(updatedPost);
+
+    restPostMockMvc.perform(put("/api/posts")
+        .contentType(MediaType.APPLICATION_JSON)
+        .content(TestUtil.convertObjectToJsonBytes(updatedPostDto)))
+        .andExpect(status().isOk());
+
+    Post resultingUpdatedPost = postRepository.findById(post.getId()).orElse(null);
+    Set<PostSpecialty> updatedPostSpecialtySet = resultingUpdatedPost.getSpecialties();
+    List <PostSpecialty> addedSubspecialties = updatedPostSpecialtySet.stream()
+        .filter(ps -> ps.getPostSpecialtyType().equals(PostSpecialtyType.SUB_SPECIALTY))
+        .collect(Collectors.toList());
+
+    assertThat(addedSubspecialties.size()).isEqualTo(1);
+    assertThat(addedSubspecialties.get(0).getSpecialty()).isEqualTo(aSubspecialty);
+  }
+
+  @Test
+  @Transactional
+  public void shouldFailToCreatePostIfSubspecialtyIsNotOfTypeSubspecialty() throws Exception {
+    int databaseSizeBeforeCreate = postRepository.findAll().size();
+
+    // Attempt to save a Post whose specialty is of specialtyType.PLACEMENT.
+    // This involves: creating a PostSpecialty of PostSpecialtyType.SUB_SPECIALTY where the
+    // postSpecialty.specialty is NOT of specialtyType.SUB_SPECIALTY (but specialtyType.PLACEMENT).
+    // The creation should fail.
+
+    Post post = createEntity();
+    post.setNationalPostNumber("NEW_NPN");
+    Specialty notASubspecialty = createSpecialty();
+    notASubspecialty.setSpecialtyTypes(new HashSet<>(
+        Collections.singletonList(SpecialtyType.PLACEMENT)));
+
+    Specialty persistedNonSubspecialty = specialtyRepository.save(notASubspecialty);
+
+    PostSpecialty postSpecialty = createPostSpecialty(persistedNonSubspecialty,
+        PostSpecialtyType.SUB_SPECIALTY, post);
+    post.setSpecialties(new HashSet<>(Collections.singletonList(postSpecialty)));
+    PostDTO postDto = postMapper.postToPostDTO(post);
+
+    restPostMockMvc.perform(post("/api/posts")
+        .contentType(MediaType.APPLICATION_JSON)
+        .content(TestUtil.convertObjectToJsonBytes(postDto)))
+        .andExpect(status().isBadRequest())
+        .andExpect(jsonPath("$.message").value("error.validation"))
+        .andExpect(jsonPath("$.fieldErrors[0].field").value("specialties"));
+
+    List<Post> postList = postRepository.findAll();
+    assertThat(postList).hasSize(databaseSizeBeforeCreate);
+  }
+
+  @Test
+  @Transactional
+  public void shouldAllowCreationOfPostIfSubspecialtyIsOfTypeSubspecialty() throws Exception {
+    int databaseSizeBeforeCreate = postRepository.findAll().size();
+
+    // Attempt to save a Post whose specialty is of specialtyType.SUB_SPECIALTY.
+    // This involves: creating a PostSpecialty of PostSpecialtyType.SUB_SPECIALTY where the
+    // postSpecialty.specialty is indeed of specialtyType.SUB_SPECIALTY.
+    // The creation should succeed.
+
+    Post post = createEntity();
+    post.setNationalPostNumber("NEW_NPN");
+    Specialty subspecialty = createSpecialty();
+    subspecialty.setSpecialtyTypes(new HashSet<>(
+        Collections.singletonList(SpecialtyType.SUB_SPECIALTY)));
+
+    Specialty persistedSubspecialty = specialtyRepository.save(subspecialty);
+
+    PostSpecialty postSpecialty = createPostSpecialty(persistedSubspecialty,
+        PostSpecialtyType.SUB_SPECIALTY, post);
+    post.setSpecialties(new HashSet<>(Collections.singletonList(postSpecialty)));
+    PostDTO postDto = postMapper.postToPostDTO(post);
+
+    restPostMockMvc.perform(post("/api/posts")
+        .contentType(MediaType.APPLICATION_JSON)
+        .content(TestUtil.convertObjectToJsonBytes(postDto)))
+        .andExpect(status().isCreated());
+
+    List<Post> postList = postRepository.findAll();
+    assertThat(postList).hasSize(databaseSizeBeforeCreate + 1);
   }
 
   @Test
