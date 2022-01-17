@@ -42,6 +42,7 @@ import java.util.Optional;
 import java.util.Set;
 import java.util.stream.Collectors;
 import org.apache.commons.codec.EncoderException;
+import org.apache.commons.codec.net.URLCodec;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.lang3.exception.ExceptionUtils;
 import org.slf4j.Logger;
@@ -108,18 +109,18 @@ public class TcsServiceImpl extends AbstractClientService {
 
   static {
     try {
-      curriculumJsonQuerystringURLEncoded = new org.apache.commons.codec.net.URLCodec()
+      curriculumJsonQuerystringURLEncoded = new URLCodec()
           .encode("{\"name\":[\"PARAMETER_NAME\"]}");
-      programmeJsonQuerystringURLEncoded = new org.apache.commons.codec.net.URLCodec().encode(
+      programmeJsonQuerystringURLEncoded = new URLCodec().encode(
           "{\"programmeName\":[\"PARAMETER_NAME\"],\"programmeNumber\":[\"PARAMETER_NUMBER\"],\"status\":[\"CURRENT\"]}");
-      specialtyJsonQuerystringURLEncoded = new org.apache.commons.codec.net.URLCodec()
+      specialtyJsonQuerystringURLEncoded = new URLCodec()
           .encode("{\"name\":[\"PARAMETER_NAME\"],\"status\":[\"CURRENT\"]}");
-      specialtyJsonQuerystringAndSpecialtyTypeURLEncoded = new org.apache.commons.codec.net.URLCodec()
-          .encode(
-              "{\"name\":[\"PARAMETER_NAME\"],\"status\":[\"CURRENT\"],\"specialtyTypes\":[\"PARAMETER_TYPE\"]}");
-      placementJsonQuerystringURLEncoded = new org.apache.commons.codec.net.URLCodec()
+      specialtyJsonQuerystringAndSpecialtyTypeURLEncoded = new URLCodec().encode(
+              "{\"name\":[\"PARAMETER_NAME\"],\"status\":[\"CURRENT\"],"
+                  + "\"specialtyTypes\":[\"PARAMETER_TYPE\"]}");
+      placementJsonQuerystringURLEncoded = new URLCodec()
           .encode("{\"traineeId\":[\"PARAMETER_TRAINEE_ID\"],\"postId\":[\"PARAMETER_POST_ID\"]}");
-      rotationJsonQuerystringURLEncoded = new org.apache.commons.codec.net.URLCodec()
+      rotationJsonQuerystringURLEncoded = new URLCodec()
           .encode("{\"programmeId\":[\"PARAMETER_PROGRAMME_ID\"],\"status\":[\"CURRENT\"]}");
     } catch (EncoderException e) {
       log.error("URL encoding failed.", e);
@@ -519,7 +520,8 @@ public class TcsServiceImpl extends AbstractClientService {
   }
 
   /**
-   * Calls the endpoint to retrieve all specialties filtered by name and SpecialtyType
+   * Calls the endpoint to retrieve all specialties filtered by name and SpecialtyType.
+   *
    * @param name          the name of the Specialty
    * @param specialtyType the SpecialtyType to filter specialties by
    * @return              list of all specialties matching the parameters
