@@ -33,6 +33,7 @@ import com.transformuk.hee.tis.tcs.api.dto.TariffFundingTypeFieldsDTO;
 import com.transformuk.hee.tis.tcs.api.dto.TariffRateDTO;
 import com.transformuk.hee.tis.tcs.api.dto.TrainerApprovalDTO;
 import com.transformuk.hee.tis.tcs.api.dto.TrainingNumberDTO;
+import com.transformuk.hee.tis.tcs.api.enumeration.SpecialtyType;
 import java.io.UnsupportedEncodingException;
 import java.net.URLEncoder;
 import java.util.List;
@@ -41,6 +42,7 @@ import java.util.Optional;
 import java.util.Set;
 import java.util.stream.Collectors;
 import org.apache.commons.codec.EncoderException;
+import org.apache.commons.codec.net.URLCodec;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.lang3.exception.ExceptionUtils;
 import org.slf4j.Logger;
@@ -102,20 +104,23 @@ public class TcsServiceImpl extends AbstractClientService {
   private static final String API_ABSENCE_BY_ABS_ID = API_ABSENCE + "absenceId/";
   private static final Map<Class, ParameterizedTypeReference> classToParamTypeRefMap;
   private static String curriculumJsonQuerystringURLEncoded, programmeJsonQuerystringURLEncoded,
-      specialtyJsonQuerystringURLEncoded, placementJsonQuerystringURLEncoded,
-      rotationJsonQuerystringURLEncoded;
+      specialtyJsonQuerystringURLEncoded, specialtyJsonQuerystringAndSpecialtyTypeURLEncoded,
+      placementJsonQuerystringURLEncoded, rotationJsonQuerystringURLEncoded;
 
   static {
     try {
-      curriculumJsonQuerystringURLEncoded = new org.apache.commons.codec.net.URLCodec()
+      curriculumJsonQuerystringURLEncoded = new URLCodec()
           .encode("{\"name\":[\"PARAMETER_NAME\"]}");
-      programmeJsonQuerystringURLEncoded = new org.apache.commons.codec.net.URLCodec().encode(
+      programmeJsonQuerystringURLEncoded = new URLCodec().encode(
           "{\"programmeName\":[\"PARAMETER_NAME\"],\"programmeNumber\":[\"PARAMETER_NUMBER\"],\"status\":[\"CURRENT\"]}");
-      specialtyJsonQuerystringURLEncoded = new org.apache.commons.codec.net.URLCodec()
+      specialtyJsonQuerystringURLEncoded = new URLCodec()
           .encode("{\"name\":[\"PARAMETER_NAME\"],\"status\":[\"CURRENT\"]}");
-      placementJsonQuerystringURLEncoded = new org.apache.commons.codec.net.URLCodec()
+      specialtyJsonQuerystringAndSpecialtyTypeURLEncoded = new URLCodec().encode(
+              "{\"name\":[\"PARAMETER_NAME\"],\"status\":[\"CURRENT\"],"
+                  + "\"specialtyTypes\":[\"PARAMETER_TYPE\"]}");
+      placementJsonQuerystringURLEncoded = new URLCodec()
           .encode("{\"traineeId\":[\"PARAMETER_TRAINEE_ID\"],\"postId\":[\"PARAMETER_POST_ID\"]}");
-      rotationJsonQuerystringURLEncoded = new org.apache.commons.codec.net.URLCodec()
+      rotationJsonQuerystringURLEncoded = new URLCodec()
           .encode("{\"programmeId\":[\"PARAMETER_PROGRAMME_ID\"],\"status\":[\"CURRENT\"]}");
     } catch (EncoderException e) {
       log.error("URL encoding failed.", e);
@@ -509,6 +514,28 @@ public class TcsServiceImpl extends AbstractClientService {
         .exchange(
             serviceUrl + API_CURRENT_SPECIALTIES_COLUMN_FILTERS + specialtyJsonQuerystringURLEncoded
                 .replace("PARAMETER_NAME", urlEncode(name)), HttpMethod.GET, null,
+            new ParameterizedTypeReference<List<SpecialtyDTO>>() {
+            })
+        .getBody();
+  }
+
+  /**
+   * Calls the endpoint to retrieve all specialties filtered by name and SpecialtyType.
+   *
+   * @param name          the name of the Specialty
+   * @param specialtyType the SpecialtyType to filter specialties by
+   * @return              list of all specialties matching the parameters
+   */
+  @Cacheable("specialty")
+  public List<SpecialtyDTO> getSpecialtyByName(String name, SpecialtyType specialtyType) {
+    log.debug("calling getSpecialtyByName with {}", name);
+    return tcsRestTemplate
+        .exchange(
+            serviceUrl + API_CURRENT_SPECIALTIES_COLUMN_FILTERS
+                + specialtyJsonQuerystringAndSpecialtyTypeURLEncoded
+                    .replace("PARAMETER_NAME", urlEncode(name))
+                    .replace("PARAMETER_TYPE", urlEncode(specialtyType.name())), HttpMethod.GET,
+            null,
             new ParameterizedTypeReference<List<SpecialtyDTO>>() {
             })
         .getBody();

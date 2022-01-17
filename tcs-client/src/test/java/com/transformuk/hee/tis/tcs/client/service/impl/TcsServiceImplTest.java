@@ -1,24 +1,34 @@
 package com.transformuk.hee.tis.tcs.client.service.impl;
 
 import static org.hamcrest.CoreMatchers.is;
+import static org.hamcrest.CoreMatchers.not;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertThat;
 import static org.junit.Assert.assertTrue;
 import static org.mockito.Mockito.doReturn;
+import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.spy;
 import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.verifyNoInteractions;
 
 import com.github.tomakehurst.wiremock.junit.WireMockClassRule;
 import com.google.common.collect.Maps;
 import com.transformuk.hee.tis.tcs.api.dto.AbsenceDTO;
+import com.transformuk.hee.tis.tcs.api.dto.CurriculumDTO;
 import com.transformuk.hee.tis.tcs.api.dto.SpecialtyDTO;
+import com.transformuk.hee.tis.tcs.api.enumeration.SpecialtyType;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
+import java.util.Arrays;
+import java.util.Collections;
 import java.util.HashMap;
+import java.util.HashSet;
+import java.util.List;
 import java.util.Optional;
-
-import com.transformuk.hee.tis.tcs.api.dto.CurriculumDTO;
+import org.apache.commons.codec.EncoderException;
+import org.apache.commons.codec.net.URLCodec;
+import org.assertj.core.util.Lists;
 import org.junit.Before;
 import org.junit.ClassRule;
 import org.junit.Rule;
@@ -26,6 +36,8 @@ import org.junit.Test;
 import org.junit.rules.ExpectedException;
 import org.junit.runner.RunWith;
 import org.springframework.cloud.contract.wiremock.WireMockSpring;
+import org.springframework.core.ParameterizedTypeReference;
+import org.springframework.http.HttpMethod;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.http.client.HttpComponentsClientHttpRequestFactory;
@@ -36,16 +48,14 @@ import org.springframework.web.client.RestTemplate;
 @RunWith(SpringRunner.class)
 public class TcsServiceImplTest {
 
-  private static int WIRE_MOCK_PORT = 9999;
-  private TcsServiceImpl testObj;
-  private RestTemplate restTemplate;
-
-  @Rule
-  public ExpectedException exceptionRule = ExpectedException.none();
-
+  private static final int WIRE_MOCK_PORT = 9999;
   @ClassRule
   public static WireMockClassRule wiremock = new WireMockClassRule(
       WireMockSpring.options().port(WIRE_MOCK_PORT));
+  @Rule
+  public ExpectedException exceptionRule = ExpectedException.none();
+  private TcsServiceImpl testObj;
+  private RestTemplate restTemplate;
 
   @Before
   public void setup() {
@@ -238,6 +248,82 @@ public class TcsServiceImplTest {
     SpecialtyDTO result = testObj.getSpecialtyById(20L);
     assertThat("Unexpected result", result, is(specialty));
     verify(restTemplate).getForEntity(url, SpecialtyDTO.class);
+  }
+
+  @Test
+  public void getSpecialtyByNameShouldFindSpecialtyDto() throws EncoderException {
+    SpecialtyDTO specialty = new SpecialtyDTO();
+    specialty.setName("specialtyName");
+    specialty.setSpecialtyTypes(new HashSet<>(
+        Collections.singletonList(SpecialtyType.SUB_SPECIALTY)));
+    specialty.setId(20L);
+
+    String encodedParameters = new URLCodec().encode("{\"name\":[\"specialtyName\"],"
+        + "\"status\":[\"CURRENT\"],\"specialtyTypes\":[\"SUB_SPECIALTY\"]}");
+    String url = "http://localhost:9999/tcs/api/specialties?columnFilters=" + encodedParameters;
+
+    List<SpecialtyDTO> expectedResult = Arrays.asList(specialty);
+    ResponseEntity responseEntity = new ResponseEntity(expectedResult, HttpStatus.OK);
+    doReturn(responseEntity).when(restTemplate).exchange(url, HttpMethod.GET, null,
+        new ParameterizedTypeReference<List<SpecialtyDTO>>() {
+        });
+
+    List<SpecialtyDTO> result = testObj.getSpecialtyByName("specialtyName",
+        SpecialtyType.SUB_SPECIALTY);
+    assertThat("Unexpected result", result, is(expectedResult));
+    verify(restTemplate).exchange(url, HttpMethod.GET, null,
+        new ParameterizedTypeReference<List<SpecialtyDTO>>() {
+        });
+  }
+
+  @Test
+  public void getSpecialtyByNameShouldNotFindDifferentTypeSpecialtyDto() throws EncoderException {
+    SpecialtyDTO specialty = new SpecialtyDTO();
+    specialty.setName("specialtyName");
+    specialty.setSpecialtyTypes(new HashSet<>(
+        Collections.singletonList(SpecialtyType.SUB_SPECIALTY)));
+    specialty.setId(20L);
+
+    String encodedParametersForSpecialtiesOfTypeSubspecialty = new URLCodec()
+        .encode("{\"name\":[\"specialtyName\"],"
+            + "\"status\":[\"CURRENT\"],\"specialtyTypes\":[\"SUB_SPECIALTY\"]}");
+    String urlForSpecialtiesOfTypeSubspecialty =
+        "http://localhost:9999/tcs/api/specialties?columnFilters="
+            + encodedParametersForSpecialtiesOfTypeSubspecialty;
+
+    String encodedParametersForSpecialtiesOfTypePlacement = new URLCodec()
+        .encode("{\"name\":[\"specialtyName\"],"
+            + "\"status\":[\"CURRENT\"],\"specialtyTypes\":[\"PLACEMENT\"]}");
+    String urlForSpecialtiesOfTypePlacement =
+        "http://localhost:9999/tcs/api/specialties?columnFilters="
+            + encodedParametersForSpecialtiesOfTypePlacement;
+
+    List<SpecialtyDTO> expectedResultOfTypeSubSpecialty = Lists.newArrayList(specialty);
+    ResponseEntity responseEntity1 = new ResponseEntity(expectedResultOfTypeSubSpecialty,
+        HttpStatus.OK);
+    List<SpecialtyDTO> expectedResultOfTypePlacement = Lists.emptyList();
+    ResponseEntity responseEntity2 = new ResponseEntity(expectedResultOfTypePlacement,
+        HttpStatus.OK);
+
+    doReturn(responseEntity1).when(restTemplate)
+        .exchange(urlForSpecialtiesOfTypeSubspecialty, HttpMethod.GET, null,
+            new ParameterizedTypeReference<List<SpecialtyDTO>>() {
+            });
+    doReturn(responseEntity2).when(restTemplate)
+        .exchange(urlForSpecialtiesOfTypePlacement, HttpMethod.GET, null,
+            new ParameterizedTypeReference<List<SpecialtyDTO>>() {
+            });
+
+    List<SpecialtyDTO> result = testObj.getSpecialtyByName("specialtyName",
+        SpecialtyType.SUB_SPECIALTY);
+    assertThat("Unexpected result", result, is(expectedResultOfTypeSubSpecialty));
+    assertThat("Unexpected result", result, not(expectedResultOfTypePlacement));
+    verify(restTemplate).exchange(urlForSpecialtiesOfTypeSubspecialty, HttpMethod.GET, null,
+        new ParameterizedTypeReference<List<SpecialtyDTO>>() {
+        });
+    verify(restTemplate, never()).exchange(urlForSpecialtiesOfTypePlacement, HttpMethod.GET, null,
+            new ParameterizedTypeReference<List<SpecialtyDTO>>() {
+            });
   }
 
   @Test
