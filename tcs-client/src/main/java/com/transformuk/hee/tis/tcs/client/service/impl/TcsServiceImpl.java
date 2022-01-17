@@ -115,7 +115,8 @@ public class TcsServiceImpl extends AbstractClientService {
       specialtyJsonQuerystringURLEncoded = new org.apache.commons.codec.net.URLCodec()
           .encode("{\"name\":[\"PARAMETER_NAME\"],\"status\":[\"CURRENT\"]}");
       specialtyJsonQuerystringAndSpecialtyTypeURLEncoded = new org.apache.commons.codec.net.URLCodec()
-          .encode("{\"name\":[\"PARAMETER_NAME\"],\"status\":[\"CURRENT\"],\"specialtyTypes\":[\"PARAMETER_TYPE\"]}");
+          .encode(
+              "{\"name\":[\"PARAMETER_NAME\"],\"status\":[\"CURRENT\"],\"specialtyTypes\":[\"PARAMETER_TYPE\"]}");
       placementJsonQuerystringURLEncoded = new org.apache.commons.codec.net.URLCodec()
           .encode("{\"traineeId\":[\"PARAMETER_TRAINEE_ID\"],\"postId\":[\"PARAMETER_POST_ID\"]}");
       rotationJsonQuerystringURLEncoded = new org.apache.commons.codec.net.URLCodec()
@@ -517,15 +518,21 @@ public class TcsServiceImpl extends AbstractClientService {
         .getBody();
   }
 
+  /**
+   * Calls the endpoint to retrieve all specialties filtered by name and SpecialtyType
+   * @param name          the name of the Specialty
+   * @param specialtyType the SpecialtyType to filter specialties by
+   * @return              list of all specialties matching the parameters
+   */
   @Cacheable("specialty")
   public List<SpecialtyDTO> getSpecialtyByName(String name, SpecialtyType specialtyType) {
     log.debug("calling getSpecialtyByName with {}", name);
     return tcsRestTemplate
         .exchange(
-            serviceUrl + API_CURRENT_SPECIALTIES_COLUMN_FILTERS +
-                specialtyJsonQuerystringAndSpecialtyTypeURLEncoded
-                .replace("PARAMETER_NAME", urlEncode(name))
-                .replace("PARAMETER_TYPE", urlEncode(specialtyType.name())), HttpMethod.GET,
+            serviceUrl + API_CURRENT_SPECIALTIES_COLUMN_FILTERS
+                + specialtyJsonQuerystringAndSpecialtyTypeURLEncoded
+                    .replace("PARAMETER_NAME", urlEncode(name))
+                    .replace("PARAMETER_TYPE", urlEncode(specialtyType.name())), HttpMethod.GET,
             null,
             new ParameterizedTypeReference<List<SpecialtyDTO>>() {
             })
