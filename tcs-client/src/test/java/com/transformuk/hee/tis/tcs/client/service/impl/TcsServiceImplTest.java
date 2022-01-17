@@ -13,12 +13,19 @@ import com.github.tomakehurst.wiremock.junit.WireMockClassRule;
 import com.google.common.collect.Maps;
 import com.transformuk.hee.tis.tcs.api.dto.AbsenceDTO;
 import com.transformuk.hee.tis.tcs.api.dto.SpecialtyDTO;
+import com.transformuk.hee.tis.tcs.api.enumeration.SpecialtyType;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
+import java.util.Arrays;
+import java.util.Collections;
 import java.util.HashMap;
+import java.util.HashSet;
+import java.util.List;
 import java.util.Optional;
 
 import com.transformuk.hee.tis.tcs.api.dto.CurriculumDTO;
+import org.apache.commons.codec.EncoderException;
+import org.apache.commons.codec.net.URLCodec;
 import org.junit.Before;
 import org.junit.ClassRule;
 import org.junit.Rule;
@@ -26,6 +33,8 @@ import org.junit.Test;
 import org.junit.rules.ExpectedException;
 import org.junit.runner.RunWith;
 import org.springframework.cloud.contract.wiremock.WireMockSpring;
+import org.springframework.core.ParameterizedTypeReference;
+import org.springframework.http.HttpMethod;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.http.client.HttpComponentsClientHttpRequestFactory;
@@ -238,6 +247,30 @@ public class TcsServiceImplTest {
     SpecialtyDTO result = testObj.getSpecialtyById(20L);
     assertThat("Unexpected result", result, is(specialty));
     verify(restTemplate).getForEntity(url, SpecialtyDTO.class);
+  }
+
+  @Test
+  public void getSpecialtyByNameShouldFindSpecialtyDto() throws EncoderException {
+    SpecialtyDTO specialty = new SpecialtyDTO();
+    specialty.setName("specialtyName");
+    specialty.setSpecialtyTypes(new HashSet<>(
+        Collections.singletonList(SpecialtyType.SUB_SPECIALTY)));
+    specialty.setId(20L);
+
+    String encodedParameters = new URLCodec().encode("{\"name\":[\"specialtyName\"],"
+        + "\"status\":[\"CURRENT\"],\"specialtyTypes\":[\"SUB_SPECIALTY\"]}");
+    String url = "http://localhost:9999/tcs/api/specialties?columnFilters=" + encodedParameters;
+
+    List<SpecialtyDTO> expectedResult = Arrays.asList(specialty);
+    ResponseEntity responseEntity = new ResponseEntity(expectedResult, HttpStatus.OK);
+    doReturn(responseEntity).when(restTemplate).exchange(url, HttpMethod.GET, null,
+        new ParameterizedTypeReference<List<SpecialtyDTO>>() {});
+
+    List<SpecialtyDTO> result = testObj.getSpecialtyByName("specialtyName",
+        SpecialtyType.SUB_SPECIALTY);
+    assertThat("Unexpected result", result, is(expectedResult));
+    verify(restTemplate).exchange(url, HttpMethod.GET, null,
+        new ParameterizedTypeReference<List<SpecialtyDTO>>() {});
   }
 
   @Test
