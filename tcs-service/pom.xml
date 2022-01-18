@@ -341,7 +341,7 @@
     <javax.servlet.version>4.0.1</javax.servlet.version>
     <jhipster.server.version>1.3.1</jhipster.server.version>
     <jjwt.version>0.9.1</jjwt.version>
-    <logstash-logback-encoder.version>6.6</logstash-logback-encoder.version>
+    <logstash-logback-encoder.version>7.0.1</logstash-logback-encoder.version>
     <m2e.apt.activation>jdt_apt</m2e.apt.activation>
     <mapstruct.version>1.4.2.Final</mapstruct.version>
     <maven-compiler-plugin.version>3.9.0</maven-compiler-plugin.version>
