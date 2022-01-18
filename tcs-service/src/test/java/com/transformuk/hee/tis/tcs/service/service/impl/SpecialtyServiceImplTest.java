@@ -3,8 +3,8 @@ package com.transformuk.hee.tis.tcs.service.service.impl;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.verifyNoInteractions;
 import static org.mockito.Mockito.verifyNoMoreInteractions;
-import static org.mockito.Mockito.verifyZeroInteractions;
 import static org.mockito.Mockito.when;
 
 import com.google.common.collect.Lists;
@@ -229,8 +229,8 @@ public class SpecialtyServiceImplTest {
     try {
       testObj.getSpecialtiesForProgrammeAndPerson(null, 1L);
     } catch (Exception e) {
-      verifyZeroInteractions(specialtyRepositoryMock);
-      verifyZeroInteractions(specialtyMapperMock);
+      verifyNoInteractions(specialtyRepositoryMock);
+      verifyNoInteractions(specialtyMapperMock);
       throw e;
     }
   }
@@ -240,8 +240,8 @@ public class SpecialtyServiceImplTest {
     try {
       testObj.getSpecialtiesForProgrammeAndPerson(1L, null);
     } catch (Exception e) {
-      verifyZeroInteractions(specialtyRepositoryMock);
-      verifyZeroInteractions(specialtyMapperMock);
+      verifyNoInteractions(specialtyRepositoryMock);
+      verifyNoInteractions(specialtyMapperMock);
       throw e;
     }
   }

@@ -7,7 +7,7 @@ import java.util.Optional;
 import java.util.Set;
 import org.apache.commons.collections4.CollectionUtils;
 import org.apache.lucene.search.join.ScoreMode;
-import org.elasticsearch.common.collect.Tuple;
+import org.elasticsearch.core.Tuple;
 import org.elasticsearch.index.query.BoolQueryBuilder;
 import org.elasticsearch.index.query.MatchQueryBuilder;
 import org.elasticsearch.index.query.NestedQueryBuilder;

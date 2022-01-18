@@ -3,7 +3,7 @@ package com.transformuk.hee.tis.tcs.service.service.impl;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.verify;
-import static org.mockito.Mockito.verifyZeroInteractions;
+import static org.mockito.Mockito.verifyNoInteractions;
 import static org.mockito.Mockito.when;
 
 import com.google.common.collect.Lists;
@@ -158,9 +158,8 @@ public class PlacementPlannerServiceImpTest {
 
     Assert.assertNull(result.getSpecialties());
 
-    verifyZeroInteractions(placementRepositoryMock);
-    verifyZeroInteractions(referenceServiceMock);
-    verifyZeroInteractions(placementPlannerMapperMock);
+    verifyNoInteractions(placementRepositoryMock);
+    verifyNoInteractions(referenceServiceMock);
+    verifyNoInteractions(placementPlannerMapperMock);
   }
-
 }

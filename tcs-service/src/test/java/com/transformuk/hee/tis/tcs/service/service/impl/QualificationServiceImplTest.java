@@ -1,7 +1,7 @@
 package com.transformuk.hee.tis.tcs.service.service.impl;
 
-import static org.mockito.Matchers.any;
-import static org.mockito.Matchers.anyList;
+import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.anyList;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.times;
@@ -23,7 +23,7 @@ import org.mockito.ArgumentCaptor;
 import org.mockito.Captor;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
-import org.mockito.runners.MockitoJUnitRunner;
+import org.mockito.junit.MockitoJUnitRunner;
 import org.springframework.core.convert.converter.Converter;
 import org.springframework.data.domain.Example;
 import org.springframework.data.domain.Page;

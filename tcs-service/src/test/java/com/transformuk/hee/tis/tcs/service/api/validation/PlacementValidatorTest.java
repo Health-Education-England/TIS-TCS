@@ -19,7 +19,6 @@ import com.transformuk.hee.tis.tcs.api.enumeration.PostSpecialtyType;
 import com.transformuk.hee.tis.tcs.service.model.Placement;
 import com.transformuk.hee.tis.tcs.service.model.PlacementEsrEvent;
 import com.transformuk.hee.tis.tcs.service.model.Post;
-import com.transformuk.hee.tis.tcs.service.repository.OwnerProjection;
 import com.transformuk.hee.tis.tcs.service.repository.PersonRepository;
 import com.transformuk.hee.tis.tcs.service.repository.PlacementRepository;
 import com.transformuk.hee.tis.tcs.service.repository.PostRepository;
@@ -37,8 +36,7 @@ import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
-import org.mockito.Mockito;
-import org.mockito.runners.MockitoJUnitRunner;
+import org.mockito.junit.MockitoJUnitRunner;
 
 @RunWith(MockitoJUnitRunner.class)
 public class PlacementValidatorTest {

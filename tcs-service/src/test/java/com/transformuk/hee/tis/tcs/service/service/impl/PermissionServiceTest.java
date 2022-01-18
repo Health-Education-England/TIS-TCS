@@ -2,13 +2,12 @@ package com.transformuk.hee.tis.tcs.service.service.impl;
 
 import com.transformuk.hee.tis.security.model.Trust;
 import com.transformuk.hee.tis.tcs.TestUtils;
-import com.transformuk.hee.tis.tcs.service.api.TestUtil;
 import org.assertj.core.util.Sets;
 import org.junit.Assert;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.mockito.InjectMocks;
-import org.mockito.runners.MockitoJUnitRunner;
+import org.mockito.junit.MockitoJUnitRunner;
 
 @RunWith(MockitoJUnitRunner.class)
 public class PermissionServiceTest {

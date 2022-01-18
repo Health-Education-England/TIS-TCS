@@ -31,7 +31,7 @@ import java.util.stream.Collectors;
 import org.apache.commons.collections4.CollectionUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.lucene.search.join.ScoreMode;
-import org.elasticsearch.common.collect.Tuple;
+import org.elasticsearch.core.Tuple;
 import org.elasticsearch.index.query.BoolQueryBuilder;
 import org.elasticsearch.index.query.MatchQueryBuilder;
 import org.elasticsearch.index.query.NestedQueryBuilder;
@@ -47,6 +47,11 @@ import org.springframework.data.domain.PageImpl;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Sort;
+import org.springframework.data.elasticsearch.core.ElasticsearchOperations;
+import org.springframework.data.elasticsearch.core.SearchHit;
+import org.springframework.data.elasticsearch.core.SearchHits;
+import org.springframework.data.elasticsearch.core.query.NativeSearchQuery;
+import org.springframework.data.elasticsearch.core.query.NativeSearchQueryBuilder;
 import org.springframework.jdbc.core.namedparam.MapSqlParameterSource;
 import org.springframework.jdbc.core.namedparam.NamedParameterJdbcTemplate;
 import org.springframework.stereotype.Component;
@@ -60,6 +65,8 @@ public class PersonElasticSearchService {
       "SELECT personId, trustId FROM PersonTrust WHERE personId IN (:personIds)";
   @Autowired
   private PersonElasticSearchRepository personElasticSearchRepository;
+  @Autowired
+  private ElasticsearchOperations elasticsearchOperations;
   @Autowired
   private SqlQuerySupplier sqlQuerySupplier;
   @Autowired
@@ -98,10 +105,18 @@ public class PersonElasticSearchService {
       query = query.must(boolSearchQuery);
     }
 
-    Page<PersonView> result = personElasticSearchRepository.search(query, pageable);
-    List<PersonViewDTO> personViewDTOS = convertPersonViewToDTO(result.getContent(), null);
+    NativeSearchQuery nativeQuery = new NativeSearchQueryBuilder()
+        .withQuery(query)
+        .withPageable(pageable)
+        .build();
+
+    SearchHits<PersonView> result = elasticsearchOperations.search(nativeQuery, PersonView.class);
+    List<PersonView> personViews = result.stream()
+        .map(SearchHit::getContent)
+        .collect(Collectors.toList());
+    List<PersonViewDTO> personViewDTOS = convertPersonViewToDTO(personViews, null);
     List<PersonViewDTO> decoratedPersonViews = personViewDecorator.decorate(personViewDTOS);
-    return new PageImpl<>(decoratedPersonViews, pageable, result.getTotalElements());
+    return new PageImpl<>(decoratedPersonViews, pageable, result.getTotalHits());
   }
 
   public Page<PersonViewDTO> searchForPage(String searchQuery,
@@ -191,11 +206,20 @@ public class PersonElasticSearchService {
 //    LOG.info("Query {}", fullQuery.toString());
       pageable = replaceSortByIdHack(pageable);
 
-      Page<PersonView> result = personElasticSearchRepository.search(fullQuery, pageable);
+
+      NativeSearchQuery nativeQuery = new NativeSearchQueryBuilder()
+          .withQuery(fullQuery)
+          .withPageable(pageable)
+          .build();
+
+      SearchHits<PersonView> result = elasticsearchOperations.search(nativeQuery, PersonView.class);
+      List<PersonView> personViews = result.stream()
+          .map(SearchHit::getContent)
+          .collect(Collectors.toList());
 
       return new PageImpl<>(
-          convertPersonViewToDTO(result.getContent(), programmeMembershipStatusFilter), pageable,
-          result.getTotalElements());
+          convertPersonViewToDTO(personViews, programmeMembershipStatusFilter), pageable,
+          result.getTotalHits());
     } catch (RuntimeException re) {
       LOG.error("An exception occurred while attempting to do an ES search", re);
       throw re;
@@ -321,14 +345,12 @@ public class PersonElasticSearchService {
     } else {
       deletePersonDocument(personId);
     }
-    personElasticSearchRepository.refresh();
+    elasticsearchOperations.indexOps(PersonView.class).refresh();
   }
 
   public void deletePersonDocument(Long personId) {
     Preconditions.checkNotNull(personId, "Person id cannot be null");
-    Iterable<PersonView> foundPersons = personElasticSearchRepository
-        .search(new MatchQueryBuilder("personId", personId));
-    personElasticSearchRepository.deleteAll(foundPersons);
+    personElasticSearchRepository.deleteAllByPersonId(personId);
   }
 
   public void updatePersonDocumentForProgramme(Long programmeId) {

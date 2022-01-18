@@ -4,7 +4,7 @@ package com.transformuk.hee.tis.tcs.service.service.impl;
 import static org.mockito.AdditionalAnswers.returnsFirstArg;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.verify;
-import static org.mockito.Mockito.verifyZeroInteractions;
+import static org.mockito.Mockito.verifyNoInteractions;
 import static org.mockito.Mockito.when;
 
 import com.google.common.collect.Maps;
@@ -61,8 +61,8 @@ public class AbsenceServiceTest {
     try {
       testObj.findById(null);
     } finally {
-      Mockito.verifyZeroInteractions(absenceRepositoryMock);
-      Mockito.verifyZeroInteractions(absenceMapper);
+      Mockito.verifyNoInteractions(absenceRepositoryMock);
+      Mockito.verifyNoInteractions(absenceMapper);
     }
   }
 
@@ -73,7 +73,7 @@ public class AbsenceServiceTest {
     Optional<AbsenceDTO> result = testObj.findById(NON_EXISTING_ABSENCE_ID);
 
     Assert.assertFalse(result.isPresent());
-    verifyZeroInteractions(absenceMapper);
+    verifyNoInteractions(absenceMapper);
   }
 
   @Test
@@ -94,8 +94,8 @@ public class AbsenceServiceTest {
     try {
       testObj.findAbsenceByAbsenceAttendanceId(null);
     } finally {
-      Mockito.verifyZeroInteractions(absenceRepositoryMock);
-      Mockito.verifyZeroInteractions(absenceMapper);
+      verifyNoInteractions(absenceRepositoryMock);
+      verifyNoInteractions(absenceMapper);
     }
   }
 
@@ -107,7 +107,7 @@ public class AbsenceServiceTest {
     Optional<AbsenceDTO> result = testObj.findAbsenceByAbsenceAttendanceId(NON_EXISTING_ESR_ABSENCE_ID);
 
     Assert.assertFalse(result.isPresent());
-    verifyZeroInteractions(absenceMapper);
+    verifyNoInteractions(absenceMapper);
   }
 
   @Test
@@ -129,9 +129,9 @@ public class AbsenceServiceTest {
     try {
       testObj.createAbsence(null);
     } finally {
-      verifyZeroInteractions(absenceMapper);
-      verifyZeroInteractions(personRepositoryMock);
-      verifyZeroInteractions(absenceRepositoryMock);
+      verifyNoInteractions(absenceMapper);
+      verifyNoInteractions(personRepositoryMock);
+      verifyNoInteractions(absenceRepositoryMock);
     }
   }
 
@@ -143,9 +143,9 @@ public class AbsenceServiceTest {
 
       testObj.createAbsence(absenceDto);
     } finally {
-      verifyZeroInteractions(absenceMapper);
-      verifyZeroInteractions(personRepositoryMock);
-      verifyZeroInteractions(absenceRepositoryMock);
+      verifyNoInteractions(absenceMapper);
+      verifyNoInteractions(personRepositoryMock);
+      verifyNoInteractions(absenceRepositoryMock);
     }
   }
 
@@ -183,8 +183,8 @@ public class AbsenceServiceTest {
     try {
       testObj.updateAbsence(null);
     } finally {
-      verifyZeroInteractions(personRepositoryMock);
-      verifyZeroInteractions(absenceRepositoryMock);
+      verifyNoInteractions(personRepositoryMock);
+      verifyNoInteractions(absenceRepositoryMock);
     }
   }
 
@@ -193,9 +193,9 @@ public class AbsenceServiceTest {
     try {
       testObj.updateAbsence(new AbsenceDTO());
     } finally {
-      verifyZeroInteractions(absenceMapper);
-      verifyZeroInteractions(personRepositoryMock);
-      verifyZeroInteractions(absenceRepositoryMock);
+      verifyNoInteractions(absenceMapper);
+      verifyNoInteractions(personRepositoryMock);
+      verifyNoInteractions(absenceRepositoryMock);
     }
   }
 
@@ -235,8 +235,8 @@ public class AbsenceServiceTest {
     try {
       testObj.patchAbsence(null);
     } finally {
-      verifyZeroInteractions(absenceRepositoryMock);
-      verifyZeroInteractions(absenceMapper);
+      verifyNoInteractions(absenceRepositoryMock);
+      verifyNoInteractions(absenceMapper);
     }
   }
 
