@@ -383,10 +383,10 @@ public class RevalidationServiceImpl implements RevalidationService {
 
     //Programme Membership
     ProgrammeMembership programmeMembership = programmeMembershipRepository
-        .findLatestProgrammeMembershipByTraineeId(personId);
+        .findLatestCurriculumByTraineeId(personId);
     if (Objects.nonNull(programmeMembership)) {
       LOG.debug("Programme Membership End Date : {}", programmeMembership.getProgrammeEndDate());
-      revalidationRecordDto.setCctDate(programmeMembership.getProgrammeEndDate());
+      revalidationRecordDto.setCctDate(programmeMembership.getCurriculumEndDate());
       revalidationRecordDto.setProgrammeMembershipType(programmeMembership
           .getProgrammeMembershipType().toString());
       revalidationRecordDto.setProgrammeName(programmeMembership.getProgramme().getProgrammeName());

@@ -142,10 +142,12 @@ public class RevalidationServiceImplTest {
 
     programmeMembership = new ProgrammeMembership();
     programmeMembership.setProgrammeEndDate(CCT_DATE);
+    programmeMembership.setCurriculumEndDate(CCT_DATE);
     programmeMembership.setProgrammeMembershipType(PROGRAMME_MEMBERSHIP_TYPE);
     programmeMembership1 = new ProgrammeMembership();
     programmeMembership1.setProgrammeStartDate(PM_START_DATE);
     programmeMembership1.setProgrammeEndDate(PM_END_DATE);
+    programmeMembership1.setCurriculumEndDate(PM_END_DATE);
     programmeMembership1.setProgrammeMembershipType(PROGRAMME_MEMBERSHIP_TYPE);
 
     Programme programme = new Programme();
@@ -178,7 +180,7 @@ public class RevalidationServiceImplTest {
   public void findRevalidationRecordByGmcIdShouldRetrieveOne() {
     when(contactDetailsService.findOne(PERSON_ID)).thenReturn(contactDetails);
     when(gmcDetailsRepositoryMock.findGmcDetailsByGmcNumber("1000")).thenReturn(gmcDetails);
-    when(programmeMembershipRepositoryMock.findLatestProgrammeMembershipByTraineeId(PERSON_ID))
+    when(programmeMembershipRepositoryMock.findLatestCurriculumByTraineeId(PERSON_ID))
         .thenReturn(programmeMembership);
     when(placementRepositoryMock
         .findCurrentPlacementForTrainee(PERSON_ID, now(), PLACEMENT_TYPES))
@@ -201,7 +203,7 @@ public class RevalidationServiceImplTest {
   public void findAllRevalidationRecordsByGmcIdsShouldRetrieveAll() {
     when(contactDetailsService.findOne(PERSON_ID)).thenReturn(contactDetails);
     when(gmcDetailsRepositoryMock.findByGmcNumberIn(GMC_IDS)).thenReturn(gmcDetailList);
-    when(programmeMembershipRepositoryMock.findLatestProgrammeMembershipByTraineeId(PERSON_ID))
+    when(programmeMembershipRepositoryMock.findLatestCurriculumByTraineeId(PERSON_ID))
         .thenReturn(programmeMembership);
     when(placementRepositoryMock
         .findCurrentPlacementForTrainee(PERSON_ID, now(), PLACEMENT_TYPES))
@@ -252,7 +254,7 @@ public class RevalidationServiceImplTest {
     when(contactDetailsService.findOne(PERSON_ID)).thenReturn(contactDetails);
     when(programmeMembershipRepositoryMock.findAllProgrammeMembershipInDescOrderByTraineeId(PERSON_ID))
         .thenReturn(programmeMembershipList);
-    when(programmeMembershipRepositoryMock.findLatestProgrammeMembershipByTraineeId(PERSON_ID))
+    when(programmeMembershipRepositoryMock.findLatestCurriculumByTraineeId(PERSON_ID))
         .thenReturn(programmeMembership);
     when(placementRepositoryMock
         .findCurrentPlacementForTrainee(PERSON_ID, now(), PLACEMENT_TYPES))

@@ -443,7 +443,7 @@ public class PostResourceIntTest {
         .filter(ps -> ps.getPostSpecialtyType().equals(PostSpecialtyType.SUB_SPECIALTY))
         .collect(Collectors.toList());
 
-    assertThat(addedSubspecialties.size()).isZero();
+    assertThat(addedSubspecialties).isEmpty();
     assertThat(postAfterUpdate).isEqualTo(post);
   }
 
@@ -489,7 +489,7 @@ public class PostResourceIntTest {
         .filter(ps -> ps.getPostSpecialtyType().equals(PostSpecialtyType.SUB_SPECIALTY))
         .collect(Collectors.toList());
 
-    assertThat(addedSubspecialties.size()).isEqualTo(1);
+    assertThat(addedSubspecialties).hasSize(1);
     assertThat(addedSubspecialties.get(0).getSpecialty()).isEqualTo(aSubspecialty);
   }
 
