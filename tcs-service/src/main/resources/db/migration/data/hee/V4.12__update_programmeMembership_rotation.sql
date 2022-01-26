@@ -1,5 +1,5 @@
 UPDATE `ProgrammeMembership` SET `rotation` = NULL WHERE `id` = 39816;
-UPDATE `ProgrammeMembership` SET `rotation` = NULL WHERE `id` = 7114;
+UPDATE `ProgrammeMembership` SET `rotation` = NULL WHERE `id` = 62457;
 
 UPDATE `ProgrammeMembership` SET `rotation` = 'General Practice - Chertsey', `rotationId` = '3276' WHERE `id` = 17795;
 UPDATE `ProgrammeMembership` SET `rotation` = '16/KSS/RVV01/F2/022', `rotationId` = '936' WHERE `id` = 26937;
