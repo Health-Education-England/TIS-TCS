@@ -152,7 +152,7 @@ public class RevalidationServiceImpl implements RevalidationService {
     connectionDetailDto.setGmcNumber(revalidationRecordDto.getGmcNumber());
     connectionDetailDto.setForenames(revalidationRecordDto.getForenames());
     connectionDetailDto.setSurname(revalidationRecordDto.getSurname());
-    connectionDetailDto.setCctDate(revalidationRecordDto.getCctDate());
+    connectionDetailDto.setCurriculumEndDate(revalidationRecordDto.getCurriculumEndDate());
     connectionDetailDto
         .setProgrammeMembershipType(revalidationRecordDto.getProgrammeMembershipType());
     connectionDetailDto.setProgrammeName(revalidationRecordDto.getProgrammeName());
@@ -386,7 +386,7 @@ public class RevalidationServiceImpl implements RevalidationService {
         .findLatestCurriculumByTraineeId(personId);
     if (Objects.nonNull(programmeMembership)) {
       LOG.debug("Programme Membership End Date : {}", programmeMembership.getProgrammeEndDate());
-      revalidationRecordDto.setCctDate(programmeMembership.getCurriculumEndDate());
+      revalidationRecordDto.setCurriculumEndDate(programmeMembership.getCurriculumEndDate());
       revalidationRecordDto.setProgrammeMembershipType(programmeMembership
           .getProgrammeMembershipType().toString());
       revalidationRecordDto.setProgrammeName(programmeMembership.getProgramme().getProgrammeName());
