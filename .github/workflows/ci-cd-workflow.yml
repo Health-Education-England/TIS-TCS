@@ -192,7 +192,6 @@ jobs:
           service: tis-tcs
           cluster: tis-preprod
           wait-for-service-stability: true
-          wait-for-minutes: 60
 
   deploy-prod:
     name: Deploy production definition
@@ -230,7 +229,6 @@ jobs:
           service: tis-tcs
           cluster: tis-prod
           wait-for-service-stability: true
-          wait-for-minutes: 60
 
   deploy-nimdta:
     name: Deploy NIMDTA definition
