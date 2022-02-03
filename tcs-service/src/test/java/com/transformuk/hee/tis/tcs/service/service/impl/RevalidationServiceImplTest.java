@@ -71,7 +71,7 @@ public class RevalidationServiceImplTest {
   private static final Long PERSON_ID = 1111L;
   private static final Long GRADE_ID = 2222L;
   private static final Long PLACEMENT_ID = 3333L;
-  private static final LocalDate CCT_DATE = now();
+  private static final LocalDate CURRICULUM_END_DATE = now();
   private static final List<String> PLACEMENT_TYPES = asList("In post", "In Post - Acting Up",
       "In post - Extension", "Parental Leave", "Long-term sick", "Suspended", "Phased Return");
   private static final ProgrammeMembershipType PROGRAMME_MEMBERSHIP_TYPE =
@@ -141,8 +141,8 @@ public class RevalidationServiceImplTest {
     gmcDetailsDTO.setGmcNumber(GMC_NUMBER);
 
     programmeMembership = new ProgrammeMembership();
-    programmeMembership.setProgrammeEndDate(CCT_DATE);
-    programmeMembership.setCurriculumEndDate(CCT_DATE);
+    programmeMembership.setProgrammeEndDate(CURRICULUM_END_DATE);
+    programmeMembership.setCurriculumEndDate(CURRICULUM_END_DATE);
     programmeMembership.setProgrammeMembershipType(PROGRAMME_MEMBERSHIP_TYPE);
     programmeMembership1 = new ProgrammeMembership();
     programmeMembership1.setProgrammeStartDate(PM_START_DATE);
@@ -193,7 +193,7 @@ public class RevalidationServiceImplTest {
     assertThat(result.getGmcNumber(), is("1000"));
     assertThat(result.getForenames(), is(FORENAME));
     assertThat(result.getSurname(), is(SURNAME));
-    assertThat(result.getCctDate(), is(CCT_DATE));
+    assertThat(result.getCurriculumEndDate(), is(CURRICULUM_END_DATE));
     assertThat(result.getProgrammeMembershipType(), is(PROGRAMME_MEMBERSHIP_TYPE.toString()));
     assertThat(result.getProgrammeName(), is(PROGRAMME_NAME));
     assertThat(result.getCurrentGrade(), is(CURRENT_GRADE));
@@ -219,7 +219,7 @@ public class RevalidationServiceImplTest {
     assertThat(record.getGmcNumber(), is("1000"));
     assertThat(record.getForenames(), is(FORENAME));
     assertThat(record.getSurname(), is(SURNAME));
-    assertThat(record.getCctDate(), is(CCT_DATE));
+    assertThat(record.getCurriculumEndDate(), is(CURRICULUM_END_DATE));
     assertThat(record.getProgrammeMembershipType(), is(PROGRAMME_MEMBERSHIP_TYPE.toString()));
     assertThat(record.getProgrammeName(), is(PROGRAMME_NAME));
     assertThat(record.getCurrentGrade(), is(CURRENT_GRADE));
@@ -266,7 +266,7 @@ public class RevalidationServiceImplTest {
     assertThat(result.getGmcNumber(), is(GMC_NUMBER));
     assertThat(result.getForenames(), is(FORENAME));
     assertThat(result.getSurname(), is(SURNAME));
-    assertThat(result.getCctDate(), is(CCT_DATE));
+    assertThat(result.getCurriculumEndDate(), is(CURRICULUM_END_DATE));
     assertThat(result.getProgrammeMembershipType(), is(PROGRAMME_MEMBERSHIP_TYPE.toString()));
     assertThat(result.getProgrammeName(), is(PROGRAMME_NAME));
     assertThat(result.getCurrentGrade(), is(CURRENT_GRADE));

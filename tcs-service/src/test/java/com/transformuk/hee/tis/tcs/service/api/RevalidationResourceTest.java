@@ -46,7 +46,7 @@ public class RevalidationResourceTest {
   private static final String GMC_ID3 = "1234569";
   private static final String FORENAME = "forename";
   private static final String SURNAME = "surname";
-  private static final LocalDate CCT_DATE = LocalDate.now();
+  private static final LocalDate CURRICULUM_END_DATE = LocalDate.now();
   private static final String PROGRAMME_MEMBERSHIP_TYPE = "Substantive";
   private static final String PROGRAMME_NAME = "Clinical Radiology";
   private static final String CURRENT_GRADE = "Foundation Year 2";
@@ -71,7 +71,7 @@ public class RevalidationResourceTest {
     recordDto.setGmcNumber(gmcId);
     recordDto.setForenames(FORENAME);
     recordDto.setSurname(SURNAME);
-    recordDto.setCctDate(CCT_DATE);
+    recordDto.setCurriculumEndDate(CURRICULUM_END_DATE);
     recordDto.setProgrammeMembershipType(PROGRAMME_MEMBERSHIP_TYPE);
     recordDto.setProgrammeName(PROGRAMME_NAME);
     recordDto.setCurrentGrade(CURRENT_GRADE);
@@ -117,7 +117,7 @@ public class RevalidationResourceTest {
     assertThat(revalidationRecordDto.getGmcNumber(), is(GMC_ID1));
     assertThat(revalidationRecordDto.getForenames(), is(FORENAME));
     assertThat(revalidationRecordDto.getSurname(), is(SURNAME));
-    assertThat(revalidationRecordDto.getCctDate(), is(CCT_DATE));
+    assertThat(revalidationRecordDto.getCurriculumEndDate(), is(CURRICULUM_END_DATE));
     assertThat(revalidationRecordDto.getProgrammeMembershipType(), is(PROGRAMME_MEMBERSHIP_TYPE));
     assertThat(revalidationRecordDto.getProgrammeName(), is(PROGRAMME_NAME));
     assertThat(revalidationRecordDto.getCurrentGrade(), is(CURRENT_GRADE));
@@ -156,7 +156,7 @@ public class RevalidationResourceTest {
       assertThat(revalidationRecordDto.getGmcNumber(), is(id));
       assertThat(revalidationRecordDto.getForenames(), is(FORENAME));
       assertThat(revalidationRecordDto.getSurname(), is(SURNAME));
-      assertThat(revalidationRecordDto.getCctDate(), is(CCT_DATE));
+      assertThat(revalidationRecordDto.getCurriculumEndDate(), is(CURRICULUM_END_DATE));
       assertThat(revalidationRecordDto.getProgrammeMembershipType(), is(PROGRAMME_MEMBERSHIP_TYPE));
       assertThat(revalidationRecordDto.getProgrammeName(), is(PROGRAMME_NAME));
       assertThat(revalidationRecordDto.getCurrentGrade(), is(CURRENT_GRADE));
@@ -227,7 +227,7 @@ public class RevalidationResourceTest {
     connectionDetailDto.setGmcNumber(GMC_ID1);
     connectionDetailDto.setForenames(FORENAME);
     connectionDetailDto.setSurname(SURNAME);
-    connectionDetailDto.setCctDate(CCT_DATE);
+    connectionDetailDto.setCurriculumEndDate(CURRICULUM_END_DATE);
     connectionDetailDto.setProgrammeMembershipType(PROGRAMME_MEMBERSHIP_TYPE);
     connectionDetailDto.setProgrammeName(PROGRAMME_NAME);
     connectionDetailDto.setCurrentGrade(CURRENT_GRADE);
@@ -253,7 +253,7 @@ public class RevalidationResourceTest {
     assertThat(contentConnectionDetailDto.getGmcNumber(), is(GMC_ID1));
     assertThat(contentConnectionDetailDto.getForenames(), is(FORENAME));
     assertThat(contentConnectionDetailDto.getSurname(), is(SURNAME));
-    assertThat(contentConnectionDetailDto.getCctDate(), is(CCT_DATE));
+    assertThat(contentConnectionDetailDto.getCurriculumEndDate(), is(CURRICULUM_END_DATE));
     assertThat(contentConnectionDetailDto.getProgrammeMembershipType(),
         is(PROGRAMME_MEMBERSHIP_TYPE));
     assertThat(contentConnectionDetailDto.getProgrammeName(), is(PROGRAMME_NAME));

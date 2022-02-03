@@ -10,7 +10,7 @@ public class ConnectionDetailDto {
   private String gmcNumber;
   private String forenames;
   private String surname;
-  private LocalDate cctDate;
+  private LocalDate curriculumEndDate;
   private String programmeMembershipType;
   private String programmeName;
   private String currentGrade;
