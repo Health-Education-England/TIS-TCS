@@ -41,7 +41,6 @@ import com.transformuk.hee.tis.tcs.service.service.EsrNotificationService;
 import com.transformuk.hee.tis.tcs.service.service.PostService;
 import com.transformuk.hee.tis.tcs.service.service.helper.SqlQuerySupplier;
 import com.transformuk.hee.tis.tcs.service.service.mapper.DesignatedBodyMapper;
-import com.transformuk.hee.tis.tcs.service.service.mapper.PlacementEsrEventDtoMapper;
 import com.transformuk.hee.tis.tcs.service.service.mapper.PostEsrEventDtoMapper;
 import com.transformuk.hee.tis.tcs.service.service.mapper.PostMapper;
 import java.sql.ResultSet;
@@ -644,7 +643,7 @@ public class PostServiceImpl implements PostService {
   public Optional<PostEsrEvent> markPostAsEsrMatched(Long postId,
                                                      PostEsrEventDto postEsrExportedDto) {
     Optional<Post> optionalPostId = postRepository.findPostWithTrustsById(postId);
-    if(!optionalPostId.isPresent()) {
+    if (!optionalPostId.isPresent()) {
       return Optional.empty();
     }
 
