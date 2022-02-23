@@ -18,7 +18,7 @@ import lombok.Data;
 /**
  * A list of post events that are linked to ESR
  * <p>
- * This is a list of exported, or exported_processed events
+ * This is a list of matched, unmatched (TODO: or deleted?) events
  */
 @Entity
 @Table(name = "PostEsrEvent")

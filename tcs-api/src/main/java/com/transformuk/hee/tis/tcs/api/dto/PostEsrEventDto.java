@@ -9,7 +9,7 @@ import lombok.Data;
 public class PostEsrEventDto implements Serializable {
   private static final long serialVersionUID = 1L;
 
-  private Date exportedAt;
+  private Date reconciledAt;
   private String filename;
   private Long postId;
   private Long positionNumber;
