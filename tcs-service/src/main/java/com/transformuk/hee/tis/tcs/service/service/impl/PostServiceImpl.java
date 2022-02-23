@@ -639,9 +639,10 @@ public class PostServiceImpl implements PostService {
     return postMapper.postsToPostDTOs(result);
   }
 
+  //TODO: what about un-matched or deleted? Can we get those from the API call?
   @Override
-  public Optional<PostEsrEvent> markPostAsEsrExported(Long postId,
-      PostEsrEventDto postEsrExportedDto) {
+  public Optional<PostEsrEvent> markPostAsEsrMatched(Long postId,
+                                                     PostEsrEventDto postEsrExportedDto) {
     Optional<Post> optionalPostId = postRepository.findPostWithTrustsById(postId);
     if(!optionalPostId.isPresent()) {
       return Optional.empty();
@@ -651,8 +652,8 @@ public class PostServiceImpl implements PostService {
     PostEsrEvent newPostEsrEvent = postEsrEventDtoMapper
         .postEsrEventDtoToPostEsrEvent(postEsrExportedDto);
     newPostEsrEvent.setPost(post);
-    newPostEsrEvent.setEventDateTime(postEsrExportedDto.getExportedAt());
-    newPostEsrEvent.setStatus(PostEsrEventStatus.EXPORTED);
+    newPostEsrEvent.setEventDateTime(postEsrExportedDto.getReconciledAt());
+    newPostEsrEvent.setStatus(PostEsrEventStatus.MATCHED);
 
     PostEsrEvent newPost = postEsrEventRepository.save(newPostEsrEvent);
     return Optional.ofNullable(newPost);

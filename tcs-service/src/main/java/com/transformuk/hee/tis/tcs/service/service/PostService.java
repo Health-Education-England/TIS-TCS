@@ -182,11 +182,11 @@ public interface PostService {
 
 
   /**
-   * Create new Post ESR Event and mark as Exported
+   * Create new Post ESR Event and mark as Matched
    *
    * @param postId The id of the Post
    * @param postEsrEventDto         the post ESR event
    * @return Optional post ESR event
    */
-  Optional<PostEsrEvent> markPostAsEsrExported(Long postId, PostEsrEventDto postEsrEventDto);
+  Optional<PostEsrEvent> markPostAsEsrMatched(Long postId, PostEsrEventDto postEsrEventDto);
 }

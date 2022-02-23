@@ -9,11 +9,11 @@ import org.mapstruct.Mapping;
 @Mapper(componentModel = "spring")
 public interface PostEsrEventDtoMapper {
 
-  @Mapping(target = "eventDateTime", source = "exportedAt")
+  @Mapping(target = "eventDateTime", source = "reconciledAt")
   PostEsrEvent postEsrEventDtoToPostEsrEvent(
       PostEsrEventDto postEsrExportedDto);
 
-  @Mapping(target = "exportedAt", source = "eventDateTime")
+  @Mapping(target = "reconciledAt", source = "eventDateTime")
   PostEsrEventDto postEsrEventToPostEsrEventDto(
       PostEsrEvent postEsrEvent);
 

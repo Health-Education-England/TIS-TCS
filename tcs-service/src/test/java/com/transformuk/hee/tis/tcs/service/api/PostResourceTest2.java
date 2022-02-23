@@ -14,10 +14,13 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
+import com.fasterxml.jackson.databind.ObjectMapper;
 import com.google.common.collect.Lists;
 import com.google.common.collect.Sets;
 import com.transformuk.hee.tis.tcs.TestUtils;
+import com.transformuk.hee.tis.tcs.api.dto.PlacementEsrEventDto;
 import com.transformuk.hee.tis.tcs.api.dto.PostDTO;
+import com.transformuk.hee.tis.tcs.api.dto.PostEsrEventDto;
 import com.transformuk.hee.tis.tcs.api.dto.ProgrammeDTO;
 import com.transformuk.hee.tis.tcs.api.enumeration.PostSpecialtyType;
 import com.transformuk.hee.tis.tcs.api.enumeration.Status;
@@ -27,13 +30,18 @@ import com.transformuk.hee.tis.tcs.service.api.decorator.PlacementViewDecorator;
 import com.transformuk.hee.tis.tcs.service.api.validation.PostValidator;
 import com.transformuk.hee.tis.tcs.service.exception.AccessUnauthorisedException;
 import com.transformuk.hee.tis.tcs.service.exception.ExceptionTranslator;
+import com.transformuk.hee.tis.tcs.service.model.PlacementEsrEvent;
+import com.transformuk.hee.tis.tcs.service.model.PostEsrEvent;
 import com.transformuk.hee.tis.tcs.service.repository.PlacementViewRepository;
 import com.transformuk.hee.tis.tcs.service.service.PlacementService;
 import com.transformuk.hee.tis.tcs.service.service.PostService;
 import com.transformuk.hee.tis.tcs.service.service.mapper.PlacementViewMapper;
 import java.lang.reflect.Method;
 import java.util.ArrayList;
+import java.util.Date;
 import java.util.List;
+import java.util.Optional;
+
 import org.apache.commons.lang3.StringUtils;
 import org.hamcrest.core.StringContains;
 import org.junit.Assert;
@@ -42,6 +50,7 @@ import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.mockito.ArgumentCaptor;
 import org.mockito.Captor;
+import org.mockito.Mockito;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.boot.test.mock.mockito.MockBean;
@@ -66,6 +75,10 @@ public class PostResourceTest2 {
 
   public static final String POST_DTO_NAME = "PostDTO";
   public static final String SPECIAL_CHARACTERS = "#%$^&**(";
+  public static final String RECONCILED_FILENAME = "reconciled filename";
+  public static final long RECONCILED_POST_ID = 1111L;
+  public static final long RECONCILED_POSITION_ID = 2222L;
+  public static final long RECONCILED_POSITION_NUMBER = 4444L;
 
   @MockBean
   private PostService postService;
@@ -93,6 +106,9 @@ public class PostResourceTest2 {
   private PostDTO postDTO;
   @Captor
   private ArgumentCaptor<PostDTO> postDTOArgumentCaptor;
+  @Captor
+  private ArgumentCaptor<PostEsrEventDto> postEsrReconciledDtoArgumentCaptor;
+  private PostEsrEventDto postEsrReconciledDto;
 
   @Before
   public void setup() {
@@ -108,6 +124,17 @@ public class PostResourceTest2 {
     postDTO = new PostDTO();
     postDTO.setStatus(Status.CURRENT);
     postDTO.setOwner("Owner");
+
+    setupPostEsrReconciledDto();
+  }
+
+  private void setupPostEsrReconciledDto() {
+    postEsrReconciledDto = new PostEsrEventDto();
+    postEsrReconciledDto.setReconciledAt(new Date(111L));
+    postEsrReconciledDto.setFilename(RECONCILED_FILENAME);
+    postEsrReconciledDto.setPostId(RECONCILED_POST_ID);
+    postEsrReconciledDto.setPositionId(RECONCILED_POSITION_ID);
+    postEsrReconciledDto.setPositionNumber(RECONCILED_POSITION_NUMBER);
   }
 
   @Test
@@ -374,5 +401,26 @@ public class PostResourceTest2 {
         .andExpect(jsonPath("$[0].programmes[0].programmeName").value(programmeName));
 
     verify(postService).findPostsForProgrammeIdAndNpn(programmeId, postNpn);
+  }
+
+  @Test
+  public void markPostAsEsrMatchedShouldCallServiceToMarkItAsMatched() throws Exception {
+
+    PostEsrEvent newPostEvent = new PostEsrEvent();
+    when(postService.markPostAsEsrMatched(Mockito.eq(RECONCILED_POST_ID), postEsrReconciledDtoArgumentCaptor
+        .capture()))
+        .thenReturn(Optional.of(newPostEvent));
+
+    restPostMockMvc.perform(post("/api/posts/{postId}/esr-matched", RECONCILED_POST_ID)
+            .content(new ObjectMapper().writeValueAsBytes(postEsrReconciledDto))
+            .contentType(MediaType.APPLICATION_JSON_UTF8))
+        .andExpect(status().isOk());
+
+    PostEsrEventDto capturedPayload = postEsrReconciledDtoArgumentCaptor.getValue();
+    Assert.assertEquals(postEsrReconciledDto.getReconciledAt(), capturedPayload.getReconciledAt());
+    Assert.assertEquals(postEsrReconciledDto.getFilename(), capturedPayload.getFilename());
+    Assert.assertEquals(postEsrReconciledDto.getPostId(), capturedPayload.getPostId());
+    Assert.assertEquals(postEsrReconciledDto.getPositionNumber(), capturedPayload.getPositionNumber());
+    Assert.assertEquals(postEsrReconciledDto.getPositionId(), capturedPayload.getPositionId());
   }
 }
