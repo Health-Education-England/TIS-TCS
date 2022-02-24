@@ -5,6 +5,9 @@ import java.io.Serializable;
 import java.util.Date;
 import lombok.Data;
 
+/**
+ * This DTO is used for ESR Reconcilation Event for Post.
+ */
 @Data
 public class PostEsrEventDto implements Serializable {
   private static final long serialVersionUID = 1L;

@@ -16,8 +16,7 @@ import javax.persistence.Table;
 import lombok.Data;
 
 /**
- * A list of post events that are linked to ESR
- * <p>
+ * A list of post events that are linked to ESR.
  * This is a list of matched, unmatched (TODO: or deleted?) events
  */
 @Entity

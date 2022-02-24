@@ -6,6 +6,9 @@ import java.util.Set;
 import org.mapstruct.Mapper;
 import org.mapstruct.Mapping;
 
+/**
+ * Mapper for the entity PostEsrEvent and its DTO PostEsrEventDto.
+ */
 @Mapper(componentModel = "spring")
 public interface PostEsrEventDtoMapper {
 
