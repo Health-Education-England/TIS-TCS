@@ -18,7 +18,6 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import com.google.common.collect.Lists;
 import com.google.common.collect.Sets;
 import com.transformuk.hee.tis.tcs.TestUtils;
-import com.transformuk.hee.tis.tcs.api.dto.PlacementEsrEventDto;
 import com.transformuk.hee.tis.tcs.api.dto.PostDTO;
 import com.transformuk.hee.tis.tcs.api.dto.PostEsrEventDto;
 import com.transformuk.hee.tis.tcs.api.dto.ProgrammeDTO;
@@ -30,7 +29,6 @@ import com.transformuk.hee.tis.tcs.service.api.decorator.PlacementViewDecorator;
 import com.transformuk.hee.tis.tcs.service.api.validation.PostValidator;
 import com.transformuk.hee.tis.tcs.service.exception.AccessUnauthorisedException;
 import com.transformuk.hee.tis.tcs.service.exception.ExceptionTranslator;
-import com.transformuk.hee.tis.tcs.service.model.PlacementEsrEvent;
 import com.transformuk.hee.tis.tcs.service.model.PostEsrEvent;
 import com.transformuk.hee.tis.tcs.service.repository.PlacementViewRepository;
 import com.transformuk.hee.tis.tcs.service.service.PlacementService;
@@ -407,11 +405,11 @@ public class PostResourceTest2 {
   public void markPostAsEsrMatchedShouldCallServiceToMarkItAsMatched() throws Exception {
 
     PostEsrEvent newPostEvent = new PostEsrEvent();
-    when(postService.markPostAsEsrMatched(Mockito.eq(RECONCILED_POST_ID), postEsrReconciledDtoArgumentCaptor
+    when(postService.markPostAsEsrReconciled(Mockito.eq(RECONCILED_POST_ID), postEsrReconciledDtoArgumentCaptor
         .capture()))
         .thenReturn(Optional.of(newPostEvent));
 
-    restPostMockMvc.perform(post("/api/posts/{postId}/esr-matched", RECONCILED_POST_ID)
+    restPostMockMvc.perform(post("/api/posts/{postId}/esr-reconciled", RECONCILED_POST_ID)
             .content(new ObjectMapper().writeValueAsBytes(postEsrReconciledDto))
             .contentType(MediaType.APPLICATION_JSON_UTF8))
         .andExpect(status().isOk());

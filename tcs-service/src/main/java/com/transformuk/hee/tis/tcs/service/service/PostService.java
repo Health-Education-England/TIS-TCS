@@ -188,5 +188,5 @@ public interface PostService {
    * @param postEsrEventDto         the post ESR event
    * @return Optional post ESR event
    */
-  Optional<PostEsrEvent> markPostAsEsrMatched(Long postId, PostEsrEventDto postEsrEventDto);
+  Optional<PostEsrEvent> markPostAsEsrReconciled(Long postId, PostEsrEventDto postEsrEventDto);
 }

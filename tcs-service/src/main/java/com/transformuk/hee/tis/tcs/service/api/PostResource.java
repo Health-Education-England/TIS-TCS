@@ -623,12 +623,12 @@ public class PostResource {
 
   }
 
-  @PostMapping(value = "/posts/{postId}/esr-matched")
+  @PostMapping(value = "/posts/{postId}/esr-reconciled")
   @PreAuthorize("hasAuthority('tcs:add:modify:entities')")
   public ResponseEntity<PostEsrEvent> markPostAsEsrMatched(@PathVariable Long postId,
       @RequestBody PostEsrEventDto postEsrEventDto) {
     Optional<PostEsrEvent> optionalPostEvent = postService
-        .markPostAsEsrMatched(postId, postEsrEventDto);
+        .markPostAsEsrReconciled(postId, postEsrEventDto);
 
     return ResponseEntity.of(optionalPostEvent);
   }
