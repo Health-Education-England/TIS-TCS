@@ -182,7 +182,7 @@ public interface PostService {
 
 
   /**
-   * Create new Post ESR Event and mark as Reconciled (matched or unmatched).
+   * Create new Post ESR Event and mark as Reconciled or Deleted.
    *
    * @param postId The id of the Post
    * @param postEsrEventDto         the post ESR event
