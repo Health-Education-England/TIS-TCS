@@ -4,6 +4,7 @@ import com.google.common.collect.Lists;
 import com.google.common.collect.Sets;
 import com.transformuk.hee.tis.tcs.api.dto.PostDTO;
 import com.transformuk.hee.tis.tcs.api.dto.PostEsrDTO;
+import com.transformuk.hee.tis.tcs.api.dto.PostEsrEventDto;
 import com.transformuk.hee.tis.tcs.api.dto.PostFundingDTO;
 import com.transformuk.hee.tis.tcs.api.dto.PostGradeDTO;
 import com.transformuk.hee.tis.tcs.api.dto.PostSiteDTO;
@@ -11,6 +12,7 @@ import com.transformuk.hee.tis.tcs.api.dto.PostSpecialtyDTO;
 import com.transformuk.hee.tis.tcs.api.dto.ProgrammeDTO;
 import com.transformuk.hee.tis.tcs.api.dto.SpecialtyDTO;
 import com.transformuk.hee.tis.tcs.service.model.Post;
+import com.transformuk.hee.tis.tcs.service.model.PostEsrEvent;
 import com.transformuk.hee.tis.tcs.service.model.PostFunding;
 import com.transformuk.hee.tis.tcs.service.model.PostGrade;
 import com.transformuk.hee.tis.tcs.service.model.PostSite;
@@ -151,6 +153,21 @@ public class PostMapper {
     if (CollectionUtils.isNotEmpty(post.getFundings())) {
       result.setFundings(
           post.getFundings().stream().map(this::fundingToFundingDTO).collect(Collectors.toSet()));
+    }
+
+    if (CollectionUtils.isNotEmpty(post.getPostEsrEvents())) {
+      Set<PostEsrEventDto> postEsrEventDtos = Sets.newHashSet();
+      for (PostEsrEvent postEsrEvent : post.getPostEsrEvents()) {
+        PostEsrEventDto postEsrEventDto = new PostEsrEventDto();
+        postEsrEventDto.setReconciledAt(postEsrEvent.getEventDateTime());
+        postEsrEventDto.setFilename(postEsrEvent.getFilename());
+        postEsrEventDto.setPostId(postEsrEvent.getPost().getId());
+        postEsrEventDto.setPositionNumber(postEsrEvent.getPositionNumber());
+        postEsrEventDto.setPositionId(postEsrEvent.getPositionId());
+        postEsrEventDto.setStatus(postEsrEvent.getStatus());
+        postEsrEventDtos.add(postEsrEventDto);
+      }
+      result.setPostEsrEvents(postEsrEventDtos);
     }
 
     result.setProgrammes(programmeToProgrammeDTO(post.getProgrammes()));
