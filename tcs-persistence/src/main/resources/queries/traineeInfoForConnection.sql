@@ -16,9 +16,9 @@ from (
   left join GmcDetails gmc on (gmc.id = p.id)
   left join (select distinct pmi.personId, pmi.programmeStartDate, pmi.programmeEndDate,
           pmi.programmeId, pmi.programmeMembershipType
-          from ProgrammeMembership pmi
+          from CurriculumMembership pmi
           inner join (select personId, MAX(programmeEndDate) as latestEndDate
-              from ProgrammeMembership
+              from CurriculumMembership
               group by personId) latest on pmi.personId = latest.personId
               and pmi.programmeEndDate = latest.latestEndDate
           ) latestPm on (latestPm.personId = p.id)

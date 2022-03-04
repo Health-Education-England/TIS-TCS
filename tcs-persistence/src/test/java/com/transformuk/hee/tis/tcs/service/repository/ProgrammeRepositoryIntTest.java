@@ -1,12 +1,12 @@
 package com.transformuk.hee.tis.tcs.service.repository;
 
-import com.google.common.collect.Sets;
 import com.transformuk.hee.tis.tcs.service.TestConfig;
 import com.transformuk.hee.tis.tcs.service.model.Curriculum;
+import com.transformuk.hee.tis.tcs.service.model.CurriculumMembership;
 import com.transformuk.hee.tis.tcs.service.model.Person;
 import com.transformuk.hee.tis.tcs.service.model.Programme;
 import com.transformuk.hee.tis.tcs.service.model.ProgrammeCurriculum;
-import com.transformuk.hee.tis.tcs.service.model.ProgrammeMembership;
+
 import java.util.List;
 import javax.persistence.EntityManager;
 import org.assertj.core.util.Lists;
@@ -30,14 +30,14 @@ public class ProgrammeRepositoryIntTest {
   private PersonRepository personRepository;
 
   @Autowired
-  private ProgrammeMembershipRepository programmeMembershipRepository;
+  private CurriculumMembershipRepository curriculumMembershipRepository;
 
   @Autowired
   private ProgrammeCurriculumRepository programmeCurriculumRepository;
 
   @Autowired
   private CurriculumRepository curriculumRepository;
-  
+
   @Autowired
   private EntityManager entityManager;
 
@@ -48,7 +48,7 @@ public class ProgrammeRepositoryIntTest {
 
   @Transactional
   @Test
-  public void findByProgrammeMembershipPersonIdShouldReturnAUniqueCollectionOfProgrammesThePersonIsEnrolledOn() {
+  public void findByCurriculumMembershipPersonIdShouldReturnAUniqueCollectionOfProgrammesThePersonIsEnrolledOn() {
     Programme programme1 = new Programme(), programme2 = new Programme(), programme3 = new Programme();
 
     programme1.setProgrammeName("Programme 1");
@@ -63,8 +63,8 @@ public class ProgrammeRepositoryIntTest {
     personRepository.saveAll(Lists.newArrayList(person1, person2));
     personRepository.flush();
 
-    ProgrammeMembership pm1 = new ProgrammeMembership(), pm2 = new ProgrammeMembership(), pm3 = new ProgrammeMembership(),
-        pmWithSameProgramme = new ProgrammeMembership();
+    CurriculumMembership pm1 = new CurriculumMembership(), pm2 = new CurriculumMembership(), pm3 = new CurriculumMembership(),
+        pmWithSameProgramme = new CurriculumMembership();
 
     pm1.setProgramme(programme1);
     pm1.setPerson(person1);
@@ -76,10 +76,10 @@ public class ProgrammeRepositoryIntTest {
     pm3.setProgramme(programme3);
     pm3.setPerson(person2);
 
-    programmeMembershipRepository.saveAll(Lists.newArrayList(pm1, pm2, pm3, pmWithSameProgramme));
-    programmeMembershipRepository.flush();
+    curriculumMembershipRepository.saveAll(Lists.newArrayList(pm1, pm2, pm3, pmWithSameProgramme));
+    curriculumMembershipRepository.flush();
 
-    List<Programme> result = testObj.findByProgrammeMembershipPersonId(person1.getId());
+    List<Programme> result = testObj.findByCurriculumMembershipPersonId(person1.getId());
 
     //no duplicate programmes - this would have 3 if we didn't have the distinct
     Assert.assertEquals(2, result.size());
@@ -98,7 +98,7 @@ public class ProgrammeRepositoryIntTest {
     Curriculum curriculum = new Curriculum();
     curriculum.setName("Curricula 1");
     curriculum = curriculumRepository.saveAndFlush(curriculum);
-    
+
     ProgrammeCurriculum join = new ProgrammeCurriculum();
     join.setCurriculum(curriculum);
 
@@ -115,7 +115,7 @@ public class ProgrammeRepositoryIntTest {
 
     Assert.assertTrue(result);
   }
-  
+
   @Test
   @Transactional
   public void programCurriculumCanBeSavedFollowingProgramme() {
@@ -123,7 +123,7 @@ public class ProgrammeRepositoryIntTest {
     Curriculum curriculum = new Curriculum();
     curriculum.setName("Curricula 1");
     curriculum = curriculumRepository.saveAndFlush(curriculum);
-    
+
     ProgrammeCurriculum join = new ProgrammeCurriculum();
     join.setCurriculum(curriculum);
 
@@ -134,7 +134,7 @@ public class ProgrammeRepositoryIntTest {
     join.setCurriculum(curriculum);
     join.setGmcProgrammeCode(GMC_CODE);
     join = entityManager.merge(join);
-    
+
     ProgrammeCurriculum byId = programmeCurriculumRepository.getOne(join.getId());
     Assert.assertEquals(GMC_CODE, byId.getGmcProgrammeCode());
   }

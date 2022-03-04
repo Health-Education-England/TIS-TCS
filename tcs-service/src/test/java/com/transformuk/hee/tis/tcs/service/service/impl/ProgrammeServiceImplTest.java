@@ -56,7 +56,7 @@ public class ProgrammeServiceImplTest {
     try {
       testObj.findTraineeProgrammes(null);
     } catch (Exception e) {
-      verify(programmeRepositoryMock, never()).findByProgrammeMembershipPersonId(any());
+      verify(programmeRepositoryMock, never()).findByCurriculumMembershipPersonId(any());
       verify(programmeMapperMock, never()).programmesToProgrammeDTOs(anyList());
       throw e;
     }
@@ -66,14 +66,14 @@ public class ProgrammeServiceImplTest {
   public void findTraineeProgrammesShouldReturnAnEmptyListWhenNoProgrammesFound() {
     List<Programme> foundProgrammes = Lists.newArrayList();
     List<ProgrammeDTO> convertedProgrammes = Lists.newArrayList();
-    when(programmeRepositoryMock.findByProgrammeMembershipPersonId(PERSON_ID))
+    when(programmeRepositoryMock.findByCurriculumMembershipPersonId(PERSON_ID))
         .thenReturn(foundProgrammes);
     when(programmeMapperMock.programmesToProgrammeDTOs(foundProgrammes))
         .thenReturn(convertedProgrammes);
 
     List<ProgrammeDTO> result = testObj.findTraineeProgrammes(PERSON_ID);
 
-    verify(programmeRepositoryMock).findByProgrammeMembershipPersonId(PERSON_ID);
+    verify(programmeRepositoryMock).findByCurriculumMembershipPersonId(PERSON_ID);
     verify(programmeMapperMock).programmesToProgrammeDTOs(foundProgrammes);
 
     Assert.assertNotNull(result);
@@ -101,14 +101,14 @@ public class ProgrammeServiceImplTest {
 
     List<Programme> foundProgrammes = Lists.newArrayList(programme1, programme2);
     List<ProgrammeDTO> convertedProgrammes = Lists.newArrayList(programmeDTO1, programmeDTO2);
-    when(programmeRepositoryMock.findByProgrammeMembershipPersonId(PERSON_ID))
+    when(programmeRepositoryMock.findByCurriculumMembershipPersonId(PERSON_ID))
         .thenReturn(foundProgrammes);
     when(programmeMapperMock.programmesToProgrammeDTOs(foundProgrammes))
         .thenReturn(convertedProgrammes);
 
     List<ProgrammeDTO> result = testObj.findTraineeProgrammes(PERSON_ID);
 
-    verify(programmeRepositoryMock).findByProgrammeMembershipPersonId(PERSON_ID);
+    verify(programmeRepositoryMock).findByCurriculumMembershipPersonId(PERSON_ID);
     verify(programmeMapperMock).programmesToProgrammeDTOs(foundProgrammes);
 
     Assert.assertNotNull(result);
