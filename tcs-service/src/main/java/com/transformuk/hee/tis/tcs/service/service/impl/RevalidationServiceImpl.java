@@ -63,6 +63,7 @@ import org.springframework.util.StringUtils;
 public class RevalidationServiceImpl implements RevalidationService {
 
   private static final String CONNECTION_OWNER = "owner";
+  private static final String CURRICULUM_END_DATE_FIELD = "curriculumEndDate";
   private static final String GMC_NUMBER_FIELD = "gmcNumber";
   private static final String FORENAMES_FIELD = "forenames";
   private static final String PROGRAMME_END_DATE_FIELD = "programmeEndDate";
@@ -416,12 +417,16 @@ public class RevalidationServiceImpl implements RevalidationService {
       String owner = rs.getString(CONNECTION_OWNER);
       LocalDate start;
       LocalDate end;
+      LocalDate curriculumEnd;
       try {
         start = rs.getDate(PROGRAMME_START_DATE_FIELD).toLocalDate();
         end = rs.getDate(PROGRAMME_END_DATE_FIELD).toLocalDate();
+        curriculumEnd = rs.getDate(CURRICULUM_END_DATE_FIELD).toLocalDate();
+
       } catch (Exception e) {
         start = null;
         end = null;
+        curriculumEnd = null;
       }
       return ConnectionInfoDto.builder()
           .tcsPersonId(rs.getLong("id"))
@@ -434,6 +439,7 @@ public class RevalidationServiceImpl implements RevalidationService {
           .programmeOwner(owner)
           .programmeMembershipStartDate(start)
           .programmeMembershipEndDate(end)
+          .curriculumEndDate(curriculumEnd)
           .dataSource("TCS")
           .build();
     }
