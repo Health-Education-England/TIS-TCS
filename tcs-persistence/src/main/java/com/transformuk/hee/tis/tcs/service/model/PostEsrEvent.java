@@ -2,7 +2,7 @@ package com.transformuk.hee.tis.tcs.service.model;
 
 import com.transformuk.hee.tis.tcs.api.enumeration.PostEsrEventStatus;
 import java.io.Serializable;
-import java.util.Date;
+import java.time.LocalDateTime;
 import javax.persistence.Column;
 import javax.persistence.Entity;
 import javax.persistence.EnumType;
@@ -33,7 +33,7 @@ public class PostEsrEvent implements Serializable {
   private Post post;
 
   @Column(name = "eventDateTime")
-  private Date eventDateTime;
+  private LocalDateTime eventDateTime;
   @Column(name = "filename")
   private String filename;
   @Column(name = "positionNumber")

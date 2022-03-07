@@ -87,7 +87,7 @@ public class Post implements Serializable {
   private Set<Placement> placementHistory = new HashSet<>();
   @OneToMany(mappedBy = "post", fetch = FetchType.LAZY)
   private Set<PostTrust> associatedTrusts;
-  @OneToMany(mappedBy = "post", fetch = FetchType.LAZY, cascade = CascadeType.REMOVE)
+  @OneToMany(mappedBy = "post", fetch = FetchType.EAGER, cascade = CascadeType.REMOVE)
   private Set<PostEsrEvent> postEsrEvents;
 
   public Post intrepidId(final String intrepidId) {
