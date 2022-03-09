@@ -8,15 +8,15 @@ from (
     latestPm.programmeMembershipType,
     latestPm.programmeStartDate,
     latestPm.programmeEndDate,
-    latestPm.curriculumEndDate,
     prg.programmeName,
-    prg.owner
+    prg.owner,
+    cm.curriculumEndDate
   from
     Person p
   join ContactDetails cd on (cd.id = p.id)
   left join GmcDetails gmc on (gmc.id = p.id)
   left join (select distinct pmi.personId, pmi.programmeStartDate, pmi.programmeEndDate,
-          pmi.programmeId, pmi.programmeMembershipType, pmi.curriculumEndDate
+          pmi.programmeId, pmi.programmeMembershipType, pmi.curriculumId
           from ProgrammeMembership pmi
           inner join (select personId, MAX(programmeEndDate) as latestEndDate
               from ProgrammeMembership
@@ -24,5 +24,6 @@ from (
               and pmi.programmeEndDate = latest.latestEndDate
           ) latestPm on (latestPm.personId = p.id)
   left join Programme prg on (prg.id = latestPm.programmeId)
+  left join CurriculumMembership cm on (cm.id = latestPm.curriculumId)
   ) as ot
 ;
