@@ -1,6 +1,6 @@
 package com.transformuk.hee.tis.tcs.service.message;
 
-import com.transformuk.hee.tis.tcs.api.dto.MainDoctorViewDto;
+import com.transformuk.hee.tis.tcs.api.dto.ConnectionInfoDto;
 import com.transformuk.hee.tis.tcs.service.service.RevalidationService;
 import java.util.List;
 import org.springframework.amqp.rabbit.annotation.RabbitListener;
@@ -32,15 +32,15 @@ public class RevalidationMessageListener {
   @RabbitListener(queues = "${app.rabbit.reval.queue.connection.syncstart}")
   public void receiveMessage(final String start) {
     if (start.equals("syncStart") && !exchange.equals("false")) {
-      List<MainDoctorViewDto> connections = revalidationService.extractConnectionInfoForSync();
-      for (MainDoctorViewDto connection : connections) {
+      List<ConnectionInfoDto> connections = revalidationService.extractConnectionInfoForSync();
+      for (ConnectionInfoDto connection : connections) {
         rabbitTemplate.convertAndSend(exchange, routingKey, connection);
       }
       rabbitTemplate.convertAndSend(exchange, routingKey, getSyncEndMessageDto());
     }
   }
 
-  private MainDoctorViewDto getSyncEndMessageDto() {
-    return MainDoctorViewDto.builder().syncEnd(true).build();
+  private ConnectionInfoDto getSyncEndMessageDto() {
+    return ConnectionInfoDto.builder().syncEnd(true).build();
   }
 }

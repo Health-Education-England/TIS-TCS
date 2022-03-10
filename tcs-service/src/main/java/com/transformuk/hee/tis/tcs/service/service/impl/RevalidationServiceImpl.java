@@ -9,8 +9,8 @@ import com.transformuk.hee.tis.reference.api.dto.GradeDTO;
 import com.transformuk.hee.tis.reference.client.ReferenceService;
 import com.transformuk.hee.tis.tcs.api.dto.ConnectionDetailDto;
 import com.transformuk.hee.tis.tcs.api.dto.ConnectionDto;
-import com.transformuk.hee.tis.tcs.api.dto.MainDoctorViewDto;
-import com.transformuk.hee.tis.tcs.api.dto.MainDoctorViewDto.MainDoctorViewDtoBuilder;
+import com.transformuk.hee.tis.tcs.api.dto.ConnectionInfoDto;
+import com.transformuk.hee.tis.tcs.api.dto.ConnectionInfoDto.ConnectionInfoDtoBuilder;
 import com.transformuk.hee.tis.tcs.api.dto.ConnectionRecordDto;
 import com.transformuk.hee.tis.tcs.api.dto.ConnectionSummaryDto;
 import com.transformuk.hee.tis.tcs.api.dto.ConnectionSummaryRecordDto;
@@ -215,22 +215,22 @@ public class RevalidationServiceImpl implements RevalidationService {
   }
 
   @Override
-  public MainDoctorViewDto buildTcsConnectionInfo(Long personId) {
+  public ConnectionInfoDto buildTcsConnectionInfo(Long personId) {
 
-    final MainDoctorViewDtoBuilder MainDoctorViewDtoBuilder = MainDoctorViewDto.builder();
-    MainDoctorViewDtoBuilder.tcsPersonId(personId);
+    final ConnectionInfoDtoBuilder connectionInfoDtoBuilder = ConnectionInfoDto.builder();
+    connectionInfoDtoBuilder.tcsPersonId(personId);
 
     // GMC Details
     final GmcDetailsDTO gmcDetailsDto = gmcDetailsService.findOne(personId);
     if (gmcDetailsDto != null) {
-      MainDoctorViewDtoBuilder.gmcReferenceNumber(gmcDetailsDto.getGmcNumber());
+      connectionInfoDtoBuilder.gmcReferenceNumber(gmcDetailsDto.getGmcNumber());
     }
 
     // Contact Details
     final ContactDetailsDTO contactDetailsDto = contactDetailsService.findOne(personId);
     if (contactDetailsDto != null) {
-      MainDoctorViewDtoBuilder.doctorFirstName(contactDetailsDto.getForenames());
-      MainDoctorViewDtoBuilder.doctorLastName(contactDetailsDto.getSurname());
+      connectionInfoDtoBuilder.doctorFirstName(contactDetailsDto.getForenames());
+      connectionInfoDtoBuilder.doctorLastName(contactDetailsDto.getSurname());
     }
 
     // latest Programme Membership
@@ -242,7 +242,7 @@ public class RevalidationServiceImpl implements RevalidationService {
       final String owner = programmeMembershipDto.getProgrammeOwner();
       final ProgrammeMembershipType membershipType = programmeMembershipDto
           .getProgrammeMembershipType();
-      MainDoctorViewDtoBuilder
+      connectionInfoDtoBuilder
           .tcsDesignatedBody(owner != null ? DesignatedBodyMapper.getDbcByOwner(owner) : null)
           .programmeOwner(owner)
           .programmeName(programmeMembershipDto.getProgrammeName())
@@ -251,12 +251,12 @@ public class RevalidationServiceImpl implements RevalidationService {
           .programmeMembershipType(membershipType != null ? membershipType.toString() : null);
     }
 
-    MainDoctorViewDtoBuilder.dataSource("TCS");
-    return MainDoctorViewDtoBuilder.build();
+    connectionInfoDtoBuilder.dataSource("TCS");
+    return connectionInfoDtoBuilder.build();
   }
 
   @Override
-  public List<MainDoctorViewDto> extractConnectionInfoForSync() {
+  public List<ConnectionInfoDto> extractConnectionInfoForSync() {
     final String query = sqlQuerySupplier
         .getQuery(SqlQuerySupplier.TRAINEE_CONNECTION_INFO);
     MapSqlParameterSource paramSource = new MapSqlParameterSource();
@@ -410,10 +410,10 @@ public class RevalidationServiceImpl implements RevalidationService {
     return revalidationRecordDto;
   }
 
-  private class RevalidationConnectionInfoMapper implements RowMapper<MainDoctorViewDto> {
+  private class RevalidationConnectionInfoMapper implements RowMapper<ConnectionInfoDto> {
 
     @Override
-    public MainDoctorViewDto mapRow(ResultSet rs, int rowNum) throws SQLException {
+    public ConnectionInfoDto mapRow(ResultSet rs, int rowNum) throws SQLException {
       String owner = rs.getString(CONNECTION_OWNER);
       LocalDate start;
       LocalDate end;
@@ -428,7 +428,7 @@ public class RevalidationServiceImpl implements RevalidationService {
         end = null;
         curriculumEnd = null;
       }
-      return MainDoctorViewDto.builder()
+      return ConnectionInfoDto.builder()
           .tcsPersonId(rs.getLong("id"))
           .gmcReferenceNumber(rs.getString(GMC_NUMBER_FIELD))
           .doctorFirstName(rs.getString(FORENAMES_FIELD))

@@ -17,7 +17,7 @@ import com.transformuk.hee.tis.reference.api.dto.GradeDTO;
 import com.transformuk.hee.tis.reference.client.ReferenceService;
 import com.transformuk.hee.tis.tcs.api.dto.ConnectionDetailDto;
 import com.transformuk.hee.tis.tcs.api.dto.ConnectionDto;
-import com.transformuk.hee.tis.tcs.api.dto.MainDoctorViewDto;
+import com.transformuk.hee.tis.tcs.api.dto.ConnectionInfoDto;
 import com.transformuk.hee.tis.tcs.api.dto.ConnectionSummaryDto;
 import com.transformuk.hee.tis.tcs.api.dto.ConnectionRecordDto;
 import com.transformuk.hee.tis.tcs.api.dto.ContactDetailsDTO;
@@ -480,7 +480,7 @@ public class RevalidationServiceImplTest {
     when(programmeMembershipDTO.getProgrammeName()).thenReturn(PROGRAMME_NAME);
     when(programmeMembershipDTO.getProgrammeMembershipType()).thenReturn(PROGRAMME_MEMBERSHIP_TYPE);
 
-    MainDoctorViewDto result = testObj.buildTcsConnectionInfo(PERSON_ID);
+    ConnectionInfoDto result = testObj.buildTcsConnectionInfo(PERSON_ID);
 
     assertThat(result, notNullValue());
     assertThat(result.getTcsPersonId(), is(PERSON_ID));
@@ -501,7 +501,7 @@ public class RevalidationServiceImplTest {
     when(programmeMembershipDTO.getProgrammeName()).thenReturn(PROGRAMME_NAME);
     when(programmeMembershipDTO.getProgrammeMembershipType()).thenReturn(PROGRAMME_MEMBERSHIP_TYPE);
 
-    MainDoctorViewDto result = testObj.buildTcsConnectionInfo(PERSON_ID);
+    ConnectionInfoDto result = testObj.buildTcsConnectionInfo(PERSON_ID);
 
     assertThat(result, notNullValue());
     assertThat(result.getTcsPersonId(), is(PERSON_ID));
@@ -522,7 +522,7 @@ public class RevalidationServiceImplTest {
     when(programmeMembershipDTO.getProgrammeName()).thenReturn(PROGRAMME_NAME);
     when(programmeMembershipDTO.getProgrammeMembershipType()).thenReturn(PROGRAMME_MEMBERSHIP_TYPE);
 
-    MainDoctorViewDto result = testObj.buildTcsConnectionInfo(PERSON_ID);
+    ConnectionInfoDto result = testObj.buildTcsConnectionInfo(PERSON_ID);
 
     assertThat(result, notNullValue());
     assertThat(result.getTcsPersonId(), is(PERSON_ID));
@@ -540,7 +540,7 @@ public class RevalidationServiceImplTest {
     when(programmeMembershipRepositoryMock.findLatestProgrammeMembershipByTraineeId(PERSON_ID))
         .thenReturn(null);
 
-    MainDoctorViewDto result = testObj.buildTcsConnectionInfo(PERSON_ID);
+    ConnectionInfoDto result = testObj.buildTcsConnectionInfo(PERSON_ID);
 
     assertThat(result, notNullValue());
     assertThat(result.getGmcReferenceNumber(), is("1000"));
@@ -558,7 +558,7 @@ public class RevalidationServiceImplTest {
     when(namedParameterJdbcTemplateMock
         .query(anyString(), any(MapSqlParameterSource.class), any(RowMapper.class))).thenReturn(new ArrayList<>());
 
-    List<MainDoctorViewDto> result = testObj.extractConnectionInfoForSync();
+    List<ConnectionInfoDto> result = testObj.extractConnectionInfoForSync();
     verify(namedParameterJdbcTemplateMock).query(any(String.class), any(MapSqlParameterSource.class), any(RowMapper.class));
 
   }
