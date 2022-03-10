@@ -1,7 +1,7 @@
 package com.transformuk.hee.tis.tcs.service.service;
 
 import com.transformuk.hee.tis.tcs.api.dto.ConnectionDetailDto;
-import com.transformuk.hee.tis.tcs.api.dto.ConnectionInfoDto;
+import com.transformuk.hee.tis.tcs.api.dto.MainDoctorViewDto;
 import com.transformuk.hee.tis.tcs.api.dto.ConnectionRecordDto;
 import com.transformuk.hee.tis.tcs.api.dto.ConnectionSummaryDto;
 import com.transformuk.hee.tis.tcs.api.dto.RevalidationRecordDto;
@@ -24,7 +24,7 @@ public interface RevalidationService {
   ConnectionSummaryDto getExceptionTrainees(final List<String> gmcIds, final int pageNumber,
       final String searchGmcNumber, final List<String> dbcs);
 
-  ConnectionInfoDto buildTcsConnectionInfo(Long personId);
+  MainDoctorViewDto buildTcsConnectionInfo(Long personId);
 
-  List<ConnectionInfoDto> extractConnectionInfoForSync();
+  List<MainDoctorViewDto> extractConnectionInfoForSync();
 }

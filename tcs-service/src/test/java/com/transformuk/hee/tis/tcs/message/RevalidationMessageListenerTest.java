@@ -4,7 +4,7 @@ import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.*;
 import static org.springframework.test.util.ReflectionTestUtils.setField;
 
-import com.transformuk.hee.tis.tcs.api.dto.ConnectionInfoDto;
+import com.transformuk.hee.tis.tcs.api.dto.MainDoctorViewDto;
 import com.transformuk.hee.tis.tcs.service.message.RevalidationMessageListener;
 import com.transformuk.hee.tis.tcs.service.service.RevalidationService;
 import lombok.var;
@@ -62,7 +62,7 @@ public class RevalidationMessageListenerTest {
     setField(revalidationMessageListener, ROUTING_KEY, ROUTING_KEY);
 
     revalidationMessageListener.receiveMessage("syncStart");
-    verify(rabbitTemplate, never()).convertAndSend(any(String.class), any(String.class), any(ConnectionInfoDto.class));
+    verify(rabbitTemplate, never()).convertAndSend(any(String.class), any(String.class), any(MainDoctorViewDto.class));
   }
 
 }

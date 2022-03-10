@@ -7,7 +7,7 @@ import lombok.Data;
 
 @Builder
 @Data
-public class ConnectionInfoDto {
+public class MainDoctorViewDto {
   Long tcsPersonId;
   String gmcReferenceNumber;
   String doctorFirstName;
