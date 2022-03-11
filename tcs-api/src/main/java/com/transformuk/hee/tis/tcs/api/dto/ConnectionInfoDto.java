@@ -21,6 +21,7 @@ public class ConnectionInfoDto {
   String connectionStatus;
   LocalDate programmeMembershipStartDate;
   LocalDate programmeMembershipEndDate;
+  LocalDate curriculumEndDate;
   String dataSource;
   @Nullable
   Boolean syncEnd;
