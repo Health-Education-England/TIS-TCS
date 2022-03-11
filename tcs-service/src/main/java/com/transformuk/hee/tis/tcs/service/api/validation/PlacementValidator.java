@@ -11,7 +11,6 @@ import com.transformuk.hee.tis.tcs.api.enumeration.PostSpecialtyType;
 import com.transformuk.hee.tis.tcs.service.model.Placement;
 import com.transformuk.hee.tis.tcs.service.model.Post;
 import com.transformuk.hee.tis.tcs.service.model.PostSpecialty;
-import com.transformuk.hee.tis.tcs.service.model.Specialty;
 import com.transformuk.hee.tis.tcs.service.repository.PersonRepository;
 import com.transformuk.hee.tis.tcs.service.repository.PlacementRepository;
 import com.transformuk.hee.tis.tcs.service.repository.PostRepository;
@@ -39,6 +38,7 @@ import org.springframework.validation.FieldError;
 public class PlacementValidator {
 
   private static final String PLACEMENT_DTO_NAME = "PlacementDTO";
+  private static final String SPECIALTY_FIELD_NAME = "specialties";
   private final ReferenceService referenceService;
   private final PostRepository postRepository;
   private final PersonRepository personRepository;
@@ -113,38 +113,27 @@ public class PlacementValidator {
 
     Set<PlacementSpecialtyDTO> placementSpecialtyDtos = placementDetailsDto.getSpecialties();
 
-    // check count of primary specialty
-    long primary_specialty_count_long = placementSpecialtyDtos.stream()
-        .filter(ps -> ps.getPlacementSpecialtyType() == PostSpecialtyType.PRIMARY).count();
-    int primary_specialty_count = Math.toIntExact(primary_specialty_count_long);
-    if (primary_specialty_count > 1) {
-      fieldErrors.add(new FieldError(PLACEMENT_DTO_NAME, "specialties",
-          "There is only one primary specialty in the placement."));
-    } else if (primary_specialty_count == 0) {
-      fieldErrors.add(new FieldError(PLACEMENT_DTO_NAME, "specialties",
-          "The primary specialty is required."));
-    }
+    // Check specialty type
+    List<PlacementSpecialtyDTO> placementPrimarySpecialtyDtos = placementSpecialtyDtos.stream()
+        .filter(ps -> ps.getPlacementSpecialtyType() == PostSpecialtyType.PRIMARY).collect(
+            Collectors.toList());
+    int primarySpecialtyCount = placementPrimarySpecialtyDtos.size();
 
-    // check count of sub specialty
     List<PlacementSpecialtyDTO> placementSubSpecialtyDtos = placementSpecialtyDtos.stream()
         .filter(ps -> ps.getPlacementSpecialtyType().equals(PostSpecialtyType.SUB_SPECIALTY))
         .collect(
             Collectors.toList());
-    int sub_specialty_count = placementSubSpecialtyDtos.size();
-    if (sub_specialty_count > 1) {
-      fieldErrors.add(new FieldError(PLACEMENT_DTO_NAME, "specialties",
-          "There is only one sub specialty in the placement."));
-    }
+    int subSpecialtyCount = placementSubSpecialtyDtos.size();
 
-    boolean shouldCheckPostSubSpecialties = true;
+    checkSpecialtyType(fieldErrors, primarySpecialtyCount, subSpecialtyCount);
 
     // Check if each specialty exists
+    boolean shouldCheckPostSubSpecialties = true;
     for (PlacementSpecialtyDTO placementSpecialtyDto : placementSpecialtyDtos) {
       boolean specialtyExists =
           specialtyRepository.existsById(placementSpecialtyDto.getSpecialtyId());
-      Specialty specialty = specialtyRepository.getOne(placementSpecialtyDto.getSpecialtyId());
       if (!specialtyExists) {
-        fieldErrors.add(new FieldError(PLACEMENT_DTO_NAME, "specialties",
+        fieldErrors.add(new FieldError(PLACEMENT_DTO_NAME, SPECIALTY_FIELD_NAME,
             String.format("The specialty %s does not exist.",
                 placementSpecialtyDto.getSpecialtyName())));
         if (placementSpecialtyDto.getPlacementSpecialtyType()
@@ -155,27 +144,32 @@ public class PlacementValidator {
     }
 
     // Check if sub specialty is from the post
-    if (sub_specialty_count == 1 && shouldCheckPostSubSpecialties) {
+    if (subSpecialtyCount == 1 && shouldCheckPostSubSpecialties) {
       PlacementSpecialtyDTO placementSubSpecialtyDto = placementSubSpecialtyDtos.get(0);
-      Optional<Post> optionalPost = postRepository.findById(placementDetailsDto.getPostId());
-      if (optionalPost.isPresent()) {
-        Post post = optionalPost.get();
-        Set<PostSpecialty> postSpecialties = post.getSpecialties().stream()
-            .filter(ps -> ps.getPostSpecialtyType() == PostSpecialtyType.SUB_SPECIALTY).collect(
-                Collectors.toSet());
-        Optional<PostSpecialty> postSpecialty = postSpecialties.stream()
-            .filter(
-                ps -> ps.getSpecialty().getId().equals(placementSubSpecialtyDto.getSpecialtyId()))
-            .findFirst();
-        if (!postSpecialty.isPresent()) {
-          fieldErrors.add(new FieldError(PLACEMENT_DTO_NAME, "specialties",
-              String.format("The post does not have the sub specialty: %s.",
-                  placementSubSpecialtyDto.getSpecialtyName())));
-        }
+      checkIsSubSpecialtyFromPost(fieldErrors, placementDetailsDto, placementSubSpecialtyDto);
+    }
+    return fieldErrors;
+  }
+
+  private void checkIsSubSpecialtyFromPost(final List<FieldError> fieldErrors,
+      final PlacementDetailsDTO placementDetailsDto,
+      final PlacementSpecialtyDTO placementSubSpecialtyDto) {
+    Optional<Post> optionalPost = postRepository.findById(placementDetailsDto.getPostId());
+    if (optionalPost.isPresent()) {
+      Post post = optionalPost.get();
+      Set<PostSpecialty> postSpecialties = post.getSpecialties().stream()
+          .filter(ps -> ps.getPostSpecialtyType() == PostSpecialtyType.SUB_SPECIALTY).collect(
+              Collectors.toSet());
+      Optional<PostSpecialty> postSpecialty = postSpecialties.stream()
+          .filter(
+              ps -> ps.getSpecialty().getId().equals(placementSubSpecialtyDto.getSpecialtyId()))
+          .findFirst();
+      if (!postSpecialty.isPresent()) {
+        fieldErrors.add(new FieldError(PLACEMENT_DTO_NAME, SPECIALTY_FIELD_NAME,
+            String.format("The post does not have the sub specialty: %s.",
+                placementSubSpecialtyDto.getSpecialtyName())));
       }
     }
-
-    return fieldErrors;
   }
 
   private List<FieldError> checkPost(final PlacementDetailsDTO placementDetailsDTO) {
@@ -283,15 +277,18 @@ public class PlacementValidator {
   }
 
   private void checkSpecialtyType(final List<FieldError> fieldErrors,
-      final int noOfPrimarySpecialtyCount,
-      final int noOfSubSpecialtyCount) {
-    if (noOfPrimarySpecialtyCount > 1) {
-      fieldErrors.add(new FieldError(PLACEMENT_DTO_NAME, "specialties",
-          String.format("Only one Specialty of type %s allowed", PostSpecialtyType.PRIMARY)));
+      final int primarySpecialtyCount, final int subSpecialtyCount) {
+    if (primarySpecialtyCount > 1) {
+      fieldErrors.add(new FieldError(PLACEMENT_DTO_NAME, SPECIALTY_FIELD_NAME,
+          String.format("Only one Specialty of type %s is allowed", PostSpecialtyType.PRIMARY)));
+    } else if (primarySpecialtyCount == 0) {
+      fieldErrors.add(new FieldError(PLACEMENT_DTO_NAME, SPECIALTY_FIELD_NAME,
+          "The primary specialty is required."));
     }
-    if (noOfSubSpecialtyCount > 1) {
-      fieldErrors.add(new FieldError(PLACEMENT_DTO_NAME, "specialties",
-          String.format("Only one Specialty of type %s allowed", PostSpecialtyType.SUB_SPECIALTY)));
+    if (subSpecialtyCount > 1) {
+      fieldErrors.add(new FieldError(PLACEMENT_DTO_NAME, SPECIALTY_FIELD_NAME,
+          String.format("Only one Specialty of type %s is allowed",
+              PostSpecialtyType.SUB_SPECIALTY)));
     }
   }
 
