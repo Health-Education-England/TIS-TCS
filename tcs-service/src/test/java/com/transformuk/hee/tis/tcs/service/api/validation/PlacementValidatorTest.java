@@ -4,7 +4,7 @@ import static java.time.temporal.ChronoUnit.DAYS;
 import static java.time.temporal.ChronoUnit.YEARS;
 import static org.hamcrest.CoreMatchers.is;
 import static org.hamcrest.CoreMatchers.notNullValue;
-import static org.junit.Assert.assertThat;
+import static org.hamcrest.MatcherAssert.assertThat;
 import static org.junit.Assert.fail;
 import static org.mockito.BDDMockito.given;
 import static org.mockito.Mockito.when;
@@ -19,7 +19,8 @@ import com.transformuk.hee.tis.tcs.api.enumeration.PostSpecialtyType;
 import com.transformuk.hee.tis.tcs.service.model.Placement;
 import com.transformuk.hee.tis.tcs.service.model.PlacementEsrEvent;
 import com.transformuk.hee.tis.tcs.service.model.Post;
-import com.transformuk.hee.tis.tcs.service.repository.OwnerProjection;
+import com.transformuk.hee.tis.tcs.service.model.PostSpecialty;
+import com.transformuk.hee.tis.tcs.service.model.Specialty;
 import com.transformuk.hee.tis.tcs.service.repository.PersonRepository;
 import com.transformuk.hee.tis.tcs.service.repository.PlacementRepository;
 import com.transformuk.hee.tis.tcs.service.repository.PostRepository;
@@ -32,13 +33,11 @@ import java.util.Optional;
 import java.util.Set;
 import org.assertj.core.util.Maps;
 import org.junit.Before;
-import org.junit.Ignore;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
-import org.mockito.Mockito;
-import org.mockito.runners.MockitoJUnitRunner;
+import org.mockito.junit.MockitoJUnitRunner;
 
 @RunWith(MockitoJUnitRunner.class)
 public class PlacementValidatorTest {
@@ -49,6 +48,7 @@ public class PlacementValidatorTest {
   private static final Long DEFAULT_POST = 123L;
   private static final Long DEFAULT_SITE = 1234L;
   private static final Long DEFAULT_GRADE = 12345L;
+  private static final Long DEFAULT_PRIMARY_SPECIALTY = 111L;
   private static final String DEFAULT_LOCAL_POST_NUMBER = "LOCAL_POST_NUMBER";
   private static final String DEFAULT_TRAINING_DESCRIPTION = "TRAINING";
   private static final LocalDate DEFAULT_DATE_FROM = LocalDate.ofEpochDay(0L);
@@ -84,7 +84,6 @@ public class PlacementValidatorTest {
     placementDTO = new PlacementDetailsDTO();
     placementDTO.setSiteId(DEFAULT_SITE);
     placementDTO.setGradeId(DEFAULT_GRADE);
-    //placementDTO.setSpecialties(Sets.newHashSet());
     placementDTO.setDateFrom(DEFAULT_DATE_FROM);
     placementDTO.setDateTo(DEFAULT_DATE_TO);
     placementDTO.setPlacementType(DEFAULT_PLACEMENT_TYPE);
@@ -94,6 +93,11 @@ public class PlacementValidatorTest {
     placementDTO.setTraineeId(DEFAULT_TRAINEE);
     //placementDTO.setClinicalSupervisorIds(Sets.newHashSet(DEFAULT_CLINICAL_SUPERVISOR));
     placementDTO.setPostId(DEFAULT_POST);
+    // set default specialties
+    PlacementSpecialtyDTO placementSpecialtyDto = new PlacementSpecialtyDTO();
+    placementSpecialtyDto.setSpecialtyId(DEFAULT_PRIMARY_SPECIALTY);
+    placementSpecialtyDto.setPlacementSpecialtyType(PostSpecialtyType.PRIMARY);
+    placementDTO.setSpecialties(Sets.newHashSet(placementSpecialtyDto));
 
     given(personRepository.existsById(DEFAULT_TRAINEE)).willReturn(true);
     given(postRepository.existsById(DEFAULT_POST)).willReturn(true);
@@ -103,6 +107,7 @@ public class PlacementValidatorTest {
         .willReturn(Maps.newHashMap(DEFAULT_GRADE, true));
     given(referenceService.placementTypeExists(Lists.newArrayList(DEFAULT_PLACEMENT_TYPE)))
         .willReturn(Maps.newHashMap(DEFAULT_PLACEMENT_TYPE, true));
+    given(specialtyRepository.existsById(DEFAULT_PRIMARY_SPECIALTY)).willReturn(true);
   }
 
   @Test
@@ -173,8 +178,6 @@ public class PlacementValidatorTest {
     }
   }
 
-  // TODO add specialties
-  @Ignore
   @Test
   public void testValidateFailsIfSpecialtyIsInvalid() {
     try {
@@ -182,7 +185,7 @@ public class PlacementValidatorTest {
       final PlacementSpecialtyDTO placementSpecialtyDTO = new PlacementSpecialtyDTO();
       placementSpecialtyDTO.setSpecialtyId(321L);
       placementSpecialtyDTO.setPlacementSpecialtyType(PostSpecialtyType.PRIMARY);
-      //placementDTO.setSpecialties(Sets.newHashSet(placementSpecialtyDTO));
+      placementDTO.setSpecialties(Sets.newHashSet(placementSpecialtyDTO));
       placementValidator.validate(placementDTO);
       fail("ValidationException expected.");
     } catch (final ValidationException ex) {
@@ -191,8 +194,6 @@ public class PlacementValidatorTest {
     }
   }
 
-  // TODO add specialties
-  @Ignore
   @Test
   public void testValidateFailsIfMoreThanOnePrimarySpecialtyDefined() {
     try {
@@ -204,7 +205,7 @@ public class PlacementValidatorTest {
       final PlacementSpecialtyDTO placementSpecialtyDTO2 = new PlacementSpecialtyDTO();
       placementSpecialtyDTO2.setSpecialtyId(4321L);
       placementSpecialtyDTO2.setPlacementSpecialtyType(PostSpecialtyType.PRIMARY);
-      //placementDTO.setSpecialties(Sets.newHashSet(placementSpecialtyDTO, placementSpecialtyDTO2));
+      placementDTO.setSpecialties(Sets.newHashSet(placementSpecialtyDTO, placementSpecialtyDTO2));
       placementValidator.validate(placementDTO);
       fail("ValidationException expected.");
     } catch (final ValidationException ex) {
@@ -213,10 +214,8 @@ public class PlacementValidatorTest {
     }
   }
 
-  // TODO add specialties
-  @Ignore
   @Test
-  public void testValidateFailsIfMoreThanOneSubSpecialtySpecialtyDefined() {
+  public void testValidateFailsIfMoreThanOneSubSpecialtyDefined() {
     try {
       given(specialtyRepository.existsById(321L)).willReturn(true);
       given(specialtyRepository.existsById(4321L)).willReturn(true);
@@ -226,7 +225,8 @@ public class PlacementValidatorTest {
       final PlacementSpecialtyDTO placementSpecialtyDTO2 = new PlacementSpecialtyDTO();
       placementSpecialtyDTO2.setSpecialtyId(4321L);
       placementSpecialtyDTO2.setPlacementSpecialtyType(PostSpecialtyType.SUB_SPECIALTY);
-      //placementDTO.setSpecialties(Sets.newHashSet(placementSpecialtyDTO, placementSpecialtyDTO2));
+      placementDTO.getSpecialties().add(placementSpecialtyDTO);
+      placementDTO.getSpecialties().add(placementSpecialtyDTO2);
       placementValidator.validate(placementDTO);
       fail("ValidationException expected.");
     } catch (final ValidationException ex) {
@@ -235,20 +235,70 @@ public class PlacementValidatorTest {
     }
   }
 
-  // TODO add specialties
-  @Ignore
   @Test
-  public void testValidateSucceedsIfMoreThanOneOtherSpecialtyDefined() throws Exception {
-    given(specialtyRepository.existsById(321L)).willReturn(true);
-    given(specialtyRepository.existsById(4321L)).willReturn(true);
-    final PlacementSpecialtyDTO placementSpecialtyDTO = new PlacementSpecialtyDTO();
-    placementSpecialtyDTO.setSpecialtyId(321L);
-    placementSpecialtyDTO.setPlacementSpecialtyType(PostSpecialtyType.OTHER);
-    final PlacementSpecialtyDTO placementSpecialtyDTO2 = new PlacementSpecialtyDTO();
-    placementSpecialtyDTO2.setSpecialtyId(4321L);
-    placementSpecialtyDTO2.setPlacementSpecialtyType(PostSpecialtyType.OTHER);
-    //placementDTO.setSpecialties(Sets.newHashSet(placementSpecialtyDTO, placementSpecialtyDTO2));
-    placementValidator.validate(placementDTO);
+  public void testValidateFailsIfSubSpecialtyNotInPost() {
+    try {
+      given(specialtyRepository.existsById(321L)).willReturn(true);
+      final PlacementSpecialtyDTO placementSpecialtyDto = new PlacementSpecialtyDTO();
+      placementSpecialtyDto.setSpecialtyId(321L);
+      placementSpecialtyDto.setPlacementSpecialtyType(PostSpecialtyType.SUB_SPECIALTY);
+      placementDTO.getSpecialties().add(placementSpecialtyDto);
+
+      Post post = new Post();
+      post.setId(DEFAULT_POST);
+      given(postRepository.findById(DEFAULT_POST)).willReturn(Optional.of(post));
+
+      placementValidator.validate(placementDTO);
+      fail("ValidationException expected.");
+    } catch (final ValidationException ex) {
+      assertThat(ex.getBindingResult().getErrorCount(), is(1));
+      assertThat(ex.getBindingResult().getFieldError("specialties"), is(notNullValue()));
+    }
+  }
+
+  @Test
+  public void testValidateSucceedsIfSubSpecialtyInPost() {
+      try {
+        given(specialtyRepository.existsById(321L)).willReturn(true);
+        final PlacementSpecialtyDTO placementSpecialtyDto = new PlacementSpecialtyDTO();
+        placementSpecialtyDto.setSpecialtyId(321L);
+        placementSpecialtyDto.setPlacementSpecialtyType(PostSpecialtyType.SUB_SPECIALTY);
+        placementDTO.getSpecialties().add(placementSpecialtyDto);
+
+        Post post = new Post();
+        post.setId(DEFAULT_POST);
+        PostSpecialty postSpecialty = new PostSpecialty();
+        postSpecialty.setPost(post);
+        postSpecialty.setPostSpecialtyType(PostSpecialtyType.SUB_SPECIALTY);
+        Specialty specialty = new Specialty();
+        specialty.setId(321L);
+        postSpecialty.setSpecialty(specialty);
+        post.setSpecialties(Sets.newHashSet(postSpecialty));
+        given(postRepository.findById(DEFAULT_POST)).willReturn(Optional.of(post));
+
+        placementValidator.validate(placementDTO);
+      } catch (final ValidationException ex) {
+        assertThat(ex.getBindingResult().getErrorCount(), is(0));
+      }
+    }
+
+  @Test
+  public void testValidateSucceedsIfMoreThanOneOtherSpecialtyDefined() {
+    try {
+      given(specialtyRepository.existsById(321L)).willReturn(true);
+      given(specialtyRepository.existsById(4321L)).willReturn(true);
+      final PlacementSpecialtyDTO placementSpecialtyDTO = new PlacementSpecialtyDTO();
+      placementSpecialtyDTO.setSpecialtyId(321L);
+      placementSpecialtyDTO.setPlacementSpecialtyType(PostSpecialtyType.OTHER);
+      final PlacementSpecialtyDTO placementSpecialtyDTO2 = new PlacementSpecialtyDTO();
+      placementSpecialtyDTO2.setSpecialtyId(4321L);
+      placementSpecialtyDTO2.setPlacementSpecialtyType(PostSpecialtyType.OTHER);
+      placementDTO.getSpecialties().add(placementSpecialtyDTO);
+      placementDTO.getSpecialties().add(placementSpecialtyDTO2);
+      placementValidator.validate(placementDTO);
+    } catch (final ValidationException ex) {
+      assertThat(ex.getBindingResult().getErrorCount(), is(0));
+    }
   }
 
   @Test(expected = IllegalArgumentException.class)
@@ -286,7 +336,6 @@ public class PlacementValidatorTest {
     when(placementRepository.findById(PLACEMENT_ID)).thenReturn(Optional.empty());
     placementValidator.validatePlacementForDelete(PLACEMENT_ID);
   }
-
 
   @Test
   public void validatePlacementForDeleteShouldValidate() {
@@ -329,5 +378,4 @@ public class PlacementValidatorTest {
     // act
     placementValidator.validate(placementDTO);
   }
-
 }
