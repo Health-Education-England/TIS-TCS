@@ -27,9 +27,11 @@ import com.transformuk.hee.tis.tcs.api.dto.PersonLiteDTO;
 import com.transformuk.hee.tis.tcs.api.dto.PlacementCommentDTO;
 import com.transformuk.hee.tis.tcs.api.dto.PlacementDTO;
 import com.transformuk.hee.tis.tcs.api.dto.PlacementDetailsDTO;
+import com.transformuk.hee.tis.tcs.api.dto.PlacementSpecialtyDTO;
 import com.transformuk.hee.tis.tcs.api.dto.PlacementSupervisorDTO;
 import com.transformuk.hee.tis.tcs.api.enumeration.CommentSource;
 import com.transformuk.hee.tis.tcs.api.enumeration.LifecycleState;
+import com.transformuk.hee.tis.tcs.api.enumeration.PostSpecialtyType;
 import com.transformuk.hee.tis.tcs.api.enumeration.Status;
 import com.transformuk.hee.tis.tcs.service.Application;
 import com.transformuk.hee.tis.tcs.service.api.decorator.AsyncReferenceService;
@@ -250,7 +252,6 @@ public class PlacementResourceIntTest {
    * PlacementRepository.findPlacementsByPostIds().
    *
    * @param npn               National Post Number
-   * @param idForAll          id to be assigned to all entities
    * @param placementDateFrom placement date from
    * @param placementDateTo   placement date to
    */
@@ -287,12 +288,13 @@ public class PlacementResourceIntTest {
   public void setup() {
     MockitoAnnotations.initMocks(this);
     asyncReferenceService = new AsyncReferenceService(referenceService);
-    placementValidator = new PlacementValidator(referenceService, postRepository, personRepository,
-        placementRepository);
+    placementValidator = new PlacementValidator(referenceService, postRepository,
+        personRepository, placementRepository, specialtyRepository);
     placementDetailsDecorator = new PlacementDetailsDecorator(asyncReferenceService,
         asyncPersonBasicDetailsRepository, postRepository);
     final PlacementResource placementResource = new PlacementResource(placementService,
-        placementValidator, placementDetailsDecorator, placementPlannerServiceImp, permissionService);
+        placementValidator, placementDetailsDecorator, placementPlannerServiceImp,
+        permissionService);
     this.restPlacementMockMvc = MockMvcBuilders.standaloneSetup(placementResource)
         .setCustomArgumentResolvers(pageableArgumentResolver)
         .setControllerAdvice(exceptionTranslator)
@@ -316,7 +318,7 @@ public class PlacementResourceIntTest {
     entityManager.persist(post);
 
     final Specialty specialty = new Specialty();
-    entityManager.persist(specialty);
+    entityManager.persist(specialty); // id is auto-generated
 
     placementDetails = createEntity();
 
@@ -326,7 +328,6 @@ public class PlacementResourceIntTest {
     placement = createPlacementEntity();
     placement.setPost(post);
     placement.setTrainee(trainee);
-
   }
 
   @Test
@@ -337,8 +338,8 @@ public class PlacementResourceIntTest {
 
     //when & then
     restPlacementMockMvc.perform(post("/api/placements")
-        .contentType(MediaType.APPLICATION_JSON)
-        .content(TestUtil.convertObjectToJsonBytes(placementDTO)))
+            .contentType(MediaType.APPLICATION_JSON)
+            .content(TestUtil.convertObjectToJsonBytes(placementDTO)))
         .andExpect(status().isBadRequest())
         .andExpect(jsonPath("$.message").value("error.validation"))
         .andExpect(jsonPath("$.fieldErrors[*].field").
@@ -355,8 +356,8 @@ public class PlacementResourceIntTest {
 
     //when & then
     restPlacementMockMvc.perform(put("/api/placements")
-        .contentType(MediaType.APPLICATION_JSON)
-        .content(TestUtil.convertObjectToJsonBytes(placementDTO)))
+            .contentType(MediaType.APPLICATION_JSON)
+            .content(TestUtil.convertObjectToJsonBytes(placementDTO)))
         .andExpect(status().isBadRequest())
         .andExpect(jsonPath("$.message").value("error.validation"))
         .andExpect(jsonPath("$.fieldErrors[*].field").
@@ -367,7 +368,8 @@ public class PlacementResourceIntTest {
   @Test
   @Transactional
   public void createPlacement() throws Exception {
-    TestUtils.mockUserProfileWithPermissions("Test User", new HashSet<>(Arrays.asList("placement:approve")));
+    TestUtils.mockUserProfileWithPermissions("Test User",
+        new HashSet<>(Arrays.asList("placement:approve")));
     final int databaseSizeBeforeCreate = placementDetailsRepository.findAll().size();
 
     // Create the Placement
@@ -387,10 +389,11 @@ public class PlacementResourceIntTest {
         .placementDetailsToPlacementDetailsDTO(placementDetails);
 
     addSupervisorsToPlacement(placementDetailsDTO);
+    addPrimarySpecialtyToPlacementDetailsDTO(placementDetailsDTO);
 
     restPlacementMockMvc.perform(post("/api/placements")
-        .contentType(MediaType.APPLICATION_JSON)
-        .content(TestUtil.convertObjectToJsonBytes(placementDetailsDTO)))
+            .contentType(MediaType.APPLICATION_JSON)
+            .content(TestUtil.convertObjectToJsonBytes(placementDetailsDTO)))
         .andExpect(status().isCreated());
 
     // Validate the Placement in the database
@@ -434,8 +437,8 @@ public class PlacementResourceIntTest {
 
     // An entity with an existing ID cannot be created, so this API call must fail
     restPlacementMockMvc.perform(post("/api/placements")
-        .contentType(MediaType.APPLICATION_JSON)
-        .content(TestUtil.convertObjectToJsonBytes(placementDTO)))
+            .contentType(MediaType.APPLICATION_JSON)
+            .content(TestUtil.convertObjectToJsonBytes(placementDTO)))
         .andExpect(status().isBadRequest());
 
     // Validate the Alice in the database
@@ -449,8 +452,7 @@ public class PlacementResourceIntTest {
 
   @Test
   @Transactional
-  public void createDraftPlacementShouldNotSendEsrNotification() throws Exception
-  {
+  public void createDraftPlacementShouldNotSendEsrNotification() throws Exception {
     TestUtils.mockUserProfileWithPermissions("Test User", new HashSet<>());
     // Create the Placement
     final String postNumber = "EOE/RGT00/021/FY1/010";
@@ -465,9 +467,11 @@ public class PlacementResourceIntTest {
     final PlacementDetailsDTO placementDetailsDTO = placementDetailsMapper
         .placementDetailsToPlacementDetailsDTO(placementDetails);
 
+    addPrimarySpecialtyToPlacementDetailsDTO(placementDetailsDTO);
+
     restPlacementMockMvc.perform(post("/api/placements")
-        .contentType(MediaType.APPLICATION_JSON)
-        .content(TestUtil.convertObjectToJsonBytes(placementDetailsDTO)))
+            .contentType(MediaType.APPLICATION_JSON)
+            .content(TestUtil.convertObjectToJsonBytes(placementDetailsDTO)))
         .andExpect(status().isCreated());
 
     final List<EsrNotification> esrNotifications = esrNotificationRepository.findAll();
@@ -478,7 +482,8 @@ public class PlacementResourceIntTest {
   @Transactional
   public void createPlacementStartingAfter3MonthsShouldOnlyCreatePlacementWithoutEsrNotification()
       throws Exception {
-    TestUtils.mockUserProfileWithPermissions("Test User", new HashSet<>(Arrays.asList("placement:approve")));
+    TestUtils.mockUserProfileWithPermissions("Test User",
+        new HashSet<>(Arrays.asList("placement:approve")));
     final int databaseSizeBeforeCreate = placementDetailsRepository.findAll().size();
 
     // Create the Placement
@@ -497,9 +502,12 @@ public class PlacementResourceIntTest {
 
     final PlacementDetailsDTO placementDetailsDTO = placementDetailsMapper
         .placementDetailsToPlacementDetailsDTO(placementDetails);
+
+    addPrimarySpecialtyToPlacementDetailsDTO(placementDetailsDTO);
+
     restPlacementMockMvc.perform(post("/api/placements")
-        .contentType(MediaType.APPLICATION_JSON)
-        .content(TestUtil.convertObjectToJsonBytes(placementDetailsDTO)))
+            .contentType(MediaType.APPLICATION_JSON)
+            .content(TestUtil.convertObjectToJsonBytes(placementDetailsDTO)))
         .andExpect(status().isCreated());
 
     // Validate the Placement in the database
@@ -521,8 +529,6 @@ public class PlacementResourceIntTest {
     final List<EsrNotification> esrNotifications = esrNotificationRepository.findAll();
     assertThat(esrNotifications).isEmpty();
   }
-
-
 
   @Test
   @Transactional
@@ -548,7 +554,7 @@ public class PlacementResourceIntTest {
         .andExpect(jsonPath("$.[*].placementWholeTimeEquivalent")
             .value(DEFAULT_PLACEMENT_WHOLE_TIME_EQUIVALENT.doubleValue()))
         .andExpect(jsonPath("$.[*].lifecycleState").value(LifecycleState.DRAFT.name()))
-        ;
+    ;
   }
 
   @Test
@@ -614,7 +620,7 @@ public class PlacementResourceIntTest {
         .andExpect(jsonPath("$.wholeTimeEquivalent")
             .value(DEFAULT_PLACEMENT_WHOLE_TIME_EQUIVALENT.floatValue()))
         .andExpect(jsonPath("$.lifecycleState").value(LifecycleState.DRAFT.name()))
-        ;
+    ;
   }
 
   @Test
@@ -629,7 +635,8 @@ public class PlacementResourceIntTest {
   @Transactional
   public void updatePlacement() throws Exception {
     TestUtils.mockUserprofile("Test user", "DBC-1");
-    TestUtils.mockUserProfileWithPermissions("Test User", new HashSet<>(Arrays.asList("placement:approve")));
+    TestUtils.mockUserProfileWithPermissions("Test User",
+        new HashSet<>(Arrays.asList("placement:approve")));
     // Initialize the database
     placementDetails.setLifecycleState(LifecycleState.APPROVED);
     placementDetailsRepository.saveAndFlush(placementDetails);
@@ -658,6 +665,7 @@ public class PlacementResourceIntTest {
     final PlacementDetailsDTO placementDTO = placementDetailsMapper
         .placementDetailsToPlacementDetailsDTO(updatedPlacement);
 
+    addPrimarySpecialtyToPlacementDetailsDTO(placementDTO);
     addSupervisorsToPlacement(placementDTO);
     // This method is invoked from here to add comments to the PlacementDTO
     addCommentsToPlacementDetailsDTO(placementDTO);
@@ -665,8 +673,8 @@ public class PlacementResourceIntTest {
     SimpleDateFormat simpleDateFormat = new SimpleDateFormat("yyyy-MM-dd");
     String expectedAmendedDate = simpleDateFormat.format(new Date());
     restPlacementMockMvc.perform(put("/api/placements")
-        .contentType(MediaType.APPLICATION_JSON)
-        .content(TestUtil.convertObjectToJsonBytes(placementDTO)))
+            .contentType(MediaType.APPLICATION_JSON)
+            .content(TestUtil.convertObjectToJsonBytes(placementDTO)))
         .andExpect(status().isOk())
         .andExpect(content().contentType(MediaType.APPLICATION_JSON))
         .andExpect(jsonPath("$.comments[0].body").value("Comment Body"))
@@ -703,7 +711,8 @@ public class PlacementResourceIntTest {
   @Transactional
   public void updatePlacementWithNewComment() throws Exception {
     TestUtils.mockUserprofile("Test user", "DBC-1");
-    TestUtils.mockUserProfileWithPermissions("Test User", new HashSet<>(Arrays.asList("placement:approve")));
+    TestUtils.mockUserProfileWithPermissions("Test User",
+        new HashSet<>(Arrays.asList("placement:approve")));
 
     // Initialize the database
     placementDetailsRepository.saveAndFlush(placementDetails);
@@ -718,13 +727,14 @@ public class PlacementResourceIntTest {
     final PlacementDetailsDTO placementDTO = placementDetailsMapper
         .placementDetailsToPlacementDetailsDTO(updatedPlacement);
     addCommentsToPlacementDetailsDTO(placementDTO);
+    addPrimarySpecialtyToPlacementDetailsDTO(placementDTO);
 
     SimpleDateFormat simpleDateFormat = new SimpleDateFormat("yyyy-MM-dd");
     String expectedAmendedDate = simpleDateFormat.format(new Date());
 
     restPlacementMockMvc.perform(put("/api/placements")
-        .contentType(MediaType.APPLICATION_JSON)
-        .content(TestUtil.convertObjectToJsonBytes(placementDTO)))
+            .contentType(MediaType.APPLICATION_JSON)
+            .content(TestUtil.convertObjectToJsonBytes(placementDTO)))
         .andExpect(status().isOk())
         .andExpect(content().contentType(MediaType.APPLICATION_JSON))
         .andExpect(jsonPath("$.comments[0].body").value("Comment Body"))
@@ -773,9 +783,11 @@ public class PlacementResourceIntTest {
     final PlacementDetailsDTO placementDTO = placementDetailsMapper
         .placementDetailsToPlacementDetailsDTO(updatedPlacement);
 
+    addPrimarySpecialtyToPlacementDetailsDTO(placementDTO);
+
     restPlacementMockMvc.perform(put("/api/placements")
-        .contentType(MediaType.APPLICATION_JSON)
-        .content(TestUtil.convertObjectToJsonBytes(placementDTO)))
+            .contentType(MediaType.APPLICATION_JSON)
+            .content(TestUtil.convertObjectToJsonBytes(placementDTO)))
         .andExpect(status().isOk());
 
     final List<EsrNotification> esrNotifications = esrNotificationRepository.findAll();
@@ -786,7 +798,8 @@ public class PlacementResourceIntTest {
   @Transactional
   public void updateCurrentPlacementWithDateChangeAndWithoutAnyFuturePlacementToTriggerNotification()
       throws Exception {
-    TestUtils.mockUserProfileWithPermissions("Test User", new HashSet<>(Arrays.asList("placement:approve")));
+    TestUtils.mockUserProfileWithPermissions("Test User",
+        new HashSet<>(Arrays.asList("placement:approve")));
     // Initialize the database
     final String localPostNumber = "EOE/RGT00/004/STR/704";
     final String placementType = "In Post";
@@ -818,9 +831,11 @@ public class PlacementResourceIntTest {
     final PlacementDetailsDTO placementDTO = placementDetailsMapper
         .placementDetailsToPlacementDetailsDTO(updatedPlacement);
 
+    addPrimarySpecialtyToPlacementDetailsDTO(placementDTO);
+
     restPlacementMockMvc.perform(put("/api/placements")
-        .contentType(MediaType.APPLICATION_JSON)
-        .content(TestUtil.convertObjectToJsonBytes(placementDTO)))
+            .contentType(MediaType.APPLICATION_JSON)
+            .content(TestUtil.convertObjectToJsonBytes(placementDTO)))
         .andExpect(status().isOk());
 
     // Validate the Placement in the database
@@ -854,7 +869,8 @@ public class PlacementResourceIntTest {
   @Transactional
   public void updateFuturePlacementWithDateChangeAndWithoutAnyCurrentPlacementToTriggerNotification()
       throws Exception {
-    TestUtils.mockUserProfileWithPermissions("Test User", new HashSet<>(Arrays.asList("placement:approve")));
+    TestUtils.mockUserProfileWithPermissions("Test User",
+        new HashSet<>(Arrays.asList("placement:approve")));
     // Initialize the database
     final String localPostNumber = "EOE/RGT00/004/STR/704";
     final String placementType = "In Post";
@@ -887,9 +903,11 @@ public class PlacementResourceIntTest {
     final PlacementDetailsDTO placementDTO = placementDetailsMapper
         .placementDetailsToPlacementDetailsDTO(updatedPlacement);
 
+    addPrimarySpecialtyToPlacementDetailsDTO(placementDTO);
+
     restPlacementMockMvc.perform(put("/api/placements")
-        .contentType(MediaType.APPLICATION_JSON)
-        .content(TestUtil.convertObjectToJsonBytes(placementDTO)))
+            .contentType(MediaType.APPLICATION_JSON)
+            .content(TestUtil.convertObjectToJsonBytes(placementDTO)))
         .andExpect(status().isOk());
 
     // Validate the Placement in the database
@@ -934,7 +952,8 @@ public class PlacementResourceIntTest {
   @Transactional
   public void updateFuturePlacementBeyond3MonthsShouldNotTriggerNotification() throws Exception {
     // Initialize the database
-    TestUtils.mockUserProfileWithPermissions("Test User", new HashSet<>(Arrays.asList("placement:approve")));
+    TestUtils.mockUserProfileWithPermissions("Test User",
+        new HashSet<>(Arrays.asList("placement:approve")));
     final String localPostNumber = "EOE/RGT00/004/STR/704";
     final String placementType = "In Post";
 
@@ -966,9 +985,11 @@ public class PlacementResourceIntTest {
     final PlacementDetailsDTO placementDTO = placementDetailsMapper
         .placementDetailsToPlacementDetailsDTO(updatedPlacement);
 
+    addPrimarySpecialtyToPlacementDetailsDTO(placementDTO);
+
     restPlacementMockMvc.perform(put("/api/placements")
-        .contentType(MediaType.APPLICATION_JSON)
-        .content(TestUtil.convertObjectToJsonBytes(placementDTO)))
+            .contentType(MediaType.APPLICATION_JSON)
+            .content(TestUtil.convertObjectToJsonBytes(placementDTO)))
         .andExpect(status().isOk());
 
     // Validate the Placement in the database
@@ -1001,7 +1022,7 @@ public class PlacementResourceIntTest {
 
     // Get the placementDetails
     restPlacementMockMvc.perform(delete("/api/placements/{id}", placementDetails.getId())
-        .accept(MediaType.APPLICATION_JSON))
+            .accept(MediaType.APPLICATION_JSON))
         .andExpect(status().isOk());
 
     // Validate the database is empty
@@ -1021,7 +1042,7 @@ public class PlacementResourceIntTest {
     postRepository.saveAndFlush(post);
 
     restPlacementMockMvc.perform(delete("/api/placements/{id}", placementDetails.getId())
-        .accept(MediaType.APPLICATION_JSON))
+            .accept(MediaType.APPLICATION_JSON))
         .andExpect(status().isOk());
 
     final List<EsrNotification> esrNotifications = esrNotificationRepository.findAll();
@@ -1070,7 +1091,7 @@ public class PlacementResourceIntTest {
 
     // Get the placementDetails
     restPlacementMockMvc.perform(delete("/api/placements/{id}", placementDetails.getId())
-        .accept(MediaType.APPLICATION_JSON))
+            .accept(MediaType.APPLICATION_JSON))
         .andExpect(status().isOk());
 
     // Validate the database is empty
@@ -1131,7 +1152,7 @@ public class PlacementResourceIntTest {
 
     // Get the placementDetails
     restPlacementMockMvc.perform(delete("/api/placements/{id}", placementDetails.getId())
-        .accept(MediaType.APPLICATION_JSON))
+            .accept(MediaType.APPLICATION_JSON))
         .andExpect(status().isOk());
 
     // Validate the database is empty
@@ -1197,7 +1218,7 @@ public class PlacementResourceIntTest {
 
     // Get the placementDetails
     restPlacementMockMvc.perform(delete("/api/placements/{id}", futurePlacementToDelete.getId())
-        .accept(MediaType.APPLICATION_JSON))
+            .accept(MediaType.APPLICATION_JSON))
         .andExpect(status().isOk());
 
     // Validate the database is empty
@@ -1285,7 +1306,7 @@ public class PlacementResourceIntTest {
         .andExpect(jsonPath("$.[*].placementType").value(DEFAULT_PLACEMENT_TYPE))
         .andExpect(jsonPath("$.[*].localPostNumber").value(DEFAULT_LOCAL_POST_NUMBER))
         .andExpect(jsonPath("$.[*].lifecycleState").value(LifecycleState.APPROVED.name()))
-        ;
+    ;
   }
 
   @Test
@@ -1299,8 +1320,8 @@ public class PlacementResourceIntTest {
     final String dateRangeFilter = "{\"dateFrom\":[\"2017-10-01\", \"2017-12-01\"]}";
     // Get filtered placements
     restPlacementMockMvc.perform(
-        get("/api/placements/filter?page=0&size=30&columnFilters=" + encodeDateRange(
-            dateRangeFilter)))
+            get("/api/placements/filter?page=0&size=30&columnFilters=" + encodeDateRange(
+                dateRangeFilter)))
         .andExpect(status().isOk())
         .andExpect(content().string("[]"));
   }
@@ -1319,8 +1340,8 @@ public class PlacementResourceIntTest {
 
     // Get filtered placements
     final ResultActions resultActions = restPlacementMockMvc.perform(
-        get("/api/placements/filter?page=0&size=30&columnFilters=" + encodeDateRange(
-            dateRangeFilter)))
+            get("/api/placements/filter?page=0&size=30&columnFilters=" + encodeDateRange(
+                dateRangeFilter)))
         .andExpect(status().isOk());
     resultActions.andExpect(status().isOk())
         .andExpect(content().contentType(MediaType.APPLICATION_JSON_VALUE))
@@ -1351,8 +1372,8 @@ public class PlacementResourceIntTest {
     final String dateRangeFilter = "{\"dateFrom\":[\"2018-02-01\", \"2018-05-01\"]}";
     // Get filtered placements
     restPlacementMockMvc.perform(
-        get("/api/placements/filter?page=0&size=30&columnFilters=" + encodeDateRange(
-            dateRangeFilter)))
+            get("/api/placements/filter?page=0&size=30&columnFilters=" + encodeDateRange(
+                dateRangeFilter)))
         .andExpect(status().isOk())
         .andExpect(content().string("[]"));
 
@@ -1371,8 +1392,8 @@ public class PlacementResourceIntTest {
     final String dateRangeFilter = "{\"dateFrom\":[\"201802-01\", \"2018-0501\"]}";
     // Get filtered placements
     restPlacementMockMvc.perform(
-        get("/api/placements/filter?page=0&size=30&columnFilters=" + encodeDateRange(
-            dateRangeFilter)))
+            get("/api/placements/filter?page=0&size=30&columnFilters=" + encodeDateRange(
+                dateRangeFilter)))
         .andExpect(status().is5xxServerError());
   }
 
@@ -1390,8 +1411,8 @@ public class PlacementResourceIntTest {
     final String dateRangeFilter = "{\"dateFrom\":[\"2018-02-01\", \"2018-05-01\", \"2018-05-01\"]}";
     // Get filtered placements
     restPlacementMockMvc.perform(
-        get("/api/placements/filter?page=0&size=30&columnFilters=" + encodeDateRange(
-            dateRangeFilter)))
+            get("/api/placements/filter?page=0&size=30&columnFilters=" + encodeDateRange(
+                dateRangeFilter)))
         .andExpect(status().is5xxServerError());
   }
 
@@ -1429,6 +1450,15 @@ public class PlacementResourceIntTest {
     placementDetailsDTO.setComments(comments);
   }
 
+  private void addPrimarySpecialtyToPlacementDetailsDTO(
+      final PlacementDetailsDTO placementDetailsDto) {
+    List<Specialty> existingSpecialties = specialtyRepository.findAll();
+    PlacementSpecialtyDTO placementSpecialtyDto = new PlacementSpecialtyDTO();
+    placementSpecialtyDto.setSpecialtyId(existingSpecialties.get(0).getId());
+    placementSpecialtyDto.setPlacementSpecialtyType(PostSpecialtyType.PRIMARY);
+    placementDetailsDto.setSpecialties(Sets.newHashSet(placementSpecialtyDto));
+  }
+
   private void addSupervisorsToPlacement(final PlacementDetailsDTO placementDetailsDTO) {
     final Set<PlacementSupervisorDTO> supervisors = new HashSet<>();
 
@@ -1459,8 +1489,8 @@ public class PlacementResourceIntTest {
         LocalDate.of(2019, 9, 5));
 
     restPlacementMockMvc.perform(
-        get("/api/placements/overlapping?npn=" + npn + "&fromDate=2019-05-01&toDate=2019-06-06")
-        .accept(MediaType.APPLICATION_JSON))
+            get("/api/placements/overlapping?npn=" + npn + "&fromDate=2019-05-01&toDate=2019-06-06")
+                .accept(MediaType.APPLICATION_JSON))
         .andExpect(status().isOk()).andExpect(jsonPath("$.overlapping").value(true));
   }
 
@@ -1472,8 +1502,8 @@ public class PlacementResourceIntTest {
         LocalDate.of(2019, 9, 5));
 
     restPlacementMockMvc.perform(
-        get("/api/placements/overlapping?npn=" + npn + "&fromDate=2019-05-01&toDate=2019-06-04")
-            .accept(MediaType.APPLICATION_JSON))
+            get("/api/placements/overlapping?npn=" + npn + "&fromDate=2019-05-01&toDate=2019-06-04")
+                .accept(MediaType.APPLICATION_JSON))
         .andExpect(status().isOk()).andExpect(jsonPath("$.overlapping").value(false));
   }
 
@@ -1485,8 +1515,8 @@ public class PlacementResourceIntTest {
         LocalDate.of(2019, 9, 5));
 
     restPlacementMockMvc.perform(
-        get("/api/placements/overlapping?npn=" + npn + "&fromDate=2019-06-01&toDate=2019-07-04")
-        .accept(MediaType.APPLICATION_JSON))
+            get("/api/placements/overlapping?npn=" + npn + "&fromDate=2019-06-01&toDate=2019-07-04")
+                .accept(MediaType.APPLICATION_JSON))
         .andExpect(status().isOk()).andExpect(jsonPath("$.overlapping").value(true));
   }
 
@@ -1498,15 +1528,17 @@ public class PlacementResourceIntTest {
         LocalDate.of(2019, 9, 5));
 
     restPlacementMockMvc.perform(
-        get("/api/placements/overlapping?npn=" + npn + "&fromDate=2019-05-01&toDate=2019-06-04")
-            .accept(MediaType.APPLICATION_JSON))
+            get("/api/placements/overlapping?npn=" + npn + "&fromDate=2019-05-01&toDate=2019-06-04")
+                .accept(MediaType.APPLICATION_JSON))
         .andExpect(status().isOk()).andExpect(jsonPath("$.overlapping").value(false));
   }
 
-  private PlacementDetailsDTO createPlacementForApproval(LifecycleState state, boolean canApprovePlacement) {
+  private PlacementDetailsDTO createPlacementForApproval(LifecycleState state,
+      boolean canApprovePlacement) {
 
     if (canApprovePlacement) {
-      TestUtils.mockUserProfileWithPermissions("Test User", new HashSet<>(Arrays.asList("placement:approve")));
+      TestUtils.mockUserProfileWithPermissions("Test User",
+          new HashSet<>(Arrays.asList("placement:approve")));
     } else {
       TestUtils.mockUserProfileWithPermissions("Test User", new HashSet<>());
     }
@@ -1518,6 +1550,8 @@ public class PlacementResourceIntTest {
     final PlacementDetailsDTO placementDetailsDTO = placementDetailsMapper
         .placementDetailsToPlacementDetailsDTO(placementDetails);
 
+    addPrimarySpecialtyToPlacementDetailsDTO(placementDetailsDTO);
+
     return placementDetailsDTO;
   }
 
@@ -1526,11 +1560,12 @@ public class PlacementResourceIntTest {
   public void createDraftPlacementWithoutApprovalPerm() throws Exception {
     final int databaseSizeBeforeCreate = placementDetailsRepository.findAll().size();
 
-    PlacementDetailsDTO placementDetailsDTO = createPlacementForApproval(LifecycleState.DRAFT, false);
+    PlacementDetailsDTO placementDetailsDTO = createPlacementForApproval(LifecycleState.DRAFT,
+        false);
 
     restPlacementMockMvc.perform(post("/api/placements")
-        .contentType(MediaType.APPLICATION_JSON)
-        .content(TestUtil.convertObjectToJsonBytes(placementDetailsDTO)))
+            .contentType(MediaType.APPLICATION_JSON)
+            .content(TestUtil.convertObjectToJsonBytes(placementDetailsDTO)))
         .andExpect(status().isCreated())
         .andExpect(jsonPath("$.lifecycleState").value(LifecycleState.DRAFT.name()));
 
@@ -1539,7 +1574,8 @@ public class PlacementResourceIntTest {
     final PlacementDetails testPlacement = placementList.get(placementList.size() - 1);
     assertThat(testPlacement.getLifecycleState()).isEqualTo(LifecycleState.DRAFT);
 
-    List<PlacementLog> placementLogs = placementLogRepository.findByPlacementIdOrderByIdAsc(testPlacement.getId());
+    List<PlacementLog> placementLogs = placementLogRepository.findByPlacementIdOrderByIdAsc(
+        testPlacement.getId());
     assertThat(placementLogs.size()).isEqualTo(1);
     PlacementLog placementLog = placementLogs.get(0);
     assertThat(placementLog.getLifecycleState()).isEqualTo(LifecycleState.DRAFT);
@@ -1556,11 +1592,12 @@ public class PlacementResourceIntTest {
   public void createApprovedPlacementWithoutApprovalPerm() throws Exception {
     final int databaseSizeBeforeCreate = placementDetailsRepository.findAll().size();
 
-    PlacementDetailsDTO placementDetailsDTO = createPlacementForApproval(LifecycleState.APPROVED, false);
+    PlacementDetailsDTO placementDetailsDTO = createPlacementForApproval(LifecycleState.APPROVED,
+        false);
 
     restPlacementMockMvc.perform(post("/api/placements")
-        .contentType(MediaType.APPLICATION_JSON)
-        .content(TestUtil.convertObjectToJsonBytes(placementDetailsDTO)))
+            .contentType(MediaType.APPLICATION_JSON)
+            .content(TestUtil.convertObjectToJsonBytes(placementDetailsDTO)))
         .andExpect(status().isCreated())
         .andExpect(jsonPath("$.lifecycleState").value(LifecycleState.DRAFT.name()));
 
@@ -1569,7 +1606,8 @@ public class PlacementResourceIntTest {
     final PlacementDetails testPlacement = placementList.get(placementList.size() - 1);
     assertThat(testPlacement.getLifecycleState()).isEqualTo(LifecycleState.DRAFT);
 
-    List<PlacementLog> placementLogs = placementLogRepository.findByPlacementIdOrderByIdAsc(testPlacement.getId());
+    List<PlacementLog> placementLogs = placementLogRepository.findByPlacementIdOrderByIdAsc(
+        testPlacement.getId());
     assertThat(placementLogs.size()).isEqualTo(1);
     PlacementLog placementLog = placementLogs.get(0);
     assertThat(placementLog.getLifecycleState()).isEqualTo(LifecycleState.DRAFT);
@@ -1586,11 +1624,12 @@ public class PlacementResourceIntTest {
   public void createDraftPlacementWithApprovalPerm() throws Exception {
     final int databaseSizeBeforeCreate = placementDetailsRepository.findAll().size();
 
-    PlacementDetailsDTO placementDetailsDTO = createPlacementForApproval(LifecycleState.DRAFT, true);
+    PlacementDetailsDTO placementDetailsDTO = createPlacementForApproval(LifecycleState.DRAFT,
+        true);
 
     restPlacementMockMvc.perform(post("/api/placements")
-        .contentType(MediaType.APPLICATION_JSON)
-        .content(TestUtil.convertObjectToJsonBytes(placementDetailsDTO)))
+            .contentType(MediaType.APPLICATION_JSON)
+            .content(TestUtil.convertObjectToJsonBytes(placementDetailsDTO)))
         .andExpect(status().isCreated())
         .andExpect(jsonPath("$.lifecycleState").value(LifecycleState.DRAFT.name()));
 
@@ -1609,11 +1648,12 @@ public class PlacementResourceIntTest {
   public void createApprovedPlacementWithApprovalPerm() throws Exception {
     final int databaseSizeBeforeCreate = placementDetailsRepository.findAll().size();
 
-    PlacementDetailsDTO placementDetailsDTO = createPlacementForApproval(LifecycleState.APPROVED, true);
+    PlacementDetailsDTO placementDetailsDTO = createPlacementForApproval(LifecycleState.APPROVED,
+        true);
 
     restPlacementMockMvc.perform(post("/api/placements")
-        .contentType(MediaType.APPLICATION_JSON)
-        .content(TestUtil.convertObjectToJsonBytes(placementDetailsDTO)))
+            .contentType(MediaType.APPLICATION_JSON)
+            .content(TestUtil.convertObjectToJsonBytes(placementDetailsDTO)))
         .andExpect(status().isCreated())
         .andExpect(jsonPath("$.lifecycleState").value(LifecycleState.APPROVED.name()));
 
@@ -1622,7 +1662,8 @@ public class PlacementResourceIntTest {
     final PlacementDetails testPlacement = placementList.get(placementList.size() - 1);
     assertThat(testPlacement.getLifecycleState()).isEqualTo(LifecycleState.APPROVED);
 
-    List<PlacementLog> placementLogs = placementLogRepository.findByPlacementIdOrderByIdAsc(testPlacement.getId());
+    List<PlacementLog> placementLogs = placementLogRepository.findByPlacementIdOrderByIdAsc(
+        testPlacement.getId());
     assertThat(placementLogs.size()).isEqualTo(1);
     PlacementLog placementLog = placementLogs.get(0);
     assertThat(placementLog.getLifecycleState()).isEqualTo(LifecycleState.APPROVED);
@@ -1637,9 +1678,11 @@ public class PlacementResourceIntTest {
     assertThat(esrNotification.getId()).isNotNull();
   }
 
-  private PlacementDetailsDTO prepareForApprovalUpdate(LifecycleState state, boolean canApprovePlacement) {
+  private PlacementDetailsDTO prepareForApprovalUpdate(LifecycleState state,
+      boolean canApprovePlacement) {
     if (canApprovePlacement) {
-      TestUtils.mockUserProfileWithPermissions("Test User", new HashSet<>(Arrays.asList("placement:approve")));
+      TestUtils.mockUserProfileWithPermissions("Test User",
+          new HashSet<>(Arrays.asList("placement:approve")));
     } else {
       TestUtils.mockUserProfileWithPermissions("Test User", new HashSet<>());
     }
@@ -1651,6 +1694,9 @@ public class PlacementResourceIntTest {
 
     final PlacementDetailsDTO placementDetailsDTO = placementDetailsMapper
         .placementDetailsToPlacementDetailsDTO(placementDetails);
+
+    addPrimarySpecialtyToPlacementDetailsDTO(placementDetailsDTO);
+
     return placementDetailsDTO;
   }
 
@@ -1666,8 +1712,8 @@ public class PlacementResourceIntTest {
     placementDetailsDTO.setDateFrom(placementDetailsDTO.getDateFrom().plusDays(1));
 
     restPlacementMockMvc.perform(put("/api/placements")
-        .contentType(MediaType.APPLICATION_JSON)
-        .content(TestUtil.convertObjectToJsonBytes(placementDetailsDTO)))
+            .contentType(MediaType.APPLICATION_JSON)
+            .content(TestUtil.convertObjectToJsonBytes(placementDetailsDTO)))
         .andExpect(status().isOk())
         .andExpect(content().contentType(MediaType.APPLICATION_JSON))
         .andExpect(jsonPath("$.lifecycleState").value(LifecycleState.DRAFT.name()));
@@ -1679,7 +1725,8 @@ public class PlacementResourceIntTest {
     assertThat(testPlacement.getLifecycleState()).isEqualTo(LifecycleState.DRAFT);
 
     // Validate the Placement Log in the database
-    final List<PlacementLog> placementLogs = placementLogRepository.findByPlacementIdOrderByIdAsc(placementDetailsDTO.getId());
+    final List<PlacementLog> placementLogs = placementLogRepository.findByPlacementIdOrderByIdAsc(
+        placementDetailsDTO.getId());
     assertThat(placementLogs).hasSize(2);
     final PlacementLog testLog = placementLogs.get(1);
     assertThat(testLog.getLifecycleState()).isEqualTo(LifecycleState.DRAFT);
@@ -1702,8 +1749,8 @@ public class PlacementResourceIntTest {
     placementDetailsDTO.setDateFrom(placementDetailsDTO.getDateFrom().plusDays(1));
 
     restPlacementMockMvc.perform(put("/api/placements")
-        .contentType(MediaType.APPLICATION_JSON)
-        .content(TestUtil.convertObjectToJsonBytes(placementDetailsDTO)))
+            .contentType(MediaType.APPLICATION_JSON)
+            .content(TestUtil.convertObjectToJsonBytes(placementDetailsDTO)))
         .andExpect(status().isOk())
         .andExpect(content().contentType(MediaType.APPLICATION_JSON))
         .andExpect(jsonPath("$.lifecycleState").value(LifecycleState.DRAFT.name()));
@@ -1723,7 +1770,8 @@ public class PlacementResourceIntTest {
   @Transactional
   public void updateApprovedPlacementToApprovedWithoutApprovalPerm() throws Exception {
 
-    PlacementDetailsDTO placementDetailsDTO = prepareForApprovalUpdate(LifecycleState.APPROVED, false);
+    PlacementDetailsDTO placementDetailsDTO = prepareForApprovalUpdate(LifecycleState.APPROVED,
+        false);
 
     final int databaseSizeBeforeUpdate = placementDetailsRepository.findAll().size();
 
@@ -1731,8 +1779,8 @@ public class PlacementResourceIntTest {
     placementDetailsDTO.setDateFrom(placementDetailsDTO.getDateFrom().plusDays(1));
 
     restPlacementMockMvc.perform(put("/api/placements")
-        .contentType(MediaType.APPLICATION_JSON)
-        .content(TestUtil.convertObjectToJsonBytes(placementDetailsDTO)))
+            .contentType(MediaType.APPLICATION_JSON)
+            .content(TestUtil.convertObjectToJsonBytes(placementDetailsDTO)))
         .andExpect(status().isOk())
         .andExpect(content().contentType(MediaType.APPLICATION_JSON))
         .andExpect(jsonPath("$.lifecycleState").value(LifecycleState.DRAFT.name()));
@@ -1752,7 +1800,8 @@ public class PlacementResourceIntTest {
   @Transactional
   public void updateApprovedPlacementToDraftWithoutApprovalPerm() throws Exception {
 
-    PlacementDetailsDTO placementDetailsDTO = prepareForApprovalUpdate(LifecycleState.APPROVED, false);
+    PlacementDetailsDTO placementDetailsDTO = prepareForApprovalUpdate(LifecycleState.APPROVED,
+        false);
 
     final int databaseSizeBeforeUpdate = placementDetailsRepository.findAll().size();
 
@@ -1760,8 +1809,8 @@ public class PlacementResourceIntTest {
     placementDetailsDTO.setDateFrom(placementDetailsDTO.getDateFrom().plusDays(1));
 
     restPlacementMockMvc.perform(put("/api/placements")
-        .contentType(MediaType.APPLICATION_JSON)
-        .content(TestUtil.convertObjectToJsonBytes(placementDetailsDTO)))
+            .contentType(MediaType.APPLICATION_JSON)
+            .content(TestUtil.convertObjectToJsonBytes(placementDetailsDTO)))
         .andExpect(status().isOk())
         .andExpect(content().contentType(MediaType.APPLICATION_JSON))
         .andExpect(jsonPath("$.lifecycleState").value(LifecycleState.DRAFT.name()));
@@ -1780,7 +1829,8 @@ public class PlacementResourceIntTest {
   @Test
   @Transactional
   public void updateApprovedPlacementToDraftWithApprovalPerm() throws Exception {
-    PlacementDetailsDTO placementDetailsDTO = prepareForApprovalUpdate(LifecycleState.APPROVED, true);
+    PlacementDetailsDTO placementDetailsDTO = prepareForApprovalUpdate(LifecycleState.APPROVED,
+        true);
 
     final int databaseSizeBeforeUpdate = placementDetailsRepository.findAll().size();
 
@@ -1788,8 +1838,8 @@ public class PlacementResourceIntTest {
     placementDetailsDTO.setDateFrom(placementDetailsDTO.getDateFrom().plusDays(1));
 
     restPlacementMockMvc.perform(put("/api/placements")
-        .contentType(MediaType.APPLICATION_JSON)
-        .content(TestUtil.convertObjectToJsonBytes(placementDetailsDTO)))
+            .contentType(MediaType.APPLICATION_JSON)
+            .content(TestUtil.convertObjectToJsonBytes(placementDetailsDTO)))
         .andExpect(status().isOk())
         .andExpect(content().contentType(MediaType.APPLICATION_JSON))
         .andExpect(jsonPath("$.lifecycleState").value(LifecycleState.DRAFT.name()));
@@ -1816,8 +1866,8 @@ public class PlacementResourceIntTest {
     placementDetailsDTO.setDateFrom(placementDetailsDTO.getDateFrom().plusDays(1));
 
     restPlacementMockMvc.perform(put("/api/placements")
-        .contentType(MediaType.APPLICATION_JSON)
-        .content(TestUtil.convertObjectToJsonBytes(placementDetailsDTO)))
+            .contentType(MediaType.APPLICATION_JSON)
+            .content(TestUtil.convertObjectToJsonBytes(placementDetailsDTO)))
         .andExpect(status().isOk())
         .andExpect(content().contentType(MediaType.APPLICATION_JSON))
         .andExpect(jsonPath("$.lifecycleState").value(LifecycleState.APPROVED.name()));
@@ -1839,7 +1889,8 @@ public class PlacementResourceIntTest {
   @Test
   @Transactional
   public void updateApprovedPlacementToApprovedWithApprovalPerm() throws Exception {
-    PlacementDetailsDTO placementDetailsDTO = prepareForApprovalUpdate(LifecycleState.APPROVED, true);
+    PlacementDetailsDTO placementDetailsDTO = prepareForApprovalUpdate(LifecycleState.APPROVED,
+        true);
 
     final int databaseSizeBeforeUpdate = placementDetailsRepository.findAll().size();
 
@@ -1847,8 +1898,8 @@ public class PlacementResourceIntTest {
     placementDetailsDTO.setDateFrom(placementDetailsDTO.getDateFrom().plusDays(1));
 
     restPlacementMockMvc.perform(put("/api/placements")
-        .contentType(MediaType.APPLICATION_JSON)
-        .content(TestUtil.convertObjectToJsonBytes(placementDetailsDTO)))
+            .contentType(MediaType.APPLICATION_JSON)
+            .content(TestUtil.convertObjectToJsonBytes(placementDetailsDTO)))
         .andExpect(status().isOk())
         .andExpect(content().contentType(MediaType.APPLICATION_JSON))
         .andExpect(jsonPath("$.lifecycleState").value(LifecycleState.APPROVED.name()));
@@ -1868,15 +1919,18 @@ public class PlacementResourceIntTest {
         .filter(esrNotification -> esrNotification.getNotificationTitleCode().equals("4"))
         .forEach(esrNotification -> {
           assertThat(esrNotification.getChangeOfProjectedHireDate()).isNotNull();
-          assertThat(esrNotification.getChangeOfProjectedHireDate()).isEqualTo(UPDATED_DATE_FROM.plusMonths(1).plusDays(1));
-          assertThat(esrNotification.getChangeOfProjectedEndDate()).isEqualTo(UPDATED_DATE_TO.plusMonths(3));
+          assertThat(esrNotification.getChangeOfProjectedHireDate()).isEqualTo(
+              UPDATED_DATE_FROM.plusMonths(1).plusDays(1));
+          assertThat(esrNotification.getChangeOfProjectedEndDate()).isEqualTo(
+              UPDATED_DATE_TO.plusMonths(3));
         });
   }
 
   @Test
   @Transactional
-  public void shouldApproveAllDraftPlacementsByProgrammeId() throws Exception{
-    TestUtils.mockUserProfileWithPermissions("Test User", new HashSet<>(Arrays.asList("placement:approve")));
+  public void shouldApproveAllDraftPlacementsByProgrammeId() throws Exception {
+    TestUtils.mockUserProfileWithPermissions("Test User",
+        new HashSet<>(Arrays.asList("placement:approve")));
     Placement placement1 = new Placement();
     placement1.setLifecycleState(LifecycleState.DRAFT);
 
@@ -1885,7 +1939,8 @@ public class PlacementResourceIntTest {
 
     Placement placement3 = new Placement();
     placement3.setLifecycleState(LifecycleState.APPROVED);
-    List<Placement> placementList = placementRepository.saveAll(Arrays.asList(placement1, placement2, placement3));
+    List<Placement> placementList = placementRepository.saveAll(
+        Arrays.asList(placement1, placement2, placement3));
 
     Post post = new Post();
     post.setId(1L);
@@ -1900,8 +1955,8 @@ public class PlacementResourceIntTest {
     programmeRepository.saveAndFlush(programme);
 
     restPlacementMockMvc.perform(patch("/api/placements/approve/1")
-        .contentType(MediaType.APPLICATION_JSON)
-        .content(TestUtil.convertObjectToJsonBytes(null)))
+            .contentType(MediaType.APPLICATION_JSON)
+            .content(TestUtil.convertObjectToJsonBytes(null)))
         .andExpect(status().isOk())
         .andExpect(content().contentType(MediaType.APPLICATION_JSON))
         .andExpect(jsonPath("$.updatedCount").value(2));
@@ -1909,7 +1964,7 @@ public class PlacementResourceIntTest {
 
   @Test
   @Transactional
-  public void createPlacementByBulkUploadShouldBeApproved() throws Exception{
+  public void createPlacementByBulkUploadShouldBeApproved() throws Exception {
     TestUtils.mockUserprofile("bulk_upload");
     final int databaseSizeBeforeCreate = placementDetailsRepository.findAll().size();
     placementDetails.setDateFrom(UPDATED_DATE_FROM.plusMonths(1));
@@ -1919,9 +1974,11 @@ public class PlacementResourceIntTest {
     final PlacementDetailsDTO placementDetailsDTO = placementDetailsMapper
         .placementDetailsToPlacementDetailsDTO(placementDetails);
 
+    addPrimarySpecialtyToPlacementDetailsDTO(placementDetailsDTO);
+
     restPlacementMockMvc.perform(post("/api/placements")
-        .contentType(MediaType.APPLICATION_JSON)
-        .content(TestUtil.convertObjectToJsonBytes(placementDetailsDTO)))
+            .contentType(MediaType.APPLICATION_JSON)
+            .content(TestUtil.convertObjectToJsonBytes(placementDetailsDTO)))
         .andExpect(status().isCreated())
         .andExpect(jsonPath("$.lifecycleState").value(LifecycleState.APPROVED.name()));
 
@@ -1953,12 +2010,14 @@ public class PlacementResourceIntTest {
     final PlacementDetailsDTO placementDetailsDTO = placementDetailsMapper
         .placementDetailsToPlacementDetailsDTO(placementDetails);
 
+    addPrimarySpecialtyToPlacementDetailsDTO(placementDetailsDTO);
+
     placementDetailsDTO.setLifecycleState(LifecycleState.APPROVED);
     placementDetailsDTO.setDateFrom(placementDetailsDTO.getDateFrom().plusDays(1));
 
     restPlacementMockMvc.perform(put("/api/placements")
-        .contentType(MediaType.APPLICATION_JSON)
-        .content(TestUtil.convertObjectToJsonBytes(placementDetailsDTO)))
+            .contentType(MediaType.APPLICATION_JSON)
+            .content(TestUtil.convertObjectToJsonBytes(placementDetailsDTO)))
         .andExpect(status().isOk())
         .andExpect(content().contentType(MediaType.APPLICATION_JSON))
         .andExpect(jsonPath("$.lifecycleState").value(LifecycleState.APPROVED.name()));
@@ -1978,15 +2037,19 @@ public class PlacementResourceIntTest {
         .filter(esrNotification -> esrNotification.getNotificationTitleCode().equals("4"))
         .forEach(esrNotification -> {
           assertThat(esrNotification.getChangeOfProjectedHireDate()).isNotNull();
-          assertThat(esrNotification.getChangeOfProjectedHireDate()).isEqualTo(UPDATED_DATE_FROM.plusMonths(1).plusDays(1));
-          assertThat(esrNotification.getChangeOfProjectedEndDate()).isEqualTo(UPDATED_DATE_TO.plusMonths(3));
+          assertThat(esrNotification.getChangeOfProjectedHireDate()).isEqualTo(
+              UPDATED_DATE_FROM.plusMonths(1).plusDays(1));
+          assertThat(esrNotification.getChangeOfProjectedEndDate()).isEqualTo(
+              UPDATED_DATE_TO.plusMonths(3));
         });
   }
 
   @Test
   @Transactional
-  public void approvedPlacementUpdateToDraftWithDateChangeThenUpdateToApprovedShouldSendNotification() throws Exception {
-    TestUtils.mockUserProfileWithPermissions("Test User", new HashSet<>(Arrays.asList("placement:approve")));
+  public void approvedPlacementUpdateToDraftWithDateChangeThenUpdateToApprovedShouldSendNotification()
+      throws Exception {
+    TestUtils.mockUserProfileWithPermissions("Test User",
+        new HashSet<>(Arrays.asList("placement:approve")));
     // create an approved placement
     placementDetails.setDateFrom(UPDATED_DATE_FROM.plusMonths(1));
     placementDetails.setDateTo(UPDATED_DATE_TO.plusMonths(3));
@@ -1995,9 +2058,11 @@ public class PlacementResourceIntTest {
     final PlacementDetailsDTO placementDetailsDTO = placementDetailsMapper
         .placementDetailsToPlacementDetailsDTO(placementDetails);
 
+    addPrimarySpecialtyToPlacementDetailsDTO(placementDetailsDTO);
+
     restPlacementMockMvc.perform(post("/api/placements")
-        .contentType(MediaType.APPLICATION_JSON)
-        .content(TestUtil.convertObjectToJsonBytes(placementDetailsDTO)))
+            .contentType(MediaType.APPLICATION_JSON)
+            .content(TestUtil.convertObjectToJsonBytes(placementDetailsDTO)))
         .andExpect(status().isCreated());
 
     final List<EsrNotification> esrNotifications1 = esrNotificationRepository.findAll();
@@ -2008,12 +2073,14 @@ public class PlacementResourceIntTest {
     PlacementDetailsDTO placementDetailsDTO0 = placementDetailsMapper
         .placementDetailsToPlacementDetailsDTO(placementDetailsCreated);
 
+    addPrimarySpecialtyToPlacementDetailsDTO(placementDetailsDTO0);
+
     placementDetailsDTO0.setDateFrom(placementDetailsDTO0.getDateFrom().plusDays(1));
     placementDetailsDTO0.setLifecycleState(LifecycleState.DRAFT);
 
     restPlacementMockMvc.perform(put("/api/placements")
-        .contentType(MediaType.APPLICATION_JSON)
-        .content(TestUtil.convertObjectToJsonBytes(placementDetailsDTO0)))
+            .contentType(MediaType.APPLICATION_JSON)
+            .content(TestUtil.convertObjectToJsonBytes(placementDetailsDTO0)))
         .andExpect(status().isOk());
 
     final List<EsrNotification> esrNotifications2 = esrNotificationRepository.findAll();
@@ -2025,10 +2092,11 @@ public class PlacementResourceIntTest {
         .placementDetailsToPlacementDetailsDTO(placementDetailsUpdated1);
 
     placementDetailsDTO1.setLifecycleState(LifecycleState.APPROVED);
+    addPrimarySpecialtyToPlacementDetailsDTO(placementDetailsDTO1);
 
     restPlacementMockMvc.perform(put("/api/placements")
-        .contentType(MediaType.APPLICATION_JSON)
-        .content(TestUtil.convertObjectToJsonBytes(placementDetailsDTO1)))
+            .contentType(MediaType.APPLICATION_JSON)
+            .content(TestUtil.convertObjectToJsonBytes(placementDetailsDTO1)))
         .andExpect(status().isOk());
 
     final List<EsrNotification> esrNotifications3 = esrNotificationRepository.findAll();
@@ -2039,7 +2107,8 @@ public class PlacementResourceIntTest {
   @Transactional
   public void approvedPlacementUpdateToDraftWithDateChangeThenUpdateToApprovedAndDateChangedBackShouldNotSendNotification()
       throws Exception {
-    TestUtils.mockUserProfileWithPermissions("Test User", new HashSet<>(Arrays.asList("placement:approve")));
+    TestUtils.mockUserProfileWithPermissions("Test User",
+        new HashSet<>(Arrays.asList("placement:approve")));
     // create an approved placement
     placementDetails.setDateFrom(UPDATED_DATE_FROM.plusMonths(1));
     placementDetails.setDateTo(UPDATED_DATE_TO.plusMonths(3));
@@ -2048,9 +2117,11 @@ public class PlacementResourceIntTest {
     final PlacementDetailsDTO placementDetailsDTO = placementDetailsMapper
         .placementDetailsToPlacementDetailsDTO(placementDetails);
 
+    addPrimarySpecialtyToPlacementDetailsDTO(placementDetailsDTO);
+
     restPlacementMockMvc.perform(post("/api/placements")
-        .contentType(MediaType.APPLICATION_JSON)
-        .content(TestUtil.convertObjectToJsonBytes(placementDetailsDTO)))
+            .contentType(MediaType.APPLICATION_JSON)
+            .content(TestUtil.convertObjectToJsonBytes(placementDetailsDTO)))
         .andExpect(status().isCreated());
 
     final List<EsrNotification> esrNotifications1 = esrNotificationRepository.findAll();
@@ -2061,14 +2132,15 @@ public class PlacementResourceIntTest {
     PlacementDetailsDTO placementDetailsDTO0 = placementDetailsMapper
         .placementDetailsToPlacementDetailsDTO(placementDetailsCreated);
 
+    addPrimarySpecialtyToPlacementDetailsDTO(placementDetailsDTO0);
+
     placementDetailsDTO0.setDateFrom(placementDetailsDTO0.getDateFrom().plusDays(1));
     placementDetailsDTO0.setLifecycleState(LifecycleState.DRAFT);
 
     restPlacementMockMvc.perform(put("/api/placements")
-        .contentType(MediaType.APPLICATION_JSON)
-        .content(TestUtil.convertObjectToJsonBytes(placementDetailsDTO0)))
+            .contentType(MediaType.APPLICATION_JSON)
+            .content(TestUtil.convertObjectToJsonBytes(placementDetailsDTO0)))
         .andExpect(status().isOk());
-
 
     final List<EsrNotification> esrNotifications2 = esrNotificationRepository.findAll();
     assertThat(esrNotifications2).hasSize(1);
@@ -2081,9 +2153,11 @@ public class PlacementResourceIntTest {
     placementDetailsDTO1.setDateFrom(placementDetailsDTO1.getDateFrom().minusDays(1));
     placementDetailsDTO1.setLifecycleState(LifecycleState.APPROVED);
 
+    addPrimarySpecialtyToPlacementDetailsDTO(placementDetailsDTO1);
+
     restPlacementMockMvc.perform(put("/api/placements")
-        .contentType(MediaType.APPLICATION_JSON)
-        .content(TestUtil.convertObjectToJsonBytes(placementDetailsDTO1)))
+            .contentType(MediaType.APPLICATION_JSON)
+            .content(TestUtil.convertObjectToJsonBytes(placementDetailsDTO1)))
         .andExpect(status().isOk());
 
     final List<PlacementLog> placementLogs = placementLogRepository
@@ -2130,9 +2204,11 @@ public class PlacementResourceIntTest {
     final PlacementDetailsDTO placementDTO = placementDetailsMapper
         .placementDetailsToPlacementDetailsDTO(updatedPlacement);
 
+    addPrimarySpecialtyToPlacementDetailsDTO(placementDTO);
+
     restPlacementMockMvc.perform(put("/api/placements")
-        .contentType(MediaType.APPLICATION_JSON)
-        .content(TestUtil.convertObjectToJsonBytes(placementDTO)))
+            .contentType(MediaType.APPLICATION_JSON)
+            .content(TestUtil.convertObjectToJsonBytes(placementDTO)))
         .andExpect(status().isOk());
 
     // Validate the Placement in the database
@@ -2205,9 +2281,11 @@ public class PlacementResourceIntTest {
     final PlacementDetailsDTO placementDTO = placementDetailsMapper
         .placementDetailsToPlacementDetailsDTO(updatedPlacement);
 
+    addPrimarySpecialtyToPlacementDetailsDTO(placementDTO);
+
     restPlacementMockMvc.perform(put("/api/placements")
-        .contentType(MediaType.APPLICATION_JSON)
-        .content(TestUtil.convertObjectToJsonBytes(placementDTO)))
+            .contentType(MediaType.APPLICATION_JSON)
+            .content(TestUtil.convertObjectToJsonBytes(placementDTO)))
         .andExpect(status().isOk());
 
     // Validate the Placement in the database
@@ -2248,8 +2326,8 @@ public class PlacementResourceIntTest {
     placementDetailsDTO.setWholeTimeEquivalent(BigDecimal.valueOf(2));
 
     restPlacementMockMvc.perform(post("/api/placements")
-        .contentType(MediaType.APPLICATION_JSON)
-        .content(TestUtil.convertObjectToJsonBytes(placementDetailsDTO)))
+            .contentType(MediaType.APPLICATION_JSON)
+            .content(TestUtil.convertObjectToJsonBytes(placementDetailsDTO)))
         .andExpect(status().isBadRequest())
         .andExpect(jsonPath("$.fieldErrors[*].message")
             .value("WholeTimeEquivalent should be between 0 and 1"));
@@ -2265,8 +2343,8 @@ public class PlacementResourceIntTest {
     placementDetailsDTO.setWholeTimeEquivalent(BigDecimal.valueOf(0.001));
 
     restPlacementMockMvc.perform(post("/api/placements")
-        .contentType(MediaType.APPLICATION_JSON)
-        .content(TestUtil.convertObjectToJsonBytes(placementDetailsDTO)))
+            .contentType(MediaType.APPLICATION_JSON)
+            .content(TestUtil.convertObjectToJsonBytes(placementDetailsDTO)))
         .andExpect(status().isBadRequest())
         .andExpect(jsonPath("$.fieldErrors[*].message")
             .value("Format of wholeTimeEquivalent is not correct"));
