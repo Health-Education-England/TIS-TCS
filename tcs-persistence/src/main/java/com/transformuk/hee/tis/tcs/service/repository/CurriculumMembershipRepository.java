@@ -3,8 +3,6 @@ package com.transformuk.hee.tis.tcs.service.repository;
 import com.transformuk.hee.tis.tcs.service.model.CurriculumMembership;
 import java.util.List;
 import java.util.Set;
-
-import com.transformuk.hee.tis.tcs.service.model.ProgrammeMembership;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
