@@ -20,19 +20,19 @@ import com.transformuk.hee.tis.tcs.api.dto.GmcDetailsDTO;
 import com.transformuk.hee.tis.tcs.api.dto.ProgrammeMembershipDTO;
 import com.transformuk.hee.tis.tcs.api.dto.RevalidationRecordDto;
 import com.transformuk.hee.tis.tcs.api.enumeration.ProgrammeMembershipType;
+import com.transformuk.hee.tis.tcs.service.model.CurriculumMembership;
 import com.transformuk.hee.tis.tcs.service.model.GmcDetails;
 import com.transformuk.hee.tis.tcs.service.model.Placement;
-import com.transformuk.hee.tis.tcs.service.model.ProgrammeMembership;
+import com.transformuk.hee.tis.tcs.service.repository.CurriculumMembershipRepository;
 import com.transformuk.hee.tis.tcs.service.repository.GmcDetailsRepository;
 import com.transformuk.hee.tis.tcs.service.repository.PersonRepository;
 import com.transformuk.hee.tis.tcs.service.repository.PlacementRepository;
-import com.transformuk.hee.tis.tcs.service.repository.ProgrammeMembershipRepository;
 import com.transformuk.hee.tis.tcs.service.service.ContactDetailsService;
 import com.transformuk.hee.tis.tcs.service.service.GmcDetailsService;
 import com.transformuk.hee.tis.tcs.service.service.RevalidationService;
 import com.transformuk.hee.tis.tcs.service.service.helper.SqlQuerySupplier;
+import com.transformuk.hee.tis.tcs.service.service.mapper.CurriculumMembershipMapper;
 import com.transformuk.hee.tis.tcs.service.service.mapper.DesignatedBodyMapper;
-import com.transformuk.hee.tis.tcs.service.service.mapper.ProgrammeMembershipMapper;
 
 import java.sql.ResultSet;
 import java.sql.SQLException;
@@ -78,11 +78,11 @@ public class RevalidationServiceImpl implements RevalidationService {
   private final ContactDetailsService contactDetailsService;
   private final GmcDetailsService gmcDetailsService;
   private final GmcDetailsRepository gmcDetailsRepository;
-  private final ProgrammeMembershipRepository programmeMembershipRepository;
+  private final CurriculumMembershipRepository curriculumMembershipRepository;
   private final PlacementRepository placementRepository;
   private final ReferenceService referenceService;
   private final PersonRepository personRepository;
-  private final ProgrammeMembershipMapper programmeMembershipMapper;
+  private final CurriculumMembershipMapper curriculumMembershipMapper;
   @Autowired
   private NamedParameterJdbcTemplate namedParameterJdbcTemplate;
   @Autowired
@@ -91,19 +91,19 @@ public class RevalidationServiceImpl implements RevalidationService {
   public RevalidationServiceImpl(ContactDetailsService contactDetailsService,
       GmcDetailsService gmcDetailsService,
       GmcDetailsRepository gmcDetailsRepository,
-      ProgrammeMembershipRepository programmeMembershipRepository,
+      CurriculumMembershipRepository curriculumMembershipRepository,
       PlacementRepository placementRepository,
       ReferenceService referenceService,
       PersonRepository personRepository,
-      ProgrammeMembershipMapper programmeMembershipMapper) {
+      CurriculumMembershipMapper curriculumMembershipMapper) {
     this.contactDetailsService = contactDetailsService;
     this.gmcDetailsService = gmcDetailsService;
     this.gmcDetailsRepository = gmcDetailsRepository;
-    this.programmeMembershipRepository = programmeMembershipRepository;
+    this.curriculumMembershipRepository = curriculumMembershipRepository;
     this.placementRepository = placementRepository;
     this.referenceService = referenceService;
     this.personRepository = personRepository;
-    this.programmeMembershipMapper = programmeMembershipMapper;
+    this.curriculumMembershipMapper = curriculumMembershipMapper;
   }
 
   @Override
@@ -133,10 +133,10 @@ public class RevalidationServiceImpl implements RevalidationService {
 
       LOG.info("Searching Programme membership for person: {}", gmcDetail.getId());
 
-      final ProgrammeMembership programmeMembership = programmeMembershipRepository
-          .findLatestProgrammeMembershipByTraineeId(gmcDetail.getId());
+      final CurriculumMembership curriculumMembership = curriculumMembershipRepository
+          .findLatestCurriculumMembershipByTraineeId(gmcDetail.getId());
 
-      final ConnectionRecordDto connectionRecordDto = getConnectionStatus(programmeMembership);
+      final ConnectionRecordDto connectionRecordDto = getConnectionStatus(curriculumMembership);
       connectionRecordDtoMap.put(gmcDetail.getGmcNumber(), connectionRecordDto);
     });
     return connectionRecordDtoMap;
@@ -159,12 +159,12 @@ public class RevalidationServiceImpl implements RevalidationService {
     connectionDetailDto.setProgrammeName(revalidationRecordDto.getProgrammeName());
     connectionDetailDto.setCurrentGrade(revalidationRecordDto.getCurrentGrade());
 
-    final List<ProgrammeMembership> programmeMemberships = programmeMembershipRepository
-        .findAllProgrammeMembershipInDescOrderByTraineeId(gmcDetail.getId());
+    final List<CurriculumMembership> curriculumMemberships = curriculumMembershipRepository
+        .findAllCurriculumMembershipInDescOrderByTraineeId(gmcDetail.getId());
     LOG.info("Programme memberships found for person: {}, membership: {}", gmcDetail.getId(),
-        programmeMemberships);
+        curriculumMemberships);
 
-    List<ConnectionRecordDto> programmeHistory = programmeMemberships.stream()
+    List<ConnectionRecordDto> programmeHistory = curriculumMemberships.stream()
         .map(pm -> getConnectionStatus(pm)).collect(toList());
     connectionDetailDto.setProgrammeHistory(programmeHistory);
 
@@ -234,10 +234,10 @@ public class RevalidationServiceImpl implements RevalidationService {
     }
 
     // latest Programme Membership
-    final ProgrammeMembership latestProgrammeMembership = programmeMembershipRepository
-        .findLatestProgrammeMembershipByTraineeId(personId);
-    final ProgrammeMembershipDTO programmeMembershipDto = programmeMembershipMapper
-        .toDto(latestProgrammeMembership);
+    final CurriculumMembership latestCurriculumMembership = curriculumMembershipRepository
+        .findLatestCurriculumMembershipByTraineeId(personId);
+    final ProgrammeMembershipDTO programmeMembershipDto = curriculumMembershipMapper
+        .toDto(latestCurriculumMembership);
     if (programmeMembershipDto != null) {
       final String owner = programmeMembershipDto.getProgrammeOwner();
       final ProgrammeMembershipType membershipType = programmeMembershipDto
@@ -265,10 +265,10 @@ public class RevalidationServiceImpl implements RevalidationService {
   }
 
   private ConnectionSummaryRecordDto buildHiddenConnectionList(ConnectionDto conn) {
-    final ProgrammeMembership latestProgrammeMembership = programmeMembershipRepository
-        .findLatestProgrammeMembershipByTraineeId(conn.getPersonId());
-    final ProgrammeMembershipDTO programmeMembershipDTO = programmeMembershipMapper
-        .toDto(latestProgrammeMembership);
+    final CurriculumMembership latestCurriculumMembership = curriculumMembershipRepository
+        .findLatestCurriculumMembershipByTraineeId(conn.getPersonId());
+    final ProgrammeMembershipDTO programmeMembershipDTO = curriculumMembershipMapper
+        .toDto(latestCurriculumMembership);
 
     final ConnectionSummaryRecordDtoBuilder connectionHiddenRecordDtoBuilder =
         ConnectionSummaryRecordDto
@@ -329,43 +329,43 @@ public class RevalidationServiceImpl implements RevalidationService {
     return isConnected ? "Yes" : "No";
   }
 
-  private ConnectionRecordDto getConnectionStatus(final ProgrammeMembership programmeMembership) {
+  private ConnectionRecordDto getConnectionStatus(final CurriculumMembership curriculumMembership) {
     final ConnectionRecordDto connectionRecordDto = new ConnectionRecordDto();
     connectionRecordDto.setConnectionStatus("No");
     final LocalDate currentDate = now();
 
-    if (Objects.nonNull(programmeMembership)) {
+    if (Objects.nonNull(curriculumMembership)) {
 
-      LOG.info("Programme membership found membership: {}", programmeMembership.getId());
+      LOG.info("Programme membership found membership: {}", curriculumMembership.getId());
 
-      if (!isDisconnected(currentDate, programmeMembership)) {
+      if (!isDisconnected(currentDate, curriculumMembership)) {
         connectionRecordDto.setConnectionStatus("Yes");
       }
       final String programmeMemberShipType =
-          Objects.nonNull(programmeMembership.getProgrammeMembershipType()) ? programmeMembership
+          Objects.nonNull(curriculumMembership.getProgrammeMembershipType()) ? curriculumMembership
               .getProgrammeMembershipType().toString() : null;
       connectionRecordDto.setProgrammeMembershipType(programmeMemberShipType);
       connectionRecordDto
-          .setProgrammeMembershipStartDate(programmeMembership.getProgrammeStartDate());
-      connectionRecordDto.setProgrammeMembershipEndDate(programmeMembership.getProgrammeEndDate());
-      if (Objects.nonNull(programmeMembership.getProgramme())) {
-        String programmeOwner = programmeMembership.getProgramme().getOwner();
+          .setProgrammeMembershipStartDate(curriculumMembership.getProgrammeStartDate());
+      connectionRecordDto.setProgrammeMembershipEndDate(curriculumMembership.getProgrammeEndDate());
+      if (Objects.nonNull(curriculumMembership.getProgramme())) {
+        String programmeOwner = curriculumMembership.getProgramme().getOwner();
         connectionRecordDto.setProgrammeOwner(programmeOwner);
         connectionRecordDto
             .setDesignatedBodyCode(DesignatedBodyMapper.getDbcByOwner(programmeOwner));
-        connectionRecordDto.setProgrammeName(programmeMembership.getProgramme().getProgrammeName());
+        connectionRecordDto.setProgrammeName(curriculumMembership.getProgramme().getProgrammeName());
       }
     }
 
     return connectionRecordDto;
   }
 
-  private boolean isDisconnected(LocalDate currentDate, ProgrammeMembership programmeMembership) {
-    return Objects.isNull(programmeMembership) ||
-        Objects.isNull(programmeMembership.getProgrammeStartDate()) ||
-        Objects.isNull(programmeMembership.getProgrammeEndDate()) ||
-        programmeMembership.getProgrammeStartDate().isAfter(currentDate) ||
-        programmeMembership.getProgrammeEndDate().isBefore(currentDate);
+  private boolean isDisconnected(LocalDate currentDate, CurriculumMembership curriculumMembership) {
+    return Objects.isNull(curriculumMembership) ||
+        Objects.isNull(curriculumMembership.getProgrammeStartDate()) ||
+        Objects.isNull(curriculumMembership.getProgrammeEndDate()) ||
+        curriculumMembership.getProgrammeStartDate().isAfter(currentDate) ||
+        curriculumMembership.getProgrammeEndDate().isBefore(currentDate);
   }
 
   private RevalidationRecordDto buildRevalidationRecord(GmcDetails gmcDetails) {
@@ -383,14 +383,14 @@ public class RevalidationServiceImpl implements RevalidationService {
     revalidationRecordDto.setSurname(contactDetailsDto.getSurname());
 
     //Programme Membership
-    ProgrammeMembership programmeMembership = programmeMembershipRepository
+    CurriculumMembership curriculumMembership = curriculumMembershipRepository
         .findLatestCurriculumByTraineeId(personId);
-    if (Objects.nonNull(programmeMembership)) {
-      LOG.debug("Programme Membership End Date : {}", programmeMembership.getProgrammeEndDate());
-      revalidationRecordDto.setCurriculumEndDate(programmeMembership.getCurriculumEndDate());
-      revalidationRecordDto.setProgrammeMembershipType(programmeMembership
+    if (Objects.nonNull(curriculumMembership)) {
+      LOG.debug("Programme Membership End Date : {}", curriculumMembership.getProgrammeEndDate());
+      revalidationRecordDto.setCurriculumEndDate(curriculumMembership.getCurriculumEndDate());
+      revalidationRecordDto.setProgrammeMembershipType(curriculumMembership
           .getProgrammeMembershipType().toString());
-      revalidationRecordDto.setProgrammeName(programmeMembership.getProgramme().getProgrammeName());
+      revalidationRecordDto.setProgrammeName(curriculumMembership.getProgramme().getProgrammeName());
     }
     //Placement
     List<Placement> currentPlacementsForTrainee = placementRepository
