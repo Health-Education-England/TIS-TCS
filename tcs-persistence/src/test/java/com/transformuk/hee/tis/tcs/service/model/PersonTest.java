@@ -65,7 +65,7 @@ public class PersonTest extends Person {
 
   private void assertPersonRecordStatusEquals(Status expected,
       Set<CurriculumMembership> curriculumMemberships) {
-    Person person = new Person().programmeMemberships(curriculumMemberships);
+    Person person = new Person().curriculumMemberships(curriculumMemberships);
     Status actual = person.programmeMembershipsStatus();
     assertEquals(expected, actual);
   }
