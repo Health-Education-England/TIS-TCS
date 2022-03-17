@@ -8,7 +8,7 @@ import com.transformuk.hee.tis.tcs.api.dto.CurriculumMembershipDTO;
 import com.transformuk.hee.tis.tcs.api.dto.ProgrammeMembershipCurriculaDTO;
 import com.transformuk.hee.tis.tcs.api.dto.ProgrammeMembershipDTO;
 import com.transformuk.hee.tis.tcs.api.enumeration.Status;
-import com.transformuk.hee.tis.tcs.service.event.ProgrammeMembershipSavedEvent;
+import com.transformuk.hee.tis.tcs.service.event.CurriculumMembershipSavedEvent;
 import com.transformuk.hee.tis.tcs.service.model.Curriculum;
 import com.transformuk.hee.tis.tcs.service.model.CurriculumMembership;
 import com.transformuk.hee.tis.tcs.service.model.Person;
@@ -143,7 +143,7 @@ public class ProgrammeMembershipServiceImpl implements ProgrammeMembershipServic
     if (CollectionUtils.isNotEmpty(programmeMembershipDtos)) {
       programmeMembershipDtos.stream()
           .distinct()
-          .map(ProgrammeMembershipSavedEvent::new)
+          .map(CurriculumMembershipSavedEvent::new)
           .forEach(applicationEventPublisher::publishEvent);
     }
   }

@@ -197,8 +197,8 @@ public class Person implements Serializable {
     return this;
   }
 
-  public Person programmeMemberships(Set<CurriculumMembership> programmeMemberships) {
-    this.curriculumMemberships = programmeMemberships;
+  public Person programmeMemberships(Set<CurriculumMembership> curriculumMemberships) {
+    this.curriculumMemberships = curriculumMemberships;
     return this;
   }
 

@@ -4,11 +4,11 @@ import com.transformuk.hee.tis.tcs.api.dto.ProgrammeMembershipDTO;
 import java.util.Objects;
 import org.springframework.context.ApplicationEvent;
 
-public class ProgrammeMembershipSavedEvent extends ApplicationEvent {
+public class CurriculumMembershipSavedEvent extends ApplicationEvent {
 
   private ProgrammeMembershipDTO programmeMembershipDTO;
 
-  public ProgrammeMembershipSavedEvent(ProgrammeMembershipDTO source) {
+  public CurriculumMembershipSavedEvent(ProgrammeMembershipDTO source) {
     super(source);
     this.programmeMembershipDTO = source;
   }
@@ -25,7 +25,7 @@ public class ProgrammeMembershipSavedEvent extends ApplicationEvent {
     if (o == null || getClass() != o.getClass()) {
       return false;
     }
-    ProgrammeMembershipSavedEvent that = (ProgrammeMembershipSavedEvent) o;
+    CurriculumMembershipSavedEvent that = (CurriculumMembershipSavedEvent) o;
     return Objects.equals(programmeMembershipDTO, that.programmeMembershipDTO);
   }
 

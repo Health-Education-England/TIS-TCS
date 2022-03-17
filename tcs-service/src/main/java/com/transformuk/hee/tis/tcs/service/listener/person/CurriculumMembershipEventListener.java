@@ -1,8 +1,8 @@
 package com.transformuk.hee.tis.tcs.service.listener.person;
 
-import com.transformuk.hee.tis.tcs.service.event.ProgrammeMembershipCreatedEvent;
-import com.transformuk.hee.tis.tcs.service.event.ProgrammeMembershipDeletedEvent;
-import com.transformuk.hee.tis.tcs.service.event.ProgrammeMembershipSavedEvent;
+import com.transformuk.hee.tis.tcs.service.event.CurriculumMembershipCreatedEvent;
+import com.transformuk.hee.tis.tcs.service.event.CurriculumMembershipDeletedEvent;
+import com.transformuk.hee.tis.tcs.service.event.CurriculumMembershipSavedEvent;
 import com.transformuk.hee.tis.tcs.service.service.PersonElasticSearchService;
 import com.transformuk.hee.tis.tcs.service.service.RevalidationRabbitService;
 import com.transformuk.hee.tis.tcs.service.service.RevalidationService;
@@ -13,9 +13,9 @@ import org.springframework.context.event.EventListener;
 import org.springframework.stereotype.Component;
 
 @Component
-public class ProgrammeMembershipEventListener {
+public class CurriculumMembershipEventListener {
 
-  private static final Logger LOG = LoggerFactory.getLogger(ProgrammeMembershipEventListener.class);
+  private static final Logger LOG = LoggerFactory.getLogger(CurriculumMembershipEventListener.class);
 
   @Autowired
   private RevalidationRabbitService revalidationRabbitService;
@@ -27,13 +27,13 @@ public class ProgrammeMembershipEventListener {
   private RevalidationService revalidationService;
 
   /**
-   * handle Programme membership saved event.
+   * handle Curriculum membership saved event.
    *
-   * @param event details of the programme saved event
+   * @param event details of the curriculum membership saved event
    */
   @EventListener
-  public void handleProgrammeMembershipSavedEvent(ProgrammeMembershipSavedEvent event) {
-    LOG.info("Received ProgrammeMembership saved event for ProgrammeMembership id: [{}]",
+  public void handleCurriculumMembershipSavedEvent(CurriculumMembershipSavedEvent event) {
+    LOG.info("Received CurriculumMembership saved event for CurriculumMembership id: [{}]",
         event.getProgrammeMembershipDTO().getId());
     final Long personId = event.getProgrammeMembershipDTO().getPerson().getId();
     personElasticSearchService.updatePersonDocument(personId);
@@ -41,13 +41,13 @@ public class ProgrammeMembershipEventListener {
   }
 
   /**
-   * handle Programme membership created event.
+   * handle Curriculum membership created event.
    *
-   * @param event details of the programme created event
+   * @param event details of the curriculum membership created event
    */
   @EventListener
-  public void handleProgrammeMembershipCreatedEvent(ProgrammeMembershipCreatedEvent event) {
-    LOG.info("Received ProgrammeMembership created event for ProgrammeMembership id: [{}]",
+  public void handleCurriculumMembershipCreatedEvent(CurriculumMembershipCreatedEvent event) {
+    LOG.info("Received CurriculumMembership created event for CurriculumMembership id: [{}]",
         event.getProgrammeMembershipDTO().getId());
     final Long personId = event.getProgrammeMembershipDTO().getPerson().getId();
     personElasticSearchService.updatePersonDocument(personId);
@@ -55,13 +55,13 @@ public class ProgrammeMembershipEventListener {
   }
 
   /**
-   * handle Programme membership deleted event.
+   * handle Curriculum membership deleted event.
    *
-   * @param event details of the programme deleted event
+   * @param event details of the curriculum membership deleted event
    */
   @EventListener
-  public void handleProgrammeMembershipDeletedEvent(ProgrammeMembershipDeletedEvent event) {
-    LOG.info("Received ProgrammeMembership deleted event for ProgrammeMembership id: [{}]",
+  public void handleCurriculumMembershipDeletedEvent(CurriculumMembershipDeletedEvent event) {
+    LOG.info("Received CurriculumMembership deleted event for CurriculumMembership id: [{}]",
         event.getProgrammeMembershipDTO().getId());
     final Long personId = event.getProgrammeMembershipDTO().getPerson().getId();
     personElasticSearchService.deletePersonDocument(personId);
