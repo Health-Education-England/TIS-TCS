@@ -29,7 +29,7 @@ public class RevalidationMessageListener {
    *
    * @param start set to 'syncStart' to receive messages from the reval rabbit queue
    */
-  @RabbitListener(queues = "${app.rabbit.reval.queue.connection.syncstart}")
+  @RabbitListener(queues = "${app.rabbit.reval.queue.connection.syncstart}", ackMode = "NONE")
   public void receiveMessage(final String start) {
     if (start.equals("syncStart") && !exchange.equals("false")) {
       List<ConnectionInfoDto> connections = revalidationService.extractConnectionInfoForSync();
