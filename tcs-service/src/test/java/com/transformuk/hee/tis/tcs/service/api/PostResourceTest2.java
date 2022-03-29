@@ -35,8 +35,8 @@ import com.transformuk.hee.tis.tcs.service.service.PlacementService;
 import com.transformuk.hee.tis.tcs.service.service.PostService;
 import com.transformuk.hee.tis.tcs.service.service.mapper.PlacementViewMapper;
 import java.lang.reflect.Method;
+import java.time.LocalDateTime;
 import java.util.ArrayList;
-import java.util.Date;
 import java.util.List;
 import java.util.Optional;
 
@@ -128,7 +128,7 @@ public class PostResourceTest2 {
 
   private void setupPostEsrReconciledDto() {
     postEsrReconciledDto = new PostEsrEventDto();
-    postEsrReconciledDto.setReconciledAt(new Date(111L));
+    postEsrReconciledDto.setEventDateTime(LocalDateTime.now());
     postEsrReconciledDto.setFilename(RECONCILED_FILENAME);
     postEsrReconciledDto.setPostId(RECONCILED_POST_ID);
     postEsrReconciledDto.setPositionId(RECONCILED_POSITION_ID);
@@ -415,7 +415,7 @@ public class PostResourceTest2 {
         .andExpect(status().isOk());
 
     PostEsrEventDto capturedPayload = postEsrReconciledDtoArgumentCaptor.getValue();
-    Assert.assertEquals(postEsrReconciledDto.getReconciledAt(), capturedPayload.getReconciledAt());
+    Assert.assertEquals(postEsrReconciledDto.getEventDateTime(), capturedPayload.getEventDateTime());
     Assert.assertEquals(postEsrReconciledDto.getFilename(), capturedPayload.getFilename());
     Assert.assertEquals(postEsrReconciledDto.getPostId(), capturedPayload.getPostId());
     Assert.assertEquals(postEsrReconciledDto.getPositionNumber(), capturedPayload.getPositionNumber());

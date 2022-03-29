@@ -623,7 +623,7 @@ public class PostResource {
 
   }
 
-  @PostMapping(value = "/posts/{postId}/esr-reconciled")
+  @PostMapping(value = "/post/{postId}/esr-position-change/esr-exported")
   @PreAuthorize("hasAuthority('tcs:add:modify:entities')")
   public ResponseEntity<PostEsrEvent> markPostAsEsrReconciled(@PathVariable Long postId,
       @RequestBody PostEsrEventDto postEsrEventDto) {

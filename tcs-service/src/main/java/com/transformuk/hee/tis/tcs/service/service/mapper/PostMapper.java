@@ -159,7 +159,7 @@ public class PostMapper {
       Set<PostEsrEventDto> postEsrEventDtos = Sets.newHashSet();
       for (PostEsrEvent postEsrEvent : post.getPostEsrEvents()) {
         PostEsrEventDto postEsrEventDto = new PostEsrEventDto();
-        postEsrEventDto.setReconciledAt(postEsrEvent.getEventDateTime());
+        postEsrEventDto.setEventDateTime(postEsrEvent.getEventDateTime());
         postEsrEventDto.setFilename(postEsrEvent.getFilename());
         postEsrEventDto.setPostId(postEsrEvent.getPost().getId());
         postEsrEventDto.setPositionNumber(postEsrEvent.getPositionNumber());

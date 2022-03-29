@@ -4,7 +4,6 @@ import com.transformuk.hee.tis.tcs.api.dto.PostEsrEventDto;
 import com.transformuk.hee.tis.tcs.service.model.PostEsrEvent;
 import java.util.Set;
 import org.mapstruct.Mapper;
-import org.mapstruct.Mapping;
 
 /**
  * Mapper for the entity PostEsrEvent and its DTO PostEsrEventDto.
@@ -12,11 +11,9 @@ import org.mapstruct.Mapping;
 @Mapper(componentModel = "spring")
 public interface PostEsrEventDtoMapper {
 
-  @Mapping(target = "eventDateTime", source = "reconciledAt")
   PostEsrEvent postEsrEventDtoToPostEsrEvent(
       PostEsrEventDto postEsrExportedDto);
 
-  @Mapping(target = "reconciledAt", source = "eventDateTime")
   PostEsrEventDto postEsrEventToPostEsrEventDto(
       PostEsrEvent postEsrEvent);
 
