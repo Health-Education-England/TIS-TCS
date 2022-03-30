@@ -402,10 +402,10 @@ public class PostResourceTest2 {
   }
 
   @Test
-  public void markPostAsEsrMatchedShouldCallServiceToMarkItAsMatched() throws Exception {
+  public void markPostAsEsrPositionChangedShouldCallServiceToMarkItAsChanged() throws Exception {
 
     PostEsrEvent newPostEvent = new PostEsrEvent();
-    when(postService.markPostAsEsrReconciled(Mockito.eq(RECONCILED_POST_ID), postEsrReconciledDtoArgumentCaptor
+    when(postService.markPostAsEsrPositionChanged(Mockito.eq(RECONCILED_POST_ID), postEsrReconciledDtoArgumentCaptor
         .capture()))
         .thenReturn(Optional.of(newPostEvent));
 

@@ -638,8 +638,8 @@ public class PostServiceImpl implements PostService {
   }
 
   @Override
-  public Optional<PostEsrEvent> markPostAsEsrReconciled(Long postId,
-                                                        PostEsrEventDto postEsrExportedDto) {
+  public Optional<PostEsrEvent> markPostAsEsrPositionChanged(Long postId,
+                                                             PostEsrEventDto postEsrExportedDto) {
     Optional<Post> optionalPostId = postRepository.findPostWithTrustsById(postId);
     if (!optionalPostId.isPresent()) {
       return Optional.empty();
