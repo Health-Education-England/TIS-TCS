@@ -2,6 +2,7 @@ package com.transformuk.hee.tis.tcs.service.api;
 
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.doNothing;
+import static org.mockito.Mockito.doReturn;
 import static org.mockito.Mockito.doThrow;
 import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.verify;
@@ -15,6 +16,8 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.fasterxml.jackson.databind.SerializationFeature;
+import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule;
 import com.google.common.collect.Lists;
 import com.google.common.collect.Sets;
 import com.transformuk.hee.tis.tcs.TestUtils;
@@ -30,6 +33,7 @@ import com.transformuk.hee.tis.tcs.service.api.validation.PostValidator;
 import com.transformuk.hee.tis.tcs.service.exception.AccessUnauthorisedException;
 import com.transformuk.hee.tis.tcs.service.exception.ExceptionTranslator;
 import com.transformuk.hee.tis.tcs.service.model.PostEsrEvent;
+import com.transformuk.hee.tis.tcs.service.model.Programme;
 import com.transformuk.hee.tis.tcs.service.repository.PlacementViewRepository;
 import com.transformuk.hee.tis.tcs.service.service.PlacementService;
 import com.transformuk.hee.tis.tcs.service.service.PostService;
@@ -37,6 +41,7 @@ import com.transformuk.hee.tis.tcs.service.service.mapper.PlacementViewMapper;
 import java.lang.reflect.Method;
 import java.time.LocalDateTime;
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
 import java.util.Optional;
 
@@ -77,6 +82,7 @@ public class PostResourceTest2 {
   public static final long RECONCILED_POST_ID = 1111L;
   public static final long RECONCILED_POSITION_ID = 2222L;
   public static final long RECONCILED_POSITION_NUMBER = 4444L;
+  public static final String RECONCILED_DATE_STAMP = "2020-01-01T01:01:01.100";
 
   @MockBean
   private PostService postService;
@@ -122,13 +128,18 @@ public class PostResourceTest2 {
     postDTO = new PostDTO();
     postDTO.setStatus(Status.CURRENT);
     postDTO.setOwner("Owner");
+    postDTO.setNationalPostNumber("test");
+    postDTO.setTrainingBodyId(1L);
+    postDTO.setEmployingBodyId(1L);
+    ProgrammeDTO programmeDto = new ProgrammeDTO();
+    postDTO.setProgrammes(Collections.singleton(programmeDto));
 
     setupPostEsrReconciledDto();
   }
 
   private void setupPostEsrReconciledDto() {
     postEsrReconciledDto = new PostEsrEventDto();
-    postEsrReconciledDto.setEventDateTime(LocalDateTime.now());
+    postEsrReconciledDto.setEventDateTime(LocalDateTime.parse(RECONCILED_DATE_STAMP));
     postEsrReconciledDto.setFilename(RECONCILED_FILENAME);
     postEsrReconciledDto.setPostId(RECONCILED_POST_ID);
     postEsrReconciledDto.setPositionId(RECONCILED_POSITION_ID);
@@ -405,12 +416,16 @@ public class PostResourceTest2 {
   public void markPostAsEsrPositionChangedShouldCallServiceToMarkItAsChanged() throws Exception {
 
     PostEsrEvent newPostEvent = new PostEsrEvent();
-    when(postService.markPostAsEsrPositionChanged(Mockito.eq(RECONCILED_POST_ID), postEsrReconciledDtoArgumentCaptor
-        .capture()))
-        .thenReturn(Optional.of(newPostEvent));
+    doReturn(Optional.of(newPostEvent))
+        .when(postService)
+        .markPostAsEsrPositionChanged(Mockito.eq(RECONCILED_POST_ID), postEsrReconciledDtoArgumentCaptor
+        .capture());
 
+    ObjectMapper mapper = new ObjectMapper();
+    mapper.registerModule(new JavaTimeModule());
+    mapper.disable(SerializationFeature.WRITE_DATES_AS_TIMESTAMPS);
     restPostMockMvc.perform(post("/api/posts/{postId}/esr-reconciled", RECONCILED_POST_ID)
-            .content(new ObjectMapper().writeValueAsBytes(postEsrReconciledDto))
+            .content(mapper.writeValueAsBytes(postEsrReconciledDto))
             .contentType(MediaType.APPLICATION_JSON_UTF8))
         .andExpect(status().isOk());
 

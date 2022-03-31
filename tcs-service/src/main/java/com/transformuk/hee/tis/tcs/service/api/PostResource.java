@@ -623,10 +623,17 @@ public class PostResource {
 
   }
 
+  /**
+   * Mark a Post with ESR reconciliation (Matched or Deleted).
+   *
+   * @param postId          the id of the Post
+   * @param postEsrEventDto the Post ESR reconciliation DTO
+   * @return the Post ESR event details
+   */
   @PostMapping(value = "/posts/{postId}/esr-reconciled")
   @PreAuthorize("hasAuthority('tcs:add:modify:entities')")
-  public ResponseEntity<PostEsrEvent> markPostAsEsrPositionChanged(@PathVariable Long postId,
-                                                                   @RequestBody PostEsrEventDto postEsrEventDto) {
+  public ResponseEntity<PostEsrEvent> markPostAsEsrPositionChanged(
+      @PathVariable Long postId, @RequestBody PostEsrEventDto postEsrEventDto) {
     Optional<PostEsrEvent> optionalPostEvent = postService
         .markPostAsEsrPositionChanged(postId, postEsrEventDto);
 
