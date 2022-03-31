@@ -73,7 +73,7 @@ import org.springframework.web.bind.MethodArgumentNotValidException;
  */
 @RunWith(SpringRunner.class)
 @SpringBootTest(classes = Application.class)
-public class PostResourceTestTwo {
+public class PostResource2Test {
 
   public static final String POST_DTO_NAME = "PostDTO";
   public static final String SPECIAL_CHARACTERS = "#%$^&**(";
