@@ -33,7 +33,6 @@ import com.transformuk.hee.tis.tcs.service.api.validation.PostValidator;
 import com.transformuk.hee.tis.tcs.service.exception.AccessUnauthorisedException;
 import com.transformuk.hee.tis.tcs.service.exception.ExceptionTranslator;
 import com.transformuk.hee.tis.tcs.service.model.PostEsrEvent;
-import com.transformuk.hee.tis.tcs.service.model.Programme;
 import com.transformuk.hee.tis.tcs.service.repository.PlacementViewRepository;
 import com.transformuk.hee.tis.tcs.service.service.PlacementService;
 import com.transformuk.hee.tis.tcs.service.service.PostService;
@@ -74,7 +73,7 @@ import org.springframework.web.bind.MethodArgumentNotValidException;
  */
 @RunWith(SpringRunner.class)
 @SpringBootTest(classes = Application.class)
-public class PostResourceTest2 {
+public class PostResourceTestTwo {
 
   public static final String POST_DTO_NAME = "PostDTO";
   public static final String SPECIAL_CHARACTERS = "#%$^&**(";

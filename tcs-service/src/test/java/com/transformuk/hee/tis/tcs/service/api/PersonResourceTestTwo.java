@@ -57,7 +57,7 @@ import org.springframework.test.web.servlet.setup.MockMvcBuilders;
 
 @RunWith(SpringRunner.class)
 @SpringBootTest(classes = Application.class)
-public class PersonResourceTest2 {
+public class PersonResourceTestTwo {
 
   private MockMvc mockMvc;
 
