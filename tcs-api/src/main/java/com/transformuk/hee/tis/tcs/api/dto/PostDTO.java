@@ -228,8 +228,8 @@ public class PostDTO implements Serializable {
     if (programmes != null ? !programmes.equals(postDTO.programmes) : postDTO.programmes != null) {
       return false;
     }
-    if (postEsrEvents != null ?
-        !postEsrEvents.equals(postDTO.postEsrEvents) : postDTO.postEsrEvents != null) {
+    if (postEsrEvents != null ? !postEsrEvents.equals(postDTO.postEsrEvents)
+        : postDTO.postEsrEvents != null) {
       return false;
     }
     return fundings != null ? fundings.equals(postDTO.fundings) : postDTO.fundings == null;

@@ -44,7 +44,7 @@ public class PostMapperTest {
     //then
     assertThat(postDTO.getPostEsrEvents()).hasSize(1);
     PostEsrEventDto postEsrEventDto = postDTO.getPostEsrEvents().iterator().next();
-    assertThat(postEsrEventDto.getEventDateTime().toString()).isEqualTo(dateStamp);
+    assertThat(postEsrEventDto.getEventDateTime()).hasToString(dateStamp);
     assertThat(postEsrEventDto.getFilename()).isEqualTo("test.dat");
     assertThat(postEsrEventDto.getPositionNumber()).isEqualTo(1L);
     assertThat(postEsrEventDto.getStatus()).isEqualTo(PostEsrEventStatus.DELETED);
