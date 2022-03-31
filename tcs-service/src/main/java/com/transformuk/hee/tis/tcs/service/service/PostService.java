@@ -2,10 +2,13 @@ package com.transformuk.hee.tis.tcs.service.service;
 
 import com.transformuk.hee.tis.tcs.api.dto.PostDTO;
 import com.transformuk.hee.tis.tcs.api.dto.PostEsrDTO;
+import com.transformuk.hee.tis.tcs.api.dto.PostEsrEventDto;
 import com.transformuk.hee.tis.tcs.api.dto.PostFundingDTO;
 import com.transformuk.hee.tis.tcs.api.dto.PostViewDTO;
 import com.transformuk.hee.tis.tcs.service.model.ColumnFilter;
+import com.transformuk.hee.tis.tcs.service.model.PostEsrEvent;
 import java.util.List;
+import java.util.Optional;
 import java.util.Set;
 import java.util.concurrent.CompletableFuture;
 import org.springframework.data.domain.Page;
@@ -176,4 +179,14 @@ public interface PostService {
    * @return List of PostDTO of the found Posts
    */
   List<PostDTO> findPostsForProgrammeIdAndNpn(Long programmeId, String npn);
+
+
+  /**
+   * Create new Post ESR Event and mark as Reconciled or Deleted.
+   *
+   * @param postId The id of the Post
+   * @param postEsrEventDto         the post ESR event
+   * @return Optional post ESR event
+   */
+  Optional<PostEsrEvent> markPostAsEsrPositionChanged(Long postId, PostEsrEventDto postEsrEventDto);
 }

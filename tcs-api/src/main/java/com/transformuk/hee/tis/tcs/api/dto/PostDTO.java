@@ -48,6 +48,7 @@ public class PostDTO implements Serializable {
   private Set<ProgrammeDTO> programmes;
   private Set<PostFundingDTO> fundings;
   private boolean bypassNPNGeneration;
+  private Set<PostEsrEventDto> postEsrEvents;
 
   public PostDTO id(final Long id) {
     this.id = id;
@@ -139,6 +140,11 @@ public class PostDTO implements Serializable {
     return this;
   }
 
+  public PostDTO postEsrEvents(final Set<PostEsrEventDto> postEsrEvents) {
+    this.postEsrEvents = postEsrEvents;
+    return this;
+  }
+
   public void addFunding(final PostFundingDTO funding) {
     if (fundings == null) {
       fundings = new HashSet<>();
@@ -222,6 +228,10 @@ public class PostDTO implements Serializable {
     if (programmes != null ? !programmes.equals(postDTO.programmes) : postDTO.programmes != null) {
       return false;
     }
+    if (postEsrEvents != null ? !postEsrEvents.equals(postDTO.postEsrEvents)
+        : postDTO.postEsrEvents != null) {
+      return false;
+    }
     return fundings != null ? fundings.equals(postDTO.fundings) : postDTO.fundings == null;
   }
 
@@ -247,6 +257,7 @@ public class PostDTO implements Serializable {
     result = 31 * result + (programmes != null ? programmes.hashCode() : 0);
     result = 31 * result + (fundings != null ? fundings.hashCode() : 0);
     result = 31 * result + (bypassNPNGeneration ? 1 : 0);
+    result = 31 * result + (postEsrEvents != null ? postEsrEvents.hashCode() : 0);
     return result;
   }
 }

@@ -7,6 +7,7 @@ import com.transformuk.hee.tis.tcs.api.dto.PlacementSummaryDTO;
 import com.transformuk.hee.tis.tcs.api.dto.PlacementViewDTO;
 import com.transformuk.hee.tis.tcs.api.dto.PostDTO;
 import com.transformuk.hee.tis.tcs.api.dto.PostEsrDTO;
+import com.transformuk.hee.tis.tcs.api.dto.PostEsrEventDto;
 import com.transformuk.hee.tis.tcs.api.dto.PostFundingDTO;
 import com.transformuk.hee.tis.tcs.api.dto.PostViewDTO;
 import com.transformuk.hee.tis.tcs.api.dto.validation.Create;
@@ -24,6 +25,7 @@ import com.transformuk.hee.tis.tcs.service.api.util.UrlDecoderUtil;
 import com.transformuk.hee.tis.tcs.service.api.validation.PostValidator;
 import com.transformuk.hee.tis.tcs.service.model.ColumnFilter;
 import com.transformuk.hee.tis.tcs.service.model.PlacementView;
+import com.transformuk.hee.tis.tcs.service.model.PostEsrEvent;
 import com.transformuk.hee.tis.tcs.service.repository.PlacementViewRepository;
 import com.transformuk.hee.tis.tcs.service.service.PlacementService;
 import com.transformuk.hee.tis.tcs.service.service.PostService;
@@ -621,4 +623,21 @@ public class PostResource {
 
   }
 
+  /**
+   * Mark a Post with ESR reconciliation (Matched or Deleted).
+   *
+   * @param postId          the id of the Post
+   * @param postEsrEventDto the Post ESR reconciliation DTO
+   * @return the Post ESR event details
+   */
+  @PostMapping(value = "/posts/{postId}/esr-reconciled")
+  @PreAuthorize("hasAuthority('tcs:add:modify:entities')")
+  public ResponseEntity<PostEsrEvent> markPostAsEsrPositionChanged(
+      @PathVariable Long postId, @RequestBody PostEsrEventDto postEsrEventDto) {
+
+    Optional<PostEsrEvent> optionalPostEvent = postService
+        .markPostAsEsrPositionChanged(postId, postEsrEventDto);
+
+    return ResponseEntity.of(optionalPostEvent);
+  }
 }
