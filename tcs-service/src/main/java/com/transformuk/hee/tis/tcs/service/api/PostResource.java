@@ -632,12 +632,10 @@ public class PostResource {
    */
   @PostMapping(value = "/posts/{postId}/esr-reconciled")
   @PreAuthorize("hasAuthority('tcs:add:modify:entities')")
-  public ResponseEntity<PostEsrEvent> markPostAsEsrPositionChanged(
+  public ResponseEntity<PostEsrEventDto> markPostAsEsrPositionChanged(
       @PathVariable Long postId, @RequestBody PostEsrEventDto postEsrEventDto) {
 
-    Optional<PostEsrEvent> optionalPostEvent = postService
-        .markPostAsEsrPositionChanged(postId, postEsrEventDto);
-
-    return ResponseEntity.of(optionalPostEvent);
+    return ResponseEntity.of(postService
+        .markPostAsEsrPositionChanged(postId, postEsrEventDto));
   }
 }

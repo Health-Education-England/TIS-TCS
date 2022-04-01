@@ -638,9 +638,10 @@ public class PostServiceImpl implements PostService {
   }
 
   @Override
-  public Optional<PostEsrEvent> markPostAsEsrPositionChanged(Long postId,
-                                                             PostEsrEventDto postEsrExportedDto) {
-    Optional<Post> optionalPostId = postRepository.findPostWithoutSubObjectsById(postId);
+  public Optional<PostEsrEventDto> markPostAsEsrPositionChanged(
+      Long postId, PostEsrEventDto postEsrExportedDto) {
+
+    Optional<Post> optionalPostId = postRepository.findPostWithTrustsById(postId);
     if (!optionalPostId.isPresent()) {
       return Optional.empty();
     }
@@ -651,7 +652,8 @@ public class PostServiceImpl implements PostService {
     newPostEsrEvent.setPost(post);
 
     PostEsrEvent newPost = postEsrEventRepository.save(newPostEsrEvent);
-    return Optional.ofNullable(newPost);
+    return Optional.ofNullable(
+        postEsrEventDtoMapper.postEsrEventToPostEsrEventDto(newPost));
   }
 
   protected String createWhereClause(final String searchString,

@@ -188,5 +188,5 @@ public interface PostService {
    * @param postEsrEventDto         the post ESR event
    * @return Optional post ESR event
    */
-  Optional<PostEsrEvent> markPostAsEsrPositionChanged(Long postId, PostEsrEventDto postEsrEventDto);
+  Optional<PostEsrEventDto> markPostAsEsrPositionChanged(Long postId, PostEsrEventDto postEsrEventDto);
 }

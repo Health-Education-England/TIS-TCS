@@ -34,11 +34,6 @@ public interface PostRepository extends JpaRepository<Post, Long>, JpaSpecificat
 
   OwnerProjection findPostById(Long id);
 
-  @Query("SELECT p " +
-      "FROM Post p " +
-      "WHERE p.id = :id")
-  Optional<Post> findPostWithoutSubObjectsById(Long id);
-
   Set<Post> findByNationalPostNumberStartingWith(String nationalPostNumberNoCounter);
 
   Page<EsrPostProjection> findByIdNotNullAndNationalPostNumberIn(List<String> nationalPostNumbers,

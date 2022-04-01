@@ -690,7 +690,7 @@ public class PostServiceImplTest {
     PostEsrEventDto postEsrEventDto = new PostEsrEventDto();
 
     //when
-    Optional<PostEsrEvent> postEsrEvent =
+    Optional<PostEsrEventDto> postEsrEvent =
         testObj.markPostAsEsrPositionChanged(postId, postEsrEventDto);
 
     //then
