@@ -6,7 +6,6 @@ import com.transformuk.hee.tis.tcs.api.dto.PostEsrEventDto;
 import com.transformuk.hee.tis.tcs.api.dto.PostFundingDTO;
 import com.transformuk.hee.tis.tcs.api.dto.PostViewDTO;
 import com.transformuk.hee.tis.tcs.service.model.ColumnFilter;
-import com.transformuk.hee.tis.tcs.service.model.PostEsrEvent;
 import java.util.List;
 import java.util.Optional;
 import java.util.Set;
@@ -188,5 +187,6 @@ public interface PostService {
    * @param postEsrEventDto         the post ESR event
    * @return Optional post ESR event
    */
-  Optional<PostEsrEventDto> markPostAsEsrPositionChanged(Long postId, PostEsrEventDto postEsrEventDto);
+  Optional<PostEsrEventDto> markPostAsEsrPositionChanged(
+      Long postId, PostEsrEventDto postEsrEventDto);
 }

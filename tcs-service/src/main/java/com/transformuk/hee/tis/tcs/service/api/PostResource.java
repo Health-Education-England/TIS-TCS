@@ -25,7 +25,6 @@ import com.transformuk.hee.tis.tcs.service.api.util.UrlDecoderUtil;
 import com.transformuk.hee.tis.tcs.service.api.validation.PostValidator;
 import com.transformuk.hee.tis.tcs.service.model.ColumnFilter;
 import com.transformuk.hee.tis.tcs.service.model.PlacementView;
-import com.transformuk.hee.tis.tcs.service.model.PostEsrEvent;
 import com.transformuk.hee.tis.tcs.service.repository.PlacementViewRepository;
 import com.transformuk.hee.tis.tcs.service.service.PlacementService;
 import com.transformuk.hee.tis.tcs.service.service.PostService;
