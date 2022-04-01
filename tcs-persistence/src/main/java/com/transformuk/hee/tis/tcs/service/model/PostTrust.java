@@ -8,6 +8,7 @@ import javax.persistence.GenerationType;
 import javax.persistence.Id;
 import javax.persistence.JoinColumn;
 import javax.persistence.ManyToOne;
+import com.fasterxml.jackson.annotation.JsonBackReference;
 import lombok.Data;
 
 /**
@@ -25,6 +26,7 @@ public class PostTrust {
 
   @ManyToOne(fetch = FetchType.LAZY, optional = false)
   @JoinColumn(name = "postId")
+  @JsonBackReference
   private Post post;
 
   @Column(name = "trustId", nullable = false)
