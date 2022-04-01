@@ -640,7 +640,7 @@ public class PostServiceImpl implements PostService {
   @Override
   public Optional<PostEsrEvent> markPostAsEsrPositionChanged(Long postId,
                                                              PostEsrEventDto postEsrExportedDto) {
-    Optional<Post> optionalPostId = postRepository.findPostWithTrustsById(postId);
+    Optional<Post> optionalPostId = postRepository.findPostWithoutSubObjectsById(postId);
     if (!optionalPostId.isPresent()) {
       return Optional.empty();
     }

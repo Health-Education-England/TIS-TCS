@@ -1,6 +1,5 @@
 package com.transformuk.hee.tis.tcs.service.model;
 
-import com.fasterxml.jackson.annotation.JsonBackReference;
 import javax.persistence.Column;
 import javax.persistence.Entity;
 import javax.persistence.FetchType;
@@ -26,7 +25,6 @@ public class PostTrust {
 
   @ManyToOne(fetch = FetchType.LAZY, optional = false)
   @JoinColumn(name = "postId")
-  @JsonBackReference
   private Post post;
 
   @Column(name = "trustId", nullable = false)
