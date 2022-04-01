@@ -13,6 +13,7 @@ import static org.mockito.Mockito.when;
 import com.google.common.collect.Lists;
 import com.google.common.collect.Sets;
 import com.transformuk.hee.tis.tcs.api.dto.PostDTO;
+import com.transformuk.hee.tis.tcs.api.dto.PostEsrEventDto;
 import com.transformuk.hee.tis.tcs.api.dto.PostFundingDTO;
 import com.transformuk.hee.tis.tcs.api.dto.PostGradeDTO;
 import com.transformuk.hee.tis.tcs.api.dto.PostSiteDTO;
@@ -30,6 +31,7 @@ import com.transformuk.hee.tis.tcs.service.api.validation.PostFundingValidator;
 import com.transformuk.hee.tis.tcs.service.exception.AccessUnauthorisedException;
 import com.transformuk.hee.tis.tcs.service.model.ColumnFilter;
 import com.transformuk.hee.tis.tcs.service.model.Post;
+import com.transformuk.hee.tis.tcs.service.model.PostEsrEvent;
 import com.transformuk.hee.tis.tcs.service.model.PostFunding;
 import com.transformuk.hee.tis.tcs.service.model.PostGrade;
 import com.transformuk.hee.tis.tcs.service.model.PostSite;
@@ -37,6 +39,7 @@ import com.transformuk.hee.tis.tcs.service.model.PostSpecialty;
 import com.transformuk.hee.tis.tcs.service.model.PostTrust;
 import com.transformuk.hee.tis.tcs.service.model.Programme;
 import com.transformuk.hee.tis.tcs.service.model.Specialty;
+import com.transformuk.hee.tis.tcs.service.repository.PostEsrEventRepository;
 import com.transformuk.hee.tis.tcs.service.repository.PostFundingRepository;
 import com.transformuk.hee.tis.tcs.service.repository.PostGradeRepository;
 import com.transformuk.hee.tis.tcs.service.repository.PostRepository;
@@ -44,6 +47,7 @@ import com.transformuk.hee.tis.tcs.service.repository.PostSiteRepository;
 import com.transformuk.hee.tis.tcs.service.repository.PostSpecialtyRepository;
 import com.transformuk.hee.tis.tcs.service.repository.ProgrammeRepository;
 import com.transformuk.hee.tis.tcs.service.service.helper.SqlQuerySupplier;
+import com.transformuk.hee.tis.tcs.service.service.mapper.PostEsrEventDtoMapper;
 import com.transformuk.hee.tis.tcs.service.service.mapper.PostMapper;
 import java.util.ArrayList;
 import java.util.Collections;
@@ -127,6 +131,8 @@ public class PostServiceImplTest {
   @Mock
   private PostRepository postRepositoryMock;
   @Mock
+  private PostEsrEventRepository postEsrEventRepositoryMock;
+  @Mock
   private PostGradeRepository postGradeRepositoryMock;
   @Mock
   private PostSiteRepository postSiteRepositoryMock;
@@ -136,6 +142,8 @@ public class PostServiceImplTest {
   private ProgrammeRepository programmeRepositoryMock;
   @Mock
   private PostMapper postMapperMock;
+  @Mock
+  private PostEsrEventDtoMapper postEsrEventDtoMapperMock;
   @Mock
   private SqlQuerySupplier sqlQuerySupplierMock;
   @Mock
@@ -672,5 +680,40 @@ public class PostServiceImplTest {
     verify(postRepositoryMock).findPostsForProgrammeIdAndNpnLike(programmeId, npn, Status.CURRENT);
     verify(postMapperMock).postsToPostDTOs(postsFromDb);
     Assert.assertSame(convertedPosts, result);
+  }
+
+  @Test
+  public void markPostAsEsrPositionChangedShouldReturnEmptyIfPostIdNotFound() {
+    //given
+    Long postId = 1L;
+    when(postRepositoryMock.findPostWithTrustsById(postId)).thenReturn(Optional.empty());
+    PostEsrEventDto postEsrEventDto = new PostEsrEventDto();
+
+    //when
+    Optional<PostEsrEventDto> postEsrEvent =
+        testObj.markPostAsEsrPositionChanged(postId, postEsrEventDto);
+
+    //then
+    boolean postEsrEventIsPresent = postEsrEvent.isPresent();
+    Assert.assertFalse("Unexpected PostEsrEvent returned", postEsrEventIsPresent);
+  }
+
+  @Test
+  public void markPostAsEsrPositionChangedShouldSaveUpdatedPostEsrEvent() {
+    //given
+    Long postId = 1L;
+    Post post = new Post();
+    post.setId(postId);
+    PostEsrEventDto postEsrEventDto = new PostEsrEventDto();
+    PostEsrEvent postEsrEvent = new PostEsrEvent();
+
+    when(postEsrEventDtoMapperMock.postEsrEventDtoToPostEsrEvent(any())).thenReturn(postEsrEvent);
+    when(postRepositoryMock.findPostWithTrustsById(postId)).thenReturn(Optional.of(post));
+
+    //when
+    testObj.markPostAsEsrPositionChanged(postId, postEsrEventDto);
+
+    //then
+    verify(postEsrEventRepositoryMock).save(postEsrEvent);
   }
 }

@@ -6,6 +6,7 @@ import com.google.common.collect.Maps;
 import com.google.common.collect.Sets;
 import com.transformuk.hee.tis.tcs.api.dto.PostDTO;
 import com.transformuk.hee.tis.tcs.api.dto.PostEsrDTO;
+import com.transformuk.hee.tis.tcs.api.dto.PostEsrEventDto;
 import com.transformuk.hee.tis.tcs.api.dto.PostFundingDTO;
 import com.transformuk.hee.tis.tcs.api.dto.PostGradeDTO;
 import com.transformuk.hee.tis.tcs.api.dto.PostSiteDTO;
@@ -19,6 +20,7 @@ import com.transformuk.hee.tis.tcs.service.exception.AccessUnauthorisedException
 import com.transformuk.hee.tis.tcs.service.model.ColumnFilter;
 import com.transformuk.hee.tis.tcs.service.model.EsrNotification;
 import com.transformuk.hee.tis.tcs.service.model.Post;
+import com.transformuk.hee.tis.tcs.service.model.PostEsrEvent;
 import com.transformuk.hee.tis.tcs.service.model.PostFunding;
 import com.transformuk.hee.tis.tcs.service.model.PostGrade;
 import com.transformuk.hee.tis.tcs.service.model.PostSite;
@@ -27,6 +29,7 @@ import com.transformuk.hee.tis.tcs.service.model.PostTrust;
 import com.transformuk.hee.tis.tcs.service.model.Programme;
 import com.transformuk.hee.tis.tcs.service.model.Specialty;
 import com.transformuk.hee.tis.tcs.service.repository.EsrPostProjection;
+import com.transformuk.hee.tis.tcs.service.repository.PostEsrEventRepository;
 import com.transformuk.hee.tis.tcs.service.repository.PostFundingRepository;
 import com.transformuk.hee.tis.tcs.service.repository.PostGradeRepository;
 import com.transformuk.hee.tis.tcs.service.repository.PostRepository;
@@ -37,6 +40,7 @@ import com.transformuk.hee.tis.tcs.service.service.EsrNotificationService;
 import com.transformuk.hee.tis.tcs.service.service.PostService;
 import com.transformuk.hee.tis.tcs.service.service.helper.SqlQuerySupplier;
 import com.transformuk.hee.tis.tcs.service.service.mapper.DesignatedBodyMapper;
+import com.transformuk.hee.tis.tcs.service.service.mapper.PostEsrEventDtoMapper;
 import com.transformuk.hee.tis.tcs.service.service.mapper.PostMapper;
 import java.sql.ResultSet;
 import java.sql.SQLException;
@@ -106,6 +110,10 @@ public class PostServiceImpl implements PostService {
   private PostFundingRepository postFundingRepository;
   @Autowired
   private PostFundingValidator postFundingValidator;
+  @Autowired
+  private PostEsrEventRepository postEsrEventRepository;
+  @Autowired
+  private PostEsrEventDtoMapper postEsrEventDtoMapper;
 
   /**
    * Save a post.
@@ -627,6 +635,25 @@ public class PostServiceImpl implements PostService {
     List<Post> result = postRepository
         .findPostsForProgrammeIdAndNpnLike(programmeId, npn, Status.CURRENT);
     return postMapper.postsToPostDTOs(result);
+  }
+
+  @Override
+  public Optional<PostEsrEventDto> markPostAsEsrPositionChanged(
+      Long postId, PostEsrEventDto postEsrExportedDto) {
+
+    Optional<Post> optionalPostId = postRepository.findPostWithTrustsById(postId);
+    if (!optionalPostId.isPresent()) {
+      return Optional.empty();
+    }
+
+    Post post = optionalPostId.get();
+    PostEsrEvent newPostEsrEvent = postEsrEventDtoMapper
+        .postEsrEventDtoToPostEsrEvent(postEsrExportedDto);
+    newPostEsrEvent.setPost(post);
+
+    PostEsrEvent newPost = postEsrEventRepository.save(newPostEsrEvent);
+    return Optional.ofNullable(
+        postEsrEventDtoMapper.postEsrEventToPostEsrEventDto(newPost));
   }
 
   protected String createWhereClause(final String searchString,
