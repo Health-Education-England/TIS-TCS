@@ -423,7 +423,7 @@ public class PostResource2Test {
     ObjectMapper mapper = new ObjectMapper();
     mapper.registerModule(new JavaTimeModule());
     mapper.disable(SerializationFeature.WRITE_DATES_AS_TIMESTAMPS);
-    restPostMockMvc.perform(post("/api/posts/{postId}/esr-reconciled", RECONCILED_POST_ID)
+    restPostMockMvc.perform(post("/api/posts/{postId}/esr-changed", RECONCILED_POST_ID)
             .content(mapper.writeValueAsBytes(postEsrReconciledDto))
             .contentType(MediaType.APPLICATION_JSON_UTF8))
         .andExpect(status().isOk());
