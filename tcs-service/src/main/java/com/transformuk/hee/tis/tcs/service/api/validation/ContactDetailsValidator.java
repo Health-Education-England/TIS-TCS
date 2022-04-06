@@ -26,7 +26,7 @@ public class ContactDetailsValidator {
   private static final String CONTACT_DETAILS_DTO_NAME = "ContactDetailsDTO";
 
   // TODO: Better way to validate emails.
-  private static final String REGEX_EMAIL = "^$|^[A-Za-z0-9+_.-]+@(.+)$";
+  private static final String REGEX_EMAIL = "^$|[a-zA-Z0-9!#$%&'*+/=?^_`{|}~-]+(?:\\.[a-zA-Z0-9!#$%&'*+/=?^_`{|}~-]+)*@(?:[a-zA-Z0-9](?:[a-zA-Z0-9-]*[a-zA-Z0-9])?\\.)+[a-zA-Z0-9](?:[a-zA-Z0-9-]*[a-zA-Z0-9])?";
   private static final String REGEX_EMAIL_ERROR = "Valid email format required.";
 
   private static final String REGEX_NAME = "^$|^[A-Za-z0-9\\-' ]+";
