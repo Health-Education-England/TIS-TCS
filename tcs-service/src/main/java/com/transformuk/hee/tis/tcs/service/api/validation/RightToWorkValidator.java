@@ -2,15 +2,23 @@ package com.transformuk.hee.tis.tcs.service.api.validation;
 
 import com.transformuk.hee.tis.reference.api.dto.PermitToWorkDTO;
 import com.transformuk.hee.tis.reference.client.ReferenceService;
+import com.transformuk.hee.tis.tcs.api.dto.PersonDTO;
 import com.transformuk.hee.tis.tcs.api.dto.RightToWorkDTO;
 import com.transformuk.hee.tis.tcs.api.enumeration.EeaResident;
 import com.transformuk.hee.tis.tcs.api.enumeration.Settled;
+
+
+import com.transformuk.hee.tis.tcs.service.model.Person;
 import com.transformuk.hee.tis.tcs.service.model.RightToWork;
 import java.lang.reflect.Method;
 import java.time.LocalDate;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
+import java.util.Optional;
+
+
+import com.transformuk.hee.tis.tcs.service.repository.PersonRepository;
 import org.springframework.core.MethodParameter;
 import org.springframework.stereotype.Component;
 import org.springframework.validation.BeanPropertyBindingResult;
@@ -27,9 +35,11 @@ public class RightToWorkValidator {
   private static final String DTO_NAME = "RightToWorkDTO";
 
   private final ReferenceService referenceService;
+  private final PersonRepository personRepository;
 
-  RightToWorkValidator(ReferenceService referenceService) {
+  RightToWorkValidator(ReferenceService referenceService, PersonRepository personRepository) {
     this.referenceService = referenceService;
+    this.personRepository = personRepository;
   }
 
   /**
@@ -83,14 +93,33 @@ public class RightToWorkValidator {
     }
   }
 
-  private void checkVisaDates(RightToWorkDTO dto, List<FieldError> fieldErrors) {
-    LocalDate visaIssued = dto.getVisaIssued();
-    LocalDate visaValidTo = dto.getVisaValidTo();
+  private void checkVisaDates(List<FieldError> fieldErrors, PersonDTO personDto) {
+
+    LocalDate visaIssued = personDto.getRightToWork().getVisaIssued();;
+    LocalDate visaValidTo = personDto.getRightToWork().getVisaValidTo();
+
+    Optional<Person> originalPersonRecord = personRepository.findPersonById(personDto.getId());
+    Person existingPerson22 = originalPersonRecord.get();
+    RightToWork oldRTWDTO = existingPerson22.getRightToWork();
 
     if (visaIssued != null && visaValidTo != null && visaIssued.isAfter(visaValidTo)) {
       FieldError fieldError =
           new FieldError(DTO_NAME, "visaIssued", "visaIssued must be before visaValidTo.");
       fieldErrors.add(fieldError);
+    } else if(visaIssued != null && visaValidTo == null) {
+      if(visaIssued.isAfter(oldRTWDTO.getVisaValidTo())) {
+        FieldError fieldError =
+            new FieldError(DTO_NAME, "visaIssued", "visaIssued is after current visaValidTo date.");
+        fieldErrors.add(fieldError);
+      }
+    } else if(visaValidTo != null && visaIssued == null) {
+      if(visaValidTo.isBefore(oldRTWDTO.getVisaIssued())) {
+        FieldError fieldError =
+            new FieldError(DTO_NAME, "visaIssued", "visaValidTo date is before current visaIssued" +
+                " date" +
+                ".");
+        fieldErrors.add(fieldError);
+      }
     }
   }
 
@@ -114,13 +143,13 @@ public class RightToWorkValidator {
    * @param rightToWorkDto the rightToWorkDto to check
    * @return list of FieldErrors
    */
-  public List<FieldError> validateForBulk(RightToWorkDTO rightToWorkDto) {
+  public List<FieldError> validateForBulk(RightToWorkDTO rightToWorkDto, PersonDTO personDto) {
     List<FieldError> fieldErrors = new ArrayList<>();
 
     if (rightToWorkDto != null) {
       checkEeaResident(rightToWorkDto, fieldErrors);
       checkSettled(rightToWorkDto, fieldErrors);
-      checkVisaDates(rightToWorkDto, fieldErrors);
+      checkVisaDates(fieldErrors, personDto);
       checkPermitToWork(rightToWorkDto, fieldErrors);
     }
     return fieldErrors;
