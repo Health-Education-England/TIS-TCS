@@ -10,9 +10,12 @@ import static org.mockito.Mockito.when;
 
 import com.transformuk.hee.tis.reference.api.dto.PermitToWorkDTO;
 import com.transformuk.hee.tis.reference.client.ReferenceService;
+import com.transformuk.hee.tis.tcs.api.dto.PersonDTO;
 import com.transformuk.hee.tis.tcs.api.dto.RightToWorkDTO;
 import java.time.LocalDate;
 import java.util.List;
+
+import com.transformuk.hee.tis.tcs.service.repository.PersonRepository;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.springframework.validation.FieldError;
@@ -21,18 +24,22 @@ import org.springframework.web.bind.MethodArgumentNotValidException;
 class RightToWorkValidatorTest {
 
   private RightToWorkValidator validator;
-
+  private final PersonRepository personRepository;
   private ReferenceService referenceService;
+
+  RightToWorkValidatorTest(PersonRepository personRepository) {
+    this.personRepository = personRepository;
+  }
 
   @BeforeEach
   void setUp() {
     referenceService = mock(ReferenceService.class);
-    validator = new RightToWorkValidator(referenceService);
+    validator = new RightToWorkValidator(referenceService, personRepository);
   }
 
   @Test
   void shouldPassBulkValidationWhenDtoNull() {
-    List<FieldError> fieldErrors = validator.validateForBulk(null);
+    List<FieldError> fieldErrors = validator.validateForBulk(null, null );
     assertThat("Unexpected number of errors", fieldErrors.size(), is(0));
   }
 
@@ -43,7 +50,7 @@ class RightToWorkValidatorTest {
     dto.setEeaResident("invalid");
 
     // When.
-    List<FieldError> fieldErrors = validator.validateForBulk(dto);
+    List<FieldError> fieldErrors = validator.validateForBulk(dto, null );
 
     // Then.
     assertThat("should return 1 error", fieldErrors.size(), is(1));
@@ -58,7 +65,7 @@ class RightToWorkValidatorTest {
     dto.setEeaResident("Yes");
 
     // When.
-    List<FieldError> fieldErrors = validator.validateForBulk(dto);
+    List<FieldError> fieldErrors = validator.validateForBulk(dto,null);
 
     // Then.
     assertThat("should return 1 error", fieldErrors.size(), is(1));
@@ -73,7 +80,7 @@ class RightToWorkValidatorTest {
     dto.setEeaResident("YES");
 
     // When.
-    List<FieldError> fieldErrors = validator.validateForBulk(dto);
+    List<FieldError> fieldErrors = validator.validateForBulk(dto,null);
 
     // Then.
     assertThat("should not return errors", fieldErrors.size(), is(0));
@@ -86,7 +93,7 @@ class RightToWorkValidatorTest {
     dto.setEeaResident("NO");
 
     // When.
-    List<FieldError> fieldErrors = validator.validateForBulk(dto);
+    List<FieldError> fieldErrors = validator.validateForBulk(dto,null);
 
     // Then.
     assertThat("should not return errors", fieldErrors.size(), is(0));
@@ -99,7 +106,7 @@ class RightToWorkValidatorTest {
     dto.setEeaResident("UNKNOWN");
 
     // When.
-    List<FieldError> fieldErrors = validator.validateForBulk(dto);
+    List<FieldError> fieldErrors = validator.validateForBulk(dto,null);
 
     // Then.
     assertThat("should not return errors", fieldErrors.size(), is(0));
@@ -112,7 +119,7 @@ class RightToWorkValidatorTest {
     dto.setSettled("invalid");
 
     // When.
-    List<FieldError> fieldErrors = validator.validateForBulk(dto);
+    List<FieldError> fieldErrors = validator.validateForBulk(dto,null);
 
     // Then.
     assertThat("should return 1 error", fieldErrors.size(), is(1));
@@ -127,7 +134,7 @@ class RightToWorkValidatorTest {
     dto.setSettled("Yes");
 
     // When.
-    List<FieldError> fieldErrors = validator.validateForBulk(dto);
+    List<FieldError> fieldErrors = validator.validateForBulk(dto,null);
 
     // Then
     assertThat("should return 1 error", fieldErrors.size(), is(1));
@@ -142,7 +149,7 @@ class RightToWorkValidatorTest {
     dto.setSettled("YES");
 
     // When.
-    List<FieldError> fieldErrors = validator.validateForBulk(dto);
+    List<FieldError> fieldErrors = validator.validateForBulk(dto,null);
 
     // Then
     assertThat("should not return errors", fieldErrors.size(), is(0));
@@ -155,7 +162,7 @@ class RightToWorkValidatorTest {
     dto.setSettled("NO");
 
     // When.
-    List<FieldError> fieldErrors = validator.validateForBulk(dto);
+    List<FieldError> fieldErrors = validator.validateForBulk(dto,null);
 
     // Then
     assertThat("should not return errors", fieldErrors.size(), is(0));
@@ -169,7 +176,7 @@ class RightToWorkValidatorTest {
     dto.setVisaValidTo(LocalDate.now());
 
     // When.
-    List<FieldError> fieldErrors = validator.validateForBulk(dto);
+    List<FieldError> fieldErrors = validator.validateForBulk(dto,null);
 
     // Then
     assertThat("should return 1 error", fieldErrors.size(), is(1));
@@ -184,7 +191,7 @@ class RightToWorkValidatorTest {
     dto.setVisaIssued(LocalDate.now());
 
     // When.
-    List<FieldError> fieldErrors = validator.validateForBulk(dto);
+    List<FieldError> fieldErrors = validator.validateForBulk(dto,null);
 
     // Then
     assertThat("should not return errors", fieldErrors.size(), is(0));
@@ -197,7 +204,7 @@ class RightToWorkValidatorTest {
     dto.setVisaValidTo(LocalDate.now());
 
     // When.
-    List<FieldError> fieldErrors = validator.validateForBulk(dto);
+    List<FieldError> fieldErrors = validator.validateForBulk(dto,null);
 
     // Then
     assertThat("should not return errors", fieldErrors.size(), is(0));
@@ -209,7 +216,7 @@ class RightToWorkValidatorTest {
     RightToWorkDTO dto = new RightToWorkDTO();
 
     // When.
-    List<FieldError> fieldErrors = validator.validateForBulk(dto);
+    List<FieldError> fieldErrors = validator.validateForBulk(dto,null);
 
     // Then
     assertThat("should not return errors", fieldErrors.size(), is(0));
@@ -225,7 +232,7 @@ class RightToWorkValidatorTest {
     dto.setVisaValidTo(LocalDate.now());
 
     // When.
-    List<FieldError> fieldErrors = validator.validateForBulk(dto);
+    List<FieldError> fieldErrors = validator.validateForBulk(dto,null);
     // Then.
     assertThat("Error list should be empty.", fieldErrors.size(), equalTo(0));
   }
@@ -240,7 +247,7 @@ class RightToWorkValidatorTest {
     dto.setVisaValidTo(LocalDate.now());
 
     // When.
-    List<FieldError> fieldErrors = validator.validateForBulk(dto);
+    List<FieldError> fieldErrors = validator.validateForBulk(dto,null);
     // Then.
     assertThat("Error list should contain 3 errors.", fieldErrors.size(), equalTo(3));
   }
