@@ -24,16 +24,14 @@ import org.springframework.web.bind.MethodArgumentNotValidException;
 class RightToWorkValidatorTest {
 
   private RightToWorkValidator validator;
-  private final PersonRepository personRepository;
+  private PersonRepository personRepository;
   private ReferenceService referenceService;
 
-  RightToWorkValidatorTest(PersonRepository personRepository) {
-    this.personRepository = personRepository;
-  }
 
   @BeforeEach
   void setUp() {
     referenceService = mock(ReferenceService.class);
+    personRepository = mock(PersonRepository.class);
     validator = new RightToWorkValidator(referenceService, personRepository);
   }
 
