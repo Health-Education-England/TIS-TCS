@@ -15,6 +15,7 @@ import com.transformuk.hee.tis.tcs.api.dto.RightToWorkDTO;
 import java.time.LocalDate;
 import java.util.List;
 
+import com.transformuk.hee.tis.tcs.service.model.Person;
 import com.transformuk.hee.tis.tcs.service.repository.PersonRepository;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
