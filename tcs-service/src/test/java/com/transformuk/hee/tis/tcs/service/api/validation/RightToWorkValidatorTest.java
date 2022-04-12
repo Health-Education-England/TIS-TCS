@@ -173,9 +173,11 @@ class RightToWorkValidatorTest {
     RightToWorkDTO dto = new RightToWorkDTO();
     dto.setVisaIssued(LocalDate.now().plusDays(1));
     dto.setVisaValidTo(LocalDate.now());
+    PersonDTO personDTO = new PersonDTO();
+    personDTO.setRightToWork(dto);
 
     // When.
-    List<FieldError> fieldErrors = validator.validateForBulk(dto,null);
+    List<FieldError> fieldErrors = validator.validateForBulk(dto,personDTO);
 
     // Then
     assertThat("should return 1 error", fieldErrors.size(), is(1));
@@ -244,9 +246,11 @@ class RightToWorkValidatorTest {
     dto.setSettled("Invalid");
     dto.setVisaIssued(LocalDate.now().plusDays(1));
     dto.setVisaValidTo(LocalDate.now());
+    PersonDTO personDTO = new PersonDTO();
+    personDTO.setRightToWork(dto);
 
     // When.
-    List<FieldError> fieldErrors = validator.validateForBulk(dto,null);
+    List<FieldError> fieldErrors = validator.validateForBulk(dto,personDTO);
     // Then.
     assertThat("Error list should contain 3 errors.", fieldErrors.size(), equalTo(3));
   }
