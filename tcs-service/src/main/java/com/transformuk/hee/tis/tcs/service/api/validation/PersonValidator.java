@@ -46,8 +46,10 @@ public class PersonValidator {
   private final TrainerApprovalValidator trainerApprovalValidator;
 
   public PersonValidator(PersonRepository personRepository, ReferenceService referenceService,
-                         ContactDetailsValidator contactDetailsValidator, GdcDetailsValidator gdcDetailsValidator,
-                         GmcDetailsValidator gmcDetailsValidator, PersonalDetailsValidator personalDetailsValidator,
+                         ContactDetailsValidator contactDetailsValidator,
+                         GdcDetailsValidator gdcDetailsValidator,
+                         GmcDetailsValidator gmcDetailsValidator,
+                         PersonalDetailsValidator personalDetailsValidator,
                          RightToWorkValidator rightToWorkValidator,
                          TrainerApprovalValidator trainerApprovalValidator) {
     this.personRepository = personRepository;
