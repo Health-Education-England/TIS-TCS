@@ -108,15 +108,15 @@ public class RightToWorkValidator {
         fieldErrors.add(fieldError);
       } else if (originalPersonRecord.isPresent()) {
         Person existingPerson = originalPersonRecord.get();
-        RightToWork oldRTWDTO = existingPerson.getRightToWork();
+        RightToWork oldRTWDto = existingPerson.getRightToWork();
         if (visaIssued != null && visaValidTo == null) {
-          if (visaIssued.isAfter(oldRTWDTO.getVisaValidTo())) {
+          if (visaIssued.isAfter(oldRTWDto.getVisaValidTo())) {
             FieldError fieldError =
                 new FieldError(DTO_NAME, "visaIssued", "visaIssued is after current visaValidTo date.");
             fieldErrors.add(fieldError);
           }
         } else if (visaValidTo != null && visaIssued == null) {
-          if (visaValidTo.isBefore(oldRTWDTO.getVisaIssued())) {
+          if (visaValidTo.isBefore(oldRTWDto.getVisaIssued())) {
             FieldError fieldError =
                 new FieldError(DTO_NAME, "visaIssued", "visaValidTo date is before current visaIssued" +
                     " date" +
