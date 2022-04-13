@@ -15,7 +15,6 @@ import com.transformuk.hee.tis.tcs.api.dto.RightToWorkDTO;
 import java.time.LocalDate;
 import java.util.List;
 
-import com.transformuk.hee.tis.tcs.service.model.Person;
 import com.transformuk.hee.tis.tcs.service.repository.PersonRepository;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -215,7 +214,7 @@ class RightToWorkValidatorTest {
     assertThat("should not return errors", fieldErrors.size(), is(0));
   }
 
-  @Test
+   @Test
   void shouldNotReturnErrorWhenEmpty() {
     // Given.
     RightToWorkDTO dto = new RightToWorkDTO();
