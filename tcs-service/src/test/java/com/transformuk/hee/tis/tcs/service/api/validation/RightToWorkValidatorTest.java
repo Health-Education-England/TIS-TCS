@@ -190,9 +190,11 @@ class RightToWorkValidatorTest {
     // Given.
     RightToWorkDTO dto = new RightToWorkDTO();
     dto.setVisaIssued(LocalDate.now());
+    PersonDTO personDTO = new PersonDTO();
+    personDTO.setRightToWork(dto);
 
     // When.
-    List<FieldError> fieldErrors = validator.validateForBulk(dto,null);
+    List<FieldError> fieldErrors = validator.validateForBulk(dto,personDTO);
 
     // Then
     assertThat("should not return errors", fieldErrors.size(), is(0));
@@ -203,9 +205,11 @@ class RightToWorkValidatorTest {
     // Given.
     RightToWorkDTO dto = new RightToWorkDTO();
     dto.setVisaValidTo(LocalDate.now());
+    PersonDTO personDTO = new PersonDTO();
+    personDTO.setRightToWork(dto);
 
     // When.
-    List<FieldError> fieldErrors = validator.validateForBulk(dto,null);
+    List<FieldError> fieldErrors = validator.validateForBulk(dto,personDTO);
 
     // Then
     assertThat("should not return errors", fieldErrors.size(), is(0));
@@ -215,9 +219,11 @@ class RightToWorkValidatorTest {
   void shouldNotReturnErrorWhenEmpty() {
     // Given.
     RightToWorkDTO dto = new RightToWorkDTO();
+    PersonDTO personDTO = new PersonDTO();
+    personDTO.setRightToWork(dto);
 
     // When.
-    List<FieldError> fieldErrors = validator.validateForBulk(dto,null);
+    List<FieldError> fieldErrors = validator.validateForBulk(dto,personDTO);
 
     // Then
     assertThat("should not return errors", fieldErrors.size(), is(0));
