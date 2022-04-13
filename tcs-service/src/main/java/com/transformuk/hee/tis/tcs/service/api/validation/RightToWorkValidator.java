@@ -10,6 +10,7 @@ import com.transformuk.hee.tis.tcs.api.enumeration.Settled;
 
 import com.transformuk.hee.tis.tcs.service.model.Person;
 import com.transformuk.hee.tis.tcs.service.model.RightToWork;
+
 import java.lang.reflect.Method;
 import java.time.LocalDate;
 import java.util.ArrayList;
@@ -95,7 +96,7 @@ public class RightToWorkValidator {
 
   private void checkVisaDates(List<FieldError> fieldErrors, PersonDTO personDto) {
 
-    if(personDto != null) {
+    if (personDto != null) {
       LocalDate visaIssued = personDto.getRightToWork().getVisaIssued();
       LocalDate visaValidTo = personDto.getRightToWork().getVisaValidTo();
 
@@ -106,8 +107,8 @@ public class RightToWorkValidator {
             new FieldError(DTO_NAME, "visaIssued", "visaIssued must be before visaValidTo.");
         fieldErrors.add(fieldError);
       } else if (originalPersonRecord.isPresent()) {
-        Person existingPerson22 = originalPersonRecord.get();
-        RightToWork oldRTWDTO = existingPerson22.getRightToWork();
+        Person existingPerson = originalPersonRecord.get();
+        RightToWork oldRTWDTO = existingPerson.getRightToWork();
         if (visaIssued != null && visaValidTo == null) {
           if (visaIssued.isAfter(oldRTWDTO.getVisaValidTo())) {
             FieldError fieldError =
