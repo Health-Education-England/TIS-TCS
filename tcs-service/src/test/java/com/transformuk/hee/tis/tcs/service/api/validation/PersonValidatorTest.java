@@ -77,50 +77,37 @@ public class PersonValidatorTest {
     when(personDTOMock.getRole()).thenReturn(PERSON_ROLE);
   }
 
-  @Test(expected = MethodArgumentNotValidException.class)
-  public void validateShouldThrowExceptionWhenDifferentPersonWithPublicHealthNumberAlreadyExists()
-      throws MethodArgumentNotValidException {
+  @Test
+  public void validateShouldThrowExceptionWhenDifferentPersonWithPublicHealthNumberAlreadyExists() {
     when(personMock1.getId()).thenReturn(DIFFERENT_PERSON_ID);
     when(personRepositoryMock.findByPublicHealthNumber(PUBLIC_HEALTH_NUMBER))
         .thenReturn(Lists.newArrayList(personMock1));
-    try {
-      testObj.validate(personDTOMock);
-    } catch (MethodArgumentNotValidException e) {
-      verify(personRepositoryMock).findByPublicHealthNumber(PUBLIC_HEALTH_NUMBER);
-      Assert.assertTrue(exceptionContainsFieldError(e, "publicHealthNumber"));
-      throw e;
-    }
+    MethodArgumentNotValidException exception = Assert
+        .assertThrows(MethodArgumentNotValidException.class, () -> testObj.validate(personDTOMock));
+    verify(personRepositoryMock).findByPublicHealthNumber(PUBLIC_HEALTH_NUMBER);
+    Assert.assertTrue(exceptionContainsFieldError(exception, "publicHealthNumber"));
   }
 
-
-  @Test(expected = MethodArgumentNotValidException.class)
-  public void validateShouldThrowExceptionWhenThereAreMultiplePeopleWithSamePublicHealthNumber()
-      throws MethodArgumentNotValidException {
+  @Test
+  public void validateShouldThrowExceptionWhenThereAreMultiplePeopleWithSamePublicHealthNumber() {
     when(personMock1.getId()).thenReturn(DIFFERENT_PERSON_ID);
     when(personRepositoryMock.findByPublicHealthNumber(PUBLIC_HEALTH_NUMBER))
         .thenReturn(Lists.newArrayList(personMock1, personMock2));
-    try {
-      testObj.validate(personDTOMock);
-    } catch (MethodArgumentNotValidException e) {
-      verify(personRepositoryMock).findByPublicHealthNumber(PUBLIC_HEALTH_NUMBER);
-      Assert.assertTrue(exceptionContainsFieldError(e, "publicHealthNumber"));
-      throw e;
-    }
+    MethodArgumentNotValidException exception = Assert
+        .assertThrows(MethodArgumentNotValidException.class, () -> testObj.validate(personDTOMock));
+    verify(personRepositoryMock).findByPublicHealthNumber(PUBLIC_HEALTH_NUMBER);
+    Assert.assertTrue(exceptionContainsFieldError(exception, "publicHealthNumber"));
   }
 
-  @Test(expected = MethodArgumentNotValidException.class)
-  public void validateShouldThrowExceptionDuringCreatePublicHealthNumberAlreadyExists()
-      throws MethodArgumentNotValidException {
+  @Test
+  public void validateShouldThrowExceptionDuringCreatePublicHealthNumberAlreadyExists() {
     when(personDTOMock.getId()).thenReturn(null);
     when(personRepositoryMock.findByPublicHealthNumber(PUBLIC_HEALTH_NUMBER))
         .thenReturn(Lists.newArrayList(personMock1, personMock2));
-    try {
-      testObj.validate(personDTOMock);
-    } catch (MethodArgumentNotValidException e) {
-      verify(personRepositoryMock).findByPublicHealthNumber(PUBLIC_HEALTH_NUMBER);
-      Assert.assertTrue(exceptionContainsFieldError(e, "publicHealthNumber"));
-      throw e;
-    }
+    MethodArgumentNotValidException exception = Assert
+        .assertThrows(MethodArgumentNotValidException.class, () -> testObj.validate(personDTOMock));
+    verify(personRepositoryMock).findByPublicHealthNumber(PUBLIC_HEALTH_NUMBER);
+    Assert.assertTrue(exceptionContainsFieldError(exception, "publicHealthNumber"));
   }
 
   @Test
@@ -132,8 +119,7 @@ public class PersonValidatorTest {
   }
 
   @Test
-  public void validatePersonShouldThrowExceptionWhenRoleIsNull()
-      throws MethodArgumentNotValidException {
+  public void validatePersonShouldThrowExceptionWhenRoleIsNull() {
     when(personDTOMock.getRole()).thenReturn(null);
     try {
       testObj.validate(personDTOMock);
@@ -143,8 +129,7 @@ public class PersonValidatorTest {
   }
 
   @Test
-  public void validatePersonShouldThrowExceptionWhenRoleIsEmptyString()
-      throws MethodArgumentNotValidException {
+  public void validatePersonShouldThrowExceptionWhenRoleIsEmptyString() {
     when(personDTOMock.getRole()).thenReturn("");
     try {
       testObj.validate(personDTOMock);
@@ -272,14 +257,12 @@ public class PersonValidatorTest {
 
   private boolean exceptionContainsFieldError(MethodArgumentNotValidException e, String field) {
     List<FieldError> fieldErrors = e.getBindingResult().getFieldErrors();
-    boolean contains = false;
     for (FieldError fieldError : fieldErrors) {
       if (fieldError.getField().equalsIgnoreCase(field)) {
-        contains = true;
-        break;
+        return true;
       }
     }
-    return contains;
+    return false;
   }
 
   @Test
@@ -305,7 +288,7 @@ public class PersonValidatorTest {
     when(gdcDetailsValidatorMock.validateForBulk(any())).thenReturn(Lists.emptyList());
     when(gmcDetailsValidatorMock.validateForBulk(any())).thenReturn(Lists.emptyList());
     when(personalDetailsValidatorMock.validateForBulk(any())).thenReturn(Lists.emptyList());
-    when(rightToWorkValidatorMock.validateForBulk(any())).thenReturn(Lists.emptyList());
+    when(rightToWorkValidatorMock.validateForBulk(any(), any())).thenReturn(Lists.emptyList());
 
     // When.
     testObj.validateForBulk(Lists.newArrayList(personDTOMock));
@@ -339,7 +322,7 @@ public class PersonValidatorTest {
     when(gdcDetailsValidatorMock.validateForBulk(any())).thenReturn(Lists.emptyList());
     when(gmcDetailsValidatorMock.validateForBulk(any())).thenReturn(Lists.emptyList());
     when(personalDetailsValidatorMock.validateForBulk(any())).thenReturn(Lists.emptyList());
-    when(rightToWorkValidatorMock.validateForBulk(any())).thenReturn(Lists.emptyList());
+    when(rightToWorkValidatorMock.validateForBulk(any(), any())).thenReturn(Lists.emptyList());
     when(trainerApprovalValidatorMock.validateForBulk(any())).thenReturn(Lists.emptyList());
 
     // When.
@@ -349,7 +332,7 @@ public class PersonValidatorTest {
   }
 
   @Test
-  public void ShouldValidateTrainerApprovalWhenRoleNotUpdated() {
+  public void shouldValidateTrainerApprovalWhenRoleNotUpdated() {
     // Given.
     when(personMock1.getId()).thenReturn(PERSON_ID);
     when(personRepositoryMock.existsById(PERSON_ID)).thenReturn(true);
@@ -357,9 +340,6 @@ public class PersonValidatorTest {
         .thenReturn(Lists.newArrayList(personMock1));
     Person existingPerson = new Person();
     existingPerson.setRole("role1");
-
-    Map<String, Boolean> roleToMatches = new HashMap<>();
-    roleToMatches.put("role1", true);
 
     RoleDTO roleDto = new RoleDTO();
     RoleCategoryDTO roleCategoryDto = new RoleCategoryDTO();
@@ -372,7 +352,7 @@ public class PersonValidatorTest {
     when(gdcDetailsValidatorMock.validateForBulk(any())).thenReturn(Lists.emptyList());
     when(gmcDetailsValidatorMock.validateForBulk(any())).thenReturn(Lists.emptyList());
     when(personalDetailsValidatorMock.validateForBulk(any())).thenReturn(Lists.emptyList());
-    when(rightToWorkValidatorMock.validateForBulk(any())).thenReturn(Lists.emptyList());
+    when(rightToWorkValidatorMock.validateForBulk(any(), any())).thenReturn(Lists.emptyList());
     when(trainerApprovalValidatorMock.validateForBulk(any())).thenReturn(Lists.emptyList());
 
     // When.
@@ -384,59 +364,23 @@ public class PersonValidatorTest {
 
   @Test
   public void roleCheckShouldHandleCommaSeparator() {
-    // Given.
-    PersonDTO dto = new PersonDTO();
-    dto.setRole("role1 , role2,role3,");
-    List<PersonDTO> dtoList = new ArrayList<>();
-    dtoList.add(dto);
-
-    Map<String, String> roleToMatches = new HashMap<>();
-    roleToMatches.put("role1", "role1");
-    roleToMatches.put("role2", "role2");
-    roleToMatches.put("role3", "role3");
-
-    ArgumentCaptor<List<String>> rolesCaptor = ArgumentCaptor.forClass(List.class);
-    when(referenceService.rolesMatch(rolesCaptor.capture(), eq(true))).thenReturn(roleToMatches);
-
-    // When.
-    testObj.validateForBulk(dtoList);
-    // Then.
-    assertThat("should not contain any errors", dtoList.get(0).getMessageList().size(), is(0));
-
-    List<String> splitRoles = rolesCaptor.getValue();
-    assertThat("Unexpected roles.", splitRoles, hasItems("role1", "role2", "role3"));
+    testRolesSplit("role1 , role2,role3,");
   }
 
   @Test
   public void roleCheckShouldHandleSemiColonSeparator() {
-    // Given.
-    PersonDTO dto = new PersonDTO();
-    dto.setRole("role1 ; role2;role3;");
-    List<PersonDTO> dtoList = new ArrayList<>();
-    dtoList.add(dto);
-
-    Map<String, String> roleToMatches = new HashMap<>();
-    roleToMatches.put("role1", "role1");
-    roleToMatches.put("role2", "role2");
-    roleToMatches.put("role3", "role3");
-
-    ArgumentCaptor<List<String>> rolesCaptor = ArgumentCaptor.forClass(List.class);
-    when(referenceService.rolesMatch(rolesCaptor.capture(), eq(true))).thenReturn(roleToMatches);
-
-    // When.
-    testObj.validateForBulk(dtoList);
-    // Then.
-    assertThat("should not contain any errors", dtoList.get(0).getMessageList().size(), is(0));
-
-    List<String> splitRoles = rolesCaptor.getValue();
-    assertThat("Unexpected roles.", splitRoles, hasItems("role1", "role2", "role3"));
+    testRolesSplit("role1 ; role2;role3;");
   }
 
   @Test
   public void roleCheckShouldHandleMixedSeparators() {
+    testRolesSplit("role1 ; role2,role3,");
+  }
+
+  private void testRolesSplit(String roleList) {
     // Given.
     PersonDTO dto = new PersonDTO();
-    dto.setRole("role1 ; role2,role3,");
+    dto.setRole(roleList);
     List<PersonDTO> dtoList = new ArrayList<>();
     dtoList.add(dto);
 
@@ -455,5 +399,6 @@ public class PersonValidatorTest {
 
     List<String> splitRoles = rolesCaptor.getValue();
     assertThat("Unexpected roles.", splitRoles, hasItems("role1", "role2", "role3"));
+
   }
 }

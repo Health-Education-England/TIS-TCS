@@ -5,12 +5,15 @@ import com.transformuk.hee.tis.reference.client.ReferenceService;
 import com.transformuk.hee.tis.tcs.api.dto.RightToWorkDTO;
 import com.transformuk.hee.tis.tcs.api.enumeration.EeaResident;
 import com.transformuk.hee.tis.tcs.api.enumeration.Settled;
+import com.transformuk.hee.tis.tcs.service.model.Person;
 import com.transformuk.hee.tis.tcs.service.model.RightToWork;
+import com.transformuk.hee.tis.tcs.service.repository.PersonRepository;
 import java.lang.reflect.Method;
 import java.time.LocalDate;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
+import java.util.Optional;
 import org.springframework.core.MethodParameter;
 import org.springframework.stereotype.Component;
 import org.springframework.validation.BeanPropertyBindingResult;
@@ -25,11 +28,14 @@ import org.springframework.web.bind.MethodArgumentNotValidException;
 public class RightToWorkValidator {
 
   private static final String DTO_NAME = "RightToWorkDTO";
+  private static final String FIELD_NAME_VISA_ISSUED = "visaIssued";
 
   private final ReferenceService referenceService;
+  private final PersonRepository personRepository;
 
-  RightToWorkValidator(ReferenceService referenceService) {
+  RightToWorkValidator(ReferenceService referenceService, PersonRepository personRepository) {
     this.referenceService = referenceService;
+    this.personRepository = personRepository;
   }
 
   /**
@@ -83,14 +89,35 @@ public class RightToWorkValidator {
     }
   }
 
-  private void checkVisaDates(RightToWorkDTO dto, List<FieldError> fieldErrors) {
-    LocalDate visaIssued = dto.getVisaIssued();
-    LocalDate visaValidTo = dto.getVisaValidTo();
+  private void checkVisaDates(List<FieldError> fieldErrors, RightToWorkDTO dto, Long personId) {
+    if (dto != null) {
+      LocalDate visaIssued = dto.getVisaIssued();
+      LocalDate visaValidTo = dto.getVisaValidTo();
+      Optional<Person> originalPersonRecord = personRepository.findPersonById(personId);
 
-    if (visaIssued != null && visaValidTo != null && visaIssued.isAfter(visaValidTo)) {
-      FieldError fieldError =
-          new FieldError(DTO_NAME, "visaIssued", "visaIssued must be before visaValidTo.");
-      fieldErrors.add(fieldError);
+      if (visaIssued != null && visaValidTo != null && visaIssued.isAfter(visaValidTo)) {
+        FieldError fieldError =
+            new FieldError(DTO_NAME, FIELD_NAME_VISA_ISSUED, "visaIssued must be before "
+                + "visaValidTo.");
+        fieldErrors.add(fieldError);
+      } else if (originalPersonRecord.isPresent()) {
+        Person existingPerson = originalPersonRecord.get();
+        RightToWork oldRtwDto = existingPerson.getRightToWork();
+        if (visaIssued != null && visaValidTo == null) {
+          if (visaIssued.isAfter(oldRtwDto.getVisaValidTo())) {
+            FieldError fieldError =
+                new FieldError(DTO_NAME, FIELD_NAME_VISA_ISSUED, "visaIssued is after "
+                    + "current visaValidTo date.");
+            fieldErrors.add(fieldError);
+          }
+        } else if (visaValidTo != null && visaIssued == null
+            && visaValidTo.isBefore(oldRtwDto.getVisaIssued())) {
+          FieldError fieldError =
+              new FieldError(DTO_NAME, FIELD_NAME_VISA_ISSUED, "visaValidTo date is "
+                  + "before current visaIssued date.");
+          fieldErrors.add(fieldError);
+        }
+      }
     }
   }
 
@@ -114,13 +141,13 @@ public class RightToWorkValidator {
    * @param rightToWorkDto the rightToWorkDto to check
    * @return list of FieldErrors
    */
-  public List<FieldError> validateForBulk(RightToWorkDTO rightToWorkDto) {
+  public List<FieldError> validateForBulk(RightToWorkDTO rightToWorkDto, Long personId) {
     List<FieldError> fieldErrors = new ArrayList<>();
 
     if (rightToWorkDto != null) {
       checkEeaResident(rightToWorkDto, fieldErrors);
       checkSettled(rightToWorkDto, fieldErrors);
-      checkVisaDates(rightToWorkDto, fieldErrors);
+      checkVisaDates(fieldErrors, rightToWorkDto, personId);
       checkPermitToWork(rightToWorkDto, fieldErrors);
     }
     return fieldErrors;

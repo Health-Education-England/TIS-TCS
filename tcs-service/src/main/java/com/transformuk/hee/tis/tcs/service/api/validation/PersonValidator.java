@@ -46,10 +46,12 @@ public class PersonValidator {
   private final TrainerApprovalValidator trainerApprovalValidator;
 
   public PersonValidator(PersonRepository personRepository, ReferenceService referenceService,
-      ContactDetailsValidator contactDetailsValidator, GdcDetailsValidator gdcDetailsValidator,
-      GmcDetailsValidator gmcDetailsValidator, PersonalDetailsValidator personalDetailsValidator,
-      RightToWorkValidator rightToWorkValidator,
-      TrainerApprovalValidator trainerApprovalValidator) {
+                         ContactDetailsValidator contactDetailsValidator,
+                         GdcDetailsValidator gdcDetailsValidator,
+                         GmcDetailsValidator gmcDetailsValidator,
+                         PersonalDetailsValidator personalDetailsValidator,
+                         RightToWorkValidator rightToWorkValidator,
+                         TrainerApprovalValidator trainerApprovalValidator) {
     this.personRepository = personRepository;
     this.referenceService = referenceService;
     this.contactDetailsValidator = contactDetailsValidator;
@@ -133,7 +135,8 @@ public class PersonValidator {
     fieldErrors.addAll(gdcDetailsValidator.validateForBulk(personDto.getGdcDetails()));
     fieldErrors.addAll(gmcDetailsValidator.validateForBulk(personDto.getGmcDetails()));
     fieldErrors.addAll(personalDetailsValidator.validateForBulk(personDto.getPersonalDetails()));
-    fieldErrors.addAll(rightToWorkValidator.validateForBulk(personDto.getRightToWork()));
+    fieldErrors.addAll(rightToWorkValidator.validateForBulk(personDto.getRightToWork(),
+        personDto.getId()));
     personDto.getTrainerApprovals()
         .forEach(ta -> fieldErrors.addAll(trainerApprovalValidator.validateForBulk(ta)));
 
