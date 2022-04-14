@@ -2,7 +2,6 @@ package com.transformuk.hee.tis.tcs.service.api.validation;
 
 import com.transformuk.hee.tis.reference.api.dto.PermitToWorkDTO;
 import com.transformuk.hee.tis.reference.client.ReferenceService;
-import com.transformuk.hee.tis.tcs.api.dto.PersonDTO;
 import com.transformuk.hee.tis.tcs.api.dto.RightToWorkDTO;
 import com.transformuk.hee.tis.tcs.api.enumeration.EeaResident;
 import com.transformuk.hee.tis.tcs.api.enumeration.Settled;
