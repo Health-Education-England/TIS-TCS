@@ -8,17 +8,18 @@ import com.transformuk.hee.tis.tcs.api.enumeration.Settled;
 import com.transformuk.hee.tis.tcs.service.model.Person;
 import com.transformuk.hee.tis.tcs.service.model.RightToWork;
 import com.transformuk.hee.tis.tcs.service.repository.PersonRepository;
+import org.springframework.core.MethodParameter;
+import org.springframework.stereotype.Component;
+import org.springframework.validation.BeanPropertyBindingResult;
+import org.springframework.validation.FieldError;
+import org.springframework.web.bind.MethodArgumentNotValidException;
+
 import java.lang.reflect.Method;
 import java.time.LocalDate;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 import java.util.Optional;
-import org.springframework.core.MethodParameter;
-import org.springframework.stereotype.Component;
-import org.springframework.validation.BeanPropertyBindingResult;
-import org.springframework.validation.FieldError;
-import org.springframework.web.bind.MethodArgumentNotValidException;
 
 /**
  * Holds more complex custom validation for a {@link RightToWork} that cannot be easily done via
@@ -91,8 +92,6 @@ public class RightToWorkValidator {
 
   private void checkVisaDates(List<FieldError> fieldErrors, RightToWorkDTO dto, Long personId) {
 
-    if (dto != null) {
-
       LocalDate visaIssued = dto.getVisaIssued();
       LocalDate visaValidTo = dto.getVisaValidTo();
       Optional<Person> originalPersonRecord = personRepository.findPersonById(personId);
@@ -121,7 +120,6 @@ public class RightToWorkValidator {
         }
       }
     }
-  }
 
   private void checkPermitToWork(RightToWorkDTO dto, List<FieldError> fieldErrors) {
     String permitToWork = dto.getPermitToWork();
