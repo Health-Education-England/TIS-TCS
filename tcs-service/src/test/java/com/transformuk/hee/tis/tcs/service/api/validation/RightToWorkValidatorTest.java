@@ -296,7 +296,7 @@ class RightToWorkValidatorTest {
   }
 
   @Test
-  void shouldReturnErrorWhenVisaValidToDateToIsBeforeDbVisaIssuedDate() {
+  void shouldReturnErrorWhenVisaValidToDateIsBeforeDbVisaIssuedDate() {
     // Given.
     RightToWork dbdto = new RightToWork();
     dbdto.setVisaIssued(LocalDate.now().plusDays(10));
