@@ -29,6 +29,7 @@ import org.springframework.web.bind.MethodArgumentNotValidException;
 public class RightToWorkValidator {
 
   private static final String DTO_NAME = "RightToWorkDTO";
+  private static String field = "visaIssued";
 
   private final ReferenceService referenceService;
   private final PersonRepository personRepository;
@@ -92,7 +93,7 @@ public class RightToWorkValidator {
   private void checkVisaDates(List<FieldError> fieldErrors, RightToWorkDTO dto, Long PersonId) {
 
     if (dto != null) {
-      String field = "visaIssued";
+
       LocalDate visaIssued = dto.getVisaIssued();
       LocalDate visaValidTo = dto.getVisaValidTo();
       Optional<Person> originalPersonRecord = personRepository.findPersonById(PersonId);
