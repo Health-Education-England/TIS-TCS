@@ -28,7 +28,7 @@ import org.springframework.web.bind.MethodArgumentNotValidException;
 public class RightToWorkValidator {
 
   private static final String DTO_NAME = "RightToWorkDTO";
-  private static String field = "visaIssued";
+  private static final String field = "visaIssued";
 
   private final ReferenceService referenceService;
   private final PersonRepository personRepository;

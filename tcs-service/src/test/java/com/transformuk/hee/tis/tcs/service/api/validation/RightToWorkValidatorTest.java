@@ -15,6 +15,7 @@ import com.transformuk.hee.tis.tcs.api.dto.RightToWorkDTO;
 
 import java.time.LocalDate;
 import java.util.List;
+import java.util.Optional;
 
 import com.transformuk.hee.tis.tcs.service.model.Person;
 import com.transformuk.hee.tis.tcs.service.model.RightToWork;
@@ -235,7 +236,7 @@ class RightToWorkValidatorTest {
     person.setRightToWork(dbdto);
     // When.
 
-    when(personRepository.findPersonById(1L)).thenReturn(java.util.Optional.of(person));
+    when(personRepository.findPersonById(1L)).thenReturn(Optional.of(person));
 
     List<FieldError> fieldErrors = validator.validateForBulk(dto, dto.getId());
 
@@ -261,7 +262,7 @@ class RightToWorkValidatorTest {
     person.setRightToWork(dbdto);
     // When.
 
-    when(personRepository.findPersonById(1L)).thenReturn(java.util.Optional.of(person));
+    when(personRepository.findPersonById(1L)).thenReturn(Optional.of(person));
 
     List<FieldError> fieldErrors = validator.validateForBulk(dto, dto.getId());
 
@@ -284,12 +285,12 @@ class RightToWorkValidatorTest {
 
     // When.
 
-    when(personRepository.findPersonById(1L)).thenReturn(java.util.Optional.of(person));
+    when(personRepository.findPersonById(1L)).thenReturn(Optional.of(person));
 
     List<FieldError> fieldErrors = validator.validateForBulk(dto, person.getId());
 
     // Then
-    assertThat("should not return errors", fieldErrors.size(), is(1));
+    assertThat("should return 1 error", fieldErrors.size(), is(1));
   }
 
   @Test
@@ -307,12 +308,12 @@ class RightToWorkValidatorTest {
 
     // When.
 
-    when(personRepository.findPersonById(1L)).thenReturn(java.util.Optional.of(person));
+    when(personRepository.findPersonById(1L)).thenReturn(Optional.of(person));
 
     List<FieldError> fieldErrors = validator.validateForBulk(dto, person.getId());
 
     // Then
-    assertThat("should not return errors", fieldErrors.size(), is(1));
+    assertThat("should return 1 error", fieldErrors.size(), is(1));
   }
 
   @Test
@@ -328,7 +329,7 @@ class RightToWorkValidatorTest {
 
     // When.
 
-    when(personRepository.findPersonById(1L)).thenReturn(java.util.Optional.of(person));
+    when(personRepository.findPersonById(1L)).thenReturn(Optional.of(person));
 
     List<FieldError> fieldErrors = validator.validateForBulk(dto, person.getId());
 
