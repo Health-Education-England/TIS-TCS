@@ -275,21 +275,18 @@ class RightToWorkValidatorTest {
     RightToWork dbdto = new RightToWork();
     dbdto.setVisaValidTo(LocalDate.now());
 
-    RightToWorkDTO dto = new RightToWorkDTO();
-    dto.setVisaIssued(LocalDate.now().plusDays(10));
-
-    PersonDTO personDTO = new PersonDTO();
-    personDTO.setRightToWork(dto);
-    personDTO.setId(1L);
-
     Person person = new Person();
     person.setId(1L);
     person.setRightToWork(dbdto);
+
+    RightToWorkDTO dto = new RightToWorkDTO();
+    dto.setVisaIssued(LocalDate.now().plusDays(10));
+
     // When.
 
     when(personRepository.findPersonById(1L)).thenReturn(java.util.Optional.of(person));
 
-    List<FieldError> fieldErrors = validator.validateForBulk(dto, dto.getId());
+    List<FieldError> fieldErrors = validator.validateForBulk(dto, person.getId());
 
     // Then
     assertThat("should not return errors", fieldErrors.size(), is(1));
@@ -301,21 +298,18 @@ class RightToWorkValidatorTest {
     RightToWork dbdto = new RightToWork();
     dbdto.setVisaIssued(LocalDate.now().plusDays(10));
 
-    RightToWorkDTO dto = new RightToWorkDTO();
-    dto.setVisaValidTo(LocalDate.now());
-
-    PersonDTO personDTO = new PersonDTO();
-    personDTO.setRightToWork(dto);
-    personDTO.setId(1L);
-
     Person person = new Person();
     person.setId(1L);
     person.setRightToWork(dbdto);
+
+    RightToWorkDTO dto = new RightToWorkDTO();
+    dto.setVisaValidTo(LocalDate.now());
+
     // When.
 
     when(personRepository.findPersonById(1L)).thenReturn(java.util.Optional.of(person));
 
-    List<FieldError> fieldErrors = validator.validateForBulk(dto, dto.getId());
+    List<FieldError> fieldErrors = validator.validateForBulk(dto, person.getId());
 
     // Then
     assertThat("should not return errors", fieldErrors.size(), is(1));
