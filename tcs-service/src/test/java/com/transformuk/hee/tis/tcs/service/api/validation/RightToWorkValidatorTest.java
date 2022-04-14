@@ -319,8 +319,6 @@ class RightToWorkValidatorTest {
   void shouldNotReturnErrorWhenEmpty() {
     // Given.
     RightToWorkDTO dto = new RightToWorkDTO();
-    PersonDTO personDTO = new PersonDTO();
-    personDTO.setRightToWork(dto);
 
     // When.
     List<FieldError> fieldErrors = validator.validateForBulk(dto, dto.getId());
