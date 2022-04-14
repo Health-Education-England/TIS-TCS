@@ -179,7 +179,7 @@ class RightToWorkValidatorTest {
     personDTO.setRightToWork(dto);
 
     // When.
-    List<FieldError> fieldErrors = validator.validateForBulk(dto, personDTO);
+    List<FieldError> fieldErrors = validator.validateForBulk(dto, dto.getId());
 
     // Then
     assertThat("should return 1 error", fieldErrors.size(), is(1));
@@ -196,7 +196,7 @@ class RightToWorkValidatorTest {
     personDTO.setRightToWork(dto);
 
     // When.
-    List<FieldError> fieldErrors = validator.validateForBulk(dto, personDTO);
+    List<FieldError> fieldErrors = validator.validateForBulk(dto, dto.getId());
 
     // Then
     assertThat("should not return errors", fieldErrors.size(), is(0));
@@ -211,7 +211,7 @@ class RightToWorkValidatorTest {
     personDTO.setRightToWork(dto);
 
     // When.
-    List<FieldError> fieldErrors = validator.validateForBulk(dto, personDTO);
+    List<FieldError> fieldErrors = validator.validateForBulk(dto, dto.getId());
 
     // Then
     assertThat("should not return errors", fieldErrors.size(), is(0));
@@ -237,7 +237,7 @@ class RightToWorkValidatorTest {
 
     when(personRepository.findPersonById(1L)).thenReturn(java.util.Optional.of(person));
 
-    List<FieldError> fieldErrors = validator.validateForBulk(dto, personDTO);
+    List<FieldError> fieldErrors = validator.validateForBulk(dto, dto.getId());
 
     // Then
     assertThat("should not return errors", fieldErrors.size(), is(0));
@@ -263,7 +263,7 @@ class RightToWorkValidatorTest {
 
     when(personRepository.findPersonById(1L)).thenReturn(java.util.Optional.of(person));
 
-    List<FieldError> fieldErrors = validator.validateForBulk(dto, personDTO);
+    List<FieldError> fieldErrors = validator.validateForBulk(dto, dto.getId());
 
     // Then
     assertThat("should not return errors", fieldErrors.size(), is(0));
@@ -289,7 +289,7 @@ class RightToWorkValidatorTest {
 
     when(personRepository.findPersonById(1L)).thenReturn(java.util.Optional.of(person));
 
-    List<FieldError> fieldErrors = validator.validateForBulk(dto, personDTO);
+    List<FieldError> fieldErrors = validator.validateForBulk(dto, dto.getId());
 
     // Then
     assertThat("should not return errors", fieldErrors.size(), is(1));
@@ -315,7 +315,7 @@ class RightToWorkValidatorTest {
 
     when(personRepository.findPersonById(1L)).thenReturn(java.util.Optional.of(person));
 
-    List<FieldError> fieldErrors = validator.validateForBulk(dto, personDTO);
+    List<FieldError> fieldErrors = validator.validateForBulk(dto, dto.getId());
 
     // Then
     assertThat("should not return errors", fieldErrors.size(), is(1));
@@ -329,7 +329,7 @@ class RightToWorkValidatorTest {
     personDTO.setRightToWork(dto);
 
     // When.
-    List<FieldError> fieldErrors = validator.validateForBulk(dto, personDTO);
+    List<FieldError> fieldErrors = validator.validateForBulk(dto, dto.getId());
 
     // Then
     assertThat("should not return errors", fieldErrors.size(), is(0));
@@ -362,7 +362,7 @@ class RightToWorkValidatorTest {
     personDTO.setRightToWork(dto);
 
     // When.
-    List<FieldError> fieldErrors = validator.validateForBulk(dto, personDTO);
+    List<FieldError> fieldErrors = validator.validateForBulk(dto, dto.getId());
     // Then.
     assertThat("Error list should contain 3 errors.", fieldErrors.size(), equalTo(3));
   }
