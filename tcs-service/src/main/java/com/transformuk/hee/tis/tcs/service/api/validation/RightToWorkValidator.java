@@ -89,13 +89,13 @@ public class RightToWorkValidator {
     }
   }
 
-  private void checkVisaDates(List<FieldError> fieldErrors, PersonDTO personDto) {
+  private void checkVisaDates(List<FieldError> fieldErrors, RightToWorkDTO dto, Long PersonId) {
 
-    if (personDto != null) {
+    if (dto != null) {
       String field = "visaIssued";
-      LocalDate visaIssued = personDto.getRightToWork().getVisaIssued();
-      LocalDate visaValidTo = personDto.getRightToWork().getVisaValidTo();
-      Optional<Person> originalPersonRecord = personRepository.findPersonById(personDto.getId());
+      LocalDate visaIssued = dto.getVisaIssued();
+      LocalDate visaValidTo = dto.getVisaValidTo();
+      Optional<Person> originalPersonRecord = personRepository.findPersonById(PersonId);
 
       if (visaIssued != null && visaValidTo != null && visaIssued.isAfter(visaValidTo)) {
         FieldError fieldError =
@@ -143,13 +143,13 @@ public class RightToWorkValidator {
    * @param rightToWorkDto the rightToWorkDto to check
    * @return list of FieldErrors
    */
-  public List<FieldError> validateForBulk(RightToWorkDTO rightToWorkDto, PersonDTO personDto) {
+  public List<FieldError> validateForBulk(RightToWorkDTO rightToWorkDto, Long personId) {
     List<FieldError> fieldErrors = new ArrayList<>();
 
     if (rightToWorkDto != null) {
       checkEeaResident(rightToWorkDto, fieldErrors);
       checkSettled(rightToWorkDto, fieldErrors);
-      checkVisaDates(fieldErrors, personDto);
+      checkVisaDates(fieldErrors, rightToWorkDto, personId);
       checkPermitToWork(rightToWorkDto, fieldErrors);
     }
     return fieldErrors;

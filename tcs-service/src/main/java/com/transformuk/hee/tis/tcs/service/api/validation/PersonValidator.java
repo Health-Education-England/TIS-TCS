@@ -136,7 +136,7 @@ public class PersonValidator {
     fieldErrors.addAll(gmcDetailsValidator.validateForBulk(personDto.getGmcDetails()));
     fieldErrors.addAll(personalDetailsValidator.validateForBulk(personDto.getPersonalDetails()));
     fieldErrors.addAll(rightToWorkValidator.validateForBulk(personDto.getRightToWork(),
-        personDto));
+        personDto.getId()));
     personDto.getTrainerApprovals()
         .forEach(ta -> fieldErrors.addAll(trainerApprovalValidator.validateForBulk(ta)));
 
