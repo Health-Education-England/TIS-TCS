@@ -317,7 +317,7 @@ class RightToWorkValidatorTest {
   }
 
   @Test
-  void shouldnotReturnErrorWhenNoVisaValidToDateOrVisaIssuedDate() {
+  void shouldNotReturnErrorWhenNoVisaValidToDateOrVisaIssuedDate() {
     // Given.
     RightToWork dbdto = new RightToWork();
 
