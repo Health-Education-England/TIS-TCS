@@ -316,6 +316,27 @@ class RightToWorkValidatorTest {
   }
 
   @Test
+  void shouldnotReturnErrorWhenNoVisaValidToDateOrVisaIssuedDate() {
+    // Given.
+    RightToWork dbdto = new RightToWork();
+
+    Person person = new Person();
+    person.setId(1L);
+    person.setRightToWork(dbdto);
+
+    RightToWorkDTO dto = new RightToWorkDTO();
+
+    // When.
+
+    when(personRepository.findPersonById(1L)).thenReturn(java.util.Optional.of(person));
+
+    List<FieldError> fieldErrors = validator.validateForBulk(dto, person.getId());
+
+    // Then
+    assertThat("should not return errors", fieldErrors.size(), is(0));
+  }
+
+  @Test
   void shouldNotReturnErrorWhenEmpty() {
     // Given.
     RightToWorkDTO dto = new RightToWorkDTO();
