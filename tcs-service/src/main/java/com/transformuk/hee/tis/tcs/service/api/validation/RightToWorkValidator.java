@@ -28,7 +28,7 @@ import org.springframework.web.bind.MethodArgumentNotValidException;
 public class RightToWorkValidator {
 
   private static final String DTO_NAME = "RightToWorkDTO";
-  private static final String field = "visaIssued";
+  private static final String FIELD = "visaIssued";
 
   private final ReferenceService referenceService;
   private final PersonRepository personRepository;
@@ -90,14 +90,14 @@ public class RightToWorkValidator {
   }
 
   private void checkVisaDates(List<FieldError> fieldErrors, RightToWorkDTO dto, Long personId) {
-    if(dto != null) {
+    if (dto != null) {
       LocalDate visaIssued = dto.getVisaIssued();
       LocalDate visaValidTo = dto.getVisaValidTo();
       Optional<Person> originalPersonRecord = personRepository.findPersonById(personId);
 
       if (visaIssued != null && visaValidTo != null && visaIssued.isAfter(visaValidTo)) {
         FieldError fieldError =
-            new FieldError(DTO_NAME, field, "visaIssued must be before "
+            new FieldError(DTO_NAME, FIELD, "visaIssued must be before "
                 + "visaValidTo.");
         fieldErrors.add(fieldError);
       } else if (originalPersonRecord.isPresent()) {
@@ -106,14 +106,14 @@ public class RightToWorkValidator {
         if (visaIssued != null && visaValidTo == null) {
           if (visaIssued.isAfter(oldRtwDto.getVisaValidTo())) {
             FieldError fieldError =
-                new FieldError(DTO_NAME, field, "visaIssued is after "
+                new FieldError(DTO_NAME, FIELD, "visaIssued is after "
                     + "current visaValidTo date.");
             fieldErrors.add(fieldError);
           }
         } else if (visaValidTo != null && visaIssued == null
             && visaValidTo.isBefore(oldRtwDto.getVisaIssued())) {
           FieldError fieldError =
-              new FieldError(DTO_NAME, field, "visaValidTo date is "
+              new FieldError(DTO_NAME, FIELD, "visaValidTo date is "
                   + "before current visaIssued date.");
           fieldErrors.add(fieldError);
         }
