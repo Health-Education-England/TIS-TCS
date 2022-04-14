@@ -89,13 +89,13 @@ public class RightToWorkValidator {
     }
   }
 
-  private void checkVisaDates(List<FieldError> fieldErrors, RightToWorkDTO dto, Long PersonId) {
+  private void checkVisaDates(List<FieldError> fieldErrors, RightToWorkDTO dto, Long personId) {
 
     if (dto != null) {
 
       LocalDate visaIssued = dto.getVisaIssued();
       LocalDate visaValidTo = dto.getVisaValidTo();
-      Optional<Person> originalPersonRecord = personRepository.findPersonById(PersonId);
+      Optional<Person> originalPersonRecord = personRepository.findPersonById(personId);
 
       if (visaIssued != null && visaValidTo != null && visaIssued.isAfter(visaValidTo)) {
         FieldError fieldError =
