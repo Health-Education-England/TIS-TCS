@@ -111,7 +111,7 @@ public class RightToWorkValidator {
             fieldErrors.add(fieldError);
           }
         } else if (visaValidTo != null && visaIssued == null && oldRtwDto.getVisaIssued() != null) {
-          if(visaValidTo.isBefore(oldRtwDto.getVisaIssued())) {
+          if (visaValidTo.isBefore(oldRtwDto.getVisaIssued())) {
             FieldError fieldError =
                 new FieldError(DTO_NAME, FIELD_NAME_VISA_ISSUED, "visaValidTo date is "
                     + "before current visaIssued date.");
