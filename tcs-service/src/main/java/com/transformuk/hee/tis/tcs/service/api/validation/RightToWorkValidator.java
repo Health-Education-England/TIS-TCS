@@ -97,29 +97,31 @@ public class RightToWorkValidator {
 
       if (visaIssued != null && visaValidTo != null && visaIssued.isAfter(visaValidTo)) {
         FieldError fieldError =
-            new FieldError(DTO_NAME, FIELD_NAME_VISA_ISSUED, "visaIssued must be before "
-                + "visaValidTo.");
+            new FieldError(DTO_NAME, FIELD_NAME_VISA_ISSUED, "visaIssued must be before"
+                + " visaValidTo.");
         fieldErrors.add(fieldError);
       } else if (originalPersonRecord.isPresent()) {
         Person existingPerson = originalPersonRecord.get();
         RightToWork oldRtwDto = existingPerson.getRightToWork();
-        if (visaIssued != null && visaValidTo == null) {
+        if (visaIssued != null && visaValidTo == null && oldRtwDto.getVisaValidTo() != null) {
           if (visaIssued.isAfter(oldRtwDto.getVisaValidTo())) {
             FieldError fieldError =
                 new FieldError(DTO_NAME, FIELD_NAME_VISA_ISSUED, "visaIssued is after "
                     + "current visaValidTo date.");
             fieldErrors.add(fieldError);
           }
-        } else if (visaValidTo != null && visaIssued == null
-            && visaValidTo.isBefore(oldRtwDto.getVisaIssued())) {
-          FieldError fieldError =
-              new FieldError(DTO_NAME, FIELD_NAME_VISA_ISSUED, "visaValidTo date is "
-                  + "before current visaIssued date.");
-          fieldErrors.add(fieldError);
+        } else if (visaValidTo != null && visaIssued == null && oldRtwDto.getVisaIssued() != null) {
+          if(visaValidTo.isBefore(oldRtwDto.getVisaIssued())) {
+            FieldError fieldError =
+                new FieldError(DTO_NAME, FIELD_NAME_VISA_ISSUED, "visaValidTo date is "
+                    + "before current visaIssued date.");
+            fieldErrors.add(fieldError);
+          }
         }
       }
     }
   }
+
 
   private void checkPermitToWork(RightToWorkDTO dto, List<FieldError> fieldErrors) {
     String permitToWork = dto.getPermitToWork();
