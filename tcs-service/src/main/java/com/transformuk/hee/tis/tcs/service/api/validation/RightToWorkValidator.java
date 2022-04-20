@@ -8,12 +8,14 @@ import com.transformuk.hee.tis.tcs.api.enumeration.Settled;
 import com.transformuk.hee.tis.tcs.service.model.Person;
 import com.transformuk.hee.tis.tcs.service.model.RightToWork;
 import com.transformuk.hee.tis.tcs.service.repository.PersonRepository;
+
 import java.lang.reflect.Method;
 import java.time.LocalDate;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 import java.util.Optional;
+
 import org.springframework.core.MethodParameter;
 import org.springframework.stereotype.Component;
 import org.springframework.validation.BeanPropertyBindingResult;
@@ -95,7 +97,7 @@ public class RightToWorkValidator {
       LocalDate visaValidTo = dto.getVisaValidTo();
       Optional<Person> originalPersonRecord = personRepository.findPersonById(personId);
 
-      if(visaIssued == null && visaValidTo == null) {
+      if (visaIssued == null && visaValidTo == null) {
         //Nothing to check
         return;
       }
@@ -108,29 +110,24 @@ public class RightToWorkValidator {
                   + " visaValidTo.");
           fieldErrors.add(fieldError);
         }
-        return;
       } else if (originalPersonRecord.isPresent()) {
         RightToWork oldRtwDto = originalPersonRecord.get().getRightToWork();
-        if (visaIssued != null && visaValidTo == null && oldRtwDto.getVisaValidTo() != null) {
+        if (visaIssued != null && oldRtwDto.getVisaValidTo() != null) {
           if (visaIssued.isAfter(oldRtwDto.getVisaValidTo())) {
             FieldError fieldError =
                 new FieldError(DTO_NAME, FIELD_NAME_VISA_ISSUED, "visaIssued is after "
                     + "current visaValidTo date.");
             fieldErrors.add(fieldError);
           }
-          return;
-        } else if (visaValidTo != null && visaIssued == null && oldRtwDto.getVisaIssued() != null) {
-          if (visaValidTo.isBefore(oldRtwDto.getVisaIssued())) {
-            FieldError fieldError =
-                new FieldError(DTO_NAME, FIELD_NAME_VISA_ISSUED, "visaValidTo date is "
-                    + "before current visaIssued date.");
-            fieldErrors.add(fieldError);
-          }
+        } else if (visaValidTo != null && oldRtwDto.getVisaIssued() != null && visaValidTo.isBefore(oldRtwDto.getVisaIssued())) {
+          FieldError fieldError =
+              new FieldError(DTO_NAME, FIELD_NAME_VISA_ISSUED, "visaValidTo date is "
+                  + "before current visaIssued date.");
+          fieldErrors.add(fieldError);
         }
       }
     }
   }
-
 
   private void checkPermitToWork(RightToWorkDTO dto, List<FieldError> fieldErrors) {
     String permitToWork = dto.getPermitToWork();
