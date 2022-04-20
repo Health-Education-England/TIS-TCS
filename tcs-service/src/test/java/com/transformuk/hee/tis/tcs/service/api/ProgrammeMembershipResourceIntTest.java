@@ -40,7 +40,6 @@ import java.time.LocalDateTime;
 import java.time.ZoneId;
 import java.util.Collections;
 import java.util.List;
-import java.util.Objects;
 import javax.persistence.EntityManager;
 import org.junit.Before;
 import org.junit.Test;
