@@ -29,6 +29,7 @@ public class RightToWorkValidator {
 
   private static final String DTO_NAME = "RightToWorkDTO";
   private static final String FIELD_NAME_VISA_ISSUED = "visaIssued";
+  private static final String FIELD_NAME_VISA_VALID_TO = "visaValidTo";
 
   private final ReferenceService referenceService;
   private final PersonRepository personRepository;
@@ -128,7 +129,7 @@ public class RightToWorkValidator {
         fieldErrors.add(fieldError);
       } else if (visaValidTo != null && oldRtwDto.getVisaIssued() != null) {
         FieldError fieldError =
-            new FieldError(DTO_NAME, FIELD_NAME_VISA_ISSUED, "Visa Valid To Date "
+            new FieldError(DTO_NAME, FIELD_NAME_VISA_VALID_TO, "Visa Valid To Date "
                 + "conflicts with Visa Issued date already in Database");
         fieldErrors.add(fieldError);
       }
