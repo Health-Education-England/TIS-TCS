@@ -4,7 +4,6 @@ import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyCollection;
 import static org.mockito.ArgumentMatchers.anyLong;
 import static org.mockito.ArgumentMatchers.anySet;
-import static org.mockito.ArgumentMatchers.argThat;
 import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
@@ -22,7 +21,6 @@ import com.transformuk.hee.tis.tcs.service.model.Curriculum;
 import com.transformuk.hee.tis.tcs.service.model.CurriculumMembership;
 import com.transformuk.hee.tis.tcs.service.model.Person;
 import com.transformuk.hee.tis.tcs.service.model.Programme;
-import com.transformuk.hee.tis.tcs.service.model.ProgrammeMembership;
 import com.transformuk.hee.tis.tcs.service.model.TrainingNumber;
 import com.transformuk.hee.tis.tcs.service.repository.CurriculumMembershipRepository;
 import com.transformuk.hee.tis.tcs.service.repository.CurriculumRepository;
@@ -36,7 +34,6 @@ import com.transformuk.hee.tis.tcs.service.service.mapper.ProgrammeMembershipMap
 import com.transformuk.hee.tis.tcs.service.service.mapper.SpecialtyMapperImpl;
 
 import java.time.LocalDate;
-import java.time.LocalDateTime;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Optional;
@@ -502,30 +499,6 @@ public class ProgrammeMembershipServiceImplTest {
   }
 
   @Test
-  public void shouldSaveProgrammeMembershipDtoToProgrammeMembershipRepository() {
-    //this is deprecated and should be removed once parallel updates to the
-    //ProgrammeMembershipRepository are stopped
-
-    //given
-    List<ProgrammeMembership> programmeMembershipList
-        = programmeMembershipMapper.toEntity(programmeMembershipDto1);
-    when(programmeMembershipRepositoryMock.saveAll(anyCollection()))
-        .thenReturn(programmeMembershipList);
-    List<CurriculumMembership> curriculumMembershipList
-        = curriculumMembershipMapper.toEntity(programmeMembershipDto1);
-    when(curriculumMembershipRepositoryMock.saveAll(anyCollection()))
-        .thenReturn(curriculumMembershipList);
-    when(personRepositoryMock.getOne(anyLong())).thenReturn(person);
-
-    //when
-    testObj.save(programmeMembershipDto1);
-
-    //then
-    verify(programmeMembershipRepositoryMock, times(1))
-        .saveAll(anyCollection());
-  }
-
-  @Test
   public void shouldSaveProgrammeMembershipDtoListToCurriculumMembershipRepository() {
     //given
     List<CurriculumMembership> curriculumMembershipList
@@ -549,30 +522,6 @@ public class ProgrammeMembershipServiceImplTest {
   }
 
   @Test
-  public void shouldSaveProgrammeMembershipDtoListToProgrammeMembershipRepository() {
-    //this is deprecated and should be removed once parallel updates to the
-    //ProgrammeMembershipRepository are stopped
-
-    //given
-    List<ProgrammeMembership> programmeMembershipList
-        = programmeMembershipMapper.toEntity(programmeMembershipDto1);
-    when(programmeMembershipRepositoryMock.saveAll(anyCollection()))
-        .thenReturn(programmeMembershipList);
-    List<CurriculumMembership> curriculumMembershipList
-        = curriculumMembershipMapper.toEntity(programmeMembershipDto1);
-    when(curriculumMembershipRepositoryMock.saveAll(anyCollection()))
-        .thenReturn(curriculumMembershipList);
-    when(personRepositoryMock.getOne(anyLong())).thenReturn(person);
-
-    //when
-    testObj.save(Lists.newArrayList(programmeMembershipDto1));
-
-    //then
-    verify(programmeMembershipRepositoryMock, times(1))
-        .saveAll(anyCollection());
-  }
-
-  @Test
   public void shouldDeleteFromCurriculumMembershipRepository() {
     //given
     when(personRepositoryMock.getOne(anyLong())).thenReturn(person);
@@ -587,57 +536,5 @@ public class ProgrammeMembershipServiceImplTest {
         .deleteById(PROGRAMME_MEMBERSHIP_ID_1);
   }
 
-  @Test
-  public void shouldDeleteFromProgrammeMembershipRepository() {
-    //this is deprecated and should be removed once parallel updates to the
-    //ProgrammeMembershipRepository are stopped
-    //given
-    when(personRepositoryMock.getOne(anyLong())).thenReturn(person);
-    when(curriculumMembershipRepositoryMock.getOne(PROGRAMME_MEMBERSHIP_ID_1))
-        .thenReturn(curriculumMembership1);
 
-    //when
-    testObj.delete(PROGRAMME_MEMBERSHIP_ID_1);
-
-    //then
-    verify(programmeMembershipRepositoryMock, times(1))
-        .deleteById(PROGRAMME_MEMBERSHIP_ID_1);
-  }
-
-  @Test
-  public void shouldSetAmendedDateForProgrammeMembershipFromDbWhenUpdating() {
-    //given
-    LocalDateTime dbAmendedDate = LocalDateTime.parse("2021-01-01T01:01:01.001");
-    LocalDateTime staleAmendedDate = LocalDateTime.parse("2021-01-01T00:00:00.000");
-
-    ProgrammeMembership pmInDb = new ProgrammeMembership();
-    pmInDb.setId(PROGRAMME_MEMBERSHIP_ID_1);
-    pmInDb.setAmendedDate(dbAmendedDate);
-
-    programmeMembershipDto1.getCurriculumMemberships().get(0).setAmendedDate(dbAmendedDate);
-    List<ProgrammeMembership> pmToSaveUpdatedList
-        = programmeMembershipMapper.toEntity(programmeMembershipDto1);
-    programmeMembershipDto1.getCurriculumMemberships().get(0).setAmendedDate(staleAmendedDate);
-
-    when(programmeMembershipRepositoryMock.findById(PROGRAMME_MEMBERSHIP_ID_1))
-        .thenReturn(Optional.of(pmInDb));
-    when(programmeMembershipRepositoryMock.saveAll(anyCollection()))
-        .thenReturn(pmToSaveUpdatedList);
-
-    List<CurriculumMembership> curriculumMembershipList
-        = curriculumMembershipMapper.toEntity(programmeMembershipDto1);
-    when(curriculumMembershipRepositoryMock.saveAll(anyCollection()))
-        .thenReturn(curriculumMembershipList);
-    when(personRepositoryMock.getOne(anyLong())).thenReturn(person);
-
-    //when
-    testObj.save(Lists.newArrayList(programmeMembershipDto1));
-
-    //then
-    verify(programmeMembershipRepositoryMock, times(1))
-        .saveAll(argThat((List<ProgrammeMembership> pmList)
-            -> pmList.get(0).getAmendedDate().compareTo(dbAmendedDate) == 0));
-    verify(programmeMembershipRepositoryMock, times(1))
-        .findById(PROGRAMME_MEMBERSHIP_ID_1);
-  }
 }

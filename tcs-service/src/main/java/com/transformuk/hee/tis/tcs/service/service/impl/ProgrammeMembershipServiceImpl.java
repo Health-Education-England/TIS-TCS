@@ -13,7 +13,6 @@ import com.transformuk.hee.tis.tcs.service.model.Curriculum;
 import com.transformuk.hee.tis.tcs.service.model.CurriculumMembership;
 import com.transformuk.hee.tis.tcs.service.model.Person;
 import com.transformuk.hee.tis.tcs.service.model.Programme;
-import com.transformuk.hee.tis.tcs.service.model.ProgrammeMembership;
 import com.transformuk.hee.tis.tcs.service.repository.CurriculumMembershipRepository;
 import com.transformuk.hee.tis.tcs.service.repository.CurriculumRepository;
 import com.transformuk.hee.tis.tcs.service.repository.PersonRepository;
@@ -94,12 +93,6 @@ public class ProgrammeMembershipServiceImpl implements ProgrammeMembershipServic
         .toEntity(programmeMembershipDto);
     curriculumMembershipList = curriculumMembershipRepository.saveAll(curriculumMembershipList);
 
-    //below is deprecated
-    List<ProgrammeMembership> programmeMembershipList = programmeMembershipMapper
-        .toEntity(programmeMembershipDto);
-    programmeMembershipList.forEach(this::setProgrammeMembershipAmendedDateFromDbRecord);
-    programmeMembershipRepository.saveAll(programmeMembershipList);
-
     //emit events
     updatePersonWhenStatusIsStale(curriculumMembershipList.get(0).getPerson().getId());
     List<ProgrammeMembershipDTO> resultDtos = curriculumMembershipMapper
@@ -123,12 +116,6 @@ public class ProgrammeMembershipServiceImpl implements ProgrammeMembershipServic
     List<CurriculumMembership> curriculumMemberships = curriculumMembershipMapper
         .programmeMembershipDtosToCurriculumMemberships(programmeMembershipDto);
     curriculumMemberships = curriculumMembershipRepository.saveAll(curriculumMemberships);
-
-    //below is deprecated
-    List<ProgrammeMembership> programmeMemberships = programmeMembershipMapper
-        .programmeMembershipDTOsToProgrammeMemberships(programmeMembershipDto);
-    programmeMemberships.forEach(this::setProgrammeMembershipAmendedDateFromDbRecord);
-    programmeMembershipRepository.saveAll(programmeMemberships);
 
     //emit events
     updatePersonWhenStatusIsStale(curriculumMemberships.get(0).getPerson().getId());
@@ -185,9 +172,6 @@ public class ProgrammeMembershipServiceImpl implements ProgrammeMembershipServic
   @Override
   public void delete(Long id) {
     log.debug("Request to delete ProgrammeMembership : {}", id);
-    //below is deprecated
-    programmeMembershipRepository.deleteById(id);
-    programmeRepository.flush();
 
     //Get the person id from the programme membership before deleting it
     Long personId = curriculumMembershipRepository.getOne(id).getPerson().getId();
@@ -390,38 +374,4 @@ public class ProgrammeMembershipServiceImpl implements ProgrammeMembershipServic
     }
   }
 
-  /**
-   * Set a ProgrammeMembership AmendedDate from its database record.
-   *
-   * <p>The amendedDate of the programmeMembershipDto which is being saved is based on the entry
-   * in the CurriculumMembership table, which will have a slightly different AmendedDate value
-   * from the record in the ProgrammeMembership table. Since this field is used for @Version
-   * optimistic locking, we need the actual value from the ProgrammeMembership table otherwise we
-   * will get 'You are acting on stale data, please refresh' concurrency failures.
-   *
-   * <p>Caution: by overwriting the AmendedDate, it is possible to handle concurrent updates to the
-   * same ProgrammeMembership incorrectly: for example, if record A is updated to A' and this is
-   * committed, and then update B (which was based on A not A') is committed, this should fail as
-   * B needs to be based on A', otherwise the A' update is lost. To avoid this, apply the
-   * ProgrammeMembership record Save after the parallel CurriculumMembership Save in the same
-   * code block: in the event of stale data (the B update in the example above) the
-   * CurriculumMembership Save will fail and throw an exception before the incorrect
-   * ProgrammeMembership Save is applied.
-   *
-   * @param pm the ProgrammeMembership to set the amended date for
-   * @return the updated ProgrammeMembership
-   */
-  private ProgrammeMembership setProgrammeMembershipAmendedDateFromDbRecord(
-      ProgrammeMembership pm) {
-    if (pm.getId() != null) {
-      Optional<ProgrammeMembership> programmeMembership
-          = programmeMembershipRepository.findById(pm.getId());
-      if (programmeMembership.isPresent()) {
-        pm.setAmendedDate(programmeMembership.get().getAmendedDate());
-      } else {
-        log.error("ProgrammeMembership record missing: {}", pm.getId());
-      }
-    }
-    return pm;
-  }
 }
