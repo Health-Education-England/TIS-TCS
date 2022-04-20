@@ -91,8 +91,6 @@ public class RightToWorkValidator {
 
   private void checkVisaDates(List<FieldError> fieldErrors, RightToWorkDTO dto, Long personId) {
 
-    boolean dbValidationError = false;
-
     if (dto != null) {
       LocalDate visaIssued = dto.getVisaIssued();
       LocalDate visaValidTo = dto.getVisaValidTo();
@@ -111,31 +109,30 @@ public class RightToWorkValidator {
           fieldErrors.add(fieldError);
         }
       } else {
-        dbValidationError = checkDbVisaDates(personId, visaIssued, visaValidTo);
-      }
-
-      if (dbValidationError) {
-        FieldError fieldError =
-            new FieldError(DTO_NAME, FIELD_NAME_VISA_ISSUED, "Visa Dates conflict"
-                + " with dates already in Database");
-        fieldErrors.add(fieldError);
+        checkDbVisaDates(fieldErrors, personId, visaIssued, visaValidTo);
       }
     }
   }
 
-  private boolean checkDbVisaDates(Long personId, LocalDate visaIssued, LocalDate visaValidTo) {
+  private void checkDbVisaDates(List<FieldError> fieldErrors, Long personId,
+                                   LocalDate visaIssued, LocalDate visaValidTo) {
 
     Optional<Person> originalPersonRecord = personRepository.findPersonById(personId);
 
     if (originalPersonRecord.isPresent()) {
       RightToWork oldRtwDto = originalPersonRecord.get().getRightToWork();
       if (visaIssued != null && oldRtwDto.getVisaValidTo() != null) {
-        return visaIssued.isAfter(oldRtwDto.getVisaValidTo());
+        FieldError fieldError =
+            new FieldError(DTO_NAME, FIELD_NAME_VISA_ISSUED, "Visa Issued Date "
+                + "conflicts with Visa Valid to date already in Database");
+        fieldErrors.add(fieldError);
       } else if (visaValidTo != null && oldRtwDto.getVisaIssued() != null) {
-        return visaValidTo.isBefore(oldRtwDto.getVisaIssued());
+        FieldError fieldError =
+            new FieldError(DTO_NAME, FIELD_NAME_VISA_ISSUED, "Visa Valid To Date "
+                + "conflicts with Visa Issued date already in Database");
+        fieldErrors.add(fieldError);
       }
     }
-    return false;
   }
 
   private void checkPermitToWork(RightToWorkDTO dto, List<FieldError> fieldErrors) {
