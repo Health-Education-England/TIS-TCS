@@ -20,7 +20,6 @@ import com.transformuk.hee.tis.tcs.service.repository.ProgrammeRepository;
 import com.transformuk.hee.tis.tcs.service.service.ProgrammeMembershipService;
 import com.transformuk.hee.tis.tcs.service.service.mapper.CurriculumMapper;
 import com.transformuk.hee.tis.tcs.service.service.mapper.CurriculumMembershipMapper;
-import com.transformuk.hee.tis.tcs.service.service.mapper.ProgrammeMembershipMapper;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.List;
@@ -57,7 +56,19 @@ public class ProgrammeMembershipServiceImpl implements ProgrammeMembershipServic
   private final ApplicationEventPublisher applicationEventPublisher;
   private final PersonRepository personRepository;
 
-  public ProgrammeMembershipServiceImpl(CurriculumMembershipRepository curriculumMembershipRepository,
+  /**
+   * Initialise the ProgrammeMembershipService.
+   *
+   * @param curriculumMembershipRepository  the CurriculumMembershipRepository
+   * @param curriculumMembershipMapper      the CurriculumMembershipMapper
+   * @param curriculumRepository            the CurriculumRepository
+   * @param curriculumMapper                the CurriculumMapper
+   * @param programmeRepository             the ProgrammeRepository
+   * @param applicationEventPublisher       the ApplicationEventPublisher
+   * @param personRepository                the PersonRepository
+   */
+  public ProgrammeMembershipServiceImpl(
+      CurriculumMembershipRepository curriculumMembershipRepository,
       CurriculumMembershipMapper curriculumMembershipMapper,
       CurriculumRepository curriculumRepository, CurriculumMapper curriculumMapper,
       ProgrammeRepository programmeRepository, ApplicationEventPublisher applicationEventPublisher,
