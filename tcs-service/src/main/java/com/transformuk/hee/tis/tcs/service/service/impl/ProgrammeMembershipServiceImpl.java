@@ -16,7 +16,6 @@ import com.transformuk.hee.tis.tcs.service.model.Programme;
 import com.transformuk.hee.tis.tcs.service.repository.CurriculumMembershipRepository;
 import com.transformuk.hee.tis.tcs.service.repository.CurriculumRepository;
 import com.transformuk.hee.tis.tcs.service.repository.PersonRepository;
-import com.transformuk.hee.tis.tcs.service.repository.ProgrammeMembershipRepository;
 import com.transformuk.hee.tis.tcs.service.repository.ProgrammeRepository;
 import com.transformuk.hee.tis.tcs.service.service.ProgrammeMembershipService;
 import com.transformuk.hee.tis.tcs.service.service.mapper.CurriculumMapper;
@@ -50,9 +49,7 @@ public class ProgrammeMembershipServiceImpl implements ProgrammeMembershipServic
 
   private final Logger log = LoggerFactory.getLogger(ProgrammeMembershipServiceImpl.class);
 
-  private final ProgrammeMembershipRepository programmeMembershipRepository;
   private final CurriculumMembershipRepository curriculumMembershipRepository;
-  private final ProgrammeMembershipMapper programmeMembershipMapper;
   private final CurriculumMembershipMapper curriculumMembershipMapper;
   private final CurriculumRepository curriculumRepository;
   private final CurriculumMapper curriculumMapper;
@@ -60,16 +57,12 @@ public class ProgrammeMembershipServiceImpl implements ProgrammeMembershipServic
   private final ApplicationEventPublisher applicationEventPublisher;
   private final PersonRepository personRepository;
 
-  public ProgrammeMembershipServiceImpl(ProgrammeMembershipRepository programmeMembershipRepository,
-      CurriculumMembershipRepository curriculumMembershipRepository,
-      ProgrammeMembershipMapper programmeMembershipMapper,
+  public ProgrammeMembershipServiceImpl(CurriculumMembershipRepository curriculumMembershipRepository,
       CurriculumMembershipMapper curriculumMembershipMapper,
       CurriculumRepository curriculumRepository, CurriculumMapper curriculumMapper,
       ProgrammeRepository programmeRepository, ApplicationEventPublisher applicationEventPublisher,
       PersonRepository personRepository) {
-    this.programmeMembershipRepository = programmeMembershipRepository;
     this.curriculumMembershipRepository = curriculumMembershipRepository;
-    this.programmeMembershipMapper = programmeMembershipMapper;
     this.curriculumMembershipMapper = curriculumMembershipMapper;
     this.curriculumRepository = curriculumRepository;
     this.curriculumMapper = curriculumMapper;

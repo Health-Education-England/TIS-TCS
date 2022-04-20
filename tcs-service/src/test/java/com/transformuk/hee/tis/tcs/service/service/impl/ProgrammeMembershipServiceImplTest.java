@@ -103,8 +103,7 @@ public class ProgrammeMembershipServiceImplTest {
     CurriculumMapper curriculumMapper = new CurriculumMapperImpl();
     ReflectionTestUtils.setField(curriculumMapper, "specialtyMapper",
         new SpecialtyMapperImpl());
-    testObj = new ProgrammeMembershipServiceImpl(programmeMembershipRepositoryMock,
-        curriculumMembershipRepositoryMock, programmeMembershipMapper, curriculumMembershipMapper,
+    testObj = new ProgrammeMembershipServiceImpl(curriculumMembershipRepositoryMock, curriculumMembershipMapper,
         curriculumRepositoryMock, curriculumMapper, programmeRepositoryMock,
         applicationEventPublisherMock, personRepositoryMock);
 
