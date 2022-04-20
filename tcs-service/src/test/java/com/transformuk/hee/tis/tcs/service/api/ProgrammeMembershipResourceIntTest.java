@@ -337,7 +337,7 @@ public class ProgrammeMembershipResourceIntTest {
 
   @Test
   @Transactional
-  public void createProgrammeMembership() throws Exception {
+  public void createProgrammeMembershipDoesNotWriteToProgrammeMembershipRepository() throws Exception {
     personRepository.saveAndFlush(person);
     curriculumRepository.saveAndFlush(curriculum);
     programme.setCurricula(Collections.singleton(programmeCurriculum));
@@ -345,6 +345,7 @@ public class ProgrammeMembershipResourceIntTest {
     rotation.setProgrammeId(programme.getId());
     rotationRepository.saveAndFlush(rotation);
     int databasePmSizeBeforeCreate = programmeMembershipRepository.findAll().size();
+    int databaseCmSizeBeforeCreate = curriculumMembershipRepository.findAll().size();
 
     programmeMembership.setPerson(person);
     programmeMembership.setProgramme(programme);
@@ -359,29 +360,11 @@ public class ProgrammeMembershipResourceIntTest {
             .content(TestUtil.convertObjectToJsonBytes(programmeMembershipDTO)))
         .andExpect(status().isCreated());
 
-    // Validate the ProgrammeMembership in the database
+    // Validate the ProgrammeMembershipRepository has NOT changed (it is actually saved as CurriculumMembership)
     List<ProgrammeMembership> programmeMembershipList = programmeMembershipRepository.findAll();
-    assertThat(programmeMembershipList).hasSize(databasePmSizeBeforeCreate + 1);
-    ProgrammeMembership testProgrammeMembership = programmeMembershipList
-        .get(programmeMembershipList.size() - 1);
-    assertThat(testProgrammeMembership.getIntrepidId()).isEqualTo(DEFAULT_INTREPID_ID);
-    assertThat(testProgrammeMembership.getProgrammeMembershipType())
-        .isEqualTo(DEFAULT_PROGRAMME_MEMBERSHIP_TYPE);
-    assertThat(testProgrammeMembership.getRotation()).isEqualTo(rotation);
-    assertThat(testProgrammeMembership.getCurriculumStartDate())
-        .isEqualTo(DEFAULT_CURRICULUM_START_DATE);
-    assertThat(testProgrammeMembership.getCurriculumEndDate())
-        .isEqualTo(DEFAULT_CURRICULUM_END_DATE);
-    assertThat(testProgrammeMembership.getPeriodOfGrace()).isEqualTo(DEFAULT_PERIOD_OF_GRACE);
-    assertThat(testProgrammeMembership.getProgrammeStartDate())
-        .isEqualTo(DEFAULT_PROGRAMME_START_DATE);
-    assertThat(testProgrammeMembership.getCurriculumCompletionDate())
-        .isEqualTo(DEFAULT_CURRICULUM_COMPLETION_DATE);
-    assertThat(testProgrammeMembership.getProgrammeEndDate()).isEqualTo(DEFAULT_PROGRAMME_END_DATE);
-    assertThat(testProgrammeMembership.getLeavingDestination())
-        .isEqualTo(DEFAULT_LEAVING_DESTINATION);
-    assertThat(testProgrammeMembership.getLeavingReason()).isEqualTo(DEFAULT_LEAVING_REASON);
-    assertThat(person.getStatus()).isEqualTo(Status.INACTIVE);
+    assertThat(programmeMembershipList).hasSize(databasePmSizeBeforeCreate);
+    List<CurriculumMembership> curriculumMembershipList = curriculumMembershipRepository.findAll();
+    assertThat(curriculumMembershipList).hasSize(databaseCmSizeBeforeCreate+1);
   }
 
   @Test
@@ -727,7 +710,7 @@ public class ProgrammeMembershipResourceIntTest {
 
   @Test
   @Transactional
-  public void updateProgrammeMembership() throws Exception {
+  public void updateProgrammeMembershipShouldNotUpdateProgrammeMembershipRepository() throws Exception {
     // Initialize the database
     personRepository.saveAndFlush(person);
     curriculumRepository.saveAndFlush(curriculum);
@@ -739,56 +722,34 @@ public class ProgrammeMembershipResourceIntTest {
     programmeMembership.setProgramme(programme);
     programmeMembership
         .setCurriculumId(programme.getCurricula().iterator().next().getCurriculum().getId());
+
+    // Get a copy of the programmeMembership and update it
     programmeMembershipRepository.saveAndFlush(programmeMembership);
-
-    int databaseSizeBeforeUpdate = programmeMembershipRepository.findAll().size();
-
-    // Update the programmeMembership
     ProgrammeMembership updatedProgrammeMembership = programmeMembershipRepository
         .findById(programmeMembership.getId()).orElse(null);
-    updatedProgrammeMembership
-        .intrepidId(UPDATED_INTREPID_ID)
-        .programmeMembershipType(UPDATED_PROGRAMME_MEMBERSHIP_TYPE)
-        .rotation(rotation)
-        .curriculumStartDate(UPDATED_CURRICULUM_START_DATE)
-        .curriculumEndDate(UPDATED_CURRICULUM_END_DATE)
-        .periodOfGrace(UPDATED_PERIOD_OF_GRACE)
-        .programmeStartDate(UPDATED_PROGRAMME_START_DATE)
-        .curriculumCompletionDate(UPDATED_CURRICULUM_COMPLETION_DATE)
-        .programmeEndDate(UPDATED_PROGRAMME_END_DATE)
-        .leavingDestination(UPDATED_LEAVING_DESTINATION)
-        .leavingReason(UPDATED_LEAVING_REASON);
+    updatedProgrammeMembership.setIntrepidId(UPDATED_INTREPID_ID);
+    updatedProgrammeMembership.setLeavingReason(UPDATED_LEAVING_REASON);
     ProgrammeMembershipDTO programmeMembershipDTO = programmeMembershipMapper
         .toDto(updatedProgrammeMembership);
 
+    programmeMembership.setIntrepidId(DEFAULT_INTREPID_ID);
+    programmeMembership.setLeavingReason(DEFAULT_LEAVING_REASON);
+    programmeMembershipRepository.saveAndFlush(programmeMembership);
+    int databaseSizeBeforeUpdate = programmeMembershipRepository.findAll().size();
+
+    //this will update the curriculum membership repository, not the programme membership repository
     restProgrammeMembershipMockMvc.perform(put("/api/programme-memberships")
             .contentType(MediaType.APPLICATION_JSON)
             .content(TestUtil.convertObjectToJsonBytes(programmeMembershipDTO)))
         .andExpect(status().isOk());
 
-    // Validate the ProgrammeMembership in the database
+    // Validate that the original ProgrammeMembership in the repository is unchanged
     List<ProgrammeMembership> programmeMembershipList = programmeMembershipRepository.findAll();
     assertThat(programmeMembershipList).hasSize(databaseSizeBeforeUpdate);
     ProgrammeMembership testProgrammeMembership = programmeMembershipList
         .get(programmeMembershipList.size() - 1);
-    assertThat(testProgrammeMembership.getIntrepidId()).isEqualTo(UPDATED_INTREPID_ID);
-    assertThat(testProgrammeMembership.getProgrammeMembershipType())
-        .isEqualTo(UPDATED_PROGRAMME_MEMBERSHIP_TYPE);
-    assertThat(testProgrammeMembership.getRotation()).isEqualTo(rotation);
-    assertThat(testProgrammeMembership.getCurriculumStartDate())
-        .isEqualTo(UPDATED_CURRICULUM_START_DATE);
-    assertThat(testProgrammeMembership.getCurriculumEndDate())
-        .isEqualTo(UPDATED_CURRICULUM_END_DATE);
-    assertThat(testProgrammeMembership.getPeriodOfGrace()).isEqualTo(UPDATED_PERIOD_OF_GRACE);
-    assertThat(testProgrammeMembership.getProgrammeStartDate())
-        .isEqualTo(UPDATED_PROGRAMME_START_DATE);
-    assertThat(testProgrammeMembership.getCurriculumCompletionDate())
-        .isEqualTo(UPDATED_CURRICULUM_COMPLETION_DATE);
-    assertThat(testProgrammeMembership.getProgrammeEndDate()).isEqualTo(UPDATED_PROGRAMME_END_DATE);
-    assertThat(testProgrammeMembership.getLeavingDestination())
-        .isEqualTo(UPDATED_LEAVING_DESTINATION);
-    assertThat(testProgrammeMembership.getLeavingReason()).isEqualTo(UPDATED_LEAVING_REASON);
-    assertThat(testProgrammeMembership.getAmendedDate()).isAfter(DEFAULT_AMENDED_DATE);
+    assertThat(testProgrammeMembership.getIntrepidId()).isEqualTo(DEFAULT_INTREPID_ID);
+    assertThat(testProgrammeMembership.getLeavingReason()).isEqualTo(DEFAULT_LEAVING_REASON);
   }
 
   @Test
@@ -821,7 +782,7 @@ public class ProgrammeMembershipResourceIntTest {
   @Test
   @Transactional
   @DirtiesContext(methodMode = DirtiesContext.MethodMode.BEFORE_METHOD)
-  public void deleteProgrammeAndCurriculumMemberships() throws Exception {
+  public void deleteProgrammeAndCurriculumMembershipsShouldOnlyDeleteCurriculumMembership() throws Exception {
     // Initialize the database
     // The reason this test needs to run with a fresh context is that the delete function expects
     // the record to have the same ID in both the CurriculumMembership and ProgrammeMembership
@@ -832,8 +793,6 @@ public class ProgrammeMembershipResourceIntTest {
     curriculumMembershipRepository.saveAndFlush(curriculumMembership);
     int databaseCmSizeBeforeDelete = curriculumMembershipRepository.findAll().size();
 
-    //deprecated: when the programmeMembershipRepository is no longer updated in parallel,
-    //these lines should be removed
     programmeMembership.setPerson(person);
     programmeMembershipRepository.deleteAll();
     programmeMembershipRepository.saveAndFlush(programmeMembership);
@@ -849,10 +808,9 @@ public class ProgrammeMembershipResourceIntTest {
     List<CurriculumMembership> curriculumMembershipList = curriculumMembershipRepository.findAll();
     assertThat(curriculumMembershipList).hasSize(databaseCmSizeBeforeDelete - 1);
 
-    //deprecated: when the programmeMembershipRepository is no longer updated in parallel,
-    //these lines should be removed
+    //check that programme membership repository is unaffected
     List<ProgrammeMembership> programmeMembershipList = programmeMembershipRepository.findAll();
-    assertThat(programmeMembershipList).hasSize(databasePmSizeBeforeDelete - 1);
+    assertThat(programmeMembershipList).hasSize(databasePmSizeBeforeDelete);
   }
 
   @Test

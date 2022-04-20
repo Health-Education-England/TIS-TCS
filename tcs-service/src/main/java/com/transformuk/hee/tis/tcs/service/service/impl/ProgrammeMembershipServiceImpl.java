@@ -13,16 +13,13 @@ import com.transformuk.hee.tis.tcs.service.model.Curriculum;
 import com.transformuk.hee.tis.tcs.service.model.CurriculumMembership;
 import com.transformuk.hee.tis.tcs.service.model.Person;
 import com.transformuk.hee.tis.tcs.service.model.Programme;
-import com.transformuk.hee.tis.tcs.service.model.ProgrammeMembership;
 import com.transformuk.hee.tis.tcs.service.repository.CurriculumMembershipRepository;
 import com.transformuk.hee.tis.tcs.service.repository.CurriculumRepository;
 import com.transformuk.hee.tis.tcs.service.repository.PersonRepository;
-import com.transformuk.hee.tis.tcs.service.repository.ProgrammeMembershipRepository;
 import com.transformuk.hee.tis.tcs.service.repository.ProgrammeRepository;
 import com.transformuk.hee.tis.tcs.service.service.ProgrammeMembershipService;
 import com.transformuk.hee.tis.tcs.service.service.mapper.CurriculumMapper;
 import com.transformuk.hee.tis.tcs.service.service.mapper.CurriculumMembershipMapper;
-import com.transformuk.hee.tis.tcs.service.service.mapper.ProgrammeMembershipMapper;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.List;
@@ -51,9 +48,7 @@ public class ProgrammeMembershipServiceImpl implements ProgrammeMembershipServic
 
   private final Logger log = LoggerFactory.getLogger(ProgrammeMembershipServiceImpl.class);
 
-  private final ProgrammeMembershipRepository programmeMembershipRepository;
   private final CurriculumMembershipRepository curriculumMembershipRepository;
-  private final ProgrammeMembershipMapper programmeMembershipMapper;
   private final CurriculumMembershipMapper curriculumMembershipMapper;
   private final CurriculumRepository curriculumRepository;
   private final CurriculumMapper curriculumMapper;
@@ -61,16 +56,24 @@ public class ProgrammeMembershipServiceImpl implements ProgrammeMembershipServic
   private final ApplicationEventPublisher applicationEventPublisher;
   private final PersonRepository personRepository;
 
-  public ProgrammeMembershipServiceImpl(ProgrammeMembershipRepository programmeMembershipRepository,
+  /**
+   * Initialise the ProgrammeMembershipService.
+   *
+   * @param curriculumMembershipRepository  the CurriculumMembershipRepository
+   * @param curriculumMembershipMapper      the CurriculumMembershipMapper
+   * @param curriculumRepository            the CurriculumRepository
+   * @param curriculumMapper                the CurriculumMapper
+   * @param programmeRepository             the ProgrammeRepository
+   * @param applicationEventPublisher       the ApplicationEventPublisher
+   * @param personRepository                the PersonRepository
+   */
+  public ProgrammeMembershipServiceImpl(
       CurriculumMembershipRepository curriculumMembershipRepository,
-      ProgrammeMembershipMapper programmeMembershipMapper,
       CurriculumMembershipMapper curriculumMembershipMapper,
       CurriculumRepository curriculumRepository, CurriculumMapper curriculumMapper,
       ProgrammeRepository programmeRepository, ApplicationEventPublisher applicationEventPublisher,
       PersonRepository personRepository) {
-    this.programmeMembershipRepository = programmeMembershipRepository;
     this.curriculumMembershipRepository = curriculumMembershipRepository;
-    this.programmeMembershipMapper = programmeMembershipMapper;
     this.curriculumMembershipMapper = curriculumMembershipMapper;
     this.curriculumRepository = curriculumRepository;
     this.curriculumMapper = curriculumMapper;
@@ -93,12 +96,6 @@ public class ProgrammeMembershipServiceImpl implements ProgrammeMembershipServic
     List<CurriculumMembership> curriculumMembershipList = curriculumMembershipMapper
         .toEntity(programmeMembershipDto);
     curriculumMembershipList = curriculumMembershipRepository.saveAll(curriculumMembershipList);
-
-    //below is deprecated
-    List<ProgrammeMembership> programmeMembershipList = programmeMembershipMapper
-        .toEntity(programmeMembershipDto);
-    programmeMembershipList.forEach(this::setProgrammeMembershipAmendedDateFromDbRecord);
-    programmeMembershipRepository.saveAll(programmeMembershipList);
 
     //emit events
     updatePersonWhenStatusIsStale(curriculumMembershipList.get(0).getPerson().getId());
@@ -123,12 +120,6 @@ public class ProgrammeMembershipServiceImpl implements ProgrammeMembershipServic
     List<CurriculumMembership> curriculumMemberships = curriculumMembershipMapper
         .programmeMembershipDtosToCurriculumMemberships(programmeMembershipDto);
     curriculumMemberships = curriculumMembershipRepository.saveAll(curriculumMemberships);
-
-    //below is deprecated
-    List<ProgrammeMembership> programmeMemberships = programmeMembershipMapper
-        .programmeMembershipDTOsToProgrammeMemberships(programmeMembershipDto);
-    programmeMemberships.forEach(this::setProgrammeMembershipAmendedDateFromDbRecord);
-    programmeMembershipRepository.saveAll(programmeMemberships);
 
     //emit events
     updatePersonWhenStatusIsStale(curriculumMemberships.get(0).getPerson().getId());
@@ -185,9 +176,6 @@ public class ProgrammeMembershipServiceImpl implements ProgrammeMembershipServic
   @Override
   public void delete(Long id) {
     log.debug("Request to delete ProgrammeMembership : {}", id);
-    //below is deprecated
-    programmeMembershipRepository.deleteById(id);
-    programmeRepository.flush();
 
     //Get the person id from the programme membership before deleting it
     Long personId = curriculumMembershipRepository.getOne(id).getPerson().getId();
@@ -390,38 +378,4 @@ public class ProgrammeMembershipServiceImpl implements ProgrammeMembershipServic
     }
   }
 
-  /**
-   * Set a ProgrammeMembership AmendedDate from its database record.
-   *
-   * <p>The amendedDate of the programmeMembershipDto which is being saved is based on the entry
-   * in the CurriculumMembership table, which will have a slightly different AmendedDate value
-   * from the record in the ProgrammeMembership table. Since this field is used for @Version
-   * optimistic locking, we need the actual value from the ProgrammeMembership table otherwise we
-   * will get 'You are acting on stale data, please refresh' concurrency failures.
-   *
-   * <p>Caution: by overwriting the AmendedDate, it is possible to handle concurrent updates to the
-   * same ProgrammeMembership incorrectly: for example, if record A is updated to A' and this is
-   * committed, and then update B (which was based on A not A') is committed, this should fail as
-   * B needs to be based on A', otherwise the A' update is lost. To avoid this, apply the
-   * ProgrammeMembership record Save after the parallel CurriculumMembership Save in the same
-   * code block: in the event of stale data (the B update in the example above) the
-   * CurriculumMembership Save will fail and throw an exception before the incorrect
-   * ProgrammeMembership Save is applied.
-   *
-   * @param pm the ProgrammeMembership to set the amended date for
-   * @return the updated ProgrammeMembership
-   */
-  private ProgrammeMembership setProgrammeMembershipAmendedDateFromDbRecord(
-      ProgrammeMembership pm) {
-    if (pm.getId() != null) {
-      Optional<ProgrammeMembership> programmeMembership
-          = programmeMembershipRepository.findById(pm.getId());
-      if (programmeMembership.isPresent()) {
-        pm.setAmendedDate(programmeMembership.get().getAmendedDate());
-      } else {
-        log.error("ProgrammeMembership record missing: {}", pm.getId());
-      }
-    }
-    return pm;
-  }
 }
