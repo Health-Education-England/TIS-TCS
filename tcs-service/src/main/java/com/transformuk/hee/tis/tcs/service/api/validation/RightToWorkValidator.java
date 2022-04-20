@@ -8,14 +8,12 @@ import com.transformuk.hee.tis.tcs.api.enumeration.Settled;
 import com.transformuk.hee.tis.tcs.service.model.Person;
 import com.transformuk.hee.tis.tcs.service.model.RightToWork;
 import com.transformuk.hee.tis.tcs.service.repository.PersonRepository;
-
 import java.lang.reflect.Method;
 import java.time.LocalDate;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 import java.util.Optional;
-
 import org.springframework.core.MethodParameter;
 import org.springframework.stereotype.Component;
 import org.springframework.validation.BeanPropertyBindingResult;
@@ -106,8 +104,8 @@ public class RightToWorkValidator {
         //only check the values passed in
         if (visaIssued.isAfter(visaValidTo)) {
           FieldError fieldError =
-              new FieldError(DTO_NAME, FIELD_NAME_VISA_ISSUED, "visaIssued must be before"
-                  + " visaValidTo.");
+              new FieldError(DTO_NAME, FIELD_NAME_VISA_ISSUED, "visaIssued must be" +
+                  " before visaValidTo.");
           fieldErrors.add(fieldError);
         }
       } else if (originalPersonRecord.isPresent()) {
@@ -119,7 +117,8 @@ public class RightToWorkValidator {
                     + "current visaValidTo date.");
             fieldErrors.add(fieldError);
           }
-        } else if (visaValidTo != null && oldRtwDto.getVisaIssued() != null && visaValidTo.isBefore(oldRtwDto.getVisaIssued())) {
+        } else if (visaValidTo != null && oldRtwDto.getVisaIssued() != null
+            && visaValidTo.isBefore(oldRtwDto.getVisaIssued())) {
           FieldError fieldError =
               new FieldError(DTO_NAME, FIELD_NAME_VISA_ISSUED, "visaValidTo date is "
                   + "before current visaIssued date.");
