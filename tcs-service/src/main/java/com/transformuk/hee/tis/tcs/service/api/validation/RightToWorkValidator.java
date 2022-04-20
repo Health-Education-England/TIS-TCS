@@ -110,7 +110,9 @@ public class RightToWorkValidator {
                   + " before visaValidTo.");
           fieldErrors.add(fieldError);
         }
-      } else {  dbValidationError = checkDbVisaDates(personId, visaIssued, visaValidTo); }
+      } else {
+        dbValidationError = checkDbVisaDates(personId, visaIssued, visaValidTo);
+      }
 
       if (dbValidationError) {
         FieldError fieldError =
