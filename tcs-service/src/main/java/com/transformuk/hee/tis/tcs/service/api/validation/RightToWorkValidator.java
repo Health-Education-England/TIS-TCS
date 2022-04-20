@@ -110,12 +110,12 @@ public class RightToWorkValidator {
                   + " before visaValidTo.");
           fieldErrors.add(fieldError);
         }
-      } else { dbValidationError = checkDbVisaDates(personId, visaIssued, visaValidTo);}
+      } else {  dbValidationError = checkDbVisaDates(personId, visaIssued, visaValidTo); }
 
       if (dbValidationError) {
         FieldError fieldError =
-            new FieldError(DTO_NAME, FIELD_NAME_VISA_ISSUED, "Visa Dates conflict" +
-                " with dates already in Database");
+            new FieldError(DTO_NAME, FIELD_NAME_VISA_ISSUED, "Visa Dates conflict"
+                + " with dates already in Database");
         fieldErrors.add(fieldError);
       }
     }
@@ -128,7 +128,7 @@ public class RightToWorkValidator {
     if (originalPersonRecord.isPresent()) {
       RightToWork oldRtwDto = originalPersonRecord.get().getRightToWork();
       if (visaIssued != null && oldRtwDto.getVisaValidTo() != null) {
-          return visaIssued.isAfter(oldRtwDto.getVisaValidTo());
+        return visaIssued.isAfter(oldRtwDto.getVisaValidTo());
       } else if (visaValidTo != null && oldRtwDto.getVisaIssued() != null) {
         return visaValidTo.isBefore(oldRtwDto.getVisaIssued());
       }
