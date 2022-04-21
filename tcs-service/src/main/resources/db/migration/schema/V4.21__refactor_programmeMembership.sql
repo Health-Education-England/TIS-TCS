@@ -4,13 +4,13 @@ CREATE TABLE `ProgrammeMembership` (
   `programmeMembershipType` varchar(255) DEFAULT NULL,
   `programmeStartDate` date DEFAULT NULL,
   `programmeEndDate` date DEFAULT NULL,
-  `periodOfGrace` int(11) DEFAULT NULL,
   `programmeId` bigint(20) NOT NULL,
   `trainingNumberId` bigint(20) DEFAULT NULL,
   `personId` bigint(20) NOT NULL,
   `rotation` varchar(255) DEFAULT NULL,
   `rotationId` bigint(20) DEFAULT NULL,
   `trainingPathway` varchar(255) DEFAULT NULL,
+  `leavingReason` varchar(255) DEFAULT NULL,
   `amendedDate` datetime(3) NOT NULL DEFAULT CURRENT_TIMESTAMP(3),
   PRIMARY KEY (`id`),
   KEY `fk_ProgrammeMembership_person_id` (`personId`),
@@ -24,10 +24,10 @@ CREATE TABLE `ProgrammeMembership` (
 ) ENGINE=InnoDB AUTO_INCREMENT=0 DEFAULT CHARSET=utf8;
 
 INSERT INTO ProgrammeMembership (personId, programmeId, rotationId, rotation, programmeStartDate, programmeEndDate,
-programmeMembershipType, trainingPathway, periodOfGrace)
+programmeMembershipType, trainingPathway, leavingReason)
 SELECT
 personId, programmeId, rotationId, max(rotation), programmeStartDate, programmeEndDate,
-programmeMembershipType, max(trainingPathway), max(periodOfGrace)
+programmeMembershipType, max(trainingPathway), max(leavingReason)
 FROM CurriculumMembership
 GROUP BY
 personId, programmeId, rotationId, programmeStartDate, programmeEndDate, programmeMembershipType;
