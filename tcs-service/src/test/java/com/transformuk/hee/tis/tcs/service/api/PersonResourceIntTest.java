@@ -328,7 +328,7 @@ public class PersonResourceIntTest {
     verify(gdcDetailsValidator).validate(any(GdcDetailsDTO.class));
     verify(personalDetailsValidator).validate(any(PersonalDetailsDTO.class));
     verify(contactDetailsValidator).validate(any(ContactDetailsDTO.class));
-    verify(rightToWorkValidator).validate(any(RightToWorkDTO.class));
+    verify(rightToWorkValidator).validate(any(RightToWorkDTO.class), any());
   }
 
   @Test
@@ -716,7 +716,7 @@ public class PersonResourceIntTest {
     verify(gdcDetailsValidator).validate(any(GdcDetailsDTO.class));
     verify(personalDetailsValidator).validate(any(PersonalDetailsDTO.class));
     verify(contactDetailsValidator).validate(any(ContactDetailsDTO.class));
-    verify(rightToWorkValidator).validate(any(RightToWorkDTO.class));
+    verify(rightToWorkValidator).validate(any(RightToWorkDTO.class), any());
   }
 
   @Test
