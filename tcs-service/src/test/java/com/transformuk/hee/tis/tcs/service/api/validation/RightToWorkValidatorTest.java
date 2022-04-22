@@ -383,7 +383,7 @@ class RightToWorkValidatorTest {
 
   @Test
   void shouldPassValidationWhenDtoNull() {
-    assertDoesNotThrow(() -> validator.validate(null,null));
+    assertDoesNotThrow(() -> validator.validate(null));
   }
 
   @Test
@@ -395,7 +395,7 @@ class RightToWorkValidatorTest {
         .thenReturn(false);
 
     MethodArgumentNotValidException exception = assertThrows(MethodArgumentNotValidException.class,
-        () -> validator.validate(dto, 1L));
+        () -> validator.validate(dto));
 
     List<FieldError> permitToWorkErrors = exception.getBindingResult()
         .getFieldErrors("permitToWork");
@@ -413,6 +413,6 @@ class RightToWorkValidatorTest {
 
     when(referenceService.isValueExists(PermitToWorkDTO.class, "doesExist", true)).thenReturn(true);
 
-    assertDoesNotThrow(() -> validator.validate(dto, 1L));
+    assertDoesNotThrow(() -> validator.validate(dto));
   }
 }

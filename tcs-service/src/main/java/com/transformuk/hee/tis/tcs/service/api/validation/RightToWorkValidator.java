@@ -46,14 +46,13 @@ public class RightToWorkValidator {
    * @param dto the rightToWork to check
    * @throws MethodArgumentNotValidException if there are validation errors
    */
-  public void validate(RightToWorkDTO dto, Long personId) throws MethodArgumentNotValidException {
+  public void validate(RightToWorkDTO dto) throws MethodArgumentNotValidException {
     if (dto == null) {
       return;
     }
 
     List<FieldError> fieldErrors = new ArrayList<>();
     checkPermitToWork(dto, fieldErrors);
-    checkVisaDates(fieldErrors, dto, personId);
 
     if (!fieldErrors.isEmpty()) {
       BeanPropertyBindingResult bindingResult = new BeanPropertyBindingResult(dto, DTO_NAME);
