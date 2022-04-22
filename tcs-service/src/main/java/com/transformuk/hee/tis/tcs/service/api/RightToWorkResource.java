@@ -67,7 +67,7 @@ public class RightToWorkResource {
       @RequestBody @Validated(Create.class) RightToWorkDTO rightToWorkDTO)
       throws URISyntaxException, MethodArgumentNotValidException {
     log.debug("REST request to save RightToWork : {}", rightToWorkDTO);
-    rightToWorkValidator.validate(rightToWorkDTO, rightToWorkDTO.getId());
+    rightToWorkValidator.validate(rightToWorkDTO);
     RightToWorkDTO result = rightToWorkService.save(rightToWorkDTO);
     return ResponseEntity.created(new URI("/api/right-to-works/" + result.getId()))
         .headers(HeaderUtil.createEntityCreationAlert(ENTITY_NAME, result.getId().toString()))
@@ -89,7 +89,7 @@ public class RightToWorkResource {
       @RequestBody @Validated(Update.class) RightToWorkDTO rightToWorkDTO)
       throws URISyntaxException, MethodArgumentNotValidException {
     log.debug("REST request to update RightToWork : {}", rightToWorkDTO);
-    rightToWorkValidator.validate(rightToWorkDTO, rightToWorkDTO.getId());
+    rightToWorkValidator.validate(rightToWorkDTO);
     if (rightToWorkDTO.getId() == null) {
       return ResponseEntity.badRequest()
           .headers(HeaderUtil.createFailureAlert(ENTITY_NAME, "must_provide_id",

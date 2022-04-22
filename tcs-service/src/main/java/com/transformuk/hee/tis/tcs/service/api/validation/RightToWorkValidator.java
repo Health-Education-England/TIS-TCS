@@ -46,14 +46,14 @@ public class RightToWorkValidator {
    * @param dto the rightToWork to check
    * @throws MethodArgumentNotValidException if there are validation errors
    */
-  public void validate(RightToWorkDTO dto, Long personId) throws MethodArgumentNotValidException {
+  public void validate(RightToWorkDTO dto) throws MethodArgumentNotValidException {
     if (dto == null) {
       return;
     }
 
     List<FieldError> fieldErrors = new ArrayList<>();
     checkPermitToWork(dto, fieldErrors);
-    checkVisaDates(fieldErrors, dto, personId);
+    checkVisaDates(fieldErrors, dto);
 
     if (!fieldErrors.isEmpty()) {
       BeanPropertyBindingResult bindingResult = new BeanPropertyBindingResult(dto, DTO_NAME);
@@ -91,7 +91,7 @@ public class RightToWorkValidator {
     }
   }
 
-  private void checkVisaDates(List<FieldError> fieldErrors, RightToWorkDTO dto, Long personId) {
+  private void checkVisaDates(List<FieldError> fieldErrors, RightToWorkDTO dto) {
 
     if (dto != null) {
       LocalDate visaIssued = dto.getVisaIssued();
@@ -111,28 +111,50 @@ public class RightToWorkValidator {
           fieldErrors.add(fieldError);
         }
       } else {
-        checkDbVisaDates(fieldErrors, personId, visaIssued, visaValidTo);
+        checkDbVisaDates(fieldErrors, dto.getId(), visaIssued, visaValidTo);
       }
     }
   }
 
-  private void checkDbVisaDates(List<FieldError> fieldErrors, Long personId,
-                                   LocalDate visaIssued, LocalDate visaValidTo) {
+  private void checkDbVisaDates(List<FieldError> fieldErrors, Long rightToWorkId,
+                                LocalDate visaIssued, LocalDate visaValidTo) {
 
-    Optional<Person> originalPersonRecord = personRepository.findPersonById(personId);
+    Optional<Person> originalPersonRecord = personRepository.findPersonById(rightToWorkId);
+    RightToWork oldRtwDto = originalPersonRecord.get().getRightToWork();
+    if (oldRtwDto.getVisaIssued() != null) {
+      System.out.println("db Visa Issued Date: " + originalPersonRecord.get().getRightToWork()
+          .getVisaIssued());
+    }
+
+    if (oldRtwDto.getVisaValidTo() != null) {
+      System.out.println("db Visa Valid Date: " + originalPersonRecord.get().getRightToWork()
+          .getVisaValidTo());
+    }
+
+    if (visaIssued != null) {
+      System.out.println("new Visa Issued Date: " + visaIssued);
+    }
+
+    if (visaValidTo != null) {
+      System.out.println("new Visa Valid Date: " + visaValidTo);
+    }
 
     if (originalPersonRecord.isPresent()) {
-      RightToWork oldRtwDto = originalPersonRecord.get().getRightToWork();
+       oldRtwDto = originalPersonRecord.get().getRightToWork();
       if (visaIssued != null && oldRtwDto.getVisaValidTo() != null) {
-        FieldError fieldError =
-            new FieldError(DTO_NAME, FIELD_NAME_VISA_ISSUED, "Visa Issued Date "
-                + "conflicts with Visa Valid to date already in Database");
-        fieldErrors.add(fieldError);
+        if (visaIssued.isAfter(oldRtwDto.getVisaValidTo())) {
+          FieldError fieldError =
+              new FieldError(DTO_NAME, FIELD_NAME_VISA_ISSUED, "Visa Issued Date "
+                  + "conflicts with Visa Valid to date already in Database");
+          fieldErrors.add(fieldError);
+        }
       } else if (visaValidTo != null && oldRtwDto.getVisaIssued() != null) {
-        FieldError fieldError =
-            new FieldError(DTO_NAME, FIELD_NAME_VISA_VALID_TO, "Visa Valid To Date "
-                + "conflicts with Visa Issued date already in Database");
-        fieldErrors.add(fieldError);
+        if (visaValidTo.isBefore(oldRtwDto.getVisaIssued())) {
+          FieldError fieldError =
+              new FieldError(DTO_NAME, FIELD_NAME_VISA_VALID_TO, "Visa Valid To Date "
+                  + "conflicts with Visa Issued date already in Database");
+          fieldErrors.add(fieldError);
+        }
       }
     }
   }
@@ -157,13 +179,13 @@ public class RightToWorkValidator {
    * @param rightToWorkDto the rightToWorkDto to check
    * @return list of FieldErrors
    */
-  public List<FieldError> validateForBulk(RightToWorkDTO rightToWorkDto, Long personId) {
+  public List<FieldError> validateForBulk(RightToWorkDTO rightToWorkDto) {
     List<FieldError> fieldErrors = new ArrayList<>();
 
     if (rightToWorkDto != null) {
       checkEeaResident(rightToWorkDto, fieldErrors);
       checkSettled(rightToWorkDto, fieldErrors);
-      checkVisaDates(fieldErrors, rightToWorkDto, personId);
+      checkVisaDates(fieldErrors, rightToWorkDto);
       checkPermitToWork(rightToWorkDto, fieldErrors);
     }
     return fieldErrors;

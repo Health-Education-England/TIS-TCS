@@ -41,7 +41,7 @@ class RightToWorkValidatorTest {
 
   @Test
   void shouldPassBulkValidationWhenDtoNull() {
-    List<FieldError> fieldErrors = validator.validateForBulk(null, null);
+    List<FieldError> fieldErrors = validator.validateForBulk(null);
     assertThat("Unexpected number of errors", fieldErrors.size(), is(0));
   }
 
@@ -52,7 +52,7 @@ class RightToWorkValidatorTest {
     dto.setEeaResident("invalid");
 
     // When.
-    List<FieldError> fieldErrors = validator.validateForBulk(dto, null);
+    List<FieldError> fieldErrors = validator.validateForBulk(dto);
 
     // Then.
     assertThat("should return 1 error", fieldErrors.size(), is(1));
@@ -67,7 +67,7 @@ class RightToWorkValidatorTest {
     dto.setEeaResident("Yes");
 
     // When.
-    List<FieldError> fieldErrors = validator.validateForBulk(dto, null);
+    List<FieldError> fieldErrors = validator.validateForBulk(dto);
 
     // Then.
     assertThat("should return 1 error", fieldErrors.size(), is(1));
@@ -82,7 +82,7 @@ class RightToWorkValidatorTest {
     dto.setEeaResident("YES");
 
     // When.
-    List<FieldError> fieldErrors = validator.validateForBulk(dto, null);
+    List<FieldError> fieldErrors = validator.validateForBulk(dto);
 
     // Then.
     assertThat("should not return errors", fieldErrors.size(), is(0));
@@ -95,7 +95,7 @@ class RightToWorkValidatorTest {
     dto.setEeaResident("NO");
 
     // When.
-    List<FieldError> fieldErrors = validator.validateForBulk(dto, null);
+    List<FieldError> fieldErrors = validator.validateForBulk(dto);
 
     // Then.
     assertThat("should not return errors", fieldErrors.size(), is(0));
@@ -108,7 +108,7 @@ class RightToWorkValidatorTest {
     dto.setEeaResident("UNKNOWN");
 
     // When.
-    List<FieldError> fieldErrors = validator.validateForBulk(dto, null);
+    List<FieldError> fieldErrors = validator.validateForBulk(dto);
 
     // Then.
     assertThat("should not return errors", fieldErrors.size(), is(0));
@@ -121,7 +121,7 @@ class RightToWorkValidatorTest {
     dto.setSettled("invalid");
 
     // When.
-    List<FieldError> fieldErrors = validator.validateForBulk(dto, null);
+    List<FieldError> fieldErrors = validator.validateForBulk(dto);
 
     // Then.
     assertThat("should return 1 error", fieldErrors.size(), is(1));
@@ -136,7 +136,7 @@ class RightToWorkValidatorTest {
     dto.setSettled("Yes");
 
     // When.
-    List<FieldError> fieldErrors = validator.validateForBulk(dto, null);
+    List<FieldError> fieldErrors = validator.validateForBulk(dto);
 
     // Then
     assertThat("should return 1 error", fieldErrors.size(), is(1));
@@ -151,7 +151,7 @@ class RightToWorkValidatorTest {
     dto.setSettled("YES");
 
     // When.
-    List<FieldError> fieldErrors = validator.validateForBulk(dto, null);
+    List<FieldError> fieldErrors = validator.validateForBulk(dto);
 
     // Then
     assertThat("should not return errors", fieldErrors.size(), is(0));
@@ -164,7 +164,7 @@ class RightToWorkValidatorTest {
     dto.setSettled("NO");
 
     // When.
-    List<FieldError> fieldErrors = validator.validateForBulk(dto, null);
+    List<FieldError> fieldErrors = validator.validateForBulk(dto);
 
     // Then
     assertThat("should not return errors", fieldErrors.size(), is(0));
@@ -180,7 +180,7 @@ class RightToWorkValidatorTest {
     personDTO.setRightToWork(dto);
 
     // When.
-    List<FieldError> fieldErrors = validator.validateForBulk(dto, dto.getId());
+    List<FieldError> fieldErrors = validator.validateForBulk(dto);
 
     // Then
     assertThat("should return 1 error", fieldErrors.size(), is(1));
@@ -197,7 +197,7 @@ class RightToWorkValidatorTest {
     personDTO.setRightToWork(dto);
 
     // When.
-    List<FieldError> fieldErrors = validator.validateForBulk(dto, dto.getId());
+    List<FieldError> fieldErrors = validator.validateForBulk(dto);
 
     // Then
     assertThat("should not return errors", fieldErrors.size(), is(0));
@@ -212,7 +212,7 @@ class RightToWorkValidatorTest {
     personDTO.setRightToWork(dto);
 
     // When.
-    List<FieldError> fieldErrors = validator.validateForBulk(dto, dto.getId());
+    List<FieldError> fieldErrors = validator.validateForBulk(dto);
 
     // Then
     assertThat("should not return errors", fieldErrors.size(), is(0));
@@ -238,7 +238,7 @@ class RightToWorkValidatorTest {
 
     when(personRepository.findPersonById(1L)).thenReturn(Optional.of(person));
 
-    List<FieldError> fieldErrors = validator.validateForBulk(dto, dto.getId());
+    List<FieldError> fieldErrors = validator.validateForBulk(dto);
 
     // Then
     assertThat("should not return errors", fieldErrors.size(), is(0));
@@ -264,7 +264,7 @@ class RightToWorkValidatorTest {
 
     when(personRepository.findPersonById(1L)).thenReturn(Optional.of(person));
 
-    List<FieldError> fieldErrors = validator.validateForBulk(dto, dto.getId());
+    List<FieldError> fieldErrors = validator.validateForBulk(dto);
 
     // Then
     assertThat("should not return errors", fieldErrors.size(), is(0));
@@ -287,7 +287,7 @@ class RightToWorkValidatorTest {
 
     when(personRepository.findPersonById(1L)).thenReturn(Optional.of(person));
 
-    List<FieldError> fieldErrors = validator.validateForBulk(dto, person.getId());
+    List<FieldError> fieldErrors = validator.validateForBulk(dto);
 
     // Then
     assertThat("should return 1 error", fieldErrors.size(), is(1));
@@ -310,7 +310,7 @@ class RightToWorkValidatorTest {
 
     when(personRepository.findPersonById(1L)).thenReturn(Optional.of(person));
 
-    List<FieldError> fieldErrors = validator.validateForBulk(dto, person.getId());
+    List<FieldError> fieldErrors = validator.validateForBulk(dto);
 
     // Then
     assertThat("should return 1 error", fieldErrors.size(), is(1));
@@ -331,7 +331,7 @@ class RightToWorkValidatorTest {
 
     when(personRepository.findPersonById(1L)).thenReturn(Optional.of(person));
 
-    List<FieldError> fieldErrors = validator.validateForBulk(dto, person.getId());
+    List<FieldError> fieldErrors = validator.validateForBulk(dto);
 
     // Then
     assertThat("should not return errors", fieldErrors.size(), is(0));
@@ -343,7 +343,7 @@ class RightToWorkValidatorTest {
     RightToWorkDTO dto = new RightToWorkDTO();
 
     // When.
-    List<FieldError> fieldErrors = validator.validateForBulk(dto, dto.getId());
+    List<FieldError> fieldErrors = validator.validateForBulk(dto);
 
     // Then
     assertThat("should not return errors", fieldErrors.size(), is(0));
@@ -359,7 +359,7 @@ class RightToWorkValidatorTest {
     dto.setVisaValidTo(LocalDate.now());
 
     // When.
-    List<FieldError> fieldErrors = validator.validateForBulk(dto, null);
+    List<FieldError> fieldErrors = validator.validateForBulk(dto);
     // Then.
     assertThat("Error list should be empty.", fieldErrors.size(), equalTo(0));
   }
@@ -376,14 +376,14 @@ class RightToWorkValidatorTest {
     personDTO.setRightToWork(dto);
 
     // When.
-    List<FieldError> fieldErrors = validator.validateForBulk(dto, dto.getId());
+    List<FieldError> fieldErrors = validator.validateForBulk(dto);
     // Then.
     assertThat("Error list should contain 3 errors.", fieldErrors.size(), equalTo(3));
   }
 
   @Test
   void shouldPassValidationWhenDtoNull() {
-    assertDoesNotThrow(() -> validator.validate(null,null));
+    assertDoesNotThrow(() -> validator.validate(null));
   }
 
   @Test
@@ -395,7 +395,7 @@ class RightToWorkValidatorTest {
         .thenReturn(false);
 
     MethodArgumentNotValidException exception = assertThrows(MethodArgumentNotValidException.class,
-        () -> validator.validate(dto, 1L));
+        () -> validator.validate(dto));
 
     List<FieldError> permitToWorkErrors = exception.getBindingResult()
         .getFieldErrors("permitToWork");
@@ -413,6 +413,6 @@ class RightToWorkValidatorTest {
 
     when(referenceService.isValueExists(PermitToWorkDTO.class, "doesExist", true)).thenReturn(true);
 
-    assertDoesNotThrow(() -> validator.validate(dto, 1L));
+    assertDoesNotThrow(() -> validator.validate(dto));
   }
 }
