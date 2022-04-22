@@ -5,6 +5,7 @@ import com.transformuk.hee.tis.tcs.api.dto.PlacementDetailsDTO;
 import com.transformuk.hee.tis.tcs.api.dto.PlacementEsrEventDto;
 import com.transformuk.hee.tis.tcs.api.dto.validation.Create;
 import com.transformuk.hee.tis.tcs.api.dto.validation.Update;
+import com.transformuk.hee.tis.tcs.service.annotation.NoRepeatSubmit;
 import com.transformuk.hee.tis.tcs.service.api.decorator.PlacementDetailsDecorator;
 import com.transformuk.hee.tis.tcs.service.api.util.HeaderUtil;
 import com.transformuk.hee.tis.tcs.service.api.util.PaginationUtil;
@@ -89,6 +90,7 @@ public class PlacementResource {
    * with status 400 (Bad Request) if the placement has already an ID
    * @throws URISyntaxException if the Location URI syntax is incorrect
    */
+  @NoRepeatSubmit
   @PostMapping("/placements")
   @PreAuthorize("hasAuthority('tcs:add:modify:entities')")
   public ResponseEntity<PlacementDetailsDTO> createPlacement(

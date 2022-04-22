@@ -127,6 +127,9 @@ spring:
     username: ${REVAL_RABBITMQ_USERNAME}
     password: ${REVAL_RABBITMQ_PASSWORD}
     ssl.enabled: ${RABBITMQ_USE_SSL}
+  redis:
+    host: localhost
+    port: 50001 # the default port is 6397, somehow this port is occupied in my local, so I changed it to 50001
 
 server:
   port: 8093

@@ -317,6 +317,29 @@
       <artifactId>spring-boot-starter-amqp</artifactId>
     </dependency>
 
+    <dependency>
+      <groupId>org.springframework.data</groupId>
+      <artifactId>spring-data-redis</artifactId>
+    </dependency>
+
+    <dependency>
+      <groupId>org.springframework.cloud</groupId>
+      <artifactId>spring-cloud-aws-context</artifactId>
+      <version>2.2.6.RELEASE</version>
+    </dependency>
+
+    <dependency>
+      <groupId>redis.clients</groupId>
+      <artifactId>jedis</artifactId>
+      <version>3.3.0</version>
+    </dependency>
+
+    <dependency>
+      <groupId>com.amazonaws</groupId>
+      <artifactId>aws-java-sdk-elasticache</artifactId>
+      <version>1.11.859</version>
+    </dependency>
+
   </dependencies>
   <packaging>war</packaging>
   <name>tcs-service</name>
