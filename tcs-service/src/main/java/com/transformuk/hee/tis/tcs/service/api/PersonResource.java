@@ -145,7 +145,7 @@ public class PersonResource {
     gdcDetailsValidator.validate(personDTO.getGdcDetails());
     personalDetailsValidator.validate(personDTO.getPersonalDetails());
     contactDetailsValidator.validate(personDTO.getContactDetails());
-    rightToWorkValidator.validate(personDTO.getRightToWork());
+    rightToWorkValidator.validate(personDTO.getRightToWork(), personDTO.getId());
 
     final PersonDTO result = personService.create(personDTO);
     return ResponseEntity.created(new URI("/api/people/" + result.getId()))
@@ -178,7 +178,7 @@ public class PersonResource {
     gdcDetailsValidator.validate(personDTO.getGdcDetails());
     personalDetailsValidator.validate(personDTO.getPersonalDetails());
     contactDetailsValidator.validate(personDTO.getContactDetails());
-    rightToWorkValidator.validate(personDTO.getRightToWork());
+    rightToWorkValidator.validate(personDTO.getRightToWork(), personDTO.getId());
 
     PersonDTO result = personService.save(personDTO);
     return ResponseEntity.ok()
