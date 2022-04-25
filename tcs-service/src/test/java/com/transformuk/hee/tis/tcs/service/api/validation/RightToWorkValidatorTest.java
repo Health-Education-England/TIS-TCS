@@ -7,6 +7,8 @@ import static org.junit.jupiter.api.Assertions.assertDoesNotThrow;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
+import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.times;
 
 import com.transformuk.hee.tis.reference.api.dto.PermitToWorkDTO;
 import com.transformuk.hee.tis.reference.client.ReferenceService;
@@ -31,7 +33,6 @@ class RightToWorkValidatorTest {
   private PersonRepository personRepository;
   private ReferenceService referenceService;
 
-
   @BeforeEach
   void setUp() {
     referenceService = mock(ReferenceService.class);
@@ -41,7 +42,7 @@ class RightToWorkValidatorTest {
 
   @Test
   void shouldPassBulkValidationWhenDtoNull() {
-    List<FieldError> fieldErrors = validator.validateForBulk(null, null);
+    List<FieldError> fieldErrors = validator.validateForBulk(null);
     assertThat("Unexpected number of errors", fieldErrors.size(), is(0));
   }
 
@@ -52,7 +53,7 @@ class RightToWorkValidatorTest {
     dto.setEeaResident("invalid");
 
     // When.
-    List<FieldError> fieldErrors = validator.validateForBulk(dto, null);
+    List<FieldError> fieldErrors = validator.validateForBulk(dto);
 
     // Then.
     assertThat("should return 1 error", fieldErrors.size(), is(1));
@@ -67,7 +68,7 @@ class RightToWorkValidatorTest {
     dto.setEeaResident("Yes");
 
     // When.
-    List<FieldError> fieldErrors = validator.validateForBulk(dto, null);
+    List<FieldError> fieldErrors = validator.validateForBulk(dto);
 
     // Then.
     assertThat("should return 1 error", fieldErrors.size(), is(1));
@@ -82,7 +83,7 @@ class RightToWorkValidatorTest {
     dto.setEeaResident("YES");
 
     // When.
-    List<FieldError> fieldErrors = validator.validateForBulk(dto, null);
+    List<FieldError> fieldErrors = validator.validateForBulk(dto);
 
     // Then.
     assertThat("should not return errors", fieldErrors.size(), is(0));
@@ -95,7 +96,7 @@ class RightToWorkValidatorTest {
     dto.setEeaResident("NO");
 
     // When.
-    List<FieldError> fieldErrors = validator.validateForBulk(dto, null);
+    List<FieldError> fieldErrors = validator.validateForBulk(dto);
 
     // Then.
     assertThat("should not return errors", fieldErrors.size(), is(0));
@@ -108,7 +109,7 @@ class RightToWorkValidatorTest {
     dto.setEeaResident("UNKNOWN");
 
     // When.
-    List<FieldError> fieldErrors = validator.validateForBulk(dto, null);
+    List<FieldError> fieldErrors = validator.validateForBulk(dto);
 
     // Then.
     assertThat("should not return errors", fieldErrors.size(), is(0));
@@ -121,7 +122,7 @@ class RightToWorkValidatorTest {
     dto.setSettled("invalid");
 
     // When.
-    List<FieldError> fieldErrors = validator.validateForBulk(dto, null);
+    List<FieldError> fieldErrors = validator.validateForBulk(dto);
 
     // Then.
     assertThat("should return 1 error", fieldErrors.size(), is(1));
@@ -136,7 +137,7 @@ class RightToWorkValidatorTest {
     dto.setSettled("Yes");
 
     // When.
-    List<FieldError> fieldErrors = validator.validateForBulk(dto, null);
+    List<FieldError> fieldErrors = validator.validateForBulk(dto);
 
     // Then
     assertThat("should return 1 error", fieldErrors.size(), is(1));
@@ -151,7 +152,7 @@ class RightToWorkValidatorTest {
     dto.setSettled("YES");
 
     // When.
-    List<FieldError> fieldErrors = validator.validateForBulk(dto, null);
+    List<FieldError> fieldErrors = validator.validateForBulk(dto);
 
     // Then
     assertThat("should not return errors", fieldErrors.size(), is(0));
@@ -164,23 +165,21 @@ class RightToWorkValidatorTest {
     dto.setSettled("NO");
 
     // When.
-    List<FieldError> fieldErrors = validator.validateForBulk(dto, null);
+    List<FieldError> fieldErrors = validator.validateForBulk(dto);
 
     // Then
     assertThat("should not return errors", fieldErrors.size(), is(0));
   }
 
   @Test
-  void bulkValidateShouldReturnErrorWhenVisaIssuedAfterVisaValidTo() {
+  void shouldReturnErrorWhenVisaIssuedAfterVisaValidTo() {
     // Given.
     RightToWorkDTO dto = new RightToWorkDTO();
     dto.setVisaIssued(LocalDate.now().plusDays(1));
     dto.setVisaValidTo(LocalDate.now());
-    PersonDTO personDTO = new PersonDTO();
-    personDTO.setRightToWork(dto);
 
     // When.
-    List<FieldError> fieldErrors = validator.validateForBulk(dto, dto.getId());
+    List<FieldError> fieldErrors = validator.validateForBulk(dto);
 
     // Then
     assertThat("should return 1 error", fieldErrors.size(), is(1));
@@ -189,152 +188,166 @@ class RightToWorkValidatorTest {
   }
 
   @Test
-  void bulkValidateShouldNotReturnErrorWhenVisaIssuedAndNoVisaValidTo() {
+  void shouldNotReturnErrorWhenNoVisaValidTo() {
     // Given.
     RightToWorkDTO dto = new RightToWorkDTO();
     dto.setVisaIssued(LocalDate.now());
-    PersonDTO personDTO = new PersonDTO();
-    personDTO.setRightToWork(dto);
 
     // When.
-    List<FieldError> fieldErrors = validator.validateForBulk(dto, dto.getId());
+    List<FieldError> fieldErrors = validator.validateForBulk(dto);
 
     // Then
     assertThat("should not return errors", fieldErrors.size(), is(0));
   }
 
   @Test
-  void shouldNotReturnErrorWhenNotVisaIssuedAndVisaValidTo() {
+  void shouldNotReturnErrorWhenNoVisaIssued() {
     // Given.
     RightToWorkDTO dto = new RightToWorkDTO();
     dto.setVisaValidTo(LocalDate.now());
-    PersonDTO personDTO = new PersonDTO();
-    personDTO.setRightToWork(dto);
 
     // When.
-    List<FieldError> fieldErrors = validator.validateForBulk(dto, dto.getId());
+    List<FieldError> fieldErrors = validator.validateForBulk(dto);
 
     // Then
     assertThat("should not return errors", fieldErrors.size(), is(0));
   }
 
   @Test
-  void shouldNotReturnErrorWhenVisaValidToIsAfterDbVisaIssuedDate() {
+  void shouldNotReturnErrorWhenVisaValidToIsAfterVisaIssued() {
     // Given.
-    RightToWork dbdto = new RightToWork();
-    dbdto.setVisaIssued(LocalDate.now());
-
     RightToWorkDTO dto = new RightToWorkDTO();
+    dto.setVisaIssued(LocalDate.now());
+    dto.setVisaValidTo(LocalDate.now().plusDays(1));
+
+    // When.
+    List<FieldError> fieldErrors = validator.validateForBulk(dto);
+
+    // Then
+    assertThat("should return 1 error", fieldErrors.size(), is(0));
+  }
+
+  @Test
+  void bulkValidateShouldNotReturnErrorWhenVisaValidToIsAfterDbVisaIssued() {
+    // Given.
+    Long personId = 1L;
+    RightToWorkDTO dto = new RightToWorkDTO();
+    dto.setId(personId);
     dto.setVisaValidTo(LocalDate.now().plusDays(10));
 
-    PersonDTO personDTO = new PersonDTO();
-    personDTO.setRightToWork(dto);
-    personDTO.setId(1L);
-
+    RightToWork dbDto = new RightToWork();
+    dbDto.setVisaIssued(LocalDate.now());
     Person person = new Person();
-    person.setId(1L);
-    person.setRightToWork(dbdto);
+    person.setId(personId);
+    person.setRightToWork(dbDto);
+
+    when(personRepository.findPersonById(personId)).thenReturn(Optional.of(person));
+
     // When.
-
-    when(personRepository.findPersonById(1L)).thenReturn(Optional.of(person));
-
-    List<FieldError> fieldErrors = validator.validateForBulk(dto, dto.getId());
+    List<FieldError> fieldErrors = validator.validateForBulk(dto);
 
     // Then
     assertThat("should not return errors", fieldErrors.size(), is(0));
   }
 
   @Test
-  void shouldNotReturnErrorWhenVisaIssuedDateToIsBeforeDbVisaValidToDate() {
+  void bulkValidateShouldReturnErrorWhenVisaValidToIsBeforeDbVisaIssued() {
     // Given.
-    RightToWork dbdto = new RightToWork();
-    dbdto.setVisaValidTo(LocalDate.now().plusDays(10));
-
+    Long personId = 1L;
     RightToWorkDTO dto = new RightToWorkDTO();
-    dto.setVisaIssued(LocalDate.now());
-
-    PersonDTO personDTO = new PersonDTO();
-    personDTO.setRightToWork(dto);
-    personDTO.setId(1L);
-
-    Person person = new Person();
-    person.setId(1L);
-    person.setRightToWork(dbdto);
-    // When.
-
-    when(personRepository.findPersonById(1L)).thenReturn(Optional.of(person));
-
-    List<FieldError> fieldErrors = validator.validateForBulk(dto, dto.getId());
-
-    // Then
-    assertThat("should not return errors", fieldErrors.size(), is(0));
-  }
-
-  @Test
-  void shouldReturnErrorWhenVisaIssuedDateToIsAfterDbVisaValidToDate() {
-    // Given.
-    RightToWork dbdto = new RightToWork();
-    dbdto.setVisaValidTo(LocalDate.now());
-
-    Person person = new Person();
-    person.setId(1L);
-    person.setRightToWork(dbdto);
-
-    RightToWorkDTO dto = new RightToWorkDTO();
-    dto.setVisaIssued(LocalDate.now().plusDays(10));
-
-    // When.
-
-    when(personRepository.findPersonById(1L)).thenReturn(Optional.of(person));
-
-    List<FieldError> fieldErrors = validator.validateForBulk(dto, person.getId());
-
-    // Then
-    assertThat("should return 1 error", fieldErrors.size(), is(1));
-  }
-
-  @Test
-  void shouldReturnErrorWhenVisaValidToDateIsBeforeDbVisaIssuedDate() {
-    // Given.
-    RightToWork dbdto = new RightToWork();
-    dbdto.setVisaIssued(LocalDate.now().plusDays(10));
-
-    Person person = new Person();
-    person.setId(1L);
-    person.setRightToWork(dbdto);
-
-    RightToWorkDTO dto = new RightToWorkDTO();
+    dto.setId(personId);
     dto.setVisaValidTo(LocalDate.now());
 
+    RightToWork dbDto = new RightToWork();
+    dbDto.setVisaIssued(LocalDate.now().plusDays(10));
+    Person person = new Person();
+    person.setId(personId);
+    person.setRightToWork(dbDto);
+
+    when(personRepository.findPersonById(personId)).thenReturn(Optional.of(person));
+
     // When.
-
-    when(personRepository.findPersonById(1L)).thenReturn(Optional.of(person));
-
-    List<FieldError> fieldErrors = validator.validateForBulk(dto, person.getId());
+    List<FieldError> fieldErrors = validator.validateForBulk(dto);
 
     // Then
     assertThat("should return 1 error", fieldErrors.size(), is(1));
   }
 
   @Test
-  void shouldNotReturnErrorWhenNoVisaValidToDateOrVisaIssuedDate() {
+  void bulkValidateShouldNotReturnErrorWhenDbVisaValidToIsAfterVisaIssued() {
     // Given.
-    RightToWork dbdto = new RightToWork();
-
-    Person person = new Person();
-    person.setId(1L);
-    person.setRightToWork(dbdto);
-
+    Long personId = 1L;
     RightToWorkDTO dto = new RightToWorkDTO();
+    dto.setId(personId);
+    dto.setVisaIssued(LocalDate.now());
+
+    RightToWork dbDto = new RightToWork();
+    dbDto.setVisaValidTo(LocalDate.now().plusDays(10));
+    Person person = new Person();
+    person.setId(personId);
+    person.setRightToWork(dbDto);
+
+    when(personRepository.findPersonById(personId)).thenReturn(Optional.of(person));
 
     // When.
-
-    when(personRepository.findPersonById(1L)).thenReturn(Optional.of(person));
-
-    List<FieldError> fieldErrors = validator.validateForBulk(dto, person.getId());
+    List<FieldError> fieldErrors = validator.validateForBulk(dto);
 
     // Then
     assertThat("should not return errors", fieldErrors.size(), is(0));
+  }
+
+  @Test
+  void bulkValidateShouldReturnErrorWhenDbVisaValidToIsBeforeVisaIssued() {
+    // Given.
+    Long personId = 1L;
+    RightToWorkDTO dto = new RightToWorkDTO();
+    dto.setId(personId);
+    dto.setVisaIssued(LocalDate.now().plusDays(10));
+
+    RightToWork dbDto = new RightToWork();
+    dbDto.setVisaValidTo(LocalDate.now());
+    Person person = new Person();
+    person.setId(personId);
+    person.setRightToWork(dbDto);
+
+    when(personRepository.findPersonById(personId)).thenReturn(Optional.of(person));
+
+    // When.
+    List<FieldError> fieldErrors = validator.validateForBulk(dto);
+
+    // Then
+    assertThat("should return 1 error", fieldErrors.size(), is(1));
+  }
+
+  @Test
+  void bulkValidateShouldNotReturnErrorWhenNoDBRtwFoundForVisaDateCheck() {
+    // Given.
+    Long personId = 1L;
+    RightToWorkDTO dto = new RightToWorkDTO();
+    dto.setId(personId);
+    dto.setVisaValidTo(LocalDate.now().plusDays(10));
+
+    Person person = new Person();
+
+    when(personRepository.findPersonById(personId)).thenReturn(Optional.of(person));
+
+    // When.
+    List<FieldError> fieldErrors = validator.validateForBulk(dto);
+
+    // Then
+    assertThat("should not return errors", fieldErrors.size(), is(0));
+  }
+
+  @Test
+  void shouldNotReturnErrorWhenDbVisaValidToIsBeforeVisaIssuedForBulkUpdate() {
+    Long personId = 1L;
+    RightToWorkDTO dto = new RightToWorkDTO();
+    dto.setId(personId);
+    dto.setVisaIssued(LocalDate.now().plusDays(10));
+
+    verify(personRepository, times(0)).findPersonById(personId);
+
+    assertDoesNotThrow(() -> validator.validate(dto));
   }
 
   @Test
@@ -343,7 +356,7 @@ class RightToWorkValidatorTest {
     RightToWorkDTO dto = new RightToWorkDTO();
 
     // When.
-    List<FieldError> fieldErrors = validator.validateForBulk(dto, dto.getId());
+    List<FieldError> fieldErrors = validator.validateForBulk(dto);
 
     // Then
     assertThat("should not return errors", fieldErrors.size(), is(0));
@@ -359,7 +372,7 @@ class RightToWorkValidatorTest {
     dto.setVisaValidTo(LocalDate.now());
 
     // When.
-    List<FieldError> fieldErrors = validator.validateForBulk(dto, null);
+    List<FieldError> fieldErrors = validator.validateForBulk(dto);
     // Then.
     assertThat("Error list should be empty.", fieldErrors.size(), equalTo(0));
   }
@@ -376,14 +389,14 @@ class RightToWorkValidatorTest {
     personDTO.setRightToWork(dto);
 
     // When.
-    List<FieldError> fieldErrors = validator.validateForBulk(dto, dto.getId());
+    List<FieldError> fieldErrors = validator.validateForBulk(dto);
     // Then.
     assertThat("Error list should contain 3 errors.", fieldErrors.size(), equalTo(3));
   }
 
   @Test
   void shouldPassValidationWhenDtoNull() {
-    assertDoesNotThrow(() -> validator.validate(null,null));
+    assertDoesNotThrow(() -> validator.validate(null));
   }
 
   @Test
@@ -395,7 +408,7 @@ class RightToWorkValidatorTest {
         .thenReturn(false);
 
     MethodArgumentNotValidException exception = assertThrows(MethodArgumentNotValidException.class,
-        () -> validator.validate(dto, 1L));
+        () -> validator.validate(dto));
 
     List<FieldError> permitToWorkErrors = exception.getBindingResult()
         .getFieldErrors("permitToWork");
@@ -413,6 +426,6 @@ class RightToWorkValidatorTest {
 
     when(referenceService.isValueExists(PermitToWorkDTO.class, "doesExist", true)).thenReturn(true);
 
-    assertDoesNotThrow(() -> validator.validate(dto, 1L));
+    assertDoesNotThrow(() -> validator.validate(dto));
   }
 }
