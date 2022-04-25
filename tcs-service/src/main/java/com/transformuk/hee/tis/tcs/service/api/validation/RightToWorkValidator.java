@@ -91,7 +91,8 @@ public class RightToWorkValidator {
     }
   }
 
-  private void checkVisaDates(RightToWorkDTO dto, List<FieldError> fieldErrors, boolean checkExistingDBValues) {
+  private void checkVisaDates(RightToWorkDTO dto, List<FieldError> fieldErrors,
+                              boolean checkExistingDbValues) {
 
     if (dto != null) {
       LocalDate visaIssued = dto.getVisaIssued();
@@ -110,7 +111,7 @@ public class RightToWorkValidator {
                   + " before visaValidTo.");
           fieldErrors.add(fieldError);
         }
-      } else if (checkExistingDBValues){
+      } else if (checkExistingDbValues) {
         checkDbVisaDates(fieldErrors, dto.getId(), visaIssued, visaValidTo);
       }
     }
@@ -138,7 +139,8 @@ public class RightToWorkValidator {
             new FieldError(DTO_NAME, FIELD_NAME_VISA_ISSUED, "Visa Issued Date "
                 + "conflicts with Visa Valid to date already in Database");
         fieldErrors.add(fieldError);
-      } else if (visaValidTo != null && oldVisaIssued != null && oldVisaIssued.isAfter(visaValidTo)) {
+      } else if (visaValidTo != null && oldVisaIssued != null
+          && oldVisaIssued.isAfter(visaValidTo)) {
         FieldError fieldError =
             new FieldError(DTO_NAME, FIELD_NAME_VISA_VALID_TO, "Visa Valid To Date "
                 + "conflicts with Visa Issued date already in Database");
