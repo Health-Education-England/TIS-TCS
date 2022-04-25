@@ -288,7 +288,7 @@ public class PersonValidatorTest {
     when(gdcDetailsValidatorMock.validateForBulk(any())).thenReturn(Lists.emptyList());
     when(gmcDetailsValidatorMock.validateForBulk(any())).thenReturn(Lists.emptyList());
     when(personalDetailsValidatorMock.validateForBulk(any())).thenReturn(Lists.emptyList());
-    when(rightToWorkValidatorMock.validateForBulk(any(), any())).thenReturn(Lists.emptyList());
+    when(rightToWorkValidatorMock.validateForBulk(any())).thenReturn(Lists.emptyList());
 
     // When.
     testObj.validateForBulk(Lists.newArrayList(personDTOMock));
@@ -322,7 +322,7 @@ public class PersonValidatorTest {
     when(gdcDetailsValidatorMock.validateForBulk(any())).thenReturn(Lists.emptyList());
     when(gmcDetailsValidatorMock.validateForBulk(any())).thenReturn(Lists.emptyList());
     when(personalDetailsValidatorMock.validateForBulk(any())).thenReturn(Lists.emptyList());
-    when(rightToWorkValidatorMock.validateForBulk(any(), any())).thenReturn(Lists.emptyList());
+    when(rightToWorkValidatorMock.validateForBulk(any())).thenReturn(Lists.emptyList());
     when(trainerApprovalValidatorMock.validateForBulk(any())).thenReturn(Lists.emptyList());
 
     // When.
@@ -352,7 +352,7 @@ public class PersonValidatorTest {
     when(gdcDetailsValidatorMock.validateForBulk(any())).thenReturn(Lists.emptyList());
     when(gmcDetailsValidatorMock.validateForBulk(any())).thenReturn(Lists.emptyList());
     when(personalDetailsValidatorMock.validateForBulk(any())).thenReturn(Lists.emptyList());
-    when(rightToWorkValidatorMock.validateForBulk(any(), any())).thenReturn(Lists.emptyList());
+    when(rightToWorkValidatorMock.validateForBulk(any())).thenReturn(Lists.emptyList());
     when(trainerApprovalValidatorMock.validateForBulk(any())).thenReturn(Lists.emptyList());
 
     // When.
