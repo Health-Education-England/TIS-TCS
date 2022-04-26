@@ -15,6 +15,8 @@ import javax.persistence.JoinColumn;
 import javax.persistence.ManyToOne;
 import javax.persistence.Version;
 import lombok.Data;
+import org.hibernate.annotations.Cascade;
+import org.hibernate.annotations.CascadeType;
 
 /**
  * A CurriculumMembership.
@@ -30,6 +32,7 @@ public class CurriculumMembership implements Serializable {
   private Long id;
 
   @ManyToOne
+  //@Cascade(CascadeType.SAVE_UPDATE)
   @JoinColumn(name = "programmeMembershipId")
   private ProgrammeMembership programmeMembership;
 

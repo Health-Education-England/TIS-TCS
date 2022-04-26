@@ -105,27 +105,12 @@ public class ProgrammeMembershipServiceImpl implements ProgrammeMembershipServic
     log.debug("Request to save ProgrammeMembership : {}", programmeMembershipDto);
 
     ProgrammeMembership programmeMembership = programmeMembershipMapper.toEntity(programmeMembershipDto);
-
-    //note that the saved ProgrammeMembership and CurriculumMembership objects are retrieved and used in place of their
-    //original ones. If any of these are new records they will thus have their id field populated, which is needed
-    //for relational integrity between ProgrammeMembership and CurriculumMembership(s), and possibly other fields set
-    //during the save process (e.g. amendedDate).
-
-    ProgrammeMembership programmeMembershipSaved = programmeMembershipRepository.saveAndFlush(programmeMembership);
-    ProgrammeMembershipDTO programmeMembershipSavedDto = programmeMembershipMapper.toDto(programmeMembershipSaved);
-    List<CurriculumMembership> curriculumMembershipsSaved =
-        curriculumMembershipRepository.saveAll(curriculumMembershipMapper.toEntity(programmeMembershipSavedDto));
-
-    curriculumMembershipRepository.flush();
-    List<CurriculumMembershipDTO> curriculumMembershipSavedDtos = curriculumMembershipMapper
-        .curriculumMembershipsToCurriculumMembershipDtos(curriculumMembershipsSaved);
+    programmeMembership = programmeMembershipRepository.saveAndFlush(programmeMembership);
+    ProgrammeMembershipDTO programmeMembershipSavedDto = programmeMembershipMapper.toDto(programmeMembership);
 
     //emit events
     updatePersonWhenStatusIsStale(programmeMembershipSavedDto.getPerson().getId());
-
-    programmeMembershipSavedDto.setCurriculumMemberships(curriculumMembershipSavedDtos);
     List<ProgrammeMembershipDTO> resultDtos = Collections.singletonList(programmeMembershipSavedDto);
-
     emitProgrammeMembershipSavedEvents(resultDtos);
     return CollectionUtils.isNotEmpty(resultDtos) ? resultDtos.get(0) : null;
   }
@@ -140,14 +125,16 @@ public class ProgrammeMembershipServiceImpl implements ProgrammeMembershipServic
   public List<ProgrammeMembershipDTO> save(List<ProgrammeMembershipDTO> programmeMembershipDto) {
     log.debug("Request to save ProgrammeMembership : {}", programmeMembershipDto);
 
-    List<CurriculumMembership> curriculumMemberships = curriculumMembershipMapper
-        .programmeMembershipDtosToCurriculumMemberships(programmeMembershipDto);
-    curriculumMemberships = curriculumMembershipRepository.saveAll(curriculumMemberships);
+    List<ProgrammeMembership> programmeMemberships =
+        programmeMembershipMapper.programmeMembershipDTOsToProgrammeMemberships(programmeMembershipDto);
+    programmeMemberships = programmeMembershipRepository.saveAll(programmeMemberships);
 
     //emit events
-    programmeMembershipDto.forEach(pm -> updatePersonWhenStatusIsStale(pm.getPerson().getId()));
-    emitProgrammeMembershipSavedEvents(programmeMembershipDto);
-    return programmeMembershipDto;
+    programmeMemberships.forEach(pm -> updatePersonWhenStatusIsStale(pm.getPerson().getId()));
+    List<ProgrammeMembershipDTO> resultDtos =
+        programmeMembershipMapper.programmeMembershipsToProgrammeMembershipDTOs(programmeMemberships);
+    emitProgrammeMembershipSavedEvents(resultDtos);
+    return resultDtos;
   }
 
   private void emitProgrammeMembershipSavedEvents(

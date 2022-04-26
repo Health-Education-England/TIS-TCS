@@ -58,9 +58,9 @@ public class ProgrammeMembership implements Serializable {
   @JoinColumn(name = "trainingNumberId")
   private TrainingNumber trainingNumber;
 
-  //@OneToMany(mappedBy = "programmeMembership", cascade = {CascadeType.ALL}, orphanRemoval = true)
-  @OneToMany(mappedBy = "programmeMembership", cascade = {CascadeType.REMOVE,
-      CascadeType.REFRESH}, orphanRemoval = true)
+  @OneToMany(mappedBy = "programmeMembership", cascade = {CascadeType.ALL}, orphanRemoval = true)
+  //@OneToMany(mappedBy = "programmeMembership", cascade = {CascadeType.REMOVE,
+  //    CascadeType.REFRESH}, orphanRemoval = true)
   private Set<CurriculumMembership> curriculumMemberships = new HashSet<>();
 
   @Version

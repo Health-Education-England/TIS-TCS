@@ -302,7 +302,6 @@ public class ProgrammeMembershipResourceIntTest {
     programmeMembership.setPerson(person);
     programmeMembership.setProgramme(programme);
     programmeMembership.setRotation(rotation);
-    programmeMembershipRepository.saveAndFlush(programmeMembership);
 
     int databaseCmSizeBeforeCreate = curriculumMembershipRepository.findAll().size();
     int databasePmSizeBeforeCreate = programmeMembershipRepository.findAll().size();
@@ -320,9 +319,9 @@ public class ProgrammeMembershipResourceIntTest {
             .content(TestUtil.convertObjectToJsonBytes(programmeMembershipDTO)))
         .andExpect(status().isCreated());
 
-    // Validate that ProgrammeMembership has been updated in the database
+    // Validate that ProgrammeMembership has been added to the database
     List<ProgrammeMembership> programmeMembershipList = programmeMembershipRepository.findAll();
-    assertThat(programmeMembershipList).hasSize(databasePmSizeBeforeCreate);
+    assertThat(programmeMembershipList).hasSize(databasePmSizeBeforeCreate + 1);
 
     // Validate the CurriculumMembership in the database
     List<CurriculumMembership> curriculumMembershipList = curriculumMembershipRepository.findAll();
@@ -330,24 +329,22 @@ public class ProgrammeMembershipResourceIntTest {
     CurriculumMembership testCurriculumMembership = curriculumMembershipList
         .get(curriculumMembershipList.size() - 1);
     assertThat(testCurriculumMembership.getIntrepidId()).isEqualTo(DEFAULT_INTREPID_ID);
-    assertThat(testCurriculumMembership.getProgrammeMembershipType())
-        .isEqualTo(DEFAULT_PROGRAMME_MEMBERSHIP_TYPE);
-    assertThat(testCurriculumMembership.getRotation()).isEqualTo(rotation);
     assertThat(testCurriculumMembership.getCurriculumStartDate())
         .isEqualTo(DEFAULT_CURRICULUM_START_DATE);
     assertThat(testCurriculumMembership.getCurriculumEndDate())
         .isEqualTo(DEFAULT_CURRICULUM_END_DATE);
     assertThat(testCurriculumMembership.getPeriodOfGrace()).isEqualTo(DEFAULT_PERIOD_OF_GRACE);
-    assertThat(testCurriculumMembership.getProgrammeStartDate())
-        .isEqualTo(DEFAULT_PROGRAMME_START_DATE);
     assertThat(testCurriculumMembership.getCurriculumCompletionDate())
         .isEqualTo(DEFAULT_CURRICULUM_COMPLETION_DATE);
-    assertThat(testCurriculumMembership.getProgrammeEndDate()).isEqualTo(DEFAULT_PROGRAMME_END_DATE);
     assertThat(testCurriculumMembership.getLeavingDestination())
         .isEqualTo(DEFAULT_LEAVING_DESTINATION);
     assertThat(testCurriculumMembership.getLeavingReason()).isEqualTo(DEFAULT_LEAVING_REASON);
     assertThat(person.getStatus()).isEqualTo(Status.INACTIVE);
   }
+
+  //TODO: add tests:
+  //saved PM and 2 new CMs
+  //saved PM and CM, update to both
 
 //  @Test
 //  @Transactional

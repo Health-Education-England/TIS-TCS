@@ -248,9 +248,9 @@ public class CurriculumMembershipMapper {
     CurriculumMembership result = new CurriculumMembership();
 
     //TODO: this is not very elegant
-    ProgrammeMembership programmeMembership = new ProgrammeMembership();
-    programmeMembership.setId(programmeMembershipDto.getId());
-    result.setProgrammeMembership(programmeMembership);
+//    ProgrammeMembership programmeMembership = new ProgrammeMembership();
+//    programmeMembership.setId(programmeMembershipDto.getId());
+//    result.setProgrammeMembership(programmeMembership);
     //FIXME: these fields should be held at the level of curriculum membership not programme membership
     result.setLeavingDestination(programmeMembershipDto.getLeavingDestination());
     result.setLeavingReason(programmeMembershipDto.getLeavingReason());
