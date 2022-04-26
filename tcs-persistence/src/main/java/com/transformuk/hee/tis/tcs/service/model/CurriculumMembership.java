@@ -29,12 +29,18 @@ public class CurriculumMembership implements Serializable {
   @GeneratedValue(strategy = GenerationType.IDENTITY)
   private Long id;
 
+  @ManyToOne
+  @JoinColumn(name = "programmeMembershipId")
+  private ProgrammeMembership programmeMembership;
+
   private String intrepidId;
 
+  @Deprecated
   @ManyToOne
   @JoinColumn(name = "personId")
   private Person person;
 
+  @Deprecated
   @Enumerated(EnumType.STRING)
   private ProgrammeMembershipType programmeMembershipType;
 
@@ -44,26 +50,31 @@ public class CurriculumMembership implements Serializable {
 
   private Integer periodOfGrace;
 
+  @Deprecated
   private LocalDate programmeStartDate;
 
   private LocalDate curriculumCompletionDate;
 
+  @Deprecated
   private LocalDate programmeEndDate;
 
   private String leavingDestination;
 
   private String leavingReason;
 
+  @Deprecated
   @ManyToOne
   @JoinColumn(name = "programmeId")
   private Programme programme;
 
   private Long curriculumId;
 
+  @Deprecated
   @ManyToOne
   @JoinColumn(name = "rotationId")
   private Rotation rotation;
 
+  @Deprecated
   @ManyToOne
   @JoinColumn(name = "trainingNumberId")
   private TrainingNumber trainingNumber;
@@ -71,6 +82,7 @@ public class CurriculumMembership implements Serializable {
   @Version
   private LocalDateTime amendedDate;
 
+  @Deprecated
   private String trainingPathway;
 
   public CurriculumMembership intrepidId(String intrepidId) {

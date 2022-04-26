@@ -39,10 +39,6 @@ public class ProgrammeMembershipMapperTest {
     pm2.setProgrammeEndDate(programmeEndDate1);
     pm3.setProgrammeEndDate(programmeEndDate2);
 
-    pm1.setCurriculumId(1L);
-    pm2.setCurriculumId(2L);
-    pm3.setCurriculumId(3L);
-
     Person person1 = new Person();
     person1.setId(1L);
 

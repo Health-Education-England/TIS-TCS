@@ -13,9 +13,11 @@ import com.transformuk.hee.tis.tcs.service.model.Curriculum;
 import com.transformuk.hee.tis.tcs.service.model.CurriculumMembership;
 import com.transformuk.hee.tis.tcs.service.model.Person;
 import com.transformuk.hee.tis.tcs.service.model.Programme;
+import com.transformuk.hee.tis.tcs.service.model.ProgrammeMembership;
 import com.transformuk.hee.tis.tcs.service.repository.CurriculumMembershipRepository;
 import com.transformuk.hee.tis.tcs.service.repository.CurriculumRepository;
 import com.transformuk.hee.tis.tcs.service.repository.PersonRepository;
+import com.transformuk.hee.tis.tcs.service.repository.ProgrammeMembershipRepository;
 import com.transformuk.hee.tis.tcs.service.repository.ProgrammeRepository;
 import com.transformuk.hee.tis.tcs.service.service.ProgrammeMembershipService;
 import com.transformuk.hee.tis.tcs.service.service.mapper.CurriculumMapper;
@@ -29,6 +31,8 @@ import java.util.Optional;
 import java.util.Set;
 import java.util.function.Predicate;
 import java.util.stream.Collectors;
+
+import com.transformuk.hee.tis.tcs.service.service.mapper.ProgrammeMembershipMapper;
 import org.apache.commons.collections4.CollectionUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -48,7 +52,9 @@ public class ProgrammeMembershipServiceImpl implements ProgrammeMembershipServic
 
   private final Logger log = LoggerFactory.getLogger(ProgrammeMembershipServiceImpl.class);
 
+  private final ProgrammeMembershipRepository programmeMembershipRepository;
   private final CurriculumMembershipRepository curriculumMembershipRepository;
+  private final ProgrammeMembershipMapper programmeMembershipMapper;
   private final CurriculumMembershipMapper curriculumMembershipMapper;
   private final CurriculumRepository curriculumRepository;
   private final CurriculumMapper curriculumMapper;
@@ -59,7 +65,9 @@ public class ProgrammeMembershipServiceImpl implements ProgrammeMembershipServic
   /**
    * Initialise the ProgrammeMembershipService.
    *
+   * @param programmeMembershipRepository   the ProgrammeMembershipRepository
    * @param curriculumMembershipRepository  the CurriculumMembershipRepository
+   * @param programmeMembershipMapper       the ProgrammeMembershipMapper
    * @param curriculumMembershipMapper      the CurriculumMembershipMapper
    * @param curriculumRepository            the CurriculumRepository
    * @param curriculumMapper                the CurriculumMapper
@@ -68,12 +76,16 @@ public class ProgrammeMembershipServiceImpl implements ProgrammeMembershipServic
    * @param personRepository                the PersonRepository
    */
   public ProgrammeMembershipServiceImpl(
+      ProgrammeMembershipRepository programmeMembershipRepository,
       CurriculumMembershipRepository curriculumMembershipRepository,
+      ProgrammeMembershipMapper programmeMembershipMapper,
       CurriculumMembershipMapper curriculumMembershipMapper,
       CurriculumRepository curriculumRepository, CurriculumMapper curriculumMapper,
       ProgrammeRepository programmeRepository, ApplicationEventPublisher applicationEventPublisher,
       PersonRepository personRepository) {
+    this.programmeMembershipRepository = programmeMembershipRepository;
     this.curriculumMembershipRepository = curriculumMembershipRepository;
+    this.programmeMembershipMapper = programmeMembershipMapper;
     this.curriculumMembershipMapper = curriculumMembershipMapper;
     this.curriculumRepository = curriculumRepository;
     this.curriculumMapper = curriculumMapper;
@@ -83,7 +95,7 @@ public class ProgrammeMembershipServiceImpl implements ProgrammeMembershipServic
   }
 
   /**
-   * Save a programmeMembership.
+   * Save a programmeMembership and its curriculum memberships.
    *
    * @param programmeMembershipDto the entity to save
    * @return the persisted entity
@@ -92,15 +104,27 @@ public class ProgrammeMembershipServiceImpl implements ProgrammeMembershipServic
   public ProgrammeMembershipDTO save(ProgrammeMembershipDTO programmeMembershipDto) {
     log.debug("Request to save ProgrammeMembership : {}", programmeMembershipDto);
 
-    //new
-    List<CurriculumMembership> curriculumMembershipList = curriculumMembershipMapper
-        .toEntity(programmeMembershipDto);
-    curriculumMembershipList = curriculumMembershipRepository.saveAll(curriculumMembershipList);
+    ProgrammeMembership programmeMembership = programmeMembershipMapper.toEntity(programmeMembershipDto);
+
+    //note that the saved ProgrammeMembership and CurriculumMembership objects are retrieved and used in place of their
+    //original ones. If any of these are new records they will thus have their id field populated, which is needed
+    //for relational integrity between ProgrammeMembership and CurriculumMembership(s), and possibly other fields set
+    //during the save process (e.g. amendedDate).
+
+    ProgrammeMembership programmeMembershipSaved = programmeMembershipRepository.saveAndFlush(programmeMembership);
+    ProgrammeMembershipDTO programmeMembershipSavedDto = programmeMembershipMapper.toDto(programmeMembershipSaved);
+    List<CurriculumMembership> curriculumMembershipsSaved =
+        curriculumMembershipRepository.saveAll(curriculumMembershipMapper.toEntity(programmeMembershipSavedDto));
+
+    curriculumMembershipRepository.flush();
+    List<CurriculumMembershipDTO> curriculumMembershipSavedDtos = curriculumMembershipMapper
+        .curriculumMembershipsToCurriculumMembershipDtos(curriculumMembershipsSaved);
 
     //emit events
-    updatePersonWhenStatusIsStale(curriculumMembershipList.get(0).getPerson().getId());
-    List<ProgrammeMembershipDTO> resultDtos = curriculumMembershipMapper
-        .curriculumMembershipsToProgrammeMembershipDtos(curriculumMembershipList);
+    updatePersonWhenStatusIsStale(programmeMembershipSavedDto.getPerson().getId());
+
+    programmeMembershipSavedDto.setCurriculumMemberships(curriculumMembershipSavedDtos);
+    List<ProgrammeMembershipDTO> resultDtos = Collections.singletonList(programmeMembershipSavedDto);
 
     emitProgrammeMembershipSavedEvents(resultDtos);
     return CollectionUtils.isNotEmpty(resultDtos) ? resultDtos.get(0) : null;
@@ -116,17 +140,14 @@ public class ProgrammeMembershipServiceImpl implements ProgrammeMembershipServic
   public List<ProgrammeMembershipDTO> save(List<ProgrammeMembershipDTO> programmeMembershipDto) {
     log.debug("Request to save ProgrammeMembership : {}", programmeMembershipDto);
 
-    //new
     List<CurriculumMembership> curriculumMemberships = curriculumMembershipMapper
         .programmeMembershipDtosToCurriculumMemberships(programmeMembershipDto);
     curriculumMemberships = curriculumMembershipRepository.saveAll(curriculumMemberships);
 
     //emit events
-    updatePersonWhenStatusIsStale(curriculumMemberships.get(0).getPerson().getId());
-    List<ProgrammeMembershipDTO> programmeMembershipDtos = curriculumMembershipMapper
-        .curriculumMembershipsToProgrammeMembershipDtos(curriculumMemberships);
-    emitProgrammeMembershipSavedEvents(programmeMembershipDtos);
-    return programmeMembershipDtos;
+    programmeMembershipDto.forEach(pm -> updatePersonWhenStatusIsStale(pm.getPerson().getId()));
+    emitProgrammeMembershipSavedEvents(programmeMembershipDto);
+    return programmeMembershipDto;
   }
 
   private void emitProgrammeMembershipSavedEvents(

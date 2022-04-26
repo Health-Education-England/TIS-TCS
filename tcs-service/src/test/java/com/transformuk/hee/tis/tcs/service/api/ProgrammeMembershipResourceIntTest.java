@@ -40,6 +40,7 @@ import java.time.LocalDateTime;
 import java.time.ZoneId;
 import java.util.Collections;
 import java.util.List;
+import java.util.Set;
 import javax.persistence.EntityManager;
 import org.junit.Before;
 import org.junit.Test;
@@ -101,6 +102,10 @@ public class ProgrammeMembershipResourceIntTest {
 
   private static final String DEFAULT_LEAVING_REASON = "AAAAAAAAAA";
   private static final String UPDATED_LEAVING_REASON = "BBBBBBBBBB";
+
+  private static final Long PROGRAMME_MEMBERSHIP_ID = 99L;
+  private static final Long CURRICULUM_MEMBERSHIP_ID_1 = 1L;
+  private static final Long CURRICULUM_MEMBERSHIP_ID_2 = 2L;
 
   private static final Long NOT_EXISTS_PROGRAMME_ID = 10101010l;
   private static final Long NOT_EXISTS_CURRICULUM_ID = 20202020l;
@@ -190,21 +195,17 @@ public class ProgrammeMembershipResourceIntTest {
         .programmeEndDate(DEFAULT_PROGRAMME_END_DATE)
         .leavingDestination(DEFAULT_LEAVING_DESTINATION)
         .leavingReason(DEFAULT_LEAVING_REASON);
+    curriculumMembership.setId(CURRICULUM_MEMBERSHIP_ID_1);
     return curriculumMembership;
   }
 
   public static ProgrammeMembership createProgrammeMembershipEntity() {
     ProgrammeMembership programmeMembership = new ProgrammeMembership()
-        .intrepidId(DEFAULT_INTREPID_ID)
         .programmeMembershipType(DEFAULT_PROGRAMME_MEMBERSHIP_TYPE)
-        .curriculumStartDate(DEFAULT_CURRICULUM_START_DATE)
-        .curriculumEndDate(DEFAULT_CURRICULUM_END_DATE)
-        .periodOfGrace(DEFAULT_PERIOD_OF_GRACE)
         .programmeStartDate(DEFAULT_PROGRAMME_START_DATE)
-        .curriculumCompletionDate(DEFAULT_CURRICULUM_COMPLETION_DATE)
         .programmeEndDate(DEFAULT_PROGRAMME_END_DATE)
-        .leavingDestination(DEFAULT_LEAVING_DESTINATION)
         .leavingReason(DEFAULT_LEAVING_REASON);
+    programmeMembership.setId(PROGRAMME_MEMBERSHIP_ID);
     return programmeMembership;
   }
 
@@ -258,8 +259,10 @@ public class ProgrammeMembershipResourceIntTest {
     programme.setCurricula(Collections.singleton(programmeCurriculum));
     programmeRepository.saveAndFlush(programme);
 
-    curriculumMembership.setPerson(person);
-    curriculumMembership.setProgramme(programme);
+    programmeMembership.setProgramme(programme);
+    programmeMembershipRepository.saveAndFlush(programmeMembership);
+
+    curriculumMembership.setProgrammeMembership(programmeMembership);
     curriculumMembership
         .setCurriculumId(programme.getCurricula().iterator().next().getCurriculum().getId());
     CurriculumMembership savedCurriculumMembership = curriculumMembershipRepository.saveAndFlush(
@@ -295,13 +298,20 @@ public class ProgrammeMembershipResourceIntTest {
     programmeRepository.saveAndFlush(programme);
     rotation.setProgrammeId(programme.getId());
     rotationRepository.saveAndFlush(rotation);
-    int databaseCmSizeBeforeCreate = curriculumMembershipRepository.findAll().size();
 
-    curriculumMembership.setPerson(person);
-    curriculumMembership.setProgramme(programme);
+    programmeMembership.setPerson(person);
+    programmeMembership.setProgramme(programme);
+    programmeMembership.setRotation(rotation);
+    programmeMembershipRepository.saveAndFlush(programmeMembership);
+
+    int databaseCmSizeBeforeCreate = curriculumMembershipRepository.findAll().size();
+    int databasePmSizeBeforeCreate = programmeMembershipRepository.findAll().size();
+
+    curriculumMembership.setId(null); //new record cannot have ID
     curriculumMembership
         .setCurriculumId(programme.getCurricula().iterator().next().getCurriculum().getId());
-    curriculumMembership.setRotation(rotation);
+    curriculumMembership.setProgrammeMembership(programmeMembership);
+
     // Create the CurriculumMembership
     ProgrammeMembershipDTO programmeMembershipDTO = curriculumMembershipMapper
         .toDto(curriculumMembership);
@@ -309,6 +319,10 @@ public class ProgrammeMembershipResourceIntTest {
             .contentType(MediaType.APPLICATION_JSON)
             .content(TestUtil.convertObjectToJsonBytes(programmeMembershipDTO)))
         .andExpect(status().isCreated());
+
+    // Validate that ProgrammeMembership has been updated in the database
+    List<ProgrammeMembership> programmeMembershipList = programmeMembershipRepository.findAll();
+    assertThat(programmeMembershipList).hasSize(databasePmSizeBeforeCreate);
 
     // Validate the CurriculumMembership in the database
     List<CurriculumMembership> curriculumMembershipList = curriculumMembershipRepository.findAll();
@@ -335,37 +349,37 @@ public class ProgrammeMembershipResourceIntTest {
     assertThat(person.getStatus()).isEqualTo(Status.INACTIVE);
   }
 
-  @Test
-  @Transactional
-  public void createProgrammeMembershipDoesNotWriteToProgrammeMembershipRepository() throws Exception {
-    personRepository.saveAndFlush(person);
-    curriculumRepository.saveAndFlush(curriculum);
-    programme.setCurricula(Collections.singleton(programmeCurriculum));
-    programmeRepository.saveAndFlush(programme);
-    rotation.setProgrammeId(programme.getId());
-    rotationRepository.saveAndFlush(rotation);
-    int databasePmSizeBeforeCreate = programmeMembershipRepository.findAll().size();
-    int databaseCmSizeBeforeCreate = curriculumMembershipRepository.findAll().size();
-
-    programmeMembership.setPerson(person);
-    programmeMembership.setProgramme(programme);
-    programmeMembership
-        .setCurriculumId(programme.getCurricula().iterator().next().getCurriculum().getId());
-    programmeMembership.setRotation(rotation);
-    // Create the ProgrammeMembership
-    ProgrammeMembershipDTO programmeMembershipDTO = programmeMembershipMapper
-        .toDto(programmeMembership);
-    restProgrammeMembershipMockMvc.perform(post("/api/programme-memberships")
-            .contentType(MediaType.APPLICATION_JSON)
-            .content(TestUtil.convertObjectToJsonBytes(programmeMembershipDTO)))
-        .andExpect(status().isCreated());
-
-    // Validate the ProgrammeMembershipRepository has NOT changed (it is actually saved as CurriculumMembership)
-    List<ProgrammeMembership> programmeMembershipList = programmeMembershipRepository.findAll();
-    assertThat(programmeMembershipList).hasSize(databasePmSizeBeforeCreate);
-    List<CurriculumMembership> curriculumMembershipList = curriculumMembershipRepository.findAll();
-    assertThat(curriculumMembershipList).hasSize(databaseCmSizeBeforeCreate+1);
-  }
+//  @Test
+//  @Transactional
+//  public void createProgrammeMembershipDoesNotWriteToProgrammeMembershipRepository() throws Exception {
+//    personRepository.saveAndFlush(person);
+//    curriculumRepository.saveAndFlush(curriculum);
+//    programme.setCurricula(Collections.singleton(programmeCurriculum));
+//    programmeRepository.saveAndFlush(programme);
+//    rotation.setProgrammeId(programme.getId());
+//    rotationRepository.saveAndFlush(rotation);
+//    int databasePmSizeBeforeCreate = programmeMembershipRepository.findAll().size();
+//    int databaseCmSizeBeforeCreate = curriculumMembershipRepository.findAll().size();
+//
+//    programmeMembership.setPerson(person);
+//    programmeMembership.setProgramme(programme);
+//    programmeMembership
+//        .setCurriculumId(programme.getCurricula().iterator().next().getCurriculum().getId());
+//    programmeMembership.setRotation(rotation);
+//    // Create the ProgrammeMembership
+//    ProgrammeMembershipDTO programmeMembershipDTO = programmeMembershipMapper
+//        .toDto(programmeMembership);
+//    restProgrammeMembershipMockMvc.perform(post("/api/programme-memberships")
+//            .contentType(MediaType.APPLICATION_JSON)
+//            .content(TestUtil.convertObjectToJsonBytes(programmeMembershipDTO)))
+//        .andExpect(status().isCreated());
+//
+//    // Validate the ProgrammeMembershipRepository has NOT changed (it is actually saved as CurriculumMembership)
+//    List<ProgrammeMembership> programmeMembershipList = programmeMembershipRepository.findAll();
+//    assertThat(programmeMembershipList).hasSize(databasePmSizeBeforeCreate);
+//    List<CurriculumMembership> curriculumMembershipList = curriculumMembershipRepository.findAll();
+//    assertThat(curriculumMembershipList).hasSize(databaseCmSizeBeforeCreate+1);
+//  }
 
   @Test
   @Transactional
@@ -408,7 +422,11 @@ public class ProgrammeMembershipResourceIntTest {
     curriculumRepository.saveAndFlush(curriculum);
     programme.setCurricula(Collections.singleton(programmeCurriculum));
     programmeRepository.saveAndFlush(programme);
-    curriculumMembership.setProgramme(programme);
+
+    programmeMembership.setProgramme(programme);
+    programmeMembershipRepository.saveAndFlush(programmeMembership);
+
+    curriculumMembership.setProgrammeMembership(programmeMembership);
     curriculumMembership
         .setCurriculumId(programme.getCurricula().iterator().next().getCurriculum().getId());
     ProgrammeMembershipDTO programmeMembershipDTO = curriculumMembershipMapper
@@ -432,9 +450,13 @@ public class ProgrammeMembershipResourceIntTest {
     curriculumRepository.saveAndFlush(curriculum);
     programme.setCurricula(Collections.singleton(programmeCurriculum));
     programmeRepository.saveAndFlush(programme);
-    curriculumMembership.setProgramme(programme);
+
+    programmeMembership.setProgramme(programme);
+    programmeMembershipRepository.saveAndFlush(programmeMembership);
+
     curriculumMembership
         .setCurriculumId(programme.getCurricula().iterator().next().getCurriculum().getId());
+    curriculumMembership.setProgrammeMembership(programmeMembership);
     ProgrammeMembershipDTO programmeMembershipDTO = curriculumMembershipMapper
         .toDto(curriculumMembership);
     person.setId(1020120L); // set not exists person Id
@@ -458,7 +480,11 @@ public class ProgrammeMembershipResourceIntTest {
     curriculumRepository.saveAndFlush(curriculum);
     programme.setCurricula(Collections.singleton(programmeCurriculum));
     programmeRepository.saveAndFlush(programme);
-    curriculumMembership.setProgramme(programme); // this programme doesn't exist in DB
+
+    programmeMembership.setProgramme(programme); // this programme doesn't exist in DB
+    programmeMembershipRepository.saveAndFlush(programmeMembership);
+
+    curriculumMembership.setProgrammeMembership(programmeMembership);
     curriculumMembership
         .setCurriculumId(programme.getCurricula().iterator().next().getCurriculum().getId());
     ProgrammeMembershipDTO programmeMembershipDTO = curriculumMembershipMapper
@@ -485,7 +511,12 @@ public class ProgrammeMembershipResourceIntTest {
     curriculumRepository.saveAndFlush(curriculum);
     programme.setCurricula(Collections.singleton(programmeCurriculum));
     programmeRepository.saveAndFlush(programme);
-    curriculumMembership.setProgramme(programme);
+
+    programmeMembership.setProgramme(programme);
+    programmeMembershipRepository.saveAndFlush(programmeMembership);
+
+    curriculumMembership.setProgrammeMembership(programmeMembership);
+
     curriculumMembership.setCurriculumId(NOT_EXISTS_CURRICULUM_ID);
     ProgrammeMembershipDTO programmeMembershipDTO = curriculumMembershipMapper
         .toDto(curriculumMembership);
@@ -510,7 +541,11 @@ public class ProgrammeMembershipResourceIntTest {
     curriculumRepository.saveAndFlush(curriculum);
     programme.setCurricula(Collections.singleton(programmeCurriculum));
     programmeRepository.saveAndFlush(programme);
-    curriculumMembership.setProgramme(programme);
+
+    programmeMembership.setProgramme(programme);
+    programmeMembershipRepository.saveAndFlush(programmeMembership);
+
+    curriculumMembership.setProgrammeMembership(programmeMembership);
 
     Curriculum notAssociatedCurriculum = CurriculumResourceIntTest.createCurriculumEntity();
     curriculumRepository.saveAndFlush(notAssociatedCurriculum);
@@ -541,10 +576,13 @@ public class ProgrammeMembershipResourceIntTest {
     programme.setCurricula(Collections.singleton(programmeCurriculum));
     programmeRepository.saveAndFlush(programme);
 
+    programmeMembership.setPerson(person);
+    programmeMembership.setProgramme(programme);
+    programmeMembershipRepository.saveAndFlush(programmeMembership);
+
     // Create the CurriculumMembership with an existing ID
     curriculumMembership.setId(1L);
-    curriculumMembership.setPerson(person);
-    curriculumMembership.setProgramme(programme);
+    curriculumMembership.setProgrammeMembership(programmeMembership);
     curriculumMembership
         .setCurriculumId(programme.getCurricula().iterator().next().getCurriculum().getId());
     //Save programme membership
@@ -652,8 +690,12 @@ public class ProgrammeMembershipResourceIntTest {
     programmeRepository.saveAndFlush(programme);
     rotation.setProgrammeId(programme.getId());
     rotationRepository.saveAndFlush(rotation);
-    curriculumMembership.setPerson(person);
-    curriculumMembership.setProgramme(programme);
+
+    programmeMembership.setPerson(person);
+    programmeMembership.setProgramme(programme);
+    programmeMembershipRepository.saveAndFlush(programmeMembership);
+
+    curriculumMembership.setProgrammeMembership(programmeMembership);
     curriculumMembership
         .setCurriculumId(programme.getCurricula().iterator().next().getCurriculum().getId());
     curriculumMembershipRepository.saveAndFlush(curriculumMembership);
@@ -708,59 +750,66 @@ public class ProgrammeMembershipResourceIntTest {
     assertThat(testCurriculumMembership.getAmendedDate()).isAfter(DEFAULT_AMENDED_DATE);
   }
 
+//  @Test
+//  @Transactional
+//  public void updateProgrammeMembershipShouldNotUpdateProgrammeMembershipRepository() throws Exception {
+//    // Initialize the database
+//    personRepository.saveAndFlush(person);
+//    curriculumRepository.saveAndFlush(curriculum);
+//    programme.setCurricula(Collections.singleton(programmeCurriculum));
+//    programmeRepository.saveAndFlush(programme);
+//    rotation.setProgrammeId(programme.getId());
+//    rotationRepository.saveAndFlush(rotation);
+//    programmeMembership.setPerson(person);
+//    programmeMembership.setProgramme(programme);
+//    programmeMembership
+//        .setCurriculumId(programme.getCurricula().iterator().next().getCurriculum().getId());
+//
+//    // Get a copy of the programmeMembership and update it
+//    programmeMembershipRepository.saveAndFlush(programmeMembership);
+//    ProgrammeMembership updatedProgrammeMembership = programmeMembershipRepository
+//        .findById(programmeMembership.getId()).orElse(null);
+//    updatedProgrammeMembership.setIntrepidId(UPDATED_INTREPID_ID);
+//    updatedProgrammeMembership.setLeavingReason(UPDATED_LEAVING_REASON);
+//    ProgrammeMembershipDTO programmeMembershipDTO = programmeMembershipMapper
+//        .toDto(updatedProgrammeMembership);
+//
+//    programmeMembership.setIntrepidId(DEFAULT_INTREPID_ID);
+//    programmeMembership.setLeavingReason(DEFAULT_LEAVING_REASON);
+//    programmeMembershipRepository.saveAndFlush(programmeMembership);
+//    int databaseSizeBeforeUpdate = programmeMembershipRepository.findAll().size();
+//
+//    //this will update the curriculum membership repository, not the programme membership repository
+//    restProgrammeMembershipMockMvc.perform(put("/api/programme-memberships")
+//            .contentType(MediaType.APPLICATION_JSON)
+//            .content(TestUtil.convertObjectToJsonBytes(programmeMembershipDTO)))
+//        .andExpect(status().isOk());
+//
+//    // Validate that the original ProgrammeMembership in the repository is unchanged
+//    List<ProgrammeMembership> programmeMembershipList = programmeMembershipRepository.findAll();
+//    assertThat(programmeMembershipList).hasSize(databaseSizeBeforeUpdate);
+//    ProgrammeMembership testProgrammeMembership = programmeMembershipList
+//        .get(programmeMembershipList.size() - 1);
+//    assertThat(testProgrammeMembership.getIntrepidId()).isEqualTo(DEFAULT_INTREPID_ID);
+//    assertThat(testProgrammeMembership.getLeavingReason()).isEqualTo(DEFAULT_LEAVING_REASON);
+//  }
+
   @Test
   @Transactional
-  public void updateProgrammeMembershipShouldNotUpdateProgrammeMembershipRepository() throws Exception {
-    // Initialize the database
+  public void updateNonExistingCurriculumMembership() throws Exception {
+    int databaseSizeBeforeUpdate = curriculumMembershipRepository.findAll().size();
     personRepository.saveAndFlush(person);
     curriculumRepository.saveAndFlush(curriculum);
     programme.setCurricula(Collections.singleton(programmeCurriculum));
     programmeRepository.saveAndFlush(programme);
     rotation.setProgrammeId(programme.getId());
     rotationRepository.saveAndFlush(rotation);
+
     programmeMembership.setPerson(person);
     programmeMembership.setProgramme(programme);
-    programmeMembership
-        .setCurriculumId(programme.getCurricula().iterator().next().getCurriculum().getId());
-
-    // Get a copy of the programmeMembership and update it
     programmeMembershipRepository.saveAndFlush(programmeMembership);
-    ProgrammeMembership updatedProgrammeMembership = programmeMembershipRepository
-        .findById(programmeMembership.getId()).orElse(null);
-    updatedProgrammeMembership.setIntrepidId(UPDATED_INTREPID_ID);
-    updatedProgrammeMembership.setLeavingReason(UPDATED_LEAVING_REASON);
-    ProgrammeMembershipDTO programmeMembershipDTO = programmeMembershipMapper
-        .toDto(updatedProgrammeMembership);
 
-    programmeMembership.setIntrepidId(DEFAULT_INTREPID_ID);
-    programmeMembership.setLeavingReason(DEFAULT_LEAVING_REASON);
-    programmeMembershipRepository.saveAndFlush(programmeMembership);
-    int databaseSizeBeforeUpdate = programmeMembershipRepository.findAll().size();
-
-    //this will update the curriculum membership repository, not the programme membership repository
-    restProgrammeMembershipMockMvc.perform(put("/api/programme-memberships")
-            .contentType(MediaType.APPLICATION_JSON)
-            .content(TestUtil.convertObjectToJsonBytes(programmeMembershipDTO)))
-        .andExpect(status().isOk());
-
-    // Validate that the original ProgrammeMembership in the repository is unchanged
-    List<ProgrammeMembership> programmeMembershipList = programmeMembershipRepository.findAll();
-    assertThat(programmeMembershipList).hasSize(databaseSizeBeforeUpdate);
-    ProgrammeMembership testProgrammeMembership = programmeMembershipList
-        .get(programmeMembershipList.size() - 1);
-    assertThat(testProgrammeMembership.getIntrepidId()).isEqualTo(DEFAULT_INTREPID_ID);
-    assertThat(testProgrammeMembership.getLeavingReason()).isEqualTo(DEFAULT_LEAVING_REASON);
-  }
-
-  @Test
-  @Transactional
-  public void updateNonExistingCurriculumMembership() throws Exception {
-    int databaseSizeBeforeUpdate = curriculumMembershipRepository.findAll().size();
-    curriculumRepository.saveAndFlush(curriculum);
-    programme.setCurricula(Collections.singleton(programmeCurriculum));
-    programmeRepository.saveAndFlush(programme);
-    curriculumMembership.setPerson(person);
-    curriculumMembership.setProgramme(programme);
+    curriculumMembership.setProgrammeMembership(programmeMembership);
     curriculumMembership
         .setCurriculumId(programme.getCurricula().iterator().next().getCurriculum().getId());
 

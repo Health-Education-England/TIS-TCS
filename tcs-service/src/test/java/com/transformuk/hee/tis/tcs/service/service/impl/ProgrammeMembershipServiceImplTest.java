@@ -81,7 +81,10 @@ public class ProgrammeMembershipServiceImplTest {
   private final PersonDTO personDto = new PersonDTO();
   private final Person person = new Person();
   private ProgrammeMembershipServiceImpl testObj;
+  private ProgrammeMembershipMapper programmeMembershipMapper;
   private CurriculumMembershipMapper curriculumMembershipMapper;
+  @Mock
+  private ProgrammeMembershipRepository programmeMembershipRepositoryMock;
   @Mock
   private CurriculumMembershipRepository curriculumMembershipRepositoryMock;
   @Mock
@@ -96,12 +99,13 @@ public class ProgrammeMembershipServiceImplTest {
   @Before
   public void setup() {
     curriculumMembershipMapper = new CurriculumMembershipMapper();
+    programmeMembershipMapper = new ProgrammeMembershipMapper(curriculumMembershipMapper);
     CurriculumMapper curriculumMapper = new CurriculumMapperImpl();
     ReflectionTestUtils.setField(curriculumMapper, "specialtyMapper",
         new SpecialtyMapperImpl());
-    testObj = new ProgrammeMembershipServiceImpl(curriculumMembershipRepositoryMock, curriculumMembershipMapper,
-        curriculumRepositoryMock, curriculumMapper, programmeRepositoryMock,
-        applicationEventPublisherMock, personRepositoryMock);
+    testObj = new ProgrammeMembershipServiceImpl(programmeMembershipRepositoryMock, curriculumMembershipRepositoryMock,
+        programmeMembershipMapper, curriculumMembershipMapper, curriculumRepositoryMock, curriculumMapper,
+        programmeRepositoryMock, applicationEventPublisherMock, personRepositoryMock);
 
     initialiseData();
   }
