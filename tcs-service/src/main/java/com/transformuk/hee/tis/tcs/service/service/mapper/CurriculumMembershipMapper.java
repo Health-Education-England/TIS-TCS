@@ -178,7 +178,11 @@ public class CurriculumMembershipMapper {
       result.setProgrammeOwner(programme.getOwner());
       result.setProgrammeName(programme.getProgrammeName());
       result.setProgrammeNumber(programme.getProgrammeNumber());
-      result.setRotation(rotationToRotationDto(programmeMembership.getRotation(), programme));
+      if (programmeMembership.getRotation() == null) {
+        result.setRotation(null);
+      } else {
+        result.setRotation(rotationToRotationDto(programmeMembership.getRotation(), programme));
+      }
     }
     result.setTrainingNumber(
         trainingNumberToTrainingNumberDto(programmeMembership.getTrainingNumber()));
@@ -188,6 +192,7 @@ public class CurriculumMembershipMapper {
     } else {
       result.setPerson(personToPersonDto(programmeMembership.getPerson()));
     }
+
     result.setTrainingPathway(programmeMembership.getTrainingPathway());
     return result;
   }

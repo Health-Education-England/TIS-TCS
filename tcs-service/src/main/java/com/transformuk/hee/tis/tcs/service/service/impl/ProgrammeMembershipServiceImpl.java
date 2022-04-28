@@ -105,7 +105,10 @@ public class ProgrammeMembershipServiceImpl implements ProgrammeMembershipServic
     log.debug("Request to save ProgrammeMembership : {}", programmeMembershipDto);
 
     ProgrammeMembership programmeMembership = programmeMembershipMapper.toEntity(programmeMembershipDto);
-    programmeMembership = programmeMembershipRepository.saveAndFlush(programmeMembership);
+    curriculumMembershipRepository.saveAll(programmeMembership.getCurriculumMemberships());
+    programmeMembership = programmeMembershipRepository.save(programmeMembership);
+
+
     ProgrammeMembershipDTO programmeMembershipSavedDto = programmeMembershipMapper.toDto(programmeMembership);
 
     //emit events
@@ -127,10 +130,13 @@ public class ProgrammeMembershipServiceImpl implements ProgrammeMembershipServic
 
     List<ProgrammeMembership> programmeMemberships =
         programmeMembershipMapper.programmeMembershipDTOsToProgrammeMemberships(programmeMembershipDto);
-    programmeMemberships = programmeMembershipRepository.saveAll(programmeMemberships);
+    programmeMemberships.forEach(programmeMembership -> {
+      curriculumMembershipRepository.saveAll(programmeMembership.getCurriculumMemberships());
+      programmeMembership = programmeMembershipRepository.save(programmeMembership);
+      updatePersonWhenStatusIsStale(programmeMembership.getPerson().getId());
+    });
 
     //emit events
-    programmeMemberships.forEach(pm -> updatePersonWhenStatusIsStale(pm.getPerson().getId()));
     List<ProgrammeMembershipDTO> resultDtos =
         programmeMembershipMapper.programmeMembershipsToProgrammeMembershipDTOs(programmeMemberships);
     emitProgrammeMembershipSavedEvents(resultDtos);
@@ -177,17 +183,19 @@ public class ProgrammeMembershipServiceImpl implements ProgrammeMembershipServic
   }
 
   /**
-   * Delete the  programmeMembership by id.
+   * Delete the curriculumMembership by id.
+   * NOTE: this is the curriculumMembership, not the containing programmeMembership
    *
    * @param id the id of the entity
    */
   @Override
   public void delete(Long id) {
-    log.debug("Request to delete ProgrammeMembership : {}", id);
+    log.debug("Request to delete CurriculumMembership : {}", id);
 
     //Get the person id from the programme membership before deleting it
-    Long personId = curriculumMembershipRepository.getOne(id).getPerson().getId();
-    //new
+    Long personId = curriculumMembershipRepository.getOne(id)
+        .getProgrammeMembership().getPerson().getId();
+
     curriculumMembershipRepository.deleteById(id);
     curriculumRepository.flush();
 
@@ -299,33 +307,14 @@ public class ProgrammeMembershipServiceImpl implements ProgrammeMembershipServic
   public List<ProgrammeMembershipCurriculaDTO> findProgrammeMembershipsForTrainee(Long traineeId) {
     Preconditions.checkNotNull(traineeId);
 
-    List<CurriculumMembership> foundCurriculumMemberships = curriculumMembershipRepository
+    List<ProgrammeMembership> foundProgrammeMemberships = programmeMembershipRepository
         .findByTraineeId(traineeId);
 
-    if (CollectionUtils.isNotEmpty(foundCurriculumMemberships)) {
-      List<ProgrammeMembershipDTO> programmeMembershipDtos = curriculumMembershipMapper
-          .allEntityToDto(foundCurriculumMemberships);
+    if (CollectionUtils.isNotEmpty(foundProgrammeMemberships)) {
+      List<ProgrammeMembershipDTO> programmeMembershipDtos = programmeMembershipMapper
+          .allEntityToDto(foundProgrammeMemberships);
       List<ProgrammeMembershipCurriculaDTO> result = attachCurricula(programmeMembershipDtos);
 
-      //get the programme names and numbers
-      Set<Long> programmeIds = foundCurriculumMemberships.stream()
-          .filter(pm -> Objects.nonNull(pm.getProgramme()))
-          .map(pm -> pm.getProgramme().getId())
-          .collect(Collectors.toSet());
-
-      List<Programme> programmesById = programmeRepository.findByIdIn(programmeIds);
-      Map<Long, Programme> programmeIdToProgramme = Maps.newHashMap();
-      if (CollectionUtils.isNotEmpty(programmesById)) {
-        programmeIdToProgramme = programmesById.stream()
-            .filter(Objects::nonNull)
-            .collect(Collectors.toMap(Programme::getId, p -> p));
-      }
-      for (ProgrammeMembershipCurriculaDTO programmeMembershipCurriculaDto : result) {
-        Programme programme = programmeIdToProgramme
-            .get(programmeMembershipCurriculaDto.getProgrammeId());
-        programmeMembershipCurriculaDto.setProgrammeName(programme.getProgrammeName());
-        programmeMembershipCurriculaDto.setProgrammeNumber(programme.getProgrammeNumber());
-      }
       return result;
     }
     return Collections.emptyList();
@@ -337,10 +326,10 @@ public class ProgrammeMembershipServiceImpl implements ProgrammeMembershipServic
       Long programmeId) {
     Preconditions.checkNotNull(programmeId);
 
-    List<CurriculumMembership> foundCurriculumMemberships = curriculumMembershipRepository
+    List<ProgrammeMembership> foundProgrammeMemberships = programmeMembershipRepository
         .findByProgrammeId(programmeId);
-    return curriculumMembershipMapper
-        .curriculumMembershipsToProgrammeMembershipDtos(foundCurriculumMemberships);
+
+    return programmeMembershipMapper.allEntityToDto(foundProgrammeMemberships);
   }
 
   private List<ProgrammeMembershipCurriculaDTO> attachCurricula(
@@ -385,5 +374,4 @@ public class ProgrammeMembershipServiceImpl implements ProgrammeMembershipServic
       personRepository.save(person);
     }
   }
-
 }
