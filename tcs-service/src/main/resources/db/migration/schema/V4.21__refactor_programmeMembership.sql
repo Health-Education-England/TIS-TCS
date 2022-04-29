@@ -46,4 +46,6 @@ IFNULL(pm.programmeMembershipType,'') = IFNULL(cm.programmeMembershipType,''));
 ALTER TABLE CurriculumMembership MODIFY COLUMN `programmeMembershipId` bigint(20) NOT NULL;
 ALTER TABLE CurriculumMembership ADD INDEX `fk_ProgrammeMembership_programme_membership_id` (`programmeMembershipId`);
 ALTER TABLE CurriculumMembership ADD FOREIGN KEY (`programmeMembershipId`) REFERENCES `ProgrammeMembership` (`id`);
+ALTER TABLE CurriculumMembership CHANGE COLUMN `programmeId` `programmeId` BIGINT(20) NULL,
+                                 CHANGE COLUMN `personId` `personId` BIGINT(20) NULL;
 
