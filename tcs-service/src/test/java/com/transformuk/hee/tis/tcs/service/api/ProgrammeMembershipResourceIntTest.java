@@ -41,7 +41,6 @@ import java.time.ZoneId;
 import java.util.Collections;
 import java.util.List;
 import javax.persistence.EntityManager;
-
 import org.assertj.core.util.Sets;
 import org.junit.Before;
 import org.junit.Test;

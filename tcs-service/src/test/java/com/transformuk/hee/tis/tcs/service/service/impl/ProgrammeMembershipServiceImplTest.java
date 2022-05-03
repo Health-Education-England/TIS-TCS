@@ -32,7 +32,6 @@ import com.transformuk.hee.tis.tcs.service.service.mapper.CurriculumMapperImpl;
 import com.transformuk.hee.tis.tcs.service.service.mapper.CurriculumMembershipMapper;
 import com.transformuk.hee.tis.tcs.service.service.mapper.ProgrammeMembershipMapper;
 import com.transformuk.hee.tis.tcs.service.service.mapper.SpecialtyMapperImpl;
-
 import java.time.LocalDate;
 import java.util.ArrayList;
 import java.util.Collections;
