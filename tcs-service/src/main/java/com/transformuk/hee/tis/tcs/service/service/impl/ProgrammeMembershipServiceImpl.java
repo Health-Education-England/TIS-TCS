@@ -105,7 +105,6 @@ public class ProgrammeMembershipServiceImpl implements ProgrammeMembershipServic
     ProgrammeMembership programmeMembership = programmeMembershipMapper.toEntity(programmeMembershipDto);
 
     programmeMembership = programmeMembershipRepository.save(programmeMembership);
-    //curriculumMembershipRepository.saveAll(programmeMembership.getCurriculumMemberships());
 
     ProgrammeMembershipDTO programmeMembershipSavedDto = programmeMembershipMapper.toDto(programmeMembership);
 
@@ -129,7 +128,6 @@ public class ProgrammeMembershipServiceImpl implements ProgrammeMembershipServic
     List<ProgrammeMembership> programmeMemberships =
         programmeMembershipMapper.programmeMembershipDTOsToProgrammeMemberships(programmeMembershipDto);
     programmeMemberships.forEach(programmeMembership -> {
-      //curriculumMembershipRepository.saveAll(programmeMembership.getCurriculumMemberships());
       programmeMembership = programmeMembershipRepository.save(programmeMembership);
       updatePersonWhenStatusIsStale(programmeMembership.getPerson().getId());
     });

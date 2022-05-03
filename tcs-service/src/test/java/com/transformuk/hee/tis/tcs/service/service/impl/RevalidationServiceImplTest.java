@@ -29,6 +29,7 @@ import com.transformuk.hee.tis.tcs.service.model.CurriculumMembership;
 import com.transformuk.hee.tis.tcs.service.model.GmcDetails;
 import com.transformuk.hee.tis.tcs.service.model.Placement;
 import com.transformuk.hee.tis.tcs.service.model.Programme;
+import com.transformuk.hee.tis.tcs.service.model.ProgrammeMembership;
 import com.transformuk.hee.tis.tcs.service.repository.CurriculumMembershipRepository;
 import com.transformuk.hee.tis.tcs.service.repository.GmcDetailsRepository;
 import com.transformuk.hee.tis.tcs.service.repository.PersonRepository;
@@ -97,6 +98,7 @@ public class RevalidationServiceImplTest {
   List<Placement> currentPlacementsForTrainee;
   Map<String,Object> connectionMap;
   private CurriculumMembership curriculumMembership, curriculumMembership1;
+  private ProgrammeMembership programmeMembership, programmeMembership1;
   @Mock
   private ContactDetailsService contactDetailsService;
   @Mock
@@ -141,21 +143,31 @@ public class RevalidationServiceImplTest {
     gmcDetailsDTO.setId(PERSON_ID);
     gmcDetailsDTO.setGmcNumber(GMC_NUMBER);
 
-    curriculumMembership = new CurriculumMembership();
-    curriculumMembership.setProgrammeEndDate(CURRICULUM_END_DATE);
-    curriculumMembership.setCurriculumEndDate(CURRICULUM_END_DATE);
-    curriculumMembership.setProgrammeMembershipType(PROGRAMME_MEMBERSHIP_TYPE);
-    curriculumMembership1 = new CurriculumMembership();
-    curriculumMembership1.setProgrammeStartDate(PM_START_DATE);
-    curriculumMembership1.setProgrammeEndDate(PM_END_DATE);
-    curriculumMembership1.setCurriculumEndDate(PM_END_DATE);
-    curriculumMembership1.setProgrammeMembershipType(PROGRAMME_MEMBERSHIP_TYPE);
-
     Programme programme = new Programme();
     programme.setProgrammeName(PROGRAMME_NAME);
     programme.setOwner(PROGRAMME_OWNER);
-    curriculumMembership.setProgramme(programme);
-    curriculumMembership1.setProgramme(programme);
+
+    //TODO: maybe also test with a PM with multiple CMs
+
+    programmeMembership = new ProgrammeMembership();
+    programmeMembership.setProgrammeEndDate(CURRICULUM_END_DATE);
+    programmeMembership.setProgrammeMembershipType(PROGRAMME_MEMBERSHIP_TYPE);
+    programmeMembership.setProgramme(programme);
+
+    curriculumMembership = new CurriculumMembership();
+    curriculumMembership.setCurriculumEndDate(CURRICULUM_END_DATE);
+    curriculumMembership.setProgrammeMembership(programmeMembership);
+
+    programmeMembership1 = new ProgrammeMembership();
+    programmeMembership1.setProgrammeStartDate(PM_START_DATE);
+    programmeMembership1.setProgrammeEndDate(PM_END_DATE);
+    programmeMembership1.setProgrammeMembershipType(PROGRAMME_MEMBERSHIP_TYPE);
+    programmeMembership1.setProgramme(programme);
+
+    curriculumMembership1 = new CurriculumMembership();
+    curriculumMembership1.setCurriculumEndDate(PM_END_DATE);
+    curriculumMembership1.setProgrammeMembership(programmeMembership1);
+
     Placement placement = new Placement();
     placement.setId(PLACEMENT_ID);
     placement.setGradeId(GRADE_ID);
@@ -290,7 +302,7 @@ public class RevalidationServiceImplTest {
   @Test
   public void connectionStatusMustBeNoIfProgrammeStartDateIsTodayOrOlder() {
     when(gmcDetailsRepositoryMock.findByGmcNumberIn(GMC_IDS)).thenReturn(gmcDetailList);
-    curriculumMembership1.setProgrammeStartDate(PM_START_DATE.plusDays(1));
+    programmeMembership1.setProgrammeStartDate(PM_START_DATE.plusDays(1));
     when(curriculumMembershipRepositoryMock.findLatestCurriculumMembershipByTraineeId(PERSON_ID))
         .thenReturn(curriculumMembership1);
     Map<String, ConnectionRecordDto> result = testObj.findAllConnectionsByGmcIds(GMC_IDS);
@@ -305,8 +317,8 @@ public class RevalidationServiceImplTest {
   @Test
   public void connectionStatusMustBeYesIfProgrammeStartDateIsTodayAndEndDateIsInFuture() {
     when(gmcDetailsRepositoryMock.findByGmcNumberIn(GMC_IDS)).thenReturn(gmcDetailList);
-    curriculumMembership1.setProgrammeStartDate(PM_START_DATE);
-    curriculumMembership1.setProgrammeEndDate(now().plusDays(1));
+    programmeMembership1.setProgrammeStartDate(PM_START_DATE);
+    programmeMembership1.setProgrammeEndDate(now().plusDays(1));
     when(curriculumMembershipRepositoryMock.findLatestCurriculumMembershipByTraineeId(PERSON_ID))
         .thenReturn(curriculumMembership1);
     Map<String, ConnectionRecordDto> result = testObj.findAllConnectionsByGmcIds(GMC_IDS);
@@ -322,8 +334,8 @@ public class RevalidationServiceImplTest {
     when(gmcDetailsRepositoryMock.findByGmcNumberIn(GMC_IDS)).thenReturn(gmcDetailList);
     final LocalDate programmeStartDate = PM_START_DATE.minusDays(1);
     final LocalDate programmeEndDate = now().plusDays(5);
-    curriculumMembership1.setProgrammeStartDate(programmeStartDate);
-    curriculumMembership1.setProgrammeEndDate(programmeEndDate);
+    programmeMembership1.setProgrammeStartDate(programmeStartDate);
+    programmeMembership1.setProgrammeEndDate(programmeEndDate);
     when(curriculumMembershipRepositoryMock.findLatestCurriculumMembershipByTraineeId(PERSON_ID))
         .thenReturn(curriculumMembership1);
     Map<String, ConnectionRecordDto> result = testObj.findAllConnectionsByGmcIds(GMC_IDS);
@@ -341,7 +353,7 @@ public class RevalidationServiceImplTest {
   public void connectionStatusShouldBeNoIfProgrammeStartDateNotExists() {
 
     when(gmcDetailsRepositoryMock.findByGmcNumberIn(GMC_IDS)).thenReturn(gmcDetailList);
-    curriculumMembership1.setProgrammeStartDate(null);
+    programmeMembership1.setProgrammeStartDate(null);
     when(curriculumMembershipRepositoryMock.findLatestCurriculumMembershipByTraineeId(PERSON_ID))
         .thenReturn(curriculumMembership1);
     Map<String, ConnectionRecordDto> result = testObj.findAllConnectionsByGmcIds(GMC_IDS);
@@ -358,7 +370,7 @@ public class RevalidationServiceImplTest {
   public void connectionStatusShouldBeNoIfProgrammeEndDateNotExists() {
 
     when(gmcDetailsRepositoryMock.findByGmcNumberIn(GMC_IDS)).thenReturn(gmcDetailList);
-    curriculumMembership1.setProgrammeEndDate(null);
+    programmeMembership1.setProgrammeEndDate(null);
     when(curriculumMembershipRepositoryMock.findLatestCurriculumMembershipByTraineeId(PERSON_ID))
         .thenReturn(curriculumMembership1);
     Map<String, ConnectionRecordDto> result = testObj.findAllConnectionsByGmcIds(GMC_IDS);
@@ -394,7 +406,7 @@ public class RevalidationServiceImplTest {
 
     when(gmcDetailsRepositoryMock.findByGmcNumberIn(GMC_IDS)).thenReturn(gmcDetailList);
     final LocalDate programmeEndDate = now().minusDays(1);
-    curriculumMembership1.setProgrammeEndDate(programmeEndDate);
+    programmeMembership1.setProgrammeEndDate(programmeEndDate);
     when(curriculumMembershipRepositoryMock.findLatestCurriculumMembershipByTraineeId(PERSON_ID))
         .thenReturn(curriculumMembership1);
     Map<String, ConnectionRecordDto> result = testObj.findAllConnectionsByGmcIds(GMC_IDS);

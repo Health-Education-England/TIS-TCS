@@ -63,6 +63,7 @@ public class ProgrammeRepositoryIntTest {
     personRepository.saveAll(Lists.newArrayList(person1, person2));
     personRepository.flush();
 
+    //TODO: rewrite with new data structure
     CurriculumMembership pm1 = new CurriculumMembership(), pm2 = new CurriculumMembership(), pm3 = new CurriculumMembership(),
         pmWithSameProgramme = new CurriculumMembership();
 

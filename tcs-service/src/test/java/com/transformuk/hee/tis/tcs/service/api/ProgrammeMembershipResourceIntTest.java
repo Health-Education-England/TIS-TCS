@@ -692,12 +692,14 @@ public class ProgrammeMembershipResourceIntTest {
 
     programmeMembership.setPerson(person);
     programmeMembership.setProgramme(programme);
-    programmeMembershipRepository.saveAndFlush(programmeMembership);
+    programmeMembership.setCurriculumMemberships(Sets.newLinkedHashSet(curriculumMembership));
 
     curriculumMembership.setProgrammeMembership(programmeMembership);
     curriculumMembership
         .setCurriculumId(programme.getCurricula().iterator().next().getCurriculum().getId());
-    curriculumMembershipRepository.saveAndFlush(curriculumMembership);
+    //curriculumMembershipRepository.saveAndFlush(curriculumMembership);
+
+    programmeMembershipRepository.saveAndFlush(programmeMembership);
 
     int databaseSizeBeforeUpdate = curriculumMembershipRepository.findAll().size();
 
