@@ -33,7 +33,7 @@ public class CurriculumMembership implements Serializable {
   @GeneratedValue(strategy = GenerationType.IDENTITY)
   private Long id;
 
-  @ManyToOne(targetEntity = ProgrammeMembership.class, fetch = FetchType.LAZY)
+  @ManyToOne(targetEntity = ProgrammeMembership.class)
   @JoinColumn(name = "programmeMembershipId")
   private ProgrammeMembership programmeMembership;
 
@@ -64,6 +64,7 @@ public class CurriculumMembership implements Serializable {
 
   private String leavingDestination;
 
+  @Deprecated
   private String leavingReason;
 
   @Deprecated

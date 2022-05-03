@@ -171,7 +171,7 @@ public class CurriculumMembershipMapper {
     result.setProgrammeStartDate(programmeMembership.getProgrammeStartDate());
     result.setProgrammeEndDate(programmeMembership.getProgrammeEndDate());
     result.setLeavingDestination(curriculumMembership.getLeavingDestination());
-    result.setLeavingReason(curriculumMembership.getLeavingReason());
+    result.setLeavingReason(programmeMembership.getLeavingReason());
     Programme programme = programmeMembership.getProgramme();
     if (programme != null) {
       result.setProgrammeId(programme.getId());
@@ -252,13 +252,9 @@ public class CurriculumMembershipMapper {
       ProgrammeMembershipDTO programmeMembershipDto) {
     CurriculumMembership result = new CurriculumMembership();
 
-    //TODO: this is not very elegant
-//    ProgrammeMembership programmeMembership = new ProgrammeMembership();
-//    programmeMembership.setId(programmeMembershipDto.getId());
-//    result.setProgrammeMembership(programmeMembership);
-    //FIXME: these fields should be held at the level of curriculum membership not programme membership
+    //this is a legacy field (leavingReason is held at PM level),
+    //but technically this should be held at CM level not set for all CMs at PM level
     result.setLeavingDestination(programmeMembershipDto.getLeavingDestination());
-    result.setLeavingReason(programmeMembershipDto.getLeavingReason());
 
     return result;
   }

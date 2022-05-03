@@ -499,8 +499,6 @@ public class ProgrammeMembershipServiceImplTest {
     List<CurriculumMembership> curriculumMembershipList
         = new ArrayList<>(programmeMembership1.getCurriculumMemberships());
 
-    when(curriculumMembershipRepositoryMock.saveAll(anyCollection()))
-        .thenReturn(curriculumMembershipList);
     when(programmeMembershipRepositoryMock.save(any()))
         .thenReturn(programmeMembership1);
     when(personRepositoryMock.getOne(anyLong())).thenReturn(person);
@@ -509,8 +507,8 @@ public class ProgrammeMembershipServiceImplTest {
     ProgrammeMembershipDTO programmeMembershipDTO = testObj.save(programmeMembershipDto1);
 
     //then
-    verify(curriculumMembershipRepositoryMock, times(1))
-        .saveAll(anyCollection());
+    verify(programmeMembershipRepositoryMock, times(1))
+        .save(any());
     Assert.assertEquals(PROGRAMME_ID, programmeMembershipDTO.getProgrammeId().longValue());
     Assert.assertEquals(CURRICULUM_1_ID, programmeMembershipDTO.getCurriculumMemberships()
             .get(0).getCurriculumId().longValue());
@@ -519,11 +517,6 @@ public class ProgrammeMembershipServiceImplTest {
   @Test
   public void shouldSaveProgrammeMembershipDtoListToRepositories() {
     //given
-    List<CurriculumMembership> curriculumMembershipList
-        = curriculumMembershipMapper.toEntity(programmeMembershipDto1);
-
-    when(curriculumMembershipRepositoryMock.saveAll(anyCollection()))
-        .thenReturn(curriculumMembershipList);
     when(programmeMembershipRepositoryMock.save(any()))
         .thenReturn(programmeMembership1);
     when(personRepositoryMock.getOne(anyLong())).thenReturn(person);
@@ -534,9 +527,7 @@ public class ProgrammeMembershipServiceImplTest {
 
     //then
     verify(programmeMembershipRepositoryMock, times(1))
-        .save(any());
-    verify(curriculumMembershipRepositoryMock, times(1))
-        .saveAll(anyCollection());
+        .save(any()); //only 1 call since only 1 element in list
     Assert.assertEquals(PROGRAMME_ID, programmeMembershipDTOList.get(0)
         .getProgrammeId().longValue());
     Assert.assertEquals(CURRICULUM_1_ID, programmeMembershipDTOList.get(0)

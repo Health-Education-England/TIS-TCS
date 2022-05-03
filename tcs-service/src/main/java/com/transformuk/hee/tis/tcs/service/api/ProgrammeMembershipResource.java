@@ -77,7 +77,8 @@ public class ProgrammeMembershipResource {
     log.debug("REST request to save ProgrammeMembership : {}", programmeMembershipDTO);
     programmeMembershipValidator.validate(programmeMembershipDTO);
     if (programmeMembershipDTO.getCurriculumMemberships().get(0).getId() != null) { //TODO: this seems wrong,
-      // but might need to be left as-is to avoid changing the contract for this API call
+      // but might need to be left as-is to avoid changing the contract for this API call. As it stands, it insists
+      // that the first curriculumMembership is new, but doesn't check the programmeMembership's id.
       return ResponseEntity.badRequest().headers(HeaderUtil
           .createFailureAlert(ENTITY_NAME, "idexists",
               "A new programmeMembership cannot already have an ID")).body(null);

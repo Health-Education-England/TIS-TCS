@@ -113,7 +113,7 @@ public class ProgrammeMembershipMapper {
     }
     result.getCurriculumMemberships()
         .addAll(curriculumMembershipMapper.toEntity(programmeMembershipDTO));
-
+    result.getCurriculumMemberships().forEach(cm -> cm.setProgrammeMembership(result));
     return result;
   }
 

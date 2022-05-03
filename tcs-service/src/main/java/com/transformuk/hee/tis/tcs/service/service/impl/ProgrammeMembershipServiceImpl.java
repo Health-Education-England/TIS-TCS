@@ -12,7 +12,6 @@ import com.transformuk.hee.tis.tcs.service.event.CurriculumMembershipSavedEvent;
 import com.transformuk.hee.tis.tcs.service.model.Curriculum;
 import com.transformuk.hee.tis.tcs.service.model.CurriculumMembership;
 import com.transformuk.hee.tis.tcs.service.model.Person;
-import com.transformuk.hee.tis.tcs.service.model.Programme;
 import com.transformuk.hee.tis.tcs.service.model.ProgrammeMembership;
 import com.transformuk.hee.tis.tcs.service.repository.CurriculumMembershipRepository;
 import com.transformuk.hee.tis.tcs.service.repository.CurriculumRepository;
@@ -105,9 +104,9 @@ public class ProgrammeMembershipServiceImpl implements ProgrammeMembershipServic
     log.debug("Request to save ProgrammeMembership : {}", programmeMembershipDto);
 
     ProgrammeMembership programmeMembership = programmeMembershipMapper.toEntity(programmeMembershipDto);
-    curriculumMembershipRepository.saveAll(programmeMembership.getCurriculumMemberships());
-    programmeMembership = programmeMembershipRepository.save(programmeMembership);
 
+    programmeMembership = programmeMembershipRepository.save(programmeMembership);
+    //curriculumMembershipRepository.saveAll(programmeMembership.getCurriculumMemberships());
 
     ProgrammeMembershipDTO programmeMembershipSavedDto = programmeMembershipMapper.toDto(programmeMembership);
 
@@ -131,7 +130,7 @@ public class ProgrammeMembershipServiceImpl implements ProgrammeMembershipServic
     List<ProgrammeMembership> programmeMemberships =
         programmeMembershipMapper.programmeMembershipDTOsToProgrammeMemberships(programmeMembershipDto);
     programmeMemberships.forEach(programmeMembership -> {
-      curriculumMembershipRepository.saveAll(programmeMembership.getCurriculumMemberships());
+      //curriculumMembershipRepository.saveAll(programmeMembership.getCurriculumMemberships());
       programmeMembership = programmeMembershipRepository.save(programmeMembership);
       updatePersonWhenStatusIsStale(programmeMembership.getPerson().getId());
     });

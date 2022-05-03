@@ -1,6 +1,5 @@
 package com.transformuk.hee.tis.tcs.service.model;
 
-import com.transformuk.hee.tis.tcs.api.dto.validation.Update;
 import com.transformuk.hee.tis.tcs.api.enumeration.ProgrammeMembershipType;
 import java.io.Serializable;
 import java.time.LocalDate;
@@ -12,7 +11,6 @@ import javax.persistence.CascadeType;
 import javax.persistence.Entity;
 import javax.persistence.EnumType;
 import javax.persistence.Enumerated;
-import javax.persistence.FetchType;
 import javax.persistence.GeneratedValue;
 import javax.persistence.GenerationType;
 import javax.persistence.Id;
@@ -20,8 +18,6 @@ import javax.persistence.JoinColumn;
 import javax.persistence.ManyToOne;
 import javax.persistence.OneToMany;
 import javax.persistence.Version;
-import javax.validation.constraints.NotNull;
-
 import lombok.Data;
 
 /**
@@ -62,8 +58,7 @@ public class ProgrammeMembership implements Serializable {
   @JoinColumn(name = "trainingNumberId")
   private TrainingNumber trainingNumber;
 
-  @OneToMany(mappedBy = "programmeMembership", cascade = CascadeType.REMOVE, fetch = FetchType.LAZY,
-      orphanRemoval = true)
+  @OneToMany(mappedBy = "programmeMembership", cascade = CascadeType.ALL, orphanRemoval = true)
   private Set<CurriculumMembership> curriculumMemberships = new HashSet<>();
 
   @Version

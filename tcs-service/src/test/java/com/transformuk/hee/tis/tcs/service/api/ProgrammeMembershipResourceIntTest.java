@@ -40,7 +40,6 @@ import java.time.LocalDateTime;
 import java.time.ZoneId;
 import java.util.Collections;
 import java.util.List;
-import java.util.Set;
 import javax.persistence.EntityManager;
 
 import org.assertj.core.util.Sets;
@@ -184,15 +183,11 @@ public class ProgrammeMembershipResourceIntTest {
   public static CurriculumMembership createCurriculumMembershipEntity() {
     CurriculumMembership curriculumMembership = new CurriculumMembership()
         .intrepidId(DEFAULT_INTREPID_ID)
-        .programmeMembershipType(DEFAULT_PROGRAMME_MEMBERSHIP_TYPE)
         .curriculumStartDate(DEFAULT_CURRICULUM_START_DATE)
         .curriculumEndDate(DEFAULT_CURRICULUM_END_DATE)
         .periodOfGrace(DEFAULT_PERIOD_OF_GRACE)
-        .programmeStartDate(DEFAULT_PROGRAMME_START_DATE)
         .curriculumCompletionDate(DEFAULT_CURRICULUM_COMPLETION_DATE)
-        .programmeEndDate(DEFAULT_PROGRAMME_END_DATE)
-        .leavingDestination(DEFAULT_LEAVING_DESTINATION)
-        .leavingReason(DEFAULT_LEAVING_REASON);
+        .leavingDestination(DEFAULT_LEAVING_DESTINATION);
     return curriculumMembership;
   }
 
@@ -334,7 +329,6 @@ public class ProgrammeMembershipResourceIntTest {
         .isEqualTo(DEFAULT_CURRICULUM_COMPLETION_DATE);
     assertThat(testCurriculumMembership.getLeavingDestination())
         .isEqualTo(DEFAULT_LEAVING_DESTINATION);
-    assertThat(testCurriculumMembership.getLeavingReason()).isEqualTo(DEFAULT_LEAVING_REASON);
     assertThat(person.getStatus()).isEqualTo(Status.INACTIVE);
   }
 
@@ -713,16 +707,11 @@ public class ProgrammeMembershipResourceIntTest {
         .findById(curriculumMembership.getId()).orElse(null);
     updatedCurriculumMembership
         .intrepidId(UPDATED_INTREPID_ID)
-        .programmeMembershipType(UPDATED_PROGRAMME_MEMBERSHIP_TYPE)
-        .rotation(rotation)
         .curriculumStartDate(UPDATED_CURRICULUM_START_DATE)
         .curriculumEndDate(UPDATED_CURRICULUM_END_DATE)
         .periodOfGrace(UPDATED_PERIOD_OF_GRACE)
-        .programmeStartDate(UPDATED_PROGRAMME_START_DATE)
-        .curriculumCompletionDate(UPDATED_CURRICULUM_COMPLETION_DATE)
-        .programmeEndDate(UPDATED_PROGRAMME_END_DATE)
         .leavingDestination(UPDATED_LEAVING_DESTINATION)
-        .leavingReason(UPDATED_LEAVING_REASON);
+        .curriculumCompletionDate(UPDATED_CURRICULUM_COMPLETION_DATE);
     ProgrammeMembershipDTO programmeMembershipDTO = curriculumMembershipMapper
         .toDto(updatedCurriculumMembership);
 
@@ -746,7 +735,6 @@ public class ProgrammeMembershipResourceIntTest {
         .isEqualTo(UPDATED_CURRICULUM_COMPLETION_DATE);
     assertThat(testCurriculumMembership.getLeavingDestination())
         .isEqualTo(UPDATED_LEAVING_DESTINATION);
-    assertThat(testCurriculumMembership.getLeavingReason()).isEqualTo(UPDATED_LEAVING_REASON);
     assertThat(testCurriculumMembership.getAmendedDate()).isAfter(DEFAULT_AMENDED_DATE);
   }
 
@@ -861,7 +849,7 @@ public class ProgrammeMembershipResourceIntTest {
             .accept(MediaType.APPLICATION_JSON))
         .andExpect(status().isOk());
 
-    // Validate the database is empty
+    // Validate the curriculum membership repository is empty
     List<CurriculumMembership> curriculumMembershipList = curriculumMembershipRepository.findAll();
     assertThat(curriculumMembershipList).hasSize(databaseCmSizeBeforeDelete - 1);
 
