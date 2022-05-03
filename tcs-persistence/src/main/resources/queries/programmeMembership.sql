@@ -9,13 +9,13 @@ select distinct
 from
   (
   select
-    id,
-    personId,
-    programmeId,
-    trainingNumberId,
-    get_programmeMembershipStatus(programmeStartDate, programmeEndDate) as programmeMembershipStatus
+    cmem.id,
+    pmem.personId,
+    pmem.programmeId,
+    pmem.trainingNumberId,
+    get_programmeMembershipStatus(pmem.programmeStartDate, pmem.programmeEndDate) as programmeMembershipStatus
   from
-    CurriculumMembership WHERECLAUSE
+    CurriculumMembership cmem JOIN ProgrammeMembership pmem ON cmem.programmeMembershipId = pmem.id WHERECLAUSE
   ) as pm
 left join Programme prg on (prg.id = pm.programmeId)
 left join TrainingNumber tn on (tn.id = pm.trainingNumberId);
