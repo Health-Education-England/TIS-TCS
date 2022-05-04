@@ -189,11 +189,18 @@ public class ProgrammeMembershipServiceImpl implements ProgrammeMembershipServic
     log.debug("Request to delete CurriculumMembership : {}", id);
 
     //Get the person id from the programme membership before deleting it
-    Long personId = curriculumMembershipRepository.getOne(id)
-        .getProgrammeMembership().getPerson().getId();
+    ProgrammeMembership programmeMembership = curriculumMembershipRepository.getOne(id)
+        .getProgrammeMembership();
+    Long personId = programmeMembership.getPerson().getId();
 
-    curriculumMembershipRepository.deleteById(id);
-    curriculumRepository.flush();
+    programmeMembership.getCurriculumMemberships().removeIf(cm -> cm.getId() == id);
+
+    if (programmeMembership.getCurriculumMemberships().size() > 0) {
+      programmeMembershipRepository.save(programmeMembership);
+    } else {
+      //TODO: confirm - if PM now has no CMs, do we delete it as well?
+      programmeMembershipRepository.delete(programmeMembership);
+    }
 
     updatePersonWhenStatusIsStale(personId);
   }

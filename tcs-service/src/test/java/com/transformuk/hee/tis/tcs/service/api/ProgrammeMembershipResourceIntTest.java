@@ -40,7 +40,10 @@ import java.time.LocalDateTime;
 import java.time.ZoneId;
 import java.util.Collections;
 import java.util.List;
+import java.util.Optional;
 import javax.persistence.EntityManager;
+import javax.persistence.EntityNotFoundException;
+
 import org.assertj.core.util.Sets;
 import org.junit.Before;
 import org.junit.Test;
@@ -51,6 +54,7 @@ import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.data.web.PageableHandlerMethodArgumentResolver;
 import org.springframework.http.MediaType;
 import org.springframework.http.converter.json.MappingJackson2HttpMessageConverter;
+import org.springframework.orm.jpa.JpaObjectRetrievalFailureException;
 import org.springframework.test.annotation.DirtiesContext;
 import org.springframework.test.context.junit4.SpringRunner;
 import org.springframework.test.web.servlet.MockMvc;
@@ -845,17 +849,22 @@ public class ProgrammeMembershipResourceIntTest {
     // in both the CurriculumMembership and ProgrammeMembership
     // tables, to avoid an accidental false-positive key miss.
     // During the process of running the other tests these get out of sync.
-    personRepository.saveAndFlush(person);
-
-    programmeMembership.setPerson(person);
-    programmeMembership.setCurriculumMemberships(Sets.newLinkedHashSet(curriculumMembership));
     programmeMembershipRepository.deleteAll();
-    programmeMembershipRepository.saveAndFlush(programmeMembership);
-    int databasePmSizeBeforeDelete = programmeMembershipRepository.findAll().size();
+    personRepository.saveAndFlush(person);
+    programmeMembership.setPerson(person);
 
+    CurriculumMembership curriculumMembership1 = new CurriculumMembership()
+        .intrepidId("XXX")
+        .curriculumStartDate(DEFAULT_CURRICULUM_START_DATE)
+        .curriculumEndDate(DEFAULT_CURRICULUM_END_DATE)
+        .periodOfGrace(DEFAULT_PERIOD_OF_GRACE)
+        .curriculumCompletionDate(DEFAULT_CURRICULUM_COMPLETION_DATE);
+
+    programmeMembership.setCurriculumMemberships(Sets.newLinkedHashSet(curriculumMembership, curriculumMembership1));
     curriculumMembership.setProgrammeMembership(programmeMembership);
-    curriculumMembershipRepository.deleteAll();
-    curriculumMembershipRepository.saveAndFlush(curriculumMembership);
+    programmeMembershipRepository.saveAndFlush(programmeMembership);
+
+    int databasePmSizeBeforeDelete = programmeMembershipRepository.findAll().size();
     int databaseCmSizeBeforeDelete = curriculumMembershipRepository.findAll().size();
 
     // Delete the first record, which will have id 1 because of the @DirtiesContext annotation
@@ -865,12 +874,47 @@ public class ProgrammeMembershipResourceIntTest {
         .andExpect(status().isOk());
 
     // Validate the curriculum membership repository is empty
-    List<CurriculumMembership> curriculumMembershipList = curriculumMembershipRepository.findAll();
-    assertThat(curriculumMembershipList).hasSize(databaseCmSizeBeforeDelete - 1);
+    int cmSize = curriculumMembershipRepository.findAll().size();
+    assertThat(cmSize).isEqualTo(databaseCmSizeBeforeDelete - 1);
 
     //check that programme membership repository is unaffected
-    List<ProgrammeMembership> programmeMembershipList = programmeMembershipRepository.findAll();
-    assertThat(programmeMembershipList).hasSize(databasePmSizeBeforeDelete);
+    int pmSize = programmeMembershipRepository.findAll().size();
+    assertThat(pmSize).isEqualTo(databasePmSizeBeforeDelete);
+  }
+
+  @Test //(expected = JpaObjectRetrievalFailureException.class)
+  @Transactional
+  @DirtiesContext(methodMode = DirtiesContext.MethodMode.BEFORE_METHOD)
+  public void deleteLastCurriculumMembershipShouldDeleteContainingProgrammeMembership()
+      throws Exception {
+    //given
+    programmeMembershipRepository.deleteAll();
+    personRepository.saveAndFlush(person);
+    programmeMembership.setPerson(person);
+
+    programmeMembership.setCurriculumMemberships(Sets.newLinkedHashSet(curriculumMembership));
+    curriculumMembership.setProgrammeMembership(programmeMembership);
+    programmeMembershipRepository.saveAndFlush(programmeMembership);
+
+    int databasePmSizeBeforeDelete = programmeMembershipRepository.findAll().size();
+    int databaseCmSizeBeforeDelete = curriculumMembershipRepository.findAll().size();
+
+    //when
+    // Delete the programme membership's only curriculum membership
+    restProgrammeMembershipMockMvc
+        .perform(delete("/api/programme-memberships/{id}", 1L)
+            .accept(MediaType.APPLICATION_JSON))
+        .andExpect(status().isOk());
+
+    //then
+    int cmSize = curriculumMembershipRepository.findAll().size();
+    assertThat(cmSize).isEqualTo(databaseCmSizeBeforeDelete - 1);
+    int pmSize = programmeMembershipRepository.findAll().size();
+    assertThat(pmSize).isEqualTo(databasePmSizeBeforeDelete - 1);
+
+    // Validate the programme membership has been deleted
+    Optional<ProgrammeMembership> optionalProgrammeMembership = programmeMembershipRepository.findById(programmeMembership.getId());
+    assertThat(optionalProgrammeMembership).isNotPresent();
   }
 
   @Test

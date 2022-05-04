@@ -534,20 +534,26 @@ public class ProgrammeMembershipServiceImplTest {
   }
 
   @Test
-  public void shouldDeleteFromCurriculumMembershipRepository() {
+  public void shouldDeleteCurriculumMemberships() {
     //given
     when(personRepositoryMock.getOne(anyLong())).thenReturn(person);
     when(curriculumMembershipRepositoryMock.getOne(CURRICULUM_MEMBERSHIP_ID_1))
         .thenReturn(curriculumMembership1);
+    when(curriculumMembershipRepositoryMock.getOne(CURRICULUM_MEMBERSHIP_ID_2))
+        .thenReturn(curriculumMembership2);
 
     //when
     testObj.delete(CURRICULUM_MEMBERSHIP_ID_1);
 
     //then
-    verify(programmeMembershipRepositoryMock, times(0))
-        .deleteById(anyLong());
-    verify(curriculumMembershipRepositoryMock, times(1))
-        .deleteById(CURRICULUM_MEMBERSHIP_ID_1);
+    verify(programmeMembershipRepositoryMock, times(1))
+        .save(any()); //since there were 2 CMs, so the PM is updated not deleted
+
+    testObj.delete(CURRICULUM_MEMBERSHIP_ID_2);
+
+    verify(programmeMembershipRepositoryMock, times(1))
+        .delete(any()); //since the last CM is deleted, so the PM is deleted too
+
   }
 
 
