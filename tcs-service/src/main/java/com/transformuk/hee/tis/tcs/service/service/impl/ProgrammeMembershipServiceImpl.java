@@ -193,7 +193,7 @@ public class ProgrammeMembershipServiceImpl implements ProgrammeMembershipServic
         .getProgrammeMembership();
     Long personId = programmeMembership.getPerson().getId();
 
-    programmeMembership.getCurriculumMemberships().removeIf(cm -> cm.getId() == id);
+    programmeMembership.getCurriculumMemberships().removeIf(cm -> cm.getId().equals(id));
 
     if (programmeMembership.getCurriculumMemberships().size() > 0) {
       programmeMembershipRepository.save(programmeMembership);
