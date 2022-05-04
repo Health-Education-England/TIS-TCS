@@ -5,6 +5,7 @@ import com.transformuk.hee.tis.tcs.api.dto.validation.Update;
 import com.transformuk.hee.tis.tcs.api.enumeration.ProgrammeMembershipType;
 import java.io.Serializable;
 import java.time.LocalDate;
+import java.time.LocalDateTime;
 import java.util.List;
 import java.util.Objects;
 import javax.validation.Valid;
@@ -48,6 +49,8 @@ public class ProgrammeMembershipDTO implements Serializable {
   private String trainingPathway;
 
   private TrainingNumberDTO trainingNumber;
+
+  private LocalDateTime amendedDate;
 
   @Valid
   private List<CurriculumMembershipDTO> curriculumMemberships;

@@ -94,6 +94,7 @@ public class ProgrammeMembershipMapper {
     result.setProgrammeEndDate(programmeMembershipDTO.getProgrammeEndDate());
     result.setLeavingReason(programmeMembershipDTO.getLeavingReason());
     result.setTrainingPathway(programmeMembershipDTO.getTrainingPathway());
+    result.setAmendedDate(programmeMembershipDTO.getAmendedDate());
     Programme programme = null;
     if (programmeMembershipDTO.getProgrammeId() != null) {
       programme = new Programme();
@@ -136,6 +137,7 @@ public class ProgrammeMembershipMapper {
     result.setProgrammeStartDate(programmeMembership.getProgrammeStartDate());
     result.setProgrammeEndDate(programmeMembership.getProgrammeEndDate());
     result.setLeavingReason(programmeMembership.getLeavingReason());
+    result.setAmendedDate(programmeMembership.getAmendedDate());
     Programme programme = programmeMembership.getProgramme();
     if (programme != null) {
       result.setProgrammeId(programme.getId());

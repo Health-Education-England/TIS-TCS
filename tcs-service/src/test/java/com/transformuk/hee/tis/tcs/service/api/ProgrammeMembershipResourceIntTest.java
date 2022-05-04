@@ -721,22 +721,21 @@ public class ProgrammeMembershipResourceIntTest {
         .curriculumEndDate(UPDATED_CURRICULUM_END_DATE)
         .periodOfGrace(UPDATED_PERIOD_OF_GRACE)
         .curriculumCompletionDate(UPDATED_CURRICULUM_COMPLETION_DATE);
-
-    //this works
-    //programmeMembershipRepository.save(updatedProgrammeMembership);
-
-    //this gives detached CM entity
     ProgrammeMembershipDTO programmeMembershipDTO = programmeMembershipMapper.toDto(updatedProgrammeMembership);
-    ProgrammeMembership updatedPMfromDTO = programmeMembershipMapper.toEntity(programmeMembershipDTO);
-    programmeMembershipRepository.save(updatedPMfromDTO);
-
-
-
 //
-//    restProgrammeMembershipMockMvc.perform(put("/api/programme-memberships")
-//            .contentType(MediaType.APPLICATION_JSON)
-//            .content(TestUtil.convertObjectToJsonBytes(programmeMembershipDTO)))
-//        .andExpect(status().isOk());
+//    //this works
+//    //programmeMembershipRepository.save(updatedProgrammeMembership);
+//
+//    //this gives detached CM entity
+//    ProgrammeMembershipDTO programmeMembershipDTO = programmeMembershipMapper.toDto(updatedProgrammeMembership);
+//    ProgrammeMembership updatedPMfromDTO = programmeMembershipMapper.toEntity(programmeMembershipDTO);
+//    //programmeMembershipRepository.save(updatedPMfromDTO);
+
+
+    restProgrammeMembershipMockMvc.perform(put("/api/programme-memberships")
+            .contentType(MediaType.APPLICATION_JSON)
+            .content(TestUtil.convertObjectToJsonBytes(programmeMembershipDTO)))
+        .andExpect(status().isOk());
 
     // Validate the CurriculumMembership in the database
     List<CurriculumMembership> curriculumMembershipList = curriculumMembershipRepository.findAll();
