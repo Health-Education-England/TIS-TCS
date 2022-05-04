@@ -169,7 +169,7 @@ public class CurriculumMembershipMapper {
     result.setProgrammeMembershipType(programmeMembership.getProgrammeMembershipType());
     result.setProgrammeStartDate(programmeMembership.getProgrammeStartDate());
     result.setProgrammeEndDate(programmeMembership.getProgrammeEndDate());
-    result.setLeavingDestination(curriculumMembership.getLeavingDestination());
+    result.setLeavingDestination(null);
     result.setLeavingReason(programmeMembership.getLeavingReason());
     Programme programme = programmeMembership.getProgramme();
     if (programme != null) {
@@ -251,9 +251,9 @@ public class CurriculumMembershipMapper {
       ProgrammeMembershipDTO programmeMembershipDto) {
     CurriculumMembership result = new CurriculumMembership();
 
-    //this is a legacy field (leavingReason is held at PM level),
-    //but technically this should be held at CM level not set for all CMs at PM level
-    result.setLeavingDestination(programmeMembershipDto.getLeavingDestination());
+    //leavingReason is held at PM level,
+    //CHECK: can leavingDestination be omitted as legacy field?
+    //result.setLeavingDestination(programmeMembershipDto.getLeavingDestination());
 
     return result;
   }

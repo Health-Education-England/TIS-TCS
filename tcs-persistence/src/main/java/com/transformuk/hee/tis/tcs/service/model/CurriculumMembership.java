@@ -58,6 +58,7 @@ public class CurriculumMembership implements Serializable {
   @Deprecated
   private LocalDate programmeEndDate;
 
+  @Deprecated
   private String leavingDestination;
 
   @Deprecated

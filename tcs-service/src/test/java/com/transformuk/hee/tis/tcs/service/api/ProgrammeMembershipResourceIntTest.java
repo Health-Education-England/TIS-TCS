@@ -185,8 +185,7 @@ public class ProgrammeMembershipResourceIntTest {
         .curriculumStartDate(DEFAULT_CURRICULUM_START_DATE)
         .curriculumEndDate(DEFAULT_CURRICULUM_END_DATE)
         .periodOfGrace(DEFAULT_PERIOD_OF_GRACE)
-        .curriculumCompletionDate(DEFAULT_CURRICULUM_COMPLETION_DATE)
-        .leavingDestination(DEFAULT_LEAVING_DESTINATION);
+        .curriculumCompletionDate(DEFAULT_CURRICULUM_COMPLETION_DATE);
     return curriculumMembership;
   }
 
@@ -326,8 +325,6 @@ public class ProgrammeMembershipResourceIntTest {
     assertThat(testCurriculumMembership.getPeriodOfGrace()).isEqualTo(DEFAULT_PERIOD_OF_GRACE);
     assertThat(testCurriculumMembership.getCurriculumCompletionDate())
         .isEqualTo(DEFAULT_CURRICULUM_COMPLETION_DATE);
-    assertThat(testCurriculumMembership.getLeavingDestination())
-        .isEqualTo(DEFAULT_LEAVING_DESTINATION);
     assertThat(person.getStatus()).isEqualTo(Status.INACTIVE);
   }
 
@@ -625,7 +622,6 @@ public class ProgrammeMembershipResourceIntTest {
             .value(hasItem(DEFAULT_PROGRAMME_START_DATE.toString())))
         .andExpect(jsonPath("$.[*].programmeEndDate")
             .value(hasItem(DEFAULT_PROGRAMME_END_DATE.toString())))
-        .andExpect(jsonPath("$.[*].leavingDestination").value(hasItem(DEFAULT_LEAVING_DESTINATION)))
         .andExpect(jsonPath("$.[*].leavingReason").value(hasItem(DEFAULT_LEAVING_REASON)))
         .andExpect(jsonPath("$.[*].curriculumMemberships[*].amendedDate").isNotEmpty());
   }
@@ -666,7 +662,6 @@ public class ProgrammeMembershipResourceIntTest {
             .value(hasItem(DEFAULT_PERIOD_OF_GRACE)))
         .andExpect(jsonPath("$.programmeStartDate").value(DEFAULT_PROGRAMME_START_DATE.toString()))
         .andExpect(jsonPath("$.programmeEndDate").value(DEFAULT_PROGRAMME_END_DATE.toString()))
-        .andExpect(jsonPath("$.leavingDestination").value(DEFAULT_LEAVING_DESTINATION))
         .andExpect(jsonPath("$.leavingReason").value(DEFAULT_LEAVING_REASON))
         .andExpect(jsonPath("$.curriculumMemberships[*].amendedDate").isNotEmpty());
   }
@@ -704,22 +699,44 @@ public class ProgrammeMembershipResourceIntTest {
     int databaseSizeBeforeUpdate = curriculumMembershipRepository.findAll().size();
 
     // Update the curriculumMembership
-    CurriculumMembership updatedCurriculumMembership = curriculumMembershipRepository
-        .findById(curriculumMembership.getId()).orElse(null);
+//    CurriculumMembership updatedCurriculumMembership = curriculumMembershipRepository
+//        .findById(curriculumMembership.getId()).orElse(null);
+//    updatedCurriculumMembership
+//        .intrepidId(UPDATED_INTREPID_ID)
+//        .curriculumStartDate(UPDATED_CURRICULUM_START_DATE)
+//        .curriculumEndDate(UPDATED_CURRICULUM_END_DATE)
+//        .periodOfGrace(UPDATED_PERIOD_OF_GRACE)
+//        .leavingDestination(UPDATED_LEAVING_DESTINATION)
+//        .curriculumCompletionDate(UPDATED_CURRICULUM_COMPLETION_DATE);
+//    ProgrammeMembershipDTO programmeMembershipDTO = curriculumMembershipMapper
+//        .toDto(updatedCurriculumMembership);
+
+    //make update from PM instead of from CM repo
+    ProgrammeMembership updatedProgrammeMembership = programmeMembershipRepository
+        .findById(programmeMembership.getId()).orElse(null);
+    CurriculumMembership updatedCurriculumMembership = updatedProgrammeMembership.getCurriculumMemberships().iterator().next();
     updatedCurriculumMembership
         .intrepidId(UPDATED_INTREPID_ID)
         .curriculumStartDate(UPDATED_CURRICULUM_START_DATE)
         .curriculumEndDate(UPDATED_CURRICULUM_END_DATE)
         .periodOfGrace(UPDATED_PERIOD_OF_GRACE)
-        .leavingDestination(UPDATED_LEAVING_DESTINATION)
         .curriculumCompletionDate(UPDATED_CURRICULUM_COMPLETION_DATE);
-    ProgrammeMembershipDTO programmeMembershipDTO = curriculumMembershipMapper
-        .toDto(updatedCurriculumMembership);
 
-    restProgrammeMembershipMockMvc.perform(put("/api/programme-memberships")
-            .contentType(MediaType.APPLICATION_JSON)
-            .content(TestUtil.convertObjectToJsonBytes(programmeMembershipDTO)))
-        .andExpect(status().isOk());
+    //this works
+    //programmeMembershipRepository.save(updatedProgrammeMembership);
+
+    //this gives detached CM entity
+    ProgrammeMembershipDTO programmeMembershipDTO = programmeMembershipMapper.toDto(updatedProgrammeMembership);
+    ProgrammeMembership updatedPMfromDTO = programmeMembershipMapper.toEntity(programmeMembershipDTO);
+    programmeMembershipRepository.save(updatedPMfromDTO);
+
+
+
+//
+//    restProgrammeMembershipMockMvc.perform(put("/api/programme-memberships")
+//            .contentType(MediaType.APPLICATION_JSON)
+//            .content(TestUtil.convertObjectToJsonBytes(programmeMembershipDTO)))
+//        .andExpect(status().isOk());
 
     // Validate the CurriculumMembership in the database
     List<CurriculumMembership> curriculumMembershipList = curriculumMembershipRepository.findAll();
@@ -734,8 +751,6 @@ public class ProgrammeMembershipResourceIntTest {
     assertThat(testCurriculumMembership.getPeriodOfGrace()).isEqualTo(UPDATED_PERIOD_OF_GRACE);
     assertThat(testCurriculumMembership.getCurriculumCompletionDate())
         .isEqualTo(UPDATED_CURRICULUM_COMPLETION_DATE);
-    assertThat(testCurriculumMembership.getLeavingDestination())
-        .isEqualTo(UPDATED_LEAVING_DESTINATION);
     assertThat(testCurriculumMembership.getAmendedDate()).isAfter(DEFAULT_AMENDED_DATE);
   }
 

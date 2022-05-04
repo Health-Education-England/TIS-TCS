@@ -13,7 +13,10 @@ import org.springframework.data.repository.query.Param;
 @SuppressWarnings("unused")
 public interface CurriculumMembershipRepository extends JpaRepository<CurriculumMembership, Long> {
   //Note: personId, programme, programmeEndDate etc. are now only updated in the
-  //programmeMembership table, and may be null in the curriculumMembership table.
+  //programmeMembership table, and may be NULL in the CurriculumMembership table.
+
+  //TODO: the CurriculumMemberships that are returned may have NULL values in the fields above (the deprecated fields)
+  // - these need to be resolved
 
   @Query(value = "SELECT cm "
       + "FROM CurriculumMembership cm "
