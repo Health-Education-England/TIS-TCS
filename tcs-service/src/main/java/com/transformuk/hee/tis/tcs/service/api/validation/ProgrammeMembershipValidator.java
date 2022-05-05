@@ -51,9 +51,11 @@ public class ProgrammeMembershipValidator {
    *
    * @param programmeMembershipDTO the programmeMembership to check
    * @throws MethodArgumentNotValidException if there are validation errors
+   * @return
    */
-  public void validate(ProgrammeMembershipDTO programmeMembershipDTO)
+  public List<FieldError> validate(ProgrammeMembershipDTO programmeMembershipDTO)
       throws MethodArgumentNotValidException {
+
 
     List<FieldError> fieldErrors = new ArrayList<>();
     fieldErrors.addAll(checkPerson(programmeMembershipDTO));
@@ -67,6 +69,7 @@ public class ProgrammeMembershipValidator {
       fieldErrors.forEach(bindingResult::addError);
       throw new MethodArgumentNotValidException(null, bindingResult);
     }
+    return fieldErrors;
   }
 
   /**
@@ -114,6 +117,7 @@ public class ProgrammeMembershipValidator {
    * Check programme start date is before finish.
    *
    * @param programmeMembershipDto
+   * return
    */
   private void checkProgrammeDates(List<FieldError> fieldErrors,
                                                    ProgrammeMembershipDTO programmeMembershipDto) {
@@ -122,19 +126,11 @@ public class ProgrammeMembershipValidator {
       LocalDate startDate = programmeMembershipDto.getProgrammeStartDate();
       LocalDate endDate = programmeMembershipDto.getProgrammeEndDate();
 
-      if (startDate == null && endDate == null) {
-        //nothing to check
-        return;
-      }
-
-      if (startDate != null && endDate != null) {
-        //only compare passed in values
-        if (startDate.isAfter(endDate)) {
-          FieldError fieldError =
-              new FieldError(PROGRAMME_MEMBERSHIP_DTO_NAME,"Programme Start Date",
-                  String.format("Programme Start Date must be after the End Date"));
-          fieldErrors.add(fieldError);
-        }
+      if (startDate.isAfter(endDate)) {
+        FieldError fieldError =
+            new FieldError(PROGRAMME_MEMBERSHIP_DTO_NAME,"Programme Start Date",
+                String.format("Programme Start Date must be after the End Date"));
+        fieldErrors.add(fieldError);
       }
     }
   }
