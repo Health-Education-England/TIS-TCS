@@ -5,10 +5,8 @@ import com.transformuk.hee.tis.tcs.api.dto.ProgrammeMembershipDTO;
 import com.transformuk.hee.tis.tcs.service.model.ProgrammeMembership;
 import com.transformuk.hee.tis.tcs.service.repository.CurriculumRepository;
 import com.transformuk.hee.tis.tcs.service.repository.PersonRepository;
-import com.transformuk.hee.tis.tcs.service.repository.ProgrammeMembershipRepository;
 import com.transformuk.hee.tis.tcs.service.repository.ProgrammeRepository;
 import com.transformuk.hee.tis.tcs.service.service.RotationService;
-
 import java.time.LocalDate;
 import java.util.ArrayList;
 import java.util.List;
@@ -113,26 +111,25 @@ public class ProgrammeMembershipValidator {
   }
 
   /**
-   * Check programme start date is before finish
+   * Check programme start date is before finish.
    *
-   * @param programmeMembershipDTO
-   * @return
+   * @param programmeMembershipDto
    */
   private void checkProgrammeDates(List<FieldError> fieldErrors,
-                                                   ProgrammeMembershipDTO programmeMembershipDTO) {
+                                                   ProgrammeMembershipDTO programmeMembershipDto) {
 
-    if(programmeMembershipDTO != null) {
-      LocalDate startDate = programmeMembershipDTO.getProgrammeStartDate();
-      LocalDate endDate = programmeMembershipDTO.getProgrammeEndDate();
+    if(programmeMembershipDto != null) {
+      LocalDate startDate = programmeMembershipDto.getProgrammeStartDate();
+      LocalDate endDate = programmeMembershipDto.getProgrammeEndDate();
 
       if (startDate == null && endDate == null) {
         //nothing to check
         return;
       }
 
-      if(startDate !=null && endDate !=null) {
+      if (startDate != null && endDate != null) {
         //only compare passed in values
-        if(startDate.isAfter(endDate)) {
+        if (startDate.isAfter(endDate)) {
           FieldError fieldError =
               new FieldError(PROGRAMME_MEMBERSHIP_DTO_NAME,"Programme Start Date",
                   String.format("Programme Start Date must be after the End Date"));
