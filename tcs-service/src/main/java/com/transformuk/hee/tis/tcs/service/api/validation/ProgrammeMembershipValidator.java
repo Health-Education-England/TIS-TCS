@@ -49,27 +49,26 @@ public class ProgrammeMembershipValidator {
    * based validation already in place. It checks that the person, programme and curriculum
    * entered.
    *
-   * @param programmeMembershipDTO the programmeMembership to check
+   * @param programmeMembershipDto the programmeMembership to check
    * @throws MethodArgumentNotValidException if there are validation errors
    * @return
    */
-  public List<FieldError> validate(ProgrammeMembershipDTO programmeMembershipDTO)
+  public void validate(ProgrammeMembershipDTO programmeMembershipDto)
       throws MethodArgumentNotValidException {
 
 
     List<FieldError> fieldErrors = new ArrayList<>();
-    fieldErrors.addAll(checkPerson(programmeMembershipDTO));
-    fieldErrors.addAll(checkProgramme(programmeMembershipDTO));
-    fieldErrors.addAll(checkCurriculum(programmeMembershipDTO));
-    fieldErrors.addAll(checkRotation(programmeMembershipDTO));
-    checkProgrammeDates(fieldErrors, programmeMembershipDTO);
+    fieldErrors.addAll(checkPerson(programmeMembershipDto));
+    fieldErrors.addAll(checkProgramme(programmeMembershipDto));
+    fieldErrors.addAll(checkCurriculum(programmeMembershipDto));
+    fieldErrors.addAll(checkRotation(programmeMembershipDto));
+    checkProgrammeDates(fieldErrors, programmeMembershipDto);
     if (!fieldErrors.isEmpty()) {
       BeanPropertyBindingResult bindingResult = new BeanPropertyBindingResult(
-          programmeMembershipDTO, PROGRAMME_MEMBERSHIP_DTO_NAME);
+          programmeMembershipDto, PROGRAMME_MEMBERSHIP_DTO_NAME);
       fieldErrors.forEach(bindingResult::addError);
       throw new MethodArgumentNotValidException(null, bindingResult);
     }
-    return fieldErrors;
   }
 
   /**
@@ -122,17 +121,15 @@ public class ProgrammeMembershipValidator {
   private void checkProgrammeDates(List<FieldError> fieldErrors,
                                                    ProgrammeMembershipDTO programmeMembershipDto) {
 
-    if (programmeMembershipDto != null) {
-      LocalDate startDate = programmeMembershipDto.getProgrammeStartDate();
-      LocalDate endDate = programmeMembershipDto.getProgrammeEndDate();
+    LocalDate startDate = programmeMembershipDto.getProgrammeStartDate();
+    LocalDate endDate = programmeMembershipDto.getProgrammeEndDate();
 
-      if (startDate.isAfter(endDate)) {
-        FieldError fieldError =
-            new FieldError(PROGRAMME_MEMBERSHIP_DTO_NAME, "Programme Start Date",
-                "Programme Start Date must be after the End Date");
-        fieldErrors.add(fieldError);
+    if (startDate.isAfter(endDate)) {
+      FieldError fieldError =
+          new FieldError(PROGRAMME_MEMBERSHIP_DTO_NAME, "Programme Start Date",
+              "Programme Start Date must be after the End Date");
+      fieldErrors.add(fieldError);
       }
-    }
   }
 
   /**
