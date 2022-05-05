@@ -35,9 +35,9 @@ public class ProgrammeMembershipValidator {
 
   @Autowired
   public ProgrammeMembershipValidator(PersonRepository personRepository,
-      ProgrammeRepository programmeRepository,
-      CurriculumRepository curriculumRepository,
-      RotationService rotationService) {
+                                      ProgrammeRepository programmeRepository,
+                                      CurriculumRepository curriculumRepository,
+                                      RotationService rotationService) {
     this.personRepository = personRepository;
     this.programmeRepository = programmeRepository;
     this.curriculumRepository = curriculumRepository;
@@ -50,8 +50,8 @@ public class ProgrammeMembershipValidator {
    * entered.
    *
    * @param programmeMembershipDto the programmeMembership to check
-   * @throws MethodArgumentNotValidException if there are validation errors
    * @return
+   * @throws MethodArgumentNotValidException if there are validation errors
    */
   public void validate(ProgrammeMembershipDTO programmeMembershipDto)
       throws MethodArgumentNotValidException {
@@ -115,11 +115,10 @@ public class ProgrammeMembershipValidator {
   /**
    * Check programme start date is before finish.
    *
-   * @param programmeMembershipDto
-   * return
+   * @param programmeMembershipDto return
    */
   private void checkProgrammeDates(List<FieldError> fieldErrors,
-                                                   ProgrammeMembershipDTO programmeMembershipDto) {
+                                   ProgrammeMembershipDTO programmeMembershipDto) {
 
     LocalDate startDate = programmeMembershipDto.getProgrammeStartDate();
     LocalDate endDate = programmeMembershipDto.getProgrammeEndDate();
@@ -129,7 +128,7 @@ public class ProgrammeMembershipValidator {
           new FieldError(PROGRAMME_MEMBERSHIP_DTO_NAME, "Programme Start Date",
               "Programme Start Date must be after the End Date");
       fieldErrors.add(fieldError);
-      }
+    }
   }
 
   /**
@@ -165,7 +164,7 @@ public class ProgrammeMembershipValidator {
    * @param curriculumId
    */
   private void checkProgrammeCurriculumAssociation(List<FieldError> fieldErrors, Long programmeId,
-      Long curriculumId) {
+                                                   Long curriculumId) {
 
     boolean isExists = programmeRepository
         .programmeCurriculumAssociationExists(programmeId, curriculumId);
