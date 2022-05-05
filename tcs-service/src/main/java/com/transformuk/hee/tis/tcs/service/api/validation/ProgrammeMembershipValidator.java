@@ -64,6 +64,7 @@ public class ProgrammeMembershipValidator {
     fieldErrors.addAll(checkProgramme(programmeMembershipDTO));
     fieldErrors.addAll(checkCurriculum(programmeMembershipDTO));
     fieldErrors.addAll(checkRotation(programmeMembershipDTO));
+    System.out.println("should check dates next");
     checkProgrammeDates(fieldErrors, programmeMembershipDTO);
     if (!fieldErrors.isEmpty()) {
       BeanPropertyBindingResult bindingResult = new BeanPropertyBindingResult(
@@ -123,6 +124,7 @@ public class ProgrammeMembershipValidator {
   private void checkProgrammeDates(List<FieldError> fieldErrors,
                                                    ProgrammeMembershipDTO programmeMembershipDTO) {
 
+    System.out.println("inside checkProgramDates");
     if(programmeMembershipDTO != null) {
       LocalDate startDate = programmeMembershipDTO.getProgrammeStartDate();
       LocalDate endDate = programmeMembershipDTO.getProgrammeEndDate();
@@ -135,44 +137,12 @@ public class ProgrammeMembershipValidator {
       if(startDate !=null && endDate !=null) {
         //only compare passed in values
         if(startDate.isAfter(endDate)) {
+          System.out.println("should 1st error");
           FieldError fieldError =
               new FieldError(PROGRAMME_MEMBERSHIP_DTO_NAME,"Programme Start Date",
                   String.format("Programme Start Date must be after the End Date"));
+          fieldErrors.add(fieldError);
         }
-      } else {
-        checkDbProgrammeDates(fieldErrors,programmeMembershipDTO.getProgrammeId(),startDate,
-            endDate);
-      }
-    }
-  }
-
-  private void checkDbProgrammeDates(List<FieldError> fieldErrors, Long programmeId,
-                                     LocalDate startDate,
-                                     LocalDate endDate) {
-
-    if(programmeId == null)
-    {
-      return;
-    }
-
-    List<ProgrammeMembership> originalProgrammeMembership =
-        programmeMembershipRepository.findByProgrammeId(programmeId);
-
-    if(!originalProgrammeMembership.isEmpty()) {
-      LocalDate oldStartDate = originalProgrammeMembership.get(0).getProgrammeStartDate();
-      LocalDate oldEndDate = originalProgrammeMembership.get(0).getProgrammeEndDate();
-
-
-      if(startDate !=null && oldEndDate != null && startDate.isAfter(oldEndDate)) {
-        FieldError fieldError =
-            new FieldError(PROGRAMME_MEMBERSHIP_DTO_NAME,"Programme Start Date",
-                String.format("Programme Start Date is after Program End Date in Database"));
-        fieldErrors.add(fieldError);
-      } else if (endDate != null && oldStartDate != null && oldStartDate.isAfter(endDate)) {
-        FieldError fieldError =
-            new FieldError(PROGRAMME_MEMBERSHIP_DTO_NAME,"Programme Start Date",
-                String.format("Programme End Date is after Program Start Date in Database"));
-        fieldErrors.add(fieldError);
       }
     }
   }
