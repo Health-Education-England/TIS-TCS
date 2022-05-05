@@ -62,7 +62,6 @@ public class ProgrammeMembershipValidator {
     fieldErrors.addAll(checkProgramme(programmeMembershipDTO));
     fieldErrors.addAll(checkCurriculum(programmeMembershipDTO));
     fieldErrors.addAll(checkRotation(programmeMembershipDTO));
-    System.out.println("should check dates next");
     checkProgrammeDates(fieldErrors, programmeMembershipDTO);
     if (!fieldErrors.isEmpty()) {
       BeanPropertyBindingResult bindingResult = new BeanPropertyBindingResult(
@@ -122,7 +121,6 @@ public class ProgrammeMembershipValidator {
   private void checkProgrammeDates(List<FieldError> fieldErrors,
                                                    ProgrammeMembershipDTO programmeMembershipDTO) {
 
-    System.out.println("inside checkProgramDates");
     if(programmeMembershipDTO != null) {
       LocalDate startDate = programmeMembershipDTO.getProgrammeStartDate();
       LocalDate endDate = programmeMembershipDTO.getProgrammeEndDate();
@@ -135,7 +133,6 @@ public class ProgrammeMembershipValidator {
       if(startDate !=null && endDate !=null) {
         //only compare passed in values
         if(startDate.isAfter(endDate)) {
-          System.out.println("should 1st error");
           FieldError fieldError =
               new FieldError(PROGRAMME_MEMBERSHIP_DTO_NAME,"Programme Start Date",
                   String.format("Programme Start Date must be after the End Date"));
