@@ -34,7 +34,6 @@ public class ProgrammeMembershipValidator {
   private ProgrammeRepository programmeRepository;
   private CurriculumRepository curriculumRepository;
   private RotationService rotationService;
-  private ProgrammeMembershipRepository programmeMembershipRepository;
 
   @Autowired
   public ProgrammeMembershipValidator(PersonRepository personRepository,
@@ -45,7 +44,6 @@ public class ProgrammeMembershipValidator {
     this.programmeRepository = programmeRepository;
     this.curriculumRepository = curriculumRepository;
     this.rotationService = rotationService;
-    this.programmeMembershipRepository = programmeMembershipRepository;
   }
 
   /**
