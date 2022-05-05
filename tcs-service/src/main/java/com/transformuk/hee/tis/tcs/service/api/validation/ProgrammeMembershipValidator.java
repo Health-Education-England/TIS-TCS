@@ -5,8 +5,11 @@ import com.transformuk.hee.tis.tcs.api.dto.ProgrammeMembershipDTO;
 import com.transformuk.hee.tis.tcs.service.model.ProgrammeMembership;
 import com.transformuk.hee.tis.tcs.service.repository.CurriculumRepository;
 import com.transformuk.hee.tis.tcs.service.repository.PersonRepository;
+import com.transformuk.hee.tis.tcs.service.repository.ProgrammeMembershipRepository;
 import com.transformuk.hee.tis.tcs.service.repository.ProgrammeRepository;
 import com.transformuk.hee.tis.tcs.service.service.RotationService;
+
+import java.time.LocalDate;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Set;
@@ -31,6 +34,7 @@ public class ProgrammeMembershipValidator {
   private ProgrammeRepository programmeRepository;
   private CurriculumRepository curriculumRepository;
   private RotationService rotationService;
+  private ProgrammeMembershipRepository programmeMembershipRepository;
 
   @Autowired
   public ProgrammeMembershipValidator(PersonRepository personRepository,
@@ -41,6 +45,7 @@ public class ProgrammeMembershipValidator {
     this.programmeRepository = programmeRepository;
     this.curriculumRepository = curriculumRepository;
     this.rotationService = rotationService;
+    this.programmeMembershipRepository = programmeMembershipRepository;
   }
 
   /**
@@ -59,6 +64,7 @@ public class ProgrammeMembershipValidator {
     fieldErrors.addAll(checkProgramme(programmeMembershipDTO));
     fieldErrors.addAll(checkCurriculum(programmeMembershipDTO));
     fieldErrors.addAll(checkRotation(programmeMembershipDTO));
+    checkProgrammeDates(fieldErrors, programmeMembershipDTO);
     if (!fieldErrors.isEmpty()) {
       BeanPropertyBindingResult bindingResult = new BeanPropertyBindingResult(
           programmeMembershipDTO, PROGRAMME_MEMBERSHIP_DTO_NAME);
@@ -106,6 +112,69 @@ public class ProgrammeMembershipValidator {
       }
     }
     return fieldErrors;
+  }
+
+  /**
+   * Check programme start date is before finish
+   *
+   * @param programmeMembershipDTO
+   * @return
+   */
+  private void checkProgrammeDates(List<FieldError> fieldErrors,
+                                                   ProgrammeMembershipDTO programmeMembershipDTO) {
+
+    if(programmeMembershipDTO != null) {
+      LocalDate startDate = programmeMembershipDTO.getProgrammeStartDate();
+      LocalDate endDate = programmeMembershipDTO.getProgrammeEndDate();
+
+      if (startDate == null && endDate == null) {
+        //nothing to check
+        return;
+      }
+
+      if(startDate !=null && endDate !=null) {
+        //only compare passed in values
+        if(startDate.isAfter(endDate)) {
+          FieldError fieldError =
+              new FieldError(PROGRAMME_MEMBERSHIP_DTO_NAME,"Programme Start Date",
+                  String.format("Programme Start Date must be after the End Date"));
+        }
+      } else {
+        checkDbProgrammeDates(fieldErrors,programmeMembershipDTO.getProgrammeId(),startDate,
+            endDate);
+      }
+    }
+  }
+
+  private void checkDbProgrammeDates(List<FieldError> fieldErrors, Long programmeId,
+                                     LocalDate startDate,
+                                     LocalDate endDate) {
+
+    if(programmeId == null)
+    {
+      return;
+    }
+
+    List<ProgrammeMembership> originalProgrammeMembership =
+        programmeMembershipRepository.findByProgrammeId(programmeId);
+
+    if(!originalProgrammeMembership.isEmpty()) {
+      LocalDate oldStartDate = originalProgrammeMembership.get(0).getProgrammeStartDate();
+      LocalDate oldEndDate = originalProgrammeMembership.get(0).getProgrammeEndDate();
+
+
+      if(startDate !=null && oldEndDate != null && startDate.isAfter(oldEndDate)) {
+        FieldError fieldError =
+            new FieldError(PROGRAMME_MEMBERSHIP_DTO_NAME,"Programme Start Date",
+                String.format("Programme Start Date is after Program End Date in Database"));
+        fieldErrors.add(fieldError);
+      } else if (endDate != null && oldStartDate != null && oldStartDate.isAfter(endDate)) {
+        FieldError fieldError =
+            new FieldError(PROGRAMME_MEMBERSHIP_DTO_NAME,"Programme Start Date",
+                String.format("Programme End Date is after Program Start Date in Database"));
+        fieldErrors.add(fieldError);
+      }
+    }
   }
 
   /**
