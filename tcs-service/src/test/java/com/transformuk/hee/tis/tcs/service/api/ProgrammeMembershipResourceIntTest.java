@@ -369,6 +369,40 @@ public class ProgrammeMembershipResourceIntTest {
 
   @Test
   @Transactional
+  public void createProgrammeMembershipShouldError400WhenInvalidProgrammeDatesProvided()
+      throws Exception {
+    personRepository.saveAndFlush(person);
+    curriculumRepository.saveAndFlush(curriculum);
+    programme.setCurricula(Collections.singleton(programmeCurriculum));
+    programmeRepository.saveAndFlush(programme);
+    rotation.setProgrammeId(programme.getId());
+    rotationRepository.saveAndFlush(rotation);
+    int databasePmSizeBeforeCreate = programmeMembershipRepository.findAll().size();
+    int databaseCmSizeBeforeCreate = curriculumMembershipRepository.findAll().size();
+    programmeMembership.setProgrammeStartDate(LocalDate.now().plusDays(10));
+    programmeMembership.setProgrammeEndDate(LocalDate.now());
+    programmeMembership.setPerson(person);
+    programmeMembership.setProgramme(programme);
+    programmeMembership
+        .setCurriculumId(programme.getCurricula().iterator().next().getCurriculum().getId());
+    programmeMembership.setRotation(rotation);
+    // Create the ProgrammeMembership
+    ProgrammeMembershipDTO programmeMembershipDTO = programmeMembershipMapper
+        .toDto(programmeMembership);
+    restProgrammeMembershipMockMvc.perform(post("/api/programme-memberships")
+        .contentType(MediaType.APPLICATION_JSON)
+        .content(TestUtil.convertObjectToJsonBytes(programmeMembershipDTO)))
+        .andExpect(status().isBadRequest());
+
+    // Validate the ProgrammeMembershipRepository has NOT changed or saved as CurriculumMembership
+    List<ProgrammeMembership> programmeMembershipList = programmeMembershipRepository.findAll();
+    assertThat(programmeMembershipList).hasSize(databasePmSizeBeforeCreate);
+    List<CurriculumMembership> curriculumMembershipList = curriculumMembershipRepository.findAll();
+    assertThat(curriculumMembershipList).hasSize(databaseCmSizeBeforeCreate);
+  }
+
+  @Test
+  @Transactional
   public void shouldValidateMandatoryFieldsWhenCreating() throws Exception {
     //given
     ProgrammeMembershipDTO programmeMembershipDTO = new ProgrammeMembershipDTO();
