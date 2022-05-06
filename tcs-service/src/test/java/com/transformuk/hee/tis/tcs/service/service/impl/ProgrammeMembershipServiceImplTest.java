@@ -115,7 +115,7 @@ public class ProgrammeMembershipServiceImplTest {
 
   private void initialiseData() {
     person.setId(1L);
-    person.setCurriculumMemberships(Sets.newHashSet());
+    person.setProgrammeMemberships(Sets.newHashSet());
 
     trainingNumber.setId(TRAINEE_ID);
     trainingNumber.setTrainingNumber(TRAINEE_NUMBER);

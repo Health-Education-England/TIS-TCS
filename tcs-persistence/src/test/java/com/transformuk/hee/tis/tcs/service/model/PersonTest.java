@@ -11,9 +11,9 @@ import com.transformuk.hee.tis.tcs.api.enumeration.Status;
 
 public class PersonTest extends Person {
 
-  private CurriculumMembership pastMembership;
-  private CurriculumMembership futureMembership;
-  private CurriculumMembership currentMembership;
+  private ProgrammeMembership pastMembership;
+  private ProgrammeMembership futureMembership;
+  private ProgrammeMembership currentMembership;
 
   private LocalDate today = LocalDate.now();
   private LocalDate yesterday = today.minusDays(1);
@@ -25,15 +25,15 @@ public class PersonTest extends Person {
 
   public PersonTest() {
 
-    pastMembership = new CurriculumMembership();
+    pastMembership = new ProgrammeMembership();
     pastMembership.setProgrammeEndDate(yesterday);
     pastMembership.setProgrammeStartDate(lastYear);
 
-    futureMembership = new CurriculumMembership();
+    futureMembership = new ProgrammeMembership();
     futureMembership.setProgrammeEndDate(nextYear);
     futureMembership.setProgrammeStartDate(tomorrow);
 
-    currentMembership = new CurriculumMembership();
+    currentMembership = new ProgrammeMembership();
     currentMembership.setProgrammeEndDate(nextMonth);
     currentMembership.setProgrammeStartDate(lastMonth);
   }
@@ -42,7 +42,7 @@ public class PersonTest extends Person {
   public void testCalculateTrainingStatusWithNoProgrammes() {
     assertPersonRecordStatusEquals(Status.INACTIVE, null);
     assertPersonRecordStatusEquals(Status.INACTIVE,
-        Collections.<CurriculumMembership>emptySet());
+        Collections.emptySet());
   }
 
   @Test
@@ -58,14 +58,14 @@ public class PersonTest extends Person {
   @Test
   public void testCalculateTrainingStatusWithCurrentProgramme() {
     assertPersonRecordStatusEquals(Status.CURRENT, Collections.singleton(currentMembership));
-    Set<CurriculumMembership> allMemberships = new HashSet<CurriculumMembership>();
+    Set<ProgrammeMembership> allMemberships = new HashSet<>();
     allMemberships.addAll(Arrays.asList(pastMembership, currentMembership, futureMembership));
     assertPersonRecordStatusEquals(Status.CURRENT, allMemberships);
   }
 
   private void assertPersonRecordStatusEquals(Status expected,
-      Set<CurriculumMembership> curriculumMemberships) {
-    Person person = new Person().programmeMemberships(curriculumMemberships);
+      Set<ProgrammeMembership> programmeMemberships) {
+    Person person = new Person().programmeMemberships(programmeMemberships);
     Status actual = person.programmeMembershipsStatus();
     assertEquals(expected, actual);
   }

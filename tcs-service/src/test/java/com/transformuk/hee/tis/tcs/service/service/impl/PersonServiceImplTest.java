@@ -25,6 +25,7 @@ import com.transformuk.hee.tis.tcs.service.model.Person;
 import com.transformuk.hee.tis.tcs.service.model.PersonTrust;
 import com.transformuk.hee.tis.tcs.service.model.PersonalDetails;
 import com.transformuk.hee.tis.tcs.service.model.PostTrust;
+import com.transformuk.hee.tis.tcs.service.model.ProgrammeMembership;
 import com.transformuk.hee.tis.tcs.service.model.RightToWork;
 import com.transformuk.hee.tis.tcs.service.repository.ContactDetailsRepository;
 import com.transformuk.hee.tis.tcs.service.repository.GdcDetailsRepository;
@@ -86,7 +87,7 @@ public class PersonServiceImplTest {
   private ArgumentCaptor<PersonV2DTO> personV2DTOArgumentCaptor;
 
   private Person person;
-  private CurriculumMembership pm1, pm2, pm3, pm4;
+  private ProgrammeMembership pm1, pm2, pm3, pm4;
   private PersonDTO personDTO;
   private ProgrammeMembershipDTO pmDTO1, pmDTO2, pmDTO3, pmDTO4;
   private PersonDTO unsavedPersonDTOMock = mock(PersonDTO.class), savedPersonDTOMock = mock(
@@ -148,12 +149,12 @@ public class PersonServiceImplTest {
     LocalDate pm3Date = null;
     LocalDate pm4Date = LocalDate.of(2000, 1, 1);
 
-    pm1 = new CurriculumMembership().programmeStartDate(pm1Date);
-    pm2 = new CurriculumMembership().programmeStartDate(pm2Date);
-    pm3 = new CurriculumMembership().programmeStartDate(pm3Date);
-    pm4 = new CurriculumMembership().programmeStartDate(pm4Date);
+    pm1 = new ProgrammeMembership().programmeStartDate(pm1Date);
+    pm2 = new ProgrammeMembership().programmeStartDate(pm2Date);
+    pm3 = new ProgrammeMembership().programmeStartDate(pm3Date);
+    pm4 = new ProgrammeMembership().programmeStartDate(pm4Date);
 
-    person.setCurriculumMemberships(Sets.newHashSet(pm1, pm2, pm3, pm4));
+    person.setProgrammeMemberships(Sets.newHashSet(pm1, pm2, pm3, pm4));
 
     personDTO = new PersonDTO();
     pmDTO1 = new ProgrammeMembershipDTO();
