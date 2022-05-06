@@ -1,8 +1,7 @@
 package com.transformuk.hee.tis.tcs.service.api;
 
 import static org.assertj.core.api.Assertions.assertThat;
-import static org.hamcrest.Matchers.containsInAnyOrder;
-import static org.hamcrest.Matchers.hasItem;
+import static org.hamcrest.Matchers.*;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.delete;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
@@ -365,6 +364,80 @@ public class ProgrammeMembershipResourceIntTest {
     assertThat(programmeMembershipList).hasSize(databasePmSizeBeforeCreate);
     List<CurriculumMembership> curriculumMembershipList = curriculumMembershipRepository.findAll();
     assertThat(curriculumMembershipList).hasSize(databaseCmSizeBeforeCreate+1);
+  }
+
+  @Test
+  @Transactional
+  public void createProgrammeMembershipShouldError400WhenInvalidProgrammeDatesProvided()
+      throws Exception {
+    personRepository.saveAndFlush(person);
+    curriculumRepository.saveAndFlush(curriculum);
+    programme.setCurricula(Collections.singleton(programmeCurriculum));
+    programmeRepository.saveAndFlush(programme);
+    rotation.setProgrammeId(programme.getId());
+    rotationRepository.saveAndFlush(rotation);
+    int databasePmSizeBeforeCreate = programmeMembershipRepository.findAll().size();
+    int databaseCmSizeBeforeCreate = curriculumMembershipRepository.findAll().size();
+    programmeMembership.setProgrammeStartDate(LocalDate.now().plusDays(10));
+    programmeMembership.setProgrammeEndDate(LocalDate.now());
+    programmeMembership.setPerson(person);
+    programmeMembership.setProgramme(programme);
+    programmeMembership
+        .setCurriculumId(programme.getCurricula().iterator().next().getCurriculum().getId());
+    programmeMembership.setRotation(rotation);
+    // Create the ProgrammeMembership
+    ProgrammeMembershipDTO programmeMembershipDTO = programmeMembershipMapper
+        .toDto(programmeMembership);
+    restProgrammeMembershipMockMvc.perform(post("/api/programme-memberships")
+        .contentType(MediaType.APPLICATION_JSON)
+        .content(TestUtil.convertObjectToJsonBytes(programmeMembershipDTO)))
+        .andExpect(status().isBadRequest())
+        .andExpect(content().string(containsString(
+            "Programme Start Date must be before the End Date")));
+
+    // Validate the ProgrammeMembershipRepository has NOT changed or saved as CurriculumMembership
+    List<ProgrammeMembership> programmeMembershipList = programmeMembershipRepository.findAll();
+    assertThat(programmeMembershipList).hasSize(databasePmSizeBeforeCreate);
+    List<CurriculumMembership> curriculumMembershipList = curriculumMembershipRepository.findAll();
+    assertThat(curriculumMembershipList).hasSize(databaseCmSizeBeforeCreate);
+  }
+
+  @Test
+  @Transactional
+  public void createProgrammeMembershipShouldError400WhenNullProgrammeDatesProvided()
+      throws Exception {
+    personRepository.saveAndFlush(person);
+    curriculumRepository.saveAndFlush(curriculum);
+    programme.setCurricula(Collections.singleton(programmeCurriculum));
+    programmeRepository.saveAndFlush(programme);
+    rotation.setProgrammeId(programme.getId());
+    rotationRepository.saveAndFlush(rotation);
+    int databasePmSizeBeforeCreate = programmeMembershipRepository.findAll().size();
+    int databaseCmSizeBeforeCreate = curriculumMembershipRepository.findAll().size();
+    programmeMembership.setProgrammeStartDate(null);
+    programmeMembership.setProgrammeEndDate(null);
+    programmeMembership.setPerson(person);
+    programmeMembership.setProgramme(programme);
+    programmeMembership
+        .setCurriculumId(programme.getCurricula().iterator().next().getCurriculum().getId());
+    programmeMembership.setRotation(rotation);
+    // Create the ProgrammeMembership
+    ProgrammeMembershipDTO programmeMembershipDTO = programmeMembershipMapper
+        .toDto(programmeMembership);
+    restProgrammeMembershipMockMvc.perform(post("/api/programme-memberships")
+        .contentType(MediaType.APPLICATION_JSON)
+        .content(TestUtil.convertObjectToJsonBytes(programmeMembershipDTO)))
+        .andExpect(status().isBadRequest())
+        .andExpect(content().string(containsString(
+            "ProgrammeStartDate is required")))
+        .andExpect(content().string(containsString(
+            "ProgrammeEndDate is required")));
+
+    // Validate the ProgrammeMembershipRepository has NOT changed or saved as CurriculumMembership
+    List<ProgrammeMembership> programmeMembershipList = programmeMembershipRepository.findAll();
+    assertThat(programmeMembershipList).hasSize(databasePmSizeBeforeCreate);
+    List<CurriculumMembership> curriculumMembershipList = curriculumMembershipRepository.findAll();
+    assertThat(curriculumMembershipList).hasSize(databaseCmSizeBeforeCreate);
   }
 
   @Test
