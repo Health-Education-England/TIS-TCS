@@ -35,9 +35,9 @@ public class ProgrammeMembershipValidator {
 
   @Autowired
   public ProgrammeMembershipValidator(PersonRepository personRepository,
-                                      ProgrammeRepository programmeRepository,
-                                      CurriculumRepository curriculumRepository,
-                                      RotationService rotationService) {
+      ProgrammeRepository programmeRepository,
+      CurriculumRepository curriculumRepository,
+      RotationService rotationService) {
     this.personRepository = personRepository;
     this.programmeRepository = programmeRepository;
     this.curriculumRepository = curriculumRepository;
@@ -55,7 +55,6 @@ public class ProgrammeMembershipValidator {
    */
   public void validate(ProgrammeMembershipDTO programmeMembershipDto)
       throws MethodArgumentNotValidException {
-
 
     List<FieldError> fieldErrors = new ArrayList<>();
     fieldErrors.addAll(checkPerson(programmeMembershipDto));
@@ -166,7 +165,7 @@ public class ProgrammeMembershipValidator {
    * @param curriculumId
    */
   private void checkProgrammeCurriculumAssociation(List<FieldError> fieldErrors, Long programmeId,
-                                                   Long curriculumId) {
+      Long curriculumId) {
 
     boolean isExists = programmeRepository
         .programmeCurriculumAssociationExists(programmeId, curriculumId);
