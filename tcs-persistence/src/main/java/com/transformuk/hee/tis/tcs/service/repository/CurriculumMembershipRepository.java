@@ -12,36 +12,32 @@ import org.springframework.data.repository.query.Param;
  */
 @SuppressWarnings("unused")
 public interface CurriculumMembershipRepository extends JpaRepository<CurriculumMembership, Long> {
-  //Note: personId, programme, programmeEndDate etc. are now only updated in the
-  //programmeMembership table, and may be NULL in the CurriculumMembership table.
-
-  //TODO: the CurriculumMemberships that are returned may have NULL values in the fields above (the deprecated fields)
-  // - these need to be resolved
+  //Note: personId, programme, programmeEndDate etc. should be updated in the
+  //programmeMembership table, and removed from the CurriculumMembership table.
+  //See commit 43657e57f8068704ed5ad81f8b9d66090845d025 for initial work to refactor this
 
   @Query(value = "SELECT cm "
       + "FROM CurriculumMembership cm "
-      + "WHERE cm.programmeMembership.person.id = :traineeId "
-      + "AND cm.programmeMembership.programme.id = :programmeId")
+      + "WHERE personId = :traineeId "
+      + "AND cm.programme.id = :programmeId")
   List<CurriculumMembership> findByTraineeIdAndProgrammeId(@Param("traineeId") Long traineeId,
                                                           @Param("programmeId") Long programmeId);
 
   @Query(value = "SELECT cm "
       + "FROM CurriculumMembership cm "
-      + "WHERE cm.programmeMembership.person.id = :traineeId")
+      + "WHERE personId = :traineeId")
   List<CurriculumMembership> findByTraineeId(@Param("traineeId") Long traineeId);
 
   //Find latest curriculum membership of a trainee
   @Query(value = "SELECT cm.* FROM CurriculumMembership cm "
-      + "JOIN ProgrammeMembership pm ON cm.programmeMembershipId = pm.id "
-      + "WHERE pm.personId = :traineeId ORDER BY pm.programmeEndDate DESC LIMIT 1",
+      + "WHERE cm.personId = :traineeId ORDER BY cm.programmeEndDate DESC LIMIT 1",
       nativeQuery = true)
   CurriculumMembership findLatestCurriculumMembershipByTraineeId(@Param("traineeId")
                                                                      Long traineeId);
 
   @Query(value = "SELECT cm.* FROM CurriculumMembership cm "
-      + "JOIN ProgrammeMembership pm ON cm.programmeMembershipId = pm.id "
-      + "WHERE pm.personId = :traineeId "
-      + "ORDER BY pm.programmeEndDate DESC", nativeQuery = true)
+      + "WHERE cm.personId = :traineeId "
+      + "ORDER BY cm.programmeEndDate DESC", nativeQuery = true)
   List<CurriculumMembership> findAllCurriculumMembershipInDescOrderByTraineeId(
       @Param("traineeId") Long traineeId);
 
@@ -54,8 +50,7 @@ public interface CurriculumMembershipRepository extends JpaRepository<Curriculum
 
   //Find latest curriculum membership of a trainee order by curriculum end date
   @Query(value = "SELECT cm.* FROM CurriculumMembership cm "
-      + "JOIN ProgrammeMembership pm ON cm.programmeMembershipId = pm.id "
-      + "WHERE pm.personId = :traineeId ORDER BY cm.curriculumEndDate DESC LIMIT 1",
+      + "WHERE cm.personId = :traineeId ORDER BY cm.curriculumEndDate DESC LIMIT 1",
       nativeQuery = true)
   CurriculumMembership findLatestCurriculumByTraineeId(@Param("traineeId") Long traineeId);
 }

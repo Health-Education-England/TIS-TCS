@@ -255,6 +255,33 @@ public class CurriculumMembershipMapper {
     //CHECK: can leavingDestination be omitted as legacy field?
     //result.setLeavingDestination(programmeMembershipDto.getLeavingDestination());
 
+    //TODO: the following should be removed in future once e.g. the tcs-persistence repository queries are refactored
+    // to allow CurriculumMembership to not duplicate ProgrammeMembership data
+    result.setProgrammeMembershipType(programmeMembershipDto.getProgrammeMembershipType());
+    result.setProgrammeStartDate(programmeMembershipDto.getProgrammeStartDate());
+    result.setProgrammeEndDate(programmeMembershipDto.getProgrammeEndDate());
+    result.setLeavingReason(programmeMembershipDto.getLeavingReason());
+    result.setLeavingDestination(programmeMembershipDto.getLeavingDestination());
+    if (programmeMembershipDto.getProgrammeId() != null) {
+      Programme programme = new Programme();
+      programme.setId(programmeMembershipDto.getProgrammeId());
+      programme.setProgrammeName(programmeMembershipDto.getProgrammeName());
+      programme.setOwner(programmeMembershipDto.getProgrammeOwner());
+      programme.setProgrammeNumber(programmeMembershipDto.getProgrammeNumber());
+      result.setProgramme(programme);
+      result.setRotation(rotationDtoToRotation(programmeMembershipDto.getRotation()));
+    }
+    result.setTrainingNumber(
+        trainingNumberDTOToTrainingNumber(programmeMembershipDto.getTrainingNumber()));
+
+    if (programmeMembershipDto.getPerson() == null) {
+      result.setPerson(null);
+    } else {
+      result.setPerson(personDtoToPerson(programmeMembershipDto.getPerson()));
+    }
+    result.setTrainingPathway(programmeMembershipDto.getTrainingPathway());
+    //end remove block
+
     return result;
   }
 
@@ -378,6 +405,23 @@ public class CurriculumMembershipMapper {
       result.setProgrammeId(rotationDto.getProgrammeId());
       result.setName(rotationDto.getName());
       result.setStatus(rotationDto.getStatus());
+    }
+    return result;
+  }
+
+  /**
+   * Convert a trainingNumberDTO to a trainingNumber object.
+   *
+   * @param trainingNumberDTO the TrainingNumberDTO object to convert
+   * @return a TrainingNumber object
+   */
+  private TrainingNumber trainingNumberDTOToTrainingNumber(TrainingNumberDTO trainingNumberDTO) {
+    TrainingNumber result = null;
+    if (trainingNumberDTO != null) {
+      result = new TrainingNumber();
+      result.setId(trainingNumberDTO.getId());
+      result.setIntrepidId(trainingNumberDTO.getIntrepidId());
+      result.setTrainingNumber(trainingNumberDTO.getTrainingNumber());
     }
     return result;
   }
