@@ -351,8 +351,6 @@ public class ProgrammeMembershipResourceIntTest {
     programmeMembership.setProgrammeEndDate(LocalDate.now());
     programmeMembership.setPerson(person);
     programmeMembership.setProgramme(programme);
-    programmeMembership
-        .setCurriculumId(programme.getCurricula().iterator().next().getCurriculum().getId());
     programmeMembership.setRotation(rotation);
     // Create the ProgrammeMembership
     ProgrammeMembershipDTO programmeMembershipDTO = programmeMembershipMapper
@@ -387,8 +385,6 @@ public class ProgrammeMembershipResourceIntTest {
     programmeMembership.setProgrammeEndDate(null);
     programmeMembership.setPerson(person);
     programmeMembership.setProgramme(programme);
-    programmeMembership
-        .setCurriculumId(programme.getCurricula().iterator().next().getCurriculum().getId());
     programmeMembership.setRotation(rotation);
     // Create the ProgrammeMembership
     ProgrammeMembershipDTO programmeMembershipDTO = programmeMembershipMapper
