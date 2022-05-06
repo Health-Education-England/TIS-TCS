@@ -120,12 +120,15 @@ public class ProgrammeMembershipValidator {
   private List<FieldError> checkProgrammeDates(ProgrammeMembershipDTO programmeMembershipDto) {
     List<FieldError> fieldErrors = new ArrayList<>();
 
-    LocalDate startDate = programmeMembershipDto.getProgrammeStartDate();
-    LocalDate endDate = programmeMembershipDto.getProgrammeEndDate();
+    if(programmeMembershipDto.getProgrammeStartDate() != null &&
+        programmeMembershipDto.getProgrammeEndDate() != null) {
+      LocalDate startDate = programmeMembershipDto.getProgrammeStartDate();
+      LocalDate endDate = programmeMembershipDto.getProgrammeEndDate();
 
-    if (startDate.isAfter(endDate)) {
-      fieldErrors.add(new FieldError(PROGRAMME_MEMBERSHIP_DTO_NAME, "Programme Start Date",
-          "Programme Start Date must be before the End Date"));
+      if (startDate.isAfter(endDate)) {
+        fieldErrors.add(new FieldError(PROGRAMME_MEMBERSHIP_DTO_NAME, "Programme Start Date",
+            "Programme Start Date must be before the End Date"));
+      }
     }
     return fieldErrors;
   }
