@@ -1,8 +1,7 @@
 package com.transformuk.hee.tis.tcs.service.api;
 
 import static org.assertj.core.api.Assertions.assertThat;
-import static org.hamcrest.Matchers.containsInAnyOrder;
-import static org.hamcrest.Matchers.hasItem;
+import static org.hamcrest.Matchers.*;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.delete;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
@@ -392,7 +391,9 @@ public class ProgrammeMembershipResourceIntTest {
     restProgrammeMembershipMockMvc.perform(post("/api/programme-memberships")
         .contentType(MediaType.APPLICATION_JSON)
         .content(TestUtil.convertObjectToJsonBytes(programmeMembershipDTO)))
-        .andExpect(status().isBadRequest());
+        .andExpect(status().isBadRequest())
+        .andExpect(content().string(containsString(
+            "Programme Start Date must be before the End Date")));
 
     // Validate the ProgrammeMembershipRepository has NOT changed or saved as CurriculumMembership
     List<ProgrammeMembership> programmeMembershipList = programmeMembershipRepository.findAll();
