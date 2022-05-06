@@ -126,7 +126,7 @@ public class ProgrammeMembershipValidator {
     if (startDate.isAfter(endDate)) {
       FieldError fieldError =
           new FieldError(PROGRAMME_MEMBERSHIP_DTO_NAME, "Programme Start Date",
-              "Programme Start Date must be after the End Date");
+              "Programme Start Date must be before the End Date");
       fieldErrors.add(fieldError);
     }
   }
