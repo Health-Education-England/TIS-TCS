@@ -7,6 +7,7 @@ import com.transformuk.hee.tis.tcs.service.repository.CurriculumRepository;
 import com.transformuk.hee.tis.tcs.service.repository.PersonRepository;
 import com.transformuk.hee.tis.tcs.service.repository.ProgrammeRepository;
 import com.transformuk.hee.tis.tcs.service.service.RotationService;
+import java.time.LocalDate;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Set;
@@ -48,20 +49,22 @@ public class ProgrammeMembershipValidator {
    * based validation already in place. It checks that the person, programme and curriculum
    * entered.
    *
-   * @param programmeMembershipDTO the programmeMembership to check
+   * @param programmeMembershipDto the programmeMembership to check
+   * @return
    * @throws MethodArgumentNotValidException if there are validation errors
    */
-  public void validate(ProgrammeMembershipDTO programmeMembershipDTO)
+  public void validate(ProgrammeMembershipDTO programmeMembershipDto)
       throws MethodArgumentNotValidException {
 
     List<FieldError> fieldErrors = new ArrayList<>();
-    fieldErrors.addAll(checkPerson(programmeMembershipDTO));
-    fieldErrors.addAll(checkProgramme(programmeMembershipDTO));
-    fieldErrors.addAll(checkCurriculum(programmeMembershipDTO));
-    fieldErrors.addAll(checkRotation(programmeMembershipDTO));
+    fieldErrors.addAll(checkPerson(programmeMembershipDto));
+    fieldErrors.addAll(checkProgramme(programmeMembershipDto));
+    fieldErrors.addAll(checkCurriculum(programmeMembershipDto));
+    fieldErrors.addAll(checkRotation(programmeMembershipDto));
+    fieldErrors.addAll(checkProgrammeDates(programmeMembershipDto));
     if (!fieldErrors.isEmpty()) {
       BeanPropertyBindingResult bindingResult = new BeanPropertyBindingResult(
-          programmeMembershipDTO, PROGRAMME_MEMBERSHIP_DTO_NAME);
+          programmeMembershipDto, PROGRAMME_MEMBERSHIP_DTO_NAME);
       fieldErrors.forEach(bindingResult::addError);
       throw new MethodArgumentNotValidException(null, bindingResult);
     }
@@ -104,6 +107,24 @@ public class ProgrammeMembershipValidator {
         fieldErrors.add(new FieldError(PROGRAMME_MEMBERSHIP_DTO_NAME, "programmeId",
             String.format("Programme with id %s does not exist", programmeId)));
       }
+    }
+    return fieldErrors;
+  }
+
+  /**
+   * Check programme start date is before finish.
+   *
+   * @param programmeMembershipDto return
+   */
+  private List<FieldError> checkProgrammeDates(ProgrammeMembershipDTO programmeMembershipDto) {
+    List<FieldError> fieldErrors = new ArrayList<>();
+
+    LocalDate startDate = programmeMembershipDto.getProgrammeStartDate();
+    LocalDate endDate = programmeMembershipDto.getProgrammeEndDate();
+
+    if (startDate.isAfter(endDate)) {
+      fieldErrors.add(new FieldError(PROGRAMME_MEMBERSHIP_DTO_NAME, "Programme Start Date",
+          "Programme Start Date must be before the End Date"));
     }
     return fieldErrors;
   }
