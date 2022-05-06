@@ -43,7 +43,7 @@ public interface CurriculumMembershipRepository extends JpaRepository<Curriculum
 
   @Query(value = "SELECT cm "
       + "FROM CurriculumMembership cm "
-      + "WHERE cm.programmeMembership.programme.id = :programmeId")
+      + "WHERE cm.programme.id = :programmeId")
   List<CurriculumMembership> findByProgrammeId(@Param("programmeId") Long programmeId);
 
   List<CurriculumMembership> findByIdIn(Set<Long> ids);
