@@ -404,7 +404,7 @@ public class ProgrammeMembershipResourceIntTest {
 
   @Test
   @Transactional
-  public void createProgrammeMembershipShouldError400WhennullProgrammeDatesProvided()
+  public void createProgrammeMembershipShouldError400WhenNullProgrammeDatesProvided()
       throws Exception {
     personRepository.saveAndFlush(person);
     curriculumRepository.saveAndFlush(curriculum);
