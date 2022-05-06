@@ -120,8 +120,8 @@ public class ProgrammeMembershipValidator {
   private List<FieldError> checkProgrammeDates(ProgrammeMembershipDTO programmeMembershipDto) {
     List<FieldError> fieldErrors = new ArrayList<>();
 
-    if(programmeMembershipDto.getProgrammeStartDate() != null &&
-        programmeMembershipDto.getProgrammeEndDate() != null) {
+    if (programmeMembershipDto.getProgrammeStartDate() != null
+        && programmeMembershipDto.getProgrammeEndDate() != null) {
       LocalDate startDate = programmeMembershipDto.getProgrammeStartDate();
       LocalDate endDate = programmeMembershipDto.getProgrammeEndDate();
 
