@@ -13,7 +13,6 @@ import com.transformuk.hee.tis.tcs.service.model.Programme;
 import com.transformuk.hee.tis.tcs.service.model.ProgrammeMembership;
 import com.transformuk.hee.tis.tcs.service.model.Rotation;
 import com.transformuk.hee.tis.tcs.service.model.TrainingNumber;
-import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 import java.util.stream.Collectors;
@@ -98,27 +97,6 @@ public class CurriculumMembershipMapper {
   }
 
   /**
-   * Convert a list of CurriculumMemberships to a list of distinct CurriculumMembershipDTOs.
-   *
-   * @param curriculumMemberships the list of CurriculumMembership objects to convert
-   * @return a list of distinct CurriculumMembershipDTO objects
-   */
-  public List<CurriculumMembershipDTO> curriculumMembershipsToCurriculumMembershipDtos(
-      List<CurriculumMembership> curriculumMemberships) {
-    Map<CurriculumMembershipDTO, CurriculumMembershipDTO> listMap = Maps.newHashMap();
-
-    for (CurriculumMembership curriculumMembership : curriculumMemberships) {
-      CurriculumMembershipDTO curriculumMembershipDto = curriculumMembershipToCurriculumMembershipDto(
-          curriculumMembership);
-      if (!listMap.containsKey(curriculumMembershipDto)) {
-        listMap.put(curriculumMembershipDto, curriculumMembershipDto);
-      }
-    }
-
-    return new ArrayList<>(listMap.keySet());
-  }
-
-  /**
    * Convert a ProgrammeMembershipDTO to a CurriculumMembership object, enriched with all
    * curriculum membership details from the ProgrammeMembershipDTO.
    *
@@ -136,22 +114,6 @@ public class CurriculumMembershipMapper {
       curriculumMembershipList.add(curriculumMembership);
     }
     return curriculumMembershipList;
-  }
-
-  /**
-   * Convert a list of ProgrammeMembershipDTOs to a list of CurriculumMembership objects.
-   *
-   * @param programmeMembershipDtos the list of ProgrammeMembershipDTO objects to convert
-   * @return a list of CurriculumMembership objects
-   */
-  public List<CurriculumMembership> programmeMembershipDtosToCurriculumMemberships(
-      List<ProgrammeMembershipDTO> programmeMembershipDtos) {
-    List<CurriculumMembership> result = Lists.newArrayList();
-
-    for (ProgrammeMembershipDTO programmeMembershipDto : programmeMembershipDtos) {
-      result.addAll(toEntity(programmeMembershipDto));
-    }
-    return result;
   }
 
   /**
@@ -349,23 +311,6 @@ public class CurriculumMembershipMapper {
       result.setId(trainingNumber.getId());
       result.setIntrepidId(trainingNumber.getIntrepidId());
       result.setTrainingNumber(trainingNumber.getTrainingNumber());
-    }
-    return result;
-  }
-
-  /**
-   * Convert a TrainingNumberDTO to a TrainingNumber object.
-   *
-   * @param trainingNumberDto the TrainingNumberDTO object to convert
-   * @return a TrainingNumber object
-   */
-  private TrainingNumber trainingNumberDtoToTrainingNumber(TrainingNumberDTO trainingNumberDto) {
-    TrainingNumber result = null;
-    if (trainingNumberDto != null) {
-      result = new TrainingNumber();
-      result.setId(trainingNumberDto.getId());
-      result.setIntrepidId(trainingNumberDto.getIntrepidId());
-      result.setTrainingNumber(trainingNumberDto.getTrainingNumber());
     }
     return result;
   }
