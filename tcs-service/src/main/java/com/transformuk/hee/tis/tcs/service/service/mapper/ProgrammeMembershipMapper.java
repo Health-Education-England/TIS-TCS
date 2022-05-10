@@ -42,6 +42,10 @@ public class ProgrammeMembershipMapper {
       }
       result.getCurriculumMemberships()
           .addAll(programmeMembershipToCurriculumMembershipDTOs(programmeMembership));
+      if (!result.getCurriculumMemberships().isEmpty()) {
+        //set ID from curriculumMembership
+        result.setId(result.getCurriculumMemberships().iterator().next().getId());
+      }
     }
     return result;
   }
@@ -58,6 +62,10 @@ public class ProgrammeMembershipMapper {
       }
       programmeMembershipDTO.getCurriculumMemberships()
           .addAll(programmeMembershipToCurriculumMembershipDTOs(programmeMembership));
+      if (!programmeMembershipDTO.getCurriculumMemberships().isEmpty()) {
+        //set ID from curriculumMembership
+        programmeMembershipDTO.setId(programmeMembershipDTO.getCurriculumMemberships().iterator().next().getId());
+      }
       result.add(programmeMembershipDTO);
     }
 
@@ -79,6 +87,10 @@ public class ProgrammeMembershipMapper {
       }
       programmeMembershipDTO.getCurriculumMemberships()
           .addAll(programmeMembershipToCurriculumMembershipDTOs(programmeMembership));
+      if (!programmeMembershipDTO.getCurriculumMemberships().isEmpty()) {
+        //set ID from curriculumMembership
+        programmeMembershipDTO.setId(programmeMembershipDTO.getCurriculumMemberships().iterator().next().getId());
+      }
       listMap.put(programmeMembershipDTO, programmeMembershipDTO);
     }
 
@@ -88,7 +100,7 @@ public class ProgrammeMembershipMapper {
   public ProgrammeMembership toEntity(ProgrammeMembershipDTO programmeMembershipDTO) {
     ProgrammeMembership result = new ProgrammeMembership();
 
-    result.setId(programmeMembershipDTO.getId());
+    result.setId(programmeMembershipDTO.getProgrammeMembershipId()); //use real (database) ID
     result.setProgrammeMembershipType(programmeMembershipDTO.getProgrammeMembershipType());
     result.setProgrammeStartDate(programmeMembershipDTO.getProgrammeStartDate());
     result.setProgrammeEndDate(programmeMembershipDTO.getProgrammeEndDate());
@@ -132,7 +144,8 @@ public class ProgrammeMembershipMapper {
       ProgrammeMembership programmeMembership) {
     ProgrammeMembershipDTO result = new ProgrammeMembershipDTO();
 
-    result.setId(programmeMembership.getId());
+    //result.setId(programmeMembership.getId());
+    result.setProgrammeMembershipId(programmeMembership.getId());
     result.setProgrammeMembershipType(programmeMembership.getProgrammeMembershipType());
     result.setProgrammeStartDate(programmeMembership.getProgrammeStartDate());
     result.setProgrammeEndDate(programmeMembership.getProgrammeEndDate());

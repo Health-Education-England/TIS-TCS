@@ -20,6 +20,8 @@ public class ProgrammeMembershipDTO implements Serializable {
 
   private Long id;
 
+  private Long programmeMembershipId; //real (database record) ID
+
   @NotNull(message = "ProgrammeMembershipType is required", groups = {Update.class, Create.class})
   private ProgrammeMembershipType programmeMembershipType;
 

@@ -127,7 +127,8 @@ public class CurriculumMembershipMapper {
     ProgrammeMembershipDTO result = new ProgrammeMembershipDTO();
     ProgrammeMembership programmeMembership = curriculumMembership.getProgrammeMembership();
 
-    result.setId(programmeMembership.getId());
+    result.setId(curriculumMembership.getId()); //use CM ID
+    result.setProgrammeMembershipId(programmeMembership.getId());
     result.setProgrammeMembershipType(programmeMembership.getProgrammeMembershipType());
     result.setProgrammeStartDate(programmeMembership.getProgrammeStartDate());
     result.setProgrammeEndDate(programmeMembership.getProgrammeEndDate());

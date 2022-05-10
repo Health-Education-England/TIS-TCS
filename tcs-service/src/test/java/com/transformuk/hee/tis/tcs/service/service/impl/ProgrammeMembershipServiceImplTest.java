@@ -292,7 +292,8 @@ public class ProgrammeMembershipServiceImplTest {
 
     Assert.assertNotNull(result);
     Assert.assertEquals(1, result.size());
-    Assert.assertEquals(PROGRAMME_MEMBERSHIP_ID_1, result.get(0).getId());
+    Assert.assertEquals(PROGRAMME_MEMBERSHIP_ID_1, result.get(0).getProgrammeMembershipId());
+    Assert.assertEquals(CURRICULUM_MEMBERSHIP_ID_1, result.get(0).getId());
     ProgrammeMembershipCurriculaDTO programmeMembershipCurriculaDTO = result.get(0);
     Assert.assertEquals(PROGRAMME_NAME, programmeMembershipCurriculaDTO.getProgrammeName());
     Assert.assertEquals(PROGRAMME_NUMBER1, programmeMembershipCurriculaDTO.getProgrammeNumber());
@@ -482,12 +483,14 @@ public class ProgrammeMembershipServiceImplTest {
     Assert.assertEquals(2, result.size());
 
     ProgrammeMembershipCurriculaDTO pmc1 = result.get(0);
-    Assert.assertEquals(PROGRAMME_MEMBERSHIP_ID_1, pmc1.getId());
+    Assert.assertEquals(PROGRAMME_MEMBERSHIP_ID_1, pmc1.getProgrammeMembershipId());
+    Assert.assertEquals(CURRICULUM_MEMBERSHIP_ID_1, pmc1.getId());
     Assert.assertEquals(PROGRAMME_ID, pmc1.getProgrammeId().longValue());
     Assert.assertEquals(curriculum1.getId(), pmc1.getCurriculumDTO().getId());
 
     ProgrammeMembershipCurriculaDTO pmc2 = result.get(1);
-    Assert.assertEquals(PROGRAMME_MEMBERSHIP_ID_1, pmc2.getId());
+    Assert.assertEquals(PROGRAMME_MEMBERSHIP_ID_1, pmc2.getProgrammeMembershipId());
+    Assert.assertEquals(CURRICULUM_MEMBERSHIP_ID_2, pmc2.getId());
     Assert.assertEquals(PROGRAMME_ID, pmc2.getProgrammeId().longValue());
     Assert.assertEquals(curriculum2.getId(), pmc2.getCurriculumDTO().getId());
   }
