@@ -291,7 +291,7 @@ public class ProgrammeMembershipServiceImplTest {
         .findProgrammeMembershipsForTrainee(TRAINEE_ID);
 
     Assert.assertNotNull(result);
-    Assert.assertEquals(1, result.size());
+    Assert.assertEquals(2, result.size());
     Assert.assertEquals(PROGRAMME_MEMBERSHIP_ID_1, result.get(0).getProgrammeMembershipId());
     Assert.assertEquals(CURRICULUM_MEMBERSHIP_ID_1, result.get(0).getId());
     ProgrammeMembershipCurriculaDTO programmeMembershipCurriculaDTO = result.get(0);

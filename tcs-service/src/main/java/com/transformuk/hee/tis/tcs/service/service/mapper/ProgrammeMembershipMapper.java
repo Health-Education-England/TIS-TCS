@@ -55,18 +55,11 @@ public class ProgrammeMembershipMapper {
     List<ProgrammeMembershipDTO> result = Lists.newArrayList();
 
     for (ProgrammeMembership programmeMembership : programmeMemberships) {
-      ProgrammeMembershipDTO programmeMembershipDTO = programmeMembershipToProgrammeMembershipDTO(
-          programmeMembership);
-      if (CollectionUtils.isEmpty(programmeMembershipDTO.getCurriculumMemberships())) {
-        programmeMembershipDTO.setCurriculumMemberships(Lists.newArrayList());
+      for (CurriculumMembership curriculumMembership : programmeMembership.getCurriculumMemberships()) {
+        ProgrammeMembershipDTO programmeMembershipDTO = curriculumMembershipMapper.toDto(
+            curriculumMembership);
+        result.add(programmeMembershipDTO);
       }
-      programmeMembershipDTO.getCurriculumMemberships()
-          .addAll(programmeMembershipToCurriculumMembershipDTOs(programmeMembership));
-      if (!programmeMembershipDTO.getCurriculumMemberships().isEmpty()) {
-        //set ID from curriculumMembership
-        programmeMembershipDTO.setId(programmeMembershipDTO.getCurriculumMemberships().iterator().next().getId());
-      }
-      result.add(programmeMembershipDTO);
     }
 
     return result;
