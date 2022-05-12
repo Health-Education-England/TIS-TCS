@@ -214,10 +214,6 @@ public class CurriculumMembershipMapper {
       ProgrammeMembershipDTO programmeMembershipDto) {
     CurriculumMembership result = new CurriculumMembership();
 
-    //leavingReason is held at PM level,
-    //CHECK: can leavingDestination be omitted as legacy field?
-    //result.setLeavingDestination(programmeMembershipDto.getLeavingDestination());
-
     //TODO: the following should be removed in future once e.g. the tcs-persistence repository queries are refactored
     // to allow CurriculumMembership to not duplicate ProgrammeMembership data
     result.setProgrammeMembershipType(programmeMembershipDto.getProgrammeMembershipType());

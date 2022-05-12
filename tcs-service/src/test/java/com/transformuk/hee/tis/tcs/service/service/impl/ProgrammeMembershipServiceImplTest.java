@@ -39,6 +39,8 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Optional;
 import java.util.Set;
+import java.util.UUID;
+
 import org.assertj.core.util.Lists;
 import org.assertj.core.util.Sets;
 import org.junit.Assert;
@@ -62,8 +64,8 @@ public class ProgrammeMembershipServiceImplTest {
   private static final long CURRICULUM_1_ID = 5L;
   private static final long PROGRAMME_ID = 2L;
   private static final ProgrammeMembershipType PROGRAMME_MEMBERSHIP_TYPE = ProgrammeMembershipType.SUBSTANTIVE;
-  private static final Long PROGRAMME_MEMBERSHIP_ID_1 = 11L;
-  private static final Long PROGRAMME_MEMBERSHIP_ID_2 = 22L;
+  private static final UUID PROGRAMME_MEMBERSHIP_ID_1 = UUID.randomUUID();
+  private static final UUID PROGRAMME_MEMBERSHIP_ID_2 = UUID.randomUUID();
   private static final Long CURRICULUM_MEMBERSHIP_ID_1 = 7777L;
   private static final Long CURRICULUM_MEMBERSHIP_ID_2 = 8888L;
   private static final LocalDate PROGRAMME_START_DATE = LocalDate.of(2020, 1, 1);

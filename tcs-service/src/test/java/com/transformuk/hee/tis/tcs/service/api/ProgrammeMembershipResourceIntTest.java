@@ -197,7 +197,8 @@ public class ProgrammeMembershipResourceIntTest {
         .programmeMembershipType(DEFAULT_PROGRAMME_MEMBERSHIP_TYPE)
         .programmeStartDate(DEFAULT_PROGRAMME_START_DATE)
         .programmeEndDate(DEFAULT_PROGRAMME_END_DATE)
-        .leavingReason(DEFAULT_LEAVING_REASON);
+        .leavingReason(DEFAULT_LEAVING_REASON)
+        .leavingDestination(DEFAULT_LEAVING_DESTINATION);
     return programmeMembership;
   }
 
@@ -893,7 +894,8 @@ public class ProgrammeMembershipResourceIntTest {
     assertThat(pmSize).isEqualTo(databasePmSizeBeforeDelete - 1);
 
     // Validate the programme membership has been deleted
-    Optional<ProgrammeMembership> optionalProgrammeMembership = programmeMembershipRepository.findById(programmeMembership.getId());
+    Optional<ProgrammeMembership> optionalProgrammeMembership
+        = programmeMembershipRepository.findById(programmeMembership.getId());
     assertThat(optionalProgrammeMembership).isNotPresent();
   }
 

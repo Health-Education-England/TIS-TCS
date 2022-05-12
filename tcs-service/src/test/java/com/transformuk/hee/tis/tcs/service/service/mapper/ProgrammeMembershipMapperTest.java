@@ -6,6 +6,8 @@ import com.transformuk.hee.tis.tcs.service.model.Person;
 import com.transformuk.hee.tis.tcs.service.model.ProgrammeMembership;
 import java.time.LocalDate;
 import java.util.List;
+import java.util.UUID;
+
 import org.assertj.core.util.Lists;
 import org.assertj.core.util.Sets;
 import org.junit.Assert;
@@ -29,15 +31,17 @@ public class ProgrammeMembershipMapperTest {
 
   @Test
   public void entityToDtoShouldReturnListOfAllElementsInAsDto() {
+    UUID pmID = UUID.randomUUID();
+    UUID pm2ID = UUID.randomUUID();
     ProgrammeMembership pm1 = new ProgrammeMembership(), pm2 = new ProgrammeMembership();
     CurriculumMembership cm1 = new CurriculumMembership(), cm2 = new CurriculumMembership(),
         cm3 = new CurriculumMembership();
     ProgrammeMembershipDTO pmDTO = new ProgrammeMembershipDTO();
-    pmDTO.setProgrammeMembershipId(12345L);
+    pmDTO.setProgrammeMembershipId(pmID);
     pmDTO.setId(1L);
 
-    pm1.setId(12345L);
-    pm2.setId(99876L);
+    pm1.setId(pmID);
+    pm2.setId(pm2ID);
 
     cm1.setId(1L);
     cm2.setId(2L);

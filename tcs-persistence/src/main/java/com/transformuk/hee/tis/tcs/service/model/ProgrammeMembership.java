@@ -7,6 +7,7 @@ import java.time.LocalDateTime;
 import java.util.HashSet;
 import java.util.Objects;
 import java.util.Set;
+import java.util.UUID;
 import javax.persistence.CascadeType;
 import javax.persistence.Entity;
 import javax.persistence.EnumType;
@@ -19,6 +20,7 @@ import javax.persistence.ManyToOne;
 import javax.persistence.OneToMany;
 import javax.persistence.Version;
 import lombok.Data;
+import org.hibernate.annotations.GenericGenerator;
 
 /**
  * A ProgrammeMembership.
@@ -30,8 +32,12 @@ public class ProgrammeMembership implements Serializable {
   private static final long serialVersionUID = 1L;
 
   @Id
-  @GeneratedValue(strategy = GenerationType.IDENTITY)
-  private Long id;
+  @GeneratedValue(generator = "UUID")
+  @GenericGenerator(
+      name = "UUID",
+      strategy = "org.hibernate.id.UUIDGenerator"
+  )
+  private UUID id;
 
   @ManyToOne
   @JoinColumn(name = "personId")
@@ -45,6 +51,8 @@ public class ProgrammeMembership implements Serializable {
   private LocalDate programmeEndDate;
 
   private String leavingReason;
+
+  private String leavingDestination;
 
   @ManyToOne
   @JoinColumn(name = "programmeId")
@@ -89,6 +97,11 @@ public class ProgrammeMembership implements Serializable {
 
   public ProgrammeMembership leavingReason(String leavingReason) {
     this.leavingReason = leavingReason;
+    return this;
+  }
+
+  public ProgrammeMembership leavingDestination(String leavingDestination) {
+    this.leavingDestination = leavingDestination;
     return this;
   }
 
