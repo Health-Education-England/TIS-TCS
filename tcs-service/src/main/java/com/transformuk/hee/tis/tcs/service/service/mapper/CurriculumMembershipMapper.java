@@ -313,9 +313,9 @@ public class CurriculumMembershipMapper {
   }
 
   /**
-   * Convert a trainingNumberDTO to a trainingNumber object.
+   * Convert a TrainingNumberDTO to a TrainingNumber object.
    *
-   * @param trainingNumberDTO the TrainingNumberDTO object to convert
+   * @param trainingNumberDto the TrainingNumberDTO object to convert
    * @return a TrainingNumber object
    */
   private TrainingNumber trainingNumberDtoToTrainingNumber(TrainingNumberDTO trainingNumberDto) {
