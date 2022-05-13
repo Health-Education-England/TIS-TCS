@@ -13,7 +13,7 @@ import org.springframework.data.repository.query.Param;
  * Spring Data JPA repository for the ProgrammeMembership entity.
  */
 @SuppressWarnings("unused")
-public interface ProgrammeMembershipRepository extends JpaRepository<ProgrammeMembership, Long> {
+public interface ProgrammeMembershipRepository extends JpaRepository<ProgrammeMembership, UUID> {
 
   @Query(value = "SELECT pm "
       + "FROM ProgrammeMembership pm "
@@ -44,8 +44,6 @@ public interface ProgrammeMembershipRepository extends JpaRepository<ProgrammeMe
   List<ProgrammeMembership> findByProgrammeId(@Param("programmeId") Long programmeId);
 
   List<ProgrammeMembership> findByIdIn(Set<UUID> ids);
-
-  Optional<ProgrammeMembership> findById(UUID id);
 
   //Find latest programme membership of a trainee order by curriculum end date
   //this won't work with the new structure: there is no curriculumEndDate
