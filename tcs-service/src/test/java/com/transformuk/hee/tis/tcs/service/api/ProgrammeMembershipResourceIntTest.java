@@ -671,7 +671,6 @@ public class ProgrammeMembershipResourceIntTest {
     programmeRepository.saveAndFlush(programme);
 
     programmeMembership.setProgramme(programme);
-    programmeMembershipRepository.saveAndFlush(programmeMembership);
 
     curriculumMembership.setProgrammeMembership(programmeMembership);
     curriculumMembership
@@ -699,7 +698,6 @@ public class ProgrammeMembershipResourceIntTest {
     programmeRepository.saveAndFlush(programme);
 
     programmeMembership.setProgramme(programme);
-    programmeMembershipRepository.saveAndFlush(programmeMembership);
 
     curriculumMembership
         .setCurriculumId(programme.getCurricula().iterator().next().getCurriculum().getId());
@@ -729,7 +727,6 @@ public class ProgrammeMembershipResourceIntTest {
     programmeRepository.saveAndFlush(programme);
 
     programmeMembership.setProgramme(programme); // this programme doesn't exist in DB
-    programmeMembershipRepository.saveAndFlush(programmeMembership);
 
     curriculumMembership.setProgrammeMembership(programmeMembership);
     curriculumMembership
@@ -760,7 +757,6 @@ public class ProgrammeMembershipResourceIntTest {
     programmeRepository.saveAndFlush(programme);
 
     programmeMembership.setProgramme(programme);
-    programmeMembershipRepository.saveAndFlush(programmeMembership);
 
     curriculumMembership.setProgrammeMembership(programmeMembership);
 
@@ -790,7 +786,6 @@ public class ProgrammeMembershipResourceIntTest {
     programmeRepository.saveAndFlush(programme);
 
     programmeMembership.setProgramme(programme);
-    programmeMembershipRepository.saveAndFlush(programmeMembership);
 
     curriculumMembership.setProgrammeMembership(programmeMembership);
 

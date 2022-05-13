@@ -11,6 +11,7 @@ import java.util.Objects;
 import java.util.UUID;
 import javax.validation.Valid;
 import javax.validation.constraints.NotNull;
+import javax.validation.constraints.Null;
 import lombok.Data;
 
 /**
@@ -21,6 +22,7 @@ public class ProgrammeMembershipDTO implements Serializable {
 
   private Long id;
 
+  @Null(groups = {Create.class})
   private UUID programmeMembershipId; //real (database record) ID
 
   @NotNull(message = "ProgrammeMembershipType is required", groups = {Update.class, Create.class})
