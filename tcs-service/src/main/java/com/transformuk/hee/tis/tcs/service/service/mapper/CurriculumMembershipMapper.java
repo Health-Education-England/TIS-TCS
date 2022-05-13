@@ -132,7 +132,7 @@ public class CurriculumMembershipMapper {
     result.setProgrammeMembershipType(programmeMembership.getProgrammeMembershipType());
     result.setProgrammeStartDate(programmeMembership.getProgrammeStartDate());
     result.setProgrammeEndDate(programmeMembership.getProgrammeEndDate());
-    result.setLeavingDestination(null);
+    result.setLeavingDestination(programmeMembership.getLeavingDestination());
     result.setLeavingReason(programmeMembership.getLeavingReason());
     Programme programme = programmeMembership.getProgramme();
     if (programme != null) {
@@ -231,7 +231,7 @@ public class CurriculumMembershipMapper {
       result.setRotation(rotationDtoToRotation(programmeMembershipDto.getRotation()));
     }
     result.setTrainingNumber(
-        trainingNumberDTOToTrainingNumber(programmeMembershipDto.getTrainingNumber()));
+        trainingNumberDtoToTrainingNumber(programmeMembershipDto.getTrainingNumber()));
 
     if (programmeMembershipDto.getPerson() == null) {
       result.setPerson(null);
@@ -313,6 +313,23 @@ public class CurriculumMembershipMapper {
   }
 
   /**
+   * Convert a trainingNumberDTO to a trainingNumber object.
+   *
+   * @param trainingNumberDTO the TrainingNumberDTO object to convert
+   * @return a TrainingNumber object
+   */
+  private TrainingNumber trainingNumberDtoToTrainingNumber(TrainingNumberDTO trainingNumberDTO) {
+    TrainingNumber result = null;
+    if (trainingNumberDTO != null) {
+      result = new TrainingNumber();
+      result.setId(trainingNumberDTO.getId());
+      result.setIntrepidId(trainingNumberDTO.getIntrepidId());
+      result.setTrainingNumber(trainingNumberDTO.getTrainingNumber());
+    }
+    return result;
+  }
+
+  /**
    * Convert a Rotation to a RotationDTO object.
    *
    * @param rotation the Rotation object to convert
@@ -347,23 +364,6 @@ public class CurriculumMembershipMapper {
       result.setProgrammeId(rotationDto.getProgrammeId());
       result.setName(rotationDto.getName());
       result.setStatus(rotationDto.getStatus());
-    }
-    return result;
-  }
-
-  /**
-   * Convert a trainingNumberDTO to a trainingNumber object.
-   *
-   * @param trainingNumberDTO the TrainingNumberDTO object to convert
-   * @return a TrainingNumber object
-   */
-  private TrainingNumber trainingNumberDTOToTrainingNumber(TrainingNumberDTO trainingNumberDTO) {
-    TrainingNumber result = null;
-    if (trainingNumberDTO != null) {
-      result = new TrainingNumber();
-      result.setId(trainingNumberDTO.getId());
-      result.setIntrepidId(trainingNumberDTO.getIntrepidId());
-      result.setTrainingNumber(trainingNumberDTO.getTrainingNumber());
     }
     return result;
   }
