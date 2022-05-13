@@ -1,5 +1,6 @@
 package com.transformuk.hee.tis.tcs.service.service.mapper;
 
+import com.transformuk.hee.tis.tcs.api.dto.CurriculumMembershipDTO;
 import com.transformuk.hee.tis.tcs.api.dto.ProgrammeMembershipDTO;
 import com.transformuk.hee.tis.tcs.service.model.CurriculumMembership;
 import com.transformuk.hee.tis.tcs.service.model.Person;
@@ -36,9 +37,6 @@ public class ProgrammeMembershipMapperTest {
     ProgrammeMembership pm1 = new ProgrammeMembership(), pm2 = new ProgrammeMembership();
     CurriculumMembership cm1 = new CurriculumMembership(), cm2 = new CurriculumMembership(),
         cm3 = new CurriculumMembership();
-    ProgrammeMembershipDTO pmDTO = new ProgrammeMembershipDTO();
-    pmDTO.setProgrammeMembershipId(pmID);
-    pmDTO.setId(1L);
 
     pm1.setId(pmID);
     pm2.setId(pm2ID);
@@ -66,14 +64,23 @@ public class ProgrammeMembershipMapperTest {
     pm1.setPerson(person1);
     pm2.setPerson(person1);
 
-    when(curriculumMembershipMapperMock.toDto(cm1)).thenReturn(pmDTO);
+    CurriculumMembershipDTO cmDTO1 = new CurriculumMembershipDTO();
+    cmDTO1.setId(1L);
+    CurriculumMembershipDTO cmDTO2 = new CurriculumMembershipDTO();
+    cmDTO2.setId(2L);
+    CurriculumMembershipDTO cmDTO3 = new CurriculumMembershipDTO();
+    cmDTO3.setId(3L);
+
+    when(curriculumMembershipMapperMock.curriculumMembershipToCurriculumMembershipDto(cm1)).thenReturn(cmDTO1);
+    when(curriculumMembershipMapperMock.curriculumMembershipToCurriculumMembershipDto(cm2)).thenReturn(cmDTO2);
+    when(curriculumMembershipMapperMock.curriculumMembershipToCurriculumMembershipDto(cm3)).thenReturn(cmDTO3);
 
     List<ProgrammeMembershipDTO> result = testObj.allEntityToDto(Lists.newArrayList(pm1, pm2));
 
     Assert.assertEquals(3, result.size()); //listed by curriculum membership
     ProgrammeMembershipDTO pmDTOreturned = result.get(0);
     Assert.assertNotNull(pmDTOreturned);
-    assertThat(pmDTO.getId()).isEqualTo(pmDTOreturned.getId()); //check that cm1 is the first entity converted to a DTO
-    assertThat(pmDTO.getProgrammeMembershipId()).isEqualTo(pmDTOreturned.getProgrammeMembershipId());
+    assertThat(cm1.getId()).isEqualTo(pmDTOreturned.getId()); //check that cm1 is the first entity converted to a DTO
+    assertThat(pmID).isEqualTo(pmDTOreturned.getProgrammeMembershipId());
   }
 }

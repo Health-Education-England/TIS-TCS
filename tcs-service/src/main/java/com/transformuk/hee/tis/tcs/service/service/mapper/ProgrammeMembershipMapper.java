@@ -56,8 +56,19 @@ public class ProgrammeMembershipMapper {
 
     for (ProgrammeMembership programmeMembership : programmeMemberships) {
       for (CurriculumMembership curriculumMembership : programmeMembership.getCurriculumMemberships()) {
-        ProgrammeMembershipDTO programmeMembershipDTO = curriculumMembershipMapper.toDto(
-            curriculumMembership);
+        ProgrammeMembershipDTO programmeMembershipDTO = programmeMembershipToProgrammeMembershipDTO(
+            programmeMembership);
+        if (CollectionUtils.isEmpty(programmeMembershipDTO.getCurriculumMemberships())) {
+          programmeMembershipDTO.setCurriculumMemberships(Lists.newArrayList());
+        }
+        CurriculumMembershipDTO curriculumMembershipDTO
+            = curriculumMembershipMapper.curriculumMembershipToCurriculumMembershipDto(curriculumMembership);
+        programmeMembershipDTO.getCurriculumMemberships()
+            .add(curriculumMembershipDTO);
+        if (!programmeMembershipDTO.getCurriculumMemberships().isEmpty()) {
+          //set ID from curriculumMembership
+          programmeMembershipDTO.setId(programmeMembershipDTO.getCurriculumMemberships().iterator().next().getId());
+        }
         result.add(programmeMembershipDTO);
       }
     }

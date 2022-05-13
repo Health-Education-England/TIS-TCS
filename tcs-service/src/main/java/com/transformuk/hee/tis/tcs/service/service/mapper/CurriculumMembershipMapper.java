@@ -165,7 +165,7 @@ public class CurriculumMembershipMapper {
    * @param curriculumMembership the CurriculumMembership object to convert
    * @return a CurriculumMembershipDTO object
    */
-  private CurriculumMembershipDTO curriculumMembershipToCurriculumMembershipDto(
+  public CurriculumMembershipDTO curriculumMembershipToCurriculumMembershipDto(
       CurriculumMembership curriculumMembership) {
     CurriculumMembershipDTO result = new CurriculumMembershipDTO();
 
