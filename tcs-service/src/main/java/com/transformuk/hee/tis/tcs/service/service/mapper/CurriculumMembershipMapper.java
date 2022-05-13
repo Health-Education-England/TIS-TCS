@@ -318,13 +318,13 @@ public class CurriculumMembershipMapper {
    * @param trainingNumberDTO the TrainingNumberDTO object to convert
    * @return a TrainingNumber object
    */
-  private TrainingNumber trainingNumberDtoToTrainingNumber(TrainingNumberDTO trainingNumberDTO) {
+  private TrainingNumber trainingNumberDtoToTrainingNumber(TrainingNumberDTO trainingNumberDto) {
     TrainingNumber result = null;
-    if (trainingNumberDTO != null) {
+    if (trainingNumberDto != null) {
       result = new TrainingNumber();
-      result.setId(trainingNumberDTO.getId());
-      result.setIntrepidId(trainingNumberDTO.getIntrepidId());
-      result.setTrainingNumber(trainingNumberDTO.getTrainingNumber());
+      result.setId(trainingNumberDto.getId());
+      result.setIntrepidId(trainingNumberDto.getIntrepidId());
+      result.setTrainingNumber(trainingNumberDto.getTrainingNumber());
     }
     return result;
   }
