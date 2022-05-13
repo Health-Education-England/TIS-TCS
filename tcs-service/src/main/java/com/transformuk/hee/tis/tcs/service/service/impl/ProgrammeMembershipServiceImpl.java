@@ -195,10 +195,9 @@ public class ProgrammeMembershipServiceImpl implements ProgrammeMembershipServic
 
     programmeMembership.getCurriculumMemberships().removeIf(cm -> cm.getId().equals(id));
 
-    if (programmeMembership.getCurriculumMemberships().size() > 0) {
+    if (!programmeMembership.getCurriculumMemberships().isEmpty()) {
       programmeMembershipRepository.save(programmeMembership);
     } else {
-      //TODO: confirm - if PM now has no CMs, do we delete it as well?
       programmeMembershipRepository.delete(programmeMembership);
     }
 
