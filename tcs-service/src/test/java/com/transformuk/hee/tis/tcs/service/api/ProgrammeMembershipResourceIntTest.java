@@ -959,17 +959,19 @@ public class ProgrammeMembershipResourceIntTest {
     ProgrammeMembership updatedProgrammeMembership = programmeMembershipRepository
         .findById(programmeMembership.getId()).orElse(null);
 
-    updatedProgrammeMembership.setProgrammeMembershipType(UPDATED_PROGRAMME_MEMBERSHIP_TYPE);
-    updatedProgrammeMembership.setProgrammeEndDate(UPDATED_PROGRAMME_END_DATE);
-
-    CurriculumMembership updatedCurriculumMembership = updatedProgrammeMembership.getCurriculumMemberships().iterator().next();
-    updatedCurriculumMembership
-        .intrepidId(UPDATED_INTREPID_ID)
-        .curriculumStartDate(UPDATED_CURRICULUM_START_DATE)
-        .curriculumEndDate(UPDATED_CURRICULUM_END_DATE)
-        .periodOfGrace(UPDATED_PERIOD_OF_GRACE)
-        .curriculumCompletionDate(UPDATED_CURRICULUM_COMPLETION_DATE);
     ProgrammeMembershipDTO programmeMembershipDTO = programmeMembershipMapper.toDto(updatedProgrammeMembership);
+
+    programmeMembershipDTO.setProgrammeMembershipType(UPDATED_PROGRAMME_MEMBERSHIP_TYPE);
+    programmeMembershipDTO.setProgrammeEndDate(UPDATED_PROGRAMME_END_DATE);
+
+    CurriculumMembershipDTO curriculumMembershipDTO
+        = programmeMembershipDTO.getCurriculumMemberships().iterator().next();
+
+    curriculumMembershipDTO.setIntrepidId(UPDATED_INTREPID_ID);
+    curriculumMembershipDTO.setCurriculumStartDate(UPDATED_CURRICULUM_START_DATE);
+    curriculumMembershipDTO.setCurriculumEndDate(UPDATED_CURRICULUM_END_DATE);
+    curriculumMembershipDTO.setCurriculumCompletionDate(UPDATED_CURRICULUM_COMPLETION_DATE);
+    curriculumMembershipDTO.setPeriodOfGrace(UPDATED_PERIOD_OF_GRACE);
 
     //when
     restProgrammeMembershipMockMvc.perform(put("/api/programme-memberships")
@@ -1052,7 +1054,7 @@ public class ProgrammeMembershipResourceIntTest {
     programmeMembership.setPerson(person);
 
     CurriculumMembership curriculumMembership1 = new CurriculumMembership()
-        .intrepidId("XXX")
+        .intrepidId(DEFAULT_INTREPID_ID)
         .curriculumStartDate(DEFAULT_CURRICULUM_START_DATE)
         .curriculumEndDate(DEFAULT_CURRICULUM_END_DATE)
         .periodOfGrace(DEFAULT_PERIOD_OF_GRACE)
@@ -1080,7 +1082,7 @@ public class ProgrammeMembershipResourceIntTest {
     assertThat(pmSize).isEqualTo(databasePmSizeBeforeDelete);
   }
 
-  @Test //(expected = JpaObjectRetrievalFailureException.class)
+  @Test
   @Transactional
   @DirtiesContext(methodMode = DirtiesContext.MethodMode.BEFORE_METHOD)
   public void deleteLastCurriculumMembershipShouldDeleteContainingProgrammeMembership()
