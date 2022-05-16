@@ -108,8 +108,8 @@ public class ProgrammeMembershipMapper {
   /**
    * Covert a ProgrammeMembershipDTO to a ProgrammeMembership, including its CurriculumMemberships.
    *
-   * @param programmeMembershipDto
-   * @return
+   * @param programmeMembershipDto the ProgrammeMembershipDTO to convert
+   * @return the ProgrammeMembership entity
    */
   public ProgrammeMembership toEntity(ProgrammeMembershipDTO programmeMembershipDto) {
     ProgrammeMembership result = new ProgrammeMembership();
@@ -159,7 +159,6 @@ public class ProgrammeMembershipMapper {
       ProgrammeMembership programmeMembership) {
     ProgrammeMembershipDTO result = new ProgrammeMembershipDTO();
 
-    //Note - do not use PM ID: result.setId(programmeMembership.getId());
     result.setProgrammeMembershipId(programmeMembership.getId());
     result.setProgrammeMembershipType(programmeMembership.getProgrammeMembershipType());
     result.setProgrammeStartDate(programmeMembership.getProgrammeStartDate());
