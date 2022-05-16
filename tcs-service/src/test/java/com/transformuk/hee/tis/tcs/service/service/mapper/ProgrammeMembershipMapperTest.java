@@ -50,20 +50,6 @@ public class ProgrammeMembershipMapperTest {
     pm1.setCurriculumMemberships(Sets.newLinkedHashSet(cm1));
     pm2.setCurriculumMemberships(Sets.newLinkedHashSet(cm2, cm3));
 
-    LocalDate programmeStartDate1 = LocalDate.now(), programmeStartDate2 = LocalDate.of(1999, 1, 1);
-    pm1.setProgrammeStartDate(programmeStartDate1);
-    pm2.setProgrammeStartDate(programmeStartDate1);
-
-    LocalDate programmeEndDate1 = LocalDate.now(), programmeEndDate2 = LocalDate.of(2000, 1, 1);
-    pm1.setProgrammeEndDate(programmeEndDate1);
-    pm2.setProgrammeEndDate(programmeEndDate1);
-
-    Person person1 = new Person();
-    person1.setId(1L);
-
-    pm1.setPerson(person1);
-    pm2.setPerson(person1);
-
     CurriculumMembershipDTO cmDTO1 = new CurriculumMembershipDTO();
     cmDTO1.setId(1L);
     CurriculumMembershipDTO cmDTO2 = new CurriculumMembershipDTO();
@@ -80,7 +66,7 @@ public class ProgrammeMembershipMapperTest {
     Assert.assertEquals(3, result.size()); //listed by curriculum membership
     ProgrammeMembershipDTO pmDTOreturned = result.get(0);
     Assert.assertNotNull(pmDTOreturned);
-    assertThat(cm1.getId()).isEqualTo(pmDTOreturned.getId()); //check that cm1 is the first entity converted to a DTO
+    assertThat(cm1.getId()).isEqualTo(pmDTOreturned.getId()); //check that cm ID is used as pm ID
     assertThat(pmID).isEqualTo(pmDTOreturned.getProgrammeMembershipId());
   }
 }

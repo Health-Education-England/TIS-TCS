@@ -2,6 +2,7 @@ package com.transformuk.hee.tis.tcs.service.api;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.hamcrest.Matchers.*;
+import static org.mockito.Mockito.when;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.delete;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
@@ -35,6 +36,8 @@ import com.transformuk.hee.tis.tcs.service.service.RotationService;
 import com.transformuk.hee.tis.tcs.service.service.mapper.CurriculumMembershipMapper;
 import com.transformuk.hee.tis.tcs.service.service.mapper.PersonMapper;
 import com.transformuk.hee.tis.tcs.service.service.mapper.ProgrammeMembershipMapper;
+
+import java.io.IOException;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.time.ZoneId;
@@ -42,9 +45,12 @@ import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 import java.util.Optional;
+import java.util.UUID;
 import javax.persistence.EntityManager;
 
+import org.assertj.core.util.Lists;
 import org.assertj.core.util.Sets;
+import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -945,17 +951,20 @@ public class ProgrammeMembershipResourceIntTest {
 
     programmeMembership.setPerson(person);
     programmeMembership.setProgramme(programme);
-    programmeMembership.setCurriculumMemberships(Sets.newLinkedHashSet(curriculumMembership));
+    programmeMembership.setCurriculumMemberships(Sets.newLinkedHashSet(curriculumMembership, curriculumMembership1));
 
     curriculumMembership.setProgrammeMembership(programmeMembership);
     curriculumMembership
+        .setCurriculumId(programme.getCurricula().iterator().next().getCurriculum().getId());
+    curriculumMembership1.setProgrammeMembership(programmeMembership);
+    curriculumMembership1
         .setCurriculumId(programme.getCurricula().iterator().next().getCurriculum().getId());
 
     programmeMembershipRepository.saveAndFlush(programmeMembership);
 
     int databaseSizeBeforeUpdate = curriculumMembershipRepository.findAll().size();
 
-    //Update curriculumMembership
+    //Update first curriculumMembership and its programmeMembership
     ProgrammeMembership updatedProgrammeMembership = programmeMembershipRepository
         .findById(programmeMembership.getId()).orElse(null);
 
@@ -986,11 +995,10 @@ public class ProgrammeMembershipResourceIntTest {
     assertThat(retrievedProgrammeMembership.getProgrammeMembershipType()).isEqualTo(UPDATED_PROGRAMME_MEMBERSHIP_TYPE);
     assertThat(retrievedProgrammeMembership.getProgrammeEndDate()).isEqualTo(UPDATED_PROGRAMME_END_DATE);
 
-    // Validate the CurriculumMembership in the database
+    // Validate the updated CurriculumMembership in the database
     List<CurriculumMembership> curriculumMembershipList = curriculumMembershipRepository.findAll();
     assertThat(curriculumMembershipList).hasSize(databaseSizeBeforeUpdate);
-    CurriculumMembership testCurriculumMembership = curriculumMembershipList
-        .get(curriculumMembershipList.size() - 1);
+    CurriculumMembership testCurriculumMembership = curriculumMembershipList.get(0);
     assertThat(testCurriculumMembership.getIntrepidId()).isEqualTo(UPDATED_INTREPID_ID);
     assertThat(testCurriculumMembership.getCurriculumStartDate())
         .isEqualTo(UPDATED_CURRICULUM_START_DATE);
@@ -1000,6 +1008,58 @@ public class ProgrammeMembershipResourceIntTest {
     assertThat(testCurriculumMembership.getCurriculumCompletionDate())
         .isEqualTo(UPDATED_CURRICULUM_COMPLETION_DATE);
     assertThat(testCurriculumMembership.getAmendedDate()).isAfter(DEFAULT_AMENDED_DATE);
+  }
+
+  @Test
+  @Transactional
+  public void allEntityToDtoDoesNotDetachEntities() throws Exception {
+    // Initialize the database
+    personRepository.saveAndFlush(person);
+    curriculumRepository.saveAndFlush(curriculum);
+    programme.setCurricula(Collections.singleton(programmeCurriculum));
+    programmeRepository.saveAndFlush(programme);
+    rotation.setProgrammeId(programme.getId());
+    rotationRepository.saveAndFlush(rotation);
+
+    programmeMembership.setPerson(person);
+    programmeMembership.setProgramme(programme);
+    programmeMembership.setCurriculumMemberships(Sets.newLinkedHashSet(curriculumMembership));
+
+    ProgrammeMembership programmeMembership1 = new ProgrammeMembership();
+    programmeMembership1.setPerson(person);
+    programmeMembership1.setProgramme(programme);
+    programmeMembership1.setCurriculumMemberships(Sets.newLinkedHashSet(curriculumMembership1));
+
+    curriculumMembership.setProgrammeMembership(programmeMembership);
+    curriculumMembership
+        .setCurriculumId(programme.getCurricula().iterator().next().getCurriculum().getId());
+    curriculumMembership1.setProgrammeMembership(programmeMembership1);
+    curriculumMembership1
+        .setCurriculumId(programme.getCurricula().iterator().next().getCurriculum().getId());
+
+    programmeMembershipRepository.saveAndFlush(programmeMembership);
+    programmeMembershipRepository.saveAndFlush(programmeMembership1);
+
+    List<ProgrammeMembershipDTO> programmeMembershipDtoList
+       = programmeMembershipMapper.allEntityToDto(Lists.newArrayList(programmeMembership, programmeMembership1));
+
+    assertThat(programmeMembershipDtoList.size()).isEqualTo(2); //sanity check
+    ProgrammeMembershipDTO pmDto1 = programmeMembershipDtoList.get(0);
+    pmDto1.setProgrammeMembershipType(UPDATED_PROGRAMME_MEMBERSHIP_TYPE);
+    pmDto1.setProgrammeEndDate(UPDATED_PROGRAMME_END_DATE);
+
+    //when
+    restProgrammeMembershipMockMvc.perform(put("/api/programme-memberships")
+            .contentType(MediaType.APPLICATION_JSON)
+            .content(TestUtil.convertObjectToJsonBytes(pmDto1)))
+        .andExpect(status().isOk());
+
+    //then
+    // Validate the updated ProgrammeMembership in the database without a failed 'detached entities' error.
+    ProgrammeMembership retrievedProgrammeMembership = programmeMembershipRepository
+        .findById(programmeMembership.getId()).orElse(null);
+    assertThat(retrievedProgrammeMembership.getProgrammeMembershipType()).isEqualTo(UPDATED_PROGRAMME_MEMBERSHIP_TYPE);
+    assertThat(retrievedProgrammeMembership.getProgrammeEndDate()).isEqualTo(UPDATED_PROGRAMME_END_DATE);
   }
 
   @Test
