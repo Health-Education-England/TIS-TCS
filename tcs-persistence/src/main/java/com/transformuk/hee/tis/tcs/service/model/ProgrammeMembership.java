@@ -38,7 +38,7 @@ public class ProgrammeMembership implements Serializable {
       strategy = "org.hibernate.id.UUIDGenerator"
   )
   @Type(type = "org.hibernate.type.UUIDCharType")
-  private UUID id;
+  private UUID uuid;
 
   @ManyToOne
   @JoinColumn(name = "personId")
@@ -115,14 +115,14 @@ public class ProgrammeMembership implements Serializable {
       return false;
     }
     ProgrammeMembership programmeMembership = (ProgrammeMembership) o;
-    if (programmeMembership.id == null || id == null) {
+    if (programmeMembership.uuid == null || uuid == null) {
       return false;
     }
-    return Objects.equals(id, programmeMembership.id);
+    return Objects.equals(uuid, programmeMembership.uuid);
   }
 
   @Override
   public int hashCode() {
-    return Objects.hashCode(id);
+    return Objects.hashCode(uuid);
   }
 }

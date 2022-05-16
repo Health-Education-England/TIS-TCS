@@ -114,7 +114,7 @@ public class ProgrammeMembershipMapper {
   public ProgrammeMembership toEntity(ProgrammeMembershipDTO programmeMembershipDto) {
     ProgrammeMembership result = new ProgrammeMembership();
 
-    result.setId(programmeMembershipDto.getProgrammeMembershipId()); //use real (database) ID
+    result.setUuid(programmeMembershipDto.getProgrammeMembershipUuid()); //use real (database) ID
     result.setProgrammeMembershipType(programmeMembershipDto.getProgrammeMembershipType());
     result.setProgrammeStartDate(programmeMembershipDto.getProgrammeStartDate());
     result.setProgrammeEndDate(programmeMembershipDto.getProgrammeEndDate());
@@ -159,7 +159,7 @@ public class ProgrammeMembershipMapper {
       ProgrammeMembership programmeMembership) {
     ProgrammeMembershipDTO result = new ProgrammeMembershipDTO();
 
-    result.setProgrammeMembershipId(programmeMembership.getId());
+    result.setProgrammeMembershipUuid(programmeMembership.getUuid());
     result.setProgrammeMembershipType(programmeMembership.getProgrammeMembershipType());
     result.setProgrammeStartDate(programmeMembership.getProgrammeStartDate());
     result.setProgrammeEndDate(programmeMembership.getProgrammeEndDate());

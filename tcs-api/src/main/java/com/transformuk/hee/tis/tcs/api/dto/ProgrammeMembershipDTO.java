@@ -23,7 +23,7 @@ public class ProgrammeMembershipDTO implements Serializable {
   private Long id;
 
   @Null(groups = {Create.class})
-  private UUID programmeMembershipId; //real (database record) ID
+  private UUID programmeMembershipUuid; //real (database record) UUID
 
   @NotNull(message = "ProgrammeMembershipType is required", groups = {Update.class, Create.class})
   private ProgrammeMembershipType programmeMembershipType;

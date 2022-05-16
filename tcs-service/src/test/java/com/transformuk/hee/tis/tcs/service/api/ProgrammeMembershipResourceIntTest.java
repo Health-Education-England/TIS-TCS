@@ -2,7 +2,6 @@ package com.transformuk.hee.tis.tcs.service.api;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.hamcrest.Matchers.*;
-import static org.mockito.Mockito.when;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.delete;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
@@ -37,7 +36,6 @@ import com.transformuk.hee.tis.tcs.service.service.mapper.CurriculumMembershipMa
 import com.transformuk.hee.tis.tcs.service.service.mapper.PersonMapper;
 import com.transformuk.hee.tis.tcs.service.service.mapper.ProgrammeMembershipMapper;
 
-import java.io.IOException;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.time.ZoneId;
@@ -45,12 +43,9 @@ import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 import java.util.Optional;
-import java.util.UUID;
 import javax.persistence.EntityManager;
-
 import org.assertj.core.util.Lists;
 import org.assertj.core.util.Sets;
-import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -965,7 +960,7 @@ public class ProgrammeMembershipResourceIntTest {
 
     //Update first curriculumMembership and its programmeMembership
     ProgrammeMembership updatedProgrammeMembership = programmeMembershipRepository
-        .findById(programmeMembership.getId()).orElse(null);
+        .findById(programmeMembership.getUuid()).orElse(null);
 
     ProgrammeMembershipDTO programmeMembershipDTO = programmeMembershipMapper.toDto(updatedProgrammeMembership);
 
@@ -990,7 +985,7 @@ public class ProgrammeMembershipResourceIntTest {
     //then
     // Validate the updated ProgrammeMembership in the database
     ProgrammeMembership retrievedProgrammeMembership = programmeMembershipRepository
-        .findById(programmeMembership.getId()).orElse(null);
+        .findByUuid(programmeMembership.getUuid()).orElse(null);
     assertThat(retrievedProgrammeMembership.getProgrammeMembershipType()).isEqualTo(UPDATED_PROGRAMME_MEMBERSHIP_TYPE);
     assertThat(retrievedProgrammeMembership.getProgrammeEndDate()).isEqualTo(UPDATED_PROGRAMME_END_DATE);
 
@@ -1056,7 +1051,7 @@ public class ProgrammeMembershipResourceIntTest {
     //then
     // Validate the updated ProgrammeMembership in the database without a failed 'detached entities' error.
     ProgrammeMembership retrievedProgrammeMembership = programmeMembershipRepository
-        .findById(programmeMembership.getId()).orElse(null);
+        .findByUuid(programmeMembership.getUuid()).orElse(null);
     assertThat(retrievedProgrammeMembership.getProgrammeMembershipType()).isEqualTo(UPDATED_PROGRAMME_MEMBERSHIP_TYPE);
     assertThat(retrievedProgrammeMembership.getProgrammeEndDate()).isEqualTo(UPDATED_PROGRAMME_END_DATE);
   }
@@ -1173,7 +1168,7 @@ public class ProgrammeMembershipResourceIntTest {
 
     // Validate the programme membership has been deleted
     Optional<ProgrammeMembership> optionalProgrammeMembership
-        = programmeMembershipRepository.findById(programmeMembership.getId());
+        = programmeMembershipRepository.findByUuid(programmeMembership.getUuid());
     assertThat(optionalProgrammeMembership).isNotPresent();
   }
 

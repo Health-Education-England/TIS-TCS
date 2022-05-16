@@ -30,7 +30,7 @@ public class CurriculumMembership implements Serializable {
   private Long id;
 
   @ManyToOne(targetEntity = ProgrammeMembership.class)
-  @JoinColumn(name = "programmeMembershipId")
+  @JoinColumn(name = "programmeMembershipUuid")
   private ProgrammeMembership programmeMembership;
 
   private String intrepidId;

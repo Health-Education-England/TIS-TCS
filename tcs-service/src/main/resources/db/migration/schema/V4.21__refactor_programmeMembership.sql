@@ -1,6 +1,6 @@
 DROP TABLE `ProgrammeMembership`;
 CREATE TABLE `ProgrammeMembership` (
-  `id` varchar(36) NOT NULL, -- for UUID
+  `uuid` varchar(36) NOT NULL,
   `programmeMembershipType` varchar(255) DEFAULT NULL,
   `programmeStartDate` date DEFAULT NULL,
   `programmeEndDate` date DEFAULT NULL,
@@ -13,7 +13,7 @@ CREATE TABLE `ProgrammeMembership` (
   `leavingReason` varchar(255) DEFAULT NULL,
   `leavingDestination` varchar(255) DEFAULT NULL,
   `amendedDate` datetime(3) NOT NULL DEFAULT CURRENT_TIMESTAMP(3),
-  PRIMARY KEY (`id`),
+  PRIMARY KEY (`uuid`),
   KEY `fk_ProgrammeMembership_person_id` (`personId`),
   KEY `fk_ProgrammeMembership_programme_id` (`programmeId`),
   KEY `fk_ProgrammeMembership_training_number_id` (`trainingNumberId`),
@@ -24,7 +24,7 @@ CREATE TABLE `ProgrammeMembership` (
   CONSTRAINT `fk_ProgrammeMembership_rotation_id` FOREIGN KEY (`rotationId`) REFERENCES `Rotation` (`id`)
 ) ENGINE=InnoDB AUTO_INCREMENT=0 DEFAULT CHARSET=utf8;
 
-INSERT INTO ProgrammeMembership (id, personId, programmeId, rotationId, rotation, programmeStartDate, programmeEndDate,
+INSERT INTO ProgrammeMembership (uuid, personId, programmeId, rotationId, rotation, programmeStartDate, programmeEndDate,
 programmeMembershipType, trainingPathway, trainingNumberId, leavingReason, leavingDestination)
 SELECT
 uuid(), personId, programmeId, rotationId, max(rotation), programmeStartDate, programmeEndDate,
@@ -33,10 +33,10 @@ FROM CurriculumMembership
 GROUP BY
 personId, programmeId, rotationId, programmeStartDate, programmeEndDate, programmeMembershipType;
 
-ALTER TABLE CurriculumMembership ADD COLUMN `programmeMembershipId` varchar(36) DEFAULT NULL;
+ALTER TABLE CurriculumMembership ADD COLUMN `programmeMembershipUuid` varchar(36) DEFAULT NULL;
 
 UPDATE tcs.CurriculumMembership cm
-SET programmeMembershipId = (SELECT id FROM tcs.ProgrammeMembership pm
+SET programmeMembershipUuid = (SELECT uuid FROM tcs.ProgrammeMembership pm
 WHERE pm.personId = cm.personId AND
 pm.programmeId = cm.programmeId AND
 IFNULL(pm.rotationId,0) = IFNULL(cm.rotationId,0) AND
@@ -44,9 +44,9 @@ pm.programmeStartDate = cm.programmeStartDate AND
 pm.programmeEndDate = cm.programmeEndDate AND
 IFNULL(pm.programmeMembershipType,'') = IFNULL(cm.programmeMembershipType,''));
 
-ALTER TABLE CurriculumMembership MODIFY COLUMN `programmeMembershipId` varchar(36) NOT NULL;
-ALTER TABLE CurriculumMembership ADD INDEX `fk_ProgrammeMembership_programme_membership_id` (`programmeMembershipId`);
-ALTER TABLE CurriculumMembership ADD FOREIGN KEY (`programmeMembershipId`) REFERENCES `ProgrammeMembership` (`id`);
+ALTER TABLE CurriculumMembership MODIFY COLUMN `programmeMembershipUuid` varchar(36) NOT NULL;
+ALTER TABLE CurriculumMembership ADD INDEX `fk_ProgrammeMembership_programme_membership_id` (`programmeMembershipUuid`);
+ALTER TABLE CurriculumMembership ADD FOREIGN KEY (`programmeMembershipUuid`) REFERENCES `ProgrammeMembership` (`uuid`);
 ALTER TABLE CurriculumMembership CHANGE COLUMN `programmeId` `programmeId` BIGINT(20) NULL,
                                  CHANGE COLUMN `personId` `personId` BIGINT(20) NULL;
 

@@ -128,7 +128,7 @@ public class CurriculumMembershipMapper {
     ProgrammeMembership programmeMembership = curriculumMembership.getProgrammeMembership();
 
     result.setId(curriculumMembership.getId()); //use CM ID
-    result.setProgrammeMembershipId(programmeMembership.getId());
+    result.setProgrammeMembershipUuid(programmeMembership.getUuid());
     result.setProgrammeMembershipType(programmeMembership.getProgrammeMembershipType());
     result.setProgrammeStartDate(programmeMembership.getProgrammeStartDate());
     result.setProgrammeEndDate(programmeMembership.getProgrammeEndDate());

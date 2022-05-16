@@ -18,7 +18,7 @@ from (
   left join (select distinct pm.personId, pm.programmeStartDate, pm.programmeEndDate,
           pm.programmeId, pm.programmeMembershipType, cm.curriculumId, cm.curriculumEndDate
           from CurriculumMembership cm
-          inner join ProgrammeMembership pm ON cm.programmeMembershipId = pm.id
+          inner join ProgrammeMembership pm ON cm.programmeMembershipUuid = pm.uuid
           inner join (select personId, MAX(programmeEndDate) as latestEndDate
               from ProgrammeMembership
               group by personId) latest on pm.personId = latest.personId

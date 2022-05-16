@@ -38,8 +38,8 @@ public class ProgrammeMembershipMapperTest {
     CurriculumMembership cm1 = new CurriculumMembership(), cm2 = new CurriculumMembership(),
         cm3 = new CurriculumMembership();
 
-    pm1.setId(pmID);
-    pm2.setId(pm2ID);
+    pm1.setUuid(pmID);
+    pm2.setUuid(pm2ID);
 
     cm1.setId(1L);
     cm2.setId(2L);
@@ -67,6 +67,6 @@ public class ProgrammeMembershipMapperTest {
     ProgrammeMembershipDTO pmDTOreturned = result.get(0);
     Assert.assertNotNull(pmDTOreturned);
     assertThat(cm1.getId()).isEqualTo(pmDTOreturned.getId()); //check that cm ID is used as pm ID
-    assertThat(pmID).isEqualTo(pmDTOreturned.getProgrammeMembershipId());
+    assertThat(pmID).isEqualTo(pmDTOreturned.getProgrammeMembershipUuid());
   }
 }
