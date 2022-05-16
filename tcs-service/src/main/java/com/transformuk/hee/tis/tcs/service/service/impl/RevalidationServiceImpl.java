@@ -367,11 +367,11 @@ public class RevalidationServiceImpl implements RevalidationService {
       return true;
     }
     ProgrammeMembership programmeMembership = curriculumMembership.getProgrammeMembership();
-    return Objects.isNull(programmeMembership) ||
-        Objects.isNull(programmeMembership.getProgrammeStartDate()) ||
-        Objects.isNull(programmeMembership.getProgrammeEndDate()) ||
-        programmeMembership.getProgrammeStartDate().isAfter(currentDate) ||
-        programmeMembership.getProgrammeEndDate().isBefore(currentDate);
+    return Objects.isNull(programmeMembership)
+        || Objects.isNull(programmeMembership.getProgrammeStartDate())
+        || Objects.isNull(programmeMembership.getProgrammeEndDate())
+        || programmeMembership.getProgrammeStartDate().isAfter(currentDate)
+        || programmeMembership.getProgrammeEndDate().isBefore(currentDate);
   }
 
   private RevalidationRecordDto buildRevalidationRecord(GmcDetails gmcDetails) {

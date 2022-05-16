@@ -37,7 +37,7 @@ public class ProgrammeMembership implements Serializable {
       name = "UUID",
       strategy = "org.hibernate.id.UUIDGenerator"
   )
-  @Type(type="org.hibernate.type.UUIDCharType")
+  @Type(type = "org.hibernate.type.UUIDCharType")
   private UUID id;
 
   @ManyToOne

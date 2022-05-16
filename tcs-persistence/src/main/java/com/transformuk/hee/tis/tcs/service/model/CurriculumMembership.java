@@ -35,11 +35,17 @@ public class CurriculumMembership implements Serializable {
 
   private String intrepidId;
 
+  /**
+   * @deprecated (to be removed as part of Programme Membership refactoring)
+   */
   @Deprecated
   @ManyToOne
   @JoinColumn(name = "personId")
   private Person person;
 
+  /**
+   * @deprecated (to be removed as part of Programme Membership refactoring)
+   */
   @Deprecated
   @Enumerated(EnumType.STRING)
   private ProgrammeMembershipType programmeMembershipType;
@@ -50,20 +56,35 @@ public class CurriculumMembership implements Serializable {
 
   private Integer periodOfGrace;
 
+  /**
+   * @deprecated (to be removed as part of Programme Membership refactoring)
+   */
   @Deprecated
   private LocalDate programmeStartDate;
 
   private LocalDate curriculumCompletionDate;
 
+  /**
+   * @deprecated (to be removed as part of Programme Membership refactoring)
+   */
   @Deprecated
   private LocalDate programmeEndDate;
 
+  /**
+   * @deprecated (to be removed as part of Programme Membership refactoring)
+   */
   @Deprecated
   private String leavingDestination;
 
+  /**
+   * @deprecated (to be removed as part of Programme Membership refactoring)
+   */
   @Deprecated
   private String leavingReason;
 
+  /**
+   * @deprecated (to be removed as part of Programme Membership refactoring)
+   */
   @Deprecated
   @ManyToOne
   @JoinColumn(name = "programmeId")
@@ -71,11 +92,17 @@ public class CurriculumMembership implements Serializable {
 
   private Long curriculumId;
 
+  /**
+   * @deprecated (to be removed as part of Programme Membership refactoring)
+   */
   @Deprecated
   @ManyToOne
   @JoinColumn(name = "rotationId")
   private Rotation rotation;
 
+  /**
+   * @deprecated (to be removed as part of Programme Membership refactoring)
+   */
   @Deprecated
   @ManyToOne
   @JoinColumn(name = "trainingNumberId")
@@ -84,6 +111,9 @@ public class CurriculumMembership implements Serializable {
   @Version
   private LocalDateTime amendedDate;
 
+  /**
+   * @deprecated (to be removed as part of Programme Membership refactoring)
+   */
   @Deprecated
   private String trainingPathway;
 
@@ -92,12 +122,20 @@ public class CurriculumMembership implements Serializable {
     return this;
   }
 
+  /**
+   * @deprecated (to be removed as part of Programme Membership refactoring)
+   */
+  @Deprecated
   public CurriculumMembership programmeMembershipType(
       ProgrammeMembershipType programmeMembershipType) {
     this.programmeMembershipType = programmeMembershipType;
     return this;
   }
 
+  /**
+   * @deprecated (to be removed as part of Programme Membership refactoring)
+   */
+  @Deprecated
   public CurriculumMembership rotation(Rotation rotation) {
     this.rotation = rotation;
     return this;
@@ -118,6 +156,10 @@ public class CurriculumMembership implements Serializable {
     return this;
   }
 
+  /**
+   * @deprecated (to be removed as part of Programme Membership refactoring)
+   */
+  @Deprecated
   public CurriculumMembership programmeStartDate(LocalDate programmeStartDate) {
     this.programmeStartDate = programmeStartDate;
     return this;
@@ -128,16 +170,28 @@ public class CurriculumMembership implements Serializable {
     return this;
   }
 
+  /**
+   * @deprecated (to be removed as part of Programme Membership refactoring)
+   */
+  @Deprecated
   public CurriculumMembership programmeEndDate(LocalDate programmeEndDate) {
     this.programmeEndDate = programmeEndDate;
     return this;
   }
 
+  /**
+   * @deprecated (to be removed as part of Programme Membership refactoring)
+   */
+  @Deprecated
   public CurriculumMembership leavingDestination(String leavingDestination) {
     this.leavingDestination = leavingDestination;
     return this;
   }
 
+  /**
+   * @deprecated (to be removed as part of Programme Membership refactoring)
+   */
+  @Deprecated
   public CurriculumMembership leavingReason(String leavingReason) {
     this.leavingReason = leavingReason;
     return this;

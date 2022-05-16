@@ -55,21 +55,24 @@ public class ProgrammeMembershipMapper {
     List<ProgrammeMembershipDTO> result = Lists.newArrayList();
 
     for (ProgrammeMembership programmeMembership : programmeMemberships) {
-      for (CurriculumMembership curriculumMembership : programmeMembership.getCurriculumMemberships()) {
-        ProgrammeMembershipDTO programmeMembershipDTO = programmeMembershipToProgrammeMembershipDTO(
-            programmeMembership);
-        if (CollectionUtils.isEmpty(programmeMembershipDTO.getCurriculumMemberships())) {
-          programmeMembershipDTO.setCurriculumMemberships(Lists.newArrayList());
+      for (CurriculumMembership curriculumMembership
+          : programmeMembership.getCurriculumMemberships()) {
+        ProgrammeMembershipDTO programmeMembershipDto
+            = programmeMembershipToProgrammeMembershipDTO(programmeMembership);
+        if (CollectionUtils.isEmpty(programmeMembershipDto.getCurriculumMemberships())) {
+          programmeMembershipDto.setCurriculumMemberships(Lists.newArrayList());
         }
         CurriculumMembershipDTO curriculumMembershipDTO
-            = curriculumMembershipMapper.curriculumMembershipToCurriculumMembershipDto(curriculumMembership);
-        programmeMembershipDTO.getCurriculumMemberships()
+            = curriculumMembershipMapper
+            .curriculumMembershipToCurriculumMembershipDto(curriculumMembership);
+        programmeMembershipDto.getCurriculumMemberships()
             .add(curriculumMembershipDTO);
-        if (!programmeMembershipDTO.getCurriculumMemberships().isEmpty()) {
+        if (!programmeMembershipDto.getCurriculumMemberships().isEmpty()) {
           //set ID from curriculumMembership
-          programmeMembershipDTO.setId(programmeMembershipDTO.getCurriculumMemberships().iterator().next().getId());
+          programmeMembershipDto.setId(
+              programmeMembershipDto.getCurriculumMemberships().iterator().next().getId());
         }
-        result.add(programmeMembershipDTO);
+        result.add(programmeMembershipDto);
       }
     }
 
@@ -81,21 +84,22 @@ public class ProgrammeMembershipMapper {
     Map<ProgrammeMembershipDTO, ProgrammeMembershipDTO> listMap = Maps.newHashMap();
 
     for (ProgrammeMembership programmeMembership : programmeMemberships) {
-      ProgrammeMembershipDTO programmeMembershipDTO = programmeMembershipToProgrammeMembershipDTO(
-          programmeMembership);
-      if (listMap.containsKey(programmeMembershipDTO)) {
-        programmeMembershipDTO = listMap.get(programmeMembershipDTO);
+      ProgrammeMembershipDTO programmeMembershipDto
+          = programmeMembershipToProgrammeMembershipDTO(programmeMembership);
+      if (listMap.containsKey(programmeMembershipDto)) {
+        programmeMembershipDto = listMap.get(programmeMembershipDto);
       }
-      if (CollectionUtils.isEmpty(programmeMembershipDTO.getCurriculumMemberships())) {
-        programmeMembershipDTO.setCurriculumMemberships(Lists.newArrayList());
+      if (CollectionUtils.isEmpty(programmeMembershipDto.getCurriculumMemberships())) {
+        programmeMembershipDto.setCurriculumMemberships(Lists.newArrayList());
       }
-      programmeMembershipDTO.getCurriculumMemberships()
+      programmeMembershipDto.getCurriculumMemberships()
           .addAll(programmeMembershipToCurriculumMembershipDTOs(programmeMembership));
-      if (!programmeMembershipDTO.getCurriculumMemberships().isEmpty()) {
+      if (!programmeMembershipDto.getCurriculumMemberships().isEmpty()) {
         //set ID from curriculumMembership
-        programmeMembershipDTO.setId(programmeMembershipDTO.getCurriculumMemberships().iterator().next().getId());
+        programmeMembershipDto.setId(
+            programmeMembershipDto.getCurriculumMemberships().iterator().next().getId());
       }
-      listMap.put(programmeMembershipDTO, programmeMembershipDTO);
+      listMap.put(programmeMembershipDto, programmeMembershipDto);
     }
 
     return new ArrayList<>(listMap.keySet());
@@ -121,7 +125,8 @@ public class ProgrammeMembershipMapper {
       result.setRotation(rotationDTOToRotation(programmeMembershipDTO.getRotation()));
     }
     result.setProgramme(programme);
-    result.setTrainingNumber(trainingNumberDTOToTrainingNumber(programmeMembershipDTO.getTrainingNumber()));
+    result.setTrainingNumber(
+        trainingNumberDTOToTrainingNumber(programmeMembershipDTO.getTrainingNumber()));
     result.setPerson(personDTOToPerson(programmeMembershipDTO.getPerson()));
 
     if (CollectionUtils.isEmpty(programmeMembershipDTO.getCurriculumMemberships())) {
@@ -137,8 +142,8 @@ public class ProgrammeMembershipMapper {
       List<ProgrammeMembershipDTO> programmeMembershipDTOs) {
     List<ProgrammeMembership> result = Lists.newArrayList();
 
-    for (ProgrammeMembershipDTO programmeMembershipDTO : programmeMembershipDTOs) {
-      result.add(toEntity(programmeMembershipDTO));
+    for (ProgrammeMembershipDTO programmeMembershipDto : programmeMembershipDTOs) {
+      result.add(toEntity(programmeMembershipDto));
     }
 
     return result;
@@ -179,21 +184,22 @@ public class ProgrammeMembershipMapper {
   private List<CurriculumMembershipDTO> programmeMembershipToCurriculumMembershipDTOs(
       ProgrammeMembership programmeMembership) {
     List<CurriculumMembershipDTO> curriculumMembershipDTOs = Lists.newArrayList();
-    Set<CurriculumMembership> curriculumMemberships = programmeMembership.getCurriculumMemberships();
+    Set<CurriculumMembership> curriculumMemberships
+        = programmeMembership.getCurriculumMemberships();
 
     curriculumMemberships.forEach(cm -> {
-      CurriculumMembershipDTO cmDTO = new CurriculumMembershipDTO();
+      CurriculumMembershipDTO cmDto = new CurriculumMembershipDTO();
 
-      cmDTO.setId(cm.getId());
-      cmDTO.setIntrepidId(cm.getIntrepidId());
-      cmDTO.setCurriculumStartDate(cm.getCurriculumStartDate());
-      cmDTO.setCurriculumEndDate(cm.getCurriculumEndDate());
-      cmDTO.setPeriodOfGrace(cm.getPeriodOfGrace());
-      cmDTO.setCurriculumCompletionDate(cm.getCurriculumCompletionDate());
-      cmDTO.setCurriculumId(cm.getCurriculumId());
-      cmDTO.setAmendedDate(cm.getAmendedDate());
+      cmDto.setId(cm.getId());
+      cmDto.setIntrepidId(cm.getIntrepidId());
+      cmDto.setCurriculumStartDate(cm.getCurriculumStartDate());
+      cmDto.setCurriculumEndDate(cm.getCurriculumEndDate());
+      cmDto.setPeriodOfGrace(cm.getPeriodOfGrace());
+      cmDto.setCurriculumCompletionDate(cm.getCurriculumCompletionDate());
+      cmDto.setCurriculumId(cm.getCurriculumId());
+      cmDto.setAmendedDate(cm.getAmendedDate());
 
-      curriculumMembershipDTOs.add(cmDTO);
+      curriculumMembershipDTOs.add(cmDto);
     });
 
     return curriculumMembershipDTOs;

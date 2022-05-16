@@ -110,7 +110,7 @@ public class ProgrammeMembershipServiceImplTest {
         new SpecialtyMapperImpl());
     testObj = new ProgrammeMembershipServiceImpl(programmeMembershipRepositoryMock, curriculumMembershipRepositoryMock,
         programmeMembershipMapper, curriculumMembershipMapper, curriculumRepositoryMock, curriculumMapper,
-        programmeRepositoryMock, applicationEventPublisherMock, personRepositoryMock);
+        applicationEventPublisherMock, personRepositoryMock);
 
     initialiseData();
   }

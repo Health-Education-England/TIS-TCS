@@ -56,7 +56,6 @@ public class ProgrammeMembershipServiceImpl implements ProgrammeMembershipServic
   private final CurriculumMembershipMapper curriculumMembershipMapper;
   private final CurriculumRepository curriculumRepository;
   private final CurriculumMapper curriculumMapper;
-  private final ProgrammeRepository programmeRepository;
   private final ApplicationEventPublisher applicationEventPublisher;
   private final PersonRepository personRepository;
 
@@ -69,7 +68,6 @@ public class ProgrammeMembershipServiceImpl implements ProgrammeMembershipServic
    * @param curriculumMembershipMapper      the CurriculumMembershipMapper
    * @param curriculumRepository            the CurriculumRepository
    * @param curriculumMapper                the CurriculumMapper
-   * @param programmeRepository             the ProgrammeRepository
    * @param applicationEventPublisher       the ApplicationEventPublisher
    * @param personRepository                the PersonRepository
    */
@@ -79,7 +77,7 @@ public class ProgrammeMembershipServiceImpl implements ProgrammeMembershipServic
       ProgrammeMembershipMapper programmeMembershipMapper,
       CurriculumMembershipMapper curriculumMembershipMapper,
       CurriculumRepository curriculumRepository, CurriculumMapper curriculumMapper,
-      ProgrammeRepository programmeRepository, ApplicationEventPublisher applicationEventPublisher,
+      ApplicationEventPublisher applicationEventPublisher,
       PersonRepository personRepository) {
     this.programmeMembershipRepository = programmeMembershipRepository;
     this.curriculumMembershipRepository = curriculumMembershipRepository;
@@ -87,7 +85,6 @@ public class ProgrammeMembershipServiceImpl implements ProgrammeMembershipServic
     this.curriculumMembershipMapper = curriculumMembershipMapper;
     this.curriculumRepository = curriculumRepository;
     this.curriculumMapper = curriculumMapper;
-    this.programmeRepository = programmeRepository;
     this.applicationEventPublisher = applicationEventPublisher;
     this.personRepository = personRepository;
   }
@@ -102,15 +99,18 @@ public class ProgrammeMembershipServiceImpl implements ProgrammeMembershipServic
   public ProgrammeMembershipDTO save(ProgrammeMembershipDTO programmeMembershipDto) {
     log.debug("Request to save ProgrammeMembership : {}", programmeMembershipDto);
 
-    ProgrammeMembership programmeMembership = programmeMembershipMapper.toEntity(programmeMembershipDto);
+    ProgrammeMembership programmeMembership
+        = programmeMembershipMapper.toEntity(programmeMembershipDto);
 
     programmeMembership = programmeMembershipRepository.save(programmeMembership);
 
-    ProgrammeMembershipDTO programmeMembershipSavedDto = programmeMembershipMapper.toDto(programmeMembership);
+    ProgrammeMembershipDTO programmeMembershipSavedDto
+        = programmeMembershipMapper.toDto(programmeMembership);
 
     //emit events
     updatePersonWhenStatusIsStale(programmeMembershipSavedDto.getPerson().getId());
-    List<ProgrammeMembershipDTO> resultDtos = Collections.singletonList(programmeMembershipSavedDto);
+    List<ProgrammeMembershipDTO> resultDtos
+        = Collections.singletonList(programmeMembershipSavedDto);
     emitProgrammeMembershipSavedEvents(resultDtos);
     return CollectionUtils.isNotEmpty(resultDtos) ? resultDtos.get(0) : null;
   }
@@ -126,7 +126,8 @@ public class ProgrammeMembershipServiceImpl implements ProgrammeMembershipServic
     log.debug("Request to save ProgrammeMembership : {}", programmeMembershipDto);
 
     List<ProgrammeMembership> programmeMemberships =
-        programmeMembershipMapper.programmeMembershipDTOsToProgrammeMemberships(programmeMembershipDto);
+        programmeMembershipMapper
+            .programmeMembershipDTOsToProgrammeMemberships(programmeMembershipDto);
     programmeMemberships.forEach(programmeMembership -> {
       programmeMembership = programmeMembershipRepository.save(programmeMembership);
       updatePersonWhenStatusIsStale(programmeMembership.getPerson().getId());
@@ -134,7 +135,8 @@ public class ProgrammeMembershipServiceImpl implements ProgrammeMembershipServic
 
     //emit events
     List<ProgrammeMembershipDTO> resultDtos =
-        programmeMembershipMapper.programmeMembershipsToProgrammeMembershipDTOs(programmeMemberships);
+        programmeMembershipMapper
+            .programmeMembershipsToProgrammeMembershipDTOs(programmeMemberships);
     emitProgrammeMembershipSavedEvents(resultDtos);
     return resultDtos;
   }
@@ -315,9 +317,7 @@ public class ProgrammeMembershipServiceImpl implements ProgrammeMembershipServic
     if (CollectionUtils.isNotEmpty(foundProgrammeMemberships)) {
       List<ProgrammeMembershipDTO> programmeMembershipDtos = programmeMembershipMapper
           .allEntityToDto(foundProgrammeMemberships);
-      List<ProgrammeMembershipCurriculaDTO> result = attachCurricula(programmeMembershipDtos);
-
-      return result;
+      return attachCurricula(programmeMembershipDtos);
     }
     return Collections.emptyList();
   }
