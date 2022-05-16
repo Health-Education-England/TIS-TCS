@@ -390,8 +390,7 @@ public class ProgrammeMembershipResourceIntTest {
     assertThat(programmeMembershipList).hasSize(databasePmSizeBeforeCreate + 1);
     ProgrammeMembership testProgrammeMembership = programmeMembershipList
         .get(programmeMembershipList.size() - 1);
-    assertThat(testProgrammeMembership.getCurriculumMemberships().size())
-        .isEqualTo(2);
+    assertThat(testProgrammeMembership.getCurriculumMemberships()).hasSize(2);
     assertThat(testProgrammeMembership.getProgrammeStartDate())
         .isEqualTo(programmeMembership.getProgrammeStartDate());
 
@@ -1043,7 +1042,7 @@ public class ProgrammeMembershipResourceIntTest {
     List<ProgrammeMembershipDTO> programmeMembershipDtoList
        = programmeMembershipMapper.allEntityToDto(Lists.newArrayList(programmeMembership, programmeMembership1));
 
-    assertThat(programmeMembershipDtoList.size()).isEqualTo(2); //sanity check
+    assertThat(programmeMembershipDtoList).hasSize(2); //sanity check
     ProgrammeMembershipDTO pmDto1 = programmeMembershipDtoList.get(0);
     pmDto1.setProgrammeMembershipType(UPDATED_PROGRAMME_MEMBERSHIP_TYPE);
     pmDto1.setProgrammeEndDate(UPDATED_PROGRAMME_END_DATE);

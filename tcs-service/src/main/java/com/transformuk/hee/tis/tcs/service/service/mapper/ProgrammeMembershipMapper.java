@@ -62,11 +62,11 @@ public class ProgrammeMembershipMapper {
         if (CollectionUtils.isEmpty(programmeMembershipDto.getCurriculumMemberships())) {
           programmeMembershipDto.setCurriculumMemberships(Lists.newArrayList());
         }
-        CurriculumMembershipDTO curriculumMembershipDTO
+        CurriculumMembershipDTO curriculumMembershipDto
             = curriculumMembershipMapper
             .curriculumMembershipToCurriculumMembershipDto(curriculumMembership);
         programmeMembershipDto.getCurriculumMemberships()
-            .add(curriculumMembershipDTO);
+            .add(curriculumMembershipDto);
         if (!programmeMembershipDto.getCurriculumMemberships().isEmpty()) {
           //set ID from curriculumMembership
           programmeMembershipDto.setId(
@@ -105,35 +105,41 @@ public class ProgrammeMembershipMapper {
     return new ArrayList<>(listMap.keySet());
   }
 
-  public ProgrammeMembership toEntity(ProgrammeMembershipDTO programmeMembershipDTO) {
+  /**
+   * Covert a ProgrammeMembershipDTO to a ProgrammeMembership, including its CurriculumMemberships.
+   *
+   * @param programmeMembershipDto
+   * @return
+   */
+  public ProgrammeMembership toEntity(ProgrammeMembershipDTO programmeMembershipDto) {
     ProgrammeMembership result = new ProgrammeMembership();
 
-    result.setId(programmeMembershipDTO.getProgrammeMembershipId()); //use real (database) ID
-    result.setProgrammeMembershipType(programmeMembershipDTO.getProgrammeMembershipType());
-    result.setProgrammeStartDate(programmeMembershipDTO.getProgrammeStartDate());
-    result.setProgrammeEndDate(programmeMembershipDTO.getProgrammeEndDate());
-    result.setLeavingReason(programmeMembershipDTO.getLeavingReason());
-    result.setTrainingPathway(programmeMembershipDTO.getTrainingPathway());
-    result.setAmendedDate(programmeMembershipDTO.getAmendedDate());
+    result.setId(programmeMembershipDto.getProgrammeMembershipId()); //use real (database) ID
+    result.setProgrammeMembershipType(programmeMembershipDto.getProgrammeMembershipType());
+    result.setProgrammeStartDate(programmeMembershipDto.getProgrammeStartDate());
+    result.setProgrammeEndDate(programmeMembershipDto.getProgrammeEndDate());
+    result.setLeavingReason(programmeMembershipDto.getLeavingReason());
+    result.setTrainingPathway(programmeMembershipDto.getTrainingPathway());
+    result.setAmendedDate(programmeMembershipDto.getAmendedDate());
     Programme programme = null;
-    if (programmeMembershipDTO.getProgrammeId() != null) {
+    if (programmeMembershipDto.getProgrammeId() != null) {
       programme = new Programme();
-      programme.setId(programmeMembershipDTO.getProgrammeId());
-      programme.setProgrammeName(programmeMembershipDTO.getProgrammeName());
-      programme.setOwner(programmeMembershipDTO.getProgrammeOwner());
-      programme.setProgrammeNumber(programmeMembershipDTO.getProgrammeNumber());
-      result.setRotation(rotationDTOToRotation(programmeMembershipDTO.getRotation()));
+      programme.setId(programmeMembershipDto.getProgrammeId());
+      programme.setProgrammeName(programmeMembershipDto.getProgrammeName());
+      programme.setOwner(programmeMembershipDto.getProgrammeOwner());
+      programme.setProgrammeNumber(programmeMembershipDto.getProgrammeNumber());
+      result.setRotation(rotationDTOToRotation(programmeMembershipDto.getRotation()));
     }
     result.setProgramme(programme);
     result.setTrainingNumber(
-        trainingNumberDTOToTrainingNumber(programmeMembershipDTO.getTrainingNumber()));
-    result.setPerson(personDTOToPerson(programmeMembershipDTO.getPerson()));
+        trainingNumberDTOToTrainingNumber(programmeMembershipDto.getTrainingNumber()));
+    result.setPerson(personDTOToPerson(programmeMembershipDto.getPerson()));
 
-    if (CollectionUtils.isEmpty(programmeMembershipDTO.getCurriculumMemberships())) {
+    if (CollectionUtils.isEmpty(programmeMembershipDto.getCurriculumMemberships())) {
       result.setCurriculumMemberships(new HashSet<>());
     }
     result.getCurriculumMemberships()
-        .addAll(curriculumMembershipMapper.toEntity(programmeMembershipDTO));
+        .addAll(curriculumMembershipMapper.toEntity(programmeMembershipDto));
     result.getCurriculumMemberships().forEach(cm -> cm.setProgrammeMembership(result));
     return result;
   }
@@ -153,7 +159,7 @@ public class ProgrammeMembershipMapper {
       ProgrammeMembership programmeMembership) {
     ProgrammeMembershipDTO result = new ProgrammeMembershipDTO();
 
-    //result.setId(programmeMembership.getId());
+    //Note - do not use PM ID: result.setId(programmeMembership.getId());
     result.setProgrammeMembershipId(programmeMembership.getId());
     result.setProgrammeMembershipType(programmeMembership.getProgrammeMembershipType());
     result.setProgrammeStartDate(programmeMembership.getProgrammeStartDate());
@@ -183,7 +189,7 @@ public class ProgrammeMembershipMapper {
 
   private List<CurriculumMembershipDTO> programmeMembershipToCurriculumMembershipDTOs(
       ProgrammeMembership programmeMembership) {
-    List<CurriculumMembershipDTO> curriculumMembershipDTOs = Lists.newArrayList();
+    List<CurriculumMembershipDTO> curriculumMembershipDtos = Lists.newArrayList();
     Set<CurriculumMembership> curriculumMemberships
         = programmeMembership.getCurriculumMemberships();
 
@@ -199,10 +205,10 @@ public class ProgrammeMembershipMapper {
       cmDto.setCurriculumId(cm.getCurriculumId());
       cmDto.setAmendedDate(cm.getAmendedDate());
 
-      curriculumMembershipDTOs.add(cmDto);
+      curriculumMembershipDtos.add(cmDto);
     });
 
-    return curriculumMembershipDTOs;
+    return curriculumMembershipDtos;
   }
 
   private PersonDTO personToPersonDTO(Person person) {

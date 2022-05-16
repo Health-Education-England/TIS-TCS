@@ -36,6 +36,8 @@ public class CurriculumMembership implements Serializable {
   private String intrepidId;
 
   /**
+   * This field is now part of Programme Membership.
+   *
    * @deprecated (to be removed as part of Programme Membership refactoring)
    */
   @Deprecated
@@ -44,6 +46,8 @@ public class CurriculumMembership implements Serializable {
   private Person person;
 
   /**
+   * This field is now part of Programme Membership.
+   *
    * @deprecated (to be removed as part of Programme Membership refactoring)
    */
   @Deprecated
@@ -57,6 +61,8 @@ public class CurriculumMembership implements Serializable {
   private Integer periodOfGrace;
 
   /**
+   * This field is now part of Programme Membership.
+   *
    * @deprecated (to be removed as part of Programme Membership refactoring)
    */
   @Deprecated
@@ -65,24 +71,32 @@ public class CurriculumMembership implements Serializable {
   private LocalDate curriculumCompletionDate;
 
   /**
+   * This field is now part of Programme Membership.
+   *
    * @deprecated (to be removed as part of Programme Membership refactoring)
    */
   @Deprecated
   private LocalDate programmeEndDate;
 
   /**
+   * This field is now part of Programme Membership.
+   *
    * @deprecated (to be removed as part of Programme Membership refactoring)
    */
   @Deprecated
   private String leavingDestination;
 
   /**
+   * This field is now part of Programme Membership.
+   *
    * @deprecated (to be removed as part of Programme Membership refactoring)
    */
   @Deprecated
   private String leavingReason;
 
   /**
+   * This field is now part of Programme Membership.
+   *
    * @deprecated (to be removed as part of Programme Membership refactoring)
    */
   @Deprecated
@@ -93,6 +107,8 @@ public class CurriculumMembership implements Serializable {
   private Long curriculumId;
 
   /**
+   * This field is now part of Programme Membership.
+   *
    * @deprecated (to be removed as part of Programme Membership refactoring)
    */
   @Deprecated
@@ -101,6 +117,8 @@ public class CurriculumMembership implements Serializable {
   private Rotation rotation;
 
   /**
+   * This field is now part of Programme Membership.
+   *
    * @deprecated (to be removed as part of Programme Membership refactoring)
    */
   @Deprecated
@@ -112,6 +130,8 @@ public class CurriculumMembership implements Serializable {
   private LocalDateTime amendedDate;
 
   /**
+   * This field is now part of Programme Membership.
+   *
    * @deprecated (to be removed as part of Programme Membership refactoring)
    */
   @Deprecated
@@ -123,6 +143,8 @@ public class CurriculumMembership implements Serializable {
   }
 
   /**
+   * This field is now part of Programme Membership.
+   *
    * @deprecated (to be removed as part of Programme Membership refactoring)
    */
   @Deprecated
@@ -133,6 +155,8 @@ public class CurriculumMembership implements Serializable {
   }
 
   /**
+   * This field is now part of Programme Membership.
+   *
    * @deprecated (to be removed as part of Programme Membership refactoring)
    */
   @Deprecated
@@ -157,6 +181,8 @@ public class CurriculumMembership implements Serializable {
   }
 
   /**
+   * This field is now part of Programme Membership.
+   *
    * @deprecated (to be removed as part of Programme Membership refactoring)
    */
   @Deprecated
@@ -171,6 +197,8 @@ public class CurriculumMembership implements Serializable {
   }
 
   /**
+   * This field is now part of Programme Membership.
+   *
    * @deprecated (to be removed as part of Programme Membership refactoring)
    */
   @Deprecated
@@ -180,6 +208,8 @@ public class CurriculumMembership implements Serializable {
   }
 
   /**
+   * This field is now part of Programme Membership.
+   *
    * @deprecated (to be removed as part of Programme Membership refactoring)
    */
   @Deprecated
@@ -189,6 +219,8 @@ public class CurriculumMembership implements Serializable {
   }
 
   /**
+   * This field is now part of Programme Membership.
+   *
    * @deprecated (to be removed as part of Programme Membership refactoring)
    */
   @Deprecated
