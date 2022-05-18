@@ -124,3 +124,4 @@ app:
     reval.routingKey.connection.update: ${REVAL_RABBIT_ROUTING_KEY:reval.connection.update}
     reval.routingKey.connection.syncstart: ${REVAL_RABBIT_SYNCSTART_ROUTING_KEY:reval.connection.syncstart}
     reval.routingKey.connection.syncdata: ${REVAL_RABBIT_SYNCDATA_ROUTING_KEY:reval.connection.syncdata}
+    reval.routingKey.revalupdate.created: ${REVAL_RABBIT_REVALUPDATE_CREATED:tis.revalupdate.created}

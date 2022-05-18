@@ -13,7 +13,7 @@ public class RevalidationRabbitServiceImpl implements RevalidationRabbitService 
   @Value("${app.rabbit.reval.exchange}")
   private String exchange;
 
-  @Value("${app.rabbit.reval.routingKey.connection.update}")
+  @Value("${app.rabbit.reval.routingKey.revalupdate.created}")
   private String routingKey;
 
   private RabbitTemplate rabbitTemplate;
