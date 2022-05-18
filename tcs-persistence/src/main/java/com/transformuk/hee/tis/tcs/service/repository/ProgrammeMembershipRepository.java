@@ -46,11 +46,4 @@ public interface ProgrammeMembershipRepository extends JpaRepository<ProgrammeMe
   List<ProgrammeMembership> findByUuidIn(Set<UUID> ids);
 
   Optional<ProgrammeMembership> findByUuid(UUID id);
-
-  //Find latest programme membership of a trainee order by curriculum end date
-  //this won't work with the new structure: there is no curriculumEndDate
-  //  @Query(value = "SELECT pm.* FROM ProgrammeMembership pm "
-  //      + "WHERE pm.personId = :traineeId ORDER BY pm.curriculumEndDate DESC LIMIT 1",
-  //      nativeQuery = true)
-  //  ProgrammeMembership findLatestCurriculumByTraineeId(@Param("traineeId") Long traineeId);
 }

@@ -22,8 +22,13 @@ public class ProgrammeMembershipDTO implements Serializable {
 
   private Long id;
 
-  @Null(groups = {Create.class})
-  private UUID programmeMembershipUuid; //real (database record) UUID
+  /**
+   * This is the real unique (database) identifier for a ProgrammeMembership. Existing clients may
+   * use this DTO to update a {@link CurriculumMembershipDTO}, without this uuid. That means we
+   * can't specify @NotNull(message = "uuid is required", groups = {Update.class})
+   */
+  @Null(message = "ProgrammeMembership ID must be null", groups = {Create.class})
+  private UUID programmeMembershipUuid;
 
   @NotNull(message = "ProgrammeMembershipType is required", groups = {Update.class, Create.class})
   private ProgrammeMembershipType programmeMembershipType;
