@@ -97,8 +97,8 @@ public class CurriculumMembershipMapper {
   }
 
   /**
-   * Convert a ProgrammeMembershipDTO to a CurriculumMembership object, enriched with all
-   * curriculum membership details from the ProgrammeMembershipDTO.
+   * Convert a ProgrammeMembershipDTO to a CurriculumMembership object, enriched with all curriculum
+   * membership details from the ProgrammeMembershipDTO.
    *
    * @param programmeMembershipDto the ProgrammeMembershipDTO object to convert
    * @return a CurriculumMembership object
@@ -128,7 +128,7 @@ public class CurriculumMembershipMapper {
     ProgrammeMembership programmeMembership = curriculumMembership.getProgrammeMembership();
 
     result.setId(curriculumMembership.getId()); //use CM ID
-    result.setProgrammeMembershipUuid(programmeMembership.getUuid());
+    result.setUuid(programmeMembership.getUuid());
     result.setProgrammeMembershipType(programmeMembership.getProgrammeMembershipType());
     result.setProgrammeStartDate(programmeMembership.getProgrammeStartDate());
     result.setProgrammeEndDate(programmeMembership.getProgrammeEndDate());
@@ -186,7 +186,7 @@ public class CurriculumMembershipMapper {
    * Amend a CurriculumMembership object with details from a CurriculumMembershipDTO.
    *
    * @param curriculumMembershipDto the CurriculumMembershipDTO to use
-   * @param curriculumMembership the CurriculumMembership object to amend
+   * @param curriculumMembership    the CurriculumMembership object to amend
    * @return the amended (enriched) CurriculumMembership object
    */
   private CurriculumMembership curriculumMembershipDtoToCurriculumMembership(
@@ -333,7 +333,7 @@ public class CurriculumMembershipMapper {
   /**
    * Convert a Rotation to a RotationDTO object.
    *
-   * @param rotation the Rotation object to convert
+   * @param rotation  the Rotation object to convert
    * @param programme the rotation Programme
    * @return a RotationDTO object
    */

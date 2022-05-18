@@ -28,7 +28,7 @@ public class ProgrammeMembershipDTO implements Serializable {
    * can't specify @NotNull(message = "uuid is required", groups = {Update.class})
    */
   @Null(message = "ProgrammeMembership ID must be null", groups = {Create.class})
-  private UUID programmeMembershipUuid;
+  private UUID uuid;
 
   @NotNull(message = "ProgrammeMembershipType is required", groups = {Update.class, Create.class})
   private ProgrammeMembershipType programmeMembershipType;

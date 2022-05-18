@@ -40,7 +40,6 @@ import java.util.List;
 import java.util.Optional;
 import java.util.Set;
 import java.util.UUID;
-
 import org.assertj.core.util.Lists;
 import org.assertj.core.util.Sets;
 import org.junit.Assert;
@@ -81,10 +80,10 @@ public class ProgrammeMembershipServiceImplTest {
   private final CurriculumDTO curriculumDto2 = new CurriculumDTO();
   private final TrainingNumber trainingNumber = new TrainingNumber();
   private final TrainingNumberDTO trainingNumberDto = new TrainingNumberDTO();
-  private ProgrammeMembershipDTO programmeMembershipDto1 = new ProgrammeMembershipDTO();
   private final Programme programme = new Programme();
   private final PersonDTO personDto = new PersonDTO();
   private final Person person = new Person();
+  private ProgrammeMembershipDTO programmeMembershipDto1 = new ProgrammeMembershipDTO();
   private ProgrammeMembershipServiceImpl testObj;
   private ProgrammeMembershipMapper programmeMembershipMapper;
   private CurriculumMembershipMapper curriculumMembershipMapper;
@@ -108,9 +107,10 @@ public class ProgrammeMembershipServiceImplTest {
     CurriculumMapper curriculumMapper = new CurriculumMapperImpl();
     ReflectionTestUtils.setField(curriculumMapper, "specialtyMapper",
         new SpecialtyMapperImpl());
-    testObj = new ProgrammeMembershipServiceImpl(programmeMembershipRepositoryMock, curriculumMembershipRepositoryMock,
-        programmeMembershipMapper, curriculumMembershipMapper, curriculumRepositoryMock, curriculumMapper,
-        applicationEventPublisherMock, personRepositoryMock);
+    testObj = new ProgrammeMembershipServiceImpl(programmeMembershipRepositoryMock,
+        curriculumMembershipRepositoryMock, programmeMembershipMapper, curriculumMembershipMapper,
+        curriculumRepositoryMock, curriculumMapper, applicationEventPublisherMock,
+        personRepositoryMock);
 
     initialiseData();
   }
@@ -141,7 +141,8 @@ public class ProgrammeMembershipServiceImplTest {
     programmeMembership1.setProgrammeEndDate(PROGRAMME_END_DATE);
     programmeMembership1.setPerson(person);
     programmeMembership1.setTrainingNumber(trainingNumber);
-    programmeMembership1.setCurriculumMemberships(Sets.newLinkedHashSet(curriculumMembership1, curriculumMembership2));
+    programmeMembership1.setCurriculumMemberships(
+        Sets.newLinkedHashSet(curriculumMembership1, curriculumMembership2));
 
     trainingNumberDto.setId(TRAINEE_ID);
     trainingNumberDto.setTrainingNumber(TRAINEE_NUMBER);
@@ -294,7 +295,7 @@ public class ProgrammeMembershipServiceImplTest {
 
     Assert.assertNotNull(result);
     Assert.assertEquals(2, result.size());
-    Assert.assertEquals(PROGRAMME_MEMBERSHIP_ID_1, result.get(0).getProgrammeMembershipUuid());
+    Assert.assertEquals(PROGRAMME_MEMBERSHIP_ID_1, result.get(0).getUuid());
     Assert.assertEquals(CURRICULUM_MEMBERSHIP_ID_1, result.get(0).getId());
     ProgrammeMembershipCurriculaDTO programmeMembershipCurriculaDTO = result.get(0);
     Assert.assertEquals(PROGRAMME_NAME, programmeMembershipCurriculaDTO.getProgrammeName());
@@ -485,13 +486,13 @@ public class ProgrammeMembershipServiceImplTest {
     Assert.assertEquals(2, result.size());
 
     ProgrammeMembershipCurriculaDTO pmc1 = result.get(0);
-    Assert.assertEquals(PROGRAMME_MEMBERSHIP_ID_1, pmc1.getProgrammeMembershipUuid());
+    Assert.assertEquals(PROGRAMME_MEMBERSHIP_ID_1, pmc1.getUuid());
     Assert.assertEquals(CURRICULUM_MEMBERSHIP_ID_1, pmc1.getId());
     Assert.assertEquals(PROGRAMME_ID, pmc1.getProgrammeId().longValue());
     Assert.assertEquals(curriculum1.getId(), pmc1.getCurriculumDTO().getId());
 
     ProgrammeMembershipCurriculaDTO pmc2 = result.get(1);
-    Assert.assertEquals(PROGRAMME_MEMBERSHIP_ID_1, pmc2.getProgrammeMembershipUuid());
+    Assert.assertEquals(PROGRAMME_MEMBERSHIP_ID_1, pmc2.getUuid());
     Assert.assertEquals(CURRICULUM_MEMBERSHIP_ID_2, pmc2.getId());
     Assert.assertEquals(PROGRAMME_ID, pmc2.getProgrammeId().longValue());
     Assert.assertEquals(curriculum2.getId(), pmc2.getCurriculumDTO().getId());
@@ -515,7 +516,7 @@ public class ProgrammeMembershipServiceImplTest {
         .save(any());
     Assert.assertEquals(PROGRAMME_ID, programmeMembershipDTO.getProgrammeId().longValue());
     Assert.assertEquals(CURRICULUM_1_ID, programmeMembershipDTO.getCurriculumMemberships()
-            .get(0).getCurriculumId().longValue());
+        .get(0).getCurriculumId().longValue());
   }
 
   @Test

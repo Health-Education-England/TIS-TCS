@@ -38,7 +38,7 @@ public class CurriculumMembership implements Serializable {
   /**
    * This field is now part of Programme Membership.
    *
-   * @deprecated (to be removed as part of Programme Membership refactoring)
+   * @deprecated 2022-05 (to be removed as part of Programme Membership refactoring)
    */
   @Deprecated
   @ManyToOne
@@ -48,7 +48,7 @@ public class CurriculumMembership implements Serializable {
   /**
    * This field is now part of Programme Membership.
    *
-   * @deprecated (to be removed as part of Programme Membership refactoring)
+   * @deprecated 2022-05 (to be removed as part of Programme Membership refactoring)
    */
   @Deprecated
   @Enumerated(EnumType.STRING)
@@ -63,7 +63,7 @@ public class CurriculumMembership implements Serializable {
   /**
    * This field is now part of Programme Membership.
    *
-   * @deprecated (to be removed as part of Programme Membership refactoring)
+   * @deprecated 2022-05 (to be removed as part of Programme Membership refactoring)
    */
   @Deprecated
   private LocalDate programmeStartDate;
@@ -73,7 +73,7 @@ public class CurriculumMembership implements Serializable {
   /**
    * This field is now part of Programme Membership.
    *
-   * @deprecated (to be removed as part of Programme Membership refactoring)
+   * @deprecated 2022-05 (to be removed as part of Programme Membership refactoring)
    */
   @Deprecated
   private LocalDate programmeEndDate;
@@ -81,7 +81,7 @@ public class CurriculumMembership implements Serializable {
   /**
    * This field is now part of Programme Membership.
    *
-   * @deprecated (to be removed as part of Programme Membership refactoring)
+   * @deprecated 2022-05 (to be removed as part of Programme Membership refactoring)
    */
   @Deprecated
   private String leavingDestination;
@@ -89,7 +89,7 @@ public class CurriculumMembership implements Serializable {
   /**
    * This field is now part of Programme Membership.
    *
-   * @deprecated (to be removed as part of Programme Membership refactoring)
+   * @deprecated 2022-05 (to be removed as part of Programme Membership refactoring)
    */
   @Deprecated
   private String leavingReason;
@@ -97,7 +97,7 @@ public class CurriculumMembership implements Serializable {
   /**
    * This field is now part of Programme Membership.
    *
-   * @deprecated (to be removed as part of Programme Membership refactoring)
+   * @deprecated 2022-05 (to be removed as part of Programme Membership refactoring)
    */
   @Deprecated
   @ManyToOne
@@ -109,7 +109,7 @@ public class CurriculumMembership implements Serializable {
   /**
    * This field is now part of Programme Membership.
    *
-   * @deprecated (to be removed as part of Programme Membership refactoring)
+   * @deprecated 2022-05 (to be removed as part of Programme Membership refactoring)
    */
   @Deprecated
   @ManyToOne
@@ -119,7 +119,7 @@ public class CurriculumMembership implements Serializable {
   /**
    * This field is now part of Programme Membership.
    *
-   * @deprecated (to be removed as part of Programme Membership refactoring)
+   * @deprecated 2022-05 (to be removed as part of Programme Membership refactoring)
    */
   @Deprecated
   @ManyToOne
@@ -132,7 +132,7 @@ public class CurriculumMembership implements Serializable {
   /**
    * This field is now part of Programme Membership.
    *
-   * @deprecated (to be removed as part of Programme Membership refactoring)
+   * @deprecated 2022-05 (to be removed as part of Programme Membership refactoring)
    */
   @Deprecated
   private String trainingPathway;
@@ -145,7 +145,7 @@ public class CurriculumMembership implements Serializable {
   /**
    * This field is now part of Programme Membership.
    *
-   * @deprecated (to be removed as part of Programme Membership refactoring)
+   * @deprecated 2022-05 (to be removed as part of Programme Membership refactoring)
    */
   @Deprecated
   public CurriculumMembership programmeMembershipType(
@@ -157,7 +157,7 @@ public class CurriculumMembership implements Serializable {
   /**
    * This field is now part of Programme Membership.
    *
-   * @deprecated (to be removed as part of Programme Membership refactoring)
+   * @deprecated 2022-05 (to be removed as part of Programme Membership refactoring)
    */
   @Deprecated
   public CurriculumMembership rotation(Rotation rotation) {
@@ -183,7 +183,7 @@ public class CurriculumMembership implements Serializable {
   /**
    * This field is now part of Programme Membership.
    *
-   * @deprecated (to be removed as part of Programme Membership refactoring)
+   * @deprecated 2022-05 (to be removed as part of Programme Membership refactoring)
    */
   @Deprecated
   public CurriculumMembership programmeStartDate(LocalDate programmeStartDate) {
@@ -199,7 +199,7 @@ public class CurriculumMembership implements Serializable {
   /**
    * This field is now part of Programme Membership.
    *
-   * @deprecated (to be removed as part of Programme Membership refactoring)
+   * @deprecated 2022-05 (to be removed as part of Programme Membership refactoring)
    */
   @Deprecated
   public CurriculumMembership programmeEndDate(LocalDate programmeEndDate) {
@@ -210,7 +210,7 @@ public class CurriculumMembership implements Serializable {
   /**
    * This field is now part of Programme Membership.
    *
-   * @deprecated (to be removed as part of Programme Membership refactoring)
+   * @deprecated 2022-05 (to be removed as part of Programme Membership refactoring)
    */
   @Deprecated
   public CurriculumMembership leavingDestination(String leavingDestination) {
@@ -221,7 +221,7 @@ public class CurriculumMembership implements Serializable {
   /**
    * This field is now part of Programme Membership.
    *
-   * @deprecated (to be removed as part of Programme Membership refactoring)
+   * @deprecated 2022-05 (to be removed as part of Programme Membership refactoring)
    */
   @Deprecated
   public CurriculumMembership leavingReason(String leavingReason) {
