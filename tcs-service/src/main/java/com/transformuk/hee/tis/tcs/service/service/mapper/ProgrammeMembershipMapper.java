@@ -42,10 +42,6 @@ public class ProgrammeMembershipMapper {
       }
       result.getCurriculumMemberships()
           .addAll(programmeMembershipToCurriculumMembershipDTOs(programmeMembership));
-      if (!result.getCurriculumMemberships().isEmpty()) {
-        //set ID from curriculumMembership
-        result.setId(result.getCurriculumMemberships().iterator().next().getId());
-      }
     }
     return result;
   }
@@ -65,11 +61,6 @@ public class ProgrammeMembershipMapper {
             .curriculumMembershipToCurriculumMembershipDto(curriculumMembership);
         programmeMembershipDto.getCurriculumMemberships()
             .add(curriculumMembershipDto);
-        if (!programmeMembershipDto.getCurriculumMemberships().isEmpty()) {
-          //set ID from curriculumMembership
-          programmeMembershipDto.setId(
-              programmeMembershipDto.getCurriculumMemberships().iterator().next().getId());
-        }
         result.add(programmeMembershipDto);
       }
     }
@@ -92,11 +83,6 @@ public class ProgrammeMembershipMapper {
       }
       programmeMembershipDto.getCurriculumMemberships()
           .addAll(programmeMembershipToCurriculumMembershipDTOs(programmeMembership));
-      if (!programmeMembershipDto.getCurriculumMemberships().isEmpty()) {
-        //set ID from curriculumMembership
-        programmeMembershipDto.setId(
-            programmeMembershipDto.getCurriculumMemberships().iterator().next().getId());
-      }
       listMap.put(programmeMembershipDto, programmeMembershipDto);
     }
 
@@ -157,6 +143,10 @@ public class ProgrammeMembershipMapper {
       ProgrammeMembership programmeMembership) {
     ProgrammeMembershipDTO result = new ProgrammeMembershipDTO();
 
+    if (!programmeMembership.getCurriculumMemberships().isEmpty()) {
+      //Preserve backward-compatibility
+      result.setId(programmeMembership.getCurriculumMemberships().iterator().next().getId());
+    }
     result.setUuid(programmeMembership.getUuid());
     result.setProgrammeMembershipType(programmeMembership.getProgrammeMembershipType());
     result.setProgrammeStartDate(programmeMembership.getProgrammeStartDate());

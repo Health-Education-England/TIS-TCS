@@ -209,9 +209,8 @@ public class CurriculumMembershipMapper {
    *
    * @param programmeMembershipDto the ProgrammeMembershipDTO object to convert
    * @return a CurriculumMembership object
-   *
-   *  @deprecated 2022-05 as part of the programme membership refactoring,
-   *  a curriculum membership should not duplicate programme membership fields.
+   * @deprecated 2022-05 as part of the programme membership refactoring, a curriculum membership
+   *     should not duplicate programme membership fields.
    */
   @Deprecated
   private CurriculumMembership programmeMembershipDtoToCurriculumMembership(
