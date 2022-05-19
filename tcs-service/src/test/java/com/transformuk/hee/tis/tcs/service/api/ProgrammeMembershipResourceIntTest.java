@@ -36,6 +36,7 @@ import com.transformuk.hee.tis.tcs.service.service.mapper.CurriculumMembershipMa
 import com.transformuk.hee.tis.tcs.service.service.mapper.PersonMapper;
 import com.transformuk.hee.tis.tcs.service.service.mapper.ProgrammeMembershipMapper;
 
+import java.lang.reflect.Field;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.time.ZoneId;
@@ -48,6 +49,9 @@ import org.assertj.core.util.Lists;
 import org.assertj.core.util.Sets;
 import org.junit.Before;
 import org.junit.Test;
+import org.junit.jupiter.api.BeforeAll;
+import org.junit.jupiter.params.ParameterizedTest;
+import org.junit.jupiter.params.provider.ValueSource;
 import org.junit.runner.RunWith;
 import org.mockito.MockitoAnnotations;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -1058,8 +1062,11 @@ public class ProgrammeMembershipResourceIntTest {
 
   @Test
   @Transactional
-  public void updateNonExistingCurriculumMembershipShouldFail() throws Exception {
-    int databaseSizeBeforeUpdate = curriculumMembershipRepository.findAll().size();
+  @ParameterizedTest
+  @ValueSource(strings = {"curriculumStartDate", "curriculumEndDate", "curriculumId"})
+  void updateCurriculumMembershipWithoutRequiredFieldsShouldFail(String fieldToNull) throws Exception {
+    setup();
+    initTest();
     personRepository.saveAndFlush(person);
     curriculumRepository.saveAndFlush(curriculum);
     programme.setCurricula(Collections.singleton(programmeCurriculum));
@@ -1069,19 +1076,27 @@ public class ProgrammeMembershipResourceIntTest {
 
     programmeMembership.setPerson(person);
     programmeMembership.setProgramme(programme);
-    programmeMembershipRepository.saveAndFlush(programmeMembership);
-
-    curriculumMembership.setCurriculumStartDate(null);
     curriculumMembership.setProgrammeMembership(programmeMembership);
     curriculumMembership
         .setCurriculumId(programme.getCurricula().iterator().next().getCurriculum().getId());
+    programmeMembership.setCurriculumMemberships(Sets.newLinkedHashSet(curriculumMembership));
+    programmeMembershipRepository.saveAndFlush(programmeMembership);
 
-    // Create the CurriculumMembership
+    int databaseSizeBeforeUpdate = curriculumMembershipRepository.findAll().size();
+
+    // Create the DTO
     ProgrammeMembershipDTO programmeMembershipDTO = curriculumMembershipMapper
         .toDto(curriculumMembership);
 
-    // If the curriculumMembership doesn't have a start or end date, it will give error instead of creating due to
-    // validation. Note that record ID is not compulsory, which seems odd.
+    CurriculumMembershipDTO curriculumMembershipDto
+        = programmeMembershipDTO.getCurriculumMemberships().iterator().next();
+    Field field = curriculumMembershipDto.getClass().getDeclaredField(fieldToNull);
+    field.setAccessible(true);
+    field.set(curriculumMembershipDto, null);
+
+    // If the curriculumMembership doesn't have a start or end date or curriculum, it will give error instead of
+    // updating due to validation. Note that record ID is not compulsory (if missing, the curriculumMembership is
+    // assumed to be new and added instead of being updated).
     //TODO: confirm the ProgrammeMembershipDTO and CurriculumMembershipDTO Update.class field groups
     restProgrammeMembershipMockMvc.perform(put("/api/programme-memberships")
             .contentType(MediaType.APPLICATION_JSON)

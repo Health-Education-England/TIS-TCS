@@ -94,7 +94,8 @@ public class ProgrammeMembershipResource {
   }
 
   /**
-   * PUT /programme-memberships : Updates an existing programmeMembership.
+   * PUT /programme-memberships : Updates an existing programmeMembership, or creates it if it
+   * does not exist.
    *
    * @param programmeMembershipDto the programmeMembershipDTO to update
    * @return the ResponseEntity with status 200 (OK) and with body the updated
