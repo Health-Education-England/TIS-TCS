@@ -209,14 +209,15 @@ public class CurriculumMembershipMapper {
    *
    * @param programmeMembershipDto the ProgrammeMembershipDTO object to convert
    * @return a CurriculumMembership object
+   *
+   *  @deprecated 2022-05 as part of the programme membership refactoring,
+   *  a curriculum membership should not duplicate programme membership fields.
    */
+  @Deprecated
   private CurriculumMembership programmeMembershipDtoToCurriculumMembership(
       ProgrammeMembershipDTO programmeMembershipDto) {
     CurriculumMembership result = new CurriculumMembership();
 
-    //TODO: the following should be removed in future
-    // once e.g. the tcs-persistence repository queries are refactored
-    // to allow CurriculumMembership to not duplicate ProgrammeMembership data
     result.setProgrammeMembershipType(programmeMembershipDto.getProgrammeMembershipType());
     result.setProgrammeStartDate(programmeMembershipDto.getProgrammeStartDate());
     result.setProgrammeEndDate(programmeMembershipDto.getProgrammeEndDate());
@@ -240,7 +241,6 @@ public class CurriculumMembershipMapper {
       result.setPerson(personDtoToPerson(programmeMembershipDto.getPerson()));
     }
     result.setTrainingPathway(programmeMembershipDto.getTrainingPathway());
-    //end remove block
 
     return result;
   }

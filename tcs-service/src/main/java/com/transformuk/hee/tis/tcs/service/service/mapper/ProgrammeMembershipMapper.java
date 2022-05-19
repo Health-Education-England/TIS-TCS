@@ -59,9 +59,7 @@ public class ProgrammeMembershipMapper {
           : programmeMembership.getCurriculumMemberships()) {
         ProgrammeMembershipDTO programmeMembershipDto
             = programmeMembershipToProgrammeMembershipDTO(programmeMembership);
-        if (CollectionUtils.isEmpty(programmeMembershipDto.getCurriculumMemberships())) {
-          programmeMembershipDto.setCurriculumMemberships(Lists.newArrayList());
-        }
+        programmeMembershipDto.setCurriculumMemberships(Lists.newArrayList());
         CurriculumMembershipDTO curriculumMembershipDto
             = curriculumMembershipMapper
             .curriculumMembershipToCurriculumMembershipDto(curriculumMembership);
@@ -135,7 +133,7 @@ public class ProgrammeMembershipMapper {
         trainingNumberDTOToTrainingNumber(programmeMembershipDto.getTrainingNumber()));
     result.setPerson(personDTOToPerson(programmeMembershipDto.getPerson()));
 
-    if (CollectionUtils.isEmpty(programmeMembershipDto.getCurriculumMemberships())) {
+    if (programmeMembershipDto.getCurriculumMemberships() == null) {
       result.setCurriculumMemberships(new HashSet<>());
     }
     result.getCurriculumMemberships()
