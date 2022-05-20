@@ -35,13 +35,13 @@ personId, programmeId, rotationId, programmeStartDate, programmeEndDate, program
 
 ALTER TABLE CurriculumMembership ADD COLUMN `programmeMembershipUuid` varchar(36) DEFAULT NULL;
 
-UPDATE tcs.CurriculumMembership cm
-SET programmeMembershipUuid = (SELECT uuid FROM tcs.ProgrammeMembership pm
+UPDATE CurriculumMembership cm
+SET programmeMembershipUuid = (SELECT uuid FROM ProgrammeMembership pm
 WHERE pm.personId = cm.personId AND
 pm.programmeId = cm.programmeId AND
 IFNULL(pm.rotationId,0) = IFNULL(cm.rotationId,0) AND
-pm.programmeStartDate = cm.programmeStartDate AND
-pm.programmeEndDate = cm.programmeEndDate AND
+IFNULL(pm.programmeStartDate,'1800-01-01') = IFNULL(cm.programmeStartDate,'1800-01-01') AND
+IFNULL(pm.programmeEndDate,'1800-01-01') = IFNULL(cm.programmeEndDate, '1800-01-01') AND
 IFNULL(pm.programmeMembershipType,'') = IFNULL(cm.programmeMembershipType,''));
 
 ALTER TABLE CurriculumMembership MODIFY COLUMN `programmeMembershipUuid` varchar(36) NOT NULL;
