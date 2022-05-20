@@ -236,7 +236,7 @@ public class RevalidationServiceImpl implements RevalidationService {
 
     // latest Programme Membership
     final CurriculumMembership latestCurriculumMembership = curriculumMembershipRepository
-        .findLatestCurriculumMembershipByTraineeId(personId);
+        .findLatestCurriculumByTraineeId(personId);
     final ProgrammeMembershipDTO programmeMembershipDto = curriculumMembershipMapper
         .toDto(latestCurriculumMembership);
     if (programmeMembershipDto != null) {

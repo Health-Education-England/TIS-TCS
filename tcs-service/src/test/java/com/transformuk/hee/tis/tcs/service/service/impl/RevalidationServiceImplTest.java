@@ -487,7 +487,7 @@ public class RevalidationServiceImplTest {
   public void shouldBuildTcsConnectionInfo() {
     when(contactDetailsService.findOne(PERSON_ID)).thenReturn(contactDetails);
     when(gmcDetailsServiceMock.findOne(PERSON_ID)).thenReturn(gmcDetailsDTO);
-    when(curriculumMembershipRepositoryMock.findLatestCurriculumMembershipByTraineeId(PERSON_ID))
+    when(curriculumMembershipRepositoryMock.findLatestCurriculumByTraineeId(PERSON_ID))
         .thenReturn(curriculumMembership);
     when(cmMapper.toDto(curriculumMembership)).thenReturn(programmeMembershipDTO);
     when(programmeMembershipDTO.getProgrammeName()).thenReturn(PROGRAMME_NAME);
@@ -508,7 +508,7 @@ public class RevalidationServiceImplTest {
   public void shouldBuildTcsConnectionInfoWithoutContactDetails() {
     when(contactDetailsService.findOne(PERSON_ID)).thenReturn(null);
     when(gmcDetailsServiceMock.findOne(PERSON_ID)).thenReturn(gmcDetailsDTO);
-    when(curriculumMembershipRepositoryMock.findLatestCurriculumMembershipByTraineeId(PERSON_ID))
+    when(curriculumMembershipRepositoryMock.findLatestCurriculumByTraineeId(PERSON_ID))
         .thenReturn(curriculumMembership);
     when(cmMapper.toDto(curriculumMembership)).thenReturn(programmeMembershipDTO);
     when(programmeMembershipDTO.getProgrammeName()).thenReturn(PROGRAMME_NAME);
@@ -529,7 +529,7 @@ public class RevalidationServiceImplTest {
   public void shouldBuildTcsConnectionInfoWithoutGMCDetails() {
     when(contactDetailsService.findOne(PERSON_ID)).thenReturn(contactDetails);
     when(gmcDetailsServiceMock.findOne(PERSON_ID)).thenReturn(null);
-    when(curriculumMembershipRepositoryMock.findLatestCurriculumMembershipByTraineeId(PERSON_ID))
+    when(curriculumMembershipRepositoryMock.findLatestCurriculumByTraineeId(PERSON_ID))
         .thenReturn(curriculumMembership);
     when(cmMapper.toDto(curriculumMembership)).thenReturn(programmeMembershipDTO);
     when(programmeMembershipDTO.getProgrammeName()).thenReturn(PROGRAMME_NAME);
@@ -550,7 +550,7 @@ public class RevalidationServiceImplTest {
   public void shouldBuildTcsConnectionInfoWithoutProgrammeMembership() {
     when(contactDetailsService.findOne(PERSON_ID)).thenReturn(contactDetails);
     when(gmcDetailsServiceMock.findOne(PERSON_ID)).thenReturn(gmcDetailsDTO);
-    when(curriculumMembershipRepositoryMock.findLatestCurriculumMembershipByTraineeId(PERSON_ID))
+    when(curriculumMembershipRepositoryMock.findLatestCurriculumByTraineeId(PERSON_ID))
         .thenReturn(null);
 
     ConnectionInfoDto result = testObj.buildTcsConnectionInfo(PERSON_ID);
