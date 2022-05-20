@@ -49,6 +49,8 @@ public class ProgrammeRepositoryIntTest {
   @Transactional
   @Test
   public void findByCurriculumMembershipPersonIdShouldReturnAUniqueCollectionOfProgrammesThePersonIsEnrolledOn() {
+    //TODO: rewrite this test when curriculum memberships
+    // do not duplicate programme membership fields (e.g. programme)
     Programme programme1 = new Programme(), programme2 = new Programme(), programme3 = new Programme();
 
     programme1.setProgrammeName("Programme 1");

@@ -12,6 +12,9 @@ import org.springframework.data.repository.query.Param;
  */
 @SuppressWarnings("unused")
 public interface CurriculumMembershipRepository extends JpaRepository<CurriculumMembership, Long> {
+  //Note: personId, programme, programmeEndDate etc. should be updated in the
+  //programmeMembership table, and removed from the CurriculumMembership table.
+  //See commit 43657e57f8068704ed5ad81f8b9d66090845d025 for initial work to refactor this
 
   @Query(value = "SELECT cm "
       + "FROM CurriculumMembership cm "

@@ -26,9 +26,8 @@ import java.util.List;
 import javax.persistence.EntityManager;
 import javax.persistence.Query;
 import org.apache.commons.lang3.StringUtils;
-import org.junit.Before;
-import org.junit.Test;
-import org.junit.runner.RunWith;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
 import org.mockito.Mock;
 import org.mockito.MockitoAnnotations;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -36,7 +35,6 @@ import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.data.web.PageableHandlerMethodArgumentResolver;
 import org.springframework.http.MediaType;
 import org.springframework.http.converter.json.MappingJackson2HttpMessageConverter;
-import org.springframework.test.context.junit4.SpringRunner;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.setup.MockMvcBuilders;
 import org.springframework.transaction.annotation.Transactional;
@@ -46,9 +44,9 @@ import org.springframework.transaction.annotation.Transactional;
  *
  * @see ContactDetailsResource
  */
-@RunWith(SpringRunner.class)
 @SpringBootTest(classes = Application.class)
-public class ContactDetailsResourceIntTest {
+public
+class ContactDetailsResourceIntTest {
 
   private static final String DEFAULT_SURNAME = "AAAAAAAAAA";
   private static final String UPDATED_SURNAME = "BBBBBBBBBB";
@@ -152,8 +150,8 @@ public class ContactDetailsResourceIntTest {
     return contactDetails;
   }
 
-  @Before
-  public void setup() {
+  @BeforeEach
+  void setup() {
     MockitoAnnotations.initMocks(this);
     ContactDetailsResource contactDetailsResource = new ContactDetailsResource(
         contactDetailsService, contactDetailsValidator);
@@ -163,14 +161,14 @@ public class ContactDetailsResourceIntTest {
         .setMessageConverters(jacksonMessageConverter).build();
   }
 
-  @Before
-  public void initTest() {
+  @BeforeEach
+  void initTest() {
     contactDetails = createEntity(em);
   }
 
   @Test
   @Transactional
-  public void createContactDetails() throws Exception {
+  void createContactDetails() throws Exception {
     Query nativeQuery = em.createNativeQuery("select * from information_schema.indexes;");
     List<Object[]> authors = nativeQuery.getResultList();
 
@@ -209,7 +207,7 @@ public class ContactDetailsResourceIntTest {
 
   @Test
   @Transactional
-  public void shouldValidateMandatoryFieldsWhenCreating() throws Exception {
+  void shouldValidateMandatoryFieldsWhenCreating() throws Exception {
     //given
     ContactDetailsDTO contactDetailsDTO = new ContactDetailsDTO();
 
@@ -225,7 +223,7 @@ public class ContactDetailsResourceIntTest {
 
   @Test
   @Transactional
-  public void shouldValidateMandatoryFieldsWhenUpdating() throws Exception {
+  void shouldValidateMandatoryFieldsWhenUpdating() throws Exception {
     //given
     ContactDetailsDTO contactDetailsDTO = new ContactDetailsDTO();
 
@@ -241,7 +239,7 @@ public class ContactDetailsResourceIntTest {
 
   @Test
   @Transactional
-  public void shouldValidateValidEmailField() throws Exception {
+  void shouldValidateValidEmailField() throws Exception {
     //given
     ContactDetailsDTO contactDetailsDTO = contactDetailsMapper.toDto(contactDetails);
     contactDetailsDTO.setEmail("test");
@@ -258,7 +256,7 @@ public class ContactDetailsResourceIntTest {
 
   @Test
   @Transactional
-  public void createContactDetailsWithExistingId() throws Exception {
+  void createContactDetailsWithExistingId() throws Exception {
     int databaseSizeBeforeCreate = contactDetailsRepository.findAll().size();
 
     // Create the ContactDetails with an existing ID
@@ -278,7 +276,7 @@ public class ContactDetailsResourceIntTest {
 
   @Test
   @Transactional
-  public void getAllContactDetails() throws Exception {
+  void getAllContactDetails() throws Exception {
     // Initialize the database
     contactDetailsRepository.saveAndFlush(contactDetails);
 
@@ -287,28 +285,28 @@ public class ContactDetailsResourceIntTest {
         .andExpect(status().isOk())
         .andExpect(content().contentType(MediaType.APPLICATION_JSON_VALUE))
         .andExpect(jsonPath("$.[*].id").value(hasItem(contactDetails.getId().intValue())))
-        .andExpect(jsonPath("$.[*].surname").value(hasItem(DEFAULT_SURNAME.toString())))
-        .andExpect(jsonPath("$.[*].forenames").value(hasItem(DEFAULT_FORENAMES.toString())))
-        .andExpect(jsonPath("$.[*].knownAs").value(hasItem(DEFAULT_KNOWN_AS.toString())))
-        .andExpect(jsonPath("$.[*].maidenName").value(hasItem(DEFAULT_MAIDEN_NAME.toString())))
-        .andExpect(jsonPath("$.[*].initials").value(hasItem(DEFAULT_INITIALS.toString())))
-        .andExpect(jsonPath("$.[*].title").value(hasItem(DEFAULT_TITLE.toString())))
+        .andExpect(jsonPath("$.[*].surname").value(hasItem(DEFAULT_SURNAME)))
+        .andExpect(jsonPath("$.[*].forenames").value(hasItem(DEFAULT_FORENAMES)))
+        .andExpect(jsonPath("$.[*].knownAs").value(hasItem(DEFAULT_KNOWN_AS)))
+        .andExpect(jsonPath("$.[*].maidenName").value(hasItem(DEFAULT_MAIDEN_NAME)))
+        .andExpect(jsonPath("$.[*].initials").value(hasItem(DEFAULT_INITIALS)))
+        .andExpect(jsonPath("$.[*].title").value(hasItem(DEFAULT_TITLE)))
         .andExpect(
-            jsonPath("$.[*].telephoneNumber").value(hasItem(DEFAULT_CONTACT_PHONE_NR_1.toString())))
+            jsonPath("$.[*].telephoneNumber").value(hasItem(DEFAULT_CONTACT_PHONE_NR_1)))
         .andExpect(
-            jsonPath("$.[*].mobileNumber").value(hasItem(DEFAULT_CONTACT_PHONE_NR_2.toString())))
-        .andExpect(jsonPath("$.[*].email").value(hasItem(DEFAULT_EMAIL.toString())))
-        .andExpect(jsonPath("$.[*].address1").value(hasItem(DEFAULT_ADDRESS.toString())))
-        .andExpect(jsonPath("$.[*].postCode").value(hasItem(DEFAULT_POST_CODE.toString())))
-        .andExpect(jsonPath("$.[*].legalSurname").value(hasItem(DEFAULT_LEGAL_SURNAME.toString())))
+            jsonPath("$.[*].mobileNumber").value(hasItem(DEFAULT_CONTACT_PHONE_NR_2)))
+        .andExpect(jsonPath("$.[*].email").value(hasItem(DEFAULT_EMAIL)))
+        .andExpect(jsonPath("$.[*].address1").value(hasItem(DEFAULT_ADDRESS)))
+        .andExpect(jsonPath("$.[*].postCode").value(hasItem(DEFAULT_POST_CODE)))
+        .andExpect(jsonPath("$.[*].legalSurname").value(hasItem(DEFAULT_LEGAL_SURNAME)))
         .andExpect(
-            jsonPath("$.[*].legalForenames").value(hasItem(DEFAULT_LEGAL_FORENAMES.toString())))
+            jsonPath("$.[*].legalForenames").value(hasItem(DEFAULT_LEGAL_FORENAMES)))
         .andExpect(jsonPath("$.[*].amendedDate").isNotEmpty());
   }
 
   @Test
   @Transactional
-  public void getContactDetails() throws Exception {
+  void getContactDetails() throws Exception {
     // Initialize the database
     contactDetailsRepository.saveAndFlush(contactDetails);
 
@@ -317,26 +315,26 @@ public class ContactDetailsResourceIntTest {
         .andExpect(status().isOk())
         .andExpect(content().contentType(MediaType.APPLICATION_JSON_VALUE))
         .andExpect(jsonPath("$.id").value(contactDetails.getId().intValue()))
-        .andExpect(jsonPath("$.surname").value(DEFAULT_SURNAME.toString()))
-        .andExpect(jsonPath("$.forenames").value(DEFAULT_FORENAMES.toString()))
-        .andExpect(jsonPath("$.knownAs").value(DEFAULT_KNOWN_AS.toString()))
-        .andExpect(jsonPath("$.maidenName").value(DEFAULT_MAIDEN_NAME.toString()))
-        .andExpect(jsonPath("$.initials").value(DEFAULT_INITIALS.toString()))
-        .andExpect(jsonPath("$.title").value(DEFAULT_TITLE.toString()))
-        .andExpect(jsonPath("$.telephoneNumber").value(DEFAULT_CONTACT_PHONE_NR_1.toString()))
-        .andExpect(jsonPath("$.mobileNumber").value(DEFAULT_CONTACT_PHONE_NR_2.toString()))
-        .andExpect(jsonPath("$.email").value(DEFAULT_EMAIL.toString()))
-        .andExpect(jsonPath("$.address1").value(DEFAULT_ADDRESS.toString()))
-        .andExpect(jsonPath("$.postCode").value(DEFAULT_POST_CODE.toString()))
-        .andExpect(jsonPath("$.legalSurname").value(DEFAULT_LEGAL_SURNAME.toString()))
-        .andExpect(jsonPath("$.legalForenames").value(DEFAULT_LEGAL_FORENAMES.toString()))
+        .andExpect(jsonPath("$.surname").value(DEFAULT_SURNAME))
+        .andExpect(jsonPath("$.forenames").value(DEFAULT_FORENAMES))
+        .andExpect(jsonPath("$.knownAs").value(DEFAULT_KNOWN_AS))
+        .andExpect(jsonPath("$.maidenName").value(DEFAULT_MAIDEN_NAME))
+        .andExpect(jsonPath("$.initials").value(DEFAULT_INITIALS))
+        .andExpect(jsonPath("$.title").value(DEFAULT_TITLE))
+        .andExpect(jsonPath("$.telephoneNumber").value(DEFAULT_CONTACT_PHONE_NR_1))
+        .andExpect(jsonPath("$.mobileNumber").value(DEFAULT_CONTACT_PHONE_NR_2))
+        .andExpect(jsonPath("$.email").value(DEFAULT_EMAIL))
+        .andExpect(jsonPath("$.address1").value(DEFAULT_ADDRESS))
+        .andExpect(jsonPath("$.postCode").value(DEFAULT_POST_CODE))
+        .andExpect(jsonPath("$.legalSurname").value(DEFAULT_LEGAL_SURNAME))
+        .andExpect(jsonPath("$.legalForenames").value(DEFAULT_LEGAL_FORENAMES))
         .andExpect(jsonPath("$.amendedDate").isNotEmpty());
 
   }
 
   @Test
   @Transactional
-  public void getNonExistingContactDetails() throws Exception {
+  void getNonExistingContactDetails() throws Exception {
     // Get the contactDetails
     restContactDetailsMockMvc.perform(get("/api/contact-details/{id}", Long.MAX_VALUE))
         .andExpect(status().isNotFound());
@@ -344,7 +342,7 @@ public class ContactDetailsResourceIntTest {
 
   @Test
   @Transactional
-  public void updateContactDetails() throws Exception {
+  void updateContactDetails() throws Exception {
     // Initialize the database
     contactDetailsRepository.saveAndFlush(contactDetails);
     int databaseSizeBeforeUpdate = contactDetailsRepository.findAll().size();
@@ -395,7 +393,7 @@ public class ContactDetailsResourceIntTest {
 
   @Test
   @Transactional
-  public void updateNonExistingContactDetails() throws Exception {
+  void updateNonExistingContactDetails() throws Exception {
     int databaseSizeBeforeUpdate = contactDetailsRepository.findAll().size();
 
     // Create the ContactDetails
@@ -415,7 +413,7 @@ public class ContactDetailsResourceIntTest {
 
   @Test
   @Transactional
-  public void deleteContactDetails() throws Exception {
+  void deleteContactDetails() throws Exception {
     // Initialize the database
     contactDetailsRepository.saveAndFlush(contactDetails);
     int databaseSizeBeforeDelete = contactDetailsRepository.findAll().size();
@@ -432,7 +430,7 @@ public class ContactDetailsResourceIntTest {
 
   @Test
   @Transactional
-  public void equalsVerifier() throws Exception {
+  void equalsVerifier() throws Exception {
     TestUtil.equalsVerifier(ContactDetails.class);
     ContactDetails contactDetails1 = new ContactDetails();
     contactDetails1.setId(1L);
@@ -447,7 +445,7 @@ public class ContactDetailsResourceIntTest {
 
   @Test
   @Transactional
-  public void dtoEqualsVerifier() throws Exception {
+  void dtoEqualsVerifier() throws Exception {
     TestUtil.equalsVerifier(ContactDetailsDTO.class);
     ContactDetailsDTO contactDetailsDTO1 = new ContactDetailsDTO();
     contactDetailsDTO1.setId(1L);
@@ -463,7 +461,7 @@ public class ContactDetailsResourceIntTest {
 
   @Test
   @Transactional
-  public void patchContactDetails() throws Exception {
+  void patchContactDetails() throws Exception {
     // Initialize the database
     contactDetailsRepository.saveAndFlush(contactDetails);
     ContactDetails updatedContactDetails = contactDetailsRepository.findById(contactDetails.getId())

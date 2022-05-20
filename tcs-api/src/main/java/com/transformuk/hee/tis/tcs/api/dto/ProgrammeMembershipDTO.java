@@ -5,10 +5,13 @@ import com.transformuk.hee.tis.tcs.api.dto.validation.Update;
 import com.transformuk.hee.tis.tcs.api.enumeration.ProgrammeMembershipType;
 import java.io.Serializable;
 import java.time.LocalDate;
+import java.time.LocalDateTime;
 import java.util.List;
 import java.util.Objects;
+import java.util.UUID;
 import javax.validation.Valid;
 import javax.validation.constraints.NotNull;
+import javax.validation.constraints.Null;
 import lombok.Data;
 
 /**
@@ -18,6 +21,14 @@ import lombok.Data;
 public class ProgrammeMembershipDTO implements Serializable {
 
   private Long id;
+
+  /**
+   * This is the real unique (database) identifier for a ProgrammeMembership. Existing clients may
+   * use this DTO to update a {@link CurriculumMembershipDTO}, without this uuid. That means we
+   * can't specify @NotNull(message = "uuid is required", groups = {Update.class})
+   */
+  @Null(message = "ProgrammeMembership ID must be null", groups = {Create.class})
+  private UUID uuid;
 
   @NotNull(message = "ProgrammeMembershipType is required", groups = {Update.class, Create.class})
   private ProgrammeMembershipType programmeMembershipType;
@@ -48,6 +59,8 @@ public class ProgrammeMembershipDTO implements Serializable {
   private String trainingPathway;
 
   private TrainingNumberDTO trainingNumber;
+
+  private LocalDateTime amendedDate;
 
   @Valid
   private List<CurriculumMembershipDTO> curriculumMemberships;

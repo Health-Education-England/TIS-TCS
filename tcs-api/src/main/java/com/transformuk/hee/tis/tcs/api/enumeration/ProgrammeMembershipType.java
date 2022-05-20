@@ -26,6 +26,7 @@ public enum ProgrammeMembershipType {
     return null;
   }
 
+  @Override
   public String toString() {
     return text;
   }

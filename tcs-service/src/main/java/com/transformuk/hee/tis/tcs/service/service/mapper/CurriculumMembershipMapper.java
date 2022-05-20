@@ -10,6 +10,7 @@ import com.transformuk.hee.tis.tcs.api.dto.TrainingNumberDTO;
 import com.transformuk.hee.tis.tcs.service.model.CurriculumMembership;
 import com.transformuk.hee.tis.tcs.service.model.Person;
 import com.transformuk.hee.tis.tcs.service.model.Programme;
+import com.transformuk.hee.tis.tcs.service.model.ProgrammeMembership;
 import com.transformuk.hee.tis.tcs.service.model.Rotation;
 import com.transformuk.hee.tis.tcs.service.model.TrainingNumber;
 import java.util.List;
@@ -96,8 +97,8 @@ public class CurriculumMembershipMapper {
   }
 
   /**
-   * Convert a ProgrammeMembershipDTO to a CurriculumMembership object, enriched with all
-   * curriculum membership details from the ProgrammeMembershipDTO.
+   * Convert a ProgrammeMembershipDTO to a CurriculumMembership object, enriched with all curriculum
+   * membership details from the ProgrammeMembershipDTO.
    *
    * @param programmeMembershipDto the ProgrammeMembershipDTO object to convert
    * @return a CurriculumMembership object
@@ -116,22 +117,6 @@ public class CurriculumMembershipMapper {
   }
 
   /**
-   * Convert a list of ProgrammeMembershipDTOs to a list of CurriculumMembership objects.
-   *
-   * @param programmeMembershipDtos the list of ProgrammeMembershipDTO objects to convert
-   * @return a list of CurriculumMembership objects
-   */
-  public List<CurriculumMembership> programmeMembershipDtosToCurriculumMemberships(
-      List<ProgrammeMembershipDTO> programmeMembershipDtos) {
-    List<CurriculumMembership> result = Lists.newArrayList();
-
-    for (ProgrammeMembershipDTO programmeMembershipDto : programmeMembershipDtos) {
-      result.addAll(toEntity(programmeMembershipDto));
-    }
-    return result;
-  }
-
-  /**
    * Convert a CurriculumMembership to a ProgrammeMembershipDTO, without its curriculumMemberships.
    *
    * @param curriculumMembership the CurriculumMembership object to convert
@@ -140,30 +125,37 @@ public class CurriculumMembershipMapper {
   private ProgrammeMembershipDTO curriculumMembershipToProgrammeMembershipDto(
       CurriculumMembership curriculumMembership) {
     ProgrammeMembershipDTO result = new ProgrammeMembershipDTO();
+    ProgrammeMembership programmeMembership = curriculumMembership.getProgrammeMembership();
 
-    result.setId(curriculumMembership.getId());
-    result.setProgrammeMembershipType(curriculumMembership.getProgrammeMembershipType());
-    result.setProgrammeStartDate(curriculumMembership.getProgrammeStartDate());
-    result.setProgrammeEndDate(curriculumMembership.getProgrammeEndDate());
-    result.setLeavingDestination(curriculumMembership.getLeavingDestination());
-    result.setLeavingReason(curriculumMembership.getLeavingReason());
-    Programme programme = curriculumMembership.getProgramme();
+    result.setId(curriculumMembership.getId()); //use CM ID
+    result.setUuid(programmeMembership.getUuid());
+    result.setProgrammeMembershipType(programmeMembership.getProgrammeMembershipType());
+    result.setProgrammeStartDate(programmeMembership.getProgrammeStartDate());
+    result.setProgrammeEndDate(programmeMembership.getProgrammeEndDate());
+    result.setLeavingDestination(programmeMembership.getLeavingDestination());
+    result.setLeavingReason(programmeMembership.getLeavingReason());
+    Programme programme = programmeMembership.getProgramme();
     if (programme != null) {
       result.setProgrammeId(programme.getId());
       result.setProgrammeOwner(programme.getOwner());
       result.setProgrammeName(programme.getProgrammeName());
       result.setProgrammeNumber(programme.getProgrammeNumber());
-      result.setRotation(rotationToRotationDto(curriculumMembership.getRotation(), programme));
+      if (programmeMembership.getRotation() == null) {
+        result.setRotation(null);
+      } else {
+        result.setRotation(rotationToRotationDto(programmeMembership.getRotation(), programme));
+      }
     }
     result.setTrainingNumber(
-        trainingNumberToTrainingNumberDto(curriculumMembership.getTrainingNumber()));
+        trainingNumberToTrainingNumberDto(programmeMembership.getTrainingNumber()));
 
-    if (curriculumMembership.getPerson() == null) {
+    if (programmeMembership.getPerson() == null) {
       result.setPerson(null);
     } else {
-      result.setPerson(personToPersonDto(curriculumMembership.getPerson()));
+      result.setPerson(personToPersonDto(programmeMembership.getPerson()));
     }
-    result.setTrainingPathway(curriculumMembership.getTrainingPathway());
+
+    result.setTrainingPathway(programmeMembership.getTrainingPathway());
     return result;
   }
 
@@ -173,7 +165,7 @@ public class CurriculumMembershipMapper {
    * @param curriculumMembership the CurriculumMembership object to convert
    * @return a CurriculumMembershipDTO object
    */
-  private CurriculumMembershipDTO curriculumMembershipToCurriculumMembershipDto(
+  public CurriculumMembershipDTO curriculumMembershipToCurriculumMembershipDto(
       CurriculumMembership curriculumMembership) {
     CurriculumMembershipDTO result = new CurriculumMembershipDTO();
 
@@ -194,7 +186,7 @@ public class CurriculumMembershipMapper {
    * Amend a CurriculumMembership object with details from a CurriculumMembershipDTO.
    *
    * @param curriculumMembershipDto the CurriculumMembershipDTO to use
-   * @param curriculumMembership the CurriculumMembership object to amend
+   * @param curriculumMembership    the CurriculumMembership object to amend
    * @return the amended (enriched) CurriculumMembership object
    */
   private CurriculumMembership curriculumMembershipDtoToCurriculumMembership(
@@ -217,25 +209,27 @@ public class CurriculumMembershipMapper {
    *
    * @param programmeMembershipDto the ProgrammeMembershipDTO object to convert
    * @return a CurriculumMembership object
+   * @deprecated 2022-05 as part of the programme membership refactoring, a curriculum membership
+   *     should not duplicate programme membership fields.
    */
+  @Deprecated
   private CurriculumMembership programmeMembershipDtoToCurriculumMembership(
       ProgrammeMembershipDTO programmeMembershipDto) {
     CurriculumMembership result = new CurriculumMembership();
 
-    result.setId(programmeMembershipDto.getId());
     result.setProgrammeMembershipType(programmeMembershipDto.getProgrammeMembershipType());
-    result.setRotation(rotationDtoToRotation(programmeMembershipDto.getRotation()));
     result.setProgrammeStartDate(programmeMembershipDto.getProgrammeStartDate());
     result.setProgrammeEndDate(programmeMembershipDto.getProgrammeEndDate());
-    result.setLeavingDestination(programmeMembershipDto.getLeavingDestination());
     result.setLeavingReason(programmeMembershipDto.getLeavingReason());
-    result.setTrainingPathway(programmeMembershipDto.getTrainingPathway());
+    result.setLeavingDestination(programmeMembershipDto.getLeavingDestination());
     if (programmeMembershipDto.getProgrammeId() != null) {
       Programme programme = new Programme();
       programme.setId(programmeMembershipDto.getProgrammeId());
       programme.setProgrammeName(programmeMembershipDto.getProgrammeName());
+      programme.setOwner(programmeMembershipDto.getProgrammeOwner());
       programme.setProgrammeNumber(programmeMembershipDto.getProgrammeNumber());
       result.setProgramme(programme);
+      result.setRotation(rotationDtoToRotation(programmeMembershipDto.getRotation()));
     }
     result.setTrainingNumber(
         trainingNumberDtoToTrainingNumber(programmeMembershipDto.getTrainingNumber()));
@@ -245,6 +239,8 @@ public class CurriculumMembershipMapper {
     } else {
       result.setPerson(personDtoToPerson(programmeMembershipDto.getPerson()));
     }
+    result.setTrainingPathway(programmeMembershipDto.getTrainingPathway());
+
     return result;
   }
 
@@ -336,7 +332,7 @@ public class CurriculumMembershipMapper {
   /**
    * Convert a Rotation to a RotationDTO object.
    *
-   * @param rotation the Rotation object to convert
+   * @param rotation  the Rotation object to convert
    * @param programme the rotation Programme
    * @return a RotationDTO object
    */

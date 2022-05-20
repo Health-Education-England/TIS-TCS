@@ -1,57 +1,72 @@
 package com.transformuk.hee.tis.tcs.service.service.mapper;
 
+import static org.assertj.core.api.Assertions.assertThat;
+import static org.mockito.Mockito.when;
+
+import com.transformuk.hee.tis.tcs.api.dto.CurriculumMembershipDTO;
 import com.transformuk.hee.tis.tcs.api.dto.ProgrammeMembershipDTO;
-import com.transformuk.hee.tis.tcs.service.model.Person;
+import com.transformuk.hee.tis.tcs.service.model.CurriculumMembership;
 import com.transformuk.hee.tis.tcs.service.model.ProgrammeMembership;
-import java.time.LocalDate;
 import java.util.List;
+import java.util.UUID;
 import org.assertj.core.util.Lists;
+import org.assertj.core.util.Sets;
 import org.junit.Assert;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.mockito.InjectMocks;
-import org.mockito.runners.MockitoJUnitRunner;
+import org.mockito.Mock;
+import org.mockito.junit.MockitoJUnitRunner;
 
 @RunWith(MockitoJUnitRunner.class)
 public class ProgrammeMembershipMapperTest {
+
+  @Mock
+  CurriculumMembershipMapper curriculumMembershipMapperMock;
 
   @InjectMocks
   private ProgrammeMembershipMapper testObj;
 
   @Test
   public void entityToDtoShouldReturnListOfAllElementsInAsDto() {
-    //programme membership 1 and 2 are to have same programme data but different curricula
-    //the issue was that the equals method use programme fields to check for equality and the the mapper method used a map collection using
-    //the dto as the key (therefore not converting all of the entities when data is duplicated)
-    ProgrammeMembership pm1 = new ProgrammeMembership(), pm2 = new ProgrammeMembership(), pm3 = new ProgrammeMembership();
+    UUID pmID = UUID.randomUUID();
+    UUID pm2ID = UUID.randomUUID();
+    ProgrammeMembership pm1 = new ProgrammeMembership(), pm2 = new ProgrammeMembership();
+    CurriculumMembership cm1 = new CurriculumMembership(), cm2 = new CurriculumMembership(),
+        cm3 = new CurriculumMembership();
 
-    pm1.setId(12345L);
-    pm2.setId(99876L);
-    pm3.setId(45667L);
+    pm1.setUuid(pmID);
+    pm2.setUuid(pm2ID);
 
-    LocalDate programmeStartDate1 = LocalDate.now(), programmeStartDate2 = LocalDate.of(1999, 1, 1);
-    pm1.setProgrammeStartDate(programmeStartDate1);
-    pm2.setProgrammeStartDate(programmeStartDate1);
-    pm3.setProgrammeStartDate(programmeStartDate2);
+    cm1.setId(1L);
+    cm2.setId(2L);
+    cm3.setId(3L);
+    cm1.setProgrammeMembership(pm1);
+    cm2.setProgrammeMembership(pm2);
+    cm3.setProgrammeMembership(pm2);
+    pm1.setCurriculumMemberships(Sets.newLinkedHashSet(cm1));
+    pm2.setCurriculumMemberships(Sets.newLinkedHashSet(cm2, cm3));
 
-    LocalDate programmeEndDate1 = LocalDate.now(), programmeEndDate2 = LocalDate.of(2000, 1, 1);
-    pm1.setProgrammeEndDate(programmeEndDate1);
-    pm2.setProgrammeEndDate(programmeEndDate1);
-    pm3.setProgrammeEndDate(programmeEndDate2);
+    CurriculumMembershipDTO cmDTO1 = new CurriculumMembershipDTO();
+    cmDTO1.setId(1L);
+    CurriculumMembershipDTO cmDTO2 = new CurriculumMembershipDTO();
+    cmDTO2.setId(2L);
+    CurriculumMembershipDTO cmDTO3 = new CurriculumMembershipDTO();
+    cmDTO3.setId(3L);
 
-    pm1.setCurriculumId(1L);
-    pm2.setCurriculumId(2L);
-    pm3.setCurriculumId(3L);
+    when(curriculumMembershipMapperMock.curriculumMembershipToCurriculumMembershipDto(cm1))
+        .thenReturn(cmDTO1);
+    when(curriculumMembershipMapperMock.curriculumMembershipToCurriculumMembershipDto(cm2))
+        .thenReturn(cmDTO2);
+    when(curriculumMembershipMapperMock.curriculumMembershipToCurriculumMembershipDto(cm3))
+        .thenReturn(cmDTO3);
 
-    Person person1 = new Person();
-    person1.setId(1L);
+    List<ProgrammeMembershipDTO> result = testObj.allEntityToDto(Lists.newArrayList(pm1, pm2));
 
-    pm1.setPerson(person1);
-    pm2.setPerson(person1);
-    pm3.setPerson(person1);
-
-    List<ProgrammeMembershipDTO> result = testObj.allEntityToDto(Lists.newArrayList(pm1, pm2, pm3));
-
-    Assert.assertEquals(3, result.size());
+    Assert.assertEquals(3, result.size()); //listed by curriculum membership
+    ProgrammeMembershipDTO pmDTOreturned = result.get(0);
+    Assert.assertNotNull(pmDTOreturned);
+    assertThat(cm1.getId()).isEqualTo(pmDTOreturned.getId()); //check that cm ID is used as pm ID
+    assertThat(pmID).isEqualTo(pmDTOreturned.getUuid());
   }
 }
