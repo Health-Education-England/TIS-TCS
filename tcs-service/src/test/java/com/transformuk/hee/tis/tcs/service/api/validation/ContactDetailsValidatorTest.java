@@ -848,6 +848,8 @@ class ContactDetailsValidatorTest {
 
   @ParameterizedTest
   @ValueSource(strings = {"a..b@b.com", "()@b.com", "a@f%.com", "a@b|.com", "a.b.com", "a@f'%com",
+      " abc.com", "abc.com ", "a bc.com",
+      "\u00A0abc.com", "abc.com\u00A0", "a\u00A0bc.com", // non-breaking spaces
       //following examples drawn from https://en.wikipedia.org/wiki/Email_address
       //failing entries with the current REGEXP are commented out
       "Abc.example.com",
