@@ -34,7 +34,6 @@ import com.transformuk.hee.tis.tcs.service.service.RevalidationService;
 import com.transformuk.hee.tis.tcs.service.service.helper.SqlQuerySupplier;
 import com.transformuk.hee.tis.tcs.service.service.mapper.CurriculumMembershipMapper;
 import com.transformuk.hee.tis.tcs.service.service.mapper.DesignatedBodyMapper;
-
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.time.LocalDate;
@@ -249,7 +248,9 @@ public class RevalidationServiceImpl implements RevalidationService {
           .programmeName(programmeMembershipDto.getProgrammeName())
           .programmeMembershipStartDate(programmeMembershipDto.getProgrammeStartDate())
           .programmeMembershipEndDate(programmeMembershipDto.getProgrammeEndDate())
+          .curriculumEndDate(latestCurriculumMembership.getCurriculumEndDate())
           .programmeMembershipType(membershipType != null ? membershipType.toString() : null);
+
     }
 
     connectionInfoDtoBuilder.dataSource("TCS");
@@ -273,11 +274,11 @@ public class RevalidationServiceImpl implements RevalidationService {
 
     final ConnectionSummaryRecordDtoBuilder connectionHiddenRecordDtoBuilder =
         ConnectionSummaryRecordDto
-        .builder()
-        .gmcReferenceNumber(conn.getGmcNumber())
-        .doctorFirstName(conn.forenames)
-        .doctorLastName(conn.surname)
-        .connectionStatus(getHiddenConnectionStatus(conn));
+            .builder()
+            .gmcReferenceNumber(conn.getGmcNumber())
+            .doctorFirstName(conn.forenames)
+            .doctorLastName(conn.surname)
+            .connectionStatus(getHiddenConnectionStatus(conn));
 
     if (programmeMembershipDTO != null) {
       final String owner = programmeMembershipDTO.getProgrammeOwner();
