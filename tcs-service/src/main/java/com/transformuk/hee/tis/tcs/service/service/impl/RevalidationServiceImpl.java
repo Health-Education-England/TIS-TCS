@@ -236,7 +236,7 @@ public class RevalidationServiceImpl implements RevalidationService {
 
     // latest Programme Membership
     final CurriculumMembership latestCurriculumMembership = curriculumMembershipRepository
-        .findLatestCurriculumByTraineeId(personId);
+        .findLatestCurriculumMembershipByTraineeId(personId);
     final ProgrammeMembershipDTO programmeMembershipDto = curriculumMembershipMapper
         .toDto(latestCurriculumMembership);
     if (programmeMembershipDto != null) {
@@ -249,7 +249,9 @@ public class RevalidationServiceImpl implements RevalidationService {
           .programmeName(programmeMembershipDto.getProgrammeName())
           .programmeMembershipStartDate(programmeMembershipDto.getProgrammeStartDate())
           .programmeMembershipEndDate(programmeMembershipDto.getProgrammeEndDate())
+          .curriculumEndDate(latestCurriculumMembership.getCurriculumEndDate())
           .programmeMembershipType(membershipType != null ? membershipType.toString() : null);
+
     }
 
     connectionInfoDtoBuilder.dataSource("TCS");
