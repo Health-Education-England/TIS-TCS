@@ -18,6 +18,7 @@ import com.transformuk.hee.tis.tcs.api.dto.PlacementCommentDTO;
 import com.transformuk.hee.tis.tcs.api.dto.PlacementDTO;
 import com.transformuk.hee.tis.tcs.api.dto.PlacementDetailsDTO;
 import com.transformuk.hee.tis.tcs.api.dto.PlacementFunderDTO;
+import com.transformuk.hee.tis.tcs.api.dto.PlacementSummaryDTO;
 import com.transformuk.hee.tis.tcs.api.dto.PostDTO;
 import com.transformuk.hee.tis.tcs.api.dto.PostFundingDTO;
 import com.transformuk.hee.tis.tcs.api.dto.ProgrammeDTO;
@@ -351,10 +352,10 @@ public class TcsServiceImpl extends AbstractClientService {
         }).getBody();
   }
 
-  public List<PlacementDetailsDTO> getPlacementForTrainee(Long traineeId) {
+  public List<PlacementSummaryDTO> getPlacementForTrainee(Long traineeId) {
     String uri = String.format(API_TRAINEE_PLACEMENTS, traineeId);
     return tcsRestTemplate.exchange(serviceUrl + uri,
-        HttpMethod.GET, null, new ParameterizedTypeReference<List<PlacementDetailsDTO>>() {
+        HttpMethod.GET, null, new ParameterizedTypeReference<List<PlacementSummaryDTO>>() {
         }).getBody();
   }
 
