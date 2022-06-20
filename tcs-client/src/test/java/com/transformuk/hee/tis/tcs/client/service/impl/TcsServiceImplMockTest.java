@@ -15,6 +15,7 @@ import com.google.common.collect.Maps;
 import com.transformuk.hee.tis.tcs.api.dto.AbsenceDTO;
 import com.transformuk.hee.tis.tcs.api.dto.CurriculumDTO;
 import com.transformuk.hee.tis.tcs.api.dto.PersonDTO;
+import com.transformuk.hee.tis.tcs.api.dto.PlacementSummaryDTO;
 import com.transformuk.hee.tis.tcs.api.dto.ProgrammeMembershipCurriculaDTO;
 import com.transformuk.hee.tis.tcs.api.dto.TrainerApprovalDTO;
 import java.util.Collections;
@@ -179,6 +180,24 @@ public class TcsServiceImplMockTest {
     // Then.
     assertThat("Unexpected number of patched DTOs.", returnDtos.size(), is(1));
     assertThat("Unexpected patched DTOs.", returnDtos.get(0), is(dto));
+  }
+
+  @Test
+  public void getPlacementForTraineeShouldReturnResponse() {
+    PlacementSummaryDTO dto = new PlacementSummaryDTO();
+    dto.setPlacementId(1L);
+    dto.setTraineeId(2L);
+
+    ResponseEntity<List<PlacementSummaryDTO>> response = ResponseEntity.ok(Lists.newArrayList(dto));
+    when(restTemplateMock.exchange(anyString(), eq(HttpMethod.GET), eq(null), any(
+        ParameterizedTypeReference.class))).thenReturn(response);
+
+    // When.
+    List<PlacementSummaryDTO> returnDtos = testObj
+        .getPlacementForTrainee(2L);
+    // Then.
+    assertThat("Unexpected number of placement DTOs.", returnDtos.size(), is(1));
+    assertThat("Unexpected placement DTO.", returnDtos.get(0), is(dto));
   }
 
   @Test
