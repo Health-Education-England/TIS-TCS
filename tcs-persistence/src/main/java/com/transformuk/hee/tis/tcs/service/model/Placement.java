@@ -37,6 +37,7 @@ import lombok.Data;
         columns = {
             @ColumnResult(name = "dateFrom"),
             @ColumnResult(name = "dateTo"),
+            @ColumnResult(name = "postId"),
             @ColumnResult(name = "siteId"),
             @ColumnResult(name = "primarySpecialtyName"),
             @ColumnResult(name = "gradeId"),

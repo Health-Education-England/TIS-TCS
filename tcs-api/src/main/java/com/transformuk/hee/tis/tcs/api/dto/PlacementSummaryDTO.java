@@ -16,6 +16,7 @@ public class PlacementSummaryDTO {
 
   private Date dateFrom;
   private Date dateTo;
+  private Long postId;
   private Long siteId;
   private String siteName;
   private String primarySpecialtyName;
@@ -37,12 +38,13 @@ public class PlacementSummaryDTO {
   private String nationalPostNumber;
   private Set<PlacementEsrEventDto> esrEvents;
 
-  public PlacementSummaryDTO(Date dateFrom, Date dateTo, Long siteId, String primarySpecialtyName,
+  public PlacementSummaryDTO(Date dateFrom, Date dateTo, Long postId, Long siteId, String primarySpecialtyName,
       Long gradeId, String placementType, String status, String forenames, String legalforenames,
       String surname, String legalsurname, Long traineeId, String email, String gradeAbbreviation,
       Long placementId, String placementSpecialtyType, BigDecimal placementWholeTimeEquivalent, String nationalPostNumber) {
     this.dateFrom = dateFrom;
     this.dateTo = dateTo;
+    this.postId = postId;
     this.siteId = siteId;
     this.primarySpecialtyName = primarySpecialtyName;
     this.gradeId = gradeId;
@@ -72,6 +74,7 @@ public class PlacementSummaryDTO {
     PlacementSummaryDTO that = (PlacementSummaryDTO) o;
     return Objects.equals(dateFrom, that.dateFrom) &&
         Objects.equals(dateTo, that.dateTo) &&
+        Objects.equals(postId, that.postId) &&
         Objects.equals(siteId, that.siteId) &&
         Objects.equals(siteName, that.siteName) &&
         Objects.equals(primarySpecialtyName, that.primarySpecialtyName) &&
@@ -98,7 +101,7 @@ public class PlacementSummaryDTO {
   public int hashCode() {
 
     return Objects
-        .hash(dateFrom, dateTo, siteId, siteName, primarySpecialtyName, gradeId, gradeName,
+        .hash(dateFrom, dateTo, postId, siteId, siteName, primarySpecialtyName, gradeId, gradeName,
             placementType, status, forenames, legalforenames, surname, legalsurname, traineeId,
             email, gradeAbbreviation, placementId, placementStatus, placementSpecialtyType,
             placementWholeTimeEquivalent, nationalPostNumber, esrEvents);

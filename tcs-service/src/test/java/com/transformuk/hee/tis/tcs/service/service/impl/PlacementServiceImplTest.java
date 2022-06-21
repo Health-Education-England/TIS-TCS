@@ -131,7 +131,7 @@ public class PlacementServiceImplTest {
   private ArgumentCaptor<PlacementEsrEvent> placementEsrEventArgumentCaptor;
 
   public static PlacementSummaryDTO createPlacementSummaryDTO() {
-    return new PlacementSummaryDTO(null, null, number,
+    return new PlacementSummaryDTO(null, null, number, number,
         "Elbows", number, "In Post", "CURRENT", "Joe", "Bloggs", "Joe", "Bloggs",
         number, "emailId", "F1", number, null, null, null);
   }
