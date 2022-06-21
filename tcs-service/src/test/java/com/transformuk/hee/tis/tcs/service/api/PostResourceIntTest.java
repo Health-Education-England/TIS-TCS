@@ -1399,6 +1399,7 @@ public class PostResourceIntTest {
         .andExpect(jsonPath("$.[*].legalforenames").value(hasItem(DEFAULT_TRAINEE_FORENAMES)))
         .andExpect(jsonPath("$.[*].legalsurname").value(hasItem(DEFAULT_TRAINEE_SURNAME)))
         .andExpect(jsonPath("$.[0].nationalPostNumber").value(DEFAULT_NATIONAL_POST_NUMBER))
+        .andExpect(jsonPath("$.[0].postId").value(post.getId()))
         .andReturn();
 
     mvcResult.getResponse().getContentAsString();

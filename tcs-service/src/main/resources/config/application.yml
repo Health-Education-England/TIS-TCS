@@ -87,7 +87,7 @@ spring:
     clean-on-validation-error: false
     ignore-future-migrations: true
     init-sqls: # SQL statements to execute to initialize a connection immediately after obtaining it.
-    locations: classpath:db/migration/schema
+    locations: classpath:db/migration/schema,classpath:db/migration/data/hee
     out-of-order: true
     password: ${DBPASSWORD:}
     schemas: ${DBNAME:tcs}
