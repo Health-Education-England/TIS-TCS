@@ -106,12 +106,4 @@
       </plugin>
     </plugins>
   </build>
-
-  <distributionManagement>
-    <repository>
-      <id>codeartifact</id>
-      <name>CodeArtifact</name>
-      <url>https://hee-430723991443.d.codeartifact.eu-west-1.amazonaws.com/maven/Health-Education-England/</url>
-    </repository>
-  </distributionManagement>
 </project>
