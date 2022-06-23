@@ -13,6 +13,7 @@ public class PlacementRowMapper implements RowMapper<PlacementSummaryDTO> {
     final PlacementSummaryDTO dto = new PlacementSummaryDTO();
     dto.setDateFrom(rs.getDate("dateFrom"));
     dto.setDateTo(rs.getDate("dateTo"));
+    dto.setPostId(rs.getLong("postId"));
     dto.setSiteId(rs.getLong("siteId"));
     dto.setPrimarySpecialtyName(rs.getString("primarySpecialtyName"));
     dto.setGradeId(rs.getLong("gradeId"));

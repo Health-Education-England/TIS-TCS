@@ -73,11 +73,12 @@ import org.springframework.jdbc.core.namedparam.NamedParameterJdbcTemplate;
 @RunWith(MockitoJUnitRunner.class)
 public class PlacementServiceImplTest {
 
-  private static final Long PLACEMENT_ID = 1L, PLACEMENT2_ID = 2L;
-  private static final Long number = 1L;
   public static final Long POSITION_NUMBER = 1111L;
   public static final Long POSITION_ID = 2222L;
   public static final String ESR_FILENAME_TXT = "esr_filename.txt";
+  private static final Long PLACEMENT_ID = 1L, PLACEMENT2_ID = 2L;
+  private static final Long number = 1L;
+  private static final String string = "fooo";
   @Spy
   @InjectMocks
   private PlacementServiceImpl testObj;
@@ -131,9 +132,9 @@ public class PlacementServiceImplTest {
   private ArgumentCaptor<PlacementEsrEvent> placementEsrEventArgumentCaptor;
 
   public static PlacementSummaryDTO createPlacementSummaryDTO() {
-    return new PlacementSummaryDTO(null, null, number,
-        "Elbows", number, "In Post", "CURRENT", "Joe", "Bloggs", "Joe", "Bloggs",
-        number, "emailId", "F1", number, null, null, null);
+    return new PlacementSummaryDTO(null, null, number, string, "Elbows", number, string, "In Post",
+        "CURRENT", "Joe", "Bloggs", "Joe", "Bloggs", number, "emailId", "F1", number, string, null,
+        null, number, null, new HashSet<>());
   }
 
   @Before
@@ -287,7 +288,7 @@ public class PlacementServiceImplTest {
     for (PlacementSummaryDTO placement : placements) {
       Assert.assertNotNull(placement.getEsrEvents());
       Assert.assertTrue(placement.getEsrEvents().contains(placementEsrEventDto1)
-      || placement.getEsrEvents().contains(placementEsrEventDto2));
+          || placement.getEsrEvents().contains(placementEsrEventDto2));
     }
   }
 
@@ -851,11 +852,13 @@ public class PlacementServiceImplTest {
   public void markPlacementAsEsrExportedShouldFindPlacementAndCreateNewEventAgainstIt() {
     PlacementEsrEvent placementEsrEventMock = mock(PlacementEsrEvent.class);
     PlacementEsrEventDto placementEsrExportedDtoMock = mock(PlacementEsrEventDto.class);
-    when(placementRepositoryMock.findPlacementById(PLACEMENT_ID)).thenReturn(Optional.of(placementMock));
+    when(placementRepositoryMock.findPlacementById(PLACEMENT_ID))
+        .thenReturn(Optional.of(placementMock));
     when(placementEsrExportedDtoMapper
         .placementEsrEventDtoToPlacementEsrEvent(placementEsrExportedDtoMock))
         .thenReturn(placementEsrEventMock);
-    when(placementEsrEventRepositoryMock.save(placementEsrEventArgumentCaptor.capture())).thenReturn(placementEsrEventMock);
+    when(placementEsrEventRepositoryMock.save(placementEsrEventArgumentCaptor.capture()))
+        .thenReturn(placementEsrEventMock);
 
     Optional<PlacementEsrEvent> result = testObj
         .markPlacementAsEsrExported(PLACEMENT_ID, placementEsrExportedDtoMock);
