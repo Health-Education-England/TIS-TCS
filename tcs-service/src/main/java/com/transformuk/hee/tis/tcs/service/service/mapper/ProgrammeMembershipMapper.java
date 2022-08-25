@@ -41,7 +41,7 @@ public class ProgrammeMembershipMapper {
         result.setCurriculumMemberships(Lists.newArrayList());
       }
       result.getCurriculumMemberships()
-          .addAll(programmeMembershipToCurriculumMembershipDTOs(programmeMembership));
+          .addAll(programmeMembershipToCurriculumMembershipDtos(programmeMembership));
     }
     return result;
   }
@@ -82,7 +82,7 @@ public class ProgrammeMembershipMapper {
         programmeMembershipDto.setCurriculumMemberships(Lists.newArrayList());
       }
       programmeMembershipDto.getCurriculumMemberships()
-          .addAll(programmeMembershipToCurriculumMembershipDTOs(programmeMembership));
+          .addAll(programmeMembershipToCurriculumMembershipDtos(programmeMembership));
       listMap.put(programmeMembershipDto, programmeMembershipDto);
     }
 
@@ -174,7 +174,7 @@ public class ProgrammeMembershipMapper {
     return result;
   }
 
-  private List<CurriculumMembershipDTO> programmeMembershipToCurriculumMembershipDTOs(
+  private List<CurriculumMembershipDTO> programmeMembershipToCurriculumMembershipDtos(
       ProgrammeMembership programmeMembership) {
     List<CurriculumMembershipDTO> curriculumMembershipDtos = Lists.newArrayList();
     Set<CurriculumMembership> curriculumMemberships
