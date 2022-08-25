@@ -1224,8 +1224,8 @@ class ProgrammeMembershipResourceIntTest {
     person.setStatus(Status.CURRENT);
     personRepository.saveAndFlush(person);
 
-    assertThat(programmeMembershipRepository.findAll().size()).isEqualTo(2);
-    assertThat(curriculumMembershipRepository.findAll().size()).isEqualTo(2);
+    assertThat(programmeMembershipRepository.findAll()).hasSize(2);
+    assertThat(curriculumMembershipRepository.findAll()).hasSize(2);
 
     // Prepare the programmeMembershipDto to be deleted
     ProgrammeMembershipDTO programmeMembershipDto = programmeMembershipMapper
@@ -1240,9 +1240,9 @@ class ProgrammeMembershipResourceIntTest {
 
     Person personToCheck = personRepository.findPersonById(personSaved.getId()).get();
     assertThat(personToCheck.getStatus()).isEqualTo(Status.INACTIVE);
-    assertThat(personToCheck.getProgrammeMemberships().size()).isEqualTo(1);
-    assertThat(programmeMembershipRepository.findAll().size()).isEqualTo(1);
-    assertThat(curriculumMembershipRepository.findAll().size()).isEqualTo(1);
+    assertThat(personToCheck.getProgrammeMemberships()).hasSize(1);
+    assertThat(programmeMembershipRepository.findAll()).hasSize(1);
+    assertThat(curriculumMembershipRepository.findAll()).hasSize(1);
   }
 
   @Test
