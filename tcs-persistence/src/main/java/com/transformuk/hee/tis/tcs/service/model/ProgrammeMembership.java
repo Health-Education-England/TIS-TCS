@@ -17,6 +17,7 @@ import javax.persistence.Id;
 import javax.persistence.JoinColumn;
 import javax.persistence.ManyToOne;
 import javax.persistence.OneToMany;
+import javax.persistence.PreRemove;
 import javax.persistence.Version;
 import lombok.Data;
 import org.hibernate.annotations.GenericGenerator;
@@ -124,5 +125,10 @@ public class ProgrammeMembership implements Serializable {
   @Override
   public int hashCode() {
     return Objects.hashCode(uuid);
+  }
+
+  @PreRemove
+  private void dismissParent() {
+    this.getPerson().getProgrammeMemberships().remove(this);
   }
 }

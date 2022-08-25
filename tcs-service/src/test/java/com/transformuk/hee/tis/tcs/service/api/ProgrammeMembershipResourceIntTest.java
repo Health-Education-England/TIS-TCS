@@ -177,7 +177,7 @@ class ProgrammeMembershipResourceIntTest {
 
   private CurriculumMembership curriculumMembership, curriculumMembership1;
 
-  private ProgrammeMembership programmeMembership;
+  private ProgrammeMembership programmeMembership, programmeMembership1;
 
   private ProgrammeCurriculum programmeCurriculum;
 
@@ -245,6 +245,7 @@ class ProgrammeMembershipResourceIntTest {
     curriculumMembership = createCurriculumMembershipEntity(DEFAULT_INTREPID_ID);
     curriculumMembership1 = createCurriculumMembershipEntity(ANOTHER_INTREPID_ID);
     programmeMembership = createProgrammeMembershipEntity();
+    programmeMembership1 = createProgrammeMembershipEntity();
     rotation = new Rotation().name("test").status(Status.CURRENT);
   }
 
@@ -1189,6 +1190,59 @@ class ProgrammeMembershipResourceIntTest {
     Optional<ProgrammeMembership> optionalProgrammeMembership
         = programmeMembershipRepository.findByUuid(programmeMembership.getUuid());
     assertThat(optionalProgrammeMembership).isNotPresent();
+  }
+
+  @Test
+  @Transactional
+  void deleteProgrammeMembershipShouldUpdatePersonStatus()
+      throws Exception {
+    // given
+    programmeMembershipRepository.deleteAll();
+    Person personSaved = personRepository.saveAndFlush(person);
+
+    // Initialise and save a current programmeMembership
+    programmeMembership.setPerson(personSaved);
+    LocalDate today = LocalDate.now();
+    programmeMembership.setProgrammeStartDate(today.minusDays(1));
+    programmeMembership.setProgrammeEndDate(today.plusDays(1));
+    programmeMembership.setCurriculumMemberships(Sets.newLinkedHashSet(curriculumMembership));
+    curriculumMembership.setProgrammeMembership(programmeMembership);
+    ProgrammeMembership programmeMembershipSaved = programmeMembershipRepository
+        .saveAndFlush(programmeMembership);
+
+    // Initialise and save a past programmeMembership
+    programmeMembership1.setPerson(personSaved);
+    programmeMembership1.setProgrammeStartDate(today.minusDays(10));
+    programmeMembership1.setProgrammeEndDate(today.minusDays(5));
+    programmeMembership1.setCurriculumMemberships(Sets.newLinkedHashSet(curriculumMembership1));
+    curriculumMembership1.setProgrammeMembership(programmeMembership1);
+    ProgrammeMembership programmeMembershipSaved1 = programmeMembershipRepository
+        .saveAndFlush(programmeMembership1);
+
+    person.getProgrammeMemberships().add(programmeMembershipSaved);
+    person.getProgrammeMemberships().add(programmeMembershipSaved1);
+    person.setStatus(Status.CURRENT);
+    personRepository.saveAndFlush(person);
+
+    assertThat(programmeMembershipRepository.findAll().size()).isEqualTo(2);
+    assertThat(curriculumMembershipRepository.findAll().size()).isEqualTo(2);
+
+    // Prepare the programmeMembershipDto to be deleted
+    ProgrammeMembershipDTO programmeMembershipDto = programmeMembershipMapper
+        .toDto(programmeMembershipSaved);
+
+    // when
+    // Delete the current programmeMembership
+    restProgrammeMembershipMockMvc.perform(post("/api/programme-memberships/delete/")
+            .contentType(MediaType.APPLICATION_JSON)
+            .content(TestUtil.convertObjectToJsonBytes(programmeMembershipDto)))
+        .andExpect(status().isOk());
+
+    Person personToCheck = personRepository.findPersonById(personSaved.getId()).get();
+    assertThat(personToCheck.getStatus()).isEqualTo(Status.INACTIVE);
+    assertThat(personToCheck.getProgrammeMemberships().size()).isEqualTo(1);
+    assertThat(programmeMembershipRepository.findAll().size()).isEqualTo(1);
+    assertThat(curriculumMembershipRepository.findAll().size()).isEqualTo(1);
   }
 
   @Test
