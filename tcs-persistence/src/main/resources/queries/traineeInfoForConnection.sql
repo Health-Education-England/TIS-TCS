@@ -5,25 +5,34 @@ from (
     gmc.gmcNumber,
     cd.forenames,
     cd.surname,
-    latestPm.programmeMembershipType,
-    latestPm.programmeStartDate,
-    latestPm.programmeEndDate,
-    latestPm.curriculumEndDate,
-    prg.programmeName,
+    pm1.programmeMembershipType,
+    pm1.programmeStartDate,
+    pm1.programmeEndDate,
+    latestCm.curriculumEndDate,
+    if(prg.programmeName is null and currentPmCounts.count_num > 1, "multiple programmes", prg.programmeName) as programmeName,
     prg.owner
   from
     Person p
   join ContactDetails cd on (cd.id = p.id)
   left join GmcDetails gmc on (gmc.id = p.id)
-  left join (select distinct pm.personId, pm.programmeStartDate, pm.programmeEndDate,
-          pm.programmeId, pm.programmeMembershipType, cm.curriculumId, cm.curriculumEndDate
-          from CurriculumMembership cm
-          inner join ProgrammeMembership pm ON cm.programmeMembershipUuid = pm.uuid
-          inner join (select personId, MAX(programmeEndDate) as latestEndDate
-              from ProgrammeMembership
-              group by personId) latest on pm.personId = latest.personId
-              and pm.programmeEndDate = latest.latestEndDate
-          ) latestPm on (latestPm.personId = p.id)
-  left join Programme prg on (prg.id = latestPm.programmeId)
+  left join (
+    -- count current PMs for each person
+    select
+      personId,
+      count(if(pm.programmeStartDate <= current_date() and pm.programmeEndDate >= current_date(), true, null)) as count_num
+    from ProgrammeMembership pm
+    group by personId
+  ) currentPmCounts on p.id = currentPmCounts.personId
+  left join ProgrammeMembership pm1
+    on pm1.personId = currentPmCounts.personId and currentPmCounts.count_num = 1 and (pm1.programmeStartDate <= current_date() and pm1.programmeEndDate >= current_date())
+  left join (
+    -- get max curriculumEndDate for every PM
+      select
+          cm.programmeMembershipUuid,
+          max(cm.curriculumEndDate) curriculumEndDate
+      from CurriculumMembership cm
+      group by cm.programmeMembershipUuid
+  ) latestCm on latestCm.programmeMembershipUuid = pm1.uuid
+  left join Programme prg on prg.id = pm1.programmeId
   ) as ot
 ;
