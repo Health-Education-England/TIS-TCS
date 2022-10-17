@@ -260,7 +260,9 @@ public class RevalidationServiceImpl implements RevalidationService {
   @Override
   public List<ConnectionInfoDto> extractConnectionInfoForSync() {
     final String query = sqlQuerySupplier
-        .getQuery(SqlQuerySupplier.TRAINEE_CONNECTION_INFO);
+        .getQuery(SqlQuerySupplier.TRAINEE_CONNECTION_INFO)
+        .replace("WHERECLAUSE1", "").replace("WHERECLAUSE2", "")
+        .replace("ORDERBYCLAUSE", "").replace("LIMITCLAUSE", "");
     MapSqlParameterSource paramSource = new MapSqlParameterSource();
     return namedParameterJdbcTemplate
         .query(query, paramSource, new RevalidationConnectionInfoMapper());
