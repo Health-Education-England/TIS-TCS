@@ -62,6 +62,7 @@ import org.springframework.util.StringUtils;
 @Transactional
 public class RevalidationServiceImpl implements RevalidationService {
 
+  private static final String PERSON_ID_FIELD = "personId";
   private static final String CONNECTION_OWNER = "owner";
   private static final String CURRICULUM_END_DATE_FIELD = "curriculumEndDate";
   private static final String GMC_NUMBER_FIELD = "gmcNumber";
@@ -259,10 +260,10 @@ public class RevalidationServiceImpl implements RevalidationService {
 
   @Override
   public List<ConnectionInfoDto> extractConnectionInfoForSync() {
-    final String query = sqlQuerySupplier
-        .getQuery(SqlQuerySupplier.TRAINEE_CONNECTION_INFO)
-        .replace("WHERECLAUSE1", "").replace("WHERECLAUSE2", "")
-        .replace("ORDERBYCLAUSE", "").replace("LIMITCLAUSE", "");
+    final String query = sqlQuerySupplier.getQuery(SqlQuerySupplier.TRAINEE_CONNECTION_INFO)
+        .replace("WHERECLAUSE", "")
+        .replace("ORDERBYCLAUSE", "")
+        .replace("LIMITCLAUSE", "");
     MapSqlParameterSource paramSource = new MapSqlParameterSource();
     return namedParameterJdbcTemplate
         .query(query, paramSource, new RevalidationConnectionInfoMapper());
@@ -439,7 +440,7 @@ public class RevalidationServiceImpl implements RevalidationService {
         curriculumEnd = null;
       }
       return ConnectionInfoDto.builder()
-          .tcsPersonId(rs.getLong("id"))
+          .tcsPersonId(rs.getLong(PERSON_ID_FIELD))
           .gmcReferenceNumber(rs.getString(GMC_NUMBER_FIELD))
           .doctorFirstName(rs.getString(FORENAMES_FIELD))
           .doctorLastName(rs.getString(SURNAME_FIELD))

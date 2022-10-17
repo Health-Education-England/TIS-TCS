@@ -1,7 +1,7 @@
 select distinct ot.*
 from (
   select
-    p.id,
+    p.id personId,
     gmc.gmcNumber,
     cd.forenames,
     cd.surname,
@@ -21,7 +21,7 @@ from (
       personId,
       count(if(pm.programmeStartDate <= current_date() and pm.programmeEndDate >= current_date(), true, null)) as count_num
     from ProgrammeMembership pm
-    WHERECLAUSE1 -- where personId in ()
+    WHERECLAUSE
     group by personId
   ) currentPmCounts on p.id = currentPmCounts.personId
   left join ProgrammeMembership pm1
@@ -32,11 +32,11 @@ from (
           cm.programmeMembershipUuid,
           max(cm.curriculumEndDate) curriculumEndDate
       from CurriculumMembership cm
-      WHERECLAUSE1 -- where personId in ()
+      WHERECLAUSE
       group by cm.programmeMembershipUuid
   ) latestCm on latestCm.programmeMembershipUuid = pm1.uuid
   left join Programme prg on prg.id = pm1.programmeId
-  WHERECLAUSE2 -- where p.id in ()
+  WHERECLAUSE
   ) as ot
 ORDERBYCLAUSE
 LIMITCLAUSE
