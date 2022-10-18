@@ -27,7 +27,6 @@ import com.transformuk.hee.tis.tcs.service.repository.GmcDetailsRepository;
 import com.transformuk.hee.tis.tcs.service.repository.PersonRepository;
 import com.transformuk.hee.tis.tcs.service.repository.PlacementRepository;
 import com.transformuk.hee.tis.tcs.service.service.ContactDetailsService;
-import com.transformuk.hee.tis.tcs.service.service.GmcDetailsService;
 import com.transformuk.hee.tis.tcs.service.service.RevalidationService;
 import com.transformuk.hee.tis.tcs.service.service.helper.SqlQuerySupplier;
 import com.transformuk.hee.tis.tcs.service.service.mapper.CurriculumMembershipMapper;
@@ -70,12 +69,19 @@ public class RevalidationServiceImpl implements RevalidationService {
   private static final String PROGRAMME_NAME_FIELD = "programmeName";
   private static final String PROGRAMME_START_DATE_FIELD = "programmeStartDate";
   private static final String SURNAME_FIELD = "surname";
+  /**
+   * This RegEx matches strings in format of WHERECLAUSE(p, id).
+   * Whitespaces are allowed in the brackets.
+   * and it also recognises p and id as parenthesized match sub patterns.
+   */
+  private static final String WHERE_CLAUSE_MACRO_REGEX =
+      "WHERECLAUSE\\(\\s*([^\\(\\)\\s]+)\\s*,\\s*([^\\(\\)\\s]+)\\s*\\)";
+
   public static final int SIZE = 20;
   private static final Logger LOG = LoggerFactory.getLogger(RevalidationServiceImpl.class);
   private static final List<String> placementTypes = asList("In post", "In Post - Acting Up",
       "In post - Extension", "Parental Leave", "Long-term sick", "Suspended", "Phased Return");
   private final ContactDetailsService contactDetailsService;
-  private final GmcDetailsService gmcDetailsService;
   private final GmcDetailsRepository gmcDetailsRepository;
   private final CurriculumMembershipRepository curriculumMembershipRepository;
   private final PlacementRepository placementRepository;
@@ -88,7 +94,6 @@ public class RevalidationServiceImpl implements RevalidationService {
   private SqlQuerySupplier sqlQuerySupplier;
 
   public RevalidationServiceImpl(ContactDetailsService contactDetailsService,
-      GmcDetailsService gmcDetailsService,
       GmcDetailsRepository gmcDetailsRepository,
       CurriculumMembershipRepository curriculumMembershipRepository,
       PlacementRepository placementRepository,
@@ -96,7 +101,6 @@ public class RevalidationServiceImpl implements RevalidationService {
       PersonRepository personRepository,
       CurriculumMembershipMapper curriculumMembershipMapper) {
     this.contactDetailsService = contactDetailsService;
-    this.gmcDetailsService = gmcDetailsService;
     this.gmcDetailsRepository = gmcDetailsRepository;
     this.curriculumMembershipRepository = curriculumMembershipRepository;
     this.placementRepository = placementRepository;
@@ -213,17 +217,6 @@ public class RevalidationServiceImpl implements RevalidationService {
         .build();
   }
 
-  /**
-   * The returned regular expression matches strings in format of <b>WHERECLAUSE(p, id)<b/>.
-   * Whitespaces are allowed in the brackets.
-   * and it also recognises p and id as parenthesized match sub patterns.
-   *
-   * @return the regular expression for WhereClause macro
-   */
-  private String getWhereClauseMacro() {
-    return "WHERECLAUSE\\(\\s*([^\\(\\)\\s]+)\\s*,\\s*([^\\(\\)\\s]+)\\s*\\)";
-  }
-
   @Override
   public ConnectionInfoDto buildTcsConnectionInfo(Long personId) {
 
@@ -232,7 +225,7 @@ public class RevalidationServiceImpl implements RevalidationService {
 
     final String query = sqlQuerySupplier
         .getQuery(SqlQuerySupplier.TRAINEE_CONNECTION_INFO)
-        .replaceAll(getWhereClauseMacro(), whereClause)
+        .replaceAll(WHERE_CLAUSE_MACRO_REGEX, whereClause)
         .replace("ORDERBYCLAUSE", "")
         .replace("LIMITCLAUSE", "");
 
@@ -251,7 +244,7 @@ public class RevalidationServiceImpl implements RevalidationService {
   @Override
   public List<ConnectionInfoDto> extractConnectionInfoForSync() {
     final String query = sqlQuerySupplier.getQuery(SqlQuerySupplier.TRAINEE_CONNECTION_INFO)
-        .replaceAll(getWhereClauseMacro(), "")
+        .replaceAll(WHERE_CLAUSE_MACRO_REGEX, "")
         .replace("ORDERBYCLAUSE", "")
         .replace("LIMITCLAUSE", "");
     MapSqlParameterSource paramSource = new MapSqlParameterSource();
