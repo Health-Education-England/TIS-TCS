@@ -75,7 +75,7 @@ public class RevalidationServiceImpl implements RevalidationService {
    * and it also recognises p and id as parenthesized match sub patterns.
    */
   private static final String WHERE_CLAUSE_MACRO_REGEX =
-      "WHERECLAUSE\\(\\s*([^\\(\\)\\s]+)\\s*,\\s*([^\\(\\)\\s]+)\\s*\\)";
+      "WHERECLAUSE\\(\\s*(\\w+?)\\s*,\\s*(\\w+?)\\s*\\)";
 
   public static final int SIZE = 20;
   private static final Logger LOG = LoggerFactory.getLogger(RevalidationServiceImpl.class);
