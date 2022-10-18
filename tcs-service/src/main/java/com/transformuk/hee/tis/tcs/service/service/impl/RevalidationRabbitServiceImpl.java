@@ -26,7 +26,7 @@ public class RevalidationRabbitServiceImpl implements RevalidationRabbitService 
 
   @Override
   public void updateReval(Object object) {
-    if (!exchange.equals("false")) {
+    if (!exchange.equals("false") && object != null) {
       rabbitTemplate.convertAndSend(exchange, routingKey, object);
     }
   }
