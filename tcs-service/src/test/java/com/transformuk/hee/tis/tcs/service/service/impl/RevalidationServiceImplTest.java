@@ -39,6 +39,8 @@ import com.transformuk.hee.tis.tcs.service.repository.PlacementRepository;
 import com.transformuk.hee.tis.tcs.service.service.ContactDetailsService;
 import com.transformuk.hee.tis.tcs.service.service.GmcDetailsService;
 import com.transformuk.hee.tis.tcs.service.service.helper.SqlQuerySupplier;
+import com.transformuk.hee.tis.tcs.service.service.mapper.ConnectionInfoToRevalidationRecordMapper;
+import com.transformuk.hee.tis.tcs.service.service.mapper.ConnectionInfoToRevalidationRecordMapperImpl;
 import com.transformuk.hee.tis.tcs.service.service.mapper.CurriculumMembershipMapper;
 import com.transformuk.hee.tis.tcs.service.service.mapper.DesignatedBodyMapper;
 
@@ -57,7 +59,6 @@ import org.mockito.ArgumentCaptor;
 import org.mockito.Captor;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
-import org.mockito.MockitoAnnotations;
 import org.mockito.Spy;
 import org.mockito.junit.MockitoJUnitRunner;
 import org.mockito.stubbing.OngoingStubbing;
@@ -127,7 +128,9 @@ public class RevalidationServiceImplTest {
   @Mock
   private NamedParameterJdbcTemplate namedParameterJdbcTemplateMock;
   @Spy
-  private SqlQuerySupplier sqlQuerySupplier;
+  private SqlQuerySupplier sqlQuerySupplier = new SqlQuerySupplier();
+  @Spy
+  private ConnectionInfoToRevalidationRecordMapper connectionInfoToRevalidationRecordMapper = new ConnectionInfoToRevalidationRecordMapperImpl();
 
   private ContactDetailsDTO contactDetails;
   private GmcDetailsDTO gmcDetailsDTO;
@@ -198,14 +201,24 @@ public class RevalidationServiceImplTest {
 
   @Test
   public void findRevalidationRecordByGmcIdShouldRetrieveOne() {
-    when(contactDetailsService.findOne(PERSON_ID)).thenReturn(contactDetails);
+    ConnectionInfoDto connectionInfoDto = ConnectionInfoDto.builder()
+        .tcsPersonId(PERSON_ID)
+        .doctorFirstName(FORENAME)
+        .doctorLastName(SURNAME)
+        .gmcReferenceNumber(GMC_NUMBER)
+        .curriculumEndDate(CURRICULUM_END_DATE)
+        .programmeMembershipType(PROGRAMME_MEMBERSHIP_TYPE.toString())
+        .programmeName(PROGRAMME_NAME)
+        .build();
+
     when(gmcDetailsRepositoryMock.findGmcDetailsByGmcNumber("1000")).thenReturn(gmcDetails);
-    when(curriculumMembershipRepositoryMock.findLatestCurriculumByTraineeId(PERSON_ID))
-        .thenReturn(curriculumMembership);
     when(placementRepositoryMock
         .findCurrentPlacementForTrainee(PERSON_ID, now(), PLACEMENT_TYPES))
         .thenReturn(currentPlacementsForTrainee);
     when(referenceServiceMock.findGradesIdIn(Collections.singleton(GRADE_ID))).thenReturn(grades);
+    when(namedParameterJdbcTemplateMock.query(
+        anyString(), any(MapSqlParameterSource.class), any(RowMapper.class)))
+        .thenReturn(Lists.newArrayList(connectionInfoDto));
 
     RevalidationRecordDto result = testObj.findRevalidationByGmcId("1000");
 
@@ -221,14 +234,24 @@ public class RevalidationServiceImplTest {
 
   @Test
   public void findAllRevalidationRecordsByGmcIdsShouldRetrieveAll() {
-    when(contactDetailsService.findOne(PERSON_ID)).thenReturn(contactDetails);
+    ConnectionInfoDto connectionInfoDto = ConnectionInfoDto.builder()
+        .tcsPersonId(PERSON_ID)
+        .doctorFirstName(FORENAME)
+        .doctorLastName(SURNAME)
+        .gmcReferenceNumber(GMC_NUMBER)
+        .curriculumEndDate(CURRICULUM_END_DATE)
+        .programmeMembershipType(PROGRAMME_MEMBERSHIP_TYPE.toString())
+        .programmeName(PROGRAMME_NAME)
+        .build();
+
     when(gmcDetailsRepositoryMock.findByGmcNumberIn(GMC_IDS)).thenReturn(gmcDetailList);
-    when(curriculumMembershipRepositoryMock.findLatestCurriculumByTraineeId(PERSON_ID))
-        .thenReturn(curriculumMembership);
     when(placementRepositoryMock
         .findCurrentPlacementForTrainee(PERSON_ID, now(), PLACEMENT_TYPES))
         .thenReturn(currentPlacementsForTrainee);
     when(referenceServiceMock.findGradesIdIn(Collections.singleton(GRADE_ID))).thenReturn(grades);
+    when(namedParameterJdbcTemplateMock.query(
+        anyString(), any(MapSqlParameterSource.class), any(RowMapper.class)))
+        .thenReturn(Lists.newArrayList(connectionInfoDto));
 
     Map<String, RevalidationRecordDto> result = testObj.findAllRevalidationsByGmcIds(GMC_IDS);
 
@@ -267,19 +290,30 @@ public class RevalidationServiceImplTest {
 
   @Test
   public void findAllConnectionDetailByTraineeGmcIdShouldRetrieveAll() {
+    ConnectionInfoDto connectionInfoDto = ConnectionInfoDto.builder()
+        .tcsPersonId(PERSON_ID)
+        .doctorFirstName(FORENAME)
+        .doctorLastName(SURNAME)
+        .gmcReferenceNumber(GMC_NUMBER)
+        .curriculumEndDate(CURRICULUM_END_DATE)
+        .programmeMembershipType(PROGRAMME_MEMBERSHIP_TYPE.toString())
+        .programmeName(PROGRAMME_NAME)
+        .build();
+
     final List<CurriculumMembership> curriculumMembershipList = new ArrayList<>();
     curriculumMembershipList.add(curriculumMembership);
     curriculumMembershipList.add(curriculumMembership1);
     when(gmcDetailsRepositoryMock.findGmcDetailsByGmcNumber(GMC_NUMBER)).thenReturn(gmcDetails);
-    when(contactDetailsService.findOne(PERSON_ID)).thenReturn(contactDetails);
     when(curriculumMembershipRepositoryMock.findAllCurriculumMembershipInDescOrderByTraineeId(PERSON_ID))
         .thenReturn(curriculumMembershipList);
-    when(curriculumMembershipRepositoryMock.findLatestCurriculumByTraineeId(PERSON_ID))
-        .thenReturn(curriculumMembership);
     when(placementRepositoryMock
         .findCurrentPlacementForTrainee(PERSON_ID, now(), PLACEMENT_TYPES))
         .thenReturn(currentPlacementsForTrainee);
     when(referenceServiceMock.findGradesIdIn(Collections.singleton(GRADE_ID))).thenReturn(grades);
+    when(namedParameterJdbcTemplateMock.query(
+        anyString(), any(MapSqlParameterSource.class), any(RowMapper.class)))
+        .thenReturn(Lists.newArrayList(connectionInfoDto));
+
     ConnectionDetailDto result = testObj.findAllConnectionsHistoryByGmcId(GMC_NUMBER);
 
     assertThat(result, notNullValue());
@@ -492,8 +526,6 @@ public class RevalidationServiceImplTest {
 
   @Test
   public void shouldReturnDtoWhenBuildTcsConnectionInfo() {
-    MockitoAnnotations.initMocks(this);
-
     ConnectionInfoDto connectionInfoDto = ConnectionInfoDto.builder().build();
     when(namedParameterJdbcTemplateMock.query(
           anyString(), any(MapSqlParameterSource.class), any(RowMapper.class)))
@@ -514,8 +546,6 @@ public class RevalidationServiceImplTest {
 
   @Test
   public void shouldReturnNullWhenBuildTcsConnectionInfo() {
-    MockitoAnnotations.initMocks(this);
-
     when(namedParameterJdbcTemplateMock.query(
           anyString(), any(MapSqlParameterSource.class), any(RowMapper.class)))
         .thenReturn(Lists.newArrayList());
@@ -529,8 +559,6 @@ public class RevalidationServiceImplTest {
 
   @Test
   public void shouldExtractTraineeConnectionInfo() {
-    MockitoAnnotations.initMocks(this);
-
     when(namedParameterJdbcTemplateMock.query(
           anyString(), any(MapSqlParameterSource.class), any(RowMapper.class)))
         .thenReturn(new ArrayList<>());
