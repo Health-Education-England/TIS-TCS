@@ -10,13 +10,11 @@ import com.transformuk.hee.tis.reference.client.ReferenceService;
 import com.transformuk.hee.tis.tcs.api.dto.ConnectionDetailDto;
 import com.transformuk.hee.tis.tcs.api.dto.ConnectionDto;
 import com.transformuk.hee.tis.tcs.api.dto.ConnectionInfoDto;
-import com.transformuk.hee.tis.tcs.api.dto.ConnectionInfoDto.ConnectionInfoDtoBuilder;
 import com.transformuk.hee.tis.tcs.api.dto.ConnectionRecordDto;
 import com.transformuk.hee.tis.tcs.api.dto.ConnectionSummaryDto;
 import com.transformuk.hee.tis.tcs.api.dto.ConnectionSummaryRecordDto;
 import com.transformuk.hee.tis.tcs.api.dto.ConnectionSummaryRecordDto.ConnectionSummaryRecordDtoBuilder;
 import com.transformuk.hee.tis.tcs.api.dto.ContactDetailsDTO;
-import com.transformuk.hee.tis.tcs.api.dto.GmcDetailsDTO;
 import com.transformuk.hee.tis.tcs.api.dto.ProgrammeMembershipDTO;
 import com.transformuk.hee.tis.tcs.api.dto.RevalidationRecordDto;
 import com.transformuk.hee.tis.tcs.api.enumeration.ProgrammeMembershipType;
@@ -29,7 +27,6 @@ import com.transformuk.hee.tis.tcs.service.repository.GmcDetailsRepository;
 import com.transformuk.hee.tis.tcs.service.repository.PersonRepository;
 import com.transformuk.hee.tis.tcs.service.repository.PlacementRepository;
 import com.transformuk.hee.tis.tcs.service.service.ContactDetailsService;
-import com.transformuk.hee.tis.tcs.service.service.GmcDetailsService;
 import com.transformuk.hee.tis.tcs.service.service.RevalidationService;
 import com.transformuk.hee.tis.tcs.service.service.helper.SqlQuerySupplier;
 import com.transformuk.hee.tis.tcs.service.service.mapper.CurriculumMembershipMapper;
@@ -72,12 +69,19 @@ public class RevalidationServiceImpl implements RevalidationService {
   private static final String PROGRAMME_NAME_FIELD = "programmeName";
   private static final String PROGRAMME_START_DATE_FIELD = "programmeStartDate";
   private static final String SURNAME_FIELD = "surname";
+  /**
+   * This RegEx matches strings in format of WHERECLAUSE(p, id).
+   * Whitespaces are allowed in the brackets.
+   * and it also recognises p and id as parenthesized match sub patterns.
+   */
+  private static final String WHERE_CLAUSE_MACRO_REGEX =
+      "WHERECLAUSE\\(\\s*(\\w+?)\\s*,\\s*(\\w+?)\\s*\\)";
+
   public static final int SIZE = 20;
   private static final Logger LOG = LoggerFactory.getLogger(RevalidationServiceImpl.class);
   private static final List<String> placementTypes = asList("In post", "In Post - Acting Up",
       "In post - Extension", "Parental Leave", "Long-term sick", "Suspended", "Phased Return");
   private final ContactDetailsService contactDetailsService;
-  private final GmcDetailsService gmcDetailsService;
   private final GmcDetailsRepository gmcDetailsRepository;
   private final CurriculumMembershipRepository curriculumMembershipRepository;
   private final PlacementRepository placementRepository;
@@ -90,7 +94,6 @@ public class RevalidationServiceImpl implements RevalidationService {
   private SqlQuerySupplier sqlQuerySupplier;
 
   public RevalidationServiceImpl(ContactDetailsService contactDetailsService,
-      GmcDetailsService gmcDetailsService,
       GmcDetailsRepository gmcDetailsRepository,
       CurriculumMembershipRepository curriculumMembershipRepository,
       PlacementRepository placementRepository,
@@ -98,7 +101,6 @@ public class RevalidationServiceImpl implements RevalidationService {
       PersonRepository personRepository,
       CurriculumMembershipMapper curriculumMembershipMapper) {
     this.contactDetailsService = contactDetailsService;
-    this.gmcDetailsService = gmcDetailsService;
     this.gmcDetailsRepository = gmcDetailsRepository;
     this.curriculumMembershipRepository = curriculumMembershipRepository;
     this.placementRepository = placementRepository;
@@ -218,50 +220,31 @@ public class RevalidationServiceImpl implements RevalidationService {
   @Override
   public ConnectionInfoDto buildTcsConnectionInfo(Long personId) {
 
-    final ConnectionInfoDtoBuilder connectionInfoDtoBuilder = ConnectionInfoDto.builder();
-    connectionInfoDtoBuilder.tcsPersonId(personId);
+    // $1 and $2 will be injected with the parenthesized match sub patterns from the RegEx
+    final String whereClause = String.format("where $1.$2 = %s", personId);
 
-    // GMC Details
-    final GmcDetailsDTO gmcDetailsDto = gmcDetailsService.findOne(personId);
-    if (gmcDetailsDto != null) {
-      connectionInfoDtoBuilder.gmcReferenceNumber(gmcDetailsDto.getGmcNumber());
+    final String query = sqlQuerySupplier
+        .getQuery(SqlQuerySupplier.TRAINEE_CONNECTION_INFO)
+        .replaceAll(WHERE_CLAUSE_MACRO_REGEX, whereClause)
+        .replace("ORDERBYCLAUSE", "")
+        .replace("LIMITCLAUSE", "");
+
+    MapSqlParameterSource paramSource = new MapSqlParameterSource();
+    List<ConnectionInfoDto> connectionInfoDtos = namedParameterJdbcTemplate
+        .query(query, paramSource, new RevalidationConnectionInfoMapper());
+    if (connectionInfoDtos.size() == 1) {
+      return connectionInfoDtos.get(0);
+    } else {
+      LOG.error("There are {} connectionInfoDtos found for personId: {}",
+          connectionInfoDtos.size(), personId);
+      return null;
     }
-
-    // Contact Details
-    final ContactDetailsDTO contactDetailsDto = contactDetailsService.findOne(personId);
-    if (contactDetailsDto != null) {
-      connectionInfoDtoBuilder.doctorFirstName(contactDetailsDto.getForenames());
-      connectionInfoDtoBuilder.doctorLastName(contactDetailsDto.getSurname());
-    }
-
-    // latest Programme Membership
-    final CurriculumMembership latestCurriculumMembership = curriculumMembershipRepository
-        .findLatestCurriculumMembershipByTraineeId(personId);
-    final ProgrammeMembershipDTO programmeMembershipDto = curriculumMembershipMapper
-        .toDto(latestCurriculumMembership);
-    if (programmeMembershipDto != null) {
-      final String owner = programmeMembershipDto.getProgrammeOwner();
-      final ProgrammeMembershipType membershipType = programmeMembershipDto
-          .getProgrammeMembershipType();
-      connectionInfoDtoBuilder
-          .tcsDesignatedBody(owner != null ? DesignatedBodyMapper.getDbcByOwner(owner) : null)
-          .programmeOwner(owner)
-          .programmeName(programmeMembershipDto.getProgrammeName())
-          .programmeMembershipStartDate(programmeMembershipDto.getProgrammeStartDate())
-          .programmeMembershipEndDate(programmeMembershipDto.getProgrammeEndDate())
-          .curriculumEndDate(latestCurriculumMembership.getCurriculumEndDate())
-          .programmeMembershipType(membershipType != null ? membershipType.toString() : null);
-
-    }
-
-    connectionInfoDtoBuilder.dataSource("TCS");
-    return connectionInfoDtoBuilder.build();
   }
 
   @Override
   public List<ConnectionInfoDto> extractConnectionInfoForSync() {
     final String query = sqlQuerySupplier.getQuery(SqlQuerySupplier.TRAINEE_CONNECTION_INFO)
-        .replace("WHERECLAUSE", "")
+        .replaceAll(WHERE_CLAUSE_MACRO_REGEX, "")
         .replace("ORDERBYCLAUSE", "")
         .replace("LIMITCLAUSE", "");
     MapSqlParameterSource paramSource = new MapSqlParameterSource();

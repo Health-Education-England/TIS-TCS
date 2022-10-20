@@ -51,4 +51,12 @@ public class RevalidationRabbitServiceImplTest {
     verify(rabbitTemplate, never()).convertAndSend(EXCHANGE_NIMDTA, ROUTINGKEY_NIMDTA,
         OBJECT);
   }
+
+  @Test
+  public void shouldNotSendMessageWhenObjectIsNull() {
+    tcsFieldsSetup();
+    testObj.updateReval(null);
+    verify(rabbitTemplate, never()).convertAndSend(EXCHANGE_NIMDTA, ROUTINGKEY_NIMDTA,
+        OBJECT);
+  }
 }

@@ -4,7 +4,9 @@ import static com.transformuk.hee.tis.tcs.api.enumeration.ProgrammeMembershipTyp
 import static com.transformuk.hee.tis.tcs.api.enumeration.ProgrammeMembershipType.VISITOR;
 import static java.time.LocalDate.now;
 import static java.util.Arrays.asList;
+import static org.hamcrest.CoreMatchers.containsString;
 import static org.hamcrest.CoreMatchers.is;
+import static org.hamcrest.CoreMatchers.not;
 import static org.hamcrest.CoreMatchers.notNullValue;
 import static org.hamcrest.CoreMatchers.nullValue;
 import static org.hamcrest.MatcherAssert.assertThat;
@@ -51,9 +53,12 @@ import org.assertj.core.util.Lists;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
+import org.mockito.ArgumentCaptor;
+import org.mockito.Captor;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.MockitoAnnotations;
+import org.mockito.Spy;
 import org.mockito.junit.MockitoJUnitRunner;
 import org.mockito.stubbing.OngoingStubbing;
 import org.springframework.data.domain.Page;
@@ -121,13 +126,15 @@ public class RevalidationServiceImplTest {
   private ProgrammeMembershipDTO programmeMembershipDTO;
   @Mock
   private NamedParameterJdbcTemplate namedParameterJdbcTemplateMock;
-  @Mock
+  @Spy
   private SqlQuerySupplier sqlQuerySupplier;
 
   private ContactDetailsDTO contactDetails;
   private GmcDetailsDTO gmcDetailsDTO;
   @InjectMocks
   private RevalidationServiceImpl testObj;
+  @Captor
+  private ArgumentCaptor<String> stringArgCaptor;
 
   @Before
   public void setup() {
@@ -484,95 +491,57 @@ public class RevalidationServiceImplTest {
   }
 
   @Test
-  public void shouldBuildTcsConnectionInfo() {
-    when(contactDetailsService.findOne(PERSON_ID)).thenReturn(contactDetails);
-    when(gmcDetailsServiceMock.findOne(PERSON_ID)).thenReturn(gmcDetailsDTO);
-    when(curriculumMembershipRepositoryMock.findLatestCurriculumMembershipByTraineeId(PERSON_ID))
-        .thenReturn(curriculumMembership);
-    when(cmMapper.toDto(curriculumMembership)).thenReturn(programmeMembershipDTO);
-    when(programmeMembershipDTO.getProgrammeName()).thenReturn(PROGRAMME_NAME);
-    when(programmeMembershipDTO.getProgrammeMembershipType()).thenReturn(PROGRAMME_MEMBERSHIP_TYPE);
+  public void shouldReturnDtoWhenBuildTcsConnectionInfo() {
+    MockitoAnnotations.initMocks(this);
+
+    ConnectionInfoDto connectionInfoDto = ConnectionInfoDto.builder().build();
+    when(namedParameterJdbcTemplateMock.query(
+          anyString(), any(MapSqlParameterSource.class), any(RowMapper.class)))
+        .thenReturn(Lists.newArrayList(connectionInfoDto));
 
     ConnectionInfoDto result = testObj.buildTcsConnectionInfo(PERSON_ID);
+    verify(namedParameterJdbcTemplateMock).query(stringArgCaptor.capture(),
+        any(MapSqlParameterSource.class), any(RowMapper.class));
 
+    String querySql = stringArgCaptor.getValue();
+    assertThat(querySql, containsString("where cd.id = " + PERSON_ID));
+    assertThat(querySql, containsString("where pm.personId = " + PERSON_ID));
+    assertThat(querySql, containsString("where cm.personId = " + PERSON_ID));
+    assertThat(querySql, not(containsString("ORDERBYCLAUSE")));
+    assertThat(querySql, not(containsString("LIMITCLAUSE")));
     assertThat(result, notNullValue());
-    assertThat(result.getTcsPersonId(), is(PERSON_ID));
-    assertThat(result.getGmcReferenceNumber(), is("1000"));
-    assertThat(result.getDoctorFirstName(), is(FORENAME));
-    assertThat(result.getDoctorLastName(), is(SURNAME));
-    assertThat(result.getProgrammeMembershipType(), is(PROGRAMME_MEMBERSHIP_TYPE.toString()));
-    assertThat(result.getProgrammeName(), is(PROGRAMME_NAME));
   }
 
   @Test
-  public void shouldBuildTcsConnectionInfoWithoutContactDetails() {
-    when(contactDetailsService.findOne(PERSON_ID)).thenReturn(null);
-    when(gmcDetailsServiceMock.findOne(PERSON_ID)).thenReturn(gmcDetailsDTO);
-    when(curriculumMembershipRepositoryMock.findLatestCurriculumMembershipByTraineeId(PERSON_ID))
-        .thenReturn(curriculumMembership);
-    when(cmMapper.toDto(curriculumMembership)).thenReturn(programmeMembershipDTO);
-    when(programmeMembershipDTO.getProgrammeName()).thenReturn(PROGRAMME_NAME);
-    when(programmeMembershipDTO.getProgrammeMembershipType()).thenReturn(PROGRAMME_MEMBERSHIP_TYPE);
+  public void shouldReturnNullWhenBuildTcsConnectionInfo() {
+    MockitoAnnotations.initMocks(this);
+
+    when(namedParameterJdbcTemplateMock.query(
+          anyString(), any(MapSqlParameterSource.class), any(RowMapper.class)))
+        .thenReturn(Lists.newArrayList());
 
     ConnectionInfoDto result = testObj.buildTcsConnectionInfo(PERSON_ID);
+    verify(namedParameterJdbcTemplateMock).query(anyString(),
+        any(MapSqlParameterSource.class), any(RowMapper.class));
 
-    assertThat(result, notNullValue());
-    assertThat(result.getTcsPersonId(), is(PERSON_ID));
-    assertThat(result.getGmcReferenceNumber(), is("1000"));
-    assertThat(result.getDoctorFirstName(), is(nullValue()));
-    assertThat(result.getDoctorLastName(), is(nullValue()));
-    assertThat(result.getProgrammeMembershipType(), is(PROGRAMME_MEMBERSHIP_TYPE.toString()));
-    assertThat(result.getProgrammeName(), is(PROGRAMME_NAME));
-  }
-
-  @Test
-  public void shouldBuildTcsConnectionInfoWithoutGMCDetails() {
-    when(contactDetailsService.findOne(PERSON_ID)).thenReturn(contactDetails);
-    when(gmcDetailsServiceMock.findOne(PERSON_ID)).thenReturn(null);
-    when(curriculumMembershipRepositoryMock.findLatestCurriculumMembershipByTraineeId(PERSON_ID))
-        .thenReturn(curriculumMembership);
-    when(cmMapper.toDto(curriculumMembership)).thenReturn(programmeMembershipDTO);
-    when(programmeMembershipDTO.getProgrammeName()).thenReturn(PROGRAMME_NAME);
-    when(programmeMembershipDTO.getProgrammeMembershipType()).thenReturn(PROGRAMME_MEMBERSHIP_TYPE);
-
-    ConnectionInfoDto result = testObj.buildTcsConnectionInfo(PERSON_ID);
-
-    assertThat(result, notNullValue());
-    assertThat(result.getTcsPersonId(), is(PERSON_ID));
-    assertThat(result.getGmcReferenceNumber(), is(nullValue()));
-    assertThat(result.getDoctorFirstName(), is(FORENAME));
-    assertThat(result.getDoctorLastName(), is(SURNAME));
-    assertThat(result.getProgrammeMembershipType(), is(PROGRAMME_MEMBERSHIP_TYPE.toString()));
-    assertThat(result.getProgrammeName(), is(PROGRAMME_NAME));
-  }
-
-  @Test
-  public void shouldBuildTcsConnectionInfoWithoutProgrammeMembership() {
-    when(contactDetailsService.findOne(PERSON_ID)).thenReturn(contactDetails);
-    when(gmcDetailsServiceMock.findOne(PERSON_ID)).thenReturn(gmcDetailsDTO);
-    when(curriculumMembershipRepositoryMock.findLatestCurriculumMembershipByTraineeId(PERSON_ID))
-        .thenReturn(null);
-
-    ConnectionInfoDto result = testObj.buildTcsConnectionInfo(PERSON_ID);
-
-    assertThat(result, notNullValue());
-    assertThat(result.getGmcReferenceNumber(), is("1000"));
-    assertThat(result.getDoctorFirstName(), is(FORENAME));
-    assertThat(result.getDoctorLastName(), is(SURNAME));
-    assertThat(result.getProgrammeMembershipType(), is(nullValue()));
-    assertThat(result.getProgrammeName(), is(nullValue()));
+    assertThat(result, nullValue());
   }
 
   @Test
   public void shouldExtractTraineeConnectionInfo() {
     MockitoAnnotations.initMocks(this);
-    when(sqlQuerySupplier.getQuery(any(String.class))).thenReturn("Query");
 
-    when(namedParameterJdbcTemplateMock
-        .query(anyString(), any(MapSqlParameterSource.class), any(RowMapper.class))).thenReturn(new ArrayList<>());
+    when(namedParameterJdbcTemplateMock.query(
+          anyString(), any(MapSqlParameterSource.class), any(RowMapper.class)))
+        .thenReturn(new ArrayList<>());
 
-    List<ConnectionInfoDto> result = testObj.extractConnectionInfoForSync();
-    verify(namedParameterJdbcTemplateMock).query(any(String.class), any(MapSqlParameterSource.class), any(RowMapper.class));
+    testObj.extractConnectionInfoForSync();
+    verify(namedParameterJdbcTemplateMock).query(stringArgCaptor.capture(),
+        any(MapSqlParameterSource.class), any(RowMapper.class));
 
+    String querySql = stringArgCaptor.getValue();
+    assertThat(querySql, not(containsString("WHERECLAUSE")));
+    assertThat(querySql, not(containsString("ORDERBYCLAUSE")));
+    assertThat(querySql, not(containsString("LIMITCLAUSE")));
   }
 }
