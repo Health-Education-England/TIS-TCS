@@ -25,12 +25,11 @@ import com.transformuk.hee.tis.tcs.service.repository.CurriculumMembershipReposi
 import com.transformuk.hee.tis.tcs.service.repository.GmcDetailsRepository;
 import com.transformuk.hee.tis.tcs.service.repository.PersonRepository;
 import com.transformuk.hee.tis.tcs.service.repository.PlacementRepository;
-import com.transformuk.hee.tis.tcs.service.service.ContactDetailsService;
 import com.transformuk.hee.tis.tcs.service.service.RevalidationService;
 import com.transformuk.hee.tis.tcs.service.service.helper.SqlQuerySupplier;
-import com.transformuk.hee.tis.tcs.service.service.mapper.ConnectionInfoToRevalidationRecordMapper;
 import com.transformuk.hee.tis.tcs.service.service.mapper.CurriculumMembershipMapper;
 import com.transformuk.hee.tis.tcs.service.service.mapper.DesignatedBodyMapper;
+import com.transformuk.hee.tis.tcs.service.service.mapper.RevalidationRecordMapper;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.time.LocalDate;
@@ -79,35 +78,33 @@ public class RevalidationServiceImpl implements RevalidationService {
   private static final Logger LOG = LoggerFactory.getLogger(RevalidationServiceImpl.class);
   private static final List<String> placementTypes = asList("In post", "In Post - Acting Up",
       "In post - Extension", "Parental Leave", "Long-term sick", "Suspended", "Phased Return");
-  private final ContactDetailsService contactDetailsService;
   private final GmcDetailsRepository gmcDetailsRepository;
   private final CurriculumMembershipRepository curriculumMembershipRepository;
   private final PlacementRepository placementRepository;
   private final ReferenceService referenceService;
   private final PersonRepository personRepository;
   private final CurriculumMembershipMapper curriculumMembershipMapper;
-  private final ConnectionInfoToRevalidationRecordMapper connectionInfoToRevalidationRecordMapper;
-  private NamedParameterJdbcTemplate namedParameterJdbcTemplate;
-  private SqlQuerySupplier sqlQuerySupplier;
+  private final RevalidationRecordMapper revalidationRecordMapper;
+  private final NamedParameterJdbcTemplate namedParameterJdbcTemplate;
+  private final SqlQuerySupplier sqlQuerySupplier;
 
-  public RevalidationServiceImpl(ContactDetailsService contactDetailsService,
+  public RevalidationServiceImpl(
       GmcDetailsRepository gmcDetailsRepository,
       CurriculumMembershipRepository curriculumMembershipRepository,
       PlacementRepository placementRepository,
       ReferenceService referenceService,
       PersonRepository personRepository,
       CurriculumMembershipMapper curriculumMembershipMapper,
-      ConnectionInfoToRevalidationRecordMapper connectionInfoToRevalidationRecordMapper,
+      RevalidationRecordMapper revalidationRecordMapper,
       NamedParameterJdbcTemplate namedParameterJdbcTemplate,
       SqlQuerySupplier sqlQuerySupplier) {
-    this.contactDetailsService = contactDetailsService;
     this.gmcDetailsRepository = gmcDetailsRepository;
     this.curriculumMembershipRepository = curriculumMembershipRepository;
     this.placementRepository = placementRepository;
     this.referenceService = referenceService;
     this.personRepository = personRepository;
     this.curriculumMembershipMapper = curriculumMembershipMapper;
-    this.connectionInfoToRevalidationRecordMapper = connectionInfoToRevalidationRecordMapper;
+    this.revalidationRecordMapper = revalidationRecordMapper;
     this.namedParameterJdbcTemplate = namedParameterJdbcTemplate;
     this.sqlQuerySupplier = sqlQuerySupplier;
   }
@@ -365,28 +362,26 @@ public class RevalidationServiceImpl implements RevalidationService {
   }
 
   private RevalidationRecordDto buildRevalidationRecord(GmcDetails gmcDetails) {
+    RevalidationRecordDto revalidationRecordDto = new RevalidationRecordDto();
+    revalidationRecordDto.setGmcNumber(gmcDetails.getGmcNumber());
 
     final long personId = gmcDetails.getId();
     LOG.debug("Person ID : {}", personId);
 
     ConnectionInfoDto connectionInfoDto = buildTcsConnectionInfo(personId);
-    RevalidationRecordDto revalidationRecordDto =
-      connectionInfoToRevalidationRecordMapper.toRevalidationRecord(connectionInfoDto);
+    revalidationRecordMapper.toRevalidationRecord(connectionInfoDto, revalidationRecordDto);
 
-    if (revalidationRecordDto != null) {
-      //Placement
-      List<Placement> currentPlacementsForTrainee = placementRepository
+    //Placement
+    List<Placement> currentPlacementsForTrainee = placementRepository
         .findCurrentPlacementForTrainee(personId, now(), placementTypes);
 
-      if (CollectionUtils.isNotEmpty(currentPlacementsForTrainee)
+    if (CollectionUtils.isNotEmpty(currentPlacementsForTrainee)
         && currentPlacementsForTrainee.get(0).getGradeId() != null) {
-
-        LOG.debug("Placement ID : {}", currentPlacementsForTrainee.get(0).getId());
-        Long gradeId = currentPlacementsForTrainee.get(0).getGradeId();
-        LOG.debug("GRADE ID : {}", gradeId);
-        List<GradeDTO> grades = referenceService.findGradesIdIn(Collections.singleton(gradeId));
-        grades.forEach(gradeDTO -> revalidationRecordDto.setCurrentGrade(gradeDTO.getName()));
-      }
+      LOG.debug("Placement ID : {}", currentPlacementsForTrainee.get(0).getId());
+      Long gradeId = currentPlacementsForTrainee.get(0).getGradeId();
+      LOG.debug("GRADE ID : {}", gradeId);
+      List<GradeDTO> grades = referenceService.findGradesIdIn(Collections.singleton(gradeId));
+      grades.forEach(gradeDTO -> revalidationRecordDto.setCurrentGrade(gradeDTO.getName()));
     }
     return revalidationRecordDto;
   }
@@ -410,19 +405,19 @@ public class RevalidationServiceImpl implements RevalidationService {
         curriculumEnd = null;
       }
       return ConnectionInfoDto.builder()
-        .tcsPersonId(rs.getLong(PERSON_ID_FIELD))
-        .gmcReferenceNumber(rs.getString(GMC_NUMBER_FIELD))
-        .doctorFirstName(rs.getString(FORENAMES_FIELD))
-        .doctorLastName(rs.getString(SURNAME_FIELD))
-        .programmeName(rs.getString(PROGRAMME_NAME_FIELD))
-        .programmeMembershipType(rs.getString(PROGRAMME_MEMBERSHIP_TYPE_FIELD))
-        .tcsDesignatedBody(owner != null ? DesignatedBodyMapper.getDbcByOwner(owner) : null)
-        .programmeOwner(owner)
-        .programmeMembershipStartDate(start)
-        .programmeMembershipEndDate(end)
-        .curriculumEndDate(curriculumEnd)
-        .dataSource("TCS")
-        .build();
+          .tcsPersonId(rs.getLong(PERSON_ID_FIELD))
+          .gmcReferenceNumber(rs.getString(GMC_NUMBER_FIELD))
+          .doctorFirstName(rs.getString(FORENAMES_FIELD))
+          .doctorLastName(rs.getString(SURNAME_FIELD))
+          .programmeName(rs.getString(PROGRAMME_NAME_FIELD))
+          .programmeMembershipType(rs.getString(PROGRAMME_MEMBERSHIP_TYPE_FIELD))
+          .tcsDesignatedBody(owner != null ? DesignatedBodyMapper.getDbcByOwner(owner) : null)
+          .programmeOwner(owner)
+          .programmeMembershipStartDate(start)
+          .programmeMembershipEndDate(end)
+          .curriculumEndDate(curriculumEnd)
+          .dataSource("TCS")
+          .build();
     }
   }
 }

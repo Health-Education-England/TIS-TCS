@@ -39,8 +39,8 @@ import com.transformuk.hee.tis.tcs.service.repository.PlacementRepository;
 import com.transformuk.hee.tis.tcs.service.service.ContactDetailsService;
 import com.transformuk.hee.tis.tcs.service.service.GmcDetailsService;
 import com.transformuk.hee.tis.tcs.service.service.helper.SqlQuerySupplier;
-import com.transformuk.hee.tis.tcs.service.service.mapper.ConnectionInfoToRevalidationRecordMapper;
-import com.transformuk.hee.tis.tcs.service.service.mapper.ConnectionInfoToRevalidationRecordMapperImpl;
+import com.transformuk.hee.tis.tcs.service.service.mapper.RevalidationRecordMapper;
+import com.transformuk.hee.tis.tcs.service.service.mapper.RevalidationRecordMapperImpl;
 import com.transformuk.hee.tis.tcs.service.service.mapper.CurriculumMembershipMapper;
 import com.transformuk.hee.tis.tcs.service.service.mapper.DesignatedBodyMapper;
 
@@ -130,7 +130,7 @@ public class RevalidationServiceImplTest {
   @Spy
   private SqlQuerySupplier sqlQuerySupplier = new SqlQuerySupplier();
   @Spy
-  private ConnectionInfoToRevalidationRecordMapper connectionInfoToRevalidationRecordMapper = new ConnectionInfoToRevalidationRecordMapperImpl();
+  private RevalidationRecordMapper revalidationRecordMapper = new RevalidationRecordMapperImpl();
 
   private ContactDetailsDTO contactDetails;
   private GmcDetailsDTO gmcDetailsDTO;
