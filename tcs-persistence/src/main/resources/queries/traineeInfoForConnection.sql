@@ -1,7 +1,7 @@
 select distinct ot.*
 from (
   select
-    cd.id personId,
+    cd.id as personId,
     gmc.gmcNumber,
     cd.forenames,
     cd.surname,
@@ -9,32 +9,35 @@ from (
     pm1.programmeStartDate,
     pm1.programmeEndDate,
     latestCm.curriculumEndDate,
-    if(prg.programmeName is null and currentPmCounts.count_num > 1, "multiple programmes", prg.programmeName) as programmeName,
-    prg.owner
+    currentPmCounts.programmeNames as programmeName,
+    if(currentPmCounts.count_num > 1, NULL, currentPmCounts.owner) as owner
   from
     ContactDetails cd
   left join GmcDetails gmc on (gmc.id = cd.id)
   left join (
-    -- count current PMs for each person
+    -- count current PMs with combined programme names for each person
     select
-      personId,
+      pm.personId,
+      GROUP_CONCAT(prg.programmeName SEPARATOR " | ") programmeNames,
+      GROUP_CONCAT(prg.owner SEPARATOR " | ") owner,
       count(if(pm.programmeStartDate <= current_date() and pm.programmeEndDate >= current_date(), true, null)) as count_num
     from ProgrammeMembership pm
+    left join Programme prg
+      on pm.programmeId = prg.id and pm.programmeStartDate <= current_date() and pm.programmeEndDate >= current_date()
     WHERECLAUSE(pm, personId)
-    group by personId
+    group by pm.personId
   ) currentPmCounts on cd.id = currentPmCounts.personId
   left join ProgrammeMembership pm1
     on pm1.personId = currentPmCounts.personId and currentPmCounts.count_num = 1 and (pm1.programmeStartDate <= current_date() and pm1.programmeEndDate >= current_date())
   left join (
     -- get max curriculumEndDate for every PM
       select
-          cm.programmeMembershipUuid,
-          max(cm.curriculumEndDate) curriculumEndDate
+        cm.programmeMembershipUuid,
+        max(cm.curriculumEndDate) curriculumEndDate
       from CurriculumMembership cm
       WHERECLAUSE(cm, personId)
       group by cm.programmeMembershipUuid
   ) latestCm on latestCm.programmeMembershipUuid = pm1.uuid
-  left join Programme prg on prg.id = pm1.programmeId
   WHERECLAUSE(cd, id)
   ) as ot
 ORDERBYCLAUSE
