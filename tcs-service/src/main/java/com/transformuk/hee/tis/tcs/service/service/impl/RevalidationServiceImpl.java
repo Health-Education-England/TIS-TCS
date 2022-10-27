@@ -14,7 +14,6 @@ import com.transformuk.hee.tis.tcs.api.dto.ConnectionRecordDto;
 import com.transformuk.hee.tis.tcs.api.dto.ConnectionSummaryDto;
 import com.transformuk.hee.tis.tcs.api.dto.ConnectionSummaryRecordDto;
 import com.transformuk.hee.tis.tcs.api.dto.ConnectionSummaryRecordDto.ConnectionSummaryRecordDtoBuilder;
-import com.transformuk.hee.tis.tcs.api.dto.ContactDetailsDTO;
 import com.transformuk.hee.tis.tcs.api.dto.ProgrammeMembershipDTO;
 import com.transformuk.hee.tis.tcs.api.dto.RevalidationRecordDto;
 import com.transformuk.hee.tis.tcs.api.enumeration.ProgrammeMembershipType;
@@ -26,15 +25,14 @@ import com.transformuk.hee.tis.tcs.service.repository.CurriculumMembershipReposi
 import com.transformuk.hee.tis.tcs.service.repository.GmcDetailsRepository;
 import com.transformuk.hee.tis.tcs.service.repository.PersonRepository;
 import com.transformuk.hee.tis.tcs.service.repository.PlacementRepository;
-import com.transformuk.hee.tis.tcs.service.service.ContactDetailsService;
 import com.transformuk.hee.tis.tcs.service.service.RevalidationService;
 import com.transformuk.hee.tis.tcs.service.service.helper.SqlQuerySupplier;
 import com.transformuk.hee.tis.tcs.service.service.mapper.CurriculumMembershipMapper;
 import com.transformuk.hee.tis.tcs.service.service.mapper.DesignatedBodyMapper;
+import com.transformuk.hee.tis.tcs.service.service.mapper.RevalidationRecordMapper;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.time.LocalDate;
-import java.util.ArrayList;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
@@ -46,7 +44,6 @@ import javax.transaction.Transactional;
 import org.apache.commons.collections4.CollectionUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.jdbc.core.RowMapper;
@@ -81,32 +78,35 @@ public class RevalidationServiceImpl implements RevalidationService {
   private static final Logger LOG = LoggerFactory.getLogger(RevalidationServiceImpl.class);
   private static final List<String> placementTypes = asList("In post", "In Post - Acting Up",
       "In post - Extension", "Parental Leave", "Long-term sick", "Suspended", "Phased Return");
-  private final ContactDetailsService contactDetailsService;
   private final GmcDetailsRepository gmcDetailsRepository;
   private final CurriculumMembershipRepository curriculumMembershipRepository;
   private final PlacementRepository placementRepository;
   private final ReferenceService referenceService;
   private final PersonRepository personRepository;
   private final CurriculumMembershipMapper curriculumMembershipMapper;
-  @Autowired
-  private NamedParameterJdbcTemplate namedParameterJdbcTemplate;
-  @Autowired
-  private SqlQuerySupplier sqlQuerySupplier;
+  private final RevalidationRecordMapper revalidationRecordMapper;
+  private final NamedParameterJdbcTemplate namedParameterJdbcTemplate;
+  private final SqlQuerySupplier sqlQuerySupplier;
 
-  public RevalidationServiceImpl(ContactDetailsService contactDetailsService,
+  public RevalidationServiceImpl(
       GmcDetailsRepository gmcDetailsRepository,
       CurriculumMembershipRepository curriculumMembershipRepository,
       PlacementRepository placementRepository,
       ReferenceService referenceService,
       PersonRepository personRepository,
-      CurriculumMembershipMapper curriculumMembershipMapper) {
-    this.contactDetailsService = contactDetailsService;
+      CurriculumMembershipMapper curriculumMembershipMapper,
+      RevalidationRecordMapper revalidationRecordMapper,
+      NamedParameterJdbcTemplate namedParameterJdbcTemplate,
+      SqlQuerySupplier sqlQuerySupplier) {
     this.gmcDetailsRepository = gmcDetailsRepository;
     this.curriculumMembershipRepository = curriculumMembershipRepository;
     this.placementRepository = placementRepository;
     this.referenceService = referenceService;
     this.personRepository = personRepository;
     this.curriculumMembershipMapper = curriculumMembershipMapper;
+    this.revalidationRecordMapper = revalidationRecordMapper;
+    this.namedParameterJdbcTemplate = namedParameterJdbcTemplate;
+    this.sqlQuerySupplier = sqlQuerySupplier;
   }
 
   @Override
@@ -363,44 +363,26 @@ public class RevalidationServiceImpl implements RevalidationService {
 
   private RevalidationRecordDto buildRevalidationRecord(GmcDetails gmcDetails) {
     RevalidationRecordDto revalidationRecordDto = new RevalidationRecordDto();
-    final long personId = gmcDetails.getId();
-    LOG.debug("Person ID : {}", personId);
     revalidationRecordDto.setGmcNumber(gmcDetails.getGmcNumber());
 
-    //tisPersonId - it is needed in the Reval FE to call different TCS api
-    revalidationRecordDto.setTisPersonId(personId);
+    final long personId = gmcDetails.getId();
+    LOG.debug("Person ID : {}", personId);
 
-    // Contact details.
-    ContactDetailsDTO contactDetailsDto = contactDetailsService.findOne(personId);
-    revalidationRecordDto.setForenames(contactDetailsDto.getForenames());
-    revalidationRecordDto.setSurname(contactDetailsDto.getSurname());
+    ConnectionInfoDto connectionInfoDto = buildTcsConnectionInfo(personId);
+    revalidationRecordMapper.toRevalidationRecord(connectionInfoDto, revalidationRecordDto);
 
-    //Programme Membership
-    CurriculumMembership curriculumMembership = curriculumMembershipRepository
-        .findLatestCurriculumByTraineeId(personId);
-    if (Objects.nonNull(curriculumMembership)) {
-      ProgrammeMembership programmeMembership = curriculumMembership.getProgrammeMembership();
-      LOG.debug("Curriculum Membership End Date : {}", programmeMembership.getProgrammeEndDate());
-      revalidationRecordDto.setCurriculumEndDate(curriculumMembership.getCurriculumEndDate());
-      revalidationRecordDto.setProgrammeMembershipType(programmeMembership
-          .getProgrammeMembershipType().toString());
-      revalidationRecordDto.setProgrammeName(programmeMembership.getProgramme().getProgrammeName());
-    }
     //Placement
     List<Placement> currentPlacementsForTrainee = placementRepository
         .findCurrentPlacementForTrainee(personId, now(), placementTypes);
+
     if (CollectionUtils.isNotEmpty(currentPlacementsForTrainee)
         && currentPlacementsForTrainee.get(0).getGradeId() != null) {
       LOG.debug("Placement ID : {}", currentPlacementsForTrainee.get(0).getId());
       Long gradeId = currentPlacementsForTrainee.get(0).getGradeId();
       LOG.debug("GRADE ID : {}", gradeId);
-      List<GradeDTO> grades = new ArrayList<>();
-      if (gradeId != null) {
-        grades = referenceService.findGradesIdIn(Collections.singleton(gradeId));
-      }
+      List<GradeDTO> grades = referenceService.findGradesIdIn(Collections.singleton(gradeId));
       grades.forEach(gradeDTO -> revalidationRecordDto.setCurrentGrade(gradeDTO.getName()));
     }
-
     return revalidationRecordDto;
   }
 
