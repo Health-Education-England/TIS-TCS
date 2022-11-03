@@ -87,8 +87,7 @@ public class RevalidationMessageListenerTest {
     List<Long> personIds = personIdCaptor.getAllValues();
     List<ConnectionInfoDto> connectionInfoDtos = connectionInfoDtoArguementCaptor.getAllValues();
 
-    assertThat(personIds).hasSize(3);
-    assertThat(personIds).contains(1l, 2l, 3l);
+    assertThat(personIds).hasSize(3).contains(1l, 2l, 3l);
     assertThat(connectionInfoDtos).hasSize(3);
   }
 }
