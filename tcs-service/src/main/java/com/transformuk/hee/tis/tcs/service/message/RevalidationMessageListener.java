@@ -1,6 +1,7 @@
 package com.transformuk.hee.tis.tcs.service.message;
 
 import com.transformuk.hee.tis.tcs.api.dto.ConnectionInfoDto;
+import com.transformuk.hee.tis.tcs.service.service.RevalidationRabbitService;
 import com.transformuk.hee.tis.tcs.service.service.RevalidationService;
 import java.util.List;
 import org.springframework.amqp.rabbit.annotation.RabbitListener;
@@ -24,6 +25,9 @@ public class RevalidationMessageListener {
   @Autowired
   RevalidationService revalidationService;
 
+  @Autowired
+  RevalidationRabbitService revalidationRabbitService;
+
   /**
    * Receive message from the Rabbit queue if app is configured for the Reval exchange.
    *
@@ -38,6 +42,12 @@ public class RevalidationMessageListener {
       }
       rabbitTemplate.convertAndSend(exchange, routingKey, getSyncEndMessageDto());
     }
+  }
+
+  @RabbitListener(queues = "${app.rabbit.reval.queue.currentpm.update}")
+  public void receiveMessageNightlyPmSync(final List<String> personIds) {
+    personIds.forEach(id -> revalidationRabbitService.updateReval(
+        revalidationService.buildTcsConnectionInfo(Long.valueOf(id))));
   }
 
   private ConnectionInfoDto getSyncEndMessageDto() {
