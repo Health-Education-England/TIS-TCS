@@ -48,6 +48,11 @@ public class RevalidationMessageListener {
     }
   }
 
+  /**
+   * Receive personIds from Rabbit queue and populate currentPm and export to Reval.
+   *
+   * @param personIds the personIds whose currentPm changes nightly
+   */
   @RabbitListener(queues = "${app.rabbit.reval.queue.currentpm.update.tcs}")
   public void receiveMessageNightlyPmSync(final List<String> personIds) {
     LOG.info("Received {} personIds and start to sync currentPm.", personIds.size());
