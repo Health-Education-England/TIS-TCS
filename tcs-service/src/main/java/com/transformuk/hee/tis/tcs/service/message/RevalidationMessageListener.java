@@ -1,8 +1,11 @@
 package com.transformuk.hee.tis.tcs.service.message;
 
 import com.transformuk.hee.tis.tcs.api.dto.ConnectionInfoDto;
+import com.transformuk.hee.tis.tcs.service.service.RevalidationRabbitService;
 import com.transformuk.hee.tis.tcs.service.service.RevalidationService;
 import java.util.List;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.amqp.rabbit.annotation.RabbitListener;
 import org.springframework.amqp.rabbit.core.RabbitTemplate;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -11,6 +14,8 @@ import org.springframework.stereotype.Component;
 
 @Component
 public class RevalidationMessageListener {
+
+  private static final Logger LOG = LoggerFactory.getLogger(RevalidationMessageListener.class);
 
   @Value("${app.rabbit.reval.exchange}")
   private String exchange;
@@ -23,6 +28,9 @@ public class RevalidationMessageListener {
 
   @Autowired
   RevalidationService revalidationService;
+
+  @Autowired
+  RevalidationRabbitService revalidationRabbitService;
 
   /**
    * Receive message from the Rabbit queue if app is configured for the Reval exchange.
@@ -38,6 +46,18 @@ public class RevalidationMessageListener {
       }
       rabbitTemplate.convertAndSend(exchange, routingKey, getSyncEndMessageDto());
     }
+  }
+
+  /**
+   * Receive personIds from Rabbit queue and populate currentPm and export to Reval.
+   *
+   * @param personIds the personIds whose currentPm changes nightly
+   */
+  @RabbitListener(queues = "${app.rabbit.reval.queue.currentpm.update.tcs}")
+  public void receiveMessageNightlyPmSync(final List<String> personIds) {
+    LOG.info("Received {} personIds and start to sync currentPm.", personIds.size());
+    personIds.forEach(id -> revalidationRabbitService.updateReval(
+        revalidationService.buildTcsConnectionInfo(Long.valueOf(id))));
   }
 
   private ConnectionInfoDto getSyncEndMessageDto() {
