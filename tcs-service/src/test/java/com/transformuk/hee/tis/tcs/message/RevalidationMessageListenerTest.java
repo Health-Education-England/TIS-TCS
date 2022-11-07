@@ -19,7 +19,6 @@ import org.mockito.Captor;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.MockitoAnnotations;
-import org.mockito.Spy;
 import org.mockito.junit.MockitoJUnitRunner;
 import org.springframework.amqp.rabbit.core.RabbitTemplate;
 
@@ -33,10 +32,10 @@ public class RevalidationMessageListenerTest {
   @Mock
   RabbitTemplate rabbitTemplate;
 
-  @Spy
+  @Mock
   RevalidationService revalidationService;
 
-  @Spy
+  @Mock
   RevalidationRabbitService revalidationRabbitService;
 
   @InjectMocks
@@ -87,7 +86,7 @@ public class RevalidationMessageListenerTest {
     List<Long> personIds = personIdCaptor.getAllValues();
     List<ConnectionInfoDto> connectionInfoDtos = connectionInfoDtoArguementCaptor.getAllValues();
 
-    assertThat(personIds).hasSize(3).contains(1l, 2l, 3l);
+    assertThat(personIds).hasSize(3).containsExactlyInAnyOrder(1L, 2L, 3L);
     assertThat(connectionInfoDtos).hasSize(3);
   }
 }
