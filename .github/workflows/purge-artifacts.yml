@@ -13,6 +13,6 @@ jobs:
 
     steps:
       - name: Purge
-        uses: c-hive/gha-remove-artifacts@v1.2.0
+        uses: c-hive/gha-remove-artifacts@v1.3.0
         with:
           age: '7 days'
