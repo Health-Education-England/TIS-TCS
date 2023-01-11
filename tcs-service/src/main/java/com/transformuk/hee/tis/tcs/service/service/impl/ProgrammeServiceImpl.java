@@ -195,7 +195,7 @@ public class ProgrammeServiceImpl implements ProgrammeService {
   public List<ProgrammeDTO> findTraineeProgrammes(Long traineeId) {
     Preconditions.checkNotNull(traineeId);
     List<Programme> traineeProgrammes =
-        programmeRepository.findByCurriculumMembershipPersonId(traineeId);
+        programmeRepository.findByProgrammeMembershipPersonId(traineeId);
     return programmeMapper.programmesToProgrammeDTOs(traineeProgrammes);
   }
 

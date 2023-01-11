@@ -80,7 +80,7 @@ public class ProgrammeRepositoryIntTest {
     programmeMembershipRepository.saveAll(Lists.newArrayList(pm1, pm2, pm3, pmWithSameProgramme));
     programmeMembershipRepository.flush();
 
-    List<Programme> result = testObj.findByCurriculumMembershipPersonId(person1.getId());
+    List<Programme> result = testObj.findByProgrammeMembershipPersonId(person1.getId());
 
     //no duplicate programmes - this would have 3 if we didn't have the distinct
     Assert.assertEquals(2, result.size());

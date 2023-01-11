@@ -33,7 +33,7 @@ public interface ProgrammeRepository extends JpaRepository<Programme, Long>,
       "SELECT distinct pm.programme " +
           "FROM ProgrammeMembership pm " +
           "WHERE pm.person.id = :personId")
-  List<Programme> findByCurriculumMembershipPersonId(@Param("personId") Long personId);
+  List<Programme> findByProgrammeMembershipPersonId(@Param("personId") Long personId);
 
   @Query("SELECT p " +
       "FROM Programme p " +
