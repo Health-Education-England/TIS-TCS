@@ -63,7 +63,7 @@ public interface PersonRepository extends JpaRepository<Person, Long>,
    *                      (latest programmeMembership which is visitor OR expired)
    *                      AND in the restricted local office.
    */
-  final String GET_EXCEPTION_QUERY =
+  static final String GET_EXCEPTION_QUERY =
       "Select distinct cd.surname, cd.forenames, gmc.gmcNumber, gmc.id, prg.owner, "
       + "prg.programmeName, latestPm.programmeMembershipType, latestPm.programmeStartDate, "
       + "latestPm.programmeEndDate "
@@ -89,6 +89,7 @@ public interface PersonRepository extends JpaRepository<Person, Long>,
                   + "OR gmc.gmcNumber in (:gmcIds) ) "
               + "AND prg.OWNER in (:owner) ) "
       + ") AND (:search is true or gmc.gmcNumber = :gmcNumber)";
+
   @Query(value = GET_EXCEPTION_QUERY,
       countQuery = GET_EXCEPTION_QUERY,
       nativeQuery = true)
