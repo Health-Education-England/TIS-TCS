@@ -2,11 +2,10 @@ package com.transformuk.hee.tis.tcs.service.repository;
 
 import com.transformuk.hee.tis.tcs.service.TestConfig;
 import com.transformuk.hee.tis.tcs.service.model.Curriculum;
-import com.transformuk.hee.tis.tcs.service.model.CurriculumMembership;
 import com.transformuk.hee.tis.tcs.service.model.Person;
 import com.transformuk.hee.tis.tcs.service.model.Programme;
 import com.transformuk.hee.tis.tcs.service.model.ProgrammeCurriculum;
-
+import com.transformuk.hee.tis.tcs.service.model.ProgrammeMembership;
 import java.util.List;
 import javax.persistence.EntityManager;
 import org.assertj.core.util.Lists;
@@ -30,7 +29,7 @@ public class ProgrammeRepositoryIntTest {
   private PersonRepository personRepository;
 
   @Autowired
-  private CurriculumMembershipRepository curriculumMembershipRepository;
+  private ProgrammeMembershipRepository programmeMembershipRepository;
 
   @Autowired
   private ProgrammeCurriculumRepository programmeCurriculumRepository;
@@ -65,8 +64,8 @@ public class ProgrammeRepositoryIntTest {
     personRepository.saveAll(Lists.newArrayList(person1, person2));
     personRepository.flush();
 
-    CurriculumMembership pm1 = new CurriculumMembership(), pm2 = new CurriculumMembership(), pm3 = new CurriculumMembership(),
-        pmWithSameProgramme = new CurriculumMembership();
+    ProgrammeMembership pm1 = new ProgrammeMembership(), pm2 = new ProgrammeMembership(), pm3 = new ProgrammeMembership(),
+        pmWithSameProgramme = new ProgrammeMembership();
 
     pm1.setProgramme(programme1);
     pm1.setPerson(person1);
@@ -78,8 +77,8 @@ public class ProgrammeRepositoryIntTest {
     pm3.setProgramme(programme3);
     pm3.setPerson(person2);
 
-    curriculumMembershipRepository.saveAll(Lists.newArrayList(pm1, pm2, pm3, pmWithSameProgramme));
-    curriculumMembershipRepository.flush();
+    programmeMembershipRepository.saveAll(Lists.newArrayList(pm1, pm2, pm3, pmWithSameProgramme));
+    programmeMembershipRepository.flush();
 
     List<Programme> result = testObj.findByCurriculumMembershipPersonId(person1.getId());
 

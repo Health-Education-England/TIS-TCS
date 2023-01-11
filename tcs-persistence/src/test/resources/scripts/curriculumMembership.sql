@@ -1,5 +1,3 @@
-SET MODE MYSQL;
-
 INSERT INTO `Person` (`id`)
 VALUES
     (1),
