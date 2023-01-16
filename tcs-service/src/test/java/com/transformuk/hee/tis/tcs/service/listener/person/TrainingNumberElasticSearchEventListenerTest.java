@@ -74,7 +74,7 @@ public class TrainingNumberElasticSearchEventListenerTest {
     programmeMembership2.setUuid(PROGRAMME_MEMBERSHIP_UUID_2);
     programmeMembership2.setTrainingNumber(trainingNumber);
 
-    when(programmeMembershipRepositoryMock.findByTrainingNumber_Id(TRAININGNUMER_ID)).thenReturn(
+    when(programmeMembershipRepositoryMock.findByTrainingNumberId(TRAININGNUMER_ID)).thenReturn(
         Lists.newArrayList(programmeMembership1, programmeMembership2));
   }
 

@@ -46,7 +46,7 @@ public class TrainingNumberElasticSearchEventListener {
 
   private void publishEventsForRelatedProgrammeMemberships(Long trainingNumberId) {
     List<ProgrammeMembership> programmeMemberships = programmeMembershipRepository
-        .findByTrainingNumber_Id(trainingNumberId);
+        .findByTrainingNumberId(trainingNumberId);
 
     if (CollectionUtils.isNotEmpty(programmeMemberships)) {
       programmeMemberships.stream()

@@ -47,5 +47,5 @@ public interface ProgrammeMembershipRepository extends JpaRepository<ProgrammeMe
 
   Optional<ProgrammeMembership> findByUuid(UUID id);
 
-  List<ProgrammeMembership> findByTrainingNumber_Id(Long trainingNumberId);
+  List<ProgrammeMembership> findByTrainingNumberId(Long trainingNumberId);
 }

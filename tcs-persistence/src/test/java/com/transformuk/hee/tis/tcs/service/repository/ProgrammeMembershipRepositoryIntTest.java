@@ -70,7 +70,7 @@ public class ProgrammeMembershipRepositoryIntTest {
   @Test
   public void shouldFindByTrainingNumberId() {
     List<ProgrammeMembership> programmeMemberships =
-        programmeMembershipRepository.findByTrainingNumber_Id(trainingNumber1.getId());
+        programmeMembershipRepository.findByTrainingNumberId(trainingNumber1.getId());
     Assert.assertEquals(2, programmeMemberships.size());
   }
 }
