@@ -1,10 +1,11 @@
 package com.transformuk.hee.tis.tcs.service.listener.person;
 
 import com.transformuk.hee.tis.tcs.service.event.CurriculumMembershipSavedEvent;
+import com.transformuk.hee.tis.tcs.service.event.TrainingNumberDeletedEvent;
 import com.transformuk.hee.tis.tcs.service.event.TrainingNumberSavedEvent;
-import com.transformuk.hee.tis.tcs.service.model.CurriculumMembership;
-import com.transformuk.hee.tis.tcs.service.repository.CurriculumMembershipRepository;
-import com.transformuk.hee.tis.tcs.service.service.mapper.CurriculumMembershipMapper;
+import com.transformuk.hee.tis.tcs.service.model.ProgrammeMembership;
+import com.transformuk.hee.tis.tcs.service.repository.ProgrammeMembershipRepository;
+import com.transformuk.hee.tis.tcs.service.service.mapper.ProgrammeMembershipMapper;
 import java.util.List;
 import org.apache.commons.collections4.CollectionUtils;
 import org.slf4j.Logger;
@@ -21,10 +22,10 @@ public class TrainingNumberElasticSearchEventListener {
       .getLogger(TrainingNumberElasticSearchEventListener.class);
 
   @Autowired
-  private CurriculumMembershipRepository curriculumMembershipRepository;
+  private ProgrammeMembershipRepository programmeMembershipRepository;
 
   @Autowired
-  private CurriculumMembershipMapper curriculumMembershipMapper;
+  private ProgrammeMembershipMapper programmeMembershipMapper;
 
   @Autowired
   private ApplicationEventPublisher applicationEventPublisher;
@@ -33,24 +34,24 @@ public class TrainingNumberElasticSearchEventListener {
   public void handleTrainingNumberSavedEvent(TrainingNumberSavedEvent event) {
     LOG.info("Received TrainingNumber saved event for TrainingNumber id: [{}]",
         event.getTrainingNumberDTO().getId());
-    publishEventsForRelatedCurriculumMemberships(event.getTrainingNumberDTO().getId());
+    publishEventsForRelatedProgrammeMemberships(event.getTrainingNumberDTO().getId());
   }
 
   @EventListener
-  public void handleTrainingNumberDeletedEvent(TrainingNumberSavedEvent event) {
+  public void handleTrainingNumberDeletedEvent(TrainingNumberDeletedEvent event) {
     LOG.info("Received TrainingNumber deleted event for TrainingNumber id: [{}]",
         event.getTrainingNumberDTO().getId());
-    publishEventsForRelatedCurriculumMemberships(event.getTrainingNumberDTO().getId());
+    publishEventsForRelatedProgrammeMemberships(event.getTrainingNumberDTO().getId());
   }
 
-  private void publishEventsForRelatedCurriculumMemberships(Long trainingNumberId) {
-    List<CurriculumMembership> curriculumMembershipsByTraineeId = curriculumMembershipRepository
-        .findByTraineeId(trainingNumberId);
+  private void publishEventsForRelatedProgrammeMemberships(Long trainingNumberId) {
+    List<ProgrammeMembership> programmeMemberships = programmeMembershipRepository
+        .findByTrainingNumberId(trainingNumberId);
 
-    if (CollectionUtils.isNotEmpty(curriculumMembershipsByTraineeId)) {
-      curriculumMembershipsByTraineeId.stream()
+    if (CollectionUtils.isNotEmpty(programmeMemberships)) {
+      programmeMemberships.stream()
           .distinct()
-          .map(curriculumMembershipMapper::toDto)
+          .map(programmeMembershipMapper::toDto)
           .map(CurriculumMembershipSavedEvent::new)
           .forEach(applicationEventPublisher::publishEvent);
     }
