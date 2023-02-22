@@ -264,7 +264,7 @@ public class RevalidationServiceImpl implements RevalidationService {
             .gmcReferenceNumber(conn.getGmcNumber())
             .doctorFirstName(conn.forenames)
             .doctorLastName(conn.surname)
-            .connectionStatus(getHiddenConnectionStatus(conn));
+            .tisConnectionStatus(getHiddenConnectionStatus(conn));
 
     if (programmeMembershipDTO != null) {
       final String owner = programmeMembershipDTO.getProgrammeOwner();
@@ -319,7 +319,7 @@ public class RevalidationServiceImpl implements RevalidationService {
 
   private ConnectionRecordDto getConnectionStatus(final CurriculumMembership curriculumMembership) {
     final ConnectionRecordDto connectionRecordDto = new ConnectionRecordDto();
-    connectionRecordDto.setConnectionStatus("No");
+    connectionRecordDto.setTisConnectionStatus("No");
     final LocalDate currentDate = now();
 
     if (Objects.nonNull(curriculumMembership)) {
@@ -327,7 +327,7 @@ public class RevalidationServiceImpl implements RevalidationService {
       LOG.info("Curriculum membership found membership: {}", curriculumMembership.getId());
 
       if (!isDisconnected(currentDate, curriculumMembership)) {
-        connectionRecordDto.setConnectionStatus("Yes");
+        connectionRecordDto.setTisConnectionStatus("Yes");
       }
       ProgrammeMembership programmeMembership = curriculumMembership.getProgrammeMembership();
       final String programmeMemberShipType =

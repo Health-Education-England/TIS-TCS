@@ -283,7 +283,7 @@ public class RevalidationServiceImplTest {
     assertThat(record.getProgrammeMembershipType(), is(PROGRAMME_MEMBERSHIP_TYPE.toString()));
     assertThat(record.getProgrammeName(), is(PROGRAMME_NAME));
     assertThat(record.getProgrammeOwner(), is(PROGRAMME_OWNER));
-    assertThat(record.getConnectionStatus(), is(CONNECTION_STATUS_CONNECTED));
+    assertThat(record.getTisConnectionStatus(), is(CONNECTION_STATUS_CONNECTED));
     assertThat(record.getProgrammeMembershipStartDate(), is(PM_START_DATE));
     assertThat(record.getProgrammeMembershipEndDate(), is(PM_END_DATE));
   }
@@ -330,7 +330,7 @@ public class RevalidationServiceImplTest {
         is(PROGRAMME_MEMBERSHIP_TYPE.toString()));
     assertThat(result.getProgrammeHistory().get(0).getProgrammeName(), is(PROGRAMME_NAME));
     assertThat(result.getProgrammeHistory().get(0).getProgrammeOwner(), is(PROGRAMME_OWNER));
-    assertThat(result.getProgrammeHistory().get(0).getConnectionStatus(),
+    assertThat(result.getProgrammeHistory().get(0).getTisConnectionStatus(),
         is(CONNECTION_STATUS_DISCONNECTED));
     assertThat(result.getProgrammeHistory().get(0).getDesignatedBodyCode(),
         is(DESIGNATED_BODY_CODE));
@@ -351,7 +351,7 @@ public class RevalidationServiceImplTest {
     assertThat(result.size(), is(1));
     ConnectionRecordDto record = result.get("1000");
     //programme membership start date is tomorrow so the status is No
-    assertThat(record.getConnectionStatus(), is(CONNECTION_STATUS_DISCONNECTED));
+    assertThat(record.getTisConnectionStatus(), is(CONNECTION_STATUS_DISCONNECTED));
 
   }
 
@@ -366,7 +366,7 @@ public class RevalidationServiceImplTest {
     assertThat(result, notNullValue());
     assertThat(result.size(), is(1));
     ConnectionRecordDto record = result.get("1000");
-    assertThat(record.getConnectionStatus(), is(CONNECTION_STATUS_CONNECTED));
+    assertThat(record.getTisConnectionStatus(), is(CONNECTION_STATUS_CONNECTED));
 
   }
 
@@ -383,7 +383,7 @@ public class RevalidationServiceImplTest {
     assertThat(result, notNullValue());
     assertThat(result.size(), is(1));
     ConnectionRecordDto record = result.get("1000");
-    assertThat(record.getConnectionStatus(), is(CONNECTION_STATUS_CONNECTED));
+    assertThat(record.getTisConnectionStatus(), is(CONNECTION_STATUS_CONNECTED));
     assertThat(record.getProgrammeMembershipStartDate(), is(programmeStartDate));
     assertThat(record.getProgrammeMembershipEndDate(), is(programmeEndDate));
     assertThat(record.getProgrammeOwner(), is(PROGRAMME_OWNER));
@@ -401,7 +401,7 @@ public class RevalidationServiceImplTest {
     assertThat(result, notNullValue());
     assertThat(result.size(), is(1));
     ConnectionRecordDto record = result.get("1000");
-    assertThat(record.getConnectionStatus(), is(CONNECTION_STATUS_DISCONNECTED));
+    assertThat(record.getTisConnectionStatus(), is(CONNECTION_STATUS_DISCONNECTED));
     assertThat(record.getProgrammeMembershipStartDate(), is(nullValue()));
     assertThat(record.getProgrammeMembershipEndDate(), is(PM_END_DATE));
     assertThat(record.getProgrammeOwner(), is(PROGRAMME_OWNER));
@@ -420,7 +420,7 @@ public class RevalidationServiceImplTest {
     ConnectionRecordDto record = result.get("1000");
     assertThat(record.getProgrammeMembershipType(), is(PROGRAMME_MEMBERSHIP_TYPE.toString()));
     assertThat(record.getProgrammeName(), is(PROGRAMME_NAME));
-    assertThat(record.getConnectionStatus(), is(CONNECTION_STATUS_DISCONNECTED));
+    assertThat(record.getTisConnectionStatus(), is(CONNECTION_STATUS_DISCONNECTED));
     assertThat(record.getProgrammeMembershipStartDate(), is(PM_START_DATE));
     assertThat(record.getProgrammeMembershipEndDate(), is(nullValue()));
     assertThat(record.getProgrammeOwner(), is(PROGRAMME_OWNER));
@@ -436,7 +436,7 @@ public class RevalidationServiceImplTest {
     assertThat(result, notNullValue());
     assertThat(result.size(), is(1));
     ConnectionRecordDto record = result.get("1000");
-    assertThat(record.getConnectionStatus(), is(CONNECTION_STATUS_DISCONNECTED));
+    assertThat(record.getTisConnectionStatus(), is(CONNECTION_STATUS_DISCONNECTED));
     assertThat(record.getProgrammeMembershipStartDate(), is(nullValue()));
     assertThat(record.getProgrammeMembershipEndDate(), is(nullValue()));
     assertThat(record.getProgrammeOwner(), is(nullValue()));
@@ -454,7 +454,7 @@ public class RevalidationServiceImplTest {
     assertThat(result, notNullValue());
     assertThat(result.size(), is(1));
     ConnectionRecordDto record = result.get("1000");
-    assertThat(record.getConnectionStatus(), is(CONNECTION_STATUS_DISCONNECTED));
+    assertThat(record.getTisConnectionStatus(), is(CONNECTION_STATUS_DISCONNECTED));
     assertThat(record.getProgrammeMembershipStartDate(), is(PM_START_DATE));
     assertThat(record.getProgrammeMembershipEndDate(), is(programmeEndDate));
     assertThat(record.getProgrammeOwner(), is(PROGRAMME_OWNER));

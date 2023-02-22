@@ -16,7 +16,7 @@ public class ConnectionSummaryRecordDto {
   private String doctorFirstName;
   private String doctorLastName;
   private String designatedBody;
-  private String connectionStatus;
+  private String tisConnectionStatus;
   private LocalDate programmeMembershipEndDate;
   private LocalDate programmeMembershipStartDate;
   private String programmeMembershipType;

@@ -81,7 +81,7 @@ public class RevalidationResourceTest {
   private ConnectionRecordDto createConnectionRecordDto(final String gmcId) {
     final ConnectionRecordDto recordDto = new ConnectionRecordDto();
     recordDto.setProgrammeOwner(PROGRAMME_OWNER);
-    recordDto.setConnectionStatus(CONNECTION_STATUS);
+    recordDto.setTisConnectionStatus(CONNECTION_STATUS);
     recordDto.setProgrammeMembershipStartDate(PM_START_DATE);
     recordDto.setProgrammeMembershipEndDate(PM_END_DATE);
     return recordDto;
@@ -194,7 +194,7 @@ public class RevalidationResourceTest {
     gmcIds.forEach(id -> {
       ConnectionRecordDto connectionRecordDto = map.get(id);
       assertThat(connectionRecordDto.getProgrammeOwner(), is(PROGRAMME_OWNER));
-      assertThat(connectionRecordDto.getConnectionStatus(), is(CONNECTION_STATUS));
+      assertThat(connectionRecordDto.getTisConnectionStatus(), is(CONNECTION_STATUS));
       assertThat(connectionRecordDto.getProgrammeMembershipStartDate(), is(PM_START_DATE));
       assertThat(connectionRecordDto.getProgrammeMembershipEndDate(), is(PM_END_DATE));
     });
@@ -262,7 +262,7 @@ public class RevalidationResourceTest {
     assertThat(contentConnectionDetailDto.getProgrammeHistory().size(), is(1));
     assertThat(contentConnectionDetailDto.getProgrammeHistory().get(0).getProgrammeOwner(),
         is(PROGRAMME_OWNER));
-    assertThat(contentConnectionDetailDto.getProgrammeHistory().get(0).getConnectionStatus(),
+    assertThat(contentConnectionDetailDto.getProgrammeHistory().get(0).getTisConnectionStatus(),
         is(CONNECTION_STATUS));
     assertThat(
         contentConnectionDetailDto.getProgrammeHistory().get(0).getProgrammeMembershipStartDate(),
