@@ -1,0 +1,11 @@
+delete from RightToWork where id in(305827);
+-- n/a delete from Qualification where personId in(305827);
+-- n/a delete from ProgrammeMembership where personId in(305827);
+-- n/a delete from PersonTrust where personId in(305827);
+delete from PersonOwner where id in(305827);
+delete from PersonalDetails where id in(305827);
+delete from GmcDetails where id in(305827);
+delete from GdcDetails where id in(305827);
+delete from ContactDetails where id in(305827);
+-- n/a delete from Absence where personId in(305827);
+delete from Person where id in(305827);
