@@ -18,7 +18,6 @@ public class ConnectionInfoDto {
   String designatedBody;
   String tcsDesignatedBody;
   String programmeOwner;
-  String connectionStatus;
   LocalDate programmeMembershipStartDate;
   LocalDate programmeMembershipEndDate;
   LocalDate curriculumEndDate;
