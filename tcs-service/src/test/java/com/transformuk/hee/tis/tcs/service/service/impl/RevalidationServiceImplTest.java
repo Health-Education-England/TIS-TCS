@@ -91,7 +91,7 @@ public class RevalidationServiceImplTest {
   private static final String CURRENT_GRADE = "GP Specialty Training";
   private static final String CONNECTION_STATUS_CONNECTED = "Yes";
   private static final String CONNECTION_STATUS_DISCONNECTED = "No";
-  private static final String DESIGNATED_BODY_CODE = "1-AIIDQQ";
+  private static final String DESIGNATED_BODY_CODE = "1-1RSG4X0";
   private static final LocalDate PM_START_DATE = now();
   private static final LocalDate PM_END_DATE = now().plusDays(10);
   private static final LocalDate EXPIRED_PM_START_DATE = now().minusYears(1);

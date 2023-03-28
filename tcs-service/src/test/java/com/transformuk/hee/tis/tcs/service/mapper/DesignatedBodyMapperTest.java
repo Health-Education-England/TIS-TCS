@@ -12,7 +12,7 @@ public class DesignatedBodyMapperTest {
   @Test
   public void shouldMapDbcs() {
     //Given
-    Set<String> dbcs = Sets.newHashSet("1-AIIDR8", "1-AIIDSA", "1-AIIDMY");
+    Set<String> dbcs = Sets.newHashSet("1-1RUZV1D", "1-1RSSPZ7", "1-1RUZUYF");
     //When
     Set<String> res = DesignatedBodyMapper.map(dbcs);
 
@@ -74,6 +74,6 @@ public class DesignatedBodyMapperTest {
     String res = DesignatedBodyMapper.getDbcByOwner(owner);
 
     //Then
-    assertThat(res).isEqualTo("1-AIIDMY");
+    assertThat(res).isEqualTo("1-1RUZUYF");
   }
 }
