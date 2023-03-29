@@ -124,7 +124,7 @@ public class ProgrammeResourceIntTest {
         .setCustomArgumentResolvers(pageableArgumentResolver)
         .setControllerAdvice(exceptionTranslator)
         .setMessageConverters(jacksonMessageConverter).build();
-    TestUtils.mockUserprofile("jamesh", "1-AIIDR8", "1-AIIDWA");
+    TestUtils.mockUserprofile("jamesh", "1-1RUZV1D", "1-1RUZV6H");
   }
 
   @Before
