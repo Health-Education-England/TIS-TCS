@@ -39,11 +39,11 @@ public class DesignatedBodyMapper {
       .put("1-AIIDWT", Lists.newArrayList("Health Education England East of England"))
       .put("1-AIIDSI", Lists.newArrayList("Health Education England North East"))
       .put("1-AIIDH1", Lists.newArrayList("Health Education England Thames Valley"))
-      .put("1-AIIDQQ", Lists.newArrayList("Health Education England Yorkshire and the Humber"))
+      .put("1-1P9Y9QH", Lists.newArrayList("Health Education England Yorkshire and the Humber"))
       .put("1-AIIDMY", Lists.newArrayList("Health Education England West Midlands"))
       .put("1-AIIDMQ", Lists.newArrayList("Health Education England South West"))
       .put("1-AIIDHJ", Lists.newArrayList("Health Education England Wessex"))
-      .put("1-AIIDNQ", Lists.newArrayList("Health Education England North West"))
+      .put("1-1P9Y9R1", Lists.newArrayList("Health Education England North West"))
       .put("1-25U-830", Lists.newArrayList("Northern Ireland Medical and Dental Training Agency"))
       .build();
 
