@@ -18,7 +18,7 @@ import org.hibernate.annotations.Type;
 public class ConditionsOfJoining {
 
   @Id
-  @Type(type = "uuid-char")
+  @Type(type = "org.hibernate.type.UUIDCharType")
   private UUID programmeMembershipUuid;
   private Instant signedAt;
   @Enumerated(EnumType.STRING)

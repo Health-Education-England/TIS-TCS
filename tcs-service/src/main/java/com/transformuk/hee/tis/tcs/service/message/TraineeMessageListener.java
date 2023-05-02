@@ -17,7 +17,7 @@ public class TraineeMessageListener {
     this.conditionsOfJoiningService = conditionsOfJoiningService;
   }
 
-  @RabbitListener(queues = "${app.rabbit.trainee.queue.coj.signed}", ackMode = "NONE")
+  @RabbitListener(queues = "${app.rabbit.trainee.queue.coj.signed}", ackMode = "AUTO")
   public void receiveMessage(final ConditionsOfJoiningSignedEvent event) {
     conditionsOfJoiningService.save(event.getProgrammeMembershipId(),
         event.getConditionsOfJoining());
