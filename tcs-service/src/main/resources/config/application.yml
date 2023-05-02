@@ -230,3 +230,5 @@ app:
     reval.routingKey.connection.update: ${REVAL_RABBIT_ROUTING_KEY}
     reval.routingKey.connection.syncstart: ${REVAL_RABBIT_SYNCSTART_ROUTING_KEY}
     reval.routingKey.connection.syncdata: ${REVAL_RABBIT_SYNCDATA_ROUTING_KEY}
+    trainee.queue.coj.signed: ${TRAINEE_RABBIT_COJ_SIGNED_QUEUE}
+
