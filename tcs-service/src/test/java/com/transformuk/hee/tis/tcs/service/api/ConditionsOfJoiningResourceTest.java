@@ -1,5 +1,6 @@
 package com.transformuk.hee.tis.tcs.service.api;
 
+import static com.transformuk.hee.tis.tcs.service.api.ConditionsOfJoiningResourceTest.TheSameInstant.theSameInstantAs;
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.hasSize;
 import static org.hamcrest.Matchers.is;
@@ -14,11 +15,15 @@ import com.transformuk.hee.tis.tcs.api.dto.ConditionsOfJoiningDto;
 import com.transformuk.hee.tis.tcs.api.enumeration.GoldGuideVersion;
 import com.transformuk.hee.tis.tcs.service.Application;
 import com.transformuk.hee.tis.tcs.service.service.ConditionsOfJoiningService;
+import java.math.BigDecimal;
 import java.time.Instant;
 import java.time.ZoneOffset;
 import java.time.ZonedDateTime;
 import java.util.List;
 import java.util.UUID;
+import org.hamcrest.Description;
+import org.hamcrest.Matcher;
+import org.hamcrest.TypeSafeMatcher;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -83,16 +88,10 @@ public class ConditionsOfJoiningResourceTest {
         .andExpect(jsonPath("$", hasSize(1)))
         .andExpect(jsonPath("$[0].programmeMembershipUuid")
             .value(is(PROGRAMME_MEMBERSHIP_UUID.toString())))
-        //FIXME the json comes out as a BigDecimal representation of a timestamp and the instant insists on being a string date
-        //.andExpect(jsonPath("$[0].signedAt").value(sameInstant(zonedDateTime)))
+        .andExpect(jsonPath("$[0].signedAt").value(is(theSameInstantAs(SIGNED_AT))))
         .andExpect(jsonPath("$[0].version").value(is(VERSION.name())))
         .andExpect(status().isOk())
         .andReturn();
-
-//    String content = result.getResponse().getContentAsString();
-//    ObjectMapper mapper = new ObjectMapper();
-//    JsonNode actualObj = mapper.readTree(content);
-//    assertThat("Unexpected signedAt", actualObj.get(0).get("signedAt"), is(asJsonString(SIGNED_AT)));
 
     verify(conditionsOfJoiningServiceMock).findConditionsOfJoiningsForTrainee(TRAINEE_ID);
   }
@@ -123,9 +122,11 @@ public class ConditionsOfJoiningResourceTest {
         .andExpect(jsonPath("$", hasSize(2)))
         .andExpect(jsonPath("$[0].programmeMembershipUuid")
             .value(is(PROGRAMME_MEMBERSHIP_UUID.toString())))
+        .andExpect(jsonPath("$[0].signedAt").value(is(theSameInstantAs(SIGNED_AT))))
         .andExpect(jsonPath("$[0].version").value(is(VERSION.name())))
         .andExpect(jsonPath("$[1].programmeMembershipUuid")
             .value(is(PROGRAMME_MEMBERSHIP_UUID_2.toString())))
+        .andExpect(jsonPath("$[0].signedAt").value(is(theSameInstantAs(SIGNED_AT_2))))
         .andExpect(jsonPath("$[1].version").value(is(VERSION.name())))
         .andExpect(status().isOk())
         .andReturn();
@@ -148,6 +149,7 @@ public class ConditionsOfJoiningResourceTest {
             .contentType(MediaType.APPLICATION_JSON))
         .andExpect(jsonPath("$.programmeMembershipUuid")
             .value(is(PROGRAMME_MEMBERSHIP_UUID.toString())))
+        .andExpect(jsonPath("$.signedAt").value(is(theSameInstantAs(SIGNED_AT))))
         .andExpect(jsonPath("$.version").value(is(VERSION.name())))
         .andExpect(status().isOk())
         .andReturn();
@@ -197,17 +199,34 @@ public class ConditionsOfJoiningResourceTest {
     verify(conditionsOfJoiningServiceMock).findOne(PROGRAMME_MEMBERSHIP_UUID);
   }
 
+  /**
+   * Helper matcher class for comparing Instants.
+   */
+  static class TheSameInstant extends TypeSafeMatcher<BigDecimal> {
 
-//  public static String asJsonString(final Object obj) {
-//    try {
-//      ObjectMapper objectMapper = new ObjectMapper();
-//      objectMapper.registerModule(new JavaTimeModule());
-//      objectMapper.enable(SerializationFeature.WRITE_DATES_AS_TIMESTAMPS);
-//
-//      return objectMapper.writeValueAsString(obj);
-//    } catch (Exception e) {
-//      throw new RuntimeException(e);
-//    }
-//
-//  }
+    private final Instant theRequiredInstant;
+
+    public TheSameInstant(Instant instant) {
+      theRequiredInstant = instant;
+    }
+
+    @Override
+    protected boolean matchesSafely(BigDecimal provided) {
+      BigDecimal ONE_BILLION = new BigDecimal(1000000000L);
+      long seconds = provided.longValue();
+      int nanoseconds = provided.subtract(new BigDecimal(seconds)).multiply(ONE_BILLION).intValue();
+      Instant theInstant = Instant.ofEpochSecond(seconds, nanoseconds);
+
+      return theInstant.equals(theRequiredInstant);
+    }
+
+    @Override
+    public void describeTo(Description description) {
+      description.appendText("is the same instant as " + theRequiredInstant.toString());
+    }
+
+    public static Matcher<BigDecimal> theSameInstantAs(Instant instant) {
+      return new TheSameInstant(instant);
+    }
+  }
 }
