@@ -126,7 +126,7 @@ public class ConditionsOfJoiningResourceTest {
         .andExpect(jsonPath("$[0].version").value(is(VERSION.name())))
         .andExpect(jsonPath("$[1].programmeMembershipUuid")
             .value(is(PROGRAMME_MEMBERSHIP_UUID_2.toString())))
-        .andExpect(jsonPath("$[0].signedAt").value(is(theSameInstantAs(SIGNED_AT_2))))
+        .andExpect(jsonPath("$[1].signedAt").value(is(theSameInstantAs(SIGNED_AT_2))))
         .andExpect(jsonPath("$[1].version").value(is(VERSION.name())))
         .andExpect(status().isOk())
         .andReturn();
