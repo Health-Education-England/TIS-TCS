@@ -56,7 +56,7 @@ public class ConditionsOfJoiningResource {
    *
    * @param uuid the id of the conditionsOfJoiningDTO to retrieve
    * @return the ResponseEntity with status 200 (OK) and with body the conditionsOfJoiningDTO, or
-   * with status 404 (Not Found)
+   *         with status 404 (Not Found)
    */
   @GetMapping("/conditions-of-joining/{uuid}")
   @PreAuthorize("hasPermission('tis:people::person:', 'View')")
@@ -77,8 +77,9 @@ public class ConditionsOfJoiningResource {
   public ResponseEntity<String> getConditionsOfJoiningText(@PathVariable UUID uuid) {
     log.debug("REST request to get Conditions of Joining text: {}", uuid);
     ConditionsOfJoiningDto conditionsOfJoiningDto = conditionsOfJoiningService.findOne(uuid);
-    String cojText = conditionsOfJoiningDto != null ?
-        conditionsOfJoiningDto.toString() : "Not signed through TIS Self-Service";
+    String cojText = conditionsOfJoiningDto != null
+        ? conditionsOfJoiningDto.toString()
+        : "Not signed through TIS Self-Service";
 
     return ResponseUtil.wrapOrNotFound(Optional.ofNullable(cojText));
   }

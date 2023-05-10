@@ -32,6 +32,13 @@ public class ConditionsOfJoiningServiceImpl implements ConditionsOfJoiningServic
   private final ConditionsOfJoiningMapper mapper;
   private final ProgrammeMembershipService programmeMembershipService;
 
+  /**
+   * Initialise the Conditions of Joining service.
+   *
+   * @param repository the Conditions of Joining repository
+   * @param mapper the Conditions of Joining mapper
+   * @param programmeMembershipService the Programme Membership service
+   */
   @Autowired
   public ConditionsOfJoiningServiceImpl(ConditionsOfJoiningRepository repository,
       ConditionsOfJoiningMapper mapper, ProgrammeMembershipService programmeMembershipService) {
@@ -73,7 +80,7 @@ public class ConditionsOfJoiningServiceImpl implements ConditionsOfJoiningServic
   }
 
   /**
-   * Get one ConditionsOfJoiningDto by uuid
+   * Get one ConditionsOfJoiningDto by uuid.
    *
    * @param programmeMembershipUuid the uuid of the entity
    * @return the entity

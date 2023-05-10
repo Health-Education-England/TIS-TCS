@@ -488,6 +488,12 @@ public class TcsServiceImpl extends AbstractClientService {
         .getBody();
   }
 
+  /**
+   * Get a list of Conditions of Joining for a trainee.
+   *
+   * @param traineeId the ID of the trainee
+   * @return the list of Conditions of Joinings Dtos or an empty list if none found.
+   */
   public List<ConditionsOfJoiningDto> getConditionsOfJoiningsForTrainee(Long traineeId) {
     return tcsRestTemplate.exchange(
         serviceUrl + API_TRAINEE_CONDITIONS_OF_JOINING + traineeId + "/conditions-of-joining",
@@ -496,6 +502,13 @@ public class TcsServiceImpl extends AbstractClientService {
         }).getBody();
   }
 
+  /**
+   * Get a Conditions of Joining using an uuid.
+   *
+   * @param uuid the uuid of the Conditions of Joining (which is equal to the uuid of the parent
+   *             one-to-one programme membership)
+   * @return the Conditions of Joinings or 404 if not found.
+   */
   public ConditionsOfJoiningDto getConditionsOfJoiningById(UUID uuid) {
     return tcsRestTemplate.exchange(serviceUrl + API_CONDITIONS_OF_JOINING + uuid,
         HttpMethod.GET, null, new ParameterizedTypeReference<ConditionsOfJoiningDto>() {

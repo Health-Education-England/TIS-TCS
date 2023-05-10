@@ -16,6 +16,12 @@ public interface ConditionsOfJoiningMapper {
 
   ConditionsOfJoining toEntity(ConditionsOfJoiningDto dto);
 
+  /**
+   * Convert a list of Conditions of Joinings to their equivalent Dtos.
+   *
+   * @param conditionsOfJoinings the list of Conditions of Joining
+   * @return a list of Conditions of Joining Dtos
+   */
   default List<ConditionsOfJoiningDto> allEntityToDto(
       List<ConditionsOfJoining> conditionsOfJoinings) {
     List<ConditionsOfJoiningDto> result = Lists.newArrayList();

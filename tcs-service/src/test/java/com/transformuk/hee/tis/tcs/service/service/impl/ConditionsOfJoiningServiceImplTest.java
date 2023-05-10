@@ -154,7 +154,7 @@ class ConditionsOfJoiningServiceImplTest {
   }
 
   @Test()
-  public void findAllShouldReturnPageOfPopulatedDtos() {
+  void findAllShouldReturnPageOfPopulatedDtos() {
     //given
     List<ConditionsOfJoining> conditionsOfJoiningList = Lists
         .newArrayList(conditionsOfJoining1, conditionsOfJoining2);

@@ -6,6 +6,7 @@ package com.transformuk.hee.tis.tcs.api.enumeration;
 public enum GoldGuideVersion {
   GG9("Gold Guide 9");
   private final String description;
+
   private GoldGuideVersion(String description) {
     this.description = description;
   }
