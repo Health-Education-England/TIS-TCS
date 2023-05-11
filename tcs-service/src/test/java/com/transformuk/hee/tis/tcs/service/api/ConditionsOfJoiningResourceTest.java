@@ -1,6 +1,5 @@
 package com.transformuk.hee.tis.tcs.service.api;
 
-import static com.transformuk.hee.tis.tcs.service.api.ConditionsOfJoiningResourceTest.TheSameInstant.theSameInstantAs;
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.hasSize;
 import static org.hamcrest.Matchers.is;
@@ -15,15 +14,11 @@ import com.transformuk.hee.tis.tcs.api.dto.ConditionsOfJoiningDto;
 import com.transformuk.hee.tis.tcs.api.enumeration.GoldGuideVersion;
 import com.transformuk.hee.tis.tcs.service.Application;
 import com.transformuk.hee.tis.tcs.service.service.ConditionsOfJoiningService;
-import java.math.BigDecimal;
 import java.time.Instant;
 import java.time.ZoneOffset;
 import java.time.ZonedDateTime;
 import java.util.List;
 import java.util.UUID;
-import org.hamcrest.Description;
-import org.hamcrest.Matcher;
-import org.hamcrest.TypeSafeMatcher;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -68,6 +63,7 @@ public class ConditionsOfJoiningResourceTest {
     testObj = new ConditionsOfJoiningResource(conditionsOfJoiningServiceMock);
     mockMvc = MockMvcBuilders.standaloneSetup(testObj)
           .setCustomArgumentResolvers(new PageableHandlerMethodArgumentResolver())
+          .setMessageConverters(jacksonMessageConverter)
           .build();
   }
 
@@ -88,7 +84,7 @@ public class ConditionsOfJoiningResourceTest {
         .andExpect(jsonPath("$", hasSize(1)))
         .andExpect(jsonPath("$[0].programmeMembershipUuid")
             .value(is(PROGRAMME_MEMBERSHIP_UUID.toString())))
-        .andExpect(jsonPath("$[0].signedAt").value(is(theSameInstantAs(SIGNED_AT))))
+        .andExpect(jsonPath("$[0].signedAt").value(is(SIGNED_AT.toString())))
         .andExpect(jsonPath("$[0].version").value(is(VERSION.name())))
         .andExpect(status().isOk())
         .andReturn();
@@ -122,11 +118,11 @@ public class ConditionsOfJoiningResourceTest {
         .andExpect(jsonPath("$", hasSize(2)))
         .andExpect(jsonPath("$[0].programmeMembershipUuid")
             .value(is(PROGRAMME_MEMBERSHIP_UUID.toString())))
-        .andExpect(jsonPath("$[0].signedAt").value(is(theSameInstantAs(SIGNED_AT))))
+        .andExpect(jsonPath("$[0].signedAt").value(is(SIGNED_AT.toString())))
         .andExpect(jsonPath("$[0].version").value(is(VERSION.name())))
         .andExpect(jsonPath("$[1].programmeMembershipUuid")
             .value(is(PROGRAMME_MEMBERSHIP_UUID_2.toString())))
-        .andExpect(jsonPath("$[1].signedAt").value(is(theSameInstantAs(SIGNED_AT_2))))
+        .andExpect(jsonPath("$[1].signedAt").value(is(SIGNED_AT_2.toString())))
         .andExpect(jsonPath("$[1].version").value(is(VERSION.name())))
         .andExpect(status().isOk())
         .andReturn();
@@ -149,7 +145,7 @@ public class ConditionsOfJoiningResourceTest {
             .contentType(MediaType.APPLICATION_JSON))
         .andExpect(jsonPath("$.programmeMembershipUuid")
             .value(is(PROGRAMME_MEMBERSHIP_UUID.toString())))
-        .andExpect(jsonPath("$.signedAt").value(is(theSameInstantAs(SIGNED_AT))))
+        .andExpect(jsonPath("$.signedAt").value(is(SIGNED_AT.toString())))
         .andExpect(jsonPath("$.version").value(is(VERSION.name())))
         .andExpect(status().isOk())
         .andReturn();
@@ -176,7 +172,7 @@ public class ConditionsOfJoiningResourceTest {
     String content = result.getResponse().getContentAsString();
 
     assertThat("Unexpected Condition of Joining text",
-        content, is(conditionsOfJoiningDto.toString()));
+        content, is("\"" + conditionsOfJoiningDto.toString() + "\""));
 
     verify(conditionsOfJoiningServiceMock).findOne(PROGRAMME_MEMBERSHIP_UUID);
   }
@@ -194,39 +190,8 @@ public class ConditionsOfJoiningResourceTest {
     String content = result.getResponse().getContentAsString();
 
     assertThat("Unexpected Condition of Joining text",
-        content, is("Not signed through TIS Self-Service"));
+        content, is("\"Not signed through TIS Self-Service\""));
 
     verify(conditionsOfJoiningServiceMock).findOne(PROGRAMME_MEMBERSHIP_UUID);
-  }
-
-  /**
-   * Helper matcher class for comparing Instants.
-   */
-  static class TheSameInstant extends TypeSafeMatcher<BigDecimal> {
-
-    private final Instant theRequiredInstant;
-
-    public TheSameInstant(Instant instant) {
-      theRequiredInstant = instant;
-    }
-
-    @Override
-    protected boolean matchesSafely(BigDecimal provided) {
-      BigDecimal ONE_BILLION = new BigDecimal(1000000000L);
-      long seconds = provided.longValue();
-      int nanoseconds = provided.subtract(new BigDecimal(seconds)).multiply(ONE_BILLION).intValue();
-      Instant theInstant = Instant.ofEpochSecond(seconds, nanoseconds);
-
-      return theInstant.equals(theRequiredInstant);
-    }
-
-    @Override
-    public void describeTo(Description description) {
-      description.appendText("is the same instant as " + theRequiredInstant.toString());
-    }
-
-    public static Matcher<BigDecimal> theSameInstantAs(Instant instant) {
-      return new TheSameInstant(instant);
-    }
   }
 }
