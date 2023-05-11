@@ -1,5 +1,6 @@
 package com.transformuk.hee.tis.tcs.service.api;
 
+import static org.hamcrest.Matchers.hasSize;
 import static org.hamcrest.Matchers.is;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.content;
@@ -7,13 +8,25 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
 import com.transformuk.hee.tis.tcs.api.enumeration.GoldGuideVersion;
+import com.transformuk.hee.tis.tcs.api.enumeration.ProgrammeMembershipType;
 import com.transformuk.hee.tis.tcs.service.Application;
 import com.transformuk.hee.tis.tcs.service.exception.ExceptionTranslator;
 import com.transformuk.hee.tis.tcs.service.model.ConditionsOfJoining;
+import com.transformuk.hee.tis.tcs.service.model.Curriculum;
+import com.transformuk.hee.tis.tcs.service.model.Person;
+import com.transformuk.hee.tis.tcs.service.model.Programme;
+import com.transformuk.hee.tis.tcs.service.model.ProgrammeCurriculum;
+import com.transformuk.hee.tis.tcs.service.model.ProgrammeMembership;
 import com.transformuk.hee.tis.tcs.service.repository.ConditionsOfJoiningRepository;
+import com.transformuk.hee.tis.tcs.service.repository.CurriculumRepository;
+import com.transformuk.hee.tis.tcs.service.repository.PersonRepository;
+import com.transformuk.hee.tis.tcs.service.repository.ProgrammeMembershipRepository;
+import com.transformuk.hee.tis.tcs.service.repository.ProgrammeRepository;
 import com.transformuk.hee.tis.tcs.service.service.ConditionsOfJoiningService;
 import com.transformuk.hee.tis.tcs.service.service.mapper.ConditionsOfJoiningMapper;
 import java.time.Instant;
+import java.time.LocalDate;
+import java.util.Collections;
 import java.util.UUID;
 import org.junit.Before;
 import org.junit.Test;
@@ -48,11 +61,19 @@ public class ConditionsOfJoiningResourceIntTest {
   private static final GoldGuideVersion ANOTHER_VERSION = GoldGuideVersion.GG9;
 
   private static final Long DEFAULT_TRAINEE_ID = 1L;
-  private static final Long ANOTHER_TRAINEE_ID = 2L;
 
 
   @Autowired
   private ConditionsOfJoiningRepository conditionsOfJoiningRepository;
+
+  @Autowired
+  private ProgrammeMembershipRepository programmeMembershipRepository;
+  @Autowired
+  private PersonRepository personRepository;
+  @Autowired
+  private ProgrammeRepository programmeRepository;
+  @Autowired
+  private CurriculumRepository curriculumRepository;
 
   @Autowired
   private ConditionsOfJoiningMapper conditionsOfJoiningMapper;
@@ -163,29 +184,57 @@ public class ConditionsOfJoiningResourceIntTest {
         .andExpect(status().isBadRequest());
   }
 
-//  @Test
-//  @Transactional
-//  public void shouldFindConditionsOfJoiningByTrainee() throws Exception {
-//    //TODO: save related programme memberships with different trainee ids
-//    ConditionsOfJoining anotherConditionsOfJoining
-//        = createConditionsOfJoiningEntity(ANOTHER_PROGRAMME_MEMBERSHIP_UUID, ANOTHER_SIGNED_AT,
-//        ANOTHER_VERSION);
-//
-//    ConditionsOfJoiningDto conditionsOfJoiningDto = conditionsOfJoiningMapper.toDto(this.conditionsOfJoining);
-//    ConditionsOfJoiningDto conditionsOfJoiningDto2 = conditionsOfJoiningMapper.toDto(anotherConditionsOfJoining);
-//
-//    //ensure conditions of joinings are in the database before an update
-//    ConditionsOfJoining savedConditionsOfJoining = conditionsOfJoiningRepository.saveAndFlush(this.conditionsOfJoining);
-//    ConditionsOfJoining savedConditionsOfJoining2 = conditionsOfJoiningRepository.saveAndFlush(anotherConditionsOfJoining);
-//
-//    restConditionsOfJoiningMockMvc.perform(get("/api/trainee/{traineeId}/conditions-of-joining" + DEFAULT_TRAINEE_ID))
-//        .andExpect(status().isOk())
-//        .andExpect(jsonPath("$", hasSize(1)))
-//        .andExpect(jsonPath("$[0].programmeMembershipUuid")
-//            .value(is(DEFAULT_PROGRAMME_MEMBERSHIP_UUID.toString())))
-//        .andExpect(jsonPath("$[0].signedAt").value(is(theSameInstantAs(DEFAULT_SIGNED_AT))))
-//        .andExpect(jsonPath("$[0].version").value(is(DEFAULT_VERSION.name())));
-//  }
+  @Test
+  @Transactional
+  public void getNonUuidConditionsOfJoiningText() throws Exception {
+    restConditionsOfJoiningMockMvc.perform(get("/api/conditions-of-joining/not-a-uuid/text"))
+        .andExpect(status().isBadRequest());
+  }
 
+  @Test
+  @Transactional
+  public void shouldFindConditionsOfJoiningByTrainee() throws Exception {
+    Person person = new Person();
+    person.setId(DEFAULT_TRAINEE_ID);
+    personRepository.saveAndFlush(person);
+
+    Curriculum curriculum = CurriculumResourceIntTest.createCurriculumEntity();
+    curriculumRepository.saveAndFlush(curriculum);
+
+    Programme programme = ProgrammeResourceIntTest.createEntity();
+    ProgrammeCurriculum programmeCurriculum
+        = new ProgrammeCurriculum(programme, curriculum, "GMCGMC");
+    programme.setCurricula(Collections.singleton(programmeCurriculum));
+    programmeRepository.saveAndFlush(programme);
+
+    ProgrammeMembership programmeMembership = new ProgrammeMembership()
+        .programmeMembershipType(ProgrammeMembershipType.SUBSTANTIVE)
+        .programmeStartDate(LocalDate.ofEpochDay(0L))
+        .programmeEndDate(LocalDate.ofEpochDay(0L))
+        .leavingReason("abc")
+        .leavingDestination("abc");
+
+    programmeMembership.setPerson(person);
+    programmeMembership.setProgramme(programme);
+    programmeMembershipRepository.saveAndFlush(programmeMembership);
+
+    ConditionsOfJoining anotherConditionsOfJoining
+        = createConditionsOfJoiningEntity(ANOTHER_PROGRAMME_MEMBERSHIP_UUID, ANOTHER_SIGNED_AT,
+        ANOTHER_VERSION);
+
+    this.conditionsOfJoining.setProgrammeMembershipUuid(programmeMembership.getUuid());
+    conditionsOfJoiningRepository.saveAndFlush(this.conditionsOfJoining);
+    conditionsOfJoiningRepository.saveAndFlush(anotherConditionsOfJoining);
+
+    restConditionsOfJoiningMockMvc
+        .perform(get("/api/trainee/{traineeId}/conditions-of-joinings",
+            DEFAULT_TRAINEE_ID))
+        .andExpect(status().isOk())
+        .andExpect(jsonPath("$", hasSize(1))) //only one matching CoJ record, not both
+        .andExpect(jsonPath("$[0].programmeMembershipUuid")
+            .value(is(programmeMembership.getUuid().toString())))
+        .andExpect(jsonPath("$[0].signedAt").value(is(DEFAULT_SIGNED_AT.toString())))
+        .andExpect(jsonPath("$[0].version").value(is(DEFAULT_VERSION.name())));
+  }
 }
 
