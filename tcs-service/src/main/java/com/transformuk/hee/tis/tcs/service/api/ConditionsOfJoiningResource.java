@@ -56,13 +56,19 @@ public class ConditionsOfJoiningResource {
    *
    * @param uuid the id of the conditionsOfJoiningDTO to retrieve
    * @return the ResponseEntity with status 200 (OK) and with body the conditionsOfJoiningDTO, or
-   *         with status 404 (Not Found)
+   *         with status 404 (Not Found). An invalid uuid will trigger a 400 (Bad Request) response.
    */
   @GetMapping("/conditions-of-joining/{uuid}")
   @PreAuthorize("hasPermission('tis:people::person:', 'View')")
-  public ResponseEntity<ConditionsOfJoiningDto> getConditionsOfJoining(@PathVariable UUID uuid) {
+  public ResponseEntity<ConditionsOfJoiningDto> getConditionsOfJoining(@PathVariable String uuid) {
     log.debug("REST request to get Conditions of Joining : {}", uuid);
-    ConditionsOfJoiningDto conditionsOfJoiningDto = conditionsOfJoiningService.findOne(uuid);
+    ConditionsOfJoiningDto conditionsOfJoiningDto = null;
+    try {
+      UUID realUuid = UUID.fromString(uuid);
+      conditionsOfJoiningDto = conditionsOfJoiningService.findOne(realUuid);
+    } catch (IllegalArgumentException ignored) {
+      return new ResponseEntity<>(null, new HttpHeaders(), HttpStatus.BAD_REQUEST);
+    }
     return ResponseUtil.wrapOrNotFound(Optional.ofNullable(conditionsOfJoiningDto));
   }
 
@@ -70,13 +76,20 @@ public class ConditionsOfJoiningResource {
    * GET /conditions-of-joining/:uuid/text : get the "uuid" ConditionsOfJoining text.
    *
    * @param uuid the id of the conditionsOfJoiningDTO to retrieve
-   * @return the ResponseEntity with status 200 (OK) and with body the conditionsOfJoining text
+   * @return the ResponseEntity with status 200 (OK) and with body the conditionsOfJoining text.
+   *         An invalid uuid will trigger a 400 (Bad Request) response.
    */
   @GetMapping("/conditions-of-joining/{uuid}/text")
   @PreAuthorize("hasPermission('tis:people::person:', 'View')")
-  public ResponseEntity<String> getConditionsOfJoiningText(@PathVariable UUID uuid) {
+  public ResponseEntity<String> getConditionsOfJoiningText(@PathVariable String uuid) {
     log.debug("REST request to get Conditions of Joining text: {}", uuid);
-    ConditionsOfJoiningDto conditionsOfJoiningDto = conditionsOfJoiningService.findOne(uuid);
+    ConditionsOfJoiningDto conditionsOfJoiningDto = null;
+    try {
+      UUID realUuid = UUID.fromString(uuid);
+      conditionsOfJoiningDto = conditionsOfJoiningService.findOne(realUuid);
+    } catch (IllegalArgumentException ignored) {
+      return new ResponseEntity<>("Invalid UUID", new HttpHeaders(), HttpStatus.BAD_REQUEST);
+    }
     String cojText = conditionsOfJoiningDto != null
         ? conditionsOfJoiningDto.toString()
         : "Not signed through TIS Self-Service";
@@ -100,6 +113,4 @@ public class ConditionsOfJoiningResource {
 
     return new ResponseEntity<>(conditionsOfJoiningDtos, HttpStatus.OK);
   }
-
-
 }

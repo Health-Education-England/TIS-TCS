@@ -1,9 +1,10 @@
 package com.transformuk.hee.tis.tcs.api.dto;
 
 import com.transformuk.hee.tis.tcs.api.enumeration.GoldGuideVersion;
-import java.text.SimpleDateFormat;
 import java.time.Instant;
-import java.util.Date;
+import java.time.LocalDate;
+import java.time.ZoneOffset;
+import java.time.format.DateTimeFormatter;
 import java.util.UUID;
 import lombok.Data;
 
@@ -19,11 +20,10 @@ public class ConditionsOfJoiningDto {
 
   @Override
   public String toString() {
-    Date signedDate = Date.from(signedAt); //TODO: Date or LocalDate?
-    SimpleDateFormat dateFormat = new SimpleDateFormat("dd/MM/yyyy");
+    LocalDate signedDate = signedAt.atZone(ZoneOffset.UTC).toLocalDate();
     return "Signed "
         + version.toString()
         + " "
-        + dateFormat.format(signedDate);
+        + signedDate.format(DateTimeFormatter.ofPattern("dd/MM/yyyy"));
   }
 }

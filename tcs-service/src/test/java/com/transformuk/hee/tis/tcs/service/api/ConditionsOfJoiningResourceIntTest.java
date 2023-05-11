@@ -139,7 +139,7 @@ public class ConditionsOfJoiningResourceIntTest {
 
     // Get the condition of joining
     restConditionsOfJoiningMockMvc.perform(get("/api/conditions-of-joining/{uuid}",
-            conditionsOfJoining.getProgrammeMembershipUuid()))
+            conditionsOfJoining.getProgrammeMembershipUuid().toString()))
         .andExpect(status().isOk())
         .andExpect(content().contentType(MediaType.APPLICATION_JSON_VALUE))
         .andExpect(jsonPath("$.programmeMembershipUuid")
@@ -151,10 +151,16 @@ public class ConditionsOfJoiningResourceIntTest {
   @Test
   @Transactional
   public void getNonExistingConditionsOfJoining() throws Exception {
-    // Get the conditions of joining
     restConditionsOfJoiningMockMvc.perform(get("/api/conditions-of-joining/{uuid}",
-            UUID.randomUUID()))
+            UUID.randomUUID().toString()))
         .andExpect(status().isNotFound());
+  }
+
+  @Test
+  @Transactional
+  public void getNonUuidConditionsOfJoining() throws Exception {
+    restConditionsOfJoiningMockMvc.perform(get("/api/conditions-of-joining/not-a-uuid"))
+        .andExpect(status().isBadRequest());
   }
 
 //  @Test
