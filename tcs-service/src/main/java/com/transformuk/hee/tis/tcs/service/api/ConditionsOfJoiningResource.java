@@ -1,6 +1,7 @@
 package com.transformuk.hee.tis.tcs.service.api;
 
 import com.transformuk.hee.tis.tcs.api.dto.ConditionsOfJoiningDto;
+import com.transformuk.hee.tis.tcs.api.dto.ConditionsOfJoiningStatusDto;
 import com.transformuk.hee.tis.tcs.service.api.util.PaginationUtil;
 import com.transformuk.hee.tis.tcs.service.service.ConditionsOfJoiningService;
 import io.github.jhipster.web.util.ResponseUtil;
@@ -69,19 +70,23 @@ public class ConditionsOfJoiningResource {
   /**
    * GET /conditions-of-joining/:uuid/text : get the "uuid" ConditionsOfJoining text.
    *
-   * @param uuid the id of the conditionsOfJoiningDTO to retrieve
+   * @param id the id of the conditionsOfJoiningDTO to retrieve
    * @return the ResponseEntity with status 200 (OK) and with body the conditionsOfJoining text
    */
-  @GetMapping("/conditions-of-joining/{uuid}/text")
+  @GetMapping("/conditions-of-joining/{id}/text")
   @PreAuthorize("hasPermission('tis:people::person:', 'View')")
-  public ResponseEntity<String> getConditionsOfJoiningText(@PathVariable UUID uuid) {
-    log.debug("REST request to get Conditions of Joining text: {}", uuid);
+  public ResponseEntity<ConditionsOfJoiningStatusDto> getConditionsOfJoiningText(@PathVariable String id) {
+    UUID uuid = UUID.fromString(id);
+    log.info("REST request to get Conditions of Joining text: {}", uuid);
     ConditionsOfJoiningDto conditionsOfJoiningDto = conditionsOfJoiningService.findOne(uuid);
     String cojText = conditionsOfJoiningDto != null
         ? conditionsOfJoiningDto.toString()
         : "Not signed through TIS Self-Service";
+    log.info("Result: {}", cojText);
+    ConditionsOfJoiningStatusDto dto = new ConditionsOfJoiningStatusDto();
+    dto.setConditionsOfJoiningStatus(cojText);
 
-    return ResponseUtil.wrapOrNotFound(Optional.ofNullable(cojText));
+    return ResponseUtil.wrapOrNotFound(Optional.ofNullable(dto));
   }
 
   /**
