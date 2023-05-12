@@ -9,7 +9,6 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 
 import com.transformuk.hee.tis.tcs.api.dto.ConditionsOfJoiningDto;
 import com.transformuk.hee.tis.tcs.api.enumeration.GoldGuideVersion;
-import com.transformuk.hee.tis.tcs.api.enumeration.ProgrammeMembershipType;
 import com.transformuk.hee.tis.tcs.service.Application;
 import com.transformuk.hee.tis.tcs.service.exception.ExceptionTranslator;
 import com.transformuk.hee.tis.tcs.service.model.ConditionsOfJoining;
@@ -26,7 +25,6 @@ import com.transformuk.hee.tis.tcs.service.repository.ProgrammeRepository;
 import com.transformuk.hee.tis.tcs.service.service.ConditionsOfJoiningService;
 import com.transformuk.hee.tis.tcs.service.service.mapper.ConditionsOfJoiningMapper;
 import java.time.Instant;
-import java.time.LocalDate;
 import java.util.Collections;
 import java.util.UUID;
 import org.junit.Before;
@@ -225,13 +223,7 @@ public class ConditionsOfJoiningResourceIntTest {
     programme.setCurricula(Collections.singleton(programmeCurriculum));
     programmeRepository.saveAndFlush(programme);
 
-    ProgrammeMembership programmeMembership = new ProgrammeMembership()
-        .programmeMembershipType(ProgrammeMembershipType.SUBSTANTIVE)
-        .programmeStartDate(LocalDate.ofEpochDay(0L))
-        .programmeEndDate(LocalDate.ofEpochDay(0L))
-        .leavingReason("abc")
-        .leavingDestination("abc");
-
+    ProgrammeMembership programmeMembership = new ProgrammeMembership();
     programmeMembership.setPerson(person);
     programmeMembership.setProgramme(programme);
     programmeMembershipRepository.saveAndFlush(programmeMembership);
