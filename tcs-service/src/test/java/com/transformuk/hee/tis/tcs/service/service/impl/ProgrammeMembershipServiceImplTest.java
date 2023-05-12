@@ -9,6 +9,7 @@ import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
+import com.transformuk.hee.tis.tcs.api.dto.ConditionsOfJoiningDto;
 import com.transformuk.hee.tis.tcs.api.dto.CurriculumDTO;
 import com.transformuk.hee.tis.tcs.api.dto.PersonDTO;
 import com.transformuk.hee.tis.tcs.api.dto.ProgrammeMembershipCurriculaDTO;
@@ -16,17 +17,21 @@ import com.transformuk.hee.tis.tcs.api.dto.ProgrammeMembershipDTO;
 import com.transformuk.hee.tis.tcs.api.dto.TrainingNumberDTO;
 import com.transformuk.hee.tis.tcs.api.enumeration.ProgrammeMembershipType;
 import com.transformuk.hee.tis.tcs.api.enumeration.Status;
+import com.transformuk.hee.tis.tcs.service.model.ConditionsOfJoining;
 import com.transformuk.hee.tis.tcs.service.model.Curriculum;
 import com.transformuk.hee.tis.tcs.service.model.CurriculumMembership;
 import com.transformuk.hee.tis.tcs.service.model.Person;
 import com.transformuk.hee.tis.tcs.service.model.Programme;
 import com.transformuk.hee.tis.tcs.service.model.ProgrammeMembership;
 import com.transformuk.hee.tis.tcs.service.model.TrainingNumber;
+import com.transformuk.hee.tis.tcs.service.repository.ConditionsOfJoiningRepository;
 import com.transformuk.hee.tis.tcs.service.repository.CurriculumMembershipRepository;
 import com.transformuk.hee.tis.tcs.service.repository.CurriculumRepository;
 import com.transformuk.hee.tis.tcs.service.repository.PersonRepository;
 import com.transformuk.hee.tis.tcs.service.repository.ProgrammeMembershipRepository;
 import com.transformuk.hee.tis.tcs.service.repository.ProgrammeRepository;
+import com.transformuk.hee.tis.tcs.service.service.mapper.ConditionsOfJoiningMapper;
+import com.transformuk.hee.tis.tcs.service.service.mapper.ConditionsOfJoiningMapperImpl;
 import com.transformuk.hee.tis.tcs.service.service.mapper.CurriculumMapper;
 import com.transformuk.hee.tis.tcs.service.service.mapper.CurriculumMapperImpl;
 import com.transformuk.hee.tis.tcs.service.service.mapper.CurriculumMembershipMapper;
@@ -48,6 +53,7 @@ import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.mockito.Mock;
 import org.mockito.junit.MockitoJUnitRunner;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.ApplicationEventPublisher;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageImpl;
@@ -96,6 +102,8 @@ public class ProgrammeMembershipServiceImplTest {
   @Mock
   private ProgrammeRepository programmeRepositoryMock;
   @Mock
+  private ConditionsOfJoiningRepository conditionsOfJoiningRepositoryMock;
+  @Mock
   private ApplicationEventPublisher applicationEventPublisherMock;
   @Mock
   private PersonRepository personRepositoryMock;
@@ -105,12 +113,13 @@ public class ProgrammeMembershipServiceImplTest {
     curriculumMembershipMapper = new CurriculumMembershipMapper();
     programmeMembershipMapper = new ProgrammeMembershipMapper(curriculumMembershipMapper);
     CurriculumMapper curriculumMapper = new CurriculumMapperImpl();
+    ConditionsOfJoiningMapper conditionsOfJoiningMapper = new ConditionsOfJoiningMapperImpl();
     ReflectionTestUtils.setField(curriculumMapper, "specialtyMapper",
         new SpecialtyMapperImpl());
     testObj = new ProgrammeMembershipServiceImpl(programmeMembershipRepositoryMock,
         curriculumMembershipRepositoryMock, programmeMembershipMapper, curriculumMembershipMapper,
         curriculumRepositoryMock, curriculumMapper, applicationEventPublisherMock,
-        personRepositoryMock);
+        personRepositoryMock, conditionsOfJoiningRepositoryMock, conditionsOfJoiningMapper);
 
     initialiseData();
   }

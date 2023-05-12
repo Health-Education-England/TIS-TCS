@@ -3,21 +3,25 @@ package com.transformuk.hee.tis.tcs.service.service.impl;
 import com.google.common.base.Preconditions;
 import com.google.common.collect.Lists;
 import com.google.common.collect.Maps;
+import com.transformuk.hee.tis.tcs.api.dto.ConditionsOfJoiningDto;
 import com.transformuk.hee.tis.tcs.api.dto.CurriculumDTO;
 import com.transformuk.hee.tis.tcs.api.dto.CurriculumMembershipDTO;
 import com.transformuk.hee.tis.tcs.api.dto.ProgrammeMembershipCurriculaDTO;
 import com.transformuk.hee.tis.tcs.api.dto.ProgrammeMembershipDTO;
 import com.transformuk.hee.tis.tcs.api.enumeration.Status;
 import com.transformuk.hee.tis.tcs.service.event.CurriculumMembershipSavedEvent;
+import com.transformuk.hee.tis.tcs.service.model.ConditionsOfJoining;
 import com.transformuk.hee.tis.tcs.service.model.Curriculum;
 import com.transformuk.hee.tis.tcs.service.model.CurriculumMembership;
 import com.transformuk.hee.tis.tcs.service.model.Person;
 import com.transformuk.hee.tis.tcs.service.model.ProgrammeMembership;
+import com.transformuk.hee.tis.tcs.service.repository.ConditionsOfJoiningRepository;
 import com.transformuk.hee.tis.tcs.service.repository.CurriculumMembershipRepository;
 import com.transformuk.hee.tis.tcs.service.repository.CurriculumRepository;
 import com.transformuk.hee.tis.tcs.service.repository.PersonRepository;
 import com.transformuk.hee.tis.tcs.service.repository.ProgrammeMembershipRepository;
 import com.transformuk.hee.tis.tcs.service.service.ProgrammeMembershipService;
+import com.transformuk.hee.tis.tcs.service.service.mapper.ConditionsOfJoiningMapper;
 import com.transformuk.hee.tis.tcs.service.service.mapper.CurriculumMapper;
 import com.transformuk.hee.tis.tcs.service.service.mapper.CurriculumMembershipMapper;
 import com.transformuk.hee.tis.tcs.service.service.mapper.ProgrammeMembershipMapper;
@@ -28,8 +32,10 @@ import java.util.Map;
 import java.util.Objects;
 import java.util.Optional;
 import java.util.Set;
+import java.util.UUID;
 import java.util.function.Predicate;
 import java.util.stream.Collectors;
+import javax.persistence.EntityNotFoundException;
 import org.apache.commons.collections4.CollectionUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -51,8 +57,10 @@ public class ProgrammeMembershipServiceImpl implements ProgrammeMembershipServic
 
   private final ProgrammeMembershipRepository programmeMembershipRepository;
   private final CurriculumMembershipRepository curriculumMembershipRepository;
+  private final ConditionsOfJoiningRepository conditionsOfJoiningRepository;
   private final ProgrammeMembershipMapper programmeMembershipMapper;
   private final CurriculumMembershipMapper curriculumMembershipMapper;
+  private final ConditionsOfJoiningMapper conditionsOfJoiningMapper;
   private final CurriculumRepository curriculumRepository;
   private final CurriculumMapper curriculumMapper;
   private final ApplicationEventPublisher applicationEventPublisher;
@@ -61,14 +69,16 @@ public class ProgrammeMembershipServiceImpl implements ProgrammeMembershipServic
   /**
    * Initialise the ProgrammeMembershipService.
    *
-   * @param programmeMembershipRepository   the ProgrammeMembershipRepository
-   * @param curriculumMembershipRepository  the CurriculumMembershipRepository
-   * @param programmeMembershipMapper       the ProgrammeMembershipMapper
-   * @param curriculumMembershipMapper      the CurriculumMembershipMapper
-   * @param curriculumRepository            the CurriculumRepository
-   * @param curriculumMapper                the CurriculumMapper
-   * @param applicationEventPublisher       the ApplicationEventPublisher
-   * @param personRepository                the PersonRepository
+   * @param programmeMembershipRepository  the ProgrammeMembershipRepository
+   * @param curriculumMembershipRepository the CurriculumMembershipRepository
+   * @param programmeMembershipMapper      the ProgrammeMembershipMapper
+   * @param curriculumMembershipMapper     the CurriculumMembershipMapper
+   * @param curriculumRepository           the CurriculumRepository
+   * @param curriculumMapper               the CurriculumMapper
+   * @param applicationEventPublisher      the ApplicationEventPublisher
+   * @param personRepository               the PersonRepository
+   * @param conditionsOfJoiningRepository  the ConditionsOfJoiningRepository
+   * @param conditionsOfJoiningMapper      the ConditionsOfJoiningMapper
    */
   public ProgrammeMembershipServiceImpl(
       ProgrammeMembershipRepository programmeMembershipRepository,
@@ -77,7 +87,9 @@ public class ProgrammeMembershipServiceImpl implements ProgrammeMembershipServic
       CurriculumMembershipMapper curriculumMembershipMapper,
       CurriculumRepository curriculumRepository, CurriculumMapper curriculumMapper,
       ApplicationEventPublisher applicationEventPublisher,
-      PersonRepository personRepository) {
+      PersonRepository personRepository,
+      ConditionsOfJoiningRepository conditionsOfJoiningRepository,
+      ConditionsOfJoiningMapper conditionsOfJoiningMapper) {
     this.programmeMembershipRepository = programmeMembershipRepository;
     this.curriculumMembershipRepository = curriculumMembershipRepository;
     this.programmeMembershipMapper = programmeMembershipMapper;
@@ -86,6 +98,8 @@ public class ProgrammeMembershipServiceImpl implements ProgrammeMembershipServic
     this.curriculumMapper = curriculumMapper;
     this.applicationEventPublisher = applicationEventPublisher;
     this.personRepository = personRepository;
+    this.conditionsOfJoiningRepository = conditionsOfJoiningRepository;
+    this.conditionsOfJoiningMapper = conditionsOfJoiningMapper;
   }
 
   /**
@@ -180,8 +194,8 @@ public class ProgrammeMembershipServiceImpl implements ProgrammeMembershipServic
   }
 
   /**
-   * Delete the curriculumMembership by id.
-   * NOTE: this is the curriculumMembership, not the containing programmeMembership
+   * Delete the curriculumMembership by id. NOTE: this is the curriculumMembership, not the
+   * containing programmeMembership
    *
    * @param id the id of the entity
    */
@@ -299,11 +313,11 @@ public class ProgrammeMembershipServiceImpl implements ProgrammeMembershipServic
     return pmc ->
         Objects.equals(pmc.getProgrammeId(), programmeMembershipCurriculaDto.getProgrammeId())
             && Objects.equals(pmc.getProgrammeMembershipType(),
-                programmeMembershipCurriculaDto.getProgrammeMembershipType())
+            programmeMembershipCurriculaDto.getProgrammeMembershipType())
             && Objects.equals(pmc.getProgrammeStartDate(),
-                programmeMembershipCurriculaDto.getProgrammeStartDate())
+            programmeMembershipCurriculaDto.getProgrammeStartDate())
             && Objects.equals(pmc.getProgrammeEndDate(),
-                programmeMembershipCurriculaDto.getProgrammeEndDate());
+            programmeMembershipCurriculaDto.getProgrammeEndDate());
   }
 
   @Transactional(readOnly = true)
@@ -331,7 +345,8 @@ public class ProgrammeMembershipServiceImpl implements ProgrammeMembershipServic
     List<ProgrammeMembership> foundProgrammeMemberships = programmeMembershipRepository
         .findByProgrammeId(programmeId);
 
-    return attachConditionsOfJoiningsToPm(programmeMembershipMapper.allEntityToDto(foundProgrammeMemberships));
+    return attachConditionsOfJoiningsToPm(
+        programmeMembershipMapper.allEntityToDto(foundProgrammeMemberships));
   }
 
   private List<ProgrammeMembershipCurriculaDTO> attachCurricula(
@@ -369,27 +384,65 @@ public class ProgrammeMembershipServiceImpl implements ProgrammeMembershipServic
   private ProgrammeMembershipCurriculaDTO attachConditionsOfJoining(
       ProgrammeMembershipCurriculaDTO programmeMembershipDto) {
     ProgrammeMembershipCurriculaDTO result = new ProgrammeMembershipCurriculaDTO();
+    BeanUtils.copyProperties(programmeMembershipDto, result);
 
-    //TODO attach CoJ details from ConditionsOfJoiningRepository
-
+    try {
+      ConditionsOfJoining conditionsOfJoining
+          = conditionsOfJoiningRepository.getOne(programmeMembershipDto.getUuid());
+      ConditionsOfJoiningDto conditionsOfJoiningDto
+          = conditionsOfJoiningMapper.toDto(conditionsOfJoining);
+      result.setConditionsOfJoining(conditionsOfJoiningDto);
+    } catch (EntityNotFoundException ignored) {
+    }
     return result;
   }
 
   private ProgrammeMembershipDTO attachConditionsOfJoiningToPm(
       ProgrammeMembershipDTO programmeMembershipDto) {
-    ProgrammeMembershipDTO result = new ProgrammeMembershipCurriculaDTO();
+    ProgrammeMembershipDTO result = new ProgrammeMembershipDTO();
+    BeanUtils.copyProperties(programmeMembershipDto, result);
 
-    //TODO attach CoJ details from ConditionsOfJoiningRepository
-
+    try {
+      ConditionsOfJoining conditionsOfJoining
+          = conditionsOfJoiningRepository.getOne(programmeMembershipDto.getUuid());
+      ConditionsOfJoiningDto conditionsOfJoiningDto
+          = conditionsOfJoiningMapper.toDto(conditionsOfJoining);
+      result.setConditionsOfJoining(conditionsOfJoiningDto);
+    } catch (EntityNotFoundException ignored) {
+    }
     return result;
+  }
+
+  private Map<UUID, ConditionsOfJoiningDto> getCojDtosForPmUuids(Set<UUID> pmUuids) {
+    Map<UUID, ConditionsOfJoiningDto> conditionsOfJoiningDtoMap = Maps.newHashMap();
+    if (CollectionUtils.isNotEmpty(pmUuids)) {
+      List<ConditionsOfJoining> all = conditionsOfJoiningRepository.findAllById(pmUuids);
+      conditionsOfJoiningDtoMap = all.stream().collect(
+          Collectors.toMap(ConditionsOfJoining::getProgrammeMembershipUuid,
+              conditionsOfJoiningMapper::toDto));
+    }
+    return conditionsOfJoiningDtoMap;
   }
 
   private List<ProgrammeMembershipCurriculaDTO> attachConditionsOfJoinings(
       List<ProgrammeMembershipCurriculaDTO> programmeMembershipDtos) {
     List<ProgrammeMembershipCurriculaDTO> result = Lists.newArrayList();
 
-    //TODO attach CoJ details from ConditionsOfJoiningRepository
+    Set<UUID> pmUuids = programmeMembershipDtos.stream().
+        map(ProgrammeMembershipDTO::getUuid).
+        collect(Collectors.toSet());
 
+    Map<UUID, ConditionsOfJoiningDto> conditionsOfJoiningDtoMap = getCojDtosForPmUuids(pmUuids);
+
+    //attach the conditions of joining data to the programme membership curriculum dtos
+    for (ProgrammeMembershipDTO pm : programmeMembershipDtos) {
+      ProgrammeMembershipCurriculaDTO programmeMembershipCurriculaDto
+          = new ProgrammeMembershipCurriculaDTO();
+      BeanUtils.copyProperties(pm, programmeMembershipCurriculaDto);
+      programmeMembershipCurriculaDto
+          .setConditionsOfJoining(conditionsOfJoiningDtoMap.get(pm.getUuid()));
+      result.add(programmeMembershipCurriculaDto);
+    }
     return result;
   }
 
@@ -397,8 +450,21 @@ public class ProgrammeMembershipServiceImpl implements ProgrammeMembershipServic
       List<ProgrammeMembershipDTO> programmeMembershipDtos) {
     List<ProgrammeMembershipDTO> result = Lists.newArrayList();
 
-    //TODO attach CoJ details from ConditionsOfJoiningRepository
+    Set<UUID> pmUuids = programmeMembershipDtos.stream().
+        map(ProgrammeMembershipDTO::getUuid).
+        collect(Collectors.toSet());
 
+    Map<UUID, ConditionsOfJoiningDto> conditionsOfJoiningDtoMap = getCojDtosForPmUuids(pmUuids);
+
+    //attach the conditions of joining data to the programme membership dtos
+    for (ProgrammeMembershipDTO pm : programmeMembershipDtos) {
+      ProgrammeMembershipDTO programmeMembershipDto
+          = new ProgrammeMembershipDTO();
+      BeanUtils.copyProperties(pm, programmeMembershipDto);
+      programmeMembershipDto
+          .setConditionsOfJoining(conditionsOfJoiningDtoMap.get(pm.getUuid()));
+      result.add(programmeMembershipDto);
+    }
     return result;
   }
 
