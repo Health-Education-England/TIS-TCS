@@ -4,6 +4,7 @@ import com.google.common.base.Preconditions;
 import com.google.common.collect.Maps;
 import com.transformuk.hee.tis.client.impl.AbstractClientService;
 import com.transformuk.hee.tis.tcs.api.dto.AbsenceDTO;
+import com.transformuk.hee.tis.tcs.api.dto.ConditionsOfJoiningDto;
 import com.transformuk.hee.tis.tcs.api.dto.ContactDetailsDTO;
 import com.transformuk.hee.tis.tcs.api.dto.CurriculumDTO;
 import com.transformuk.hee.tis.tcs.api.dto.FundingComponentsDTO;
@@ -41,6 +42,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.Optional;
 import java.util.Set;
+import java.util.UUID;
 import java.util.stream.Collectors;
 import org.apache.commons.codec.EncoderException;
 import org.apache.commons.codec.net.URLCodec;
@@ -79,6 +81,7 @@ public class TcsServiceImpl extends AbstractClientService {
   private static final String API_CONTACT_DETAILS = "/api/contact-details/";
   private static final String API_RIGHT_TO_WORKS = "/api/right-to-works/";
   private static final String API_PROGRAMME_MEMBERSHIPS = "/api/programme-memberships/";
+  private static final String API_CONDITIONS_OF_JOINING = "/api/conditions-of-joining/";
   private static final String API_TRAINEE_PLACEMENTS = "/api/people/%d/placements/new";
   private static final String API_SPECIALTIES = "/api/specialties/";
   private static final String API_CURRENT_SPECIALTIES_COLUMN_FILTERS =
@@ -97,6 +100,7 @@ public class TcsServiceImpl extends AbstractClientService {
   private static final String API_POSTS_IN = "/api/posts/in/";
   private static final String API_PEOPLE_IN = "/api/people/in/";
   private static final String API_PEOPLE_PHN_IN = "/api/people/phn/in/";
+  private static final String API_TRAINEE_CONDITIONS_OF_JOINING = "/api/trainee/";
   private static final String API_TRAINEE_PROGRAMME_MEMBERSHIPS = "/api/trainee/";
   private static final String BASIC = "/basic";
   private static final String API_POST_FUNDINGS = "/api/post/fundings";
@@ -482,6 +486,33 @@ public class TcsServiceImpl extends AbstractClientService {
             new ParameterizedTypeReference<ProgrammeMembershipDTO>() {
             })
         .getBody();
+  }
+
+  /**
+   * Get a list of Conditions of Joining for a trainee.
+   *
+   * @param traineeId the ID of the trainee
+   * @return the list of Conditions of Joinings Dtos or an empty list if none found.
+   */
+  public List<ConditionsOfJoiningDto> getConditionsOfJoiningsForTrainee(Long traineeId) {
+    return tcsRestTemplate.exchange(
+        serviceUrl + API_TRAINEE_CONDITIONS_OF_JOINING + traineeId + "/conditions-of-joining",
+        HttpMethod.GET, null,
+        new ParameterizedTypeReference<List<ConditionsOfJoiningDto>>() {
+        }).getBody();
+  }
+
+  /**
+   * Get a Conditions of Joining using an uuid.
+   *
+   * @param uuid the uuid of the Conditions of Joining (which is equal to the uuid of the parent
+   *             one-to-one programme membership)
+   * @return the Conditions of Joinings or 404 if not found.
+   */
+  public ConditionsOfJoiningDto getConditionsOfJoiningById(UUID uuid) {
+    return tcsRestTemplate.exchange(serviceUrl + API_CONDITIONS_OF_JOINING + uuid,
+        HttpMethod.GET, null, new ParameterizedTypeReference<ConditionsOfJoiningDto>() {
+        }).getBody();
   }
 
   /**
