@@ -7,6 +7,7 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
+import com.transformuk.hee.tis.tcs.api.dto.ConditionsOfJoiningDto;
 import com.transformuk.hee.tis.tcs.api.enumeration.GoldGuideVersion;
 import com.transformuk.hee.tis.tcs.api.enumeration.ProgrammeMembershipType;
 import com.transformuk.hee.tis.tcs.service.Application;
@@ -93,21 +94,7 @@ public class ConditionsOfJoiningResourceIntTest {
   private MockMvc restConditionsOfJoiningMockMvc;
 
   private ConditionsOfJoining conditionsOfJoining;
-
-  /**
-   * Create an entity for this test.
-   * <p>
-   * This is a static method, as tests for other entities might also need it, if they test an entity
-   * which requires the current entity.
-   */
-  public static ConditionsOfJoining createConditionsOfJoiningEntity() {
-    ConditionsOfJoining conditionsOfJoining = new ConditionsOfJoining();
-    conditionsOfJoining.setProgrammeMembershipUuid(DEFAULT_PROGRAMME_MEMBERSHIP_UUID);
-    conditionsOfJoining.setSignedAt(DEFAULT_SIGNED_AT);
-    conditionsOfJoining.setVersion(DEFAULT_VERSION);
-
-    return conditionsOfJoining;
-  }
+  private ConditionsOfJoiningDto conditionsOfJoiningDto;
 
   public static ConditionsOfJoining createConditionsOfJoiningEntity(UUID programmeMembershipUuid,
       Instant signedAt, GoldGuideVersion version) {
@@ -124,7 +111,8 @@ public class ConditionsOfJoiningResourceIntTest {
     MockitoAnnotations.initMocks(this);
     ConditionsOfJoiningResource conditionsOfJoiningResource
         = new ConditionsOfJoiningResource(conditionsOfJoiningService);
-    this.restConditionsOfJoiningMockMvc = MockMvcBuilders.standaloneSetup(conditionsOfJoiningResource)
+    this.restConditionsOfJoiningMockMvc
+        = MockMvcBuilders.standaloneSetup(conditionsOfJoiningResource)
         .setCustomArgumentResolvers(pageableArgumentResolver)
         .setControllerAdvice(exceptionTranslator)
         .setMessageConverters(jacksonMessageConverter).build();
@@ -134,6 +122,7 @@ public class ConditionsOfJoiningResourceIntTest {
   public void initTest() {
     conditionsOfJoining = createConditionsOfJoiningEntity(DEFAULT_PROGRAMME_MEMBERSHIP_UUID,
         DEFAULT_SIGNED_AT, DEFAULT_VERSION);
+    conditionsOfJoiningDto = conditionsOfJoiningMapper.toDto(conditionsOfJoining);
   }
 
   @Test
@@ -167,6 +156,35 @@ public class ConditionsOfJoiningResourceIntTest {
             .value(is(DEFAULT_PROGRAMME_MEMBERSHIP_UUID.toString())))
         .andExpect(jsonPath("$.signedAt").value(is(DEFAULT_SIGNED_AT.toString())))
         .andExpect(jsonPath("$.version").value(is(DEFAULT_VERSION.name())));
+  }
+
+  @Test
+  @Transactional
+  public void getConditionOfJoiningText() throws Exception {
+    // Initialize the database
+    conditionsOfJoiningRepository.saveAndFlush(conditionsOfJoining);
+
+    // Get the condition of joining status text
+    restConditionsOfJoiningMockMvc.perform(get("/api/conditions-of-joining/{uuid}/text",
+            conditionsOfJoining.getProgrammeMembershipUuid().toString()))
+        .andExpect(status().isOk())
+        .andExpect(content().contentType(MediaType.APPLICATION_JSON_VALUE))
+        .andExpect(jsonPath("$.conditionsOfJoiningStatus")
+            .value(is(conditionsOfJoiningDto.toString())));
+  }
+
+  @Test
+  @Transactional
+  public void getConditionOfJoiningTextForNonExistentCoj() throws Exception {
+    ConditionsOfJoiningDto emptyConditionsOfJoiningDto = new ConditionsOfJoiningDto();
+
+    // Get the non-existent condition of joining status text
+    restConditionsOfJoiningMockMvc.perform(get("/api/conditions-of-joining/{uuid}/text",
+            conditionsOfJoining.getProgrammeMembershipUuid().toString()))
+        .andExpect(status().isOk())
+        .andExpect(content().contentType(MediaType.APPLICATION_JSON_VALUE))
+        .andExpect(jsonPath("$.conditionsOfJoiningStatus")
+            .value(is(emptyConditionsOfJoiningDto.toString())));
   }
 
   @Test

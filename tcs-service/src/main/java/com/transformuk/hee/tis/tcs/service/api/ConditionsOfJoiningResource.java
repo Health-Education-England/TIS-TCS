@@ -1,6 +1,7 @@
 package com.transformuk.hee.tis.tcs.service.api;
 
 import com.transformuk.hee.tis.tcs.api.dto.ConditionsOfJoiningDto;
+import com.transformuk.hee.tis.tcs.api.dto.ConditionsOfJoiningStatusDto;
 import com.transformuk.hee.tis.tcs.service.api.util.PaginationUtil;
 import com.transformuk.hee.tis.tcs.service.service.ConditionsOfJoiningService;
 import io.github.jhipster.web.util.ResponseUtil;
@@ -66,7 +67,7 @@ public class ConditionsOfJoiningResource {
     try {
       UUID realUuid = UUID.fromString(uuid);
       conditionsOfJoiningDto = conditionsOfJoiningService.findOne(realUuid);
-    } catch (IllegalArgumentException ignored) {
+    } catch (IllegalArgumentException e) {
       return new ResponseEntity<>(null, new HttpHeaders(), HttpStatus.BAD_REQUEST);
     }
     return ResponseUtil.wrapOrNotFound(Optional.ofNullable(conditionsOfJoiningDto));
@@ -76,25 +77,28 @@ public class ConditionsOfJoiningResource {
    * GET /conditions-of-joining/:uuid/text : get the "uuid" ConditionsOfJoining text.
    *
    * @param uuid the id of the conditionsOfJoiningDTO to retrieve
-   * @return the ResponseEntity with status 200 (OK) and with body the conditionsOfJoining text.
+   * @return the ResponseEntity with status 200 (OK) and with body the conditionsOfJoiningStatus.
    *         An invalid uuid will trigger a 400 (Bad Request) response.
    */
   @GetMapping("/conditions-of-joining/{uuid}/text")
   @PreAuthorize("hasPermission('tis:people::person:', 'View')")
-  public ResponseEntity<String> getConditionsOfJoiningText(@PathVariable String uuid) {
+  public ResponseEntity<ConditionsOfJoiningStatusDto> getConditionsOfJoiningText(
+      @PathVariable String uuid) {
     log.debug("REST request to get Conditions of Joining text: {}", uuid);
-    ConditionsOfJoiningDto conditionsOfJoiningDto = null;
+    ConditionsOfJoiningDto conditionsOfJoiningDto;
     try {
       UUID realUuid = UUID.fromString(uuid);
       conditionsOfJoiningDto = conditionsOfJoiningService.findOne(realUuid);
-    } catch (IllegalArgumentException ignored) {
-      return new ResponseEntity<>("Invalid UUID", new HttpHeaders(), HttpStatus.BAD_REQUEST);
+    } catch (IllegalArgumentException e) {
+      return new ResponseEntity<>(null, new HttpHeaders(), HttpStatus.BAD_REQUEST);
     }
     String cojText = conditionsOfJoiningDto != null
         ? conditionsOfJoiningDto.toString()
-        : "Not signed through TIS Self-Service";
+        : new ConditionsOfJoiningDto().toString();
 
-    return ResponseUtil.wrapOrNotFound(Optional.ofNullable(cojText));
+    ConditionsOfJoiningStatusDto dto = new ConditionsOfJoiningStatusDto();
+    dto.setConditionsOfJoiningStatus(cojText);
+    return ResponseUtil.wrapOrNotFound(Optional.of(dto));
   }
 
   /**

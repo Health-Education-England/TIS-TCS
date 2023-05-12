@@ -20,10 +20,14 @@ public class ConditionsOfJoiningDto {
 
   @Override
   public String toString() {
-    LocalDate signedDate = signedAt.atZone(ZoneOffset.UTC).toLocalDate();
-    return "Signed "
-        + version.toString()
-        + " "
-        + signedDate.format(DateTimeFormatter.ofPattern("dd/MM/yyyy"));
+    if (programmeMembershipUuid != null) {
+      LocalDate signedDate = signedAt.atZone(ZoneOffset.UTC).toLocalDate();
+      return "Signed "
+          + version.toString()
+          + " "
+          + signedDate.format(DateTimeFormatter.ofPattern("dd/MM/yyyy"));
+    } else {
+      return "Not signed through TIS Self-Service";
+    }
   }
 }

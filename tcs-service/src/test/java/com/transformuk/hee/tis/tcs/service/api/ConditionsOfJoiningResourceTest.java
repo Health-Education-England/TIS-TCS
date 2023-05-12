@@ -1,6 +1,6 @@
 package com.transformuk.hee.tis.tcs.service.api;
 
-import static org.hamcrest.MatcherAssert.assertThat;
+import static org.hamcrest.Matchers.contains;
 import static org.hamcrest.Matchers.containsString;
 import static org.hamcrest.Matchers.hasSize;
 import static org.hamcrest.Matchers.is;
@@ -35,7 +35,6 @@ import org.springframework.http.MediaType;
 import org.springframework.http.converter.json.MappingJackson2HttpMessageConverter;
 import org.springframework.test.context.junit4.SpringRunner;
 import org.springframework.test.web.servlet.MockMvc;
-import org.springframework.test.web.servlet.MvcResult;
 import org.springframework.test.web.servlet.setup.MockMvcBuilders;
 
 @RunWith(SpringRunner.class)
@@ -62,9 +61,9 @@ public class ConditionsOfJoiningResourceTest {
     ConditionsOfJoiningResource testObj = new ConditionsOfJoiningResource(
         conditionsOfJoiningServiceMock);
     mockMvc = MockMvcBuilders.standaloneSetup(testObj)
-          .setCustomArgumentResolvers(new PageableHandlerMethodArgumentResolver())
-          .setMessageConverters(jacksonMessageConverter)
-          .build();
+        .setCustomArgumentResolvers(new PageableHandlerMethodArgumentResolver())
+        .setMessageConverters(jacksonMessageConverter)
+        .build();
   }
 
   @Test
@@ -188,27 +187,19 @@ public class ConditionsOfJoiningResourceTest {
     when(conditionsOfJoiningServiceMock.findOne(PROGRAMME_MEMBERSHIP_UUID_2))
         .thenReturn(conditionsOfJoiningDto2);
 
-    MvcResult result = mockMvc.perform(get("/api/conditions-of-joining/{uuid}/text",
+    mockMvc.perform(get("/api/conditions-of-joining/{uuid}/text",
             PROGRAMME_MEMBERSHIP_UUID.toString())
             .contentType(MediaType.TEXT_PLAIN))
         .andExpect(status().isOk())
-        .andReturn();
+        .andExpect(jsonPath("$.conditionsOfJoiningStatus")
+            .value(containsString(theDateText)));
 
-    String content = result.getResponse().getContentAsString();
-
-    assertThat("Unexpected Condition of Joining text (late time)",
-        content, containsString(theDateText));
-
-    MvcResult result2 = mockMvc.perform(get("/api/conditions-of-joining/{uuid}/text",
+    mockMvc.perform(get("/api/conditions-of-joining/{uuid}/text",
             PROGRAMME_MEMBERSHIP_UUID_2.toString())
             .contentType(MediaType.TEXT_PLAIN))
         .andExpect(status().isOk())
-        .andReturn();
-
-    String content2 = result2.getResponse().getContentAsString();
-
-    assertThat("Unexpected Condition of Joining text (early time)",
-        content2, containsString(theDateText));
+        .andExpect(jsonPath("$.conditionsOfJoiningStatus")
+            .value(containsString(theDateText)));
 
     verify(conditionsOfJoiningServiceMock).findOne(PROGRAMME_MEMBERSHIP_UUID);
     verify(conditionsOfJoiningServiceMock).findOne(PROGRAMME_MEMBERSHIP_UUID_2);
@@ -224,16 +215,12 @@ public class ConditionsOfJoiningResourceTest {
     when(conditionsOfJoiningServiceMock.findOne(PROGRAMME_MEMBERSHIP_UUID))
         .thenReturn(conditionsOfJoiningDto);
 
-    MvcResult result = mockMvc.perform(get("/api/conditions-of-joining/{uuid}/text",
+    mockMvc.perform(get("/api/conditions-of-joining/{uuid}/text",
             PROGRAMME_MEMBERSHIP_UUID.toString())
             .contentType(MediaType.TEXT_PLAIN))
         .andExpect(status().isOk())
-        .andReturn();
-
-    String content = result.getResponse().getContentAsString();
-
-    assertThat("Unexpected Condition of Joining text",
-        content, is("\"" + conditionsOfJoiningDto.toString() + "\""));
+        .andExpect(jsonPath("$.conditionsOfJoiningStatus")
+            .value(is(conditionsOfJoiningDto.toString())));
 
     verify(conditionsOfJoiningServiceMock).findOne(PROGRAMME_MEMBERSHIP_UUID);
   }
@@ -242,17 +229,14 @@ public class ConditionsOfJoiningResourceTest {
   public void getConditionOfJoiningTextShouldReturnStandardTextOfNotFoundCoj() throws Exception {
     when(conditionsOfJoiningServiceMock.findOne(PROGRAMME_MEMBERSHIP_UUID))
         .thenReturn(null);
+    ConditionsOfJoiningDto emptyConditionsOfJoiningDto = new ConditionsOfJoiningDto();
 
-    MvcResult result = mockMvc.perform(get("/api/conditions-of-joining/{uuid}/text",
+    mockMvc.perform(get("/api/conditions-of-joining/{uuid}/text",
             PROGRAMME_MEMBERSHIP_UUID.toString())
             .contentType(MediaType.TEXT_PLAIN))
         .andExpect(status().isOk())
-        .andReturn();
-
-    String content = result.getResponse().getContentAsString();
-
-    assertThat("Unexpected Condition of Joining text",
-        content, is("\"Not signed through TIS Self-Service\""));
+        .andExpect(jsonPath("$.conditionsOfJoiningStatus")
+            .value(is(emptyConditionsOfJoiningDto.toString())));
 
     verify(conditionsOfJoiningServiceMock).findOne(PROGRAMME_MEMBERSHIP_UUID);
   }

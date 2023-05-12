@@ -27,16 +27,23 @@ class ConditionsOfJoiningDtoTest {
   }
 
   @Test
-  void shouldGenerateCorrectText() {
+  void shouldGenerateCorrectTextIfPopulated() {
     String text = dto.toString();
     String expectedText = "Signed "
-        + VERSION.toString()
+        + VERSION
         + " "
         + SIGNED_AT.atZone(ZoneOffset.UTC)
-            .toLocalDate()
-            .format(DateTimeFormatter.ofPattern("dd/MM/yyyy"));
+        .toLocalDate()
+        .format(DateTimeFormatter.ofPattern("dd/MM/yyyy"));
 
     assertThat("Unexpected DTO text", text, is(expectedText));
   }
 
+  @Test
+  void shouldGenerateCorrectTextIfNotPopulated() {
+    String text = new ConditionsOfJoiningDto().toString();
+    String expectedText = "Not signed through TIS Self-Service";
+
+    assertThat("Unexpected DTO text", text, is(expectedText));
+  }
 }
