@@ -134,8 +134,8 @@ public class ProgrammeMembershipServiceImpl implements ProgrammeMembershipServic
 
     //emit events
     List<ProgrammeMembershipDTO> resultDtos =
-        programmeMembershipMapper
-            .programmeMembershipsToProgrammeMembershipDTOs(programmeMemberships);
+        attachConditionsOfJoiningsToPm(programmeMembershipMapper
+            .programmeMembershipsToProgrammeMembershipDTOs(programmeMemberships));
     emitProgrammeMembershipSavedEvents(resultDtos);
     return resultDtos;
   }
@@ -161,7 +161,7 @@ public class ProgrammeMembershipServiceImpl implements ProgrammeMembershipServic
   public Page<ProgrammeMembershipDTO> findAll(Pageable pageable) {
     log.debug("Request to get all ProgrammeMemberships");
     Page<CurriculumMembership> result = curriculumMembershipRepository.findAll(pageable);
-    return result.map(curriculumMembershipMapper::toDto);
+    return result.map(cm -> attachConditionsOfJoiningToPm(curriculumMembershipMapper.toDto(cm)));
   }
 
   /**
@@ -176,7 +176,7 @@ public class ProgrammeMembershipServiceImpl implements ProgrammeMembershipServic
     log.debug("Request to get ProgrammeMembership : {}", id);
     CurriculumMembership curriculumMembership = curriculumMembershipRepository.findById(id)
         .orElse(null);
-    return curriculumMembershipMapper.toDto(curriculumMembership);
+    return attachConditionsOfJoiningToPm(curriculumMembershipMapper.toDto(curriculumMembership));
   }
 
   /**
@@ -218,7 +218,7 @@ public class ProgrammeMembershipServiceImpl implements ProgrammeMembershipServic
         .curriculumMembershipsToProgrammeMembershipDtos(foundCurriculumMemberships);
 
     //get all curriculum ids
-    return attachCurricula(programmeMembershipDtos);
+    return attachConditionsOfJoinings(attachCurricula(programmeMembershipDtos));
   }
 
   @Transactional(readOnly = true)
@@ -230,7 +230,7 @@ public class ProgrammeMembershipServiceImpl implements ProgrammeMembershipServic
     List<ProgrammeMembershipDTO> programmeMembershipDtos
         = curriculumMembershipMapper.allEntityToDto(curriculumMemberships);
 
-    return attachCurricula(programmeMembershipDtos);
+    return attachConditionsOfJoinings(attachCurricula(programmeMembershipDtos));
   }
 
   /**
@@ -273,7 +273,7 @@ public class ProgrammeMembershipServiceImpl implements ProgrammeMembershipServic
 
           foundPmc.setCurriculumMemberships(curriculumMemberships);
         } else {
-          result.add(programmeMembershipCurriculaDto);
+          result.add(attachConditionsOfJoining(programmeMembershipCurriculaDto));
         }
       }
     }
@@ -287,6 +287,7 @@ public class ProgrammeMembershipServiceImpl implements ProgrammeMembershipServic
       ProgrammeMembershipCurriculaDTO programmeMembershipCurriculaDto) {
     if (CollectionUtils.isNotEmpty(result)) {
       return result.stream()
+          .map(this::attachConditionsOfJoining)
           .filter(isProgrammeMembershipEffectivelyTheSame(programmeMembershipCurriculaDto))
           .findAny();
     }
@@ -316,7 +317,7 @@ public class ProgrammeMembershipServiceImpl implements ProgrammeMembershipServic
     if (CollectionUtils.isNotEmpty(foundProgrammeMemberships)) {
       List<ProgrammeMembershipDTO> programmeMembershipDtos = programmeMembershipMapper
           .allEntityToDto(foundProgrammeMemberships);
-      return attachCurricula(programmeMembershipDtos);
+      return attachConditionsOfJoinings(attachCurricula(programmeMembershipDtos));
     }
     return Collections.emptyList();
   }
@@ -330,7 +331,7 @@ public class ProgrammeMembershipServiceImpl implements ProgrammeMembershipServic
     List<ProgrammeMembership> foundProgrammeMemberships = programmeMembershipRepository
         .findByProgrammeId(programmeId);
 
-    return programmeMembershipMapper.allEntityToDto(foundProgrammeMemberships);
+    return attachConditionsOfJoiningsToPm(programmeMembershipMapper.allEntityToDto(foundProgrammeMemberships));
   }
 
   private List<ProgrammeMembershipCurriculaDTO> attachCurricula(
@@ -362,6 +363,42 @@ public class ProgrammeMembershipServiceImpl implements ProgrammeMembershipServic
       }
       result.add(programmeMembershipCurriculaDto);
     }
+    return result;
+  }
+
+  private ProgrammeMembershipCurriculaDTO attachConditionsOfJoining(
+      ProgrammeMembershipCurriculaDTO programmeMembershipDto) {
+    ProgrammeMembershipCurriculaDTO result = new ProgrammeMembershipCurriculaDTO();
+
+    //TODO attach CoJ details from ConditionsOfJoiningRepository
+
+    return result;
+  }
+
+  private ProgrammeMembershipDTO attachConditionsOfJoiningToPm(
+      ProgrammeMembershipDTO programmeMembershipDto) {
+    ProgrammeMembershipDTO result = new ProgrammeMembershipCurriculaDTO();
+
+    //TODO attach CoJ details from ConditionsOfJoiningRepository
+
+    return result;
+  }
+
+  private List<ProgrammeMembershipCurriculaDTO> attachConditionsOfJoinings(
+      List<ProgrammeMembershipCurriculaDTO> programmeMembershipDtos) {
+    List<ProgrammeMembershipCurriculaDTO> result = Lists.newArrayList();
+
+    //TODO attach CoJ details from ConditionsOfJoiningRepository
+
+    return result;
+  }
+
+  private List<ProgrammeMembershipDTO> attachConditionsOfJoiningsToPm(
+      List<ProgrammeMembershipDTO> programmeMembershipDtos) {
+    List<ProgrammeMembershipDTO> result = Lists.newArrayList();
+
+    //TODO attach CoJ details from ConditionsOfJoiningRepository
+
     return result;
   }
 
