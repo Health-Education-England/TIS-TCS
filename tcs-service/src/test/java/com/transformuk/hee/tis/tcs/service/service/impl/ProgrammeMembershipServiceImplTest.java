@@ -15,6 +15,7 @@ import com.transformuk.hee.tis.tcs.api.dto.PersonDTO;
 import com.transformuk.hee.tis.tcs.api.dto.ProgrammeMembershipCurriculaDTO;
 import com.transformuk.hee.tis.tcs.api.dto.ProgrammeMembershipDTO;
 import com.transformuk.hee.tis.tcs.api.dto.TrainingNumberDTO;
+import com.transformuk.hee.tis.tcs.api.enumeration.GoldGuideVersion;
 import com.transformuk.hee.tis.tcs.api.enumeration.ProgrammeMembershipType;
 import com.transformuk.hee.tis.tcs.api.enumeration.Status;
 import com.transformuk.hee.tis.tcs.service.model.ConditionsOfJoining;
@@ -37,8 +38,10 @@ import com.transformuk.hee.tis.tcs.service.service.mapper.CurriculumMapperImpl;
 import com.transformuk.hee.tis.tcs.service.service.mapper.CurriculumMembershipMapper;
 import com.transformuk.hee.tis.tcs.service.service.mapper.ProgrammeMembershipMapper;
 import com.transformuk.hee.tis.tcs.service.service.mapper.SpecialtyMapperImpl;
+import java.time.Instant;
 import java.time.LocalDate;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Collections;
 import java.util.HashSet;
 import java.util.List;
@@ -53,7 +56,6 @@ import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.mockito.Mock;
 import org.mockito.junit.MockitoJUnitRunner;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.ApplicationEventPublisher;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageImpl;
@@ -90,9 +92,11 @@ public class ProgrammeMembershipServiceImplTest {
   private final PersonDTO personDto = new PersonDTO();
   private final Person person = new Person();
   private ProgrammeMembershipDTO programmeMembershipDto1 = new ProgrammeMembershipDTO();
+  private final ConditionsOfJoining conditionsOfJoining = new ConditionsOfJoining();
   private ProgrammeMembershipServiceImpl testObj;
   private ProgrammeMembershipMapper programmeMembershipMapper;
   private CurriculumMembershipMapper curriculumMembershipMapper;
+  private ConditionsOfJoiningMapper conditionsOfJoiningMapper;
   @Mock
   private ProgrammeMembershipRepository programmeMembershipRepositoryMock;
   @Mock
@@ -112,6 +116,7 @@ public class ProgrammeMembershipServiceImplTest {
   public void setup() {
     curriculumMembershipMapper = new CurriculumMembershipMapper();
     programmeMembershipMapper = new ProgrammeMembershipMapper(curriculumMembershipMapper);
+    conditionsOfJoiningMapper  = new ConditionsOfJoiningMapperImpl();
     CurriculumMapper curriculumMapper = new CurriculumMapperImpl();
     ConditionsOfJoiningMapper conditionsOfJoiningMapper = new ConditionsOfJoiningMapperImpl();
     ReflectionTestUtils.setField(curriculumMapper, "specialtyMapper",
@@ -171,6 +176,10 @@ public class ProgrammeMembershipServiceImplTest {
     curriculumDto1.setName("XXX");
     curriculumDto2.setId(6L);
     curriculumDto2.setName("YYY");
+
+    conditionsOfJoining.setVersion(GoldGuideVersion.GG9);
+    conditionsOfJoining.setProgrammeMembershipUuid(PROGRAMME_MEMBERSHIP_ID_1);
+    conditionsOfJoining.setSignedAt(Instant.now());
   }
 
   @Test(expected = NullPointerException.class)
@@ -398,6 +407,60 @@ public class ProgrammeMembershipServiceImplTest {
   }
 
   @Test
+  public void findProgrammeMembershipsByProgrammeShouldReturnListOfPmDtosWithCojAttached() {
+    LocalDate dateFrom = LocalDate.of(1999, 12, 31);
+    LocalDate dateTo = LocalDate.of(2000, 12, 31);
+    UUID pmUuid = PROGRAMME_MEMBERSHIP_ID_1;
+    UUID pmUuid2 = UUID.randomUUID();
+    Set<UUID> pmUuids = new HashSet<>(Arrays.asList(pmUuid, pmUuid2));
+
+    ProgrammeMembership pm1 = new ProgrammeMembership();
+    ProgrammeMembership pm2 = new ProgrammeMembership();
+
+    pm1.setProgramme(programme);
+    pm1.setProgrammeStartDate(dateFrom);
+    pm1.setProgrammeEndDate(dateTo);
+    pm1.setProgrammeMembershipType(ProgrammeMembershipType.FTSTA);
+    pm1.setUuid(pmUuid);
+
+    pm2.setProgramme(programme);
+    pm2.setProgrammeStartDate(dateFrom);
+    pm2.setProgrammeEndDate(dateTo);
+    pm2.setProgrammeMembershipType(ProgrammeMembershipType.FTSTA);
+    pm2.setUuid(pmUuid2);
+
+    CurriculumMembership cm1 = new CurriculumMembership();
+    CurriculumMembership cm2 = new CurriculumMembership();
+
+    cm1.setCurriculumId(curriculum1.getId());
+    cm1.setCurriculumStartDate(dateFrom);
+    cm1.setCurriculumEndDate(dateTo);
+    cm1.setProgrammeMembership(pm1);
+
+    cm2.setCurriculumId(curriculum1.getId());
+    cm2.setCurriculumStartDate(dateFrom);
+    cm2.setCurriculumEndDate(dateTo);
+    cm2.setProgrammeMembership(pm2);
+
+    pm1.setCurriculumMemberships(Sets.newLinkedHashSet(cm1));
+    pm2.setCurriculumMemberships(Sets.newLinkedHashSet(cm2));
+
+    when(programmeMembershipRepositoryMock.findByProgrammeId(PROGRAMME_ID))
+        .thenReturn(Lists.newArrayList(pm1, pm2));
+    when(conditionsOfJoiningRepositoryMock.findAllById(pmUuids))
+        .thenReturn(Collections.singletonList(conditionsOfJoining));
+
+    List<ProgrammeMembershipDTO> result = testObj.findProgrammeMembershipsByProgramme(PROGRAMME_ID);
+
+    Assert.assertEquals(2, result.size());
+    Optional<ProgrammeMembershipDTO> pmWithCoj = result.stream()
+        .filter(pm -> pm.getConditionsOfJoining() != null).findAny();
+    Assert.assertTrue(pmWithCoj.isPresent());
+    ConditionsOfJoiningDto conditionsOfJoiningDto = pmWithCoj.get().getConditionsOfJoining();
+    Assert.assertEquals(conditionsOfJoiningDto, conditionsOfJoiningMapper.toDto(conditionsOfJoining));
+  }
+
+  @Test
   public void testProgrammeMembershipWithCertificateType() {
     //TODO: vary no. of CMs per PM
     LocalDate pm1DateFrom = LocalDate.of(2019, 12, 31);
@@ -571,5 +634,69 @@ public class ProgrammeMembershipServiceImplTest {
 
   }
 
+  @Test
+  public void shouldFindProgrammeMembershipDetailsByIdsAndAttachCojs() {
+    Set<Long> ids = new HashSet<>();
+    ids.add(1L);
+    ids.add(2L);
 
+    Set<UUID> cmUuids = Collections.singleton(PROGRAMME_MEMBERSHIP_ID_1);
+
+    curriculumMembership1.setCurriculumId(curriculum1.getId());
+    curriculumMembership2.setCurriculumId(curriculum2.getId());
+
+    List<CurriculumMembership> curriculumMemberships = Lists
+        .newArrayList(curriculumMembership1, curriculumMembership2);
+
+    List<Curriculum> foundCurricula = Lists.newArrayList(curriculum1, curriculum2);
+    Set<Long> curriculumIds = Sets.newLinkedHashSet(5L, 6L);
+    when(curriculumRepositoryMock.findAllById(curriculumIds)).thenReturn(foundCurricula);
+
+    when(curriculumMembershipRepositoryMock.findByIdIn(ids)).thenReturn(curriculumMemberships);
+
+    when(conditionsOfJoiningRepositoryMock.findAllById(cmUuids))
+        .thenReturn(Collections.singletonList(conditionsOfJoining));
+
+    List<ProgrammeMembershipCurriculaDTO> result = testObj.findProgrammeMembershipDetailsByIds(ids);
+
+    Assert.assertNotNull(result);
+    Assert.assertEquals(2, result.size());
+
+    ConditionsOfJoiningDto expectedCoj = conditionsOfJoiningMapper.toDto(conditionsOfJoining);
+
+    ProgrammeMembershipCurriculaDTO pmc1 = result.get(0);
+    Assert.assertEquals(PROGRAMME_MEMBERSHIP_ID_1, pmc1.getUuid());
+    Assert.assertEquals(CURRICULUM_MEMBERSHIP_ID_1, pmc1.getId());
+    Assert.assertEquals(PROGRAMME_ID, pmc1.getProgrammeId().longValue());
+    Assert.assertEquals(curriculum1.getId(), pmc1.getCurriculumDTO().getId());
+    Assert.assertEquals(expectedCoj, pmc1.getConditionsOfJoining());
+
+    ProgrammeMembershipCurriculaDTO pmc2 = result.get(1);
+    Assert.assertEquals(PROGRAMME_MEMBERSHIP_ID_1, pmc2.getUuid());
+    Assert.assertEquals(CURRICULUM_MEMBERSHIP_ID_2, pmc2.getId());
+    Assert.assertEquals(PROGRAMME_ID, pmc2.getProgrammeId().longValue());
+    Assert.assertEquals(curriculum2.getId(), pmc2.getCurriculumDTO().getId());
+    Assert.assertEquals(expectedCoj, pmc2.getConditionsOfJoining());
+  }
+
+  @Test()
+  public void findOneShouldReturnProgrammeMembershipDtoWithCojAttached() {
+    //given
+    when(curriculumMembershipRepositoryMock.findById(1L))
+        .thenReturn(Optional.of(curriculumMembership1));
+
+    when(conditionsOfJoiningRepositoryMock.getOne(PROGRAMME_MEMBERSHIP_ID_1))
+        .thenReturn(conditionsOfJoining);
+
+    //when
+    ProgrammeMembershipDTO result = testObj.findOne(1L);
+
+    //then
+    ConditionsOfJoiningDto expectedCoj = conditionsOfJoiningMapper.toDto(conditionsOfJoining);
+
+    Assert.assertNotNull(result);
+    Assert.assertEquals(PROGRAMME_ID, result.getProgrammeId().longValue());
+    Assert.assertEquals(1, result.getCurriculumMemberships().size());
+    Assert.assertEquals(expectedCoj, result.getConditionsOfJoining());
+  }
 }

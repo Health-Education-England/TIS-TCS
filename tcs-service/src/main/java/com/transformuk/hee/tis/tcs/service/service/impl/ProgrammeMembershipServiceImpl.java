@@ -287,7 +287,7 @@ public class ProgrammeMembershipServiceImpl implements ProgrammeMembershipServic
 
           foundPmc.setCurriculumMemberships(curriculumMemberships);
         } else {
-          result.add(attachConditionsOfJoining(programmeMembershipCurriculaDto));
+          result.add(programmeMembershipCurriculaDto);
         }
       }
     }
@@ -383,34 +383,26 @@ public class ProgrammeMembershipServiceImpl implements ProgrammeMembershipServic
 
   private ProgrammeMembershipCurriculaDTO attachConditionsOfJoining(
       ProgrammeMembershipCurriculaDTO programmeMembershipDto) {
-    ProgrammeMembershipCurriculaDTO result = new ProgrammeMembershipCurriculaDTO();
-    BeanUtils.copyProperties(programmeMembershipDto, result);
+    if (programmeMembershipDto == null) return null;
 
-    try {
-      ConditionsOfJoining conditionsOfJoining
-          = conditionsOfJoiningRepository.getOne(programmeMembershipDto.getUuid());
-      ConditionsOfJoiningDto conditionsOfJoiningDto
-          = conditionsOfJoiningMapper.toDto(conditionsOfJoining);
-      result.setConditionsOfJoining(conditionsOfJoiningDto);
-    } catch (EntityNotFoundException ignored) {
-    }
-    return result;
+    ConditionsOfJoining conditionsOfJoining
+        = conditionsOfJoiningRepository.getOne(programmeMembershipDto.getUuid());
+    ConditionsOfJoiningDto conditionsOfJoiningDto
+        = conditionsOfJoiningMapper.toDto(conditionsOfJoining);
+    programmeMembershipDto.setConditionsOfJoining(conditionsOfJoiningDto);
+    return programmeMembershipDto;
   }
 
   private ProgrammeMembershipDTO attachConditionsOfJoiningToPm(
       ProgrammeMembershipDTO programmeMembershipDto) {
-    ProgrammeMembershipDTO result = new ProgrammeMembershipDTO();
-    BeanUtils.copyProperties(programmeMembershipDto, result);
+    if (programmeMembershipDto == null) return null;
 
-    try {
-      ConditionsOfJoining conditionsOfJoining
-          = conditionsOfJoiningRepository.getOne(programmeMembershipDto.getUuid());
-      ConditionsOfJoiningDto conditionsOfJoiningDto
-          = conditionsOfJoiningMapper.toDto(conditionsOfJoining);
-      result.setConditionsOfJoining(conditionsOfJoiningDto);
-    } catch (EntityNotFoundException ignored) {
-    }
-    return result;
+    ConditionsOfJoining conditionsOfJoining
+        = conditionsOfJoiningRepository.getOne(programmeMembershipDto.getUuid());
+    ConditionsOfJoiningDto conditionsOfJoiningDto
+        = conditionsOfJoiningMapper.toDto(conditionsOfJoining);
+    programmeMembershipDto.setConditionsOfJoining(conditionsOfJoiningDto);
+    return programmeMembershipDto;
   }
 
   private Map<UUID, ConditionsOfJoiningDto> getCojDtosForPmUuids(Set<UUID> pmUuids) {
@@ -434,14 +426,9 @@ public class ProgrammeMembershipServiceImpl implements ProgrammeMembershipServic
 
     Map<UUID, ConditionsOfJoiningDto> conditionsOfJoiningDtoMap = getCojDtosForPmUuids(pmUuids);
 
-    //attach the conditions of joining data to the programme membership curriculum dtos
-    for (ProgrammeMembershipDTO pm : programmeMembershipDtos) {
-      ProgrammeMembershipCurriculaDTO programmeMembershipCurriculaDto
-          = new ProgrammeMembershipCurriculaDTO();
-      BeanUtils.copyProperties(pm, programmeMembershipCurriculaDto);
-      programmeMembershipCurriculaDto
-          .setConditionsOfJoining(conditionsOfJoiningDtoMap.get(pm.getUuid()));
-      result.add(programmeMembershipCurriculaDto);
+    for (ProgrammeMembershipCurriculaDTO pm : programmeMembershipDtos) {
+      pm.setConditionsOfJoining(conditionsOfJoiningDtoMap.get(pm.getUuid()));
+      result.add(pm);
     }
     return result;
   }
@@ -456,14 +443,9 @@ public class ProgrammeMembershipServiceImpl implements ProgrammeMembershipServic
 
     Map<UUID, ConditionsOfJoiningDto> conditionsOfJoiningDtoMap = getCojDtosForPmUuids(pmUuids);
 
-    //attach the conditions of joining data to the programme membership dtos
     for (ProgrammeMembershipDTO pm : programmeMembershipDtos) {
-      ProgrammeMembershipDTO programmeMembershipDto
-          = new ProgrammeMembershipDTO();
-      BeanUtils.copyProperties(pm, programmeMembershipDto);
-      programmeMembershipDto
-          .setConditionsOfJoining(conditionsOfJoiningDtoMap.get(pm.getUuid()));
-      result.add(programmeMembershipDto);
+      pm.setConditionsOfJoining(conditionsOfJoiningDtoMap.get(pm.getUuid()));
+      result.add(pm);
     }
     return result;
   }
